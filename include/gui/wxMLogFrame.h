@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:38  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:15  karsten
  * first try at a complete archive
  *
@@ -17,10 +21,6 @@
 #ifdef __GNUG__
 #	pragma interface "wxMLogFrame.h"
 #endif
-
-#include	<guidef.h>
-#include	<MLogFrame.h>
-#include	<wxMFrame.h>
 
 class wxMLogFrame : public MLogFrameBase, public wxMFrame
 {
@@ -36,7 +36,8 @@ public:
    /// output a line of text
    void Write(const char *str);
    void OnMenuCommand(int id);
-   int OnClose(void);
+
+   ON_CLOSE_TYPE OnClose(void);
 };
 
 #endif

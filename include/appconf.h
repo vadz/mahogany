@@ -99,12 +99,17 @@
 #if APPCONF_USE_CONFIG_H
 #	include <config.h>
 #	ifdef	HAVE_LIBINTL
-#		undef	APPCONF_USE_GETTEXT
+#		undef 	APPCONF_USE_GETTEXT
 #		define	APPCONF_USE_GETTEXT	1
 #	endif
 #endif
 
-#include  <iostream.h>
+#if     USE_IOSTREAMH
+  #include  <iostream.h>
+#else   // old C style headers
+  #include  <iostream>
+#endif  // new/old style headers
+
 #include  <stdlib.h>
 
 // make sure we have a Bool type
@@ -488,12 +493,13 @@ public:
    FileConfig(const char *szName, Bool bLocalOnly = FALSE,
 	      Bool bFullPathGiven = FALSE,
 	      Bool bUseSubDir = FALSE, const char *szConfigFileName = "config");
+
    /**
       @memo   Ctor for FileConfig for reading from a stream
       @param  input stream to read from
     */
-  
    FileConfig(istream *iStream);
+
    /**
       Another constructor, creating an empty object. For use with the
       readFile() method.
@@ -725,11 +731,11 @@ public:
     ///
    Bool writeEntry(const char *szKey, const char *szValue);
     ///
-   Bool writeEntry(const char *szKey, int Value)     { return BaseConfig::writeEntry(szKey, Default);} 
+   Bool writeEntry(const char *szKey, int Value)     { return BaseConfig::writeEntry(szKey, Value);} 
     ///
-   Bool writeEntry(const char *szKey, long int Value)     { return BaseConfig::writeEntry(szKey, Default);} 
+   Bool writeEntry(const char *szKey, long int Value)     { return BaseConfig::writeEntry(szKey, Value);} 
    ///
-   Bool writeEntry(const char *szKey, double Value)     { return BaseConfig::writeEntry(szKey, Default); } 
+   Bool writeEntry(const char *szKey, double Value)     { return BaseConfig::writeEntry(szKey, Value); } 
 
     ///
   Bool deleteEntry(const char *szKey);

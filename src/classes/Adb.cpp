@@ -6,44 +6,27 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:39  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:18  karsten
  * first try at a complete archive
  *
  *******************************************************************/
 
 #ifdef __GNUG__
-#	pragma implementation "Adb.h"
+#  pragma implementation "Adb.h"
 #endif
 
-#include	<Adb.h>
-#include	<MApplication.h>
-#include	<strutil.h>
-#include	<fstream.h>
-#include	<MDialogs.h>
+#include  "Mpch.h"
+#include "Mcommon.h"
 
-#if 0
+#include <time.h>
 
-#error This strsep function is broken, it cannot handle empty tokens (just like strtok)!
-static
-char *strsep(char **stringp, const char *delim)
-{
-   char *c;
-   if(strchr(delim, **stringp)) // first character is delimiter
-   {
-      if(**stringp == '\0')
-	 return NULL;
-      **stringp = 0;
-      c = *stringp;
-      *stringp ++;
-      return c;
-   }
-   c = strtok(*stringp, delim);
-   if(c)
-      *stringp += strlen(c)+1;
-   
-   return c;
-}
-#endif
+#include "MFrame.h"
+#include  "Adb.h"
+#include "MDialogs.h"
 
 void
 AdbNameStruct::parse(String const &in)
@@ -52,7 +35,7 @@ AdbNameStruct::parse(String const &in)
       *buf2 = strutil_strdup(in),
       *buf = buf2,
       *c;
-   c = strsep(&buf, ";"); if(c) family = c;
+   c = strsep(&buf,";"); if(c) family = c;
    c = strsep(&buf,";"); if(c) first = c;
    c = strsep(&buf,";"); if(c) other = c;
    c = strsep(&buf,";"); if(c) prefix = c;
@@ -171,7 +154,7 @@ AdbEmailStruct::parse(String const &in)
 void
 AdbEmailStruct::write(String  &out) const
 {
-   list<String>::const_iterator i;
+   std::list<String>::const_iterator i;
 
    out = preferred;
    for(i = other.begin(); i != other.end(); i++)
@@ -187,73 +170,76 @@ AdbEntry::load(istream &istr)
    bool
       inside = false; // found BEGIN ?
    
-   if(istr.bad() || istr.eof())
+   if(istr.fail() || istr.eof())
       return false;
 
    for(;;)
    {
-      if(istr.bad() || istr.eof())
-	 break;
+      // VZ: bad() doesn't check for failbit, and if an IO error occurs we
+      //     must still exit the loop!
+      if(istr.fail() || istr.eof())
+         break;
       strutil_getfoldedline(istr, line);
       strutil_delwhitespace(line);
       if(*line.c_str() == '#') // comment
-	 continue;
+         continue;
       if(line.length() == 0)
-	 continue;
+         continue;
       section = strutil_before(line,':');
       strutil_toupper(section);
       value = strutil_after(line,':');
       strutil_delwhitespace(value);
       if(! inside && section == "BEGIN")
       {
-	 inside = true;
-	 continue;
+         inside = true;
+         continue;
       }
       else if(inside && section== "END")
-	 return true;
+         return true;
       if(inside)
       {
-	 if(section == "FN")
-	    formattedName = value;
-	 else if(section == "N")
-	    structuredName.parse(value);
-	 else if(section == "ADR;INTL;HOME")
-	    homeAddress.parse(value);
-	 else if(section == "ADR;INTL;WORK")
-	    workAddress.parse(value);
-	 else if(section == "TEL;WORK;VOICE")
-	    workPhone.parse(value);
-	 else if(section == "TEL;WORK;FAX")
-	    workFax.parse(value);
-	 else if(section == "TEL;HOME;VOICE")
-	    homePhone.parse(value);
-	 else if(section == "TEL;HOME;FAX")
-	    homeFax.parse(value);
-	 else if(section == "EMAIL")
-	    email.parse(value);
-	 else if(section == "TITLE")
-	    title = value;
-	 else if(section == "ORG")
-	    organisation = value;
-	 else if(section == "URL")
-	    url = value;
-	 else if(section == "BDAY")
-	 {
-	 }
-	 else if(section == "REV")
-	 {
-	    lastChangedDate.tm_year = atoi(value.substr(0,4).c_str());
-	    lastChangedDate.tm_mon = atoi(value.substr(4,2).c_str());
-	    lastChangedDate.tm_mday = atoi(value.substr(6,2).c_str());
-	    lastChangedDate.tm_hour = atoi(value.substr(9,2).c_str());
-	    lastChangedDate.tm_min = atoi(value.substr(11,2).c_str());
-	    lastChangedDate.tm_sec = atoi(value.substr(13,2).c_str());
-	    lastChangedDate.tm_isdst = 0;
-	 }
-	 else if(section == "ALIAS")
-	    alias = value;
+         if(section == "FN")
+            formattedName = value;
+         else if(section == "N")
+            structuredName.parse(value);
+         else if(section == "ADR;INTL;HOME")
+            homeAddress.parse(value);
+         else if(section == "ADR;INTL;WORK")
+            workAddress.parse(value);
+         else if(section == "TEL;WORK;VOICE")
+            workPhone.parse(value);
+         else if(section == "TEL;WORK;FAX")
+            workFax.parse(value);
+         else if(section == "TEL;HOME;VOICE")
+            homePhone.parse(value);
+         else if(section == "TEL;HOME;FAX")
+            homeFax.parse(value);
+         else if(section == "EMAIL")
+            email.parse(value);
+         else if(section == "TITLE")
+            title = value;
+         else if(section == "ORG")
+            organisation = value;
+         else if(section == "URL")
+            url = value;
+         else if(section == "BDAY")
+         {
+         }
+         else if(section == "REV")
+         {
+            lastChangedDate.tm_year = atoi(value.substr(0,4).c_str());
+            lastChangedDate.tm_mon = atoi(value.substr(4,2).c_str());
+            lastChangedDate.tm_mday = atoi(value.substr(6,2).c_str());
+            lastChangedDate.tm_hour = atoi(value.substr(9,2).c_str());
+            lastChangedDate.tm_min = atoi(value.substr(11,2).c_str());
+            lastChangedDate.tm_sec = atoi(value.substr(13,2).c_str());
+            lastChangedDate.tm_isdst = 0;
+         }
+         else if(section == "ALIAS")
+          alias = value;
       }
    }
+
    if(inside)
       return true;
    else
@@ -267,20 +253,20 @@ AdbEntry::save(ostream &ostr)
    if(! ostr || !ostr.good() )
       return false;
 
-   String	val;
+   String   val;
 
    if(formattedName.length() == 0)
    {
       if(structuredName.prefix.length())
-	 formattedName += structuredName.prefix + String(" ");
+    formattedName += structuredName.prefix + String(" ");
       if(structuredName.first.length())
-	 formattedName += structuredName.first + String(" ");
+    formattedName += structuredName.first + String(" ");
       if(structuredName.first.length())
-	 formattedName += structuredName.other + String(" ");
+    formattedName += structuredName.other + String(" ");
       if(structuredName.first.length())
-	 formattedName += structuredName.family + String(" ");
+    formattedName += structuredName.family + String(" ");
       if(structuredName.first.length())
-	 formattedName += structuredName.suffix;
+    formattedName += structuredName.suffix;
    }
    
    ostr << "BEGIN" << endl;
@@ -318,7 +304,7 @@ AdbEntry::save(ostream &ostr)
       ostr << "ALIAS:" << alias << endl;
 
    time_t t;
-   struct tm	 *utc;
+   struct tm    *utc;
    time(&t);
    utc = gmtime(&t);
    ostr << "REV:";
@@ -330,7 +316,7 @@ AdbEntry::save(ostream &ostr)
    ostr << utc->tm_mday;
    ostr << 'T';
    ostr.width(2); ostr.fill('0');
-   ostr	<< utc->tm_hour; 
+   ostr  << utc->tm_hour; 
    ostr.width(2); ostr.fill('0');
    ostr << utc->tm_min; 
    ostr.width(2); ostr.fill('0');
@@ -343,7 +329,7 @@ AdbEntry::save(ostream &ostr)
 Adb::Adb(String const &ifilename)
 {
    fileName = ifilename;
-   ifstream	in(fileName.c_str());
+   ifstream in(fileName.c_str());
 
    AdbEntry *eptr;
 
@@ -352,11 +338,11 @@ Adb::Adb(String const &ifilename)
       eptr = new AdbEntry;
       if(! eptr->load(in))
       {
-	 delete eptr;
-	 break;
+    delete eptr;
+    break;
       }
       else
-	 push_back(eptr);
+    push_back(eptr);
    }
    String tmp = "Adb: read " + strutil_ultoa(size()) + " database entries.";
    LOGMESSAGE((LOG_INFO, tmp));
@@ -383,33 +369,33 @@ Adb::Expand(String const &name)
       a = (*i)->formattedName;
       strutil_toupper(a);
       if(strutil_ncmp(a,b,len))
-	 goto found;
+    goto found;
       a = (*i)->structuredName.first;
       strutil_toupper(a);
       if(strutil_ncmp(a,b,len))
-	 goto found;
+    goto found;
       a = (*i)->structuredName.family;
       strutil_toupper(a);
       if(strutil_ncmp(a,b,len))
-	 goto found;
+    goto found;
       a = (*i)->structuredName.other;
       strutil_toupper(a);
       if(strutil_ncmp(a,b,len))
-	 goto found;
+    goto found;
       a = (*i)->alias;
       strutil_toupper(a);
       if(strutil_ncmp(a,b,len))
-	 goto found;
+    goto found;
       a = (*i)->email.preferred;
       if(strutil_ncmp(a,b,len))
-	 goto found;
+    goto found;
       a = (*i)->organisation;
       if(strutil_ncmp(a,b,len))
-	 goto found;
+    goto found;
       continue;
    found:
       if(foundList == NULL)
-	 foundList = new AdbExpandListType;
+    foundList = new AdbExpandListType;
       foundList->push_back(*i);
    }
    return foundList;
@@ -437,9 +423,9 @@ Adb::Delete(AdbEntry *eptr)
    {
       if(*i == eptr)
       {
-	 erase(i);
-	 delete eptr;
-	 return;
+    erase(i);
+    delete eptr;
+    return;
       }
    }
 }
@@ -447,7 +433,7 @@ Adb::Delete(AdbEntry *eptr)
 Adb::~Adb()
 {
    AdbEntryIterator i;
-   ofstream	out(fileName.c_str());
+   ofstream out(fileName.c_str());
 
    for(i = begin(); i != end(); i++)
    {
@@ -459,14 +445,14 @@ Adb::~Adb()
 AdbEntry *
 Adb::Lookup(String const &key, MFrame *parent) 
 {
-   AdbExpandListType	*list = Expand(key);
+   AdbExpandListType *list = Expand(key);
    
    if(list)
    {
       if(list->size() > 1)
-	 return MDialog_AdbLookupList(list, parent);
+    return MDialog_AdbLookupList(list, parent);
       else
-	 return *(list->begin());
+    return *(list->begin());
    }
    else
       wxBell();
@@ -488,19 +474,19 @@ Adb::UpdateEntry(String email, String name, MFrame *parent)
    
    if(list)
    {
-      entry = *(list->begin());	// take the first one, should be only one
+      entry = *(list->begin());  // take the first one, should be only one
       if(entry->formattedName.length() == 0)
-	 entry->formattedName = name;
+    entry->formattedName = name;
       if(entry->email.preferred != email)
       {
-	 String
-	    msg = _("Enter the following email address as the\n" \
-		    "default address for the user?\n\n");
-	 msg += String(_("eMail: \"")) + email + "\"\n";
-	 msg += String(_("Name:  \"")) + name + "\"\n";
-	 
-	 if(MDialog_YesNoDialog(msg.c_str(), parent, false, _("ADB entry"), true))
-	    entry->email.preferred = email;
+    String
+       msg = _("Enter the following email address as the\n" \
+          "default address for the user?\n\n");
+    msg += String(_("eMail: \"")) + email + "\"\n";
+    msg += String(_("Name:  \"")) + name + "\"\n";
+    
+    if(MDialog_YesNoDialog(msg.c_str(), parent, false, _("ADB entry"), true))
+       entry->email.preferred = email;
       }
    }
    else // create new entry

@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:39  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:19  karsten
  * first try at a complete archive
  *
@@ -15,21 +19,30 @@
 #pragma implementation "PathFinder.h"
 #endif
 
-#include	<guidef.h>
+#include  "Mpch.h"
+#include  "Mcommon.h"
 
-#include	<PathFinder.h>
-#include	<strings.h>
-#ifdef	OS_UNIX
+#if       !USE_PCH
+  #include	<guidef.h>
+  #include	<string.h>
+#endif
+
+#if       defined(OS_UNIX)
 #	include	<unistd.h>
 #	include <sys/stat.h>
 #	define	ANYFILE	"/*"
-#else
+#elif     defined(OS_WIN)
+#	include <sys/stat.h>
+# define  S_ISDIR(mode)     ((mode) & _S_IFDIR)
+# define  S_ISREG(mode)     ((mode) & _S_IFREG)
 #	define	ANYFILE	"/*.*"
 #endif
 
+#include	"PathFinder.h"
+
 PathFinder::PathFinder(String const &ipathlist, bool recursive)
 {
-   pathList = new list<String>;
+   pathList = new std::list<String>;
    AddPaths(ipathlist,recursive);
 }
 
@@ -74,7 +87,7 @@ String
 PathFinder::Find(String const &filename, bool *found,
 		 int mode) const
 {
-   list<String>::const_iterator i;
+   std::list<String>::const_iterator i;
    String	work;
    int	result;
    
@@ -97,7 +110,7 @@ String
 PathFinder::FindFile(String const &filename, bool *found,
 		 int mode) const
 {
-   list<String>::const_iterator i;
+   std::list<String>::const_iterator i;
    String	work;
    int	result;
    
@@ -120,7 +133,7 @@ String
 PathFinder::FindDir(String const &filename, bool *found,
 		 int mode) const
 {
-   list<String>::const_iterator i;
+   std::list<String>::const_iterator i;
    String	work;
    int	result;
    
@@ -143,7 +156,7 @@ String
 PathFinder::FindDirFile(String const &filename, bool *found,
 		 int mode) const
 {
-   list<String>::const_iterator i;
+   std::list<String>::const_iterator i;
    String	work;
    int	result;
    

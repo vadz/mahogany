@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:38  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:15  karsten
  * first try at a complete archive
  *
@@ -18,12 +22,14 @@
 #pragma interface "wxFontManager.h"
 #endif
 
-#define	Uses_wxFont
-#include	<wx/wx.h>
+#if         !USE_PCH
+  #define	Uses_wxFont
+  #include	<wx/wx.h>
 
-#include	<Mcommon.h>
+  #include	<Mcommon.h>
 
-#include	<list>
+  #include	<list>
+#endif
 
 #define	WXFM_DEFAULT_SIZE	12
 #define	WXFM_DEFAULT_FAMILY	wxROMAN
@@ -37,25 +43,33 @@
    allocate or deallocate them.
 */
 
+/** A structure holding information about the fonts.
+   This is the element of the list.
+*/
+struct	FontData
+{
+  int	size;
+  int	family;
+  int	style;
+  int	weight;
+  Bool	underline;
+  wxFont	*fontPtr;
+
+  IMPLEMENT_DUMMY_COMPARE_OPERATORS(FontData)
+};
+
+/** A list of all known fonts.
+   @see FontData
+*/
+typedef std::list<FontData> FontDataList;
+
 class wxFontManager
 {
-   /** A structure holding information about the fonts.
-       This is the element of the list.
-   */
-   struct	FontData
-   {
-      int	size;
-      int	family;
-      int	style;
-      int	weight;
-      Bool	underline;
-      wxFont	*fontPtr;
-   };
-   
+private:
    /** A list of all known fonts.
-       @see FontData
+      @see FontData
    */
-   list<FontData>	*fontList;
+   FontDataList *fontList;
    
    /// An Font to return for unknown lookup strings.
    wxFont	*unknownFont;

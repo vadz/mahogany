@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:37  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:12  karsten
  * first try at a complete archive
  *
@@ -17,13 +21,6 @@
 #ifdef __GNUG__
 #pragma interface "Profile.h"
 #endif
-
-#include	<Mcommon.h>
-#include	<appconf.h>
-#include	<PathFinder.h>
-#include	<list>
-
-using namespace std;
 
 /**@name Profile management classes. */
 //@{
@@ -65,21 +62,25 @@ public:
    file gets opened only once.
 */
 
+/** A structure holding name and FileConfig pointer.
+   This is the element of the list.
+*/
+struct	FCData
+{
+  String		fileName;
+  FileConfig	*fileConfig;
+
+  IMPLEMENT_DUMMY_COMPARE_OPERATORS(FCData)
+};
+
+/** A list of all known icons.
+   @see FCData
+*/
+typedef std::list<FCData>	FCDataList;
+
 class ConfigFileManager : public CommonBase
 {
-   /** A structure holding name and FileConfig pointer.
-       This is the element of the list.
-   */
-   struct	FCData
-   {
-      String		fileName;
-      FileConfig	*fileConfig;
-   };
-   
-   /** A list of all known icons.
-       @see FCData
-   */
-   list<FCData>	*fcList;
+   FCDataList *fcList;
    
 public:
    /** Constructor
@@ -162,26 +163,25 @@ public:
    bool readEntry(const char *szKey, bool Default = false) const
       {
 	 DBGLOG("ProfileAppConfig::readEntry(" << szKey << ',' << Default << ')');
-	 return appConfig->readEntry(szKey, (long int)
-						Default);
+	 return appConfig->readEntry(szKey, (long int)Default) != 0;
       }
    /// Write back the character value.
    inline
    bool writeEntry(const char *szKey, const char *szValue)
       {
-	 return appConfig->writeEntry(szKey, szValue);
+	 return appConfig->writeEntry(szKey, szValue) != 0;
       }
    /// Write back the int value.
    inline
    bool writeEntry(const char *szKey, int Value)
       {
-	 return appConfig->writeEntry(szKey, (long) Value);
+	 return appConfig->writeEntry(szKey, (long) Value) != 0;
       }
    /// Write back the bool value.
    inline
    bool writeEntry(const char *szKey, bool Value)
       {
-	 return appConfig->writeEntry(szKey, (long int) Value);
+	 return appConfig->writeEntry(szKey, (long int) Value) != 0;
       }
    //@}
    CB_DECLARE_CLASS(ProfileAppConfig, CommonBase);

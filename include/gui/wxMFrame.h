@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:38  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:15  karsten
  * first try at a complete archive
  *
@@ -16,9 +20,6 @@
 #ifdef __GNUG__
 #pragma interface "wxMFrame.h"
 #endif
-
-#include	<guidef.h>
-#include	<MFrame.h>
 
 /**
   * A wxWindows Frame class
@@ -59,10 +60,11 @@ public:
    /// return true if initialised
    bool	IsInitialised(void) const { return initialised; }
    /// to be called on closing of window
-   Bool	OnClose(void);	
+   ON_CLOSE_TYPE OnClose(void);
+
    /// make it visible or invisible
-#ifdef WXWIN2
-   bool Show(bool visible = true) { wxFrame::Show(visible); }
+#if     USE_WXWINDOWS2
+   bool Show(bool visible = true) { return wxFrame::Show(visible); }
 #else
    void	Show(bool visible = true) { wxFrame::Show(visible); }
 #endif
@@ -72,6 +74,27 @@ public:
    virtual String const & GetFrameName(void) const { return name; }
    /// handle basic menu callbacks
    void OnMenuCommand(int id);
+
+#if     USE_WXWINDOWS2
+
+   //@{ Menu callbacks
+    /// 
+   void OnOpen(wxCommandEvent&)     { OnMenuCommand(WXMENU_FILE_OPEN); }
+    /// 
+   void OnAdbEdit(wxCommandEvent&)  { OnMenuCommand(WXMENU_FILE_ADBEDIT); }
+    /// 
+   void OnClose(wxCommandEvent&)    { OnMenuCommand(WXMENU_FILE_CLOSE); }
+    /// 
+   void OnCompose(wxCommandEvent&)  { OnMenuCommand(WXMENU_FILE_COMPOSE); }
+    /// 
+   void OnExit(wxCommandEvent&)     { OnMenuCommand(WXMENU_FILE_EXIT); }
+    /// 
+   void OnAbout(wxCommandEvent&)    { OnMenuCommand(WXMENU_HELP_ABOUT); }
+   //@}
+
+   DECLARE_EVENT_TABLE()
+#endif
+
 private:
    ///  try to save the window position and size in config file
    void	SavePosition(void);

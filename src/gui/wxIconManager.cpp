@@ -1,33 +1,52 @@
 /*-*- c++ -*-********************************************************
  * wxIconManager - allocating and deallocating icons for drawing    *
  *                                                                  *
- * (C) 1997, 1998 by Karsten Ballüder (Ballueder@usa.net)           *
+ * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$         *
+ * $Id$                                                             *
+ ********************************************************************
+ * $Log$
+ * Revision 1.4  1998/03/26 23:05:41  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
+ * Revision 1.1  1998/03/14 12:21:22  karsten
+ * first try at a complete archive
+ *
  *******************************************************************/
+
 #ifdef __GNUG__
 #pragma implementation "wxIconManager.h"
 #endif
 
-#include	<CommonBase.h>	//VAR() macro
-#include	<Mdefaults.h>
-#include	<wxIconManager.h>
-#include	<strutil.h>
+#include	"Mpch.h"
+#include  "Mcommon.h"
 
-#include	<unknown.xpm>
-#include	<txt.xpm>
-#include	<audio.xpm>
-#include	<application.xpm>
-#include	<image.xpm>
-#include	<video.xpm>
-#include	<postscript.xpm>
-#include	<dvi.xpm>
-#include	<hlink.xpm>
-#include	<ftplink.xpm>
+#include	"gui/wxIconManager.h"
+
+#ifdef    OS_WIN
+  #define   unknown_xpm     "unknown"
+  #define   txt_xpm         "txt"
+  #define   audio_xpm       "audio"
+  #define   application_xpm "application"
+  #define   image_xpm       "image"
+  #define   video_xpm       "video"
+  #define   postscript_xpm  "postscript"
+  #define   dvi_xpm         "dvi"
+#else   //real XPMs
+  #include	"../src/icons/unknown.xpm"
+  #include	"../src/icons/txt.xpm"
+  #include	"../src/icons/audio.xpm"
+  #include	"../src/icons/application.xpm"
+  #include	"../src/icons/image.xpm"
+  #include	"../src/icons/video.xpm"
+  #include	"../src/icons/postscript.xpm"
+  #include	"../src/icons/dvi.xpm"
+#endif  //Win/Unix
 
 wxIconManager::wxIconManager()
 {
-   iconList = NEW list<IconData>;
+   iconList = GLOBAL_NEW std::list<IconData>;
 
    //AddIcon("unknown", unknown_xpm);
    AddIcon("TEXT", txt_xpm);
@@ -37,25 +56,24 @@ wxIconManager::wxIconManager()
    AddIcon("APPLICATION/DVI", dvi_xpm);
    AddIcon("IMAGE", image_xpm);
    AddIcon("VIDEO", video_xpm);
-   AddIcon(M_ICON_HLINK_HTTP, hlink_xpm);
-   AddIcon(M_ICON_HLINK_FTP, ftplink_xpm);
-   unknownIcon = NEW wxIcon(unknown_xpm);
+
+   unknownIcon = GLOBAL_NEW wxIcon(unknown_xpm);
 }
 
 
 wxIconManager::~wxIconManager()
 {
-   list<IconData>::iterator i;
+   std::list<IconData>::iterator i;
 
    for(i = iconList->begin(); i != iconList->end(); i++)
-      DELETE (*i).iconPtr;
-   DELETE unknownIcon;
+      GLOBAL_DELETE (*i).iconPtr;
+   GLOBAL_DELETE unknownIcon;
 }
 
 wxIcon *
 wxIconManager::GetIcon(String const &iconName)
 {
-   list<IconData>::iterator i;
+   std::list<IconData>::iterator i;
 
    for(i = iconList->begin(); i != iconList->end(); i++)
    {
@@ -75,12 +93,14 @@ wxIconManager::GetIcon(String const &iconName)
 }
 
 void
-wxIconManager::AddIcon(String const &iconName,  char *data[])
+wxIconManager::AddIcon(String const &iconName,  IconResourceType data)
 {
    IconData	id;
 
    id.iconName = iconName;
-   id.iconPtr = NEW wxIcon(data);
+
+   id.iconPtr = GLOBAL_NEW wxIcon(data);
+
    iconList->push_front(id);
 }
 

@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:41  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:22  karsten
  * first try at a complete archive
  *
@@ -15,31 +19,54 @@
 #pragma	implementation "wxMainFrame.h"
 #endif
 
+#include	"Mpch.h"
+#include	"Mcommon.h"
 
-#include	<Mcommon.h>
+#if       !USE_PCH
+  #include	<guidef.h>
+  #include	<gui/wxMDialogs.h>
+#endif
 
-#include	<guidef.h>
-#include	<wxMainFrame.h>
-#include	<wxFolderView.h>
-#include	<wxComposeView.h>
-#include	<wxMDialogs.h>
+#include	"MFrame.h"
+#include	"MLogFrame.h"
 
-#include	<MApplication.h>
-#include	<MailFolderCC.h>
+#include	"Mdefaults.h"
 
-#include	<MainFrame.xpm>
+#include	"PathFinder.h"
+#include	"MimeList.h"
+#include	"MimeTypes.h"
+#include	"Profile.h"
+
+#include  "MApplication.h"
+
+#include  "FolderView.h"
+#include	"MailFolder.h"
+#include	"MailFolderCC.h"
+
+#include	"gui/wxMainFrame.h"
+#include	"gui/wxFolderView.h"
+#include	"gui/wxComposeView.h"
+
+#ifdef    OS_WIN
+  #define MainFrame_xpm   "MainFrame"
+#else   //real XPMs
+  #include	"../src/icons/MainFrame.xpm"
+#endif  //Win/Unix
 
 wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    : wxMFrame(iname,parent)
 {
-   SetIcon(NEW wxIcon(MainFrame_xpm));
+   SetIcon(GLOBAL_NEW wxIcon(MainFrame_xpm));
 
    AddMenuBar();
    AddFileMenu();
    AddHelpMenu();
    SetMenuBar(menuBar);
+#ifdef  USE_WXWINDOWS2
+   CreateStatusBar();
+#else   // wxWin1
    CreateStatusLine(1);
-
+#endif  // wxWin ver
 }
 
 void

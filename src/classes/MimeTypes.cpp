@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:39  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:19  karsten
  * first try at a complete archive
  *
@@ -15,17 +19,30 @@
 #pragma implementation "MimeTypes.h"
 #endif
 
-#include <MimeTypes.h>
-#include <MApplication.h>
-#include <PathFinder.h>
-#include <strutil.h>
+#include  "Mpch.h"
+#include  "Mcommon.h"
 
-#include <string.h>
-#include <fstream.h>
+#if       !USE_PCH
+  #include <strutil.h>
 
-extern "C" {
-#include	<mail.h>
-	   }
+  #include <string.h>
+
+  extern "C" {
+    #include	<mail.h>
+	}
+#endif
+
+#include	"MFrame.h"
+#include	"MLogFrame.h"
+
+#include	"Mdefaults.h"
+
+#include	"PathFinder.h"
+#include	"MimeList.h"
+#include	"MimeTypes.h"
+#include	"Profile.h"
+
+#include  "MApplication.h"
 
 MimeTEntry::MimeTEntry(void)
 {
@@ -71,7 +88,7 @@ MimeTEntry::Parse(String const & str)
 bool
 MimeTEntry::Match(String const & extension, String &mimeType)
 {
-   list<String>::iterator i;
+   std::list<String>::iterator i;
    for(i = extensions.begin(); i != extensions.end(); i++)
       if((*i) == extension)
       {
@@ -81,7 +98,7 @@ MimeTEntry::Match(String const & extension, String &mimeType)
    return false;
 }
 
-MimeTypes::MimeTypes(void) : list<MimeTEntry>()
+MimeTypes::MimeTypes(void) : std::list<MimeTEntry>()
 {
    bool	found;
    MimeTEntry	newEntry;

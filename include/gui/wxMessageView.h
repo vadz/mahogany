@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/03/26 23:05:38  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.2  1998/03/22 20:41:28  KB
  * included profile setting for fonts etc,
  * made XFaces work, started adding support for highlighted URLs
@@ -21,11 +25,13 @@
 #pragma interface "wxMessageView.h"
 #endif
 
-#include	<Message.h>
-#include	<MessageView.h>
-#include	<gui/wxMenuDefs.h>
-#include	<gui/wxMFrame.h>
-#include	<XFace.h>
+#if !USE_PCH
+  #include	<Message.h>
+  #include	<MessageView.h>
+  #include	<gui/wxMenuDefs.h>
+  #include	<gui/wxMFrame.h>
+  #include	<XFace.h>
+#endif
 
 //#include	<gui/wxFTCanvas.h>
 class wxFTOList;

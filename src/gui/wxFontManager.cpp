@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:41  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:22  karsten
  * first try at a complete archive
  *
@@ -15,7 +19,10 @@
 #pragma implementation "wxFontManager.h"
 #endif
 
-#include	<wxFontManager.h>
+#include  "Mpch.h"
+#include	"Mcommon.h"
+
+#include	"gui/wxFontManager.h"
 
 /**
    FontManager class, this class allocates and deallocates fonts for
@@ -26,23 +33,23 @@
 
 wxFontManager::wxFontManager()
 {
-   fontList = NEW list<FontData>;
+   fontList = GLOBAL_NEW std::list<FontData>;
 }
 
 
 wxFontManager::~wxFontManager()
 {
-   list<FontData>::iterator i;
+   std::list<FontData>::iterator i;
    for(i = fontList->begin(); i != fontList->end(); i++)
-      DELETE (*i).fontPtr;
-   DELETE fontList;
+      GLOBAL_DELETE (*i).fontPtr;
+   GLOBAL_DELETE fontList;
 }
 
 wxFont *
 wxFontManager::GetFont(int size, int family, int style, int weight,
 		       Bool underline)
 {
-   list<FontData>::iterator i;
+   std::list<FontData>::iterator i;
    
    FontData    	*fd;
 
@@ -64,7 +71,7 @@ wxFontManager::GetFont(int size, int family, int style, int weight,
    newFont.style = style;
    newFont.weight = weight;
    newFont.underline = underline;
-   newFont.fontPtr = NEW wxFont(size,family,style,weight,underline);
+   newFont.fontPtr = GLOBAL_NEW wxFont(size,family,style,weight,underline != 0);
    fontList->push_front(newFont);
    return newFont.fontPtr;
 }

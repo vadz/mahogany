@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:37  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:12  karsten
  * first try at a complete archive
  *
@@ -18,12 +22,6 @@
 #pragma interface "MimeTypes.h"
 #endif
 
-#include	<Mcommon.h>
-#include	<CommonBase.h>
-
-#include	<list>
-#include	<iostream.h>
-
 /**
    MimeTypes - maps file extensions to mime types.
 */
@@ -32,7 +30,7 @@ class MimeTEntry
    /// type
    String	type;
    /// list of extensions for this type
-   list<String> extensions;
+   std::list<String> extensions;
    friend class MimeTypes;
 public:
    MimeTEntry();
@@ -42,13 +40,15 @@ public:
    */
    bool	Parse(String const & str);
    bool Match(String const & extension, String &mimeType);
+
+   IMPLEMENT_DUMMY_COMPARE_OPERATORS(MimeTEntry);
 };
 
 /**
    MimeTypes - mapping of Mime types to icons and handlers
 */
 
-class MimeTypes : public list<MimeTEntry>, public CommonBase
+class MimeTypes : public std::list<MimeTEntry>, public CommonBase
 {
 public:
    /** Constructor

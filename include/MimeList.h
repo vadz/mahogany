@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:37  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:12  karsten
  * first try at a complete archive
  *
@@ -17,12 +21,6 @@
 #ifdef __GNUG__
 #pragma interface "MimeList.h"
 #endif
-
-#include	<Mcommon.h>
-#include	<CommonBase.h>
-
-#include	<list>
-#include	<iostream.h>
 
 #ifndef	MIME_UNKNOWN_ICON
 /// the icon to use if no other is known
@@ -63,13 +61,15 @@ public:
        @return true if a new entry was found
    */
    bool	Parse(String const & str);
+
+   IMPLEMENT_DUMMY_COMPARE_OPERATORS(MimeEntry)
 };
 
 /**
    MimeList - mapping of Mime types to icons and handlers
 */
 
-class MimeList : public list<MimeEntry>, public CommonBase
+class MimeList : public std::list<MimeEntry>, public CommonBase
 {
 //   DECLARE_CLASS(MimeList)
    

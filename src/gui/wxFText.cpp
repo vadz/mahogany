@@ -3,21 +3,48 @@
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$               *
- ********************************************************************/
-
+ * $Id$                                                             *
+ ********************************************************************
+ * $Log$
+ * Revision 1.4  1998/03/26 23:05:41  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
+ * Revision 1.1  1998/03/14 12:21:22  karsten
+ * first try at a complete archive
+ *
+ *******************************************************************/
 
 #ifdef __GNUG__
 #pragma implementation "wxFText.h"
 #endif
 
-#include	<Mcommon.h>
-#include	<MApplication.h>
+#include	"Mpch.h"
+#include	"Mcommon.h"
 
-#include	<guidef.h>	
-#include	<wxFText.h>
-#include	<strutil.h>
-#include	<MDialogs.h>
+#if       !USE_PCH
+  #include	<strutil.h>
+
+  #include	<guidef.h>	
+#endif
+
+#include	"MFrame.h"
+#include	"MLogFrame.h"
+
+#include	"Mdefaults.h"
+
+#include	"PathFinder.h"
+#include	"MimeList.h"
+#include	"MimeTypes.h"
+#include	"Profile.h"
+
+#include  "MApplication.h"
+#include  "Mdialogs.h"
+
+#include	"gui/wxFontManager.h"
+#include	"gui/wxIconManager.h"
+
+#include	"gui/wxFText.h"
 
 void
 FTObject::Create(void)
@@ -33,8 +60,8 @@ FTObject::Create(void)
    posX2 = 0;
    height = 0;
    width = 0;
-   needsFormat = False;
-   isOk = False;
+   needsFormat = FALSE;
+   isOk = FALSE;
    text = "";
    icon = NULL;
    font = NULL;
@@ -96,7 +123,7 @@ FTObject::Create(String & str, int &cx, int &cy, float &x, float &y,
       if(*cptr)
 	 cptr++;
       str = cptr;
-      isOk = True;
+      isOk = TRUE;
       return LI_NEWLINE;
    }
 
@@ -113,25 +140,19 @@ FTObject::Create(String & str, int &cx, int &cy, float &x, float &y,
       return type;
    }
       
-   if(*cptr == delimiter1)
+   if(*cptr == delimiter1 && *(cptr+1) != delimiter1)
    {
-      if(*(cptr+1) != delimiter1)
-      {
-	 type = LI_COMMAND;
-	 cptr++;	// skip initial delimiter
-	 while(*cptr && *cptr != delimiter2)
-	    text += *cptr++;
-	 //strutil_toupper(text);
-	 if(*cptr == delimiter2)
-	    cptr++;	// skip ending delimiter
-	 str = cptr;
-	 Update(dc,x,y);
-	 isOk = True;
-	 return LI_COMMAND;
-      }
-      //else
-      cptr++;
-      text += *cptr++; // continue as normal string
+      type = LI_COMMAND;
+      cptr++;	// skip initial delimiter
+      while(*cptr && *cptr != delimiter2)
+	 text += *cptr++;
+      strutil_toupper(text);
+      if(*cptr == delimiter2)
+	 cptr++;	// skip ending delimiter
+      str = cptr;
+      Update(dc,x,y);
+      isOk = TRUE;
+      return LI_COMMAND;
    }
    
    /* normal string */
@@ -141,12 +162,10 @@ FTObject::Create(String & str, int &cx, int &cy, float &x, float &y,
    {
       if(*cptr == delimiter2 && *(cptr+1) == delimiter2)
       {
-	 text += *cptr++;
 	 cptr++;
 	 continue;
       }else if(*cptr == delimiter1 && *(cptr+1) == delimiter1)
       {
-	 text += *cptr++;
 	 cptr++;
 	 continue;
       }
@@ -183,10 +202,10 @@ FTObject::Update(wxDC *dc, float &x, float &y, wxFTOList *ftc)
 	 if(type == LI_COMMAND && ftc != NULL)
 	    ftc->ProcessCommand(text, this);
 	    
-      isOk = True;
+      isOk = TRUE;
    }
    else
-      isOk = False; // do it later
+      isOk = FALSE; // do it later
 }
 
 
@@ -202,7 +221,7 @@ FTObject::SetHeight(float h, Bool setDelta)
 FTObject::FTObject(String & str, int &cx, int &cy, float &x, float &y,
 		   bool formatFlag, wxDC *dc)
 {
-   Create(str,cx,cy,x,y,dc);
+   Create(str,cx,cy,x,y,formatFlag,dc);
 }
 
 #ifndef NDEBUG
@@ -249,19 +268,22 @@ FTObject::Draw(wxFTOList & ftc, bool pageing, int *pageno) const
    switch(type)
    {
    case LI_TEXT:
-      if(!dc->IsExposed(posX, posY, posX2, posY2))
-	 return;
+      #ifndef USE_WXWINDOWS2
+        if(!dc->IsExposed(posX, posY, posX2, posY2))
+          return;
+      #endif  
+
       //dc->DrawRectangle(posX,posY,posX2-posX, posY2-posY);
       dc->SetFont(font);
       dc->DrawText(text.c_str(), x, y+posYdelta);
       break;
    case LI_ICON:
-   case LI_URL:
       if(icon)
 	 dc->DrawIcon(icon,x, y);
       break;
    case LI_NEWLINE:
    case LI_COMMAND:
+   case LI_URL:
    case LI_ILLEGAL:
       break;
    };
@@ -465,7 +487,13 @@ void
 wxFTOList::SetCanvas(wxCanvas *ic)
 {
    float width, height;
+
+#ifdef  USE_WXWINDOWS2
+   // @@@@ GetDC
+#else
    SetDC(ic->GetDC(), false);
+#endif
+
    canvas = ic;
    ReCalculateLines(&width, &height);
 
@@ -473,14 +501,20 @@ wxFTOList::SetCanvas(wxCanvas *ic)
    scrollPixelsY = scrollPixelsX;
    scrollLengthX = 50;
    scrollLengthY = 5;
-   canvas->SetScrollbars(scrollPixelsX,scrollPixelsY,
-			 scrollLengthX, scrollLengthY,
-			 WXFTEXT_SCROLLSTEPS_PER_PAGE,WXFTEXT_SCROLLSTEPS_PER_PAGE);
-			 
+   #ifdef  USE_WXWINDOWS2
+     canvas->SetScrollbar(wxHORIZONTAL, 0, scrollPixelsX, scrollLengthX);
+     canvas->SetScrollbar(wxVERTICAL,   0, scrollPixelsY, scrollLengthY);
+   #else
+     canvas->SetScrollbars(scrollPixelsX, scrollPixelsY,
+                           scrollLengthX, scrollLengthY,
+                           WXFTEXT_SCROLLSTEPS_PER_PAGE,
+                           WXFTEXT_SCROLLSTEPS_PER_PAGE);
+   #endif
+
    DrawCursor();
 }
 
-wxFTOList::wxFTOList(wxDC *idc, ProfileBase *profile)
+wxFTOList::wxFTOList(wxDC *idc)
 {
    pageingFlag = false;
    listOfLines = NULL;
@@ -488,33 +522,18 @@ wxFTOList::wxFTOList(wxDC *idc, ProfileBase *profile)
    editable = false;
    Clear();
 
-   if(profile)
-   {
-      drawInfo.FontFamily(profile->readEntry(MP_FTEXT_FONT, MP_FTEXT_FONT_D));
-      drawInfo.FontStyle(profile->readEntry(MP_FTEXT_STYLE, MP_FTEXT_STYLE_D));
-      drawInfo.FontWeight(profile->readEntry(MP_FTEXT_WEIGHT, MP_FTEXT_WEIGHT_D));
-      drawInfo.FontSize(profile->readEntry(MP_FTEXT_SIZE, MP_FTEXT_SIZE_D));
-   }
    SetDC(idc);
    
    //SetCursor(canvas_cursor = DEBUG_NEW wxCursor(wxCURSOR_PENCIL));
 }
 
-wxFTOList::wxFTOList(wxCanvas *ic, ProfileBase *profile)
+wxFTOList::wxFTOList(wxCanvas *ic)
 {
    pageingFlag = false;
    listOfLines = NULL;
    listOfClickables = NULL;
    editable = false;
    Clear();
-
-   if(profile)
-   {
-      drawInfo.FontFamily(profile->readEntry(MP_FTEXT_FONT, MP_FTEXT_FONT_D));
-      drawInfo.FontStyle(profile->readEntry(MP_FTEXT_STYLE, MP_FTEXT_STYLE_D));
-      drawInfo.FontWeight(profile->readEntry(MP_FTEXT_WEIGHT, MP_FTEXT_WEIGHT_D));
-      drawInfo.FontSize(profile->readEntry(MP_FTEXT_SIZE, MP_FTEXT_SIZE_D));
-   }
 
    SetCanvas(ic);
    
@@ -523,19 +542,19 @@ wxFTOList::wxFTOList(wxCanvas *ic, ProfileBase *profile)
 
 wxFTOList::~wxFTOList()
 {
-   DELETE listOfLines;
-   DELETE listOfClickables;
+   GLOBAL_DELETE listOfLines;
+   GLOBAL_DELETE listOfClickables;
 }
 
 void
 wxFTOList::Clear()
 {
    if(listOfLines)
-      DELETE listOfLines;
-   listOfLines = NEW FTOListType;
+      GLOBAL_DELETE listOfLines;
+   listOfLines = GLOBAL_NEW FTOListType;
    lastLineFound = listOfLines->begin();
    if(listOfClickables)
-      listOfClickables = NEW list<FTObject const *>;
+      listOfClickables = GLOBAL_NEW std::list<FTObject const *>;
 
    extractIterator = listOfLines->begin();
    extractContent = "";
@@ -616,7 +635,7 @@ wxFTOList::Wrap(int margin)
       {
 	 FTObject fo;
 	 String	tmp = "\n";
-	 fo.Create(tmp,cursorX, cursorY, dcX, dcY, formatFlag, dc);
+	 fo.Create(tmp,cursorX, cursorY, dcX, dcY, formatFlag != 0, dc);
 	 listOfLines->insert(i,fo);
       }
    }
@@ -641,55 +660,33 @@ wxFTOList::DrawText(const char *text, int x, int y)
 void
 wxFTOList::ProcessCommand(String const &command, FTObject *fto)
 {
-   Bool	enable = True;
+   Bool	enable = TRUE;
    const char *cmd = command.c_str();
 
    if(*cmd == '/')
    {
-      enable = False;
+      enable = FALSE;
       cmd++;
    }
       
-   if(strcmp(cmd,"B")==0 || strcmp(cmd,"b")==0)
+   if(strcmp(cmd,"BF")==0)
       drawInfo.Bold(enable);
-   else if(strcmp(cmd,"SF")==0 || strcmp(cmd,"sf")==0)
+   else if(strcmp(cmd,"SF")==0)
       drawInfo.SansSerif(enable);
-   else if(strcmp(cmd,"TT")==0 || strcmp(cmd,"tt")==0)
+   else if(strcmp(cmd,"TT")==0)
       drawInfo.Typewriter(enable);
-   else if(strcmp(cmd,"EM")==0 || strcmp(cmd,"em")==0)
+   else if(strcmp(cmd,"EM")==0)
       drawInfo.Italics(enable);
-   else if(strcmp(cmd,"SL")==0 || strcmp(cmd,"sl")==0)
+   else if(strcmp(cmd,"SL")==0)
       drawInfo.Slanted(enable);
-   else if(strcmp(cmd,"IT")==0 || strcmp(cmd,"it")==0)
+   else if(strcmp(cmd,"IT")==0)
       drawInfo.Italics(enable);
-   else if(strcmp(cmd,"RM")==0 || strcmp(cmd,"rm")==0)
+   else if(strcmp(cmd,"RM")==0)
       drawInfo.Roman(enable);
-   else if(strcmp(cmd,"UL")==0 || strcmp(cmd,"ul")==0)
+   else if(strcmp(cmd,"UL")==0)
       drawInfo.Underline(enable);
-   else if(strncmp(cmd,"SZ",2)==0 || strcmp(cmd,"sz")==0)
+   else if(strncmp(cmd,"SZ",2)==0)
       drawInfo.ChangeSize(atoi(cmd+2));
-   else if((strncmp(cmd,"A HREF=\"", 8)==0
-	    || strncmp(cmd,"a href=\"", 8)==0)
-	   && fto)
-   {
-      fto->type = LI_URL;
-      char *buf = strutil_strdup(cmd+9);
-      char *cptr = buf;
-      while(*cptr && *cptr != '"') cptr++;
-      *cptr = '\0';
-      if(strncmp(buf,"HTTP", 4) == 0 || strncmp(buf,"http",4) == 0)
-	 fto->icon = iconManager.GetIcon(M_ICON_HLINK_HTTP);
-      else if(strncmp(buf,"FTP",3) == 0 || strncmp(buf,"ftp",3) == 0)
-	 fto->icon = iconManager.GetIcon(M_ICON_HLINK_FTP);
-      else
-	 fto->icon = iconManager.GetIcon(M_ICON_UNKNOWN);
-      fto->width = fto->icon->GetWidth();
-      fto->height = fto->icon->GetHeight();
-      fto->text = String(buf); // the argument of IMG SRC=
-      DELETE [] buf;
-      return;
-      
-   }
    else if(strncmp(cmd,"IMG SRC=\"",9)==0 && fto)
    {
       fto->type = LI_ICON;
@@ -700,11 +697,12 @@ wxFTOList::ProcessCommand(String const &command, FTObject *fto)
       char *cptr2 = cptr1;
       while(*cptr2 && *cptr2 != '"') cptr2++;
       *cptr2 = '\0';
+      VAR(cptr1);
       fto->icon = iconManager.GetIcon(cptr1);
       fto->width = fto->icon->GetWidth();
       fto->height = fto->icon->GetHeight();
-      fto->text = String(buf); // the argument of IMG SRC=
-      DELETE [] buf;
+      fto->text = String(cmd); // the argument of IMG SRC=
+      GLOBAL_DELETE [] buf;
       return;
    }
 
@@ -756,8 +754,8 @@ wxFTOList::ReCalculateLines(float *maxW, float *maxY)
 			   // up to date
    
    // empty list as all coordinates will change
-   DELETE listOfClickables;
-   listOfClickables = NEW list<FTObject const *>;
+   GLOBAL_DELETE listOfClickables;
+   listOfClickables = GLOBAL_NEW std::list<FTObject const *>;
 
    height = drawInfo.TextHeight();
    for(;;)//ever
@@ -777,7 +775,7 @@ wxFTOList::ReCalculateLines(float *maxW, float *maxY)
       xpos = 0.0;
       while((*i).GetType() != LI_NEWLINE && i != listOfLines->end())
       {
-	 (*i).SetHeight(height,True);
+	 (*i).SetHeight(height,TRUE);
 	 (*i).SetYPos(ypos);
 	 (*i).SetXPos(xpos);
 	 (*i).cursorX = cX;
@@ -881,7 +879,7 @@ wxFTOList::AddClickable(FTObject const *obj)
 FTObject const *
 wxFTOList::FindClickable(float x, float y) const
 {
-   list<FTObject const *>::const_iterator	i;
+   std::list<FTObject const *>::const_iterator	i;
    float x1, y1, x2, y2;
    
    for(i = listOfClickables->begin(); i != listOfClickables->end(); i++)
@@ -1019,9 +1017,11 @@ wxFTOList::SimplifyLine(FTOListType::iterator i, bool toEnd)
     @return Iterator to the first object of the next line, or listOfLines->end().
 */
 wxFTOList::FTOListType::iterator
-wxFTOList::ReCalculateLine(FTOListType::iterator ii,
-				      bool toEnde)
+wxFTOList::ReCalculateLine(FTOListType::iterator ii, bool toEnde)
 {
+  assert(0);
+
+  return ii;
 }
 
 void
@@ -1240,7 +1240,12 @@ wxFTOList::ScrollToCursor(void)
       return;
 
    int x1, x2, y1, y2, w, h;
+#ifdef  USE_WXWINDOWS2
+   // @@@@ ViewStart
+#else
    canvas->ViewStart(&x1,&y1);
+#endif
+
    canvas->GetClientSize(&w,&h);
 
    x1 *= scrollPixelsX; y1 *= scrollPixelsY;
@@ -1262,10 +1267,18 @@ wxFTOList::ScrollToCursor(void)
    if(ypos >= scrollLengthY)
       scrollLengthY += scrollLengthY / 2;
    
-   canvas->SetScrollbars(scrollPixelsX,scrollPixelsY,
-			 scrollLengthX, scrollLengthY,
-			 WXFTEXT_SCROLLSTEPS_PER_PAGE,WXFTEXT_SCROLLSTEPS_PER_PAGE);
-   canvas->Scroll(xpos, ypos);
+   #ifdef USE_WXWINDOWS2
+     canvas->SetScrollbar(wxHORIZONTAL, 0, scrollPixelsX, scrollLengthX);
+     canvas->SetScrollbar(wxVERTICAL,   0, scrollPixelsY, scrollLengthY);
+     canvas->SetScrollPos(wxHORIZONTAL, xpos);
+     canvas->SetScrollPos(wxVERTICAL,   ypos);
+   #else  // wxWin 1
+     canvas->SetScrollbars(scrollPixelsX, scrollPixelsY,
+                           scrollLengthX, scrollLengthY,
+                           WXFTEXT_SCROLLSTEPS_PER_PAGE, 
+                           WXFTEXT_SCROLLSTEPS_PER_PAGE);
+     canvas->Scroll(xpos, ypos);
+   #endif // wxWin ver
 }
 
 void

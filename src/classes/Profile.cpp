@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:39  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:20  karsten
  * first try at a complete archive
  *
@@ -15,10 +19,24 @@
 #pragma implementation "Profile.h"
 #endif
 
-#include	<Profile.h>
-#include	<Mdefaults.h>
-#include	<MApplication.h>
-#include	<strutil.h>
+#include  "Mpch.h"
+#include  "Mcommon.h"
+
+#if       !USE_PCH
+  #include	<strutil.h>
+#endif
+
+#include	"MFrame.h"
+#include	"MLogFrame.h"
+
+#include	"Mdefaults.h"
+
+#include	"PathFinder.h"
+#include	"MimeList.h"
+#include	"MimeTypes.h"
+#include	"Profile.h"
+
+#include  "MApplication.h"
 
 /**
    Profile class, managing configuration options on a per class basis.
@@ -124,7 +142,7 @@ bool
 Profile::readEntry(const char *szKey, bool Default) const
 {
    //DBGLOG("Profile::readEntry(" << szKey << ',' << Default << ')' << " name: " << profileName);
-   return (bool) readEntry(szKey, (int) Default);
+   return readEntry(szKey, (int) Default) != 0;
 }
 
 bool
@@ -132,7 +150,7 @@ Profile::writeEntry(const char *szKey, int Value)
 {
    if(! fileConfig)
       return false;
-   return fileConfig->writeEntry(szKey, (long int) Value);
+   return fileConfig->writeEntry(szKey, (long int) Value) != 0;
 }
 
 bool
@@ -140,7 +158,7 @@ Profile::writeEntry(const char *szKey, const char *szValue)
 {
    if(! fileConfig)
       return false;
-   return fileConfig->writeEntry(szKey, szValue);
+   return fileConfig->writeEntry(szKey, szValue) != 0;
 }
 
 bool
@@ -153,13 +171,12 @@ ConfigFileManager Profile::cfManager;
 
 ConfigFileManager::ConfigFileManager()
 {
-   fcList = new list<FCData>;
-
+   fcList = new FCDataList;
 }
 
 ConfigFileManager::~ConfigFileManager()
 {
-   list<FCData>::iterator i;
+   FCDataList::iterator i;
    FileConfig *fcp;
    
 #ifdef DEBUG
@@ -177,7 +194,7 @@ ConfigFileManager::~ConfigFileManager()
 FileConfig *
 ConfigFileManager::GetConfig(String const &fileName)
 {
-   list<FCData>::iterator i;
+   FCDataList::iterator i;
 
 #ifdef DEBUG
    cerr << "ConfigFileManager.GetConfig(" << fileName << ")" << endl;
@@ -207,7 +224,7 @@ ConfigFileManager::GetConfig(String const &fileName)
 void
 ConfigFileManager::Debug(void)
 {
-   list<FCData>::iterator i;
+   FCDataList::iterator i;
 
    cerr << "------ConfigFileManager------" << endl;
    for(i = fcList->begin(); i != fcList->end(); i++)

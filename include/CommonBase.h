@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:36  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:10  karsten
  * first try at a complete archive
  *
@@ -14,14 +18,19 @@
 #ifndef COMMONBASE_H
 #define	COMMONBASE_H
 
-#include	<iostream.h>
-#include	<strstream.h>
-
-#include	<Mconfig.h>
-#include	<Mcommon.h>
+#if         USE_IOSTREAMH
+  #ifdef    OS_WIN
+    // remember these 8.3 names
+    #include	<strstrea.h>
+  #else
+    #include	<strstream.h>
+  #endif
+#else
+  #include	<strstream>
+#endif  // VC++
 
 #if	USE_MEMDEBUG
-#	include	<magic.h>
+#	include	"magic.h"
 #else
 #	define	DEFINE_MAGIC(classname,magic)	/**/
 #     	define	SET_MAGIC(magic)		/**/
@@ -103,7 +112,6 @@ class CommonBase
 #	define	CLASSINIT(name)
 #	define	CBDEBUG()
 #	define	VAR(x)
-#endif // NCOMMONBASE
-
+#endif // USE_COMMONBASE
 
 #endif	// COMMONBASE_H

@@ -13,14 +13,16 @@
 #pragma interface "wxFText.h"
 #endif
 
-using namespace std;
+#if !USE_PCH
+  using namespace std;
 
-#include	<map>
-#include	<list>
+  #include	<map>
+  #include	<list>
 
-#include	<Profile.h>
-#include	<wxFontManager.h>
-#include	<wxIconManager.h>
+   #include	<Profile.h>
+  #include	<wxFontManager.h>
+  #include	<wxIconManager.h>
+#endif
 
 /// describing a FTObject's type
 enum FTObjectType { LI_TEXT, LI_COMMAND, LI_NEWLINE, LI_ICON, LI_URL, LI_ILLEGAL };
@@ -176,9 +178,9 @@ public:
    /**
       Sets the height value.
       @param h new height
-      @param setDelta if True, recalculate offset for baseline
+      @param setDelta if TRUE, recalculate offset for baseline
    */
-   void  SetHeight(float h, Bool setDelta = False);
+   void  SetHeight(float h, Bool setDelta = FALSE);
 
    /**
       Gets the height value.
@@ -232,6 +234,8 @@ public:
 
    void	InsertText(String const &str, int offset = 0);
    void	DeleteChar(int offset = 0);
+
+   IMPLEMENT_DUMMY_COMPARE_OPERATORS(FTObject)
 };
 
 
@@ -267,11 +271,11 @@ class wxFTOList
       /// height of a text line in currently selected font
       float	textHeight;
       
-      list<int> familyStack;
-      list<int> styleStack;
-      list<int> weightStack;
-      list<Bool> underlineStack;
-      list<int> sizeStack;
+      std::list<int> familyStack;
+      std::list<int> styleStack;
+      std::list<int> weightStack;
+      std::list<Bool> underlineStack;
+      std::list<int> sizeStack;
 
       /// the current font:
       wxFont	*font;
@@ -285,11 +289,11 @@ class wxFTOList
 	 @param family	font family
 	 @param	style	font style
 	 @param	weight	font weight
-	 @param underlined True if text is to be underlined
+	 @param underlined TRUE if text is to be underlined
       */	
       DrawInfo(int size = 14, int family =
 	       wxROMAN, int style = wxNORMAL, int weight = wxNORMAL,
-	       Bool underlined = False);
+	       Bool underlined = FALSE);
 
       /// destructor, freeing resources
       ~DrawInfo();
@@ -303,15 +307,15 @@ class wxFTOList
       wxFont	*GetFont(void) { return font; }
       
       /// set font family
-      void	FontFamily(int family, Bool enable = True);
+      void	FontFamily(int family, Bool enable = TRUE);
       /// set font style
-      void	FontStyle(int style, Bool enable = True);
+      void	FontStyle(int style, Bool enable = TRUE);
       /// set font weight
-      void	FontWeight(int weight, Bool enable = True);
+      void	FontWeight(int weight, Bool enable = TRUE);
       /// set font underline
-      void	Underline(Bool enable = True);
+      void	Underline(Bool enable = TRUE);
       /// set font size ion pixels
-      void	FontSize(int size, Bool enable = True);
+      void	FontSize(int size, Bool enable = TRUE);
       /// allocate a font with the current settings
       wxFont *	SetFont(wxDC *dc);
       /** change font size in steps, starting from default size
@@ -325,18 +329,18 @@ class wxFTOList
       /// return the descent of currently selected font
       float	Descent(void) { return fontDescent; }
       
-      void	Roman(Bool enable = True) 	{ FontFamily(wxROMAN, enable); }
-      void	Modern(Bool enable = True) 	{ FontFamily(wxMODERN, enable); }
-      void 	Typewriter(Bool enable = True){ FontFamily(wxTELETYPE, enable); }
-      void	SansSerif(Bool enable = True) { FontFamily(wxSWISS, enable); }
-      void	Script(Bool enable = True) 	{ FontFamily(wxSCRIPT, enable); }
-      void	Decorative(Bool enable = True){ FontFamily(wxDECORATIVE, enable); }
-      void 	Italics(Bool enable = True)	{ FontStyle(wxITALIC, enable); }
-      void	NormalStyle(Bool enable = True) { FontStyle(wxNORMAL, enable); }	
-      void	Slanted(Bool enable = True)	{ FontStyle(wxSLANT, enable); }
-      void	Bold(Bool enable = True) 	{ FontWeight(wxBOLD, enable); }
-      void	Light(Bool enable = True) 	{ FontWeight(wxLIGHT, enable); }
-      void	NormalWeight(Bool enable = True) { FontStyle(wxNORMAL, enable); }
+      void	Roman(Bool enable = TRUE) 	{ FontFamily(wxROMAN, enable); }
+      void	Modern(Bool enable = TRUE) 	{ FontFamily(wxMODERN, enable); }
+      void 	Typewriter(Bool enable = TRUE){ FontFamily(wxTELETYPE, enable); }
+      void	SansSerif(Bool enable = TRUE) { FontFamily(wxSWISS, enable); }
+      void	Script(Bool enable = TRUE) 	{ FontFamily(wxSCRIPT, enable); }
+      void	Decorative(Bool enable = TRUE){ FontFamily(wxDECORATIVE, enable); }
+      void 	Italics(Bool enable = TRUE)	{ FontStyle(wxITALIC, enable); }
+      void	NormalStyle(Bool enable = TRUE) { FontStyle(wxNORMAL, enable); }	
+      void	Slanted(Bool enable = TRUE)	{ FontStyle(wxSLANT, enable); }
+      void	Bold(Bool enable = TRUE) 	{ FontWeight(wxBOLD, enable); }
+      void	Light(Bool enable = TRUE) 	{ FontWeight(wxLIGHT, enable); }
+      void	NormalWeight(Bool enable = TRUE) { FontStyle(wxNORMAL, enable); }
    };
 
 
@@ -362,15 +366,15 @@ class wxFTOList
    /**@name A list of all text lines. */
    //@{
    /// The type of the list. 
-   typedef list<FTObject>	FTOListType;
+   typedef std::list<FTObject>	FTOListType;
    /// The list itself:
    FTOListType *listOfLines;
    //@}
    /// a list of all text line lengths, indexed by cursor position
-   map<int,int>	listOfLengths;
+   std::map<int,int>	listOfLengths;
    
    /// a list of all clickable items
-   list<FTObject const *> *listOfClickables;
+   std::list<FTObject const *> *listOfClickables;
    
    /// a wxIconManager
    wxIconManager	iconManager;
@@ -391,7 +395,7 @@ class wxFTOList
 //   wxFTOList &operator=(wxFTOList const &in) { }
 
    /// remember the last line at which redraw started
-   list<FTObject>::iterator	lastLineFound;
+   std::list<FTObject>::iterator	lastLineFound;
 
    /// the last drawn cursor
    struct
@@ -583,7 +587,7 @@ public:
    FTOListType::iterator ReCalculateLine(FTOListType::iterator i, bool toEnde = false);
 
    /// add an icon to the iconmanager
-   void AddIcon(String const &iconName, char *data[])
+   void AddIcon(String const &iconName, IconResourceType data)
       { iconManager.AddIcon(iconName, data); }
 
 //@}

@@ -7,6 +7,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/03/26 23:05:37  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.2  1998/03/16 18:45:52  karsten
  * checked consistency of CVS archive, made XFace.cc compile in absence
  * of libcompface
@@ -19,17 +23,9 @@
 #ifndef MESSAGECC_H
 #define MESSAGECC_H
 
-#include	<Mcommon.h>
-#include	<list>
-
 #ifdef __GNUG__
 #pragma interface "MessageCC.h"
 #endif
-
-#include	<Message.h>
-#include	<MailFolderCC.h>
-#include	<CommonBase.h>
-#include	<Profile.h>
 
 /** Message class, containing the most commonly used message headers.
    */

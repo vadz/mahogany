@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/03/26 23:05:36  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.2  1998/03/22 20:44:46  KB
  * fixed global profile bug in MApplication.cc
  * adopted configure/makeopts to Python 1.5
@@ -17,17 +21,26 @@
 #ifndef MCONFIG_H
 #define	MCONFIG_H
 
-#include	<config.h>
+#include	"config.h"
 
 #ifdef unix
 #	define	OS_UNIX		1
 #	define	OS_TYPE		"unix"
-#endif
-#if defined(__WIN__) || defined (__WIN32__)
+#elif defined(__WIN__) || defined (__WIN32__)
 #	define	OS_WIN		1
 #	define	OS_TYPE		"windows"
+# ifndef  __WINDOWS__
+#   define  __WINDOWS__     // for wxWindows 2.x
+# endif
+#else
+  // this reminder is important, it won't compile without it anyhow...
+# error   "Unknown platform (forgot to #define unix?)"
 #endif
 
+#ifdef  USE_WXWINDOWS2
+  #define wxTextWindow  wxTextCtrl
+  #define wxText        wxTextCtrl
+#endif  // wxWin 2
 
 /// use one common base class
 #define	USE_COMMONBASE		1
@@ -41,12 +54,17 @@
 /// debug allocator
 #define	USE_DEBUGNEW		0
 
+/// are we using precompiled headers?
+#ifndef USE_PCH
+# define USE_PCH        1
+#endif
+
 #if USE_DEBUGNEW
-#	define	NEW	WXDEBUG_NEW
-#	define	DELETE	delete
+#	define	GLOBAL_NEW	  WXDEBUG_NEW
+#	define	GLOBAL_DELETE	delete
 #else
-#	define	NEW	new
-#	define	DELETE	delete
+#	define	GLOBAL_NEW	  new
+#	define	GLOBAL_DELETE	delete
 #endif
 
 /// use simple dynamic class information

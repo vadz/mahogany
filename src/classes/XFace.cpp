@@ -6,9 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
- * Revision 1.3  1998/03/22 20:41:34  KB
- * included profile setting for fonts etc,
- * made XFaces work, started adding support for highlighted URLs
+ * Revision 1.4  1998/03/26 23:05:40  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
  *
  * Revision 1.2  1998/03/16 18:45:53  karsten
  * checked consistency of CVS archive, made XFace.cc compile in absence
@@ -23,16 +23,21 @@
 #pragma implementation "XFace.h"
 #endif
 
-#include	<XFace.h>
-#include	<strutil.h>
-#include	<stdio.h>
+#include	"Mpch.h"
+#include	"Mcommon.h"
+
+#include	"XFace.h"
 
 #ifdef 	HAVE_COMPFACE_H
 extern "C" {
 #include	<compface.h>
 	   };
 #else
-#	warning	"No compface library found, compiling empty XFace class!"
+  #ifdef  _MSC_VER
+    #pragma message("No compface library found, compiling empty XFace class!")
+  #else
+    #warning	"No compface library found, compiling empty XFace class!"
+  #endif
 #endif
 
 
@@ -187,8 +192,8 @@ XFace::CreateXpm(String &xpm)
       "/* width height num_colors chars_per_pixel */\n"
       "\"    48    48        2            1\",\n"
       "/* colors */\n"
-      "\"# c #000000\",\n"
-      "\". c #ffffff\",\n";
+      "\". c #000000\",\n"
+      "\"# c #ffffff\",\n";
    for(l = 0; l < 48; l++)
    {
       xpm += '"';
@@ -253,6 +258,37 @@ XFace::CreateXpm(String &xpm)
 #endif
 }
 
+char **
+XFace::SplitXpm(String const &xpm)
+{
+   int
+      lines = 0;
+   char
+      *ptr,
+      *token,
+      *buf = strutil_strdup(xpm);
+   
+   ptr = buf;
+   while(strsep(&ptr,"\n\r"))
+      lines++;
+   lines++;
+   strcpy(buf, xpm.c_str());
+   char **xpmdata = new char * [lines];
+   ptr = buf;
+   lines = 0;
+   do
+   {
+      token = strsep(&ptr,"\n\r");
+      if(token)
+	 xpmdata[lines] = strutil_strdup(token);
+      else
+	 xpmdata[lines] = NULL;
+      lines++;
+   }while(token);
+   delete [] buf;
+   return xpmdata;
+}
+
 XFace::~XFace()
 {
    if(data)	delete[] data;
@@ -261,85 +297,3 @@ XFace::~XFace()
 }
 
 
-bool
-XFace::CreateXpm(char ***xpm)
-{
-#ifndef	HAVE_COMPFACE_H
-   return false;
-#else
-   int
-      l,c,q;
-   char
-      *ptr, *buf, *token;
-   int
-      line = 0;
-   String
-      tmp;
-   
-   *xpm = new char * [ 51 ];
-   
-   buf = strutil_strdup(data);
-   ptr = buf;
-   
-   (*xpm)[line++] = strutil_strdup(" 48 48 2 1");
-   (*xpm)[line++] = strutil_strdup("# c #000000");
-   (*xpm)[line++] = strutil_strdup(". c #ffffff");
-   for(l = 0; l < 48; l++)
-   {
-      tmp = "";
-      for(c = 0; c < 3; c++)
-      {
-	 token = strsep(&ptr,",\n\r");
-	 if(strlen(token) == 0)
-	    token = strsep(&ptr, ",\n\r");	// skip end of line
-	 if(token)
-	 {
-	    token += 2;	// skip  0x
-	    for(q = 0; q < 4; q++)
-	    {
-	       switch(token[q])
-	       {
-	       case '0':
-		  tmp += "...."; break;
-	       case '1':
-		  tmp += "...#"; break;
-	       case '2':
-		  tmp += "..#."; break;
-	       case '3':
-		  tmp += "..##"; break;
-	       case '4':
-		  tmp += ".#.."; break;
-	       case '5':
-		  tmp += ".#.#"; break;
-	       case '6':
-		  tmp += ".##."; break;
-	       case '7':
-		  tmp += ".###"; break;
-	       case '8':
-		  tmp += "#..."; break;
-	       case '9':
-		  tmp += "#..#"; break;
-	       case 'a': case 'A':
-		  tmp += "#.#."; break;
-	       case 'b': case 'B':
-		  tmp += "#.##"; break;
-	       case 'c': case 'C':
-		  tmp += "##.."; break;
-	       case 'd': case 'D':
-		  tmp += "##.#"; break;
-	       case 'e': case 'E':
-		  tmp += "###."; break;
-	       case 'f': case 'F':
-		  tmp += "####"; break;
-	       default:
-		  break;
-	       }
-	    }
-	    
-	 }
-      }
-      (*xpm)[line++] = strutil_strdup(tmp);
-   }
-   return true;
-#endif
-}

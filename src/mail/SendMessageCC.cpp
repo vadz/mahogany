@@ -1,26 +1,47 @@
-#include	<Profile.h>
-#include	<Mdefaults.h>
-#include	<strutil.h>
-#include	<strings.h>
-#include	<MApplication.h>
-#include	<SendMessageCC.h>
-#include	<MDialogs.h>
+#include    "Mpch.h"
+#include    "Mcommon.h"
 
-// includes for c-client library
-extern "C"
+#if         !USE_PCH
+  #include	<strutil.h>
+  #include	<strings.h>
+
+  // includes for c-client library
+  extern "C"
+  {
+    #include	<stdio.h>
+    #include	<osdep.h>
+    #include	<rfc822.h>
+    #include	<smtp.h>
+    #include	<nntp.h>
+  }
+#endif
+
+extern "C" 
 {
-#include	<stdio.h>
-#include	<osdep.h>
-#include	<rfc822.h>
-#include	<smtp.h>
-#include	<nntp.h>
-#include	<misc.h>
+  #include	<misc.h>
 
-void rfc822_setextraheaders(const char **names, const char **values);
-
+  void rfc822_setextraheaders(const char **names, const char **values);
 }
 
+#include	"MFrame.h"
+#include	"MLogFrame.h"
 
+#include	"Mdefaults.h"
+
+#include	"PathFinder.h"
+#include	"MimeList.h"
+#include	"MimeTypes.h"
+#include	"Profile.h"
+
+#include  "MApplication.h"
+
+#include  "FolderView.h"
+#include	"MailFolder.h"
+#include	"MailFolderCC.h"
+#include	"Message.h"
+#include	"MessageCC.h"
+
+#include	"SendMessageCC.h"
 
 #define	CPYSTR(x)	cpystr(x)
 
@@ -110,7 +131,7 @@ SendMessageCC::AddPart(int type, const char *buf, size_t len,
       bdy->type = type;
       bdy->subtype = (char *) fs_get(subtype.length()+1);
       strcpy(bdy->subtype,(char *)subtype.c_str());
-      bdy->contents.text.data = data;
+      bdy->contents.text.data = (unsigned char *)data;
       bdy->contents.text.size = len;
       bdy->encoding = ENC8BIT;
       break;
@@ -118,7 +139,7 @@ SendMessageCC::AddPart(int type, const char *buf, size_t len,
       bdy->type = type;
       bdy->subtype = (char *) fs_get(subtype.length()+1);
       strcpy(bdy->subtype,(char *)subtype.c_str());
-      bdy->contents.text.data = data;
+      bdy->contents.text.data = (unsigned char *)data;
       bdy->contents.text.size = len;
       bdy->encoding = ENCBINARY;
       break;
@@ -143,9 +164,9 @@ SendMessageCC::Send(void)
       *hostlist [2],
       **headerNames,
       **headerValues;
-   list<String>
+   std::list<String>
       headerList;
-   list<String>::iterator
+   std::list<String>::iterator
       i;
    
    headers = strutil_strdup(profile->readEntry(MP_EXTRAHEADERS,MP_EXTRAHEADERS_D));

@@ -6,17 +6,16 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:37  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:13  karsten
  * first try at a complete archive
  *
  *******************************************************************/
 #ifndef STRUTIL_H
 #define	STRUTIL_H
-
-#include	<Mcommon.h>
-#include	<iostream.h>
-#include	<map>
-#include	<list>
 
 /**@name String class helper functions */
 //@{
@@ -121,7 +120,7 @@ char *strutil_strdup(String const &in);
 /**
    
   */
-void strutil_splitlist(String const &str, map<String,String> &table);
+void strutil_splitlist(String const &str, std::map<String,String> &table);
 
 /**
    This takes the string and splits it into tokens delimited by the
@@ -131,7 +130,7 @@ void strutil_splitlist(String const &str, map<String,String> &table);
    @param delim		character array holding the delimiters
    @param tlist		reference to an STL String list to append the tokens to
   */
-void strutil_tokenise(char *string, const char *delim, list<String> &tlist);
+void strutil_tokenise(char *string, const char *delim, std::list<String> &tlist);
 
 #ifndef	HAVE_STRSEP
 char * strsep(char **stringp, const char *delim);

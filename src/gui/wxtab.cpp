@@ -8,15 +8,19 @@
 #pragma implementation "wxtab.h"
 #endif
 
-// For compilers that support precompilation, includes "wx.h".
-#include <wx/wx_prec.h>
+#include	"Mpch.h"
+#include  "Mcommon.h"
+
+#ifdef    USE_WXWINDOWS2
+  #define COLOR_CAST(col)   (*col)
+
+  #define wxDialogBox       wxDialog
+#else
+  #define COLOR_CAST(col)   (const_cast<wxColour &>(col))
+#endif
 
 #ifdef __BORLANDC__
 #pragma hdrstop
-#endif
-
-#ifndef WX_PRECOMP
-#include <wx/wx.h>
 #endif
 
 #include <stdio.h>
@@ -24,7 +28,7 @@
 #include <stdarg.h>
 #include <math.h>
 
-#include "wxtab.h"
+#include "gui/wxtab.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxTabControl, wxObject)
 
@@ -167,7 +171,12 @@ void wxTabControl::OnDraw(wxDC *dc, Bool lastInRow)
   else
     dc->SetFont(GetFont());
     
-  dc->SetTextForeground(&(view->GetTextColour()));
+  #ifdef  USE_WXWINDOWS2
+    dc->SetTextForeground(view->GetTextColour());
+  #else
+    dc->SetTextForeground(&(view->GetTextColour()));
+  #endif
+
   dc->SetBackgroundMode(wxTRANSPARENT);
   float textWidth, textHeight;
   dc->GetTextExtent(GetLabel().GetData(), &textWidth, &textHeight);
@@ -471,20 +480,20 @@ void wxTabView::OnTabActivate(int activateId, int deactivateId)
 void wxTabView::SetHighlightColour(const wxColour& col)
 {
   highlightColour = col;
-  highlightPen = wxThePenList->FindOrCreatePen((wxColour *)&col, 1, wxSOLID);
+  highlightPen = wxThePenList->FindOrCreatePen(COLOR_CAST(&col), 1, wxSOLID);
 }
 
 void wxTabView::SetShadowColour(const wxColour& col)
 {
   shadowColour = col;
-  shadowPen = wxThePenList->FindOrCreatePen((wxColour *)&col, 1, wxSOLID);
+  shadowPen = wxThePenList->FindOrCreatePen(COLOR_CAST(&col), 1, wxSOLID);
 }
 
 void wxTabView::SetBackgroundColour(const wxColour& col)
 {
   backgroundColour = col;
-  backgroundPen = wxThePenList->FindOrCreatePen((wxColour *)&col, 1, wxSOLID);
-  backgroundBrush = wxTheBrushList->FindOrCreateBrush((wxColour *)&col, wxSOLID);
+  backgroundPen = wxThePenList->FindOrCreatePen(COLOR_CAST(&col), 1, wxSOLID);
+  backgroundBrush = wxTheBrushList->FindOrCreateBrush(COLOR_CAST(&col), wxSOLID);
 }
 
 void wxTabView::SetTabSelection(int sel)
@@ -581,9 +590,12 @@ int wxTabView::CalculateTabWidth(int noTabs, Bool adjustView)
  
 IMPLEMENT_CLASS(wxTabbedDialogBox, wxDialogBox)
 
-wxTabbedDialogBox::wxTabbedDialogBox(wxWindow *parent, Const char *title, Bool modal, int x, int y,
-     int width, int height, long windowStyle, Constdata char *name):
-   wxDialogBox(parent, title, modal, x, y, width, height, windowStyle, name)
+wxTabbedDialogBox::wxTabbedDialogBox(wxWindow *parent, const char *title, 
+                                     Bool modal, int x, int y,
+                                     int width, int height, 
+                                     long windowStyle, const char *name)
+                 : wxDialogBox(parent, title, modal != 0, 
+                               x, y, width, height, windowStyle, name)
 {
   tabView = NULL;
 }
@@ -593,8 +605,8 @@ wxTabbedDialogBox::~wxTabbedDialogBox(void)
   if (tabView)
     delete tabView;
 }
- 
-Bool wxTabbedDialogBox::OnClose(void)
+
+ON_CLOSE_TYPE wxTabbedDialogBox::OnClose(void)
 {
   return TRUE;
 }
@@ -618,8 +630,9 @@ void wxTabbedDialogBox::OnPaint(void)
 IMPLEMENT_CLASS(wxTabbedPanel, wxPanel)
 
 wxTabbedPanel::wxTabbedPanel(wxWindow *parent, int x, int y,
-     int width, int height, long windowStyle, Constdata char *name):
-   wxPanel(parent, x, y, width, height, windowStyle, name)
+                             int width, int height, 
+                             long windowStyle, const char *name)
+             : wxPanel(parent, x, y, width, height, windowStyle, name)
 {
   tabView = NULL;
 }
@@ -657,7 +670,11 @@ wxPanelTabView::wxPanelTabView(wxPanel *pan, long style): wxTabView(style), tabP
   else if (panel->IsKindOf(CLASSINFO(wxTabbedPanel)))
     ((wxTabbedPanel *)panel)->SetTabView(this);
 
+#ifdef  USE_WXWINDOWS2
+  // @@@@ GetDC
+#else
   SetDC(panel->GetDC());
+#endif
 }
 
 wxPanelTabView::~wxPanelTabView(void)

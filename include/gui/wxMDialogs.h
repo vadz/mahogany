@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:38  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:15  karsten
  * first try at a complete archive
  *
@@ -18,10 +22,21 @@
 #pragma interface "wxMDialogs.h"
 #endif
 
-#include	<MApplication.h>
-#include	<MFrame.h>
-#include	<MDialogs.h>
-#include	<Adb.h>
+#if     !USE_PCH
+  #include	<MApplication.h>
+  #include	<MFrame.h>
+  #include	<MDialogs.h>
+  #include	<Adb.h>
+#else
+  // fwd decl
+  class ProfileBase;
+  class AdbEntry;
+
+  // don't fwd decl typedef if it's already defined
+  #ifndef   ADB_H
+    class AdbExpandListType;
+  #endif
+#endif
 
 /**
    Dialog Boxes 

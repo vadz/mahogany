@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:41  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:22  karsten
  * first try at a complete archive
  *
@@ -15,23 +19,59 @@
 #pragma implementation "wxMFrame.h"
 #endif
 
-#include	<MApplication.h>
-#include	<Mdefaults.h>
+#include	  "Mpch.h"
+#include    "Mcommon.h"
 
-#include	<guidef.h>	
-#include	<wxMFrame.h>
-#include	<wxComposeView.h>
-#include	<wxFolderView.h>
+#if       !USE_PCH
+  #include	<guidef.h>	
+#endif
 
-#include	<MFrame.xpm>
-#include	<wxAdbEdit.h>
-#include	<MDialogs.h>
+#include	"MFrame.h"
+#include	"MLogFrame.h"
+
+#include	"Mdefaults.h"
+
+#include	"PathFinder.h"
+#include	"MimeList.h"
+#include	"MimeTypes.h"
+#include	"Profile.h"
+
+#include  "MApplication.h"
+
+#include  "FolderView.h"
+#include	"MailFolder.h"
+#include	"MailFolderCC.h"
+
+#include  "Adb.h"
+#include  "MDialogs.h"
 
 // test:
-#include	<SendMessageCC.h>
-#include	<MailFolderCC.h>
+#include	"SendMessageCC.h"
+#include	"MailFolderCC.h"
+
+#include	"gui/wxMFrame.h"
+#include	"gui/wxComposeView.h"
+#include	"gui/wxFolderView.h"
+#include	"gui/wxAdbEdit.h"
+
+#ifdef    OS_WIN
+  #define   MFrame_xpm    "MFrame"
+#else
+  #include	"../src/icons/MFrame.xpm"
+#endif
 
 IMPLEMENT_DYNAMIC_CLASS(wxMFrame, wxFrame)
+
+#if     USE_WXWINDOWS2
+  BEGIN_EVENT_TABLE(wxMFrame, wxFrame)
+	  EVT_MENU(WXMENU_FILE_OPEN,    wxMFrame::OnOpen)
+	  EVT_MENU(WXMENU_FILE_ADBEDIT, wxMFrame::OnAdbEdit)
+    EVT_MENU(WXMENU_FILE_CLOSE,   wxMFrame::OnClose)
+    EVT_MENU(WXMENU_FILE_COMPOSE, wxMFrame::OnCompose)
+    EVT_MENU(WXMENU_FILE_EXIT,    wxMFrame::OnExit)
+    EVT_MENU(WXMENU_HELP_ABOUT,   wxMFrame::OnAbout)
+  END_EVENT_TABLE()
+#endif
 
 wxMFrame::wxMFrame(const String &iname, wxFrame *parent)
 {
@@ -63,7 +103,7 @@ wxMFrame::Create(const String &iname, wxFrame *parent)
    mApplication.setCurrentPath(tmp.c_str());
    
    // use name as default title
-   wxFrame::Create(parent, GetFrameName().c_str(), xpos, ypos, width, height);
+   wxFrame::CreateFrame(parent, GetFrameName().c_str(), xpos, ypos, width, height);
    //Show(true);
 
    SetIcon(new wxIcon(MFrame_xpm));
@@ -85,6 +125,11 @@ wxMFrame::AddFileMenu(void)
    fileMenu->Append(WXMENU_FILE_COMPOSE,(char *)_("&Compose"));
 //   fileMenu->Append(WXMENU_FILE_TEST,(char *)_("&Test"));
    fileMenu->Append(WXMENU_FILE_OPEN,(char *)_("&Open"));
+
+   #ifdef USE_WXWINDOWS2
+      wxWindow *parent = GetParent();
+   #endif
+
    if(parent != NULL)
       fileMenu->Append(WXMENU_FILE_CLOSE,(char *)_("&Close"));
    fileMenu->Append(WXMENU_FILE_ADBEDIT, (char *)_("edit &Database"));
@@ -108,7 +153,7 @@ wxMFrame::~wxMFrame()
    SavePosition();
 }
 
-Bool
+ON_CLOSE_TYPE
 wxMFrame::OnClose(void)
 {
    if(this == mApplication.TopLevelFrame())
@@ -160,13 +205,18 @@ wxMFrame::OnMenuCommand(int id)
    {
    case WXMENU_FILE_OPEN:
    {
-      char *name = wxGetTextFromUser(
-	 _("Name of the folder?"),
-	 _("Folder Open"),
-	 "INBOX",this);
+     #ifdef USE_WXWINDOWS2
+      wxString
+     #else
+      char *
+     #endif
+      name = wxGetTextFromUser(_("Name of the folder?"),
+                               _("Folder Open"),
+                                 "INBOX",
+                               this);
       if(name)
       {
-	 MailFolder *mf = new MailFolderCC(name);
+	 MailFolder *mf = new MailFolderCC((const char *)name);
 	 if(mf->IsInitialised())
 	    (new wxFolderView(mf, "FolderView", this))->Show();
 	 else

@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:39  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:19  karsten
  * first try at a complete archive
  *
@@ -15,13 +19,26 @@
 #pragma implementation "MimeList.h"
 #endif
 
-#include <MimeList.h>
-#include <MApplication.h>
-#include <PathFinder.h>
-#include <strutil.h>
+#include  "Mpch.h"
+#include  "Mcommon.h"
 
-#include <string.h>
-#include <fstream.h>
+#if       !USE_PCH
+  #include <strutil.h>
+
+  #include <string.h>
+#endif
+
+#include	"MFrame.h"
+#include	"MLogFrame.h"
+
+#include	"Mdefaults.h"
+
+#include	"PathFinder.h"
+#include	"MimeList.h"
+#include	"MimeTypes.h"
+#include	"Profile.h"
+
+#include  "MApplication.h"
 
 //IMPLEMENT_CLASS2(MimeList, CommonBase, list<MimeEntry>)
    
@@ -77,7 +94,7 @@ MimeEntry::Parse(String const & str)
 
 
 MimeList::MimeList(void)
-   : list<MimeEntry>()
+        : std::list<MimeEntry>()
 {
    bool	found;
    MimeEntry	newEntry;

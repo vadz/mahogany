@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:37  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:12  karsten
  * first try at a complete archive
  *
@@ -18,20 +22,23 @@
 #pragma interface "PathFinder.h"
 #endif
 
-#include	<Mcommon.h>
-#include	<CommonBase.h>
+#if !USE_PCH
+  #include	<Mcommon.h>
+  #include	<CommonBase.h>
 
-#include	<list>
+  #include	<list>
+#endif
 
 /**@name PathFinder class for finding files */
 //@{
 
-#ifdef OS_UNIX
+#if     defined(OS_UNIX)
 /// define a delimiter for separating paths
 #	define	PATHFINDER_DELIMITER	":"
 #	include	<unistd.h>
-#else
+#elif   defined(OS_WIN)
 #	define	PATHFINDER_DELIMITER	";"
+# define  R_OK                  4       // access() mode
 #endif
 
 /**
@@ -41,7 +48,7 @@
 class PathFinder : public CommonBase
 {
    /// the list of absolute paths
-   list<String> *pathList;
+  std::list<String> *pathList;
 public:
    /**
       Constructor.

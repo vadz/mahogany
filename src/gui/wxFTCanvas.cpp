@@ -6,9 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
- * Revision 1.2  1998/03/22 20:41:50  KB
- * included profile setting for fonts etc,
- * made XFaces work, started adding support for highlighted URLs
+ * Revision 1.3  1998/03/26 23:05:40  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
  *
  * Revision 1.1  1998/03/14 12:21:22  karsten
  * first try at a complete archive
@@ -19,29 +19,52 @@
 #pragma	implementation "wxFTCanvas.h"
 #endif
 
-#include	<wxFTCanvas.h>
-#include	<PathFinder.h>
-#include	<Mcommon.h>
-#include	<MApplication.h>
-#include	<Mdefaults.h>
+#include	"Mpch.h"
+#include	"Mcommon.h"
 
+#include	"MFrame.h"
+#include	"MLogFrame.h"
+
+#include	"Mdefaults.h"
+
+#include	"PathFinder.h"
+#include	"MimeList.h"
+#include	"MimeTypes.h"
+#include	"Profile.h"
+
+#include  "MApplication.h"
+
+#include	"gui/wxFontManager.h"
+#include	"gui/wxIconManager.h"
+
+#include	"gui/wxFText.h"
+#include	"gui/wxFTCanvas.h"
 
 IMPLEMENT_CLASS(wxFTCanvas, wxCanvas)
 
 
 wxFTCanvas::wxFTCanvas(wxPanel *iparent, int ix, int iy, int iwidth,
-		       int iheight, long style,
-		       ProfileBase *profile)
+		       int iheight, long style)
 {
+#ifdef  USE_WXWINDOWS2
+  #define parent GetParent()
+
+  SetParent(iparent);
+
+  wxCanvas::Create(parent, -1, wxPoint(ix, iy), 
+                   wxSize(iwidth, iheight), style);
+#else
    parent = iparent;
    wxCanvas::Create(parent, ix, iy, iwidth, iheight, style);
-   ftoList = NEW wxFTOList(this, profile);
+#endif
+
+   ftoList = GLOBAL_NEW wxFTOList(this);
    wrapMargin = -1;
 }
 
 wxFTCanvas::~wxFTCanvas()
 {
-   DELETE  ftoList;
+   GLOBAL_DELETE  ftoList;
 }
 
 
@@ -66,13 +89,21 @@ wxFTCanvas::OnPaint(void)
 void
 wxFTCanvas::OnEvent(wxMouseEvent &event)
 {
-   if(parent)
+  if(parent)
+    #ifdef  USE_WXWINDOWS2
+      // @@@@ wxWindow::OnEvent
+      ;
+    #else
       parent->OnEvent(event);
+    #endif
 }
 
 void
 wxFTCanvas::Print(void)
 {
+#ifdef  USE_WXWINDOWS2
+   // @@@@ postscript printing...
+#else
    // set AFM path
    PathFinder	pf(mApplication.readEntry(MC_AFMPATH,MC_AFMPATH_D),
 		   true);	// recursive!
@@ -82,7 +113,7 @@ wxFTCanvas::Print(void)
    String	afmpath = pf.FindDirFile("Cour.afm");
    wxSetAFMPath((char *) afmpath.c_str());
 
-   wxDC *dc = NEW wxPostScriptDC(NULL, TRUE, this);
+   wxDC *dc = GLOBAL_NEW wxPostScriptDC(NULL, TRUE, this);
    if (dc->Ok() && dc->StartDoc((char *)_("Printing message...")))
    {
 	    dc->SetUserScale(1.0, 1.0);
@@ -92,9 +123,10 @@ wxFTCanvas::Print(void)
 	    ftoList->Draw();
 	    dc->EndDoc();
    }
-   DELETE  dc;
+   GLOBAL_DELETE  dc;
    ftoList->SetCanvas(this);
    ftoList->ReCalculateLines();
+#endif
 }
 
 void

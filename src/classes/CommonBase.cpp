@@ -6,14 +6,19 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:39  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:19  karsten
  * first try at a complete archive
  *
  *******************************************************************/
 
-#include	<CommonBase.h>
+#include  "Mpch.h"
+#include	"Mcommon.h"
 
-#ifndef NCOMMONBASE
+#ifdef USE_COMMONBASE
 
 // define ClassInfo structure
 CB_IMPLEMENT_CLASS(CommonBase, CommonBase);
@@ -44,5 +49,5 @@ CommonBase::Validate(void)
 #endif
 
 
-#endif // NCOMMONBASE
+#endif // USE_COMMONBASE
 

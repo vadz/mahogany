@@ -1,7 +1,14 @@
-#include	<Profile.h>
-#include	<Mdefaults.h>
-#include	<strutil.h>
-#include	<wx.h>
+#include  "Mcommon.h"
+
+#if       !USE_PCH
+  #include	<Profile.h>
+  #include	<Mdefaults.h>
+  #include	<strutil.h>
+  #include	<wx.h>
+#endif
+
+// defined in windows.h
+#undef  SendMessage
 
 class SendMessageCC
 {

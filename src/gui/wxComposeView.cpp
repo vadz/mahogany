@@ -6,9 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
- * Revision 1.3  1998/03/22 20:41:50  KB
- * included profile setting for fonts etc,
- * made XFaces work, started adding support for highlighted URLs
+ * Revision 1.4  1998/03/26 23:05:40  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
  *
  * Revision 1.2  1998/03/16 18:22:43  karsten
  * started integration of python, fixed bug in wxFText/word wrapping
@@ -22,25 +22,36 @@
 #pragma	implementation "wxComposeView.h"
 #endif
 
-#include	<wxFTCanvas.h>
-#include	<Mcommon.h>
-#include	<MApplication.h>
-#include	<MessageCC.h>
-#include	<wxComposeView.h>
-#include	<strutil.h>
-#include	<Mdefaults.h>
-#include	<SendMessageCC.h>
-#include	<MDialogs.h>
-#include	<wxAdbEdit.h>
+#include   "Mpch.h"
+#include	 "Mcommon.h"
 
-// for testing only
+#include	"MFrame.h"
+#include	"MLogFrame.h"
 
-#include	<MessageCC.h>
+#include	"Mdefaults.h"
 
-extern "C"
-{
-#include	<rfc822.h>
-}
+#include	"PathFinder.h"
+#include	"MimeList.h"
+#include	"MimeTypes.h"
+#include	"Profile.h"
+
+#include  "MApplication.h"
+
+#include  "FolderView.h"
+#include	"MailFolder.h"
+#include	"MailFolderCC.h"
+#include	"Message.h"
+#include	"MessageCC.h"
+#include	"SendMessageCC.h"
+#include  "Adb.h"
+#include  "Mdialogs.h"
+
+#include	"gui/wxFontManager.h"
+#include	"gui/wxIconManager.h"
+#include	"gui/wxFText.h"
+#include	"gui/wxFTCanvas.h"
+#include	"gui/wxComposeView.h"
+#include	"gui/wxAdbEdit.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxComposeView, wxMFrame)
 
@@ -99,28 +110,32 @@ wxComposeView::Create(const String &iname, wxFrame *parent,
    wxItem		*last;
    wxLayoutConstraints	*c;
    
-   panel    = new wxPanel(this,0,0,1000,500,wxNO_DC|wxBORDER, "MyPanel");
+   panel = CreateNamedPanel(this, 0, 0, 1000, 500, "MyPanel");
+
+#ifdef USE_WXWINDOWS2
+   // @@ ??
+#else
    panel->SetLabelPosition(wxVERTICAL);
+#endif
 
    // Create some panel items
-   txtToLabel = new wxMessage(panel,_("To:"));
-   txtTo = new wxText(panel,NULL,NULL,"",-1,-1,-1,-1,0,"toField");
+   txtToLabel = CreateLabel(panel, "To:");
+   txtTo      = CreateText(panel, -1, -1, -1, -1, "toField");
 
-
-   aliasButton = new wxButton(panel, NULL, _("Expand"));
+   aliasButton = CreateButton(panel, "Expand", "");
    
    if(profile->readEntry(MP_SHOWCC,MP_SHOWCC_D))
    {
-      txtCCLabel = new wxMessage(panel,_("CC:"));
-      txtCC = new wxText(panel,NULL,NULL,"");
+      txtCCLabel = CreateLabel(panel,"CC:");
+      txtCC = CreateText(panel, -1, -1, -1, -1, "");
    }
    if(profile->readEntry(MP_SHOWBCC,MP_SHOWBCC_D))
    {
-      txtBCCLabel = new wxMessage(panel,_("BCC:"));
-      txtBCC = new wxText(panel,NULL,NULL);
+      txtBCCLabel = CreateLabel(panel,"BCC:");
+      txtBCC = CreateText(panel, -1, -1, -1, -1, "");
    }
-   txtSubjectLabel = new wxMessage(panel,_("Subject:"));
-   txtSubject = new wxText(panel,NULL,NULL,"Subject");
+   txtSubjectLabel = CreateLabel(panel,"Subject:");
+   txtSubject = CreateText(panel, -1, -1, -1, -1, "Subject");
 
    // with the constraints, I assume that "Subject" is the longest label
    c = new wxLayoutConstraints;
@@ -242,7 +257,7 @@ wxComposeView::Create(const String &iname, wxFrame *parent,
 void
 wxComposeView::CreateFTCanvas(void)
 {
-   ftCanvas = new wxFTCanvas(panel, -1,-1,-1,-1, 0, profile);
+   ftCanvas = new wxFTCanvas(panel);
    // Canvas
    wxLayoutConstraints *c = new wxLayoutConstraints;
    c->left.SameAs       (panel, wxLeft);
@@ -350,7 +365,11 @@ wxComposeView::OnMenuCommand(int id)
       delete ftCanvas;
       CreateFTCanvas();
       Layout();
+#ifdef  USE_WXWINDOWS2
+      Refresh();
+#else //wxWin1
       OnPaint();
+#endif
       break;
    default:
       wxMFrame::OnMenuCommand(id);
@@ -410,12 +429,12 @@ wxComposeView::Send(void)
       numMimeType;
    
    SendMessageCC sm( mApplication.GetProfile(),
-		     txtSubject->GetValue(),
-		     txtTo->GetValue(),
-		     profile->readEntry(MP_SHOWCC,MP_SHOWCC_D) ?
-		     txtCC->GetValue() : NULL,
+		     (const char *)txtSubject->GetValue(),
+		     (const char *)txtTo->GetValue(),
+		     profile->readEntry(MP_SHOWCC,MP_SHOWCC_D) ? 
+         (const char *)txtCC->GetValue() : NULL,
 		     profile->readEntry(MP_SHOWBCC,MP_SHOWBCC_D) ?
-		     txtBCC->GetValue() : NULL);
+		     (const char *)txtBCC->GetValue() : NULL);
    tmp = ftCanvas->GetContent(&ftoType, true);
    while(ftoType != LI_ILLEGAL)
    {

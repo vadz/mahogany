@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:38  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:15  karsten
  * first try at a complete archive
  *
@@ -16,13 +20,6 @@
 #ifdef __GNUG__
 #pragma interface "wxFolderView.h"
 #endif
-
-#include	<Profile.h>
-#include	<Mdefaults.h>
-#include	<FolderView.h>
-#include	<wxMenuDefs.h>
-#include	<wxMFrame.h>
-#include	<MailFolder.h>
 
 class wxFolderViewPanel;
 class wxFolderView;
@@ -42,7 +39,12 @@ public:
        @param win the window
    */
    void OnCommand(wxWindow &win, wxCommandEvent &ev);
+
+#ifdef  USE_WXWINDOWS2
+   void OnDefaultAction(wxControl *item);
+#else   // wxWin 1
    void OnDefaultAction(wxItem *item);
+#endif  // wxWin version
 };
 
 /** a timer class for the FolderView */

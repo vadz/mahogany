@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:41  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:22  karsten
  * first try at a complete archive
  *
@@ -15,15 +19,35 @@
 #pragma	implementation "wxFolderView.h"
 #endif
 
-#include	<Mcommon.h>
-#include	<strutil.h>
-#include	<CommonBase.h>
-#include	<MApplication.h>
-#include	<MailFolderCC.h>
-#include	<Message.h>
-#include	<wxFolderView.h>
-#include	<wxMessageView.h>
-#include	<wxComposeView.h>
+#include  "Mpch.h"
+#include	"Mcommon.h"
+
+#if       !USE_PCH
+  #include	<strutil.h>
+#endif
+
+#include  <XFace.h>
+
+#include	"MFrame.h"
+#include	"MLogFrame.h"
+
+#include	"Mdefaults.h"
+
+#include	"PathFinder.h"
+#include	"MimeList.h"
+#include	"MimeTypes.h"
+#include	"Profile.h"
+
+#include  "MApplication.h"
+
+#include  "FolderView.h"
+#include	"MailFolder.h"
+#include	"MailFolderCC.h"
+#include	"MessageView.h"
+
+#include	"gui/wxFolderView.h"
+#include	"gui/wxMessageView.h"
+#include	"gui/wxComposeView.h"
 
 wxFolderView::wxFolderView(MailFolder *iMailFolder, const String
 			   &iname, wxFrame *parent, bool ownsFolderi)
@@ -44,7 +68,7 @@ wxFolderView::wxFolderView(MailFolder *iMailFolder, const String
    Build(width,height);
    mailFolder->RegisterView(this);
 
-   timer = NEW wxFVTimer(mailFolder);
+   timer = GLOBAL_NEW wxFVTimer(mailFolder);
    Update();
 }
 
@@ -56,7 +80,7 @@ wxFolderView::Build(int x, int y)
    AddMenuBar();
    AddFileMenu();
        
-   messageMenu = NEW wxMenu;
+   messageMenu = GLOBAL_NEW wxMenu;
    messageMenu->Append(WXMENU_MSG_OPEN, (char *)_("&Open"));
    messageMenu->Append(WXMENU_MSG_REPLY, (char *)_("&Reply"));
    messageMenu->Append(WXMENU_MSG_FORWARD, (char *)_("&Forward"));
@@ -75,13 +99,8 @@ wxFolderView::Build(int x, int y)
    width = x; height = y;
    x = (int) x - WXFRAME_WIDTH_DELTA;
    y = (int) y - WXFRAME_HEIGHT_DELTA;
-   panel = NEW wxFolderViewPanel(this);
-   listBox = NEW wxListBox(panel, (wxFunction) NULL, "",
-			   wxMULTIPLE,
-			   -1,-1,x,y,
-			   0,
-			   NULL,
-			   wxALWAYS_SB);
+   panel = GLOBAL_NEW wxFolderViewPanel(this);
+   listBox = CreateListBox(panel, -1, -1, x, y);
 }
 
 void
@@ -96,7 +115,7 @@ wxFolderView::Update(void)
    char	buffer[200];
    const char *format;
    
-   bool doesExpand = mApplication.doesExpandVariables();
+   bool doesExpand = mApplication.doesExpandVariables() != 0;
    mApplication.expandVariables(false);
    format = mApplication.readEntry(MC_DATE_FMT,MC_DATE_FMT_D);
    mApplication.expandVariables(doesExpand);
@@ -128,10 +147,10 @@ wxFolderView::~wxFolderView()
    if(initialised)
    {
       timer->Stop();
-      DELETE timer;
+      GLOBAL_DELETE timer;
       mailFolder->RegisterView(this,false);
       if(ownsFolder)
-	 DELETE mailFolder;
+	 GLOBAL_DELETE mailFolder;
    }
 }
 
@@ -202,7 +221,7 @@ wxFolderView::OpenMessages(int n, int *selections)
    {
       mptr = mailFolder->GetMessage(selections[i]+1);
       title = mptr->Subject() + " - " + mptr->From();
-      mv = NEW wxMessageView(mailFolder,selections[i]+1,
+      mv = GLOBAL_NEW wxMessageView(mailFolder,selections[i]+1,
 			     "wxMessageView",
 			     this);
       mv->SetTitle(title);
@@ -223,10 +242,13 @@ wxFolderView::SaveMessages(int n, int *selections)
    int i;
    String str;
 
-   char *folderName = wxGetTextFromUser(
-	 _("Name of the folder to write to?"),
-	 _("Save Message"),
-	 "",this);
+   #ifdef  USE_WXWINDOWS2
+    wxString 
+   #else
+    char *
+   #endif
+   folderName = wxGetTextFromUser(_("Name of the folder to write to?"),
+	                                _("Save Message"),"",this);
    MailFolderCC	*mf;
    
    if(! folderName || strlen(folderName) == 0)
@@ -236,9 +258,9 @@ wxFolderView::SaveMessages(int n, int *selections)
    {
       str = "";
       mailFolder->GetMessage(selections[i]+1)->WriteToString(str);
-      mf = NEW MailFolderCC(folderName);
+      mf = GLOBAL_NEW MailFolderCC((const char *)folderName);
       mf->AppendMessage(str.c_str());
-      DELETE mf;
+      GLOBAL_DELETE mf;
    }
 }
 
@@ -258,7 +280,7 @@ wxFolderView::ReplyMessages(int n, int *selections)
       str = "";
       msg = mailFolder->GetMessage(selections[i]+1);
       msg->WriteToString(str, false);
-      cv = NEW wxComposeView(_("Reply"), this,
+      cv = GLOBAL_NEW wxComposeView(_("Reply"), this,
 			     mailFolder->GetProfile());
       cptr = str.c_str();
       str2 = "";
@@ -285,7 +307,11 @@ wxFolderView::ReplyMessages(int n, int *selections)
 wxFolderViewPanel::wxFolderViewPanel(wxFolderView *iFolderView)
 {
    folderView = iFolderView;
+
+   // @@@@ what goes on here?
+#ifndef USE_WXWINDOWS2
    Create(folderView);
+#endif
 }
 
 void

@@ -7,6 +7,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:43  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:28  karsten
  * first try at a complete archive
  *
@@ -16,20 +20,33 @@
 #pragma implementation "MessageCC.h"
 #endif
 
-#include	<Mcommon.h>
-#include	<strutil.h>
-#include	<MessageCC.h>
-#include	<Mdefaults.h>
+#include  "Mpch.h"
+#include	"Mcommon.h"
 
-// includes for c-client library
-extern "C"
-{
-#include	<stdio.h>
-#include	<osdep.h>
-#include	<rfc822.h>
-#include	<smtp.h>
-#include	<nntp.h>
-}
+#include  "Profile.h"
+#include  "FolderView.h"
+
+#include	"Mdefaults.h"
+
+#include	"MailFolder.h"
+#include	"MailFolderCC.h"
+
+#include	"Message.h"
+#include	"MessageCC.h"
+
+#if       !USE_PCH
+  #include	"strutil.h"
+
+  // includes for c-client library
+  extern "C"
+  {
+    #include	<stdio.h>
+    #include	<osdep.h>
+    #include	<rfc822.h>
+    #include	<smtp.h>
+    #include	<nntp.h>
+  }
+#endif
 
 MessageCC::MessageCC(MailFolderCC *ifolder, unsigned long msgno,
 		     unsigned long iuid)
@@ -63,7 +80,7 @@ MessageCC::MessageCC(const char *itext,  Profile *iprofile)
    {
       if(text[pos] == '\012' && text[pos+1] == '\012') // empty line is end of header
       {
-	 header = NEW char [pos+2];
+	 header = GLOBAL_NEW char [pos+2];
 	 strncpy(header, text, pos+1);
 	 header[pos+1] = '\0';
 	 headerLen = pos+1;
@@ -73,10 +90,10 @@ MessageCC::MessageCC(const char *itext,  Profile *iprofile)
    if(! header)
       return;	// failed
    
-   char *buf = NEW char [headerLen];
+   char *buf = GLOBAL_NEW char [headerLen];
    rfc822_parse_msg (&envelope, &body,header,headerLen, b,
 		     ""   /*defaulthostname */,  buf);
-   DELETE [] buf;
+   GLOBAL_DELETE [] buf;
    initialisedFlag = true;
 #endif
 }
@@ -106,11 +123,11 @@ MessageCC::Create(Profile *iprofile)
 MessageCC::~MessageCC()
 {
    if(partInfos != NULL)
-      DELETE [] partInfos;
+      GLOBAL_DELETE [] partInfos;
    if(partContentPtr)
-      DELETE	partContentPtr;
+      GLOBAL_DELETE	partContentPtr;
    if(text)
-      DELETE [] text;
+      GLOBAL_DELETE [] text;
 }
 
 void
@@ -152,7 +169,7 @@ MessageCC::GetHeaderLine(const String &line, String &value)
    STRINGLIST	slist;
    slist.next = NULL;
    slist.text.size = line.length();
-   slist.text.data = strutil_strdup(line);
+   slist.text.data = (unsigned char *)strutil_strdup(line);
 
    char *
       rc = mail_fetchheader_full (folder->Stream(),
@@ -160,7 +177,7 @@ MessageCC::GetHeaderLine(const String &line, String &value)
 				  &slist,
 				  NIL,FT_UID);
    value = rc;
-   DELETE [] slist.text.data;
+   GLOBAL_DELETE [] slist.text.data;
 }
 
 String const
@@ -336,7 +353,7 @@ MessageCC::DecodeMIME(void)
    if(partInfos == NULL)
    {
       int nparts = CountParts();
-      partInfos = NEW PartInfo[nparts];
+      partInfos = GLOBAL_NEW PartInfo[nparts];
       int count = 0;
       String tmp = "" ;
       decode_body(body,tmp, 0, &count, true);
@@ -382,8 +399,8 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
    }
    
    if(partContentPtr)
-      DELETE partContentPtr;
-   partContentPtr = NEW char[len+1];
+      GLOBAL_DELETE partContentPtr;
+   partContentPtr = GLOBAL_NEW char[len+1];
    strncpy(partContentPtr, cptr, len);
    partContentPtr[len] = '\0';
    //fs_give(&cptr);	// c-client's free() function

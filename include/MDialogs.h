@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/03/26 23:05:36  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.2  1998/03/16 18:22:40  karsten
  * started integration of python, fixed bug in wxFText/word wrapping
  *
@@ -20,10 +24,6 @@
 #ifdef __GNUG__
 #pragma interface "MDialogs.h"
 #endif
-
-#include	<MFrame.h>
-#include	<MApplication.h>
-#include	<guidef.h>
 
 /**@name Strings for default titles */
 //@{
@@ -40,7 +40,7 @@
 //@}
 
 #ifdef USE_WXWINDOWS
-#	include	<wxMDialogs.h>
+#	include	"gui/wxMDialogs.h"
 #endif
 
 #endif

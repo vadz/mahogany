@@ -6,13 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
- * Revision 1.3  1998/03/25 21:29:34  KB
- * - almost fixed handling/highlighting of URLs in messages
- * - added some (testing) python code and the required changes to configure stuff
- *
- * Revision 1.2  1998/03/22 20:44:50  KB
- * fixed global profile bug in MApplication.cc
- * adopted configure/makeopts to Python 1.5
+ * Revision 1.4  1998/03/26 23:05:39  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
  *
  * Revision 1.1  1998/03/14 12:21:19  karsten
  * first try at a complete archive
@@ -23,26 +19,34 @@
 #pragma implementation "MApplication.h"
 #endif
 
-#include	<Mcommon.h>
-#include	<guidef.h>
-#include	<MApplication.h>
-#include	<MMainFrame.h>
-#include	<wxFolderView.h>
-#include	<MLogFrame.h>
-#include	<Mdefaults.h>
-#include	<strutil.h>
+#include  "Mpch.h"
+#include	"Mcommon.h"
+
 #include	<locale.h>
 #include	<errno.h>
 
-#include	<MailFolderCC.h>
+#include	"MFrame.h"
+#include	"MLogFrame.h"
 
-#ifdef	USE_PYTHON
-#	include	"Python.h"
-#endif
+#include	"Mdefaults.h"
+
+#include	"PathFinder.h"
+#include	"MimeList.h"
+#include	"MimeTypes.h"
+#include	"Profile.h"
+
+#include	"Mapplication.h"
+
+#include	"FolderView.h"
+#include	"MailFolder.h"
+#include	"MailFolderCC.h"
+#include	"gui/wxFolderView.h"
+#include	"gui/wxMainFrame.h"
+
+#include	"Adb.h"
 
 #ifdef OS_UNIX
-MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME, FALSE,
-					     FALSE, TRUE)
+MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME, FALSE, TRUE)
 #else
 MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME)
 #endif
@@ -61,7 +65,7 @@ MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME)
    setCurrentPath(M_APPLICATIONNAME);
    VAR(readEntry("TestEntry","DefaultValue"));
    // initialise the profile
-   profile = NEW ProfileAppConfig(this);
+   profile = GLOBAL_NEW ProfileAppConfig(this);
 
    adb = NULL;
    // do we have gettext() ?
@@ -70,7 +74,6 @@ MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME)
    //bindtextdomain (M_APPLICATIONNAME, LOCALEDIR);
    textdomain (M_APPLICATIONNAME);
 #endif
-
 
 }
 
@@ -117,11 +120,11 @@ MApplication::~MApplication()
 {
    if(! initialisedFlag)
       return;
-   DELETE mimeList;
-   DELETE mimeTypes;
-   DELETE profile;
+   GLOBAL_DELETE mimeList;
+   GLOBAL_DELETE mimeTypes;
+   GLOBAL_DELETE profile;
    if(adb)
-      DELETE adb;
+      GLOBAL_DELETE adb;
    flush();
 }
 
@@ -129,8 +132,7 @@ MFrame *
 MApplication::OnInit(void)
 {
    // this is being called from the GUI's initialisation function
-   String	tmp;
-   topLevelFrame = NEW MainFrame();
+   topLevelFrame = GLOBAL_NEW MainFrame();
    if(topLevelFrame)
    {
       initialisedFlag = true;
@@ -158,68 +160,38 @@ MApplication::OnInit(void)
 
    char *cptr = ExpandEnvVars(readEntry(MC_USERDIR,MC_USERDIR_D));
    localDir = String(cptr);
-   DELETE [] cptr;
-
-   // extend path for commands, look in M's dirs first
-   tmp="";
-   tmp += GetLocalDir();
-   tmp += "/scripts";
-   tmp += PATH_SEPARATOR;
-   tmp = GetGlobalDir();
-   tmp += "/scripts";
-   tmp += PATH_SEPARATOR;
-   if(getenv("PATH"))
-      tmp += getenv("PATH");
-   setenv("PATH", tmp.c_str(), 1);
-
-      // initialise python interpreter
-#ifdef	USE_PYTHON
-   tmp = "";
-   tmp += GetLocalDir();
-   tmp += "/scripts";
-   tmp += PATH_SEPARATOR;
-   tmp = GetGlobalDir();
-   tmp += "/scripts";
-   tmp += PATH_SEPARATOR;
-   tmp += readEntry(MC_PYTHONPATH,MC_PYTHONPATH_D);
-   if(getenv("PYTHONPATH"))
-      tmp += getenv("PYTHONPATH");
-   setenv("PYTHONPATH", tmp.c_str(), 1);
-   Py_Initialize();
-   PyRun_SimpleString("import sys,os");
-   PyRun_SimpleString("print 'Hello,', os.environ['USER'] + '.'");
-#endif
-
+   GLOBAL_DELETE [] cptr;
+   
    // now the icon is available, so do this again:
    topLevelFrame->SetTitle(M_TOPLEVELFRAME_TITLE);
 
-   ShowConsole(readEntry(MC_SHOWCONSOLE,(long int)MC_SHOWCONSOLE_D));
+   ShowConsole(readEntry(MC_SHOWCONSOLE,(long int)MC_SHOWCONSOLE_D) != 0);
    
-   mimeList = NEW MimeList();
-   mimeTypes = NEW MimeTypes();
+   mimeList = GLOBAL_NEW MimeList();
+   mimeTypes = GLOBAL_NEW MimeTypes();
 
    // load address database
    PathFinder lpf(localDir);
    String adbName = lpf.FindFile(readEntry(MC_ADBFILE,MC_ADBFILE_D), &found);
    if(! found)
       adbName = localDir + '/' + readEntry(MC_ADBFILE,MC_ADBFILE_D);
-   adb = NEW Adb(adbName);
+   adb = GLOBAL_NEW Adb(adbName);
 
    // Open all default mailboxes:
    char *folders = strutil_strdup(readEntry(MC_OPENFOLDERS,MC_OPENFOLDERS_D));
-   list<String>	openFoldersList;
+   std::list<String>	openFoldersList;
    strutil_tokenise(folders,";",openFoldersList);
-   DELETE [] folders;
-   list<String>::iterator i;
+   GLOBAL_DELETE [] folders;
+   std::list<String>::iterator i;
    for(i = openFoldersList.begin(); i != openFoldersList.end(); i++)
    {
       if((*i).length() == 0) // empty token
 	 continue;
-      MailFolderCC *mf = NEW MailFolderCC(*i);
+      MailFolderCC *mf = GLOBAL_NEW MailFolderCC(*i);
       if(mf->IsInitialised())
-	 (NEW wxFolderView(mf, *i, topLevelFrame))->Show();
+	 (GLOBAL_NEW wxFolderView(mf, *i, topLevelFrame))->Show();
       else
-	 DELETE mf;
+	 GLOBAL_DELETE mf;
    }
    
    return topLevelFrame;
@@ -242,7 +214,7 @@ MApplication::Exit(bool force)
    {
       logFrame = NULL; // avoid any more output being printed
       if(topLevelFrame)
-	 DELETE topLevelFrame;
+	 GLOBAL_DELETE topLevelFrame;
       else
 	 exit(0);
    }
@@ -305,12 +277,12 @@ MApplication::ShowConsole(bool display)
    if(display)
    {
       if(logFrame == NULL)
-	 logFrame = NEW MLogFrame();
-      logFrame->Show(True);
+	 logFrame = GLOBAL_NEW MLogFrame();
+      logFrame->Show(TRUE);
    }
    else if(logFrame)
    {
-      DELETE logFrame;
+      GLOBAL_DELETE logFrame;
       logFrame = NULL;
    }
 }

@@ -56,17 +56,32 @@
 #	include  <windows.h>
 #endif    // WIN32
 
-#ifdef	  __unix__
+#if       defined(__unix__)
 #	include <sys/param.h>
 #	include	<sys/stat.h>
 #	include <unistd.h>
-#	define MAX_PATH	MAXPATHLEN
+#	define MAX_PATH	      MAXPATHLEN
+#elif     defined(__WINDOWS__)
+# define MAX_PATH	      _MAX_PATH
 #endif
 
 #include  <fcntl.h>
 #include  <sys/types.h>
-#include  <iostream.h>
-#include  <fstream.h>
+
+#ifdef    USE_IOSTREAMH
+  #include  <iostream>
+  #include  <fstream>
+
+  using     namespace std;
+
+  #define   STREAM_READ_MODE  ios::in
+#else     // old style headers
+  #include  <iostream.h>
+  #include  <fstream.h>
+
+  #define   STREAM_READ_MODE  ios::in | ios::nocreate
+#endif    // iostream style
+
 #include  <string.h>
 #include  <ctype.h>
 #include  <stdio.h>
@@ -75,7 +90,7 @@
 #include  <assert.h>
 
 // our headers
-#include  <appconf.h>
+#include  "appconf.h"
 
 // ----------------------------------------------------------------------------
 // some debug/error reporting functions
@@ -152,7 +167,8 @@ const char *SysError()
 // ----------------------------------------------------------------------------
 // global functions
 // ----------------------------------------------------------------------------
-inline size_t Strlen(const char *pc) { return pc == NULL ? 0 : strlen(pc); }
+//inline size_t Strlen(const char *pc) { return pc == NULL ? 0 : strlen(pc); }
+extern size_t Strlen(const char *pc);
 inline Bool   IsValid(char c) { return isalnum(c) || strchr("_/-!.*%", c); }
 inline Bool   IsCSym (char c) { return isalnum(c) || ( c == '_');          }
 inline size_t Min(size_t n1, size_t n2) { return n1 < n2 ? n1 : n2; }
@@ -379,10 +395,9 @@ BaseConfig::readEntry(const char *szKey, long int Default) const
    const char *cptr = readEntry(szKey,(const char *)NULL);
    if(cptr)
       return atol(cptr);
-   else
-   {
+   else {
       if(m_bRecordDefaults)
-	 ((BaseConfig *)this)->writeEntry(szKey,Default);
+        ((BaseConfig *)this)->writeEntry(szKey,Default);
       return Default;
    }
 }
@@ -393,10 +408,9 @@ BaseConfig::readEntry(const char *szKey, double Default) const
    const char *cptr = readEntry(szKey,(const char *)NULL);
    if(cptr)
       return atof(cptr);
-   else
-   {
+   else {
       if(m_bRecordDefaults)
-	 ((BaseConfig *)this)->writeEntry(szKey,Default);
+        ((BaseConfig *)this)->writeEntry(szKey,Default);
       return Default;
    }
 }
@@ -573,6 +587,11 @@ const char *BaseConfig::getCurrentPath() const
 // called before writing
 char *BaseConfig::filterOut(const char *szValue)
 {
+  if ( !szValue ) {
+    assert( 0 );
+    return NULL;
+  }
+
   // quote entire string if it starts with space or with quote
   Bool bDoQuote = isspace(*szValue) || (*szValue == '"');
 
@@ -646,6 +665,11 @@ char *BaseConfig::filterOut(const char *szValue)
 // called after reading
 char *BaseConfig::filterIn(const char *szValue)
 {
+  if ( !szValue ) {
+    assert( 0 );
+    return NULL;
+  }
+
   // it will be a bit smaller, but who cares
   char *szBuf = new char[Strlen(szValue) + 1];
 
@@ -1243,7 +1267,7 @@ FileConfig::FileConfig(const char *szFileName, Bool bLocalOnly,
   ifstream inpStream;
   if ( !bLocalOnly ) {
     m_szFullFileName = GlobalConfigFile();
-    inpStream.open(m_szFullFileName, ios::in | ios::nocreate);
+    inpStream.open(m_szFullFileName, STREAM_READ_MODE);
     if ( inpStream ) {
       m_bParsingLocal = FALSE;
       m_bOk = readStream(&inpStream);
@@ -1257,7 +1281,7 @@ FileConfig::FileConfig(const char *szFileName, Bool bLocalOnly,
   // ------------------------
   m_szFullFileName = LocalConfigFile();
   if ( m_szFullFileName != NULL ) {
-    inpStream.open(m_szFullFileName, ios::in | ios::nocreate);
+    inpStream.open(m_szFullFileName, STREAM_READ_MODE);
     if ( inpStream ) {
       m_bParsingLocal = TRUE;
       if ( readStream(&inpStream) ) {
@@ -1304,7 +1328,7 @@ FileConfig::readFile(const char *szFileName)
    strcpy(m_szFileName, szFileName);
    m_bFullPathGiven = TRUE;
    m_szFullFileName = m_szFileName;
-   inpStream.open(m_szFullFileName, ios::in | ios::nocreate);
+   inpStream.open(m_szFullFileName, STREAM_READ_MODE);
    if ( inpStream ) {
       m_bParsingLocal = TRUE;
       if ( readStream(&inpStream) ) {
@@ -1691,8 +1715,8 @@ Bool FileConfig::flush(Bool bCurrentOnly)
   ConfigGroup *pRootGroup = bCurrentOnly ? m_pCurGroup : m_pRootGroup;
 
   if ( m_pRootGroup->IsDirty() ) {
-     char *tmp = LocalConfigFile();
-     fstream outStream(tmp, ios::out|ios::trunc);
+    const char *tmp = LocalConfigFile();
+    fstream outStream(tmp, ios::out|ios::trunc);
     
     Bool bOk = pRootGroup->flush(&outStream);
     
@@ -1703,7 +1727,7 @@ Bool FileConfig::flush(Bool bCurrentOnly)
     }
     
     outStream.sync();
-
+    
     return bOk;
   }
   else
@@ -1921,11 +1945,10 @@ const char *RegistryConfig::readEntry(const char *szKey,
 
   if(pRetValue != NULL)
      return pRetValue;
-  else
-  {
-     if(m_bRecordDefaults)
-	writeEntry(szKey, szDefault);
-     return szDefault;
+  else {
+    if ( m_bRecordDefaults && szDefault != NULL )
+      const_cast<RegistryConfig *>(this)->writeEntry(szKey, szDefault);
+    return szDefault;
   }
 }
 

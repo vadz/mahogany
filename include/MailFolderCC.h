@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:36  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:11  karsten
  * first try at a complete archive
  *
@@ -14,23 +18,28 @@
 #ifndef MAILFOLDERCC_H
 #define MAILFOLDERCC_H
 
-#include	<MailFolder.h>
-#include	<Profile.h>
-#include	<list.h>
-
 #ifdef __GNUG__
 #pragma interface "MailFolderCC.h"
 #endif
 
-
-// includes for c-client library
-extern "C"
-{
-#include	<mail.h>
-}
-
-
 struct __docxxfix;
+
+// fwd decl needed to define StreamListType before MailFolderCC
+// (can't be defined inside the class - VC++ 5.0 can't compile it)
+class MailFolderCC;
+
+/// structure to hold MailFolder pointer and associated mailstream pointer
+struct StreamConnection
+{
+  /// pointer to a MailFolderCC object
+  MailFolderCC 	*folder;
+  /// pointer to the associated MAILSTREAM
+  MAILSTREAM	const *stream;
+
+  IMPLEMENT_DUMMY_COMPARE_OPERATORS(StreamConnection)
+};
+/// map type for mapping mailstreams to objects:
+typedef	std::list<StreamConnection> StreamListType;
 
 /**
    MailFolder class, implemented with the C-client library.
@@ -137,6 +146,10 @@ public:
    /** Updates the associated FolderViews */
    void UpdateViews(void);
    
+   /// which type is this mailfolder?
+   enum FolderType { MF_INBOX = 0, MF_FILE = 1, MF_POP = 2, MF_IMAP =
+		     3, MF_NNTP = 4 };
+   
 private:
    /// for POP/IMAP boxes, this holds the user id for the callback
    static String MF_user;
@@ -144,11 +157,7 @@ private:
    static String MF_pwd;
 
    /// a list of FolderViews to be notified when this folder changes
-   list<FolderViewBase *>	viewList;
-   
-   /// which type is this mailfolder?
-   enum FolderType { MF_INBOX = 0, MF_FILE = 1, MF_POP = 2, MF_IMAP =
-		     3, MF_NNTP = 4 };
+   std::list<FolderViewBase *>	viewList;
    
    /// which type is this mailfolder?
    FolderType	folderType;
@@ -175,16 +184,6 @@ private:
        the  c-client library to the object associated with that event.
        */
    //@{
-   /// structure to hold MailFolder pointer and associated mailstream pointer
-   typedef struct 
-   {
-      /// pointer to a MailFolderCC object
-      MailFolderCC 	*folder;
-      /// pointer to the associated MAILSTREAM
-      MAILSTREAM	const *stream;
-   } StreamConnection;
-   /// map type for mapping mailstreams to objects:
-   typedef	list<StreamConnection> StreamListType;
 
    /// a pointer to the object to use as default if lookup fails
    static MailFolderCC	*streamListDefaultObj;

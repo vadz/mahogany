@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:36  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:12  karsten
  * first try at a complete archive
  *
@@ -14,10 +18,10 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
-#include	<Mcommon.h>
-#include	<list>
-
-using namespace std;
+#if     !USE_PCH
+  #include	<Mcommon.h>
+  #include	<list>
+#endif
 
 /// a type used by Address():
 enum MessageAddressType { MAT_FROM, MAT_SENDER, MAT_REPLYTO };

@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:43  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:27  karsten
  * first try at a complete archive
  *
@@ -15,20 +19,18 @@
 #pragma implementation "MailFolderCC.h"
 #endif
 
-#include	<strutil.h>
-#include	<MApplication.h>
-#include	<MailFolderCC.h>
-#include	<MessageCC.h>
-#include	<MDialogs.h>
+#include  "Mpch.h"
+#include  "Mcommon.h"
 
-// includes for c-client library
-extern "C"
-{
-#include	<osdep.h>
-#include	<rfc822.h>
-#include	<smtp.h>
-#include	<nntp.h>
-}
+#include  "Profile.h"
+#include  "FolderView.h"
+
+#include	"Mdefaults.h"
+#include	"MailFolder.h"
+#include	"MailFolderCC.h"
+
+#include	"Message.h"
+#include	"MessageCC.h"
 
 String MailFolderCC::MF_user;
 String MailFolderCC::MF_pwd;
@@ -136,7 +138,7 @@ MailFolderCC::~MailFolderCC()
 void
 MailFolderCC::RegisterView(FolderViewBase *view, bool reg)
 {
-   list<FolderViewBase *>::iterator i;
+  std::list<FolderViewBase *>::iterator i;
    if(reg)
       viewList.push_front(view);
    else	
@@ -154,7 +156,7 @@ MailFolderCC::RegisterView(FolderViewBase *view, bool reg)
 void
 MailFolderCC::UpdateViews(void)
 {
-   list<FolderViewBase *>::iterator i;
+   std::list<FolderViewBase *>::iterator i;
    for(i = viewList.begin(); i != viewList.end(); i++)
       (*i)->Update();
 }
@@ -256,14 +258,11 @@ MailFolderCC::RemoveFromMap(MAILSTREAM const *stream)
 // static class member functions:
 //-------------------------------------------------------------------
 
-MailFolderCC::StreamListType
-MailFolderCC::streamList;
+StreamListType MailFolderCC::streamList;
 
-bool
-MailFolderCC::cclientInitialisedFlag = false;
+bool MailFolderCC::cclientInitialisedFlag = false;
 
-MailFolderCC *
-MailFolderCC::streamListDefaultObj = NULL;
+MailFolderCC *MailFolderCC::streamListDefaultObj = NULL;
 
 void
 MailFolderCC::CClientInit(void)
@@ -505,7 +504,6 @@ MailFolderCC::mm_fatal(char *str)
 {
    String	msg = (String) "Fatal Error:" + (String) str;
    LOGMESSAGE((LOG_ERROR, msg));
-   mApplication.ErrorMessage(msg);
 }
 
 //-------------------------------------------------------------------

@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:35  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:10  karsten
  * first try at a complete archive
  *
@@ -17,15 +21,6 @@
 #ifdef __GNUG__
 #pragma interface "Adb.h"
 #endif
-
-#include	<list>
-
-#include	<Mcommon.h>
-#include	<CommonBase.h>
-#include	<MFrame.h>
-#include	<guidef.h>
-#include	<time.h>
-#include	<iostream.h>
 
 /**@name Adb classes */
 //@{
@@ -69,7 +64,7 @@ struct AdbTelStruct
 struct AdbEmailStruct
 {
    String	preferred;
-   list<String> other;
+   std::list<String> other;
 
    void parse(String const &in);
    void write(String &out) const;
@@ -103,10 +98,10 @@ public:
 };
 
 
-typedef	list<AdbEntry *>		AdbEntryListType;
+typedef	std::list<AdbEntry *>		AdbEntryListType;
 typedef AdbEntryListType::iterator	AdbEntryIterator;
 
-typedef	list<AdbEntry *> 		AdbExpandListType;
+typedef	std::list<AdbEntry *> 		AdbExpandListType;
 typedef	AdbExpandListType::iterator 	AdbExpandListIterator;
 
 /**

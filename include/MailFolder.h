@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:36  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:11  karsten
  * first try at a complete archive
  *
@@ -13,13 +17,6 @@
 
 #ifndef MAILFOLDER_H
 #define MAILFOLDER_H
-
-#include	<Mconfig.h>
-
-#include	<Message.h>
-#include	<CommonBase.h>
-#include	<Profile.h>
-#include	<FolderView.h>
 
 #define	MSG_STAT_UNREAD    1
 #define	MSG_STAT_DELETED   2

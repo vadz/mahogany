@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/03/26 23:05:38  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.2  1998/03/16 18:22:42  karsten
  * started integration of python, fixed bug in wxFText/word wrapping
  *
@@ -20,14 +24,16 @@
 #pragma interface "wxComposeView.h"
 #endif
 
-#include	<map>
+#if !USE_PCH
+  #include	<map>
 
-#include	<Message.h>
-#include	<wxMenuDefs.h>
-#include	<wxMFrame.h>
-#include	<Profile.h>
+  #include	<Message.h>
+  #include	<wxMenuDefs.h>
+  #include	<wxMFrame.h>
+  #include	<Profile.h>
 
-using namespace std;
+  using namespace std;
+#endif
 
 class wxFTOList;
 class wxComposeView;
@@ -88,7 +94,7 @@ private:
    void	ProcessMouse(wxMouseEvent &event);
    //@}
 
-   typedef map<unsigned long, String> MapType;
+   typedef std::map<unsigned long, String> MapType;
    MapType	fileMap;
    unsigned long	nextFileID;
 

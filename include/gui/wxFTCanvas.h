@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/03/26 23:05:38  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.2  1998/03/22 20:41:28  KB
  * included profile setting for fonts etc,
  * made XFaces work, started adding support for highlighted URLs
@@ -17,11 +21,11 @@
 #ifndef	WXFTCANVAS_H
 #define WXFTCANVAS_H
 
-#include	<wxFText.h>
-
 #ifdef __GNUG__
 #pragma interface "wxFTCanvas.h"
 #endif
+
+class wxFTOList;
 
 /**
    This class provides a high level abstraction to the wxFText
@@ -92,7 +96,7 @@ public:
    /// Sets wrap margin, set it to -1 to disable auto wrapping
    void SetWrapMargin(int n) { wrapMargin = n; }
    /// add an icon to the iconmanager
-   void AddIcon(String const &iconName, char *data[])
+   void AddIcon(String const &iconName, IconResourceType data)
       { ftoList->AddIcon(iconName, data); }
 
 };

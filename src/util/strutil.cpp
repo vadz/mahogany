@@ -1,10 +1,12 @@
-#include <Mcommon.h>
-#include <strutil.h>
+#include "Mpch.h"
+#include "Mcommon.h"
+
 #include <ctype.h>
 #include <stdio.h>
-#include <map>
 
-using namespace std;
+#if      !USE_PCH
+  #include "strutil.h"
+#endif
 
 void
 strutil_getstrline(istream &istr, String &str)
@@ -139,7 +141,7 @@ strutil_strdup(String const &in)
 
 // split string into name=value;name=value pairs
 void
-strutil_splitlist(String const &str, map<String,String> &table)
+strutil_splitlist(String const &str, std::map<String,String> &table)
 {
    char *tmp = strutil_strdup(str);
    char *name, *value, *ptr, *trail;
@@ -244,7 +246,7 @@ strsep(char **stringp, const char *delim)
 #endif
 
 void
-strutil_tokenise(char *string, const char *delim, list<String> &tlist)
+strutil_tokenise(char *string, const char *delim, std::list<String> &tlist)
 {
    char *found;
    
@@ -256,5 +258,3 @@ strutil_tokenise(char *string, const char *delim, list<String> &tlist)
       tlist.push_back(String(found));
    }
 }
-
-

@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/26 23:05:41  VZ
+ * Necessary changes to make it compile under Windows (VC++ only)
+ * Header reorganization to be able to use precompiled headers
+ *
  * Revision 1.1  1998/03/14 12:21:22  karsten
  * first try at a complete archive
  *
@@ -15,14 +19,30 @@
 #	pragma implementation "wxMLogFrame.h"
 #endif
 
-#include	<wxMLogFrame.h>
-#include	<MApplication.h>
+#include	 "Mpch.h"
+#include   "Mcommon.h"
+
+#include	"MFrame.h"
+#include	"MLogFrame.h"
+#include	"PathFinder.h"
+#include	"MimeList.h"
+#include	"MimeTypes.h"
+#include	"Profile.h"
+
+#include  "MApplication.h"
+
+#include   "gui/wxMLogFrame.h"
 
 wxMLogFrame::wxMLogFrame(void)
    : wxMFrame("LogWindow", mApplication.TopLevelFrame())
 {
    SetTitle(_("M activity log"));
-   tw = NEW wxTextWindow(this);
+
+   #ifdef   USE_WXWINDOWS2
+      tw = GLOBAL_NEW wxTextWindow(this, -1);
+   #else  // wxWin 1
+      tw = GLOBAL_NEW wxTextWindow(this);
+   #endif // wxWin ver
 
    
    AddMenuBar();
@@ -63,7 +83,7 @@ wxMLogFrame::OnMenuCommand(int id)
    }
 }
 
-int
+ON_CLOSE_TYPE
 wxMLogFrame::OnClose(void)
 {
    mApplication.ShowConsole(false);

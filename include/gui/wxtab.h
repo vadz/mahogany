@@ -12,8 +12,13 @@
 #pragma interface "wxtab.h"
 #endif
 
-#include <wx/wx_hash.h>
-#include <wx/wxstring.h>
+#ifdef  USE_WXWINDOWS2
+  #include <wx/hash.h>
+  #include <wx/string.h>
+#else //wxWin 1
+  #include <wx/wx_hash.h>
+  #include <wx/wxstring.h>
+#endif
 
 class wxTabView;
 
@@ -244,7 +249,7 @@ class wxTabView: public wxObject
  * A dialog box class that is tab-friendly
  */
  
-class wxTabbedDialogBox: public wxDialogBox
+class wxTabbedDialogBox: public wxDialog
 {
    DECLARE_DYNAMIC_CLASS(wxTabbedDialogBox)
  
@@ -253,14 +258,16 @@ class wxTabbedDialogBox: public wxDialogBox
    
  public:
 
-   wxTabbedDialogBox(wxWindow *parent, Const char *title, Bool modal, int x = -1, int y = -1,
-     int width = -1, int height = -1, long windowStyle = wxDEFAULT_DIALOG_STYLE, Constdata char *name = "dialogBox");
+   wxTabbedDialogBox(wxWindow *parent, const char *title, Bool modal, 
+                     int x = -1, int y = -1, int width = -1, int height = -1, 
+                     long windowStyle = wxDEFAULT_DIALOG_STYLE, 
+                     const char *name = "dialogBox");
    ~wxTabbedDialogBox(void);
  
    inline wxTabView *GetTabView() { return tabView; }
    inline void SetTabView(wxTabView *v) { tabView = v; }
   
-   virtual Bool OnClose(void);
+   virtual ON_CLOSE_TYPE OnClose(void);
    virtual void OnEvent(wxMouseEvent& event);
    virtual void OnPaint(void);
 };
@@ -278,8 +285,10 @@ class wxTabbedPanel: public wxPanel
    
  public:
 
-   wxTabbedPanel(wxWindow *parent, int x = -1, int y = -1,
-     int width = -1, int height = -1, long windowStyle = 0, Constdata char *name = "panel");
+   wxTabbedPanel(wxWindow *parent, int x = -1, int y = -1, 
+                                   int width = -1, int height = -1, 
+                                   long windowStyle = 0, 
+                                   const char *name = "panel");
    ~wxTabbedPanel(void);
  
    inline wxTabView *GetTabView() { return tabView; }
