@@ -73,8 +73,14 @@ BUG:
 - MessageCC::GetBody() can return with body/envelope == NULL if
   message no longer exists. Just got a crash in Refresh().
   Add a CHECK() wherever it is called.
+Is MailfolderCC::UpdateCount() still used anywhere?
 
 TODO:
+- Things like CopyMessagesToFolder need a return code indicating
+  whether they were successful or not, otherwise MoveMessagesToFolder
+  deletes them in any case. Trivial to add.
+ --> Clicking ABORT doesn't return false!
+- MessageCC::Addresses() returns empty name for Morten Poulson  WHY?
 - add auto collection to compose view
 - add a popup dialog to edit message headers in composeview
 - some html mail import/filtering of tags (easy, quick and dirty)
@@ -149,9 +155,6 @@ TODO:
 - make message view use the new font settings.
 
 - add "double click to open" profile option support to folder list ctrl
-- Things like CopyMessagesToFolder need a return code indicating
-  whether they were successful or not, otherwise MoveMessagesToFolder
-  deletes them in any case. Trivial to add.
 - allow angle brackets and full name <> in reply-to field.
 - folder set message flag update hook takes too long for really large folders
    ==> code commented out in MailFolderCC.cpp
