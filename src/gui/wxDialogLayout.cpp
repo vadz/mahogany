@@ -787,8 +787,17 @@ void wxNotebookDialog::CreateAllControls()
 // ----------------------------------------
 bool wxNotebookDialog::TransferDataToWindow()
 {
+#ifdef __WXGTK__
+   // an ugly workaround for the wxGTK bug
+   // TODO remove it as soon as wxGTK works again
+   int sel = m_notebook->GetSelection();
+   m_notebook->SetSelection(0);
+   m_notebook->SetSelection(sel);
+#endif // __WXGTK__
+
    for ( int nPage = 0; nPage < m_notebook->GetPageCount(); nPage++ ) {
-      if ( !m_notebook->GetPage(nPage)->TransferDataToWindow() ) {
+      wxWindow *page = m_notebook->GetPage(nPage);
+      if ( !page->TransferDataToWindow() ) {
          return FALSE;
       }
    }
