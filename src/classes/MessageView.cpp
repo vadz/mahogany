@@ -3173,13 +3173,27 @@ MessageView::DoShowMessage(Message *mailMessage)
 
 String MessageView::GetText() const
 {
+   // return selection if we have any and if the option to reply to selected
+   // text hasn't been disabled by the user
    String text;
    if ( READ_CONFIG(GetProfile(), MP_REPLY_QUOTE_SELECTION) )
    {
       text = m_viewer->GetSelection();
    }
 
-   return text.empty() ? m_textBody : text;
+   // test for m_textBody is important to avoid problems in the code below
+   if ( !text.empty() || m_textBody.empty() )
+      return text;
+
+   // trim trailing empty lines, it is annoying to have to delete them manually
+   // when replying
+   const wxChar *p = m_textBody.end() - 1;
+   while ( *p == _T('\r') || *p == _T('\n') )
+      p--;
+
+   const_cast<String &>(m_textBody).erase(p - m_textBody.begin() + 1);
+
+   return m_textBody;
 }
 
 // ----------------------------------------------------------------------------
@@ -3187,13 +3201,13 @@ String MessageView::GetText() const
 // ----------------------------------------------------------------------------
 
 bool
-MessageView::Print(void)
+MessageView::Print()
 {
    return m_viewer->Print();
 }
 
 void
-MessageView::PrintPreview(void)
+MessageView::PrintPreview()
 {
    m_viewer->PrintPreview();
 }
