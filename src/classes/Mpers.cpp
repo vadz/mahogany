@@ -163,7 +163,8 @@ static const struct
    { _T("FormatParagraphBeforeExit"),gettext_noop("format all paragraphs in composer before exit") },
    { _T("LangChangedWarn"),          gettext_noop("warn if 8bit characters are used in composer and language is not set") },
    { _T("ContUpdateAfterError"),     gettext_noop("ask if we should continue updating folders after an error") },
-   //{ "", gettext_noop("") },
+   { _T("RemoveAllAttach"),          gettext_noop("ask for confirmation before removing all attachments from composer") },
+   //{ _T(""), gettext_noop("") },
 };
 
 // ============================================================================
