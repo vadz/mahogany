@@ -1854,6 +1854,22 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
             MLocker lockHeaders(m_mutexHeaders);
 
             m_headers->CachePositions(seq);
+
+            // wxFolderView sets us as the interactive frame for this folder
+            // when opening it so that the user gets some feedback while the
+            // folder is being opened, but it should be reset when it is
+            // finally done to avoid showing this feedback later when the
+            // folder is just being checked as part of the background
+            // processing
+            //
+            // I don't know what is the right place to do it though... this one
+            // is most probably not the right one, but for now do it here
+            MailFolder *mf = m_FolderView->GetMailFolder();
+            if ( mf )
+            {
+               mf->SetInteractiveFrame(NULL);
+               mf->DecRef();
+            }
          }
 
          // we may now (quickly!) update m_uidFocus, see comment in UpdateFocus()
@@ -3144,9 +3160,21 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
                                            readonly ? MailFolder::ReadOnly
                                                     : MailFolder::Normal);
    SetFolder(mf);
-   SafeDecRef(mf);
 
+   // reset this frame as the default interactive one ...
    MailFolder::ResetInteractive();
+
+   if ( mf )
+   {
+      // ... but set it as interactive frame for this folder only to ensure
+      // that we get the feedback while opening it
+      //
+      // it will be reset later (currently from wxFolderListCtrl::OnIdle())
+      mf->SetInteractiveFrame(m_Frame);
+
+      mf->DecRef();
+   }
+
    wxEndBusyCursor();
 
    if ( !mf )
