@@ -269,8 +269,6 @@ wxVCardDialog::wxVCardDialog(wxVCard *vcard)
     wxBoxSizer *sizerTop = new wxBoxSizer( wxVERTICAL );
 
     wxNotebook *notebook = new wxNotebook( this, -1 );
-    wxNotebookSizer *sizerNotebook = new wxNotebookSizer( notebook );
-    sizerTop->Add(sizerNotebook, 1, wxGROW | wxALL, 5);
     sizerTop->Add(CreateButtonSizer(wxOK | wxCANCEL), 0,
                   wxALIGN_RIGHT | (wxALL & ~wxRIGHT), 10);
 
