@@ -61,9 +61,10 @@ public:
 
    /** Update the status bar to the new value.
        @param value new value
+       @param newmsg if used, new message to display
        @returns true if ABORT button has not been pressed
    */
-   bool Update(int value = -1);
+   bool Update(int value = -1, const char *newmsg = NULL);
 
    /** Can be called to continue after the cancel button has been pressed, but
        the program decided to continue the operation (e.g., user didn't
@@ -83,6 +84,8 @@ private:
 
    /// the status bar
    class wxGauge *m_gauge;
+   /// the message displayed
+   class wxStaticText *m_msg;
    /// disable all or parent window only
    bool m_disableParentOnly;
    /// continue processing or not (return value for Update())

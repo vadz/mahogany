@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Mahogany 0.21\n"
-"POT-Creation-Date: 1999-05-04 21:24+0100\n"
+"POT-Creation-Date: 1999-05-08 17:07+0100\n"
 "PO-Revision-Date: 1999-01-11 23:23+0000\n"
 "Last-Translator: Karsten Ballüder <ballueder@gmx.net>\n"
 "Language-Team: M-Team <m-developers@makelist.com>\n"
@@ -14,6 +14,7 @@ msgid "Deleted illegal folder profile: '"
 msgstr "Ungültiges Mailboxprofil gelöscht: '"
 
 #: upgrade.cpp:308
+#, c-format
 msgid "Converting information for folder '%s'."
 msgstr "Konvertiere Einstellungen für Mailbox '%s'."
 
@@ -85,50 +86,51 @@ msgstr ""
 msgid "Testing your configuration"
 msgstr "Einstellungen werden geprüft"
 
-#: miscutil.cpp:76
+#: miscutil.cpp:76 miscutil.cpp:77
 #, c-format
 msgid ""
 "Failed to create the address book '%s' for autocollected e-mail addresses."
 msgstr "Kann Adreßbuch '%s' zum automatischen Adreßsammeln nicht anlegen."
 
-#: miscutil.cpp:99
+#: miscutil.cpp:99 miscutil.cpp:100
 #, c-format
 msgid "Auto collected e-mail address '%s' (added to the entry '%s')."
 msgstr "E-Mail Adresse '%s' gesammelt (in Eintrag '%s')."
 
-#: miscutil.cpp:111
+#: miscutil.cpp:111 miscutil.cpp:112
 msgid "Add new e-mail entry to database?"
 msgstr "Neue E-Mail Addresse in Datenbank aufnehmen?"
 
-#: miscutil.cpp:138
+#: miscutil.cpp:138 miscutil.cpp:139
 #, c-format
 msgid ""
 "Couldn't create an entry in the address book '%s' for autocollected address."
 msgstr ""
 "Kann  keinen automatisch gesammelten Eintrag in Adreßbuch '%s' anlegen."
 
-#: miscutil.cpp:162
+#: miscutil.cpp:162 miscutil.cpp:163
 #, c-format
 msgid "This entry was automatically added on %s."
 msgstr "Dieser Eintrag wurde automatisch gesammelt (%s)."
 
-#: miscutil.cpp:171
+#: miscutil.cpp:171 miscutil.cpp:172
 #, c-format
 msgid ""
 "Auto collected e-mail address '%s' (created new entry '%s' in group '%s')."
 msgstr "E-Mail Adresse '%s' gesammelt (neuer Eintrag '%s' in Gruppe '%s')."
 
-#: miscutil.cpp:215
+#: miscutil.cpp:215 miscutil.cpp:216
 #, c-format
 msgid "'%s': the name is missing, address was not autocollected."
 msgstr "'%s': der Name fehlt, Adresse wurde nicht gesammelt."
 
-#: miscutil.cpp:225
+#: miscutil.cpp:225 miscutil.cpp:296
 #, c-format
 msgid "RGB(%d, %d, %d)"
 msgstr ""
 
-#: miscutil.cpp:278
+#: miscutil.cpp:278 miscutil.cpp:349
+#, c-format
 msgid ""
 "Cannot find a colour named '%s', using default instead.\n"
 "(please check the settings)"
@@ -268,6 +270,7 @@ msgid "New Mail"
 msgstr "Neue Nachrichten"
 
 #: MFolder.cpp:241
+#, c-format
 msgid "Cannot create a folder '%s' which already exists."
 msgstr "Kann keine Mailbox mit Namen '%s' anlegen: existiert bereits."
 
@@ -279,10 +282,11 @@ msgid ""
 msgstr "Kann Konfiguration mit Namen '%s' nicht anlegen: existiert bereits."
 
 #: MFolder.cpp:481
+#, c-format
 msgid "Cannot create subfolder '%s': folder with this name already exists."
 msgstr ""
-"Kann Mailbox '%s' nicht anlegen : eine Mailbox mit diesem Namen "
-"existiert bereits."
+"Kann Mailbox '%s' nicht anlegen : eine Mailbox mit diesem Namen existiert "
+"bereits."
 
 #: MFolder.cpp:515
 msgid ""
@@ -302,6 +306,7 @@ msgstr ""
 "existiert bereits."
 
 #: MailCollector.cpp:78
+#, c-format
 msgid "Cannot open incoming folder '%s'."
 msgstr "Kann eingehende Mailbox '%s' nicht öffnen."
 
@@ -311,9 +316,11 @@ msgstr "Kann keine Liste der Eingangsmailboxen erstellen."
 
 #: MailCollector.cpp:133
 msgid "Cannot collect mail without New Mail folder."
-msgstr "Keine Mailbox für neue Nachrichten definiert, kann keine Mails abholen."
+msgstr ""
+"Keine Mailbox für neue Nachrichten definiert, kann keine Mails abholen."
 
 #: MailCollector.cpp:177
+#, c-format
 msgid "You have %lu new messages in folder '%s'.\n"
 msgstr "Sie haben %lu neue Nachrichten in Mailbox '%s'.\n"
 
@@ -413,23 +420,35 @@ msgstr "Konnte Einstellungen nicht speichern."
 msgid "Help not implemented for current context, yet."
 msgstr "Noch keine Hilfe für den aktuellen Kontext implementiert."
 
-#: wxFolderView.cpp:63
+#: wxMFrame.cpp:344
+msgid "Mahogany Toolbar"
+msgstr ""
+
+#: wxFolderView.cpp:62 wxFolderView.cpp:63
+msgid "Status"
+msgstr ""
+
+#: wxFolderView.cpp:63 wxFolderView.cpp:64
 msgid "Date"
 msgstr "Datum"
 
-#: wxFolderView.cpp:64
+#: wxFolderView.cpp:64 wxFolderView.cpp:65
 msgid "Size"
 msgstr "Größe"
 
-#: wxFolderView.cpp:65
+#: wxFolderView.cpp:65 wxFolderView.cpp:66
 msgid "From"
 msgstr "Von"
 
-#: wxFolderView.cpp:66
+#: wxFolderView.cpp:66 wxFolderView.cpp:67
 msgid "Subject"
 msgstr "Betreff"
 
-#: wxFolderView.cpp:318
+#: wxFolderView.cpp:103 wxFolderView.cpp:104
+msgid "DUXCSMRFOPH "
+msgstr ""
+
+#: wxFolderView.cpp:318 wxFolderView.cpp:319
 #, c-format
 msgid ""
 "Mark all articles in\n"
@@ -440,7 +459,7 @@ msgstr ""
 "%s\n"
 "als gelesen markieren?"
 
-#: wxFolderView.cpp:456
+#: wxFolderView.cpp:456 wxFolderView.cpp:457
 msgid ""
 "Invalid value '%s' for the date format: it should contain exacty 3 %%u "
 "format specificators. Default value '%s' will be used instead."
@@ -449,30 +468,33 @@ msgstr ""
 "enhalten. Standardwert '%s' wird verwendet."
 
 #: wxFolderView.cpp:506
+#, c-format
 msgid "Folder '%s' (%lu messages, %lu recent, %lu new)"
 msgstr "Mailbox '%s' (%lu Nachrichten, %lu ungelesen, %lu neu)"
 
-#: wxFolderView.cpp:530
+#: wxFolderView.cpp:524 wxFolderView.cpp:530
 #, c-format
 msgid "The folder '%s' could not be opened, please check its settings."
 msgstr ""
 "Die Mailbox '%s' konnte nicht geöffnet werden, bitte überprüfen Sie ihre "
 "Einstellungen."
 
-#: wxFolderView.cpp:562
+#: wxFolderView.cpp:556 wxFolderView.cpp:562
 msgid "Deleted messages were expunged"
 msgstr "Als gelöscht markierte Nachrichten wurden entfernt"
 
-#: wxFolderView.cpp:735 wxFolderView.cpp:751
+#: wxFolderView.cpp:729 wxFolderView.cpp:735 wxFolderView.cpp:745
+#: wxFolderView.cpp:751
 #, c-format
 msgid "%d messages saved"
 msgstr "%d Nachrichten gesichert"
 
-#: wxFolderView.cpp:737 wxFolderView.cpp:753
+#: wxFolderView.cpp:731 wxFolderView.cpp:737 wxFolderView.cpp:747
+#: wxFolderView.cpp:753
 msgid "Saving messages failed."
 msgstr "Nachrichten konnten nicht gesichert werden."
 
-#: wxFolderView.cpp:773
+#: wxFolderView.cpp:767 wxFolderView.cpp:773
 #, c-format
 msgid "Closing folder '%s' because the underlying mail folder was deleted."
 msgstr "Schließe Mailbox '%s' weil die Mailbox gelöscht wurde."
@@ -497,7 +519,9 @@ msgstr "&Sichern..."
 #, c-format
 msgid ""
 "Temporary file '%s' left because it is still in use by an external process"
-msgstr "Temporäre Datei '%s' zurückgelassen, das sie noch von einem externen Prozeß benutzt wird."
+msgstr ""
+"Temporäre Datei '%s' zurückgelassen, das sie noch von einem externen Prozeß "
+"benutzt wird."
 
 #: wxMessageView.cpp:654
 msgid "MIME type: "
@@ -588,6 +612,7 @@ msgid "Could not save the attachment."
 msgstr "Konnte Anhang nicht sichern."
 
 #: wxMessageView.cpp:1042
+#, c-format
 msgid "Cannot open URL '%s'"
 msgstr "Kann URL '%s' nicht öffnen."
 
@@ -609,6 +634,7 @@ msgid "Could not launch browser: '%s' failed."
 msgstr "Kann Browser nicht starten: '%s' fehlgeschlagen."
 
 #: wxMessageView.cpp:1099
+#, c-format
 msgid "Couldn't launch browser: '%s' failed"
 msgstr "Konnte Browser nicht starten: '%s' fehlgeschlagen."
 
@@ -659,7 +685,7 @@ msgstr ""
 msgid "Printing"
 msgstr "Drucken"
 
-#: wxMessageView.cpp:1345
+#: wxMessageView.cpp:1345 wxMessageView.cpp:1370
 msgid ""
 "There was a problem with showing the preview:\n"
 "perhaps your current printer is not set correctly?"
@@ -667,15 +693,15 @@ msgstr ""
 "Es gab ein Problem mit der Druckvoransicht:\n"
 "Vielleicht ist Ihr Durcker nicht richtig eingestellt?"
 
-#: wxMessageView.cpp:1347
+#: wxMessageView.cpp:1347 wxMessageView.cpp:1372
 msgid "Previewing"
 msgstr "Duckvoransicht"
 
-#: wxMessageView.cpp:1354
+#: wxMessageView.cpp:1354 wxMessageView.cpp:1380
 msgid "Print Preview"
 msgstr "Druckvoransicht"
 
-#: wxMessageView.cpp:1409
+#: wxMessageView.cpp:1409 wxMessageView.cpp:1435
 #, c-format
 msgid "%s (external viewer exited with non null exit code)"
 msgstr "%s (externer Betracher terminierte mit Fehlercode)"
@@ -760,6 +786,7 @@ msgid "way "
 msgstr "viel "
 
 #: wxComposeView.cpp:834
+#, c-format
 msgid ""
 "Please terminate the external editor (PID %d) before closing this window."
 msgstr ""
@@ -793,6 +820,7 @@ msgid "Choose file to save message to"
 msgstr "Wählen Sie eine Datei zum speichern"
 
 #: wxComposeView.cpp:926
+#, c-format
 msgid "Message text saved to file '%s'."
 msgstr "Nachrichtentext in Datei '%s' gesichert."
 
@@ -914,12 +942,12 @@ msgstr "Kann die Textdatei nicht einfügen."
 msgid "Cannot write message to file '%s'."
 msgstr "Kann Nachricht nicht in Datei '%s' schreiben."
 
-#: wxMainFrame.cpp:70
+#: wxMainFrame.cpp:70 wxMainFrame.cpp:71
 #, c-format
 msgid "Selected folder '%s'."
 msgstr "Mailbox '%s' ausgewählt."
 
-#: wxMainFrame.cpp:199
+#: wxMainFrame.cpp:199 wxMainFrame.cpp:200
 msgid ""
 "This folder couldn't be opened last time, do you still want to try to open "
 "it (it will probably fail again)?"
@@ -927,17 +955,18 @@ msgstr ""
 "Diese Mailbox konnte das letzte Mal nicht geöffnet werden, möchten Sie es "
 "trotzdem versuchen?"
 
-#: wxMainFrame.cpp:207
+#: wxMainFrame.cpp:207 wxMainFrame.cpp:208
 msgid "Would you like to change folder settings before trying to open it?"
 msgstr ""
 "Möchten Sie die Mailboxeinstellungen ändern bevor Sie versuchen sie zu "
 "öffnen?"
 
 #: wxMainFrame.cpp:251
+#, c-format
 msgid "Opened folder '%s' (%lu messages, %lu recent, %lu new)"
 msgstr "Mailbox '%s' geöffnet (%lu Nachrichten, %lu neu)"
 
-#: wxMainFrame.cpp:287
+#: wxMainFrame.cpp:280 wxMainFrame.cpp:287
 msgid "Do you really want to exit Mahogany?"
 msgstr "Möchten Sie Mahogany wirklich beenden?"
 
@@ -1954,7 +1983,8 @@ msgid ""
 "retrieved from remote server: if the message size or\n"
 "number is greater than the value specified here, you\n"
 "will be asked for confirmation before transfering data."
-msgstr "The folgenden Einstellungen erlauben es, die Datenmenge\n"
+msgstr ""
+"The folgenden Einstellungen erlauben es, die Datenmenge\n"
 "die von externen Servern geholt wird zu beschränken: falls die\n"
 "Nachrichtengröße oder die Anzahl größer ist als diese Werte\n"
 "werden Sie vor Übertragen der Daten gefragt."
@@ -2233,16 +2263,16 @@ msgstr "Möchten Sie die Mailbox '%s' wirklich löschen?"
 msgid "All folders"
 msgstr "Alle Mailboxen"
 
-#: wxFolderTree.cpp:652
+#: wxFolderTree.cpp:652 wxFolderTree.cpp:655
 msgid "Please select the folder to delete first."
 msgstr "Bitte wählen Sie erst die Mailbox zum löschen."
 
-#: wxFolderTree.cpp:666
+#: wxFolderTree.cpp:666 wxFolderTree.cpp:669
 #, c-format
 msgid "Folder '%s' deleted"
 msgstr "Mailbox '%s' gelöscht"
 
-#: wxFolderTree.cpp:751
+#: wxFolderTree.cpp:751 wxFolderTree.cpp:754
 msgid "Cannot open this folder."
 msgstr "Kann diese Mailbox nicht öffnen."
 
@@ -2476,15 +2506,16 @@ msgid "Mailstream for folder '%s' has been closed, trying to reopen it."
 msgstr "Verbindung mit Mailbox '%s' wurde geschlossen. Wird wieder geöffnet."
 
 #: MailFolderCC.cpp:428
+#, c-format
 msgid "Re-opening closed folder '%s' failed."
 msgstr "Konnte Mailbox '%s' nicht wieder öffnen."
 
 #: MailFolderCC.cpp:436
-#, fuzzy, c-format
 msgid "Folder '%s' is alive."
-msgstr "Mailbox '%s' gelöscht"
+msgstr "Mailbox '%s' ist verfügbar."
 
 #: MailFolderCC.cpp:802
+#, c-format
 msgid ""
 "This folder (%s) contains %lu messages, which is greater than the current "
 "threshold of %lu.\n"
@@ -2492,8 +2523,8 @@ msgid ""
 "Would you like to retrieve only the first %lu messages?\n"
 "(selecting [No] will retrieve all messages)"
 msgstr ""
-"Die Mailbox (%s) enthält %lu Nachrichten, mehr als die momentane Begrenzung von "
-"%lu.\n"
+"Die Mailbox (%s) enthält %lu Nachrichten, mehr als die momentane Begrenzung "
+"von %lu.\n"
 "\n"
 "Möchten Sie nur die ersten %lu Nachrichten holen?\n"
 "([Nein] wird alle Nachrichten holen)"
@@ -2508,6 +2539,7 @@ msgid "<address missing>"
 msgstr "<Adresse fehlt>"
 
 #: MailFolderCC.cpp:1169
+#, c-format
 msgid "Folder '%s' : "
 msgstr "Mailbox '%s' : "
 
@@ -2527,7 +2559,8 @@ msgstr "c-client debug: "
 msgid ""
 "\n"
 "Attempt to re-open all folders failed."
-msgstr "\n"
+msgstr ""
+"\n"
 "Der Versuch, alle Mailboxen wieder zu öffnen, schlug fehl."
 
 #: MessageCC.cpp:188 MessageCC.cpp:402
@@ -2547,6 +2580,7 @@ msgid "Article posted."
 msgstr "Artikel gesendet."
 
 #: SendMessageCC.cpp:507
+#, c-format
 msgid "Failed to send - %s"
 msgstr "Konnte Nachricht nicht senden - %s."
 
@@ -2702,6 +2736,7 @@ msgid "%s '%s' already exists %s."
 msgstr "%s '%s' existiert bereits %s."
 
 #: AdbFrame.cpp:1457
+#, c-format
 msgid "Can't create %s named '%s' %s."
 msgstr "Kann %s mit Namen '%s' nicht anlegen %s."
 
@@ -2941,6 +2976,7 @@ msgid "No matches for '%s'."
 msgstr "Keine passenden Einträge für '%s'."
 
 #: AdbManager.cpp:355
+#, c-format
 msgid "Can't open the address book '%s'."
 msgstr "Kann das Adreßbuchnamen '%s' nicht öffnen."
 
@@ -3004,6 +3040,32 @@ msgstr "Diese Meldung nicht wieder zeigen "
 #: PythonHelp.cpp:380
 msgid "Cannot run script: "
 msgstr "Kann Skript nicht ausführen: "
+
+#: miscutil.cpp:248
+msgid "1 message"
+msgstr "1 Nachricht"
+
+#: miscutil.cpp:252
+msgid "no messages"
+msgstr "keine Nachrichten"
+
+#: miscutil.cpp:260
+#, c-format
+msgid ", %lu recent"
+msgstr ", %lu ungelesen"
+
+#: miscutil.cpp:271
+#, c-format
+msgid ", %lu new"
+msgstr ", %lu neu"
+
+#: wxFolderView.cpp:498
+msgid "Folder '%s'"
+msgstr "Mailbox '%s'"
+
+#: wxMainFrame.cpp:246
+msgid "Opened folder '%s'"
+msgstr "Mailbox '%s' geöffnet"
 
 # MDialogs.h
 msgid "Error"
@@ -3344,9 +3406,6 @@ msgstr "Bitte wählen Sie"
 
 #~ msgid " to 1 to re-enable it later)"
 #~ msgstr " auf 1 um es später wieder zu aktivieren)?"
-
-#~ msgid "Opening folder '%s'..."
-#~ msgstr "Öffne Mailbox '%s'..."
 
 #~ msgid "can not delete root folder."
 #~ msgstr "Kann den obersten Eintrag nicht löschen."

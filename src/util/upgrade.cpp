@@ -58,7 +58,8 @@ enum MVersion
    Version_Alpha001, // first public version
    Version_Alpha010, // some config strucutre changes (due to wxPTextEntry)
    Version_Alpha020, // folder host name is now ServerName, not HostName
-   Version_Unknown   // some unreckognized version
+   Version_NoChange, // any version from which we don't need to upgrade
+   Version_Unknown   // some unrecognized version
 };
 
 // ============================================================================
@@ -281,128 +282,17 @@ UpgradeFrom010()
 
    return rc;
 
-#if 0
-   // The old Folders section appears as a profile now:
-   ProfileBase *p2;
-
-   long
-      index = 0, index2 = 0;
-   String
-      group;
-   bool
-      ok, ok2;
-   String
-      entry, value, pw;
-   kbStringList
-      folders;
-
-   for ( ok = p->GetFirstGroup(group, index);
-         ok ;
-         ok = p->GetNextGroup(group, index))
-      folders.push_back(new String(group));
-
-   for(kbStringList::iterator i = folders.begin(); i != folders.end();i++)
-
-   {
-      group = **i;
-      wxLogMessage(_("Converting information for folder '%s'."),
-                   group.c_str());
-      p->SetPath(group);
-      p2 = ProfileBase::CreateProfile(group);
-      index2 = 0;
-      for ( ok2 = p->GetFirstEntry(entry, index2);
-            ok2 ;
-            ok2 = p->GetNextEntry(entry, index2))
-      {
-         value = p->readEntry(entry, "");
-         p2->writeEntry(entry, value);
-         wxLogDebug("converted entry '%s'='%s'", entry.c_str(), value.c_str());
-      }
-      pw = p2->readEntry(MP_FOLDER_PASSWORD, MP_FOLDER_PASSWORD_D);
-      p2->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(pw));
-      p2->DecRef();
-      p->ResetPath();
-      //FIXME causes assert in wxConfig code p->DeleteGroup(group);
-   }
-   p->DecRef();
-
-   p = ProfileBase::CreateProfile("");
-   // We need to rename the old mainfolder, to remove its leading
-   // slash:
-   String mainFolder = p->readEntry(MP_MAINFOLDER,MP_MAINFOLDER_D);
-   if(mainFolder.Length())
-   {
-      if(mainFolder[0u] == '/')
-      {
-         mainFolder = mainFolder.Mid(1);
-         p->writeEntry(MP_MAINFOLDER, mainFolder);
-      }
-   }
-   // And now we delete the old Folders section altogether
-   //FIXME: disabled due to wxFileConfig bug
-   //p->DeleteGroup("Folders");
-
-   // Write our new version number:
-   p->writeEntry(MP_VERSION, M_VERSION);
-   p->DecRef();
-
-   // The old [AdbEditor] section has to be moved to [M/Profiles/AdbEditor].
-   wxConfigBase *cf = mApplication->GetProfile()->GetConfig();
-   String path = cf->GetPath();
-   const char *adbGroup = "/AdbEditor";
-   cf->SetPath(adbGroup);
-   kbStringList
-      groups, entries;
-
-   index=0;
-   for ( ok = cf->GetFirstGroup(entry, index);
-         ok ;
-         ok = cf->GetNextGroup(entry, index))
-      groups.push_back(new String(entry));
-   index=0;
-   for ( ok = cf->GetFirstEntry(entry, index);
-         ok ;
-         ok = cf->GetNextEntry(entry, index))
-      entries.push_back(new String(entry));
-
-   p =  ProfileBase::CreateProfile("AdbEditor");
-
-   // copy all top level entries:
-   String *name;
-   while((name = entries.pop_front()) != NULL)
-   {
-      p->writeEntry(*name, cf->Read(*name,String("")));
-      delete name;
-   }
-   String *grp;
-   index=0;
-   while((grp = groups.pop_front()) != NULL)
-   {
-      cf->SetPath(*grp);
-      for ( ok = cf->GetFirstEntry(entry, index);
-            ok ;
-            ok = cf->GetNextEntry(entry, index))
-
-         p->writeEntry(entry, cf->Read(entry,String("")));
-      cf->SetPath("..");
-      delete grp;
-   }
-   cf->SetPath(path);
-   //FIXME: broken!! cf->DeleteGroup(adbGroup);
-   p->DecRef();
-   return true;
-#endif
 }
 
 
 
-   class UpgradeFolderTraversal : public MFolderTraversal
-   {
-   public:
-      UpgradeFolderTraversal(MFolder* folder) : MFolderTraversal(*folder)
-         { }
+class UpgradeFolderTraversal : public MFolderTraversal
+{
+public:
+   UpgradeFolderTraversal(MFolder* folder) : MFolderTraversal(*folder)
+      { }
 
-      virtual bool OnVisitFolder(const wxString& folderName)
+   virtual bool OnVisitFolder(const wxString& folderName)
       {
          Profile_obj profile(folderName);
          bool found;
@@ -429,7 +319,7 @@ UpgradeFrom010()
 
          return TRUE;
       }
-   };
+};
 
 static bool
 UpgradeFrom020()
@@ -468,6 +358,8 @@ Upgrade(const String& fromVersion)
       oldVersion = Version_Alpha010;
    else if ( fromVersion == "0.20a" )
       oldVersion = Version_Alpha020;
+   else if ( fromVersion == "0.21a" )
+      oldVersion = Version_NoChange;
    else
       oldVersion = Version_Unknown;
 
@@ -477,43 +369,44 @@ Upgrade(const String& fromVersion)
    bool success = TRUE;
    switch ( oldVersion )
    {
-      case Version_None:
-         UpgradeFromNone();
-         break;
+   case Version_None:
+      UpgradeFromNone();
+      break;
 
-      case Version_Alpha001:
-         if ( success )
-            success = UpgradeFrom001();
-         // fall through
+   case Version_Alpha001:
+      if ( success )
+         success = UpgradeFrom001();
+      // fall through
 
-      case Version_Alpha010:
-         if ( success )
-            success = UpgradeFrom010();
-         // fall through
+   case Version_Alpha010:
+      if ( success )
+         success = UpgradeFrom010();
+      // fall through
 
-      case Version_Alpha020:
-         if ( success && UpgradeFrom020() )
-            wxLogMessage(_("Configuration information and program files were "
-                           "successfully upgraded from the version '%s'."),
-                         fromVersion.c_str());
-         else
-            wxLogError(_("Configuration information and program files "
-                         "could not be upgraded from version '%s', some "
-                         "settings might be lost.\n"
-                         "\n"
-                         "It is recommended that you uninstall and reinstall "
-                         "the program before using it."),
-                         fromVersion.c_str());
-         break;
+   case Version_Alpha020:
+      if ( success && UpgradeFrom020() )
+         wxLogMessage(_("Configuration information and program files were "
+                        "successfully upgraded from the version '%s'."),
+                      fromVersion.c_str());
+      else
+         wxLogError(_("Configuration information and program files "
+                      "could not be upgraded from version '%s', some "
+                      "settings might be lost.\n"
+                      "\n"
+                      "It is recommended that you uninstall and reinstall "
+                      "the program before using it."),
+                    fromVersion.c_str());
+      break;
+   case Version_NoChange:
+      break;
+   default:
+      FAIL_MSG("invalid version value");
+      // fall through
 
-      default:
-         FAIL_MSG("invalid version value");
-         // fall through
-
-      case Version_Unknown:
-         wxLogError(_("The previously installed version of Mahogany was "
-                      "probably newer than this one. Cannot upgrade."));
-         return FALSE;
+   case Version_Unknown:
+      wxLogError(_("The previously installed version of Mahogany was "
+                   "probably newer than this one. Cannot upgrade."));
+      return FALSE;
    }
 
    return TRUE;

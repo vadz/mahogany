@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: M\n"
-"POT-Creation-Date: 1999-05-04 21:24+0100\n"
+"POT-Creation-Date: 1999-05-08 17:07+0100\n"
 "Last-Translator: Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>\n"
 "Language-Team: M-developers <m-developers@makelist.com>\n"
 "MIME-Version: 1.0\n"
@@ -83,7 +83,7 @@ msgstr ""
 msgid "Testing your configuration"
 msgstr "Vérification de la configuration en cours"
 
-#: miscutil.cpp:76
+#: miscutil.cpp:76 miscutil.cpp:77
 #, c-format
 msgid ""
 "Failed to create the address book '%s' for autocollected e-mail addresses."
@@ -91,16 +91,16 @@ msgstr ""
 "La création du carnet d'adresses pour les adresses ramassées automatiquement "
 "a échoué."
 
-#: miscutil.cpp:99
+#: miscutil.cpp:99 miscutil.cpp:100
 #, c-format
 msgid "Auto collected e-mail address '%s' (added to the entry '%s')."
 msgstr "Adresse '%s' a été ramassée (rajoutée à l'entrée '%s')."
 
-#: miscutil.cpp:111
+#: miscutil.cpp:111 miscutil.cpp:112
 msgid "Add new e-mail entry to database?"
 msgstr "Ajouter une nouvelle adresse au carnet d'adresses?"
 
-#: miscutil.cpp:138
+#: miscutil.cpp:138 miscutil.cpp:139
 #, c-format
 msgid ""
 "Couldn't create an entry in the address book '%s' for autocollected address."
@@ -108,28 +108,28 @@ msgstr ""
 "Créeation de l'entrée '%s' pour une adresse ramassée automatiquement a "
 "échoué."
 
-#: miscutil.cpp:162
+#: miscutil.cpp:162 miscutil.cpp:163
 #, fuzzy, c-format
 msgid "This entry was automatically added on %s."
 msgstr "Cette entrée a été crée automatiquement par M le %s."
 
-#: miscutil.cpp:171
+#: miscutil.cpp:171 miscutil.cpp:172
 #, fuzzy, c-format
 msgid ""
 "Auto collected e-mail address '%s' (created new entry '%s' in group '%s')."
 msgstr "Adresse '%s' a été ramassée (nouvelle entrée '%s' a été créee)."
 
-#: miscutil.cpp:215
+#: miscutil.cpp:215 miscutil.cpp:216
 #, c-format
 msgid "'%s': the name is missing, address was not autocollected."
 msgstr "'%s': pas de nom, l'adresse n'a pas été ramassée automatiquement."
 
-#: miscutil.cpp:225
+#: miscutil.cpp:225 miscutil.cpp:296
 #, c-format
 msgid "RGB(%d, %d, %d)"
 msgstr ""
 
-#: miscutil.cpp:278
+#: miscutil.cpp:278 miscutil.cpp:349
 #, c-format
 msgid ""
 "Cannot find a colour named '%s', using default instead.\n"
@@ -425,32 +425,32 @@ msgstr "Pas (encore) d'aide pour ce contexte, déseolé."
 msgid "Mahogany Toolbar"
 msgstr ""
 
-#: wxFolderView.cpp:62
+#: wxFolderView.cpp:62 wxFolderView.cpp:63
 msgid "Status"
 msgstr "Etat"
 
-#: wxFolderView.cpp:63
+#: wxFolderView.cpp:63 wxFolderView.cpp:64
 msgid "Date"
 msgstr "Date"
 
-#: wxFolderView.cpp:64
+#: wxFolderView.cpp:64 wxFolderView.cpp:65
 msgid "Size"
 msgstr "Taille"
 
-#: wxFolderView.cpp:65
+#: wxFolderView.cpp:65 wxFolderView.cpp:66
 msgid "From"
 msgstr "De"
 
-#: wxFolderView.cpp:66
+#: wxFolderView.cpp:66 wxFolderView.cpp:67
 msgid "Subject"
 msgstr "Au sujet de"
 
-#: wxFolderView.cpp:103
+#: wxFolderView.cpp:103 wxFolderView.cpp:104
 #, fuzzy
 msgid "DUXCSMRFOPH "
 msgstr "EAPCSD"
 
-#: wxFolderView.cpp:318
+#: wxFolderView.cpp:318 wxFolderView.cpp:319
 #, c-format
 msgid ""
 "Mark all articles in\n"
@@ -458,7 +458,7 @@ msgid ""
 "as read?"
 msgstr ""
 
-#: wxFolderView.cpp:456
+#: wxFolderView.cpp:456 wxFolderView.cpp:457
 #, fuzzy
 msgid ""
 "Invalid value '%s' for the date format: it should contain exacty 3 %%u "
@@ -473,27 +473,29 @@ msgstr ""
 msgid "Folder '%s' (%lu messages, %lu recent, %lu new)"
 msgstr ""
 
-#: wxFolderView.cpp:530
+#: wxFolderView.cpp:524 wxFolderView.cpp:530
 #, c-format
 msgid "The folder '%s' could not be opened, please check its settings."
 msgstr ""
 
-#: wxFolderView.cpp:562
+#: wxFolderView.cpp:556 wxFolderView.cpp:562
 #, fuzzy
 msgid "Deleted messages were expunged"
 msgstr "Effacer le contenu du message"
 
-#: wxFolderView.cpp:735 wxFolderView.cpp:751
+#: wxFolderView.cpp:729 wxFolderView.cpp:735 wxFolderView.cpp:745
+#: wxFolderView.cpp:751
 #, c-format
 msgid "%d messages saved"
 msgstr "%d messages sauvegardés"
 
-#: wxFolderView.cpp:737 wxFolderView.cpp:753
+#: wxFolderView.cpp:731 wxFolderView.cpp:737 wxFolderView.cpp:747
+#: wxFolderView.cpp:753
 #, fuzzy
 msgid "Saving messages failed."
 msgstr "Sauvegarder le texte du message dans un fichier"
 
-#: wxFolderView.cpp:773
+#: wxFolderView.cpp:767 wxFolderView.cpp:773
 #, c-format
 msgid "Closing folder '%s' because the underlying mail folder was deleted."
 msgstr ""
@@ -694,7 +696,7 @@ msgstr ""
 msgid "Printing"
 msgstr "Impression en cours"
 
-#: wxMessageView.cpp:1345
+#: wxMessageView.cpp:1345 wxMessageView.cpp:1370
 msgid ""
 "There was a problem with showing the preview:\n"
 "perhaps your current printer is not set correctly?"
@@ -702,16 +704,16 @@ msgstr ""
 "Il y a avait un problème avec l'aperçu d'impression:\n"
 "peut-être votre imprimante n'est pas installée correctement?"
 
-#: wxMessageView.cpp:1347
+#: wxMessageView.cpp:1347 wxMessageView.cpp:1372
 msgid "Previewing"
 msgstr "Aperçu d'imppression"
 
-#: wxMessageView.cpp:1354
+#: wxMessageView.cpp:1354 wxMessageView.cpp:1380
 #, fuzzy
 msgid "Print Preview"
 msgstr "&Aperçu d'imppression"
 
-#: wxMessageView.cpp:1409
+#: wxMessageView.cpp:1409 wxMessageView.cpp:1435
 #, c-format
 msgid "%s (external viewer exited with non null exit code)"
 msgstr "%s (un procès externe s'est terminé avec un code de retour non nul)"
@@ -958,18 +960,18 @@ msgstr "Impossible d'insérer le fichier texte dans le message."
 msgid "Cannot write message to file '%s'."
 msgstr "Impossible d'écrire dans le fichier."
 
-#: wxMainFrame.cpp:70
+#: wxMainFrame.cpp:70 wxMainFrame.cpp:71
 #, c-format
 msgid "Selected folder '%s'."
 msgstr "Répertoire '%s' sélectionné."
 
-#: wxMainFrame.cpp:199
+#: wxMainFrame.cpp:199 wxMainFrame.cpp:200
 msgid ""
 "This folder couldn't be opened last time, do you still want to try to open "
 "it (it will probably fail again)?"
 msgstr ""
 
-#: wxMainFrame.cpp:207
+#: wxMainFrame.cpp:207 wxMainFrame.cpp:208
 #, fuzzy
 msgid "Would you like to change folder settings before trying to open it?"
 msgstr "Voulez-vous configurer l'éditeur externe maintenant?"
@@ -979,7 +981,7 @@ msgstr "Voulez-vous configurer l'éditeur externe maintenant?"
 msgid "Opened folder '%s' (%lu messages, %lu recent, %lu new)"
 msgstr ""
 
-#: wxMainFrame.cpp:287
+#: wxMainFrame.cpp:280 wxMainFrame.cpp:287
 #, fuzzy
 msgid "Do you really want to exit Mahogany?"
 msgstr "Voulez-vous vraiment quitter M?"
@@ -2307,16 +2309,16 @@ msgstr "Voulez-vous vraiment effacer le répertoire '%s'?"
 msgid "All folders"
 msgstr "Tous les répertoires"
 
-#: wxFolderTree.cpp:652
+#: wxFolderTree.cpp:652 wxFolderTree.cpp:655
 msgid "Please select the folder to delete first."
 msgstr "Veuillez choisir le répertoires à effacer."
 
-#: wxFolderTree.cpp:666
+#: wxFolderTree.cpp:666 wxFolderTree.cpp:669
 #, c-format
 msgid "Folder '%s' deleted"
 msgstr "Le répertoire '%s' a été effacé."
 
-#: wxFolderTree.cpp:751
+#: wxFolderTree.cpp:751 wxFolderTree.cpp:754
 #, fuzzy
 msgid "Cannot open this folder."
 msgstr "Impossible d'ouvrir ce répertoire."
@@ -3119,6 +3121,36 @@ msgstr "Ne montrez plus ce message"
 #: PythonHelp.cpp:380
 msgid "Cannot run script: "
 msgstr "Impossible d'exécuter le script: "
+
+#: miscutil.cpp:248
+#, fuzzy
+msgid "1 message"
+msgstr "Ouvrir le message"
+
+#: miscutil.cpp:252
+#, fuzzy
+msgid "no messages"
+msgstr "Ouvrir le message"
+
+#: miscutil.cpp:260
+#, c-format
+msgid ", %lu recent"
+msgstr ""
+
+#: miscutil.cpp:271
+#, c-format
+msgid ", %lu new"
+msgstr ""
+
+#: wxFolderView.cpp:498
+#, fuzzy, c-format
+msgid "Folder '%s'"
+msgstr "Répertoire '"
+
+#: wxMainFrame.cpp:246
+#, fuzzy, c-format
+msgid "Opened folder '%s'"
+msgstr "Répertoire '%s' sélectionné."
 
 # MDialogs.h
 msgid "Error"

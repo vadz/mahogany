@@ -532,9 +532,9 @@
 /// how often should we check for incoming mail (secs, 0 to disable)?
 #define   MP_POLLINCOMINGDELAY_D       300
 /// ask user if he really wants to exit?
-#define   MP_CONFIRMEXIT_D      1
+#define   MP_CONFIRMEXIT_D      1l
 /// open folders when they're clicked (otherwise - double clicked)
-#define   MP_OPEN_ON_CLICK_D     0
+#define   MP_OPEN_ON_CLICK_D     0l
 /// create .profile files?
 #define   MP_CREATE_PROFILES_D   0l
 /// umask setting for normal files
