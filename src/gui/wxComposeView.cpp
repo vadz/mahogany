@@ -2530,6 +2530,7 @@ void wxComposeView::OnFirstTimeModify()
    if ( m_kind == Message_New && !m_template.empty() )
    {
       DoClear();
+
       DoInitText();
    }
 }
@@ -2931,8 +2932,11 @@ bool wxComposeView::OnFirstTimeFocus()
    // now we can launch the ext editor if configured to do it
    if ( READ_CONFIG(m_Profile, MP_ALWAYS_USE_EXTERNALEDITOR) )
    {
-      // we're going to modify it even if the composer window doesn't know it
-      OnFirstTimeModify();
+      // init the composer text if not done yet
+      if ( !IsModified() )
+      {
+         OnFirstTimeModify();
+      }
 
       if ( !StartExternalEditor() )
       {
