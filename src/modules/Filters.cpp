@@ -2240,7 +2240,8 @@ FilterRuleImpl::ApplyCommonCode(class MailFolder *mf,
                 (
                    (hi->GetStatus() & MailFolder::MSG_STAT_RECENT)
                    && ! (hi->GetStatus() & MailFolder::MSG_STAT_SEEN)
-                   ) // n   ew == recent and not seen
+                   && ! (hi->GetStatus() & MailFolder::MSG_STAT_DELETED)
+                   ) // n   ew == rece   nt and not seen
                )
             {
                rc &= Apply(mf, hi->GetUId());

@@ -825,7 +825,7 @@ void wxFolderTreeImpl::DoFolderDelete(bool removeOnly)
    }
 
    // don't try to delete folders which can't be deleted
-   if ( !removeOnly && CanDeleteFolderOfType(folder->GetType()) )
+   if ( !removeOnly && !CanDeleteFolderOfType(folder->GetType()) )
    {
       removeOnly = TRUE;
    }

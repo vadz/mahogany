@@ -29,7 +29,7 @@
 
 #  include "Profile.h"
 #  include "MApplication.h"
-
+#  include "strutil.h"
 #  include <wx/confbase.h>    // for wxSplitPath
 #  include <wx/dynarray.h>
 #endif // USE_PCH
@@ -74,6 +74,13 @@ public:
 
    // implement base class pure virtuals
    virtual String GetPath() const;
+// get the server for the folder:
+   virtual String GetServer() const;
+   // get the login for the folder:
+   virtual String GetLogin() const;
+   // get the password for the folder:
+   virtual String GetPassword() const;
+   
    virtual String GetName() const;
    virtual wxString GetFullName() const { return m_folderName; }
 
@@ -379,6 +386,45 @@ String MFolderFromProfile::GetPath() const
    CHECK( profile, "", "panic in MFolder: no profile" );
 
    return READ_CONFIG(profile, MP_FOLDER_PATH);
+}
+
+String MFolderFromProfile::GetServer() const
+{
+   Profile_obj profile(m_folderName);
+   CHECK( profile, "", "panic in MFolder: no profile" );
+
+   String server;
+   switch(GetType())
+   {
+   case MF_NNTP:
+      server = READ_CONFIG(profile, MP_NNTPHOST); break;
+   case MF_IMAP:
+      server = READ_CONFIG(profile, MP_IMAPHOST); break;
+   case MF_POP:
+      server = READ_CONFIG(profile, MP_POPHOST); break;
+   default:
+      ; // do nothing
+   }
+   return server;
+}
+
+String MFolderFromProfile::GetLogin() const
+{
+   Profile_obj profile(m_folderName);
+   CHECK( profile, "", "panic in MFolder: no profile" );
+   String login = READ_CONFIG(profile, MP_FOLDER_LOGIN);
+   // if no login setting, fall back to username:
+   if(FolderTypeHasUserName(GetType()) && strutil_isempty(login)) // fall back to user name
+      login = READ_CONFIG(profile, MP_USERNAME);
+   return login;
+}
+
+String MFolderFromProfile::GetPassword() const
+{
+   Profile_obj profile(m_folderName);
+   CHECK( profile, "", "panic in MFolder: no profile" );
+
+   return strutil_decrypt(READ_CONFIG(profile, MP_FOLDER_PASSWORD));
 }
 
 FolderType MFolderFromProfile::GetType() const

@@ -293,6 +293,15 @@ private:
 String MailFolderCC::MF_user;
 String MailFolderCC::MF_pwd;
 
+
+/* static */
+void
+MailFolderCC::SetLoginData(const String &user, const String &pw)
+{
+   MailFolderCC::MF_user = user;
+   MailFolderCC::MF_pwd = pw;
+}
+
 // a variable telling c-client to shut up
 static bool mm_ignore_errors = false;
 /// a variable disabling all events
@@ -817,14 +826,11 @@ MailFolderCC::Open(void)
    UpdateTimeoutValues();
 
    if(GetType() == MF_POP || GetType() == MF_IMAP)
-   {
-      MF_user = m_Login;
-      MF_pwd = m_Password;
-   }
+      SetLoginData(m_Login, m_Password);
 
-      // for files, check whether mailbox is locked, c-client library is
-      // to dumb to handle this properly
-      if(GetType() == MF_FILE
+   // for files, check whether mailbox is locked, c-client library is
+   // to dumb to handle this properly
+   if(GetType() == MF_FILE
 #ifdef OS_UNIX
          || GetType() == MF_INBOX
 #endif
@@ -2183,8 +2189,6 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
       return streamListDefaultObj;
    }
    ASSERT_MSG(0,"Cannot find mailbox for callback!");
-   LOGMESSAGE((M_LOG_ERROR,"Cannot find mailbox (%s) for callback!", 
-      name));
    return NULL;
 }
 
@@ -2427,7 +2431,7 @@ MailFolderCC::mm_login(NETMBX * /* mb */,
 void
 MailFolderCC::mm_critical(MAILSTREAM * stream)
 {
-   ms_LastCriticalFolder = stream->mailbox;
+   ms_LastCriticalFolder = stream ? stream->mailbox : NULL;
    MailFolderCC *mf = LookupObject(stream);
    if(mf)
    {
@@ -2717,25 +2721,22 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
 }
 
 
-/** Phyically deletes this folder.
+/** Physically deletes this folder.
     @return true on success
     */
 /* static */
 bool
 MailFolderCC::DeleteFolder(const MFolder *mfolder)
 {
-   ASSERT_MSG(0, "not implemented yet - unfinished");
-#if 0
-   int type = mfolder->GetType();
    String mboxpath = GetImapSpec(mfolder->GetType(),
                                  mfolder->GetFlags(),
                                  mfolder->GetPath(),
                                  mfolder->GetServer(),
-                                 mfolder->GetLogin(),
-                                 mfolder->GetPassword());
-   return mail_delete(NIL, mboxpath) != NIL;
-#endif
-   return false;
+                                 mfolder->GetLogin());
+   SetLoginData(mfolder->GetLogin(), mfolder->GetPassword());
+   bool rc = mail_delete(NIL, (char *) mboxpath.c_str()) != NIL;
+   ProcessEventQueue();
+   return rc;
 }
 
 extern "C"

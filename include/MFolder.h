@@ -26,110 +26,126 @@
 #   include "FolderType.h"
 #endif
 
-// ----------------------------------------------------------------------------
-// A class representing a folder used by M. The folders are organized in a tree
-// structure with an artificial "root" folder on the top of it. It is the only
-// one whose parent is NULL and its type is MFolder::Root.
-//
-// A folder is identified by its full name which has the form
-//                   /folder1/.../folderN/folder.
-// The name "" corresponds to a root pseudo-folder which always exists and
-// can't be recreated or changed.
-//
-// This class is refcounted (deriving from MObjectRC) so the usual rules of
-// dealing with refcounted objects apply.
-//
-// NB: this class doesn't know anything about how this folder is actually used
-//     (that's what MailFolder class is for), nor anything about its GUI
-//     representation (wxFolderTree control), it's just an abstraction to allow
-//     the application to conveniently manage (create, delete) it's folders.
-//
-// Actually, the folder information is stored in a profile, but this class
-// hides this implementation detail so in the future we may store folder info
-// in a database or on the network and still use the same interface.
-// ----------------------------------------------------------------------------
+/** A class representing a folder used by M. The folders are organized in a tree
+    structure with an artificial "root" folder on the top of it. It is the only
+    one whose parent is NULL and its type is MFolder::Root.
+
+    A folder is identified by its full name which has the form
+    /folder1/.../folderN/folder.
+    The name "" corresponds to a root pseudo-folder which always exists and
+    can't be recreated or changed.
+
+    This class is refcounted (deriving from MObjectRC) so the usual rules of
+    dealing with refcounted objects apply.
+
+    NB: this class doesn't know anything about how this folder is actually used
+        (that's what MailFolder class is for), nor anything about its GUI
+        representation (wxFolderTree control), it's just an abstraction to allow
+        the application to conveniently manage (create, delete) it's folders.
+
+    Actually, the folder information is stored in a profile, but this class
+    hides this implementation detail so in the future we may store folder info
+    in a database or on the network and still use the same interface.
+*/
 class MFolder : public MObjectRC
 {
 public:
-   // constants
+   /// constants
    enum Flags
    {
-      OpenOnStartup   = 0x0001,  // auto open on startup?
-      OpenInMainFrame = 0x0002   // or in a separate window?
+      OpenOnStartup   = 0x0001,  /// auto open on startup?
+      OpenInMainFrame = 0x0002   /// or in a separate window?
    };
 
-   // static functions
-      // get folder object by name, NULL is returned if it doesn't exist. The
-      // root folder is returned if the name is empty.
+   /**@name static functions */
+   //@{
+   /** get folder object by name, NULL is returned if it doesn't exist. The
+       root folder is returned if the name is empty.
+   */
    static MFolder *Get(const String& fullname);
-      // create a new folder of specified type, it's an error to call it with
-      // the folder name which already exists (NULL will be returned)
+   /** create a new folder of specified type, it's an error to call it with
+       the folder name which already exists (NULL will be returned)
+   */
    static MFolder *Create(const String& fullname, FolderType type);
-
-   // misc accessors
-      // get the folder path (i.e. something by which it's identified by the
-      // mail subsystem)
+   //@}
+   
+   /**@name misc accessors */
+   //@{
+   /** get the folder path (i.e. something by which it's identified by the
+       mail subsystem)
+   */
    virtual String GetPath() const = 0;
+   /// get the server for the folder:
+   virtual String GetServer() const = 0;
+   /// get the login for the folder:
+   virtual String GetLogin() const = 0;
+   /// get the password for the folder:
+   virtual String GetPassword() const = 0;
 
-      // the folder name must be unique among its siblings
+   /// the folder name must be unique among its siblings
    virtual String GetName() const = 0;
 
-      // full folder name (has the same form as a full path name)
+   /// full folder name (has the same form as a full path name)
    virtual wxString GetFullName() const = 0;
 
-      // folder type can't be changed once it's created
+   /// folder type can't be changed once it's created
    virtual FolderType GetType() const = 0;
 
-      // the icon index for this folder or -1 if there is no specific icon
-      // associated to it (the icon index should be used to pass it to
-      // GetFolderIconName())
+      /// the icon index for this folder or -1 if there is no specific icon
+      /// associated to it (the icon index should be used to pass it to
+      /// GetFolderIconName())
    virtual int GetIcon() const = 0;
-      // set the icon
+      /// set the icon
    virtual void SetIcon(int icon) = 0;
 
-      // folder may have an arbitrary comment associated with it - get it
+      /// folder may have an arbitrary comment associated with it - get it
    virtual String GetComment() const = 0;
-      // change the comment
+      /// change the comment
    virtual void SetComment(const String& comment) = 0;
-
-   // flags
-      // get the folder flags (see Flags enum)
+   //@}   
+   /**@name flags */
+   //@{
+       /// get the folder flags (see Flags enum)   
    virtual int GetFlags() const = 0;
-      // set the flags (this replaces the old value of flags)
+      /// set the flags (this replaces the old value of flags)
    virtual void SetFlags(int flags) = 0;
 
-      // set the specified flags (this adds new flags to the old value)
+      /// set the specified flags (this adds new flags to the old value)
    void AddFlags(int flags) { SetFlags(GetFlags() | flags); }
-      // clear the specified flags
+      /// clear the specified flags
    void ResetFlags(int flags) { SetFlags(GetFlags() & ~flags); }
-
-   // sub folders access
-      // get the number of subfolders
+   //@}
+   
+   /**@name sub folders access */
+   //@{
+   /// get the number of subfolders
    virtual size_t GetSubfolderCount() const = 0;
-      // get the given subfolder by index (or NULL if index is invalid)
+      /// get the given subfolder by index (or NULL if index is invalid)
    virtual MFolder *GetSubfolder(size_t n) const = 0;
-      // get the given subfolder by name (or NULL if not found)
+      /// get the given subfolder by name (or NULL if not found)
    virtual MFolder *GetSubfolder(const String& name) const = 0;
-      // get the parent of this folder (NULL only for the top level one)
+      /// get the parent of this folder (NULL only for the top level one)
    virtual MFolder *GetParent() const = 0;
-
-   // operations
-      // create a new subfolder
+   //@}
+   
+   /**@name operations */
+   //@{
+   /// create a new subfolder
    virtual MFolder *CreateSubfolder(const String& name, FolderType type) = 0;
-      // delete this folder (does not delete the C++ object!)
+      /// delete this folder (does not delete the C++ object!)
    virtual void Delete() = 0;
-      // rename this folder: FALSE returned if it failed
+      /// rename this folder: FALSE returned if it failed
    virtual bool Rename(const String& name) = 0;
-
+   //@}
    MOBJECT_DEBUG(MFolder)
 
 protected:
-   // ctor and dtor are private because the user code doesn't create nor deletes
-   // these objects directly
+   /// ctor and dtor are private because the user code doesn't create nor deletes
+   /// these objects directly
    MFolder() { }
    virtual ~MFolder() { }
 
-   // no assignment operator/copy ctor
+   /// no assignment operator/copy ctor
    MFolder(const MFolder&);
    MFolder& operator=(const MFolder&);
 };

@@ -349,7 +349,10 @@ private:
    /// half open the folder
    bool HalfOpen(void);
 
-   /// for POP/IMAP boxes, this holds the user id for the callback
+
+   static void SetLoginData(const String &user, const String &pw);
+
+   /// for POP/IMAP boxes, this holds the user id for the callback   
    static String MF_user;
    /// for POP/IMAP boxes, this holds the password for the callback
    static String MF_pwd;
