@@ -1214,25 +1214,27 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
 
    // the panel which fills all the frame client area and contains all children
    // (we use it to make the tab navigation work)
-   m_panel = new wxPanel(this, -1);
+   m_splitter = new wxPSplitterWindow("ComposeSplit", this, -1,
+                                      wxDefaultPosition, wxDefaultSize,
+                                      wxSP_3D);
+
+   m_panel = new wxPanel(m_splitter, -1);
    m_panel->SetAutoLayout(TRUE);
 
-   // the sizer containing everything
-   wxSizer *sizerTop = new wxBoxSizer(wxVERTICAL);
-
-   // add the headers sizer to it
-   sizerTop->Add(CreateHeaderFields(), 0, (wxALL & ~wxTOP) | wxEXPAND,
-                 LAYOUT_MARGIN);
-
-   // create a m_LayoutWindow
-   CreateFTCanvas();
-   sizerTop->Add(m_LayoutWindow, 1, wxALL | wxEXPAND, LAYOUT_MARGIN);
+   // the sizer containing all header fields
+   wxSizer *sizerHeaders = CreateHeaderFields();
 
    // associate this sizer with the window
-   m_panel->SetSizer(sizerTop);
-   m_panel->SetAutoLayout(TRUE);
+   m_panel->SetSizer(sizerHeaders);
+   sizerHeaders->Fit(m_panel);
 
-   sizerTop->SetSizeHints(this);
+   // create the composer window itself
+   CreateFTCanvas();
+
+   // configure splitter
+   wxCoord heightHeaders = m_panel->GetSize().y;
+   m_splitter->SplitHorizontally(m_panel, m_LayoutWindow, heightHeaders);
+   m_splitter->SetMinimumPaneSize(heightHeaders);
 
    // initialize the controls
    // -----------------------
@@ -1261,7 +1263,7 @@ wxComposeView::CreateFTCanvas(void)
    wxASSERT_MSG( m_LayoutWindow == NULL, "creating layout window twice?" );
 
    // create the window
-   m_LayoutWindow = new wxComposerLayoutWindow(this, m_panel);
+   m_LayoutWindow = new wxComposerLayoutWindow(this, m_splitter);
 
    // and set its params from config:
 

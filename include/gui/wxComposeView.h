@@ -45,6 +45,7 @@ class WXDLLEXPORT wxChoice;
 class WXDLLEXPORT wxLayoutWindow;
 class WXDLLEXPORT wxProcess;
 class WXDLLEXPORT wxProcessEvent;
+class WXDLLEXPORT wxSplitterWindow;
 class WXDLLEXPORT wxTextCtrl;
 
 #include <wx/dynarray.h>
@@ -398,7 +399,10 @@ private:
    /// the initial from/reply-to address
    String m_from;
 
-   /// the panel: all controls are its children
+   /// the main splitter
+   wxSplitterWindow *m_splitter;
+
+   /// the panel: all header controls are its children
    wxPanel *m_panel;
 
    /// the edit/cut menu item
