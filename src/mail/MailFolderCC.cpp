@@ -1515,7 +1515,12 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
 
    wxFontEncoding encoding = wxFONTENCODING_SYSTEM;
 
-   String out;
+   // if the header starts with an encoded word, preceding whitespace must be
+   // ignored, so the flag must be set to true initially
+   bool maybeBetweenEncodedWords = true;
+
+   String out,
+          space;
    out.reserve(in.length());
    for ( const wxChar *p = in.c_str(); *p; p++ )
    {
@@ -1678,12 +1683,33 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
             encoding = ConvertUnicodeToSystem(&textDecoded, encoding);
          }
 #endif // !wxUSE_UNICODE
+
          out += textDecoded;
+
+         // forget the space before this encoded word, it must be ignored
+         space.clear();
+         maybeBetweenEncodedWords = true;
       }
-      else
+      else if ( maybeBetweenEncodedWords &&
+                  (*p == _T(' ') || *p == _T('\r') || *p == _T('\n')) )
       {
-         // just another normal char
+         // spaces separating the encoded words must be ignored according
+         // to section 6.2 of the RFC 2047, so we don't output them immediately
+         // but delay until we know that what follows is not an encoded word
+         space += *p;
+      }
+      else // just another normal char
+      {
+         // if we got any delayed whitespace (see above), flush it now
+         if ( !space.empty() )
+         {
+            out += space;
+            space.clear();
+         }
+
          out += *p;
+
+         maybeBetweenEncodedWords = false;
       }
    }
 
