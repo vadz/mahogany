@@ -6,7 +6,12 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.7  1998/05/14 17:34:30  VZ
+ * added wxWin2 event map to wxComposeView class (fixed layout problem, menu
+ * commands now also work)
+ *
  * Revision 1.6  1998/05/12 12:19:00  VZ
+ *
  * fixes to Windows fixes. Compiles under wxGTK if you #define USE_APPCONF.
  *
  * Revision 1.5  1998/05/02 15:21:33  KB
@@ -169,12 +174,33 @@ public:
    
    /// called on Menu selection
    void OnMenuCommand(int id);
+   
+   /// for button
+   void OnExpand(wxCommandEvent &event);
+   
+#ifdef  USE_WXWINDOWS2
+   //@{ Menu callbacks
+      ///
+   void OnInsertFile(wxCommandEvent&) 
+      { OnMenuCommand(WXMENU_COMPOSE_INSERTFILE); }
+      ///
+   void OnSend(wxCommandEvent&) { OnMenuCommand(WXMENU_COMPOSE_SEND); }
+      ///
+   void OnPrint(wxCommandEvent&) { OnMenuCommand(WXMENU_COMPOSE_PRINT); }
+      ///
+   void OnClear(wxCommandEvent&) { OnMenuCommand(WXMENU_COMPOSE_CLEAR); }
 
+   /// resize callback
+   void OnSize(wxSizeEvent& eventSize);
+
+   DECLARE_EVENT_TABLE()
+#else //wxWin1
    /// resize callback
    void OnSize(int w, int h);
 
    /// for button
    void OnCommand(wxWindow &win, wxCommandEvent &event);
+#endif //wxWin1/2
 };
 
 #endif

@@ -43,9 +43,38 @@
 #include	"gui/wxComposeView.h"
 #include	"gui/wxAdbEdit.h"
 
+// control ids
+enum
+{
+   IDB_EXPAND = 100
+};
+
 IMPLEMENT_DYNAMIC_CLASS(wxComposeView, wxMFrame)
 
+#ifdef USE_WXWINDOWS2
+   BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
+   /*
+      // wxMFrame menu events
+      EVT_MENU(WXMENU_FILE_OPEN,    wxMFrame::OnOpen)
+      EVT_MENU(WXMENU_FILE_ADBEDIT, wxMFrame::OnAdbEdit)
+      EVT_MENU(WXMENU_FILE_CLOSE,   wxMFrame::OnMenuClose)
+      EVT_MENU(WXMENU_FILE_COMPOSE, wxMFrame::OnCompose)
+      EVT_MENU(WXMENU_FILE_EXIT,    wxMFrame::OnExit)
+      EVT_MENU(WXMENU_HELP_ABOUT,   wxMFrame::OnAbout)
+   */
+      // wxComposeView menu events
+      EVT_MENU(WXMENU_COMPOSE_INSERTFILE, wxComposeView::OnInsertFile)
+      EVT_MENU(WXMENU_COMPOSE_SEND,       wxComposeView::OnSend)
+      EVT_MENU(WXMENU_COMPOSE_PRINT,      wxComposeView::OnPrint)
+      EVT_MENU(WXMENU_COMPOSE_CLEAR,      wxComposeView::OnClear)
+   
+      // button notifications
+      EVT_BUTTON(IDB_EXPAND, wxComposeView::OnExpand)
 
+      // size change
+      EVT_SIZE(wxComposeView::OnSize)
+   END_EVENT_TABLE() 
+#endif
 
 void
 wxComposeView::Create(const String &iname, wxFrame *parent,
@@ -111,7 +140,7 @@ wxComposeView::Create(const String &iname, wxFrame *parent,
   txtToLabel = CreateLabel(panel, "To:");
   txtTo      = CreateText(panel, -1, -1, -1, -1, "toField");
 
-  aliasButton = CreateButton(panel, "Expand", "");
+  aliasButton = CreateButton(panel, "Expand", "", IDB_EXPAND);
 
   if(profile->readEntry(MP_SHOWCC,MP_SHOWCC_D))
   {
@@ -259,11 +288,19 @@ wxComposeView::CreateFTCanvas(void)
       profile->readEntry(MP_COMPOSE_WRAPMARGIN,MP_COMPOSE_WRAPMARGIN_D));
 }
 
+#ifdef   USE_WXWINDOWS2
+void
+wxComposeView::OnSize(wxSizeEvent& /* event */)
+{
+   Layout();
+}
+#else  //wxWin1
 void
 wxComposeView::OnSize(int  w, int h)
 {
    Layout();
 }
+#endif //wxWin1/2
 
 wxComposeView::wxComposeView(const String &iname, wxFrame *parent,
 			     ProfileBase *parentProfile, bool hide)
@@ -286,55 +323,62 @@ wxComposeView::ProcessMouse(wxMouseEvent &event)
 }
 
 void
-wxComposeView::OnCommand(wxWindow &win, wxCommandEvent &event)
+wxComposeView::OnExpand(wxCommandEvent &event)
 {
-   // this gets called when the Expand button is pressed
    Adb * adb = mApplication.GetAdb();
    AdbEntry *entry = NULL;
 
    String	tmp = txtTo->GetValue();
    int l = tmp.length();
+   
+   // FIXME @@@ VZ: I don't know what this test does, so I disabled it
+   //if ( tmp.substr(l - 1, 1) == " " )
 
-   if(
-      (strcmp(win.GetName(),"toField")==0
-	 && tmp.substr(l-1,1) == " ")
-      ||
-      strcmp(win.GetName(),"button") == 0)
+   const char *expStr = NULL;
+   if(l > 0)
    {
-      const char *expStr = NULL;
-      if(l > 0)
+      tmp = tmp.substr(0,l-1);
+      txtTo->SetValue(WXCPTR tmp.c_str());
+      expStr = strrchr(tmp.c_str(),',');
+      if(expStr)
       {
-	 tmp = tmp.substr(0,l-1);
-	 txtTo->SetValue(WXCPTR tmp.c_str());
-	 expStr = strrchr(tmp.c_str(),',');
-	 if(expStr)
-	 {
-	    tmp = tmp.substr(0,l-strlen(expStr));
-	    expStr ++;
-	 }
-	 else
-	    expStr = tmp.c_str();
-	 entry = adb->Lookup(expStr, this);
-	 if(! entry)
-	    wxBell();
+         tmp = tmp.substr(0,l-strlen(expStr));
+         expStr ++;
       }
-      if(entry)
+      else
+         expStr = tmp.c_str();
+      entry = adb->Lookup(expStr, this);
+      if(! entry)
+         wxBell();
+   }
+   if(entry)
+   {
+      String
+         tmp2 = entry->formattedName + String(" <")
+         + entry->email.preferred.c_str() + String(">");
+
+      if(expStr == tmp.c_str())
+         tmp = tmp2;
+      else
       {
-	 String
-	    tmp2 = entry->formattedName + String(" <")
-	    + entry->email.preferred.c_str() + String(">");
-	 
-	 if(expStr == tmp.c_str())
-	    tmp = tmp2;
-	 else
-	 {
-	    tmp += ',';
-	    tmp += tmp2;
-	 }
-	 txtTo->SetValue(WXCPTR tmp.c_str());
+         tmp += ',';
+         tmp += tmp2;
       }
+      txtTo->SetValue(WXCPTR tmp.c_str());
    }
 }
+
+#ifndef USE_WXWINDOWS2
+void
+wxComposeView::OnCommand(wxWindow &win, wxCommandEvent &event)
+{
+   // this gets called when the Expand button is pressed
+   if ( strcmp(win.GetName(),"toField") == 0 || 
+        strcmp(win.GetName(),"button")  == 0    ) {
+      OnExpand(event);
+   }
+}
+#endif // wxWin1
 
 void
 wxComposeView::OnMenuCommand(int id)
