@@ -471,10 +471,12 @@ PGPEngine::DoExecCommand(const String& options,
                 READ_APPCONFIG_TEXT(MP_PGP_COMMAND).c_str(),
                 options.c_str()
                );
-#if !defined(NDEBUG)
-   if (log)
+
+#ifdef DEBUG
+   if ( log )
       log->AddMessage(command);
 #endif
+
    long pid = wxExecute
               (command,
                wxEXEC_ASYNC,
@@ -486,18 +488,12 @@ PGPEngine::DoExecCommand(const String& options,
       return CANNOT_EXEC_PROGRAM;
    }
 
-   // if we have data to write to PGP stdin, do it
    wxOutputStream *in = process.GetOutputStream();
-   CHECK( in, CANNOT_EXEC_PROGRAM, _T("where is PGP subprocess stdin?") );
-
-   if ( !messageIn.empty() )
-   {
-      in->Write(messageIn.c_str(), messageIn.length());
-      process.CloseOutput();
-   }
-
    wxInputStream *out = process.GetInputStream(),
                  *err = process.GetErrorStream();
+
+   CHECK( in && out && err, CANNOT_EXEC_PROGRAM,
+            _T("where is PGP subprocess stdin/out/err?") );
 
    wxTextInputStream errText(*err);
 
@@ -511,22 +507,43 @@ PGPEngine::DoExecCommand(const String& options,
    messageOut.clear();
    wxChar buf[4096];
 
+   size_t lenIn = messageIn.length();
+   const wxChar *ptrIn = messageIn.c_str();
+
    bool outEof = false,
         errEof = false;
    while ( !process.IsDone() || !outEof || !errEof )
    {
       wxYield();
 
+      // the order is important here, lest we deadlock: first get everything
+      // gpg has for us and only then try to feed it more data
       if ( out->GetLastError() == wxSTREAM_EOF )
       {
          outEof = true;
       }
-      else if ( out->CanRead() )
+      else
       {
-         // leave space for terminating NUL
-         buf[out->Read(buf, WXSIZEOF(buf) - 1).LastRead()] = '\0';
+         while ( out->CanRead() )
+         {
+            // leave space for terminating NUL
+            buf[out->Read(buf, WXSIZEOF(buf) - 1).LastRead()] = '\0';
 
-         messageOut += buf;
+            messageOut += buf;
+         }
+      }
+
+      if ( lenIn )
+      {
+         const size_t CHUNK_SIZE = 4096;
+         size_t lenChunk = lenIn > CHUNK_SIZE ? CHUNK_SIZE : lenIn;
+         in->Write(ptrIn, lenChunk);
+
+         lenIn -= lenChunk;
+         ptrIn += lenChunk;
+
+         if ( !lenIn )
+            process.CloseOutput();
       }
 
       if ( err->GetLastError() == wxSTREAM_EOF )
@@ -536,11 +553,13 @@ PGPEngine::DoExecCommand(const String& options,
       else if ( err->CanRead() )
       {
          String line = errText.ReadLine();
-#if !defined(NDEBUG)
+
+#ifdef DEBUG
          // In debug mode, log everything
          if (log)
             log->AddMessage(line);
-#endif
+#endif // DEBUG
+
          if ( line.StartsWith(_T("[GNUPG:] "), &line) )
          {
             String code;
