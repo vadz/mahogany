@@ -480,6 +480,111 @@ URLDetector::URLDetector()
    computeBackArcs();
 }
 
+/*
+   When we're called, p points to the "\r\n" and so p+2 is the start of the
+   next line. What we try to do here is to detect the case when there is an
+   extension somewhere near the end of the line -- if it's incomplete, we can
+   be (almost) sure that the URL continues on the next line. OTOH, if we have
+   the full extension here, chances are that the URL is not wrapped.
+ */
+static bool CanBeWrapped(const char *p)
+{
+   // we consider any alphanumeric string of 3 characters an extension
+   // but we have separate arrays of known extensions of other lengths
+   static const char *extensions1 =
+   {
+      // this one is actually a string and not an array as like this we can use
+      // strchr() below
+      "cCfhZ",
+   };
+
+   static const char *extensions2[] =
+   {
+      "cc", "gz",
+   };
+
+   static const char *extensions4[] =
+   {
+      "html", "jpeg", "tiff",
+   };
+
+   if ( !IsAlnum(p[-1]) )
+   {
+      // can't be part of an extension, so, by default, consider that the URL
+      // can be wrapped
+      return true;
+   }
+
+   if ( p[-2] == '.' )
+   {
+      if ( strchr(extensions1, p[-1]) )
+      {
+         // we seem to have a one letter extension at the end
+         return false;
+      }
+   }
+   else if ( !IsAlnum(p[-2]) )
+   {
+      // as above -- we don't know, assume it can be wrapped
+      return true;
+   }
+   else if ( p[-3] == '.' )
+   {
+      for ( size_t n = 0; n < WXSIZEOF(extensions2); n++ )
+      {
+         if ( p[-2] == extensions2[n][0] &&
+               p[-1] == extensions2[n][1] )
+         {
+            // line ends with a full 2 letter extension
+            return false;
+         }
+      }
+   }
+   else if ( !IsAlnum(p[-3]) )
+   {
+      // as above -- we don't know, assume it can be wrapped
+      return true;
+   }
+   else if ( p[-4] == '.' )
+   {
+      for ( size_t n = 0; n < WXSIZEOF(extensions4); n++ )
+      {
+         const char * const ext = extensions4[n];
+         if ( strncmp(p - 3, ext, 3) == 0 && p[2] == ext[3] )
+         {
+            // looks like a long extension got wrapped
+            return true;
+         }
+      }
+
+      // it doesn't look that extension is continued on the next line,
+      // consider this to be the end of the URL
+      return false;
+   }
+   else if ( p[-5] == '.' )
+   {
+      for ( size_t n = 0; n < WXSIZEOF(extensions4); n++ )
+      {
+         if ( strncmp(p - 4, extensions4[n], 4) == 0 )
+         {
+            // line ends with an extension, shouldn't wrap normally
+            return false;
+         }
+      }
+
+      return true;
+   }
+   else // no periods at all anywhere in sight
+   {
+      return true;
+   }
+
+   // we get here if we had a period near the end of the string but we didn't
+   // recognize the extension following it -- so try to understand whether this
+   // is a wrapped extension by checking if the next char is an alnum one
+   return IsAlnum(p[2]);
+}
+
 int URLDetector::FindURL(const char *text, int& len)
 {
    int offset = 0;
@@ -568,35 +673,12 @@ match:
          }
 #endif // 0
 
-         // heuristic text for end of URL detection: consider that if it ends
-         // with an extension (i.e. ".xyz") then it's the end of the URL
-         if ( p - start > 5 && p[-4] == '.' &&
-               isalnum(p[-3]) && isalnum(p[-2]) && isalnum(p[-1]) )
+         // heuristic text for end of URL detection
+         if ( p - start > 5 && !CanBeWrapped(p) )
          {
-            // some special cases where the URL could still be wrapped: html,
-            // jpeg and tiff are common 4 letter extension
-            static const char *longExtensions[] =
-            {
-               "html", "jpeg", "tiff"
-            };
-
-            size_t n;
-            for ( n = 0; n < WXSIZEOF(longExtensions); n++ )
-            {
-               const char * const ext = longExtensions[n];
-               if ( strncmp(p - 3, ext, 3) == 0 && p[2] == ext[3] )
-               {
-                  // looks like a long extension got wrapped
-                  break;
-               }
-            }
-
-            if ( n == WXSIZEOF(longExtensions) )
-            {
-               // it doesn't look that extension is continued on the next line,
-               // consider this to be the end of the URL
-               break;
-            }
+            // apparently we have an extension at the end of this line, so
+            // consider that the URL ends here
+            break;
          }
 
          // Check that the beginning of next line is not the start of
