@@ -111,9 +111,9 @@ wxImportDialog::wxImportDialog(MImporter& importer, wxWindow *parent)
 
    wxStaticBox *box = new wxStaticBox(this, -1, _("&What to do:"));
    wxStaticBoxSizer *actionsSizer = new wxStaticBoxSizer(box, wxVERTICAL);
+   m_checkSettings = new wxCheckBox(this, -1, _("import &settings"));
    m_checkADB = new wxCheckBox(this, -1, _("import &address books"));
    m_checkFolders = new wxCheckBox(this, -1, _("import &folders"));
-   m_checkSettings = new wxCheckBox(this, -1, _("import &settings"));
    m_checkFilters = new wxCheckBox(this, -1, _("import filter &rules"));
    actionsSizer->Add(m_checkADB, 0, wxEXPAND);
    actionsSizer->Add(m_checkFolders, 0, wxEXPAND);
@@ -158,14 +158,20 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
             if ( !m_importer.Import##what() ) \
                m_ok = false
 
+      DO_IMPORT(Settings);
       DO_IMPORT(ADB);
       DO_IMPORT(Folders);
-      DO_IMPORT(Settings);
       DO_IMPORT(Filters);
 
       #undef DO_IMPORT
 
       m_done = true;
+
+      // disable all checkboxes as they can't be used any longer
+      m_checkADB->Disable();
+      m_checkFolders->Disable();
+      m_checkSettings->Disable();
+      m_checkFilters->Disable();
 
       SetOkBtnLabel(_("Ok"));
 
@@ -173,6 +179,11 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
       wxWindow *btnCancel = FindWindow(wxID_CANCEL);
       if ( btnCancel )
          btnCancel->Disable();
+
+      if ( m_ok )
+         wxLogMessage(_("PINE configuration settings imported successfully."));
+      else
+         wxLogError(_("Importing PINE settings failed."));
    }
 }
 
