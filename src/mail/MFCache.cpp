@@ -214,25 +214,8 @@ void MfStatusCache::InvalidateStatus(const String& folderName)
       m_isDirty = true;
    }
 
-   /*
-      If we send this event from here we're in trouble because we're called
-      from mm_exists() notification and this event gets intermixed with other
-      c-client callbacks (notably flags update logic in OnMsgStatusChanged():
-      the simplest way to reproduce this bug is to send oneself a new message
-      and, before it is detected, flag a message in the inbox -- instant assert
-      failure) and, OTOH, the folder status will get updated anyhow as
-      currently UpdateStatus() will be called shortly after mm_exists() in any
-      case.
-
-      Nevertheless it is possible to imagine that it wouldn't and in this case
-      we'd need to restore this Send() here and try to fix the real bug in
-      status update code -- but for now just not generating this event here
-      makes everything work.
-    */
-#if 0
    // if anybody has the status info for this folder, it must be updated
    MEventManager::Send(new MEventFolderStatusData(folderName));
-#endif // 0
 }
 
 // ----------------------------------------------------------------------------
