@@ -47,6 +47,8 @@ BUG:- saving message from messageview (called from embedded rfc822) saves
   this case points to a different folder!) Maybe that functionality
   should really be moved to MailFolder ??
 
+- occasionally parts of xface header show up in following mail header
+  lines (content type/parameters)
 - when creating a newsgroup folder, subscribe to it, so it appears in .newsrc
 - add note about --with instead of -with to docs.
 - copying message to non-existing folder gives error message but works
