@@ -2493,8 +2493,8 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
          // TODO: make the format of the string inside the parentheses
          //       configurable
 
-         String subject = m_MailMessage->Subject(),
-                from = m_MailMessage->From();
+         String subject = MailFolder::DecodeHeader(m_MailMessage->Subject()),
+                from = MailFolder::DecodeHeader(m_MailMessage->From());
 
          textPD.Printf(_("Filtering message %u/%u"), idx + 1, count);
 
