@@ -240,3 +240,5 @@
 #      error "Mahogany's thread support requires a wxWindows with threads compiled in!"
 #   endif
 #endif
+
+#endif
