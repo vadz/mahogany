@@ -21,10 +21,6 @@
 #define MDIALOG_YESNOTITLE_C (char *)MDIALOG_YESNOTITLE
 %}
 
-// it's not really a dialog, but is useful too
-inline void MDialog_StatusMessage(const char *message, MFrame *frame = NULL)
-  { wxLogStatus(frame, message); }
-
 %import MString.i
 %import MProfile.i
 

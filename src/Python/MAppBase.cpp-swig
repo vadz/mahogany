@@ -520,21 +520,6 @@ static swig_type_info *swig_types[7];
 #ifdef __cplusplus
 extern "C" {
 #endif
-static PyObject *_wrap_MDialog_StatusMessage(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    char *arg0 ;
-    MFrame *arg1 = NULL ;
-    PyObject * argo1 =0 ;
-    
-    if(!PyArg_ParseTuple(args,"s|O:MDialog_StatusMessage",&arg0,&argo1)) return NULL;
-    if ((SWIG_ConvertPtr(argo1,(void **) &arg1,SWIGTYPE_p_MFrame,1)) == -1) return NULL;
-    MDialog_StatusMessage((char const *)arg0,arg1);
-    Py_INCREF(Py_None);
-    resultobj = Py_None;
-    return resultobj;
-}
-
-
 static PyObject *_wrap_wxGetApp(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MAppBase *result ;
@@ -792,7 +777,6 @@ static PyObject *_wrap_MAppBase_GetProfile(PyObject *self, PyObject *args) {
 
 
 static PyMethodDef MAppBasecMethods[] = {
-	 { "MDialog_StatusMessage", _wrap_MDialog_StatusMessage, METH_VARARGS },
 	 { "wxGetApp", _wrap_wxGetApp, METH_VARARGS },
 	 { "MDialog_ErrorMessage", _wrap_MDialog_ErrorMessage, METH_VARARGS },
 	 { "MDialog_SystemErrorMessage", _wrap_MDialog_SystemErrorMessage, METH_VARARGS },

@@ -48,8 +48,6 @@ class MAppBasePtr(MAppBase):
 
 #-------------- FUNCTION WRAPPERS ------------------
 
-MDialog_StatusMessage = MAppBasec.MDialog_StatusMessage
-
 def wxGetApp(*args, **kwargs):
     val = apply(MAppBasec.wxGetApp,args,kwargs)
     if val: val = MAppBasePtr(val); val.thisown = 1
