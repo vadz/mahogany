@@ -115,7 +115,15 @@ public:
    // has this entry expired?
    bool HasExpired() const
    {
-      return m_expires && (m_dt > wxDateTime::Now());
+#if 0
+      wxLogTrace(TRACE_MF_CLOSE,
+                 "Checking if '%s' expired: exp time: %s, now: %s",
+                 m_mf->GetName().c_str(),
+                 m_dt.FormatTime().c_str(),
+                 wxDateTime::Now().FormatTime().c_str());
+#endif // 0
+
+      return m_expires && (m_dt <= wxDateTime::Now());
    }
 
    // does this entry match this folder?
@@ -140,7 +148,7 @@ private:
 };
 
 // a linked list of MfCloseEntries
-KBLIST_DEFINE(MfList, MfCloseEntry);
+M_LIST_OWN(MfList, MfCloseEntry);
 
 // the timer which periodically really closes the previously "closed" folders
 class MfCloser;
@@ -288,8 +296,7 @@ MfCloseEntry::~MfCloseEntry()
 // ----------------------------------------------------------------------------
 
 MfCloser::MfCloser()
-        : m_MfList(true),
-          m_timer(this)
+        : m_timer(this)
 {
    m_interval = READ_APPCONFIG(MP_FOLDER_CLOSE_DELAY);
 
@@ -339,8 +346,7 @@ void MfCloser::OnTimer(void)
    MfList::iterator i;
    for( i = m_MfList.begin(); i != m_MfList.end();)
    {
-      MfCloseEntry *entry = *i;
-      if ( entry->HasExpired() )
+      if ( i->HasExpired() )
       {
          i = m_MfList.erase(i);
       }
@@ -353,9 +359,7 @@ void MfCloser::OnTimer(void)
 
 void MfCloser::CleanUp(void)
 {
-   MfList::iterator i = m_MfList.begin();
-   while (i != m_MfList.end() )
-      i = m_MfList.erase(i);
+   m_MfList.clear();
 }
 
 void MfCloser::Remove(MfCloseEntry *entry)
@@ -369,7 +373,7 @@ void MfCloser::Remove(MfCloseEntry *entry)
 
    for ( MfList::iterator i = m_MfList.begin(); i != m_MfList.end(); i++ )
    {
-      if ( *i == entry )
+      if ( i.operator->() == entry )
       {
          m_MfList.erase(i);
 
@@ -382,10 +386,9 @@ MfCloseEntry *MfCloser::GetCloseEntry(MailFolderCmn *mf) const
 {
    for ( MfList::iterator i = m_MfList.begin(); i != m_MfList.end(); i++ )
    {
-      MfCloseEntry *entry = *i;
-      if ( entry->Matches(mf) )
+      if ( i->Matches(mf) )
       {
-         return entry;
+         return i.operator->();
       }
    }
 
