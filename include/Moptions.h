@@ -65,8 +65,6 @@ extern const MOption MP_USE_CONFIG_FILE;
 
 extern const MOption MP_TBARIMAGES;
 
-extern const MOption MP_USER_MDIR;
-
 #ifdef OS_UNIX
 extern const MOption MP_PATHLIST;
 extern const MOption MP_ROOTDIRNAME;
@@ -519,9 +517,6 @@ extern const MOption MP_TREAT_AS_JUNK_MAIL_FOLDER;
 
 /// the directory containing the help files
 #define MP_HELPDIR_NAME _T("HelpDir")
-
-/// the name of the M directory
-#   define   MP_USER_MDIR_NAME         _T("MDirName")
 
 // Unix-only entries
 #ifdef OS_UNIX
@@ -1359,13 +1354,6 @@ extern const MOption MP_TREAT_AS_JUNK_MAIL_FOLDER;
 
 /// show images in the toolbar
 #define MP_TBARIMAGES_DEFVAL 0l // == TbarShow_Icons - 1
-
-#ifdef OS_UNIX
-/// the name of the M directory under users HOME
-#  define   MP_USER_MDIR_DEFVAL         _T(".M")
-#elif defined(OS_WIN)
-#  define   MP_USER_MDIR_DEFVAL         _T("Mahogany")
-#endif
 
 // Unix-only entries
 #ifdef OS_UNIX

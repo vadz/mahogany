@@ -128,8 +128,6 @@ const MOption MP_USE_CONFIG_FILE;
 
 const MOption MP_TBARIMAGES;
 
-const MOption MP_USER_MDIR;
-
 #ifdef OS_UNIX
 const MOption MP_PATHLIST;
 const MOption MP_ROOTDIRNAME;
@@ -542,8 +540,6 @@ static const MOptionData MOptions[] =
 #endif // OS_WIN
 
     DEFINE_OPTION(MP_TBARIMAGES),
-
-    DEFINE_OPTION(MP_USER_MDIR),
 
 #ifdef OS_UNIX
     DEFINE_OPTION(MP_PATHLIST),
