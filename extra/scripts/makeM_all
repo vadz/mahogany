@@ -16,6 +16,8 @@ DOWXWIN=yes  # no or yes
 DOINSTALL=yes
 DOSHARED=no
 DEBUG=no
+USETARSRC=no
+MKTARSRC=no
 ADDON=
 
 while [ ! -z "$1" ]
@@ -35,6 +37,14 @@ do
 	;;
 	"x--shared")
 		DOSHARED=yes
+		shift
+	;;
+	"x--fromtar")
+		USETARSRC=yes
+		shift
+	;;
+	"x--mktar")
+		MKTARSRC=yes
 		shift
 	;;
 	*)
@@ -211,11 +221,21 @@ if [ ! -d $MPREFIX ] ; then mkdir $MPREFIX ; fi
 
 if [ "x$MAKE" = x ] ; then MAKE=make; fi
 
+RCNAME=.makeMrc    
 # obtain central options file from ftp server
 $SCP $FTPLOCATION/buildoptions /tmp/makeM_deb.$$ && \
 ( . /tmp/makeM_deb.$$ ; rm -f /tmp/makeM_deb.$$ )
 
+# obtain local config file:
+if [ -r $HOME/$RCNAME ] ; then echo "Reading $HOME/$RCNAME"; . $HOME/$RCNAME ; fi    
 
+# obtain 2nd local config file:
+HOSTNAME=`hostname`
+if [ -r $HOME/$RCNAME.$HOSTNAME ]
+then
+  echo "Reading $HOME/$RCNAME"
+  . $HOME/$RCNAME
+fi    
 
 echo "OSTYPE=$OSTYPE"
 echo "OSTYPE_ADDON=$OSTYPE_ADDON"
@@ -234,6 +254,8 @@ echo "SCP=$SCP"
 echo "DOSHARED=$DOSHARED"
 echo "MCONFOPT=$MCONFOPT"
 echo "DOINSTALL=$DOINSTALL"
+echo "USETARSRC=$USETARSRC"
+echo "MKTARSRC=$MKTARSRC"
 
 export OSTYPE
 
@@ -256,31 +278,45 @@ then
   echo "Building wxGTK."
   echo "##################################################################"
 
+
   NAME=$WXNAME
   VERSION="-$WXVERSION"
-  if [ $USESTABLE = yes ]
-  then
-    TAG="-rM_STABLE"
-    echo "Using stable version of wxGTK."
-  else
-    TAG="-A"
-    echo "Using latest version of wxGTK."
-  fi
-
-  echo REALHOME=$HOME
-  if [ ! -d wxWindows ]
-  then
-    echo "wxWindows directory does not exist. Doing fresh checkout."
-    ( HOME=$REALHOME; $CVS -d"$WXCVSROOT" -q checkout $TAG wxGTK 2>&1)
-  else
-    echo "Updating wxWindows sources."
-    (HOME=$REALHOME; cd wxWindows && $CVS -d "$WXCVSROOT" -q update $TAG 2>&1)
-  fi
-  if [ $? -gt 1 ]
-  then
-    echo "Calling CVS failed - exiting."
-    exit 2
-  fi
+  if [ $USETARSRC = yes ]   # build from $HOME/wxWindows.tar.gz
+  then 
+    rm -r -f wxWindows
+    cat $HOME/wxWindows.tar.gz | gzip -dc | tar xf -
+    if [ $? != 0 ] 
+    then
+	echo "Failed to unpack $HOME/wxWindows.tar.gz"
+	exit 1
+    fi
+  else   # build from cvs
+    if [ "x$TAG" = "x" ]
+    then
+      if [ $USESTABLE = yes ]
+        then
+          TAG="-rM_STABLE"
+          echo "Using stable version of wxGTK."
+        else
+          TAG="-A"
+        echo "Using latest version of wxGTK."
+      fi
+    fi
+    echo REALHOME=$HOME
+    if [ ! -d wxWindows ]
+    then
+      echo "wxWindows directory does not exist. Doing fresh checkout."
+      ( HOME=$REALHOME; $CVS -d"$WXCVSROOT" -Q checkout $TAG wxGTK 2>&1)
+    else
+      echo "Updating wxWindows sources."
+      (HOME=$REALHOME; cd wxWindows && $CVS -d "$WXCVSROOT" -Q update $TAG 2>&1)
+    fi
+    if [ $? -gt 1 ]
+    then
+      echo "Calling CVS failed - exiting."
+      exit 2
+    fi
+  fi # TARSRC
 
   if [ "$DEBUG" = "yes" ] ; then
   	DEBUGOPTS="--enable-debug_flag --enable-debug_info"
@@ -328,22 +364,33 @@ export NAME VERSION
 
 cd $BUILDDIR
 
-if [ ! -d $NAME-$VERSION ]
+if [ $USETARSRC = yes ]
 then
-  echo "$NAME-$VERSION directory does not exist. Doing fresh checkout."
-  rm -rf M
-  (HOME=$REALHOME; $CVS -d "$MCVSROOT" -q checkout M 2>&1) && \
-  mv M $NAME-$VERSION
-else
-  echo "Updating Mahogany sources."
-  (HOME=$REALHOME; cd $NAME-$VERSION && $CVS -d "$MCVSROOT" -q update -A 2>&1)
+  rm -r -f M
+  cat $HOME/Mahogany.tar.gz | gzip -dc | tar xf -
+  if [ $? != 0 ] 
+  then
+    echo "Unpacking $HOME/Mahogany.tar.gz failed."
+    exit 1
+  fi
+else # build from cvs
+  if [ ! -d $NAME-$VERSION ]
+  then
+    echo "$NAME-$VERSION directory does not exist. Doing fresh checkout."
+    rm -rf M
+    (HOME=$REALHOME; $CVS -d "$MCVSROOT" -q checkout M 2>&1) && \
+    mv M $NAME-$VERSION
+  else
+    echo "Updating Mahogany sources."
+    (HOME=$REALHOME; cd $NAME-$VERSION && $CVS -d "$MCVSROOT" -q update -A 2>&1)
+  fi
+  if [ $? -gt 1 ]
+  then
+    echo "Calling CVS failed - exiting."
+    exit 2
+  fi
 fi
-if [ $? -gt 1 ]
-then
-  echo "Calling CVS failed - exiting."
-  exit 2
-fi
-
+    
 PATH="/sbin:/usr/sbin:$PATH:$WXPREFIX/bin"
 export PATH
 
@@ -461,9 +508,25 @@ then
   echo "Uploading wxWindows shared library to ftp server"
   cd $WXPREFIX && \
   tar cvf wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON$ADDON.tar lib/libwx_gtk* && \
-  gzip -9 wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON$ADDON.tar && \
-  $SCP wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON$ADDON.tar $FTPLOCATION && \
-  rm -f wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON$ADDON.tar
+  gzip -f -9 wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON$ADDON.tar && \
+  $SCP wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON$ADDON.tar.gz $FTPLOCATION && \
+  rm -f wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON$ADDON.tar*
+fi
+
+##########################################################
+## Build $HOME/wxWindows.tar.gz and $HOME/Mahogany.tar.gz
+##########################################################
+if [ $MKTARSRC = yes ]
+then
+  echo "Cleaning and building $HOME/wxWindows.tar.gz"
+  cd $BUILDDIR/wxWindows && ($MAKE clean; rm -f *cache ) >/dev/null 2>&1
+  cd $BUILDDIR && \
+  (tar cf $HOME/wxWindows.tar wxWindows && gzip -f -9 $HOME/wxWindows.tar)
+  echo "Cleaning and building $HOME/Mahogany.tar.gz"
+  cd $BUILDDIR/$MNAME-$MVERSION && ($MAKE allclean; rm -f *cache ) >/dev/null 2>&1
+    cd $BUILDDIR && \
+      (mv $MNAME-$MVERSION M && tar cf $HOME/Mahogany.tar M && gzip -f -9 $HOME/Mahogany.tar)
+  	mv $BUILDDIR/M $BUILDDIR/$MNAME-$MVERSION
 fi
 
 ############################
