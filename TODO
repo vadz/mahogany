@@ -3,6 +3,9 @@ $Id$
 
 *** things to fix/implement next ***
 
+- SendMessageCC
+  + add folder aliases (trivial)
+
 - MessageView:
   + use parameters from list as default filenames
 
