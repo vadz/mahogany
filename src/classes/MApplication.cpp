@@ -360,8 +360,9 @@ MAppBase::OnStartup()
    GetIconManager()->SetSubDirectory("");
 
    // show the splash screen (do it as soon as we have profile to read
-   // MP_SHOWSPLASH from)
-   if ( READ_APPCONFIG(MP_SHOWSPLASH) )
+   // MP_SHOWSPLASH from) unless this is our first run in which case it will
+   // disappear any how - not showing it avoids some ugly flicker on screen
+   if ( !READ_APPCONFIG(MP_FIRSTRUN) && READ_APPCONFIG(MP_SHOWSPLASH) )
    {
       // no parent because no frames created yet
       MDialog_AboutDialog(NULL);
@@ -371,8 +372,7 @@ MAppBase::OnStartup()
    // -------------------------------------------
    if ( !VerifySettings() )
    {
-      ERRORMESSAGE((_("Program execution aborted due to "
-                      "installation problems.")));
+      ERRORMESSAGE((_("Program execution aborted.")));
 
       wxYield();
       return false;

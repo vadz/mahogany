@@ -7,7 +7,7 @@
 // Created:     20.08.98
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-// Licence:     M license
+// License:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
@@ -1952,6 +1952,8 @@ CheckConfiguration(void)
       }
       else
       {
+         ERRORMESSAGE((_("You must accept the license to run Mahogany.")));
+
          return FALSE;
       }
    }
