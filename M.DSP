@@ -781,7 +781,7 @@ SOURCE=.\src\adb\Collect.cpp
 # Begin Group "python"
 
 # PROP Default_Filter ""
-# Begin Group "SWIG-IN"
+# Begin Group "SWIG Input"
 
 # PROP Default_Filter "*.i"
 # Begin Source File
@@ -815,7 +815,7 @@ SOURCE=.\src\Python\MString.i
 # PROP Exclude_From_Build 1
 # End Source File
 # End Group
-# Begin Group "SWIG-OUT"
+# Begin Group "SWIG Precompiled Output"
 
 # PROP Default_Filter "*.cpp"
 # Begin Source File
@@ -1739,10 +1739,9 @@ InputPath=".\src\Python\swiglib.cpp-swig"
 
 # End Source File
 # End Group
-# Begin Source File
+# Begin Group "SWIG Out"
 
-SOURCE=.\src\Python\InitPython.cpp
-# End Source File
+# PROP Default_Filter ""
 # Begin Source File
 
 SOURCE=.\src\Python\MailFolder_swig.cpp
@@ -1781,17 +1780,22 @@ SOURCE=.\src\Python\MString_swig.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\Python\swiglib_swig.cpp
+# ADD CPP /W1
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# End Group
+# Begin Source File
+
+SOURCE=.\src\Python\InitPython.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\Python\PythonDll.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\Python\PythonHelp.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\Python\swiglib_swig.cpp
-# ADD CPP /W1
-# SUBTRACT CPP /YX /Yc /Yu
 # End Source File
 # End Group
 # Begin Group "wx"
