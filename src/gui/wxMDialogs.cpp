@@ -230,14 +230,9 @@ MGetNumberFromUser(const wxString& message,
                    wxWindow *parent,
                    const wxPoint& pos)
 {
-   ///FIXME: not in wxGTK at present!!!
-#if 0
    return wxGetNumberFromUser(message, prompt, caption,
                               value, min, max,
                               parent, pos);
-#else
-   return 0;
-#endif
 }
 
 // ----------------------------------------------------------------------------
