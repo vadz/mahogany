@@ -266,12 +266,13 @@ protected:
    /// select the first interesting message in the folder
    void SelectInitialMessage(const HeaderInfoList_obj& hil);
 
+   /// get the number of the messages we show
+   inline size_t GetHeadersCount() const;
+
 private:
    /// the full name of the folder opened in this folder view
    wxString m_fullname;
 
-   /// the number of messages in the folder when last updated
-   unsigned long m_NumOfMessages;
    /// number of deleted messages in the folder
    unsigned long m_nDeleted;
 

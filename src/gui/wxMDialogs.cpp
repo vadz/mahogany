@@ -2683,6 +2683,7 @@ static const struct
    { "ApplyQuickFilter",         gettext_noop("propose to apply quick filter after creation") },
    { "BrowseImapServers",        gettext_noop("propose to get all folders from IMAP server") },
    { "GfxNotInlined",            gettext_noop("ask if big images should be inlined") },
+   { "EditOnOpenFail",           gettext_noop("propose to edit folder settings if opening it failed") },
    //{ "", gettext_noop() },
 };
 
