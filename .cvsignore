@@ -15,3 +15,5 @@ solaris2.5.system.cache.tmp
 FreeBSD.system.cache.tmp
 FreeBSD.system.cache
 tmp
+Release
+Debug

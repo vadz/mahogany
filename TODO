@@ -23,11 +23,6 @@ $Id$
 		speed up wxLayout scrollbar setting, *way* too slow
 		now 
 6	VZ	All Folder create dialog pages have no HelpIDs set.
-6		"Hostname" in identity options page is misleading -
-		should be "default server for POP/IMAP. It isn't!!
-		Also, move TCP params somewhere else - what does
-		it have to do with identity?? Nothing, neither the
-		servers. Set up a "Network" page?
 5	KB	for NNTP only count unread/new messages
 5		changing the value of "autocollect" timer doesn't take
 		effect until next run - either add a message saying
@@ -46,9 +41,6 @@ $Id$
 *********************************************************************
 * PRI	WHO	DESCRIPTION
 *********************************************************************
-
-8	VZ	when user level is >=1 (advanced) show full
-		preferences pages in folder notbook
 
 6	VZ	Could you please add a file-browse button/dialog to
 		the folder selection dialog and modify its return
@@ -88,7 +80,6 @@ $Id$
 		next/previous/goto_next_unread
 4		improve key bindings for message editor, page up/down
 		whole page 
-5		easy to implement but useful feature: "check for new mail now"
 
 *********************************************************************
 *** TESTS
