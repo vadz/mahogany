@@ -699,7 +699,9 @@ MsgnoType HeaderInfoListImpl::GetOldPosFromIdx(MsgnoType n) const
    }
    else // use the table if any
    {
-      return m_tablePos ? m_tablePos[n] : n;
+      // maybe we haven't yet updated the table for the new messages, in this
+      // case assume that these new messages are after all the old ones
+      return m_tablePos && n < m_sizeTables ? m_tablePos[n] : n;
    }
 }
 
