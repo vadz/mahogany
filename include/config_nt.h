@@ -43,3 +43,6 @@
 /** Define this to build M with dialup support */
 #define USE_DIALUP
 
+/** Only static modules are supported under Windows so far */
+#define USE_MODULES
+#define USE_MODULES_STATIC
