@@ -161,8 +161,6 @@ public:
    */
    virtual unsigned long CountMessages(int mask = 0, int value = 0) const;
 
-   virtual bool CountInterestingMessages(MailFolderStatus *status) const;
-
    /** get message header
        @param uid mesage uid
        @return message header information class
@@ -449,6 +447,7 @@ protected:
    virtual void RequestUpdate(void);
    virtual void UpdateStatus(void);
    virtual bool IsAlive(void) const;
+   virtual bool DoCountMessages(MailFolderStatus *status) const;
 
    /// Update the timeout values from a profile
    void UpdateTimeoutValues(void);

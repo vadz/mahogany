@@ -28,10 +28,11 @@
 class MailFolderCmn : public MailFolder
 {
 public:
+   /// do status caching and call DoCountMessages() to do the real work
+   virtual bool CountInterestingMessages(MailFolderStatus *status) const;
+
    /**@name Some higher level functionality implemented by the
-      MailFolder class on top of the other functions.
-      These functions are not used by anything else in the MailFolder
-      class and can easily be removed if needed.
+      MailFolderCmn class on top of the other functions.
    */
    //@{
    virtual bool SaveMessages(const UIdArray *selections,
@@ -204,6 +205,9 @@ protected:
 
    /// Is the mailfolder still connected to a server or file?
    virtual bool IsAlive(void) const = 0;
+
+   /// really count messages
+   virtual bool DoCountMessages(MailFolderStatus *status) const = 0;
 
    /**@name Config information used */
    //@{

@@ -46,6 +46,8 @@
 
 #include "MThread.h"
 
+#include "MFCache.h"
+
 #include "miscutil.h"         // for GetSequenceString()
 
 #include <wx/timer.h>
@@ -203,6 +205,9 @@ protected:
 
 // the unique MfCloser object
 static MfCloser *gs_MailFolderCloser = NULL;
+
+// the mail folder status cache
+static MfStatusCache *gs_MfStatusCache = NULL;
 
 // ============================================================================
 // implementation
@@ -1612,6 +1617,24 @@ MailFolderCmn::DeleteDuplicates()
 #endif // 0
 
 // ----------------------------------------------------------------------------
+// MailFolderCmn message counting
+// ----------------------------------------------------------------------------
+
+bool MailFolderCmn::CountInterestingMessages(MailFolderStatus *status) const
+{
+   String name = GetName();
+   if ( !gs_MfStatusCache->GetStatus(name, status) )
+   {
+      if ( !DoCountMessages(status) )
+         return false;
+
+      gs_MfStatusCache->UpdateStatus(name, *status);
+   }
+
+   return true;
+}
+
+// ----------------------------------------------------------------------------
 // MfCmnEventReceiver
 // ----------------------------------------------------------------------------
 
@@ -1664,6 +1687,8 @@ extern bool MailFolderCmnInit()
    if ( !gs_MailFolderCloser )
    {
       gs_MailFolderCloser = new MfCloser;
+
+      gs_MfStatusCache = MfStatusCache::Create();
    }
 
    return true;
@@ -1671,11 +1696,18 @@ extern bool MailFolderCmnInit()
 
 extern void MailFolderCmnCleanup()
 {
-   // any MailFolderCmn::DecRef() shouldn't add folders to gs_MailFolderCloser
-   // from now on, so NULL it immediately
-   MfCloser *mfCloser = gs_MailFolderCloser;
-   gs_MailFolderCloser = NULL;
+   if ( gs_MailFolderCloser )
+   {
+      // any MailFolderCmn::DecRef() shouldn't add folders to
+      // gs_MailFolderCloser from now on, so NULL it immediately
+      MfCloser *mfCloser = gs_MailFolderCloser;
+      gs_MailFolderCloser = NULL;
 
-   delete mfCloser;
+      delete mfCloser;
+
+      // save the cache
+      delete gs_MfStatusCache;
+      gs_MfStatusCache = NULL;
+   }
 }
 

@@ -2166,7 +2166,7 @@ MailFolderCC::CountMessages(int mask, int value) const
    return numOfMessages;
 }
 
-bool MailFolderCC::CountInterestingMessages(MailFolderStatus *status) const
+bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
 {
    CHECK( status, false, "NULL pointer in CountInterestingMessages" );
 
