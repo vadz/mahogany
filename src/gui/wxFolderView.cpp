@@ -755,7 +755,7 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
                      + msg->Subject());
       SafeDecRef(msg);
       wxString seq;
-      seq << i;
+      seq << selections[i]+1;
       m_MailFolder->SetSequenceFlag(seq, MailFolder::MSG_STAT_ANSWERED, true);
    }
 }
