@@ -521,7 +521,16 @@ esac
 AC_SUBST(MAKE_EXPERIMENTAL)
 
 if test "x$USE_DIALUP" = "x1"; then
-    AC_DEFINE(USE_DIALUP)
+    case "$OSTYPE" in
+	darwin*)
+	    AC_MSG_WARN([Dialup support is not available under Mac OS X])
+	    USE_DIALUP=0
+	    ;;
+
+	*)
+	    AC_DEFINE(USE_DIALUP)
+	    ;;
+    esac
 fi
 
 dnl --------------------------------------------------------------------------
@@ -953,6 +962,8 @@ case "$USE_CCOSTYPE" in
 		yes)	CCOSTYPE=gsg ;;
 		*)	CCOSTYPE=sg6 ;;
 		esac ;;
+	darwin*)
+		CCOSTYPE=osx ;;
 	*)
 		AC_MSG_RESULT(unknown)
 		AC_MSG_ERROR([cannot determine c-client OS type for $OSTYPE])
