@@ -63,7 +63,6 @@ public:
    // did anything change?
    bool HasChanges() const { return m_hasChanges; }
 
-   virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
 protected:
@@ -122,10 +121,18 @@ wxFolderRenameDialog::wxFolderRenameDialog(wxWindow *parent,
 {
    // init members
    m_folder = folder;
-   m_chDelim = '/';
+   m_chDelim = MailFolder::GetFolderDelimiter(m_folder);
    m_hasChanges = false;
    m_folderName = folderName;
    m_mboxName = mboxName;
+
+   bool canRenameMailbox = true;
+   if ( folder->GetType() == MF_IMAP )
+   {
+      const String& name = folder->GetFullName();
+      if ( wxStricmp(name, _T("inbox")) )
+            canRenameMailbox = false;
+   }
 
    // first create the box around everything
    wxLayoutConstraints *c;
@@ -208,6 +215,9 @@ wxFolderRenameDialog::wxFolderRenameDialog(wxWindow *parent,
    m_textMbox->SetConstraints(c);
 
    // set the initial state of the controls
+   if ( !canRenameMailbox )
+      m_chkRenameMbox->Disable();
+
    DoUpdateUI();
 
    m_textFolder->SetFocus();
@@ -223,8 +233,9 @@ void wxFolderRenameDialog::OnCheckbox(wxCommandEvent& WXUNUSED(event))
 void wxFolderRenameDialog::OnText(wxCommandEvent& event)
 {
    // update the mailbox path if the user doesn't want to modify it himself
-   if ( !m_chkRenameMbox->GetValue() &&
-        event.GetEventObject() == m_textFolder )
+   if ( m_chkRenameMbox->IsEnabled() &&
+         !m_chkRenameMbox->GetValue() &&
+           event.GetEventObject() == m_textFolder )
    {
       DoUpdateMboxPath(event.GetString());
    }
@@ -260,30 +271,10 @@ void wxFolderRenameDialog::DoUpdateUI()
    // if we have the checkbox, we must have the other two controls as well
    CHECK_RET( m_textMbox && m_labelMbox, _T("where are our controls?") );
 
-   bool enable = m_chkRenameMbox->GetValue();
+   bool enable = m_chkRenameMbox->IsEnabled() && m_chkRenameMbox->GetValue();
 
    m_textMbox->Enable(enable);
    m_labelMbox->Enable(enable);
-}
-
-bool wxFolderRenameDialog::TransferDataToWindow()
-{
-   // get the folder delimiter
-   MailFolder *mf = MailFolder::OpenFolder(m_folder, MailFolder::ReadOnly);
-   if ( !mf )
-   {
-      // probably will fail to rename too, don't even try
-      wxLogError(_("Impossible to rename the mailbox '%s'."),
-                 m_mboxName->c_str());
-
-      return false;
-   }
-
-   m_chDelim = mf->GetFolderDelimiter();
-
-   mf->DecRef();
-
-   return true;
 }
 
 bool wxFolderRenameDialog::TransferDataFromWindow()
