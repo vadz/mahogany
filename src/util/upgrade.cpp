@@ -829,7 +829,9 @@ bool RunInstallWizard()
    gs_installWizardData.useOutbox = TRUE;
    gs_installWizardData.useTrash = TRUE;
    gs_installWizardData.collectAllMail = TRUE;
+#ifdef USE_PYTHON
    gs_installWizardData.usePython = FALSE;
+#endif
    gs_installWizardData.usePalmOs = TRUE;
    
    gs_installWizardData.email = READ_APPCONFIG(MP_RETURN_ADDRESS);
