@@ -6154,7 +6154,7 @@ msgstr "Wählen Sie eine Datei um die Nachricht zu speichern"
 
 #: gui/wxMIMETreeDialog.cpp:416
 msgid ""
-"Attachment has a name of existinf file,\n"
+"Attachment has a name of existing file,\n"
 "please choose another one:"
 msgstr ""
 

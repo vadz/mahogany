@@ -413,7 +413,7 @@ void wxMIMETreeDialog::SaveAttachments(size_t count, const MimePart **parts)
          filename = wxPFileSelector
                     (
                         _T("MimeSave"),
-                        _("Attachment has a name of existinf file,\n"
+                        _("Attachment has a name of existing file,\n"
                           "please choose another one:"),
                         dir,  // default path
                         NULL, // default name

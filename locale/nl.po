@@ -6960,7 +6960,7 @@ msgstr "Kies bestand om bericht in te bewaren"
 
 #: gui/wxMIMETreeDialog.cpp:416
 msgid ""
-"Attachment has a name of existinf file,\n"
+"Attachment has a name of existing file,\n"
 "please choose another one:"
 msgstr ""
 
