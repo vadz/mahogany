@@ -122,9 +122,13 @@ struct InstallWizardData
    bool   isSigFile;    // TRUE => signature is a filename,
    String signature;    // FALSE => it's a signature itself
 
+   // operations page:
+   int   useDialUp; // initially -1
+   bool   useOutbox;
+   bool   useTrash;
+   bool   collectAllMail;
    // dial up page
-   bool   useDialUp;
-
+   
 #if defined(OS_WIN)
    String connection;
 #elif defined(OS_UNIX)
@@ -268,13 +272,26 @@ class InstallWizardOperationsPage : public InstallWizardPage
 public:
    InstallWizardOperationsPage(wxWizard *wizard);
 
+   virtual bool TransferDataToWindow()
+   {
+      m_UseDialUpCheckbox->SetValue(gs_installWizardData.useDialUp);
+      m_UseOutboxCheckbox->SetValue(gs_installWizardData.useOutbox);
+      m_TrashCheckbox->SetValue(gs_installWizardData.useTrash);
+      m_CollectCheckbox->SetValue(gs_installWizardData.collectAllMail);
+      return TRUE;
+   }
+
    virtual bool TransferDataFromWindow()
    {
+      gs_installWizardData.useDialUp  = m_UseDialUpCheckbox->GetValue();
+      gs_installWizardData.useOutbox  = m_UseOutboxCheckbox->GetValue();
+      gs_installWizardData.useTrash   = m_TrashCheckbox->GetValue();
+      gs_installWizardData.collectAllMail = m_CollectCheckbox->GetValue();
       return TRUE;
    }
 private:
    wxCheckBox *m_CollectCheckbox, *m_TrashCheckbox,
-      *m_OutboxCheckbox;
+      *m_UseOutboxCheckbox, *m_UseDialUpCheckbox;
 };
 
 #ifdef USE_HELPERS_PAGE
@@ -346,22 +363,24 @@ BEGIN_EVENT_TABLE(InstallWizardPage, wxWizardPage)
    EVT_WIZARD_CANCEL(-1, InstallWizardPage::OnWizardCancel)
 END_EVENT_TABLE()
 
-int InstallWizardPage::ms_isUsingDialUp = -1;
-
+   /** FIXME: This code is completely obsolete as the dialup code will 
+       be user-selectable on the dial-up page which must be shown if
+       useDialUp is set. */
+   
 bool InstallWizardPage::ShouldShowDialUpPage()
 {
-   if ( ms_isUsingDialUp == -1 )
+   if ( gs_installWizardData.useDialUp == -1 )
    {
       wxDialUpManager *man = wxDialUpManager::Create();
 
       // if we have a LAN connection, then we don't need to configure dial-up
       // netowrking, but if we don't, then we probably do
-      ms_isUsingDialUp = !man->IsAlwaysOnline();
+      gs_installWizardData.useDialUp = !man->IsAlwaysOnline();
 
       delete man;
    }
 
-   return ms_isUsingDialUp != 0;
+   return gs_installWizardData.useDialUp != 0;
 }
 
 InstallWizardPageId InstallWizardPage::GetPrevPageId() const
@@ -595,6 +614,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
    labels.Add(_("&Collect new mail:"));
    labels.Add(_("Use &Trash mailbox:"));
    labels.Add(_("Use &Outbox queues:"));
+   labels.Add(_("Use dial-up network or remote mail servers:"));
 
    long widthMax = GetMaxLabelWidth(labels, panel);
 
@@ -613,8 +633,12 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
          "Mahogany can either send messages immediately\n"
          "or queue them and only send them on demand."
          ), m_TrashCheckbox);
-   m_OutboxCheckbox = panel->CreateCheckBox(labels[2], widthMax, text3);
-   //TODO: collect remote POP account?
+   m_UseOutboxCheckbox = panel->CreateCheckBox(labels[2], widthMax, text3);
+   
+   m_UseDialUpCheckbox = panel->CreateCheckBox(labels[3], widthMax, m_UseOutboxCheckbox);
+
+
+//TODO: collect remote POP account?
    
    panel->Layout();
 }
@@ -703,6 +727,7 @@ bool RunInstallWizard()
 
    // first, set up the default values for the wizard:
 
+   gs_installWizardData.useDialUp = -1;
    gs_installWizardData.email = READ_APPCONFIG(MP_RETURN_ADDRESS);
    if(gs_installWizardData.email.Length() == 0)
    {

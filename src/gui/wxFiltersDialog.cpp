@@ -81,8 +81,12 @@ class wxOneFilterDialog : public wxManuallyLaidOutDialog
 public:
    // ctor & dtor
    wxOneFilterDialog(const wxString & filterName,
+                     ProfileBase *profile,
                      wxWindow *parent);
-   virtual ~wxOneFilterDialog() { }
+   virtual ~wxOneFilterDialog()
+      {
+         SafeDecRef(m_Profile);
+      }
 
    // transfer data to/from dialog
    virtual bool TransferDataFromWindow();
@@ -93,12 +97,16 @@ public:
 
    // event handlers
    void OnUpdate(wxCommandEvent& event) { }
+
+   ProfileBase * GetProfile() const { return m_Profile; }
 protected:
+   ProfileBase *m_Profile;
    // data
    wxTextCtrl *m_NameCtrl;
    wxString m_Name;
    wxString  m_Filter,
              m_OldFilter;
+   class OneCritControls *m_CritControl;
 private:
    DECLARE_EVENT_TABLE()
 };
@@ -109,9 +117,10 @@ END_EVENT_TABLE()
 
 static
 bool ConfigureOneFilter(const wxString &name,
+                        ProfileBase *profile,
                         wxWindow *parent)
 {
-   wxOneFilterDialog dlg(name, parent);
+   wxOneFilterDialog dlg(name, profile, parent);
    return ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() );
 }
 
@@ -189,14 +198,25 @@ OneCritControls::Save(wxString *str)
    str->Printf("%d %d \"%s\" %d",
               (int)m_Not->GetValue(),
               m_Type->GetSelection(),
-              m_Argument->GetValue().c_str(),
+              strutil_escapeString(m_Argument->GetValue()).c_str(),
               m_Where->GetSelection());
 }
 
 void
 OneCritControls::Load(wxString *str)
 {
+   long number;
+
+   number = strutil_readNumber(*str);
+   m_Not->SetValue(number);
+   number = strutil_readNumber(*str);
+   m_Type->SetSelection(number);
+   m_Argument->SetValue(strutil_readString(*str));
+
+   number = strutil_readNumber(*str);
+   m_Where->SetSelection(number);
 }
+
 class OneActionControls
 {
 public:
@@ -265,6 +285,7 @@ OneActionControls::OneActionControls(wxWindow *parent, wxLayoutConstraints *c)
 */
 
 wxOneFilterDialog::wxOneFilterDialog(const wxString &filterName,
+                                     ProfileBase *profile,
                                      wxWindow *parent)
    : wxManuallyLaidOutDialog(parent,
                             _("Filter rule"),
@@ -274,7 +295,9 @@ wxOneFilterDialog::wxOneFilterDialog(const wxString &filterName,
                                              MH_DIALOG_FILTERS);
 
    m_Name = filterName;
-
+   m_Profile = profile;
+   SafeIncRef(m_Profile);
+   
    SetDefaultSize(380, 240, FALSE /* not minimal */);
 
    SetAutoLayout( TRUE );
@@ -322,7 +345,7 @@ wxOneFilterDialog::wxOneFilterDialog(const wxString &filterName,
    c->top.SameAs(criteria, wxTop, 4*LAYOUT_Y_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
-   (void) new OneCritControls(this, c);
+   m_CritControl = new OneCritControls(this, c);
 
    c = new wxLayoutConstraints;
    c->left.SameAs(actions, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -338,6 +361,10 @@ wxOneFilterDialog::wxOneFilterDialog(const wxString &filterName,
 bool
 wxOneFilterDialog::TransferDataFromWindow()
 {
+   String str;
+   m_CritControl->Save(&str);
+   GetProfile()->writeEntry("FilterDialog", str);
+
 #if 0
    m_Filter = m_textctrl->GetValue();
    GetProfile()->writeEntry(MP_DATE_FMT, m_Filter);
@@ -351,6 +378,9 @@ bool
 wxOneFilterDialog::TransferDataToWindow()
 {
    m_NameCtrl->SetValue(m_Name);
+   String str;
+   GetProfile()->readEntry("FilterDialog", &str);
+   m_CritControl->Load(&str);
 #if 0
    m_Filter = READ_CONFIG(GetProfile(), MP_DATE_FMT);
    m_UseGMT->SetValue( READ_CONFIG(GetProfile(), MP_DATE_GMT) != 0);
@@ -483,9 +513,9 @@ wxFiltersDialog::OnButton( wxCommandEvent &event )
       if(obj == m_Buttons[idx])
       {
          if(idx == Button_New)
-            ConfigureOneFilter(_("New Filter"), this);
+            ConfigureOneFilter(_("New Filter"), GetProfile(), this);
          else if(idx == Button_Edit)
-            ConfigureOneFilter("XXX", this);
+            ConfigureOneFilter("XXX", GetProfile(), this);
          else
             return;
       }

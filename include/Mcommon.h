@@ -33,10 +33,10 @@ typedef long int lcoord_t;
 // ----------------------------------------------------------------------------
 // debugging macros
 // ----------------------------------------------------------------------------
-
 #ifdef DEBUG
 #  define   DEBUG_DEF     void Debug(void) const;
 #  ifndef __WXDEBUG__
+#     pragma error "This should not happen!"
 #     define ASSERT(x)          assert(x)
 #     define ASSERT_MSG(x, msg) assert(x)
 #     define ASSERT_RET(x)      {assert(x); if(!(x)) return;}
