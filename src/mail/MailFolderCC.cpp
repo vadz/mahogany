@@ -146,7 +146,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
          break;
 
       case MF_NNTP:
-         mboxpath << "*{" << server << "/nntp}" << name;
+         mboxpath << '{' << server << "/nntp}" << name;
          break;
 
       default:
