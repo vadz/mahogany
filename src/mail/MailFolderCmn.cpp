@@ -1498,7 +1498,7 @@ MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections,
    if ( useTrash )
    {
       // however if we are the trash folder, we can't use it
-      trashFolderName = READ_CONFIG(GetProfile(), MP_TRASH_FOLDER);
+      trashFolderName = READ_CONFIG_TEXT(GetProfile(), MP_TRASH_FOLDER);
       if ( GetName() == trashFolderName )
          useTrash = false;
    }
