@@ -212,7 +212,6 @@ public:
    void UpdateProgram();
 
    // event handlers
-   void OnUpdateUI(wxUpdateUIEvent& event);
    void OnButtonMoreOrLess(wxCommandEvent& event);
    void OnProgramTextUpdate(wxCommandEvent& event);
 
@@ -221,6 +220,8 @@ public:
    void OnCheckBox(wxCommandEvent& event) { UpdateProgram(); }
 
 protected:
+   void DoUpdateUI();
+
    void AddOneControl();
    void RemoveOneControl();
 
@@ -267,8 +268,6 @@ private:
 IMPLEMENT_ABSTRACT_CLASS(wxOneFilterDialog, wxManuallyLaidOutDialog)
 
 BEGIN_EVENT_TABLE(wxOneFilterDialog, wxManuallyLaidOutDialog)
-   EVT_UPDATE_UI(-1, wxOneFilterDialog::OnUpdateUI)
-
    // More/Less button
    EVT_BUTTON(Button_MoreTests, wxOneFilterDialog::OnButtonMoreOrLess)
    EVT_BUTTON(Button_LessTests, wxOneFilterDialog::OnButtonMoreOrLess)
@@ -685,17 +684,16 @@ static const wxOptionsPageDesc gs_SpamPageDesc =
 void
 OneCritControl::InitSpamOptions(const String& rule)
 {
-   // this is really crude but should work in common case when there is only
-   // one spam test in the rule
-   m_checkSpamAssassin = strstr(rule, SPAM_TEST_SPAMASSASSIN) != 0;
-   m_check8bit = strstr(rule, SPAM_TEST_SUBJ8BIT) != 0;
-   m_checkKorean = strstr(rule, SPAM_TEST_KOREAN) != 0;
+   // use the default values to initialize the dialog
+   m_checkSpamAssassin = MP_SPAM_SPAM_ASSASSIN_D;
+   m_check8bit = MP_SPAM_8BIT_SUBJECT_D;
+   m_checkKorean = MP_SPAM_KOREAN_CSET_D;
 
-   m_checkXAuthWarn = strstr(rule, SPAM_TEST_XAUTHWARN) != 0;
-   m_checkHtml = strstr(rule, SPAM_TEST_HTML) != 0;
+   m_checkXAuthWarn = MP_SPAM_X_AUTH_WARN_D;
+   m_checkHtml = MP_SPAM_HTML_D;
 
 #ifdef USE_RBL
-   m_checkRBL = strstr(rule, SPAM_TEST_RBL) != 0;
+   m_checkRBL = MP_SPAM_RBL_D;
 #endif // USE_RBL
 }
 
@@ -1115,6 +1113,10 @@ void wxOneFilterDialog::UpdateProgram()
 {
    if ( !m_initializing )
    {
+      // show/create the appropriate controls first
+      DoUpdateUI();
+
+      // next update the program text
       MFilterDesc filterData;
       if ( DoTransferDataFromWindow(&filterData) &&
                (filterData != *m_FilterData) )
@@ -1135,7 +1137,7 @@ void wxOneFilterDialog::UpdateProgram()
 }
 
 void
-wxOneFilterDialog::OnUpdateUI(wxUpdateUIEvent& event)
+wxOneFilterDialog::DoUpdateUI()
 {
    if ( m_isSimple )
    {
@@ -1148,8 +1150,6 @@ wxOneFilterDialog::OnUpdateUI(wxUpdateUIEvent& event)
       m_ButtonLess->Enable(m_nControls > 1);
       m_ButtonMore->Enable(m_nControls < MAX_CONTROLS);
    }
-
-   FindWindow(wxID_OK)->Enable( m_NameCtrl->GetValue().Length() != 0 );
 }
 
 void
@@ -1182,12 +1182,16 @@ wxOneFilterDialog::OnText(wxCommandEvent& event)
 
    if ( event.GetEventObject() == m_NameCtrl )
    {
-      // avoid updating the program unnecessarily if only the filter name was
-      // changed
-      return;
-   }
+      wxWindow *btnOk = FindWindow(wxID_OK);
+      CHECK_RET( btnOk, "no [Ok] button in the dialog?" );
 
-   UpdateProgram();
+      // the filter name can't be empty
+      btnOk->Enable( !m_NameCtrl->GetValue().empty() );
+   }
+   else
+   {
+      UpdateProgram();
+   }
 }
 
 void
