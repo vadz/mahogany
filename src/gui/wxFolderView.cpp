@@ -301,11 +301,11 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          }
 #endif
          break;
+
       default:
-         ;
+         event.Skip();
       }
    }
-   event.Skip();
 }
 
 void wxFolderListCtrl::OnMouse(wxMouseEvent& event)
