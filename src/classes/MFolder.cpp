@@ -458,7 +458,7 @@ MFolder *MFolderFromProfile::GetSubfolder(size_t n) const
    }
    //else: not all folders traversed, i.e. the right one found
 
-   return Get(GetSubFolderFullName(index.GetName()));
+   return Get(index.GetName());
 }
 
 MFolder *MFolderFromProfile::GetSubfolder(const String& name) const
