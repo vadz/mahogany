@@ -261,7 +261,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FOLDER_OPEN,      gettext_noop("&Open...\tCtrl-O"),   gettext_noop("Open an existing message folder")                  , FALSE },
    { WXMENU_FOLDER_OPEN_RO,   gettext_noop("Open read-onl&y..."), gettext_noop("Open a folder in read only mode")                  , FALSE },
    { WXMENU_FOLDER_CREATE,    gettext_noop("&Create..."), gettext_noop("Create a new folder definition")               , FALSE },
-   { WXMENU_FOLDER_RENAME,    gettext_noop("Re&name"), gettext_noop("Rename the selected folder")               , FALSE },
+   { WXMENU_FOLDER_RENAME,    gettext_noop("Re&name..."), gettext_noop("Rename the selected folder")               , FALSE },
    { WXMENU_FOLDER_REMOVE,    gettext_noop("&Remove from tree"), gettext_noop("Remove the selected folder from the folder tree")               , FALSE },
    { WXMENU_FOLDER_DELETE,    gettext_noop("&Delete"), gettext_noop("Delete all messages in the folder and remove it")               , FALSE },
    { WXMENU_FOLDER_CLEAR,     gettext_noop("C&lear..."), gettext_noop("Delete all messages in the folder")               , FALSE },
