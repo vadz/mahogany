@@ -1913,9 +1913,9 @@ void wxMessageView::OpenURL(const String& url, bool inNewWindow)
    if ( m_ProfileValues.browser.IsEmpty() )
    {
 #ifdef OS_WIN
-      // using ShellExecute() doesn't allow us to open in the same
-      // window, so do it manually
-      if ( !inNewWindow )
+      // ShellExecute() always opens in the same window,
+      // so do it manually for new window
+      if ( inNewWindow )
       {
          wxRegKey key(wxRegKey::HKCR, url.BeforeFirst(':') + "\\shell\\open");
          if ( key.Exists() )
@@ -1958,7 +1958,7 @@ void wxMessageView::OpenURL(const String& url, bool inNewWindow)
                        command.c_str());
          bOk = LaunchProcess(command, errmsg);
       }
-      else // easy case: open in new window
+      else // easy case: open in the same window
       {
          bOk = (int)ShellExecute(NULL, "open", url,
                                  NULL, NULL, SW_SHOWNORMAL ) > 32;
