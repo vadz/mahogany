@@ -49,9 +49,8 @@
 #include "MDialogs.h"
 #include "MHelp.h"
 
-BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
+BEGIN_EVENT_TABLE(wxFolderListCtrl, wxPListCtrl)
    EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
-   EVT_SIZE              (wxFolderListCtrl::OnSize)
    EVT_CHAR              (wxFolderListCtrl::OnKey)
 END_EVENT_TABLE()
 
@@ -178,19 +177,18 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    int
       w = 500,
       h = 300;
-   if(parent) parent->GetClientSize(&w,&h);
-   wxListCtrl::Create(parent,-1,wxDefaultPosition,wxSize(w,h),wxLC_REPORT);
+
+   if(parent)
+      parent->GetClientSize(&w,&h);
+
+   wxPListCtrl::Create("FolderView", parent, -1,
+                       wxDefaultPosition, wxSize(w,h), wxLC_REPORT);
 
    m_columns[WXFLC_STATUS] = READ_CONFIG(p,MP_FLC_STATUSCOL);
-   m_columnWidths[WXFLC_STATUS] = READ_CONFIG(p,MP_FLC_STATUSWIDTH);
    m_columns[WXFLC_DATE] = READ_CONFIG(p,MP_FLC_DATECOL);
-   m_columnWidths[WXFLC_DATE] = READ_CONFIG(p,MP_FLC_DATEWIDTH);
    m_columns[WXFLC_SUBJECT] = READ_CONFIG(p,MP_FLC_SUBJECTCOL);
-   m_columnWidths[WXFLC_SUBJECT] = READ_CONFIG(p,MP_FLC_SUBJECTWIDTH);
    m_columns[WXFLC_SIZE] = READ_CONFIG(p,MP_FLC_SIZECOL);
-   m_columnWidths[WXFLC_SIZE] = READ_CONFIG(p,MP_FLC_SIZEWIDTH);
    m_columns[WXFLC_FROM] = READ_CONFIG(p,MP_FLC_FROMCOL);
-   m_columnWidths[WXFLC_FROM] = READ_CONFIG(p,MP_FLC_FROMWIDTH);
 
    for(int i = 0; i < WXFLC_NUMENTRIES; i++)
    {
@@ -214,19 +212,6 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
       selections.Add(item++);
    return selections.Count();
 }
-void
-wxFolderListCtrl::OnSize( wxSizeEvent & WXUNUSED(event) )
-{
-   // VZ: what does this do? nothing good here, anyhow
-#  ifndef OS_WIN
-      int x,y,i;
-      GetClientSize(&x,&y);
-
-      if (m_Style & wxLC_REPORT)
-         for(i = 0; i < WXFLC_NUMENTRIES; i++)
-            SetColumnWidth(m_columns[i],(m_columnWidths[i]*x)/100*9/10);
-#  endif //OS_WIN
-}
 
 void
 wxFolderListCtrl::Clear(void)
@@ -243,8 +228,7 @@ wxFolderListCtrl::Clear(void)
          for (int i = 0; i < WXFLC_NUMENTRIES; i++)
             if(m_columns[i] == c)
                InsertColumn( c, _(wxFLC_ColumnNames[i]),
-                             wxLIST_FORMAT_LEFT,
-                             (m_columnWidths[i]*x)/100 );
+                             wxLIST_FORMAT_LEFT);
    }
 }
 
@@ -267,11 +251,12 @@ wxFolderListCtrl::SetEntry(long index,
 }
 
 void
-wxFolderView::SetFolder(MailFolder *mf)
+wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 {
    // this shows what's happening:
    m_MessagePreview->Clear();
-   m_FolderCtrl->Clear();
+   if ( recreateFolderCtrl )
+      m_FolderCtrl->Clear();
    wxYield();
    
    if(m_MailFolder)  // clean up old folder
@@ -317,10 +302,13 @@ wxFolderView::SetFolder(MailFolder *mf)
       m_timer = new wxFVTimer(m_MailFolder);
       m_MailFolder->RegisterView(this);
 
-      wxWindow *oldfolderctrl = m_FolderCtrl;
-      m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
-      m_SplitterWindow->ReplaceWindow(oldfolderctrl, m_FolderCtrl);
-      delete oldfolderctrl;
+      if ( recreateFolderCtrl )
+      {
+         wxWindow *oldfolderctrl = m_FolderCtrl;
+         m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
+         m_SplitterWindow->ReplaceWindow(oldfolderctrl, m_FolderCtrl);
+         delete oldfolderctrl;
+      }
 
       wxYield(); // display the new folderctrl immediately
       Update();
@@ -471,7 +459,7 @@ wxFolderView::OpenFolder(String const &profilename)
 
 wxFolderView::~wxFolderView()
 {
-   SetFolder(NULL);
+   SetFolder(NULL, FALSE);
 }
 
 void

@@ -56,8 +56,13 @@
 // ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(wxPNotebook, wxNotebook)
     EVT_SIZE(wxPNotebook::OnSize)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxPListCtrl, wxListCtrl)
+    EVT_SIZE(wxPListCtrl::OnSize)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -537,6 +542,150 @@ void wxPSplitterWindow::SetConfigObject(wxConfigBase *config)
 void wxPSplitterWindow::SetConfigPath(const wxString& path)
 {
     m_persist->SetPath(path);
+}
+
+// ----------------------------------------------------------------------------
+// wxPListBox
+// ----------------------------------------------------------------------------
+
+const char *wxPListCtrl::ms_listctrlKey = "ListCtrl";
+
+// default ctor
+wxPListCtrl::wxPListCtrl()
+{
+    m_bFirstTime = true;
+    m_persist = new wxPHelper;
+}
+
+// standard ctor
+wxPListCtrl::wxPListCtrl(const wxString& configPath,
+                         wxWindow *parent,
+                         wxWindowID id,
+                         const wxPoint &pos,
+                         const wxSize &size,
+                         long style,
+                         const wxValidator& validator,
+                         wxConfigBase *config)
+           : wxListCtrl(parent, id, pos, size, style, validator)
+{
+    m_bFirstTime = true;
+    m_persist = new wxPHelper(configPath, config);
+}
+
+// pseudo ctor
+bool wxPListCtrl::Create(const wxString& configPath,
+                         wxWindow *parent,
+                         wxWindowID id,
+                         const wxPoint &pos,
+                         const wxSize &size,
+                         long style,
+                         const wxValidator& validator,
+                         wxConfigBase *config)
+{
+   m_persist->SetConfig(config);
+   m_persist->SetPath(configPath);
+
+   return wxListCtrl::Create(parent, id, pos, size, style, validator);
+}
+
+// dtor saves the settings
+wxPListCtrl::~wxPListCtrl()
+{
+    SaveWidths();
+
+    delete m_persist;
+}
+
+// set the config object to use (must be !NULL)
+void wxPListCtrl::SetConfigObject(wxConfigBase *config)
+{
+    m_persist->SetConfig(config);
+}
+
+// set the path to use (either absolute or relative)
+void wxPListCtrl::SetConfigPath(const wxString& path)
+{
+    m_persist->SetPath(path);
+}
+
+// first time our OnSize() is called we restore the page: there is no other
+// event sent specifically after window creation and we can't do in the ctor
+// (too early) - this should change in wxWin 2.1...
+void wxPListCtrl::OnSize(wxSizeEvent& event)
+{
+    if ( m_bFirstTime ) {
+        RestoreWidths();
+
+        m_bFirstTime = FALSE;
+    }
+
+    // important things are done in the base class version!
+    event.Skip();
+}
+
+// retrieve the column widths from config
+void wxPListCtrl::RestoreWidths()
+{
+    if ( m_persist->ChangePath() ) {
+        wxString str = m_persist->GetConfig()->Read(ms_listctrlKey);
+        if ( !str.IsEmpty() )
+        {
+            int countCol = GetColumnCount();
+            char *p = str.GetWriteBuf(str.Len());
+            for ( int col = 0; col < countCol; col++ )
+            {
+                if ( IsEmpty(p) )
+                    break;
+
+                char *end = strchr(p, ':');
+                if ( end )
+                    *end = '\0';    // temporarily truncate
+
+                int width;
+                if ( sscanf(p, "%d", &width) == 1 )
+                    SetColumnWidth(col, width);
+                else
+                    wxFAIL_MSG("wxPListCtrl: corrupted config entry?");
+
+                if ( end )
+                    p = end + 1;
+                else
+                    break;
+            }
+
+            str.UngetWriteBuf();
+        }
+
+        m_persist->RestorePath();
+    }
+}
+
+// save the column widths to config as ':' delimited sequence of numbers
+void wxPListCtrl::SaveWidths()
+{
+    wxString str;
+
+    int count = GetColumnCount();
+    if ( count == 0 )
+    {
+        // probably the control couldn't be created at all?
+        return;
+    }
+
+    for ( int col = 0; col < count; col++ )
+    {
+        if ( !str.IsEmpty() )
+            str << ':';
+
+        str << GetColumnWidth(col);
+    }
+
+    if ( m_persist->ChangePath() ) {
+        wxConfigBase *config = m_persist->GetConfig();
+        config->Write(ms_listctrlKey, str);
+
+        m_persist->RestorePath();
+    }
 }
 
 // ----------------------------------------------------------------------------

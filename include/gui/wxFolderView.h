@@ -19,7 +19,7 @@
 #include "FolderView.h"
 #include "wxMessageView.h"
 
-#include <wx/listctrl.h>
+#include <wx/persctrl.h>
 #include <wx/splitter.h>
 
 class wxArrayInt;
@@ -77,7 +77,7 @@ public:
    /** Set the associated folder.
        @param folder the folder to display or NULL
    */
-   void SetFolder(MailFolder *mf);
+   void SetFolder(MailFolder *mf, bool recreateFolderCtrl = TRUE);
    
    /** Open folder from profile and display.
        @param profilename the name of the folder profile
@@ -166,6 +166,9 @@ public:
    ProfileBase *GetProfile(void) const { return m_Profile; }
    /// return pointer to folder
    MailFolder * GetFolder(void) const { return m_MailFolder; }
+
+   /// get folder name
+   const String& GetFullName() const { return m_folderName; }
 
    // process folder delete event
    virtual void OnFolderDeleteEvent(const String& folderName);
@@ -266,7 +269,7 @@ protected:
 };
 #endif // 0
 
-class wxFolderListCtrl : public wxListCtrl
+class wxFolderListCtrl : public wxPListCtrl
 {
 public:
    wxFolderListCtrl(wxWindow *parent, wxFolderView *fv);
@@ -281,9 +284,10 @@ public:
    int GetSelections(wxArrayInt &selections) const;
    bool IsSelected(long index)
       { return GetItemState(index,wxLIST_STATE_SELECTED) != 0; }
+
    void OnSelected(wxListEvent& event);
-   void OnSize( wxSizeEvent &event );
    void OnKey( wxKeyEvent &event);
+
    DECLARE_EVENT_TABLE()
 
 protected:
@@ -295,8 +299,6 @@ protected:
    wxFolderView *m_FolderView;
    /// column numbers
    int m_columns[WXFLC_NUMENTRIES];
-   /// column widths
-   int m_columnWidths[WXFLC_NUMENTRIES];
    /// which entry is in column 0?
    int m_firstColumn;
 };

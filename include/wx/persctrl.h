@@ -239,7 +239,6 @@ private:
 // a list control which remembers the widths of its columns
 // ----------------------------------------------------------------------------
 
-#if 0
 class WXDLLEXPORT wxPListCtrl : public wxListCtrl
 {
 public:
@@ -274,18 +273,24 @@ public:
         // set the path to use (either absolute or relative)
     void SetConfigPath(const wxString& path);
 
-protected:
-    // retrieve the position of the sash from config
-    void RestoreWidths();
-    // save current position there
-    void SavePosition();
+    // callbacks
+        // when we're resized the first time we restore our page
+    void OnSize(wxSizeEvent& event);
 
+protected:
+    // retrieve the column widths from config
+    void RestoreWidths();
+    // save the column widths to config
+    void SaveWidths();
+
+    bool       m_bFirstTime;  // FIXME hack used in OnSize()
     wxPHelper *m_persist;
 
 private:
     static const char *ms_listctrlKey;
+
+    DECLARE_EVENT_TABLE()
 };
-#endif
 
 // ----------------------------------------------------------------------------
 // Persistent file selector functions: remember the last directory and file
