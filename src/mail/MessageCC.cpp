@@ -1090,7 +1090,7 @@ MessageCC::GetCacheElement() const
       }
       else
       {
-         FAIL_MSG( "faild to get cache element for the message?" );
+         FAIL_MSG( "failed to get cache element for the message?" );
       }
 
       m_folder->UnLock();
