@@ -7,11 +7,9 @@ $Id$
 
 - wxLayout:
   + fix wxGTK postscript printing which is pretty broken, compare with wxXt?
-  + backspace sometimes goes wrong, occasional editing problems ??
-  + flicker
-  + key bindings for wxLayoutWindow
-  + cursor not seen if at (0, 0), hide it if we don't have focus.
-    it could also be made to blink (use a timer...)
+    + check printing example
+  + scroll to cursos
+
 
 - Profile/wxMDialogs
   + fix usage of readEntry to use String objects
@@ -85,6 +83,7 @@ classes in the hierarchy.
 Create a function to expand path names, including ~ or $HOME.
 Create a module to deal with all kinds of pathname lookups and
 expansions. 
+
 ********************* known wxWindows bugs **********************
 
 - drawing of transparent icons on wxDC gives undefined background (wxGTK)
