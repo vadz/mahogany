@@ -124,7 +124,7 @@ protected:
    String EncodingToCharset(wxFontEncoding enc);
 
    /// encode the string using m_encHeaders encoding
-   String EncodeHeaderString(const String& header);
+   String EncodeHeaderString(const String& header, bool isAddressField = false);
 
    /// encode the address field using m_encHeaders
    void EncodeAddress(struct mail_address *adr);

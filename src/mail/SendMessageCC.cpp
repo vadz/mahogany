@@ -402,28 +402,35 @@ SendMessageCC::SetHeaderEncoding(wxFontEncoding enc)
    m_encHeaders = enc;
 }
 
-// returns true if the character must be encoded in an SMTP header
-static inline bool NeedsEncodingInHeader(unsigned char c)
+// returns true if the character must be encoded in an SMTP [address] header
+static inline bool NeedsEncodingInHeader(unsigned char c, bool isaddr)
 {
-   return iscntrl(c) || c > 127 || strchr("()<>@,;:\"/[]?.=", c);
+   return iscntrl(c) ||
+          c > 127 ||
+          (isaddr && strchr("()<>@,;:\"/[]?.=", c));
 }
 
 String
-SendMessageCC::EncodeHeaderString(const String& header)
+SendMessageCC::EncodeHeaderString(const String& header, bool isaddr)
 {
-   // only encode the strings which contain the characters unallowed in RFC
-   // 822 headers
-   const unsigned char *p;
-   for ( p = (unsigned char *)header.c_str(); *p; p++ )
+   // if a header contains "=?", encode it anyhow to avoid generating invalid
+   // encoded words
+   if ( !strstr(header, "=?") )
    {
-      if ( NeedsEncodingInHeader(*p) )
-         break;
-   }
+      // only encode the strings which contain the characters unallowed in RFC
+      // 822 headers
+      const unsigned char *p;
+      for ( p = (unsigned char *)header.c_str(); *p; p++ )
+      {
+         if ( NeedsEncodingInHeader(*p, isaddr) )
+            break;
+      }
 
-   if ( !*p )
-   {
-      // string has only valid chars, don't encode
-      return header;
+      if ( !*p )
+      {
+         // string has only valid chars, don't encode
+         return header;
+      }
    }
 
    // get the encoding in RFC 2047 sense: choose the most reasonable one
@@ -481,7 +488,8 @@ SendMessageCC::EncodeHeaderString(const String& header)
 
             // normal characters stand for themselves in QP, the encoded ones
             // take 3 positions (=XX)
-            lenRemaining -= (NeedsEncodingInHeader(c) || c == ' ') ? 3 : 1;
+            lenRemaining -= (NeedsEncodingInHeader(c, isaddr) || c == ' ')
+                              ? 3 : 1;
 
             if ( lenRemaining <= 0 )
             {
@@ -592,7 +600,7 @@ SendMessageCC::EncodeAddress(struct mail_address *adr)
    if ( adr->personal )
    {
       char *tmp = adr->personal;
-      adr->personal = cpystr(EncodeHeaderString(tmp));
+      adr->personal = cpystr(EncodeHeaderString(tmp, true /* address field */));
 
       fs_give((void **)&tmp);
    }
