@@ -95,6 +95,8 @@ public:
    // dtor
    virtual ~wxSubfoldersTree();
 
+   char GetDelimiter() const { return m_chDelimiter; }
+
    // event handlers
    // --------------
 
@@ -190,7 +192,7 @@ private:
    // ----------------
 
    wxStaticBox *m_box;
-   wxTreeCtrl *m_treectrl;
+   class wxSubfoldersTree *m_treectrl;
    wxTextCtrl *m_textFind;
 
    // the variables used for "quick search"
@@ -206,11 +208,13 @@ private:
    // the folder itself
    MFolder *m_folder;
 
+   // the folder name separator
+   char m_chDelimiter;
+
    // returns the separator of the folder name components
    char GetFolderNameSeparator() const
    {
-      return (m_folderType == MF_NNTP) || (m_folderType == MF_NEWS) ? '.'
-                                                                    : '/';
+      return m_treectrl->GetDelimiter();
    }
 
    DECLARE_EVENT_TABLE()
@@ -683,6 +687,7 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
    m_folder->IncRef();
    m_folderType = folder->GetType();
    m_settingFromProgram = false;
+   m_chDelimiter = '\0';
 
    // create controls
    wxLayoutConstraints *c;
@@ -1190,6 +1195,8 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
             name = name.c_str() + 1;
          }
 
+         wxString path = name;
+         name.Replace(wxString(chDelimiter), "/");
          MFolder *folderNew = m_folder->GetSubfolder(name);
          if ( !folderNew )
          {
@@ -1218,8 +1225,8 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
             folderNew->SetFlags(flags);
 
             Profile_obj profile(folderNew->GetFullName());
-            String path;
-            path << m_folder->GetPath() << chDelimiter << name;
+            String fullpath;
+            fullpath << m_folder->GetPath() << chDelimiter << path;
             profile->writeEntry(MP_FOLDER_PATH, path);
          }
 

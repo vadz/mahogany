@@ -556,11 +556,11 @@ MailFolderCmn::DeleteDuplicates()
    HeaderInfoList *hil = GetHeaders();
    if(! hil)
       return 0;
-   
+
    Dup_MsgInfoList mlist;
 
    UIdArray toDelete;
-   
+
    for(size_t idx = 0; idx < hil->Count(); idx++)
    {
       String   id = (*hil)[idx]->GetId();
@@ -593,10 +593,10 @@ MailFolderCmn::DeleteDuplicates()
       }
    }
    hil->DecRef();
-   
+
    if(toDelete.Count() == 0)
       return 0; // nothing to do
-   
+
    if(DeleteMessages(&toDelete,FALSE))
       return toDelete.Count();
    else
@@ -649,7 +649,7 @@ public:
       }
    void OnTimer(void)
       {
-         
+
          MfList::iterator i;
          for(i = m_MfList.begin(); i != m_MfList.end(); i++)
          {
@@ -1764,7 +1764,7 @@ MailFolderCmn::ApplyFilterRulesCommonCode(UIdArray *msgs,
       MFolder_obj folder(GetName());
       wxArrayString filters = folder->GetFilters();
       size_t count = filters.GetCount();
-      
+
       for ( size_t n = 0; n < count; n++ )
       {
          MFilter_obj filter(filters[n]);
@@ -1859,10 +1859,11 @@ static void CleanStatic()
 /* static */
 void
 MailFolder::CleanUp(void)
-{      
+{
    CleanStatic();
 
    // clean up CClient driver memory
    extern void CC_Cleanup(void);
    CC_Cleanup();
 }
+

@@ -241,6 +241,7 @@ public:
                           FolderType protocol,
                           const String &mailboxname,
                           bool subscribe = true);
+
    /** Get a listing of all mailboxes.
 
        DO NOT USE THIS FUNCTION, BUT ASMailFolder::ListFolders instead!!!

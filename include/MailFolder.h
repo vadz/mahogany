@@ -162,18 +162,18 @@ public:
                                   const String &password = NULLstring,
                                   const String &symbolicname = NULLstring,
                                   bool halfopen = FALSE);
-   
+
    /** The same OpenFolder function, but taking all arguments from a
        MFolder object. */
    static MailFolder * OpenFolder(const class MFolder *mfolder);
 
-   /** This opens a mailfolder from either a profile of that name, or, 
+   /** This opens a mailfolder from either a profile of that name, or,
        if it is an absolute path, from a file of that name.
        Profile parameter is only used when name is a filename.
    */
    static MailFolder * OpenFolder(const String &name,
                                   Profile *profile = NULL);
-   
+
    /** Half open the folder using paremeters from MFolder object. */
    static MailFolder * HalfOpenFolder(const class MFolder *mfolder,
                                       Profile *profile = NULL);
@@ -246,6 +246,7 @@ public:
                          FolderType protocol,
                          const String &mailboxname,
                          bool subscribe = true);
+
    /** Get a listing of all mailboxes.
 
        DO NOT USE THIS FUNCTION, BUT ASMailFolder::ListFolders instead!!!
@@ -315,7 +316,7 @@ public:
    /** Delete duplicate messages by Message-Id
     @return number of messages removed or UID_ILLEGAL on error*/
    virtual UIdType DeleteDuplicates() = 0;
-   
+
    /** UnDelete a message.  UNSUPPORTED!
        @param uid the message uid
        @return true on success

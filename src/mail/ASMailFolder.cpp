@@ -1132,6 +1132,94 @@ ASMailFolder::ListFolders(const String &pattern,
                                                   reference, ud);
 }
 
+// get the folder name separator: it is easy for most protocols except IMAP
+// where it has to be retrieved from the server
+class DummyListReceiver : public MEventReceiver
+{
+public:
+   DummyListReceiver()
+   {
+      m_regCookie = MEventManager::Register(*this, MEventId_ASFolderResult);
+   }
+   virtual ~DummyListReceiver()
+   {
+      MEventManager::Deregister(m_regCookie);
+   }
+
+   virtual bool OnMEvent(MEventData& event);
+
+   char GetDelimiter() const { return m_chDelimiter; }
+
+private:
+   // MEventReceiver cookie for the event manager
+   void *m_regCookie;
+
+   // the delimiterwe get from OnMEvent
+   char m_chDelimiter;
+};
+
+// needed to be able to use DECLARE_AUTOREF() macro
+typedef ASMailFolder::ResultFolderExists ASFolderExistsResult;
+DECLARE_AUTOPTR(ASFolderExistsResult);
+
+bool DummyListReceiver::OnMEvent(MEventData& event)
+{
+   // we're only subscribed to the ASFolder events
+   CHECK( event.GetId() == MEventId_ASFolderResult, FALSE,
+          "unexpected event type" );
+
+   MEventASFolderResultData &data = (MEventASFolderResultData &)event;
+
+   ASFolderExistsResult_obj result((ASFolderExistsResult *)data.GetResult());
+
+   // is this message really for us?
+   if ( result->GetUserData() != this )
+   {
+      // no: continue with other event handlers
+      return TRUE;
+   }
+
+   if ( result->GetOperation() != ASMailFolder::Op_ListFolders )
+   {
+      FAIL_MSG( "unexpected operation notification" );
+
+      // eat the event - it was for us but we didn't process it...
+      return FALSE;
+   }
+
+   m_chDelimiter = result->GetDelimiter();
+
+   // we don't want anyone else to receive this message - it was for us only
+   return FALSE;
+}
+
+char ASMailFolder::GetFolderDelimiter()
+{
+   switch ( GetType() )
+   {
+      case MF_MH:
+         return '/';
+
+      case MF_NNTP:
+      case MF_NEWS:
+         return '.';
+
+      case MF_IMAP:
+         {
+            DummyListReceiver rcv;
+            MailFolder *mf = GetMailFolder();
+            mf->ListFolders(this, "", false, "", &rcv);
+            mf->DecRef();
+
+            return rcv.GetDelimiter();
+         }
+
+      default:
+         FAIL_MSG( "this folder doesn't have any separator" );
+         return '\0';
+   }
+}
+
 // ----------------------------------------------------------------------------
 // debugging functions
 // ----------------------------------------------------------------------------

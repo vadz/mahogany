@@ -497,11 +497,19 @@ public:
                       bool subscribed_only = false,
                       const String &reference = "",
                       UserData ud = 0);
-   //@}
+
    //@}
    //@}
    /**@name Synchronous Access Functions */
    //@{
+   /**
+      Returns the delimiter used to separate the components of the folder
+      name
+
+      @return character dependind on the folder type and server
+    */
+   char GetFolderDelimiter();
+
    /** Get name of mailbox.
        @return the symbolic name of the mailbox
    */
