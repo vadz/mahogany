@@ -427,13 +427,17 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
    if(hil)
    {
       const HeaderInfo *hi =(*hil)[focused];
-      UIdType focused_uid = hi->GetUId();
-      if(m_PreviewOnSingleClick)
+      if ( hi )
       {
-         new wxMessageViewFrame(m_FolderView->GetFolder(), focused_uid, m_FolderView);
+         UIdType focused_uid = hi->GetUId();
+         if(m_PreviewOnSingleClick)
+         {
+            new wxMessageViewFrame(m_FolderView->GetFolder(),
+                                   focused_uid, m_FolderView);
+         }
+         else
+            m_FolderView->PreviewMessage(focused_uid);
       }
-      else
-         m_FolderView->PreviewMessage(focused_uid);
       hil->DecRef();
    }
 }
