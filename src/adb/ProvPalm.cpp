@@ -379,6 +379,9 @@ bool PalmDataProvider::TestBookAccess(const String& name, AdbTests test)
        return rc;
   case Test_Create:
      return FALSE;
+  case Test_AutodetectCapable:
+  case Test_RecognizesName:
+    return true;
   default:
      FAIL_MSG(_T("invalid test in TestBookAccess"));
      return FALSE;

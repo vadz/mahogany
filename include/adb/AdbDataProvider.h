@@ -50,9 +50,16 @@ public:
   // the flags for TestBookAccess (not a bit flag)
   enum AdbTests
   {
-    Test_Create,        // may create book with this name?
-    Test_Open,          // does the book with this name already exists?
-    Test_OpenReadOnly   // currently unused
+    // may create book with this name?
+    Test_Create,
+    // does the book with this name already exists?
+    Test_OpenReadOnly,
+    // currently unused
+    Test_Open,
+    // Does Test_OpenReadOnly check file format?
+    Test_AutodetectCapable,
+    // Does it have separate namespace? Does it check its name?
+    Test_RecognizesName
   };
 
   // list holding descriptions of all data providers

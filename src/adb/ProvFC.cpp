@@ -838,6 +838,14 @@ bool FCDataProvider::TestBookAccess(const String& name, AdbTests test)
       }
       break;
 
+    case Test_AutodetectCapable:
+      ok = true;
+      break;
+      
+    case Test_RecognizesName:
+      ok = false;
+      break;
+      
     default:
       FAIL_MSG(_T("invalid test in TestBookAccess"));
   }

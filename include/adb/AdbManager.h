@@ -103,6 +103,10 @@ private:
   AdbBook *FindInCache(const String& name,
                        const AdbDataProvider *provider) const;
 
+   static AdbDataProvider *AutodetectFormat(const String& name);
+   static AdbDataProvider *CreateNative(const String& name);
+   static AdbDataProvider *MatchBookName(const String& name);
+
   static AdbManager *ms_pManager;
 
   GCC_DTOR_WARN_OFF

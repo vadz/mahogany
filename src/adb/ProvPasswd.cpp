@@ -472,6 +472,10 @@ bool PasswdDataProvider::TestBookAccess(const String& name, AdbTests test)
          return false;
 
       case Test_OpenReadOnly:
+         return name.empty();
+         
+      case Test_AutodetectCapable:
+      case Test_RecognizesName:
          return true;
    }
 }

@@ -426,47 +426,90 @@ AdbBook *AdbManager::CreateBook(const String& name,
    }
 
    // no, must create a new one
-   AdbDataProvider *prov = provider;
-   if ( prov == NULL ) {
-    // try to find it
-    AdbDataProvider::AdbProviderInfo *info = AdbDataProvider::ms_listProviders;
-    while ( info ) {
-      prov = info->CreateProvider();
-      if ( prov->TestBookAccess(name, AdbDataProvider::Test_OpenReadOnly) ||
-            prov->TestBookAccess(name, AdbDataProvider::Test_Create) ) {
-        if ( providerName ) {
-          // return the provider name if asked for it
-          *providerName = info->szName;
-        }
-        break;
+   AdbDataProvider *prov = NULL;
+   if ( provider )
+   {
+      prov = provider;
+      prov->IncRef();
+   }
+   if ( prov == NULL )
+      prov = AutodetectFormat(name);
+   if ( prov == NULL )
+      prov = CreateNative(name);
+   if ( prov == NULL )
+      prov = MatchBookName(name);
+
+   if ( providerName && prov )
+   {
+      // return the provider name if asked for it
+      *providerName = prov->GetProviderName();
+   }
+   
+   if ( prov ) {
+      book = prov->CreateBook(name);
+   }
+
+   if ( book == NULL ) {
+      wxLogError(_("Can't open the address book '%s'."), name.c_str());
+   }
+   else {
+      book->IncRef();
+      gs_booksCache.Add(book);
+      gs_provCache.Add(prov->GetProviderName());
+   }
+
+   if ( prov )
+      prov->DecRef();
+
+   return book;
+}
+
+/*static*/ AdbDataProvider *AdbManager::AutodetectFormat(const String& name)
+{
+   for ( AdbDataProvider::AdbProviderInfo *info
+      = AdbDataProvider::ms_listProviders; info; info = info->pNext )
+   {
+      AdbDataProvider *prov = info->CreateProvider();
+      
+      if ( prov->TestBookAccess(name,
+         AdbDataProvider::Test_AutodetectCapable)
+         && prov->TestBookAccess(name, AdbDataProvider::Test_OpenReadOnly) )
+      {
+         return prov;
       }
 
       prov->DecRef();
-      prov = NULL;
+   }
+   
+   return NULL;
+}
 
-      info = info->pNext;
-    }
-  }
+/*static*/ AdbDataProvider *AdbManager::CreateNative(const String& name)
+{
+   AdbDataProvider *prov = AdbDataProvider::GetNativeProvider();
+   
+   if ( prov->TestBookAccess(name, AdbDataProvider::Test_Create) )
+      return prov;
+      
+   prov->DecRef();
+   return NULL;
+}
 
-  if ( prov ) {
-    book = prov->CreateBook(name);
-  }
+/*static*/ AdbDataProvider *AdbManager::MatchBookName(const String& name)
+{
+   for ( AdbDataProvider::AdbProviderInfo *info
+      = AdbDataProvider::ms_listProviders; info; info = info->pNext )
+   {
+      AdbDataProvider *prov = info->CreateProvider();
+      
+      if ( prov->TestBookAccess(name, AdbDataProvider::Test_RecognizesName)
+         && prov->TestBookAccess(name, AdbDataProvider::Test_Create) )
+         return prov;
 
-  if ( book == NULL ) {
-    wxLogError(_("Can't open the address book '%s'."), name.c_str());
-  }
-  else {
-    book->IncRef();
-    gs_booksCache.Add(book);
-    gs_provCache.Add(prov->GetProviderName());
-  }
-
-  if ( prov && !provider ) {
-    // only if it's the one we created, not the one which was passed in!
-    prov->DecRef();
-  }
-
-  return book;
+      prov->DecRef();
+   }
+   
+   return NULL;
 }
 
 size_t AdbManager::GetBookCount() const

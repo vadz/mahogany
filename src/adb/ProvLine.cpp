@@ -622,6 +622,11 @@ bool LineDataProvider::TestBookAccess(const String& name, AdbTests test)
          }
       }
       break;
+
+      case Test_AutodetectCapable:
+      case Test_RecognizesName:
+         ok = false;
+         break;
       
       default:
          FAIL_MSG(_T("invalid test in TestBookAccess"));

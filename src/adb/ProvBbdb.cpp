@@ -1056,12 +1056,25 @@ BbdbDataProvider::EnumBooks(wxArrayString& aNames)
 bool
 BbdbDataProvider::TestBookAccess(const String& name, AdbTests test)
 {
-   if(wxFileExists(name))
+   switch ( test )
    {
-      ifstream file(name.mb_str());
-      String line;
-      strutil_getstrline(file, line);
-      return BbdbEntry::ReadHeader(NULL, &line);
+      case Test_Create:
+      case Test_OpenReadOnly:
+      case Test_Open:
+         // FIXME: Different code for Test_OpenReadOnly, Test_Open,
+         // and Test_Create
+         if(wxFileExists(name))
+         {
+            ifstream file(name.mb_str());
+            String line;
+            strutil_getstrline(file, line);
+            return BbdbEntry::ReadHeader(NULL, &line);
+         }
+         return false;
+      case Test_AutodetectCapable:
+         return true;
+      case Test_RecognizesName:
+         return false;
    }
    return false;
 }
