@@ -473,7 +473,7 @@ MailFolderCC::RegisterView(FolderView *view, bool reg)
 }
 
 
-void
+bool
 MailFolderCC::AppendMessage(String const &msg)
 {
    CHECK_DEAD("Appending to closed folder '%s' failed.");
@@ -484,19 +484,23 @@ MailFolderCC::AppendMessage(String const &msg)
    ProcessEventQueue();
 
 //??   PingReopen();
-   if(! mail_append(m_MailStream,(char *)m_MailboxPath.c_str(),&str))
+   bool rc = ( mail_append(m_MailStream,
+                           (char *)m_MailboxPath.c_str(),&str) 
+               != 0);
+   if(! rc)
       ERRORMESSAGE(("cannot append message"));
    ProcessEventQueue();
+   return rc;
 }
 
-void
+bool
 MailFolderCC::AppendMessage(Message const &msg)
 {
    CHECK_DEAD("Appending to closed folder '%s' failed.");
    String tmp;
 
    msg.WriteToString(tmp);
-   AppendMessage(tmp);
+   return AppendMessage(tmp);
 }
 
 void

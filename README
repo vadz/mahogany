@@ -115,5 +115,6 @@ Required software:
     --with-libpng \
     --with-libjpeg 
 
+If using gtk 1.0.6 rather than 1.2.x, youu need to add --without-dnd .
 If you experience a problem with thread support, you can just as well
 compile it --without-threads, they are not currently required.

@@ -183,13 +183,15 @@ public:
                                 bool set = true) = 0;
    /** Appends the message to this folder.
        @param msg the message to append
+       @return true on success
    */
-   virtual void AppendMessage(const Message &msg) = 0;
+   virtual bool AppendMessage(const Message &msg) = 0;
 
    /** Appends the message to this folder.
        @param msg text of the  message to append
+       @return true on success
    */
-   virtual void AppendMessage(const String &msg) = 0;
+   virtual bool AppendMessage(const String &msg) = 0;
 
    /** Expunge messages.
      */

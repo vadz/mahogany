@@ -162,12 +162,12 @@ public:
    /** Appends the message to this folder.
        @param msg the message to append
    */
-   virtual void AppendMessage(const Message &msg);
+   virtual bool AppendMessage(const Message &msg);
 
    /** Appends the message to this folder.
        @param msg text of the  message to append
    */
-   virtual void AppendMessage(const String &msg);
+   virtual bool AppendMessage(const String &msg);
 
    /** Expunge messages.
      */

@@ -223,13 +223,14 @@ MailFolder::SaveMessages(const INTARRAY *selections,
                                              msg,
                                              2*n, NULL);// open a status window:
    }
+   bool rc = true;
    for(i = 0; i < n; i++)
    {
       msg = GetMessage((*selections)[i]);
       if(msg)
       {
          if(pd) pd->Update( 2*i + 1 );
-         mf->AppendMessage(*msg);
+         rc &= mf->AppendMessage(*msg);
          if(pd) pd->Update( 2*i + 2);
          msg->DecRef();
       }
@@ -238,7 +239,7 @@ MailFolder::SaveMessages(const INTARRAY *selections,
    mf->EnableNewMailEvents(events, true);
    mf->DecRef();
    if(pd) delete pd;
-   return true;
+   return rc;
 }
 
 

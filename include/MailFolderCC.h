@@ -172,13 +172,15 @@ public:
 
    /** Appends the message to this folder.
        @param msg the message to append
+       @return true on success
    */
-   virtual void AppendMessage(Message const &msg);
+   virtual bool AppendMessage(Message const &msg);
 
    /** Appends the message to this folder.
        @param msg text of the  message to append
+       @return true on success
    */
-   virtual void AppendMessage(String const &msg);
+   virtual bool AppendMessage(String const &msg);
 
    /** Delete a message.
        @param uid mesage uid
