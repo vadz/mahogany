@@ -30,7 +30,7 @@
 
 #include "AddressCC.h"
 
-#include <c-client.h>
+#include "Mcclient.h"
 
 // ----------------------------------------------------------------------------
 // private functions
