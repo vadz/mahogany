@@ -47,7 +47,7 @@
 
 #include <wx/dynarray.h>
 #include <wx/radiobox.h>
-#include <wx/minifram.h>
+//FIXME#include <wx/minifram.h>
 
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
@@ -482,7 +482,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    ll.Insert("         to");
    ll.LineBreak();
    ll.Insert("         ");
-   ll.Insert(new wxLayoutObjectIcon(ICON(M_32x32)));
+   ll.Insert(new wxLayoutObjectIcon(ICON("M_32x32")));
    ll.Insert("!");
    ll.SetFontWeight(wxNORMAL);
    ll.SetFontSize(10);

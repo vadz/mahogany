@@ -7,10 +7,13 @@ Pri:        5 high --- 0 low
 --------------------------------------------------------------------------
 Pri Difficulty Target				Treatment
 --------------------------------------------------------------------------
-5 1  - fix install target
-5 ?  - fix Linux/NIS bug
-4 5  - fix wxGTK memory holes, serious debugging with dmalloc
-4 5  - fix c-client memory holes
+5 0  - fix MessageBox in wxMApp.cpp
+5 0  - wxOptionsDlg.cpp which headers are needed?
+5 0  - minifram.h ????
+5 1  - rewrite Profile so that wxXXX classes are no longer required in
+       header, change macros 
+3 5  - fix wxGTK memory holes, serious debugging with dmalloc
+3 5  - fix c-client memory holes
 
 - class rewrite:
 3 1  - Message/MailFolder classes              KB: will do this next

@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                *
+ * $Id$
  *******************************************************************/
 
 #ifndef PROFILE_H
@@ -15,9 +15,19 @@
 
 // ----------------------------------------------------------------------------
 // headers
+//
 // ----------------------------------------------------------------------------
+
 #ifndef  USE_PCH
-#  include  "kbList.h"
+#   include  "kbList.h"
+#   include   <wx/config.h>
+#   ifdef  OS_WIN
+#      include   <wx/msw/regconf.h>
+#   else
+#      include   <wx/file.h>
+#      include   <wx/textfile.h>
+#      include   <wx/fileconf.h>
+#   endif
 #endif
 
 // ----------------------------------------------------------------------------
@@ -26,7 +36,6 @@
 
 // the classes in this file can use either the (old) standalone appconf,
 // or wxConfig included in wxWindows 2
-#ifdef   USE_WXCONFIG
 #  define   READ_ENTRY     Read
 #  define   WRITE_ENTRY    Write
 #  define   FLUSH          Flush
@@ -34,26 +43,7 @@
 #  define   CHANGE_PATH    SetPath
 #  define   GET_PATH       GetPath
 
-#  include  <wx/config.h>
-#  ifdef  __WXMSW__
-#     include <wx/msw/regconf.h>
-#  else
-#     include <wx/fileconf.h>
-#  endif
 
-   // both types are mapped just on wxConfig
-   typedef  wxConfigBase       FileConfig;
-   typedef  wxConfig           AppConfig;
-#else
-#  include  "appconf.h"
-
-#  define   READ_ENTRY     readEntry
-#  define   WRITE_ENTRY    writeEntry
-#  define   FLUSH          flush
-#  define   SET_PATH       setCurrentPath
-#  define   CHANGE_PATH    changeCurrentPath
-#  define   GET_PATH       getCurrentPath
-#endif
 
 // this macro enforces the convention that for config entry FOO the default
 // value is FOO_D(EFAULT).
@@ -80,7 +70,7 @@ class ProfileBase : public CommonBase
 {
 public:
    /**@name Reading and writing entries.
-      All these functions are just identical to the FileConfig ones.
+      All these functions are just identical to the wxConfig ones.
    */
    //@{
    /// Read a character entry.
@@ -100,22 +90,22 @@ public:
 };
 
 /** ConfigFileManager class, this class allocates and deallocates
-   FileConfig objects for the profile so to ensure that every config
+   wxConfig objects for the profile so to ensure that every config
    file gets opened only once.
 */
 
-/** A structure holding name and FileConfig pointer.
+/** A structure holding name and wxConfig pointer.
    This is the element of the list.
 */
 struct FCData
 {
   String      fileName;
-  FileConfig *fileConfig;
+  wxConfig *fileConfig;
 
   IMPLEMENT_DUMMY_COMPARE_OPERATORS(FCData)
 };
 
-/** A list of all loaded FileConfigs
+/** A list of all loaded wxConfigs
    @see FCData
 */
 KBLIST_DEFINE(FCDataList, FCData);
@@ -135,12 +125,12 @@ public:
    */
    ~ConfigFileManager();
 
-   /** Get a FileConfig object.
+   /** Get a wxConfig object.
        @param fileName name of configuration file
        @param isApp if we're creating the app config
-       @return the FileConfig object
+       @return the wxConfig object
    */
-   FileConfig *GetConfig(String const &fileName, bool isApp = FALSE);
+   wxConfig *GetConfig(String const &fileName, bool isApp = FALSE);
 
    /// Prints a list of all entries.
    DEBUG_DEF
@@ -150,20 +140,20 @@ public:
 
 /**
    Profile class, managing configuration options on a per class basis.
-   This class does essentially the same as the FileConfig class, but
+   This class does essentially the same as the wxConfig class, but
    when initialised gets passed the name of the class it is related to
    and a parent profile. It then tries to load the class configuration
    file. If an entry is not found, it tries to get it from its parent
    profile. Thus, an inheriting profile structure is created.
    @see ProfileBase
-   @see FileConfig
+   @see wxConfig
 */
 
 class Profile : public ProfileBase
 {
 private:
-   /// The FileConfig object.
-   FileConfig  *fileConfig;
+   /// The wxConfig object.
+   wxConfig  *fileConfig;
    /// The parent profile.
    ProfileBase const *parentProfile;
    /// Name of this profile
@@ -175,11 +165,11 @@ private:
        config object where the entries are searched if not found everywhere
        else.
    */
-   static AppConfig *appConfig;
+   static wxConfig *appConfig;
 
 public:
    /// get the top level config object
-   static FileConfig *GetAppConfig() { return appConfig; }
+   static wxConfig *GetAppConfig() { return appConfig; }
 
    /** Constructor for the appConfig entry 
        @param appConfigFile - the full file name of app config file
@@ -206,10 +196,10 @@ public:
    bool IsInitialised(void) const { return isOk; }
 
    /// get the associated config object
-   FileConfig *GetConfig() const { return fileConfig; }
+   wxConfig *GetConfig() const { return fileConfig; }
 
    /**@name Reading and writing entries.
-      All these functions are just identical to the FileConfig ones.
+      All these functions are just identical to the wxConfig ones.
    */
    //@{
       /// Read a character entry.
@@ -246,7 +236,7 @@ public:
 class ProfilePathChanger
 {
 public:
-   ProfilePathChanger(wxConfigBase *config, const String& path)
+   ProfilePathChanger(wxConfig *config, const String& path)
    {
       m_config = config;
       m_strOldPath = m_config->GetPath();
@@ -256,7 +246,7 @@ public:
    ~ProfilePathChanger() { m_config->SetPath(m_strOldPath); }
 
 private:
-   wxConfigBase *m_config;
+   wxConfig *m_config;
    String        m_strOldPath;
 };
 

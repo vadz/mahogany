@@ -1,7 +1,7 @@
 # This file was created automatically by SWIG.
 import Messagec
 
-from String import *
+from MString import *
 class MessagePtr :
     def __init__(self,this):
         self.this = this

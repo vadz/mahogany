@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$               *
+ * $Id$
  *
  *******************************************************************/
 
@@ -22,13 +22,13 @@
 #include  "Mcommon.h"
 
 #ifndef USE_PCH
-#  include "strutil.h"
-#  include "PathFinder.h"
+#   include "strutil.h"
+#   include "PathFinder.h"
 
-#  include "MimeList.h"
-#  include "MimeTypes.h"
+#   include "MimeList.h"
+#   include "MimeTypes.h"
 
-#  include "kbList.h"
+#   include "kbList.h"
 
 #   include "MFrame.h"
 #   include "gui/wxMFrame.h"
@@ -54,11 +54,11 @@
 // ----------------------------------------------------------------------------
 
 // static member variables
-AppConfig *Profile::appConfig = NULL;
+wxConfig *Profile::appConfig = NULL;
 
 /**
    Profile class, managing configuration options on a per class basis.
-   This class does essentially the same as the FileConfig class, but
+   This class does essentially the same as the wxConfig class, but
    when initialised gets passed the name of the class it is related to
    and a parent profile. It then tries to load the class configuration
    file. If an entry is not found, it tries to get it from its parent
@@ -75,7 +75,7 @@ Profile::Profile(const String& appConfigFile)
    fileConfig = mApplication.GetConfigManager().GetConfig(appConfigFile, TRUE);
    isOk = fileConfig != NULL;
    if ( isOk )
-      appConfig = (AppConfig *)fileConfig;
+      appConfig = (wxConfig *)fileConfig;
 
    //  activate recording of configuration entries
    if ( READ_APPCONFIG(MC_RECORDDEFAULTS) )
@@ -233,7 +233,7 @@ ConfigFileManager::~ConfigFileManager()
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
       FCData *data = *i;
-      FileConfig *fcp = data->fileConfig;
+      wxConfig *fcp = data->fileConfig;
       fcp->FLUSH();
       delete fcp;
       delete data;
@@ -242,7 +242,7 @@ ConfigFileManager::~ConfigFileManager()
    delete fcList;
 }
 
-FileConfig *
+wxConfig *
 ConfigFileManager::GetConfig(String const &fileName, bool isApp)
 {
    FCDataList::iterator i;
@@ -259,12 +259,12 @@ ConfigFileManager::GetConfig(String const &fileName, bool isApp)
 
 #  ifdef  USE_WXCONFIG
       if ( isApp )
-         newEntry->fileConfig = GLOBAL_NEW AppConfig(newEntry->fileName);
+         newEntry->fileConfig = GLOBAL_NEW wxConfig(newEntry->fileName);
       else
-         newEntry->fileConfig = GLOBAL_NEW wxFileConfig(newEntry->fileName,
+         newEntry->fileConfig = GLOBAL_NEW wxConfig(newEntry->fileName,
                                                         wxString(""));
 #  else
-      newEntry->fileConfig = GLOBAL_NEW FileConfig;
+      newEntry->fileConfig = GLOBAL_NEW wxConfig;
       newEntry->fileConfig->readFile(newEntry->fileName->c_str());
       newEntry->fileConfig->expandVariables(M_PROFILE_VAREXPAND);
 

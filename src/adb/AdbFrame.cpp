@@ -22,20 +22,14 @@
 #include "Mpch.h"
 
 #ifndef  USE_PCH
-#include  "kbList.h"
+#   include  "kbList.h"
 
-#include  "guidef.h"
-#include  "strutil.h"
-#include  <ctype.h>
-
-#ifdef   USE_WXCONFIG
-#  include "wx/config.h"
-#else  //standalone appconf
-#  include "appconf.h"
-#endif
+#   include  "guidef.h"
+#   include  "strutil.h"
+#   include  <ctype.h>
+#    include <wx/config.h>
 
 #   include "Mcommon.h"
-
 #   include "MFrame.h"
 #   include "gui/wxMFrame.h"
 

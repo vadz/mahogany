@@ -17,7 +17,6 @@ ICONDIR=$(BUILDDIR)/src/icons
 
 # compiler flags
 DBG = @DBGFLAGS@ 
-DEF = @DEFINES@
 ODIR=.
 
 # this will be set or unset
@@ -66,9 +65,9 @@ LD_RUN_PATH=$(DATADIR)/$(CANONICAL_HOST)/$(DATADIR)
 
 LINK = $(CXX) -Wl-r$(LD_RUN_PATH)
 
-DEF = @DEFINES@ -DM_BASEDIR="\"$(DATADIR)\"" -DM_DATADIR="\"$(DATADIR)/data\"" -DM_DOCDIR="\"$(DATADIR)/M/doc\""
+DEF = -DM_BASEDIR="\"$(DATADIR)\"" -DM_DATADIR="\"$(DATADIR)/data\"" -DM_DOCDIR="\"$(DATADIR)/M/doc\""
 INC = -I$(BUILDDIR)/include -I$(BUILDDIR)/extra/include -I$(BUILDDIR)/include/gui -I$(CCLIENTINCLUDE) \
-      $(GUI_INCLUDE) $(PYTHON_INCLUDE) $(XPM_INCLUDE) $(EXTRA_SRC_INC) 
+      $(GUI_INCLUDE) $(PYTHON_INCLUDE) $(XPM_INCLUDE) $(EXTRA_SRC_INC) @CPPFLAGS@
 CFLAGS   = @CFLAGS@ $(DBG) $(DEF) $(INC)
 CXXFLAGS = @CXXFLAGS@ $(DBG) $(DEF) $(INC)
 LDFLAGS = @LDFLAGS@

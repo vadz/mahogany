@@ -109,9 +109,13 @@ wxMApp::OnAbnormalTermination()
 {
    MAppBase::OnAbnormalTermination();
 
+//FIXME
+#if 0
    ::MessageBox(NULL, _("The application is terminating abnormally.\n"
                 "Please report the bug to m-developers@makelist.com\n"
-                "Thank you!"), "Fatal application error", MB_ICONSTOP);
+                        "Thank you!"), "Fatal application error",
+                MB_ICONSTOP);
+#endif   
 }
 
 // app initilization

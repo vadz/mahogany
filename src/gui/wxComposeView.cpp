@@ -271,13 +271,13 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    // set def values for the headers
    if(m_txtFields[Field_To])
       m_txtFields[Field_To]->SetValue(
-         strutil_isempty(to) ? READ_CONFIG(m_Profile, MP_COMPOSE_TO) : to.c_str());
+         strutil_isempty(to) ? READ_CONFIG(m_Profile, MP_COMPOSE_TO) : to);
    if(m_txtFields[Field_Cc])
       m_txtFields[Field_Cc]->SetValue(
-         strutil_isempty(cc) ? READ_CONFIG(m_Profile, MP_COMPOSE_CC) : cc.c_str());
+         strutil_isempty(cc) ? READ_CONFIG(m_Profile, MP_COMPOSE_CC) : cc);
    if(m_txtFields[Field_Bcc])
       m_txtFields[Field_Bcc]->SetValue(
-         strutil_isempty(bcc) ? READ_CONFIG(m_Profile, MP_COMPOSE_BCC) : bcc.c_str());
+         strutil_isempty(bcc) ? READ_CONFIG(m_Profile, MP_COMPOSE_BCC) : bcc);
 
    // append signature
    if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE) )

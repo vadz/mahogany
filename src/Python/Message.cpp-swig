@@ -53,11 +53,12 @@ extern PyObject *SWIG_newvarlink(void);
 
 #define SWIG_name    "Messagec"
 
-#include	"Mpch.h"
-#ifndef	USE_PCH
-#   include   "Mcommon.h"
-#   include   "Message.h"
-#endif
+#include   "Mcommon.h"
+#include   "Message.h"
+
+// we don't want to export our functions as we don't build a shared library
+#undef SWIGEXPORT
+#define SWIGEXPORT(a,b) a b
 #define Message_GetHeaderLine(_swigobj,_swigarg0,_swigarg1)  (_swigobj->GetHeaderLine(_swigarg0,_swigarg1))
 static PyObject *_wrap_Message_GetHeaderLine(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
@@ -112,7 +113,7 @@ static PyObject *_wrap_Message_Subject(PyObject *self, PyObject *args) {
         return NULL;
         }
     }
-    String & _result_ref = Message_Subject(_arg0);
+    const String & _result_ref = Message_Subject(_arg0);
     _result = (String *) &_result_ref;
     SWIG_MakePtr(_ptemp, (char *) _result,"_String_p");
     _resultobj = Py_BuildValue("s",_ptemp);
@@ -159,7 +160,7 @@ static PyObject *_wrap_Message_Date(PyObject *self, PyObject *args) {
         return NULL;
         }
     }
-    String & _result_ref = Message_Date(_arg0);
+    const String & _result_ref = Message_Date(_arg0);
     _result = (String *) &_result_ref;
     SWIG_MakePtr(_ptemp, (char *) _result,"_String_p");
     _resultobj = Py_BuildValue("s",_ptemp);
@@ -327,7 +328,7 @@ static PyObject *_wrap_Message_GetPartMimeType(PyObject *self, PyObject *args) {
         return NULL;
         }
     }
-    String & _result_ref = Message_GetPartMimeType(_arg0,_arg1);
+    const String & _result_ref = Message_GetPartMimeType(_arg0,_arg1);
     _result = (String *) &_result_ref;
     SWIG_MakePtr(_ptemp, (char *) _result,"_String_p");
     _resultobj = Py_BuildValue("s",_ptemp);
@@ -352,7 +353,7 @@ static PyObject *_wrap_Message_GetPartDesc(PyObject *self, PyObject *args) {
         return NULL;
         }
     }
-    String & _result_ref = Message_GetPartDesc(_arg0,_arg1);
+    const String & _result_ref = Message_GetPartDesc(_arg0,_arg1);
     _result = (String *) &_result_ref;
     SWIG_MakePtr(_ptemp, (char *) _result,"_String_p");
     _resultobj = Py_BuildValue("s",_ptemp);
@@ -377,7 +378,7 @@ static PyObject *_wrap_Message_GetPartSpec(PyObject *self, PyObject *args) {
         return NULL;
         }
     }
-    String & _result_ref = Message_GetPartSpec(_arg0,_arg1);
+    const String & _result_ref = Message_GetPartSpec(_arg0,_arg1);
     _result = (String *) &_result_ref;
     SWIG_MakePtr(_ptemp, (char *) _result,"_String_p");
     _resultobj = Py_BuildValue("s",_ptemp);

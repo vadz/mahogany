@@ -13,9 +13,9 @@ MOBJS += Python/*.o
 
 all: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
-	$(LINK) -o M $(MOBJS) $(LIBS)
-#	$(CXX) -shared $(MOBJS) -lswigpy $(NONPLIBS) -o libM.so
-#	$(LINK) -o M -L. -lM $(SLIBS)
+	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(LIBS)
+#	$(CXX) -shared $(MOBJS) $(LDFLAGS) -lswigpy $(NONPLIBS) -o libM.so
+#	$(LINK) -o M -L. $(LDFLAGS) -lM $(SLIBS)
 
 semistatic:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done

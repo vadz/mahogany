@@ -49,11 +49,15 @@ extern PyObject *SWIG_newvarlink(void);
 }
 #endif
 
-#define SWIG_init    initStringc
+#define SWIG_init    initMStringc
 
-#define SWIG_name    "Stringc"
+#define SWIG_name    "MStringc"
 
-#include	"Mpch.h"
+#include  "Mcommon.h"
+
+// we don't want to export our functions as we don't build a shared library
+#undef SWIGEXPORT
+#define SWIGEXPORT(a,b) a b
 #define new_String(_swigarg0) (new String(_swigarg0))
 static PyObject *_wrap_new_String(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
@@ -91,7 +95,7 @@ static PyObject *_wrap_String_c_str(PyObject *self, PyObject *args) {
     return _resultobj;
 }
 
-static PyMethodDef StringcMethods[] = {
+static PyMethodDef MStringcMethods[] = {
 	 { "String_c_str", _wrap_String_c_str, 1 },
 	 { "new_String", _wrap_new_String, 1 },
 	 { NULL, NULL }
@@ -100,10 +104,10 @@ static PyObject *SWIG_globals;
 #ifdef __cplusplus
 extern "C" 
 #endif
-SWIGEXPORT(void,initStringc)() {
+SWIGEXPORT(void,initMStringc)() {
 	 PyObject *m, *d;
 	 SWIG_globals = SWIG_newvarlink();
-	 m = Py_InitModule("Stringc", StringcMethods);
+	 m = Py_InitModule("MStringc", MStringcMethods);
 	 d = PyModule_GetDict(m);
 /*
  * These are the pointer type-equivalency mappings. 

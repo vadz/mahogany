@@ -1,9 +1,9 @@
 /*-*- c++ -*-********************************************************
- * MAppBase class: all non GUI specific application stuff       *
+ * MAppBase class: all non GUI specific application stuff           *
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$         *
+ * $Id$  
  *                                                                  *
  *******************************************************************/
 
@@ -24,11 +24,6 @@
 #ifndef   USE_PCH
 #  include   "Mcommon.h"
 #  include   "strutil.h"
-
-#   include  <wx/file.h>
-#   include  <wx/textfile.h>
-#   include  <wx/config.h>
-#   include  <wx/fileconf.h>
 #  include   "Profile.h"
 #  include   "MimeList.h"
 #  include   "MimeTypes.h"

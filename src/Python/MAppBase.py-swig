@@ -1,7 +1,7 @@
 # This file was created automatically by SWIG.
 import MAppBasec
 
-from String import *
+from MString import *
 class MAppBasePtr :
     def __init__(self,this):
         self.this = this
@@ -18,10 +18,12 @@ class MAppBasePtr :
     def GetGlobalDir(self):
         val = MAppBasec.MAppBase_GetGlobalDir(self.this)
         val = StringPtr(val)
+        val.thisown = 1
         return val
     def GetLocalDir(self):
         val = MAppBasec.MAppBase_GetLocalDir(self.this)
         val = StringPtr(val)
+        val.thisown = 1
         return val
     def GetMimeList(self):
         val = MAppBasec.MAppBase_GetMimeList(self.this)
@@ -57,6 +59,8 @@ MDialog_SystemErrorMessage = MAppBasec.MDialog_SystemErrorMessage
 MDialog_FatalErrorMessage = MAppBasec.MDialog_FatalErrorMessage
 
 MDialog_Message = MAppBasec.MDialog_Message
+
+MDialog_StatusMessage = MAppBasec.MDialog_StatusMessage
 
 MDialog_YesNoDialog = MAppBasec.MDialog_YesNoDialog
 

@@ -25,6 +25,10 @@
 # include "Profile.h"
 #endif
 
+//FIXME which headers are required?
+#include <guidef.h>
+#include <wx/wx.h>
+
 #include <wx/log.h>
 #include <wx/imaglist.h>
 #include <wx/notebook.h>
@@ -763,6 +767,8 @@ void wxOptionsPage::Refresh()
             }
           }
           break;
+      default:
+         ;
       }
     }
     // this field is always enabled

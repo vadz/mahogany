@@ -59,11 +59,15 @@ DEFAULT_USE_EFENCE=0
 DEFAULT_USE_DMALLOC=1
 DEFAULT_USE_DEBUG=1
 DEFAULT_USE_PYTHON=1
-
+DEFAULT_USE_THREADS=1
 
 AC_OVERRIDES(python,python,
 --with-python   use python scripting,
 USE_PYTHON)
+
+AC_OVERRIDES(threads,threads,
+--with-threads    link with pthread(s) library,
+USE_THREADS)
 
 AC_OVERRIDES(dmalloc,dmalloc,
 --with-dmalloc  use dmalloc library for debugging,
@@ -210,7 +214,6 @@ AC_TYPE_SIZE_T
 AC_STRUCT_TM
 AC_CHECK_FUNCS(strerror strstr strsep)
 
-AC_HEADER_STDC
 AC_CHECK_HEADERS(strings.h unistd.h)
 AC_CHECK_HEADERS(libintl.h)
 AC_CHECK_HEADERS(stdlib.h)
@@ -251,14 +254,15 @@ else
 	GTK_LDFLAGS=$X_EXTRA_LIBS
 fi
 LIBS="$LIBS $GTK_LDFLAGS"
-AC_CHECK_LIB(dl,main,,AC_MSG_WARN("dl library might be needed."))
-AC_CHECK_LIB(pthread,main)
-AC_CHECK_LIB(pthreads,main)
+AC_CHECK_LIB(dl,main,,AC_MSG_ERROR("dl library is needed."))
+
+if test "$USE_THREADS" = 1
+then
+	AC_CHECK_LIB(pthread,main,,AC_CHECK_LIB(pthreads,main))
+fi
 
 AC_CHECK_HEADERS(wx/wx.h)
 AC_CHECK_LIB(wx_gtk,main,,AC_MSG_ERROR("wx_gtk library is required."))
-
-
 
 AC_CHECK_LIB(c,crypt,,AC_CHECK_LIB(crypt,crypt,,AC_MSG_ERROR("Cannot find crypt function.")))
 
@@ -282,7 +286,7 @@ AC_CHECK_HEADERS(python1.5/Python.h
 		AC_CHECK_LIB(swigpy,main,
 			AC_DEFINE(USE_PYTHON)
 			MAKE_USE_PYTHON="USE_PYTHON=yes"
-			LIBS="$LIBS -lpython -lswigpy"
+			LIBS="$LIBS -lpython1.5 -lswigpy"
 			,
 			AC_MSG_WARN("Cannot find SWIG library for python - disabling python.")
 			MAKE_USE_PYTHON=
@@ -293,6 +297,8 @@ AC_CHECK_HEADERS(python1.5/Python.h
 AC_PATH_PROG(SWIG,swig)
 fi
 AC_SUBST(MAKE_USE_PYTHON)
+
+AC_CHECK_HEADERS(compface.h)
 
 dnl set debug/optimisation flags
 dnl we don't use CFLAGS/CXXFLAGS from autoconf
@@ -358,8 +364,5 @@ else
 fi
 AC_SUBST(DOCHTML)
 AC_SUBST(DOCTEX)
-
-DEFINES="$DEFINES -D__WXGTK__"
-AC_SUBST(DEFINES)
 
 AC_OUTPUT(makeopts)

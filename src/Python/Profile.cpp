@@ -53,33 +53,36 @@ extern PyObject *SWIG_newvarlink(void);
 
 #define SWIG_name    "Profilec"
 
-#include	"Mpch.h"
-#include	"Mcommon.h"
-#include	"Profile.h"
-#if       !USE_PCH
-#	include	<strutil.h>
-#endif
+#include  "Mcommon.h"
+#include  "kbList.h"
+#include  "Profile.h"
+#include  "strutil.h"
 
-#include	"MFrame.h"
-#include	"MLogFrame.h"
+#include  "MFrame.h"
+#include  "guidef.h"
+#include  "gui/wxMFrame.h"
 
-#include	"Mdefaults.h"
+#include  "Mdefaults.h"
 
-#include	"PathFinder.h"
-#include	"MimeList.h"
-#include	"MimeTypes.h"
-#include	"Profile.h"
+#include  "PathFinder.h"
+#include  "MimeList.h"
+#include  "MimeTypes.h"
+#include  "Profile.h"
 
 #include  "MApplication.h"
 
+// we don't want to export our functions as we don't build a shared library
+#undef SWIGEXPORT
+#define SWIGEXPORT(a,b) a b
 #define Profile_readEntry(_swigobj,_swigarg0,_swigarg1)  (_swigobj->readEntry(_swigarg0,_swigarg1))
 static PyObject *_wrap_Profile_readEntry(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
-    char * _result;
+    String * _result;
     Profile * _arg0;
     char * _arg1;
     char * _arg2 = NULL;
     char * _argc0 = 0;
+    char _ptemp[128];
 
     self = self;
     if(!PyArg_ParseTuple(args,"ss|s:Profile_readEntry",&_argc0,&_arg1,&_arg2)) 
@@ -90,8 +93,9 @@ static PyObject *_wrap_Profile_readEntry(PyObject *self, PyObject *args) {
         return NULL;
         }
     }
-    _result = (char *)Profile_readEntry(_arg0,_arg1,_arg2);
-    _resultobj = Py_BuildValue("s", _result);
+    _result = new String (Profile_readEntry(_arg0,_arg1,_arg2));
+    SWIG_MakePtr(_ptemp, (void *) _result,"_String_p");
+    _resultobj = Py_BuildValue("s",_ptemp);
     return _resultobj;
 }
 

@@ -3,7 +3,7 @@
 CWD = gui
 SRC = wxMApp.cpp wxMFrame.cpp wxFolderView.cpp wxMessageView.cpp \
 wxComposeView.cpp wxMainFrame.cpp wxIconManager.cpp wxFontManager.cpp wxMDialogs.cpp  \
-wxlwindow.cpp wxllist.cpp wxlparser.cpp wxMenuDefs.cpp
+wxlwindow.cpp wxllist.cpp wxlparser.cpp wxMenuDefs.cpp wxOptionsDlg.cpp
 
 ifdef USE_WXTAB
 SRC += wxtab.cpp

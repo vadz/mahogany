@@ -9,8 +9,6 @@
 
 #include   "Mpch.h"
 
-#include   "Python.h"
-#include   "PythonHelp.h"
 
 #ifndef   USE_PCH
 #   include   "Mcommon.h"
@@ -20,6 +18,8 @@
 #   include   "gui/wxMApp.h"
 #endif
 
+#include   "Python.h"
+#include   "PythonHelp.h"
 #include   "MDialogs.h"
 
 // the module initialisations
@@ -44,7 +44,7 @@ static bool CheckPyError()
    {
       String err;
       PyH_GetErrorMessage(&err);
-      ERRORMESSAGE(("Python error: %s", err));
+      ERRORMESSAGE(("Python error: %s", err.c_str()));
       PyErr_Print();
 
       return FALSE;

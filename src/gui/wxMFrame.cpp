@@ -65,7 +65,7 @@ bool wxMFrame::RestorePosition(const char *name,
 {
    wxCHECK( x && y && w && h, FALSE ); // no NULL pointers please
 
-   FileConfig *pConf = Profile::GetAppConfig();
+   wxConfig *pConf = Profile::GetAppConfig();
    if ( pConf != NULL )
    {
       ProfilePathChanger ppc(pConf, M_FRAMES_CONFIG_SECTION);
@@ -176,7 +176,7 @@ wxMFrame::SavePosition(const char *name, wxFrame *frame)
 {
    int x,y;
 
-   FileConfig *pConf = Profile::GetAppConfig();
+   wxConfig *pConf = Profile::GetAppConfig();
    if ( pConf != NULL ) {
       ProfilePathChanger ppc(pConf, M_FRAMES_CONFIG_SECTION);
       pConf->CHANGE_PATH(name);

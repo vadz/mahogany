@@ -53,20 +53,36 @@ extern PyObject *SWIG_newvarlink(void);
 
 #define SWIG_name    "MAppBasec"
 
-#include	"Mpch.h"
-#ifndef	USE_PCH
-#   include   "Mcommon.h"
-#   include   "strutil.h"
-#   include   "Profile.h"
-#   include   "MFrame.h"
-#   include   "MLogFrame.h"
-#   include   "MimeList.h"
-#   include   "MimeTypes.h"
-#   include   "Mdefaults.h"
-#   include   "MApplication.h"
-#   include   "wxMApp.h"
-#   include   "gui/wxMDialogs.h"
-#endif
+#include   "Mcommon.h"
+#include   "kbList.h"
+#include   "guidef.h"
+#include   "strutil.h"
+#include   "Profile.h"
+#include   "MFrame.h"
+#include   "gui/wxMFrame.h"
+#include   "MimeList.h"
+#include   "MimeTypes.h"
+#include   "Mdefaults.h"
+#include   "MApplication.h"
+#include   "gui/wxMApp.h"
+#include   "MDialogs.h"
+
+// SWIG bug: it generates code which assignes the default argument to "char *"
+// variable. To make it compile we need this hack
+#define	MDIALOG_ERRTITLE_C (char *)MDIALOG_ERRTITLE
+#define	MDIALOG_SYSERRTITLE_C (char *)MDIALOG_SYSERRTITLE
+#define	MDIALOG_FATALERRTITLE_C (char *)MDIALOG_FATALERRTITLE
+#define	MDIALOG_MSGTITLE_C (char *)MDIALOG_MSGTITLE
+#define	MDIALOG_YESNOTITLE_C (char *)MDIALOG_YESNOTITLE
+
+// we don't want to export our functions as we don't build a shared library
+#undef SWIGEXPORT
+#define SWIGEXPORT(a,b) a b
+
+// it's not really a dialog, but is useful too
+inline void MDialog_StatusMessage(const char *message, MFrame *frame = NULL)
+  { wxLogStatus(frame, message); }
+
 static PyObject *_wrap_wxGetApp(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
     MAppBase * _result;
@@ -86,7 +102,7 @@ static PyObject *_wrap_MDialog_ErrorMessage(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
     char * _arg0;
     MFrame * _arg1 = NULL;
-    char * _arg2 = MDIALOG_ERRTITLE;
+    char * _arg2 = MDIALOG_ERRTITLE_C;
     bool  _arg3 = false;
     char * _argc1 = 0;
     int tempbool3;
@@ -111,7 +127,7 @@ static PyObject *_wrap_MDialog_SystemErrorMessage(PyObject *self, PyObject *args
     PyObject * _resultobj;
     char * _arg0;
     MFrame * _arg1 = NULL;
-    char * _arg2 = MDIALOG_SYSERRTITLE;
+    char * _arg2 = MDIALOG_SYSERRTITLE_C;
     bool  _arg3 = false;
     char * _argc1 = 0;
     int tempbool3;
@@ -136,7 +152,7 @@ static PyObject *_wrap_MDialog_FatalErrorMessage(PyObject *self, PyObject *args)
     PyObject * _resultobj;
     char * _arg0;
     MFrame * _arg1 = NULL;
-    char * _arg2 = MDIALOG_FATALERRTITLE;
+    char * _arg2 = MDIALOG_FATALERRTITLE_C;
     char * _argc1 = 0;
 
     self = self;
@@ -167,13 +183,34 @@ static PyObject *_wrap_MDialog_Message(PyObject *self, PyObject *args) {
     return _resultobj;
 }
 
+static PyObject *_wrap_MDialog_StatusMessage(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    char * _arg0;
+    MFrame * _arg1 = NULL;
+    char * _argc1 = 0;
+
+    self = self;
+    if(!PyArg_ParseTuple(args,"s|s:MDialog_StatusMessage",&_arg0,&_argc1)) 
+        return NULL;
+    if (_argc1) {
+        if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_MFrame_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of MDialog_StatusMessage. Expected _MFrame_p.");
+        return NULL;
+        }
+    }
+    MDialog_StatusMessage(_arg0,_arg1);
+    Py_INCREF(Py_None);
+    _resultobj = Py_None;
+    return _resultobj;
+}
+
 static PyObject *_wrap_MDialog_YesNoDialog(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
     bool  _result;
     char * _arg0;
     MFrame * _arg1 = NULL;
     bool  _arg2 = false;
-    char * _arg3 = MDIALOG_YESNOTITLE;
+    char * _arg3 = MDIALOG_YESNOTITLE_C;
     bool  _arg4 = true;
     char * _argc1 = 0;
     int tempbool2;
@@ -270,11 +307,12 @@ static PyObject *_wrap_MDialog_FileRequester(PyObject *self, PyObject *args) {
 static PyObject *_wrap_MAppBase_Exit(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
     MAppBase * _arg0;
-    int  _arg1;
+    bool  _arg1;
     char * _argc0 = 0;
+    int tempbool1;
 
     self = self;
-    if(!PyArg_ParseTuple(args,"si:MAppBase_Exit",&_argc0,&_arg1)) 
+    if(!PyArg_ParseTuple(args,"si:MAppBase_Exit",&_argc0,&tempbool1)) 
         return NULL;
     if (_argc0) {
         if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_MAppBase_p")) {
@@ -282,6 +320,7 @@ static PyObject *_wrap_MAppBase_Exit(PyObject *self, PyObject *args) {
         return NULL;
         }
     }
+    _arg1 = (bool ) tempbool1;
     MAppBase_Exit(_arg0,_arg1);
     Py_INCREF(Py_None);
     _resultobj = Py_None;
@@ -350,9 +389,8 @@ static PyObject *_wrap_MAppBase_GetGlobalDir(PyObject *self, PyObject *args) {
         return NULL;
         }
     }
-    String & _result_ref = MAppBase_GetGlobalDir(_arg0);
-    _result = (String *) &_result_ref;
-    SWIG_MakePtr(_ptemp, (char *) _result,"_String_p");
+    _result = new String (MAppBase_GetGlobalDir(_arg0));
+    SWIG_MakePtr(_ptemp, (void *) _result,"_String_p");
     _resultobj = Py_BuildValue("s",_ptemp);
     return _resultobj;
 }
@@ -374,9 +412,8 @@ static PyObject *_wrap_MAppBase_GetLocalDir(PyObject *self, PyObject *args) {
         return NULL;
         }
     }
-    String & _result_ref = MAppBase_GetLocalDir(_arg0);
-    _result = (String *) &_result_ref;
-    SWIG_MakePtr(_ptemp, (char *) _result,"_String_p");
+    _result = new String (MAppBase_GetLocalDir(_arg0));
+    SWIG_MakePtr(_ptemp, (void *) _result,"_String_p");
     _resultobj = Py_BuildValue("s",_ptemp);
     return _resultobj;
 }
@@ -461,6 +498,7 @@ static PyMethodDef MAppBasecMethods[] = {
 	 { "MAppBase_Exit", _wrap_MAppBase_Exit, 1 },
 	 { "MDialog_FileRequester", _wrap_MDialog_FileRequester, 1 },
 	 { "MDialog_YesNoDialog", _wrap_MDialog_YesNoDialog, 1 },
+	 { "MDialog_StatusMessage", _wrap_MDialog_StatusMessage, 1 },
 	 { "MDialog_Message", _wrap_MDialog_Message, 1 },
 	 { "MDialog_FatalErrorMessage", _wrap_MDialog_FatalErrorMessage, 1 },
 	 { "MDialog_SystemErrorMessage", _wrap_MDialog_SystemErrorMessage, 1 },
