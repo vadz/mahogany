@@ -13,7 +13,7 @@
 #define _WX_WXREGEXH__
 
 #ifdef __GNUG__
-#   pragma interface "regex.h"
+#   pragma interface "wx/regex.h"
 #endif
 
 class wxRegExBase
@@ -28,7 +28,8 @@ class wxRegExBase
       RE_NOSUB    = 8,
       RE_NEWLINE  = 16,
       RE_NOTBOL   = 32,
-      RE_NOTEOL   = 64
+      RE_NOTEOL   = 64,
+      RE_DEFAULT  = RE_NOSUB
    };
    virtual void SetFlags(Flags flags) = 0;
    /** Matches the precompiled regular expression against a string.
@@ -61,7 +62,7 @@ class wxRegExPOSIX : public wxRegExBase
       {
          m_Flags = flags;
       }
-   virtual int Match(const wxString &str, Flags flags)
+   virtual int Match(const wxString &str, Flags flags) const
       {
          if( ! m_Valid )
          {
@@ -73,24 +74,11 @@ class wxRegExPOSIX : public wxRegExBase
             wxLogError(_("Regular expression matching called with illegal flags."));
             return FALSE;
          }
-         size_t nmatch;
-         regmatch_t *pmatch = NULL;
-         if( (GetCFlags() & RE_NOSUB) != 0)
-         {
-            nmatch = 256;
-            pmatch = new regmatch_t[nmatch];
-         }
-         else
-            nmatch = 0;
+
          int myflags = 0;
-         
          if(flags & RE_NOTBOL) myflags |= REG_NOTBOL;
          if(flags & RE_NOTEOL) myflags |= REG_NOTEOL;
-         regcomp(m_RegEx, str.c_str(),
-                 nmatch, pmatch,
-                 myflags);
-         //FIXME: The list of matches is currently unused
-         if(pmatch) delete [] pmatch;
+         regcomp((regex_t *)&m_RegEx, str.c_str(), myflags);
       }
 
 
@@ -104,7 +92,7 @@ class wxRegExPOSIX : public wxRegExBase
          if(errorcode)
          {
             char buffer[256];
-            regerrror(errorcode, &m_RegEx, buffer, 256);
+            regerror(errorcode, &m_RegEx, buffer, 256);
             wxLogError(_("Regular expression syntax error: '%s'"),
                        buffer);
             return FALSE;
@@ -113,7 +101,7 @@ class wxRegExPOSIX : public wxRegExBase
             return TRUE;
       }
 private:
-   int GetCFLags(void)
+   int GetCFlags(void)
       {
          int flags = 0;
          if( m_Flags & RE_EXTENDED ) flags |= REG_EXTENDED;
@@ -130,7 +118,7 @@ private:
 
 #   define wxRegEx   wxRegExPOSIX
 
-#define WX_HAS_REGEX
+#define WX_HAVE_REGEX
 
 #endif
 
