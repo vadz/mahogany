@@ -716,10 +716,10 @@ match:
          while ( wxIsalpha(*q) )
             q++;
 
-         if ( *q == _T(' ') )
+         if ( wxStrchr(_T(" .,:;"), *q) )
          {
             // looks like we've a word (i.e. sequence of letters terminated by
-            // space) at the start of the next line
+            // space or punctuation) at the start of the next line
             p -= 2;
             break;
          }
@@ -832,5 +832,13 @@ strutil_findurl(String& str, String& url)
    }
 
    return before;
+}
+
+extern
+int FindURL(const wxChar *s, int& len)
+{
+   static URLDetector s_detector;
+
+   return s_detector.FindURL(s, len);
 }
 
