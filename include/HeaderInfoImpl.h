@@ -145,6 +145,17 @@ protected:
    HeaderInfoListImpl(size_t n);
    ~HeaderInfoListImpl();
 
+   /// get the real index after translation
+   size_t GetTranslatedIndex(size_t n) const
+   {
+      if ( m_TranslationTable )
+         n = m_TranslationTable[n];
+
+      ASSERT_MSG( n < m_NumEntries, "invalid index" );
+
+      return n;
+   }
+
    /// The current listing of the folder
    HeaderInfoImpl *m_Listing;
 

@@ -186,9 +186,13 @@ public:
    /// for an empty list of selections
    int GetSelections(UIdArray &selections, bool nofocused = false) const;
 
-   // get the UID and, optionally, the index of the focused item
+   /// get the UID and, optionally, the index of the focused item
    UIdType GetFocusedUId(long *idx = NULL) const;
 
+   /// get the currently focused item or -1
+   long GetFocusedItem() const;
+
+   /// is the given item selected?
    bool IsSelected(long index)
       { return GetItemState(index,wxLIST_STATE_SELECTED) != 0; }
 
@@ -200,6 +204,7 @@ public:
    void OnActivated(wxListEvent& event);
    void OnCommandEvent(wxCommandEvent& event)
       { m_FolderView->OnCommandEvent(event); }
+   void OnIdle(wxIdleEvent& event);
 
    bool EnableSelectionCallbacks(bool enabledisable = true)
       {
@@ -243,6 +248,9 @@ protected:
    /// the folder view
    wxFolderView *m_FolderView;
 
+   /// the currently focused item
+   long m_itemFocus;
+
    /// the profile used for storing columns widths
    Profile *m_profile;
 
@@ -257,6 +265,9 @@ protected:
 
    /// did we create the list ctrl columns?
    bool m_Initialised;
+
+   /// did the listctrl focused item change?
+   bool m_FocusedItemChanged;
 
    /// the popup menu
    wxMenu *m_menu;
@@ -414,6 +425,8 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
    EVT_MOTION (wxFolderListCtrl::OnMouseMove)
 
    EVT_LIST_COL_CLICK(-1, wxFolderListCtrl::OnColumnClick)
+
+   EVT_IDLE(wxFolderListCtrl::OnIdle)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -426,17 +439,15 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
    // simple characters here (without Ctrl/Alt)
    if( !m_FolderView ||
        !m_FolderView->m_MessagePreview ||
-       ! m_FolderView->GetFolder() ||
+       !m_FolderView->GetFolder() ||
        event.HasModifiers() )
    {
       event.Skip();
       return; // nothing to do
    }
 
-   m_FolderView->UpdateSelectionInfo();
-
    long keyCode = event.KeyCode();
-   if(keyCode == WXK_F1) // help
+   if ( keyCode == WXK_F1 ) // help
    {
       mApplication->Help(MH_FOLDER_VIEW_KEYBINDINGS,
                          m_FolderView->GetWindow());
@@ -897,6 +908,20 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
                            ));
 }
 
+void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
+{
+   long itemFocus = GetFocusedItem();
+
+   if ( itemFocus != m_itemFocus )
+   {
+      m_itemFocus = itemFocus;
+
+      m_FolderView->UpdateSelectionInfo();
+   }
+
+   event.Skip();
+}
+
 wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 {
    m_Parent = parent;
@@ -911,15 +936,11 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_menu =
    m_menuFolders = NULL;
 
-   int
-      w = 500,
-      h = 300;
-
-   if(parent)
-      parent->GetClientSize(&w,&h);
+   // no item focused yet
+   m_itemFocus = -1;
 
    Create(parent, M_WXID_FOLDERVIEW_LISTCTRL,
-          wxDefaultPosition, wxSize(w,h),
+          wxDefaultPosition, parent->GetClientSize(),
           wxLC_REPORT | wxNO_BORDER);
 
    ReadColumnsInfo(m_profile, m_columns);
@@ -1009,6 +1030,11 @@ wxFolderListCtrl::GetSelections(UIdArray &selections, bool nofocused) const
    return selections.Count();
 }
 
+long wxFolderListCtrl::GetFocusedItem() const
+{
+   return GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
+}
+
 UIdType
 wxFolderListCtrl::GetFocusedUId(long *idx) const
 {
@@ -1023,7 +1049,7 @@ wxFolderListCtrl::GetFocusedUId(long *idx) const
       {
          size_t nMessages = hil->Count();
 
-         long item = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
+         long item = GetFocusedItem();
 
          // we need to compare with nMessages because the listing might have
          // been already updated and messages could have been deleted from it
@@ -1230,10 +1256,8 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
    // If we don't check, we could get called recursively from within a
    // wxYield()...
    ASSERT_MSG(m_SetFolderSemaphore == false, "DEBUG: SetFolder() called recursively, shouldn't happen.");
-//   if(m_SetFolderSemaphore)
-//      return;
-   m_SetFolderSemaphore = true;
 
+   m_SetFolderSemaphore = true;
 
    m_FocusedUId = UID_ILLEGAL;
    m_SelectedUIds.Empty();

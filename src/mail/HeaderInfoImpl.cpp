@@ -81,10 +81,7 @@ HeaderInfo *HeaderInfoListImpl::operator[](size_t n)
 
    CHECK( n < m_NumEntries, NULL, "invalid index in HeaderInfoList" );
 
-   if ( m_TranslationTable )
-      n = m_TranslationTable[n];
-
-   return &m_Listing[n];
+   return &m_Listing[GetTranslatedIndex(n)];
 }
 
 HeaderInfo *HeaderInfoListImpl::GetEntryUId(UIdType uid)
@@ -101,11 +98,13 @@ HeaderInfo *HeaderInfoListImpl::GetEntryUId(UIdType uid)
 UIdType HeaderInfoListImpl::GetIdxFromUId(UIdType uid) const
 {
    MOcheck();
-   for(size_t i = 0; i < m_NumEntries; i++)
+
+   for ( size_t i = 0; i < m_NumEntries; i++ )
    {
-      if( m_Listing[i].GetUId() == uid )
-         return i;
+      if ( m_Listing[i].GetUId() == uid )
+         return GetTranslatedIndex(i);
    }
+
    return UID_ILLEGAL;
 }
 
