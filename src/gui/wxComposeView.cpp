@@ -1944,6 +1944,10 @@ String wxComposeView::GetFrom() const
    {
       from = m_txtFrom->GetValue();
    }
+   else
+   {
+      from = m_from;
+   }
 
    return from;
 }
@@ -3328,7 +3332,7 @@ wxComposeView::BuildMessage() const
    }
 
    String from = GetFrom();
-   if ( !from.empty() && from != m_from )
+   if ( !from.empty() )
    {
       msg->SetFrom(from);
    }
