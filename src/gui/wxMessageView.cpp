@@ -539,10 +539,11 @@ wxMessageView::Update(void)
          wxBitmap icn;
          if(t == Message::MSG_TYPEIMAGE && m_ProfileValues.inlineGFX)
          {
-            char *filename = wxGetTempFileName("Mtemp");
+            wxString filename = wxGetTempFileName("Mtemp");
             MimeSave(i,filename);
             bool ok;
             wxImage img =  wxIconManager::LoadImage(filename, &ok);
+            wxRemoveFile(filename);
             if(ok)
                icn = img.ConvertToBitmap();
             else
