@@ -3078,7 +3078,6 @@ wxFolderView::Create(wxWindow *parent)
 
 wxFolderView::wxFolderView(wxWindow *parent)
 {
-   m_FocusFollowMode = false;
    m_Profile = NULL;
    m_Parent = parent;
 
@@ -3333,6 +3332,20 @@ wxFolderView::SelectInitialMessage()
 // wxFolderView profile stuff (options support, ...)
 // ----------------------------------------------------------------------------
 
+wxFolderView::AllProfileSettings::AllProfileSettings()
+{
+   dateGMT =
+   previewOnSingleClick =
+   senderOnlyNames =
+   replaceFromWithTo =
+   focusOnMouse = false;
+
+   fontFamily = wxFONTFAMILY_DEFAULT;
+   fontSize = GetNumericDefault(MP_FVIEW_FONT_SIZE);
+
+   previewDelay = 0;
+}
+
 void
 wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
 {
@@ -3400,6 +3413,7 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
       READ_CONFIG_BOOL(profile, MP_PREVIEW_ON_SELECT);
 
    settings->previewDelay = READ_CONFIG(profile, MP_FVIEW_PREVIEW_DELAY);
+   settings->focusOnMouse = READ_CONFIG_BOOL(m_Profile, MP_FOCUS_FOLLOWSMOUSE);
 
    ReadColumnsInfo(profile, settings->columns);
 }
@@ -3429,6 +3443,7 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
 
    // same as previewOnSingleClick
    m_settings.previewDelay = settings.previewDelay;
+   m_settings.focusOnMouse = settings.focusOnMouse;
 
    // did any other, important, setting change?
    if ( settings != m_settings )
@@ -3633,8 +3648,6 @@ wxFolderView::ShowFolder(MailFolder *mf)
    {
       Update();
    }
-
-   m_FocusFollowMode = READ_CONFIG_BOOL(m_Profile, MP_FOCUS_FOLLOWSMOUSE);
 
    // so we can react to keyboard events
    m_FolderCtrl->SetFocus();

@@ -172,7 +172,7 @@ public:
    ASTicketList *GetTicketList(void) const { return m_TicketList; }
 
    /// for use by the listctrl only:
-   bool GetFocusFollowMode(void) const { return m_FocusFollowMode; }
+   bool GetFocusFollowMode(void) const { return m_settings.focusOnMouse; }
 
    /// get the parent frame of the folder view
    wxFrame *GetParentFrame() const { return m_Frame; }
@@ -247,12 +247,11 @@ private:
    /// a list of pending tickets from async operations
    ASTicketList *m_TicketList;
 
-   /// do we have focus-follow enabled?
-   bool m_FocusFollowMode;
-
    /// the data we store in the profile
    struct AllProfileSettings
    {
+      AllProfileSettings();
+
       // default copy ctor is ok for now, add one if needed later!
 
       bool operator==(const AllProfileSettings& other) const;
@@ -290,6 +289,8 @@ private:
       int columns[WXFLC_NUMENTRIES];
       /// how to show the size
       MessageSizeShow showSize;
+      /// do we have focus-follow enabled?
+      bool focusOnMouse;
    } m_settings;
 
    /// read the values from the profile into AllProfileSettings structure
