@@ -105,14 +105,14 @@ Source: "doc\HtmlHlp\Manual.chm"; DestDir: "{app}\help"; Components: help
 ;Source: "src\Python\Scripts\MInit.py"; DestDir: "{app}\Python"; DestName: "Minit.py"; Components: python
 
 ; --- translations
-Source: "locale\de.mo"; DestDir: "{app}\German"; DestName: "M.mo"; Components: i18n
-Source: "locale\es.mo"; DestDir: "{app}\Spanish"; DestName: "M.mo"; Components: i18n
-Source: "locale\fi.mo"; DestDir: "{app}\Finnish"; DestName: "M.mo"; Components: i18n
-Source: "locale\fr.mo"; DestDir: "{app}\French"; DestName: "M.mo"; Components: i18n
-Source: "locale\it.mo"; DestDir: "{app}\Italian"; DestName: "M.mo"; Components: i18n
-Source: "locale\nl.mo"; DestDir: "{app}\Dutch"; DestName: "M.mo"; Components: i18n
-Source: "locale\pt.mo"; DestDir: "{app}\Portuguese"; DestName: "M.mo"; Components: i18n
-Source: "locale\pt_br.mo"; DestDir: "{app}\Portuguese-Brazil"; DestName: "M.mo"; Components: i18n
+Source: "locale\de.mo"; DestDir: "{app}\locale\de"; DestName: "M.mo"; Components: i18n
+Source: "locale\es.mo"; DestDir: "{app}\locale\es"; DestName: "M.mo"; Components: i18n
+Source: "locale\fi.mo"; DestDir: "{app}\locale\fi"; DestName: "M.mo"; Components: i18n
+Source: "locale\fr.mo"; DestDir: "{app}\locale\fr"; DestName: "M.mo"; Components: i18n
+Source: "locale\it.mo"; DestDir: "{app}\locale\it"; DestName: "M.mo"; Components: i18n
+Source: "locale\nl.mo"; DestDir: "{app}\locale\nl"; DestName: "M.mo"; Components: i18n
+Source: "locale\pt.mo"; DestDir: "{app}\locale\pt"; DestName: "M.mo"; Components: i18n
+Source: "locale\pt_br.mo"; DestDir: "{app}\locale\pt_BR"; DestName: "M.mo"; Components: i18n
 
 [UninstallDelete]
 ; delete all precompiled python files
