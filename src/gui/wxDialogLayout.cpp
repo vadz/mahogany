@@ -79,6 +79,25 @@ static wxArrayString SplitLabelWithChoices(wxString *label);
 
 extern const MPersMsgBox *M_MSGBOX_OPT_TEST_ASK;
 
+// ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
+
+// disable wxScrolledWindow::Layout() (added in wxWin 2.3.3) as we handle the
+// window resizing ourselves
+class wxEnhScrolledWindow : public wxScrolledWindow
+{
+public:
+   wxEnhScrolledWindow(wxWindow *parent)
+      : wxScrolledWindow(parent, -1,
+                         wxDefaultPosition, wxDefaultSize,
+                         wxHSCROLL | wxVSCROLL | wxTAB_TRAVERSAL)
+      {
+      }
+
+   virtual bool Layout() { return wxPanel::Layout(); }
+};
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -247,9 +266,7 @@ wxEnhancedPanel::wxEnhancedPanel(wxWindow *parent, bool enableScrolling)
 {
    if ( enableScrolling )
    {
-      m_canvas = new wxScrolledWindow(this, -1,
-                                      wxDefaultPosition, wxDefaultSize,
-                                      wxHSCROLL | wxVSCROLL | wxTAB_TRAVERSAL);
+      m_canvas = new wxEnhScrolledWindow(this);
    }
    //else: no need for it... just use the panel directly (canvas is already
    //      initialized to NULL above)
