@@ -53,6 +53,7 @@
 #define MH_DIALOG_SORTING    4210
 #define MH_DIALOG_DATEFMT    4220
 #define MH_DIALOG_FOLDERDLG  4230
+#define MH_DIALOG_XFACE      4240
 
 #define MH_PYTHON            5000
 

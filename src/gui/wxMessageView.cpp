@@ -510,7 +510,7 @@ wxMessageView::Update(void)
       m_mailMessage->GetHeaderLine("X-Face", tmp);
       if(tmp.length() > 2)   //\r\n
       {
-         xface = GLOBAL_NEW XFace();
+         xface = new XFace();
          xface->CreateFromXFace(tmp.c_str());
          if(xface->CreateXpm(&xfaceXpm))
          {

@@ -555,15 +555,15 @@ wxIconManager::GetIcon(String const &_iconName)
    if(m_GlobalDir.Length())
    {
       PathFinder pf(READ_APPCONFIG(MP_ICONPATH), true);
+      if(ms_IconPath.Length() > 0)
+         pf.AddPaths(ms_IconPath,true /*prepend */);
+      pf.AddPaths(m_GlobalDir, true);
+      pf.AddPaths(m_LocalDir, true);
       if(m_SubDir.Length() > 1)  // 1 == "/" == empty
       {
          pf.AddPaths(m_GlobalDir+m_SubDir, true);
          pf.AddPaths(m_LocalDir+m_SubDir, true);
       }
-      pf.AddPaths(m_GlobalDir, true);
-      pf.AddPaths(m_LocalDir, true);
-      if(ms_IconPath.Length() > 0)
-         pf.AddPaths(ms_IconPath,true /*prepend */);
    
       IconData *id;
 

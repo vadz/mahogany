@@ -265,6 +265,9 @@ bool ConfigureSorting(ProfileBase *profile, wxWindow *parent);
 /* Configuration dialog for sorting messages. */
 extern
 bool ConfigureDateFormat(ProfileBase *profile, wxWindow *parent);
+/* Pick an icon file: for XFace */
+extern
+bool PickXFaceDialog(ProfileBase *profile, wxWindow *parent);
 
 /** Semi-modal dialog to allow pop-up help to work.
     (Yes, I know it's a funny name, but so is the whole Help/Modal 

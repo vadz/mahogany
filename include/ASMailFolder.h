@@ -448,9 +448,6 @@ public:
    */
    virtual ProfileBase *GetProfile(void) const = 0;
 
-   /// Get update interval in seconds
-   virtual int GetUpdateInterval(void) const = 0;
-
    /** Toggle sending of new mail events.
        @param send if true, send them
        @param update if true, update internal message count
@@ -471,8 +468,6 @@ public:
        @param nmax maximum number of messages to retrieve, 0 for no limit
    */
    virtual void SetRetrievalLimit(unsigned long nmax) = 0;
-   /// Set update interval in seconds, 0 to disable
-   virtual void SetUpdateInterval(int secs) = 0;
    /// Returns the underlying MailFolder object.
    virtual MailFolder *GetMailFolder(void) const = 0;
    //@}

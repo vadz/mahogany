@@ -41,6 +41,34 @@
 #include "wx/persctrl.h"
 #include "MDialogs.h"
 #include "MApplication.h"
+#include <wx/timer.h>
+
+/*-------------------------------------------------------------------*
+ * local classes
+ *-------------------------------------------------------------------*/
+
+/** a timer class to regularly ping the mailfolder. */
+class MailFolderTimer : public wxTimer
+{
+public:
+   /** constructor
+       @param mf the mailfolder to query on timeout
+   */
+   MailFolderTimer(MailFolder *mf)
+      : m_mf(mf)
+   {
+      
+   }
+
+   /// get called on timeout and pings the mailfolder
+   void Notify(void) { m_mf->Ping(); }
+
+protected:
+   /// the mailfolder to update
+   MailFolder  *m_mf;
+};
+
+
 
 /*-------------------------------------------------------------------*
  * static member functions of MailFolder.h
@@ -176,9 +204,6 @@ MailFolder::OpenFolder(int typeAndFlags,
 
    MailFolder *mf = MailFolderCC::OpenFolder(typeAndFlags, name, profile,
                                              server, login, passwd, symbolicName);
-   if ( mf )
-      mf->SetUpdateInterval(READ_CONFIG(profile, MP_UPDATEINTERVAL));
-
    profile->DecRef();
 
    return mf;
@@ -438,6 +463,10 @@ private:
 
 MailFolderCmn::MailFolderCmn(ProfileBase *profile)
 {
+#ifdef DEBUG
+   m_PreCloseCalled = false;
+#endif
+
    // We need to know if we are building the first folder listing ever 
    // or not, to suppress NewMail events.
    m_FirstListing = true;
@@ -448,6 +477,7 @@ MailFolderCmn::MailFolderCmn(ProfileBase *profile)
    ASSERT(profile);
    m_Profile = profile;
    m_Profile->IncRef();
+   m_Timer = new MailFolderTimer(this);
 
    m_MEventReceiver = new MFCmnEventReceiver(this);
    
@@ -456,8 +486,22 @@ MailFolderCmn::MailFolderCmn(ProfileBase *profile)
 
 MailFolderCmn::~MailFolderCmn()
 {
+#ifdef DEBUG
+   ASSERT(m_PreCloseCalled == true);
+#endif
+   delete m_Timer;
    delete m_MEventReceiver;
    m_Profile->DecRef();
+}
+
+void
+MailFolderCmn::PreClose(void)
+{
+   if ( m_Timer )
+      m_Timer->Stop();
+#ifdef DEBUG
+   m_PreCloseCalled = true;
+#endif
 }
 
 bool
@@ -889,5 +933,8 @@ MailFolderCmn::UpdateConfig(void)
    m_Config.m_ListingSortOrder = READ_CONFIG(GetProfile(), MP_MSGS_SORTBY);
    m_Config.m_ReSortOnChange = READ_CONFIG(GetProfile(),
                                            MP_MSGS_RESORT_ON_CHANGE) != 0;
+   m_Config.m_UpdateInterval = READ_CONFIG(GetProfile(), MP_UPDATEINTERVAL);
+   m_Timer->Stop();
+   m_Timer->Start(m_Config.m_UpdateInterval * 1000);   
 }
 

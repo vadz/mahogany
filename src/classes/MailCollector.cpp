@@ -214,7 +214,7 @@ MailCollector::CollectOneFolder(MailFolder *mf)
                mf->GetName().c_str());
       wxYield(); // normal wxYield() should be ok here, this code never
       // gets called from a menu or such
-      long oldcount = m_NewMailFolder->CountMessages();
+//      long oldcount = m_NewMailFolder->CountMessages();
       bool sendsEvents = mf->SendsNewMailEvents();
       mf->EnableNewMailEvents(false,true);
       mf->Ping(); //update it

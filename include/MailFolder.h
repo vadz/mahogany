@@ -285,9 +285,6 @@ public:
    const char *GetClassName(void) const
       { return "MailFolder"; }
 
-   /// Get update interval in seconds
-   virtual int GetUpdateInterval(void) const = 0;
-
    /** Toggle sending of new mail events.
        @param send if true, send them
        @param update if true, update internal message count
@@ -399,8 +396,6 @@ public:
 
    /**@name Accessor methods */
    //@{
-   /// Set update interval in seconds, 0 to disable
-   virtual void SetUpdateInterval(int secs) = 0;
    /// Get authorisation information
    virtual inline void GetAuthInfo(String *login, String *password)
       const = 0;

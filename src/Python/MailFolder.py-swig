@@ -59,9 +59,6 @@ class MailFolderPtr(MObjectRCPtr):
     def GetClassName(self):
         val = MailFolderc.MailFolder_GetClassName(self.this)
         return val
-    def GetUpdateInterval(self):
-        val = MailFolderc.MailFolder_GetUpdateInterval(self.this)
-        return val
     def GetHeaders(self):
         val = MailFolderc.MailFolder_GetHeaders(self.this)
         return val

@@ -58,6 +58,7 @@
 #include <wx/choice.h>
 #include <wx/textdlg.h>
 #include <wx/treectrl.h>
+#include <wx/bmpbuttn.h>
 
 #include <wx/help.h>
 
@@ -1508,7 +1509,7 @@ wxDateFmtDialog::wxDateFmtDialog(ProfileBase *profile, wxWindow *parent)
    c->height.AsIs();
    m_UseGMT->SetConstraints(c);
 
-   SetDefaultSize(380, 220, FALSE /* not minimal */);
+   SetDefaultSize(380, 240, FALSE /* not minimal */);
 }
 
 #ifdef _MSC_VER
@@ -1570,4 +1571,127 @@ bool ConfigureDateFormat(ProfileBase *profile, wxWindow *parent)
    {
       return FALSE;
    }
+}
+
+
+class wxXFaceDialog : public wxOptionsPageSubdialog
+{
+public:
+   wxXFaceDialog(ProfileBase *profile, wxWindow *parent);
+
+   // reset the selected options to their default values
+   virtual bool TransferDataFromWindow();
+   virtual bool TransferDataToWindow();
+   bool WasChanged(void) { return m_XFace != m_OldXFace;};
+
+   void OnButton(wxCommandEvent & event );
+protected:
+
+   void UpdateButton(void);
+   
+   wxString     m_XFace;
+   wxString     m_OldXFace;
+   
+   wxCheckBox  *m_SetPermanently;
+   wxBitmap     m_Bitmap;
+   wxBitmapButton *m_Button;
+
+   DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(wxXFaceDialog, wxOptionsPageSubdialog)
+   EVT_BUTTON(-1, wxXFaceDialog::OnButton)
+END_EVENT_TABLE()
+
+
+wxXFaceDialog::wxXFaceDialog(ProfileBase *profile,
+                             wxWindow *parent)
+   : wxOptionsPageSubdialog(profile,parent,
+                            _("Choose a XFace"),
+                            "XFaceChooser")
+{
+   wxStaticBox *box = CreateStdButtonsAndBox(_("XFace"), FALSE,
+                                             MH_DIALOG_XFACE);
+   wxLayoutConstraints *c;
+   
+   wxStaticText *stattext = new wxStaticText(this, -1, _("Click on the button to change it."));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 6*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   stattext->SetConstraints(c);
+
+
+   m_Bitmap = mApplication->GetIconManager()->GetBitmap("xxx");
+
+   m_Button = new wxBitmapButton(this, -1, m_Bitmap,
+                                 wxDefaultPosition);
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.Below(stattext, 2*LAYOUT_Y_MARGIN);
+   c->width.Absolute(48);
+   c->height.Absolute(48);
+   m_Button->SetConstraints(c);
+
+   SetDefaultSize(380, 220, FALSE /* not minimal */);
+}
+
+
+void
+wxXFaceDialog::OnButton(wxCommandEvent & event )
+{
+   wxObject *obj = event.GetEventObject();
+   if ( obj != m_Button)
+   {
+      event.Skip();
+      return;
+   }
+
+   wxString path, file;
+   path = m_XFace.BeforeLast('/');
+   file = m_XFace.AfterLast('/');
+   
+   wxString newface = wxPFileSelector("xfacefilerequester",
+                                      _("Please pick an image file"),
+                                      path, file, NULL,
+                                      NULL, 0, this);
+   if(newface.Length())
+      m_XFace = newface;
+   UpdateButton();
+}
+
+bool
+wxXFaceDialog::TransferDataToWindow()
+{
+   m_XFace = READ_CONFIG(GetProfile(), MP_COMPOSE_XFACE_FILE);
+   m_OldXFace = m_XFace;
+   UpdateButton();
+   return TRUE;
+}
+
+void
+wxXFaceDialog::UpdateButton(void)
+{
+   bool success;
+   m_Bitmap = wxIconManager::LoadImage(m_XFace, &success).ConvertToBitmap();
+   if(! success)
+      m_Bitmap = mApplication->GetIconManager()->wxIconManager::GetBitmap("msg_error");
+   m_Button->SetBitmapLabel(m_Bitmap);
+   m_Button->SetBitmapFocus(m_Bitmap);
+}
+
+bool
+wxXFaceDialog::TransferDataFromWindow()
+{
+   GetProfile()->writeEntry(MP_COMPOSE_XFACE_FILE, m_XFace);
+//FIXME: needed?   m_OldXFace = m_XFace;
+   return TRUE;
+}
+
+extern
+bool PickXFaceDialog(ProfileBase *profile, wxWindow *parent)
+{
+   wxXFaceDialog dlg(profile, parent);
+   return ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() );
 }

@@ -805,10 +805,6 @@ public:
    inline ProfileBase *GetProfile(void) const
       { AScheck(); return m_MailFolder->GetProfile(); }
 
-   /// Get update interval in seconds
-   virtual int GetUpdateInterval(void) const
-      { AScheck(); return m_MailFolder->GetUpdateInterval(); }
-
    /** Toggle sending of new mail events.
        @param send if true, send them
        @param update if true, update internal message count
@@ -837,9 +833,6 @@ public:
    */
    virtual void SetRetrievalLimit(unsigned long nmax)
       { AScheck(); m_MailFolder->SetRetrievalLimit(nmax); }
-   /// Set update interval in seconds, 0 to disable
-   virtual void SetUpdateInterval(int secs)
-      { AScheck(); m_MailFolder->SetUpdateInterval(secs); }
    /// Returns the underlying MailFolder object.
    virtual MailFolder *GetMailFolder(void) const
       { AScheck(); return m_MailFolder;}

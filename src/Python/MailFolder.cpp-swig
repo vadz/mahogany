@@ -414,27 +414,6 @@ static PyObject *_wrap_MailFolder_GetClassName(PyObject *self, PyObject *args) {
     return _resultobj;
 }
 
-#define MailFolder_GetUpdateInterval(_swigobj)  (_swigobj->GetUpdateInterval())
-static PyObject *_wrap_MailFolder_GetUpdateInterval(PyObject *self, PyObject *args) {
-    PyObject * _resultobj;
-    int  _result;
-    MailFolder * _arg0;
-    char * _argc0 = 0;
-
-    self = self;
-    if(!PyArg_ParseTuple(args,"s:MailFolder_GetUpdateInterval",&_argc0)) 
-        return NULL;
-    if (_argc0) {
-        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_MailFolder_p")) {
-            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of MailFolder_GetUpdateInterval. Expected _MailFolder_p.");
-        return NULL;
-        }
-    }
-    _result = (int )MailFolder_GetUpdateInterval(_arg0);
-    _resultobj = Py_BuildValue("i",_result);
-    return _resultobj;
-}
-
 static PyObject *_wrap_MailFolder_ConvertMessageStatusToString(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
     String * _result;
@@ -476,7 +455,6 @@ static PyObject *_wrap_MailFolder_GetHeaders(PyObject *self, PyObject *args) {
 static PyMethodDef MailFoldercMethods[] = {
 	 { "MailFolder_GetHeaders", _wrap_MailFolder_GetHeaders, 1 },
 	 { "MailFolder_ConvertMessageStatusToString", _wrap_MailFolder_ConvertMessageStatusToString, 1 },
-	 { "MailFolder_GetUpdateInterval", _wrap_MailFolder_GetUpdateInterval, 1 },
 	 { "MailFolder_GetClassName", _wrap_MailFolder_GetClassName, 1 },
 	 { "MailFolder_GetProfile", _wrap_MailFolder_GetProfile, 1 },
 	 { "MailFolder_ExpungeMessages", _wrap_MailFolder_ExpungeMessages, 1 },

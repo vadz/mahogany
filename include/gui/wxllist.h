@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxLayoutList.h - a formatted text rendering engine for wxWindows *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1999 by Karsten Ballüder (ballueder@gmx.net)                 *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -776,6 +776,14 @@ public:
    /// Empty: clear the list but leave font settings.
    void Empty(void);
 
+   /** Enable or disable auto-formatting. Normally, while editing this 
+       should be enabled which is the default. While
+       inserting/deleting lots of text, it makes sense to temporarily
+       disable this.
+       @param enable TRUE to enable, FALSE to disable
+   */
+   void SetAutoFormatting(bool enable = TRUE)
+      { m_AutoFormat = enable; }
    /**@name Cursor Management */
    //@{
    /** Set new cursor position.
@@ -1170,6 +1178,8 @@ private:
    /// Is the update rectangle valid?
    bool    m_UpdateRectValid;
 
+   /// Shall we auto-format?
+   bool    m_AutoFormat;
    /**@name Cursor Management */
    //@{
    /// Where the text cursor (column,line) is.

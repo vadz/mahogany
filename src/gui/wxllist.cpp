@@ -703,6 +703,8 @@ wxLayoutLine::RecalculatePositions(int recurse, wxLayoutList *llist)
    RecalculatePosition(llist);
    if(m_Next)
    {
+
+
       if(recurse > 0)
          m_Next->RecalculatePositions(--recurse, llist);
       else if(pos != m_Position || m_Height != height)
@@ -1247,13 +1249,15 @@ wxLayoutLine::Layout(wxDC &dc,
       m_BaseLine = m_Height - descent;
    }
 
+#if 0
    // tell next line about coordinate change
    if(m_Next && m_Height != heightOld)
    {
       // FIXME isn't this done in RecalculatePositions() below anyhow?
       m_Next->RecalculatePositions(0, llist);
    }
-
+#endif
+   
    // We need to check whether we found a valid cursor size:
    if(cursorPos && cursorSize)
    {
@@ -1554,12 +1558,14 @@ wxLayoutList::wxLayoutList()
 
    m_numLines = 0;
    m_FirstLine = NULL;
+   SetAutoFormatting(TRUE);
    InvalidateUpdateRect();
    Clear();
 }
 
 wxLayoutList::~wxLayoutList()
 {
+   SetAutoFormatting(FALSE);
    InternalClear();
    Empty();
    m_FirstLine->DeleteLine(false, this);
@@ -1992,7 +1998,8 @@ wxLayoutList::Insert(wxString const &text)
 
    m_movedCursor = true;
 
-   m_CursorLine->RecalculatePositions(0, this);
+   if(m_AutoFormat)
+      m_CursorLine->RecalculatePositions(0, this);
 
    return true;
 }
@@ -2011,7 +2018,8 @@ wxLayoutList::Insert(wxLayoutObject *obj)
    m_CursorPos.x += obj->GetLength();
    m_movedCursor = true;
 
-   m_CursorLine->RecalculatePositions(0, this);
+   if(m_AutoFormat)
+      m_CursorLine->RecalculatePositions(0, this);
 
    return true;
 }
@@ -2197,7 +2205,8 @@ wxLayoutList::DeleteLines(int n)
       {  // we cannot delete this line, but we can clear it
          MoveCursorToBeginOfLine();
          DeleteToEndOfLine();
-         m_CursorLine->RecalculatePositions(2, this);
+         if(m_AutoFormat)
+            m_CursorLine->RecalculatePositions(2, this);
          return n-1;
       }
       //else:
@@ -2208,13 +2217,16 @@ wxLayoutList::DeleteLines(int n)
       wxASSERT(m_FirstLine);
       wxASSERT(m_CursorLine);
    }
-   m_CursorLine->RecalculatePositions(2, this);
+   if(m_AutoFormat)
+      m_CursorLine->RecalculatePositions(2, this);
    return n;
 }
 
 void
 wxLayoutList::Recalculate(wxDC &dc, CoordType bottom)
 {
+   if(! m_AutoFormat)
+      return;
    wxLayoutLine *line = m_FirstLine;
 
    // first, make sure everything is calculated - this might not be

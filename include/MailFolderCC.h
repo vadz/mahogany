@@ -135,13 +135,6 @@ public:
    /** Sets the symbolic name.
     */
    virtual void SetName(const String &name) { m_Name = name; };
-   /** Sets the update interval in seconds and restarts the timer.
-       @param secs seconds delay or 0 to disable
-   */
-   virtual void SetUpdateInterval(int secs);
-
-      /// Get update interval in seconds
-   virtual int GetUpdateInterval(void) const { return m_UpdateInterval; }
 
    /** Get number of messages which have a message status of value
        when combined with the mask. When mask = 0, return total
@@ -314,11 +307,6 @@ private:
 
    ///   mailstream associated with this folder
    MAILSTREAM   *m_MailStream;
-
-   /// a timer to update information
-   class MailFolderTimer *m_Timer;
-   /// Update interval for checking folder content
-   int m_UpdateInterval;
 
    /// PingReopen() protection against recursion
    bool m_PingReopenSemaphore;

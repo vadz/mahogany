@@ -175,9 +175,6 @@ public:
    const char *GetClassName(void) const
       { return "MailFolder"; }
 
-   /// Get update interval in seconds
-   int GetUpdateInterval(void) const { return m_UpdateInterval; }
-
    /** Utiltiy function to get a textual representation of a message
        status.
        @param message status

@@ -447,6 +447,18 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
             sequence = sequence.substr(0,sequence.Length()-1); //strip off comma
             m_ASMailFolder->SetSequenceFlag(sequence, MailFolder::MSG_STAT_DELETED);
          }
+         /// For all non-NNTP folders, check if the user wants to
+         /// auto-expunge the messages?
+         if(m_ASMailFolder->GetType() != MF_NNTP
+            && m_ASMailFolder->CountMessages(MailFolder::MSG_STAT_DELETED,MailFolder::MSG_STAT_DELETED)
+            && MDialog_YesNoDialog(_("Do you want to expunge all deleted messages?"),
+                                   m_Parent,
+                                   MDIALOG_YESNOTITLE,
+                                   true,
+                                   ProfileBase::FilterProfileName(m_Profile->GetName())))
+         {
+            (void) m_ASMailFolder->ExpungeMessages();
+         }
       }
 
       // This little trick makes sure that we don't react to any final

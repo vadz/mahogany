@@ -424,7 +424,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Signature file"),              Field_File,    ConfigField_Signature      },
    { gettext_noop("Use signature se&parator"),     Field_Bool,    ConfigField_Signature      },
    { gettext_noop("Us&e XFace"),                   Field_Bool,    -1,                        },
-   { gettext_noop("&XFace file"),                  Field_File,    ConfigField_XFace          },
+   { gettext_noop("&XFace file"),                  Field_SubDlg,  ConfigField_XFace          },
    { gettext_noop("Mail alias substring ex&pansion"),
                                                    Field_Bool,    -1,                        },
    { gettext_noop("Font famil&y"
@@ -1151,6 +1151,10 @@ void wxOptionsPageCompose::OnButton(wxCommandEvent& event)
    else if ( obj == GetControl(ConfigField_ComposeTemplates) )
    {
       dirty = ConfigureTemplates(m_Profile, this);
+   }
+   else if ( obj == GetControl(ConfigField_XFaceFile) )
+   {
+      dirty = PickXFaceDialog(m_Profile, this);
    }
    else
    {

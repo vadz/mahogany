@@ -167,6 +167,9 @@ protected:
    /** This function is called to update the folder listing. */
    void UpdateListing(void);
 
+   /// Call this before actually closing the folder.
+   void PreClose(void);
+   
    /** This function should be called by the driver when the status of 
        some message changed. It will cause all listings to be updated.
        The driver should make sure that its listing is updated before
@@ -205,12 +208,20 @@ protected:
    ProfileBase *m_Profile;
    //@}
 
+   /// a timer to update information
+   class MailFolderTimer *m_Timer;
+   
+
    /**@name Config information used */
    //@{
    struct MFCmnOptions
    {
+      /// how to sort the list of messages
       long m_ListingSortOrder;
+      /// do we want to re-sort it on a status change?
       bool m_ReSortOnChange;
+      /// Timer update interval for checking folder content
+      int m_UpdateInterval;
    } m_Config;
    //@}
 
@@ -220,6 +231,10 @@ private:
    friend class MFCmnEventReceiver;
    /// We react to config change events.
    class MEventReceiver *m_MEventReceiver;
+
+#ifdef DEBUG
+   bool m_PreCloseCalled;
+#endif
 };
 
 

@@ -12,7 +12,11 @@ $Id$
 		selections via keyboard still broken
 		speed up wxLayout scrollbar setting, *way* too slow
 		now
-		- deleting wxllist takes ages, calling MoveLines(,-1)
+                1. Change RecalculatePositions() to be non-recursive,
+		   possibly from wxLayoutList, 11000 recursions take 
+		   just too long
+ 
+                - deleting wxllist takes ages, calling MoveLines(,-1)
 		  recursively 
                 - delete lines at begin of window, then move cursor
   		  down, next insert at wrong position. If cursor gets
@@ -21,15 +25,20 @@ $Id$
 		  window? Should speed up things N*(N-1) fold...
 		- scrollbars don't appear immediately in long
 		  composeview messages
-9	KB	mm_list() needs mailfolder to work
-9	KB	message sorting seems buggy
-9	KB	check new mail after startup
+8		Find out where Mahogany is when laying out really long 
+		text messages. How can we speed this up? Why do
+		redraws take long, too?
+
+	KB	Finish XFace dialog:
+		- check image for correct size
+		- check if B&W, otherwise offer to convert it
+		- set focused-image, too
+		
+9	KB	message sorting seems buggy -- maybe not
+9	KB	check new mail after startup -- should be done already
 9               initial dialogs (wxConfig errors) show unknown icon
 9	KB	check password prompt in mailfolder
 5	KB	make MailFolder timer react to options change
-5	KB	(optionally, but on by default) expunge deleted messages when
-		the folder is closed - as noticed in 32bitonline comparison,
-		otherwise it's a nuisance.
 4	KB	Nicer icons: filetypes (GNOME?) and message/rfc822 and 
 		message view properties page --> rename to "Viewer?"
 		Rename "File" menu to "Messages" or "Program"?
@@ -39,8 +48,14 @@ $Id$
 3	KB	Filters: empty rest expression still causes abort of
 		parsing somehow, try FilterTest="5*4+3"
 
+7      ?        We need a generic way to re-enable disabled pControls
 
 
+		Is wxOptionsDlg WasChange() relative to last
+		TransferDataFromWindow() or to very beginning?
+
+	VZ	trying to create a folder under "All Folders" triggers 
+		assert
 8	VZ	AdbImort dialog under Windows lacks UpdateUI somewhere
 
 8	VZ	Opening NNTP folders suddenly asks for password - what 
@@ -85,7 +100,7 @@ $Id$
 9	KB	nice dialog for selecting and pre-viewing xface
 8	KB	line-wrap in compose view before sending
 
-Option to start up iconified.
+		Option to start up iconified.
 
 9	KB	Add a "find text in folder" method, too, trivial.
 
@@ -96,6 +111,7 @@ Option to start up iconified.
 		a) allow configuring them for outgoing messages
 		b) automatically choose the correct one and display the message using
 		   the right encoding for the incoming ones
+		---> HOW DO I SET CHARSETS FOR WXWINDOWS???
 
 7	KB	Find all possible MT problems in MailFolder.cpp and
 		put mutexes around them.
@@ -127,9 +143,6 @@ Option to start up iconified.
 		a) take them from files
 		b) "Apply template" command in compose view
 
-8		Find out where Mahogany is when laying out really long 
-		text messages. How can we speed this up? Why do
-		redraws take long, too?
 7		dnd for messages between folders and treectrl
 6	KB	implement temporary/fake Profile mode
 5		add goto_next_unread to folderview
@@ -231,6 +244,9 @@ from 32bitsonline review:
 6	VZ	folder properties assert when trying to create a
 		subfolder under INBOX - sort of fixed because folders can't be
 		created under INBOX (or any other non group folder) any more.
+5	KB	(optionally, but on by default) expunge deleted messages when
+		the folder is closed - as noticed in 32bitonline comparison,
+		otherwise it's a nuisance.
 
 
 

@@ -88,28 +88,6 @@ GetMsgStatus(MESSAGECACHE *elt)
    return (MailFolder::MessageStatus) status;
 }
 
-#include <wx/timer.h>
-/** a timer class to regularly ping the mailfolder. */
-class MailFolderTimer : public wxTimer
-{
-public:
-   /** constructor
-       @param mf the mailfolder to query on timeout
-   */
-   MailFolderTimer(MailFolder *mf) : m_mf(mf)
-   {
-      Start(mf->GetUpdateInterval()*1000);
-   }
-
-   /// get called on timeout and pings the mailfolder
-   void Notify(void) { m_mf->Ping(); }
-
-protected:
-   /// the mailfolder to update
-   MailFolder  *m_mf;
-};
-
-
 /* Little helper function to convert iso8859 encoded header lines into
    8 bit. This is a quick fix until wxWindows supports unicode.
    Modified it now to not look at the charset argument but always do a
@@ -491,7 +469,6 @@ MailFolderCC::Create(int typeAndFlags)
    m_FolderFlags = GetFolderFlags(typeAndFlags);
 
    SetType(type);
-   m_Timer = NULL;
 
    if( !FolderTypeHasUserName(type) )
       m_Login = ""; // empty login for these types
@@ -502,13 +479,9 @@ MailFolderCC::Create(int typeAndFlags)
 
 MailFolderCC::~MailFolderCC()
 {
-   CCQuiet(true); // disable all callbacks!
-   if ( m_Timer )
-   {
-      m_Timer->Stop();
-      delete m_Timer;
-   }
+   PreClose();
 
+   CCQuiet(true); // disable all callbacks!
    Close();
 #ifdef USE_THREADS
    delete m_Mutex;
@@ -601,17 +574,6 @@ MailFolderCC::OpenFolder(int typeAndFlags,
 }
 
 
-void
-MailFolderCC::SetUpdateInterval(int seconds)
-{
-   if(m_Timer)
-   {
-      m_Timer->Stop();
-      delete m_Timer;
-   }
-   m_UpdateInterval = seconds;
-   m_Timer = new MailFolderTimer(this);
-}
 
 #define UPDATE_TO(name, var)    to = READ_CONFIG(p,MP_TCP_##name); \
                                 if (to != var) \
