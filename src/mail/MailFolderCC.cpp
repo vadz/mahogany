@@ -716,7 +716,7 @@ MailFolderCC::mm_dlog(String str)
       }
 
       // hide the password
-      while ( str[n] != '\0' )
+      while ( n < str.length() )
       {
          msg += '*';
          n++;
