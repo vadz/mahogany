@@ -124,9 +124,6 @@ public:
    virtual void IncRef() { wxASSERT(m_nRef > 0); m_nRef++; }
    virtual bool DecRef() { if ( --m_nRef ) return TRUE; delete this; return FALSE; }
 
-   void SafeIncRef() { if ( this ) IncRef(); }
-   void SafeDecRef() { if ( this ) DecRef(); }
-
 protected:
    /// Removes the module from the global list
    virtual ~MModuleCommon() { wxASSERT(!m_nRef); }
