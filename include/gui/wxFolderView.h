@@ -133,7 +133,11 @@ public:
    /// return profile name for persistent controls
    wxString const &GetFullName(void) const { return m_ProfileName; }
    /// for use by the listctrl:
-   class ASTicketList *GetTicketList(void) const { return m_TicketList; }
+   class ASTicketList *GetTicketList(void) const { return
+                                                      m_TicketList; }
+   
+   /// for use by the listctrl only:
+   bool GetFocusFollowMode(void) const { return m_FocusFollowMode; }
 protected:
    /** Save messages to a folder.
        @param n number of messages
@@ -178,6 +182,8 @@ private:
    class ASTicketList *m_TicketList;
    /// Used by SaveMessagesToFolder: ticket from moving messages
    ASMailFolder::Ticket m_DeleteSavedMessagesTicket;
+   /// do we have focus-follow enabled?
+   bool m_FocusFollowMode;
 };
 
 
@@ -252,7 +258,11 @@ public:
 
    void OnSelected(wxListEvent& event);
    void OnChar( wxKeyEvent &event);
-   void OnMouse(wxListEvent& event);
+   void OnMouse(wxMouseEvent& event);
+   void OnDoubleClick(wxMouseEvent & /* event */);
+   void OnActivated(wxListEvent& event);
+   void OnCommandEvent(wxCommandEvent& event)
+      { m_FolderView->OnCommandEvent(event); }
 
    bool EnableSelectionCallbacks(bool enabledisable = true)
       {
@@ -263,8 +273,12 @@ public:
 
    // this is a workaround for focus handling under GTK but it should not be
    // enabled under other platforms
-#ifdef __WXGTK__
-   void OnMouseMove(wxMouseEvent &event) { SetFocus(); }
+#ifndef OS_WIN
+   void OnMouseMove(wxMouseEvent &event)
+      {
+         if(m_FolderView->GetFocusFollowMode())
+            SetFocus();
+      }
 #endif // wxGTK
 
    DECLARE_EVENT_TABLE()
@@ -284,6 +298,8 @@ protected:
    bool m_SelectionCallbacks;
    /// have we been used previously?
    bool m_Initialised;
+   /// the popup menu
+   wxMenu *m_menu;
 };
 
 #endif // WXFOLDERVIEW_H

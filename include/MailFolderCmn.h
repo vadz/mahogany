@@ -167,6 +167,15 @@ protected:
    /** This function is called to update the folder listing. */
    void UpdateListing(void);
 
+   /** This function should be called by the driver when the status of 
+       some message changed. It will cause all listings to be updated.
+       The driver should make sure that its listing is updated before
+       this function is called. It does not do much more than send an
+       event to the application.
+       @param uid uid of the message which changed status
+   */
+   void UpdateMessageStatus(UIdType uid);
+   
    /** This function must be implemented by the driver and return a
        newly built listing of all messages in the folder.
    */

@@ -304,6 +304,10 @@ BEGIN_EVENT_TABLE(wxMessageView, wxLayoutWindow)
    EVT_MENU(WXLOWIN_MENU_LCLICK, wxMessageView::OnMouseEvent)
    EVT_MENU(WXLOWIN_MENU_DBLCLICK, wxMessageView::OnMouseEvent)
 
+#ifndef OS_WIN
+   EVT_MOTION(wxMessageView::OnMouseMove)
+#endif
+   
    // menu & toolbars
    EVT_MENU(-1, wxMessageView::OnMenuCommand)
    EVT_TOOL(-1, wxMessageView::OnMenuCommand)
@@ -458,6 +462,9 @@ wxMessageView::UpdateProfileValues()
    m_ProfileValues.afmpath = READ_APPCONFIG(MP_AFMPATH);
 #endif // Unix
    m_ProfileValues.showFaces = READ_CONFIG(m_Profile, MP_SHOW_XFACES) != 0;
+#ifndef OS_WIN
+   m_ProfileValues.focusFollowMode = READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE) != 0;
+#endif
 }
 
 void

@@ -810,21 +810,28 @@ wxMApp::GetStdIcon(int which) const
    {
    public:
       ConfigPathRestorer()
-      {
-         m_path = mApplication->GetProfile()->GetConfig()->GetPath();
-      }
+         {
+            if(mApplication->GetProfile())
+               m_path = mApplication->GetProfile()->GetConfig()->GetPath();
+         }
 
       ~ConfigPathRestorer()
-      {
-         mApplication->GetProfile()->GetConfig()->SetPath(m_path);
-      }
-
+         {
+            if(mApplication->GetProfile())
+               mApplication->GetProfile()->GetConfig()->SetPath(m_path);
+         }
+      
    private:
       wxString m_path;
    } storeConfigPath;
 
    // Set our icons for the dialogs.
 
+   // This might happen during program shutdown, when the profile has
+   // already been deleted.
+   if(! GetProfile())
+      return wxApp::GetStdIcon(which);
+   
    // this ugly "#ifdefs" are needed to silent warning about "switch without
    // any case" warning under Windows
 #ifndef OS_WIN

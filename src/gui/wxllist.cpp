@@ -2311,7 +2311,8 @@ void
 wxLayoutList::Draw(wxDC &dc,
                    wxPoint const &offset,
                    CoordType top,
-                   CoordType bottom)
+                   CoordType bottom,
+                   bool clipStrictly)
 {
    wxLayoutLine *line = m_FirstLine;
 
@@ -2353,7 +2354,8 @@ wxLayoutList::Draw(wxDC &dc,
             style_set = true;
          }
          // little condition to speed up redrawing:
-         if(bottom != -1
+
+         if(clipStrictly && bottom != -1
             && line->GetPosition().y+line->GetHeight() >= bottom)
             break;
          line->Draw(dc, this, offset);
@@ -2934,7 +2936,8 @@ bool wxLayoutPrintout::OnPrintPage(int page)
       // SetDeviceOrigin() doesn't work here, so we need to manually
       // translate all coordinates.
       wxPoint translate(m_Offset.x,m_Offset.y-top);
-      m_llist->Draw(*dc, translate, top, bottom);
+      m_llist->Draw(*dc, translate, top, bottom, TRUE /* clip strictly 
+                                                       */);
       return true;
    }
    else

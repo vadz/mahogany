@@ -220,6 +220,9 @@ enum ConfigFields
    ConfigField_AFMPath,
    ConfigField_TearOffMenus,
 #endif // Unix
+#ifndef OS_WIN
+   ConfigField_FocusFollowsMouse,
+#endif
    ConfigField_DockableMenubars,
    ConfigField_DockableToolbars,
    ConfigField_ToolbarsFlatButtons,
@@ -535,6 +538,9 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("&Path where to find AFM files"), Field_Text,    -1                     },
    { gettext_noop("Use &detachable tar-off menus"), Field_Bool,    -1                     },
 #endif
+#ifndef OS_WIN
+   { gettext_noop("&Focus follows mouse"), Field_Bool,    -1                     },
+#endif
    { gettext_noop("Use floating &menu-bars"), Field_Bool,    -1                     },
    { gettext_noop("Use floating &tool-bars"), Field_Bool,    -1                     },
    { gettext_noop("Tool-bars with f&lat buttons"), Field_Bool,    -1                     }
@@ -674,6 +680,9 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_AFMPATH),
    CONFIG_ENTRY(MP_TEAROFF_MENUS),
+#endif
+#ifndef OS_WIN
+   CONFIG_ENTRY(MP_FOCUS_FOLLOWSMOUSE),
 #endif
    CONFIG_ENTRY(MP_DOCKABLE_MENUBARS),
    CONFIG_ENTRY(MP_DOCKABLE_TOOLBARS),

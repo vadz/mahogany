@@ -103,7 +103,12 @@ public:
 
    /// called on mouse click
    void OnMouseEvent(wxCommandEvent & event);
-
+#ifndef OS_WIN
+   /// called on mouse move
+   void OnMouseMove(wxMouseEvent & /* event */)
+      { if(m_ProfileValues.focusFollowMode) SetFocus(); }
+#endif
+   
    /// called when a process we launched terminates
    void OnProcessTermination(wxProcessEvent& event);
 
@@ -215,6 +220,10 @@ protected:
 #endif // Unix
       /// Show XFaces?
       bool showFaces;
+#ifndef OS_WIN
+      /// Do we want the focus to follow the mouse?
+      bool focusFollowMode;
+#endif
    } m_ProfileValues, m_oldProfileValue;
 
    bool m_hasOldValues;

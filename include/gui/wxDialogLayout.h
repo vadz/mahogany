@@ -19,7 +19,7 @@
 // -----------------------------------------------------------------------------
 
 #include <wx/persctrl.h>
-
+#include "gui/wxMDialogs.h"
 // -----------------------------------------------------------------------------
 // forward declarations
 // -----------------------------------------------------------------------------
@@ -47,7 +47,7 @@ class wxComboBox;
 // a stand-in for the wxPDialog class which is not written yet...
 // ----------------------------------------------------------------------------
 
-class wxPDialog : public wxDialog
+class wxPDialog : public wxSMDialog
 {
 public:
    // ctor restores position/size

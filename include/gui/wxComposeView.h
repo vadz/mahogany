@@ -277,6 +277,12 @@ protected:
    /// A list of all extra headerslines to add to header.
    kbStringList m_ExtraHeaderLinesValues;
 
+#ifndef OS_WIN
+   /// called on mouse move
+   void OnMouseMove(wxMouseEvent & /* event */)
+      { if(m_FocusFollowMode) SetFocus(); }
+#endif
+
 private:
    /// a profile
    ProfileBase * m_Profile;
@@ -331,6 +337,11 @@ private:
 
    /// enable/disable editing of the message text
    inline void EnableEditing(bool enable);
+
+#ifndef OS_WIN
+   /// Do we want the focus to follow the mouse?
+   bool m_FocusFollowMode;
+#endif
 
    /// ids for different processes we may launch
    enum

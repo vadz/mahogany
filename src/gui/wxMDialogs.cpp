@@ -33,6 +33,7 @@
 #   include "MailFolder.h"
 #   include "Profile.h"
 #   include "MModule.h"
+#   include "MHelp.h"
 #endif
 
 #include "modules/Scoring.h"
@@ -99,6 +100,50 @@ extern void CloseSplash()
 // private classes
 // ----------------------------------------------------------------------------
 
+
+
+int
+wxSMDialog::ShowModal()
+{
+   m_modalShowing = TRUE;
+
+   /* Disable all other windows apart from the help frame and this
+      one. */
+   
+   wxFrame *hf = NULL;
+   wxHelpController *hc = ((wxMApp
+                            *)mApplication)->GetHelpController();
+   if(hc && hc->IsKindOf(CLASSINFO(wxHelpControllerHtml)))
+      hf = ((wxHelpControllerHtml *)hc)->GetFrameParameters();
+
+   wxWindowList::Node *node;
+   for ( node = wxTopLevelWindows.GetFirst(); node; node = node->GetNext() )
+      if(node->GetData() != hf && node->GetData() != this)
+         node->GetData()->Enable(FALSE);
+
+   Show( TRUE );
+
+   while(IsModal())
+      wxTheApp->Dispatch();
+
+   wxEnableTopLevelWindows(TRUE);
+   return GetReturnCode();
+}
+
+void wxSMDialog::EndModal( int retCode )
+{
+    SetReturnCode( retCode );
+
+    if (!IsModal())
+    {
+        wxFAIL_MSG( _T("wxSMDialog:EndModal called twice") );
+        return;
+    }
+    m_modalShowing = FALSE;
+    Show( FALSE );
+}
+
+
 // better looking and wxConfig-aware wxTextEntryDialog
 class MTextInputDialog : public wxDialog
 {
@@ -134,7 +179,7 @@ BEGIN_EVENT_TABLE(MTextInputDialog, wxDialog)
 END_EVENT_TABLE()
 
 // a dialog showing all folders
-class MFolderDialog : public wxDialog
+class MFolderDialog : public wxSMDialog
 {
 public:
    MFolderDialog(wxWindow *parent, const wxPoint& pos, const wxSize& size);
@@ -147,11 +192,19 @@ public:
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
+   void OnButton(wxCommandEvent &ev);
+   void OnTree(wxTreeEvent &ev);
+   DECLARE_EVENT_TABLE()
 private:
+   wxString     m_FileName;
    MFolder      *m_folder;
    wxFolderTree *m_tree;
 };
 
+BEGIN_EVENT_TABLE(MFolderDialog, wxSMDialog)
+    EVT_BUTTON(-1, MFolderDialog::OnButton)
+    EVT_TREE_SEL_CHANGED(-1, MFolderDialog::OnTree)
+END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
 // MTextDialog - a dialog containing a multi-line text control (used to show
@@ -816,7 +869,7 @@ MDialog_FolderOpen(const MWindow *parent)
 MFolderDialog::MFolderDialog(wxWindow *parent,
                              const wxPoint& pos,
                              const wxSize& size)
-             : wxDialog(parent, -1, _("Choose folder"),
+             : wxSMDialog(parent, -1, _("Choose folder"),
                         pos, size,
                         wxDEFAULT_DIALOG_STYLE |
                         wxDIALOG_MODAL |
@@ -856,6 +909,24 @@ MFolderDialog::MFolderDialog(wxWindow *parent,
 
    btnOk->SetConstraints(c);
 
+   // File button
+   wxButton *btnFile = new wxButton(this, wxID_OPEN, _("File..."));
+   c = new wxLayoutConstraints;
+   c->height.Absolute(heightBtn);
+   c->width.Absolute(widthBtn);
+   c->right.SameAs(btnOk, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->bottom.SameAs(this, wxBottom, 2*LAYOUT_Y_MARGIN);
+   btnFile->SetConstraints(c);
+
+   // Help button
+   wxButton *btnHelp = new wxButton(this, wxID_HELP, _("Help"));
+   c = new wxLayoutConstraints;
+   c->height.Absolute(heightBtn);
+   c->width.Absolute(widthBtn);
+   c->left.SameAs(this, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->bottom.SameAs(this, wxBottom, 2*LAYOUT_Y_MARGIN);
+   btnHelp->SetConstraints(c);
+
    // create the folder tree control
    // ------------------------------
 
@@ -877,6 +948,29 @@ MFolderDialog::MFolderDialog(wxWindow *parent,
    Centre(wxCENTER_FRAME | wxBOTH);
 }
 
+void
+MFolderDialog::OnButton(wxCommandEvent &ev)
+{
+   switch(ev.GetId())
+   {
+   case wxID_OPEN:
+      m_FileName = wxPFileSelector("FolderDialogFile",
+                                   _("Mahogany: Please choose a folder file"),
+                                   NULL, NULL, NULL, NULL, 0, this);
+      break;
+   case wxID_HELP:
+      mApplication->Help(MH_DIALOG_FOLDERDLG);
+      break;
+   default:
+      ev.Skip();
+   }
+}
+void
+MFolderDialog::OnTree(wxTreeEvent &ev)
+{
+   m_FileName = ""; // we use the tree selection
+}
+
 bool MFolderDialog::TransferDataToWindow()
 {
    // restore last folder from config
@@ -885,12 +979,17 @@ bool MFolderDialog::TransferDataToWindow()
 
 bool MFolderDialog::TransferDataFromWindow()
 {
-   m_folder = m_tree->GetSelection();
-   if ( m_folder != NULL )
-   {
-      // save the folder to config
-   }
 
+   if(m_FileName.Length() == 0)
+   {
+      m_folder = m_tree->GetSelection();
+      if ( m_folder != NULL )
+      {
+         // save the folder to config
+      }
+   }
+   else
+      m_folder = MFolder::Create(m_FileName, MF_FILE);
    return true;
 }
 
@@ -964,11 +1063,10 @@ static wxString labels[NUM_LABELS] =
    gettext_noop("then, sort by")
 };
 
-class wxMessageSortingDialog : public wxManuallyLaidOutDialog
+class wxMessageSortingDialog : public wxOptionsPageSubdialog
 {
 public:
    wxMessageSortingDialog(ProfileBase *profile, wxWindow *parent);
-   ~wxMessageSortingDialog();
 
    // reset the selected options to their default values
    virtual bool TransferDataFromWindow();
@@ -976,7 +1074,6 @@ public:
    bool WasChanged(void) { return m_SortOrder != m_OldSortOrder;};
    
 protected:
-   ProfileBase *m_Profile;
    wxChoice    *m_Choices[NUM_CRITERIA];
    wxCheckBox  *m_UseThreading;
    wxCheckBox  *m_ReSortOnChange;
@@ -986,13 +1083,10 @@ protected:
 
 wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile,
                                                wxWindow *parent)
-                      : wxManuallyLaidOutDialog(parent,
-                                                _("Message sorting"),
-                                                "MessageSortingDialog")
+                      : wxOptionsPageSubdialog(profile,parent,
+                                               _("Message sorting"),
+                                               "MessageSortingDialog")
 {
-   m_Profile = profile;
-   profile->IncRef(); // paranoid
-
    SetDefaultSize(380,280);
 
    wxStaticBox *box = CreateStdButtonsAndBox(_("Sort messages by"),MH_DIALOG_SORTING);
@@ -1056,10 +1150,6 @@ wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile,
    Layout();
 }
 
-wxMessageSortingDialog::~wxMessageSortingDialog()
-{
-   m_Profile->DecRef();
-}
 
 bool wxMessageSortingDialog::TransferDataFromWindow()
 {
@@ -1076,9 +1166,10 @@ bool wxMessageSortingDialog::TransferDataFromWindow()
       m_SortOrder += selection;
    }
 
-   m_Profile->writeEntry(MP_MSGS_SORTBY, m_SortOrder);
-   m_Profile->writeEntry(MP_MSGS_USE_THREADING, m_UseThreading->GetValue());
-   m_Profile->writeEntry(MP_MSGS_RESORT_ON_CHANGE,
+   GetProfile()->writeEntry(MP_MSGS_SORTBY, m_SortOrder);
+   GetProfile()->writeEntry(MP_MSGS_USE_THREADING,
+                         m_UseThreading->GetValue());
+   GetProfile()->writeEntry(MP_MSGS_RESORT_ON_CHANGE,
                          m_ReSortOnChange->GetValue());
 
    if(uses_scoring)
@@ -1103,7 +1194,7 @@ bool wxMessageSortingDialog::TransferDataFromWindow()
 
 bool wxMessageSortingDialog::TransferDataToWindow()
 {
-   long sortOrder = READ_CONFIG(m_Profile, MP_MSGS_SORTBY);
+   long sortOrder = READ_CONFIG(GetProfile(), MP_MSGS_SORTBY);
    /* Sort order is stored as 4 bits per hierarchy:
       0xdcba --> 1. sort by "a", then by "b", ...
    */
@@ -1119,9 +1210,9 @@ bool wxMessageSortingDialog::TransferDataToWindow()
       sortOrder >>= 4;
    }
    m_UseThreading->SetValue(
-      READ_CONFIG(m_Profile, MP_MSGS_USE_THREADING) != 0);
-   m_UseThreading->SetValue(
-      READ_CONFIG(m_Profile, MP_MSGS_RESORT_ON_CHANGE) != 0);
+      READ_CONFIG(GetProfile(), MP_MSGS_USE_THREADING) != 0);
+   m_ReSortOnChange->SetValue(
+      READ_CONFIG(GetProfile(), MP_MSGS_RESORT_ON_CHANGE) != 0);
    return TRUE;
 }
 
@@ -1194,18 +1285,16 @@ BEGIN_EVENT_TABLE(wxDateTextCtrl, wxTextCtrl)
    EVT_RIGHT_DOWN(wxDateTextCtrl::OnRClick)
 END_EVENT_TABLE()
 
-class wxDateFmtDialog : public wxManuallyLaidOutDialog
+class wxDateFmtDialog : public wxOptionsPageSubdialog
 {
 public:
    wxDateFmtDialog(ProfileBase *profile, wxWindow *parent);
-   ~wxDateFmtDialog() { m_Profile->DecRef(); }
 
    // reset the selected options to their default values
    virtual bool TransferDataFromWindow();
    virtual bool TransferDataToWindow();
    bool WasChanged(void) { return m_DateFmt != m_OldDateFmt;}
 protected:
-   ProfileBase *m_Profile;
    wxString  m_DateFmt, m_OldDateFmt;
    wxCheckBox *m_UseGMT;
    wxTextCtrl *m_textctrl;
@@ -1214,13 +1303,10 @@ protected:
 
 
 wxDateFmtDialog::wxDateFmtDialog(ProfileBase *profile, wxWindow *parent)
-   : wxManuallyLaidOutDialog(parent, _("Date Format"), "DateFormatDialog")
+   : wxOptionsPageSubdialog(profile, parent, _("Date Format"), "DateFormatDialog")
 {
    wxASSERT(NUM_DATE_FMTS == NUM_DATE_FMTS_LABELS);
 
-   m_Profile = profile;
-   m_Profile->IncRef();
-   
    SetDefaultSize(380,220);
    wxStaticBox *box = CreateStdButtonsAndBox(_("Date Format"), MH_DIALOG_DATEFMT);
 
@@ -1258,16 +1344,16 @@ bool
 wxDateFmtDialog::TransferDataFromWindow()
 {
    m_DateFmt = m_textctrl->GetValue();
-   m_Profile->writeEntry(MP_DATE_FMT,m_DateFmt);
-   m_Profile->writeEntry(MP_DATE_GMT, m_UseGMT->GetValue() != 0);
+   GetProfile()->writeEntry(MP_DATE_FMT,m_DateFmt);
+   GetProfile()->writeEntry(MP_DATE_GMT, m_UseGMT->GetValue() != 0);
    return TRUE;
 }
 
 bool
 wxDateFmtDialog::TransferDataToWindow()
 {
-   m_DateFmt = READ_CONFIG(m_Profile, MP_DATE_FMT);
-   m_UseGMT->SetValue( READ_CONFIG(m_Profile, MP_DATE_GMT) != 0);
+   m_DateFmt = READ_CONFIG(GetProfile(), MP_DATE_FMT);
+   m_UseGMT->SetValue( READ_CONFIG(GetProfile(), MP_DATE_GMT) != 0);
    m_OldDateFmt = m_DateFmt;
    m_textctrl->SetValue(m_DateFmt);
    return TRUE;

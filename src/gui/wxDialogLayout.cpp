@@ -143,7 +143,7 @@ wxPDialog::wxPDialog(const wxString& profileKey,
                      wxWindow *parent,
                      const wxString& title,
                      long style)
-         : wxDialog(parent, -1, title,
+         : wxSMDialog(parent, -1, title,
                     wxDefaultPosition, wxDefaultSize,
                     style),
            m_profileKey(profileKey)

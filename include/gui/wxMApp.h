@@ -79,6 +79,8 @@ public:
    virtual void ThrLeave(SectionId what) { ThrEnterLeave(FALSE, what); }
    //@}
 
+   wxHelpController *GetHelpController(void)
+      { return m_HelpController; }
 protected:
    /** Common code for ThrEnter and ThrLeave, if enter==TRUE, enter,
        otherwise leave.

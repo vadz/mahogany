@@ -1446,14 +1446,9 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
    wxLogDebug("mm_status: folder '%s', %lu messages",
               mf->m_MailboxPath.c_str(), status->messages);
 
-   if(mf->m_Config.m_ReSortOnChange)
-      mf->UpdateListing(); // we need a complete new listing
-   else
-   {
-      if(status->flags & SA_MESSAGES)
-         mf->m_NumOfMessages  = status->messages;
-      MEventManager::Send( new MEventFolderUpdateData (mf) );
-   }
+   if(status->flags & SA_MESSAGES)
+      mf->m_NumOfMessages  = status->messages;
+   MEventManager::Send( new MEventFolderUpdateData (mf) );
 }
 
 /** log a message
@@ -1656,20 +1651,25 @@ MailFolderCC::ProcessEventQueue(void)
          MailFolderCC *mf = LookupObject(evptr->m_stream);
          CHECK_RET(mf,"NULL mailfolder");
          // Find the listing entry for this message:
-         unsigned long uid = mail_uid(evptr->m_stream, evptr->m_args[0].m_ulong);
+         UIdType uid = mail_uid(evptr->m_stream,
+                                evptr->m_args[0].m_ulong);
          HeaderInfoList *hil = mf->GetHeaders();
-         UIdType i;
-         for(i = 0; i < hil->Count() && (*hil)[i]->GetUId() != uid; i++)
-            ;
-         if(i < hil->Count())
+         ASSERT(hil);
+         if(hil)
          {
-            ASSERT(((*hil)[i])->GetUId() == uid);
-            MESSAGECACHE *elt = mail_elt (evptr->m_stream,evptr->m_args[0].m_ulong);
-            ((HeaderInfoCC *)((*hil)[i]))->m_Status = GetMsgStatus(elt);
-            // now we sent an update event to update folderviews etc
-            MEventManager::Send( new MEventFolderUpdateData (mf) );
+            UIdType i;
+            for(i = 0; i < hil->Count() && (*hil)[i]->GetUId() != uid; i++)
+               ;
+            if(i < hil->Count())
+            {
+               ASSERT(((*hil)[i])->GetUId() == uid);
+               MESSAGECACHE *elt = mail_elt (evptr->m_stream,evptr->m_args[0].m_ulong);
+               ((HeaderInfoCC *)((*hil)[i]))->m_Status = GetMsgStatus(elt);
+               // now we sent an update event to update folderviews etc
+               mf->UpdateMessageStatus(uid);
+            }
+            hil->DecRef();
          }
-         hil->DecRef();
          break;
       }
       case Expunged:

@@ -55,9 +55,11 @@
 BEGIN_EVENT_TABLE(wxFolderListCtrl, wxPListCtrl)
    EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
    EVT_CHAR              (wxFolderListCtrl::OnChar)
-   EVT_LIST_ITEM_ACTIVATED(-1, wxFolderListCtrl::OnMouse)
-
-#ifdef __WXGTK__
+   EVT_LIST_ITEM_ACTIVATED(-1, wxFolderListCtrl::OnActivated)
+   EVT_RIGHT_DOWN( wxFolderListCtrl::OnMouse)
+   EVT_MENU(-1, wxFolderListCtrl::OnCommandEvent)
+   EVT_LEFT_DCLICK(wxFolderListCtrl::OnDoubleClick)
+#ifndef OS_WIN
    EVT_MOTION (wxFolderListCtrl::OnMouseMove)
 #endif // wxGTK
 
@@ -102,13 +104,16 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       if(focused == -1 || focused >= nMsgs)
             return;
       // in this case we operate on the highlighted  message
+      UIdType focused_uid = UID_ILLEGAL;
       HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
-      const HeaderInfo *hi =(*hil)[focused]; 
-      UIdType focused_uid = hi->GetUId();
-      if(nselected == 0 && hi)
-         selections.Add(focused_uid);
-      hil->DecRef();
-
+      if(hil)
+      {
+         const HeaderInfo *hi =(*hil)[focused]; 
+         focused_uid = hi->GetUId();
+         if(nselected == 0 && hi)
+            selections.Add(focused_uid);
+         hil->DecRef();
+      }
       /** To    allow translations:
           Delete, Undelete, eXpunge, Copytofolder, Savetofile,
           Movetofolder, ReplyTo, Forward, Open, Print, Show Headers,
@@ -169,7 +174,6 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          m_FolderView->m_MessagePreview->DoMenuCommand(WXMENU_MSG_TOGGLEHEADERS);
          break;
       case 'V':
-         
          m_FolderView->PreviewMessage(focused_uid);
          break;
       case ' ':
@@ -197,13 +201,37 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
    //SetFocus();  //FIXME ugly wxGTK listctrl bug workaround
 }
 
-
-void wxFolderListCtrl::OnMouse(wxListEvent& event)
+void wxFolderListCtrl::OnMouse(wxMouseEvent& event)
 {
+// why doesn't this work?   wxASSERT(event.m_rightDown);
+   PopupMenu(m_menu, event.GetX(), event.GetY());
+}
+
+void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
+{
+   // there is exactly one item with the focus on  it:
+   long focused = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
+   // in this case we operate on the highlighted  message
+   HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
+   if(hil)
+   {
+      const HeaderInfo *hi =(*hil)[focused]; 
+      UIdType focused_uid = hi->GetUId();
+      m_FolderView->PreviewMessage(focused_uid);
+      hil->DecRef();
+   }
+}
+
+void wxFolderListCtrl::OnActivated(wxListEvent& event)
+{
+   
+#if 0
+   //FIXME: is this needed? I thought OnSelected() should do it?
    HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
    const HeaderInfo *hi = (*hil)[event.m_itemIndex];
    m_FolderView->PreviewMessage(hi->GetUId());
    hil->DecRef();
+#endif
 }
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
@@ -282,6 +310,18 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
       }
    }
 
+   // Create popup menu:
+#ifndef wxMENU_TEAROFF
+   ///FIXME WXWIN-COMPATIBILITY
+   m_menu = new wxMenu(); 
+#else
+   int style = 0;
+   if(READ_APPCONFIG(MP_TEAROFF_MENUS) != 0)
+      style = wxMENU_TEAROFF;
+   m_menu = new wxMenu("", style); 
+#endif
+   AppendToMenu(m_menu, WXMENU_MSG_BEGIN+1, WXMENU_MSG_END); 
+
    Clear();
 }
 
@@ -290,28 +330,31 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
 {
    long item = -1;
    HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
-   const HeaderInfo *hi;
-   while((item = GetNextItem(item,
-                             wxLIST_NEXT_ALL,wxLIST_STATE_SELECTED))
-         != -1)
-   {
-      hi = (*hil)[item++];
-      if(hi)
-         selections.Add(hi->GetUId());
-   }
-   // If none is selected, use the focused entry
-   if(selections.Count() == 0)
-   {
-      item = -1;
-      item = GetNextItem(item, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
-      if(item != -1)
+   const HeaderInfo *hi = NULL;
+   if(hil)
+   {   
+      while((item = GetNextItem(item,
+                                wxLIST_NEXT_ALL,wxLIST_STATE_SELECTED))
+            != -1)
       {
          hi = (*hil)[item++];
          if(hi)
             selections.Add(hi->GetUId());
       }
+      // If none is selected, use the focused entry
+      if(selections.Count() == 0)
+      {
+         item = -1;
+         item = GetNextItem(item, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
+         if(item != -1)
+         {
+            hi = (*hil)[item++];
+            if(hi)
+               selections.Add(hi->GetUId());
+         }
+      }
+      hil->DecRef();
    }
-   hil->DecRef();
    return selections.Count();
 }
 
@@ -387,12 +430,15 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
             // build sequence
             wxString sequence;
             HeaderInfoList *hil = m_ASMailFolder->GetHeaders();
-            for(size_t i = 0; i < hil->Count(); i++)
+            if(hil)
             {
-               sequence += strutil_ultoa((*hil)[i]->GetUId());
-               sequence += ',';
+               for(size_t i = 0; i < hil->Count(); i++)
+               {
+                  sequence += strutil_ultoa((*hil)[i]->GetUId());
+                  sequence += ',';
+               }
+               hil->DecRef();
             }
-            hil->DecRef();
             sequence = sequence.substr(0,sequence.Length()-1); //strip off comma
             m_ASMailFolder->SetSequenceFlag(sequence, MailFolder::MSG_STAT_DELETED);
          }
@@ -444,7 +490,9 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          // the callback will preview the (just) selected message
       }
 #ifndef OS_WIN
-      m_FolderCtrl->SetFocus(); // so we can react to keyboard events
+      m_FocusFollowMode = READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE);
+      if(m_FocusFollowMode)
+         m_FolderCtrl->SetFocus(); // so we can react to keyboard events
 #endif
    }
 }
@@ -530,39 +578,9 @@ wxFolderView::Update(HeaderInfoList *listing)
    bool   dateGMT;
    
    n = listing->Count();
-
-   // mildly annoying, but have to do it in order to prevent the generation of
-   // error messages about failed env var expansion (this string contains '%'
-   // which introduce env vars under Windows)
-   {
-      ProfileEnvVarSave suspend(mApplication->GetProfile(),false);
-      dateFormat = READ_APPCONFIG(MP_DATE_FMT);
-      dateGMT = READ_CONFIG(m_Profile, MP_DATE_GMT);
-      
-#if 0
-      //FIXME: check date format somehow
-     // should have _exactly_ 3 format specificators, otherwise can't call
-      // Printf()!
-      String specs = strutil_extract_formatspec(dateFormat);
-      if ( specs != "ddd" )
-      {
-         static bool s_bErrorMessageGiven = false;
-         if ( s_bErrorMessageGiven )
-         {
-            // don't give it each time - annoying...
-            s_bErrorMessageGiven = true;
-
-            wxLogError(_("Invalid value '%s' for the date format: it should "
-                         "contain exacty 3 %%u format specificators. Default "
-                         "value '%s' will be used instead."),
-                         dateFormat.c_str(), (unsigned int)MP_DATE_FMT_D);
-         }
-
-         dateFormat = MP_DATE_FMT_D;
-      }
-#endif
-   }
-
+   dateFormat = READ_APPCONFIG(MP_DATE_FMT);
+   dateGMT = READ_CONFIG(m_Profile, MP_DATE_GMT);
+   
    if(n < m_NumOfMessages)  // messages have been deleted, start over
    {
       m_FolderCtrl->Clear();

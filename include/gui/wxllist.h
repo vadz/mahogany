@@ -971,10 +971,13 @@ public:
        @param offset an optional offset to shift printout
        @param top optional y coordinate where to start drawing
        @param bottom optional y coordinate where to stop drawing
+       @param clipStrictly if set, do not draw objects which reach
+       beyond "bottom". Set this when printing.
    */
    void Draw(wxDC &dc,
              const wxPoint &offset = wxPoint(0,0),
-             CoordType top = -1, CoordType bottom = -1);
+             CoordType top = -1, CoordType bottom = -1,
+             bool clipStrictly = false);
 
    /** Calculates new layout for the list, like Draw() but does not
        actually draw it.

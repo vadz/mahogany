@@ -256,6 +256,8 @@ private:
    //@{
    /// Do we want to auto-replace the selection with new text?
    bool         m_AutoDeleteSelection;
+   /// Do we want the focus to follow the mouse?
+   bool m_FocusFollowMode;
    //@}
    DECLARE_EVENT_TABLE()
 };

@@ -22,6 +22,7 @@
 #include <wx/icon.h>
 #include <wx/frame.h>
 #include <wx/progdlg.h>
+#include <wx/dialog.h>
 
 // fwd decl
 class ProfileBase;
@@ -264,5 +265,30 @@ bool ConfigureSorting(ProfileBase *profile, wxWindow *parent);
 /* Configuration dialog for sorting messages. */
 extern
 bool ConfigureDateFormat(ProfileBase *profile, wxWindow *parent);
+
+/** Semi-modal dialog to allow pop-up help to work.
+    (Yes, I know it's a funny name, but so is the whole Help/Modal 
+    problem... :-)
+
+    Behaves identical to wxDialog, but ShowModal() is only a
+    fake-modal mode to allow one to browse the help window.
+*/
+class wxSMDialog : public wxDialog
+{
+public:
+   wxSMDialog( wxWindow *parent, wxWindowID id,
+               const wxString &title,
+               const wxPoint &pos = wxDefaultPosition,
+               const wxSize &size = wxDefaultSize,
+               long style = wxDEFAULT_DIALOG_STYLE,
+               const wxString &name = wxDialogNameStr )
+      : wxDialog ( parent, id, title, pos, size, style, name)
+      {
+      }
+
+   wxSMDialog() : wxDialog() {}
+   virtual int ShowModal();
+   virtual void EndModal(int rc);
+};
 
 #endif  //WXMDIALOGS_H

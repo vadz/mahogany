@@ -454,6 +454,7 @@ extern void
 CreateMMenu(wxMenuBar *menubar, int menu_begin, int menu_end, const wxString &caption)
 {                                                                       
 #ifndef wxMENU_TEAROFF
+   ///FIXME WXWIN-COMPATIBILITY
    wxMenu *pMenu = new wxMenu(); 
 #else
    int style = 0;

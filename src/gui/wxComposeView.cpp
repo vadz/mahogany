@@ -57,7 +57,6 @@
 #include "MDialogs.h"
 #include "HeadersDialogs.h"
 
-#include "gui/wxFontManager.h"
 #include "gui/wxIconManager.h"
 
 #include "gui/wxllist.h"
@@ -506,6 +505,10 @@ BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
    // process termination notification
    EVT_END_PROCESS(HelperProcess_Editor, wxComposeView::OnExtEditorTerm)
 
+#ifndef OS_WIN
+   EVT_MOTION(wxComposeView::OnMouseMove)
+#endif
+   
    // button notifications
    EVT_BUTTON(IDB_EXPAND, wxComposeView::OnExpand)
 END_EVENT_TABLE()
@@ -1247,6 +1250,9 @@ wxComposeView::CreateFTCanvas(void)
 
    m_font = wxFonts[m_font];
    m_size = READ_CONFIG(m_Profile,MP_CVIEW_FONT_SIZE);
+#ifndef OS_WIN
+   m_FocusFollowMode = READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE) != 0;
+#endif
 
    EnableEditing(true);
    m_LayoutWindow->Clear(m_font, m_size, (int) wxNORMAL, (int)wxNORMAL, 0, &m_fg, &m_bg);
@@ -2442,14 +2448,18 @@ VarExpander::ExpandMisc(const String& name, String *value) const
    {
       case Var_Date:
          {
-            char buf[256];
             time_t ltime;
             (void)time(&ltime);
+#if 0
+            char buf[256];
             tm *now = localtime(&ltime);
 
             (void)strftime(buf, WXSIZEOF(buf), "%x", now);
-
             *value = buf;
+#endif
+            *value = strutil_ftime(
+               ltime,
+               READ_CONFIG(m_profile, MP_DATE_FMT));
          }
          break;
 

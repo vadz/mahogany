@@ -715,10 +715,10 @@ static int CompareStatus(int stat1, int stat2, int flag)
    if( stat1 & MailFolder::MSG_STAT_DELETED )
    {
       if( ! (stat2 & MailFolder::MSG_STAT_DELETED ))
-         return -flag;
+         return flag;
    }
    else if( stat2 & MailFolder::MSG_STAT_DELETED )
-      return flag;
+      return -flag;
 
    /* We use a scoring system:
       recent = +1
@@ -740,7 +740,7 @@ static int CompareStatus(int stat1, int stat2, int flag)
    if( stat2 & MailFolder::MSG_STAT_ANSWERED )
       score2 -= 1;
 
-   return (score1 > score2) ? flag : (score1 < score2) ? -flag : 0;
+   return (score1 > score2) ? -flag : (score1 < score2) ? flag : 0;
 }
 
 extern "C"
@@ -754,6 +754,7 @@ extern "C"
       long sortOrder = gs_SortOrder, criterium;
 
       int result = 0;
+      int flag;
       
       while(result == 0 && sortOrder != 0 )
       {
@@ -765,62 +766,53 @@ extern "C"
          case MSO_NONE:
             break;
          case MSO_DATE:
+         case MSO_DATE_REV:
+            flag = criterium == MSO_DATE ? -1 : 1;
             if(i1->GetDate() > i2->GetDate())
-               result = 1;
+               result = flag;
             else
                if(i1->GetDate() < i2->GetDate())
-                  result = -1;
+                  result = -flag;
                else
                   result = 0;
-            break;
-         case MSO_DATE_REV:
-            if(i1->GetDate() < i2->GetDate())
-               result = 1;
-            else
-               if(i1->GetDate() > i2->GetDate())
-                  result = -1;
-               else
-                  result = 0;
-            break;
+         break;
          case MSO_SUBJECT:
-            result = Stricmp(i1->GetSubject(), i2->GetSubject());
-            break;
-       case MSO_SUBJECT_REV:
-            result = - Stricmp(i1->GetSubject(), i2->GetSubject());
+         case MSO_SUBJECT_REV:
+            result = criterium == MSO_SUBJECT ?
+               Stricmp(i1->GetSubject(), i2->GetSubject())
+               : -Stricmp(i1->GetSubject(), i2->GetSubject());
             break;
          case MSO_AUTHOR:
-            result = Stricmp(i1->GetFrom(), i2->GetFrom());
-            break;
          case MSO_AUTHOR_REV:
-            result = -Stricmp(i1->GetFrom(), i2->GetFrom());
+            result = criterium == MSO_SUBJECT ?
+               Stricmp(i1->GetFrom(), i2->GetFrom())
+               : -Stricmp(i1->GetFrom(), i2->GetFrom());
             break;
          case MSO_STATUS_REV:
          case MSO_STATUS:
-         {
-            int flag =
-               (criterium == MSO_STATUS_REV) ? 1 : -1;
-            int
-               stat1 = i1->GetStatus(),
-               stat2 = i2->GetStatus();
-            // msg1 new?
-            result = CompareStatus(stat1, stat2, flag);
-            break;
-         }
+             flag = criterium == MSO_STATUS_REV ? -1 : 1;
+             {
+                int
+                   stat1 = i1->GetStatus(),
+                   stat2 = i2->GetStatus();
+                // ms   g1 new?
+                result = CompareStatus(stat1, stat2, flag);
+             }
+             break;
          case MSO_SCORE:
          case MSO_SCORE_REV:
-         {
-            int flag =
-               (criterium == MSO_SCORE_REV) ? -1 : 1;
-            long score1 = 0, score2 = 0;
-            if(gs_ScoreModule)
+            flag = criterium == MSO_SCORE_REV ? -1 : 1;
             {
-               score1 = gs_ScoreModule->ScoreMessage(gs_MailFolder, i1);
-               score2 = gs_ScoreModule->ScoreMessage(gs_MailFolder, i2);
+               long score1 = 0, score2 = 0;
+               if(gs_ScoreModule)
+               {
+                  score1 = gs_ScoreModule->ScoreMessage(gs_MailFolder, i1);
+                  score2 = gs_ScoreModule->ScoreMessage(gs_MailFolder, i2);
+               }
+               result = score1 > score2 ?
+                  flag : score2 > score1 ?
+                  -flag : 0;
             }
-            return score1 > score2 ?
-               flag : score2 > score1 ?
-               -flag : 0;
-         }
          break;
          case MSO_THREAD:
          case MSO_THREAD_REV:
@@ -895,6 +887,18 @@ MailFolderCmn::UpdateListing(void)
          m_OldMessageCount = hil->Count();
 
       hil->DecRef();
+   }
+}
+
+void
+MailFolderCmn::UpdateMessageStatus(UIdType uid)
+{
+   if(m_Config.m_ReSortOnChange)
+      UpdateListing(); // we need a complete new listing
+   else
+   {
+      /// just tell them that we have an updated listing:
+      MEventManager::Send( new MEventFolderUpdateData (this) );
    }
 }
 

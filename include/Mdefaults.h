@@ -139,6 +139,8 @@
 #define   MP_EXPAND_TREECTRL   "ExpandTreeControl"
 /// use tear-off menus?
 #define   MP_TEAROFF_MENUS     "TearOffMenus"
+/// focus follows mouse?
+#define MP_FOCUS_FOLLOWSMOUSE  "FocusFollowsMouse"
 /// dockable menu bars?
 #define   MP_DOCKABLE_MENUBARS "MenuBarsDockable"
 /// dockable tool bars?
@@ -550,6 +552,8 @@
 #define   MP_EXPAND_TREECTRL_D   1
 /// use tear-off menus?
 #define   MP_TEAROFF_MENUS_D   1l
+/// focus follows mouse?
+#define MP_FOCUS_FOLLOWSMOUSE_D    1l
 /// dockable menu bars?
 #define   MP_DOCKABLE_MENUBARS_D   1l
 /// dockable tool bars?
