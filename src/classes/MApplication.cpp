@@ -42,8 +42,9 @@
 #include "MailFolder.h"
 #include "HeaderInfo.h"
 #include "FolderMonitor.h"
-#include "PathFinder.h"         // for PathFinder
+#include "PathFinder.h"       // for PathFinder
 #include "Composer.h"         // for RestoreAll()
+#include "SendMessage.h"
 
 #include "gui/wxMainFrame.h"
 #include "gui/wxMDialogs.h"         // MDialog_YesNoDialog
@@ -1108,7 +1109,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
       return;
    }
 
-   MailFolder *mf = MailFolder::OpenFolder(folderOutbox);
+   MailFolder_obj mf(MailFolder::OpenFolder(folderOutbox));
    if(! mf)
    {
       String msg;
@@ -1118,130 +1119,95 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
    }
 
    if( mf->IsEmpty() )
-   {  // nothing to do
-      mf->DecRef();
+   {
+      // nothing to do
       return;
    }
 
 #ifdef USE_DIALUP
    if(checkOnline && ! IsOnline())
    {
-      if ( MDialog_YesNoDialog(
-         _("Cannot send queued messages while dialup network is down.\n"
-           "Do you want to go online now?"),
-         NULL,
-         MDIALOG_YESNOTITLE,
-         M_DLG_YES_DEFAULT,
-         M_MSGBOX_GO_ONLINE_TO_SEND_OUTBOX) )
+      if ( !MDialog_YesNoDialog
+            (
+             _("Cannot send queued messages while dialup network is down.\n"
+               "Do you want to go online now?"),
+             NULL,
+             MDIALOG_YESNOTITLE,
+             M_DLG_YES_DEFAULT,
+             M_MSGBOX_GO_ONLINE_TO_SEND_OUTBOX
+            ) )
       {
-         STATUSMESSAGE((_("Going online...")));
-         GoOnline();
-      }
-      else
-      {
-         mf->DecRef();
          return;
       }
+
+      STATUSMESSAGE((_("Going online...")));
+      GoOnline();
    }
 #endif // USE_DIALUP
 
-   HeaderInfoList *hil = mf->GetHeaders();
+   HeaderInfoList_obj hil(mf->GetHeaders());
    if(! hil)
    {
-      mf->DecRef();
-      return; // nothing to do
+      // hmm, folder is not empty but has no headers (maybe no more?)?
+      return;
    }
 
-   const HeaderInfo *hi;
-   Message *msg;
    // We can't have a for loop over the HeaderInfoList as messages
    // will be deleted from it just after sending (that is, inside
    // the loop)
-   size_t totalNb = hil->Count();
+   const size_t totalNb = hil->Count();
    size_t nbOfMsgTried = 0;
-   Message *lastMsgTried = 0; 
    UIdType i = 0;
+
    // FIXME: rewrite this loop as a for loop and do not try
    // to delete messages inside the body of the loop ?
-   while (i < hil->Count())
+   while ( i < hil->Count() )
    {
-      hi = (*hil)[i];
-      ASSERT(hi);
-      msg = mf->GetMessage(hi->GetUId());
-      ASSERT(msg);
-      if(msg)
+      nbOfMsgTried++;
+
+      const HeaderInfo *hi = hil[i];
+      if ( !hi )
       {
-         // Temporary kludge because the same message is sent multiple
-         // time in some 'to-be-determined' cases...
-         if (lastMsgTried == msg) {
-            wxFAIL_MSG(_T("Sending same message again !?"));
-            i++;
-            continue;
-         }
-         lastMsgTried = msg;
-         String msgText;
-         String target;
-         bool alreadyCounted = false;
-         msg->GetHeaderLine(_T("To"), target);
-         Protocol protocol = Prot_Illegal;
-         if(target.Length() > 0)
-         {
-#ifdef OS_UNIX
-            if ( READ_APPCONFIG(MP_USE_SENDMAIL) )
-               protocol = Prot_Sendmail;
-            else
-#endif // OS_UNIX
-               protocol = Prot_SMTP;
-            STATUSMESSAGE(( _("Sending message %lu/%lu: %s"),
-                            (unsigned long)(nbOfMsgTried+1),
-                            (unsigned long)(totalNb),
-                            msg->Subject().c_str()));
-            wxYield();
-            if(msg->SendOrQueue(protocol, TRUE))
-            {
-               count++; alreadyCounted = true;
-               mf->DeleteMessage(hi->GetUId());
-            }
-            else
-            {
-               String msg;
-               msg.Printf(_("Cannot send message '%s'."),
-                          hi->GetSubject().c_str());
-               ERRORMESSAGE((msg));
-               ++i;
-            }
-         }
-         msg->GetHeaderLine(_T("Newsgroups"), target);
-         protocol = Prot_NNTP; // default
-         if(target.Length() > 0)
-         {
-            protocol = Prot_NNTP;
-            STATUSMESSAGE(( _("Posting article %lu/%lu: %s"),
-                            (unsigned long)(nbOfMsgTried+1),
-                            (unsigned long)(totalNb),
-                            msg->Subject().c_str()));
-            wxYield();
-            if(msg->SendOrQueue(protocol, TRUE))
-            {
-               if(! alreadyCounted) count++;
-               mf->DeleteMessage(hi->GetUId());
-            }
-            else
-            {
-               String msg;
-               msg.Printf(_("Cannot post article '%s'."),
-                          hi->GetSubject().c_str());
-               ERRORMESSAGE((msg));
-               ++i;
-            }
-         }
-         nbOfMsgTried++;
+         ERRORMESSAGE(( _("Failed to access message #%lu in the outbox."),
+                        (unsigned long)nbOfMsgTried ));
+         ++i;
+
+         continue;
       }
-      //ASSERT(0); //TODO: static SendMessageCC::Send(String)!!!
-      SafeDecRef(msg);
+
+      Message_obj msg(mf->GetMessage(hi->GetUId()));
+      if ( !msg )
+      {
+         ERRORMESSAGE(( _("Failed to recreate message #%lu from the outbox."),
+                        (unsigned long)nbOfMsgTried ));
+         ++i;
+
+         continue;
+      }
+
+      const String subject = msg->Subject();
+      STATUSMESSAGE(( _("Sending message %lu/%lu: %s"),
+                      (unsigned long)nbOfMsgTried,
+                      (unsigned long)totalNb,
+                      subject.c_str()));
+      wxYield();
+      SendMessage_obj
+         sendMsg(SendMessage::CreateFromMsg(mf->GetProfile(), msg.Get()));
+
+      if ( sendMsg && sendMsg->SendOrQueue(SendMessage::NeverQueue) )
+      {
+         count++;
+         mf->DeleteMessage(hi->GetUId());
+      }
+      else
+      {
+         ERRORMESSAGE((_("Cannot send message '%s'."), subject.c_str()));
+         ++i;
+      }
+
       mf->ExpungeMessages();
    }
-   SafeDecRef(hil);
+
    if(count > 0)
    {
       String msg;
@@ -1249,7 +1215,6 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
                  (unsigned long) count, mf->GetName().c_str());
       STATUSMESSAGE((msg));
    }
-   SafeDecRef(mf);
 }
 
 // ----------------------------------------------------------------------------

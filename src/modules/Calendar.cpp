@@ -28,6 +28,7 @@
 #include "UIdArray.h"
 
 #include "HeaderInfo.h"
+#include "SendMessage.h"
 
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxOptionsPage.h"
@@ -997,10 +998,16 @@ CalendarFrame::CheckUpdate(MailFolder *eventFolder)
             }
             else if(action == CAL_ACTION_SEND)
             {
-               if( msg->SendOrQueue() )
+               SendMessage_obj sendMsg(SendMessage::CreateFromMsg
+                                       (
+                                        mf->GetProfile(),
+                                        msg
+                                       ));
+
+               if ( sendMsg && sendMsg->SendOrQueue() )
                {
                   wxString txt;
-                  txt.Printf(_("Send or queued message `%s'."),
+                  txt.Printf(_("Sent or queued message `%s'."),
                              m_Alarms[count]->GetSubject().c_str());
                   GetStatusBar()->SetStatusText(txt);
                   DeleteOrRewrite(mf, msg,

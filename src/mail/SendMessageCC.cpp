@@ -192,7 +192,19 @@ SendMessage::CreateResent(Profile *profile,
                           const Message *message,
                           wxFrame *frame)
 {
-   return new SendMessageCC(profile, Prot_Default, frame, message);
+   return new SendMessageCC(profile, Prot_Default, frame, message, true);
+}
+
+/* static */
+SendMessage *
+SendMessage::CreateFromMsg(Profile *profile,
+                           const Message *message,
+                           Protocol protocol,
+                           wxFrame *frame)
+{
+   CHECK( message, NULL, _T("no Message in SendMessage::CreateFromMsg()") );
+
+   return new SendMessageCC(profile, protocol, frame, message, false);
 }
 
 SendMessage::~SendMessage()
@@ -206,10 +218,13 @@ SendMessage::~SendMessage()
 SendMessageCC::SendMessageCC(Profile *profile,
                              Protocol protocol,
                              wxFrame *frame,
-                             const Message *message)
+                             const Message *message,
+                             bool resend)
 {
    m_frame = frame;
    m_encHeaders = wxFONTENCODING_SYSTEM;
+
+   m_encodeHeaders = true;
 
    m_headerNames =
    m_headerValues = NULL;
@@ -232,15 +247,27 @@ SendMessageCC::SendMessageCC(Profile *profile,
    m_profile = profile;
    m_profile->IncRef();
 
-   // choose the protocol: mail (SMTP, Sendmail) or NNTP
+   // choose the protocol: mail (and whether it is SMTP or sendmail) or news
    if ( protocol == Prot_Default )
    {
+      // if we have the original message, try to get protocol from it first
+      if ( message )
+      {
+         // autodetect protocol:
+         String tmp;
+         if ( message->GetHeaderLine(_T("Newsgroups"), tmp) )
+            protocol = Prot_NNTP;
+      }
+
+      if ( protocol == Prot_Default )
+      {
 #ifdef OS_UNIX
-      if ( READ_CONFIG_BOOL(profile, MP_USE_SENDMAIL) )
-         protocol = Prot_Sendmail;
-      else
+         if ( READ_CONFIG_BOOL(profile, MP_USE_SENDMAIL) )
+            protocol = Prot_Sendmail;
+         else
 #endif // OS_UNIX
-         protocol = Prot_SMTP;
+            protocol = Prot_SMTP;
+      }
    }
 
    m_Protocol = protocol;
@@ -315,19 +342,35 @@ SendMessageCC::SendMessageCC(Profile *profile,
    // -----------------------------------------
 
    if ( message )
-      InitResent(message);
+   {
+      if ( resend )
+         InitResent(message);
+      else
+         InitFromMsg(message);
+   }
    else
+   {
       InitNew();
+   }
 }
 
-void SendMessageCC::InitNew()
+void SendMessageCC::InitBody()
 {
-   // FIXME: why do we do it here, it seems to be overwritten in Build()??
+   // this is some strange code: we start by creating a fake multipart and then
+   // flatten it in Build() if we realize that we don't have any other parts
+   //
+   // it could probably have been done simpler but this code is there since a
+   // long time and seems to work, so let's not touch it without reason
    m_Body->type = TYPEMULTIPART;
    m_Body->nested.part = mail_newbody_part();
    m_Body->nested.part->next = NULL;
    m_NextPart = m_Body->nested.part;
    m_LastPart = m_NextPart;
+}
+
+void SendMessageCC::InitNew()
+{
+   InitBody();
 
    m_ReplyTo = READ_CONFIG_TEXT(m_profile, MP_REPLY_ADDRESS);
 
@@ -421,6 +464,120 @@ void SendMessageCC::InitResent(const Message *message)
    String text = message->FetchText();
    m_Body->contents.text.data = (unsigned char *)cpystr(wxConvertWX2MB(text.c_str()));
    m_Body->contents.text.size = text.length();
+}
+
+void
+SendMessageCC::InitFromMsg(const Message *message)
+{
+   // the headers must be already encoded in the existing message, don't encode
+   // them twice
+   m_encodeHeaders = false;
+
+   InitBody();
+
+   SetSubject(message->Subject());
+
+   // VZ: I'm not sure at all about what exactly we're trying to do here so
+   //     this is almost surely wrong - but the old code was even more wrong
+   //     than the current one! (FIXME)
+   AddressList_obj addrListReplyTo(message->GetAddressList(MAT_REPLYTO));
+   Address *addrReplyTo = addrListReplyTo ? addrListReplyTo->GetFirst() : NULL;
+
+   AddressList_obj addrListFrom(message->GetAddressList(MAT_FROM));
+   Address *addrFrom = addrListFrom ? addrListFrom->GetFirst() : NULL;
+   if ( !addrFrom )
+      addrFrom = addrReplyTo;
+
+   String from,
+          replyto;
+   if ( addrFrom )
+      from = addrFrom->GetAddress();
+   if ( addrReplyTo )
+      replyto = addrReplyTo->GetAddress();
+
+   if ( addrFrom || addrReplyTo )
+      SetFrom(from, replyto);
+
+   switch ( m_Protocol )
+   {
+      case Prot_SMTP:
+         {
+            static const wxChar *headers[] =
+            {
+               _T("To"),
+               _T("Cc"),
+               _T("Bcc"),
+               NULL
+            };
+            wxArrayString recipients = message->GetHeaderLines(headers);
+
+            SetAddresses(recipients[0], recipients[1], recipients[2]);
+         }
+         break;
+
+      case Prot_NNTP:
+         {
+            String newsgroups;
+            if ( message->GetHeaderLine(_T("Newsgroups"), newsgroups) )
+               SetNewsgroups(newsgroups);
+         }
+         break;
+
+      // make gcc happy
+      case Prot_Illegal:
+      default:
+         FAIL_MSG(_T("unknown protocol"));
+   }
+
+   const int count = message->CountParts();
+   for(int i = 0; i < count; i++)
+   {
+      unsigned long len;
+      const void *data = message->GetPartContent(i, &len);
+      String dispType;
+      MessageParameterList const &dlist = message->GetDisposition(i, &dispType);
+      MessageParameterList const &plist = message->GetParameters(i);
+
+      AddPart
+      (
+         message->GetPartType(i),
+         data, len,
+         strutil_after(message->GetPartMimeType(i),'/'), //subtype
+         dispType,
+         &dlist,
+         &plist
+      );
+   }
+
+   String header = message->GetHeader();
+   String headerLine;
+   const wxChar *cptr = header;
+   String name, value;
+   do
+   {
+      while(*cptr && *cptr != '\r' && *cptr != '\n')
+         headerLine << *cptr++;
+      while(*cptr == '\r' || *cptr == '\n')
+         cptr ++;
+      if(*cptr == ' ' || *cptr == '\t') // continue
+      {
+         while(*cptr == ' ' || *cptr == '\t')
+            cptr++;
+         continue;
+      }
+      // end of this line
+      name = headerLine.BeforeFirst(':').Lower();
+      value = headerLine.AfterFirst(':');
+      if ( name != _T("date") &&
+           name != _T("from") &&
+           name != _T("message-id") &&
+           name != _T("mime-version") &&
+           name != _T("content-type") &&
+           name != _T("content-disposition") &&
+           name != _T("content-transfer-encoding") )
+         AddHeaderEntry(name, value);
+      headerLine = _T("");
+   } while ( *cptr && *cptr != '\012' );
 }
 
 SendMessageCC::~SendMessageCC()
@@ -539,8 +696,12 @@ static inline bool NeedsEncodingInHeader(unsigned char c)
 }
 
 String
-SendMessageCC::EncodeHeaderString(const String& header, bool /* isaddr */)
+SendMessageCC::EncodeHeaderString(const String& header)
 {
+   // if headers are already encoded, don't do anything
+   if ( !m_encodeHeaders )
+      return header;
+
    // if a header contains "=?", encode it anyhow to avoid generating invalid
    // encoded words
    if ( !wxStrstr(header, _T("=?")) )
@@ -729,7 +890,7 @@ SendMessageCC::EncodeAddress(struct mail_address *adr)
    if ( adr->personal )
    {
       char *tmp = adr->personal;
-      adr->personal = cpystr(wxConvertWX2MB(EncodeHeaderString(wxConvertMB2WX(tmp), true /* address field */)));
+      adr->personal = cpystr(wxConvertWX2MB(EncodeHeaderString(wxConvertMB2WX(tmp))));
 
       fs_give((void **)&tmp);
    }

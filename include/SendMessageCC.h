@@ -118,13 +118,20 @@ protected:
    SendMessageCC(Profile *profile,
                  Protocol protocol,
                  wxFrame *frame,
-                 const Message *message = NULL);
+                 const Message *message = NULL,
+                 bool resend = false);
 
    /// init the fields for a new message
    void InitNew();
 
    /// init the fields for a resent message
    void InitResent(const Message *message);
+
+   /// init the header and contents from an existing message
+   void InitFromMsg(const Message *message);
+
+   /// common part of InitNew() and InitFromMsg()
+   void InitBody();
 
    //@}
 
@@ -147,7 +154,7 @@ protected:
    String EncodingToCharset(wxFontEncoding enc);
 
    /// encode the string using m_encHeaders encoding
-   String EncodeHeaderString(const String& header, bool isAddressField = false);
+   String EncodeHeaderString(const String& header);
 
    /// encode the address field using m_encHeaders
    void EncodeAddress(struct mail_address *adr);
@@ -275,6 +282,13 @@ private:
 
    /// extra headers to be added before sending
    MessageHeadersList m_extraHeaders;
+
+   /**
+      Normally true and we RFC2047-encode all text headers, but false if we aer
+      created from an existing message in which case all of the headers had
+      been already encoded and don't need to be reencoded again.
+    */
+   bool m_encodeHeaders;
 
    /// a list of folders to save copies of the message in after sending
    M_LIST_OWN(StringList, String) m_FccList;

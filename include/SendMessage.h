@@ -52,29 +52,49 @@ public:
    /** @name Creating outgoing messages
 
        A new message is created with Create(), to redirect/bounce an existing
-       one, use CreateResent()
+       one, use CreateResent() and to send an existing message (typically from
+       some kind of Outbox folder) for the first time use CreateFromMsg().
    */
    //@{
 
-   /** Creates an empty object, setting some initial values.
+   /**
+      Creates an empty object, setting some initial values.
 
-       @param profile pointer to the profile to use (must be non NULL)
-       @param protocol which protocol to use for sending
-       @param frame the parent window for dialogs, may be NULL
+      @param profile pointer to the profile to use (must be non NULL)
+      @param protocol which protocol to use for sending
+      @param frame the parent window for dialogs, may be NULL
    */
    static SendMessage *Create(Profile *profile,
                               Protocol protocol = Prot_Default,
                               wxFrame *frame = NULL);
 
-   /** Creates a duplicate of an existing message.
+   /**
+      Creates a duplicate of an existing message.
 
-       @param profile pointer to the profile to use (must be non NULL)
-       @param message the original message (can't be NULL)
-       @param frame the parent window for dialogs, may be NULL
+      This must be used only to resend a message which had been previously sent
+      (and received), as its name indicates. Use CreateFromMsg() to create a
+      SendMessage from a message which has never been sent.
+
+      @param profile pointer to the profile to use (must be non NULL)
+      @param message the original message (can't be NULL)
+      @param frame the parent window for dialogs, may be NULL
    */
    static SendMessage *CreateResent(Profile *profile,
                                     const Message *message,
                                     wxFrame *frame = NULL);
+
+   /**
+      Creates a new SendMessage object and initializes it with the existing
+      message contents.
+
+      @param profile pointer to the profile to use (must be non NULL)
+      @param message the original message (can't be NULL)
+      @param frame the parent window for dialogs, may be NULL
+    */
+   static SendMessage *CreateFromMsg(Profile *profile,
+                                     const Message *message,
+                                     Protocol protocol = Prot_Default,
+                                     wxFrame *frame = NULL);
 
    //@}
 
