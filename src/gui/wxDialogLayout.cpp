@@ -643,11 +643,10 @@ void wxEnhancedPanel::RefreshScrollbar(const wxSize& size)
       static const int nPageSize = 10;
 
       m_canvas->SetScrollbars(0, nPageSize, 0, height / nPageSize);
-      m_canvas->EnableScrolling(FALSE, TRUE);
    }
-   else
+   else // remove scrollbar completely, we don't need it
    {
-      m_canvas->EnableScrolling(FALSE, FALSE);
+      m_canvas->SetScrollbars(0, 0, 0, 0);
    }
 
    GetCanvas()->SetSize(size);
