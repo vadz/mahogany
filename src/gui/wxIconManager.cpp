@@ -230,7 +230,7 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
          {
             wxLogError(_("The setting for image conversion program should include "
                          "exactly two '%%s' format specificators.\n"
-                         "The current settin '%s' is incorrect and "
+                         "The current setting '%s' is incorrect and "
                          "the default value will be used instead."),
                        strConvertProgram.c_str());
             strConvertProgram = MP_CONVERTPROGRAM_D;
