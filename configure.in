@@ -475,10 +475,14 @@ case "$USE_SSL" in
 		AC_CACHE_CHECK(if libssl needs libcrypto,
 			m_cv_ssl_needs_crypto,
 		[AC_TRY_LINK([#include "$ssl_option/openssl/ssl.h"],
-			[SSLv2_client_method(); return 0;],m_cv_ssl_needs_crypto="no")
-		LIBS="$LIBS -lcrypto"
-		AC_TRY_LINK([#include "$ssl_option/openssl/ssl.h"],
-			[SSLv2_client_method(); return 0;],m_cv_ssl_needs_crypto="yes")])
+			[SSLv2_client_method(); return 0;],m_cv_ssl_needs_crypto="no");
+		case "$m_cv_ssl_needs_crypto" in
+		no) ;;
+		*)  LIBS="$LIBS -lcrypto"
+			AC_TRY_LINK([#include "$ssl_option/openssl/ssl.h"],
+				[SSLv2_client_method(); return 0;],m_cv_ssl_needs_crypto="yes")
+		;;
+		esac])
 		LIBS="$LIBS_SAVE";;
 	no) ;;
 	nope) ;;
