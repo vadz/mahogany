@@ -312,9 +312,10 @@ END_EVENT_TABLE()
 // ----------------------------------------------------------------------------
 
 /// returns the argument if it's !NULL of the top-level application frame
-static inline wxWindow *GetParent(const wxWindow *parent)
+static inline wxWindow *GetDialogParent(const wxWindow *parent)
 {
-  return parent == NULL ? mApplication->TopLevelFrame() : (wxWindow *)parent;
+  return parent == NULL ? mApplication->TopLevelFrame()
+                        : GetFrame(parent);
 }
 
 // under Windows we don't use wxCENTRE style which uses the generic message box
@@ -457,7 +458,7 @@ bool MInputBox(wxString *pstr,
   wxString strConfigPath;
   strConfigPath << "/Prompts/" << szKey;
 
-  MTextInputDialog dlg(GetParent(parent), *pstr,
+  MTextInputDialog dlg(GetDialogParent(parent), *pstr,
                        strCaption, strPrompt, strConfigPath, def, passwordflag);
 
   // do not allow attempts to store the password:
@@ -484,7 +485,7 @@ MDialog_ErrorMessage(const char *msg,
                      bool /* modal */)
 {
    wxMessageBox(msg, wxString("Mahogany : ") + title, Style(wxOK|wxICON_EXCLAMATION),
-                GetParent(parent));
+                GetDialogParent(parent));
 }
 
 
@@ -546,13 +547,13 @@ MDialog_Message(const char *message,
    {
       wxPMessageBox(configPath, message, caption,
                     Style(wxOK | wxICON_INFORMATION),
-                    GetParent(parent));
+                    GetDialogParent(parent));
    }
    else
    {
       wxMessageBox(message, caption,
                    Style(wxOK | wxICON_INFORMATION),
-                   GetParent(parent));
+                   GetDialogParent(parent));
    }
 }
 
@@ -582,13 +583,13 @@ MDialog_YesNoDialog(const char *message,
    {
       return wxPMessageBox(configPath, message, caption,
                            style,
-                           GetParent(parent)) == wxYES;
+                           GetDialogParent(parent)) == wxYES;
    }
    else
    {
       return wxMessageBox(message, caption,
                           style,
-                          GetParent(parent)) == wxYES;
+                          GetDialogParent(parent)) == wxYES;
    }
 }
 
@@ -664,17 +665,15 @@ MDialog_AdbLookupList(ArrayAdbElements& aEntries,
    int
       w = 400,
       h = 400;
+
+   parent = GetDialogParent(parent);
    if(parent)
    {
-      parent = GetFrame((wxWindow *)parent);
-      if(parent)
-      {
-         parent->GetClientSize(&w,&h);
-         w = (w * 8) / 10;
-         h = (h * 8) / 10;
-      }
+      parent->GetClientSize(&w,&h);
+      w = (w * 8) / 10;
+      h = (h * 8) / 10;
    }
-   
+
    if ( nEntryCount == 0 ) {
      // no matches at all
      return -1;
@@ -754,6 +753,7 @@ END_EVENT_TABLE()
 wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
              : wxLayoutWindow(parent)
 {
+   // strings used for primitive alignment of text
    static const char *align = "                 ";
    static const char *align2 = "        ";
 #ifdef __WXMSW__

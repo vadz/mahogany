@@ -64,7 +64,7 @@ inline long AdjustCharHeight(long h)
 // this functions go up the window inheritance chain until it finds a window of
 // the given class or a window without parent (in which case the function will
 // return NULL). This function is mainly for the use with the macro below.
-extern wxWindow *GetParentOfClass(wxWindow *win, wxClassInfo *classinfo);
+extern wxWindow *GetParentOfClass(const wxWindow *win, wxClassInfo *classinfo);
 
 // get the pointer to the parent window of given type (may be NULL), very
 // useful to find, for example, the parent frame for any control in the frame.
@@ -72,7 +72,7 @@ extern wxWindow *GetParentOfClass(wxWindow *win, wxClassInfo *classinfo);
    ((classname *)(GetParentOfClass(win, CLASSINFO(classname))))
 
 // get the pointer to the frame we belong to (returns NULL if none)
-inline wxFrame *GetFrame(wxWindow *win)
+inline wxFrame *GetFrame(const wxWindow *win)
 {
    return  GET_PARENT_OF_CLASS(win, wxFrame);
 }

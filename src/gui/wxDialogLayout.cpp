@@ -85,7 +85,7 @@ END_EVENT_TABLE()
 // ----------------------------------------------------------------------------
 
 // FIXME this has nothing to do here...
-wxWindow *GetParentOfClass(wxWindow *win, wxClassInfo *classinfo)
+wxWindow *GetParentOfClass(const wxWindow *win, wxClassInfo *classinfo)
 {
    // find the frame we're in
    while ( win && !win->IsKindOf(classinfo) ) {
@@ -93,7 +93,7 @@ wxWindow *GetParentOfClass(wxWindow *win, wxClassInfo *classinfo)
    }
 
    // may be NULL!
-   return win;
+   return (wxWindow *)win; // const_cast
 }
 
 long GetMaxLabelWidth(const wxArrayString& labels, wxWindow *win)
