@@ -558,8 +558,8 @@ class MT_Subscribe : public MailThread
 {
 public:
    MT_Subscribe(ASMailFolder *mf, UserData ud,
-                  const String &host,
-                  FolderType protocol,
+                const String &host,
+                FolderType protocol,
                 const String &mailboxname,
                 bool subscribe)
       : MailThread(mf, ud)

@@ -550,6 +550,11 @@ public:
    {
       if ( m_ticket == ILLEGAL_TICKET )
       {
+         // also put it into the status bar to overwrite the previous message
+         // there
+         wxLogStatus(m_folderView->GetParentFrame(), m_msgError);
+
+         // and show the error to the user
          wxLogError(m_msgError);
       }
       else // success
@@ -3292,7 +3297,7 @@ wxFolderView::SaveMessagesToFile(const UIdArray& selections)
                                 count);
 
    Ticket t = m_ASMailFolder->SaveMessagesToFile(&selections, m_Frame, this);
-   status->Monitor(t, _("Saving messages to file failed."));
+   status->Monitor(t, _("Saving message(s) to file failed."));
 }
 
 void wxFolderView::OnFolderClosedEvent(MEventFolderClosedData& event)

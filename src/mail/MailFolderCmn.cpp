@@ -656,7 +656,8 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
                }
 
                tmpstr = strutil_enforceNativeCRLF(cptr);
-               if ( file.Write(tmpstr, tmpstr.length()) != size )
+               size = tmpstr.length();
+               if ( file.Write(tmpstr, size) != size )
                {
                   rc = false;
                }
