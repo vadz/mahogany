@@ -11,6 +11,9 @@ SUBDIRS=generic
 all:
 	for i in $(SUBDIRS); do $(MAKE) -C $$i $@ ; done
 
+depend:
+	for i in $(SUBDIRS); do $(MAKE) -C $$i $@ ; done
+
 clean:
 	$(RM) common/*.o generic/*.o
 
