@@ -1664,7 +1664,13 @@ wxXFaceDialog::wxXFaceDialog(ProfileBase *profile,
    wxLayoutConstraints *c;
    
    wxStaticText *stattext = new wxStaticText(this, -1,
-                                             _("Click on the button to change it.")); 
+                                             _("XFaces are small images that can be included\n"
+                                               "in your mail message to help recognise you.\n"
+                                               "They are limited to 48*48 pixels black and white,\n"
+                                               "but Mahogany will automatically convert any file\n"
+                                               "to this specification automatically.\n"
+                                               "\n"
+                                               "Click on the button to change it.")); 
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(box, wxTop, 6*LAYOUT_Y_MARGIN);

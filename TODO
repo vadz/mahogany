@@ -25,7 +25,9 @@ $Id$
 		XFace dialog complains *twice* about non-existing
 		file, test for it!
 
-		MessageView should show cursor only on demand
+		MessageView:
+		 - should show cursor only on demand
+
 		properties/access shows wrong help
 		properties/custom headers/more shows corrupted title
 		main window hides about-splash - not nice
@@ -128,6 +130,8 @@ $Id$
 *********************************************************************
 * PRI	WHO	DESCRIPTION
 *********************************************************************
+		MFrame classname obsolete?
+
 9	KB	add xface button to composeview
 
 		configure "From" format

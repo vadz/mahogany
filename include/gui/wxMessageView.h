@@ -239,6 +239,9 @@ public:
    /// wxWin2 event system callbacks
    void OnCommandEvent(wxCommandEvent & event);
    void OnSize(wxSizeEvent & event);
+   /// don't even think of using this!
+   wxMessageViewFrame(void) {ASSERT(0);}
+   DECLARE_DYNAMIC_CLASS(wxMessageViewFrame)
 
 private:
    wxMessageView *m_MessageView;
