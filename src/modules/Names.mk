@@ -14,7 +14,7 @@ SRC	:= $(patsubst .src/%,%,$(wildcard .src/modules/*.cpp))
 # unfortunately Calendar.cpp doesn't work any more (if it ever has, I'm not
 # even sure about it) and I prefer to disable even building it until I have
 # time to look at it in details
-SRC	:=	$(filter-out Calendar.cpp, $(SRC))
+SRC	:=	$(filter-out modules/Calendar.cpp, $(SRC))
 
 MOD	:= $(SRC:.cpp=.so)
 
