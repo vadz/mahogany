@@ -1,10 +1,18 @@
-/*-*- c++ -*-********************************************************
- * wxModulesDlg.cpp -  a dialog to choose which modules to load     *
- *                                                                  *
- * (C) 1999-2000 by Karsten Ballüder (ballueder@gmx.net)            *
- *                                                                  *
- * $Id$
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   gui/wxModulesDlg.cpp
+// Purpose:     dialog to configure the modules [not] to load
+// Author:      Karsten Ballüder
+// Modified by: Vadim Zeitlin on 2004-07-11 to select modules not to be loaded
+// Created:     13.04.01 (extracted from src/gui/wxComposeView.cpp)
+// CVS-ID:      $Id$
+// Copyright:   (c) 1999-2004 M-Team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
+
+// ============================================================================
+// declarations
+// ============================================================================
 
 // ----------------------------------------------------------------------------
 // headers
@@ -33,9 +41,17 @@
 
 #include "gui/wxDialogLayout.h"
 
-extern const MOption MP_MODULES;
+// ----------------------------------------------------------------------------
+// options and message boxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_MODULES_DONT_LOAD;
 
 extern const MPersMsgBox *M_MSGBOX_MODULES_WARNING;
+
+// ----------------------------------------------------------------------------
+// wxModulesDialog
+// ----------------------------------------------------------------------------
 
 class wxModulesDialog : public wxManuallyLaidOutDialog
 {
@@ -53,10 +69,8 @@ public:
 
 protected:
    MModuleListing *m_Listing;
-   kbStringList    m_Modules;
    wxCheckListBox *m_checklistBox;
    wxTextCtrl     *m_textCtrl;
-   kbStringList::iterator FindInList(const wxString &module) const;
 
    DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxModulesDialog)
@@ -66,16 +80,16 @@ BEGIN_EVENT_TABLE(wxModulesDialog, wxDialog)
    EVT_LISTBOX(-1, wxModulesDialog::Update)
 END_EVENT_TABLE()
 
+// ============================================================================
+// implementation
+// ============================================================================
 
 wxModulesDialog::wxModulesDialog(wxWindow *parent)
-   : wxManuallyLaidOutDialog( parent,
-                              _("Extension Modules Configuration"),
-                              _T("ModulesDialog"))
+               : wxManuallyLaidOutDialog(parent,
+                                         _("Loadable Modules Configuration"),
+                                         _T("ModulesDialog"))
 {
-   // we only show the modules which can be loaded at starup and not, for
-   // example, different importers as it doesn't make sense to select them in
-   // this dialog
-   m_Listing = MModule::ListLoadableModules();
+   m_Listing = MModule::ListAvailableModules();
 
    // create controls
    wxStaticBox *box = CreateStdButtonsAndBox(_("Available modules"), FALSE,
@@ -83,13 +97,14 @@ wxModulesDialog::wxModulesDialog(wxWindow *parent)
    wxLayoutConstraints *c;
 
    // create a short help message above
-   wxStaticText *msg = new wxStaticText
-                           (
-                            this,
-                            -1,
-                            _("The selected modules will be loaded\n"
-                              "into Mahogany at the next program start.")
-                           );
+   wxStaticText *
+      msg = new wxStaticText
+                (
+                  this,
+                  -1,
+                  _("The modules checked in the list below will be used by\n"
+                  "Mahogany as needed, uncheck a module to never load it.")
+                );
 
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -154,61 +169,54 @@ wxModulesDialog::InternalUpdate(size_t n)
 
 bool wxModulesDialog::TransferDataToWindow()
 {
-   // get list of configured modules
-   wxString modules = READ_APPCONFIG(MP_MODULES);
-   wxChar *tmp = strutil_strdup(modules);
-   strutil_tokenise(tmp, _T(":"), m_Modules);
+   if ( !m_Listing )
+      return FALSE;
 
-   size_t count = m_Listing ? m_Listing->Count() : 0;
+   // get list of modules which shouldn't be loaded
+   wxString modulesStr = READ_APPCONFIG(MP_MODULES_DONT_LOAD);
+   wxArrayString modules = strutil_restore_array(modulesStr);
 
    // add the items to the checklistbox
+   const size_t count = m_Listing->Count();
    for ( size_t n = 0; n < count; n++ )
    {
-      m_checklistBox->Append((*m_Listing)[n].GetShortDescription());
-      if( FindInList((*m_Listing)[n].GetName()) != m_Modules.end() )
-         m_checklistBox->Check(n, TRUE);
+      const MModuleListingEntry& entry = (*m_Listing)[n];
+
+      const wxString
+            name(entry.GetName()),
+            desc(entry.GetShortDescription());
+
+      m_checklistBox->Append(desc.empty() ? name : desc);
+      m_checklistBox->Check(n, modules.Index(name) == wxNOT_FOUND);
    }
 
-   if(count)
-      InternalUpdate(0);
-
-   delete [] tmp;
+   InternalUpdate(0);
 
    return TRUE;
 }
 
 bool wxModulesDialog::TransferDataFromWindow()
 {
-   wxString setting;
-#if wxCHECK_VERSION(2, 3, 2)
-   size_t count = (size_t)m_checklistBox->GetCount();
-#else
-   size_t count = (size_t)m_checklistBox->Number();
-#endif
+   wxArrayString modules;
+   const size_t count = (size_t)m_checklistBox->GetCount();
    for ( size_t n = 0; n < count; n++ )
    {
-      if(m_checklistBox->IsChecked(n))
+      if ( !m_checklistBox->IsChecked(n) )
       {
-         setting << (*m_Listing)[n].GetName();
-         if(n != count-1) setting << ':';
+         modules.Add((*m_Listing)[n].GetName());
       }
    }
-   mApplication->GetProfile()->writeEntry(MP_MODULES, setting);
+
+   mApplication->GetProfile()->
+      writeEntry(MP_MODULES_DONT_LOAD, strutil_flatten_array(modules));
+
    return TRUE;
 }
 
-kbStringList::iterator
-wxModulesDialog::FindInList(const wxString &module) const
-{
-   kbStringList::iterator i;
-   for(i = m_Modules.begin(); i != m_Modules.end(); i++)
-      if( (**i) == module)
-         return i;
-   return m_Modules.end();
-}
+// ----------------------------------------------------------------------------
+// our public API
+// ----------------------------------------------------------------------------
 
-
-/// creates and shows the dialog allowing to choose modules
 extern
 void ShowModulesDialog(wxFrame *parent)
 {
@@ -216,7 +224,7 @@ void ShowModulesDialog(wxFrame *parent)
    if ( dlg.ShowModal() == wxID_OK )
    {
       MDialog_Message(
-         _("Notice: any changes to the modules settings will only\n"
+         _("Notice: most changes to the modules settings will only\n"
            "take effect the next time you start Mahogany."),
          parent,
          MDIALOG_MSGTITLE,

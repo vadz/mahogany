@@ -121,6 +121,9 @@ enum MMOD_FUNC
 };
 //@}
 
+/// The name of the interface of modules which should be loaded on startup
+#define STARTUP_INTERFACE _T("Startup")
+
 // ----------------------------------------------------------------------------
 // classes used for browsing/listing the available modules
 // ----------------------------------------------------------------------------
@@ -269,19 +272,10 @@ public:
        DecRef()'d by the caller. Does not check if modules are loaded,
        i.e. GetModule() from these entries will return NULL.
 
-       If iface is not empty, will only return modules implementing
-       the given interface.
-
-       If loadableOnly is true, will only return the modules with non
-       empty desc property.
+       @param iface if not empty, will only return modules implementing
+                    the given interface, otherwise returns all modules
    */
-   static MModuleListing * ListAvailableModules(const String& iface = _T(""),
-                                                bool loadableOnly = false);
-
-   /** As ListAvailableModules() but only returns the modules which can be
-       loaded manually by the user (and not various importers, for example)
-   */
-   static MModuleListing * ListLoadableModules();
+   static MModuleListing * ListAvailableModules(const String& iface = _T(""));
 
    /** Finds the first module which provides the given interface. Only
        searches already loaded modules.

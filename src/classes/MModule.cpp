@@ -46,6 +46,12 @@
 #include "MInterface.cpp"
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_MODULES_DONT_LOAD;
+
+// ----------------------------------------------------------------------------
 // function prototypes
 // ----------------------------------------------------------------------------
 
@@ -61,8 +67,6 @@ static wxArrayString BuildListOfModulesDirs();
 // ----------------------------------------------------------------------------
 
 #define DLL_EXTENSION wxDynamicLibrary::GetDllExt()
-
-#define MMD_SIGNATURE "Mahogany-Module-Definition"
 
 // the trace mask used by module loading code
 #define M_TRACE_MODULES _T("mmodule")
@@ -353,35 +357,25 @@ MModule::LoadModule(const String & name)
 MModule *
 MModule::GetProvider(const wxString &interfaceName)
 {
-   MModuleList::iterator i;
-   for(i = GetMModuleList()->begin();
-       i != GetMModuleList()->end();
-       i++)
+   RefCounter<MModuleListing> listing(ListAvailableModules(interfaceName));
+   if ( !listing )
    {
-      MModuleListEntry *me = *i;
-      if( me->m_Interface == interfaceName )
-      {
-#if 0 // creating them on the fly is wrong!
-#ifdef USE_MODULES_STATIC
-         if( !me->m_Module )
-         {
-            // create the module on the fly
-            int errorCode;
-            me->m_Module = (*(me->m_InitFunc))(
-               M_VERSION_MAJOR, M_VERSION_MINOR, M_VERSION_RELEASE,
-               &gs_MInterface, &errorCode);
-         }
-#endif
-#endif
-         if ( me->m_Module )
-         {
-            me->m_Module->IncRef();
-            return me->m_Module;
-         }
-      }
+      wxLogWarning(_("No modules implementing \"%s\" interface found."),
+                   interfaceName.c_str());
+      return NULL;
    }
 
-   return NULL; // not found
+   if ( listing->Count() > 1 )
+   {
+      wxLogWarning(_("Several modules implement \"%s\" interface, you "
+                     "should probably disable all but one of them using the "
+                     "\"Edit|Modules...\" menu command."),
+                   interfaceName.c_str());
+
+      // still return something
+   }
+
+   return LoadModule((*listing)[0].GetName());
 }
 
 class MModuleListingEntryImpl : public MModuleListingEntry
@@ -494,11 +488,20 @@ private:
 
 // this function can list all loaded modules (default) or do other things as
 // well depending on the parameters values, so the name is a bit unfortunate
-static MModuleListing * DoListLoadedModules(bool listall = false,
-                                            const String& interfaceName = _T(""),
-                                            bool loadableOnly = false)
+static MModuleListing *
+DoListLoadedModules(bool listall = false, const String& interfaceName = _T(""))
 {
-#ifndef USE_MODULES_STATIC
+#ifdef USE_MODULES_STATIC
+   wxArrayString modulesNot;
+
+   // only exclude modules to ignore if we're looking for modules implementing
+   // some interface, not if we want (really) all modules
+   if ( listall && !interfaceName.empty() )
+   {
+      const String modulesDontLoad = READ_APPCONFIG(MP_MODULES_DONT_LOAD);
+      modulesNot = strutil_restore_array(modulesDontLoad);
+   }
+#else
    // this function only works for loaded modules in dynamic case
    ASSERT_MSG( !listall, _T("this mode is not supported with dynamic modules") );
 #endif // USE_MODULES_STATIC
@@ -519,20 +522,20 @@ static MModuleListing * DoListLoadedModules(bool listall = false,
       if ( (listall || me->m_Module) &&
            (interfaceName.empty() || me->m_Interface == interfaceName) )
       {
-         // check that the module is "loadable" if requested
-         String desc = me->m_Description;
-         if ( !loadableOnly || !desc.empty() )
+         // also ignore the modules excluded by user
+         if ( !listall || modulesNot.Index(me->m_Name) == wxNOT_FOUND )
          {
-            MModuleListingEntryImpl entry
-                                    (
-                                       me->m_Name, // module name
-                                       me->m_Interface,
-                                       desc,
-                                       _T(""), // long description
-                                       String(me->m_Version) + _(" (builtin)"),
-                                       _T("mahogany-developers@lists.sourceforge.net"),
-                                       me->m_Module
-                                    );
+            MModuleListingEntryImpl
+               entry
+               (
+                  me->m_Name, // module name
+                  me->m_Interface,
+                  me->m_Description,
+                  _T(""), // long description
+                  String(me->m_Version) + _(" (builtin)"),
+                  _T("mahogany-developers@lists.sourceforge.net"),
+                  me->m_Module
+               );
 
             (*listing)[count++] = entry;
          }
@@ -548,22 +551,17 @@ static MModuleListing * DoListLoadedModules(bool listall = false,
          continue;
       }
 
-      // check that the module is "loadable" if requested
-      String desc = m->GetDescription();
-      if ( !loadableOnly || !desc.empty() )
-      {
-         MModuleListingEntryImpl entry
-                                 (
-                                    m->GetName(), // module name
-                                    m->GetInterface(),
-                                    desc,
-                                    _T(""), // long description
-                                    m->GetVersion(),
-                                    _T(""), // author
-                                    m
-                                 );
-         (*listing)[count++] = entry;
-      }
+      MModuleListingEntryImpl entry
+                              (
+                                 m->GetName(), // module name
+                                 m->GetInterface(),
+                                 m->GetDescription(),
+                                 _T(""), // long description
+                                 m->GetVersion(),
+                                 _T(""), // author
+                                 m
+                              );
+      (*listing)[count++] = entry;
    }
 #endif // USE_MODULES_STATIC/!USE_MODULES_STATIC
 
@@ -582,17 +580,10 @@ MModule::ListLoadedModules(void)
 
 /* static */
 MModuleListing *
-MModule::ListLoadableModules()
-{
-   return ListAvailableModules(_T(""), true /* loadable only */);
-}
-
-/* static */
-MModuleListing *
-MModule::ListAvailableModules(const String& interfaceName, bool loadableOnly)
+MModule::ListAvailableModules(const String& interfaceName)
 {
 #ifdef USE_MODULES_STATIC
-   return DoListLoadedModules(true, interfaceName, loadableOnly);
+   return DoListLoadedModules(true, interfaceName);
 #else // !USE_MODULES_STATIC
    kbStringList modules;
 
@@ -613,7 +604,7 @@ MModule::ListAvailableModules(const String& interfaceName, bool loadableOnly)
               interfaceName.c_str(), path.c_str());
 #endif // DEBUG
 
-   // First, build list of all .mmd and .so files in module directories
+   // First, build list of all .dll/.so files in module directories
    wxString extDll = DLL_EXTENSION;
 
    // but take care to only take each of the modules once - loading different
@@ -627,29 +618,11 @@ MModule::ListAvailableModules(const String& interfaceName, bool loadableOnly)
       pathname = dirs[i];
       if ( wxPathExists(pathname) )
       {
-         // first look for MMDs
-         pathname << _T("*.mmd");
-         filename = wxFindFirstFile(pathname);
-         while( filename.length() )
-         {
-            wxSplitPath(filename, NULL, &basename, NULL);
-            if ( moduleNames.Index(basename) == wxNOT_FOUND )
-            {
-               moduleNames.Add(basename);
-
-               modules.push_back(new wxString(filename));
-            }
-
-            filename = wxFindNextFile();
-         }
-
-         // now restart with the DLLs
          pathname = dirs[i];
          pathname << "*" << extDll;
          filename = wxFindFirstFile(pathname);
          while ( filename.length() )
          {
-            // only add if we hadn't found a matching .mmd for it
             wxSplitPath(filename, NULL, &basename, NULL);
             if ( moduleNames.Index(basename) == wxNOT_FOUND )
             {
@@ -663,158 +636,75 @@ MModule::ListAvailableModules(const String& interfaceName, bool loadableOnly)
       }
    }
 
-   // the components of MMD file format
-   enum
-   {
-      MMD_LINE_SIGNATURE,
-      MMD_LINE_NAME,
-      MMD_LINE_INTERFACE,
-      MMD_LINE_VERSION,
-      MMD_LINE_AUTHOR,
-      MMD_LINE_LAST
-   };
-
-   static const wxChar *MMD_HEADERS[] =
-   {
-      MMD_SIGNATURE,
-      _T("Name:"),
-      _T("Interface:"),
-      _T("Version:"),
-      _T("Author:"),
-   };
-
-   ASSERT_MSG( WXSIZEOF(MMD_HEADERS) == MMD_LINE_LAST,
-               _T("forgot to update the constants describing MMD format") );
-
    // Second: load list info:
+   const String modulesDontLoad = READ_APPCONFIG(MP_MODULES_DONT_LOAD);
+   const wxArrayString modulesNot = strutil_restore_array(modulesDontLoad);
+
    MModuleListingImpl *listing = MModuleListingImpl::Create(modules.size());
    kbStringList::iterator it;
-   bool errorflag;
    size_t count = 0;
    for(it = modules.begin(); it != modules.end(); it ++)
    {
       filename = **it;
 
-      // it's either a .mmd file in which case we just read its contents or a
-      // .so file in which case we load it and call its GetMModuleInfo()
-      if ( filename.Right(4) == _T(".mmd") )
+      wxDynamicLibrary dll(filename);
+      MModule_GetModulePropFuncType
+         getProps = dll.IsLoaded() ?
+            (MModule_GetModulePropFuncType)
+            dll.GetSymbol(MMODULE_GETPROPERTY_FUNCTION) : NULL;
+
+      if ( !getProps )
       {
-         errorflag = false;
-         wxTextFile tf(filename);
-         if(! tf.Open())
-         {
-            errorflag = true;
-         }
-         else
-         {
-            // check that we have all required lines
-            if(tf.GetLineCount() < MMD_LINE_LAST)
-            {
-               errorflag = true;
-            }
-            else
-            {
-               // check that the first MMD_LINE_LAST lines are correct and get
-               // the values of the fields too
-               wxString headerValues[MMD_LINE_LAST];
-               for ( size_t line = 0; !errorflag && (line < MMD_LINE_LAST); line++ )
-               {
-                  if ( !tf[line].StartsWith(MMD_HEADERS[line], &headerValues[line]) )
-                     errorflag = TRUE;
-               }
+         // this is not our module
+         wxLogWarning(_("Shared library '%s' is not a Mahogany module."),
+                      filename.c_str());
 
-               if ( !errorflag )
-               {
-                  String interfaceModule = headerValues[MMD_LINE_INTERFACE];
-
-                  // take all modules if interfaceName is empty, otherwise only
-                  // take those which implement the given interface
-                  if ( !interfaceName || interfaceName == interfaceModule )
-                  {
-                     String description;
-                     for(size_t l = MMD_LINE_LAST + 1; l < tf.GetLineCount(); l++)
-                        description << tf[l] << _T('\n');
-
-                     String name;
-                     wxSplitPath((**it), NULL, &name, NULL);
-                     MModuleListingEntryImpl entry(
-                        name, // module name
-
-                        headerValues[MMD_LINE_INTERFACE],
-                        headerValues[MMD_LINE_NAME],
-                        description,
-                        headerValues[MMD_LINE_VERSION],
-                        headerValues[MMD_LINE_AUTHOR]);
-                     (*listing)[count++] = entry;
-                  }
-               }
-            }
-         }
-         if(errorflag)
-         {
-            wxLogWarning(_("Cannot parse MMD file for module '%s'."),
-                         filename.c_str());
-         }
+         continue;
       }
-      else // it's not an .mmd, get info from .so/.dll directly
+
+      const ModuleProperty *props = (*getProps)();
+
+      // does it have the right interface?
+      String interfaceModule;
+
+      if ( props )
       {
-         errorflag = true;
+         interfaceModule = GetMModuleProperty(props,
+                                              MMODULE_INTERFACE_PROP);
 
-         wxDynamicLibrary dll(filename);
-         if ( dll.IsLoaded() )
+         const String name = GetMModuleProperty(props, MMODULE_NAME_PROP);
+         if ( !interfaceName.empty() )
          {
-            MModule_GetModulePropFuncType getProps =
-               (MModule_GetModulePropFuncType)
-               dll.GetSymbol(MMODULE_GETPROPERTY_FUNCTION);
-
-            if ( getProps )
+            if ( interfaceName != interfaceModule )
             {
-               const ModuleProperty *props = (*getProps)();
+               // wrong interface, we're not interested in this one
+               continue;
+            }
 
-               // does it have the right interface?
-               String interfaceModule;
-
-               if ( props )
-               {
-                  interfaceModule = GetMModuleProperty(props,
-                                                       MMODULE_INTERFACE_PROP);
-
-                  if ( !interfaceName || interfaceName == interfaceModule )
-                  {
-                     // check if it is loadable if necessary
-                     String desc = GetMModuleProperty(props, MMODULE_DESC_PROP);
-                     if ( !loadableOnly || !desc.empty() )
-                     {
-                        String name;
-                        wxSplitPath(filename, NULL, &name, NULL);
-                        MModuleListingEntryImpl entry(
-                           name,
-                           interfaceModule,
-                           desc,
-                           GetMModuleProperty(props, MMODULE_DESCRIPTION_PROP),
-                           GetMModuleProperty(props, MMODULE_VERSION_PROP),
-                           GetMModuleProperty(props, MMODULE_AUTHOR_PROP));
-                        (*listing)[count++] = entry;
-                     }
-                  }
-
-                  errorflag = false;
-               }
-               else // no properties in this module??
-               {
-                  wxLogWarning(_("Mahogany module '%s' is probably corrupted"),
-                               filename.c_str());
-
-                  errorflag = true;
-               }
+            // note that this check is only done for a specific interface, if
+            // all modules are requested, then return really all of them
+            if ( modulesNot.Index(name) != wxNOT_FOUND )
+            {
+               // this module was excluded by user
+               continue;
             }
          }
 
-         if ( errorflag )
-         {
-            wxLogWarning(_("Shared library '%s' is not a Mahogany module."),
-                         filename.c_str());
-         }
+         MModuleListingEntryImpl entry(
+            name,
+            interfaceModule,
+            GetMModuleProperty(props, MMODULE_DESC_PROP),
+            GetMModuleProperty(props, MMODULE_DESCRIPTION_PROP),
+            GetMModuleProperty(props, MMODULE_VERSION_PROP),
+            GetMModuleProperty(props, MMODULE_AUTHOR_PROP)
+         );
+
+         (*listing)[count++] = entry;
+      }
+      else // no properties in this module??
+      {
+         wxLogWarning(_("Mahogany module '%s' is probably corrupted"),
+                      filename.c_str());
       }
    }
 
@@ -915,7 +805,8 @@ static wxArrayString BuildListOfModulesDirs()
 // working with module properties
 // ----------------------------------------------------------------------------
 
-const wxChar *GetMModuleProperty(const ModuleProperty *table, const wxChar *name)
+const wxChar *
+GetMModuleProperty(const ModuleProperty *table, const wxChar *name)
 {
    while ( table->name )
    {

@@ -1528,22 +1528,21 @@ wxMApp::Help(int UNUSED_IF_WIN(id), wxWindow * UNUSED_IF_WIN(parent))
 void
 wxMApp::LoadModules(void)
 {
-   kbStringList modules;
-   kbStringList::iterator i;
+   RefCounter<MModuleListing>
+      listing(MModule::ListAvailableModules(STARTUP_INTERFACE));
 
-   String moduleString = READ_APPCONFIG(MP_MODULES);
-   wxChar *modulestring = strutil_strdup(moduleString);
-   strutil_tokenise(modulestring, _T(":"), modules);
-   delete [] modulestring;
+   if ( !listing )
+      return;
 
-   MModule *module;
-   for(i = modules.begin(); i != modules.end(); i++)
+   const size_t count = listing->Count();
+   for ( size_t n = 0; n < count; n++ )
    {
-      module = MModule::LoadModule(**i);
-      if(module == NULL)
+      const String& name = (*listing)[n].GetName();
+      MModule *module = MModule::LoadModule(name);
+
+      if ( !module )
       {
-         ERRORMESSAGE((_("Cannot load module '%s'."),
-                       (**i).c_str()));
+         ERRORMESSAGE((_("Cannot load module '%s'."), name.c_str()));
       }
       else
       {
@@ -1556,7 +1555,7 @@ wxMApp::LoadModules(void)
                    module->GetDescription(),
                    module->GetVersion()));
 
-#endif
+#endif // DEBUG
       }
    }
 }
@@ -1566,7 +1565,7 @@ wxMApp::InitModules(void)
 {
    for ( ModulesList::iterator i = gs_GlobalModulesList.begin();
          i != gs_GlobalModulesList.end();
-         i++ )
+         ++i )
    {
       MModule *module = (**i).m_Module;
       if ( module->Entry(MMOD_FUNC_INIT) != 0 )
@@ -1581,11 +1580,10 @@ wxMApp::InitModules(void)
 void
 wxMApp::UnloadModules(void)
 {
-   for (ModulesList::iterator j = gs_GlobalModulesList.begin();
-       j != gs_GlobalModulesList.end();)
+   for ( ModulesList::iterator i = gs_GlobalModulesList.begin();
+         i != gs_GlobalModulesList.end();
+         ++i )
    {
-      ModulesList::iterator i = j;
-      ++j;
       (**i).m_Module->DecRef();
    }
 }
