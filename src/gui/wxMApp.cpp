@@ -2288,17 +2288,17 @@ extern bool EnsureAvailableTextEncoding(wxFontEncoding *enc,
          if ( text )
          {
             wxEncodingConverter conv;
-            if ( conv.Init(*enc, encAlt) )
+            if ( !conv.Init(*enc, encAlt) )
             {
-               *enc = encAlt;
-
-               *text = conv.Convert(*text);
-            }
-            else // failed to convert the text
-            {
+               // failed to convert the text
                return false;
             }
+
+            *text = conv.Convert(*text);
          }
+         //else: just return the encoding
+
+         *enc = encAlt;
       }
       else //no equivalent encoding
       {
