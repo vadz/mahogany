@@ -478,6 +478,8 @@
 #define MP_FOLDER_FILTERS   "Filters"
 /// the default folder file format
 #define MP_FOLDER_FILE_DRIVER   "MailboxFileFormat"
+/// the background colour for the folder tree
+#define MP_FOLDER_BGCOLOUR "FTreeBgColour"
 /**@name  Font settings for message view */
 //@{
 /// which font to use
@@ -1001,6 +1003,8 @@
 /// the default folder file format
 #define MP_FOLDER_FILE_DRIVER_D 0L
 /* format: mbx:unix:mmdf:tenex defined in MailFolderCC.cpp */
+/// the background colour for the folder tree
+#define MP_FOLDER_BGCOLOUR_D ""
 /**@name  Font settings for message view */
 //@{
 /// which font to use

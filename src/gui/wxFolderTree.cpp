@@ -190,6 +190,9 @@ public:
       // own popup menu
    bool ProcessMenuCommand(int id);
 
+      // update the bg colour
+   void UpdateBackground();
+
    // callbacks
    void OnChar(wxKeyEvent&);
 
@@ -362,6 +365,9 @@ private:
    // give focus to the tree when mouse enters it [used under unix only]
    bool m_FocusFollowMode;
 #endif // wxGTK
+
+   // the bg colour name
+   wxString m_colBgName;
 
    DECLARE_EVENT_TABLE()
 };
@@ -906,6 +912,8 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
 
    SetImageList(imageList);
 
+   UpdateBackground();
+
    // create our drop target
    new MMessagesDropTarget(new TreeMessagesDropWhere(this), this);
 
@@ -924,6 +932,25 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    ASSERT_MSG( m_eventFolderChange && m_eventOptionsChange && m_eventFolderStatus,
                "folder tree failed to register with event manager" );
 }
+
+void wxFolderTreeImpl::UpdateBackground()
+{
+   wxString colName = READ_APPCONFIG(MP_FOLDER_BGCOLOUR);
+   if ( colName != m_colBgName )
+   {
+      if ( !!colName )
+      {
+         wxColour col;
+         if ( ParseColourString(colName, &col) )
+         {
+            SetBackgroundColour(col);
+         }
+      }
+
+      m_colBgName = colName;
+   }
+}
+
 
 void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
 {
@@ -1500,6 +1527,9 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
 #ifdef __WXGTK__
       m_FocusFollowMode = READ_APPCONFIG(MP_FOCUS_FOLLOWSMOUSE) != 0;
 #endif // wxGTK
+
+      // reread the bg colour setting
+      UpdateBackground();
 
       MEventOptionsChangeData& event = (MEventOptionsChangeData &)ev;
 

@@ -185,6 +185,7 @@ enum ConfigFields
    ConfigField_UseTrash,
    ConfigField_TrashName,
    ConfigField_FoldersFileFormat,
+   ConfigField_FolderTreeBgColour,
    ConfigField_StatusFormatHelp,
    ConfigField_StatusFormat_StatusBar,
    ConfigField_StatusFormat_TitleBar,
@@ -701,6 +702,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Default format for mailbox files"
       ":Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)"),
      Field_Combo, -1},
+   { gettext_noop("Folder tree &background"), Field_Color, -1 },
    { gettext_noop("You can specify the format for the strings shown in the\n"
                   "status and title bars. Use %f for the folder name and\n"
                   "%t, %r and %n for the number of all, recent and new\n"
@@ -907,8 +909,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #endif // USE_TCP_TIMEOUTS
 
    // compose
-   CONFIG_ENTRY(MP_USEOUTGOINGFOLDER), // where to keep copies of
-                                       // messages send
+   CONFIG_ENTRY(MP_USEOUTGOINGFOLDER), // where to keep copies of messages sent
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),
    CONFIG_ENTRY(MP_WRAPMARGIN),
    CONFIG_ENTRY(MP_AUTOMATIC_WORDWRAP),
@@ -938,15 +939,16 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FOLDER_CLOSE_DELAY),
    CONFIG_ENTRY(MP_AUTOSHOW_FIRSTMESSAGE),
    CONFIG_ENTRY(MP_FOLDERPROGRESS_THRESHOLD),
-   CONFIG_ENTRY(MP_USE_OUTBOX), // where to store message before
-                                // sending them
+   CONFIG_ENTRY(MP_USE_OUTBOX), // where to store message before sending them
    CONFIG_ENTRY(MP_OUTBOX_NAME),
    CONFIG_ENTRY(MP_USE_TRASH_FOLDER),
    CONFIG_ENTRY(MP_TRASH_FOLDER),
    CONFIG_ENTRY(MP_FOLDER_FILE_DRIVER),
+   CONFIG_ENTRY(MP_FOLDER_BGCOLOUR),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FOLDERSTATUS_STATBAR),
    CONFIG_ENTRY(MP_FOLDERSTATUS_TITLEBAR),
+
    // python
 #ifdef USE_PYTHON
    CONFIG_NONE(),

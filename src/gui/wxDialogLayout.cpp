@@ -1113,15 +1113,10 @@ wxNotebookDialog::SendOptionsChangeEvent()
    ASSERT_MSG( m_lastBtn != MEventOptionsChangeData::Invalid,
                "this should be only called when a button is pressed" );
 
-   if ( !m_profileForButtons )
-   {
-      // this may happen when cancelling the creation of a folder, so
-      // just ignore it (nobody can be interested in it anyhow, this
-      // event doesn't carry any useful information)
-      ASSERT_MSG( m_lastBtn == MEventOptionsChangeData::Cancel,
-                  "event from Apply or Ok should have a profile!" );
-   }
-   else
+   // note that we might actually not have this profile when creating the
+   // folder (there is no profile yet then), so it's not an error - just don't
+   // do anything in that case
+   if ( m_profileForButtons )
    {
       // notify everybody who cares about the change
       MEventOptionsChangeData *data = new MEventOptionsChangeData

@@ -221,10 +221,14 @@ wxFolderBrowseButton::~wxFolderBrowseButton()
 
 void wxColorBrowseButton::DoBrowse()
 {
-   (void)ParseColourString(GetText(), &m_color);
-
    wxColourData colData;
-   colData.SetColour(m_color);
+
+   wxString colName = GetText();
+   if ( !!colName )
+   {
+      (void)ParseColourString(colName, &m_color);
+      colData.SetColour(m_color);
+   }
 
    wxColourDialog dialog(this, &colData);
 
