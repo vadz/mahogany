@@ -24,14 +24,19 @@ include ../../makeopts
 # aren't fully C++ compliant on RH6.1
 CXXFLAGS:=$(CXXFLAGS_RELAXED)
 
-SRC = Mdummy.cpp Filters.cpp Calendar.cpp \
-PineImport.cpp XFMailImport.cpp
+SRC :=	Mdummy.cpp Filters.cpp Calendar.cpp \
+	PineImport.cpp XFMailImport.cpp
 
 ifdef PISOCK_LIB
 SRC := $(SRC) PalmOS.cpp
 ifdef LIBMAL_SRC
 CPPFLAGS := $(CPPFLAGS) -DMALSYNC -DHAVE_LIBMAL -I$(LIBMAL_SRC)/malsync_src/mal/client/common -I$(LIBMAL_SRC)/malsync_src/mal/common -I$(LIBMAL_SRC) 
 endif
+endif
+
+ifdef USE_EXPERIMENTAL
+SRC +=	MCrypt.cpp  MExtProcCrypt.cpp  MPGPCrypt.cpp  MPassphrase.cpp
+vpath %.cpp .src/crypt
 endif
 
 ifeq ($(USE_MODULES),static)
