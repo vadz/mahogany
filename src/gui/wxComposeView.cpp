@@ -1102,7 +1102,7 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
                                  _("Please choose a file to insert."),
                                  NULL, "dead.letter", NULL,
                                  _("All files (*.*)|*.*"),
-                                 wxOPEN | wxHIDE_READONLY,
+                                 wxOPEN | wxHIDE_READONLY | wxFILE_MUST_EXIST,
                                  this);
 
       if( !filename )
@@ -1275,7 +1275,7 @@ wxComposeView::Send(void)
 
    if(success && READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER))
       sm.WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER), 
-                       MailFolder::MF_PROFILE_OR_FILE);
+                       MF_PROFILE_OR_FILE);
 
    return success;
 }

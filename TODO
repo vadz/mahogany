@@ -133,7 +133,7 @@ $Id$
 *** things to fix/implement next ***
 *********************************************************************
 
-- wxPNotebook doesn't restore the page sometimes, why?
+- anonymous IMAP access (VZ: I'll do it)
 
 - wxFolderCreateNotebook should be split into base class and 2 derivations:
   wxFolderCreateNotebook and wxFolderPropNotebook

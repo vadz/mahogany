@@ -82,7 +82,7 @@ public:
        @param type folder type
    */
    void WriteToFolder(String const &foldername,
-                      MailFolder::Type type = MailFolder::MF_PROFILE );
+                      MailFolder::Type type = MF_PROFILE );
    
    /** Sends the message.
        @return true on success

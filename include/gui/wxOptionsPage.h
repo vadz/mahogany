@@ -14,6 +14,8 @@
 #ifndef _GUI_WXOPTIONSPAGE_H
 #define _GUI_WXOPTIONSPAGE_H
 
+#include <wx/dynarray.h>
+
 WX_DEFINE_ARRAY(wxControl *, ArrayControls);
 
 // -----------------------------------------------------------------------------

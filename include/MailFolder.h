@@ -15,6 +15,8 @@
 #   pragma interface "MailFolder.h"
 #endif
 
+#include "FolderType.h"
+
 // forward declarations
 class FolderView;
 class ProfileBase;
@@ -42,37 +44,8 @@ class MailFolder : public MObjectRC
 public:
    /** @name Constants and Types */
    //@{
-   /** Which type is this mailfolder? (consistent with c-client?)
-       Only the lower byte is a type, the upper one is for additional
-       flags.
-   */
-   enum Type
-   {
-      /// illegal type
-      MF_ILLEGAL = -1,
-      /// system inbox
-      MF_INBOX = 0,
-      /// mbox file
-      MF_FILE = 1,
-      /// pop3
-      MF_POP = 2,
-      /// imap
-      MF_IMAP = 3,
-      /// newsgroup
-      MF_NNTP = 4,
-      /// read type etc from profile
-      MF_PROFILE = 10,
-      // like MF_FILE, but use MH mode, each mesage a file in a dir
-      MF_MH, 
-      // profile, if it doesn't work, file
-      MF_PROFILE_OR_FILE,
-      /// use this with AND to obtain pure type
-      MF_TYPEMASK = 255,
-      /// from here on it's flags
-      MF_FLAGSMASK = 0xff00,
-      /// use anonymous access
-      MF_FLAGS_ANON = 0x100
-   };
+   // compatibility
+   typedef FolderType Type;
 
    /// what's the status of a given message in the folder?
    enum Status
@@ -83,7 +56,7 @@ public:
       MSG_STAT_DELETED = 2,
       /// message has been replied to
       MSG_STAT_REPLIED = 4,
-      /// message is "recent" (what's this?)
+      /// message is "recent" (see RFC 2060)
       MSG_STAT_RECENT = 8,
       /// message matched a search
       MSG_STAT_SEARCHED = 16
@@ -112,7 +85,7 @@ public:
       @param password only used for POP, IMAP
       
    */
-   static MailFolder * OpenFolder(MailFolder::Type type,
+   static MailFolder * OpenFolder(int typeAndFlags,
                                   String const &path,
                                   ProfileBase *profile = NULL,
                                   String const &server = NULLstring,

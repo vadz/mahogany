@@ -276,7 +276,7 @@ wxFolderView::Create(MailFolder *mf, MWindow *parent)
 wxFolderView *
 wxFolderView::Create(String const & folderName, MWindow *iparent)
 {
-   MailFolder *mf = MailFolder::OpenFolder(MailFolder::MF_PROFILE,folderName);
+   MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,folderName);
    if ( !mf )
    {
       ERRORMESSAGE((_("Can't open folder '%s'."), folderName.c_str()));
@@ -578,7 +578,7 @@ wxFolderView::SaveMessages(const wxArrayInt& selections, String const &folderNam
    Message *msg;
    
    int n = selections.Count();
-   mf = MailFolder::OpenFolder(MailFolder::MF_PROFILE,folderName);
+   mf = MailFolder::OpenFolder(MF_PROFILE,folderName);
    if(! mf)
    {
       wxString msg;

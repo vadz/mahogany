@@ -24,7 +24,7 @@
 #include  "MailFolderCC.h"
 
 MailFolder *
-MailFolder::OpenFolder(MailFolder::Type i_type,
+MailFolder::OpenFolder(int typeAndFlags,
                        String const &i_name,
                        ProfileBase *parentProfile,
                        String const &i_server,
@@ -34,17 +34,22 @@ MailFolder::OpenFolder(MailFolder::Type i_type,
    // open a folder:
    ProfileBase *profile = NULL;
    String login, passwd, name, server;
-   MailFolder::Type type;
-
+   FolderType type = GetFolderType(typeAndFlags);
+   int flags = GetFolderFlags(typeAndFlags);
    
-   if(i_type == MF_PROFILE || i_type == MF_PROFILE_OR_FILE)
+   if ( type == MF_PROFILE || type == MF_PROFILE_OR_FILE )
    {
       profile = ProfileBase::CreateFolderProfile(i_name, parentProfile);
       CHECK(profile, NULL, "can't create profile");   // return if it fails
+
       login = READ_CONFIG(profile, MP_POP_LOGIN);
       passwd = READ_CONFIG(profile, MP_POP_PASSWORD);
       name = READ_CONFIG(profile, MP_FOLDER_PATH);
-      type = (MailFolder::Type)READ_CONFIG(profile, MP_FOLDER_TYPE);
+
+      int typeflags = READ_CONFIG(profile, MP_FOLDER_TYPE);
+      type = GetFolderType(typeflags);
+      flags = GetFolderFlags(typeflags);
+
       if(type == MF_ILLEGAL)
       {
          type = MF_FILE;
@@ -60,43 +65,48 @@ MailFolder::OpenFolder(MailFolder::Type i_type,
       name = i_name;
       passwd = i_passwd;
       login = i_login;
-      type = i_type;
    }
    
-   switch(type)
+   switch( type )
    {
-   case MF_NNTP:
-      if(strutil_isempty(i_server))
-         server = READ_CONFIG(profile, MP_NNTPHOST);
-      // FIXME this login is, in fact, a newsgroup name - which is
-      // stored in folder path config entry. Clear, eh?
-      break;
-   case MF_FILE:
-   case MF_MH:
-      if( strutil_isempty(name) )
-         name = READ_CONFIG(profile, MP_FOLDER_PATH);
-      if(name == "INBOX")
-         type = MF_INBOX;
-      name = strutil_expandfoldername(name);
-      break;
-   case MF_POP:
-   case MF_IMAP:
-      if(strutil_isempty(server))
-         server = READ_CONFIG(profile, MP_POP_HOST);
-      if(strutil_isempty(login))
-         login = READ_CONFIG(profile, MP_POP_LOGIN);
-      if(strutil_isempty(passwd))
-         passwd = READ_CONFIG(profile, MP_POP_PASSWORD);
-      if(strutil_isempty(name))
-         name = READ_CONFIG(profile, MP_FOLDER_PATH);
-      break;
-   default:
-      // not sure about others, but fall through for now
-      ;
+      case MF_NNTP:
+         if(strutil_isempty(i_server))
+            server = READ_CONFIG(profile, MP_NNTPHOST);
+         break;
+
+      case MF_FILE:
+      case MF_MH:
+         if( strutil_isempty(name) )
+            name = READ_CONFIG(profile, MP_FOLDER_PATH);
+         if(name == "INBOX")
+            type = MF_INBOX;
+         name = strutil_expandfoldername(name);
+         break;
+
+      case MF_POP:
+      case MF_IMAP:
+         if(strutil_isempty(server))
+            server = READ_CONFIG(profile, MP_POP_HOST);
+         if(strutil_isempty(login))
+            login = READ_CONFIG(profile, MP_POP_LOGIN);
+         if(strutil_isempty(passwd))
+            passwd = READ_CONFIG(profile, MP_POP_PASSWORD);
+         if(strutil_isempty(name))
+            name = READ_CONFIG(profile, MP_FOLDER_PATH);
+         break;
+
+      case MF_INBOX:
+         // nothing special to do
+         break;
+
+      default:
+         FAIL_MSG("unknown folder type");
    }
 
-   // @@ calling MailFolderCC::OpenFolder() explicitly here is "anti-OO"
-   MailFolder *mf = MailFolderCC::OpenFolder(type, name, profile,
+   // FIXME calling MailFolderCC::OpenFolder() explicitly here is "anti-OO"
+   typeAndFlags = CombineFolderTypeAndFlags(type, flags);
+
+   MailFolder *mf = MailFolderCC::OpenFolder(typeAndFlags, name, profile,
                                              server, login, passwd);
    if ( mf )
       mf->m_UpdateInterval = READ_CONFIG(profile, MP_UPDATEINTERVAL);

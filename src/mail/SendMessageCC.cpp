@@ -433,7 +433,7 @@ SendMessageCC::WriteToFolder(String const &name, MailFolder::Type type)
 
    WriteToString(str);
    MailFolder *mf =
-      MailFolder::OpenFolder(MailFolder::MF_PROFILE,name);
+      MailFolder::OpenFolder(MF_PROFILE,name);
    if(! mf) // there is no profile folder called name
    {
       String filename = strutil_expandfoldername(name);

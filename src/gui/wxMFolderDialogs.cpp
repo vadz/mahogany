@@ -673,7 +673,7 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
    {
       switch ( m_radio->GetSelection() )
       {
-         case MFolder::File:
+         case File:
             // set the file name as the default folder name
             {
                wxString name;
@@ -683,12 +683,11 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
             }
             break;
 
-         case MFolder::News:
+         case News:
             // set the newsgroup name as the default folder name
             dlg->SetFolderName(m_newsgroup->GetValue());
             break;
-      case MFolder::IMAP:
-         break;
+
          default:
             // nothing
             ;
@@ -725,9 +724,9 @@ wxFolderPropertiesPage::UpdateUI(int sel)
 
    switch ( selection )
    {
-   case MailFolder::MF_IMAP:
+   case MF_IMAP:
       m_mailboxname->Enable(TRUE); //only difference from POP
-   case MailFolder::MF_POP:
+   case MF_POP:
       m_login->Enable(TRUE);
       m_password->Enable(TRUE);
       m_server->Enable(TRUE);
@@ -735,7 +734,7 @@ wxFolderPropertiesPage::UpdateUI(int sel)
       m_browsePath->Enable(FALSE);
       break;
 
-   case MailFolder::MF_NNTP:
+   case MF_NNTP:
       m_mailboxname->Enable(FALSE);
       m_login->Enable(FALSE);
       m_password->Enable(FALSE);
@@ -744,7 +743,7 @@ wxFolderPropertiesPage::UpdateUI(int sel)
       m_browsePath->Enable(FALSE);
       break;
 
-   case MailFolder::MF_FILE:
+   case MF_FILE:
       m_mailboxname->Enable(FALSE);
       m_login->Enable(FALSE);
       m_password->Enable(FALSE);
@@ -755,7 +754,7 @@ wxFolderPropertiesPage::UpdateUI(int sel)
       m_browsePath->Enable(TRUE & m_isCreating);
       break;
 
-   case MailFolder::MF_INBOX:
+   case MF_INBOX:
       m_mailboxname->Enable(FALSE);
       m_login->Enable(FALSE);
       m_password->Enable(FALSE);
@@ -791,8 +790,8 @@ wxFolderPropertiesPage::SetDefaultValues(bool firstTime)
    if ( firstTime )
    {
       typeFolder = (MFolder::Type)READ_CONFIG(m_profile, MP_FOLDER_TYPE);
-      if(typeFolder == MFolder::Invalid)
-         typeFolder = MFolder::File;
+      if(typeFolder == FolderInvalid)
+         typeFolder = File;
       m_radio->SetSelection(typeFolder);
    }
    else
@@ -800,7 +799,7 @@ wxFolderPropertiesPage::SetDefaultValues(bool firstTime)
       typeFolder = (MFolder::Type)m_radio->GetSelection();
    }
 
-   if ( MFolder::TypeHasUserName(typeFolder) )
+   if ( FolderTypeHasUserName(typeFolder) )
    {
       String value = READ_CONFIG(m_profile,MP_POP_LOGIN);
       if ( !value )
@@ -809,18 +808,18 @@ wxFolderPropertiesPage::SetDefaultValues(bool firstTime)
 
       m_password->SetValue(READ_CONFIG(m_profile,MP_POP_PASSWORD));
 
-      if ( typeFolder == MFolder::POP || typeFolder == MFolder::IMAP )
+      if ( typeFolder == POP || typeFolder == IMAP )
          value = READ_CONFIG(m_profile, MP_POP_HOST);
-      else if ( typeFolder == MFolder::News )
+      else if ( typeFolder == News )
          value = READ_CONFIG(m_profile, MP_NNTPHOST);
       else
          value.Empty();
       m_server->SetValue(value);
    }
 
-   if ( typeFolder == MFolder::File && !m_isCreating )
+   if ( typeFolder == File && !m_isCreating )
       m_path->SetValue(READ_CONFIG(m_profile,MP_FOLDER_PATH));
-   else if ( typeFolder == MFolder::News )
+   else if ( typeFolder == News )
       m_newsgroup->SetValue(READ_CONFIG(m_profile,MP_FOLDER_PATH));
 
    if ( !m_isCreating )
@@ -844,7 +843,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
    // ... but its properties (comment) may still be changed, so check for this
    // only if we're creating it
-   CHECK( !m_dlgCreate || typeFolder != MFolder::Inbox, false,
+   CHECK( !m_dlgCreate || typeFolder != Inbox, false,
           "Ok button should be disabled" );
 
    // 1st step: create the folder in the MFolder sense. For this we need only
@@ -882,24 +881,24 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    FolderPathChanger changePath(m_profile, fullname);
    switch ( typeFolder )
    {
-      case MFolder::POP:
-      case MFolder::IMAP:
+      case POP:
+      case IMAP:
          m_profile->writeEntry(MP_POP_LOGIN,m_login->GetValue());
          m_profile->writeEntry(MP_POP_PASSWORD,m_password->GetValue());
          m_profile->writeEntry(MP_POP_HOST,m_server->GetValue());
          m_profile->writeEntry(MP_FOLDER_PATH,m_mailboxname->GetValue());
          break;
 
-      case MFolder::News:
+      case News:
          m_profile->writeEntry(MP_NNTPHOST,m_server->GetValue());
          m_profile->writeEntry(MP_FOLDER_PATH,m_newsgroup->GetValue());
          break;
 
-      case MFolder::File:
+      case File:
          m_profile->writeEntry(MP_FOLDER_PATH,m_path->GetValue());
          break;
 
-      case MFolder::Inbox:
+      case Inbox:
          if ( !m_dlgCreate )
             break;
          //else: can't create INBOX folder!

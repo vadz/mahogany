@@ -96,7 +96,7 @@ public:
       @param password only used for POP, IMAP
 
    */
-   static MailFolderCC * OpenFolder(MailFolder::Type type,
+   static MailFolderCC * OpenFolder(int typeAndFlags,
                                     String const &path,
                                     ProfileBase *profile,
                                     String const &server,
@@ -212,7 +212,7 @@ public:
 
 private:
    /// private constructor, does basic initialisation
-   MailFolderCC(MailFolder::Type type,
+   MailFolderCC(int typeAndFlags,
                 String const &path,
                 ProfileBase *profile,
                 String const &server,
@@ -233,7 +233,8 @@ private:
    FolderViewList   m_viewList;
 
    /// which type is this mailfolder?
-   MailFolder::Type   m_folderType;
+   FolderType   m_folderType;
+
    ///   mailstream associated with this folder
    MAILSTREAM   *m_MailStream;
 
@@ -289,8 +290,9 @@ private:
    friend class MessageCC;
 
 protected:
-   void SetType(MailFolder::Type type) { m_folderType = type; }
-   MailFolder::Type GetType(void) const { return m_folderType; }
+   void SetType(FolderType type) { m_folderType = type; }
+   FolderType GetType(void) const { return m_folderType; }
+
 public:
    /** @name common callback routines
        They all take a stram argument and the number of a message.

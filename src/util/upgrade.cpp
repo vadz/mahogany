@@ -187,7 +187,7 @@ VerifyInbox(void)
    {
       ProfileBase *ibp = ProfileBase::CreateFolderProfile("INBOX", parent);
       ibp->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
-      ibp->writeEntry(MP_FOLDER_TYPE, MFolder::Inbox);
+      ibp->writeEntry(MP_FOLDER_TYPE, Inbox);
       ibp->writeEntry(MP_FOLDER_COMMENT,
                      _("Default system folder for incoming mail."));
       ibp->DecRef();

@@ -45,7 +45,7 @@ static inline void CCQuiet(void) { mm_ignore_errors = true; }
 static inline void CCVerbose(void) { mm_ignore_errors = false; }
 
 
-MailFolderCC::MailFolderCC(MailFolder::Type type,
+MailFolderCC::MailFolderCC(int typeAndFlags,
                            String const &path,
                            ProfileBase *profile,
                            String const &server,
@@ -54,22 +54,24 @@ MailFolderCC::MailFolderCC(MailFolder::Type type,
 {
    m_MailStream = NIL;
 
-   //fixme: server is ignored for now
+   //FIXME: server is ignored for now
    m_Profile = profile;
    m_Profile->IncRef(); // we use it now
    m_MailboxPath = path;
    m_Login = login;
    m_Password = password;
    numOfMessages = -1;
-   type = (MailFolder::Type) (type & MF_TYPEMASK);
+
+   FolderType type = GetFolderType(typeAndFlags);
    SetType(type);
-   if(type == MF_INBOX || type == MF_FILE)
+
+   if( !FolderTypeHasUserName(type) )
       m_Login = ""; // empty login for these types
 
 }
 
 MailFolderCC *
-MailFolderCC::OpenFolder(MailFolder::Type type,
+MailFolderCC::OpenFolder(int typeAndFlags,
                          String const &name,
                          ProfileBase *profile,
                          String const &server,
@@ -80,34 +82,40 @@ MailFolderCC::OpenFolder(MailFolder::Type type,
    MailFolderCC *mf;
    String mboxpath;
 
-   int flags = (int) (type & MailFolder::MF_FLAGSMASK);
-   type = (MailFolder::Type)(type & MailFolder::MF_TYPEMASK);
+   int flags = GetFolderFlags(typeAndFlags);
+   int type = GetFolderType(typeAndFlags);
 
-   switch(type)
+   switch( type )
    {
-   case MailFolder::MF_INBOX:
-      mboxpath = "INBOX";
-      break;
-   case MailFolder::MF_FILE:
-      mboxpath = name;
-      break;
-   case MailFolder::MF_MH:
-      mboxpath << "#mh/" << name;
-      break;
-   case MailFolder::MF_POP:
-      mboxpath << '{' << server << "/pop3}";
-      break;
-   case MailFolder::MF_IMAP:  // do we need /imap flag?
-      if(flags & MF_FLAGS_ANON)
-         mboxpath << '{' << server << "/anonymous}" << name;
-      else
-         mboxpath << '{' << server << "/user=" << login << '}'<< name;
-      break;
-   case MailFolder::MF_NNTP:
-      mboxpath << '{' << server << "/nntp}" << name;
-      break;
-   default:
-      FAIL_MSG("Unsupported folder type.");
+      case MF_INBOX:
+         mboxpath = "INBOX";
+         break;
+
+      case MF_FILE:
+         mboxpath = name;
+         break;
+
+      case MF_MH:
+         mboxpath << "#mh/" << name;
+         break;
+
+      case MF_POP:
+         mboxpath << '{' << server << "/pop3}";
+         break;
+
+      case MF_IMAP:  // do we need /imap flag?
+         if(flags & MF_FLAGS_ANON)
+            mboxpath << '{' << server << "/anonymous}" << name;
+         else
+            mboxpath << '{' << server << "/user=" << login << '}'<< name;
+         break;
+
+      case MF_NNTP:
+         mboxpath << '{' << server << "/nntp}" << name;
+         break;
+
+      default:
+         FAIL_MSG("Unsupported folder type.");
    }
 
    mf = FindFolder(mboxpath,login);
@@ -117,12 +125,15 @@ MailFolderCC::OpenFolder(MailFolder::Type type,
       return mf;
    }
 
-   mf = new MailFolderCC(type,mboxpath,profile,server,login,password);
-   if(mf->Open())
+   mf = new MailFolderCC(typeAndFlags,mboxpath,profile,server,login,password);
+   if( mf->Open() )
       return mf;
    else
+   {
       mf->DecRef();
-   return NULL;
+
+      return NULL;
+   }
 }
 
 
@@ -169,25 +180,24 @@ MailFolderCC::Open(void)
          {
             fclose(fp);
             String msg;
-            msg.Printf("Found lock-file:\n"
+            msg.Printf(_("Found lock-file:\n"
                        "'%s'\n"
                        "Some other process may be using the folder.\n"
-                       "Shall I forcefully override the lock?",
+                       "Shall I forcefully override the lock?"),
                        lockfile.c_str());
             if(MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE, true))
             {
                int success = remove(lockfile);
                if(success != 0) // error!
                   MDialog_Message(
-                     "Could not remove lock-file.\n"
+                     _("Could not remove lock-file.\n"
                      "Other process may have terminated.\n"
-                     "Will try to continue as normal.");
+                     "Will try to continue as normal."));
             }
             else
             {
-               MDialog_Message(
-                     "Cannot open the folder while.\n"
-                     "lock-file exists.\n");
+               MDialog_Message(_("Cannot open the folder while "
+                                 "lock-file exists."));
                return false;
             }
          }      
@@ -318,15 +328,15 @@ MailFolderCC::GetName(void) const
    String symbolicName;
    switch(GetType())
    {
-   case MailFolder::MF_INBOX:
+   case MF_INBOX:
       symbolicName = "INBOX"; break;
-   case MailFolder::MF_FILE:
+   case MF_FILE:
       symbolicName = m_MailboxPath; break;
-   case MailFolder::MF_POP:
+   case MF_POP:
       symbolicName << "pop_" << m_Login; break;
-   case MailFolder::MF_IMAP:
+   case MF_IMAP:
       symbolicName << "imap_" << m_Login; break;
-   case MailFolder::MF_NNTP:
+   case MF_NNTP:
       symbolicName << "news_" << m_Login;
    default:
       // just to keep the compiler happy

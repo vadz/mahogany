@@ -692,7 +692,7 @@ private:
    wxTextCtrl *m_PasswordTextCtrl;
    wxStaticText *m_PathStaticText;
    wxButton   *m_CancelButton, *m_OkButton, *m_UndoButton;
-   wxString    m_choices[MFolder::Max];
+   wxString    m_choices[News - Inbox];
 
    DECLARE_EVENT_TABLE()
 };
@@ -764,11 +764,11 @@ wxPEP_Folder::wxPEP_Folder(ProfileBase *profile, wxWindow *parent)
    MkTextCtrl(m_UserIdTextCtrl, "User ID",-1);
    MkTextCtrl(m_PasswordTextCtrl, "Password",-1);
 
-   m_choices[MFolder::Inbox] = _("INBOX");
-   m_choices[MFolder::File]  = _("Message box file");
-   m_choices[MFolder::POP]   = _("POP3");
-   m_choices[MFolder::IMAP]  = _("IMAP");
-   m_choices[MFolder::News]  = _("News");
+   m_choices[Inbox] = _("INBOX");
+   m_choices[File]  = _("Message box file");
+   m_choices[POP]   = _("POP3");
+   m_choices[IMAP]  = _("IMAP");
+   m_choices[News]  = _("News");
    long xRadio = labelWidth + inputWidth + 20;
    m_FolderTypeRadioBox = new wxRadioBox( this, M_WXID_PEP_RADIO,
                                           _("Folder Type"),
@@ -799,10 +799,10 @@ wxPEP_Folder::wxPEP_Folder(ProfileBase *profile, wxWindow *parent)
 void
 wxPEP_Folder::UpdateUI(void)
 {
-   int type = m_FolderTypeRadioBox->GetSelection();
+   FolderType type = GetFolderType(m_FolderTypeRadioBox->GetSelection());
 
    m_FolderPathTextCtrl->Enable(TRUE);
-   if ( type == MFolder::POP || type == MFolder::IMAP )
+   if ( FolderTypeHasUserName(type) )
    {
       m_UserIdTextCtrl->Enable(TRUE);
       m_PasswordTextCtrl->Enable(TRUE);
@@ -813,7 +813,7 @@ wxPEP_Folder::UpdateUI(void)
       m_UserIdTextCtrl->Enable(FALSE);
       m_PasswordTextCtrl->Enable(FALSE);
       m_PathStaticText->SetLabel(_("Pathname or name of folder"));
-      if(type == 0)
+      if ( type == Inbox )
       {
          m_FolderPathTextCtrl->SetValue("INBOX");
          m_FolderPathTextCtrl->Enable(FALSE);
@@ -824,12 +824,13 @@ wxPEP_Folder::UpdateUI(void)
 bool
 wxPEP_Folder::TransferDataFromWindow(void)
 {
-   int type;
-   m_Profile->writeEntry(MP_FOLDER_TYPE,type = m_FolderTypeRadioBox->GetSelection());
+   FolderType type = GetFolderType(m_FolderTypeRadioBox->GetSelection());
+
+   m_Profile->writeEntry(MP_FOLDER_TYPE,type);
    m_Profile->writeEntry(MP_FOLDER_PATH,m_FolderPathTextCtrl->GetValue());
    m_Profile->writeEntry(MP_UPDATEINTERVAL,atoi(m_UpdateIntervalTextCtrl->GetValue()));
 
-   if ( type == MFolder::POP || type == MFolder::IMAP )
+   if ( FolderTypeHasUserName(type) )
    {
       m_Profile->writeEntry(MP_POP_LOGIN,m_UserIdTextCtrl->GetValue());
       m_Profile->writeEntry(MP_POP_PASSWORD,m_PasswordTextCtrl->GetValue());
@@ -843,19 +844,19 @@ wxPEP_Folder::TransferDataFromWindow(void)
 bool
 wxPEP_Folder::TransferDataToWindow(void)
 {
-   int type = READ_CONFIG(m_Profile, MP_FOLDER_TYPE);
+   FolderType type = GetFolderType(READ_CONFIG(m_Profile, MP_FOLDER_TYPE));
 
    // the trouble is that if INBOX.profile doesn't exist (yet), we get the
    // wrong value here (FIXME: this is not the right solution neither!)
    if ( type == MP_FOLDER_TYPE_D &&
         ((ProfileBase *)m_Profile)->GetProfileName() == "INBOX" ) { // yuck (FIXME)
-      type = MFolder::Inbox;
+      type = Inbox;
    }
 
    m_FolderTypeRadioBox->SetSelection(type);
    m_FolderPathTextCtrl->SetValue(READ_CONFIG(m_Profile,MP_FOLDER_PATH));
    m_UpdateIntervalTextCtrl->SetValue(strutil_ltoa(READ_CONFIG(m_Profile,MP_UPDATEINTERVAL)));
-   if ( type == MFolder::POP || type == MFolder::IMAP )
+   if ( FolderTypeHasUserName(type) )
    {
       m_UserIdTextCtrl->SetValue(READ_CONFIG(m_Profile,MP_POP_LOGIN));
       m_PasswordTextCtrl->SetValue(READ_CONFIG(m_Profile,MP_POP_PASSWORD));

@@ -1,4 +1,4 @@
-// //// //// //// //// //// //// //// //// //// //// //// //// //// //// //////
+///////////////////////////////////////////////////////////////////////////////
 // Project:     M - cross platform e-mail GUI client
 // File name:   MFolder.h - non GUI and non mail folder related classes
 // Purpose:     manage all folders used by the application
@@ -8,7 +8,7 @@
 // CVS-ID:      $Id$
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     M license
-// // //// //// //// //// //// //// //// //// //// //// //// //// //// //// ///
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef  _MFOLDER_H
 #define  _MFOLDER_H
@@ -22,6 +22,8 @@
 #ifndef USE_PCH
 #   include "Profile.h"
 #   include "MailFolder.h"
+
+#   include "FolderType.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -49,22 +51,10 @@
 class MFolder : public MObjectRC
 {
 public:
+   // compatibility
+   typedef FolderType Type;
+
    // constants
-   enum Type
-   {
-      // real folder types
-      Inbox = MailFolder::MF_INBOX,     // system inbox
-      File = MailFolder::MF_FILE,      // local file (MBOX format)
-      POP = MailFolder::MF_POP,       // POP3 server
-      IMAP = MailFolder::MF_IMAP,      // IMAP4 server
-      News = MailFolder::MF_NNTP,      // NNTP server
-
-      // pseudo types
-      Invalid = MailFolder::MF_ILLEGAL,   // folder not initialized properly
-      Root = 999,      // this is the the special pseudo-folder
-      Max        // end of enum marker
-   };
-
    enum Flags
    {
       OpenOnStartup   = 0x0001,  // auto open on startup?
@@ -78,21 +68,6 @@ public:
       // create a new folder of specified type, it's an error to call it with
       // the folder name which already exists (NULL will be returned)
    static MFolder *Create(const String& fullname, Type type);
-
-      // is this a folder type for which username/password make sense?
-   static bool TypeHasUserName(Type type)
-   {
-      switch ( type )
-      {
-         case POP:
-         case IMAP:
-         case News:
-            return true;
-
-         default:
-            return false;
-      }
-   }
 
    // misc accessors
       // the folder name must be unique among its siblings

@@ -118,7 +118,7 @@ public:
    MRootFolderFromProfile() : MFolderFromProfile("") { }
 
    // implement base class pure virtuals (some of them don't make sense to us)
-   virtual Type GetType() const { return MFolder::Root; }
+   virtual FolderType GetType() const { return FolderRoot; }
 
    virtual String GetComment() const { return ""; }
    virtual void SetComment(const String& /* comment */)
@@ -344,13 +344,13 @@ String MFolderFromProfile::GetName() const
    return m_folderName.AfterLast('/');
 }
 
-MFolder::Type MFolderFromProfile::GetType() const
+FolderType MFolderFromProfile::GetType() const
 {
    ProfileBase *profile = mApplication->GetProfile();
-   CHECK( profile != NULL, MFolder::Invalid, "panic in MFolder: no app profile" );
+   CHECK( profile != NULL, FolderInvalid, "panic in MFolder: no app profile" );
 
    FolderPathChanger changePath(profile, m_folderName);
-   return (Type)READ_CONFIG(profile, MP_FOLDER_TYPE);
+   return GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
 }
 
 String MFolderFromProfile::GetComment() const

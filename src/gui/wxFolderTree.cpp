@@ -316,7 +316,7 @@ void wxFolderTree::OnSelectionChange(MFolder * /* oldsel */, MFolder *newsel)
    if ( READ_APPCONFIG(MP_OPEN_ON_CLICK) )
    {
       // don't even try to open the root folder
-      if ( newsel && newsel->GetType() != MFolder::Root )
+      if ( newsel && newsel->GetType() != FolderRoot )
       {
          newsel->IncRef(); // before returning it to the outside world
          OnOpenHere(newsel);
@@ -347,7 +347,7 @@ void wxFolderTree::OnOpenHere(MFolder *folder)
 // open a new folder view on this folder
 void wxFolderTree::OnOpen(MFolder *folder)
 {
-   if ( folder->GetType() != MFolder::Root )
+   if ( folder->GetType() != FolderRoot )
    {
       (void)wxFolderViewFrame::Create(
          // we need to pass relative names (profile names) into
@@ -381,13 +381,13 @@ bool wxFolderTree::OnDelete(MFolder *folder)
 
    switch ( folder->GetType() )
    {
-      case MFolder::Inbox:
+      case Inbox:
          wxLogError(_("You should not delete the INBOX folder:\n"
                       "it is automatically created by M to store your "
                       "incoming mail"));
          return FALSE;
 
-      case MFolder::Root:
+      case FolderRoot:
          wxLogError(_("The root folder can not be deleted."));
          return FALSE;
 
@@ -446,12 +446,12 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
       MFolder::Type          type;
    } FolderIcons[] =
    {
-      { wxFolderTreeImpl::iconInbox, MFolder::Inbox },
-      { wxFolderTreeImpl::iconFile,  MFolder::File  },
-      { wxFolderTreeImpl::iconPOP,   MFolder::POP   },
-      { wxFolderTreeImpl::iconIMAP,  MFolder::IMAP  },
-      { wxFolderTreeImpl::iconNews,  MFolder::News  },
-      { wxFolderTreeImpl::iconRoot,  MFolder::Root  }
+      { wxFolderTreeImpl::iconInbox, Inbox },
+      { wxFolderTreeImpl::iconFile,  File  },
+      { wxFolderTreeImpl::iconPOP,   POP   },
+      { wxFolderTreeImpl::iconIMAP,  IMAP  },
+      { wxFolderTreeImpl::iconNews,  News  },
+      { wxFolderTreeImpl::iconRoot,  FolderRoot  }
    };
 
    MFolder::Type type = folder->GetType();
@@ -470,7 +470,7 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    ASSERT_MSG( n < WXSIZEOF(FolderIcons), "no icon for this folder type" );
 
    // add this item to the tree
-   if ( folder->GetType() == MFolder::Root )
+   if ( folder->GetType() == FolderRoot )
    {
       SetId(tree->AddRoot(wxString(_("All folders")), image, image, this));
    }
@@ -543,7 +543,7 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
       }
 
       // disable the items which don't make sense for some kinds of folders
-      bool isRoot = folder->GetType() == MFolder::Root;
+      bool isRoot = folder->GetType() == FolderRoot;
 
       // you can't open nor delete the root folder and it has no properties
       m_menu->Enable(FolderMenu::Open, !isRoot);
