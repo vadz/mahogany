@@ -372,7 +372,7 @@ wxMApp::OnInit()
    {
       // now we can create the log window
       if ( READ_APPCONFIG(MP_SHOWLOG) ) {
-         (void)new wxMLogWindow(m_topLevelFrame, _("Mahogany: Activity Log"));
+         (void)new wxMLogWindow(m_topLevelFrame, _("Mahogany : Activity Log"));
 
          // we want it to be above the log frame
          m_topLevelFrame->Raise();
