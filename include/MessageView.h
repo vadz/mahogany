@@ -94,6 +94,9 @@ public:
    /// return the name of the folder which messages we're viewing
    String GetFolderName() const;
 
+   /// get the message being previewd, do not DecRef() (may be NULL)
+   Message *GetMessage() const { return m_mailMessage; }
+
    //@}
 
    /** @name Commands
