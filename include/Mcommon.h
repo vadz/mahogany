@@ -3,12 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.1  1998/03/14 12:21:11  karsten
- * first try at a complete archive
- *
+ * $Id$           *
  *******************************************************************/
 #ifndef MCOMMON_H
 #define	MCOMMON_H

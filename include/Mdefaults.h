@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/03/25 21:29:16  KB
+ * - almost fixed handling/highlighting of URLs in messages
+ * - added some (testing) python code and the required changes to configure stuff
+ *
  * Revision 1.3  1998/03/22 20:41:16  KB
  * included profile setting for fonts etc,
  * made XFaces work, started adding support for highlighted URLs
@@ -48,6 +52,15 @@
 #define	M_ACTION_ALWAYS	2
 //@}
 
+/** @name built-in icon names */
+//@{
+/// for hyperlinks/http
+#define M_ICON_HLINK_HTTP	"M-HTTPLINK"
+/// for hyperlinks/ftp
+#define M_ICON_HLINK_FTP	"M-FTPLINK"
+/// unknown icon
+#define M_ICON_UNKNOWN		"UNKNOWN"
+//@}
 /** @name names of configuration entries */
 //@{
 /// shall we record default values in configuration files
@@ -186,6 +199,8 @@
 #define MP_FTEXT_WEIGHT			"FontWeight"
 /// highlight URLS?
 #define	MP_HIGHLIGHT_URLS		"HighlightURL"
+/// open URLs with
+#define	MP_BROWSER			"Browser"
 /// the wildcard for save dialog
 //@}
 //@}
@@ -325,6 +340,8 @@
 #define MP_FTEXT_WEIGHT_D		0
 /// highlight URLS?
 #define	MP_HIGHLIGHT_URLS_D		1
+/// open URLs with
+#define	MP_BROWSER_D			"Mnetscape"
 /// the wildcard for save dialog
 #ifdef OS_UNIX
 #define MP_DEFAULT_SAVE_WILDCARD_D	"*"

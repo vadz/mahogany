@@ -1,17 +1,17 @@
 /*-*- c++ -*-********************************************************
- * Munix.h - unix specific configuration                            *
+ * Mwin.h - Windows specific configuration                          *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
  * $Id$             *
  *******************************************************************/
-#ifndef MUNIX_H
-#define	MUNIX_H
+#ifndef MWIN_H
+#define	MWIN_H
 
 /// separating directories in a pathname
-#define	DIR_SEPARATOR	'/'
+#define	DIR_SEPARATOR	'\\'
 
 /// separating directories in a search path
-#define	PATH_SEPARATOR	':'
+#define	PATH_SEPARATOR	';'
 
 #endif

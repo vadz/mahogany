@@ -3,16 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.2  1998/03/22 20:41:51  KB
- * included profile setting for fonts etc,
- * made XFaces work, started adding support for highlighted URLs
- *
- * Revision 1.1  1998/03/14 12:21:22  karsten
- * first try at a complete archive
- *
+ * $Id$         *
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -169,14 +160,14 @@ wxMessageView::Update(void)
       }
    }  
 #endif
-   ftoList->AddFormattedText(_("<bf>From:</bf> "));
+   ftoList->AddFormattedText(_("<b>From:</b> "));
    from = mailMessage->Address(tmp,MAT_FROM);
    if(tmp.length() > 0)
       from = tmp + String(" <") + from + '>';
    ftoList->AddText(from);
-   ftoList->AddFormattedText(_("\n<bf>Subject:</bf> "));
+   ftoList->AddFormattedText(_("\n<b>Subject:</b> "));
    ftoList->AddText(mailMessage->Subject());
-   ftoList->AddFormattedText(_("\n<bf>Date:</bf> "));
+   ftoList->AddFormattedText(_("\n<b>Date:</b> "));
    ftoList->AddText(mailMessage->Date());
    ftoList->AddText("\n\n");
 
@@ -231,19 +222,24 @@ wxMessageView::HighLightURLs(const char *input, String &out)
 
    while(*cptr)
    {
-      // escape brackets:
-      if(*cptr == '<')
-	 out += '<';
-      else
-	 if(*cptr == '>')
-	    out += '>';
-      if(strncmp(cptr, "http:", 5) == 0)
+      
+      if(strncmp(cptr, "http:", 5) == 0 || strncmp(cptr, "ftp:", 4) == 0)
       {
-	 const char *cptr2 = cptr+5;
-	 out += " <IMG SRC=\"M-HLINK\";";
+	 const char *cptr2 = cptr;
+	 out += " <a href=\"";
+	 out += "\"";
 	 while(*cptr2 && ! isspace(*cptr2))
 	    out += *cptr2++;
-	 out += "> ";
+	 out += "\"> ";
+      }
+      else
+      {
+	 // escape brackets:
+	 if(*cptr == '<')
+	    out += '<';
+	 else
+	    if(*cptr == '>')
+	       out += '>';
       }
       out += *cptr++;
    }
@@ -288,24 +284,26 @@ wxMessageView::ProcessMouse(wxMouseEvent &event)
 	    char *buf = strutil_strdup(type);
 	    char *token = strtok(buf,";");
 	    token = strtok(NULL,";");
-	    if(!token) abort(); // EH???
+	    if(!token) return; // e.g. a X-Face
 	    type = token;
 	    token = strtok(NULL,";");
-	    if(!token) abort(); // EH???
+	    if(!token) return; 
 	    mimeDisplayPart = atoi(token); // remember section to use it in
 				     // Popup menu
 	    DELETE [] buf;
-	    VAR(type);
-	    VAR(mApplication.GetMimeList()->GetCommand(type,command,flags));
-	    VAR(command);
-	    VAR(flags);
-
 	    PopupMenu(popupMenu, event.x-x, event.y-y);
 
 	 }
 	 else if (obj->GetType() == LI_URL)
 	 {
-	    ERRORMESSAGE(("Object Type LI_URL not implemented yet."));
+	    String	cmd;
+	    if(folder)
+	       cmd = folder->GetProfile()->readEntry(MP_BROWSER,MP_BROWSER_D);
+	    else
+	       cmd = mApplication.readEntry(MP_BROWSER,MP_BROWSER_D);
+	    cmd += ' ';
+	    cmd += obj->GetText();
+	    wxExecute(WXCPTR cmd.c_str());
 	 }
       }
    }

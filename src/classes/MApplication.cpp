@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/03/25 21:29:34  KB
+ * - almost fixed handling/highlighting of URLs in messages
+ * - added some (testing) python code and the required changes to configure stuff
+ *
  * Revision 1.2  1998/03/22 20:44:50  KB
  * fixed global profile bug in MApplication.cc
  * adopted configure/makeopts to Python 1.5
@@ -32,12 +36,9 @@
 
 #include	<MailFolderCC.h>
 
-#if 0
 #ifdef	USE_PYTHON
-#	include	"pyembed.h"
+#	include	"Python.h"
 #endif
-#endif
-
 
 #ifdef OS_UNIX
 MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME, FALSE,
@@ -128,6 +129,7 @@ MFrame *
 MApplication::OnInit(void)
 {
    // this is being called from the GUI's initialisation function
+   String	tmp;
    topLevelFrame = NEW MainFrame();
    if(topLevelFrame)
    {
@@ -158,19 +160,31 @@ MApplication::OnInit(void)
    localDir = String(cptr);
    DELETE [] cptr;
 
+   // extend path for commands, look in M's dirs first
+   tmp="";
+   tmp += GetLocalDir();
+   tmp += "/scripts";
+   tmp += PATH_SEPARATOR;
+   tmp = GetGlobalDir();
+   tmp += "/scripts";
+   tmp += PATH_SEPARATOR;
+   if(getenv("PATH"))
+      tmp += getenv("PATH");
+   setenv("PATH", tmp.c_str(), 1);
+
       // initialise python interpreter
 #ifdef	USE_PYTHON
-   String	tmp;
-   tmp = GetGlobalDir();
-   tmp += "/scripts:";
+   tmp = "";
    tmp += GetLocalDir();
-   tmp += "/scripts:";
-   VAR(readEntry(MC_PYTHONPATH,MC_PYTHONPATH_D));
+   tmp += "/scripts";
+   tmp += PATH_SEPARATOR;
+   tmp = GetGlobalDir();
+   tmp += "/scripts";
+   tmp += PATH_SEPARATOR;
    tmp += readEntry(MC_PYTHONPATH,MC_PYTHONPATH_D);
    if(getenv("PYTHONPATH"))
       tmp += getenv("PYTHONPATH");
    setenv("PYTHONPATH", tmp.c_str(), 1);
-   VAR(tmp);
    Py_Initialize();
    PyRun_SimpleString("import sys,os");
    PyRun_SimpleString("print 'Hello,', os.environ['USER'] + '.'");

@@ -1,4 +1,5 @@
 
 - doc++ dumps core when generating documentation
 
-- the highlighted  urls in message view don't work yet
+- there is still a minor problem with URLs ending in > like <http:xxx>
+- paths for PATH and PYTHONPATH get set wrongly in MApplication::OnInit(), why?

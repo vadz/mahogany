@@ -3,17 +3,9 @@
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.2  1998/03/22 20:41:50  KB
- * included profile setting for fonts etc,
- * made XFaces work, started adding support for highlighted URLs
- *
- * Revision 1.1  1998/03/14 12:21:22  karsten
- * first try at a complete archive
- *
- *******************************************************************/
+ * $Id$               *
+ ********************************************************************/
+
 
 #ifdef __GNUG__
 #pragma implementation "wxFText.h"
@@ -121,19 +113,25 @@ FTObject::Create(String & str, int &cx, int &cy, float &x, float &y,
       return type;
    }
       
-   if(*cptr == delimiter1 && *(cptr+1) != delimiter1)
+   if(*cptr == delimiter1)
    {
-      type = LI_COMMAND;
-      cptr++;	// skip initial delimiter
-      while(*cptr && *cptr != delimiter2)
-	 text += *cptr++;
-      strutil_toupper(text);
-      if(*cptr == delimiter2)
-	 cptr++;	// skip ending delimiter
-      str = cptr;
-      Update(dc,x,y);
-      isOk = True;
-      return LI_COMMAND;
+      if(*(cptr+1) != delimiter1)
+      {
+	 type = LI_COMMAND;
+	 cptr++;	// skip initial delimiter
+	 while(*cptr && *cptr != delimiter2)
+	    text += *cptr++;
+	 //strutil_toupper(text);
+	 if(*cptr == delimiter2)
+	    cptr++;	// skip ending delimiter
+	 str = cptr;
+	 Update(dc,x,y);
+	 isOk = True;
+	 return LI_COMMAND;
+      }
+      //else
+      cptr++;
+      text += *cptr++; // continue as normal string
    }
    
    /* normal string */
@@ -143,10 +141,12 @@ FTObject::Create(String & str, int &cx, int &cy, float &x, float &y,
    {
       if(*cptr == delimiter2 && *(cptr+1) == delimiter2)
       {
+	 text += *cptr++;
 	 cptr++;
 	 continue;
       }else if(*cptr == delimiter1 && *(cptr+1) == delimiter1)
       {
+	 text += *cptr++;
 	 cptr++;
 	 continue;
       }
@@ -256,12 +256,12 @@ FTObject::Draw(wxFTOList & ftc, bool pageing, int *pageno) const
       dc->DrawText(text.c_str(), x, y+posYdelta);
       break;
    case LI_ICON:
+   case LI_URL:
       if(icon)
 	 dc->DrawIcon(icon,x, y);
       break;
    case LI_NEWLINE:
    case LI_COMMAND:
-   case LI_URL:
    case LI_ILLEGAL:
       break;
    };
@@ -650,24 +650,46 @@ wxFTOList::ProcessCommand(String const &command, FTObject *fto)
       cmd++;
    }
       
-   if(strcmp(cmd,"BF")==0)
+   if(strcmp(cmd,"B")==0 || strcmp(cmd,"b")==0)
       drawInfo.Bold(enable);
-   else if(strcmp(cmd,"SF")==0)
+   else if(strcmp(cmd,"SF")==0 || strcmp(cmd,"sf")==0)
       drawInfo.SansSerif(enable);
-   else if(strcmp(cmd,"TT")==0)
+   else if(strcmp(cmd,"TT")==0 || strcmp(cmd,"tt")==0)
       drawInfo.Typewriter(enable);
-   else if(strcmp(cmd,"EM")==0)
+   else if(strcmp(cmd,"EM")==0 || strcmp(cmd,"em")==0)
       drawInfo.Italics(enable);
-   else if(strcmp(cmd,"SL")==0)
+   else if(strcmp(cmd,"SL")==0 || strcmp(cmd,"sl")==0)
       drawInfo.Slanted(enable);
-   else if(strcmp(cmd,"IT")==0)
+   else if(strcmp(cmd,"IT")==0 || strcmp(cmd,"it")==0)
       drawInfo.Italics(enable);
-   else if(strcmp(cmd,"RM")==0)
+   else if(strcmp(cmd,"RM")==0 || strcmp(cmd,"rm")==0)
       drawInfo.Roman(enable);
-   else if(strcmp(cmd,"UL")==0)
+   else if(strcmp(cmd,"UL")==0 || strcmp(cmd,"ul")==0)
       drawInfo.Underline(enable);
-   else if(strncmp(cmd,"SZ",2)==0)
+   else if(strncmp(cmd,"SZ",2)==0 || strcmp(cmd,"sz")==0)
       drawInfo.ChangeSize(atoi(cmd+2));
+   else if((strncmp(cmd,"A HREF=\"", 8)==0
+	    || strncmp(cmd,"a href=\"", 8)==0)
+	   && fto)
+   {
+      fto->type = LI_URL;
+      char *buf = strutil_strdup(cmd+9);
+      char *cptr = buf;
+      while(*cptr && *cptr != '"') cptr++;
+      *cptr = '\0';
+      if(strncmp(buf,"HTTP", 4) == 0 || strncmp(buf,"http",4) == 0)
+	 fto->icon = iconManager.GetIcon(M_ICON_HLINK_HTTP);
+      else if(strncmp(buf,"FTP",3) == 0 || strncmp(buf,"ftp",3) == 0)
+	 fto->icon = iconManager.GetIcon(M_ICON_HLINK_FTP);
+      else
+	 fto->icon = iconManager.GetIcon(M_ICON_UNKNOWN);
+      fto->width = fto->icon->GetWidth();
+      fto->height = fto->icon->GetHeight();
+      fto->text = String(buf); // the argument of IMG SRC=
+      DELETE [] buf;
+      return;
+      
+   }
    else if(strncmp(cmd,"IMG SRC=\"",9)==0 && fto)
    {
       fto->type = LI_ICON;
@@ -678,11 +700,10 @@ wxFTOList::ProcessCommand(String const &command, FTObject *fto)
       char *cptr2 = cptr1;
       while(*cptr2 && *cptr2 != '"') cptr2++;
       *cptr2 = '\0';
-      VAR(cptr1);
       fto->icon = iconManager.GetIcon(cptr1);
       fto->width = fto->icon->GetWidth();
       fto->height = fto->icon->GetHeight();
-      fto->text = String(cmd); // the argument of IMG SRC=
+      fto->text = String(buf); // the argument of IMG SRC=
       DELETE [] buf;
       return;
    }

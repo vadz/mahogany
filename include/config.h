@@ -1,5 +1,11 @@
 /* include/config.h.  Generated automatically by configure.  */
-/*-*- c++ -*-*/
+/*-*- c++ -*-********************************************************
+ * config.h.in: config.h template file for use with autoconf        *
+ *                                                                  *
+ * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ *                                                                  *
+ * $Id$           *
+ *******************************************************************/
 /**@name config.h.in: Defines generated automatically from configure.in by autoheader.  */
 //@{
 /** Define to empty if the keyword does not work.  */
@@ -38,7 +44,7 @@
 /** Define if you have the <strings.h> header file.  */
 #define HAVE_STRINGS_H 1
 
-/** Define if you have the <stlib.h> header file.  */
+/** Define if you have the <stlib.h> header file. (required for Python.h) */
 #define HAVE_STDLIB_H 1
 
 /** Define if you have the <unistd.h> header file.  */
@@ -61,5 +67,9 @@
 
 /** Define if you use Python. */
 #define USE_PYTHON 1
+
+/** Define if the C++ compiler supports prototypes (of course it
+    does!) - required for Python.h */
+#define HAVE_PROTOTYPES 1
 
 //@}

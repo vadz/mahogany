@@ -281,6 +281,8 @@ AC_LANG_RESTORE
 AC_PROG_MAKE_SET
 AC_ISC_POSIX
 
+dnl we use C++ so we always have prototypes
+AC_DEFINE(HAVE_PROTOTYPES)
 
 dnl find the X11 include and library files
 AC_PATH_XTRA
