@@ -36,26 +36,26 @@
 
 struct MOptionData
 {
-   MOptionData(const char *name_, long val)
+   MOptionData(const wxChar *name_, long val)
    {
       name = name_;
       value.n = val;
       isNumeric = true;
    }
 
-   MOptionData(const char *name_, const char *val)
+   MOptionData(const wxChar *name_, const wxChar *val)
    {
       name = name_;
       value.s = val;
       isNumeric = false;
    }
 
-   const char *name;
+   const wxChar *name;
 
    union
    {
       long n;
-      const char *s;
+      const wxChar *s;
    } value;
 
    bool isNumeric;
@@ -915,7 +915,7 @@ MOption::MOption()
 extern MOptionValue GetOptionValue(Profile *profile, const MOption opt)
 {
    MOptionValue value;
-   const char *name = GetOptionName(opt);
+   const wxChar *name = GetOptionName(opt);
    if ( IsNumeric(opt) )
       value.Set(profile->readEntry(name, GetNumericDefault(opt)));
    else
@@ -931,7 +931,7 @@ extern long GetNumericOptionValue(Profile *profile, const MOption opt)
    return profile->readEntry(optdata.name, optdata.value.n);
 }
 
-extern const char *GetOptionName(const MOption opt)
+extern const wxChar *GetOptionName(const MOption opt)
 {
    ASSERT_MSG( (size_t)opt.GetId() < WXSIZEOF(MOptions),
                _T("invalid option index!") );
@@ -949,7 +949,7 @@ extern long GetNumericDefault(const MOption opt)
    return MOptions[opt.GetId()].value.n;
 }
 
-extern const char *GetStringDefault(const MOption opt)
+extern const wxChar *GetStringDefault(const MOption opt)
 {
    return MOptions[opt.GetId()].value.s;
 }

@@ -71,7 +71,7 @@ void MObjectRC::CheckLeaks()
 
 String MObjectRC::DebugDump() const
 {
-   return MObject::DebugDump() + String::Format(" m_nRef = %lu: ", (unsigned long)m_nRef);
+   return MObject::DebugDump() + String::Format(_T(" m_nRef = %lu: "), (unsigned long)m_nRef);
 }
 
 void MObject::CheckLeaks()
@@ -83,7 +83,7 @@ String MObject::DebugDump() const
 {
    MOcheck();
    String str;
-   str.Printf("%s at %p", DebugGetClassName(), this);
+   str.Printf(_T("%s at %p"), DebugGetClassName(), this);
 
    return str;
 }

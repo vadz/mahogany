@@ -9,9 +9,9 @@
 #define	MUNIX_H
 
 /// separating directories in a pathname
-#define	DIR_SEPARATOR	'/'
+#define	DIR_SEPARATOR	_T('/')
 
 /// separating directories in a search path
-#define	PATH_SEPARATOR	':'
+#define	PATH_SEPARATOR	_T(':')
 
 #endif

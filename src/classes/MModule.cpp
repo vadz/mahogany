@@ -65,7 +65,7 @@ static wxArrayString BuildListOfModulesDirs();
 #define MMD_SIGNATURE "Mahogany-Module-Definition"
 
 // the trace mask used by module loading code
-#define M_TRACE_MODULES "mmodule"
+#define M_TRACE_MODULES _T("mmodule")
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -219,10 +219,10 @@ MModule *FindModule(const String & name)
 
 #ifdef USE_MODULES_STATIC
 extern
-void MModule_AddStaticModule(const char *Name,
-                             const char *Interface,
-                             const char *Description,
-                             const char *Version,
+void MModule_AddStaticModule(const wxChar *Name,
+                             const wxChar *Interface,
+                             const wxChar *Description,
+                             const wxChar *Version,
                             MModule_InitModuleFuncType initFunc)
 {
    MModuleListEntry *me = new MModuleListEntry;
@@ -404,12 +404,12 @@ public:
          if(m_Module) m_Module->IncRef();
          return m_Module;
       }
-   MModuleListingEntryImpl(const String &name = "",
-                           const String &interfaceName = "",
-                           const String &shortdesc = "",
-                           const String &desc = "",
-                           const String &version = "",
-                           const String &author = "",
+   MModuleListingEntryImpl(const String &name = _T(""),
+                           const String &interfaceName = _T(""),
+                           const String &shortdesc = _T(""),
+                           const String &desc = _T(""),
+                           const String &version = _T(""),
+                           const String &author = _T(""),
                            MModule *module = NULL)
       {
          m_Name = name;
@@ -495,7 +495,7 @@ private:
 // this function can list all loaded modules (default) or do other things as
 // well depending on the parameters values, so the name is a bit unfortunate
 static MModuleListing * DoListLoadedModules(bool listall = false,
-                                            const String& interfaceName = "",
+                                            const String& interfaceName = _T(""),
                                             bool loadableOnly = false)
 {
 #ifndef USE_MODULES_STATIC
@@ -528,9 +528,9 @@ static MModuleListing * DoListLoadedModules(bool listall = false,
                                        me->m_Name, // module name
                                        me->m_Interface,
                                        desc,
-                                       "", // long description
+                                       _T(""), // long description
                                        String(me->m_Version) + _(" (builtin)"),
-                                       "mahogany-developers@lists.sourceforge.net",
+                                       _T("mahogany-developers@lists.sourceforge.net"),
                                        me->m_Module
                                     );
 
@@ -557,9 +557,9 @@ static MModuleListing * DoListLoadedModules(bool listall = false,
                                     m->GetName(), // module name
                                     m->GetInterface(),
                                     desc,
-                                    "", // long description
+                                    _T(""), // long description
                                     m->GetVersion(),
-                                    "", // author
+                                    _T(""), // author
                                     m
                                  );
          (*listing)[count++] = entry;
@@ -584,7 +584,7 @@ MModule::ListLoadedModules(void)
 MModuleListing *
 MModule::ListLoadableModules()
 {
-   return ListAvailableModules("", true /* loadable only */);
+   return ListAvailableModules(_T(""), true /* loadable only */);
 }
 
 /* static */
@@ -628,7 +628,7 @@ MModule::ListAvailableModules(const String& interfaceName, bool loadableOnly)
       if ( wxPathExists(pathname) )
       {
          // first look for MMDs
-         pathname << "*.mmd";
+         pathname << _T("*.mmd");
          filename = wxFindFirstFile(pathname);
          while( filename.length() )
          {
@@ -674,13 +674,13 @@ MModule::ListAvailableModules(const String& interfaceName, bool loadableOnly)
       MMD_LINE_LAST
    };
 
-   static const char *MMD_HEADERS[] =
+   static const wxChar *MMD_HEADERS[] =
    {
       MMD_SIGNATURE,
-      "Name:",
-      "Interface:",
-      "Version:",
-      "Author:",
+      _T("Name:"),
+      _T("Interface:"),
+      _T("Version:"),
+      _T("Author:"),
    };
 
    ASSERT_MSG( WXSIZEOF(MMD_HEADERS) == MMD_LINE_LAST,
@@ -697,7 +697,7 @@ MModule::ListAvailableModules(const String& interfaceName, bool loadableOnly)
 
       // it's either a .mmd file in which case we just read its contents or a
       // .so file in which case we load it and call its GetMModuleInfo()
-      if ( filename.Right(4) == ".mmd" )
+      if ( filename.Right(4) == _T(".mmd") )
       {
          errorflag = false;
          wxTextFile tf(filename);
@@ -733,7 +733,7 @@ MModule::ListAvailableModules(const String& interfaceName, bool loadableOnly)
                   {
                      String description;
                      for(size_t l = MMD_LINE_LAST + 1; l < tf.GetLineCount(); l++)
-                        description << tf[l] << '\n';
+                        description << tf[l] << _T('\n');
 
                      String name;
                      wxSplitPath((**it), NULL, &name, NULL);
@@ -896,17 +896,17 @@ static wxArrayString BuildListOfModulesDirs()
 // working with module properties
 // ----------------------------------------------------------------------------
 
-const char *GetMModuleProperty(const ModuleProperty *table, const char *name)
+const wxChar *GetMModuleProperty(const ModuleProperty *table, const wxChar *name)
 {
    while ( table->name )
    {
-      if ( strcmp(table->name, name) == 0 )
+      if ( wxStrcmp(table->name, name) == 0 )
          return table->value;
 
       table++;
    }
 
-   return "";
+   return _T("");
 }
 
 MModuleCommon::~MModuleCommon()

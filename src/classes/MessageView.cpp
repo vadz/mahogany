@@ -736,7 +736,7 @@ MessageView::InitializeViewFilters()
                                        filter,
                                        prio,
                                        name,
-                                       _(filterFactory->GetDescription()),
+                                       wxGetTranslation(filterFactory->GetDescription()),
                                        node
                                    );
 
@@ -1860,7 +1860,7 @@ MessageView::ShowPart(const MimePart *mimepart)
          }
          else
          {
-            String s((const char *)data, len);
+            String s((const wxChar *)data, len);
 
             m_viewer->InsertRawContents(s);
          }
@@ -1938,7 +1938,7 @@ MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
 {
    if ( mimepart->GetParam(_T("protocol")) == _T("application/pgp-signature") )
    {
-      static const char *sigIgnoredMsg =
+      static const wxChar *sigIgnoredMsg =
          gettext_noop("\n\nSignature will be ignored");
 
       MimePart * const signedPart = mimepart->GetNested();
@@ -1947,7 +1947,7 @@ MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
       {
          wxLogWarning(String(_("This message pretends to be signed but "
                                "doesn't have the correct MIME structure.")) +
-                      _(sigIgnoredMsg));
+                      wxGetTranslation(sigIgnoredMsg));
 
          // still show the message contents
          ProcessAllNestedParts(mimepart);
@@ -1967,7 +1967,7 @@ MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
       {
          wxLogWarning(String(_("Signed message signature does not have a "
                                "\"application/pgp-signature\" type.")) +
-                      _(sigIgnoredMsg));
+                      wxGetTranslation(sigIgnoredMsg));
 
          ProcessAllNestedParts(mimepart);
 
@@ -2755,7 +2755,7 @@ MessageView::MimeSave(const MimePart *mimepart,const wxChar *ifilename)
          ok = MailFolder::SaveMessageAsMBOX
               (
                 filename,
-                String((const char *)content, len)
+                String((const wxChar *)content, len)
               );
       }
       else // not a message
@@ -3010,7 +3010,7 @@ MessageView::ShowMessage(UIdType uid)
       // to the previous message does not stay there...
       wxFrame *frame = GetParentFrame();
       CHECK_RET( frame, _T("message view without parent frame?") );
-      frame->SetStatusText("");
+      frame->SetStatusText(_T(""));
    }
 }
 

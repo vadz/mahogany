@@ -32,9 +32,9 @@
 #include <wx/file.h>
 
 #if defined(OS_UNIX)
-#   define   ANYFILE   "/*"
+#   define   ANYFILE   _T("/*")
 #elif defined(OS_WIN)
-#   define   ANYFILE   "/*.*"
+#   define   ANYFILE   _T("/*.*")
 #endif
 
 PathFinder::PathFinder(const String & ipathlist, bool recursive)
@@ -46,14 +46,14 @@ PathFinder::PathFinder(const String & ipathlist, bool recursive)
 void
 PathFinder::AddPaths(const String & ipathlist, bool recursive, bool prepend)
 {
-   char *work = new char[ipathlist.length()+1];
-   char   *found;
+   wxChar *work = new wxChar[ipathlist.length()+1];
+   wxChar   *found;
    String   tmp;
    String   subdirList = _T("");
 
    MOcheck();
-   strcpy(work,ipathlist.c_str());
-   found = strtok(work, PATHFINDER_DELIMITER);
+   wxStrcpy(work,ipathlist.c_str());
+   found = wxStrtok(work, PATHFINDER_DELIMITER);
 
    while(found)
    {
@@ -70,13 +70,13 @@ PathFinder::AddPaths(const String & ipathlist, bool recursive, bool prepend)
             if(IsDir(nextfile))
             {
                if(subdirList.length() > 0)
-                  subdirList += ":";
+                  subdirList += _T(":");
                subdirList = subdirList + String(nextfile);
             }
             nextfile = wxFindNextFile();
          }
       }
-      found = strtok(NULL, PATHFINDER_DELIMITER);
+      found = wxStrtok(NULL, PATHFINDER_DELIMITER);
    }
    delete[] work;
    if(subdirList.length() > 0)

@@ -22,10 +22,10 @@
 
 #if defined(OS_UNIX) || defined(__CYGWIN__)
 /// define a delimiter for separating paths
-#  define   PATHFINDER_DELIMITER ":"
+#  define   PATHFINDER_DELIMITER _T(":")
 #  include  <unistd.h>  // for R_OK
 #elif   defined(OS_WIN)
-#  define   PATHFINDER_DELIMITER ";"
+#  define   PATHFINDER_DELIMITER _T(";")
 #  define  R_OK                  4       // access() mode
 #endif
 

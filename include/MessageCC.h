@@ -34,7 +34,7 @@ class MessageCC : public Message
 {
 public:
    // get specfied header lines
-   virtual wxArrayString GetHeaderLines(const char **headers,
+   virtual wxArrayString GetHeaderLines(const wxChar **headers,
                                         wxArrayInt *encodings = NULL) const;
 
    virtual String GetHeader(void) const;
@@ -139,7 +139,7 @@ public:
    /// Return the numeric uid
    virtual UIdType GetUId(void) const { return m_uid; }
 
-   static MessageCC *Create(const char *text,
+   static MessageCC *Create(const wxChar *text,
                             UIdType uid = UID_ILLEGAL,
                             Profile *profile = NULL)
    {
@@ -160,7 +160,7 @@ protected:
 
    /// constructors called by Create()
    MessageCC(MailFolderCC *folder, const HeaderInfo& hi);
-   MessageCC(const char *text,
+   MessageCC(const wxChar *text,
              UIdType uid = UID_ILLEGAL,
              Profile *profile = NULL);
 

@@ -98,7 +98,7 @@ private:
    String m_str;
 
    /// the pointer to the current position inside m_header
-   const char *m_pcCurrent;
+   const wxChar *m_pcCurrent;
 };
 
 // ----------------------------------------------------------------------------
@@ -115,7 +115,7 @@ class Message : public MObjectRC
 public:
    /** This constructor creates a Message from a string.
     */
-   static Message *Create(const char * itext,
+   static Message *Create(const wxChar * itext,
                           UIdType uid = UID_ILLEGAL,
                           Profile *profile = NULL);
 

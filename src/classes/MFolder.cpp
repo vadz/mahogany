@@ -90,7 +90,7 @@ static const size_t INVALID_CHILDREN_COUNT = (size_t)-1;
 // for the folders of one type
 static String GetClassForType(MFolderType type)
 {
-   return type == MF_VIRTUAL ? "virtual" : "cclient";
+   return type == MF_VIRTUAL ? _T("virtual") : _T("cclient");
 }
 
 // ----------------------------------------------------------------------------
@@ -191,7 +191,7 @@ public:
    virtual int GetIcon() const { return -1; }
    virtual void SetIcon(int /* icon */) { }
 
-   virtual String GetComment() const { return ""; }
+   virtual String GetComment() const { return _T(""); }
    virtual void SetComment(const String& /* comment */) { }
 
    virtual int GetFlags() const { return m_flags; }
@@ -388,7 +388,7 @@ class MRootFolderFromProfile : public MFolderFromProfile
 {
 public:
    // ctor
-   MRootFolderFromProfile() : MFolderFromProfile("")
+   MRootFolderFromProfile() : MFolderFromProfile(_T(""))
    {
    }
 
@@ -406,7 +406,7 @@ public:
    virtual void DontTryToCreate()
       { FAIL_MSG(_T("doesn't make sense for root folder")); }
 
-   virtual String GetComment() const { return ""; }
+   virtual String GetComment() const { return _T(""); }
    virtual void SetComment(const String& /* comment */)
       { FAIL_MSG(_T("can not set root folder attributes.")); }
 
@@ -633,7 +633,7 @@ MFolder::CreateTempFile(const String& fullname, const String& path, int flags)
 String MFolder::DebugDump() const
 {
    String str = MObjectRC::DebugDump();
-   str << "name '" << GetFullName() << '\'';
+   str << _T("name '") << GetFullName() << _T('\'');
 
    return str;
 }
@@ -654,7 +654,7 @@ MFolderFromProfile::~MFolderFromProfile()
 
 bool MFolderFromProfile::Exists(const String& fullname)
 {
-   Profile_obj profile("");
+   Profile_obj profile(_T(""));
 
    return profile->HasGroup(fullname);
 }
@@ -672,7 +672,7 @@ bool MFolderFromProfile::Create(const String& fullname)
 
    String path, component;
 
-   Profile *profile = Profile::CreateFolderProfile("");
+   Profile *profile = Profile::CreateFolderProfile(_T(""));
 
    size_t n,
           count = components.GetCount();
@@ -684,7 +684,7 @@ bool MFolderFromProfile::Create(const String& fullname)
 
       if ( !updatedCount )
       {
-         if ( profile->readEntryFromHere(component + '/' + MP_FOLDER_TYPE,
+         if ( profile->readEntryFromHere(component + _T('/') + MP_FOLDER_TYPE,
                                          MF_ILLEGAL) == MF_ILLEGAL )
          {
             MFolderFromProfile *folder = (MFolderFromProfile *)MFolder::Get(path);
@@ -717,7 +717,7 @@ bool MFolderFromProfile::Create(const String& fullname)
 
       // go down
       if ( !path.empty() )
-         path += '/';
+         path += _T('/');
       path += components[n];
 
       profile->DecRef();
@@ -734,7 +734,7 @@ bool MFolderFromProfile::Create(const String& fullname)
 
 String MFolderFromProfile::GetName() const
 {
-   return m_folderName.AfterLast('/');
+   return m_folderName.AfterLast(_T('/'));
 }
 
 String MFolderFromProfile::GetPath() const
@@ -746,7 +746,7 @@ String MFolderFromProfile::GetPath() const
    // make sure we replace all of them with the proper backslashes before using
    // the filename (it is also better to show it like to the user in this form)
    if ( GetType() == MF_FILE )
-      path.Replace("/", "\\");
+      path.Replace(_T("/"), _T("\\"));
 #endif // Windows
 
    return path;
@@ -784,7 +784,7 @@ String MFolderFromProfile::GetServer() const
 void MFolderFromProfile::SetServer(const String& /* server */)
 {
    // it's not used now...
-   FAIL_MSG( "not implemented" );
+   FAIL_MSG( _T("not implemented") );
 }
 
 String MFolderFromProfile::GetLogin() const
@@ -975,13 +975,13 @@ void MFolderFromProfile::RemoveFilter(const String& filter)
    else // something will be left
    {
       String others;
-      if ( filters.StartsWith(filter + ':', &others) )
+      if ( filters.StartsWith(filter + _T(':'), &others) )
       {
          filters = others;
       }
       else
       {
-         const char *start = strstr(filters, ':' + filter);
+         const wxChar *start = wxStrstr(filters, _T(':') + filter);
          if ( !start )
          {
             // we don't have such filter
@@ -1040,7 +1040,7 @@ MFolder *MFolderFromProfile::GetSubfolder(const String& name) const
 
 MFolder *MFolderFromProfile::GetParent() const
 {
-   String path = m_folderName.BeforeLast('/');
+   String path = m_folderName.BeforeLast(_T('/'));
    return Get(path);
 }
 
@@ -1065,7 +1065,7 @@ MFolder *MFolderFromProfile::CreateSubfolder(const String& name,
                                         type, tryCreateLater);
 
    // is it our immediate child?
-   if ( subfolder && name.find('/') == String::npos )
+   if ( subfolder && name.find(_T('/')) == String::npos )
    {
       // we must update the children count if we had already calculated it
       if ( m_nChildren != INVALID_CHILDREN_COUNT )
@@ -1118,12 +1118,12 @@ bool MFolderFromProfile::Rename(const String& newName)
 {
    CHECK( !m_folderName.empty(), false, _T("can't rename the root pseudo-folder") );
 
-   String path = m_folderName.BeforeLast('/'),
-          name = m_folderName.AfterLast('/');
+   String path = m_folderName.BeforeLast(_T('/')),
+          name = m_folderName.AfterLast(_T('/'));
 
    String newFullName = path;
    if ( !path.empty() )
-      newFullName += '/';
+      newFullName += _T('/');
    newFullName += newName;
 
    // we can't use Exists() here as it tries to read a value from the config
@@ -1198,7 +1198,7 @@ bool MFolderFromProfile::Move(MFolder *newParent)
    String name = m_folderName.AfterLast('/');
    String newFullName = path;
    if ( !path.empty() )
-      newFullName += '/';
+      newFullName += _T('/');
    newFullName += name;
 
    // Create a new folder
@@ -1379,7 +1379,7 @@ bool MFolderTraversal::DoTraverse(const wxString& start, RecurseMode mode)
 
    wxString rootName(start);
    if ( !rootName.empty() )
-      rootName += '/';
+      rootName += _T('/');
    //else: there should be no leading slash
 
    for ( bool cont = profile->GetFirstGroup(name, cookie);
@@ -1430,7 +1430,7 @@ extern MFolder *CreateFolderTreeEntry(MFolder *parent,
    String fullname;
    if ( parent && parent->GetType() != MF_ROOT )
    {
-      fullname << parent->GetFullName() << '/';
+      fullname << parent->GetFullName() << _T('/');
    }
    fullname << name;
 
@@ -1471,7 +1471,7 @@ extern MFolder *CreateFolderTreeEntry(MFolder *parent,
            folderParent->GetPath().empty() )
       {
          // yes, now check if we're INBOX
-         if ( path.empty() || !wxStricmp(path, "INBOX") )
+         if ( path.empty() || !wxStricmp(path, _T("INBOX")) )
          {
             // INBOX created, so disable the parent
             folderParent->AddFlags(MF_FLAGS_NOSELECT);
@@ -1507,7 +1507,7 @@ bool CreateMboxSubtreeHelper(MFolder *parent,
 
    // create folders for all files in this dir
    wxString filename;
-   bool cont = dir.GetFirst(&filename, "", wxDIR_FILES);
+   bool cont = dir.GetFirst(&filename, _T(""), wxDIR_FILES);
    while ( cont )
    {
       wxString fullname;
@@ -1537,7 +1537,7 @@ bool CreateMboxSubtreeHelper(MFolder *parent,
 
    // and recursively call us for each subdir
    wxString dirname;
-   cont = dir.GetFirst(&dirname, "", wxDIR_DIRS);
+   cont = dir.GetFirst(&dirname, _T(""), wxDIR_DIRS);
    while ( cont )
    {
       wxString subdir;
