@@ -2111,7 +2111,7 @@ SetupServers(void)
                                       "",
                                       FALSE);
       p = ProfileBase::CreateProfile(mfolder->GetName());
-      p->writeEntry(MP_NNTPHOST, serverName);
+      //inherit default instead p->writeEntry(MP_NNTPHOST, serverName);
       p->DecRef();
       SafeDecRef(mfolder);
    }
@@ -2127,7 +2127,7 @@ SetupServers(void)
                                       "",
                                       FALSE);
       p = ProfileBase::CreateProfile(mfolder->GetName());
-      p->writeEntry(MP_IMAPHOST, serverName);
+      //inherit default instead p->writeEntry(MP_IMAPHOST, serverName);
       p->DecRef();
       SafeDecRef(mfolder);
    }
@@ -2143,8 +2143,8 @@ SetupServers(void)
                                       "",
                                       FALSE);
       p = ProfileBase::CreateProfile(mfolder->GetName());
-      p->writeEntry(MP_POPHOST, serverName);
-      p->writeEntry(MP_USERNAME, READ_APPCONFIG(MP_USERNAME));
+      //inherit default instead p->writeEntry(MP_POPHOST, serverName);
+      //inherit default instead p->writeEntry(MP_USERNAME, READ_APPCONFIG(MP_USERNAME));
       p->DecRef();
       SafeDecRef(mfolder);
    }
