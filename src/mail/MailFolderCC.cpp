@@ -101,12 +101,15 @@ String MailFolderCC::qprint(const String &in)
    const char *cptr = in.c_str() + pos2 + strlen(QPRINT_MIDDLEMARKER);
    while(*cptr && !(*cptr == '?' && *(cptr+1) == '='))
       quoted << (char) *cptr++;
-   cptr += 2; // "?="
-   unsigned long unused_len;
-   char *cptr2 = (char *)rfc822_qprint((unsigned char *)quoted.c_str(), in.Length(), &unused_len);
-   out +=  cptr2;
+   if(*cptr)
+   {
+      cptr += 2; // "?="
+      unsigned long unused_len;
+      char *cptr2 = (char *)rfc822_qprint((unsigned char *)quoted.c_str(), in.Length(), &unused_len);
+      out +=  cptr2;
+      fs_give((void **) &cptr2); // free memory allocated
+   }
    out +=  cptr;
-   fs_give((void **) &cptr2); // free memory allocated
 
    // Check whether we need to decode even more:
    if(in.Find(ISO8859MARKER) != -1)
