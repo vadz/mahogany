@@ -70,7 +70,7 @@ extern const MOption MP_POPHOST;
 extern const MOption MP_REPLY_COLLAPSE_PREFIX;
 extern const MOption MP_REPLY_PREFIX;
 extern const MOption MP_SET_REPLY_FROM_TO;
-extern const MOption MP_USERNAME;
+extern const MOption MP_SET_REPLY_STD_NAME;
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
@@ -1056,6 +1056,23 @@ MailFolder::ReplyMessage(Message *msg,
       String from;
       if ( ContainsOwnAddress(to, profile, OwnAddress_From, &from) )
       {
+         // check if the personal name is missing
+         AddressList_obj addrFrom(from);
+         Address *addr = addrFrom->GetFirst();
+         if ( addr && addr->GetName().empty() )
+         {
+            if ( READ_CONFIG(profile, MP_SET_REPLY_STD_NAME) )
+            {
+               // use the standard personal name
+               AddressList_obj addrOwn(AddressList::CreateFromAddress(profile));
+               addr = addrOwn->GetFirst();
+               if ( addr )
+               {
+                  from = Address::BuildFullForm(addr->GetName(), from);
+               }
+            }
+         }
+
          cv->SetFrom(from);
       }
    }

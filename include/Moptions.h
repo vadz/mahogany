@@ -170,6 +170,7 @@ extern const MOption MP_NNTPHOST_USE_SSL;
 extern const MOption MP_NNTPHOST_USE_SSL_UNSIGNED;
 extern const MOption MP_BEACONHOST;
 extern const MOption MP_SET_REPLY_FROM_TO;
+extern const MOption MP_SET_REPLY_STD_NAME;
 extern const MOption MP_USEVCARD;
 extern const MOption MP_VCARD;
 
@@ -752,6 +753,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 
 /// set reply string from To: field?
 #define MP_SET_REPLY_FROM_TO_NAME   _T("ReplyEqualsTo")
+/// set reply address only?
+#define MP_SET_REPLY_STD_NAME_NAME  _T("ReplyUseStdName")
 /// should we attach vCard to outgoing messages?
 #define MP_USEVCARD_NAME _T("UseVCard")
 /// the vCard to use
@@ -1597,6 +1600,8 @@ extern const MOption MP_OPTION_ORIGIN_INHERITED;
 
 /// set reply string from To: field?
 #define MP_SET_REPLY_FROM_TO_DEFVAL   0l
+/// set reply address only?
+#define MP_SET_REPLY_STD_NAME_DEFVAL  1l
 /// should we attach vCard to outgoing messages?
 #define MP_USEVCARD_DEFVAL 0l
 /// the vCard to use
