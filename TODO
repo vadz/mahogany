@@ -15,6 +15,9 @@ $Id$
 - make AdbEdit auto-generate a formatted name from first/family-name and prefix/title.
 - add Picture field to Adb
 
+- New Mail indicator
+- Check for new mail button
+
 - folders should remember whether they were opened on program shutdown and
   reopen automatically in this case (/Folders/<FolderName>/AutoOpen = TRUE)
   KB: WHY? We have the "list of open folders". Better: have a "Reopen
