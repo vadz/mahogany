@@ -575,7 +575,7 @@ dnl just a file where to dump some unneeded code in the python dir
 MAKE_LOCAL_LIBS_DEFINE="junk"
 
 dnl compface is included in M source
-LIBS="$LIBS -lcompface"
+LIBS="$LIBS -lMcompface"
 
 dnl add other flags
 LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PNG $LIB_JPEG"
