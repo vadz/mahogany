@@ -66,8 +66,9 @@ public:
                       (abortButton ? wxPD_CAN_ABORT : 0) |
                       wxPD_AUTO_HIDE
 #ifdef wxPD_ESTIMATED_TIME
-//FIXME WXCOMPATIBILITY
-                      |wxPD_ESTIMATED_TIME|wxPD_ELAPSED_TIME|wxPD_REMAINING_TIME
+                      |wxPD_ESTIMATED_TIME
+                      |wxPD_ELAPSED_TIME
+                      |wxPD_REMAINING_TIME
 #endif
       )
    {

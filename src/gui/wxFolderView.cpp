@@ -1681,7 +1681,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl,
                                        m_MessagePreview,
                                        m_Parent->GetClientSize().y/3);
-   m_SplitterWindow->SetMinimumPaneSize(0);
+   m_SplitterWindow->SetMinimumPaneSize(10);
    m_SplitterWindow->SetFocus();
 
    m_FocusedUId = UID_ILLEGAL;

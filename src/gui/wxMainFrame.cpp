@@ -177,7 +177,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
                                m_FolderView->GetWindow(),
                                x/3);
 
-   m_splitter->SetMinimumPaneSize(0);
+   m_splitter->SetMinimumPaneSize(10);
    m_splitter->SetFocus();
 
    //FIXME: ugly workaround for wxGTK toolbar/resize bug

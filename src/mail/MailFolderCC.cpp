@@ -125,6 +125,10 @@
    }
 #endif // OS_UNIX
 
+#ifdef OS_WIN
+    #include "wx/msw/private.h"     // for ::UpdateWindow()
+#endif // OS_WIN
+
 extern "C"
 {
    #undef LOCAL         // previously defined in other cclient headers
@@ -2883,6 +2887,22 @@ MailFolderCC::BuildListing(void)
       {
          MGuiLocker locker;
          delete m_ProgressDialog;
+
+         // ok, it's really ugly to put it here, but it's the only way to do it
+         // for now, unfortunately (FIXME)
+         //
+         // we don't want to leave a big "hole" on the parent window but this
+         // may happen as we are not returning to the main loop immediately -
+         // instead we risk to spend some (long) time applying filters and the
+         // window won't be repainted before we finish, so force window redraw
+         // right now
+#ifdef OS_WIN
+         wxFrame *frame = mApplication->TopLevelFrame();
+         if ( frame )
+         {
+            ::UpdateWindow(GetHwndOf(frame));
+         }
+#endif // OS_WIN
       }
 
       // We set it to an illegal address here to suppress further updating.

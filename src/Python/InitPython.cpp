@@ -82,6 +82,7 @@ InitPython(void)
 
       // note that "scripts" has small 's'
       path << pythondir << PATH_SEPARATOR
+           << pythondir << DIR_SEPARATOR << "Python" << PATH_SEPARATOR
            << pythondir << DIR_SEPARATOR << "scripts"
            // add also the uninstalled locations
 #ifdef M_TOP_BUILDDIR
@@ -94,7 +95,8 @@ InitPython(void)
       String localdir = mApplication->GetLocalDir();
       if ( localdir != globaldir )
       {
-         path << localdir << DIR_SEPARATOR << "Scripts" << PATH_SEPARATOR;
+         path << PATH_SEPARATOR
+              << localdir << DIR_SEPARATOR << "Scripts" << PATH_SEPARATOR;
       }
    }
 
