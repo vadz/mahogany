@@ -1841,7 +1841,7 @@ wxListItemAttr *wxFolderListCtrl::OnGetItemAttr(long item) const
    {
       if ( m_attr->HasFont() && m_attr->GetFont().GetEncoding() != enc )
       {
-         m_attr->SetFont(GetFont());
+         m_attr->SetFont(wxNullFont);
       }
    }
 
