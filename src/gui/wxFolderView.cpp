@@ -64,6 +64,8 @@
 #include "MFolder.h"
 #include "MFCache.h"
 
+#include "FolderMonitor.h" // for case WXK_F5
+
 #include "FolderView.h"
 #include "MailFolder.h"
 #include "HeaderInfo.h"
@@ -3954,6 +3956,19 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
       case WXK_F1:
          mApplication->Help(MH_FOLDER_VIEW_KEYBINDINGS, GetWindow());
          return true;
+
+      case WXK_F5: // check mail (taken from wxMFrame.cpp)
+         {
+            FolderMonitor *mailCollector = mApplication->GetFolderMonitor();
+            if ( mailCollector )
+            {
+               // when the user explicitly checks for the new mail, also update
+               // the currently opened folder(s) and give the verbose messages
+               mailCollector->CheckNewMail(FolderMonitor::Interactive |
+                                           FolderMonitor::Opened);
+            }
+         }
+         break;
 
       case WXK_PRIOR:
       case WXK_NEXT:
