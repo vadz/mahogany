@@ -243,6 +243,8 @@ MAppBase::OnStartup()
       else
          wxLogInfo(_("Created directory '%s' for configuration files."),
                    strConfFile.c_str());
+
+      
       //  Also, create an empty config file with the right
       //  permissions:
       String realFile = strConfFile + "/config";
@@ -256,6 +258,29 @@ MAppBase::OnStartup()
       else
          close(fd);
    }
+   /* Check whether other users can write our config dir. This must
+      not be allowed! */
+   if(stat(strConfFile, &st) == 0) // else shouldn't happen, we just created it
+      if( (st.st_mode & (S_IWGRP | S_IWOTH)) != 0)
+      {
+         // No other user must have write access to the config dir.
+         String 
+            msg;
+         msg.Printf(_("Configuration directory '%s' was writable for other users.\n"
+                      "Passwords may have been compromised, please consider changing them.\n"),
+                    strConfFile.c_str());
+         if(chmod(strConfFile, st.st_mode^(S_IWGRP|S_IWOTH)) == 0)
+            msg += _("This has been fixed now, the directory is no longer writable for others.");
+         else
+         {
+            String tmp;
+            tmp.Printf(_("The attempt to make the directory unwritable for others has failed.\n(%s)"),
+                       strerror(errno));
+            msg << tmp;
+         }
+         wxLogError(msg);
+      }
+
    strConfFile += "/config";
 #else  // Windows
    strConfFile = M_APPLICATIONNAME;
@@ -280,7 +305,7 @@ MAppBase::OnStartup()
          else
          {
             String tmp;
-            tmp.Printf(_("The attempt to make the file unreadable to others has failed.\n(%s)"),
+            tmp.Printf(_("The attempt to make the file unreadable for others has failed.\n(%s)"),
                        strerror(errno));
             msg << tmp;
          }
@@ -319,7 +344,7 @@ MAppBase::OnStartup()
             String msg;
             msg.Printf(_("Cannot find global directory \"%s\" in\n"
                          "\"%s\"\n"
-                         "Wo   uld you like to specify its location now?"),
+                         "Would you like to specify its location now?"),
                        MP_ROOTDIRNAME_D, MP_ETCPATH_D);
             if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
                                      TRUE /* yes default */, "AskSpecifyDir") )
