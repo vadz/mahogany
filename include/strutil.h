@@ -375,5 +375,17 @@ extern String strutil_flatten_array(const wxArrayString& array, char ch = ':');
 // return an array containing unique strings from sorted array
 extern wxArrayString strutil_uniq_array(const wxSortedArrayString& arrSorted);
 
+/**
+  Try to convert text in UTF-8 or 7 to the current encoding (the conversion is
+  done in place)
+
+  @param strUtf string containing UTF text on input, ASCII text on output
+  @param utfEnc specifies if it is in UTF-7 or UTF-8
+  @return the encoding of the returned string
+ */
+extern wxFontEncoding
+ConvertUnicodeToSystem(wxString *strUtf,
+                       wxFontEncoding utfEnc = wxFONTENCODING_UTF8);
+
 //@}
 #endif

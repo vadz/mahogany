@@ -506,7 +506,7 @@ void TextViewer::ShowHeader(const String& headerName,
       {
          // convert from UTF-8|7 to environment's default encoding
          // FIXME it won't be needed when full Unicode support is available
-         encHeader = ConvertUnicodeToSystem(&headerValue, encHeader == wxFONTENCODING_UTF7);
+         encHeader = ConvertUnicodeToSystem(&headerValue, encHeader);
       }
       wxFont font = profileValues.GetFont(encHeader);
       attr.SetFont(font);

@@ -71,12 +71,6 @@
 #include <wx/clipbrd.h>
 #include <wx/splitter.h>
 
-#include "Mcclient.h"
-extern "C"
-{
-   #include "utf8.h"  // for utf8_text_utf7()
-}
-
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -557,63 +551,3 @@ extern MessageView *ShowMessageViewFrame(wxWindow *parent,
    return frame->GetMessageView();
 }
 
-// convert a string in UTF-8 or 7 into the string in the current encoding: of
-// course, this doesn't work in general as Unicode is not representable as an 8
-// bit charset but it works in some common cases and is better than no UTF-8
-// support at all
-//
-// FIXME this won't be needed when full Unicode support is available
-extern wxFontEncoding ConvertUnicodeToSystem(wxString *strUtf, bool isUTF7)
-{
-   CHECK( strUtf, wxFONTENCODING_SYSTEM,
-          "NULL string in ConvertUnicodeToSystem" );
-
-   if ( !strUtf->empty() )
-   {
-      if ( isUTF7 )
-      {
-         //wxWindows does not support UTF-7 yet, so we first convert
-         //UTF-7 to UTF-8 using c-client function and then convert
-         //UTF-8 to current environment's encoding.
-
-         SIZEDTEXT *text7 = new SIZEDTEXT;
-	 SIZEDTEXT *text8 = new SIZEDTEXT;
-         text7->data = (unsigned char *) strUtf->c_str();
-	 text7->size = strUtf->Length();
-
-         // cclient doesn't use the table parameter in utf8_text_utf7
-         // function but still has it (for future extensions? or just
-         // because other conversion functions have it?)
-	 void *tab = NULL;
-	 utf8_text_utf7 ( text7, text8, tab );
-	 strUtf->Empty();
-
-         // we cannot use "*strUtf << text8->data" here as utf8_text_utf7()
-         // returns text8->data which is longer than text8->size:
-	 for ( unsigned long k = 0; k < text8->size; k++ )
-	 {
-            *strUtf << wxChar(text8->data[k]);
-	 }
-	 free(text7);
-	 free(text8);
-      }
-
-      wxString str(strUtf->wc_str(wxConvUTF8), wxConvLocal);
-      if ( str.empty() )
-      {
-         // conversion failed - use original text (and display incorrectly,
-         // unfortunately)
-         wxLogDebug("conversion from UTF-8 to default encoding failed");
-      }
-      else
-      {
-         *strUtf = str;
-      }
-   }
-
-#if wxUSE_INTL
-   return wxLocale::GetSystemEncoding();
-#else // !wxUSE_INTL
-   return wxFONTENCODING_ISO8859_1;
-#endif // wxUSE_INTL/!wxUSE_INTL
-}

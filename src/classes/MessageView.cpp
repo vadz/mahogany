@@ -1144,9 +1144,10 @@ MessageView::ShowHeaders()
       if ( !EnsureAvailableTextEncoding(&encHeader, &value) )
       {
          // special handling for the UTF-7|8 if it's not supported natively
-         if ( encHeader == wxFONTENCODING_UTF8 || encHeader == wxFONTENCODING_UTF7 )
+         if ( encHeader == wxFONTENCODING_UTF8 ||
+               encHeader == wxFONTENCODING_UTF7 )
          {
-            encHeader = ConvertUnicodeToSystem(&value, encHeader == wxFONTENCODING_UTF7);
+            encHeader = ConvertUnicodeToSystem(&value, encHeader);
          }
       }
 
@@ -1242,7 +1243,7 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
          m_encodingAuto = encPart;
 
          // convert from UTF-8|7 to environment's default encoding
-         encPart = ConvertUnicodeToSystem(&textPart, encPart == wxFONTENCODING_UTF7);
+         encPart = ConvertUnicodeToSystem(&textPart, encPart);
       }
       else if ( encPart == wxFONTENCODING_SYSTEM ||
                 encPart == wxFONTENCODING_DEFAULT )

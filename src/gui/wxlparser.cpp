@@ -18,18 +18,15 @@
 
 #include "Mpch.h"
 
-#ifdef M_PREFIX
-#   include "gui/wxllist.h"
-#   include "gui/wxlparser.h"
-#else
-#   include "wxllist.h"
-#   include "wxlparser.h"
+#ifndef USE_PCH
+#   include "strutil.h"    // for ConvertUnicodeToSystem()
 #endif
+
+#include "gui/wxllist.h"
+#include "gui/wxlparser.h"
 
 #include <wx/fontmap.h>
 #include <wx/encconv.h>
-
-#include "MessageView.h" // ConvertUnicodeToSystem()
 
 #define   BASE_SIZE 12
 
@@ -189,7 +186,7 @@ void wxLayoutImportText(wxLayoutList *list,
    if ( encoding == wxFONTENCODING_UTF8 || encoding == wxFONTENCODING_UTF7 )
    {
       // Convert from UTF-8|7 to environment's default encoding
-      encoding = ConvertUnicodeToSystem(&str, encoding == wxFONTENCODING_UTF7);
+      encoding = ConvertUnicodeToSystem(&str, encoding);
    }
 
    bool useConverter = FALSE;
