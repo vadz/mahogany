@@ -452,8 +452,22 @@ int URLDetector::FindURL(const char *text, int& len)
    }
    else // !bare mail address
    {
-      while ( IsURLChar(*p) )
-         p++;
+      for ( ;; )
+      {
+         while ( IsURLChar(*p) )
+            p++;
+
+         // URLs are frequently so long that they're spread across multiple
+         // lines, try to see if this might be the case here
+         if ( p[0] != '\r' || p[1] != '\n' || !IsURLChar(p[2]) )
+         {
+            // it isn't
+            break;
+         }
+
+         // continue on the next line and no need to test the first character
+         p += 3;
+      }
    }
 
    // truncate any punctuation at the end

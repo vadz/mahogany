@@ -2661,27 +2661,47 @@ MessageView::DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
 
       case ClickableInfo::CI_URL:
       {
-         wxString url = ci->GetUrl();
+         // URL taken from the text may contain the line breaks if it had been
+         // broken so remove them
+         wxString url;
+         url.reserve(ci->GetUrl().length());
+         for ( const char *p = ci->GetUrl().c_str(); *p; p++ )
+         {
+            if ( *p != '\r' && *p != '\n' )
+               url += *p;
+         }
 
-         // treat mail urls separately:
+         // treat mail urls separately: we handle them ourselves
          wxString protocol = url.BeforeFirst(':');
-         if ( protocol == "mailto" )
+         if ( protocol == url )
+         {
+            protocol.clear();
+         }
+
+         if ( protocol == "mailto" ||
+               (protocol.empty() && url.find('@') != String::npos) )
          {
             Composer *cv = Composer::CreateNewMessage(GetProfile());
 
-            cv->SetAddresses(ci->GetUrl().Right(ci->GetUrl().Length()-7));
+            String address = url;
+            if ( !protocol.empty() )
+            {
+               address.erase(0, 7); // 7 == strlen("mailto:")
+            }
+
+            cv->SetAddresses(address);
             cv->InitText();
-
-            break;
          }
-
-         if ( id == WXMENU_LAYOUT_RCLICK )
+         else // not mailto URL
          {
-            PopupURLMenu(GetWindow(), url, pt);
-         }
-         else // left or double click
-         {
-            OpenURL(url, m_ProfileValues.browserInNewWindow);
+            if ( id == WXMENU_LAYOUT_RCLICK )
+            {
+               PopupURLMenu(GetWindow(), url, pt);
+            }
+            else // left or double click
+            {
+               OpenURL(url, m_ProfileValues.browserInNewWindow);
+            }
          }
       }
       break;
