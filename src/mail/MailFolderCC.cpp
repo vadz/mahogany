@@ -65,7 +65,7 @@ public:
    virtual String const &GetReferences(void) const { return m_References; }
    virtual int GetStatus(void) const { return m_Status; }
    virtual unsigned long const &GetSize(void) const { return m_Size; }
-
+   
 protected:
    String m_Subject, m_From, m_Date, m_Id, m_References;
    int m_Status;
@@ -422,9 +422,15 @@ MailFolderCC::SetSequenceFlag(String const &sequence,
                      GetProfile(), "ss", sequence.c_str(), flags.c_str()),1)  )
    {
       if(set)
-         mail_setflag(m_MailStream, (char *)sequence.c_str(), (char *)flags.c_str());
+         mail_setflag_full(m_MailStream,
+                           (char *)sequence.c_str(),
+                           (char *)flags.c_str(),
+                           ST_UID);
       else
-         mail_clearflag(m_MailStream, (char *)sequence.c_str(), (char *)flags.c_str());
+         mail_clearflag_full(m_MailStream,
+                        (char *)sequence.c_str(),
+                        (char *)flags.c_str(),
+                        ST_UID);
       ProcessEventQueue();
    }
 }
@@ -434,7 +440,9 @@ MailFolderCC::SetMessageFlag(unsigned long msgno,
                              int flag,
                              bool set)
 {
-   String sequence = strutil_ultoa(msgno);
+   ASSERT(m_Listing);
+   ASSERT(msgno >= 1 && msgno <= m_NumOfMessages);
+   String sequence = strutil_ultoa(m_Listing[msgno-1].m_Uid);
    SetSequenceFlag(sequence,flag,set);
 }
 
