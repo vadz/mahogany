@@ -265,9 +265,10 @@ public:
    /// what happened?
    enum ChangeKind
    {
-      Create,
-      Delete,
-      Rename
+      Create,     // folder "fullname" was created
+      Delete,     //                       deleted
+      Rename,     //                       renamed
+      CreateUnder // some folders were created under folder "fullname"
    };
 
    MEventFolderTreeChangeData(const String& fullname, ChangeKind what)

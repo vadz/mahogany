@@ -1164,10 +1164,15 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
       MEventFolderTreeChangeData& event = (MEventFolderTreeChangeData &)ev;
 
       String folderName = event.GetFolderFullName();
+      MEventFolderTreeChangeData::ChangeKind kind = event.GetChangeKind();
 
       // refresh the branch of the tree with the parent of the folder which
-      // changed
-      String parentName = folderName.BeforeLast('/');
+      // changed for all usual events or this folder itself for CreateUnder
+      // events (which are sent when (possibly) multiple folders were created
+      // under the common parent)
+      String parentName = kind == MEventFolderTreeChangeData::CreateUnder
+                          ? folderName
+                          : folderName.BeforeLast('/');
 
       // recreate the branch
       wxTreeItemId parent = GetTreeItemFromName(parentName);
@@ -1176,7 +1181,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
 
       ReopenBranch(parent);
 
-      if ( event.GetChangeKind() == MEventFolderTreeChangeData::Delete )
+      if ( kind == MEventFolderTreeChangeData::Delete )
       {
          // if the deleted folder was either the tree ctrl selection or was
          // opened (these 2 folders may be different), refresh

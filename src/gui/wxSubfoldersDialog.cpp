@@ -700,10 +700,15 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
    size_t countSel = m_treectrl->GetSelections(selections);
    for ( size_t sel = 0; sel < countSel; sel++ )
    {
+      // this is the tree item we're creating folder for
+      wxTreeItemId id = selections[sel];
+
+      // this will be used to set MF_FLAGS_GROUP flag later
+      bool isGroup = m_treectrl->HasChildren(id);
+
       // construct the full folder name by going upwars the tree and
       // concatenating everything
       wxArrayString components;
-      wxTreeItemId id = selections[sel];
       while ( id != idRoot )
       {
          components.Add(m_treectrl->GetItemText(id));
@@ -735,23 +740,30 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
             folderNew = parent->CreateSubfolder(name, m_folderType);
             if ( !folderNew )
             {
-               wxLogError(_("Failed to subscribe to '%s'."), fullpath.c_str());
+               wxLogError(_("Failed to create folder '%s'."), fullpath.c_str());
 
                // can't create children if parent creation failed...
                break;
             }
-            else
+
+            // set up the just created folder
+            Profile_obj profile(folderNew->GetFullName());
+            profile->writeEntry(MP_FOLDER_PATH, fullpath);
+
+            // copy folder flags from its parent hadling MF_FLAGS_GROUP
+            // specially: for all the intermediate folders, it must be set (as
+            // they have children, they obviously _are_ groups), but for the
+            // last one it should only be set if it is a group as detected
+            // above
+            int flags = parent->GetFlags();
+            if ( !level && !isGroup )
             {
-               // set up the just created folder
-               Profile_obj profile(folderNew->GetFullName());
-               profile->writeEntry(MP_FOLDER_PATH, fullpath);
-
-               // copy folder flags from its parent
-               folderNew->SetFlags(parent->GetFlags());
-
-               // we created a new folder, set the flag to refresh the tree
-               createdSomething = TRUE;
+               flags &= ~MF_FLAGS_GROUP;
             }
+            folderNew->SetFlags(flags);
+
+            // we created a new folder, set the flag to refresh the tree
+            createdSomething = TRUE;
          }
 
          parent->DecRef();
@@ -767,7 +779,7 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
       // created
       MEventManager::Send(
          new MEventFolderTreeChangeData(m_folder->GetFullName(),
-                                        MEventFolderTreeChangeData::Create)
+                                        MEventFolderTreeChangeData::CreateUnder)
          );
       MEventManager::DispatchPending();
    }
