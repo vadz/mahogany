@@ -1001,6 +1001,8 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
    // We can't have a for loop over the HeaderInfoList as messages
    // will be deleted from it just after sending (that is, inside
    // the loop)
+   size_t totalNb = hil->Count();
+   size_t nbOfMsgTried = 0;
    UIdType i = 0;
    while (i < hil->Count())
    {
@@ -1024,8 +1026,8 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
 #endif // OS_UNIX
                protocol = Prot_SMTP;
             STATUSMESSAGE(( _("Sending message %lu/%lu: %s"),
-                            (unsigned long)(i+1),
-                            (unsigned long)(hil->Count()),
+                            (unsigned long)(nbOfMsgTried+1),
+                            (unsigned long)(totalNb),
                             msg->Subject().c_str()));
             wxYield();
             if(msg->SendOrQueue(protocol, TRUE))
@@ -1048,8 +1050,8 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
          {
             protocol = Prot_NNTP;
             STATUSMESSAGE(( _("Posting article %lu/%lu: %s"),
-                            (unsigned long)(i+1),
-                            (unsigned long)(hil->Count()),
+                            (unsigned long)(nbOfMsgTried+1),
+                            (unsigned long)(totalNb),
                             msg->Subject().c_str()));
             wxYield();
             if(msg->SendOrQueue(protocol, TRUE))
@@ -1066,6 +1068,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
                ++i;
             }
          }
+         nbOfMsgTried++;
       }
       //ASSERT(0); //TODO: static SendMessageCC::Send(String)!!!
       SafeDecRef(msg);
