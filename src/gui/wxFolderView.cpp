@@ -74,16 +74,7 @@
 #include "miscutil.h"            // for UpdateTitleAndStatusBars
 
 #ifdef __WXGTK__
-   #define BROKEN_LISTCTRL
-#endif
-
-// the generic list control only refreshes itself during the idle time anyhow,
-// but with the native Win32 one we have to freeze/thaw it manually to avoid
-// horrible flicker
-#ifdef __WXMSW__
-   #define USE_SUSPEND_LISTCTRL
-
-   #include <wx/msw/private.h>
+   //#define BROKEN_LISTCTRL
 #endif
 
 // ----------------------------------------------------------------------------
@@ -294,20 +285,8 @@ public:
    /// for wxFolderView
    wxFolderMenu *GetFolderMenu() const { return m_menuFolders; }
 
-#ifdef USE_SUSPEND_LISTCTRL
-   /// temporarily disable redrawing the control
-   void Freeze() { if ( !m_isFrozen ) { m_isFrozen = true; SetRedraw(false); } }
-
    /// reenable redrawing
-   void Thaw() { if ( m_isFrozen ) { m_isFrozen = false; SetRedraw(true); } }
-
-private:
-   /// tell Win32 control to redraw itself (or not)
-   void SetRedraw(bool enable);
-
-   /// is redrawing enabled?
-   bool m_isFrozen;
-#endif // USE_SUSPEND_LISTCTRL
+   void Thaw() { if ( m_isFrozen ) { m_isFrozen = false; Refresh(); } }
 
 protected:
    /// get the colour to use for this entry (depends on status)
@@ -367,6 +346,9 @@ protected:
    /// the folder view
    wxFolderView *m_FolderView;
 
+   /// true until SelectInitialMessage() is called, don't update the control
+   bool m_isFrozen;
+
    /// the currently focused item
    long m_itemFocus;
 
@@ -387,9 +369,6 @@ protected:
 
    /// do we preview a message on a single mouse click?
    bool m_PreviewOnSingleClick;
-
-   /// did we create the list ctrl columns?
-   bool m_Initialised;
 
    /// do we handle OnSelected()?
    bool m_enableOnSelect;
@@ -732,7 +711,6 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
    m_profile->IncRef(); // we wish to keep it until dtor
    m_FolderView = fv;
-   m_Initialised = false;
    m_enableOnSelect = true;
    m_menu = NULL;
    m_menuFolders = NULL;
@@ -743,9 +721,8 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_suppressFocusTracking = false;
 #endif // BROKEN_LISTCTRL
 
-#ifdef USE_SUSPEND_LISTCTRL
-   m_isFrozen = false;
-#endif // USE_SUSPEND_LISTCTRL
+   // start in frozen state, wxFolderView should call Thaw() later
+   m_isFrozen = true;
 
    // no item focused yet
    m_itemFocus = -1;
@@ -1367,27 +1344,8 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
       UpdateFocus();
    }
 
-#ifdef USE_SUSPEND_LISTCTRL
-   // redraw now
-   if ( m_isFrozen )
-   {
-      Thaw();
-   }
-#endif // USE_SUSPEND_LISTCTRL
-
    event.Skip();
 }
-
-#ifdef USE_SUSPEND_LISTCTRL
-
-void wxFolderListCtrl::SetRedraw(bool enable)
-{
-   // don't use SendMessage as we undef it to avoid conflicts with the class
-   // name!
-   ::SendMessageA(GetHwnd(), WM_SETREDRAW, enable, 0);
-}
-
-#endif // USE_SUSPEND_LISTCTRL
 
 // ----------------------------------------------------------------------------
 // header info
@@ -1647,6 +1605,11 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
 {
    wxString text;
 
+   if ( m_isFrozen )
+   {
+      return text;
+   }
+
    // this does happen because the number of messages in m_Listing is
    // decremented first and our OnFolderExpungeEvent() is called much later
    // (during idle time), so we have no choice but to ignore the requests for
@@ -1805,6 +1768,11 @@ wxFolderListCtrl::GetEntryColour(const HeaderInfo *hi) const
 
 wxListItemAttr *wxFolderListCtrl::OnGetItemAttr(long item) const
 {
+   if ( m_isFrozen )
+   {
+      return NULL;
+   }
+
    // see comment in the beginning of OnGetItemText()
    if ( (size_t)item >= GetHeadersCount() )
    {
@@ -2338,7 +2306,13 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          Update();
       }
 
+      // the list control is created in "frozen" state, i.e. it doesn't show
+      // anything before we thaw it: this allows us to avoid retrieving the
+      // headers in the start of the folder if we're going to scroll to the
+      // first unread message (which is usually near the end) as the first
+      // thing anyhow
       SelectInitialMessage(m_ASMailFolder->GetHeaders());
+      m_FolderCtrl->Thaw();
 
       m_FocusFollowMode = READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE) != 0;
       if ( wxWindow::FindFocus() != m_FolderCtrl )
