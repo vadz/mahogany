@@ -446,4 +446,22 @@ void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
 #endif // Windows
 }
 
+
+extern void
+CreateMMenu(wxMenuBar *menubar, int menu_begin, int menu_end, const wxString &caption)
+{                                                                       
+#ifndef wxMENU_TEAROFF
+   // FIXME WXWIN-COMPATIBILITY
+   wxMenu *pMenu = new wxMenu(); 
+#else
+   int style = 0;
+   if(READ_APPCONFIG(MP_TEAROFF_MENUS) != 0)
+      style = wxMENU_TEAROFF;
+   wxMenu *pMenu = new wxMenu(style); 
+#endif
+   AppendToMenu(pMenu, menu_begin+1, menu_end); 
+   menubar->Append(pMenu, caption);                                     
+}
+
+
 /* vi: set tw=0 */

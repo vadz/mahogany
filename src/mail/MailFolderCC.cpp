@@ -316,8 +316,7 @@ protected:
    ~HeaderInfoListCC()
       {
          MOcheck();
-         if ( m_NumEntries )
-            delete [] m_Listing;
+         if ( m_Listing ) delete [] m_Listing;
       }
    /// The current listing of the folder
    class HeaderInfoCC *m_Listing;

@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Mdefaults.h : all default defines for readEntry() config entries *
  *                                                                  *
- * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *
@@ -137,6 +137,8 @@
 
 /// expand folder tree control?
 #define   MP_EXPAND_TREECTRL   "ExpandTreeControl"
+/// use tear-off menus?
+#define   MP_TEAROFF_MENUS     "TearOffMenus"
 /// help browser name
 #define   MP_HELPBROWSER   "HelpBrowser"
 /// is help browser of netscape type?
@@ -531,6 +533,8 @@
 #define MP_TMPGFXFORMAT_D      2
 /// expand folder tree control?
 #define   MP_EXPAND_TREECTRL_D   1
+/// use tear-off menus?
+#define   MP_TEAROFF_MENUS_D   1l
 
 /// the user's M directory
 #define   MP_USERDIR_D         M_EMPTYSTRING

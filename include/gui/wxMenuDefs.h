@@ -28,12 +28,12 @@ extern void AppendToMenu(wxMenu *menu, int nFirst, int nLast);
    (WXMENU_##menu##_BEGIN < (id) && WXMENU_##menu##_END >= (id))
 
 /// creates a menu, appends all it's items to it and appends it to menu bar
-#define  WXADD_MENU(menubar, menu, caption)                                \
-   {                                                                       \
-      wxMenu *pMenu = new wxMenu;                                          \
-      AppendToMenu(pMenu, WXMENU_##menu##_BEGIN + 1, WXMENU_##menu##_END); \
-      menubar->Append(pMenu, caption);                                     \
-   }
+extern void CreateMMenu(class wxMenuBar *menubar,
+                        int menu_begin, int menu_end,
+                        const wxString& caption);
+
+#define WXADD_MENU(menubar,menu,caption) \
+    CreateMMenu(menubar,  WXMENU_##menu##_BEGIN,WXMENU_##menu##_END,caption)
 
 /** Definition of all numeric menu IDs.
     Include each menu in WXMENU_menuname_BEGIN and WXMENU_menuname_END, so it

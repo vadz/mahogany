@@ -217,7 +217,8 @@ enum ConfigFields
    ConfigField_ShowNewMail,
 #ifdef OS_UNIX
    ConfigField_AFMPath,
-   ConfigField_OthersLast = ConfigField_AFMPath,
+   ConfigField_TearOffMenus,
+   ConfigField_OthersLast = ConfigField_TearOffMenus,
 #else // !Unix
    ConfigField_OthersLast = ConfigField_ShowNewMail,
 #endif // Unix/!Unix
@@ -530,6 +531,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Show new mail &notifications"), Field_Bool,    -1                     },
 #ifdef OS_UNIX
    { gettext_noop("&Path where to find AFM files"), Field_Text,    -1                     },
+   { gettext_noop("Use &Tear-off menus"),           Field_Bool,    -1                     },
 #endif
 };
 
@@ -665,6 +667,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_AFMPATH),
+   CONFIG_ENTRY(MP_TEAROFF_MENUS),
 #endif
 };
 
