@@ -979,7 +979,11 @@ case "$USE_CCOSTYPE" in
 	IRIX*)
 		case "$GXX" in
 		yes)	CCOSTYPE=gsg ;;
-		*)	CCOSTYPE=sg6 ;;
+		*)	dnl should use sg6 for IRIX 6.5, sgi otherwise
+			case `uname -r` in
+			    6.5*) CCOSTYPE=sg6 ;;
+			    *) 	  CCOSTYPE=sgi ;;
+			esac
 		esac ;;
 	darwin*)
 		CCOSTYPE=osx ;;
@@ -1169,11 +1173,26 @@ dnl
 dnl for now, we just support -MD on g++ and also OSF/1 Compaq cc compiler which
 dnl supports the same options
 DEPFLAGS=
-if test "x$GXX" = "xyes" -o "x$CCOSTYPE" = "xosf"; then
+if test "x$GXX" = "xyes"; then -o "x$CCOSTYPE" = "xosf"; then
     DEPFLAGS="-MMD"
-elif test "x$CCOSTYPE" = "xsol"; then
-    dnl Sun Forte C/C++ compiler is reported to have these
-    DEPFLAGS="-xM1"
+else
+    dnl non-gcc compiler switches depend on platform (we assume that we use
+    dnl the native compiler if we don't use gcc)
+    case "$OSTYPE" in
+	OSF1*)
+	    DEPFLAGS="-MMD"
+	    ;;
+
+	Solaris* | solaris* | SunOS*)
+	    dnl Sun Forte C/C++ compiler is reported to have these
+	    DEPFLAGS="-xM1"
+	    ;;
+
+	IRIX*)
+	    dnl see http://mahogany.sourceforge.net/cgi-bin/show_bug.cgi?id=699
+	    DEPFLAGS="-M"
+	    ;;
+    esac
 fi
 
 dnl now check that these flags are really supported by the compiler
