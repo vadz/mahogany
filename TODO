@@ -9,41 +9,35 @@ $Id$
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
 
+9		New Mail dialog for non-collected messages shows empty 
+		subject and from
+7 gtk	VZ?	message boxes have broken icons under wxGTK
+7	KB	why does Message/Find no longer work?
+7 gtk		Mahogany occasionally doesn't terminate but remains in
+		gtk event loop without any open windows.
+6	KB	add a message status marker for "Unread"
 5		wxLayout editing glitches & cursor positioning bug	
 		selections via keyboard still broken
 		speed up wxLayout scrollbar setting, *way* too slow
 		now 
-
-7 gtk	VZ?	message boxes have broken icons under wxGTK
-  win	VZ	lock files are sometimes left
-
-2 win	VZ	keyboard navigation is somewhat strange in the options
-		dialog, can't TAB to the buttons from the notebook
-		page
-
 6	VZ	All Folder create dialog pages have no HelpIDs set.
-
-7 gtk		Mahogany occasionally doesn't terminate but remains in
-		gtk event loop without any open windows.
-
-7	KB	why does Message/Find no longer work?
-
-5	KB	for NNTP only count unread/new messages
-
-5		changing the value of "autocollect" timer doesn't take
-		effect until next run - either add a message saying
-		or, better, recreate timer when the option changes.
-		-- use OptionsChange event for this?!
-
 6		"Hostname" in identity options page is misleading -
 		should be "default server for POP/IMAP. It isn't!!
 		Also, move TCP params somewhere else - what does
 		it have to do with identity?? Nothing, neither the
 		servers. Set up a "Network" page?
-
+5	KB	for NNTP only count unread/new messages
+5		changing the value of "autocollect" timer doesn't take
+		effect until next run - either add a message saying
+		or, better, recreate timer when the option changes.
+		-- use OptionsChange event for this?!
 3		foldername in password prompt seems wrong
 3		URL highlighting in headers is missing (e.g. X-Url)
-6	KB	add a message status marker for "Unread"
+? win	VZ	lock files are sometimes left
+2 win	VZ	keyboard navigation is somewhat strange in the options
+		dialog, can't TAB to the buttons from the notebook
+		page
+
 
 *********************************************************************
 *** PROJECTS
