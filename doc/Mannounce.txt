@@ -58,7 +58,7 @@ The main "selling points" of Mahogany in our opinion are:
   templates, multiple identities, support for calendar plugin,
   powerful and flexible address book (with vCard support),
   synchronization with Palm, built-in HTML viewer, X-Face support,
-  support for receiving faxes send via EFax and much more.
+  support for receiving faxes sent via EFax and much more.
 
 Acknowledgements
 =====================================================================
