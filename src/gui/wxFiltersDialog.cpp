@@ -2400,7 +2400,7 @@ void wxQuickFilterDialog::OnText(wxCommandEvent& event)
       }
    }
 
-   FAIL_MSG( _T("ignoring text event from unknown control") );
+   // some other button, e.g. the browse button of the folder entry: ignore it
 }
 
 void wxQuickFilterDialog::OnUpdateOk(wxUpdateUIEvent& event)
