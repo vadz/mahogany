@@ -277,9 +277,11 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
    {
       m_timer->Stop();
       delete m_timer;
-      
+      wxString msg;
+      msg.Printf(_("Mark all articles in\n%s\nas read?"),
+                 m_MailFolder->GetName().c_str());
       if(m_NumOfMessages > 0 && m_MailFolder->GetType() == MF_NNTP
-         && MDialog_YesNoDialog(_("Mark all articles as read?"),
+         && MDialog_YesNoDialog(msg,
                                 m_Parent,
                                 MDIALOG_YESNOTITLE,
                                 true,

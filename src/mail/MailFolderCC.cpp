@@ -376,13 +376,18 @@ MailFolderCC::GetName(void) const
    case MF_INBOX:
       symbolicName = "INBOX"; break;
    case MF_FILE:
+   case MF_POP:
+   case MF_IMAP:
+   case MF_NNTP:
       symbolicName = m_MailboxPath; break;
+#if 0
    case MF_POP:
       symbolicName << "pop_" << m_Login; break;
    case MF_IMAP:
       symbolicName << "imap_" << m_Login; break;
    case MF_NNTP:
-      symbolicName << "news_" << m_Login; break;
+      symbolicName << "news_" << m_MailboxPath; break;
+#endif
    default:
       ASSERT(0);
    }
