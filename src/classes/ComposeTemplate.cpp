@@ -545,7 +545,7 @@ static String GetReplyPrefix(Message *msg, Profile *profile)
          wxStringTokenizer tk(name);
          while ( tk.HasMoreTokens() )
          {
-            char chInitial = tk.GetNextToken()[0u];
+            unsigned char chInitial = tk.GetNextToken()[0u];
 
             if ( chInitial == '<' )
             {
