@@ -194,15 +194,21 @@ private:
    /// tickets for the async operations in progress
    ASTicketList *m_TicketList;
 
-   // drag and dropping messages is complicated because all operations
-   // (message saving, deletion *and* DoDragDrop() call) are async, so
-   // everything may happen in any order, yet we should never delete the
-   // messages which couldn't be copied successfully. To deal with this we
-   // maintain the following lists:
-   //  * m_TicketsDroppedList which contains all tickets created by
-   //    DropMessagesToFolder()
-   //  * m_UIdsCopiedOk which contains messages from tickets of
-   //    m_TicketsDroppedList which have been already saved successfully.
+   /**
+     drag and dropping messages is complicated because all operations
+     (message saving, deletion *and* DoDragDrop() call) are async, so
+     everything may happen in any order, yet we should never delete the
+     messages which couldn't be copied successfully. To deal with this we
+     maintain the following lists:
+
+      * m_TicketsToDeleteList which contains the tickets of all messages we
+        should delete once we receive the confirmation that they had been
+        copied successfully to the target folder
+      * m_TicketsDroppedList which contains all tickets created by
+        DropMessagesToFolder()
+      * m_UIdsCopiedOk which contains messages from tickets of
+        m_TicketsDroppedList which have been already saved successfully.
+   */
 
    /// a list of tickets we should delete if copy operation succeeded
    ASTicketList *m_TicketsToDeleteList;
@@ -970,7 +976,7 @@ MsgCmdProcImpl::DeleteAndExpungeMessages(const UIdArray& selections)
    AsyncStatusHandler *status =
       new AsyncStatusHandler(this, _("Permanently deleting messages..."));
 
-   status->Monitor(m_asmf->DeleteMessages(&selections, true /* epxunge */, this),
+   status->Monitor(m_asmf->DeleteMessages(&selections, true /* expunge */, this),
                    _("Failed to permanently delete messages"));
 }
 
@@ -1254,7 +1260,11 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
             // also delete the messages which have been already saved
             if ( !m_UIdsCopiedOk.IsEmpty() )
             {
-               DeleteOrTrashMessages(m_UIdsCopiedOk);
+               m_TicketList->Add
+               (
+                  // true => expunge as well
+                  m_asmf->DeleteMessages(&m_UIdsCopiedOk, true, this)
+               );
                m_UIdsCopiedOk.Empty();
 
                wxLogTrace(M_TRACE_DND, "Deleted previously dropped msgs.");
@@ -1445,7 +1455,11 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                   if ( toDelete )
                   {
                      // delete right now
-                     m_TicketList->Add(m_asmf->DeleteOrTrashMessages(seq, this));
+                     m_TicketList->Add
+                     (
+                        // true => expunge as well
+                        m_asmf->DeleteMessages(seq, true, this)
+                     );
 
                      if ( !wasDropped )
                      {
