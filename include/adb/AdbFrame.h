@@ -16,10 +16,13 @@
 class wxFrame;
 
 /// create the ADB frame if it doesn't exist and show it
-void ShowAdbFrame(wxFrame *parent);
+extern void ShowAdbFrame(wxFrame *parent);
 
 // add the given address book to the list of address books opened in the ADB
 // editor
-void AddBookToAdbEditor(const String& adbname, const String& provname);
+extern void AddBookToAdbEditor(const String& adbname, const String& provname);
+
+/// return the root path in config for the ADB editor settings
+extern String GetAdbEditorConfigPath();
 
 #endif  //_ADBFRAME_H

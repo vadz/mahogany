@@ -17,6 +17,7 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
 #include "Mpch.h"
 
 #ifndef USE_PCH
@@ -30,6 +31,7 @@
 #endif // USE_PCH
 
 #include "adb/AdbEntry.h"
+#include "adb/AdbFrame.h"        // for GetAdbEditorConfigPath()
 #include "adb/AdbBook.h"
 #include "adb/AdbManager.h"
 #include "adb/AdbDataProvider.h"
@@ -407,9 +409,7 @@ AdbBook *AdbManager::GetBook(size_t n) const
 void AdbManager::LoadAll()
 {
   wxConfigBase *conf = mApplication->GetProfile()->GetConfig();
-  wxString path;
-  path << '/' << ADB_CONFIG_PATH;
-  conf->SetPath(path);
+  conf->SetPath(GetAdbEditorConfigPath());
 
   wxArrayString astrAdb, astrProv;
   RestoreArray(conf, astrAdb, "AddressBooks");

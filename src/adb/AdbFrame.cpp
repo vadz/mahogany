@@ -89,10 +89,10 @@ extern const MOption MP_USERDIR;
 // ----------------------------------------------------------------------------
 
 // get the full name of the group we use in wxConfig
-static inline wxString GetConfigPath()
+extern String GetAdbEditorConfigPath()
 {
-  wxString path;
-  path << '/' << ADB_CONFIG_PATH << '/' << M_SETTINGS_CONFIG_SECTION;
+  String path;
+  path << '/' << M_SETTINGS_CONFIG_SECTION << '/' << ADB_CONFIG_PATH;
 
   return path;
 }
@@ -1166,7 +1166,7 @@ void AddBookToAdbEditor(const String& adbname, const String& provname)
     // shows up
 
     wxConfigBase *conf = mApplication->GetProfile()->GetConfig();
-    conf->SetPath(GetConfigPath());
+    conf->SetPath(GetAdbEditorConfigPath());
 
     wxArrayString books;
     RestoreArray(conf, books, aszConfigNames[ConfigName_AddressBooks]);
@@ -1332,7 +1332,7 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
       RestoreArray(conf, var, aszConfigNames[i])
 
   wxConfigBase *conf = mApplication->GetProfile()->GetConfig();
-  conf->SetPath(GetConfigPath());
+  conf->SetPath(GetAdbEditorConfigPath());
 
   TRANSFER_STRING(m_strLastNewEntry, ConfigName_LastNewEntry);
   TRANSFER_STRING(m_strSelection, ConfigName_TreeSelection);
