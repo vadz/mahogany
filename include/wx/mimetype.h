@@ -29,7 +29,37 @@ class wxMimeTypesManagerImpl;
 class wxFileType
 {
 friend wxMimeTypesManagerImpl;  // it has access to m_impl
+
 public:
+    // An object of this class must be passed to Get{Open|Print}Command. The
+    // default implementation is trivial and doesn't know anything at all about
+    // parameters, only filename and MIME type are used (so it's probably ok for
+    // Windows where %{param} is not used anyhow)
+    class MessageParameters
+    {
+    public:
+        // ctors
+        MessageParameters() { }
+        MessageParameters(const wxString& filename, const wxString& mimetype)
+            : m_filename(filename), m_mimetype(mimetype) { }
+
+        // accessors (called by GetOpenCommand)
+            // filename
+        const wxString& GetFileName() const { return m_filename; }
+            // mime type
+        const wxString& GetMimeType() const { return m_mimetype; }
+        
+        // override this function in derived class
+        virtual wxString GetParamValue(const wxString& paramName) const
+            { return ""; }
+
+        // virtual dtor as in any base class
+        virtual ~MessageParameters() { }
+
+    protected:
+        wxString m_filename, m_mimetype;
+    };
+
     // ctor
     wxFileType();
 
@@ -45,19 +75,21 @@ public:
     bool GetIcon(wxIcon *icon) const;
         // get a brief file type description ("*.txt" => "text document")
     bool GetDescription(wxString *desc) const;
-        // get the command to execute the file of given type, returned string
-        // always contains exactly one '%s' printf() format specifier
-    bool GetOpenCommand(wxString *openCmd) const;
-        // get the command to print the file of given type, returned string
-        // always contains exactly one '%s' printf() format specifier
-    bool GetPrintCommand(wxString *printCmd) const;
+
+    // get the command to be used to open/print the given file.
+        // get the command to execute the file of given type
+    bool GetOpenCommand(wxString *openCmd,
+                        const MessageParameters& params) const;
+        // get the command to print the file of given type
+    bool GetPrintCommand(wxString *printCmd,
+                         const MessageParameters& params) const;
 
     // operations
         // expand a string in the format of GetOpenCommand (which may contain
-        // '%s' and '%t' format specificators for the file name and mime type)
+        // '%s' and '%t' format specificators for the file name and mime type
+        // and %{param} constructions).
     static wxString ExpandCommand(const wxString& command,
-                                  const wxString& filename,
-                                  const wxString& mimetype);
+                                  const MessageParameters& params);
 
     // dtor (not virtual, shouldn't be derived from)
     ~wxFileType();
@@ -109,3 +141,5 @@ private:
 };
 
 #endif  //_MIMETYPE_H
+
+/* vi: set cin tw=80 ts=4 sw=4: */

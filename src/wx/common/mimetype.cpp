@@ -92,9 +92,11 @@ public:
     bool GetMimeType(wxString *mimeType) const;
     bool GetIcon(wxIcon *icon) const;
     bool GetDescription(wxString *desc) const;
-    bool GetOpenCommand(wxString *openCmd) const
+    bool GetOpenCommand(wxString *openCmd,
+                        const wxFileType::MessageParameters&) const
         { return GetCommand(openCmd, "open"); }
-    bool GetPrintCommand(wxString *printCmd) const
+    bool GetPrintCommand(wxString *printCmd,
+                         const wxFileType::MessageParameters&) const
         { return GetCommand(printCmd, "print"); }
 
 private:
@@ -178,12 +180,66 @@ public:
 // lines (used for users mime.types).
 //
 // For both formats spaces are ignored and lines starting with a '#' are
-// comments. Each record has one of two following forms: a) for "brief" format:
-// <mime type>  <space separated list of extensions> b) for "expanded" format:
-// type=<mime type> \ desc="<description>" \ exts="ext"
+// comments. Each record has one of two following forms:
+//  a) for "brief" format:
+//      <mime type>  <space separated list of extensions>
+//  b) for "expanded" format: 
+//      type=<mime type> \ desc="<description>" \ exts="ext"
 //
 // We try to autodetect the format of mime.types: if a non-comment line starts
 // with "type=" we assume the second format, otherwise the first one.
+
+// there may be more than one entry for one and the same mime type, to
+// choose the right one we have to run the command specified in the test
+// field on our data.
+class MailCapEntry
+{
+public:
+    // ctor
+    MailCapEntry(const wxString& openCmd,
+                 const wxString& printCmd,
+                 const wxString& testCmd)
+        : m_openCmd(openCmd), m_printCmd(printCmd), m_testCmd(testCmd)
+    {
+        m_next = NULL;
+    }
+
+    // accessors
+    const wxString& GetOpenCmd()  const { return m_openCmd;  }
+    const wxString& GetPrintCmd() const { return m_printCmd; }
+    const wxString& GetTestCmd()  const { return m_testCmd;  }
+
+    MailCapEntry *GetNext() const { return m_next; }
+
+    // operations
+        // prepend this element to the list
+    void Prepend(MailCapEntry *next) { m_next = next; }
+        // append to the list
+    void Append(MailCapEntry *next)
+    {
+        // FIXME slooow...
+        MailCapEntry *cur;
+        for ( cur = next; cur->m_next != NULL; cur = cur->m_next )
+            ;
+
+        cur->m_next = this;
+
+        // we initialize it in the ctor and there is no reason to both Prepend()
+        // and Append() one and the same entry
+        wxASSERT( m_next == NULL );
+    }
+
+private:
+    wxString m_openCmd,         // command to use to open/view the file
+             m_printCmd,        //                     print
+             m_testCmd;         // only apply this entry if test yields
+                                // true (i.e. the command returns 0)
+
+    MailCapEntry *m_next;       // in the linked list
+};
+
+WX_DEFINE_ARRAY(MailCapEntry *, ArrayTypeEntries);
+
 class wxMimeTypesManagerImpl
 {
 friend class wxFileTypeImpl; // give it access to m_aXXX variables
@@ -206,40 +262,6 @@ public:
     wxString GetExtension(size_t index) { return m_aExtensions[index]; }
 
 private:
-    // there may be more than one entry for one and the same mime type, to
-    // choose the right one we have to run the command specified in the test
-    // field on our data.
-    class MailCapEntry
-    {
-    private:
-        wxString m_openCmd,         // command to use to open/view the file
-                 m_printCmd,        //                     print
-                 m_testCmd;         // only apply this entry if test yields
-                                    // true (i.e. the command returns 0)
-
-        MailCapEntry *m_next;       // in the linked list
-
-    public:
-        // ctor
-        MailCapEntry(const wxString& openCmd,
-                     const wxString& printCmd,
-                     const wxString& testCmd)
-            : m_openCmd(openCmd), m_printCmd(printCmd), m_testCmd(testCmd)
-        {
-            m_next = NULL;
-        }
-
-        // accessors
-        const wxString& GetOpenCmd()  const { return m_openCmd;  }
-        const wxString& GetPrintCmd() const { return m_printCmd; }
-        const wxString& GetTestCmd()  const { return m_testCmd;  }
-
-        // operations
-        void SetNext(MailCapEntry *next) { m_next = next; }
-    };
-
-    WX_DEFINE_ARRAY(MailCapEntry *, ArrayTypeEntries);
-
     wxArrayString m_aTypes,         // MIME types
                   m_aDescriptions,  // descriptions (just some text)
                   m_aExtensions;    // space separated list of extensions
@@ -262,19 +284,27 @@ public:
     bool GetDescription(wxString *desc) const
         { *desc = m_manager->m_aDescriptions[m_index]; return TRUE; }
 
-    bool GetOpenCommand(wxString *openCmd) const
+    bool GetOpenCommand(wxString *openCmd,
+                        const wxFileType::MessageParameters& params) const
     {
-        *openCmd = m_manager->m_aEntries[m_index]->GetOpenCmd();
-        return TRUE;
+        return GetExpandedCommand(openCmd, params, TRUE);
     }
 
-    bool GetPrintCommand(wxString *printCmd) const
+    bool GetPrintCommand(wxString *printCmd,
+                         const wxFileType::MessageParameters& params) const
     {
-        *printCmd = m_manager->m_aEntries[m_index]->GetPrintCmd();
-        return TRUE;
+        return GetExpandedCommand(printCmd, params, FALSE);
     }
 
 private:
+    // get the entry which passes the test (may return NULL)
+    MailCapEntry *GetEntry(const wxFileType::MessageParameters& params) const;
+
+    // choose the correct entry to use and expand the command
+    bool GetExpandedCommand(wxString *expandedCmd,
+                            const wxFileType::MessageParameters& params,
+                            bool open) const;
+
     wxMimeTypesManagerImpl *m_manager;
     size_t                  m_index; // in the wxMimeTypesManagerImpl arrays
 };
@@ -290,40 +320,75 @@ private:
 // ----------------------------------------------------------------------------
 
 wxString wxFileType::ExpandCommand(const wxString& command,
-                                   const wxString& filename,
-                                   const wxString& mimetype)
+                                   const wxFileType::MessageParameters& params)
 {
+    bool hasFilename = FALSE;
+
     wxString str;
-    for ( const char *pc = command.c_str(); *pc != '\0'; pc++ )
-    {
-        if ( *pc == '%' )
-        {
+    for ( const char *pc = command.c_str(); *pc != '\0'; pc++ ) {
+        if ( *pc == '%' ) {
             switch ( *++pc ) {
                 case 's':
                     // '%s' expands into file name (quoted because it might
                     // contain spaces) - except if there are already quotes
                     // there because otherwise some programs may get confused by
                     // double double quotes
+#if 0
                     if ( *(pc - 2) == '"' )
-                        str << filename;
+                        str << params.GetFileName();
                     else
-                        str << '"' << filename << '"';
+                        str << '"' << params.GetFileName() << '"';
+#endif
+                    str << params.GetFileName();
+                    hasFilename = TRUE;
                     break;
 
                 case 't':
                     // '%t' expands into MIME type (quote it too just to be
                     // consistent)
-                    str << '"' << mimetype << '"';
+                    str << '\'' << params.GetMimeType() << '\'';
+                    break;
+
+                case '{':
+                    {
+                        const char *pEnd = strchr(pc, '}');
+                        if ( pEnd == NULL ) {
+                            wxString mimetype;
+                            wxLogWarning(_("Unmatched '{' in an entry for "
+                                           "mime type %s."),
+                                         params.GetMimeType().c_str());
+                            str << "%{";
+                        }
+                        else {
+                            wxString param(pc + 1, pEnd - pc - 1);
+                            str << '\'' << params.GetParamValue(param) << '\'';
+                            pc = pEnd;
+                        }
+                    }
+                    break;
+
+                case 'n':
+                case 'F':
+                    // TODO %n is the number of parts, %F is an array containing
+                    //      the names of temp files these parts were written to
+                    //      and their mime types.
                     break;
 
                 default:
+                    wxLogDebug("Unknown field %%%c in command '%s'.",
+                               *pc, command.c_str());
                     str << *pc;
             }
         }
-        else
-        {
+        else {
             str << *pc;
         }
+    }
+
+    // metamail(1) man page states that if the mailcap entry doesn't have '%s'
+    // the program will accept the data on stdin: so give it to it!
+    if ( !hasFilename && !str.IsEmpty() ) {
+        str << " < '" << params.GetFileName() << '\'';
     }
 
     return str;
@@ -359,14 +424,18 @@ bool wxFileType::GetDescription(wxString *desc) const
     return m_impl->GetDescription(desc);
 }
 
-bool wxFileType::GetOpenCommand(wxString *openCmd) const
+bool
+wxFileType::GetOpenCommand(wxString *openCmd,
+                           const wxFileType::MessageParameters& params) const
 {
-    return m_impl->GetOpenCommand(openCmd);
+    return m_impl->GetOpenCommand(openCmd, params);
 }
 
-bool wxFileType::GetPrintCommand(wxString *printCmd) const
+bool
+wxFileType::GetPrintCommand(wxString *printCmd,
+                            const wxFileType::MessageParameters& params) const
 {
-    return m_impl->GetPrintCommand(printCmd);
+    return m_impl->GetPrintCommand(printCmd, params);
 }
 
 // ----------------------------------------------------------------------------
@@ -593,14 +662,62 @@ wxMimeTypesManagerImpl::GetFileTypeFromMimeType(const wxString& mimeType)
 
 #else  // Unix
 
+MailCapEntry *
+wxFileTypeImpl::GetEntry(const wxFileType::MessageParameters& params) const
+{
+    wxString command;
+    MailCapEntry *entry = m_manager->m_aEntries[m_index];
+    while ( entry != NULL ) {
+        // notice that an empty command would always succeed (@@ is it ok?)
+        command = wxFileType::ExpandCommand(entry->GetTestCmd(), params);
+
+        if ( command.IsEmpty() || (system(command) == 0) ) {
+            // ok, passed
+            wxLogTrace("Test '%s' for mime type '%s' succeeded.",
+                       command.c_str(), params.GetMimeType().c_str());
+            break;
+        }
+        else {
+            wxLogTrace("Test '%s' for mime type '%s' failed.",
+                       command.c_str(), params.GetMimeType().c_str());
+        }
+
+        entry = entry->GetNext();
+    }
+
+    return entry;
+}
+
+bool
+wxFileTypeImpl::GetExpandedCommand(wxString *expandedCmd,
+                                   const wxFileType::MessageParameters& params,
+                                   bool open) const
+{
+    MailCapEntry *entry = GetEntry(params);
+    if ( entry == NULL ) {
+        // all tests failed...
+        return FALSE;
+    }
+
+    wxString cmd = open ? entry->GetOpenCmd() : entry->GetPrintCmd();
+    if ( cmd.IsEmpty() ) {
+        // may happen, especially for "print"
+        return FALSE;
+    }
+
+    *expandedCmd = wxFileType::ExpandCommand(cmd, params);
+    return TRUE;
+}
+
 bool wxFileTypeImpl::GetExtensions(wxArrayString& extensions)
 {
     wxString strExtensions = m_manager->GetExtension(m_index);
     extensions.Empty();
 
-    wxString strExt;    // one extension in the space delimitid list
+    // one extension in the space or comma delimitid list
+    wxString strExt;
     for ( const char *p = strExtensions; ; p++ ) {
-        if ( *p == ' ' || *p == '\0' ) {
+        if ( *p == ' ' || *p == ',' || *p == '\0' ) {
             if ( !strExt.IsEmpty() ) {
                 extensions.Add(strExt);
                 strExt.Empty();
@@ -681,17 +798,21 @@ wxMimeTypesManagerImpl::GetFileTypeFromExtension(const wxString& ext)
 wxFileType *
 wxMimeTypesManagerImpl::GetFileTypeFromMimeType(const wxString& mimeType)
 {
+    // mime types are not case-sensitive
+    wxString mimetype(mimeType);
+    mimetype.MakeLower();
+
     // first look for an exact match
-    int index = m_aTypes.Index(mimeType);
+    int index = m_aTypes.Index(mimetype);
     if ( index == NOT_FOUND ) {
         // then try to find "text/*" as match for "text/plain" (for example)
         // NB: if mimeType doesn't contain '/' at all, Left() will return the
         //     whole string - ok.
-        wxString strCategory = mimeType.Left('/');
+        wxString strCategory = mimetype.Left('/');
 
         size_t nCount = m_aTypes.Count();
         for ( size_t n = 0; n < nCount; n++ ) {
-            if ( (m_aTypes[n].Before('/').CmpNoCase(strCategory) == 0) &&
+            if ( (m_aTypes[n].Before('/') == strCategory ) &&
                  m_aTypes[n].Right('/') == "*" ) {
                     index = n;
                     break;
@@ -858,6 +979,9 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
     if ( !file.Open() )
         return;
 
+    // see the comments near the end of function for the reason we need this
+    wxArrayInt aEntryIndices;
+
     size_t nLineCount = file.GetLineCount();
     for ( size_t nLine = 0; nLine < nLineCount; nLine++ ) {
         // now we're at the start of the line
@@ -880,7 +1004,7 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
         {
             Field_Type,
             Field_OpenCmd,
-            Field_Other,
+            Field_Other
         } currentToken = Field_Type;
 
         // the flags and field values on the current line
@@ -961,7 +1085,7 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
                                         // it might be quoted
                                         if ( rhs[0u] == '"' &&
                                              rhs.Last() == '"' ) {
-                                            strDesc = wxString(rhs + 1,
+                                            strDesc = wxString(rhs.c_str() + 1,
                                                                rhs.Len() - 2);
                                         }
                                         else {
@@ -979,6 +1103,9 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
                                 }
                                 else {
                                     // no, it's a simple flag
+                                    // TODO support the flags:
+                                    //  1. create an xterm for 'needsterminal'
+                                    //  2. append "| $PAGER" for 'copiousoutput'
                                     if ( curField == "needsterminal" )
                                         needsterminal = TRUE;
                                     else if ( curField == "copiousoutput" )
@@ -1035,6 +1162,7 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
                                                    strPrintCmd,
                                                    strTest);
 
+            strType.MakeLower();
             int nIndex = m_aTypes.Index(strType);
             if ( nIndex == NOT_FOUND ) {
                 // new file type
@@ -1045,9 +1173,28 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
                 m_aDescriptions.Add(strDesc);
             }
             else {
-                // modify the existing entry
-                entry->SetNext(m_aEntries[nIndex]);
-                m_aEntries[nIndex] = entry;
+                // modify the existing entry: the entry in one and the same file
+                // are read in top-to-bottom order, i.e. the entries read first
+                // should be tried before the entries below. However, the files
+                // read later should override the settings in the files read
+                // before, thus we Append() the new entry to the list if it has
+                // already occured in _this_ file, but Prepend() it if it
+                // occured in some of the previous ones.
+                if ( aEntryIndices.Index(nIndex) == NOT_FOUND ) {
+                    // first time in this file
+                    aEntryIndices.Add(nIndex);
+                    entry->Prepend(m_aEntries[nIndex]);
+                    m_aEntries[nIndex] = entry;
+                }
+                else {
+                    // not the first time in _this_ file
+                    entry->Append(m_aEntries[nIndex]);
+                }
+
+                if ( !strDesc.IsEmpty() ) {
+                    // @@ replace the old one - what else can we do??
+                    m_aDescriptions[nIndex] = strDesc;
+                }
             }
         }
 

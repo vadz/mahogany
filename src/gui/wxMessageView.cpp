@@ -92,7 +92,7 @@ extern wxFrame *GetFrame(wxWindow *win)
 }
 
 // ----------------------------------------------------------------------------
-// private types
+// private classes
 // ----------------------------------------------------------------------------
 
 // data associated with the clickable objects
@@ -120,10 +120,6 @@ private:
    String m_url;
 };
 
-// ----------------------------------------------------------------------------
-// private classes
-// ----------------------------------------------------------------------------
-
 // the popup menu invoked by clicking on an attachment in the mail message
 class MimePopup : public wxMenu
 {
@@ -149,6 +145,27 @@ private:
    int m_PartNo;
 
    DECLARE_EVENT_TABLE()
+};
+
+// the message parameters for the MIME type manager
+class MailMessageParamaters : public wxFileType::MessageParameters
+{
+public:
+   MailMessageParamaters(const wxString& filename,
+         const wxString& mimetype,
+         Message *mailMessage,
+         int part)
+      : wxFileType::MessageParameters(filename, mimetype)
+      {
+         m_mailMessage = mailMessage;
+         m_part = part;
+      }
+
+   virtual wxString GetParamValue(const wxString& name) const;
+
+private:
+   Message *m_mailMessage;
+   int m_part;
 };
 
 // ----------------------------------------------------------------------------
@@ -179,6 +196,30 @@ MimePopup::OnCommandEvent(wxCommandEvent &event)
    }
 }
 
+wxString
+MailMessageParamaters::GetParamValue(const wxString& name) const
+{
+   const MessageParameterList &plist = m_mailMessage->GetParameters(m_part);
+   MessageParameterList::iterator i;
+   for ( i = plist.begin(); i != plist.end(); i++) {
+      if ( name.CmpNoCase((*i)->name) == 0 ) {
+         // found
+         return (*i)->value;
+      }
+   }
+
+   const MessageParameterList &dlist = m_mailMessage->GetDisposition(m_part);
+   for ( i = dlist.begin(); i != dlist.end(); i++) {
+      if ( name.CmpNoCase((*i)->name) == 0 ) {
+         // found
+         return (*i)->value;
+      }
+   }
+
+   // if all else failed, call the base class
+   return wxFileType::MessageParameters::GetParamValue(name);
+}
+
 void
 wxMessageView::Create(wxFolderView *fv, wxWindow *parent, const String &iname)
 {
@@ -197,9 +238,7 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent, const String &iname)
    SetFocus();
    SetMouseTracking();
 
-//#ifndef __WXMSW__
    SetBackgroundColour( wxColour("White") );
-//#endif
 
    m_Profile = ProfileBase::CreateProfile(iname, fv ? fv->GetProfile() : NULL);
    initialised = true;
@@ -533,8 +572,12 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       }
 #  endif // Win
 
+   // need a filename for GetOpenCommand()
+   String filename = tmpnam(NULL);
+   MailMessageParamaters params(filename, mimetype,
+                                mailMessage, mimeDisplayPart);
    String command;
-   if ( (fileType == NULL) || !fileType->GetOpenCommand(&command) ) {
+   if ( (fileType == NULL) || !fileType->GetOpenCommand(&command, params) ) {
       // unknown MIME type, ask the user for the command to use
       String prompt;
       prompt.Printf(_("Please enter the command to handle '%s' data:"),
@@ -545,15 +588,21 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
          return;
       }
 
-      // the command must contain exactly one '%s' format specificator!
-      String specs = strutil_extract_formatspec(command);
-      if ( specs.IsEmpty() && !command.IsEmpty() ) {
-         // at least the filename should be there!
-         command += " %s";
-      }
-      //else: if the command was empty, leave it empty
+      if ( !command.IsEmpty() )
+      {
+         // the command must contain exactly one '%s' format specificator!
+         String specs = strutil_extract_formatspec(command);
+         if ( specs.IsEmpty() ) {
+            // at least the filename should be there!
+            command += " %s";
+         }
 
-      // TODO save this command to mailcap!
+         // do expand it
+         command = wxFileType::ExpandCommand(command, params);
+
+         // TODO save this command to mailcap!
+      }
+      //else: empty command means try to handle it internally
    }
 
    delete fileType;  // may be NULL, ok
@@ -580,7 +629,6 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
    else
    {
       // have a command to open this kind of data - so do it
-      String filename = tmpnam(NULL);
       FILE *out = fopen(filename,"wb");
       if( !out )
       {
@@ -615,7 +663,6 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
          }
 #     endif // Win
 
-      command = wxFileType::ExpandCommand(command, filename, mimetype);
       if ( !wxExecute(command) )
       {
          wxLogError(_("Error opening attachment: command '%s' failed."),
