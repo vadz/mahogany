@@ -155,7 +155,7 @@ private:
    String m_UserName, m_Password;
 #ifdef USE_SSL
    /// use SSL ?
-   bool m_UseSSL;
+   bool m_UseSSLforSMTP, m_UseSSLforNNTP;
 #endif
 
    /// Address bits

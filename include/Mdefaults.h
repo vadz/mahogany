@@ -407,13 +407,13 @@ enum MFolderIndex
 #define   MP_NNTPHOST_LOGIN   "NewsHostLogin"
 /// the news host password
 #define   MP_NNTPHOST_PASSWORD  "NewsHostPw"
-/// the mail host
+/// use SSL?
 #define   MP_SMTPHOST_USE_SSL         "MailHostSSL"
 /// sendmail command
 #define MP_SENDMAILCMD "SendmailCmd"
 /// use sendmail?
 #define MP_USE_SENDMAIL "UseSendmail"
-/// the news server
+/// use SSL?
 #define   MP_NNTPHOST_USE_SSL         "NewsHostSSL"
 /// the beacon host to test for net connection
 #define   MP_BEACONHOST      "BeaconHost"
@@ -1090,9 +1090,9 @@ enum MFolderIndex
 #define   MP_SENDER_D           ""
 /// the mail host user-id
 #define   MP_SMTPHOST_LOGIN_D   ""
-/// the mail host user-id
+/// the mail host password
 #define   MP_SMTPHOST_PASSWORD_D   ""
-/// the mail host
+/// use SSL?
 #define   MP_SMTPHOST_USE_SSL_D   0l
 /// sendmail command  FIXME - should be detected by configure
 #ifdef OS_LINUX
@@ -1110,11 +1110,11 @@ enum MFolderIndex
 #define   MP_SMTPHOST_FB        "localhost"
 /// the news server
 #define   MP_NNTPHOST_D      "news"
-/// the news server
+/// the news server user-id
 #define   MP_NNTPHOST_LOGIN_D      ""
-/// the news server
+/// the news server password
 #define   MP_NNTPHOST_PASSWORD_D      ""
-/// the news server
+/// use SSL?
 #define   MP_NNTPHOST_USE_SSL_D   0l
 /// the beacon host to test for net connection
 #define   MP_BEACONHOST_D      ""

@@ -235,7 +235,8 @@ SendMessageCC::Create(Protocol protocol,
    }
 
 #ifdef USE_SSL
-   m_UseSSL = READ_CONFIG(prof, MP_SMTPHOST_USE_SSL) != 0;
+   m_UseSSLforSMTP = READ_CONFIG(prof, MP_SMTPHOST_USE_SSL) != 0;
+   m_UseSSLforNNTP = READ_CONFIG(prof, MP_NNTPHOST_USE_SSL) != 0;
 #endif
 }
 
@@ -1168,7 +1169,7 @@ SendMessageCC::Send(void)
          wxLogTrace("send", "Trying to open connection to SMTP server '%s'",
                      m_ServerHost.c_str());
 #ifdef USE_SSL
-         if(m_UseSSL)
+         if ( m_UseSSLforSMTP )
          {
             STATUSMESSAGE(("Sending message via SSL..."));
             service << "ssl";
@@ -1186,7 +1187,7 @@ SendMessageCC::Send(void)
          wxLogTrace("send", "Trying to open connection to NNTP server '%s'",
                     m_ServerHost.c_str());
 #ifdef USE_SSL
-         if( m_UseSSL )
+         if ( m_UseSSLforNNTP )
          {
             STATUSMESSAGE(("Posting message via SSL..."));
             service << "ssl";
