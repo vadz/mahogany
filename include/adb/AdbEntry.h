@@ -58,7 +58,7 @@ enum AdbField
   AdbField_H_City,
   AdbField_H_Postcode,
   AdbField_H_Country,
-  AdbField_H_POBox,                       // @@@ Karsten, what this one is?
+  AdbField_H_POBox,
   AdbField_H_Phone,
   AdbField_H_Fax,
   AdbField_H_AddrPageLast,

@@ -410,7 +410,16 @@ bool FCEntry::Save()
   wxASSERT( nFieldMax <= AdbField_Max ); // too many fields?
   wxASSERT( AdbField_NickName == 0 );    // nickname must be always the first one
 
-  wxString str, strValue;
+  // optimize a bit: remove all trailing empty fields
+  wxString strField;
+  while ( strField.IsEmpty() )
+  {
+      GetField(--nFieldMax, &strField);
+  }
+
+  nFieldMax++; // compensate for the last '--'
+
+  wxString strValue;
   for ( size_t nField = 1; nField < nFieldMax; nField++ ) {
     // @@ in fact, it should be done if ms_aFields[nField].type == FieldList
     //    and not only for the emails, but so far it's the only list field we
@@ -418,26 +427,26 @@ bool FCEntry::Save()
     if ( nField == AdbField_OtherEMails ) {
       // concatenate all e-mail addresses
       size_t nEMailCount = GetEMailCount();
-      str.Empty();
+      strField.Empty();
       for ( size_t nEMail = 0; nEMail < nEMailCount; nEMail++ ) {
         if ( nEMail > 0 )
-          str += ',';
+          strField += ',';
         for ( const char *pc = m_astrEmails[nEMail]; *pc != '\0'; pc++ ) {
           if ( *pc == ',' )
-            str +=  "\\,";
+            strField +=  "\\,";
           else
-            str += *pc;
+            strField += *pc;
         }
       }
     }
     else {
-      GetField(nField, &str);
+      GetField(nField, &strField);
     }
 
     // escape special characters
     if ( nField > 1 )
       strValue += ':';
-    for ( const char *pc = str; *pc != '\0'; pc++ ) {
+    for ( const char *pc = strField; *pc != '\0'; pc++ ) {
       switch ( *pc ) {
         case ':':
           strValue << "\\:";

@@ -98,7 +98,7 @@ TODO: (+ in first column means done)
 + 14. case (in)sensitive match, take into account find options, make
       the toolbar button work like "Find Next" if "Find" was done,
   15. sort the find results from top to bottom
-  16. prompts should have a real history and not only remember the last value
++ 16. prompts should have a real history and not only remember the last value
 
   @@PERS indicates the things that should be persistent (default values for
          the controls &c) but are not yet
@@ -134,6 +134,23 @@ class AdbTreeRoot;
 // ----------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
+// helper class: just stores all data from an AdbEntry
+// ----------------------------------------------------------------------------
+
+class AdbData
+{
+public:
+  // ctor copies data from the entry
+  AdbData(const AdbEntry& entry);
+
+  // copy the data back
+  void Copy(AdbEntry *entry);
+
+private:
+  wxString m_fields[AdbField_Max];
+};
+
+// ----------------------------------------------------------------------------
 // ADB classes
 // ----------------------------------------------------------------------------
 
@@ -144,7 +161,10 @@ enum TreeElement
   TreeElement_Group,      // a group, but not an address book
   TreeElement_Book,       // an address book (top level items)
   TreeElement_Root,       // the root of the tree
-  TreeElement_Max
+  TreeElement_Max,        // last from normal ids
+
+  TreeElement_KindMask = 0x0F,   // mask for the kind - the rest are flags
+  TreeElement_Clipboard = 0x80   // item on clipboard (not in the tree at all)
 };
 
 // common base class for both entries and groups of them
@@ -158,9 +178,15 @@ class AdbTreeElement : public wxTreeItemData
 public:
   AdbTreeElement(TreeElement kind,
                  const wxString& name,
-                 AdbTreeNode *parent) : m_name(name)
-    { m_parent = parent; m_kind = kind; }
-  virtual ~AdbTreeElement() { }
+                 AdbTreeNode *parent,
+                 bool onClipboard = FALSE);
+  virtual ~AdbTreeElement()
+  {
+    if ( IsOnClipboard() )
+      delete m_data;
+    else
+      wxASSERT_MSG( !m_data, "memory leak in AdbTreeElement" );
+  }
 
   // accessors
   const wxString& GetName() const { return m_name; }
@@ -169,12 +195,18 @@ public:
   wxString GetPath() const;
 
     // what kind of item are we?
-  bool IsRoot() const { return m_kind == TreeElement_Root; }
-  bool IsBook() const { return m_kind == TreeElement_Book; }
+  bool IsRoot() const { return GetKind() == TreeElement_Root; }
+  bool IsBook() const { return GetKind() == TreeElement_Book; }
+
     // group is anything that can contain entries, not just TreeElement_Group
-  bool IsGroup() const { return m_kind != TreeElement_Entry; }
+  bool IsGroup() const { return GetKind() != TreeElement_Entry; }
+
     // just get the kind - useful for switch()es
-  TreeElement GetKind() const { return m_kind; }
+  TreeElement GetKind() const
+    { return (TreeElement)(m_kind & TreeElement_KindMask); }
+
+    // item is on clipboard if it has this type
+  bool IsOnClipboard() const { return (m_kind & TreeElement_Clipboard) != 0; }
 
   // operations
     // insert the item into the given tree control (under it's parent)
@@ -188,9 +220,10 @@ public:
   /* virtual */ void ClearDirtyFlag();
 
 protected:
-  TreeElement     m_kind;         // what kind of item we are
-  wxString        m_name;         // the name which is the same as label
-  AdbTreeNode    *m_parent;       // the group which contains us
+  TreeElement   m_kind;   // what kind of item we are
+  wxString      m_name;   // the name which is the same as label
+  AdbTreeNode  *m_parent; // the group which contains us
+  AdbData      *m_data;   // our AdbEntry if we don't gave parent
 };
 
 // an array of pointers to the entries
@@ -202,12 +235,12 @@ class AdbTreeNode : public AdbTreeElement
 public:
   // ctors
     // the usual ctor which creates a subgroup of the parent
-  AdbTreeNode(const wxString& name, AdbTreeNode *parent);
+  AdbTreeNode(const wxString& name,
+              AdbTreeNode *parent,
+              bool onClipboard = FALSE);
     // a special ctor used by derived classes
   AdbTreeNode() : AdbTreeElement(TreeElement_Invalid, "", 0)
     { m_bWasExpanded = FALSE; m_pGroup = NULL; }
-    // another special ctor @@@@
-  AdbTreeNode(const wxString& name);
 
     // dtor deletes all children
   virtual ~AdbTreeNode();
@@ -309,7 +342,7 @@ public:
   // operations
     // flush
   bool Flush() const { return m_pBook->Flush(); }
-  
+
 protected:
   AdbBook   *m_pBook;
 };
@@ -347,8 +380,8 @@ public:
     FieldList,    // list of strings, as "Additional E-Mails"
     FieldBool,    // yes/no or unknown
     FieldNum,     // can contain only digits
-    FieldDate,    // @@@ this and the following types are the same as
-    FieldURL,     //     text now
+    FieldDate,    // TODO this and the following types are the same as
+    FieldURL,     //      text now
     FieldPhone,   //
     FieldMax
   };
@@ -364,62 +397,64 @@ public:
   static FieldInfo ms_aFields[];
 
   // ctor
-  AdbTreeEntry(const wxString& name, AdbTreeNode *parent);
+  AdbTreeEntry(const wxString& name,
+               AdbTreeNode *parent,
+               bool onClipboard = FALSE);
 
   // operations
-    // @@@ renaming not implemented
+    // TODO renaming not implemented
   void Rename(const wxString& /* name */) { NOT_IMPLEMENTED; }
 
     // copy data from another entry
   void CopyData(const AdbTreeEntry& other);
     // mark the data as being clean
-  void ClearDirty() { /* @@@@ */ }
+  void ClearDirty() { }
 
     // get the AdbEntry which we represent
   AdbEntry *GetAdbEntry() const
     { return GetParent()->AdbGroup()->GetEntry(m_name); }
 };
 
-// many compilers (VC++ for example) don't allow initializing of static
-// member variables inside the class, that's why we must initialize it here
+// this array contains labels for all fields and their types - should be kept
+// in sync with AdbField enum!
 AdbTreeEntry::FieldInfo AdbTreeEntry::ms_aFields[] =
 {
-  { "Nick &Name",         FieldText },
-  { "F&ull Name",         FieldText },
-  { "&First Name",        FieldText },
-  { "F&amily Name",       FieldText },
-  { "&Prefix",            FieldText },
-  { "&Title",             FieldText },
-  { "&Organization",      FieldText },
-  { "&Birthday date",     FieldDate },
-  { "&Comments",          FieldMemo },
+  { gettext_noop("Nick &Name"),         FieldText },
+  { gettext_noop("F&ull Name"),         FieldText },
+  { gettext_noop("&First Name"),        FieldText },
+  { gettext_noop("F&amily Name"),       FieldText },
+  { gettext_noop("&Prefix"),            FieldText },
+  { gettext_noop("&Title"),             FieldText },
+  { gettext_noop("&Organization"),      FieldText },
+  { gettext_noop("&Birthday date"),     FieldDate },
+  { gettext_noop("&Comments"),          FieldMemo },
 
-  { "&E-Mail",            FieldText },
-  { "&Home Page",         FieldURL  },
-  { "&ICQ",               FieldNum  },
-  { "Prefers &HTML mail", FieldBool },
-  { "&Additional e-mail"
-    " addresses",         FieldList },
+  { gettext_noop("&E-Mail"),            FieldText },
+  { gettext_noop("&Home Page"),         FieldURL  },
+  { gettext_noop("&ICQ"),               FieldNum  },
+  { gettext_noop("Prefers &HTML mail"), FieldBool },
+  { gettext_noop("&Additional e-mail"
+                 " addresses"),         FieldList },
 
-  { "Street &Number",     FieldText },
-  { "&Street",            FieldText },
-  { "&Locality",          FieldText },
-  { "C&ity",              FieldText },
-  { "&Postcode",          FieldNum  },
-  { "&Country",           FieldText },
-  { "PO &Box",            FieldText },
-  { "P&hone",             FieldPhone },
-  { "&Fax",               FieldPhone },
+  { gettext_noop("Street &Number"),     FieldText },
+  { gettext_noop("&Street"),            FieldText },
+  { gettext_noop("&Locality"),          FieldText },
+  { gettext_noop("C&ity"),              FieldText },
+  { gettext_noop("&Postcode"),          FieldNum  },
+  { gettext_noop("&Country"),           FieldText },
+  { gettext_noop("PO &Box"),            FieldText },
+  { gettext_noop("P&hone"),             FieldPhone },
+  { gettext_noop("&Fax"),               FieldPhone },
 
-  { "Street &Number",     FieldText },
-  { "&Street",            FieldText },
-  { "&Locality",          FieldText },
-  { "C&ity",              FieldText },
-  { "&Postcode",          FieldNum  },
-  { "&Country",           FieldText },
-  { "PO &Box",            FieldText },
-  { "P&hone",             FieldPhone },
-  { "&Fax",               FieldPhone },
+  { gettext_noop("Street &Number"),     FieldText },
+  { gettext_noop("&Street"),            FieldText },
+  { gettext_noop("&Locality"),          FieldText },
+  { gettext_noop("C&ity"),              FieldText },
+  { gettext_noop("&Postcode"),          FieldNum  },
+  { gettext_noop("&Country"),           FieldText },
+  { gettext_noop("PO &Box"),            FieldText },
+  { gettext_noop("P&hone"),             FieldPhone },
+  { gettext_noop("&Fax"),               FieldPhone },
 };
 
 // ----------------------------------------------------------------------------
@@ -468,8 +503,8 @@ public:
 private:
   // data
   wxPTextEntry *m_text;
-  int        *m_where,
-             *m_how;
+  int          *m_where,
+               *m_how;
 
   // controls
   wxCheckBox *m_checkNick,
@@ -673,7 +708,7 @@ private:
 
   // cut&paste data
   // --------------
-  AdbTreeElement *m_clipboard;   // @@ currently only one element/group
+  AdbTreeElement *m_clipboard;   // TODO currently only one element/group
 
   // find data
   // ---------
@@ -1825,11 +1860,15 @@ void wxAdbEditFrame::DoCopy()
     // yet be loaded - so we must do it now
     group->LoadAllData();
 
-    m_clipboard = new AdbTreeNode(group->GetName());
+    m_clipboard = new AdbTreeNode(group->GetName(),
+                                  NULL,    // no parent
+                                  TRUE);   // on clipboard
   }
   else {
     // just one entry to copy
-    m_clipboard = new AdbTreeEntry(m_current->GetName(), NULL /* parent */);
+    m_clipboard = new AdbTreeEntry(m_current->GetName(),
+                                   NULL,    // no parent
+                                   TRUE);   // on clipboard
   }
 
   // save data to clipboard
@@ -2021,12 +2060,8 @@ void wxAdbEditFrame::OnUpdateCopy(wxUpdateUIEvent& event)
 {
   CHECK_INIT_DONE
 
-#if 0
   // only when not root or ADB (i.e. a normal entry or group)
   event.Enable(!(m_current->IsRoot() || m_current->IsBook()));
-#else
-  event.Enable(FALSE); // cut-&-paste doesn't work right now
-#endif
 }
 
 // keep your namespace clean
@@ -2109,7 +2144,7 @@ void wxAdbEditFrame::SetMinSize()
   int widthBtn, heightBtn;
   m_btnCancel->GetClientSize(&widthBtn, &heightBtn);
 
-  // @@ this is completely arbitrary
+  // FIXME the numbers are completely arbitrary
   SetSizeHints(7*widthBtn, 22*heightBtn);
 }
 
@@ -3157,10 +3192,10 @@ wxString AdbTreeElement::GetFullName() const
   wxString strPath;
   if ( IsRoot() )
     strPath = "/";
-  else if ( m_parent->IsRoot() )
+  else if ( GetParent()->IsRoot() )
     strPath << "/" << ((AdbTreeBook *)this)->GetAdbName();
   else {
-    strPath << m_parent->GetFullName() << "/" << m_name;
+    strPath << GetParent()->GetFullName() << "/" << m_name;
   }
 
   return strPath;
@@ -3221,23 +3256,24 @@ void AdbTreeElement::TreeInsert(wxTreeCtrl& tree)
     // we want to have all the groups before all the items
     if ( IsGroup() ) {
       wxTreeItemId newItemId;
-      const wxTreeItemId& lastGroupId = m_parent->GetLastGroupId();
+      const wxTreeItemId& lastGroupId = GetParent()->GetLastGroupId();
       if ( lastGroupId.IsOk() ) {
-        newItemId = tree.InsertItem(m_parent->GetId(), lastGroupId,
+        newItemId = tree.InsertItem(GetParent()->GetId(), lastGroupId,
                                     GetName(), image, image, this);
       }
       else {
         // no last group, this is the first one
-        newItemId = tree.AppendItem(m_parent->GetId(), GetName(),
+        newItemId = tree.AppendItem(GetParent()->GetId(), GetName(),
                                     image, image, this);
       }
 
       SetId(newItemId);
-      m_parent->SetLastGroupId(newItemId);
+      GetParent()->SetLastGroupId(newItemId);
     }
     else {
       // it's an item, insert it in the end
-      SetId(tree.AppendItem(m_parent->GetId(), GetName(), image, image, this));
+      SetId(tree.AppendItem(GetParent()->GetId(), GetName(),
+                            image, image, this));
     }
 
     tree.SetItemHasChildren(GetId(), IsGroup());
@@ -3248,16 +3284,60 @@ void AdbTreeElement::TreeInsert(wxTreeCtrl& tree)
 // an ADB entry
 // -----------------------------------------------------------------------------
 
-AdbTreeEntry::AdbTreeEntry(const wxString& name, AdbTreeNode *parent)
-            : AdbTreeElement(TreeElement_Entry, name, parent)
+AdbTreeEntry::AdbTreeEntry(const wxString& name,
+                           AdbTreeNode *parent,
+                           bool onClipboard)
+            : AdbTreeElement(TreeElement_Entry, name, parent, onClipboard)
 {
-  if ( parent != NULL )
-    parent->AddChild(this);
 }
 
-void AdbTreeEntry::CopyData(const AdbTreeEntry& /* other */)
+// this function either copies data to the clipboard or from it
+void AdbTreeEntry::CopyData(const AdbTreeEntry& other)
 {
-  wxFAIL_MSG("not implemented");
+  if ( IsOnClipboard() ) {
+    // currently it's not possible - if it changes later, this assert will
+    // remind that this case has never been tested
+    wxCHECK_RET( !m_data, "copying to item which already has some data?" );
+
+    // we're copying data to the clipboard
+    AdbEntry *otherEntry = other.GetAdbEntry();
+    wxCHECK_RET( otherEntry, "can't copy from entry without data" );
+
+    m_data = new AdbData(*otherEntry);
+
+    otherEntry->DecRef();
+  }
+  else {
+    // we should be copying from clipboard to a normal entry
+    AdbEntry *entry = GetAdbEntry();
+
+    wxCHECK_RET( other.IsOnClipboard() && entry, "error copying data" );
+
+    other.m_data->Copy(entry);
+    entry->DecRef();
+  }
+
+  m_name = other.GetName();
+}
+
+// -----------------------------------------------------------------------------
+// a temporary placeholder for ADB data
+// -----------------------------------------------------------------------------
+
+AdbData::AdbData(const AdbEntry& entry)
+{
+  for ( size_t i = 0; i < AdbField_Max; i++ )
+  {
+    entry.GetField(i, &m_fields[i]);
+  }
+}
+
+void AdbData::Copy(AdbEntry *entry)
+{
+  for ( size_t i = 0; i < AdbField_Max; i++ )
+  {
+    entry->SetField(i, m_fields[i]);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -3265,26 +3345,13 @@ void AdbTreeEntry::CopyData(const AdbTreeEntry& /* other */)
 // -----------------------------------------------------------------------------
 
 // normal ctor
-AdbTreeNode::AdbTreeNode(const wxString& name, AdbTreeNode *parent)
-           : AdbTreeElement(TreeElement_Group, name, parent)
+AdbTreeNode::AdbTreeNode(const wxString& name,
+                         AdbTreeNode *parent,
+                         bool onClipboard)
+           : AdbTreeElement(TreeElement_Group, name, parent, onClipboard)
 {
   m_bWasExpanded = FALSE;
   m_pGroup = NULL;
-
-  wxCHECK_RET( parent, "AdbTreeNode needs a parent!" );
-
-  parent->AddChild(this);
-}
-
-// special ctor: it's called when a group is copied to the clipboard, so it
-// doesn't (temporarily) have any parent
-AdbTreeNode::AdbTreeNode(const wxString& name)
-           : AdbTreeElement(TreeElement_Group, name, NULL /* parent */)
-{
-  wxFAIL_MSG("should be changed");
-
-  m_pGroup = NULL;
-  m_bWasExpanded = FALSE;
 }
 
 // recursively copy the data
@@ -3292,14 +3359,23 @@ void AdbTreeNode::CopyData(const AdbTreeNode& other)
 {
   wxASSERT( m_children.Count() == 0 ); // we must be empty
 
+  // we're either copying to the clipboard or from it, so if the other item is
+  // on the clipboard we're not and ice versa
+  bool onClipboard = !other.IsOnClipboard();
+
+  if ( !onClipboard ) {
+    // create the associated ADB group
+    EnsureHasGroup();
+  }
+
   AdbTreeElement *child, *current;
   size_t nCount = other.m_children.Count();
   for ( size_t n = 0; n < nCount; n++ ) {
     current = other.m_children[n];
     if ( current->IsGroup() )
-      child = new AdbTreeNode(current->GetName(), this);
+      child = new AdbTreeNode(current->GetName(), this, onClipboard);
     else
-      child = new AdbTreeEntry(current->GetName(), this);
+      child = new AdbTreeEntry(current->GetName(), this, onClipboard);
     child->CopyData(*current);
   }
 }
@@ -3423,7 +3499,7 @@ void AdbTreeNode::DeleteChild(AdbTreeElement *child)
 
       // do nothing for address books (could delete the file...)
       break;
-      
+
     default:
       wxFAIL_MSG("something weird in our ADB tree");
   }
@@ -3502,6 +3578,8 @@ AdbTreeBook::AdbTreeBook(AdbTreeRoot *root,
 
   m_parent = root;
   m_parent->AddChild(this);
+
+  m_data = NULL;
 
   m_pGroup = m_pBook = root->GetAdbManager()->
     CreateBook(filename, pProvider, pstrProviderName);
@@ -3585,4 +3663,25 @@ AdbTreeRoot::~AdbTreeRoot()
 {
   // to match the Get() in ctor
   AdbManager::Unget();
+}
+
+// -----------------------------------------------------------------------------
+// AdbTreeElement - the base class for all others
+// -----------------------------------------------------------------------------
+
+AdbTreeElement::AdbTreeElement(TreeElement kind,
+                               const wxString& name,
+                               AdbTreeNode *parent,
+                               bool onClipboard)
+              : m_name(name)
+{
+   m_parent = parent;
+   if ( m_parent )
+      m_parent->AddChild(this);
+
+   m_kind = kind;
+   if ( onClipboard )
+      m_kind = (TreeElement)(m_kind | TreeElement_Clipboard);
+
+   m_data = NULL;
 }
