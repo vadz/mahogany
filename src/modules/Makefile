@@ -37,12 +37,6 @@ endif
 PalmOS.so: SO_LIBS += $(PISOCK_LIB)
 endif
 
-ifdef EXPERIMENTAL
-# in the crypt subdirectory; pick them up with vpath
-MOD +=	MCrypt.cpp MExtProcCrypt.cpp MPGPCrypt.cpp MPassphrase.cpp
-vpath %.cpp .src/crypt
-endif
-
 # indirection to pick up definitions in makerules
 all:	binaries
 

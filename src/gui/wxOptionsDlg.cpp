@@ -671,18 +671,18 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "mail or news. Tick the following boxes to activate this.")
      , Field_Message, -1 },
    { gettext_noop("SMTP server uses SS&L"), Field_Bool,    -1,                        },
-   { gettext_noop("NNTP s&erver uses SSL"),Field_Bool,    -1,                        },
+   { gettext_noop("NNTP s&erver uses SSL"), Field_Bool,    -1,                        },
 #endif
 #ifdef OS_UNIX
-   { gettext_noop("Use local mail delivery a&gent"), Field_Bool, -1,           },
-   { gettext_noop("Local MDA &command"), Field_Text, ConfigField_UseSendmail },
+   { gettext_noop("Use local mail delivery a&gent"), Field_Bool | Field_Global, -1,           },
+   { gettext_noop("Local MDA &command"), Field_Text | Field_Global, ConfigField_UseSendmail },
 #endif
    { gettext_noop("Mahogany contains support for dial-up networks and can detect if the\n"
                   "network is up or not. It can also be used to connect and disconnect the\n"
                   "network. To aid in detecting the network status, you can specify a beacon\n"
                   "host which should only be reachable if the network is up, e.g. the WWW\n"
                   "server of your ISP. Leave it empty to use the SMTP server for this.")
-     , Field_Message, -1 },
+     , Field_Message | Field_Global, -1 },
    { gettext_noop("&Dial-up network support"),    Field_Bool | Field_Global,    -1,                        },
    { gettext_noop("&Beacon host (e.g. www.yahoo.com)"), Field_Text | Field_Global,   ConfigField_DialUpSupport},
 #ifdef OS_WIN

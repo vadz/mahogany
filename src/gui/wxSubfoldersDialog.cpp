@@ -415,12 +415,19 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
       // start from the folder being expanded
       wxString reference = GetRelativePath(m_idParent);
 
-      // disable the tree (it will be reenabled in OnNoMoreFolders) to prevent
-      // other events (possible as we will call wxYield())
+      // disable the tree right now to prevent it from getting other events
+      // (possible as we call wxYield)
       Disable();
 
       // this is the IMAP spec of the folder whose children we enum
       m_reference = ((MailFolderCC *)m_mailFolder->GetMailFolder())->GetImapSpec();
+      if ( !m_reference.empty() &&
+               (reference.empty() || reference[0u] != m_chDelimiter) )
+      {
+         // insert a delimiter if we don't have it already
+         m_reference += m_chDelimiter;
+      }
+
       m_reference += reference;
 
       wxBusyCursor bc;
@@ -497,6 +504,13 @@ bool wxSubfoldersTree::OnMEvent(MEventData& event)
    }
    else // normal folder event
    {
+      if ( m_nFoldersRetrieved > PROGRESS_THRESHOLD )
+      {
+         // hide the tree to prevent flicker while it is being updated (it will
+         // be shown back in OnNoMoreFolders)
+         Hide();
+      }
+
       // we're passed a folder specification - extract the folder name from it
       wxString name;
       if ( spec.StartsWith(m_reference, &name) )
@@ -580,6 +594,7 @@ void wxSubfoldersTree::OnNoMoreFolders()
       m_progressInfo = NULL;
    }
 
+   Show();
    Enable();
 
    if ( !m_nFoldersRetrieved && m_idParent.IsOk() )
@@ -985,18 +1000,17 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
       // this is the tree item we're creating folder for
       wxTreeItemId id = selections[sel];
 
-      // the item data is only set by the tree for non selectable folders
-      bool canBeOpened = !m_treectrl->GetItemData(id);
-
       // this will be used to set MF_FLAGS_GROUP flag later
       bool isGroup = m_treectrl->ItemHasChildren(id);
 
       // construct the full folder name by going upwars the tree and
       // concatenating everything
       wxArrayString components;
+      wxArrayTreeItemIds ids;
       while ( id != idRoot )
       {
          components.Add(m_treectrl->GetItemText(id));
+         ids.Add(id);
          id = m_treectrl->GetParent(id);
       }
 
@@ -1042,7 +1056,7 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
             Profile_obj profile(folderNew->GetFullName());
             profile->writeEntry(MP_FOLDER_PATH, fullpath);
 
-            // copy folder flags from its parent hadling MF_FLAGS_GROUP
+            // copy folder flags from its parent handling MF_FLAGS_GROUP
             // specially: for all the intermediate folders, it must be set (as
             // they have children, they obviously _are_ groups), but for the
             // last one it should only be set if it is a group as detected
@@ -1053,13 +1067,15 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
                flags &= ~MF_FLAGS_GROUP;
             }
 
-            if ( canBeOpened )
-            {
-               flags &= ~MF_FLAGS_NOSELECT;
-            }
-            else
+            // the item data is only set by the tree for non selectable
+            // folders, so a folder with item data has NOSELECT flag
+            if ( m_treectrl->GetItemData(ids[level]) )
             {
                flags |= MF_FLAGS_NOSELECT;
+            }
+            else // this folder doesn't have NOSELECT flag
+            {
+               flags &= ~MF_FLAGS_NOSELECT;
             }
 
             folderNew->SetFlags(flags);

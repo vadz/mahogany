@@ -3267,7 +3267,17 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
    if ( !caption )
       caption = _("Mahogany: please wait");
 
-   m_frame = new wxMiniFrame(parent, -1, caption);
+   m_frame = new wxMiniFrame(parent, -1, caption,
+                             wxDefaultPosition, wxDefaultSize,
+   // this is ugly but needed as we don't have wxDEFAULT_MINIFRAME_STYLE :-(
+#ifdef __WXMSW__
+                             wxDEFAULT_FRAME_STYLE |
+                             wxTINY_CAPTION_HORIZ |
+#else // wxGTK
+                             wxCAPTION |
+                             wxRESIZE_BORDER |
+#endif // MSW/GTK
+                             wxSTAY_ON_TOP);
    wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
    sizer->Add(new wxStaticText(m_frame, -1, text), 0, wxALL & ~wxRIGHT, 10);
 

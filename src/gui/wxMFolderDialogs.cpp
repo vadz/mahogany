@@ -1296,7 +1296,6 @@ wxFolderPropertiesPage::EnableControlsForImapOrPop(bool isIMAP)
 
    // this makes no sense for POP and for IMAP we will detect it ourselves and
    // reset the MF_FLAGS_GROUP if the folder has \Noinferiors flag
-   m_isGroup->SetValue(isIMAP);
    m_isGroup->Enable(FALSE);
 }
 
