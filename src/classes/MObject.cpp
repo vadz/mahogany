@@ -83,7 +83,7 @@ String MObject::DebugDump() const
 {
    MOcheck();
    String str;
-   str.Printf("%s at 0x%p", DebugGetClassName(), this);
+   str.Printf("%s at 0x%x", DebugGetClassName(), this);
 
    return str;
 }
@@ -106,7 +106,7 @@ void MObjectRC::IncRef()
 
    if ( this == gs_traceObject )
    {
-      wxLogTrace("Object %x: IncRef() called, m_nRef = %u.", this, m_nRef);
+      wxLogTrace("Object 0x%x: IncRef() called, m_nRef = %u.", this, m_nRef);
    }
 }
 
@@ -119,7 +119,7 @@ bool MObjectRC::DecRef()
 
    if ( this == gs_traceObject )
    {
-      wxLogTrace("Object %x: DecRef() called, m_nRef = %u.", this, m_nRef);
+      wxLogTrace("Object 0x%x: DecRef() called, m_nRef = %u.", this, m_nRef);
    }
 
    if ( m_nRef == 0 )

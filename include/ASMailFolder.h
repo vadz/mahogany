@@ -515,10 +515,16 @@ public:
     */
    char GetFolderDelimiter() const;
 
+   /**
+      Returns the full spec (in cclient sense) for this folder
+    */
+   String GetImapSpec(void) const;
+
    /** Get name of mailbox.
        @return the symbolic name of the mailbox
    */
    virtual String GetName(void) const = 0;
+
    /** Get number of messages which have a message status of value
        when combined with the mask. When mask = 0, return total
        message count.

@@ -330,7 +330,7 @@ wxSubfoldersTree::wxSubfoldersTree(wxWindow *parent,
    m_mailFolder = mailFolder;
    m_mailFolder->IncRef();
 
-   m_reference = ((MailFolderCC *)m_mailFolder->GetMailFolder())->GetImapSpec();
+   m_reference = m_mailFolder->GetImapSpec();
 
    m_regCookie = MEventManager::Register(*this, MEventId_ASFolderResult);
    ASSERT_MSG( m_regCookie, "can't register with event manager");
@@ -1116,7 +1116,7 @@ size_t ListFolderEventReceiver::AddAllFolders(MFolder *folder,
    m_folder = folder;
    m_folder->IncRef();
 
-   m_reference = ((MailFolderCC *)mailFolder->GetMailFolder())->GetImapSpec();
+   m_reference = mailFolder->GetImapSpec();
    m_nFoldersRetrieved = 0u;
    m_finished = false;
 
@@ -1271,7 +1271,7 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
 // tree
 bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
 {
-   if ( !(folder->GetFlags() & MF_FLAGS_GROUP) )
+   if ( !CanHaveSubfolders(folder->GetType(), folder->GetFlags()) )
    {
       // how did we get here at all?
       wxLogMessage(_("The folder '%s' has no subfolders."),
@@ -1288,9 +1288,16 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
    {
       if ( mApplication->GetLastError() != M_ERROR_CANCEL )
       {
+         wxString folderPath = folder->GetPath();
+         if ( !folderPath )
+         {
+            // take its name or the error message will be unreadable
+            folderPath = folder->GetFullName();
+         }
+
          wxLogError(_("Impossible to browse subfolders of folder '%s' because "
                       "the folder cannot be opened."),
-                    folder->GetPath().c_str());
+                    folderPath.c_str());
       }
       //else: the user didn't want to open the folder (for example because it
       //      requires going online and he didn't want it)

@@ -1241,13 +1241,14 @@ char ASMailFolder::GetFolderDelimiter() const
          {
             DummyListReceiver rcv;
             MailFolder *mf = GetMailFolder();
-            mf->ListFolders(this, "", false, "", &rcv);
+            ASMailFolder *self = (ASMailFolder *)this; // const_cast
+            mf->ListFolders(self, "", false, "", &rcv);
 
             // well, except that in practice some IMAP servers do *not* return
             // anything in reply to this command! try working around this bug
             if ( !rcv.GotAny() )
             {
-               mf->ListFolders(this, "%", false, "", &rcv);
+               mf->ListFolders(self, "%", false, "", &rcv);
             }
 
             mf->DecRef();
@@ -1255,6 +1256,20 @@ char ASMailFolder::GetFolderDelimiter() const
             return rcv.GetDelimiter();
          }
    }
+}
+
+String ASMailFolder::GetImapSpec(void) const
+{
+   String spec;
+   MailFolder *mf = GetMailFolder();
+   if ( mf )
+   {
+      spec = ((MailFolderCC *)mf)->GetImapSpec();
+
+      mf->DecRef();
+   }
+
+   return spec;
 }
 
 // ----------------------------------------------------------------------------

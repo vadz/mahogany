@@ -255,7 +255,7 @@ inline bool CanHaveSubfolders(FolderType folderType,
          {
             if ( subtype )
             {
-               *subtype = MF_IMAP;
+               *subtype = folderType;
             }
 
             return TRUE;
