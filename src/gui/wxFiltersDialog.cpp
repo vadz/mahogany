@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxMFilterDialog.cpp : dialog for setting up filter rules         *
  *                                                                  *
- * (C) 1998-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1999-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -970,9 +970,10 @@ wxFiltersDialog::TransferDataFromWindow()
       m_FiltersProfile->writeEntry(name+"/Criterium", m_FilterData[i].GetCriterium());
       m_FiltersProfile->writeEntry(name+"/Action", m_FilterData[i].GetAction());
       m_FiltersProfile->writeEntry(name+"/Active", m_FilterData[i].GetActive());
-      m_Filter <<
-         TranslateOneRuleToProgram(m_FilterData[i].GetCriterium(),
-                                   m_FilterData[i].GetAction());
+      if(m_FilterData[i].GetActive())
+         m_Filter <<
+            TranslateOneRuleToProgram(m_FilterData[i].GetCriterium(),
+                                      m_FilterData[i].GetAction());
    }
    m_Profile->writeEntry("Filter", m_Filter);
    return TRUE;
