@@ -31,7 +31,7 @@ endif
 ifdef USE_DSPAM
 ifeq ($(USE_MODULES),static)
 CPPFLAGS_modules_spam_DspamFilter_o := -I../lib/dspam/.src
-LDFLAGS_modules_spam_DspamFilter_o := ../lib/dspam/libdspam.a -lsqlite
+LDFLAGS := $(LDFLAGS) ../lib/dspam/libdspam.a -lsqlite
 else
 CPPFLAGS_modules_spam_DspamFilter_so := -I../lib/dspam/.src
 LDFLAGS_modules_spam_DspamFilter_so := ../lib/dspam/libdspam.a -lsqlite
