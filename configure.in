@@ -321,15 +321,15 @@ if test "$USE_PYTHON" = 1 ; then
            ],
              [ AC_DEFINE(USE_PYTHON)
                MAKE_USE_PYTHON="USE_PYTHON=yes"
-               AC_CHECK_LIB(swigpy,main,
-             [  AC_DEFINE(HAVE_SWIGLIB)
-                PYTHON_LIBS="$libpath_python1_5_main -lpython1.5 -lswigpy"
-              ],
-              [ AC_MSG_WARN("Cannot find SWIG library for python - trying anyway.")
+#               AC_CHECK_LIB(swigpy,main,
+#             [  AC_DEFINE(HAVE_SWIGLIB)
+#                PYTHON_LIBS="$libpath_python1_5_main -lpython1.5 -lswigpy"
+#              ],
+#              [ AC_MSG_WARN("Cannot find SWIG library for python - trying anyway.")
                 PYTHON_LIBS="$libpath_python1_5_main -lpython1.5"
-              ],
-              [$libpath_python1_5_main -lpython1.5]
-             )
+#              ],
+#              [$libpath_python1_5_main -lpython1.5]
+#             )
            ]
          )
        ]
