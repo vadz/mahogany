@@ -15,6 +15,7 @@ $Id$
   + constraints
   + MIME inclusion
   + MIME subtypes are missing TEXT/ instead of TEXT/PLAIN
+  + extra header lines don't get set, why? Profile bug?
 
 - wxLayout:
   + fix my printing code in wxl*.new in src/Projects/wxLayout
