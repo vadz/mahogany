@@ -1,4 +1,4 @@
-//-*- c++ -*-//////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // Project:     M - cross platform e-mail GUI client
 // File name:   FolderType.h - constants for folder types
 // Purpose:     collect all folder types and flags in one place
@@ -72,6 +72,39 @@ enum FileMailboxFormat
    FileMbox_Max
 };
 
+/// kinds of SSL support
+///
+/// NB: these values shouldn't be changed, they're stored in config
+enum SSLSupport
+{
+   /// never use TLS nor SSL
+   SSLSupport_None,
+
+   /// use TLS if available, fall back to plain text if not
+   SSLSupport_TLSIfAvailable,
+
+   /// force using TLS, fail if it's not available
+   SSLSupport_TLS,
+
+   /// use SSL
+   SSLSupport_SSL,
+
+   /// end of enum marker
+   SSLSupport_Max
+};
+
+/// accept unsigned SSL certificates?
+///
+/// NB: these values must be false and true
+enum SSLCert
+{
+   /// don't trust self-signed certificates
+   SSLCert_SignedOnly,
+
+   /// accept self-signed certificates
+   SSLCert_AcceptUnsigned
+};
+
 // ----------------------------------------------------------------------------
 // Flags of a mail folder
 // ----------------------------------------------------------------------------
@@ -109,13 +142,13 @@ enum FolderFlags
    MF_FLAGS_NEWMAILFOLDER = 0x00001000, // the central new mail folder
    MF_FLAGS_DONTDELETE    = 0x00002000, // forbid deletion of this folder
    MF_FLAGS_KEEPOPEN      = 0x00004000, // keep this folder open at all times
-   MF_FLAGS_REOPENONPING  = 0x00008000, // -- value unused any more --
+   // MF_FLAGS_REOPENONPING  = 0x00008000, // -- value unused any more --
    MF_FLAGS_ISLOCAL       = 0x00010000, // can be accessed even without network
    MF_FLAGS_HIDDEN        = 0x00020000, // don't show in the folder tree
    MF_FLAGS_GROUP         = 0x00040000, // contains subfolders
-   MF_FLAGS_SSLAUTH       = 0x00080000, // use SSL authentication/encryption
+   // MF_FLAGS_SSLAUTH       = 0x00080000, // -- value unused any more --
    MF_FLAGS_NOSELECT      = 0x00100000, // folder can't be opened
-   MF_FLAGS_SSLUNSIGNED   = 0x00200000, // accept unsigned certificates
+   // MF_FLAGS_SSLUNSIGNED   = 0x00200000, // -- value unused any more --
    MF_FLAGS_MONITOR       = 0x00400000, // poll this folder periodically
    MF_FLAGS_TEMPORARY     = 0x00800000  // temp folder: delete file on close
 };
