@@ -926,7 +926,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Polling &interval in seconds"), Field_Number | Field_NotApp,
                                                    ConfigField_NewMailMonitor },
    { gettext_noop("Checking the checkbox below will result in checking the folder\n"
-                  "for the new mail immediately after staring up instead of\n"
+                  "for the new mail immediately after starting up instead of\n"
                   "waiting until the interval above expires."),
                                                    Field_Message | Field_NotApp,
                                                    ConfigField_NewMailMonitor },
