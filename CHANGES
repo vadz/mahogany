@@ -6,6 +6,7 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
+19.10.02 MC: added new filter tests and actions for working with flags
 15.09.02 VZ: added an option to show text [only] in the toolbar buttons
 10.09.02 XN: added a "Move folder" command
 07.09.02 VZ: added possibility to directly edit FCC header in the composer
@@ -13,7 +14,7 @@ Release 0.65 '???' ??? ??, 2002
 29.08.02 VZ: show the number of selected messages in the status bar
 15.08.02 VZ: added "Resend message" command
 08.08.02 NB: added "Follow-up to newsgroup" command
-25.07.02 XN: preventing a renamed filter to not being used any more
+25.07.02 XN: prevent a renamed filter from continuing being used under old name
 23.07.02 VZ: implemented "search in multiple folders" function
 17.07.02 VZ: limited virtual folder support for showing the search results
 01.07.02 NB: added a SpamAssassin SPAM test

@@ -717,7 +717,8 @@ private:
 class QueryOp : public SyntaxNode
 {
 public:
-   QueryOp(const SyntaxNode *cond, const SyntaxNode *left, const SyntaxNode *right)
+   QueryOp(const SyntaxNode *cond, const SyntaxNode *left,
+           const SyntaxNode *right)
       : m_Cond(cond), m_Left(left), m_Right(right)
       {
          ASSERT(m_Cond); ASSERT(m_Left); ASSERT(m_Right);
@@ -1546,7 +1547,8 @@ BAndOp(Token t)
 #endif
    return NULL;
 }
-LeftAssoc(BAnds,BAndOp,Relational,_("Expected expression after bit AND operator"))
+LeftAssoc(BAnds,BAndOp,Relational,
+          _("Expected expression after bit AND operator"))
 
 static inline OpCreate
 RelOp(Token t)
@@ -1612,7 +1614,8 @@ MulOp(Token t)
       default: return NULL;
    }
 }
-LeftAssoc(Factor,MulOp,Unary,_("Expected factor after multiply/divide/modulus operator"))
+LeftAssoc(Factor,MulOp,Unary,
+          _("Expected factor after multiply/divide/modulus operator"))
 
 const SyntaxNode *
 FilterRuleImpl::ParseUnary(void)
@@ -2126,7 +2129,8 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
 
    if ( !count )
    {
-      wxLogWarning(_("No SPAM tests configured, please edit this filter rule."));
+      wxLogWarning(
+         _("No SPAM tests configured, please edit this filter rule."));
 
       return Value();
    }
@@ -2489,6 +2493,35 @@ static Value func_istome(ArgList *args, FilterRuleImpl *p)
    return Value(false);
 }
 
+static Value func_hasflag(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 1)
+      return Value(false);
+   const Value v1 = args->GetArg(0)->Evaluate();
+   String flag_str = v1.ToString();
+   if(flag_str.Length() != 1)
+      return Value(false);
+   Message_obj msg = p->GetMessage();
+   if(! msg)
+      return Value(false);
+   int status = msg->GetStatus();
+
+   if      ( flag_str == "U" )   // Unread (result is inverted)
+      return Value(status & MailFolder::MSG_STAT_SEEN     ? false : true);
+   else if ( flag_str == "D" )   // Deleted
+      return Value(status & MailFolder::MSG_STAT_DELETED  ? true  : false);
+   else if ( flag_str == "A" )   // Answered
+      return Value(status & MailFolder::MSG_STAT_ANSWERED ? true  : false);
+   else if ( flag_str == "R" )   // Recent
+      return Value(status & MailFolder::MSG_STAT_RECENT   ? true  : false);
+// else if ( flag_str == "S" )   // Search match
+//    return Value(status & MailFolder::MSG_STAT_SEARCHED ? true  : false);
+   else if ( flag_str == "*" )   // Flagged/Important
+      return Value(status & MailFolder::MSG_STAT_FLAGGED  ? true  : false);
+
+   return Value(false);
+}
+
 static Value func_header(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
@@ -2648,6 +2681,35 @@ static Value func_score(ArgList *args, FilterRuleImpl *p)
    return Value(score);
 }
 
+static Value func_setscore(ArgList *args, FilterRuleImpl *p)
+{
+   if(args->Count() != 1)
+      return Value(-1);
+
+   const Value d = args->GetArg(0)->Evaluate();
+
+#ifdef USE_HEADER_SCORE
+   MailFolder_obj mf = p->GetFolder();
+   if ( mf )
+   {
+      HeaderInfoList_obj hil = mf->GetHeaders();
+      if(hil)
+      {
+         Message_obj msg = p->GetMessage();
+         if ( msg )
+         {
+            // MAC: I'd rather use ->SetScore() or something similar,
+            // MAC: but I couldn't find any of the scoring methods.
+            int score = hil->GetEntryUId( msg->GetUId() )->GetScore();
+            hil->GetEntryUId( msg->GetUId() )->AddScore(d.ToNumber() - score);
+         }
+      }
+   }
+#endif // USE_HEADER_SCORE
+
+   return Value(0);
+}
+
 static Value func_addscore(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 1)
@@ -2673,6 +2735,7 @@ static Value func_addscore(ArgList *args, FilterRuleImpl *p)
 
    return Value(0);
 }
+
 static Value func_setcolour(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 1)
@@ -2697,6 +2760,52 @@ static Value func_setcolour(ArgList *args, FilterRuleImpl *p)
 #endif // USE_HEADER_COLOUR
 
    return Value(0);
+}
+
+static Value func_do_setflag(ArgList *args, FilterRuleImpl *p, bool set)
+{
+   if(args->Count() != 1)
+      return Value(false);
+   const Value v1 = args->GetArg(0)->Evaluate();
+   String flag_str = v1.ToString();
+   if(flag_str.Length() != 1)
+      return Value(false);
+
+   int flag = 0;
+   if      ( flag_str == "U" )   // Unread, inverse of actual flag (SEEN)
+   {
+      flag = MailFolder::MSG_STAT_SEEN;
+      set  = ! set;
+   }
+   else if ( flag_str == "D" )   // Deleted
+      flag = MailFolder::MSG_STAT_DELETED;
+   else if ( flag_str == "A" )   // Answered
+      flag = MailFolder::MSG_STAT_ANSWERED;
+   // The Recent flag is not changable.
+   // else if ( flag_str == "R" )   // Recent
+   //   flag = MailFolder::MSG_STAT_RECENT;
+// else if ( flag_str == "S" )   // Search match
+//    flag = MailFolder::MSG_STAT_SEARCHED;
+   else if ( flag_str == "*" )   // Flagged/Important
+      flag = MailFolder::MSG_STAT_FLAGGED;
+   else
+      return Value(false);
+
+   // Set or clear the selected flag
+   MailFolder_obj mf = p->GetFolder();
+   if ( ! mf )
+      return Value(false);
+   return Value(mf->SetMessageFlag(p->GetMessageUId(), flag, set));
+}
+
+static Value func_setflag(ArgList *args, FilterRuleImpl *p)
+{
+   return func_do_setflag(args, p, true);
+}
+
+static Value func_clearflag(ArgList *args, FilterRuleImpl *p)
+{
+   return func_do_setflag(args, p, false);
 }
 
 
@@ -2756,6 +2865,7 @@ BuiltinFunctions(void)
          Define("recipients", func_recipients);
          Define("headerline", func_headerline);
          Define("from", func_from);
+         Define("hasflag", func_hasflag);
          Define("header", func_header);
          Define("body", func_body);
          Define("text", func_text);
@@ -2773,8 +2883,11 @@ BuiltinFunctions(void)
          Define("matchregexi", func_matchregexi);
          Define("setcolour", func_setcolour);
          Define("score", func_score);
+         Define("setscore", func_setscore);
          Define("addscore", func_addscore);
          Define("istome", func_istome);
+         Define("setflag", func_setflag);
+         Define("clearflag", func_clearflag);
 #ifdef TEST
          Define("nargs", func_nargs);
          Define("arg", func_arg);
@@ -2870,7 +2983,8 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
          if ( !m_MailMessage )
          {
             // maybe another session deleted it?
-            wxLogDebug(_T("Filter error: message with UID %ld in folder '%s' doesn't exist any more."),
+            wxLogDebug(
+               _T("Filter error: message with UID %ld in folder '%s' doesn't exist any more."),
                        m_MessageUId, m_MailFolder->GetName().c_str());
             continue;
          }
@@ -3093,7 +3207,7 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
                if ( pd )
                {
                   pd->Update(2*count, pdExecText + '\n' +
-                             wxString::Format(_("Deleting moved messages...")));
+                            wxString::Format(_("Deleting moved messages...")));
                }
 
                if ( !m_MailFolder->DeleteMessages(&uidsToDelete) )
@@ -3105,9 +3219,8 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
                   rc |= FilterRule::Deleted;
 
                   // remove the deleted messages from msgs
-
-                  // iterate from end because otherwise the indices would shift while we
-                  // traverse them
+                  // iterate from end because otherwise the indices would shift
+                  // while we traverse them
                   size_t count = indicesDeleted.GetCount();
                   for ( size_t n = count; n > 0; n-- )
                   {
@@ -3407,4 +3520,3 @@ main(void)
    return errs != 0;
 }
 #endif // TEST
-

@@ -26,6 +26,9 @@ class MModule_Filters;
 /** Enum holding the different possible matching filter actions.
     Do not change the order of these without changing MFilter.cpp
     where corresponding strings are defined.
+
+    Actually, never change the order or remove any of these values,
+    their numeric values are used to store filter settings.
 */
 enum MFDialogTest
 {
@@ -45,8 +48,21 @@ enum MFDialogTest
    ORC_T_ScoreAbove,       // score of the message is greater than argument
    ORC_T_ScoreBelow,       //                         less
    ORC_T_IsToMe,           // the message is addressed to one of my addresses
+   ORC_T_HasFlag,          // flag is set for message
    ORC_T_Illegal,          // illegal must not occur
    ORC_T_Max = ORC_T_Illegal
+};
+
+enum MFDialogHasFlag
+{
+   ORC_MF_Illegal = -1,
+   ORC_MF_Unseen  = 0, // MailFolder::MSG_STAT_SEEN (inverted)
+   ORC_MF_Deleted,     // MailFolder::MSG_STAT_DELETED
+   ORC_MF_Answered,    // MailFolder::MSG_STAT_ANSWERED
+// ORC_MF_Searched,    // MailFolder::MSG_STAT_SEARCHED
+   ORC_MF_Important,   // MailFolder::MSG_STAT_FLAGGED
+   ORC_MF_Recent,      // MailFolder::MSG_STAT_RECENT
+   ORC_MF_Max
 };
 
 enum MFDialogTarget
@@ -73,11 +89,26 @@ enum MFDialogAction
    OAC_T_MessageBox,
    OAC_T_LogEntry,
    OAC_T_Python,
-   OAC_T_ChangeScore,
+   OAC_T_AddScore,
    OAC_T_SetColour,
    OAC_T_Zap,
    OAC_T_Print,
+   OAC_T_SetFlag,
+   OAC_T_ClearFlag,
+   OAC_T_SetScore,
    OAC_T_Max
+};
+
+enum MFDialogSetFlag
+{
+   OAC_MF_Illegal = -1,
+   OAC_MF_Unseen  = 0, // MailFolder::MSG_STAT_SEEN (inverted)
+   OAC_MF_Deleted,     // MailFolder::MSG_STAT_DELETED
+   OAC_MF_Answered,    // MailFolder::MSG_STAT_ANSWERED
+// OAC_MF_Searched,    // MailFolder::MSG_STAT_SEARCHED
+   OAC_MF_Important,   // MailFolder::MSG_STAT_FLAGGED
+// OAC_MF_Recent,      // MailFolder::MSG_STAT_RECENT (can't set)
+   OAC_MF_Max
 };
 
 enum MFDialogLogical
@@ -89,10 +120,28 @@ enum MFDialogLogical
 };
 
 /// return true if this filter test requires an argument
-extern bool FilterTestNeedsArgument(int test);
+extern bool FilterTestNeedsArgument(MFDialogTest test);
 
 /// return true if this filter test requires the target to operate on
-extern bool FilterTestNeedsTarget(int test);
+extern bool FilterTestNeedsTarget(MFDialogTest test);
+
+/// return true if this filter test is implemented
+extern bool FilterTestImplemented(MFDialogTest test);
+
+/// return true if this filter action requires an argument
+extern bool FilterActionNeedsArg(MFDialogAction action);
+
+/// return true if this filter action can use the colour popup
+extern bool FilterActionUsesColour(MFDialogAction action);
+
+/// return true if this filter action can use the folder popup
+extern bool FilterActionUsesFolder(MFDialogAction action);
+
+/// return true if this filter action sets a message flag
+extern bool FilterActionMsgFlag(MFDialogAction action);
+
+/// return true if this filter action is implemented
+extern bool FilterActionImplemented(MFDialogAction action);
 
 //@}
 
@@ -278,7 +327,10 @@ public:
 /// smart reference to MFilter
 BEGIN_DECLARE_AUTOPTR(MFilter)
    public:
-      MFilter_obj(const String& name) { m_ptr = MFilter::CreateFromProfile(name); }
+      MFilter_obj(const String& name)
+      {
+         m_ptr = MFilter::CreateFromProfile(name);
+      }
 END_DECLARE_AUTOPTR();
 
 /**
@@ -292,4 +344,3 @@ END_DECLARE_AUTOPTR();
 extern FilterRule *GetFilterForFolder(const MFolder *mfolder);
 
 #endif // _MFILTER_H
-

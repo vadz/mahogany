@@ -147,34 +147,46 @@ const char * ORC_T_Names[] =
    "score() > ",        // ORC_T_ScoreAbove
    "score() < ",        // ORC_T_ScoreBelow
    "istome()",          // ORC_T_IsToMe
+   "hasflag(",          // ORC_T_HasFlag
    NULL
 };
 
 /// this array tells us if the tests need arguments
 #define ORC_F_NeedsTarget   0x01
 #define ORC_F_NeedsArg      0x02
+#define ORC_F_Unimplemented 0x80
 
 static unsigned char ORC_T_Flags[] =
 {
-   0,                                  // ORC_T_Always = 0,
-   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_Match,
-   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_Contains,
-   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_MatchC,
-   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_ContainsC,
-   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_MatchRegExC,
-   ORC_F_NeedsArg,                     // ORC_T_LargerThan,
-   ORC_F_NeedsArg,                     // ORC_T_SmallerThan,
-   ORC_F_NeedsArg,                     // ORC_T_OlderThan,
-   ORC_F_NeedsArg,                     // ORC_T_NewerThan,
-   ORC_F_NeedsArg,                     // ORC_T_IsSpam,
-   ORC_F_NeedsArg,                     // ORC_T_Python,
-   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_MatchRegEx,
-   ORC_F_NeedsArg,                     // ORC_T_ScoreAbove,
+   0,                                  // ORC_T_Always
+   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_Match
+   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_Contains
+   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_MatchC
+   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_ContainsC
+   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_MatchRegExC
+   ORC_F_NeedsArg,                     // ORC_T_LargerThan
+   ORC_F_NeedsArg,                     // ORC_T_SmallerThan
+   ORC_F_NeedsArg,                     // ORC_T_OlderThan
+   ORC_F_NeedsArg,                     // ORC_T_NewerThan
+   ORC_F_NeedsArg,                     // ORC_T_IsSpam
+#ifndef USE_PYTHON
+   ORC_F_Unimplemented|
+#endif
+   ORC_F_NeedsArg,                     // ORC_T_Python
+   ORC_F_NeedsTarget|ORC_F_NeedsArg,   // ORC_T_MatchRegEx
+#ifndef USE_HEADER_SCORE
+   ORC_F_Unimplemented|
+#endif
+   ORC_F_NeedsArg,                     // ORC_T_ScoreAbove
+#ifndef USE_HEADER_SCORE
+   ORC_F_Unimplemented|
+#endif
    ORC_F_NeedsArg,                     // ORC_T_ScoreBelow
    0,                                  // ORC_T_IsToMe
+   ORC_F_NeedsArg                      // ORC_T_HasFlag
 };
 
-bool FilterTestNeedsArgument(int test)
+bool FilterTestNeedsArgument(MFDialogTest test)
 {
    CHECK( test >= 0 && (unsigned)test < WXSIZEOF(ORC_T_Flags), false,
           _T("invalid filter test") );
@@ -182,7 +194,7 @@ bool FilterTestNeedsArgument(int test)
    return (ORC_T_Flags[test] & ORC_F_NeedsArg) != 0;
 }
 
-bool FilterTestNeedsTarget(int test)
+bool FilterTestNeedsTarget(MFDialogTest test)
 {
    CHECK( test >= 0 && (unsigned)test < WXSIZEOF(ORC_T_Flags), false,
           _T("invalid filter test") );
@@ -190,50 +202,77 @@ bool FilterTestNeedsTarget(int test)
    return (ORC_T_Flags[test] & ORC_F_NeedsTarget) != 0;
 }
 
+bool FilterTestImplemented(MFDialogTest test)
+{
+   CHECK( test >= 0 && (unsigned)test < WXSIZEOF(ORC_T_Flags), false,
+          _T("invalid filter test") );
+
+   return (ORC_T_Flags[test] & ORC_F_Unimplemented) == 0;
+}
+
 static
 const char * ORC_W_Names[] =
 {
-   "subject()",
-   "header()",
-   "from()",
-   "body()",
-   "message()",
-   "to()",
-   "header(\"Sender\")",
-   "recipients()",
+   "subject()",             // ORC_W_Subject
+   "header()",              // ORC_W_Header
+   "from()",                // ORC_W_From
+   "body()",                // ORC_W_Body
+   "message()",             // ORC_W_Message
+   "to()",                  // ORC_W_To
+   "header(\"Sender\")",    // ORC_W_Sender
+   "recipients()",          // ORC_W_Recipients
    NULL
 };
 
 static const char * OAC_T_Names[] =
 {
-   "delete(",
-   "copy(",
-   "move(",
-   "expunge(",
-   "message(",
-   "log(",
-   "python(",
-   "addscore(",
-   "setcolour(",
-   "zap(",
-   "print(",
+   "delete(",       // OAC_T_Delete
+   "copy(",         // OAC_T_CopyTo
+   "move(",         // OAC_T_MoveTo
+   "expunge(",      // OAC_T_Expunge
+   "message(",      // OAC_T_MessageBox
+   "log(",          // OAC_T_LogEntry
+   "python(",       // OAC_T_Python
+   "addscore(",     // OAC_T_AddScore
+   "setcolour(",    // OAC_T_SetColour
+   "zap(",          // OAC_T_Zap
+   "print(",        // OAC_T_Print
+   "setflag(",      // OAC_T_SetFlag
+   "clearflag(",    // OAC_T_ClearFlag
+   "setscore(",     // OAC_T_SetScore
    NULL
 };
 
-#define OAC_F_NeedsArg   0x01
+#define OAC_F_NeedsArg      0x01
+#define OAC_F_Colour        0x02
+#define OAC_F_Folder        0x04
+#define OAC_F_MsgFlag       0x08
+#define OAC_F_Unimplemented 0x80
 static unsigned char OAC_T_Flags[] =
 {
-   0,
-   OAC_F_NeedsArg,
-   OAC_F_NeedsArg,
-   0,
-   OAC_F_NeedsArg,
-   OAC_F_NeedsArg,
-   OAC_F_NeedsArg,
-   OAC_F_NeedsArg,
-   OAC_F_NeedsArg,
-   0,
-   0,
+   0,                            // OAC_T_Delete
+   OAC_F_NeedsArg|OAC_F_Folder,  // OAC_T_CopyTo
+   OAC_F_NeedsArg|OAC_F_Folder,  // OAC_T_MoveTo
+   0,                            // OAC_T_Expunge
+   OAC_F_NeedsArg,               // OAC_T_MessageBox
+   OAC_F_NeedsArg,               // OAC_T_LogEntry
+#ifndef USE_PYTHON
+   OAC_F_Unimplemented|
+#endif
+   OAC_F_NeedsArg,               // OAC_T_Python
+#ifndef USE_HEADER_SCORE
+   OAC_F_Unimplemented|
+#endif
+   OAC_F_NeedsArg,               // OAC_T_AddScore
+   OAC_F_NeedsArg|OAC_F_Colour,  // OAC_T_SetColour
+   0,                            // OAC_T_Zap
+   0,                            // OAC_T_Print
+   OAC_F_NeedsArg|OAC_F_MsgFlag, // OAC_T_SetFlag
+   OAC_F_NeedsArg|OAC_F_MsgFlag, // OAC_T_ClearFlag
+#ifndef USE_HEADER_SCORE
+   OAC_F_Unimplemented|
+#endif
+   OAC_F_NeedsArg                // OAC_T_SetScore
 };
 
 wxCOMPILE_TIME_ASSERT( WXSIZEOF(ORC_T_Names) == ORC_T_Max + 1,
@@ -245,12 +284,53 @@ wxCOMPILE_TIME_ASSERT( WXSIZEOF(ORC_T_Flags) == ORC_T_Max,
 wxCOMPILE_TIME_ASSERT( WXSIZEOF(ORC_W_Names) == ORC_W_Max + 1,
                        MismatchInTargetArray );
 
+bool FilterActionNeedsArg(MFDialogAction action)
+{
+   CHECK( action >= 0 && (unsigned)action < WXSIZEOF(ORC_T_Flags), false,
+          _T("invalid filter action") );
+
+   return (OAC_T_Flags[action] & OAC_F_NeedsArg) != 0;
+}
+
+bool FilterActionUsesColour(MFDialogAction action)
+{
+   CHECK( action >= 0 && (unsigned)action < WXSIZEOF(ORC_T_Flags), false,
+          _T("invalid filter action") );
+
+   return (OAC_T_Flags[action] & OAC_F_Colour) != 0;
+}
+
+bool FilterActionUsesFolder(MFDialogAction action)
+{
+   CHECK( action >= 0 && (unsigned)action < WXSIZEOF(ORC_T_Flags), false,
+          _T("invalid filter action") );
+
+   return (OAC_T_Flags[action] & OAC_F_Folder) != 0;
+}
+
+bool FilterActionMsgFlag(MFDialogAction action)
+{
+   CHECK( action >= 0 && (unsigned)action < WXSIZEOF(ORC_T_Flags), false,
+          _T("invalid filter action") );
+
+   return (OAC_T_Flags[action] & OAC_F_MsgFlag) != 0;
+}
+
+bool FilterActionImplemented(MFDialogAction action)
+{
+   CHECK( action >= 0 && (unsigned)action < WXSIZEOF(ORC_T_Flags), false,
+          _T("invalid filter action") );
+
+   return (OAC_T_Flags[action] & OAC_F_Unimplemented) == 0;
+}
+
 String
 MFDialogComponent::WriteTest(void)
 {
    String program;
 
-   CHECK( m_Test >= 0 && m_Test < ORC_T_Max, program, _T("illegal filter test") );
+   CHECK( m_Test >= 0 && m_Test < ORC_T_Max, program,
+          _T("illegal filter test") );
 
    // This returns the bit to go into an if between the brackets:
    // if ( .............. )
@@ -523,7 +603,7 @@ MFDialogSettingsImpl::WriteAction(void) const
       ASSERT_MSG(0, _T("illegal action - must not happen"));
       return "";
    }
-   bool needsArgument = OAC_T_Flags[m_Action] & OAC_F_NeedsArg;
+   bool needsArgument = FilterActionNeedsArg(m_Action);
    program << OAC_T_Names[m_Action];
    if(needsArgument)
       program << '"' << m_ActionArgument << '"';
@@ -560,7 +640,7 @@ MFDialogSettingsImpl::ReadSettingsFromRule(const String & rule)
          m_Action = (MFDialogAction) i;
          break;
       }
-   bool needsArgument = OAC_T_Flags[m_Action] & OAC_F_NeedsArg;
+   bool needsArgument = FilterActionNeedsArg(m_Action);
    if(needsArgument)
    {
       if(*cptr != '"') return FALSE;
@@ -730,7 +810,8 @@ protected:
             {
                // if we have matching dialog settings, we prefer to
                // write them as they are more compact in the config file
-               m_Profile->writeEntry(MP_FILTER_GUIDESC, m_Settings->WriteSettings());
+               m_Profile->writeEntry(MP_FILTER_GUIDESC,
+                                     m_Settings->WriteSettings());
             }
             else
             {
@@ -936,4 +1017,3 @@ GetFilterForFolder(const MFolder *folder)
 
    return filterRule;
 }
-

@@ -71,6 +71,54 @@ extern const MPersMsgBox *M_MSGBOX_FILTER_NOT_USED_YET;
 extern const MPersMsgBox *M_MSGBOX_FILTER_CONFIRM_OVERWRITE;
 extern const MPersMsgBox *M_MSGBOX_FILTER_REPLACE;
 
+// ---------------------------------------------------------------------------
+// macros to allow choice labels in other than enum order
+// ---------------------------------------------------------------------------
+
+/// Run in constructor to eliminate unimplemented operations from label list
+/// arrayL = Label array, arrayS = Swap array, count = count of arrays
+/// implemented = function which returns true if enum is implemented
+#define SKIP_UNIMPLEMENTED_LABELS( arrayL, arrayS, count, implemented ) \
+ { \
+   size_t from, to; \
+   for ( from = to = 0; from < count; ++from ) \
+   { \
+      if ( implemented(arrayS[from]) ) \
+      { \
+         if ( to != from ) \
+         { \
+            arrayL[to] = arrayL[from]; \
+            arrayS[to] = arrayS[from]; \
+         } \
+         ++to; \
+      } \
+   } \
+   count = to; \
+}
+
+/// Define function T##_fromSelect to convert selection value to enum
+#define ENUM_fromSelect( T, arrayS, count, default ) \
+static \
+T T##_fromSelect ( size_t value ) \
+{ \
+   CHECK(value < count, default, _T(#T " out of range for choice")); \
+   return arrayS[value]; \
+}
+
+/// Define function T##_toSelect to convert enum to selection value
+#define ENUM_toSelect( T, arrayS, count, default ) \
+static \
+int T##_toSelect ( T value ) \
+{ \
+   size_t i; \
+   for ( i = 0; i < count; ++i ) \
+   { \
+      if ( arrayS[i] == value ) \
+         return i; \
+   } \
+   CHECK(false, default, _T("choice not in " #T)); \
+}
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -92,58 +140,115 @@ enum
    Text_Program = 200
 };
 
-// the config entries under[Filters/N]
-#define FILTER_NAME        "Name"
-#define FILTER_CRITERIUM   "Criterium"
-#define FILTER_ACTION      "Action"
-#define FILTER_ACTIVE      "Active"
-
 // data for the OneCritControl
 
-static const
+static
 wxString ORC_Types[] =
 {
-   gettext_noop("Always"),
-   gettext_noop("Match"),
-   gettext_noop("Contains"),
-   gettext_noop("Match Case"),
-   gettext_noop("Contains Case"),
-   gettext_noop("Match RegExp Case"),
-   gettext_noop("Larger than"),
-   gettext_noop("Smaller than"),
-   gettext_noop("Older than"),
-   gettext_noop("Newer than"),
-   gettext_noop("Seems to be SPAM"),
-   gettext_noop("Python"),
-   gettext_noop("Match RegExp"),
-   gettext_noop("Score above"),
-   gettext_noop("Score below"),
-   gettext_noop("Sent to me"),
+   // Must be in the same order as ORC_T_Swap[]
+   gettext_noop("Always"),              // ORC_T_Always
+   gettext_noop("Match"),               // ORC_T_Match
+   gettext_noop("Match Case"),          // ORC_T_MatchC
+   gettext_noop("Contains"),            // ORC_T_Contains
+   gettext_noop("Contains Case"),       // ORC_T_ContainsC
+   gettext_noop("Match RegExp"),        // ORC_T_MatchRegEx
+   gettext_noop("Match RegExp Case"),   // ORC_T_MatchRegExC
+   gettext_noop("Larger than"),         // ORC_T_LargerThan
+   gettext_noop("Smaller than"),        // ORC_T_SmallerThan
+   gettext_noop("Older than"),          // ORC_T_OlderThan
+   gettext_noop("Newer than"),          // ORC_T_NewerThan
+   gettext_noop("Seems to be SPAM"),    // ORC_T_IsSpam
+   gettext_noop("Python"),              // ORC_T_Python
+   gettext_noop("Score above"),         // ORC_T_ScoreAbove
+   gettext_noop("Score below"),         // ORC_T_ScoreBelow
+   gettext_noop("Sent to me"),          // ORC_T_IsToMe
+   gettext_noop("Flag is Set")          // ORC_T_HasFlag
 };
 
-static const size_t ORC_TypesCount = WXSIZEOF(ORC_Types);
+static const
+size_t ORC_TypesCount  = WXSIZEOF(ORC_Types);
+static
+size_t ORC_TypesCountS = WXSIZEOF(ORC_Types);
+
+static 
+MFDialogTest ORC_T_Swap[] =
+{
+   // Must be in the same order as ORC_Types[]
+   ORC_T_Always,
+   ORC_T_Match,
+   ORC_T_MatchC,
+   ORC_T_Contains,
+   ORC_T_ContainsC,
+   ORC_T_MatchRegEx,
+   ORC_T_MatchRegExC,
+   ORC_T_LargerThan,
+   ORC_T_SmallerThan,
+   ORC_T_OlderThan,
+   ORC_T_NewerThan,
+   ORC_T_IsSpam,
+   ORC_T_Python,
+   ORC_T_ScoreAbove,
+   ORC_T_ScoreBelow,
+   ORC_T_IsToMe,
+   ORC_T_HasFlag
+};
+ENUM_fromSelect(MFDialogTest, ORC_T_Swap, ORC_TypesCountS, ORC_T_Always)
+ENUM_toSelect(  MFDialogTest, ORC_T_Swap, ORC_TypesCountS, ORC_T_Always)
 
 static const
+wxString ORC_Msg_Flag[] =
+{
+   gettext_noop("Unseen"),    // ORC_MF_Unseen (inverted)
+   gettext_noop("Deleted"),   // ORC_MF_Deleted
+   gettext_noop("Answered"),  // ORC_MF_Answered
+// gettext_noop("Searched"),  // ORC_MF_Searched
+   gettext_noop("Important"), // ORC_MF_Important
+   gettext_noop("Recent")     // ORC_MF_Recent
+};
+
+static const
+size_t ORC_Msg_Flag_Count = WXSIZEOF(ORC_Msg_Flag);
+
+static
 wxString ORC_Where[] =
 {
-   gettext_noop("in subject"),
-   gettext_noop("in header"),
-   gettext_noop("in from"),
-   gettext_noop("in body"),
-   gettext_noop("in message"),
-   gettext_noop("in to"),
-   gettext_noop("in sender"),
-   gettext_noop("in any recipient")
+   // Must be in the same order as ORC_W_Swap[]
+   gettext_noop("in subject"),          // ORC_W_Subject
+   gettext_noop("in from"),             // ORC_W_From
+   gettext_noop("in to"),               // ORC_W_To
+   gettext_noop("in sender"),           // ORC_W_Sender
+   gettext_noop("in any recipient"),    // ORC_W_Recipients
+   gettext_noop("in header"),           // ORC_W_Header
+   gettext_noop("in body"),             // ORC_W_Body
+   gettext_noop("in message")           // ORC_W_Message
 };
 
 static const
-size_t ORC_WhereCount = WXSIZEOF(ORC_Where);
+size_t ORC_WhereCount  = WXSIZEOF(ORC_Where);
+static
+size_t ORC_WhereCountS = WXSIZEOF(ORC_Where);
+
+static
+MFDialogTarget ORC_W_Swap[] =
+{
+   // Must be in the same order as ORC_Where[]
+   ORC_W_Subject,
+   ORC_W_From,
+   ORC_W_To,
+   ORC_W_Sender,
+   ORC_W_Recipients,
+   ORC_W_Header,
+   ORC_W_Body,
+   ORC_W_Message
+};
+ENUM_fromSelect(MFDialogTarget, ORC_W_Swap, ORC_WhereCountS, ORC_W_Subject)
+ENUM_toSelect(  MFDialogTarget, ORC_W_Swap, ORC_WhereCountS, ORC_W_Subject)
 
 static const
 wxString ORC_Logical[] =
 {
-   gettext_noop("or"),
-   gettext_noop("and"),
+   gettext_noop("or"),  // ORC_L_Or
+   gettext_noop("and")  // ORC_L_And
 };
 
 static const
@@ -151,24 +256,66 @@ size_t ORC_LogicalCount = WXSIZEOF(ORC_Logical);
 
 // and for OneActionControl
 
-static const
+static
 wxString OAC_Types[] =
 {
-   gettext_noop("Delete"),
-   gettext_noop("Copy to"),
-   gettext_noop("Move to"),
-   gettext_noop("Expunge"),
-   gettext_noop("MessageBox"),
-   gettext_noop("Log Entry"),
-   gettext_noop("Python"),
-   gettext_noop("Change Score"),
-   gettext_noop("Set Colour"),
-   gettext_noop("Zap"),
-   gettext_noop("Print")
+   // Must be in the same order as OAC_T_Swap[]
+   gettext_noop("Delete"),              // OAC_T_Delete
+   gettext_noop("Copy to"),             // OAC_T_CopyTo
+   gettext_noop("Move to"),             // OAC_T_MoveTo
+   gettext_noop("Expunge"),             // OAC_T_Expunge
+   gettext_noop("Zap"),                 // OAC_T_Zap
+   gettext_noop("MessageBox"),          // OAC_T_MessageBox
+   gettext_noop("Log Entry"),           // OAC_T_LogEntry
+   gettext_noop("Python"),              // OAC_T_Python
+   gettext_noop("Set Score"),           // OAC_T_SetScore
+   gettext_noop("Add to Score"),        // OAC_T_AddScore
+   gettext_noop("Set Colour"),          // OAC_T_SetColour
+   gettext_noop("Print"),               // OAC_T_Print
+   gettext_noop("Set Flag"),            // OAC_T_SetFlag
+   gettext_noop("Clear Flag")           // OAC_T_ClearFlag
 };
 
 static const
-size_t OAC_TypesCount = WXSIZEOF(OAC_Types);
+size_t OAC_TypesCount  = WXSIZEOF(OAC_Types);
+static
+size_t OAC_TypesCountS = WXSIZEOF(OAC_Types);
+
+static
+MFDialogAction OAC_T_Swap[] =
+{
+   // Must be in the same order as OAC_Types[]
+   OAC_T_Delete,
+   OAC_T_CopyTo,
+   OAC_T_MoveTo,
+   OAC_T_Expunge,
+   OAC_T_Zap,
+   OAC_T_MessageBox,
+   OAC_T_LogEntry,
+   OAC_T_Python,
+   OAC_T_SetScore,
+   OAC_T_AddScore,
+   OAC_T_SetColour,
+   OAC_T_Print,
+   OAC_T_SetFlag,
+   OAC_T_ClearFlag
+};
+ENUM_fromSelect(MFDialogAction, OAC_T_Swap, OAC_TypesCountS, OAC_T_Delete)
+ENUM_toSelect(  MFDialogAction, OAC_T_Swap, OAC_TypesCountS, OAC_T_Delete)
+
+static const
+wxString OAC_Msg_Flag[] =
+{
+   gettext_noop("Unseen"),    // OAC_MF_Unseen (inverted)
+   gettext_noop("Deleted"),   // OAC_MF_Deleted
+   gettext_noop("Answered"),  // OAC_MF_Answered
+// gettext_noop("Searched"),  // OAC_MF_Searched
+   gettext_noop("Important")  // OAC_MF_Important
+// gettext_noop("Recent")     // OAC_MF_Recent (can't set)
+};
+
+static const
+size_t OAC_Msg_Flag_Count = WXSIZEOF(OAC_Msg_Flag);
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -339,18 +486,33 @@ public:
 
    MFDialogTest GetTest() const
    {
-      return (MFDialogTest)m_Type->GetSelection();
+      return MFDialogTest_fromSelect(m_Type->GetSelection());
    }
 
    MFDialogTarget GetTarget() const
    {
-      return (MFDialogTarget)m_Where->GetSelection();
+      return MFDialogTarget_fromSelect(m_Where->GetSelection());
    }
 
    String GetArgument() const
    {
-      return GetTest() == ORC_T_IsSpam ? GetSpamTestArgument()
-                                       : m_Argument->GetValue();
+      switch ( GetTest() )
+      {
+         case ORC_T_IsSpam: return GetSpamTestArgument();
+         case ORC_T_HasFlag:
+            switch ( m_choiceFlags->GetSelection() )
+            {
+               case ORC_MF_Unseen:    return "U";
+               case ORC_MF_Deleted:   return "D";
+               case ORC_MF_Answered:  return "A";
+//             case ORC_MF_Searched:  return "S";
+               case ORC_MF_Important: return "*";
+               case ORC_MF_Recent:    return "R";
+            }
+            CHECK( false, "", _T("Invalid test message flag") );
+            break;
+         default: return m_Argument->GetValue();
+      }
    }
 
    // enable the controls corresponding to the current m_Type value
@@ -387,6 +549,7 @@ private:
    wxChoice   *m_Where;    // corresponds to ORC_Where
 
    // special controls
+   wxChoice   *m_choiceFlags; // used for ORC_T_HasFlag
    wxButton   *m_btnSpam;  // configure the ORC_T_IsSpam test
 
    // the parent for all these controls
@@ -408,6 +571,7 @@ private:
 
 wxCOMPILE_TIME_ASSERT( ORC_LogicalCount == ORC_L_Max, MismatchInLogicOps );
 wxCOMPILE_TIME_ASSERT( ORC_TypesCount == ORC_T_Max, MismatchInTestTypes );
+wxCOMPILE_TIME_ASSERT( ORC_Msg_Flag_Count == ORC_MF_Max, MismatchInHasFlag );
 wxCOMPILE_TIME_ASSERT( ORC_WhereCount == ORC_W_Max, MismatchInTargets );
 
 OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
@@ -433,11 +597,12 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
    }
 
    m_Type = new wxChoice(parent, -1, wxDefaultPosition,
-                         wxDefaultSize, ORC_TypesCount, ORC_Types);
+                         wxDefaultSize, ORC_TypesCountS, ORC_Types);
+   m_choiceFlags = new wxChoice(parent, -1, wxDefaultPosition,
+                         wxDefaultSize, ORC_Msg_Flag_Count, ORC_Msg_Flag);
    m_Argument = new wxTextCtrl(parent,-1,"", wxDefaultPosition);
-
    m_Where = new wxChoice(parent, -1, wxDefaultPosition,
-                          wxDefaultSize, ORC_WhereCount, ORC_Where);
+                          wxDefaultSize, ORC_WhereCountS, ORC_Where);
 
    // set up the initial values or the code in UpdateProgram() would complain
    // about invalid values
@@ -447,11 +612,13 @@ OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
       // as it is usually more convenient (user usually creates filter of the
       // form "foo AND bar AND baz" or "foo OR bar OR baz"...)
       wxChoice *prevLogical = previous->m_Logical;
-      m_Logical->Select(prevLogical ? prevLogical->GetSelection() : ORC_L_Or);
+      m_Logical->SetSelection(prevLogical ? prevLogical->GetSelection()
+                              : ORC_L_Or);
    }
 
-   m_Type->Select(ORC_T_Contains);
-   m_Where->Select(ORC_W_Subject);
+   m_Type->SetSelection(MFDialogTest_toSelect(ORC_T_Contains));
+   m_choiceFlags->SetSelection(ORC_MF_Unseen);
+   m_Where->SetSelection(MFDialogTarget_toSelect(ORC_W_Subject));
 }
 
 OneCritControl::~OneCritControl()
@@ -466,6 +633,7 @@ OneCritControl::~OneCritControl()
    delete m_Argument;
    delete m_Where;
 
+   delete m_choiceFlags;
    delete m_btnSpam;
 }
 
@@ -514,6 +682,13 @@ OneCritControl::LayoutControls(wxWindow **last)
    c->height.AsIs();
    m_Argument->SetConstraints(c);
 
+   c = new wxLayoutConstraints;
+   c->left.RightOf(m_Type, LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->centreY.SameAs(m_Not, wxCentreY);
+   c->height.AsIs();
+   m_choiceFlags->SetConstraints(c);
+
    *last = m_Where;
 }
 
@@ -539,49 +714,48 @@ OneCritControl::CreateSpamButton(const String& rule)
 void
 OneCritControl::UpdateUI(wxTextCtrl *textProgram)
 {
-   int test = m_Type->GetSelection();
-   switch ( test )
+   if ( m_Type->GetSelection() == -1 ) // use raw selection value here
+      return; // do nothing if not a valid test
+
+   // decide what to show and enable
+   MFDialogTest test   = GetTest();
+   bool enable_isspam  = test == ORC_T_IsSpam;
+   bool enable_msgflag = test == ORC_T_HasFlag;
+   bool enable_arg     = ! enable_isspam && ! enable_msgflag &&
+                         FilterTestNeedsArgument(test);
+   bool enable_target  = FilterTestNeedsTarget(test);
+
+   // don't leave anything in the argument if it's not needed for this test
+   if ( !enable_arg )
    {
-      case -1:
-         // no selection -- do nothing
-         break;
+      // NB: don't call SetValue() unconditionally because it results in
+      //     another callback generated by wxGTK even if the text control
+      //     is already empty!
+      if ( !m_Argument->GetValue().empty() )
+         m_Argument->SetValue("");
+   }
 
-      case ORC_T_IsSpam:
-         if ( !m_btnSpam )
-         {
-            CreateSpamButton(textProgram->GetValue());
-         }
+   // disable everything if test not implemented
+   if ( ! FilterTestImplemented(test) )
+   {
+      enable_msgflag = false;
+      enable_arg     = false;
+      enable_target  = false;
+      enable_isspam  = false;
+   }
 
-         m_btnSpam->Show();
-         m_Argument->Hide();
-         m_Where->Hide();
-         break;
-
-      default:
-         bool enableArg = FilterTestNeedsArgument(test);
-         if ( !enableArg )
-         {
-            // don't leave anything in this field if it's not needed for the
-            // current test
-            //
-            // NB: don't call SetValue() unconditionally because it results in
-            //     another callback generated by wxGTK even if the text control
-            //     is already empty!
-            if ( !m_Argument->GetValue().empty() )
-            {
-               m_Argument->SetValue("");
-            }
-         }
-
-         if ( m_btnSpam )
-         {
-            m_btnSpam->Hide();
-            m_Argument->Show();
-            m_Where->Show();
-         }
-
-         m_Argument->Enable(enableArg);
-         m_Where->Enable(FilterTestNeedsTarget(test));
+   m_choiceFlags->Show(enable_msgflag);
+   m_choiceFlags->Enable(enable_msgflag);
+   m_Argument->Show(enable_arg);
+   m_Argument->Enable(enable_arg);
+   m_Where->Show(enable_target);
+   m_Where->Enable(enable_target);
+   if ( enable_isspam && ! m_btnSpam )
+      CreateSpamButton(textProgram->GetValue());
+   if ( m_btnSpam )
+   {
+      m_btnSpam->Show(enable_isspam);
+      m_btnSpam->Enable(enable_isspam);
    }
 }
 
@@ -590,6 +764,7 @@ OneCritControl::Disable()
 {
    m_Not->Disable();
    m_Type->Disable();
+   m_choiceFlags->Disable();
    m_Argument->Disable();
    m_Where->Disable();
    if ( m_Logical )
@@ -603,10 +778,29 @@ OneCritControl::SetValues(const MFDialogSettings& settings, size_t n)
    if ( m_Logical && logical != ORC_L_None )
       m_Logical->SetSelection(logical);
 
+   MFDialogTest test = settings.GetTest(n);
    m_Not->SetValue(settings.IsInverted(n));
-   m_Type->SetSelection(settings.GetTest(n));
-   m_Where->SetSelection(settings.GetTestTarget(n));
-   m_Argument->SetValue(settings.GetTestArgument(n));
+   m_Type->SetSelection(MFDialogTest_toSelect(test));
+   m_Where->SetSelection(MFDialogTarget_toSelect(settings.GetTestTarget(n)));
+   String argument = settings.GetTestArgument(n);
+   if ( test == ORC_T_HasFlag )
+   {
+      MFDialogHasFlag flag;
+      if      ( argument == "U" ) flag = ORC_MF_Unseen;
+      else if ( argument == "D" ) flag = ORC_MF_Deleted;
+      else if ( argument == "A" ) flag = ORC_MF_Answered;
+//    else if ( argument == "S" ) flag = ORC_MF_Searched;
+      else if ( argument == "*" ) flag = ORC_MF_Important;
+      else if ( argument == "R" ) flag = ORC_MF_Recent;
+      else
+      {
+         CHECK_RET( false, _T("Invalid test message flag character") );
+      }
+
+      m_choiceFlags->SetSelection(flag);
+   }
+   else
+      m_Argument->SetValue(argument);
 }
 
 // ----------------------------------------------------------------------------
@@ -669,12 +863,17 @@ static const wxOptionsPage::FieldInfo gs_SpamPageFieldInfos[] =
                   "\n"
                   "So the message is considered to be spam if it has..."),
                   wxOptionsPage::Field_Message, -1 },
-   { gettext_noop("Been tagged as spam by Spam&Assassin"), wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("Too many &8 bit characters in subject"), wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("Only &capitals in subject"), wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("Been tagged as spam by Spam&Assassin"),
+     wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("Too many &8 bit characters in subject"),
+     wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("Only &capitals in subject"),
+     wxOptionsPage::Field_Bool, -1 },
    { gettext_noop("&Korean charset"), wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("X-Authentication-&Warning header"), wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("Suspicious \"&Received\" headers"), wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("X-Authentication-&Warning header"),
+     wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("Suspicious \"&Received\" headers"),
+     wxOptionsPage::Field_Bool, -1 },
    { gettext_noop("&HTML content"), wxOptionsPage::Field_Bool, -1 },
 #ifdef USE_RBL
    { gettext_noop("been &blacklisted by RBL"), wxOptionsPage::Field_Bool, -1},
@@ -762,6 +961,7 @@ OneCritControl::InitSpamOptions(const String& rule)
             wxLogDebug(_T("Unknown spam test \"%s\""), t.c_str());
       }
    }
+
 }
 
 void
@@ -796,7 +996,8 @@ OneCritControl::ShowDetails()
       m_checkRBL = profile->readEntry(MP_SPAM_RBL, 0l) != 0;
 #endif // USE_RBL
 
-      wxOneFilterDialog *dlg = GET_PARENT_OF_CLASS(m_Parent, wxOneFilterDialog);
+      wxOneFilterDialog *dlg =
+         GET_PARENT_OF_CLASS(m_Parent, wxOneFilterDialog);
       CHECK_RET( dlg, _T("should be a child of wxOneFilterDialog") );
 
       dlg->UpdateProgram();
@@ -870,22 +1071,58 @@ public:
    /// init from MFDialogSettings
    void SetValues(const MFDialogSettings& settings)
    {
-      m_Type->SetSelection(settings.GetAction());
-      m_Argument->SetValue(settings.GetActionArgument());
+      MFDialogAction action = settings.GetAction();
+      String argument = settings.GetActionArgument();
+      m_Type->SetSelection(MFDialogAction_toSelect(action));
+      if ( FilterActionMsgFlag(action) )
+      {
+         MFDialogSetFlag flag;
+         if      ( argument == "U" ) flag = OAC_MF_Unseen;
+         else if ( argument == "D" ) flag = OAC_MF_Deleted;
+         else if ( argument == "A" ) flag = OAC_MF_Answered;
+//       else if ( argument == "S" ) flag = OAC_MF_Searched;
+         else if ( argument == "*" ) flag = OAC_MF_Important;
+      // else if ( argument == "R" ) flag = OAC_MF_Recent; // can't set
+         else
+         {
+            CHECK_RET( false, _T("Invalid action message flag character") );
+         }
+         m_choiceFlags->SetSelection(flag);
+      }
+      else
+         m_Argument->SetValue(argument);
    }
 
    /// get the action
    MFDialogAction GetAction() const
-      { return (MFDialogAction)m_Type->GetSelection(); }
+      { return MFDialogAction_fromSelect(m_Type->GetSelection()); }
 
    /// get the action argument
-   String GetArgument() const { return m_Argument->GetValue(); }
+   String GetArgument() const
+   {
+      if ( FilterActionMsgFlag(GetAction()) )
+      {
+         switch ( m_choiceFlags->GetSelection() )
+         {
+            case OAC_MF_Unseen:    return "U";
+            case OAC_MF_Deleted:   return "D";
+            case OAC_MF_Answered:  return "A";
+//          case OAC_MF_Searched:  return "S";
+            case OAC_MF_Important: return "*";
+         // case OAC_MF_Recent:    return "R"; // can't set
+         }
+         CHECK( false, "", _T("Invalid action message flag") );
+      }
+      else
+         return m_Argument->GetValue();
+   }
 
    void UpdateUI(void);
    void Hide()
    {
       m_Type->Hide();
       m_Argument->Hide();
+      m_choiceFlags->Hide();
       m_btnFolder->Hide();
       m_btnColour->Hide();
    }
@@ -893,6 +1130,7 @@ public:
    {
       m_Type->Disable();
       m_Argument->Disable();
+      m_choiceFlags->Disable();
       m_btnFolder->Disable();
       m_btnColour->Disable();
    }
@@ -904,6 +1142,7 @@ public:
 private:
    wxChoice             *m_Type;       // Which action to perform
    wxTextCtrl           *m_Argument;   // string, number of days or bytes
+   wxChoice             *m_choiceFlags;   // Which message flag to set or clear
 
    // browse buttons: only one of them is currently shown
    wxFolderBrowseButton *m_btnFolder;
@@ -915,54 +1154,59 @@ private:
 void
 OneActionControl::UpdateUI()
 {
-   int type = m_Type->GetSelection();
+   MFDialogAction type = GetAction();
+   bool enable_msgflag = FilterActionMsgFlag(type);
+   bool enable_arg     = ! enable_msgflag && FilterActionNeedsArg(type);
+   bool enable_colour  = FilterActionUsesColour(type);
+   bool enable_folder  = FilterActionUsesFolder(type);
 
-   bool enable = !(type == OAC_T_Delete
-                   || type == OAC_T_Expunge
-                   //|| type == OAC_T_Python
-                   || type == OAC_T_Zap
-                   || type == OAC_T_Print
-      );
-   m_Argument->Enable(enable);
-
-   switch ( type )
+   // don't leave anything in the argument if it's not needed for this action
+   if ( !enable_arg )
    {
-      case OAC_T_CopyTo:
-      case OAC_T_MoveTo:
-         // browse for folder
-         m_btnColour->Hide();
-         m_btnFolder->Show();
-         m_btnFolder->Enable(TRUE);
-         break;
-
-      case OAC_T_SetColour:
-         // browse for colour
-         m_btnFolder->Hide();
-         m_btnColour->Show();
-         m_btnColour->Enable(TRUE);
-         break;
-
-      default:
-         // nothing to browse for
-         m_btnColour->Disable();
-         m_btnFolder->Disable();
+      // NB: don't call SetValue() unconditionally because it results in
+      //     another callback generated by wxGTK even if the text control
+      //     is already empty!
+      if ( !m_Argument->GetValue().empty() )
+         m_Argument->SetValue("");
    }
+
+   // disable everything if action not implemented
+   if ( ! FilterActionImplemented(type) )
+   {
+      enable_msgflag = false;
+      enable_arg     = false;
+      enable_colour  = false;
+      enable_folder  = false;
+   }
+
+   m_choiceFlags->Show(enable_msgflag);
+   m_choiceFlags->Enable(enable_msgflag);
+   m_Argument->Show(enable_arg);
+   m_Argument->Enable(enable_arg);
+   m_btnColour->Show(enable_colour);
+   m_btnColour->Enable(enable_colour);
+   m_btnFolder->Show(enable_folder);
+   m_btnFolder->Enable(enable_folder);
 }
 
 OneActionControl::OneActionControl(wxWindow *parent)
 {
-   wxASSERT_MSG( OAC_TypesCount == OAC_T_Max, _T("forgot to update something") );
+   wxASSERT_MSG( OAC_TypesCount == OAC_T_Max,
+                 _T("forgot to update something") );
 
    m_Parent = parent;
 
    m_Type = new wxChoice(parent, -1, wxDefaultPosition, wxDefaultSize,
-                         OAC_TypesCount, OAC_Types);
+                         OAC_TypesCountS, OAC_Types);
+   m_choiceFlags = new wxChoice(parent, -1, wxDefaultPosition, wxDefaultSize,
+                             OAC_Msg_Flag_Count, OAC_Msg_Flag);
    m_Argument = new wxTextCtrl(parent, -1, "");
    m_btnFolder = new wxFolderBrowseButton(m_Argument, parent);
    m_btnColour = new wxColorBrowseButton(m_Argument, parent);
 
-   // select something or UpdateProgram() would complain abotu invalid action
-   m_Type->Select(OAC_T_Delete);
+   // select something or UpdateProgram() would complain about invalid action
+   m_Type->SetSelection(MFDialogAction_toSelect(OAC_T_Delete));
+   m_choiceFlags->SetSelection(OAC_MF_Unseen);
 }
 
 void
@@ -977,6 +1221,13 @@ OneActionControl::LayoutControls(wxWindow **last,
    c->width.AsIs();
    c->height.AsIs();
    m_Type->SetConstraints(c);
+
+   c = new wxLayoutConstraints;
+   c->left.SameAs(m_Type, wxRight, LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->top.SameAs(m_Type, wxTop, 0);
+   c->height.AsIs();
+   m_choiceFlags->SetConstraints(c);
 
    c = new wxLayoutConstraints;
    c->right.SameAs(m_Parent, wxRight, rightMargin);
@@ -1041,6 +1292,12 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    m_FilterData = fd;
    SetAutoLayout( TRUE );
    wxLayoutConstraints *c;
+
+   // Remove unimplemented labels for tests and actions
+   SKIP_UNIMPLEMENTED_LABELS( ORC_Types, ORC_T_Swap, ORC_TypesCountS,
+                              FilterTestImplemented );
+   SKIP_UNIMPLEMENTED_LABELS( OAC_Types, OAC_T_Swap, OAC_TypesCountS,
+                              FilterActionImplemented );
 
    wxStaticBox *box = CreateStdButtonsAndBox(_("Filter Rule"), FALSE,
                                              MH_DIALOG_FILTERS_DETAILS);
@@ -1355,6 +1612,10 @@ wxOneFilterDialog::TransferDataToWindow()
       m_textProgram->SetValue(m_FilterData->GetProgram());
    }
 
+   // MAC: The test and action controls were not getting hidden and
+   // MAC: disabled properly sometimes when the dialog started.
+   DoUpdateUI();
+
    // now any updates come from user, not from program
    m_initializing = false;
 
@@ -1655,7 +1916,7 @@ private:
   wxString m_name;
   wxString m_nameNew;
 public:
-   RenameAFilterTraversal(MFolder* folder, wxString name, wxString nameNew)
+   RenameAFilterTraversal(MFolder* folder, wxString name, wxString nameNew) 
       : MFolderTraversal(*folder)
       , m_name(name)
       , m_nameNew(nameNew)
@@ -1782,12 +2043,13 @@ wxAllFiltersDialog::DoCopyFilter(const wxString& nameOld,
 
    if ( idx == wxNOT_FOUND )
    {
-      // insert it just after the original filter, this ensures that when we do a
-      // rename (== copy + delete) the filter doesn't jump to the end of the list
-      // (as it owuld do if we used simple Append() here)
+      // insert it just after the original filter, this ensures that when we
+      // do a rename (== copy + delete) the filter doesn't jump to the end of
+      // the list (as it owuld do if we used simple Append() here)
       idx = m_lboxFilters->FindString(nameOld);
 
-      ASSERT_MSG( idx != wxNOT_FOUND, _T("copied a filter which doesn't exist??") );
+      ASSERT_MSG( idx != wxNOT_FOUND,
+                  _T("copied a filter which doesn't exist??") );
 
       m_lboxFilters->Insert(nameNew, idx + 1);
    }
@@ -2207,7 +2469,8 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
       }
 
       c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-      c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN + widthMax + LAYOUT_X_MARGIN);
+      c->left.SameAs(box, wxLeft,
+                     2*LAYOUT_X_MARGIN + widthMax + LAYOUT_X_MARGIN);
       c->height.AsIs();
       m_text[n]->SetConstraints(c);
 
@@ -2433,4 +2696,3 @@ extern bool CreateQuickFilter(MFolder *folder,
 
    return dlg.ShowModal() == wxID_OK;
 }
-
