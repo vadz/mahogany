@@ -27,11 +27,6 @@ class ProfileBase;
 
 class SendMessageCC
 {
-   ProfileBase 	*m_Profile;
-
-   ENVELOPE	*m_Envelope;
-   BODY		*m_Body;
-   PART		*m_NextPart, *m_LastPart;
 public:
    /** Creates an empty object, setting some initial values.
        @param iprof optional pointer for a parent profile
@@ -43,23 +38,23 @@ public:
    /** Sets the message subject.
        @param subject the subject
    */
-   void SetSubject(const String &subject);
+   virtual void SetSubject(const String &subject);
    
    /** Sets the address fields, To:, CC: and BCC:.
        @param To primary address to send mail to
        @param CC carbon copy addresses
        @param BCC blind carbon copy addresses
    */
-   void SetAddresses(const String &To,
+   virtual void SetAddresses(const String &To,
                      const String &CC = "",
-                     const String & = "");
+                     const String &BCC = "");
    
-   void SetNewsgroups(const String &groups);
+   virtual void SetNewsgroups(const String &groups);
    
    /** Get the profile.
        @return pointer to the profile
    */
-   inline ProfileBase *GetProfile(void) { return m_Profile; }
+   virtual inline ProfileBase *GetProfile(void) { return m_Profile; }
    /** Adds a part to the message.
        @param type numeric mime type
        @param buf  pointer to data
@@ -69,57 +64,69 @@ public:
        @param dlist list of disposition parameters
        @param plist list of parameters
    */
-   void	AddPart(MessageContentType type,
-                 const char *buf, size_t len,
-                const String &subtype = M_EMPTYSTRING,
-                const String &disposition = SM_INLINE,
-                MessageParameterList const *dlist = NULL,
-                MessageParameterList const *plist = NULL);
+   virtual void	AddPart(MessageContentType type,
+                        const char *buf, size_t len,
+                        const String &subtype = M_EMPTYSTRING,
+                        const String &disposition = SM_INLINE,
+                        MessageParameterList const *dlist = NULL,
+                        MessageParameterList const *plist = NULL);
 
    /** Writes the message to a String
        @param output string to write to
    */
-   void WriteToString(String  &output);
+   virtual void WriteToString(String  &output);
 
    /** Writes the message to a file
        @param filename file where to write to
        @param append if false, overwrite existing contents
    */
-   void WriteToFile(const String &filename, bool append = true);
+   virtual void WriteToFile(const String &filename, bool append = true);
    
    /** Writes the message to a folder.
        @param foldername file where to write to
        @param type folder type
    */
-   void WriteToFolder(const String &foldername,
-                      MailFolder::Type type = MF_PROFILE );
+   virtual void WriteToFolder(const String &foldername,
+                              MailFolder::Type type = MF_PROFILE );
 
    /** Adds an extra header line.
        @param entry name of header entry
        @param value value of header entry
    */
-   void AddHeaderEntry(const String &entry, const String &value);
-   
-   /** Sends the message.
+   virtual void AddHeaderEntry(const String &entry, const String &value);
+
+   /** Sends the message or stores it in the outbox queue, depending
+       on profile settings.
        @return true on success
    */
-   bool Send(void);
+   virtual bool SendOrQueue(void);
 
    /// destructor
-   ~SendMessageCC();
+   virtual ~SendMessageCC();
 
    enum Mode
    { Mode_SMTP, Mode_NNTP };
 protected:
+   /** Sends the message.
+       @return true on success
+   */
+   bool Send(void);
+   friend class MessageCC; // allowed to call Send() directly
+   
    /** Builds the message, i.e. prepare to send it. */
    void Build(void);
    /// Checks for existence of a header entry
    bool HasHeaderEntry(const String &entry);
 private:
+   ProfileBase 	*m_Profile;
+
+   ENVELOPE	*m_Envelope;
+   BODY		*m_Body;
+   PART		*m_NextPart, *m_LastPart;
    /// 2nd stage constructor, see constructor
    void	Create(Protocol protocol, ProfileBase *iprof);
    /// Protocol used for sending
-   Protocol m_protocol;
+   Protocol m_Protocol;
    /** @name variables managed by Build() */
    //@{
    /// names of header lines

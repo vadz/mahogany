@@ -160,13 +160,13 @@ public:
   /// ref counting
 #ifdef   DEBUG
     /// increment
-  void IncRef();
+   virtual void IncRef();
     /// decrement and delete if reached 0, return TRUE if item wasn't deleted
-  bool DecRef();
+   virtual bool DecRef();
 #else  ///release
-  void IncRef()
+   virtual void IncRef()
     { MOcheck(); wxASSERT(m_nRef > 0); m_nRef++; }
-  bool DecRef()
+   virtual bool DecRef()
     { MOcheck(); if ( --m_nRef ) return TRUE; delete this; return FALSE; }
 #endif ///debug/release
 

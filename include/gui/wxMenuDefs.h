@@ -233,8 +233,15 @@ enum
    WXTBAR_ADB_UNDO,
    WXTBAR_ADB_FINDNEXT,
 
+   WXTBAR_MOD_BEGIN,
+   WXTBAR_MOD_PALMOS = WXTBAR_MOD_BEGIN,
+   WXTBAR_MOD_END = WXTBAR_MOD_PALMOS,
+
    WXTBAR_MAX
 };
+
+
+   
 
 /// all frames which have toolbars
 enum wxFrameId
@@ -250,5 +257,6 @@ enum wxFrameId
 // not only it adds the icons, but also calls CreateTools() or
 // Realize()/Layout() hiding MSW/GTK differences
 extern void AddToolbarButtons(wxToolBar *ToolBar, wxFrameId frameId);
+extern void AddToolbarButton(wxToolBar *toolbar, int nButton);
 
 #endif

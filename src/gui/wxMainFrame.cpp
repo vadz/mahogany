@@ -45,6 +45,9 @@
 #include "MHelp.h"
 #include "MDialogs.h"
 
+#include "MModule.h"
+#include "modules/PalmOS.h"
+
 // define this for future, less broken versions of wxWindows to dynamically
 // insert/remove the message menu depending on whether we have or not a folder
 // view in the frame - with current wxGTK it doesn't work at all, so disabling
@@ -165,6 +168,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    SetMenuBar(m_MenuBar);
    m_ToolBar = CreateToolBar();
    AddToolbarButtons(m_ToolBar, WXFRAME_MAIN);
+
 
    m_splitter->SetMinimumPaneSize(0);
    m_splitter->SetFocus();
@@ -296,7 +300,15 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 {
    int id = event.GetId();
 
-   if(m_FolderView &&
+
+   if(id == WXTBAR_MOD_PALMOS)
+   {
+      MModule_PalmOS *mod = (MModule_PalmOS *) MModule::GetProvider(MMODULE_INTERFACE_PALMOS);
+      ASSERT(mod);
+      mod->Synchronise();
+      mod->DecRef();
+   }
+   else if(m_FolderView &&
       (WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
        || id == WXMENU_FILE_COMPOSE || id == WXMENU_FILE_POST
        || id == WXMENU_EDIT_COPY ))
@@ -305,6 +317,22 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
       mApplication->Help(MH_MAIN_FRAME,this);
    else
       wxMFrame::OnMenuCommand(id);
+}
+
+void
+wxMainFrame::UpdateToolbar(void)
+{
+   MModule *mod = MModule::GetProvider(MMODULE_INTERFACE_PALMOS);
+   if(mod)
+   {
+      m_ToolBar->AddSeparator();
+      m_ToolBar->AddTool(WXTBAR_MOD_PALMOS,
+                         ICON("tb_palmos"),
+                         wxNullBitmap,
+                         FALSE, -1, -1, NULL,
+                         _("Call PalmOS module"));
+      mod->DecRef();
+   }
 }
 
 wxMainFrame::~wxMainFrame()

@@ -421,7 +421,8 @@ void AddToolbarButton(wxToolBar *toolbar, int nButton)
 // add all buttons for the given frame to the toolbar
 void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
 {
-   wxASSERT( WXSIZEOF(g_aToolBarData) == WXTBAR_MAX );
+   wxASSERT( WXSIZEOF(g_aToolBarData) ==
+             (WXTBAR_MAX - (WXTBAR_MOD_END+1 - WXTBAR_MOD_BEGIN)));
 
 #ifdef __WXMSW__
    // we use the icons of non standard size

@@ -41,6 +41,8 @@ public:
    void OnCommandEvent(wxCommandEvent &);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
 
+   /// add buttons for modules
+   void UpdateToolbar(void);
 protected:
    /// the splitter window holding the treectrl and folder view
    wxSplitterWindow *m_splitter;

@@ -13,6 +13,7 @@
 #ifndef  _FOLDERTYPE_H
 #define  _FOLDERTYPE_H
 
+#include "Mcommon.h"
 #include <limits.h>
 
 // ----------------------------------------------------------------------------

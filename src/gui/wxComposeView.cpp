@@ -1886,51 +1886,7 @@ wxComposeView::Send(void)
          break;
    }
 
-   // send directly?
-   bool send_directly = TRUE;
-   if(READ_CONFIG(m_Profile,MP_USE_OUTBOX))
-      send_directly = FALSE;
-   else if(! mApplication->IsOnline())
-   {
-      
-      MDialog_Message(
-         _("No network connection available at present.\n"
-           "Message will be queued in outbox."),
-         this, MDIALOG_MSGTITLE,"MailNoNetQueuedMessage");
-      send_directly = FALSE;
-   }
-   if( send_directly )
-      success = msg->Send();
-   else // store in outbox
-   {
-      String outbox = READ_CONFIG(m_Profile,MP_OUTBOX_NAME);
-      if( outbox.Length() == 0)
-         success = FALSE;
-      else
-      {
-         outbox << ((m_mode == Mode_SMTP) ? "" : _(M_NEWSOUTBOX_POSTFIX));
-         msg->WriteToFolder(outbox, MF_PROFILE_OR_FILE);
-         success = TRUE;
-      }
-
-      if(success)
-      {
-         wxString msg;
-         if(m_mode == Mode_SMTP)
-            msg.Printf(_("Message queued in ´%s´."),
-                       outbox.c_str());
-         else
-            msg = _("Article posted."),
-         MDialog_Message(msg, this, MDIALOG_MSGTITLE,"MailQueuedMessage");
-      }
-   }
-   // make copy to "Sent" folder?
-   if ( success && READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER) )
-   {
-      msg->WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER),
-                         MF_PROFILE_OR_FILE);
-   }
-
+   success = msg->SendOrQueue();
    delete msg;
 
    return success;

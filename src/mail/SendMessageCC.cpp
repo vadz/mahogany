@@ -91,7 +91,7 @@ SendMessageCC::Create(Protocol protocol,
    m_Profile->IncRef(); // make sure it doesn't go away
    m_headerNames = NULL;
    m_headerValues = NULL;
-   m_protocol = protocol;
+   m_Protocol = protocol;
 
    m_Envelope = mail_newenvelope();
    m_Body = mail_newbody();
@@ -154,7 +154,7 @@ SendMessageCC::SetAddresses(const String &to,
    // If Build() has already been called, then it's too late to change
    // anything.
    ASSERT(m_headerNames == NULL);
-   ASSERT(m_protocol == Prot_SMTP);
+   ASSERT(m_Protocol == Prot_SMTP);
 
    String
       defaulthost;
@@ -196,7 +196,7 @@ SendMessageCC::SetNewsgroups(const String &groups)
    // If Build() has already been called, then it's too late to change
    // anything.
    ASSERT(m_headerNames == NULL);
-   ASSERT(m_protocol == Prot_NNTP);
+   ASSERT(m_Protocol == Prot_NNTP);
 
    if(groups.Length())
    {
@@ -523,6 +523,57 @@ SendMessageCC::AddPart(Message::ContentType type,
       }
    }
 }
+bool
+SendMessageCC::SendOrQueue(void)
+{
+   bool success;
+   // send directly?
+   bool send_directly = TRUE;
+   if(READ_CONFIG(m_Profile,MP_USE_OUTBOX))
+      send_directly = FALSE;
+   else if(! mApplication->IsOnline())
+   {
+      
+      MDialog_Message(
+         _("No network connection available at present.\n"
+           "Message will be queued in outbox."),
+         NULL, MDIALOG_MSGTITLE,"MailNoNetQueuedMessage"); 
+      send_directly = FALSE;
+      
+   }
+   if( send_directly )
+      success = Send();
+   else // store in outbox
+   {
+      String outbox = READ_CONFIG(m_Profile,MP_OUTBOX_NAME);
+      if( outbox.Length() == 0)
+         success = FALSE;
+      else
+      {
+         outbox << ((m_Protocol == Prot_SMTP) ? "" : _(M_NEWSOUTBOX_POSTFIX));
+         WriteToFolder(outbox, MF_PROFILE_OR_FILE);
+         success = TRUE;
+      }
+
+      if(success)
+      {
+         wxString msg;
+         if(m_Protocol == Prot_SMTP)
+            msg.Printf(_("Message queued in ´%s´."),
+                       outbox.c_str());
+         else
+            msg = _("Article posted."),
+         MDialog_Message(msg, NULL, MDIALOG_MSGTITLE,"MailQueuedMessage");
+      }
+   }
+   // make copy to "Sent" folder?
+   if ( success && READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER) )
+   {
+      WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER),
+                    MF_PROFILE_OR_FILE);
+   }
+   return success;
+}
 
 bool
 SendMessageCC::Send(void)
@@ -547,7 +598,7 @@ SendMessageCC::Send(void)
 
    String host;
    hostlist[1] = NIL;
-   switch(m_protocol)
+   switch(m_Protocol)
    {
    case Prot_SMTP:
       // notice that we _must_ assign the result to this string!
@@ -567,7 +618,7 @@ SendMessageCC::Send(void)
 
    if (stream)
    {
-      switch(m_protocol)
+      switch(m_Protocol)
       {
       case Prot_SMTP:
          success = smtp_mail (stream,"MAIL",m_Envelope,m_Body) != 0;
@@ -580,7 +631,7 @@ SendMessageCC::Send(void)
       }
       if(success)
       {
-         MDialog_Message(m_protocol==Prot_SMTP?_("Message sent."):_("Article posted."),
+         MDialog_Message(m_Protocol==Prot_SMTP?_("Message sent."):_("Article posted."),
                          NULL, // parent window
                          MDIALOG_MSGTITLE,
                          "MailSentMessage");

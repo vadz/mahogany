@@ -1,4 +1,4 @@
-/* -*- c++ -*-
+/* -*- text -*-
  * $Id$
  *
  *.mid file for generating IDL and .h files for Mahogany C interface
@@ -6,7 +6,11 @@
 include(M4FILE)
 
 INCLUDE(`"MApplication.h"')
+INCLUDE(`"strutil.h"')
 INCLUDE(`"MDialogs.h"')
+INCLUDE(`"MailFolderCC.h"')
+INCLUDE(`"MessageCC.h"')
+INCLUDE(`"SendMessageCC.h"')
 FILE_HEADER
 
 INTERFACE(MInterface,`
@@ -38,8 +42,37 @@ ARG(STRING, configPath, =NULL) )
  MDialog_Message(message,parent,title,configPath);
 ')
 
+FUNCTION(YesNoDialog, bool , (
+ARG(STRING, message), ARG(const MWindow *, parent, =NULL),
+ARG(STRING, title, =MDIALOG_YESNOTITLE),
+ARG(bool, yesdefault, =true),
+ARG(STRING, configPath, =NULL) )
+,
+`
+	return MDialog_YesNoDialog(message,parent,title,yesdefault, configPath);
+')
 
+FUNCTION(StatusMessage, void , ( ARG(STRING, message) )
+,
+`
+  STATUSMESSAGE((message));
+')
 
+FUNCTION(CreateSendMessageCC, SendMessageCC *, (
+ARG(ProfileBase, *profile),
+ARG(Protocol , protocol, =Prot_SMTP)
+),
+`
+ return new SendMessageCC(profile,protocol);
+')
+
+FUNCTION(OpenFolder, MailFolder *, (
+ARG(int, typeAndFlags),
+ARG(STRING , path)
+),
+`
+ return MailFolder::OpenFolder(typeAndFlags,path);
+')
 ')
 
 
