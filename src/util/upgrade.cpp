@@ -2058,34 +2058,34 @@ VerifyMailConfig(void)
 static
 void VerifyUserDir(void)
 {
-   if( !strutil_isempty(READ_APPCONFIG(MP_USERDIR)) )
-      return;
-
-   ProfileBase *profile = mApplication->GetProfile();
+   String userdir = READ_APPCONFIG(MP_USERDIR);
+   if ( !userdir )
+   {
+      ProfileBase *profile = mApplication->GetProfile();
 #if defined(OS_UNIX)
-   wxString strHome;
-   strHome = getenv("HOME");
-   strHome << DIR_SEPARATOR << READ_APPCONFIG(MP_USER_MDIR);
-   profile->writeEntry(MP_USERDIR, strHome);
+      userdir = getenv("HOME");
+      userdir << DIR_SEPARATOR << READ_APPCONFIG(MP_USER_MDIR);
 #elif defined(OS_WIN)
-   // take the directory of the program
-   char szFileName[MAX_PATH];
-   if ( !GetModuleFileName(NULL, szFileName, WXSIZEOF(szFileName)) )
-   {
-      wxLogError(_("Cannot find your Mahogany directory, please specify it "
-                   "in the options dialog."));
-   }
-   else
-   {
-      wxString localDir;
-      wxSplitPath(szFileName, &localDir, NULL, NULL);
-      profile->writeEntry(MP_USERDIR, localDir);
-   }
+      // take the directory of the program
+      char szFileName[MAX_PATH];
+      if ( !GetModuleFileName(NULL, szFileName, WXSIZEOF(szFileName)) )
+      {
+         wxLogError(_("Cannot find your Mahogany directory, please specify it "
+                      "in the options dialog."));
+      }
+      else
+      {
+         wxSplitPath(szFileName, &userdir, NULL, NULL);
+      }
 #else
-#   error "Don't know how to find local dir under this OS"
+#     error "Don't know how to find local dir under this OS"
 #endif // OS
 
-   mApplication->SetLocalDir(READ_APPCONFIG(MP_USERDIR));
+      // save it for the next runs
+      profile->writeEntry(MP_USERDIR, userdir);
+   }
+
+   mApplication->SetLocalDir(userdir);
 }
 
 /*
@@ -2180,6 +2180,7 @@ SetupMinimalConfig(void)
       profile->writeEntry(MP_PERSONALNAME, buffer);
    }
 
+   // this is normally already done, but better be safe
    VerifyUserDir();
 
    // now that we have the local dir, we can set up a default mail
@@ -2265,10 +2266,15 @@ CheckConfiguration(void)
       }
    }
 
+   // this is vital: we must have the local directory to read address books
+   // and other M files from it
+   VerifyUserDir();
+
    if ( READ_APPCONFIG(MP_FIRSTRUN) != 0 )
    {
       // make sure the essential things have proper values
       SetupMinimalConfig();
+
       // next time won't be the first one any more
       profile->writeEntry(MP_FIRSTRUN, 0);
    }
