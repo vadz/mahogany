@@ -1256,8 +1256,10 @@ EditorContentPart *BareBonesEditor::GetFirstPart()
       // and drop any characters it can't convert)
       SetFontEncoding(encPart);
    }
-
+#else
+   encPart = m_encoding;
 #endif // wxUSE_WCHAR_T
+
    wxString text = m_textControl->GetValue();
 
    // Translate LF to CRLF. All internal strings should have only LF, but
@@ -1266,7 +1268,7 @@ EditorContentPart *BareBonesEditor::GetFirstPart()
    // think twice before changing it.
    //
    // VZ: see above (FIXME)
-   return new EditorContentPart(strutil_enforceCRLF(text), m_encoding);
+   return new EditorContentPart(strutil_enforceCRLF(text), encPart);
 }
 
 EditorContentPart *BareBonesEditor::GetNextPart()
