@@ -1459,13 +1459,22 @@ ParserImpl::ParseCondition(void)
       | EXPRESSION & EXPRESSION
       | EXPRESSION | EXPRESSION
       | EXPRESSION   
-
+      | IFELSEBLOCK
+      
       Which is identical to the following expression, resolving the
       left recursion problem:
       
       CONDITION := EXPRESSION RESTCONDITION    
       
    */
+   Token t = PeekToken();
+   // Is there an IF() ELSE statement?
+   if(t.GetType() == TT_Keyword && t.GetKeyword() == "if")
+   {
+      return ParseIfElse();
+   }
+
+
    SyntaxNode *expr = ParseExpression();
    if(expr)
    {
@@ -1483,11 +1492,12 @@ ParserImpl::ParseBlock(void)
    /* STATEMENT :=
       | { STATEMENT RESTSTATEMENT }
       | CONDITION ;
-      | IFELSE
+      
    */
 
    Token t = PeekToken();
 
+#if 0
    // Is there an IF() ELSE statement?
    if(t.GetType() == TT_Keyword && t.GetKeyword() == "if")
    {
@@ -1498,7 +1508,8 @@ ParserImpl::ParseBlock(void)
       block->AddNode(ifelse);
       return block;
    }
-
+#endif
+   
    // Normal block:
    if(t.GetType() == TT_Char && t.GetChar() == '{')
    {
