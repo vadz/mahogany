@@ -32,6 +32,11 @@ or disable features, should follow the following conventions:
 3. To test a define, do not use #if, but use #ifdef, #if defined() or
   #ifndef .
 
+4. Try to reduce duplicate code in preprocessor dependent sources to
+  avoid confusing DOC++. I.e. do not repeat multiple class declarations,
+  but keep only one which changes depending on the predefined symbols.
+  See section \ref{DOCXX} for an example.
+
 1.1.2 Operating system identifiers
 
 The source code must never reference any prdefined symbols such as
@@ -162,8 +167,33 @@ a comment containing the word FIXME should be used.
 
 3.4.3 Use DOC++ comments
 
-It's pretty buggy, but maybe some day there will be a working version
-of it, so use it.
+\label{DOCXX} It's pretty buggy, but maybe some day there will be a
+working version of it, so use it.
+
+Avoid duplicate definitions or declarations in multiple branches
+  of compilation:
+
+The following example confuses DOC++:
+
+
+
+
+
+
+
+
+
+
+
+Instead, use code like this:
+
+
+
+
+
+
+
+
 
 4 Other coding issues
 
@@ -191,15 +221,20 @@ The sources are managed by the CVS version control system. For easy
 identification, each file should start with a comment, including at
 least the $Id$ and
 the $Log$
-the Revision 1.5  1998/05/14 18:49:08  KB
-the Extended naming conventions, added postscript versions.
-theRevision 1.5  1998/05/02 18:29:51  KBAfter
-many problems, Python integration is eventually taking off -works.
-tags. Including the $Log$
-tags. Including the Revision 1.5  1998/05/14 18:49:08  KB
-tags. Including the Extended naming conventions, added postscript versions.
-tags. Including theRevision 1.5  1998/05/02
+the Revision 1.6  1998/05/20 13:32:12  KB
+the Eventually fixed that Doc++ core dump problem and added a note about
+the this in the StyleGuide.
+theRevision 1.6  1998/05/14 18:49:07  KBExtended
+naming conventions, added postscript versions.Revision 1.5  1998/05/02
 18:29:51  KBAfter many problems, Python integration is eventually
-taking off -works. information in each file somehow inflates the code,
-but as the CVS archive might only be accessible through a dial-up
-internet connection, it provides valuable information.
+taking off -works. tags. Including the $Log$
+taking off -works. tags. Including the Revision 1.6  1998/05/20 13:32:12  KB
+taking off -works. tags. Including the Eventually fixed that Doc++ core dump problem and added a note about
+taking off -works. tags. Including the this in the StyleGuide.
+taking off -works. tags. Including theRevision
+1.6  1998/05/14 18:49:07  KBExtended naming conventions, added postscript
+versions.Revision 1.5  1998/05/02 18:29:51  KBAfter many problems,
+Python integration is eventually taking off -works. information in
+each file somehow inflates the code, but as the CVS archive might
+only be accessible through a dial-up internet connection, it provides
+valuable information.

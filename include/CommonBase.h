@@ -6,6 +6,10 @@
  * $Id$             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/05/20 13:32:15  KB
+ * Eventually fixed that Doc++ core dump problem and added a note about
+ * this in the StyleGuide.
+ *
  * Revision 1.4  1998/05/02 15:21:31  KB
  * Fixed the #if/#ifndef etc mess - previous sources were not compilable.
  *
@@ -64,10 +68,9 @@
    methods to be implemented by all other classes. Furtheron it
    provides an interface for debugging and error message output.
    */
+class CommonBase
 #ifdef USE_WXOBJECT
-class	CommonBase : public class wxObject
-#else
-class	CommonBase
+: public class wxObject
 #endif
 {
 #ifdef	USE_MEMDEBUG

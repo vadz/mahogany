@@ -1,4 +1,4 @@
-#This file was created by <karsten> Thu May 14 19:47:36 1998
+#This file was created by <karsten> Wed May 20 14:29:52 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -108,6 +108,23 @@ not
 #ifndef
 \family default 
  .
+\layout Enumerate
+
+Try to reduce duplicate code in preprocessor dependent sources to avoid
+ confusing 
+\family typewriter 
+DOC++
+\family default 
+.
+ I.e.
+ do not repeat multiple class declarations, but keep only one which changes
+ depending on the predefined symbols.
+ See section 
+\begin_inset LatexCommand \ref{DOCXX}
+
+\end_inset 
+
+ for an example.
 \layout Subsubsection
 
 Operating system identifiers
@@ -491,8 +508,89 @@ FIXME
 Use DOC++ comments
 \layout Standard
 
-It's pretty buggy, but maybe some day there will be a working version of
+
+\begin_inset LatexCommand \label{DOCXX}
+
+\end_inset 
+
+ It's pretty buggy, but maybe some day there will be a working version of
  it, so use it.
+\layout Paragraph
+
+Avoid duplicate definitions or declarations in multiple branches of compilation:
+\layout Standard
+
+The following example confuses 
+\family typewriter 
+DOC++
+\family default 
+:
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|#ifdef XXX|
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|class Class : public class BaseClass|
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|#else|
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|class Class|
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|#endif|
+\layout Standard
+
+Instead, use code like this:
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|class Class| 
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|#ifdef XXX|
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|: public class BaseClass|
+\layout Standard
+
+
+\latex latex 
+
+\backslash 
+verb|#endif|
 \layout Section
 
 Other coding issues
@@ -559,20 +657,24 @@ $Id$
  and the 
 \family typewriter 
 $Log$
-Revision 1.6  1998/05/14 18:49:07  KB
-Extended naming conventions, added postscript versions.
-Revision 1.5  1998/05/02 18:29:51  KBAfter many problems,
- Python integration is eventually taking off -works.
+Revision 1.7  1998/05/20 13:32:10  KB
+Eventually fixed that Doc++ core dump problem and added a note about
+this in the StyleGuide.
+Revision 1.6  1998/05/14 18:49:07  KBExtended naming
+ conventions, added postscript versions.Revision 1.5  1998/05/02 18:29:51
+  KBAfter many problems, Python integration is eventually taking off -works.
 
 \family default 
  tags.
  Including the 
 \family typewriter 
 $Log$
-Revision 1.6  1998/05/14 18:49:07  KB
-Extended naming conventions, added postscript versions.
-Revision 1.5  1998/05/02 18:29:51  KBAfter many problems,
- Python integration is eventually taking off -works.
+Revision 1.7  1998/05/20 13:32:10  KB
+Eventually fixed that Doc++ core dump problem and added a note about
+this in the StyleGuide.
+Revision 1.6  1998/05/14 18:49:07  KBExtended naming
+ conventions, added postscript versions.Revision 1.5  1998/05/02 18:29:51
+  KBAfter many problems, Python integration is eventually taking off -works.
 
 \family default 
  information in each file somehow inflates the code, but as the CVS archive

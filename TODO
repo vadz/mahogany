@@ -7,8 +7,6 @@ $Id$
 
 - remove remaining few STL classes
 
-- doc++ dumps core when generating documentation
-
 - there is still a minor problem with URLs ending in > like <http:xxx>
   Ignored for now, until wxFText/wxFTCanvas get rewritten.
 
