@@ -20,6 +20,8 @@ $Id$
          re-open folder)  
       VZ when 2 mail clients are running simultaneously and the message is deleted
          from the spool M crashes with meaningless backtrace.
+0009  KB Sending messages with XFace can cause segfault in release mode.
+0010  KB Using a global /etc/M.conf file leads to lots of strange results.
 
 *****************************************************************************
 ** Fixed, to be tested                                                     **
