@@ -100,7 +100,7 @@ String AddressCC::GetName() const
    String personal;
    CHECK( m_adr, personal, _T("invalid address") );
 
-   personal = m_adr->personal;
+   personal = wxConvertMB2WX(m_adr->personal);
 
    return personal;
 }
@@ -110,7 +110,7 @@ String AddressCC::GetMailbox() const
    String mailbox;
    CHECK( m_adr, mailbox, _T("invalid address") );
 
-   mailbox = m_adr->mailbox;
+   mailbox = wxConvertMB2WX(m_adr->mailbox);
 
    return mailbox;
 }
@@ -120,7 +120,7 @@ String AddressCC::GetDomain() const
    String host;
    CHECK( m_adr, host, _T("invalid address") );
 
-   host = m_adr->host;
+   host = wxConvertMB2WX(m_adr->host);
 
    return host;
 }
@@ -135,7 +135,7 @@ String AddressCC::GetEMail() const
 // ----------------------------------------------------------------------------
 
 // case insensitive string compare of strings which may be NULL
-static inline bool SafeCompare(const char *s1, const char *s2)
+static inline bool SafeCompare(const wxChar *s1, const wxChar *s2)
 {
    if ( !s1 || !s2 )
       return !s1 == !s2;
@@ -154,8 +154,8 @@ bool AddressCC::IsSameAs(const Address& addr) const
    //
    // we also ignore adl field - IMHO the addresses differing only by source
    // route should be considered identical, shouldn't they?
-   return SafeCompare(m_adr->mailbox, addrCC.m_adr->mailbox) &&
-          SafeCompare(m_adr->host, addrCC.m_adr->host);
+   return SafeCompare(wxConvertMB2WX(m_adr->mailbox), wxConvertMB2WX(addrCC.m_adr->mailbox)) &&
+          SafeCompare(wxConvertMB2WX(m_adr->host), wxConvertMB2WX(addrCC.m_adr->host));
 }
 
 // ============================================================================
@@ -249,19 +249,19 @@ AddressList *AddressList::CreateFromAddress(Profile *profile)
 
    // set personal name
    ADDRESS *adr = mail_newaddr();
-   adr->personal = cpystr(READ_CONFIG_TEXT(profile, MP_PERSONALNAME));
+   adr->personal = cpystr(wxConvertWX2MB(READ_CONFIG_TEXT(profile, MP_PERSONALNAME)));
 
    // set mailbox/host
    String email = READ_CONFIG(profile, MP_FROM_ADDRESS);
    size_t pos = email.find('@');
    if ( pos != String::npos )
    {
-      adr->mailbox = cpystr(email.substr(0, pos).c_str());
-      adr->host = cpystr(email.c_str() + pos + 1);
+      adr->mailbox = cpystr(wxConvertWX2MB(email.substr(0, pos).c_str()));
+      adr->host = cpystr(wxConvertWX2MB(email.c_str()) + pos + 1);
    }
    else // no '@'?
    {
-      adr->mailbox = cpystr(email);
+      adr->mailbox = cpystr(wxConvertWX2MB(email));
 
       String host;
       if ( READ_CONFIG(profile, MP_ADD_DEFAULT_HOSTNAME) )
@@ -274,10 +274,10 @@ AddressList *AddressList::CreateFromAddress(Profile *profile)
          // trick c-client into accepting addresses without host names
          // instead of using a stupid MISSING.WHATEVER instead of the host
          // part
-         host = '@';
+         host = _T('@');
       }
 
-      adr->host = cpystr(host);
+      adr->host = cpystr(wxConvertWX2MB(host));
    }
 
    return new AddressListCC(adr);
@@ -294,7 +294,7 @@ AddressList *AddressList::Create(const String& address, const String& defhost)
 
       if ( !adr || adr->error )
       {
-         DBGMESSAGE(("Invalid RFC822 address '%s'.", address.c_str()));
+         DBGMESSAGE((_T("Invalid RFC822 address '%s'."), address.c_str()));
 
          return NULL;
       }
@@ -373,10 +373,10 @@ bool AddressListCC::IsSameAs(const AddressList *addrListOther) const
 String AddressListCC::DebugDump() const
 {
    String str = MObjectRC::DebugDump();
-   str << "address list";
+   str << _T("address list");
    if ( m_addrCC )
    {
-      str << " (" << Adr2String(m_addrCC->m_adr) << ')';
+      str << _T(" (") << Adr2String(m_addrCC->m_adr) << _T(')');
    }
 
    return str;
@@ -393,19 +393,19 @@ String AddressListCC::DebugDump() const
 // reproducible buffer overflows and MRC refuses to fix it! <sigh>
 
 // wspecials and rspecials string from c-client
-static const char *WORD_SPECIALS = " ()<>@,;:\\\"[]";
-const char *ALL_SPECIALS =  "()<>@,;:\\\"[].";
+static const wxChar *WORD_SPECIALS = _T(" ()<>@,;:\\\"[]");
+const wxChar *ALL_SPECIALS =  _T("()<>@,;:\\\"[].");
 
 // this one is the replacement for rfc822_cat()
-static String Rfc822Quote(const char *src, const char *specials)
+static String Rfc822Quote(const wxChar *src, const wxChar *specials)
 {
    String dest;
 
    // do we have any specials at all?
-   if ( strpbrk(src, specials) )
+   if ( wxStrpbrk(src, specials) )
    {
       // need to quote
-      dest = '"';
+      dest = _T('"');
 
       while ( *src )
       {
@@ -445,16 +445,16 @@ static String Adr2Email(ADDRESS *adr)
       // deal with the A-D-L
       if ( adr->adl )
       {
-         email << adr->adl << ':';
+         email << wxConvertMB2WX(adr->adl) << ':';
       }
 
       // and now the mailbox name: we quote all characters forbidden in a word
-      email << Rfc822Quote(adr->mailbox, WORD_SPECIALS);
+      email << Rfc822Quote(wxConvertMB2WX(adr->mailbox), WORD_SPECIALS);
 
       // passing the NULL host suppresses printing the full address
       if ( *adr->host != '@' )
       {
-         email << '@' << adr->host;
+         email << '@' << wxConvertMB2WX(adr->host);
       }
    }
 
@@ -505,7 +505,7 @@ static String Adr2String(ADDRESS *adr, Adr2StringWhich which, bool *error)
          if ( !groupDepth )
          {
             // separate from the previous one
-            address << ", ";
+            address << _T(", ");
          }
       }
 
@@ -520,15 +520,15 @@ static String Adr2String(ADDRESS *adr, Adr2StringWhich which, bool *error)
          else // no, must use phrase <route-addr> form
          {
             if ( adr->personal )
-               address << Rfc822Quote(adr->personal, ALL_SPECIALS);
+               address << Rfc822Quote(wxConvertMB2WX(adr->personal), ALL_SPECIALS);
 
-            address << " <" << Adr2Email(adr) << '>';
+            address << _T(" <") << Adr2Email(adr) << _T('>');
          }
       }
       else if ( adr->mailbox ) // start of group?
       {
          // yes, write group name
-         address << Rfc822Quote(adr->mailbox, ALL_SPECIALS) << ": ";
+         address << Rfc822Quote(wxConvertMB2WX(adr->mailbox), ALL_SPECIALS) << _T(": ");
 
          // in a group
          groupDepth++;
@@ -548,10 +548,10 @@ extern ADDRESS *ParseAddressList(const String& address, const String& defhost)
 {
    // NB: rfc822_parse_adrlist() modifies the string passed in, copy them!
 
-   char *addressCopy = strdup(address);
+   char *addressCopy = strdup(wxConvertWX2MB(address));
 
    // use '@' to trick c-client into accepting addresses without host names
-   char *defhostCopy = strdup(defhost.empty() ? "@" : defhost.c_str());
+   char *defhostCopy = strdup(defhost.empty() ? "@" : wxConvertWX2MB(defhost.c_str()));
 
    ADDRESS *adr = NULL;
    rfc822_parse_adrlist(&adr, addressCopy, defhostCopy);

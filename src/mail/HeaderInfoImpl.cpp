@@ -129,7 +129,7 @@ class StatusIndicator
 public:
    // show the status message specified by the remaining arguments if frame is
    // not NULL
-   StatusIndicator(wxFrame *frame, const char *fmt, ...);
+   StatusIndicator(wxFrame *frame, const wxChar *fmt, ...);
 
    // append "done" to the message given by the ctor if Fail() hadn't been
    // called
@@ -143,7 +143,7 @@ protected:
    StatusIndicator() { m_frame = NULL; }
 
    // ctor version which can be also called by derived classes
-   void Init(wxFrame *frame, const char *fmt, va_list argptr);
+   void Init(wxFrame *frame, const wxChar *fmt, va_list argptr);
 
    // our frame - may be NULL!
    wxFrame *m_frame;
@@ -159,10 +159,10 @@ protected:
 class BusyIndicator : public StatusIndicator
 {
 public:
-   BusyIndicator(bool nonInteractive, MailFolder *mf, const char *fmt, ...);
+   BusyIndicator(bool nonInteractive, MailFolder *mf, const wxChar *fmt, ...);
    ~BusyIndicator();
 
-   void SetLabel(const char *fmt, ...);
+   void SetLabel(const wxChar *fmt, ...);
 
 private:
    // the busy info screen we show
@@ -303,7 +303,7 @@ static void DumpTransTables(MsgnoType count,
 // StatusIndicator
 // ----------------------------------------------------------------------------
 
-StatusIndicator::StatusIndicator(wxFrame *frame, const char *fmt, ...)
+StatusIndicator::StatusIndicator(wxFrame *frame, const wxChar *fmt, ...)
 {
    va_list argptr;
    va_start(argptr, fmt);
@@ -311,7 +311,7 @@ StatusIndicator::StatusIndicator(wxFrame *frame, const char *fmt, ...)
    va_end(argptr);
 }
 
-void StatusIndicator::Init(wxFrame *frame, const char *fmt, va_list argptr)
+void StatusIndicator::Init(wxFrame *frame, const wxChar *fmt, va_list argptr)
 {
    m_msgInitial.PrintfV(fmt, argptr);
 
@@ -343,7 +343,7 @@ StatusIndicator::~StatusIndicator()
 
 BusyIndicator::BusyIndicator(bool nonInteractive,
                              MailFolder *mf,
-                             const char *fmt, ...)
+                             const wxChar *fmt, ...)
 {
    va_list argptr;
    va_start(argptr, fmt);
@@ -364,7 +364,7 @@ BusyIndicator::BusyIndicator(bool nonInteractive,
    }
 }
 
-void BusyIndicator::SetLabel(const char *fmt, ...)
+void BusyIndicator::SetLabel(const wxChar *fmt, ...)
 {
    if ( m_progInfo )
    {
@@ -2026,7 +2026,7 @@ bool HeaderInfoListImpl::ReallyGet(MsgnoType pos)
 String HeaderInfoListImpl::DebugDump() const
 {
    String s1 = MObjectRC::DebugDump(), s2;
-   s2.Printf("%u entries", (unsigned int)Count());
+   s2.Printf(_T("%u entries"), (unsigned int)Count());
 
    return s1 + s2;
 }

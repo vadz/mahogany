@@ -166,10 +166,10 @@ String Address::NormalizeSubject(const String& subjectOrig)
    size_t idx = 0;
 
    if(subject.Length() > strlen("Re")
-      && Stricmp(subject.Left(strlen("Re")), "Re") == 0)
+      && wxStricmp(subject.Left(strlen("Re")), _T("Re")) == 0)
       idx = strlen("Re");
    else if(subject.Length() > trPrefix.Length()
-           && Stricmp(subject.Left(trPrefix.Length()), trPrefix) == 0)
+           && wxStricmp(subject.Left(trPrefix.Length()), trPrefix) == 0)
       idx = trPrefix.Length();
 
    if(idx == 0)
@@ -224,25 +224,25 @@ String Address::BuildFullForm(const String& name, const String& email)
 
    // we need to quote the personal part if it's not an atext as defined by RFC
    // 2822 (TODO: reuse IsATextChar() from matchurl.cpp!)
-   bool doQuote = strpbrk(name, ",;\"") != (const char *)NULL;
+   bool doQuote = wxStrpbrk(name, _T(",;\"")) != (const wxChar *)NULL;
    if ( doQuote )
    {
-      address = '"';
+      address = _T('"');
 
       // escape all quotes
-      personal.Replace("\"", "\\\"");
+      personal.Replace(_T("\""), _T("\\\""));
    }
 
    address += personal;
 
    if ( doQuote )
    {
-      address += '"';
+      address += _T('"');
    }
 
    if ( !email.empty() )
    {
-      address << " <" << email << '>';
+      address << _T(" <") << email << _T('>');
    }
    //else: can it really be empty??
 

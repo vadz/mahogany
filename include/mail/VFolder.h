@@ -51,7 +51,7 @@ public:
 
    virtual ServerInfoEntry *CreateServerInfo(const MFolder *folder) const;
 
-   virtual char GetFolderDelimiter() const;
+   virtual wxChar GetFolderDelimiter() const;
 
    //@}
 

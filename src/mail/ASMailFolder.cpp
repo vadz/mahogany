@@ -557,7 +557,7 @@ public:
    virtual void WorkFunction(void)
       {
          int rc = m_Op == ASMailFolder::Op_SaveMessagesToFile
-                  ? m_MailFolder->SaveMessagesToFile(m_Seq, "", m_Parent)
+                  ? m_MailFolder->SaveMessagesToFile(m_Seq, _T(""), m_Parent)
                   : m_MailFolder->SaveMessages(m_Seq, m_Folder);
          SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder,
                                                    m_Ticket, m_Op,
@@ -1232,7 +1232,7 @@ String ASMailFolder::GetImapSpec(void) const
 String ASMailFolderImpl::DebugDump() const
 {
    String s1 = MObjectRC::DebugDump(), s2;
-   s2.Printf("name '%s'", GetName().c_str());
+   s2.Printf(_T("name '%s'"), GetName().c_str());
 
    return s1 + s2;
 }
@@ -1240,14 +1240,14 @@ String ASMailFolderImpl::DebugDump() const
 String ASMailFolder::ResultImpl::DebugDump() const
 {
    String s1 = MObjectRC::DebugDump(), s2;
-   s2.Printf("operation id = %d, folder '%s'", m_Id, m_Mf->GetName().c_str());
+   s2.Printf(_T("operation id = %d, folder '%s'"), m_Id, m_Mf->GetName().c_str());
 
    return s1 + s2;
 }
 
 String ASTicketListImpl::DebugDump() const
 {
-   return ASTicketList::DebugDump() << m_Tickets.GetCount() << " tickets";
+   return ASTicketList::DebugDump() << m_Tickets.GetCount() << _T(" tickets");
 }
 
 #endif // DEBUG

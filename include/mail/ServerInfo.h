@@ -23,7 +23,7 @@
 #include "MailFolder.h"
 
 // put this in the trace mask to get messages about connection caching
-#define TRACE_SERVER_CACHE  "servercache"
+#define TRACE_SERVER_CACHE  _T("servercache")
 
 /**
    Whenever we need to establish a connection with a remote server, we try to

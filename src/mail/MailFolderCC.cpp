@@ -181,10 +181,10 @@ extern const MPersMsgBox *M_MSGBOX_NO_NET_PING_ANYWAY;
 // ----------------------------------------------------------------------------
 
 // turn on to log [almost] all cclient callbacks
-#define TRACE_MF_CALLBACK "cccback"
+#define TRACE_MF_CALLBACK _T("cccback")
 
 // turn on logging of MailFolderCC operations
-#define TRACE_MF_CALLS "mfcall"
+#define TRACE_MF_CALLS _T("mfcall")
 
 // ----------------------------------------------------------------------------
 // global functions prototypes
@@ -240,7 +240,7 @@ static bool mm_show_debug = false;
 static int cc_loglevel = wxLOG_Error;
 
 /// the cclient mail folder driver name
-static const char *CCLIENT_DRIVER_NAME = "cclient";
+static const wxChar *CCLIENT_DRIVER_NAME = _T("cclient");
 
 /// our mail folder factory object
 static MFDriver gs_driverCC
@@ -657,7 +657,7 @@ public:
 
       m_msgProgress.Printf(_("Retrieving %lu message headers..."), m_nTotal);
 
-      m_progdlg = new MProgressDialog(name, m_msgProgress + "\n\n", m_nTotal,
+      m_progdlg = new MProgressDialog(name, m_msgProgress + _T("\n\n"), m_nTotal,
                                       NULL, false, true);
    }
 
@@ -916,7 +916,7 @@ private:
    // which can be compared with another NETMBX later
    //
    // returns false if we failed to parse the mailbox spec
-   static bool CanonicalizeMailbox(const char *mailbox,
+   static bool CanonicalizeMailbox(const wxChar *mailbox,
                                    NETMBX *mbx,
                                    String *filename)
    {
@@ -950,7 +950,7 @@ private:
       //     name already is
       String filename;
       NETMBX mbx;
-      if ( !CanonicalizeMailbox(name, &mbx, &filename) )
+      if ( !CanonicalizeMailbox(wxConvertMB2WX(name), &mbx, &filename) )
       {
          FAIL_MSG( _T("c-client failed to parse its own spec?") );
       }
@@ -1151,16 +1151,16 @@ static String GetImapFlags(int flag)
 {
    String flags;
    if(flag & MailFolder::MSG_STAT_SEEN)
-      flags <<"\\SEEN ";
+      flags << _T("\\SEEN ");
 
    // RECENT flag can't be set, it is handled entirely by server in IMAP
 
    if(flag & MailFolder::MSG_STAT_ANSWERED)
-      flags <<"\\ANSWERED ";
+      flags << _T("\\ANSWERED ");
    if(flag & MailFolder::MSG_STAT_DELETED)
-      flags <<"\\DELETED ";
+      flags << _T("\\DELETED ");
    if(flag & MailFolder::MSG_STAT_FLAGGED)
-      flags <<"\\FLAGGED ";
+      flags << _T("\\FLAGGED ");
 
    if(flags.Length() > 0) // chop off trailing space
      flags.RemoveLast();
@@ -1255,11 +1255,11 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
          // no, it doesn't -- indicate it for POP and IMAP (cclient can't parse
          // this for NNTP however)
          if ( type != MF_NNTP )
-            spec << "/anonymous";
+            spec << _T("/anonymous");
       }
       else if ( !login.empty() )
       {
-         spec << "/user=" << login;
+         spec << _T("/user=") << login;
       }
       //else: we'll ask the user about his login later
    }
@@ -1267,7 +1267,7 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
    switch ( type )
    {
       case MF_INBOX:
-         spec = "INBOX";
+         spec = _T("INBOX");
          break;
 
       case MF_FILE:
@@ -1280,7 +1280,7 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
             // ones should start with MHROOT
             wxString mhRoot = MailFolderCC::InitializeMH();
 
-            const char *p;
+            const wxChar *p;
             wxString nameReal;
             if ( name.StartsWith(mhRoot, &nameReal) )
             {
@@ -1296,7 +1296,7 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
                                "root MH directory '%s'."),
                             p, mhRoot.c_str());
 
-                  return "";
+                  return _T("");
                }
             }
 
@@ -1307,7 +1307,7 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
             while ( *p == '/' )
                p++;
 
-            spec << "#mh/" << p;
+            spec << _T("#mh/") << p;
          }
          break;
 
@@ -1317,23 +1317,23 @@ String MailFolder::GetImapSpec(const MFolder *folder, const String& login_)
             if ( READ_CONFIG(profile, MP_POP_NO_AUTH) )
             {
                // turn authentification off forcefully
-               spec << "/loser";
+               spec << _T("/loser");
             }
          }
 
-         spec << "/pop3}";
+         spec << _T("/pop3}");
          break;
 
       case MF_IMAP:
-         spec << '}' << name;
+         spec << _T('}') << name;
          break;
 
       case MF_NEWS:
-         spec << "#news." << name;
+         spec << _T("#news.") << name;
          break;
 
       case MF_NNTP:
-         spec << "/nntp}" << name;
+         spec << _T("/nntp}") << name;
          break;
 
       default:
@@ -1361,7 +1361,7 @@ bool MailFolder::SpecToFolderName(const String& specification,
    case MF_MH:
    {
       static const int lenPrefix = 4;  // strlen("#mh/")
-      if ( strncmp(specification, "#mh/", lenPrefix) != 0 )
+      if ( wxStrncmp(specification, _T("#mh/"), lenPrefix) != 0 )
       {
          FAIL_MSG(_T("invalid MH folder specification - no #mh/ prefix"));
 
@@ -1369,7 +1369,7 @@ bool MailFolder::SpecToFolderName(const String& specification,
       }
 
       // make sure that the folder name does not start with s;ash
-      const char *start = specification.c_str() + lenPrefix;
+      const wxChar *start = specification.c_str() + lenPrefix;
       while ( wxIsPathSeparator(*start) )
       {
          start++;
@@ -1391,7 +1391,7 @@ bool MailFolder::SpecToFolderName(const String& specification,
       {
          wxString protocol(specification.c_str() + 1, 4);
          protocol.MakeLower();
-         if ( protocol == "nntp" || protocol == "news" )
+         if ( protocol == _T("nntp") || protocol == _T("news") )
          {
             startIndex = specification.Find('}');
          }
@@ -1401,8 +1401,8 @@ bool MailFolder::SpecToFolderName(const String& specification,
       {
          wxString lowercase = specification;
          lowercase.MakeLower();
-         if( lowercase.Contains("/nntp") ||
-             lowercase.Contains("/news") )
+         if( lowercase.Contains(_T("/nntp")) ||
+             lowercase.Contains(_T("/news")) )
          {
             startIndex = specification.Find('}');
          }
@@ -1434,9 +1434,9 @@ bool MailFolder::SpecToFolderName(const String& specification,
 static
 String GetFirstPartFromImapSpec(const String &imap)
 {
-   if(imap[0] != '{') return "";
+   if(imap[0] != '{') return _T("");
    String first;
-   const char *cptr = imap.c_str()+1;
+   const wxChar *cptr = imap.c_str()+1;
    while(*cptr && *cptr != '}')
       first << *cptr++;
    first << *cptr;
@@ -1448,13 +1448,13 @@ String GetPathFromImapSpec(const String &imap)
 {
    if(imap[0] != '{') return imap;
 
-   const char *cptr = imap.c_str()+1;
+   const wxChar *cptr = imap.c_str()+1;
    while(*cptr && *cptr != '}')
       cptr++;
    if(*cptr == '}')
       return cptr+1;
    else
-      return ""; // error
+      return _T(""); // error
 }
 
 // ----------------------------------------------------------------------------
@@ -1509,14 +1509,14 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
 
    String out;
    out.reserve(in.length());
-   for ( const char *p = in.c_str(); *p; p++ )
+   for ( const wxChar *p = in.c_str(); *p; p++ )
    {
       if ( *p == '=' && *(p + 1) == '?' )
       {
          // found encoded word
 
          // save the start of it
-         const char *pEncWordStart = p++;
+         const wxChar *pEncWordStart = p++;
 
          // get the charset
          String csName;
@@ -1573,7 +1573,7 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
                        pEncWordStart);
 
             // scan until the end of the encoded word
-            const char *pEncWordEnd = strstr(p, "?=");
+            const wxChar *pEncWordEnd = wxStrstr(p, _T("?="));
             if ( !pEncWordEnd )
             {
                wxLogDebug(_T("Missing encoded word end marker in '%s'."),
@@ -1596,7 +1596,7 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
 
          // get the encoded text
          bool hasUnderscore = false;
-         const char *pEncTextStart = p;
+         const wxChar *pEncTextStart = p;
          while ( *p && (p[0] != '?' || p[1] != '=') )
          {
             // this is needed for QP hack below
@@ -1638,14 +1638,14 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
             if ( hasUnderscore )
             {
                strWithoutUnderscores = String(pEncTextStart, lenEncWord);
-               strWithoutUnderscores.Replace("_", " ");
+               strWithoutUnderscores.Replace(_T("_"), _T(" "));
                start = (unsigned char *)strWithoutUnderscores.c_str();
             }
 
             text = (char *)rfc822_qprint(start, lenEncWord, &len);
          }
 
-         String word(text, (size_t)len);
+         String word(wxConvertMB2WX(text), (size_t)len);
          fs_give((void **)&text);
 
          // normally we leave the (8 bit) string as is and remember its
@@ -1653,12 +1653,13 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
          // correctly, but in case of UTF-7/8 we really need to transform it
          // here as we don't have any UTF-7/8 fonts, so we should display a
          // different string
+#if !wxUSE_UNICODE
          if ( encoding == wxFONTENCODING_UTF7 ||
                   encoding == wxFONTENCODING_UTF8 )
          {
             encoding = ConvertUnicodeToSystem(&word, encoding);
          }
-
+#endif
          out += word;
       }
       else
@@ -1844,7 +1845,7 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
                  imapspec.c_str());
 
       CCErrorDisabler noErrs;
-      stream = MailOpen(imapspec);
+      stream = MailOpen(wxConvertWX2MB(imapspec));
    }
 
    // login data was reset by mm_login() called from mail_open(), set it once
@@ -1876,7 +1877,7 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
       wxLogTrace(TRACE_MF_CALLS, _T("Opening MailFolderCC '%s' after creating it."),
                  imapspec.c_str());
 
-      stream = MailOpen(stream, imapspec);
+      stream = MailOpen(stream, wxConvertWX2MB(imapspec));
    }
 
    if ( stream )
@@ -2011,7 +2012,7 @@ void MailFolderCC::CreateFileFolder()
       }
 
       tmp += m_ImapSpec;
-      mail_create(NIL, (char *)tmp.mb_str()); // const_cast for c-client
+      mail_create(NIL, strutil_strdup(wxConvertWX2MB(tmp))); // const_cast for c-client
    }
 
    // we either already tried to create it once or it had existed even before
@@ -2038,7 +2039,7 @@ GetOperationName(MailFolder::OpenMode openmode)
 
       default:
          FAIL_MSG( _T("unknown open mode") );
-         name = "???";
+         name = _T("???");
    }
 
    return name;
@@ -2060,9 +2061,9 @@ MailFolderCC::CheckForFileLock()
    {
       // get INBOX path name
       MCclientLocker lock;
-      file = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
+      file = (wxChar *) mail_parameters (NIL,GET_SYSINBOX,NULL);
       if(file.empty()) // another c-client stupidity
-         file = (char *) sysinbox();
+         file = (wxChar *) sysinbox();
    }
 #endif // OS_UNIX
    else
@@ -2076,7 +2077,7 @@ MailFolderCC::CheckForFileLock()
    if ( wxFileExists(file) )
    {
       // TODO: we should be using c-client's lockname() here
-      String lockfile = wxFindFirstFile(file + ".lock*", wxFILE);
+      String lockfile = wxFindFirstFile(file + _T(".lock*"), wxFILE);
       while ( !lockfile.empty() )
       {
          // outch, someone has a lock, opening the mailbox will fail as c-client
@@ -2120,7 +2121,7 @@ MailFolderCC::CheckForFileLock()
          {
             // remove the file but be prepared to the fact that it could have
             // already disappeared by itself
-            if ( remove(lockfile) != 0 && wxFile::Exists(lockfile) )
+            if ( wxRemove(lockfile) != 0 && wxFile::Exists(lockfile) )
             {
                wxLogSysError(_("Failed to remove the lock file"));
 
@@ -2265,7 +2266,7 @@ MailFolderCC::Open(OpenMode openmode)
          wxLogTrace(TRACE_MF_CALLS, _T("Opening MailFolderCC '%s'."),
                     m_ImapSpec.c_str());
 
-         m_MailStream = MailOpen(stream, m_ImapSpec, ccOptions);
+         m_MailStream = MailOpen(stream, wxConvertWX2MB(m_ImapSpec), ccOptions);
       }
    } // end of cclient lock block
 
@@ -2294,7 +2295,7 @@ MailFolderCC::Open(OpenMode openmode)
       // redirect all notifications to us again
       CCDefaultFolder def(this);
       MAILSTREAM *
-         msHalfOpened = MailOpen(m_MailStream, m_ImapSpec, OP_HALFOPEN);
+         msHalfOpened = MailOpen(m_MailStream, wxConvertWX2MB(m_ImapSpec), OP_HALFOPEN);
       if ( msHalfOpened )
       {
          mail_close(msHalfOpened);
@@ -2645,9 +2646,9 @@ MailFolderCC::Checkpoint(void)
    // immediately afterwards, so don't try to access it from here
    if ( GetType() == MF_FILE )
    {
-      if ( !wxFile::Exists(m_MailStream->mailbox) )
+      if ( !wxFile::Exists(wxConvertMB2WX(m_MailStream->mailbox)) )
       {
-         DBGMESSAGE(("MBOX folder '%s' already deleted.", m_MailStream->mailbox));
+         DBGMESSAGE((_T("MBOX folder '%s' already deleted."), m_MailStream->mailbox));
          return;
       }
    }
@@ -2818,7 +2819,7 @@ MailFolderCC::DoCheckStatus(const MFolder *folder, MAILSTATUS *mailstatus)
       // we're not interested in mm_exists() and what not
       CCCallbackDisabler noCallbacks;
 
-      stream = MailOpen(spec, OP_HALFOPEN | OP_READONLY);
+      stream = MailOpen(wxConvertWX2MB(spec), OP_HALFOPEN | OP_READONLY);
       if ( !stream )
       {
          // if we failed to open it, checking its status won't work neither
@@ -2970,7 +2971,7 @@ MailFolderCC::AppendMessage(const String& msg)
    wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::AppendMessage(string)"),
               GetName().c_str());
 
-   CHECK_DEAD_RC(_T("Appending to closed folder '%s' failed."), false);
+   CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
    STRING str;
    INIT(&str, mail_string, (void *) msg.c_str(), msg.Length());
@@ -2995,7 +2996,7 @@ MailFolderCC::AppendMessage(const Message& msg)
               GetName().c_str());
 
    String date;
-   msg.GetHeaderLine("Date", date);
+   msg.GetHeaderLine(_T("Date"), date);
 
    char *dateptr = NULL;
    char datebuf[128];
@@ -3020,7 +3021,7 @@ MailFolderCC::AppendMessage(const Message& msg)
    STRING str;
    INIT(&str, mail_string, (void *) tmp.c_str(), tmp.Length());
 
-   CHECK_DEAD_RC(_T("Appending to closed folder '%s' failed."), false);
+   CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
    if ( !mail_append_full(m_MailStream,
                           (char *)m_ImapSpec.c_str(),
@@ -3047,7 +3048,7 @@ bool
 MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
 {
    CHECK( folder, false, _T("SaveMessages() needs a valid folder pointer") );
-   CHECK_DEAD_RC( _T("SaveMessages(): folder is closed"), false );
+   CHECK_DEAD_RC( "SaveMessages(): folder is closed", false );
 
    size_t count = selections->Count();
    CHECK( count, true, _T("SaveMessages(): nothing to save") );
@@ -3218,14 +3219,14 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
 void
 MailFolderCC::ExpungeMessages(void)
 {
-   CHECK_DEAD(_T("Cannot expunge messages from closed folder '%s'."));
+   CHECK_DEAD("Cannot expunge messages from closed folder '%s'.");
 
    if ( PY_CALLBACK(MCB_FOLDEREXPUNGE,1,GetProfile()) )
    {
       wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::ExpungeMessages()"),
                  GetName().c_str());
 
-      CHECK_DEAD(_T("ExpungeMessages(): folder closed"));
+      CHECK_DEAD("ExpungeMessages(): folder closed");
 
       mail_expunge(m_MailStream);
 
@@ -3349,7 +3350,7 @@ MailFolderCC::GetMsgnoFromUID(UIdType uid) const
 Message *
 MailFolderCC::GetMessage(unsigned long uid) const
 {
-   CHECK_DEAD_RC(_T("Cannot access closed folder '%s'."), NULL);
+   CHECK_DEAD_RC("Cannot access closed folder '%s'.", NULL);
 
    HeaderInfoList_obj headers(GetHeaders());
    CHECK( headers, NULL, _T("GetMessage: failed to get headers") );
@@ -3576,7 +3577,7 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit, int flags)
 
    *slistMatch = mail_newstringlist();
 
-   (*slistMatch)->text.data = (unsigned char *)strdup(crit->m_Key);
+   (*slistMatch)->text.data = (unsigned char *)strdup(wxConvertWX2MB(crit->m_Key));
    (*slistMatch)->text.size = crit->m_Key.length();
 
    if ( crit->m_Invert )
@@ -3631,7 +3632,7 @@ MailFolderCC::SetSequenceFlag(SequenceKind kind,
                               int flag,
                               bool set)
 {
-   CHECK_DEAD_RC(_T("Cannot access closed folder '%s'."), false);
+   CHECK_DEAD_RC("Cannot access closed folder '%s'.", false);
 
    if ( !CanSetFlag(flag) )
    {
@@ -3674,7 +3675,7 @@ MailFolderCC::SetSequenceFlag(SequenceKind kind,
 
 void MailFolderCC::OnMsgStatusChanged()
 {
-   CHECK_RET( m_statusChangeData, "OnMsgStatusChanged() shouldn't be called!" );
+   CHECK_RET( m_statusChangeData, _T("OnMsgStatusChanged() shouldn't be called!") );
 
    HeaderInfoList_obj headers(GetHeaders());
    CHECK_RET( headers, _T("OnMsgStatusChanged(): couldn't get headers") );
@@ -3698,7 +3699,7 @@ void MailFolderCC::OnMsgStatusChanged()
          }
          else
          {
-            FAIL_MSG( "connection broken?" );
+            FAIL_MSG( _T("connection broken?") );
 
             status = 0;
          }
@@ -3850,7 +3851,7 @@ String
 MailFolderCC::DebugDump() const
 {
    String str = MObjectRC::DebugDump();
-   str << "mailbox '" << m_ImapSpec << "' of type " << (int) GetType();
+   str << _T("mailbox '") << m_ImapSpec << _T("' of type ") << (int) GetType();
 
    return str;
 }
@@ -4327,7 +4328,7 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
    MFolderType folderType = GetType();
    if ( folderType == MF_NNTP || folderType == MF_NEWS )
    {
-      entry.m_NewsGroups = env->newsgroups;
+      entry.m_NewsGroups = wxConvertMB2WX(env->newsgroups);
    }
    else
    {
@@ -4366,7 +4367,7 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
 
    // subject
 
-   entry.m_Subject = DecodeHeader(env->subject, &encoding);
+   entry.m_Subject = DecodeHeader(wxConvertMB2WX(env->subject), &encoding);
    if ( (encoding != wxFONTENCODING_SYSTEM) &&
         (encoding != encodingMsg) )
    {
@@ -4383,9 +4384,9 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
    // all the other fields
    entry.m_Size = elt->rfc822_size;
    entry.m_Lines = 0;   // TODO: calculate them?
-   entry.m_Id = env->message_id;
-   entry.m_References = env->references;
-   entry.m_InReplyTo = env->in_reply_to;
+   entry.m_Id = wxConvertMB2WX(env->message_id);
+   entry.m_References = wxConvertMB2WX(env->references);
+   entry.m_InReplyTo = wxConvertMB2WX(env->in_reply_to);
    entry.m_UId = mail_uid(m_MailStream, elt->msgno);
 
    // set the font encoding to be used for displaying this entry
@@ -4790,14 +4791,14 @@ CCStreamCleaner::~CCStreamCleaner()
       if ( isOnline )
       {
          // we are online, so we can close it properly:
-         DBGMESSAGE(("CCStreamCleaner: closing stream"));
+         DBGMESSAGE((_T("CCStreamCleaner: closing stream")));
 
          mail_close(stream);
       }
       else // !online
       {
          // brutally free all memory without closing stream:
-         DBGMESSAGE(("CCStreamCleaner: freeing stream offline"));
+         DBGMESSAGE((_T("CCStreamCleaner: freeing stream offline")));
 
          // copied from c-client mail.c:
          if (stream->mailbox) fs_give ((void **) &stream->mailbox);
@@ -4858,7 +4859,7 @@ String
 MailFolderCC::GetNewsSpool(void)
 {
    CClientInit();
-   return (const char *)mail_parameters (NIL,GET_NEWSSPOOL,NULL);
+   return (const wxChar *)mail_parameters (NIL,GET_NEWSSPOOL,NULL);
 }
 
 const String& MailFolder::InitializeNewsSpool()
@@ -4868,7 +4869,7 @@ const String& MailFolder::InitializeNewsSpool()
       // first, init cclient
       MailFolderCCInit();
 
-      gs_NewsSpoolDir = (char *)mail_parameters(NULL, GET_NEWSSPOOL, NULL);
+      gs_NewsSpoolDir = (wxChar *)mail_parameters(NULL, GET_NEWSSPOOL, NULL);
       if ( !gs_NewsSpoolDir )
       {
          gs_NewsSpoolDir = READ_APPCONFIG_TEXT(MP_NEWS_SPOOL_DIR);
@@ -5043,7 +5044,7 @@ MailFolderCC::mm_log(const String& str, long errflg, MailFolderCC *mf)
 {
    GetLogCircle().Add(str);
 
-   if ( str.StartsWith("SELECT failed") )
+   if ( str.StartsWith(_T("SELECT failed")) )
    {
       // send this to the debug window anyhow, but don't show it to the user
       // as this message can only result from trying to open a folder which
@@ -5062,8 +5063,8 @@ MailFolderCC::mm_log(const String& str, long errflg, MailFolderCC *mf)
 
    String msg = _("Mail log");
    if( mf )
-      msg << " (" << mf->GetName() << ')';
-   msg << ": " << str
+      msg << _T(" (") << mf->GetName() << _T(')');
+   msg << _T(": ") << str
 #ifdef DEBUG
        << _(", error level: ") << strutil_ultoa(errflg)
 #endif
@@ -5132,8 +5133,8 @@ MailFolderCC::mm_login(NETMBX * /* mb */,
    // normally this shouldn't happen
    ASSERT_MSG( !MF_user.empty(), _T("no username in mm_login()?") );
 
-   strcpy(user, MF_user.c_str());
-   strcpy(pwd, MF_pwd.c_str());
+   strcpy(user, wxConvertWX2MB(MF_user.c_str()));
+   strcpy(pwd, wxConvertWX2MB(MF_pwd.c_str()));
 
    // they are used once only, don't keep them or they could be reused for
    // another folder somehow
@@ -5160,7 +5161,7 @@ MailFolderCC::mm_critical(MAILSTREAM *stream)
 {
    if ( stream )
    {
-      ms_LastCriticalFolder = stream->mailbox;
+      ms_LastCriticalFolder = wxConvertMB2WX(stream->mailbox);
       MailFolderCC *mf = LookupObject(stream);
       if(mf)
       {
@@ -5169,7 +5170,7 @@ MailFolderCC::mm_critical(MAILSTREAM *stream)
    }
    else
    {
-      ms_LastCriticalFolder = "";
+      ms_LastCriticalFolder = _T("");
    }
 }
 
@@ -5179,7 +5180,7 @@ MailFolderCC::mm_critical(MAILSTREAM *stream)
 void
 MailFolderCC::mm_nocritical(MAILSTREAM *stream)
 {
-   ms_LastCriticalFolder = "";
+   ms_LastCriticalFolder = _T("");
    if ( stream )
    {
       MailFolderCC *mf = LookupObject(stream);
@@ -5208,7 +5209,7 @@ MailFolderCC::mm_diskerror(MAILSTREAM * /* stream */,
     @param  str   message str
 */
 void
-MailFolderCC::mm_fatal(char *str)
+MailFolderCC::mm_fatal(wxChar *str)
 {
    GetLogCircle().Add(str);
    wxLogError(_("Fatal error: %s"), str);

@@ -458,8 +458,8 @@ public:
    virtual bool IsInCriticalSection(void) const = 0;
 
    /// return class name
-   const char *GetClassName(void) const
-      { return "MailFolder"; }
+   const wxChar *GetClassName(void) const
+      { return _T("MailFolder"); }
 
    /**
      Create the server info entry for the given folder -- this is a backdoor
@@ -474,7 +474,7 @@ public:
 
       @return character depending on the folder type and server
     */
-   virtual char GetFolderDelimiter() const = 0;
+   virtual wxChar GetFolderDelimiter() const = 0;
 
    /**
      This function allows to get the folder hierarchy delimiter without
@@ -483,7 +483,7 @@ public:
      @param folder the MFolder describing the folder we'd like to get info for
      @return the delimiter character or NUL
     */
-   static char GetFolderDelimiter(const MFolder *folder);
+   static wxChar GetFolderDelimiter(const MFolder *folder);
 
    //@}
 

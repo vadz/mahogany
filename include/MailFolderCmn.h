@@ -33,10 +33,10 @@
 #undef DEBUG_FOLDER_CLOSE
 
 // trace mask for the new mail messages
-#define TRACE_MF_NEWMAIL "mfnew"
+#define TRACE_MF_NEWMAIL _T("mfnew")
 
 // trace mask for the mail folder related events
-#define TRACE_MF_EVENTS "mfevent"
+#define TRACE_MF_EVENTS _T("mfevent")
 
 class FilterRule;
 DECLARE_REF_COUNTER(FilterRule)
