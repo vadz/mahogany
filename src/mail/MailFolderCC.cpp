@@ -6650,6 +6650,9 @@ void ServerInfoEntry::KeepStream(MAILSTREAM *stream, const MFolder *folder)
    if ( !ms_connCloseTimer->IsRunning() ||
            (ms_connCloseTimer->GetInterval() / 1000 > delay) )
    {
+      wxLogTrace(TRACE_CONN_CACHE,
+                 "Starting connection clean up timer (delay = %ds)", delay);
+
       // we want to use a smaller interval
       ms_connCloseTimer->Start(delay * 1000);
    }
@@ -6657,14 +6660,19 @@ void ServerInfoEntry::KeepStream(MAILSTREAM *stream, const MFolder *folder)
 
 void ServerInfoEntry::CheckTimeout()
 {
-   time_t t = time(NULL);
+   // close the connection even if the timeout hasn't expired yet but expires
+   // in less than 1 second: this helps when we have a really big timeout (i.e.
+   // 30 minutes) and if the timer comes up slightly before the moment *j
+   // (which does happen in practice): we don't want to wait for another 30
+   // minutes before closing the connection
+   time_t t = time(NULL) + 1;
 
    // iterate in parallel over both lists
    StreamList::iterator i = m_connections.begin();
    TimeList::iterator j = m_timeouts.begin();
    while ( i != m_connections.end() )
    {
-      if ( *j < t )
+      if ( *j <= t )
       {
          // timed out
          MAILSTREAM *stream = *i;
@@ -6709,6 +6717,8 @@ void ServerInfoEntry::CheckTimeoutAll()
    if ( !hasAnyConns )
    {
       // timer will be restarted in KeepStream() when/if neecessary
+      wxLogTrace(TRACE_CONN_CACHE, "Stopping connection clean up timer");
+
       ms_connCloseTimer->Stop();
    }
 }
