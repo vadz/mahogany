@@ -18,7 +18,7 @@
   MEvent to be sent out to the application after the current folder
   operation is done. To update all immediately available information,
   UpdateStatus() is used which will also generate new mail events if
-  necessary. 
+  necessary.
  */
 // ============================================================================
 // declarations
@@ -607,7 +607,17 @@ static String GetImapSpec(int type, int flags,
       break;
 
    case MF_MH:
-      mboxpath << "#mh/" << name;
+      // newly created MH folders won't have leading slash, but we may still
+      // have to deal with the old entries in config, so eat both here, but be
+      // sure to remove the leading backslash: we want #mh/inbox, not
+      // #mh//inbox
+      {
+         const char *p = name.c_str();
+         while ( *p == '/' )
+            p++;
+
+         mboxpath << "#mh/" << p;
+      }
       break;
 
    case MF_POP:
@@ -911,7 +921,7 @@ MailFolderCC::Open(void)
 
       // Make sure the event handling code knows us:
       SetDefaultObj();
-      
+
       // if the file folder doesn't exist, we should create it first
       bool alreadyCreated = FALSE;
       if ( !exists
@@ -1117,7 +1127,7 @@ MailFolderCC::Close(void)
      DO NOT SEND EVENTS FROM HERE, ITS CALLED FROM THE DESTRUCTOR AND
      THE OBJECT *WIL* DISAPPEAR!
    */
-   
+
    // can cause references to this folder, cannot be allowd:
 //   UpdateStatus(); // send last status event before closing
 //   ProcessEventQueue();  //FIXMe: is this safe or not?
@@ -1270,7 +1280,7 @@ MailFolderCC::GetMessage(unsigned long uid)
    CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", NULL);
 
    // This is a test to see if the UID is valid:
-   
+
    bool uidValid = false;
    HeaderInfoList *hil = GetHeaders();
    if ( !hil ) return NULL;
@@ -1295,7 +1305,7 @@ MailFolderCC::CountNewMessages(void) const
 {
    const int mask = MSG_STAT_RECENT | MSG_STAT_SEEN;
    const int value = MSG_STAT_RECENT;
-   
+
    UIdType num = 0;
    if( m_Listing )
    {
@@ -1314,7 +1324,7 @@ MailFolderCC::GetHeaders(void) const
 {
    // remove const from this:
    MailFolderCC *that = (MailFolderCC *)this;
-   
+
    // check if we are still alive:
    if(m_MailStream == NIL)
    {
@@ -1326,13 +1336,13 @@ MailFolderCC::GetHeaders(void) const
       }
       that->m_NeedFreshListing = true; // re-build it!
    }
-   
+
    if(m_NeedFreshListing)
    {
       UIdType old_nNewMessages = that->CountNewMessages();
 
       that->UpdateStatus();
-      
+
       // we need to re-generate the listing:
       that->BuildListing();
 
@@ -1342,7 +1352,7 @@ MailFolderCC::GetHeaders(void) const
          // we need to re-generate the listing:
          that->BuildListing();
       }
-      
+
       // sort/thread listing:
       that->ProcessHeaderListing(m_Listing);
 
@@ -1685,7 +1695,7 @@ MailFolderCC::BuildListing(void)
    // we don't want MEvents to be handled while we are in here, as
    // they might query this folder:
    MEventManager::Suspend(true);
-   
+
    m_BuildListingSemaphore = true;
 
    if ( m_FirstListing )
@@ -2125,7 +2135,7 @@ bool MailFolderCC::SpecToFolderName(const String& specification,
             startIndex = specification.Find('}');
          }
       }
-      
+
       if ( startIndex == wxNOT_FOUND )
       {
          FAIL_MSG("invalid folder specification - no {nntp/...}");
@@ -2165,7 +2175,7 @@ MailFolderCC::UpdateStatus(void)
 {
    if(m_MailStream == NIL && ! PingReopen())
       return; // fail
-   
+
    if(m_nMessages != m_MailStream->nmsgs ||
       m_nRecent != m_MailStream->recent)
    {
@@ -2282,7 +2292,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
                    + String(" n: ") + strutil_ultoa(number);
       LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
-      
+
       // this test seems necessary for MH folders, otherwise we're going into
       // an infinite loop (and it shouldn't (?) break anything for other
       // folders)
@@ -2291,7 +2301,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
       {
          mf->m_nMessages = number;
          // This can be called from within mail_open(), before we have a
-         // valid m_MailStream, so check. It's slightly more efficient 
+         // valid m_MailStream, so check. It's slightly more efficient
          // to check here than in UpdateStatus().
          if(mf->m_MailStream != NULL)
             mf->RequestUpdate();
@@ -2548,14 +2558,14 @@ MailFolderCC::UpdateMessageStatus(unsigned long seqno)
       return; // will be regenerated anyway
 
    // Otherwise: update the current listing information:
-   
+
    // Find the listing entry for this message:
    UIdType uid = mail_uid(m_MailStream, seqno);
    size_t i;
    for(i = 0; i < m_Listing->Count() && (*m_Listing)[i]->GetUId() != uid; i++)
       ;
    ASSERT_RET(i < m_Listing->Count());
-   
+
    MESSAGECACHE *elt = mail_elt (m_MailStream,seqno);
    ((HeaderInfoCC *)(*m_Listing)[i])->m_Status = GetMsgStatus(elt);
 
@@ -2662,7 +2672,7 @@ MailFolderCC::ProcessEventQueue(void)
          mf->m_UpdateNeeded = false;
       }
    }
-   // If we don't call this, we have to wait for wxMApp::OnIdle(). 
+   // If we don't call this, we have to wait for wxMApp::OnIdle().
 //   MEventManager::DispatchPending();
 }
 

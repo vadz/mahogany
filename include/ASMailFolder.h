@@ -275,15 +275,10 @@ public:
       }
 
    /// and a function to create a half opened folder
-   static ASMailFolder *HalfOpenFolder(const String& path)
+   static ASMailFolder *HalfOpenFolder(MFolder *mfolder,
+                                       ProfileBase *profile)
    {
-      MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,
-                                              path,
-                                              (ProfileBase *)NULL,
-                                              NULLstring,
-                                              NULLstring,
-                                              NULLstring,
-                                              TRUE /* half open */);
+      MailFolder *mf = MailFolder::HalfOpenFolder(mfolder, profile);
       if ( !mf ) return NULL;
       ASMailFolder *asmf = Create(mf);
       mf->DecRef();

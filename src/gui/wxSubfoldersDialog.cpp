@@ -227,6 +227,13 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent, MFolder *folder)
    m_folderPath = folder->GetPath();
    m_folderType = folder->GetType();
 
+   // a hack around old entries in config which were using '/inbox' instead of
+   // just 'inbox' for #mh/inbox
+   if ( m_folderType == MF_MH && !!m_folderPath && m_folderPath[0] == '/' )
+   {
+      m_folderPath.erase(0, 1);
+   }
+
    m_nSubfolders = 0;
    m_settingFromProgram = false;
 
@@ -729,7 +736,14 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
       for ( int level = levelMax - 1; level >= 0; level-- )
       {
          wxString name = components[level];
-         fullpath << GetFolderNameSeparator() << name;
+
+         // the idea for this test is to avoid creating MH folders named
+         // /inbox (m_folderPath is empty for the root MH folder)
+         if ( !!fullpath )
+         {
+            fullpath += GetFolderNameSeparator();
+         }
+         fullpath += name;
 
          // to create a a/b/c, we must first create a, then b and then c, so
          // we create a folder during each loop iteration - unless it already
@@ -798,7 +812,7 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
 {
    // The folder must be half opened because we don't really want to read any
    // messages in it, just enum subfolders
-   ASMailFolder *asmf = ASMailFolder::HalfOpenFolder(folder->GetName());
+   ASMailFolder *asmf = ASMailFolder::HalfOpenFolder(folder, NULL);
 
    if ( !asmf )
    {

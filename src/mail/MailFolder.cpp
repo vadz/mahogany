@@ -96,6 +96,24 @@ MailFolder::OpenFolder(const MFolder *mfolder, ProfileBase *profile)
 
 /* static */
 MailFolder *
+MailFolder::HalfOpenFolder(const MFolder *mfolder, ProfileBase *profile)
+{
+   CHECK( mfolder, NULL, "NULL MFolder in OpenFolder()" );
+
+   int typeAndFlags = CombineFolderTypeAndFlags(mfolder->GetType(),
+                                                mfolder->GetFlags());
+
+   return OpenFolder( typeAndFlags,
+                      mfolder->GetPath(),
+                      profile,
+                      mfolder->GetServer(),
+                      mfolder->GetLogin(),
+                      mfolder->GetPassword(),
+                      true );
+}
+
+/* static */
+MailFolder *
 MailFolder::OpenFolder(int folderType,
                        String const &i_name,
                        ProfileBase *parentProfile,

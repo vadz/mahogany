@@ -1181,6 +1181,13 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
 
       ReopenBranch(parent);
 
+      if ( kind == MEventFolderTreeChangeData::CreateUnder )
+      {
+         // always expand the folder in this case, even if it wasn't expanded
+         // before
+         Expand(parent);
+      }
+
       if ( kind == MEventFolderTreeChangeData::Delete )
       {
          // if the deleted folder was either the tree ctrl selection or was

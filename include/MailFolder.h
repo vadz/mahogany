@@ -132,6 +132,10 @@ public:
    static MailFolder * OpenFolder(const class MFolder *mfolder,
                                   ProfileBase *profile = NULL);
 
+   /** Half open the folder using paremeters from MFolder object. */
+   static MailFolder * HalfOpenFolder(const class MFolder *mfolder,
+                                      ProfileBase *profile = NULL);
+
    /** Phyically deletes this folder.
        @return true on success
    */

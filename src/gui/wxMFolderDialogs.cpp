@@ -1387,7 +1387,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
                      << READ_CONFIG(profile, MP_FOLDER_PATH);
                   if ( !!path && !wxIsPathSeparator(path.Last()) )
                      path << '/';
-                  path << dlg->GetFolderName();
+                  path << dlg->GetFolderName().AfterLast('/');
 
                   m_path->SetValue(path);
 
