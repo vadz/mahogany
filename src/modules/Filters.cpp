@@ -84,7 +84,7 @@ public:
    const char * GetInterface() { return ::GetInterface(); }
    const char * GetDescription() { return ::GetDescription(); }
    const char * GetVersion() { return ::GetModuleVersion(); }
-   void GetMVersion(int *a, int *b, int *c){ return ::GetMVersion(a,b,c); }
+   void GetMVersion(int *a, int *b, int *c){ ::GetMVersion(a,b,c); }
    
    /** Takes a string representation of a filterrule and compiles it
        into a class FilterRule object.
@@ -375,26 +375,9 @@ public:
    virtual Value Evaluate(Value left, Value right) const = 0;
    /// for logical operators, shall we continue parsing the right?
    virtual bool TestLeft(Value left) const = 0;
-   /// Returns the priority  of the operator.
-   virtual int  Priority(void) const = 0;
 #ifdef DEBUG
    virtual String Debug(void) const = 0;
 #endif
-};
-
-/// The numbers returned by Operator::Priority()
-enum OperatorPriorities
-{
-   /// standard, lowest
-   PRI_LOWEST,
-   /// boolean operators:
-   PRI_BOOLEAN,
-   /// for addition and substraction
-   PRI_PLUS_MINUS,
-   /// for multiplication and division
-   PRI_TIMES_DIV,
-   /// the exponential operator
-   PRI_EXPONENTIONAL
 };
 
 // ----------------------------------------------------------------------------
@@ -751,7 +734,7 @@ Value operator oper(const Value &left, const Value &right) \
 } 
 
 #ifdef DEBUG
-#define IMPLEMENT_OP(name, oper, priority) \
+#define IMPLEMENT_OP(name, oper) \
 class Operator##name : public Operator \
 { \
 public: \
@@ -762,8 +745,6 @@ public: \
          MOcheck(); \
          return (bool) ((left.GetType() == Type_Number) ? \
                        left.GetNumber() : left.GetString().Length())!= 0; } \
-   virtual int Priority(void) const \
-      { return priority; } \
    virtual String Debug(void) const \
       { MOcheck(); return #oper; } \
 }
@@ -774,9 +755,12 @@ class Operator##name : public Operator \
 { \
 public: \
    virtual Value Evaluate(Value left, Value right) const \
-      { return left oper right; } \
+      { MOcheck(); return left oper right; } \
    virtual bool TestLeft(Value left) const \
-      { MOcheck(); return (bool) (left oper 1) != 0; } \
+      { \
+         MOcheck(); \
+         return (bool) ((left.GetType() == Type_Number) ? \
+                       left.GetNumber() : left.GetString().Length())!= 0; } \
 } 
 #endif
 
@@ -787,12 +771,12 @@ IMPLEMENT_VALUE_OP(-, left.GetString().Length(),right.GetString().Length());
 IMPLEMENT_VALUE_OP(*, left.GetString().Length(),right.GetString().Length());
 IMPLEMENT_VALUE_OP(/, left.GetString().Length(),right.GetString().Length());
 
-IMPLEMENT_OP(Or,||, PRI_BOOLEAN);
-IMPLEMENT_OP(And,&&, PRI_BOOLEAN);
-IMPLEMENT_OP(Plus,+, PRI_PLUS_MINUS);
-IMPLEMENT_OP(Minus,-, PRI_PLUS_MINUS);
-IMPLEMENT_OP(Times,*, PRI_TIMES_DIV);
-IMPLEMENT_OP(Divide,/, PRI_TIMES_DIV);
+IMPLEMENT_OP(Or,||);
+IMPLEMENT_OP(And,&&);
+IMPLEMENT_OP(Plus,+);
+IMPLEMENT_OP(Minus,-);
+IMPLEMENT_OP(Times,*);
+IMPLEMENT_OP(Divide,/);
 
 
 /* static */
@@ -1349,7 +1333,10 @@ int FilterTest(MInterface *interface)
       SyntaxNode *sn = p->Parse();
       if(sn)
       {
+#ifdef DEBUG
          String str = sn->Debug();
+         msg << str << '\n';
+#endif
          Value v = sn->Evaluate();
          msg << '\n' << program + String(" = ")+v.ToString();
          delete sn;
