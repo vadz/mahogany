@@ -2003,7 +2003,8 @@ wxComposeView::Print(void)
 #endif
    wxPrinter printer;
    wxLayoutPrintout printout(m_LayoutWindow->GetLayoutList(),_("Mahogany: Printout"));
-   if (! printer.Print(this, &printout, TRUE))
+   if (! printer.Print(this, &printout, TRUE)
+      && ! printer.GetAbort() )
       wxMessageBox(
          _("There was a problem with printing the message:\n"
            "perhaps your current printer is not set up correctly?"),

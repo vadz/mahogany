@@ -1105,12 +1105,18 @@ MailFolderCC::AppendMessage(String const &msg)
    ProcessEventQueue();
 
 //??   PingReopen();
+#if 0
    char *flags = "\\NEW\\RECENT";
    bool rc = ( mail_append_full(
       m_MailStream,
       (char *)m_MailboxPath.c_str(),
       flags, NIL, &str)
                != 0);
+#else
+   bool rc = ( mail_append(
+      m_MailStream, (char *)m_MailboxPath.c_str(), &str) 
+               != 0);
+#endif
    if(! rc)
       ERRORMESSAGE(("cannot append message"));
    ProcessEventQueue();

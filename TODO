@@ -8,9 +8,10 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
+9	KB	use only one outbox
 9		disabling "collect mail" in properties has no effect!
 9	KB	finish filters dialog
-
+9	KB	debug filters, does '|' really work?
 9	KB	wxLayout:
 		- delete in empty line (works at home...)
 		- add blinking cursor
