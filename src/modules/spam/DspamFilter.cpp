@@ -446,7 +446,7 @@ void DspamFilter::Train(wxWindow *parent)
    MProgressDialog pd
                    (
                      _("Training DSPAM, please wait..."),
-                     _(""),
+                     _T(""),
                      count,
                      parent,
                      wxPD_CAN_ABORT
