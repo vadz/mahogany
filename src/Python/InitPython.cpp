@@ -1,11 +1,14 @@
-/*-*- c++ -*-********************************************************
- * InitPython.cpp: initialisation of the Python interpreter          *
- *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
- *                                                                  *
- * $Id$
- *
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M
+// File name:   InitPython.cpp: initialisation of the Python interpreter
+// Purpose:     public InitPython() and FreePython()
+// Author:      Karsten Ballueder, Vadim Zeitlin
+// Modified by:
+// Created:     1998
+// CVS-ID:      $Id$
+// Copyright:   (c) 1998-2004 Mahogany Team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 #include   "Mpch.h"
 
@@ -27,6 +30,7 @@
 #include "MDialogs.h"
 
 extern const MOption MP_PYTHONPATH;
+extern const MOption MP_PYTHONMODULE_TO_LOAD;
 extern const MOption MP_USEPYTHON;
 
 // module initialization functions (called by InitPython() below)
@@ -40,9 +44,6 @@ extern "C"
    void init_Message();
    void init_SendMessage();
 }
-
-/// used by PythonHelp.cc helper functions
-PyObject *Python_MinitModule = NULL;
 
 // had Python been initialized? (MT ok as only used by the main thread)
 static bool gs_isPythonInitialized = false;
@@ -127,7 +128,7 @@ InitPython(void)
    // should be harmless otherwise
    putenv((char *)pythonPathNew.c_str());
 
-   if ( !READ_CONFIG(mApplication->GetProfile(), MP_USEPYTHON) )
+   if ( !READ_APPCONFIG(MP_USEPYTHON) )
    {
       // it is not an error to have it disabled
       return true;
@@ -150,32 +151,29 @@ InitPython(void)
    bool rc = true;
 
    // run the init script
-   Python_MinitModule = PyImport_ImportModule("Minit");
+   String startScript = READ_APPCONFIG(MP_PYTHONMODULE_TO_LOAD);
 
-   if( !CheckPyError() || Python_MinitModule == NULL)
+   if ( !startScript.empty() )
    {
-      ERRORMESSAGE(("Python: Cannot find/evaluate Minit.py initialisation script."));
+      PyObject *moduleInit = PyImport_ImportModule(startScript);
 
-      rc = false;
-   }
-   else
-   {
-      Py_INCREF(Python_MinitModule); // keep it in memory
-      PyObject *minit = PyObject_GetAttrString(Python_MinitModule, "Minit");
-      if(minit)
+      if ( !CheckPyError() || !moduleInit )
       {
-         Py_INCREF(minit);
-         PyObject_CallObject(minit,NULL);
-         rc = CheckPyError();
-         Py_DECREF(minit);
+         ERRORMESSAGE(("Cannot load Python module \"%s\".",
+                       startScript.c_str()));
+
+         rc = false;
       }
       else
       {
-         (void)CheckPyError();
-
-         ERRORMESSAGE(("Python: Cannot find Minit.Minit function in Minit module."));
-
-         rc = false;
+         Py_INCREF(moduleInit); // keep it in memory
+         PyObject *minit = PyObject_GetAttrString(moduleInit, "Init");
+         if ( minit )
+         {
+            PyObject_CallObject(minit, NULL);
+            rc = CheckPyError();
+         }
+         //else: no Init() function, ignore it
       }
    }
 
@@ -193,6 +191,10 @@ void FreePython()
 {
    if ( gs_isPythonInitialized )
    {
+      // ensure there are no pending errors because otherwise Py_Finalize()
+      // calls abort()
+      PyErr_Clear();
+
       Py_Finalize();
 
       gs_isPythonInitialized = false;
