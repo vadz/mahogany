@@ -1395,7 +1395,7 @@ bool wxMApp::InitHelp()
    m_HelpController->SetFrameParameters("Mahogany : %s", size, pos);
 
    // remember the dir where we found the files
-   if ( helpdir != GetHelpDir() )
+   if ( helpdir != READ_APPCONFIG(MP_HELPDIR) )
    {
       mApplication->GetProfile()->writeEntry(MP_HELPDIR, helpdir);
    }
