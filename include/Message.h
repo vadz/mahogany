@@ -93,13 +93,14 @@ public:
    */
    virtual const String & Subject(void) const = 0;
 
-   /** get an address line
+   /** Get an address line.
+       Using MAT_REPLY should always return a valid return address.
        @param name where to store personal name if available
        @param type which address
        @return address entry
    */
    virtual const String Address(String &name,
-                                MessageAddressType type = MAT_FROM) const = 0;
+                                MessageAddressType type = MAT_REPLYTO) const = 0;
                
    /** get From line
        @return From entry
