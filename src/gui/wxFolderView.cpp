@@ -4909,7 +4909,7 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
    // ones which are not shown to the end of it too
    for ( n = 0; n < WXFLC_NUMENTRIES; n++ )     // loop over columns
    {
-      if ( columns[n] == WXFLC_NONE )
+      if ( columns[n] == -1 )
       {
          colNames.Add(GetColumnName(n));
          status.Add(false);
@@ -4983,7 +4983,7 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
          }
          else // shown column
          {
-            String s = String::Format("%u", widths[n]);
+            String s = String::Format("%u", widths[columns[n]]);
             strWidthsNew.Add(s);
             strWidthsDefNew.Add(s);
          }
