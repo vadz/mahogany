@@ -16,6 +16,9 @@ $Id$
    + add other functionality such as undelete messages or stripMime
    + delete and forward don't work properly
    + correct handling of message flags: NEW flag must be reset, Read/Replied flags?
+   + call to Update() from within PreviewMessage/MessageCC code leads
+     to Clear() on wxFolderListCtrl and subsequent invalidation of
+     wxListCtrl data. All this happens from within OnSelected!
 
 - wxLayout:
   + fix wxGTK postscript printing which is pretty broken, compare with wxXt?
