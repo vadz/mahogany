@@ -74,8 +74,6 @@ $Id$
 		change them. 
 
 
-	VZ	trying to create a folder under "All Folders" triggers 
-		assert
 8	VZ	AdbImort dialog under Windows lacks UpdateUI somewhere
 
 8	VZ	Opening NNTP folders suddenly asks for password - what 
@@ -89,8 +87,10 @@ $Id$
 8	VZ?     After a dialog was opened (e.g. wxModulesDialog), the
 		app won't termiante but keeps running without windows.
 
-6 gtk   VZ?     The force-reopen checkbox doesn't display its
+6 gtk   RR      The force-reopen checkbox doesn't display its
 		tooltip. Does this work under MSW? A wxGTK bug?
+		VZ: yes, it's a wxGTK bug.
+
 7 gtk		Mahogany occasionally doesn't terminate but remains in
 		gtk event loop without any open windows.
 6	VZ	All Folder create dialog pages have no HelpIDs set.
@@ -102,7 +102,6 @@ $Id$
 		page
 2		adb addressbook extension appears twice when new book
 		is created
-3	VZ?	Why doesn't the tooltip in wxMFolderDialogs.cpp work?
 5	VZ	custom headers are not inherited
 
 4 gtk	VZ	icon selector suffers from several appearance problems
@@ -146,9 +145,6 @@ $Id$
 		FolderGroup, NewMail, SentMail, small icons (16x16) for the
 		custom headers dialog, AdbImport.
 
-
-8	VZ	make the message templates work: GUI suport for configuring them
-		and (many) more macros should be added.
 7	VZ	document the new properties dialog entries/pages,
 		please - I've started extending the docs
 6	VZ	Could you please check the file-browse button/dialog to
