@@ -111,6 +111,8 @@ public:
    /// like the constructor, but reuses existing objects
    static ProfileBase * CreateProfile(const String & iClassName,
                                       ProfileBase const *Parent);
+   static ProfileBase * CreateFolderProfile(const String & iClassName,
+                                            ProfileBase const *Parent);
    /// makes an empty profile, just inheriting from Parent
    static ProfileBase * CreateEmptyProfile(ProfileBase const *Parent);
 
@@ -155,12 +157,14 @@ private:
    /** Constructor.
        @param iClassName the name of this profile
        @param iParent the parent profile
+       @param section the section to use if not M_PROFILE_CONFIG_SECTION
        This will try to load the configuration file given by
        iClassName".profile" and look for it in all the paths specified
        by GetAppConfig()->readEntry(MC_PROFILEPATH).
 
    */
-   Profile(const String & iClassName, ProfileBase const *Parent);
+   Profile(const String & iClassName, ProfileBase const *Parent,
+           const char *section);
    /// constructor for empty, inheriting profile
    Profile(ProfileBase const *Parent);
    /// The parent profile.
@@ -355,9 +359,9 @@ wxConfigProfile::wxConfigProfile(const String & fileName)
                            fileName, mApplication->GetGlobalDir(),
                            wxCONFIG_USE_LOCAL_FILE|
                            wxCONFIG_USE_GLOBAL_FILE);
-   // set the default path for configuration entries
-   m_config->SetPath(M_APPLICATIONNAME);
 #  endif // Unix/Windows
+   // set the default path for configuration entries
+   m_config->SetPath(M_PROFILE_CONFIG_SECTION);
 }
 
 void wxConfigProfile::SetPath(const String & path)
@@ -436,14 +440,17 @@ wxConfigProfile::writeEntry(const String & key, long value)
    file. If an entry is not found, it tries to get it from its parent
    profile. Thus, an inheriting profile structure is created.
 */
-Profile::Profile(const String & iClassName, ProfileBase const *Parent)
+Profile::Profile(const String & iClassName, ProfileBase const *Parent, 
+                 const char *section)
 {
    m_config = NULL;   // set it before using CHECK()
    parentProfile = Parent;
    profileName = iClassName;
    m_isEmpty = false; // by default we are no dummy
 
-   // find our config file unless we already have an absolute path name
+   // find our config file unless we already have an absolute path
+   // name
+   // This is also done if a section is specified.
    String fullName;
    if ( !IsAbsPath(profileName) )
    {
@@ -473,7 +480,11 @@ Profile::Profile(const String & iClassName, ProfileBase const *Parent)
       // global profile in the corresponding section
    }
 
-   ms_cfManager.Register(iClassName, this);
+   // now the profileName which is used as the section must be
+   // prefixed with the section name:
+   if(section)
+      profileName = String(section) + profileName;
+   ms_cfManager.Register(profileName, this);
 }
 
 // constructor for empty profile
@@ -490,7 +501,17 @@ Profile::CreateProfile(const String & iClassName, ProfileBase const *parent)
 {
    ProfileBase *profile = ms_cfManager.Find(iClassName);
    if(! profile)
-      profile = new Profile(iClassName, parent);
+      profile = new Profile(iClassName, parent, M_PROFILE_CONFIG_SECTION);
+   return profile;
+}
+
+ProfileBase *
+Profile::CreateFolderProfile(const String & iClassName, ProfileBase const *parent)
+{
+   String classname = String(M_FOLDER_CONFIG_SECTION) + iClassName;
+   ProfileBase *profile = ms_cfManager.Find(classname);
+   if(! profile)
+      profile = new Profile(iClassName, parent, M_FOLDER_CONFIG_SECTION);
    return profile;
 }
 
@@ -606,9 +627,10 @@ readEntryHelper(wxConfigBase *config,
    // third, try our name in the global config file:
    if ( !bRead )
    {
-      ProfilePathChanger ppc(mApplication->GetProfile(), M_PROFILE_CONFIG_SECTION);
-      mApplication->GetProfile()->SetPath(profileName);
-
+      //ProfilePathChanger ppc(mApplication->GetProfile(), M_PROFILE_CONFIG_SECTION);
+      //mApplication->GetProfile()->SetPath(profileName);
+      ProfilePathChanger ppc(mApplication->GetProfile(), profileName);
+      
       bRead = readEntryFromProfile(value, mApplication->GetProfile(),
                                    key, defaultValue);
    }
@@ -626,8 +648,9 @@ readEntryHelper(wxConfigBase *config,
                config->Write(key, defaultValue.GetNumber());
          }else
          {
-            ProfilePathChanger ppc(mApplication->GetProfile(), M_PROFILE_CONFIG_SECTION);
-            mApplication->GetProfile()->SetPath(profileName);
+            //ProfilePathChanger ppc(mApplication->GetProfile(), M_PROFILE_CONFIG_SECTION);
+            //mApplication->GetProfile()->SetPath(profileName);
+            ProfilePathChanger ppc(mApplication->GetProfile(), profileName);
             if( defaultValue.IsString() )
                mApplication->GetProfile()->writeEntry(key, defaultValue.GetString());
             else
@@ -715,8 +738,10 @@ Profile::writeEntry(const String & key, long Value)
       return m_config->Write(key, Value) != 0;
    else // we don't have a profile, write to global
    {
-      ProfilePathChanger ppc(mApplication->GetProfile(), M_PROFILE_CONFIG_SECTION);
-      mApplication->GetProfile()->SetPath(profileName);
+      //ProfilePathChanger ppc(mApplication->GetProfile(), M_PROFILE_CONFIG_SECTION);
+      //mApplication->GetProfile()->SetPath(profileName);
+      ProfilePathChanger ppc(mApplication->GetProfile(),
+                             profileName);
       return mApplication->GetProfile()->writeEntry(key, Value);
    }
 }
@@ -730,8 +755,10 @@ Profile::writeEntry(const String & key, const String & value)
       return m_config->Write(key, value) != 0;
    else // we don't have a profile, write to global
    {
-      ProfilePathChanger ppc(mApplication->GetProfile(), M_PROFILE_CONFIG_SECTION);
-      mApplication->GetProfile()->SetPath(profileName);
+      //ProfilePathChanger ppc(mApplication->GetProfile(), M_PROFILE_CONFIG_SECTION);
+      //mApplication->GetProfile()->SetPath(profileName);
+      ProfilePathChanger ppc(mApplication->GetProfile(),
+                             profileName);
       return mApplication->GetProfile()->writeEntry(key, value);
    }
    return false; // keep compiler happy

@@ -1401,6 +1401,7 @@ bool wxOptionsDialog::TransferDataFromWindow()
       // first, create such a profile:
       profile = ProfileBase::CreateProfile(m_folderName->GetValue(),
                                            mApplication->GetProfile());
+      profile->writeEntry(MP_PROFILE_TYPE,ProfileBase::PT_FolderProfile);
       // tell the pages to use this profile instead of the global one:
       for (int nPage = 0; nPage < m_notebook->GetPageCount(); nPage++)
          ((wxOptionsPage *)m_notebook->GetPage(nPage))->SetProfile(profile);

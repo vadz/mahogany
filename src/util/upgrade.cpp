@@ -176,6 +176,7 @@ SetupInitialConfig(void)
    if(! parent->HasEntry("INBOX"))
    {
       ProfileBase *ibp = ProfileBase::CreateProfile("INBOX",parent);
+      ibp->writeEntry(MP_PROFILE_TYPE,ProfileBase::PT_FolderProfile);
       ibp->writeEntry(MP_FOLDER_TYPE,MailFolder::MF_INBOX);
       ibp->writeEntry(MP_FOLDER_COMMENT,
                      _("Default system folder for incoming mail.")); 
