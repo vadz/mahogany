@@ -989,6 +989,8 @@ case "$USE_CCOSTYPE" in
 		CCOSTYPE=osx ;;
 	OpenBSD*)
 		CCOSTYPE=bso ;;
+	CYGWIN*)
+		CCOSTYPE=cyg ;;
 	*)
 		AC_MSG_RESULT(unknown)
 		AC_MSG_ERROR([cannot guess c-client OS type for $OSTYPE,

@@ -4800,6 +4800,8 @@ echo "configure:4773: checking for c-client library OS type" >&5
 		CCOSTYPE=osx ;;
 	OpenBSD*)
 		CCOSTYPE=bso ;;
+	CYGWIN*)
+		CCOSTYPE=cyg ;;
 	*)
 		echo "$ac_t""unknown" 1>&6
 		{ echo "configure: error: cannot guess c-client OS type for $OSTYPE,
