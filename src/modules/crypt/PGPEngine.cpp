@@ -497,6 +497,7 @@ PGPEngine::DoExecCommand(const String& options,
    wxTextInputStream errText(*err);
 
    Status status = MAX_ERROR;
+   bool encryptedForSomeoneElse = false;
 
    // the user hint and the passphrase
    String user,
@@ -684,8 +685,7 @@ PGPEngine::DoExecCommand(const String& options,
             }
             else if ( code == _T("NO_SECKEY") )
             {
-               wxLogWarning(_("Secret key needed to decrypt this message is "
-                              "not available"));
+               encryptedForSomeoneElse = true;
             }
             else if ( code == _T("ENC_TO") ||
                       code == _T("BEGIN_DECRYPTION") ||
@@ -713,7 +713,7 @@ PGPEngine::DoExecCommand(const String& options,
                log->SetUserID(userId);
             }
          }
-         else // normal (free form) gpg output
+         else // normal (free form) gg output
          {
             // remember in the output log object if we have one
             if ( log )
@@ -722,6 +722,12 @@ PGPEngine::DoExecCommand(const String& options,
             }
          }
       }
+   }
+
+   if ( encryptedForSomeoneElse && status != OK )
+   {
+      wxLogWarning(_("Secret key needed to decrypt this message is "
+                              "not available"));
    }
 
    // Removing this assert:
@@ -748,7 +754,7 @@ PGPEngine::ExecCommand(const String& options,
    if ( status == NONEXISTING_KEY_ERROR )
    {
       // propose to the user to retrieve the key from a keyserver
-      if ( MDialog_YesNoDialog
+      if ( MDialog_Message
            (
                wxString::Format(
                  _("This message was prepared using a public key which you "
@@ -759,9 +765,8 @@ PGPEngine::ExecCommand(const String& options,
                  log->GetPublicKey().c_str()
                ),
                log->GetParent(),
-               _("Get public key from the key server?"),
-               M_DLG_YES_DEFAULT,
-               M_MSGBOX_GET_PGP_PUBKEY
+               M_MSGBOX_GET_PGP_PUBKEY,
+               M_DLG_ALLOW_CANCEL
            ) )
       {
          // try to get it
@@ -883,10 +888,9 @@ PGPEngine::VerifyDetachedSignature(const String& message,
                                    const String& signature,
                                    MCryptoEngineOutputLog *log)
 {
-   // create temporary files to store the signature and the message text
-   //
-   // TODO: do we have to use a temp file for the signed text? why not pass it
-   //       via stdin?
+   // create temporary files to store the signature and the message text:
+   // Using a temp file for both is necessary because GPG does not allow anything
+   // else for this (detached signature) case.
    MTempFileName tmpfileSig, tmpfileText;
    bool ok = tmpfileSig.IsOk() && tmpfileText.IsOk();
 
