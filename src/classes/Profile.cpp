@@ -190,7 +190,8 @@ public:
       { return ConfigSourceLocal::GetFirstEntry(Fix(key), entry, cookie); }
    virtual bool DeleteEntry(const String&) { return true; }
    virtual bool DeleteGroup(const String&) { return true; }
-   virtual bool CopyEntry(const String&, const String&) { return true; }
+   virtual bool CopyEntry(const String&, const String&, ConfigSource *)
+      { return true; }
    virtual bool RenameGroup(const String&, const String&) { return true; }
 };
 

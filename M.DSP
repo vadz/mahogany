@@ -598,42 +598,82 @@ SOURCE=.\res\M.rc
 # Begin Group "adb"
 
 # PROP Default_Filter "*.cpp"
+# Begin Group "Providers"
+
+# PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\src\adb\AdbDialogs.cpp
+SOURCE=.\src\adb\ProvBbdb.cpp
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\adb\AdbEntry.cpp
+SOURCE=.\src\adb\ProvDummy.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\adb\AdbExport.cpp
+SOURCE=.\src\adb\ProvFC.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\adb\AdbFrame.cpp
+SOURCE=.\src\adb\ProvLine.cpp
+# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\adb\AdbImport.cpp
-# End Source File
-# Begin Source File
+SOURCE=.\src\adb\ProvPalm.cpp
 
-SOURCE=.\src\adb\AdbManager.cpp
-# End Source File
-# Begin Source File
+!IF  "$(CFG)" == "M - Win32 Release"
 
-SOURCE=.\src\adb\AdbModule.cpp
-# End Source File
-# Begin Source File
+# PROP Exclude_From_Build 1
 
-SOURCE=.\src\adb\AdbProvider.cpp
-# End Source File
-# Begin Source File
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
-SOURCE=.\src\adb\Collect.cpp
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
+# End Group
+# Begin Group "ImpExp"
+
+# PROP Default_Filter ""
 # Begin Source File
 
 SOURCE=.\src\adb\ExportPalm.cpp
@@ -779,73 +819,42 @@ SOURCE=.\src\adb\ImportXFMail.cpp
 !ENDIF 
 
 # End Source File
+# End Group
 # Begin Source File
 
-SOURCE=.\src\adb\ProvBbdb.cpp
-
-!IF  "$(CFG)" == "M - Win32 Release"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
-
-# PROP BASE Exclude_From_Build 1
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
+SOURCE=.\src\adb\AdbDialogs.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\adb\ProvDummy.cpp
+SOURCE=.\src\adb\AdbEntry.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\adb\ProvFC.cpp
+SOURCE=.\src\adb\AdbExport.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\adb\ProvLine.cpp
+SOURCE=.\src\adb\AdbFrame.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\adb\ProvPalm.cpp
+SOURCE=.\src\adb\AdbImport.cpp
+# End Source File
+# Begin Source File
 
-!IF  "$(CFG)" == "M - Win32 Release"
+SOURCE=.\src\adb\AdbManager.cpp
+# End Source File
+# Begin Source File
 
-# PROP Exclude_From_Build 1
+SOURCE=.\src\adb\AdbModule.cpp
+# End Source File
+# Begin Source File
 
-!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+SOURCE=.\src\adb\AdbProvider.cpp
+# End Source File
+# Begin Source File
 
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
-
-# PROP BASE Exclude_From_Build 1
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
+SOURCE=.\src\adb\Collect.cpp
 # End Source File
 # End Group
 # Begin Group "python"
