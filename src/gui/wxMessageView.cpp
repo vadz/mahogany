@@ -332,7 +332,7 @@ bool wxMessageView::AllProfileValues::operator==(const AllProfileValues& other)
           CMP(quotedMaxWhitespace) && CMP(quotedMaxAlpha) &&
           CMP(HeaderNameCol) && CMP(HeaderValueCol) &&
           CMP(font) && CMP(size) &&
-          CMP(showHeaders) && CMP(rfc822isText) &&
+          CMP(showHeaders) && CMP(inlineRFC822) && CMP(inlinePlainText) &&
           CMP(highlightURLs) && CMP(inlineGFX) &&
           CMP(browser) && CMP(browserIsNS) &&
           CMP(autocollect) && CMP(autocollectNamed) &&
@@ -550,7 +550,8 @@ wxMessageView::ReadAllSettings(AllProfileValues *settings)
    settings->font = wxFonts[settings->font];
    settings->size = READ_CONFIG(m_Profile,MP_MVIEW_FONT_SIZE);
    settings->showHeaders = READ_CONFIG(m_Profile,MP_SHOWHEADERS) != 0;
-   settings->rfc822isText = READ_CONFIG(m_Profile,MP_RFC822_IS_TEXT) != 0;
+   settings->inlinePlainText = READ_CONFIG(m_Profile,MP_PLAIN_IS_TEXT) != 0;
+   settings->inlineRFC822 = READ_CONFIG(m_Profile,MP_RFC822_IS_TEXT) != 0;
    settings->highlightURLs = READ_CONFIG(m_Profile,MP_HIGHLIGHT_URLS) != 0;
    settings->inlineGFX = READ_CONFIG(m_Profile, MP_INLINE_GFX) != 0;
    settings->browser = READ_CONFIG(m_Profile, MP_BROWSER);
@@ -789,19 +790,20 @@ wxMessageView::Update(void)
       }
 
       /* Insert text:
-         - if it is text/plain and not "attachment" or with a filename
+         - if it is text/plain and not explicitly marked as "attachment"
+           or has a filename and we don't override this
          - if it is rfc822 and it is configured to be displayed
-         - HTML is for now displayed as normal text
+         - HTML is for now displayed as normal text with the same rules
       */
-      if (
-         ((fileName.Length() == 0) && (disposition != "attachment"))
-         && ( (mimeType == "text/plain" || (mimeType == "text/html")
-               || (t == Message::MSG_TYPEMESSAGE
-                   && (m_ProfileValues.rfc822isText != 0)))
-            )
-         )
+      bool isHTML = mimeType == "text/html";
+      if ( (disposition != "attachment") &&
+           (
+               ((mimeType == "text/plain" || isHTML) &&
+                (fileName.empty() || m_ProfileValues.inlinePlainText))
+               ||
+               (t == Message::MSG_TYPEMESSAGE && m_ProfileValues.inlineRFC822)
+           ) )
       {
-         bool isHTML = (mimeType == "text/html");
          // get the encoding of the text
          wxFontEncoding encPart;
          if ( m_encodingUser != wxFONTENCODING_SYSTEM )

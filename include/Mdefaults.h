@@ -489,7 +489,9 @@ enum MFolderIndex
 #define MP_VIEW_AUTOMATIC_WORDWRAP   "ViewAutoWrap"
 /// wrapmargin for message view (set to -1 to disable it)
 #define   MP_VIEW_WRAPMARGIN      "ViewWrapMargin"
-/// show MESSAGE/RFC822 as text?
+/// show TEXT/PLAIN as inlined text?
+#define   MP_PLAIN_IS_TEXT      "PlainIsText"
+/// show MESSAGE/RFC822 as inlined text?
 #define   MP_RFC822_IS_TEXT      "Rfc822IsText"
 /// prefix for subject in replies
 #define   MP_REPLY_PREFIX         "ReplyPrefix"
@@ -1082,6 +1084,8 @@ enum MFolderIndex
 #define MP_VIEW_AUTOMATIC_WORDWRAP_D   1l
 /// wrapmargin for message view (set to -1 to disable it)
 #define   MP_VIEW_WRAPMARGIN_D      70
+/// show TEXT/PLAIN as inlined text?
+#define   MP_PLAIN_IS_TEXT_D      1l
 /// show MESSAGE/RFC822 as text?
 #define   MP_RFC822_IS_TEXT_D      0l
 /// prefix for subject in replies

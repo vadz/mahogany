@@ -227,8 +227,10 @@ protected:
       int font, size;
       /// show headers?
       bool showHeaders;
-      /// show forwarded messages as text?
-      bool rfc822isText;
+      /// inline MESSAGE/RFC822 attachments?
+      bool inlineRFC822;
+      /// inline TEXT/PLAIN attachments?
+      bool inlinePlainText;
       /// highlight URLs?
       bool highlightURLs;
       /// inline graphics?

@@ -4,6 +4,7 @@
 Release 0.61 'Hawkins'
 -------------------------------------------------------------------------------
 
+30.12.00 VZ: added an option to show TEXT/PLAIN attachments inline
 04.12.00 VZ: improvement to "folder filters" dialog: can add filters from here
 01.12.00 VZ: "system" folders are now on the top of the folder tree
              fixed bug with messages boxes which couldn't be disabled in 0.61
