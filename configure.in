@@ -391,7 +391,7 @@ dnl we need to set the target for c-client library:
 AC_MSG_CHECKING(for c-client library OS type)
 CCOSTYPE=
 case "${OSTYPE}" in
-linux*)
+linux* | Linux*)
   CCOSTYPE=slx
   ;;
 solaris*|SunOS*)
@@ -417,7 +417,7 @@ esac
 
 AC_MSG_RESULT($CCOSTYPE)
 if test "x$CCOSTYPE" = "x" ; then
-	AC_MSG_ERROR("Cannot determine OS type for c-client library.")
+	AC_MSG_ERROR("Cannot determine OS type for c-client library for your OS: ${OSTYPE}.")
 fi
 AC_SUBST(CCOSTYPE)
 

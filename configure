@@ -3760,7 +3760,7 @@ echo $ac_n "checking for c-client library OS type""... $ac_c" 1>&6
 echo "configure:3761: checking for c-client library OS type" >&5
 CCOSTYPE=
 case "${OSTYPE}" in
-linux*)
+linux* | Linux*)
   CCOSTYPE=slx
   ;;
 solaris*|SunOS*)
@@ -3786,7 +3786,7 @@ esac
 
 echo "$ac_t""$CCOSTYPE" 1>&6
 if test "x$CCOSTYPE" = "x" ; then
-	{ echo "configure: error: "Cannot determine OS type for c-client library."" 1>&2; exit 1; }
+	{ echo "configure: error: "Cannot determine OS type for c-client library for your OS: ${OSTYPE}."" 1>&2; exit 1; }
 fi
 
 
