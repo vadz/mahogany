@@ -2819,6 +2819,9 @@ wxComposeView::OnMenuCommand(int id)
             }
             else if ( SaveMsgTextToFile(filename) )
             {
+               // we have been saved
+               ResetDirty();
+
                wxLogStatus(this, _("Message text saved to file '%s'."),
                            filename.c_str());
             }
@@ -2969,7 +2972,6 @@ bool wxComposeView::StartExternalEditor()
             break;
          }
 
-         // 'false' means that it's ok to leave the file empty
          if ( !SaveMsgTextToFile(tmpFileName.GetName()) )
          {
             wxLogError(_("Failed to pass message to external editor."));
@@ -3094,6 +3096,8 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
    }
    else // exit code ok
    {
+      bool wasModified = m_editor->IsModified();
+
       if ( !InsertFileAsText(m_tmpFileName, MessageEditor::Insert_Replace) )
       {
          wxLogError(_("Failed to insert back the text from external editor."));
@@ -3110,8 +3114,13 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
          // check if the text was really changed
          if ( ComputeTextHash() == m_oldTextHash )
          {
-            // assume it wasn't
-            ResetDirty();
+            // assume it wasn't and so restore the previous "modified" flag (if
+            // it had been modified before the ext editor was launched, it is
+            // still dirty, of course, but if it wasn't, it didn't become so)
+            if ( !wasModified )
+            {
+               m_editor->ResetDirty();
+            }
 
             // show it to the user so that he knows that there will be no
             // question before closing the window
@@ -3936,8 +3945,6 @@ wxComposeView::SaveMsgTextToFile(const String& filename) const
 
       part->DecRef();
    }
-
-   ((wxComposeView *)this)->ResetDirty(); // const_cast
 
    return true;
 }
