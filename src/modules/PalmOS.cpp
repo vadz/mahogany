@@ -890,9 +890,31 @@ PalmOSModule::CreateFileList(wxArrayString &list, DIR * dir, wxString directory)
       // ignore .* files (especially . or ..)
       if (dirent->d_name[0] == '.')
          continue;
+#ifdef _DIRENT_HAVE_D_TYPE
+      // ignore directories
+      if ( dirent->d_type == DT_REG )
+          name.Printf("%s%s", directory.c_str(), dirent->d_name);
+      else
+      {
+         wxString msg;
+         msg.Printf(_("Ignoring entry '%s' which is not a regular file."),
+                    name.c_str());
+         StatusMessage(_(msg));
+         continue;
+      }
+  
+#endif
+      wxString extension = name.AfterLast('.');
+      if(extension != "pdb" && extension != "prc" &&
+         extension != "prc" && extension != "PRC")
+      {
+         wxString msg;
+         msg.Printf(_("Ignoring file '%s' with unknown extension."),
+                    name.c_str());
+         StatusMessage(_(msg));
+         continue;
+      }
 
-      name.Printf("%s%s", directory.c_str(), dirent->d_name);
-      
       // now we open the file and see whether it is really a file for
       // the Palm. If yes, then we remember the filename.
       struct pi_file *f = pi_file_open((char*)name.c_str());
@@ -1177,16 +1199,6 @@ PalmOSModule::InstallFiles(wxArrayString &fnames, bool delFile)
    for (unsigned int j = 0; j < fnames.GetCount(); j++) {
       db[dbcount] = (struct db*)malloc(sizeof(struct db));
 
-      wxString extension = fnames.Item(j).AfterLast('.');
-      if(extension != "pdb" && extension != "prc" &&
-         extension != "prc" && extension != "PRC")
-      {
-         wxString msg;
-         msg.Printf(_("Skipping file '%s' with unknown extension."),
-                    fnames.Item(j).c_str());
-         ErrorMessage(_(msg));
-         continue;
-      }
       // remember filename
       sprintf(db[dbcount]->name, "%s", fnames.Item(j).c_str());
 
