@@ -1,3 +1,5 @@
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
 // File name:   gui/wxFolderView.cpp - window with folder view inside
 // Purpose:     wxFolderView is used to show to the user folder contents
 // Author:      Karsten Ballüder (Ballueder@gmx.net)
@@ -17,7 +19,7 @@
 // ----------------------------------------------------------------------------
 
 #ifdef __GNUG__
-#pragma  implementation "wxFolderView.h"
+   #pragma  implementation "wxFolderView.h"
 #endif
 
 #include "Mpch.h"
@@ -442,37 +444,109 @@ public:
 };
 
 // ----------------------------------------------------------------------------
-// wxStatusProgress: displays a message in the status bar of the given frame
-// in its ctor and the same message with "done" appended in its dtor
+// FolderViewAsyncStatus: this object is constructed before launching an async
+// operation to show some initial message
+//
+// Then it must be given the ticket to monitor - if the ticket is invalid, it
+// deletes itself (with an error message) and the story stops here, otherwise
+// it waits untiul OnASFolderResultEvent() deletes it and gives the final
+// message indicating either success (default) or failure (if Fail() was
+// called)
 // ----------------------------------------------------------------------------
 
-// TODO: move this class in a header, it will be useful elsewhere too
-
-class wxStatusProgress
+class FolderViewAsyncStatus
 {
 public:
-   wxStatusProgress(wxFrame *frame, const char *fmt, ...)
+   FolderViewAsyncStatus(wxFolderView *fv, const char *fmt, ...)
    {
-      m_frame = frame;
+      m_folderView = fv;
+      m_ticket = ILLEGAL_TICKET;
 
       va_list argptr;
       va_start(argptr, fmt);
-      m_msg.PrintfV(fmt, argptr);
+      m_msgInitial.PrintfV(fmt, argptr);
       va_end(argptr);
 
-      wxLogStatus(m_frame, m_msg);
+      m_folderView->AddAsyncStatus(this);
+
+      wxLogStatus(m_folderView->GetParentFrame(), m_msgInitial);
       wxBeginBusyCursor();
    }
 
-   ~wxStatusProgress()
+   // monitor the given ticket, give error message if the corresponding
+   // operation terminates with an error
+   bool Monitor(Ticket ticket, const char *fmt, ...)
    {
-      wxLogStatus(m_frame, m_msg + _("done."));
+      va_list argptr;
+      va_start(argptr, fmt);
+      m_msgError.PrintfV(fmt, argptr);
+      va_end(argptr);
+
+      m_ticket = ticket;
+
+      if ( ticket == ILLEGAL_TICKET )
+      {
+         // self delete as wxFolderView will never do it as it will never get
+         // the notifications for the invalid ticket
+         m_folderView->RemoveAsyncStatus(this);
+
+         delete this;
+
+         return FALSE;
+      }
+
+      m_folderView->GetTicketList()->Add(ticket);
+
+      return TRUE;
+   }
+
+   // used by OnASFolderResultEvent() to find the matching progress indicator
+   Ticket GetTicket() const { return m_ticket; }
+
+   // use to indicate that our operation finally failed
+   void Fail() { m_ticket = ILLEGAL_TICKET; }
+
+   // use different message on success (default is initial message + done)
+   void SetSuccessMsg(const char *fmt, ...)
+   {
+      va_list argptr;
+      va_start(argptr, fmt);
+      m_msgOk.PrintfV(fmt, argptr);
+      va_end(argptr);
+   }
+
+   // give the appropariate message
+   ~FolderViewAsyncStatus()
+   {
+      if ( m_ticket == ILLEGAL_TICKET )
+      {
+         wxLogError(m_msgError);
+      }
+      else // success
+      {
+         if ( m_msgOk.empty() )
+         {
+            m_msgOk << m_msgInitial << _(" done.");
+         }
+         //else: set explicitly, use it as is
+
+         wxLogStatus(m_folderView->GetParentFrame(), m_msgOk);
+      }
+
       wxEndBusyCursor();
    }
 
 private:
-   wxFrame *m_frame;
-   wxString m_msg;
+   // the folder view which initiated the async operation
+   wxFolderView *m_folderView;
+
+   // the ticket for our operation
+   Ticket m_ticket;
+
+   // the initial message and the final message in case of success and failure
+   wxString m_msgInitial,
+            m_msgOk,
+            m_msgError;
 };
 
 // ----------------------------------------------------------------------------
@@ -922,8 +996,11 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
       m_menuFolders = new wxFolderMenu();
    }
 
+   // constructing the menu may take a long time
+   wxBeginBusyCursor();
    m_menu->Insert(0, WXMENU_POPUP_FOLDER_MENU, _("&Quick move"),
                   m_menuFolders->GetMenu());
+   wxEndBusyCursor();
 
    m_isInPopupMenu = true;
 
@@ -1805,6 +1882,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_SetFolderSemaphore = false;
 
    m_Parent = parent;
+
    // cast is harmless as we can only have MFrames in this application
    m_Frame = (MFrame *)GetFrame(m_Parent);
 
@@ -2611,9 +2689,25 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
          {
             UIdArray selections = GetSelections();
 
-            m_TicketList->Add(
-                  m_ASMailFolder->ApplyFilterRules(&selections, this)
-               );
+            size_t count = selections.GetCount();
+            if ( count )
+            {
+               FolderViewAsyncStatus *status =
+                  new FolderViewAsyncStatus(this,
+                                            _("Applying filter rules to %u "
+                                              "messages..."), count);
+               Ticket t = m_ASMailFolder->ApplyFilterRules(&selections, this);
+               if ( status->Monitor(t, _("Failed to apply filter rules.")) )
+               {
+                  status->SetSuccessMsg(_("Applied filters to %u messages, "
+                                          "see log window for details."),
+                                        count);
+               }
+            }
+            else // no messages
+            {
+               wxLogStatus(m_Frame, _("Please select messages to filter."));
+            }
          }
          break;
 
@@ -3004,10 +3098,10 @@ wxFolderView::DeleteOrTrashMessages(const UIdArray& selections)
    if ( !selections.Count() )
       return;
 
-   wxStatusProgress(m_Frame, _("Deleting messages..."));
-
-   Ticket t = m_ASMailFolder->DeleteOrTrashMessages(&selections, this);
-   m_TicketList->Add(t);
+   FolderViewAsyncStatus *status =
+      new FolderViewAsyncStatus(this, _("Deleting messages..."));
+   status->Monitor(m_ASMailFolder->DeleteOrTrashMessages(&selections, this),
+                   _("Failed to delete messages"));
 }
 
 void
@@ -3061,14 +3155,16 @@ wxFolderView::SaveMessagesToFolder(const UIdArray& selections, MFolder *folder)
       folder->IncRef(); // to match DecRef() below
    }
 
-   wxStatusProgress(m_Frame, _("Saving %d message(s) to '%s'..."),
-                    count, folder->GetFullName().c_str());
+   FolderViewAsyncStatus *status =
+      new FolderViewAsyncStatus(this, _("Saving %d message(s) to '%s'..."),
+                                count, folder->GetFullName().c_str());
 
-   Ticket t = m_ASMailFolder->SaveMessagesToFolder(&selections,
-                                                   m_Frame,
-                                                   folder,
-                                                   this);
-   m_TicketList->Add(t);
+   Ticket t = m_ASMailFolder->
+                  SaveMessagesToFolder(&selections, m_Frame, folder, this);
+
+   status->Monitor(t,
+                   _("Failed to save messages to the folder '%s'."),
+                   folder->GetFullName().c_str());
 
    folder->DecRef();
 
@@ -3116,19 +3212,12 @@ wxFolderView::SaveMessagesToFile(const UIdArray& selections)
    if ( !count )
       return;
 
-   wxStatusProgress(m_Frame, _("Saving %d message(s) to file..."), count);
+   FolderViewAsyncStatus *status =
+      new FolderViewAsyncStatus(this, _("Saving %d message(s) to file..."),
+                                count);
 
-   bool rc = m_ASMailFolder->SaveMessagesToFile(&selections,
-                                                m_Frame,
-                                                this) != 0;
-
-   String msg;
-   if ( rc )
-      msg.Printf(_("%d messages saved"), count);
-   else
-      msg.Printf(_("Saving messages failed."));
-
-   wxLogStatus(m_Frame, msg);
+   Ticket t = m_ASMailFolder->SaveMessagesToFile(&selections, m_Frame, this);
+   status->Monitor(t, _("Saving messages to file failed."));
 }
 
 void wxFolderView::OnFolderClosedEvent(MEventFolderClosedData& event)
@@ -3390,7 +3479,6 @@ wxFolderView::DragAndDropMessages()
 void
 wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
 {
-   String msg;
    ASMailFolder::Result *result = event.GetResult();
    const Ticket& t = result->GetTicket();
 
@@ -3400,24 +3488,34 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
 
       m_TicketList->Remove(t);
 
-      int value = ((ASMailFolder::ResultInt *)result)->GetValue();
+      int ok = ((ASMailFolder::ResultInt *)result)->GetValue() != 0;
 
+      // find the corresponding FolderViewAsyncStatus object, if any
+      bool hadStatusObject = false;
+      size_t progressCount = m_arrayAsyncStatus.GetCount();
+      for ( size_t n = 0; n < progressCount; n++ )
+      {
+         FolderViewAsyncStatus *asyncStatus = m_arrayAsyncStatus[n];
+         if ( asyncStatus->GetTicket() == t )
+         {
+            if ( !ok )
+            {
+               // tell it to show the error message, not success one
+               asyncStatus->Fail();
+            }
+
+            delete asyncStatus;
+            m_arrayAsyncStatus.RemoveAt(n);
+
+            hadStatusObject = true;
+
+            break;
+         }
+      }
+
+      String msg;
       switch ( result->GetOperation() )
       {
-         case ASMailFolder::Op_SaveMessagesToFile:
-            if ( value )
-            {
-               msg.Printf(_("Saved %lu messages."), (unsigned long)
-                          result->GetSequence()->Count());
-            }
-            else
-            {
-               msg.Printf(_("Saving messages failed."));
-            }
-
-            wxLogStatus(m_Frame, msg);
-            break;
-
          case ASMailFolder::Op_SaveMessagesToFolder:
             ASSERT(result->GetSequence());
 
@@ -3450,7 +3548,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                   wxLogTrace(M_TRACE_DND, "Dropped msgs copied ok");
                }
 
-               if ( !value )
+               if ( !ok )
                {
                   // something failed - what?
                   if ( toDelete )
@@ -3459,6 +3557,11 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                      msg = _("Dragging messages failed.");
                   else
                      msg = _("Copying messages failed.");
+
+                  wxLogError(msg);
+
+                  // avoid logging status message as well below
+                  msg.clear();
                }
                else // success
                {
@@ -3494,17 +3597,24 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                   }
                   else // simple copy, not move
                   {
-                     msg.Printf(_("Copied %lu messages."), count);
+                     if ( !hadStatusObject )
+                     {
+                        msg.Printf(_("Copied %lu messages."), count);
+                     }
+                     //else: status message already given
                   }
                }
 
-               wxLogStatus(m_Frame, msg);
+               if ( !msg.empty() )
+               {
+                  wxLogStatus(m_Frame, msg);
+               }
             }
             break;
 
          case ASMailFolder::Op_SearchMessages:
             ASSERT(result->GetSequence());
-            if( value )
+            if( ok )
             {
                UIdArray *uidsMatching = result->GetSequence();
                if ( !uidsMatching )
@@ -3523,7 +3633,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                   structure.
 
                   VZ: I wonder why do we jump through all these hops - we might
-                      return msgnos from search directly...
+                      return msgnos from search directly... (FIXME)
                 */
                HeaderInfoList_obj hil = GetFolder()->GetHeaders();
                for ( unsigned long n = 0; n < uidsMatching->Count(); n++ )
@@ -3549,24 +3659,9 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
             wxLogStatus(m_Frame, msg);
             break;
 
+         // nothing special to do for these cases
          case ASMailFolder::Op_ApplyFilterRules:
-         {
-            ASSERT(result->GetSequence());
-            if ( value == -1 )
-            {
-               wxLogError(_("Filtering messages failed."));
-            }
-            else
-            {
-               msg.Printf(_("Applied filters to %lu messages, "
-                            "see log window for details."),
-                          (unsigned long)result->GetSequence()->Count());
-               wxLogStatus(m_Frame, msg);
-            }
-            break;
-         }
-
-         // these cases don't have return values
+         case ASMailFolder::Op_SaveMessagesToFile:
          case ASMailFolder::Op_ReplyMessages:
          case ASMailFolder::Op_ForwardMessages:
          case ASMailFolder::Op_DeleteMessages:
@@ -3622,6 +3717,27 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
    //else: not out result at all
 
    result->DecRef();
+}
+
+void wxFolderView::RemoveAsyncStatus(FolderViewAsyncStatus *asyncStatus)
+{
+   size_t progressCount = m_arrayAsyncStatus.GetCount();
+   for ( size_t n = 0; n < progressCount; n++ )
+   {
+      if ( asyncStatus == m_arrayAsyncStatus[n] )
+      {
+         m_arrayAsyncStatus.RemoveAt(n);
+
+         return;
+      }
+   }
+
+   wxFAIL_MSG( "async status not found in m_arrayAsyncStatus" );
+}
+
+void wxFolderView::AddAsyncStatus(FolderViewAsyncStatus *asyncStatus)
+{
+   m_arrayAsyncStatus.Add(asyncStatus);
 }
 
 // ----------------------------------------------------------------------------

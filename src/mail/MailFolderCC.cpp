@@ -575,6 +575,16 @@ public:
 
    void OnProgress(unsigned long count)
    {
+      // CreateDialog() and Update() may call wxYield() and result in
+      // generation of the idle events and calls to MEventManager::
+      // DispatchPending() which may lead to a disaster if any event handler
+      // decides to call back to c-client which is currently locked by our
+      // caller
+      //
+      // So disable the event processing temporarily to avoid all these
+      // complications
+      MEventManagerSuspender suspendEvent;
+
       m_readSoFar = count;
 
       if ( !m_dlgProgress )
@@ -1290,8 +1300,9 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    MailFolderCC *mf = FindFolder(mboxpath, login);
    if(mf)
    {
-      mf->IncRef();
-      mf->PingReopen(); //FIXME: is this really needed? // make sure it's updated
+      //FIXME: is this really needed? 
+      mf->PingReopen(); // make sure it's updated
+
       return mf;
    }
 
@@ -1698,6 +1709,7 @@ MailFolderCC::CloseFolder(const MFolder *folder)
    }
 
    mf->Init();
+   mf->DecRef();
 
    return true;
 }
@@ -1949,11 +1961,16 @@ MailFolderCC::FindFolder(String const &path, String const &login)
       {
          wxLogTrace(TRACE_MF_CACHE, "  Re-using entry: '%s',login '%s'",
                     conn->name.c_str(), conn->login.c_str());
-         return conn->folder;
+
+         MailFolderCC *mf = conn->folder;
+         mf->IncRef();
+
+         return mf;
       }
    }
 
    wxLogTrace(TRACE_MF_CACHE, "  No matching entry found.");
+
    return NULL;
 }
 
@@ -4117,6 +4134,12 @@ MailFolderCC::mm_log(const String& str, long errflg, MailFolderCC *mf)
 void
 MailFolderCC::mm_dlog(const String& str)
 {
+   if ( str.empty() )
+   {
+      // avoid calling GetWriteBuf(0) below, this is invalid
+      return;
+   }
+
    GetLogCircle().Add(str);
 
    // replace the passwords in the log window output (which can be seen by
@@ -4589,6 +4612,8 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
    {
       stream = mf->m_MailStream;
       nmsgs = mf->m_msgnoMax;
+      mf->DecRef();
+
       noCCC = NULL;
    }
    else // this folder is not opened
@@ -4638,7 +4663,7 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
       {
          mf->ExpungeMessages();
 
-         // no "mf->DecRef()" because FindFolder() doesn't IncRef() it
+         mf->DecRef();
       }
       else // folder is not opened, just expunge quietly
       {

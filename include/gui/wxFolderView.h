@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////////
-// Project:     Mahogany
+// Project:     Mahogany - cross platform e-mail GUI client
 // File name:   gui/wxFolderView.h - wxFolderView and related classes
 // Purpose:     wxFolderView is used to show to the user folder contents
 // Author:      Karsten Ballüder (Ballueder@gmx.net)
@@ -14,7 +14,7 @@
 #define WXFOLDERVIEW_H
 
 #ifdef __GNUG__
-#pragma interface "wxFolderView.h"
+   #pragma interface "wxFolderView.h"
 #endif
 
 #include "Mdefaults.h"
@@ -36,6 +36,9 @@ class MailFolder;
 class ASMailFolder;
 class ASTicketList;
 class HeaderInfoList_obj;
+class FolderViewAsyncStatus;
+
+WX_DEFINE_ARRAY(FolderViewAsyncStatus *, ArrayAsyncStatus);
 
 enum wxFolderListCtrlFields
 {
@@ -224,6 +227,15 @@ public:
    /// called when the focused (== current) item in the listctrl changes
    void OnFocusChange(void);
 
+   /// get the parent frame of the folder view
+   MFrame *GetParentFrame() const { return m_Frame; }
+
+   /// add an async status object to m_arrayAsyncStatus
+   void AddAsyncStatus(FolderViewAsyncStatus *asyncStatus);
+
+   /// remove the given async status object from m_arrayAsyncStatus
+   void RemoveAsyncStatus(FolderViewAsyncStatus *asyncStatus);
+
 protected:
    /** Save messages to a folder.
        @param messages array holding the message numbers
@@ -352,6 +364,9 @@ private:
 
    /// set the entry colour to correspond to its status
    void SetEntryColour(size_t index, const HeaderInfo *hi);
+
+   /// the array containing the progress objects for all async operations
+   ArrayAsyncStatus m_arrayAsyncStatus;
 
    /// MEventManager reg info
    void *m_regOptionsChange;

@@ -809,7 +809,17 @@ MFolder *MFolderFromProfile::CreateSubfolder(const String& name, FolderType type
    }
 
    // ok, it is: do create it
-   return MFolder::Create(GetSubFolderFullName(name), type);
+   MFolder *subfolder = MFolder::Create(GetSubFolderFullName(name), type);
+   if ( subfolder )
+   {
+      // we must update the children count if we had already calculated it
+      if ( m_nChildren != INVALID_CHILDREN_COUNT )
+      {
+         m_nChildren++;
+      }
+   }
+
+   return subfolder;
 }
 
 // ----------------------------------------------------------------------------

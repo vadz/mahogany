@@ -2120,7 +2120,7 @@ void wxFolderTreeImpl::ReopenBranch(wxTreeItemId parent)
 
    RestoreExpandedBranches(parent, expState);
 
-   if ( !!currentName )
+   if ( !currentName.empty() )
    {
       wxTreeItemId id = GetTreeItemFromName(currentName);
       if ( id.IsOk() )
@@ -2306,15 +2306,24 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
             wxTreeItemId parent = GetTreeItemFromName(folderName);
             CHECK_RET( parent.IsOk(), "no such item in the tree??" );
 
-            // refresh the branch of the tree with the parent of the folder
-            // which changed for all usual events or this folder itself for
-            // CreateUnder events (which are sent when (possibly) multiple
-            // folders were created under the common parent)
-            ReopenBranch(parent);
+            if ( IsExpanded(parent) )
+            {
+               // refresh the branch of the tree with the parent of the folder
+               // which changed for all usual events or this folder itself for
+               // CreateUnder events (which are sent when (possibly) multiple
+               // folders were created under the common parent)
+               ReopenBranch(parent);
+            }
+            else // wasn't expanded yet, no need to reopen - just open
+            {
+               SetItemHasChildren(parent, TRUE);
 
-            // always expand the branch in this case, even if it wasn't
-            // expanded before - we want to show the newly created folders
-            Expand(parent);
+               // expand the branch even if it wasn't expanded before - we want
+               // to show the newly created folders
+               Expand(parent);
+            }
+
+            EnsureVisible(parent);
          }
          break;
 

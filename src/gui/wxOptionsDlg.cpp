@@ -849,10 +849,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Ping/check folder interval in seconds"), Field_Number, -1},
    { gettext_noop("Mahogany may keep the folder open after closing it\n"
                   "for some time to make reopening the folder faster.\n"
-                  "This is useful for folders you often reopen."),
-                                                   Field_Message |
-                                                   Field_AppWide, -1 },
-   { gettext_noop("&Keep open for (seconds)"), Field_Number | Field_AppWide, -1},
+                  "This is useful for folders you often reopen."), Field_Message, -1 },
+   { gettext_noop("&Keep open for (seconds)"), Field_Number, -1},
    { gettext_noop("Folder to save &collected messages to"), Field_Folder | Field_AppWide, -1 },
    { gettext_noop("Send outgoing messages later"), Field_Bool, -1 },
    { gettext_noop("Folder for &outgoing messages"), Field_Folder, ConfigField_UseOutbox },
