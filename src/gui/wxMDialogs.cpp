@@ -839,6 +839,8 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                 "</center>");
 
    bottom->SetPage("<body text=#000000 bgcolor=#ffffff>"
+                   "<font face=\"Times New Roman,times\" size-2>"
+
 #ifdef DEBUG
                    "<h3>Debug information:</h3>"
                    "<h4>Features:</h4>"

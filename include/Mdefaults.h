@@ -703,7 +703,7 @@
 /// how often should we autosave the profile settings (0 to disable)?
 #define   MP_AUTOSAVEDELAY_D       60
 /// how often should we check for incoming mail (secs, 0 to disable)?
-#define   MP_POLLINCOMINGDELAY_D       300
+#define   MP_POLLINCOMINGDELAY_D       300 
 /// ask user if he really wants to exit?
 #define   MP_CONFIRMEXIT_D      1l
 /// open folders when they're clicked (otherwise - double clicked)
@@ -868,7 +868,7 @@
 /// comment
 #define   MP_FOLDER_COMMENT_D      M_EMPTYSTRING
 /// update interval for folders in seconds
-#define   MP_UPDATEINTERVAL_D      60
+#define   MP_UPDATEINTERVAL_D      180
 /// do automatic word wrap?
 #define MP_AUTOMATIC_WORDWRAP_D   1l
 /// wrapmargin for composition/message view (set to -1 to disable it)
