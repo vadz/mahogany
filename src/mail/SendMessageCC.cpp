@@ -119,13 +119,13 @@ SendMessageCC::Create(Protocol protocol,
    {
       m_ServerHost = READ_CONFIG(prof, MP_SMTPHOST);
       m_UserName = READ_CONFIG(prof,MP_SMTPHOST_LOGIN);
-      m_Password = READ_CONFIG(prof,MP_SMTPHOST_PASSWORD);
+      m_Password = strutil_decrypt(READ_CONFIG(prof,MP_SMTPHOST_PASSWORD));
    }
    else
    {
       m_ServerHost = READ_CONFIG(prof, MP_NNTPHOST);
       m_UserName = READ_CONFIG(prof,MP_NNTPHOST_LOGIN);
-      m_Password = READ_CONFIG(prof,MP_NNTPHOST_PASSWORD);
+      m_Password = strutil_decrypt(READ_CONFIG(prof,MP_NNTPHOST_PASSWORD));
    }
 #ifdef USE_SSL
    m_UseSSL = READ_CONFIG(prof, MP_SMTPHOST_USE_SSL) != 0;
