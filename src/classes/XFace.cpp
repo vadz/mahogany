@@ -238,7 +238,7 @@ XFace::ConvertImgToXFaceData(wxImage &img)
                value <<= 1;
    }
          value = value ^ 0xffff;
-   tmp.Printf("0x%04lX", value);
+   tmp.Printf("0x%04lX", (unsigned long)value);
    dataString += tmp;
          dataString += ',';
       }

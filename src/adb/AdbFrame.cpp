@@ -3090,7 +3090,7 @@ bool wxADBPropertiesDialog::TransferDataToWindow()
   m_staticFileSize->SetLabel(str);
   m_staticFileName->SetLabel(filename);
 
-  str.Printf("%ld", m_book->GetNumberOfEntries());
+  str.Printf("%ld", (unsigned long)m_book->GetNumberOfEntries());
   m_staticNumEntries->SetLabel(str);
 
   m_textName->SetValue(m_book->GetBook()->GetName());

@@ -5033,7 +5033,7 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
       // update the number of headers in the listing
       if ( m_headers )
       {
-         wxLogTrace(TRACE_MF_EVENTS, "Adding msgno %u to headers", msgnoMax);
+         wxLogTrace(TRACE_MF_EVENTS, "Adding msgno %u to headers", (unsigned int)msgnoMax);
 
          m_headers->OnAdd(msgnoMax);
       }
@@ -5139,7 +5139,7 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
             m_expungedPositions->Add(m_headers->GetPosFromIdx(idx));
          }
 
-         wxLogTrace(TRACE_MF_EVENTS, "Removing msgno %u from headers", msgno);
+         wxLogTrace(TRACE_MF_EVENTS, "Removing msgno %u from headers", (unsigned int)msgno);
 
          m_headers->OnRemove(idx);
       }
@@ -6706,7 +6706,7 @@ void ServerInfoEntry::KeepStream(MAILSTREAM *stream, const MFolder *folder)
 
    wxLogTrace(TRACE_CONN_CACHE,
               "Keeping connection to %s alive for %d seconds.",
-              stream->mailbox, delay);
+              stream->mailbox, (int)delay);
 
    m_timeouts.push_back(t + delay);
 
@@ -6719,7 +6719,7 @@ void ServerInfoEntry::KeepStream(MAILSTREAM *stream, const MFolder *folder)
            (ms_connCloseTimer->GetInterval() / 1000 > delay) )
    {
       wxLogTrace(TRACE_CONN_CACHE,
-                 "Starting connection clean up timer (delay = %ds)", delay);
+                 "Starting connection clean up timer (delay = %ds)", (int)delay);
 
       // we want to use a smaller interval
       ms_connCloseTimer->Start(delay * 1000);

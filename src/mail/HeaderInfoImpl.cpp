@@ -2007,7 +2007,7 @@ bool HeaderInfoListImpl::ReallyGet(MsgnoType pos)
 String HeaderInfoListImpl::DebugDump() const
 {
    String s1 = MObjectRC::DebugDump(), s2;
-   s2.Printf("%u entries", Count());
+   s2.Printf("%u entries", (unsigned int)Count());
 
    return s1 + s2;
 }
