@@ -136,6 +136,11 @@ public:
    /// start showing a new MIME part
    virtual void StartPart() = 0;
 
+   /// insert an arbitrary active object (takes ownership of ClickableInfo)
+   virtual void InsertClickable(const wxBitmap& icon,
+                                ClickableInfo *ci,
+                                const wxColour& col = wxNullColour) = 0;
+
    /// insert an attechment (takes ownership of ClickableInfo)
    virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci) = 0;
 

@@ -16,6 +16,8 @@
 
 #include "MModule.h"
 
+class MCryptoEngineOutputLog;
+
 class WXDLLEXPORT wxWindow;
 
 /**
@@ -48,6 +50,7 @@ public:
       KEYRING_VIEW_ERROR,
       KEYRING_CHECK_ERROR,
       KEYRING_SIGNATURE_ERROR,
+      SIGNATURE_EXPIRED_ERROR,
       SIGNATURE_ERROR,
       PUBLIC_KEY_ENCRIPTION_ERROR,
       ENCRYPTION_ERROR,
@@ -66,6 +69,9 @@ public:
 
       All methods in this section return a Status enum code, in particular they
       all return OK (0) on success.
+
+      They also all take an optional last parameter to collect the detailed
+      output of the crypto engine into.
     */
    //@{
 
@@ -74,10 +80,12 @@ public:
 
       @param messageIn the encrypted text
       @param messageOut the decrypted text (only valid if OK is returned)
+      @param log the object to place output log into, if not NULL
       @return Status code, OK if decryption succeeded
     */
-   virtual int Decrypt(const String& messageIn,
-                       String& messageOut) = 0;
+   virtual Status Decrypt(const String& messageIn,
+                          String& messageOut,
+                          MCryptoEngineOutputLog *log = NULL) = 0;
 
    /**
       This method encrypts and signs a message.
@@ -95,20 +103,24 @@ public:
 
       @param user A pointer to the Id of the private key of the
       sender, usually is the email address used to create that key.
+
+      @param log the object to place output log into, if not NULL
    */
-   virtual int Encrypt(const String& recipient,
-                       const String& messageIn,
-                       String &messageOut,
-                       const String& user = _T("")) = 0;
+   virtual Status Encrypt(const String& recipient,
+                          const String& messageIn,
+                          String &messageOut,
+                          const String& user = _T(""),
+                          MCryptoEngineOutputLog *log = NULL) = 0;
 
    /**
       Just signs the message.
 
       Takes the user id to use and creates a signed message on output.
     */
-   virtual int Sign(const String& user,
-                    const String& messageIn,
-                    String& messageOut) = 0;
+   virtual Status Sign(const String& user,
+                       const String& messageIn,
+                       String& messageOut,
+                       MCryptoEngineOutputLog *log = NULL) = 0;
 
    /**
       Verifies the message signature.
@@ -116,15 +128,26 @@ public:
       On success, returns OK and puts the message text without the signature in
       messageOut. If no signature was found, returns NO_SIG_ERROR
     */
-   virtual int VerifySignature(const String& messageIn,
-                               String& messageOut) = 0;
+   virtual Status VerifySignature(const String& messageIn,
+                                  String& messageOut,
+                                  MCryptoEngineOutputLog *log = NULL) = 0;
+
+   /**
+      Verifies the detached signature.
+
+      On success returns OK but does nothing else.
+    */
+   virtual Status
+      VerifyDetachedSignature(const String& message,
+                              const String& signature,
+                              MCryptoEngineOutputLog *log = NULL) = 0;
 
 #if 0
-   virtual int CheckRecipient(const String & recipient) const = 0;
+   virtual Status CheckRecipient(const String & recipient) const = 0;
 
-   virtual int GetFingerprint(String & fp) const = 0;
+   virtual Status GetFingerprint(String & fp) const = 0;
 
-   virtual int GetPublicKey(String & pk) const = 0;
+   virtual Status GetPublicKey(String & pk) const = 0;
 #endif // 0
    //@}
 
@@ -139,6 +162,24 @@ public:
    //virtual void Configure(wxWindow *parent) = 0;
 
    //@}
+};
+
+// ----------------------------------------------------------------------------
+// MCryptoEngineOutputLog: collects the crypto engine execution log
+// ----------------------------------------------------------------------------
+
+class MCryptoEngineOutputLog
+{
+public:
+   MCryptoEngineOutputLog() { }
+
+   void AddMessage(const String& line) { m_messages.Add(line); }
+
+   size_t GetMessageCount() const { return m_messages.GetCount(); }
+   const String& GetMessage(size_t n) const { return m_messages[n]; }
+
+private:
+   wxArrayString m_messages;
 };
 
 // ----------------------------------------------------------------------------

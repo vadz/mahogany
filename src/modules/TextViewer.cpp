@@ -93,6 +93,9 @@ public:
    virtual void StartBody();
    virtual void StartPart();
    virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci);
+   virtual void InsertClickable(const wxBitmap& icon,
+                                ClickableInfo *ci,
+                                const wxColour& col);
    virtual void InsertImage(const wxImage& image, ClickableInfo *ci);
    virtual void InsertRawContents(const String& data);
    virtual void InsertText(const String& text, const MTextStyle& style);
@@ -563,9 +566,20 @@ void TextViewer::StartPart()
 
 void TextViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
 {
-   wxString str;
-   str << '[' << "Attachment: " << ci->GetLabel() << ']';
+   String str;
+   str << _("[Attachment: ") << ci->GetLabel() << _T(']');
+
    m_window->InsertClickable(str, ci, GetOptions().AttCol);
+}
+
+void TextViewer::InsertClickable(const wxBitmap& icon,
+                                 ClickableInfo *ci,
+                                 const wxColour& col)
+{
+   String str;
+   str << _T('[') << ci->GetLabel() << _T(']');
+
+   m_window->InsertClickable(str, ci, col);
 }
 
 void TextViewer::InsertImage(const wxImage& image, ClickableInfo *ci)

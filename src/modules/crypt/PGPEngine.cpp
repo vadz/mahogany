@@ -49,57 +49,6 @@ extern const MOption MP_PGP_COMMAND;
 extern const MPersMsgBox *M_MSGBOX_REMEMBER_PGP_PASSPHRASE;
 
 // ----------------------------------------------------------------------------
-// MPassphrase: not used currently
-// ----------------------------------------------------------------------------
-
-#if 0
-
-/**
-  MPassphrase represents a passphrase needed to unlock a private key.
-
-  MPassphrase is basicly just a string which is either stored in memory
-  (insecure) or which the user is asked about every time it is needed. Each
-  pass phrase is associated with a given user id.
- */
-class MPassphrase
-{
-public:
-   MPassphrase() { m_store = false; }
-
-   /**
-     Returns the passphrase -- called by MCryptoEngine when needed.
-
-     This can either return the stored string or ask the user. In either case,
-     Unget() must be called later if the passphrase was correct or Get() should
-     be called again if it was not.
-
-     @param user the user id of the user whose passphrase is requested
-     @param passphrase is filled with the pass phrase if true is returned
-     @return true if ok, false if user cancelled entering the passphrase
-    */
-   bool Get(const String& user, String& passphrase);
-
-   /**
-     Forget or store the passphrase previously returned by Get().
-
-     @param passphrase the pass phrase previously returned by Get()
-    */
-   void Unget(const String& passphrase);
-
-private:
-   /// the user the passphrase was last requested for
-   String m_user;
-
-   /// the stored passphrase if m_store is true
-   String m_passphrase;
-
-   /// if true, we have a valid stored pass phrase
-   bool m_store;
-};
-
-#endif // 0
-
-// ----------------------------------------------------------------------------
 // PassphraseManager: this class can be used to remember the passphrases
 //                    instead of asking the user to reenter them again and
 //                    again (and again...)
@@ -147,28 +96,37 @@ class PGPEngine : public MCryptoEngine
 {
 public:
    // implement the base class pure virtuals
-   virtual int Decrypt(const String& messageIn,
-                       String& messageOut);
+   virtual Status Decrypt(const String& messageIn,
+                          String& messageOut,
+                          MCryptoEngineOutputLog *log);
 
-   virtual int Encrypt(const String& recipient,
+   virtual Status Encrypt(const String& recipient,
+                          const String& messageIn,
+                          String &messageOut,
+                          const String& user,
+                          MCryptoEngineOutputLog *log);
+
+   virtual Status Sign(const String& user,
                        const String& messageIn,
-                       String &messageOut,
-                       const String& user);
+                       String& messageOut,
+                       MCryptoEngineOutputLog *log);
 
-   virtual int Sign(const String& user,
-                    const String& messageIn,
-                    String& messageOut);
+   virtual Status VerifySignature(const String& messageIn,
+                                  String& messageOut,
+                                  MCryptoEngineOutputLog *log);
 
-   virtual int VerifySignature(const String& messageIn,
-                               String& messageOut);
+   virtual Status VerifyDetachedSignature(const String& message,
+                                          const String& signature,
+                                          MCryptoEngineOutputLog *log);
 
 protected:
    /**
       Executes the tool with messageIn on stdin and puts stdout into messageOut
     */
-   int ExecCommand(const String& options,
-                   const String& messageIn,
-                   String& messageOut);
+   Status ExecCommand(const String& options,
+                      const String& messageIn,
+                      String& messageOut,
+                      MCryptoEngineOutputLog *log);
 
 private:
    DECLARE_CRYPTO_ENGINE(PGPEngine)
@@ -191,7 +149,7 @@ IMPLEMENT_CRYPTO_ENGINE(PGPEngine,
 // ----------------------------------------------------------------------------
 
 /*
-   The format og "gnupg --status-fd" output as taken from the DETAILS file of
+   The format of "gnupg --status-fd" output as taken from the DETAILS file of
    gnupg distribution:
 
 Format of the "--status-fd" output
@@ -477,25 +435,19 @@ private:
    bool m_done;
 };
 
-int
+PGPEngine::Status
 PGPEngine::ExecCommand(const String& options,
                        const String& messageIn,
-                       String& messageOut)
+                       String& messageOut,
+                       MCryptoEngineOutputLog *log)
 {
-   Profile *profile = mApplication->GetProfile();
-
    PGPProcess process;
    long pid = wxExecute
               (
                wxString::Format
                (
                 "%s --status-fd=2 --command-fd 0 --output - -a %s",
-//                String(READ_CONFIG_TEXT(profile, MP_PGP_COMMAND)), //FIXME
-#ifdef OS_WIN
-                "G:\\Internet\\PGP\\GPG-1.2.1\\gpg.exe", // TODO
-#else
-                "/usr/bin/gpg", // TODO
-#endif
+                READ_APPCONFIG_TEXT(MP_PGP_COMMAND).c_str(),
                 options.c_str()
                ),
                wxEXEC_ASYNC,
@@ -578,8 +530,7 @@ PGPEngine::ExecCommand(const String& options,
             }
             else if ( code == _T("EXPSIG") || code == _T("EXPKEYSIG") )
             {
-               // FIXME: at least give a warning
-               status = OK;
+               status = SIGNATURE_EXPIRED_ERROR;
                wxLogWarning(_("Expired signature for public key \"%s\""), pc);
             }
             else if ( code == _T("BADSIG") )
@@ -639,8 +590,8 @@ PGPEngine::ExecCommand(const String& options,
             }
             else if ( code == _T("MISSING_PASSPHRASE") )
             {
-               wxLogWarning(_("Passphrase for the user \"%s\" unavailable."),
-                            user.c_str());
+               wxLogError(_("Passphrase for the user \"%s\" unavailable."),
+                          user.c_str());
             }
             else if ( code == _T("DECRYPTION_FAILED") )
             {
@@ -692,7 +643,14 @@ PGPEngine::ExecCommand(const String& options,
                             line.c_str());
             }
          }
-         //else: some babble, ignore
+         else // normal (free form) gpg output
+         {
+            // remember in the output log object if we have one
+            if ( log )
+            {
+               log->AddMessage(line);
+            }
+         }
       }
    }
 
@@ -711,9 +669,10 @@ PGPEngine::ExecCommand(const String& options,
 // PGPEngine: encryption
 // ----------------------------------------------------------------------------
 
-int
+PGPEngine::Status
 PGPEngine::Decrypt(const String& messageIn,
-                   String& messageOut)
+                   String& messageOut,
+                   MCryptoEngineOutputLog *log)
 {
    // as wxExecute() doesn't allow redirecting anything but stdin/out/err we
    // have no way to pass both the encrypted data and the passphrase to PGP on
@@ -733,15 +692,16 @@ PGPEngine::Decrypt(const String& messageIn,
       return CANNOT_EXEC_PROGRAM;
    }
 
-   return ExecCommand(tmpfname.GetName(), _T(""), messageOut);
+   return ExecCommand(tmpfname.GetName(), _T(""), messageOut, log);
 }
 
 
-int
+PGPEngine::Status
 PGPEngine::Encrypt(const String& recipient,
                    const String& messageIn,
                    String &messageOut,
-                   const String& user)
+                   const String& user,
+                   MCryptoEngineOutputLog *log)
 {
    FAIL_MSG( _T("TODO") );
 
@@ -752,10 +712,11 @@ PGPEngine::Encrypt(const String& recipient,
 // PGPEngine: signing
 // ----------------------------------------------------------------------------
 
-int
+PGPEngine::Status
 PGPEngine::Sign(const String& user,
                 const String& messageIn,
-                String& messageOut)
+                String& messageOut,
+                MCryptoEngineOutputLog *log)
 {
    FAIL_MSG( _T("TODO") );
 
@@ -763,16 +724,27 @@ PGPEngine::Sign(const String& user,
 }
 
 
-int
+PGPEngine::Status
 PGPEngine::VerifySignature(const String& messageIn,
-                           String& messageOut)
+                           String& messageOut,
+                           MCryptoEngineOutputLog *log)
 {
-   return ExecCommand(_T(""), messageIn, messageOut);
+   return ExecCommand(_T(""), messageIn, messageOut, log);
 }
 
-// ----------------------------------------------------------------------------
+PGPEngine::Status
+PGPEngine::VerifyDetachedSignature(const String& message,
+                                   const String& signature,
+                                   MCryptoEngineOutputLog *log)
+{
+   FAIL_MSG( _T("TODO") );
+
+   return NOT_IMPLEMENTED_ERROR;
+}
+
+// ============================================================================
 // PassphraseManager
-// ----------------------------------------------------------------------------
+// ============================================================================
 
 UserPassMap PassphraseManager::m_map;
 

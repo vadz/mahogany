@@ -110,6 +110,9 @@ public:
    virtual void StartBody();
    virtual void StartPart();
    virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci);
+   virtual void InsertClickable(const wxBitmap& icon,
+                                ClickableInfo *ci,
+                                const wxColour& col);
    virtual void InsertImage(const wxImage& image, ClickableInfo *ci);
    virtual void InsertRawContents(const String& data);
    virtual void InsertText(const String& text, const MTextStyle& style);
@@ -395,7 +398,7 @@ void HtmlViewerWindow::OnCellMouseHover(wxHtmlCell *cell, wxCoord x, wxCoord y)
    if ( link )
    {
       ClickableInfo *ci = GetClickable(link->GetHref());
-      if ( ci )
+      if ( !ci )
       {
          // let the base class process it
          return;
@@ -853,6 +856,13 @@ void HtmlViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
               << "\"></a>";
 
    m_window->StoreClickable(ci, url);
+}
+
+void HtmlViewer::InsertClickable(const wxBitmap& icon,
+                                 ClickableInfo *ci,
+                                 const wxColour& col)
+{
+   InsertAttachment(icon, ci);
 }
 
 void HtmlViewer::InsertImage(const wxImage& image, ClickableInfo *ci)

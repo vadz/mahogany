@@ -22,14 +22,150 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+
+   #include <wx/menu.h>
 #endif //USE_PCH
 
+#include "MessageView.h"
+#include "MessageViewer.h"
 #include "ViewFilter.h"
 
 #include "modules/MCrypt.h"
 
+#include "ClickInfo.h"
+
 // ----------------------------------------------------------------------------
-// PGPFilter declaration
+// ClickablePGPInfo: an icon in message viewer containing PGP information
+// ----------------------------------------------------------------------------
+
+class ClickablePGPInfo : public ClickableInfo
+{
+public:
+   ClickablePGPInfo(MessageView *msgView,
+                    const String& label,
+                    const String& bmpName,
+                    const wxColour& colour);
+   virtual ~ClickablePGPInfo();
+
+   // implement the base class pure virtuals
+   virtual String GetLabel() const;
+
+   virtual void OnLeftClick(const wxPoint&) const { ShowDetails(); }
+   virtual void OnRightClick(const wxPoint& pt) const;
+   virtual void OnDoubleClick(const wxPoint&) const { ShowDetails(); }
+
+   // show the details about this PGP info object to the user (menu command)
+   void ShowDetails() const;
+
+   // show the raw text of the PGP message (menu command)
+   void ShowRawText() const;
+
+   // get the bitmap and the colour to show in the viewer
+   wxBitmap GetBitmap() const;
+   wxColour GetColour() const;
+
+   // used by PGPFilter only
+   void SetRaw(const String& textRaw) { m_textRaw = textRaw; }
+   void SetLog(MCryptoEngineOutputLog *log)
+      { ASSERT_MSG( !m_log, _T("SetLog() called twice?") ); m_log = log; }
+
+private:
+   // the kind of object (e.g. "good signature")
+   String m_label;
+
+   // the name of the bitmap shown by this object
+   String m_bmpName;
+
+   // the raw text of the PGP message
+   String m_textRaw;
+
+   // the colour to show this object in (only for text viewer)
+   wxColour m_colour;
+
+   // the log output (we own this object and will delete it)
+   MCryptoEngineOutputLog *m_log;
+};
+
+// ----------------------------------------------------------------------------
+// A bunch of classes trivially deriving from ClickablePGPInfo
+// ----------------------------------------------------------------------------
+
+class PGPInfoGoodSig : public ClickablePGPInfo
+{
+public:
+   PGPInfoGoodSig(MessageView *msgView)
+      : ClickablePGPInfo(msgView,
+                         _("Good PGP signature"),
+                         _T("pgpsig_good"),
+                         *wxGREEN) { }
+};
+
+class PGPInfoExpiredSig : public ClickablePGPInfo
+{
+public:
+   PGPInfoExpiredSig(MessageView *msgView)
+      : ClickablePGPInfo(msgView,
+                         _("Expired PGP signature"),
+                         _T("pgpsig_exp"),
+                         wxColour(0, 255, 255)) { }
+};
+
+class PGPInfoBadSig : public ClickablePGPInfo
+{
+public:
+   PGPInfoBadSig(MessageView *msgView)
+      : ClickablePGPInfo(msgView,
+                         _("Bad PGP signature"),
+                         _T("pgpsig_bad"),
+                         *wxRED) { }
+};
+
+class PGPInfoGoodMsg : public ClickablePGPInfo
+{
+public:
+   PGPInfoGoodMsg(MessageView *msgView)
+      : ClickablePGPInfo(msgView,
+                         _("Decrypted PGP message"),
+                         _T("pgpmsg_ok"),
+                         *wxGREEN) { }
+};
+
+class PGPInfoBadMsg : public ClickablePGPInfo
+{
+public:
+   PGPInfoBadMsg(MessageView *msgView)
+      : ClickablePGPInfo(msgView,
+                         _("Encrypted PGP message"),
+                         _T("pgpmsg_bad"),
+                         *wxRED) { }
+};
+
+// ----------------------------------------------------------------------------
+// PGPMenu: used by ClickablePGPInfo
+// ----------------------------------------------------------------------------
+
+class PGPMenu : public wxMenu
+{
+public:
+   PGPMenu(const ClickablePGPInfo *pgpInfo, const wxChar *title);
+
+   void OnCommandEvent(wxCommandEvent &event);
+
+private:
+   // menu command ids
+   enum
+   {
+      RAW_TEXT,
+      DETAILS
+   };
+
+   const ClickablePGPInfo * const m_pgpInfo;
+
+   DECLARE_EVENT_TABLE()
+};
+
+// ----------------------------------------------------------------------------
+// PGPFilter itself
 // ----------------------------------------------------------------------------
 
 class PGPFilter : public ViewFilter
@@ -255,42 +391,75 @@ PGPFilter::DoProcess(String& text,
 
          CHECK_RET( m_engine, _T("PGP filter can't work without PGP engine") );
 
+         ClickablePGPInfo *pgpInfo = NULL;
+         MCryptoEngineOutputLog *log = new MCryptoEngineOutputLog;
+
          String in(start, end),
                 out;
          if ( isSigned )
          {
             // pass everything between start and end to PGP for verification
-            if ( m_engine->VerifySignature(in, out) != MCryptoEngine::OK )
+            switch ( m_engine->VerifySignature(in, out, log) )
             {
-               // TODO: more details...
-               wxLogWarning(_("The PGP signature of this message is invalid!"));
+               case MCryptoEngine::OK:
+                  // create an icon for the sig just to show that it was there
+                  pgpInfo = new PGPInfoGoodSig(m_msgView);
+                  break;
 
-               // use unmodified text
-               out = in;
-            }
-            else
-            {
-               // TODO: create an icon for the sig...
+               case MCryptoEngine::SIGNATURE_EXPIRED_ERROR:
+                  pgpInfo = new PGPInfoExpiredSig(m_msgView);
+                  break;
+
+               default:
+                  // use unmodified text
+                  out = in;
+
+                  // but still create an icon showing that signature check
+                  // failed
+                  pgpInfo = new PGPInfoBadSig(m_msgView);
             }
          }
          else // encrypted
          {
             // try to decrypt
-            MCryptoEngine::Status rc = (MCryptoEngine::Status) m_engine->Decrypt(in, out);
-            if ( rc != MCryptoEngine::OK )
+            MCryptoEngine::Status rc = m_engine->Decrypt(in, out, log);
+            switch ( rc )
             {
-               // if the user cancelled decryption, don't complain about it
-               if ( rc != MCryptoEngine::OPERATION_CANCELED_BY_USER )
-               {
-                  wxLogError(_("Decrypting the PGP message failed."));
-               }
+               case MCryptoEngine::OK:
+                  pgpInfo = new PGPInfoGoodMsg(m_msgView);
+                  break;
 
-               // using unmodified text is not very helpful here, is it?
-               out = _("\r\n[Encrypted message text]\r\n");
+               default:
+                  wxLogError(_("Decrypting the PGP message failed."));
+                  // fall through
+
+               // if the user cancelled decryption, don't complain about it
+               case MCryptoEngine::OPERATION_CANCELED_BY_USER:
+                  // using unmodified text is not very helpful here anyhow so
+                  // simply replace it with an icon
+                  pgpInfo = new PGPInfoBadMsg(m_msgView);
             }
          }
 
          m_next->Process(out, viewer, style);
+
+         if ( pgpInfo )
+         {
+            pgpInfo->SetLog(log);
+            pgpInfo->SetRaw(in);
+            // we want the PGP stuff to stand out
+            viewer->InsertText(_T("\r\n"), style);
+
+            viewer->InsertClickable(pgpInfo->GetBitmap(),
+                                    pgpInfo,
+                                    pgpInfo->GetColour());
+
+            viewer->InsertText(_T("\r\n"), style);
+         }
+         else
+         {
+            delete log;
+         }
       }
 
       if ( ok )
@@ -305,5 +474,135 @@ PGPFilter::DoProcess(String& text,
    }
 
    m_next->Process(text, viewer, style);
+}
+
+// ============================================================================
+// ClickablePGPInfo
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// ClickablePGPInfo ctor/dtor
+// ----------------------------------------------------------------------------
+
+ClickablePGPInfo::ClickablePGPInfo(MessageView *msgView,
+                                   const String& label,
+                                   const String& bmpName,
+                                   const wxColour& colour)
+                : ClickableInfo(msgView),
+                  m_label(label),
+                  m_bmpName(bmpName),
+                  m_colour(colour)
+{
+   m_log = NULL;
+}
+
+ClickablePGPInfo::~ClickablePGPInfo()
+{
+   delete m_log;
+}
+
+// ----------------------------------------------------------------------------
+// ClickablePGPInfo accessors
+// ----------------------------------------------------------------------------
+
+wxBitmap
+ClickablePGPInfo::GetBitmap() const
+{
+   return mApplication->GetIconManager()->GetBitmap(m_bmpName);
+}
+
+wxColour
+ClickablePGPInfo::GetColour() const
+{
+   return m_colour;
+}
+
+String
+ClickablePGPInfo::GetLabel() const
+{
+   return m_label;
+}
+
+// ----------------------------------------------------------------------------
+// ClickablePGPInfo operations
+// ----------------------------------------------------------------------------
+
+void
+ClickablePGPInfo::OnRightClick(const wxPoint& pt) const
+{
+   PGPMenu menu(this, m_label);
+
+   m_msgView->GetWindow()->PopupMenu(&menu, pt);
+}
+
+void
+ClickablePGPInfo::ShowDetails() const
+{
+   // TODO: something better
+   if ( m_log )
+   {
+      String allText;
+      allText.reserve(4096);
+
+      const size_t count = m_log->GetMessageCount();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         allText << m_log->GetMessage(n) << _T('\n');
+      }
+
+      MDialog_ShowText(m_msgView->GetWindow(),
+                       _("PGP Information"),
+                       allText,
+                       _T("PGPDetails"));
+   }
+   else // no log??
+   {
+      wxLogMessage(_("Sorry, no PGP details available."));
+   }
+}
+
+void
+ClickablePGPInfo::ShowRawText() const
+{
+   MDialog_ShowText(m_msgView->GetWindow(),
+                    _("PGP Message Raw Text"),
+                    m_textRaw,
+                    _T("PGPRawText"));
+}
+
+// ============================================================================
+// PGPMenu implementation
+// ============================================================================
+
+BEGIN_EVENT_TABLE(PGPMenu, wxMenu)
+   EVT_MENU(-1, PGPMenu::OnCommandEvent)
+END_EVENT_TABLE()
+
+PGPMenu::PGPMenu(const ClickablePGPInfo *pgpInfo, const wxChar *title)
+       : wxMenu(wxString::Format(_("PGP: %s"), title)),
+         m_pgpInfo(pgpInfo)
+{
+   // create the menu items
+   Append(RAW_TEXT, _("Show ra&w text..."));
+   AppendSeparator();
+   Append(DETAILS, _("&Details..."));
+}
+
+void
+PGPMenu::OnCommandEvent(wxCommandEvent &event)
+{
+   switch ( event.GetId() )
+   {
+      case DETAILS:
+         m_pgpInfo->ShowDetails();
+         break;
+
+      case RAW_TEXT:
+         m_pgpInfo->ShowRawText();
+         break;
+
+      default:
+         FAIL_MSG( _T("unexpected command in PGPMenu") );
+   }
 }
 

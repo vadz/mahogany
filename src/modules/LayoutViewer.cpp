@@ -92,6 +92,9 @@ public:
    virtual void StartBody();
    virtual void StartPart();
    virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci);
+   virtual void InsertClickable(const wxBitmap& icon,
+                                ClickableInfo *ci,
+                                const wxColour& col);
    virtual void InsertImage(const wxImage& image, ClickableInfo *ci);
    virtual void InsertRawContents(const String& data);
    virtual void InsertText(const String& text, const MTextStyle& style);
@@ -510,6 +513,13 @@ void LayoutViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
    // add extra whitespace so lines with multiple icons can
    // be broken:
    llist->Insert(" ");
+}
+
+void LayoutViewer::InsertClickable(const wxBitmap& icon,
+                                   ClickableInfo *ci,
+                                   const wxColour& col)
+{
+   InsertAttachment(icon, ci);
 }
 
 void LayoutViewer::InsertImage(const wxImage& image, ClickableInfo *ci)
