@@ -1325,7 +1325,10 @@ wxString wxFolderTreeNode::GetName() const
             SIZEDTEXT *text8 = new SIZEDTEXT;
             text7->data = (unsigned char *) nameutf7.c_str();
             text7->size = nameutf7.Length();
-            void *tab;
+
+            // FIXME: this looks suspicious, can we really pass NULL table
+            //        to cclient?
+            void *tab = NULL;
             utf8_text_utf7 ( text7, text8, tab );
 
             //we cannot use "nameutf8 << text8->data" here as utf8_text_utf7()
