@@ -1,14 +1,16 @@
 /*-*- c++ -*-********************************************************
  * InitPython.cc: initialisation of the Python interpreter          *
  *                                                                  *
- * (C) 1998by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
  * $Id$
  *
  * $Log$
+ * Revision 1.2  1998/05/24 08:28:54  KB
+ * eventually fixed the type problem, now python works as expected
+ *
  * Revision 1.1  1998/05/02 18:31:38  KB
  * Python integration works.
- *
  *
  *******************************************************************/
 
@@ -30,7 +32,7 @@ void InitPython(void)
 // the module initialisations
 extern "C"
 {
-   void initMTestc();
+   void initStringc();
    void initProfilec();
    void initMApplicationc();
 };
@@ -46,7 +48,7 @@ InitPython(void)
    tmp += mApplication.GetLocalDir();
    tmp += "/scripts";
    tmp += PATH_SEPARATOR;
-   tmp = mApplication.GetGlobalDir();
+   tmp += mApplication.GetGlobalDir();
    tmp += "/scripts";
    tmp += PATH_SEPARATOR;
    tmp += mApplication.readEntry(MC_PYTHONPATH,MC_PYTHONPATH_D);
@@ -61,7 +63,7 @@ InitPython(void)
    Py_Initialize();
 
    // initialise the modules
-   initMTestc();
+   initStringc();
    initProfilec();
    initMApplicationc();
    

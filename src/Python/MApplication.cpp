@@ -33,8 +33,8 @@
  * and things like that.
  *
  * $Log$
- * Revision 1.1  1998/05/13 19:01:54  KB
- * added kbList, adapted MimeTypes for it, more python, new icons
+ * Revision 1.2  1998/05/24 08:28:55  KB
+ * eventually fixed the type problem, now python works as expected
  *
  ************************************************************************/
 
@@ -568,6 +568,34 @@ char *SWIG_GetPtr(char *_c, void **ptr, char *_t)
 #	include	"Mdefaults.h"
 #	include	"MApplication.h"
 #endif
+static int _wrap_mApplication_set(PyObject *val) {
+    char * tval;
+    MApplication * temp;
+
+    tval = (char *) PyString_AsString(val);
+    if (PyErr_Occurred()) {
+        PyErr_SetString(PyExc_TypeError,"C variable 'mApplication'(MApplication *)");
+        return 1; 
+    }
+    if (tval) {
+        if (SWIG_GetPtr(tval,(void **) &temp,"_MApplication_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in value of mApplication. Expected _MApplication_p.");
+        return 1;
+        }
+    }
+    mApplication = *temp;
+    return 0;
+}
+
+static PyObject *_wrap_mApplication_get() {
+    PyObject * pyobj;
+    char ptemp[128];
+
+    SWIG_MakePtr(ptemp,(char *) &mApplication,"_MApplication_p");
+    pyobj = PyString_FromString(ptemp);
+    return pyobj;
+}
+
 #define new_MApplication() (new MApplication())
 static PyObject *_wrap_new_MApplication(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
@@ -1085,6 +1113,8 @@ SWIGEXPORT(void,initMApplicationc)() {
 	 SWIG_globals = SWIG_newvarlink();
 	 m = Py_InitModule("MApplicationc", MApplicationcMethods);
 	 d = PyModule_GetDict(m);
+	 PyDict_SetItemString(d,"cvar", SWIG_globals);
+	 SWIG_addvarlink(SWIG_globals,"mApplication",_wrap_mApplication_get, _wrap_mApplication_set);
 /*
  * These are the pointer type-equivalency mappings. 
  * (Used by the SWIG pointer type-checker).
@@ -1101,6 +1131,8 @@ SWIGEXPORT(void,initMApplicationc)() {
 	 SWIG_RegisterMapping("_unsigned_int","_int",0);
 	 SWIG_RegisterMapping("_short","_unsigned_short",0);
 	 SWIG_RegisterMapping("_short","_signed_short",0);
+	 SWIG_RegisterMapping("_String","_class_String",0);
 	 SWIG_RegisterMapping("_int","_unsigned_int",0);
 	 SWIG_RegisterMapping("_int","_signed_int",0);
+	 SWIG_RegisterMapping("_class_String","_String",0);
 }

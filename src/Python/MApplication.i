@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/05/24 08:28:56  KB
+ * eventually fixed the type problem, now python works as expected
+ *
  * Revision 1.2  1998/05/13 19:01:54  KB
  * added kbList, adapted MimeTypes for it, more python, new icons
  *
@@ -16,7 +19,6 @@
  * first try at a complete archive
  *
  *******************************************************************/
-
 %module 	MApplication
 %{
 #include	"Mpch.h"
@@ -32,6 +34,7 @@
 #	include	"MApplication.h"
 #endif
 %}
+%import String.i
 
 class MApplication 
 {
@@ -64,3 +67,4 @@ public:
    void Log(int level, String  &message);
 };
 
+MApplication mApplication;
