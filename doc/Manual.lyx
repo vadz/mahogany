@@ -5792,9 +5792,8 @@ Mahogany
 Mcallbacks.h
 \family default 
 .
- There is no documentation for these callbacks yet, but don't hesitate to ask
- us if you need more information about this.
-
+ There is no documentation for these callbacks yet, but don't hesitate to
+ ask us if you need more information about this.
  All of these callbacks are called with at least two arguments:
 \layout Enumerate
 
@@ -6949,8 +6948,8 @@ Before asking for the help on our mailing lists, please try to see if you
  Also, make sure to rebuild everything (ideally, create a new build directory)
  after installing or uninstalling a new wxWindows or Mahogany version.
  If the problem still persists, please try building the debug version of
- the program (you need debug wxWindows library and run configure with
- --enable-debug switch), run it under 
+ the program (you need debug wxWindows library and run configure with --enable-d
+ebug switch), run it under 
 \noun on 
 gdb
 \noun default 
@@ -7876,4 +7875,21 @@ Mahogany tries to preserve some sanity by disabling "Create new folder"
  in the popup menu when you select a folder of a non hierarchical format
  (such as MBX) but you can still circumvent this by doing "Folder|Create..."
  and selecting the folder you want as the parent.
+\layout Subsection
+
+Can I 
+\begin_inset Quotes eld
+\end_inset 
+
+Follow-up
+\begin_inset Quotes erd
+\end_inset 
+
+ to the message?
+\layout Standard
+
+You can open the message in the Sent Mail folder and do "Message|Edit in
+ composer".
+ It is sort of like "replying to yourself" but the to/from fields remain
+ the same.
 \the_end

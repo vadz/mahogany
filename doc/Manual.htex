@@ -2699,9 +2699,9 @@ of wxWindows installed. Also, make sure to rebuild everything (ideally,
 create a new build directory) after installing or uninstalling a new
 wxWindows or Mahogany version. If the problem still persists, please
 try building the debug version of the program (you need debug wxWindows
-library and run configure with --enable-debug switch), run it under \noun{gdb}
-and send us the output of {}``bt{}'' command in the debugger when
-it crashes.
+library and run configure with --enable-debug switch), run it under
+\noun{gdb} and send us the output of {}``bt{}'' command in the
+debugger when it crashes.
 \item If your problem is related to receiving or sending mail, please look
 at the message log window for possible explanation. If you don't see
 the log window, make sure it wasn't disabled in the {}``Miscellaneous{}''
@@ -3135,4 +3135,11 @@ new folder\char`\"{} in the popup menu when you select a folder of
 a non hierarchical format (such as MBX) but you can still circumvent
 this by doing \char`\"{}Folder|Create...\char`\"{} and selecting the
 folder you want as the parent.
+
+
+\subsection{Can I {}``Follow-up{}'' to the message?}
+
+You can open the message in the Sent Mail folder and do \char`\"{}Message|Edit
+in composer\char`\"{}. It is sort of like \char`\"{}replying to yourself\char`\"{}
+but the to/from fields remain the same.
 \end{document}
