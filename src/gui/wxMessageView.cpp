@@ -502,7 +502,7 @@ wxMessageView::SetParentProfile(ProfileBase *profile)
    }
    else
       m_Profile = ProfileBase::CreateEmptyProfile();
-   
+
    UpdateProfileValues();
 
    Clear();
@@ -589,7 +589,7 @@ wxMessageView::Update(void)
       return;
 
    m_uid = m_mailMessage->GetUId();
-   
+
    // if wanted, display all header lines
    if(m_ProfileValues.showHeaders)
    {
@@ -693,7 +693,7 @@ wxMessageView::Update(void)
 #ifdef DEBUG
       obj = NULL;
 #endif
-      
+
       if( t == Message::MSG_TYPEAPPLICATION) // let's guess a little
       {
          wxString ext = fileName.AfterLast('.');
@@ -712,7 +712,7 @@ wxMessageView::Update(void)
                t = Message::MSG_TYPEVIDEO;
          }
       }
-      
+
       /* Insert text:
          - if it is text/plain and not "attachment" or with a filename
          - if it is rfc822 and it is configured to be displayed
@@ -720,7 +720,7 @@ wxMessageView::Update(void)
       */
       if (
          ((fileName.Length() == 0) && (disposition != "attachment"))
-         && ( (mimeType == "text/plain" || (mimeType == "text/html") 
+         && ( (mimeType == "text/plain" || (mimeType == "text/html")
                || (t == Message::MSG_TYPEMESSAGE
                    && (m_ProfileValues.rfc822isText != 0)))
             )
@@ -769,7 +769,7 @@ wxMessageView::Update(void)
             wxString filename = wxGetTempFileName("Mtemp");
             if(mimeFileName.Length() == 0)
                mimeFileName = GetParameter(m_mailMessage,i,"NAME");
-            
+
             MimeSave(i,filename);
             bool ok;
             wxImage img =  wxIconManager::LoadImage(filename, &ok, true);
@@ -823,7 +823,7 @@ wxMessageView::Update(void)
       llist->WrapAll(m_WrapMargin);
    // yes, we allow the user to edit the buffer, in case he wants to
    // modify it for pasting or wrap lines manually:
-   SetEditable(FALSE); 
+   SetEditable(FALSE);
    SetCursorVisibility(-1);
    RequestUpdate();
 }
@@ -921,7 +921,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
 {
    // we'll need this filename later
    wxString filenameOrig = GetFileNameForMIME(m_mailMessage, mimeDisplayPart);
-   
+
 #if 0
    // look for "FILENAME" parameter:
    (void)m_mailMessage->ExpandParameter
@@ -940,7 +940,8 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
             &filenameOrig
             );
    }
-#endif
+#endif // 0
+
    String mimetype = m_mailMessage->GetPartMimeType(mimeDisplayPart);
    wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
 
@@ -988,7 +989,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       wxMessageViewFrame * f = new wxMessageViewFrame(NULL, 1, NULL, m_Parent);
       f->ShowMessage(msg);
       f->SetTitle(mimetype);
-      msg->DecRef(); 
+      msg->DecRef();
 #endif
 
       char *filename = wxGetTempFileName("Mtemp");
@@ -1003,8 +1004,12 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       return;
    }
 
+   String
+      filename = wxGetTempFileName("Mtemp"),
+      filename2 = "";
+
 #  ifdef OS_WIN
-   // get the standard extension for such files - we'll use it below...
+   // get the standard extension for such files
    wxString ext;
    if ( fileType != NULL ) {
       wxArrayString exts;
@@ -1012,17 +1017,31 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
          ext = exts[0u];
       }
    }
-#  endif // Win
 
-   String
-      filename = wxGetTempFileName("Mtemp"),
-      filename2 = "";
+   // under Windows some programs will do different things depending on the
+   // extensions of the input file (case in point: WinZip), so try to choose a
+   // correct one
+   wxString path, name, extOld;
+   wxSplitPath(filename, &path, &name, &extOld);
+   if ( extOld != ext )
+   {
+      // Windows creates the temp file even if we didn't use it yet
+      if ( !wxRemoveFile(filename) )
+      {
+         wxLogDebug("Warning: stale temp file '%s' will be left.",
+                    filename.c_str());
+      }
+
+      filename = path + wxFILE_SEP_PATH + name + ext;
+   }
+#  endif // Win
 
    MailMessageParameters
       params(filename, mimetype, m_mailMessage, mimeDisplayPart);
 
    // We might fake a file, so we need this:
    bool already_saved = false;
+
 #ifdef OS_UNIX
    /* For IMAGE/TIFF content, check whether it comes from one of the
       fax domains. If so, change the mimetype to "IMAGE/TIFF-G3" and
@@ -1083,10 +1102,10 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
          already_saved = true; // use this file instead!
       }
    }
-#endif
+#endif // Unix
+
    String command;
-   if ( (fileType == NULL) || !fileType->GetOpenCommand(&command,
-                                                        params) )
+   if ( (fileType == NULL) || !fileType->GetOpenCommand(&command, params) )
    {
       // unknown MIME type, ask the user for the command to use
       String prompt;
@@ -1129,30 +1148,6 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
    {
       if(already_saved || MimeSave(mimeDisplayPart,filename))
       {
-#     ifdef OS_WIN
-         // under Windows some programs will do different things depending on
-         // the extensions of the input file (case in point: WinZip), so try to
-         // choose a correct one
-         if ( !ext.IsEmpty() )
-         {
-            String newFilename;
-            newFilename << filename << '.' << ext;
-            if ( rename(filename, newFilename) != 0 )
-            {
-               wxLogSysError(_("Cannot rename temporary file."));
-
-               // well, try to open it nevertheless?
-            }
-            else
-            {
-               // change the filename in the command too
-               command.Replace(filename, newFilename);
-
-               filename = newFilename;
-            }
-         }
-#     endif // Win
-
          wxString errmsg;
          errmsg.Printf(_("Error opening attachment: command '%s' failed"),
                        command.c_str());
@@ -1184,7 +1179,7 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
                &filename
                );
 #endif
-      
+
       wxString path, name, ext;
       wxSplitPath(filename, &path, &name, &ext);
 
@@ -1812,7 +1807,7 @@ wxMessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
             /* The only situation where we receive a Message, is if we
                want to open it in a separate viewer. */
             Message *mptr = ((ASMailFolder::ResultMessage *)result)->GetMessage();
-            
+
             if(mptr && mptr->GetUId() != m_uid)
             {
                ShowMessage(mptr);

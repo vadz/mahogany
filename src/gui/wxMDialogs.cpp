@@ -80,6 +80,9 @@
 
 #include <errno.h>
 
+// ----------------------------------------------------------------------------
+// the images names
+// ----------------------------------------------------------------------------
 
 #ifdef    OS_WIN
 #   define Mahogany      "Mahogany"
@@ -90,6 +93,16 @@
 #     include "../src/icons/PythonPowered.xpm"
 #   endif
 #endif  //Win/Unix
+
+// under Windows, we might not have PNG support compiled in, btu we always have
+// BMPs, so fall back to them
+#if defined(__WINDOWS__) && !wxUSE_PNG
+   #define MEMORY_FS_FILE_EXT ".bmp"
+   #define MEMORY_FS_FILE_FMT wxBITMAP_TYPE_BMP
+#else // either not Windows or we do have PNG support
+   #define MEMORY_FS_FILE_EXT ".png"
+   #define MEMORY_FS_FILE_FMT wxBITMAP_TYPE_PNG
+#endif
 
 // ----------------------------------------------------------------------------
 // global vars and functions
@@ -829,15 +842,14 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    wxHtmlWindow *bottom = new MyHtmlWindow(this,sp);
    sp->SplitHorizontally(top,bottom,240);
 
-   wxMemoryFSHandler::AddFile("splash.png", wxBITMAP(Msplash),
-                              wxBITMAP_TYPE_PNG);
+   wxMemoryFSHandler::AddFile("splash" MEMORY_FS_FILE_EXT, wxBITMAP(Msplash), MEMORY_FS_FILE_FMT);
+
 #ifdef USE_PYTHON
-   wxMemoryFSHandler::AddFile("pythonpowered.png", wxBITMAP(PythonPowered),
-                              wxBITMAP_TYPE_PNG);
+   wxMemoryFSHandler::AddFile("pythonpowered" MEMORY_FS_FILE_EXT, wxBITMAP(PythonPowered), MEMORY_FS_FILE_FMT);
 #endif
 
    top->SetPage("<body text=#000000 bgcolor=#ffffff>"
-                "<center><img src=\"memory:splash.png\"><br>"
+                "<center><img src=\"memory:splash" MEMORY_FS_FILE_EXT "\"><br>"
                 "</center>");
 
    bottom->SetPage("<body text=#000000 bgcolor=#ffffff>"
@@ -896,9 +908,9 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
       );
 
 
-   wxMemoryFSHandler::RemoveFile("splash.png");
+   wxMemoryFSHandler::RemoveFile("splash" MEMORY_FS_FILE_EXT);
 #ifdef USE_PYTHON
-   wxMemoryFSHandler::RemoveFile("pythonpowered.png");
+   wxMemoryFSHandler::RemoveFile("pythonpowered" MEMORY_FS_FILE_EXT);
 #endif
 
    bottom->SetFocus();
@@ -2390,15 +2402,14 @@ wxLicenseDialog::wxLicenseDialog(ProfileBase *profile, wxWindow *parent)
                                              MH_DIALOG_LICENSE);
    wxHtmlWindow *license = new wxHtmlWindow(this);
 
-   wxMemoryFSHandler::AddFile("splash.png", wxBITMAP(Msplash),
-                              wxBITMAP_TYPE_PNG);
+   wxMemoryFSHandler::AddFile("splash" MEMORY_FS_FILE_EXT, wxBITMAP(Msplash), MEMORY_FS_FILE_FMT);
 
    license->SetPage("<body text=#000000 bgcolor=#ffffff>"
-                    "<center><img src=\"memory:splash.png\"><br>"
+                    "<center><img src=\"memory:splash" MEMORY_FS_FILE_EXT "\"><br>"
                     "</center>"
 #include "license.html"
                    );
-   wxMemoryFSHandler::RemoveFile("splash.png");
+   wxMemoryFSHandler::RemoveFile("splash" MEMORY_FS_FILE_EXT);
 
 
    wxLayoutConstraints *c = new wxLayoutConstraints;

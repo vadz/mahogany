@@ -22,10 +22,11 @@ aaa		ICON	"Micon.ico"
 Micon		ICON	"Micon.ico"
 mahogany	BITMAP	"mahogany.bmp"
 #ifdef USE_PYTHON
-pythonopower	BITMAP	"pythonpower.bmp"
+PythonPowered	BITMAP	"pythonpower.bmp"
 #endif
 background	BITMAP	"background.bmp"
 adbimport	BITMAP	"adbimport.bmp"
+Msplash		BITMAP	"Msplash.bmp"
 
 // frame icons (32x32)
 MFrame		ICON	"Mframe.ico"
@@ -77,6 +78,8 @@ tb_modules	BITMAP	"tb_modules.bmp"
 // ADB tree ctrl image list (16x16) bitmaps
 adb_address	BITMAP "address.bmp"
 adb_book	BITMAP "book.bmp"
+adb_bbdb	BITMAP "adb_bbdb.bmp"
+adb_palmos	BITMAP "adb_palmos.bmp"
 adb_library	BITMAP "library.bmp"
 adb_closed	BITMAP "closed.bmp"
 adb_opened	BITMAP "opened.bmp"
@@ -103,6 +106,7 @@ access		BITMAP "access.bmp"
 
 // Folder tree bitmaps (16x16)
 folder_inbox		BITMAP "folder_inbox.bmp"
+folder_outbox		BITMAP "folder_outbox.bmp"
 folder_file		BITMAP "folder_file.bmp"
 folder_pop		BITMAP "folder_pop.bmp"
 folder_imap		BITMAP "folder_imap.bmp"

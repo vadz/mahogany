@@ -120,7 +120,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "wxXPM"=L:\wxWindows\src\xpm\wxXPM.dsp - Package Owner=<4>
+Project: "xpm"=L:\wxWindows\src\xpm\xpm.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

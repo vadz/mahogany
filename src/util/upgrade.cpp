@@ -1637,7 +1637,7 @@ VerifyInbox(void)
       if(flags & MF_FLAGS_DONTDELETE) flags ^= MF_FLAGS_DONTDELETE;
       if(flags != oldflags)
          ibp->writeEntry(MP_FOLDER_TYPE, flags);
-      if(ibp->readEntry("Icon", "") == "")
+      if(ibp->readEntry("Icon", -1) == -1)
          ibp->writeEntry("Icon", wxFolderTree::iconSentMail);
       ibp->DecRef();
    }
@@ -1674,7 +1674,7 @@ VerifyInbox(void)
       if(flags & MF_FLAGS_DONTDELETE) flags ^= MF_FLAGS_DONTDELETE;
       if(flags != oldflags)
          p->writeEntry(MP_FOLDER_TYPE, flags);
-      if(p->readEntry("Icon", "") == "")
+      if(p->readEntry("Icon", -1) == -1)
          p->writeEntry("Icon", wxFolderTree::iconTrash);
       p->DecRef();
    }
@@ -1711,7 +1711,7 @@ VerifyInbox(void)
       if(flags & MF_FLAGS_DONTDELETE) flags ^= MF_FLAGS_DONTDELETE;
       if(flags != oldflags)
          p->writeEntry(MP_FOLDER_TYPE, flags);
-      if(p->readEntry("Icon", "") == "")
+      if(p->readEntry("Icon", -1) == -1)
          p->writeEntry("Icon", wxFolderTree::iconOutbox);
       p->DecRef();
    }

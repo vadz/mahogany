@@ -115,6 +115,8 @@ public:
 class MModuleCommon : public MObjectRC
 {
 protected:
+   /* When a module gets deleted it must make sure that it is no longer
+      in the module list. */
    virtual ~MModuleCommon();
 };
 
@@ -255,12 +257,12 @@ extern "C" \
    MDLLEXPORT MModule *InitMModule(int version_major,\
                            int version_minor,\
                            int version_release,\
-                           class MInterface * interface,\
+                           class MInterface * minterface,\
                            int *errorCode)\
    {\
       return ClassName::Init(version_major,  version_minor, \
                              version_release, \
-                             interface , errorCode);\
+                             minterface , errorCode);\
    }\
 } \
 MMODULE_INITIALISE(Name, Interface, Description, Version)

@@ -37,7 +37,7 @@ private:
        A real module would store the MInterface pointer for later
        reference and check if everything is set up properly.
    */
-   DummyModule(MInterface *interface);
+   DummyModule(MInterface *minterface);
    DEFAULT_ENTRY_FUNC
 };
 
@@ -56,7 +56,7 @@ MMODULE_IMPLEMENT(DummyModule,
 /* static */
 MModule *
 DummyModule::Init(int version_major, int version_minor, 
-                  int version_release, MInterface *interface,
+                  int version_release, MInterface *minterface,
                   int *errorCode)
 {
    if(! MMODULE_SAME_VERSION(version_major, version_minor,
@@ -65,7 +65,7 @@ DummyModule::Init(int version_major, int version_minor,
       if(errorCode) *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS;
       return NULL;
    }
-   return new DummyModule(interface);
+   return new DummyModule(minterface);
 }
 
 

@@ -75,6 +75,7 @@ struct MModuleListEntry
 /// A list of all loaded modules.
 KBLIST_DEFINE(MModuleList, MModuleListEntry);
 
+// VZ: this should be somehow made accessible to the modules! (FIXME)
 
 /// The actual list of all loaded modules.
 static MModuleList *gs_MModuleList = NULL;
@@ -85,43 +86,6 @@ MModuleList *GetMModuleList(void)
    if(! gs_MModuleList) gs_MModuleList = new MModuleList;
    return gs_MModuleList;
 }
-
-typedef MModule *MModulePtr;
-KBLIST_DEFINE(MModulePtrList, MModulePtr);
-
-extern
-void MModule_Cleanup(void)
-{
-   if(gs_MModuleList)
-   {
-      MModulePtrList modules;
-      /* For statically linked modules, we must decrement them here to 
-         avoid memory leaks. The refcount gets raised to 1 before
-         anyone uses them, so it should be back to 1 now so that
-         DecRef() causes them to be freed.
-
-         We cannot decref them straight from the list, as this would
-         remove them from the list and the iterator would get
-         corrupted. Ugly, but we need to remember them and clean them
-         outside the loop.
-      */
-      MModuleList::iterator i;
-      for(i = gs_MModuleList->begin();
-          i != gs_MModuleList->end();
-          i++)
-         if( (**i).m_Module )
-            modules.push_back( new MModulePtr((**i).m_Module) );
-      
-      for(MModulePtrList::iterator j = modules.begin();
-          j != modules.end();
-          j++)
-         (**j)->DecRef();
-
-      delete gs_MModuleList;
-      gs_MModuleList = NULL;
-   }
-}
-
 
 /* When a module gets deleted it must make sure that it is no longer
    in the module list. */
@@ -138,11 +102,48 @@ MModuleCommon::~MModuleCommon()
    }
 }
 
+typedef MModule *MModulePtr;
+KBLIST_DEFINE(MModulePtrList, MModulePtr);
+
+extern
+void MModule_Cleanup(void)
+{
+   if(gs_MModuleList)
+   {
+      MModulePtrList modules;
+      /* For statically linked modules, we must decrement them here to
+         avoid memory leaks. The refcount gets raised to 1 before
+         anyone uses them, so it should be back to 1 now so that
+         DecRef() causes them to be freed.
+
+         We cannot decref them straight from the list, as this would
+         remove them from the list and the iterator would get
+         corrupted. Ugly, but we need to remember them and clean them
+         outside the loop.
+      */
+      MModuleList::iterator i;
+      for(i = gs_MModuleList->begin();
+          i != gs_MModuleList->end();
+          i++)
+         if( (**i).m_Module )
+            modules.push_back( new MModulePtr((**i).m_Module) );
+
+      for(MModulePtrList::iterator j = modules.begin();
+          j != modules.end();
+          j++)
+         (**j)->DecRef();
+
+      delete gs_MModuleList;
+      gs_MModuleList = NULL;
+   }
+}
+
+
 static
 MModule *FindModule(const String & name)
 {
    MModuleList::iterator i;
-   
+
    for(i = GetMModuleList()->begin();
        i != GetMModuleList()->end();
        i++)
@@ -205,7 +206,7 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
       M_VERSION_MAJOR, M_VERSION_MINOR, M_VERSION_RELEASE,
       &gs_MInterface, &errorCode);
    }
-   
+
    if(module)
    {
       MModuleListEntry *me = new MModuleListEntry;
@@ -369,7 +370,7 @@ public:
 private:
    /// forbidden:
    MModuleListingEntryImpl(const MModuleListingEntryImpl &);
-   
+
    String m_Name, m_Interface, m_ShortDesc,
          m_Desc, m_Version, m_Author;
    MModule *m_Module;
@@ -470,7 +471,14 @@ MModule::ListAvailableModules(void)
 #else
    kbStringList modules;
 
+   // look under extra M_CANONICAL_HOST directory under Unix, but not for other
+   // platforms (doesn't make much sense under Windows)
+#ifdef OS_UNIX
    const int nDirs = 3;
+#else
+   const int nDirs = 2;
+#endif
+
    wxString
       pathname,
       filename,
@@ -479,14 +487,20 @@ MModule::ListAvailableModules(void)
    dirs[0] = mApplication->GetGlobalDir();
    dirs[0] << DIR_SEPARATOR << M_CANONICAL_HOST
            << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
-   dirs[1] = mApplication->GetLocalDir();
-   dirs[1] << DIR_SEPARATOR << M_CANONICAL_HOST
+
+   int i = 1;
+#ifdef OS_UNIX
+   dirs[i] = mApplication->GetLocalDir();
+   dirs[i] << DIR_SEPARATOR << M_CANONICAL_HOST
            << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
-   dirs[2] = mApplication->GetLocalDir();
-   dirs[2] << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
+   i++
+#endif // Unix
+
+   dirs[i] = mApplication->GetLocalDir();
+   dirs[i] << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
 
    /// First, build list of all .mmd files:
-   for(int i = 0; i < nDirs ; i++)
+   for(i = 0; i < nDirs ; i++)
    {
          pathname = dirs[i];
          if(wxDirExists(pathname))
