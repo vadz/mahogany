@@ -19,8 +19,6 @@
 class MModule_Filters : public MModule
 {
 public:
-   MModule_Filters() : MModule() { }
-
    /** Takes a string representation of a filterrule and compiles it
        into a class FilterRule object.
    */

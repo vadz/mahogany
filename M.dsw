@@ -102,6 +102,18 @@ Package=<4>
 
 ###############################################################################
 
+Project: "png"=L:\wxWindows\src\png\png.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
 Project: "python15"=L:\wxWindows\samples\help\Python\PCbuild\python15.dsp - Package Owner=<4>
 
 Package=<5>
@@ -114,7 +126,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "wxWinDll"=L:\wxWindows\samples\help\Libs\wxWindows\wxWinDll\wxWinDll.dsp - Package Owner=<4>
+Project: "wxWinDll"=L:\wxWindows\wxWinDll.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -122,6 +134,15 @@ Package=<5>
 
 Package=<4>
 {{{
+    Begin Project Dependency
+    Project_Dep_Name png
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name zlib
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name xpm
+    End Project Dependency
 }}}
 
 ###############################################################################
@@ -139,6 +160,18 @@ Package=<4>
 ###############################################################################
 
 Project: "xpm"=L:\wxWindows\src\xpm\xpm.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "zlib"=L:\wxWindows\src\zlib\zlib.dsp - Package Owner=<4>
 
 Package=<5>
 {{{

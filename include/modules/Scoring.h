@@ -19,8 +19,6 @@
 class MModule_Scoring : public MModule
 {
 public:
-   MModule_Scoring() : MModule() { }
-
    /** Calculates the score, which can be both positive or negative.
        @param mf pointer to the MailFolder in question
        @param headerInfo the HeaderInfo structure for the message to score

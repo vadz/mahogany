@@ -33,6 +33,10 @@ class wxPHelper;
 #include <wx/radiobox.h>
 #include <wx/treectrl.h>
 
+// when we're in M, we are not in a DLL - to be removed!
+#undef WXDLLEXPORT
+#define WXDLLEXPORT
+
 // ----------------------------------------------------------------------------
 // a helper class for persistent controls
 // ----------------------------------------------------------------------------

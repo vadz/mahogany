@@ -29,7 +29,7 @@
     @deffunc UIdArray
 */
 #include <wx/dynarray.h>
-WX_DEFINE_EXPORTED_ARRAY(UIdType, UIdArray);
+WX_DEFINE_ARRAY(UIdType, UIdArray);
 
 // forward declarations
 class FolderView;

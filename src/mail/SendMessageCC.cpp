@@ -162,7 +162,7 @@ SendMessageCC::SetSubject(const String &subject)
 
 void
 SendMessageCC::SetFrom(const String &from,
-                       const String & returnaddress = "")
+                       const String & returnaddress)
 {
 }
 
