@@ -729,17 +729,22 @@ SendMessageCC::AddPart(Message::ContentType type,
                        MessageParameterList const *plist,
                        wxFontEncoding enc)
 {
-   BODY
-      *bdy;
-   unsigned char
-      *data;
+   BODY *bdy;
+   unsigned char *data;
 
-   // it seems that text data must be NUL terminated, even if its size is
-   // known, so copy the terminating NUL too here
+   // the text must be NUL terminated or it will not be encoded correctly
    if ( type == TYPETEXT )
       len += sizeof(char);
 
    data = (unsigned char *) fs_get (len);
+
+   if ( type == TYPETEXT )
+   {
+      data[len] = '\0';
+
+      len -= sizeof(char);
+   }
+
    memcpy(data, buf, len);
 
    String subtype(subtype_given);

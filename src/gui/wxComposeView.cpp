@@ -2124,9 +2124,12 @@ wxComposeView::Send(bool schedule)
                if ( file.Open(filename) )
                {
                   size_t size = file.Length();
-                  char *buffer = new char[size];
+                  char *buffer = new char[size + 1];
                   if ( file.Read(buffer, size) )
                   {
+                     // always NUL terminate it
+                     buffer[size] = '\0';
+
                      MessageParameterList plist, dlist;
                      // some mailers want "FILENAME" in disposition parameters
                      MessageParameter *p = new MessageParameter;
