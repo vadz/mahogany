@@ -46,17 +46,6 @@ class HtmlViewerWindow;
 WX_DEFINE_ARRAY(ClickableInfo *, ArrayClickInfo);
 
 // ----------------------------------------------------------------------------
-// constants
-// ----------------------------------------------------------------------------
-
-// the possible values of MakeHtmlSafe() second parameter
-enum HtmlSpaceMode
-{
-   HtmlSpace_DontBreak,
-   HtmlSpace_Keep
-};
-
-// ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
@@ -64,8 +53,7 @@ enum HtmlSpaceMode
 static wxString Col2Html(const wxColour& col);
 
 // filter out special HTML characters from the text
-static wxString MakeHtmlSafe(const wxString& text,
-                             HtmlSpaceMode htmlSpaceMode = HtmlSpace_DontBreak);
+static wxString MakeHtmlSafe(const wxString& text);
 
 // ----------------------------------------------------------------------------
 // HtmlViewer: a wxHTML-based MessageViewer implementation
@@ -682,7 +670,7 @@ static wxString Col2Html(const wxColour& col)
                            (int)col.Red(), (int)col.Green(), (int)col.Blue());
 }
 
-static wxString MakeHtmlSafe(const wxString& text, HtmlSpaceMode htmlSpaceMode)
+static wxString MakeHtmlSafe(const wxString& text)
 {
    wxString textSafe;
    textSafe.reserve(text.length());
@@ -721,13 +709,8 @@ static wxString MakeHtmlSafe(const wxString& text, HtmlSpaceMode htmlSpaceMode)
             break;
 
          case ' ':
-            // replace the spaces with non breaking ones if necessary
-            if ( htmlSpaceMode == HtmlSpace_DontBreak )
-            {
-               textSafe += "&nbsp;";
-               break;
-            }
-            //else: fall through
+            textSafe += "&nbsp;";
+            break;
 
          default:
             textSafe += *p;
@@ -979,7 +962,7 @@ void HtmlViewer::InsertText(const String& text, const MTextStyle& style)
 
    FontStyleChanger styleChanger(style.GetFont(), m_htmlText);
 
-   m_htmlText += MakeHtmlSafe(text, HtmlSpace_Keep);
+   m_htmlText += MakeHtmlSafe(text);
 }
 
 void HtmlViewer::InsertURL(const String& text, const String& url)
