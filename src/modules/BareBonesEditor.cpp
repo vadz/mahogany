@@ -678,13 +678,15 @@ void wxBareBonesAttachments::OnKeyDown(wxKeyEvent& event)
       {
          wxListItem item;
          item.SetId(selected);
+         item.SetMask(wxLIST_MASK_DATA);
          GetItem(item);
 
          EditorContentPart *part = (EditorContentPart *)item.GetData();
 
          DeleteItem(selected);
 
-         part->DecRef();
+         if ( part )
+            part->DecRef();
       }
    }
 
@@ -759,14 +761,15 @@ BareBonesEditor::BareBonesEditor()
 
 BareBonesEditor::~BareBonesEditor()
 {
-   int itemIndex;
-
-   // DecRef all EditorContentPart objects in wxListCtrl, that's all
-   for(itemIndex = 0; itemIndex < m_attachments->GetItemCount(); ++itemIndex)
+   // free all EditorContentPart objects in wxListCtrl
+   const int count = m_attachments->GetItemCount();
+   for ( int itemIndex = 0; itemIndex < count; ++itemIndex )
    {
       wxListItem itemProperties;
 
       itemProperties.SetId(itemIndex);
+      itemProperties.SetMask(wxLIST_MASK_DATA);
+
       m_attachments->GetItem(itemProperties);
 
       EditorContentPart *file = (EditorContentPart *)itemProperties.GetData();
