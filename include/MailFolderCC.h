@@ -425,9 +425,17 @@ private:
 
    /**
       Try to create folder if it hadn't been created yet, returns true if the
-      folder could be created and opened successfully or NULL if it failed.
+      folder could be created and opened successfully or false if the folder
+      had to be created but its creation failed.
+
+      @param folder to create/open
+      @param pStream will be filled with a valid stream if not NULL and
+                     if we indeed created the folder (and will be NULL if we
+                     didn't do anything)
+      @return false if the folder couldn't be created
    */
-   static bool CreateIfNeeded(const MFolder *folder);
+   static bool CreateIfNeeded(const MFolder *folder,
+                              MAILSTREAM **pStream = NULL);
 
    /// Updates the status of a single message.
    void UpdateMessageStatus(unsigned long seqno);
@@ -547,6 +555,9 @@ private:
 
    /// last seen UID of a new message
    UIdType m_uidLastNew;
+
+   /// UID validity (in IMAP/c-client sense) for this folder
+   UIdType m_uidValidity;
 
    //@}
 

@@ -928,9 +928,12 @@ static AuthInfoList gs_authInfoList;
 
 struct LastNewUIDEntry
 {
-   LastNewUIDEntry(const String& folderName, UIdType uidLastNew)
+   LastNewUIDEntry(const String& folderName,
+                   UIdType uidLastNew,
+                   UIdType uidValidity)
       : m_folderName(folderName),
-        m_uidLastNew(uidLastNew)
+        m_uidLastNew(uidLastNew),
+        m_uidValidity(uidValidity)
    {
    }
 
@@ -939,6 +942,10 @@ struct LastNewUIDEntry
 
    // the UID of the last processed new message in this folder
    UIdType m_uidLastNew;
+
+   // the UID validity for this folder: if it changes, m_uidLastNew should be
+   // discarded as well as all the UIDs in the folder could have changed
+   UIdType m_uidValidity;
 };
 
 M_LIST_OWN(LastNewUIDList, LastNewUIDEntry);
@@ -1539,7 +1546,8 @@ MailFolderCC::Create(FolderType type, int flags)
 void MailFolderCC::Init()
 {
    m_uidLast =
-   m_uidLastNew = UID_ILLEGAL;
+   m_uidLastNew =
+   m_uidValidity = UID_ILLEGAL;
 
    // maybe we had stored the UID of the last new message for this folder?
    for ( LastNewUIDList::iterator i = gs_lastNewUIDList.begin();
@@ -1549,6 +1557,7 @@ void MailFolderCC::Init()
       if ( i->m_folderName == GetName() )
       {
          m_uidLastNew = i->m_uidLastNew;
+         m_uidValidity = i->m_uidValidity;
 
          break;
       }
@@ -1738,8 +1747,11 @@ bool MailFolderCC::GetAuthInfoForFolder(const MFolder *mfolder,
 // ----------------------------------------------------------------------------
 
 /* static */
-bool MailFolderCC::CreateIfNeeded(const MFolder *folder)
+bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
 {
+   if ( pStream )
+      *pStream = NULL;
+
    Profile_obj profile(folder->GetProfile());
 
    if ( !profile->readEntryFromHere(MP_FOLDER_TRY_CREATE, false) )
@@ -1765,8 +1777,9 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder)
       SetLoginData(login, password);
    }
 
-   // disable callbacks as we don't have the folder to redirect them to
-   CCAllDisabler noCallbacks;
+   // disable callbacks if we don't have the folder to redirect them to: assume
+   // that we do have the folder if we want to get the stream back
+   CCAllDisabler *noCallbacks = pStream ? NULL : new CCAllDisabler;
 
    // and create the mailbox
    mail_create(NIL, (char *)imapspec.c_str());
@@ -1784,11 +1797,19 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder)
 
    if ( stream )
    {
-      mail_close(stream);
+      // either keep the stream for the caller or close it if we don't need it
+      // any more
+      if ( pStream )
+         *pStream = stream;
+      else
+         mail_close(stream);
    }
 
    // don't try any more, whatever the result was
    profile->DeleteEntry(MP_FOLDER_TRY_CREATE);
+
+   // restore callbacks
+   delete noCallbacks;
 
    return stream != NULL;
 }
@@ -2097,6 +2118,11 @@ MailFolderCC::Open(OpenMode openmode)
       return false;
    }
 
+   if ( HasLogin() )
+   {
+      SetLoginData(m_login, m_password);
+   }
+
    // lock cclient inside this block
    {
       MCclientLocker lock;
@@ -2120,7 +2146,7 @@ MailFolderCC::Open(OpenMode openmode)
             {
                // check if this is the first time we're opening this folder: in
                // this case, try creating it first
-               if ( !CreateIfNeeded(m_mfolder) )
+               if ( !CreateIfNeeded(m_mfolder, &m_MailStream) )
                {
                   // CreateIfNeeded() returns false only if the folder couldn't
                   // be opened at all, no need to retry again
@@ -2138,19 +2164,11 @@ MailFolderCC::Open(OpenMode openmode)
             break;
       }
 
-      if ( tryOpen )
+      // the stream could have been already opened by CreateIfNeeded(), but if
+      // it wasn't, open it here
+      if ( !m_MailStream && tryOpen )
       {
-         if ( HasLogin() )
-         {
-            SetLoginData(m_login, m_password);
-         }
-
          m_MailStream = mail_open(NIL, (char *)m_ImapSpec.c_str(), ccOptions);
-
-         if ( m_MailStream && GetType() == MF_POP )
-         {
-            Pop3_RestoreFlags(GetName(), m_MailStream);
-         }
       }
    } // end of cclient lock block
 
@@ -2213,6 +2231,30 @@ MailFolderCC::Open(OpenMode openmode)
    }
 
    // folder really opened!
+
+   // we have to invalidate m_uidLastNew if the UID validity changed
+   //
+   // NB: this happens each time we open the folder for the types which
+   //     don't support the real UIDs (i.e. POP3)
+   if ( m_uidLastNew != UID_ILLEGAL )
+   {
+      ASSERT_MSG( m_uidValidity != UID_ILLEGAL,
+                  "UID validity must be set if we deal with UIDs!" );
+
+      if ( m_MailStream->uid_validity != m_uidValidity )
+      {
+         m_uidLastNew = UID_ILLEGAL;
+      }
+   }
+
+   // and update UID validity for the next time
+   m_uidValidity = m_MailStream->uid_validity;
+
+   // update the flags for POP3 (which doesn't keep them itself) from our cache
+   if ( GetType() == MF_POP )
+   {
+      Pop3_RestoreFlags(GetName(), m_MailStream);
+   }
 
    // now we are known
    AddToMap(m_MailStream, m_login);
@@ -2341,6 +2383,7 @@ MailFolderCC::Close()
       if ( i->m_folderName == folderName )
       {
          i->m_uidLastNew = m_uidLastNew;
+         i->m_uidValidity = m_uidValidity;
 
          break;
       }
@@ -2348,7 +2391,13 @@ MailFolderCC::Close()
 
    if ( i == gs_lastNewUIDList.end() )
    {
-      gs_lastNewUIDList.push_front(new LastNewUIDEntry(folderName, m_uidLastNew));
+      // note that the lists take ownership of the entry
+      gs_lastNewUIDList.push_front(new LastNewUIDEntry
+                                       (
+                                          folderName,
+                                          m_uidLastNew,
+                                          m_uidValidity
+                                       ));
    }
 }
 
