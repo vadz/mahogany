@@ -98,7 +98,7 @@ M_OVERRIDES(ccostype,ccostype,
 USE_CCOSTYPE)
 
 M_OVERRIDES(modules,modules,
---with-modules_static    Compile plugin modules statically,
+--with-modules    either =static =none or =dynamic,
 USE_MODULES)
 
 M_OVERRIDES(strict, strict,
@@ -644,12 +644,14 @@ if test "x$USE_MODULES" != "x"; then
        USE_MODULES=1
        USE_MODULES_STATIC=
        MAKE_USE_MODULES="USE_MODULES=dynamic"
+       AC_DEFINE(USE_MODULES)
        ;;
      static|Static|STATIC)
        USE_MODULES=1
        USE_MODULES_STATIC=1
        MAKE_USE_MODULES="USE_MODULES=static"
        AC_DEFINE(USE_MODULES_STATIC)
+       AC_DEFINE(USE_MODULES)
        ;;
      *)
        AC_MSG_ERROR(Set --with-modules= to either static/dynamic/none!)

@@ -519,6 +519,7 @@ wxMessageView::ReadAllSettings(AllProfileValues *settings)
 #ifndef OS_WIN
    SetFocusFollowMode(READ_CONFIG(m_Profile,MP_FOCUS_FOLLOWSMOUSE) != 0);
 #endif
+   SetWrapMargin( READ_CONFIG(m_Profile, MP_WRAPMARGIN));
 }
 
 void

@@ -656,7 +656,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER), // where to keep copies of
                                        // messages send
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),
-   CONFIG_ENTRY(MP_COMPOSE_WRAPMARGIN),
+   CONFIG_ENTRY(MP_WRAPMARGIN),
    CONFIG_ENTRY(MP_REPLY_PREFIX),
    CONFIG_ENTRY(MP_REPLY_COLLAPSE_PREFIX),
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX),

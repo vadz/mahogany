@@ -15,10 +15,13 @@ $Id$
 
 9	VZ	properties dialog fails for INBOX and corrupts its
 		settings
+		"collect all mail" checkbox does not react immediately
 
 9	VZ	FolderTree: changing folder hidden flag is not
 		reflected, tried to react to it in options change event, but doesn't
 		work, see wxFolderTree.cpp:1061 //FIXME
+
+5	VZ	appending to log file (Log Window/Save) fails
 
 7		after deleting a folder from the tree, the opened message from
 		it stays shown in the main frame - this is confusing and

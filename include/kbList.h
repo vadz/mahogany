@@ -241,7 +241,7 @@ protected:
        param iterator i
    */
    inline void deleteContent(iterator i)
-      { ASSERT(0); /* if(ownsEntries) delete *i; */ }
+      { if(ownsEntries) { ASSERT(0); } /* delete *i; */ }
 
 
 private:
@@ -317,6 +317,7 @@ public: \
          delete first; \
          first = next; \
       } \
+      ownsEntries = false; \
    } \
 protected: \
    inline void deleteContent(iterator i) \

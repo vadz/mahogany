@@ -392,9 +392,11 @@ private:
    GCC_DTOR_WARN_OFF
 };
 
-/* static */
-MModuleListing *
-MModule::ListLoadedModules(void)
+#ifdef USE_MODULES_STATIC
+static MModuleListing * DoListLoadedModules(bool listall = false)
+#else
+static MModuleListing * DoListLoadedModules(void)
+#endif
 {
    MModuleListingImpl *listing = MModuleListingImpl::Create(GetMModuleList()->size());
    size_t count = 0;
@@ -405,7 +407,7 @@ MModule::ListLoadedModules(void)
 #ifdef USE_MODULES_STATIC
    {
       // we have unloaded modules in the list, ignore them:
-      if((**i).m_Module)
+      if((**i).m_Module || listall)
       {
          MModuleListingEntryImpl entry(
             (**i).m_Name, // module name
@@ -436,13 +438,19 @@ MModule::ListLoadedModules(void)
    return listing;
 }
 
-   
+/* static */
+MModuleListing *
+MModule::ListLoadedModules(void)
+{
+   return DoListLoadedModules();
+}
+
 /* static */
 MModuleListing *
 MModule::ListAvailableModules(void)
 {
 #ifdef USE_MODULES_STATIC
-   return ListLoadedModules();
+   return DoListLoadedModules(true);
 #else
    kbStringList modules;
 

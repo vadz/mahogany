@@ -398,8 +398,8 @@
 #define   MP_FOLDER_COMMENT      "Comment"
 /// update interval for folders in seconds
 #define   MP_UPDATEINTERVAL      "UpdateInterval"
-/// wrapmargin for composition view (set to -1 to disable it)
-#define   MP_COMPOSE_WRAPMARGIN      "WrapMargin"
+/// wrapmargin for composition/message view (set to -1 to disable it)
+#define   MP_WRAPMARGIN      "WrapMargin"
 /// show MESSAGE/RFC822 as text?
 #define   MP_RFC822_IS_TEXT      "Rfc822IsText"
 /// prefix for subject in replies
@@ -852,8 +852,8 @@
 #define   MP_FOLDER_COMMENT_D      M_EMPTYSTRING
 /// update interval for folders in seconds
 #define   MP_UPDATEINTERVAL_D      60
-/// wrapmargin for composition view (set to -1 to disable it)
-#define   MP_COMPOSE_WRAPMARGIN_D      60
+/// wrapmargin for composition/message view (set to -1 to disable it)
+#define   MP_WRAPMARGIN_D      60
 /// show MESSAGE/RFC822 as text?
 #define   MP_RFC822_IS_TEXT_D      0l
 /// prefix for subject in replies
