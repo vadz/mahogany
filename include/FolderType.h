@@ -14,6 +14,9 @@
 #define  _FOLDERTYPE_H
 
 #include "Mcommon.h"
+
+#include <wx/setup.h>   // for wxSIZE_T_IS_ULONG/UINT
+
 #include <limits.h>
 
 // ----------------------------------------------------------------------------
@@ -34,10 +37,13 @@ class UIdArray;
 // with UIdArray which has both methods Remove(UIdType) and Remove(size_t), so
 // if configure determined that size_t was the same type as unsigned long we
 // define it as unsigned int instead
-#ifdef UIDTYPE_IS_UINT
+#if !defined(wxSIZE_T_IS_ULONG)
+   typedef unsigned long UIdType;
+#elif !defined(wxSIZE_T_IS_UINT)
    typedef unsigned int UIdType;
 #else
-   typedef unsigned long UIdType;
+   // how can size_t be both uint and ulong simultaneously??
+   #error "Don't know how to define UIdType!"
 #endif
 
 /// An illegal, never happening UId number:
