@@ -371,3 +371,12 @@ bool MfStatusCache::Save(const String& filename)
    return true;
 }
 
+/* static */
+void MfStatusCache::Flush()
+{
+   if ( gs_mfStatusCache )
+   {
+      (void)gs_mfStatusCache->Save(gs_mfStatusCache->GetFileName());
+   }
+}
+

@@ -130,11 +130,6 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
    // are supported:
    if(! m_knowHandlers) // first time initialisation
    {
-#ifdef DEBUG
-      wxLogDebug("Checking for natively supported image formats:");
-      wxString formats;
-#endif // DEBUG
-
       ms_NumOfHandlers = 0;
       for(int i = 0; m_wxBitmapHandlers[i] != -1; i++)
          if(wxImage::FindHandler( m_wxBitmapHandlers[i] ) == NULL)
@@ -142,15 +137,8 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
          else
          {
             ms_NumOfHandlers ++;
-#ifdef DEBUG
-            formats << HandlerNames[i] << ',';
-#endif // DEBUG
          }
 
-#ifdef DEBUG
-      formats << "xpm";
-      wxLogDebug(formats);
-#endif // DEBUG
       m_knowHandlers = true;
    }
 
@@ -322,8 +310,9 @@ wxIconManager::LoadImageXpm(String filename)
                  command.c_str());
       if(system(command) == 0)
          cpptr = LoadXpm(tempfile);
-#endif
+#endif // OS_UNIX
    }
+
    if(! cpptr)  // try loading the file itself as an xpm
       cpptr = LoadXpm(filename);
    if(tempfile.length()) // using a temporary file
@@ -449,7 +438,7 @@ wxIconManager::SetSubDirectory(wxString subDir)
          delete m_iconList;
       m_iconList = new IconDataList();
 
-      m_SubDir = '/'+subDir;
+      m_SubDir = DIR_SEPARATOR + subDir;
       if(! wxDirExists(m_GlobalDir+m_SubDir)
          && ! wxDirExists(m_LocalDir+m_SubDir))
          m_SubDir = ""; // save ourselves some time when searching

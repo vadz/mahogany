@@ -254,7 +254,8 @@ enum ConfigFields
    ConfigField_MessageViewQuotedColour2,
    ConfigField_MessageViewQuotedColour3,
    ConfigField_MessageViewProgressHelp,
-   ConfigField_MessageViewProgressThreshold,
+   ConfigField_MessageViewProgressThresholdSize,
+   ConfigField_MessageViewProgressThresholdTime,
    ConfigField_MessageViewInlineGraphics,
    ConfigField_MessageViewInlineGraphicsSize,
    ConfigField_MessageViewAutoDetectEncoding,
@@ -879,12 +880,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Colour for &1st level of quoted text"),Field_Color,   ConfigField_MessageViewQuotedColourize },
    { gettext_noop("Colour for &2nd level of quoted text"),Field_Color,   ConfigField_MessageViewQuotedColourize },
    { gettext_noop("Colour for &3nd level of quoted text"),Field_Color,   ConfigField_MessageViewQuotedColourize },
-   { gettext_noop("A progress dialog can be shown during the message\n"
-                  "download if it takes longer than the specified time\n"
-                  "(use -1 to disable progress dialog entirely)"), Field_Message, -1 },
+   { gettext_noop("A progress dialog can be shown during the message download\n"
+                  "if it is bigger than the given size or takes longer than the\n"
+                  "specified time (use -1 to disable progress dialog entirely)"), Field_Message, -1 },
+   { gettext_noop("Dialog minimal size t&hreshold (kb)"),             Field_Number,    -1 },
    { gettext_noop("Progress dialog &delay (seconds)"),             Field_Number,    -1 },
-   { gettext_noop("&Inline graphics"),             Field_Bool,    -1 },
-   { gettext_noop("Only if their size is less than"), Field_Number, ConfigField_MessageViewInlineGraphics },
+   { gettext_noop("Show images &inline"),             Field_Bool,    -1 },
+   { gettext_noop("Btu only if size is less than (kb)"), Field_Number, ConfigField_MessageViewInlineGraphics },
    { gettext_noop("&Autodetect font encoding"),    Field_Bool,    -1 },
    { gettext_noop("Display &text attachments inline"),Field_Bool,    -1 },
    { gettext_noop("Display &mail messages as text"),Field_Bool,    -1 },
@@ -1185,7 +1187,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MVIEW_QUOTED_COLOUR2),
    CONFIG_ENTRY(MP_MVIEW_QUOTED_COLOUR3),
    CONFIG_NONE(),
-   CONFIG_ENTRY(MP_MESSAGEPROGRESS_THRESHOLD),
+   CONFIG_ENTRY(MP_MESSAGEPROGRESS_THRESHOLD_SIZE),
+   CONFIG_ENTRY(MP_MESSAGEPROGRESS_THRESHOLD_TIME),
    CONFIG_ENTRY(MP_INLINE_GFX),
    CONFIG_ENTRY(MP_INLINE_GFX_SIZE),
    CONFIG_ENTRY(MP_MSGVIEW_AUTO_ENCODING),

@@ -137,6 +137,9 @@ extern "C"
    #include <pop3.h>    // for pop3_xxx() in GetMessageUID()
 }
 
+// this is #define'd in windows.h included by one of cclient headers
+#undef CreateDialog
+
 #define USE_READ_PROGRESS
 //#define USE_BLOCK_NOTIFY
 
@@ -516,9 +519,17 @@ public:
       m_readTotal = totalToRead ? totalToRead : 1;
       m_readSoFar = 0ul;
 
-      m_dlgProgress = NULL;
+      if ( secondsToWait )
+      {
+         // don't show the dialog immediately, wait a little
+         m_dlgProgress = NULL;
 
-      m_timeStart = time(NULL) + secondsToWait * 1000; // in ms
+         m_timeStart = time(NULL) + secondsToWait;
+      }
+      else // show the dialog from the beginning
+      {
+         CreateDialog();
+      }
    }
 
    ~ReadProgressInfo()
@@ -534,22 +545,11 @@ public:
       {
          if ( time(NULL) > m_timeStart )
          {
-            String msg;
-            msg.Printf(_("Reading %s..."),
-                       MailFolder::SizeToString(m_readTotal, 0,
-                                                MessageSize_AutoBytes,
-                                                true /* verbose */).c_str()
-                      );
-
-            m_dlgProgress = new MProgressDialog
-                                (
-                                 _("Retrieving data from server"),
-                                 msg
-                                );
+            CreateDialog();
          }
          else // too early to show it yet
          {
-            // skip SetValue() below
+            // skip Update() below (which would dereference NULL pointer)
             return;
          }
       }
@@ -566,6 +566,22 @@ public:
    }
 
 private:
+   void CreateDialog()
+   {
+      String msg;
+      msg.Printf(_("Reading %s..."),
+                 MailFolder::SizeToString(m_readTotal, 0,
+                                          MessageSize_AutoBytes,
+                                          true /* verbose */).c_str()
+                );
+
+      m_dlgProgress = new MProgressDialog
+                          (
+                           _("Retrieving data from server"),
+                           msg
+                          );
+   }
+
    MProgressDialog *m_dlgProgress;
 
    unsigned long m_readSoFar,
@@ -4415,12 +4431,18 @@ void MailFolderCC::StartReading(unsigned long total)
 #ifdef USE_READ_PROGRESS
    ASSERT_MSG( !gs_readProgressInfo, "can't start another read operation" );
 
-   gs_readProgressInfo = new ReadProgressInfo
-                             (
-                              total,
-                              READ_CONFIG(m_Profile,
-                                          MP_MESSAGEPROGRESS_THRESHOLD)
-                             );
+   // here is the idea: if the message is big, we show the progress dialog
+   // immediately, otherwise we only do it if retrieving it takes longer than
+   // the specified time
+   long size = READ_CONFIG(m_Profile, MP_MESSAGEPROGRESS_THRESHOLD_SIZE);
+   if ( size > 0 )
+   {
+      int delay = total > (unsigned long)size * 1024
+                  ? 0
+                  : READ_CONFIG(m_Profile, MP_MESSAGEPROGRESS_THRESHOLD_TIME);
+
+      gs_readProgressInfo = new ReadProgressInfo(total, delay);
+   }
 #endif // USE_READ_PROGRESS
 }
 
@@ -4432,10 +4454,7 @@ void MailFolderCC::EndReading()
       delete gs_readProgressInfo;
       gs_readProgressInfo = NULL;
    }
-   else
-   {
-      FAIL_MSG( "unexpected call to EndReading" );
-   }
+   //else: we didn't create it in StartReading()
 #endif // USE_READ_PROGRESS
 }
 

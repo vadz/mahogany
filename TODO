@@ -8,6 +8,21 @@ $Id$
     JUST CONTINUE TO REMOVE BUGS FROM THIS LIST AS THEY ARE 
     FIXED.
 
+************ optimize
+
+1. wxIconManager::LoadImageXpm() is very slow
+
+2. wxRegConfig::SetPath() takes 15% of program time!!!
+
+3. wxLogError() &c shouldn't do anything if wxNoLog
+
+4. print data in OnInit() shouldn't be allocated initially, only on demand
+
+5. make env var expansion optional and disable it by default under Windows
+   (takes half a second just for itself!)
+
+6. wxColourDisplay() should cache the result
+
 ************ possible cclient improvements (from reading PINE sources)
 
 1. mail_fetch_overview_x() could be made obsolete by using SET_IMAPEXTRAHEADERS
@@ -16,8 +31,6 @@ $Id$
 2. must install SET_BLOCKNOTIFY handler (it's not clear when exactly is it
    called and with which args, so have to test it first, but it might be a
    good place to show the busy cursor and such...)
-
-3. use SET_READPROGRESS to show reading message progress (IMAP only but still)
 
 ************ THREADING PROBLEMS:
 

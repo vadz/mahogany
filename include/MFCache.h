@@ -43,6 +43,10 @@ public:
    // been never called)
    static void CleanUp();
 
+   // flush the current status to disk (always safe to call, even if there is
+   // no MfStatusCache in use currently)
+   static void Flush();
+
    // query the status info: return true and fill the provided pointer with
    // info if we have it, return false otherwise
    bool GetStatus(const String& folderName, MailFolderStatus *status);

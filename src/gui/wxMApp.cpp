@@ -43,12 +43,12 @@
 #include <wx/statusbr.h>
 #include <wx/fs_mem.h>
 
-#include "wx/dialup.h"
+#include <wx/dialup.h>
+
+#include "MObject.h"
 
 #include "Mdefaults.h"
 #include "MDialogs.h"
-
-#include "MObject.h"
 
 #include "MHelp.h"
 
@@ -57,6 +57,8 @@
 #include "MailCollector.h"
 #include "MModule.h"
 #include "Mpers.h"
+
+#include "MFCache.h"
 
 #ifdef OS_WIN
 #   include <winnls.h>
@@ -104,7 +106,13 @@ public:
       { m_started = TRUE; return wxTimer::Start(millisecs, oneShot); }
 
    virtual void Notify()
-      { wxLogTrace("timer", "Autosaving everything."); Profile::FlushAll(); }
+   {
+      wxLogTrace("timer", "Autosaving options and folder status.");
+
+      Profile::FlushAll();
+
+      MfStatusCache::Flush();
+   }
 
     virtual void Stop()
       { if ( m_started ) wxTimer::Stop(); }
