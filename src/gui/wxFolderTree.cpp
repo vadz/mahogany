@@ -560,6 +560,11 @@ void wxFolderTree::ProcessMenuCommand(int id)
    m_tree->ProcessMenuCommand(id);
 }
 
+// this function is used to update the state (enabled/disabled) of menu items
+// both for the popup menu we use ourselves and for the "Folder" menu in the
+// main frame menu bar, so the menu passed here may have more items than our
+// popup menu - handle it properly by disabling all items which don't make sense
+// for the current selection!
 void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
 {
    int folderFlags = folder->GetFlags();
@@ -580,7 +585,7 @@ void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
       menu->Enable(WXMENU_FOLDER_DELETE, CanDeleteFolderOfType(folderType));
 
       // TODO should check that it is really opened
-      menu->Enable(WXMENU_FOLDER_CLOSE, TRUE);
+      menu->Enable(WXMENU_FOLDER_CLOSE, !isRoot);
    }
 
    // browsing subfolders only makes sense if we have any and not for the
