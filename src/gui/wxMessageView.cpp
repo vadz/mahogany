@@ -1607,24 +1607,20 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
          {
             wxFrame *frame = GetFrame(this);
 
-            // wxYield() hangs the program in the release build under Windows
-            /*
-              wxLogStatus(frame, _("Opening URL '%s'..."), ci->url.c_str());
-              wxYield();  // let the status bar update itself
-            */
+            wxLogStatus(frame, _("Opening URL '%s'..."), ci->GetUrl().c_str());
 
-            wxBeginBusyCursor();
+            wxBusyCursor bc;
 
             // treat mail urls separately:
             if(ci->GetUrl().Left(7) == "mailto:")
             {
-               wxEndBusyCursor();
                wxComposeView *cv = wxComposeView::CreateNewMessage(m_Profile);
                cv->SetAddresses(ci->GetUrl().Right(ci->GetUrl().Length()-7));
                cv->InitText();
                cv->Show(TRUE);
                break;
             }
+
             bool bOk;
             if ( m_ProfileValues.browser.IsEmpty() )
             {
@@ -1695,8 +1691,6 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
 
                   bOk = LaunchProcess(command, errmsg);
                }
-
-               wxEndBusyCursor();
 
                if ( bOk )
                   wxLogStatus(frame, _("Opening URL '%s'... done."),
@@ -1845,17 +1839,21 @@ wxMessageView::DoMenuCommand(int id)
 void
 wxMessageView::ShowMessage(ASMailFolder *folder, UIdType uid)
 {
-   if(uid == UID_ILLEGAL)
+   if ( m_uid == uid )
+      return;
+
+   if ( uid == UID_ILLEGAL )
    {
       Clear();
       return;
    }
-   if ( m_uid == uid )
-      return;
+
    SafeDecRef(m_folder);
    m_folder = folder;
    SafeIncRef(m_folder);
-   (void) m_folder->GetMessage(uid, this); // file request
+
+   Clear();
+   (void)m_folder->GetMessage(uid, this); // file request
 }
 
 void
