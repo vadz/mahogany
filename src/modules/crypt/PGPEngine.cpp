@@ -674,10 +674,15 @@ PGPEngine::DoExecCommand(const String& options,
                   wxLogDebug(_T("Weird IMPORTED reply: %s"), pc);
                }
             }
+            else if ( code == _T("NO_SECKEY") )
+            {
+               wxLogWarning(_("Secret key needed to decrypt this message is "
+                              "not available"));
+            }
             else if ( code == _T("ENC_TO") ||
-                      code == _T("NO_SECKEY") ||
                       code == _T("BEGIN_DECRYPTION") ||
                       code == _T("END_DECRYPTION") ||
+                      code == _T("GOODMDC") ||     // what does it mean?
                       code == _T("GOT_IT") ||
                       code == _T("SIGEXPIRED") || // we will give a warning
                       code == _T("KEYEXPIRED") || // when we get EXPKEYSIG
