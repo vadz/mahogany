@@ -512,6 +512,7 @@ wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent,
 
    m_msgCmdProc = MsgCmdProc::Create(m_MessageView);
    m_msgCmdProc->SetFolder(asmf);
+   m_msgCmdProc->SetFrame(this);
 
    AddFileMenu();
    AddEditMenu();

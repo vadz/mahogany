@@ -75,6 +75,8 @@ public:
     */
    virtual void SetFrame(wxFrame *frame) { m_frame = frame; }
 
+   virtual void SetWindowForDnD(wxWindow *win) { m_winForDnd = win; }
+
    /**
      Process the given WXMENU_MSG_XXX command for all message
 

@@ -1855,6 +1855,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_MessagePreview = MessageView::Create(m_SplitterWindow);
 
    m_msgCmdProc = MsgCmdProc::Create(m_MessagePreview, m_FolderCtrl);
+   m_msgCmdProc->SetFrame(GetFrame(m_FolderCtrl));
 
    ReadProfileSettings(&m_settings);
    m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
@@ -2241,6 +2242,8 @@ wxFolderView::ShowFolder(MailFolder *mf)
    m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
 
    m_SplitterWindow->ReplaceWindow(oldfolderctrl, m_FolderCtrl);
+
+   m_msgCmdProc->SetWindowForDnD(m_FolderCtrl);
    delete oldfolderctrl;
 
    // TODO: sometimes we already have an UpdateFolder event in the event

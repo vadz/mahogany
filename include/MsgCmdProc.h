@@ -60,6 +60,11 @@ public:
    virtual void SetFrame(wxFrame *frame) = 0;
 
    /**
+     Set the window to use for DnD
+    */
+   virtual void SetWindowForDnD(wxWindow *winForDnd) = 0;
+
+   /**
      Process the given command for all messages in the array
 
      @param id the menu command (WXMENU_MSG_XX
