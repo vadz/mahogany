@@ -39,10 +39,12 @@ dep depend:
 
 install: all
 	strip M
+	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/bin
+	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/lib
 	$(INSTALL) -d $(DATADIR)/bin
-	$(INSTALL) -d $(DATADIR)/bin/$(OSTYPE)
-	$(INSTALL_PROGRAM) M $(DATADIR)/bin/$(OSTYPE)
-	ln -fs $(DATADIR)/$(OSTYPE)/M $(BINDIR)
+	$(INSTALL_PROGRAM) M $(DATADIR)/$(CANONICAL_HOST)/bin
+	ln -fs $(DATADIR)/$(CANONICAL_HOST)/bin/M $(BINDIR)
+	ln -fs $(DATADIR)/$(CANONICAL_HOST)/bin/M $(DATADIR)/bin
 	$(INSTALL) -d $(DATADIR)/icons
 	$(INSTALL_DATA) `find icons/* -not -type d` $(DATADIR)/icons
 

@@ -100,7 +100,7 @@ DATADIR = @datadir@/M
 DOCDIR = @docdir@
 
 # for the dynamic linker, better than using -rpath
-LD_RUN_PATH=$(DATADIR)/bin/$(CANONICAL_HOST)
+LD_RUN_PATH=$(DATADIR)/$(CANONICAL_HOST)/$(DATADIR)
 
 X_CFLAGS = @X_CFLAGS@
 X_LIBS = @X_LIBS@
