@@ -84,8 +84,7 @@ bool MDialog_YesNoDialog(const char *message,
                            MWindow *parent = NULL,
                            const char *title = MDIALOG_YESNOTITLE_C,
                            bool YesDefault = true,
-                           const char *configPath = NULL,
-                           bool configBool = false);
+                           const char *configPath = NULL);
 
 char *MDialog_FileRequester(String  &message,
                             MWindow *parent = NULL,
