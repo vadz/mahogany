@@ -86,7 +86,7 @@ extern "C"
 // private functions
 // ----------------------------------------------------------------------------
 
-// return TRUE if we're showing all folders, even hidden ones, in the tree
+// return true if we're showing all folders, even hidden ones, in the tree
 static bool ShowHiddenFolders()
 {
    return READ_APPCONFIG(MP_SHOW_HIDDEN_FOLDERS) != 0;
@@ -280,6 +280,9 @@ public:
       // of the tree - it may expand it - it is not `const')
    wxTreeItemId GetTreeItemFromName(const String& fullname);
 
+      // go to the next folder with unread messages after the given one
+   bool GoToNextUnreadFolder(wxFolderTreeNode *nodeStart, bool next = true);
+
       // change the currently opened (in the main frame) folder name: we need
       // it to notify the main frame if this folder is deleted
    void SetOpenFolderName(const String& name) { m_openFolderName = name; }
@@ -292,7 +295,8 @@ public:
    void UpdateBackground();
 
    // callbacks
-   void OnChar(wxKeyEvent&);
+   void OnKeyDown(wxTreeEvent& event);
+   void OnChar(wxKeyEvent& event);
 
    void OnRightDown(wxMouseEvent& event);
 #ifdef USE_MIDDLE_CLICK_HACK
@@ -321,22 +325,22 @@ public:
 #endif // wxGTK
 
    // get the folder tree node object from item id
-   wxFolderTreeNode *GetFolderTreeNode(const wxTreeItemId& item)
+   wxFolderTreeNode *GetFolderTreeNode(const wxTreeItemId& item) const
    {
       return (wxFolderTreeNode *)GetItemData(item);
    }
 
 protected:
-   // return TRUE if the current folder may be opened
+   // return true if the current folder may be opened
    bool CanOpen() const
    {
       // is the root item chosen?
       if ( wxTreeCtrl::GetSelection() == GetRootItem() )
-         return FALSE;
+         return false;
 
       wxFolderTreeNode *node = GetSelection();
 
-      CHECK( node, FALSE, "shouldn't be called if no selection" );
+      CHECK( node, false, "shouldn't be called if no selection" );
 
       return ::CanOpen(node->GetFolder());
    }
@@ -349,7 +353,7 @@ protected:
 
    void DoFolderCreate();
    void DoFolderRename();
-   void DoFolderDelete(bool removeOnly = TRUE);
+   void DoFolderDelete(bool removeOnly = true);
    void DoFolderClear();
    void DoFolderClose();
 
@@ -370,11 +374,11 @@ protected:
    // reexpand branch - called when something in the tree changes
    void ReopenBranch(wxTreeItemId parent);
 
-   // returns TRUE if the given node has hidden flag set in the profile
+   // returns true if the given node has hidden flag set in the profile
    bool IsHidden(wxFolderTreeNode *node)
    {
       return node ? (node->GetFolder()->GetFlags() & MF_FLAGS_HIDDEN) != 0
-                  : FALSE;
+                  : false;
    }
 
    // process the event which can result in changing of a tree item colour due
@@ -386,6 +390,12 @@ protected:
 
    // process the folder tree change event
    void ProcessFolderTreeChange(const MEventFolderTreeChangeData& event);
+
+   // get the next/previouos item after/before this one
+   wxTreeItemId GetNextItem(wxTreeItemId id, bool next = true) const;
+
+   // find the next/previous folder with unread status in the tree
+   wxTreeItemId FindNextUnreadFolder(wxTreeItemId id, bool next = true) const;
 
 private:
    class FolderMenu : public wxMenu
@@ -434,7 +444,7 @@ private:
 
          if ( isRoot )
          {
-            Append(ShowHidden, _("Show &hidden folders"), "", TRUE);
+            Append(ShowHidden, _("Show &hidden folders"), "", true);
          }
 
          Append(Properties, _("&Properties"));
@@ -457,15 +467,15 @@ private:
           m_selectedFolderName;
 
    // icon management
-      // update the icon for the selected folder, if "tmp" is TRUE remember the
+      // update the icon for the selected folder, if "tmp" is true remember the
       // old value to be able to restore it later with RestoreIcon()
-   void UpdateIcon(const wxTreeItemId item, bool tmp = FALSE);
+   void UpdateIcon(const wxTreeItemId item, bool tmp = false);
 
-      // restore the icon previously changed by UpdateIcon(FALSE)
+      // restore the icon previously changed by UpdateIcon(false)
    void RestoreIcon(const wxTreeItemId item);
 
       // find item in m_itemsWithChangedIcons and return its index in the out
-      // parameter and TRUE if found (otherwise return FALSE)
+      // parameter and true if found (otherwise return false)
    bool FindItemWithChangedIcon(const wxTreeItemId& item, size_t *index);
 
       // all the items whose icons were changed by UpdateIcon()
@@ -631,6 +641,7 @@ BEGIN_EVENT_TABLE(wxFolderTreeImpl, wxPTreeCtrl)
    EVT_MIDDLE_DOWN(wxFolderTreeImpl::OnMiddleDown)
 #endif // USE_MIDDLE_CLICK_HACK
 
+   EVT_TREE_KEY_DOWN(-1, wxFolderTreeImpl::OnKeyDown)
    EVT_CHAR(wxFolderTreeImpl::OnChar)
 
    EVT_MENU(-1, wxFolderTreeImpl::OnMenuCommand)
@@ -686,6 +697,13 @@ bool wxFolderTree::SelectFolder(MFolder *folder)
    {
       return false;
    }
+}
+
+bool wxFolderTree::GoToNextUnreadFolder(bool next)
+{
+   CHECK( m_tree, false, "you didn't call Init()" );
+
+   return m_tree->GoToNextUnreadFolder(m_tree->GetSelection(), next);
 }
 
 void wxFolderTree::ProcessMenuCommand(int id)
@@ -870,19 +888,19 @@ MFolder *wxFolderTree::OnCreate(MFolder *parent)
 
 bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
 {
-   CHECK( folder, FALSE, "can't delete NULL folder" );
+   CHECK( folder, false, "can't delete NULL folder" );
 
    if ( folder->GetFlags() & MF_FLAGS_DONTDELETE )
    {
       wxLogError(_("The folder '%s' is used by Mahogany and cannot be deleted"),
                  folder->GetFullName().c_str());
-      return FALSE;
+      return false;
    }
 
    if ( folder->GetType() == MF_ROOT )
    {
       wxLogError(_("The root folder can not be deleted."));
-      return FALSE;
+      return false;
    }
 
    // by default, don't allow to suppress this question as deleting a whole
@@ -926,7 +944,7 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
    bool ok = MDialog_YesNoDialog(msg,
                                  m_tree->wxWindow::GetParent(),
                                  MDIALOG_YESNOTITLE,
-                                 FALSE /* 'no' default */,
+                                 false /* 'no' default */,
                                  configPath);
    if ( ok )
    {
@@ -959,27 +977,27 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
 
 bool wxFolderTree::OnRename(MFolder *folder, const String& folderNewName)
 {
-   CHECK( folder, FALSE, "can't rename NULL folder" );
+   CHECK( folder, false, "can't rename NULL folder" );
 
    if ( folder->GetType() == MF_INBOX )
    {
       wxLogError(_("INBOX folder is a special folder used by the mail "
                    "system and can not be renamed."));
 
-      return FALSE;
+      return false;
    }
 
    if ( folder->GetType() == MF_ROOT )
    {
       wxLogError(_("The root folder can not be renamed."));
-      return FALSE;
+      return false;
    }
 
    if ( folder->GetFlags() & MF_FLAGS_DONTDELETE )
    {
       wxLogError(_("The folder '%s' is used by Mahogany and cannot be renamed."),
                  folder->GetName().c_str());
-      return FALSE;
+      return false;
    }
 
    return folder->Rename(folderNewName);
@@ -1004,7 +1022,7 @@ void wxFolderTree::OnClear(MFolder *folder)
             msg,
             parent,
             _("Please confirm"),
-            FALSE /* 'no' default */
+            false /* 'no' default */
          ) )
    {
       wxLogStatus(GetFrame(parent), _("No messages were deleted."));
@@ -1034,13 +1052,13 @@ bool wxFolderTree::OnClose(MFolder *folder)
                _("Folder '%s' closed."),
                folder->GetFullName().c_str());
 
-   return TRUE;
+   return true;
 }
 
 bool wxFolderTree::OnDoubleClick()
 {
    MFolder *sel = GetSelection();
-   CHECK( sel, FALSE, "no folder to open" );
+   CHECK( sel, false, "no folder to open" );
 
    if ( !CanOpen(sel) )
    {
@@ -1048,7 +1066,7 @@ bool wxFolderTree::OnDoubleClick()
 
       sel->DecRef();
 
-      return FALSE;
+      return false;
    }
 
    if ( READ_APPCONFIG(MP_OPEN_ON_CLICK) )
@@ -1062,7 +1080,7 @@ bool wxFolderTree::OnDoubleClick()
       OnOpenHere(sel);
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -1344,7 +1362,7 @@ wxString wxFolderTreeNode::GetName() const
    wxString name, nameutf7, nameutf8;
    wxString nameOrig = m_folder->GetName();
 
-   bool isValid = TRUE;
+   bool isValid = true;
 
    size_t len = nameOrig.Length();
    for ( size_t i = 0; i < len; i++ )
@@ -1355,7 +1373,7 @@ wxString wxFolderTreeNode::GetName() const
       {
          /* reserved for future use with UTF-8 */
          wxLogDebug("mailbox name with 8-bit character");
-         isValid = FALSE;
+         isValid = false;
          break;
       }
 
@@ -1370,13 +1388,13 @@ wxString wxFolderTreeNode::GetName() const
             {
                case '\0':
                   wxLogDebug("unterminated modified UTF-7 name");
-                  isValid = FALSE;
+                  isValid = false;
                   break;
                default:    /* must be alphanumeric */
                   if (!isalnum (s))
                   {
                      wxLogDebug("invalid modified UTF-7 name");
-                     isValid = FALSE;
+                     isValid = false;
                      break;
                   }
                   else
@@ -1386,11 +1404,11 @@ wxString wxFolderTreeNode::GetName() const
 #if 0
                case '+':   /* valid modified BASE64 */
                   // but we don't support it yet  FIXME
-                  isValid = FALSE;
+                  isValid = false;
                   break;
                case ',':  /* all OK so far */
                   // but we don't support it yet; should be changed to "/"  FIXME
-                  isValid = FALSE;
+                  isValid = false;
                   break;
 #endif
             }
@@ -1465,11 +1483,11 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    m_sink = sink;
    m_menu =
    m_menuRoot = NULL;
-   m_suppressSelectionChange = FALSE;
+   m_suppressSelectionChange = false;
    m_previousFolder = NULL;
 
    m_showHidden = ShowHiddenFolders();
-   m_curIsHidden = FALSE;
+   m_curIsHidden = false;
 
 #ifdef __WXGTK__
    m_FocusFollowMode = READ_APPCONFIG(MP_FOCUS_FOLLOWSMOUSE) != 0;
@@ -1489,7 +1507,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
       if ( !imageList )
       {
          imageList = new wxImageList(bmp.GetWidth(), bmp.GetHeight(),
-                                     FALSE, nIcons);
+                                     false, nIcons);
       }
 
       imageList->Add(bmp);
@@ -1726,7 +1744,7 @@ void wxFolderTreeImpl::DoFolderDelete(bool removeOnly)
    // don't try to delete folders which can't be deleted
    if ( !removeOnly && !CanDeleteFolderOfType(folder->GetType()) )
    {
-      removeOnly = TRUE;
+      removeOnly = true;
    }
 
    if ( m_sink->OnDelete(folder, removeOnly) )
@@ -1737,7 +1755,7 @@ void wxFolderTreeImpl::DoFolderDelete(bool removeOnly)
          m_current = NULL;
       }
 
-      wxLogStatus(_("Folder '%s' %s"),
+      wxLogStatus(GetFrame(this), _("Folder '%s' %s"),
                   folder->GetName().c_str(),
                   removeOnly ? _("removed from the tree")
                              : _("deleted"));
@@ -1789,6 +1807,113 @@ void wxFolderTreeImpl::DoToggleHidden()
    mApplication->GetProfile()->writeEntry(MP_SHOW_HIDDEN_FOLDERS, m_showHidden);
 
    ReopenBranch(GetRootItem());
+}
+
+// ----------------------------------------------------------------------------
+// tree traversal and looking for unread folders
+// ----------------------------------------------------------------------------
+
+wxTreeItemId wxFolderTreeImpl::GetNextItem(wxTreeItemId id, bool next) const
+{
+   // garbage in, garbage out
+   CHECK( id.IsOk(), id, "invalid tree item in GetNextItem" );
+
+   long cookie;
+   wxTreeItemId idNext;
+
+   if ( next )
+   {
+      // first try our child
+      idNext = GetFirstChild(id, cookie);
+
+      if ( !idNext.IsOk() )
+      {
+         wxTreeItemId idParent = id;
+         while ( idParent.IsOk() )
+         {
+            // then try sibling just below
+            idNext = GetNextSibling(idParent);
+
+            // still doesn't work? try the next sibling of our parent
+            if ( idNext.IsOk() )
+               break;
+
+            idParent = GetParent(idParent);
+         }
+      }
+   }
+   else // previous
+   {
+      idNext = GetPrevSibling(id);
+      if ( !idNext.IsOk() )
+      {
+         // simple case: our previous item is our parent
+         idNext = GetParent(id);
+      }
+      else // find the last child of our previous sibling now
+      {
+         for ( ;; )
+         {
+            wxTreeItemId idChild = GetLastChild(idNext);
+            if ( !idChild.IsOk() )
+               break;
+
+            idNext = idChild;
+         }
+      }
+   }
+
+   // avoid infinite loops in the caller
+   ASSERT_MSG( idNext != id, "logic error in GetNextItem" );
+
+   return idNext;
+}
+
+wxTreeItemId
+wxFolderTreeImpl::FindNextUnreadFolder(wxTreeItemId id, bool next) const
+{
+   // we want to find the next item, not the same one as we have now
+   MfStatusCache *mfStatus = MfStatusCache::Get();
+   if ( !mfStatus )
+      return wxTreeItemId();
+
+   id = GetNextItem(id, next);
+   if ( !id.IsOk() )
+   {
+      return id;
+   }
+
+   // check first this item, then the next one(s)
+   do
+   {
+      MailFolderStatus status;
+      wxString name = GetFolderTreeNode(id)->GetFolder()->GetFullName();
+      if ( mfStatus->GetStatus(name, &status) && status.unread )
+      {
+         return id;
+      }
+
+      id = GetNextItem(id, next);
+   }
+   while ( id.IsOk() );
+
+   return id;
+}
+
+bool wxFolderTreeImpl::GoToNextUnreadFolder(wxFolderTreeNode *node, bool next)
+{
+   wxTreeItemId id = FindNextUnreadFolder(node->GetId(), next);
+   if ( !id.IsOk() )
+   {
+      wxLogStatus(GetFrame(this), _("No more folders with unread messages."));
+
+      return false;
+   }
+
+   SelectItem(id);
+   EnsureVisible(id);
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -1914,12 +2039,12 @@ bool wxFolderTreeImpl::IsEditingInPlace() const
    #define SendMessage SendMessageA
 
    if ( TreeView_GetEditControl((HWND)GetHWND()) )
-      return TRUE;
+      return true;
 
    #undef SendMessage
 #endif // MSW
 
-   return FALSE;
+   return false;
 }
 
 // ----------------------------------------------------------------------------
@@ -1953,7 +2078,7 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
    // button from this node
    if ( nSubfolders == 0 )
    {
-      SetItemHasChildren(itemId, FALSE);
+      SetItemHasChildren(itemId, false);
    }
    else // we do have children
    {
@@ -2070,7 +2195,7 @@ void wxFolderTreeImpl::OnDoubleClick()
 void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
 {
    // for now... see comments near m_suppressSelectionChange declaration
-   m_suppressSelectionChange = TRUE;
+   m_suppressSelectionChange = true;
 
    wxPoint pt = event.GetPosition();
    wxTreeItemId item = HitTest(pt);
@@ -2104,7 +2229,7 @@ void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
    SafeDecRef(m_previousFolder); // matches IncRef() in OnTreeSelect()
    m_previousFolder = NULL;
 
-   m_suppressSelectionChange = FALSE;
+   m_suppressSelectionChange = false;
 }
 
 #ifdef USE_MIDDLE_CLICK_HACK
@@ -2144,7 +2269,7 @@ bool wxFolderTreeImpl::ProcessMenuCommand(int id)
          break;
 
       case FolderMenu::Delete:
-         DoFolderDelete(FALSE);
+         DoFolderDelete(false);
          break;
 
       case WXMENU_FOLDER_CLEAR:
@@ -2180,10 +2305,25 @@ bool wxFolderTreeImpl::ProcessMenuCommand(int id)
          // possible for us to be called for another event - ignore silently
          //
          //FAIL_MSG("unexpected menu command in wxFolderTree");
-         return FALSE;
+         return false;
    }
 
-   return TRUE;
+   return true;
+}
+
+void wxFolderTreeImpl::OnKeyDown(wxTreeEvent& event)
+{
+   // we want to make PageUp/Down to go to the next folder with unread
+   // messages in it
+   int keycode = event.GetCode();
+   if ( keycode != WXK_PRIOR && keycode != WXK_NEXT )
+   {
+      event.Skip();
+      return;
+   }
+
+   // go to next or previous folder
+   m_sink->GoToNextUnreadFolder(keycode == WXK_NEXT);
 }
 
 void wxFolderTreeImpl::OnChar(wxKeyEvent& event)
@@ -2191,7 +2331,7 @@ void wxFolderTreeImpl::OnChar(wxKeyEvent& event)
   // someone typed into the tree, so the user must be back
   mApplication->UpdateAwayMode();
 
-  switch ( event.KeyCode() ) {
+  switch ( event.GetKeyCode() ) {
     case WXK_DELETE:
       DoFolderDelete(event.ShiftDown());
       break;
@@ -2231,7 +2371,7 @@ void wxFolderTreeImpl::ReopenBranch(wxTreeItemId parent)
    Collapse(parent);
    DeleteChildren(parent);
    GetFolderTreeNode(parent)->ResetExpandedFlag();
-   SetItemHasChildren(parent, TRUE);
+   SetItemHasChildren(parent, true);
 
    RestoreExpandedBranches(parent, expState);
 
@@ -2286,13 +2426,13 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
       if ( profileName.empty() )
       {
          // root folder, ignore
-         return TRUE;
+         return true;
       }
 
       int pos = profileName.Find(M_PROFILE_CONFIG_SECTION);
 
       // don't know how to get folder name...
-      CHECK( pos == 0, TRUE, "weird profile path" )
+      CHECK( pos == 0, true, "weird profile path" )
 
       // skip the M_PROFILE_CONFIG_SECTION prefix
       wxString folderName = profileName.c_str() +
@@ -2306,11 +2446,11 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
          switch ( event.GetChangeKind() )
          {
             case MEventOptionsChangeData::Apply:
-               UpdateIcon(item, TRUE /* temporary change, may be undone */);
+               UpdateIcon(item, true /* temporary change, may be undone */);
                break;
 
             case MEventOptionsChangeData::Ok:
-               UpdateIcon(item, FALSE /* definitive change, no undo */);
+               UpdateIcon(item, false /* definitive change, no undo */);
                break;
 
             case MEventOptionsChangeData::Cancel:
@@ -2418,7 +2558,7 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
 
                // if the parent hadn't had any children before, it would be
                // impossible to open it now if we don't do this
-               SetItemHasChildren(parent, TRUE);
+               SetItemHasChildren(parent, true);
 
                // force creation of the new item
                Expand(parent);
@@ -2444,7 +2584,7 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
             }
             else // wasn't expanded yet, no need to reopen - just open
             {
-               SetItemHasChildren(parent, TRUE);
+               SetItemHasChildren(parent, true);
 
                // expand the branch even if it wasn't expanded before - we want
                // to show the newly created folders
@@ -2544,8 +2684,8 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *folder)
 // folder icons
 // ----------------------------------------------------------------------------
 
-// update the icon of the selected folder: called with tmp == FALSE when [Ok]
-// button is pressed or TRUE if it was the [Apply] button
+// update the icon of the selected folder: called with tmp == false when [Ok]
+// button is pressed or true if it was the [Apply] button
 void wxFolderTreeImpl::UpdateIcon(const wxTreeItemId item, bool tmp)
 {
    wxFolderTreeNode *node = GetFolderTreeNode(item);
@@ -2574,7 +2714,7 @@ void wxFolderTreeImpl::UpdateIcon(const wxTreeItemId item, bool tmp)
    SetItemImage(item, image);
 }
 
-// restore the icon previously changed by UpdateIcon(FALSE)
+// restore the icon previously changed by UpdateIcon(false)
 void wxFolderTreeImpl::RestoreIcon(const wxTreeItemId item)
 {
    size_t n;
@@ -2589,8 +2729,8 @@ void wxFolderTreeImpl::RestoreIcon(const wxTreeItemId item)
    //else: the icon wasn't changed, so nothing to do
 }
 
-// find the item in the list of items whose icons were changed, return TRUE if
-// found or FALSE otherwise
+// find the item in the list of items whose icons were changed, return true if
+// found or false otherwise
 bool wxFolderTreeImpl::FindItemWithChangedIcon(const wxTreeItemId& item,
                                                size_t *index)
 {
@@ -2601,11 +2741,11 @@ bool wxFolderTreeImpl::FindItemWithChangedIcon(const wxTreeItemId& item,
       {
          *index = n;
 
-         return TRUE;
+         return true;
       }
    }
 
-   return FALSE;
+   return false;
 }
 
 // ----------------------------------------------------------------------------
@@ -2626,7 +2766,7 @@ bool wxFolderTreeImpl::MSWOnNotify(int idCtrl,
     bool isDblClk = hdr->code == NM_DBLCLK;
     if ( isDblClk )
     {
-       m_openedFolderOnDblClick = FALSE;
+       m_openedFolderOnDblClick = false;
     }
 
     bool rc = wxPTreeCtrl::MSWOnNotify(idCtrl, lParam, result);
@@ -2636,7 +2776,7 @@ bool wxFolderTreeImpl::MSWOnNotify(int idCtrl,
        if ( m_openedFolderOnDblClick )
        {
           // prevent default processing from taking place
-          *result = TRUE;
+          *result = true;
        }
     }
 

@@ -6,6 +6,7 @@
 Release 0.64 '???' ???, 2001
 -------------------------------------------------------------------------------
 
+20.08.01 VZ: added navigation between unread folders in the tree using PgUp/Dn
 13.08.01 NB: added the option to configure Forward prefix
 12.08.01 VZ: added the option to include the selected text only in reply
 11.08.01 MR: added "quote original text in reply" option (yes/no/ask)
