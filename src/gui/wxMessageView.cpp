@@ -962,6 +962,7 @@ wxMessageView::ShowMessage(MailFolder *folder, long num)
                }
 
                AdbEntry *entry = book->CreateEntry(entryname);
+               book->DecRef();
                if ( !entry )
                {
                   wxLogError(_("Couldn't create an entry in the address "
@@ -976,6 +977,7 @@ wxMessageView::ShowMessage(MailFolder *folder, long num)
                entry->SetField(AdbField_NickName, entryname);
                entry->SetField(AdbField_FullName, entryname);
                entry->SetField(AdbField_EMail, email);
+               entry->DecRef();
 
                wxLogStatus(GetFrame(this),
                            _("Auto collected e-mail address '%s' "
