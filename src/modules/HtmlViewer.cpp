@@ -743,15 +743,13 @@ void HtmlViewer::ShowHeaderName(const String& name)
 
    FontColourChanger colChanger(GetOptions().HeaderNameCol, m_htmlText);
 
-   m_htmlText << "<tt>" << name << ":&nbsp;</tt>";
+   // second column will be for the header values
+   m_htmlText << "<tt>" << name << ":&nbsp;</tt></td><td>";
 }
 
 void HtmlViewer::ShowHeaderValue(const String& value,
                                  wxFontEncoding encoding)
 {
-   // second column: header values
-   m_htmlText += "</td><td>";
-
    FontColourChanger colChanger(GetOptions().HeaderValueCol, m_htmlText);
 
    EncodingChanger encChanger(encoding, m_htmlText);

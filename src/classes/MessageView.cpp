@@ -1189,6 +1189,8 @@ MessageView::ShowHeaders()
 
             if ( *url.c_str() == '<' )
             {
+               urlText = url;
+
                // try to find the personal name as well by going backwards
                // until we reach the previous address
                bool inQuotes = false,
@@ -1212,7 +1214,7 @@ MessageView::ShowHeaders()
                   if ( stop )
                      break;
 
-                  url.insert(0, 1, ch);
+                  urlText.insert(0, 1, ch);
                   before.erase(before.length() - 1);
                }
             }

@@ -586,7 +586,7 @@ void TextViewer::InsertText(const String& text, const MTextStyle& style)
 
 void TextViewer::InsertURL(const String& text, const String& url)
 {
-   m_window->InsertClickable(url, new ClickableInfo(url), GetOptions().UrlCol);
+   m_window->InsertClickable(text, new ClickableInfo(url), GetOptions().UrlCol);
 }
 
 void TextViewer::InsertSignature(const String& signature)
