@@ -1,7 +1,6 @@
-Information.aux
-Information.dvi
-Information.log
-Information.ps
-Information.toc
+*.aux
+*.dvi
+*.log
+*.toc
 wxhelp.map
 Manual
