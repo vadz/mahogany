@@ -1286,7 +1286,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
       case TYPETEXT:
          // if the actual message text is in 7 bit, avoid encoding it even if
          // some charset which we would have normally encoded was used
-         if ( strutil_is7bit(data) )
+         if ( enc == wxFONTENCODING_SYSTEM || strutil_is7bit(data) )
          {
             bdy->encoding = ENC7BIT;
          }
