@@ -50,7 +50,9 @@
 #include "MessageViewer.h"
 #include "ViewFilter.h"
 
-#include "Message.h"
+#include "MailFolderCC.h" // needed to properly include MessageCC.h
+#include "MessageCC.h"
+#include "MimePartCC.h"
 #include "FolderView.h"
 #include "ASMailFolder.h"
 #include "MFolder.h"
@@ -1997,6 +1999,108 @@ MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
 }
 
 void
+MessageView::ProcessEncryptedMultiPart(const MimePart *mimepart)
+{
+   if ( mimepart->GetParam(_T("protocol")) == _T("application/pgp-encrypted") )
+   {
+      MimePart * const controlPart = mimepart->GetNested();
+      MimePart * const encryptedPart = controlPart->GetNext();
+
+      if ( !controlPart || !encryptedPart )
+      {
+         wxLogError(_("This message pretends to be encrypted but "
+                      "doesn't have the correct MIME structure."));
+         return;
+      }
+
+      // We could also test some more features:
+      // - that the control part actually has an "application/pgp-encrypted" type
+      // - that it contains a "Version: 1" field (and only that)
+
+      if ( encryptedPart->GetType().GetFull() != _T("APPLICATION/OCTET-STREAM") )
+      {
+         wxLogError(_("The actual encrypted data part does not have a "
+                      "\"application/octet-stream\" type, "
+                      "ignoring it."));
+         return;
+      }
+
+      unsigned long encryptedPartLength = 0;
+      const char* c = (const char *)encryptedPart->GetRawContent(&encryptedPartLength);
+      String encryptedData(wxConvertMB2WX(c), encryptedPartLength);
+
+      MCryptoEngineFactory * const factory
+         = (MCryptoEngineFactory *)MModule::LoadModule(_T("PGPEngine"));
+      if ( factory )
+      {
+         MCryptoEngine* pgpEngine = factory->Get();
+
+         MCryptoEngineOutputLog *log = new MCryptoEngineOutputLog(GetWindow());
+
+         String decryptedData;
+         MCryptoEngine::Status status =
+               pgpEngine->Decrypt(encryptedData, decryptedData, log);
+
+         ClickablePGPInfo *pgpInfo = 0;
+         switch ( status )
+         {
+            case MCryptoEngine::OK:
+               pgpInfo = new PGPInfoGoodMsg(this);
+
+               // TODO: process the mime part that's just been decrypted
+               // the problem is: how to create a MimePart instance from its full text?
+               // The following code raises an assert because the MessageCC is
+               // not associated to a folder...
+               {
+                  MessageCC* decryptedMessage = MessageCC::Create(decryptedData);
+                  const MimePart* decryptedMimePart = decryptedMessage->GetTopMimePart();
+                  ProcessPart(decryptedMimePart);
+               }
+               break;
+
+            default:
+               wxLogError(_("Decrypting the PGP message failed."));
+               // fall through
+            // if the user cancelled decryption, don't complain about it
+            case MCryptoEngine::OPERATION_CANCELED_BY_USER:
+               // using unmodified text is not very helpful here anyhow so
+               // simply replace it with an icon
+               pgpInfo = new PGPInfoBadMsg(this);
+         }
+
+         if ( pgpInfo )
+         {
+            pgpInfo->SetLog(log);
+
+            ShowText(_T("\r\n"));
+
+            m_viewer->InsertClickable(pgpInfo->GetBitmap(),
+                                      pgpInfo,
+                                      pgpInfo->GetColour());
+
+            ShowText(_T("\r\n"));
+         }
+         else
+         {
+            delete log;
+         }
+
+         factory->DecRef();
+      }
+      else
+      {
+         FAIL_MSG( _T("failed to create PGPEngineFactory") );
+
+         ProcessPart(encryptedPart);
+      }
+   }
+   else // unknown encryption protocol, don't try to interpret it
+   {
+      ProcessAllNestedParts(mimepart);
+   }
+}
+
+void
 MessageView::ProcessMultiPart(const MimePart *mimepart, const String& subtype)
 {
    // TODO: support for DIGEST and RELATED
@@ -2009,6 +2113,12 @@ MessageView::ProcessMultiPart(const MimePart *mimepart, const String& subtype)
    {
       ProcessSignedMultiPart(mimepart);
    }
+#if 0
+   else if ( subtype == _T("ENCRYPTED") )
+   {
+      ProcessEncryptedMultiPart(mimepart);
+   }
+#endif
    else // process all unknown as MIXED (according to the RFC 2047)
    {
       ProcessAllNestedParts(mimepart);

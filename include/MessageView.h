@@ -314,6 +314,9 @@ protected:
    /// process a multipart/signed part
    void ProcessSignedMultiPart(const MimePart *part);
 
+   /// process a multipart/encrypted part
+   void ProcessEncryptedMultiPart(const MimePart *part);
+
    /// call ProcessPart() for all subparts of this part
    void ProcessAllNestedParts(const MimePart *part);
 
