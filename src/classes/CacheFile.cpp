@@ -123,7 +123,18 @@ bool CacheFile::Save()
    {
       if ( !wxMkdir(dirname) )
       {
-         wxLogError(_("Failed to create directory for cache files."));
+         static String s_dirFailedCreate;
+
+         // remember if we had already given the message about this directory
+         // and don't do any more - as we're called perdiodically, this would
+         // result in a flood of messages if the user went away from the
+         // terminal
+         if ( dirname != s_dirFailedCreate )
+         {
+            s_dirFailedCreate = dirname;
+
+            wxLogError(_("Failed to create directory for cache files."));
+         }
 
          return false;
       }
