@@ -811,7 +811,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
       LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
       mf->m_NumOfMessages = number;
-      RequestUpdate();
+      mf->RequestUpdate();
    }
    else
    {
