@@ -202,12 +202,12 @@ public:
       m_MessageView = parent;
 
       // create the menu items
-      Append(WXMENU_MIME_INFO, _("&Info..."));
+      Append(WXMENU_MIME_INFO, _("&Info"));
       AppendSeparator();
       Append(WXMENU_MIME_OPEN, _("&Open"));
       Append(WXMENU_MIME_OPEN_WITH, _("Open &with..."));
       Append(WXMENU_MIME_SAVE, _("&Save..."));
-      Append(WXMENU_MIME_VIEW_AS_TEXT, _("&View as text..."));
+      Append(WXMENU_MIME_VIEW_AS_TEXT, _("&View as text"));
    }
 
    // callbacks
