@@ -90,7 +90,6 @@ VZ:
 
 ******* Priorities for KB: ******************************
 
-- why does wxLayout not draw first cmd object in buffer?
 - document python callback behaviour for incoming folders, possibly do 
   testing for callback results in CollectOneFolder!!
 - add closing delay for sentmail folder to avoid reopening it each time

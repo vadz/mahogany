@@ -391,7 +391,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Folder where to collect &new mail"), Field_Text, -1},
    { gettext_noop("Poll for &new mail interval in seconds"), Field_Number, -1},
    { gettext_noop("&Ping/check folder interval in seconds"), Field_Number, -1},
-   { gettext_noop("&Automatically display first message in viewer"), Field_Bool, -1},
+   { gettext_noop("&Automatically select first message in viewer"), Field_Bool, -1},
    { gettext_noop("&Threshold for displaying progress dialog"), Field_Number, -1},
 
 

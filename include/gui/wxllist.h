@@ -29,7 +29,8 @@
 #   define WXMENU_LAYOUT_DBLCLICK   1113
 #endif
 
-#ifdef   __WXDEBUG__
+// do not enable debug mode within Mahogany
+#if defined(__WXDEBUG__)  && ! defined(M_BASEDIR)
 #   define   WXLAYOUT_DEBUG
 #endif
 
@@ -887,10 +888,10 @@ private:
    /// A structure for the selection.
    struct Selection
    {
+      Selection() { m_valid = false; m_selecting = false; }
       bool m_valid;
       bool m_selecting;
       wxPoint m_CursorA, m_CursorB;
-      Selection() { m_valid = false; m_selecting = true; }
    } m_Selection;
    /** @name Font parameters. */
    //@{

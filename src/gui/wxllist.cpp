@@ -456,7 +456,7 @@ wxLayoutLine::FindObjectScreen(wxDC &dc,
       if( x <= xpos && xpos <= x + width )
       {
          *cxpos = cx + (**i).GetOffsetScreen(dc, xpos-x);
-         wxLogDebug("wxLayoutLine::FindObjectScreen: cursor xpos = %ld", *cxpos);
+         WXLO_DEBUG(("wxLayoutLine::FindObjectScreen: cursor xpos = %ld", *cxpos));
          if(found) *found = true;
          return i;
       }
@@ -971,12 +971,10 @@ wxLayoutLine::Debug(void)
 {
    wxString tmp;
    wxPoint pos = GetPosition();
-   tmp.Printf("Line %ld, Pos (%ld,%ld), Height %ld",
+   WXLO_DEBUG(("Line %ld, Pos (%ld,%ld), Height %ld",
               (long int) GetLineNumber(),
               (long int) pos.x, (long int) pos.y,
-              (long int) GetHeight());
-              
-   wxLogDebug(tmp);
+              (long int) GetHeight()));
 }
 #endif
 
@@ -1432,10 +1430,10 @@ wxLayoutList::Draw(wxDC &dc,
                                     m_CursorLine == m_FirstLine));
    InvalidateUpdateRect();
 
-   wxLogDebug("Selection is %s : l%d,%ld/%ld,%ld",
-              m_Selection.m_valid ? "valid" : "invalid",
-              m_Selection.m_CursorA.x, m_Selection.m_CursorA.y,
-              m_Selection.m_CursorB.x, m_Selection.m_CursorB.y);
+   WXLO_DEBUG(("Selection is %s : l%d,%ld/%ld,%ld",
+               m_Selection.m_valid ? "valid" : "invalid",
+               m_Selection.m_CursorA.x, m_Selection.m_CursorA.y,
+               m_Selection.m_CursorB.x, m_Selection.m_CursorB.y));
 }
 
 wxLayoutObject *
@@ -1543,7 +1541,7 @@ wxLayoutList::SetUpdateRect(CoordType x, CoordType y)
 void
 wxLayoutList::StartSelection(void)
 {
-   wxLogDebug("Starting selection at %ld/%ld", m_CursorPos.x, m_CursorPos.y);
+   WXLO_DEBUG(("Starting selection at %ld/%ld", m_CursorPos.x, m_CursorPos.y));
    m_Selection.m_CursorA = m_CursorPos;
    m_Selection.m_selecting = true;
    m_Selection.m_valid = false;
@@ -1554,7 +1552,7 @@ wxLayoutList::ContinueSelection(void)
 {
    wxASSERT(m_Selection.m_selecting == true);
    wxASSERT(m_Selection.m_valid == false);
-   wxLogDebug("Continuing selection at %ld/%ld", m_CursorPos.x, m_CursorPos.y);
+   WXLO_DEBUG(("Continuing selection at %ld/%ld", m_CursorPos.x, m_CursorPos.y));
    m_Selection.m_CursorB = m_CursorPos;
    // We always want m_CursorA <= m_CursorB!
    if(! (m_Selection.m_CursorA <= m_Selection.m_CursorB))
@@ -1569,7 +1567,7 @@ void
 wxLayoutList::EndSelection(void)
 {
    ContinueSelection();
-   wxLogDebug("Ending selection at %ld/%ld", m_CursorPos.x, m_CursorPos.y);
+   WXLO_DEBUG(("Ending selection at %ld/%ld", m_CursorPos.x, m_CursorPos.y));
    m_Selection.m_selecting = false;
    m_Selection.m_valid = true;
 }

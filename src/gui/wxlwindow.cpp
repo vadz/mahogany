@@ -43,6 +43,12 @@
 
 #include <ctype.h>
 
+#ifdef WXLAYOUT_DEBUG
+#  define   WXLO_DEBUG(x)      wxLogDebug x
+#else
+#  define WXLO_DEBUG(x)
+#endif
+
 /// offsets to put a nice frame around text
 #define WXLO_XOFFSET   4
 #define WXLO_YOFFSET   4
@@ -281,11 +287,6 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       case 'v':
          Paste();
          break;
-#ifdef WXLAYOUT_DEBUG
-      case WXK_F1:
-         m_llist->SetFont(-1,-1,-1,-1,true);  // underlined
-         break;
-#endif
       default:
          ;
       }
@@ -419,8 +420,10 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
 
    //m_llist->InvalidateUpdateRect();
    //const wxRect *r = m_llist->GetUpdateRect();
-   wxLogDebug("Update rect: %ld,%ld / %ld,%ld",
-              updateRect->x, updateRect->y, updateRect->x+updateRect->width, updateRect->y+updateRect->height);
+   WXLO_DEBUG(("Update rect: %ld,%ld / %ld,%ld",
+               updateRect->x, updateRect->y,
+               updateRect->x+updateRect->width,
+               updateRect->y+updateRect->height));
 
 #if 0
    //FIXME: we should never need to call Layout at all because the
@@ -443,7 +446,7 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
    /* Make sure that the scrollbars are at a position so that the
       cursor is visible if we are editing. */
       /** Scroll so that cursor is visible! */
-   wxLogDebug("m_ScrollToCursor = %d", (int) m_ScrollToCursor);
+   WXLO_DEBUG(("m_ScrollToCursor = %d", (int) m_ScrollToCursor));
    if(IsEditable() && m_ScrollToCursor)
    {
       wxPoint cc = m_llist->GetCursorScreenPos(*m_memDC);
@@ -497,8 +500,10 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
 
    
    /* This is the important bit: we tell the list to draw itself: */
-   wxLogDebug("Update rect: %ld,%ld / %ld,%ld",
-              updateRect->x, updateRect->y, updateRect->x+updateRect->width, updateRect->y+updateRect->height);
+   WXLO_DEBUG(("Update rect: %ld,%ld / %ld,%ld",
+               updateRect->x, updateRect->y,
+               updateRect->x+updateRect->width,
+               updateRect->y+updateRect->height)); 
    
    wxPoint offset(-x0+WXLO_XOFFSET,-y0+WXLO_YOFFSET);
    m_llist->Draw(*m_memDC,offset, y0, y0+y1);
@@ -513,8 +518,8 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
    if(ri)
       while(ri)
       {
-         wxLogDebug("UpdateRegion: %ld,%ld, %ld,%ld",
-                    ri.GetX(),ri.GetY(),ri.GetW(),ri.GetH());
+         WXLO_DEBUG(("UpdateRegion: %ld,%ld, %ld,%ld",
+                     ri.GetX(),ri.GetY(),ri.GetW(),ri.GetH()));
          dc.Blit(x0+ri.GetX(),y0+ri.GetY(),ri.GetW(),ri.GetH(),
                  m_memDC,ri.GetX(),ri.GetY(),wxCOPY,FALSE);
          ri++;

@@ -455,4 +455,5 @@ void PyH_GetErrorMessage(String *errString)
       *errString = result;
    else
       *errString = "Unknown error";
+   free(result);
 }

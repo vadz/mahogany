@@ -1,4 +1,4 @@
-#This file was created by <karsten> Fri May  7 23:28:46 1999
+#This file was created by <karsten> Mon May 10 16:28:54 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -41,7 +41,7 @@ User Manual for Version 0.22a
 \begin_inset Quotes eld
 \end_inset 
 
-Viewforth
+Polwarth III
 \begin_inset Quotes erd
 \end_inset 
 
@@ -1766,6 +1766,18 @@ Mahogany will check all incoming mailboxes for new mail.
  set it to a longer value to reduce the annoying screen updates, set it
  to a shorter value if you care about receiving your new mail with little
  delay.
+\layout Itemize
+
+
+\series bold 
+Automatically select first message in viewer
+\series default 
+
+\newline 
+If enabled, Mahogany will automatically select and display the first message
+ in the message viewer whenever you open a folder.
+ This can be inconvenient if you want to just look at headers without downloadin
+g messages over a slow link.
 \layout Itemize
 
 
