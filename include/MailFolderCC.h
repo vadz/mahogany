@@ -187,6 +187,8 @@ public:
                                 int flag,
                                 bool set = true);
 
+   virtual bool SetFlagForAll(int flag, bool set = true);
+
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
        @param sequence the IMAP sequence of uids
        @param flag flag to be set, e.g. "\\Deleted"
@@ -234,6 +236,20 @@ public:
        @return string uniquely identifying the message in this folder
    */
    virtual String GetMessageUID(unsigned long msgno) const;
+
+   enum SequenceKind
+   {
+      SEQ_UID,
+      SEQ_MSGNO
+   };
+
+   /** Set a flag for all messages in this sequence which may contain either
+       UIDs or msgnos
+    */
+   virtual bool DoSetSequenceFlag(SequenceKind kind,
+                                  const String& sequence,
+                                  int flag,
+                                  bool set = true);
 
    /** Check whether mailbox has changed.
        @return FALSE on error

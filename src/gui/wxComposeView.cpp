@@ -2942,9 +2942,7 @@ wxComposeView::Send(bool schedule)
    String from = GetFrom();
    if ( !from.empty() && from != m_from )
    {
-      msg->SetFrom(Message::GetEMailFromAddress(from),
-                   Message::GetNameFromAddress(from)
-                   /* don't set Reply-To yet FIXME?*/);
+      msg->SetFrom(from);
    }
 
    // Add additional header lines: first for this time only and then also the
@@ -3049,8 +3047,14 @@ wxComposeView::SetDefaultFrom()
 {
    if ( m_txtFrom )
    {
-      m_from = miscutil_GetFromAddress(m_Profile);
-      m_txtFrom->SetValue(m_from);
+      Address *addr = Address::CreateFromAddress(m_Profile);
+      if ( addr )
+      {
+         m_from = addr->GetAddress();
+         m_txtFrom->SetValue(m_from);
+
+         delete addr;
+      }
    }
 }
 

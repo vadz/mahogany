@@ -22,8 +22,8 @@
 
 
 #include "MApplication.h"
+#include "Profile.h"
 #include "strutil.h"
-#include "miscutil.h"
 #include "MDialogs.h"
 #include "MFolder.h"
 #include "MailFolder.h"
@@ -256,22 +256,6 @@ strutil_RegEx * re)
 virtual void RemoveModule (MModuleCommon * module)
 {
 mApplication->RemoveModule(module);
-}
-
-
-
-virtual String miscutil_GetReplyAddress (
-Profile * p)
-{
-return ::miscutil_GetReplyAddress(p);
-}
-
-
-
-virtual String miscutil_GetFromAddress (
-Profile * p)
-{
-return ::miscutil_GetFromAddress(p);
 }
 
 

@@ -53,7 +53,6 @@
 #   include <strings.h>
 #endif // USE_PCH
 
-#include "miscutil.h"
 #include "Mdefaults.h"
 #include "MApplication.h"
 #include "Message.h"
@@ -169,24 +168,38 @@ SendMessageCC::Create(Protocol protocol,
 
    CHECK_RET(prof,"SendMessageCC::Create() requires profile");
 
-   (void) miscutil_GetFromAddress(prof, &m_FromPersonal, &m_FromAddress);
-   m_ReplyTo = miscutil_GetReplyAddress(prof);
-   m_ReturnAddress = m_FromAddress;
+   m_DefaultHost = READ_CONFIG(prof, MP_HOSTNAME);
+   if ( m_DefaultHost.empty() )
+   {
+      // trick c-client into accepting addresses without host names
+      m_DefaultHost = '@';
+   }
+
+   // set up default values for From/Reply-To headers
+   Address *addrFrom = Address::CreateFromAddress(prof);
+   if ( addrFrom )
+   {
+      m_From = addrFrom->GetAddress();
+      delete addrFrom;
+   }
+
+   m_ReplyTo = READ_CONFIG(prof, MP_REPLY_ADDRESS);
 
    /*
       Sender logic: by default, use the SMTP login if it is set and differs
-      from the "From" valu, otherwise leave it empty. If guessing it is
-      disabled, then we use the sender value specified by user as is instead.
+      from the "From" value, otherwise leave it empty. If guessing it is
+      disabled, then we use the sender value specified by the user "as is"
+      instead.
    */
    if ( READ_CONFIG(prof, MP_GUESS_SENDER) )
    {
       m_Sender = READ_CONFIG(prof, MP_SMTPHOST_LOGIN);
       m_Sender.Trim().Trim(FALSE); // remove all spaces on begin/end
 
-      if ( Message::CompareAddresses(m_FromAddress, m_Sender) )
+      if ( Message::CompareAddresses(m_From, m_Sender) )
       {
          // leave Sender empty if it is the same as From, redundant
-         m_Sender = "";
+         m_Sender.clear();
       }
    }
    else // don't guess, use provided value
@@ -201,13 +214,6 @@ SendMessageCC::Create(Protocol protocol,
    if(READ_CONFIG(prof,MP_USEOUTGOINGFOLDER) )
       m_SentMailName = READ_CONFIG(prof,MP_OUTGOINGFOLDER);
    m_CharSet = READ_CONFIG(prof,MP_CHARSET);
-
-   m_DefaultHost = miscutil_GetDefaultHost(prof);
-   if ( !m_DefaultHost )
-   {
-      // trick c-client into accepting addresses without host names
-      m_DefaultHost = '@';
-   }
 
    m_SendmailCmd = READ_CONFIG(prof, MP_USE_SENDMAIL) ?
       READ_CONFIG(prof,MP_SENDMAILCMD) : String("");
@@ -273,7 +279,7 @@ SendMessageCC::SetHeaderEncoding(wxFontEncoding enc)
 }
 
 String
-SendMessageCC::EncodeHeader(const String& header)
+SendMessageCC::EncodeHeaderString(const String& header)
 {
    // only encode the strings which contain the characters unallowed in RFC
    // 822 headers (FIXME should we quote RFC 822 specials? probably too...)
@@ -399,18 +405,18 @@ SendMessageCC::EncodeHeader(const String& header)
    return headerEnc;
 }
 
-// unlike EncodeHeader(), we should only encode the personal name part of the
+// unlike EncodeHeaderString(), we should only encode the personal name part of the
 // address headers
-String
-SendMessageCC::EncodeAddress(const String& addr)
+void
+SendMessageCC::EncodeAddress(struct mail_address *adr)
 {
-   if ( m_encHeaders == wxFONTENCODING_SYSTEM )
-      return addr;
+   if ( adr->personal )
+   {
+      char *tmp = adr->personal;
+      adr->personal = cpystr(EncodeHeaderString(tmp));
 
-   String name = Message::GetNameFromAddress(addr),
-          email = Message::GetEMailFromAddress(addr);
-
-   return EncodeHeader(name) + " <" + email + '>';
+      fs_give((void **)&tmp);
+   }
 }
 
 void
@@ -418,13 +424,7 @@ SendMessageCC::EncodeAddressList(struct mail_address *adr)
 {
    while ( adr )
    {
-      if ( adr->personal )
-      {
-         char *tmp = adr->personal;
-         adr->personal = cpystr(EncodeHeader(tmp));
-
-         fs_give((void **)&tmp);
-      }
+      EncodeAddress(adr);
 
       adr = adr->next;
    }
@@ -433,72 +433,50 @@ SendMessageCC::EncodeAddressList(struct mail_address *adr)
 void
 SendMessageCC::SetSubject(const String &subject)
 {
-   if(m_Envelope->subject) fs_give((void **)&m_Envelope->subject);
+   if(m_Envelope->subject)
+      fs_give((void **)&m_Envelope->subject);
 
-   String subj = EncodeHeader(subject);
+   String subj = EncodeHeaderString(subject);
    m_Envelope->subject = cpystr(subj.c_str());
 }
 
 void
 SendMessageCC::SetFrom(const String& from,
-                       const String& personal,
                        const String& replyaddress,
                        const String& sender)
 {
-   if( !from.empty() )
-      m_FromAddress = EncodeAddress(from);
-   if( !personal.empty() )
-      m_FromPersonal = personal;
+   if ( !from.empty() )
+      m_From = from;
+
    if ( !replyaddress.empty() )
-      m_ReplyTo = EncodeAddress(replyaddress);
-   if( !sender.empty() )
-      m_Sender = EncodeAddress(sender);
+      m_ReplyTo = replyaddress;
+
+   if ( !sender.empty() )
+      m_Sender = sender;
 }
 
 void
-SendMessageCC::SetupAddresses(void)
+SendMessageCC::SetupFromAddresses(void)
 {
-   if(m_Envelope->from != NIL)
-      mail_free_address(&m_Envelope->from);
-   if(m_Envelope->return_path != NIL)
-      mail_free_address(&m_Envelope->return_path);
+   // From
+   SetAddressField(&m_Envelope->from, m_From);
 
-   // From: line:
-   m_Envelope->from = mail_newaddr();
-   m_Envelope->return_path = mail_newaddr ();
+   ADDRESS *adr = m_Envelope->from;
 
-   String mailbox, mailhost;
-
-   String email = Message::GetEMailFromAddress(m_FromAddress);
-   mailbox = strutil_before(email, '@');
-   mailhost = strutil_after(email,'@');
-
-   m_Envelope->from->personal = cpystr(EncodeHeader(m_FromPersonal));
-   m_Envelope->from->mailbox = cpystr(mailbox);
-   m_Envelope->from->host = cpystr(mailhost);
-
-   if(m_Sender.Length() > 0)
+   // Sender
+   if ( !m_Sender.empty() )
    {
-      m_Envelope->sender = mail_newaddr();
-      email = Message::GetEMailFromAddress(m_Sender);
-      mailbox = strutil_before(email, '@');
-      mailhost = strutil_after(email,'@');
+      SetAddressField(&m_Envelope->sender, m_Sender);
 
-      if ( mailhost.empty() )
-      {
-         // SMTP servers often won't accept unqualified username as sender, so
-         // always use some domain name
-         mailhost = m_ServerHost;
-      }
-
-      String tmp = Message::GetNameFromAddress(m_Sender);
-      if(tmp != email) // it might just be the same name@host
-         m_Envelope->sender->personal = cpystr(tmp);
-      m_Envelope->sender->mailbox = cpystr(mailbox);
-      m_Envelope->sender->host = cpystr(mailhost);
+      adr = m_Envelope->sender;
    }
-   m_Envelope->return_path->mailbox = cpystr(mailbox);
-   m_Envelope->return_path->host = cpystr(mailhost);
+
+   // Return-Path (it is used as SMTP "MAIL FROM: <>" argument)
+   ASSERT_MSG( m_Envelope->return_path == NIL, "Return-Path already set?" );
+
+   m_Envelope->return_path = mail_newaddr();
+   m_Envelope->return_path->mailbox = cpystr(adr->mailbox);
+   m_Envelope->return_path->host = cpystr(adr->host);
 }
 
 void
@@ -528,8 +506,13 @@ SendMessageCC::SetAddressField(ADDRESS **pAdr, const String& address)
    free(hostCopy);
 
    // finally filter out any invalid addressees
-   ADDRESS *adrPrev = *pAdr,
-           *adr = *pAdr;
+   CheckAddressFieldForErrors(*pAdr);
+}
+
+void SendMessageCC::CheckAddressFieldForErrors(ADDRESS *adrStart)
+{
+   ADDRESS *adrPrev = adrStart,
+           *adr = adrStart;
    while ( adr )
    {
       ADDRESS *adrNext = adr->next;
@@ -550,7 +533,7 @@ SendMessageCC::SetAddressField(ADDRESS **pAdr, const String& address)
       adr = adrNext;
    }
 
-   EncodeAddressList(*pAdr);
+   EncodeAddressList(adrStart);
 }
 
 void
@@ -762,7 +745,7 @@ SendMessageCC::Build(bool forStorage)
    if(m_headerNames != NULL) // message was already build
       return;
 
-   SetupAddresses();
+   SetupFromAddresses();
 
    bool replyToSet = false;
 
@@ -825,22 +808,19 @@ SendMessageCC::Build(bool forStorage)
 #endif // Unix/Windows
       m_headerValues[h++] = strutil_strdup(version);
    }
-   if(! replyToSet)
+
+   // set Reply-To if it hadn't been set by the user as a custom header
+   if ( !replyToSet )
    {
-      if(! HasHeaderEntry("Reply-To"))
+      ASSERT_MSG( !HasHeaderEntry("Reply-To"), "logic error" );
+
+      if ( !m_ReplyTo.empty() )
       {
-         //(always add reply-to header) add only if not empty:
-         if(m_ReplyTo.Length() > 0)
-         {
-            tmpstr = m_ReplyTo;
-            if(!strutil_isempty(tmpstr))
-            {
-               m_headerNames[h] = strutil_strdup("Reply-To");
-               m_headerValues[h++] = strutil_strdup(tmpstr);
-            }
-         }
+         m_headerNames[h] = strutil_strdup("Reply-To");
+         m_headerValues[h++] = strutil_strdup(m_ReplyTo);
       }
    }
+
 #ifdef HAVE_XFACES
    // add an XFace?
    if(! HasHeaderEntry("X-Face") && m_XFaceFile.Length() > 0)

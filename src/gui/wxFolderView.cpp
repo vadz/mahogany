@@ -2234,9 +2234,7 @@ wxFolderView::Clear()
                      GetFullPersistentKey(M_MSGBOX_MARK_READ)
                     ) )
                {
-                  UIdArray *seq = GetAllMessagesSequence(m_ASMailFolder);
-                  m_ASMailFolder->SetSequenceFlag(seq, MailFolder::MSG_STAT_DELETED);
-                  delete seq;
+                  m_ASMailFolder->SetFlagForAll(MailFolder::MSG_STAT_DELETED);
                }
             }
          }

@@ -45,12 +45,10 @@ public:
 
    /** Sets the value for the from field.
        @param from sender address
-       @param personal personal name
        @param returnaddress address for Reply-To
        @param sender setting if needed
    */
    virtual void SetFrom(const String &from,
-                        const String &personal = "",
                         const String &replyaddress = "",
                         const String &sender = "") = 0;
 

@@ -19,6 +19,8 @@
 
 #include "MObject.h"
 
+class Profile;
+
 /**
    Note on variable names: we have a lot of addresses here (strings, objects of
    address class, cclient addresses...) so we name them in a consitent manner
@@ -41,6 +43,9 @@
 class Address
 {
 public:
+   /// create the from address using settings in this profile
+   static Address *CreateFromAddress(Profile *profile);
+
    /// is the address valid?
    virtual bool IsValid() const = 0;
 

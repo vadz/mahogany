@@ -35,6 +35,8 @@
 #include "MDialogs.h"
 #include "Mdefaults.h"
 
+#include "Address.h"
+
 #include "MessageView.h"
 
 #include <wx/confbase.h>      // for wxExpandEnvVars()
@@ -295,6 +297,12 @@ protected:
 private:
    // helper used by GetCategory and GetVariable
    static int FindStringInArray(const char *strs[], int max, const String& s);
+
+   // helper used by ExpandOriginal(): return the personal name part of the
+   // first address of the given type
+   //
+   // FIXME: this function is bad as it completely ignores the other addresses
+   void GetNameForAddress(String *value, MessageAddressType type) const;
 
    // the sink we use when expanding pseudo variables
    ExpansionSink& m_sink;
@@ -882,6 +890,15 @@ VarExpander::ExpandMessage(const String& name, String *value) const
    return TRUE;
 }
 
+void
+VarExpander::GetNameForAddress(String *value, MessageAddressType type) const
+{
+   AddressList_obj addrList = m_msg->GetAddressList(MAT_REPLYTO);
+   Address *addr = addrList ? addrList->GetFirst() : NULL;
+   if ( addr )
+      *value = addr->GetName();
+}
+
 bool
 VarExpander::ExpandOriginal(const String& Name, String *value) const
 {
@@ -915,23 +932,25 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
             break;
 
          case OriginalHeader_ReplyTo:
-            m_msg->Address(*value, MAT_REPLYTO);
+            GetNameForAddress(value, MAT_REPLYTO);
             break;
 
          case OriginalHeader_To:
-            m_msg->Address(*value, MAT_TO);
+            GetNameForAddress(value, MAT_TO);
             break;
 
          case OriginalHeader_PersonalName:
-            m_msg->Address(*value, MAT_FROM);
+            GetNameForAddress(value, MAT_FROM);
             break;
 
          case OriginalHeader_FirstName:
-            *value = m_msg->GetAddressFirstName(MAT_FROM);
+            GetNameForAddress(value, MAT_FROM);
+            *value = Message::GetFirstNameFromAddress(*value);
             break;
 
          case OriginalHeader_LastName:
-            *value = m_msg->GetAddressLastName(MAT_FROM);
+            GetNameForAddress(value, MAT_FROM);
+            *value = Message::GetLastNameFromAddress(*value);
             break;
 
          case OriginalHeader_Newsgroups:
@@ -1061,11 +1080,11 @@ String VarExpander::GetReplyPrefix() const
       // take from address, not reply-to which can be set to
       // reply to a mailing list, for example
       String name;
-      m_msg->Address(name, MAT_FROM);
+      GetNameForAddress(&name, MAT_FROM);
       if ( name.empty() )
       {
          // no from address? try to find anything else
-         m_msg->Address(name, MAT_REPLYTO);
+         GetNameForAddress(&name, MAT_REPLYTO);
       }
 
       name = MailFolder::DecodeHeader(name);

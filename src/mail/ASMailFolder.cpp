@@ -28,8 +28,6 @@
 #include "ASMailFolder.h"
 #include "MailFolderCC.h"
 
-#include "miscutil.h"
-
 /// Call this always before using it.
 #ifdef DEBUG
 #   define   AScheck()   { MOcheck(); ASSERT(m_MailFolder); }
@@ -209,6 +207,7 @@ public:
 class MT_SetSequenceFlag : public MailThread
 {
 public:
+   // passing empty sequence string means that we set flag for all messages
    MT_SetSequenceFlag(ASMailFolder *mf, UserData ud,
                       const String &sequence,
                       int flag, bool set)
@@ -220,8 +219,12 @@ public:
       }
    virtual void WorkFunction(void)
       {
-         m_MailFolder->SetSequenceFlag(m_Sequence, m_Flag, m_Set);
+         if ( m_Sequence.empty() )
+            m_MailFolder->SetFlagForAll(m_Flag, m_Set);
+         else
+            m_MailFolder->SetSequenceFlag(m_Sequence, m_Flag, m_Set);
       }
+
 protected:
    String m_Sequence;
    int m_Flag;
@@ -692,6 +695,12 @@ public:
          return (new MT_GetMessage(this, ud, uid))->Start();
       }
 
+   virtual Ticket SetFlagForAll(int flag, bool set = true)
+      {
+         // passing empty string means that we set it for all messages
+         return (new MT_SetSequenceFlag(this, NULL, "", flag, set))->Start();
+      }
+
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
        @param sequence the IMAP sequence of uids
        @param flag flag to be set, e.g. "\\Deleted"
@@ -712,7 +721,7 @@ public:
    */
    virtual Ticket SetFlag(const UIdArray *sequence, int flag, bool set)
       {
-         return (new MT_SetFlag(this, NULL, sequence,flag,set))->Start();
+         return (new MT_SetFlag(this, NULL, sequence, flag, set))->Start();
       }
 
 

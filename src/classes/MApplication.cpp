@@ -669,9 +669,8 @@ MAppBase::CanClose() const
          if( mf )
          {
             // make sure they are all marked as deleted:
-            UIdArray * ia = GetAllMessagesSequence(mf);
-            mf->SetSequenceFlag(ia, MailFolder::MSG_STAT_DELETED);
-            delete ia;
+            mf->SetFlagForAll(MailFolder::MSG_STAT_DELETED);
+
             // And now, we can ask if we want to expunge them:
             CheckExpungeDialog(mf);
             mf->DecRef();

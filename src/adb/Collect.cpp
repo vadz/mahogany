@@ -31,6 +31,9 @@
 
 #include "MDialogs.h"
 
+#include "Address.h"
+#include "Collect.h"
+
 #include "adb/AdbManager.h"
 #include "adb/AdbBook.h"
 
@@ -53,14 +56,52 @@ DECLARE_AUTOPTR(AdbBook);
 // implementation
 // ============================================================================
 
-void AutoCollectAddresses(const String &email,
-                          String name,
+void AutoCollectAddresses(const Message *message,
                           int autocollectFlag,
                           bool collectNamed,
                           const String& bookName,
                           const String& groupName,
                           wxFrame *frame)
 {
+   static const MessageAddressType addressTypesToCollect[] =
+   {
+      MAT_REPLYTO,
+      MAT_FROM
+   };
+
+   for ( size_t n = 0; n < WXSIZEOF(addressTypesToCollect); n++ )
+   {
+      AddressList *addrList = message->GetAddressList(MAT_REPLYTO);
+      if ( !addrList )
+         continue;
+
+      for ( Address *addr = addrList->GetFirst();
+            addr;
+            addr = addrList->GetNext(addr) )
+      {
+         AutoCollectAddress(addr->GetEMail(),
+                            addr->GetName(),
+                            autocollectFlag,
+                            collectNamed,
+                            bookName,
+                            groupName,
+                            frame);
+      }
+
+      addrList->DecRef();
+   }
+}
+
+void AutoCollectAddress(const String& email,
+                        const String& nameOrig,
+                        int autocollectFlag,
+                        bool collectNamed,
+                        const String& bookName,
+                        const String& groupName,
+                        wxFrame *frame)
+{
+   String name = nameOrig;
+
    // we need an address and a name
    bool hasEmailAndName = true;
    if ( email.IsEmpty() )

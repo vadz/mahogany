@@ -20,6 +20,7 @@
 #include "FolderType.h"    // for Protocol enum
 
 class WXDLLEXPORT wxArrayString;
+class AddressList;
 class MailFolder;
 class Profile;
 
@@ -112,22 +113,20 @@ public:
    virtual size_t GetAddresses(MessageAddressType type,
                                wxArrayString& addresses) const = 0;
 
-   /** Get an address line.
-       Using MAT_REPLY should always return a valid return address.
-       @param name where to store personal name if available
-       @param type which address
-       @return address entry
-   */
-   virtual String Address(String &name,
-                          MessageAddressType type = MAT_REPLYTO) const = 0;
+   /**
+       Get the address list of all address of the given type. The caller must
+       DecRef() the returned pointer.
 
-   /** Extract the first name from the result returned by calling Address()
-   */
-   virtual String GetAddressFirstName(MessageAddressType type = MAT_REPLYTO) const;
+       @return address list or NULL if no such addresses
+    */
+   virtual AddressList *GetAddressList(MessageAddressType type) const = 0;
 
-   /** Extract the last name from the result returned by calling Address()
-   */
-   virtual String GetAddressLastName(MessageAddressType type = MAT_REPLYTO) const;
+   /**
+       Get the string containing all addresses
+
+       @return string containing all addresses of given type
+    */
+   String GetAddressesString(MessageAddressType type) const;
 
    /** get From line
        @return From entry

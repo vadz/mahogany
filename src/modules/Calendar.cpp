@@ -701,14 +701,12 @@ CalendarFrame::GetConfig(void)
    wxString oldFolderName = m_FolderName;
 
    // settings read from normal module profile:
-   m_FolderName = m_Profile->readEntry(MP_MOD_CALENDAR_BOX,
-                                       MP_MOD_CALENDAR_BOX_D);
-   m_Show = m_Profile->readEntry(MP_MOD_CALENDAR_SHOWONSTARTUP,
-                                 MP_MOD_CALENDAR_SHOWONSTARTUP_D) != 0;
+   m_FolderName = READ_CONFIG(m_Profile, MP_MOD_CALENDAR_BOX);
+   m_Show = READ_CONFIG(m_Profile, MP_MOD_CALENDAR_SHOWONSTARTUP) != 0;
 
    // settings read from folder profile:
    Profile *fp = m_MInterface->CreateProfile(m_FolderName);
-   m_MyEmail = m_MInterface->miscutil_GetFromAddress(fp);
+   m_MyEmail = READ_CONFIG(fp, MP_FROM_ADDRESS);
 
    {
 #ifdef OS_WIN

@@ -62,11 +62,9 @@ private:
 class AddressListCC : public AddressList
 {
 public:
-   // create the address from cclient ADDRESS struct
-   AddressListCC(mail_address *adr);
-
-   // free the addresses
-   virtual ~AddressListCC();
+   // create by copying an already existing ADDRESS struct (we don't take
+   // ownership of it)
+   static AddressList *Create(const mail_address *adr);
 
    // implement the base class pure virtuals  
    virtual Address *GetFirst() const;
@@ -75,8 +73,17 @@ public:
    virtual bool IsSameAs(const AddressList *addr) const;
 
 private:
+   // create the address from cclient ADDRESS struct, we take ownership of it!
+   AddressListCC(mail_address *adr);
+
+   // free the addresses
+   virtual ~AddressListCC();
+
    // pointer to the head of the linked list of addresses
    AddressCC *m_addrCC;
+
+   // it uses our ctor
+   friend AddressList *AddressList::Create(const String&);
 
    MOBJECT_DEBUG(AddressListCC)
 };

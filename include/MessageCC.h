@@ -61,14 +61,7 @@ public:
    virtual size_t GetAddresses(MessageAddressType type,
                                wxArrayString& addresses) const;
 
-   /** Get an address line.
-       Using MAT_REPLY should always return a valid return address.
-       @param name where to store personal name if available
-       @param type which address
-       @return address entry
-   */
-   virtual String Address(String &name,
-                          MessageAddressType type = MAT_REPLYTO) const;
+   virtual AddressList *GetAddressList(MessageAddressType type) const;
 
    /** get From line
        @return From entry
@@ -166,10 +159,6 @@ protected:
 
    /// get the ADDRESS struct for the given address header
    ADDRESS *GetAddressStruct(MessageAddressType type) const;
-
-   /// get name/email from ADDRESS
-   static
-   void AddressToNameAndEmail(ADDRESS *addr, wxString& name, wxString& email);
 
 private:
    /// common part of all ctors

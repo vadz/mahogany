@@ -51,7 +51,6 @@ public:
        @param sender setting if needed
    */
    virtual void SetFrom(const String &from,
-                        const String &personal = "",
                         const String &replyaddress = "",
                         const String &sender = "");
 
@@ -118,7 +117,9 @@ protected:
        @return true on success
    */
    bool Send(void);
-   void SetupAddresses(void);
+
+   /// set sender address fields
+   void SetupFromAddresses(void);
 
    /** Builds the message, i.e. prepare to send it.
     @param forStorage if this is TRUE, store some extra information
@@ -132,11 +133,11 @@ protected:
    /// translate the (wxWin) encoding to (MIME) charset
    String EncodingToCharset(wxFontEncoding enc);
 
-   /// encode the header field using m_encHeaders
-   String EncodeHeader(const String& header);
+   /// encode the string using m_encHeaders encoding
+   String EncodeHeaderString(const String& header);
 
-   /// encode the address header field using m_encHeaders
-   String EncodeAddress(const String& addr);
+   /// encode the address field using m_encHeaders
+   void EncodeAddress(struct mail_address *adr);
 
    /// encode all entries in the list of addresses
    void EncodeAddressList(struct mail_address *adr);
@@ -160,12 +161,23 @@ private:
    bool m_UseSSLUnsignedforSMTP, m_UseSSLUnsignedforNNTP;
 #endif
 
-   /// Address bits
-   String m_FromAddress, m_FromPersonal;
-   String m_ReturnAddress;
+   /** @name Address fields
+    */
+   //@{
+
+   /// the full From: address
+   String m_From;
+
+   /// the full value of Reply-To: header (may be empty)
    String m_ReplyTo;
+
+   /// the full value of Sender: header (may be empty)
    String m_Sender;
+
+   /// the saved value of Bcc: set by call to SetAddresses()
    String m_Bcc;
+   //@}
+
    /// if not empty, name of xface file
    String m_XFaceFile;
    /// Outgoing folder name or empty
@@ -206,6 +218,10 @@ private:
 
    /// sets one address field in the envelope
    void SetAddressField(ADDRESS **pAdr, const String& address);
+
+   /// filters out erroneous addresses
+   void CheckAddressFieldForErrors(ADDRESS *adr);
+
    //@}
 
    // give it access to m_headerNames nad m_headerValues

@@ -55,8 +55,9 @@
 #include "MDialogs.h"
 #include "Mpers.h"
 #include "XFace.h"
-#include "miscutil.h"
+#include "Collect.h"
 #include "sysutil.h"
+#include "miscutil.h"         // for GetColourByName()
 
 #include "MessageTemplate.h"
 #include "Composer.h"
@@ -963,9 +964,7 @@ MessageView::ShowHeaders()
                      case EnvelopHeader_Bcc: mat = MAT_BCC; break;
                   }
 
-                  String name;
-                  String addr = m_mailMessage->Address(name, mat);
-                  value = GetFullEmailAddress(name, addr);
+                  value = m_mailMessage->GetAddressesString(mat);
                }
                break;
 
@@ -2635,23 +2634,13 @@ MessageView::DoShowMessage(Message *mailMessage)
       m_mailMessage->GetFolder()->
         SetMessageFlag(m_uid, MailFolder::MSG_STAT_SEEN, true);
 
-      // autocollect the address:
+      // autocollect the addresses from it if configured
       if ( m_ProfileValues.autocollect )
       {
-         String addr, name;
-         addr = m_mailMessage->Address(name, MAT_REPLYTO);
-
          String folderName = m_mailMessage->GetFolder() ?
             m_mailMessage->GetFolder()->GetName() : String(_("unknown"));
 
-         AutoCollectAddresses(addr, name,
-                              m_ProfileValues.autocollect,
-                              m_ProfileValues.autocollectNamed != 0,
-                              m_ProfileValues.autocollectBookName,
-                              folderName,
-                              (MFrame *)GetParentFrame());
-         addr = m_mailMessage->Address(name, MAT_FROM);
-         AutoCollectAddresses(addr, name,
+         AutoCollectAddresses(m_mailMessage,
                               m_ProfileValues.autocollect,
                               m_ProfileValues.autocollectNamed != 0,
                               m_ProfileValues.autocollectBookName,

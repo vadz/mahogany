@@ -26,8 +26,8 @@
 
 
 #include "MApplication.h"
+#include "Profile.h"
 #include "strutil.h"
-#include "miscutil.h"
 #include "MDialogs.h"
 #include "MFolder.h"
 #include "MailFolder.h"
@@ -132,12 +132,6 @@ void strutil_freeRegEx (
 in strutil_RegEx * re);
 
 void RemoveModule (in MModuleCommon * module);
-
-String miscutil_GetReplyAddress (
-in Profile * p);
-
-String miscutil_GetFromAddress (
-in Profile * p);
 
 /* The following line is the end of the MInterface interface definition. */
 

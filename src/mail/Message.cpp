@@ -310,20 +310,20 @@ Message::GetFirstNameFromAddress(const String& address)
    return name;
 }
 
-String Message::GetAddressFirstName(MessageAddressType type) const
+// ----------------------------------------------------------------------------
+// convenience wrappers
+// ----------------------------------------------------------------------------
+
+String Message::GetAddressesString(MessageAddressType type) const
 {
-   String addr;
-   Address(addr, type);
+   String address;
+   AddressList_obj addrList = GetAddressList(type);
+   if ( addrList )
+   {
+      address = addrList->GetAddresses();
+   }
 
-   return GetFirstNameFromAddress(addr);
-}
-
-String Message::GetAddressLastName(MessageAddressType type) const
-{
-   String addr;
-   Address(addr, type);
-
-   return GetLastNameFromAddress(addr);
+   return address;
 }
 
 /* static */

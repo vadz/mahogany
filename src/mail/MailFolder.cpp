@@ -39,6 +39,8 @@
 #include "Mdefaults.h"
 #include "MFolder.h"
 
+#include "Sequence.h"
+
 #include "Message.h"
 #include "MailFolder.h"
 #include "MailFolderCC.h" // CC_Cleanup (FIXME: shouldn't be there!)
@@ -46,8 +48,6 @@
 #ifdef EXPERIMENTAL
 #include "MMailFolder.h"
 #endif
-
-#include "miscutil.h"   // GetFullEmailAddress
 
 #include "Composer.h"
 #include "MApplication.h"
@@ -1177,5 +1177,22 @@ void MailFolder::SetInteractive(MFrame *frame, const String& foldername)
 void MailFolder::ResetInteractive()
 {
    SetInteractive(NULL, "");
+}
+
+// ----------------------------------------------------------------------------
+// misc
+// ----------------------------------------------------------------------------
+
+extern String GetSequenceString(const UIdArray *messages)
+{
+   Sequence seq;
+
+   size_t count = messages ? messages->GetCount() : 0;
+   for ( size_t n = 0; n < count; n++ )
+   {
+      seq.Add((*messages)[n]);
+   }
+
+   return seq.GetString();
 }
 

@@ -633,6 +633,10 @@ public:
                                int flag,
                                bool set = true) = 0;
 
+   /** Set flag for all messages
+    */
+   virtual bool SetFlagForAll(int flag, bool set = true) = 0;
+
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
        @param sequence the IMAP sequence of uids
        @param flag flag to be set, e.g. "\\Deleted"
@@ -1047,6 +1051,9 @@ extern String FormatFolderStatusString(const String& format,
                                        const String& folderName,
                                        MailFolderStatus *status,
                                        const MailFolder *mf = NULL);
+
+// get the sequence string for these messages
+extern String GetSequenceString(const UIdArray *messages);
 
 // ----------------------------------------------------------------------------
 // global (but private to MailFolder) functions

@@ -28,7 +28,7 @@
 #endif // USE_PCH
 
 #include "strutil.h"          // for strutil_uniq_array()
-#include "miscutil.h"         // for InteractivelyCollectAddresses()
+#include "Collect.h"          // for InteractivelyCollectAddresses()
 
 #include "MFolder.h"
 

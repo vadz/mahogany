@@ -37,7 +37,6 @@
 
 #include <wx/fontmap.h>
 
-#include "miscutil.h"
 #include "FolderView.h"
 
 #include "Mdefaults.h"
@@ -225,29 +224,49 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
 
    sendMsg->SetSubject(Subject());
 
-   String name;
-   String reply = Address(name, MAT_REPLYTO);
+   // VZ: I'm not sure at all about what exactly we're trying to do here so
+   //     this is almost surely wrong - but the old code was even more wrong
+   //     than the current one! (FIXME)
+   AddressList_obj addrListReplyTo = GetAddressList(MAT_REPLYTO);
+   Address *addrReplyTo = addrListReplyTo ? addrListReplyTo->GetFirst() : NULL;
 
-   switch(protocol)
+   AddressList_obj addrListFrom = GetAddressList(MAT_FROM);
+   Address *addrFrom = addrListFrom ? addrListFrom->GetFirst() : NULL;
+   if ( !addrFrom )
+      addrFrom = addrReplyTo;
+
+   if ( !addrFrom )
+   {
+      // maybe send it nevertheless?
+      wxLogError(_("Can't send the message without neither \"From\" nor "
+                   "\"Reply-To\" address."));
+      return false;
+   }
+
+   String replyto;
+   if ( addrReplyTo )
+      replyto = addrReplyTo->GetAddress();
+
+   sendMsg->SetFrom(addrFrom->GetAddress(), replyto);
+
+   switch ( protocol )
    {
       case Prot_SMTP:
-      {
-         static const char *headers[] = { "To", "Cc", "Bcc", NULL };
-         wxArrayString recipients = GetHeaderLines(headers);
+         {
+            static const char *headers[] = { "To", "Cc", "Bcc", NULL };
+            wxArrayString recipients = GetHeaderLines(headers);
 
-         sendMsg->SetAddresses(recipients[0], recipients[1], recipients[2]);
-         sendMsg->SetFrom(From(), name, reply);
-      }
-      break;
+            sendMsg->SetAddresses(recipients[0], recipients[1], recipients[2]);
+         }
+         break;
 
       case Prot_NNTP:
-      {
-         String newsgroups;
-         GetHeaderLine("Newsgroups",newsgroups);
-         sendMsg->SetNewsgroups(newsgroups);
-         sendMsg->SetFrom(From(), name, reply);
-      }
-      break;
+         {
+            String newsgroups;
+            GetHeaderLine("Newsgroups",newsgroups);
+            sendMsg->SetNewsgroups(newsgroups);
+         }
+         break;
 
       // make gcc happy
       case Prot_Illegal:
@@ -273,7 +292,7 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
    String header = GetHeader();
    String headerLine;
    const char *cptr = header;
-   String value;
+   String name, value;
    do
    {
       while(*cptr && *cptr != '\r' && *cptr != '\n')
@@ -339,9 +358,7 @@ String MessageCC::Date(void) const
 
 String MessageCC::From(void) const
 {
-   String name;
-   String email = Address(name, MAT_FROM);
-   return GetFullEmailAddress(name, email);
+   return GetAddressesString(MAT_FROM);
 }
 
 String
@@ -675,43 +692,21 @@ MessageCC::GetAddresses(MessageAddressType type,
    return addresses.GetCount();
 }
 
-String
-MessageCC::Address(String &nameAll, MessageAddressType type) const
+AddressList *MessageCC::GetAddressList(MessageAddressType type) const
 {
    ADDRESS *adr = GetAddressStruct(type);
-
-   // special case for Reply-To: we want to find a valid reply address
    if ( type == MAT_REPLYTO )
    {
+      // try hard to find some address to which we can reply
       if ( !adr )
+      {
          adr = GetAddressStruct(MAT_FROM);
-      if ( !adr )
-         adr = GetAddressStruct(MAT_SENDER);
+         if ( !adr )
+            adr = GetAddressStruct(MAT_SENDER);
+      }
    }
 
-   // concatenate all found addresses together
-   String emailAll;
-   while ( adr )
-   {
-      AddressCC addrCC(adr);
-
-      // concatenate emails together
-      if ( !emailAll.empty() )
-         emailAll += ", ";
-
-      emailAll += addrCC.GetEMail();
-
-      // for now: use first name found (VZ: FIXME, this is completely wrong!!!)
-      String name = addrCC.GetName();
-      if ( nameAll.empty() )
-        nameAll = name;
-      else if ( !name.empty() ) // found another name
-        nameAll << " ...";
-
-      adr = adr->next;
-   }
-
-   return emailAll;
+   return AddressListCC::Create(adr);
 }
 
 // ----------------------------------------------------------------------------

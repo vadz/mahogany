@@ -31,6 +31,8 @@
 #include "AddressCC.h"
 
 #include "Mcclient.h"
+#include "Mdefaults.h"
+#include "Profile.h"
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -53,6 +55,49 @@ AddressCC::AddressCC(ADDRESS *adr)
 
    m_adr = adr;
    m_addrNext = NULL;
+}
+
+/* static */
+Address *Address::CreateFromAddress(Profile *profile)
+{
+   // it is a bit difficult for From because we have 2 entries in config to
+   // specify it (for historic reasons mainly, I don't think this is actually
+   // useful) and so we must combine them together
+
+   // set personal name
+   ADDRESS *adr = mail_newaddr();
+   adr->personal = cpystr(READ_CONFIG(profile, MP_PERSONALNAME));
+
+   // set mailbox/host
+   String email = READ_CONFIG(profile, MP_FROM_ADDRESS);
+   size_t pos = email.find('@');
+   if ( pos != String::npos )
+   {
+      adr->mailbox = cpystr(email.substr(0, pos));
+      adr->host = cpystr(email.c_str() + pos + 1);
+   }
+   else // no '@'?
+   {
+      adr->mailbox = cpystr(email);
+
+      String host;
+      if ( READ_CONFIG(profile, MP_ADD_DEFAULT_HOSTNAME) )
+      {
+         host = READ_CONFIG(profile, MP_HOSTNAME);
+      }
+
+      if ( host.empty() )
+      {
+         // trick c-client into accepting addresses without host names
+         // instead of using a stupid MISSING.WHATEVER instead of the host
+         // part
+         host = '@';
+      }
+
+      adr->host = cpystr(host);
+   }
+
+   return new AddressCC(adr);
 }
 
 // ----------------------------------------------------------------------------
@@ -199,9 +244,18 @@ AddressListCC::~AddressListCC()
    }
 }
 
-// ----------------------------------------------------------------------------
-// AddressListCC enumeration
-// ----------------------------------------------------------------------------
+/* static */
+AddressList *AddressListCC::Create(const mail_address *adr)
+{
+   if ( !adr )
+   {
+      // it's not an error, MessageCC::GetAddressList() uses us like this
+      return NULL;
+   }
+
+   // copy the address as AddressListCC takes ownership of it and will free it
+   return new AddressListCC(rfc822_cpy_adr((ADDRESS *)adr));
+}
 
 /* static */
 AddressList *AddressList::Create(const String& address)
@@ -225,6 +279,10 @@ AddressList *AddressList::Create(const String& address)
 
    return new AddressListCC(adr);
 }
+
+// ----------------------------------------------------------------------------
+// AddressListCC enumeration
+// ----------------------------------------------------------------------------
 
 Address *AddressListCC::GetFirst() const
 {

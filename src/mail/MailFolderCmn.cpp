@@ -48,8 +48,6 @@
 
 #include "MFCache.h"
 
-#include "miscutil.h"         // for GetSequenceString()
-
 #include <wx/timer.h>
 #include <wx/datetime.h>
 #include <wx/file.h>

@@ -3206,9 +3206,18 @@ String MailFolderCC::BuildSequence(const UIdArray& messages)
 }
 
 bool
-MailFolderCC::SetSequenceFlag(String const &sequence,
+MailFolderCC::SetSequenceFlag(const String& sequence,
                               int flag,
                               bool set)
+{
+   return DoSetSequenceFlag(SEQ_UID, sequence, flag, set);
+}
+
+bool
+MailFolderCC::DoSetSequenceFlag(SequenceKind kind,
+                                const String& sequence,
+                                int flag,
+                                bool set)
 {
    CHECK_DEAD_RC("Cannot access closed folder '%s'.", false);
    String flags = GetImapFlags(flag);
@@ -3217,10 +3226,16 @@ MailFolderCC::SetSequenceFlag(String const &sequence,
                      1, this, this->GetClassName(),
                      GetProfile(), "ss", sequence.c_str(), flags.c_str()),1)  )
    {
+      int opFlags = 0;
+      if ( set )
+         opFlags |= ST_SET;
+      if ( kind == SEQ_UID )
+         opFlags |= ST_UID;
+
       mail_flag(m_MailStream,
                 (char *)sequence.c_str(),
                 (char *)flags.c_str(),
-                ST_UID | (set ? ST_SET : 0));
+                opFlags);
    }
    //else: blocked by python callback
 
@@ -3231,6 +3246,21 @@ bool
 MailFolderCC::SetFlag(const UIdArray *selections, int flag, bool set)
 {
    return SetSequenceFlag(BuildSequence(*selections), flag, set);
+}
+
+bool
+MailFolderCC::SetFlagForAll(int flag, bool set)
+{
+   if ( !m_nMessages )
+   {
+      // no messages to set the flag for
+      return true;
+   }
+
+   Sequence sequence;
+   sequence.AddRange(1, m_nMessages);
+
+   return DoSetSequenceFlag(SEQ_MSGNO, sequence.GetString(), flag, set);
 }
 
 bool

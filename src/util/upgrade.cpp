@@ -2497,7 +2497,7 @@ VerifyEMailSendingWorks(void)
 {
    // we send a mail to ourself
    Profile *p = mApplication->GetProfile();
-   String me = miscutil_GetFromAddress(p);
+   String me = READ_CONFIG(p, MP_FROM_ADDRESS);
 
    SendMessage *sm = SendMessage::Create(p);
    sm->SetSubject(_("Mahogany Test Message"));

@@ -333,6 +333,10 @@ public:
                                int flag,
                                bool set = true) = 0;
 
+   /** Set flag for all messages
+    */
+   virtual Ticket SetFlagForAll(int flag, bool set = true) = 0;
+
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
        @param sequence the IMAP sequence of uids
        @param flag flag to be set, e.g. "\\Deleted"
@@ -341,6 +345,7 @@ public:
    virtual Ticket SetSequenceFlag(const UIdArray *sequence,
                                 int flag,
                                 bool set = true) = 0;
+
    /** Appends the message to this folder.
        @param msg the message to append
        @return ResultInt with boolean success value
