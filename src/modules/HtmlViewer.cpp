@@ -56,7 +56,10 @@ WX_DEFINE_ARRAY(ClickableInfo *, ArrayClickInfo);
 static wxString Col2Html(const wxColour& col);
 
 // filter out special HTML characters from the text
-static wxString MakeHtmlSafe(const wxString& text);
+//
+// if dontWrap is true, spaces are replaced by non breaking spaces (&nbsp;),
+// otherwise they're left alone
+static wxString MakeHtmlSafe(const wxString& text, bool dontWrap = true);
 
 // escape all double quotes in a string by replacing them with HTML entity
 //
@@ -731,7 +734,7 @@ static wxString Col2Html(const wxColour& col)
                            (int)col.Red(), (int)col.Green(), (int)col.Blue());
 }
 
-static wxString MakeHtmlSafe(const wxString& text)
+static wxString MakeHtmlSafe(const wxString& text, bool dontWrap)
 {
    wxString textSafe;
    textSafe.reserve(text.length());
@@ -770,8 +773,12 @@ static wxString MakeHtmlSafe(const wxString& text)
             break;
 
          case ' ':
-            textSafe += _T("&nbsp;");
-            break;
+            if ( dontWrap )
+            {
+               textSafe += _T("&nbsp;");
+               break;
+            }
+            //else: fall through
 
          default:
             textSafe += *p;
@@ -1138,7 +1145,7 @@ void HtmlViewer::InsertText(const String& text, const MTextStyle& style)
 
    FontStyleChanger styleChanger(style.GetFont(), m_htmlText);
 
-   m_htmlText += MakeHtmlSafe(text);
+   m_htmlText += MakeHtmlSafe(text, false /* allow wrapping */);
 }
 
 void HtmlViewer::InsertURL(const String& text, const String& url)
