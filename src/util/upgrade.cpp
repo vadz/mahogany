@@ -27,6 +27,7 @@
 #  include "MApplication.h"
 #  include "strutil.h"
 #  include "Mpers.h"
+#  include "gui/wxMApp.h"  // for wxMApp::GetDialUpManager()
 #endif  //USE_PCH
 
 #  include "Message.h"
@@ -131,33 +132,7 @@ enum InstallWizardPageId
 };
 
 // ----------------------------------------------------------------------------
-// private functions
-// ----------------------------------------------------------------------------
-
-// check the given address for validity
-static bool CheckHostName(const wxString& hostname)
-{
-   // check if server names are valid by verifying the hostname part (i.e.
-   // discard everything after ':' which is the port number) with DNS
-   return hostname.empty() || wxIPV4address().Hostname(hostname.AfterLast(':'));
-}
-
-// return the name of the main mail folder
-static wxString GetMainMailFolderName()
-{
-   String mainFolderName;
-#ifdef USE_MAIL_COLLECT
-   if ( !gs_installWizardData.collectAllMail )
-      mainFolderName = "INBOX";
-   else
-#endif // USE_MAIL_COLLECT
-      mainFolderName = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
-
-   return mainFolderName;
-}
-
-// ----------------------------------------------------------------------------
-// wizardry
+// module global data
 // ----------------------------------------------------------------------------
 
 static wxWizardPage *gs_wizardPages[InstallWizard_PagesMax];
@@ -216,6 +191,36 @@ struct InstallWizardData
    // do we have something to import?
    int showImportPage; // logically bool but initially -1
 } gs_installWizardData;
+
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+// check the given address for validity
+static bool CheckHostName(const wxString& hostname)
+{
+   // check if server names are valid by verifying the hostname part (i.e.
+   // discard everything after ':' which is the port number) with DNS
+   return hostname.empty() || wxIPV4address().Hostname(hostname.AfterLast(':'));
+}
+
+// return the name of the main mail folder
+static wxString GetMainMailFolderName()
+{
+   String mainFolderName;
+#ifdef USE_MAIL_COLLECT
+   if ( !gs_installWizardData.collectAllMail )
+      mainFolderName = "INBOX";
+   else
+#endif // USE_MAIL_COLLECT
+      mainFolderName = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
+
+   return mainFolderName;
+}
+
+// ----------------------------------------------------------------------------
+// wizardry
+// ----------------------------------------------------------------------------
 
 // the base class for our wizards pages: it allows to return page ids (and not
 // the pointers themselves) from GetPrev/Next and processes [Cancel] in a
@@ -549,7 +554,7 @@ private:
               *m_UseOutboxCheckbox,
               *m_UseDialUpCheckbox
 #ifdef USE_MAIL_COLLECT
-             , *m_CollectCheckbox,
+             , *m_CollectCheckbox
 #endif // USE_MAIL_COLLECT
 #ifdef USE_PISOCK
              , *m_UsePalmOsCheckbox
@@ -676,8 +681,6 @@ void InstallWizardPage::OnWizardCancel(wxWizardEvent& event)
    else
    {
       // wizard will be cancelled, so don't try to test anything
-      gs_wizardPages;
-
       wxLogMessage(_("Please use the 'Options' dialog to configure\n"
                      "the program before using it!"));
    }
