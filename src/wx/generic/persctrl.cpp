@@ -1772,6 +1772,13 @@ int wxPMessageBox(const wxString& configPath,
       if ( config && config->Exists(configValue) ) {
          // don't show it, it was disabled
          rc = config->Read(configValue, 0l);
+
+         // the values of wxYES and wxNO have changed in wxWindows, still read
+         // the old values if we have them
+         if ( rc == 0x20 )
+             rc = wxYES;
+         else if ( rc == 0x40 )
+             rc = wxNO;
       }
       else {
          // do show the msg box
