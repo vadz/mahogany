@@ -1436,9 +1436,12 @@ void Threader::pruneEmptyContainers(ThreadContainer *parent,
 {
    ThreadContainer *c, *prev, *next;
    for (prev = 0, c = parent->getChild(), next = c->getNext();
-   c != 0;
-   prev = c, c = next, next = (c == 0 ? 0 : c->getNext()))
+        c != 0;
+        prev = c, c = next, next = (c == 0 ? 0 : c->getNext()))
    {
+      if (c->getChild() != 0 && !fromBreakThreads) {   
+         pruneEmptyContainers(c, false);
+      }
       if ((c->getThreadable() == 0 ||
            c->getThreadable()->isDummy()) &&
           (c->getChild() == 0))
@@ -1478,10 +1481,7 @@ void Threader::pruneEmptyContainers(ThreadContainer *parent,
 
          delete c;
          c = prev;
-
-      } else if (c->getChild() != 0 && !fromBreakThreads)
-
-         pruneEmptyContainers(c, false);
+      }
    }
 }
 
