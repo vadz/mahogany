@@ -71,6 +71,7 @@
 
 #include <wx/utils.h> // wxGetFullHostName()
 #include <wx/file.h>
+#include <wx/fontmap.h> // for GetEncodingName()
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -697,6 +698,7 @@ SendMessageCC::EncodingToCharset(wxFontEncoding enc)
 {
    // translate encoding to the charset
    wxString cs;
+#if 0
    switch ( enc )
    {
       case wxFONTENCODING_ISO8859_1:
@@ -746,7 +748,12 @@ SendMessageCC::EncodingToCharset(wxFontEncoding enc)
          // no special encoding
          break;
    }
-
+#endif // 0
+   if ( enc != wxFONTENCODING_SYSTEM && enc != wxFONTENCODING_DEFAULT )
+   {
+      cs = wxFontMapper::GetEncodingName(enc);
+      cs.MakeUpper();
+   }
    return cs;
 }
 
