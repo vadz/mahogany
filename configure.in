@@ -394,7 +394,7 @@ case "${OSTYPE}" in
 linux*)
   CCOSTYPE=slx
   ;;
-solaris*)
+solaris*|SunOS*)
   if test "$GCC" = "yes"
   then
     CCOSTYPE=gso
