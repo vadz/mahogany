@@ -772,6 +772,14 @@ void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
 {
    // a workaround for focus handling - otherwise, the listctrl keeps losing
    // focus
+#ifdef OS_WIN
+   // workaround for workaround: we have to test this to avoid the frame
+   // containing the list ctrl being raised to the top from behind another top
+   // level frame
+   HWND hwndTop = ::GetForegroundWindow();
+   wxFrame *frame = m_FolderView->m_Frame;
+   if ( frame && frame->GetHWND() == (WXHWND)hwndTop )
+#endif // OS_WIN
    if ( m_FolderView->GetFocusFollowMode() && (FindFocus() != this) )
    {
       SetFocus();

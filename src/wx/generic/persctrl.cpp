@@ -1295,7 +1295,17 @@ void wxPTreeCtrl::RestoreExpandedBranches()
         // tree by default - this is why we use "0" as default value
         wxString data = m_persist->GetConfig()->Read(m_persist->GetKey(), _T("0"));
 
+#ifdef __WXMSW__
+        // under Windows, expanding several branches provokes terrible flicker
+        // which can be [partly] avoided by hiding and showing it
+        Hide();
+#endif // __WXMSW__
+
         RestoreExpandedBranches(GetRootItem(), data);
+
+#ifdef __WXMSW__
+        Show();
+#endif // __WXMSW__
 
         m_persist->RestorePath();
     }

@@ -935,9 +935,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("The following program will be used to view the online help system:"),     Field_Message, -1                      },
    { gettext_noop("&Help viewer"),                Field_File,    -1                      },
    { gettext_noop("Help &viewer is Netscape"),    Field_Bool,    -1                      },
-   { gettext_noop("You may configure the external editor to be used "
-                  "when composing the messages and optionally choose "
-                  "to launch it automatically."),       Field_Message, -1                      },
+   { gettext_noop("You may configure the external editor to be used when composing the messages\n"
+                  "and optionally choose to launch it automatically."),
+                                                  Field_Message, -1                      },
    { gettext_noop("&External editor"),            Field_Text,    -1                      },
    { gettext_noop("Always &use it"),              Field_Bool, ConfigField_ExternalEditor },
 #ifdef OS_UNIX
