@@ -276,7 +276,8 @@ UUDecodeFilter::DoProcess(String& text,
          }
 
          // now create the header for the uuencoded part
-         String header(_T("Mime-Version: 1.0\nContent-Disposition: uuencoded\n"));
+         String header(_T("Mime-Version: 1.0\r\n")
+                       _T("Content-Disposition: uuencoded\r\n"));
 
          // get a mimeType from the extention
          String mimeType;
@@ -293,10 +294,10 @@ UUDecodeFilter::DoProcess(String& text,
 
          if ( mimeType.empty() )
             mimeType = _T("APPLICATION/OCTET-STREAM");
-         header += _T("Content-Type: ") + mimeType + _T("\n");
+         header += _T("Content-Type: ") + mimeType + _T("\r\n");
 
          MimePartVirtual *
-            mimepart = new MimePartVirtual(header + _T('\n') + decodedFile);
+            mimepart = new MimePartVirtual(header + _T("\r\n") + decodedFile);
          m_msgView->AddVirtualMimePart(mimepart);
          m_msgView->ShowPart(mimepart);
 
