@@ -356,22 +356,5 @@ ConvertUnicodeToSystem(wxString *strUtf,
 // otherwise
 extern size_t IsEndOfLine(const wxChar *p);
 
-class DetectSignature
-{
-public:
-   DetectSignature();
-   ~DetectSignature();
-   
-   bool Initialize(Profile *profile);
-   bool StartsHere(const wxChar *cptr);
-
-private:
-#if wxUSE_REGEX
-   bool m_useRE;
-   // a RE to detect the start of the signature
-   scoped_ptr<wxRegEx> m_reSig;
-#endif
-};
-
 //@}
 #endif
