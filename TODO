@@ -52,12 +52,6 @@ as the MailFolderCC.cpp code should take care of that itself.
 		subscribe to newsgroups, import MH folders, mirror server IMAP
 		folders...
 
-5               [Cancel] in options dialog doesn't cancel everything (i.e. if
-                you [Apply] change first it's not undone when [Cancel] is
-                pressed), for example:
-                a) sorting order
-                b) ...
-
 9	KB	wxLayout:
 		- delete in empty line (works at home...)
 		- add blinking cursor
