@@ -425,8 +425,8 @@ AC_CHECK_FUNC(crypt,,
   [AC_CHECK_LIB(crypt,crypt,,
     [AC_MSG_ERROR([Cannot find crypt function.
 It appears that the c library does not contain it, nor is libcrypt
-installed on your system.  Before compiling Mahogany you need to
-install libcrypt which is needed for password authentication.  You
+installed on your system.  It is needed for password authentication,
+so before compiling Mahogany, you need to install libcrypt.  You
 can download the source for a suitable libcrypt from the Mahogany
 ftp server (ftp://ronnie.phy.hw.ac.uk/pub/Mahogany/Libraries).])])]) 
 
@@ -444,10 +444,10 @@ case "$USE_RBL" in 1) AC_DEFINE(USE_RBL) ;; esac
 
 dnl POSIX.2 regexp support
 HAVE_POSIX_REGEX=0
-AC_CHECK_HEADERS(regexp.h,
+AC_CHECK_HEADER(regex.h,
 	AC_CHECK_FUNC(regcomp, HAVE_POSIX_REGEX=1,
-		AC_CHECK_LIB(regex,regcomp, [LIBS="$LIBS -lregex"
-			HAVE_POSIX_REGEX=1 ] )))
+		AC_CHECK_LIB(regex,regcomp, [LIBS="-lregex $LIBS"
+			HAVE_POSIX_REGEX=1])))
 case "$HAVE_POSIX_REGEX" in 1) AC_DEFINE(HAVE_POSIX_REGEX) ;; esac
 
 dnl --------------------------------------------------------------------------
@@ -510,7 +510,7 @@ case "$USE_PYTHON" in
 	MAKE_USE_PYTHON="USE_PYTHON=yes"
 	dnl extra libs required by python on freebsd
 	case "$OSTYPE" in freebsd* | FreeBSD*)
-		LIBS="$LIBS -lreadline" ;;
+		LIBS="-readline $LIBS" ;;
 	esac ;;
 *)	MAKE_USE_PYTHON=
 	AC_MSG_WARN(Building M without Python leads to reduced functionality!)
@@ -558,7 +558,7 @@ AC_SUBST(GUI_LIBS_STATIC)
 
 dnl only now can we check for wx.h because it would
 dnl fail without the gtk headers
-AC_CHECK_HEADERS(wx/wx.h,,AC_MSG_ERROR([cannot find wx/wx.h header file.
+AC_CHECK_HEADER(wx/wx.h,,AC_MSG_ERROR([cannot find wx/wx.h header file.
 	You must have wxWindows installed to compile Mahogany.]))
 
 dnl --------------------------------------------------------------------------
@@ -602,7 +602,7 @@ AC_SUBST(CCOSTYPE)
 dnl this must come after we checked for wxGTK and network libraries
 dnl Check if we have the pi-sock library and headers for PalmOS support.
 MAKE_PISOCKLIB=
-AC_CHECK_HEADERS(pi-source.h,
+AC_CHECK_HEADER(pi-source.h,
  AC_CHECK_LIB(pisock, main,
   [ AC_DEFINE(USE_PISOCK)
     MAKE_PISOCKLIB="PISOCK_LIB=-lpisock"
@@ -730,7 +730,6 @@ dnl --------------------------------------------------------------------------
 
 dnl set the extra include and lib directories
 CPPFLAGS="-I$SOURCEDIR/include $CPPFLAGS -I$SOURCEDIR/extra/include"
-LIBS="$LIBS -L$BUILDDIR/extra/lib"
 case "$BUILDDIR" in "$SOURCEDIR") ;; *)
 	CPPFLAGS="-I$BUILDDIR/include $CPPFLAGS" ;;
 esac
@@ -758,7 +757,7 @@ esac
 dnl add other flags
 CFLAGS="$CFLAGS $MYFLAGS"
 CXXFLAGS="$CXXFLAGS $MYFLAGS"
-LIBS="$LIBS $PYTHON_LIBS $LIB_PNG $LIB_JPEG $LIB_EFENCE $LIB_DMALLOC"
+LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC"
 
 dnl Python code produces warnings at present, so don't break compilation:
 CXXFLAGS_RELAXED=`echo $CXXFLAGS | sed 's/-Werror/-Wall/g'`
