@@ -212,7 +212,7 @@ void MModule_Cleanup(void);
 MModule_AddStaticModule(InitMModule,GetName, GetInterface, \
                         GetDescription, GetModuleVersion, GetMVersion, UnLoadMModule);
 #else
-#   define MMODULE_INTIALISE
+#   define MMODULE_INITIALISE
 #endif   
 
 /** This macro does all the module definition, greatly simplifying
@@ -274,6 +274,7 @@ extern "C" \
    }\
 } /* extern "C" */ \
 MMODULE_INITIALISE
+
 
 
 

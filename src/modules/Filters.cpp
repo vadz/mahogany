@@ -38,8 +38,8 @@ static int UnloadFilters(void)
    return 1;
 }
 
-MMODULE_DEFINE_MODULE("Filters", "Filters", "This module provides a filtering language for Mahogany.",
-                      "0.00", FilterTest, UnloadFilters)
+MMODULE_DEFINE_MODULE("Filters", "Filters", "This module provides a filtering language for Mahogany.", "0.00", FilterTest, UnloadFilters)
+
 
 ///------------------------------
 /// Own functionality:

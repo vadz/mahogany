@@ -36,8 +36,7 @@ static int DummyFunc(MInterface *minterface);
     here. But this should do the job in 90% of the cases and
     transparently handles static and dynamic linkage. (KB) */
 
-MMODULE_DEFINE_MODULE("Mdummy", "none", "This module demonstrates the MModule plugin interface.",
-                      "0.00", DummyFunc, UnloadDummy)
+MMODULE_DEFINE_MODULE("Mdummy", "none", "This module demonstrates the MModule plugin interface.", "0.00", DummyFunc, UnloadDummy)
 
 ///------------------------------
 /// Own functionality:
