@@ -174,7 +174,14 @@ public:
       }
       else // !mailto
       {
-         title = url.BeforeFirst(':').Upper() + _(" url");
+         title = url.BeforeFirst(':').Upper();
+         if ( title.length() == url.length() )
+         {
+            // no ':' in the URL, so it must be HTTP by default
+            title = _T("HTTP");
+         }
+
+         title += _(" url");
       }
 
       SetTitle(title);
