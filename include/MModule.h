@@ -102,6 +102,9 @@ public:
 #define MMOD_FUNC_MAIN       1
 /// Config(): Run the module configuration function
 #define MMOD_FUNC_CONFIG     2
+/** below this number are reserved, from this one on available for
+    module specific functions: */
+#define MMOD_FUNC_USER     0x100
 //@}
 
 /**
