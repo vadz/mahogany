@@ -21,31 +21,33 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-#   include "Mcommon.h"
-#   include "MApplication.h"
-#   include "Profile.h"
-#   include "guidef.h"
-#   include "strutil.h"
-#   include "MHelp.h"
-#   include "gui/wxMIds.h"
+#  include "Mcommon.h"
+#  include "MApplication.h"
+#  include "Profile.h"
+#  include "guidef.h"
+#  include "strutil.h"
+#  include "MHelp.h"
+#  include "gui/wxMIds.h"
+
+#  include <wx/log.h>
+#  include <wx/choice.h>
+#  include <wx/control.h>
+#  include <wx/dcclient.h>
+#  include <wx/layout.h>
+#  include <wx/dynarray.h>
+#  include <wx/stattext.h>
+#  include <wx/settings.h>
+#  include <wx/listbox.h>
+#  include <wx/checkbox.h>
+#  include <wx/radiobox.h>
+#  include <wx/combobox.h>
+#  include <wx/statbox.h>
+#  include <wx/statbmp.h>
 #endif
 
-#include <wx/log.h>
 #include <wx/imaglist.h>
 #include <wx/notebook.h>
 #include <wx/persctrl.h>
-#include <wx/control.h>
-#include <wx/dcclient.h>
-#include <wx/layout.h>
-#include <wx/dynarray.h>
-#include <wx/stattext.h>
-#include <wx/settings.h>
-#include <wx/listbox.h>
-#include <wx/checkbox.h>
-#include <wx/radiobox.h>
-#include <wx/combobox.h>
-#include <wx/statbox.h>
-#include <wx/statbmp.h>
 
 #include <wx/menuitem.h>
 #include <wx/checklst.h>
@@ -558,10 +560,11 @@ wxRadioBox *wxEnhancedPanel::CreateActionChoice(const char *label,
 }
 
 // create a combobox
-wxComboBox *wxEnhancedPanel::CreateComboBox(const char *label,
-                                               long widthMax,
-                                               wxControl *last,
-                                               size_t nRightMargin)
+wxControl *wxEnhancedPanel::CreateComboBoxOrChoice(bool createCombobox,
+                                                   const char *label,
+                                                   long widthMax,
+                                                   wxControl *last,
+                                                   size_t nRightMargin)
 {
    // split the "label" into the real label and the choices:
    kbStringList tlist;
@@ -601,11 +604,23 @@ wxComboBox *wxEnhancedPanel::CreateComboBox(const char *label,
    c->left.RightOf(pLabel, LAYOUT_X_MARGIN);
    c->right.SameAs(GetCanvas(), wxRight, LAYOUT_X_MARGIN + nRightMargin);
    c->height.AsIs();
-   wxComboBox *combobox = new wxComboBox(GetCanvas(), -1, "",
-                                         wxDefaultPosition, wxDefaultSize,
-                                         n-1,
-                                         choices+1,
-                                         wxCB_DROPDOWN|wxCB_READONLY);
+
+   wxControl *combobox;
+   if ( createCombobox )
+   {
+      combobox = new wxComboBox(GetCanvas(), -1, "",
+                                wxDefaultPosition, wxDefaultSize,
+                                n-1,
+                                choices+1,
+                                wxCB_DROPDOWN | wxCB_READONLY);
+   }
+   else
+   {
+      combobox = new wxChoice(GetCanvas(), -1,
+                              wxDefaultPosition, wxDefaultSize,
+                              n-1, choices+1);
+   }
+
 
    combobox->SetConstraints(c);
    delete [] choices;
@@ -723,8 +738,8 @@ void wxEnhancedPanel::EnableTextWithLabel(wxTextCtrl *control, bool bEnable)
    }
 }
 
-// enable/disable the combobox with label
-void wxEnhancedPanel::EnableComboBox(wxComboBox *control, bool bEnable)
+// enable/disable any control with label
+void wxEnhancedPanel::EnableControlWithLabel(wxControl *control, bool bEnable)
 {
    // first enable the combobox itself
    control->Enable(bEnable);
@@ -736,7 +751,7 @@ void wxEnhancedPanel::EnableComboBox(wxComboBox *control, bool bEnable)
    wxWindow *win = FindWindow(id);
 
    if ( win == NULL ) {
-      wxFAIL_MSG("can't find label for the text entry zone");
+      wxFAIL_MSG("can't find label for the control");
    }
    else {
       // did we find the right one?

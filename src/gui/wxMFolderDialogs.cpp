@@ -34,6 +34,7 @@
 #  include <wx/layout.h>
 #  include <wx/stattext.h>
 #  include <wx/radiobox.h>
+#  include <wx/choice.h>
 #endif
 
 #include <wx/imaglist.h>
@@ -309,7 +310,7 @@ protected:
    /// Use anonymous access for this folder?
    wxCheckBox *m_isAnonymous;
    /// The combobox for folder subtype
-   wxComboBox *m_folderSubtype;
+   wxChoice *m_folderSubtype;
    /// browse button for the icon
    wxIconBrowseButton *m_browseIcon;
 
@@ -443,6 +444,7 @@ BEGIN_EVENT_TABLE(wxFolderPropertiesPage, wxNotebookPageBase)
    EVT_RADIOBOX(-1, wxFolderPropertiesPage::OnEvent)
    EVT_CHECKBOX(-1, wxFolderPropertiesPage::OnEvent)
    EVT_COMBOBOX(-1, wxFolderPropertiesPage::OnEvent)
+   EVT_CHOICE  (-1, wxFolderPropertiesPage::OnEvent)
    EVT_TEXT    (-1, wxFolderPropertiesPage::OnChange)
 END_EVENT_TABLE()
 
@@ -879,7 +881,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    m_keepOpen = CreateCheckBox(labels[Label_KeepOpen], widthMax, m_isIncoming);
    m_forceReOpen = CreateCheckBox(labels[Label_ForceReOpen], widthMax, m_keepOpen);
    m_isAnonymous = CreateCheckBox(labels[Label_IsAnonymous], widthMax, m_forceReOpen);
-   m_folderSubtype = CreateComboBox(labels[Label_FolderSubtype], widthMax, m_isAnonymous);
+   m_folderSubtype = CreateChoice(labels[Label_FolderSubtype], widthMax, m_isAnonymous);
 
    m_forceReOpen->SetToolTip(_("Tick this box if Mahogany appears to have "
                                "problems updating the folder listing.\n"
@@ -1149,8 +1151,8 @@ wxFolderPropertiesPage::UpdateUI(FolderType folderType)
 
    // enable folder subtype combobox only if we're creating because (folder
    // type can't be changed later) and if there are any subtypes
-   EnableComboBox(m_folderSubtype, m_isCreating &&
-                                   (m_folderSubtype->Number() > 0));
+   EnableControlWithLabel(m_folderSubtype,
+                          m_isCreating && (m_folderSubtype->Number() > 0));
 
    dlg->SetMayEnableOk(TRUE);
 }

@@ -20,6 +20,7 @@
 
 #include <wx/persctrl.h>
 #include "gui/wxMDialogs.h"
+
 // -----------------------------------------------------------------------------
 // forward declarations
 // -----------------------------------------------------------------------------
@@ -37,9 +38,8 @@ class WXDLLEXPORT wxStaticText;
 class WXDLLEXPORT wxStaticBox;
 class WXDLLEXPORT wxCheckListBox;
 class WXDLLEXPORT wxRadioBox;
+class WXDLLEXPORT wxChoice;
 class WXDLLEXPORT wxComboBox;
-
-#undef CreateButton
 
 // =============================================================================
 // GUI classes declared in this file
@@ -321,6 +321,8 @@ public:
                                    wxControl *last,
                                    size_t nRightMargin = 0,
                                    int style = wxALIGN_RIGHT);
+
+      // create a simple static text control
    wxStaticText *CreateMessage(const char *label, wxControl *last);
 
       // a combobox, the entries are taken from the label string which is
@@ -328,7 +330,22 @@ public:
    wxComboBox *CreateComboBox(const char *label,
                               long widthMax,
                               wxControl *last,
-                              size_t nRightMargin = 0);
+                              size_t nRightMargin = 0)
+   {
+      return (wxComboBox *)CreateComboBoxOrChoice(TRUE, label, widthMax,
+                                                  last, nRightMargin);
+   }
+
+      // a choice control, the entries are taken from the label string which is
+      // composed as: "LABEL:entry1:entry2:entry3:...."
+   wxChoice *CreateChoice(const char *label,
+                          long widthMax,
+                          wxControl *last,
+                          size_t nRightMargin = 0)
+   {
+      return (wxChoice *)CreateComboBoxOrChoice(FALSE, label, widthMax,
+                                                last, nRightMargin);
+   }
 
       // a button: the label string is "label:id" where id is the id for the
       // button
@@ -382,7 +399,11 @@ public:
    void EnableTextWithButton(wxTextCtrl *control, bool enable);
 
       // enable/disable the combobox and its label
-   void EnableComboBox(wxComboBox *control, bool bEnable);
+   void EnableComboBox(wxComboBox *control, bool enable)
+      { EnableControlWithLabel(control, enable); }
+
+      // works for any control preceded by the label
+   void EnableControlWithLabel(wxControl *control, bool enable);
 
    // get the canvas - all the controls should be created as children of this
    // canvas, not of the page itself
@@ -406,6 +427,13 @@ private:
                                      wxControl *last,
                                      BtnKind kind,
                                      wxTextBrowseButton **ppButton = NULL);
+
+   // create a wxComboBox or wxChoice
+   wxControl *CreateComboBoxOrChoice(bool createCombobox,
+                                     const char *label,
+                                     long widthMax,
+                                     wxControl *last,
+                                     size_t nRightMargin = 0);
 
    // event handlers
    void OnSize(wxSizeEvent& event);
