@@ -1796,11 +1796,7 @@ void wxFolderTreeImpl::DoFolderCreate()
 
 bool wxFolderTreeImpl::CanRenameFolder(const MFolder *folder) const
 {
-   if ( !folder )
-   {
-      wxLogError(_("Please select the folder to rename first."));
-   }
-   else if ( folder->GetType() == MF_INBOX )
+   if ( folder->GetType() == MF_INBOX )
    {
       wxLogError(_("INBOX folder is a special folder used by the mail "
                    "system and can not be renamed."));
@@ -1826,25 +1822,32 @@ bool wxFolderTreeImpl::CanRenameFolder(const MFolder *folder) const
 void wxFolderTreeImpl::DoFolderRename()
 {
    MFolder *folder = m_sink->GetSelection();
-   if ( CanRenameFolder(folder) )
+   if ( !folder )
    {
-      wxFrame *frame = GetFrame(this);
+      wxLogError(_("Please select the folder to rename first."));
+   }
+   else // have a folder
+   {
+      if ( CanRenameFolder(folder) )
+      {
+         wxFrame *frame = GetFrame(this);
 
-      String folderName, mboxName;
-      if ( !ShowFolderRenameDialog(folder, &folderName, &mboxName, frame) )
-      {
-         wxLogStatus(frame, _("Folder renaming cancelled."));
+         String folderName, mboxName;
+         if ( !ShowFolderRenameDialog(folder, &folderName, &mboxName, frame) )
+         {
+            wxLogStatus(frame, _("Folder renaming cancelled."));
+         }
+         else // we have got the new name
+         {
+            // try to rename (the text will be changed in MEvent handler
+            // if OnRename() succeeds)
+            (void)m_sink->OnRename(folder, folderName, mboxName);
+         }
       }
-      else // we have got the new name
-      {
-         // try to rename (the text will be changed in MEvent handler
-         // if OnRename() succeeds)
-         (void)m_sink->OnRename(folder, folderName, mboxName);
-      }
+      //else: can't rename this folder
 
       folder->DecRef();
    }
-   //else: can't rename folder
 }
 
 void wxFolderTreeImpl::DoFolderDelete(bool removeOnly)
@@ -2064,6 +2067,11 @@ void wxFolderTreeImpl::OnBeginLabelEdit(wxTreeEvent& event)
    mApplication->UpdateAwayMode();
 
    MFolder *folder = m_sink->GetSelection();
+
+   if ( !folder )
+   {
+      return;
+   }
 
    // should we allow renaming this item?
    bool allow;
