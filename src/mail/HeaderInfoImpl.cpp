@@ -1,10 +1,23 @@
-/*-*- c++ -*-*******************************************************
-* HeaderInfoImpl : header info listing for mailfolders
-*                                                                  *
-* (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)            *
-*                                                                  *
-* $Id$
-*******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     Mahogany - cross platform e-mail GUI client
+// File name:   mail/HeaderInfoImpl.cpp - implements HeaderInfo(List) classes
+// Purpose:     implements HI in the simplest way: just store all data in
+//              memory
+// Author:      Karsten Ballüder (Ballueder@gmx.net)
+// Modified by:
+// Created:     1997
+// CVS-ID:      $Id$
+// Copyright:   (c) 1997-2001 Mahogany team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
+
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
 
 #ifdef __GNUG__
 #   pragma implementation "HeaderInfoImpl.h"
@@ -12,6 +25,7 @@
 #endif
 
 #include  "Mpch.h"
+
 #ifndef  USE_PCH
 #   include "strutil.h"
 #   include "MApplication.h"
@@ -20,6 +34,53 @@
 
 #include "Mdefaults.h"
 #include "HeaderInfoImpl.h"
+
+// ----------------------------------------------------------------------------
+// HeaderInfo
+// ----------------------------------------------------------------------------
+
+/* static */
+HeaderInfo::HeaderKind
+HeaderInfo::GetFromOrTo(const HeaderInfo *hi,
+                        bool replaceFromWithTo,
+                        const wxArrayString& ownAddresses,
+                        String *value)
+{
+   CHECK( hi && value, Invalid, "invalid parameter in HeaderInfo::GetFromOrTo" );
+
+   *value = hi->GetFrom();
+
+   // optionally replace the "From" with "To: someone" for messages sent by
+   // the user himself
+   if ( replaceFromWithTo )
+   {
+      size_t nAdrCount = ownAddresses.GetCount();
+      for ( size_t nAdr = 0; nAdr < nAdrCount; nAdr++ )
+      {
+         if ( Message::CompareAddresses(*value, ownAddresses[nAdr]) )
+         {
+            // sender is the user himself, do the replacement
+            *value = hi->GetTo();
+
+            if ( value->empty() )
+            {
+               // hmm, must be a newsgroup message
+               String ng = hi->GetNewsgroups();
+               if ( !ng.empty() )
+               {
+                  *value = ng;
+                  return Newsgroup;
+               }
+               //else: weird, both to and newsgroup are empty??
+            }
+
+            return To;
+         }
+      }
+   }
+
+   return From;
+}
 
 // ----------------------------------------------------------------------------
 // HeaderInfoImpl

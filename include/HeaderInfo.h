@@ -74,6 +74,31 @@ public:
 
    virtual ~HeaderInfo() {}
 
+   /// the kind of header returned by GetFromOrTo()
+   enum HeaderKind
+   {
+      Invalid,
+      From,
+      To,
+      Newsgroup
+   };
+
+   /**
+     Return either the sender of the message or recipient of it if
+     replaceFromWithTo is true and the sender address occurs in the array
+     ownAddresses
+
+     @param hi the header info to retrieve the from/to headers from
+     @param replaceFromWithTo if false, always return from
+     @param ownAddresses the addresses for which replacement is done
+     @param value the string to return result in
+     @return the kind of header returned
+   */
+   static HeaderKind GetFromOrTo(const HeaderInfo *hi,
+                                 bool replaceFromWithTo,
+                                 const wxArrayString& ownAddresses,
+                                 String *value);
+
 private:
    /// Disallow copy construction, use Clone() instead
    HeaderInfo(const HeaderInfo &);

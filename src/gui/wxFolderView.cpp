@@ -2144,33 +2144,32 @@ void
 wxFolderView::AddEntry(const HeaderInfo *hi)
 {
    String subject = wxString(' ', 3*hi->GetIndentation()) + hi->GetSubject();
-   String sender = hi->GetFrom();
+
+   String sender;
 
    // optionally replace the "From" with "To: someone" for messages sent by
    // the user himself
-   bool replaceFromWithTo = false;
-   if ( m_settings.replaceFromWithTo )
+   switch ( HeaderInfo::GetFromOrTo(hi,
+                                    m_settings.replaceFromWithTo,
+                                    m_settings.returnAddresses,
+                                    &sender) )
    {
-      const wxArrayString& adrs = m_settings.returnAddresses;
-      size_t nAdrCount = adrs.GetCount();
-      for ( size_t nAdr = 0; !replaceFromWithTo && (nAdr < nAdrCount); nAdr++ )
-      {
-         replaceFromWithTo = Message::CompareAddresses(sender, adrs[nAdr]);
-      }
-   }
+      default:
+      case HeaderInfo::Invalid:
+         FAIL_MSG( "unexpected GetFromOrTo() return value" );
+         // fall through
 
-   if ( replaceFromWithTo )
-   {
-      sender.clear();
+      case HeaderInfo::From:
+         // nothing special to do
+         break;
 
-      // if there is no "To" address, this must be a newsgroup posting (not
-      // 100% true, but for 99% it is)
-      String to = hi->GetTo(),
-             newsgroups = hi->GetNewsgroups();
-      if ( to.empty() && !newsgroups.empty() )
-         sender << _("Posted to: ") << newsgroups;
-      else
-         sender << _("To: ") << to;
+      case HeaderInfo::To:
+         sender.Prepend(_("To: "));
+         break;
+
+      case HeaderInfo::Newsgroup:
+         sender.Prepend(_("Posted to: "));
+         break;
    }
 
    // optionally leave only the name part of the address
@@ -4069,23 +4068,12 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
 bool wxFolderView::AllProfileSettings::
 operator==(const wxFolderView::AllProfileSettings& other) const
 {
-   bool equal = dateFormat == other.dateFormat &&
-                dateGMT == other.dateGMT &&
-                senderOnlyNames == other.senderOnlyNames &&
-                replaceFromWithTo == other.replaceFromWithTo &&
-                showSize == other.showSize &&
-                memcmp(columns, other.columns, sizeof(columns)) == 0;
-
-   if ( equal )
-   {
-      size_t count = returnAddresses.GetCount();
-      equal = count == other.returnAddresses.GetCount();
-      for ( size_t n = 0; equal && (n < count); n++ )
-      {
-         equal = returnAddresses[n] == other.returnAddresses[n];
-      }
-   }
-
-   return equal;
+   return dateFormat == other.dateFormat &&
+          dateGMT == other.dateGMT &&
+          senderOnlyNames == other.senderOnlyNames &&
+          replaceFromWithTo == other.replaceFromWithTo &&
+          showSize == other.showSize &&
+          memcmp(columns, other.columns, sizeof(columns)) == 0 &&
+          returnAddresses == other.returnAddresses;
 }
 

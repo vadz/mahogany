@@ -862,8 +862,12 @@ enum MessageSortOrder
    /// subject
    MSO_SUBJECT, MSO_SUBJECT_REV,
 
-   /// from
+   // old, deprecated name for MSO_SENDER
    MSO_AUTHOR, MSO_AUTHOR_REV,
+
+   /// sender (or recipient for messages from oneself)
+   MSO_SENDER = MSO_AUTHOR,
+   MSO_SENDER_REV = MSO_AUTHOR_REV,
 
    /// status (deleted < answered < unread < new)
    MSO_STATUS, MSO_STATUS_REV,

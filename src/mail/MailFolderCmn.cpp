@@ -838,6 +838,18 @@ MailFolderCmn::ForwardMessages(const UIdArray *selections,
 // MailFolderCmn sorting
 // ----------------------------------------------------------------------------
 
+struct SortParams
+{
+   // the sort order to use
+   long order;
+
+   // replace to addresses with from for messages from oneself?
+   bool replaceFromWithTo;
+
+   // if replaceFromWithTo, the pointer to our own addresses
+   wxArrayString *ownAddresses;
+};
+
 // we can only sort one listing at a time currently as we use global data to
 // pass information to the C callback used by qsort() - if this proves to be a
 // significant limitation, we should reimplement sorting ourselves
@@ -846,11 +858,11 @@ static struct SortData
    // the struct must be locked while in use
    MMutex mutex;
 
-   // the sort order to use
-   long order;
-
    // the listing which we're sorting
    HeaderInfoList *hil;
+
+   // the parameters for sorting
+   SortParams sortParams;
 } gs_SortData;
 
 // return negative number if a < b, 0 if a == b and positive number if a > b
@@ -914,7 +926,7 @@ extern "C"
                  *i2 = gs_SortData.hil->GetItemByIndex(n2);
 
       // copy it as we're going to modify it while processing
-      long sortOrder = gs_SortData.order;
+      long sortOrder = gs_SortData.sortParams.order;
 
       int result = 0;
       while ( result == 0 && sortOrder != 0 )
@@ -945,8 +957,28 @@ extern "C"
                }
                break;
 
-            case MSO_AUTHOR:
-               result = Stricmp(i1->GetFrom(), i2->GetFrom());
+            case MSO_SENDER:
+               {
+                  // use "To" if needed
+                  String value1, value2;
+                  (void)HeaderInfo::GetFromOrTo
+                                    (
+                                       i1,
+                                       gs_SortData.sortParams.replaceFromWithTo,
+                                       *gs_SortData.sortParams.ownAddresses,
+                                       &value1
+                                    );
+
+                  (void)HeaderInfo::GetFromOrTo
+                                    (
+                                       i2,
+                                       gs_SortData.sortParams.replaceFromWithTo,
+                                       *gs_SortData.sortParams.ownAddresses,
+                                       &value2
+                                    );
+
+                  result = Stricmp(value1, value2);
+               }
                break;
 
             case MSO_STATUS:
@@ -1124,13 +1156,15 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
    }
 }
 
-static void SortListing(MailFolder *mf, HeaderInfoList *hil, long sortOrder)
+static void SortListing(MailFolder *mf,
+                        HeaderInfoList *hil,
+                        const SortParams& sortParams)
 {
    CHECK_RET( hil, "no listing to sort" );
 
    // don't sort the listing if we don't have any sort criterium (so sorting
    // "by arrival order" will be much faster!)
-   if ( sortOrder != 0 )
+   if ( sortParams.order != 0 )
    {
       size_t count = hil->Count();
       if ( count >= 1 )
@@ -1142,7 +1176,7 @@ static void SortListing(MailFolder *mf, HeaderInfoList *hil, long sortOrder)
          }
 
          MLocker lock(gs_SortData.mutex);
-         gs_SortData.order = sortOrder;
+         gs_SortData.sortParams = sortParams;
          gs_SortData.hil = hil;
 
          // start with unsorted listing
@@ -1255,7 +1289,16 @@ MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
    CHECK_RET( hilp, "no listing to process" );
 
    hilp->IncRef();
-   SortListing(this, hilp, m_Config.m_ListingSortOrder);
+
+   SortParams sortParams;
+   sortParams.order = m_Config.m_ListingSortOrder;
+   sortParams.replaceFromWithTo = m_Config.m_replaceFromWithTo;
+   if ( sortParams.replaceFromWithTo )
+      sortParams.ownAddresses = &m_Config.m_ownAddresses;
+   else
+      sortParams.ownAddresses = NULL;
+
+   SortListing(this, hilp, sortParams);
 
    if ( m_Config.m_UseThreading )
    {
@@ -1336,6 +1379,18 @@ MailFolderCmn::ReadConfig(MailFolderCmn::MFCmnOptions& config)
    config.m_ReSortOnChange = READ_CONFIG(profile, MP_MSGS_RESORT_ON_CHANGE) != 0;
    config.m_UpdateInterval = READ_CONFIG(profile, MP_UPDATEINTERVAL);
    config.m_UseThreading = READ_CONFIG(profile, MP_MSGS_USE_THREADING) != 0;
+   config.m_replaceFromWithTo = READ_CONFIG(profile, MP_FVIEW_FROM_REPLACE) != 0;
+   if ( config.m_replaceFromWithTo )
+   {
+      String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
+      if ( returnAddrs == MP_FROM_REPLACE_ADDRESSES_D )
+      {
+         // the default for this option is just the return address
+         returnAddrs = READ_CONFIG(profile, MP_FROM_ADDRESS);
+      }
+
+      config.m_ownAddresses = strutil_restore_array(':', returnAddrs);
+   }
 }
 
 // ----------------------------------------------------------------------------

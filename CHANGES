@@ -3,9 +3,10 @@
       Please refer to the cvs update list archives for the detailed list of
       all changes.
 
-Release 0.63 'Saugus' June 7, 2001
+Release 0.63 'Saugus' June ???, 2001
 -------------------------------------------------------------------------------
 
+12.06.01 VZ: added possibilitiy to sort on "To: " in folder view
 10.06.01 VZ: fixed opening of files as folders
 06.06.01 NB: added support for showing folder names containing letters encoded
              in modified UTF-7 (converts text to current locale's encoding only,

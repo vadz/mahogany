@@ -196,7 +196,14 @@ protected:
          return m_ListingSortOrder != other.m_ListingSortOrder ||
                 m_ReSortOnChange != other.m_ReSortOnChange ||
                 m_UpdateInterval != other.m_UpdateInterval ||
-                m_UseThreading != other.m_UseThreading;
+                m_UseThreading != other.m_UseThreading ||
+                m_replaceFromWithTo != other.m_replaceFromWithTo ||
+                m_ownAddresses != other.m_ownAddresses;
+      }
+
+      bool operator==(const MFCmnOptions& other) const
+      {
+         return !(*this != other);
       }
 
       /// how to sort the list of messages
@@ -207,6 +214,10 @@ protected:
       int m_UpdateInterval;
       /// do we want to thread messages?
       bool m_UseThreading;
+      /// do we use "To" instead of "From" for messages from oneself?
+      bool m_replaceFromWithTo;
+      /// if m_replaceFromWithTo, the list of our addresses
+      wxArrayString m_ownAddresses;
    } m_Config;
    //@}
 
