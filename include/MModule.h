@@ -358,8 +358,10 @@ void MModule_AddStaticModule(const wxChar *Name,
 #else
    #define MMODULE_DEFINE_GET_PROPERTIES(ClassName)                           \
       extern "C"                                                              \
+      {                                                                       \
       MDLLEXPORT const ModuleProperty *GetMModuleProperties()                 \
-         { return ClassName::ms_properties; }
+         { return ClassName::ms_properties; }                                 \
+      }
 #endif
 
 /// this macro must be used inside the class declaration for any module class
