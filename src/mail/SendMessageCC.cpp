@@ -214,13 +214,24 @@ SendMessageCC::Create(Protocol protocol,
    {
       m_ServerHost = READ_CONFIG(prof, MP_SMTPHOST);
       m_UserName = READ_CONFIG(prof,MP_SMTPHOST_LOGIN);
-      m_Password = strutil_decrypt(READ_CONFIG(prof,MP_SMTPHOST_PASSWORD));
+
+      m_Password = READ_CONFIG(prof,MP_SMTPHOST_PASSWORD);
    }
-   else
+   else // protocol == NNTP
    {
       m_ServerHost = READ_CONFIG(prof, MP_NNTPHOST);
       m_UserName = READ_CONFIG(prof,MP_NNTPHOST_LOGIN);
-      m_Password = strutil_decrypt(READ_CONFIG(prof,MP_NNTPHOST_PASSWORD));
+      m_Password = READ_CONFIG(prof,MP_NNTPHOST_PASSWORD);
+   }
+
+   // check that we have password if we use it
+   if ( !m_UserName.empty() && m_Password.empty() )
+   {
+      MDialog_GetPassword(protocol, m_ServerHost, &m_Password, &m_UserName);
+   }
+   else // we do have it stored
+   {
+      m_Password = strutil_decrypt(m_Password);
    }
 
 #ifdef USE_SSL

@@ -423,6 +423,18 @@ bool MDialog_GetPassword(const wxString& folderName,
                          wxString *username,
                          wxWindow *parent = NULL);
 
+/**
+  Show a dialog asking the user for the password and username needed to
+  send an SMTP/NNTP message
+
+  @return TRUE if Ok was pressed
+*/
+bool MDialog_GetPassword(Protocol protocol,
+                         const wxString& server,
+                         wxString *password,
+                         wxString *username,
+                         wxWindow *parent = NULL);
+
 #if 1 //def OS_WIN
 #  undef USE_SEMIMODAL
 

@@ -3607,25 +3607,26 @@ bool MDialog_GetText2FromUser(const wxString& message,
 }
 
 // ----------------------------------------------------------------------------
-// MPasswordDialog
+// MPasswordDialog &c
 // ----------------------------------------------------------------------------
 
 class MPasswordDialog : public MText2Dialog
 {
 public:
    MPasswordDialog(wxWindow *parent,
-                   const wxString& folderName,
+                   const wxString& message,
+                   const wxString& label,
                    wxString *username,
                    wxString *password)
       : MText2Dialog(parent,
                      "PasswordDialog",
-                     _("Please enter login/password to access this folder"),
-                     _("Password required"),
-                     wxString::Format(_("Folder '%s':"), folderName.c_str()),
+                     message,
+                     _("Password required"), // caption
+                     label,
                      _("&Username: "), username,
                      _("&Password: "), password,
                      wxTE_PASSWORD
-                     )
+                    )
    {
    }
 
@@ -3658,12 +3659,71 @@ void MPasswordDialog::OnUpdateOk(wxUpdateUIEvent& event)
                    m_text2->GetValue().empty()) );
 }
 
+// ----------------------------------------------------------------------------
+// MFolderPasswordDialog
+// ----------------------------------------------------------------------------
+
+class MFolderPasswordDialog : public MPasswordDialog
+{
+public:
+   MFolderPasswordDialog(wxWindow *parent,
+                         const wxString& folderName,
+                         wxString *username,
+                         wxString *password)
+      : MPasswordDialog(
+                        parent,
+                        _("Please enter login/password to access this folder"),
+                        wxString::Format(_("Folder '%s':"), folderName.c_str()),
+                        username,
+                        password
+                       )
+   {
+   }
+};
+
 bool MDialog_GetPassword(const wxString& folderName,
                          wxString *username,
                          wxString *password,
                          wxWindow *parent)
 {
-   MPasswordDialog dlg(parent, folderName, username, password);
+   MFolderPasswordDialog dlg(parent, folderName, username, password);
+
+   return dlg.ShowModal() == wxID_OK;
+}
+
+// ----------------------------------------------------------------------------
+// MSendPasswordDialog
+// ----------------------------------------------------------------------------
+
+class MSendPasswordDialog : public MPasswordDialog
+{
+public:
+   MSendPasswordDialog(wxWindow *parent,
+                       const wxString& server,
+                       Protocol protocol,
+                       wxString *username,
+                       wxString *password)
+      : MPasswordDialog(
+                        parent,
+                        wxString::Format(
+                           _("Please enter login/password to %s this message"),
+                           protocol == Prot_SMTP ? _("send") : _("post")
+                        ),
+                        wxString::Format(_("Server '%s':"), server.c_str()),
+                        username,
+                        password
+                       )
+   {
+   }
+};
+
+bool MDialog_GetPassword(Protocol protocol,
+                         const wxString& server,
+                         wxString *password,
+                         wxString *username,
+                         wxWindow *parent)
+{
+   MSendPasswordDialog dlg(parent, server, protocol, username, password);
 
    return dlg.ShowModal() == wxID_OK;
 }
