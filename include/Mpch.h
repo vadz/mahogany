@@ -27,6 +27,7 @@
 #include "Mcclient.h"
 
    // windows.h included from osdep.h #defines all these
+#  undef   CreateDialog
 #  undef   DrawText
 #  undef   FindWindow
 #  undef   GetCharWidth
