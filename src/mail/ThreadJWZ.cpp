@@ -373,6 +373,10 @@ strutil_removeAllReplyPrefixes(const String &isubject,
       char c = subject[i];
       switch (state)
       {
+         // make gcc happy by including all enum elements in the switch
+      case becomeGarbage:
+         break;
+
       case notInPrefix:
          if (c == 'r' || c == 'R')
          {
@@ -445,10 +449,6 @@ strutil_removeAllReplyPrefixes(const String &isubject,
             //startIndex = i+1;
          }
          break;
-
-         // make gcc happy by including all enum elements in the switch
-      case becomeGarbage:
-         ;
       }
 
       if (state == becomeGarbage)
