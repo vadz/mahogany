@@ -51,8 +51,8 @@
 #include "adb/AdbImpExp.h"
 #include "MImport.h"
 
-// User Comments TODO
-// - create an outbox folder
+// User/Dev Comments TODO
+// - create an outbox folder setting [DONE]
 //
 // - use flags in folder creation
 // The important parameter is "flags" which is a combination of masks defined
@@ -77,8 +77,6 @@
 // at it, BTW, you will see how it handles system folders (Pine code doesn't do
 // it although it probably should as well).
 //
-// - if the user selects 'All Folders' force creation of container for imported
-//   folders
 
 
 // GENERAL TODO
@@ -117,6 +115,16 @@
 //
 // - implement importing of IMAP server stuff [ASK]
 
+
+
+
+#define NR_SYS_FLD 6
+static const wxString sysFolderList[] = {"Drafts",
+                                             "Inbox",
+                                             "Sent",
+                                             "Templates",
+                                             "Trash",
+                                             "Unsent Messages"};
 
 //------------------------------------------
 // Map struct
@@ -728,8 +736,8 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
                                       const wxString& dir,
                                       int flags )
 {
-  // this part is one2one from the Pine importer
-  // thanks Vadim
+  // based on Pine and XFMail Importer by Vadim and Nerijus
+  static int level = 0;
 
   wxDir currDir(dir);
 
@@ -767,6 +775,21 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
     return TRUE;
    }
 
+  // as far as I know there isn't a flag in Netscape to mark
+  // system folders, but I don't know much. So, if you know
+  // please let me know
+
+  // Usually, system folders are at root level and have given names
+  // Eliminate them from the file list, if user doesn't want to import them
+
+  if (level == 0) {                             // only at root level
+    if (!(flags & ImportFolder_SystemImport) )      // don't want to import them
+      {
+        for (int i=0; i<NR_SYS_FLD; i++)
+          fileList.Remove(sysFolderList[i]); 
+        wxLogMessage("NOTE: >>>>>>> Netscape system folders not imported");
+      }
+  }    
 
   MFolder *folder = NULL;
   MFolder *subFolder = NULL;
@@ -786,8 +809,18 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
   // TODO
   // - in the case of failure, remove the created folders
   //   (essentially before each 'return FALSE;'
-  // - find out the type (MF_?) of FoFs
+  // - [DONE] find out the type (MF_?) of FoFs [DONE]
 
+  // in the next for loop no system folders will be treated anyway
+  MFolder *tmpParent = NULL;
+  if (level == 0) {
+    if ( (flags & ImportFolder_AllUseParent)
+         == ImportFolder_AllUseParent )
+      tmpParent = parent;
+  }
+  else 
+    tmpParent = parent;   // at lower levels, the dad is known
+  
   for ( size_t n = 0; n < dirList.GetCount(); n++ )
    {
      const wxString& name = dirList[n];
@@ -797,19 +830,19 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
 
      // TODO: determine if this is a system folder (probably just by name, i.e.
      //       compare with Inbox, Outbox, Drafts, ...) and process it
-     //       accordingly to the flags
-     folder = CreateFolderTreeEntry (parent,    // parent may be NULL
-                              dirFldName,      // the folder name
-                              MF_GROUP,   //            type
-                              0,         //            flags
-                              path,      //            path
-                              FALSE      // don't notify
-                              );
+     //       accordingly to the flags [DONE?]
+     folder = CreateFolderTreeEntry (tmpParent,    // parent may be NULL
+                                     dirFldName,      // the folder name
+                                     MF_GROUP,   //            type
+                                     0,         //            flags
+                                     path,      //            path
+                                     FALSE      // don't notify
+                                     );
 
      if ( folder )
       {
         folderList.Add(folder);
-        wxLogMessage(_("Created group folder: %s."),dirFldName.c_str());
+        wxLogMessage(_("Imported group folder: %s."),dirFldName.c_str());
       }
      else
       return FALSE;
@@ -824,7 +857,7 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
         wxString tmpPath;
         tmpPath << dir << DIR_SEPARATOR << fileList[i];
         subFolder = CreateFolderTreeEntry ( folder,    // parent may be NULL
-                                   "Misc",      // the folder name
+                                   "AAA Misc",      // the folder name
                                    MF_FILE,   //            type
                                    0,         //            flags
                                    tmpPath,      //            path
@@ -836,44 +869,75 @@ bool MNetscapeImporter::CreateFolders(MFolder *parent,
          {
            folderList.Add(subFolder);
            fileList.Remove(i);      // this one has been created, remove from filelist
-           wxLogMessage(_("Created mail folder: %sin group folder %s."),"Misc",dirFldName.c_str());
+           wxLogMessage(_("NOTE: >>>>>> Created 'AAA Misc' folder to contain the msgs currently in group folder %s."),
+                        dirFldName.c_str());
          }
         else
          return FALSE;
       }
 
+     // crude way to know if we are at the root mail dir level
+     // another would be to check if the current dir is m_MailDir
+     level++; 
      // recursive call
      if ( ! CreateFolders( folder, path, flags ) )
       return FALSE;
+     level--;
    }
 
   // we have created all the directories, etc
   // now create the normal folders
 
   for ( size_t n = 0; n < fileList.GetCount(); n++ )
-   {
-     const wxString& name = fileList[n];
-     wxString path;
-     path << dir << DIR_SEPARATOR << name;
+  {
+    const wxString& name = fileList[n];
+    wxString path;
+    path << dir << DIR_SEPARATOR << name;
 
-     folder = CreateFolderTreeEntry ( parent,    // parent may be NULL
-                              name,      // the folder name
-                              MF_FILE,   //            type
-                              0,         //            flags
-                              path,      //            path
-                              FALSE      // don't notify
-                              );
-      if ( folder )
-       {
-         folderList.Add(folder);
-         wxLogMessage(_("Created mail folder: %s in group folder %s."),name.c_str(),dirFldName.c_str());
-       }
-      else
-       return FALSE;
-   }
-
+     // find out the folder type (system or not) by walking the list
+     // to know how to set the parent folder (accordig to flags)
+    tmpParent = NULL;
+     
+    if (level == 0) {
+      // look mum, I'm making fire with two stones!
+      bool found = FALSE;
+      for (int i=0; i<NR_SYS_FLD; i++)
+        if (name == sysFolderList[i]) {
+          found = TRUE;
+          break;
+        }
+      
+      if ( ! found )  {    // it isn't a system folder
+        if ( (flags & ImportFolder_AllUseParent)
+             == ImportFolder_AllUseParent )
+          tmpParent = parent;
+      }
+      else                        // it is, it is
+        if ( (flags & ImportFolder_SystemUseParent) 
+             == ImportFolder_SystemUseParent )
+          tmpParent = parent;
+    }
+    else 
+      tmpParent = parent;   // at lower levels, the dad is known
+    
+    folder = CreateFolderTreeEntry ( tmpParent,    // parent may be NULL
+                                     name,      // the folder name
+                                     MF_FILE,   //            type
+                                     0,         //            flags
+                                     path,      //            path
+                                     FALSE      // don't notify
+                                     );
+    if ( folder )
+      {
+        folderList.Add(folder);
+        wxLogMessage(_("Imported mail folder: %s "), name.c_str());
+      }
+    else
+      return FALSE;
+  }
+  
   return TRUE;
-}
+  }
 
 
 
