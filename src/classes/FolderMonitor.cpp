@@ -46,6 +46,7 @@
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_COLLECTATSTARTUP;
+extern const MOption MP_POLLINCOMINGDELAY;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -116,10 +117,29 @@ public:
    bool IncreaseFailCount() { return ++m_failcount >= MC_MAX_FAIL; }
    void ResetFailCount() { m_failcount = 0; }
 
+   // next check time
+   void UpdateCheckTime()
+   {
+      Profile_obj profile(m_folder->GetProfile());
+
+      m_timeNext = time(NULL) + READ_CONFIG(profile, MP_POLLINCOMINGDELAY);
+
+      wxLogTrace(TRACE_MONITOR, "Next check for %s scheduled for %s",
+                 m_folder->GetFullName().c_str(),
+                 ctime(&m_timeNext));
+   }
+
+   time_t GetCheckTime() const { return m_timeNext; }
+
 private:
+   // the folder we monitor
    MFolder *m_folder;
 
+   // its current state: Ok/Temp Unavailable/Inaccessible
    FolderState m_state;
+
+   // the time of the next check
+   time_t m_timeNext;
 
    /**
      Failcount is 0 initially, when it reaches MC_MAX_FAIL a warning is
@@ -366,6 +386,8 @@ FolderMonitorImpl::CheckNewMail(int flags)
    if ( m_inNewMailCheck.IsLocked() )
       return true;
 
+   time_t timeCur = time(NULL);
+
    MLocker lockNewMailCheck(m_inNewMailCheck);
 
    bool rc = true;
@@ -382,8 +404,12 @@ FolderMonitorImpl::CheckNewMail(int flags)
          i != m_list.end();
          ++i )
    {
-      if ( !CheckOneFolder(i.operator->()) )
-         rc = false;
+      if ( i->GetCheckTime() < timeCur )
+      {
+         if ( !CheckOneFolder(i.operator->()) )
+            rc = false;
+      }
+      //else: don't check this folder yet
    }
 
    return rc;
@@ -431,6 +457,9 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i)
 
       i->SetState(Folder_TempUnavailable);
    }
+
+   // update the time of the next check
+   i->UpdateCheckTime();
 
    wxLogTrace(TRACE_MONITOR, "Checking for new mail in '%s'.",
               i->GetName().c_str());
