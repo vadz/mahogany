@@ -57,7 +57,7 @@ class wxRegExPOSIX : public wxRegExBase
    ~wxRegExPOSIX()
       {
          if(m_Valid)
-		regfree(m_RegEx);
+		regfree(&m_RegEx);
       }
    virtual bool IsValid(void) const
       {
@@ -95,7 +95,7 @@ class wxRegExPOSIX : public wxRegExBase
    */
    bool Compile(const wxString &expr)
       {
-         if(m_Valid) regfree(m_RegEx);
+         if(m_Valid) regfree(&m_RegEx);
          int errorcode = regcomp(&m_RegEx, expr, GetCFlags());
          if(errorcode)
          {
@@ -103,11 +103,15 @@ class wxRegExPOSIX : public wxRegExBase
             regerror(errorcode, &m_RegEx, buffer, 256);
             wxLogError(_("Regular expression syntax error: '%s'"),
                        buffer);
+            m_Valid = FALSE;
             return FALSE;
          }
          else
+         {
+            m_Valid = FALSE;
             return TRUE;
-      }
+         }
+     }
 private:
    int GetCFlags(void)
       {
