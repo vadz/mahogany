@@ -2096,9 +2096,50 @@ static bool IsExeFilename(const String& filename)
    static wxSortedArrayString extsExe;
    if ( extsExe.IsEmpty() )
    {
-      extsExe.Add(_T("scr"));
-      extsExe.Add(_T("pif"));
-      extsExe.Add(_T("hta"));
+      // from http://web.mit.edu/services/mail/attachments.html#filtering
+      static const wxChar *exts[] =
+      {
+          _T("ade"),
+          _T("adp"),
+          _T("bas"),
+          _T("bat"),
+          _T("chm"),
+          _T("cmd"),
+          _T("com"),
+          _T("cpl"),
+          _T("crt"),
+          _T("eml"),
+          _T("exe"),
+          _T("hlp"),
+          _T("hta"),
+          _T("inf"),
+          _T("ins"),
+          _T("isp"),
+          _T("jse"),
+          _T("lnk"),
+          _T("mdb"),
+          _T("mde"),
+          _T("msc"),
+          _T("msi"),
+          _T("msp"),
+          _T("mst"),
+          _T("pcd"),
+          _T("pif"),
+          _T("reg"),
+          _T("scr"),
+          _T("sct"),
+          _T("shs"),
+          _T("url"),
+          _T("vbs"),
+          _T("vbe"),
+          _T("wsf"),
+          _T("wsh"),
+          _T("wsc"),
+      };
+
+      extsExe.Alloc(WXSIZEOF(exts));
+      for ( size_t n = 0; n < WXSIZEOF(exts); n++ )
+         extsExe.Add(exts[n]);
    }
 
    return extsExe.Index(ext.Lower()) != wxNOT_FOUND;
