@@ -1,4 +1,4 @@
-#This file was created by <karsten> Tue Jul  6 21:42:15 1999
+#This file was created by <zeitlin> Mon Jul 12 17:48:42 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -2149,8 +2149,13 @@ end{figure}
 Here several important settings are configured, so it is advised (as the
  program itself will tell you whenit is run for the first time) to set them
  up before starting using Mahogany.
- These include your personal identity settings as well as your preferred
- mail and news servers and some network parameters.
+ These include your personal identity settings - see also your preferred
+ mail and news servers which is configured from the network page (
+\begin_inset LatexCommand \ref{NetworkPage}
+
+\end_inset 
+
+).
 \layout Itemize
 
 
@@ -2167,8 +2172,9 @@ This is used as (default) login name for the accounts which require one
 
 \series bold 
 Hostname
-\layout Itemize
-
+\series default 
+ 
+\newline 
 This is used as the default hostname for your username.
  If you do not specify a return address, this must form a valid mail address
  when used together with your username.
@@ -2240,6 +2246,81 @@ mycompany.com
 
 
 \series bold 
+Personal name
+\newline 
+
+\series default 
+ Your full personal name to be included in your address.
+\layout Itemize
+
+
+\series bold 
+
+\begin_inset LatexCommand \label{UserLevel}
+
+\end_inset 
+
+User level
+\series default 
+
+\newline 
+Setting it to advance will allow you more detailed configuration of Mahogany,
+ allowing you to make changes to the configuration which might be confusing
+ to a novice user.
+ It's recommended that you first become familiar with the program before
+ changing the value of this option.
+\layout Standard
+
+
+\latex latex 
+
+\begin_inset LatexCommand \label{NetworkPage}
+
+\end_inset 
+
+%%disabled!
+\backslash 
+begin{figure}{
+\backslash 
+htmlimage{scale=1}
+\backslash 
+centering
+\backslash 
+epsfig{file=pics/Network.eps,width=0.6
+\backslash 
+textwidth}}
+\backslash 
+end{figure}
+\layout Standard
+
+This page allows you to configure the network-related settings.
+ Please notice that the four server names (for POP3, IMAP4, SMTP and NNTP)
+ are only the default values and that Mahogany can use as many different
+ servers (in particular, POP3 and NNTP) as you wish - for this, it is just
+ enough to change the server name when creating a new folder from the default
+ value specified here.
+\layout Itemize
+
+
+\series bold 
+POP server
+\newline 
+
+\series default 
+This is the default server for your POP3 mail folders.
+\layout Itemize
+
+
+\series bold 
+IMAP server
+\newline 
+
+\series default 
+This is the default server for your IMAP mail folders.
+\layout Itemize
+
+
+\series bold 
 SMTP server
 \series default 
 
@@ -2256,27 +2337,6 @@ NNTP server
 
 \newline 
 This is the server used for reading USENET newsgroups and posting news articles.
-\layout Itemize
-
-
-\series bold 
-Personal name
-\newline 
-
-\series default 
- Your full personal name to be included in your address.
-\layout Itemize
-
-
-\series bold 
-User level
-\series default 
-
-\newline 
-Setting it to advance will allow you more detailed configuration of Mahogany,
- allowing you to make changes to the configuration which potentially make
- no sense.
- Not supported at present.
 \layout Itemize
 
 
@@ -2349,16 +2409,21 @@ If the attempt to open a remote shell connection (used for some mail operations)
 \end_deeper 
 \layout Subsubsection
 
-Compose Page_4100_ 
-\layout Itemize
-
-
-\series bold 
 
 \begin_inset LatexCommand \label{ComposePage}
 
 \end_inset 
 
+Compose Page_4100_ 
+\layout Standard
+
+On this page you may configure different settings which control the behaviour
+ of the message composer (it is also used when replying or forwarding mail
+ messages, not only for composing the new ones).
+\layout Itemize
+
+
+\series bold 
 Save sent messages
 \series default 
 
@@ -2383,6 +2448,8 @@ Wrap margin
 \newline 
 If set to a value greater than zero, the message editor will wrap lines
  for you at that margin.
+ It is recommended to set it at number less than 75, otherwise the lines
+ in your mail messages might become too long to be conveniently read.
 \layout Itemize
 
 
@@ -2445,7 +2512,7 @@ Quote character
 \series default 
 
 \newline 
-The text inserted before each quoted character.
+The text inserted before each line of the quoted message when replying.
 \layout Itemize
 
 
@@ -2456,6 +2523,16 @@ Use signature
 \newline 
 If enabled, Mahogany will append the contents of your signature file to
  each message sent.
+\layout Itemize
+
+
+\series bold 
+Use signature separator
+\newline 
+
+\series default 
+If enabled, your signature will be separated from the text with two dashes.
+ This is a common Internet/Usenet convention.
 \layout Itemize
 
 
@@ -2515,6 +2592,36 @@ Configure headers
 \newline 
 Allows you to specify default values for the To:, CC: and BCC: fields and
  whether to display them in the compose view or not.
+ Hint: you may want to configure the folder where you collect all messages
+ from some person (or the mailing list) to have this persons reply address
+ default value for the 
+\begin_inset Quotes eld
+\end_inset 
+
+To:
+\begin_inset Quotes eld
+\end_inset 
+
+ field.
+\newline 
+
+\newline 
+The dialog shown will also allow you to edit the custom headers for outgoing
+ messages (i.e.
+ add arbitrary additional headers) if the user level (
+\begin_inset LatexCommand \ref{UserLevel}
+
+\end_inset 
+
+) is set to 
+\begin_inset Quotes eld
+\end_inset 
+
+Advanced
+\begin_inset Quotes erd
+\end_inset 
+
+.
 \layout Subsubsection
 
 Folders page_4107_
@@ -2536,17 +2643,7 @@ Folder opened in main frame
 
 \newline 
 This specifies the folder to open in the main frame on program startup.
- It will automatically remembered each time you exit Mahogany.
-\layout Itemize
-
-
-\series bold 
-Folder where to collect new mail
-\series default 
-
-\newline 
-The mail from all folders which are marked as incoming (INBOX by default)
- will automatically be collected in this file folder.
+ It will be automatically remembered each time you exit Mahogany.
 \layout Itemize
 
 
@@ -2561,6 +2658,24 @@ Mahogany will check all incoming mailboxes for new mail.
  set it to a longer value to reduce the annoying screen updates, set it
  to a shorter value if you care about receiving your new mail with little
  delay.
+\layout Itemize
+
+
+\series bold 
+Ping/check folder interval in seconds
+\newline 
+
+\series default 
+Mahogany checks periodically whether the opened folders are still 
+\begin_inset Quotes eld
+\end_inset 
+
+alive
+\begin_inset Quotes erd
+\end_inset 
+
+ (a folder may become dead if, for example, the remote server goes down
+ or the network link fails).
 \layout Itemize
 
 
@@ -2584,7 +2699,9 @@ Threshold for displaying progress dialog
 Mahogany will display progress dialogs when parsing mail folders or querying
  servers.
  If the number of messages is less than this threshold value, the progress
- dialog will be suppressed.
+ dialog will be suppressed - play with this setting and set it to the value
+ which doesn't show the progress dialogs which disappear too quickly, but
+ still shows them if the operation lasts a long time.
 \layout Subsubsection
 
 Python page_4103_
@@ -3063,6 +3180,41 @@ Just like the option for the URL browser, this will take talk to an already
 
 
 \series bold 
+External editor
+\newline 
+
+\series default 
+This is the external editor which will be invoked if you choose 
+\begin_inset Quotes eld
+\end_inset 
+
+External editor...
+\begin_inset Quotes erd
+\end_inset 
+
+ from the compose view menu.
+ You should use the 
+\begin_inset Quotes eld
+\end_inset 
+
+%s
+\begin_inset Quotes erd
+\end_inset 
+
+ characters to indicate the place where the file name will be inserted in
+ the command line (if you don't do it, an implicit 
+\begin_inset Quotes eld
+\end_inset 
+
+%s
+\begin_inset Quotes erd
+\end_inset 
+
+ will be added to the end of the string).
+\layout Itemize
+
+
+\series bold 
 New Mail Command
 \series default 
 
@@ -3249,8 +3401,224 @@ This is Mahogany's own address book format, offering you the maximum set
  address book format used by the address auto-collection mechanisms, which
  uses different groups for address entries collected from different mail
  folders.
- More detailed documentation will be added here soon, for now, just play
- around with the address book editor and see what happens.
+\layout Standard
+
+To edit the address book, open the address book editor.
+ If the book is already present in the address book tree on the left side
+ of the window, you may expand it (and any subgroups it might have) and
+ start editing immediately.
+ If not, you must first add it to the tree by choosing 
+\begin_inset Quotes eld
+\end_inset 
+
+New..
+\begin_inset Quotes erd
+\end_inset 
+
+ from the 
+\begin_inset Quotes eld
+\end_inset 
+
+Book
+\begin_inset Quotes erd
+\end_inset 
+
+ submenu or using the corresponding toolbar button.
+\layout Standard
+
+Generally speaking, there are several ways to perform the same action in
+ the address book editor:
+\layout Enumerate
+
+use the menus: the commands for creating and deleting address book entries
+ are in the 
+\begin_inset Quotes eld
+\end_inset 
+
+Edit
+\begin_inset Quotes erd
+\end_inset 
+
+ menu, the corresponding commands for the address books - in 
+\begin_inset Quotes eld
+\end_inset 
+
+Book
+\begin_inset Quotes erd
+\end_inset 
+
+ one.
+\layout Enumerate
+
+use the toolbar: this may be more convenient because, depending on the current
+ position of the selected item in the tree it will propose to create either
+ an address book or an entry.
+\layout Enumerate
+
+use keyboard: <INSERT> key creates a new entry or address book if the current
+ selection is the root of the tree, <DELETE> deletes an item and <Alt-ENTER>
+ brings upthe 
+\begin_inset Quotes eld
+\end_inset 
+
+Properties
+\begin_inset Quotes erd
+\end_inset 
+
+ dialog.
+\layout Standard
+
+To edit the entry, simply select it in the tree.
+ The data associated to it is spraed over several notebook pages - select
+ the one which contains the field you want to change and change it.
+ If you want to undo your changes, simply press 
+\begin_inset Quotes eld
+\end_inset 
+
+Cancel
+\begin_inset Quotes erd
+\end_inset 
+
+ at any moment - however, this only works while you're editing the entry.
+ As soon as you pass to another one, all previous changes are saved and
+ cannot be undone any more.
+ The changes are saved automatically when you select another entry or close
+ the address book editor - there is no special 
+\begin_inset Quotes eld
+\end_inset 
+
+Save
+\begin_inset Quotes erd
+\end_inset 
+
+ button.
+\layout Standard
+
+To quickly move in the address book tree you may use either the 
+\begin_inset Quotes eld
+\end_inset 
+
+Find
+\begin_inset Quotes erd
+\end_inset 
+
+ or 
+\begin_inset Quotes eld
+\end_inset 
+
+Go to
+\begin_inset Quotes erd
+\end_inset 
+
+ dialogs (both available in the 
+\begin_inset Quotes eld
+\end_inset 
+
+Find
+\begin_inset Quotes erd
+\end_inset 
+
+ menu).
+ The first dialog allows you to find the entry by its contents while the
+ second one allows you to quickly go to the entry (in thecurrent address
+ book only) if you know its nickname.
+ In the 
+\begin_inset Quotes eld
+\end_inset 
+
+Find
+\begin_inset Quotes erd
+\end_inset 
+
+ dialog you have several options to configure the search: it may be either
+ case sensitive or not (should 
+\begin_inset Quotes eld
+\end_inset 
+
+mike
+\begin_inset Quotes erd
+\end_inset 
+
+ match 
+\begin_inset Quotes eld
+\end_inset 
+
+Mike
+\begin_inset Quotes erd
+\end_inset 
+
+?) and try to find only the whole string or just the substring of it (should
+ 
+\begin_inset Quotes eld
+\end_inset 
+
+mik
+\begin_inset Quotes erd
+\end_inset 
+
+ match 
+\begin_inset Quotes eld
+\end_inset 
+
+Mike
+\begin_inset Quotes erd
+\end_inset 
+
+?).
+ You may also choose among which fields should the search be done.
+ You may choose as many fields as you like (possibly all of them) but you
+ must choose at least one.
+\layout Standard
+
+After you used the 
+\begin_inset Quotes eld
+\end_inset 
+
+Find
+\begin_inset Quotes erd
+\end_inset 
+
+ dialog once, you may choose the 
+\begin_inset Quotes eld
+\end_inset 
+
+Find next
+\begin_inset Quotes erd
+\end_inset 
+
+ menu item to go to the next address book entry matching your search criterium
+ (notice that a message in the status bar will notify you about how many
+ matches, if any, were found).
+ Keep hitting 
+\begin_inset Quotes eld
+\end_inset 
+
+Find next
+\begin_inset Quotes erd
+\end_inset 
+
+ until the search wraps to the beginning (again, watch the status line for
+ the message) or until you find the entry you're looking for.
+\layout Standard
+
+You may import your existing address book file by choosing the 
+\begin_inset Quotes eld
+\end_inset 
+
+Import book...
+\begin_inset Quotes erd
+\end_inset 
+
+entry from the 
+\begin_inset Quotes eld
+\end_inset 
+
+Book
+\begin_inset Quotes erd
+\end_inset 
+
+ menu - this will open the address book import dialog proposing you to select
+ the 
 \layout Subsection
 
 Support for BBDB Address Books_3002_

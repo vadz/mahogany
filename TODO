@@ -110,6 +110,7 @@ $Id$
 2	VZ?	make activity log frame appear on demand only
 
 2	VZ	printing from ADB
+3	VZ	"GoTo"  the entry should expand the branch which contains it
 3	VZ	LDIF format import
 
 2		fix es.po - many little errors
