@@ -251,6 +251,7 @@ enum ConfigFields
 
    // folder view options
    ConfigField_FolderViewFirst = ConfigField_MessageViewLast,
+   ConfigField_FolderViewNewMailotify,
    ConfigField_FolderViewHelpText,
    ConfigField_FolderViewOnlyNames,
    ConfigField_FolderViewReplaceFrom,
@@ -310,7 +311,6 @@ enum ConfigFields
    ConfigField_ConfirmExit,
    ConfigField_OpenOnClick,
    ConfigField_ShowHiddenFolders,
-   ConfigField_ShowNewMail,
    ConfigField_DebugCClient,
 #ifdef USE_SSL
    ConfigField_SslHelp,
@@ -826,7 +826,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Configure &format for displaying dates"),         Field_SubDlg,    -1                     },
 
    // folder view
-   { gettext_noop("The following settings are for the list of messages."),
+   { gettext_noop("Show new mail &notification"), Field_Bool,    -1 },
+   { gettext_noop("The following settings control appearance of the list of messages."),
                                                    Field_Message,  -1 },
    { gettext_noop("Show only sender's name, not &e-mail"), Field_Bool,    -1 },
    { gettext_noop("Show \"&To\" for messages from oneself"), Field_Bool,    -1 },
@@ -893,7 +894,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Confirm &exit"),                Field_Bool | Field_Restart, -1                     },
    { gettext_noop("Open folder on single &click"), Field_Bool,    -1                     },
    { gettext_noop("Show &hidden folders in the folder tree"), Field_Bool,    -1                     },
-   { gettext_noop("Show new mail &notifications"), Field_Bool,    -1                     },
    { gettext_noop("Debug server and mailbox access"), Field_Bool, -1
    },
 #ifdef USE_SSL
@@ -1086,6 +1086,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_DATE_FMT),
 
    // folder view
+   CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FVIEW_NAMES_ONLY),
    CONFIG_ENTRY(MP_FVIEW_FROM_REPLACE),
@@ -1139,7 +1140,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_CONFIRMEXIT),
    CONFIG_ENTRY(MP_OPEN_ON_CLICK),
    CONFIG_ENTRY(MP_SHOW_HIDDEN_FOLDERS),
-   CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
    CONFIG_ENTRY(MP_DEBUG_CCLIENT),
 #ifdef USE_SSL
    CONFIG_NONE(),

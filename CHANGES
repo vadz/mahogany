@@ -1,5 +1,10 @@
-(next release) on (date of next release)
-23.10.00 KB: fixed IMAP flag string generation which was incompatible with some servers (trailing space)
+      This file contains the detailed list of the user visible changes in
+       Mahogany, you can use it to find all the changes between releases.
+
+Release 0.60 'Redmond' October 24, 2000
+-------------------------------------------------------------------------------
+24.10.00 VZ: added a per-folder flag for new mail notification
+23.10.00 KB: fixed IMAP flag string generation (didn't work for some servers)
 20.10.00 VZ: access program options dialog from root folder properties
              don't popup message boxes with unimportant messages any more  
 18.10.00 VZ: ask for the passwords as needed, propose to remember them
@@ -136,7 +141,8 @@
 23.04.00 VZ: added "Quick move" submenu to folder popup menu
 18.04.00 VZ: dynamic plug-in (modules) loading works under Windows
 
-     0.50        March 27, 2000
+Release 0.50 'Meadows' March 27, 2000
+-------------------------------------------------------------------------------
 24.03.00 VZ: startup tips
              creating MH folders from subfolders dialogs works
 23.03.00 KB: Finished folder creation wizard. Fixed inheritance of FolderView column sizes.
