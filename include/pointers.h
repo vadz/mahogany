@@ -18,8 +18,10 @@ template <class ClassName>
 class RefCounter
 {
 public:
-   RefCounter() { m_pointer = 0; }
-   ~RefCounter() { RefCounterDecrement(m_pointer); }
+   RefCounter() { NewDefault(); }
+   RefCounter(ClassName *copy) { NewBare(copy); }
+   RefCounter(const RefCounter<ClassName> &copy) { NewCopy(copy); }
+   ~RefCounter() { Destroy(); }
    
    void AttachAndIncRef(ClassName *pointer)
    {
@@ -27,22 +29,41 @@ public:
       m_pointer = pointer;
    }
 
-   ClassName *Get() { return m_pointer; }
-   bool NotNull() { return m_pointer != 0; }
-   
    operator ClassName *() { return Get(); }
    ClassName *operator->() { return Get(); }
    operator bool() { return NotNull(); }
+   RefCounter<ClassName>& operator=(const RefCounter<ClassName> &copy)
+      { return Assign(copy); }
 
 private:
+   void NewDefault() { m_pointer = 0; }
+   void NewCopy(const RefCounter<ClassName> &copy)
+      { NewBare(copy.m_pointer); }
+   void NewBare(ClassName *copy)
+      { RefCounterIncrement(m_pointer = copy); }
+   void Destroy() { RefCounterDecrement(m_pointer); }
+   
+   RefCounter<ClassName>& Assign(const RefCounter<ClassName> &copy)
+   {
+      AttachAndIncRef(copy.m_pointer);
+      return *this;
+   }
+
+   ClassName *Get() const { return m_pointer; }
+   bool NotNull() const { return m_pointer != 0; }
+   
    ClassName *m_pointer;
 };
 
 #define DECLARE_REF_COUNTER(ClassName) \
+   class ClassName; \
+   extern void RefCounterIncrement(ClassName *pointer); \
    extern void RefCounterDecrement(ClassName *pointer); \
    extern void RefCounterAssign(ClassName *target,ClassName *source);
 
 #define DEFINE_REF_COUNTER(ClassName) \
+   extern void RefCounterIncrement(ClassName *pointer) \
+      { RefCounterIncrement(static_cast<MObjectRC *>(pointer)); } \
    extern void RefCounterDecrement(ClassName *pointer) \
       { RefCounterDecrement(static_cast<MObjectRC *>(pointer)); } \
    extern void RefCounterAssign(ClassName *target,ClassName *source) \
@@ -51,6 +72,7 @@ private:
          static_cast<MObjectRC *>(source)); \
    }
 
+extern void RefCounterIncrement(MObjectRC *pointer);
 extern void RefCounterDecrement(MObjectRC *pointer);
 extern void RefCounterAssign(MObjectRC *target,MObjectRC *source);
 

@@ -17,8 +17,12 @@
    #pragma interface "wxSpamOptions.h"
 #endif
 
+#include "MObject.h"
+#include "pointers.h"
 
-class SpamOptionManager
+DECLARE_REF_COUNTER(SpamOptionManager)
+
+class SpamOptionManager : public MObjectRC
 {
 public:
    virtual ~SpamOptionManager() {};
@@ -28,16 +32,7 @@ public:
    
    virtual bool ShowDialog(wxFrame *parent) = 0;
    
-   class Pointer
-   {
-   public:
-      Pointer();
-      ~Pointer();
-      
-      SpamOptionManager *operator->() { return m_pointer; }
-   private:
-      SpamOptionManager *m_pointer;
-   };
+   static RefCounter<SpamOptionManager> Create();
 };
 
 #endif // _WXSPAMOPTIONS_H_

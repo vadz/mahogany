@@ -488,12 +488,10 @@ bool SpamOptionManagerBody::ShowDialog(wxFrame *parent)
    return status;
 }
 
-SpamOptionManager::Pointer::Pointer()
-{
-   m_pointer = new SpamOptionManagerBody;
-}
+DEFINE_REF_COUNTER(SpamOptionManager)
 
-SpamOptionManager::Pointer::~Pointer()
+/*static*/ RefCounter<SpamOptionManager> SpamOptionManager::Create()
 {
-   delete m_pointer;
+   RefCounter<SpamOptionManager> pointer(new SpamOptionManagerBody);
+   return pointer;
 }

@@ -153,6 +153,12 @@ void MObject::DeRegister(void)
 // Reference counting helpers
 // ----------------------------------------------------------------------------
 
+extern void RefCounterIncrement(MObjectRC *pointer)
+{
+   if( pointer )
+      pointer->IncRef();
+}
+
 extern void RefCounterDecrement(MObjectRC *pointer)
 {
    if( pointer )

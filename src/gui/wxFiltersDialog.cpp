@@ -551,7 +551,7 @@ private:
 
 
    // the spam test data
-   SpamOptionManager::Pointer m_spam;
+   RefCounter<SpamOptionManager> m_spam;
 };
 
 wxCOMPILE_TIME_ASSERT( ORC_LogicalCount == ORC_L_Max, MismatchInLogicOps );
@@ -560,6 +560,7 @@ wxCOMPILE_TIME_ASSERT( ORC_Msg_Flag_Count == ORC_MF_Max, MismatchInHasFlag );
 wxCOMPILE_TIME_ASSERT( ORC_WhereCount == ORC_W_Max, MismatchInTargets );
 
 OneCritControl::OneCritControl(wxWindow *parent, OneCritControl *previous)
+   : m_spam(SpamOptionManager::Create())
 {
    m_Parent = parent;
 
