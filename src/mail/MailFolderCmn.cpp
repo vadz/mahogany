@@ -793,7 +793,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
    int n = selections->Count();
    CHECK( n, true, _T("SaveMessages(): nothing to save") );
 
-   MailFolder_obj mf(MailFolder::OpenFolder(folder));
+   MailFolder_obj mf(MailFolder::OpenFolder(folder, Normal, m_frame));
    if ( !mf )
    {
       String msg;
