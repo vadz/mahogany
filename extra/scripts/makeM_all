@@ -223,6 +223,7 @@ if [ "x$MAKE" = x ] ; then MAKE=make; fi
 
 RCNAME=.makeMrc    
 # obtain central options file from ftp server
+echo "Retrieving central options file"
 $SCP $FTPLOCATION/buildoptions /tmp/makeM_deb.$$ && \
 ( . /tmp/makeM_deb.$$ ; rm -f /tmp/makeM_deb.$$ )
 
@@ -256,6 +257,7 @@ echo "MCONFOPT=$MCONFOPT"
 echo "DOINSTALL=$DOINSTALL"
 echo "USETARSRC=$USETARSRC"
 echo "MKTARSRC=$MKTARSRC"
+echo "MVERSION=$MVERSION"
 
 export OSTYPE
 
