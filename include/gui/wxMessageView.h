@@ -75,6 +75,7 @@ class wxMessageViewFrame : public wxMFrame
 {
 public:
    wxMessageViewFrame(wxWindow *parent, ASMailFolder *asmf, UIdType uid);
+   virtual ~wxMessageViewFrame();
 
    MessageView *GetMessageView() { return m_MessageView; }
 
