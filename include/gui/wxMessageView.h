@@ -115,11 +115,12 @@ private:
 
    /// Profile
    ProfileBase *m_Profile;
-   /// the MIME popup
-   wxDialog *m_MimePopup;
+   /// the MIME popup menu
+   wxMenu *m_MimePopup;
    
 protected:
-   friend class MimeDialog;
+   friend class MimePopup;
+
    /// displays information about the currently selected MIME content
    void MimeInfo(int num);
    /// handles the currently selected MIME content
