@@ -9,6 +9,7 @@
 Release 0.67 'Constance' ??? ??, 2004
 ------------------------------------
 
+13.08.04 VZ: "Show MIME Structure" allows to save multiple attachments at once
 17.07.04 VZ: full support for showing PGP/MIME encoded messages
 17.07.04 VZ: added "Send now" command to the composer "Compose" menu
 16.07.04 VZ: show threading indicator in the status column

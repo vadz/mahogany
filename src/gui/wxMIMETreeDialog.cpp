@@ -32,26 +32,28 @@
 
 #include "ClickAtt.h"
 
+#include "HeaderInfo.h"
+#include "MFolder.h"
+#include "MailFolder.h"
+#include "MessageView.h"
 #include "MimePart.h"
+#include "UIdArray.h"
+
 #include "MIMETreeDialog.h"
 
 // ----------------------------------------------------------------------------
-// MIME dialog classes
+// constants
 // ----------------------------------------------------------------------------
 
-class wxMIMETreeCtrl : public wxTreeCtrl
+// control ids
+enum
 {
-public:
-   wxMIMETreeCtrl(wxWindow *parent) : wxTreeCtrl(parent, -1)
-   {
-      InitImageLists();
-   }
-
-private:
-   void InitImageLists();
-
-   DECLARE_NO_COPY_CLASS(wxMIMETreeCtrl)
+   wxMIMETree_BtnSave = 100
 };
+
+// ----------------------------------------------------------------------------
+// tree client data containing the associated MIME part
+// ----------------------------------------------------------------------------
 
 class wxMIMETreeData : public wxTreeItemData
 {
@@ -64,7 +66,30 @@ private:
    const MimePart *m_mimepart;
 };
 
-class wxMIMETreeDialog : public wxManuallyLaidOutDialog
+// ----------------------------------------------------------------------------
+// tree containing MIME parts
+// ----------------------------------------------------------------------------
+
+class wxMIMETreeCtrl : public wxTreeCtrl
+{
+public:
+   wxMIMETreeCtrl(wxWindow *parent);
+
+   // return the MIME part associated with the given item
+   const MimePart *GetMIMEData(const wxTreeItemId& id) const
+   {
+      return (static_cast<wxMIMETreeData *>(GetItemData(id)))->GetMimePart();
+   }
+
+private:
+   DECLARE_NO_COPY_CLASS(wxMIMETreeCtrl)
+};
+
+// ----------------------------------------------------------------------------
+// MIME tree dialog itself
+// ----------------------------------------------------------------------------
+
+class wxMIMETreeDialog : public wxPDialog
 {
 public:
    wxMIMETreeDialog(const MimePart *partRoot,
@@ -74,6 +99,11 @@ public:
 protected:
    // event handlers
    void OnTreeItemRightClick(wxTreeEvent& event);
+   void OnSave(wxCommandEvent& event);
+
+   // save selected attachments (to files) or messages (to folder)
+   void SaveAttachments(size_t count, const MimePart **parts);
+   void SaveMessages(size_t count, const MimePart **parts);
 
 private:
    // fill the tree
@@ -83,18 +113,20 @@ private:
    size_t m_countParts;
 
    // GUI controls
-   wxStaticBox *m_box;
-   wxTreeCtrl *m_treectrl;
+   wxMIMETreeCtrl *m_treectrl;
 
    // the parent message view
    MessageView *m_msgView;
+
 
    DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxMIMETreeDialog)
 };
 
-BEGIN_EVENT_TABLE(wxMIMETreeDialog, wxManuallyLaidOutDialog)
+BEGIN_EVENT_TABLE(wxMIMETreeDialog, wxPDialog)
    EVT_TREE_ITEM_RIGHT_CLICK(-1, wxMIMETreeDialog::OnTreeItemRightClick)
+
+   EVT_BUTTON(wxMIMETree_BtnSave, wxMIMETreeDialog::OnSave)
 END_EVENT_TABLE()
 
 
@@ -106,7 +138,15 @@ END_EVENT_TABLE()
 // wxMIMETreeCtrl
 // ----------------------------------------------------------------------------
 
-void wxMIMETreeCtrl::InitImageLists()
+wxMIMETreeCtrl::wxMIMETreeCtrl(wxWindow *parent)
+              : wxTreeCtrl
+                (
+                  parent,
+                  -1,
+                  wxDefaultPosition,
+                  wxDefaultSize,
+                  wxTR_DEFAULT_STYLE | wxTR_MULTIPLE
+                )
 {
    wxIconManager *iconManager = mApplication->GetIconManager();
 
@@ -133,38 +173,57 @@ void wxMIMETreeCtrl::InitImageLists()
 wxMIMETreeDialog::wxMIMETreeDialog(const MimePart *partRoot,
                                    wxWindow *parent,
                                    MessageView *msgView)
-                : wxManuallyLaidOutDialog(parent,
-                                          _("MIME structure of the message"),
-                                          _T("MimeTreeDialog"))
+                : wxPDialog
+                  (
+                     _T("MimeTreeDialog"),
+                     parent,
+                     String(M_TITLE_PREFIX) + _("MIME structure of the message"),
+                     wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER
+                  )
 {
    // init members
    m_msgView = msgView;
    m_countParts = 0;
-   m_box = NULL;
-   m_treectrl = NULL;
-
-   // create controls
-   wxLayoutConstraints *c;
-
-   // label will be set later below
-   m_box = CreateStdButtonsAndBox(_T(""), StdBtn_NoCancel);
-
    m_treectrl = new wxMIMETreeCtrl(this);
-   c = new wxLayoutConstraints;
-   c->top.SameAs(m_box, wxTop, 4*LAYOUT_Y_MARGIN);
-   c->left.SameAs(m_box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.SameAs(m_box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->bottom.SameAs(m_box, wxBottom, 2*LAYOUT_Y_MARGIN);
-   m_treectrl->SetConstraints(c);
 
-   // initialize them
+
+   // create and lay out the controls
+   // -------------------------------
+
+   // the box containing the tree control
+   wxStaticBox *box = new wxStaticBox(this, wxID_ANY, _T(""));
+   wxStaticBoxSizer *sizerBox = new wxStaticBoxSizer(box, wxHORIZONTAL);
+   sizerBox->Add(m_treectrl, 1, wxEXPAND | wxALL, LAYOUT_MARGIN);
+
+   // the buttons
+   wxSizer *sizerButtons = new wxBoxSizer(wxHORIZONTAL);
+   sizerButtons->AddStretchSpacer();
+   if ( m_msgView )
+   {
+      sizerButtons->Add(new wxButton(this, wxMIMETree_BtnSave, _("&Save...")),
+                           0, wxALL, LAYOUT_MARGIN);
+      sizerButtons->AddSpacer(2*LAYOUT_X_MARGIN);
+   }
+   sizerButtons->Add(new wxButton(this, wxID_CANCEL, _("&Close")),
+                        0, wxALL, LAYOUT_MARGIN);
+
+   // put everything together
+   wxSizer *sizerTop = new wxBoxSizer(wxVERTICAL);
+   sizerTop->Add(sizerBox, 1, wxEXPAND | wxALL, LAYOUT_MARGIN);
+   sizerTop->Add(sizerButtons, 0, wxEXPAND | (wxALL & ~wxTOP), LAYOUT_MARGIN);
+
+
+   // initialize the tree
    AddToTree(wxTreeItemId(), partRoot);
 
    m_treectrl->Expand(m_treectrl->GetRootItem());
+   m_treectrl->SetMinSize(wxSize(200, 200));
 
-   m_box->SetLabel(wxString::Format(_("%u MIME parts"), m_countParts));
+   box->SetLabel(wxString::Format(_("%u MIME parts"), m_countParts));
 
-   SetDefaultSize(4*wBtn, 10*hBtn);
+
+   SetSizer(sizerTop);
+   sizerTop->SetSizeHints(this);
 }
 
 void
@@ -198,14 +257,184 @@ void wxMIMETreeDialog::OnTreeItemRightClick(wxTreeEvent& event)
 {
    if ( m_msgView )
    {
-      wxMIMETreeData *data =
-         (wxMIMETreeData *)m_treectrl->GetItemData(event.GetItem());
-
-      ClickableAttachment att(m_msgView, data->GetMimePart());
+      ClickableAttachment att(m_msgView,
+                              m_treectrl->GetMIMEData(event.GetItem()));
       att.ShowPopupMenu(m_treectrl, event.GetPoint());
    }
 }
 
+void wxMIMETreeDialog::OnSave(wxCommandEvent& WXUNUSED(event))
+{
+   CHECK_RET( m_msgView, _T("button shouldn't exist if no msg view") );
+
+   // get the selected items
+   wxArrayTreeItemIds selections;
+   const size_t count = m_treectrl->GetSelections(selections);
+   if ( !count )
+      return;
+
+   // get all MIME parts to save and also check if all of them are messages
+   bool allMsgs = true;
+   size_t nParts = 0;
+   scoped_array<const MimePart *> parts(new const MimePart *[count]);
+   for ( size_t n = 0; n < count; n++ )
+   {
+      const MimePart *mimepart = m_treectrl->GetMIMEData(selections[n]);
+      if ( !mimepart )
+      {
+         wxLogWarning(_("Failed to save MIME part \"%s\", skipping."),
+                      m_treectrl->GetItemText(selections[n]).c_str());
+         continue;
+      }
+
+      parts[nParts++] = mimepart;
+
+      allMsgs &= mimepart->GetType().GetPrimary() == MimeType::MESSAGE;
+   }
+
+   // if they're, then we're going to copy them to another folder instead of
+   // saving them to file(s)
+   if ( allMsgs )
+   {
+      SaveMessages(nParts, parts.get());
+   }
+   else // save attachments to file(s)
+   {
+      SaveAttachments(nParts, parts.get());
+   }
+}
+
+void wxMIMETreeDialog::SaveMessages(size_t count, const MimePart **parts)
+{
+   // get the folder to save messages to
+   MFolder_obj folderDst(MDialog_FolderChoose(this));
+   if ( !folderDst )
+   {
+      // cancelled by user
+      return;
+   }
+
+   // copy them to a temp file
+   wxString filename;
+   if ( !wxGetTempFileName(_T("Mtemp"), filename) )
+   {
+      wxLogError(_("Failed to save messages to temporary file."));
+
+      return;
+   }
+
+   for ( size_t n = 0; n < count; n++ )
+   {
+      const MimePart * const mimepart = parts[n];
+
+      unsigned long len;
+      const void *content = mimepart->GetContent(&len);
+      if ( !content || !MailFolder::SaveMessageAsMBOX(filename, content, len) )
+      {
+         wxLogWarning(_("Failed to save attachment %u"), (unsigned)n);
+      }
+   }
+
+   // now copy them from there to the folder
+   MFolder_obj folderSrc(MFolder::CreateTempFile(_T(""), filename));
+   if ( folderSrc )
+   {
+      MailFolder_obj mf(MailFolder::OpenFolder(folderSrc));
+      if ( mf )
+      {
+         // FIXME:horrible inefficient... we really should have some
+         //       MailFolder::SaveAllMessages() as we don't need UIDs here at
+         //       all, just msgnos
+         HeaderInfoList_obj hil(mf->GetHeaders());
+         if ( hil )
+         {
+            const size_t count = hil->Count();
+            UIdArray all;
+            all.Alloc(count);
+            for ( size_t n = 0; n < count; n++ )
+            {
+               HeaderInfo *hi = hil->GetItemByIndex(n);
+               if ( hi )
+                  all.Add(hi->GetUId());
+            }
+
+            if ( mf->SaveMessages(&all, folderDst) )
+            {
+               // everything is ok
+               return;
+            }
+         }
+      }
+   }
+
+   // if we got here, something failed above
+   wxLogError(_("Copying messages failed."));
+}
+
+void wxMIMETreeDialog::SaveAttachments(size_t count, const MimePart **parts)
+{
+   String dir = MDialog_DirRequester
+                (
+                  _("Choose directory to save attachments to:"),
+                  _T(""),
+                  this,
+                  _T("MimeSave")
+                );
+   if ( dir.empty() )
+   {
+      // cancelled by user
+      return;
+   }
+
+   for ( size_t n = 0; n < count; n++ )
+   {
+      const MimePart * const mimepart = parts[n];
+
+      String name = mimepart->GetFilename();
+      bool needToAsk = name.empty();
+
+      wxFileName fn(dir, name);
+      if ( !needToAsk )
+      {
+         // never ever overwrite files silently here, this is a security
+         // risk
+         needToAsk = fn.FileExists();
+      }
+
+      String filename;
+      if ( needToAsk )
+      {
+         filename = wxPFileSelector
+                    (
+                        _T("MimeSave"),
+                        _("Attachment has a name of existinf file,\n"
+                          "please choose another one:"),
+                        dir,  // default path
+                        NULL, // default name
+                        NULL, // default ext
+                        NULL, // default filter
+                        wxSAVE |
+                        wxOVERWRITE_PROMPT,
+                        this
+                    );
+
+         if ( filename.empty() )
+         {
+            // cancelled
+            continue;
+         }
+      }
+      else
+      {
+         filename = fn.GetFullPath();
+      }
+
+      if ( !m_msgView->MimeSave(mimepart, filename) )
+      {
+         wxLogWarning(_("Failed to save attachment %u"), (unsigned)n);
+      }
+   }
+}
 
 // ----------------------------------------------------------------------------
 // public API
