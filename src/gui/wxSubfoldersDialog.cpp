@@ -60,7 +60,7 @@ enum
 };
 
 // how often to update the progress display?
-static const int PROGRESS_THRESHOLD = 10;
+static const size_t PROGRESS_THRESHOLD = 10;
 
 // ----------------------------------------------------------------------------
 // private functions
