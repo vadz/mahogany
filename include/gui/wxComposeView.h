@@ -110,11 +110,13 @@ public:
 
        @param parent parent window
        @param parentProfile parent profile
+       @param original message that we replied to
        @param hide if true, do not show frame
        @return pointer to the new compose view
     */
    static wxComposeView * CreateReplyMessage(wxWindow *parent,
                                              ProfileBase *parentProfile,
+                                             Message * original = NULL,
                                              bool hide = false);
 
    /** Constructor for forwarding a message.
@@ -282,7 +284,7 @@ private:
    /// compose menu
    wxMenu *composeMenu;
 
-
+   
    /// the edit/cut menu item
    class wxMenuItem *m_MItemCut;
    /// the edit/copy menu item
@@ -341,6 +343,8 @@ private:
    /// Has message been sent already?
    bool m_sent;
 
+   /// If replying, this is the original message
+   Message * m_OriginalMessage;
    // external editor support
    // -----------------------
 

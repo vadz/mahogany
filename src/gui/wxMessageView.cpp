@@ -272,6 +272,16 @@ GetParameter(Message *msg, int partno, const String &param)
 }
 
 
+static
+String GetFileNameForMIME(Message *message, int partNo)
+{
+   String fileName;
+   fileName = GetParameter(message, partNo, "FILENAME");
+   if(fileName.Length() == 0)
+      fileName = GetParameter(message, partNo,"NAME");
+   return fileName;
+}
+
 
 void
 MimePopup::OnCommandEvent(wxCommandEvent &event)
@@ -677,9 +687,7 @@ wxMessageView::Update(void)
 
       mimeType = m_mailMessage->GetPartMimeType(i);
       strutil_tolower(mimeType);
-      fileName = GetParameter(m_mailMessage,i,"FILENAME");
-      if(fileName.Length() == 0)
-         fileName = GetParameter(m_mailMessage,i,"NAME");
+      fileName = GetFileNameForMIME(m_mailMessage,i);
       (void) m_mailMessage->GetDisposition(i,&disposition);
       strutil_tolower(disposition);
 #ifdef DEBUG
@@ -755,8 +763,7 @@ wxMessageView::Update(void)
             In case of image content, we check whether it might be a
             Fax message. */
       {
-         wxString mimeFileName =
-            GetParameter(m_mailMessage,i,"FILENAME");
+         wxString mimeFileName = GetFileNameForMIME(m_mailMessage, i);
          if(t == Message::MSG_TYPEIMAGE && m_ProfileValues.inlineGFX)
          {
             wxString filename = wxGetTempFileName("Mtemp");
@@ -913,7 +920,9 @@ void
 wxMessageView::MimeHandle(int mimeDisplayPart)
 {
    // we'll need this filename later
-   wxString filenameOrig;
+   wxString filenameOrig = GetFileNameForMIME(m_mailMessage, mimeDisplayPart);
+   
+#if 0
    // look for "FILENAME" parameter:
    (void)m_mailMessage->ExpandParameter
          (
@@ -931,6 +940,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
             &filenameOrig
             );
    }
+#endif
    String mimetype = m_mailMessage->GetPartMimeType(mimeDisplayPart);
    wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
 
@@ -1158,6 +1168,8 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
 
    if ( strutil_isempty(ifilename) )
    {
+      filename = GetFileNameForMIME(m_mailMessage, mimeDisplayPart);
+#if 0
       (void)m_mailMessage->ExpandParameter
             (
                m_mailMessage->GetDisposition(mimeDisplayPart),
@@ -1171,7 +1183,8 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
                "NAME",
                &filename
                );
-
+#endif
+      
       wxString name, ext;
       wxSplitPath(filename, NULL, &name, &ext);
 

@@ -29,6 +29,7 @@
 #   include "Profile.h"
 #   include "MModule.h"
 #   include "MHelp.h"
+#   include "strutil.h"
 #endif
 
 #include "MHelp.h"
@@ -156,16 +157,19 @@ public:
 protected:
    void AddOneControl();
    void RemoveOneControl();
+
+   void LayoutControls(); 
    
    wxButton *m_ButtonLess, *m_ButtonMore;
    FilterEntryData *m_FilterData;
    FilterEntryData m_OriginalFilterData;
    // data
    wxTextCtrl *m_NameCtrl;
+   wxStaticText *m_IfMessage, *m_DoThis;
    wxString  m_Name;
    size_t   m_nControls;
    class OneCritControl *m_CritControl[MAX_CONTROLS];
-   class OneActionControl *m_ActionControl[MAX_CONTROLS];
+   class OneActionControl *m_ActionControl;
    wxEnhancedPanel *m_Panel;
 private:
    DECLARE_EVENT_TABLE()
@@ -191,15 +195,18 @@ bool ConfigureOneFilter(class FilterEntryData *fed,
 class OneCritControl
 {
 public:
-   OneCritControl(wxWindow *parent, wxLayoutConstraints *c, wxWindow
-                  **last, bool followup = FALSE);
+   OneCritControl(wxWindow *parent, 
+                  bool followup = FALSE);
+   ~OneCritControl();
    void Save(wxString *str);
    void Load(wxString *str);
 
    /// translate a storage string into a proper rule
-   static wxString TranslateToString(const wxString & criterium);
+   static wxString TranslateToString(wxString & criterium);
    void UpdateUI();
-   
+
+   /// layout the current controls under the window *last
+   void LayoutControls(wxWindow **last);
    wxWindow *GetLastCtrl() { return m_Where; }
 
 private:
@@ -290,41 +297,67 @@ enum ORC_Where_Enum
 
 
 OneCritControl::OneCritControl(wxWindow *parent,
-                               wxLayoutConstraints *c,
-                               wxWindow **last,
                                bool followup)
 {
    m_Parent = parent;
-   if(followup)
+   if(! followup)
    {
       m_Logical = new wxChoice(parent, -1, wxDefaultPosition,
                                wxDefaultSize, ORC_LogicalCount,
                                ORC_Logical);
-      m_Logical->SetConstraints(c);
       m_Not = new wxCheckBox(parent, -1, _("Not"));
-      if(m_Logical)
-         CRIT_CTRLCONST(m_Logical, m_Not);
    }
    else
    {
       m_Logical = NULL;
       m_Not = new wxCheckBox(parent, -1, _("Not"));
-      m_Not->SetConstraints(c);
    }
    m_Type = new wxChoice(parent, -1, wxDefaultPosition,
                          wxDefaultSize, ORC_TypesCount, ORC_Types);
-   CRIT_CTRLCONST(m_Not, m_Type);
-   
    m_Argument = new wxTextCtrl(parent,-1,"", wxDefaultPosition);
-   CRIT_CTRLCONST(m_Type, m_Argument);
-   
    m_Where = new wxChoice(parent, -1, wxDefaultPosition,
                           wxDefaultSize, ORC_WhereCount, ORC_Where);
+}
+
+OneCritControl::~OneCritControl()
+{
+   // we need a destructor to clean up our controls:
+   if(m_Logical) delete m_Logical;
+   delete m_Not;
+   delete m_Type;
+   delete m_Argument;
+   delete m_Where;
+}
+
+void
+OneCritControl::LayoutControls(wxWindow **last)
+{
+   wxLayoutConstraints *c;
+
+   c = new wxLayoutConstraints;
+   c->left.SameAs(m_Parent, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   c->top.Below(*last, 2*LAYOUT_Y_MARGIN);
+   if(m_Logical)
+   {
+      m_Logical->SetConstraints(c);
+
+      c = new wxLayoutConstraints;
+      c->left.RightOf(m_Logical, LAYOUT_X_MARGIN);
+      c->width.AsIs();
+      c->top.SameAs(m_Logical, wxTop, 0);
+      c->height.AsIs();
+      m_Not->SetConstraints(c);
+   }
+   else
+      m_Not->SetConstraints(c);
+   CRIT_CTRLCONST(m_Not, m_Type);
+   CRIT_CTRLCONST(m_Type, m_Argument);
    CRIT_CTRLCONST(m_Argument, m_Where);
    *last = m_Where;
 }
 
-   
 void
 OneCritControl::UpdateUI()
 {
@@ -379,21 +412,20 @@ OneCritControl::Load(wxString *str)
 
 /* static */
 wxString
-OneCritControl::TranslateToString(const wxString & criterium)
+OneCritControl::TranslateToString(wxString & criterium)
 {
-   String str = criterium;
    String program;
    // This returns the bit to go into an if between the brackets:
    // if ( .............. )
 
-   long logical = strutil_readNumber(str);
+   long logical = strutil_readNumber(criterium);
    switch(logical)
    {
-   case 0: // AND:
-      program << "&&";
-      break;
-   case 1: // OR:
+   case 0: // OR:
       program << "||";
+      break;
+   case 1: // AND:
+      program << "&&";
       break;
    case -1: // none:
       break;
@@ -401,12 +433,12 @@ OneCritControl::TranslateToString(const wxString & criterium)
       ASSERT(0); // not possible
    }
    program << '(';
-   if(strutil_readNumber(str) != 0)
+   if(strutil_readNumber(criterium) != 0)
       program << '!';
    
-   long type = strutil_readNumber(str);
-   wxString argument = strutil_readString(str);
-   long where = strutil_readNumber(str);
+   long type = strutil_readNumber(criterium);
+   wxString argument = strutil_readString(criterium);
+   long where = strutil_readNumber(criterium);
    bool needsWhere = true;
    bool needsArgument = true;
    switch(type)
@@ -491,15 +523,16 @@ OneCritControl::TranslateToString(const wxString & criterium)
 class OneActionControl
 {
 public:
-   OneActionControl(wxWindow *parent, wxLayoutConstraints *c,
-                    wxWindow **last);
+   OneActionControl(wxWindow *parent);
    
    void Save(wxString *str);
    void Load(wxString *str);
 
    void UpdateUI(void);
+   void LayoutControls(wxWindow **last);
+
    /// translate a storage string into a proper rule
-   static wxString TranslateToString(const wxString & action);
+   static wxString TranslateToString(wxString & action);
 private:
    /// Which action to perform
    wxChoice   *m_Type;
@@ -568,11 +601,10 @@ OneActionControl::Load(wxString *str)
 
 /* static */
 wxString
-OneActionControl::TranslateToString(const wxString & action)
+OneActionControl::TranslateToString(wxString & action)
 {
-   wxString str = action;
-   long type = strutil_readNumber(str);
-   wxString argument = strutil_readString(str);
+   long type = strutil_readNumber(action);
+   wxString argument = strutil_readString(action);
    wxString program;
 
    bool needsArgument = true;
@@ -603,18 +635,28 @@ OneActionControl::TranslateToString(const wxString & action)
 
 
 
-OneActionControl::OneActionControl(wxWindow *parent,
-                                   wxLayoutConstraints *c,
-                                   wxWindow **last)
+OneActionControl::OneActionControl(wxWindow *parent)
 {
    m_Parent = parent;
 
    m_Type = new wxChoice(m_Parent, -1, wxDefaultPosition,
                          wxDefaultSize, OAC_TypesCount, OAC_Types);
-   c->width.PercentOf(m_Parent, wxWidth, 30);
-   m_Type->SetConstraints(c);
 
    m_Argument = new wxTextCtrl(m_Parent,-1,"", wxDefaultPosition);
+}
+
+void
+OneActionControl::LayoutControls(wxWindow **last)
+{
+   wxLayoutConstraints *c = new wxLayoutConstraints;
+
+   c->left.SameAs(m_Parent, wxLeft, 8*LAYOUT_X_MARGIN);
+   c->top.Below(*last, 2*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   //c->width.PercentOf(m_Parent, wxWidth, 30);
+   m_Type->SetConstraints(c);
+   
    c = new wxLayoutConstraints;
    c->left.RightOf(m_Type, LAYOUT_X_MARGIN);
    c->width.PercentOf(m_Parent, wxWidth, 60);
@@ -623,8 +665,6 @@ OneActionControl::OneActionControl(wxWindow *parent,
    m_Argument->SetConstraints(c);
    *last = m_Argument;
 }
-
-
 
 
 /*
@@ -649,6 +689,9 @@ OneActionControl::OneActionControl(wxWindow *parent,
   +--------------------------------+
 
 */
+
+static const char * wxOneFButtonLabels[] =
+{ gettext_noop("More"), gettext_noop("Less") };
 
 wxOneFilterDialog::wxOneFilterDialog(class FilterEntryData *fed,
                                      wxWindow *parent)
@@ -685,46 +728,53 @@ wxOneFilterDialog::wxOneFilterDialog(class FilterEntryData *fed,
 
    wxWindow *canvas = m_Panel->GetCanvas();
 
-   m_nControls = 1;
-   
-/*
-  Add a scrolled window with
-   [test to apply] [where to apply] [match what]
-   [logical operator] [test] [where] [what]
-   ...T
-   [more rules] [less rules]
+   m_IfMessage = new wxStaticText(canvas,-1,_("If Message..."));
 
-   E.g.
-   [Match substring] [Subject] ["Mahogany"]
-   [ AND ] [Match substring] [Subject] ["bug"]
+   m_DoThis = new wxStaticText(canvas,-1,_("Then do this:"));
+   m_ActionControl = new OneActionControl(canvas);
 
-   ["More Tests"] [ "Less Tests" ]
-*/
+   m_ButtonMore = new wxButton(canvas, -1, _(wxOneFButtonLabels[0]));
+   m_ButtonLess = new wxButton(canvas, -1, _(wxOneFButtonLabels[1]));
 
+   TransferDataToWindow();
+   m_OriginalFilterData = *m_FilterData;
+}
+
+
+void
+wxOneFilterDialog::LayoutControls()
+{
    wxWindow *last = NULL;
-   c = new wxLayoutConstraints;
-   c->left.SameAs(canvas, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(canvas,  wxTop, 4*LAYOUT_Y_MARGIN);
+   wxLayoutConstraints *c = new wxLayoutConstraints;
+
+   c->left.SameAs(m_Panel->GetCanvas(), wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(m_Panel->GetCanvas(), wxTop, 2*LAYOUT_Y_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
-   m_CritControl[0] = new OneCritControl(canvas, c, &last, true);
+   m_IfMessage->SetConstraints(c);
 
-   c = new wxLayoutConstraints;
-   c->left.SameAs(canvas, wxLeft, 8*LAYOUT_X_MARGIN);
+   last = m_IfMessage;
+ 
+   for(size_t idx = 0; idx < m_nControls; idx++)
+   {
+      m_CritControl[idx]->LayoutControls(&last);
+   }
+
+   c = new wxLayoutConstraints();
+   c->left.SameAs(m_Panel->GetCanvas(), wxLeft, 2*LAYOUT_X_MARGIN);
    c->top.Below(last, 2*LAYOUT_Y_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
-   m_ActionControl[0] = new OneActionControl(canvas, c, &last);
+   m_DoThis->SetConstraints(c);
 
-   static const char * labels[] =
-   { gettext_noop("More"), gettext_noop("Less") };
+   last = m_DoThis;
+   m_ActionControl->LayoutControls(&last);
    
-   m_ButtonMore = new wxButton(canvas, -1, _(labels[0]));
-   m_ButtonLess = new wxButton(canvas, -1, _(labels[1]));
-   wxSize ButtonSize = ::GetButtonSize(labels, canvas);
-   
+   wxSize ButtonSize = ::GetButtonSize(wxOneFButtonLabels,
+                                       m_Panel->GetCanvas()); 
+
    c = new wxLayoutConstraints;
-   c->left.SameAs(canvas, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->left.SameAs(m_Panel->GetCanvas(), wxLeft, 2*LAYOUT_X_MARGIN);
    c->top.Below(last, 2*LAYOUT_Y_MARGIN);
    c->width.Absolute(ButtonSize.GetX());
    c->height.AsIs();
@@ -737,40 +787,29 @@ wxOneFilterDialog::wxOneFilterDialog(class FilterEntryData *fed,
    c->height.AsIs();
    m_ButtonLess->SetConstraints(c);
 
-   TransferDataToWindow();
    m_Panel->Layout();
    Layout();
-   m_OriginalFilterData = *m_FilterData;
 }
-
-
-/*
-
-  TODO TODO:
-
-  Create controls in once, via AddOneControl(), then run a separate
-  function over them to (re-) set the constraints.
-
-*/
 
 void
 wxOneFilterDialog::AddOneControl()
 {
    ASSERT(m_nControls < MAX_CONTROLS);
-   wxWindow *last = NULL;
-   wxLayoutConstraints *c = new wxLayoutConstraints;
    m_CritControl[m_nControls] = new
-      OneCritControl(m_Panel->GetCanvas(), c, &last);
-   c = new wxLayoutConstraints;
-   m_ActionControl[m_nControls] = new
-      OneActionControl(m_Panel->GetCanvas(), c, &last);
+      OneCritControl(m_Panel->GetCanvas(),
+                     m_nControls == 0); 
    m_nControls++;
+   LayoutControls();
 }
 
 
 void
 wxOneFilterDialog::RemoveOneControl()
 {
+   ASSERT(m_nControls > 1);
+   m_nControls--;
+   delete m_CritControl[m_nControls];
+   LayoutControls();
 }
 
 void
@@ -779,8 +818,8 @@ wxOneFilterDialog::OnUpdateUI(wxUpdateUIEvent& event)
    for(size_t idx = 0; idx < m_nControls; idx++)
    {
       m_CritControl[idx]->UpdateUI();
-      m_ActionControl[idx]->UpdateUI();
    }
+   m_ActionControl->UpdateUI();
    m_ButtonLess->Enable(m_nControls > 1);
    m_ButtonMore->Enable(m_nControls < MAX_CONTROLS);
 }
@@ -822,8 +861,8 @@ wxOneFilterDialog::TransferDataFromWindow()
    for(size_t idx = 0; idx < m_nControls; idx++)
    {
       m_CritControl[idx]->Save(&str1); 
-      m_ActionControl[idx]->Save(&str2);
    }
+   m_ActionControl->Save(&str2);
    m_FilterData->SetCriterium(str1);
    m_FilterData->SetAction(str2);
    return TRUE;
@@ -837,11 +876,16 @@ wxOneFilterDialog::TransferDataToWindow()
    str1 = m_FilterData->GetCriterium();
    str2 = m_FilterData->GetAction();
 
-   for(size_t idx = 0; idx < m_nControls; idx++)
+   m_nControls = 0;
+   do
    {
-      m_CritControl[idx]->Load(&str1);
-      m_ActionControl[idx]->Load(&str2);
-   }
+      AddOneControl();
+      m_CritControl[m_nControls-1]->Load(&str1);
+      strutil_delwhitespace(str1);
+   }while(str1.Length() > 0);
+
+   LayoutControls();
+   m_ActionControl->Load(&str2);
    return TRUE;
 }
 
@@ -853,13 +897,21 @@ String TranslateOneRuleToProgram(const wxString &criterium,
                                  const wxString &action)
 {
    wxString program;
+   wxString
+      str1 = criterium,
+      str2 = action;
    if(criterium.Length() > 0 && action.Length() > 0)
    {
       program = "if(";
-      program << OneCritControl::TranslateToString(criterium)
-              << ')'
+      do
+      {
+         program << OneCritControl::TranslateToString(str1);
+         strutil_delwhitespace(str1);
+      }while(str1.Length());
+            
+      program << ')'
               << '{'
-              << OneActionControl::TranslateToString(action)
+              << OneActionControl::TranslateToString(str2)
               << '}';
       
    }

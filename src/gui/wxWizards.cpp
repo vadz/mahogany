@@ -64,6 +64,11 @@ enum MWizardPageId
 {
    MWizard_CreateFolder_First,
    MWizard_CreateFolder_Welcome = MWizard_CreateFolder_First,     // say hello
+   MWizard_CreateFolder_Type,
+   MWizard_CreateFolder_Imap,
+   MWizard_CreateFolder_Pop3,
+   MWizard_CreateFolder_Nntp,
+   MWizard_CreateFolder_File,
    MWizard_CreateFolder_Final,                            // say that everything is ok
    MWizard_CreateFolder_Last = MWizard_CreateFolder_Final,
    
@@ -85,7 +90,7 @@ public:
            wxWindow *parent = NULL)
       : wxWizard( parent, -1, title,
                   bitmap ? *bitmap
-                  : mApplication->GetIconManager()->GetBitmap("wizard"))
+                  : mApplication->GetIconManager()->GetBitmap("install_welcome"))
       {
          m_Type = type;
          m_FirstPage = first;
@@ -147,8 +152,14 @@ public:
       }
 
    // implement the wxWizardPage pure virtuals in terms of our ones
-   virtual wxWizardPage *GetPrev() const { return GetPageById(m_wizard->GetPrevPageId(m_id)); }
-   virtual wxWizardPage *GetNext() const { return GetPageById(m_wizard->GetNextPageId(m_id)); }
+   virtual wxWizardPage *GetPrev() const { return GetPageById(GetPreviousPageId()); }
+   virtual wxWizardPage *GetNext() const { return GetPageById(GetNextPageId()); }
+
+   /// Override these two in derived classes if needed:
+   virtual MWizardPageId GetNextPageId() const
+      { return m_wizard->GetNextPageId(m_id); }
+   virtual MWizardPageId GetPreviousPageId() const
+      { return m_wizard->GetPrevPageId(m_id); }
 
    MWizardPageId GetPageId() const { return m_id; }
    MWizard * GetWizard() const { return (MWizard *)m_wizard; }
@@ -239,14 +250,11 @@ MWizard_CreateFolder_WelcomePage::MWizard_CreateFolder_WelcomePage(MWizard *wiza
    : MWizardPage(wizard, MWizard_CreateFolder_Welcome)
 {
    (void)new wxStaticText(this, -1, _(
-      "Welcome to Mahogany!\n"
-      "\n"
-      "This wizard will help you to setup the most\n"
-      "important settings needed to successfully use\n"
-      "the program. You don't need to specify everything\n"
-      "here - it can also be done later by opening the\n"
-      "'Options' dialog - but if you do fill the, you\n"
-      "should be able to start the program immediately.\n"
+      "This wizard will help you to set up\n"
+      "a new mailbox entry.\n"
+      "This can be either for an existing\n"
+      "mailbox or mail account or for a local\n"
+      "mailboxthat you want to create new.\n"
       "\n"
       "If you decide to not use the dialog, just check\n"
       "the box below or press [Cancel] at any moment."
@@ -279,6 +287,297 @@ MWizard_CreateFolder_WelcomePage::GetNextPageId() const
    return m_useWizard ? GetWizard()->GetNextPageId(GetPageId()) : MWizard_Done;
 }
 
+
+// CreateFolderWizardTypePage
+// ----------------------------------------------------------------------------
+
+class MWizard_CreateFolder_TypePage : public MWizardPage
+{
+public:
+   MWizard_CreateFolder_TypePage(MWizard *wizard);
+   virtual bool TransferDataFromWindow();
+   virtual MWizardPageId GetNextPageId() const;
+private:
+   wxChoice *m_Type;
+};
+
+
+MWizard_CreateFolder_TypePage::MWizard_CreateFolder_TypePage(MWizard *wizard)
+   : MWizardPage(wizard, MWizard_CreateFolder_Type)
+{
+   wxStaticText *msg = new wxStaticText(
+      this, -1,
+      _("To create a new mailbox entry, you must first choose\n"
+        "of which type this mailbox is."));
+   
+   wxEnhancedPanel *panel = CreateEnhancedPanel(msg);
+   
+   wxArrayString labels;
+   labels.Add(_("Mailbox type"));
+   
+   long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
+
+      // a choice control, the entries are taken from the label string which is
+      // composed as: "LABEL:entry1:entry2:entry3:...."
+   m_Type = panel->CreateChoice(_("Mailbox type:Local File:Remote IMAP:Remote POP3:"
+                                  "Remote IMAP Hierarchy:Remote News Hierarchy:"
+                                  "Remote Newsgroup:Local Newsgroup"),
+                                maxwidth, NULL);
+   panel->Layout();
+}
+
+bool
+MWizard_CreateFolder_TypePage::TransferDataFromWindow()
+{
+   return TRUE;
+}
+
+MWizardPageId
+MWizard_CreateFolder_TypePage::GetNextPageId() const
+{
+   switch(m_Type->GetSelection())
+   {
+   case 0:
+      return MWizard_CreateFolder_File;
+   case 1:
+      return MWizard_CreateFolder_Imap;
+   case 2:
+      return MWizard_CreateFolder_Pop3;
+   case 3:
+      //return MWizard_CreateFolder_Imap; // hierarchy
+   case 4:
+      //return MWizard_CreateFolder_Nntp; // hierarchy
+   case 5:
+      return MWizard_CreateFolder_Nntp;
+   case 6:
+      //return MWizard_CreateFolder_News;
+   default:
+      ASSERT_MSG(0,"Not implemented yet");
+      return MWizard_CreateFolder_Final;
+   }
+}
+
+// CreateFolderWizardImapPage
+// ----------------------------------------------------------------------------
+
+class MWizard_CreateFolder_ImapPage : public MWizardPage
+{
+public:
+   MWizard_CreateFolder_ImapPage(MWizard *wizard);
+   virtual bool TransferDataFromWindow();
+   virtual MWizardPageId GetNextPageId() const;
+   virtual MWizardPageId GetPreviousPageId() const
+      { return MWizard_CreateFolder_Type; }
+private:
+   wxTextCtrl *m_Server, *m_UserId, *m_Password;
+};
+
+
+MWizard_CreateFolder_ImapPage::MWizard_CreateFolder_ImapPage(MWizard *wizard)
+   : MWizardPage(wizard, MWizard_CreateFolder_Type)
+{
+   wxStaticText *msg = new wxStaticText(
+      this, -1,
+      _("In order to connect to the IMAP server,\n"
+        "you need a Login and a Password."));
+   
+   wxEnhancedPanel *panel = CreateEnhancedPanel(msg);
+   
+   wxArrayString labels;
+   labels.Add(_("Server Host"));
+   labels.Add(_("Your Login for it"));
+   labels.Add(_("Your Password"));
+   
+   long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
+
+   m_Server   = panel->CreateTextWithLabel(labels[0], maxwidth, NULL);
+   m_UserId   = panel->CreateTextWithLabel(labels[1], maxwidth, m_Server);
+   m_Password = panel->CreateTextWithLabel(labels[2], maxwidth, m_UserId);
+   panel->Layout();
+}
+
+bool
+MWizard_CreateFolder_ImapPage::TransferDataFromWindow()
+{
+   return TRUE;
+}
+
+MWizardPageId
+MWizard_CreateFolder_ImapPage::GetNextPageId() const
+{
+   return MWizard_CreateFolder_Final;
+}
+
+// CreateFolderWizardPop3Page
+// ----------------------------------------------------------------------------
+
+class MWizard_CreateFolder_Pop3Page : public MWizardPage
+{
+public:
+   MWizard_CreateFolder_Pop3Page(MWizard *wizard);
+   virtual bool TransferDataFromWindow();
+   virtual MWizardPageId GetNextPageId() const;
+   virtual MWizardPageId GetPreviousPageId() const
+      { return MWizard_CreateFolder_Type; }
+
+private:
+   wxTextCtrl *m_Server, *m_UserId, *m_Password;
+};
+
+
+MWizard_CreateFolder_Pop3Page::MWizard_CreateFolder_Pop3Page(MWizard *wizard)
+   : MWizardPage(wizard, MWizard_CreateFolder_Type)
+{
+   wxStaticText *msg = new wxStaticText(
+      this, -1,
+      _("In order to connect to the POP3 server,\n"
+        "you need a Login and a Password."));
+   
+   wxEnhancedPanel *panel = CreateEnhancedPanel(msg);
+   
+   wxArrayString labels;
+   labels.Add(_("Server Host"));
+   labels.Add(_("Your Login for it"));
+   labels.Add(_("Your Password"));
+   
+   long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
+
+   m_Server   = panel->CreateTextWithLabel(labels[0], maxwidth, NULL);
+   m_UserId   = panel->CreateTextWithLabel(labels[1], maxwidth, m_Server);
+   m_Password = panel->CreateTextWithLabel(labels[2], maxwidth, m_UserId);
+   panel->Layout();
+}
+
+bool
+MWizard_CreateFolder_Pop3Page::TransferDataFromWindow()
+{
+   return TRUE;
+}
+
+MWizardPageId
+MWizard_CreateFolder_Pop3Page::GetNextPageId() const
+{
+   return MWizard_CreateFolder_Final;
+}
+
+
+// CreateFolderWizardNntpPage
+// ----------------------------------------------------------------------------
+
+class MWizard_CreateFolder_NntpPage : public MWizardPage
+{
+public:
+   MWizard_CreateFolder_NntpPage(MWizard *wizard);
+   virtual bool TransferDataFromWindow();
+   virtual MWizardPageId GetNextPageId() const;
+   virtual MWizardPageId GetPreviousPageId() const
+      { return MWizard_CreateFolder_Type; }
+private:
+   wxChoice *m_Type;
+   wxTextCtrl *m_Server, *m_UserId, *m_Password;
+};
+
+
+MWizard_CreateFolder_NntpPage::MWizard_CreateFolder_NntpPage(MWizard *wizard)
+   : MWizardPage(wizard, MWizard_CreateFolder_Type)
+{
+   wxStaticText *msg = new wxStaticText(
+      this, -1,
+      _("To create a new mailbox entry, you must first choose\n"
+        "of which type this mailbox is."));
+   
+   wxEnhancedPanel *panel = CreateEnhancedPanel(msg);
+   
+   wxArrayString labels;
+   labels.Add(_("Mailbox type"));
+   labels.Add(_("Server Host"));
+   labels.Add(_("Your Login for it"));
+   labels.Add(_("Your Password"));
+   
+   long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
+
+      // a choice control, the entries are taken from the label string which is
+      // composed as: "LABEL:entry1:entry2:entry3:...."
+   m_Type = panel->CreateChoice(_("Mailbox type:Local File:Remote IMAP:Remote POP3:"
+                                  "Remote IMAP Hierarchy:Remote News Hierarchy:"
+                                  "Remote Newsgroup:Local Newsgroup"),
+                                maxwidth, NULL);
+   m_Server   = panel->CreateTextWithLabel(labels[1], maxwidth, m_Type);
+   m_UserId   = panel->CreateTextWithLabel(labels[2], maxwidth, m_Server);
+   m_Password = panel->CreateTextWithLabel(labels[3], maxwidth, m_UserId);
+   panel->Layout();
+}
+
+bool
+MWizard_CreateFolder_NntpPage::TransferDataFromWindow()
+{
+   return TRUE;
+}
+
+MWizardPageId
+MWizard_CreateFolder_NntpPage::GetNextPageId() const
+{
+   return MWizard_CreateFolder_Final;
+}
+
+// CreateFolderWizardFilePage
+// ----------------------------------------------------------------------------
+
+class MWizard_CreateFolder_FilePage : public MWizardPage
+{
+public:
+   MWizard_CreateFolder_FilePage(MWizard *wizard);
+   virtual bool TransferDataFromWindow();
+   virtual MWizardPageId GetNextPageId() const;
+   virtual MWizardPageId GetPreviousPageId() const
+      { return MWizard_CreateFolder_Type; }
+private:
+   wxChoice *m_Type;
+   wxTextCtrl *m_Server, *m_UserId, *m_Password;
+};
+
+
+MWizard_CreateFolder_FilePage::MWizard_CreateFolder_FilePage(MWizard *wizard)
+   : MWizardPage(wizard, MWizard_CreateFolder_Type)
+{
+   wxStaticText *msg = new wxStaticText(
+      this, -1,
+      _("To create a new mailbox entry, you must first choose\n"
+        "of which type this mailbox is."));
+   
+   wxEnhancedPanel *panel = CreateEnhancedPanel(msg);
+   
+   wxArrayString labels;
+   labels.Add(_("Mailbox type"));
+   labels.Add(_("Server Host"));
+   labels.Add(_("Your Login for it"));
+   labels.Add(_("Your Password"));
+   
+   long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
+
+      // a choice control, the entries are taken from the label string which is
+      // composed as: "LABEL:entry1:entry2:entry3:...."
+   m_Type = panel->CreateChoice(_("Mailbox type:Local File:Remote IMAP:Remote Pop3:"
+                                  "Remote IMAP Hierarchy:Remote News Hierarchy:"
+                                  "Remote Newsgroup:Local Newsgroup"),
+                                maxwidth, NULL);
+   m_Server   = panel->CreateTextWithLabel(labels[1], maxwidth, m_Type);
+   m_UserId   = panel->CreateTextWithLabel(labels[2], maxwidth, m_Server);
+   m_Password = panel->CreateTextWithLabel(labels[3], maxwidth, m_UserId);
+   panel->Layout();
+}
+
+bool
+MWizard_CreateFolder_FilePage::TransferDataFromWindow()
+{
+   return TRUE;
+}
+
+MWizardPageId
+MWizard_CreateFolder_FilePage::GetNextPageId() const
+{
+   return MWizard_CreateFolder_Final;
+}
 
 // CreateFolderWizard final page
 // ----------------------------------------------------------------------------
@@ -331,6 +630,11 @@ MWizard::GetPageById(MWizardPageId id)
       switch ( id )
       {
          CREATE_PAGE(CreateFolder_Welcome);
+         CREATE_PAGE(CreateFolder_Type);
+         CREATE_PAGE(CreateFolder_Imap);
+         CREATE_PAGE(CreateFolder_Pop3);
+         CREATE_PAGE(CreateFolder_Nntp);
+         CREATE_PAGE(CreateFolder_File);
          CREATE_PAGE(CreateFolder_Final);
       case MWizard_Done:
          ASSERT(0);

@@ -2110,14 +2110,16 @@ extern "C"
                             (unsigned int *)&tms.tm_mon,
                             (unsigned int *)&tms.tm_year);
       msg->DecRef();
-      return Value(mktime(&tms));
+      time_t today = mktime(&tms) / 60 / 60 / 24; // we count in days
+      return Value(today);
    }
 
    static Value func_now(ArgList *args, Parser *p)
    {
       if(args->Count() != 0)
          return Value(-1);
-      return Value(time(NULL));
+      time_t today = time(NULL) / 60 / 60 / 24;
+      return Value(today);
    }
 
    static Value func_size(ArgList *args, Parser *p)
@@ -2128,7 +2130,7 @@ extern "C"
       unsigned long size;
       (void) msg->GetStatus(&size);
       msg->DecRef();
-      return Value(size);
+      return Value(size / 1024); // return KiloBytes
    }
 
 /* * * * * * * * * * * * * * *

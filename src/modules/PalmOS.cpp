@@ -234,7 +234,7 @@ private:
    void Backup(void);
    void Restore(void);
    
-   void InstallFiles(char ** fnames, unsigned int files_total);
+   void InstallFiles(char ** fnames, int files_total);
    
    inline void ErrorMessage(const String &msg)
       { m_MInterface->Message(msg,NULL,"PalmOS module error!");wxYield(); }
@@ -792,9 +792,13 @@ PalmOSModule::Backup(void)
    DIR * dir;
 
    dir = opendir(m_BackupDir);
-   if (dir <= 0) {
-       ErrorMessage(_("Couldn´t access backup directory."));
-       return;
+   if (dir <= 0)
+   {
+      String msg;
+      msg.Printf(_("Could not access backup directory '%s'."),
+                 m_BackupDir.c_str());
+      ErrorMessage(msg);
+      return;
    }
 
    // Read original list of files in the backup dir
@@ -818,9 +822,14 @@ PalmOSModule::Backup(void)
    }
    
    MProgressDialog *pd;
-   pd = new MProgressDialog(_("Palm Backup"), _("Backuping files"), max, NULL, false, false);
+   pd = new MProgressDialog(_("Palm Backup"), _("Backing up files"),
+                            max, NULL, false, true); 
    max = 0;
    i = 0;
+
+   if(m_BackupDir.Length()
+      && m_BackupDir[m_BackupDir.Length()-1] != DIR_SEPARATOR)
+      m_BackupDir << DIR_SEPARATOR;
    
    while (true) {
       struct DBInfo   info;
@@ -839,16 +848,22 @@ PalmOSModule::Backup(void)
          delete pd;
          return;
       }
-      
-      strcpy(name, m_BackupDir);
-      strcat(name, "/");
+
+      strncpy(name, m_BackupDir, 256);
       protect_name(strlen(name) + name, info.name);
       if (info.flags & dlpDBFlagResource)
          strcat(name, ".prc");
       else
          strcat(name, ".pdb");
          
-      pd->Update(max++, name);
+      if( ! pd->Update(max++, name) )
+      {
+         // user cancelled
+         DeleteFileList(orig_files, ofile_total);
+         delete pd;
+         return;
+         break;
+      }
       
       if (m_IncrBackup) {
          if (stat(name, &statb) == 0) {
@@ -922,13 +937,13 @@ pdbCompare(struct db * d1, struct db * d2)
 }
 
 void
-PalmOSModule::InstallFiles(char **fnames, unsigned files_total)
+PalmOSModule::InstallFiles(char **fnames, int files_total)
 {
    struct DBInfo info;
    struct db * db[256];
    int    dbcount = 0;
    int    size;
-   unsigned i, j, max;
+   int i, j, max;
    struct pi_file * f;
    MProgressDialog *pd;
       
@@ -954,7 +969,7 @@ PalmOSModule::InstallFiles(char **fnames, unsigned files_total)
      	db[dbcount]->flags = info.flags;
      	db[dbcount]->maxblock = 0;
   	
-  	   pi_file_get_entries(f, &max);
+        pi_file_get_entries(f, &max);
   	
      	for (i=0; i<max; i++) {
   	      if (info.flags & dlpDBFlagResource)
@@ -979,7 +994,8 @@ PalmOSModule::InstallFiles(char **fnames, unsigned files_total)
             db[j] = temp;
          }
 
-   pd = new MProgressDialog(_("Palm Install"), _("Installing files"), dbcount, NULL, false, false);
+   pd = new MProgressDialog(_("Palm Install"), _("Installing files"),
+                            dbcount, NULL, false, true);
 
    // Install files
    for (i=0; i < dbcount; i++) {

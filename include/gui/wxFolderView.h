@@ -203,7 +203,8 @@ private:
    UIdType m_previewUId;
    /// semaphore to avoid duplicate calling of Update
    bool m_UpdateSemaphore;
-
+   /// semaphore to avoid recursion in SetFolder()
+   bool m_SetFolderSemaphore;
    /// allow it to access m_MessagePreview;
    friend class wxFolderListCtrl;
    /// in deletion semaphore, ugly hack to avoid recursion in destructor

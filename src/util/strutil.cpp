@@ -814,7 +814,10 @@ strutil_readNumber(String &string, bool *success)
    strutil_delwhitespace(string);
    String newstr;
    const char *cptr;
-   for(cptr = string.c_str(); *cptr && isdigit(*cptr);
+   for(cptr = string.c_str();
+       *cptr &&
+          (isdigit(*cptr)
+           || *cptr == '+' || *cptr == '-');
        cptr++)
       newstr << *cptr;
    string = cptr;

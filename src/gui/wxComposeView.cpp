@@ -821,12 +821,14 @@ wxComposeView::CreateNewMessage(wxWindow *parent,
 wxComposeView *
 wxComposeView::CreateReplyMessage(wxWindow *parent,
                                   ProfileBase *parentProfile,
+                                  Message *original,
                                   bool hide)
 {
    wxComposeView *cv = CreateNewMessage(parent, parentProfile, hide);
 
    cv->m_kind = Message_Reply;
-
+   cv->m_OriginalMessage = original;
+   SafeIncRef(cv->m_OriginalMessage);
    return cv;
 }
 
@@ -1274,6 +1276,7 @@ wxComposeView::wxComposeView(const String &iname,
    m_procExtEdit = NULL;
    m_fieldLast = Field_Max;
    m_sent = false;
+   m_OriginalMessage = NULL;
 }
 
 wxComposeView::~wxComposeView()
@@ -1283,6 +1286,7 @@ wxComposeView::~wxComposeView()
       m_Profile->DecRef();
       delete m_LayoutWindow;
    }
+   SafeDecRef(m_OriginalMessage);
 }
 
 // ----------------------------------------------------------------------------
@@ -1916,6 +1920,15 @@ wxComposeView::Send(void)
    success = msg->SendOrQueue();
    delete msg;
 
+   if(success && m_OriginalMessage != NULL)
+   {
+      // we mark the original message as "answered"
+      MailFolder *mf = m_OriginalMessage->GetFolder();
+      if(mf)
+         mf->SetMessageFlag(m_OriginalMessage->GetUId(),
+                            MailFolder::MSG_STAT_ANSWERED, true);
+   }
+   
    return success;
 }
 

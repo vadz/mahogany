@@ -599,6 +599,13 @@ wxFolderListCtrl::SelectNextUnread()
 void
 wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 {
+   // If we don't check, we could get called recursively from within a 
+   // wxYield()...
+   if(m_SetFolderSemaphore)
+      return;
+   m_SetFolderSemaphore = true;
+
+
    m_FocusedUId = UID_ILLEGAL;
    m_SelectedUIds.Empty();
 
@@ -608,7 +615,6 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
    if ( recreateFolderCtrl )
       m_FolderCtrl->Clear();
 
-//   wxSafeYield();
 
    SafeIncRef(mf);
    
@@ -651,6 +657,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
    m_NumOfMessages = 0; // At the beginning there was nothing.
    m_UpdateSemaphore = false;
+   m_SetFolderSemaphore = false;
    m_MailFolder = mf;
    m_ASMailFolder = mf ? ASMailFolder::Create(mf) : NULL;
    m_Profile = NULL;
@@ -705,6 +712,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 #endif
    }
    EnableMMenu(MMenu_Message, m_FolderCtrl, (m_ASMailFolder != NULL) );
+   m_SetFolderSemaphore = false;
 }
 
 wxFolderView *
@@ -986,7 +994,7 @@ MailFolder *
 wxFolderView::OpenFolder(String const &profilename)
 {
    wxBeginBusyCursor();
-
+   
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE, profilename);
    SetFolder(mf);
    SafeDecRef(mf);

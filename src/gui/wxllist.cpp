@@ -1320,7 +1320,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
    CoordType offset;
    wxLOiterator i = FindObject(wrapmargin, &offset);
    wxCHECK_MSG( i != NULLIT, FALSE, "Cannot find object covering wrapmargin.");
-
+   
    // from this object on, the rest of the line must be copied to the
    // next one:
    wxLOiterator copyObject = NULLIT;
@@ -2218,10 +2218,10 @@ wxLayoutList::WrapAll(CoordType column)
    wxLayoutLine *line = m_FirstLine;
    if(! line)
       return FALSE;
-   bool rc = FALSE;
-   while(line)
+   bool rc = TRUE;
+   while(line && rc)
    {
-      rc |= line->Wrap(column, this);
+      rc &= line->Wrap(column, this);
       line = line->GetNextLine();
    }
    return rc;

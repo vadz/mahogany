@@ -298,6 +298,10 @@ bool ReenablePersistentMessageBoxes(wxWindow *parent = NULL);
 /// Returns true if the license was accepted:
 extern bool ShowLicenseDialog(wxWindow *parent = NULL);
 
+/// Run a wizard for folder creation:
+extern
+bool RunCreateFolderWizard(wxWindow *parent);
+
 #ifdef USE_SSL
 /// Accept or reject certificate
 extern "C"

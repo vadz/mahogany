@@ -349,7 +349,8 @@ MailFolder::ReplyMessage(class Message *msg,
    msg->IncRef();
    if(! profile) profile = mApplication->GetProfile();
 
-   wxComposeView *cv = wxComposeView::CreateReplyMessage(parent, profile);
+   wxComposeView *cv = wxComposeView::CreateReplyMessage(parent,
+                                                         profile, msg);
 
          // set the recipient address
    String name;
@@ -488,7 +489,7 @@ MailFolder::ReplyMessage(class Message *msg,
 
    cv->SetSubject(newSubject);
 
-         // other headers
+   // other header   s
    String messageid;
    msg->GetHeaderLine("Message-Id", messageid);
    String references;
@@ -810,7 +811,7 @@ MailFolderCmn::ReplyMessages(const UIdArray *selections,
       msg = GetMessage((*selections)[i]);
       ReplyMessage(msg, flags, GetProfile(), parent);
       msg->DecRef();
-      SetMessageFlag((*selections)[i], MailFolder::MSG_STAT_ANSWERED, true);
+      //now done by composeView SetMessageFlag((*selections)[i], MailFolder::MSG_STAT_ANSWERED, true);
    }
 }
 
