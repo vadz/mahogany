@@ -105,6 +105,19 @@ public:
 
    //@}
 
+   /**
+      @name Other static methods
+    */
+   //@{
+
+   /// save contents of all opened composer windows
+   static bool SaveAll();
+
+   /// restore any previously saved window
+   static bool RestoreAll();
+
+   //@}
+
    /** @name Accessing composer data */
    //@{
 

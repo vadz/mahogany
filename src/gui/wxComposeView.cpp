@@ -49,13 +49,15 @@
 #  include <wx/sizer.h>
 #  include <wx/menu.h>
 #  include <wx/stattext.h>
+#  include <wx/textctrl.h>
 
 #  include <ctype.h>          // for isspace()
 #endif
 
-#include <wx/textctrl.h>
+#include <wx/filename.h>
 #include <wx/file.h>
 #include <wx/ffile.h>
+#include <wx/dir.h>
 #include <wx/process.h>
 #include <wx/mimetype.h>
 
@@ -147,7 +149,15 @@ enum
 };
 
 // the header used to indicate that a message is our draft
-#define DRAFT_HEADER "X-M-Draft"
+#define HEADER_IS_DRAFT "X-M-Draft"
+
+// the header used for storing the composer geometry
+#define HEADER_GEOMETRY "X-M-Geometry"
+
+// the possible values for HEADER_GEOMETRY
+#define GEOMETRY_ICONIZED "I"
+#define GEOMETRY_MAXIMIZED "M"
+#define GEOMETRY_FORMAT "%dx%d-%dx%d"
 
 // the composer frame title
 #define COMPOSER_TITLE _("Message Composition")
@@ -157,6 +167,14 @@ enum
 
 // code here was written with assumption that x and y margins are the same
 #define LAYOUT_MARGIN LAYOUT_X_MARGIN
+
+// ----------------------------------------------------------------------------
+// globals
+// ----------------------------------------------------------------------------
+
+M_LIST(ComposerList, wxComposeView *);
+
+static ComposerList gs_listOfAllComposers;
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -1064,9 +1082,10 @@ Composer::EditMessage(Profile *profile, Message *msg)
          cv->AddBcc(values[n]);
       else if ( ignoredHeaders.Index(name) == wxNOT_FOUND )
       {
-         // compare case sensitively here as we always write DRAFT_HEADER in
+         // compare case sensitively here as we always write HEADER_IS_DRAFT in
          // the same case
-         if ( names[n] == DRAFT_HEADER )
+         name = names[n];
+         if ( name == HEADER_IS_DRAFT )
          {
             cv->SetDraft(msg);
 
@@ -1087,6 +1106,33 @@ Composer::EditMessage(Profile *profile, Message *msg)
                   M_MSGBOX_DRAFT_AUTODELETE,
                   M_DLG_DISABLE
                );
+            }
+         }
+         else if ( name == HEADER_GEOMETRY )
+         {
+            // restore the composer geometry
+            wxFrame *frame = cv->GetFrame();
+            String value = values[n];
+            if ( value == GEOMETRY_ICONIZED )
+            {
+               frame->Iconize();
+            }
+            else if ( value == GEOMETRY_MAXIMIZED )
+            {
+               frame->Maximize();
+            }
+            else // not iconized, not maximized
+            {
+               int x, y, w, h;
+               if ( sscanf(value, GEOMETRY_FORMAT, &x, &y, &w, &h) == 4 )
+               {
+                  frame->SetSize(x, y, w, h);
+               }
+               else // bad header format
+               {
+                  wxLogDebug("Corrupted " HEADER_GEOMETRY " header '%s'.",
+                             value.c_str());
+               }
             }
          }
          else // just another header
@@ -1113,11 +1159,12 @@ wxComposeView::wxComposeView(const String &name,
                              Mode mode,
                              MessageKind kind,
                              wxWindow *parent)
-             : wxMFrame(name,parent)
+             : wxMFrame(name, parent)
 {
+   gs_listOfAllComposers.push_back(this);
+
    m_mode = mode;
    m_kind = kind;
-   m_name = name;
    m_pidEditor = 0;
    m_procExtEdit = NULL;
    m_sending = false;
@@ -1128,6 +1175,8 @@ wxComposeView::wxComposeView(const String &name,
 
    // by default new recipients are "to"
    m_rcptTypeLast = Recipient_To;
+
+   m_isModified = false;
 
    m_editor = NULL;
    m_encoding = wxFONTENCODING_SYSTEM;
@@ -1167,6 +1216,32 @@ wxComposeView::~wxComposeView()
 
    SafeDecRef(m_OriginalMessage);
    SafeDecRef(m_DraftMessage);
+
+   for ( ComposerList::iterator i = gs_listOfAllComposers.begin(); ; ++i )
+   {
+      if ( i == gs_listOfAllComposers.end() )
+      {
+         FAIL_MSG( "composer not in the list of all composers?" );
+
+         break;
+      }
+
+      if ( *i == this )
+      {
+         gs_listOfAllComposers.erase(i);
+
+         break;
+      }
+   }
+
+   if ( !m_filenameAutoSave.empty() )
+   {
+      if ( !wxRemoveFile(m_filenameAutoSave) )
+      {
+         wxLogSysError(_("Failed to remove stale composer autosave file '%s'"),
+                       m_filenameAutoSave.c_str());
+      }
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -2083,7 +2158,7 @@ wxComposeView::CanClose() const
 
       canClose = false;
    }
-   else if ( m_editor->IsModified() )
+   else if ( IsModified() )
    {
       // ask the user if he wants to save the changes
       MDlgResult rc = MDialog_YesNoCancel
@@ -2093,9 +2168,7 @@ wxComposeView::CanClose() const
                           "\n"
                           "You may also choose \"Cancel\" to not close this "
                           "window at all."),
-                        this, // parent
-                        MDIALOG_YESNOTITLE,
-                        M_DLG_NO_DEFAULT
+                        this  // parent
                       );
 
       switch ( rc )
@@ -2193,7 +2266,7 @@ wxComposeView::OnMenuCommand(int id)
          break;
 
       case WXMENU_COMPOSE_EVAL_TEMPLATE:
-         if ( !m_editor->IsModified() )
+         if ( !IsModified() )
          {
             // remove our prompt
             DoClear();
@@ -3232,6 +3305,12 @@ wxComposeView::SetSubject(const String &subj)
 void wxComposeView::ResetDirty()
 {
    m_editor->ResetDirty();
+   m_isModified = false;
+}
+
+bool wxComposeView::IsModified() const
+{
+   return m_isModified || m_editor->IsModified();
 }
 
 // ----------------------------------------------------------------------------
@@ -3309,6 +3388,9 @@ bool wxComposeView::DeleteDraft()
    if ( !m_DraftMessage )
       return false;
 
+   if ( !READ_CONFIG(m_Profile, MP_DRAFTS_AUTODELETE) )
+      return false;
+
    // NB: GetFolder() doesn't IncRef() the result, so don't DecRef() it
    MailFolder *mf = m_DraftMessage->GetFolder();
    CHECK( mf, false, "draft message without folder?" );
@@ -3326,6 +3408,44 @@ bool wxComposeView::DeleteDraft()
    return true;
 }
 
+SendMessage *wxComposeView::BuildDraftMessage() const
+{
+   SendMessage *msg = BuildMessage();
+   if ( !msg )
+   {
+      wxLogError(_("Failed to create the message to save."));
+   }
+   else
+   {
+      // mark this message as our draft (the value doesn't matter)
+      msg->AddHeaderEntry(HEADER_IS_DRAFT, "Yes");
+
+      // save the composer geometry info
+      String value;
+      wxFrame *frame = ((wxComposeView *)this)->GetFrame();
+      if ( frame->IsIconized() )
+      {
+         value = GEOMETRY_ICONIZED;
+      }
+      else if ( frame->IsMaximized() )
+      {
+         value = GEOMETRY_MAXIMIZED;
+      }
+      else // normal position
+      {
+         int x, y, w, h;
+         frame->GetPosition(&x, &y);
+         frame->GetSize(&w, &h);
+
+         value.Printf(GEOMETRY_FORMAT, x, y, w, h);
+      }
+
+      msg->AddHeaderEntry(HEADER_GEOMETRY, value);
+   }
+
+   return msg;
+}
+
 // from upgrade.cpp, this forward decl will disappear once we move it somewhere
 // else (most likely MFolder?)
 extern int
@@ -3338,16 +3458,12 @@ VerifyStdFolder(const MOption& optName,
 
 bool wxComposeView::SaveAsDraft() const
 {
-   SendMessage_obj msg = BuildMessage();
+   SendMessage_obj msg = BuildDraftMessage();
    if ( !msg )
    {
-      wxLogError(_("Failed to create the message to save."));
-
+      // error message already given by BuildDraftMessage()
       return false;
    }
-
-   // mark this message as our draft
-   msg->AddHeaderEntry(DRAFT_HEADER, "Yes");
 
    // ensure that the "Drafts" folder we're going to save the message to exists
    String nameDrafts = READ_CONFIG(m_Profile, MP_DRAFTS_FOLDER);
@@ -3416,6 +3532,150 @@ bool wxComposeView::SaveAsDraft() const
       M_MSGBOX_DRAFT_SAVED,
       M_DLG_DISABLE
    );
+
+   return true;
+}
+
+// ----------------------------------------------------------------------------
+// wxComposeView auto save
+// ----------------------------------------------------------------------------
+
+/**
+  Returns the directory used for autosaved composer contents, with '/' at the
+  end
+ */
+static String GetComposerAutosaveDir()
+{
+   String name = mApplication->GetLocalDir();
+   name += "/composer/";
+
+   return name;
+}
+
+bool
+wxComposeView::AutoSave()
+{
+   if ( !m_editor->IsModified() )
+   {
+      // nothing to do
+      return true;
+   }
+
+   SendMessage_obj msg = BuildDraftMessage();
+   if ( !msg )
+      return false;
+
+   if ( m_filenameAutoSave.empty() )
+   {
+      // make sure the directory we use for these scratch files exists
+      String name = GetComposerAutosaveDir();
+      if ( !wxDir::Exists(name) )
+      {
+         if ( !wxMkdir(name, 0700) )
+         {
+            wxLogSysError(_("Failed to create the directory '%s' for the "
+                            "temporary composer files"), name.c_str());
+            return false;
+         }
+      }
+
+      // we need a unique file name during the life time of this object as this
+      // file is always going to be deleted if we're destroyed correctly, it
+      // can only be left if the program crashes
+      m_filenameAutoSave = name + String::Format("%05d%08x", getpid(), this);
+   }
+
+   // false means don't append, truncate
+   if ( !msg->WriteToFile(m_filenameAutoSave, false) )
+   {
+      // TODO: disable autosaving? we risk to give many such messages if
+      //       something is wrong...
+      wxLogError(_("Failed to automatically save the message."));
+
+      return false;
+   }
+
+   // mark the editor as not modified to avoid resaving it the next time
+   // unnecessary but remember internally that it was modified (we didn't
+   // really save it)
+   m_isModified = true;
+   m_editor->ResetDirty();
+
+   return true;
+}
+
+bool Composer::SaveAll()
+{
+   bool rc = true;
+   for ( ComposerList::iterator i = gs_listOfAllComposers.begin();
+         i != gs_listOfAllComposers.end();
+         ++i )
+   {
+      rc &= (*i)->AutoSave();
+   }
+
+   return rc;
+}
+
+bool Composer::RestoreAll()
+{
+   String name = GetComposerAutosaveDir();
+   if ( !wxDir::Exists(name) )
+   {
+      // nothing to do
+      return true;
+   }
+
+   wxDir dir;
+   if ( !dir.Open(name) )
+   {
+      wxLogError(_("Failed to check for interrupted messages."));
+
+      return false;
+   }
+
+   size_t nResumed = 0;
+
+   wxString filename;
+   bool cont = dir.GetFirst(&filename, "", wxDIR_FILES);
+   while ( cont )
+   {
+      filename = name + filename;
+
+      MFolder_obj folder(MFolder::CreateTemp("", MF_FILE, 0, filename));
+
+      cont = dir.GetNext(&filename);
+
+      if ( folder )
+      {
+         MailFolder_obj mf = MailFolder::OpenFolder(folder);
+         if ( mf )
+         {
+            // FIXME: assume UID of the first message in a new MBX folder is
+            //        always 1
+            Message_obj msg = mf->GetMessage(1);
+            if ( msg )
+            {
+               if ( EditMessage(mApplication->GetProfile(), msg.operator->()) )
+               {
+                  // ok!
+                  nResumed++;
+
+                  continue;
+               }
+            }
+         }
+      }
+
+      wxLogError(_("Failed to resume composing the message from file '%s'"),
+                 filename.c_str());
+   }
+
+   if ( nResumed )
+   {
+      wxLogMessage(_("%d previously interrupted composer windows have been "
+                     "restored"), nResumed);
+   }
 
    return true;
 }

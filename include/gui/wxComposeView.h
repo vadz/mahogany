@@ -160,6 +160,12 @@ public:
    */
    bool DeleteDraft();
 
+   /**
+     Save a snapshot of the composer contents into a file to be able to restore
+     it later if the app crashes.
+   */
+   bool AutoSave();
+
    /** Send the message.
        @param schedule if TRUE, call calendar module to schedule sending
        @return true if successful, false otherwise
@@ -267,6 +273,9 @@ protected:
    /// verify that the message can be sent
    bool IsReadyToSend() const;
 
+   /// has the message been modified since last save?
+   bool IsModified() const;
+
    /// insert a text file at the current cursor position
    bool InsertFileAsText(const String& filename,
                          MessageEditor::InsertMode insMode);
@@ -282,9 +291,17 @@ protected:
      deleted by the caller (presumably after calling its Send() or
      WriteToString()).
 
-     @return msg SendMessage object to be deleted by the caller
+     @return SendMessage object to be deleted by the caller
    */
    SendMessage *BuildMessage() const;
+
+   /**
+     Return the message to be sent as a draft: it simply adds a few additional
+     headers which we put in our draft messages and use in EditMessage() later.
+
+     @return SendMessage object to be deleted by the caller
+   */
+   SendMessage *BuildDraftMessage() const;
 
    /// Destructor
    ~wxComposeView();
@@ -351,9 +368,6 @@ private:
    /// the profile (never NULL)
    Profile *m_Profile;
 
-   /// the name of the class
-   String m_name;
-
    /// the initial from/reply-to address
    String m_from;
 
@@ -419,6 +433,9 @@ private:
    /// Are we sending the message?
    bool m_sending;
 
+   /// Have we been modified since the last save?
+   bool m_isModified;
+
    /// If replying, this is the original message
    Message *m_OriginalMessage;
 
@@ -427,6 +444,9 @@ private:
 
    /// the template to use or an empty string
    String m_template;
+
+   /// the name of the file we autosaved ourselves to (may be empty)
+   String m_filenameAutoSave;
 
    /// the (main) encoding (== charset) to use for the message
    wxFontEncoding m_encoding;
