@@ -3262,7 +3262,19 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET( mf, "number of messages changed in unknown mail folder" );
 
-   if ( msgno > mf->m_msgnoMax )
+   // normally msgno should never be less than m_nMessages because we adjust
+   // the latter in mm_expunged immediately when a message is expunged and so
+   // we used to test here for "msgno > m_msgnoMax" which is more logical, but
+   // it seems that "msgno < m_msgnoMax" case does happen with IMAP servers if
+   // we send "EXPUNGE" and the server replies with "* EXISTS" untagged reply
+   // before returning tagged "EXPUNGE completed" - then mm_exists() is called
+   // before mm_expunged() is and mf->m_msgnoMax hadn't been updated yet!
+   //
+   // IMHO it's really stupid to do it like this in cclient, but life being
+   // what it is, we can't change it so we just rebuild the listing
+   // completely in this case as the messages have been both deleted and
+   // added
+   if ( msgno != mf->m_msgnoMax )
    {
       mf->m_msgnoMax = msgno;
 
@@ -3284,20 +3296,12 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
    }
    else // the messages were expunged
    {
-      // msgno should never be less than m_nMessages because we adjust the
-      // latter in mm_expunged immediately when a message is expunged
-      if ( msgno != mf->m_msgnoMax )
-      {
-         // can't use FAIL_MSG() here as it pops up a modal dialog which leads
-         // to a crash later because of different reentrancies which usually
-         // can't happe, so break into debugger directly
-         extern void Trap();
-         Trap();
-      }
-
       // only request update below if something happened: the only thing which
       // can happen to us in this case is that messages were expunged from the
-      // folder, so check for this
+      // folder, so check for this, otherwise we just got mm_exists() because
+      // of a checkpoint or something and it just confirms that the number of
+      // messages in the folder didn't change (why send it then? ask
+      // cclient author...)
       if ( !mf->m_expunged )
       {
          // no, they were not - don't refresh everything!

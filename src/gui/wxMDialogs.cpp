@@ -3098,7 +3098,8 @@ size_t MDialog_GetSelections(const wxString& message,
                              const wxArrayString& choices,
                              wxArrayInt *selections,
                              MWindow *parent,
-                             const wxString& confpathOrig)
+                             const wxString& confpathOrig,
+                             const wxSize& sizeDef)
 {
    wxCHECK_MSG( selections, 0, _T("selections pointer can't be NULL") );
 
@@ -3116,7 +3117,20 @@ size_t MDialog_GetSelections(const wxString& message,
    }
 
    int x, y, w, h;
-   wxMFrame::RestorePosition(confpath, &x, &y, &w, &h);
+   if ( !wxMFrame::RestorePosition(confpath, &x, &y, &w, &h) )
+   {
+      // we didn't find anything in the config, use the provided default size
+      if ( sizeDef.x != -1 )
+      {
+         w = sizeDef.x;
+         h = sizeDef.y;
+      }
+      else // no def size specified, use defaults for default size (sic)
+      {
+         w = 150;
+         h = 250;
+      }
+   }
 
    wxMultipleChoiceDialog dlg(parent, message, caption, choices, selections);
 

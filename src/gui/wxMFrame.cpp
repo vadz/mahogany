@@ -259,8 +259,16 @@ wxMFrame::SavePositionInternal(const char *name, wxWindow *frame, bool isFrame)
       if ( isFrame )
       {
          wxFrame *fr = (wxFrame *)frame;
-         pConf->Write(MP_ICONISED, fr->IsIconized());
-         pConf->Write(MP_MAXIMISED, fr->IsMaximized());
+         bool isIconized = fr->IsIconized();
+         bool isMaximized = fr->IsMaximized();
+
+         // the frames are rarely icon/maximized, so don't write these
+         // settings to config unless really needed
+         if ( isIconized != pConf->Read(MP_ICONISED, 0l) )
+            pConf->Write(MP_ICONISED, isIconized);
+
+         if ( isMaximized != pConf->Read(MP_MAXIMISED, 0l) )
+            pConf->Write(MP_MAXIMISED, isMaximized);
       }
    }
 }

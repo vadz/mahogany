@@ -528,44 +528,57 @@ MModule::ListAvailableModules(const String& interfaceName)
 #else // !USE_MODULES_STATIC
    kbStringList modules;
 
-   wxString pathname, filename;
    wxArrayString dirs = BuildListOfModulesDirs();
    size_t nDirs = dirs.GetCount();
 
-   /// First, build list of all .mmd and .so files in module directories
+   // First, build list of all .mmd and .so files in module directories
    wxString extDll = DLL_EXTENSION;
-   wxArrayString moduleNames; // base names, actually
+
+   // but take care to only take each of the modules once - loading different
+   // modules with the same name is a recipe for disaster, so remember the
+   // base names of the modules we had already seen in this array
+   wxArrayString moduleNames;
+
+   wxString pathname, filename, basename;
    for( size_t i = 0; i < nDirs ; i++ )
    {
-         pathname = dirs[i];
-         if(wxDirExists(pathname))
+      pathname = dirs[i];
+      if ( wxDirExists(pathname) )
+      {
+         // first look for MMDs
+         pathname << "*.mmd";
+         filename = wxFindFirstFile(pathname);
+         while( filename.length() )
          {
-            pathname << "*.mmd";
-            filename = wxFindFirstFile(pathname);
-            while(filename.Length())
+            wxSplitPath(filename, NULL, &basename, NULL);
+            if ( moduleNames.Index(basename) == wxNOT_FOUND )
             {
-               moduleNames.Add(filename.BeforeLast('.'));
+               moduleNames.Add(basename);
 
                modules.push_back(new wxString(filename));
-               filename = wxFindNextFile();
             }
 
-            pathname = dirs[i];
-            pathname << "*" << extDll;
-            filename = wxFindFirstFile(pathname);
-            while(filename.Length())
-            {
-               // only add if we didn't find a matching .mmd for it
-               wxString basename = filename;
-               basename.Truncate(filename.length() - extDll.length());
-               if ( moduleNames.Index(basename) == wxNOT_FOUND )
-               {
-                  modules.push_back(new wxString(filename));
-               }
-
-               filename = wxFindNextFile();
-            }
+            filename = wxFindNextFile();
          }
+
+         // now restart with the DLLs
+         pathname = dirs[i];
+         pathname << "*" << extDll;
+         filename = wxFindFirstFile(pathname);
+         while ( filename.length() )
+         {
+            // only add if we hadn't found a matching .mmd for it
+            wxSplitPath(filename, NULL, &basename, NULL);
+            if ( moduleNames.Index(basename) == wxNOT_FOUND )
+            {
+               moduleNames.Add(basename);
+
+               modules.push_back(new wxString(filename));
+            }
+
+            filename = wxFindNextFile();
+         }
+      }
    }
 
    // the components of MMD file format
@@ -657,8 +670,8 @@ MModule::ListAvailableModules(const String& interfaceName)
          }
          if(errorflag)
          {
-            wxLogError(_("Cannot parse MMD file for module '%s'."),
-                       filename.c_str());
+            wxLogWarning(_("Cannot parse MMD file for module '%s'."),
+                         filename.c_str());
          }
       }
       else // it's not an .mmd, get info from .so/.dll directly
@@ -670,8 +683,7 @@ MModule::ListAvailableModules(const String& interfaceName)
          {
             MModule_GetModulePropFuncType getProps =
                (MModule_GetModulePropFuncType)
-               wxDllLoader::GetSymbol(dll,
-                                      MMODULE_GETPROPERTY_FUNCTION);
+               wxDllLoader::GetSymbol(dll, MMODULE_GETPROPERTY_FUNCTION);
 
             if ( getProps )
             {
@@ -700,12 +712,14 @@ MModule::ListAvailableModules(const String& interfaceName)
 
          if ( errorflag )
          {
-            wxLogError(_("Shared library '%s' is not a Mahogany module."),
-                       filename.c_str());
+            wxLogWarning(_("Shared library '%s' is not a Mahogany module."),
+                         filename.c_str());
          }
       }
    }
+
    listing->SetCount(count);
+
    return listing;
 #endif // USE_MODULES_STATIC/!USE_MODULES_STATIC
 }

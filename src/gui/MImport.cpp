@@ -460,7 +460,8 @@ extern bool ShowImportDialog(wxWindow *parent)
                                  prognames,
                                  &selections,
                                  parent,
-                                 "Importers"
+                                 "Importers",
+                                 wxSize(150, 200)
                                 );
 
    // and do import from those he chose
