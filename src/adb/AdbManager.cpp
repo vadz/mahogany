@@ -66,6 +66,8 @@ static void GroupLookup(
                        );
 
 // search in the books specified or in all loaded books otherwise
+//
+// return true if anything was found, false otherwise
 static bool AdbLookupForEntriesOrGroups(
                                         ArrayAdbEntries& aEntries,
                                         ArrayAdbEntries *aMoreEntries,
@@ -191,7 +193,9 @@ AdbLookupForEntriesOrGroups(ArrayAdbEntries& aEntries,
   }
 
   // return true if something found
-  return !aEntries.IsEmpty() || (aGroups && !aGroups->IsEmpty());
+  return !aEntries.IsEmpty() ||
+         (aMoreEntries && !aMoreEntries->IsEmpty()) ||
+         (aGroups && !aGroups->IsEmpty());
 }
 
 bool AdbLookup(ArrayAdbEntries& aEntries,
