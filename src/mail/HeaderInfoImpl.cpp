@@ -628,10 +628,10 @@ MsgnoType HeaderInfoListImpl::GetMsgnoFromPos(MsgnoType pos) const
    {
       ASSERT_MSG( !IsThreading(), "can't reverse threaded listing!" );
 
-      if ( m_tableMsgno )
+      if ( pos < m_sizeTables )
       {
          // flip the table (which always corresponds to the direct ordering)
-         return m_tableMsgno[m_count - 1 - pos];
+         return m_tableMsgno[m_sizeTables - 1 - pos];
       }
       else // no table, reverse the natural message order
       {
@@ -669,7 +669,7 @@ MsgnoType HeaderInfoListImpl::GetPosFromIdx(MsgnoType n) const
    {
       ASSERT_MSG( !IsThreading(), "can't reverse threaded listing!" );
 
-      if ( m_tablePos )
+      if ( n < m_sizeTables )
       {
          // reverse the order specified by the table
          return m_count - 1 - m_tablePos[n];
@@ -1197,8 +1197,8 @@ MsgnoType HeaderInfoListImpl::GetNthSortedMsgno(MsgnoType n) const
    if ( m_reverseOrder )
    {
       // reverse either the table order or the natural order
-      return m_tableSort ? m_tableSort[m_count - 1 - n]
-                         : m_count - n;
+      return n < m_sizeTables ? m_tableSort[m_sizeTables - 1 - n]
+                              : m_count - n;
    }
    else // !reversed order
    {
@@ -1414,7 +1414,7 @@ void HeaderInfoListImpl::CombineSortAndThread()
     */
 
    m_thrData->m_root =
-      ReOrderTree(m_thrData->m_root, m_tableSort, m_reverseOrder, m_count);
+      ReOrderTree(m_thrData->m_root, m_tableSort, m_reverseOrder, m_sizeTables);
 
    size_t threadedIndex = 0;
    (void)FillThreadTables(m_thrData->m_root, m_thrData, threadedIndex,
@@ -1426,7 +1426,7 @@ void HeaderInfoListImpl::CombineSortAndThread()
    m_dontFreeMsgnos = true;
 
    m_tablePos = AllocTable();
-   for (size_t i = 0; i < m_count; ++i)
+   for (size_t i = 0; i < m_sizeTables; ++i)
    {
       m_tablePos[m_tableMsgno[i]-1] = i;
    }
@@ -1475,9 +1475,9 @@ void HeaderInfoListImpl::BuildTables()
       wxString msg = _("Sorting %lu messages...");
 
       if ( busy )
-         busy->SetLabel(msg, m_count);
+         busy->SetLabel(msg, m_sizeTables);
       else
-         busy = new BusyIndicator(!m_firstSort, m_mf, msg, m_count);
+         busy = new BusyIndicator(!m_firstSort, m_mf, msg, m_sizeTables);
 
       if ( !Sort() )
          busy->Fail(_("Sorting failed!"));
@@ -1491,9 +1491,9 @@ void HeaderInfoListImpl::BuildTables()
          wxString msg = _("Threading %lu messages...");
 
          if ( busy )
-            busy->SetLabel(msg, m_count);
+            busy->SetLabel(msg, m_sizeTables);
          else
-            busy = new BusyIndicator(!m_firstSort, m_mf, msg, m_count);
+            busy = new BusyIndicator(!m_firstSort, m_mf, msg, m_sizeTables);
 
          if ( !Thread() )
             busy->Fail(_("Threading failed!"));
