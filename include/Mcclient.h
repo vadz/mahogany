@@ -10,4 +10,5 @@ extern "C"
 #     include <nntp.h>
 #     include <misc.h>
 }
-undef private
+#undef private
+
