@@ -551,10 +551,17 @@ wxLayoutStyleInfo::operator=(const wxLayoutStyleInfo &other)
    COPY_SI_(underline);
    COPY_SI_(enc);
 
-   if(other.m_fg_valid)
+   if ( other.m_fg_valid )
+   {
+      m_fg_valid = true;
       m_fg = other.m_fg;
-   if(other.m_bg_valid)
+   }
+
+   if ( other.m_bg_valid )
+   {
+      m_bg_valid = true;
       m_bg = other.m_bg;
+   }
 
    return *this;
 }
