@@ -265,6 +265,8 @@ public:
    virtual void Delete() = 0;
       /// rename this folder: FALSE returned if it failed
    virtual bool Rename(const String& name) = 0;
+      /// move this folder: FALSE returned if it failed
+   virtual bool Move(MFolder *newParent) = 0;
    //@}
 
    MOBJECT_DEBUG(MFolder)

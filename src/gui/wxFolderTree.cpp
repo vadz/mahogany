@@ -400,6 +400,9 @@ protected:
    // return true if this folder can be renamed
    bool CanRenameFolder(const MFolder *folder) const;
 
+   // return true if this folder can be moved
+   bool CanMoveFolder(const MFolder *folder) const;
+
    // this is the real handler for double-click and enter events
    bool OnDoubleClick();
 
@@ -411,6 +414,7 @@ protected:
 
    void DoFolderCreate();
    void DoFolderRename();
+   void DoFolderMove();
    void DoFolderDelete(bool removeOnly = true);
    void DoFolderClear();
    void DoFolderClose();
@@ -464,6 +468,7 @@ private:
          Remove = WXMENU_FOLDER_REMOVE,
          Delete = WXMENU_FOLDER_DELETE,
          Rename = WXMENU_FOLDER_RENAME,
+         Move = WXMENU_FOLDER_MOVE,
          Close = WXMENU_FOLDER_CLOSE,
          Update = WXMENU_FOLDER_UPDATE,
          BrowseSub = WXMENU_FOLDER_BROWSESUB,
@@ -1096,6 +1101,45 @@ bool wxFolderTree::OnRename(MFolder *folder,
    }
 
    return rc;
+}
+
+bool wxFolderTree::OnMove(MFolder *folder,
+                          MFolder *newParent)
+{
+   CHECK( folder, false, "can't move NULL folder" );
+   CHECK( newParent, false, "can't move folder to NULL parent" );
+
+   bool rc = true;
+
+   String fullPath = folder->GetFullName();
+   CHECK( !fullPath.empty(), false, "can't move the root pseudo-folder" );
+
+   String oldPath = fullPath.BeforeLast('/'),
+          name    = fullPath.AfterLast('/');
+
+   String newPath = newParent->GetFullName();
+
+   // close the folder first
+   rc = OnClose(folder);
+   if ( !rc )
+   {
+      wxLogError(_("The folder must be closed before it can be moved."));
+      return false;
+   }
+
+   rc = folder->Move(newParent);
+   if ( rc )
+   {
+      wxLogStatus(GetFrame(m_tree->wxWindow::GetParent()),
+                  _("Successfully moved folder '%s' to '%s'."),
+                  folder->GetFullName().c_str(), newParent->GetFullName().c_str());
+   }
+   else
+   {
+      wxLogError(_("Failed to move the folder '%s' from '%s' to '%s'."),
+                 name.c_str(), oldPath.c_str(), newPath.c_str());
+   }
+   return false;
 }
 
 void wxFolderTree::OnClear(MFolder *folder)
@@ -1909,6 +1953,52 @@ void wxFolderTreeImpl::DoFolderRename()
    }
 }
 
+bool wxFolderTreeImpl::CanMoveFolder(const MFolder *folder) const
+{
+   return CanRenameFolder(folder);
+}
+
+void wxFolderTreeImpl::DoFolderMove()
+{
+   MFolder_obj folder(m_sink->GetSelection());
+   if ( !folder )
+   {
+      wxLogError(_("Please select the folder to move first."));
+   }
+   else // have a folder
+   {
+      if ( CanMoveFolder(folder) )
+      {
+         wxFrame *frame = GetFrame(this);
+         MFolder_obj newParent(MDialog_FolderChoose(frame, folder, MDlg_Folder_NoFiles));
+         if ( !newParent )
+         {
+            wxLogStatus(frame, _("Folder moving cancelled."));
+         }
+         else if ( newParent == folder )
+         {
+            wxLogError(_("You chose the folder itself as its new parent !"));
+         }
+         else if ( newParent == folder->GetParent() )
+         {
+            wxLogError(_("You chose the current parent as new parent !"));
+         }
+         else if ( folder->GetSubfolderCount() > 0 )
+         {
+            wxLogError(_("Sorry, moving a hierarchy of folders is not implemented yet !"));
+         }
+         else
+         {
+            (void)m_sink->OnMove(folder, newParent);
+         }
+      }
+      else
+      {
+         wxLogError(_("This folder can't be moved !"));
+      }
+   }
+}
+
 void wxFolderTreeImpl::DoFolderDelete(bool removeOnly)
 {
    MFolder *folder = m_sink->GetSelection();
@@ -2507,6 +2597,10 @@ bool wxFolderTreeImpl::ProcessMenuCommand(int id)
 
       case FolderMenu::Rename:
          DoFolderRename();
+         break;
+
+      case FolderMenu::Move:
+         DoFolderMove();
          break;
 
       case FolderMenu::Close:

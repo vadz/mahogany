@@ -158,6 +158,8 @@ public:
 
    /// return true if the entry is defined
    virtual bool HasEntry(const String & key) const = 0;
+   /// return the type of entry (Type_String, Type_Integer or Type_Unknown
+   virtual wxConfigBase::EntryType GetEntryType(const String & key) const = 0;
    /// return true if the group exists
    virtual bool HasGroup(const String & name) const = 0;
    /// delete the entry specified by path

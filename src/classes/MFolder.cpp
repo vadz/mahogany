@@ -38,6 +38,8 @@
 #include "Mdefaults.h"
 
 #include "MFolder.h"
+#include "MFilter.h"
+#include "MFCache.h"
 
 #include <wx/dir.h>
 
@@ -180,6 +182,8 @@ public:
    virtual void Delete() { FAIL_MSG("doesn't make sense for MTempFolder"); }
    virtual bool Rename(const String&)
       { FAIL_MSG("doesn't make sense for MTempFolder"); return false; }
+   virtual bool Move(MFolder*)
+      { FAIL_MSG("doesn't make sense for MTempFolder"); return false; }
 
 private:
    String m_fullname,
@@ -283,6 +287,7 @@ public:
                                     bool tryCreateLater);
    virtual void Delete();
    virtual bool Rename(const String& newName);
+   virtual bool Move(MFolder* newParent);
 
 protected:
    /** Get the full name of the subfolder.
@@ -355,6 +360,8 @@ public:
       { FAIL_MSG("can not delete root folder."); }
    virtual bool Rename(const String& /* newName */)
       { FAIL_MSG("can not rename root folder."); return false; }
+   virtual bool Move(const MFolder* /* newParent */)
+      { FAIL_MSG("can not move root folder."); return false; }
 };
 
 // ----------------------------------------------------------------------------
@@ -1040,6 +1047,184 @@ bool MFolderFromProfile::Rename(const String& newName)
 
       return false;
    }
+}
+
+bool MFolderFromProfile::Move(MFolder *newParent)
+{
+
+   // This does not really 'move' the folder, but it creates a new one 
+   // with the correct parent and name, and copies all the profile information
+   // from the old one to the new one. It then calls Delete on itself, so that
+   // the old folder is removed from the tree. Last thing is to notify everyone
+   // that a new folder has been created.
+
+   // There are things that do not make sense at all
+   CHECK( GetFolderType(GetType()) != MF_ILLEGAL, false, "How did you manage to try to move an MF_ILLEGAL folder ?" );
+   CHECK( GetFolderType(GetType()) != MF_NNTP, false, "can't move NNTP folders" );
+   CHECK( GetFolderType(GetType()) != MF_NEWS, false, "can't move News folders" );
+   CHECK( GetFolderType(GetType()) != MF_INBOX, false, "can't move system Inbox" );
+   CHECK( GetFolderType(GetType()) != MF_ROOT, false, "can't move the root pseudo-folder" );
+   //CHECK( !m_folderName.empty(), false, "can't move the root pseudo-folder" );
+
+   // And there are things we can't do yet.
+   CHECK( GetSubfolderCount() == 0, false, "can't move a folder with sub-folders (yet)" );
+   CHECK( GetFolderType(GetType()) != MF_IMAP, false, "can't move IMAP folders (yet)" );
+
+   if ( GetFolderType(GetType()) == MF_IMAP )
+   {
+      // IMAP folders have one more check: we must make sure that they stay on
+      // the same server, so that we can simply send it a RENAME command.
+      CHECK( false, false, "Same server check not yet implemented" );
+   }
+   
+   // Compute the name of the folder to create
+   String path = newParent->GetFullName();
+   String name = m_folderName.AfterLast('/');
+   String newFullName = path;
+   if ( !path.empty() )
+      newFullName += '/';
+   newFullName += name;
+
+   // Create a new folder
+   MFolder_obj newSubfolder(newParent->CreateSubfolder(name, MF_ILLEGAL));
+   if ( !newSubfolder )
+   {
+      wxLogError(_("Could not create subfolder '%s' in '%s'."),
+                   name.c_str(), path.c_str());
+      return false;
+   }
+
+   // We will now copy in the profile of the newly created folder all the
+   // information found in the profile of the moved (old) folder.
+   // XNOTODO(?): make this some method of the Profile class
+   Profile_obj newProfile(newSubfolder->GetProfile());
+   CHECK( newProfile, false, "panic in MFolder: no profile" );
+   Profile_obj oldProfile(m_folderName);
+
+   bool isExpendingEnvVars = oldProfile->IsExpandingEnvVars();
+   oldProfile->SetExpandEnvVars(false);
+   // Copy all the profile entries 
+   String entryName;
+   long dummy;
+   bool rc = true;
+   bool bCont = oldProfile->GetFirstEntry(entryName, dummy);
+   while ( bCont ) {
+      wxConfigBase::EntryType type = oldProfile->GetEntryType(entryName);
+      switch (type)
+      {
+         case wxConfigBase::Type_String:
+            {
+               String value;
+               bool found = false;
+               value = oldProfile->readEntry(entryName, "", &found);
+               if ( !found )
+               {
+                  wxLogError(_("Problem reading original profile."));
+                  return false;
+               }
+               rc = newProfile->writeEntry(entryName, value);
+               if ( !rc )
+               {
+                  wxLogError(_("Problem writing new profile."));
+                  return false;
+               }
+               break;
+            }
+         case wxConfigBase::Type_Integer:
+            {
+               long value;
+               bool found = false;
+               value = oldProfile->readEntry(entryName, -1, &found);
+               if ( !found )
+               {
+                  wxLogError(_("Problem reading original profile."));
+                  return false;
+               }
+               rc = newProfile->writeEntry(entryName, value);
+               if ( !rc )
+               {
+                  wxLogError(_("Problem writing new profile."));
+                  return false;
+               }
+               break;
+            }
+         default:
+            wxLogError(_("Unkown type for key '%s'."),
+                         entryName.c_str());
+      }
+      bCont = oldProfile->GetNextEntry(entryName, dummy);
+   }
+   oldProfile->SetExpandEnvVars(isExpendingEnvVars);
+
+   if ( GetFolderType(GetType()) == MF_IMAP )
+   {
+      // IMAP folders need one last specific thing: send a RENAME
+      // command to the server, unless we are moving the root folder
+      // for this server (in this case, nothing changes on the server
+      // and no RENAME command should be issued).
+      CHECK( false, false, "RENAME command to server not yet implemented" );
+   }
+
+   // Now, we can delete the old folder from the hierarchy
+   Delete();
+
+   // We should update the cache, but I (XNO) did not find a way to do it correctly.
+   //MFolderCache::Remove(this);
+   //MFolderCache::Add(newSubfolder);
+   
+   // Iterate over all the filters to change the name of the folder where
+   // it appears.
+   wxArrayString allFilterNames = MFilter::GetAllFilters();
+   for ( size_t i = 0; i < allFilterNames.GetCount(); ++i)
+   {
+
+      wxString filterName = allFilterNames[i];
+      MFilter *filter = MFilter::CreateFromProfile(filterName);
+      MFilterDesc filterDesc = filter->GetDesc();
+      if ( filterDesc.IsSimple() )
+      {
+         MFDialogSettings *dialogSettings = filterDesc.GetSettings();
+         wxString argument = dialogSettings->GetActionArgument();
+         size_t nbReplacements = argument.Replace(m_folderName, newFullName);
+         if ( nbReplacements > 0 )
+         {
+            dialogSettings->SetAction(dialogSettings->GetAction(), argument);
+            filterDesc.Set(dialogSettings);
+            filter->Set(filterDesc);
+            wxLogStatus(_("Filter '%s' has been updated."), filterName);
+         }
+         else
+         {
+            dialogSettings->DecRef();
+         }
+      }
+      else
+      {
+         // XNOTODO: Find out how to updqte this filter anyway
+         wxLogError(_("Filter '%s' is not \"simple\" and has not been updated."), filterName);
+      }
+      filter->DecRef();
+   }
+
+   /*
+   // notify everybody about the disappearance of the old folder
+   MEventManager::Send(
+      new MEventFolderTreeChangeData (m_folderName,
+                                      MEventFolderTreeChangeData::Delete)
+      );
+      */
+   // notify everybody about the creation of the new folder
+   MEventManager::Send(
+      new MEventFolderTreeChangeData(newFullName,
+                                     MEventFolderTreeChangeData::Create)
+      );
+
+   struct MailFolderStatus status;
+   MfStatusCache* cache = MfStatusCache::Get();
+   rc = cache->GetStatus(m_folderName, &status);
+   cache->UpdateStatus(newFullName, status);
+
+   return true;
 }
 
 // -----------------------------------------------------------------------------

@@ -263,7 +263,10 @@ public:
    static bool Copy(const String& nameSrc, const String& nameDst);
 
    /// get the list of all defined filters
-   static wxArrayString GetAllFilters();
+   static wxArrayString GetAllFilters()
+   {
+      return Profile::GetAllFilters();
+   }
 
    /// return the filter descrption
    virtual MFilterDesc GetDesc(void) const = 0;

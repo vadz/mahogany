@@ -95,6 +95,9 @@ public:
    virtual bool OnRename(MFolder *folder,
                          const String& folderNewName,
                          const String& mboxNewName = "");
+      // user wants to move this folder to a new parent, return TRUE if ok
+   virtual bool OnMove(MFolder *folder,
+                       MFolder *newParent);
       // user wants to remove all messages from this folder
    virtual void OnClear(MFolder *folder);
       // the folder must be closed, return FALSE to prevent it from closing

@@ -214,6 +214,9 @@ public:
    /// return true if the entry is defined
    virtual bool HasEntry(const String & key) const
       { return FALSE; }
+   /// return the type of entry
+   virtual wxConfigBase::EntryType GetEntryType(const String & key) const
+      { return wxConfigBase::Type_Unknown; }
    /// return true if the group exists
    virtual bool HasGroup(const String & name) const
       { return FALSE; }
@@ -364,6 +367,7 @@ public:
    virtual Profile *GetParent(void) const;
 
    virtual bool HasEntry(const String & key) const;
+   virtual wxConfigBase::EntryType GetEntryType(const String & key) const;
    virtual bool HasGroup(const String & name) const;
    virtual bool DeleteEntry(const String& key);
    virtual bool DeleteGroup(const String & path);
@@ -1089,6 +1093,14 @@ ProfileImpl::HasEntry(const String & key) const
    PCHECK();
    ms_GlobalConfig->SetPath(GetName());
    return ms_GlobalConfig->HasEntry(key) || ms_GlobalConfig->HasGroup(key);
+}
+
+wxConfigBase::EntryType
+ProfileImpl::GetEntryType(const String & key) const
+{
+   PCHECK();
+   ms_GlobalConfig->SetPath(GetName());
+   return ms_GlobalConfig->GetEntryType(key);
 }
 
 bool
