@@ -24,6 +24,8 @@
 
 #ifndef USE_PCH
     #include "Mcommon.h"
+    #include "Mdefaults.h"
+    #include "MApplication.h"
 #endif // USE_PCH
 
 #include "MPython.h"
