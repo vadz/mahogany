@@ -1,5 +1,8 @@
-mahogany (0.23a) unstable; urgency=low
+mahogany (0.50) unstable; urgency=low
 
+  * Major changes: Filters added, PalmOS module added,
+  *   subscription management for several remote folders,
+  *   Wizards and HTML based help system.
   * Bug fixes, minor improvements, Windows release. 
   * Bug fix release, improved message editor. 
   * Initial Release.
