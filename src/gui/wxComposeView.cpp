@@ -1539,7 +1539,7 @@ Composer::EditMessage(Profile *profile, Message *msg)
                }
                else // bad header format
                {
-                  wxLogDebug(_T("Corrupted "), HEADER_GEOMETRY, _T(" header '%s'."),
+                  wxLogDebug(_T("Corrupted ") HEADER_GEOMETRY _T(" header '%s'."),
                              value.c_str());
                }
             }
