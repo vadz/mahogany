@@ -977,8 +977,8 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
           wxLC_REPORT | wxLC_VIRTUAL | wxNO_BORDER);
 
    // add the images to use for the columns
-   wxBitmap bmpDown = sort_down,
-            bmpUp = sort_up;
+   wxBitmap bmpDown = sort_down_xpm,
+            bmpUp = sort_up_xpm;
    wxImageList *imagelist = new wxImageList(bmpDown.GetWidth(),
                                             bmpDown.GetHeight());
 
