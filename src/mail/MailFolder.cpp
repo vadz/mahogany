@@ -186,6 +186,14 @@ MLogCircle::Clear(void)
  * static member functions of MailFolder.h
  *-------------------------------------------------------------------*/
 
+/* Flush all event queues for all MailFolder drivers. */
+
+/* static */
+void
+MailFolder::ProcessEventQueue(void)
+{
+	MailFolderCC::ProcessEventQueue();
+}
 
 /*
  * This function guesses: it checks if such a profile exists,
@@ -743,6 +751,7 @@ public:
          {
             m_Mf->UpdateConfig();
             m_Mf->RequestUpdate();
+	    MailFolder::ProcessEventQueue();
          }
          return true;
       }

@@ -539,6 +539,9 @@ public:
    virtual int ApplyFilterRules(UIdArray msgs) = 0;
    /// Request update
    virtual void RequestUpdate(void) = 0;
+   /// Process all internal update events in the queue.
+   static void ProcessEventQueue(void);
+
 protected:
    static MLogCircle ms_LogCircle;
 };

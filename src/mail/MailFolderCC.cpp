@@ -2763,8 +2763,8 @@ MailFolderCC::RequestUpdate(void)
 {
    // invalidate current folder listing and queue at least one folder
    // update event.
-   if(! m_NeedFreshListing)
-      m_NeedFreshListing = true;
+   m_NeedFreshListing = true;
+   m_UpdateNeeded = true;
 }
 
 /* Handles the mm_overview_header callback on a per folder basis. */

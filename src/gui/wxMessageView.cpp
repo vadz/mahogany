@@ -1245,7 +1245,7 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
                                  NULL, // no default path
                                  name[0] ? name.c_str() : NULL,
                                  ext[0] ? ext.c_str() : NULL,
-                                 NULL, 0, this);
+                                 NULL, wxFILEDLG_USE_FILENAME, this);
    }
    else
       filename = ifilename;
