@@ -1044,25 +1044,25 @@ Threadable *Threader::thread(Threadable *threadableRoot)
    pruneEmptyContainers(m_root, false);
    ASSERT(m_root->getNext() == 0); // root node has a next ?!
    
-   // If asked to, gather all the messages that have the same
-   // non-empty subject in the same thread.
-   if (m_gatherSubjects) {
-      gatherSubjects();
-      ASSERT(m_root->getNext() == 0); // root node has a next ?!
-   }
-
    // Build dummy messages for the nodes that have no message.
    // Those can only appear in the root set.
    ThreadContainer *thr;
    for (thr = m_root->getChild(); thr != 0; thr = thr->getNext())
       if (thr->getThreadable() == 0)
          thr->setThreadable(thr->getChild()->getThreadable()->makeDummy());
-
+      
    wxLogTrace(TRACE_JWZ, "Entering BreakThreads");
    if (m_breakThreadsOnSubjectChange)
       breakThreads(m_root);
    wxLogTrace(TRACE_JWZ, "Leaving BreakThreads");
 
+   // If asked to, gather all the messages that have the same
+   // non-empty subject in the same thread.
+   if (m_gatherSubjects) {
+      gatherSubjects();
+      ASSERT(m_root->getNext() == 0); // root node has a next ?!
+   }
+   
    // Prepare the result to be returned: the root of the
    // *Threadable* tree that we will build by flushing the
    // ThreadContainer tree structure.
@@ -1489,6 +1489,10 @@ void Threader::gatherSubjects()
             // Make old point to its kids
             old->setChild(c);
             c->setNext(newC);
+
+            // Now that we know who is the child of the new node, we can build
+            // its dummy threadable
+            old->setThreadable(c->getThreadable()->makeDummy());
          }
          else
             old->getParent()->addAsChild(c);
