@@ -1152,7 +1152,7 @@ static size_t FillThreadTables(THREADNODE* node, ThreadData* thrData,
    if (node->branch != 0)
       nbChildren += FillThreadTables(node->branch, thrData, threadedIndex, 
                                      indent, indentIfDummyNode);
-   return nbChildren + 1;  // + 1 for oneself
+   return nbChildren + (node->num == 0 ? 0 : 1);  // + 1 for oneself if not dummy
 }
 
 
