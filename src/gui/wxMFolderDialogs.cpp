@@ -886,6 +886,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    // 3rd step: store additional data about the newly created folder directly
    // in the profile
    m_profile->writeEntry(MP_FOLDER_IS_INCOMING,m_isIncoming->GetValue());
+
    String fullname = folder->GetFullName();
    m_profile->DecRef();
    m_profile = ProfileBase::CreateProfile(fullname);
