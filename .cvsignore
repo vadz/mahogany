@@ -24,3 +24,4 @@ imessages.po
 messages.po
 CVSROOT
 log
+*.pyc
