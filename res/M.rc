@@ -136,8 +136,9 @@ folder_palmpilot	BITMAP "folder_trash.bmp"
 folder_trash		BITMAP "folder_trash.bmp"
 
 // folder list ctrl column images
-sortdown	BITMAP	"sortdown.bmp"
-sortup		BITMAP	"sortup.bmp"
+sortdown	ICON	"sortdown.ico"
+sortup		ICON	"sortup.ico"
+
 // Custom headers dialog image list (16x16)
 image_news	BITMAP	"image_news.bmp"
 image_mail	BITMAP	"image_mail.bmp"
