@@ -525,7 +525,7 @@ wxFolderView::Update(void)
 
    m_NumOfMessages = n;
    wxEndBusyCursor(); //wxSafeYield();
-   m_FolderCtrl->SetFocus();
+//   m_FolderCtrl->SetFocus();
    m_UpdateSemaphore = false;
 }
 

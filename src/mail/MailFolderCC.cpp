@@ -840,6 +840,7 @@ MailFolderCC::BuildListing(void)
    // there are too many
    unsigned long numMessages = m_NumOfMessages;
 
+   unsigned long firstMessage = 1; // the first one to retrieve
    /** The value of 0 disables the limit.
        Ask only once. Don't ask for file folders.
    */
@@ -859,6 +860,7 @@ MailFolderCC::BuildListing(void)
       if ( MDialog_YesNoDialog(msg) )
       {
          numMessages = m_RetrievalLimit;
+         firstMessage = m_NumOfMessages - m_RetrievalLimit + 1;
       }
    }
 
@@ -886,11 +888,12 @@ MailFolderCC::BuildListing(void)
    }
    else
    {
+      sequence.Printf("%lu", firstMessage);
       if( GetType() == MF_NNTP )
          // FIXME: no idea why this works for NNTP but not for the other types
-         sequence = "1-";
+         sequence << '-';
       else
-         sequence = "1:*";
+         sequence << ":*";
    }
 
    mail_fetch_overview(m_MailStream, (char *)sequence.c_str(), mm_overview_header);

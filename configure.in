@@ -452,7 +452,7 @@ AC_CHECK_HEADERS(wx/wx.h,,AC_MSG_ERROR("Cannot find wx/wx.h header file."))
 dnl We do not explicitly check for all the gtk/gdk/glib libraries. If
 dnl they are not installed, the test for wx_gtk will fail anyway.
 
-AC_CHECK_LIB(wx_gtk2,main,,AC_MSG_ERROR("wx_gtk library is required."),$GTK_LDFLAGS)
+AC_CHECK_LIB(wx_gtk,main,,AC_MSG_ERROR("wx_gtk library is required."),$GTK_LDFLAGS)
 
 dnl png library not required as it is included in wxGTK
 LIB_PNG=
@@ -582,7 +582,7 @@ LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PNG $LIB_JPEG"
 CXXFLAGS="$CXXFLAGS $DBGFLAGS"
 CFLAGS="$CFLAGS $DBGFLAGS"
 
-LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk2/-Wl,-Bstatic & -Wl,-Bdynamic/g'`
+LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk/-Wl,-Bstatic & -Wl,-Bdynamic/g'`
 AC_SUBST(LIBS_STATIC)
 
 

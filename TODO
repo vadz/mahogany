@@ -95,7 +95,7 @@ GENERAL ROADMAP/ORDER OF THINGS:
 *** KB:
 *********************************************************************
 
-- test whether retrievallimit works backwards now
+- fix printing overlap
 - test whether dialog for collecting from INBOX works
 - add goto_next_unread to folderview
 - add more buttons to folderview, such as
@@ -110,6 +110,7 @@ GENERAL ROADMAP/ORDER OF THINGS:
 - use mm_critical() and delay application exit if necessary
 - add a popup dialog to edit message headers in composeview
 
+- GetHeaderLine bug in messageCC somehow seems to drop a \0
 - drop classes documentation from archive/docs!!
 - add icons to doc++ generated docs
 - document python callback behaviour for incoming folders, possibly do 
