@@ -1919,7 +1919,14 @@ void MailFolderCC::CreateFileFolder()
          wxCOMPILE_TIME_ASSERT2( WXSIZEOF(cclient_drivers) == FileMbox_Max,
                                  FileMboxFmtMismatch, MfCCCff );
 
-         const FileMailboxFormat format = m_mfolder->GetFileMboxFormat();
+         FileMailboxFormat format = m_mfolder->GetFileMboxFormat();
+
+         if ( format >= WXSIZEOF(cclient_drivers) )
+         {
+            FAIL_MSG( _T("invalid file mailbox format!") );
+
+            format = FileMbox_MBX;
+         }
 
          tmp << _T("#driver.") << cclient_drivers[format] << _T('/');
 
