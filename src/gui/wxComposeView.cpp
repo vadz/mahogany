@@ -17,6 +17,7 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
 #include "Mpch.h"
 #include "Mcommon.h"
 
@@ -31,6 +32,8 @@
 
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
+
+#  include <wx/process.h>
 
 #  include <ctype.h>          // for isspace()
 #endif

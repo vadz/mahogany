@@ -37,7 +37,13 @@ bool sysutil_compare_filenames(String const &file1, String const &file2);
 class MTempFileName
 {
 public:
+   // def ctor: creates the temp file and doesn't delete it unless told to do
+   // so (i.e. Ok() is called)
    MTempFileName() { m_name = tmpnam(NULL); m_ok = false; }
+
+   // ctor which takes a temp file name: still won't be deleted unless Ok() is
+   // called
+   MTempFileName(const String& name) : m_name(name) { m_ok = false; }
 
    /// returns FALSE if temp file name couldn't be generated
    bool IsOk() const { return !!m_name; }

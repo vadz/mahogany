@@ -69,11 +69,13 @@
 #include "adb/AdbBook.h"
 #include "gui/wxComposeView.h"
 
+#include "sysutil.h"
+
 #include <ctype.h>  // for isspace
 #include <time.h>   // for time stamping autocollected addresses
 
 #ifdef OS_UNIX
-#include <sys/stat.h>
+   #include <sys/stat.h>
 #endif
 
 // @@@@ for testing only
@@ -88,6 +90,59 @@
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
+
+// Data about a process (external viewer typically) we launched: these objects
+// are created by LaunchProcess() and deleted when the viewer process
+// terminates. If it terminates with non 0 exit code, errormsg is given to the
+// user. The tempfile is the name of a temp file containing the data passedto
+// the viewer (or NULL if none) and will be removed after viewer terminates.
+class ProcessInfo
+{
+public:
+   ProcessInfo(wxProcess *process,
+               int pid,
+               const String& errormsg,
+               const String& tempfilename)
+      : m_errormsg(errormsg)
+   {
+      ASSERT_MSG( process && pid, "invalid process in ProcessInfo" );
+
+      m_process = process;
+      m_pid = pid;
+
+      if ( !tempfilename.IsEmpty() )
+         m_tempfile = new MTempFileName(tempfilename);
+      else
+         m_tempfile = NULL;
+   }
+
+   ~ProcessInfo()
+   {
+      if ( m_process )
+         delete m_process;
+      if ( m_tempfile )
+         delete m_tempfile;
+   }
+
+   // get the pid of our process
+   int GetPid() const { return m_pid; }
+
+   // get the error message
+   const String& GetErrorMsg() const { return m_errormsg; }
+
+   // don't delete wxProcess object (must be called before destroying this
+   // object if the external process is still running)
+   void Detach() { m_process->Detach(); m_process = NULL; }
+
+   // return the pointer to temp file object (may be NULL)
+   MTempFileName *GetTempFile() const { return m_tempfile; }
+
+private:
+   String         m_errormsg; // error message to give if launch failed
+   wxProcess     *m_process;  // wxWindows process info
+   int            m_pid;      // pid of the process
+   MTempFileName *m_tempfile; // the temp file (or NULL if none)
+};
 
 // data associated with the clickable objects
 class ClickableInfo : public wxLayoutObjectBase::UserData
@@ -217,11 +272,20 @@ MailMessageParamaters::GetParamValue(const wxString& name) const
    return BaseMessageParameters::GetParamValue(name);
 }
 
+// ----------------------------------------------------------------------------
+// wxMessageView
+// ----------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(wxMessageView, wxLayoutWindow)
+   // process termination notification
+   EVT_END_PROCESS(-1, wxMessageView::OnProcessTermination)
+
+   // mouse click processing
    EVT_MENU(WXLOWIN_MENU_RCLICK, wxMessageView::OnMouseEvent)
    EVT_MENU(WXLOWIN_MENU_LCLICK, wxMessageView::OnMouseEvent)
    EVT_MENU(WXLOWIN_MENU_DBLCLICK, wxMessageView::OnMouseEvent)
+
+   // menu & toolbars
    EVT_MENU(-1, wxMessageView::OnMenuCommand)
    EVT_TOOL(-1, wxMessageView::OnMenuCommand)
 END_EVENT_TABLE()
@@ -487,6 +551,23 @@ wxMessageView::HighLightURLs(const char *input)
 
 wxMessageView::~wxMessageView()
 {
+   size_t procCount = m_processes.GetCount();
+   for ( size_t n = 0; n < procCount; n++ )
+   {
+      ProcessInfo *info = m_processes[n];
+      info->Detach();
+
+      MTempFileName *tempfile = info->GetTempFile();
+      if ( tempfile )
+      {
+         String tempFileName = tempfile->GetName();
+         wxLogWarning(_("Temporary file '%s' left because it is still in "
+                        "use by an external process"), tempFileName.c_str());
+      }
+
+      delete info;
+   }
+
    if( !initialised )
       return;
 
@@ -576,7 +657,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
    // this we handle internally
    //if(mimetype == "MESSAGE/RFC822")
    if(mimetype.length() >= strlen("MESSAGE") &&
-      mimetype.Left(strlen("MESSAGE")) == "MESSAGE") 
+      mimetype.Left(strlen("MESSAGE")) == "MESSAGE")
    {
       char *filename = wxGetTempFileName("Mtemp");
       if(MimeSave(mimeDisplayPart,filename))
@@ -670,17 +751,10 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       }
 #     endif // Win
 
-      if ( !wxExecute(command, TRUE) )
-      {
-         wxLogError(_("Error opening attachment: command '%s' failed."),
+      wxString errmsg;
+      errmsg.Printf(_("Error opening attachment: command '%s' failed"),
                     command.c_str());
-      }
-
-      // clean up
-      if ( remove(filename) != 0 )
-      {
-         wxLogSysError(_("Can't delete temporary file '%s'"), filename.c_str());
-      }
+      (void)LaunchProcess(command, errmsg, filename);
    }
 }
 
@@ -857,17 +931,23 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                      // non-existing location      if(wxFileExists(lockfile))
                   {
                      command = "";
-                     command << cmd << " -remote openURL(" << ci->GetUrl() << ")"; 
-                     bOk = wxExecute(command) != 0;
+                     command << cmd << " -remote openURL(" << ci->GetUrl() << ")";
+
+                     bOk = RunProcess(command);
                   }
                }
 #endif
-               if(! bOk) // either not netscape or ns isn't running or 
-                  // we have non-UNIX
+               // either not netscape or ns isn't running or we have non-UNIX
+               if(! bOk)
                {
-                  command = "";
-                  command << cmd << ' ' << ci->GetUrl();
-                  bOk = wxExecute(command) != 0;
+                  command = cmd;
+                  command << ' ' << ci->GetUrl();
+
+                  wxString errmsg;
+                  errmsg.Printf(_("Couldn't launch browser: '%s' failed"),
+                                command.c_str());
+
+                  bOk = LaunchProcess(command, errmsg);
                }
 
                wxEndBusyCursor();
@@ -875,7 +955,7 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                if ( bOk )
                   wxLogStatus(frame, _("Opening URL '%s'... done."),
                               ci->GetUrl().c_str());
-               else 
+               else
                   wxLogStatus(frame, _("Opening URL '%s' failed."),
                               ci->GetUrl().c_str());
             }
@@ -1232,6 +1312,73 @@ wxMessageView::PrintPreview(void)
    frame->Show(TRUE);
 }
 
+bool
+wxMessageView::RunProcess(const String& command)
+{
+   return wxExecute(command, true) == 0;
+}
+
+bool
+wxMessageView::LaunchProcess(const String& command,
+                             const String& errormsg,
+                             const String& filename)
+{
+   wxProcess *process = new wxProcess(this);
+   int pid = wxExecute(command, false, process);
+   if ( !pid )
+   {
+      delete process;
+
+      if ( !errormsg.IsEmpty() )
+         wxLogError("%s.", errormsg.c_str());
+
+      return false;
+   }
+   else
+   {
+      ProcessInfo *procInfo = new ProcessInfo(process, pid, errormsg, filename);
+
+      m_processes.Add(procInfo);
+
+      return true;
+   }
+}
+
+void
+wxMessageView::OnProcessTermination(wxProcessEvent& event)
+{
+   // find the corresponding entry in m_processes
+   size_t n, procCount = m_processes.GetCount();
+   for ( n = 0; n < procCount; n++ )
+   {
+      if ( m_processes[n]->GetPid() == event.GetPid() )
+         break;
+   }
+
+   CHECK_RET( n != procCount, "unknown process terminated!" );
+
+   ProcessInfo *info = m_processes[n];
+   if ( event.GetExitCode() != 0 )
+   {
+      wxLogError(_("%s (external viewer exited with non null exit code)"),
+                 info->GetErrorMsg().c_str());
+   }
+
+   MTempFileName *tempfile = info->GetTempFile();
+   if ( tempfile )
+   {
+      // tell it that it's ok to delete the temp file
+      tempfile->Ok();
+   }
+
+   m_processes.Remove(n);
+   delete info;
+}
+
+// ----------------------------------------------------------------------------
+// wxMessageViewFrame
+// ----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(wxMessageViewFrame, wxMFrame)
    EVT_SIZE(wxMessageViewFrame::OnSize)
    EVT_MENU(-1, wxMessageViewFrame::OnCommandEvent)
@@ -1294,4 +1441,4 @@ wxMessageViewFrame::OnSize( wxSizeEvent & WXUNUSED(event) )
    GetClientSize( &x, &y );
    if(m_MessageView)
       m_MessageView->SetSize(0,0,x,y);
-};
+}

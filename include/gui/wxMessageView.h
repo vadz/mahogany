@@ -10,17 +10,22 @@
 #define WXMESSAGEVIEW_H
 
 #ifdef __GNUG__
-#pragma interface "wxMessageView.h"
+   #pragma interface "wxMessageView.h"
 #endif
 
 #include "MessageView.h"
 
-#include   "gui/wxlwindow.h"
+#include "gui/wxlwindow.h"
 
 #ifndef USE_PCH
-#   include   "gui/wxMFrame.h"
+#  include "gui/wxMFrame.h"
+
+#  include <wx/process.h>
+#  include <wx/dynarray.h>
 #endif
 
+struct ProcessInfo;
+WX_DEFINE_ARRAY(ProcessInfo *, ArrayProcessInfo);
 
 class wxMessageViewPanel;
 class wxMessageView;
@@ -91,13 +96,18 @@ public:
    String HighLightURLs(const char *cptr);
 
    // callbacks
-      /// called on Menu selection
+   // ---------
+
+   /// called on Menu selection
    void OnMenuCommand(wxCommandEvent& event) { (void) DoMenuCommand(event.GetId()); }
    /// returns true if it handled the command
    bool DoMenuCommand(int command);
 
    /// called on mouse click
    void OnMouseEvent(wxCommandEvent & event);
+
+   /// called when a process we launched terminates
+   void OnProcessTermination(wxProcessEvent& event);
 
    /// call to show the raw text of the current message (modal dialog)
    bool ShowRawText(MailFolder *folder = NULL);
@@ -141,6 +151,19 @@ protected:
    void MimeHandle(int num);
    /// saves the currently selected MIME content
    bool MimeSave(int num, const char *filename = NULL);
+
+   /// launch a process, returns FALSE if it failed
+   bool LaunchProcess(const String& command,    // cmd to execute
+                      const String& errormsg,   // err msg to give on failure
+                      const String& tempfile = ""); // temp file nameif any
+
+   /// launch a process and wait for its termination, returns FALSE it
+   /// exitcode != 0
+   bool RunProcess(const String& command);
+
+private:
+   /// array of process info for all external viewers we have launched
+   ArrayProcessInfo m_processes;
 
    DECLARE_EVENT_TABLE()
 };
