@@ -1022,8 +1022,12 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "for some time to make reopening the folder faster.\n"
                   "This is useful for folders you often reopen."), Field_Message, -1 },
    { gettext_noop("&Keep open for (seconds)"), Field_Number, -1},
-   { gettext_noop("Send outgoing messages later"), Field_Bool, -1 },
-   { gettext_noop("Folder for &outgoing messages"), Field_Folder, ConfigField_UseOutbox },
+   { gettext_noop("Send outgoing messages later"), Field_Bool |
+                                                   Field_Restart |
+                                                   Field_AppWide, -1 },
+   { gettext_noop("Folder for &outgoing messages"), Field_Folder |
+                                                    Field_Restart |
+                                                    Field_AppWide, ConfigField_UseOutbox },
    { gettext_noop("Use &Trash folder"), Field_Bool, -1},
    { gettext_noop("&Trash folder name"), Field_Folder, ConfigField_UseTrash},
    { gettext_noop("Default format for mailbox files"
@@ -2549,32 +2553,6 @@ void wxOptionsPageCompose::OnButton(wxCommandEvent& event)
 
       dialog->SetDirty();
    }
-}
-
-bool wxOptionsPageCompose::TransferDataFromWindow()
-{
-   bool rc = wxOptionsPage::TransferDataFromWindow();
-   if ( rc && READ_CONFIG(m_Profile, MP_USE_OUTBOX) )
-   {
-      /* Make sure the Outbox setting is consistent across all
-         folders! */
-      wxString outbox = READ_CONFIG(m_Profile, MP_OUTBOX_NAME);
-      wxString globalOutbox = READ_APPCONFIG(MP_OUTBOX_NAME);
-      if(outbox != globalOutbox)
-      {
-         /* Erasing the local value should be good enough, but let´s
-            play it safe. */
-         m_Profile->writeEntry(MP_OUTBOX_NAME, globalOutbox);
-         wxString msg;
-         msg.Printf(_("You set the name of the outbox for temporarily storing messages\n"
-                      "before sending them to be ´%s´. This is different from the\n"
-                      "setting in the global options, which is ´%s´. A you can have\n"
-                      "only a single outbox, the value has been restored to be ´%s´."),
-                    outbox.c_str(), globalOutbox.c_str(), globalOutbox.c_str());
-         wxLogError(msg);
-      }
-   }
-   return rc;
 }
 
 // ----------------------------------------------------------------------------

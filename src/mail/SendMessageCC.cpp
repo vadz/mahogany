@@ -1,18 +1,21 @@
-/*-*- c++ -*-********************************************************
- * SendMessageCC class: c-client implementation of a compose message*
- *                                                                  *
- * (C) 1997-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
- *                                                                  *
- * $Id$ *
- *                                                                  *
- *******************************************************************/
+//////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   mail/SendMessageCC.cpp: implementation of SendMessageCC
+// Purpose:     sending/posting of mail messages with c-client lib
+// Author:      Karsten Ballüder
+// Modified by:
+// Created:     1998
+// CVS-ID:      $Id$
+// Copyright:   (C) 1999-2001 by M-Team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 /*
   This is just a quick note I put here to remind me how to do the
   application/remote-printing support for sending faxes via
   remote-printer.12345@iddd.tpc.int.
 
-      puts $f "Content-Type: application/remote-printing"
+    puts $f "Content-Type: application/remote-printing"
     puts $f ""
     puts $f "Recipient:    $recipient(name)"
     puts $f "Title:        "
@@ -67,6 +70,8 @@
 
 #include "XFace.h"
 #include "MDialogs.h"
+#include "Mpers.h"
+
 #include "gui/wxIconManager.h"
 
 #include <wx/utils.h> // wxGetFullHostName()
@@ -120,6 +125,9 @@ enum MimeEncoding
    MimeEncoding_Base64 = 'B',
    MimeEncoding_QuotedPrintable = 'Q'
 };
+
+// trace mask for message sending/queuing operations
+#define TRACE_SEND   "send"
 
 // ----------------------------------------------------------------------------
 // prototypes
@@ -200,8 +208,9 @@ SendMessageCC::Create(Protocol protocol,
 {
    m_encHeaders = wxFONTENCODING_SYSTEM;
 
-   m_headerNames = NULL;
+   m_headerNames =
    m_headerValues = NULL;
+
    m_Protocol = protocol;
 
    m_Envelope = mail_newenvelope();
@@ -636,81 +645,6 @@ SendMessageCC::ExtractFccFolders(String &addresses)
    }
 }
 
-bool
-SendMessageCC::HasHeaderEntry(const String &entry)
-{
-   kbStringList::iterator i;
-   for(i = m_ExtraHeaderLinesNames.begin();
-       i != m_ExtraHeaderLinesNames.end();
-       i++)
-      if(**i == entry)
-         return true;
-   return false;
-}
-
-String
-SendMessageCC::GetHeaderEntry(const String &key)
-{
-   kbStringList::iterator i;
-   kbStringList::iterator j;
-   for(
-      i = m_ExtraHeaderLinesNames.begin(),j = m_ExtraHeaderLinesValues.begin();
-       i != m_ExtraHeaderLinesNames.end();
-       i++, j++)
-      if(**i == key)
-         return **j ;
-   return "";
-}
-
-/** Adds an extra header line.
-    @param entry name of header entry
-    @param value value of header entry
-    */
-void
-SendMessageCC::AddHeaderEntry(String const &entry, String const
-                              &ivalue)
-{
-   String
-      *name = new String(),
-      *value = new String();
-   *name = entry; *value = ivalue;
-   strutil_delwhitespace(*name);
-   strutil_delwhitespace(*value);
-   if(entry == "To")
-      ; //TODO: Fix this?SetAddresses(*value);
-   else if(entry == "CC")
-      ; //SetAddresses("",*value);
-   else if(entry == "BCC")
-      ; //SetAddresses("","",*value);
-   else if(entry == "MIME-Version"
-           || entry == "Content-Type"
-           || entry == "Content-Disposition"
-           || entry == "Content-Transfer-Encoding"
-      )
-      ;  // ignore
-   else if(entry == "Subject")
-      SetSubject(*value);
-   else
-   {
-      kbStringList::iterator i, j;
-      for(i = m_ExtraHeaderLinesNames.begin(),
-             j = m_ExtraHeaderLinesValues.begin();
-          i != m_ExtraHeaderLinesNames.end();
-          i++, j++)
-      {
-         if(**i == entry)
-         {
-            // change existing list entry
-            **j = *value;
-            return;
-         }
-      }
-      // new entry
-      m_ExtraHeaderLinesNames.push_back(name);
-      m_ExtraHeaderLinesValues.push_back(value);
-   }
-}
-
 String
 SendMessageCC::EncodingToCharset(wxFontEncoding enc)
 {
@@ -725,6 +659,96 @@ SendMessageCC::EncodingToCharset(wxFontEncoding enc)
 }
 
 // ----------------------------------------------------------------------------
+// methods to manage the extra headers
+// ----------------------------------------------------------------------------
+
+MessageHeadersList::iterator
+SendMessageCC::FindHeaderEntry(const String& name) const
+{
+   MessageHeadersList::iterator i;
+
+   for ( i = m_extraHeaders.begin(); i != m_extraHeaders.end(); ++i )
+   {
+      if ( i->m_name == name )
+         break;
+   }
+
+   return i;
+}
+
+bool
+SendMessageCC::HasHeaderEntry(const String& name) const
+{
+   return FindHeaderEntry(name) != m_extraHeaders.end();
+}
+
+String
+SendMessageCC::GetHeaderEntry(const String& name) const
+{
+   String value;
+
+   MessageHeadersList::iterator i = FindHeaderEntry(name);
+   if ( i != m_extraHeaders.end() )
+   {
+      value = i->m_value;
+   }
+
+   // empty if not found
+   return value;
+}
+
+void
+SendMessageCC::AddHeaderEntry(const String& nameIn, const String& value)
+{
+   String name = nameIn;
+
+   strutil_delwhitespace(name);
+
+   if (name == "To")
+      ; //TODO: Fix this?SetAddresses(*value);
+   else if(name == "CC")
+      ; //SetAddresses("",*value);
+   else if(name == "BCC")
+      ; //SetAddresses("","",*value);
+   else if ( name == "MIME-Version" ||
+             name == "Content-Type" ||
+             name == "Content-Disposition" ||
+             name == "Content-Transfer-Encoding" )
+   {
+      ERRORMESSAGE((_("The value of the header '%s' cannot be modified."),
+                    name.c_str()));
+
+      return;
+   }
+   else if ( name == "Subject" )
+   {
+      SetSubject(value);
+   }
+   else // any other headers
+   {
+      MessageHeadersList::iterator i = FindHeaderEntry(name);
+      if ( i != m_extraHeaders.end() )
+      {
+         // update existing value
+         i->m_value = value;
+      }
+      else // add a new header entry
+      {
+         m_extraHeaders.push_back(new MessageHeader(name, value));
+      }
+   }
+}
+
+void
+SendMessageCC::RemoveHeaderEntry(const String& name)
+{
+   MessageHeadersList::iterator i = FindHeaderEntry(name);
+   CHECK_RET( i != m_extraHeaders.end(), "RemoveHeaderEntry(): no such header");
+
+   (void)m_extraHeaders.erase(i);
+}
+
+// ----------------------------------------------------------------------------
 // SendMessageCC building
 // ----------------------------------------------------------------------------
 
@@ -736,22 +760,24 @@ SendMessageCC::Build(bool forStorage)
 
    SetupFromAddresses();
 
-   bool replyToSet = false;
-
-   /* Is the message supposed to be sent later? In that case, we need
+   /*
+      Is the message supposed to be sent later? In that case, we need
       to store the BCC header as an X-BCC or it will disappear when
-      the message is saved to the outbox. */
-   if(forStorage)
+      the message is saved to the outbox.
+    */
+   if ( forStorage )
    {
       // The X-BCC will be converted back to BCC by Send()
-      if(m_Envelope->bcc)
+      if ( m_Envelope->bcc )
          AddHeaderEntry("X-BCC", m_Bcc);
    }
-   else
-   /* If sending directly, we need to do the opposite: this message
-      might have come from the Outbox queue, so we translate X-BCC
-      back to a proper bcc setting: */
+   else // send, not store
    {
+      /*
+         If sending directly, we need to do the opposite: this message
+         might have come from the Outbox queue, so we translate X-BCC
+         back to a proper bcc setting:
+       */
       if ( HasHeaderEntry("X-BCC") )
       {
          if ( m_Envelope->bcc )
@@ -760,29 +786,42 @@ SendMessageCC::Build(bool forStorage)
          }
 
          SetAddressField(&m_Envelope->bcc, GetHeaderEntry("X-BCC"));
+
+         // don't send X-BCC field or the recipient would still see the BCC
+         // contents (which is highly undesirable!)
+         RemoveHeaderEntry("X-BCC");
       }
    }
 
    // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the
    // last NULL entry
-   size_t n = m_headerList.size() + m_ExtraHeaderLinesNames.size() + 4;
+   size_t n = m_extraHeaders.size() + 4;
    m_headerNames = new const char*[n];
    m_headerValues = new const char*[n];
 
-   /* Add directly added additional header lines: */
-   kbStringList::iterator i = m_ExtraHeaderLinesNames.begin(),
-                          i2 = m_ExtraHeaderLinesValues.begin();
+   // the current header position in m_headerNames/Values
    int h = 0;
-   for(; i != m_ExtraHeaderLinesNames.end(); i++, i2++, h++)
+
+   bool replyToSet = false,
+        xmailerSet = false;
+
+   // add the additional header lines added by the user
+   for ( MessageHeadersList::iterator i = m_extraHeaders.begin();
+         i != m_extraHeaders.end();
+         ++i, ++h )
    {
-      m_headerNames[h] = strutil_strdup(**i);
-      if(strcmp(m_headerNames[h], "Reply-To") == 0)
+      m_headerNames[h] = strutil_strdup(i->m_name);
+      if ( strcmp(m_headerNames[h], "Reply-To") == 0 )
          replyToSet = true;
-      m_headerValues[h] = strutil_strdup(**i2);
+      else if ( strcmp(m_headerNames[h], "X-Mailer") == 0 )
+         xmailerSet = true;
+
+      m_headerValues[h] = strutil_strdup(i->m_value);
    }
 
-   //always add mailer header:
-   if(! HasHeaderEntry("X-Mailer"))
+   // add X-Mailer header if it wasn't overridden by the user (yes, we do allow
+   // it - why not?)
+   if ( !xmailerSet )
    {
       m_headerNames[h] = strutil_strdup("X-Mailer");
       String version;
@@ -809,7 +848,7 @@ SendMessageCC::Build(bool forStorage)
 
 #ifdef HAVE_XFACES
    // add an XFace?
-   if(! HasHeaderEntry("X-Face") && m_XFaceFile.Length() > 0)
+   if ( !HasHeaderEntry("X-Face") && !m_XFaceFile.empty() )
    {
       XFace xface;
       if ( xface.CreateFromFile(m_XFaceFile) )
@@ -823,7 +862,7 @@ SendMessageCC::Build(bool forStorage)
       }
       //else: couldn't read X-Face from file (complain?)
    }
-#endif
+#endif // HAVE_XFACES
 
    m_headerNames[h] = NULL;
    m_headerValues[h] = NULL;
@@ -831,8 +870,7 @@ SendMessageCC::Build(bool forStorage)
    mail_free_body_part(&m_LastPart->next);
    m_LastPart->next = NULL;
 
-   /* Check if there is only one part, then we don't need
-      multipart/mixed: */
+   // check if there is only one part, then we don't need multipart/mixed
    if(m_LastPart == m_Body->nested.part)
    {
       BODY *oldbody = m_Body;
@@ -841,6 +879,7 @@ SendMessageCC::Build(bool forStorage)
       mail_free_body(&oldbody);
    }
 
+   // finally, set the date
    char tmpbuf[MAILTMPLEN];
    rfc822_date (tmpbuf);
    m_Envelope->date = (char *) fs_get (1+strlen (tmpbuf));
@@ -1039,73 +1078,87 @@ SendMessageCC::AddPart(MimeType::Primary type,
 // ----------------------------------------------------------------------------
 
 bool
-SendMessageCC::SendOrQueue(bool send)
+SendMessageCC::SendOrQueue(bool sendNow)
 {
-   bool success;
+   // send directly either if we're told to do it (e.g. when sending the
+   // messages already from Outbox) or if there is no Outbox configured at all
+   bool send = sendNow || m_OutboxName.empty();
 
-   // send directly?
-   bool send_directly = TRUE;
-   if ( !send && m_OutboxName.Length() )
-      send_directly = FALSE;
-   else if(! mApplication->IsOnline())
+   if ( send && !mApplication->IsOnline() )
    {
-/*
-  This cannot work at present as we have no Outbox setting that we
-  could use. We need to make a difference between Outbox and the
-  "send_directly" configuration settings.
+      /*
+        This cannot work at present as we have no Outbox setting that we
+        could use. We need to make a difference between Outbox and the
+        "send" configuration settings.
 
-      MDialog_Message(
-         _("No network connection available at present.\n"
-           "Message will be queued in outbox."),
-         NULL, MDIALOG_MSGTITLE,"MailNoNetQueuedMessage");
-*/
-      MDialog_Message(
-         _("No network connection available at present.\n"
-           "Message cannot be sent."),
-         NULL, MDIALOG_MSGTITLE);
-      return FALSE;
+         MDialog_Message(
+            _("No network connection available at present.\n"
+              "Message will be queued in outbox."),
+            NULL, MDIALOG_MSGTITLE,"MailNoNetQueuedMessage");
+      */
+
+      if ( !MDialog_YesNoDialog
+            (
+               _("No network connection available at present,"
+                 "message sending will probably fail.\n"
+                 "Do you still want to send it?"),
+               NULL,
+               MDIALOG_MSGTITLE,
+               false, // [No] default
+               GetPersMsgBoxName(M_MSGBOX_SEND_OFFLINE)
+            ) )
+      {
+         return false;
+      }
    }
 
-   kbStringList::iterator i;
-   for(i = m_FccList.begin(); i != m_FccList.end(); i++)
-      WriteToFolder(**i);
+   // prepare the message for sending or queuing
+   Build(!send);
 
-   if( send_directly )
+   // then either send or queue it
+   bool success;
+   if ( send )
    {
-      Build();
       success = Send();
+
+      // make copy in the "SentMail" folder?
+      if ( success )
+      {
+         if ( !m_SentMailName.empty() )
+         {
+            // copy it to the sent mail in addition to all other configured
+            // folders
+            m_FccList.push_back(new String(m_SentMailName));
+         }
+
+         // save it in the local folders
+         for ( kbStringList::iterator i = m_FccList.begin();
+               i != m_FccList.end();
+               i++ )
+         {
+            wxLogTrace(TRACE_SEND, "FCCing message to %s", (*i)->c_str());
+
+            WriteToFolder(**i);
+         }
+      }
    }
    else // store in outbox
    {
-      if( m_OutboxName.Length() == 0)
-         success = FALSE;
-      else
-      {
-         Build(TRUE); // build for sending later
-         WriteToFolder(m_OutboxName);
-         // increment counter in statusbar immediately
-         mApplication->UpdateOutboxStatus();
-         success = TRUE;
-      }
+      WriteToFolder(m_OutboxName);
 
-      if(success)
-      {
-         wxString msg;
-         if(m_Protocol == Prot_SMTP || m_Protocol == Prot_Sendmail)
-            msg.Printf(_("Message queued in ´%s´."),
-                       m_OutboxName.c_str());
-         else
-            msg.Printf(_("Article queued in '%s'."),
-                    m_OutboxName.c_str());
-         STATUSMESSAGE((msg));
-      }
+      // increment counter in statusbar immediately
+      mApplication->UpdateOutboxStatus();
+
+      // and also show what we have done with the message
+      wxString msg;
+      if(m_Protocol == Prot_SMTP || m_Protocol == Prot_Sendmail)
+         msg.Printf(_("Message queued in ´%s´."), m_OutboxName.c_str());
+      else
+         msg.Printf(_("Article queued in '%s'."), m_OutboxName.c_str());
+
+      STATUSMESSAGE((msg));
    }
-   // make copy to "Sent" folder?
-   if ( success && m_SentMailName.Length() && send_directly )
-   {
-      WriteToFolder(m_SentMailName);
-   }
-   mApplication->UpdateOutboxStatus();
+
    return success;
 }
 
@@ -1175,8 +1228,8 @@ SendMessageCC::Send(void)
    {
       case Prot_SMTP:
          service = "smtp";
-         wxLogTrace("send", "Trying to open connection to SMTP server '%s'",
-                     m_ServerHost.c_str());
+         wxLogTrace(TRACE_SEND, "Trying to open connection to SMTP server '%s'",
+                    m_ServerHost.c_str());
 #ifdef USE_SSL
          if ( m_UseSSLforSMTP )
          {
@@ -1195,7 +1248,7 @@ SendMessageCC::Send(void)
 
       case Prot_NNTP:
          service = "nntp";
-         wxLogTrace("send", "Trying to open connection to NNTP server '%s'",
+         wxLogTrace(TRACE_SEND, "Trying to open connection to NNTP server '%s'",
                     m_ServerHost.c_str());
 #ifdef USE_SSL
          if ( m_UseSSLforNNTP )
@@ -1305,7 +1358,7 @@ SendMessageCC::Send(void)
       if ( success )
       {
          MDialog_Message(m_Protocol == Prot_SMTP ? _("Message sent.")
-                                                 :_("Article posted."),
+                                                 : _("Article posted."),
                          NULL, // parent window
                          MDIALOG_MSGTITLE,
                          "MailSentMessage");
@@ -1313,20 +1366,23 @@ SendMessageCC::Send(void)
       else // failed to send/post
       {
          String tmpbuf = MailFolder::GetLogCircle().GuessError();
-         if(tmpbuf[0u])
+         if ( !tmpbuf.empty() )
             ERRORMESSAGE((tmpbuf));
-         tmpbuf.Printf(_("Failed to send - %s\n"),
-                       (reply.Length() > 0) ? reply.c_str()
-                                            :_("unknown error"));
+
+         tmpbuf.Printf(_("Failed to send: %s"),
+                       reply.empty() ? _("unknown error")
+                                     : reply.c_str());
          ERRORMESSAGE((tmpbuf));
       }
    }
    else // error in opening stream
    {
       String tmpbuf = MailFolder::GetLogCircle().GuessError();
-      if(tmpbuf[0u])
+      if ( !tmpbuf.empty() )
          ERRORMESSAGE((tmpbuf));
-      ERRORMESSAGE((_("Cannot open connection to any server.\n")));
+
+      ERRORMESSAGE((_("Cannot open connection to any server.")));
+
       success = false;
    }
 
@@ -1366,7 +1422,7 @@ SendMessageCC::WriteToString(String& output)
 
 /** Writes the message to a file
     @param filename file where to write to
-    */
+*/
 void
 SendMessageCC::WriteToFile(const String &filename, bool append)
 {
@@ -1406,7 +1462,6 @@ SendMessageCC::WriteToFolder(String const &name)
    String str;
    WriteToString(str);
 
-   // we don't want this to create new mail events
    mf->AppendMessage(str);
    mf->DecRef();
 }
@@ -1509,7 +1564,7 @@ long Rfc822OutputRedirector::FullRfc822Output(char *headers,
   // cclient omits bcc, but we need it sometimes
   if ( ms_outputBcc )
   {
-     rfc822_address_line(&headers, "bcc", env, env->bcc);
+     rfc822_address_line(&headers, "Bcc", env, env->bcc);
   }
 
   // and add all other additional custom headers at the end

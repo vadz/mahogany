@@ -2509,7 +2509,7 @@ static const struct
    { "EditOnOpenFail",           gettext_noop("propose to edit folder settings if opening it failed") },
    { "ExplainColClick",          gettext_noop("give explanation when clicking on a column in the folder view") },
    { "EmptyTrashOnExit",         gettext_noop("ask whether to purge trash folder on exit") },
-   //{ "", gettext_noop() },
+   { "SendOffline",              gettext_noop("send mail when the system is offline") },
 };
 
 /// return the name to use for the given persistent msg box

@@ -29,6 +29,9 @@ public:
    static SendMessage *Create(Profile *iprof,
                               Protocol protocol = Prot_Default);
 
+   /** @name Standard headers */
+   //@{
+
    /** Sets the message subject.
        @param subject the subject
    */
@@ -54,6 +57,45 @@ public:
 
    virtual void SetNewsgroups(const String &groups) = 0;
 
+   //@}
+
+   /** @name Custom (or extra) headers stuff */
+   //@{
+
+   /// set the encoding to use for 8bit characters in the headers
+   virtual void SetHeaderEncoding(wxFontEncoding enc) = 0;
+
+   /** Adds an extra header line.
+
+       @param name name of header entry to add
+       @param value value of header entry
+   */
+   virtual void AddHeaderEntry(const String& name, const String& value) = 0;
+
+   /** Remove the header with the specified name
+
+       @param name name of header entry to remove
+   */
+   virtual void RemoveHeaderEntry(const String& name) = 0;
+
+   /**
+     Return true if we (already) have the header with the given name.
+
+     @param name name of header entry to query
+     @return true if we have it, false otherwise
+   */
+   virtual bool HasHeaderEntry(const String& name) const = 0;
+
+   /**
+     Get the value for the header entry.
+
+     @param name name of header entry to query
+     @return header value if we have it, empty string otherwise
+   */
+   virtual String GetHeaderEntry(const String& name) const = 0;
+
+   //@}
+
    /** Adds a part to the message.
        @param type numeric mime type
        @param buf  pointer to data
@@ -72,9 +114,6 @@ public:
                         MessageParameterList const *plist = NULL,
                         wxFontEncoding enc = wxFONTENCODING_SYSTEM) = 0;
 
-   /// set the encoding to use for 8bit characters in the headers
-   virtual void SetHeaderEncoding(wxFontEncoding enc) = 0;
-
    /** Writes the message to a String
        @param output string to write to
    */
@@ -90,12 +129,6 @@ public:
        @param foldername file where to write to
    */
    virtual void WriteToFolder(const String &foldername) = 0;
-
-   /** Adds an extra header line.
-       @param entry name of header entry
-       @param value value of header entry
-   */
-   virtual void AddHeaderEntry(const String &entry, const String &value) = 0;
 
    /** Sends the message or stores it in the outbox queue, depending
        on profile settings.
