@@ -317,7 +317,7 @@ MailCollectorImpl::Collect(MailFolder *mf)
          mfolder->DecRef();
          if(imf)
          {
-            rc &= (mf && CollectOneFolder(imf));
+            rc &= (imf && CollectOneFolder(imf));
             imf->DecRef();
          }
          else
