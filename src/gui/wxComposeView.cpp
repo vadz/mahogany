@@ -2888,6 +2888,15 @@ VarExpander::ExpandMisc(const String& name, String *value) const
       case Var_Quote822:
          return ExpandOriginal("quote822", value);
 
+      case Var_Sender:
+         {
+            wxString fullname, addr;
+            ExpandOriginal("fullname", &fullname);
+            ExpandOriginal("from", &addr);
+            *value << fullname << " <" << addr << '>';
+            return TRUE;
+         }
+
       default:
          // unknown name
          return FALSE;
