@@ -53,7 +53,7 @@ enum MEventId
    /// the events used by MailFolderCmn/CC for private purposes
    MEventId_MailFolder_OnNewMail = 1100,
    MEventId_MailFolder_OnMsgStatus,
-   MEventId_MailFolder_RestoreInter,
+   MEventId_MailFolder_OnFlagsChange,
 
    /// (invalid id for an event)
    MEventId_Max
