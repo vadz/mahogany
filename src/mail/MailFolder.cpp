@@ -1784,20 +1784,20 @@ MailFolderCmn::ApplyFilterRulesCommonCode(UIdArray *msgs,
          wxLogVerbose("Using filter rule '%s'", fd.GetName().c_str());
          filterString += fd.GetRule();
       }
-      
-      FilterRule * filterRule = filterModule->GetFilter(filterString);
-      if ( filterRule )
+      if(filterString[0]) // not empty
       {
-         
-         // This might change the folder contents, so we must set this
-         // flag:
-         m_FiltersCausedChange = true;
-         if(msgs)
-            rc = filterRule->Apply(this, *msgs);
-         else
-            rc = filterRule->Apply(this, newOnly);
-         
-         filterRule->DecRef();
+         FilterRule * filterRule = filterModule->GetFilter(filterString);
+         if ( filterRule )
+         {
+            // This might change the folder contents, so we must set this
+            // flag:
+            m_FiltersCausedChange = true;
+            if(msgs)
+               rc = filterRule->Apply(this, *msgs);
+            else
+               rc = filterRule->Apply(this, newOnly);
+            filterRule->DecRef();
+         }
       }
       filterModule->DecRef();
 
