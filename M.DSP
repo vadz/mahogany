@@ -2087,7 +2087,7 @@ SOURCE=.\src\util\matchurl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\util\miscutil.cpp
+SOURCE=.\src\util\ColourNames.cpp
 # End Source File
 # Begin Source File
 
