@@ -96,6 +96,14 @@ public:
         m_path(path),
         m_server(server), m_login(login), m_password(password)
         {
+           // just as in MFolderFromProfile::GetPath() we need to ensure that
+           // we don't have any slashes in the file names under Windows
+#ifdef OS_WIN
+           if ( type == MF_FILE || type == MF_MH )
+           {
+              m_path.Replace("/", "\\");
+           }
+#endif // Windows
         }
 
    ~MTempFolder()
@@ -621,7 +629,17 @@ String MFolderFromProfile::GetName() const
 
 String MFolderFromProfile::GetPath() const
 {
-   return READ_CONFIG(m_profile, MP_FOLDER_PATH);
+   String path = READ_CONFIG(m_profile, MP_FOLDER_PATH);
+
+#ifdef OS_WIN
+   // c-client doesn't accept the files with slashes in names under Windows, so
+   // make sure we replace all of them with the proper backslashes before using
+   // the filename (it is also better to show it like to the user in this form)
+   if ( GetType() == MF_FILE )
+      path.Replace("/", "\\");
+#endif // Windows
+
+   return path;
 }
 
 void MFolderFromProfile::SetPath(const String& path)
