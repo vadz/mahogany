@@ -38,7 +38,9 @@ as local MBOX and news spool folders and sending mail using SMTP.
 %setup -n mahogany-%{VERSION}
 
 %build
-make allclean
+(cd include ; make ) || true
+make allclean || true
+(cd include ; make ) || true
 if [ ! -f configure ]; then
   autoconf
 fi
