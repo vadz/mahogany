@@ -397,7 +397,7 @@ void HtmlViewer::Clear()
 
    m_nPart = 0;
 
-   //m_bmpXFace = wxNullBitmap;
+   m_bmpXFace = wxNullBitmap;
 
    FreeMemoryFS();
 }
