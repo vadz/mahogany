@@ -16,7 +16,7 @@
 /**
   Search criterium for searching folder for certain messages.
  */
-class SearchCriterium
+struct SearchCriterium
 {
 public:
    enum Type
