@@ -300,7 +300,20 @@ MAppBase::OnStartup()
          }
          wxLogError(msg);
       }
-#endif
+#endif // OS_UNIX
+
+#ifdef DEBUG
+   // enable tracing of the specified kinds of messages
+   wxArrayString
+      masks = strutil_restore_array(':', m_profile->readEntry("DebugTrace", ""));
+   size_t nMasks = masks.GetCount();
+   for ( size_t nMask = 0; nMask < nMasks; nMask++ )
+   {
+      wxLog::AddTraceMask(masks[nMask]);
+   }
+
+#endif // DEBUG
+
    // NB: although this shouldn't normally be here (it's GUI-dependent code),
    //     it's really impossible to put it into wxMApp because some dialogs
    //     can be already shown from here and this initialization must be done
@@ -739,17 +752,15 @@ MAppBase::OnMEvent(MEventData& event)
                if ( number <= (unsigned long) READ_CONFIG(profile,
                                                           MP_SHOW_NEWMAILINFO))
                {
-                  message = _("You have received several new messages:\n");
+                  message = _("You have received new mail:");
                   for( unsigned long i = 0; i < number; i++)
                   {
                      Message *msg =
                         folder->GetMessage(mailevent.GetNewMessageIndex(i));
                      if ( msg )
                      {
-                        if ( !message.empty() )
-                           message << '\n';
-
-                        message << _("\tIn folder '") << folder->GetName() << "'\n"
+                        message << '\n'
+                                << _("\tIn folder '") << folder->GetName() << "'\n"
                                 << _("\tFrom: '") << msg->From()
                                 << _("' with subject: ") << msg->Subject();
 

@@ -190,13 +190,18 @@ enum ConfigFields
    ConfigField_ReopenLastFolder,
    ConfigField_OpenFolders,
    ConfigField_MainFolder,
+   ConfigField_FolderProgressHelpText,
+   ConfigField_FolderProgressThreshold,
+   ConfigField_FolderMaxHelpText,
+   ConfigField_FolderMaxHeadersNumHard,
+   ConfigField_FolderMaxHeadersNum,
+   ConfigField_FolderMaxMsgSize,
    ConfigField_NewMailFolder,
    ConfigField_PollIncomingDelay,
    ConfigField_CollectAtStartup,
    ConfigField_UpdateInterval,
    ConfigField_CloseDelay_HelpText,
    ConfigField_CloseDelay,
-   ConfigField_FolderProgressThreshold,
    ConfigField_AutocollectFolder,
    ConfigField_UseOutbox,
    ConfigField_OutboxName,
@@ -253,9 +258,6 @@ enum ConfigFields
    ConfigField_MessageViewFaxDomains,
    ConfigField_MessageViewFaxConverter,
 #endif // Unix
-   ConfigField_MessageViewMaxHelpText,
-   ConfigField_MessageViewMaxMsgSize,
-   ConfigField_MessageViewMaxHeadersNum,
    ConfigField_MessageViewHeaders,
    ConfigField_MessageViewDateFormat,
    ConfigField_MessageViewTitleBarFormat,
@@ -773,6 +775,20 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Restart |
                                                    Field_AppWide,
                                                    -ConfigField_ReopenLastFolder,                        },
+   { gettext_noop("A progress dialog will be shown while retrieving more\n"
+                  "the specified number of messages. Set it to 0 to never\n"
+                  "show the progress dialog at all."), Field_Message, -1},
+   { gettext_noop("&Threshold for displaying progress dialog"), Field_Number, -1},
+   { gettext_noop("The following settings allow to limit the amount of data\n"
+                  "retrieved from remote server: if the message size or\n"
+                  "number is greater than the value specified here, you\n"
+                  "will be asked for confirmation before transfering data.\n"
+                  "Additionally, if you set the hard limit, only that many\n"
+                  "messages will be downloaded without asking."),
+                                                   Field_Message,  -1 },
+   { gettext_noop("&Hard message limit"),  Field_Number,   -1 },
+   { gettext_noop("Ask if &number of messages >"),  Field_Number,   -1 },
+   { gettext_noop("Ask if size of &message (in Kb) >"), Field_Number,   -1 },
    { gettext_noop("Folder where to collect &new mail"), Field_Folder | Field_AppWide, -1},
    { gettext_noop("Poll for &new mail interval in seconds"), Field_Number, -1},
    { gettext_noop("Poll for new mail at s&tartup"), Field_Bool | Field_AppWide, -1},
@@ -783,7 +799,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Message |
                                                    Field_AppWide, -1 },
    { gettext_noop("&Keep open for (seconds)"), Field_Number | Field_AppWide, -1},
-   { gettext_noop("&Threshold for displaying progress dialog"), Field_Number, -1},
    { gettext_noop("Folder to save &collected messages to"), Field_Folder | Field_AppWide, -1 },
    { gettext_noop("Send outgoing messages later"), Field_Bool, -1 },
    { gettext_noop("Folder for &outgoing messages"), Field_Folder, ConfigField_UseOutbox },
@@ -843,14 +858,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Domains sending faxes"),       Field_Text,    ConfigField_MessageViewFaxSupport},
    { gettext_noop("Conversion program for fa&xes"), Field_File,    ConfigField_MessageViewFaxSupport},
 #endif // unix
-   { gettext_noop("The following settings allow to limit the amount of data\n"
-                  "retrieved from remote server: if the message size or\n"
-                  "number is greater than the value specified here, you\n"
-                  "will be asked for confirmation before transfering data."),
-                                                   Field_Message,  -1 },
-   { gettext_noop("Maximum size of &message (in Kb)"),
-                                                   Field_Number,   -1 },
-   { gettext_noop("Maximum &number of messages"),  Field_Number,   -1 },
    { gettext_noop("Configure &headers to show..."),Field_SubDlg,   -1 },
    { gettext_noop("Configure &format for displaying dates"),         Field_SubDlg,    -1                     },
    { gettext_noop("&Title of message view frame"),         Field_Text,    -1                     },
@@ -1062,13 +1069,18 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_REOPENLASTFOLDER),
    CONFIG_ENTRY(MP_OPENFOLDERS),
    CONFIG_ENTRY(MP_MAINFOLDER),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_FOLDERPROGRESS_THRESHOLD),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_MAX_HEADERS_NUM_HARD),
+   CONFIG_ENTRY(MP_MAX_HEADERS_NUM),
+   CONFIG_ENTRY(MP_MAX_MESSAGE_SIZE),
    CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
    CONFIG_ENTRY(MP_POLLINCOMINGDELAY),
    CONFIG_ENTRY(MP_COLLECTATSTARTUP),
    CONFIG_ENTRY(MP_UPDATEINTERVAL),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FOLDER_CLOSE_DELAY),
-   CONFIG_ENTRY(MP_FOLDERPROGRESS_THRESHOLD),
    CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
    CONFIG_ENTRY(MP_USE_OUTBOX), // where to store message before sending them
    CONFIG_ENTRY(MP_OUTBOX_NAME),
@@ -1119,9 +1131,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_INCFAX_DOMAINS),
    CONFIG_ENTRY(MP_TIFF2PS),
 #endif
-   CONFIG_NONE(),
-   CONFIG_ENTRY(MP_MAX_MESSAGE_SIZE),
-   CONFIG_ENTRY(MP_MAX_HEADERS_NUM),
    CONFIG_ENTRY(MP_MSGVIEW_HEADERS),
    CONFIG_ENTRY(MP_DATE_FMT),
    CONFIG_ENTRY(MP_MVIEW_TITLE_FMT),

@@ -951,7 +951,7 @@ MailFolderCC::Create(int typeAndFlags)
 
    UpdateTimeoutValues();
 
-   SetRetrievalLimit(0); // no limit
+   SetRetrievalLimits(0, 0); // no limits by default
    m_nMessages = 0;
    m_msgnoMax = 0;
    m_nRecent = UID_ILLEGAL;
@@ -978,6 +978,12 @@ MailFolderCC::Create(int typeAndFlags)
    m_PingReopenSemaphore = new MMutex;
    m_InListingRebuild = new MMutex;
    m_InFilterCode = new MMutex;
+}
+
+void MailFolderCC::SetRetrievalLimits(unsigned long soft, unsigned long hard)
+{
+   m_RetrievalLimit = soft;
+   m_RetrievalLimitHard = hard;
 }
 
 MailFolderCC::~MailFolderCC()
@@ -1019,17 +1025,15 @@ MailFolderCC::OpenFolder(int typeAndFlags,
                          String const &symname,
                          bool halfopen)
 {
+   CHECK( profile, NULL, "no profile in OpenFolder" );
+
    CClientInit();
-
-   String mboxpath;
-
-   ASSERT(profile);
 
    int flags = GetFolderFlags(typeAndFlags);
    int type = GetFolderType(typeAndFlags);
 
    String login = loginGiven;
-   mboxpath = MailFolder::GetImapSpec(type, flags, name, server, login);
+   String mboxpath = MailFolder::GetImapSpec(type, flags, name, server, login);
 
    //FIXME: This should somehow be done in MailFolder.cpp
    MailFolderCC *mf = FindFolder(mboxpath,login);
@@ -1066,8 +1070,8 @@ MailFolderCC::OpenFolder(int typeAndFlags,
 
    mf = new MailFolderCC(typeAndFlags, mboxpath, profile, server, login, password);
    mf->m_Name = symname;
-   if(mf && profile)
-      mf->SetRetrievalLimit(READ_CONFIG(profile, MP_MAX_HEADERS_NUM));
+   mf->SetRetrievalLimits(READ_CONFIG(profile, MP_MAX_HEADERS_NUM),
+                          READ_CONFIG(profile, MP_MAX_HEADERS_NUM_HARD));
 
    bool ok = TRUE;
    if ( mf->NeedsNetwork() && !mApplication->IsOnline() )
@@ -1550,7 +1554,7 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
 
    if(ms_StreamListDefaultObj)
    {
-      LOGMESSAGE((M_LOG_DEBUG, "Routing call to default mailfolder."));
+      wxLogTrace(TRACE_MF_CALLBACK, "Routing call to default mailfolder.");
       return ms_StreamListDefaultObj;
    }
 
@@ -1717,8 +1721,9 @@ MailFolderCC::PingReopen(void)
           // messages:
           || GetType() == MF_MH )
       {
-         DBGMESSAGE(("MailFolderCC::Ping() forcing close on folder %s.",
-                     GetName().c_str()));
+         wxLogTrace(TRACE_MF_CALLS,
+                    "MailFolderCC::Ping() forcing close on folder %s.",
+                    GetName().c_str());
          Close();
       }
 
@@ -1759,7 +1764,7 @@ MailFolderCC::PingReopen(void)
       if ( m_MailStream )
       {
          rc = true;
-         wxLogDebug("Folder '%s' is alive.", GetName().c_str());
+         wxLogTrace(TRACE_MF_CALLS, "Folder '%s' is alive.", GetName().c_str());
       }
    }
 
@@ -2225,24 +2230,24 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit)
                ASSERT(hil);
                switch(crit->m_What)
                {
-               case SearchCriterium::SC_FULL:
-               case SearchCriterium::SC_BODY:
-                  // wrong for body as it checks the whole message
-                  // including header
-                  what = msg->FetchText();
-                  break;
-               case SearchCriterium::SC_HEADER:
-                  what = msg->GetHeader();
-                  break;
-               case SearchCriterium::SC_TO:
-                  msg->GetHeaderLine("To", what);
-                  break;
-               case SearchCriterium::SC_CC:
-                  msg->GetHeaderLine("CC", what);
-                  break;
-               default:
-                  LOGMESSAGE((M_LOG_ERROR,"Unknown search criterium!"));
-                  error = true;
+                  case SearchCriterium::SC_FULL:
+                  case SearchCriterium::SC_BODY:
+                     // wrong for body as it checks the whole message
+                     // including header
+                     what = msg->FetchText();
+                     break;
+                  case SearchCriterium::SC_HEADER:
+                     what = msg->GetHeader();
+                     break;
+                  case SearchCriterium::SC_TO:
+                     msg->GetHeaderLine("To", what);
+                     break;
+                  case SearchCriterium::SC_CC:
+                     msg->GetHeaderLine("CC", what);
+                     break;
+                  default:
+                     FAIL_MSG("Unknown search criterium!");
+                     error = true;
                }
                msg->DecRef();
             }
@@ -2602,40 +2607,49 @@ MailFolderCC::BuildListing(void)
    // configured limit, ask the user whether he really wants to retrieve them
    // all. The value of 0 disables the limit. Ask only once and never for file
    // folders (loading headers from them is quick)
-   if ( !IsLocalQuickFolder(GetType()) &&
-        (m_RetrievalLimit > 0)
-        && m_FirstListing
-        && (m_nMessages > m_RetrievalLimit) )
+   if ( !IsLocalQuickFolder(GetType()) && m_FirstListing )
    {
-      // too many messages - ask the user how many of them he really wants
-      String msg, prompt, title;
-      title.Printf(_("How many messages to retrieve from folder '%s'?"),
-            GetName().c_str());
-      msg.Printf(_("This folder contains %lu messages, which is greater than\n"
-               "the current threshold of %lu (set it to 0 to avoid this "
-               "question - or\n"
-               "you can also choose [Cancel] to download all messages)."),
-            m_nMessages, m_RetrievalLimit);
-      prompt = _("How many of them do you want to retrieve?");
-
-      long nRetrieve;
+      unsigned long retrLimit = wxMin(m_RetrievalLimitHard, m_RetrievalLimit);
+      if ( (retrLimit > 0) && (m_nMessages > retrLimit) )
       {
-         MGuiLocker locker;
-         nRetrieve = MGetNumberFromUser(msg, prompt, title,
-                                        m_RetrievalLimit,
-                                        1, m_nMessages);
-      }
+         // too many messages: if we exceeded hard limit, just use it instead
+         // of m_msgnoMax, otherwise ask the user how many of them he really
+         // wants
+         long nRetrieve;
+         if ( retrLimit == m_RetrievalLimitHard )
+         {
+            nRetrieve = m_RetrievalLimitHard;
+         }
+         else // ask
+         {
+            MGuiLocker locker;
 
-      if ( nRetrieve > 0 && (unsigned long)nRetrieve < m_nMessages )
-      {
-         m_nMessages = nRetrieve;
+            String msg, prompt, title;
+            title.Printf(_("How many messages to retrieve from folder '%s'?"),
+                         GetName().c_str());
+            msg.Printf(_("This folder contains %lu messages, which is greater than\n"
+                         "the current threshold of %lu (set it to 0 to avoid this "
+                         "question - or\n"
+                         "you can also choose [Cancel] to download all messages)."),
+                  m_nMessages, m_RetrievalLimit);
+            prompt = _("How many of them do you want to retrieve?");
 
-         // FIXME: how to calculate the number of recent messages now? we
-         //        clearly can't leave it as it is/was because not all recent
-         //        messages are among the ones we retrieved
-         m_nRecent = UID_ILLEGAL;
+            nRetrieve = MGetNumberFromUser(msg, prompt, title,
+                                           m_RetrievalLimit,
+                                           1, m_nMessages);
+         }
+
+         if ( nRetrieve > 0 && (unsigned long)nRetrieve < m_nMessages )
+         {
+            m_nMessages = nRetrieve;
+
+            // FIXME: how to calculate the number of recent messages now? we
+            //        clearly can't leave it as it is/was because not all
+            //        recent messages are among the ones we retrieved
+            m_nRecent = UID_ILLEGAL;
+         }
+         //else: cancelled or 0 or invalid number entered, retrieve all
       }
-      //else: cancelled or 0 or invalid number entered, retrieve all
    }
 
    // create the new listing
@@ -2900,11 +2914,6 @@ MailFolderCC::CClientInit(void)
    if(ms_CClientInitialisedFlag == true)
       return;
 
-   // TODO: remove this
-   wxLog::AddTraceMask(TRACE_MF_CALLBACK);
-   wxLog::AddTraceMask(TRACE_MF_CALLS);
-   wxLog::AddTraceMask(TRACE_MF_EVENTS);
-
    // do further initialisation
 #include <linkage.c>
 
@@ -2927,9 +2936,9 @@ MailFolderCC::CClientInit(void)
    sa.sa_flags = SA_RESTART;
    if( sigaction(SIGPIPE,  &sa, NULL) != 0)
    {
-      LOGMESSAGE((M_LOG_ERROR, _("Cannot set signal handler for SIGPIPE.")));
+      wxLogError(_("Cannot set signal handler for SIGPIPE."));
    }
-#endif
+#endif // OS_UNIX
 
    ms_CClientInitialisedFlag = true;
    ASSERT(gs_CCStreamCleaner == NULL);
@@ -2966,14 +2975,14 @@ extern void CC_Cleanup(void)
    while ( !MailFolderCC::ms_StreamList.empty() )
    {
       MailFolderCC *folder = MailFolderCC::ms_StreamList.front()->folder;
-      DBGMESSAGE(("\tFolder '%s' leaked", folder->GetName().c_str()));
+      wxLogDebug("\tFolder '%s' leaked", folder->GetName().c_str());
       folder->DecRef();
    }
 }
 
 CCStreamCleaner::~CCStreamCleaner()
 {
-   DBGMESSAGE(("CCStreamCleaner: checking for left-over streams"));
+   wxLogTrace(TRACE_MF_CALLS, "CCStreamCleaner: checking for left-over streams");
 
    if(! mApplication->IsOnline())
    {
@@ -3189,7 +3198,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
    MailFolderCC *mf = LookupObject(stream, mailbox);
    CHECK_RET(mf, "mm_status for non existent folder");
 
-   wxLogDebug("mm_status: folder '%s', %lu messages",
+   wxLogTrace(TRACE_MF_CALLBACK, "mm_status: folder '%s', %lu messages",
               mf->m_ImapSpec.c_str(), status->messages);
 
    if ( status->flags & SA_MESSAGES )
@@ -3416,8 +3425,7 @@ void
 MailFolderCC::mm_fatal(char *str)
 {
    GetLogCircle().Add(str);
-   String   msg = (String) "Fatal Error:" + (String) str;
-   LOGMESSAGE((M_LOG_ERROR, Str(msg)));
+   wxLogError(_("Fatal error: %s"), str);
 
    String msg2 = str;
    if(ms_LastCriticalFolder.length())

@@ -431,10 +431,8 @@ public:
              || GetType() == MF_POP)
             && ! (GetFlags() & MF_FLAGS_ISLOCAL);
       }
-   /** Sets a maximum number of messages to retrieve from server.
-       @param nmax maximum number of messages to retrieve, 0 for no limit
-   */
-   virtual void SetRetrievalLimit(unsigned long nmax);
+
+   virtual void SetRetrievalLimits(unsigned long soft, unsigned long hard);
 
    /**@name Accessor methods */
    //@{

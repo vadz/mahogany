@@ -4,6 +4,8 @@
 Release 0.62 'Mars'
 -------------------------------------------------------------------------------
 
+21.02.01 VZ: added hard limit on the number of headers retrieved
+             show filters progress in the status bar
 20.02.01 VZ: made new mail reporting less intrusive
 16.02.01 VZ: added highlighting of folders with flagged messages in the tree
                 and a menu command to flag messages

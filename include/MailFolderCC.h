@@ -307,11 +307,16 @@ public:
    /** Returns a listing of the folder. Must be DecRef'd by caller. */
    virtual HeaderInfoList *GetHeaders(void) const;
    //@}
-   /** Sets a maximum number of messages to retrieve from server.
-       @param nmax maximum number of messages to retrieve, 0 for no limit
+
+   /** Sets limits for the number of headers to retrieve: if hard limit is not
+       0, we will never retrieve more than that many messages even without
+       asking the user (soft limit is ignored). Otherwise, we will ask the
+       user if the soft limit is exceeded.
+
+       @param soft maximum number of messages to retrieve without askin
+       @param hard maximum number of messages to retrieve, 0 for no limit
    */
-   virtual void SetRetrievalLimit(unsigned long nmax)
-      { m_RetrievalLimit = nmax; }
+   virtual void SetRetrievalLimits(unsigned long soft, unsigned long hard);
 
    /** RFC 2047 compliant message decoding: all encoded words from the header
        are decoded, but only the encoding of the first of them is returned in
@@ -490,6 +495,9 @@ protected:
    /** The index of the next entry in list to fill. Only used for
        BuildListing()/OverviewHeader() interaction. */
    unsigned long m_BuildNextEntry;
+
+   /// The maximum number of messages to retrive or 0
+   unsigned long m_RetrievalLimitHard;
    /// The maximum number of messages to retrive or 0
    unsigned long m_RetrievalLimit;
    //@}

@@ -51,6 +51,16 @@
 #include "MApplication.h"
 #include "modules/Filters.h"
 
+// ----------------------------------------------------------------------------
+// trace masks
+// ----------------------------------------------------------------------------
+
+// trace new mail processing
+#define TRACE_NEWMAIL "newmail"
+
+// trace mail folder closing
+#define TRACE_MF_CLOSE "mfclose"
+
 /*-------------------------------------------------------------------*
  * local classes
  *-------------------------------------------------------------------*/
@@ -762,7 +772,7 @@ public:
       {
          if ( m_mf )
          {
-            wxLogTrace("mfclose", "Mailfolder '%s': close timed out.",
+            wxLogTrace(TRACE_MF_CLOSE, "Mailfolder '%s': close timed out.",
                        m_mf->GetName().c_str());
             m_mf->RealDecRef();
          }
@@ -837,7 +847,7 @@ MailFolderCmn::DecRef()
             IsAlive() )       // and only if the folder was opened
                               // successfully and is still functional
       {
-        wxLogTrace("mfclose", "Mailfolder '%s': close delayed.",
+        wxLogTrace(TRACE_MF_CLOSE, "Mailfolder '%s': close delayed.",
                    GetName().c_str());
         Checkpoint(); // flush data immediately
         gs_MailFolderCloser->Add(this, delay);
@@ -1804,8 +1814,9 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
 
    UIdType *messageIDs = new UIdType[n];
 
-   DBGMESSAGE(("CheckForNewMail(): folder: %s highest seen uid: %lu.",
-               GetName().c_str(), (unsigned long) m_LastNewMsgUId));
+   wxLogTrace(TRACE_NEWMAIL,
+              "CheckForNewMail(): folder: %s highest seen uid: %lu.",
+              GetName().c_str(), (unsigned long) m_LastNewMsgUId);
 
    // new messages are supposed to have UIDs greater than the last new message
    // seen, but not all messages with greater UID are new, so we have to first
@@ -1849,8 +1860,9 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
    if ( m_UpdateFlags & UF_UpdateCount )
       m_LastNewMsgUId = highestId;
 
-   DBGMESSAGE(("CheckForNewMail() after test: folder: %s highest seen uid: %lu.",
-               GetName().c_str(), (unsigned long) highestId));
+   wxLogTrace(TRACE_NEWMAIL,
+              "CheckForNewMail() after test: folder: %s highest seen uid: %lu.",
+              GetName().c_str(), (unsigned long) highestId);
 
 
    delete [] messageIDs;
@@ -2247,8 +2259,6 @@ static void InitStatic()
 {
    if(gs_CloseTimer)
       return; // nothing to do
-
-   wxLog::AddTraceMask("mfclose");
 
    gs_MailFolderCloser = new MailFolderCloser;
    gs_CloseTimer = new CloseTimer();

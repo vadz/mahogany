@@ -597,10 +597,15 @@ public:
       return FolderNeedsNetwork(GetType(), GetFlags());
    }
 
-   /** Sets a maximum number of messages to retrieve from server.
-       @param nmax maximum number of messages to retrieve, 0 for no limit
+   /** Sets limits for the number of headers to retrieve: if hard limit is not
+       0, we will never retrieve more than that many messages even without
+       asking the user (soft limit is ignored). Otherwise, we will ask the
+       user if the soft limit is exceeded.
+
+       @param soft maximum number of messages to retrieve without askin
+       @param hard maximum number of messages to retrieve, 0 for no limit
    */
-   virtual void SetRetrievalLimit(unsigned long nmax) = 0;
+   virtual void SetRetrievalLimits(unsigned long soft, unsigned long hard) = 0;
 
    /**@name Accessor methods */
    //@{

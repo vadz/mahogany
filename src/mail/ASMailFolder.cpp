@@ -987,7 +987,7 @@ public:
        @param nmax maximum number of messages to retrieve, 0 for no limit
    */
    virtual void SetRetrievalLimit(unsigned long nmax)
-      { AScheck(); m_MailFolder->SetRetrievalLimit(nmax); }
+      { AScheck(); m_MailFolder->SetRetrievalLimits(nmax, 0); }
    /// Returns the underlying MailFolder object.
    virtual MailFolder *GetMailFolder(void) const
       { AScheck(); m_MailFolder->IncRef(); return m_MailFolder;}

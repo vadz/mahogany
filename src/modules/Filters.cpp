@@ -188,6 +188,10 @@ protected:
                   MInterface *minterface,
                   MModule_Filters *fmodule);
    ~FilterRuleImpl();
+
+   /// get the string to display in the status bar
+   String GetStatusString(Message *msg) const;
+
    /// common code for the two Apply() functions
    int ApplyCommonCode(MailFolder *folder,
                        UIdArray *msgs,
@@ -247,6 +251,8 @@ public:
          SafeIncRef(m_MailFolder);
          m_MessageUId = uid;
 
+         m_copiedTo.clear();
+
          m_deletedMsgs =
          m_expungedMsgs = FALSE;
       }
@@ -280,6 +286,9 @@ public:
    /// called by func_delete() to tell us that a message was deleted
    void SetDeleted() { m_deletedMsgs = true; }
 
+   /// called by func_copytofolder()
+   void SetCopiedTo(const String& copiedTo) { m_copiedTo = copiedTo; }
+
 protected:
    void EatWhiteSpace(void)
       { while(isspace(m_Input[m_Position])) m_Position++; }
@@ -303,11 +312,15 @@ private:
    const SyntaxNode *m_Program; // compiled filter program
 
    UIdType m_MessageUId;
+   size_t m_msgno;
    MailFolder *m_MailFolder;
 
    // flags set during filter evaluation
    bool m_expungedMsgs,
         m_deletedMsgs;      // some messages were marked as deleted
+
+   // the folder the message was copied to or empty
+   String m_copiedTo;
 
    GCC_DTOR_WARN_OFF
 };
@@ -2180,8 +2193,15 @@ extern "C"
       UIdType uid = p->GetMessageUId();
       UIdArray ia;
       ia.Add(uid);
-      int rc = mf->SaveMessages(&ia, fn.ToString(), true, false);
+
+      String mfName = fn.ToString();
+      bool rc = mf->SaveMessages(&ia, mfName, true, false);
       mf->DecRef();
+      if ( rc )
+      {
+         p->SetCopiedTo(mfName);
+      }
+
       return Value(rc);
 #else
       return 0;
@@ -2391,6 +2411,19 @@ BuiltinFunctions(void)
  * FilterRuleImpl - the class representing a program
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+String FilterRuleImpl::GetStatusString(Message *msg) const
+{
+   String text;
+   if ( msg )
+   {
+      text.Printf(_("Filtering message %u (from '%s' about '%s')"),
+                  m_msgno, msg->From().c_str(), msg->Subject().c_str());
+   }
+
+   return text;
+}
+
 int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid, bool *changeflag)
 {
    if(! m_Program)
@@ -2401,7 +2434,47 @@ int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid, bool *changeflag)
 
    mf->IncRef();
    SetMessage(mf, uid);
+
+   // count the messages
+   m_msgno++;
+
+   // put something into the status bar
+   Message *msg = GetMessage();
+   String text;
+   if ( msg )
+   {
+      text = GetStatusString(msg);
+
+      GetInterface()->StatusMessage(text + "...");
+      wxYield();
+   }
+
    const Value rc = m_Program->Evaluate();
+
+   // and now show the result in the status bar too
+   if ( msg )
+   {
+      text += " - ";
+
+      if ( m_copiedTo )
+      {
+         text << (m_deletedMsgs ? _("moved to ") : _("copied to "))
+              << m_copiedTo;
+      }
+      else if ( m_deletedMsgs )
+      {
+         text << _("deleted");
+      }
+      else // not moved/copied/deleted
+      {
+         text << _("done");
+      }
+
+      GetInterface()->StatusMessage(text);
+      wxYield();
+
+      msg->DecRef();
+   }
 
    // if the messages were deleted we might want to expunge them now
    if ( m_deletedMsgs )
@@ -2486,7 +2559,7 @@ FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
    HeaderInfoList *hil = mf->GetHeaders();
    CHECK(hil, 0, "Cannot get header info list");
 
-   if(msgs) // apply to all messages in list
+   if (msgs) // apply to all messages in list
    {
       for(size_t idx = 0; idx < msgs->Count(); idx++)
       {
@@ -2534,6 +2607,7 @@ FilterRuleImpl::FilterRuleImpl(const String &filterrule,
 #endif
    m_Program = Parse(filterrule);
    m_MessageUId = UID_ILLEGAL;
+   m_msgno = 0;
 }
 
 FilterRuleImpl::~FilterRuleImpl()

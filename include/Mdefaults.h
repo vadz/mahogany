@@ -667,6 +667,8 @@ enum MFolderIndex
 #define MP_MAX_MESSAGE_SIZE   "MaxMsgSize"
 /// ask confirmation before retrieveing more headers than this
 #define MP_MAX_HEADERS_NUM    "MaxHeadersNum"
+/// never download more than that many messages
+#define MP_MAX_HEADERS_NUM_HARD "HardHeadersLimit"
 //@}
 /** @name timeout values for c-client mail library */
 //@{
@@ -1417,6 +1419,8 @@ enum MFolderIndex
 #define MP_MAX_MESSAGE_SIZE_D 100l
 /// ask confirmation before retrieveing more headers than this
 #define MP_MAX_HEADERS_NUM_D  100l
+/// never download more than that many messages
+#define MP_MAX_HEADERS_NUM_HARD_D 0l
 //@}
 /** @name timeout values for c-client mail library */
 //@{
