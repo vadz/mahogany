@@ -211,7 +211,7 @@ MCONFOPT="--with-modules=static"
 ## Host/OS specific setups
 ##
 #################################################################################
-if [ `hostname` = caisteal -o `hostname` = dearg -o `hostname` = nevis]
+if [ `hostname` = caisteal -o `hostname` = dearg -o `hostname` = nevis ]
 then
   OSTYPE=SunOS
   OSTYPE_ADDON="-sparc"
