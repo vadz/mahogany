@@ -1677,7 +1677,7 @@ ProfileImpl::Commit(void)
                                            GetName()) )
       {
          // TODO: what can we do to recover here?
-         wxLogError(_("Saving previously applied settingss failed."));
+         wxLogError(_("Saving previously applied settings failed."));
       }
    }
    //else: nothing to copy anyhow
