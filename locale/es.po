@@ -7,11 +7,10 @@ msgstr ""
 "Project-Id-Version: Mahogany 0.22a\n"
 "POT-Creation-Date: 1999-06-21 10:08+0100\n"
 "PO-Revision-Date: 1999-01-11 23:23+0000\n"
-"Last-Translator: Juan Pablo Ordonez=
- <juordone@openway.com.co>\n"
+"Last-Translator: Juan Pablo Ordonez <juordone@openway.com.co>\n"
 "Language-Team: M-Team <m-developers@makelist.com>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=3DISO-8859-1\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
 # upgrade.cpp:274
@@ -23,8 +22,7 @@ msgstr "Borrado Perfil de Folder Ilegal"
 #: upgrade.cpp:389
 #, c-format
 msgid ""
-"Configuration information and program files were successfully upgraded from=
- "
+"Configuration information and program files were successfully upgraded from "
 "the version '%s'."
 msgstr ""
 "Informacion de configuracion y archivos de programa actualizados=

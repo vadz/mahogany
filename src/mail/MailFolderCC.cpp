@@ -453,7 +453,7 @@ MailFolderCC::Open(void)
                lockfile = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
                if(lockfile.IsEmpty()) // another c-client stupidity
                   lockfile = (char *) sysinbox();
-            ProcessEventQueue();
+               ProcessEventQueue();
             }
          }
 #endif
@@ -495,22 +495,22 @@ MailFolderCC::Open(void)
    CCQuiet(); // first try, don't log errors (except in debug mode)
 #endif // DEBUG
 
-   if(GetType() == MF_FILE && ! wxFileExists(m_MailboxPath))
-      mail_create(NIL, (char *)m_MailboxPath.c_str());
    {
       MCclientLocker lock;
       SetDefaultObj();
+      if(GetType() == MF_FILE && ! wxFileExists(m_MailboxPath))
+         mail_create(NIL, (char *)m_MailboxPath.c_str());
       if(m_MailStream != NIL)
          m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
                                   debugFlag ? OP_DEBUG : NIL);
-      // if we didn't have a mailstre   am or the re-use of the old one
-      // failed, we try again:   
+      // if we didn't have a ma   ilstre   am or the re-use of the old one
+      // failed, we try again:      
       if(m_MailStream == NIL)
          m_MailStream = mail_open(NIL,(char *)m_MailboxPath.c_str(),
                                   debugFlag ? OP_DEBUG : NIL);
       
-      ProcessEventQueue();
-      SetDefaultObj(false);
+         ProcessEventQueue();
+         SetDefaultObj(false);
    }
    CCVerbose();
    if(m_MailStream == NIL)
@@ -518,9 +518,10 @@ MailFolderCC::Open(void)
       // this will fail if file already exists, but it makes sure we can open it
       // try again:
       // if this fails, we want to know it, so no CCQuiet()
+      MCclientLocker lock;
+      SetDefaultObj();
       mail_create(NIL, (char *)m_MailboxPath.c_str());
       ProcessEventQueue();
-      SetDefaultObj();
       m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
                                debugFlag ? OP_DEBUG : NIL);
       ProcessEventQueue();

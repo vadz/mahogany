@@ -29,7 +29,8 @@ msgcat:
 clean:
 	$(RM) $(IDLFILES) $(INTERFACES) $(CPPFILES)
 
-dep depend:
+dep depend: all
+
 
 doc:
 	$(DOCHTML) *.h

@@ -71,6 +71,10 @@ $Id$
 		I'll then add support for that to the Copy/Move
 		Messages functions. (KB)
 
+8		Find out where Mahogany is when laying out really long 
+		text messages. How can we speed this up? Why do
+		redraws take long, too?
+
 7	KB	Find all possible MT problems in MailFolder.cpp and
 		put mutexes around them.
 6	KB	implement temporary/fake Profile mode

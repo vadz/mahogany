@@ -36,7 +36,6 @@ dep depend:
 	@echo "about missing header files - these can be safely ignored."
 	@echo "They should disappear if you run it again."
 	@echo "----------------------------------------------------------"
-	set -e; $(MAKE) -C include # build some files in include first
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
 config.status: 
