@@ -142,6 +142,7 @@ rpm: rpm_prep
 	fi; \
 	echo "*** Building RPM under $$RPM_BUILD_ROOT..."; \
 	cd $$RPM_TOP_DIR/SPECS && rpm --buildroot $$RPM_BUILD_ROOT -bb M.spec
+	cd $$RPM_TOP_DIR/SPECS && rpm --buildroot $$RPM_BUILD_ROOT -bs M.spec
 
 msgcat:
 	$(MAKE) -C src msgcat
