@@ -263,7 +263,8 @@ wxString ORC_Where[] =
    gettext_noop("in From"),
    gettext_noop("in body"),
    gettext_noop("in message"),
-   gettext_noop("in To")
+   gettext_noop("in To"),
+   gettext_noop("in Sender")
 };
 static
 size_t ORC_WhereCount = WXSIZEOF(ORC_Where);
@@ -284,7 +285,8 @@ enum ORC_Where_Enum
    ORC_W_From,
    ORC_W_Body,
    ORC_W_Message,
-   ORC_W_To
+   ORC_W_To,
+   ORC_W_Sender
 };
 
 #define CRIT_CTRLCONST(oldctrl,newctrl) \
@@ -505,6 +507,8 @@ OneCritControl::TranslateToString(wxString & criterium)
          program << "message()"; break;
       case ORC_W_To:
          program << "to()"; break;
+      case ORC_W_Sender:
+         program << "header(\"Sender\")"; break;
       };
    }
    if(needsWhere && needsArgument)
