@@ -27,12 +27,14 @@
 #ifndef USE_PCH
 #  include "Mcommon.h"
 
-#  include "MFolder.h"
 #  include "MailFolder.h"
 
 #  include "guidef.h"
-#  include "gui/wxFolderView.h"
 #endif // USE_PCH
+
+#include "MFolder.h"
+
+#include "gui/wxFolderView.h"
 
 #include "Mdnd.h"
 

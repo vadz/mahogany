@@ -1525,10 +1525,16 @@ wxFolderView::DragAndDropMessages()
    if ( countSel > 0 )
    {
       MMessagesDataObject dropData(this, selections);
+#ifdef __WXMSW__
+      wxDropSource dropSource(dropData, m_FolderCtrl,
+                              wxCursor("msg_copy"),
+                              wxCursor("msg_move"));
+#else // Unix
       wxIconManager *iconManager = mApplication->GetIconManager();
       wxIcon icon = iconManager->GetIcon(countSel > 1 ? "dnd_msgs"
                                                       : "dnd_msg");
       wxDropSource dropSource(dropData, m_FolderCtrl, icon);
+#endif // OS
 
       switch ( dropSource.DoDragDrop(TRUE /* allow move */) )
       {

@@ -130,6 +130,10 @@ image_both	BITMAP	"image_both.bmp"
 noxface		BITMAP	"noxface.bmp"
 install_welcome BITMAP  "install1.bmp"
 
+// Cursors (for dnd)
+msg_copy	CURSOR	"msg_copy.cur"
+msg_move	CURSOR	"msg_move.cur"
+
 ///////////////////////////////////////////////////////////////////////////////
 // wxWindows ressources
 ///////////////////////////////////////////////////////////////////////////////

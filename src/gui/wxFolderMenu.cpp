@@ -27,11 +27,12 @@
 
 #  include <wx/menu.h>
 
-#  include "MFolder.h"
 #  include "gui/wxMenuDefs.h"
 #endif // USE_PCH
 
-#include "wxFolderMenu.h"
+#include "MFolder.h"
+
+#include "gui/wxFolderMenu.h"
 
 // ----------------------------------------------------------------------------
 // global data
@@ -121,7 +122,7 @@ MFolder *wxFolderMenu::GetFolder(wxMenu *menu, int id)
    ASSERT_MSG( id >= WXMENU_POPUP_FOLDER_MENU, "bad id in wxFolderMenu::GetFolder" );
 
    id -= WXMENU_POPUP_FOLDER_MENU;
-   if ( id >= gs_folderNames.GetCount() )
+   if ( id >= (int)gs_folderNames.GetCount() )
    {
       // don't assert - just not our menu item
       return NULL;
