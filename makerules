@@ -34,6 +34,7 @@ ifdef USE_LIBTOOL
 	$(LIBTOOL) --mode=compile $(CXX) -fPIC $(CPPFLAGS) $(CXXFLAGS) -c $< 
 %.so: %.lo
 	$(LIBTOOL) $(CXX) -export-dynamic -fPIC $(CPPFLAGS) $(CXXFLAGS) -o $@ $<
+	@if test -f $*.d; then sed 's,\.o:,.so:,' $*.d>$*.o; mv $*.o $*.d; fi
 else
 %.o: %.cc
 	$(CXX) -fPIC $(CPPFLAGS) $(CXXFLAGS) -c $<
@@ -43,7 +44,7 @@ else
 	$(CC)  -fPIC $(CPPFLAGS) $(CFLAGS) -c $<
 %.so: %.cpp
 	$(CXX) -shared -fPIC $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(SO_LIBS)
-#-L$(BUILDDIR)/src #-lM #$(LIBS)
+	@if test -f $*.d; then sed 's,\.o:,.so:,' $*.d>$*.o; mv $*.o $*.d; fi
 endif
 
 ifdef USE_SWIG
@@ -62,43 +63,12 @@ endif
 %cmodule.so: %.o
 	$(CXX) -shared $< -lswigpy -o $@
 
-%.dvi: %.htex
-	$(SOURCEDIR)/extra/scripts/striphelpids $< >tmp.tex
-	$(LATEX) tmp.tex </dev/null
-	@touch tmp.idx
-	$(MAKEINDEX) tmp.idx
-	$(LATEX) tmp.tex </dev/null
-	$(LATEX) tmp.tex </dev/null
-	mv tmp.dvi $@
-	mv tmp.aux $*.aux
-	rm -f tmp.*
-
-%.dvi: %.tex
-	$(LATEX) $<
-	$(MAKEINDEX) $*.idx
-	$(LATEX) $<
-	$(LATEX) $<
-
-%.ps: %.dvi
-	$(DVIPS) $< -o $@
-
-%.pdf: %.ps
-	$(PSTOPDF) $< $@
-
 %.c: %.y
 	$(YACC) $(YFLAGS) $< && mv y.tab.c $@
 	if test -f y.tab.h; then \
 	  if cmp -s y.tab.h $*.h; then rm -f y.tab.h; \
 	  else mv y.tab.h $*.h; fi; \
 	else :; fi
-
-ifdef HAVE_SGMLTOOLS
-%.html: %.sgml
-	sgml2html $<
-else
-%.html: %.sgml
-	touch $@ 
-endif
 
 tags:
 	etags --c++ $(SRC) $(CXXSRC)

@@ -8,14 +8,26 @@ all:	wxhelp.map
 
 #include ../../makerules
 
-wxhelp.map: ../.src/$(DIR).htex ../$(DIR).aux
-	@ln -sf ../.src/$(DIR).htex ../$(DIR).aux ../.src/pics .
+wxhelp.map: ../.src/$(DIR).htex ../.src/html.sty
+	@ln -sf ../.src/$(DIR).htex ../.src/html.sty ../.src/pics .
+	../../.src/extra/scripts/striphelpids $(DIR).htex >tmp.tex
+	$(LATEX) tmp.tex </dev/null
+	@touch tmp.idx
+	$(MAKEINDEX) tmp.idx
+	$(LATEX) tmp.tex </dev/null
+	$(LATEX) tmp.tex </dev/null
+	$(DVIPS) tmp.dvi -o tmp.ps
+	$(PSTOPDF) tmp.ps $(DIR).pdf
+	mv tmp.dvi $(DIR).dvi
+	mv tmp.aux $(DIR).aux
+	rm -f tmp.*
 	@$(RM) -r $(DIR)
-	@mkdir $(DIR)
-	$(LATEX2HTML) -debug $(DIR).htex
+	$(LATEX2HTML) -local_icons -debug $(DIR).htex
 	cd $(DIR) && ../../../.src/extra/scripts/html2wxhelp > ../wxhelp.map
 
 install: wxhelp.map
+	$(INSTALL_DATA) $(DIR).pdf $(DOCDIR)/Pdf
+	@$(RM) -r $(DOCDIR)/$(DIR)
 	$(INSTALL) -d $(DOCDIR)/$(DIR)
 	for i in `find $(DIR) -type f`; \
 	do $(INSTALL_DATA) $$i $(DOCDIR)/$(DIR); \

@@ -22,17 +22,17 @@ doc:
 
 classdoc:
 	set -e; for i in doc; do $(MAKE) -C $$i doc; done
-	
-clean:  
+
+clean:
 	set -e; for i in $(ALL_DIRS); do $(MAKE) -C $$i $@; done
 
 allclean: clean
 	find . -name \*.bak -exec rm -f {} \;
-	find . -name \*~ -exec rm -f {} \; 
+	find . -name \*~ -exec rm -f {} \;
 	find . -name .\\\#* -exec rm -f {} \;
 	find . -name \*.mo -exec rm -f {} \;
 	find . -name .libs -exec rm -rf {} \;
-	find . -name .xvpics -exec rm -r -f {} \; 
+	find . -name .xvpics -exec rm -r -f {} \;
 	$(RM) -r debian/tmp *.po config.log src/M config.status
 	$(RM) config.* makeopts makeversion include/config.h
 	find . -type l -name .src -exec rm -f {} \;
@@ -74,7 +74,7 @@ install_bin:
 	done
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i install; done
 	set -e; for i in .src/doc/Tips/Tips*.txt; \
-	do $(INSTALL_DATA) -m 644 $$i $(DOCDIR)/Tips; \
+	do $(INSTALL_DATA) $$i $(DOCDIR)/Tips; \
 	done
 
 install_doc:
