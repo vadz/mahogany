@@ -743,9 +743,11 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
          return;
       }
 
-      if ( !command.IsEmpty() )
+      if ( command.IsEmpty() )
+      {
          wxLogWarning(_("Don't know how to handle data of type '%s'."),
                       mimetype.c_str());
+      }
       else
       {
          // the command must contain exactly one '%s' format specificator!
@@ -763,7 +765,8 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       //else: empty command means try to handle it internally
    }
 
-   delete fileType;  // may be NULL, ok
+   if ( fileType )
+      delete fileType;
 
    if ( command.IsEmpty() )
    {

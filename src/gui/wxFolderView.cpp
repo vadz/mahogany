@@ -426,16 +426,14 @@ wxFolderView::Update(void)
 void
 wxFolderView::OpenFolder(String const &profilename)
 {
-   // show loading of new folder by clearing everything
-   SetFolder(NULL);
-// m_FolderCtrl->Clear();
-// m_MessagePreview->Clear();
    wxBeginBusyCursor();
    wxYield(); // make changes visible
-   MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,profilename);
-   wxEndBusyCursor();
+
+   MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE, profilename);
    SetFolder(mf);
    SafeDecRef(mf);
+
+   wxEndBusyCursor();
 }
 
 wxFolderView::~wxFolderView()

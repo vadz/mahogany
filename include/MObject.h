@@ -156,7 +156,7 @@ private:
          virtual String DebugDump() const;
 
 #else
-#   define MOBJECT_DEBUG
+#   define MOBJECT_DEBUG(classname)
 #endif
 
 // ----------------------------------------------------------------------------

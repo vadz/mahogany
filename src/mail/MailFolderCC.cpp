@@ -595,7 +595,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
    MailFolderCC *mf = LookupObject(stream);
    if(mf)
    {
-#if DEBUG
+#ifdef DEBUG
       String tmp = "MailFolderCC::mm_exists() for folder " + mf->m_MailboxPath
                    + String(" n: ") + strutil_ultoa(number);
       LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
@@ -686,10 +686,8 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
    if(mf == NULL)
       return;  // oops?!
 
-#if DEBUG
-   String   tmp = "MailFolderCC::mm_status() for folder " + mf->m_MailboxPath;
-   LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
-#endif
+   wxLogDebug("mm_status: folder '%s', %lu messages",
+              mf->m_MailboxPath.c_str(), status->messages);
 
    if(status->flags & SA_MESSAGES)
       mf->numOfMessages  = status->messages;
