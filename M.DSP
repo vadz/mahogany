@@ -813,6 +813,11 @@ SOURCE=.\src\adb\ProvFC.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\adb\ProvLine.cpp
+# PROP Exclude_From_Build 1
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\adb\ProvPalm.cpp
 
 !IF  "$(CFG)" == "M - Win32 Release"
@@ -838,10 +843,6 @@ SOURCE=.\src\adb\ProvPalm.cpp
 
 !ENDIF 
 
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\adb\ProvLine.cpp
 # End Source File
 # End Group
 # Begin Group "python"
@@ -1960,11 +1961,11 @@ SOURCE=.\src\modules\TextViewer.cpp
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\src\modules\LayoutEditor.cpp
+SOURCE=.\src\modules\BareBonesEditor.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\modules\BareBonesEditor.cpp
+SOURCE=.\src\modules\LayoutEditor.cpp
 # End Source File
 # End Group
 # Begin Source File
