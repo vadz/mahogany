@@ -26,7 +26,7 @@
 #include "gui/listbook.h"
 
 class Message;
-class wxOptionsPage;
+class SpamOptionsPage;
 
 class WXDLLEXPORT wxFrame;
 
@@ -115,9 +115,17 @@ public:
    /**
       Show a GUI dialog allowing the user to configure all spam filters.
 
+      This function is a hack because it is used in two cases:
+         - to access the global filter dialog in which case params == NULL
+           and the options are read from and written to profile
+         - to configure a given spam rule (i.e. is_spam() filter function
+           call) in which case the options are contained and returned in params
+
       @param parent the parent frame for the dialog
+      @param params in/out parameters describing the filters options
+      @return true if something was changed, false otherwise
     */
-   static void Configure(wxFrame *parent);
+   static bool Configure(wxFrame *parent, String *params = NULL);
 
    /**
       Unload all loaded spam filters.
@@ -148,7 +156,7 @@ protected:
    /**
       Virtual dtor for the base class.
     */
-   virtual ~SpamFilter() { }
+   virtual ~SpamFilter();
 
    /**
       Loads all available spam filters.
@@ -213,12 +221,14 @@ protected:
       options.
 
       @param notebook the parent for the page
+      @param profile the profile to use for the page settings (no need to
+                     Inc/DecRef() it)
+      @param param is the argument passed to Configure()
       @return pointer to the page (which will be deleted by the caller) ot NULL
     */
-   virtual wxOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook) const
-   {
-      return NULL;
-   }
+   virtual SpamOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook,
+                                             Profile *profile,
+                                             String *params) const;
 
    /**
       Return the internal name of this spam filter.

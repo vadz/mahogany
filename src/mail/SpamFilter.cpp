@@ -43,11 +43,17 @@
 class SpamOptionsDialog : public wxOptionsEditDialog
 {
 public:
-   SpamOptionsDialog(wxFrame *parent, wxImageList *imagelist)
+   // we must have a non-NULL profile but we don't Inc/DecRef() it at all
+   SpamOptionsDialog(wxFrame *parent,
+                     Profile *profile,
+                     String *params,
+                     wxImageList *imagelist)
       : wxOptionsEditDialog(parent,
                             _("Spam filters options"),
                             _T("SpamDlg"))
    {
+      m_profile = profile;
+      m_params = params;
       m_imagelist = imagelist;
 
       CreateAllControls();
@@ -64,14 +70,16 @@ public:
       // now we can put the pages into it
       for ( SpamFilter *p = SpamFilter::ms_first; p; p = p->m_next )
       {
-         p->CreateOptionPage(m_notebook);
+         p->CreateOptionPage(m_notebook, m_profile, m_params);
       }
    }
 
 protected:
-   virtual Profile *GetProfile() const { return mApplication->GetProfile(); }
+   virtual Profile *GetProfile() const { return m_profile; }
 
 private:
+   Profile *m_profile;
+   String *m_params;
    wxImageList *m_imagelist;
 };
 
@@ -134,7 +142,7 @@ SpamFilter::CheckIfSpam(const Message& msg,
                               ? _T("headers=") + paramsAll + _T(";dspam=")
                               : paramsAll);
 
-      wxArrayString params(strutil_restore_array(paramsAll, _T(';')));
+      wxArrayString params(strutil_restore_array(paramsAllReal, _T(';')));
       const size_t count = params.GetCount();
       for ( size_t n = 0; n < count; n++ )
       {
@@ -191,7 +199,7 @@ SpamFilter::CheckIfSpam(const Message& msg,
 // ----------------------------------------------------------------------------
 
 /* static */
-void SpamFilter::Configure(wxFrame *parent)
+bool SpamFilter::Configure(wxFrame *parent, String *params)
 {
    LoadAll();
 
@@ -212,16 +220,37 @@ void SpamFilter::Configure(wxFrame *parent)
       }
    }
 
+   // check if we have anything to configure
    if ( !nPages )
    {
       wxLogMessage(_("There are no configurable spam filters."));
-      return;
+      return false;
    }
 
-   // do create the dialog and show it
-   SpamOptionsDialog dlg(parent, imagelist);
 
-   (void)dlg.ShowModal();
+   // now we must select a profile from which the filters options will be read
+   // from and written to: this can be either the "real" profile or a temporary
+   // one populated with the value of *params and deleted after copying all the
+   // changes back to *params
+   Profile_obj profile(Profile::CreateModuleProfile(SPAM_FILTER_INTERFACE));
+   if ( params )
+   {
+      // ensure that we can undo any changes later by calling Discard()
+      profile->Suspend();
+   }
+
+   // do create the dialog (this will create all the pages inside its
+   // CreateNotebook()) and show it
+   SpamOptionsDialog dlg(parent, profile, params, imagelist);
+
+   bool ok = dlg.ShowModal() == wxID_OK;
+
+   if ( params )
+   {
+      profile->Discard();
+   }
+
+   return ok;
 }
 
 // ----------------------------------------------------------------------------
@@ -296,5 +325,21 @@ void SpamFilter::UnloadAll()
 
       ms_loaded = false;
    }
+}
+
+// ----------------------------------------------------------------------------
+// trivial implementations of the base class "almost pure" virtuals
+// ----------------------------------------------------------------------------
+
+SpamOptionsPage *
+SpamFilter::CreateOptionPage(wxListOrNoteBook * /* notebook */,
+                             Profile * /* profile */,
+                             String * /* params */) const
+{
+   return NULL;
+}
+
+SpamFilter::~SpamFilter()
+{
 }
 

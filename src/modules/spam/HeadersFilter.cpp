@@ -41,9 +41,8 @@
 
 #include "Address.h"
 
-#include "gui/wxOptionsPage.h"
-
 #include "SpamFilter.h"
+#include "gui/SpamOptionsPage.h"
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -107,7 +106,9 @@ protected:
                               const String& param,
                               String *result);
    virtual const wxChar *GetOptionPageIconName() const { return _T("spam"); }
-   virtual wxOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook) const;
+   virtual SpamOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook,
+                                             Profile *profile,
+                                             String *params) const;
 
 
    DECLARE_SPAM_FILTER("headers", 30);
@@ -133,13 +134,13 @@ class SpamOption
 {
 public:
    /// Is it on or off by default?
-   virtual bool DefaultValue() const = 0;
+   virtual bool GetDefaultValue() const = 0;
 
    /// The token used in spam filter string for this option
    virtual const wxChar *Token() const = 0;
 
    /// The name of the profile entry used to pass the value to config dialog
-   virtual const wxChar *TempProfileEntryName() const = 0;
+   virtual const wxChar *GetProfileName() const = 0;
 
    /// The label of the correponding checkbox in the dialog
    virtual const wxChar *DialogLabel() const = 0;
@@ -166,10 +167,10 @@ public:
 class SpamOptionAssassin : public SpamOption
 {
 public:
-   virtual bool DefaultValue() const { return true; }
+   virtual bool GetDefaultValue() const { return true; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_SPAMASSASSIN; }
-   virtual const wxChar *TempProfileEntryName() const
+   virtual const wxChar *GetProfileName() const
       { return _T("SpamAssassin"); }
    virtual const wxChar *DialogLabel() const
       { return gettext_noop("Been tagged as spam by Spam&Assassin"); }
@@ -179,10 +180,10 @@ public:
 class SpamOption8Bit : public SpamOption
 {
 public:
-   virtual bool DefaultValue() const { return true; }
+   virtual bool GetDefaultValue() const { return true; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_SUBJ8BIT; }
-   virtual const wxChar *TempProfileEntryName() const
+   virtual const wxChar *GetProfileName() const
       { return _T("Spam8BitSubject"); }
    virtual const wxChar *DialogLabel() const
       { return gettext_noop("Too many &8 bit characters in subject"); }
@@ -192,10 +193,10 @@ public:
 class SpamOptionCaps : public SpamOption
 {
 public:
-   virtual bool DefaultValue() const { return true; }
+   virtual bool GetDefaultValue() const { return true; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_SUBJCAPS; }
-   virtual const wxChar *TempProfileEntryName() const
+   virtual const wxChar *GetProfileName() const
       { return _T("SpamCapsSubject"); }
    virtual const wxChar *DialogLabel() const
       { return gettext_noop("Only &capitals in subject"); }
@@ -205,11 +206,11 @@ public:
 class SpamOptionJunkSubject : public SpamOption
 {
 public:
-   virtual bool DefaultValue() const { return true; }
+   virtual bool GetDefaultValue() const { return true; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_SUBJENDJUNK; }
-   virtual const wxChar *TempProfileEntryName() const
-      { return _T("JunkEndSubject"); }
+   virtual const wxChar *GetProfileName() const
+      { return _T("SpamJunkEndSubject"); }
    virtual const wxChar *DialogLabel() const
       { return gettext_noop("&Junk at end of subject"); }
 };
@@ -218,10 +219,10 @@ public:
 class SpamOptionKorean : public SpamOption
 {
 public:
-   virtual bool DefaultValue() const { return true; }
+   virtual bool GetDefaultValue() const { return true; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_KOREAN; }
-   virtual const wxChar *TempProfileEntryName() const
+   virtual const wxChar *GetProfileName() const
       { return _T("SpamKoreanCharset"); }
    virtual const wxChar *DialogLabel() const
       { return gettext_noop("&Korean charset"); }
@@ -230,10 +231,10 @@ public:
 class SpamOptionExeAttach : public SpamOption
 {
 public:
-   virtual bool DefaultValue() const { return true; }
+   virtual bool GetDefaultValue() const { return true; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_EXECUTABLE_ATTACHMENT; }
-   virtual const wxChar *TempProfileEntryName() const
+   virtual const wxChar *GetProfileName() const
       { return _T("SpamExeAttachment"); }
    virtual const wxChar *DialogLabel() const
       { return gettext_noop("E&xecutable attachment"); }
@@ -255,10 +256,10 @@ public:
 class SpamOptionXAuth : public SpamOption
 {
 public:
-   virtual bool DefaultValue() const { return false; }
+   virtual bool GetDefaultValue() const { return false; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_XAUTHWARN; }
-   virtual const wxChar *TempProfileEntryName() const
+   virtual const wxChar *GetProfileName() const
       { return _T("SpamXAuthWarning"); }
    virtual const wxChar *DialogLabel() const
       { return gettext_noop("X-Authentication-&Warning header"); }
@@ -268,10 +269,10 @@ public:
 class SpamOptionReceived : public SpamOption
 {
 public:
-   virtual bool DefaultValue() const { return false; }
+   virtual bool GetDefaultValue() const { return false; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_RECEIVED; }
-   virtual const wxChar *TempProfileEntryName() const
+   virtual const wxChar *GetProfileName() const
       { return _T("SpamReceived"); }
    virtual const wxChar *DialogLabel() const
       { return gettext_noop("Suspicious \"&Received\" headers"); }
@@ -281,10 +282,10 @@ public:
 class SpamOptionHtml : public SpamOption
 {
 public:
-   virtual bool DefaultValue() const { return false; }
+   virtual bool GetDefaultValue() const { return false; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_HTML; }
-   virtual const wxChar *TempProfileEntryName() const
+   virtual const wxChar *GetProfileName() const
       { return _T("SpamHtml"); }
    virtual const wxChar *DialogLabel() const
       { return gettext_noop("Only &HTML content"); }
@@ -294,10 +295,10 @@ public:
 class SpamOptionMime : public SpamOption
 {
 public:
-   virtual bool DefaultValue() const { return false; }
+   virtual bool GetDefaultValue() const { return false; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_MIME; }
-   virtual const wxChar *TempProfileEntryName() const
+   virtual const wxChar *GetProfileName() const
       { return _T("SpamMime"); }
    virtual const wxChar *DialogLabel() const
       { return gettext_noop("Unusual &MIME structure"); }
@@ -307,10 +308,10 @@ public:
 class SpamOptionWhiteList : public SpamOption
 {
 public:
-   virtual bool DefaultValue() const { return false; }
+   virtual bool GetDefaultValue() const { return false; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_WHITE_LIST; }
-   virtual const wxChar *TempProfileEntryName() const
+   virtual const wxChar *GetProfileName() const
       { return _T("SpameWhiteList"); }
    virtual const wxChar *DialogLabel() const
       { return gettext_noop("No match in &whitelist"); }
@@ -322,10 +323,10 @@ public:
 class SpamOptionRbl : public SpamOption
 {
 public:
-   virtual bool DefaultValue() const { return false; }
+   virtual bool GetDefaultValue() const { return false; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_RBL; }
-   virtual const wxChar *TempProfileEntryName() const
+   virtual const wxChar *GetProfileName() const
       { return _T("SpamIsInRBL"); }
    virtual const wxChar *DialogLabel() const
       { return gettext_noop("Been &blacklisted by RBL"); }
@@ -337,16 +338,15 @@ public:
 // HeadersOptionsPage
 // ----------------------------------------------------------------------------
 
-class HeadersOptionsPage : public wxOptionsPageDynamic
+class HeadersOptionsPage : public SpamOptionsPage
 {
 public:
-   HeadersOptionsPage(wxListOrNoteBook *notebook);
+   HeadersOptionsPage(wxListOrNoteBook *notebook,
+                      Profile *profile,
+                      String *params);
 
-   virtual void FromString(const String &source);
-   virtual String ToString();
-
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
+   void FromString(const String &source);
+   String ToString();
 
 private:
    ConfigValueDefault *GetConfigValues();
@@ -355,9 +355,8 @@ private:
    void SetDefaults();
    void SetFalse();
 
-   void WriteProfile(Profile *profile);
-   void ReadProfile(Profile *profile);
-   void DeleteProfile(Profile *profile);
+   void WriteParamsToProfile();
+   void ReadParamsFromProfile();
 
    size_t GetConfigEntryCount();
 
@@ -1436,10 +1435,12 @@ HeadersFilter::DoCheckIfSpam(const Message& msg,
 // HeadersFilter configuration
 // ----------------------------------------------------------------------------
 
-wxOptionsPage *
-HeadersFilter::CreateOptionPage(wxListOrNoteBook *notebook) const
+SpamOptionsPage *
+HeadersFilter::CreateOptionPage(wxListOrNoteBook *notebook,
+                                Profile *profile,
+                                String *params) const
 {
-   return new HeadersOptionsPage(notebook);
+   return new HeadersOptionsPage(notebook, profile, params);
 }
 
 // ============================================================================
@@ -1468,8 +1469,10 @@ const size_t
    HeadersOptionsPage::ms_count = WXSIZEOF(HeadersOptionsPage::ms_members);
 
 
-HeadersOptionsPage::HeadersOptionsPage(wxListOrNoteBook *notebook)
-                  : wxOptionsPageDynamic(notebook)
+HeadersOptionsPage::HeadersOptionsPage(wxListOrNoteBook *notebook,
+                                       Profile *profile,
+                                       String *params)
+                  : SpamOptionsPage(notebook, profile, params)
 {
    m_nEntries = 0;
 
@@ -1477,7 +1480,7 @@ HeadersOptionsPage::HeadersOptionsPage(wxListOrNoteBook *notebook)
    (
       notebook,
       gettext_noop("Headers filter"),
-      mApplication->GetProfile(),
+      profile,
       GetFieldInfo(),
       GetConfigValues(),
       GetConfigEntryCount(),
@@ -1485,24 +1488,6 @@ HeadersOptionsPage::HeadersOptionsPage(wxListOrNoteBook *notebook)
       -1,
       notebook->GetPageCount()
    );
-}
-
-bool HeadersOptionsPage::TransferDataToWindow()
-{
-   WriteProfile(mApplication->GetProfile());
-
-   return wxOptionsPageDynamic::TransferDataToWindow();
-}
-
-bool HeadersOptionsPage::TransferDataFromWindow()
-{
-   bool rc = wxOptionsPageDynamic::TransferDataFromWindow();
-   if ( rc )
-      ReadProfile(mApplication->GetProfile());
-
-   DeleteProfile(mApplication->GetProfile());
-
-   return rc;
 }
 
 size_t HeadersOptionsPage::GetConfigEntryCount()
@@ -1528,7 +1513,7 @@ void HeadersOptionsPage::SetDefaults()
 {
    for ( HeadersOptionsPage::Iterator option(this); !option.IsEnd(); ++option )
    {
-      option->m_active = option->DefaultValue();
+      option->m_active = option->GetDefaultValue();
    }
 }
 
@@ -1594,30 +1579,31 @@ String HeadersOptionsPage::ToString()
    return result;
 }
 
-void HeadersOptionsPage::WriteProfile(Profile *profile)
+void HeadersOptionsPage::WriteParamsToProfile()
 {
-   for ( HeadersOptionsPage::Iterator option(this);
-      !option.IsEnd(); ++option )
+   CHECK_RET( m_params,
+              _T("WriteParamsToProfile() shouldn't be called without params") );
+
+   FromString(*m_params);
+
+   for ( HeadersOptionsPage::Iterator option(this); !option.IsEnd(); ++option )
    {
-      profile->writeEntry(option->TempProfileEntryName(), option->m_active);
+      m_profile->writeEntry(option->GetProfileName(), option->m_active);
    }
 }
 
-void HeadersOptionsPage::ReadProfile(Profile *profile)
+void HeadersOptionsPage::ReadParamsFromProfile()
 {
-   for ( HeadersOptionsPage::Iterator option(this); !option.IsEnd(); ++option )
-   {
-      option->m_active = profile->readEntry(
-         option->TempProfileEntryName(), 0l) != 0l;
-   }
-}
+   CHECK_RET( m_params,
+              _T("ReadParamsFromProfile() shouldn't be called without params") );
 
-void HeadersOptionsPage::DeleteProfile(Profile *profile)
-{
    for ( HeadersOptionsPage::Iterator option(this); !option.IsEnd(); ++option )
    {
-      profile->DeleteEntry(option->TempProfileEntryName());
+      option->m_active =
+         m_profile->readEntry(option->GetProfileName(), 0l) != 0l;
    }
+
+   *m_params = ToString();
 }
 
 ConfigValueDefault *HeadersOptionsPage::GetConfigValues()
@@ -1632,8 +1618,8 @@ ConfigValueDefault *HeadersOptionsPage::GetConfigValues()
       ConfigValueDefault& value = m_configValues[n];
       value = ConfigValueDefault
               (
-                  option->TempProfileEntryName(),
-                  option->DefaultValue()
+                  option->GetProfileName(),
+                  option->GetDefaultValue()
               );
       n += option->GetEntriesCount();
    }

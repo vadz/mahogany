@@ -44,6 +44,7 @@
 #include "MFolder.h"
 #include "MailFolder.h"
 #include "MModule.h"
+#include "SpamFilter.h"
 
 #include "gui/wxBrowseButton.h"
 #include "gui/wxDialogLayout.h"
@@ -497,7 +498,10 @@ public:
 
       switch ( test )
       {
-         // message flags are decoded separately
+         // spam tests or message flags are decoded separately
+         case ORC_T_IsSpam:
+            return m_spamOptions;
+
          case ORC_T_HasFlag:
             switch ( m_choiceFlags->GetSelection() )
             {
@@ -531,13 +535,9 @@ public:
 
 private:
    // create the spam button and position it correctly
-   void CreateSpamButton(const String& rule);
-
-   // initialize m_checkXXX vars(called from CreateSpamButton())
-   void InitSpamOptions(const String& rule);
+   void CreateSpamButton();
 
    // the controls which are always shown
-
    wxCheckBox *m_Not;      // invert the condition if checked
    wxChoice   *m_Logical;  // corresponds to ORC_Logical
    wxChoice   *m_Type;     // corresponds to ORC_Types
@@ -552,6 +552,9 @@ private:
 
    // the parent for all these controls
    wxWindow   *m_Parent;
+
+   // the spam options (only used if m_btnSpam != NULL)
+   String m_spamOptions;
 };
 
 wxCOMPILE_TIME_ASSERT( ORC_LogicalCount == ORC_L_Max, MismatchInLogicOps );
@@ -700,11 +703,9 @@ OneCritControl::LayoutControls(wxWindow **last)
 }
 
 void
-OneCritControl::CreateSpamButton(const String& rule)
+OneCritControl::CreateSpamButton()
 {
    ASSERT_MSG( !m_btnSpam, _T("CreateSpamButton() called twice?") );
-
-   InitSpamOptions(rule);
 
    m_btnSpam = new CritDetailsButton(m_Parent, this);
 
@@ -744,8 +745,12 @@ OneCritControl::UpdateUI(wxTextCtrl *textProgram)
    m_Argument->Enable(enable_arg);
    m_Where->Show(enable_target);
    m_Where->Enable(enable_target);
-   if ( enable_isspam && ! m_btnSpam )
-      CreateSpamButton(textProgram->GetValue());
+   if ( enable_isspam && !m_btnSpam )
+   {
+      CreateSpamButton();
+      m_spamOptions = m_Argument->GetValue();
+   }
+
    if ( m_btnSpam )
    {
       m_btnSpam->Show(enable_isspam);
@@ -802,20 +807,9 @@ OneCritControl::SetValues(const MFDialogSettings& settings, size_t n)
 // ----------------------------------------------------------------------------
 
 void
-OneCritControl::InitSpamOptions(const String& /* rule */)
-{
-#if 0
-   CHECK_RET( m_Argument, _T("no argument control in the spam test?") );
-
-   m_spam->FromString(m_Argument->GetValue());
-#endif
-}
-
-void
 OneCritControl::ShowDetails()
 {
-#if 0
-   if ( m_spam->ShowDialog(GetFrame(m_Parent)) )
+   if ( SpamFilter::Configure(GetFrame(m_Parent), &m_spamOptions) )
    {
       wxOneFilterDialog *dlg =
          GET_PARENT_OF_CLASS(m_Parent, wxOneFilterDialog);
@@ -824,7 +818,6 @@ OneCritControl::ShowDetails()
       dlg->UpdateProgram();
    }
    //else: cancelled
-#endif // 0
 }
 
 void CritDetailsButton::OnClick(wxCommandEvent& WXUNUSED(event))

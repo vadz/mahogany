@@ -34,8 +34,7 @@
 #include "HeaderInfo.h"
 
 #include "SpamFilter.h"
-
-#include "gui/wxOptionsPage.h"
+#include "gui/SpamOptionsPage.h"
 
 extern "C"
 {
@@ -104,7 +103,9 @@ protected:
                               const String& param,
                               String *result);
    virtual const wxChar *GetOptionPageIconName() const { return _T("dspam"); }
-   virtual wxOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook) const;
+   virtual SpamOptionsPage *CreateOptionPage(wxListOrNoteBook *notebook,
+                                             Profile *profile,
+                                             String *params) const;
 
 private:
    // helper: used as DoProcess() argument to initialize the context or to get
@@ -161,10 +162,11 @@ IMPLEMENT_SPAM_FILTER(DspamFilter,
 // DspamOptionsPage
 // ----------------------------------------------------------------------------
 
-class DspamOptionsPage : public wxOptionsPageDynamic
+class DspamOptionsPage : public SpamOptionsPage
 {
 public:
    DspamOptionsPage(DspamFilter *filter,
+                    String *params,
                     wxNotebook *parent,
                     const wxChar *title,
                     Profile *profile,
@@ -172,20 +174,11 @@ public:
                     ConfigValuesArray aDefaults,
                     size_t nFields,
                     int image = -1)
-      : wxOptionsPageDynamic
-        (
-            parent,
-            title,
-            profile,
-            aFields,
-            aDefaults,
-            nFields,
-            0,          // offset
-            -1,         // help id
-            image
-        )
+      : SpamOptionsPage(parent, profile, params)
    {
       m_filter = filter;
+
+      Create(parent, title, profile, aFields, aDefaults, nFields, 0, -1, image);
    }
 
 protected:
@@ -447,7 +440,10 @@ enum
    DspamPageField_Max
 };
 
-wxOptionsPage *DspamFilter::CreateOptionPage(wxListOrNoteBook *notebook) const
+SpamOptionsPage *
+DspamFilter::CreateOptionPage(wxListOrNoteBook *notebook,
+                              Profile *profile,
+                              String *params) const
 {
    static const wxOptionsPage::FieldInfo s_fields[] =
    {
@@ -502,9 +498,10 @@ wxOptionsPage *DspamFilter::CreateOptionPage(wxListOrNoteBook *notebook) const
    return new DspamOptionsPage
               (
                   const_cast<DspamFilter *>(this),
+                  params,
                   notebook,
                   gettext_noop("DSPAM"),
-                  mApplication->GetProfile(),
+                  profile,
                   s_fields,
                   s_values,
                   DspamPageField_Max,
