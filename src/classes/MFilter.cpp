@@ -636,15 +636,17 @@ protected:
          {
             // write the values to the profile
             m_Profile->writeEntry("Name", m_Name);
-#if 0
             if ( m_Settings )
             {
+               // if we have matching dialog settings, we prefer to
+               // write them as they are more compact in the config file
                m_Profile->writeEntry("Settings", m_Settings->WriteSettings());
             }
-#endif
-            // we now always write code:
-            (void) m_Profile->DeleteEntry("Settings");
-            m_Profile->writeEntry("Rule", m_Rule);
+            else
+            {
+               (void) m_Profile->DeleteEntry("Settings");
+               m_Profile->writeEntry("Rule", m_Rule);
+            }
          }
          SafeDecRef(m_Settings);
          m_Profile->DecRef();
