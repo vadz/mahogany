@@ -3332,8 +3332,9 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
 
    AttachmentProperties props;
    props.filename = filename;
-   props.name = filename;
+   props.name = wxFileNameFromPath(filename);
    props.mimetype = strMimeType;
+   mc->SetFile(props.filename);
 
    // by default propose to send the images and text parts inline but all the
    // rest as attachment
@@ -3358,7 +3359,6 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
          wxPMessageBoxDisable(configPath, wxNO);
    }
 
-   mc->SetFile(props.filename);
 
    strMimeType = props.mimetype.GetFull();
    DoInsertAttachment(mc, strMimeType);

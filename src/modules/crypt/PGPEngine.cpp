@@ -455,6 +455,10 @@ PGPEngine::DoExecCommand(const String& options,
                          String& messageOut,
                          MCryptoEngineOutputLog *log)
 {
+   // First copy from in to out, in case there is a problem and we can't
+   // execute the command. At least, the original message will be visible.
+   messageOut = messageIn;
+
    PGPProcess process;
    long pid = wxExecute
               (
