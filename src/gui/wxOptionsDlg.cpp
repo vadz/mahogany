@@ -1354,7 +1354,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Python &path"),                 Field_Text |
                                                    Field_AppWide, ConfigField_EnablePython   },
    { gettext_noop("Mahogany may load a Python module containing functions\n"
-                  "you use on stratup, you will be able to later refer to these\n"
+                  "you use on startup, you will be able to later refer to these\n"
                   "functions without \"module.\" part. Also, if this module\n"
                   "contains a special Init() function, it will be called."),
                                                    Field_Message |
