@@ -79,7 +79,7 @@ static const TbarItemInfo g_aToolBarData[] =
 
    // common for all frames
    { "tb_close",       WXMENU_FILE_CLOSE,  gettext_noop("Close this window") },
-   { "tb_adr_book",    WXMENU_EDIT_ADB,    gettext_noop("Edit address book") },
+   { "tb_adrbook",    WXMENU_EDIT_ADB,    gettext_noop("Edit address book") },
    { "tb_preferences", WXMENU_EDIT_PREF,   gettext_noop("Edit preferences")  },
 
    // main frame

@@ -118,15 +118,6 @@ static bool IsDirectionKey(long keyCode);
 // implementation
 // ============================================================================
 
-/* LEAVE IT HERE UNTIL WXGTK WORKS AGAIN!!! */
-#ifdef __WXGTK__
-/// allows me to compare to wxPoints
-static bool operator != (wxPoint const &p1, wxPoint const &p2)
-{
-   return p1.x != p2.x || p1.y != p2.y;
-}
-#endif // __WXGTK__
-
 #ifndef wxWANTS_CHARS
    #define wxWANTS_CHARS 0
 #endif
