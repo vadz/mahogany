@@ -2795,7 +2795,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
          case WXFLC_SIZE:
          case WXFLC_STATUS:
          case WXFLC_MSGNO:
-            text = "???";
+            text = _T("???");
             break;
 
          case WXFLC_FROM:
@@ -2880,13 +2880,13 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
 
       case WXFLC_SUBJECT:
          // FIXME: hard coded 3 spaces
-         text = wxString(' ', 3*m_headers->GetIndentation((size_t)item))
+         text = wxString(_T(' '), 3*m_headers->GetIndentation((size_t)item))
                   + hi->GetSubject();
          break;
 
       case WXFLC_MSGNO:
          // users, unlike programmers, count from 1, not 0 - hence +1
-         text.Printf("%ld", item + 1);
+         text.Printf(_T("%ld"), item + 1);
          break;
 
       default:
@@ -2898,16 +2898,16 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
       wxFontEncoding encoding = hi->GetEncoding();
 
       // optionally convert from UTF-8|7 to environment's default encoding
+      //
       // FIXME it won't be needed when full Unicode support is available
       if ( encoding == wxFONTENCODING_UTF8 || encoding == wxFONTENCODING_UTF7 )
       {
          encoding = ConvertUnicodeToSystem(&text, encoding);
       }
 
-      // we might do conversion if we can't show this encoding directly
+      // we might have to convert it if we can't show this encoding directly
       if ( encoding != wxFONTENCODING_SYSTEM )
       {
-         wxFontEncoding encoding = hi->GetEncoding();
          EnsureAvailableTextEncoding(&encoding, &text);
       }
    }
