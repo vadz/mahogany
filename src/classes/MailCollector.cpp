@@ -459,18 +459,23 @@ MailCollectorImpl::UpdateFolderList(void)
             (**i).m_folder = MailFolder::OpenFolder((**i).m_name);
             if((**i).m_folder == NULL) // folder inaccessible:
             {
-              ERRORMESSAGE((_("Cannot open incoming folder '%s'."), (**i).m_name.c_str()));
-              if(MDialog_YesNoDialog(
-	         _("Accessing the incoming folder\n"
-        	   "'%s' failed.\n\n"
-	           "Do you want to stop collecting\n"
-	           "mail from it in this session?"),
-	         NULL,
-	         _("Mail collection failed"),
-	         TRUE, GetPersMsgBoxName(M_MSGBOX_SUSPENDAUTOCOLLECT)))
-         		RemoveIncomingFolder((**i).m_name);
+               ERRORMESSAGE((_("Cannot open incoming folder '%s'."), (**i).m_name.c_str()));
+               if(MDialog_YesNoDialog(
+                  _("Accessing the incoming folder\n"
+                    "'%s' failed.\n\n"
+                    "Do you want to stop collecting\n"
+                    "mail from it in this session?"),
+                  NULL,
+                  _("Mail collection failed"),
+                  TRUE, GetPersMsgBoxName(M_MSGBOX_SUSPENDAUTOCOLLECT)))
+               {
+                  RemoveIncomingFolder((**i).m_name);
+                  // re-start from beginning of list to avoid iterator trouble:
+                  i = m_list->begin();
+               }
             }
-	}
+         }
+      }
    }
    else // we are offline, do we need to disable some folder:
    {
