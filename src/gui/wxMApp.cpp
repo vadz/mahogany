@@ -604,7 +604,7 @@ wxMApp::OnInit()
       of LANG="de". Once again, they do their own thing...
    */
    if( hasLocale && (wxStricmp(locale, "german") == 0) )
-      locale = "de";
+      locale = "de_DE";
 #endif // __LINUX__
 
    // if we fail to load the msg catalog, remember it in this variable because
