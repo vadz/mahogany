@@ -176,12 +176,12 @@ public:
    /** Appends the message to this folder.
        @param msg the message to append
    */
-   void AppendMessage(Message const &msg);
+   virtual void AppendMessage(Message const &msg);
 
    /** Appends the message to this folder.
        @param msg text of the  message to append
    */
-   void AppendMessage(String const &msg);
+   virtual void AppendMessage(String const &msg);
 
    /** Delete a message.
        @param index the sequence number

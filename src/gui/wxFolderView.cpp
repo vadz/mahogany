@@ -552,6 +552,7 @@ wxFolderView::SaveMessages(const wxArrayInt& selections, String const &folderNam
       mf->AppendMessage(*msg);
       SafeDecRef(msg);
    }
+   mf->Ping(); // update any views
    mf->DecRef();
    wxLogStatus(GetFrame(m_Parent), _("%d messages saved"), n);
 }

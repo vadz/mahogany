@@ -1,0 +1,13 @@
+--- /home/karsten/tmp/imap-4.5/src/c-client/auth_md5.c	Thu Dec 10 03:03:08 1998
++++ auth_md5.c	Thu Feb 18 10:23:37 1999
+@@ -35,6 +35,10 @@
+ 
+ /* MD5 context */
+ 
++#ifndef MD5ENABLE
++#   define MD5ENABLE "\\.nosuch.."  
++#endif
++
+ #define MD5BLKLEN 64		/* MD5 block length */
+ #define MD5DIGLEN 16		/* MD5 digest length */
+ 

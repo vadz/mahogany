@@ -19,6 +19,7 @@ $Id$
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
+- speed up copy mail to folder by doing them all at once
 - add some more folder properties to config dialog, i.e. be able to
   switch off automatic notification of incoming emails.
   Currently, coying emails to another folder produces "New Mail" dialogs.
