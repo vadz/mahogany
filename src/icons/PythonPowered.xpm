@@ -1,0 +1,35 @@
+/* XPM */
+static char *PythonPowered_xpm[] = {
+/* width height num_colors chars_per_pixel */
+"    55    22        6            1",
+/* colors */
+". c #ffffff",
+"# c #848484",
+"a c #393939",
+"b c #ffde00",
+"c c #0063a5",
+"d c #000000",
+/* pixels */
+"bbbbbbbbbbbbbbbbbbbcccccccccccccccccbbbbbbbbbbbbbbbbbbb",
+"bbbbbbbbbbbbbbcccccccccccccccccccccccccccbbbbbbbbbbbbbb",
+"bbbbbbbbdaaaaddadcdadaaaaadadcdaddaaaddadcdadbbbbbbbbbb",
+"bbbbbbbca....#a.ada.#.....#.ada.a#...#a.ada.adccbbbbbbb",
+"bbbbbccca.#a#.#.ada.aa#.#aa.ada.#.#a#.#.#da.adccccbbbbb",
+"bbbbcccca.#a#.#.#d#.ada.ada.#a#.#.ada.#..#a.adcccccbbbb",
+"bbcccccca....#d#.#.#dda.ada.....#.ada.#.#.#.adcccccccbb",
+"bccccccca.#aaddd#.#ddda.ada.#a#.#.ada.#.a#..adccccccccb",
+"bccccccca.addddca.addca.ada.ada.#.#a#.#.ad#.adccccccccb",
+"cccccccca.adcccca.adcca.ada.ada.a#...#a.ada.addadcccccc",
+"ccccccccdaddccccdaddccdadddadddaddaaaddadddadda.adccccc",
+"ccccccdaaaadcdaaaddadcdaddaaaddadaadddaaadddaaa.adccccc",
+"cccccca....#d#...#a.ada.a#...#a.#..#d#...#d#..#.adccccc",
+"bccccca.###.#.#a#.#.aaa.#.###.#..##.#.###.#.##..adccccb",
+"bccccca....#a.ada.#.#.#.#.....#.#ddaa.....#.ad#.adccccb",
+"bbcccca.#aada.#a#.#.#.#.#.###aa.addda.###aa.#a#.adcccbb",
+"bbbbcca.adddd#...#d#.#.#d#...aa.adccd#...ad#....adcbbbb",
+"bbbbbcdaddcccdaaadddadadddaaaddaddcccdaaadddaaaaddbbbbb",
+"bbbbbbbdddccccdddddcdddddcddddddddccccdddddcddddddbbbbb",
+"bbbbbbbbbbcccccccccccccccccccccccccccccccccccbbbbbbbbbb",
+"bbbbbbbbbbbbbbcccccccccccccccccccccccccccbbbbbbbbbbbbbb",
+"bbbbbbbbbbbbbbbbbbbcccccccccccccccccbbbbbbbbbbbbbbbbbbb"
+};
