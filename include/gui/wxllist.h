@@ -762,6 +762,14 @@ public:
                                      wxPoint const pos,
                                      wxPoint *cursorPos = NULL);
 
+   /** Called by the objects to update the update rectangle.
+       @param p a point to include in it
+   */
+   void SetUpdateRect(const wxPoint &p);
+   /// Invalidates the update rectangle.
+   void InvalidateUpdateRect(void) { m_UpdateRectValid = false; }
+   /// Returns the update rectangle.
+   const wxRect *GetUpdateRect(void) const { return &m_UpdateRect; }
    //@}
 
    /**@name For exporting one object after another. */
@@ -779,6 +787,10 @@ private:
    
    /// The list of lines.
    wxLayoutLine *m_FirstLine;
+   /// The update rectangle which needs to be refreshed:
+   wxRect  m_UpdateRect;
+   /// Is the update rectangle valid?
+   bool    m_UpdateRectValid;
    /**@name Cursor Management */
    //@{
    /// Where the text cursor (column,line) is.

@@ -191,19 +191,18 @@
 //@{
 /// Command
 #define MP_PRINT_COMMAND   "PrintCommand"
+/// Options
+#define MP_PRINT_OPTIONS   "PrintOptions"
 /// Orientation
 #define MP_PRINT_ORIENTATION "PrintOrientation"
-/// Scaling
-#define MP_PRINT_SCALING   "PrintScaling"
-/// Preview command
-#define MP_PRINT_PREVIEWCMD   "PrintPreviewCommand"
-/// Printout file
-#define MP_PRINT_FILE         "PrintFile"
-/// Translation X
-#define MP_PRINT_TRANS_X      "PrintTranslationX"
-/// Translation Y
-#define MP_PRINT_TRANS_Y      "PrintTranslationY"
-/// FIXME What about paper format?
+/// print mode
+#define MP_PRINT_MODE      "PrintMode"
+/// paper name
+#define MP_PRINT_PAPER   "PrintPaperType"
+/// paper name
+#define MP_PRINT_FILE   "PrintFilenname"
+/// print in colour?
+#define MP_PRINT_COLOUR "PrintUseColour"
 //@}
 /**@name for BBDB address book support */
 //@{
@@ -499,20 +498,19 @@
 /**@name Printer settings */
 //@{
 /// Command
-#define MP_PRINT_COMMAND   "PrintCommand"
+#define MP_PRINT_COMMAND_D "lpr"
+/// Options
+#define MP_PRINT_OPTIONS_D   ""
 /// Orientation
-#define MP_PRINT_ORIENTATION "PrintOrientation"
-/// Scaling
-#define MP_PRINT_SCALING   "PrintScaling"
-/// Preview command
-#define MP_PRINT_PREVIEWCMD   "PrintPreviewCommand"
-/// Printout file
-#define MP_PRINT_FILE         "PrintFile"
-/// Translation X
-#define MP_PRINT_TRANS_X      "PrintTranslationX"
-/// Translation Y
-#define MP_PRINT_TRANS_Y      "PrintTranslationY"
-/// FIXME What about paper format?
+#define MP_PRINT_ORIENTATION_D 1  /* wxPORTRAIT */
+/// print mode
+#define MP_PRINT_MODE_D 0  /* PS_PRINTER */
+/// paper name
+#define MP_PRINT_PAPER_D "A4"
+/// paper name
+#define MP_PRINT_FILE_D "mahogany.ps"
+/// print in colour?
+#define MP_PRINT_COLOUR_D 1
 //@}
 /**@name for BBDB address book support */
 //@{

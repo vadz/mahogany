@@ -59,19 +59,35 @@
 
 /// Use this character to estimate a cursor size when none is available.
 #define WXLO_CURSORCHAR   "E"
-
-/// Helper function, allows me to compare to wxPoints
+/** @name Helper functions */
+//@{
+/// allows me to compare to wxPoints
 bool operator ==(wxPoint const &p1, wxPoint const &p2)
 {
    return p1.x == p2.x && p1.y == p2.y;
 }
 
-/// Helper function, allows me to compare to wxPoints
+/// allows me to compare to wxPoints
 bool operator !=(wxPoint const &p1, wxPoint const &p2)
 {
    return p1.x != p2.x || p1.y != p2.y;
 }
 
+/// grows a wxRect so that it includes the given point
+
+static void GrowRect(wxRect &r, const wxPoint & p)
+{
+   if(r.x > p.x)
+      r.x = p.x;
+   else if(r.x + r.width < p.x)
+      r.width = p.x - r.x;
+   
+   if(r.y > p.y)
+      r.y = p.y;
+   else if(r.y + r.height < p.y)
+      r.height = p.y - r.y;
+}
+//@}
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
@@ -868,6 +884,7 @@ wxLayoutList::wxLayoutList()
 {
    m_DefaultSetting = NULL;
    m_FirstLine = NULL;
+   InvalidateUpdateRect();
    Clear();
 }
 
@@ -1344,6 +1361,23 @@ wxLayoutList::DrawCursor(wxDC &dc, bool active, wxPoint const &translate)
    //dc.SetBrush(wxNullBrush);
 }
 
+/** Called by the objects to update the update rectangle.
+    @param p a point to include in it
+*/
+void
+wxLayoutList::SetUpdateRect(const wxPoint &p)
+{
+   if(m_UpdateRectValid)
+      GrowRect(m_UpdateRect, p);
+   else
+   {
+      m_UpdateRect.x = p.x;
+      m_UpdateRect.y = p.y;
+      m_UpdateRect.width = 4; // large enough to avoid surprises from
+      m_UpdateRect.height = 4;// wxGTK :-)
+      m_UpdateRectValid = true;
+   }
+}
 
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 

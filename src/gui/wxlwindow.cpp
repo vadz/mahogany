@@ -287,7 +287,7 @@ wxLayoutWindow::DoPaint(bool scrollToCursor)
 #ifdef __WXGTK__
    InternalPaint();
 #else
-   Refresh();
+   Refresh(FALSE); // Causes bad flicker under wxGTK!!!
 #endif
 }
 

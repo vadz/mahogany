@@ -377,6 +377,7 @@ MAppBase::OnStartup()
    }
 #  endif //USE_PYTHON
 
+
    // open all default mailboxes
    // --------------------------
    char *folders = strutil_strdup(READ_APPCONFIG(MP_OPENFOLDERS));

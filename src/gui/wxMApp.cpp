@@ -39,6 +39,7 @@
 #  include <wx/log.h>
 #  include <wx/config.h>
 #  include <wx/intl.h>
+#  include   <wx/generic/dcpsg.h>
 #endif
 
 #include "Mdefaults.h"
@@ -216,6 +217,15 @@ wxMApp::OnInit()
       // at this moment we're fully initialized, i.e. profile and log
       // subsystems are working and the main window is created
 
+      // restore our preferred printer settings
+      wxThePrintSetupData->SetPrinterCommand(READ_APPCONFIG(MP_PRINT_COMMAND));
+      wxThePrintSetupData->SetPrinterOptions(READ_APPCONFIG(MP_PRINT_OPTIONS));
+      wxThePrintSetupData->SetPrinterOrientation(READ_APPCONFIG(MP_PRINT_ORIENTATION));
+      wxThePrintSetupData->SetPrinterMode(READ_APPCONFIG(MP_PRINT_MODE));
+      wxThePrintSetupData->SetPaperName(READ_APPCONFIG(MP_PRINT_PAPER));
+      wxThePrintSetupData->SetPrinterFile(READ_APPCONFIG(MP_PRINT_FILE));
+      wxThePrintSetupData->SetColour(READ_APPCONFIG(MP_PRINT_COLOUR));
+      
       // start a timer to autosave the profile entries
       long delay = READ_APPCONFIG(MP_AUTOSAVEDELAY);
       if ( delay > 0 )
@@ -249,6 +259,16 @@ int wxMApp::OnExit()
 {
    // disable autosave, won't need it any more
    gs_timerAutoSave.Stop();
+
+
+   // save our preferred printer settings
+   m_profile->writeEntry(MP_PRINT_COMMAND, wxThePrintSetupData->GetPrinterCommand());
+   m_profile->writeEntry(MP_PRINT_OPTIONS, wxThePrintSetupData->GetPrinterOptions());
+   m_profile->writeEntry(MP_PRINT_ORIENTATION, wxThePrintSetupData->GetPrinterOrientation());
+   m_profile->writeEntry(MP_PRINT_MODE, wxThePrintSetupData->GetPrinterMode());
+   m_profile->writeEntry(MP_PRINT_PAPER, wxThePrintSetupData->GetPaperName());
+   m_profile->writeEntry(MP_PRINT_FILE, wxThePrintSetupData->GetPrinterFile());
+   m_profile->writeEntry(MP_PRINT_COLOUR, wxThePrintSetupData->GetColour());
 
    MAppBase::OnShutDown();
 

@@ -64,6 +64,7 @@ Add choice of intermediary image format:
 
 - retrieve messages starting from last one
 - fix bitmap allocation in SetBackgroundBitmap() calls (seems ok now)
+ - save and restore printer settings in profile
 
 - fix occasional segfault/memory corruption in MailfolderCC.cpp
    + this might have been caused by the bug with rfc822_extraheaders
