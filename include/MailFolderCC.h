@@ -427,6 +427,8 @@ protected:
    virtual void RequestUpdate(void);
    /// Update the timeout values from a profile
    void UpdateTimeoutValues(void);
+   /// apply all timeout values
+   void ApplyTimeoutValues(void);
    void SetType(FolderType type) { m_folderType = type; }
 
    /// Check if this message is a "New Message":

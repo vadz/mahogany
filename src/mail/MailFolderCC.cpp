@@ -537,16 +537,8 @@ MailFolderCC::Create(int typeAndFlags)
 
    m_InCritical = false;
 
-#define SET_TO(setting, var) var = READ_APPCONFIG(MP_TCP_##setting)
-
-   SET_TO(OPENTIMEOUT, ms_TcpOpenTimeout);
-   SET_TO(READTIMEOUT, ms_TcpReadTimeout);
-   SET_TO(WRITETIMEOUT, ms_TcpWriteTimeout);
-   SET_TO(CLOSETIMEOUT, ms_TcpCloseTimeout);
-   SET_TO(RSHTIMEOUT, ms_TcpRshTimeout);
-
-#undef SET_TO
-
+   UpdateTimeoutValues();
+   
    SetRetrievalLimit(0); // no limit
    m_NumOfMessages = 0;
    m_OldNumOfMessages = 0;
@@ -744,7 +736,17 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    return mf;
 }
 
+void
+MailFolderCC::ApplyTimeoutValues(void)
+{
+   (void) mail_parameters(NIL, SET_OPENTIMEOUT, (void *) ms_TcpOpenTimeout);
+   (void) mail_parameters(NIL, SET_READTIMEOUT, (void *) ms_TcpReadTimeout);
+   (void) mail_parameters(NIL, SET_WRITETIMEOUT, (void *) ms_TcpWriteTimeout);
+   (void) mail_parameters(NIL, SET_CLOSETIMEOUT, (void *) ms_TcpCloseTimeout);
+   (void) mail_parameters(NIL, SET_RSHTIMEOUT, (void *) ms_TcpRshTimeout);
+}
 
+#if 0
 
 #define UPDATE_TO(name, var)    to = READ_CONFIG(p,MP_TCP_##name); \
                                 if (to != var) \
@@ -753,17 +755,29 @@ MailFolderCC::OpenFolder(int typeAndFlags,
                                     (void) mail_parameters(NIL, \
                                                            SET_##name, (void *) to); \
                                 }
+#endif
+
 
 void
 MailFolderCC::UpdateTimeoutValues(void)
 {
    ProfileBase *p = GetProfile();
-   int to;
-   UPDATE_TO(OPENTIMEOUT, ms_TcpOpenTimeout);
+   // int to;
+   //UPDATE_TO(OPENTIMEOUT, ms_TcpOpenTimeout);
+
+   // We now use only one common config setting:
+   ms_TcpOpenTimeout = READ_CONFIG(p,MP_TCP_OPENTIMEOUT);
+   ms_TcpReadTimeout = ms_TcpOpenTimeout;
+   ms_TcpWriteTimeout = ms_TcpOpenTimeout;
+   ms_TcpCloseTimeout = ms_TcpOpenTimeout;
+   ms_TcpRshTimeout = ms_TcpOpenTimeout;
+   ApplyTimeoutValues();
+#if 0
    UPDATE_TO(READTIMEOUT, ms_TcpReadTimeout);
    UPDATE_TO(WRITETIMEOUT, ms_TcpWriteTimeout);
    UPDATE_TO(CLOSETIMEOUT, ms_TcpCloseTimeout);
    UPDATE_TO(RSHTIMEOUT, ms_TcpRshTimeout);
+#endif
 }
 
 bool

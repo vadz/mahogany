@@ -520,6 +520,7 @@
 //@{
 /// TCP/IP open timeout in seconds.
 #define MP_TCP_OPENTIMEOUT "TCPOpenTimeout"
+#if 0 // no longer used
 /// TCP/IP read timeout in seconds.  
 #define MP_TCP_READTIMEOUT "TCPReadTimeout"
 /// TCP/IP write timeout in seconds. 
@@ -528,6 +529,7 @@
 #define  MP_TCP_CLOSETIMEOUT "TCPCloseTimeout"
 /// rsh connection timeout in seconds.
 #define MP_TCP_RSHTIMEOUT "TCPRshTimeout"
+#endif
 //@}
 /** @name for folder list ctrls: ratios of the width to use for
     columns */
@@ -992,7 +994,8 @@
 /** @name timeout values for c-client mail library */
 //@{
 /// TCP/IP open timeout in seconds.
-#define MP_TCP_OPENTIMEOUT_D      120l
+#define MP_TCP_OPENTIMEOUT_D      10l
+#if 0 // obsolete
 /// TCP/IP read timeout in seconds.  
 #define MP_TCP_READTIMEOUT_D       30l
 /// TCP/IP write timeout in seconds. 
@@ -1001,6 +1004,7 @@
 #define  MP_TCP_CLOSETIMEOUT_D 60l
 /// rsh connection timeout in seconds.
 #define MP_TCP_RSHTIMEOUT_D 60l
+#endif
 //@}
 
 /** @name for folder list ctrls: ratios of the width to use for

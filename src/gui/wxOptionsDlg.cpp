@@ -101,12 +101,15 @@ enum ConfigFields
    ConfigField_NetOffCommand,
    ConfigField_TimeoutInfo,
    ConfigField_OpenTimeout,
+#if 0
    ConfigField_ReadTimeout,
    ConfigField_WriteTimeout,
    ConfigField_CloseTimeout,
    ConfigField_RshTimeout,
    ConfigField_NetworkLast = ConfigField_RshTimeout,
-
+#endif
+   ConfigField_NetworkLast = ConfigField_OpenTimeout,
+   
    // compose
    ConfigField_ComposeFirst = ConfigField_NetworkLast,
    ConfigField_UseOutgoingFolder,
@@ -439,16 +442,16 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Beacon host (e.g. www.yahoo.com)"),Field_Text,   ConfigField_DialUpSupport},
    { gettext_noop("Command to &activate network"),   Field_Text, ConfigField_DialUpSupport},
    { gettext_noop("Command to &deactivate network"), Field_Text, ConfigField_DialUpSupport},
-   { gettext_noop("The following timeout values are used for TCP connections to\n"
-                  "remote mail or news servers. Their scope is global, but they\n"
-                  "will get set from the folder that has been opened last.\n")
-                  "All values are in seconds.", Field_Message, -1 },
-   { gettext_noop("&Open timeout"),                Field_Number,    -1,                        },
+   { gettext_noop("The following timeout value is used for TCP connections to\n"
+                  "remote mail or news servers."), Field_Message, -1 },
+   { gettext_noop("&Open timeout (in seconds)"),  Field_Number,    -1,                        },
+#if 0
    { gettext_noop("&Read timeout"),                Field_Number,    -1,                        },
    { gettext_noop("&Write timeout"),               Field_Number,    -1,                        },
    { gettext_noop("&Close timeout"),               Field_Number,    -1,                        },
    { gettext_noop("&rsh timeout"),                 Field_Number,    -1,                        },
-
+#endif
+   
    // compose
 #if 0
    { gettext_noop("Store outgoing messages and send only when asked to"),
@@ -642,11 +645,13 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_NET_OFF_COMMAND),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_TCP_OPENTIMEOUT),
+#if 0
    CONFIG_ENTRY(MP_TCP_READTIMEOUT),
    CONFIG_ENTRY(MP_TCP_WRITETIMEOUT),
    CONFIG_ENTRY(MP_TCP_RSHTIMEOUT),
    CONFIG_ENTRY(MP_TCP_CLOSETIMEOUT),
-
+#endif
+   
    // compose
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER), // where to keep copies of
                                        // messages send
