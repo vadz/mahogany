@@ -3051,9 +3051,8 @@ wxComposeView::IsReadyToSend() const
       if ( READ_CONFIG(m_Profile, MP_USE_SENDMAIL) )
          hostOrCmd = READ_CONFIG_TEXT(m_Profile, MP_SENDMAILCMD);
       else
-#else
+#endif // OS_UNIX
          hostOrCmd = READ_CONFIG_TEXT(m_Profile, MP_SMTPHOST);
-#endif
 
       if ( hostOrCmd.empty() )
       {
