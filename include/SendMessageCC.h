@@ -17,6 +17,8 @@
 #   pragma interface "SendMessageCC.h"
 #endif
 
+#include "lists.h"
+
 #include "FolderType.h"
 
 class Profile;
@@ -258,7 +260,7 @@ private:
    MessageHeadersList m_extraHeaders;
 
    /// a list of folders to save copies of the message in after sending
-   kbStringList m_FccList;
+   M_LIST_OWN(StringList, String) m_FccList;
 
    //@}
 

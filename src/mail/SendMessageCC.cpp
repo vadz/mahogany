@@ -1454,7 +1454,7 @@ SendMessageCC::SendOrQueue(int flags)
       if ( success )
       {
          // save it in the local folders, if any
-         for ( kbStringList::iterator i = m_FccList.begin();
+         for ( StringList::iterator i = m_FccList.begin();
                i != m_FccList.end();
                i++ )
          {
