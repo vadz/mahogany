@@ -1,4 +1,5 @@
 # Makefile for src/util directory
+# $Id$
 
 CWD = util
 SRC = strutil.cpp upgrade.cpp
