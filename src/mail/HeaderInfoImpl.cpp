@@ -676,6 +676,221 @@ MsgnoType *HeaderInfoListImpl::AllocTable() const
    return (MsgnoType *)malloc(m_count * sizeof(MsgnoType));
 }
 
+MsgnoType HeaderInfoListImpl::GetNthSortedMsgno(MsgnoType n) const
+{
+   if ( m_reverseOrder )
+   {
+      // reverse either the table order or the natural order
+      return m_tableSort ? m_tableSort[m_count - 1 - n]
+                         : m_count - n;
+   }
+   else // !reversed order
+   {
+      // must have a table, otherwise how do we sort messages?
+      return m_tableSort[n];
+   }
+}
+
+void HeaderInfoListImpl::CombineSortAndThread()
+{
+   // don't crash below if we don't have it somehow
+   CHECK_RET( m_thrData, "must be already threaded" );
+
+   // check it now or we'd crash in the loop below (and I don't want to
+   // put the check inside the loop obviously)
+   CHECK_RET( m_tableSort || m_reverseOrder, "how do we sort them?" );
+
+   // normally we're called from BuildTables() so we shouldn't have it yet
+   ASSERT_MSG( !m_tableMsgno, "unexpected call to CombineSortAndThread" );
+
+   m_tableMsgno = AllocTable();
+   memset(m_tableMsgno, 0, m_count * sizeof(MsgnoType));
+
+   /*
+      Here is the idea: we scan the sorting table from top to bottom and
+      extract from it first the root messages (i.e. with 0 indent in the
+      threading table) which we can immediately put in order into
+      m_tableMsgno because we know that the first root message will be at
+      position 0, the next one - at position 1 + total number of children
+      of the previous one &c (this index is idxCur below).
+
+      Next we rescan the table for messages of indent 1 and put them in
+      the free slots of m_tableMsgno (this is why we initialize it with
+      0s above), i.e. do the same thing as above but skipping over the
+      slots already taken by roots &c.
+
+      The code below optimizes the algorithm outlined above: while the
+      latter would require "max thread depth" passes over the sorting
+      table (and the last passes are very inefficient as we need to scan
+      the whole huge table only to find a few messages), the former does
+      only 2 passes:
+
+         1. position all roots as described above and count the number
+            of messages at level N
+         2. store the indices in the sort table of all messages at level
+            N in the preallocated arrays
+         3. traverse each of these arrays putting messages in place
+    */
+
+   // old multi-pass code, keep it here for now for reference (it should
+   // produce the same results as the new one!)
+#if 0
+   size_t level = 0;
+   MsgnoType countDone = 0;
+   while ( countDone < m_count )
+   {
+      MsgnoType idxCur = 0;
+
+      for ( MsgnoType n = 0; n < m_count; n++ )
+      {
+         MsgnoType msgno;
+         if ( m_reverseOrder )
+         {
+            // reverse either the table order or the natural order
+            msgno = m_tableSort ? m_tableSort[m_count - 1 - n]
+                                : m_count - n;
+         }
+         else // !reversed order
+         {
+            // must have a table, otherwise how do we sort messages?
+            msgno = m_tableSort[n];
+         }
+
+         if ( m_thrData->m_indents[msgno - 1] != level )
+         {
+            // ignore it now, we either have already seen it or will see
+            // it later
+            continue;
+         }
+
+         // skip the slots already taken (by messages of the lesser
+         // level)
+         while ( idxCur < m_count && m_tableMsgno[idxCur] )
+         {
+            idxCur++;
+         }
+
+         // there must be a free slot somewhere left!
+         ASSERT_MSG( idxCur < m_count, "logic error" );
+
+         // this is the next message we have here, so put it in the first
+         // available slot in the msgno table
+         m_tableMsgno[idxCur++] = msgno;
+
+         // one more message put in place
+         countDone++;
+
+         // reserve some places for the children of this item
+         idxCur += m_thrData->m_children[msgno - 1];
+      }
+
+      // now process the messages at the next level (if there are any, of
+      // course)
+      level++;
+   }
+#endif // 0
+
+   // first pass: position the root messages and remember the number of other
+   // ones in the array
+   wxArrayInt numAtLevel;
+
+   // the next available slot in m_tableMsgno
+   MsgnoType idxCur = 0;
+
+   MsgnoType n;
+   for ( n = 0; n < m_count; n++ )
+   {
+      MsgnoType msgno = GetNthSortedMsgno(n);
+
+      size_t level = m_thrData->m_indents[msgno - 1];
+      if ( !level ) // root message?
+      {
+         // this is the next message we have here, so put it in the first
+         // available slot in the msgno table
+         m_tableMsgno[idxCur++] = msgno;
+
+         // reserve some places for the children of this item
+         idxCur += m_thrData->m_children[msgno - 1];
+      }
+      else // child
+      {
+         // array indices start from 0, not 1
+         level--;
+
+         // make sure the array has enough elements expanding it if necessary
+         size_t count = numAtLevel.GetCount();
+         for ( size_t n = count; n <= level; n++ )
+         {
+            numAtLevel.Add(0);
+         }
+
+         // one more
+         numAtLevel[level]++;
+      }
+   }
+
+   // alloc memory for the indices
+   size_t level,
+          depthMax = numAtLevel.GetCount();
+   MsgnoType **indicesAtLevel = new MsgnoType *[depthMax];
+   for ( level = 0; level < depthMax; level++ )
+   {
+      indicesAtLevel[level] = new MsgnoType[numAtLevel[level]];
+      numAtLevel[level] = 0;
+   }
+
+   // second pass: fill the indicesAtLevel arrays
+   for ( n = 0; n < m_count; n++ )
+   {
+      MsgnoType msgno = GetNthSortedMsgno(n);
+
+      size_t level = m_thrData->m_indents[msgno - 1];
+      if ( level > 0 )
+      {
+         level--;
+         indicesAtLevel[level][numAtLevel[level]++] = msgno;
+      }
+   }
+
+   // and finally, traverse the arrays for all depths putting the messages in
+   // place
+   for ( level = 0; level < depthMax; level++ )
+   {
+      idxCur = 0;
+
+      MsgnoType countLevel = numAtLevel[level];
+      for ( n = 0; n < countLevel; n++ )
+      {
+         MsgnoType msgno = indicesAtLevel[level][n];
+
+         // skip the slots already taken (by messages of the lesser
+         // level)
+         while ( idxCur < m_count && m_tableMsgno[idxCur] )
+         {
+            idxCur++;
+         }
+
+         // there must be a free slot somewhere left!
+         ASSERT_MSG( idxCur < m_count, "logic error" );
+
+         // this is the next message we have here, so put it in the first
+         // available slot in the msgno table
+         m_tableMsgno[idxCur++] = msgno;
+
+         // reserve some places for the children of this item
+         idxCur += m_thrData->m_children[msgno - 1];
+      }
+   }
+
+   // free memory
+   for ( level = 0; level < depthMax; level++ )
+   {
+      delete [] indicesAtLevel[level];
+   }
+
+   delete [] indicesAtLevel;
+}
+
 void HeaderInfoListImpl::BuildTables()
 {
    // maybe we have them already?
@@ -703,73 +918,12 @@ void HeaderInfoListImpl::BuildTables()
          Thread();
       }
 
-      // don't crash below if we don't have it somehow
-      CHECK_RET( m_thrData, "where is the thread data?" );
-
       // how to sort threaded messages here, i.e. construct m_tableMsgno and
       // m_tablePos from m_thrData and m_tableSort
       if ( IsSorting() )
       {
-         // check it now or we'd crash in the loop below (and I don't want to
-         // put the check inside the loop obviously)
-         CHECK_RET( m_tableSort || m_reverseOrder, "how do we sort them?" );
-
-         m_tableMsgno = AllocTable();
-         memset(m_tableMsgno, 0, m_count * sizeof(MsgnoType));
-
-         size_t level = 0;
-         MsgnoType countDone = 0;
-         while ( countDone < m_count )
-         {
-            MsgnoType idxCur = 0;
-
-            for ( MsgnoType n = 0; n < m_count; n++ )
-            {
-               MsgnoType msgno;
-               if ( m_reverseOrder )
-               {
-                  // reverse either the table order or the natural order
-                  msgno = m_tableSort ? m_tableSort[m_count - 1 - n]
-                                      : m_count - n;
-               }
-               else // !reversed order
-               {
-                  // must have a table, otherwise how do we sort messages?
-                  msgno = m_tableSort[n];
-               }
-
-               if ( m_thrData->m_indents[msgno - 1] != level )
-               {
-                  // ignore it now, we either have already seen it or will see
-                  // it later
-                  continue;
-               }
-
-               // skip the slots already taken (by messages of the lesser
-               // level)
-               while ( idxCur < m_count && m_tableMsgno[idxCur] )
-               {
-                  idxCur++;
-               }
-
-               // there must be a free slot somewhere left!
-               ASSERT_MSG( idxCur < m_count, "logic error" );
-
-               // this is the next message we have here, so put it in the first
-               // available slot in the msgno table
-               m_tableMsgno[idxCur++] = msgno;
-
-               // one more message put in place
-               countDone++;
-
-               // reserve some places for the children of this item
-               idxCur += m_thrData->m_children[msgno - 1];
-            }
-
-            // now process the messages at the next level (if there are any, of
-            // course)
-            level++;
-         }
+         // create m_tableMsgno from m_tableSort and m_tableThread
+         CombineSortAndThread();
       }
       else // no sorting
       {

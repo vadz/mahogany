@@ -115,6 +115,12 @@ private:
    /// build m_tableMsgno/m_tablePos from sort/thread data if not done yet
    void BuildTables();
 
+   /// combine sorting and threading data into m_tableMsgno
+   void CombineSortAndThread();
+
+   /// CombineSortAndThread() helper: get N-th msgno from m_tableSort
+   MsgnoType GetNthSortedMsgno(MsgnoType n) const;
+
    /// free m_tableMsgno/m_tablePos tables
    void FreeTables();
 

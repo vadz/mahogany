@@ -3671,6 +3671,8 @@ bool MailFolderCC::ThreadMessages(ThreadData *thrData,
 {
    CHECK( m_MailStream, false, "can't thread closed folder" );
 
+   // FIXME: our threading code doesn't seem to work and I need working
+   //        threading for testing :-(
 #if 0
    // does the server support threading at all?
    if ( GetType() == MF_IMAP && LEVELSORT(m_MailStream) &&
@@ -3738,7 +3740,7 @@ bool MailFolderCC::ThreadMessages(ThreadData *thrData,
             MsgnoType n = 0;
             ThreadMessagesHelper(thrRoot, 0, n, thrData, thrParams);
 
-            ASSERT_MSG( n == m_MailStream->nmsgs,
+            ASSERT_MSG( n == thrData->m_count,
                         "error in the thread tree traversal?" );
 
             mail_free_threadnode(&thrRoot);
