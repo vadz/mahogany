@@ -632,7 +632,7 @@ private:
    String          m_Name;
    FunctionPointer m_FunctionPtr;
 };
-M_LIST(FunctionList,FunctionDefinition);
+M_LIST(FunctionList, FunctionDefinition);
 
 /** These classes represents a function call. */
 
@@ -2411,46 +2411,51 @@ extern "C"
 static const FunctionList *
 BuiltinFunctions(void)
 {
-   static FunctionList *defaults;
-   if (defaults)
-      return defaults;
-   defaults = new FunctionList;
-#define Define(name, fn) defaults->push_back(FunctionDefinition(name, fn))
-   Define("message", func_msgbox);
-   Define("log", func_log);
-   Define("match", func_match);
-   Define("contains", func_contains);
-   Define("matchi", func_matchi);
-   Define("containsi", func_containsi);
-   Define("matchregex", func_matchregex);
-   Define("subject", func_subject);
-   Define("to", func_to);
-   Define("recipients", func_recipients);
-   Define("headerline", func_headerline);
-   Define("from", func_from);
-   Define("header", func_header);
-   Define("body", func_body);
-   Define("text", func_text);
-   Define("delete", func_delete);
-   Define("zap", func_zap);
-   Define("copy", func_copytofolder);
-   Define("move", func_movetofolder);
-   Define("print", func_print);
-   Define("date", func_date);
-   Define("size", func_size);
-   Define("now", func_now);
-   Define("isspam", func_checkSpam);
-   Define("expunge", func_expunge);
-   Define("python", func_python);
-   Define("matchregexi", func_matchregexi);
-   Define("setcolour", func_setcolour);
-   Define("score", func_score);
-   Define("addscore", func_addscore);
+   static FunctionList s_builtinFuncList;
+   if ( s_builtinFuncList.empty() )
+   {
+      #define Define(name, fn) \
+         s_builtinFuncList.push_back(FunctionDefinition(name, fn))
+
+         Define("message", func_msgbox);
+         Define("log", func_log);
+         Define("match", func_match);
+         Define("contains", func_contains);
+         Define("matchi", func_matchi);
+         Define("containsi", func_containsi);
+         Define("matchregex", func_matchregex);
+         Define("subject", func_subject);
+         Define("to", func_to);
+         Define("recipients", func_recipients);
+         Define("headerline", func_headerline);
+         Define("from", func_from);
+         Define("header", func_header);
+         Define("body", func_body);
+         Define("text", func_text);
+         Define("delete", func_delete);
+         Define("zap", func_zap);
+         Define("copy", func_copytofolder);
+         Define("move", func_movetofolder);
+         Define("print", func_print);
+         Define("date", func_date);
+         Define("size", func_size);
+         Define("now", func_now);
+         Define("isspam", func_checkSpam);
+         Define("expunge", func_expunge);
+         Define("python", func_python);
+         Define("matchregexi", func_matchregexi);
+         Define("setcolour", func_setcolour);
+         Define("score", func_score);
+         Define("addscore", func_addscore);
 #ifdef TEST
-   Define("nargs", func_nargs);
-   Define("arg", func_arg);
+         Define("nargs", func_nargs);
+         Define("arg", func_arg);
 #endif
-   return defaults;
+
+#undef Define
+   }
+
+   return &s_builtinFuncList;
 }
 
 
