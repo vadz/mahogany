@@ -29,8 +29,6 @@
 
 class wxMFrame : public wxFrame, public MFrameBase
 {
-   DECLARE_DYNAMIC_CLASS(wxMFrame)
-
 public:
    // static helper functions (static because they're also used by wxLogWindow
    // which doesn't derive from wxMFrame)
@@ -109,33 +107,14 @@ protected:
    // it is hidden and we don't want it
 #ifdef USE_WORKAROUND_FOR_MAXIMIZE
 public:
-   virtual bool Show(bool show = TRUE)
-   {
-      if ( show && m_shouldMaximizeOnShow )
-      {
-         wxFrame::Maximize();
-
-         m_shouldMaximizeOnShow = FALSE;
-      }
-
-      return wxFrame::Show(show);
-   }
-
-   virtual void Maximize(bool maximize = TRUE)
-   {
-      if ( maximize && !IsShown() )
-      {
-         m_shouldMaximizeOnShow = TRUE;
-      }
-      else
-      {
-         wxFrame::Maximize(maximize);
-      }
-   }
+   virtual bool Show(bool show = TRUE);
+   virtual void Maximize(bool maximize = TRUE);
 
 private:
    bool m_shouldMaximizeOnShow;
 #endif // USE_WORKAROUND_FOR_MAXIMIZE
+
+   DECLARE_DYNAMIC_CLASS(wxMFrame)
 };
 
 #endif

@@ -126,6 +126,39 @@ wxMFrame::wxMFrame(const String &name, wxWindow *parent)
    Create(name, parent);
 }
 
+#ifdef USE_WORKAROUND_FOR_MAXIMIZE
+
+bool wxMFrame::Show(bool show)
+{
+   if ( show && m_shouldMaximizeOnShow )
+   {
+      // trick it into thinking we're already shown, otherwise it doesn't do
+      // anything
+      bool shown = m_isShown;
+      m_isShown = TRUE;
+      wxFrame::Maximize();
+      m_isShown = shown;
+
+      m_shouldMaximizeOnShow = FALSE;
+   }
+
+   return wxFrame::Show(show);
+}
+
+void wxMFrame::Maximize(bool maximize)
+{
+   if ( maximize && !IsShown() )
+   {
+      m_shouldMaximizeOnShow = TRUE;
+   }
+   else
+   {
+      wxFrame::Maximize(maximize);
+   }
+}
+
+#endif // USE_WORKAROUND_FOR_MAXIMIZE
+
 void
 wxMFrame::Create(const String &name, wxWindow *parent)
 {
