@@ -21,7 +21,7 @@ clean:
 dep depend: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
-install: all
+install: 
 	$(MAKE) -C install install
 
 .PHONY: all dep clean doc static allclean install

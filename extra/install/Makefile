@@ -9,8 +9,8 @@ all:
 install:
 	$(INSTALL) -d $(DATADIR)/scripts
 	$(INSTALL) -d $(DATADIR)/bin
-        $(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/bin
-        $(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/lib
+	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/bin
+	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/lib
 	$(INSTALL) -d $(DATADIR)/doc/classes
 	$(INSTALL) -d $(DATADIR)/doc/python
 	ln -fs $(DATADIR)/doc $(PREFIX)/doc/M
