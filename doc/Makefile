@@ -1,7 +1,7 @@
 # Makefile for doc directory
 # $Id$
 
-FILES_TEX = HackersGuide.htex Manual.htex
+FILES_TEX = Manual.htex # HackersGuide.htex -- too out of date to be useful
 SUB_DIRS  = $(FILES_TEX:.htex=)
 SUBDIRS   = $(FILES_TEX:.htex=.dir)
 SUB_MAPS  = $(FILES_TEX:.htex=/wxhelp.map)
