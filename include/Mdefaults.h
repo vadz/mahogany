@@ -518,7 +518,7 @@
 /// show log window?
 #define   MP_SHOWLOG_D  1
 /// open ADB editor on startup?
-#define   MP_SHOWADBEDITOR_D 0l
+#define   MP_SHOWADBEDITOR_D 0L
 /// help browser name
 #define   MP_HELPBROWSER_D   "netscape"
 /// is help browser of netscape type?

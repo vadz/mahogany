@@ -48,6 +48,8 @@
 
 #include "adb/AdbManager.h"   // for AdbManager::Delete
 
+#include "adb/AdbFrame.h"     // for ShowAdbFrame
+
 #include "Mversion.h"
 #include "Mupgrade.h"
 
@@ -536,9 +538,9 @@ MAppBase::OnStartup()
    m_MailCollector->Collect(); // empty all at beginning
 
    // show the ADB editor if it had been shown the last time when we ran
-   if ( GetProfile()->readEntry(MP_SHOWADBEDITOR) )
+   if ( READ_CONFIG(m_profile, MP_SHOWADBEDITOR) )
    {
-      ShowAdbFrame();
+      ShowAdbFrame(TopLevelFrame());
    }
 
    // register with the event subsystem
