@@ -190,12 +190,10 @@ public:
    /** Check whether mailbox has changed. */
    void Ping(void);
 
-   /** Tells the folder that n messages are now in it.
-       Called from mm_exists callback.
+   /** Creates an Event if new mails have arrived.
        
-       @param n the number of messages in the folder
    */
-   void UpdateCount(long n);
+   void UpdateCount();
    
    /** Updates the associated FolderViews */
    void UpdateViews(void);
@@ -233,7 +231,8 @@ private:
 
    /// number of messages in mailbox
    long      numOfMessages;
-
+   /// for comparison with numOfMessages to find new mail
+   long      oldnum;
    /// Path to mailbox
    String   m_MailboxPath;
 
@@ -430,7 +429,7 @@ public:
 private:
    /// destructor
    ~MailFolderCC();
-
+   
 public:
    DEBUG_DEF
    MOBJECT_DEBUG(MailFolderCC)

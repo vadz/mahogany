@@ -60,7 +60,7 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    m_MailboxPath = path;
    m_Login = login;
    m_Password = password;
-   numOfMessages = -1;
+   numOfMessages = oldnum = -1;
 
    FolderType type = GetFolderType(typeAndFlags);
    SetType(type);
@@ -480,20 +480,17 @@ MailFolderCC::RemoveFromMap(MAILSTREAM const * /* stream */)
 }
 
 void
-MailFolderCC::UpdateCount(long n)
+MailFolderCC::UpdateCount(void)
 {
-   long oldnum = numOfMessages;
-   numOfMessages = n;
    UpdateViews();
 
-   if(n > oldnum && oldnum != -1) // new mail has arrived
+   long n;
+   if(numOfMessages > oldnum && oldnum != -1) // new mail has arrived
    {
       n = numOfMessages - oldnum;
       unsigned long *messageIDs = new unsigned long[n];
 
-      // FIXME we assume here that the indices of all new messages are
-      //       consecutive which is not the case in general (should iterate
-      //       over all messages and look at their "New" flag instead)
+      // actually these are no IDs, but sequence numbers, which is fine.
       // KB: I think it should be "New" AND "Unseen"
       for ( unsigned long i = 0; i < (unsigned long)n; i++ )
          messageIDs[i] = oldnum + i + 1;
@@ -503,6 +500,7 @@ MailFolderCC::UpdateCount(long n)
 
       delete [] messageIDs;
    }
+   oldnum = numOfMessages;
 }
 
 //-------------------------------------------------------------------
@@ -602,7 +600,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
                    + String(" n: ") + strutil_ultoa(number);
       LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
-      mf->UpdateCount(number);
+      mf->numOfMessages = number;
    }
    else
    {
@@ -816,6 +814,7 @@ void
 MailFolderCC::ProcessEventQueue(void)
 {
    Event *evptr;
+   MailFolderCC *mf;
    
    while(! ms_EventQueue.empty())
    {
@@ -826,7 +825,10 @@ MailFolderCC::ProcessEventQueue(void)
          MailFolderCC::mm_searched(evptr->m_stream,  evptr->m_args[0].m_ulong);
          break;
       case Exists:
-         MailFolderCC::mm_exists(evptr->m_stream, evptr->m_args[0].m_ulong);
+         // the msg count has already been updated, but may need to generate a 
+         // new mail event
+         if((mf = LookupObject(evptr->m_stream)) != NULL)
+            mf->UpdateCount();
          break;
       case Expunged:
          MailFolderCC::mm_expunged(evptr->m_stream,  evptr->m_args[0].m_ulong);
@@ -859,6 +861,7 @@ MailFolderCC::ProcessEventQueue(void)
                                  *(evptr->m_args[0].m_str),
                                  evptr->m_args[1].m_status);
          delete evptr->m_args[0].m_str;
+         delete evptr->m_args[1].m_status;
          break;
       case Log:
          MailFolderCC::mm_log(*(evptr->m_args[0].m_str),
@@ -889,6 +892,9 @@ mm_searched(MAILSTREAM *stream, unsigned long number)
 void
 mm_exists(MAILSTREAM *stream, unsigned long number)
 {
+   // update count immediately to reflect change:
+   MailFolderCC::mm_exists(stream, number);
+   // generate an event to trigger checks for new mail after processing this
    MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Exists);
    evptr->m_args[0].m_ulong = number;
    MailFolderCC::QueueEvent(evptr);
@@ -945,9 +951,10 @@ mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 {
    MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Status);
    evptr->m_args[0].m_str = new String(mailbox);
-   evptr->m_args[1].m_status = status;
+   evptr->m_args[1].m_status = new MAILSTATUS;
+   memcpy(evptr->m_args[1].m_status, status, sizeof (MAILSTATUS));
    MailFolderCC::QueueEvent(evptr);
-   MailFolderCC::mm_status(stream, mailbox, status);
+//   MailFolderCC::mm_status(stream, mailbox, status);
 }
 
 void
