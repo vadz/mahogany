@@ -179,6 +179,13 @@ public:
    /// Return the numeric uid
    virtual UIdType GetUId(void) const { return m_uid; }
    //@}
+   static class MessageCC * Create(
+      const char * itext,
+      UIdType uid = UID_ILLEGAL,
+      ProfileBase *iprofile = NULL)
+      {
+         return new MessageCC(itext, uid, iprofile);
+      }
 protected:
    /**@name Constructors and Destructors */
    //@{
@@ -190,13 +197,6 @@ protected:
       MailFolderCC *folder,
       UIdType uid);
 
-   static class MessageCC * Create(
-      const char * itext,
-      UIdType uid = UID_ILLEGAL,
-      ProfileBase *iprofile = NULL)
-      {
-         return new MessageCC(itext, uid, iprofile);
-      }
    /// The MailFolderCC class creates MessageCC objects.
    friend class MailFolderCC;
    //@}

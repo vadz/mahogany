@@ -128,6 +128,14 @@ public:
    //@}
 
 
+   /// Count number of new messages.
+   virtual unsigned long CountNewMessages(void) const
+      {
+         return
+            CountMessages(MailFolder::MSG_STAT_RECENT|MailFolder::MSG_STAT_SEEN,
+                          MailFolder::MSG_STAT_RECENT);
+      }
+
    virtual inline void GetAuthInfo(String *login, String *password) const
       { *login = m_Login; *password = m_Password; }
 
@@ -152,6 +160,12 @@ public:
       { return m_GenerateNewMailEvents; }
 
    //@}
+   /** Apply any filter rules to the folder. Only does anything if a
+       filter module is loaded and a filter configured.
+       @param NewOnly if true, only apply filter to new messages
+       @return -1 if no filter module exists, return code otherwise
+   */
+   virtual int ApplyFilterRules(bool NewOnly);
 protected:
    /// Constructor
    MailFolderCmn(class ProfileBase *profile);
@@ -228,6 +242,8 @@ private:
    /// We react to config change events.
    class MEventReceiver *m_MEventReceiver;
 
+   /// just to notice if the filter code did any work
+   bool m_FiltersCausedChange;
 #ifdef DEBUG
    bool m_PreCloseCalled;
 #endif

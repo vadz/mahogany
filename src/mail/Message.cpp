@@ -7,7 +7,7 @@
  *******************************************************************/
 
 #ifdef __GNUG__
-#pragma implementation "MessageCC.h"
+#   pragma implementation "Message.h"
 #endif
 
 #include   "Mpch.h"
@@ -41,3 +41,8 @@ Message::ExpandParameter(MessageParameterList const & list, String
    return false;
 }
 
+/*
+  The following function is implemented in MessageCC.cpp:
+  static class Message *Message::Create(const char * itext,
+                       UIdType uid, ProfileBase *iprofile)
+*/

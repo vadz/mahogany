@@ -156,6 +156,7 @@ public:
 
    /// Update the idea of which messages are selected.
    void UpdateSelectionInfo(void);
+
 protected:
    /** Save messages to a folder.
        @param n number of messages

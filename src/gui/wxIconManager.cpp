@@ -621,7 +621,7 @@ wxIconManager::GetIcon(String const &_iconName)
    }// if globaldir
 
 #  ifdef    OS_WIN
-   // last, look in the ressources
+   // last, look in the resources
    {
       wxIcon icon(_iconName);
       if ( icon.Ok() ) {

@@ -50,6 +50,15 @@ ARG(STRING, configPath, =NULL) )
  MDialog_Message(message,parent,title,configPath);
 ')
 
+FUNCTION(Log, void , (
+ARG(int, level),
+ARG(STRING, message)
+)
+,
+`
+	wxLogGeneric(level, message);
+')
+
 FUNCTION(YesNoDialog, bool , (
 ARG(STRING, message), ARG(const MWindow *, parent, =NULL),
 ARG(STRING, title, =MDIALOG_YESNOTITLE),

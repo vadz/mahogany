@@ -204,6 +204,9 @@ public:
    */
    virtual unsigned long CountMessages(int mask = 0, int value = 0) const = 0;
 
+   /// Count number of new messages.
+   virtual unsigned long CountNewMessages(void) const = 0;
+
    /** Check whether mailbox has changed. */
    virtual void Ping(void) = 0;
 
@@ -389,14 +392,17 @@ public:
    //@}
    /// Return the folder's type.
    virtual FolderType GetType(void) const = 0;
+   /// return the folder flags
+   virtual int GetFlags(void) const = 0;
 
    /// Does the folder need a working network to be accessed?
    virtual bool NeedsNetwork(void) const
       {
          return
-            GetType() == MF_NNTP
-            || GetType() == MF_IMAP
-            || GetType() == MF_POP;
+            (GetType() == MF_NNTP
+             || GetType() == MF_IMAP
+             || GetType() == MF_POP)
+            && ! (GetFlags() & MF_FLAGS_ISLOCAL);
       }
    /** Sets a maximum number of messages to retrieve from server.
        @param nmax maximum number of messages to retrieve, 0 for no limit
@@ -410,6 +416,12 @@ public:
       const = 0;
    //@}
 
+   /** Apply any filter rules to the folder. Only does anything if a
+       filter module is loaded and a filter configured.
+       @param NewOnly if true, only apply filter to new messages
+       @return -1 if no filter module exists, return code otherwise
+   */
+   virtual int ApplyFilterRules(bool NewOnly = true) = 0;
 protected:
    /// Request update
    virtual void RequestUpdate(void) = 0;

@@ -411,8 +411,10 @@ private:
    inline MAILSTREAM   *Stream(void) const{  return m_MailStream; }
    friend class MessageCC;
 
-   // return the folder type
+   /// return the folder type
    FolderType GetType(void) const { return m_folderType; }
+   /// return the folder flags
+   int GetFlags(void) const { return m_FolderFlags; }
 protected:
    /// Request update
    virtual void RequestUpdate(void);

@@ -102,6 +102,7 @@ static const TbarItemInfo g_aToolBarData[] =
    { "tb_mail_send", WXMENU_COMPOSE_SEND,      gettext_noop("Send Message")  },
 
    // folder and message view frames
+   { "tb_next_unread",   WXMENU_MSG_NEXT_UNREAD,gettext_noop("Select next unread message") },
    { "tb_mail",          WXMENU_MSG_OPEN,      gettext_noop("Open message")      },
    { "tb_mail_forward",  WXMENU_MSG_FORWARD,   gettext_noop("Forward message")   },
    { "tb_mail_reply",    WXMENU_MSG_REPLY,     gettext_noop("Reply to message")  },
@@ -128,6 +129,7 @@ static const int g_aMainTbar[] =
    WXTBAR_MAIN_OPEN,
    WXTBAR_MAIN_COMPOSE,
    WXTBAR_SEP,
+   WXTBAR_MSG_NEXT_UNREAD,
    WXTBAR_MSG_OPEN,
    WXTBAR_MSG_FORWARD,
    WXTBAR_MSG_REPLY,
@@ -159,6 +161,8 @@ static const int g_aFolderTbar[] =
    WXTBAR_MSG_OPEN,
    WXTBAR_SEP,
    WXTBAR_MAIN_COMPOSE,
+   WXTBAR_SEP,
+   WXTBAR_MSG_NEXT_UNREAD,
    WXTBAR_MSG_FORWARD,
    WXTBAR_MSG_REPLY,
    WXTBAR_MSG_PRINT,
@@ -271,6 +275,8 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_REPLY,     gettext_noop("&Reply"),            gettext_noop("Reply to this message")    , FALSE },
    { WXMENU_MSG_FOLLOWUP,  gettext_noop("&Group reply"),      gettext_noop("Followup/group-reply to this message")    , FALSE },
    { WXMENU_MSG_FORWARD,   gettext_noop("&Forward"),          gettext_noop("Forward this message")     , FALSE },
+   { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
+   { WXMENU_MSG_FORWARD,   gettext_noop("Next &unread"), gettext_noop("Select next unread message")     , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_SAVE_TO_FILE, gettext_noop("Save as F&ile"),
      gettext_noop("Export message to a file")   , FALSE },

@@ -63,6 +63,14 @@ const char * configPath =NULL )
 
 
 
+virtual void  Log (
+int level ,
+const char * message 
+)
+ = 0;
+
+
+
 virtual bool  YesNoDialog (
 const char * message , const MWindow * parent =NULL,
 const char * title =MDIALOG_YESNOTITLE,

@@ -560,7 +560,7 @@ MAppBase::OnStartup()
 
    // initialise collector object for incoming mails
    // ----------------------------------------------
-   m_MailCollector = new MailCollector();
+   m_MailCollector = MailCollector::Create();
    m_MailCollector->Collect(); // empty all at beginning
 
    // show the ADB editor if it had been shown the last time when we ran
@@ -639,7 +639,7 @@ MAppBase::OnShutDown()
       MEventManager::Deregister(m_eventOptChangeReg);
       m_eventOptChangeReg = NULL;
    }
-   if(m_MailCollector) delete m_MailCollector;
+   if(m_MailCollector) m_MailCollector->DecRef();
    delete m_KeepOpenFolders;
 
    // clean up
@@ -833,6 +833,7 @@ MAppBase::OnMEvent(MEventData& event)
                MDialog_Message(message, m_topLevelFrame, _("New Mail"));
             }
          }
+
 
       return TRUE;
    }

@@ -26,6 +26,7 @@
 
 #include <stdlib.h>
 #include <ctype.h>
+#include <time.h>  // mktime()
 
 #include "modules/Filters.h"
 
@@ -76,7 +77,7 @@ private:
 
 /// Type of tokens
 enum TokenType
-{ TT_Invalid = -1, TT_Char, TT_Identifier, TT_String, TT_Number, TT_EOF };
+{ TT_Invalid = -1, TT_Char, TT_Identifier, TT_Keyword, TT_String, TT_Number, TT_EOF };
 
 /** Tokens are either an ASCII character or a value greater >255.
  */
@@ -84,14 +85,16 @@ class Token
 {
 public:
    Token() { m_type = TT_Invalid; }
-   inline TokenType GetType(void)
+   inline TokenType GetType(void) const
       { return m_type; }
-   inline char GetChar(void)
+   inline char GetChar(void) const
       { ASSERT(m_type == TT_Char); return m_char; }
-   inline const String & GetString(void)
+   inline const String & GetString(void) const
       { ASSERT(m_type == TT_String); return m_string; }
-   inline const String & GetIdentifier(void)
+   inline const String & GetIdentifier(void) const
       { ASSERT(m_type == TT_Identifier); return m_string; }
+   inline const String & GetKeyword(void) const
+      { ASSERT(m_type == TT_Keyword); return m_string; }
    inline long GetNumber(void)
       { ASSERT(m_type == TT_Number); return m_number; }
    
@@ -101,6 +104,8 @@ public:
       { m_type = TT_String; m_string = s; }
    inline void SetIdentifier(String const &s)
       { m_type = TT_Identifier; m_string = s; }
+   inline void SetKeyword(String const &s)
+      { m_type = TT_Keyword; m_string = s; }
    inline void SetNumber(long n)
       { m_type = TT_Number; m_number = n; }
    inline void SetEOF(void)
@@ -201,8 +206,10 @@ public:
        @param error message describing error
    */
    virtual void Error(const String &error) = 0;
-   /// Print out a message.
+   /// Print out a message in a message box.
    virtual void Output(const String &msg) = 0;
+   /// Print out a message.
+   virtual void Log(const String &imsg, int level = M_LOG_DEFAULT) = 0;
    /** Returns a list of known function definitions. */
    virtual class FunctionList *GetFunctionList(void) = 0;
    /// check if a function is already defined
@@ -323,6 +330,7 @@ public:
    class SyntaxNode * Parse(void);
    class SyntaxNode * ParseExpression(void);
    class Block      * ParseBlock(void);
+   class SyntaxNode * ParseIfElse(void);
    class SyntaxNode * ParseCondition(void);
    void  ParseRestBlock(class Block *statement);
    void  ParseRestExpression(class Expression *expression);
@@ -340,6 +348,12 @@ public:
    virtual void Output(const String &msg)
       {
          m_MInterface->Message(msg,NULL,_("Parser output"));
+      }
+   virtual void Log(const String &imsg, int level)
+      {
+         String msg = _("Parser: ");
+         msg << imsg;
+         m_MInterface->Log(level, msg);
       }
    /// Returns a list of known function definitions. 
    virtual class FunctionList *GetFunctionList(void)
@@ -636,11 +650,14 @@ KBLIST_DEFINE(FunctionList, FunctionDefinition);
 class FunctionCall : public SyntaxNode
 {
 public:
-   FunctionCall(const String &name, ArgList *args, Parser *p);
+   FunctionCall(const String &name, ArgList *args,
+                FunctionDefinition *fd, Parser *p);
    ~FunctionCall()
       {
-         ASSERT(m_fd);
-         m_fd->DecRef();
+         MOcheck();
+         if(m_fd)
+            m_fd->DecRef();
+         ASSERT(m_args);
          delete m_args;
       }
    virtual Value Evaluate() const;
@@ -658,12 +675,14 @@ private:
 };
 
 FunctionCall::FunctionCall(const String &name, ArgList *args,
+                           FunctionDefinition *fd,
                            Parser *p)
    : SyntaxNode(p)
 {
    m_name = name;
    m_args = args;
-   m_fd = p->FindFunction(name);
+   m_fd = fd;
+   m_fd->IncRef();
    m_function = m_fd->GetFPtr();
 }
    
@@ -828,11 +847,125 @@ public:
 #endif
 };
 
+
+/** An if-else statement. */
+class IfElse : public SyntaxNode
+{
+public:
+   IfElse(SyntaxNode *condition,
+          SyntaxNode *ifBlock,
+          SyntaxNode *elseBlock,
+          Parser *p)
+      : SyntaxNode(p)
+      {
+         m_Condition = condition;
+         m_IfBlock = ifBlock;
+         m_ElseBlock = elseBlock;
+      }
+   virtual Value Evaluate(void) const
+      {
+         MOcheck();
+         ASSERT(m_Condition != NULL);
+         ASSERT(m_IfBlock != NULL);
+         Value rc = m_Condition->Evaluate();
+         if(rc.ToNumber())
+            return m_IfBlock->Evaluate();
+         else
+         {
+            if(m_ElseBlock)
+               return m_ElseBlock->Evaluate();
+            else
+               return Value(0); // is this a sensible return value?
+         }
+      }
+   void SetIfBlock(SyntaxNode *left)
+      { MOcheck(); ASSERT(m_IfBlock == NULL); m_IfBlock = left; }
+   void SetElseBlock(SyntaxNode *right)
+      { MOcheck(); ASSERT(m_ElseBlock == NULL); m_ElseBlock = right; }
+   void SetCondition(SyntaxNode *right)
+      { MOcheck(); ASSERT(m_Condition == NULL); m_Condition = right; }
+   ~IfElse()
+      {
+         MOcheck();
+         if(m_Condition) delete m_Condition;
+         if(m_IfBlock) delete m_IfBlock;
+         if(m_ElseBlock)  delete m_ElseBlock;
+      }
+#ifdef DEBUG
+   virtual String Debug(void) const
+      {
+         MOcheck();
+         String s = "if(";
+         s << m_Condition->Debug() << "){";
+         if(m_IfBlock)
+            s << m_IfBlock->Debug();
+         s << '}';
+         if(m_ElseBlock)
+         {
+            s << "else{"
+              << m_ElseBlock->Debug()
+              << '}';
+         }
+         return s;
+      }
+#endif    
+private:
+   SyntaxNode *m_Condition, *m_IfBlock, *m_ElseBlock;
+   MOBJECT_NAME(IfElse)
+};
+
+
+static void PreProcessInput(String *input)
+{
+   bool modified = false;
+   String output;
+   while(input->Length() && input->c_str()[0] == '@')
+   {
+      const char *cptr = input->c_str()+1;
+      String filename;
+      while(*cptr && *cptr != '\n' && *cptr != '\r')
+         filename += *cptr++;
+      while(*cptr && (*cptr == '\r' || *cptr == '\n'))
+         cptr++;
+      *input = cptr;
+      FILE *fp = fopen(filename,"rt");
+      if(fp)
+      {
+         fseek(fp,0, SEEK_END);
+         long len = ftell(fp);
+         fseek(fp,0, SEEK_SET);
+         if(len > 0)
+         {
+            char *cp = new char [ len ];
+            if(fread(cp, 1, len, fp) > 0)
+            {
+               output << cp;
+               modified = true;
+            }
+            delete [] cp;
+         }
+         fclose(fp);
+      }
+   }
+   if(modified)
+   {
+      *input = output;
+      if(input->Length())
+         PreProcessInput(input);
+   }
+}
+
 /* static */
 Parser *
 Parser::Create(const String &input, MInterface *i)
 {
-   return new ParserImpl(input, i);
+   /* Here we handle the one special occasion of input being
+      @filename
+      in which case we replace input with the contents of that file.
+   */
+   String program = input;
+   PreProcessInput(&program);
+   return new ParserImpl(program, i);
 }
 
 
@@ -972,6 +1105,15 @@ ParserImpl::GetToken(bool remove)
                   
    if(! remove)
       Rewind(OldPos);
+   /* Now check for keywords, which so far have been treated as normal 
+      identifiers. */
+   if(token.GetType() == TT_Identifier)
+   {
+      if(token.GetIdentifier() == "if")
+         token.SetKeyword("if");
+      else if(token.GetIdentifier() == "else")
+         token.SetKeyword("else");
+   }
    return token;
 }
 
@@ -980,6 +1122,67 @@ ParserImpl::Parse(void)
 {
    MOcheck();
    return ParseBlock();
+}
+
+SyntaxNode *
+ParserImpl::ParseIfElse(void)
+{
+   /* IFELSE :=
+      IF ( CONDITION ) BLOCK [ ELSE BLOCK ] 
+   */
+   MOcheck();
+
+   SyntaxNode
+      *condition = NULL,
+      *ifBlock = NULL,
+      *elseBlock = NULL;
+   
+   Token t = PeekToken();
+   ASSERT(t.GetKeyword() == "if");
+   (void) GetToken(); // swallow "if"
+   t = PeekToken();
+   if(t.GetType() != TT_Char || t.GetChar() != '(')
+   {
+      Error(_("'(' expected after 'if'."));
+      return NULL;
+   }
+   (void) GetToken(); // swallow '('
+
+   condition = ParseCondition();
+   if(! condition)
+      goto ifElseBailout;
+
+   t = PeekToken();
+   if(t.GetType() != TT_Char || t.GetChar() != ')')
+   {
+      Error(_("')' expected after condition in if statement."));
+      goto ifElseBailout;
+   }
+   (void) GetToken(); // swallow ')'
+
+   ifBlock = ParseBlock();
+   if(! ifBlock)
+      goto ifElseBailout;
+
+   t = PeekToken();
+   if(t.GetType() == TT_Keyword && t.GetKeyword() == "else")
+   {
+      // we must parse the else branch, too:
+      (void) GetToken(); // swallow the "else"
+      elseBlock = ParseBlock();
+      if(! elseBlock)
+         goto ifElseBailout;
+   }
+   // if we reach here, everything was parsed alright:
+
+   return new IfElse(condition, ifBlock, elseBlock, this);
+   
+   // all errors will jump to this label:
+ ifElseBailout:
+   if(condition) delete condition;
+   if(ifBlock)   delete ifBlock;
+   if(elseBlock) delete elseBlock;
+   return NULL;
 }
 
 ArgList *
@@ -1042,7 +1245,23 @@ ParserImpl::ParseFunctionCall(void)
    else
       GetToken(); // swallow it
    
-   return new FunctionCall(functionName, args, this);
+   FunctionDefinition *fd = FindFunction(functionName);
+   SyntaxNode *sn = NULL;
+   if(fd)
+   {
+      sn = new FunctionCall(functionName, args, fd, this);
+      fd->DecRef();
+   }
+   else
+   {
+      String err;
+      err.Printf(_("Attempt to call undefined function '%s'."),
+                 functionName.c_str());
+      Error(err);
+      if(args)
+         delete args;
+   }
+   return sn;
 }
 
 SyntaxNode *
@@ -1261,10 +1480,24 @@ ParserImpl::ParseBlock(void)
    MOcheck();
    /* STATEMENT :=
       | { STATEMENT RESTSTATEMENT }
-      | CONDITION;
+      | CONDITION ;
+      | IFELSE
    */
 
    Token t = PeekToken();
+
+   // Is there an IF() ELSE statement?
+   if(t.GetType() == TT_Keyword && t.GetKeyword() == "if")
+   {
+      SyntaxNode *ifelse = ParseIfElse();
+      if(! ifelse)
+         return NULL;
+      Block *block = new Block(this);
+      block->AddNode(ifelse);
+      return block;
+   }
+
+   // Normal block:
    if(t.GetType() == TT_Char && t.GetChar() == '{')
    {
       GetToken();
@@ -1275,29 +1508,34 @@ ParserImpl::ParseBlock(void)
          return NULL;
       }
       ParseRestBlock(stmt);
-      t = GetToken();
+      t = PeekToken();
       if(t.GetType() != TT_Char || t.GetChar() != '}')
       {
          Error(_("Expected Condition after conditional operator."));
          delete stmt;
          return NULL;
       }
+      GetToken();
+      return stmt;
    }
-   // condition
-   SyntaxNode *cond = ParseCondition();
-   if(! cond)
-      return NULL;
-   t = PeekToken();
-   if(t.GetType() != TT_Char || t.GetChar() != ';')
+   else
    {
-      Error(_("Expected ';' at end of condition."));
-      delete cond;
-      return NULL;
+      // condition
+      SyntaxNode *cond = ParseCondition();
+      if(! cond)
+         return NULL;
+      t = PeekToken();
+      if(t.GetType() != TT_Char || t.GetChar() != ';')
+      {
+         Error(_("Expected ';' at end of condition."));
+         delete cond;
+         return NULL;
+      }
+      GetToken();
+      Block *block = new Block(this);
+      block->AddNode(cond);
+      return block;
    }
-   GetToken();
-   Block *block = new Block(this);
-   block->AddNode(cond);
-   return block;
 }
       
 void
@@ -1309,15 +1547,13 @@ ParserImpl::ParseRestBlock(Block *parent)
       | EMPTY
    */
 
-   Block *stmt = ParseBlock();
-   if(! stmt)
-      return; // empty statement
-   // else:
-   do
+   Block *stmt;
+
+   while((stmt = ParseBlock()) != NULL)
    {
       parent->AddNode(stmt);
       stmt = ParseBlock();
-   }while(stmt);
+   }
 }
 
 SyntaxNode *
@@ -1378,9 +1614,88 @@ ParserImpl::ParseTerm(void)
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+
+/**
+   First, a function to check for SPAM:
+**/
+
+#ifdef USE_RBL
+
+#define __STRICT_ANSI__
+#include <netinet/in.h>
+#include <arpa/nameser.h>
+#include <resolv.h>
+#include <netdb.h>
+
+#define BUFLEN 512
+
+/* rblcheck()
+ * Checks the specified dotted-quad address against the provided RBL
+ * domain. If "txt" is non-zero, we perform a TXT record lookup. We
+ * return the text returned from a TXT match, or an empty string, on
+ * a successful match, or NULL on an unsuccessful match. */
+static
+bool CheckRBL( int a, int b, int c, int d, const String & rblDomain)
+{
+   char * answerBuffer = new char[ BUFLEN ];
+   int len;
+   
+   String domain;
+   domain.Printf("%d.%d.%d.%d.%s", d, c, b, a, rblDomain.c_str() );
+   
+   res_init();
+   len = res_query( domain.c_str(), C_IN, T_A,
+                    (unsigned char *)answerBuffer, PACKETSZ );
+   
+   if( len != -1 )
+   {
+      if( len > PACKETSZ ) // buffer was too short, re-alloc:
+      {
+         delete [] answerBuffer;
+         answerBuffer = new char [ len ];
+         // and again:
+         len = res_query( domain, C_IN, T_A,
+                          (unsigned char *) answerBuffer, len );
+      }
+   }
+   delete [] answerBuffer;
+   return len != -1; // found, so it´s known spam
+}
+
+static const char * gs_RblSites[] =
+{ "rbl.maps.vix.com", "rbl.dorkslayers.com", NULL };
+
+#endif
+
 extern "C"
 {
-   static Value func_print(ArgList *args, Parser *p)
+   static Value func_checkSpam(ArgList *args, Parser *p)
+   {
+      // standard check:
+      if(args->Count() != 0) return Value("");
+      Message * msg = p->GetMessage();
+      if(! msg) return Value("");
+
+      bool rc = false;
+#ifdef USE_RBL
+      String received;
+      msg->GetHeaderLine("Received", received);
+      if(received.Find('[') == wxNOT_FOUND)
+         return true; // no IP number in Received line, suspicious
+      String ip;
+      ip = received.Mid(received.Find('[')+1);
+      if(ip.Find(']') == wxNOT_FOUND)
+         return true; // no closing bracket, suspicious
+      int a,b,c,d;
+      if(sscanf(ip.c_str(), "%d.%d.%d.%d", &a,&b,&c,&d) != 4)
+         return true; // no properly formatted IP number, suspicious
+      for(int i = 0; gs_RblSites[i] && ! rc ; i++)
+         rc |= CheckRBL(a,b,c,d,gs_RblSites[i]);
+#endif
+      return rc;
+   }
+
+   static Value func_msgbox(ArgList *args, Parser *p)
    {
       SyntaxNode *sn;
       Value v;
@@ -1396,6 +1711,21 @@ extern "C"
       return 1;
    }
 
+   static Value func_log(ArgList *args, Parser *p)
+   {
+      SyntaxNode *sn;
+      Value v;
+      ASSERT(args);
+      String msg;
+      for(size_t i = 0; i < args->Count(); i++)
+      {
+         sn = args->GetArg(i);
+         v= sn->Evaluate();
+         msg << v.ToString();
+      }
+      p->Log(msg);
+      return 1;
+   }
 /* * * * * * * * * * * * * * *
  *
  * Tests for message contents
@@ -1413,7 +1743,6 @@ extern "C"
       return haystack.Find(needle) != -1;
    }
 
-
 /* * * * * * * * * * * * * * *
  *
  * Access to message contents
@@ -1429,6 +1758,84 @@ extern "C"
       String subj = msg->Subject();
       msg->DecRef();
       return Value(subj);
+   }
+
+   static Value func_from(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 0)
+         return Value("");
+      Message * msg = p->GetMessage();
+      if(! msg)
+         return Value("");
+      String subj = msg->From();
+      msg->DecRef();
+      return Value(subj);
+   }
+
+   static Value func_to(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 0)
+         return Value("");
+      Message * msg = p->GetMessage();
+      if(! msg)
+         return Value("");
+      String tostr;
+      msg->GetHeaderLine("To", tostr);
+      msg->DecRef();
+      return Value(tostr);
+   }
+
+   static Value func_header(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 0)
+         return Value("");
+      Message * msg = p->GetMessage();
+      if(! msg)
+         return Value("");
+      String subj = msg->GetHeader();
+      msg->DecRef();
+      return Value(subj);
+   }
+
+   static Value func_headerline(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 1)
+         return Value("");
+      Value v1 = args->GetArg(0)->Evaluate();
+      String field = v1.ToString();
+      Message * msg = p->GetMessage();
+      if(! msg)
+         return Value("");
+      String result;
+      msg->GetHeaderLine(field, result);
+      msg->DecRef();
+      return Value(result);
+   }
+
+   static Value func_body(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 0)
+         return Value("");
+      Message * msg = p->GetMessage();
+      if(! msg)
+         return Value("");
+      String str;
+      msg->WriteToString(str, false);
+      msg->DecRef();
+      return Value(str);
+   }
+
+   static Value func_text(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 0)
+         return Value("");
+      Message * msg = p->GetMessage();
+      if(! msg)
+         return Value("");
+      String str;
+      msg->WriteToString(str, true);
+      msg->DecRef();
+      return Value(str);
    }
 
    static Value func_delete(ArgList *args, Parser *p)
@@ -1456,16 +1863,80 @@ extern "C"
       mf->DecRef();
       return Value(rc);
    }
+
+   static Value func_movetofolder(ArgList *args, Parser *p)
+   {
+      Value rc = func_copytofolder(args, p);
+      if(rc.ToNumber()) // successful
+         return func_delete(args, p);
+      else
+         return 0;
+   }
+
+   static Value func_getstatus(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 0)
+         return Value(-1);
+      Message *msg = p->GetMessage();
+      int rc = msg->GetStatus();
+      msg->DecRef();
+      return Value(rc);
+   }
+
+   static Value func_date(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 0)
+         return Value(-1);
+      Message *msg = p->GetMessage();
+      struct tm tms;
+      tms.tm_sec = 0; tms.tm_min = 0; tms.tm_hour = 0;
+      tms.tm_wday = -1; tms.tm_yday = -1; // I hope this works!
+      (void) msg->GetStatus(NULL,
+                            (unsigned int *)&tms.tm_mday,
+                            (unsigned int *)&tms.tm_mon,
+                            (unsigned int *)&tms.tm_year);
+      msg->DecRef();
+      return Value(mktime(&tms));
+   }
+
+   static Value func_now(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 0)
+         return Value(-1);
+      return Value(time(NULL));
+   }
+
+   static Value func_size(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 0)
+         return Value(-1);
+      Message *msg = p->GetMessage();
+      unsigned long size;
+      (void) msg->GetStatus(&size);
+      msg->DecRef();
+      return Value(size);
+   }
 };
 
 void
 ParserImpl::AddBuiltinFunctions(void)
 {
-   ASSERT(DefineFunction("print", func_print) != NULL);
+   ASSERT(DefineFunction("message", func_msgbox) != NULL);
+   ASSERT(DefineFunction("log", func_log) != NULL);
    ASSERT(DefineFunction("matchi", func_matchi) != NULL);
    ASSERT(DefineFunction("subject", func_subject) != NULL);
+   ASSERT(DefineFunction("to", func_to) != NULL);
+   ASSERT(DefineFunction("from", func_from) != NULL);
+   ASSERT(DefineFunction("header", func_header) != NULL);
+   ASSERT(DefineFunction("body", func_body) != NULL);
+   ASSERT(DefineFunction("text", func_text) != NULL);
    ASSERT(DefineFunction("delete", func_delete) != NULL);
-   ASSERT(DefineFunction("copyto", func_copytofolder) != NULL);
+   ASSERT(DefineFunction("copy", func_copytofolder) != NULL);
+   ASSERT(DefineFunction("move", func_copytofolder) != NULL);
+   ASSERT(DefineFunction("date", func_date) != NULL);
+   ASSERT(DefineFunction("size", func_size) != NULL);
+   ASSERT(DefineFunction("now", func_now) != NULL);
+   ASSERT(DefineFunction("isspam", func_checkSpam) != NULL);
 }
 
 
@@ -1502,14 +1973,13 @@ FilterRuleImpl::Apply(class MailFolder *mf, bool NewOnly) const
 {
    if(! m_Program || ! m_Parser)
       return 0;
-   int rc = -1;
+   int rc = 1; // no error yet
    ASSERT(mf);
    mf->IncRef();
    HeaderInfoList *hil = mf->GetHeaders();
    if(hil)
    {
-      rc = 0; // no error so far
-      for(size_t i = 0; i < hil->Count() && rc == 0; i++)
+      for(size_t i = 0; i < hil->Count() && rc != 0; i++)
       {
          const HeaderInfo * hi = (*hil)[i];
          if( ! NewOnly || // handle all or only new ones:
@@ -1563,7 +2033,11 @@ int FilterTest(MInterface *interface, MModule_Filters *that)
 {
 
    String program = interface->GetMApplication()->
-      GetProfile()->readEntry("FilterTest","matchi(subject(),\"html\")&print(\"Message: '\", subject(), \"'\");");
+      GetProfile()->readEntry("FilterTest",
+                              "if(matchi(subject(),\"html\"))"
+                              "{copy(\"Trash\")&message(\"copied message to trash:\", subject());}"
+                              "else{message(\"skipped message\");}"
+         );
 
    FilterRule * fr = that->GetFilter(program);
 
@@ -1573,14 +2047,15 @@ int FilterTest(MInterface *interface, MModule_Filters *that)
 
    MailFolder * mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, folderName); 
 
+   int rc = -1;
    if(mf)
    {
       // apply this rule to all messages
-      int rc = fr->Apply(mf, false);
+      rc = fr->Apply(mf, false);
       mf->DecRef();
    }
    fr->DecRef();
-   return MMODULE_ERR_NONE;
+   return rc;
 }
 #endif
 
@@ -1602,7 +2077,7 @@ protected:
       {
          m_Interface = interface;
 #ifdef DEBUG
-         FilterTest(m_Interface, this);
+         (void) FilterTest(m_Interface, this);
 #endif
       }
 

@@ -418,6 +418,8 @@
 #define   MP_MSGVIEW_ALL_HEADERS     "MsgViewAllHeaders"
 /// the type of the last created folder
 #define   MP_LAST_CREATED_FOLDER_TYPE  "LastFolderType"
+/// the filter program to apply
+#define MP_FILTER_RULE   "Filter"
 /**@name  Font settings for message view */
 //@{
 /// which font to use
@@ -853,6 +855,8 @@
 #define   MP_MSGVIEW_ALL_HEADERS_D "From:To:Subject:Date:Newsgroups:Return-Path:Received:Delivered-To:Message-Id:X-Sender:X-Mailer:Mime-Version:Content-Type:Content-Length:Status:X-Status:X-Keywords:X-Url:X-UID:Approved:"
 /// the type of the last created folder
 #define   MP_LAST_CREATED_FOLDER_TYPE_D  (int)File
+/// the filter program to apply
+#define MP_FILTER_RULE_D   ""
 /**@name  Font settings for message view */
 //@{
 /// which font to use

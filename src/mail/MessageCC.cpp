@@ -40,8 +40,8 @@
 #define   HEADERBUFFERSIZE 100*1024
 
 /// check for dead mailstream
-#define CHECK_DEAD()   if( folder->Stream() == NIL && ! folder->PingReopen() ) { ERRORMESSAGE((_("Cannot access inactive folder '%s'."), folder->GetName().c_str())); return; }
-#define CHECK_DEAD_RC(rc)   if( folder->Stream() == NIL && ! folder->PingReopen()) {   ERRORMESSAGE((_("Cannot access inactive folder '%s'."), folder->GetName().c_str())); return rc; }
+#define CHECK_DEAD()   if( folder && folder->Stream() == NIL && ! folder->PingReopen() ) { ERRORMESSAGE((_("Cannot access inactive folder '%s'."), folder->GetName().c_str())); return; }
+#define CHECK_DEAD_RC(rc)   if( folder && folder->Stream() == NIL && ! folder->PingReopen()) {   ERRORMESSAGE((_("Cannot access inactive folder '%s'."), folder->GetName().c_str())); return rc; }
 
 MessageCC *
 MessageCC::CreateMessageCC(MailFolderCC *ifolder,
@@ -112,7 +112,9 @@ MessageCC::MessageCC(const char * itext, UIdType uid, ProfileBase *iprofile)
    // find end of header "\012\012"
    while(text[pos])
    {
-      if(text[pos] == '\012' && text[pos+1] == '\012') // empty line is end of header
+      if((text[pos] == '\012' && text[pos+1] == '\012') // empty line
+         // is end of header
+         || text[pos+1] == '\0')
       {
          header = new char [pos+2];
          strncpy(header, text, pos+1);
@@ -121,6 +123,7 @@ MessageCC::MessageCC(const char * itext, UIdType uid, ProfileBase *iprofile)
          bodycptr = text + pos + 2;
          break;
       }
+      pos++;
    }
    if(! header)
       return;  // failed
@@ -129,6 +132,7 @@ MessageCC::MessageCC(const char * itext, UIdType uid, ProfileBase *iprofile)
    INIT(&str, mail_string, (void *) bodycptr, strlen(bodycptr));
    rfc822_parse_msg (&m_Envelope, &m_Body, header, headerLen,
                      &str, ""   /*defaulthostname */, 0);
+   delete [] header;
 }
 
 bool
@@ -228,6 +232,9 @@ const char *
 MessageCC::GetHeader(void) const
 {
    CHECK_DEAD_RC(NULL);
+   if(! folder)
+      return NULL;
+
    const char *cptr = mail_fetchheader_full(folder->Stream(), m_uid,
                                             NULL, NIL, FT_UID);
    MailFolderCC::ProcessEventQueue();
@@ -238,6 +245,9 @@ void
 MessageCC::GetHeaderLine(const String &line, String &value)
 {
    CHECK_DEAD();
+   if(! folder)
+      return NULL;
+
    STRINGLIST  slist;
    slist.next = NULL;
    slist.text.size = line.length();
@@ -477,6 +487,9 @@ MessageCC::decode_body (BODY *body, String & pfx,long i,
 BODY *
 MessageCC::GetBody(void)
 {
+   if(folder == NULL) // this message has no folder associated
+      return m_Body;
+
    int retry = 1;
 
    // Forget what we  know and re-fetch the body, it is cached anyway.
@@ -513,7 +526,7 @@ MessageCC::GetStatus(
    unsigned int *month,
    unsigned int *year) const
 {
-   if(! ((MessageCC *)this)->GetBody())
+   if(folder == NULL || ! ((MessageCC *)this)->GetBody())
       return MailFolder::MSG_STAT_NONE;
 
       
@@ -571,6 +584,10 @@ const char *
 MessageCC::GetPartContent(int n, unsigned long *lenptr)
 {
    DecodeMIME();
+
+   if(! folder)
+      return NULL;
+
    long  unsigned
       len = 0;
    String const
@@ -768,3 +785,11 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
 
 
 
+/* static */
+class Message *
+Message::Create(const char * itext,
+               UIdType uid,
+               ProfileBase *iprofile)
+{
+   return MessageCC::Create(itext, uid, iprofile);
+}

@@ -344,6 +344,8 @@ protected:
    wxCheckBox *m_forceReOpen;
    /// Use anonymous access for this folder?
    wxCheckBox *m_isAnonymous;
+   /// Is folder local?
+   wxCheckBox *m_isLocal;
    /// The combobox for folder subtype
    wxChoice *m_folderSubtype;
    /// browse button for the icon
@@ -366,6 +368,8 @@ protected:
    bool m_originalKeepOpenValue;
    /// the initial value of the "force re-open" flag
    bool m_originalForceReOpenValue;
+   /// the initial value of the "is local" flag
+   bool m_originalIsLocalValue;
 
    /// the original value for the folder icon index (-1 if nothing special)
    int m_originalFolderIcon;
@@ -888,6 +892,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       Label_KeepOpen,
       Label_ForceReOpen,
       Label_IsAnonymous,
+      Label_IsLocal,
       Label_FolderSubtype,
       Label_FolderIcon,
       Label_Max
@@ -906,6 +911,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       gettext_noop("&Keep folder always open: "),
       gettext_noop("Force &re-open on ping: "),
       gettext_noop("&Anonymous access: "),
+      gettext_noop("Folder can be accessed &without network "),
       gettext_noop("Folder sub&type "),
       gettext_noop("&Icon for this folder: "),
    };
@@ -935,7 +941,8 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    m_keepOpen = CreateCheckBox(labels[Label_KeepOpen], widthMax, m_isIncoming);
    m_forceReOpen = CreateCheckBox(labels[Label_ForceReOpen], widthMax, m_keepOpen);
    m_isAnonymous = CreateCheckBox(labels[Label_IsAnonymous], widthMax, m_forceReOpen);
-   m_folderSubtype = CreateChoice(labels[Label_FolderSubtype], widthMax, m_isAnonymous);
+   m_isLocal = CreateCheckBox(labels[Label_IsLocal], widthMax, m_isAnonymous);
+   m_folderSubtype = CreateChoice(labels[Label_FolderSubtype], widthMax, m_isLocal);
 
    m_forceReOpen->SetToolTip(_("Tick this box if Mahogany appears to have "
                                "problems updating the folder listing.\n"
@@ -1095,6 +1102,7 @@ wxFolderPropertiesPage::EnableControlsForNewsGroup(bool isNNTP)
    EnableTextWithLabel(m_newsgroup, TRUE);
    EnableTextWithButton(m_path, FALSE);
    m_forceReOpen->Enable(isNNTP);
+   m_isLocal->Enable(isNNTP);
 }
 
 // enable the controls which make sense for an IMAP folder
@@ -1106,6 +1114,7 @@ wxFolderPropertiesPage::EnableControlsForImapOrPop(bool isIMAP)
    EnableTextWithLabel(m_newsgroup, FALSE);
    EnableTextWithButton(m_path, FALSE);
    m_forceReOpen->Enable(TRUE);
+   m_isLocal->Enable(TRUE);
 }
 
 // our argument here is the current exact folder type, not the radiobox
@@ -1227,7 +1236,8 @@ wxFolderPropertiesPage::UpdateUI(FolderType folderType)
          // this can not be changed for an already existing folder
          EnableTextWithButton(m_path, m_isCreating);
          m_forceReOpen->Enable(FALSE);
-
+         m_isLocal->Enable(FALSE);
+         m_isLocal->SetValue(FALSE);
          // file folders come in several flavours
          switch ( folderType )
          {
@@ -1581,7 +1591,9 @@ wxFolderPropertiesPage::SetDefaultValues()
    m_keepOpen->SetValue(m_originalKeepOpenValue);
    m_originalForceReOpenValue = (flags & MF_FLAGS_KEEPOPEN) != 0;
    m_forceReOpen->SetValue(m_originalForceReOpenValue);
-
+   m_originalIsLocalValue = (flags & MF_FLAGS_ISLOCAL) != 0;
+   m_isLocal->SetValue(m_originalIsLocalValue);
+   
    // and the same for the anon flag
    m_originalIsAnonymous = (flags & MF_FLAGS_ANON) != 0;
    m_isAnonymous->SetValue(m_originalIsAnonymous);
@@ -1656,6 +1668,7 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
       m_isIncoming->SetValue( (folder->GetFlags() & MF_FLAGS_INCOMING) != 0 );
       m_keepOpen->SetValue( (folder->GetFlags() & MF_FLAGS_KEEPOPEN) != 0 );
       m_forceReOpen->SetValue( (folder->GetFlags() & MF_FLAGS_REOPENONPING) != 0 );
+      m_isLocal->SetValue( (folder->GetFlags() & MF_FLAGS_ISLOCAL) !=0 );
    }
 
    UpdateUI(folderType);
@@ -1699,6 +1712,8 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       flags |= MF_FLAGS_KEEPOPEN;
    if ( m_forceReOpen->GetValue() )
       flags |= MF_FLAGS_REOPENONPING;
+   if ( m_isLocal->GetValue() )
+      flags |= MF_FLAGS_ISLOCAL;
 
    // check that we have the username/password
    String loginName = m_login->GetValue(),

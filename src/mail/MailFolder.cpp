@@ -41,6 +41,7 @@
 #include "wx/persctrl.h"
 #include "MDialogs.h"
 #include "MApplication.h"
+#include "modules/Filters.h"
 #include <wx/timer.h>
 
 /*-------------------------------------------------------------------*
@@ -278,8 +279,8 @@ MailFolder::ReplyMessage(class Message *msg,
    String cc;
    if(flags & REPLY_FOLLOWUP) // group reply
    {
-      String addr = msg->Address(name, MAT_FROM);
       msg->GetHeaderLine("CC", cc);
+      String addr = msg->Address(name, MAT_FROM);
       if(! email.Contains(addr))
          email << ", " << addr;
       addr = msg->Address(name, MAT_TO);
@@ -887,8 +888,23 @@ static void SortListing(MailFolder *mf, HeaderInfoList *hil, long SortOrder)
 void
 MailFolderCmn::UpdateListing(void)
 {
+   // We must make sure that we have called BuildListing() at least
+   // once, or ApplyFilterRules() will get into an endless recursion
+   // when it tries to obtain a listing and then gets called from
+   // here.
    HeaderInfoList *hil = BuildListing();
-
+   if(CountNewMessages() > 0)
+   {
+      m_FiltersCausedChange = false;
+      // before updating the listing, we need to filter any new messages:
+      ApplyFilterRules(true);
+      if(m_FiltersCausedChange)
+      {
+        // need to re-build it as it might have changed:
+         SafeDecRef(hil);
+         hil = BuildListing();
+      }
+   }
    if(hil)
    {
       SortListing(this, hil, m_Config.m_ListingSortOrder);
@@ -925,6 +941,7 @@ MailFolderCmn::UpdateListing(void)
       hil->DecRef();
       m_FirstListing = false;
    }
+
 }
 
 void
@@ -992,3 +1009,40 @@ MailFolderCmn::DeleteMessages(const INTARRAY *selections)
       return SetSequenceFlag(GetSequenceString(selections), MailFolder::MSG_STAT_DELETED);
 }
 
+int
+MailFolderCmn::ApplyFilterRules(bool newOnly)
+{
+   // Maybe we are lucky and have nothing to do?
+   if(newOnly && CountNewMessages() == 0)
+         return 0;
+
+   // Obtain pointer to the filtering module: 
+   MModule_Filters *filterModule = MModule_Filters::GetModule();
+
+   /* Has the folder got any filter rules set?
+      If so, apply the rules before collecting.
+   */
+   if(filterModule)
+   {
+      int rc = 0;
+      String filterString;
+      // apply the filter from the original folder:
+      filterString = READ_CONFIG(GetProfile(), MP_FILTER_RULE);
+      if(filterString.Length())
+      {
+         FilterRule * filterRule = filterModule->GetFilter(filterString);
+         if(filterRule)
+         {
+            // This might change the folder contents,
+            // so we must set this flag:
+            m_FiltersCausedChange = true; 
+            rc = filterRule->Apply(this, newOnly);
+            filterRule->DecRef();
+         }
+      }
+      filterModule->DecRef();
+      return rc;
+   }
+   else
+      return -1; // no filter module
+}

@@ -80,16 +80,17 @@ static const int MF_FLAGSMASK = 0xff00;
 // the flags of a mail folder
 enum FolderFlags
 {
-   MF_FLAGS_ANON          = 0x0100, // use anonymous access
-   MF_FLAGS_INCOMING      = 0x0200, // collect all new mail from it
-   MF_FLAGS_UNACCESSIBLE  = 0x0400, // folder can't be opened
-   MF_FLAGS_MODIFIED      = 0x0800, // [essential] folder settings have been
-                                    // modified (invalidates "unaccessible"
-                                    // flag) since the last attempt to open it
-   MF_FLAGS_NEWMAILFOLDER = 0x1000, // the central new mail folder
-   MF_FLAGS_DONTDELETE    = 0x2000, // forbid deletion of this folder
-   MF_FLAGS_KEEPOPEN      = 0x4000, // keep this folder open at all times
-   MF_FLAGS_REOPENONPING  = 0x8000  // force a close and re-open on a ping
+   MF_FLAGS_ANON          = 0x00100, // use anonymous access
+   MF_FLAGS_INCOMING      = 0x00200, // collect all new mail from it
+   MF_FLAGS_UNACCESSIBLE  = 0x00400, // folder can't be opened
+   MF_FLAGS_MODIFIED      = 0x00800, // [essential] folder settings have been
+                                     // modified (invalidates "unaccessible"
+                                     // flag) since the last attempt to open it
+   MF_FLAGS_NEWMAILFOLDER = 0x01000, // the central new mail folder
+   MF_FLAGS_DONTDELETE    = 0x02000, // forbid deletion of this folder
+   MF_FLAGS_KEEPOPEN      = 0x04000, // keep this folder open at all times
+   MF_FLAGS_REOPENONPING  = 0x08000, // force a close and re-open on a ping
+   MF_FLAGS_ISLOCAL       = 0x10000  // can be accessed even without network
 };
 
 /** SendMessageCC supports two different protocols:

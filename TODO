@@ -22,20 +22,23 @@ $Id$
 		- ctrl keys not recognised when CAPSLOCK is down
 		- add blinking cursor
 		- fix import of own clipboard format
-
+		- add HTML import
 	KB	MessageView:
 		 - should show cursor only on demand
 		 - remember focused message not by index but by UID
 		   and find it again after re-sort
-
-6	KB	clear message view if message got expunged
 
 8	KB	integrate imap 4.7 and recently received patches
 
 	KB	properties/access shows wrong help
 	KB	properties/custom headers/more shows corrupted title
 
+	KB	wxMessageView: message/rfc822 display via MessageCC(string)
+
+KB		add python hook for filters
+
 7	KB	selecting/deselecting only message in folder
+		--fixed?
 
 9	VZ	can we have *all* log messages (incl status) appear in 
 		the log window?
@@ -74,15 +77,7 @@ $Id$
 6	KB	Fix PalmExport: 1. handle illegal characters like '
 				2. use libpisock
 
-4	KB	add trash
-
 3		Add routine to write large headers.
-
-7	KB	group reply misses additional To entries
-
-
-
-7		opening folder with password prompts twice at startup
 
 8?		changing password on remote folder while open results
 		in empty folder, but no error message, as login no
@@ -93,15 +88,11 @@ $Id$
 		 (News get stored to "OutboxName"+_(M_NEWSOUTBOX_POSTFIX)
 		- choose INBOX/New Mail
 
-4		TABs in messages don't show (CRAC test message)
-
 		main window hides about-splash - not nice
 		--> 2nd timer to bring it to top and run wxYield() to
 		    update it?
 
-		posting news article --> cannot find mailbox for callback
-
-		MObjectRC (FCEntryGroup) (from BBDB book)
+	KB	DEBUG:	posting news article --> cannot find mailbox for callback
 
 6	VZ	Adbframe: when creating new entry, the selection
 		should move to that, so it is displayed and can be
@@ -159,16 +150,6 @@ $Id$
 		is created
 5	VZ	custom headers are not inherited
 
-4 gtk	VZ	icon selector suffers from several appearance problems
-3 gtk	??	menu acceleratos don't work if we process char events
-
-2	KB	message searching for IMAP should use IMAP
-		functionality, document msgno usage in search sequence
-		rather than uid: returned numbers are msgnos
-
-
-
-
 
 
 6 gtk   RR      The force-reopen checkbox doesn't display its
@@ -189,7 +170,6 @@ $Id$
 		names, not just 1 2 3 4 ...
 
 9		Add option to import a directory of mailfolder files.
-
 		Config and wxWin support for different character sets
 
 	KB	wxModulesDialog: add decref/load as reaction to check/uncheck?

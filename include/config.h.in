@@ -121,6 +121,12 @@
 /** Define if you want to link Modules statically. */
 #undef USE_MODULES_STATIC
 
+/** Define this if you want to use RBL to lookup SPAM domains. */
+#undef USE_RBL
+
+/** Define this if you have POSIX.2 regexp suport. */
+#undef HAVE_POSIX_REGEX
+
 /** This define carries some information about the operating system
     and release that M is compiled for.
 */

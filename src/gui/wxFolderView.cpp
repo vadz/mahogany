@@ -109,6 +109,8 @@ public:
             SetFocus();
       }
 #endif // wxGTK
+   /// goto next unread message
+   void SelectNextUnread(void); 
 
 protected:
    long m_Style;
@@ -510,6 +512,41 @@ wxFolderListCtrl::SetEntry(long index,
 }
 
 void
+wxFolderListCtrl::SelectNextUnread()
+{
+   HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
+   if(! hil || hil->Count() == 0)
+   {
+      SafeDecRef(hil);
+      return; // cannot do anything
+   }
+   UIdType focusedUId = GetFocusedUId();
+   
+   long idx = -1;
+   bool foundFocused = false;
+   while((idx = GetNextItem(idx)) != -1)
+   {
+      const HeaderInfo *hi = (*hil)[idx];
+      if(foundFocused) // we are looking for the next unread now:
+      {
+         if((hi->GetStatus() & MailFolder::MSG_STAT_SEEN) == 0)
+         {
+            SetItemState(idx, wxLIST_STATE_FOCUSED,wxLIST_STATE_FOCUSED);
+            SetItemState(idx, wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
+            m_FolderView->PreviewMessage(hi->GetUId());
+            m_FolderView->UpdateSelectionInfo();
+            SafeDecRef(hil);
+            return;
+         }
+      }
+      if(hi->GetUId() == focusedUId)
+            foundFocused = true;
+      idx++;
+   }
+   SafeDecRef(hil);
+}
+
+void
 wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 {
    m_FocusedUId = UID_ILLEGAL;
@@ -879,6 +916,9 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       GetSelections(selections);
       m_TicketList->Add(m_ASMailFolder->DeleteMessages(&selections));
       break;
+   case WXMENU_MSG_NEXT_UNREAD:
+      m_FolderCtrl->SelectNextUnread();
+      break;
    case WXMENU_MSG_PRINT:
       GetSelections(selections);
       PrintMessages(selections);
@@ -935,7 +975,6 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       composeView->Show();
    }
    break;
-
    default:
       wxFAIL_MSG("wxFolderView::OnMenuCommand() called with illegal id.");
    }
@@ -967,6 +1006,7 @@ wxFolderView::PreviewMessage(long uid)
 {
    m_MessagePreview->ShowMessage(m_ASMailFolder, uid);
 }
+
 
 void
 wxFolderView::OpenMessages(const wxArrayInt& selections)

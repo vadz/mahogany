@@ -85,13 +85,20 @@ public:
    };
    //@}
 
+   /** This constructor creates a Message from a string.
+    */
+   static class Message * Create(
+      const char * itext,
+      UIdType uid = UID_ILLEGAL,
+      class ProfileBase *iprofile = NULL);
+   
    /** get any header line
        @line name of header line
        @value string where result will be stored, or empty string
    */
    virtual void GetHeaderLine(const String &line, String &value) = 0;
 
-   /** Get a complete header text.
+   /** Get the complete header text.
        @return pointer to an internal buffer
    */
    virtual const char * GetHeader(void) const = 0;
@@ -126,7 +133,7 @@ public:
    /** Return message references. */
    virtual String GetReferences(void) const = 0;
 
-   /** get message text
+   /** Get message text.
        @return the uninterpreted message body
    */
    virtual char *FetchText(void) = 0;

@@ -38,6 +38,7 @@
 
 #include "MDialogs.h"   // MDialog_YesNoDialog
 
+
 // instead of writing our own wrapper for wxExecute()
 #include  <wx/utils.h>
 #define   SYSTEM(command) wxExecute(command, FALSE)
@@ -49,6 +50,71 @@ struct MailCollectorFolderEntry
 };
 
 KBLIST_DEFINE(MailCollectorFolderList, MailCollectorFolderEntry);
+
+
+class MailCollectorImpl : public MailCollector
+{
+public:
+   MailCollectorImpl();
+   /// Returns true if the mailfolder mf is an incoming folder.
+   virtual bool IsIncoming(MailFolder *mf);
+   /** Collect all mail from folder mf.
+       @param mf the folder to collect from
+       @return true on success
+   */
+   virtual bool Collect(MailFolder *mf = NULL);
+   /** Tells the object about a new new mail folder.
+       @param name use this folder as the new mail folder
+   */
+   virtual void SetNewMailFolder(const String &name);
+   /** Adds a new incoming folder to the list.
+       @param name folder to collect from
+       @return true on success, false if folder was not found
+   */
+   virtual bool AddIncomingFolder(const String &name);
+   /** Removes an incoming folder from the list.
+       @param name no longer collect from this folder
+       @return true on success, false if folder was not found
+   */
+   virtual bool RemoveIncomingFolder(const String &name);
+   /** Returns true if the collector is locked.
+       @return true if collecting
+   */
+   virtual bool IsLocked(void) const { return m_IsLocked; }
+   /** Locks or unlocks the mail collector. If it is locked, it simly
+       does nothing.
+       @param lock true=lock, false=unlock
+       @return the old state
+   */
+   virtual bool Lock(bool lock = true)
+      { bool rc = m_IsLocked; m_IsLocked =lock; return rc; }
+protected:
+   /// Collect mail from this one folder.
+   bool CollectOneFolder(MailFolder *mf);
+   ~MailCollectorImpl();
+   /// re-opens any closed folders, depending on network status
+   void UpdateFolderList(void);
+private:
+   /// a list of folder names and mailfolder pointers
+   class MailCollectorFolderList *m_list;
+   /// the folder to save new mail to
+   MailFolder     *m_NewMailFolder;
+   /// profile for the new mail folder
+   ProfileBase    *m_NewMailProfile;
+   /// are we not supposed to collect anything?
+   bool           m_IsLocked;
+   /// The message for the new mail dialog.
+   String         m_Message;
+   /// The number of new messages.
+   unsigned long  m_Count;
+};
+
+/* static */
+MailCollector *
+MailCollector::Create(void)
+{
+   return new MailCollectorImpl;
+}
 
 /// only used by MailCollector to find incoming folders
 class MAppFolderTraversal : public MFolderTraversal
@@ -67,15 +133,12 @@ public:
             wxLogDebug("Found incoming folder '%s'.",
                        folderName.c_str());
             MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,folderName);
-            if(mf)
-            {
-               MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
-               e->m_name = folderName;
-               e->m_folder = mf;
-               m_list->push_back(e);
-            }
-            else
-               wxLogError(_("Cannot open incoming folder '%s'."), folderName.c_str());
+            MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
+            e->m_name = folderName;
+            e->m_folder = mf; // might be NULL!
+            m_list->push_back(e);
+            if(! mf)
+               INFOMESSAGE((_("Cannot open incoming folder '%s'."), folderName.c_str()));
          }
          if(f)f->DecRef();
          return true;
@@ -88,7 +151,7 @@ private:
 
 
 
-MailCollector::MailCollector()
+MailCollectorImpl::MailCollectorImpl()
 {
    m_IsLocked = false;
    m_list = new MailCollectorFolderList;
@@ -100,11 +163,13 @@ MailCollector::MailCollector()
    SetNewMailFolder(READ_APPCONFIG(MP_NEWMAIL_FOLDER));
 }
 
-MailCollector::~MailCollector()
+MailCollectorImpl::~MailCollectorImpl()
 {
+   MOcheck();
    MailCollectorFolderList::iterator i;
    for(i = m_list->begin();i != m_list->end(); i++)
-      (**i).m_folder->DecRef();
+      if((**i).m_folder)
+         (**i).m_folder->DecRef();
    if(m_NewMailFolder)
    {
       m_NewMailFolder->DecRef();
@@ -114,8 +179,9 @@ MailCollector::~MailCollector()
 }
 
 bool
-MailCollector::IsIncoming(MailFolder *mf)
+MailCollectorImpl::IsIncoming(MailFolder *mf)
 {
+   MOcheck();
    MailCollectorFolderList::iterator i;
    for(i = m_list->begin();i != m_list->end();i++)
       if((**i).m_folder == mf)
@@ -124,15 +190,14 @@ MailCollector::IsIncoming(MailFolder *mf)
 }
 
 bool
-MailCollector::Collect(MailFolder *mf)
+MailCollectorImpl::Collect(MailFolder *mf)
 {
+   MOcheck();
    m_Message = "";
    m_Count = 0;
    bool rc = true;
 
    CHECK(m_NewMailFolder,false,_("Cannot collect mail without New Mail folder."));
-   if(! mApplication->IsOnline())
-      return false;
 
    if(mf == NULL)
    {
@@ -189,12 +254,13 @@ MailCollector::Collect(MailFolder *mf)
 }
 
 bool
-MailCollector::CollectOneFolder(MailFolder *mf)
+MailCollectorImpl::CollectOneFolder(MailFolder *mf)
 {
+   MOcheck();
    ASSERT(mf);
    bool rc = true;
    
-   if(! mApplication->IsOnline())
+   if(mf->NeedsNetwork() && ! mApplication->IsOnline())
       return false;
 
    bool locked = Lock();
@@ -208,6 +274,9 @@ MailCollector::CollectOneFolder(MailFolder *mf)
       RemoveIncomingFolder(mf->GetName());
       return false;
    }
+
+   mf->ApplyFilterRules(false);
+
    /* Obtain exclusive access: */
    MailFolderLock lock(mf);
    if(lock.Locked())
@@ -257,17 +326,23 @@ MailCollector::CollectOneFolder(MailFolder *mf)
       }
       else
          rc = true;
+
       mf->EnableNewMailEvents(sendsEvents);
       mf->Ping(); //update it
    }
    Lock(locked);
+
+   /* We might have filter rules set on the NewMail folder, so we
+      apply these as well: */
+   m_NewMailFolder->ApplyFilterRules(true);
    return rc;
 }
 
 
 void
-MailCollector::SetNewMailFolder(const String &name)
+MailCollectorImpl::SetNewMailFolder(const String &name)
 {
+   MOcheck();
    if(m_NewMailFolder)
    {
       m_NewMailFolder->DecRef();
@@ -279,24 +354,21 @@ MailCollector::SetNewMailFolder(const String &name)
 
 
 bool
-MailCollector::AddIncomingFolder(const String &name)
+MailCollectorImpl::AddIncomingFolder(const String &name)
 {
+   MOcheck();
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,name);
-   if(mf)
-   {
-      MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
-      e->m_name = name;
-      e->m_folder = mf;
-      m_list->push_back(e);
-      return true;
-   }
-   else
-      return false;
+   MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
+   e->m_name = name;
+   e->m_folder = mf; // might be NULL
+   m_list->push_back(e);
+   return true;
 }
 
 bool
-MailCollector::RemoveIncomingFolder(const String &name)
+MailCollectorImpl::RemoveIncomingFolder(const String &name)
 {
+   MOcheck();
    MailCollectorFolderList::iterator i;
    for(i = m_list->begin();i != m_list->end();i++)
    {
@@ -314,3 +386,34 @@ MailCollector::RemoveIncomingFolder(const String &name)
    return false;
 }
 
+/** Search for incoming folders which are open but cannot be accessed
+    or which are closed and try to reopen them. */
+void
+MailCollectorImpl::UpdateFolderList(void)
+{
+   MOcheck();
+   MailCollectorFolderList::iterator i;
+
+   if(mApplication->IsOnline())
+   {
+      // Search for folders to try to open:
+      for(i = m_list->begin();i != m_list->end();i++)
+      {
+         if((**i).m_folder == NULL) // try to open:
+            (**i).m_folder = MailFolder::OpenFolder(MF_PROFILE,(**i).m_name);
+      }
+   }
+   else // we are offline, do we need to disable some folder:
+   {
+      // Search for folders to try to open:
+      for(i = m_list->begin();i != m_list->end();i++)
+      {
+         if((**i).m_folder != NULL &&
+            (**i).m_folder->NeedsNetwork())
+         {
+            (**i).m_folder->DecRef(); // close
+            (**i).m_folder = NULL; // will try to re-open when online
+         }
+      }
+   }
+}

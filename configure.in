@@ -322,6 +322,7 @@ then
 	LDFLAGS="$LDFLAGS -lpthread"
 fi
 
+
 dnl set debug/optimisation flags
 DBGFLAGS=
 MAKE_DEBUG=
@@ -387,6 +388,20 @@ dnl Check if we have the pi-sock library and headers for PalmOS support.
 AC_CHECK_HEADERS(pi-source.h, ,
   AC_MSG_WARN("Cannot find pisock library support for PalmOS disabled."))
 
+dnl libresolv or libbind
+USE_RBL=1
+AC_CHECK_LIB(resolv,res_init,,
+AC_CHECK_LIB(bind,res_init,, [ AC_MSG_WARN("Cannot use RBL spam checker.")
+USE_RBL=0 ] ))
+AC_DEFINE(USE_RBL)
+
+dnl POSIX.2 regexp support
+HAVE_POSIX_REGEX=0
+AC_CHECK_HEADERS(regexp.h,
+AC_CHECK_LIB(c, regcomp, HAVE_POSIX_REGEX=1,
+AC_CHECK_LIB(regex,regcomp, [ LIBS="$LIBS -lregex"
+HAVE_POSIX_REGEX=1 ] )))
+AC_DEFINE(HAVE_POSIX_REGEX)
 
 dnl --------------------------------------------------------------------------
 dnl check for python ( a bit lengthy thanks to its stupid installation)

@@ -406,7 +406,8 @@ wxMessageView::wxMessageView(ASMailFolder *folder,
    if(m_folder) m_folder->IncRef();
    m_Profile = NULL;
    Create(fv,parent);
-   ShowMessage(folder,num);
+   if(folder)
+      ShowMessage(folder,num);
    Show(TRUE);
 }
 
@@ -890,22 +891,28 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       fileType = mimeManager.GetFileTypeFromMimeType(mimetype);
    }
 
-#  ifdef OS_WIN
-   // get the standard extension for such files - we'll use it below...
-   wxString ext;
-   if ( fileType != NULL ) {
-      wxArrayString exts;
-      if ( fileType->GetExtensions(exts) ) {
-         ext = exts[0u];
-      }
-   }
-#  endif // Win
-
    /* First, we check for those contents that we handle in M itself: */
    // this we handle internally
    if(mimetype.length() >= strlen("MESSAGE") &&
       mimetype.Left(strlen("MESSAGE")) == "MESSAGE")
    {
+#if 0
+      // It´s a pity, but creating a MessageCC from a string doesn´t
+      // quite work yet. :-(
+      unsigned long len;
+      char const *content = m_mailMessage->GetPartContent(mimeDisplayPart, &len);
+      if( !content )
+      {
+         wxLogError(_("Cannot get attachment content."));
+         return;
+      }
+      Message *msg = Message::Create(content, 1);
+      wxMessageViewFrame * f = new wxMessageViewFrame(NULL, 1, NULL, m_Parent);
+      f->ShowMessage(msg);
+      f->SetTitle(mimetype);
+      msg->DecRef(); 
+#endif
+
       char *filename = wxGetTempFileName("Mtemp");
       if(MimeSave(mimeDisplayPart,filename))
       {
@@ -917,6 +924,17 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       wxRemoveFile(filename);
       return;
    }
+
+#  ifdef OS_WIN
+   // get the standard extension for such files - we'll use it below...
+   wxString ext;
+   if ( fileType != NULL ) {
+      wxArrayString exts;
+      if ( fileType->GetExtensions(exts) ) {
+         ext = exts[0u];
+      }
+   }
+#  endif // Win
 
    String
       filename = wxGetTempFileName("Mtemp"),
@@ -1358,21 +1376,21 @@ wxMessageView::DoMenuCommand(int id)
       break;
 
    case WXMENU_MSG_SAVE_TO_FOLDER:
-      if(m_uid != UID_ILLEGAL)
+      if(m_uid != UID_ILLEGAL && GetFolder())
          GetFolder()->SaveMessagesToFolder(&msgs, GetFrame(this));
       break;
    case WXMENU_MSG_SAVE_TO_FILE:
-      if(m_uid != UID_ILLEGAL)
+      if(m_uid != UID_ILLEGAL && GetFolder())
          GetFolder()->SaveMessagesToFile(&msgs, GetFrame(this));
       break;
 
    case WXMENU_MSG_DELETE:
-      if(m_uid != UID_ILLEGAL)
+      if(m_uid != UID_ILLEGAL && GetFolder())
          GetFolder()->DeleteMessages(&msgs);
       break;
 
    case WXMENU_MSG_UNDELETE:
-      if(m_uid != UID_ILLEGAL)
+      if(m_uid != UID_ILLEGAL && GetFolder())
          GetFolder()->UnDeleteMessages(&msgs);
       break;
 
@@ -1432,9 +1450,9 @@ wxMessageView::ShowMessage(ASMailFolder *folder, UIdType uid)
    }
    if ( m_uid == uid )
       return;
-   if(m_folder) m_folder->DecRef();
+   SafeDecRef(m_folder);
    m_folder = folder;
-   m_folder->IncRef();
+   SafeIncRef(m_folder);
    (void) m_folder->GetMessage(uid, this); // file request
 }
 
@@ -1476,7 +1494,7 @@ wxMessageView::ShowMessage(Message *mailMessage)
    m_mailMessage = mailMessage;
    m_uid = mailMessage->GetUId();
 
-   if(! (m_mailMessage->GetStatus() & MailFolder::MSG_STAT_SEEN))
+   if( GetFolder() && ! (m_mailMessage->GetStatus() & MailFolder::MSG_STAT_SEEN))
       m_mailMessage->GetFolder()->SetMessageFlag(m_uid, MailFolder::MSG_STAT_SEEN, true);
 
    /* FIXME for now it's here, should go somewhere else: */
@@ -1485,7 +1503,8 @@ wxMessageView::ShowMessage(Message *mailMessage)
       String addr, name;
       addr = m_mailMessage->Address(name, MAT_REPLYTO);
 
-      String folderName = m_mailMessage->GetFolder()->GetName();
+      String folderName = m_mailMessage->GetFolder() ?
+         m_mailMessage->GetFolder()->GetName() : String(_("unknown"));
 
       AutoCollectAddresses(addr, name,
                            m_ProfileValues.autocollect,
