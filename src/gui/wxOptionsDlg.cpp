@@ -766,7 +766,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_DOCKABLE_TOOLBARS),
    CONFIG_ENTRY(MP_FLAT_TOOLBARS),
 #ifdef OS_UNIX
-   CONFIG_ENTRY(MP_ICONSTYLE)
+   CONFIG_ENTRY(MP_ICONSTYLE),
 #endif
    CONFIG_NONE()
 };

@@ -2185,7 +2185,7 @@ void ReenableDialog::AddAllEntries(wxConfigBase *config,
       }
 
       m_listctrl->SetItem(index, 1, value);
-      m_listctrl->SetItem(index, 2, !folder ? _("all folders") : folder);
+      m_listctrl->SetItem(index, 2, !folder ? String(_("all folders")) : folder);
 
       // and remember the config path in case we'll delete it later
       if ( !!folder )
