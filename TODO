@@ -87,6 +87,9 @@ wxMSW bugs:
 
 ******* Priorities for KB: ******************************
 
+- set Reply-To: from To: is in config but not implemented yet, needs
+  change to SendMessageCC.
+
 - document python callback behaviour for incoming folders, possibly do 
   testing for callback results in CollectOneFolder!!
 - add configure option for python path
