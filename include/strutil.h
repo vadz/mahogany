@@ -380,5 +380,8 @@ strutil_freeRegEx(class strutil_RegEx *regex);
 extern wxArrayString strutil_restore_array(char ch, const String& str);
 extern String strutil_flatten_array(const wxArrayString& array, char ch = ':');
 
+// return an array containing unique strings from sorted array
+extern wxArrayString strutil_uniq_array(const wxSortedArrayString& arrSorted);
+
 //@}
 #endif

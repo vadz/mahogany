@@ -1350,3 +1350,35 @@ String strutil_flatten_array(const wxArrayString& array, char ch)
    return s;
 }
 
+// this works for any strings, not only addresses: the variable names are just
+// left overs
+wxArrayString strutil_uniq_array(const wxSortedArrayString& addrSorted)
+{
+   wxArrayString addresses;
+   wxString addr;
+   size_t count = addrSorted.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      if ( addrSorted[n] != addr )
+      {
+         // add the address we had before (if we did) to the list
+         if ( !addr.empty() )
+         {
+            addresses.Add(addr);
+         }
+
+         // and remeber it to avoid adding it more than once
+         addr = addrSorted[n];
+      }
+      //else: another copy, just skip
+   }
+
+   if ( !addr.empty() )
+   {
+      // don't forget to add the last one which we don't have yet
+      addresses.Add(addr);
+   }
+
+   return addresses;
+}
+

@@ -25,6 +25,8 @@
    #include "Mcommon.h"
 
    #include <wx/log.h>
+
+   #include "Message.h"
 #endif // USE_PCH
 
 #include "MDialogs.h"
@@ -34,6 +36,18 @@
 
 #include "adb/AdbEntry.h"
 #include "adb/AdbImport.h"
+
+// ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
+
+DECLARE_AUTOPTR(AdbEntry);
+DECLARE_AUTOPTR(AdbEntryGroup);
+DECLARE_AUTOPTR(AdbBook);
+
+// ----------------------------------------------------------------------------
+// function prototype
+// ----------------------------------------------------------------------------
 
 // ============================================================================
 // implementation
@@ -88,7 +102,7 @@ void AutoCollectAddresses(const String &email,
                       bookName.c_str());
 
          // TODO ask the user if he wants to disable autocollec?
-         return; //FIXME: why does this suddenly fail?
+         return;
       }
 
       ArrayAdbEntries matches;
@@ -246,12 +260,21 @@ void AutoCollectAddresses(const String &email,
 }
 
 int InteractivelyCollectAddresses(const wxArrayString& addresses,
-                                  const String& bookName,
-                                  const String& groupName,
+                                  const String& bookNameOrig,
+                                  const String& groupNameOrig,
                                   MFrame *parent)
 {
+   // by default, select all addresses
     wxArrayInt selections;
-    size_t count = MDialog_GetSelections
+    size_t n,
+           count = addresses.GetCount();
+    for ( n = 0; n < count; n++ )
+    {
+       selections.Add(n);
+    }
+
+    // now ask the user which ones does he really want
+    count = MDialog_GetSelections
                    (
                     _("Please select the addresses to save"),
                     _("Save addresses"),
@@ -263,17 +286,62 @@ int InteractivelyCollectAddresses(const wxArrayString& addresses,
     if ( count > 0 )
     {
        // ask the user for the book and group names to use
-       wxString book(bookName), group(groupName);
+       //
+       // TODO propose something better - ADB tree dialog for example
+       wxString bookName(bookNameOrig),
+                groupName(groupNameOrig);
        if ( MDialog_GetText2FromUser
             (
                _("Please select the location in the address\n"
                  "book to save the selected entries to:"),
                _("Save addresses"),
-               _("Address book name:"), &book,
-               _("Group name:"), &group,
+               _("Address book name:"), &bookName,
+               _("Group name:"), &groupName,
                parent
             ) )
        {
+         AdbManager_obj manager;
+         CHECK( manager, -1, "can't get AdbManager" );
+
+         AdbBook_obj autocollectbook = manager->CreateBook(bookName);
+
+         if ( !autocollectbook )
+         {
+            wxLogError(_("Failed to create the address book '%s' "
+                         "for autocollected e-mail addresses."),
+                         bookName.c_str());
+
+            // TODO ask the user for another book name
+            return -1;
+         }
+
+         AdbEntryGroup_obj group = autocollectbook->CreateGroup(groupName);
+         if ( !group )
+         {
+            wxLogError(_("Failed to create group '%s' in the address "
+                         "book '%s'."),
+                         groupName.c_str(), bookName.c_str());
+
+            return -1;
+         }
+
+         // create all entries in this group
+         for ( n = 0; n < count; n++ )
+         {
+            wxString addr = addresses[selections[n]];
+            wxString name = Message::GetNameFromAddress(addr),
+                     email = Message::GetEMailFromAddress(addr);
+
+            if ( name.empty() )
+            {
+               name = email.BeforeFirst('@');
+            }
+
+            AdbEntry_obj entry = group->CreateEntry(name);
+            entry->SetField(AdbField_NickName, name);
+            entry->SetField(AdbField_FullName, name);
+            entry->SetField(AdbField_EMail, email);
+         }
        }
        //else: cancelled
     }

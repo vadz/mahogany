@@ -1677,33 +1677,6 @@ wxMessageView::DoMenuCommand(int id)
       }
       break;
 
-   case WXMENU_MSG_SAVEADDRESSES:
-      if ( m_mailMessage )
-      {
-         // autocollect the addresses
-         wxArrayString addresses;
-         if ( m_mailMessage->ExtractAddressesFromHeader(addresses) )
-         {
-            MailFolder *folder = m_mailMessage->GetFolder();
-            String folderName =  folder ? folder->GetName()
-                                        : String(_("unknown"));
-            InteractivelyCollectAddresses(addresses,
-                                          m_ProfileValues.autocollectBookName,
-                                          folderName,
-                                          (MFrame *)GetFrame(this));
-         }
-         else
-         {
-            // very strange
-            wxLogWarning(_("This message doesn't contain any valid addresses."));
-         }
-      }
-      else
-      {
-         wxLogStatus(GetFrame(this), _("No message selected."));
-      }
-      break;
-
    case WXMENU_MSG_SHOWRAWTEXT:
       ShowRawText();
       break;

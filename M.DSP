@@ -472,6 +472,10 @@ SOURCE=.\src\adb\AdbProvider.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\adb\Collect.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\adb\ExportPalm.cpp
 # PROP Exclude_From_Build 1
 # End Source File

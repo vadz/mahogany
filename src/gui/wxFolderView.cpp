@@ -1565,186 +1565,250 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
 
    switch ( cmd )
    {
-   case WXMENU_MSG_SEARCH:
-      SearchMessages();
-      break;
-   case WXMENU_MSG_FIND:
-   case WXMENU_MSG_SAVEADDRESSES:
-   case WXMENU_MSG_TOGGLEHEADERS:
-   case WXMENU_MSG_SHOWRAWTEXT:
-   case WXMENU_EDIT_COPY:
-      (void)m_MessagePreview->DoMenuCommand(cmd);
-      break;
-   case WXMENU_LAYOUT_LCLICK:
-   case WXMENU_LAYOUT_RCLICK:
-   case WXMENU_LAYOUT_DBLCLICK:
-//FIXME      m_MessagePreview->OnMouseEvent(event);
-      break;
+      case WXMENU_MSG_SEARCH:
+         SearchMessages();
+         break;
 
-   case  WXMENU_MSG_EXPUNGE:
-      m_ASMailFolder->ExpungeMessages();
-      Update();
-      wxLogStatus(GetFrame(m_Parent), _("Deleted messages were expunged"));
-      break;
+      case WXMENU_MSG_FIND:
+      case WXMENU_MSG_TOGGLEHEADERS:
+      case WXMENU_MSG_SHOWRAWTEXT:
+      case WXMENU_EDIT_COPY:
+         (void)m_MessagePreview->DoMenuCommand(cmd);
+         break;
 
-   case WXMENU_MSG_OPEN:
-      GetSelections(selections);
-      OpenMessages(selections);
-      break;
-   case WXMENU_MSG_SAVE_TO_FOLDER:
-      GetSelections(selections);
-      SaveMessagesToFolder(selections);
-      break;
-   case WXMENU_MSG_MOVE_TO_FOLDER:
-      GetSelections(selections);
-      SaveMessagesToFolder(selections, NULL, true);
-      break;
-   case WXMENU_MSG_SAVE_TO_FILE:
-      GetSelections(selections);
-      SaveMessagesToFile(selections);
-      break;
-   case WXMENU_MSG_REPLY:
-   case WXMENU_MSG_FOLLOWUP:
-      {
-         int flags = cmd == WXMENU_MSG_FOLLOWUP ? MailFolder::REPLY_FOLLOWUP
-                                                : 0;
+      case WXMENU_LAYOUT_LCLICK:
+      case WXMENU_LAYOUT_RCLICK:
+      case WXMENU_LAYOUT_DBLCLICK:
+         //FIXME m_MessagePreview->OnMouseEvent(event);
+         break;
 
+      case  WXMENU_MSG_EXPUNGE:
+         m_ASMailFolder->ExpungeMessages();
+         Update();
+         wxLogStatus(GetFrame(m_Parent), _("Deleted messages were expunged"));
+         break;
+
+      case WXMENU_MSG_OPEN:
+         GetSelections(selections);
+         OpenMessages(selections);
+         break;
+
+      case WXMENU_MSG_SAVE_TO_FOLDER:
+         GetSelections(selections);
+         SaveMessagesToFolder(selections);
+         break;
+
+      case WXMENU_MSG_MOVE_TO_FOLDER:
+         GetSelections(selections);
+         SaveMessagesToFolder(selections, NULL, true);
+         break;
+
+      case WXMENU_MSG_SAVE_TO_FILE:
+         GetSelections(selections);
+         SaveMessagesToFile(selections);
+         break;
+
+      case WXMENU_MSG_REPLY:
+      case WXMENU_MSG_FOLLOWUP:
+         {
+            int flags = cmd == WXMENU_MSG_FOLLOWUP ? MailFolder::REPLY_FOLLOWUP
+                                                   : 0;
+
+            GetSelections(selections);
+            m_TicketList->Add(
+               m_ASMailFolder->ReplyMessages(
+                                             &selections,
+                                             MailFolder::Params(templ, flags),
+                                             GetFrame(m_Parent),
+                                             this
+                                            )
+            );
+         }
+         break;
+
+      case WXMENU_MSG_FORWARD:
          GetSelections(selections);
          m_TicketList->Add(
-            m_ASMailFolder->ReplyMessages(
-                                          &selections,
-                                          MailFolder::Params(templ, flags),
-                                          GetFrame(m_Parent),
-                                          this
-                                         )
-         );
-      }
-      break;
-   case WXMENU_MSG_FORWARD:
-      GetSelections(selections);
-      m_TicketList->Add(
-            m_ASMailFolder->ForwardMessages(
-                                            &selections,
-                                            MailFolder::Params(templ),
-                                            GetFrame(m_Parent),
-                                            this
-                                           )
-         );
-      break;
+               m_ASMailFolder->ForwardMessages(
+                                               &selections,
+                                               MailFolder::Params(templ),
+                                               GetFrame(m_Parent),
+                                               this
+                                              )
+            );
+         break;
 
-   case WXMENU_MSG_QUICK_FILTER:
-      GetSelections(selections);
-      if ( selections.Count() > 0 )
-      {
-         // create a filter for the (first of) currently selected message(s)
-         m_TicketList->Add(m_ASMailFolder->GetMessage(selections[0], this));
-      }
-      break;
+      case WXMENU_MSG_QUICK_FILTER:
+         GetSelections(selections);
+         if ( selections.Count() > 0 )
+         {
+            // create a filter for the (first of) currently selected message(s)
+            m_TicketList->Add(m_ASMailFolder->GetMessage(selections[0], this));
+         }
+         break;
 
-   case WXMENU_MSG_FILTER:
-      GetSelections(selections);
-      m_TicketList->Add(m_ASMailFolder->ApplyFilterRules(&selections, this));
-      break;
-   case WXMENU_MSG_UNDELETE:
-      GetSelections(selections);
-      m_TicketList->Add(m_ASMailFolder->UnDeleteMessages(&selections, this));
-      break;
-   case WXMENU_MSG_DELETE:
-      GetSelections(selections);
-      DeleteOrTrashMessages(selections);
-      break;
-   case WXMENU_MSG_DELDUPLICATES:
-      m_TicketList->Add(m_ASMailFolder->DeleteDuplicates(this));
-      break;
-   case WXMENU_MSG_NEXT_UNREAD:
-      m_FolderCtrl->SelectNextUnread();
-      break;
-   case WXMENU_MSG_PRINT:
-      GetSelections(selections);
-      PrintMessages(selections);
-      break;
+      case WXMENU_MSG_FILTER:
+         GetSelections(selections);
+         m_TicketList->Add(m_ASMailFolder->ApplyFilterRules(&selections, this));
+         break;
+
+      case WXMENU_MSG_UNDELETE:
+         GetSelections(selections);
+         m_TicketList->Add(m_ASMailFolder->UnDeleteMessages(&selections, this));
+         break;
+
+      case WXMENU_MSG_DELETE:
+         GetSelections(selections);
+         DeleteOrTrashMessages(selections);
+         break;
+
+      case WXMENU_MSG_DELDUPLICATES:
+         m_TicketList->Add(m_ASMailFolder->DeleteDuplicates(this));
+         break;
+
+      case WXMENU_MSG_NEXT_UNREAD:
+         m_FolderCtrl->SelectNextUnread();
+         break;
+
+      case WXMENU_MSG_PRINT:
+         GetSelections(selections);
+         PrintMessages(selections);
+         break;
+
 #ifdef USE_PS_PRINTING
-   case WXMENU_MSG_PRINT_PS:
-      //FIXME GetSelections(selections);
-      //FIXME PrintMessages(selections);
-      break;
-#endif
-   case WXMENU_MSG_PRINT_PREVIEW:
-      GetSelections(selections);
-      PrintPreviewMessages(selections);
-      break;
-   case WXMENU_MSG_SELECTALL:
-   {
-      bool tmp = m_FolderCtrl->EnableSelectionCallbacks(false);
-      for(n = 0; n < m_NumOfMessages; n++)
-         m_FolderCtrl->Select(n,TRUE);
-      m_FolderCtrl->EnableSelectionCallbacks(tmp);
-      break;
-   }
-   case WXMENU_MSG_DESELECTALL:
-   {
-      bool tmp = m_FolderCtrl->EnableSelectionCallbacks(false);
-      for(n = 0; n < m_NumOfMessages; n++)
-         m_FolderCtrl->Select(n,FALSE);
-      m_FolderCtrl->EnableSelectionCallbacks(tmp);
-      break;
-   }
-   case WXMENU_HELP_CONTEXT:
-      mApplication->Help(MH_FOLDER_VIEW,GetWindow());
-      break;
+      case WXMENU_MSG_PRINT_PS:
+         //FIXME GetSelections(selections);
+         //FIXME PrintMessages(selections);
+         break;
+#endif // USE_PS_PRINTING
 
-   case WXMENU_FILE_COMPOSE_WITH_TEMPLATE:
-   case WXMENU_FILE_COMPOSE:
+      case WXMENU_MSG_PRINT_PREVIEW:
+         GetSelections(selections);
+         PrintPreviewMessages(selections);
+         break;
+
+      case WXMENU_MSG_SELECTALL:
       {
-         wxFrame *frame = GetFrame(m_Parent);
-
-         wxString templ;
-         if ( cmd == WXMENU_FILE_COMPOSE_WITH_TEMPLATE )
-         {
-            templ = ChooseTemplateFor(MessageTemplate_NewMessage, frame);
-         }
-
-         wxComposeView *composeView = wxComposeView::CreateNewMessage
-                                      (
-                                       templ,
-                                       GetProfile()
-                                      );
-         composeView->InitText();
-         composeView->Show();
+         bool tmp = m_FolderCtrl->EnableSelectionCallbacks(false);
+         for(n = 0; n < m_NumOfMessages; n++)
+            m_FolderCtrl->Select(n,TRUE);
+         m_FolderCtrl->EnableSelectionCallbacks(tmp);
+         break;
       }
-      break;
 
-   case WXMENU_FILE_POST:
-   {
-      wxComposeView *composeView = wxComposeView::CreateNewArticle
-                                   (
-                                    GetProfile()
-                                   );
-      composeView->InitText();
-      composeView->Show();
-   }
-   break;
+      case WXMENU_MSG_DESELECTALL:
+         {
+            bool tmp = m_FolderCtrl->EnableSelectionCallbacks(false);
+            for(n = 0; n < m_NumOfMessages; n++)
+               m_FolderCtrl->Select(n,FALSE);
+            m_FolderCtrl->EnableSelectionCallbacks(tmp);
+         }
+         break;
 
-   default:
-      if ( WXMENU_CONTAINS(LANG, cmd) )
-      {
+      case WXMENU_HELP_CONTEXT:
+         mApplication->Help(MH_FOLDER_VIEW,GetWindow());
+         break;
+
+      case WXMENU_FILE_COMPOSE_WITH_TEMPLATE:
+      case WXMENU_FILE_COMPOSE:
+         {
+            wxFrame *frame = GetFrame(m_Parent);
+
+            wxString templ;
+            if ( cmd == WXMENU_FILE_COMPOSE_WITH_TEMPLATE )
+            {
+               templ = ChooseTemplateFor(MessageTemplate_NewMessage, frame);
+            }
+
+            wxComposeView *composeView = wxComposeView::CreateNewMessage
+                                         (
+                                          templ,
+                                          GetProfile()
+                                         );
+            composeView->InitText();
+            composeView->Show();
+         }
+         break;
+
+      case WXMENU_FILE_POST:
+         {
+            wxComposeView *composeView = wxComposeView::CreateNewArticle
+                                         (
+                                          GetProfile()
+                                         );
+            composeView->InitText();
+            composeView->Show();
+         }
+         break;
+
+      case WXMENU_MSG_SAVEADDRESSES:
+         GetSelections(selections);
+
+         // this is probably not the way it should be done, but I don't know
+         // how to get the folder to do all this synchronously otherwise -
+         // and I don't think this operation gains anything from being async
          if ( m_MessagePreview )
-            m_MessagePreview->SetLanguage(cmd);
-      }
-      else if ( cmd >= WXMENU_POPUP_FOLDER_MENU )
-      {
-         // it might be a folder from popup menu
-         MFolder *folder = wxFolderMenu::GetFolder(m_FolderCtrl->GetFolderMenu(),
-                                                   cmd);
-         if ( folder )
          {
-            GetSelections(selections);
-            SaveMessagesToFolder(selections, folder, true /* move */);
-            folder->DecRef();
+            CHECK_RET( m_ASMailFolder, "message preview without folder?" );
+
+            MailFolder *mf = m_ASMailFolder->GetMailFolder();
+            CHECK_RET( mf, "message preview without folder?" );
+
+            // extract all addresses from the selected messages to this array
+            wxSortedArrayString addressesSorted;
+            size_t count = selections.GetCount();
+            for ( size_t n = 0; n < count; n++ )
+            {
+               Message *msg = mf->GetMessage(selections[n]);
+               if ( !msg )
+               {
+                  FAIL_MSG( "selected message disappeared?" );
+
+                  continue;
+               }
+
+               if ( !msg->ExtractAddressesFromHeader(addressesSorted) )
+               {
+                  // very strange
+                  wxLogWarning(_("Selected message doesn't contain any valid addresses."));
+               }
+
+               msg->DecRef();
+            }
+
+            mf->DecRef();
+
+            wxArrayString addresses = strutil_uniq_array(addressesSorted);
+            if ( !addresses.IsEmpty() )
+            {
+               InteractivelyCollectAddresses(addresses,
+                                             READ_APPCONFIG(MP_AUTOCOLLECT_ADB),
+                                             m_ProfileName,
+                                             (MFrame *)GetFrame(m_Parent));
+            }
          }
+         break;
+
+      default:
+         if ( WXMENU_CONTAINS(LANG, cmd) )
+         {
+            if ( m_MessagePreview )
+               m_MessagePreview->SetLanguage(cmd);
+         }
+         else if ( cmd >= WXMENU_POPUP_FOLDER_MENU )
+         {
+            // it might be a folder from popup menu
+            MFolder *folder = wxFolderMenu::GetFolder(m_FolderCtrl->GetFolderMenu(),
+                                                      cmd);
+            if ( folder )
+            {
+               GetSelections(selections);
+               SaveMessagesToFolder(selections, folder, true /* move */);
+               folder->DecRef();
+            }
+         }
+         break;
       }
-      break;
-   }
 }
 
 bool

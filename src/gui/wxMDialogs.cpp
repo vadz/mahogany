@@ -2890,6 +2890,7 @@ public:
                           const wxArrayString& choices,
                           wxArrayInt *selections);
 
+   virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
 private:
@@ -2948,6 +2949,17 @@ wxMultipleChoiceDialog::wxMultipleChoiceDialog(wxWindow *parent,
     Centre( wxBOTH );
 
     m_checklstbox->SetFocus();
+}
+
+bool wxMultipleChoiceDialog::TransferDataToWindow()
+{
+   size_t count = m_selections->GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      m_checklstbox->Check(m_selections->Item(n));
+   }
+
+   return TRUE;
 }
 
 bool wxMultipleChoiceDialog::TransferDataFromWindow()
@@ -3312,69 +3324,69 @@ MProgressInfo::~MProgressInfo()
 }
 
 // ----------------------------------------------------------------------------
-// MPasswordDialog
+// MText2Dialog: dialog with 2 text entries
 // ----------------------------------------------------------------------------
 
-class MPasswordDialog : public wxManuallyLaidOutDialog
+class MText2Dialog : public wxManuallyLaidOutDialog
 {
 public:
-   MPasswordDialog(wxWindow *parent,
-                   const wxString& folderName,
-                   wxString *username,
-                   wxString *password);
+   MText2Dialog(wxWindow *parent,
+                const wxString& perspath,
+                const wxString& message,
+                const wxString& caption,
+                const wxString& labelBox,
+                const wxString& prompt1,
+                String *value1,
+                const wxString& prompt2,
+                String *value2,
+                long textStyle = 0);
 
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
 protected:
-   void OnUpdateOk(wxUpdateUIEvent& event);
+   wxTextCtrl *m_text1,
+              *m_text2;
 
-private:
-   wxTextCtrl *m_textUser,
-              *m_textPwd;
-
-   wxString *m_username,
-            *m_password;
-
-   DECLARE_EVENT_TABLE()
+   wxString *m_value1,
+            *m_value2;
 };
 
-BEGIN_EVENT_TABLE(MPasswordDialog, wxSMDialog)
-   EVT_UPDATE_UI(wxID_OK, MPasswordDialog::OnUpdateOk)
-END_EVENT_TABLE()
-
-MPasswordDialog::MPasswordDialog(wxWindow *parent,
-                                 const wxString& folderName,
-                                 wxString *username,
-                                 wxString *password)
+MText2Dialog::MText2Dialog(wxWindow *parent,
+                           const wxString& perspath,
+                           const wxString& message,
+                           const wxString& caption,
+                           const wxString& labelBox,
+                           const wxString& prompt1,
+                           String *value1,
+                           const wxString& prompt2,
+                           String *value2,
+                           long textStyle)
                : wxManuallyLaidOutDialog(parent,
-                                         _("Password required"),
-                                         "PasswordDialog")
+                                         caption,
+                                         perspath)
 {
    // init members
-   m_username = username;
-   m_password = password;
+   m_value1 = value1;
+   m_value2 = value2;
 
    // create controls
    wxLayoutConstraints *c;
    wxStaticText *label;
 
-   wxStaticBox *box = CreateStdButtonsAndBox(
-      wxString::Format(_("Folder '%s':"),
-                       folderName.c_str()));
+   wxStaticBox *box = CreateStdButtonsAndBox(labelBox);
 
-   label = new wxStaticText(this, -1,
-                            _("Please enter login/password to access this folder"));
+   label = new wxStaticText(this, -1, message);
    c = new wxLayoutConstraints;
    c->width.AsIs();
    c->height.AsIs();
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(box, wxTop, 5*LAYOUT_Y_MARGIN);
+   c->top.SameAs(box, wxTop, (labelBox.empty() ? 2 : 5)*LAYOUT_Y_MARGIN);
    label->SetConstraints(c);
 
    wxArrayString labels;
-   labels.Add(_("&Username: "));
-   labels.Add(_("&Password: "));
+   labels.Add(prompt1);
+   labels.Add(prompt2);
 
    long widthMax = GetMaxLabelWidth(labels, this);
 
@@ -3386,56 +3398,116 @@ MPasswordDialog::MPasswordDialog(wxWindow *parent,
    label = new wxStaticText(this, -1, labels[0]);
    label->SetConstraints(c);
 
-   m_textUser = new wxTextCtrl(this, -1, "");
+   m_text1 = new wxTextCtrl(this, -1, "");
    c = new wxLayoutConstraints;
    c->left.RightOf(label, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    c->centreY.SameAs(label, wxCentreY);
    c->height.AsIs();
-   m_textUser->SetConstraints(c);
+   m_text1->SetConstraints(c);
 
    label = new wxStaticText(this, -1, labels[1]);
    c = new wxLayoutConstraints;
    c->width.Absolute(widthMax);
    c->height.AsIs();
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->top.Below(m_textUser, 2*LAYOUT_Y_MARGIN);
+   c->top.Below(m_text1, 2*LAYOUT_Y_MARGIN);
    label->SetConstraints(c);
 
-   m_textPwd = new wxTextCtrl(this, -1, "",
-                              wxDefaultPosition, wxDefaultSize,
-                              wxTE_PASSWORD);
+   m_text2 = new wxTextCtrl(this, -1, "",
+                            wxDefaultPosition, wxDefaultSize,
+                            textStyle);
    c = new wxLayoutConstraints;
    c->left.RightOf(label, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    c->centreY.SameAs(label, wxCentreY);
    c->height.AsIs();
-   m_textPwd->SetConstraints(c);
+   m_text2->SetConstraints(c);
 
+   Layout();
    SetDefaultSize(5*wBtn, 7*hBtn);
 }
 
-bool MPasswordDialog::TransferDataToWindow()
+bool MText2Dialog::TransferDataToWindow()
 {
-   m_textUser->SetValue(*m_username);
-   m_textPwd->SetValue(*m_password);
+   m_text1->SetValue(*m_value1);
+   m_text2->SetValue(*m_value2);
 
-   m_textPwd->SetFocus();
    return TRUE;
 }
 
-bool MPasswordDialog::TransferDataFromWindow()
+bool MText2Dialog::TransferDataFromWindow()
 {
-   *m_username = m_textUser->GetValue();
-   *m_password = m_textPwd->GetValue();
+   *m_value1 = m_text1->GetValue();
+   *m_value2 = m_text2->GetValue();
+
+   return TRUE;
+}
+
+bool MDialog_GetText2FromUser(const wxString& message,
+                              const wxString& caption,
+                              const wxString& prompt1,
+                              String *value1,
+                              const wxString& prompt2,
+                              String *value2,
+                              wxWindow *parent)
+{
+   MText2Dialog dlg(parent, "Text2Dialog", message, caption, "",
+                    prompt1, value1, prompt2, value2);
+
+   return dlg.ShowModal() == wxID_OK;
+}
+
+// ----------------------------------------------------------------------------
+// MPasswordDialog
+// ----------------------------------------------------------------------------
+
+class MPasswordDialog : public MText2Dialog
+{
+public:
+   MPasswordDialog(wxWindow *parent,
+                   const wxString& folderName,
+                   wxString *username,
+                   wxString *password)
+      : MText2Dialog(parent,
+                     "PasswordDialog",
+                     _("Please enter login/password to access this folder"),
+                     _("Password required"),
+                     wxString::Format(_("Folder '%s':"), folderName.c_str()),
+                     _("&Username: "), username,
+                     _("&Password: "), password,
+                     wxTE_PASSWORD
+                     )
+   {
+   }
+
+   virtual bool TransferDataToWindow();
+
+protected:
+   void OnUpdateOk(wxUpdateUIEvent& event);
+
+private:
+   DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(MPasswordDialog, wxSMDialog)
+   EVT_UPDATE_UI(wxID_OK, MPasswordDialog::OnUpdateOk)
+END_EVENT_TABLE()
+
+bool MPasswordDialog::TransferDataToWindow()
+{
+   if ( !MText2Dialog::TransferDataToWindow() )
+      return FALSE;
+
+   m_text2->SetFocus();
 
    return TRUE;
 }
 
 void MPasswordDialog::OnUpdateOk(wxUpdateUIEvent& event)
 {
-   event.Enable( !(m_textUser->GetValue().empty() &&
-                   m_textPwd->GetValue().empty()) );
+   event.Enable( !(m_text1->GetValue().empty() &&
+                   m_text2->GetValue().empty()) );
 }
 
 bool MDialog_GetPassword(const wxString& folderName,
