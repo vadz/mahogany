@@ -1742,8 +1742,14 @@ wxComposeView::ExpandRecipient(String *textAddress)
 
    // try to expand the last component
    String& text = *textAddress;
-   text.Trim(FALSE); // trim spaces from both sides
+
+   // trim spaces from left, but not (all) from right -- this allows "Dan " to
+   // be expanded into "Dan Black" but not in "Danish Guy"
+   text.Trim(FALSE);
+   bool hasSpaceAtEnd = !text.empty() && text.Last() == ' ';
    text.Trim(TRUE);
+   if ( !text.empty() && hasSpaceAtEnd )
+      text += ' ';
 
    // check for the lone '"' simplifies the code for finding the starting
    // position below: it should be done here, otherwise the following loop
