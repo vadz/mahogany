@@ -123,10 +123,14 @@ public:
    ~MailCollector();
    bool IsIncoming(MailFolder *mf);
    bool Collect(MailFolder *mf = NULL);
+   void SetNewMailFolder(const String &name) {}
+   void AddIncomingFolder(const String &name) {}
+   void RemoveIncomingFolder(const String &name) {}
 protected:
    bool CollectOneFolder(MailFolder *mf);
 private:
    MailFolderList m_list;
+   MailFolder     *m_NewMailFolder;
 };
 
 
@@ -135,6 +139,9 @@ MailCollector::MailCollector(void)
    MAppFolderTraversal t (&m_list);
    if(! t.Traverse(true))
       wxLogError(_("Cannot build list of incoming mail folders."));
+   // keep it open all the time to speed things up
+   m_NewMailFolder = MailFolder::OpenFolder(MF_PROFILE,
+                                            READ_APPCONFIG(MP_NEWMAIL_FOLDER));
 }
 
 MailCollector::~MailCollector(void)
@@ -142,6 +149,8 @@ MailCollector::~MailCollector(void)
    MailFolderList::iterator i;
    for(i = m_list.begin();i != m_list.end(); i++)
       (**i).m_folder->DecRef();
+   if(m_NewMailFolder)
+      m_NewMailFolder->DecRef();
 }
 
 bool
@@ -157,6 +166,9 @@ MailCollector::IsIncoming(MailFolder *mf)
 bool
 MailCollector::Collect(MailFolder *mf)
 {
+   if(m_NewMailFolder)
+      m_NewMailFolder->Ping();
+
    MailFolderList::iterator i;
    if(mf == NULL)
    {
@@ -185,9 +197,16 @@ MailCollector::CollectOneFolder(MailFolder *mf)
        hi = mf->GetNextHeaderInfo(hi))
       selections.Add(hi->GetUId());
 
-   return mf->SaveMessages(&selections,
-                           READ_APPCONFIG(MP_NEWMAIL_FOLDER),
-                           true);
+   if(mf->SaveMessages(&selections,
+                       READ_APPCONFIG(MP_NEWMAIL_FOLDER),
+                       true))
+   {
+      mf->DeleteMessages(&selections);
+      mf->ExpungeMessages();
+      return true;
+   }
+   else
+      return false;
 }
 
 // ----------------------------------------------------------------------------
