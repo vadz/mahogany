@@ -1802,28 +1802,62 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
    // that we do have the folder if we want to get the stream back
    CCAllDisabler *noCallbacks = pStream ? NULL : new CCAllDisabler;
 
-   // and create the mailbox
-   mail_create(NIL, (char *)imapspec.c_str());
+   MAILSTREAM *stream;
 
-   // login data was reset by mm_login() called from mail_create(), set it once
+   // try to open the mailbox - maybe it already exists?
+   //
+   // disable the errors during the first try as it's normal for it to not
+   // exist
+   {
+      CCErrorDisabler noErrs;
+      stream = mail_open(NULL, (char *)imapspec.c_str(),
+                         mm_show_debug ? OP_DEBUG : NIL);
+   }
+   
+   // login data was reset by mm_login() called from mail_open(), set it once
    // again
    if ( !login.empty() )
    {
       SetLoginData(login, password);
    }
 
-   // try to open it now
-   MAILSTREAM *stream = mail_open(NULL, (char *)imapspec.c_str(),
-                                  mm_show_debug ? OP_DEBUG : NIL);
+   // if failed, try to create the mailbox
+   //
+   // note that for IMAP folders, c-client returns a non NULL but not opened
+   // stream to allow us to reuse the connection here
+   if ( !stream || stream->halfopen )
+   {
+      // stream may be NIL or not here
+      mail_create(stream, (char *)imapspec.c_str());
+
+      // restore the auth info once again
+      if ( !login.empty() )
+      {
+         SetLoginData(login, password);
+      }
+
+      // and try to open it again now
+      stream = mail_open(stream, (char *)imapspec.c_str(),
+                         mm_show_debug ? OP_DEBUG : NIL);
+   }
 
    if ( stream )
    {
-      // either keep the stream for the caller or close it if we don't need it
-      // any more
-      if ( pStream )
-         *pStream = stream;
-      else
+      if ( stream->halfopen )
+      {
+         // still failed
          mail_close(stream);
+         stream = NULL;
+      }
+      else // successfully opened
+      {
+         // either keep the stream for the caller or close it if we don't need it
+         // any more
+         if ( pStream )
+            *pStream = stream;
+         else
+            mail_close(stream);
+      }
    }
 
    // don't try any more, whatever the result was

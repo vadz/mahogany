@@ -57,6 +57,7 @@
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_FOLDER_PATH;
+extern const MOption MP_FOLDER_TRY_CREATE;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -1062,7 +1063,9 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
          MFolder *folderNew = parent->GetSubfolder(name);
          if ( !folderNew )
          {
-            folderNew = parent->CreateSubfolder(name, m_folderType);
+            // last parameter tell CreateSubfolder() to not try to create
+            // this folder - we know that it already exists
+            folderNew = parent->CreateSubfolder(name, m_folderType, false);
             if ( !folderNew )
             {
                wxLogError(_("Failed to create folder '%s'."), fullpath.c_str());
@@ -1248,46 +1251,71 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
          MFolder *folderNew = m_folder->GetSubfolder(name);
          if ( !folderNew )
          {
-            folderNew = m_folder->CreateSubfolder(name, m_folder->GetType());
-
-            int flags = m_flagsParent;
-            long attr = result->GetAttributes();
-            if ( attr & ASMailFolder::ATT_NOINFERIORS )
-            {
-               flags &= ~MF_FLAGS_GROUP;
-            }
-            else
-            {
-               flags |= MF_FLAGS_GROUP;
-            }
-
-            if ( attr & ASMailFolder::ATT_NOSELECT )
-            {
-               flags |= MF_FLAGS_NOSELECT;
-            }
-            else
-            {
-               flags &= ~MF_FLAGS_NOSELECT;
-            }
-
-            folderNew->SetFlags(flags);
-
-            Profile_obj profile(folderNew->GetProfile());
-            String fullpath = m_folder->GetPath();
-            if ( !fullpath.empty() )
-            {
-               // we don't want the paths to start with '/', but we want to
-               // have it if there is something before
-               fullpath += chDelimiter;
-            }
-
-            fullpath += relpath;
-
-            profile->writeEntry(MP_FOLDER_PATH, fullpath);
+            // last parameter tell CreateSubfolder() to not try to create
+            // this folder - we know that it already exists
+            folderNew = m_folder->CreateSubfolder(name,
+                                                  m_folder->GetType(), false);
          }
-         //else: folder already exists
 
-         folderNew->DecRef();
+         // note that we must set the folder flags/whatever even if it already
+         // exists as we can get first the notification for folder.subfolder
+         // and when we create it, we create the config group for folder as
+         // well but it is empty and so we have to set the params for it later
+         // when we get the notification for the folder itself
+         if ( folderNew )
+         {
+            Profile_obj profile(folderNew->GetProfile());
+
+            // check if the folder really already exists, if not - create it
+            if ( READ_CONFIG_TEXT(profile, MP_FOLDER_PATH).empty() )
+            {
+               // don't try to create this folder - we know that it already
+               // exists
+               if ( profile->HasEntry(MP_FOLDER_TRY_CREATE) )
+                  profile->DeleteEntry(MP_FOLDER_TRY_CREATE);
+
+               int flags = m_flagsParent;
+               long attr = result->GetAttributes();
+               if ( attr & ASMailFolder::ATT_NOINFERIORS )
+               {
+                  flags &= ~MF_FLAGS_GROUP;
+               }
+               else
+               {
+                  flags |= MF_FLAGS_GROUP;
+               }
+
+               if ( attr & ASMailFolder::ATT_NOSELECT )
+               {
+                  flags |= MF_FLAGS_NOSELECT;
+               }
+               else
+               {
+                  flags &= ~MF_FLAGS_NOSELECT;
+               }
+
+               folderNew->SetFlags(flags);
+
+               String fullpath = m_folder->GetPath();
+               if ( !fullpath.empty() )
+               {
+                  // we don't want the paths to start with '/', but we want to
+                  // have it if there is something before
+                  fullpath += chDelimiter;
+               }
+
+               fullpath += relpath;
+
+               profile->writeEntry(MP_FOLDER_PATH, fullpath);
+            }
+            //else: folder already exists with the correct parameters
+
+            folderNew->DecRef();
+         }
+         else
+         {
+            wxLogError(_("Failed to create the folder '%s'"), name.c_str());
+         }
       }
       else
       {

@@ -132,7 +132,8 @@ public:
    virtual MFolder *GetSubfolder(size_t) const { return NULL; }
    virtual MFolder *GetSubfolder(const String&) const { return NULL; }
    virtual MFolder *GetParent() const { return NULL; }
-   virtual MFolder *CreateSubfolder(const String&, FolderType) { return NULL; }
+   virtual MFolder *CreateSubfolder(const String&,
+                                    FolderType, bool) { return NULL; }
    virtual void Delete() { FAIL_MSG("doesn't make sense for MTempFolder"); }
    virtual bool Rename(const String&)
     { FAIL_MSG("doesn't make sense for MTempFolder"); return FALSE; }
@@ -227,7 +228,9 @@ public:
    virtual MFolder *GetSubfolder(const String& name) const;
    virtual MFolder *GetParent() const;
 
-   virtual MFolder *CreateSubfolder(const String& name, FolderType type);
+   virtual MFolder *CreateSubfolder(const String& name,
+                                    FolderType type,
+                                    bool tryCreateLater);
    virtual void Delete();
    virtual bool Rename(const String& newName);
 
@@ -446,7 +449,8 @@ MFolder *MFolder::Get(const String& fullname)
    return folder;
 }
 
-MFolder *MFolder::Create(const String& fullname, FolderType type)
+MFolder *
+MFolder::Create(const String& fullname, FolderType type, bool tryCreateLater)
 {
    MFolder *folder = Get(fullname);
    if ( folder )
@@ -480,7 +484,7 @@ MFolder *MFolder::Create(const String& fullname, FolderType type)
    // NB: if we CanDeleteFolderOfType(), then we can create them, too and, vice
    //     versa, if we can't delete folders of this type there is no sense in
    //     trying to create them neither
-   if ( CanDeleteFolderOfType(type) && folder->CanOpen() )
+   if ( tryCreateLater && CanDeleteFolderOfType(type) && folder->CanOpen() )
    {
       profile->writeEntry(MP_FOLDER_TRY_CREATE, 1);
    }
@@ -794,7 +798,9 @@ MFolder *MFolderFromProfile::GetParent() const
    return Get(path);
 }
 
-MFolder *MFolderFromProfile::CreateSubfolder(const String& name, FolderType type)
+MFolder *MFolderFromProfile::CreateSubfolder(const String& name,
+                                             FolderType type,
+                                             bool tryCreateLater)
 {
    // first of all, check if the name is valid
    MFolder *folder = GetSubfolder(name);
@@ -809,7 +815,8 @@ MFolder *MFolderFromProfile::CreateSubfolder(const String& name, FolderType type
    }
 
    // ok, it is: do create it
-   MFolder *subfolder = MFolder::Create(GetSubFolderFullName(name), type);
+   MFolder *subfolder = MFolder::Create(GetSubFolderFullName(name),
+                                        type, tryCreateLater);
 
    // is it our immediate child?
    if ( subfolder && name.find('/') == String::npos )

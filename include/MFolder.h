@@ -66,7 +66,9 @@ public:
    /** create a new folder of specified type, it's an error to call it with
        the folder name which already exists (NULL will be returned)
    */
-   static MFolder *Create(const String& fullname, FolderType type);
+   static MFolder *Create(const String& fullname,
+                          FolderType type,
+                          bool tryCreateOnOpen = true);
    /** create a temp object containing folder data
    */
    static MFolder *CreateTemp(const String& fullname,
@@ -199,8 +201,10 @@ public:
 
    /**@name operations */
    //@{
-   /// create a new subfolder
-   virtual MFolder *CreateSubfolder(const String& name, FolderType type) = 0;
+      /// create a new subfolder
+   virtual MFolder *CreateSubfolder(const String& name,
+                                    FolderType type,
+                                    bool tryCreateOnOpen = true) = 0;
       /// delete this folder (does not delete the C++ object!)
    virtual void Delete() = 0;
       /// rename this folder: FALSE returned if it failed
