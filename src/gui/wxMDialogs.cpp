@@ -110,7 +110,7 @@ private:
 class MFolderDialog : public wxDialog
 {
 public:
-   MFolderDialog(wxWindow *parent);
+   MFolderDialog(wxWindow *parent, const wxPoint& pos, const wxSize& size);
    ~MFolderDialog() { delete m_tree; }
 
    // accessors
@@ -910,63 +910,67 @@ MDialog_FolderOpen(const MWindow *parent)
 // folder dialog stuff
 // ----------------------------------------------------------------------------
 
-MFolderDialog::MFolderDialog(wxWindow *parent)
+MFolderDialog::MFolderDialog(wxWindow *parent,
+                             const wxPoint& pos,
+                             const wxSize& size)
              : wxDialog(parent, -1, _("Choose folder"),
-                        wxDefaultPosition, wxDefaultSize,
-                        wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
+                        pos, size,
+                        wxDEFAULT_DIALOG_STYLE |
+                        wxDIALOG_MODAL |
+                        wxRESIZE_BORDER)
 {
-   // determine the controls sizes
-   long heightChar = AdjustCharHeight(GetCharHeight());
+   SetAutoLayout(TRUE);
+   wxLayoutConstraints *c;
 
+   // create 2 buttons
+   // ----------------
+
+   // we want to have the buttons of standard size
+   long heightChar = AdjustCharHeight(GetCharHeight());
    long heightBtn = TEXT_HEIGHT_FROM_LABEL(heightChar),
         widthBtn = BUTTON_WIDTH_FROM_HEIGHT(heightBtn);
 
-   long widthTree = 3*widthBtn,
-        heightTree = 5*heightBtn;
+   // Cancel button
+   wxButton *btnCancel = new wxButton(this, wxID_CANCEL, _("Cancel"));
 
-   long widthDlg = widthTree + 2*LAYOUT_X_MARGIN,
-        heightDlg = heightTree + heightBtn + 3*LAYOUT_Y_MARGIN;
+   c = new wxLayoutConstraints;
+   c->height.Absolute(heightBtn);
+   c->width.Absolute(widthBtn);
+   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
+   c->bottom.SameAs(this, wxBottom, 2*LAYOUT_Y_MARGIN);
+   btnCancel->SetConstraints(c);
 
-   long x = LAYOUT_X_MARGIN,
-        y = LAYOUT_X_MARGIN;
-
-   // create the folder tree control
-   m_tree = new wxFolderTree
-                (
-                 this,
-                 -1,
-                 wxPoint(x, y),
-                 wxSize(widthTree, heightTree)
-                );
-
-   y += heightTree + LAYOUT_Y_MARGIN;
-
-   // create 2 buttons
-   x = widthDlg - 2*LAYOUT_X_MARGIN - 2*widthBtn;
-
-   wxButton *btnOk = new wxButton
-                         (
-                          this,
-                          wxID_OK,
-                          _("OK"),
-                          wxPoint(x, y),
-                          wxSize(widthBtn, heightBtn)
-                         );
-   x += widthBtn + LAYOUT_X_MARGIN;
+   // Ok button
+   wxButton *btnOk = new wxButton(this, wxID_OK, _("OK"));
 
    btnOk->SetDefault();
 
-   (void)new wxButton
-             (
-              this,
-              wxID_CANCEL,
-              _("Cancel"),
-              wxPoint(x, y),
-              wxSize(widthBtn, heightBtn)
-             );
+   c = new wxLayoutConstraints;
+   c->height.Absolute(heightBtn);
+   c->width.Absolute(widthBtn);
+   c->right.SameAs(btnCancel, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->bottom.SameAs(this, wxBottom, 2*LAYOUT_Y_MARGIN);
 
-   // set position and size
-   SetClientSize(widthDlg, heightDlg);
+   btnOk->SetConstraints(c);
+
+   // create the folder tree control
+   // ------------------------------
+
+   m_tree = new wxFolderTree(this);
+
+   c = new wxLayoutConstraints;
+   c->top.SameAs(this, wxTop, LAYOUT_Y_MARGIN);
+   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
+   c->bottom.SameAs(btnOk, wxTop, 2*LAYOUT_Y_MARGIN);
+   m_tree->GetWindow()->SetConstraints(c);
+
+   // position the dialog
+   if ( size.GetX() < 3*widthBtn )
+   {
+      SetClientSize(3*widthBtn, size.GetY());
+   }
+
    Centre(wxCENTER_FRAME | wxBOTH);
 }
 
@@ -990,11 +994,19 @@ bool MFolderDialog::TransferDataFromWindow()
 MFolder *
 MDialog_FolderChoose(const MWindow *parent)
 {
-   MFolderDialog dlg((wxWindow *)parent);
-   if ( dlg.ShowModal() == wxID_OK )
-      return dlg.GetFolder();
-   else
-      return NULL;
+   // the config path where we store the position of the dialog
+   static const char *folderDialogPos = "FolderSelDlg";
+
+   int x, y, w, h;
+   wxMFrame::RestorePosition(folderDialogPos, &x, &y, &w, &h);
+
+   MFolderDialog dlg((wxWindow *)parent, wxPoint(x, y), wxSize(w, h));
+
+   bool selected = dlg.ShowModal() == wxID_OK;
+
+   wxMFrame::SavePosition(folderDialogPos, &dlg);
+
+   return selected ? dlg.GetFolder() : NULL;
 }
 
 // ----------------------------------------------------------------------------
