@@ -672,7 +672,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("NNTP s&erver uses SSL"),Field_Bool,    -1,                        },
 #endif
 #ifdef OS_UNIX
-   { gettext_noop("Use local send&mail for delivery"), Field_Bool, -1,           },
+   { gettext_noop("Use local mail delivery a&gent"), Field_Bool, -1,           },
    { gettext_noop("Sendmail &command"), Field_Text, ConfigField_UseSendmail },
 #endif
    { gettext_noop("Mahogany contains support for dial-up networks and can detect if the\n"
