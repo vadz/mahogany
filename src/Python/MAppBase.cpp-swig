@@ -770,16 +770,13 @@ static PyObject *_wrap_MDialog_YesNoDialog(PyObject *self, PyObject *args) {
     char *arg0 ;
     wxWindow *arg1 = NULL ;
     char *arg2 = MDIALOG_YESNOTITLE_C ;
-    bool arg3 = true ;
-    char *arg4 = NULL ;
+    int arg3 = M_DLG_YES_DEFAULT ;
     PyObject * argo1 =0 ;
-    int tempbool3 = (int) true ;
     bool result ;
     
-    if(!PyArg_ParseTuple(args,(char *)"s|Osis:MDialog_YesNoDialog",&arg0,&argo1,&arg2,&tempbool3,&arg4)) return NULL;
+    if(!PyArg_ParseTuple(args,(char *)"s|Osi:MDialog_YesNoDialog",&arg0,&argo1,&arg2,&arg3)) return NULL;
     if ((SWIG_ConvertPtr(argo1,(void **) &arg1,SWIGTYPE_p_wxWindow,1)) == -1) return NULL;
-    arg3 = (bool ) tempbool3;
-    result = (bool )MDialog_YesNoDialog((char const *)arg0,arg1,(char const *)arg2,arg3,(char const *)arg4);
+    result = (bool )MDialog_YesNoDialog((char const *)arg0,arg1,(char const *)arg2,arg3);
     resultobj = PyInt_FromLong((long)result);
     return resultobj;
 }

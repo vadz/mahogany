@@ -61,8 +61,7 @@ void  MDialog_Message(const char *message,
 bool MDialog_YesNoDialog(const char *message,
                            wxWindow *parent = NULL,
                            const char *title = MDIALOG_YESNOTITLE_C,
-                           bool YesDefault = true,
-                           const char *configPath = NULL);
+                           int flags = M_DLG_YES_DEFAULT);
 
 char *MDialog_FileRequester(String  &message,
                             wxWindow *parent = NULL,
