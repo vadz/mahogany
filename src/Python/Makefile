@@ -9,11 +9,14 @@ SWIGSRC = MAppBase.i MailFolder.i String.i Profile.i Message.i MObject.i
 CPPSRC = InitPython.cpp PythonHelp.cpp
 SRC=$(CXXSRC) *.cpp
 
-CPPTARGETS = $(SWIGSRC:.i=.cpp) 
+CPPTARGETS = $(SWIGSRC:.i=.cpp) swiglib.cpp
 OBJECTS    = $(CPPTARGETS:.cpp=.o) $(CPPSRC:.cpp=.o)
 
 
 all:	$(OBJECTS)
+
+swiglib.cpp: swiglib.i
+	$(SWIG) $(SWIGFLAGS) $(ODIR)/$@ $<
 
 .PHONY: mkswig all
 

@@ -7,10 +7,10 @@
 	$(CC) $(CFLAGS) -c -o $(ODIR)/$@ $<
 
 %.cpp: %.i
-	$(SWIG) $(SWIGFLAGS) -o $(ODIR)/$@ $<
+	$(SWIG) $(SWIGFLAGS) -c -o $(ODIR)/$@ $<
 
 %.py: %.i
-	$(SWIG) $(SWIGFLAGS) -o junk $<
+	$(SWIG) $(SWIGFLAGS) -c -o junk $<
 
 %cmodule.so: %.o
 	$(CXX) -shared $< -lswigpy -o $(ODIR)/$@

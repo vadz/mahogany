@@ -43,7 +43,8 @@ CPPFLAGS =@CPPFLAGS@
 
 # SWIG
 SWIG = @SWIG@
-SWIGFLAGS = -c++ -python -shadow -c
+SWIGFLAGS = -c++ -python -shadow -dhtml
+# -c is added in makerules
 
 # other stuff
 RM = rm -f
