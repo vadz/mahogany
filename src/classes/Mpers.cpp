@@ -32,92 +32,20 @@
 // data
 // ============================================================================
 
-// the order of declarations of the MPersMsgBox objects and the array below
-// must be kept in sync!
+// note that we need to declare the variable first as being extern and then
+// define it (this can't be done all at once - at least not without a dummy
+// ctor...) and we use an auxiliary header for this as we can't use just a
+// macro in this file because a macro expansion can't contain #ifdef but some
+// ids are only used in some configurations
+#define DECL_OR_DEF extern const
+#include "MpersIds.h"
 
-MPersMsgBox M_MSGBOX_ASK_SPECIFY_DIR;
-#ifdef OS_UNIX
-MPersMsgBox M_MSGBOX_ASK_RUNASROOT;
-#endif
-MPersMsgBox M_MSGBOX_SEND_OUTBOX_ON_EXIT;
-MPersMsgBox M_MSGBOX_ABANDON_CRITICAL;
-MPersMsgBox M_MSGBOX_GO_ONLINE_TO_SEND_OUTBOX;
-MPersMsgBox M_MSGBOX_FIX_TEMPLATE;
-MPersMsgBox M_MSGBOX_ASK_FOR_SIG;
-MPersMsgBox M_MSGBOX_UNSAVED_PROMPT;
-MPersMsgBox M_MSGBOX_MESSAGE_SENT;
-MPersMsgBox M_MSGBOX_ASK_FOR_EXT_EDIT;
-MPersMsgBox M_MSGBOX_MIME_TYPE_CORRECT;
-MPersMsgBox M_MSGBOX_CONFIG_NET_FROM_COMPOSE;
-MPersMsgBox M_MSGBOX_SEND_EMPTY_SUBJECT;
-MPersMsgBox M_MSGBOX_CONFIRM_FOLDER_REMOVE;
-MPersMsgBox M_MSGBOX_CONFIRM_FOLDER_DELETE;
-MPersMsgBox M_MSGBOX_MARK_READ;
-#ifdef USE_DIALUP
-MPersMsgBox M_MSGBOX_DIALUP_CONNECTED_MSG;
-MPersMsgBox M_MSGBOX_DIALUP_DISCONNECTED_MSG;
-MPersMsgBox M_MSGBOX_DIALUP_ON_OPEN_FOLDER;
-MPersMsgBox M_MSGBOX_NET_DOWN_OPEN_ANYWAY;
-MPersMsgBox M_MSGBOX_NO_NET_PING_ANYWAY;
-#endif // USE_DIALUP
-MPersMsgBox M_MSGBOX_CONFIRM_EXIT;
-MPersMsgBox M_MSGBOX_ASK_LOGIN;
-MPersMsgBox M_MSGBOX_ASK_PWD;
-MPersMsgBox M_MSGBOX_GO_OFFLINE_SEND_FIRST;
-MPersMsgBox M_MSGBOX_OPEN_UNACCESSIBLE_FOLDER;
-MPersMsgBox M_MSGBOX_CHANGE_UNACCESSIBLE_FOLDER_SETTINGS;
-MPersMsgBox M_MSGBOX_ASK_URL_BROWSER;
-MPersMsgBox M_MSGBOX_OPT_TEST_ASK;
-MPersMsgBox M_MSGBOX_WARN_RESTART_OPT;
-MPersMsgBox M_MSGBOX_SAVE_TEMLPATE;
-MPersMsgBox M_MSGBOX_MAIL_NO_NET_QUEUED_MESSAGE;
-MPersMsgBox M_MSGBOX_MAIL_QUEUED_MESSAGE;
-MPersMsgBox M_MSGBOX_MAIL_SENT_MESSAGE;
-MPersMsgBox M_MSGBOX_TEST_MAIL_SENT;
-MPersMsgBox M_MSGBOX_ADB_DELETE_ENTRY;
-MPersMsgBox M_MSGBOX_CONFIRM_ADB_IMPORTER;
-MPersMsgBox M_MSGBOX_MODULES_WARNING;
-MPersMsgBox M_MSGBOX_BBDB_SAVE_DIALOG;
-MPersMsgBox M_MSGBOX_FOLDER_GROUP_HINT;
-MPersMsgBox M_MSGBOX_SIGNATURE_LENGTH;
-MPersMsgBox M_MSGBOX_REMEMBER_PWD;
-MPersMsgBox M_MSGBOX_KEEP_PWD;
-MPersMsgBox M_MSGBOX_SHOWLOGWINHINT;
-MPersMsgBox M_MSGBOX_AUTOEXPUNGE;
-MPersMsgBox M_MSGBOX_SUSPENDAUTOCOLLECT;
-#if 0
-MPersMsgBox M_MSGBOX_RULESMISMATCHWARN1;
-MPersMsgBox M_MSGBOX_RULESMISMATCHWARN2;
-#endif
-MPersMsgBox M_MSGBOX_FILTER_REPLACE;
-MPersMsgBox M_MSGBOX_ADD_ALL_SUBFOLDERS;
-
-MPersMsgBox M_MSGBOX_OPT_STOREREMOTENOW;
-MPersMsgBox M_MSGBOX_OPT_GETREMOTENOW;
-MPersMsgBox M_MSGBOX_OVERWRITE_REMOTE;
-MPersMsgBox M_MSGBOX_RETRIEVE_REMOTE;
-MPersMsgBox M_MSGBOX_STORE_REMOTE;
-MPersMsgBox M_MSGBOX_CONFIG_SAVED_REMOTELY;
-
-MPersMsgBox M_MSGBOX_EXPLAIN_GLOBALPASSWD;
-MPersMsgBox M_MSGBOX_FILTER_NOT_USED_YET;
-MPersMsgBox M_MSGBOX_FILTER_CONFIRM_OVERWRITE;
-MPersMsgBox M_MSGBOX_IMPORT_FOLDERS_UNDER_ROOT;
-MPersMsgBox M_MSGBOX_MOVE_EXPUNGE_CONFIRM;
-MPersMsgBox M_MSGBOX_APPLY_QUICK_FILTER_NOW;
-MPersMsgBox M_MSGBOX_BROWSE_IMAP_SERVERS;
-MPersMsgBox M_MSGBOX_GFX_NOT_INLINED;
-MPersMsgBox M_MSGBOX_EDIT_FOLDER_ON_OPEN_FAIL;
-MPersMsgBox M_MSGBOX_EXPLAIN_COLUMN_CLICK;
-MPersMsgBox M_MSGBOX_VIEWER_BAR_TIP;
-
-MPersMsgBox M_MSGBOX_EMPTY_TRASH_ON_EXIT;
-MPersMsgBox M_MSGBOX_SEND_OFFLINE;
-
-MPersMsgBox M_MSGBOX_MAX;
+#undef DECL_OR_DEF
+#define DECL_OR_DEF const
+#include "MpersIds.h"
 
 // the order of the entries in this array must match the order of the
-// declarations above
+// declarations in MpersIds.h!
 static const struct
 {
    const char *name;
