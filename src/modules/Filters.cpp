@@ -7,6 +7,8 @@
  *
  *******************************************************************/
 
+// TODO add support to Expression for comparison
+
 #ifdef __GNUG__
 #   pragma implementation "Filters.h"
 #endif
@@ -104,6 +106,24 @@ private:
 /// Own functionality:
 ///------------------------------
 
+/// the known operators
+enum OperatorType
+{
+   // the values of the constants shouldn't be changed as parsing code in
+   // GetToken() relies on them being in this order
+   Operator_Plus,
+   Operator_Minus,
+   Operator_Times,
+   Operator_Divide,
+   Operator_Less,
+   Operator_Leq,
+   Operator_Greater,
+   Operator_Geq,
+   Operator_Equal,
+   Operator_Neq,
+   Operator_Max
+};
+
 /** Tokens are either an ASCII character or a value greater > 255.
  */
 class Token
@@ -114,6 +134,7 @@ public:
    {
       TT_Invalid = -1,
       TT_Char,
+      TT_Operator,
       TT_Identifier,
       TT_Keyword,
       TT_String,
@@ -132,8 +153,10 @@ public:
       { ASSERT(m_type == TT_Identifier); return m_string; }
    inline const String & GetKeyword(void) const
       { ASSERT(m_type == TT_Keyword); return m_string; }
-   inline long GetNumber(void)
+   inline long GetNumber(void) const
       { ASSERT(m_type == TT_Number); return m_number; }
+   OperatorType GetOperator() const
+      { ASSERT(m_type == TT_Operator); return (OperatorType)m_number; }
 
    inline void SetChar(char c)
       { m_type = TT_Char; m_char = c; }
@@ -145,6 +168,8 @@ public:
       { m_type = TT_Keyword; m_string = s; }
    inline void SetNumber(long n)
       { m_type = TT_Number; m_number = n; }
+   void SetOperator(OperatorType oper)
+      { m_type = TT_Operator; m_number = oper; }
    inline void SetEOF(void)
       { m_type = TT_EOF; }
 private:
@@ -324,6 +349,7 @@ private:
      | EXPRESSION
 
    EXPRESSION :=
+     | EXPR COMPOP EXPR
      | EXPR + TERM
      | EXPR - TERM
      | TERM
@@ -354,6 +380,7 @@ private:
      RESTEXPRESSION :=
        | + EXPRESSION
        | - EXPRESSION
+       | COMPOP EXPRESSION
        | EMPTY
 
      TERM := FACTOR RESTTERM
@@ -362,6 +389,13 @@ private:
        | / TERM
        | EMPTY
 
+     COMPOP := 
+       | <
+       | >
+       | <=
+       | >=
+       | ==
+       | !=
 */
 
 
@@ -809,9 +843,16 @@ public:
          return s;
       }
 #endif
+
 private:
-   SyntaxNode *m_Left, *m_Right;
-   class Operator *m_Op;
+   // the expression is "m_Left m_Op m_Right m_CompOp m_Value", for example it
+   // may be            "foo()   +   bar()       <      17"
+   SyntaxNode *m_Left,
+              *m_Right;
+   Operator *m_Op,
+            *m_CompOp;
+   Value m_Value;
+
    MOBJECT_NAME(Expression)
 };
 
@@ -865,11 +906,24 @@ IMPLEMENT_VALUE_OP(+, left.GetString(),right.GetString());
 IMPLEMENT_VALUE_OP(-, left.GetString().Length(),right.GetString().Length());
 IMPLEMENT_VALUE_OP(*, left.GetString().Length(),right.GetString().Length());
 IMPLEMENT_VALUE_OP(/, left.GetString().Length(),right.GetString().Length());
+IMPLEMENT_VALUE_OP(<, left.GetString(),right.GetString());
+IMPLEMENT_VALUE_OP(<=, left.GetString(),right.GetString());
+IMPLEMENT_VALUE_OP(>, left.GetString(),right.GetString());
+IMPLEMENT_VALUE_OP(>=, left.GetString(),right.GetString());
+IMPLEMENT_VALUE_OP(==, left.GetString(),right.GetString());
+IMPLEMENT_VALUE_OP(!=, left.GetString(),right.GetString());
 
 IMPLEMENT_OP(Plus,+);
 IMPLEMENT_OP(Minus,-);
 IMPLEMENT_OP(Times,*);
 IMPLEMENT_OP(Divide,/);
+
+IMPLEMENT_OP(Less, <);
+IMPLEMENT_OP(Leq, <=);
+IMPLEMENT_OP(Greater, >);
+IMPLEMENT_OP(Geq, >=);
+IMPLEMENT_OP(Equal, ==);
+IMPLEMENT_OP(Neq, !=);
 
 class OperatorAnd : public Operator
 {
@@ -906,7 +960,6 @@ public:
       { MOcheck(); return "Or"; }
 #endif
 };
-
 
 /** An if-else statement. */
 class IfElse : public SyntaxNode
@@ -1159,6 +1212,43 @@ ParserImpl::GetToken(bool remove)
       else
          Error(_("Unterminated string."));
       token.SetString(tokstr);
+   }
+   else if ( strchr("+-*/<>=!", Char()) ) // it must be an operator
+   {
+      int opType;
+      static const char *ARITHM_OPERATORS = "+-*/";
+      const char *p = strchr("+-*/", Char());
+      if ( p )
+      {
+         // the +, -, * and / are in this order
+         opType = Operator_Plus + (p - ARITHM_OPERATORS);
+         (void)CharInc();
+      }
+      else if ( Char() == '<' >> Char() == '>' )
+      {
+         opType = CharInc() == '<' ? Operator_Less : Operator_Greater;
+         if ( Char() == '=' )
+         {
+            // the "or equal" operators follow the normal ones
+            opType++;
+            (void)CharInc();
+         }
+      }
+      else // Char() == '=' or '!'
+      {
+         opType = CharInc() == '=' ? Operator_Equal : Operator_Neq;
+         if ( Char() != '=' )
+         {
+            // oops... it was just a char finally, not an operator
+            opType = Operator_Max;
+         }
+         //else: ok, really an operator
+      }
+
+      if ( opType < Operator_Max )
+         token.SetOperator((OperatorType)opType);
+      else
+         token.SetChar(Char());
    }
    else
       // All other cases: return the character:
@@ -1458,15 +1548,16 @@ ParserImpl::ParseRestExpression(Expression *expression)
    /* RESTEXPRESSION :=
       | + EXPRESSION
       | - EXPRESSION
+      | COMPOP EXPRESSION
       | EMPTY
    */
    Token t = PeekToken();
 
-   if(t.GetType() == Token::TT_EOF
-      || (t.GetType() == Token::TT_Char
-          && t.GetChar() != '+'
-          && t.GetChar() != '-')
-      )
+   // the only operators disallowed here are * and /
+   if ( t.GetType() == Token::TT_EOF ||
+        t.GetType() != Token::TT_Operator ||
+        t.GetOperator() == Operator_Times ||
+        t.GetOperator() == Operator_Divide )
       return;
 
    GetToken();
@@ -1477,15 +1568,27 @@ ParserImpl::ParseRestExpression(Expression *expression)
       return;
    }
    expression->SetRight(exp);
-   switch(t.GetChar())
+
+#define OPERATOR_CASE(oper) \
+   case Operator_##oper: \
+      expression->SetOperator(new Operator##oper); \
+      break
+
+   switch(t.GetOperator())
    {
-   case '+':
-      expression->SetOperator(new OperatorPlus);break;
-   case '-':
-      expression->SetOperator(new OperatorMinus);break;
+      OPERATOR_CASE(Plus);
+      OPERATOR_CASE(Minus);
+      OPERATOR_CASE(Less);
+      OPERATOR_CASE(Leq);
+      OPERATOR_CASE(Greater);
+      OPERATOR_CASE(Geq);
+      OPERATOR_CASE(Equal);
+      OPERATOR_CASE(Neq);
    default:
       ASSERT(0);
    }
+
+#undef OPERATOR_CASE
 }
 
 
@@ -1499,15 +1602,13 @@ ParserImpl::ParseRestTerm(Expression *expression)
       | EMPTY
    */
    Token t = PeekToken();
-   if(t.GetType() == Token::TT_EOF
-      ||
-      ( t.GetType() == Token::TT_Char
-        && t.GetChar() != '/'
-        && t.GetChar() != '*'))
+   if ( t.GetType() == Token::TT_EOF ||
+        t.GetType() != Token::TT_Operator ||
+        (t.GetOperator() != Operator_Divide &&
+         t.GetOperator() != Operator_Times) )
       return;
 
    t = GetToken(); // eat operator
-   char token = t.GetChar();
    SyntaxNode *term = ParseTerm();
    if(! term)
    {
@@ -1515,11 +1616,11 @@ ParserImpl::ParseRestTerm(Expression *expression)
       return;
    }
    expression->SetRight(term);
-   switch(token)
+   switch(t.GetOperator())
    {
-   case '*':
+   case Operator_Times:
       expression->SetOperator(new OperatorTimes);break;
-   case '/':
+   case Operator_Divide:
       expression->SetOperator(new OperatorDivide);break;
    default:
       ASSERT(0);
