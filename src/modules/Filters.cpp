@@ -2500,7 +2500,7 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
 
          String subject = m_MailMessage->Subject(),
                 from = m_MailMessage->From();
-         textPD.Printf(_("Filtering message %u ("), idx + 1);
+         textPD.Printf(_("Filtering message %u/%u ("), idx + 1, count);
          if ( !from.empty() )
          {
             textPD << _("from ") << from << ' ';
