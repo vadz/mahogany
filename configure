@@ -4356,7 +4356,7 @@ esac
 
 
 
-    if test x${WX_CONFIG+set} != xset ; then
+    if test x${WX_CONFIG+set} = xset ; then
      WX_CONFIG_NAME=wx-config
   fi
 
