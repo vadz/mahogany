@@ -187,6 +187,10 @@ LINK32=link.exe
 # PROP Default_Filter "*.cpp"
 # Begin Source File
 
+SOURCE=.\src\classes\CacheFile.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\classes\ComposeTemplate.cpp
 # End Source File
 # Begin Source File
@@ -307,6 +311,10 @@ SOURCE=.\src\mail\MFCache.cpp
 # Begin Source File
 
 SOURCE=.\src\mail\MimePartCC.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\mail\Pop3.cpp
 # End Source File
 # Begin Source File
 
