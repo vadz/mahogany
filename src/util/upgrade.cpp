@@ -1719,7 +1719,7 @@ void CompleteConfiguration(const struct InstallWizardData& gs_installWizardData)
    // PalmOS-box
    if(gs_installWizardData.usePalmOs)
    {
-      Profile_obj pp = Profile::CreateModuleProfile("PalmOS");
+      Profile_obj pp(Profile::CreateModuleProfile("PalmOS"));
       pp->writeEntry("PalmBox", "PalmBox");
       pp->DecRef();
 
