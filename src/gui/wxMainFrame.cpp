@@ -594,7 +594,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
                                sizeFrame.x/3);
 
    m_splitter->SetMinimumPaneSize(10);
-   m_splitter->SetFocus();
+   m_FolderTree->GetWindow()->SetFocus();
 
    // update the menu to match the initial selection
    MFolder_obj folder = m_FolderTree->GetSelection();

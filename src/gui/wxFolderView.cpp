@@ -1546,10 +1546,15 @@ void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
    wxFrame *frame = m_FolderView->m_Frame;
    if ( frame && frame->GetHWND() == (WXHWND)hwndTop )
 #endif // OS_WIN
-      if ( m_FolderView->GetFocusFollowMode() && (FindFocus() != this) )
+   {
+      // avoid giving the focus to an empty window: it doesn't need it and
+      // simply steals focus from another pane which probably does
+      if ( m_FolderView->GetFocusFollowMode() && GetHeadersCount() &&
+            FindFocus() != this )
       {
          SetFocus();
       }
+   }
 
 #if wxUSE_DRAG_AND_DROP
    if ( HasFolder() )
@@ -3167,7 +3172,6 @@ wxFolderView::wxFolderView(wxWindow *parent)
                                        m_MessageWindow,
                                        m_Parent->GetClientSize().y/3);
    m_SplitterWindow->SetMinimumPaneSize(10);
-   m_SplitterWindow->SetFocus();
 }
 
 wxFolderView::~wxFolderView()
