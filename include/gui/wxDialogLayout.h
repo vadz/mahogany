@@ -383,7 +383,7 @@ public:
                                    long widthMax,
                                    wxControl *last,
                                    wxCoord nRightMargin = 0,
-                                   int style = wxALIGN_RIGHT);
+                                   int style = wxTE_LEFT);
 
       // create a simple static text control
    wxStaticText *CreateMessage(const wxChar *label, wxControl *last);
