@@ -44,9 +44,9 @@ DEFAULT_USE_MODULES=auto
 DEFAULT_USE_LEAKTRACER=0
 DEFAULT_USE_STRICT=0
 DEFAULT_USE_SSL=0
-DEFAULT_NODSA=0
-DEFAULT_NOIDEA=1	# illegal to use in most of Europe due to ASCOM patent
-DEFAULT_NORSA=0
+DEFAULT_USE_NO_DSA=0
+DEFAULT_USE_NO_IDEA=1	# illegal to use in most of Europe due to ASCOM patent
+DEFAULT_USE_NO_RSA=0
 
 M_OVERRIDES(python,python,
 --with-python   use python scripting,

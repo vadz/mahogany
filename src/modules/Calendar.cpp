@@ -56,12 +56,71 @@
 #define MP_MOD_CALENDAR_SHOWONSTARTUP        "ShowOnStartup"
 #define MP_MOD_CALENDAR_SHOWONSTARTUP_D      1l
 
+
+
+class wxDateTimeWithRepeat : public wxDateTime
+{
+public:
+   wxDateTimeWithRepeat(const wxDateTime &dt,
+                        const wxDateTime &edt)
+      : wxDateTime(dt)
+      {
+         m_DayRepeat = 0; m_MonthRepeat = 0; m_YearRepeat = 0;
+         m_EndDate = edt;
+      }
+   wxDateTimeWithRepeat(const wxDateTime &dt = wxDefaultDateTime)
+      : wxDateTime(dt)
+      {
+         m_DayRepeat = 0; m_MonthRepeat = 0; m_YearRepeat = 0;
+         m_EndDate = dt;
+         // m_EndDate == dt --> no end date
+      }
+   inline long int GetDayRepeat(void) const   { return m_DayRepeat; }
+   inline long int GetMonthRepeat(void) const { return m_MonthRepeat; }
+   inline long int GetYearRepeat(void) const  { return m_YearRepeat; }
+
+   inline void SetDayRepeat(long int d)   { m_DayRepeat = d; }
+   inline void SetWeekRepeat(long int w)  { SetDayRepeat(w*7); }
+   inline void SetMonthRepeat(long int m) { m_MonthRepeat = m; }
+   inline void SetYearRepeat(long int y)  { m_YearRepeat = y; }
+
+   inline void SetDayRepeatEnd(long int d)   { m_EndDate.SetDay(d); }
+   inline void SetMonthRepeatEnd(long int m)
+      {
+         m_EndDate.SetMonth((wxDateTime::Month)m);
+      }
+   inline void SetYearRepeatEnd(long int y)  { m_EndDate.SetYear(y); }
+
+   bool HasEndDate(void) const
+      {
+         return GetDay() != m_EndDate.GetDay()
+            || GetMonth() != m_EndDate.GetMonth()
+            || GetYear() != m_EndDate.GetYear()
+            ;
+      }
+   bool IsRepeating(void) const
+      {
+         return GetDayRepeat() != 0
+            || GetMonthRepeat() != 0
+            || GetYearRepeat() != 0;
+      }
+   const wxDateTime & GetEndDate(void) const { return m_EndDate; }
+   void SetEndDate(const wxDateTime &dt) {  m_EndDate = dt; }
+
+   inline long int GetDayRepeatEnd(void) const   { return m_EndDate.GetDay(); }
+   inline long int GetMonthRepeatEnd(void) const { return m_EndDate.GetMonth(); }
+   inline long int GetYearRepeatEnd(void) const  { return m_EndDate.GetYear(); }
+private:
+   long int m_DayRepeat, m_MonthRepeat, m_YearRepeat;
+   wxDateTime m_EndDate;
+};
+
 enum ActionEnum { CAL_ACTION_ILLEGAL, CAL_ACTION_REMIND, CAL_ACTION_SEND };
 
 class AlarmInfo : public MObject
 {
 public:
-   AlarmInfo(const wxDateTime &dt, const String &subject,
+   AlarmInfo(const wxDateTimeWithRepeat &dt, const String &subject,
              UIdType uid,
              ActionEnum action = CAL_ACTION_REMIND)
       {
@@ -70,7 +129,7 @@ public:
          m_Action = action;
          m_UId = uid;
       }
-   const wxDateTime & GetDate(void) const
+   const wxDateTimeWithRepeat & GetDate(void) const
       { return m_DT; }
    const wxString & GetSubject(void) const
       { return m_Subject; }
@@ -79,7 +138,7 @@ public:
    UIdType GetUId(void) const
       { return m_UId; }
 private:
-   wxDateTime m_DT;
+   wxDateTimeWithRepeat m_DT;
    wxString m_Subject;
    ActionEnum m_Action;
    UIdType m_UId;
@@ -90,6 +149,26 @@ private:
 #include <wx/dynarray.h>
 WX_DEFINE_ARRAY(AlarmInfo *, AlarmList);
 
+
+// a timer checking every hour to see if the day has changed:
+class DayCheckTimer : public wxTimer
+{
+public:
+   DayCheckTimer(class CalendarModule *module)
+      { m_Module = module; m_started = FALSE; }
+
+   virtual bool Start(void)
+      { m_started = TRUE; return wxTimer::Start(60*60*1000, TRUE); }
+
+   virtual void Notify(void);
+   
+    virtual void Stop()
+      { if ( m_started ) wxTimer::Stop(); }
+
+public:
+   class CalendarModule *m_Module;
+   bool m_started;
+};
 
 
 ///------------------------------
@@ -138,10 +217,15 @@ private:
    wxMenu *m_CalendarMenu;
    wxDateTime m_Today;
 
-
+   DayCheckTimer *m_Timer;
    GCC_DTOR_WARN_OFF
 };
 
+void
+DayCheckTimer::Notify(void)
+{
+   m_Module->OnTimer();
+}
 
 class wxDateDialog : public wxManuallyLaidOutDialog
 {
@@ -152,18 +236,119 @@ public:
    virtual bool TransferDataFromWindow()
       {
          m_Date = m_CalCtrl->GetDate();
+         if(m_CheckBox->GetValue())
+         {
+            long int num = m_SpinButton->GetValue();
+
+            switch(m_Choice->GetSelection())
+            {
+            case 0: // days
+               m_Date.SetDayRepeat(num); break;
+            case 1: // weeks
+               m_Date.SetWeekRepeat(num); break;
+            case 2: // months
+               m_Date.SetMonthRepeat(num); break;
+            case 3: // years
+               m_Date.SetYearRepeat(num); break;
+            default:
+               ASSERT(0); // cannot happen
+            }
+            if(m_EndsOn->GetValue())
+               m_Date.SetEndDate(m_CalCtrlEnd->GetDate());
+            else
+               m_Date.SetEndDate(m_Date); // no end date
+         }
          return TRUE;
       }
    virtual bool TransferDataToWindow()
       {
          m_CalCtrl->SetDate(m_Date);
+         if(m_Date.GetDayRepeat()
+            || m_Date.GetMonthRepeat()
+            || m_Date.GetYearRepeat())
+         {
+            m_CheckBox->Enable(TRUE);
+            long num = 1;
+            if(m_Date.GetDayRepeat())
+            {
+               num = m_Date.GetDayRepeat();
+               m_Choice->SetSelection(0); // day
+            }
+            else if(m_Date.GetMonthRepeat())
+            {
+               num = m_Date.GetMonthRepeat();
+               m_Choice->SetSelection(2); // month
+            }
+            else if(m_Date.GetYearRepeat())
+            {
+               num = m_Date.GetYearRepeat();
+               m_Choice->SetSelection(3); // year
+            }
+            wxString tmp;
+            tmp.Printf("%ld", num); m_TextCtrl->SetValue(tmp);
+
+            if(m_Date.HasEndDate())
+            {
+               m_EndsOn->Enable(TRUE);
+               m_CalCtrlEnd->SetDate(m_Date.GetEndDate());
+            }
+         }
          return TRUE;
       }
-   wxDateTime GetDate() { return m_Date; }
+   void OnCheckBox(wxCommandEvent & WXUNUSED(event) )
+      {
+         UpdateUI();
+      }
+   void UpdateUI(void)
+      {
+         bool enable = m_CheckBox->GetValue();
+         m_RepeatText->Enable(enable);
+         m_TextCtrl->Enable(enable);
+         m_SpinButton->Enable(enable);
+         m_Choice->Enable(enable);
+         m_EndsOn->Enable(enable);
+         bool enable2 = enable && m_EndsOn->GetValue();
+         m_CalCtrlEnd->Enable(enable2);
+      }
+
+   void OnSpin(long int delta)
+      {
+         wxString tmp = m_TextCtrl->GetValue();
+         long l = 1;
+         sscanf(tmp.c_str(),"%ld", &l);
+         l += delta;
+         if(l < 1)
+            l = 1;
+         m_SpinButton->SetValue(l);
+         tmp.Printf("%ld", l);
+         m_TextCtrl->SetValue(tmp);
+      }
+   void OnSpinUp(wxCommandEvent & WXUNUSED(event) ) { OnSpin(+1); }
+   
+   void OnSpinDown(wxCommandEvent & WXUNUSED(event) ) { OnSpin(-1); }
+   
+   wxDateTimeWithRepeat GetDate() { return m_Date; }
 protected:
-   wxDateTime     m_Date;
+   wxDateTimeWithRepeat     m_Date;
    wxCalendarCtrl *m_CalCtrl;
+
+   // for the repeat settings:
+   wxStaticText *m_RepeatText;
+   wxTextCtrl   *m_TextCtrl;
+   wxSpinButton *m_SpinButton;
+   wxChoice    *m_Choice;
+   wxCheckBox  *m_CheckBox;
+   wxCheckBox  *m_EndsOn;
+   wxCalendarCtrl *m_CalCtrlEnd;
+
+   DECLARE_EVENT_TABLE()
 };
+
+BEGIN_EVENT_TABLE(wxDateDialog, wxManuallyLaidOutDialog)
+   EVT_CHECKBOX(-1, wxDateDialog::OnCheckBox)
+   EVT_SPIN_UP(-1, wxDateDialog::OnSpinUp)
+   EVT_SPIN_DOWN(-1, wxDateDialog::OnSpinDown)
+END_EVENT_TABLE()
 
 wxDateDialog::wxDateDialog(const wxDateTime &dt, wxWindow *parent)
    : wxManuallyLaidOutDialog(parent,_("Pick a Date"),"CalendarModuleDateDlg")
@@ -173,8 +358,8 @@ wxDateDialog::wxDateDialog(const wxDateTime &dt, wxWindow *parent)
    wxLayoutConstraints *c;
 
    wxStaticText *stattext = new wxStaticText(this, -1,
-                                             _("Please pick the date on which you want the\n"
-                                               "message to be sent\n"
+                                             _("Please pick the date on which to\n"
+                                               "send the message\n"
                                                "\n"));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -194,13 +379,87 @@ wxDateDialog::wxDateDialog(const wxDateTime &dt, wxWindow *parent)
    c->height.AsIs();
    m_CalCtrl->SetConstraints(c);
 
-   SetDefaultSize(300, 300, TRUE /* minimal */);
+   m_CheckBox = new wxCheckBox(this, -1, _("Repeat Event"));
+   c = new wxLayoutConstraints;
+   c->left.RightOf(m_CalCtrl, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 6*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   m_CheckBox->SetConstraints(c);
+
+   m_RepeatText = new wxStaticText(this, -1, _("every"));
+   c = new wxLayoutConstraints;
+   c->left.RightOf(m_CalCtrl, 2*LAYOUT_X_MARGIN);
+   c->top.Below(m_CheckBox, LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   m_RepeatText->SetConstraints(c);
+
+   m_TextCtrl = new wxTextCtrl(this,-1);
+   c = new wxLayoutConstraints;
+   c->left.RightOf(m_RepeatText, LAYOUT_X_MARGIN);
+   c->top.Below(m_CheckBox, LAYOUT_Y_MARGIN);
+   c->width.Absolute(30);
+   c->height.AsIs();
+   m_TextCtrl->SetConstraints(c);
+   m_TextCtrl->SetValue("1");
+
+   m_SpinButton = new wxSpinButton(this,-1);
+   c = new wxLayoutConstraints;
+   c->left.RightOf(m_TextCtrl, LAYOUT_X_MARGIN);
+   c->top.Below(m_CheckBox, LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   m_SpinButton->SetConstraints(c);
+
+
+   static const wxString choices[] = {
+      gettext_noop("days"), gettext_noop("weeks"),
+      gettext_noop("months"), gettext_noop("years")
+   };
+   m_Choice = new wxChoice(this,-1, wxDefaultPosition, wxDefaultSize,
+                           4,choices);
+   c = new wxLayoutConstraints;
+   c->left.RightOf(m_SpinButton, LAYOUT_X_MARGIN);
+   c->top.Below(m_CheckBox, LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   m_Choice->SetConstraints(c);
+
+
+   m_SpinButton->SetValue(1);
+
+   m_EndsOn = new wxCheckBox(this, -1, _("Repeat ends on"));
+   c = new wxLayoutConstraints;
+   c->left.RightOf(m_CalCtrl, 2*LAYOUT_X_MARGIN);
+   c->top.Below(m_Choice, LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   m_EndsOn->SetConstraints(c);
+   m_EndsOn->SetValue(TRUE);
+   
+   m_CalCtrlEnd = new wxCalendarCtrl(this,-1, dt,
+                                     wxDefaultPosition,
+                                     wxDefaultSize,
+                                     wxCAL_SHOW_HOLIDAYS|wxCAL_BORDER_SQUARE);
+   c = new wxLayoutConstraints;
+   c->left.RightOf(m_CalCtrl, 2*LAYOUT_X_MARGIN);
+   c->top.Below(m_EndsOn, LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+
+   m_CalCtrlEnd->SetConstraints(c);
+
+   SetAutoLayout(TRUE);
+   SetDefaultSize(420, 320, TRUE /* minimal */);
    m_Date = dt;
    TransferDataToWindow();
+
+   UpdateUI();
 }
 
 extern
-bool PickDateDialog(wxDateTime &dt,
+bool PickDateDialog(wxDateTimeWithRepeat &dt,
                     wxWindow *parent = NULL)
 {
    wxDateDialog dlg(dt, parent);
@@ -223,7 +482,7 @@ public:
    void AddReminder(void);
    void AddReminder(const wxString &text,
                     ActionEnum action = CAL_ACTION_REMIND,
-                    const wxDateTime &when = wxDefaultDateTime);
+                    const wxDateTimeWithRepeat &when = wxDefaultDateTime);
    bool ScheduleMessage(SendMessageCC *msg);
    
    /** checks if anything needs to be done:
@@ -232,20 +491,18 @@ public:
    void CheckUpdate(MailFolder *mf = NULL);
    /// re-reads config
    void GetConfig(void);
-
-   virtual bool OnClose()
-      {
-         return TRUE;
-      }
-
 protected:
 
-   String MakeDateLine(const wxDateTime &dt);
-   wxDateTime ParseDateLine(const wxString &line);
+   String MakeDateLine(const wxDateTimeWithRepeat &dt);
+   wxDateTimeWithRepeat ParseDateLine(const wxString &line);
 
    /// build the alarms list
    void ParseFolder(void);
    void ClearAlarms(void);
+   void DeleteOrRewrite(MailFolder *mf,
+                        Message *msg,
+                        const wxDateTimeWithRepeat &dt,
+                        ActionEnum action);
    
 
 private:
@@ -439,22 +696,32 @@ CalendarFrame::GetConfig(void)
 }
 
 String
-CalendarFrame::MakeDateLine(const wxDateTime &dt)
+CalendarFrame::MakeDateLine(const wxDateTimeWithRepeat &dt)
 {
    String line;
-   line.Printf("%ld %ld %ld",
+   line.Printf("%ld %ld %ld %ld %ld %ld %ld %ld %ld",
                (long int) dt.GetYear(),
                (long int) dt.GetMonth(),
-               (long int) dt.GetDay());
+               (long int) dt.GetDay(),
+               (long int) dt.GetYearRepeat(),
+               (long int) dt.GetMonthRepeat(),
+               (long int) dt.GetDayRepeat(),
+               (long int) dt.GetYearRepeatEnd(),
+               (long int) dt.GetMonthRepeatEnd(),
+               (long int) dt.GetDayRepeatEnd());
    return line;
 }
 
-wxDateTime
+wxDateTimeWithRepeat
 CalendarFrame::ParseDateLine(const wxString &line)
 {
-   wxDateTime dt;
+   wxDateTimeWithRepeat dt;
    long year, month, day;
-   if(sscanf(line.c_str(),"%ld %ld %ld", &year, &month, &day) != 3)
+   long yr, mr, dr, yre, mre, dre;
+   if(sscanf(line.c_str(),"%ld %ld %ld %ld %ld %ld %ld %ld %ld",
+             &year, &month, &day,
+             &yr, &mr, &dr,
+             &yre, &mre, &dre) != 9)
    {
       m_Module->ErrorMessage(_("Cannot parse date information."));
       return wxDateTime::Today();
@@ -462,13 +729,15 @@ CalendarFrame::ParseDateLine(const wxString &line)
    dt.SetYear(year); dt.SetMonth((wxDateTime::Month)month); dt.SetDay(day);
    dt.SetHour(0); dt.SetMinute(0); dt.SetSecond(0);
    dt.SetMillisecond(0);
+   dt.SetYearRepeat(yr); dt.SetMonthRepeat(mr); dt.SetDayRepeat(dr);
+   dt.SetYearRepeatEnd(yre); dt.SetMonthRepeatEnd(mre); dt.SetDayRepeatEnd(dre);
    return dt;
 }
 
 bool
 CalendarFrame::ScheduleMessage(SendMessageCC *msg)
 {
-   wxDateTime dt = m_CalCtrl->GetDate();
+   wxDateTimeWithRepeat dt = m_CalCtrl->GetDate();
    if(PickDateDialog(dt))
    {
       wxString str;
@@ -532,7 +801,7 @@ CalendarFrame::ParseFolder(void)
             if(action != CAL_ACTION_ILLEGAL)
             {
                msg->GetHeaderLine("X-M-CAL-DATE", tmp);
-               wxDateTime dt = ParseDateLine(tmp);
+               wxDateTimeWithRepeat dt = ParseDateLine(tmp);
                AlarmInfo * ai = new AlarmInfo(dt,
                                               (*hil)[count]->GetSubject(),
                                               (*hil)[count]->GetUId(),
@@ -553,6 +822,42 @@ CalendarFrame::ParseFolder(void)
       m_ListCtrl->SetItem(count,2,_("reminder"));
    }
    mf->DecRef();
+}
+
+/* Depending on date and repeat settings, this either removes an
+   expired entry or changes its date to the next repeat. */
+void
+CalendarFrame::DeleteOrRewrite(MailFolder *mf,
+                               Message *msg,
+                               const wxDateTimeWithRepeat &dt,
+                               ActionEnum action)
+{
+   if(dt.IsRepeating() && dt.GetEndDate() > wxDateTime::Now()) 
+   {
+      /* We need to change the first date and re-store
+         it in folder. */
+      wxDateTimeWithRepeat newdt = dt;
+
+      // we now calculate the new start date:
+      wxDateTime::Tm tm = dt.GetTm();
+      
+      if(dt.GetDayRepeat())
+         tm.AddDays(dt.GetDayRepeat());
+      else if(dt.GetMonthRepeat())
+         tm.AddMonths(dt.GetMonthRepeat());
+      else if(dt.GetYearRepeat())
+         tm.AddMonths(12*dt.GetYearRepeat());
+
+      wxDateTime ndt = wxDateTime(tm);
+      newdt.SetDay(ndt.GetDay());
+      newdt.SetMonth(ndt.GetMonth());
+      newdt.SetYear(ndt.GetYear());
+
+      wxString text;
+      msg->WriteToString(text, FALSE);
+      AddReminder(text,action, newdt);
+   }
+   mf->DeleteMessage(msg->GetUId());
 }
 
 void
@@ -587,7 +892,9 @@ CalendarFrame::CheckUpdate(MailFolder *eventFolder)
                              m_Alarms[count]->GetSubject().c_str(),
                              m_NewMailFolder.c_str());
                   GetStatusBar()->SetStatusText(txt);
-                  mf->DeleteMessage(m_Alarms[count]->GetUId());
+
+                  DeleteOrRewrite(mf, msg,
+                                  m_Alarms[count]->GetDate(), action);
                   deleted = TRUE;
                }
                if(nmmf) nmmf->DecRef();
@@ -600,7 +907,8 @@ CalendarFrame::CheckUpdate(MailFolder *eventFolder)
                   txt.Printf(_("Send or queued message `%s'."),
                              m_Alarms[count]->GetSubject().c_str());
                   GetStatusBar()->SetStatusText(txt);
-                  mf->DeleteMessage(m_Alarms[count]->GetUId());
+                  DeleteOrRewrite(mf, msg,
+                                  m_Alarms[count]->GetDate(), action);
                   deleted = TRUE;
                }
             }
@@ -618,7 +926,7 @@ CalendarFrame::CheckUpdate(MailFolder *eventFolder)
 void
 CalendarFrame::AddReminder(const wxString &itext,
                            ActionEnum action,
-                           const wxDateTime &when)
+                           const wxDateTimeWithRepeat &when)
 {
    String fmt, text;
    wxString timeStr = wxDateTime::Now().Format("%d %b %Y %H:%M:%S");
@@ -633,7 +941,7 @@ CalendarFrame::AddReminder(const wxString &itext,
       text = "";
       text << "X-M-CAL-CMD: SEND" << "\015\012"
           << "X-M-CAL-DATE: "
-          << MakeDateLine(m_CalCtrl->GetDate())
+          << MakeDateLine(when)
           << "\015\012"
           << tmp;
    }
@@ -652,38 +960,15 @@ CalendarFrame::AddReminder(const wxString &itext,
           << "\015\012"
           << tmp
           << "\015\012";
-      text.Printf(fmt, timeStr.c_str(),
-                  MakeDateLine(m_CalCtrl->GetDate()).c_str());
+      text.Printf(fmt, timeStr.c_str(), MakeDateLine(when).c_str());
    }
    class Message * msg = m_MInterface->CreateMessage(text,UID_ILLEGAL,m_Profile);
    (void) m_Folder->AppendMessage(msg);
-   CheckUpdate();
+//causes recursion   CheckUpdate();
    msg->DecRef();
 }
 
 
-
-
-// a timer checking every hour to see if the day has changed:
-class DayCheckTimer : public wxTimer
-{
-public:
-   DayCheckTimer(CalendarModule *module)
-      { m_Module = module; m_started = FALSE; }
-
-   virtual bool Start(void)
-      { m_started = TRUE; return wxTimer::Start(60*60*1000, TRUE); }
-
-   virtual void Notify()
-      { m_Module->OnTimer(); }
-
-    virtual void Stop()
-      { if ( m_started ) wxTimer::Stop(); }
-
-public:
-   CalendarModule *m_Module;
-   bool m_started;
-};
 
 
 
@@ -738,6 +1023,7 @@ CalendarModule::CalendarModule(MInterface *minterface)
                                         -1);
    m_Today = wxDateTime::Today();
 
+   m_Timer = new DayCheckTimer(this);
    m_EventReceiver = new CalEventReceiver(this);
    CreateFrame();
    m_Frame->CheckUpdate();
@@ -745,6 +1031,7 @@ CalendarModule::CalendarModule(MInterface *minterface)
 
 CalendarModule::~CalendarModule()
 {
+   delete m_Timer;
    if(m_EventReceiver) delete m_EventReceiver;
    if(m_Frame) m_Frame->Close();
 }

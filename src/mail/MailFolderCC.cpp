@@ -3038,6 +3038,71 @@ mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW *ov)
 
 } // extern "C"
 
+#if 0
+//#ifdef USE_SSL
+
+
+/* These functions will serve as stubs for the real openSSL library
+   and must be initialised at runtime as c-client actually links
+   against these. */
+
+#include <openssl/ssl.h>
+
+
+SSL     * (*stub_SSL_new) (SSL_CTX *ctx) = NULL;
+void	  (*stub_SSL_free) (SSL *ssl) = NULL;
+int	  (*stub_SSL_set_rfd) (SSL *s, int fd) = NULL;
+int	  (*stub_SSL_set_wfd) (SSL *s, int fd) = NULL;
+void	  (*stub_SSL_set_read_ahead) (SSL *s, int yes) = NULL;
+int 	  (*stub_SSL_connect) (SSL *ssl) = NULL;
+int 	  (*stub_SSL_read) (SSL *ssl,char *buf,int num) = NULL;
+int 	  (*stub_SSL_write) (SSL *ssl,const char *buf,int num) = NULL;
+int	  (*stub_SSL_pending) (SSL *s) = NULL;
+int       (*stub_SSL_library_init) (void ) = NULL;
+void	  (*stub_SSL_load_error_strings) (void ) = NULL;
+SSL_CTX * (*stub_SSL_CTX_new) (SSL_METHOD *meth) = NULL;
+
+//extern SSL_get_cipher_bits();
+const char *	SSL_CIPHER_get_name(SSL_CIPHER *c);
+
+//extern SSL_get_cipher();
+SSL_CIPHER *SSL_get_current_cipher(SSL *s);
+
+#   if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
+SSL_METHOD *SSLv3_client_method(void);	/* SSLv3 */
+#   elif defined(TLSV1ONLYSERVER) && !defined(SSLV3ONLYSERVER)
+extern TLSv1_client_method();
+#   else
+SSL_METHOD *SSLv23_client_method(void);	/* SSLv3 but can rollback to v2 */
+#   endif
+
+SSL     * SSL_new(SSL_CTX *ctx)
+{ return (*stub_SSL_new)(ctx); }
+void	  SSL_free(SSL *ssl)
+{ (*stub_SSL_free)(ssl); }
+int	  SSL_set_rfd(SSL *s, int fd)
+{ return (*stub_SSL_set_rfd)(s,fd); }
+int	  SSL_set_wfd(SSL *s, int fd)
+{ return (*stub_SSL_set_wfd)(s,fd); }
+void	  SSL_set_read_ahead(SSL *s, int yes)
+{ (*stub_SSL_set_read_ahead)(s,yes); } 
+int 	  SSL_connect(SSL *ssl)
+{ return (*stub_SSL_connect)(SSL *ssl); }
+int 	  SSL_read(SSL *ssl,char *buf,int num)
+{ return (*stub_SSL_read)(ssl, buf, num); }
+int 	  SSL_write(SSL *ssl,const char *buf,int num)
+{ return (*stub_SSL_write)(ssl, buf, num); }
+int	  SSL_pending(SSL *s)
+{ return (*stub_SSL_pending)(s); }
+int       SSL_library_init(void )
+{ return (*stub_SSL_library_init)(); }
+void	  SSL_load_error_strings(void )
+{ (*stub_SSL_load_error_strings)(); }
+SSL_CTX * SSL_CTX_new(SSL_METHOD *meth)
+{ return (*stub_SSL_CTX_new)(meth); }
+
+#endif
+
 // ----------------------------------------------------------------------------
 // debugging support
 // ----------------------------------------------------------------------------

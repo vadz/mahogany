@@ -220,6 +220,16 @@ public:
       gs_installWizardData.name = m_name->GetValue();
       gs_installWizardData.email = email;
 
+#if 0
+      /* This goes horribly wrong. Typical situation
+         "user@hostname" without domain leads to hosts such as
+         "mail.hostname" - usually, if the entries have no
+         domainnames, then they work anyway. I.e. if the environment
+         tells us the mail server is "mail", then that is usually a
+         working alias.
+         Unless we find a more reliable method, I comment this out.
+         (KB)
+      */
       // if the email is user@some.where, then suppose that the servers are
       // pop.some.where &c
       wxString domain = email.AfterFirst('@');
@@ -231,7 +241,8 @@ public:
          AddDomain(gs_installWizardData.nntp, domain);
       }
       //else: no domain specified
-
+#endif
+      
       return TRUE;
    }
 

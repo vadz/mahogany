@@ -25,129 +25,130 @@ class MailFolderPtr(MObjectRCPtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def ListFolders(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_ListFolders,(self,) + _args, _kwargs)
+    def ListFolders(self,arg0,arg1,arg2,arg3,arg4,arg5):
+        val = MailFolderc.MailFolder_ListFolders(self.this,arg0,arg1.this,arg2,arg3.this,arg4,arg5)
         return val
-    def GetName(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_GetName,(self,) + _args, _kwargs)
-        if val: val = StringPtr(val) ; val.thisown = 1
+    def GetName(self):
+        val = MailFolderc.MailFolder_GetName(self.this)
+        val = StringPtr(val)
+        val.thisown = 1
         return val
-    def CountMessages(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_CountMessages,(self,) + _args, _kwargs)
+    def CountMessages(self,arg0,arg1):
+        val = MailFolderc.MailFolder_CountMessages(self.this,arg0,arg1)
         return val
-    def CountNewMessages(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_CountNewMessages,(self,) + _args, _kwargs)
+    def CountNewMessages(self):
+        val = MailFolderc.MailFolder_CountNewMessages(self.this)
         return val
-    def CountRecentMessages(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_CountRecentMessages,(self,) + _args, _kwargs)
+    def CountRecentMessages(self):
+        val = MailFolderc.MailFolder_CountRecentMessages(self.this)
         return val
-    def CountNewMessagesQuick(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_CountNewMessagesQuick,(self,) + _args, _kwargs)
+    def CountNewMessagesQuick(self):
+        val = MailFolderc.MailFolder_CountNewMessagesQuick(self.this)
         return val
-    def Ping(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_Ping,(self,) + _args, _kwargs)
+    def Ping(self):
+        val = MailFolderc.MailFolder_Ping(self.this)
         return val
-    def GetMessage(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_GetMessage,(self,) + _args, _kwargs)
-        if val: val = MessagePtr(val) 
+    def GetMessage(self,arg0):
+        val = MailFolderc.MailFolder_GetMessage(self.this,arg0)
+        val = MessagePtr(val)
         return val
-    def DeleteMessage(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_DeleteMessage,(self,) + _args, _kwargs)
+    def DeleteMessage(self,arg0):
+        val = MailFolderc.MailFolder_DeleteMessage(self.this,arg0)
         return val
-    def UnDeleteMessage(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_UnDeleteMessage,(self,) + _args, _kwargs)
+    def UnDeleteMessage(self,arg0):
+        val = MailFolderc.MailFolder_UnDeleteMessage(self.this,arg0)
         return val
-    def SetMessageFlag(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_SetMessageFlag,(self,) + _args, _kwargs)
+    def SetMessageFlag(self,arg0,arg1,*args):
+        val = apply(MailFolderc.MailFolder_SetMessageFlag,(self.this,arg0,arg1,)+args)
         return val
-    def SetFlag(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_SetFlag,(self,) + _args, _kwargs)
+    def SetFlag(self,arg0,arg1,*args):
+        val = apply(MailFolderc.MailFolder_SetFlag,(self.this,arg0,arg1,)+args)
         return val
-    def SetSequenceFlag(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_SetSequenceFlag,(self,) + _args, _kwargs)
+    def SetSequenceFlag(self,arg0,arg1,*args):
+        val = apply(MailFolderc.MailFolder_SetSequenceFlag,(self.this,arg0.this,arg1,)+args)
         return val
-    def AppendMessage(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_AppendMessage,(self,) + _args, _kwargs)
+    def AppendMessage(self,arg0):
+        val = MailFolderc.MailFolder_AppendMessage(self.this,arg0.this)
         return val
-    def ExpungeMessages(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_ExpungeMessages,(self,) + _args, _kwargs)
+    def ExpungeMessages(self):
+        val = MailFolderc.MailFolder_ExpungeMessages(self.this)
         return val
-    def SearchMessages(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_SearchMessages,(self,) + _args, _kwargs)
+    def SearchMessages(self,arg0):
+        val = MailFolderc.MailFolder_SearchMessages(self.this,arg0.this)
         return val
-    def GetProfile(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_GetProfile,(self,) + _args, _kwargs)
-        if val: val = ProfileBasePtr(val) 
+    def GetProfile(self):
+        val = MailFolderc.MailFolder_GetProfile(self.this)
+        val = ProfileBasePtr(val)
         return val
-    def GetClassName(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_GetClassName,(self,) + _args, _kwargs)
+    def GetClassName(self):
+        val = MailFolderc.MailFolder_GetClassName(self.this)
         return val
-    def SetUpdateFlags(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_SetUpdateFlags,(self,) + _args, _kwargs)
+    def SetUpdateFlags(self,arg0):
+        val = MailFolderc.MailFolder_SetUpdateFlags(self.this,arg0)
         return val
-    def GetUpdateFlags(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_GetUpdateFlags,(self,) + _args, _kwargs)
+    def GetUpdateFlags(self):
+        val = MailFolderc.MailFolder_GetUpdateFlags(self.this)
         return val
-    def SaveMessages(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_SaveMessages,(self,) + _args, _kwargs)
+    def SaveMessages(self,arg0,arg1,arg2,arg3):
+        val = MailFolderc.MailFolder_SaveMessages(self.this,arg0,arg1.this,arg2,arg3)
         return val
-    def SaveMessagesToFile(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_SaveMessagesToFile,(self,) + _args, _kwargs)
+    def SaveMessagesToFile(self,arg0,arg1):
+        val = MailFolderc.MailFolder_SaveMessagesToFile(self.this,arg0,arg1.this)
         return val
-    def DeleteOrTrashMessages(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_DeleteOrTrashMessages,(self,) + _args, _kwargs)
+    def DeleteOrTrashMessages(self,arg0):
+        val = MailFolderc.MailFolder_DeleteOrTrashMessages(self.this,arg0)
         return val
-    def DeleteMessages(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_DeleteMessages,(self,) + _args, _kwargs)
+    def DeleteMessages(self,arg0,arg1):
+        val = MailFolderc.MailFolder_DeleteMessages(self.this,arg0,arg1)
         return val
-    def UnDeleteMessages(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_UnDeleteMessages,(self,) + _args, _kwargs)
+    def UnDeleteMessages(self,arg0):
+        val = MailFolderc.MailFolder_UnDeleteMessages(self.this,arg0)
         return val
-    def SaveMessagesToFolder(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_SaveMessagesToFolder,(self,) + _args, _kwargs)
+    def SaveMessagesToFolder(self,arg0,arg1):
+        val = MailFolderc.MailFolder_SaveMessagesToFolder(self.this,arg0,arg1.this)
         return val
-    def ReplyMessages(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_ReplyMessages,(self,) + _args, _kwargs)
+    def ReplyMessages(self,arg0,arg1,arg2):
+        val = MailFolderc.MailFolder_ReplyMessages(self.this,arg0,arg1,arg2.this)
         return val
-    def ForwardMessages(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_ForwardMessages,(self,) + _args, _kwargs)
+    def ForwardMessages(self,arg0,arg1,arg2):
+        val = MailFolderc.MailFolder_ForwardMessages(self.this,arg0,arg1,arg2.this)
         return val
-    def Lock(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_Lock,(self,) + _args, _kwargs)
+    def Lock(self):
+        val = MailFolderc.MailFolder_Lock(self.this)
         return val
-    def UnLock(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_UnLock,(self,) + _args, _kwargs)
+    def UnLock(self):
+        val = MailFolderc.MailFolder_UnLock(self.this)
         return val
-    def IsLocked(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_IsLocked,(self,) + _args, _kwargs)
+    def IsLocked(self):
+        val = MailFolderc.MailFolder_IsLocked(self.this)
         return val
-    def GetHeaders(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_GetHeaders,(self,) + _args, _kwargs)
-        if val: val = HeaderInfoListPtr(val) 
+    def GetHeaders(self):
+        val = MailFolderc.MailFolder_GetHeaders(self.this)
+        val = HeaderInfoListPtr(val)
         return val
-    def GetType(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_GetType,(self,) + _args, _kwargs)
+    def GetType(self):
+        val = MailFolderc.MailFolder_GetType(self.this)
         return val
-    def GetFlags(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_GetFlags,(self,) + _args, _kwargs)
+    def GetFlags(self):
+        val = MailFolderc.MailFolder_GetFlags(self.this)
         return val
-    def NeedsNetwork(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_NeedsNetwork,(self,) + _args, _kwargs)
+    def NeedsNetwork(self):
+        val = MailFolderc.MailFolder_NeedsNetwork(self.this)
         return val
-    def SetRetrievalLimit(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_SetRetrievalLimit,(self,) + _args, _kwargs)
+    def SetRetrievalLimit(self,arg0):
+        val = MailFolderc.MailFolder_SetRetrievalLimit(self.this,arg0)
         return val
-    def GetAuthInfo(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_GetAuthInfo,(self,) + _args, _kwargs)
+    def GetAuthInfo(self,arg0,arg1):
+        val = MailFolderc.MailFolder_GetAuthInfo(self.this,arg0.this,arg1.this)
         return val
-    def ApplyFilterRules(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_ApplyFilterRules,(self,) + _args, _kwargs)
+    def ApplyFilterRules(self,arg0):
+        val = MailFolderc.MailFolder_ApplyFilterRules(self.this,arg0)
         return val
-    def RequestUpdate(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolder_RequestUpdate,(self,) + _args, _kwargs)
+    def RequestUpdate(self):
+        val = MailFolderc.MailFolder_RequestUpdate(self.this)
         return val
     def __repr__(self):
-        return "<C MailFolder instance at %s>" % (self.this,)
+        return "<C MailFolder instance>"
 class MailFolder(MailFolderPtr):
     def __init__(self,this):
         self.this = this
@@ -159,17 +160,17 @@ class MailFolderLockPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def __del__(self,MailFolderc=MailFolderc):
+    def __del__(self):
         if self.thisown == 1 :
-            MailFolderc.delete_MailFolderLock(self)
-    def Locked(self, *_args, **_kwargs):
-        val = apply(MailFolderc.MailFolderLock_Locked,(self,) + _args, _kwargs)
+            MailFolderc.delete_MailFolderLock(self.this)
+    def Locked(self):
+        val = MailFolderc.MailFolderLock_Locked(self.this)
         return val
     def __repr__(self):
-        return "<C MailFolderLock instance at %s>" % (self.this,)
+        return "<C MailFolderLock instance>"
 class MailFolderLock(MailFolderLockPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(MailFolderc.new_MailFolderLock,_args,_kwargs)
+    def __init__(self,arg0) :
+        self.this = MailFolderc.new_MailFolderLock(arg0.this)
         self.thisown = 1
 
 
@@ -179,45 +180,45 @@ class HeaderInfoPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def GetSubject(self, *_args, **_kwargs):
-        val = apply(MailFolderc.HeaderInfo_GetSubject,(self,) + _args, _kwargs)
-        if val: val = StringPtr(val) 
+    def GetSubject(self):
+        val = MailFolderc.HeaderInfo_GetSubject(self.this)
+        val = StringPtr(val)
         return val
-    def GetFrom(self, *_args, **_kwargs):
-        val = apply(MailFolderc.HeaderInfo_GetFrom,(self,) + _args, _kwargs)
-        if val: val = StringPtr(val) 
+    def GetFrom(self):
+        val = MailFolderc.HeaderInfo_GetFrom(self.this)
+        val = StringPtr(val)
         return val
-    def GetDate(self, *_args, **_kwargs):
-        val = apply(MailFolderc.HeaderInfo_GetDate,(self,) + _args, _kwargs)
+    def GetDate(self):
+        val = MailFolderc.HeaderInfo_GetDate(self.this)
         return val
-    def GetId(self, *_args, **_kwargs):
-        val = apply(MailFolderc.HeaderInfo_GetId,(self,) + _args, _kwargs)
-        if val: val = StringPtr(val) 
+    def GetId(self):
+        val = MailFolderc.HeaderInfo_GetId(self.this)
+        val = StringPtr(val)
         return val
-    def GetReferences(self, *_args, **_kwargs):
-        val = apply(MailFolderc.HeaderInfo_GetReferences,(self,) + _args, _kwargs)
-        if val: val = StringPtr(val) 
+    def GetReferences(self):
+        val = MailFolderc.HeaderInfo_GetReferences(self.this)
+        val = StringPtr(val)
         return val
-    def GetUId(self, *_args, **_kwargs):
-        val = apply(MailFolderc.HeaderInfo_GetUId,(self,) + _args, _kwargs)
+    def GetUId(self):
+        val = MailFolderc.HeaderInfo_GetUId(self.this)
         return val
-    def GetStatus(self, *_args, **_kwargs):
-        val = apply(MailFolderc.HeaderInfo_GetStatus,(self,) + _args, _kwargs)
+    def GetStatus(self):
+        val = MailFolderc.HeaderInfo_GetStatus(self.this)
         return val
-    def GetSize(self, *_args, **_kwargs):
-        val = apply(MailFolderc.HeaderInfo_GetSize,(self,) + _args, _kwargs)
+    def GetSize(self):
+        val = MailFolderc.HeaderInfo_GetSize(self.this)
         return val
-    def SizeOf(self, *_args, **_kwargs):
-        val = apply(MailFolderc.HeaderInfo_SizeOf,(self,) + _args, _kwargs)
+    def SizeOf(self):
+        val = MailFolderc.HeaderInfo_SizeOf(self.this)
         return val
-    def GetIndentation(self, *_args, **_kwargs):
-        val = apply(MailFolderc.HeaderInfo_GetIndentation,(self,) + _args, _kwargs)
+    def GetIndentation(self):
+        val = MailFolderc.HeaderInfo_GetIndentation(self.this)
         return val
-    def SetIndentation(self, *_args, **_kwargs):
-        val = apply(MailFolderc.HeaderInfo_SetIndentation,(self,) + _args, _kwargs)
+    def SetIndentation(self,arg0):
+        val = MailFolderc.HeaderInfo_SetIndentation(self.this,arg0)
         return val
     def __repr__(self):
-        return "<C HeaderInfo instance at %s>" % (self.this,)
+        return "<C HeaderInfo instance>"
 class HeaderInfo(HeaderInfoPtr):
     def __init__(self,this):
         self.this = this
@@ -229,21 +230,21 @@ class HeaderInfoListPtr(MObjectRCPtr):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def Count(self, *_args, **_kwargs):
-        val = apply(MailFolderc.HeaderInfoList_Count,(self,) + _args, _kwargs)
+    def Count(self):
+        val = MailFolderc.HeaderInfoList_Count(self.this)
         return val
-    def GetArray(self, *_args, **_kwargs):
-        val = apply(MailFolderc.HeaderInfoList_GetArray,(self,) + _args, _kwargs)
-        if val: val = HeaderInfoPtr(val) 
+    def GetArray(self):
+        val = MailFolderc.HeaderInfoList_GetArray(self.this)
+        val = HeaderInfoPtr(val)
         return val
-    def Swap(self, *_args, **_kwargs):
-        val = apply(MailFolderc.HeaderInfoList_Swap,(self,) + _args, _kwargs)
+    def Swap(self,arg0,arg1):
+        val = MailFolderc.HeaderInfoList_Swap(self.this,arg0,arg1)
         return val
-    def SetTranslationTable(self, *_args, **_kwargs):
-        val = apply(MailFolderc.HeaderInfoList_SetTranslationTable,(self,) + _args, _kwargs)
+    def SetTranslationTable(self,arg0):
+        val = MailFolderc.HeaderInfoList_SetTranslationTable(self.this,arg0)
         return val
     def __repr__(self):
-        return "<C HeaderInfoList instance at %s>" % (self.this,)
+        return "<C HeaderInfoList instance>"
 class HeaderInfoList(HeaderInfoListPtr):
     def __init__(self,this):
         self.this = this
@@ -255,18 +256,18 @@ class FolderListingEntryPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def GetName(self, *_args, **_kwargs):
-        val = apply(MailFolderc.FolderListingEntry_GetName,(self,) + _args, _kwargs)
-        if val: val = StringPtr(val) 
+    def GetName(self):
+        val = MailFolderc.FolderListingEntry_GetName(self.this)
+        val = StringPtr(val)
         return val
-    def GetAttribute(self, *_args, **_kwargs):
-        val = apply(MailFolderc.FolderListingEntry_GetAttribute,(self,) + _args, _kwargs)
+    def GetAttribute(self):
+        val = MailFolderc.FolderListingEntry_GetAttribute(self.this)
         return val
-    def __del__(self,MailFolderc=MailFolderc):
+    def __del__(self):
         if self.thisown == 1 :
-            MailFolderc.delete_FolderListingEntry(self)
+            MailFolderc.delete_FolderListingEntry(self.this)
     def __repr__(self):
-        return "<C FolderListingEntry instance at %s>" % (self.this,)
+        return "<C FolderListingEntry instance>"
 class FolderListingEntry(FolderListingEntryPtr):
     def __init__(self,this):
         self.this = this
@@ -278,25 +279,25 @@ class FolderListingPtr :
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def GetDelimiter(self, *_args, **_kwargs):
-        val = apply(MailFolderc.FolderListing_GetDelimiter,(self,) + _args, _kwargs)
+    def GetDelimiter(self):
+        val = MailFolderc.FolderListing_GetDelimiter(self.this)
         return val
-    def CountEntries(self, *_args, **_kwargs):
-        val = apply(MailFolderc.FolderListing_CountEntries,(self,) + _args, _kwargs)
+    def CountEntries(self):
+        val = MailFolderc.FolderListing_CountEntries(self.this)
         return val
-    def GetFirstEntry(self, *_args, **_kwargs):
-        val = apply(MailFolderc.FolderListing_GetFirstEntry,(self,) + _args, _kwargs)
-        if val: val = FolderListingEntryPtr(val) 
+    def GetFirstEntry(self,arg0):
+        val = MailFolderc.FolderListing_GetFirstEntry(self.this,arg0)
+        val = FolderListingEntryPtr(val)
         return val
-    def GetNextEntry(self, *_args, **_kwargs):
-        val = apply(MailFolderc.FolderListing_GetNextEntry,(self,) + _args, _kwargs)
-        if val: val = FolderListingEntryPtr(val) 
+    def GetNextEntry(self,arg0):
+        val = MailFolderc.FolderListing_GetNextEntry(self.this,arg0)
+        val = FolderListingEntryPtr(val)
         return val
-    def __del__(self,MailFolderc=MailFolderc):
+    def __del__(self):
         if self.thisown == 1 :
-            MailFolderc.delete_FolderListing(self)
+            MailFolderc.delete_FolderListing(self.this)
     def __repr__(self):
-        return "<C FolderListing instance at %s>" % (self.this,)
+        return "<C FolderListing instance>"
 class FolderListing(FolderListingPtr):
     def __init__(self,this):
         self.this = this
@@ -310,28 +311,28 @@ class SearchCriteriumPtr :
         self.thisown = 0
     def __setattr__(self,name,value):
         if name == "m_What" :
-            MailFolderc.SearchCriterium_m_What_set(self,value)
+            MailFolderc.SearchCriterium_m_What_set(self.this,value)
             return
         if name == "m_Invert" :
-            MailFolderc.SearchCriterium_m_Invert_set(self,value)
+            MailFolderc.SearchCriterium_m_Invert_set(self.this,value)
             return
         if name == "m_Key" :
-            MailFolderc.SearchCriterium_m_Key_set(self,value.this)
+            MailFolderc.SearchCriterium_m_Key_set(self.this,value.this)
             return
         self.__dict__[name] = value
     def __getattr__(self,name):
         if name == "m_What" : 
-            return MailFolderc.SearchCriterium_m_What_get(self)
+            return MailFolderc.SearchCriterium_m_What_get(self.this)
         if name == "m_Invert" : 
-            return MailFolderc.SearchCriterium_m_Invert_get(self)
+            return MailFolderc.SearchCriterium_m_Invert_get(self.this)
         if name == "m_Key" : 
-            return StringPtr(MailFolderc.SearchCriterium_m_Key_get(self))
+            return StringPtr(MailFolderc.SearchCriterium_m_Key_get(self.this))
         raise AttributeError,name
     def __repr__(self):
-        return "<C SearchCriterium instance at %s>" % (self.this,)
+        return "<C SearchCriterium instance>"
 class SearchCriterium(SearchCriteriumPtr):
-    def __init__(self,*_args,**_kwargs):
-        self.this = apply(MailFolderc.new_SearchCriterium,_args,_kwargs)
+    def __init__(self) :
+        self.this = MailFolderc.new_SearchCriterium()
         self.thisown = 1
 
 
@@ -341,23 +342,42 @@ class SearchCriterium(SearchCriteriumPtr):
 
 #-------------- FUNCTION WRAPPERS ------------------
 
-def MailFolder_OpenFolder(*_args, **_kwargs):
-    val = apply(MailFolderc.MailFolder_OpenFolder,_args,_kwargs)
-    if val: val = MailFolderPtr(val)
+def MailFolder_OpenFolder(arg0,arg1,*args):
+    argl = map(None,args)
+    try: argl[0] = argl[0].this
+    except: pass
+    try: argl[1] = argl[1].this
+    except: pass
+    try: argl[2] = argl[2].this
+    except: pass
+    try: argl[3] = argl[3].this
+    except: pass
+    try: argl[4] = argl[4].this
+    except: pass
+    args = tuple(argl)
+    val = apply(MailFolderc.MailFolder_OpenFolder,(arg0,arg1.this,)+args)
+    val = MailFolderPtr(val)
     return val
 
 MailFolder_DeleteFolder = MailFolderc.MailFolder_DeleteFolder
 
-MailFolder_CreateFolder = MailFolderc.MailFolder_CreateFolder
-
-MailFolder_CanExit = MailFolderc.MailFolder_CanExit
-
-def MailFolder_ConvertMessageStatusToString(*_args, **_kwargs):
-    val = apply(MailFolderc.MailFolder_ConvertMessageStatusToString,_args,_kwargs)
-    if val: val = StringPtr(val); val.thisown = 1
+def MailFolder_CreateFolder(arg0,arg1,arg2,arg3,arg4):
+    val = MailFolderc.MailFolder_CreateFolder(arg0.this,arg1,arg2,arg3.this,arg4.this)
     return val
 
-MailFolder_Subscribe = MailFolderc.MailFolder_Subscribe
+def MailFolder_CanExit(arg0):
+    val = MailFolderc.MailFolder_CanExit(arg0.this)
+    return val
+
+def MailFolder_ConvertMessageStatusToString(arg0):
+    val = MailFolderc.MailFolder_ConvertMessageStatusToString(arg0)
+    val = StringPtr(val)
+    val.thisown = 1
+    return val
+
+def MailFolder_Subscribe(arg0,arg1,arg2,*args):
+    val = apply(MailFolderc.MailFolder_Subscribe,(arg0.this,arg1,arg2.this,)+args)
+    return val
 
 
 
