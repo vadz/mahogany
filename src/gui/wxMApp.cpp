@@ -148,7 +148,11 @@ wxMLogWindow::wxMLogWindow(wxFrame *pParent, const char *szTitle)
 {
    int x, y, w, h;
    wxMFrame::RestorePosition(LOG_FRAME_SECTION, &x, &y, &w, &h);
-   GetFrame()->SetSize(x, y, w, h);
+   wxFrame *frame = GetFrame();
+
+   frame->SetSize(x, y, w, h);
+   frame->SetIcon(ICON("MFrame"));
+
    m_hasWindow = true;
    Show();
 }

@@ -361,6 +361,8 @@ MDialog_ErrorMessage(const char *msg,
                      const char *title,
                      bool /* modal */)
 {
+   CloseSplash();
+
    wxMessageBox(msg, wxString("Mahogany : ") + title, Style(wxOK|wxICON_EXCLAMATION),
                 GetDialogParent(parent));
 }
@@ -420,6 +422,8 @@ MDialog_Message(const char *message,
    wxString caption = "Mahogany : ";
    caption += title;
 
+   CloseSplash();
+
    if ( configPath != NULL )
    {
       wxPMessageBox(configPath, message, caption,
@@ -450,6 +454,8 @@ MDialog_YesNoDialog(const char *message,
                     bool yesDefault,
                     const char *configPath)
 {
+   CloseSplash();
+
    wxString caption = "Mahogany : ";
    caption += title;
 
@@ -491,6 +497,8 @@ MDialog_FileRequester(String const & message,
                       bool save,
                       ProfileBase * /* profile */)
 {
+   CloseSplash();
+
    // VZ: disabling this code because it is almost useless now with the advent
    //     of wxPFileSelector()
 #if 0
@@ -530,6 +538,8 @@ int
 MDialog_AdbLookupList(ArrayAdbElements& aEntries,
                       const MWindow *parent)
 {
+   CloseSplash();
+
    wxArrayString aChoices;
    wxString strName, strEMail;
 

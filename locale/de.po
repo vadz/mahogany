@@ -1850,8 +1850,8 @@ msgid "Contents of help system..."
 msgstr "Inhaltsverzeichnis des Hilfesystems..."
 
 #: wxMenuDefs.cpp:316
-msgid "&Search Help"
-msgstr "&Suchen"
+msgid "&Search Help..."
+msgstr "&Suchen..."
 
 #: wxMenuDefs.cpp:316
 msgid "Search help system for keyword..."
@@ -3240,7 +3240,6 @@ msgstr ""
 "Sind Sie damit einverstanden? Falls Sie Nein wählen,\n"
 "werden alle neuen Nachrichten in INBOX verbleiben, und\n"
 "Sie müssen die Mailbox selbst prüfen."
-
 
 #: upgrade.cpp:445
 #, c-format

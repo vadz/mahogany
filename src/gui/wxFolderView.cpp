@@ -46,7 +46,6 @@
 #include "gui/wxMessageView.h"
 #include "gui/wxComposeView.h"
 
-#include "gui/wxIconManager.h"
 #include "gui/wxMIds.h"
 #include "MDialogs.h"
 #include "MHelp.h"

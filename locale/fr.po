@@ -1855,8 +1855,8 @@ msgid "Contents of help system..."
 msgstr "Afficher la table de matières de l'aide..."
 
 #: wxMenuDefs.cpp:316
-msgid "&Search Help"
-msgstr "&Rechercher dans l'aide"
+msgid "&Search Help..."
+msgstr "&Rechercher dans l'aide..."
 
 #: wxMenuDefs.cpp:316
 msgid "Search help system for keyword..."

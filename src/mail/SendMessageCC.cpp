@@ -496,13 +496,16 @@ SendMessageCC::Send(void)
       // notice that we _must_ assign the result to this string!
       host = READ_CONFIG(profile, MP_SMTPHOST);
       hostlist[0] = host;
+      DBGMESSAGE(("Trying to open connection to SMTP server '%s'", host.c_str()));
       stream = smtp_open ((char **)hostlist,NIL);
       break;
    case Prot_NNTP:
       // notice that we _must_ assign the result to this string!
       host = READ_CONFIG(profile, MP_NNTPHOST);
       hostlist[0] = host;
-      stream = nntp_open ((char **)hostlist,NIL); break;
+      DBGMESSAGE(("Trying to open connection to NNTP server '%s'", host.c_str()));
+      stream = nntp_open ((char **)hostlist,NIL);
+      break;
    }
 
    if (stream)

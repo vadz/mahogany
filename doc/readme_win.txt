@@ -1,5 +1,5 @@
 File: readme_win.txt, the README file for MS Windows version
-Date: 20.06.99
+Date: 26.06.99
 Version: the information in this file applies to alpha 0.23
 
 0. Requirments
@@ -22,10 +22,10 @@ Version: the information in this file applies to alpha 0.23
     programs" applet in the Control panel).
 
     Uninstallation note: all the mail boxes files created by the program will
-    be left even if you uninstall it. This means that at least the SentMail
-    and NewMail folders will be left in the installation directory and so it
-    will not be deleted during uninstallation. Please delete these files
-    manually if you really don't want to keep them.
+    be left even if you uninstall it. As by default they're created under the
+    installation directory, at least the SentMail and NewMail folders will be
+    left there and so it will not be deleted during uninstallation. Please
+    delete these files manually if you really don't want to keep them.
 
  b) you can also install Mahogany manually. This involves copying the main
     executable M.exe to any directory on your hard drive. The registry entries
@@ -54,7 +54,12 @@ Version: the information in this file applies to alpha 0.23
     documentation which may always be found at
        http://www.phy.hw.ac.uk/~karsten/Mahogany/doc/Manual/index.html.
 
-    The future versions of the program will include help in MS HTML format.
+    The future versions of the program will include help in MS HTML format and
+    the context-sensitive help will work too, of course.
+
+    Generally speaking, documentation is far from complete, so if you have any
+    questions please feel free to ask them on the Mahogany mailing lists (see
+    the help file for details on how subscribe to/access them)
 
  c) working off-line: there are no special support for off-line mode in
     Mahogany yet, but you may use it as off-line reader too.
@@ -87,3 +92,7 @@ the near future:
  c) converting of the online HTML help into Microsoft HTML help format.
 
  d) better support for working off-line
+
+ e) the icons are really ugly - we will improve them. If you would like to
+    help us design nice looking icons for Mahogany, any help would be greatly
+    appreciated!
