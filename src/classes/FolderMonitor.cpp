@@ -28,6 +28,8 @@
 #ifndef   USE_PCH
 #  include "Mcommon.h"
 #  include "Mdefaults.h"
+#  include "MEvent.h"
+#  include "MApplication.h"
 
 #  ifdef USE_DIALUP
 #     include "MApplication.h"  // for IsOnline()
