@@ -89,6 +89,7 @@ UPLOADWXGTK=no
 if [ -f /etc/debian_version ]
 then
   DEBIAN=yes
+  OSTYPE_ADDON="-Debian"
 else
   DEBIAN=no
 fi
@@ -96,6 +97,7 @@ fi
 if [ -f /etc/redhat-release ]
 then
   REDHAT=yes
+  OSTYPE_ADDON="-RedHat"
 else
   REDHAT=no
 fi
@@ -116,6 +118,7 @@ MCONFOPT="--with-modules=static"
 if [ `hostname` = bidean ]
 then
   OSTYPE=SunOS
+  OSTYPE_ADDON="-sparc"
 fi
 
 if [ "$OSTYPE" = "SunOS" ]
@@ -140,14 +143,14 @@ fi
 
 if [ `hostname` = ronnie ]
 then
-	PATH=$PATH:/usr/local/bin
+  PATH=$PATH:/usr/local/bin
 fi
 
-# our experimental web server / RH box
-if [ `hostname` = web.phy.hw.ac.uk ]
+# RH box
+if [ `hostname` = oxide.phy.hw.ac.uk ]
 then
   WXPREFIX=/usr
-  MPREFIX=$BUILDDIR/MOPT
+  MPREFIX=/tmp/MOPT
   SCP=scp1
 fi
 
@@ -184,6 +187,7 @@ $SCP $FTPLOCATION/buildoptions /tmp/makeM_deb.$$ && \
 
 
 echo "OSTYPE=$OSTYPE"
+echo "OSTYPE_ADDON=$OSTYPE_ADDON"
 echo "BUILDDIR=$BUILDDIR"
 echo "DEBIAN=$DEBIAN"
 echo "REDHAT=$REDHAT"
@@ -362,6 +366,34 @@ then
   fi
 fi
 
+############################
+## RedHat Linux
+############################
+if [ $REDHAT = yes ]
+then
+  echo "##################################################################"
+  echo "Building RedHat package"
+  echo "##################################################################"
+  cd $BUILDDIR && \
+  (cd $NAME-$VERSION && make allclean 2>/dev/null 2>&1 || true) && \
+#  $SCP $DOCSLOCATION $BUILDDIR/$NAME-$VERSION/doc && \
+  $SCP $FTPLOCATION/Mdocs.tar.gz $BUILDDIR/$NAME-$VERSION/doc && \
+  tar czf /usr/src/redhat/SOURCES/$NAME-$VERSION.tar.gz $NAME-$VERSION && \
+  cp $BUILDDIR/$NAME-$VERSION/extra/scripts/M.spec /usr/src/redhat/SPECS/M.spec && \
+  cp $BUILDDIR/$NAME-$VERSION/redhat/mahogany.gif /usr/src/redhat/SOURCES && \
+#  cp $BUILDDIR/$NAME-$VERSION/doc/Mdocs.tar.gz /usr/src/redhat/BUILD/$NAME-$VERSION/doc/ && \
+  cd /usr/src/redhat/ && \
+  rpm -ba SPECS/M.spec
+  if [ "$DOINSTALL" = "yes" ] ; then
+#        chown karsten.users RPMS/i386/$NAME*.rpm SRPMS/$NAME*.rpm
+#	  su -c "cp RPMS/i386/$NAME*.rpm $WWWDIR/" karsten && rm RPMS/i386/$NAME*.rpm
+#	  su -c "cp SRPMS/$NAME*.rpm /home/karsten/WWW/Mahogany/daily/" karsten && \
+#		rm SRPMS/$NAME*.rpm
+	  $SCP RPMS/i386/$NAME*.rpm $FTPLOCATION && rm RPMS/i386/$NAME*.rpm
+	  $SCP SRPMS/$NAME*.rpm $FTPLOCATION && rm SRPMS/$NAME*.rpm
+  fi
+fi
+
 ###########################
 # .tar.gz
 ###########################
@@ -396,8 +428,8 @@ then
     $SCP $FTPLOCATION/Mdocs.tar.gz $BUILDDIR/$NAME-$VERSION/doc/
   fi
   cd $BUILDDIR/$NAME-$VERSION && $MAKE install_all DESTDIR=$DESTDIR  >/dev/null && \
-  cd $DESTDIR && tar cvf $BUILDDIR/$NAME-$VERSION-$OSTYPE.tar * && \
-  gzip -f -9 $BUILDDIR/$NAME-$VERSION-$OSTYPE.tar
+  cd $DESTDIR && tar cvf $BUILDDIR/$NAME-$VERSION-$OSTYPE$OSTYPE_ADDON.tar * && \
+  gzip -f -9 $BUILDDIR/$NAME-$VERSION-$OSTYPE$OSTYPE_ADDON.tar
 
 else
   echo "Build of $NAME-$VERSION.tar.gz, failed."
@@ -407,35 +439,19 @@ if [ "$DOINSTALL" = "yes" ] ; then
 	(cd $BUILDDIR; $SCP $NAME-*.gz $FTPLOCATION) 
 fi
 
-############################
-## RedHat Linux
-############################
-if [ $REDHAT = yes ]
-then
-  echo "##################################################################"
-  echo "Building RedHat package"
-  echo "##################################################################"
-  cd $BUILDDIR && \
-  (cd $NAME-$VERSION && make allclean 2>/dev/null 2>&1 || true) && \
-#  $SCP $DOCSLOCATION $BUILDDIR/$NAME-$VERSION/doc && \
-  $SCP $FTPLOCATION/Mdocs.tar.gz $BUILDDIR/$NAME-$VERSION/doc && \
-  tar czf /usr/src/redhat/SOURCES/$NAME-$VERSION.tar.gz $NAME-$VERSION && \
-  cp $BUILDDIR/$NAME-$VERSION/extra/scripts/M.spec /usr/src/redhat/SPECS/M.spec && \
-  cp $BUILDDIR/$NAME-$VERSION/redhat/mahogany.gif /usr/src/redhat/SOURCES && \
-  cp $BUILDDIR/$NAME-$VERSION/doc/Mdocs.tar.gz /usr/src/redhat/BUILD/$NAME-$VERSION/doc/ && \
-  cd /usr/src/redhat/ && \
-  rpm -ba SPECS/M.spec
-  if [ "$DOINSTALL" = "yes" ] ; then
-        chown karsten.users RPMS/i386/$NAME*.rpm SRPMS/$NAME*.rpm
-	  su -c "cp RPMS/i386/$NAME*.rpm $WWWDIR/" karsten && rm RPMS/i386/$NAME*.rpm
-	  su -c "cp SRPMS/$NAME*.rpm /home/karsten/WWW/Mahogany/daily/" karsten && \
-		rm SRPMS/$NAME*.rpm
-	#  $SCP RPMS/i386/$NAME*.rpm $FTPLOCATION && rm RPMS/i386/$NAME*.rpm
-	#  $SCP SRPMS/$NAME*.rpm $FTPLOCATION && \
-	#	rm SRPMS/$NAME*.rpm
-  fi
-fi
 
+#######################################
+## Upload wxWindows shared lib to ftp
+#######################################
+if [ $DOSHARED = yes ]
+then
+  echo "Uploading wxWindows shared library to ftp server"
+  cd $WXPREFIX && \
+  tar cvf wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON.tar lib/libwx_gtk* && \
+  gzip -9 wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON.tar && \
+  $SCP wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON.tar $FTPLOCATION && \
+  rm -f wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON.tar
+fi
 
 ############################
 ## Upload wxWindows to ftp
