@@ -30,27 +30,18 @@ as the MailFolderCC.cpp code should take care of that itself.
 
 *** VZ: this is my notepad, don't add anything here, it's only for myself
 
-1. add MTempFolder.
 2. trailing ",0" in wxPTreeCtrl should probably be discarded?
 3. Subfolders dialog must
  a) disable itself until the folder retrieval is finished
  b) show the total number of subfolders
  c) show the progress dialog?
+ d) "find fast" text field
 *** end of VZ section
 
 
 
-5	VZ	we should really remember the folder tree state, i.e. reexpand
-		all branches which were open the last time, not just root
-		(it's annoying that all opened branches are closed when the
-		"show hidden" flag changes) - this is the job for wxPTreeCtrl
-
 5	VZ	should have a global list of all templates (identified either by
 		name or file name) and a dialog to choose among all of them
-
-9	VZ	properties dialog fails for INBOX and corrupts its
-		settings
-		"collect all mail" checkbox does not react immediately
 
 5	VZ	appending to log file (Log Window/Save) fails
 

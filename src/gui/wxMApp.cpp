@@ -312,13 +312,19 @@ wxMApp::OnAbnormalTermination()
 {
    MAppBase::OnAbnormalTermination();
 
+   static const char *msg =
+      gettext_noop("The application is terminating abnormally.\n"
+                   "Please report the bug to m-developers@makelist.com\n"
+                   "Thank you!");
+   static const char *title = gettext_noop("Fatal application error");
+
+   // using a plain message box is safer in this situation, but under Unix we
+   // have no such choice
 #ifdef __WXMSW__
-   ::MessageBox(NULL, _("The application is terminating abnormally.\n"
-                        "Please report the bug to m-developers@makelist.com\n"
-                        "Thank you!"),
-                "Fatal application error",
-                MB_ICONSTOP);
-#endif // MSW only for now
+   ::MessageBox(NULL, _(msg), _(title), MB_ICONSTOP);
+#else // !MSW
+   wxMessageBox(_(msg), _(title), wxICON_STOP | wxOK);
+#endif // MSW/!MSW
 }
 
 // can we close now?
@@ -432,6 +438,8 @@ wxMApp::DoExit()
 bool
 wxMApp::OnInit()
 {
+   wxHandleFatalExceptions();
+
    m_topLevelFrame = NULL;
    // Set up locale first, so everything is in the right language.
    bool hasLocale = false;
@@ -1004,9 +1012,9 @@ void
 wxMApp::UpdateOnlineDisplay(void)
 {
    // Can be called during  application startup, in this case do
-   // nothing: 
+   // nothing:
    if(! m_topLevelFrame)
-      return; 
+      return;
    wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
    wxMenuBar *mbar = m_topLevelFrame->GetMenuBar();
    ASSERT(sbar);
@@ -1057,7 +1065,7 @@ wxMApp::UpdateStatusBar(int nfields, bool isminimum) const
    int widths[SF_MAXIMUM];
    widths[0] = 100; //flexible
    widths[1] = 10; // small empty field
-   
+
 #if 0
    if(m_DialupSupport)
    {

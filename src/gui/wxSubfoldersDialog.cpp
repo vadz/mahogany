@@ -30,6 +30,8 @@
 
 #  include <wx/app.h>
 #  include <wx/statbox.h>
+#  include <wx/stattext.h>
+#  include <wx/textctrl.h>
 #  include <wx/layout.h>
 #endif
 
@@ -58,29 +60,22 @@ public:
    // called when [Ok] is pressed, may veto it
    virtual bool TransferDataFromWindow();
 
+   // callbacks
+   // ---------
+
    // event processing function
    virtual bool OnMEvent(MEventData& event);
 
+   // item selected in the tree
+   void OnTreeSelect(wxTreeEvent& event);
+
+   // events from "quick search" text control
+   void OnText(wxCommandEvent& event);
+
+   // called by wxFolderNameTextCtrl (see below)
+   bool OnComplete(wxTextCtrl *textctrl);
+
 private:
-   // the GUI controls
-   wxTreeCtrl *m_treectrl;
-
-   // the name of the folder whose subfolders we're enumerating
-   String m_folderPath;
-
-   // the type of the folders we're enumerating
-   FolderType m_folderType;
-
-   // and the folder itself
-   MFolder *m_folder;
-
-   // returns the separator of the folder name components
-   char GetFolderNameSeparator() const
-   {
-      return (m_folderType == MF_NNTP) || (m_folderType == MF_NEWS) ? '.'
-                                                                    : '/';
-   }
-
    // helper function used to populate the tree with folders
    // ------------------------------------------------------
 
@@ -98,17 +93,122 @@ private:
    // of the tree
    void OnNoMoreFolders();
 
+   // helper functions for "quick search" text control
+   // ------------------------------------------------
+
+   // selects the folder corresponding to the given path
+   void SelectRecursively(const wxString& path);
+
+   // the GUI controls
+   // ----------------
+
+   wxStaticBox *m_box;
+   wxTreeCtrl *m_treectrl;
+   wxStaticText *m_msgBusy;
+   wxTextCtrl *m_textFind;
+
+   // the variables used for "quick search"
+   bool m_settingFromProgram;    // notification comes from program, not user
+   wxString m_completion;        // TAB completion for the current item
+
+   // the name of the folder whose subfolders we're enumerating
+   String m_folderPath;
+
+   // the type of the folders we're enumerating
+   FolderType m_folderType;
+
+   // and the folder itself
+   MFolder *m_folder;
+
+   // returns the separator of the folder name components
+   char GetFolderNameSeparator() const
+   {
+      return (m_folderType == MF_NNTP) || (m_folderType == MF_NEWS) ? '.'
+                                                                    : '/';
+   }
+
    // MEventReceiver cookie for the event manager
    void *m_regCookie;
+
+   // total number of subfolders
+   size_t m_nSubfolders;
+
+   DECLARE_EVENT_TABLE()
+};
+
+// helper wxTextCtrl class which forwards to us TABs it gets
+class wxFolderNameTextCtrl : public wxTextCtrl
+{
+public:
+   // ctor
+   wxFolderNameTextCtrl(wxSubscriptionDialog *dialog)
+      : wxTextCtrl(dialog, -1, "",
+                   wxDefaultPosition, wxDefaultSize,
+                   wxTE_PROCESS_TAB)
+   {
+      m_dialog = dialog;
+   }
+
+   // callbacks
+   void OnChar(wxKeyEvent& event);
+
+private:
+   wxSubscriptionDialog *m_dialog;
+
+   DECLARE_EVENT_TABLE()
 };
 
 // ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
 
+BEGIN_EVENT_TABLE(wxFolderNameTextCtrl, wxTextCtrl)
+   EVT_CHAR(wxFolderNameTextCtrl::OnChar)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxSubscriptionDialog, wxManuallyLaidOutDialog)
+   EVT_TEXT(-1, wxSubscriptionDialog::OnText)
+   EVT_TREE_SEL_CHANGED(-1, wxSubscriptionDialog::OnTreeSelect)
+END_EVENT_TABLE()
+
 // ============================================================================
 // implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// wxFolderNameTextCtrl
+// ----------------------------------------------------------------------------
+
+void wxFolderNameTextCtrl::OnChar(wxKeyEvent& event)
+{
+   ASSERT( event.GetEventObject() == this ); // how can we get anything else?
+
+   // we're only interested in TABs and only it's not a second TAB in a row
+   if ( event.KeyCode() == WXK_TAB )
+   {
+      if ( IsModified() &&
+           !event.ControlDown() && !event.ShiftDown() && !event.AltDown() )
+      {
+         // mark control as being "not modified" - if the user presses TAB
+         // the second time go to the next window immediately after having
+         // expanded the entry
+         DiscardEdits();
+
+         if ( m_dialog->OnComplete(this) )
+         {
+            // text changed
+            return;
+         }
+         //else: process normally
+      }
+      //else: nothing because we're not interested in Ctrl-TAB, Shift-TAB &c -
+      //      and also in the TABs if the last one was already a TAB
+   }
+
+   // let the text control process it normally: if it's a TAB this will make
+   // the focus go to the next window
+   event.Skip();
+}
 
 // ----------------------------------------------------------------------------
 // wxSubscriptionDialog
@@ -127,31 +227,65 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent, MFolder *folder)
    m_folderPath = folder->GetPath();
    m_folderType = folder->GetType();
 
+   m_nSubfolders = 0;
+   m_settingFromProgram = false;
+
    wxString title;
    title.Printf(_("Subfolders of folder '%s'"), folder->GetFullName().c_str());
    SetTitle(title);
 
    // create controls
    wxLayoutConstraints *c;
-   wxStaticBox *box = CreateStdButtonsAndBox(_("Subfolders"));
+   m_box = CreateStdButtonsAndBox(""); // label will be set later
+
+   // first create the label, then the text control - we rely on it in
+   // OnNoMoreFolders()
+   wxStaticText *label = new wxStaticText(this, -1, _("&Find: "));
+   c = new wxLayoutConstraints;
+   c->width.AsIs();
+   c->height.AsIs();
+   c->left.SameAs(m_box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->bottom.SameAs(m_box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   label->SetConstraints(c);
+
+   m_textFind = new wxFolderNameTextCtrl(this);
+   c = new wxLayoutConstraints;
+   c->height.AsIs();
+   c->left.RightOf(label, LAYOUT_X_MARGIN);
+   c->right.SameAs(m_box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->bottom.SameAs(m_box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   m_textFind->SetConstraints(c);
 
    m_treectrl = new wxTreeCtrl(this, -1,
                                wxDefaultPosition, wxDefaultSize,
-                              wxTR_HAS_BUTTONS |
-                              wxBORDER |
-                              wxTR_MULTIPLE);
+                               wxTR_HAS_BUTTONS |
+                               wxBORDER |
+                               wxTR_MULTIPLE);
    c = new wxLayoutConstraints;
-   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
-   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   c->top.SameAs(m_box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->left.SameAs(m_box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(m_box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->bottom.SameAs(m_textFind, wxTop, 2*LAYOUT_Y_MARGIN);
    m_treectrl->SetConstraints(c);
 
-   // don't allow to do anything with it until all foders are retrieved
-   // (reenabled in OnNoMoreFolders)
-   m_treectrl->Disable();
+   // to avoid flicker, initially hide the tree ctrl and show some text
+   // instead
+   m_treectrl->Hide();
 
-   SetDefaultSize(6*hBtn, 4*wBtn);
+   // create a temp static text to occupy the place of the tree control
+   m_msgBusy = new wxStaticText(this, -1, _("Retrieving the folder list..."));
+   c = new wxLayoutConstraints;
+   c->top.SameAs(m_treectrl, wxTop);
+   c->left.SameAs(m_treectrl, wxLeft);
+   c->right.SameAs(m_treectrl, wxRight);
+   c->bottom.SameAs(m_treectrl, wxBottom);
+   m_msgBusy->SetConstraints(c);
+
+   // don't allow to do anything until all foders are retrieved (reenabled in
+   // OnNoMoreFolders)
+   Disable();
+
+   SetDefaultSize(6*hBtn, 5*wBtn);
 }
 
 wxSubscriptionDialog::~wxSubscriptionDialog()
@@ -159,6 +293,146 @@ wxSubscriptionDialog::~wxSubscriptionDialog()
    m_folder->DecRef();
 
    MEventManager::Deregister(m_regCookie);
+}
+
+void wxSubscriptionDialog::SelectRecursively(const wxString& path)
+{
+   size_t len = m_folderPath.length();
+   if ( wxStrncmp(path, m_folderPath, len) != 0 )
+   {
+      // invalid path anyhow
+      return;
+   }
+
+   char sep = GetFolderNameSeparator();
+   wxString name;
+   if ( !m_folderPath )
+   {
+      // this happens when enumerating all MH subfolders
+      name = path;
+   }
+   else // normal case of non empty m_folderPath
+   {
+      size_t ofs = len;
+      if ( (path.length() > len) && (path[len] == sep) )
+      {
+         // +1 for trailing separator
+         ofs++;
+      }
+
+      name = path.c_str() + ofs;
+   }
+
+   // newsgroup names are not case sensitive, MH folder names are
+   bool withCase = sep == '.' ? false : true;
+
+   m_completion = m_folderPath;
+   if ( !!m_completion )
+      m_completion += sep;
+
+   wxTreeItemId item = m_treectrl->GetRootItem();
+   wxStringTokenizer tk(name, sep);
+   while ( item.IsOk() && tk.HasMoreTokens() )
+   {
+      // find the child with the given name
+      wxString component = tk.GetNextToken();
+
+      if ( !component )
+      {
+         // invalid folder name entered by user
+         break;
+      }
+
+      // here is the idea: suppose we have the following children under the
+      // current item: bar, foo, foobar, moo. Then:
+      //
+      // typing 'b'           should select 'bar'
+      //        'c'                         nothing at all
+      //        'f'                         'foo'
+      //        'foo'                       'foo'
+      //        'foob'                      'foobar'
+      //
+      // to implement this we first find an item which matches the first
+      // letter of component, then one which matches 2 first letters, ...
+      //
+      // if, and only if, we can match the entire string, we should continue
+      // with the rest of the path - otherwise we set item to be invalid and
+      // bail out of the enclosing loop
+      wxTreeItemId itemLastMatched;
+      len = component.length();
+      for ( size_t n = 0; n < len; n++ )
+      {
+         wxTreeItemId itemNew;
+         wxString subStr = component.Left(n + 1);
+
+         long cookie;
+         wxTreeItemId child = m_treectrl->GetFirstChild(item, cookie);
+         while ( child.IsOk() )
+         {
+            wxString label = m_treectrl->GetItemText(child);
+            int rc = withCase ? subStr.Cmp(label) : subStr.CmpNoCase(label);
+
+            if ( rc == 0 )
+            {
+               // we match this item, but may be we will match the next one
+               // too: remember that we match and continue
+               itemNew = child;
+            }
+            else if ( rc < 0 )
+            {
+               // we won't match anything any more later, so just check
+               // whether we should continue or not
+               if ( wxStrncmp(subStr, label, n + 1) == 0 )
+               {
+                  // we should select this item
+                  itemNew = child;
+               }
+
+               break;
+            }
+
+            child = m_treectrl->GetNextChild(item, cookie);
+         }
+
+         if ( !itemNew )
+         {
+            // no need to continue with longer substrings if we couldn't match
+            // a shorter one
+            break;
+         }
+
+         itemLastMatched = itemNew;
+      }
+
+      // stop here if we couldn't match anything ...
+      item = itemLastMatched;
+      if ( !item.IsOk() )
+      {
+         break;
+      }
+
+      m_completion << m_treectrl->GetItemText(item) << sep;
+
+      // ... or matched only a substring (and not the entire component)
+      if ( m_treectrl->GetItemText(item) != component )
+      {
+         break;
+      }
+   }
+
+   if ( item.IsOk() )
+   {
+      m_settingFromProgram = true;
+
+      m_treectrl->SelectItem(item);
+
+      // won't do any harm even if it doesn't have children
+      m_treectrl->Expand(item);
+
+      m_treectrl->EnsureVisible(item);
+
+      m_settingFromProgram = false;
+   }
 }
 
 void wxSubscriptionDialog::InsertRecursively(const String& path)
@@ -192,7 +466,7 @@ void wxSubscriptionDialog::InsertRecursively(const String& path)
                  "folder name separator expected in the folder name" );
 
       // +1 for trailing separator
-      name = path.c_str() + m_folderPath.length() + 1;
+      name = path.c_str() + len + 1;
    }
 
    // note: in some cases (NNTP) cclient will not return the root folder, in
@@ -266,6 +540,8 @@ wxTreeItemId wxSubscriptionDialog::InsertInOrder(wxTreeItemId parent,
 
 void wxSubscriptionDialog::OnNewFolder(String& name)
 {
+   m_nSubfolders++;
+
    // remove trailing backslashes if any
    size_t len = name.length();
    while ( len > 0 && name[len - 1] == '/' )
@@ -282,17 +558,30 @@ void wxSubscriptionDialog::OnNewFolder(String& name)
 
 void wxSubscriptionDialog::OnNoMoreFolders()
 {
+   Enable();
+
    // expand the root or add it if it's not there
    wxTreeItemId root = m_treectrl->GetRootItem();
    if ( root.IsOk() )
    {
       m_treectrl->Expand(root);
-      m_treectrl->Enable();
+      m_textFind->SetValue(m_folderPath);
+
+      m_box->SetLabel(wxString::Format(_("%u subfolders"), m_nSubfolders));
    }
    else
    {
-      m_treectrl->AddRoot(_("No subfolders"));
+      m_treectrl->Disable();
+      m_textFind->Disable();
+      wxWindow *label = FindWindow(PrevControlId(m_textFind->GetId()));
+      if ( label )
+         label->Disable();
+
+      m_box->SetLabel(_("No subfolders"));
    }
+
+   m_msgBusy->Hide();
+   m_treectrl->Show();
 }
 
 // needed to be able to use DECLARE_AUTOREF() macro
@@ -347,10 +636,57 @@ bool wxSubscriptionDialog::OnMEvent(MEventData& event)
       }
    }
 
-   wxYield(); // FIXME: is this safe?
-
    // we don't want anyone else to receive this message - it was for us only
    return FALSE;
+}
+
+void wxSubscriptionDialog::OnTreeSelect(wxTreeEvent& event)
+{
+   if ( !m_settingFromProgram )
+   {
+      wxTreeItemId item = event.GetItem();
+      if ( item.IsOk() )
+      {
+         m_settingFromProgram = true;
+         m_textFind->SetValue(m_treectrl->GetItemText(item));
+         m_settingFromProgram = false;
+      }
+   }
+}
+
+void wxSubscriptionDialog::OnText(wxCommandEvent& event)
+{
+   if ( event.GetEventObject() == m_textFind )
+   {
+      if ( !m_settingFromProgram )
+      {
+         SelectRecursively(event.GetString());
+      }
+   }
+   else
+   {
+      // ignore
+      event.Skip();
+   }
+}
+
+bool wxSubscriptionDialog::OnComplete(wxTextCtrl *textctrl)
+{
+   if ( !!m_completion )
+   {
+      m_settingFromProgram = true;
+
+      textctrl->SetValue(m_completion);
+      m_completion.clear();
+
+      m_settingFromProgram = false;
+
+      return true;
+   }
+   else
+   {
+      return false;
+   }
 }
 
 bool wxSubscriptionDialog::TransferDataFromWindow()

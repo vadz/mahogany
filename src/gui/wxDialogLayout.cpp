@@ -326,10 +326,10 @@ void wxEnhancedPanel::SetTopConstraint(wxLayoutConstraints *c,
 // create a text entry with some browse button
 wxTextCtrl *
 wxEnhancedPanel::CreateEntryWithButton(const char *label,
-                                          long widthMax,
-                                          wxControl *last,
-                                          wxEnhancedPanel::BtnKind kind,
-                                          wxTextBrowseButton **ppButton)
+                                       long widthMax,
+                                       wxControl *last,
+                                       wxEnhancedPanel::BtnKind kind,
+                                       wxTextBrowseButton **ppButton)
 {
    // create the label and text zone, as usually
    wxTextCtrl *text = CreateTextWithLabel(label, widthMax, last,
@@ -358,6 +358,10 @@ wxEnhancedPanel::CreateEntryWithButton(const char *label,
 
       case ColorBtn:
          btn = new wxColorBrowseButton(text, GetCanvas());
+         break;
+
+      case FolderBtn:
+         btn = new wxFolderBrowseButton(text, GetCanvas());
          break;
 
       default:

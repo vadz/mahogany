@@ -31,6 +31,7 @@ class WXDLLEXPORT wxListBox;
 class WXDLLEXPORT wxCheckBox;
 class WXDLLEXPORT wxFileBrowseButton;
 class WXDLLEXPORT wxFileOrDirBrowseButton;
+class WXDLLEXPORT wxFolderBrowseButton;
 class WXDLLEXPORT wxIconBrowseButton;
 class WXDLLEXPORT wxTextBrowseButton;
 class WXDLLEXPORT wxStaticBitmap;
@@ -400,6 +401,18 @@ public:
                                    wxControl *last,
                                    wxIconBrowseButton *btnIcon);
 
+      // create a text control with a browse button allowing to browse for
+      // folders
+   wxTextCtrl *CreateFolderEntry(const char *label,
+                                 long widthMax,
+                                 wxControl *last,
+                                 wxFolderBrowseButton **ppButton = NULL)
+   {
+      return CreateEntryWithButton(label, widthMax, last,
+                                   FolderBtn,
+                                   (wxTextBrowseButton **)ppButton);
+   }
+
    // UpdateUI helpers: enable disable several controls at once
    //
    // NB: these functions assume that control ids are consecutif,
@@ -458,7 +471,8 @@ private:
       FileOrDirNewBtn,     // choose any file or directory
       FileOrDirSaveBtn,    // save to a file or directory
 
-      ColorBtn             // choose a colour
+      ColorBtn,            // choose a colour
+      FolderBtn            // choose a folder
    };
 
    // return the right btn type for the given "base" type and parameters
