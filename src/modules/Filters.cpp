@@ -2380,8 +2380,8 @@ static String AddressFromFreeStyleHeader(const String &in)
    for( size_t at = in.find(_T('@')); at != String::npos;
       at = in.find(_T('@'),at+1) )
    {
-      size_t begin;
-      for( begin = at; begin > 0; --begin )
+      size_t begin = at;
+      for(;;)
       {
          if( !IsSaneAddressCharacter(in[begin])
             || begin < at && in[begin] == _T('@') )
@@ -2389,10 +2389,13 @@ static String AddressFromFreeStyleHeader(const String &in)
             ++begin;
             break;
          }
+         if( begin == 0 )
+            break;
+         --begin;
       }
 
-      size_t end;
-      for( end = at; end < in.size(); ++end )
+      size_t end = at;
+      for(;;)
       {
          if( !IsSaneAddressCharacter(in[end])
             || end > at && in[end] == _T('@') )
@@ -2400,6 +2403,9 @@ static String AddressFromFreeStyleHeader(const String &in)
             --end;
             break;
          }
+         if( end == in.size()-1 )
+            break;
+         ++end;
       }
       
       if( begin < at && at < end )
@@ -2510,13 +2516,16 @@ static String SanitizeWhitelistedAddress(const String &in,size_t header)
    {
    case AddressMessStandard:
       out = in;
+      break;
 
    case AddressMessUrl:
       out = FilterAddressList(in);
+      break;
 
    case AddressMessGarbage:
    case AddressMessUnknown:
       out = AddressFromFreeStyleHeader(in);
+      break;
    }
    
    return out;
