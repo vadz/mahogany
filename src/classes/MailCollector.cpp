@@ -67,9 +67,11 @@ public:
       }
    virtual inline bool OnMEvent(MEventData& event)
       {
+#if 0
          STATUSMESSAGE(( _("Checking for new mail...")));
          m_MC->Collect();
          STATUSMESSAGE(( _("Checking for new mail... done.")));
+#endif
          return true;
       }
 private:
