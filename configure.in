@@ -454,12 +454,18 @@ dnl If we have a libshadow, link with it. I am not sure whether we
 dnl really need this.
 AC_CHECK_LIB(shadow,main)
 
-dnl libresolv or libbind
+dnl libresolv or libbind (or simply libc under FreeBSD)
 USE_RBL=1
 AC_CHECK_LIB(resolv,res_init,,
 	AC_CHECK_LIB(bind,res_init,,
-		[AC_MSG_WARN(cannot use RBL spam checker.)
-		USE_RBL=0 ] ))
+      AC_CHECK_LIB(c,res_init,,
+         [
+            AC_MSG_WARN(cannot use RBL spam checker.)
+            USE_RBL=0
+         ]
+      )
+   )
+)
 case "$USE_RBL" in 1) AC_DEFINE(USE_RBL) ;; esac
 
 dnl POSIX.2 regexp support
