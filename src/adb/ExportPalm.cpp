@@ -147,7 +147,7 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
 {
    /*
      The format:
-     "category name";["address type";]"lastname","firstname","title","company",
+     "category name";["address type";]"lastname","firstname","title","company","",
      "phone type";"phone1",
      "phone type";"phone1",
      "phone type";"phone1",
@@ -189,6 +189,8 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
    if(tmp.Length()) val << ' ' << tmp;
    s << '"' << EscapeQuotes(val) << "\",";
    ADD(AdbField_Organization);
+
+   s << "\"\","; // unknown field after company
    s << "\"E-mail\";"; ADD(AdbField_EMail);
    s << "\"Home\";"; ADD(AdbField_H_Phone);
    s << "\"Fax\";"; ADD(AdbField_H_Fax);

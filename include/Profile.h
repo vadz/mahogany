@@ -179,6 +179,13 @@ public:
 /*     virtual const String GetPath() const = 0;
 */
 
+   /// Set temporary/suspended operation.
+   virtual void Suspend(void) = 0;
+   /// Commit changes from suspended mode.
+   virtual void Commit(void) = 0;
+   /// Discard changes from suspended mode.
+   virtual void Discard(void) = 0;
+
    /// is this profile a (grand) parent of the given one?
    virtual bool IsAncestor(ProfileBase *profile) const = 0;
 

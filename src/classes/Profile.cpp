@@ -57,6 +57,10 @@
 ///  will never conflict with a real profile name
 #define   PROFILE_EMPTY_NAME "EMPTYPROFILE?(*[]{}"
 
+/** Name for the subgroup level used for suspended profiles. Must
+    never appear as part of a profile path name. */
+#define SUSPEND_PATH "__suspended__" 
+
 #ifdef DEBUG
    // there are t many of profile trace messages - filter them. They won't
    // appear by default, if you do want them change the wxLog::ms_ulTraceMask
@@ -149,6 +153,18 @@ public:
          m_ProfilePath = "";
       }
 
+   /// Set temporary/suspended operation.
+   virtual void Suspend(void)
+      {
+         PCHECK();
+         ASSERT(m_Suspended == false);
+         m_Suspended = true;
+      }
+   /// Commit changes from suspended mode.
+   virtual void Commit(void);
+   /// Discard changes from suspended mode.
+   virtual void Discard(void);
+
    MOBJECT_DEBUG(Profile)
 
    virtual bool IsAncestor(ProfileBase *profile) const;
@@ -172,6 +188,8 @@ private:
    GCC_DTOR_WARN_OFF();
    /// this is an empty dummy profile, readonly
    bool     m_IsEmpty;
+   /// Is the profile operating in suspended mode?
+   bool m_Suspended;
 };
 //@}
 
@@ -390,6 +408,7 @@ Profile::Profile(const String & iName, ProfileBase const *Parent)
    if(iName.Length())
       m_ProfileName << '/' << iName;
    m_IsEmpty = false;
+   m_Suspended = false;
 }
 
 
@@ -410,6 +429,9 @@ Profile::CreateEmptyProfile(ProfileBase const *parent)
 Profile::~Profile()
 {
    ASSERT(this != mApplication->GetProfile());
+
+   ASSERT(! m_Suspended); // probably an application error, flag it
+   if(m_Suspended) Discard(); // but we tidy up, no big deal
 }
 
 ProfileBase *
@@ -468,12 +490,23 @@ Profile::readEntry(const String & key, const String & def, bool * found) const
    ms_GlobalConfig->SetPath(GetName());
 
    String keypath;
+
    if(m_ProfilePath.Length())
       keypath << m_ProfilePath << '/';
-   keypath << key;
-   String str;
 
-   bool foundHere = ms_GlobalConfig->Read(keypath,&str, def);
+   String str, localpath;
+   if(m_Suspended)
+   {
+      localpath << SUSPEND_PATH << '/' << key;
+      if(m_ProfilePath.Length())
+         localpath << m_ProfilePath << '/';
+   }
+
+   keypath << key;
+   bool foundHere= ms_GlobalConfig->Read(m_Suspended ?
+                                         localpath : keypath,
+                                         &str, def);
+
    bool foundAnywhere = foundHere;
    while ( !foundAnywhere &&
            (ms_GlobalConfig->GetPath() != M_PROFILE_CONFIG_SECTION) )
@@ -494,12 +527,19 @@ Profile::readEntry(const String & key, long def, bool * found) const
    PCHECK();
 
    ms_GlobalConfig->SetPath(GetName());
-   String keypath;
+   String keypath, localpath;
    if(m_ProfilePath.Length())
       keypath << m_ProfilePath << '/';
+   if(m_Suspended)
+   {
+      localpath << SUSPEND_PATH << '/' << key;
+      if(m_ProfilePath.Length())
+         keypath << m_ProfilePath << '/';
+   }
    keypath << key;
    long val;
-   bool foundHere = ms_GlobalConfig->Read(keypath,&val,def);
+   bool foundHere = ms_GlobalConfig->Read(m_Suspended ?
+                                          localpath : keypath,&val,def);
    bool foundAnywhere = foundHere;
    while ( !foundAnywhere &&
            (ms_GlobalConfig->GetPath() != M_PROFILE_CONFIG_SECTION) )
@@ -521,6 +561,8 @@ Profile::writeEntry(const String & key, const String & value)
    if(m_IsEmpty) return false;
    ms_GlobalConfig->SetPath(GetName());
    String keypath;
+   if(m_Suspended)
+      keypath << SUSPEND_PATH << '/';
    if(m_ProfilePath.Length())
       keypath << m_ProfilePath << '/';
    keypath << key;
@@ -534,12 +576,71 @@ Profile::writeEntry(const String & key, long value)
    if(m_IsEmpty) return false;
    ms_GlobalConfig->SetPath(GetName());
    String keypath;
+   if(m_Suspended)
+      keypath << SUSPEND_PATH << '/';
    if(m_ProfilePath.Length())
       keypath << m_ProfilePath << '/';
    keypath << key;
    return ms_GlobalConfig->Write(keypath, (long) value);
 }
 
+
+void
+Profile::Commit(void)
+{
+   PCHECK();
+   ASSERT(m_Suspended == true);
+   ms_GlobalConfig->SetPath(GetName());
+
+   String truePath, suspPath;
+   if(m_ProfilePath)
+      truePath << m_ProfilePath << '/';
+   suspPath = truePath;
+   suspPath << SUSPEND_PATH << '/';
+   ms_GlobalConfig->SetPath(suspPath);
+
+
+   String strValue;
+   long   numValue;
+   
+   long index;
+   String name;
+   bool cont = ms_GlobalConfig->GetFirstEntry(name, index);
+   while(cont)
+   {
+      if(ms_GlobalConfig->Read(name, &strValue)) // try to read it as a string
+      {
+         bool rc = ms_GlobalConfig->Write(truePath+name, strValue);
+         ASSERT(rc);
+      }
+      else if(ms_GlobalConfig->Read(name, &numValue)) // it MUST be a number then!
+      {
+         bool rc = ms_GlobalConfig->Write(truePath+name, numValue);
+         ASSERT(rc);
+      }
+      else
+      {
+         ASSERT(0); // neither a string nor a number -> impossible!
+      }
+      cont = ms_GlobalConfig->GetNextEntry(name, index);
+   }
+   Discard(); // now we just forget the suspended sub-group
+}
+
+void
+Profile::Discard(void)
+{
+   PCHECK();
+   ASSERT(m_Suspended == true);
+   String path;
+   ms_GlobalConfig->SetPath(GetName());
+   if(m_ProfilePath)
+      path << m_ProfilePath << '/';
+   path << SUSPEND_PATH;
+   bool success = ms_GlobalConfig->DeleteGroup(path);
+   ASSERT(success);
+   m_Suspended = false;
+}
 
 #ifdef DEBUG
 String

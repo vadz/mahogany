@@ -9,18 +9,12 @@ $Id$
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
 
-9		crash after going online?
-
 9		wxLayout PS printing text overlaps as font sizes are
 		wrong. Install different AFM set?
 
 
 3		wxDialUpManager ping method is broken and does not
 		work, need source code of ping command.
-
-9	KB	implement temporary/fake Profile mode
-		--> add Suspend()/Discard()/Commit() methods to normal 
-		    profile which work with a temporary subgroup
 
 9	KB	wxLayout:
 		- speed up by only running Layout() for recalculations 
@@ -573,6 +567,13 @@ VZ: wouldn't an ifdef alone be enough (you can already grep for it...)?
 - creation of separate index files for mail folders
 
 - compressed mail folders / possibly together with index files
+
+
+
+DONE - TO BE TESTED:
+9	KB	implement temporary/fake Profile mode
+		--> add Suspend()/Discard()/Commit() methods to normal 
+		    profile which work with a temporary subgroup
 
 
 vi: set si ts=8 sw=8 noet nolist tw=80:
