@@ -211,6 +211,8 @@
 
 /// Which encryption algorithm to use : 0 = simple builtin, 1 = twofish
 #define MP_CRYPTALGO    "CryptAlgo"
+/// some test data
+#define MP_CRYPT_TESTDATA "CryptData"
 /// the locale for translation to national languages
 #define   MP_LOCALE               "Locale"
 /// the default character set
@@ -779,7 +781,9 @@
 #endif // Unix/!Unix
 
 /// Which encryption algorithm to use : 0 = simple builtin, 1 = twofish
-#define MP_CRYPTALGO_D   0
+#define MP_CRYPTALGO_D   0L
+/// some test data
+#define MP_CRYPT_TESTDATA_D ""
 /// the locale for translation to national languages
 #define   MP_LOCALE_D               M_EMPTYSTRING
 /// the default character set

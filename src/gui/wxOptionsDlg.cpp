@@ -105,7 +105,9 @@ enum ConfigFields
    ConfigField_VCardFile,
    ConfigField_UserLevelHelp,
    ConfigField_UserLevel,
-   ConfigField_IdentLast = ConfigField_UserLevel,
+   ConfigField_SetPassword,
+   
+   ConfigField_IdentLast = ConfigField_SetPassword,
 
    // network
    ConfigField_NetworkFirst = ConfigField_IdentLast,
@@ -590,6 +592,11 @@ END_EVENT_TABLE()
 BEGIN_EVENT_TABLE(wxOptionsPageFolders, wxOptionsPage)
 END_EVENT_TABLE()
 
+BEGIN_EVENT_TABLE(wxOptionsPageIdent, wxOptionsPage)
+   // buttons invoke subdialogs
+   EVT_BUTTON(-1, wxOptionsPageIdent::OnButton)
+END_EVENT_TABLE()
+
 BEGIN_EVENT_TABLE(wxOptionsPageOthers, wxOptionsPage)
    EVT_BUTTON(-1, wxOptionsPageOthers::OnButton)
 END_EVENT_TABLE()
@@ -628,6 +635,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "`advanced' user mode which may be set here."),
                                                    Field_Message | Field_Global,   -1,                        },
    { gettext_noop("User &level:novice:advanced"),  Field_Combo | Field_Global,   -1,                        },
+   { gettext_noop("Set &global password"),  Field_SubDlg | Field_Global, -1,},
 
    // network
    { gettext_noop("The following fields are used as default values for the\n"
@@ -921,6 +929,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_VCARD),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_USERLEVEL),
+   CONFIG_NONE(),
 
    // network
    CONFIG_NONE(),
@@ -2036,6 +2045,20 @@ wxOptionsPageIdent::wxOptionsPageIdent(wxNotebook *parent,
                                   ConfigField_IdentLast,
                                   MH_OPAGE_IDENT)
 {
+}
+
+void wxOptionsPageIdent::OnButton(wxCommandEvent& event)
+{
+   wxObject *obj = event.GetEventObject();
+   if ( obj == GetControl(ConfigField_SetPassword) )
+   {
+      (void) PickGlobalPasswdDialog(m_Profile, this);
+   }
+   else
+   {
+      FAIL_MSG("click from alien button in compose view page");
+      event.Skip();
+   }
 }
 
 // ----------------------------------------------------------------------------

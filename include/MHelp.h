@@ -60,7 +60,7 @@
 #define MH_DIALOG_FOLDER_FILTERS    4262
 #define MH_DIALOG_QUICK_FILTERS    4263
 #define MH_DIALOG_LICENSE    4270
-
+#define MH_DIALOG_GLOBALPASSWD 4280
 #define MH_PYTHON            5000
 
 /** All modules related help should be from this value on and be

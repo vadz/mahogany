@@ -309,8 +309,8 @@ strutil_extract_formatspec(const char *format)
    // TODO doesn't recognize all possible formats nor backslashes (!)
    String specs;
    while ( *format != '\0' ) {
-      if ( *format == '%' ) {
-         // skip flags, width and precision which may optionally follow '%'
+      if ( *format == '-' ) {
+         // skip flags, width and precision which may optionally follow '-'
          while ( !isalpha(*format) )
             format++;
 
@@ -718,13 +718,13 @@ int TwoFishCrypt(
 
 static String gs_GlobalPassword;
 static bool strutil_has_twofish = false;
-static bool gs_UseGlobalPasswd = TRUE;
 
 static void
 setup_twofish(void)
 {
-   if(gs_UseGlobalPasswd && gs_GlobalPassword.Length() == 0)
+   if(gs_GlobalPassword.Length() == 0)
    {
+#if 0
       MDialog_Message(
          _("Mahogany uses a global password to protect sensitive\n"
            "information in your configuration files.\n\n"
@@ -737,21 +737,30 @@ setup_twofish(void)
          NULL,
          _("Global Password"),
          GetPersMsgBoxName(M_MSGBOX_EXPLAIN_GLOBALPASSWD));
-      if(! MInputBox(&gs_GlobalPassword,
-                     _("Global Password:"),
-                     _("Please enter your global Mahogany password:"),
-                     NULL,NULL,NULL,TRUE))
+#endif
+      bool retry;
+      do
       {
-         gs_UseGlobalPasswd = FALSE;
-      }
-      else
-         gs_UseGlobalPasswd = TRUE;
+         MInputBox(&gs_GlobalPassword,
+                   _("Global Password:"),
+                   _("Please enter the global password:"),
+                   NULL,NULL,NULL,TRUE);
+         wxString testdata =
+            strutil_decrypt(READ_APPCONFIG(MP_CRYPT_TESTDATA));
+         if(testdata != "TESTDATA")
+         {
+            retry = MDialog_YesNoDialog(_("The password is wrong.\nDo you want to try again?"),
+                                        NULL, MDIALOG_YESNOTITLE, true);
+         }
+         else
+            retry = FALSE;
+      }while(retry);
    }
 }
 
 /*
  * All encrypted data is hex numbers. To distinguish between strong
- * and weak data, we prefix the strong encryption with a '%'.
+ * and weak data, we prefix the strong encryption with a '-'.
  */
 String
 strutil_encrypt_tf(const String &original)
@@ -759,12 +768,12 @@ strutil_encrypt_tf(const String &original)
    setup_twofish();
    CryptData input(original);
    CryptData output;
-   int rc = TwoFishCrypt(1,256,gs_GlobalPassword, &input,&output);
+   int rc = TwoFishCrypt(1,128,gs_GlobalPassword, &input,&output);
    if(rc)
    {
       String tmp = output.ToHex();
       String tmp2;
-      tmp2 << '%' << tmp;
+      tmp2 << '-' << tmp;
       return tmp2;
    }
    return "";
@@ -780,9 +789,9 @@ strutil_decrypt_tf(const String &original)
    }
    setup_twofish();
    CryptData input;
-   input.FromHex(original.c_str()+1); // skip initial '%'
+   input.FromHex(original.c_str()+1); // skip initial '-'
    CryptData output;
-   int rc = TwoFishCrypt(0,256,gs_GlobalPassword, &input,&output);
+   int rc = TwoFishCrypt(0,128,gs_GlobalPassword, &input,&output);
    if(rc)
    {
       return output.data;
@@ -875,8 +884,9 @@ strutil_encrypt(const String &original)
    if(! strutil_encrypt_initialised)
       strutil_encrypt_initialise();
 
-   if(strutil_has_twofish)
+   if(READ_APPCONFIG(MP_CRYPTALGO) == 1)
       return strutil_encrypt_tf(original);
+      
    
    String
       tmpstr,
@@ -900,6 +910,18 @@ strutil_encrypt(const String &original)
    return newstr;
 }
 
+void
+strutil_setpasswd(const String &newpasswd)
+{
+   gs_GlobalPassword = newpasswd;
+}
+
+String
+strutil_getpasswd(void)
+{
+   return gs_GlobalPassword;
+}
+
 String
 strutil_decrypt(const String &original)
 {
@@ -909,7 +931,7 @@ strutil_decrypt(const String &original)
    if(! strutil_encrypt_initialised)
       strutil_encrypt_initialise();
 
-   if(original[0] == '%')
+   if(original[0] == '-')
       return strutil_decrypt_tf(original);
 
    CHECK(original.Length() % 4 == 0, "", "Decrypt function called with illegal string.");

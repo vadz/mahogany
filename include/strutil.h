@@ -307,6 +307,11 @@ String strutil_encrypt(const String &original);
 */
 String strutil_decrypt(const String &original);
 
+/// set the global password
+extern void strutil_setpasswd(const String &newpasswd);
+// get the global password
+extern String strutil_getpasswd(void);
+
 /** Takes a time_t time value and returns either local time or GMT in
     a string.
     @param time time value

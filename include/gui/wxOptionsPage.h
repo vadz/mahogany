@@ -381,6 +381,10 @@ class wxOptionsPageIdent : public wxOptionsPageStandard
 {
 public:
    wxOptionsPageIdent(wxNotebook *parent, Profile *profile);
+
+   void OnButton(wxCommandEvent&);
+private:
+   DECLARE_EVENT_TABLE()
 };
 
 // network configuration page
@@ -453,7 +457,7 @@ public:
 
 protected:
    long m_nAutosaveDelay;
-
+   int  m_SyncRemote;
 private:
    DECLARE_EVENT_TABLE()
 };

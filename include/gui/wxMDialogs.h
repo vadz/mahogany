@@ -297,6 +297,8 @@ bool ConfigureDateFormat(Profile *profile, wxWindow *parent);
 /** Pick an icon file: for XFace */
 extern
 bool PickXFaceDialog(Profile *profile, wxWindow *parent);
+/// set new global passwd
+extern bool PickGlobalPasswdDialog(Profile *profile, wxWindow *parent);
 
 /** Asks the user if he wants to expunge the deleted messages. */
 extern
