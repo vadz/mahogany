@@ -2048,7 +2048,7 @@ static bool CheckReceivedHeaders(const String& value)
    if ( !pc )
    {
       // the header must always be "\r\n" terminated anyhow!
-      FAIL_MSG( "no \"\\r\\n\" at the end of header?" );
+      FAIL_MSG( _T("no \"\\r\\n\" at the end of header?") );
 
       return false;
    }
