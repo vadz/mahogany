@@ -50,8 +50,12 @@
 // function prototypes
 // ----------------------------------------------------------------------------
 
+#ifndef USE_MODULES_STATIC
+
 // return the array of paths to search for modules
 static wxArrayString BuildListOfModulesDirs();
+
+#endif // USE_MODULES_STATIC
 
 // ----------------------------------------------------------------------------
 // Actual MModule code
@@ -570,6 +574,8 @@ MModule::ListAvailableModules(const String& interfaceName)
 #endif // USE_MODULES_STATIC/!USE_MODULES_STATIC
 }
 
+#ifndef USE_MODULES_STATIC
+
 static wxArrayString BuildListOfModulesDirs()
 {
    // look under extra M_CANONICAL_HOST directory under Unix, but not for other
@@ -600,10 +606,12 @@ static wxArrayString BuildListOfModulesDirs()
 
    // under Windows this owuld be the same as (1)
 #ifdef OS_UNIX
-   path1 << mApplication->GetLocalDir();
+   path1 << mApplication->GetLocalDir()
          << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
    dirs.Add(path1);
 #endif // Unix
 
    return dirs;
 }
+
+#endif // !USE_MODULES_STATIC
