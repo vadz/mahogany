@@ -46,5 +46,15 @@ binaries: $(MODOBJS) $(MODULES)
 	@true
 
 clean:	stdclean
+	rm -f *.exe
 
-.PHONY:	binaries clean
+# strangely, we need optimization on in order to compile successfully
+%.exe: %.cpp
+	$(CXX) -o $@ $(CPPFLAGS) -DTEST $(CXXFLAGS) -g3 -O1 $< $(LDFLAGS) $(GUI_LIBS) $(LIBS)
+
+%.test: %.exe
+	./$< < .src/$*.tests
+
+tests: Filters.test
+
+.PHONY:	binaries clean tests
