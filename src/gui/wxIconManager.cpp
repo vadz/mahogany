@@ -631,13 +631,13 @@ wxIcon wxIconManager::GetIconFromMimeType(const String& type,
       wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
       wxFileType *fileType = mimeManager.GetFileTypeFromMimeType(type);
       if ( fileType != NULL ) {
-#if wxCHECK_VERSION(2, 5, 0)
+#ifdef wxHAS_ICON_LOCATION
          wxIconLocation iconLoc;
          if ( fileType->GetIcon(&iconLoc) )
          {
             icon = wxIcon(iconLoc);
          }
-#else // wx 2.4.x
+#else // wx 2.4.x or very early 2.5.0
          (void)fileType->GetIcon(&icon);
 #endif
          fileType->GetExtensions(exts);
@@ -663,13 +663,13 @@ wxIcon wxIconManager::GetIconFromMimeType(const String& type,
       wxFileType *fileType = mimeManager.GetFileTypeFromExtension(ext);
       if ( fileType )
       {
-#if wxCHECK_VERSION(2, 5, 0)
+#ifdef wxHAS_ICON_LOCATION
          wxIconLocation iconLoc;
          if ( fileType->GetIcon(&iconLoc) )
          {
             icon = wxIcon(iconLoc);
          }
-#else // wx 2.4.x
+#else // wx 2.4.x or very early 2.5.0
          (void)fileType->GetIcon(&icon);
 #endif
 
