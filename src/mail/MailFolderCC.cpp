@@ -2094,7 +2094,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov)
    else
    {
       // parsing the message failed in c-client lib. Why?
-      ASSERT_MSG(0,"DEBUG (harmless?): parsing folder overview failed");
+      ASSERT_MSG(0,"DEBUG (harmless, don't worry): parsing folder overview failed");
       // don't do anything
    }
    return 1;
