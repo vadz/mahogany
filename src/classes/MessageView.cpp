@@ -1051,10 +1051,16 @@ MessageView::ShowHeaders()
       }
       else // no encoding in the header
       {
-         // use the user specified encoding if none specified in the header
-         // itself
          if ( m_encodingUser != wxFONTENCODING_SYSTEM )
+         {
+            // use the user specified encoding if none specified in the header
+            // itself
             encHeader = m_encodingUser;
+         }
+         else if ( m_encodingAuto != wxFONTENCODING_SYSTEM )
+         {
+            encHeader = m_encodingAuto;
+         }
       }
 
       m_viewer->ShowHeader(headerNames[n], headerValues[n], encHeader);
@@ -1661,12 +1667,23 @@ MessageView::Update(void)
 
    m_uid = m_mailMessage->GetUId();
 
-   // deal with the headers first
+   // use the encoding of the first body part as the default encoding for the
+   // headers - this cares for the (horribly broken) mailers which send 8 bit
+   // stuff in the headers instead of using RFC 2047
+   const MimePart *mimepart = m_mailMessage->GetTopMimePart();
+
+   CHECK_RET( mimepart, "No MIME part to show?" );
+
+   m_encodingAuto = mimepart->GetTextEncoding();
+
+   // show the headers first
    ShowHeaders();
 
+   // then the body ...
    m_viewer->StartBody();
 
-   ProcessPart(m_mailMessage->GetTopMimePart());
+   // ... by recursively showing all the parts
+   ProcessPart(mimepart);
 
    m_viewer->EndBody();
 
@@ -1680,7 +1697,10 @@ MessageView::Update(void)
    {
       encoding = m_encodingAuto;
    }
-   else encoding = wxFONTENCODING_DEFAULT;
+   else
+   {
+      encoding = wxFONTENCODING_DEFAULT;
+   }
 
    // update the menu of the frame containing us to show the encoding used
    CheckLanguageInMenu(GetParentFrame(), encoding);
