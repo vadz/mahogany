@@ -1247,9 +1247,9 @@ wxString wxFolderTreeNode::GetName() const
    wxString name, nameutf7, nameutf8;
    wxString nameOrig = m_folder->GetName();
 
-   bool isValud = TRUE;
+   bool isValid = TRUE;
 
-   size_t len = nameOrig.length();
+   size_t len = nameOrig.Length();
    for ( size_t i = 0; i < len; i++ )
    {
       // make sure valid name
@@ -1258,7 +1258,7 @@ wxString wxFolderTreeNode::GetName() const
       {
          /* reserved for future use with UTF-8 */
          wxLogDebug("mailbox name with 8-bit character");
-         isValud = FALSE;
+         isValid = FALSE;
          break;
       }
 
@@ -1273,52 +1273,55 @@ wxString wxFolderTreeNode::GetName() const
             {
                case '\0':
                   wxLogDebug("unterminated modified UTF-7 name");
-                  isValud = FALSE;
+                  isValid = FALSE;
                   break;
                default:    /* must be alphanumeric */
                   if (!isalnum (s))
                   {
                      wxLogDebug("invalid modified UTF-7 name");
-                     isValud = FALSE;
+                     isValid = FALSE;
                      break;
                   }
                   else
                   {
-                     nameutf7 << s; wxLogDebug("nameutf7: %s", nameutf7.c_str());
+                     nameutf7 << s;
                   }
 #if 0
                case '+':   /* valid modified BASE64 */
                   // but we don't support it yet  FIXME
-                  isValud = FALSE;
+                  isValid = FALSE;
                   break;
                case ',':  /* all OK so far */
                   // but we don't support it yet; should be changed to "/"  FIXME
-                  isValud = FALSE;
+                  isValid = FALSE;
                   break;
 #endif
             }
          } //end while
 
-         if (isValud)
+         if (isValid)
          {
             // valid IMAP modified UTF-7 mailbox name, converting to
             // environment's default encoding for now (FIXME)
             nameutf7 << "-";
-//wxLogDebug("nameutf7 = %s", nameutf7.c_str());
 
             //convert UTF-7 to UTF-8:
-            SIZEDTEXT *text7, *text8;
+            SIZEDTEXT *text7 = new SIZEDTEXT;
+            SIZEDTEXT *text8 = new SIZEDTEXT;
             text7->data = (unsigned char *) nameutf7.c_str();
             text7->size = nameutf7.Length();
             void *tab;
             utf8_text_utf7 ( text7, text8, tab );
-            nameutf8 = text8->data;
-
+            for ( unsigned long k = 0; k < text8->size; k++ )
+            {
+               nameutf8 << wxChar(text8->data[k]);
+            }
+            // convert nameutf8 from UTF-8 to current environment's encoding:
             nameutf8 = wxString(nameutf8.wc_str(wxConvUTF8), wxConvLocal);
             name << nameutf8;
             i = j;
-//wxLogDebug("name = %s", name.c_str());
-//wxLogDebug("nameutf8 = %s", nameutf8.c_str());
+            free(text7);
+            free(text8);
          }
       }
       else // s != '&'
@@ -1327,7 +1330,7 @@ wxString wxFolderTreeNode::GetName() const
       }
    } //end for
 
-   if ( isValud )
+   if ( isValid )
    {
       return name;
    }
