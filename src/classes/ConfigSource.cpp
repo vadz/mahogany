@@ -60,7 +60,7 @@ class MOption;
 // ----------------------------------------------------------------------------
 
 // the type of the local config source
-#define CONFIG_SOURCE_TYPE_LOCAL "local"
+#define CONFIG_SOURCE_TYPE_LOCAL _T("local")
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -69,7 +69,7 @@ class MOption;
 class ConfigSourceLocalFactory : public ConfigSourceFactory
 {
 public:
-   virtual const char *GetType() const { return CONFIG_SOURCE_TYPE_LOCAL; }
+   virtual const wxChar *GetType() const { return CONFIG_SOURCE_TYPE_LOCAL; }
    virtual ConfigSource *Create(const ConfigSource& config, const String& name);
 };
 
@@ -343,11 +343,11 @@ wxConfigBase *ConfigSourceLocal::CreateDefaultConfig(const String& filename)
 
       if ( !localFilePath.empty() )
       {
-         localFilePath << '/';
+         localFilePath << _T('/');
       }
       //else: it will be in the current one, what else can we do?
 
-      localFilePath << '.' << M_APPLICATIONNAME;
+      localFilePath << _T('.') << M_APPLICATIONNAME;
 
       if ( !wxDir::Exists(localFilePath) )
       {
@@ -362,7 +362,8 @@ wxConfigBase *ConfigSourceLocal::CreateDefaultConfig(const String& filename)
                    localFilePath.c_str());
 
          // also create an empty config file with the right permissions:
-         String filename = localFilePath + "/config";
+         String filename;
+         filename << localFilePath << DIR_SEPARATOR << _T("config");
 
          // pass false to Create() to avoid overwriting the existing file
          wxFile file;
@@ -378,7 +379,7 @@ wxConfigBase *ConfigSourceLocal::CreateDefaultConfig(const String& filename)
       // This must not be allowed as they could change the behaviour of the
       // program unknowingly to the user!
       struct stat st;
-      if ( stat(localFilePath, &st) == 0 )
+      if ( wxStat(localFilePath, &st) == 0 )
       {
          if ( st.st_mode & (S_IWGRP | S_IWOTH) )
          {
@@ -390,7 +391,7 @@ wxConfigBase *ConfigSourceLocal::CreateDefaultConfig(const String& filename)
                          "file (if any) could have been compromised!\n\n"),
                        localFilePath.c_str());
 
-            if ( chmod(localFilePath, st.st_mode & ~(S_IWGRP | S_IWOTH)) == 0 )
+            if ( chmod(localFilePath.fn_str(), st.st_mode & ~(S_IWGRP | S_IWOTH)) == 0 )
             {
                msg += _("This has been fixed now, the directory is no longer writable for others.");
             }
@@ -412,12 +413,12 @@ wxConfigBase *ConfigSourceLocal::CreateDefaultConfig(const String& filename)
                        localFilePath.c_str());
       }
 
-      localFilePath += "/config";
+      localFilePath << DIR_SEPARATOR << _T("config");
 
       // Check whether other users can read our config file.
       //
       // This must not be allowed as we store passwords in it!
-      if ( stat(localFilePath, &st) == 0 )
+      if ( wxStat(localFilePath, &st) == 0 )
       {
          if ( st.st_mode & (S_IWGRP | S_IWOTH | S_IRGRP | S_IROTH) )
          {
@@ -435,7 +436,7 @@ wxConfigBase *ConfigSourceLocal::CreateDefaultConfig(const String& filename)
             if ( st.st_mode & (S_IRGRP | S_IROTH) )
             {
                if ( !msg.empty() )
-                  msg += "\n\n";
+                  msg += _T("\n\n");
 
                msg += String::Format
                       (
@@ -446,9 +447,9 @@ wxConfigBase *ConfigSourceLocal::CreateDefaultConfig(const String& filename)
                       );
             }
 
-            msg += "\n\n";
+            msg += _T("\n\n");
 
-            if ( chmod(localFilePath, S_IRUSR | S_IWUSR) == 0 )
+            if ( chmod(localFilePath.fn_str(), S_IRUSR | S_IWUSR) == 0 )
             {
                msg += _("This has been fixed now, the file is no longer readable for others.");
             }
@@ -470,15 +471,15 @@ wxConfigBase *ConfigSourceLocal::CreateDefaultConfig(const String& filename)
    //    2. run-time specified installation dir
    //    3. default installation dir
    String globalFileName;
-   globalFileName << M_APPLICATIONNAME << ".conf";
-   globalFilePath << M_PREFIX << "/etc/" << globalFileName;
+   globalFileName << M_APPLICATIONNAME << _T(".conf");
+   globalFilePath << M_PREFIX << DIR_SEPARATOR << _T("etc") << DIR_SEPARATOR << globalFileName;
    if ( !wxFileExists(globalFilePath) )
    {
-      const char *dir = getenv("MAHOGANY_DIR");
+      const wxChar *dir = wxGetenv(_T("MAHOGANY_DIR"));
       if ( dir )
       {
          globalFilePath.clear();
-         globalFilePath << dir << "/etc/" << globalFileName;
+         globalFilePath << dir << DIR_SEPARATOR << _T("etc") << DIR_SEPARATOR << globalFileName;
       }
    }
 

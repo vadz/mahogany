@@ -1398,7 +1398,7 @@ String VarExpander::GetReplyPrefix() const
    // X-Attribution header value overrides everything else if it exists
    if ( m_msg && READ_CONFIG_BOOL(m_profile, MP_REPLY_MSGPREFIX_FROM_XATTR) )
    {
-      m_msg->GetHeaderLine("X-Attribution", prefix);
+      m_msg->GetHeaderLine(_T("X-Attribution"), prefix);
    }
 
    // prepend the senders initials to the reply prefix (this

@@ -206,9 +206,9 @@ public:
        @param reference implementation dependend reference
     */
    void ListFolders(class ASMailFolder *asmf,
-                    const String &pattern = "*",
+                    const String &pattern = _T("*"),
                     bool subscribed_only = false,
-                    const String &reference = "",
+                    const String &reference = _T(""),
                     UserData ud = 0,
                     Ticket ticket = ILLEGAL_TICKET);
 
