@@ -86,7 +86,9 @@
 #include "gui/wxSelectionDlg.h"
 #include "gui/wxIdentityCombo.h"
 
-#include "interface/MDialogs.h"
+#ifdef USE_PYTHON
+   #include "interface/MDialogs.h"
+#endif // USE_PYTHON
 
 #include <errno.h>
 
@@ -1110,7 +1112,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                 << _("Threads") << _T("<br>")
 #endif
 #ifdef USE_PYTHON
-                << _("Python") << _T("<br>")
+                << _("Embedded Python interpreter") << _T("<br>")
 #endif
 #ifdef USE_DIALUP
                 << _("Dial-up support") << _T("<br>")
@@ -3439,6 +3441,8 @@ extern wxWindow *GetDialogParent(const wxWindow *parent)
 // implementations of the wrapper functions from interface/MDialogs.h
 // ----------------------------------------------------------------------------
 
+#ifdef USE_PYTHON
+
 bool MDialogs::Message(const char *message)
 {
    return MDialog_Message(message, NULL);
@@ -3448,4 +3452,6 @@ void MDialogs::Status(const char *message)
 {
    wxLogStatus(_T("%s"), message);
 }
+
+#endif // USE_PYTHON
 
