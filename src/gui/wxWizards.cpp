@@ -685,7 +685,7 @@ MWizard_CreateFolder_ServerPage::MWizard_CreateFolder_ServerPage(
       needsPath = TRUE;
       break;
    case ET_IMAP:
-      entry = _("an IMAP mailbox");
+      entry = _("an IMAP folder");
       needsServer = TRUE;
       needsUserId = TRUE;
       needsPassword = TRUE;

@@ -1667,7 +1667,7 @@ in a mailbox at program exit and automatically retrieve that information
 the next time it is started up. This option becomes useful if you
 are using the program from different systems, e.g. if sometimes from
 the office and some other times from home over a dialup link. In this
-case, you can save some settings in a special IMAP mailbox and tell
+case, you can save some settings in a special IMAP folder and tell
 the program to use this for some of the settings. Like that, you can
 share the program settings no matter from where you run Mahogany and
 you do not need to manually adjust both configurations.
@@ -1680,7 +1680,7 @@ to share. Currently supported are:
 
 \begin{itemize}
 \item \textbf{Sync Filter Rules}: This keeps the global list of all filter
-rules synchronised via the IMAP mailbox. Very useful if you want to
+rules synchronised via the IMAP folder. Very useful if you want to
 use the same set of filter rules no matter where you run Mahogany.
 \item \textbf{Sync Identities}: This keeps the list of available identity
 settings synchronised. Be careful: some things such as server settings
@@ -2600,7 +2600,7 @@ box and continue collecting all mail from there and move it to the
 \subsection{How can I set up IMAP access?}
 
 Follow the rules for setting up POP3 access\ref{POP3} but set the
-folder type to be {}``IMAP mailbox{}''. Then enter the name of your
+folder type to be {}``IMAP folder{}''. Then enter the name of your
 IMAP server, your username and password (or leave it empty to be asked
 later) for that server and, optionally, the path to the mailbox on
 the IMAP server. You can leave the path empty, and it will use the

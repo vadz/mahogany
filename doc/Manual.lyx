@@ -4379,7 +4379,7 @@ Mahogany can automatically save a subset of its configuration settings in
  systems, e.g.
  if sometimes from the office and some other times from home over a dialup
  link.
- In this case, you can save some settings in a special IMAP mailbox and
+ In this case, you can save some settings in a special IMAP folder and
  tell the program to use this for some of the settings.
  Like that, you can share the program settings no matter from where you
  run Mahogany and you do not need to manually adjust both configurations.
@@ -6762,7 +6762,7 @@ Follow the rules for setting up POP3 access
 \begin_inset Quotes eld
 \end_inset 
 
-IMAP mailbox
+IMAP folder
 \begin_inset Quotes erd
 \end_inset 
 

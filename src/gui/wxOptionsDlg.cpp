@@ -990,7 +990,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Mahogany can synchronise part of its configuration\n"
                   "with settings stored in a special folder. This can\n"
                   "be used to share settings between machines by storing\n"
-                  "them in a special IMAP mailbox on the server.\n"
+                  "them in a special IMAP folder on the server.\n"
                   "Please read the documentation first! It is accessible\n"
                   "via the Help button below."),
                   Field_Message, -1 },
