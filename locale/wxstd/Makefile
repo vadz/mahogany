@@ -1,27 +1,19 @@
 # Makefile for locale/wxstd directory
 # $Id$
-#
 
-FILES_PO:=$(wildcard *.po)
-FILES_MO:=$(FILES_PO:.po=.mo)
+FILES_MO:=$(patsubst .src/%.po,%.mo,$(wildcard .src/*.po))
 
 include ../../makeopts
 
-wxstd-mo-files: $(FILES_MO)
-
-clean:
-	$(RM) $(FILES_MO)
-
-dep depend: 
-
-all:
-	$(MAKE) wxstd-mo-files
-
-
-.PHONY: all dep clean doc semistatic static allclean install msgcat mergecat mo-files  wxstd-mo-files
+vpath %.po .src
 
 %.mo: %.po
 	$(MSGFMT) -o $@ $<
 
+all:	$(FILES_MO)
+	@true
 
+clean:
+	$(RM) $(FILES_MO)
 
+.PHONY: all dep depend clean

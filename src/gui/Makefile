@@ -1,6 +1,5 @@
 # Makefile for src/gui directory
 
-CWD = gui
 SRC = wxMApp.cpp wxMFrame.cpp wxFolderView.cpp \
 wxComposeView.cpp wxMainFrame.cpp wxIconManager.cpp wxMDialogs.cpp  \
 wxlwindow.cpp wxllist.cpp wxlparser.cpp wxMenuDefs.cpp wxOptionsDlg.cpp \
@@ -17,24 +16,13 @@ else
 SRC += wxMessageView.cpp
 endif
 
-HDR = $(SRC:.cpp=.h)
-DEP = $(SRC:.cpp=.d)
-
-LINK = ../util/strutil.o ../classes/CommonBase.o $(CCLIENTLIB)
-
 TARGETS = $(SRC:.cpp=.o)
 
 all:	$(TARGETS)
+	@true
 
-$(LINK):
-	(cd ../util; make all)
-	(cd ../classes; make all)
-	(cd $(CCLIENTDIR); make $(CCCLIENTOSTYPE))
-
+include ../../makerules $(wildcard *.d)
 
 clean: stdclean
 
 .PHONY: clean
-
-include ../../makerules
-include .depend

@@ -1,53 +1,33 @@
 dnl $Id$
 dnl local macro definitions for M's configure.in
 
-# WARNING ... WARNING ... WARNING ... WARNING ... WARNING ... WARNING
-# This file is undergoing active modification to support separate
-# build directories.  If you really feel you need to change it, please
-# co-ordinate your changes with GregNoel@san.rr.com so the equivalent
-# changes can be made on the branch as well.
-
-AC_DEFUN(M_OVERRIDES_PREPARE,
-[
-rm -f ${OSTYPE}.system.cache.tmp
-touch ${OSTYPE}.system.cache.tmp
-touch ${OSTYPE}.system.cache
-])
-
-AC_DEFUN(M_OVERRIDES_DONE,
-[
-mv ${OSTYPE}.system.cache.tmp ${OSTYPE}.system.cache
-])
-
-dnl package,message,helpmessage,variable
+dnl package,message,variable,default,helpmessage
 AC_DEFUN(M_OVERRIDES,
-[
-AC_MSG_CHECKING("for $2")
-AC_ARG_WITH($1,$3,
-[if test "x$with_$1" = xno; then
-  ac_cv_use_$1='$4="0"'
-else
-  if test "x$with_$1" = xyes; then
-    ac_cv_use_$1='$4="1"'
-  else
-    ac_cv_use_$1='$4="$with_$1"'
-  fi
-fi],
-[
-  LINE=`grep "$4" ${OSTYPE}.system.cache`
-  if test "x$LINE" != x ; then
-    eval "DEFAULT_$LINE"
-  fi
-  ac_cv_use_$1='$4='$DEFAULT_$4
-])
-eval "$ac_cv_use_$1"
-echo $ac_cv_use_$1 >> ${OSTYPE}.system.cache.tmp
-if test "$$4" != 0; then
-  AC_MSG_RESULT(yes)
-else
-  AC_MSG_RESULT(no)
-fi
-m_cv_$4="$$4"])
+[AC_MSG_CHECKING(for $2)
+define([M_FUNC], regexp([$5], [--[^-]*-], \&))dnl
+define([M_VAR],
+	ifelse(	M_FUNC,--with-,    withval,
+ 		M_FUNC,--without-, withval,
+ 		M_FUNC,--enable-,  enableval,
+ 		M_FUNC,--disable-, enableval,
+ 		withval))dnl
+define([M_FUNC],
+	ifelse(M_VAR, enableval, [defn([AC_ARG_ENABLE])],
+ 		[defn([AC_ARG_WITH])]))dnl
+M_FUNC($1,[  $5],
+[case "$]M_VAR[" in
+  yes) m_cv_$3=1 ;;
+  no)  m_cv_$3=0 ;;
+  *)   m_cv_$3="$]M_VAR[" ;;
+  esac],
+AC_CACHE_VAL(m_cv_$3,m_cv_$3='$4')[dnl])dnl
+undefine([M_FUNC])undefine([M_VAR])dnl
+$3="$m_cv_$3"
+case "$m_cv_$3" in
+''|0)  AC_MSG_RESULT(no) ;;
+1)  AC_MSG_RESULT(yes) ;;
+*)  AC_MSG_RESULT($m_cv_$3) ;;
+esac])
 
 dnl M_CHECK_MYLIB(LIBRARY, FUNCTION, LIBPATHLIST [, ACTION-IF-FOUND 
 dnl            [, ACTION-IF-NOT-FOUND [, OTHER-LIBRARIES]]])

@@ -1,7 +1,6 @@
 # Makefile for src/modules directory
 # $Id$
 #
-#
 # To create a new module for Mahogany, simply start from Mdummy.cpp
 # and modify it. Save your Module's source in this directory and run
 # make. The Makefile will find it automatically, there is no need to
@@ -17,27 +16,23 @@
 # <empty line>
 # Any descriptive text...
 #
-#
 #######################################################################
 
 include ../../makeopts
 
-CWD = modules
+# I hate doing this, but for now it's necessary as the pi-sock headers
+# aren't fully C++ compliant on RH6.1
+CXXFLAGS:=$(CXXFLAGS_RELAXED)
+
 SRC = Mdummy.cpp Filters.cpp Calendar.cpp \
 PineImport.cpp XFMailImport.cpp
 
 ifdef PISOCK_LIB
 SRC := $(SRC) PalmOS.cpp
-
-# for MAL:
-ifdef HAVE_LIBMAL
-CPPFLAGS := $(CPPFLAGS) -DMALSYNC -DHAVE_LIBMAL -I$(LIBMAL_DIR)/malsync_src/mal/client/common -I$(LIBMAL_DIR)/malsync_src/mal/common -I$(LIBMAL_DIR) 
+ifdef LIBMAL_SRC
+CPPFLAGS := $(CPPFLAGS) -DMALSYNC -DHAVE_LIBMAL -I$(LIBMAL_SRC)/malsync_src/mal/client/common -I$(LIBMAL_SRC)/malsync_src/mal/common -I$(LIBMAL_SRC) 
 endif
-
 endif
-
-HDR = $(SRC:.cpp=.h)
-DEP = $(SRC:.cpp=.d)
 
 ifeq ($(USE_MODULES),static)
 TARGETS = $(SRC:.cpp=.o)
@@ -49,41 +44,29 @@ TARGETS=
 endif
 endif
 
+all:	$(TARGETS)
+	@true
 
-# I hate doing this, but for now it's necessary as the pi-sock headers
-# aren't fully C++ compliant on RH6.1
-CXXFLAGS:=$(CXXFLAGS_RELAXED)
-
-INTERFACE = ../../include/MInterface.h ../../include/MInterface.cpp
-
-all: $(TARGETS)
+include ../../makerules $(wildcard *.d)
 
 modules: all
-
-$(TARGETS): $(INTERFACE)
-
-$(INTERFACE): ../../include/MInterface.mid
-	$(MAKE) -C ../../include MInterface.h
 
 ifdef PISOCK_LIB
 PalmOS.so: PalmOS.cpp
 	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< -L$(BUILDDIR)/src $(PISOCK_LIB) 
-
 endif
 
 clean: 
 	$(RM) *.o *.so *.lo
 
-install: $(TARGETS)
+install: all
 ifeq ($(USE_MODULES),dynamic)
 	$(INSTALL) -d $(MODULEDIR)
 	for i in $(TARGETS); do $(INSTALL_PROGRAM) $$i $(MODULEDIR); done
+else
+	@true
 endif
 
 install-modules: install
 
 .PHONY: clean
-
-include ../../makerules
-include .depend
-

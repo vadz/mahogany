@@ -1,6 +1,5 @@
-# -*-makefile-*-
-# rules to create object files:
-#
+# makerules (rules to create object files) for M root directory
+# $Id$
 
 # modules: MODOBJS get linked in statically, MODULES installed as shared libs
 ifeq ($(USE_MODULES),static)
@@ -17,46 +16,91 @@ MODOBJS =
 endif
 endif
 
+vpath %.h .src
+vpath %.c .src
+vpath %.y .src
+vpath %.cc .src
+vpath %.cpp .src
+
+%.o: %.y
+	$(YACC) $(YFLAGS) $< && mv -f y.tab.c $*.c
+	if test -f y.tab.h; then \
+	  if cmp -s y.tab.h $*.h; then rm -f y.tab.h; \
+	  else mv -f y.tab.h $*.h; fi; \
+	else :; fi
+	$(CC)  -fPIC $(CPPFLAGS) $(CFLAGS) -c $*.c
+	@rm -f $*.c
+
 ifdef USE_LIBTOOL
 # no longer used
 %.o: %.cc
-	$(LIBTOOL) --mode=compile $(CXX) -fPIC $(CXXFLAGS) -c $<
+	$(LIBTOOL) --mode=compile $(CXX) -fPIC $(CPPFLAGS) $(CXXFLAGS) -c $<
 %.o: %.cpp
-	$(LIBTOOL) --mode=compile $(CXX)  -fPIC $(CXXFLAGS) -c $<
+	$(LIBTOOL) --mode=compile $(CXX) -fPIC $(CPPFLAGS) $(CXXFLAGS) -c $<
 %.o: %.c
-	$(LIBTOOL) --mode=compile $(CC)  -fPIC $(CFLAGS) -c $<
+	$(LIBTOOL) --mode=compile $(CC)  -fPIC $(CPPFLAGS) $(CFLAGS) -c $<
 %.lo: %.cpp
-	$(LIBTOOL) --mode=compile $(CXX)  -fPIC $(CXXFLAGS) -c $< 
+	$(LIBTOOL) --mode=compile $(CXX) -fPIC $(CPPFLAGS) $(CXXFLAGS) -c $< 
 %.so: %.lo
-	$(LIBTOOL) $(CXX) -export-dynamic -fPIC $(CXXFLAGS) -o $@ $<
+	$(LIBTOOL) $(CXX) -export-dynamic -fPIC $(CPPFLAGS) $(CXXFLAGS) -o $@ $<
 else
 %.o: %.cc
-	$(CXX)  -fPIC $(CXXFLAGS) -c $<
+	$(CXX) -fPIC $(CPPFLAGS) $(CXXFLAGS) -c $<
 %.o: %.cpp
-	$(CXX)  -fPIC $(CXXFLAGS) -c $<
+	$(CXX) -fPIC $(CPPFLAGS) $(CXXFLAGS) -c $<
 %.o: %.c
-	$(CC)  -fPIC $(CFLAGS) -c $<
-
+	$(CC)  -fPIC $(CPPFLAGS) $(CFLAGS) -c $<
 %.so: %.cpp
-	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< -L$(BUILDDIR)/src
+	$(CXX) -shared -fPIC $(CPPFLAGS) $(CXXFLAGS) -o $@ $< -L$(BUILDDIR)/src
 #-lM #$(LIBS)
 endif
 
+ifdef USE_SWIG
+vpath %.i .src
+%.o: %.i
+	$(SWIG) $(SWIGFLAGS) -o $*.cpp $<
+	$(CXX) -fPIC $(CPPFLAGS) $(CXXFLAGS) -c $*.cpp
+	@rm -f $*.cpp
 %.py: %.i
-	$(SWIG) $(SWIGFLAGS) -o junk $<
-
+	$(SWIG) $(SWIGFLAGS) -o $@ $<
 %.cpp: %.i
-	$(SWIG) $(SWIGFLAGS) -o $(ODIR)/$@ $<
+	$(SWIG) $(SWIGFLAGS) -o $@ $<
+else
+vpath %.cpp-swig .src
+%.o: %.cpp-swig
+	ln -s $< $*.cpp
+	$(CXX) -fPIC $(CPPFLAGS) $(CXXFLAGS) -c $*.cpp
+	@rm -f $*.cpp
+vpath %.py-swig .src
+%.py: %.py-swig
+	ln -s $< $@
+ifneq ($(SOURCEDIR),$(BUILDDIR))
+# FIXME: should use .cpp-swig and .py-swig
+%.py: .src/%.py
+	ln -s $< $@
+endif
+endif
 
 %cmodule.so: %.o
-	$(CXX) -shared $< -lswigpy -o $(ODIR)/$@
+	$(CXX) -shared $< -lswigpy -o $@
 
 %.dvi: %.htex
-	cp $< tmp.tex ; $(BUILDDIR)/extra/scripts/striphelpids tmp.tex ; $(LATEX) tmp.tex ; $(MAKEINDEX) tmp.idx; \
-        $(LATEX) tmp.tex ; $(LATEX) tmp.tex ; mv tmp.dvi `basename $< .htex`.dvi; mv tmp.aux `basename $< .htex`.aux ;rm -f tmp.*
+	cp $< tmp.tex
+	$(SOURCEDIR)/extra/scripts/striphelpids tmp.tex
+	$(LATEX) tmp.tex </dev/null
+	@touch tmp.idx
+	$(MAKEINDEX) tmp.idx
+	$(LATEX) tmp.tex </dev/null
+	$(LATEX) tmp.tex </dev/null
+	mv tmp.dvi $@
+	mv tmp.aux $*.aux
+	rm -f tmp.*
 
 %.dvi: %.tex
-	$(LATEX) $< ; $(MAKEINDEX) `basename $< .tex`.idx; $(LATEX) $< ; $(LATEX) $<
+	$(LATEX) $<
+	$(MAKEINDEX) $*.idx
+	$(LATEX) $<
+	$(LATEX) $<
 
 %.ps: %.dvi
 	$(DVIPS) $< -o $@
@@ -65,7 +109,7 @@ endif
 	$(PSTOPDF) $< $@
 
 %.c: %.y
-	$(YACC) $(YFLAGS) $< && mv y.tab.c $*.c
+	$(YACC) $(YFLAGS) $< && mv y.tab.c $@
 	if test -f y.tab.h; then \
 	if cmp -s y.tab.h $*.h; then rm -f y.tab.h; else mv y.tab.h $*.h; fi; \
 	else :; fi
@@ -75,30 +119,30 @@ ifdef HAVE_SGMLTOOLS
 	sgml2html $<
 else
 %.html: %.sgml
-	touch $(ODIR)/$@ 
+	touch $@ 
 endif
 
+ifdef ObsoleteDeps
 # We use the _PYCODE CXXFLAGS here, as we want to ignore all warnings
 # when making depend. Otherwise make would fail.
 dep depend:
-	$(CXX) -M $(CXXFLAGS_RELAXED) $(SRC) >.depend
-#	$(CXX) -MM $(CXXFLAGS_RELAXED) $(SRC) >.depend
-#	$(CC) -MM $(CXXFLAGS) $(CSRC) >>.depend
+	$(CXX) -M $(CPPFLAGS) $(CXXFLAGS_RELAXED) $(SRC) >.depend
+#	$(CXX) -MM $(CPPFLAGS) $(CXXFLAGS_RELAXED) $(SRC) >.depend
+#	$(CC) -MM $(CPPFLAGS) $(CXXFLAGS) $(CSRC) >>.depend
 
 .depend:
 	touch .depend ; $(MAKE) -i dep
+endif
 
 tags:
 	etags --c++ $(SRC) $(CXXSRC)
-
-.PHONY: stdclean dep depend tags msgcat modules install-modules modules
 
 msgcat:
 	@touch $(BUILDDIR)/messages.po
 	@for i in $(SRC) $(CSRC) ; do $(XGETTEXT) -C -k_ -j -o $(BUILDDIR)/messages.po $$i ; done
 
 stdclean:
-	$(RM) $(ODIR)/*.o $(ODIR)/*.so $(ODIR)/*.a $(ODIR)/*.lo $(ODIR)/.libs $(MODSOS) $(MODOBJS)
+	$(RM) -r *.o *.so *.a *.lo *.d .libs $(MODSOS) $(MODOBJS)
 
 modules:	$(MODULES)
 
@@ -107,3 +151,5 @@ ifeq ($(USE_MODULES),dynamic)
 	$(INSTALL) -d $(MODULEDIR)
 	for i in $(MODULES); do $(INSTALL_PROGRAM) $$i $(MODULEDIR); done
 endif
+
+.PHONY: stdclean dep depend tags msgcat modules install-modules modules

@@ -1,11 +1,16 @@
-# $Id$
-#
 # Makefile for libversit library
+# $Id$
+
+include ../../../makeopts
 
 TARGETS = libversit.a
-SRC:= vobject.c
 
-all: $(TARGETS)
+CPPFLAGS += -I.src
+
+all:	$(TARGETS)
+	@true
+
+include ../../../makerules $(wildcard *.d)
 
 libversit_a_OBJECTS = vcc.o vobject.o # vcaltmp.o
 
@@ -15,10 +20,6 @@ libversit.a: $(libversit_a_OBJECTS)
 	$(RANLIB) libversit.a
 
 clean: stdclean
+	rm -f vcc.c
 
 .PHONY: clean all
-
-include ../../../makeopts
-include ../../../makerules
-include .depend
-

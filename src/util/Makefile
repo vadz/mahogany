@@ -1,24 +1,19 @@
 # Makefile for src/util directory
 # $Id$
 
-CWD = util
-SRC = strutil.cpp sysutil.cpp upgrade.cpp miscutil.cpp
-CSRC =
-HDR = $(SRC:.cpp=.h) $(CSRC:.c=.h)
-
-TARGETS = $(SRC:.cpp=.o) $(CSRC:.c=.o)
-
 include ../../makeopts
+
+TARGETS = strutil.o sysutil.o upgrade.o miscutil.o
 
 ifdef USE_LEAKTRACER
 TARGETS := $(TARGETS) LeakTracer.o
 endif
 
 all:	$(TARGETS)
+	@true
+
+include ../../makerules $(wildcard *.d)
 
 clean: stdclean
 
 .PHONY: all clean
-
-include ../../makerules
-include .depend

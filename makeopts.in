@@ -1,16 +1,12 @@
-# -*-makefile-*-
 # makeopts template file for M
-#
 # $Id$
-#
-# set build root directory:
-BUILDDIR = @BUILDDIR@
+
+# set build root directories:
+SOURCEDIR = @SOURCEDIR@
+BUILDDIR  = @BUILDDIR@
 top_builddir=@BUILDDIR@
 
 # the c-client library:
-CCLIENTDIR=$(BUILDDIR)/extra/src/c-client
-CCLIENTINCLUDE=$(CCLIENTDIR)
-CCLIENTLIB=$(CCLIENTDIR)/c-client.a
 CCLIENTOSTYPE=@CCOSTYPE@
 CCLIENT_EXTRAAUTHENTICATORS=@CCLIENT_EXTRAAUTHENTICATORS@
 CCLIENT_EXTRACFLAGS=@CCLIENT_EXTRACFLAGS@
@@ -18,10 +14,7 @@ CCLIENT_EXTRACFLAGS=@CCLIENT_EXTRACFLAGS@
 SSL_LIBS=@SSL_LIBS@
 
 # where we have the Icon xpms:
-ICONDIR=$(BUILDDIR)/src/icons
-
-# compiler flags
-ODIR=.
+ICONDIR=$(SOURCEDIR)/src/icons
 
 # this will be set or unset
 @MAKE_USE_PYTHON@
@@ -35,29 +28,26 @@ ODIR=.
 @MAKE_HAVE_LIBMAL@
 
 ifdef HAVE_LIBMAL
-LIBMAL_DIR=$(BUILDDIR)/extra/src/libmal
-PISOCK_LIB:=$(PISOCK_LIB) -L$(LIBMAL_DIR)/.libs -lmal
+LIBMAL_SRC:=$(SOURCEDIR)/extra/src/libmal
+PISOCK_LIB:=$(PISOCK_LIB) -L$(BUILDDIR)/extra/src/libmal/.libs -lmal
 endif
-
-
 
 # libraries needed by the modules, linked against individually in the modules
 # directory, but listed here in case we build a static library:
 ifeq ($(USE_MODULES),static)
-# for MAL:
 MODULES_LIBS:=$(PISOCK_LIB)
 else
-MODULES_LIBS=
+MODULES_LIBS:=
 endif
 # canonical host
 CANONICAL_HOST=@host@
 
 # DOC++/kdoc (doc++ is preferred, -r to do short filenames to avoid dpkg bug)
-DOCXXHTML=doc++ -r -f -k -u -k $(DXXTBL) -H -d $(BUILDDIR)/doc/classes
-DOCXXTEX =doc++ -f -k -u -k $(DXXTBL) -H -t -o $(BUILDDIR)/doc/classes.tex
-KDOCHTML = kdoc -H -d $(BUILDDIR)/doc/classes -u $(BUILDDIR) -a -i -e M  
-KDOCTEX =  kdoc -T -d $(BUILDDIR)/doc/classes -u $(BUILDDIR) -a -i -e M
-SCANDOCHTML = @PERL@ $(BUILDDIR)/extra/scandoc/scandoc.pl  -i $(BUILDDIR)/extra/scandoc/Mtemplate.html -p $(BUILDDIR)/doc/classes/ -t 3 
+DOCXXHTML=doc++ -r -f -k -u -k $(DXXTBL) -H -d $(BILDDIR)/doc/classes
+DOCXXTEX =doc++ -f -k -u -k $(DXXTBL) -H -t -o $(BILDDIR)/doc/classes.tex
+KDOCHTML = kdoc -H -d $(BILDDIR)/doc/classes -u $(SOURCEDIR) -a -i -e M  
+KDOCTEX =  kdoc -T -d $(BILDDIR)/doc/classes -u $(SOURCEDIR) -a -i -e M
+SCANDOCHTML = @PERL@ $(SOURCEDIR)/extra/scandoc/scandoc.pl  -i $(SOURCEDIR)/extra/scandoc/Mtemplate.html -p $(BILDDIR)/doc/classes/ -t 3 
 SCANDOCTEX  = echo "Cannot generate .tex class documentation with scandoc."
 DOCHTML=@DOCHTML@
 DOCTEX=@DOCTEX@
@@ -71,28 +61,25 @@ PERL=@PERL@
 PSTOPDF=@PSTOPDF@
 
 # compiler stuff
-CC = @CC@
-CPP = @CPP@
-CXX = @CXX@
-LIBTOOL = @LIBTOOL@
-CXXCPP = @CXXCPP@
-CPPFLAGS =@CPPFLAGS@
-AR = ar
-RANLIB = @RANLIB@
-YACC = @YACC@
+CPP	= @CPP@
+CPPFLAGS= @CPPFLAGS@
+CC	= @CC@
+CXX	= @CXX@
+LIBTOOL	= @LIBTOOL@
+AR	= ar
+RANLIB	= @RANLIB@
+YACC	= @YACC@
 
 # SWIG
 ifdef USE_SWIG
 SWIG = @SWIG@
-SWIGFLAGS = -c++ -python -shadow -dhtml -c
-SWIGFLAGS_LIBSWIG = -c++ -python -shadow 
 SWIG_LIBS = #no longer needed -lswig -lswigpy
 else
-SWIG= echo
-SWIGFLAGS=
-SWIGFLAGS_LIBSWIG=
+SWIG= true swig
 SWIG_LIBS=
 endif
+SWIGFLAGS = -c++ -python -shadow -dhtml -c
+SWIGFLAGS_LIBSWIG = -c++ -python -shadow 
 
 # other stuff
 RM = rm -f
@@ -109,7 +96,6 @@ DATADIR = $(DESTDIR)/share/Mahogany
 # where to install docs
 DOCDIR = $(DATADIR)/doc
 
-PREFIX=@prefix@
 # for the dynamic linker, better than using -rpath
 LD_RUN_PATH=$(DATADIR)/$(CANONICAL_HOST)/lib
 MODULEDIR=$(DATADIR)/$(CANONICAL_HOST)/modules
@@ -121,15 +107,13 @@ LINK = $(CXX) -Wl-r$(LD_RUN_PATH)
 #-Wl-export-dynamic 
 endif
 
-DEF = -DM_PREFIX="\"$(PREFIX)/\"" -DM_CANONICAL_HOST="\"$(CANONICAL_HOST)\""
-INC = -I$(BUILDDIR)/include -I$(BUILDDIR)/extra/include -I$(BUILDDIR)/include/gui -I$(CCLIENTINCLUDE) 
-CFLAGS   = @CFLAGS@  $(CPPFLAGS) $(DEF) $(INC)
-CXXFLAGS = @CXXFLAGS@ $(CPPFLAGS) $(DEF) $(INC)
+CFLAGS   = @CFLAGS@
+CXXFLAGS = @CXXFLAGS@
 # for the python code:
-CXXFLAGS_RELAXED = @CXXFLAGS_RELAXED@ $(CPPFLAGS) $(DEF) $(INC)
+CXXFLAGS_RELAXED = @CXXFLAGS_RELAXED@
 LDFLAGS = @LDFLAGS@
 
-LIBS=$(CCLIENTLIB) $(MODULES_LIBS) $(SSL_LIBS) $(SWIG_LIBS) @LIBS@ 
-LIBS_STATIC=$(CCLIENTLIB) $(MODULES_LIBS) $(SSL_LIBS) $(SWIG_LIBS) @LIBS_STATIC@ 
+LIBS=$(MODULES_LIBS) $(SSL_LIBS) $(SWIG_LIBS) @LIBS@ 
+LIBS_STATIC=$(MODULES_LIBS) $(SSL_LIBS) $(SWIG_LIBS) @LIBS_STATIC@ 
 GUI_LIBS=@GTK_LDFLAGS@
 GUI_LIBS_STATIC=@GUI_LIBS_STATIC@

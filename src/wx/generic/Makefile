@@ -1,23 +1,17 @@
+# Makefile for src/wx/xxx directory
 # $Id$
-# Makefile2 for src/wx directory and all its subdirectories
-# Called by Makefile which handles the clean target in a non standard way.
 
-# If you change the number of subdirectories, make sure you modify Makefile, too!
+include ../../../makeopts
 
-CWD = wx
 SRC = persctrl.cpp vcarddlg.cpp
-HDR = $(SRC:.cpp=.h)
-DEP = $(SRC:.cpp=.d)
 
 TARGETS = $(SRC:.cpp=.o)
 
-all: $(TARGETS)
+all:	$(TARGETS)
+	@true
+
+include ../../../makerules $(wildcard *.d)
 
 clean: stdclean
 
 .PHONY: clean all
-
-include ../../../makeopts
-include ../../../makerules
-include .depend
-

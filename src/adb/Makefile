@@ -1,22 +1,16 @@
 # Makefile for src/adb directory
 
-CWD = adb
 SRC = AdbFrame.cpp AdbManager.cpp AdbProvider.cpp AdbEntry.cpp \
-      AdbDialogs.cpp \
-      ProvFC.cpp ProvBbdb.cpp ProvPalm.cpp \
+      AdbDialogs.cpp ProvFC.cpp ProvBbdb.cpp ProvPalm.cpp \
       AdbModule.cpp AdbImport.cpp AdbExport.cpp
 
 MOD = ImportText.cpp ImportXFMail.cpp ImportPine.cpp \
       ImportMailrc.cpp ImportVCard.cpp \
       ExportPalm.cpp ExportText.cpp ExportVCard.cpp
 
-
 ifdef DEBUG
 SRC += ProvDummy.cpp
 endif
-
-HDR = $(SRC:.cpp=.h)
-DEP = $(SRC:.cpp=.d)
 
 include ../../makeopts
 
@@ -31,10 +25,10 @@ endif
 endif
 
 all: $(TARGETS)
+	@true
+
+include ../../makerules $(wildcard *.d)
 
 clean: stdclean
 
 .PHONY: clean all
-
-include ../../makerules
-include .depend

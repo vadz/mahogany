@@ -1,132 +1,118 @@
-dnl $Id$
 dnl Process this file with autoconf to produce a configure script.
 
-# WARNING ... WARNING ... WARNING ... WARNING ... WARNING ... WARNING
-# This file is undergoing active modification to support separate
-# build directories.  If you really feel you need to change it, please
-# co-ordinate your changes with GregNoel@san.rr.com so the equivalent
-# changes can be made on the branch as well.
-
-dnl ######################## Here the actual script begins ###############
-
 AC_INIT(configure.in)
-OS="${OSTYPE}"
+AC_REVISION([$Id$])
 
-if test "x$OS" = "x"; then
-  UNAME=`uname`
-  AC_MSG_ERROR("The system variable OS has not been set"
-               "please set is everytime befor compiling on this system"
-               "A good example for this system would be:"
-               "setenv OSTYPE $UNAME        for csh as a SHELL"
-               "EXPORT OSTYPE=$UNAME        for sh as SHELL"
-               "please set this and restart again."
-              )
+rm -f conftestdata
+if ln -s X conftestdata 2>/dev/null
+then	rm -f conftestdata
+else	AC_MSG_ERROR([Sorry, this build system will not work on a
+	system without symbolic links.  It depends on the ability
+	to create links to directories, so this is not something
+	that can be worked around.])
 fi
-CWD=`pwd`
+
+case "$OSTYPE" in '')
+	UNAME=`uname`
+	AC_MSG_ERROR([The system variable OSTYPE has not been set
+	Please set it every time before compiling on this system
+	A possible value for this system might be:
+	setenv OSTYPE $UNAME        for csh as a SHELL
+	export OSTYPE=$UNAME        for sh as SHELL
+	Please set this and restart.])
+esac
+
 AC_CONFIG_HEADER(include/config.h)
-AC_CONFIG_AUX_DIR($CWD/extra/scripts)
+AC_CONFIG_AUX_DIR(extra/scripts)
 
 dnl --------------------------------------------------------------------------
-dnl overrides, all --with/--without options
+dnl Mahogany parameter evaluation
+dnl Usage: M_OVERRIDES(package,message,variable,default,help)
 dnl --------------------------------------------------------------------------
 
-M_OVERRIDES_PREPARE
+## TEMPORARY
+rm -f ${OSTYPE}.system.cache*
 
-DEFAULT_USE_EFENCE=0
-DEFAULT_USE_DMALLOC=0
-DEFAULT_USE_DEBUG=0
-DEFAULT_USE_OPT=1
-DEFAULT_USE_PROFILER=0
-DEFAULT_USE_DEBUG_FLAG=0
-DEFAULT_USE_WXDEBUG=0
-DEFAULT_USE_PYTHON=1
-DEFAULT_USE_THREADS=0
-DEFAULT_USE_EXPERIMENTAL=0
-dnl DEFAULT_USE_LIBTOOL=0
-DEFAULT_USE_MODULES=auto
-DEFAULT_USE_LEAKTRACER=0
-DEFAULT_USE_STRICT=0
-DEFAULT_USE_SSL=1
+M_OVERRIDES(python,Python,USE_PYTHON,1,
+--disable-python        no Python scripting)
 
-M_OVERRIDES(python,python,
---with-python   use python scripting,
-USE_PYTHON)
+M_OVERRIDES(strict,strict compiler options,USE_STRICT,0,
+--enable-strict         strict compiler flags - may not work on all systems)
 
-M_OVERRIDES(threads,threads,
---with-threads    link with pthread(s) library,
-USE_THREADS)
+M_OVERRIDES(opt,optimization,USE_OPT,1,
+--disable-opt           no compiler optimisations - may not be effective)
 
-M_OVERRIDES(dmalloc,dmalloc,
---with-dmalloc  use dmalloc library for debugging,
-USE_DMALLOC)
+M_OVERRIDES(debug,debug code,USE_DEBUG,0,
+--enable-debug          compile debug code)
 
-M_OVERRIDES(leaktracer,leaktracer,
---with-leaktracer  use LeakTracer for debugging,
-USE_LEAKTRACER)
+M_OVERRIDES(debuginfo,debuging info,USE_DEBUG_INFO,0,
+--enable-debuginfo      include debug info from compiler)
 
-M_OVERRIDES(efence,efence,
---with-efence   use ElectricFence,
-USE_EFENCE)
+M_OVERRIDES(wxdebug,wxWin debug libs,USE_WXDEBUG,0,
+--with-wxdebug          use debug wxWindows libraries)
 
-M_OVERRIDES(debug,debug,
---with-debug    use debug code,
-USE_DEBUG)
+M_OVERRIDES(wxconfigprg,wxWin config prog,USE_WXCONFIGPRG,,
+--with-wxconfigprg=xxx  use wx-config program named xxx e.g. wxgtkd-config)
 
-M_OVERRIDES(opt,opt,
---with-opt    use compiler optimisations,
-USE_OPT)
+M_OVERRIDES(prof,profiling,USE_PROFILER,0,
+--enable-prof           generate profiling code)
 
-M_OVERRIDES(prof,prof,
---with-prof    generate profiling code,
-USE_PROFILER)
+M_OVERRIDES(experimental,experimental code,USE_EXPERIMENTAL,0,
+--enable-experimental   compile experimental code)
 
-M_OVERRIDES(debuginfo, debuginfo,
---with-debuginfo    use debug info from compiler,
-USE_DEBUG_FLAG)
+M_OVERRIDES(threads,multi-threading,USE_THREADS,0,
+--enable-threads        multi-threaded version)
 
-M_OVERRIDES(wxdebug,wxdebug,
---with-wxdebug    use debug wxWindows,
-USE_WXDEBUG)
+M_OVERRIDES(dmalloc,dmalloc library,USE_DMALLOC,0,
+--with-dmalloc          use dmalloc library for debugging)
 
+M_OVERRIDES(leaktracer,LeakTracer,USE_LEAKTRACER,0,
+--with-leaktracer       use LeakTracer for debugging)
 
-M_OVERRIDES(experimental,experimental,
---with-experimental    use experimental code,
-USE_EXPERIMENTAL)
+M_OVERRIDES(efence,ElectricFence,USE_EFENCE,0,
+--with-efence           use ElectricFence for debugging)
 
 dnl no longer updated in makefiles
-dnl M_OVERRIDES(libtool,libtool,
-dnl --with-libtool    use GNU libtool,
-dnl USE_LIBTOOL)
+dnl M_OVERRIDES(libtool,libtool,USE_LIBTOOL,0,
+dnl --with-libtool          use GNU libtool)
 
-M_OVERRIDES(ccostype,ccostype,
---with-ccostype=xxx    use OS type xxx for c-client compilation,
-USE_CCOSTYPE)
+M_OVERRIDES(ccostype,c-client OS type,USE_CCOSTYPE,,
+--with-ccostype=xxx     use OS type xxx for c-client compilation)
 
-M_OVERRIDES(modules,modules,
---with-modules    either =static =none or =dynamic,
-USE_MODULES)
+M_OVERRIDES(modules,modules,USE_MODULES,auto,
+--with-modules=xxx      one of static/none/dynamic)
 
-M_OVERRIDES(strict, strict,
---with-strict            Strict compiler flags - may not work on all systems,
-USE_STRICT)
+M_OVERRIDES(ssl,SSL support,USE_SSL,1,
+--without-ssl           do not include SSL support (requires openSSL))
 
-M_OVERRIDES(ssl,ssl,
---with-ssl      compile in SSL support (requires openSSL),
-USE_SSL)
+AC_MSG_CHECKING(for install location)
+case "$prefix" in
+NONE)	AC_CACHE_VAL(m_cv_prefix,m_cv_prefix=/usr);;
+*)	m_cv_prefix=$prefix ;;
+esac
+prefix=$m_cv_prefix
+AC_MSG_RESULT($prefix)
 
-M_OVERRIDES(wxconfigprg,wxconfigprg,
---with-wxconfigprg=xxx    use wx-config program named xxx e.g. wxgtkd-config,
-USE_WXCONFIGPRG)
-
-
-
-M_OVERRIDES_DONE
+dnl save parameter settings in case stuff below aborts
+AC_CACHE_SAVE
 
 dnl --------------------------------------------------------------------------
 dnl testing operating system and compilers
 dnl --------------------------------------------------------------------------
 
 AC_CANONICAL_HOST
+dnl setting the OS type for information
+AC_DEFINE_UNQUOTED(M_CANONICAL_HOST,"$host")
+AC_DEFINE_UNQUOTED(M_OSINFO,"`uname -s -r -m`")
+AC_DEFINE_UNQUOTED(M_PREFIX,"$prefix")
+
+dnl set the top level directories
+dnl use "exec pwd" to avoid shell built-in
+dnl use "cd ." so FreeBSD shell will fork subshell
+SOURCEDIR=`cd $srcdir; exec pwd`
+AC_SUBST(SOURCEDIR)
+BUILDDIR=`cd .; exec pwd`
+AC_SUBST(BUILDDIR)
 
 dnl ###################
 dnl # checks programs #
@@ -134,179 +120,161 @@ dnl ###################
 
 dnl C-compiler checks
 dnl =================
-dnl use what compiler
+
+dnl use what compiler?
+CFLAGS=${CFLAGS=}	# magic incantation so CFLAGS not set by AC_PROG_CC
 AC_PROG_CC
 dnl   defines CC with the compiler to use
-dnl   defines GCC with yes if using gcc
-dnl   defines GCC empty if not using gcc
+dnl   defines GCC with yes if using gcc, else empty
 dnl   defines CFLAGS
 
-dnl does compiler support -c and -o simultaniously
-AC_PROG_CC_C_O
+dnl fixups for UNIX variants
+AC_ISC_POSIX
+
+dnl does compiler support -c and -o simultaniously?
+dnl AC_PROG_CC_C_O
 dnl   defines NO_MINUS_C_MINUS_O if compiler does not accept 
 dnl                              both switches simultaniously
-dnl what is the c-preprocessor
+
+dnl disable support for exceptions if the compiler is gcc and
+dnl new enough to support it.
+case "$GCC" in yes)
+	AC_CACHE_CHECK(whether ${CC-gcc} accepts -fno-exceptions,
+	m_cv_gcc_exceptions,
+	[echo 'void f(){}' >conftest.c
+	case "`${CC-cc} -fno-exceptions -c conftest.c 2>&1`" in
+	'')	m_cv_gcc_exceptions=yes ;;
+	*)	m_cv_gcc_exceptions=no ;;
+	esac
+	rm -f conftest*])
+	case "$m_cv_gcc_exceptions" in yes)
+		CFLAGS="$CFLAGS -fno-exceptions"
+	esac
+dnl	CFLAGS="$CFLAGS -DCC_GCC -Wall "
+esac
+
+dnl how to generate dependencies...
+dnl for now, we just support -MD on gcc
+case "$GCC" in yes)
+	CFLAGS="$CFLAGS -MD"
+esac
+
+dnl what is the c-preprocessor?
 AC_PROG_CPP
 dnl   defines CPP with the c-preprocessor
-dnl is -traditional needed for correct compilations
+
+dnl is -traditional needed for correct compilations?
 AC_PROG_GCC_TRADITIONAL
 dnl   adds -traditional for gcc if needed
 
-dnl sets RANLIB to ranlib location or nothing
-AC_PROG_RANLIB
-
-dnl sets YACC to yacc location
-AC_PROG_YACC
-
-AC_LANG_SAVE
-
-AC_PROG_INSTALL
+dnl Checks for compiler characteristics.
+AC_C_CONST
+AC_C_INLINE
 
 dnl C++-compiler checks
 dnl ===================
-dnl use what compiler
-AC_PROG_CXX
-dnl   defines CXX with the compiler to use
-dnl   defines GXX with yes if using gxx
-dnl   defines GXX empty if not using gxx
-dnl   defines CXXFLAGS
-
-AC_PROG_CXX_WORKS
-dnl check if the c++-compiler is working
-
-dnl what is the C++-preprocessor
-AC_PROG_CXXCPP
-dnl   defines CXXCPP with the C++-preprocessor
-
-dnl Karsten: why removing the -g flags??
-CXXFLAGS=`echo "$CXXFLAGS" | sed 's/-g./ /g'`
-
-AC_LANG_RESTORE
-
-AC_PROG_MAKE_SET
-AC_ISC_POSIX
 
 AC_LANG_CPLUSPLUS
 
-AC_PROG_YACC
+dnl use what compiler?
+CXXFLAGS=${CXXFLAGS=}	# magic incantation so CXXFLAGS not set by AC_PROG_CXX
+AC_PROG_CXX
+dnl   defines CXX with the compiler to use
+dnl   defines GXX with yes if using gxx, else empty
+dnl   defines CXXFLAGS
 
-dnl Are we using libtool?
-MAKE_LIBTOOL=	
-if test "$USE_LIBTOOL" = 1; then
-	AM_PROG_LIBTOOL
-	MAKE_LIBTOOL="USE_LIBTOOL=yes"
-else
-	LIBTOOL=
-	AC_SUBST(LIBTOOL)
-fi
-AC_SUBST(MAKE_LIBTOOL)
+dnl disable support for exceptions if the compiler is g++ and
+dnl new enough to support it.
+case "$GXX" in yes)
+	AC_CACHE_CHECK(whether ${CXX-g++} accepts -fno-exceptions,
+	m_cv_gxx_exceptions,
+	[echo 'void f(){}' >conftest.cc
+	case "`${CC-g++} -fno-exceptions -c conftest.cc 2>&1`" in
+	'')	m_cv_gxx_exceptions=yes ;;
+	*)	m_cv_gxx_exceptions=no ;;
+	esac
+	rm -f conftest*])
+	case "$m_cv_gxx_exceptions" in yes)
+		CXXFLAGS="$CXXFLAGS -fno-exceptions"
+	esac
+dnl	CXXFLAGS="$CXXFLAGS -DCC_GCC"
+esac
+
+dnl how to generate dependencies...
+dnl for now, we just support -MD on g++
+case "$GXX" in
+yes)	CXXFLAGS="$CXXFLAGS -MD" ;;
+*)	AC_MSG_WARN([*** dependencies not supported ***
+	Dependencies are not supported for this compiler.  If this
+	message appears, then we need to talk---we think we know
+	how to fix this, but we don't have a machine where we can
+	test it.  Please go to http://www.wxwindows.org/m-bugs and
+	submit a bug against the Build component so we can give
+	you some code to try.]);;
+esac
+
+dnl Various other commands needed
+dnl =============================
+
+dnl set RANLIB to ranlib location or nothing
+AC_PROG_RANLIB
 
 dnl check for M4
 AC_PATH_PROG(M4, m4)
 
-dnl
-dnl Here we disable support for exceptions if the compiler is gcc and
-dnl new enough to support it.
-dnl
-AC_PATH_PROG(GREP, grep)
-if test "$GCC" = "yes"
-then
-	dnl first, for gcc set our own debug flags
-	CFLAGS=`echo "$CFLAGS" | sed 's/-g//g'`
-	CXXFLAGS=`echo "$CXXFLAGS" | sed 's/-g//g'`
+dnl set YACC to yacc location
+AC_PROG_YACC
 
-	dnl now check for exception disabling
-	AC_MSG_CHECKING(for gcc with 2.8 style options)
-	CFLAGS="$CFLAGS -DCC_GCC -Wall "
-	CXXFLAGS="$CXXFLAGS -DCC_GCC -Wall"
-	newgcc=
-	dnl is it gcc 2.8 or newer?
-	$CXX -v 2>&1 | $GREP 2.8 >/dev/null
-	if test $? = 0 ; then newgcc=yes ; fi
-	dnl is it egcs?
-	$CXX -v 2>&1 | $GREP egcs >/dev/null
-	if test $? = 0 ; then newgcc=yes ; fi
-	dnl or is it pgcc?
-	$CXX -v 2>&1 | $GREP pgcc >/dev/null
-	if test $? = 0 ; then newgcc=yes ; fi
-	if test "x$newgcc" = "xyes"
-	then
-		CXXFLAGS="$CXXFLAGS -fno-exceptions "
-		AC_MSG_RESULT(yes)
-	else
-		AC_MSG_RESULT(no)
-	fi
-fi
+AC_PROG_INSTALL
+
+AC_PROG_MAKE_SET
+
+dnl Are we using libtool?
+case "$USE_LIBTOOL" in
+1)	MAKE_LIBTOOL="USE_LIBTOOL=yes"
+	AM_PROG_LIBTOOL ;;
+*)	MAKE_LIBTOOL=
+	LIBTOOL=
+	AC_SUBST(LIBTOOL) ;;
+esac
+AC_SUBST(MAKE_LIBTOOL)
 
 dnl --------------------------------------------------------------------------
-dnl add our extra directories to the search path
-dnl --------------------------------------------------------------------------
-
-dnl set the top level directory
-BUILDDIR=`pwd`
-AC_SUBST(BUILDDIR)
-
-dnl set the extra include and lib directories
-LDFLAGS="$LDFLAGS -L$BUILDDIR/extra/lib"
-CPPFLAGS="$CPPFLAGS -D__WXGTK__ -I$BUILDDIR/extra/include"
-
-dnl add all extra/src directories to the search paths
-EXTRA_SRC_LIB=
-EXTRA_SRC_INC=
-for i in `pwd`/extra/src/*
-do
-	if test "x$i" != "xCVS" -a -d $i; then
-		LIBS="$LIBS -L$i"
-		CPPFLAGS="$CPPFLAGS -I$i"
-	fi
-done
-
-
-dnl --------------------------------------------------------------------------
-dnl check for featurs and functions
+dnl check for features and functions
 dnl --------------------------------------------------------------------------
 
 dnl we use C++ so we always have prototypes - Python.h needs this
 AC_DEFINE(HAVE_PROTOTYPES)
 
 dnl used by python
-works=no
-AC_MSG_CHECKING(for variable length prototypes and stdarg.h)
-AC_TRY_COMPILE([
-#include <stdarg.h>
-int foo(int x, ...) {
-	va_list va;
-	va_start(va, x);
-	va_arg(va, int);
-	va_arg(va, char *);
-	va_arg(va, double);
-	return 0;
-}
-], [return foo(10, "", 3.14);],
-AC_DEFINE(HAVE_STDARG_PROTOTYPES) works=yes)
-AC_MSG_RESULT($works)
+AC_CACHE_CHECK(for variable length prototypes and stdarg.h,
+	m_cv_stdarg_prototypes,
+	[AC_TRY_COMPILE(
+	[#include <stdarg.h>
+	int foo(int x, ...) {
+		va_list va;
+		va_start(va, x);
+		va_arg(va, int);
+		va_arg(va, char *);
+		va_arg(va, double);
+		return 0;
+	}], [return foo(10, "", 3.14);],
+		m_cv_stdarg_prototypes=yes, m_cv_stdarg_prototypes=no)])
+case "$m_cv_stdarg_prototypes" in yes)
+	AC_DEFINE(HAVE_STDARG_PROTOTYPES)dnl
+esac
 
-if test "$have_prototypes" = yes; then
-	bad_prototypes=no
-	AC_MSG_CHECKING(for bad exec* prototypes)
-	AC_TRY_COMPILE([#include <unistd.h>], [char **t;execve("@",t,t);], ,
-	AC_DEFINE(BAD_EXEC_PROTOTYPES) bad_prototypes=yes)
-	AC_MSG_RESULT($bad_prototypes)
-fi
+AC_CACHE_CHECK(for bad exec* prototypes, m_cv_bad_exec,
+	[AC_TRY_COMPILE([#include <unistd.h>], [char **t;execve("@",t,t);],
+		m_cv_bad_exec=yes, m_cv_bad_exec=no)])
+case "$m_cv_bad_exec" in yes)
+	AC_DEFINE(BAD_EXEC_PROTOTYPES)dnl
+esac
 
-dnl Checks for typedefs, structures, and compiler characteristics.
-AC_C_CONST
-AC_C_INLINE
+dnl Checks for typedefs and structures.
 AC_TYPE_SIZE_T
 AC_STRUCT_TM
-AC_CHECK_FUNCS(strerror strstr strsep)
-
-dnl --------------------------------------------------------------------------
-dnl check for header files
-dnl --------------------------------------------------------------------------
-
-AC_CHECK_HEADERS(strings.h unistd.h stdlib.h stdarg.h)
-dnl no longer testing for compface.h because it is included with M
+AC_CHECK_FUNCS(strsep)
 
 dnl --------------------------------------------------------------------------
 dnl check for the overridable options
@@ -315,104 +283,108 @@ dnl --------------------------------------------------------------------------
 dnl memory debug libraries get tested last to make sure they are linked last
 
 dnl electric fence
-if test "$USE_EFENCE" = 1; then
-	AC_CHECK_LIB(efence,main,LIB_EFENCE="-lefence",AC_MSG_WARN("efence library configured but not available."))
-fi
+case "$USE_EFENCE" in 1)
+	AC_CHECK_LIB(efence,main,
+		LIB_EFENCE="-lefence",
+		AC_MSG_WARN(efence library configured but not available.))
+esac
 
 dnl dmalloc debugging lib
-if test "$USE_DMALLOC" = 1; then
-	AC_CHECK_LIB(dmalloc,main,LIB_DMALLOC="-ldmalloc",AC_MSG_WARN("dmalloc library configured but not available."))
-fi
+case "$USE_DMALLOC" in 1)
+	AC_CHECK_LIB(dmalloc,main,
+		LIB_DMALLOC="-ldmalloc",
+		AC_MSG_WARN(dmalloc library configured but not available.))
+esac
 
 dnl LeakTracer debugging lib
-MAKE_USE_LEAKTRACER=
-if test "$USE_LEAKTRACER" = 1; then
-	MAKE_USE_LEAKTRACER="USE_LEAKTRACER=yes"
-fi
-	AC_SUBST(MAKE_USE_LEAKTRACER)
+case "$USE_LEAKTRACER" in
+1)	MAKE_USE_LEAKTRACER="USE_LEAKTRACER=yes" ;;
+*)	MAKE_USE_LEAKTRACER="" ;;
+esac
+AC_SUBST(MAKE_USE_LEAKTRACER)
 
-if test "$USE_THREADS" = 1
-then
+case "$USE_THREADS" in 1)
 	AC_CHECK_LIB(pthread,main,,AC_CHECK_LIB(pthreads,main))
 	AC_DEFINE(USE_THREADS)
 	LDFLAGS="$LDFLAGS -lpthread"
-fi
-
+esac
 
 dnl set debug/optimisation flags
-DBGFLAGS=
-MAKE_DEBUG=
 
-if test "$USE_WXDEBUG" = 1; then
-	DBGFLAGS="-D__WXDEBUG__"
-	WXCONFIG_NAME="wxgtkd-config"
+case "$USE_WXDEBUG" in
+1)	# AC_DEFINE(__WXDEBUG__)
 	USE_OPT=0
-else
-	WXCONFIG_NAME="wx-config"
-fi
+	WXCONFIG_NAME="wxgtkd-config" ;;
+*)	WXCONFIG_NAME="wx-config" ;;
+esac
+case "$USE_WXCONFIGPRG" in
+'')	;;
+*)	WXCONFIG_NAME="$USE_WXCONFIGPRG" ;;
+esac
 
-if test "x$USE_WXCONFIGPRG" != "x"; then
-	WXCONFIG_NAME="$USE_WXCONFIGPRG"
-fi
+case "$USE_OPT" in
+1)	MYFLAGS="-O2" ;;
+*)	MYFLAGS="-O0" ;;
+esac
 
-if test "$USE_DEBUG" = 1; then
-	DBGFLAGS="$DBGFLAGS -DDEBUG"
-	MAKE_DEBUG="DEBUG=yes"
-	USE_DEBUG_FLAG=1
-fi
+case "$USE_DEBUG" in
+1)	AC_DEFINE(DEBUG)
+	if test -x /usr/bin/whoami
+	then	CPPFLAGS="$CPPFLAGS -DDEBUG_`/usr/bin/whoami`"
+	fi
+	USE_DEBUG_INFO=1
+	MAKE_DEBUG="DEBUG=yes" ;;
+*)	MAKE_DEBUG='' ;;
+esac
 AC_SUBST(MAKE_DEBUG)
 
-if test "$USE_DEBUG_FLAG" = 1; then
-	if test "$GCC" = "yes"
-	then
-		DBGFLAGS="$DBGFLAGS -O0 -g3"
-	else
-		DBGFLAGS="$DBGFLAGS -g"
-	fi
-fi
+case "$USE_DEBUG_INFO.$GXX.$ac_cv_prog_cc_g" in
+1.yes.*)	MYFLAGS="$MYFLAGS -g3" ;;
+1.no.yes)	MYFLAGS="$MYFLAGS -g" ;;
+esac
 
-if test "$USE_OPT" != 1; then
-	OPT="-O0"
-fi
-
-if test "$USE_PROFILER" = 1; then
-	OPT="$OPT -pg"
-fi
+case "$USE_PROFILER" in 1)
+	MYFLAGS="$MYFLAGS -pg"
+esac
 
 dnl experimental code (unstable!)
-MAKE_EXPERIMENTAL=
-if test "$USE_EXPERIMENTAL" = 1; then
-	DBGFLAGS="$DBGFLAGS -DEXPERIMENTAL=1"
-	MAKE_EXPERIMENTAL="EXPERIMENTAL=yes"
-fi
+case "$USE_EXPERIMENTAL" in
+1)	AC_DEFINE(EXPERIMENTAL)
+	if test -x /usr/bin/whoami
+	then	CPPFLAGS="$CPPFLAGS -DEXPERIMENTAL_`/usr/bin/whoami`"
+	fi
+	MAKE_EXPERIMENTAL="EXPERIMENTAL=yes" ;;
+*)	MAKE_EXPERIMENTAL='' ;;
+esac
 AC_SUBST(MAKE_EXPERIMENTAL)
 
 dnl precompiled headers
-if test "$USE_PCH" = 1; then
+case "$USE_PCH" in 1)
 	AC_DEFINE(USE_PCH)
-fi
+esac
 
 dnl Use SSL (requires openSSL)
 MAKE_USESSL=
 CCLIENT_EXTRAAUTHENTICATORS=
-CCLIENT_EXTRACFLAGS=
-EXTRACFLAGS=
-if test "$USE_SSL" = 1; then
-dnl we assume no idea/no dsa/no rsa as this is easiest to compile
-dnl doesn't matter anyway as we load openssl later, but we must be
-dnl able to compile the header file
-	EXTRACFLAGS="$EXTRACFLAGS -DNO_IDEA -DNO_DSA -DNO_RSA"
-	CPPFLAGS="$CPPFLAGS -DNO_IDEA -DNO_DSA -DNO_RSA"
-	AC_CHECK_LIB(c, socket,, AC_CHECK_LIB(socket,socket))
-	AC_CHECK_LIB(c, gethostname,, AC_CHECK_LIB(resolv,gethostname))
-	AC_CHECK_LIB(c, gethostbyname,, AC_CHECK_LIB(nsl,gethostbyname))
+case "$USE_SSL" in
+1)	AC_CHECK_FUNC(socket,, AC_CHECK_LIB(socket,socket))
+	AC_CHECK_FUNC(gethostname,, AC_CHECK_LIB(resolv,gethostname))
+	AC_CHECK_FUNC(gethostbyname,, AC_CHECK_LIB(nsl,gethostbyname))
 	AC_CHECK_HEADERS(openssl/ssl.h,[
 		MAKE_USESSL="USESSL=yes"
-		AC_DEFINE(USE_SSL)
 		CCLIENT_EXTRAAUTHENTICATORS="\"EXTRAAUTHENTICATORS=ssl\""
-	], AC_MSG_WARN("Cannot find openssl/ssl.h - SSL support disabled."))
-	CCLIENT_EXTRACFLAGS="\"EXTRACFLAGS=$EXTRACFLAGS\""
-fi
+		AC_DEFINE(USE_SSL)
+		dnl We assume no idea/no dsa/no rsa as this is easiest
+		dnl to compile. It doesn't matter anyway as we load openssl
+		dnl later, but we must be able to compile the header file.
+		AC_DEFINE(NO_IDEA)
+		AC_DEFINE(NO_DSA)
+		AC_DEFINE(NO_RSA)
+	], AC_MSG_WARN(Cannot find openssl/ssl.h - SSL support disabled.))
+	CCLIENT_EXTRACFLAGS="\"EXTRACFLAGS=-DNO_IDEA -DNO_DSA -DNO_RSA\""
+	;;
+*)	CCLIENT_EXTRACFLAGS=
+esac
 AC_SUBST(MAKE_USESSL)
 AC_SUBST(CCLIENT_EXTRAAUTHENTICATORS)
 AC_SUBST(CCLIENT_EXTRACFLAGS)
@@ -422,53 +394,46 @@ dnl --------------------------------------------------------------------------
 dnl check for other libraries
 dnl --------------------------------------------------------------------------
 
-dnl we might need dl (depending on wxGTK and python config), so link with it if
-dnl it is available 
-AC_CHECK_LIB(dl,main,,AC_MSG_WARN("dl library might be needed."))
+dnl we might need dl (depending on wxGTK and python config),
+dnl so link with it if it is available 
+AC_CHECK_LIB(dl,main,,AC_MSG_WARN(dl library might be needed.))
 
 dnl c-client library needs the crypt() function which is either in the 
 dnl c library or in libcrypt
-AC_CHECK_LIB(c,crypt,,
-  AC_CHECK_LIB(crypt,crypt,,[
-    AC_MSG_ERROR(
-    "Cannot find crypt function."
-    "It appears that the c library does not contain it nor is libcrypt"
-     "installed on your system. Before compiling Mahogany you need to"
-     "install libcrypt which is needed for password authentication."
-     "You can download the source for a suitable libcrypt from the"
-     "Mahogany ftp server: ftp://ronnie.phy.hw.ac.uk/pub/Mahogany/Libraries"
-)
-]
-))
+AC_CHECK_FUNC(crypt,,
+  [AC_CHECK_LIB(crypt,crypt,,
+    [AC_MSG_ERROR([Cannot find crypt function.
+It appears that the c library does not contain it, nor is libcrypt
+installed on your system.  Before compiling Mahogany you need to
+install libcrypt which is needed for password authentication.  You
+can download the source for a suitable libcrypt from the Mahogany
+ftp server (ftp://ronnie.phy.hw.ac.uk/pub/Mahogany/Libraries).])])]) 
 
 dnl If we have a libshadow, link with it. I am not sure whether we
 dnl really need this.
 AC_CHECK_LIB(shadow,main)
 
-
 dnl libresolv or libbind
 USE_RBL=1
 AC_CHECK_LIB(resolv,res_init,,
-AC_CHECK_LIB(bind,res_init,, [ AC_MSG_WARN("Cannot use RBL spam checker.")
-USE_RBL=0 ] ))
-AC_DEFINE(USE_RBL)
+	AC_CHECK_LIB(bind,res_init,,
+		[AC_MSG_WARN(cannot use RBL spam checker.)
+		USE_RBL=0 ] ))
+case "$USE_RBL" in 1) AC_DEFINE(USE_RBL) ;; esac
 
 dnl POSIX.2 regexp support
 HAVE_POSIX_REGEX=0
 AC_CHECK_HEADERS(regexp.h,
-AC_CHECK_LIB(c, regcomp, HAVE_POSIX_REGEX=1,
-AC_CHECK_LIB(regex,regcomp, [ LIBS="$LIBS -lregex"
-HAVE_POSIX_REGEX=1 ] )))
-AC_DEFINE(HAVE_POSIX_REGEX)
+	AC_CHECK_FUNC(regcomp, HAVE_POSIX_REGEX=1,
+		AC_CHECK_LIB(regex,regcomp, [LIBS="$LIBS -lregex"
+			HAVE_POSIX_REGEX=1 ] )))
+case "$HAVE_POSIX_REGEX" in 1) AC_DEFINE(HAVE_POSIX_REGEX) ;; esac
 
 dnl --------------------------------------------------------------------------
-dnl check for python ( a bit lengthy thanks to its stupid installation)
+dnl check for python (a bit lengthy thanks to its stupid installation)
 dnl --------------------------------------------------------------------------
 
-MAKE_USE_PYTHON=
-MAKE_USE_SWIG=
-PYTHON_LIBS=
-if test "$USE_PYTHON" = 1 ; then
+case "$USE_PYTHON" in 1)
    M_CHECK_MYHEADER(Python.h,
        [ /usr \
          /usr/include \
@@ -496,137 +461,123 @@ if test "$USE_PYTHON" = 1 ; then
              /home/local/lib/python1.5/config \
              /home/local/python1.5/config\
            ],
-             [ AC_DEFINE(USE_PYTHON)
-               MAKE_USE_PYTHON="USE_PYTHON=yes"
+             [ PYTHON_LIBS="$libpath_python1_5_main -lpython1.5"
 #               AC_CHECK_LIB(swigpy,main,
-#             [  AC_DEFINE(HAVE_SWIGLIB)
-#                PYTHON_LIBS="$libpath_python1_5_main -lpython1.5 -lswigpy"
-#              ],
-#              [ AC_MSG_WARN("Cannot find SWIG library for python - trying anyway.")
-                PYTHON_LIBS="$libpath_python1_5_main -lpython1.5"
-#              ],
-#              [$libpath_python1_5_main -lpython1.5]
-#             )
+#               [  AC_DEFINE(HAVE_SWIGLIB)
+#                  PYTHON_LIBS="$PYTHON_LIBS -lswigpy"
+#               ],
+#               [ AC_MSG_WARN(Cannot find SWIG library for python - trying anyway.)
+#               ],
+#               $PYTHON_LIBS)
            ], [ USE_PYTHON=0 ]
          )
        ], [ USE_PYTHON=0 ]
    )
-   AC_PATH_PROG(SWIG,swig)
-   if test "x$SWIG" != "x"
-   then
-	MAKE_USE_SWIG="USE_SWIG=yes"
-   fi
-fi
+esac
 
-if test "$USE_PYTHON" = 1
-then
-  MAKE_USE_PYTHON="USE_PYTHON=yes"
-  AC_SUBST(MAKE_USE_PYTHON)
-  AC_SUBST(MAKE_USE_SWIG)
-else
-  AC_MSG_WARN("Building M without Python leads to reduced functionality!")
-fi
+AC_PATH_PROG(SWIG,swig)
+case "$SWIG" in
+'')	AC_MSG_WARN([cannot find SWIG - will try to use intermediate files
+	to compile Python support.  If possible, please install SWIG.])
+	MAKE_USE_SWIG= ;;
+*)	MAKE_USE_SWIG="USE_SWIG=yes" ;;
+esac
+AC_SUBST(MAKE_USE_SWIG)
+
+case "$USE_PYTHON" in
+1)	AC_DEFINE(USE_PYTHON)
+	MAKE_USE_PYTHON="USE_PYTHON=yes"
+	dnl extra libs required by python on freebsd
+	case "$OSTYPE" in freebsd* | FreeBSD*)
+		LIBS="$LIBS -lreadline" ;;
+	esac ;;
+*)	MAKE_USE_PYTHON=
+	AC_MSG_WARN(Building M without Python leads to reduced functionality!)
+	PYTHON_LIBS='' ;;
+esac
+AC_SUBST(MAKE_USE_PYTHON)
 
 dnl check for xgettext
 AC_PATH_PROG(XGETTEXT,xgettext)
-if test "x$XGETTEXT" = x
-then
-  AC_MSG_WARN("Cannot generate messages.po for translations.")
-  XGETTEXT="echo xgettext "
-  AC_SUBST(XGETTEXT)
-fi
+case "$XGETTEXT" in '')
+	AC_MSG_WARN(cannot generate messages.po for translations.)
+	XGETTEXT="true xgettext"
+esac
+AC_SUBST(XGETTEXT)
 
 dnl check for msgfmt
 AC_PATH_PROG(MSGFMT,msgfmt)
-if test "x$MSGFMT" = x
-then
-  AC_MSG_WARN("Cannot translate messages.")
-  MSGFMT="echo msgfmt "
-  AC_SUBST(MSGFMT)
-fi
+case "$MSGFMT" in '')
+	AC_MSG_WARN(cannot translate messages.)
+	MSGFMT="true msgfmt"
+esac
+AC_SUBST(MSGFMT)
 
 dnl --------------------------------------------------------------------------
 dnl check for (wx)gtk libraries
 dnl --------------------------------------------------------------------------
 
-GTK_LDFLAGS=
 dnl check for wx-config
+WX_CONFIG="$WXCONFIG_NAME"	# Bug in autoconf?
 AC_PATH_PROG(WX_CONFIG,$WXCONFIG_NAME)
-if test "x$WX_CONFIG" != "x"
-then
-	GTK_CFLAGS=`$WX_CONFIG --cflags`
-	GTK_LDFLAGS=`$WX_CONFIG --libs`
-else
-	AC_MSG_ERROR("Cannot find wx-config program.")
-fi
+case "$WX_CONFIG" in '')
+	AC_MSG_ERROR([cannot find $WXCONFIG_NAME program to get the wxWin
+	configuration.  If it's not in the standard PATH, use the
+	--with-wxconfigprg option to specify it.])
+esac
+
+CPPFLAGS="$CPPFLAGS `$WX_CONFIG --cflags`"
+
+GTK_LDFLAGS=`$WX_CONFIG --libs`
 AC_SUBST(GTK_LDFLAGS)
 GUI_LIBS_STATIC=`echo $GTK_LDFLAGS | sed '
 s/-lgtk/-Wl,-Bstatic -lgtk/g
 s/-lglib/-lglib -Wl,-Bdynamic/g'`
 AC_SUBST(GUI_LIBS_STATIC)
 
-CPPFLAGS="$CPPFLAGS $GTK_CFLAGS"
-dnl only now can we check for wx.h because it would fail without the
-dnl gtk headers
-AC_CHECK_HEADERS(wx/wx.h,,AC_MSG_ERROR("Cannot find wx/wx.h header file."))
+dnl only now can we check for wx.h because it would
+dnl fail without the gtk headers
+AC_CHECK_HEADERS(wx/wx.h,,AC_MSG_ERROR([cannot find wx/wx.h header file.
+	You must have wxWindows installed to compile Mahogany.]))
 
 dnl --------------------------------------------------------------------------
 dnl c-client library: set the proper OSTYPE and compiler variables
 dnl --------------------------------------------------------------------------
 
-dnl This code also sets the EXTRALIBS setting with any OS 
-dnl specific flags that cannot otherwise be tested for.
-EXTRALIBS=
-
-dnl we need to set the target for c-client library:
-
-
-if test "x$USE_CCOSTYPE" != "x"; then
-	CCOSTYPE="$USE_CCOSTYPE"
-else
-	CCOSTYPE=
-	AC_MSG_CHECKING(for c-client library OS type)
-	case "${OSTYPE}" in
+dnl we need to set the target for c-client library
+case "$USE_CCOSTYPE" in
+''|0|1)	AC_MSG_CHECKING(for c-client library OS type)
+	case "$OSTYPE" in
 	linux* | Linux*)
-	  CCOSTYPE=slx
-	  ;;
+		CCOSTYPE=slx ;;
 	Solaris* | solaris* | SunOS*)
-	  if test "$GCC" = "yes"
-	  then
-	    CCOSTYPE=gso
-	  else
-	    CCOSTYPE=sol
-	  fi
-	  ;;
+		case "$GXX" in
+		yes)	CCOSTYPE=gso ;;
+		*)	CCOSTYPE=sol ;;
+		esac ;;
 	freebsd* | FreeBSD*)
-	  CCOSTYPE=bsf
-dnl extra libs as required by python on freebsd:
-	  EXTRALIBS="-lreadline"
-	  ;;
+		CCOSTYPE=bsf ;;
 	hpux_9*)
-	  CCOSTYPE=hpp
-	  ;;
+		CCOSTYPE=hpp ;;
 	hpux_10*)
-	  CCOSTYPE=hpx
-	  ;;
+		CCOSTYPE=hpx ;;
 	OSF1*)
-	  if test "$GCC" = "yes"
-	  then
-	    CCOSTYPE=gof
-	  else
-			    CCOSTYPE=osf
-	  fi
-	  ;;
+		case "$GXX" in
+		yes)	CCOSTYPE=gof ;;
+		*)	CCOSTYPE=osf ;;
+		esac ;;
+	*)
+		AC_MSG_RESULT(unknown)
+		AC_MSG_ERROR([cannot determine c-client OS type for $OSTYPE])
+		;;
 	esac
-fi
-
-AC_MSG_RESULT($CCOSTYPE)
-if test "x$CCOSTYPE" = "x" ; then
-	AC_MSG_ERROR("Cannot determine OS type for c-client library for your OS: ${OSTYPE}.")
-fi
+	dnl cache it to be picked up as a parameter next time
+	m_cv_USE_CCOSTYPE="$CCOSTYPE"
+	AC_MSG_RESULT($CCOSTYPE) ;;
+*)	CCOSTYPE="$USE_CCOSTYPE" ;;
+esac
 AC_SUBST(CCOSTYPE)
 
-MAKE_HAVE_LIBMAL=
 dnl this must come after we checked for wxGTK and network libraries
 dnl Check if we have the pi-sock library and headers for PalmOS support.
 MAKE_PISOCKLIB=
@@ -635,184 +586,221 @@ AC_CHECK_HEADERS(pi-source.h,
   [ AC_DEFINE(USE_PISOCK)
     MAKE_PISOCKLIB="PISOCK_LIB=-lpisock"
     AC_CHECK_LIB(pisock, pi_setmaxspeed,AC_DEFINE(HAVE_PI_SETMAXSPEED),
-    AC_MSG_WARN("Your pisock library is old - some functionality will be disabled."))
+    AC_MSG_WARN(Your pisock library is old - some functionality will be disabled.))
   ],
-  AC_MSG_WARN("Cannot find pisock library - support for PalmOS disabled.")
+  AC_MSG_WARN(Cannot find pisock library - support for PalmOS disabled.)
  ),
- AC_MSG_WARN("Cannot find pisock library headers - support for PalmOS disabled.")
+ AC_MSG_WARN(Cannot find pisock library headers - support for PalmOS disabled.)
 )
 AC_SUBST(MAKE_PISOCKLIB)    
 
-if test "x$MAKE_PISOCKLIB" != "x" ; then
+MAKE_HAVE_LIBMAL=
 dnl Check if we have libmal source in extra/src
-    AC_MSG_CHECKING(for libmal library source in ./extra/src)
-    if  test -d ./extra/src/libmal 
-    then
-	AC_MSG_RESULT(found - MAL synchronisation for PalmOS activated)
-	dnl the following settings are used by the libmal/Makefile
-	dnl MALTOP=$BUILDDIR/extra/src/libmal/malsync_src
-	MALTOP=./malsync_src
-	AC_SUBST(MALTOP)
-	cflags="$CFLAGS -I$MALTOP/mal/client/common -I$MALTOP/mal/common"
-	AC_SUBST(cflags)
-	libs=
-	llibs=
-	ccoptions=
-	AC_SUBST(libs)
-	AC_SUBST(llibs)
-	AC_SUBST(ccoptions)
-	PILOT_LIBS=$PISOCK_LIB
-	AC_SUBST(PILOT_LIBS)
-	MAKE_HAVE_LIBMAL="HAVE_LIBMAL=yes"
-    else
-      AC_MSG_RESULT(not found - MAL synchronisation for PalmOS not available)
-    fi
-fi
+case "$MAKE_PISOCKLIB" in '') ;; *)
+	AC_MSG_CHECKING(for libmal in extra/src)
+	if test ! -d $srcdir/extra/src/libmal 
+	then
+		AC_MSG_RESULT(not found - no MAL synch for PalmOS)
+	elif test "$SOURCEDIR" != "$BUILDDIR"
+	then
+		##### TODO
+		AC_MSG_RESULT(not supported for separate build tree)
+	else
+		AC_MSG_RESULT(found - MAL synch for PalmOS activiated)
+		dnl the following settings are used by the libmal/Makefile
+		dnl MALTOP=$SOURCEDIR/extra/src/libmal/malsync_src
+		MALTOP=malsync_src
+		AC_SUBST(MALTOP)
+		cflags="$CFLAGS -I$MALTOP/mal/client/common -I$MALTOP/mal/common"
+		PILOT_LIBS=$PISOCK_LIB
+		AC_SUBST(cflags) AC_SUBST(PILOT_LIBS)
+		libs=
+		llibs=
+		ccoptions=
+		AC_SUBST(libs) AC_SUBST(llibs) AC_SUBST(ccoptions)
+		MAKE_HAVE_LIBMAL="HAVE_LIBMAL=yes"
+	fi
+esac
 AC_SUBST(MAKE_HAVE_LIBMAL)
+dnl AC_CONFIG_SUBDIRS(extra/src/libmal)
 
 
 dnl --------------------------------------------------------------------------
 dnl How do we want to use modules?
 dnl --------------------------------------------------------------------------
-if test "x$USE_MODULES" != "x"; then
-   MODULES="${USE_MODULES}"
-   case "$MODULES" in
-     none|None|NONE|0)
-       USE_MODULES=
-       MAKE_USE_MODULES=
-       ;;
-     dynamic|Dynamic|DYNAMIC)
-       USE_MODULES=1
-       USE_MODULES_STATIC=
-       MAKE_USE_MODULES="USE_MODULES=dynamic"
-       AC_DEFINE(USE_MODULES)
-       ;;
-     static|Static|STATIC|1)
-       USE_MODULES=1
-       USE_MODULES_STATIC=1
-       MAKE_USE_MODULES="USE_MODULES=static"
-       AC_DEFINE(USE_MODULES_STATIC)
-       AC_DEFINE(USE_MODULES)
+dnl must be done after configuring wxWin
+case "$USE_MODULES" in
+none|None|NONE|0|'')
+	m_cv_USE_MODULES=none
+	MAKE_USE_MODULES=
 	;;
-     auto|Auto|AUTO)
-	USE_MODULES=1
-	dnl check for wxGTK dynamic linkage?
-	echo "main() { return 0; }" >conftest.c
-	$CXX -o conftest conftest.c `wx-config --libs` && \
-	ldd conftest | fgrep libwx  >/dev/null
-	if test $? = 0
+dynamic|Dynamic|DYNAMIC)
+	m_cv_USE_MODULES=dynamic
+	AC_DEFINE(USE_MODULES)
+	MAKE_USE_MODULES="USE_MODULES=dynamic"
+	;;
+static|Static|STATIC)
+	m_cv_USE_MODULES=static
+	AC_DEFINE(USE_MODULES_STATIC)
+	AC_DEFINE(USE_MODULES)
+	MAKE_USE_MODULES="USE_MODULES=static"
+	;;
+auto|Auto|AUTO|1)
+	dnl check for wxGTK dynamic linkage
+	echo "int main() { return 0; }" >conftest.c
+	if $CXX -o conftest $GTK_LDFLAGS conftest.c && \
+		ldd conftest | fgrep libwx  >/dev/null
 	then
+		m_cv_USE_MODULES=dynamic
 		MAKE_USE_MODULES="USE_MODULES=dynamic"
 	else
- 		USE_MODULES_STATIC=1
-	       	MAKE_USE_MODULES="USE_MODULES=static"
-	       	AC_DEFINE(USE_MODULES_STATIC)
-	       	AC_DEFINE(USE_MODULES)
+		m_cv_USE_MODULES=static
+		MAKE_USE_MODULES="USE_MODULES=static"
+		AC_DEFINE(USE_MODULES_STATIC)
 	fi
-	rm -f conftest
+	rm -f conftest*
 	AC_DEFINE(USE_MODULES)
 	;;
-     *)
-       AC_MSG_ERROR(Set --with-modules= to either static/dynamic/none!)
-  esac
- fi
+*)
+	AC_MSG_ERROR(Set --with-modules= to one of static/dynamic/none)
+esac
 AC_SUBST(MAKE_USE_MODULES)
-
 
 dnl --------------------------------------------------------------------------
 dnl set up generators for class documentation
 dnl --------------------------------------------------------------------------
 
-AC_PATH_PROG(PERL,perl)
-
 dnl use scandoc
 DOCHTML="\$(SCANDOCHTML)"
-
 AC_SUBST(DOCHTML)
 
 dnl check for latex/dvips
-
+AC_PATH_PROG(PERL,perl)
 AC_PATH_PROG(LATEX,latex)
 AC_PATH_PROG(MAKEINDEX,makeindex)
 AC_PATH_PROG(DVIPS,dvips)
-AC_PATH_PROG(PSTOPDF,ps2pdf)
-if test "x$PSTOPDF" = x
-then
-	PSTOPDF="echo \"ps2pdf not available.\""
-	AC_SUBST(PSTOPDF)
-fi
 if test "x$LATEX" = x -o "x$DVIPS" = x -o "x$MAKEINDEX" = x
 then
 	LATEX="echo \"No latex available.\""
 	DVIPS="echo \"No dvips available.\""
 	MAKEINDEX="echo \"No makeindex available.\""
-	AC_SUBST(LATEX)
-	AC_SUBST(DVIPS)
-	AC_SUBST(MAKEINDEX)
 fi
+AC_SUBST(LATEX)
+AC_SUBST(DVIPS)
+AC_SUBST(MAKEINDEX)
 
-MAKE_HAVE_LATEX2HTML=
-LATEX2HTML="echo \"No doc generator(html) available.\""
+AC_PATH_PROG(PSTOPDF,ps2pdf)
+case "$PSTOPDF" in '')
+	PSTOPDF="echo \"ps2pdf not available.\""
+esac
+AC_SUBST(PSTOPDF)
+
 AC_PATH_PROG(LATEX2HTML,latex2html)
-if test "x$LATEX2HTML" != "x"
-then
-  MAKE_HAVE_SGMLTOOLS="HAVE_LATEX2HTML=yes"
-fi
+case "$LATEX2HTML" in
+'')	LATEX2HTML="echo \"No doc generator(html) available.\""
+	MAKE_HAVE_LATEX2HTML='' ;;
+*)	MAKE_HAVE_SGMLTOOLS="HAVE_LATEX2HTML=yes" ;;
+esac
 AC_SUBST(MAKE_HAVE_LATEX2HTML)
 AC_SUBST(LATEX2HTML)
+
+dnl --------------------------------------------------------------------------
+dnl add our extra directories to the search path
+dnl --------------------------------------------------------------------------
+
+dnl set the extra include and lib directories
+CPPFLAGS="-I$SOURCEDIR/include $CPPFLAGS -I$SOURCEDIR/extra/include"
+LIBS="$LIBS -L$BUILDDIR/extra/lib"
+case "$BUILDDIR" in "$SOURCEDIR") ;; *)
+	CPPFLAGS="-I$BUILDDIR/include $CPPFLAGS" ;;
+esac
+
+dnl add all extra/src directories to the search paths
+dnl	c-client
+CPPFLAGS="$CPPFLAGS -I$BUILDDIR/extra/src/c-client"
+LIBS="$BUILDDIR/extra/src/c-client/c-client.a $LIBS"
+dnl	compface
+CPPFLAGS="$CPPFLAGS -I$SOURCEDIR/extra/src/compface"
+LIBS="$LIBS -L$BUILDDIR/extra/src/compface -lMcompface"
 
 dnl --------------------------------------------------------------------------
 dnl final settings, concatenation of args, etc
 dnl --------------------------------------------------------------------------
 
-dnl setting the OS type for information
-OSINFO=`uname -s -r -m`
-OSINFO="\"$OSINFO\""
-AC_DEFINE_UNQUOTED(M_OSINFO,$OSINFO)
-
-dnl just a file where to dump some unneeded code in the python dir
-MAKE_LOCAL_LIBS_DEFINE="junk"
-
-dnl compface is included in M source
-LIBS="$LIBS -lMcompface $EXTRALIBS"
-
 dnl Only now can we add them, or otherwise some tests would have failed
-if test "$GCC" = "yes"
-then
-	if test "$USE_STRICT" = 1; then
-		CXXFLAGS="$CXXFLAGS -Werror -pedantic"
-	fi
-fi
+case "$GXX" in yes)
+	case "$USE_STRICT" in
+	1)	CXXFLAGS="$CXXFLAGS -Werror -pedantic" ;;
+	*)	CXXFLAGS="$CXXFLAGS -Wall" ;;
+	esac ;;	
+esac
 
 dnl add other flags
+CFLAGS="$CFLAGS $MYFLAGS"
+CXXFLAGS="$CXXFLAGS $MYFLAGS"
 LIBS="$LIBS $PYTHON_LIBS $LIB_PNG $LIB_JPEG $LIB_EFENCE $LIB_DMALLOC"
-CXXFLAGS="$CXXFLAGS $DBGFLAGS $OPT"
-CFLAGS="$CFLAGS $DBGFLAGS $OPT"
 
 dnl Python code produces warnings at present, so don't break compilation:
-CXXFLAGS_RELAXED=`echo $CXXFLAGS | sed 's/-Werror//g'`
+CXXFLAGS_RELAXED=`echo $CXXFLAGS | sed 's/-Werror/-Wall/g'`
 AC_SUBST(CXXFLAGS_RELAXED)
 
-dnl Make sure, we get statically linked against wxGTK:
+dnl Make sure we get statically linked against wxGTK
 LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk./-Wl,-Bstatic & -Wl,-Bdynamic/g'`
 dnl libtool does not like -L.
 LIBS=`echo $LIBS | sed 's/-L\.//g'`
 AC_SUBST(LIBS_STATIC)
 
-for dir in . `exec find * -type d -print`
+OUTPUT="makeopts"
+COPY=Makefile DIR=
+for dir in `cd $srcdir; find * -type d -print`
 do	case "$dir" in
 	CVS | */CVS)		continue ;;
-	extra/src/libmal*)	continue ;;
+	extra/src)		DIR="$DIR $dir" ;;
+	extra/src/libmal/*)	continue ;;
 	esac
-	rm -f $dir/.src
-	ln -s . $dir/.src
+	if test -f $srcdir/$dir/Makefile.in
+	then	OUTPUT="$OUTPUT $dir/Makefile"
+		DIR="$DIR $dir"
+	elif test -f $srcdir/$dir/Makefile
+	then	COPY="$COPY $dir/Makefile"
+		DIR="$DIR $dir"
+	fi
 done
 
-OUTPUT=makeopts
-
-if test "x$MAKE_HAVE_LIBMAL" != "x"; then
-	OUTPUT="$OUTPUT extra/src/libmal/Makefile makeopts"
-fi
+AC_OUTPUT_COMMANDS(
+[case "$SRC" in
+"$OBJ")	# source and object jumbled together
+	for dir in . $DIR
+	do	rm -f $dir/.src
+		ln -s . $dir/.src
+	done ;;
+*)	# using separate object directories
+	rm -f .src Makefile makerules
+	ln -s $src .src
+	ln -s .src/Makefile Makefile
+	ln -s .src/makerules makerules
+	for dir in $DIR
+	do	test -d $dir || mkdir $dir
+		rm -f $dir/.src
+		case "$src" in
+		/*)  ln -s $src/$dir $dir/.src ;;
+		*)   ln -s ../.src/`expr //"$dir" : '.*/\(.*\)'` $dir/.src ;;
+		esac
+	done
+	for mf in $COPY
+	do	echo "linking $mf"
+		rm -f $mf
+		ln -s .src/Makefile $mf
+	done
+	if  test -d extra/src/libmal/.
+	then	: ln -s .src/malsync_src extra/src/libmal/malsync_src
+		######## TODO
+	fi ;;
+esac
+sh .src/makeversion.in],
+src="$srcdir" SRC="$SOURCEDIR" OBJ="$BUILDDIR"
+DIR="$DIR"
+COPY="$COPY")
 
 AC_OUTPUT($OUTPUT)
 exit

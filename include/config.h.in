@@ -19,9 +19,6 @@
 
 #endif /* !C++ */
 
-/** Define if your C compiler doesn't accept -c and -o together.  */
-#undef NO_MINUS_C_MINUS_O
-
 /** Define if you need to in order for stat and other things to work.  */
 #undef _POSIX_SOURCE
 
@@ -31,34 +28,11 @@
 /** Define if you have the ANSI C header files.  */
 #undef STDC_HEADERS
 
-/** Define if you have the strerror function.  */
-#undef HAVE_STRERROR
-
-/** Define if you have the strstr function.  */
-#undef HAVE_STRSTR
-
 /** Define if you have the strsep function.  */
 #undef HAVE_STRSEP
 
-/** Define if you have the <libintl.h> header file.  */
-#undef HAVE_LIBINTL_H
-
-/** Define if you have the <compface.h> header file.  -- we always
-    have it*/
+/** Define if you have the <compface.h> header file.  -- we always have it */
 #define HAVE_COMPFACE_H 1
-
-/** Define if you have the <strings.h> header file.  */
-#undef HAVE_STRINGS_H
-
-/* Define if you have the <stdarg.h> header file.  */
-#undef HAVE_STDARG_H
-
-/** Define if you have the <stdlib.h> header file - required for 
-    Python.h .  */
-#undef HAVE_STDLIB_H
-
-/** Define if you have the <unistd.h> header file.  */
-#undef HAVE_UNISTD_H
 
 /** Do we have the pisock library and headers? */
 #undef USE_PISOCK
@@ -125,19 +99,35 @@
 #undef USE_SSL
 
 /** Define this if you want to compile in SSL support without DSA. */
-#undef USE_NO_DSA
+#undef NO_DSA
 
 /** Define this if you want to compile in SSL support without IDEA. */
-#undef USE_NO_IDEA
+#undef NO_IDEA
 
 /** Define this if you want to compile in SSL support without RSA. */
-#undef USE_NO_RSA
+#undef NO_RSA
 
 /** Define this if you have POSIX.2 regexp suport. */
 #undef HAVE_POSIX_REGEX
 
-/** This define carries some information about the operating system
-    and release that M is compiled for.
+/** Define this if you want debugging logic included. */
+#undef DEBUG
+
+/** Define this if you want experimental logic included. */
+#undef EXPERIMENTAL
+
+/** This define contains the installation prefix where Mahogany
+    is installed.
 */
-#define M_OSINFO   "unknownOS"
+#define M_PREFIX "/usr/local"
+
+/** This define contains the full canonical string that specifies
+    the machine/system/OS/compiler
+*/
+#define M_CANONICAL_HOST "illegal-illegal-illegal-illegal"
+
+/** This define carries some information about the operating system
+    and release for which M is compiled.
+*/
+#define M_OSINFO   "UnknownOS"
 //@}

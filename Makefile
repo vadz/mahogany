@@ -1,67 +1,48 @@
 # Makefile for M root directory
 # $Id$
-#
 
-
-CWD = 
-SUB_DIRS = include extra src
-FILES = makeopts makerules Makefile makeopts.in configure.in configure
-EXTRA = extra
-
-# FIXME: VZ where can I take the version from?
-M = mahogany-0.60
+FILES := configure.in configure Makefile makeopts.in makerules
+SUB_DIRS := include extra src
+ALL_DIRS := $(SUB_DIRS) doc
 
 include makeopts
 
 all:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
 
+makeversion: .src/makeversion.in
+	sh -e .src/makeversion.in
+
+include makeversion
+
+M := mahogany-$(M_VERSION_MAJOR).$(M_VERSION_MINOR)
+
 doc:
-	set -e; for i in include extra doc ; do $(MAKE) -C $$i doc; done
+	set -e; for i in include extra doc; do $(MAKE) -C $$i doc; done
 
 clean:  
-	set -e; for i in $(SUB_DIRS) doc; do $(MAKE) -C $$i $@; done
+	set -e; for i in $(ALL_DIRS); do $(MAKE) -C $$i $@; done
 
 allclean: clean
-	find . -name .depend -exec rm {} \;
-	find . -name \*.bak -exec rm {} \;
-	find . -name \*~ -exec rm {} \; 
-	find . -name .\\\#* -exec rm {} \; || true
-	find . -name .libs -exec rm -rf {} \; || true
+	find . -name \*.bak -exec rm -f {} \;
+	find . -name \*~ -exec rm -f {} \; 
+	find . -name .\\\#* -exec rm -f {} \;
+	find . -name .libs -exec rm -rf {} \;
 	$(RM) config.status *cache* makeopts *.po config.log src/M
 	find . -name .xvpics -exec rm -r -f {} \; 
 	$(RM) -r debian/tmp
 
-dep depend: 
-	@echo "The first time \"make depend\" will print lots of warnings"
-	@echo "about missing header files - these can be safely ignored."
-	@echo "They should disappear if you run it again."
-	@echo "----------------------------------------------------------"
-	set -e; $(MAKE) -C include # generate some headers first
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -i -C $$i $@; done
-
-config.status: 
-	@echo "You should really run ./configure with appropriate arguments."
-	@echo "Type ./configure --help to find out more about it."
-	@echo "Running ./configure with default setup now..."
-	./configure
-
-config: configure makeopts.in
-	./configure || $(RM) config.status
-
-configure: configure.in aclocal.m4
-	autoconf && $(RM) config.status
-
-makeopts: makeopts.in config.status
-	./config.status
-
-include/config.h: include/config.h.in configure
-	./configure
+depend:
+	@echo "-------------------------------------------------------------"
+	@echo "-------------------------------------------------------------"
+	@echo "\"make depend\" is obsolete; there's no need to run it any more"
+	@echo "-------------------------------------------------------------"
+	@echo "-------------------------------------------------------------"
 
 bak backup:
-	tar cvf M-`date +"%y-%m-%d"`.tar $(SUB_DIRS) $(FILES) $(EXTRA)
+	tar cvf M-`date +"%y-%m-%d"`.tar $(FILES) $(ALL_DIRS)
 	gzip -9 M-`date +"%y-%m-%d"`.tar
-#
+
 # probably the most complicated target:
 #
 install_bin:
@@ -71,11 +52,14 @@ install_bin:
 	$(INSTALL) -d $(DATADIR) $(BINDIR) $(DOCDIR)
 	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/bin
 	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/lib
-	$(INSTALL) -d $(BINDIR)
 	$(INSTALL) -d $(DATADIR)/bin
 	$(INSTALL) -d $(DATADIR)/lib
 	$(INSTALL) -d $(DATADIR)/doc
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i install; done
+	$(INSTALL) -d $(DOCDIR)/Tips
+	for i in .src/doc/Tips/Tips*.txt; \
+	do $(INSTALL) $$i $(DOCDIR)/Tips; \
+	done
 
 install_doc:
 	$(MAKE) -C doc install
@@ -83,7 +67,7 @@ install_doc:
 
 # create the file list for the RPM installation
 install_rpm:
-	@echo "Creating the list of files for the RPM"
+	@echo "Creating the list of files for RPM"
 	@echo "%doc $(DOCDIR)" > filelist
 	@echo "%config $(DATADIR)/M.conf" >> filelist
 	@echo "$(DATADIR)/scripts" >> filelist
@@ -100,23 +84,23 @@ install_rpm:
 	@# the second subsitution takes care of RPM_BUILD_ROOT
 	@perl -i -npe 's/^/%attr(-, root, root) /; s: /.*//: /:' filelist
 
-install: install_bin install_doc install_locale
+install: install_bin install_locale # install_doc
 
 install_locale:
 	$(MAKE) -C locale install
 
-# prepare the scene for building the RPM
+# prepare the scene for building the RPM version
 rpm_prep:
-	if test -z "$$RPM_ROOT" ; then \
+	if test -z "$$RPM_ROOT"; then \
 		export RPM_TOP_DIR=`rpm --showrc | grep topdir | cut -d: -f 2 | sed 's/^ //'`; \
 	else \
 		export RPM_TOP_DIR=$(RPM_ROOT); \
 	fi; \
-	if test -z "$$RPM_TOP_DIR" ; then \
-   	echo "You must set the RPM_ROOT first."; \
+	if test -z "$$RPM_TOP_DIR"; then \
+   	echo "You must set RPM_ROOT first."; \
       exit 1; \
    fi; \
-	echo "*** Preparing to build the RPM in $$RPM_TOP_DIR..."; \
+	echo "*** Preparing to build RPM in $$RPM_TOP_DIR..."; \
 	cd ..; \
 	tar cvzf $$RPM_TOP_DIR/SOURCES/$(M).tar.gz \
 		--exclude="*.o" --exclude="M" --exclude="CVS" \
@@ -133,14 +117,14 @@ rpm_prep:
 
 # build the source and binary RPMs
 rpm: rpm_prep
-	@if test -z "$$RPM_ROOT" ; then \
+	@if test -z "$$RPM_ROOT"; then \
 		export RPM_TOP_DIR=`rpm --showrc | grep topdir | cut -d: -f 2 | sed 's/^ //'`; \
 		export RPM_BUILD_ROOT=`rpm --showrc | grep buildroot | cut -d: -f 2 | sed 's/^ //'`; \
 	else \
 		export RPM_TOP_DIR=$(RPM_ROOT); \
 		export RPM_BUILD_ROOT=$(RPM_ROOT)/ROOT; \
 	fi; \
-	echo "*** Building the RPM under $$RPM_BUILD_ROOT..."; \
+	echo "*** Building RPM under $$RPM_BUILD_ROOT..."; \
 	cd $$RPM_TOP_DIR/SPECS && rpm --buildroot $$RPM_BUILD_ROOT -bb M.spec
 
 msgcat:
@@ -150,6 +134,5 @@ msgcat:
 locales:
 	$(MAKE) -C locale all
 
-.PHONY: all dep clean bak backup config program doc install install_doc \
+.PHONY: all clean bak backup config program doc install install_doc \
         install_all msgcat locales scandoc install_locale rpm_prep rpm
-

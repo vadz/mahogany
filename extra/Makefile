@@ -1,44 +1,29 @@
 # Makefile for extra directory
 # $Id$
-#
-
-
-CWD = extra
-SUB_DIRS = src/compface
 
 include ../makeopts
 
-
-all: 
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
-	set -e; $(MAKE) -C src/c-client -f Makefile.M
+SUB_DIRS := src/compface
 ifdef HAVE_LIBMAL
-	set -e; $(MAKE) -C src/libmal
+SUB_DIRS += src/libmal
 endif
 
-doc:
+all: 
+	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i; done
+	$(MAKE) -C src/c-client -f .src/Makefile.M
+
+doc: ; @true
 
 clean:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
-	set -e; $(MAKE) -C src/c-client -f Makefile.M $@
+	$(MAKE) -C src/c-client -f .src/Makefile.M $@
 	$(RM) core
 ifdef HAVE_LIBMAL
 # make clean in libmal is incomplete:
-	set -e; $(MAKE) -C src/libmal $@
-	set -e; find src/libmal -name *.o -exec $(RM) {} \;
-	set -e; find src/libmal -name *.lo -exec $(RM) {} \; 2>/dev/null || true
-	set -e; find src/libmal -name *.a -exec $(RM) {} \; 2>/dev/null || true
-	set -e; find src/libmal -name .libs -exec $(RM) -r {} \; 2>/dev/null || true
+	${RM} -r x `find src/libmal -depth -name '*.o' -o -name '*.lo' -o -name '*.a' -o -name '.libs' -print`
 endif
-
-dep depend: 
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
-	set -e; $(MAKE) -C src/c-client -f Makefile.M $@
 
 install: 
 	$(MAKE) -C install install
 
 .PHONY: all dep clean doc static allclean install
-
-
-

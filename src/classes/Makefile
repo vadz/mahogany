@@ -3,24 +3,17 @@
 
 include ../../makeopts
 
-CWD = classes
 SRC = MObject.cpp MApplication.cpp PathFinder.cpp Profile.cpp \
       XFace.cpp kbList.cpp MFolder.cpp MEvent.cpp MailCollector.cpp \
       MModule.cpp MessageTemplate.cpp MFilter.cpp
 
-HDR = $(SRC:.cpp=.h)
-DEP = $(SRC:.cpp=.d)
-
 TARGETS = $(SRC:.cpp=.o)
 
-all: $(TARGETS)
+all:	$(TARGETS)
+	@true
 
-CommonBase.o:
+include ../../makerules $(wildcard *.d)
 
 clean: stdclean
 
 .PHONY: clean
-
-include ../../makerules
-include .depend
-

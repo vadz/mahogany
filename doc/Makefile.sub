@@ -1,42 +1,31 @@
 # Makefile for doc sub-directories
 # $Id$
-#
 
-CWD = doc
 FILES_TEX=$(DIR).htex
 FILES_PS=$(FILES_TEX:.htex=.ps)
 
 include ../../makeopts
 
-all:  wxhelp.map
+all:	wxhelp.map
+	@true
 
-install: 
-	$(INSTALL) -d $(DOCDIR)/$(DIR)
-	$(INSTALL_DATA) `find $(DIR) -type f` $(DOCDIR)/$(DIR)/
+#include ../../makerules
 
-copyfiles: ../$(DIR).aux
-	cp ../$(DIR).htex ../$(DIR).aux .
-
-ps: $(FILES_PS)
-	cp $(FILES_PS) ..
-
-index: copyfiles
+wxhelp.map: ../$(DIR).aux pics
+	cp -f ../.src/$(DIR).htex ../$(DIR).aux .
 	$(LATEX2HTML) -debug $(DIR).htex
+	@$(RM) -r tmp
+	@mkdir tmp
+	cd tmp && ../../../.src/extra/scripts/html2wxhelp > ../wxhelp.map
 
-wxhelp.map: index
-	( cd $(DIR); ../../../extra/scripts/html2wxhelp > ../wxhelp.map)
+pics:	../.src/pics
+	ln -sf ../.src/pics pics
 
-setup: clean
-	mkdir $(DIR) pics
-	cp ../pics/*.eps pics
+install: wxhelp.map
+	$(INSTALL) -d $(DOCDIR)/$(DIR)
+	$(INSTALL_DATA) `find tmp -type f` $(DOCDIR)/$(DIR)/
 
-clean: 
-	$(RM) -r pics $(DIR)
+clean:
+	$(RM) -r tmp pics
 
-
-.PHONY: all install ps clean setup index copyfiles
-
-include ../../makerules
-
-
-
+.PHONY:	all install ps clean setup index copyfiles

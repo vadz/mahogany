@@ -1,28 +1,20 @@
 # Makefile for extra/install directory
 
-CWD = install
 SUB_DIRS = scripts
 
 include ../../makeopts
 
-# do nothing for all
-all:
-
-#
 # install the contents of all subdirs under this one
 #
 install:
-	set -e; for i in $(SUB_DIRS); do $(INSTALL) -d $(DATADIR)/$$i ; done
-	set -e; for i in $(SUB_DIRS); do  $(MAKE) -C $$i ; done
+	set -e; for i in $(SUB_DIRS); \
+	  do $(INSTALL) -d $(DATADIR)/$$i ; \
+	  $(MAKE) -C $$i ; \
+	done
 	$(INSTALL) -d $(DATADIR)/afm
-	$(INSTALL_DATA) afm/*.afm $(DATADIR)/afm
-	$(INSTALL_DATA) newmail.wav kylemail.wav $(DATADIR)
-#	$(INSTALL_DATA) mailcap $(DATADIR)
-	$(INSTALL_DATA) M.conf $(DATADIR)
-
-clean:
-
-
-include ../../makerules
+	$(INSTALL_DATA) .src/afm/*.afm $(DATADIR)/afm
+	$(INSTALL_DATA) .src/newmail.wav .src/kylemail.wav $(DATADIR)
+#	$(INSTALL_DATA) .src/mailcap $(DATADIR)
+	$(INSTALL_DATA) .src/M.conf $(DATADIR)
 
 .PHONY: all install clean
