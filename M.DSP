@@ -1030,15 +1030,8 @@ InputPath=".\src\Python\MailFolder.cpp-swig"
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
+# PROP Exclude_From_Build 1
 # PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MailFolder.cpp-swig"
-
-"$(InputDir)\MailFolder_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MailFolder_swig.cpp
-
-# End Custom Build
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
@@ -1098,15 +1091,8 @@ InputPath=".\src\Python\MAppBase.cpp-swig"
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
+# PROP Exclude_From_Build 1
 # PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MAppBase.cpp-swig"
-
-"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
-
-# End Custom Build
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
@@ -1166,15 +1152,8 @@ InputPath=".\src\Python\Message.cpp-swig"
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
+# PROP Exclude_From_Build 1
 # PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\Message.cpp-swig"
-
-"$(InputDir)\Message_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\Message_swig.cpp
-
-# End Custom Build
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
@@ -1234,15 +1213,8 @@ InputPath=".\src\Python\MObject.cpp-swig"
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
+# PROP Exclude_From_Build 1
 # PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MObject.cpp-swig"
-
-"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MObject_swig.cpp
-
-# End Custom Build
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
@@ -1302,15 +1274,8 @@ InputPath=".\src\Python\MProfile.cpp-swig"
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
+# PROP Exclude_From_Build 1
 # PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MProfile.cpp-swig"
-
-"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
-
-# End Custom Build
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
@@ -1370,15 +1335,8 @@ InputPath=".\src\Python\MString.cpp-swig"
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
+# PROP Exclude_From_Build 1
 # PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\MString.cpp-swig"
-
-"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\MString_swig.cpp
-
-# End Custom Build
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
@@ -1472,15 +1430,8 @@ InputPath=".\src\Python\swiglib.cpp-swig"
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
+# PROP Exclude_From_Build 1
 # PROP Ignore_Default_Tool 1
-# Begin Custom Build - Updating SWIG-generated sources
-InputDir=.\src\Python
-InputPath=".\src\Python\swiglib.cpp-swig"
-
-"$(InputDir)\swiglib_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	copy $(InputPath) $(InputDir)\swiglib_swig.cpp
-
-# End Custom Build
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
