@@ -2610,7 +2610,7 @@ wxFolderView::SelectInitialMessage(const HeaderInfoList_obj& hil)
    UIdType uid;
    if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTUNREADMESSAGE) )
    {
-      uid = m_FolderCtrl->SelectNextUnreadAfter(hil);
+      uid = m_FolderCtrl->SelectNextUnreadAfter();
       idx = m_FolderCtrl->GetFocusedItem();
    }
    else
