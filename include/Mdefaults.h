@@ -707,7 +707,7 @@
 /// which headers to show in the message view?
 #define   MP_MSGVIEW_HEADERS_D     "From:Newsgroups:To:Subject:Date:"
 /// all headers we know about
-#define   MP_MSGVIEW_ALL_HEADERS_D "From:To:Subject:Date:Newsgroups:Return-Path:Received:Delivered-To:Message-Id:X-Sender:X-Mailer:Mime-Version:Content-Type:Content-Length:Status:X-Status:X-Keywords:X-UID:Approved:"
+#define   MP_MSGVIEW_ALL_HEADERS_D "From:To:Subject:Date:Newsgroups:Return-Path:Received:Delivered-To:Message-Id:X-Sender:X-Mailer:Mime-Version:Content-Type:Content-Length:Status:X-Status:X-Keywords:X-Url:X-UID:Approved:"
 /// the type of the last created folder
 #define   MP_LAST_CREATED_FOLDER_TYPE_D  (int)File
 /**@name  Font settings for message view */
