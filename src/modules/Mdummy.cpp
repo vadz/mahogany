@@ -9,18 +9,29 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
-#include "Mconfig.h"
-#include "Mcommon.h"
+
+#include "Mpch.h"
+
+#ifndef USE_PCH
+    #include "Mconfig.h"
+    #include "Mcommon.h"
+
+    #include "MDialogs.h"
+#endif
+
 #include "MModule.h"
+
 #include "Mversion.h"
-
-
-#include "MDialogs.h"
-
-
 #include "MInterface.h"
 
-void DummyFunc(MInterface *interface);
+static void DummyFunc(MInterface *minterface);
+
+// this is compiler dependent
+#ifdef _MSC_VER
+    #define MDLLEXPORT __declspec( dllexport )
+#else
+    #error "don't know how export functions from DLL with this compiler"
+#endif
 
 ///------------------------------
 /// MModule interface:
@@ -28,10 +39,10 @@ void DummyFunc(MInterface *interface);
 
 extern "C"
 {
-   int InitMModule(int version_major,
-                   int version_minor,
-                   int version_release,
-                   MInterface *interface)
+   MDLLEXPORT int InitMModule(int version_major,
+                              int version_minor,
+                              int version_release,
+                              MInterface *minterface)
    {
       /* This test is done here rather than in the MModule.cpp loading 
          code, as a module can be more flexible in accepting certain
@@ -44,30 +55,30 @@ extern "C"
 
 
       // Call own initialisation functions here.
-      DummyFunc(interface);
+      DummyFunc(minterface);
       
       return MMODULE_ERR_NONE;;
    }
 
-   const char *
+   MDLLEXPORT const char *
    GetName(void)
    {
       return "DummyModule";
    }
 
-   const char *
+   MDLLEXPORT const char *
    GetDescription(void)
    {
       return "A simple demonstration of Mahogany's plugin modules.";
    }
 
-   const char *
-   GetVersion(void)
+   MDLLEXPORT const char *
+   GetModuleVersion(void)
    {
       return "0.00";
    }
 
-   void
+   MDLLEXPORT void
    GetMVersion(int *version_major, int *version_minor,
                int *version_release)
    {
@@ -87,7 +98,7 @@ extern "C"
 ///------------------------------
 
 void
-DummyFunc(MInterface *interface)
+DummyFunc(MInterface *minterface)
 {
 #if 0
    typedef void (*FptrT)(const char *msg, void *dummy, const char *title);
@@ -96,7 +107,7 @@ DummyFunc(MInterface *interface)
    ASSERT(fptr);
 #endif
    
-   interface->Message(
+   minterface->Message(
       "This message is created by the DummyModule plugin\n"
       "for Mahogany. This module has been loaded at runtime\n"
       "and is not part of the normal Mahogany executable.",

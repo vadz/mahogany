@@ -119,7 +119,7 @@ MModuleImpl::MModuleImpl(wxDllType dll)
    m_GetDescription  = (MModule_GetDescriptionFuncType)
       wxDllLoader::GetSymbol(dll, "GetDescription"); 
    m_GetVersion = (MModule_GetVersionFuncType)
-      wxDllLoader::GetSymbol(dll, "GetVersion"); 
+      wxDllLoader::GetSymbol(dll, "GetModuleVersion"); 
    m_GetMVersion = (MModule_GetMVersionFuncType)
       wxDllLoader::GetSymbol(dll, "GetMVersion"); 
 }
