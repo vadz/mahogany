@@ -130,7 +130,7 @@ wxFolderRenameDialog::wxFolderRenameDialog(wxWindow *parent,
    if ( folder->GetType() == MF_IMAP )
    {
       const String& name = folder->GetFullName();
-      if ( wxStricmp(name, _T("inbox")) )
+      if ( wxStricmp(name, _T("inbox")) == 0 )
             canRenameMailbox = false;
    }
 
