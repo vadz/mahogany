@@ -39,6 +39,10 @@
 
 class TextViewerWindow;
 
+#ifdef __WXMSW__
+   #include <wx/msw/private.h>
+#endif // __WXMSW__
+
 // ----------------------------------------------------------------------------
 // TextViewer: a wxTextCtrl-based MessageViewer implementation
 // ----------------------------------------------------------------------------
@@ -258,6 +262,16 @@ void TextViewerWindow::OnLinkEvent(wxTextUrlEvent& event)
 
 void TextViewerWindow::OnMouseEvent(wxMouseEvent& event)
 {
+   // we need to position the cursor at the position of the click under MSW but
+   // GTK does it for us - which is great as we don't have EM_CHARFROMPOS there
+#ifdef __WXMSW__
+   wxPoint pt = event.GetPosition();
+   POINTL ptl = { pt.x, pt.y };
+
+   // can't use SendMessage because it's a class name!
+   SetInsertionPoint(::SendMessageA(GetHwnd(), EM_CHARFROMPOS, 0, (LPARAM)&ptl));
+#endif // __WXMSW__/!__WXMSW__
+
    ProcessMouseEvent(event, GetInsertionPoint());
 
    event.Skip();
