@@ -107,7 +107,12 @@ String MailFolderCC::qprint(const String &in)
    out +=  cptr2;
    out +=  cptr;
    fs_give((void **) &cptr2); // free memory allocated
-   return out;
+
+   // Check whether we need to decode even more:
+   if(in.Find(ISO8859MARKER) != -1)
+      return qprint(out);
+   else
+      return out;
 }
 
 
