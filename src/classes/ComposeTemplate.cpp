@@ -1437,8 +1437,8 @@ VarExpander::ExpandOriginalText(const String& text,
                         READ_CONFIG_BOOL(m_profile, MP_REPLY_DETECT_SIG);
 
 #if wxUSE_REGEX
-   // will we use the RE?
-   bool useRE;
+   // don't use RE at all by default because the manual code is faster
+   bool useRE = false;
 
    // a RE to detect the start of the signature
    wxRegEx reSig;
@@ -1446,13 +1446,9 @@ VarExpander::ExpandOriginalText(const String& text,
    {
       String sig = READ_CONFIG(m_profile, MP_REPLY_SIG_SEPARATOR);
 
-      if ( sig == GetStringDefault(MP_REPLY_SIG_SEPARATOR) )
+      if ( sig != GetStringDefault(MP_REPLY_SIG_SEPARATOR) )
       {
-         // use faster manual code
-         useRE = false;
-      }
-      else // use the user-supplied RE
-      {
+         // we have no choice but to use the user-supplied RE
          useRE = true;
 
          // we implicitly anchor the RE at start/end of line
