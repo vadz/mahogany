@@ -310,6 +310,11 @@ public:
       return asmf;
    }
 
+   /** Used to obtain the next Ticked id for events.
+       Only for use by ASMailFolder.cpp and MailFolderCC.cpp internally.
+   */
+   static Ticket GetTicket(void);
+
    /**@name Asynchronous Access Functions, returning results in events.*/
    //@{
    /** Check whether mailbox has changed.

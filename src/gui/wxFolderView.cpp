@@ -405,7 +405,12 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       {
       case 'D':
          m_FolderView->DeleteOrTrashMessages(selections);
-         MoveFocus(newFocus);
+         // only move on if we mark as deleted, for trash usage,
+         // selection remains the same:
+         if(READ_APPCONFIG(MP_USE_TRASH_FOLDER) == FALSE)
+            MoveFocus(newFocus);
+         else
+            m_FolderView->UpdateSelectionInfo();
          break;
       case 'U':
          m_FolderView->GetTicketList()->Add(
@@ -425,7 +430,10 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          break;
       case 'M': // move = copy + delete
          m_FolderView->SaveMessagesToFolder(selections, NULL, true);
-         MoveFocus(newFocus);
+         if(READ_APPCONFIG(MP_USE_TRASH_FOLDER) == FALSE)
+            MoveFocus(newFocus);
+         else
+            m_FolderView->UpdateSelectionInfo();
          break;
       case 'G':
       case 'R':

@@ -46,6 +46,16 @@
 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+static Ticket gs_Ticket = ILLEGAL_TICKET;
+
+Ticket
+ASMailFolder::GetTicket(void)
+{
+   if(gs_Ticket == ILLEGAL_TICKET) gs_Ticket = 0;
+   return gs_Ticket++;
+}
+
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
    MailThread - one thread for each operation to be done
@@ -84,7 +94,7 @@ public:
 
    Ticket Start(void)
       {
-         m_Ticket = GetTicket();
+         m_Ticket = ASMailFolder::GetTicket();
 #ifdef USE_THREADS
          if ( Create() != wxTHREAD_NO_ERROR )
          {
@@ -117,12 +127,6 @@ protected:
    inline void UnLockFolder(void)
       { if ( m_ASMailFolder ) m_ASMailFolder->UnLockFolder(); };
 
-   static Ticket GetTicket(void)
-      {
-         if(ms_Ticket == ILLEGAL_TICKET) ms_Ticket = 0;
-         return ms_Ticket++;
-      }
-
    virtual void *Entry();
 #ifndef USE_THREADS
    virtual void Run(void) { Entry(); }
@@ -138,7 +142,6 @@ protected:
    static Ticket ms_Ticket;
 };
 
-Ticket MailThread::ms_Ticket = ILLEGAL_TICKET;
 
 void *
 MailThread::Entry()
@@ -989,9 +992,6 @@ public:
    virtual MailFolder *GetMailFolder(void) const
       { AScheck(); m_MailFolder->IncRef(); return m_MailFolder;}
    //@}
-protected:
-   /** Used to obtain the next Ticked id for events. */
-   static Ticket GetTicket(void);
 private:
    /// The synchronous mailfolder that we map to.
    MailFolder *m_MailFolder;

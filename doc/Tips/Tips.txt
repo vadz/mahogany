@@ -16,3 +16,4 @@ As Mahogany is an OpenSource project developed by volunteers, we are always very
 If you use Mahogany in a non-English environment and it is not yet translated to your language, or the translations are incomplete, get in touch with us and we can update the translations. As we don't do them ourselves, we have to rely on others to tell us about this and actually translate it for us.
 If you disabled some message box but wish to see it again, go to the last page of the options dialog and choose the "Reenable" button there.
 If you click the right mouse button (or shift-click on an Apple Mac) over a mailbox in the tree, you can access a popup menu with many useful options and settings.
+To define filters for incoming messages, you need to first define filter rules via the Edit/Filter Rules menu and then associate them with the corresponding mail folders (e.g. the "New Mail" folder) via the Folder/Filters menu.

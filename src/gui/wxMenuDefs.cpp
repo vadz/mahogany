@@ -130,12 +130,12 @@ static const int g_aMainTbar[] =
 
 static const int g_aComposeTbar[] =
 {
+   WXTBAR_COMPOSE_SEND,
+   WXTBAR_SEP,
    WXTBAR_COMPOSE_PRINT,
    WXTBAR_COMPOSE_CLEAR,
    WXTBAR_COMPOSE_INSERT,
    WXTBAR_COMPOSE_EXTEDIT,
-   WXTBAR_SEP,
-   WXTBAR_COMPOSE_SEND,
    WXTBAR_SEP,
    WXTBAR_ADB,
    -1

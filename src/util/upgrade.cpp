@@ -45,6 +45,7 @@
 #include <wx/confbase.h>
 #include <wx/utils.h>         // wxGetFullHostName()
 #include <wx/dialup.h>        // for IsAlwaysOnline()
+#include <wx/socket.h>        // wxIPv4Address
 
 #define USE_WIZARD
 
@@ -290,6 +291,10 @@ public:
             return FALSE;
          }
 
+#if 0
+         // THIS DOES NOT WORK WELL IN PRACTICE, I DISABLED
+         // IT. Creates corrupted config settings in most cases. (KB)
+         
          // if the email is user@some.where, then suppose that the servers are
          // pop.some.where &c - be sure to check that some.where is really a
          // domain and not just a hostname by checking the number of dots in it
@@ -303,7 +308,55 @@ public:
             AddDomain(gs_installWizardData.imap, domain);
             AddDomain(gs_installWizardData.nntp, domain);
          }
-
+#endif
+         // instead: check if server names are valid:
+         String check = ""; String tmp;
+         int failed = 0;
+         wxIPV4address addr;
+         if(! addr.Hostname(gs_installWizardData.pop))
+         {
+            failed++;
+            tmp.Printf(_("POP3 server '%s'.\n"),
+                       gs_installWizardData.pop.c_str());
+            check += tmp;
+         }
+         if(! addr.Hostname(gs_installWizardData.smtp))
+         {
+            failed++;
+            tmp.Printf(_("SMTP server '%s'.\n"),
+                       gs_installWizardData.smtp.c_str());
+            check += tmp;
+         }
+         if(! addr.Hostname(gs_installWizardData.imap))
+         {
+            failed++;
+            tmp.Printf(_("IMAP server '%s'.\n"),
+                       gs_installWizardData.imap.c_str());
+            check += tmp;
+         }
+         if(! addr.Hostname(gs_installWizardData.nntp))
+         {
+            failed++;
+            tmp.Printf(_("NNTP server '%s'.\n"),
+                       gs_installWizardData.nntp.c_str());
+            check += tmp;
+         }
+         if(failed)
+         {
+            tmp.Printf(_("%d of the server names specified could not\n"
+                         "be resolved. This could be due to a temporary\n"
+                         "network problem, or because the server name really\n"
+                         "does not exist. If you use dialup-networking and\n"
+                         "are not currently connected, this is perfectly normal.\n"
+                         "The failed server name(s) were:\n"),
+                       failed);
+            check = tmp + check;
+            check += _("\nDo you want to change these settings?");
+            if( MDialog_YesNoDialog(check,this,
+                                    _("Potentially wrong server names"),
+                                    TRUE, NULL) )
+               return FALSE;
+         }
          return TRUE;
       }
 

@@ -93,14 +93,12 @@ enum ConfigFields
 {
    // identity
    ConfigField_IdentFirst = -1,
-   ConfigField_UsernameHelp,
-   ConfigField_Username,
-   ConfigField_HostnameHelp,
-   ConfigField_Hostname,
-   ConfigField_AddDefaultHostname,
-   ConfigField_ReturnAddress,
-   ConfigField_SetReplyFromTo,
    ConfigField_PersonalName,
+   ConfigField_ReturnAddress,
+   ConfigField_HostnameHelp,
+   ConfigField_AddDefaultHostname,
+   ConfigField_Hostname,
+   ConfigField_SetReplyFromTo,
    ConfigField_VCardHelp,
    ConfigField_UseVCard,
    ConfigField_VCardFile,
@@ -592,19 +590,14 @@ END_EVENT_TABLE()
 const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 {
    // network config and identity
-   { gettext_noop("The user and host names are used to compose "
-                  "the return address, unless\n"
-                  "a different return address is explicitly specified."),
-                                                   Field_Message, -1 },
-   { gettext_noop("&Username"),                    Field_Text,    -1 },
-   { gettext_noop("The host name is also used as a default host "
+   { gettext_noop("&Personal name"),               Field_Text,    -1,                        },
+   { gettext_noop("&E-mail address"),        Field_Text | Field_Vital,   -1, },
+   { gettext_noop("The following host name can be used as a default host "
                   "name for local mail addresses."),
                                                    Field_Message, -1 },
+   { gettext_noop("&Add this hostname if none specified"), Field_Bool, ConfigField_AddDefaultHostname },
    { gettext_noop("&Hostname"),                    Field_Text | Field_Vital,   -1, },
-   { gettext_noop("&Add this hostname if none specified"), Field_Bool, -1 },
-   { gettext_noop("&Return/Reply address"),        Field_Text | Field_Vital,   -1, },
    { gettext_noop("Reply return address from &To: field"), Field_Bool, -1, },
-   { gettext_noop("&Personal name"),               Field_Text,    -1,                        },
    { gettext_noop(
       "You may want to attach your personal information card (vCard)\n"
       "to all outoing messages. In this case you will need to specify\n"
@@ -884,14 +877,12 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 {
    // identity
-   CONFIG_NONE(),
-   CONFIG_ENTRY(MP_USERNAME),
-   CONFIG_NONE(),
-   CONFIG_ENTRY(MP_HOSTNAME),
-   CONFIG_ENTRY(MP_ADD_DEFAULT_HOSTNAME),
-   CONFIG_ENTRY(MP_RETURN_ADDRESS),
-   CONFIG_ENTRY(MP_SET_REPLY_FROM_TO),
    CONFIG_ENTRY(MP_PERSONALNAME),
+   CONFIG_ENTRY(MP_RETURN_ADDRESS),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_ADD_DEFAULT_HOSTNAME),
+   CONFIG_ENTRY(MP_HOSTNAME),
+   CONFIG_ENTRY(MP_SET_REPLY_FROM_TO),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_USEVCARD),
    CONFIG_ENTRY(MP_VCARD),
