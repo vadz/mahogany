@@ -1446,7 +1446,9 @@ void wxAdbEditFrame::RestoreSettings1()
       // mean that we actually open it in it, i.e. it will still be read/write
       // for the ADB providers which support it
       if ( pProvider->TestBookAccess(strFile,
-                                     AdbDataProvider::Test_OpenReadOnly) ) {
+                                     AdbDataProvider::Test_OpenReadOnly) ||
+            pProvider->TestBookAccess(strFile,
+                                      AdbDataProvider::Test_Create) ) {
         astrProviders.Add(strProv);
         astrAdb.Add(strFile);
       }
