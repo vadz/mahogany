@@ -1924,7 +1924,7 @@ bool CheckRBL( int a, int b, int c, int d, const String & rblDomain)
       }
    }
    delete [] answerBuffer;
-   return len != -1; // found, so it´s known spam
+   return len != -1; // found, so it's known spam
 }
 
 static const wxChar * gs_RblSites[] =

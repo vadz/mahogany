@@ -284,7 +284,7 @@ class PalmOSModule : public MModule
 
 private:
    /** PalmOS constructor.
-       As the class has no usable interface, this doesn´t do much, but
+       As the class has no usable interface, this doesn't do much, but
        it displays a small dialog to say hello.
    */
    PalmOSModule(MInterface *mi);
@@ -730,7 +730,7 @@ PalmOSModule::Connect(void)
          if((rc = wxExecute(m_Script1, TRUE)) != 0)
          {
             String msg;
-            msg.Printf(_("Executing command ´%s´ returned an error code (%d)."),
+            msg.Printf(_("Executing command '%s' returned an error code (%d)."),
                        m_Script1.c_str(), rc);
             ErrorMessage(msg);
          }
@@ -812,7 +812,7 @@ PalmOSModule::Connect(void)
       dlp_OpenConduit(m_PiSocket);
 
 #ifdef PALMOS_SYNCTIME
-      /* set Palm´s time */
+      /* set Palm's time */
       if (m_SyncTime)
       {
          time_t   localTime;
@@ -845,7 +845,7 @@ PalmOSModule::Disconnect(void)
          if((rc = wxExecute(m_Script2, TRUE)) != 0)
          {
             String msg;
-            msg.Printf(_("Executing command ´%s´ returned an error code (%d)."),
+            msg.Printf(_("Executing command '%s' returned an error code (%d)."),
                        m_Script2.c_str(), rc);
             ErrorMessage(msg);
          }
@@ -1113,7 +1113,7 @@ PalmOSModule::Backup(void)
          return;
       }
 
-      // don´t keep DB_open flag
+      // don't keep DB_open flag
       info.flags &= 0xff;
 
       // construct filename
@@ -1166,8 +1166,8 @@ PalmOSModule::Backup(void)
                   if ((m_BackupExcludeList.Mid(pos-2, 1)).Cmp("\\") != 0)
                      valid = true; // before entry is a kommata that is not escaped
 
-         // now we´ve made sure that the entry in the exclude list started correctly,
-         // so let´s check whether it ends correctly, too
+         // now we've made sure that the entry in the exclude list started correctly,
+         // so let's check whether it ends correctly, too
          if (valid)
             if (m_BackupExcludeList.Len() != fname.Len())
                if ((m_BackupExcludeList.Mid(pos + fname.Len(),1)).Cmp(",") != 0)
@@ -1391,7 +1391,7 @@ PalmOSModule::InstallFromDir(wxString directory, bool delFiles)
 
    ofile_total = CreateFileList(fnames, dir, directory);
 
-   // we´ve finished reading the filelist
+   // we've finished reading the filelist
    closedir(dir);
 
    // install files
@@ -1460,7 +1460,7 @@ PalmOSModule::GetAddresses(PalmBook *palmbook)
    }
 
    if (!palmbook) {
-//      ErrorMessage(_("Couldn´t create new palmbook"));
+//      ErrorMessage(_("Couldn't create new palmbook"));
       return;
    }
 
@@ -1734,7 +1734,7 @@ PalmOSModule::StoreEMails(void)
    if(! mf)
    {
       String tmpstr;
-      tmpstr.Printf(_("Cannot open PalmOS synchronisation mailbox ´%s´"), m_PalmBox.c_str());
+      tmpstr.Printf(_("Cannot open PalmOS synchronisation mailbox '%s'"), m_PalmBox.c_str());
       ErrorMessage((tmpstr));
       return;
    }

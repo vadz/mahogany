@@ -2664,7 +2664,7 @@ MailFolderCC::Checkpoint(void)
 #ifdef USE_DIALUP
    if ( NeedsNetwork() && ! mApplication->IsOnline() )
    {
-      ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"),
+      ERRORMESSAGE((_("System is offline, cannot access mailbox '%s'"),
                    GetName().c_str()));
       return;
    }

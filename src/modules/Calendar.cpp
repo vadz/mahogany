@@ -186,7 +186,7 @@ class CalendarModule : public MModule_Calendar
 
 private:
    /** Calendar constructor.
-       As the class has no usable interface, this doesn´t do much, but
+       As the class has no usable interface, this doesn't do much, but
        it displays a small dialog to say hello.
    */
    CalendarModule(MInterface *mi);

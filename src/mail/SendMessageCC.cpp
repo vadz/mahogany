@@ -1500,7 +1500,7 @@ SendMessageCC::SendOrQueue(int flags)
       // and also show what we have done with the message
       wxString msg;
       if(m_Protocol == Prot_SMTP || m_Protocol == Prot_Sendmail)
-         msg.Printf(_("Message queued in ´%s´."), m_OutboxName.c_str());
+         msg.Printf(_("Message queued in '%s'."), m_OutboxName.c_str());
       else
          msg.Printf(_("Article queued in '%s'."), m_OutboxName.c_str());
 

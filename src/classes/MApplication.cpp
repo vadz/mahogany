@@ -1051,7 +1051,7 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
          if(mf == NULL)
          {
             String msg;
-            msg.Printf(_("Cannot open outbox ´%s´"), outbox.c_str());
+            msg.Printf(_("Cannot open outbox '%s'"), outbox.c_str());
             ERRORMESSAGE((msg));
             return FALSE;
          }
@@ -1112,7 +1112,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
    if(! mf)
    {
       String msg;
-      msg.Printf(_("Cannot open outbox ´%s´"), outbox.c_str());
+      msg.Printf(_("Cannot open outbox '%s'"), outbox.c_str());
       ERRORMESSAGE((msg));
       return;
    }
@@ -1205,7 +1205,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
             else
             {
                String msg;
-               msg.Printf(_("Cannot send message ´%s´."),
+               msg.Printf(_("Cannot send message '%s'."),
                           hi->GetSubject().c_str());
                ERRORMESSAGE((msg));
                ++i;
@@ -1229,7 +1229,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
             else
             {
                String msg;
-               msg.Printf(_("Cannot post article ´%s´."),
+               msg.Printf(_("Cannot post article '%s'."),
                           hi->GetSubject().c_str());
                ERRORMESSAGE((msg));
                ++i;

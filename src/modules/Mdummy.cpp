@@ -29,7 +29,7 @@ class DummyModule : public MModule
 
 private:
    /** Dummy constructor.
-       As the class has no usable interface, this doesn´t do much, but
+       As the class has no usable interface, this doesn't do much, but
        it displays a small dialog to say hello.
    */
    DummyModule(MInterface *minterface);

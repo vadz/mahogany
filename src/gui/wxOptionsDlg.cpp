@@ -3096,7 +3096,7 @@ void wxOptionsPageCompose::OnButton(wxCommandEvent& event)
       if(dirty)
       {
          wxXFaceButton *btn = (wxXFaceButton*)obj;
-         // Why doesn´t UpdateUI() have the same effect here?
+         // Why doesn't UpdateUI() have the same effect here?
          if(READ_CONFIG(m_Profile, MP_COMPOSE_USE_XFACE))
             btn->SetFile(READ_CONFIG(m_Profile,MP_COMPOSE_XFACE_FILE));
          else
