@@ -1340,7 +1340,6 @@ ParserImpl::ParseFactor(void)
       }
    }
    // sn == NULL, illegal factor
-   Error(_("Expected a either a number, a string, an identifier, '(' or '!'."));
    return sn;
 }
 
@@ -1514,10 +1513,12 @@ ParserImpl::ParseProgram(void)
    if(empty)
    {
       delete pgm;
-      return NULL;
+      pgm = NULL;
    }
-   else
-      return pgm;
+
+   if(pgm == NULL)
+      Error(_("Parse error, cannot find valid program."));
+   return pgm;
 }
 
 Block *
