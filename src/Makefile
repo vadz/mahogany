@@ -12,8 +12,9 @@ include ../makeopts
 ifdef USE_PYTHON
 SUB_DIRS += Python
 MOBJS += Python/*.o
-endif	
+endif
 
+# build the dynamically linked binary by default
 all: subdirs
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)
 #
@@ -22,9 +23,17 @@ all: subdirs
 #	$(CXX) -shared $(MOBJS) $(LDFLAGS) -lswigpy $(NONPLIBS) -o libM.so
 #	$(LINK) -o M -L. $(LDFLAGS) -lM $(SLIBS)
 
-semistatic: subdirs
-	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(LIBS_STATIC) $(GUI_LIBS_STATIC) 
+# build the binary which is statically linked to wxGTK, dynamically to
+# everything else
+quartstatic: subdirs
+	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS_STATIC)
 
+# build the binary which is statically linked to wxGTK and GTK+, dynamically
+# to everything else
+semistatic: subdirs
+	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(LIBS_STATIC) $(GUI_LIBS_STATIC)
+
+# build a (completely) statically linked binary
 static: subdirs
 	$(LINK) -static -o M.static $(LDFLAGS) $(MOBJS) $(LIBS) -lcrypt
 
@@ -36,9 +45,9 @@ doc:
 
 clean:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
-	$(RM) core 
+	$(RM) core
 
-dep depend: 
+dep depend:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
 install: M
@@ -49,7 +58,9 @@ install: M
 	ln -f -s ../share/Mahogany/$(CANONICAL_HOST)/bin/M $(BINDIR)/mahogany
 	$(INSTALL) -d $(DATADIR)/icons
 	for i in icons/*.xpm ; do $(INSTALL_DATA) $$i $(DATADIR)/icons; done
+ifdef USE_PYTHON
 	$(MAKE) -C Python $@
+endif
 
 msgcat:
 	set -e; for i in $(SUB_DIRS) ; do $(MAKE) -C $$i $@; done
