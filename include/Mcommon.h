@@ -30,50 +30,10 @@ typedef int coord_t;
 //     different contexts
 typedef long int lcoord_t;
 
-// @@@ wxGTK alpha 10 doesn't have validators (yet)
-#  ifdef  USE_WXGTK
-#     define DEFAULT_VALIDATOR
-#  else
-#     define DEFAULT_VALIDATOR wxDefaultValidator,
-#  endif //GTK
-
-   // @@@ is this really the same thing
-#  define wxMessage   wxStaticText
-#  define wxCanvas    wxWindow
-#  define wxItem      wxControl
-#  define wxDialogBox wxDialog
-
-   // the same function sometimes have different return types in wxWin1 and 2
-#  define ON_CLOSE_TYPE    bool
-#  define SHOW_TYPE        bool
-
-#  define PanelNewLine(panel)
-
-#  define CreatePanel(parent, x, y, w, h, name)                               \
-   GLOBAL_NEW wxPanel(parent, -1, wxPoint(x, y), wxSize(w, h),                \
-                      wxTAB_TRAVERSAL, name)
-
-#  define CreateLabel(parent, title)                                          \
-   GLOBAL_NEW wxStaticText(parent, -1, _(title))
-
-#  define CreateButton(parent, title, name, id)                               \
-   GLOBAL_NEW wxButton(parent, id, _(title), wxDefaultPosition,               \
-                        wxDefaultSize, 0, DEFAULT_VALIDATOR name)
-
-#  define CreateText(parent, x, y, w, h, name)                                \
-   GLOBAL_NEW wxTextCtrl(parent, -1, M_EMPTYSTRING, wxPoint(x, y), wxSize(w, h),         \
-                         0, DEFAULT_VALIDATOR name)
-
-#  define CreateListBox(parent, x, y, w, h)                                   \
-   GLOBAL_NEW wxListBox(parent, -1, wxPoint(x, y), wxSize(w, h),              \
-                        0, NULL, wxLB_SINGLE | wxLB_ALWAYS_SB)
-
-#  define CreateFrame(parent, title, x, y, w, h)                              \
-   Create(parent, -1, title, wxPoint(x, y), wxSize(w, h))
-
 // ----------------------------------------------------------------------------
 // debugging macros
 // ----------------------------------------------------------------------------
+
 #ifdef DEBUG
 #  define   DEBUG_DEF     void Debug(void) const;
 #     define ASSERT(x)          wxASSERT(x)
@@ -94,6 +54,7 @@ typedef long int lcoord_t;
 #define VERIFY(x, msg)     if ( !(x) ) { wxFAIL_MSG(msg); }
 #define CHECK(x, rc, msg)  wxCHECK_MSG(x, rc, msg)
 #define CHECK_RET(x, msg)  wxCHECK_RET(x, msg)
+
 // ----------------------------------------------------------------------------
 // message logging macros
 // ----------------------------------------------------------------------------

@@ -36,7 +36,7 @@ public:
    virtual void SetTitle(String const & name) = 0;
 
    /// make it visible or invisible
-   virtual SHOW_TYPE Show(bool visible = true) = 0;
+   virtual bool Show(bool visible = true) = 0;
 
    /// is it ok to close the frame?
    virtual bool CanClose() const { return true; }

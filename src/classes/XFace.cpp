@@ -27,6 +27,7 @@
 #   include "Profile.h"
 #endif
 
+#include "Mdefaults.h"
 
 #ifdef HAVE_COMPFACE_H
 extern "C" {
