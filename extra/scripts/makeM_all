@@ -104,7 +104,7 @@ MTAG="-A"
 WXNAME=wxGTK
 WXVERSION=2.1.11
 
-DOCHOST=Matterhorn
+DOCHOST=phyw164
 
 # This should be set to "yes" by the Mahogany compilation if it
 # succeeds. Used in the debian compilation only for now.
@@ -127,6 +127,7 @@ if [ -f /etc/debian_version ]
 then
   DEBIAN=yes
   OSTYPE_ADDON="-Debian"
+  DEBIAN_FLAVOUR=Debian
 else
   DEBIAN=no
 fi
@@ -165,6 +166,7 @@ then
   CC=/opt/FSFgcc-2.8.0/bin/gcc
   CXX=/opt/FSFgcc-2.8.0/bin/c++
   LDFLAGS="$LDFLAGS -L/opt/FSFstdc++/lib -L/opt/lib -L/home/karsten/arch/SunOS/lib"
+  CPPFLAGS="$CPPFLAGS -I/home/karsten/arch/SunOS/include"
   CPPFLAGS="-I/opt/include -I/opt/FSFstdc++/include/g++ -I/home/karsten/arch/SunOS/include -I$HOME/opt/include" # -I/scratch/karsten/Python/include/python1.5"
   MAKE="gmake -s"
   PATH=/usr/ucb:/sbin:/usr/openwin/bin:/usr/bin:/usr/sbin:/opt/bin:/opt/SUNWspro/bin:/opt/hostsA:/usr/ccs/bin:$PATH:/usr/local/bin
@@ -190,6 +192,8 @@ fi
 if [ `hostname` = Matterhorn ]
 then
   SCP=scp1
+  OSTYPE_ADDON="-Corel"
+  DEBIAN_FLAVOUR=Corel
 fi
 
 if [ `hostname` = ronnie ]
@@ -454,6 +458,10 @@ then
   then
     echo "Build of $NAME-$VERSION failed."
   else
+    if [ "$DEBIAN_FLAVOUR" != "Debian" ]
+    then
+      mv mahogany_*.deb `basename mahogany_*.deb .deb`-$DEBIAN_FLAVOUR.deb
+    fi
     if [ "$DOINSTALL" = "yes" ] ; then
 	# do not install locally        (cd $NAME-$VERSION && super debi)
         $SCP mahogany_* $FTPLOCATION
