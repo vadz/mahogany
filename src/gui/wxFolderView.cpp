@@ -2444,9 +2444,12 @@ wxFolderView::OpenFolder(MFolder *folder)
       // only for one folder)
       if ( !MDialog_YesNoDialog
            (
-            _("This folder couldn't be opened last time, "
-              "do you still want to try to open it (it "
-              "will probably fail again)?"),
+            wxString::Format(
+               _("The folder '%s' couldn't be opened last time, "
+                 "do you still want to try to open it (it "
+                 "will probably fail again)?"),
+               m_fullname.c_str()
+            ),
             frame,
             MDIALOG_YESNOTITLE,
             false, // [No] default
