@@ -2675,13 +2675,18 @@ MailFolderCC::LookupObject(const MAILSTREAM *stream, const char *name)
       return ms_StreamListDefaultObj;
    }
 
-   // mail_status() sometimes (depends on the folder type and server
-   // capabilities for IMAP) allocates a private stream which we don't know
-   // about - just ignore it here, but panic otherwise (we risk to miss some
-   // important notification!)
+   // unfortunately, c-client seems to allocate the temp private streams fairly
+   // liberally and it doesn't seem possible to detect here all cases when it
+   // does it (some examples: from mail_status() for some folders, from
+   // mail_open() for the file based one, ...) so don't assert here as we used
+   // to do, just log
+   //
+   // we still detect the attempts to look up a missing named stream (this one
+   // can't be private to c-client) though!
    //
    // NB: gs_mmStatusRedirect is !NULL only while we're inside mail_status()
-   ASSERT_MSG( gs_mmStatusRedirect, "No mailfolder for c-client callback?" );
+   ASSERT_MSG( gs_mmStatusRedirect || !name,
+               "No mailfolder for c-client callback?" );
 
    return NULL;
 }
