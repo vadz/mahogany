@@ -54,6 +54,11 @@
 #include <wx/utils.h> // wxGetFullHostName()
 #include <wx/file.h>
 #include <wx/fontmap.h> // for GetEncodingName()
+#include <wx/datetime.h>
+
+#ifdef OS_UNIX
+   #include <unistd.h>  // for getpid()
+#endif
 
 extern bool InitSSL(); // from src/util/ssl.cpp
 
@@ -976,6 +981,50 @@ SendMessageCC::RemoveHeaderEntry(const String& name)
 // SendMessageCC building
 // ----------------------------------------------------------------------------
 
+/// build a unique string for the Message-Id header
+static
+String BuildMessageId(const char *hostname)
+{
+   // get the PID from OS (TODO: should have a wxWin function for this)
+   static unsigned long s_pid = 0;
+
+   if ( !s_pid )
+   {
+#ifdef OS_WIN
+      extern "C" DWORD GetCurrentProcessId();
+
+      s_pid = (unsigned long)GetCurrentProcessId();
+#elif defined(OS_UNIX)
+      s_pid = (unsigned long)getpid();
+#else
+      #error "Don't know how to getpid() on this platform"
+#endif
+   }
+
+   // get the time to make the message-id unique and use s_numInSec to make the
+   // messages sent during the same second unique
+   static unsigned int s_numInSec = 0;
+   static wxDateTime s_dtLast;
+
+   wxDateTime dt = wxDateTime::Now();
+   if ( s_dtLast.IsValid() && s_dtLast == dt )
+   {
+      s_numInSec++;
+   }
+   else
+   {
+      s_dtLast = dt;
+      s_numInSec = 0;
+   }
+
+   return String::Format("<Mahogany-%s-%lu-%s.%02u@%s>",
+                         M_VERSION,
+                         s_pid,
+                         dt.Format("%Y%m%d-%H%M%S").c_str(),
+                         s_numInSec,
+                         hostname);
+}
+
 void
 SendMessageCC::Build(bool forStorage)
 {
@@ -987,147 +1036,161 @@ SendMessageCC::Build(bool forStorage)
 
    m_wasBuilt = true;
 
-   // this must be done for the new as well as resent messages: RFC 2822 says
-   // that Resent-From should be always present (section 3.6.6)
+   // the headers needed for all messages
+   // -----------------------------------
+
+   // see section 3.6.6 of RFC 2822 for the full list of headers which must be
+   // present in resent messages
+
+   // From:
    SetupFromAddresses();
 
+   // To:, Cc: and Bcc: have been already set by SetAddresses
+
+   // Date:
+   char tmpbuf[MAILTMPLEN];
+   rfc822_date (tmpbuf);
+   m_Envelope->date = cpystr(tmpbuf);
+
+   // Message-Id:
+   m_Envelope->message_id = cpystr(BuildMessageId(m_DefaultHost));
+
    // don't add any more headers to the message being resent
-   if ( !m_Envelope->remail )
+   if ( m_Envelope->remail )
+   {
+      return;
+   }
+
+   // the headers needed only for new (and not resent) messages
+   // ---------------------------------------------------------
+
+   /*
+      Is the message supposed to be sent later? In that case, we need
+      to store the BCC header as an X-BCC or it will disappear when
+      the message is saved to the outbox.
+    */
+   if ( forStorage )
+   {
+      // The X-BCC will be converted back to BCC by Send()
+      if ( m_Envelope->bcc )
+         AddHeaderEntry("X-BCC", m_Bcc);
+   }
+   else // send, not store
    {
       /*
-         Is the message supposed to be sent later? In that case, we need
-         to store the BCC header as an X-BCC or it will disappear when
-         the message is saved to the outbox.
+         If sending directly, we need to do the opposite: this message
+         might have come from the Outbox queue, so we translate X-BCC
+         back to a proper bcc setting:
        */
-      if ( forStorage )
+      if ( HasHeaderEntry("X-BCC") )
       {
-         // The X-BCC will be converted back to BCC by Send()
          if ( m_Envelope->bcc )
-            AddHeaderEntry("X-BCC", m_Bcc);
-      }
-      else // send, not store
-      {
-         /*
-            If sending directly, we need to do the opposite: this message
-            might have come from the Outbox queue, so we translate X-BCC
-            back to a proper bcc setting:
-          */
-         if ( HasHeaderEntry("X-BCC") )
          {
-            if ( m_Envelope->bcc )
-            {
-               mail_free_address(&m_Envelope->bcc);
-            }
-
-            SetAddressField(&m_Envelope->bcc, GetHeaderEntry("X-BCC"));
-
-            // don't send X-BCC field or the recipient would still see the BCC
-            // contents (which is highly undesirable!)
-            RemoveHeaderEntry("X-BCC");
+            mail_free_address(&m_Envelope->bcc);
          }
-      }
 
-      // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the
-      // last NULL entry
-      size_t n = m_extraHeaders.size() + 4;
-      m_headerNames = new const char*[n];
-      m_headerValues = new const char*[n];
+         SetAddressField(&m_Envelope->bcc, GetHeaderEntry("X-BCC"));
 
-      // the current header position in m_headerNames/Values
-      int h = 0;
-
-      bool replyToSet = false,
-           xmailerSet = false;
-
-      // add the additional header lines added by the user
-      for ( MessageHeadersList::iterator i = m_extraHeaders.begin();
-            i != m_extraHeaders.end();
-            ++i, ++h )
-      {
-         m_headerNames[h] = strutil_strdup(i->m_name);
-         if ( wxStricmp(m_headerNames[h], "Reply-To") == 0 )
-            replyToSet = true;
-         else if ( wxStricmp(m_headerNames[h], "X-Mailer") == 0 )
-            xmailerSet = true;
-
-         m_headerValues[h] = strutil_strdup(i->m_value);
-      }
-
-      // add X-Mailer header if it wasn't overridden by the user (yes, we do allow
-      // it - why not?)
-      if ( !xmailerSet )
-      {
-         m_headerNames[h] = strutil_strdup("X-Mailer");
-
-         // NB: do *not* translate these strings, this doesn't make much sense
-         //     (the user doesn't usually see them) and, worse, we shouldn't
-         //     include 8bit chars (which may - and do - occur in translations) in
-         //     headers!
-         String version;
-         version << "Mahogany " << M_VERSION_STRING;
-#ifdef OS_UNIX
-         version  << ", compiled for " << M_OSINFO;
-#else // Windows
-         version << ", running under " << wxGetOsDescription();
-#endif // Unix/Windows
-         m_headerValues[h++] = strutil_strdup(version);
-      }
-
-      // set Reply-To if it hadn't been set by the user as a custom header
-      if ( !replyToSet )
-      {
-         ASSERT_MSG( !HasHeaderEntry("Reply-To"), "logic error" );
-
-         if ( !m_ReplyTo.empty() )
-         {
-            m_headerNames[h] = strutil_strdup("Reply-To");
-            m_headerValues[h++] = strutil_strdup(m_ReplyTo);
-         }
-      }
-
-#ifdef HAVE_XFACES
-      // add an XFace?
-      if ( !HasHeaderEntry("X-Face") && !m_XFaceFile.empty() )
-      {
-         XFace xface;
-         if ( xface.CreateFromFile(m_XFaceFile) )
-         {
-            m_headerNames[h] = strutil_strdup("X-Face");
-            m_headerValues[h] = strutil_strdup(xface.GetHeaderLine());
-            if(strlen(m_headerValues[h]))  // paranoid, I know.
-            {
-               ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-2] == '\r', "String should have been DOSified" );
-               ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-1] == '\n', "String should have been DOSified" );
-               ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-2] =
-                  '\0'; // cut off \n
-            }
-            h++;
-         }
-         //else: couldn't read X-Face from file (complain?)
-      }
-#endif // HAVE_XFACES
-
-      m_headerNames[h] = NULL;
-      m_headerValues[h] = NULL;
-
-      mail_free_body_part(&m_LastPart->next);
-      m_LastPart->next = NULL;
-
-      // check if there is only one part, then we don't need multipart/mixed
-      if(m_LastPart == m_Body->nested.part)
-      {
-         BODY *oldbody = m_Body;
-         m_Body = &(m_LastPart->body);
-         oldbody->nested.part = NULL;
-         mail_free_body(&oldbody);
+         // don't send X-BCC field or the recipient would still see the BCC
+         // contents (which is highly undesirable!)
+         RemoveHeaderEntry("X-BCC");
       }
    }
 
-   // finally, set the date
-   char tmpbuf[MAILTMPLEN];
-   rfc822_date (tmpbuf);
-   m_Envelope->date = (char *) fs_get (1+strlen (tmpbuf));
-   strcpy (m_Envelope->date,tmpbuf);
+   // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the
+   // last NULL entry
+   size_t n = m_extraHeaders.size() + 4;
+   m_headerNames = new const char*[n];
+   m_headerValues = new const char*[n];
+
+   // the current header position in m_headerNames/Values
+   int h = 0;
+
+   bool replyToSet = false,
+        xmailerSet = false;
+
+   // add the additional header lines added by the user
+   for ( MessageHeadersList::iterator i = m_extraHeaders.begin();
+         i != m_extraHeaders.end();
+         ++i, ++h )
+   {
+      m_headerNames[h] = strutil_strdup(i->m_name);
+      if ( wxStricmp(m_headerNames[h], "Reply-To") == 0 )
+         replyToSet = true;
+      else if ( wxStricmp(m_headerNames[h], "X-Mailer") == 0 )
+         xmailerSet = true;
+
+      m_headerValues[h] = strutil_strdup(i->m_value);
+   }
+
+   // add X-Mailer header if it wasn't overridden by the user (yes, we do allow
+   // it - why not?)
+   if ( !xmailerSet )
+   {
+      m_headerNames[h] = strutil_strdup("X-Mailer");
+
+      // NB: do *not* translate these strings, this doesn't make much sense
+      //     (the user doesn't usually see them) and, worse, we shouldn't
+      //     include 8bit chars (which may - and do - occur in translations) in
+      //     headers!
+      String version;
+      version << "Mahogany " << M_VERSION_STRING;
+#ifdef OS_UNIX
+      version  << ", compiled for " << M_OSINFO;
+#else // Windows
+      version << ", running under " << wxGetOsDescription();
+#endif // Unix/Windows
+      m_headerValues[h++] = strutil_strdup(version);
+   }
+
+   // set Reply-To if it hadn't been set by the user as a custom header
+   if ( !replyToSet )
+   {
+      ASSERT_MSG( !HasHeaderEntry("Reply-To"), "logic error" );
+
+      if ( !m_ReplyTo.empty() )
+      {
+         m_headerNames[h] = strutil_strdup("Reply-To");
+         m_headerValues[h++] = strutil_strdup(m_ReplyTo);
+      }
+   }
+
+#ifdef HAVE_XFACES
+   // add an XFace?
+   if ( !HasHeaderEntry("X-Face") && !m_XFaceFile.empty() )
+   {
+      XFace xface;
+      if ( xface.CreateFromFile(m_XFaceFile) )
+      {
+         m_headerNames[h] = strutil_strdup("X-Face");
+         m_headerValues[h] = strutil_strdup(xface.GetHeaderLine());
+         if(strlen(m_headerValues[h]))  // paranoid, I know.
+         {
+            ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-2] == '\r', "String should have been DOSified" );
+            ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-1] == '\n', "String should have been DOSified" );
+            ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-2] =
+               '\0'; // cut off \n
+         }
+         h++;
+      }
+      //else: couldn't read X-Face from file (complain?)
+   }
+#endif // HAVE_XFACES
+
+   m_headerNames[h] = NULL;
+   m_headerValues[h] = NULL;
+
+   mail_free_body_part(&m_LastPart->next);
+   m_LastPart->next = NULL;
+
+   // check if there is only one part, then we don't need multipart/mixed
+   if(m_LastPart == m_Body->nested.part)
+   {
+      BODY *oldbody = m_Body;
+      m_Body = &(m_LastPart->body);
+      oldbody->nested.part = NULL;
+      mail_free_body(&oldbody);
+   }
 }
 
 void
