@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/22 20:41:51  KB
+ * included profile setting for fonts etc,
+ * made XFaces work, started adding support for highlighted URLs
+ *
  * Revision 1.1  1998/03/14 12:21:22  karsten
  * first try at a complete archive
  *
@@ -32,8 +36,6 @@ extern "C"
 }
 
 
-//FIXME
-static char *Icondata[200];
 static void popup_callback(wxMenu& menu, wxCommandEvent& ev);
 
 IMPLEMENT_CLASS(wxMessageView, wxMFrame)
@@ -84,6 +86,7 @@ wxMessageView::Create(const String &iname, wxFrame *parent)
    mailMessage = NULL;
    mimeDisplayPart = 0;
    xface = NULL;
+   xfaceXpm = NULL;
    
    wxMFrame::Create(iname, parent);
 
@@ -104,17 +107,18 @@ wxMessageView::Create(const String &iname, wxFrame *parent)
    popupMenu->Append(WXMENU_MIME_HANDLE,(char *)_("&Handle"));
    popupMenu->Append(WXMENU_MIME_SAVE,(char *)_("&Save"));
    
-   ftoList = NEW wxFTOList();
+   ftoList = NEW wxFTOList((wxDC *)NULL,
+			   folder ? folder->GetProfile() : NULL);
    ftCanvas = NEW wxMVCanvas(ftoList,this);
    ftoList->SetDC(ftCanvas->GetDC());
    
-   folder = NULL;
    initialised = true;
 }
 
 wxMessageView::wxMessageView(const String &iname, wxFrame *parent)
 {
    initialised = false;
+   folder = NULL;
    Create(iname,parent);
    Show(TRUE);
 }
@@ -125,8 +129,8 @@ wxMessageView::wxMessageView(MailFolder *ifolder,
 			      wxFrame *parent)
 {
    initialised = false;
-   Create(iname,parent);
    folder = ifolder;
+   Create(iname,parent);
    ShowMessage(folder,num);
 
    String
@@ -145,14 +149,8 @@ wxMessageView::Update(void)
    char const * cptr;
    String	tmp,from;
    bool		lastObjectWasIcon = false; // a flag
-   
-   ftoList->AddFormattedText(_("<bf>From:</bf> "));
-   from = mailMessage->Address(tmp,MAT_FROM);
-   if(tmp.length() > 0)
-      from = tmp + String(" <") + from + '>';
-   ftoList->AddText(from);
-   ftoList->AddFormattedText(_("\n<bf>Subject:</bf> "));
-   ftoList->AddText(mailMessage->Subject());
+
+#ifdef	HAVE_XFACES
    if(folder->GetProfile() &&
       folder->GetProfile()->readEntry(MP_SHOW_XFACES,
 				      MP_SHOW_XFACES_D))
@@ -163,28 +161,27 @@ wxMessageView::Update(void)
 	 xface = NEW XFace();
 	 tmp = tmp.c_str()+strlen("X-Face:");
 	 xface->CreateFromXFace(tmp.c_str());
-	 xface->CreateXpm(tmp);
-	 char **ipm = XFace::SplitXpm(tmp);
-	 char *line;
-	 int i;
-	 for(i = 0; ipm[i]; i++)
+	 if(xface->CreateXpm(&xfaceXpm))
 	 {
-	    Icondata[i] = ipm[i];
-	    line = Icondata[i];
-	    VAR(line);
+	    ftoList->AddIcon("XFACE", xfaceXpm);
+	    ftoList->AddFormattedText(" \n<IMG SRC=\"XFACE\">\n");
 	 }
-	 ftoList->AddIcon("XFACE", Icondata);
-	 ftoList->AddFormattedText(" <bf>X-Face:</bf><IMG SRC=\"XFACE\">\n");
-	 //FIXME: free allocated arrays
       }
    }  
+#endif
+   ftoList->AddFormattedText(_("<bf>From:</bf> "));
+   from = mailMessage->Address(tmp,MAT_FROM);
+   if(tmp.length() > 0)
+      from = tmp + String(" <") + from + '>';
+   ftoList->AddText(from);
+   ftoList->AddFormattedText(_("\n<bf>Subject:</bf> "));
+   ftoList->AddText(mailMessage->Subject());
    ftoList->AddFormattedText(_("\n<bf>Date:</bf> "));
    ftoList->AddText(mailMessage->Date());
    ftoList->AddText("\n\n");
 
 
    n = mailMessage->CountParts();
-   VAR(n);
    for(i = 0; i < n; i++)
    {
       t = mailMessage->GetPartType(i);
@@ -198,7 +195,16 @@ wxMessageView::Update(void)
 	    if(cptr)
 	    {
 	       ftoList->AddText("\n");
-	       ftoList->AddText(cptr);
+	       if(folder->GetProfile() &&
+		  folder->GetProfile()->readEntry(MP_HIGHLIGHT_URLS,
+						  MP_HIGHLIGHT_URLS_D))
+	       {
+		  tmp = "";
+		  HighLightURLs(cptr, tmp);
+		  ftoList->AddFormattedText(tmp);
+	       }
+	       else
+		  ftoList->AddText(tmp.c_str());
 	       lastObjectWasIcon = false;
 	    }
 	 }
@@ -218,6 +224,31 @@ wxMessageView::Update(void)
    ftCanvas->SetScrollbars(20,20,(int)width/20,(int)(height*1.2)/20,10,10); 
 }
 
+void
+wxMessageView::HighLightURLs(const char *input, String &out)
+{
+   const char *cptr = input;
+
+   while(*cptr)
+   {
+      // escape brackets:
+      if(*cptr == '<')
+	 out += '<';
+      else
+	 if(*cptr == '>')
+	    out += '>';
+      if(strncmp(cptr, "http:", 5) == 0)
+      {
+	 const char *cptr2 = cptr+5;
+	 out += " <IMG SRC=\"M-HLINK\";";
+	 while(*cptr2 && ! isspace(*cptr2))
+	    out += *cptr2++;
+	 out += "> ";
+      }
+      out += *cptr++;
+   }
+}
+
 wxMessageView::~wxMessageView()
 {
    if(! initialised)
@@ -226,6 +257,8 @@ wxMessageView::~wxMessageView()
       DELETE mailMessage;
    if(xface)
       DELETE xface;
+   if(xfaceXpm)
+      DELETE [] xfaceXpm;
    if(popupMenu)
       DELETE	popupMenu;
    DELETE ftCanvas;

@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/22 20:41:50  KB
+ * included profile setting for fonts etc,
+ * made XFaces work, started adding support for highlighted URLs
+ *
  * Revision 1.1  1998/03/14 12:21:22  karsten
  * first try at a complete archive
  *
@@ -26,11 +30,12 @@ IMPLEMENT_CLASS(wxFTCanvas, wxCanvas)
 
 
 wxFTCanvas::wxFTCanvas(wxPanel *iparent, int ix, int iy, int iwidth,
-		       int iheight, long style)
+		       int iheight, long style,
+		       ProfileBase *profile)
 {
    parent = iparent;
    wxCanvas::Create(parent, ix, iy, iwidth, iheight, style);
-   ftoList = NEW wxFTOList(this);
+   ftoList = NEW wxFTOList(this, profile);
    wrapMargin = -1;
 }
 

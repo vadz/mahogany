@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/22 20:41:50  KB
+ * included profile setting for fonts etc,
+ * made XFaces work, started adding support for highlighted URLs
+ *
  * Revision 1.1  1998/03/14 12:21:22  karsten
  * first try at a complete archive
  *
@@ -476,7 +480,7 @@ wxFTOList::SetCanvas(wxCanvas *ic)
    DrawCursor();
 }
 
-wxFTOList::wxFTOList(wxDC *idc)
+wxFTOList::wxFTOList(wxDC *idc, ProfileBase *profile)
 {
    pageingFlag = false;
    listOfLines = NULL;
@@ -484,18 +488,33 @@ wxFTOList::wxFTOList(wxDC *idc)
    editable = false;
    Clear();
 
+   if(profile)
+   {
+      drawInfo.FontFamily(profile->readEntry(MP_FTEXT_FONT, MP_FTEXT_FONT_D));
+      drawInfo.FontStyle(profile->readEntry(MP_FTEXT_STYLE, MP_FTEXT_STYLE_D));
+      drawInfo.FontWeight(profile->readEntry(MP_FTEXT_WEIGHT, MP_FTEXT_WEIGHT_D));
+      drawInfo.FontSize(profile->readEntry(MP_FTEXT_SIZE, MP_FTEXT_SIZE_D));
+   }
    SetDC(idc);
    
    //SetCursor(canvas_cursor = DEBUG_NEW wxCursor(wxCURSOR_PENCIL));
 }
 
-wxFTOList::wxFTOList(wxCanvas *ic)
+wxFTOList::wxFTOList(wxCanvas *ic, ProfileBase *profile)
 {
    pageingFlag = false;
    listOfLines = NULL;
    listOfClickables = NULL;
    editable = false;
    Clear();
+
+   if(profile)
+   {
+      drawInfo.FontFamily(profile->readEntry(MP_FTEXT_FONT, MP_FTEXT_FONT_D));
+      drawInfo.FontStyle(profile->readEntry(MP_FTEXT_STYLE, MP_FTEXT_STYLE_D));
+      drawInfo.FontWeight(profile->readEntry(MP_FTEXT_WEIGHT, MP_FTEXT_WEIGHT_D));
+      drawInfo.FontSize(profile->readEntry(MP_FTEXT_SIZE, MP_FTEXT_SIZE_D));
+   }
 
    SetCanvas(ic);
    

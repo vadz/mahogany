@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/22 20:41:51  KB
+ * included profile setting for fonts etc,
+ * made XFaces work, started adding support for highlighted URLs
+ *
  * Revision 1.1  1998/03/14 12:21:22  karsten
  * first try at a complete archive
  *
@@ -14,6 +18,8 @@
 #ifdef __GNUG__
 #pragma implementation "wxIconManager.h"
 #endif
+
+#include	<CommonBase.h>	//VAR() macro
 
 #include	<wxIconManager.h>
 #include	<strutil.h>
@@ -26,6 +32,7 @@
 #include	<video.xpm>
 #include	<postscript.xpm>
 #include	<dvi.xpm>
+#include	<hlink.xpm>
 
 wxIconManager::wxIconManager()
 {
@@ -39,6 +46,7 @@ wxIconManager::wxIconManager()
    AddIcon("APPLICATION/DVI", dvi_xpm);
    AddIcon("IMAGE", image_xpm);
    AddIcon("VIDEO", video_xpm);
+   AddIcon("M-HLINK", hlink_xpm);
    unknownIcon = NEW wxIcon(unknown_xpm);
 }
 

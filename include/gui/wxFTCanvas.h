@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/22 20:41:28  KB
+ * included profile setting for fonts etc,
+ * made XFaces work, started adding support for highlighted URLs
+ *
  * Revision 1.1  1998/03/14 12:21:15  karsten
  * first try at a complete archive
  *
@@ -44,7 +48,8 @@ public:
        @param style	style
    */
    wxFTCanvas(wxPanel *iparent, int ix = -1, int iy = -1,
-	      int iwidth = -1, int iheight = -1, long style = 0);
+	      int iwidth = -1, int iheight = -1, long style = 0,
+	      ProfileBase *profile = NULL);
    /// Destructor.
    ~wxFTCanvas();
 

@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/22 20:41:16  KB
+ * included profile setting for fonts etc,
+ * made XFaces work, started adding support for highlighted URLs
+ *
  * Revision 1.1  1998/03/14 12:21:12  karsten
  * first try at a complete archive
  *
@@ -58,20 +62,21 @@ class XFace : public CommonBase
    bool	CreateFromXFace(const char *xfacedata);
 
    /**
-      Create an Xpm from an XFace.
+      Create an Xpm from an XFace, including all the declaration
+      stuff, just like for writing to a file.
       @param xpm String for the xpm data
       @return true on success
    */
    bool	CreateXpm(String &xpm);
 
    /**
-      Split a string with an xpm into a char * array.
-      The last line pointer will be set to NULL.
-      @param xpm	the string holding the xpm
-      @return	an array of lines
+      Create an Xpm from an XFace, creates only the contents of the
+      character array.
+      @param xpm String for the xpm data
+      @return true on success
    */
-   static char ** SplitXpm(String const &xpm);
-   
+   bool	CreateXpm(char ***xpm);
+
    /// initialised == there is a list of paths
    bool	IsInitialised(void) const { return initialised; }
 

@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/22 20:41:28  KB
+ * included profile setting for fonts etc,
+ * made XFaces work, started adding support for highlighted URLs
+ *
  * Revision 1.1  1998/03/14 12:21:15  karsten
  * first try at a complete archive
  *
@@ -23,6 +27,7 @@ using namespace std;
 #include	<map>
 #include	<list>
 
+#include	<Profile.h>
 #include	<wxFontManager.h>
 #include	<wxIconManager.h>
 
@@ -426,8 +431,8 @@ class wxFTOList
    friend FTObject;
 public:
    /// Constructor
-   wxFTOList(wxDC *dc = NULL);
-   wxFTOList(wxCanvas *icanvas);
+   wxFTOList(wxDC *dc = NULL, ProfileBase *profile = NULL);
+   wxFTOList(wxCanvas *icanvas, ProfileBase *profile = NULL);
    void DrawText(const char *text, int x, int y);
 
    /**@name Adding strings to the list. */

@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/03/22 20:41:50  KB
+ * included profile setting for fonts etc,
+ * made XFaces work, started adding support for highlighted URLs
+ *
  * Revision 1.2  1998/03/16 18:22:43  karsten
  * started integration of python, fixed bug in wxFText/word wrapping
  *
@@ -238,7 +242,7 @@ wxComposeView::Create(const String &iname, wxFrame *parent,
 void
 wxComposeView::CreateFTCanvas(void)
 {
-   ftCanvas = new wxFTCanvas(panel);
+   ftCanvas = new wxFTCanvas(panel, -1,-1,-1,-1, 0, profile);
    // Canvas
    wxLayoutConstraints *c = new wxLayoutConstraints;
    c->left.SameAs       (panel, wxLeft);

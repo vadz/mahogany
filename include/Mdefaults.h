@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/03/22 20:41:16  KB
+ * included profile setting for fonts etc,
+ * made XFaces work, started adding support for highlighted URLs
+ *
  * Revision 1.2  1998/03/16 18:22:40  karsten
  * started integration of python, fixed bug in wxFText/word wrapping
  *
@@ -172,6 +176,17 @@
 #define MP_REPLY_MSGPREFIX		"ReplyQuote"
 /// show XFaces?
 #define	MP_SHOW_XFACES			"ShowXFaces"
+/// which font to use
+#define	MP_FTEXT_FONT			"FontFamily"
+/// which font size
+#define MP_FTEXT_SIZE			"FontSize"
+/// which font style
+#define	MP_FTEXT_STYLE			"FontStyle"
+/// which font weight
+#define MP_FTEXT_WEIGHT			"FontWeight"
+/// highlight URLS?
+#define	MP_HIGHLIGHT_URLS		"HighlightURL"
+/// the wildcard for save dialog
 //@}
 //@}
 
@@ -300,6 +315,16 @@
 #define MP_REPLY_MSGPREFIX_D		" > "
 /// show XFaces?
 #define	MP_SHOW_XFACES_D		1
+/// which font to use
+#define	MP_FTEXT_FONT_D			0
+/// which font size
+#define MP_FTEXT_SIZE_D			12
+/// which font style
+#define	MP_FTEXT_STYLE_D		1
+/// which font weight
+#define MP_FTEXT_WEIGHT_D		0
+/// highlight URLS?
+#define	MP_HIGHLIGHT_URLS_D		1
 /// the wildcard for save dialog
 #ifdef OS_UNIX
 #define MP_DEFAULT_SAVE_WILDCARD_D	"*"

@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/22 20:41:28  KB
+ * included profile setting for fonts etc,
+ * made XFaces work, started adding support for highlighted URLs
+ *
  * Revision 1.1  1998/03/14 12:21:16  karsten
  * first try at a complete archive
  *
@@ -79,6 +83,9 @@ private:
 
    /// this can hold an xface
    XFace	*xface;
+   /// and the xpm for it
+   char **xfaceXpm;
+   
    /**@name The interface to its canvas. */
    //@{
    /// the MessageView canvas class
@@ -139,6 +146,9 @@ public:
 
    /// prints the currently displayed message
    void Print(void);
+
+   /// convert string in cptr to one in which URLs are highlighted
+   void HighLightURLs(const char *cptr, String &out);
 };
 
 #endif
