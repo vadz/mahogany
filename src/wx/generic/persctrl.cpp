@@ -61,13 +61,20 @@
 // icons
 // ----------------------------------------------------------------------------
 
+#ifdef M_PREFIX
+#   include   "Mcommon.h"
+#   include   "kbList.h"
+#   include   "gui/wxIconManager.h"
+#   include   "MApplication.h"
+#else
 // MSW icons are in the ressources, for all other platforms - in XPM files
 #ifndef __WXMSW__
-#   include "wx/generic/info.xpm"
-#   include "wx/generic/question.xpm"
-#   include "wx/generic/warning.xpm"
-#   include "wx/generic/error.xpm"
+#      include "wx/generic/info.xpm"
+#      include "wx/generic/question.xpm"
+#      include "wx/generic/warning.xpm"
+#      include "wx/generic/error.xpm"
 #endif // __WXMSW__
+#endif // M_PREFIX
 
 // ----------------------------------------------------------------------------
 // event tables
@@ -735,7 +742,8 @@ public:
     wxPMessageDialog(wxWindow *parent,
                      const wxString& message,
                      const wxString& caption,
-                     long style);
+                     long style,
+                     bool persistent = TRUE);
 
     // accessors
     bool DontShowAgain() const { return m_checkBox->GetValue(); }
@@ -761,7 +769,7 @@ END_EVENT_TABLE()
 wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
                                    const wxString& message,
                                    const wxString& caption,
-                                   long style)
+                                   long style, bool persistent)
                 : wxDialog(parent, -1, caption,
                            wxDefaultPosition, wxDefaultSize,
                            wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
@@ -783,8 +791,8 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
         Icon_Warning,
         Icon_Error
     } which;
-
-#ifdef __WXMSW__
+    
+#if defined( __WXMSW__ ) && ! defined( M_PREFIX )
     static char *icons[] =
     {
         "wxICON_INFO",
@@ -792,7 +800,16 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
         "wxICON_WARNING",
         "wxICON_ERROR",
     };
-#else // XPM icons
+#else // XPM icons, or names in resource via IconManager
+#ifdef M_PREFIX
+    static char *icons[] =
+    {
+        "msg_info",
+        "msg_question",
+        "msg_warning",
+        "msg_error"
+    };
+#else
     static char **icons[] =
     {
         info,
@@ -800,8 +817,9 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
         warning,
         error,
     };
+#endif
 #endif // !XPM/XPM
-
+    
     if ( style & wxICON_EXCLAMATION )
         which = Icon_Warning;
     else if ( style & wxICON_HAND )
@@ -812,7 +830,11 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
         which = Icon_Information;
 
 #ifdef USE_ICON
+#   ifdef M_PREFIX
+    wxStaticBitmap *icon = new wxStaticBitmap(this, -1, ICON(icons[which]));
+#   else
     wxStaticBitmap *icon = new wxStaticBitmap(this, -1, wxIcon(icons[which]));
+#   endif
     const int iconSize = icon->GetIcon().GetWidth();
 #endif // use icon
     
@@ -905,17 +927,20 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
         widthBtnMax += 10;
     long heightButton = widthBtnMax*23/75;
 
-    long heightTextLine;
+    long heightTextLine = 0;
     wxString textCheckbox = _("Don't show this message again ");
-    dc.GetTextExtent(textCheckbox, &width, &heightTextLine);
+    if(persistent)
+    {
+       dc.GetTextExtent(textCheckbox, &width, &heightTextLine);
 
-    // extra space for the check box
-    width += 15;
+       // extra space for the check box
+       width += 15;
 
-    // *1.2 baselineskip
-    heightTextLine *= 12;
-    heightTextLine /= 10;
+       // *1.2 baselineskip
+       heightTextLine *= 12;
+       heightTextLine /= 10;
 
+    }
     size_t nLineCount = lines.Count();
 
     long widthButtonsTotal = nButtons * (widthBtnMax + LAYOUT_X_MARGIN) -
@@ -993,14 +1018,16 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     }
 
     // and finally create the check box
-    c = new wxLayoutConstraints;
-    c->width.AsIs();
-    c->height.AsIs();
-    c->top.Below(box, LAYOUT_Y_MARGIN);
-    c->centreX.SameAs(this, wxCentreX);
-    m_checkBox = new wxCheckBox(this, -1, textCheckbox);
-    m_checkBox->SetConstraints(c);
-
+    if(persistent)
+    {
+       c = new wxLayoutConstraints;
+       c->width.AsIs();
+       c->height.AsIs();
+       c->top.Below(box, LAYOUT_Y_MARGIN);
+       c->centreX.SameAs(this, wxCentreX);
+       m_checkBox = new wxCheckBox(this, -1, textCheckbox);
+       m_checkBox->SetConstraints(c);
+    }
     // set default button
     // ------------------
 
@@ -1068,34 +1095,43 @@ int wxPMessageBox(const wxString& configPath,
                   wxWindow *parent,
                   wxConfigBase *config)
 {
-    wxPHelper persist(configPath, gs_MessageBoxPath, config);
-    persist.ChangePath();
+   if(configPath.Length())
+   {
+      wxPHelper persist(configPath, gs_MessageBoxPath, config);
+      persist.ChangePath();
 
-    wxString configValue = persist.GetKey();
+      wxString configValue = persist.GetKey();
 
-    long rc; // return code
+      long rc; // return code
 
-    // if config was NULL, wxPHelper already has the global one
-    config = persist.GetConfig();
+      // if config was NULL, wxPHelper already has the global one
+      config = persist.GetConfig();
 
-    // disabled?
-    if ( config && config->Exists(configValue) ) {
-        // don't show it, it was disabled
-        rc = config->Read(configValue, 0l);
-    }
-    else {
-        // do show the msg box
-        wxPMessageDialog dlg(parent, message, caption, style);
-        rc = dlg.ShowModal();
+      // disabled?
+      if ( config && config->Exists(configValue) ) {
+         // don't show it, it was disabled
+         rc = config->Read(configValue, 0l);
+      }
+      else {
+         // do show the msg box
+         wxPMessageDialog dlg(parent, message, caption, style);
+         rc = dlg.ShowModal();
 
-        // ignore checkbox value if the dialog was cancelled
-        if ( config && rc != wxCANCEL && dlg.DontShowAgain() ) {
+         // ignore checkbox value if the dialog was cancelled
+         if ( config && rc != wxCANCEL && dlg.DontShowAgain() ) {
             // next time we won't show it
             config->Write(configValue, rc);
-        }
-    }
-
-    return rc;
+         }
+      }
+      return rc;
+   }
+   else
+   {
+      // if no config path specified, we just work as a normal message 
+      // dialog, but with nicer layout
+      wxPMessageDialog dlg(parent, message, caption, style, false);
+      return dlg.ShowModal();
+   }
 }
 
 bool wxPMessageBoxEnabled(const wxString& configPath, wxConfigBase *config)
