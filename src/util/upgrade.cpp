@@ -464,7 +464,7 @@ private:
 extern bool
 VerifyInbox(void)
 {
-   bool rc;
+   bool rc = TRUE;
    ProfileBase *parent = mApplication->GetProfile();
    // INBOX has no meaning under Windows
 #ifndef OS_WIN
@@ -518,25 +518,37 @@ VerifyInbox(void)
    if(foldername.IsEmpty()) // this must not be
       foldername = _("New Mail");
    strutil_delwhitespace(foldername);
+
+   static const long flagsNewMail = MF_FLAGS_NEWMAILFOLDER |
+                                    MF_FLAGS_DONTDELETE |
+                                    MF_FLAGS_KEEPOPEN;
+
    // Do we need to create the NewMailFolder?
    ProfileBase *ibp = ProfileBase::CreateProfile(foldername);
    if (!  parent->HasEntry(foldername) )
    {
       ibp->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
-      ibp->writeEntry(MP_FOLDER_TYPE, MF_FILE|MF_FLAGS_NEWMAILFOLDER|MF_FLAGS_DONTDELETE);
+      ibp->writeEntry(MP_FOLDER_TYPE,
+                      CombineFolderTypeAndFlags(MF_FILE, flagsNewMail));
       ibp->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
       ibp->writeEntry(MP_FOLDER_COMMENT,
                       _("Folder where Mahogany will collect all new mail."));
       rc = FALSE;
    }
-   // Make sure the flags are valid:
-   int flags = READ_CONFIG(ibp,MP_FOLDER_TYPE);
-   int oldflags = flags;
-   if(flags & MF_FLAGS_INCOMING) flags ^= MF_FLAGS_INCOMING;
-   flags |= MF_FLAGS_DONTDELETE;
-   flags |= MF_FLAGS_KEEPOPEN;
-   if(flags != oldflags)
-      ibp->writeEntry(MP_FOLDER_TYPE, flags);
+
+   // Make sure the flags and type are valid
+   int typeAndFlags = READ_CONFIG(ibp,MP_FOLDER_TYPE);
+   int oldflags = GetFolderFlags(typeAndFlags);
+   int flags = oldflags;
+   if( flags & MF_FLAGS_INCOMING )
+      flags ^= MF_FLAGS_INCOMING;
+   flags |= flagsNewMail;
+   if( (flags != oldflags) || (GetFolderType(typeAndFlags) != MF_FILE) )
+   {
+      ibp->writeEntry(MP_FOLDER_TYPE,
+                      CombineFolderTypeAndFlags(MF_FILE, flags));
+   }
+
    ibp->DecRef();
 
    /*

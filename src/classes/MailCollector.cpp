@@ -272,8 +272,8 @@ MailCollector::SetNewMailFolder(const String &name)
       m_NewMailFolder->DecRef();
       m_NewMailProfile->DecRef();
    }
-   m_NewMailFolder = MailFolder::OpenFolder(MF_PROFILE, name);
    m_NewMailProfile = ProfileBase::CreateProfile(name);
+   m_NewMailFolder = MailFolder::OpenFolder(MF_PROFILE, name);
 }
 
 
