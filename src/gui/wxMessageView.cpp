@@ -743,7 +743,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
          MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,
                                                  filename);
          wxMessageViewFrame * f = GLOBAL_NEW
-            wxMessageViewFrame(mf, 1, NULL, m_Parent);
+            wxMessageViewFrame(mf, 0, NULL, m_Parent);  //FIXME: UID
          f->SetTitle("M : " + mimetype);
          mf->DecRef();
       }

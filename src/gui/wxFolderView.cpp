@@ -151,7 +151,7 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
          // wxListCtrl selects this one.
          if(!event.ShiftDown())
          {
-            long idx;
+            long idx = -1;
             while((idx = GetNextItem(idx, wxLIST_NEXT_ALL,
                                      wxLIST_STATE_SELECTED)) != -1)
             {

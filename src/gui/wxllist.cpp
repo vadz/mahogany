@@ -1480,11 +1480,11 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
    float scale = ScaleDC(&psdc);
 
    psdc.GetSize(&m_PageWidth, &m_PageHeight);
-   // This sets a left/top origin of 10% and 20%:
-   m_Offset = wxPoint(m_PageWidth/10, m_PageHeight/20);
+   // This sets a left/top origin of 15% and 20%:
+   m_Offset = wxPoint((15*m_PageWidth)/100, m_PageHeight/20);
 
    // This is the length of the printable area.
-   m_PrintoutHeight = m_PageHeight - (int) (m_PageHeight * 0.1);
+   m_PrintoutHeight = m_PageHeight - (int) (m_PageHeight * 0.15);
    m_PrintoutHeight = (int)( m_PrintoutHeight / scale); // we want to use the real paper height
    
    

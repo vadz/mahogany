@@ -59,7 +59,6 @@ TODO:
 
 - Modify MailFolder interface to take UIDs instead of listing indices
   everywhere. This is important for "Views" to be implemented.
-
 - add a popup dialog to edit message headers in composeview
 - ISO8859 encoded message headers!
 - some html mail import/filtering of tags (easy, quick and dirty)
