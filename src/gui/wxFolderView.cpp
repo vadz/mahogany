@@ -400,12 +400,12 @@ public:
      @param indexStart the index after which to look (exclusive)
      @param status the status bit to look for
      @param isSet if true, check that status bit is set, otherwise - cleared
-     @return uid of the item we found or UID_ILLEGAL if no more
+     @return false if no such messages were found (and focus wasn't changed)
     */
-   UIdType SelectNextUnreadAfter(long indexStart = -1,
-                                 MailFolder::MessageStatus status =
-                                    MailFolder::MSG_STAT_SEEN,
-                                 bool isSet = FALSE);
+   bool SelectNextUnreadAfter(long indexStart = -1,
+                              MailFolder::MessageStatus status =
+                                 MailFolder::MSG_STAT_SEEN,
+                              bool isSet = FALSE);
 
    /// return true if we preview this item
    bool IsPreviewed(long item) const
@@ -2405,15 +2405,14 @@ wxFolderListCtrl::SelectNextByStatus(MailFolder::MessageStatus status,
    }
 
    long idxFocused = GetFocusedItem();
-   UIdType uid = SelectNextUnreadAfter(idxFocused, status, isSet);
-   if ( uid != UID_ILLEGAL )
+   if ( SelectNextUnreadAfter(idxFocused, status, isSet) )
    {
       // always preview the selected message, if we did "Show next unread"
       // we really want to see it regardless of m_PreviewOnSingleClick
       // setting
       //
       // NB: SelectNextUnreadAfter() has already changed the focus
-      PreviewItem(GetFocusedItem(), uid);
+      PreviewItem(GetFocusedItem(), GetFocusedUId());
 
       return true;
    }
@@ -2439,28 +2438,26 @@ wxFolderListCtrl::SelectNextByStatus(MailFolder::MessageStatus status,
 }
 
 
-UIdType
+bool
 wxFolderListCtrl::SelectNextUnreadAfter(long idxFocused,
                                         MailFolder::MessageStatus status,
                                         bool isSet)
 {
-   CHECK( m_headers, UID_ILLEGAL, "no headers in SelectNextUnreadAfter" );
+   CHECK( m_headers, false, "no headers in SelectNextUnreadAfter" );
 
    MLocker lockHeaders(m_mutexHeaders);
 
    size_t idx = m_headers->FindHeaderByFlagWrap(status, isSet, idxFocused);
 
-   if ( idx != INDEX_ILLEGAL )
+   if ( idx -= INDEX_ILLEGAL )
    {
-      const HeaderInfo *hi = m_headers->GetItem(idx);
-      CHECK( hi, UID_ILLEGAL, "failed to get header" );
-
-      Focus(idx);
-
-      return hi->GetUId();
+      // no such messages
+      return false;
    }
 
-   return UID_ILLEGAL;
+   Focus(idx);
+
+   return true;
 }
 
 // ============================================================================
@@ -2607,49 +2604,41 @@ wxFolderView::SelectInitialMessage(const HeaderInfoList_obj& hil)
    }
 
    MsgnoType idx;
-   UIdType uid;
-   if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTUNREADMESSAGE) )
+   if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTUNREADMESSAGE) &&
+         m_FolderCtrl->SelectNextUnreadAfter() )
    {
-      uid = m_FolderCtrl->SelectNextUnreadAfter();
       idx = m_FolderCtrl->GetFocusedItem();
    }
    else
    {
-      uid = UID_ILLEGAL;
+      idx = INDEX_ILLEGAL;
    }
 
-   if ( uid == UID_ILLEGAL )
+   if ( idx == INDEX_ILLEGAL )
    {
       // select first unread is off or no unread message, so select the first
       // or the last one depending on the options
+      //
+      // NB: idx is always a valid index because numMessages >= 1
       idx = READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTMESSAGE) ? 0
                                                              : numMessages - 1;
 
-      // note that idx is always a valid index because numMessages >= 1
-
       m_FolderCtrl->Focus(idx);
-
-      // avoid retrieving the header if we don't need its UID below
-      if ( !m_settings.previewOnSingleClick )
-         return;
-
-      const HeaderInfo *hi = hil[idx];
-      if ( hi )
-      {
-         uid = hi->GetUId();
-      }
-      else
-      {
-         wxFAIL_MSG("Failed to get the uid of preselected message");
-      }
    }
 
-   // the item is already focused, now preview it automatically too
-   // if we're configured to do this automatically
-   if ( (uid != UID_ILLEGAL) && m_settings.previewOnSingleClick )
+   // the item is already focused, now preview it automatically too if we're
+   // configured to do this
+   if ( m_settings.previewOnSingleClick )
    {
-      m_FolderCtrl->SetPreviewMsg(idx, uid);
-      PreviewMessage(uid);
+      const HeaderInfo *hi = hil[idx];
+      CHECK_RET( hi, "Failed to get the uid of preselected message" );
+
+      UIdType uid = hi->GetUId();
+      if ( uid != UID_ILLEGAL )
+      {
+         m_FolderCtrl->SetPreviewMsg(idx, uid);
+         PreviewMessage(uid);
+      }
    }
 }
 
