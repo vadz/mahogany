@@ -230,6 +230,10 @@ SOURCE=.\src\mail\MailFolderCC.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\mail\MailFolderCmn.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\mail\MailMH.cpp
 # End Source File
 # Begin Source File
@@ -239,6 +243,10 @@ SOURCE=.\src\mail\Message.cpp
 # Begin Source File
 
 SOURCE=.\src\mail\MessageCC.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\mail\MFCache.cpp
 # End Source File
 # Begin Source File
 
