@@ -359,7 +359,7 @@ PyH_RunMScript(const char *scriptname)
 {
    wxString filename = mApplication->GetGlobalDir();
 
-   filename << DIR_SEPARATOR << "scripts";
+   filename << DIR_SEPARATOR << _T("scripts");
 
    FILE *file = fopen(filename,"rb");
    if(file)

@@ -53,7 +53,7 @@ PathFinder::AddPaths(const String & ipathlist, bool recursive, bool prepend)
    char *work = new char[ipathlist.length()+1];
    char   *found;
    String   tmp;
-   String   subdirList = "";
+   String   subdirList = _T("");
 
    MOcheck();
    strcpy(work,ipathlist.c_str());

@@ -20,7 +20,7 @@
 /**@name PathFinder class for finding files */
 //@{
 
-#ifdef   OS_UNIX
+#if defined(OS_UNIX) || defined(__CYGWIN__)
 /// define a delimiter for separating paths
 #  define   PATHFINDER_DELIMITER ":"
 #  include  <unistd.h>  // for R_OK

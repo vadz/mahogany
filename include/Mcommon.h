@@ -98,7 +98,7 @@ extern void CloseSplash();
 #     define   INTERNALERROR(arg) wxLogError arg         // just log the error
 #  endif
 
-#ifdef   OS_UNIX
+#if defined(OS_UNIX) || defined(__CYGWIN__)
 #  include "Munix.h"
 #elif   defined(OS_WIN)
 #  include "Mwin.h"

@@ -841,28 +841,28 @@ static wxArrayString BuildListOfModulesDirs()
 #ifdef M_TOP_BUILDDIR
    wxString path0;
    path0 << M_TOP_BUILDDIR
-         << DIR_SEPARATOR << "src"
-         << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
+         << DIR_SEPARATOR << _T("src")
+         << DIR_SEPARATOR << _T("modules") << DIR_SEPARATOR;
    dirs.Add(path0);
 
    path0.clear();
    path0 << M_TOP_BUILDDIR
-         << DIR_SEPARATOR << "src"
-         << DIR_SEPARATOR << "adb" << DIR_SEPARATOR;
+         << DIR_SEPARATOR << _T("src")
+         << DIR_SEPARATOR << _T("adb") << DIR_SEPARATOR;
    dirs.Add(path0);
 
    path0.clear();
    path0 << M_TOP_BUILDDIR
-         << DIR_SEPARATOR << "src"
-         << DIR_SEPARATOR << "modules"
-         << DIR_SEPARATOR << "crypt" << DIR_SEPARATOR;
+         << DIR_SEPARATOR << _T("src")
+         << DIR_SEPARATOR << _T("modules")
+         << DIR_SEPARATOR << _T("crypt") << DIR_SEPARATOR;
    dirs.Add(path0);
 
    path0.clear();
    path0 << M_TOP_BUILDDIR
-         << DIR_SEPARATOR << "src"
-         << DIR_SEPARATOR << "modules"
-         << DIR_SEPARATOR << "viewflt" << DIR_SEPARATOR;
+         << DIR_SEPARATOR << _T("src")
+         << DIR_SEPARATOR << _T("modules")
+         << DIR_SEPARATOR << _T("viewflt") << DIR_SEPARATOR;
    dirs.Add(path0);
 #endif // Unix
 
@@ -874,7 +874,7 @@ static wxArrayString BuildListOfModulesDirs()
 #ifdef OS_UNIX
          << DIR_SEPARATOR << M_CANONICAL_HOST
 #endif // Unix
-         << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
+         << DIR_SEPARATOR << _T("modules") << DIR_SEPARATOR;
 
    dirs.Add(path1);
 
@@ -883,7 +883,7 @@ static wxArrayString BuildListOfModulesDirs()
 #ifdef OS_UNIX
          << DIR_SEPARATOR << M_CANONICAL_HOST
 #endif // Unix
-         << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
+         << DIR_SEPARATOR << _T("modules") << DIR_SEPARATOR;
 
    // under Windows, the global and local dirs might be the same
    if ( path2 != path1 )

@@ -491,16 +491,19 @@ MAppBase::OnStartup()
    if(!READ_APPCONFIG(MP_CREATE_INTERNAL_MESSAGE))
       env_parameters(SET_USERHASNOLIFE,(void *)1);
    
+#ifndef __CYGWIN__ // FIXME otherwise PATH becomes
+                   // D:\Mahogany/scripts:D:\Mahogany/scripts:/cygdrive/c/WINNT/system32:...
    // extend path for commands, look in M's dirs first
    String pathEnv;
-   pathEnv << GetLocalDir() << _T("/scripts") << PATH_SEPARATOR
-           << GetDataDir() << _T("/scripts");
+   pathEnv << GetLocalDir() << DIR_SEPARATOR << _T("scripts") << PATH_SEPARATOR
+           << GetDataDir() << DIR_SEPARATOR << _T("scripts");
 
    const wxChar *path = wxGetenv(_T("PATH"));
    if ( path )
       pathEnv << PATH_SEPARATOR << path;
 
    wxSetEnv(_T("PATH"), pathEnv);
+#endif //!CYGWIN
 
    // initialise python interpreter
 #ifdef  USE_PYTHON

@@ -1281,19 +1281,19 @@ MDialog_ShowTip(const wxWindow *parent)
    if ( !dir )
    {
       // like this, it will work in an uninstalled copy of M too
-      dir = "..";
+      dir = _T("..");
    }
 
-   dir << DIR_SEPARATOR << "doc" << DIR_SEPARATOR
+   dir << DIR_SEPARATOR << _T("doc") << DIR_SEPARATOR
 #ifndef OS_WIN
-       << "Tips" << DIR_SEPARATOR
+       << _T("Tips") << DIR_SEPARATOR
 #endif // !Windows
        ;
 
    // Tips files are either Tips_LOCALENAME.txt, e.g. Tips_de.txt or
    // simply Tips.txt
 
-   filename = "Tips";
+   filename = _T("Tips");
 
 #ifdef USE_I18N
    wxLocale * locale = wxGetLocale();
@@ -1301,10 +1301,10 @@ MDialog_ShowTip(const wxWindow *parent)
       filename << '_' << locale->GetLocale();
 #endif // USE_I18N
 
-   filename << ".txt";
+   filename << _T(".txt");
 
    if(! wxFileExists(dir+filename))
-      filename = "Tips.txt";
+      filename = _T("Tips.txt");
 
    wxTipProvider *tipProvider =
       wxCreateFileTipProvider(dir+filename, READ_APPCONFIG(MP_LASTTIP));

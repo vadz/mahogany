@@ -592,7 +592,7 @@ wxMFrame::OnMenuCommand(int id)
             wxString path = mApplication->GetGlobalDir();
             if ( !path.empty() )
                path += DIR_SEPARATOR;
-            path += "scripts";
+            path += _T("scripts");
 
             wxString filename = MDialog_FileRequester
                                 (

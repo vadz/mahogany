@@ -76,7 +76,7 @@ InitPython(void)
 #endif // USE_PYTHON_DYNAMIC
 
    // set PYTHONPATH correctly to find our modules
-   String tmp = "PYTHONPATH=";
+   String tmp = _T("PYTHONPATH=");
 
    String path = READ_APPCONFIG(MP_PYTHONPATH);
    bool didntHavePath = path.empty();
@@ -87,7 +87,7 @@ InitPython(void)
       if ( globaldir.empty() )
       {
          // not installed
-         pythondir << mApplication->GetDataDir() << DIR_SEPARATOR << "Python";
+         pythondir << mApplication->GetDataDir() << DIR_SEPARATOR << _T("Python");
       }
       else
       {
@@ -96,13 +96,13 @@ InitPython(void)
 
       // note that "scripts" has small 's'
       path << pythondir << PATH_SEPARATOR
-           << pythondir << DIR_SEPARATOR << "Python" << PATH_SEPARATOR
-           << pythondir << DIR_SEPARATOR << "scripts"
+           << pythondir << DIR_SEPARATOR << _T("Python") << PATH_SEPARATOR
+           << pythondir << DIR_SEPARATOR << _T("scripts")
            // add also the uninstalled locations
 #ifdef M_TOP_BUILDDIR
            // but "Python/Scripts" has a capital 'S'!
-           << PATH_SEPARATOR << M_TOP_BUILDDIR << "/src/Python"
-           << PATH_SEPARATOR << M_TOP_BUILDDIR << "/src/Python/Scripts"
+           << PATH_SEPARATOR << M_TOP_BUILDDIR << _T("/src/Python")
+           << PATH_SEPARATOR << M_TOP_BUILDDIR << _T("/src/Python/Scripts")
 #endif
            ;
 
@@ -110,7 +110,7 @@ InitPython(void)
       if ( localdir != globaldir )
       {
          path << PATH_SEPARATOR
-              << localdir << DIR_SEPARATOR << "Scripts" << PATH_SEPARATOR;
+              << localdir << DIR_SEPARATOR << _T("Scripts") << PATH_SEPARATOR;
       }
    }
 
