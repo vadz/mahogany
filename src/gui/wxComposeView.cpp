@@ -1235,14 +1235,16 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
    // we're only interested in TABs and only it's not a second TAB in a row
    if ( event.GetKeyCode() == WXK_TAB )
    {
-      if ( event.ShiftDown() )
+      if ( event.ControlDown() || event.AltDown() )
+         return;
+
+      if ( event.ShiftDown() || !IsModified() )
       {
 #if wxCHECK_VERSION(2, 5, 2)
-         Navigate(0);
+         Navigate(event.ShiftDown() ? 0 : wxNavigationKeyEvent::IsForward);
 #endif // wx 2.5.2+
       }
-      else if ( IsModified() &&
-                  !event.ControlDown() && !event.AltDown() )
+      else
       {
          // mark control as being "not modified" - if the user presses TAB
          // the second time go to the next window immediately after having
@@ -1257,25 +1259,11 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
          if ( !GetValue().empty() )
          {
             m_rcptControl->OnExpand();
-
-            // don't call event.Skip()
-            return;
          }
-#if wxCHECK_VERSION(2, 5, 2)
-         else
-         {
-            // text is empty, treat the TAB normally
-            Navigate();
-         }
-#endif // wx 2.5.2+
       }
-      //else: nothing because we're not interested in Ctrl-TAB, Alt-TAB &c -
-      //      and also in the TABs if the last one was already a TAB
 
-#if wxCHECK_VERSION(2, 5, 2)
-      // skip Skip() below, otherwise a TAB would be inserted in the control
+      // don't call event.Skip()
       return;
-#endif // wx 2.5.2+
    }
 
    // let the text control process it normally: if it's a TAB this will make
