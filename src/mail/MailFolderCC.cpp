@@ -3604,8 +3604,8 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
    size_t count = selections->Count();
    CHECK( count, true, "SaveMessages(): nothing to save" );
 
-   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::SaveMessages()",
-              GetName().c_str());
+   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::SaveMessages(%s)",
+              GetName().c_str(), folder->GetFullName().c_str());
 
    /*
       This is an optimisation: if both mailfolders are IMAP and on the same
@@ -4379,11 +4379,19 @@ MailFolderCC::OnMsgStatusChanged()
          #define UPDATE_NUM_OF(what)   \
             if ( (!isDeleted && msgStatusNew.what) && \
                  (wasDeleted || !msgStatusOld.what) ) \
+            { \
+               wxLogTrace(M_TRACE_MFSTATUS, "%s: " #what "++ (now %lu)", \
+                          GetName().c_str(), status.what + 1); \
                status.what++; \
+            } \
             else if ( (!wasDeleted && msgStatusOld.what) && \
                       (isDeleted || !msgStatusNew.what) ) \
                if ( status.what > 0 ) \
+               { \
+                  wxLogTrace(M_TRACE_MFSTATUS, "%s: " #what "-- (now %lu)", \
+                             GetName().c_str(), status.what - 1); \
                   status.what--; \
+               } \
                else \
                   FAIL_MSG( "error in msg status change logic" )
 
@@ -4444,33 +4452,41 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
    {
       hi->m_Status = statusNew;
 
-      // we send the event telling us that we have some messages with the
-      // changed status only once, when we get the first notification - and
-      // also when we allocate the arrays for msg status change data
-      bool sendEvent;
-      if ( !m_statusChangedMsgnos )
+      if ( MfStatusCache::Get()->GetStatus(GetName()) )
       {
-         m_statusChangedMsgnos = new wxArrayInt;
-         m_statusChangedOld = new wxArrayInt;
-         m_statusChangedNew = new wxArrayInt;
+         // we send the event telling us that we have some messages with the
+         // changed status only once, when we get the first notification - and
+         // also when we allocate the arrays for msg status change data
+         bool sendEvent;
+         if ( !m_statusChangedMsgnos )
+         {
+            m_statusChangedMsgnos = new wxArrayInt;
+            m_statusChangedOld = new wxArrayInt;
+            m_statusChangedNew = new wxArrayInt;
 
-         sendEvent = true;
-      }
-      else
-      {
-         sendEvent = false;
-      }
+            sendEvent = true;
+         }
+         else
+         {
+            sendEvent = false;
+         }
 
-      // remember who changed and how
-      m_statusChangedMsgnos->Add(msgno);
-      m_statusChangedOld->Add(statusOld);
-      m_statusChangedNew->Add(statusNew);
+         // remember who changed and how
+         m_statusChangedMsgnos->Add(msgno);
+         m_statusChangedOld->Add(statusOld);
+         m_statusChangedNew->Add(statusNew);
 
-      // and schedule call to our OnMsgStatusChanged() if not done yet
-      if ( sendEvent )
-      {
-         MEventManager::Send(new MEventFolderOnMsgStatusData(this));
+         // and schedule call to our OnMsgStatusChanged() if not done yet
+         if ( sendEvent )
+         {
+            MEventManager::Send(new MEventFolderOnMsgStatusData(this));
+         }
       }
+      //else: don't update the status because we don't have anything to update
+      //      and, worse, we might obtain the new message status before we get
+      //      to OnMsgStatusChanged() and then we'd apply the updates
+      //      pertaining to the old status to the new values which would make
+      //      them out of sync with the real values
    }
    //else: flags didn't really change
 }
@@ -5194,8 +5210,8 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
       if ( msgnoMax )
       {
          // we often receive two "* EXISTS" in a row (this seems to be a bug in
-         // the IMAP I use but it does happen all the time) and in this case we
-         // don't want to send two MEventFolderOnNewMails
+         // the IMAP server I use but it does happen all the time) and in this
+         // case we don't want to send two MEventFolderOnNewMails
          if ( !m_gotUnprocessedNewMail )
          {
             // set a flag to avoid sending expunge events until we process the
