@@ -111,9 +111,7 @@ protected:
    static Ticket GetTicket(void)
       { return ms_Ticket++;}
 
-#ifndef USE_THREADS
    virtual void *Entry();
-#endif
    virtual void Run(void) { Entry(); }
 
    virtual void  WorkFunction(void) = 0;

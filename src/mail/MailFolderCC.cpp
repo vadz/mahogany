@@ -976,7 +976,7 @@ bool
 MailFolderCC::Lock(void) const
 {
 #ifdef USE_THREADS
-   ((MailFolderCC *)this)->m_Mutex.Lock();
+   ((MailFolderCC *)this)->m_Mutex->Lock();
    return true;
 #else
    if(m_Mutex == false)
@@ -993,7 +993,7 @@ void
 MailFolderCC::UnLock(void) const
 {
 #ifdef USE_THREADS
-   ((MailFolderCC *)this)->m_Mutex.UnLock();
+   ((MailFolderCC *)this)->m_Mutex->Unlock();
 #else
    ((MailFolderCC *)this)->m_Mutex = false;
 #endif

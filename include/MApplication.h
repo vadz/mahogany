@@ -323,7 +323,8 @@ public:
     Lock() and Unlock().
 */
 #ifdef USE_THREADS
-typedef class WXDLLEXPORT wxMutex MMutex;
+// use inheritance and not typedef to allow forward declaring it
+class MMutex : public wxMutex { };
 #else
 /// Dummy implementation of MMutex.
 class MMutex

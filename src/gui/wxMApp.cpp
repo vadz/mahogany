@@ -890,20 +890,22 @@ wxMApp::ThrEnterLeave(bool enter, SectionId what)
    switch(what)
    {
    case GUI:
-   case EVENTS:
+   /* case EVENTS: -- avoid multiple case value warning (EVENTS == GUI) */
       if(enter)
          wxMutexGuiEnter();
       else
          wxMutexGuiLeave();
       break;
+
    case CCLIENT:
       if(enter)
          gs_CclientMutex->Lock();
       else
-         gs_CclientMutex->UnLock();
+         gs_CclientMutex->Unlock();
       break;
+
    default:
-      FAIL("unsupported mutex id");
+      FAIL_MSG("unsupported mutex id");
    }
 }
 #endif

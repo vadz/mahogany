@@ -226,6 +226,7 @@ dnl if the environment variable "wx" is set, it contains the top level
 dnl wxWindows directory - this is used for building with uninstalled copy of
 dnl wxWin, i.e. only when we're not using wx-config
 if test $USE_WXCONFIG != 1; then
+	LDFLAGS="$LDFLAGS -L$wx/gtk/lib -lwx_gtk"
 	CPPFLAGS="$CPPFLAGS -I$wx/include -I$wx/gtk/include"
 fi
 
@@ -313,6 +314,7 @@ if test "$USE_THREADS" = 1
 then
 	AC_CHECK_LIB(pthread,main,,AC_CHECK_LIB(pthreads,main))
 	AC_DEFINE(USE_THREADS)
+	LDFLAGS="$LDFLAGS -lpthread"
 fi
 
 dnl set debug/optimisation flags
@@ -503,7 +505,7 @@ else
 		GTK_LDFLAGS="-lgtk -lgdk -lglib $X_EXTRA_LIBS"
 	fi
 	dnl we might need posix4 (depending on OS), so link with it if
-	dnl it is available 
+	dnl it is available
 	AC_CHECK_LIB(posix4,nanosleep)
 	dnl check for wcslen
 	AC_CHECK_LIB(c,wcslen,,
