@@ -34,7 +34,7 @@ CPPFLAGS := $(CPPFLAGS) -DMALSYNC -DHAVE_LIBMAL -I$(LIBMAL_SRC)/malsync_src/mal/
 endif
 endif
 
-ifdef USE_EXPERIMENTAL
+ifdef EXPERIMENTAL
 SRC +=	MCrypt.cpp  MExtProcCrypt.cpp  MPGPCrypt.cpp  MPassphrase.cpp
 vpath %.cpp .src/crypt
 endif
