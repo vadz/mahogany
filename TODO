@@ -14,50 +14,40 @@ $Id$
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
+- send new mail events again - why have they disappeared?
 - do not redraw messageview if the message is the one currently being
   shown
+  -- option to keep wxLayoutList around for reuse?
 - show status dialog while importing graphics into messageview
-- Fix occacions "Sequence invalid" (when marking/replying message) or
-  segfault in folder update code
+- fix occasional segfault/memory corruption in MailfolderCC.cpp
+- fix status flag indicators (N/U seem to be wrong)
+- Change MessageCC code to first look for a mail cache entry via
+  mail_elt() instead of always fetching message.
 - add TO: field to folderview
 - speed up copy mail to folder by cusing c-client functionality
 - add some more folder properties to config dialog, i.e. be able to
   switch off automatic notification of incoming emails.
 - cannot select only message in a folder or first message without
   chosing a different one first
-- Proper NNTP support and POP3 fetch solution are the same thing:
-  - Use mail_fetch_overview() and implement it on the MailFolder
-    interface. Use that new function in wxFolderView::Update() to
-    display header lines. For NNTP this will only list the messages
-    which exist on the server and are unread (not deleted).
-    Use this somehow to update the count of messages in the folder.
-  - wxMessageView needs to check whether the folder type is MF_NNTP and if
-    so, automatically delete each message which gets displayed.
-
 - add references (and In-Reply-To: ?) headers to message replies
 - fix my OpenAnyFolderDialog to take hostname and folderpath, as
-   required for imap  --> drop the dialog?
- - folderview listctrl: save sizes of columns
+  required for imap  --> drop the dialog?
+- folderview listctrl: save sizes of columns
    Make types of columns (and  number?) configurable with the new Config_ComboBox
- - folderview listctrl has extra Subject column behind Size field ???
- - when inserting filetype of unknown MIME type, prompt for it,
-   possibly have a MIME types editor (similar to netscape's?)
- - forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
-   SendMessageCC::AddPart()
- - POP: find a way to cache messages in MailFolder class
-      NO: find out why we read twice and mtest only once
+- folderview listctrl has extra Subject column behind Size field ???
+- when inserting filetype of unknown MIME type, prompt for it,
+  possibly have a MIME types editor (similar to netscape's?)
+- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
+  SendMessageCC::AddPart()
+- add "double click to open" profile option support to folder list ctrl
+- Printout scaling is a bit broken. Does ScaleDC() affect the
+  calculaton of the DC size and number of pages?
 
- - we need to handle the RepliedTo flag for messages which isn't used
-   much yet
-
- - Printout scaling is a bit broken. Does ScaleDC() affect the
-   calculaton of the DC size and number of pages?
-
- - Things like CopyMessagesToFolder need a return code indicating
-   whether they were successful or not, otherwise MoveMessagesToFolde r
+- Things like CopyMessagesToFolder need a return code indicating
+  whether they were successful or not, otherwise MoveMessagesToFolde r
   deletes them in any case. Trivial to add.
- - allow angle brackets and full name <> in reply-to field.
- - folder set message flag update hook takes too long for really large folders
+- allow angle brackets and full name <> in reply-to field.
+- folder set message flag update hook takes too long for really large folders
  ==> code commented out in MailFolderCC.cpp
 
  - easy to implement but useful features:
@@ -68,7 +58,6 @@ $Id$
   + undo?
   + fix the minor (moving up in 1st column over empty line) bug
   + still some cursor corruption which can lead to crashes
- - Solaris: all helpers need absolute path or won't get found
  - save and restore printer settings in profile
  - M takes ages to send a message
  - add a wxASSERT() for the correct path in READ_APPCONFIG()
@@ -350,13 +339,21 @@ classes in the hierarchy.
 *********************************************************************
 *** Fixed, to be tested:
 *********************************************************************
- - sometimes mailfolders/messages seem empty
- - suspected bug in MEvent code causing lockups/endless memory allocation
-
+ - ReplyTo flag should work now
+ - Fix occacions "Sequence invalid" (when marking/replying message)
 
 *********************************************************************
 *** Fixed and tested:
 *********************************************************************
+ - Solaris: all helpers need absolute path or won't get found
+- Proper NNTP support and POP3 fetch solution are the same thing:
+  - Use mail_fetch_overview() and implement it on the MailFolder
+    interface. Use that new function in wxFolderView::Update() to
+    display header lines. For NNTP this will only list the messages
+    which exist on the server and are unread (not deleted).
+    Use this somehow to update the count of messages in the folder.
+ - suspected bug in MEvent code causing lockups/endless memory allocation
+ - sometimes mailfolders/messages seem empty
  - A problem with expunging message from MailFolderCC: as the messages
    are queued, they cause fetches of messages which no longer exist
    because the count has not yet been updated.

@@ -273,8 +273,8 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 //      m_MailFolder->RegisterView(this,false);
       
       // These messages are no longer recent as we've seen their headers.
-      if(m_NumOfMessages > 0)
-         m_MailFolder->SetSequenceFlag("1:*", MailFolder::MSG_STAT_RECENT, false);
+      //if(m_NumOfMessages > 0)
+      //   m_MailFolder->SetSequenceFlag("1:*", MailFolder::MSG_STAT_RECENT, false);
       m_MailFolder->DecRef();
    }
 
@@ -754,7 +754,9 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
       cv->SetSubject(READ_CONFIG(GetProfile(), MP_REPLY_PREFIX)
                      + msg->Subject());
       SafeDecRef(msg);
-      m_MailFolder->SetMessageFlag(i, MailFolder::MSG_STAT_ANSWERED, true);
+      wxString seq;
+      seq << i;
+      m_MailFolder->SetSequenceFlag(seq, MailFolder::MSG_STAT_ANSWERED, true);
    }
 }
 
