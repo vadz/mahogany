@@ -490,7 +490,9 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    {
       m_Selecting = false;
       m_llist->EndSelection();
-      m_llist->DiscardSelection(); //FIXME: correct?
+      //m_llist->DiscardSelection(); //FIXME: correct?
+      // VS - no, it would make selecting text with keyboard a NOP
+      Copy(FALSE,FALSE,TRUE);
    }
    
    // If we deleted the selection here, we must not execute the
