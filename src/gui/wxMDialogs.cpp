@@ -3005,7 +3005,7 @@ extern "C"
 }
 
 
-#endif
+#endif // USE_SSL
 
 
 
