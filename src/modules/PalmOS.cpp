@@ -219,7 +219,7 @@ class PalmOSModule : public MModule
    void SendEMails(void);
    void StoreEMails(void);
 
-#if EXPERIMENTAL
+#ifdef EXPERIMENTAL
    void Backup(void);
 #endif
 
@@ -280,6 +280,7 @@ PalmOSModule::ProcessMenuEvent(int id)
    case WXMENU_MODULES_PALMOS_SYNC:
       Synchronise(NULL);
       return TRUE;
+#ifdef EXPERIMENTAL
    case WXMENU_MODULES_PALMOS_BACKUP:
       Backup();
       return TRUE;
@@ -287,6 +288,7 @@ PalmOSModule::ProcessMenuEvent(int id)
       return TRUE;
    case WXMENU_MODULES_PALMOS_INSTALL:
       return TRUE;
+#endif
    case WXMENU_MODULES_PALMOS_CONFIG:
       Configure();
       return TRUE;
@@ -407,10 +409,12 @@ PalmOSModule::PalmOSModule(MInterface *minterface)
 
    wxMenu * palmOsMenu = new wxMenu;
    palmOsMenu->Append(WXMENU_MODULES_PALMOS_SYNC, _("Synchronise"));
+#ifdef EXPERIMENTAL
    palmOsMenu->Break();
    palmOsMenu->Append(WXMENU_MODULES_PALMOS_BACKUP, _("Backup"));
    palmOsMenu->Append(WXMENU_MODULES_PALMOS_RESTORE, _("Restore"));
    palmOsMenu->Append(WXMENU_MODULES_PALMOS_INSTALL, _("Install"));
+#endif
    palmOsMenu->Break();
    palmOsMenu->Append(WXMENU_MODULES_PALMOS_CONFIG, _("Configure"));
 
