@@ -25,6 +25,7 @@
 #  include "Profile.h"
 #  include "MApplication.h"
 #  include "strutil.h"
+#  include "Mpers.h"
 #endif  //USE_PCH
 
 #  include "Message.h"
@@ -2497,7 +2498,10 @@ SetupMinimalConfig(void)
 
 #define M_SYNCMAIL_SUBJECT   "DO NOT DELETE! Mahogany remote configuration info"
 #define M_SYNCMAIL_CONFIGSTART "Mahogany configuration info:"
-static
+
+static time_t  gs_RemoteSyncDate = 0;
+
+extern
 bool RetrieveRemoteConfigSettings(void)
 {
    if(READ_APPCONFIG(MP_SYNC_REMOTE) == 0)
@@ -2525,7 +2529,6 @@ bool RetrieveRemoteConfigSettings(void)
    }
    HeaderInfoList *hil = mf->GetHeaders();
    Message * msg = mf->GetMessage( (*hil)[0]->GetUId() );
-   hil->DecRef();
    if( msg == NULL)
       return FALSE; // what happened?
    if(msg->Subject() != M_SYNCMAIL_SUBJECT)
@@ -2536,10 +2539,13 @@ bool RetrieveRemoteConfigSettings(void)
          mf->GetName().c_str());
       mf->DecRef();
       msg->DecRef();
+      hil->DecRef();
       return FALSE;
    }
 
    wxString msgText = msg->FetchText();
+   gs_RemoteSyncDate = (*hil)[0]->GetDate();
+   hil->DecRef();
    msg->DecRef();
    mf->DecRef();
 
@@ -2613,6 +2619,7 @@ bool SaveRemoteConfigSettings(void)
    {
       HeaderInfoList *hil = mf->GetHeaders();
       Message * msg = mf->GetMessage( (*hil)[0]->GetUId() );
+      time_t storedDate = (*hil)[0]->GetDate();
       hil->DecRef();
       if( msg == NULL)
          return FALSE; // what happened?
@@ -2625,6 +2632,23 @@ bool SaveRemoteConfigSettings(void)
          mf->DecRef();
          msg->DecRef();
          return FALSE;
+      }
+      if(gs_RemoteSyncDate != 0 &&
+         storedDate > gs_RemoteSyncDate)
+      {
+         if (! MDialog_YesNoDialog(
+            _("The remotely stored configuration information seems to have changed\n"
+              "since it was retrieved.\n"
+              "Are you sure you want to overwrite it with the current settings?"),
+            NULL,
+            _("Overwrite remote settings?"),
+            true,
+            GetPersMsgBoxName(M_MSGBOX_OVERWRITE_REMOTE) ) )
+         {
+            mf->DecRef();
+            msg->DecRef();
+            return FALSE;
+         }
       }
       if(! mf->DeleteMessage(msg->GetUId()))
       {

@@ -27,6 +27,7 @@
 #  include "guidef.h"
 #  include "MHelp.h"
 #  include "strutil.h"
+#  include "Mpers.h"
 
 #  include <wx/dynarray.h>
 #  include <wx/checkbox.h>
@@ -2102,6 +2103,7 @@ wxOptionsPageOthers::wxOptionsPageOthers(wxNotebook *parent,
                                    MH_OPAGE_OTHERS)
 {
    m_nAutosaveDelay = -1;
+   m_SyncRemote = -1;
 }
 
 void wxOptionsPageOthers::OnButton(wxCommandEvent& event)
@@ -2134,6 +2136,7 @@ bool wxOptionsPageOthers::TransferDataToWindow()
    if ( rc )
    {
       m_nAutosaveDelay = READ_CONFIG(m_Profile, MP_AUTOSAVEDELAY);
+      m_SyncRemote = READ_CONFIG(m_Profile, MP_SYNC_REMOTE);
    }
 
    return rc;
@@ -2161,6 +2164,28 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
          }
       }
 
+      long sRemote = READ_CONFIG(m_Profile, MP_SYNC_REMOTE);
+      if(sRemote && ! (m_SyncRemote))
+      {
+         if ( MDialog_YesNoDialog(
+            _("You have activated remote configuration synchronisation.\n"
+              "Do you want to store the current setup now?"),
+              this,
+              _("Store settings now?"),
+              true,
+            GetPersMsgBoxName(M_MSGBOX_OPT_STOREREMOTENOW) )
+            )
+            SaveRemoteConfigSettings();
+         else
+            if ( MDialog_YesNoDialog(
+               _("Do you want to merge in the remote setup now?"),
+               this,
+               _("Retrieve settings now?"),
+               true,
+               GetPersMsgBoxName(M_MSGBOX_OPT_GETREMOTENOW) )
+            )
+               RetrieveRemoteConfigSettings();
+      }
       // show/hide the log window depending on the new setting value
       bool showLog = READ_CONFIG(m_Profile, MP_SHOWLOG) != 0;
       if ( showLog != mApplication->IsLogShown() )

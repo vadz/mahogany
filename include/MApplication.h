@@ -413,5 +413,9 @@ public:
 };
 #endif
 
+// upgrade.cpp:
+extern bool RetrieveRemoteConfigSettings(void);
+extern bool SaveRemoteConfigSettings(void);
+
 
 #endif   // MAPPLICATION_H

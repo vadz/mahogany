@@ -724,7 +724,7 @@ setup_twofish(void)
    if(gs_GlobalPassword.Length() == 0)
    {
       MInputBox(&gs_GlobalPassword,
-                _("Mahogany Password:"),
+                _("Global Password:"),
                 _("Please enter your global Mahogany password:"),
                 NULL,NULL,NULL,TRUE);
    }
@@ -887,13 +887,13 @@ strutil_decrypt(const String &original)
    if(original.Length() == 0)
       return "";
 
+   if(! strutil_encrypt_initialised)
+      strutil_encrypt_initialise();
+
    if(original[0] == '%')
       return strutil_decrypt_tf(original);
 
    CHECK(original.Length() % 4 == 0, "", "Decrypt function called with illegal string.");
-
-   if(! strutil_encrypt_initialised)
-      strutil_encrypt_initialise();
 
    String
       tmpstr,
