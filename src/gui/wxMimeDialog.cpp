@@ -27,6 +27,9 @@
    #include <wx/layout.h>
 
    #include <wx/statbox.h>
+   #include <wx/stattext.h>
+
+   #include "strutil.h"
 #endif // USE_PCH
 
 #include "gui/wxDialogLayout.h"
