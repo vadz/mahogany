@@ -1262,7 +1262,7 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
    wxDropSource dropSource(dropData, m_winForDnd, icon);
 #endif // OS
 
-   switch ( dropSource.DoDragDrop(true /* allow move */) )
+   switch ( dropSource.DoDragDrop(wxDrag_DefaultMove) )
    {
       default:
          wxFAIL_MSG( "unexpected DoDragDrop return value" );
