@@ -587,8 +587,8 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    String pword = password;
    // ask the password for the folders which need it but for which it hadn't been
    // specified during creation
-   if ( FolderTypeHasUserName( (FolderType) typeAndFlags)
-        && !(typeAndFlags & MF_FLAGS_ANON) && ! pword)
+   if ( FolderTypeHasUserName( (FolderType) GetFolderType(typeAndFlags))
+        && !(GetFolderType(typeAndFlags) & MF_FLAGS_ANON) && ! pword)
    {
       String prompt;
       prompt.Printf(_("Please enter the password for folder '%s':"), name.c_str());

@@ -121,6 +121,8 @@ inline static int GetFolderFlags(int typeAndFlags)
 /// is this a folder type for which username/password make sense?
 inline bool FolderTypeHasUserName(FolderType type)
 {
+   ASSERT(GetFolderType(type) == type);
+
    switch ( type )
    {
       case MF_POP:

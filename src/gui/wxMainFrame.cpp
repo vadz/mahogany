@@ -107,9 +107,13 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 {
    SetIcon(ICON("MainFrame"));
    SetTitle(M_TOPLEVELFRAME_TITLE);
+   static int widths[3] = { -1, 70, 100 }; // FIXME: temporary for debugging
+   CreateStatusBar(3, wxST_SIZEGRIP, 12345); // 3 fields, id 12345 fo
+   GetStatusBar()->SetFieldsCount(3, widths);
 
    AddFileMenu();
    AddEditMenu();
+
 
    wxMenuItem *item = m_MenuBar->FindItem(WXMENU_EDIT_CUT);
    wxASSERT(item);
@@ -117,9 +121,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    item = m_MenuBar->FindItem(WXMENU_EDIT_PASTE);
    wxASSERT(item);
    item->Enable(FALSE); // no cut for viewer
-   static int widths[3] = { -1, 70, 100 }; // FIXME: temporary for debugging
-   CreateStatusBar(3, wxST_SIZEGRIP, 12345); // 3 fields, id 12345 fo
-   GetStatusBar()->SetFieldsCount(3, widths);
+
    int x,y;
    GetClientSize(&x, &y);
 
@@ -132,7 +134,6 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
                      wxSize(x-1,y-31),
                      wxSP_3D | wxSP_BORDER
                     );
-
    // insert treectrl in one of the splitter panes
    m_FolderTree = new wxMainFolderTree(m_splitter, this);
    m_FolderView = wxFolderView::Create(m_splitter);
@@ -140,6 +141,9 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
                                m_FolderView->GetWindow(),
                                x/3);
 
+#ifndef HAS_DYNAMIC_MENU_SUPPORT
+   AddMessageMenu();
+#endif
 
    // open the last folder in the main frame by default
    String foldername = READ_APPCONFIG(MP_MAINFOLDER);
@@ -155,10 +159,6 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
          folder->DecRef();
       }
    }
-
-#ifndef HAS_DYNAMIC_MENU_SUPPORT
-   AddMessageMenu();
-#endif
 
    // finish constructing the menu and toolbar
    AddHelpMenu();
