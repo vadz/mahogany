@@ -107,10 +107,11 @@ public:
       m_type = type;
       m_flags = 0;
 
-      m_format = FileMbox_Max;
-
       m_profile = profile ? profile : mApplication->GetProfile();
       m_profile->IncRef();
+
+      m_format = (FileMailboxFormat)(long)
+                  READ_CONFIG(m_profile, MP_FOLDER_FILE_DRIVER);
    }
 
    ~MTempFolder()
