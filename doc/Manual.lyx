@@ -1,4 +1,4 @@
-#This file was created by <karsten> Fri Feb 19 18:33:31 1999
+#This file was created by <karsten> Sat Feb 20 16:03:20 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -1870,10 +1870,33 @@ configure
 
 
 \family typewriter 
-./configure --without-threads --with-gtk --without-shared --without-debug_flags
- 
+./configure --without-threads --with-gtk --without-shared --without-debug_flag
 \newline 
- --without-debug_info --without-odbc
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+
+\protected_separator 
+--without-debug_info --without-odbc
 \layout Standard
 
 Of course, feel free to change the two debug options to 
@@ -1881,6 +1904,12 @@ Of course, feel free to change the two debug options to
 --with-debug
 \family default 
  if you want to generate a version with debugging enabled.
+ Just make sure that if you configure wxGTK with debug, then you also need
+ to configure M 
+\family typewriter 
+--with-debug
+\family default 
+, or it will fail.
 \layout Subsubsection
 
 Compile and install wxGTK
@@ -2532,6 +2561,22 @@ The Motivation behind this is to have the behaviour of different parts of
  features), it can have a smaller typeface configured for displaying the
  messages -- configured at the mailfolder level, not for a particular MessageVie
 w.
+\layout Subsection
+
+Which Profiles are there?
+\layout Standard
+
+A list of all profiles can be obtained with 
+\family typewriter 
+static kbStringList *ProfileBase::ListProfiles(int type = PT_Any)
+\family default 
+, which will return a list of either all profiles or those having the specified
+ type if it is not 
+\family typewriter 
+PT_Any
+\family default 
+.
+ 
 \layout Subsection
 
 Technical description

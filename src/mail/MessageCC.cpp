@@ -36,13 +36,15 @@
 
 MessageCC *
 MessageCC::CreateMessageCC(MailFolderCC *ifolder,
-                           unsigned long iuid)
+                           unsigned long iuid,
+                           unsigned long msgno)
 {
    CHECK(ifolder, NULL, "NULL folder");
-   return new MessageCC(ifolder, iuid);
+   return new MessageCC(ifolder, iuid, msgno);
 }
 
-MessageCC::MessageCC(MailFolderCC *ifolder,unsigned long iuid)
+MessageCC::MessageCC(MailFolderCC *ifolder,unsigned long iuid,
+                     unsigned long msgno)
 {
    mailText = NULL;
    body = NULL;
@@ -51,11 +53,10 @@ MessageCC::MessageCC(MailFolderCC *ifolder,unsigned long iuid)
    numOfParts = -1;
    partContentPtr = NULL;
    text = NULL;
-   uid = 0;
    folder = ifolder;
-   if(folder)
-      folder->IncRef();
+   folder->IncRef();
    uid = iuid;
+   m_msgno = msgno;
    Refresh();
 }
 
@@ -63,11 +64,11 @@ MessageCC::MessageCC(MailFolderCC *ifolder,unsigned long iuid)
 MessageCC::~MessageCC()
 {
    if(partInfos != NULL)
-      GLOBAL_DELETE [] partInfos;
+      delete [] partInfos;
    if(partContentPtr)
-      GLOBAL_DELETE  partContentPtr;
+      delete  partContentPtr;
    if(text)
-      GLOBAL_DELETE [] text;
+      delete [] text;
    if(folder)
       folder->DecRef();
 }
@@ -92,7 +93,7 @@ MessageCC::MessageCC(const char * /* itext */,  ProfileBase *iprofile)
    {
       if(text[pos] == '\012' && text[pos+1] == '\012') // empty line is end of header
       {
-         header = GLOBAL_NEW char [pos+2];
+         header = new char [pos+2];
          strncpy(header, text, pos+1);
          header[pos+1] = '\0';
          headerLen = pos+1;
@@ -102,10 +103,10 @@ MessageCC::MessageCC(const char * /* itext */,  ProfileBase *iprofile)
    if(! header)
       return;  // failed
 
-   char *buf = GLOBAL_NEW char [headerLen];
+   char *buf = new char [headerLen];
    rfc822_parse_msg (&envelope, &body,header,headerLen, b,
                      ""   /*defaulthostname */,  buf);
-   GLOBAL_DELETE [] buf;
+   delete [] buf;
    initialisedFlag = true;
 }
 #endif
@@ -135,8 +136,10 @@ MessageCC::From(void) const
 const char *
 MessageCC::GetHeader(void) const
 {
-   return mail_fetchheader_full(folder->Stream(), uid,
-                                NULL, NIL, FT_UID);
+   const char *cptr = mail_fetchheader_full(folder->Stream(), uid,
+                                            NULL, NIL, FT_UID);
+   MailFolderCC::ProcessEventQueue();
+   return cptr;
 }
 
 void
@@ -153,7 +156,8 @@ MessageCC::GetHeaderLine(const String &line, String &value)
                                   &slist,
                                   NIL,FT_UID);
    value = rc;
-   GLOBAL_DELETE [] slist.text.data;
+   delete [] slist.text.data;
+   MailFolderCC::ProcessEventQueue();
 }
 
 String const
@@ -206,12 +210,13 @@ MessageCC::Date(void) const
 char *
 MessageCC::FetchText(void)
 {
-   //if(mailText)
-   // free(mailText);
-
    if(folder)
-      return mailText = mail_fetchtext_full(folder->Stream(), uid,
+   {
+      mailText = mail_fetchtext_full(folder->Stream(), uid,
                                             NIL, FT_UID);
+      MailFolderCC::ProcessEventQueue();
+      return mailText;
+   }
    else // from a text
       return text;
 }
@@ -350,9 +355,42 @@ BODY *
 MessageCC::GetBody(void)
 {
    if(body == NULL && folder)
-      envelope = mail_fetchstructure_full(folder->Stream(),uid, &body, FT_UID);
+      envelope = mail_fetchstructure_full(folder->Stream(),uid, &body,
+                                          FT_UID);
+   MailFolderCC::ProcessEventQueue();
    return body;
 }
+
+
+/** Return the numeric status of message. */
+int
+MessageCC::GetStatus(
+   unsigned long *size,
+   unsigned int *day,
+   unsigned int *month,
+   unsigned int *year) const
+{
+   if(! ((MessageCC *)this)->GetBody())
+      return 0;  // should never happen
+
+      
+   MESSAGECACHE *mc = mail_elt(folder->Stream(), m_msgno);
+   folder->ProcessEventQueue();
+   
+   if(size)    *size = mc->rfc822_size;
+   if(day)  *day = mc->day;
+   if(month)   *month = mc->month;
+   if(year) *year = mc->year + BASEYEAR;
+
+   int status = 0;
+   if(!mc->seen)     status += MailFolder::MSG_STAT_UNREAD;
+   if(mc->answered)  status += MailFolder::MSG_STAT_REPLIED;
+   if(mc->deleted)   status += MailFolder::MSG_STAT_DELETED;
+   if(mc->searched)  status += MailFolder::MSG_STAT_SEARCHED;
+   if(mc->recent)    status += MailFolder::MSG_STAT_RECENT;
+   return status;
+}
+   
 
 void
 MessageCC::DecodeMIME(void)
@@ -363,7 +401,7 @@ MessageCC::DecodeMIME(void)
    if(partInfos == NULL)
    {
       int nparts = CountParts();
-      partInfos = GLOBAL_NEW PartInfo[nparts];
+      partInfos = new PartInfo[nparts];
       int count = 0;
       String tmp = "" ;
       decode_body(body,tmp, 0, &count, true);
@@ -399,6 +437,8 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
                                     uid,
                                     (char *)sp.c_str(),
                                     &len, FT_UID);
+   MailFolderCC::ProcessEventQueue();
+
    if(lenptr == NULL)
       lenptr  = &len;   // so to give c-client lib a place where to write to
 
@@ -409,8 +449,8 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
    }
 
    if(partContentPtr)
-      GLOBAL_DELETE partContentPtr;
-   partContentPtr = GLOBAL_NEW char[len+1];
+      delete partContentPtr;
+   partContentPtr = new char[len+1];
    strncpy(partContentPtr, cptr, len);
    partContentPtr[len] = '\0';
    //fs_give(&cptr); // c-client's free() function
@@ -524,12 +564,10 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
          fulllen += len;
       }
 
-      //rfc822_output(headerBuffer, envelope, body,
-      //MessageCCWriteToString, par, 0);
-
       char *bodyPart = mail_fetchtext_full(folder->Stream(),uid,&len,FT_UID);
       str += bodyPart;
       fulllen += len;
+      MailFolderCC::ProcessEventQueue();
    }
    else
    {

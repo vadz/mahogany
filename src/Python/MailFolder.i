@@ -38,36 +38,13 @@ class FolderView;
    <li>Use it with a different type and set other options such as
        login/password manually. This will use a dummy profile
        inheriting from the global profile section.
-   <ul>
+   </ul>
 */
 class MailFolder : public MObjectRC
 {
 public:   
    /** @name Constants and Types */
    //@{
-   /** Which type is this mailfolder? (consistent with c-client?)
-       Only the lower byte is a type, the upper one is for additional
-       flags.
-   */
-   enum Type
-   {
-      /// system inbox
-      MF_INBOX = 0,
-      /// mbox file
-      MF_FILE = 1,
-      /// pop3
-      MF_POP = 2,
-      /// imap
-      MF_IMAP = 3,
-      /// newsgroup
-      MF_NNTP = 4,
-      /// read type etc from profile
-      MF_PROFILE = 5,
-      /// use this with AND to obtain pure type
-      MF_TYPEMASK = 255,
-      /// from here on it's flags
-      MF_FLAGS = 256
-   };
 
    /// what's the status of a given message in the folder?
    enum Status
@@ -145,21 +122,6 @@ public:
 
    /** Check whether mailbox has changed. */
    virtual void Ping(void);
-   
-   /** Get status of message.
-       @param  msgno sequence no of message
-       @param size if not NULL, size in bytes gets stored here
-       @param day to store day (1..31)
-       @param month to store month (1..12)
-       @param year to store year (19xx)
-       @return flags of message
-   */
-   virtual int GetMessageStatus(
-      unsigned int msgno,
-      unsigned long *size = NULL,
-      unsigned int *day = NULL,
-      unsigned int *month = NULL,
-      unsigned int *year = NULL);
    
    /** get the message with number msgno
        @param msgno sequence number

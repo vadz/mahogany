@@ -27,7 +27,6 @@
 #   include "strutil.h"
 #   include "PathFinder.h"
 #   include "kbList.h"
-
 #   include "MApplication.h"
 #   ifdef  OS_WIN
 #      include <wx/msw/regconf.h>
@@ -332,6 +331,38 @@ void ProfileBase::SetExpandEnvVars(bool bDoIt)
       m_config->SetExpandEnvVars(bDoIt);
    else
       m_expandEnvVars = bDoIt;
+}
+
+/** List all profiles of a given type or all profiles in total.
+    @param type Type of profile to list or PT_Any for all.
+    @return a pointer to kbStringList of profile names to be freed by caller.
+*/
+kbStringList *
+ProfileBase::ListProfiles(int type)
+{
+   kbStringList *list = new kbStringList;
+   wxConfigBase *global_config = mApplication->GetProfile()->m_config;
+   if(! global_config)
+      return list;
+   
+   long index = 0;
+   wxString name;
+   int ptype;
+   wxString path = global_config->GetPath();
+   if(global_config->GetFirstGroup(name, index))
+   {
+      global_config->Read(name+MP_PROFILE_TYPE, &ptype, MP_PROFILE_TYPE_D);
+      if(type == PT_Any || ptype == type)
+         list->push_back(new String(name));
+   }
+   while(global_config->GetNextGroup (name, index))
+   {
+      global_config->Read(name+MP_PROFILE_TYPE, &ptype, MP_PROFILE_TYPE_D);
+      if(type == PT_Any || ptype == type)
+         list->push_back(new String(name));
+   }
+   global_config->SetPath(path);
+   return list;
 }
 
 // ----------------------------------------------------------------------------

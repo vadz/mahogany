@@ -9,14 +9,6 @@ from MObject import *
 
 from Message import *
 class MailFolderPtr(MObjectRCPtr):
-    MF_INBOX = MailFolderc.MailFolder_MF_INBOX
-    MF_FILE = MailFolderc.MailFolder_MF_FILE
-    MF_POP = MailFolderc.MailFolder_MF_POP
-    MF_IMAP = MailFolderc.MailFolder_MF_IMAP
-    MF_NNTP = MailFolderc.MailFolder_MF_NNTP
-    MF_PROFILE = MailFolderc.MailFolder_MF_PROFILE
-    MF_TYPEMASK = MailFolderc.MailFolder_MF_TYPEMASK
-    MF_FLAGS = MailFolderc.MailFolder_MF_FLAGS
     MSG_STAT_UNREAD = MailFolderc.MailFolder_MSG_STAT_UNREAD
     MSG_STAT_DELETED = MailFolderc.MailFolder_MSG_STAT_DELETED
     MSG_STAT_REPLIED = MailFolderc.MailFolder_MSG_STAT_REPLIED
@@ -44,9 +36,6 @@ class MailFolderPtr(MObjectRCPtr):
         return val
     def Ping(self):
         val = MailFolderc.MailFolder_Ping(self.this)
-        return val
-    def GetMessageStatus(self,arg0,*args):
-        val = apply(MailFolderc.MailFolder_GetMessageStatus,(self.this,arg0,)+args)
         return val
     def GetMessage(self,arg0):
         val = MailFolderc.MailFolder_GetMessage(self.this,arg0)

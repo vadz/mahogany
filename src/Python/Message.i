@@ -162,6 +162,20 @@ public:
    */
    virtual const String & GetPartSpec(int n = 0);
 
+   /** Return the numeric status of message.
+       @param  msgno sequence no of message
+       @param size if not NULL, size in bytes gets stored here
+       @param day to store day (1..31)
+       @param month to store month (1..12)
+       @param year to store year (19xx)
+       @return flags of message
+   */
+   virtual int GetStatus(
+      unsigned long *size = NULL,
+      unsigned int *day = NULL,
+      unsigned int *month = NULL,
+      unsigned int *year = NULL);
+
    /** Write the message to a String.
        @param str the string to write message text to
        @param headerFlag if true, include header

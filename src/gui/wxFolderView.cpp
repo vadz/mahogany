@@ -348,7 +348,7 @@ wxFolderView::Update(void)
    for(i = 0; i < n; i++)
    {
       mptr = m_MailFolder->GetMessage(i+1);
-      nstatus = m_MailFolder->GetMessageStatus(i+1,&nsize,&day,&month,&year);
+      nstatus = mptr->GetStatus(&nsize,&day,&month,&year);
       status = "";
       if(nstatus & MailFolder::MSG_STAT_UNREAD)  status += 'U';
       if(nstatus & MailFolder::MSG_STAT_DELETED) status += 'D';

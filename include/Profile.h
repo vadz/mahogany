@@ -73,6 +73,12 @@ public:
    /// Create a dummy Profile just inheriting from the top level
    static ProfileBase * CreateEmptyProfile(ProfileBase const *parent = NULL);
 
+   /** List all profiles of a given type or all profiles in total.
+       @param type Type of profile to list or -1 for all.
+       @return a pointer to kbStringList of profile names to be freed by caller.
+   */
+   static kbStringList * ListProfiles(int type = PT_Any);
+   
    /// Flush all (disk-based) profiles now
    static void FlushAll();
 
@@ -83,9 +89,11 @@ public:
    enum Type
    {
       /// No profile type specified.
-      PT_unknown,
+      PT_Unknown = -1,
+      /// Any profile, default argument for ListProfiles().
+      PT_Any = -1,  // PT_Unknown
       /// This profile belongs to a folder.
-      PT_FolderProfile
+      PT_FolderProfile = 1
    };
 
    /**@name Reading and writing entries.

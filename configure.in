@@ -33,6 +33,7 @@ DEFAULT_USE_PYTHON=1
 DEFAULT_USE_THREADS=1
 DEFAULT_USE_KDOC=0
 DEFAULT_USE_DOCXX=1
+DEFAULT_USE_EXPERIMENTAL=0
 
 M_OVERRIDES(python,python,
 --with-python   use python scripting,
@@ -54,6 +55,9 @@ M_OVERRIDES(debug,debug,
 --with-debug    use debug info/code,
 USE_DEBUG)
 
+M_OVERRIDES(debug,debug,
+--with-experimental    use experimental code,
+USE_EXPERIMENTAL)
 
 dnl --------------------------------------------------------------------------
 dnl testing operating system and compilers
@@ -252,6 +256,14 @@ if test "$USE_DEBUG" = 1; then
 	MAKE_DEBUG="DEBUG=yes"
 fi
 AC_SUBST(MAKE_DEBUG)
+
+dnl experimental code (unstable!)
+MAKE_EXPERIMENTAL=
+if test "$USE_EXPERIMENTAL" = 1; then
+	DBGFLAGS="$DBGFLAGS -DEXPERIMENTAL=1"
+	MAKE_EXPERIMENTAL="EXPERIMENTAL=yes"
+fi
+AC_SUBST(MAKE_EXPERIMENTAL)
 
 dnl precompiled headers
 if test "$USE_PCH" = 1; then

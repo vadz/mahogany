@@ -134,6 +134,21 @@ public:
    */
    String const & GetPartDesc(int n = 0);
 
+   /** Return the numeric status of message.
+       This only works immediately after allocating the message!
+       @param size if not NULL, size in bytes gets stored here
+       @param day to store day (1..31)
+       @param month to store month (1..12)
+       @param year to store year (19xx)
+       @return flags of message
+   */
+   virtual int GetStatus(
+      unsigned long *size = NULL,
+      unsigned int *day = NULL,
+      unsigned int *month = NULL,
+      unsigned int *year = NULL) const;
+
+
    /** Query the section specification string of body part.
        @param  n part number
        @return MIME/IMAP4 section specifier #.#.#.#
@@ -151,12 +166,13 @@ protected:
    /**@name Constructors and Destructors */
    //@{
    /** constructor, required associated folder reference
-       @param  folder where this mail is stored
-       @param  uid   unique message id
+       @param folder where this mail is stored
+       @param uid   unique message id
+       @param msgno used to get cache entry
    */
    static class MessageCC * CreateMessageCC(
       MailFolderCC *folder,
-      unsigned long uid);
+      unsigned long uid, unsigned long msgno);
    
 #if 0
    /** Constructor, creating an object from a text buffer.
@@ -172,7 +188,7 @@ protected:
 
 protected:
    /// constructor, called by CreateMessageCC()
-   MessageCC(MailFolderCC *folder,unsigned long uid);
+   MessageCC(MailFolderCC *folder,unsigned long uid, unsigned long msgno);
    /** destructor */
    ~MessageCC();
 private:
@@ -182,6 +198,8 @@ private:
    char *text; 
    /// unique message id
    unsigned long  uid;
+   /// message number, might be outdated!
+   unsigned long  m_msgno;
    /// holds the pointer to a text buffer allocated by cclient lib
    char *mailText;
    /// refresh information in this structure

@@ -123,33 +123,12 @@ public:
 
    /** Check whether mailbox has changed. */
    virtual void Ping(void) = 0;
-
-   /** Get status of message.
-       @param  msgno sequence no of message
-       @param size if not NULL, size in bytes gets stored here
-       @param day to store day (1..31)
-       @param month to store month (1..12)
-       @param year to store year (19xx)
-       @return flags of message
-   */
-   virtual int GetMessageStatus(
-      unsigned int msgno,
-      unsigned long *size = NULL,
-      unsigned int *day = NULL,
-      unsigned int *month = NULL,
-      unsigned int *year = NULL) = 0;
-
+   
    /** get the message with number msgno
        @param msgno sequence number
        @return message handler
    */
    virtual class Message *GetMessage(unsigned long msgno) = 0;
-
-   /** get the raw text of the message with given number
-       @param msgno sequence number
-       @return string containing the text (empty on error)
-   */
-   virtual String GetRawMessage(unsigned long msgno) = 0;
 
    /** Delete a message.
        @param index the sequence number

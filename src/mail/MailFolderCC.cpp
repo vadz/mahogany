@@ -169,6 +169,7 @@ MailFolderCC::Open(void)
          lockfile = (char *) mail_parameters (NIL,GET_SYSINBOX,NULL);
          if(lockfile.IsEmpty()) // another c-client stupidity
             lockfile = (char *) sysinbox();
+         ProcessEventQueue();
       }
 #endif
       lockfile << ".lock*"; //FIXME: is this fine for MS-Win?
@@ -206,7 +207,8 @@ MailFolderCC::Open(void)
    }
    CCQuiet(); // first try, don't log errors
    m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
-                          debugFlag ? OP_DEBUG : NIL);
+                            debugFlag ? OP_DEBUG : NIL);
+   ProcessEventQueue();
    SetDefaultObj(false);
    CCVerbose();
    if(m_MailStream == NIL)
@@ -215,9 +217,11 @@ MailFolderCC::Open(void)
       // try again:
       // if this fails, we want to know it, so no CCQuiet()
       mail_create(NIL, (char *)m_MailboxPath.c_str());
+      ProcessEventQueue();
       SetDefaultObj();
       m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
-                             debugFlag ? OP_DEBUG : NIL);
+                               debugFlag ? OP_DEBUG : NIL);
+      ProcessEventQueue();
       SetDefaultObj(false);
    }
    if(m_MailStream == NIL)
@@ -226,7 +230,9 @@ MailFolderCC::Open(void)
    AddToMap(m_MailStream); // now we are known
 
    mail_status(m_MailStream, (char *)m_MailboxPath.c_str(), SA_MESSAGES|SA_RECENT|SA_UNSEEN);
+   ProcessEventQueue();
 
+#if 0
    if(numOfMessages > 0)
    {
       // load fast information of all messages, so we can use mail_elt
@@ -234,6 +240,7 @@ MailFolderCC::Open(void)
       // shall we use mail_fetchstructure here? Or drop mail_elt() below?
       mail_fetchfast(m_MailStream, (char *)sequence.c_str());
    }
+#endif
    okFlag = true;
    if(okFlag)
       PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
@@ -258,12 +265,14 @@ MailFolderCC::Ping(void)
    DBGMESSAGE(("MailFolderCC::Ping() on Folder %s.", m_MailboxPath.c_str()));
 
    mail_ping(m_MailStream);
+   ProcessEventQueue();
 }
 
 MailFolderCC::~MailFolderCC()
 {
    if ( m_MailStream )
       mail_close(m_MailStream);
+   ProcessEventQueue();
    RemoveFromMap(m_MailStream);
 
    // note that RemoveFromMap already removed our node from streamList, so
@@ -298,9 +307,10 @@ MailFolderCC::AppendMessage(String const &msg)
    STRING str;
 
    INIT(&str, mail_string, (void *) msg.c_str(), msg.Length());
-
+   ProcessEventQueue();
    if(! mail_append(NIL,(char *)m_MailboxPath.c_str(),&str))
       ERRORMESSAGE(("cannot append message"));
+   ProcessEventQueue();
 }
 
 void
@@ -351,39 +361,12 @@ MailFolderCC::CountMessages(void) const
    return numOfMessages;
 }
 
-int
-MailFolderCC::GetMessageStatus(unsigned int msgno,
-                unsigned long *size,
-                unsigned int *day,
-                unsigned int *month,
-                unsigned int *year)
-{
-   int status;
-   MESSAGECACHE *mc = mail_elt(m_MailStream, msgno);
-
-   if(size)    *size = mc->rfc822_size;
-   if(day)  *day = mc->day;
-   if(month)   *month = mc->month;
-   if(year) *year = mc->year + BASEYEAR;
-   status = 0;
-   if(!mc->seen)     status += MSG_STAT_UNREAD;
-   if(mc->answered)  status += MSG_STAT_REPLIED;
-   if(mc->deleted)   status += MSG_STAT_DELETED;
-   if(mc->searched)  status += MSG_STAT_SEARCHED;
-   if(mc->recent)    status += MSG_STAT_RECENT;
-   return status;
-}
-
 Message *
 MailFolderCC::GetMessage(unsigned long index)
 {
-   return MessageCC::CreateMessageCC(this,mail_uid(m_MailStream,index));
-}
-
-String
-MailFolderCC::GetRawMessage(unsigned long index)
-{
-   return mail_fetch_message(m_MailStream, index, NULL, 0);
+   MessageCC *m = MessageCC::CreateMessageCC(this,mail_uid(m_MailStream,index),index);
+   ProcessEventQueue();
+   return m;
 }
 
 void
@@ -420,6 +403,7 @@ MailFolderCC::SetMessageFlag(unsigned long index, int flag, bool set)
          mail_setflag(m_MailStream, (char *)seq.c_str(), (char *)flagstr);
       else
          mail_clearflag(m_MailStream, (char *)seq.c_str(), (char *)flagstr);
+      ProcessEventQueue();
    }
 }
 
@@ -428,6 +412,7 @@ MailFolderCC::ExpungeMessages(void)
 {
    if(PY_CALLBACK(MCB_FOLDEREXPUNGE,1,GetProfile()))
       mail_expunge (m_MailStream);
+   ProcessEventQueue();
 }
 
 
@@ -618,7 +603,7 @@ MailFolderCC::mm_flags(MAILSTREAM *stream, unsigned long /* number */)
        @param errflg error level
        */
 void
-MailFolderCC::mm_notify(MAILSTREAM * /* stream */, char *str, long errflg)
+MailFolderCC::mm_notify(MAILSTREAM * /* stream */, String str, long errflg)
 {
    mm_log(str,errflg);
 }
@@ -633,7 +618,7 @@ MailFolderCC::mm_notify(MAILSTREAM * /* stream */, char *str, long errflg)
 void
 MailFolderCC::mm_list(MAILSTREAM * /* stream */,
                       char /* delim */,
-                      char * /* name */,
+                      String /* name */,
                       long /* attrib */)
 {
    //FIXME
@@ -649,7 +634,7 @@ MailFolderCC::mm_list(MAILSTREAM * /* stream */,
 void
 MailFolderCC::mm_lsub(MAILSTREAM * /* stream */,
                       char /* delim */,
-                      char * /* name */,
+                      String /* name */,
                       long /* attrib */)
 {
    //FIXME
@@ -662,7 +647,7 @@ MailFolderCC::mm_lsub(MAILSTREAM * /* stream */,
 */
 void
 MailFolderCC::mm_status(MAILSTREAM *stream,
-                        char * /* mailbox */,
+                        String /* mailbox */,
                         MAILSTATUS *status)
 {
    MailFolderCC *mf = LookupObject(stream);
@@ -685,7 +670,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
     @param errflg error level
 */
 void
-MailFolderCC::mm_log(const char *str, long /* errflg */)
+MailFolderCC::mm_log(String str, long /* errflg */)
 {
    if(mm_ignore_errors)
       return;
@@ -700,11 +685,11 @@ MailFolderCC::mm_log(const char *str, long /* errflg */)
     @param str    message str
 */
 void
-MailFolderCC::mm_dlog(const char *str)
+MailFolderCC::mm_dlog(String str)
 {
    String msg = _("c-client debug: ");
    // check for PASS
-   if ( str[0] == 'P' && str[1] == 'A' && str[2] == 'S' && str[3] == 'S' )
+   if ( str[0u] == 'P' && str[1u] == 'A' && str[2u] == 'S' && str[3u] == 'S' )
    {
       msg += "PASS";
 
@@ -791,6 +776,69 @@ MailFolderCC::mm_fatal(char *str)
 }
 
 
+MailFolderCC::EventQueue MailFolderCC::ms_EventQueue;
+
+void
+MailFolderCC::ProcessEventQueue(void)
+{
+   Event *evptr;
+   
+   while(! ms_EventQueue.empty())
+   {
+      evptr = ms_EventQueue.pop_front();
+      switch(evptr->m_type)
+      {
+      case Searched:
+         MailFolderCC::mm_searched(evptr->m_stream,  evptr->m_args[0].m_ulong);
+         break;
+      case Exists:
+         MailFolderCC::mm_exists(evptr->m_stream, evptr->m_args[0].m_ulong);
+         break;
+      case Expunged:
+         MailFolderCC::mm_expunged(evptr->m_stream,  evptr->m_args[0].m_ulong);
+         break;
+      case Flags:
+         MailFolderCC::mm_flags(evptr->m_stream,  evptr->m_args[0].m_ulong);
+         break;
+      case Notify:
+         MailFolderCC::mm_notify(evptr->m_stream,
+                                 *(evptr->m_args[0].m_str),
+                                 evptr->m_args[1].m_long);
+         delete evptr->m_args[0].m_str;
+         break;
+      case List:
+         MailFolderCC::mm_list(evptr->m_stream,
+                               evptr->m_args[0].m_int,
+                               *(evptr->m_args[1].m_str),
+                               evptr->m_args[2].m_long);
+         delete evptr->m_args[1].m_str;
+         break;
+      case LSub:
+         MailFolderCC::mm_lsub(evptr->m_stream, 
+                               evptr->m_args[0].m_int,
+                               *(evptr->m_args[1].m_str),
+                               evptr->m_args[2].m_long);
+         delete evptr->m_args[1].m_str;
+         break;
+      case Status:
+         MailFolderCC::mm_status(evptr->m_stream,
+                                 *(evptr->m_args[0].m_str),
+                                 evptr->m_args[1].m_status);
+         delete evptr->m_args[0].m_str;
+         break;
+      case Log:
+         MailFolderCC::mm_log(*(evptr->m_args[0].m_str),
+                              evptr->m_args[1].m_long);
+         delete evptr->m_args[0].m_str;
+         break;
+      case DLog:
+         MailFolderCC::mm_dlog(*(evptr->m_args[0].m_str));
+         delete evptr->m_args[0].m_str;
+         break;
+      }
+      delete evptr;
+   }
+}
 
 // the callbacks:
 extern "C"
@@ -799,68 +847,96 @@ extern "C"
 void
 mm_searched(MAILSTREAM *stream, unsigned long number)
 {
-   MailFolderCC::mm_searched(stream,  number);
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Searched);
+   evptr->m_args[0].m_ulong = number;
+   MailFolderCC::QueueEvent(evptr);
 }
 
 void
 mm_exists(MAILSTREAM *stream, unsigned long number)
 {
-   MailFolderCC::mm_exists(stream, number);
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Exists);
+   evptr->m_args[0].m_ulong = number;
+   MailFolderCC::QueueEvent(evptr);
 }
 
 void
 mm_expunged(MAILSTREAM *stream, unsigned long number)
 {
-   MailFolderCC::mm_expunged(stream,  number);
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Expunged);
+   evptr->m_args[0].m_ulong = number;
+   MailFolderCC::QueueEvent(evptr);
 }
 
 void
 mm_flags(MAILSTREAM *stream, unsigned long number)
 {
-   MailFolderCC::mm_flags(stream,  number);
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Flags);
+   evptr->m_args[0].m_ulong = number;
+   MailFolderCC::QueueEvent(evptr);
 }
 
 void
 mm_notify(MAILSTREAM *stream, char *str, long
              errflg)
 {
-   MailFolderCC::mm_notify(stream, str,  errflg);
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Notify);
+   evptr->m_args[0].m_str = new String(str);
+   evptr->m_args[1].m_long = errflg;
+   MailFolderCC::QueueEvent(evptr);
 }
 
 void
 mm_list(MAILSTREAM *stream, int delim, char *name, long attrib)
 {
-   MailFolderCC::mm_list(stream, delim,name, attrib);
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::List);
+   evptr->m_args[0].m_int = delim;
+   evptr->m_args[1].m_str = new String(name);
+   evptr->m_args[2].m_long = attrib;
+   MailFolderCC::QueueEvent(evptr);
 }
 
 void
 mm_lsub(MAILSTREAM *stream, int delim, char *name, long attrib)
 {
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::LSub);
+   evptr->m_args[0].m_int = delim;
+   evptr->m_args[1].m_str = new String(name);
+   evptr->m_args[2].m_long = attrib;
    MailFolderCC::mm_lsub(stream, delim, name, attrib);
 }
 
 void
-mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS
-             *status)
+mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 {
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Status);
+   evptr->m_args[0].m_str = new String(mailbox);
+   evptr->m_args[1].m_status = status;
+   MailFolderCC::QueueEvent(evptr);
    MailFolderCC::mm_status(stream, mailbox, status);
 }
 
 void
 mm_log(char *str, long errflg)
 {
-   MailFolderCC::mm_log(str, errflg);
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::Log);
+   evptr->m_args[0].m_str = new String(str);
+   evptr->m_args[1].m_long = errflg;
+   MailFolderCC::QueueEvent(evptr);
 }
 
 void
 mm_dlog(char *str)
 {
-   MailFolderCC::mm_dlog(str);
+   MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::DLog);
+   evptr->m_args[0].m_str = new String(str);
+   MailFolderCC::QueueEvent(evptr);
 }
 
 void
 mm_login(NETMBX *mb, char *user, char *pwd, long trial)
 {
+   // Cannot use event system, has to be called while c-client is working.
    MailFolderCC::mm_login(mb, user, pwd, trial);
 }
 

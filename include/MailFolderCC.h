@@ -145,28 +145,7 @@ public:
    */
    class Message *GetMessage(unsigned long msgno);
 
-   /** get the raw text of the message with given number
-       @param msgno sequence number
-       @return string containing the text (empty on error)
-   */
-   virtual String GetRawMessage(unsigned long msgno);
-
-   /** Get status of message.
-       @param    msgno   sequence no of message
-       @param size if not NULL, size in bytes gets stored here
-       @param day to store day (1..31)
-       @param month to store month (1..12)
-       @param year to store year (19xx)
-       @return flags of message
-   */
-   int   GetMessageStatus(
-      unsigned int msgno,
-      unsigned long *size = NULL,
-      unsigned int *day = NULL,
-      unsigned int *month = NULL,
-      unsigned int *year = NULL);
-
-   /** Set a message flag
+  /** Set a message flag
        @param index the sequence number
        @param flag flag to be set, e.g. MSG_STAT_DELETED
        @param set if true, set the flag, if false, clear it
@@ -293,6 +272,55 @@ protected:
    void SetType(FolderType type) { m_folderType = type; }
    FolderType GetType(void) const { return m_folderType; }
 
+   /*@name Handling of MailFolderCC internal events.
+     Callbacks from the c-client library cannot directly be used to
+     call other functions as this might lead to a lock up or recursion
+     in the mail handling routines. Therefore all callbacks add events
+     to a queue which will be processed after calls to c-client
+     return.
+   */
+   //@{
+
+public:
+   /// Process all events in the queue.
+   static void ProcessEventQueue(void);
+
+   /// Type of the event, one for each callback.
+   enum EventType
+   {
+      Searched, Exists, Expunged, Flags, Notify, List,
+      LSub, Status, Log, DLog
+   };
+   /// A structure for passing arguments.
+   union EventArgument
+   {
+      char            m_char;
+      String        * m_str;
+      int             m_int;
+      long            m_long;
+      unsigned long   m_ulong;
+      MAILSTATUS    * m_status;
+   };
+   /// The event structure.
+   struct Event
+   {
+      Event(MAILSTREAM *stream, EventType type)
+         { m_stream = stream; m_type = type; }
+      /// The type.
+      EventType   m_type;
+      /// The stream it relates to.
+      MAILSTREAM *m_stream;
+      /// The data structure, no more than three members needed
+      EventArgument m_args[3];
+   };
+   KBLIST_DEFINE(EventQueue, Event);
+   /// Add an event to the queue, called from (C) mm_ callback routines.
+   static void QueueEvent(Event *evptr)
+          { ms_EventQueue.push_back(evptr); }
+protected:
+   /// The list of events to be processed.
+   static EventQueue ms_EventQueue;
+   //@}
 public:
    /** @name common callback routines
        They all take a stram argument and the number of a message.
@@ -317,7 +345,7 @@ public:
        @param str message str
        @param errflg error level
        */
-   static void mm_notify(MAILSTREAM *stream, char *str, long
+   static void mm_notify(MAILSTREAM *stream, String str, long
                          errflg);
 
    /** this mailbox name matches a listing request
@@ -326,7 +354,7 @@ public:
        @param name    mailbox name
        @param attrib   mailbox attributes
        */
-   static void mm_list(MAILSTREAM *stream, char delim, char *name,
+   static void mm_list(MAILSTREAM *stream, char delim, String name,
                        long attrib);
 
    /** matches a subscribed mailbox listing request
@@ -335,25 +363,25 @@ public:
        @param name   mailbox name
        @param attrib   mailbox attributes
        */
-   static void mm_lsub(MAILSTREAM *stream, char delim, char *name,
+   static void mm_lsub(MAILSTREAM *stream, char delim, String name,
                        long attrib);
    /** status of mailbox has changed
        @param stream   mailstream
        @param mailbox    mailbox name for this status
        @param status   structure with new mailbox status
        */
-   static void mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status);
+   static void mm_status(MAILSTREAM *stream, String mailbox, MAILSTATUS *status);
 
    /** log a message
        @param str   message string
        @param errflg   error level
        */
-   static void mm_log(const char *str, long errflg);
+   static void mm_log(String str, long errflg);
 
    /** log a debugging message
        @param str    message string
        */
-   static void mm_dlog(const char *str);
+   static void mm_dlog(String str);
 
    /** get user name and password
        @param   mb   parsed mailbox specification
