@@ -163,6 +163,7 @@ public:
    /** Toggle update behaviour flags.
        @param updateFlags the flags to set
    */
+   //@{
    virtual void SetUpdateFlags(int updateFlags)
       {
          int oldFlags = m_UpdateFlags;
@@ -197,9 +198,6 @@ public:
        @param kind the change kind (ok/apply/cancel)
    */
    virtual void OnOptionsChange(MEventOptionsChangeData::ChangeKind kind);
-
-   /// decrement and delete if reached 0, return TRUE if item wasn't deleted
-   virtual bool DecRef();
 
    /// VZ: adding this decl as it doesn't compile otherwise
    virtual void Checkpoint(void) = 0;
@@ -307,7 +305,11 @@ protected:
    /// a timer to update information
    class MailFolderTimer *m_Timer;
 
+#ifdef DEBUG
+   virtual void IncRef(void);    ///  ### TEMPORARY
+#endif
    /// decrement and delete if reached 0, return TRUE if item wasn't deleted
+   virtual bool DecRef();
    virtual bool RealDecRef();
    friend class MfCloseEntry;
 private:

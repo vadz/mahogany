@@ -823,6 +823,15 @@ MailFolderCmn::DecRef()
         return RealDecRef();
 }
 
+#ifdef DEBUG
+void    ///  ### TEMPORARY
+///HACK: so I can put a breakpoint on all allotments of this class
+MailFolderCmn::IncRef()
+{
+   MObjectRC::IncRef();
+}
+#endif
+
 bool
 MailFolderCmn::RealDecRef()
 {
@@ -2049,12 +2058,14 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
             FilterRule * filterRule = filterModule->GetFilter(filterString);
             // apply it:
             if ( filterRule )
+            {
                (void) filterRule->Apply(this, messages,
                                         TRUE, /* ignore deleted */
                                         &changed);
-            SafeDecRef(filterRule);
+               filterRule->DecRef();
+            }
          }
-         SafeDecRef(filterModule);
+         filterModule->DecRef();
       }
       else
          wxLogVerbose("Filter module couldn't be loaded.");

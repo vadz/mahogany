@@ -1846,21 +1846,15 @@ wxLayoutList::MoveCursorTo(wxPoint const &p)
 
    wxPoint cursorPosOld = m_CursorPos;
 
-   wxLayoutLine *line = m_FirstLine;
-   while(line && line->GetLineNumber() != p.y)
-      line = line->GetNextLine();
-   if(line && line->GetLineNumber() == p.y) // found it
+   for(wxLayoutLine *line = m_FirstLine; line; line = line->GetNextLine())
    {
-      m_CursorPos.y = p.y;
-      m_CursorLine = line;
-      CoordType len = line->GetLength();
-      if(len >= p.x)
+      if(line->GetLineNumber() == p.y) // found it
       {
-         m_CursorPos.x = p.x;
-      }
-      else
-      {
-         m_CursorPos.x = len;
+         CoordType len = line->GetLength();
+         m_CursorPos.x = (len >= p.x) ? p.x : len;
+         m_CursorPos.y = p.y;
+         m_CursorLine = line;
+         break;
       }
    }
 
@@ -1872,57 +1866,47 @@ wxLayoutList::MoveCursorTo(wxPoint const &p)
 bool
 wxLayoutList::MoveCursorVertically(int n)
 {
+   if(m_CursorLine == NULL)
+      return m_movedCursor = false;
+
    AddCursorPosToUpdateRect();
 
    wxPoint cursorPosOld = m_CursorPos;
 
-   bool rc;
+   bool rc = true;
    if(n  < 0) // move up
    {
-      if(m_CursorLine == m_FirstLine) return false;
-      while(n < 0 && m_CursorLine)
+      while(n < 0)
       {
-         m_CursorLine = m_CursorLine->GetPreviousLine();
-         m_CursorPos.y--;
-         n++;
-      }
-      if(! m_CursorLine)
-      {
-         m_CursorLine = m_FirstLine;
-         m_CursorPos.y = 0;
-         rc = false;
-      }
-      else
-      {
-         if(m_CursorPos.x > m_CursorLine->GetLength())
-            m_CursorPos.x = m_CursorLine->GetLength();
-         rc = true;
+         wxLayoutLine *next = m_CursorLine->GetPreviousLine();
+         if (next == NULL)
+         {
+            m_CursorPos.x = 0;
+            m_CursorPos.y = 0;
+            rc = false;
+            break;
+         }
+         m_CursorLine = next;
+         ++n, --m_CursorPos.y;
       }
    }
    else // move down
    {
-      wxLayoutLine *last = m_CursorLine;
-      if(! m_CursorLine->GetNextLine()) return false;
-      while(n > 0 && m_CursorLine)
+      while(n > 0)
       {
-         n--;
-         m_CursorPos.y ++;
-         last = m_CursorLine;
-         m_CursorLine = m_CursorLine->GetNextLine();
-      }
-      if(! m_CursorLine)
-      {
-         m_CursorLine = last;
-         m_CursorPos.y --;
-         rc = false;
-      }
-      else
-      {
-         if(m_CursorPos.x > m_CursorLine->GetLength())
+         wxLayoutLine *next = m_CursorLine->GetNextLine();
+         if (next == NULL)
+         {
             m_CursorPos.x = m_CursorLine->GetLength();
-         rc = true;
+            rc = false;
+            break;
+         }
+         m_CursorLine = next;
+         --n, ++m_CursorPos.y;
       }
    }
+   if(m_CursorPos.x > m_CursorLine->GetLength())
+      m_CursorPos.x = m_CursorLine->GetLength();
 
    m_movedCursor = m_CursorPos != cursorPosOld;
 

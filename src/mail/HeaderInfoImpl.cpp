@@ -81,14 +81,9 @@ HeaderInfo *HeaderInfoListImpl::operator[](size_t n)
    ASSERT(n < m_NumEntries);
    if(n >= m_NumEntries)
       return NULL;
-   else
-   {
-      if(m_TranslationTable)
-         return & m_Listing[ m_TranslationTable[n] ];
-      else
-         return & m_Listing[n];
-   }
-   return & m_Listing[n];
+   if(m_TranslationTable)
+      n = m_TranslationTable[n];
+   return &m_Listing[n];
 }
 
 HeaderInfo *HeaderInfoListImpl::GetEntryUId(UIdType uid)
