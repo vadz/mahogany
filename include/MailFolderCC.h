@@ -16,6 +16,7 @@
 
 #ifndef   USE_PCH
 #   include  "kbList.h"
+#   include  "MObject.h"
 
 // includes for c-client library
 extern "C"
@@ -32,7 +33,6 @@ extern "C"
 
 #include  "MailFolder.h"
 #include  "FolderView.h"
-
 #include  "MFolder.h"
 
 // fwd decl needed to define StreamListType before MailFolderCC

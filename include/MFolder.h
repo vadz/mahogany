@@ -22,7 +22,7 @@
 #ifndef USE_PCH
 #   include "Profile.h"
 #   include "MailFolder.h"
-
+#   include "MObject.h"
 #   include "FolderType.h"
 #endif
 
