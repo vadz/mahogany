@@ -207,12 +207,13 @@ extern
 void ShowModulesDialog(wxFrame *parent)
 {
    wxModulesDialog dlg(parent);
-   (void)dlg.ShowModal();
-   MDialog_Message(
-      _("Notice: any changes to the modules settings will only\n"
-        "take effect the next time you start Mahogany."),
-      parent,
-      MDIALOG_MSGTITLE,
-      GetPersMsgBoxName(M_MSGBOX_MODULES_WARNING));
-
+   if ( dlg.ShowModal() == wxID_OK )
+   {
+      MDialog_Message(
+         _("Notice: any changes to the modules settings will only\n"
+           "take effect the next time you start Mahogany."),
+         parent,
+         MDIALOG_MSGTITLE,
+         GetPersMsgBoxName(M_MSGBOX_MODULES_WARNING));
+   }
 }
