@@ -46,7 +46,7 @@ Ballueder@usa.net
 \backslash 
 Contact us: 
 \family typewriter 
-m-developers@makelistcom
+mahogany-developers@lists.sourceforge.net
 \layout Abstract
 
 These are the release notes for M.
@@ -95,7 +95,7 @@ Cross-platform.
  Use one mail client, no matter what system you use.
  The source and binary for Windows 95/98/NT are available on request (
 \family typewriter 
-m-developers@makelist.com
+mahogany-developers@lists.sourceforge.net
 \family default 
 ).
  Mailbox file formats are the same on both platforms.
@@ -294,19 +294,19 @@ Online resources
 
 M has a homepage at 
 \family typewriter 
-http://Ballueder.home.ml.org/M/
+http://www.wxwindows.org/Mahogany/
 \family default 
  
 \layout Itemize
 
 The wxWindows homepage is 
 \family typewriter 
-http://web.ukonline.co.uk/julian.smart/
+http://www.wxwindows.org/
 \layout Itemize
 
 wxGTK, the GTK port of wxWindows, is available from 
 \family typewriter 
-http://www.freiburg.linux.de/~wxxt/
+http://www.wxwindows.org/dl_gtk.htm
 \layout Section
 
 FAQ

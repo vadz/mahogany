@@ -54,7 +54,7 @@ Copyright 1997-1999 by Karsten Ballüder
 \newline 
 
 \family typewriter 
-<m-developers@egroups.com>
+<mahogany-developers@lists.sourceforge.net>
 \layout Standard
 
 
@@ -80,7 +80,7 @@ These compilation notes are probably a bit outdated.
  option of configure to see which options it supports.
  These notes are written with the Unix version in mind, for problems with
  compiling the MS Windows or MacOS versions, you might want to contact the
- m-developers@egroups.com mailing list instead.
+ mahogany-developers@lists.sourceforge.net mailing list instead.
 \layout Section
 
 General Procedure
@@ -93,13 +93,13 @@ Before you can compile Mahogany, you will need a matching copy of
 \latex latex 
 
 \backslash 
-htmladdnormallinkfoot{wxWindows}{http://web.ukonline.co.uk/julian.smart/wxwin/}
+htmladdnormallinkfoot{wxWindows}{http://www.wxwindows.org/}
 \latex default 
 , that is, if compiling under Unix, you will need 
 \latex latex 
 
 \backslash 
-htmladdnormallinkfoot{wxGTK}{http://www.freiburg.linux.de/~wxxt/}
+htmladdnormallinkfoot{wxGTK}{http://www.wxwindows.org/dl_gtk.htm}
 \latex default 
 .
  As wxGTK is under constant development, you should use the same copy of
@@ -107,8 +107,8 @@ htmladdnormallinkfoot{wxGTK}{http://www.freiburg.linux.de/~wxxt/}
 \latex latex 
 
 \backslash 
-htmladdnormallinkfoot{Mahogany download page}{http://www.phy.hw.ac.uk/~karsten/M/dow
-nload.html}
+htmladdnormallinkfoot{Mahogany download page}{http://www.wxwindows.org/Mahogany/
+download.html}
 \latex default 
 .
 \layout Subsection
@@ -543,7 +543,7 @@ Any other projects in the workspace shouldn't be used and should be left
 After loading the ones which you need (C-Client is mandatory, all the other
  optional), you may start the build.
  It should succeed :-) If it doesn't, please report the build log with the
- explanation of what happened to m-developers@egroups.com mailing list.
+ explanation of what happened to mahogany-developers@lists.sourceforge.net mailing list.
 \layout Enumerate
 
 Notice that the environment variable WX must be set before you launch MSDEV.EXE
@@ -573,8 +573,7 @@ The list of all Mahogany source files can be found by looking at the Makefile
 Add all of the sources to the makefile/project file and also add the resource
  file res/M.rc to the project, choose the same options as for wxWindows compilati
 on and see what happens.
- If it doesn't work, send you questions to the usual place (m-developers@egroups.
-com).
+ If it doesn't work, send you questions to the usual place (mahogany-developers@lists.sourceforge.net).
  If it does work, please tell us about it as well so that this file could
  be updated.
 \layout Subsection
@@ -940,11 +939,11 @@ wxWindows is available from
  
 \family typewriter 
 \latex default 
-http://web.ukonline.co.uk/julian.smart/
+http://www.wxwindows.org/
 \layout Itemize
 
-The GTK port of wxWindows, wxGTK, is available from: http://www.freiburg.linux.de/~
-wxxt/
+The GTK port of wxWindows, wxGTK, is available from: http://www.wxwindows.org/
+dl_gtk.htm
 \layout Standard
 
 In order to compile this alpha release of 

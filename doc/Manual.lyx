@@ -401,7 +401,7 @@ Generally we welcome help for anything.
 \latex latex 
 
 \backslash 
-htmladdnormallinkfoot{m-developers@egroups.com}{mailto:m-developers@egroups.com}
+htmladdnormallinkfoot{mahogany-developers@lists.sourceforge.net}{mailto:mahogany-developers@lists.sourceforge.net}
 \latex default 
 .
  If you have questions about the Mahogany License, discuss them with us
@@ -5114,8 +5114,7 @@ htmladdnormallinkfoot{online docs}{../HackersGuide/index.html}
 \latex latex 
 
 \backslash 
-htmladdnormallinkfoot{Mahogany Web page}{http://mahogany.home.dhs.org/docs/HackersG
-uide/index.html}
+htmladdnormallinkfoot{Mahogany Web page}{http://www.wxwindows.org/Mahogany/docs.html}
 \latex default 
 .
 \layout Standard

@@ -10,9 +10,9 @@ mahogany (0.60) stable; urgency=medium
   * Bug fix release, improved message editor. 
   * Initial Release.
 
- -- Karsten Ballueder <m-developers@egroups.com>  Sun, 25 Apr 1999 20:54:01 +0100
+ -- Karsten Ballueder <mahogany-developers@lists.sourceforge.net>  Sun, 25 Apr 1999 20:54:01 +0100
 
 Local variables:
 mode: debian-changelog
-add-log-mailing-address: "m-developers@egroups.com"
+add-log-mailing-address: "mahogany-developers@lists.sourceforge.net"
 End:

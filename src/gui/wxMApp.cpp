@@ -1292,7 +1292,7 @@ wxMApp::FatalError(const char *message)
    wxString msg = _("An unrecoverable internal error has occured.\n"
                     "The application will shut down now. Please take\n"
                     "a note of the error message and report it to\n"
-                    "m-developers@egroups.com\n\nInternal error message:\n\n");
+                    "mahogany-developers@lists.sourceforge.net\n\nInternal error message:\n\n");
    msg << message;
    MDialog_ErrorMessage(message, NULL, _("FATAL INTERNAL ERROR"));
 #ifdef DEBUG

@@ -28,7 +28,7 @@ for Version 0.23a\\
 
 \author{Copyright 1997-1999 by Karsten Ballüder \\
  Written by Karsten Ballüder and Vadim Zeitlin\\
-\texttt{<m-developers@egroups.com>}}
+\texttt{<mahogany-developers@lists.sourceforge.net>}}
 
 \maketitle
 \tableofcontents{}
@@ -39,7 +39,7 @@ for Version 0.23a\\
 These compilation notes are probably a bit outdated. The best start is to use
 the \texttt{-{}-help} option of configure to see which options it supports.
 These notes are written with the Unix version in mind, for problems with compiling
-the MS Windows or MacOS versions, you might want to contact the m-developers@egroups.com
+the MS Windows or MacOS versions, you might want to contact the mahogany-developers@lists.sourceforge.net
 mailing list instead.
 
 
@@ -48,10 +48,10 @@ mailing list instead.
 
 \subsection{Prerequisites}
 
-Before you can compile Mahogany, you will need a matching copy of \htmladdnormallinkfoot{wxWindows}{http://web.ukonline.co.uk/julian.smart/wxwin/},
-that is, if compiling under Unix, you will need \htmladdnormallinkfoot{wxGTK}{http://www.freiburg.linux.de/~wxxt/}.
+Before you can compile Mahogany, you will need a matching copy of \htmladdnormallinkfoot{wxWindows}{http://www.wxwindows.org/},
+that is, if compiling under Unix, you will need \htmladdnormallinkfoot{wxGTK}{http://www.wxwindows.org/dl_gtk.htm}.
 As wxGTK is under constant development, you should use the same copy of wxGTK
-that we used to build Mahogany, you can get it from the \htmladdnormallinkfoot{Mahogany download page}{http://www.phy.hw.ac.uk/~karsten/M/download.html}.
+that we used to build Mahogany, you can get it from the \htmladdnormallinkfoot{Mahogany download page}{http://www.wxwindows.org/Mahogany/download.html}.
 
 
 \subsection{Configuring wxGTK}
@@ -248,7 +248,7 @@ distribution. If you don't have Python, leave it unloaded.
 \item Any other projects in the workspace shouldn't be used and should be left unloaded.
 \item After loading the ones which you need (C-Client is mandatory, all the other
 optional), you may start the build. It should succeed :-) If it doesn't, please
-report the build log with the explanation of what happened to m-developers@egroups.com
+report the build log with the explanation of what happened to mahogany-developers@lists.sourceforge.net
 mailing list.
 \item Notice that the environment variable WX must be set before you launch MSDEV.EXE
 (otherwise it won't inherit it)! 
@@ -267,7 +267,7 @@ files in that directory. \\
 Add all of the sources to the makefile/project file and also add the resource
 file res/M.rc to the project, choose the same options as for wxWindows compilation
 and see what happens. If it doesn't work, send you questions to the usual place
-(m-developers@egroups.com). If it does work, please tell us about it as well
+(mahogany-developers@lists.sourceforge.net). If it does work, please tell us about it as well
 so that this file could be updated.
 \end{enumerate}
 
@@ -363,8 +363,8 @@ You will need the wxWindows GUI toolkit to compile \textsl{Mahogany}.
 Further Information
 
 \begin{itemize}
-\item wxWindows is available from \texttt{http://web.ukonline.co.uk/julian.smart/}
-\item The GTK port of wxWindows, wxGTK, is available from: http://www.freiburg.linux.de/\textasciitilde{}wxxt/
+\item wxWindows is available from \texttt{http://www.wxwindows.org/}
+\item The GTK port of wxWindows, wxGTK, is available from: http://www.wxwindows.org/dl_gtk.htm
 \end{itemize}
 In order to compile this alpha release of \emph{Mahogany} you will need wxWindows
 2.0 strictly later than beta 3 and so it is probably easier to take the wxWindows

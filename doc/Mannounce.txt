@@ -104,7 +104,7 @@ NEXT
    - a calendar/timeplanner plugin, synchronised with the PalmOS support
 
 
-Please direct any queries to m-developers@egroups.com
+Please direct any queries to mahogany-developers@lists.sourceforge.net
 
 --
  Karsten Ballüder  http://Ballueder.home.dhs.org/  mailto:karste-@phy.hw.ac.uk

@@ -447,7 +447,7 @@ static MModuleListing * DoListLoadedModules(void)
             (**i).m_Description,
             "", // long description
             String((**i).m_Version)+ _(" (builtin)"),
-            "m-developers@groups.com",
+            "mahogany-developers@lists.sourceforge.net",
             (**i).m_Module);
          (*listing)[count++] = entry;
       }
