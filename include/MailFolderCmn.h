@@ -280,25 +280,29 @@ protected:
    /// a timer to update information
    class MailFolderTimer *m_Timer;
 
-#ifdef DEBUG
-   virtual void IncRef(void);    ///  ### TEMPORARY
-#endif
+#ifdef DEBUG_FOLDER_CLOSE
+   virtual void IncRef(void);
+#endif // DEBUG_FOLDER_CLOSE
+
    /// decrement and delete if reached 0, return TRUE if item wasn't deleted
    virtual bool DecRef();
    virtual bool RealDecRef();
-   friend class MfCloseEntry;
+
 private:
-   friend class MFCmnEventReceiver;
    /// We react to config change events.
    class MEventReceiver *m_MEventReceiver;
 
    /** gcc 2.7.2.1 on FreeBSD 2.8.8-stable is reported to need this to
        link correctly: */
    MailFolderCmn(const MailFolderCmn &) { ASSERT(0); }
+
 #ifdef DEBUG
    bool m_PreCloseCalled;
 #endif
+
+   friend class MfCloseEntry;
+   friend class MFCmnEventReceiver;
 };
 
+#endif // MAILFOLDERCMN_H
 
-#endif

@@ -415,6 +415,26 @@ MAppBase::OnStartup()
    // use it
    InitModules();
 
+   // register with the event subsystem
+   // ---------------------------------
+
+   m_eventNewMailReg = MEventManager::Register(*this, MEventId_NewMail);
+
+   // should never fail...
+   CHECK( m_eventNewMailReg, FALSE,
+          "failed to register event handler for new mail event " );
+   m_eventOptChangeReg = MEventManager::Register(*this,
+                                                 MEventId_OptionsChange);
+   CHECK( m_eventOptChangeReg, FALSE,
+          "failed to register event handler for options change event " );
+   m_eventFolderUpdateReg = MEventManager::Register(*this,
+                                                    MEventId_FolderUpdate);
+   CHECK( m_eventFolderUpdateReg, FALSE,
+          "failed to register event handler for folder status event " );
+
+   // open all folders we open initially
+   // ----------------------------------
+
    // open the remembered folder in the main frame unless disabled
    if ( !READ_APPCONFIG(MP_DONTOPENSTARTUP) )
    {
@@ -445,11 +465,6 @@ MAppBase::OnStartup()
    {
       ShowLog();
    }
-
-   // after opening the folder, show the frame
-   m_topLevelFrame->Show(true);
-   // FIXME: ugly, need wxMApp method for this
-   ((wxMApp *)this)->SetTopWindow(m_topLevelFrame);
 
    // open all default mailboxes
    // --------------------------
@@ -485,23 +500,6 @@ MAppBase::OnStartup()
    {
       ShowAdbFrame(TopLevelFrame());
    }
-
-   // register with the event subsystem
-   // ---------------------------------
-
-   m_eventNewMailReg = MEventManager::Register(*this, MEventId_NewMail);
-
-   // should never fail...
-   CHECK( m_eventNewMailReg, FALSE,
-          "failed to register event handler for new mail event " );
-   m_eventOptChangeReg = MEventManager::Register(*this,
-                                                 MEventId_OptionsChange);
-   CHECK( m_eventOptChangeReg, FALSE,
-          "failed to register event handler for options change event " );
-   m_eventFolderUpdateReg = MEventManager::Register(*this,
-                                                    MEventId_FolderUpdate);
-   CHECK( m_eventFolderUpdateReg, FALSE,
-          "failed to register event handler for folder status event " );
 
    return TRUE;
 }

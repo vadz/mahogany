@@ -23,6 +23,9 @@
 #   include <errno.h>
 #endif
 
+// define this for some additional checks of folder closing logic
+#undef DEBUG_FOLDER_CLOSE
+
 #include <wx/timer.h>
 #include <wx/datetime.h>
 #include <wx/file.h>
@@ -60,6 +63,9 @@
 
 // trace mail folder closing
 #define TRACE_MF_CLOSE "mfclose"
+
+// trace mail folder ref counting
+#define TRACE_MF_REF "mfref"
 
 /*-------------------------------------------------------------------*
  * local classes
@@ -784,13 +790,17 @@ public:
       {
          m_mf = mf;
 
+         // keep it for now
+         m_mf->IncRef();
+
          m_expires = secs != NEVER_EXPIRES;
-         if ( m_expires )
-         {
-            m_dt = wxDateTime::Now();
-            m_dt.Add(wxTimeSpan::Seconds(secs));
-         }
-         //else: m_dt stays uninitialized
+         m_timeout = secs;
+
+         ResetTimeout();
+
+#ifdef DEBUG_FOLDER_CLOSE
+         m_deleting = false;
+#endif // DEBUG_FOLDER_CLOSE
       }
 
    ~MfCloseEntry()
@@ -799,13 +809,41 @@ public:
          {
             wxLogTrace(TRACE_MF_CLOSE, "Really closing mailfolder '%s'",
                        m_mf->GetName().c_str());
+
+#ifdef DEBUG_FOLDER_CLOSE
+            m_deleting = true;
+#endif // DEBUG_FOLDER_CLOSE
+
             m_mf->RealDecRef();
          }
       }
 
-   MailFolderCmn * m_mf;
+   // restart the expire timer
+   void ResetTimeout()
+   {
+      if ( m_expires )
+      {
+         m_dt = wxDateTime::Now() + wxTimeSpan::Seconds(m_timeout);
+      }
+      //else: no need to (re)set timeout which never expires, leave m_dt as is
+   }
+
+   // the folder we're going to close
+   MailFolderCmn *m_mf;
+
+   // the time when we will close it
    wxDateTime m_dt;
+
+   // the timeout in seconds we're waiting before closing the folder
+   int m_timeout;
+
+   // if false, timeout is infinite
    bool m_expires;
+
+#ifdef DEBUG_FOLDER_CLOSE
+   // set to true just before deleting the folder
+   bool m_deleting;
+#endif // DEBUG_FOLDER_CLOSE
 };
 
 KBLIST_DEFINE(MfList, MfCloseEntry);
@@ -824,9 +862,19 @@ public:
 
    void Add(MailFolderCmn *mf, int delay)
       {
+#ifdef DEBUG_FOLDER_CLOSE
+         // this shouldn't happen as we only add the folder to the list when
+         // it is about to be deleted and it can't be deleted if we're holding
+         // to it (MfCloseEntry has a lock), so this would be an error in ref
+         // counting (extra DecRef()) elsewhere
+         ASSERT_MSG( !GetCloseEntry(mf),
+                     "adding a folder to MailFolderCloser twice??" );
+#endif // DEBUG_FOLDER_CLOSE
+
          CHECK_RET( mf, "NULL MailFolder in MailFolderCloser::Add()");
          m_MfList.push_back(new MfCloseEntry(mf,delay));
       }
+
    void OnTimer(void)
       {
          MfList::iterator i;
@@ -845,6 +893,29 @@ public:
          while(i != m_MfList.end() )
             i = m_MfList.erase(i);
       }
+
+   MfCloseEntry *GetCloseEntry(MailFolderCmn *mf) const
+   {
+      for ( MfList::iterator i = m_MfList.begin();
+            i != m_MfList.end();
+            i++ )
+      {
+         MfCloseEntry *entry = *i;
+
+         // if the deleting flag is set, we're removing the folder from the
+         // list right now, so the check for !GetCloseEntry() in RealDecRef()
+         // below shouldn't succeed
+         if ( entry->m_mf == mf
+#ifdef DEBUG_FOLDER_CLOSE
+               && !entry->m_deleting
+#endif // DEBUG_FOLDER_CLOSE
+            )
+            return entry;
+      }
+
+      return NULL;
+   }
+
 private:
    MfList m_MfList;
 };
@@ -862,55 +933,95 @@ static CloseTimer *gs_CloseTimer = NULL;
 bool
 MailFolderCmn::DecRef()
 {
-   if ( gs_MailFolderCloser )
+   // don't keep folders alive artificially if we're going to terminate soon
+   // anyhow
+   if ( gs_MailFolderCloser && !mApplication->IsShuttingDown() )
    {
-      // the folder is going to be really closed if this is the last DecRef()
-      // and we only delay closing of the folders which could be opened
-      // successfully and are atill functional
-      if ( GetNRef() == 1 && IsAlive() )
+      switch ( GetNRef() )
       {
-         int delay;
+         case 1:
+            // the folder is going to be really closed if this is the last
+            // DecRef(), delay closing of the folder after checking that it
+            // was opened successfully and is atill functional
+            if ( IsAlive() )
+            {
+               int delay;
 
-         if ( GetFlags() & MF_FLAGS_KEEPOPEN )
-         {
-            // never close it at all
-            delay = MfCloseEntry::NEVER_EXPIRES;
-         }
-         else
-         {
-            // don't close it only if the linger delay is set
-            delay = READ_CONFIG(GetProfile(), MP_FOLDER_CLOSE_DELAY);
-         }
+               if ( GetFlags() & MF_FLAGS_KEEPOPEN )
+               {
+                  // never close it at all
+                  delay = MfCloseEntry::NEVER_EXPIRES;
+               }
+               else
+               {
+                  // don't close it only if the linger delay is set
+                  delay = READ_CONFIG(GetProfile(), MP_FOLDER_CLOSE_DELAY);
+               }
 
-         if ( delay > 0 )
-         {
-            wxLogTrace(TRACE_MF_CLOSE,
-                       "Mailfolder '%s': close delayed for %d seconds.",
-                       GetName().c_str(), delay);
+               if ( delay > 0 )
+               {
+                  wxLogTrace(TRACE_MF_CLOSE,
+                             "Mailfolder '%s': close delayed for %d seconds.",
+                             GetName().c_str(), delay);
 
-            Checkpoint(); // flush data immediately
-            gs_MailFolderCloser->Add(this, delay);
-         }
+                  Checkpoint(); // flush data immediately
 
-         return FALSE;
+                  gs_MailFolderCloser->Add(this, delay);
+               }
+            }
+            break;
+
+         case 2:
+            // if the folder is already in gs_MailFolderCloser list the
+            // remaining lock is hold by it and will be removed when the
+            // timeout expires, but we want to reset the timeout as the folder
+            // was just accessed and so we want to keep it around longer
+            {
+               MfCloseEntry *entry = gs_MailFolderCloser->GetCloseEntry(this);
+               if ( entry )
+               {
+                  // restart the expire timer
+                  entry->ResetTimeout();
+               }
+            }
+            break;
       }
    }
 
    return RealDecRef();
 }
 
-#ifdef DEBUG
-void    ///  ### TEMPORARY
-///HACK: so I can put a breakpoint on all allotments of this class
+// temp hack: so I can put a breakpoint on all allotments of this class
+#ifdef DEBUG_FOLDER_CLOSE
+void
 MailFolderCmn::IncRef()
 {
+   wxLogTrace(TRACE_MF_REF, "MF(%s)::IncRef(): %u -> %u",
+              GetName().c_str(), m_nRef, m_nRef + 1);
+
    MObjectRC::IncRef();
 }
-#endif
+#endif // DEBUG_FOLDER_CLOSE
 
 bool
 MailFolderCmn::RealDecRef()
 {
+   wxLogTrace(TRACE_MF_REF, "MF(%s)::DecRef(): %u -> %u",
+              GetName().c_str(), m_nRef, m_nRef - 1);
+
+#ifdef DEBUG_FOLDER_CLOSE
+   // check that the folder is not in the mail folder closer list any more if
+   // we're going to delete it
+   if ( m_nRef == 1 )
+   {
+      if ( gs_MailFolderCloser && gs_MailFolderCloser->GetCloseEntry(this) )
+      {
+         // we will crash later when removing it from the list!
+         FAIL_MSG("deleting folder still in MailFolderCloser list!");
+      }
+   }
+#endif // DEBUG_FOLDER_CLOSE
+
    return MObjectRC::DecRef();
 }
 
@@ -1374,9 +1485,12 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       Message *msg = GetMessage((*selections)[i]);
       if(msg)
       {
-         if(pd) pd->Update( 2*i + 1 );
+         if(pd)
+            pd->Update( 2*i + 1 );
          rc &= mf->AppendMessage(*msg, FALSE);
-         if(pd) pd->Update( 2*i + 2);
+         if(pd)
+            pd->Update( 2*i + 2);
+
          msg->DecRef();
       }
    }

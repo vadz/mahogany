@@ -773,9 +773,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 
    // folders
    { gettext_noop("You may choose to not open any folders at all on startup,\n"
-                  "reopen all folders which were when the program was closed\n"
-                  "the last time or explicitly specify the folders to reopen\n"
-                  "on each startup"), Field_Message | Field_AppWide, -1 },
+                  "reopen all folders which were open when the program was closed\n"
+                  "for the last time or explicitly specify the folders to reopen:"),
+                  Field_Message | Field_AppWide, -1 },
    { gettext_noop("Don't open any folders at startup"), Field_Bool | Field_AppWide, -1, },
    { gettext_noop("Reopen last open folders"), Field_Bool | Field_AppWide,
                                                -ConfigField_DontOpenAtStartup, },

@@ -383,6 +383,40 @@ public:
 };
 
 // ----------------------------------------------------------------------------
+// wxStatusProgress: displays a message in the status bar of the given frame
+// in its ctor and the same message with "done" appended in its dtor
+// ----------------------------------------------------------------------------
+
+// TODO: move this class in a header, it will be useful elsewhere too
+
+class wxStatusProgress
+{
+public:
+   wxStatusProgress(wxFrame *frame, const char *fmt, ...)
+   {
+      m_frame = frame;
+
+      va_list argptr;
+      va_start(argptr, fmt);
+      m_msg.PrintfV(fmt, argptr);
+      va_end(argptr);
+
+      wxLogStatus(m_frame, m_msg);
+      wxBeginBusyCursor();
+   }
+
+   ~wxStatusProgress()
+   {
+      wxLogStatus(m_frame, m_msg + _("done."));
+      wxEndBusyCursor();
+   }
+
+private:
+   wxFrame *m_frame;
+   wxString m_msg;
+};
+
+// ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
@@ -2588,6 +2622,14 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       }
 }
 
+void
+wxFolderView::SetSize(const int x, const int y,
+                      const int width, int height)
+{
+   if(m_SplitterWindow)
+      m_SplitterWindow->SetSize( x, y, width, height );
+}
+
 bool
 wxFolderView::HasSelection() const
 {
@@ -2646,7 +2688,6 @@ wxFolderView::PreviewMessage(long uid)
       m_previewUId = uid;
    }
 }
-
 
 void
 wxFolderView::OpenMessages(const UIdArray& selections)
@@ -2713,6 +2754,8 @@ wxFolderView::DeleteOrTrashMessages(const UIdArray& selections)
    if ( !selections.Count() )
       return;
 
+   wxStatusProgress(m_Frame, _("Deleting messages..."));
+
    Ticket t = m_ASMailFolder->DeleteOrTrashMessages(&selections, this);
    m_TicketList->Add(t);
 }
@@ -2753,8 +2796,12 @@ wxFolderView::SaveMessagesToFolder(const UIdArray& selections,
                                    MFolder *folder,
                                    bool del)
 {
-   if ( !selections.Count() )
+   size_t count = selections.GetCount();
+   if ( !count )
       return ILLEGAL_TICKET;
+
+   wxStatusProgress(m_Frame, _("Saving %d message(s) to '%s'..."),
+                    count, folder->GetFullName().c_str());
 
    Ticket t =
       m_ASMailFolder->SaveMessagesToFolder(&selections,
@@ -2795,28 +2842,23 @@ wxFolderView::DropMessagesToFolder(const UIdArray& selections, MFolder *folder)
 void
 wxFolderView::SaveMessagesToFile(const UIdArray& selections)
 {
-   if ( !selections.Count() )
+   size_t count = selections.Count();
+   if ( !count )
       return;
+
+   wxStatusProgress(m_Frame, _("Saving %d message(s) to file..."), count);
 
    bool rc = m_ASMailFolder->SaveMessagesToFile(&selections,
                                                 m_Frame,
                                                 this) != 0;
 
    String msg;
-   if(rc)
-     msg.Printf(_("%d messages saved"), selections.Count());
+   if ( rc )
+      msg.Printf(_("%d messages saved"), count);
    else
       msg.Printf(_("Saving messages failed."));
 
    wxLogStatus(m_Frame, msg);
-}
-
-void
-wxFolderView::SetSize(const int x, const int y,
-                      const int width, int height)
-{
-   if(m_SplitterWindow)
-      m_SplitterWindow->SetSize( x, y, width, height );
 }
 
 void wxFolderView::OnFolderDeleteEvent(const String& folderName)
@@ -2874,9 +2916,12 @@ wxFolderView::DragAndDropMessages()
    size_t countSel = m_FolderCtrl->GetSelections(selections);
    if ( countSel > 0 )
    {
-      MMessagesDataObject dropData(this,
-                                   GetFolder()->GetMailFolder(),
-                                   selections);
+      MailFolder *mf = GetFolder()->GetMailFolder();
+      CHECK( mf, false, "no mail folder to drag messages from?" );
+
+      MMessagesDataObject dropData(this, mf, selections);
+
+      // setting up the dnd icons can't be done in portable way :-(
 #ifdef __WXMSW__
       wxDropSource dropSource(dropData, m_FolderCtrl,
                               wxCursor("msg_copy"),
@@ -2958,6 +3003,8 @@ wxFolderView::DragAndDropMessages()
       {
          m_UIdsCopiedOk.Empty();
       }
+
+      mf->DecRef();
    }
 
    // did we do anything?

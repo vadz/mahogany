@@ -86,12 +86,6 @@ UIdArray MMessagesDataObject::GetMessages() const
 
 MMessagesDataObject::~MMessagesDataObject()
 {
-   Data *data = GetMData();
-   if ( data )
-   {
-      SafeDecRef(data->folder);
-   }
-   //else: it's ok for it to be NULL if we had been created with def ctor
 }
 
 // ----------------------------------------------------------------------------
