@@ -22,10 +22,12 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-   #include "Mcommon.h"
+#   include "Mcommon.h"
+#   include "Profile.h"
 
-   #include <wx/intl.h>
-   #include <wx/log.h>
+//#   include <wx/string.h>
+#   include <wx/intl.h>
+#   include <wx/log.h>
 #endif // USE_PCH
 
 #include <wx/textfile.h>

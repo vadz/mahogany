@@ -33,6 +33,8 @@
 #  include <wx/stattext.h>
 #  include <wx/statbmp.h>
 #  include <wx/textctrl.h>
+#  include <wx/menu.h>
+#  include <wx/listbox.h>
 #endif
 
 #include "Mdefaults.h"

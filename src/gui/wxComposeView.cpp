@@ -369,7 +369,7 @@ public:
                wxComposeView& cv,
                ProfileBase *profile = NULL,
                Message *msg = NULL)
-      : m_cv(cv), m_sink(sink)
+      : m_sink(sink), m_cv(cv)
    {
       m_profile = profile ? profile : mApplication->GetProfile();
       m_profile->IncRef();
@@ -2583,7 +2583,7 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
             {
                // insert the original text (optionally prefixed by reply
                // string)
-               String prefix = name == "text" ? ""
+               String prefix = name == "text" ? wxString("")
                                               : READ_CONFIG(m_profile,
                                                             MP_REPLY_MSGPREFIX);
                int nParts = m_msg->CountParts();

@@ -194,7 +194,7 @@ public:
    String GetHeaderValue(AddressField which) const
    {
       wxTextCtrl *text = m_txtFields[which];
-      return text ? text->GetValue() : "";
+      return text ? text->GetValue() : wxString("");
    }
 
    /// inserts a text
