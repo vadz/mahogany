@@ -153,6 +153,7 @@ MAppBase::MAppBase()
 #endif // USE_DIALUP
 
    m_mimeManager = NULL;
+   m_statusPanes[0] = SF_ILLEGAL; // will be really initialized later
 
    m_cycle = Initializing;
 
@@ -1177,32 +1178,80 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
    SafeDecRef(mf);
 }
 
+// ----------------------------------------------------------------------------
+// status bar support
+// ----------------------------------------------------------------------------
 
 int
-MAppBase::GetStatusField(enum StatusFields function) const
+MAppBase::GetStatusField(StatusFields field)
 {
-   // re-setting the statusbar causes crashes on wxGTK, keep it with
-   // three fields always for now:
-   switch(function)
+   // status bar can't be empty except right after program startup, so if it is
+   // initialize it with the default values
+   if ( m_statusPanes[0] == SF_ILLEGAL )
    {
-   case SF_STANDARD:
-      return 0;
-   case SF_ONLINE:
-      return 1;
-   case SF_OUTBOX:
-      return 2;
-   default:
-      ASSERT(0);
-      return 0;
+      StatusFields *p = m_statusPanes;
+      *p++ = SF_STANDARD;
+      *p++ = SF_FOLDER;
+
+#ifdef USE_DIALUP
+      if ( m_DialupSupport )
+         *p++ = SF_ONLINE;
+#endif // USE_DIALUP
+
+      if ( m_UseOutbox )
+         *p++ = SF_OUTBOX;
    }
-#if 0
-   int field = 0;
-   if( function > SF_STANDARD)
-      field++;
-   if(function > SF_ONLINE && m_DialupSupport)
-      field++;
-   return field;
-#endif
+
+   // look for the field in the sorted array using linear search (for an array
+   // of 4 elements this isn't wasteful)
+   for ( size_t n = 0; n < WXSIZEOF(m_statusPanes); n++ )
+   {
+      if ( m_statusPanes[n] == field )
+      {
+         // found the position at which this field appears
+         return n;
+      }
+
+      if ( m_statusPanes[n] > field )
+      {
+         // we insert the status field here to keep the array sorted
+         for ( size_t m = n + 1; m < WXSIZEOF(m_statusPanes); m++ )
+         {
+            m_statusPanes[m] = m_statusPanes[m - 1];
+         }
+
+         m_statusPanes[n] = field;
+
+         RecreateStatusBar();
+
+         return n;
+      }
+   }
+
+   FAIL_MSG( "logic error in GetStatusField" );
+
+   return -1;
+}
+
+void MAppBase::RemoveStatusField(StatusFields field)
+{
+   for ( size_t n = 0; n < WXSIZEOF(m_statusPanes); n++ )
+   {
+      if ( m_statusPanes[n] == field )
+      {
+         for ( size_t m = n + 1; m <= WXSIZEOF(m_statusPanes); m++ )
+         {
+            m_statusPanes[m - 1] =
+               m == WXSIZEOF(m_statusPanes) ? SF_ILLEGAL : m_statusPanes[m];
+         }
+
+         RecreateStatusBar();
+
+         return;
+      }
+   }
+
+   FAIL_MSG( "RemoveStatusField(): no such field shown" );
 }
 
 static bool FatalErrorSemaphore = false;

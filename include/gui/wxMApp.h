@@ -171,8 +171,7 @@ public:
    virtual bool Yield(bool onlyIfNeeded = FALSE);
 
 protected:
-   /// makes sure the status bar has enough fields
-   virtual void UpdateStatusBar(int nfields, bool isminimum = FALSE) const;
+   virtual void RecreateStatusBar();
 
 #ifdef USE_DIALUP
    /// sets up the class handling dial up networking

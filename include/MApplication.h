@@ -397,16 +397,50 @@ public:
 
    //@}
 
+   /** @name Status bar stuff */
+   //@{
+
+   /// all defined status bar panes, not all of them are always used
    enum StatusFields
    {
-      SF_STANDARD = 0,
+      SF_ILLEGAL = -1,
+
+      /// the main pane where all status messages go by default
+      SF_STANDARD,
+
+      /// folder view status
+      SF_FOLDER,
+
+#ifdef USE_DIALUP
+      /// online/offline status is shown here
       SF_ONLINE,
+#endif // USE_DIALUP
+
+      /// outbox status is shown here
       SF_OUTBOX,
+
+      /// total number of status bar fields
       SF_MAXIMUM
    };
-   /// return the number of the status bar field to use for a given
-   /// function
-   virtual int GetStatusField(enum StatusFields function) const;
+
+   /**
+     return the number of the status bar pane to use for the given
+     field inserting a new pane in the status bar if necessary
+
+     @param field to find index for
+     @return the index of the field in the status bar, normally never -1
+    */
+   virtual int GetStatusField(StatusFields field);
+
+   /**
+     removes a field from the status bar
+
+     @param field to remove
+    */
+   virtual void RemoveStatusField(StatusFields field);
+
+   //@}
+
    /// updates display of outbox status
    virtual void UpdateOutboxStatus(class MailFolder *mf = NULL) const = 0;
 
@@ -428,8 +462,19 @@ protected:
    /// Unload modules loaded at startup
    virtual void UnloadModules(void) = 0;
 
-   /// makes sure the status bar has enough fields
-   virtual void UpdateStatusBar(int nfields, bool isminimum = FALSE) const = 0;
+
+   /**
+      m_statusPanes is a sorted array containing all the status bar fields
+      currently shown in their order of appearance
+    */
+   StatusFields m_statusPanes[SF_MAXIMUM];
+
+   /**
+     this method should be implemented at GUI level to recreate the status bar
+     to match m_statusPanes array and is called by Get/RemoveStatusField()
+    */
+   virtual void RecreateStatusBar() = 0;
+
 
    /// Send all messages from the outbox "name"
    void SendOutbox(const String &name, bool checkOnline) const;

@@ -552,9 +552,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    SetIcon(ICON("MainFrame"));
    SetTitle(_("Copyright (C) 1997-2002 The Mahogany Developers Team"));
 
-   static int widths[3] = { -1, 70, 100 }; // FIXME: temporary for debugging
-   CreateStatusBar(3, wxST_SIZEGRIP, 12345); // 3 fields, id 12345
-   GetStatusBar()->SetFieldsCount(3, widths);
+   CreateStatusBar();
 
    // construct the menu and toolbar
    AddFileMenu();

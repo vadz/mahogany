@@ -393,63 +393,9 @@ void wxMLogWindow::OnFrameDelete(wxFrame *frame)
    wxLogWindow::OnFrameDelete(frame);
 }
 
-#if 0
-// ----------------------------------------------------------------------------
-// wxMStatusBar
-// ----------------------------------------------------------------------------
-class wxMStatusBar : public wxStatusBar
-{
-public:
-   wxMStatusBar(wxWindow *parent) : wxStatusBar(parent, -1)
-      {
-         m_show = false;
-         m_OnlineIcon = new wxIcon;
-         m_OfflineIcon = new wxIcon;
-         *m_Onli+neIcon = ICON( "online");
-         *m_OfflineIcon = ICON( "offline");
-      }
-
-   ~wxMStatusBar()
-      {
-         delete m_OnlineIcon;
-         delete m_OfflineIcon;
-      }
-   void UpdateOnlineStatus(bool show, bool isOnline)
-      {
-         m_show = show; m_isOnline = isOnline;
-//         Refresh();
-      }
-   virtual void DrawField(wxDC &dc, int i)
-      {
-         wxStatusBar::DrawField(dc, i);
-         if(m_show)
-         {
-            int field = mApplication->GetStatusField(MAppBase::SF_ONLINE);
-            if(i == field)
-            {
-               wxRect r;
-               GetFieldRect(i, r);
-               dc.DrawIcon(m_isOnline ?
-                           *m_OnlineIcon
-                           : *m_OfflineIcon,
-                           r.x, r.y+2); // +2: small vertical offset
-            }
-         }
-      }
-private:
-   wxIcon *m_OnlineIcon;
-   wxIcon *m_OfflineIcon;
-   /// show online status?
-   bool m_show;
-   /// are we online?
-   bool m_isOnline;
-};
-#endif
-
 // ----------------------------------------------------------------------------
 // wxMApp
 // ----------------------------------------------------------------------------
-
 
 BEGIN_EVENT_TABLE(wxMApp, wxApp)
    EVT_IDLE                (wxMApp::OnIdle)
@@ -1688,49 +1634,6 @@ wxMApp::GetStdIcon(int which) const
 }
 
 void
-wxMApp::UpdateStatusBar(int nfields, bool isminimum) const
-{
-   ASSERT(nfields <= SF_MAXIMUM);
-   ASSERT(nfields >= 0);
-   ASSERT(m_topLevelFrame);
-   ASSERT(m_topLevelFrame->GetStatusBar());
-   int n = nfields;
-
-   // ugly, but effective:
-   //static int statusIconWidth = -1;
-
-   wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
-   if(isminimum && sbar->GetFieldsCount() > nfields)
-      n = sbar->GetFieldsCount();
-
-   int widths[SF_MAXIMUM];
-   widths[0] = 100; //flexible
-   widths[1] = 10; // small empty field
-
-#if 0
-   if(m_DialupSupport)
-   {
-      if(statusIconWidth == -1)
-      {
-         const wxIcon & icon = ICON("online");
-         // make field 1.5 times as wide as icon and add border:
-         statusIconWidth = (3*icon.GetWidth())/2 + 2*sbar->GetBorderX();
-      }
-      widths[GetStatusField(SF_ONLINE)] = statusIconWidth;
-   }
-#endif
-
-#ifdef USE_DIALUP
-   if(m_DialupSupport)
-      widths[GetStatusField(SF_ONLINE)] = 70;
-#endif // USE_DIALUP
-
-   if(READ_APPCONFIG(MP_USE_OUTBOX))
-      widths[GetStatusField(SF_OUTBOX)] = 100;
-   //FIXME: wxGTK crashes after calling this repeatedly sbar->SetFieldsCount(n, widths);
-}
-
-void
 wxMApp::UpdateOutboxStatus(MailFolder *mf) const
 {
    if(! m_topLevelFrame) // called when flushing events at program end?
@@ -1740,11 +1643,11 @@ wxMApp::UpdateOutboxStatus(MailFolder *mf) const
    bool enable = CheckOutbox(&nSMTP, &nNNTP, mf);
 
    // only enable menu item if outbox is used and contains messages:
-   ASSERT(m_topLevelFrame->GetMenuBar());
+   wxMenuBar *mbar = m_topLevelFrame->GetMenuBar();
+   CHECK_RET( mbar, "no menubar in the main frame?" );
 
    bool useOutbox = READ_APPCONFIG_BOOL(MP_USE_OUTBOX);
-   m_topLevelFrame->GetMenuBar()->Enable(
-      (int)WXMENU_FILE_SEND_OUTBOX,enable && useOutbox);
+   mbar->Enable(WXMENU_FILE_SEND_OUTBOX, enable && useOutbox);
 
    if ( !useOutbox )
          return;
@@ -1758,10 +1661,11 @@ wxMApp::UpdateOutboxStatus(MailFolder *mf) const
                  (unsigned long) nSMTP,
                  (unsigned long) nNNTP);
 
-   int field = GetStatusField(SF_OUTBOX);
-   UpdateStatusBar(field+1, TRUE);
-   ASSERT(m_topLevelFrame->GetStatusBar());
-   m_topLevelFrame->GetStatusBar()->SetStatusText(msg, field);
+   wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
+   CHECK_RET( sbar, "no status bar in the main frame?" );
+
+   // const_cast needed
+   sbar->SetStatusText(msg, ((wxMApp *)this)->GetStatusField(SF_OUTBOX));
 }
 
 wxIconManager *wxMApp::GetIconManager(void) const
@@ -1907,34 +1811,24 @@ wxMApp::UpdateOnlineDisplay(void)
    // nothing:
    if(! m_topLevelFrame)
       return;
+
    wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
    wxMenuBar *mbar = m_topLevelFrame->GetMenuBar();
-   ASSERT(sbar);
-   ASSERT(mbar);
+   CHECK_RET( sbar && mbar, "no status/menu bar in the main frame?" );
 
    if(! m_DialupSupport)
    {
-      mbar->Enable((int)WXMENU_FILE_NET_ON, FALSE);
-      mbar->Enable((int)WXMENU_FILE_NET_OFF, FALSE);
+      mbar->Enable(WXMENU_FILE_NET_ON, FALSE);
+      mbar->Enable(WXMENU_FILE_NET_OFF, FALSE);
    }
-   else
+   else // we do have dialup support
    {
       bool online = IsOnline();
-      if(online)
-      {
-         mbar->Enable((int)WXMENU_FILE_NET_OFF, TRUE);
-         mbar->Enable((int)WXMENU_FILE_NET_ON, FALSE);
-//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, m_DialupSupport);
-      }
-      else
-      {
-         mbar->Enable((int)WXMENU_FILE_NET_ON, TRUE);
-         mbar->Enable((int)WXMENU_FILE_NET_OFF, FALSE);
-//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, m_DialupSupport);
-      }
-      int field = GetStatusField(SF_ONLINE);
-      UpdateStatusBar(field+1, TRUE);
-      sbar->SetStatusText(online ? _("Online"):_("Offline"), field);
+      mbar->Enable(WXMENU_FILE_NET_OFF, online);
+      mbar->Enable(WXMENU_FILE_NET_ON, !online);
+
+      sbar->SetStatusText(online ? _("Online"):_("Offline"),
+                          GetStatusField(SF_ONLINE));
    }
 }
 
@@ -1978,6 +1872,39 @@ wxMApp::SetAwayMode(bool isAway)
 
       m_logWindow->PassMessages(!isAway);
    }
+}
+
+void wxMApp::RecreateStatusBar()
+{
+   // this array is indexed by StatusFields elements
+   //
+   // SF_STANDARD is the largest and takes thrice as much space as SF_FOLDER
+   // while SF_ONLINE and SF_OUTBOX have fixed width
+   static const int s_statusWidths[] = { -3, -1, 70, 150 };
+
+   wxCOMPILE_TIME_ASSERT2( WXSIZEOF(s_statusWidths) == SF_MAXIMUM,
+                           StatusWidthsNotInSync, MAppStatus );
+
+   CHECK_RET( m_topLevelFrame, "no top level frame to recreate status bar for" );
+
+   wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
+   CHECK_RET( sbar, "no status bar to recreate?" );
+
+   int widths[SF_MAXIMUM];
+   size_t n;
+   for ( n = 0; n < WXSIZEOF(m_statusPanes); n++ )
+   {
+      StatusFields field = m_statusPanes[n];
+      if ( field == SF_ILLEGAL )
+      {
+         // no more fields, SF_ILLEGAL is the termination marker
+         break;
+      }
+
+      widths[n] = s_statusWidths[field];
+   }
+
+   sbar->SetFieldsCount(n, widths);
 }
 
 // ----------------------------------------------------------------------------
