@@ -5,36 +5,6 @@
  *                                                                  *
  * $Id$
  *
- * $Log$
- * Revision 1.9  1998/07/12 15:05:22  KB
- * some fixes and ugly fix to work with std::string again
- *
- * Revision 1.8  1998/07/08 11:56:52  KB
- * M compiles and runs on Solaris 2.5/gcc 2.8/c-client gso
- *
- * Revision 1.7  1998/06/14 12:24:10  KB
- * started to move wxFolderView to be a panel, Python improvements
- *
- * Revision 1.6  1998/06/09 10:14:38  KB
- * InitPython now exits gracefully if Minit.Minit() cannot be found.
- *
- * Revision 1.5  1998/06/08 08:19:06  KB
- * Fixed makefiles for wxtab/python. Made Python work with new MAppBase.
- *
- * Revision 1.4  1998/05/30 17:55:50  KB
- * Python integration mostly complete, added hooks and sample callbacks.
- * Wrote documentation on how to use it.
- *
- * Revision 1.3  1998/05/24 14:47:31  KB
- * lots of progress on Python, but cannot call functions yet
- * kbList fixes again?
- *
- * Revision 1.2  1998/05/24 08:28:54  KB
- * eventually fixed the type problem, now python works as expected
- *
- * Revision 1.1  1998/05/02 18:31:38  KB
- * Python integration works.
- *
  *******************************************************************/
 
 #include   "Mpch.h"

@@ -80,7 +80,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    GetClientSize(&x, &y);
 
    m_FolderView = NULL;
-   m_splitter = new wxSplitterWindow(this,-1,wxPosition(1,31),wxSize(x-1,y-31),wxSP_3D);
+   m_splitter = new wxSplitterWindow(this,-1,wxPoint(1,31),wxSize(x-1,y-31),wxSP_3D);
    const char *foldername = READ_APPCONFIG(MC_MAINFOLDER);
   //FIXME: insert treectrl here
    if(! strutil_isempty(foldername))

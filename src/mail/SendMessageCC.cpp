@@ -190,7 +190,7 @@ SendMessageCC::Send(void)
    for(i = headerList.begin(), j = 0; i != headerList.end(); i++, j++)
    {
       headerNames[j] = strutil_strdup(StringCast(i)->c_str());
-      headerValues[j] = profile->readEntry(StringCast(i)->c_str(),"");
+      headerValues[j] = strutil_strdup(profile->readEntry(StringCast(i)->c_str(),""));
    }
    //always add mailer header:
    headerNames[j] = strutil_strdup("X-Mailer:");

@@ -26,6 +26,11 @@ $Id$
 - ComposeView:
   + support saving of sent mail (FCC)
 
+- Profile/wxMDialogs
+  + fix usage of readEntry to use String objects
+  + wxMDialogs completely broken as it is now
+  + who cleans up CPYSTR() generated strings?
+
 - configure: USE_WXCONFIG does not get defined!
 
 - not all windows get closed when application exits.
