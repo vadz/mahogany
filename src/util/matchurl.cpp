@@ -495,15 +495,28 @@ match:
             break;
          }
 
+         // even with all the checks below we still get too many false
+         // positives so consider that only "long" URLs are wrapped where long
+         // URLs are defined as the ones containing the CGI script parameters
+         if ( strcspn(start + len, "?&\r") == p - start - len )
+         {
+            // no CGI parameters, suppose it can't wrap
+            break;
+         }
+
          // Check that the beginning of next line is not the start of
-         // another URL. Note that '@' alone is recognized as the beginning
+         // another URL.
+         //
+         // Note that although '@' alone is recognized as the beginning
          // of an URL: here it should not be the case.
          int nextlen = 0;
-         int nextpos = scan(p+2, nextlen);
+         int nextpos = scan(p + 2, nextlen);
          if ( nextlen && nextpos == 0 && p[2] != '@')
+         {
             // The start of the next line being the start of an URL on its own,
             // do not join the two.
             break;
+         }
 
          // it might be a wrapped URL but it might be not: it seems like we
          // get way too many false positives if we suppose that it's already
@@ -520,7 +533,7 @@ match:
          if ( q >= text && *q != '\n' )
             break;
 
-         // it did occur at the start, suppose the URL is wrapped ans so
+         // it did occur at the start, suppose the URL is wrapped and so
          // continue on the next line (no need to test the first character,
          // it had been already done above)
          p += 3;
