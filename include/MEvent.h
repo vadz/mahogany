@@ -50,9 +50,10 @@ enum MEventId
    /// MEventData (no special data) - notifies everybody that the app closes
    MEventId_AppExit = 1000,
 
-   /// the events used by MailFolderCC for private purposes
+   /// the events used by MailFolderCmn/CC for private purposes
    MEventId_MailFolder_OnNewMail = 1100,
    MEventId_MailFolder_OnMsgStatus,
+   MEventId_MailFolder_RestoreInter,
 
    /// (invalid id for an event)
    MEventId_Max

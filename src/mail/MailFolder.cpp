@@ -43,7 +43,13 @@
 
 #include "Message.h"
 #include "MailFolder.h"
-#include "MailFolderCC.h" // CC_Cleanup (FIXME: shouldn't be there!)
+
+// we use many MailFolderCC methods explicitly currently, this is wrong: we
+// should have some sort of a redirector to emulate virtual static methods
+// (TODO)
+#include "MailFolderCC.h"
+
+#include "MFPrivate.h"
 
 #ifdef EXPERIMENTAL
 #include "MMailFolder.h"
@@ -73,9 +79,13 @@ extern const MOption MP_REPLY_PREFIX;
 extern const MOption MP_SET_REPLY_FROM_TO;
 extern const MOption MP_USERNAME;
 
-/*-------------------------------------------------------------------*
- * local classes
- *-------------------------------------------------------------------*/
+// ============================================================================
+// implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// MLogCircle
+// ----------------------------------------------------------------------------
 
 #define MF_LOGCIRCLE_SIZE   10
 
@@ -279,7 +289,7 @@ MailFolder::GetOpenedFolderFor(const MFolder *folder)
 }
 
 /* static */
-bool MailFolder::PingAllOpened(void)
+bool MailFolder::PingAllOpened(OpenMode openmode)
 {
    MailFolder **mfOpened = GetAllOpened();
    if ( !mfOpened )
@@ -289,6 +299,8 @@ bool MailFolder::PingAllOpened(void)
    for ( size_t n = 0; mfOpened[n]; n++ )
    {
       MailFolder *mf = mfOpened[n];
+
+      NonInteractiveLock noInter(mf, openmode);
 
       if ( !mf->Ping() )
       {
@@ -304,7 +316,7 @@ bool MailFolder::PingAllOpened(void)
 
 /* static */
 bool
-MailFolder::CheckFolder(const MFolder *folder)
+MailFolder::CheckFolder(const MFolder *folder, OpenMode openmode)
 {
    if ( !Init() )
       return false;
@@ -314,6 +326,8 @@ MailFolder::CheckFolder(const MFolder *folder)
    MailFolder *mf = MailFolder::GetOpenedFolderFor(folder);
    if ( mf )
    {
+      NonInteractiveLock noInter(mf, openmode);
+
       // just pinging it is enough
       rc = mf->Ping();
       mf->DecRef();

@@ -4,7 +4,7 @@
 // Purpose:     declares FolderMonitor class
 // Author:      Vadim Zeitlin
 // Modified by:
-// Created:     13.11.01 (based on FolderMonitor.cpp)
+// Created:     13.11.01 (based on MailCollector.cpp)
 // CVS-ID:      $Id$
 // Copyright:   (c) 1999-2000 Karsten Ballüder (Ballueder@gmx.net)
 //              (c) 2001      Vadim Zeitlin    <vadim@wxwindows.org>
@@ -211,7 +211,7 @@ public:
 
 protected:
    /// check for new mail in this one folder only
-   bool CheckOneFolder(FolderMonitorFolderEntry *i);
+   bool CheckOneFolder(FolderMonitorFolderEntry *i, bool interactive);
 
    /// return true if we already have this folder in the incoming list
    bool IsBeingMonitored(const MFolder *folder) const;
@@ -233,6 +233,16 @@ private:
    /// the mutex locked while we're checking for new mail
    MMutex m_inNewMailCheck;
 };
+
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+// translate bool interactive flag to MailFolder open mode
+static inline MailFolder::OpenMode GetMode(bool interactive)
+{
+   return interactive ? MailFolder::Normal : MailFolder::Silent;
+}
 
 // ============================================================================
 // FolderMonitorImpl implementation
@@ -278,7 +288,7 @@ FolderMonitorImpl::FolderMonitorImpl()
       Profile_obj profile(i->GetFolder()->GetProfile());
       if ( READ_CONFIG_BOOL(profile, MP_COLLECTATSTARTUP) )
       {
-         (void)CheckOneFolder(i.operator->());
+         (void)CheckOneFolder(i.operator->(), true /* interactive check */);
       }
    }
 }
@@ -395,7 +405,7 @@ FolderMonitorImpl::CheckNewMail(int flags)
    // check all opened folders if requested
    if ( flags & Opened )
    {
-      if ( !MailFolder::PingAllOpened() )
+      if ( !MailFolder::PingAllOpened(GetMode(flags & Interactive)) )
          rc = false;
    }
 
@@ -404,9 +414,11 @@ FolderMonitorImpl::CheckNewMail(int flags)
          i != m_list.end();
          ++i )
    {
+      // force the check now if it was done by the user, even if the timeout
+      // hasn't expired yet
       if ( (flags & Interactive) || (i->GetCheckTime() < timeCur) )
       {
-         if ( !CheckOneFolder(i.operator->()) )
+         if ( !CheckOneFolder(i.operator->(), flags & Interactive) )
             rc = false;
       }
       //else: don't check this folder yet
@@ -416,7 +428,7 @@ FolderMonitorImpl::CheckNewMail(int flags)
 }
 
 bool
-FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i)
+FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i, bool interactive)
 {
    const MFolder *folder = i->GetFolder();
 
@@ -464,7 +476,14 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i)
    wxLogTrace(TRACE_MONITOR, "Checking for new mail in '%s'.",
               i->GetName().c_str());
 
-   if ( !MailFolder::CheckFolder(folder) )
+   if ( interactive )
+   {
+      // TODO: show to the user that we're doing something
+      ;
+   }
+
+   // don't show the dialogs in non-interactive mode
+   if ( !MailFolder::CheckFolder(folder, GetMode(interactive)) )
    {
       if ( !i->IncreaseFailCount() )
       {

@@ -305,7 +305,6 @@ private:
    wxFrame *m_frame;
 
    friend class MfCloseEntry;
-   friend class MFCmnEventReceiver;
 };
 
 #endif // MAILFOLDERCMN_H

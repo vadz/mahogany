@@ -58,6 +58,7 @@
 #include  <wx/utils.h>        // for wxExecute()
 
 #include "MailFolderCmn.h"
+#include "MFPrivate.h"
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -226,7 +227,12 @@ public:
    void Notify(void)
    {
       if ( mApplication->AllowBgProcessing() && !m_mf->IsLocked() )
+      {
+         // don't show any dialogs when doing background checks
+         NonInteractiveLock noInter(m_mf, MailFolder::Silent);
+
          m_mf->Ping();
+      }
    }
 
 protected:

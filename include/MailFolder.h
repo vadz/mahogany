@@ -248,9 +248,17 @@ public:
    /// flags for OpenFolder()
    enum OpenMode
    {
+      /// open the folder normally
       Normal,
+
+      /// open the folder in readonly mode
       ReadOnly,
-      HalfOpen
+
+      /// only connect to the server, don't really open it
+      HalfOpen,
+
+      /// not used for OpenFolder() (yet?), used by CheckFolder()
+      Silent
    };
 
    /// flags for SearchByFlag()
@@ -330,9 +338,11 @@ public:
    /**
      Check the folder status without opening it (if possible).
 
+     @param openmode if it is Silent, no dialogs are shown
      @return true if ok, false if an error occured
     */
-   static bool CheckFolder(const MFolder *mfolder);
+   static bool CheckFolder(const MFolder *mfolder,
+                           OpenMode openmode = Normal);
 
    //@}
 
@@ -364,8 +374,11 @@ public:
 
    /**
      Call Ping() on all opened mailboxes.
+
+     @param openmode if it is Silent, no dialogs are shown
+     @return true if ok, false if an error occured
     */
-   static bool PingAllOpened(void);
+   static bool PingAllOpened(OpenMode openmode = Normal);
 
    //@}
 
@@ -984,8 +997,8 @@ private:
 DECLARE_AUTOPTR_WITH_CONVERSION(MailFolder);
 
 // ----------------------------------------------------------------------------
-// MFSuspendInteractiviy: resets the folders interactive frame thus suppresing
-//                        any dialogs/... during the life time of this object
+// MFSuspendInteractivity: resets the folders interactive frame thus suppresing
+//                         any dialogs/... during the life time of this object
 // ----------------------------------------------------------------------------
 
 class MFSuspendInteractivity
