@@ -3501,8 +3501,10 @@ MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
       SORTPGM *pgmSort = NULL;
       SORTPGM **ppgmStep = &pgmSort;
 
-      long sortOrder = sortParams.sortOrder;
-      while ( sortOrder )
+      // iterate over all individual sort criteriums
+      for ( long sortOrder = sortParams.sortOrder;
+            sortOrder;
+            sortOrder = GetSortNextCriterium(sortOrder) )
       {
          // c-client sort function
          int sortFunction;
@@ -3532,10 +3534,17 @@ MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
                sortFunction = -1;
                break;
 
+            case MSO_NONE:
                // MSO_NONE is not supposed to occur in sortOrder except as the
                // first (and only) criterium in which case we wouldn't get
                // here because of the loop test
-            case MSO_NONE:
+               //
+               // but as the user can currently create such sort orders using
+               // the controls in the sort dialog (there are no checks there,
+               // just ignore it here instead of giving an error)
+               wxLogDebug("Unexpected MSO_NONE in the sort order");
+               continue;
+
             default:
                FAIL_MSG("unexpected sort criterium");
 
@@ -3557,9 +3566,6 @@ MailFolderCC::SortMessages(MsgnoType *msgnos, const SortParams& sortParams)
          (*ppgmStep)->reverse = IsSortCritReversed(sortOrder);
          (*ppgmStep)->function = sortFunction;
          ppgmStep = &(*ppgmStep)->next;
-
-         // and check the next sort criterium
-         sortOrder = GetSortNextCriterium(sortOrder);
       }
 
       // call mail_sort() to do server side sorting if we can
@@ -4031,7 +4037,7 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
       if ( msgnoMax )
       {
          // flushing it like we do here is a bit dumb, so maybe we could
-         // analyze the status of only the messages? i.e. add "range"
+         // analyze the status of only the new messages? i.e. add "range"
          // parameters to DoCountMessages() and call it from here?
          mfStatusCache->InvalidateStatus(GetName());
       }
