@@ -60,6 +60,11 @@ WXGTK:
 
 - add ext editor icon to toolbar in composeview, nicer icon for insert file
 
+- when doing "select all", disable OnSelect() for folder listctrl
+  And disable events! When doing a Delete() etc, do not rebuild the
+  listing between, this corrupts message numbers!
+  Find a clever way to handle this, build a sequence first!
+
 - make mailfolders collectable:
   - have a "collect" flag
   - have a global "NewMail" folder setting and ensure its existence
