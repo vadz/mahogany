@@ -219,14 +219,20 @@ public:
    /// select the item currently focused
    void SelectFocused() { Select(GetFocusedItem(), true); }
 
-   /// goto next message by MessageStatus, return true if found
-   bool SelectNextByStatus(int status, bool condition);
+   /** select the next (after the current one) message in the control which
+       has the given status bit on or off, depending on the second parameter
+
+       @param status the status bit to check
+       @param isSet go to message with status bit set if true, unset if false
+       @return true if we found such item
+   */
+   bool SelectNextByStatus(int status, bool isSet);
 
    /// select next unread or flagged message after the given one
    UIdType SelectNextUnreadAfter(const HeaderInfoList_obj& hil,
                                  long indexStart = -1,
                                  int status = MailFolder::MSG_STAT_SEEN,
-                                 bool condition = FALSE);
+                                 bool isSet = FALSE);
 
    /// focus the given item and ensure it is visible
    void Focus(long index);
@@ -660,6 +666,12 @@ static MessageSortOrder SortOrderFromCol(wxFolderListCtrlFields col)
 static wxArrayString UnpackWidths(const wxString& s)
 {
    return strutil_restore_array(COLUMNS_WIDTHS_SEP, s);
+}
+
+// check if the status bit is set/unset
+inline bool CheckStatusBit(int status, int bit, bool isSet)
+{
+   return !(status & bit) == !isSet;
 }
 
 // ============================================================================
@@ -1648,7 +1660,7 @@ wxFolderListCtrl::SetEntryStatus(long index, const String& status)
 // ----------------------------------------------------------------------------
 
 bool
-wxFolderListCtrl::SelectNextByStatus(int status, bool condition)
+wxFolderListCtrl::SelectNextByStatus(int status, bool isSet)
 {
    HeaderInfoList_obj hil = m_FolderView->GetFolder()->GetHeaders();
    if( !hil || hil->Count() == 0 )
@@ -1658,9 +1670,16 @@ wxFolderListCtrl::SelectNextByStatus(int status, bool condition)
    }
 
    long idxFocused = GetFocusedItem();
-   UIdType uid = SelectNextUnreadAfter(hil, idxFocused, status, condition);
+   UIdType uid = SelectNextUnreadAfter(hil, idxFocused, status, isSet);
    if ( uid != UID_ILLEGAL )
    {
+      // unselect the previously selected message if there was exactly one
+      // selected - i.e. move selection to the new focus
+      if ( m_selIsUnique )
+      {
+         Select(m_itemFocus, false);
+      }
+
       // always preview the selected message, if we did "Show next unread"
       // we really want to see it regardless of m_PreviewOnSingleClick
       // setting
@@ -1673,7 +1692,7 @@ wxFolderListCtrl::SelectNextByStatus(int status, bool condition)
 
    String msg;
    if ( (idxFocused != -1) &&
-            (!(hil[idxFocused]->GetStatus() & status) == !condition) )
+            CheckStatusBit(hil[idxFocused]->GetStatus(), status, isSet) )
    {
       // "more" because the one selected previously was unread
       msg = _("No more unread or flagged messages in this folder.");
@@ -1692,7 +1711,7 @@ wxFolderListCtrl::SelectNextByStatus(int status, bool condition)
 
 UIdType wxFolderListCtrl::SelectNextUnreadAfter(const HeaderInfoList_obj& hil,
                                                 long idxFocused, int status,
-                                                bool condition)
+                                                bool isSet)
 {
    long idx = idxFocused;
    for ( ;; )
@@ -1712,7 +1731,7 @@ UIdType wxFolderListCtrl::SelectNextUnreadAfter(const HeaderInfoList_obj& hil,
 
       // is this one unread or flagged?
       const HeaderInfo *hi = hil[idx];
-      if( !(hi->GetStatus() & status) == !condition )
+      if( CheckStatusBit(hi->GetStatus(), status, isSet) )
       {
          Focus(idx);
 
@@ -2589,7 +2608,7 @@ void wxFolderView::ExpungeMessages()
    }
 }
 
-void wxFolderView::SelectAllByStatus(int status, bool condition)
+void wxFolderView::SelectAllByStatus(int status, bool isSet)
 {
    wxFolderListCtrlBlockOnSelect dontHandleOnSelect(m_FolderCtrl);
 
@@ -2599,7 +2618,7 @@ void wxFolderView::SelectAllByStatus(int status, bool condition)
    size_t count = hil->Count();
    for ( size_t n = 0; n < count; n++ )
    {
-      if ( !(hil[n]->GetStatus() & status) == !condition )
+      if ( CheckStatusBit(hil[n]->GetStatus(), status, isSet) )
       {
          m_FolderCtrl->Select(n, true);
       }

@@ -1270,6 +1270,48 @@ bool MailFolderCC::AskPasswordIfNeeded(const String& name,
    return true;
 }
 
+/* static */
+bool MailFolderCC::CreateIfNeeded(Profile *profile)
+{
+   if ( !profile->readEntryFromHere(MP_FOLDER_TRY_CREATE, false) )
+   {
+      // don't even try
+      return true;
+   }
+
+   MFolder_obj folder(profile);
+   CHECK( folder, false, "invalid profile in CreateIfNeeded" );
+
+   String imapspec = MailFolder::GetImapSpec
+                     (
+                      folder->GetType(),
+                      folder->GetFlags(),
+                      folder->GetPath(),
+                      folder->GetServer(),
+                      folder->GetLogin()
+                     );
+
+   // disable callbacks as we don't have the folder to redirect them to
+   CCAllDisabler noCallbacks;
+
+   // and create the mailbox
+   mail_create(NIL, (char *)imapspec.c_str());
+
+   // try to open it now
+   MAILSTREAM *stream = mail_open(NULL, (char *)imapspec.c_str(),
+                                  mm_show_debug ? OP_DEBUG : NIL);
+
+   if ( stream )
+   {
+      mail_close(stream);
+   }
+
+   // don't try any more, whatever the result was
+   profile->DeleteEntry(MP_FOLDER_TRY_CREATE);
+
+   return stream != NULL;
+}
+
 /*
   This gets called with a folder path as its name, NOT with a symbolic
   folder/profile name.
@@ -1577,7 +1619,9 @@ MailFolderCC::Open(void)
       // Make sure that all events to unknown folder go to us
       CCDefaultFolder def(this);
 
-      // create the mailbox if it doesn't exist yet
+      // create the mailbox if it doesn't exist yet: this must be done
+      // separately for the file folders to specify the format we want this
+      // mailbox to be in
       bool alreadyTriedToCreate = FALSE;
       if ( folderType == MF_FILE || folderType == MF_MH )
       {
@@ -1586,48 +1630,12 @@ MailFolderCC::Open(void)
       }
 
       // check if this is the first time we're opening this folder: in this
-      // case, be prepared to create it if opening fails
-      bool tryCreate =
-         m_Profile->readEntryFromHere(MP_FOLDER_TRY_CREATE, false) != 0;
-
-      CCErrorDisabler *noErrors;
-      if ( tryCreate )
+      // case, try creating it first
+      if ( alreadyTriedToCreate || CreateIfNeeded(m_Profile) )
       {
-         // disable the errors first
-         noErrors = new CCErrorDisabler;
-      }
-      else
-      {
-         // show errors
-         noErrors = NULL;
-      }
-
-      // try to open the folder
-      m_MailStream = mail_open(m_MailStream, (char *)m_ImapSpec.c_str(),
-                               mm_show_debug ? OP_DEBUG : NIL);
-
-      // try to create it if opening failed and we hadn't tried to create yet
-      // (note that if the mailbox doesn't exist, the mail stream will still
-      // be non NULL, but the folder will be only half opened)
-      if ( tryCreate )
-      {
-         // show errors now
-         delete noErrors;
-
-         // test for alreadyTriedToCreate is normally not needed as opening file
-         // folders shouldn't fail but do it just in case
-         if ( (!m_MailStream || m_MailStream->halfopen) &&
-              !alreadyTriedToCreate )
-         {
-            mail_create(NIL, (char *)m_ImapSpec.c_str());
-
-            // retry again
-            m_MailStream = mail_open(m_MailStream, (char *)m_ImapSpec.c_str(),
-                                     mm_show_debug ? OP_DEBUG : NIL);
-         }
-
-         // don't try any more, whatever the result was
-         m_Profile->DeleteEntry(MP_FOLDER_TRY_CREATE);
+         // try to open the folder
+         m_MailStream = mail_open(NIL, (char *)m_ImapSpec.c_str(),
+                                  mm_show_debug ? OP_DEBUG : NIL);
       }
    } // end of cclient lock block
 
@@ -1656,7 +1664,17 @@ MailFolderCC::Open(void)
       {
          mail_close(msHalfOpened);
 
-         MFolder_obj(m_Profile)->AddFlags(MF_FLAGS_NOSELECT);
+         MFolder_obj folder(m_Profile);
+         if ( folder )
+         {
+            // remember that we can't open it
+            folder->AddFlags(MF_FLAGS_NOSELECT);
+         }
+         else
+         {
+            // were we deleted without noticing?
+            FAIL_MSG( "associated folder somehow disappeared?" );
+         }
 
          mApplication->SetLastError(M_ERROR_HALFOPENED_ONLY);
       }
@@ -1699,6 +1717,10 @@ MailFolderCC::CloseFolder(const MFolder *folder)
       // nothing to close
       return false;
    }
+
+   // do it first to remove the folder from the gs_MailFolderCloser list, we
+   // don't want to keep it opened any more (FIXME this is too ugly)
+   mf->MailFolderCmn::Close();
 
    mf->Close();
 
@@ -2357,14 +2379,20 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
 
       if ( serverSrc == serverDst )
       {
-         String sequence = BuildSequence(*selections);
-         String pathDst = GetPathFromImapSpec(specDst);
-         if ( mail_copy_full(m_MailStream,
-                             (char *)sequence.c_str(),
-                             (char *)pathDst.c_str(),
-                             CP_UID) )
+         // before trying to copy messages to this folder, create it if hadn't
+         // been done yet
+         Profile_obj profile(folder->GetFullName());
+         if ( CreateIfNeeded(profile) )
          {
-            didServerSideCopy = true;
+            String sequence = BuildSequence(*selections);
+            String pathDst = GetPathFromImapSpec(specDst);
+            if ( mail_copy_full(m_MailStream,
+                                (char *)sequence.c_str(),
+                                (char *)pathDst.c_str(),
+                                CP_UID) )
+            {
+               didServerSideCopy = true;
+            }
          }
       }
    }
@@ -5068,7 +5096,10 @@ mm_log(char *str, long errflg)
 void
 mm_dlog(char *str)
 {
-   if ( !mm_disable_callbacks )
+   // always show debug logs, even if other callbacks are disabled - this
+   // makes it easier to understand what's going on
+
+   // if ( !mm_disable_callbacks )
    {
       TRACE_CALLBACK_NOSTREAM_1(mm_dlog, "%s", str);
 

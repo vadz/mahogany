@@ -169,6 +169,9 @@ public:
    // get the entry for this folder or NULL if it's not in the list
    MfCloseEntry *GetCloseEntry(MailFolderCmn *mf) const;
 
+   // remove the given entry from list
+   void Remove(MfCloseEntry *entry);
+
    // restart the timer (useful if timer interval changed)
    void RestartTimer();
 
@@ -358,6 +361,21 @@ void MfCloser::CleanUp(void)
       i = m_MfList.erase(i);
 }
 
+void MfCloser::Remove(MfCloseEntry *entry)
+{
+   CHECK_RET( entry, "NULL entry in MfCloser::Remove" );
+
+   for ( MfList::iterator i = m_MfList.begin(); i != m_MfList.end(); i++ )
+   {
+      if ( *i == entry )
+      {
+         m_MfList.erase(i);
+
+         break;
+      }
+   }
+}
+
 MfCloseEntry *MfCloser::GetCloseEntry(MailFolderCmn *mf) const
 {
    for ( MfList::iterator i = m_MfList.begin(); i != m_MfList.end(); i++ )
@@ -389,6 +407,21 @@ void MfCloseTimer::Notify(void)
 // ----------------------------------------------------------------------------
 // MailFolderCmn folder closing
 // ----------------------------------------------------------------------------
+
+void MailFolderCmn::Close(void)
+{
+   if ( gs_MailFolderCloser )
+   {
+      MfCloseEntry *entry = gs_MailFolderCloser->GetCloseEntry(this);
+      if ( entry )
+      {
+         gs_MailFolderCloser->Remove(entry);
+      }
+      //else: it is not an error if this folder is not in the list
+   }
+
+   return true;
+}
 
 bool
 MailFolderCmn::DecRef()

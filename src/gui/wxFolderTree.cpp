@@ -808,12 +808,12 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
       return FALSE;
    }
 
-   const char *configPath;
+   // by default, don't allow to suppress this question as deleting a whole
+   // subtree of folders is something which should require confirmation
+   const char *configPath = NULL;
    wxString msg;
    if ( folder->GetSubfolderCount() > 0 )
    {
-      configPath = NULL; // this question can't be suppressed
-
       if ( removeOnly )
       {
          msg.Printf(_("Do you really want to remove folder '%s' and all of its\n"
@@ -831,13 +831,15 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
    {
       if ( removeOnly )
       {
+         // in this case the question can be suppressed as you don't lose much
+         // by inadvertently answering "Yes" to it
          configPath = "ConfirmFolderDelete";
+
          msg.Printf(_("Do you really want to remove folder '%s'?"),
                     folder->GetFullName().c_str());
       }
       else // remove and delete
       {
-         configPath = "ConfirmFolderPhysDelete";
          msg.Printf(_("Do you really want to delete folder '%s' with\n"
                       "all the messages contained in it?"),
                     folder->GetFullName().c_str());

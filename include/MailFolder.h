@@ -773,6 +773,9 @@ public:
    //@}
 
 protected:
+   /// Close the folder
+   virtual void Close(void) = 0;
+
    /// the helper class for determining the exact error msg from cclient log
    static MLogCircle ms_LogCircle;
 

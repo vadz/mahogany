@@ -162,6 +162,9 @@ public:
    virtual void Checkpoint(void) = 0;
 
 protected:
+   /// remove the folder from our "closer" list
+   virtual void Close(void);
+
    /** Checks for new mail and filters if necessary.
        @return FilterRule flags combination
    */

@@ -1,16 +1,14 @@
-/*-*- c++ -*-********************************************************
- * MailFolderCC class: handling of mail folders through C-Client lib*
- *                                                                  *
- * (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)            *
- *                                                                  *
- * $Id$
- *
- *******************************************************************/
-
-/**
-   @package Mailfolder access
-   @author  Karsten Ballüder
-*/
+//////////////////////////////////////////////////////////////////////////////
+// Project:     Mahogany - cross platform e-mail GUI client
+// File name:   MailFolderCC.h: declaration of MailFolderCC class
+// Purpose:     handling of mail folders with c-client lib
+// Author:      Karsten Ballüder
+// Modified by:
+// Created:     1997
+// CVS-ID:      $Id$
+// Copyright:   (C) 1997-2001 by Karsten Ballüder (ballueder@gmx.net)
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef MAILFOLDERCC_H
 #define MAILFOLDERCC_H
@@ -503,7 +501,7 @@ protected:
    int OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov);
 
    /// Close the folder
-   void Close(void);
+   virtual void Close(void);
 
    /// physically create the file (MF_FILE or MF_MH) folder
    void CreateFileFolder();
@@ -529,6 +527,11 @@ protected:
                                    String *login,
                                    String *password,
                                    bool *didAsk = NULL);
+
+   /** Try to create folder if it hadn't been created yet, returns false only
+       if it needed to be created and the creation failed
+   */
+   static bool CreateIfNeeded(Profile *profile);
 
    /// A Mutex to control access to this folder.
    MMutex *m_Mutex;
