@@ -290,7 +290,7 @@ public:
   virtual bool TestBookAccess(const String& name, AdbTests test);
    
   // Our entry is derived from AdbEntryStoredInMemory
-  virtual bool HasField(AdbField field) const { return true; }
+  virtual bool HasField(AdbField /* field */) const { return true; }
   virtual bool HasMultipleEMails() const { return true; }
 
   MOBJECT_DEBUG(FCDataProvider)
