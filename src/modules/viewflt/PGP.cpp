@@ -255,11 +255,11 @@ PGPFilter::DoProcess(String& text,
 
          CHECK_RET( m_engine, _T("PGP filter can't work without PGP engine") );
 
+         String in(start, end),
+                out;
          if ( isSigned )
          {
             // pass everything between start and end to PGP for verification
-            String in(start, end),
-                   out;
             if ( m_engine->VerifySignature(in, out) != MCryptoEngine::OK )
             {
                // TODO: more details...
@@ -272,16 +272,20 @@ PGPFilter::DoProcess(String& text,
             {
                // TODO: create an icon for the sig...
             }
-
-            m_next->Process(out, viewer, style);
          }
          else // encrypted
          {
-            // TODO: decrypt the message between start and end into textClear
-            String textClear = "PGP encrypted messages not supported yet.\r\n";
+            // try to decrypt
+            if ( m_engine->Decrypt(in, out) != MCryptoEngine::OK )
+            {
+               wxLogError(_("Decrypting the PGP message failed."));
 
-            m_next->Process(textClear, viewer, style);
+               // using unmodified text is not very helpful here, is it?
+               out = _("\r\n[Encrypted message text]\r\n");
+            }
          }
+
+         m_next->Process(out, viewer, style);
       }
 
       if ( ok )

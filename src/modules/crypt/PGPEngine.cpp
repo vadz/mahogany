@@ -29,6 +29,8 @@
 
 #include "modules/MCrypt.h"
 
+#include <wx/file.h>
+#include <wx/textfile.h>
 #include <wx/process.h>
 #include <wx/txtstrm.h>
 #include <wx/textdlg.h>
@@ -138,8 +140,7 @@ class PGPEngine : public MCryptoEngine
 {
 public:
    // implement the base class pure virtuals
-   virtual int Decrypt(const String& user,
-                       const String& messageIn,
+   virtual int Decrypt(const String& messageIn,
                        String& messageOut);
 
    virtual int Encrypt(const String& recipient,
@@ -158,7 +159,9 @@ protected:
    /**
       Executes the tool with messageIn on stdin and puts stdout into messageOut
     */
-   int ExecCommand(const String& messageIn, String& messageOut);
+   int ExecCommand(const String& options,
+                   const String& messageIn,
+                   String& messageOut);
 
 private:
    DECLARE_CRYPTO_ENGINE(PGPEngine)
@@ -450,70 +453,98 @@ more arguments in future versions.
                 0x02 = this attribute packet is revoked
                 0x04 = this attribute packet is expired
  */
-int
-PGPEngine::ExecCommand(const String& messageIn, String& messageOut)
+
+class PGPProcess : public wxProcess
 {
-   wxProcess *process = wxProcess::Open
-                        (
-                           wxString::Format
-                           (
-                            "%s --status-fd=2",
-                            "G:\\Internet\\PGP\\GPG-1.2.1\\gpg.exe" // TODO
-                           )
-                        );
-   if ( !process )
+public:
+   PGPProcess() { m_done = false; Redirect(); }
+
+   virtual void OnTerminate(int /* pid */, int /* status */)
+   {
+      m_done = true;
+   }
+
+   bool IsDone() const { return m_done; }
+
+private:
+   bool m_done;
+};
+
+int
+PGPEngine::ExecCommand(const String& options,
+                       const String& messageIn,
+                       String& messageOut)
+{
+   PGPProcess process;
+   long pid = wxExecute
+              (
+               wxString::Format
+               (
+                "%s --status-fd=2 --command-fd 0 --output - -a %s",
+                "G:\\Internet\\PGP\\GPG-1.2.1\\gpg.exe", // TODO
+                options.c_str()
+               ),
+               wxEXEC_ASYNC,
+               &process
+              );
+
+   if ( !pid )
    {
       return CANNOT_EXEC_PROGRAM;
    }
 
-   process->GetOutputStream()->Write(messageIn.c_str(), messageIn.length());
-   process->CloseOutput();
+   // if we have data to write to PGP stdin, do it
+   wxOutputStream *in = process.GetOutputStream();
+   CHECK( in, CANNOT_EXEC_PROGRAM, _T("where is PGP subprocess stdin?") );
 
-   wxInputStream *out = process->GetInputStream(),
-                 *err = process->GetErrorStream();
+   if ( !messageIn.empty() )
+   {
+      in->Write(messageIn.c_str(), messageIn.length());
+      process.CloseOutput();
+   }
+
+   wxInputStream *out = process.GetInputStream(),
+                 *err = process.GetErrorStream();
 
    wxTextInputStream errText(*err);
 
    Status status = MAX_ERROR;
 
+   // the user hint and the passphrase
+   String user,
+          pass;
+
    messageOut.clear();
    char buf[4096];
 
-   bool outEof = false,
-        errEof = false;
-   while ( !outEof && !errEof )
+   while ( !process.IsDone() )
    {
-      if ( out->GetLastError() == wxSTREAM_EOF )
-      {
-         outEof = true;
-      }
-      else if ( out->CanRead() )
+      wxYield();
+
+      if ( out->CanRead() )
       {
          buf[out->Read(buf, WXSIZEOF(buf)).LastRead()] = '\0';
 
          messageOut += buf;
       }
 
-      if ( err->GetLastError() == wxSTREAM_EOF )
-      {
-         errEof = true;
-      }
-      else if ( err->CanRead() )
+      if ( err->CanRead() )
       {
          String line = errText.ReadLine();
          if ( line.StartsWith(_T("[GNUPG:] "), &line) )
          {
             String code;
-            for ( const char *pc = line.c_str(); !isspace(*pc); pc++ )
+            const char *pc;
+            for ( pc = line.c_str(); *pc && !isspace(*pc); pc++ )
             {
                code += *pc;
             }
 
             if ( code == _T("GOODSIG") ||
                  code == _T("VALIDSIG") ||
-                 code == _T("SIG_ID") )
+                 code == _T("SIG_ID") ||
+                 code == _T("DECRYPTION_OKAY") )
             {
-               // signature checked ok
                status = OK;
             }
             else if ( code == _T("EXPSIG") || code == _T("EXPKEYSIG") )
@@ -538,6 +569,74 @@ PGPEngine::ExecCommand(const String& messageIn, String& messageOut)
             {
                // TODO: something
             }
+            else if ( code == _T("USERID_HINT") )
+            {
+               // skip the key id
+               for ( pc++; *pc && !isspace(*pc); pc++ )
+                  ;
+
+               // remember the user
+               user = ++pc;
+            }
+            else if ( code == _T("NEED_PASSPHRASE") )
+            {
+               if ( user.empty() )
+               {
+                  FAIL_MSG( _T("got NEED_PASSPHRASE without USERID_HINT?") );
+
+                  user = _("default user");
+               }
+
+               if ( !PassphraseManager::Get(user, pass) )
+               {
+                  status = OPERATION_CANCELED_BY_USER;
+
+                  process.CloseOutput();
+
+                  break;
+               }
+
+               String pass2 = pass;
+               pass2 += wxTextFile::GetEOL();
+
+               in->Write(pass2.c_str(), pass2.length());
+            }
+            else if ( code == _T("GOOD_PASSPHRASE") )
+            {
+               PassphraseManager::Unget(user, pass);
+            }
+            else if ( code == _T("BAD_PASSPHRASE") )
+            {
+               wxLogWarning(_("The passphrase you entered was invalid."));
+            }
+            else if ( code == _T("MISSING_PASSPHRASE") )
+            {
+               wxLogWarning(_("Passphrase for the user \"%s\" unavailable."),
+                            user.c_str());
+            }
+            else if ( code == _T("NO_SECKEY") )
+            {
+               wxLogWarning(_("Secret key for the user \"%s\" not available."),
+                            user.c_str());
+            }
+            else if ( code == _T("DECRYPTION_FAILED") )
+            {
+               status = DECRYPTION_ERROR;
+            }
+            else if ( code == _T("GET_BOOL") ||
+                      code == _T("GET_LINE") ||
+                      code == _T("GET_HIDDEN") )
+            {
+               // TODO: give gpg whatever it's asking for, otherwise
+               //       we'd deadlock!
+            }
+            else if ( code == _T("ENC_TO") ||
+                      code == _T("BEGIN_DECRYPTION") ||
+                      code == _T("END_DECRYPTION") ||
+                      code == _T("GOT_IT") )
+            {
+               // ignore these
+            }
             else
             {
                wxLogWarning(_("Ignoring unexpected GnuPG status line: \"%s\""),
@@ -558,13 +657,28 @@ PGPEngine::ExecCommand(const String& messageIn, String& messageOut)
 // ----------------------------------------------------------------------------
 
 int
-PGPEngine::Decrypt(const String& user,
-                   const String& messageIn,
+PGPEngine::Decrypt(const String& messageIn,
                    String& messageOut)
 {
-   FAIL_MSG( _T("TODO") );
+   // as wxExecute() doesn't allow redirecting anything but stdin/out/err we
+   // have no way to pass both the encrypted data and the passphrase to PGP on
+   // the same stream -- and so we must use a temp file :-(
+   MTempFileName tmpfname;
+   bool ok = tmpfname.IsOk();
+   if ( ok )
+   {
+      wxFile file(tmpfname.GetName(), wxFile::write);
+      ok = file.IsOpened() && file.Write(messageIn);
+   }
 
-   return NOT_IMPLEMENTED_ERROR;
+   if ( !ok )
+   {
+      wxLogError(_("Can't pass the encrypted data to PGP."));
+
+      return CANNOT_EXEC_PROGRAM;
+   }
+
+   return ExecCommand(tmpfname.GetName(), _T(""), messageOut);
 }
 
 
@@ -598,7 +712,7 @@ int
 PGPEngine::VerifySignature(const String& messageIn,
                            String& messageOut)
 {
-   return ExecCommand(messageIn, messageOut);
+   return ExecCommand(_T(""), messageIn, messageOut);
 }
 
 // ----------------------------------------------------------------------------

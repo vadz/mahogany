@@ -52,7 +52,7 @@ public:
       COMPRESSION_ERROR,
       SIGNATURE_CHECK_ERROR,
       PUBLIC_KEY_DECRIPTION_ERROR,
-      DECRIPTION_ERROR,
+      DECRYPTION_ERROR,
       DECOMPRESSION_ERROR,
       NO_SIG_ERROR,                 // no signature in VerifySignature()
       NOT_IMPLEMENTED_ERROR,        // operation not implemented by this engine
@@ -68,15 +68,13 @@ public:
    //@{
 
    /**
-      Decryptes an encrypted message and returns the result.
+      Decrypts an encrypted message and returns the result.
 
-      @param user the user id to use for decryption
       @param messageIn the encrypted text
       @param messageOut the decrypted text (only valid if OK is returned)
       @return Status code, OK if decryption succeeded
     */
-   virtual int Decrypt(const String& user,
-                       const String& messageIn,
+   virtual int Decrypt(const String& messageIn,
                        String& messageOut) = 0;
 
    /**
