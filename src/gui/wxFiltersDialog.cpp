@@ -1270,6 +1270,11 @@ public:
 
    virtual bool TransferDataFromWindow();
 
+protected:
+   void DoUpdateUI() { m_action->UpdateUI(); }
+
+   void OnChoice(wxCommandEvent&) { DoUpdateUI(); }
+
 private:
    // GUI controls
    wxCheckBox *m_checkSubj,
@@ -1280,7 +1285,13 @@ private:
    OneActionControl *m_action;
 
    MFolder *m_folder;
+
+   DECLARE_EVENT_TABLE()
 };
+
+BEGIN_EVENT_TABLE(wxQuickFilterDialog, wxManuallyLaidOutDialog)
+   EVT_CHOICE(-1, wxQuickFilterDialog::OnChoice)
+END_EVENT_TABLE()
 
 wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
                                          const String& from,
@@ -1295,12 +1306,13 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
 
    wxLayoutConstraints *c;
 
-   wxStaticBox *box = CreateStdButtonsAndBox("", FALSE, MH_DIALOG_QUICK_FILTERS);
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Apply this filter"),
+                                             FALSE, MH_DIALOG_QUICK_FILTERS);
 
    wxStaticText *msg = new wxStaticText
                            (
                             this, -1,
-                            _("Apply this filter only if ...")
+                            _("Only if:")
                            );
 
    c = new wxLayoutConstraints;
@@ -1309,6 +1321,7 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    c->height.AsIs();
    msg->SetConstraints(c);
+
    wxArrayString labels;
    labels.Add(_("the message was sent from"));
    labels.Add(_("the message subject contains"));
@@ -1346,11 +1359,21 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
    c->height.AsIs();
    m_checkSubj->SetConstraints(c);
 
+   msg = new wxStaticText(this, -1, _("And then:"));
+   c = new wxLayoutConstraints;
+   c->top.Below(m_checkSubj, 3*LAYOUT_Y_MARGIN);
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   msg->SetConstraints(c);
+
    m_action = new OneActionControl(this);
 
-   wxWindow *last = m_checkSubj;
+   wxWindow *last = msg;
    m_action->LayoutControls(&last, 2*LAYOUT_X_MARGIN, 3*LAYOUT_X_MARGIN);
    SetDefaultSize(4*wBtn, 4*hBtn);
+
+   DoUpdateUI();
 }
 
 bool wxQuickFilterDialog::TransferDataFromWindow()
