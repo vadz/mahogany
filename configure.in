@@ -468,6 +468,21 @@ case "$USE_SSL" in
 		AC_CHECK_LIB(resolv,gethostname,, ssl_option=no))
 	AC_CHECK_FUNC(gethostbyname,,
 		AC_CHECK_LIB(nsl,gethostbyname,, ssl_option=no))
+	case "$ssl_option" in
+	*)  dnl must check if ssl needs libcrypto
+		LIBS_SAVE=$LIBS
+		LIBS="$LIBS -lssl"
+		AC_CACHE_CHECK(if libssl needs libcrypto,
+			m_cv_ssl_needs_crypto,
+		[AC_TRY_LINK([#include "$ssl_option/openssl/ssl.h"],
+			[SSLv2_client_method(); return 0;],m_cv_ssl_needs_crypto="no")
+		LIBS="$LIBS -lcrypto"
+		AC_TRY_LINK([#include "$ssl_option/openssl/ssl.h"],
+			[SSLv2_client_method(); return 0;],m_cv_ssl_needs_crypto="yes")])
+		LIBS="$LIBS_SAVE";;
+	no) ;;
+	nope) ;;
+	esac
 	;;
 *)	AC_MSG_WARN([Did not understand --with-ssl=$USE_SSL])
 	ssl_option=nope ;;
@@ -495,6 +510,10 @@ no)	AC_MSG_WARN([Cannot find libraries for SSL - SSL support disabled])
 		CPPFLAGS="$CPPFLAGS -I$ssl_option"
 	esac
 	LIBS="$LIBS -lssl"
+	case "$m_cv_ssl_needs_crypto" in
+	yes) LIBS="$LIBS -lcrypto";;
+	*);;
+	esac
 	;;
 *)	AC_MSG_ERROR([Internal configure problem; we shouldn't get here])
 	;;
