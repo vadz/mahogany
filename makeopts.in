@@ -2,9 +2,9 @@
 # $Id$
 
 # set build root directories:
-SOURCEDIR = @SOURCEDIR@
-BUILDDIR  = @BUILDDIR@
-top_builddir=@BUILDDIR@
+SOURCEDIR := @SOURCEDIR@
+BUILDDIR  := @BUILDDIR@
+top_builddir := @BUILDDIR@
 
 # the c-client library:
 CCLIENTOSTYPE=@CCOSTYPE@
@@ -38,7 +38,7 @@ else
 MODULES_LIBS :=
 endif
 # canonical host
-CANONICAL_HOST=@host@
+CANONICAL_HOST := @host@
 
 # DOC++/kdoc (doc++ is preferred, -r to do short filenames to avoid dpkg bug)
 DOCXXHTML=doc++ -r -f -k -u -k $(DXXTBL) -H -d $(BILDDIR)/doc/classes
@@ -47,44 +47,42 @@ KDOCHTML = kdoc -H -d $(BILDDIR)/doc/classes -u $(SOURCEDIR) -a -i -e M
 KDOCTEX =  kdoc -T -d $(BILDDIR)/doc/classes -u $(SOURCEDIR) -a -i -e M
 SCANDOCHTML = @PERL@ $(SOURCEDIR)/extra/scandoc/scandoc.pl  -i $(SOURCEDIR)/extra/scandoc/Mtemplate.html -p $(BILDDIR)/doc/classes/ -t 3 
 SCANDOCTEX  = echo "Cannot generate .tex class documentation with scandoc."
-DOCHTML=@DOCHTML@
-DOCTEX=@DOCTEX@
-LATEX=@LATEX@
-MAKEINDEX=@MAKEINDEX@
-DVIPS=@DVIPS@
-LATEX2HTML=@LATEX2HTML@ -local_icons
-XGETTEXT=@XGETTEXT@
-MSGFMT=@MSGFMT@
-PERL=@PERL@
-PSTOPDF=@PSTOPDF@
+DOCHTML	:= @DOCHTML@
+DOCTEX	:= @DOCTEX@
+LATEX	:= @LATEX@
+MAKEINDEX := @MAKEINDEX@
+DVIPS	:= @DVIPS@
+LATEX2HTML := @LATEX2HTML@ -local_icons
+XGETTEXT := @XGETTEXT@
+MSGFMT	:= @MSGFMT@
+PERL	:= @PERL@
+PSTOPDF	:= @PSTOPDF@
 
 # compiler stuff
-CPP	= @CPP@
-CPPFLAGS= @CPPFLAGS@
-CC	= @CC@
-CXX	= @CXX@
-LIBTOOL	= @LIBTOOL@
-AR	= ar
-RANLIB	= @RANLIB@
-YACC	= @YACC@
+CPP	:= @CPP@
+CPPFLAGS:= @CPPFLAGS@
+CC	:= @CC@
+CXX	:= @CXX@
+LIBTOOL	:= @LIBTOOL@
+AR	:= ar
+RANLIB	:= @RANLIB@
+YACC	:= @YACC@
 
 # SWIG
 ifdef USE_SWIG
-SWIG = @SWIG@
-SWIG_LIBS = #no longer needed -lswig -lswigpy
+SWIG	:= @SWIG@
 else
-SWIG= true swig
-SWIG_LIBS=
+SWIG	:= true swig
 endif
-SWIGFLAGS = -c++ -python -shadow -dhtml -c
-SWIGFLAGS_LIBSWIG = -c++ -python -shadow 
+SWIGFLAGS_LIBSWIG := -I.src -c++ -python -shadow 
+SWIGFLAGS := $(SWIGFLAGS_LIBSWIG) -dhtml -c
 
 # other stuff
-RM = rm -f
-INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA = @INSTALL_DATA@
-M4=@M4@ 
+RM	:= rm -f
+M4	:= @M4@ 
+INSTALL	:= @INSTALL@
+INSTALL_PROGRAM	:= @INSTALL_PROGRAM@
+INSTALL_DATA	:= @INSTALL_DATA@
 
 DESTDIR = @prefix@
 # Directory in which to install scripts.
@@ -111,7 +109,7 @@ CXXFLAGS = @CXXFLAGS@
 CXXFLAGS_RELAXED = @CXXFLAGS_RELAXED@
 LDFLAGS = @LDFLAGS@
 
-LIBS=$(MODULES_LIBS) $(SWIG_LIBS) @LIBS@ 
-LIBS_STATIC=$(MODULES_LIBS) $(SWIG_LIBS) @LIBS_STATIC@ 
+LIBS=$(MODULES_LIBS) @LIBS@ 
+LIBS_STATIC=$(MODULES_LIBS) @LIBS_STATIC@ 
 GUI_LIBS=@GTK_LDFLAGS@
 GUI_LIBS_STATIC=@GUI_LIBS_STATIC@
