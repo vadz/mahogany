@@ -7,7 +7,7 @@ this software package may be copied, such that the Copyright Holder
 maintains some semblance of artistic control over the development
 of the package, while giving the users of the package the right to
 use and distribute the Package in a more-or-less customary fashion,
-plus the right to make reasonable modifications. 
+plus the right to make reasonable modifications.
 
 This license is based on Perl's ``Artistic License'' and has been adapted
 to better suit Mahogany. It aims to confirm with the Open-Source specification.
@@ -19,44 +19,44 @@ us.
 
 ``Package'' refers to the collection of files distributed by the Copyright
 Holder, and derivatives of that collection of files created through
-textual modification. 
+textual modification.
 
 ``Standard Version'' refers to such a Package if it has not been modified,
 or has been modified in accordance with the wishes of the Copyright
-Holder as specified below. 
+Holder as specified below.
 
 ``Copyright Holder'' is whoever is named in the copyright or copyrights
-for the package. 
+for the package.
 
 ``You'' is you, if you're thinking about copying or distributing this
-Package. 
+Package.
 
 ``Reasonable copying fee'' is whatever you can justify on the basis
 of media cost, duplication charges, time of people involved, and so
 on. (You will not be required to justify it to the Copyright Holder,
 but only to the computing community at large as a market that must
-bear the fee.) 
+bear the fee.)
 
 ``Freely Available'' means that no fee is charged for the item itself,
 though there may be fees involved in handling the item. It also means
 that recipients of the item may redistribute it under the same conditions
-they received it. 
+they received it.
 
 Conditions of Use
 
 1. You may make and give away verbatim copies of the source form of
   the Standard Version of this Package without restriction, provided
   that you duplicate all of the original copyright notices and associated
-  disclaimers and only distribute the complete package as a whole. 
+  disclaimers and only distribute the complete package as a whole.
 
 2. You may apply bug fixes, portability fixes and other modifications
   derived from the Public Domain or from the Copyright Holder. A Package
-  modified in such a way shall still be considered the Standard Version. 
+  modified in such a way shall still be considered the Standard Version.
 
 3. You may otherwise modify your copy of this Package in any way, provided
   that you insert a prominent notice in each changed file stating
   how and when you changed that file, and provided that you do at
-  least ONE of the following: 
+  least ONE of the following:
 
   (a) place your modifications in the Public Domain or otherwise make
     them Freely Available, such as by posting said modifications to
@@ -70,30 +70,30 @@ Conditions of Use
     from the Standard Version. You must not make the modified version
     depend on any other software or libary if that software or libary
     is not Freely Available or if it is covered under a license more
-    restrictive than this. 
+    restrictive than this.
 
   (b) use the modified Package only within your corporation or organization.
 
-  (c) make other distribution arrangements with the Copyright Holder. 
+  (c) make other distribution arrangements with the Copyright Holder.
 
 4. You may distribute the programs of this Package in object code or
-  executable form, provided that you do at least ONE of the following: 
+  executable form, provided that you do at least ONE of the following:
 
   (a) distribute a Standard Version of the executables and library files,
     together with instructions (in the manual page or equivalent)
-    on where to get the Standard Version. 
+    on where to get the Standard Version.
 
   (b) accompany the distribution with the machine-readable source of
     the Package with your modifications, including the complete machine-readable
     source of the unmodified Standard Version. You must not make the
     modified version depend on any other software or libary if that
     software or libary is not Freely Available or if it is covered
-    under a license more restrictive than this. 
+    under a license more restrictive than this.
 
   (c) give non-standard executables non-standard names, and clearly document
     the differences in manual pages (or equivalent), together with
     instructions on where to get the Standard Version. d.make other
-    distribution arrangements with the Copyright Holder. 
+    distribution arrangements with the Copyright Holder.
 
 5. You may charge a reasonable copying fee for any distribution of this
   Package. You may charge any fee you choose for support of this Package.
@@ -101,14 +101,14 @@ Conditions of Use
   distribute this Package in aggregate with other (possibly commercial)
   programs as part of a larger (possibly commercial) software distribution
   provided that you do not advertise this Package as a product of
-  your own. 
+  your own.
 
 6. The name of the Copyright Holder may not be used to endorse or promote
   products derived from this software without specific prior written
   permission. However, all products derived from this software must
   reproduce the original copyright notice as found in the Standard
-  Version. 
+  Version.
 
 7. THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
   WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES
-  OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE. 
+  OF MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.

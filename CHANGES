@@ -4,6 +4,7 @@
 Release 0.61 'Hawkins'
 -------------------------------------------------------------------------------
 
+23.01.01 ALL:allow (dual) licensing Mahogany under GPL
 22.01.01 VZ: open autocollect address book in the editor the first time
 22.01.01 NB: fix attachment name and language autodetection
 19.01.01 VZ: serious server side searching on IMAP servers bug fixed
