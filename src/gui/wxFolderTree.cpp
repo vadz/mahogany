@@ -94,6 +94,7 @@ extern "C"
 extern const MOption MP_FOCUS_FOLLOWSMOUSE;
 extern const MOption MP_FTREE_BGCOLOUR;
 extern const MOption MP_FTREE_FGCOLOUR;
+extern const MOption MP_FTREE_SHOWOPENED;
 extern const MOption MP_FOLDER_TREEINDEX;
 extern const MOption MP_FTREE_FORMAT;
 extern const MOption MP_FTREE_HOME;
@@ -1860,7 +1861,10 @@ void wxFolderTreeImpl::SetOpenFolderName(const String& name)
    {
       // yes, visually emphasize it
       m_idOpenedHere = wxTreeCtrl::GetSelection();
-      SetItemBold(m_idOpenedHere, true);
+      if ( READ_APPCONFIG(MP_FTREE_SHOWOPENED) )
+      {
+         SetItemBold(m_idOpenedHere, true);
+      }
    }
 }
 
