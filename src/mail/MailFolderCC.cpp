@@ -488,6 +488,8 @@ public:
    /// Set Colour setting (name or empty string)
    virtual void SetColour(const String &col) { m_Colour = col; }
 
+   virtual void SetEncoding(wxFontEncoding enc) { m_Encoding = enc; }
+   virtual wxFontEncoding GetEncoding() const { return m_Encoding; }
 
    /// Assignment operator.
    HeaderInfo & operator= (const HeaderInfo &);
@@ -502,6 +504,8 @@ protected:
    unsigned m_Indentation;
    String m_Colour;
    int m_Score;
+   wxFontEncoding m_Encoding;
+
    friend class MailFolderCC;
 };
 
@@ -509,6 +513,8 @@ HeaderInfoCC::HeaderInfoCC()
 {
    m_Indentation = 0;
    m_Score = 0;
+   m_Encoding = wxFONTENCODING_SYSTEM;
+
    // all other fields are filled in by the MailFolderCC when creating
    // it
 }
@@ -524,6 +530,8 @@ HeaderInfoCC::operator= ( const HeaderInfo &old)
    m_Status = old.GetStatus();
    m_Size = old.GetSize();
    SetIndentation(old.GetIndentation());
+   SetEncoding(old.GetEncoding());
+
    return *this;
 }
 
@@ -2138,7 +2146,8 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
       }
       else
          entry.m_From = _("<address missing>");
-      entry.m_From = DecodeHeader(entry.m_From);
+      wxFontEncoding encodingFrom;
+      entry.m_From = DecodeHeader(entry.m_From, &encodingFrom);
 #if 0
       //FIXME: what on earth are user flags?
       if (i = elt->user_flags)
@@ -2153,11 +2162,34 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
       }
 #endif
 
-      entry.m_Subject = DecodeHeader(ov->subject);
+      wxFontEncoding encodingSubject;
+      entry.m_Subject = DecodeHeader(ov->subject, &encodingSubject);
       entry.m_Size = ov->optional.octets;
       entry.m_Id = ov->message_id;
       entry.m_References = ov->references;
       entry.m_Uid = uid;
+
+      // set the font encoding to be used for displaying this entry
+      if ( encodingSubject != encodingFrom )
+      {
+         if ( encodingSubject != wxFONTENCODING_SYSTEM &&
+              encodingFrom != wxFONTENCODING_SYSTEM )
+         {
+            // I just want to know if this happens, we can't do anything smart
+            // about this so far anyhow
+            wxLogDebug("Different encodings for From and Subject fields");
+         }
+
+         if ( encodingSubject != wxFONTENCODING_SYSTEM )
+            entry.m_Encoding = encodingSubject;
+         else
+            entry.m_Encoding = encodingFrom;
+      }
+      else
+      {
+         entry.m_Encoding = encodingFrom;
+      }
+
       m_BuildNextEntry++;
 
       // This is 1 if we don't want any further updates.

@@ -148,7 +148,7 @@ MLogCircle::GuessError(void) const
    String guess, err;
    bool addLog = false;
    bool addErr = false;
-   
+
    if(Find("No such host", &err))
    {
       guess = _("The server name could not be resolved.\n"
@@ -161,7 +161,7 @@ MLogCircle::GuessError(void) const
       addErr = true;
       addLog = true;
    }
-   
+
    if(addErr)
    {
       guess += _("\nThe exact error message was:\n");
@@ -192,14 +192,14 @@ MLogCircle::Clear(void)
 void
 MailFolder::ProcessEventQueue(void)
 {
-	MailFolderCC::ProcessEventQueue();
+   MailFolderCC::ProcessEventQueue();
 }
 
 /*
  * This function guesses: it checks if such a profile exists,
  * otherwise it tries a file with that name.
  */
- 
+
 /* static */
 MailFolder *
 MailFolder::OpenFolder(const String &name, Profile *parentProfile)
@@ -287,7 +287,7 @@ MailFolder::OpenFolder(int folderType,
    CHECK( type != MF_MFILE && type != MF_MDIR,
           NULL, "Obsolete MailFolder::OpenFolder() called." );
 #endif
-   
+
 // open a folder:
    Profile *profile = NULL;
    String login, passwd, name, server;
@@ -296,7 +296,7 @@ MailFolder::OpenFolder(int folderType,
    String symbolicName = i_name;
    if(strutil_isempty(symbolicName))
       symbolicName = i_path;
-      
+
    if ( type == MF_PROFILE )
    {
       if(type == MF_PROFILE)
@@ -392,11 +392,11 @@ MailFolder::OpenFolder(int folderType,
 #ifdef EXPERIMENTAL
    case MF_MFILE:
    case MF_MDIR:
-#endif   
+#endif
    case MF_INBOX:
       // nothing special to do
       break;
-      
+
    default:
       profile->DecRef();
       FAIL_MSG("unknown folder type");
@@ -479,7 +479,7 @@ MailFolder::ConvertMessageStatusToString(int status, MailFolder *mf)
    bool isNews = FALSE;
    if(mf && mf->GetType() == MF_NEWS  || mf->GetType() == MF_NNTP)
       isNews = TRUE;
-   
+
    if(isNews)
    {
       if((status & MSG_STAT_SEEN) == 0)
@@ -507,7 +507,7 @@ MailFolder::ConvertMessageStatusToString(int status, MailFolder *mf)
          else
             strstatus << ' ';
    }
-   
+
    strstatus << ((status & MSG_STAT_FLAGGED) ? 'F' : ' ');
    strstatus << ((status & MSG_STAT_ANSWERED) ? 'A' : ' ');
    strstatus << ((status & MSG_STAT_DELETED) ? 'D' : ' ');
@@ -749,17 +749,18 @@ public:
             m_Mf->Ping();
          else // options change
          {
-            m_Mf->UpdateConfig();
-            m_Mf->RequestUpdate();
-	    MailFolder::ProcessEventQueue();
+            // do update - but only if this event is for us
+            MEventOptionsChangeData& data = (MEventOptionsChangeData&)event;
+            if ( data.GetProfile()->IsAncestor(m_Mf->GetProfile()) )
+               m_Mf->OnOptionsChange(data.GetChangeKind());
          }
          return true;
       }
+
 private:
    MailFolderCmn *m_Mf;
    void *m_MEventCookie, *m_MEventPingCookie;
 };
-
 
 MailFolderCmn::MailFolderCmn()
 {
@@ -1470,18 +1471,62 @@ MailFolderCmn::UpdateMessageStatus(UIdType uid)
 }
 
 void
+MailFolderCmn::OnOptionsChange(MEventOptionsChangeData::ChangeKind kind)
+{
+   MFCmnOptions configOld = m_Config;
+
+   switch ( kind )
+   {
+      case MEventOptionsChangeData::Apply:
+         m_ConfigOld = m_Config;
+         // fall through
+
+      case MEventOptionsChangeData::Ok:
+         ReadConfig(m_Config);
+         break;
+
+      default:
+         wxFAIL_MSG("unexpected options change event kind");
+         // fall through
+
+      case MEventOptionsChangeData::Cancel:
+         m_Config = m_ConfigOld;
+   }
+
+   if ( m_Config != configOld )
+      DoUpdate();
+}
+
+void
 MailFolderCmn::UpdateConfig(void)
 {
-   m_Config.m_ListingSortOrder = READ_CONFIG(GetProfile(), MP_MSGS_SORTBY);
-   m_Config.m_ReSortOnChange = READ_CONFIG(GetProfile(),
-                                           MP_MSGS_RESORT_ON_CHANGE) != 0;
-   m_Config.m_UpdateInterval = READ_CONFIG(GetProfile(),
-                                           MP_UPDATEINTERVAL);
-   m_Config.m_UseThreading = READ_CONFIG(GetProfile(),
-                                         MP_MSGS_USE_THREADING) != 0;
+   ReadConfig(m_Config);
 
-   m_Timer->Stop();
-   m_Timer->Start(m_Config.m_UpdateInterval * 1000);
+   DoUpdate();
+}
+
+void
+MailFolderCmn::DoUpdate()
+{
+   int interval = m_Config.m_UpdateInterval * 1000;
+   if ( interval != m_Timer->GetInterval() )
+   {
+      m_Timer->Stop();
+      m_Timer->Start(interval);
+   }
+
+   RequestUpdate();
+   MailFolder::ProcessEventQueue();
+}
+
+void
+MailFolderCmn::ReadConfig(MailFolderCmn::MFCmnOptions& config)
+{
+   Profile *profile = GetProfile();
+   config.m_ListingSortOrder = READ_CONFIG(profile, MP_MSGS_SORTBY);
+   config.m_ReSortOnChange = READ_CONFIG(profile, MP_MSGS_RESORT_ON_CHANGE) != 0;
+   config.m_UpdateInterval = READ_CONFIG(profile, MP_UPDATEINTERVAL);
+   config.m_UseThreading = READ_CONFIG(profile, MP_MSGS_USE_THREADING) != 0;
 
    MailFolderCC::UpdateCClientConfig();
 }
@@ -1514,7 +1559,7 @@ MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections)
    // newsgroups really delete:
    if(GetType() == MF_NNTP || GetType() == MF_NEWS)
       reallyDelete = true;
-   
+
    if(!reallyDelete)
    {
       bool rc = SaveMessages(selections,

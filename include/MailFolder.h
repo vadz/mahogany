@@ -22,6 +22,8 @@
 #include "FolderType.h"
 #include "kbList.h"
 
+#include <wx/fontenc.h>
+
 /** The UIdArray define is a class which is an integer array. It needs
     to provide a int Count() method to return the number of elements
     and an int operator[int] to access them.
@@ -598,6 +600,14 @@ public:
    virtual void AddScore(int delta) = 0;
    /// Set Colour setting (name or empty string)
    virtual void SetColour(const String &col) = 0;
+
+   /// Set the encoding used (wxFONTENCODING_SYSTEM for default)
+   virtual void SetEncoding(wxFontEncoding encoding) = 0;
+   /// Get the encoding used (wxFONTENCODING_SYSTEM for default)
+   virtual wxFontEncoding GetEncoding() const = 0;
+   /// Return true if we have non default encoding
+   bool HasEncoding() const { return GetEncoding() != wxFONTENCODING_SYSTEM; }
+
 private:
    /// Disallow copy construction
    HeaderInfo(const HeaderInfo &);

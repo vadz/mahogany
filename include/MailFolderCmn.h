@@ -16,6 +16,8 @@
 
 #include "MailFolder.h"
 
+#include "MEvent.h"
+
 /**
    MailFolderCmn  class, common code shared by all implementations of
    the MailFolder ABC.
@@ -184,9 +186,50 @@ public:
        @return -1 if no filter module exists, return code otherwise
    */
    virtual int ApplyFilterRules(UIdArray msgs);
+
+   /** Update the folder to correspond to the new parameters: called from
+       Options_Change MEvent handler.
+
+       @param kind the change kind (ok/apply/cancel)
+   */
+   virtual void OnOptionsChange(MEventOptionsChangeData::ChangeKind kind);
+
 protected:
+   /**@name Config information used */
+   //@{
+   struct MFCmnOptions
+   {
+      MFCmnOptions()
+      {
+         memset(this, sizeof(*this), 0);
+      }
+
+      bool operator!=(const MFCmnOptions& other) const
+      {
+         return m_ListingSortOrder != other.m_ListingSortOrder ||
+                m_ReSortOnChange != other.m_ReSortOnChange ||
+                m_UpdateInterval != other.m_UpdateInterval ||
+                m_UseThreading != other.m_UseThreading;
+      }
+
+      /// how to sort the list of messages
+      long m_ListingSortOrder;
+      /// do we want to re-sort it on a status change?
+      bool m_ReSortOnChange;
+      /// Timer update interval for checking folder content
+      int m_UpdateInterval;
+      /// do we want to thread messages?
+      bool m_UseThreading;
+   } m_Config, m_ConfigOld;
+   //@}
+
+   /// Use the new options from m_Config
+   void DoUpdate();
    /// Update Config info from profile.
    void UpdateConfig(void);
+   /// Read options from profile into the options struct
+   void ReadConfig(MailFolderCmn::MFCmnOptions& config);
+
    /// common code for ApplyFilterRules:
    int ApplyFilterRulesCommonCode(UIdArray *msgs, bool NewOnly = FALSE);
    /// Update the folder status, number of messages, etc
@@ -246,21 +289,6 @@ protected:
    /// a timer to update information
    class MailFolderTimer *m_Timer;
 
-
-   /**@name Config information used */
-   //@{
-   struct MFCmnOptions
-   {
-      /// how to sort the list of messages
-      long m_ListingSortOrder;
-      /// do we want to re-sort it on a status change?
-      bool m_ReSortOnChange;
-      /// Timer update interval for checking folder content
-      int m_UpdateInterval;
-      /// do we want to thread messages?
-      bool m_UseThreading;
-   } m_Config;
-   //@}
 
 private:
    friend class MFCmnEventReceiver;

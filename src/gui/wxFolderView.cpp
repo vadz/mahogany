@@ -1193,6 +1193,14 @@ wxFolderView::SetEntry(HeaderInfoList *listing, size_t index)
                  m_settingsCurrent.UnreadCol)
             )
          );
+
+   if ( hi->HasEncoding() )
+   {
+      wxFont font = m_FolderCtrl->GetFont();
+      font.SetEncoding(hi->GetEncoding());
+      info.SetFont(font);
+   }
+
    m_FolderCtrl->SetItem(info);
 }
 

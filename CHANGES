@@ -1,6 +1,7 @@
 (next release) on (date of next release)
 14.06.00 VZ: RFC 2047 compliant header parsing for the non ASCII strings in
-             headers
+             headers and displaying them using appropriate fonts
+             The folder view is immediately updated after options change.
 14.06.00 VZ: viewing messages in non-default charsets
 11.06.00 KB: Filter rules editor shows program code and should check for
              consistency. Manual editing supported.
