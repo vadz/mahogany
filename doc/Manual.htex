@@ -81,9 +81,12 @@ any problems with building it.
 
 The most noticeable new feature is the new composer. Unfortunately, it is less
 powerful than the old one as the new one is text-only and not rich text but it
-is also significantly less buggy and simpler to use. Other than that, the focus
-of the new release is yet again more bug fixing than adding new features. As
-usual, some of them were still added:
+is also significantly less buggy and simpler to use. Another big internal
+change is that the built in Python interpreter now works again and you can use
+it to write filter functions and do other nifty things (see section
+\ref{python}). Other than that, the focus of the new release is yet again
+more bug fixing than adding new features. As usual, some of them were still
+added:
 \begin{itemize}
 \item Quick search commands in the folder view (see \ref{keybindings} and
       \ref{searching})
@@ -1985,11 +1988,9 @@ in mind many other programs can create such messages and this option
 applies only to Mahogany.
 \end{itemize}
 
-\subsubsection{Python page\_4103\_}
+\subsubsection{Python page\_4103\_}\label{PythonOptions}
 
-(only if you have a Python-enabled version of Mahogany)
-
-\label{PythonOptions}
+(This page is only present if you have a Python-enabled version of Mahogany)
 
 \begin{itemize}
 \item \textbf{Enable Python}\\
@@ -2511,7 +2512,7 @@ to download the addressbook again.
 \chapter{Scripting and Extending \textsl{Mahogany\label{Scripting}}}
 
 
-\section{Python Scripting}
+\section{Python Scripting}\label{python}
 
 
 \subsection{Introduction}
@@ -2556,20 +2557,17 @@ There are a number of callbacks available which will be called from
 different places within \textsl{Mahogany}. These are defined in the
 header file \texttt{Mcallbacks.h}. There is no documentation for these
 callbacks yet, but don't hesitate to ask us if you need more information
-about this. All of these callbacks are called with at least two arguments:
-
-\begin{enumerate}
-\item The name of the hook for which the function got called, e.g. \texttt{FolderOpenHook}
-\item A pointer to the object from which it was called. E.g. for \texttt{FolderOpenHook},
+about this. All of these callbacks are called with at least one arguments
+which is a pointer to the object from which it was called. E.g. for \texttt{FolderOpenHook},
 this would be a pointer to a \texttt{MailFolder} object. This object
 does not carry a useable type with it and needs to be converted in
 the callback, e.g. if the argument is called \texttt{arg} and the
 object is a \texttt{MailFolder}, the object must either be used as
-\texttt{MailFolder.MailFolder(arg)} or be converted as \texttt{mf
-= MailFolder.MailFolder(arg)}.
-\item Some callbacks have a third argument. This is either a single value
+\texttt{MailFolder.MailFolderPtr(arg)} or be converted as
+\texttt{mf = MailFolder.MailFolderPtr(arg)}.
+
+Some callbacks have a third argument. This is either a single value
 or a tuple holding several values.
-\end{enumerate}
 
 \subsection{Namespaces}
 
