@@ -1397,6 +1397,7 @@ void MailFolderCC::Init()
    m_statusChangedOld =
    m_statusChangedNew = NULL;
 
+   m_gotUnprocessedNewMail =
    m_InCritical = false;
 
    m_chDelimiter = ILLEGAL_DELIMITER;
@@ -2881,42 +2882,7 @@ MailFolderCC::ExpungeMessages(void)
       wxLogTrace(TRACE_MF_CALLS, "MailFolderCC(%s)::ExpungeMessages()",
                  GetName().c_str());
 
-#ifdef EXPERIMENTAL_expunging_mutex
-      {
-         m_countNewWhileExpunging = 0;
-
-         MLocker expungeLock(m_mutexExpunging);
-
-         mail_expunge(m_MailStream);
-
-         if ( m_countNewWhileExpunging )
-         {
-            // we got some new messages which we ignored in OnMailExists() for
-            // the reasons explained there, now update the headers
-            if ( m_headers )
-            {
-               ASSERT_MSG( m_nMessages >= m_countNewWhileExpunging,
-                           "total number of messages less than number of "
-                           "new ones?" );
-
-               for ( size_t n = m_nMessages - m_countNewWhileExpunging + 1;
-                     n <= m_nMessages;
-                     n++ )
-               {
-                  m_headers->OnAdd(n);
-               }
-            }
-            else
-            {
-               FAIL_MSG( "m_countNewWhileExpunging set but no headers?" );
-            }
-
-            m_countNewWhileExpunging = 0;
-         }
-      }
-#else // !EXPERIMENTAL_expunging_mutex
       mail_expunge(m_MailStream);
-#endif // EXPERIMENTAL_expunging_mutex/!EXPERIMENTAL_expunging_mutex
 
       // for some types of folders (IMAP) mm_exists() is called from
       // mail_expunge() but for the others (POP) it isn't and we have to call
@@ -4216,29 +4182,28 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
       // update the number of headers in the listing
       if ( m_headers )
       {
-#ifdef EXPERIMENTAL_expunging_mutex
-         if ( m_mutexExpunging.IsLocked() )
-         {
-            // we can't call HeaderInfoList::OnAdd() from here if we're
-            // expunging the messages because it invalidatest the tables
-            // m_headers maintains internally to map msgnos to positions and
-            // which OnMailExpunge() uses - if we called OnAdd(), they would
-            // have to be rebuilt when OnMailExpunge() would have been called
-            // possibly resulting in another call to c-client (if we use server
-            // side sorting/threading) which would generate a fatal error as it
-            // is not reentrant
-            //
-            // so just remember that we need to adjust the number of messages
-            // later but don't call it now
-            m_countNewWhileExpunging++;
-         }
-         else // not inside ExpungeMessages()
-#endif // EXPERIMENTAL_expunging_mutex
-         {
-            wxLogTrace(TRACE_MF_EVENTS, "Adding msgno %u to headers", msgnoMax);
+         wxLogTrace(TRACE_MF_EVENTS, "Adding msgno %u to headers", msgnoMax);
 
-            m_headers->OnAdd(msgnoMax);
-         }
+         m_headers->OnAdd(msgnoMax);
+      }
+
+      // set a flag to avoid sending expunge events until we process the new
+      // mail event: this is unnecessary anyhow but, even worse, it may result
+      // in the c-client reentrancy as new mail invalidates the msgno ->
+      // position mapping in m_headers and so a call to GetPosFromIdx() in
+      // OnMailExpunge() below could result in another call to c-client if we
+      // use server side sorting and/or threading
+      m_gotUnprocessedNewMail = true;
+
+      // we also may safely throw away any pending expunge notifications as
+      // we're going to send FolderUpdate event soon anyhow
+      if ( m_expungedMsgnos )
+      {
+         delete m_expungedMsgnos;
+         delete m_expungedPositions;
+
+         m_expungedMsgnos =
+         m_expungedPositions = NULL;
       }
 
       // our cached idea of the number of messages we have doesn't correspond
@@ -4334,14 +4299,12 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
    {
       if ( idx < m_headers->Count() )
       {
-         // if we're applying the filters to the new messages, the GUI hadn't
-         // been notified about existence of these messages yet, so we don't
-         // need to notify it about their disappearance neither - it just will
-         // never know they were there at all
+         // if we'll send a FolderUpdate later, there is no need to send a
+         // FolderExpunge one
          //
-         // otherwise prepare for sending event from RequestUpdateAfterExpunge()
+         // otherwise prepare for sending it from RequestUpdateAfterExpunge()
          // a bit later
-         if ( !m_mutexNewMail.IsLocked() )
+         if ( !m_gotUnprocessedNewMail )
          {
             // let all the others know that some messages were expunged: we
             // don't do it right now but wait until mm_exists() which is sent
@@ -4367,28 +4330,7 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
       }
       else // expunged message not in m_headers
       {
-#ifdef EXPERIMENTAL_expunging_mutex
-         // this probably can happen if we had previously decided not to call
-         // m_headers->OnAdd() in OnMailExists() (see comment there for the
-         // reason why we might have to do it)
-         if ( m_mutexExpunging.IsLocked() )
-         {
-            if ( m_countNewWhileExpunging )
-            {
-               // just compensate for the one we had previously added
-               m_countNewWhileExpunging--;
-            }
-            else
-            {
-               FAIL_MSG( "unexpectedly invalid msgno in mm_expunged" );
-            }
-         }
-         else
-#endif // EXPERIMENTAL_expunging_mutex
-         {
-            // but otherwise it shouldn't happen!
-            FAIL_MSG( "invalid msgno in mm_expunged" );
-         }
+         FAIL_MSG( "invalid msgno in mm_expunged" );
       }
    }
 
@@ -4440,6 +4382,9 @@ void MailFolderCC::OnNewMail()
 
       CollectNewMail();
    }
+
+   // no more
+   m_gotUnprocessedNewMail = false;
 
    // we delayed sending the update notification in OnMailExists() because we
    // wanted to filter the new messages first - now we can notify the GUI

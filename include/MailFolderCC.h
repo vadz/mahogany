@@ -33,6 +33,7 @@
 #include <wx/fontenc.h>    // enum wxFontEncoding can't be fwd declared
 
 // fwd decls
+class ASMailFolder;
 class MailFolderCC;
 
 // ----------------------------------------------------------------------------
@@ -481,6 +482,7 @@ private:
 
    /** @name Authentification info */
    //@{
+
    /// The following is also called by SendMessageCC for ESMTP authentication
    static void SetLoginData(const String &user, const String &pw);
 
@@ -488,6 +490,7 @@ private:
    static String MF_user;
    /// for POP/IMAP boxes, this holds the password for the callback
    static String MF_pwd;
+
    //@}
 
    /** @name c-client initialization */
@@ -513,10 +516,12 @@ private:
 
    /// the profile we use for our options
    Profile *m_Profile;
+
    //@}
 
    /** @name Mail folder state */
    //@{
+
    /// mailstream associated with this folder
    MAILSTREAM *m_MailStream;
 
@@ -525,10 +530,22 @@ private:
 
    /// last seen UID, all messages above this one are new
    UIdType m_LastUId;
+
    //@}
 
    /** @name Temporary operation parameters */
    //@{
+
+   /**
+     This flag is set to true during the window between mm_exists()
+     notification and the moment we send an update request to the GUI (which
+     happens during the next idle time iteration normally).
+
+     During this time span the listing (m_headers) is in an intermediate state
+     as its internal msgno <-> position mapping may be out of date and it
+     should be used with extreme care to avoid possible c-client reentrancies!
+    */
+   bool m_gotUnprocessedNewMail;
 
    /**
      These two arrays are used between the moment when we get the expunge
@@ -547,11 +564,6 @@ private:
 
    /// the array containing the positions of expunged messages or NULL
    wxArrayInt *m_expungedPositions;
-
-#ifdef EXPERIMENTAL_expunging_mutex
-   /// the number of new messages received while we were in ExpungeMessages()
-   size_t m_countNewWhileExpunging;
-#endif // EXPERIMENTAL_expunging_mutex
 
    //@}
 
@@ -580,7 +592,7 @@ private:
    //@{
    UserData m_UserData;
    Ticket   m_Ticket;
-   class ASMailFolder *m_ASMailFolder;
+   ASMailFolder *m_ASMailFolder;
    //@}
 
    /// Used by the subscription management.
@@ -599,11 +611,6 @@ private:
 
    /// locked while we're processing the new mail which just arrived
    MMutex m_mutexNewMail;
-
-#ifdef EXPERIMENTAL_expunging_mutex
-   /// locked while we're inside our ExpungeMessages()
-   MMutex m_mutexExpunging;
-#endif // EXPERIMENTAL_expunging_mutex
 
    //@}
 
