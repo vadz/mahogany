@@ -213,6 +213,7 @@ public:
 
    /** @name UID/msgno to index mapping */
    //@{
+
    /** Returns the (internal) index for this UID or INDEX_ILLEGAL */
    virtual MsgnoType GetIdxFromUId(UIdType uid) const = 0;
 
@@ -223,25 +224,33 @@ public:
    }
 
    /** Returns the (internal) index for the given msgno. */
-   MsgnoType GetIdxFromMsgno(MsgnoType msgno) const { return msgno - 1; }
+   static MsgnoType GetIdxFromMsgno(MsgnoType msgno) { return msgno - 1; }
+
+   /** Returns the msgno for the given index */
+   static MsgnoType GetMsgnoFromIdx(MsgnoType idx) { return idx + 1; }
+
    //@}
 
    /** @name Position to/from index mapping */
    //@{
+
    /** Returns the (internal) index for the given display position. */
    virtual MsgnoType GetIdxFromPos(MsgnoType pos) const = 0;
 
    /** Returns the position at which this item should be displayed. */
    virtual MsgnoType GetPosFromIdx(MsgnoType n) const = 0;
+
    //@}
 
    /** @name Appearance parameters */
    //@{
+
    /// get the indentation level of this message in thread (0 for root)
    virtual size_t GetIndentation(MsgnoType pos) const = 0;
 
    // TODO: possible score and colour settings for individual messages should
    //       be kept here as well
+
    //@}
 
    /** @name Functions called by MailFolder */
@@ -319,6 +328,7 @@ public:
    /** @name Cache control
     */
    //@{
+
    /// opaque typedef used by GetLastMod() and HasChanged()
    typedef unsigned long LastMod;
 
@@ -366,6 +376,12 @@ public:
       trip to server and so should be done asynchronously.
     */
    virtual bool IsInCache(MsgnoType pos) const = 0;
+
+   /**
+      Do retrieve this header from server, we need it right now.
+    */
+   virtual bool ReallyGet(MsgnoType pos) = 0;
+
    //@}
 
    MOBJECT_NAME(HeaderInfoList)

@@ -1053,6 +1053,39 @@ bool HeaderInfoListImpl::IsInCache(MsgnoType pos) const
    return (idx < m_headers.GetCount()) && (m_headers[idx] != NULL);
 }
 
+bool HeaderInfoListImpl::ReallyGet(MsgnoType pos)
+{
+   CHECK( !NeedsSort(), false, "can't be called now" );
+
+   MsgnoType idx = GetIdxFromPos(pos);
+
+   ExpandToMakeIndexValid(idx);
+
+   if ( !m_headers[idx] )
+   {
+      // the idea is that this method is only called if the header had been
+      // "retrieved" before but the transfer was cancelled by the user, so we
+      // don't really have any information for it - but in this case the element
+      // corresponding to it must have been already created, so assert
+      FAIL_MSG( "not supposed to be called" );
+
+      // but still don't crash
+      m_headers[idx] = new HeaderInfo;
+   }
+
+   if ( m_headers[idx]->IsValid() )
+   {
+      FAIL_MSG( "why call ReallyGet() then?" );
+
+      return true;
+   }
+
+   Sequence seq;
+   seq.Add(GetMsgnoFromIdx(idx));
+
+   return m_mf->GetHeaderInfo(m_headers, seq) == 1;
+}
+
 // ----------------------------------------------------------------------------
 // HeaderInfoListImpl debugging
 // ----------------------------------------------------------------------------

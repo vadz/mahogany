@@ -93,6 +93,7 @@ public:
    virtual void CachePositions(const Sequence& seq);
    virtual void CacheMsgnos(MsgnoType msgnoFrom, MsgnoType msgnoTo);
    virtual bool IsInCache(MsgnoType pos) const;
+   virtual bool ReallyGet(MsgnoType pos);
 
    virtual ~HeaderInfoListImpl();
 

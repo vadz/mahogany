@@ -1276,6 +1276,23 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
       // called yet
       m_itemFocus = GetFocusedItem();
 
+      // check if we already have this item - maybe we need to retrieve it
+      // from server? this may happen if the header retrieval was cancelled
+      UIdType uid = GetFocusedUId();
+
+      if ( uid == UID_ILLEGAL )
+      {
+         if ( !m_headers->ReallyGet(m_itemFocus) )
+         {
+            // we failed to get it, what can we do?
+            return;
+         }
+
+         uid = GetFocusedUId();
+
+         ASSERT_MSG( uid != UID_ILLEGAL, "invalid uid after ReallyGet()?" );
+      }
+
       // preview the message when it is the first one we select or if there is
       // exactly one currently selected message (which will be deselected by
       // PreviewItem then); selecting subsequent messages just extends the
@@ -1289,7 +1306,7 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
          // message will be previewed automatically
          //
          // if m_PreviewDelay == 0, this is just the same as PreviewItem()
-         PreviewItemDelayed(m_itemFocus, GetFocusedUId());
+         PreviewItemDelayed(m_itemFocus, uid);
       }
       //else: don't react to selecting another message
    }
