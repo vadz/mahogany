@@ -164,6 +164,19 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
               ((quoted && *pc && *pc != '"') ||
               (isalnum(*pc) && *pc != bracketClose && *pc)) )
       {
+         if ( quoted && *pc == '\\' )
+         {
+            // unless it's the last character in the string, backslash quotes
+            // the next one (it may be used to insert quotes into templates)
+            pc++;
+            if ( !*pc || *pc == '\n' )
+            {
+               // oops... nothing to quote: rollback and insert just '\\'
+               pc--;
+            }
+            //else: we will insert the next character below
+         }
+
          word += *pc++;
       }
 

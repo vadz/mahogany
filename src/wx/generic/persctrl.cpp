@@ -916,6 +916,15 @@ void wxPListBox::RestoreSelection()
 
         if ( sel < Number() ) {
             SetSelection(sel);
+
+            // emulate the event which would have resulted if the user selected
+            // the listbox
+            wxCommandEvent event(wxEVT_COMMAND_LISTBOX_SELECTED, GetId());
+            event.m_commandInt = sel;
+            event.m_clientData = GetClientData(sel);
+            event.m_commandString = GetString(sel);
+            event.SetEventObject( this );
+            (void)ProcessCommand(event);
         }
 
         m_persist->RestorePath();
@@ -1372,7 +1381,7 @@ wxString wxPFileSelector(const wxString& configPath,
     // use the stored value for the default name/path and fall back to the
     // given one if there is none
     wxString defaultName, defaultPath, defName;
-    if ( !defname || !defext )
+    if ( !wxIsEmpty(defname) || !wxIsEmpty(defext) )
     {
         // only do it if either name of extension are given
         defName << defname << '.' << defext;

@@ -441,6 +441,63 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+// global data: the definitions of the popum menu for the template editing
+// dialog.
+// ----------------------------------------------------------------------------
+
+// NB: These menus should be kept in sync (if possible) with the variable names
+
+// the misc submenu
+static TemplatePopupMenuItem gs_popupSubmenuMisc[] =
+{
+   TemplatePopupMenuItem(_("Put &cursor here"), "$cursor"),
+   TemplatePopupMenuItem(),
+   TemplatePopupMenuItem(_("Insert &quoted text"), "$quote"),
+   TemplatePopupMenuItem(_("&Attach original text"), "$quote822"),
+};
+
+// the message submenu
+static TemplatePopupMenuItem gs_popupSubmenuMessage[] =
+{
+   TemplatePopupMenuItem(_("&To"), "${message:to}"),
+   TemplatePopupMenuItem(_("&Subject"), "${message:subject}"),
+   TemplatePopupMenuItem(_("&CC"), "${message:cc}"),
+   TemplatePopupMenuItem(_("&BCC"), "${message:bcc}"),
+};
+
+// the original message submenu
+static TemplatePopupMenuItem gs_popupSubmenuOriginal[] =
+{
+   TemplatePopupMenuItem(_("&Date"), "${original:date}"),
+   TemplatePopupMenuItem(_("&From"), "${original:from}"),
+   TemplatePopupMenuItem(_("&Subject"), "${original:subject}"),
+   TemplatePopupMenuItem(_("&Full name"), "${original:fullname}"),
+   TemplatePopupMenuItem(_("&To"), "${original:to}"),
+   TemplatePopupMenuItem(_("&Reply to"), "${original:replyto}"),
+   TemplatePopupMenuItem(_("&Newsgroups"), "${original:newsgroups}"),
+};
+
+// the whole menu
+static TemplatePopupMenuItem gs_popupMenu[] =
+{
+   TemplatePopupMenuItem(_("&Miscellaneous"),
+                         gs_popupSubmenuMisc,
+                         WXSIZEOF(gs_popupSubmenuMisc)),
+   TemplatePopupMenuItem(_("Message &headers"),
+                         gs_popupSubmenuMessage,
+                         WXSIZEOF(gs_popupSubmenuMessage)),
+   TemplatePopupMenuItem(_("&Original message"),
+                         gs_popupSubmenuOriginal,
+                         WXSIZEOF(gs_popupSubmenuOriginal)),
+   TemplatePopupMenuItem(_("&Insert file..."), "${file:%s}", TRUE),
+   TemplatePopupMenuItem(_("&Attach file..."), "${attach:%s}", TRUE),
+   TemplatePopupMenuItem(_("&Execute command..."), "${cmd:%s}", FALSE),
+};
+
+TemplatePopupMenuItem& g_ComposeViewTemplatePopupMenu =
+   TemplatePopupMenuItem("", gs_popupMenu, WXSIZEOF(gs_popupMenu));
+
+// ----------------------------------------------------------------------------
 // event tables &c
 // ----------------------------------------------------------------------------
 IMPLEMENT_CLASS(wxComposeView, wxMFrame)
@@ -2245,7 +2302,7 @@ const char *VarExpander::ms_templateVarCategories[] =
 {
    "",
    "file",
-   "attache",
+   "attach",
    "cmd",
 #ifdef USE_PYTHON
    "python",
