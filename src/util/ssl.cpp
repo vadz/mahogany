@@ -100,8 +100,6 @@ SSL_DEF( int,  SSL_pending, (SSL *s), (s) );
 SSL_DEF( int,  SSL_library_init, (void ), () );
 SSL_DEF_VOID( SSL_load_error_strings, (void ), () );
 SSL_DEF( SSL_CTX *,SSL_CTX_new, (SSL_METHOD *meth), (meth) );
-SSL_DEF( unsigned long, ERR_get_error, (void), () );
-SSL_DEF( char *, ERR_error_string, (unsigned long e, char *p), (e, p) );
 SSL_DEF( const char *, SSL_CIPHER_get_name, (SSL_CIPHER *c), (c) );
 SSL_DEF( int, SSL_CIPHER_get_bits, (SSL_CIPHER *c, int *alg_bits), (c,alg_bits) );
 SSL_DEF( SSL_CIPHER *, SSL_get_current_cipher ,(SSL *s), (s) );
@@ -138,6 +136,9 @@ SSL_DEF_VOID( SSL_CTX_free, (SSL_CTX *ctx), (ctx) );
 SSL_DEF( RSA *, RSA_generate_key, (int bits, unsigned long e,void (*cb)(int,int,void *),void *cb_arg), (bits,e,cb,cb_arg) );
 SSL_DEF(SSL_METHOD *, TLSv1_client_method, (void), () );
 SSL_DEF(SSL_METHOD *, SSLv23_client_method, (void), () );
+
+SSL_DEF( unsigned long, ERR_get_error, (void), () );
+SSL_DEF( char *, ERR_error_string, (unsigned long e, char *p), (e, p) );
 
 #undef SSL_DEF
 
@@ -185,16 +186,43 @@ bool InitSSL(void) /* FIXME: MT */
    SSL_LOOKUP(SSL_load_error_strings );
    SSL_LOOKUP(SSL_CTX_new );
    SSL_LOOKUP(SSL_CIPHER_get_name );
-   SSL_LOOKUP(SSL_get_current_cipher );
-   CRYPTO_LOOKUP(ERR_get_error);
-   CRYPTO_LOOKUP(ERR_error_string);
    SSL_LOOKUP(SSL_CIPHER_get_bits);
+   SSL_LOOKUP(SSL_get_current_cipher );
    SSL_LOOKUP(SSL_get_fd);
    SSL_LOOKUP(SSL_set_fd);
    SSL_LOOKUP(SSL_get_error);
    SSL_LOOKUP(SSL_get_peer_certificate);
+   SSL_LOOKUP(RAND_seed);
+   SSL_LOOKUP(BIO_new_socket);
+   SSL_LOOKUP(SSL_CTX_ctrl);
+   SSL_LOOKUP(SSL_CTX_set_verify);
+   SSL_LOOKUP(SSL_CTX_load_verify_locations);
+   SSL_LOOKUP(SSL_CTX_set_default_verify_paths);
+   SSL_LOOKUP(SSL_set_bio);
+   SSL_LOOKUP(SSL_set_connect_state);
+   SSL_LOOKUP(SSL_state);
+   SSL_LOOKUP(SSL_ctrl);
+   SSL_LOOKUP(ERR_load_crypto_strings);
+   SSL_LOOKUP(TLSv1_server_method);
+   SSL_LOOKUP(SSLv23_server_method);
+   SSL_LOOKUP(SSL_CTX_set_cipher_list);
+   SSL_LOOKUP(SSL_CTX_use_certificate_chain_file);
+   SSL_LOOKUP(SSL_CTX_use_RSAPrivateKey_file);
+   SSL_LOOKUP(SSL_CTX_set_tmp_rsa_callback);
+   SSL_LOOKUP(SSL_accept);
+   SSL_LOOKUP(X509_STORE_CTX_get_error);
+   SSL_LOOKUP(X509_verify_cert_error_string);
+   SSL_LOOKUP(X509_STORE_CTX_get_current_cert);
+   SSL_LOOKUP(X509_get_subject_name);
+   SSL_LOOKUP(X509_NAME_oneline);
+   SSL_LOOKUP(SSL_shutdown);
+   SSL_LOOKUP(SSL_CTX_free);
+   SSL_LOOKUP(RSA_generate_key);
    SSL_LOOKUP(TLSv1_client_method );
    SSL_LOOKUP(SSLv23_client_method );
+
+   CRYPTO_LOOKUP(ERR_get_error);
+   CRYPTO_LOOKUP(ERR_error_string);
 
    gs_SSL_available =
    gs_SSL_loaded = true;
