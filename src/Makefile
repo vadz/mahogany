@@ -83,10 +83,6 @@ install:
 	$(MAKE) -C modules $@
 	$(INSTALL) -d $(DATADIR)/icons
 	for i in icons/*.xpm ; do $(INSTALL_DATA) $$i $(DATADIR)/icons; done
-	$(INSTALL) -d $(DATADIR)/icons/GNOME
-	for i in icons/GNOME/*.xpm ; do $(INSTALL_DATA) $$i $(DATADIR)/icons/GNOME; done
-	$(INSTALL) -d $(DATADIR)/icons/small
-	for i in icons/small/*.xpm ; do $(INSTALL_DATA) $$i $(DATADIR)/icons/small; done
 ifdef USE_PYTHON
 	$(MAKE) -C Python $@
 endif
