@@ -1462,7 +1462,7 @@ dnl show the configuration used
 echo
 echo "Configured Mahogany ${M_VERSION_MAJOR}.${M_VERSION_MINOR}.${M_VERSION_RELEASE} for ${host}."
 echo ""
-echo "	wxWindows port used:		${WX_NAME} ${WX_VERSION}"
+echo "	wxWindows port used:			${WX_NAME} ${WX_VERSION}"
 echo "	Debug mode:				${debug_option}"
 echo "	SSL support:				${ssl_option}"
 echo "	Modules support:			${m_cv_USE_MODULES}"
