@@ -29,6 +29,9 @@
 #   endif
 #endif
 
+class wxString;
+class wxWindow;
+
 /**
    Dialog Boxes 
 */
@@ -136,6 +139,35 @@ bool MDialog_YesNoDialog(String const &message,
                          bool YesDefault = true);
 
 
+/**
+  Ask the user to enter some text and remember the last value in the "Prompt"
+  section of the global config object in the key named "key" if it's !NULL:
+  it may be NULL in which case this function won't use wxConfig.
+
+  If FALSE is returned (meaning the user chose <Cancel>), the string pstr is
+  not modified, otherwise it receives the value entered (the old contents is
+  the default value shown in the dialog unless it's NULL and key is not: then
+  the default value is read from the config using the "def" argument for the
+  default value)
+
+  If parent parameter is NULL, the top level application frame is used.
+
+  @param pstr is the string which will receive the entered string
+  @param caption is the title of the dialog
+  @param prompt is the message displayed in the dialog itself
+  @param parent is the parent window for the modal dialog box
+  @param key contains the name of config entry to use if !NULL
+  @param def contains the default value (only if pstr->IsEmpty())
+
+  @return FALSE if cancelled, TRUE otherwise
+*/
+bool MInputBox(wxString *pstr,
+               const wxString& caption,
+               const wxString& prompt,
+               wxWindow *parent = NULL,
+               const char *key = NULL,
+               const char *def = NULL);
+
 AdbEntry *
 MDialog_AdbLookupList(AdbExpandListType *adblist,
 		      MWindow *parent = NULL);
@@ -144,4 +176,8 @@ MDialog_AdbLookupList(AdbExpandListType *adblist,
 void
 MDialog_AboutDialog( MWindow *parent);
 
-#endif
+// @@@ the coeffecients are purely empirical...
+#define TEXT_HEIGHT_FROM_LABEL(h)   (23*(h)/13)
+#define BUTTON_WIDTH_FROM_HEIGHT(w) (75*(w)/23)
+
+#endif  //WXMDIALOGS_H
