@@ -9,7 +9,7 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-
+9	KB	RFC822_IS_TEXT config setting missing
 6	KB	wxFolderView.cpp:123 in wxFolderListCtrl::ApplyOptions()
 		leaks memory - the font will be never freed.
 
