@@ -301,9 +301,6 @@ void MDialog_FolderOpen(const MWindow *parent);
 /// Configure modules, in wxModulesDialog.cpp:
 extern
 void ShowModulesDialog(wxFrame *parent);
-/// Configure message/folder sorting
-extern
-bool ConfigureSorting(Profile *profile, wxWindow *parent);
 /* Configuration dialog for searching for messages. */
 extern
 bool

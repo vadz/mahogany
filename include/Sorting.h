@@ -20,6 +20,7 @@
 #include <wx/dynarray.h>   // for wxArrayInt
 
 class Profile;
+class WXDLLEXPORT wxWindow;
 
 /**
    Sort order enum for sorting message listings.
@@ -114,6 +115,9 @@ extern wxArrayInt SplitSortOrder(long sortOrder);
 
 /// combine several (max 8) sort orders into one value
 extern long BuildSortOrder(const wxArrayInt& sortOrders);
+
+/// Configure message/folder sorting
+extern bool ConfigureSorting(Profile *profile, wxWindow *parent);
 
 #endif // _SORTING_H_
 
