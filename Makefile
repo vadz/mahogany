@@ -3,6 +3,13 @@
 
 include makeopts
 
+makeversion: .src/makeversion.in
+	sh -e .src/makeversion.in
+
+include makeversion
+
+M := mahogany-$(M_VERSION_MAJOR).$(M_VERSION_MINOR)
+
 FILES := configure.in configure Makefile makeopts.in makerules
 ifeq ($(USE_RESOURCES),yes)
 SUB_DIRS := include extra res src
@@ -19,13 +26,6 @@ all semistatic quartstatic static:
 			$(MAKE) -C $$i all; \
 		fi \
 	done
-
-makeversion: .src/makeversion.in
-	sh -e .src/makeversion.in
-
-include makeversion
-
-M := mahogany-$(M_VERSION_MAJOR).$(M_VERSION_MINOR)
 
 doc:
 	set -e; for i in extra doc; do $(MAKE) -C $$i doc; done
@@ -44,7 +44,7 @@ allclean: clean
 	find . -name .libs -exec rm -rf {} \;
 	find . -name .xvpics -exec rm -r -f {} \;
 	$(RM) -r debian/tmp *.po config.log src/M config.status
-	$(RM) config.* makeopts makeversion include/config.h
+	$(RM) config.* makeopts include/config.h
 	find . -type l -name .src -exec rm -f {} \;
 	find . -type l -name Makefile -exec rm -f {} \;
 
@@ -108,12 +108,7 @@ locales:
 mergecat:
 	$(MAKE) -C locale mergecat
 
-#########################################################################
-# The targets below don't really belong here.  They should either be in
-# a separate makefile or the logic should be moved to the spec file.
-#########################################################################
-
-# create the file list for the RPM installation
+# create the file list for the RPM installation: used by redhat/M.spec
 install_rpm:
 	@echo "Creating the list of files for RPM"
 	@echo "%doc $(DOCDIR)" > filelist
@@ -132,47 +127,6 @@ install_rpm:
 	@# the second subsitution takes care of RPM_BUILD_ROOT
 	@$(PERL) -i -npe 's/^/%attr(-, root, root) /; s: /.*//: /:' filelist
 
-# prepare the scene for building the RPM version
-rpm_prep:
-	if test -z "$$RPM_ROOT"; then \
-		export RPM_TOP_DIR=`rpm --showrc | grep topdir | cut -d: -f 2 | sed 's/^ //'`; \
-	else \
-		export RPM_TOP_DIR=$(RPM_ROOT); \
-	fi; \
-	if test -z "$$RPM_TOP_DIR"; then \
-   	echo "You must set RPM_ROOT first."; \
-      exit 1; \
-   fi; \
-	echo "*** Preparing to build RPM in $$RPM_TOP_DIR..."; \
-	cd $(SOURCEDIR)/..; \
-	mv M $(M); \
-	tar cvzf $$RPM_TOP_DIR/SOURCES/$(M).tar.gz \
-		--exclude="*.o" --exclude="M" --exclude="CVS" \
-		--exclude=".cvsignore" --exclude="*~" --exclude="*.swp" \
-		--exclude="*.mo" --exclude="*.a" \
-		--exclude=".sniffdir" --exclude=".depend" \
-		$(M)/README $(M)/TODO $(M)/INSTALL $(M)/Makefile \
-		$(M)/aclocal.m4 $(M)/configure.* \
-		$(M)/doc $(M)/extra/Makefile $(M)/include $(M)/locale \
-		$(M)/makeopts.in $(M)/makerules $(M)/src $(M)/extra/install \
-		$(M)/extra/scripts $(M)/makeversion.in $(M)/extra/src; \
-	mv $(M) M; \
-	cd M; \
-	cp redhat/mahogany.gif $$RPM_ROOT/SOURCES; \
-	cp redhat/M.spec $$RPM_ROOT/SPECS
-
-# build the source and binary RPMs
-rpm: rpm_prep
-	@if test -z "$$RPM_ROOT"; then \
-		export RPM_TOP_DIR=`rpm --showrc | grep topdir | cut -d: -f 2 | sed 's/^ //'`; \
-		export RPM_BUILD_ROOT=`rpm --showrc | grep buildroot | cut -d: -f 2 | sed 's/^ //'`; \
-	else \
-		export RPM_TOP_DIR=$(RPM_ROOT); \
-		export RPM_BUILD_ROOT=$(RPM_ROOT)/ROOT; \
-	fi; \
-	echo "*** Building RPM under $$RPM_BUILD_ROOT..."; \
-	cd $$RPM_TOP_DIR/SPECS && rpm --buildroot $$RPM_BUILD_ROOT -bb M.spec ;\
-	cd $$RPM_TOP_DIR/SPECS && rpm --buildroot $$RPM_BUILD_ROOT -bs M.spec
 
 .PHONY: all clean bak backup config program doc install install_doc \
-        install_all locales scandoc install_locale rpm_prep rpm classdoc
+	locales scandoc install_locale install_rpm classdoc
