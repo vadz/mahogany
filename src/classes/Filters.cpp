@@ -124,7 +124,8 @@ public:
       }
    class SyntaxNode * Parse(void);
    class SyntaxNode * ParseExpression(void);
-   class FunctionCall *ParseFunctionCall(void);
+   class SyntaxNode *ParseFunctionCall(void);
+   class SyntaxNode * ParseFunctionOrConstant(void);
    virtual size_t GetPos(void) const { return m_Position; }
    virtual inline void Rewind(size_t pos = 0) { m_Position = pos; }
    virtual Token GetToken(bool remove = true);
@@ -143,21 +144,203 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+// ABC for logical operators.
+// ----------------------------------------------------------------------------
+
+/** This class represents logical operators. */
+class Operator : MObject
+{
+public:
+   virtual long Evaluate(const class SyntaxNode *left,
+                         const class SyntaxNode *right) const = 0;
+#ifdef DEBUG
+   virtual String Debug(const class SyntaxNode *left,
+                        const class SyntaxNode *right) const = 0;
+#endif
+};
+
+// ----------------------------------------------------------------------------
 // ABC for syntax tree nodes.
 // ----------------------------------------------------------------------------
 /** This class is used to build a syntax tree.
  */
-class SyntaxNode
+class SyntaxNode : MObject
 {
-   
+public:
+   virtual long Evaluate(void) const = 0;
+#ifdef DEBUG
+   virtual String Debug(void) const = 0;
+#endif
+};
+
+
+class Value : public SyntaxNode
+{
+public:
+   Value(long v) { m_value = v; }
+   virtual long Evaluate(void) const { return m_value; }
+#ifdef DEBUG
+   virtual String Debug(void) const { String s; s.Printf("Value(%ld)",m_value); return s; }
+#endif    
+private:
+   long m_value;
+};
+
+/** Functioncall handling */
+
+extern "C" {
+   typedef long (*FunctionPointer)(const char *arguments);
+
+   static long echo_func(const char *arguments)
+      {  INFOMESSAGE((arguments)); return 1; }
+};
+
+struct FunctionDefinition
+{
+   const char *m_name;
+   FunctionPointer m_FunctionPtr;
 };
 
 class FunctionCall : public SyntaxNode
 {
 public:
-   String m_name;
+   FunctionCall(const String &name, const String &args);
+   virtual long Evaluate(void) const;
+#ifdef DEBUG
+   virtual String Debug(void) const
+      { return String("FunctionCall(") + m_name + String(")"); }
+#endif    
+private:
+   FunctionPointer FindFunction(void);
+
+   FunctionPointer m_function;
    String m_args;
+   String m_name;
+   static FunctionDefinition ms_Functions[];
 };
+
+FunctionCall::FunctionCall(const String &name, const String &args)
+{
+   m_name = name;
+   m_args = args;
+   m_function = FindFunction();
+}
+   
+
+/* static */
+FunctionDefinition
+FunctionCall::ms_Functions[] =
+{
+   { "print", echo_func },
+   { NULL, NULL }
+};
+
+FunctionPointer
+FunctionCall::FindFunction(void)
+{
+   FunctionDefinition *fd = ms_Functions;
+   while(fd->m_name != NULL)
+   {
+      if(m_name == fd->m_name)
+         return fd->m_FunctionPtr;
+      else
+         fd++;
+   }
+   return NULL;
+}
+
+long
+FunctionCall::Evaluate(void) const
+{
+   ASSERT(m_function);
+   return (*m_function)(m_args.c_str());
+}
+
+/** An expression consisting of more than one token. */
+class Expression : public SyntaxNode
+{
+public:
+   Expression(const SyntaxNode *left, class Operator *op, const SyntaxNode *right)
+      { m_left = left; m_right = right; m_operator = op; }
+   long Evaluate(void) const
+      { return m_operator->Evaluate(m_left, m_right); }
+   ~Expression()
+      {
+         if(m_left)  delete m_left;
+         if(m_right) delete m_right;
+         if(m_operator) delete m_operator;
+      }
+#ifdef DEBUG
+   virtual String Debug(void) const
+      {
+         String s = "Expression(";
+         if(m_operator) s << m_operator->Debug(m_left, m_right);
+         s << ')';
+         return s;
+      }
+#endif    
+private:
+   const SyntaxNode *m_left, *m_right;
+   class Operator *m_operator;
+};
+
+
+/* This operator evaluates both operands and returns the value of the 
+   right one, like ',' in C. */
+class OperatorNone : public Operator
+{
+public:
+   virtual long Evaluate(const class SyntaxNode *left,
+                        const class SyntaxNode *right) const
+      {
+         (void) left->Evaluate();
+         return right->Evaluate();
+      }
+#ifdef DEBUG
+   String Debug(const class SyntaxNode *left, const class SyntaxNode
+                *right) const
+      {
+         String s;
+         if(left) s << left->Debug();
+         s << ";";
+         if(right) s << right->Debug();
+         return s;
+      }
+#endif
+};
+
+#ifdef DEBUG
+#define IMPLEMENT_OP(name, operator) \
+class Operator##name : public Operator \
+{ \
+public: \
+   virtual long Evaluate(const class SyntaxNode *left, \
+                        const class SyntaxNode *right) const \
+      { return left->Evaluate() operator right->Evaluate(); } \
+   virtual String Debug(const class SyntaxNode *left, \
+                        const class SyntaxNode *right) const \
+                           { String s; if(left) s << left->Debug(); \
+                           s << "operator"; \
+                           if(right) s << right->Debug(); return s; } \
+}
+#else
+#define IMPLEMENT_OP(name, operator) \
+class Operator##name : public Operator \
+{ \
+public: \
+   virtual long Evaluate(const class SyntaxNode *left, \
+                        const class SyntaxNode *right) const \
+      { return left->Evaluate() operator right->Evaluate(); } \
+}
+#endif
+
+
+IMPLEMENT_OP(Or,||);
+IMPLEMENT_OP(And,&&);
+IMPLEMENT_OP(Plus,+);
+IMPLEMENT_OP(Minus,-);
+IMPLEMENT_OP(Times,*);
+IMPLEMENT_OP(Divide,/);
 
 
 /* static */
@@ -192,24 +375,20 @@ ParserImpl::GetToken(bool remove)
    if(! Char())
    {
       token.SetEOF();
-      return token;
    }
-
-   if(isalpha(Char())) // this must be an identifier
+   else if(isalpha(Char())) // this must be an identifier
    {
       while(isalpha(Char()) || isdigit(Char()) || Char() == '_')
          tokstr += CharInc();
       token.SetIdentifier(tokstr);
    }
-
-   if(isdigit(Char())) // it is a number
+   else if(isdigit(Char())) // it is a number
    {
       while(isdigit(Char()))
          tokstr += CharInc();
       token.SetNumber(atol(tokstr.c_str()));
    }
-
-   if(Char() == '"') // a quoted string
+   else if(Char() == '"') // a quoted string
    {
       m_Position++;
       bool escaped = false;
@@ -229,8 +408,9 @@ ParserImpl::GetToken(bool remove)
       }
       token.SetString(tokstr);
    }
-   // All other cases: return the character:
-   token.SetChar(CharInc());
+   else
+      // All other cases: return the character:
+      token.SetChar(CharInc());
                   
    if(! remove)
       Rewind(OldPos);
@@ -243,24 +423,23 @@ ParserImpl::Parse(void)
    return ParseExpression();
 }
 
-FunctionCall *
+SyntaxNode *
 ParserImpl::ParseFunctionCall(void)
 {
    Token t = GetToken();
    ASSERT(t.GetType() == TT_Identifier);
 
-   FunctionCall *f = new FunctionCall();
-   f->m_name = t.GetIdentifier();
-
+   const String & functionName = t.GetIdentifier();
+   String arguments;
+   
    // Need to swallow argument list?
    t = PeekToken();
    if(t.GetType() != TT_Char || t.GetChar() != '(')
    {
       String err;
       err.Printf(_("Functioncall expected '(' after '%s'."),
-                 f->m_name.c_str());
+                 functionName.c_str());
       Error(err);
-      delete f;
       return NULL;
    }
    (void) GetToken(); // swallow '('
@@ -271,41 +450,110 @@ ParserImpl::ParseFunctionCall(void)
       if(Char() == '\\')
       {
          if(escaped)
-            f->m_args += CharInc();
+            arguments += CharInc();
          else
             escaped = true;
       }
       else
-         f->m_args += CharInc();
+         arguments += CharInc();
    }
-   return f;
+   if(Char() != ')')
+      Error("Expected ')' at end of argument list.");
+   else
+      GetToken(); // swallow it
+   
+   return new FunctionCall(functionName, arguments);
 }
 
 SyntaxNode *
-ParserImpl::ParseExpression(void)
+ParserImpl::ParseFunctionOrConstant(void)
 {
-   /* EXPRESSION :=
+   /* FuncionOrConstant :=
         | IDENTIFIER( ARGLIST )
-        | ( EXPRESSION )
-        | EXPRESSION LOGICAL_OPERATOR EXPRESSION
+        | NUMBER
    */
-   // For now, we do only a simple function call for a test.
+   SyntaxNode *sn = NULL;
+
    Token t = PeekToken();
    if(t.GetType() == TT_Identifier)
    {
       // IDENTIFIER ( ARGLIST )
-      return ParseFunctionCall();
-   }
-   else if(t.GetType() == TT_Char && t.GetChar() == '(')
-   {
-      // ( EXPRESSION )
+      sn = ParseFunctionCall();
    }
    else
    {
-      Error(_("No valid expression."));
-      return NULL;
+      if(t.GetType() != TT_Number)
+         Error(_("Expecting a number or a function call."));
+      else
+      {
+         sn = new Value(t.GetNumber());
+         GetToken();
+      }
    }
-   return NULL;
+   return sn;
+}
+
+
+SyntaxNode *
+ParserImpl::ParseExpression(void)
+{
+   /* Expression :=
+        | FunctonOrConstant
+        | ( Expression )
+        | Expression LogicalOperator Expression
+   */
+   SyntaxNode *sn = NULL;
+   bool needParan = false;
+   
+   Token t = PeekToken();
+   if(t.GetType() == TT_Char)
+   {
+      if(t.GetChar() == '(')
+      {
+         needParan = true;
+         t = GetToken();
+      }
+   }
+   else
+      sn = ParseFunctionOrConstant();
+   
+   t = PeekToken();
+   if(t.GetType() == TT_Char)
+   {
+      char token = t.GetChar();
+      switch(token)
+      {
+      case '&':
+         GetToken(); sn = new Expression(sn, new OperatorAnd, ParseExpression()); break;
+      case '|':
+         GetToken(); sn = new Expression(sn, new OperatorOr, ParseExpression()); break;
+      case '+':
+         GetToken(); sn = new Expression(sn, new OperatorPlus, ParseExpression()); break;
+      case '-':
+         GetToken(); sn = new Expression(sn, new OperatorMinus, ParseExpression()); break;
+      case '*':
+         GetToken(); sn = new Expression(sn, new OperatorTimes, ParseExpression()); break;
+      case '/':
+         GetToken(); sn = new Expression(sn, new OperatorDivide, ParseExpression()); break;
+      case ';':
+         GetToken(); sn = new Expression(sn, new OperatorNone, ParseExpression());break;
+      case ')':
+         if(needParan)
+            GetToken();
+         else
+         {
+            Error("')' expected after expression.");
+            if(sn) delete sn;
+            return NULL;
+         }
+         break;
+      default:
+         Error("Unexpected character.");
+         if(sn) delete sn;
+         return NULL;
+      }
+   }
+   return sn;
 }
 
 /** A FUNCTIONCALL has a logical value:
@@ -346,3 +594,19 @@ Condition::Create(Token &token, Parser &p)
    return NULL;
 }
 
+
+
+
+/** FOR TESTING ONLY, called from MAppBase::OnStartup(): **/
+
+static const char *testprogram = " 5 + ( 3 * 4 )";
+
+void FilterTest(void)
+{
+   Parser *p = Parser::Create(testprogram);
+   SyntaxNode *sn = p->Parse();
+   String str = sn->Debug();
+   INFOMESSAGE((str.c_str()));
+   p->DecRef();
+   delete sn;
+}

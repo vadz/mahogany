@@ -473,6 +473,13 @@ MAppBase::OnStartup()
    CHECK( m_eventReg, FALSE,
           "failed to register event handler for new mail event " );
 
+
+#ifdef EXPERIMENTAL
+   /* Test the Filtering subsystem. Completely disabled in release
+      build. */
+   extern void FilterTest(void);
+   FilterTest();
+#endif
    return TRUE;
 }
 

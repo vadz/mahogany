@@ -540,7 +540,7 @@
 /// umask setting for normal files
 #define   MP_UMASK_D               022
 /// automatically show first message in folderview?
-#define   MP_AUTOSHOW_FIRSTMESSAGE_D 0
+#define   MP_AUTOSHOW_FIRSTMESSAGE_D 0l
 /// program used to convert image files?
 #define   MP_CONVERTPROGRAM_D      "convert %s -compress None %s"
 /**@name Printer settings */
