@@ -809,7 +809,7 @@ Profile::CreateGlobalConfig(const String& filename)
             wxLogError(_("Cannot create the directory for configuration "
                          "files '%s'."), strConfFile.c_str());
 
-            return FALSE;
+            return NULL;
          }
          else
          {

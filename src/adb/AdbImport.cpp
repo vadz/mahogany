@@ -190,7 +190,7 @@ AdbImporter *FindImporter(const String& filename, AdbImporter *importer)
             // cancelled by user
             mApplication->SetLastError(M_ERROR_CANCEL);
 
-            return FALSE;
+            return NULL;
          }
       }
 

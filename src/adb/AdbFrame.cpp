@@ -4020,7 +4020,7 @@ AdbTreeElement *AdbTreeNode::CreateChild(const wxString& name, bool bGroup)
     wxLogError(_("%s '%s' already exists in this group."),
                strWhat.c_str(), name.c_str());
 
-    return FALSE;
+    return NULL;
   }
 
   // if the entries which already exist in the config file now were not yet

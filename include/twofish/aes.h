@@ -35,8 +35,10 @@ INCLUDE IMPLEMENTATION SPECIFIC INFORMATION.
 #define 	MODE_CBC 		2 		/* Are we ciphering in CBC mode? */
 #define 	MODE_CFB1 		3 		/* Are we ciphering in 1-bit CFB mode? */
 
+#ifndef TRUE
 #define 	TRUE 			1
 #define 	FALSE 			0
+#endif
 
 #define 	BAD_KEY_DIR 		-1	/* Key direction is invalid (unknown value) */
 #define 	BAD_KEY_MAT 		-2	/* Key material not of correct length */
