@@ -231,7 +231,9 @@ public:
    EditorContentPart() { Init(); m_Type = Type_None; }
 
    /// ctor for text contents
-   EditorContentPart(const String& text) { Init(); SetText(text); }
+   EditorContentPart(const String& text,
+                     wxFontEncoding encoding = wxFONTENCODING_SYSTEM)
+      { Init(); SetText(text); m_encoding = encoding; }
 
    //@}
 
@@ -303,6 +305,14 @@ public:
       return m_Text.length();
    }
 
+   /// get the encoding (ISO8859-1, KOI8-R, UTF-8, ...) of the text part
+   wxFontEncoding GetEncoding() const
+   {
+      ASSERT_MSG( m_Type == Type_Text, _T("this attachment doesn't have any text") );
+
+      return m_encoding;
+   }
+
    /// get the pointer to attachment data, only valid for data attachments
    const void *GetData() const
    {
@@ -338,6 +348,7 @@ private:
              m_Text;
 
    MimeType m_MimeType;
+   wxFontEncoding m_encoding;
 
    MOBJECT_DEBUG(EditorContentPart)
 

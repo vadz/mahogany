@@ -3823,7 +3823,7 @@ wxComposeView::BuildMessage() const
                            _T("INLINE"),  // disposition
                            NULL,          // disposition parameters
                            NULL,          // other parameters
-                           m_encoding
+                           part->GetEncoding()
                         );
             break;
 
