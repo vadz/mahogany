@@ -361,8 +361,11 @@ class wxFTOList
    coord_t	dcX, dcY;
    /// the current settings
    DrawInfo	drawInfo;
+   
    /// the DC
    wxDC	*dc;
+   /// @@ added by VZ - where is it supposed to be?
+   bool pageingFlag;
    
    /**@name A list of all text lines. */
    //@{
@@ -383,8 +386,6 @@ class wxFTOList
    /// shall we look for formatting commands
    Bool		formatFlag;
 
-   /// Do we need to split the output into pages?
-   bool		pageingFlag;
 
    /// Is List editable?
    bool		editable;
@@ -592,6 +593,11 @@ public:
       { iconManager.AddIcon(iconName, data); }
 
 //@}
+   
+   // trivial accessors
+   wxDC     *GetDC()     const { return dc;     }
+   wxCanvas *GetCanvas() const { return canvas; }
+
 /// Destructor
    ~wxFTOList();
    
