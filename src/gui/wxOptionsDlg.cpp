@@ -3502,6 +3502,11 @@ bool wxOptionsPageNetwork::TransferDataToWindow()
 
          if ( dial )
          {
+            // wxDialUpManager can fail to enumerate the connections but we
+            // don't want to present the user with an error each time he opens
+            // the preferences dialog just because of this
+            wxLogNull noLog;
+
             wxArrayString aConnections;
             dial->GetISPNames(aConnections);
 
@@ -3871,7 +3876,7 @@ bool wxOptionsPageSync::TransferDataFromWindow()
                      "to config file?");
          else
             msg += _("Do you want to import the existing contents of config "
-                     "file to the reigstry?");
+                     "file to the registry?");
 
          msg << _T('\n')
              << _("Note that this may overwrite the existing settings.");

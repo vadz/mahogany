@@ -2439,7 +2439,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
                         "stored using weak encryption.\n"
                         "So if you are concerned about security, it is "
                         "indeed better to leave it empty\n"
-                        "and let Mahogany will prompt you for it "
+                        "and let Mahogany prompt you for it "
                         "whenever needed.\n");
                }
 
