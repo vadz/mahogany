@@ -1010,8 +1010,8 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
    // this must be consistent with logic in UpdateSortIndicator(): first icon
    // is used for the reversed sort, second for the normal one
-   imagelist->Add(bmpDown);
    imagelist->Add(bmpUp);
+   imagelist->Add(bmpDown);
    AssignImageList(imagelist, wxIMAGE_LIST_SMALL);
 
    // create a drop target for dropping messages on us
