@@ -52,7 +52,6 @@
 
 #include "MApplication.h"
 #include "gui/wxMApp.h"
-#include "gui/wxMFrame.h"
 #include "gui/wxIconManager.h"
 
 #include "MHelp.h"
