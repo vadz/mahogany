@@ -1009,8 +1009,7 @@ MailFolderCC::Open(void)
                format = 0;
             tmp = "#driver.";
             tmp << cclient_drivers[format] << '/';
-               LOGMESSAGE((M_LOG_WINONLY,
-                           _("Trying to create folder '%s' in %s format."),
+               STATUSMESSAGE((_("Trying to create folder '%s' in %s format."),
                            GetName().c_str(),
                            cclient_drivers[format]
                   ));
@@ -1114,7 +1113,7 @@ MailFolderCC::PingReopen(void) const
       if(m_MailStream)
          ProcessEventQueue(); // flush queue
       RemoveFromMap(); // will be added again by Open()
-      LOGMESSAGE((M_LOG_WINONLY, _("Mailstream for folder '%s' has been closed, trying to reopen it."),
+      STATUSMESSAGE((_("Mailstream for folder '%s' has been closed, trying to reopen it."),
                   GetName().c_str()));
       rc = t->Open();
       if(rc == false)
@@ -2473,11 +2472,10 @@ MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf )
 #ifdef DEBUG
    msg << _(", error level: ") << strutil_ultoa(errflg);
 #endif
-   STATUSMESSAGE((msg));
    if(errflg > 1)
       LOGMESSAGE((CC_GetLogLevel(), msg));
    else
-      LOGMESSAGE((M_LOG_WINONLY, Str(msg)));
+      STATUSMESSAGE((msg)); // goes to window anyway
 }
 
 /** log a debugging message
@@ -2513,7 +2511,7 @@ MailFolderCC::mm_dlog(String str)
       msg += str;
    }
 
-   LOGMESSAGE((M_LOG_WINONLY, Str(msg)));
+   STATUSMESSAGE((Str(msg)));
 }
 
 /** get user name and password
