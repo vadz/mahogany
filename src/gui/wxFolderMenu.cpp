@@ -238,7 +238,7 @@ MFolder *wxFolderMenu::GetFolder(int id) const
 
 void wxFolderMenu::Detach()
 {
-   CHECK( m_data, NULL, "must call wxFolderMenu::GetMenu() first" );
+   CHECK_RET( m_data, "must call wxFolderMenu::GetMenu() first" );
 
    m_data->Detach();
 }
