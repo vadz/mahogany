@@ -1,4 +1,4 @@
-#This file was created by <zeitlin> Mon Jul 12 17:48:42 1999
+#This file was created by <karsten> Tue Jul 13 09:46:07 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -35,13 +35,13 @@ Mahogany User Manual
 \newline 
 
 \shape default 
-for Version 0.23a
+for Version 0.23a+
 \newline 
 
 \begin_inset Quotes eld
 \end_inset 
 
-Polwarth IV
+Viewforth
 \begin_inset Quotes erd
 \end_inset 
 
@@ -4251,6 +4251,15 @@ htmladdnormallinkfoot{Mahogany Web page}{http://mahogany.home.dhs.org/docs/Hacke
 uide/index.html}
 \latex default 
 .
+\layout Standard
+
+Some quick notes about common compilation problems can be found in the FAQ,
+ in section 
+\begin_inset LatexCommand \ref{CompileErrors}
+
+\end_inset 
+
+.
 \layout Chapter
 
 FAQ - Frequently Asked Questions_1002_
@@ -4345,6 +4354,61 @@ thedistributionfile
 tar
 \family default 
  should show you a list of all files being installed as it unpacks them.
+\layout Subsection
+
+Compiling aborts with errors
+\layout Standard
+
+
+\begin_inset LatexCommand \label{CompileErrors}
+
+\end_inset 
+
+A common problem with compiling wxGTK and Mahogany is, that you need to
+ follow the instructions in Mahogany's README file and use the configure
+ script to set them up as explained.
+ If you use different arguments for configure than those shown in README,
+ things will not work! Also, before running configure again, remove any
+ *.cache and *status files in the working directory or configure will re-use
+ some old settings.
+\layout Standard
+
+Also, as we are omitting some unused subdirectories from the wxGTK source,
+ to save you download time, you may need to run 
+\begin_inset Quotes eld
+\end_inset 
+
+make -k
+\begin_inset Quotes erd
+\end_inset 
+
+ rather than just 
+\begin_inset Quotes eld
+\end_inset 
+
+make
+\begin_inset Quotes erd
+\end_inset 
+
+ to get it to ignore some errors caused by this.
+ On non-Linux/GNU systems, you need to use the GNU linker, i.e.
+ 
+\begin_inset Quotes eld
+\end_inset 
+
+gmake
+\begin_inset Quotes erd
+\end_inset 
+
+ rather than the default 
+\begin_inset Quotes eld
+\end_inset 
+
+make
+\begin_inset Quotes erd
+\end_inset 
+
+.
 \layout Section
 
 Other Problems
