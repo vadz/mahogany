@@ -1159,6 +1159,7 @@ dnl check whether we use dspam
 dnl --------------------------------------------------------------------------
 
 MAKE_USE_DSPAM=
+using_dspam="no"
 case "$USE_DSPAM" in
     1)
 	dnl check for sqlite as we use sqlite driver for dspam
@@ -1166,6 +1167,7 @@ case "$USE_DSPAM" in
 	dnl TODO: support for other drivers
 	AC_CHECK_HEADER(sqlite.h,
 	    AC_CHECK_LIB(sqlite, main,
+		using_dspam="yes"
 		MAKE_USE_DSPAM="USE_DSPAM=1",
 		AC_MSG_WARN(Cannot find sqlite library - support for DSPAM disabled.)
 	    ),
@@ -1510,6 +1512,7 @@ echo "	Embedded Python:			${PYTHON_VER:-none}"
 if test "$USE_PYTHON" != 0 -a "$USE_SWIG" = 1; then
     echo "	      with swig:			${SWIG}"
 fi
+echo "  DSPAM spam filtering:			${using_dspam}"
 echo ""
 echo "Please look at config.log for more details."
 
