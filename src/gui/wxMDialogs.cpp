@@ -700,7 +700,7 @@ public:
   void OnClick(wxMouseEvent&) { DoClose(); }
 
   // close the about frame
-  void DoClose() { GetParent()->Close(true); delete m_pTimer; }
+  void DoClose() { if(GetParent()) GetParent()->Close(true); delete m_pTimer; }
 
 private:
   // timer which calls our DoClose() when it expires
