@@ -280,9 +280,10 @@ MAppBase::ContinueStartup()
 
    if ( !READ_APPCONFIG(MP_DONTOPENSTARTUP) )
    {
-      wxChar *folders = strutil_strdup(READ_APPCONFIG(MP_OPENFOLDERS));
+      String foldersToReopen = READ_APPCONFIG(MP_OPENFOLDERS);
+      char *folders = strutil_strdup(wxConvertWX2MB(foldersToReopen));
       kbStringList openFoldersList;
-      strutil_tokenise(folders, _T(";"), openFoldersList);
+      strutil_tokenise(folders, ";", openFoldersList);
       delete [] folders;
 
       bool ok = true;

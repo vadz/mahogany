@@ -166,11 +166,11 @@ protected:
 // ============================================================================
 
 int
-CountQuoteLevel(const char *string, int max_white, int max_alpha)
+CountQuoteLevel(const wxChar *string, int max_white, int max_alpha)
 {
    int levels = 0;
 
-   for ( const char *c = string; *c != 0 && *c != '\n'; c++)
+   for ( const wxChar *c = string; *c != 0 && *c != '\n'; c++)
    {
       // skip white space
       int num_white = 0;
@@ -233,7 +233,7 @@ IMPLEMENT_VIEWER_FILTER(QuoteURLFilter,
                         ViewFilter::Priority_Default,
                         true,      // enabled by default
                         gettext_noop("Quotes and URLs"),
-                        "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
+                        _T("(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>"));
 
 // ----------------------------------------------------------------------------
 // QuoteURLFilter options

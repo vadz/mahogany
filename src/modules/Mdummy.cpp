@@ -39,15 +39,15 @@ private:
 
 
 MMODULE_BEGIN_IMPLEMENT(DummyModule,
-                        "Mdummy",
-                        "none",
-                        "Dummy module for Mahogany",
-                        "0.00")
-   MMODULE_PROP("description", "This module does not do anything, "
+                        _T("Mdummy"),
+                        _T("none"),
+                        _T("Dummy module for Mahogany"),
+                        _T("0.00"))
+   MMODULE_PROP(_T("description"), _T("This module does not do anything, "
                                "it simply gets loaded, opens a dialog and "
                                "that's all. It's purpose is to serve as an "
-                               "example and template for writing real modules.")
-   MMODULE_PROP("author", "Karsten Ballüder <karsten@phy.hw.ac.uk>")
+                               "example and template for writing real modules."))
+   MMODULE_PROP(_T("author"), _T("Karsten Ballüder <karsten@phy.hw.ac.uk>"))
 MMODULE_END_IMPLEMENT(DummyModule)
 
 
@@ -68,9 +68,9 @@ DummyModule::DummyModule(MInterface *minterface)
            : MModule(minterface)
 {
    minterface->MessageDialog(
-      "This message is created by the DummyModule plugin\n"
+      _T("This message is created by the DummyModule plugin\n"
       "for Mahogany. This module has been loaded at runtime\n"
-      "and is not part of the normal Mahogany executable.",
+      "and is not part of the normal Mahogany executable."),
       NULL,
-      "Welcome from DummyModule!");
+      _T("Welcome from DummyModule!"));
 }

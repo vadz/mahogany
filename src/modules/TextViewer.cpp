@@ -285,24 +285,24 @@ wxString wxTextEasyPrinting::ControlToHtml(wxTextCtrl *text)
       switch ( ch[0u] )
       {
          case '<':
-            s += "&lt;";
+            s += _T("&lt;");
             break;
 
          case '>':
-            s += "&gt;";
+            s += _T("&gt;");
             break;
 
          case '&':
-            s += "&amp;";
+            s += _T("&amp;");
             break;
 
          case '"':
-            s += "&quot;";
+            s += _T("&quot;");
             break;
 
          case '\t':
             // we hardcode the tab width to 8 spaces
-            s += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+            s += _T("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
             break;
 
          case '\r':
@@ -310,11 +310,11 @@ wxString wxTextEasyPrinting::ControlToHtml(wxTextCtrl *text)
             break;
 
          case '\n':
-            s += "<br>\n";
+            s += _T("<br>\n");
             break;
 
          case ' ':
-            s += "&nbsp;";
+            s += _T("&nbsp;");
             break;
 
          default:
@@ -342,7 +342,7 @@ BEGIN_EVENT_TABLE(TextViewerWindow, wxTextCtrl)
 END_EVENT_TABLE()
 
 TextViewerWindow::TextViewerWindow(TextViewer *viewer, wxWindow *parent)
-                : wxTextCtrl(parent, -1, "",
+                : wxTextCtrl(parent, -1, _T(""),
                              wxDefaultPosition, wxDefaultSize,
                              wxTE_RICH2 |
 #ifdef USE_AUTO_URL_DETECTION
@@ -503,7 +503,7 @@ bool TextViewerWindow::ProcessMouseEvent(const wxMouseEvent& event, long pos)
 
 IMPLEMENT_MESSAGE_VIEWER(TextViewer,
                          _("Text only message viewer"),
-                         "(c) 2001 Vadim Zeitlin <vadim@wxwindows.org>");
+                         _T("(c) 2001 Vadim Zeitlin <vadim@wxwindows.org>"));
 
 TextViewer::TextViewer()
 {
@@ -561,16 +561,16 @@ bool TextViewer::Find(const String& text)
 
 bool TextViewer::FindAgain()
 {
-   const char *pStart = m_window->GetValue();
+   const wxChar *pStart = m_window->GetValue();
 
-   const char *p = pStart;
+   const wxChar *p = pStart;
    if ( m_posFind != -1 )
    {
       // start looking at the next position after the last match
       p += m_posFind + 1;
    }
 
-   p = *p != '\0' ? strstr(p, m_textFind) : NULL;
+   p = *p != '\0' ? wxStrstr(p, m_textFind) : NULL;
 
    if ( p )
    {
@@ -655,7 +655,7 @@ void TextViewer::ShowHeaderName(const String& name)
    font.SetWeight(wxFONTWEIGHT_BOLD);
    attr.SetFont(font);
 
-   InsertText(name + ": ", attr);
+   InsertText(name + _T(": "), attr);
 
    // restore the non bold font
    attr.SetFont(m_window->GetFont());
@@ -689,7 +689,7 @@ void TextViewer::ShowHeaderURL(const String& text,
 
 void TextViewer::EndHeader()
 {
-   InsertText("\n", MTextStyle());
+   InsertText(_T("\n"), MTextStyle());
 }
 
 void TextViewer::ShowXFace(const wxBitmap& /* bitmap */)
@@ -713,7 +713,7 @@ void TextViewer::StartPart()
 {
    // put a blank line before each part start - including the very first one to
    // separate it from the headers
-   m_window->AppendText("\n");
+   m_window->AppendText(_T("\n"));
 }
 
 void TextViewer::InsertAttachment(const wxBitmap& /* icon */, ClickableInfo *ci)

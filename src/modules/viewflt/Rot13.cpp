@@ -56,7 +56,7 @@ IMPLEMENT_VIEWER_FILTER(Rot13Filter,
                         ViewFilter::Priority_Low,
                         false,      // initially disabled
                         gettext_noop("ROT13"),
-                        "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
+                        _T("(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>"));
 
 void
 Rot13Filter::DoProcess(String& text,

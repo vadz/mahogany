@@ -53,20 +53,20 @@ protected:
 // ----------------------------------------------------------------------------
 
 // all PGP messages in ASCII armour start with a line whose prefix is this
-#define PGP_BEGIN_PREFIX "-----BEGIN PGP "
+#define PGP_BEGIN_PREFIX _T("-----BEGIN PGP ")
 
 // .. and suffix is that
-#define PGP_BEGIN_SUFFIX "MESSAGE-----"
+#define PGP_BEGIN_SUFFIX _T("MESSAGE-----")
 
 // PGP signature block starts with this line
 #define PGP_BEGIN_SIG PGP_BEGIN_PREFIX PGP_END_SIG_SUFFIX
 
 // end of the PGP encrypted message or signature block starts with this
-#define PGP_END_PREFIX "-----END PGP "
+#define PGP_END_PREFIX _T("-----END PGP ")
 
 // end ends with either of those
-#define PGP_END_CRYPT_SUFFIX "MESSAGE-----"
-#define PGP_END_SIG_SUFFIX "SIGNATURE-----"
+#define PGP_END_CRYPT_SUFFIX _T("MESSAGE-----")
+#define PGP_END_SIG_SUFFIX _T("SIGNATURE-----")
 
 // ============================================================================
 // PGPFilter implementation
@@ -80,7 +80,7 @@ IMPLEMENT_VIEWER_FILTER(PGPFilter,
                         ViewFilter::Priority_High + 10,
                         false,      // initially disabled
                         gettext_noop("PGP"),
-                        "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
+                        _T("(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>"));
 
 // ----------------------------------------------------------------------------
 // PGPFilter ctor
@@ -143,10 +143,10 @@ PGPFilter::DoProcess(String& text,
    //
    // there should be a BEGIN line near the start of the message
    bool foundBegin = false;
-   const char *start = text.c_str();
+   const wxChar *start = text.c_str();
    for ( size_t numLines = 0; numLines < 10; numLines++ )
    {
-      if ( strncmp(start, PGP_BEGIN_PREFIX, strlen(PGP_BEGIN_PREFIX)) == 0 )
+      if ( wxStrncmp(start, PGP_BEGIN_PREFIX, wxStrlen(PGP_BEGIN_PREFIX)) == 0 )
       {
          foundBegin = true;
          break;
@@ -154,7 +154,7 @@ PGPFilter::DoProcess(String& text,
 
       // try the next line (but only if not already at the end)
       if ( *start )
-         start = strchr(start, '\n');
+         start = wxStrchr(start, '\n');
       else
          break;
       if ( start )
@@ -166,16 +166,16 @@ PGPFilter::DoProcess(String& text,
    if ( foundBegin )
    {
       // is the message just signed or encrypted?
-      const char *tail = start + strlen(PGP_BEGIN_PREFIX);
+      const wxChar *tail = start + wxStrlen(PGP_BEGIN_PREFIX);
       bool isKey = false;
-      bool isSigned = strncmp(tail, "SIGNED ", 7 /* strlen("SIGNED ") */) == 0;
+      bool isSigned = wxStrncmp(tail, _T("SIGNED "), 7 /* strlen("SIGNED ") */) == 0;
       if ( isSigned )
       {
          tail += 7;
       } 
       else
       {
-         isKey = strncmp(tail, "PUBLIC KEY ", 11 /* strlen("PUBLIC KEY ") */) == 0;
+         isKey = wxStrncmp(tail, _T("PUBLIC KEY "), 11 /* strlen("PUBLIC KEY ") */) == 0;
       }
 
       // this flag tells us if everything is ok so far -- as soon as it becomes
@@ -185,7 +185,7 @@ PGPFilter::DoProcess(String& text,
       // TODO: propose to import it into the keyring?
       bool ok = !isKey;
 
-      if ( ok && strncmp(tail, PGP_BEGIN_SUFFIX, strlen(PGP_BEGIN_SUFFIX)) != 0 )
+      if ( ok && wxStrncmp(tail, PGP_BEGIN_SUFFIX, wxStrlen(PGP_BEGIN_SUFFIX)) != 0 )
       {
          wxLogWarning(_("The BEGIN line doesn't end with expected suffix."));
 
@@ -193,11 +193,11 @@ PGPFilter::DoProcess(String& text,
       }
 
       // end of the PGP part
-      const char *end = NULL; // unneeded but suppresses the compiler warning
+      const wxChar *end = NULL; // unneeded but suppresses the compiler warning
       if ( ok ) // ok, it starts with something valid
       {
          // now locate the end line
-         const char *pc = start + text.length() - 1;
+         const wxChar *pc = start + text.length() - 1;
 
          bool foundEnd = false;
          for ( ;; )
@@ -214,9 +214,9 @@ PGPFilter::DoProcess(String& text,
             // we took one extra char
             pc++;
 
-            if ( strncmp(pc, PGP_END_PREFIX, strlen(PGP_END_PREFIX)) == 0 )
+            if ( wxStrncmp(pc, PGP_END_PREFIX, wxStrlen(PGP_END_PREFIX)) == 0 )
             {
-               tail = pc + strlen(PGP_END_PREFIX);
+               tail = pc + wxStrlen(PGP_END_PREFIX);
 
                foundEnd = true;
                break;
@@ -247,10 +247,10 @@ PGPFilter::DoProcess(String& text,
       // check that the END line matches the BEGIN one
       if ( ok )
       {
-         const char * const suffix = isSigned ? PGP_END_SIG_SUFFIX
+         const wxChar * const suffix = isSigned ? PGP_END_SIG_SUFFIX
                                               : PGP_END_CRYPT_SUFFIX;
 
-         if ( strncmp(tail, suffix, strlen(suffix)) != 0 )
+         if ( wxStrncmp(tail, suffix, wxStrlen(suffix)) != 0 )
          {
             wxLogWarning(_("Mismatch between BEGIN and END lines."));
 

@@ -110,7 +110,7 @@ bool ListEventReceiver::OnMEvent(MEventData& event)
          FAIL_MSG( _T("unexpected folder in mm_list()") );
       }
 
-      const char delim = result->GetDelimiter();
+      const wxChar delim = result->GetDelimiter();
 
       // we don't want the leading slash, if any
       if ( !name.empty() && name[0u] == delim )

@@ -199,11 +199,17 @@ TAG_HANDLER_BEGIN(META, "META" )
                     wxFontMapper::Get()->CharsetToEncoding(
                               content.Mid(CHARSET_STRING_LEN));
 
-                if ( enc == wxFONTENCODING_SYSTEM ||
-                     enc == m_WParser->GetInputEncoding() )
+                if ( enc == wxFONTENCODING_SYSTEM
+#if wxUSE_UNICODE
+                   )
+#else
+                     || enc == m_WParser->GetInputEncoding() )
+#endif
                    return FALSE;
 
+#if !wxUSE_UNICODE
                 m_WParser->SetInputEncoding(enc);
+#endif
                 m_WParser->GetContainer()->InsertCell(
                     new wxHtmlFontCell(m_WParser->CreateCurrentFont()));
             }
@@ -274,7 +280,7 @@ public:
          // could change it either to our own custom tag or to something
          // completely different, but for now leave it as is...
          DoChange(GetMetaString(wxFontMapper::GetEncodingName(enc)),
-                  GetMetaString("iso-8859-1"));
+                  GetMetaString(_T("iso-8859-1")));
       }
    }
 
@@ -282,8 +288,8 @@ private:
    static String GetMetaString(const String& charset)
    {
       String s;
-      s << "<meta http-equiv=\"Content-Type\" content=\"text/html; charset="
-        << charset << "\">";
+      s << _T("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=")
+        << charset << _T("\">");
       return s;
    }
 
@@ -303,9 +309,9 @@ public:
       if ( col.Ok() )
       {
          String start;
-         start << "<font color=\"#" << Col2Html(col) << "\">";
+         start << _T("<font color=\"#") << Col2Html(col) << _T("\">");
 
-         DoChange(start, "</font>");
+         DoChange(start, _T("</font>"));
       }
    }
 
@@ -328,12 +334,12 @@ public:
       // destruction of the subobjects
       if ( font.GetStyle() == wxFONTSTYLE_ITALIC )
       {
-         m_changerSlant.DoChange("<i>", "</i>");
+         m_changerSlant.DoChange(_T("<i>"), _T("</i>"));
       }
 
       if ( font.GetWeight() == wxFONTWEIGHT_BOLD )
       {
-         m_changerWeight.DoChange("<b>", "</b>");
+         m_changerWeight.DoChange(_T("<b>"), _T("</b>"));
       }
    }
 
@@ -440,7 +446,7 @@ HtmlViewerWindow::HtmlViewerWindow(HtmlViewer *viewer, wxWindow *parent)
 {
    m_viewer = viewer;
 
-   SetRelatedFrame(GetFrame(parent), "");
+   SetRelatedFrame(GetFrame(parent), _T(""));
    SetRelatedStatusBar(0);
 }
 
@@ -556,7 +562,7 @@ HtmlViewerWindow::OnOpeningURL(wxHtmlURLType type,
 
 IMPLEMENT_MESSAGE_VIEWER(HtmlViewer,
                          _("HTML message viewer"),
-                         "(c) 2001 Vadim Zeitlin <vadim@wxwindows.org>");
+                         _T("(c) 2001 Vadim Zeitlin <vadim@wxwindows.org>"));
 
 HtmlViewer::HtmlViewer()
 {
@@ -590,7 +596,7 @@ void HtmlViewer::Create(MessageView *msgView, wxWindow *parent)
 void HtmlViewer::Clear()
 {
    m_window->ClearClickables();
-   m_window->SetPage("");
+   m_window->SetPage(_T(""));
 
    m_htmlText.clear();
 
@@ -681,7 +687,7 @@ wxWindow *HtmlViewer::GetWindow() const
 
 static wxString Col2Html(const wxColour& col)
 {
-   return wxString::Format("%02x%02x%02x",
+   return wxString::Format(_T("%02x%02x%02x"),
                            (int)col.Red(), (int)col.Green(), (int)col.Blue());
 }
 
@@ -690,29 +696,29 @@ static wxString MakeHtmlSafe(const wxString& text)
    wxString textSafe;
    textSafe.reserve(text.length());
 
-   for ( const char *p = text.c_str(); *p; p++ )
+   for ( const wxChar *p = text.c_str(); *p; p++ )
    {
       switch ( *p )
       {
          case '<':
-            textSafe += "&lt;";
+            textSafe += _T("&lt;");
             break;
 
          case '>':
-            textSafe += "&gt;";
+            textSafe += _T("&gt;");
             break;
 
          case '&':
-            textSafe += "&amp;";
+            textSafe += _T("&amp;");
             break;
 
          case '"':
-            textSafe += "&quot;";
+            textSafe += _T("&quot;");
             break;
 
          case '\t':
             // we hardcode the tab width to 8 spaces
-            textSafe += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+            textSafe += _T("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
             break;
 
          case '\r':
@@ -720,11 +726,11 @@ static wxString MakeHtmlSafe(const wxString& text)
             break;
 
          case '\n':
-            textSafe += "<br>";
+            textSafe += _T("<br>");
             break;
 
          case ' ':
-            textSafe += "&nbsp;";
+            textSafe += _T("&nbsp;");
             break;
 
          default:
@@ -739,7 +745,7 @@ void HtmlViewer::AddColourAttr(const wxChar *attr, const wxColour& col)
 {
    if ( col.Ok() )
    {
-      m_htmlText += wxString::Format(" %s=\"#%s\"",
+      m_htmlText += wxString::Format(_T(" %s=\"#%s\""),
                                      attr, Col2Html(col).c_str());
    }
 }
@@ -761,7 +767,7 @@ wxString HtmlViewer::GetVirtualFileName(size_t n) const
 {
    // the image file names must be globally unique, so concatenate the address
    // of this object together with counter to obtain a really unique name
-   return wxString::Format("Mhtml%08lx%lu.png",
+   return wxString::Format(_T("Mhtml%08lx%lu.png"),
                            (unsigned long)this, (unsigned long)n);
 }
 
@@ -792,22 +798,22 @@ void HtmlViewer::StartHeaders()
    const ProfileValues& profileValues = GetOptions();
 
    m_htmlEnd.clear();
-   m_htmlText = "<html><body";
+   m_htmlText = _T("<html><body");
 
-   AddColourAttr("text", profileValues.FgCol);
-   AddColourAttr("bgcolor", profileValues.BgCol);
-   AddColourAttr("link", profileValues.UrlCol);
+   AddColourAttr(_T("text"), profileValues.FgCol);
+   AddColourAttr(_T("bgcolor"), profileValues.BgCol);
+   AddColourAttr(_T("link"), profileValues.UrlCol);
 
    // close <body> tag
-   m_htmlText += ">";
+   m_htmlText += _T(">");
 
    wxFont font = profileValues.GetFont();
 
    int diff = CalculateFontSize(font.GetPointSize() - DEFAULT_FONT_SIZE);
    if ( diff )
    {
-      m_htmlText << "<font size=" << wxString::Format("%+d", diff) << ">";
-      m_htmlEnd.Prepend("</font>");
+      m_htmlText << _T("<font size=") << wxString::Format(_T("%+d"), diff) << _T(">");
+      m_htmlEnd.Prepend(_T("</font>"));
    }
 
    // map the font family into HTML font face name
@@ -815,8 +821,8 @@ void HtmlViewer::StartHeaders()
    // TODO: use <font face="...">
    if ( font.IsFixedWidth() )
    {
-      m_htmlText << "<tt>";
-      m_htmlEnd.Prepend("</tt>");
+      m_htmlText << _T("<tt>");
+      m_htmlEnd.Prepend(_T("</tt>"));
    }
 
    // the next header is going to be the first one
@@ -829,8 +835,8 @@ void HtmlViewer::ShowRawHeaders(const String& header)
    wxFont font = profileValues.GetFont();
 
    int diff = CalculateFontSize(font.GetPointSize() - DEFAULT_FONT_SIZE);
-   m_htmlText << "<pre>" << "<font size=" << wxString::Format("%+d", diff) << ">"
-              << MakeHtmlSafe(header) << "</font>" << "</pre>";
+   m_htmlText << _T("<pre>") << _T("<font size=") << wxString::Format(_T("%+d"), diff) << _T(">")
+              << MakeHtmlSafe(header) << _T("</font>") << _T("</pre>");
 }
 
 void HtmlViewer::ShowHeaderName(const String& name)
@@ -838,19 +844,19 @@ void HtmlViewer::ShowHeaderName(const String& name)
    if ( m_firstheader )
    {
       // start the table containing the headers
-      m_htmlText += "<table cellspacing=1 cellpadding=1 border=0>";
+      m_htmlText += _T("<table cellspacing=1 cellpadding=1 border=0>");
 
       m_firstheader = false;
    }
 
    // create the first column: header names (width=1 means minimal width)
-   m_htmlText += "<tr>"
-                 "<td align=\"right\" width=\"1\">";
+   m_htmlText += _T("<tr>"
+                 "<td align=\"right\" width=\"1\">");
 
    FontColourChanger colChanger(GetOptions().HeaderNameCol, m_htmlText);
 
    // second column will be for the header values
-   m_htmlText << "<tt>" << name << ":&nbsp;</tt></td><td>";
+   m_htmlText << _T("<tt>") << name << _T(":&nbsp;</tt></td><td>");
 }
 
 void HtmlViewer::ShowHeaderValue(const String& value,
@@ -872,13 +878,13 @@ void HtmlViewer::ShowHeaderURL(const String& text,
 void HtmlViewer::EndHeader()
 {
    // terminate the header row
-   m_htmlText += "</td></tr>";
+   m_htmlText += _T("</td></tr>");
 }
 
 void HtmlViewer::ShowXFace(const wxBitmap& bitmap)
 {
    // make a new table inside the header table for the headers
-   m_htmlText += "<table cellspacing=1 cellpadding=1 border=0><td>";
+   m_htmlText += _T("<table cellspacing=1 cellpadding=1 border=0><td>");
 
    m_bmpXFace = bitmap;
 }
@@ -888,22 +894,22 @@ void HtmlViewer::EndHeaders()
    if ( !m_firstheader )
    {
       // close the headers table
-      m_htmlText += "</table>";
+      m_htmlText += _T("</table>");
    }
    //else: we had no headers at all
 
    if ( m_bmpXFace.Ok() )
    {
       wxString filename = CreateImageInMemoryFS(m_bmpXFace.ConvertToImage());
-      m_htmlText << "</td><td width="
-                 << wxString::Format("%d", m_bmpXFace.GetWidth()) << ">"
-                    "<img src=\"memory:" << filename << "\">"
+      m_htmlText << _T("</td><td width=")
+                 << wxString::Format(_T("%d"), m_bmpXFace.GetWidth()) << _T(">")
+                    _T("<img src=\"memory:") << filename << _T("\">"
                     "</td>"
-                    "</table>";
+                    "</table>");
    }
 
    // skip a line before the body
-   m_htmlText += "<br>";
+   m_htmlText += _T("<br>");
 }
 
 // ----------------------------------------------------------------------------
@@ -912,7 +918,7 @@ void HtmlViewer::EndHeaders()
 
 void HtmlViewer::StartBody()
 {
-   m_htmlText += "<br>";
+   m_htmlText += _T("<br>");
 }
 
 void HtmlViewer::StartPart()
@@ -924,21 +930,21 @@ void HtmlViewer::StartPart()
    {
       // separate subsequent parts from each other but don't insert the
       // separator between the headers and the first one
-      m_htmlText += "<hr>";
+      m_htmlText += _T("<hr>");
    }
 #endif // 0
 
-   m_htmlText += "<p>";
+   m_htmlText += _T("<p>");
 }
 
 void HtmlViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
 {
    wxString url;
-   url << "memory:" << CreateImageInMemoryFS(icon.ConvertToImage());
+   url << _T("memory:") << CreateImageInMemoryFS(icon.ConvertToImage());
 
-   m_htmlText << "<a href=\"" << url << "\">"
-                 "<img alt=\"" << ci->GetLabel() << "\" src=\"" << url
-              << "\"></a>";
+   m_htmlText << _T("<a href=\"") << url << _T("\">"
+                 "<img alt=\"") << ci->GetLabel() << _T("\" src=\"") << url
+              << _T("\"></a>");
 
    m_window->StoreClickable(ci, url);
 }
@@ -953,11 +959,11 @@ void HtmlViewer::InsertClickable(const wxBitmap& icon,
 void HtmlViewer::InsertImage(const wxImage& image, ClickableInfo *ci)
 {
    wxString url;
-   url << "memory:" << CreateImageInMemoryFS(wxImage(image));
+   url << _T("memory:") << CreateImageInMemoryFS(wxImage(image));
 
-   m_htmlText << "<a href=\"" << url << "\">"
-                 "<p><img alt=\"" << ci->GetLabel() << "\" "
-                 "src=\"" << url << "\"></a>";
+   m_htmlText << _T("<a href=\"") << url << _T("\">"
+                 "<p><img alt=\"") << ci->GetLabel() << _T("\" "
+                 "src=\"") << url << _T("\"></a>");
 
    m_window->StoreClickable(ci, url);
 }
@@ -1037,9 +1043,9 @@ void HtmlViewer::InsertURL(const String& text, const String& url)
 {
    // URLs may contain special characters which must be replaced by HTML
    // entities (i.e. '&' -> "&amp;") so use MakeHtmlSafe() to filter them
-   m_htmlText << "<a href=\"" << MakeHtmlSafe(url) << "\">"
+   m_htmlText << _T("<a href=\"") << MakeHtmlSafe(url) << _T("\">")
               << MakeHtmlSafe(text)
-              << "</a>";
+              << _T("</a>");
 }
 
 void HtmlViewer::EndText()
@@ -1049,14 +1055,14 @@ void HtmlViewer::EndText()
 
 void HtmlViewer::EndPart()
 {
-   m_htmlText += "<br>";
+   m_htmlText += _T("<br>");
 }
 
 void HtmlViewer::EndBody()
 {
    m_htmlText += m_htmlEnd;
 
-   m_htmlText += "</body></html>";
+   m_htmlText += _T("</body></html>");
 
    // makes cut-&-pasting into Netscape easier
    //wxLogTrace(_T("html"), _T("Generated HTML output:\n%s\n"), m_htmlText.c_str());
@@ -1131,7 +1137,7 @@ bool HtmlViewer::ShouldInlineImage(const String& url) const
    const ProfileValues& profileValues = GetOptions();
 
    return profileValues.inlineGFX &&
-            (url.StartsWith("memory:") || profileValues.showExtImages);
+            (url.StartsWith(_T("memory:")) || profileValues.showExtImages);
 }
 
 // this is called by MessageView to ask us if, in principle, we can inline
@@ -1145,6 +1151,6 @@ bool HtmlViewer::CanInlineImages() const
 bool HtmlViewer::CanProcess(const String& mimetype) const
 {
    // we understand HTML directly
-   return mimetype == "TEXT/HTML";
+   return mimetype == _T("TEXT/HTML");
 }
 

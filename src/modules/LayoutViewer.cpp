@@ -275,7 +275,7 @@ void LayoutViewerWindow::OnMouseEvent(wxCommandEvent& event)
 
 IMPLEMENT_MESSAGE_VIEWER(LayoutViewer,
                          _("Default message viewer"),
-                         "(c) 1997-2001 Mahogany Team");
+                         _T("(c) 1997-2001 Mahogany Team"));
 
 LayoutViewer::LayoutViewer()
 {
@@ -376,7 +376,7 @@ String LayoutViewer::GetSelection() const
                break;
 
             case WXLO_EXPORT_EMPTYLINE:
-               sel += "\n";
+               sel += _T("\n");
                break;
 
             default:
@@ -434,7 +434,7 @@ void LayoutViewer::ShowHeaderName(const String& name)
 
    // always terminate the header names with ": " - configurability
    // cannot be endless neither
-   llist->Insert(name + ": ");
+   llist->Insert(name + _T(": "));
 
    llist->SetFontWeight(wxNORMAL);
 }
@@ -510,7 +510,7 @@ void LayoutViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
 
    // add extra whitespace so lines with multiple icons can
    // be broken:
-   llist->Insert(" ");
+   llist->Insert(_T(" "));
 }
 
 void LayoutViewer::InsertClickable(const wxBitmap& icon,
@@ -572,8 +572,8 @@ void LayoutViewer::InsertURL(const String& textOrig, const String& url)
           textRest;
    do
    {
-      const char *p0 = text;
-      const char *p = strchr(p0, '\n');
+      const wxChar *p0 = text;
+      const wxChar *p = wxStrchr(p0, '\n');
       if ( p )
       {
          textRest = text.substr(p - p0 + 1);

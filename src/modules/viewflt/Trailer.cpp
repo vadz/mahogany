@@ -59,7 +59,7 @@ IMPLEMENT_VIEWER_FILTER(TrailerFilter,
                         ViewFilter::Priority_High + 20,
                         true,      // initially enabled
                         gettext_noop("Trailer"),
-                        "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
+                        _T("(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>"));
 
 void
 TrailerFilter::DoProcess(String& text,
@@ -73,8 +73,8 @@ TrailerFilter::DoProcess(String& text,
    if ( text.empty() )
       return;
 
-   const char *start = text.c_str();
-   const char *pc = start + text.length() - 1;
+   const wxChar *start = text.c_str();
+   const wxChar *pc = start + text.length() - 1;
 
    // while we're not too far from end
    for ( size_t numLinesFromEnd = 0; numLinesFromEnd < 10; numLinesFromEnd++ )

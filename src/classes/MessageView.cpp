@@ -2503,10 +2503,11 @@ MessageView::MimeHandle(const MimePart *mimepart)
          || wxMimeTypesManager::IsOfType(mimetype, _T("APPLICATION/OCTET-STREAM"))))
    {
       kbStringList faxdomains;
-      wxChar *faxlisting = strutil_strdup(READ_CONFIG(profile,
-                                                    MP_INCFAX_DOMAINS));
-      strutil_tokenise(faxlisting, _T(":;,"), faxdomains);
+      String faxListing = READ_CONFIG(profile, MP_INCFAX_DOMAINS);
+      char *faxlisting = strutil_strdup(wxConvertWX2MB(faxListing));
+      strutil_tokenise(faxlisting, ":;,", faxdomains);
       delete [] faxlisting;
+
       bool isfax = false;
       wxString domain;
       wxString fromline = m_mailMessage->From();

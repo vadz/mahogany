@@ -265,7 +265,7 @@ strutil_tokenise(char *string, const char *delim, kbStringList &tlist)
 }
 
 String
-strutil_extract_formatspec(const char *format)
+strutil_extract_formatspec(const wxChar *format)
 {
    // TODO doesn't recognize all possible formats nor backslashes (!)
    String specs;

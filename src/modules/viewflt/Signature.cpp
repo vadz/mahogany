@@ -140,7 +140,7 @@ IMPLEMENT_VIEWER_FILTER(SignatureFilter,
                         ViewFilter::Priority_Default + 10,
                         true,      // initially enabled
                         gettext_noop("Signature"),
-                        "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
+                        _T("(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>"));
 
 void
 SignatureFilter::DoProcess(String& text,
@@ -156,8 +156,8 @@ SignatureFilter::DoProcess(String& text,
 
    String signature;
 
-   const char *start = text.c_str();
-   const char *pc = start + text.length() - 1;
+   const wxChar *start = text.c_str();
+   const wxChar *pc = start + text.length() - 1;
 
    // while we're not too far from end
    for ( size_t numLinesFromEnd = 0; numLinesFromEnd < 10; numLinesFromEnd++ )

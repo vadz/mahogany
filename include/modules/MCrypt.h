@@ -248,7 +248,7 @@ public:
       MMODULE_DEFINE();                                                       \
       DEFAULT_ENTRY_FUNC;                                                     \
    };                                                                         \
-   MMODULE_BEGIN_IMPLEMENT(cname ## Factory, #cname,                          \
+   MMODULE_BEGIN_IMPLEMENT(cname ## Factory, _T(#cname),                      \
                            CRYPTO_ENGINE_INTERFACE, desc, _T("1.00"))         \
       MMODULE_PROP(_T("author"), cpyright)                                    \
    MMODULE_END_IMPLEMENT(cname ## Factory)                                    \

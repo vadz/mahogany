@@ -276,7 +276,7 @@ private:
 
 IMPLEMENT_MESSAGE_EDITOR(BareBonesEditor,
                          _("Minimal message editor"),
-                         "(c) 2003 Mahogany Team");
+                         _T("(c) 2003 Mahogany Team"));
 
 // ----------------------------------------------------------------------------
 // some global helper functions

@@ -75,14 +75,14 @@ static String gs_spamTest;                // MT-FIXME
 // ----------------------------------------------------------------------------
 
 // all recipient headers, more can be added (but always NULL terminate!)
-static const char *headersRecipients[] =
+static const wxChar *headersRecipients[] =
 {
-   "To",
-   "CC",
-   "Bcc",
-   "Resent-To",
-   "Resent-Cc",
-   "Resent-Bcc",
+   _T("To"),
+   _T("CC"),
+   _T("Bcc"),
+   _T("Resent-To"),
+   _T("Resent-Cc"),
+   _T("Resent-Bcc"),
    NULL
 };
 
@@ -171,7 +171,7 @@ public:
       { return m_type == TT_String; }
    int IsNumber(void) const
       { return m_type == TT_Number; }
-   int IsIdentifier(const char *s) const
+   int IsIdentifier(const wxChar *s) const
       { return m_type == TT_Identifier && m_string == s; }
    int IsEOF(void) const
       { return m_type == TT_EOF; }
@@ -428,7 +428,7 @@ public:
          if(m_Type == Type_String)
             return m_String;
 
-         return String::Format("%ld", m_Num);
+         return String::Format(_T("%ld"), m_Num);
       }
 
    void Abort() { m_abort = true; }
@@ -605,7 +605,7 @@ public:
    virtual const Value Evaluate() const { MOcheck(); return m_value; }
 #ifdef DEBUG
    virtual String Debug(void) const
-      { MOcheck(); String s; s.Printf("%ld",m_value); return s; }
+      { MOcheck(); String s; s.Printf(_T("%ld"), m_value); return s; }
 #endif
 private:
    long m_value;
@@ -651,7 +651,7 @@ public:
       {
          MOcheck();
          String s;
-         s << "!(" << m_Sn->Debug() << ')';
+         s << _T("!(") << m_Sn->Debug() << _T(')');
          return s;
       }
 #endif
@@ -677,7 +677,7 @@ public:
       {
          MOcheck();
          String s;
-         s << "!(" << m_Sn->Debug() << ')';
+         s << _T("!(") << m_Sn->Debug() << _T(')');
          return s;
       }
 #endif
@@ -694,10 +694,10 @@ private:
 class FunctionDefinition
 {
 public:
-   FunctionDefinition(const char *name, FunctionPointer fptr)
+   FunctionDefinition(const wxChar *name, FunctionPointer fptr)
       : m_Name(name), m_FunctionPtr(fptr)
       { ASSERT(m_Name); ASSERT(m_FunctionPtr); }
-   const char *GetName(void) const { return m_Name; }
+   const wxChar *GetName(void) const { return m_Name; }
    FunctionPointer GetFPtr(void) const { return m_FunctionPtr; }
 
 private:
@@ -782,7 +782,9 @@ public:
    virtual String Debug(void) const
       {
          MOcheck();
-         return String("FunctionCall(") + m_fd->GetName() + String(")");
+         String temp;
+         temp << _T("FunctionCall(") << m_fd->GetName() << _T(")");
+         return temp;
       }
 #endif
 private:
@@ -819,7 +821,7 @@ public:
    virtual String Debug(void) const
       {
          MOcheck();
-         String s = "(";
+         String s = _T("(");
          s << m_Cond->Debug()
            << '?'
            << m_Left->Debug()
@@ -851,12 +853,12 @@ public:
          delete m_Right;
       }
 #ifdef DEBUG
-   virtual const char *OperName(void) const = 0;
+   virtual const wxChar *OperName(void) const = 0;
    String Debug(void) const
       {
          MOcheck();
-         String s = "(";
-         s << m_Left->Debug() << OperName() << m_Right->Debug() << ')';
+         String s = _T("(");
+         s << m_Left->Debug() << OperName() << m_Right->Debug() << _T(')');
          return s;
       }
 #endif
@@ -899,7 +901,7 @@ public: \
       { return new Operator##name(l, r); } \
    virtual const Value Evaluate(void) const \
       { return m_Left->Evaluate() oper m_Right->Evaluate(); } \
-   virtual const char *OperName(void) const { return #oper; } \
+   virtual const wxChar *OperName(void) const { return _T(#oper); } \
 }
 
 #else        // not DEBUGing
@@ -948,7 +950,7 @@ public:
          return lv;
       }
 #ifdef DEBUG
-   virtual const char *OperName(void) const { return "&&"; }
+   virtual const wxChar *OperName(void) const { return _T("&&"); }
 #endif
 };
 
@@ -969,7 +971,7 @@ public:
          return lv;
       }
 #ifdef DEBUG
-   virtual const char *OperName(void) const { return "||"; }
+   virtual const wxChar *OperName(void) const { return _T("||"); }
 #endif
 };
 
@@ -1009,16 +1011,16 @@ public:
    virtual String Debug(void) const
       {
          MOcheck();
-         String s = "if(";
-         s << m_Condition->Debug() << "){";
+         String s = _T("if(");
+         s << m_Condition->Debug() << _T("){");
          if(m_IfBlock)
             s << m_IfBlock->Debug();
-         s << '}';
+         s << _T('}');
          if(m_ElseBlock)
          {
-            s << "else{"
+            s << _T("else{")
               << m_ElseBlock->Debug()
-              << '}';
+              << _T('}');
          }
          return s;
       }
@@ -1041,13 +1043,13 @@ FilterRuleImpl::FindFunction(const String &name)
       {
          // remember if we have some particular functions - we use it to
          // optimize filter execution in Apply()
-         if ( name == "to" )
+         if ( name == _T("to") )
             m_hasToFunc = true;
-         else if ( name == "recipients" )
+         else if ( name == _T("recipients") )
             m_hasRcptFunc = true;
-         else if ( name == "headerline" )
+         else if ( name == _T("headerline") )
             m_hasHdrLineFunc = true;
-         else if ( name == "header" )
+         else if ( name == _T("header") )
             m_hasHeaderFunc = true;
 
          return i.operator->();
@@ -1232,14 +1234,14 @@ static void PreProcessInput(String *input)
    String output;
    while(input->Length() && input->c_str()[0] == '@')
    {
-      const char *cptr = input->c_str()+1;
+      const wxChar *cptr = input->c_str()+1;
       String filename;
       while(*cptr && *cptr != '\n' && *cptr != '\r')
          filename += *cptr++;
       while(*cptr && (*cptr == '\r' || *cptr == '\n'))
          cptr++;
       *input = cptr;
-      FILE *fp = fopen(filename,"rt");
+      FILE *fp = wxFopen(filename, _T("rt"));
       if(fp)
       {
          fseek(fp, 0, SEEK_END);
@@ -1247,7 +1249,7 @@ static void PreProcessInput(String *input)
          fseek(fp, 0, SEEK_SET);
          if(len > 0)
          {
-            char *cp = new char[len + 1];
+            wxChar *cp = new wxChar[len + 1];
             if(fread(cp, 1, len, fp) > 0)
             {
                cp[len] = '\0';
@@ -1304,7 +1306,7 @@ FilterRuleImpl::ParseFilters(void)
 {
    MOcheck();
    const SyntaxNode * filter = NULL;
-   if(token.IsIdentifier("if"))
+   if(token.IsIdentifier(_T("if")))
    {
       filter = ParseIfElse();
    }
@@ -1329,7 +1331,7 @@ FilterRuleImpl::ParseIfElse(void)
 {
    MOcheck();
 
-   ASSERT(token.IsIdentifier("if"));
+   ASSERT(token.IsIdentifier(_T("if")));
    NextToken(); // swallow "if"
    if(!token.IsChar('('))
    {
@@ -1357,11 +1359,11 @@ FilterRuleImpl::ParseIfElse(void)
    }
 
    const SyntaxNode *elseBlock = NULL;
-   if(token.IsIdentifier("else"))
+   if(token.IsIdentifier(_T("else")))
    {
       // we must parse the else branch, too:
       NextToken(); // swallow the "else"
-      if(token.IsIdentifier("if"))
+      if(token.IsIdentifier(_T("if")))
          elseBlock = ParseIfElse();
       else
          elseBlock = ParseBlock();
@@ -1412,7 +1414,7 @@ FilterRuleImpl::ParseStmts(void)
 {
    MOcheck();
    const SyntaxNode * stmt;
-   if(token.IsIdentifier("if"))
+   if(token.IsIdentifier(_T("if")))
    {
       stmt = ParseIfElse();
       if(stmt == NULL)
@@ -1542,7 +1544,7 @@ OrOp(Token t)
          OPERATOR_VALUE(Or);
          default: return NULL;
       }
-   else if (t.IsIdentifier("or"))
+   else if (t.IsIdentifier(_T("or")))
       return OperatorOr::Create;
    return NULL;
 }
@@ -1574,7 +1576,7 @@ AndOp(Token t)
          OPERATOR_VALUE(And);
          default: return NULL;
       }
-   else if (t.IsIdentifier("and"))
+   else if (t.IsIdentifier(_T("and")))
       return OperatorAnd::Create;
    return NULL;
 }
@@ -1900,10 +1902,10 @@ bool CheckRBL( int a, int b, int c, int d, const String & rblDomain)
    int len;
 
    String domain;
-   domain.Printf("%d.%d.%d.%d.%s", d, c, b, a, rblDomain.c_str() );
+   domain.Printf(_T("%d.%d.%d.%d.%s"), d, c, b, a, rblDomain.c_str() );
 
    res_init();
-   len = res_query( domain.c_str(), C_IN, T_A,
+   len = res_query( wxConvertWX2MB(domain.c_str()), C_IN, T_A,
                     (unsigned char *)answerBuffer, PACKETSZ );
 
    if( len != -1 )
@@ -1913,7 +1915,7 @@ bool CheckRBL( int a, int b, int c, int d, const String & rblDomain)
          delete [] answerBuffer;
          answerBuffer = new char [ len ];
          // and again:
-         len = res_query( domain.c_str(), C_IN, T_A,
+         len = res_query( wxConvertWX2MB(domain.c_str()), C_IN, T_A,
                           (unsigned char *) answerBuffer, len );
       }
    }
@@ -1921,8 +1923,8 @@ bool CheckRBL( int a, int b, int c, int d, const String & rblDomain)
    return len != -1; // found, so it´s known spam
 }
 
-static const char * gs_RblSites[] =
-{ "rbl.maps.vix.com", "relays.orbs.org", "rbl.dorkslayers.com", NULL };
+static const wxChar * gs_RblSites[] =
+{ _T("rbl.maps.vix.com"), _T("relays.orbs.org"), _T("rbl.dorkslayers.com"), NULL };
 
 static bool findIP(String &header,
                    char openChar, char closeChar,
@@ -1942,7 +1944,7 @@ static bool findIP(String &header,
       if(closePos == wxNOT_FOUND)
          // no second bracket found
          break;
-      if(sscanf(ip.c_str(), "%d.%d.%d.%d", a,b,c,d) != 4)
+      if(wxSscanf(ip.c_str(), _T("%d.%d.%d.%d"), a,b,c,d) != 4)
       {
          // no valid IP number behind open bracket, continue
          // search:
@@ -1955,7 +1957,7 @@ static bool findIP(String &header,
             return true;
       }
    }
-   header = "";
+   header = _T("");
    return false;
 }
 
@@ -1998,7 +2000,7 @@ static bool CheckSubjectFor8Bit(const String& subject)
 static bool CheckSubjectForCapitals(const String& subject)
 {
    bool hasSpace = false;
-   for ( const char *pc = subject; *pc; pc++ )
+   for ( const wxChar *pc = subject; *pc; pc++ )
    {
       if ( islower(*pc) )
       {
@@ -2063,8 +2065,8 @@ static bool CheckMimePartForKoreanCSet(const MimePart *part)
       if ( CheckMimePartForKoreanCSet(part->GetNested()) )
          return true;
 
-      String cset = part->GetParam("charset").Lower();
-      if ( cset == "ks_c_5601-1987" || cset == "euc-kr" )
+      String cset = part->GetParam(_T("charset")).Lower();
+      if ( cset == _T("ks_c_5601-1987") || cset == _T("euc-kr") )
       {
          return true;
       }
@@ -2081,7 +2083,7 @@ static bool CheckXSpamStatus(const String& value)
 {
    // SpamAssassin adds header "X-Spam-Status: Yes" for the messages it
    // believes to be spams, so simply check if the header value looks like this
-   return value.Lower().StartsWith("yes");
+   return value.Lower().StartsWith(_T("yes"));
 }
 
 // check the value of X-Authentication-Warning header and return true if we
@@ -2089,14 +2091,14 @@ static bool CheckXSpamStatus(const String& value)
 static bool CheckXAuthWarning(const String& value)
 {
    // check for "^.*Host.+claimed to be.+$" regex manually
-   static const char *HOST_STRING = "Host ";
-   static const char *CLAIMED_STRING = "claimed to be ";
+   static const wxChar *HOST_STRING = _T("Host ");
+   static const wxChar *CLAIMED_STRING = _T("claimed to be ");
 
-   const char *pc = strstr(value, HOST_STRING);
+   const wxChar *pc = wxStrstr(value, HOST_STRING);
    if ( !pc )
       return false;
 
-   const char *pc2 = strstr(pc + 1, CLAIMED_STRING);
+   const wxChar *pc2 = wxStrstr(pc + 1, CLAIMED_STRING);
    if ( !pc2 )
       return false;
 
@@ -2113,11 +2115,11 @@ static bool CheckXAuthWarning(const String& value)
    // try to filter them out
 
    // skip to the hostnames
-   pc += strlen(HOST_STRING);
-   pc2 += strlen(CLAIMED_STRING);
+   pc += wxStrlen(HOST_STRING);
+   pc2 += wxStrlen(CLAIMED_STRING);
 
    // check if the host names are equal (case 1 above)
-   const char *host1 = pc,
+   const wxChar *host1 = pc,
               *host2 = pc2;
 
    bool hostsEqual = true;
@@ -2140,8 +2142,8 @@ static bool CheckXAuthWarning(const String& value)
    }
 
    // check if the domains match
-   const char *domain1 = strchr(pc, '.'),
-              *domain2 = strchr(pc2, '.');
+   const wxChar *domain1 = wxStrchr(pc, '.'),
+                *domain2 = wxStrchr(pc2, '.');
 
    if ( !domain1 || !domain2 )
    {
@@ -2166,12 +2168,12 @@ static bool CheckXAuthWarning(const String& value)
 // indicate that this is a spam
 static bool CheckReceivedHeaders(const String& value)
 {
-   static const char *FROM_UNKNOWN_STR = "from unknown";
-   static const size_t FROM_UNKNOWN_LEN = strlen(FROM_UNKNOWN_STR);
+   static const wxChar *FROM_UNKNOWN_STR = _T("from unknown");
+   static const size_t FROM_UNKNOWN_LEN = wxStrlen(FROM_UNKNOWN_STR);
 
    // "Received: from unknown" is very suspicious, especially if it appears in
    // the last "Received:" header, i.e. the first one in chronological order
-   const char *pc = strstr(value, FROM_UNKNOWN_STR);
+   const wxChar *pc = wxStrstr(value, FROM_UNKNOWN_STR);
    if ( !pc )
       return false;
 
@@ -2183,7 +2185,7 @@ static bool CheckReceivedHeaders(const String& value)
    // sometimes "from unknown" warnings for legitimate mail so we try to reduce
    // the number of false positives by checking the last header only as this is
    // normally the only one which the spammer directly controls
-   pc = strstr(pc + FROM_UNKNOWN_LEN, "\r\n");
+   pc = wxStrstr(pc + FROM_UNKNOWN_LEN, _T("\r\n"));
    if ( pc )
    {
       // skip the line end
@@ -2219,21 +2221,21 @@ static bool CheckForHTMLOnly(const Message *msg)
          {
             String subtype = type.GetSubType();
 
-            if ( subtype == "PLAIN" )
+            if ( subtype == _T("PLAIN") )
             {
                // check if it was really in the message or returned by c-client in
                // absence of MIME-Version
                String value;
-               if ( !msg->GetHeaderLine("MIME-Version", value) )
+               if ( !msg->GetHeaderLine(_T("MIME-Version"), value) )
                {
-                  if ( msg->GetHeaderLine("Content-Type", value) )
+                  if ( msg->GetHeaderLine(_T("Content-Type"), value) )
                   {
-                     if ( strstr(value.MakeLower(), "text/html") )
+                     if ( wxStrstr(value.MakeLower(), _T("text/html")) )
                         return true;
                   }
                }
             }
-            else if ( subtype == "HTML" )
+            else if ( subtype == _T("HTML") )
             {
                return true;
             }
@@ -2289,45 +2291,45 @@ static bool CheckForHTMLOnly(const Message *msg)
 // FIXME: Match address groups (wx-*@wxwindows.org) and domains
 static bool CheckWhiteList(const Message *msg)
 {
-   static const char *headers[] =
+   static const wxChar *headers[] =
    {
       // Source
-      "From",
-      "Sender",
-      "Reply-To",
+      _T("From"),
+      _T("Sender"),
+      _T("Reply-To"),
       // Destination
-      "To",
-      "Cc",
-      "Bcc",
+      _T("To"),
+      _T("Cc"),
+      _T("Bcc"),
       // List
-      "List-Id",
-      "List-Help",
-      "List-Subscribe",
-      "List-Unsubscribe",
-      "List-Post",
-      "List-Owner",
-      "List-Archive",
+      _T("List-Id"),
+      _T("List-Help"),
+      _T("List-Subscribe"),
+      _T("List-Unsubscribe"),
+      _T("List-Post"),
+      _T("List-Owner"),
+      _T("List-Archive"),
       // Obscure
-      "Resent-To",
-      "Resent-Cc",
-      "Resent-Bcc",
-      "Resent-From",
-      "Resent-Sender",
+      _T("Resent-To"),
+      _T("Resent-Cc"),
+      _T("Resent-Bcc"),
+      _T("Resent-From"),
+      _T("Resent-Sender"),
       // Non-standard - some entries can be probably removed without danger
-      "Envelope-To",            // Exim
-      "X-Envelope-To",          // Sendmail
-      "Apparently-To",          // Procmail ^TO
-      "X-Envelope-From",        // Procmail ^FROM_DAEMON
-      "Mailing-List",           // Ezmlm and Yahoo
-      "X-Mailing-List",         // SmartList
-      "X-BeenThere",            // Mailman
-      "Delivered-To",           // qmail
-      "X-Delivered-To",         // fastmail.fm
-      "X-Original-To",          // postfix 2.0
-      "X-Rcpt-To",              // best.com
-      "X-Real-To",              // CommuniGate Pro
-      "X-MDMailing-List",       // Nancy Mc'Gough's Procmail Faq
-      "Return-Path",            // Nancy Mc'Gough's Procmail Faq
+      _T("Envelope-To"),            // Exim
+      _T("X-Envelope-To"),          // Sendmail
+      _T("Apparently-To"),          // Procmail ^TO
+      _T("X-Envelope-From"),        // Procmail ^FROM_DAEMON
+      _T("Mailing-List"),           // Ezmlm and Yahoo
+      _T("X-Mailing-List"),         // SmartList
+      _T("X-BeenThere"),            // Mailman
+      _T("Delivered-To"),           // qmail
+      _T("X-Delivered-To"),         // fastmail.fm
+      _T("X-Original-To"),          // postfix 2.0
+      _T("X-Rcpt-To"),              // best.com
+      _T("X-Real-To"),              // CommuniGate Pro
+      _T("X-MDMailing-List"),       // Nancy Mc'Gough's Procmail Faq
+      _T("Return-Path"),            // Nancy Mc'Gough's Procmail Faq
       NULL
    };
 
@@ -2396,7 +2398,7 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
       case 0:
          // for compatibility: before, this function didn't take any arguments
          // and only checked the RBL
-         arg = "rbl";
+         arg = _T("rbl");
          break;
 
       case 1:
@@ -2454,7 +2456,7 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
       {
          // SpamAssassin adds header "X-Spam-Status: Yes" to all (probably)
          // detected spams
-         if ( msg->GetHeaderLine("X-Spam-Status", value) &&
+         if ( msg->GetHeaderLine(_T("X-Spam-Status"), value) &&
                   CheckXSpamStatus(value) )
          {
             gs_spamTest = _("tagged by SpamAssassin");
@@ -2464,7 +2466,7 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
       {
          // unfortunately not only spams have this header but we consider that
          // only spammers change their address in such way
-         if ( msg->GetHeaderLine("X-Authentication-Warning", value) &&
+         if ( msg->GetHeaderLine(_T("X-Authentication-Warning"), value) &&
                   CheckXAuthWarning(value) )
          {
             gs_spamTest = _("contains X-Authentication-Warning");
@@ -2472,7 +2474,7 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
       }
       else if ( test == SPAM_TEST_RECEIVED )
       {
-         if ( msg->GetHeaderLine("Received", value) &&
+         if ( msg->GetHeaderLine(_T("Received"), value) &&
                   CheckReceivedHeaders(value) )
          {
             gs_spamTest = _("suspicious \"Received:\"");
@@ -2496,7 +2498,7 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
 #ifdef USE_RBL
       else if ( test == SPAM_TEST_RBL )
       {
-         msg->GetHeaderLine("Received", value);
+         msg->GetHeaderLine(_T("Received"), value);
 
          int a,b,c,d;
          String testHeader = value;
@@ -2694,7 +2696,7 @@ static Value func_print(ArgList *args, FilterRuleImpl *p)
 
    Message * msg = p->GetMessage();
    if(! msg)
-      return Value("");
+      return Value(_T(""));
 
    // FIXME: this can't work like this!!
 #if 0
@@ -2721,10 +2723,10 @@ static Value func_print(ArgList *args, FilterRuleImpl *p)
 static Value func_subject(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
-      return Value("");
+      return Value(_T(""));
    Message_obj msg(p->GetMessage());
    if(! msg)
-      return Value("");
+      return Value(_T(""));
 
    return Value(msg->Subject());
 }
@@ -2732,10 +2734,10 @@ static Value func_subject(ArgList *args, FilterRuleImpl *p)
 static Value func_from(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
-      return Value("");
+      return Value(_T(""));
    Message_obj msg(p->GetMessage());
    if(! msg)
-      return Value("");
+      return Value(_T(""));
 
    return Value(msg->From());
 }
@@ -2743,13 +2745,13 @@ static Value func_from(ArgList *args, FilterRuleImpl *p)
 static Value func_to(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
-      return Value("");
+      return Value(_T(""));
    Message_obj msg(p->GetMessage());
    if(! msg)
-      return Value("");
+      return Value(_T(""));
 
    String tostr;
-   msg->GetHeaderLine("To", tostr);
+   msg->GetHeaderLine(_T("To"), tostr);
    return Value(tostr);
 }
 
@@ -2796,7 +2798,7 @@ static Value func_istome(ArgList *args, FilterRuleImpl *p)
    if ( msg )
    {
       String value;
-      if ( msg->GetHeaderLine("List-Post", value) )
+      if ( msg->GetHeaderLine(_T("List-Post"), value) )
       {
          return Value(true);
       }
@@ -2831,17 +2833,17 @@ static Value func_hasflag(ArgList *args, FilterRuleImpl *p)
       return Value(false);
    int status = msg->GetStatus();
 
-   if      ( flag_str == "U" )   // Unread (result is inverted)
+   if      ( flag_str == _T("U") )   // Unread (result is inverted)
       return Value(status & MailFolder::MSG_STAT_SEEN     ? false : true);
-   else if ( flag_str == "D" )   // Deleted
+   else if ( flag_str == _T("D") )   // Deleted
       return Value(status & MailFolder::MSG_STAT_DELETED  ? true  : false);
-   else if ( flag_str == "A" )   // Answered
+   else if ( flag_str == _T("A") )   // Answered
       return Value(status & MailFolder::MSG_STAT_ANSWERED ? true  : false);
-   else if ( flag_str == "R" )   // Recent
+   else if ( flag_str == _T("R") )   // Recent
       return Value(status & MailFolder::MSG_STAT_RECENT   ? true  : false);
-// else if ( flag_str == "S" )   // Search match
+// else if ( flag_str == _T("S") )   // Search match
 //    return Value(status & MailFolder::MSG_STAT_SEARCHED ? true  : false);
-   else if ( flag_str == "*" )   // Flagged/Important
+   else if ( flag_str == _T("*") )   // Flagged/Important
       return Value(status & MailFolder::MSG_STAT_FLAGGED  ? true  : false);
 
    return Value(false);
@@ -2850,10 +2852,10 @@ static Value func_hasflag(ArgList *args, FilterRuleImpl *p)
 static Value func_header(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
-      return Value("");
+      return Value(_T(""));
    Message * msg = p->GetMessage();
    if(! msg)
-      return Value("");
+      return Value(_T(""));
    String subj = msg->GetHeader();
    msg->DecRef();
    return Value(subj);
@@ -2862,12 +2864,12 @@ static Value func_header(ArgList *args, FilterRuleImpl *p)
 static Value func_headerline(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 1)
-      return Value("");
+      return Value(_T(""));
    const Value v1 = args->GetArg(0)->Evaluate();
    String field = v1.ToString();
    Message * msg = p->GetMessage();
    if(! msg)
-      return Value("");
+      return Value(_T(""));
    String result;
    msg->GetHeaderLine(field, result);
    msg->DecRef();
@@ -2877,10 +2879,10 @@ static Value func_headerline(ArgList *args, FilterRuleImpl *p)
 static Value func_body(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
-      return Value("");
+      return Value(_T(""));
    Message * msg = p->GetMessage();
    if(! msg)
-      return Value("");
+      return Value(_T(""));
    String str;
    msg->WriteToString(str, false);
    msg->DecRef();
@@ -2890,10 +2892,10 @@ static Value func_body(ArgList *args, FilterRuleImpl *p)
 static Value func_text(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
-      return Value("");
+      return Value(_T(""));
    Message * msg = p->GetMessage();
    if(! msg)
-      return Value("");
+      return Value(_T(""));
    String str;
    msg->WriteToString(str, true);
    msg->DecRef();
@@ -3097,21 +3099,21 @@ static Value func_do_setflag(ArgList *args, FilterRuleImpl *p, bool set)
       return Value(false);
 
    int flag = 0;
-   if      ( flag_str == "U" )   // Unread, inverse of actual flag (SEEN)
+   if      ( flag_str == _T("U") )   // Unread, inverse of actual flag (SEEN)
    {
       flag = MailFolder::MSG_STAT_SEEN;
       set  = ! set;
    }
-   else if ( flag_str == "D" )   // Deleted
+   else if ( flag_str == _T("D") )   // Deleted
       flag = MailFolder::MSG_STAT_DELETED;
-   else if ( flag_str == "A" )   // Answered
+   else if ( flag_str == _T("A") )   // Answered
       flag = MailFolder::MSG_STAT_ANSWERED;
    // The Recent flag is not changable.
-   // else if ( flag_str == "R" )   // Recent
+   // else if ( flag_str == _T("R") )   // Recent
    //   flag = MailFolder::MSG_STAT_RECENT;
-// else if ( flag_str == "S" )   // Search match
+// else if ( flag_str == _T("S") )   // Search match
 //    flag = MailFolder::MSG_STAT_SEARCHED;
-   else if ( flag_str == "*" )   // Flagged/Important
+   else if ( flag_str == _T("*") )   // Flagged/Important
       flag = MailFolder::MSG_STAT_FLAGGED;
    else
       return Value(false);
@@ -3177,45 +3179,45 @@ BuiltinFunctions(void)
       #define Define(name, fn) \
          s_builtinFuncList.push_back(FunctionDefinition(name, fn))
 
-         Define("message", func_msgbox);
-         Define("log", func_log);
-         Define("match", func_match);
-         Define("contains", func_contains);
-         Define("matchi", func_matchi);
-         Define("containsi", func_containsi);
-         Define("matchregex", func_matchregex);
-         Define("subject", func_subject);
-         Define("to", func_to);
-         Define("recipients", func_recipients);
-         Define("headerline", func_headerline);
-         Define("from", func_from);
-         Define("hasflag", func_hasflag);
-         Define("header", func_header);
-         Define("body", func_body);
-         Define("text", func_text);
-         Define("delete", func_delete);
-         Define("zap", func_zap);
-         Define("copy", func_copytofolder);
-         Define("move", func_movetofolder);
-         Define("print", func_print);
-         Define("date", func_date);
-         Define("size", func_size);
-         Define("now", func_now);
-         Define("isspam", func_isspam);
-         Define("expunge", func_expunge);
-         Define("python", func_python);
-         Define("matchregexi", func_matchregexi);
-         Define("setcolour", func_setcolour);
-         Define("score", func_score);
-         Define("setscore", func_setscore);
-         Define("addscore", func_addscore);
-         Define("istome", func_istome);
-         Define("setflag", func_setflag);
-         Define("clearflag", func_clearflag);
-         Define("isfromme", func_isfromme);
+         Define(_T("message"), func_msgbox);
+         Define(_T("log"), func_log);
+         Define(_T("match"), func_match);
+         Define(_T("contains"), func_contains);
+         Define(_T("matchi"), func_matchi);
+         Define(_T("containsi"), func_containsi);
+         Define(_T("matchregex"), func_matchregex);
+         Define(_T("subject"), func_subject);
+         Define(_T("to"), func_to);
+         Define(_T("recipients"), func_recipients);
+         Define(_T("headerline"), func_headerline);
+         Define(_T("from"), func_from);
+         Define(_T("hasflag"), func_hasflag);
+         Define(_T("header"), func_header);
+         Define(_T("body"), func_body);
+         Define(_T("text"), func_text);
+         Define(_T("delete"), func_delete);
+         Define(_T("zap"), func_zap);
+         Define(_T("copy"), func_copytofolder);
+         Define(_T("move"), func_movetofolder);
+         Define(_T("print"), func_print);
+         Define(_T("date"), func_date);
+         Define(_T("size"), func_size);
+         Define(_T("now"), func_now);
+         Define(_T("isspam"), func_isspam);
+         Define(_T("expunge"), func_expunge);
+         Define(_T("python"), func_python);
+         Define(_T("matchregexi"), func_matchregexi);
+         Define(_T("setcolour"), func_setcolour);
+         Define(_T("score"), func_score);
+         Define(_T("setscore"), func_setscore);
+         Define(_T("addscore"), func_addscore);
+         Define(_T("istome"), func_istome);
+         Define(_T("setflag"), func_setflag);
+         Define(_T("clearflag"), func_clearflag);
+         Define(_T("isfromme"), func_isfromme);
 #ifdef TEST
-         Define("nargs", func_nargs);
-         Define("arg", func_arg);
+         Define(_T("nargs"), func_nargs);
+         Define(_T("arg"), func_arg);
 #endif
 
 #undef Define
@@ -3329,7 +3331,7 @@ FilterRuleApply::Run()
    // check if Cancel wasn't pressed (we'd exit the loop above by break then)
    if ( m_idx == m_msgs.GetCount() &&
         (!m_pd ||
-            m_pd->Update(m_msgs.GetCount(), GetExecuteProgressString(""))) )
+            m_pd->Update(m_msgs.GetCount(), GetExecuteProgressString(_T("")))) )
    {
       if ( !LoopCopy() )
       {
@@ -3373,7 +3375,7 @@ FilterRuleApply::LoopEvaluate()
       // do it first so that the arrays have the right size even if we hit
       // "continue" below
       m_allOperations.Add(FilterRuleImpl::None);
-      m_destinations.Add("");
+      m_destinations.Add(_T(""));
 
       if ( !GetMessage() )
       {
@@ -3460,7 +3462,7 @@ FilterRuleApply::CreateProgressDialog()
                      m_msgs.GetCount(),
                      m_parent->m_MailFolder->GetName().c_str()
                   ),
-                  "\n\n",  // must be tall enough for 3 lines
+                  _T("\n\n"),  // must be tall enough for 3 lines
                   2*m_msgs.GetCount(),
                   frame,
                   false,   // !"disable parent only"
@@ -3609,7 +3611,7 @@ String FilterRuleApply::CreditsForStatusBar()
       String subject;
       GetSenderSubject(from,subject);
    
-      textLog << " (";
+      textLog << _T(" (");
 
       if ( !from.empty() )
       {
@@ -3705,12 +3707,12 @@ FilterRuleApply::UpdateProgressDialog()
       //
       // NB: textLog may contain '%'s itself, so don't let it be
       //     interpreted as a format string
-      wxLogGeneric(M_LOG_WINONLY, "%s", textLog.c_str());
+      wxLogGeneric(M_LOG_WINONLY, _T("%s"), textLog.c_str());
    }
    else // no progress dialog
    {
       // see comment above
-      wxLogStatus("%s", textLog.c_str());
+      wxLogStatus(_T("%s"), textLog.c_str());
    }
 
    return true;
@@ -3839,18 +3841,18 @@ protected:
 };
 
 MMODULE_BEGIN_IMPLEMENT(MModule_FiltersImpl,
-                        "Filters",
+                        _T("Filters"),
                         MMODULE_INTERFACE_FILTERS,
                         _("Filtering capabilities plugin"),
-                        "0.00")
-   MMODULE_PROP("description",
+                        _T("0.00"))
+   MMODULE_PROP(_T("description"),
                 _("This plug-in provides a filtering language for Mahogany.\n"
                   "\n"
                   "It is an interpreter for a simplified algebraic language "
                   "which allows one to apply different tests and operations "
                   "to messages, like sorting, replying or moving them "
                   "automatically."))
-   MMODULE_PROP("author", "Karsten Ballüder <karsten@phy.hw.ac.uk>")
+   MMODULE_PROP(_T("author"), _T("Karsten Ballüder <karsten@phy.hw.ac.uk>"))
 MMODULE_END_IMPLEMENT(MModule_FiltersImpl)
 
 FilterRule *

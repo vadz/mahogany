@@ -1510,12 +1510,12 @@ wxMApp::Help(int UNUSED_IF_WIN(id), wxWindow * UNUSED_IF_WIN(parent))
 void
 wxMApp::LoadModules(void)
 {
-   wxChar *modulestring;
    kbStringList modules;
    kbStringList::iterator i;
 
-   modulestring = strutil_strdup(READ_APPCONFIG(MP_MODULES));
-   strutil_tokenise(modulestring, _T(":"), modules);
+   String moduleString = READ_APPCONFIG(MP_MODULES);
+   char *modulestring = strutil_strdup(wxConvertWX2MB(moduleString));
+   strutil_tokenise(modulestring, ":", modules);
    delete [] modulestring;
 
    MModule *module;

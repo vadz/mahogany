@@ -82,7 +82,7 @@ private:
 // generic
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_M_IMPORTER(MXFMailImporter, "XFMail",
+IMPLEMENT_M_IMPORTER(MXFMailImporter, _T("XFMail"),
                      gettext_noop("Import settings from XFMail"))
 
 int MXFMailImporter::GetFeatures() const
@@ -96,7 +96,7 @@ int MXFMailImporter::GetFeatures() const
 
 /* static */ wxString MXFMailImporter::GetXFMailDir()
 {
-   return wxExpandEnvVars("$HOME/.xfmail/");
+   return wxExpandEnvVars(_T("$HOME/.xfmail/"));
 }
 
 bool MXFMailImporter::Applies() const
@@ -114,17 +114,17 @@ void MXFMailImporter::ImportSetting(const wxString& xfmailrc,
                                     const wxString& value)
 {
    Profile *profile = mApplication->GetProfile();
-   if ( var == "nntphost" )
+   if ( var == _T("nntphost") )
    {
       profile->writeEntry(MP_NNTPHOST, value);
       wxLogMessage(_("Imported NNTP host setting from %s: %s."),
                    "XFMail", value.c_str());
    }
-   else if ( var == "nntpuser" )
+   else if ( var == _T("nntpuser") )
    {
       // TODO
    }
-   else if ( var == "from" )
+   else if ( var == _T("from") )
    {
       String personalName = Message::GetNameFromAddress(value);
       if ( !!personalName )
@@ -134,17 +134,17 @@ void MXFMailImporter::ImportSetting(const wxString& xfmailrc,
                       "XFMail", personalName.c_str());
       }
    }
-   else if ( var == "replyexand" )
+   else if ( var == _T("replyexand") )
    {
       profile->writeEntry(MP_FROM_ADDRESS, value);
       wxLogMessage(_("Imported return address setting from %s: %s."),
                    "XFMail", value.c_str());
    }
-   else if ( var == "myface" )
+   else if ( var == _T("myface") )
    {
       // TODO
    }
-   else if ( var == "maildir" )
+   else if ( var == _T("maildir") )
    {
       // remember it for ImportFolders()
       m_mailDir = value;
@@ -153,7 +153,7 @@ void MXFMailImporter::ImportSetting(const wxString& xfmailrc,
 
 bool MXFMailImporter::ImportSettings()
 {
-   wxString filename = GetXFMailDir() + ".xfmailrc";
+   wxString filename = GetXFMailDir() + _T(".xfmailrc");
    wxTextFile file(filename);
    if ( !file.Open() )
    {
@@ -195,7 +195,7 @@ bool MXFMailImporter::ImportSettings()
 
 bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
 {
-   wxString foldersfilename = GetXFMailDir() + ".xfmfolders";
+   wxString foldersfilename = GetXFMailDir() + _T(".xfmfolders");
    wxTextFile foldersfile(foldersfilename);
    if ( !foldersfile.Open() )
    {
@@ -206,7 +206,7 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
 
    // find the directory where XFMail folders live by default (i.e. the
    // relative paths are relative to this maildir)
-   wxString filenamerc = GetXFMailDir() + ".xfmailrc";
+   wxString filenamerc = GetXFMailDir() + _T(".xfmailrc");
    wxTextFile filerc(filenamerc);
    if ( filerc.Open() )
    {
@@ -227,7 +227,7 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
          }
 
          wxString var(line, (size_t)nEq), value = line.c_str() + nEq + 1;
-         if ( var == "maildir" && !!value )
+         if ( var == _T("maildir") && !!value )
          {
             ImportSetting(filenamerc, nLine + 1, var, value);
          }
@@ -235,7 +235,7 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
    }
 
    if ( !m_mailDir )
-      m_mailDir = wxExpandEnvVars("$HOME/Mail");
+      m_mailDir = wxExpandEnvVars(_T("$HOME/Mail"));
 
    if ( m_mailDir.Last() != '/' )
       m_mailDir += '/';
@@ -256,7 +256,7 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
 
       // first get the folder name
       wxString folderName;
-      const char *p = line.c_str() + 2;
+      const wxChar *p = line.c_str() + 2;
       while ( *p != ' ' )
          folderName += *p++;
 
@@ -360,12 +360,12 @@ bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
       // find the parent for the folder we're going to import
       MFolder *parent = NULL;
       if ( (flags & SYSTEM) ||
-            folderName == "inbox" ||
-            folderName == "outbox" ||
-            folderName == "trash" ||
-            folderName == "sent_mail" ||
-            folderName == "draft" ||
-            folderName == "template" )
+            folderName == _T("inbox") ||
+            folderName == _T("outbox") ||
+            folderName == _T("trash") ||
+            folderName == _T("sent_mail") ||
+            folderName == _T("draft") ||
+            folderName == _T("template") )
       {
          wxLogTrace(_T("importxfmail"),
                     _T("%s(%lu): folder %s is a system folder."),
@@ -466,13 +466,13 @@ bool MXFMailImporter::ImportADB()
    // first, find all XFMail ADBs
    wxArrayString xfmailADBs;
 
-   const wxString XFMAIL_ADB_PREFIX = ".xfbook";
+   const wxString XFMAIL_ADB_PREFIX = _T(".xfbook");
    wxString dirname = GetXFMailDir();
    wxDir dir(dirname);
    if ( dir.IsOpened() )
    {
       wxString filename;
-      bool cont = dir.GetFirst(&filename, XFMAIL_ADB_PREFIX + '*',
+      bool cont = dir.GetFirst(&filename, XFMAIL_ADB_PREFIX + _T('*'),
                                wxDIR_FILES | wxDIR_HIDDEN);
       while ( cont )
       {
@@ -491,7 +491,7 @@ bool MXFMailImporter::ImportADB()
       return FALSE;
    }
 
-   AdbImporter *importer = AdbImporter::GetImporterByName("AdbXFMailImporter");
+   AdbImporter *importer = AdbImporter::GetImporterByName(_T("AdbXFMailImporter"));
    if ( !importer )
    {
       wxLogError(_("%s address book import module not found."),"XFMail");
@@ -507,7 +507,7 @@ bool MXFMailImporter::ImportADB()
                adbname = xfmailADBs[n].c_str() + XFMAIL_ADB_PREFIX.length();
       if ( !adbname )
       {
-         adbname = "xfmail";
+         adbname = _T("xfmail");
          adbusername = _("Default XFMail address book");
       }
       else
@@ -516,7 +516,7 @@ bool MXFMailImporter::ImportADB()
          adbname = adbname.c_str() + 1;
          adbusername = adbname;
       }
-      adbname += ".adb";
+      adbname += _T(".adb");
 
       wxString path = dirname + xfmailADBs[n];
       if ( AdbImport(path, adbname, adbusername, importer) )
@@ -537,7 +537,7 @@ bool MXFMailImporter::ImportADB()
 bool MXFMailImporter::ImportFilters()
 {
    // read the XFMail rules file
-   wxString filename = GetXFMailDir() + ".xfmrules";
+   wxString filename = GetXFMailDir() + _T(".xfmrules");
    wxTextFile file(filename);
    if ( !file.Open() )
    {
@@ -586,7 +586,7 @@ typedef struct _xf_rule {
 #endif // 0
 
       const wxString& line = file[nLine];
-      const char *p = line.c_str();
+      const wxChar *p = line.c_str();
       if ( *p++ != '@' )
       {
          wxLogTrace(_T("importxfmail"),
@@ -597,7 +597,7 @@ typedef struct _xf_rule {
       }
 
       // tokenize the string
-      wxStringTokenizer tk(p, " ");
+      wxStringTokenizer tk(p, _T(" "));
       if ( tk.CountTokens() != 5 )
       {
          wxLogTrace(_T("importxfmail"),
@@ -627,16 +627,16 @@ typedef struct _xf_rule {
 
       // translate XFMail rule to our form
 
-      static const char *headers[] =
+      static const wxChar *headers[] =
       {
-         "Subject",
-         "Header",
-         "From",
-         "Body",
-         "Message",
-         "To",
-         "Sender",
-         "Recipients"
+         _T("Subject"),
+         _T("Header"),
+         _T("From"),
+         _T("Body"),
+         _T("Message"),
+         _T("To"),
+         _T("Sender"),
+         _T("Recipients")
       };
       MFDialogTarget where = ORC_W_Illegal;
       for ( size_t n = 0; n < WXSIZEOF(headers); n++ )

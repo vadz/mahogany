@@ -323,7 +323,7 @@ public:
    virtual bool HasPrevPage(wxWizardPage *page);
 
    // implement ListEventReceiver methods
-   virtual void OnListFolder(const String& path, char delim, long flags);
+   virtual void OnListFolder(const String& path, wxChar delim, long flags);
    virtual void OnNoMoreFolders();
 
 private:
@@ -619,14 +619,14 @@ private:
 // ============================================================================
 
 MMODULE_BEGIN_IMPLEMENT(MigrateModule,
-                        "Migrate",
-                        "Migrate",
-                        "Migration tool",
-                        "1.00")
-   MMODULE_PROP("description",
+                        _T("Migrate"),
+                        _T("Migrate"),
+                        _T("Migration tool"),
+                        _T("1.00"))
+   MMODULE_PROP(_T("description"),
                 _("Allows to migrate entire IMAP server mail hierarchy to "
                   "another IMAP server or local storage."))
-   MMODULE_PROP("author", "Vadim Zeitlin <vadim@wxwindows.org>")
+   MMODULE_PROP(_T("author"), _T("Vadim Zeitlin <vadim@wxwindows.org>"))
 MMODULE_END_IMPLEMENT(MigrateModule)
 
 /* static */
@@ -1008,7 +1008,7 @@ const wxChar *LocalPanel::GetFormatName(FileMailboxFormat format)
    ASSERT_MSG( (size_t)format < WXSIZEOF(formatNames),
                _T("mailbox format out of range") );
 
-   return _(formatNames[format]);
+   return wxGetTranslation(formatNames[format]);
 }
 
 // ----------------------------------------------------------------------------
@@ -1977,7 +1977,7 @@ bool MigrateWizard::HasPrevPage(wxWizardPage *page)
 }
 
 void
-MigrateWizard::OnListFolder(const String& path, char delim, long flags)
+MigrateWizard::OnListFolder(const String& path, wxChar delim, long flags)
 {
    Data().AddFolder(path, delim, flags);
 }

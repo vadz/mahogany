@@ -466,7 +466,7 @@ PGPEngine::DoExecCommand(const String& options,
    PGPProcess process;
    String command = wxString::Format
                (
-                "%s --status-fd=2 --command-fd 0 --output - -a %s",
+                _T("%s --status-fd=2 --command-fd 0 --output - -a %s"),
                 READ_APPCONFIG_TEXT(MP_PGP_COMMAND).c_str(),
                 options.c_str()
                );
@@ -508,7 +508,7 @@ PGPEngine::DoExecCommand(const String& options,
           pass;
 
    messageOut.clear();
-   char buf[4096];
+   wxChar buf[4096];
 
    bool outEof = false,
         errEof = false;
@@ -543,7 +543,7 @@ PGPEngine::DoExecCommand(const String& options,
          if ( line.StartsWith(_T("[GNUPG:] "), &line) )
          {
             String code;
-            const char *pc;
+            const wxChar *pc;
             for ( pc = line.c_str(); *pc && !isspace(*pc); pc++ )
             {
                code += *pc;
@@ -652,7 +652,7 @@ PGPEngine::DoExecCommand(const String& options,
                // give gpg whatever it's asking for, otherwise we'd deadlock!
                if ( code == _T("GET_HIDDEN") )
                {
-                  if ( strcmp(pc, _T("passphrase.enter")) == 0 )
+                  if ( wxStrcmp(pc, _T("passphrase.enter")) == 0 )
                   {
                      // we're being asked for a passphrase
                      String pass2 = pass;
@@ -680,7 +680,7 @@ PGPEngine::DoExecCommand(const String& options,
             }
             else if ( code == _T("IMPORTED") )
             {
-               const char * const pSpace = strchr(pc, ' ');
+               const wxChar * const pSpace = wxStrchr(pc, ' ');
                if ( pSpace )
                {
                   log->SetPublicKey(String(pc, pSpace));
