@@ -18,9 +18,15 @@ $Id$
 		- selections: do not exchange end/start while
 		  selecting but only at end, so moving selection
 		  across start behaves correctly
+		- selecting with keyboard uses mouse cursor as
+		  starting position :-)
 		- selection mit cursor a bit funny
 		- editing leaks MObjects
 		- write editor plugin translating keysyms to actions
+		- scroll to cursor after Find()
+		- ctrl keys not recognised when CAPSLOCK is down
+
+		garbage at end of messages is back
 
 	KB	MessageView:
 		 - should show cursor only on demand
@@ -33,6 +39,11 @@ $Id$
 		main window hides about-splash - not nice
 		--> 2nd timer to bring it to top and run wxYield() to
 		    update it?
+
+		posting news article --> cannot find mailbox for callback
+
+9		exiting program does not call auto-expunge
+		functionality in main folder
 
 7		After setting date format and closing date fmt dialog, 
 		main config dialog remains completely disabled under
@@ -152,7 +163,10 @@ $Id$
 *********************************************************************
 * PRI	WHO	DESCRIPTION
 *********************************************************************
-        KB	wxModulesDialog: add decref/load as reaction to check/uncheck?
+
+		Config and wxWin support for different character sets
+
+	KB	wxModulesDialog: add decref/load as reaction to check/uncheck?
 
 MFrame classname obsolete?
 
