@@ -60,7 +60,7 @@ public:
       PUBLIC_KEY_DECRIPTION_ERROR,
       DECRYPTION_ERROR,
       DECOMPRESSION_ERROR,
-      NO_SIG_ERROR,                 // no signature in VerifySignature()
+      NO_DATA_ERROR,                // or no signature in VerifySignature()
       NOT_IMPLEMENTED_ERROR,        // operation not implemented by this engine
       MAX_ERROR
    };
@@ -174,7 +174,7 @@ public:
 class MCryptoEngineOutputLog
 {
 public:
-   MCryptoEngineOutputLog() { }
+   MCryptoEngineOutputLog(wxWindow *parent) { m_parent = parent; }
 
    void AddMessage(const String& line) { m_messages.Add(line); }
 
@@ -184,9 +184,23 @@ public:
    const String& GetUserID() const { return m_userID; }
    void  SetUserID(const String& userID) { m_userID = userID; }
 
+   const String& GetPublicKey() const { return m_pubkey; }
+   void  SetPublicKey(const String& pubkey) { m_pubkey = pubkey; }
+
+   wxWindow *GetParent() const { return m_parent; }
+
 private:
+   // the parent window for the dialogs which we may shown
+   wxWindow     *m_parent;
+
+   // uninterpreted output of PGP program
    wxArrayString m_messages;
+
+   // the user id mentioned in the PGP output
    String        m_userID;
+
+   // the public key mentioned in the PGP output
+   String        m_pubkey;
 };
 
 // ----------------------------------------------------------------------------

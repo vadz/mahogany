@@ -41,12 +41,14 @@
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_PGP_COMMAND;
+extern const MOption MP_PGP_KEYSERVER;
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
 extern const MPersMsgBox *M_MSGBOX_REMEMBER_PGP_PASSPHRASE;
+extern const MPersMsgBox *M_MSGBOX_GET_PGP_PUBKEY;
 
 // ----------------------------------------------------------------------------
 // PassphraseManager: this class can be used to remember the passphrases
@@ -121,12 +123,24 @@ public:
 
 protected:
    /**
-      Executes the tool with messageIn on stdin and puts stdout into messageOut
+      Executes PGP/GPG with messageIn on stdin and puts stdout into messageOut.
+
+      @param options are hte PGP/GPG program options
+      @param messageIn will be written to child stdin
+      @param messageOut will contain child stdout
+      @param log may contain miscellaneous additional info
+      @return the status code
     */
    Status ExecCommand(const String& options,
                       const String& messageIn,
                       String& messageOut,
                       MCryptoEngineOutputLog *log);
+
+   /// this is the worker function used by ExecCommand()
+   Status DoExecCommand(const String& options,
+                        const String& messageIn,
+                        String& messageOut,
+                        MCryptoEngineOutputLog *log);
 
 private:
    DECLARE_CRYPTO_ENGINE(PGPEngine)
@@ -436,10 +450,10 @@ private:
 };
 
 PGPEngine::Status
-PGPEngine::ExecCommand(const String& options,
-                       const String& messageIn,
-                       String& messageOut,
-                       MCryptoEngineOutputLog *log)
+PGPEngine::DoExecCommand(const String& options,
+                         const String& messageIn,
+                         String& messageOut,
+                         MCryptoEngineOutputLog *log)
 {
    PGPProcess process;
    long pid = wxExecute
@@ -553,7 +567,7 @@ PGPEngine::ExecCommand(const String& options,
             }
             else if ( code == _T("NODATA") )
             {
-               status = NO_SIG_ERROR;
+               status = NO_DATA_ERROR;
             }
             else if ( code.StartsWith(_T("TRUST_")) )
             {
@@ -641,13 +655,31 @@ PGPEngine::ExecCommand(const String& options,
             }
             else if ( code == _T("NO_PUBKEY") )
             {
+               log->SetPublicKey(pc);              // till the end of line
+
                status = NONEXISTING_KEY_ERROR;
+            }
+            else if ( code == _T("IMPORTED") )
+            {
+               const char * const pSpace = strchr(pc, ' ');
+               if ( pSpace )
+               {
+                  log->SetPublicKey(String(pc, pSpace));
+                  log->SetUserID(pSpace + 1);      // till the end of line
+
+                  status = OK;
+               }
+               else // no space in "IMPORTED" line?
+               {
+                  wxLogDebug(_T("Weird IMPORTED reply: %s"), pc);
+               }
             }
             else if ( code == _T("ENC_TO") ||
                       code == _T("NO_SECKEY") ||
                       code == _T("BEGIN_DECRYPTION") ||
                       code == _T("END_DECRYPTION") ||
                       code == _T("GOT_IT") ||
+                      code == _T("IMPORT_OK") ||
                       code == _T("IMPORT_RES") )
             {
                // ignore these
@@ -684,6 +716,76 @@ PGPEngine::ExecCommand(const String& options,
    // scope
    while ( !process.IsDone() )
       wxYield();
+
+   return status;
+}
+
+PGPEngine::Status
+PGPEngine::ExecCommand(const String& options,
+                       const String& messageIn,
+                       String& messageOut,
+                       MCryptoEngineOutputLog *log)
+{
+   Status status = DoExecCommand(options, messageIn, messageOut, log);
+   if ( status == NONEXISTING_KEY_ERROR )
+   {
+      // propose to the user to retrieve the key from a keyserver
+      if ( MDialog_YesNoDialog
+           (
+               wxString::Format(
+                 _("This message was prepared using a public key which you "
+                   "don't have in the local keyring.\n"
+                   "\n"
+                   "Would you like to try to retrieve this public key "
+                   "(\"%s\") from the keyserver?"),
+                 log->GetPublicKey().c_str()
+               ),
+               log->GetParent(),
+               _("Get public key from the key server?"),
+               M_DLG_YES_DEFAULT,
+               M_MSGBOX_GET_PGP_PUBKEY
+           ) )
+      {
+         // try to get it
+
+         // TODO: don't hard code the key server name
+         const String keyserver = READ_APPCONFIG_TEXT(MP_PGP_KEYSERVER);
+         status = DoExecCommand
+                  (
+                     wxString::Format
+                     (
+                        _T("--keyserver %s --recv-keys %s"),
+                        keyserver.c_str(),
+                        log->GetPublicKey().c_str()
+                     ),
+                     _T(""),
+                     messageOut,
+                     log
+                  );
+
+         switch ( status )
+         {
+            default:
+               wxLogWarning(_("Importing public key failed for unknown "
+                              "reason."));
+               break;
+
+            case NO_DATA_ERROR:
+               wxLogWarning(_("Public key not found on the key server \"%s\"."),
+                            keyserver.c_str());
+               break;
+
+            case OK:
+               wxLogMessage(_("Successfully imported public key for \"%s\"."),
+                            log->GetUserID().c_str());
+
+               // try redoing the original command again
+               status = DoExecCommand(options, messageIn, messageOut, log);
+               break;
+         }
+      }
+      //else: key import cancelled by user
+   }
 
    return status;
 }
@@ -760,63 +862,37 @@ PGPEngine::VerifyDetachedSignature(const String& message,
                                    const String& signature,
                                    MCryptoEngineOutputLog *log)
 {
-   PGPEngine::Status status = MAX_ERROR;
-   // Create a temporary file to store the signature
-   wxString sigFilename, textFilename;
-   if ( wxGetTempFileName("Mtemp", sigFilename) )
+   // create temporary files to store the signature and the message text
+   //
+   // TODO: do we have to use a temp file for the signed text? why not pass it
+   //       via stdin?
+   MTempFileName tmpfileSig, tmpfileText;
+   bool ok = tmpfileSig.IsOk() && tmpfileText.IsOk();
+
+   if ( ok )
    {
-      bool ok;
-      {
-         wxFile out(sigFilename, wxFile::write);
-         ok = out.IsOpened();
-
-         if ( ok )
-         {
-            // write the signature
-            unsigned long len = signature.Length();
-            ok = out.Write(signature, len) == len;
-         }
-      }
-      if ( ok ) 
-      {
-         ok = wxGetTempFileName("Mtemp", textFilename);
-      }
-      else
-      {
-         (void)wxRemoveFile(sigFilename);
-      }
-      if ( ok )
-      {
-         wxFile out(textFilename, wxFile::write);
-         ok = out.IsOpened();
-
-         if ( ok )
-         {
-            // write the signature
-            unsigned long len = message.Length();
-            ok = out.Write(message, len) == len;
-         }
-      }
-      else
-      {
-         (void)wxRemoveFile(sigFilename);
-         (void)wxRemoveFile(textFilename);
-      }
-
-      String messageIn = _T("");
-      String messageOut = _T("");
-      if ( ok )
-      {
-         status = ExecCommand(_T("--verify ") + sigFilename + _T(" ") + textFilename, messageIn, messageOut, log);
-      }
-      ok = wxRemoveFile(sigFilename);
-      ok |= wxRemoveFile(textFilename);
+      wxFile fileSig(tmpfileSig.GetName(), wxFile::write);
+      ok = fileSig.IsOpened() && fileSig.Write(signature);
    }
 
+   if ( ok )
+   {
+      wxFile fileText(tmpfileText.GetName(), wxFile::write);
+      ok = fileText.IsOpened() && fileText.Write(message);
+   }
 
-   //FAIL_MSG( _T("TODO") );
+   if ( !ok )
+   {
+      wxLogError(_("Failed to verify the message signature."));
 
-   return status;
+      return SIGNATURE_CHECK_ERROR;
+   }
+
+   wxString messageOut;
+
+   return ExecCommand(_T("--verify ") + tmpfileSig.GetName() +
+                      _T(" ") + tmpfileText.GetName(),
+                      _T(""), messageOut, log);
 }
 
 // ============================================================================
