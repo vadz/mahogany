@@ -1061,19 +1061,16 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   // ---------------
 
   AddFileMenu();                               // file (global) operations
-  WXADD_MENU(m_MenuBar, ADBBOOK, _("&Book"));  // operations on address books
-  WXADD_MENU(m_MenuBar, ADBEDIT, _("&Edit"));  // commands to edit ADB entries
-  WXADD_MENU(m_MenuBar, ADBFIND, _("&Find"));  // searching and moving
+  WXADD_MENU(GetMenuBar(), ADBBOOK, _("&Book"));  // operations on address books
+  WXADD_MENU(GetMenuBar(), ADBEDIT, _("&Edit"));  // commands to edit ADB entries
+  WXADD_MENU(GetMenuBar(), ADBFIND, _("&Find"));  // searching and moving
   AddHelpMenu();                               // help
-
-  SetMenuBar(m_MenuBar);
 
   // toolbar and status bar
   // ----------------------
 
   // standard M toolbar
-  m_ToolBar = CreateToolBar();
-  AddToolbarButtons(m_ToolBar, WXFRAME_ADB);
+  AddToolbarButtons(CreateToolBar(), WXFRAME_ADB);
 
   // create a status bar with 2 panes
   CreateStatusBar(2);
@@ -2117,7 +2114,7 @@ void wxAdbEditFrame::OnTextLookupChange(wxCommandEvent&)
     return;
 #endif // GTK
 
-  m_ToolBar->EnableTool(WXMENU_ADBFIND_NEXT, !m_textKey->GetValue().IsEmpty());
+  GetToolBar()->EnableTool(WXMENU_ADBFIND_NEXT, !m_textKey->GetValue().IsEmpty());
 }
 
 // UpdateUI event handlers are called during the idle time and set the state
@@ -2143,7 +2140,7 @@ void wxAdbEditFrame::OnUpdateCancel(wxUpdateUIEvent& event)
 
   event.Enable(bDoEnable);
   m_btnCancel->Enable(bDoEnable);
-  m_ToolBar->EnableTool(WXMENU_ADBEDIT_UNDO, bDoEnable);
+  GetToolBar()->EnableTool(WXMENU_ADBEDIT_UNDO, bDoEnable);
 }
 
 void wxAdbEditFrame::OnUpdateProp(wxUpdateUIEvent& event)
@@ -2163,7 +2160,7 @@ void wxAdbEditFrame::OnUpdateDelete(wxUpdateUIEvent& event)
 
   event.Enable(bDoEnable);
   m_btnDelete->Enable(bDoEnable);
-  m_ToolBar->EnableTool(WXMENU_ADBEDIT_DELETE, bDoEnable);
+  GetToolBar()->EnableTool(WXMENU_ADBEDIT_DELETE, bDoEnable);
 }
 
 void wxAdbEditFrame::OnUpdatePaste(wxUpdateUIEvent& event)

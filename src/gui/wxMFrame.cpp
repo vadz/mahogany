@@ -123,8 +123,7 @@ wxMFrame::Create(const String &iname, wxWindow *parent)
    int style = 0;
    if(READ_APPCONFIG(MP_TEAROFF_MENUS) != 0)
       style = wxMB_DOCKABLE;
-   m_MenuBar = new wxMenuBar(style);
-   m_ToolBar = NULL;
+   SetMenuBar(new wxMenuBar(style));
 }
 
 void
@@ -151,25 +150,25 @@ wxMFrame::AddFileMenu(void)
    // +2 because WXMENU_FILE_CLOSE has a separator with it
    AppendToMenu(fileMenu, WXMENU_FILE_CLOSE + 2, WXMENU_FILE_END);
 
-   m_MenuBar->Append(fileMenu, _("&File"));
+   GetMenuBar()->Append(fileMenu, _("&File"));
 }
 
 void
 wxMFrame::AddEditMenu(void)
 {
-   WXADD_MENU(m_MenuBar, EDIT, _("&Edit"));
+   WXADD_MENU(GetMenuBar(), EDIT, _("&Edit"));
 }
 
 void
 wxMFrame::AddHelpMenu(void)
 {
-   WXADD_MENU(m_MenuBar, HELP, _("&Help"));
+   WXADD_MENU(GetMenuBar(), HELP, _("&Help"));
 }
 
 void
 wxMFrame::AddMessageMenu(void)
 {
-   WXADD_MENU(m_MenuBar, MSG, _("&Message"));
+   WXADD_MENU(GetMenuBar(), MSG, _("&Message"));
 }
 
 wxMFrame::~wxMFrame()
@@ -392,15 +391,15 @@ wxMFrame::OnMenuCommand(int id)
 wxToolBar *
 wxMFrame::CreateToolBar(void)
 {
-   int style = wxTB_HORIZONTAL;
+   int style = wxTB_HORIZONTAL | wxNO_BORDER;
    if(READ_APPCONFIG(MP_DOCKABLE_TOOLBARS) != 0)
       style |= wxTB_DOCKABLE;
    if(READ_APPCONFIG(MP_FLAT_TOOLBARS) != 0)
       style |= wxTB_FLAT;
 
-   wxToolBar *tb =
-      wxFrame::CreateToolBar(style,-1, _("Mahogany Toolbar"));
-   tb->SetMargins(2,2);
+   wxToolBar *tb = wxFrame::CreateToolBar(style, -1, _("Mahogany Toolbar"));
+   tb->SetMargins(4, 4);
+
    return tb;
 }
 

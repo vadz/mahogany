@@ -1060,9 +1060,18 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
             String newFilename;
             newFilename << filename << '.' << ext;
             if ( rename(filename, newFilename) != 0 )
+            {
                wxLogSysError(_("Cannot rename temporary file."));
+
+               // well, try to open it nevertheless?
+            }
             else
+            {
+               // change the filename in the command too
+               command.Replace(filename, newFilename);
+
                filename = newFilename;
+            }
          }
 #     endif // Win
 
@@ -1752,7 +1761,6 @@ wxMessageViewFrame::wxMessageViewFrame(ASMailFolder *folder,
                                        const String &iname)
 {
    m_MessageView = NULL;
-   m_ToolBar = NULL;
 
    wxString name = iname;
    if(name.Length() == 0)
@@ -1762,12 +1770,10 @@ wxMessageViewFrame::wxMessageViewFrame(ASMailFolder *folder,
    AddFileMenu();
    AddEditMenu();
    AddMessageMenu();
-   SetMenuBar(m_MenuBar);
 
    // add a toolbar to the frame
    // NB: the buttons must have the same ids as the menu commands
-   m_ToolBar = CreateToolBar();
-   AddToolbarButtons(m_ToolBar, WXFRAME_MESSAGE);
+   AddToolbarButtons(CreateToolBar(), WXFRAME_MESSAGE);
    CreateStatusBar(2);
    static const int s_widths[] = { -1, 70 };
    SetStatusWidths(WXSIZEOF(s_widths), s_widths);

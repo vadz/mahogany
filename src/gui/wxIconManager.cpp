@@ -91,7 +91,7 @@ wxString wxIconManager::ms_IconPath = "";
 
 /// valid filename extensions for icon files
 static const char *wxIconManagerFileExtensions[] =
-{ 
+{
    ".xpm", ".png", ".bmp", ".jpg",".gif",".pcx",".pnm", NULL
 };
 
@@ -99,7 +99,7 @@ static const char *wxIconManagerFileExtensions[] =
 int wxIconManager::ms_NumOfHandlers = 0;
 
 // how many formats/extensions stored in the array above?
-#define NUMBER_OF_FORMATS 4 
+#define NUMBER_OF_FORMATS 4
 
 bool wxIconManager::m_knowHandlers = false;
 long wxIconManager::m_wxBitmapHandlers[] =
@@ -113,7 +113,7 @@ long wxIconManager::m_wxBitmapHandlers[] =
    wxBITMAP_TYPE_PCX,
    wxBITMAP_TYPE_TIF,
    wxBITMAP_TYPE_ANY,
-   wxBITMAP_TYPE_CUR, 
+   wxBITMAP_TYPE_CUR,
    wxBITMAP_TYPE_ICO,  //wxGTK ??
    -1
 };
@@ -139,7 +139,7 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
 {
    bool loaded = false;
    wxImage *img = new wxImage();
-   
+
    // If we haven't been called yet, find out which image handlers
    // are supported:
    if(! m_knowHandlers) // first time initialisation
@@ -179,7 +179,7 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
    // will fail.
    {
       wxLogNull logNo;
-      
+
       for(int i = 0; (!loaded) && m_wxBitmapHandlers[i] != -1; i++)
          if(m_wxBitmapHandlers[i])
          {
@@ -351,16 +351,16 @@ wxIconManager::LoadXpm(String filename)
    // this is the actual XPM loading:
    size_t maxlines = WXICONMANAGER_DEFAULTSIZE;
    size_t line = 0;
-   
+
    char **cpptr = (char **) malloc(maxlines * sizeof(char *));
    ASSERT(cpptr);
    bool found_xpm = false;
-   
+
    ifstream in(filename);
    if(in)
-   {  
+   {
       String str;
-      
+
       do
       {
          if(line == maxlines)
@@ -378,7 +378,7 @@ wxIconManager::LoadXpm(String filename)
             free(cpptr);
             return NULL;
          }
-         // We only load the actual data, that is, lines starting with 
+         // We only load the actual data, that is, lines starting with
          // a double quote and ending in a comma:  "data",  --> data
          if(str.length() > 0 && str.c_str()[0] == '"')
          {
@@ -445,7 +445,7 @@ void
 wxIconManager::SetSubDirectory(wxString subDir)
 {
    wxASSERT(this);
-   // We cannot do this in the constructor as the global dir might not 
+   // We cannot do this in the constructor as the global dir might not
    // be set yet.
    if(mApplication && ! m_GlobalDir.Length())
    {
@@ -456,17 +456,17 @@ wxIconManager::SetSubDirectory(wxString subDir)
    if(! m_iconList
       || subDir != m_SubDir)
    {
-      /* If we change the directory, we should also discard all old icons 
+      /* If we change the directory, we should also discard all old icons
          to get the maximum effect. */
       if(m_iconList)
          delete m_iconList;
       m_iconList = new IconDataList();
-      
+
       m_SubDir = '/'+subDir;
       if(! wxDirExists(m_GlobalDir+m_SubDir)
          && ! wxDirExists(m_LocalDir+m_SubDir))
          m_SubDir = ""; // save ourselves some time when searching
-      
+
       // Always add the built-in icons:
       AddIcon(M_ICON_HLINK_HTTP, hlink_xpm);
       AddIcon(M_ICON_HLINK_FTP, ftplink_xpm);
@@ -499,12 +499,12 @@ wxIconManager::GetBitmap(const String& bmpName)
   delete it at program exit.
   The copy constructor doesn't copy but keeps track of reference
   counts for us.
-  If a class doesn't delete the icon it requested, this will lead to a 
+  If a class doesn't delete the icon it requested, this will lead to a
   wrong reference count but no memory loss as the icon exists all the
   time anyway.
 */
 
-wxIcon 
+wxIcon
 wxIconManager::GetIcon(String const &_iconName)
 {
    wxASSERT(this);
@@ -570,7 +570,7 @@ wxIconManager::GetIcon(String const &_iconName)
          pf.AddPaths(m_GlobalDir+m_SubDir, false, true);
          pf.AddPaths(m_LocalDir+m_SubDir, false, true);
       }
-   
+
       IconData *id;
 
       String name;
@@ -595,8 +595,8 @@ wxIconManager::GetIcon(String const &_iconName)
             }
          }
 #endif
-         
-         
+
+
          if( found )
          {
 #ifdef   OS_UNIX
@@ -611,7 +611,7 @@ wxIconManager::GetIcon(String const &_iconName)
             ms_IconPath = name.BeforeLast('\\');
             if(icn.LoadFile(Str(name),0))
             {
-#endif   
+#endif
                id = new IconData;
                id->iconRef = icn;
                id->iconName = iconName;
@@ -653,10 +653,13 @@ wxIcon wxIconManager::GetIconFromMimeType(const String& type,
    // matches only if there is none
    wxIcon icon = GetIcon(type);
 
+   // the following code will never yield anything under Windows, so save the
+   // efforts
+#ifdef OS_UNIX
    // Then, try the extension with GNOME first:
    if(ext.Length() > 0 )
       icon = GetIcon("file-dot-"+ext);
-   
+
    wxArrayString exts;
    if ( icon == m_unknownIcon )
    {
@@ -670,15 +673,34 @@ wxIcon wxIconManager::GetIconFromMimeType(const String& type,
    }
    if ( icon == m_unknownIcon )
       icon = GetIcon(type.After('/'));
-   for(size_t i = 0; i < exts.Count(); i++)
+   for ( size_t i = 0; i < exts.Count(); i++ )
    {
       /// try the gnome style filenames "file-dot-wav.xpm"
       icon = GetIcon("file-dot-"+exts[i]);
       if(icon != m_unknownIcon)
          return icon;
    }
+#endif // Unix
+
    if ( icon == m_unknownIcon )
+   {
+      // try to get it from extension: many (broken) mailers will send foo.gif
+      // as application/octet-stream instead of image/gif
+      wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
+      wxFileType *fileType = mimeManager.GetFileTypeFromExtension(ext);
+      if ( fileType )
+      {
+         (void)fileType->GetIcon(&icon);
+
+         delete fileType;
+      }
+   }
+
+   if ( icon == m_unknownIcon )
+   {
+      // the generic icon for this class of things
       icon = GetIcon(type.Before('/'));
+   }
 
    return icon;
 }

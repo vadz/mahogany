@@ -52,10 +52,6 @@
 # define BMP(name)  ICON(name)
 #endif
 
-/// convenience macro to add a button to a toolbar
-#define   TB_AddTool(tb, bmp, id, helptext) \
-    tb->AddTool(id, BMP(bmp), wxNullBitmap, FALSE, -1, -1, NULL, _(helptext))
-
 // ----------------------------------------------------------------------------
 // local data
 // ----------------------------------------------------------------------------
@@ -425,10 +421,11 @@ void AddToolbarButton(wxToolBar *toolbar, int nButton)
       toolbar->AddSeparator();
    }
    else {
-      TB_AddTool(toolbar,
-                 String(g_aToolBarData[nButton].bmp),
-                 g_aToolBarData[nButton].id,
-                 g_aToolBarData[nButton].tooltip);
+      toolbar->AddTool(g_aToolBarData[nButton].id,
+                       BMP(g_aToolBarData[nButton].bmp),
+                       wxNullBitmap,
+                       FALSE, -1, -1, NULL,
+                       _(g_aToolBarData[nButton].tooltip));
    }
 }
 
@@ -439,12 +436,8 @@ void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
 
 #ifdef __WXMSW__
    // we use the icons of non standard size
-   toolbar->SetToolBitmapSize(wxSize(32, 32));
+   toolbar->SetToolBitmapSize(wxSize(32, 30));
 #endif
-
-   // if the buttons were of other size we'd have to use this function
-   // (standard size is 16x15 under MSW)
-   // toolbar->SetDefaultSize(wxSize(24, 24));
 
    wxASSERT( frameId < WXFRAME_MAX );
    const int *aTbarIcons = g_aFrameToolbars[frameId];

@@ -944,6 +944,8 @@ wxNotebookDialog::wxNotebookDialog(wxFrame *parent,
    m_btnOk =
    m_btnApply = NULL;
 
+   m_profileForButtons = NULL;
+
    m_lastBtn = MEventOptionsChangeData::Invalid;
 }
 
@@ -1116,9 +1118,6 @@ wxNotebookDialog::SendOptionsChangeEvent()
 
 void wxNotebookDialog::OnOK(wxCommandEvent& /* event */)
 {
-   ProfileBase *profile = GetProfile();
-   CHECK_RET( profile, "no profile in [Ok] btn handler" );
-
    m_lastBtn = MEventOptionsChangeData::Ok;
 
    if ( m_bDirty )
@@ -1126,14 +1125,20 @@ void wxNotebookDialog::OnOK(wxCommandEvent& /* event */)
 
    if ( !m_bDirty )
    {
-      profile->Commit();
+      // ok, changes accepted (or there were no changes to begin with) -
+      // anyhow, DoApply() succeeded
+      if ( m_profileForButtons )
+      {
+         m_profileForButtons->Commit();
+         m_profileForButtons->DecRef();
+         m_profileForButtons = NULL;
+      }
 
-      // ok, changes accepted (or there were no changes to begin with)
       EndModal(TRUE);
    }
    //else: test done from DoApply() failed, don't close the dialog
-
-   profile->DecRef();
+   //      nor free m_profileForButtons (this will be done in OnCancel or in
+   //      a more successful call to OnOk)
 }
 
 void wxNotebookDialog::OnApply(wxCommandEvent& /* event */)
@@ -1147,10 +1152,13 @@ void wxNotebookDialog::OnApply(wxCommandEvent& /* event */)
 
 bool wxNotebookDialog::DoApply()
 {
-   ProfileBase *profile = GetProfile();
-   CHECK( profile, FALSE, "no profile in [Apply] btn handler" );
+   if ( !m_profileForButtons )
+   {
+      m_profileForButtons = GetProfile();
+   }
 
-   profile->Suspend();
+   if ( m_profileForButtons )
+      m_profileForButtons->Suspend();
 
    if ( TransferDataFromWindow() )
    {
@@ -1161,30 +1169,36 @@ bool wxNotebookDialog::DoApply()
 
          SendOptionsChangeEvent();
 
-         // FIXME what if it is deleted here? then Discard() is called
-         // implicitly
-         profile->DecRef();
-
          return TRUE;
       }
    }
    // If OnSettingsChange() or the Transfer function failed, we
    // don't reset the m_bDirty flag so that OnOk() will know we failed
 
-   profile->Discard();
-   profile->DecRef();
+   if ( m_profileForButtons )
+   {
+      m_profileForButtons->Discard();
+   }
+
+   // don't m_profileForButtons->DecRef() - this will be done in OnOk or
+   // OnCancel later
 
    return FALSE;
 }
 
 void wxNotebookDialog::OnCancel(wxCommandEvent& /* event */)
 {
-   ProfileBase *profile = GetProfile();
-   if ( profile )
+   if ( m_profileForButtons )
    {
-      profile->Discard();
-      profile->DecRef();
+      // [Apply] has been called before, undo it now
+      m_profileForButtons->Discard();
+      m_profileForButtons->DecRef();
+
+      m_profileForButtons = NULL;
    }
+
+   // note that as [Apply] hasn't been pressed if m_profileForButtons is NUL,
+   // we might not send the event below neither in this case - should we?
 
    m_lastBtn = MEventOptionsChangeData::Cancel;
    SendOptionsChangeEvent();

@@ -1008,7 +1008,7 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
       UIdType highestId = UID_ILLEGAL;
       for ( UIdType i = 0; i < n; i++ )
       {
-         /* status =(*hilp)[i]->GetStatus();
+         /* int status =(*hilp)[i]->GetStatus();
             ASSERT(nextIdx < n);
             if( (status & MSG_STAT_RECENT) &&
             !(status & MSG_STAT_SEEN))

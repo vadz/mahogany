@@ -8,7 +8,12 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-9	KB	Outbox : TEST!!!
+
+6    W  VZ	splash screen disappears immediately
+
+6	VZ	constraints in the notebooks half broken again, both GTK and
+                Windows (well, they actually work but give warnings)
+
 9		disabling "collect mail" in properties has no effect!
 9	KB	finish filters dialog
 9	KB	debug filters, does '|' really work?
@@ -57,17 +62,6 @@ $Id$
 		entries under a group as "Create..." is disabled in the
 		popup.
 
-9	VZ	Creating a new entry under "all Folders" is possible, i.e.
-		you get the dialog, but, clicking on "OK" does not close it,
-		the only way out is "Cancel" so at present one cannot create
-		new folders in Mahogany.
-
-9	VZ	When trying to create a new NNTP folder, the anonymous
-		flag should really be on by default.
-
-9	VZ	can we have *all* log messages (incl status) appear in 
-		the log window?
-
 9	VZ	deleting groups from an ADB book messes up the book and
 		deletes other non-selected groups and entries, too
 
@@ -84,10 +78,6 @@ $Id$
 		folders. 
 
 8	VZ	AdbImort dialog under Windows lacks UpdateUI somewhere
-
-8	VZ	MH folder name <-> path confusion in wxMFolderDialogs.cpp
-
-5	VZ	"hidden" flag for folder treecontrol
 
 7		After setting date format and closing date fmt dialog, 
 		main config dialog remains completely disabled under
@@ -118,9 +108,6 @@ $Id$
 
 	KB	DEBUG:	posting news article --> cannot find mailbox for callback
 
-6	VZ	double click on new folder in treectrl opens not the
-		folder clicked on but the one previously selected
-
 	VZ	templates need "First Name" field
 	VZ	icons in icons-dialog are scaled --> ugly
 
@@ -141,8 +128,6 @@ $Id$
 	VZ	Clicking on "header dialog/More button" produces
 		"headers for folder "xpm" in the dialog when called
 		from toplevel window.
-
-5	VZ	the type of the last created folder not remembered any more
 
 6	VZ	All Folder create dialog pages have no HelpIDs set.
 5		File/Page Setup does nothing
@@ -565,6 +550,26 @@ VZ: wouldn't an ifdef alone be enough (you can already grep for it...)?
 
 
 DONE - TO BE TESTED:
+9	VZ	Creating a new entry under "all Folders" is possible, i.e.
+		you get the dialog, but, clicking on "OK" does not close it,
+		the only way out is "Cancel" so at present one cannot create
+		new folders in Mahogany.
+
+5	VZ	the type of the last created folder not remembered any more
+
+9	VZ	When trying to create a new NNTP folder, the anonymous
+		flag should really be on by default.
+
+9	VZ	can we have *all* log messages (incl status) appear in 
+		the log window?
+
+8	VZ	MH folder name <-> path confusion in wxMFolderDialogs.cpp
+
+5	VZ	"hidden" flag for folder treecontrol
+
+6	VZ	double click on new folder in treectrl opens not the
+		folder clicked on but the one previously selected
+
 9	KB	implement temporary/fake Profile mode
 		--> add Suspend()/Discard()/Commit() methods to normal 
 		    profile which work with a temporary subgroup

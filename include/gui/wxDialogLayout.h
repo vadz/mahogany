@@ -218,6 +218,12 @@ private:
             *m_btnOk,
             *m_btnApply;
 
+   // this profile is first retrieved using GetProfile(), but it's only done
+   // once and then it is reused so that [Cancel] will call Discard() on the
+   // same profile as [Apply] called Suspend() on and not on some other profile
+   // with the same path
+   ProfileBase *m_profileForButtons;
+
    bool m_bDirty;
 
    // Ok/Cancel/Apply depending on the last button pressed

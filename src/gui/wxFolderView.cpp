@@ -1278,8 +1278,7 @@ wxFolderViewFrame::InternalCreate(wxFolderView *fv, wxMFrame * /* parent */)
    SetTitle(m_FolderView->GetFolder()->GetName());
    // add a toolbar to the frame
    // NB: the buttons must have the same ids as the menu commands
-   m_ToolBar = CreateToolBar();
-   AddToolbarButtons(m_ToolBar, WXFRAME_FOLDER);
+   AddToolbarButtons(CreateToolBar(), WXFRAME_FOLDER);
    Show(true);
 }
 
@@ -1320,15 +1319,14 @@ wxFolderViewFrame::wxFolderViewFrame(String const &name, wxMFrame *parent)
    // menu
    AddFileMenu();
    AddEditMenu();
-   wxMenuItem *item = m_MenuBar->FindItem(WXMENU_EDIT_CUT);
-   wxASSERT(item);
-   item->Enable(FALSE); // no cut for viewer
-   item = m_MenuBar->FindItem(WXMENU_EDIT_CUT);
-   wxASSERT(item);
-   item->Enable(FALSE); // no cut for viewer
+
+   // no cut/paste for viewer
+   wxMenuBar *menuBar = GetMenuBar();
+   menuBar->Enable(WXMENU_EDIT_CUT, FALSE);
+   menuBar->Enable(WXMENU_EDIT_CUT, FALSE);
 
    AddMessageMenu();
-   SetMenuBar(m_MenuBar);
+
    // status bar
    CreateStatusBar();
 }

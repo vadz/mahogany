@@ -66,7 +66,7 @@ public:
    void OnCommandEvent(wxCommandEvent &event);
    ~wxModulePopup()
       { SafeDecRef(m_Listing); }
-         
+
 private:
    wxModulePopup();
    MModuleListing *m_Listing;
@@ -94,7 +94,7 @@ wxModulePopup::wxModulePopup()
 {
    m_CountMain = 0;
    m_CountConfig = 0;
-   
+
    m_Listing = MModule::ListLoadedModules();
    m_CountModules = m_Listing->Count();
    for(size_t i = 0; i < m_CountModules; i++)
@@ -106,7 +106,7 @@ wxModulePopup::wxModulePopup()
          m_CountConfig++;
       mod->DecRef();
    }
-   
+
    if(m_CountMain+m_CountConfig == 0)
    {
       /// dummy menu:
@@ -120,13 +120,13 @@ wxModulePopup::wxModulePopup()
          for(size_t i = 0; i < m_Listing->Count(); i++)
          {
             wxString entry;
-	    MModule *mod = (*m_Listing)[i].GetModule();
+            MModule *mod = (*m_Listing)[i].GetModule();
             if(mod->Entry(MMOD_FUNC_GETFLAGS) & MMOD_FLAG_HASMAIN)
             {
-	       entry = (*m_Listing)[i].GetName();
-	       entry << _(" module...");
-	       Append(WXMENU_POPUP_MODULES_OFFS+i, entry);
-	    }       
+               entry = (*m_Listing)[i].GetName();
+               entry << _(" module...");
+               Append(WXMENU_POPUP_MODULES_OFFS+i, entry);
+            }
             mod->DecRef();
          }
       }
@@ -157,7 +157,7 @@ wxModulePopup::OnCommandEvent(wxCommandEvent &event)
       return;
 
    size_t id = (size_t) event.GetId();
-   
+
    id = id-WXMENU_POPUP_MODULES_OFFS;
    if(id < m_CountModules)
    {
@@ -242,13 +242,10 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    AddFileMenu();
    AddEditMenu();
 
-
-   wxMenuItem *item = m_MenuBar->FindItem(WXMENU_EDIT_CUT);
-   wxASSERT(item);
-   item->Enable(FALSE); // no cut for viewer
-   item = m_MenuBar->FindItem(WXMENU_EDIT_PASTE);
-   wxASSERT(item);
-   item->Enable(FALSE); // no cut for viewer
+   // disable the operations which don't make sense for viewer
+   wxMenuBar *menuBar = GetMenuBar();
+   menuBar->Enable(WXMENU_EDIT_CUT, FALSE);
+   menuBar->Enable(WXMENU_EDIT_PASTE, FALSE);
 
    int x,y;
    GetClientSize(&x, &y);
@@ -290,9 +287,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
    // finish constructing the menu and toolbar
    AddHelpMenu();
-   SetMenuBar(m_MenuBar);
-   m_ToolBar = CreateToolBar();
-   AddToolbarButtons(m_ToolBar, WXFRAME_MAIN);
+   AddToolbarButtons(CreateToolBar(), WXFRAME_MAIN);
 
    m_splitter->SetMinimumPaneSize(0);
    m_splitter->SetFocus();
@@ -315,7 +310,7 @@ wxMainFrame::UpdateToolBar(void)
    m_ModulePopup = wxModulePopup::Create();
    if(! m_ModulePopup)
    {
-      m_ToolBar->EnableTool(WXMENU_MODULES, FALSE);
+      GetToolBar()->EnableTool(WXMENU_MODULES, FALSE);
       delete m_ModulePopup;
       m_ModulePopup = NULL;
    }
@@ -383,7 +378,7 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
    {
       // we want save the full folder name in m_folderName
       ASSERT( folder->GetFullName() == m_folderName );
-      
+
       MailFolder *mailFolder = m_FolderView->OpenFolder(folder->GetFullName());
       if ( mailFolder )
       {

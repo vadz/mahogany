@@ -860,12 +860,11 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
                                   // all the others
    radioChoices[n++] = _("Group");// must follow "News" (assumed elsewhere)
 
-   m_radio = new wxPRadioBox(MP_LAST_CREATED_FOLDER_TYPE,
-                             GetCanvas(), -1, _("Folder Type"),
-                             wxDefaultPosition,wxDefaultSize,
-                             n, radioChoices,
-                             // create a horizontal radio box
-                             n, wxRA_SPECIFY_COLS);
+   m_radio = new wxRadioBox(GetCanvas(), -1, _("Folder Type"),
+                            wxDefaultPosition,wxDefaultSize,
+                            n, radioChoices,
+                            // create a horizontal radio box
+                            n, wxRA_SPECIFY_COLS);
 
    c = new wxLayoutConstraints();
    c->left.SameAs(GetCanvas(), wxLeft, LAYOUT_X_MARGIN);
@@ -1157,18 +1156,6 @@ wxFolderPropertiesPage::UpdateUI(FolderType folderType)
       //else: the subtype choice contents shouldn't change
 
       m_folderType = folderType;
-
-      if ( folderType == MF_NNTP )
-      {
-         // although NNTP servers do support password-protected access, this
-         // is so rare that anonymous is the default
-         m_isAnonymous->SetValue(TRUE);
-      }
-      else
-      {
-         // by default it's off for other types of folders
-         m_isAnonymous->SetValue(FALSE);
-      }
 
       if ( folderType == FolderGroup )
       {
@@ -1592,9 +1579,12 @@ wxFolderPropertiesPage::SetDefaultValues()
    m_forceReOpen->SetValue(m_originalForceReOpenValue);
    m_originalIsLocalValue = (flags & MF_FLAGS_ISLOCAL) != 0;
    m_isLocal->SetValue(m_originalIsLocalValue);
-   
+
    // and the same for the anon flag
-   m_originalIsAnonymous = (flags & MF_FLAGS_ANON) != 0;
+
+   // although NNTP servers do support password-protected access, this
+   // is so rare that anonymous is the default
+   m_originalIsAnonymous = (flags & MF_FLAGS_ANON) || (folderType == MF_NNTP);
    m_isAnonymous->SetValue(m_originalIsAnonymous);
 
    // update the folder icon
@@ -1639,7 +1629,7 @@ bool
 wxFolderPropertiesPage::TransferDataToWindow(void)
 {
    Profile_obj profile("");
-   if ( m_folderPath )
+   if ( !!m_folderPath )
       profile->SetPath(m_folderPath);
 
    FolderType folderType = GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
@@ -1648,7 +1638,7 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
       // this may only happen if we're creating the folder
       ASSERT_MSG( m_isCreating, "invalid folder type" );
 
-      folderType = (FolderType)MP_LAST_CREATED_FOLDER_TYPE_D;
+      folderType = (FolderType)READ_APPCONFIG(MP_LAST_CREATED_FOLDER_TYPE);
    }
 
    if ( (folderType == Inbox) && m_isCreating )
@@ -1718,58 +1708,59 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    String loginName = m_login->GetValue(),
           password = m_password->GetValue();
 
-   // For normal folders, we make sure that a password is specified if 
+   // For normal folders, we make sure that a password is specified if
    // needed:
    bool hasUsername = FolderTypeHasUserName(folderType);
    if(! FolderTypeIsGroup(folderType))
    {
-   if ( hasUsername )
-   {
-      // anonymous access?
-      bool anonymous = m_isAnonymous->GetValue() || loginName == "anonymous";
-
-      if ( anonymous )
-         flags |= MF_FLAGS_ANON;
-      else
+      if ( hasUsername )
       {
-         wxString what,    // what did the user forget to specify
-                  keyname; // for MDialog_YesNoDialog
-         if ( !loginName )
-         {
-            what = _("a login name");
-            keyname = "AskLogin";
-         }
-         else if ( !m_password->GetValue() )
-         {
-            what = _("a password");
-            keyname = "AskPwd";
-         }
+         // anonymous access?
+         bool anonymous = m_isAnonymous->GetValue() || loginName == "anonymous";
 
-         if ( !!what )
+         if ( anonymous )
+            flags |= MF_FLAGS_ANON;
+         else
          {
-            wxString msg;
-            msg.Printf(_("You have not specified %s for this folder, although it requires one.\n"
-                         "Alternatively, you might want to select anonymous access.\n"
-                         "Would you like to do change this now?"),
-                       what.c_str());
-
-            if ( keyname == "AskPwd" )
+            wxString what,    // what did the user forget to specify
+            keyname; // for MDialog_YesNoDialog
+            if ( !loginName )
             {
-               msg << _("\n\n"
+               what = _("a login name");
+               keyname = "AskLogin";
+            }
+            else if ( !m_password->GetValue() )
+            {
+               what = _("a password");
+               keyname = "AskPwd";
+            }
+
+            if ( !!what )
+            {
+               wxString msg;
+               msg.Printf(_("You have not specified %s for this folder, although it requires one.\n"
+                        "Alternatively, you might want to select anonymous access.\n"
+                        "Would you like to do change this now?"),
+                     what.c_str());
+
+               if ( keyname == "AskPwd" )
+               {
+                  msg << _("\n\n"
                         "Notice that the password will be stored in your configuration with\n"
                         "very weak encryption. If you are concerned about security, leave it\n"
                         "empty and Mahogany will prompt you for it whenever needed.");
-            }
+               }
 
-            if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
-                                     true, keyname) )
-            {
-               return false;
+               if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
+                        true, keyname) )
+               {
+                  return false;
+               }
             }
          }
       }
    }
-   }
+
    // 1st step: create the folder in the MFolder sense. For this we need only
    // the name and the type
    wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
@@ -1946,6 +1937,9 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    }
 
    folder->DecRef();
+
+   // remember the type of this folder - will be the default one the next time
+   mApplication->GetProfile()->writeEntry(MP_LAST_CREATED_FOLDER_TYPE, folderType);
 
    return true;
 }

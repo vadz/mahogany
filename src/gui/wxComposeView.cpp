@@ -946,18 +946,16 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    // ----------
    AddFileMenu();
    AddEditMenu();
-   WXADD_MENU(m_MenuBar, COMPOSE, _("&Compose"));
+   WXADD_MENU(GetMenuBar(), COMPOSE, _("&Compose"));
    AddHelpMenu();
-   SetMenuBar(m_MenuBar);
 
    // FIXME: provide some visual feedback for them, like
    // enabling/disabling them. Not used yet.
-   m_MItemCut = m_MenuBar->FindItem(WXMENU_EDIT_CUT);
-   m_MItemCopy = m_MenuBar->FindItem(WXMENU_EDIT_COPY);
-   m_MItemPaste = m_MenuBar->FindItem(WXMENU_EDIT_CUT);
+   m_MItemCut = GetMenuBar()->FindItem(WXMENU_EDIT_CUT);
+   m_MItemCopy = GetMenuBar()->FindItem(WXMENU_EDIT_COPY);
+   m_MItemPaste = GetMenuBar()->FindItem(WXMENU_EDIT_CUT);
 
-   m_ToolBar = CreateToolBar();
-   AddToolbarButtons(m_ToolBar, WXFRAME_COMPOSE);
+   AddToolbarButtons(CreateToolBar(), WXFRAME_COMPOSE);
 
    CreateStatusBar(2);
    static const int s_widths[] = { -1, 70 };

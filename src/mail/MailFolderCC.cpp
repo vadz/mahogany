@@ -689,26 +689,30 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    if(mf && profile)
       mf->SetRetrievalLimit(READ_CONFIG(profile, MP_MAX_HEADERS_NUM));
 
-   String msg;
-   msg.Printf(_("Dial-Up network is down.\n"
-                "Do you want to try and open folder '%s' anyway?"), mf->GetName().c_str());
-   if(mf->NeedsNetwork()
-      && ! mApplication->IsOnline()
-      && ! MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
+   if( mf->NeedsNetwork() && !mApplication->IsOnline() )
+   {
+      String msg;
+      msg.Printf(_("To open the folder '%s', network access is required "
+                   "but it is currently not available.\n"
+                   "Would you like to connect to the network now?"),
+                 mf->GetName().c_str());
+
+      if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
                                FALSE /* [No] default */,
                                mf->GetName()+"/NetDownOpenAnyway"))
       {
-         mf->DecRef();
-         return NULL;
+         mApplication->GoOnline();
       }
-   //else
-   if( mf->Open() )
-      return mf;
-   else
+   }
+
+   // try to really open it
+   if( !mf->Open() )
    {
       mf->DecRef();
-      return NULL;
+      mf = NULL;
    }
+
+   return mf;
 }
 
 
