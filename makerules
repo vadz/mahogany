@@ -3,22 +3,22 @@
 #
 ifdef USE_LIBTOOL
 %.o: %.cc
-	$(LIBTOOL) --mode=compile $(CXX) $(CXXFLAGS) -c $<
+	$(LIBTOOL) --mode=compile $(CXX) -fPIC $(CXXFLAGS) -c $<
 %.o: %.cpp
-	$(LIBTOOL) --mode=compile $(CXX) $(CXXFLAGS) -c $<
+	$(LIBTOOL) --mode=compile $(CXX)  -fPIC $(CXXFLAGS) -c $<
 %.o: %.c
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) -c $<
+	$(LIBTOOL) --mode=compile $(CC)  -fPIC $(CFLAGS) -c $<
 else
 %.o: %.cc
-	$(CXX) $(CXXFLAGS) -c $<
+	$(CXX)  -fPIC $(CXXFLAGS) -c $<
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $<
+	$(CXX)  -fPIC $(CXXFLAGS) -c $<
 %.o: %.c
-	$(CC) $(CFLAGS) -c $<
+	$(CC)  -fPIC $(CFLAGS) -c $<
 endif
 
-%.so: %.o
-	$(CXX) --shared $(CXXFLAGS) -o $@ $<
+%.so: %.cpp
+	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $<
 
 %.cpp: %.i
 	$(SWIG) $(SWIGFLAGS) -o $(ODIR)/$@ $<

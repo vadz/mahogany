@@ -85,7 +85,11 @@ LD_RUN_PATH=$(DATADIR)/$(CANONICAL_HOST)/lib
 # the following must be identical to the setting in Mdefaults.h
 MODULEDIR=$(DATADIR)/$(CANONICAL_HOST)/lib
 
+ifdef USE_LIBTOOL
 LINK = $(LIBTOOL) --mode=link $(CXX) -Wl-r$(LD_RUN_PATH)
+else
+LINK = $(CXX) -Wl-r$(LD_RUN_PATH)
+endif
 
 DEF = -DM_PREFIX="\"$(PREFIX)/\""
 INC = -I$(BUILDDIR)/include -I$(BUILDDIR)/extra/include -I$(BUILDDIR)/include/gui -I$(CCLIENTINCLUDE) 
