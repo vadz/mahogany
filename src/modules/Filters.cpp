@@ -2233,7 +2233,7 @@ extern "C"
       ia.Add(uid);
 
       String mfName = fn.ToString();
-      bool rc = mf->SaveMessages(&ia, mfName, true, false);
+      bool rc = mf->SaveMessages(&ia, mfName, true);
       mf->DecRef();
       if ( rc )
       {

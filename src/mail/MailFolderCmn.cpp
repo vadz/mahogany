@@ -463,7 +463,6 @@ MailFolderCmn::MailFolderCmn()
    // or not, to suppress NewMail events.
    m_FirstListing = true;
    m_ProgressDialog = NULL;
-   m_UpdateFlags = UF_Default;
    m_Timer = new MailFolderTimer(this);
    m_LastNewMsgUId = UID_ILLEGAL;
 
@@ -571,8 +570,7 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
 
 bool
 MailFolderCmn::SaveMessages(const UIdArray *selections,
-                            MFolder *folder,
-                            bool updateCount)
+                            MFolder *folder)
 {
    CHECK( folder, false, "SaveMessages() needs a valid folder pointer" );
 
@@ -597,9 +595,6 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
 
       return false;
    }
-
-   int updateFlags = mf->GetUpdateFlags();
-   mf->SetUpdateFlags( updateCount ? UF_UpdateCount : 0 );
 
    MProgressDialog *pd = NULL;
    int threshold = mf->GetProfile() ?
@@ -633,7 +628,6 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
    }
 
    mf->Ping(); // with our flags
-   mf->SetUpdateFlags(updateFlags); // restore old flags
    mf->DecRef();
 
    delete pd;
@@ -644,8 +638,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
 bool
 MailFolderCmn::SaveMessages(const UIdArray *selections,
                             String const & folderName,
-                            bool isProfile,
-                            bool updateCount)
+                            bool isProfile)
 {
    // this shouldn't happen any more, use SaveMessages(MFolder)
    CHECK( isProfile, false, "obsolete version of SaveMessages called" );
@@ -659,7 +652,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       return false;
    }
 
-   return SaveMessages(selections, folder, updateCount);
+   return SaveMessages(selections, folder);
 }
 
 bool
@@ -674,7 +667,7 @@ MailFolderCmn::SaveMessagesToFolder(const UIdArray *selections,
    bool rc;
    if ( CanCreateMessagesInFolder(folder->GetType()) )
    {
-      rc = SaveMessages(selections, folder, true);
+      rc = SaveMessages(selections, folder);
    }
    else // we can't copy/move the messages there
    {
@@ -1144,16 +1137,13 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
 
    ASSERT_MSG( nextIdx <= n, "more new messages than total?" );
 
-   // do we want new mail events?
-   if ( m_UpdateFlags & UF_DetectNewMail )
+   if ( nextIdx != 0)
    {
-      if ( nextIdx != 0)
-         MEventManager::Send(new MEventNewMailData(this, nextIdx, messageIDs));
-      //else: no new messages found
+      MEventManager::Send(new MEventNewMailData(this, nextIdx, messageIDs));
    }
+   //else: no new messages found
 
-   if ( m_UpdateFlags & UF_UpdateCount )
-      m_LastNewMsgUId = highestId;
+   m_LastNewMsgUId = highestId;
 
    wxLogTrace(TRACE_NEWMAIL,
               "CheckForNewMail() after test: folder: %s highest seen uid: %lu.",
@@ -1313,8 +1303,7 @@ MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections)
    {
       rc = SaveMessages(selections,
                         trashFolderName,
-                        true /* is profile */,
-                        false /* don´t update */);
+                        true /* is profile */);
       if ( rc )
       {
          // delete and expunge
@@ -1510,8 +1499,7 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
 
             if ( SaveMessages(&messages,
                               newMailFolder,
-                              true /* isProfile */,
-                              false /* update count */))
+                              true /* isProfile */))
             {
                // delete and expunge
                DeleteMessages(&messages, true);

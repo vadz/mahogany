@@ -1152,8 +1152,8 @@ SendMessageCC::Send(void)
    {
       case Prot_SMTP:
          service = "smtp";
-         DBGMESSAGE(("Trying to open connection to SMTP server '%s'",
-                     m_ServerHost.c_str()));
+         wxLogTrace("send", "Trying to open connection to SMTP server '%s'",
+                     m_ServerHost.c_str());
 #ifdef USE_SSL
          if(m_UseSSL)
          {
@@ -1170,8 +1170,8 @@ SendMessageCC::Send(void)
 
       case Prot_NNTP:
          service = "nntp";
-         DBGMESSAGE(("Trying to open connection to NNTP server '%s'",
-                    m_ServerHost.c_str()));
+         wxLogTrace("send", "Trying to open connection to NNTP server '%s'",
+                    m_ServerHost.c_str());
 #ifdef USE_SSL
          if( m_UseSSL )
          {
@@ -1371,10 +1371,7 @@ SendMessageCC::WriteToFolder(String const &name)
    WriteToString(str);
 
    // we don't want this to create new mail events
-   int updateFlags = mf->GetUpdateFlags();
-   mf->SetUpdateFlags( MailFolder::UF_UpdateCount);
    mf->AppendMessage(str);
-   mf->SetUpdateFlags(updateFlags);
    mf->DecRef();
 }
 

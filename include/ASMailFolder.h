@@ -400,8 +400,8 @@ public:
    virtual Ticket SaveMessages(const UIdArray *selections,
                                String const & folderName,
                                bool isProfile,
-                               bool updateCount = true,
                                UserData ud = 0) = 0;
+
    /** Save the messages to a file.
        @param selections the message indices which will be converted using the current listing
        @param fileName the name of the folder to save to
@@ -425,7 +425,7 @@ public:
    virtual Ticket DeleteMessages(const UIdArray *messages,
                                  bool expunge = false,
                                  UserData ud = 0) = 0;
-   
+
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean
@@ -437,8 +437,9 @@ public:
        @parent parent window for dialog
        @return ResultInt boolean
    */
-   virtual Ticket SaveMessagesToFile(const UIdArray *messages, MWindow
-                                   *parent = NULL, UserData ud = 0) = 0;
+   virtual Ticket SaveMessagesToFile(const UIdArray *messages,
+                                     MWindow *parent = NULL,
+                                     UserData ud = 0) = 0;
 
    /** Save messages to a folder.
        @param messages pointer to an array holding the message numbers
@@ -546,13 +547,6 @@ public:
        @return Pointer to the profile.
    */
    virtual Profile *GetProfile(void) const = 0;
-
-   /** Toggle update behaviour flags.
-       @param updateFlags the flags to set
-   */
-   virtual void SetUpdateFlags(int updateFlags) = 0;
-   /// Get the current update flags
-   virtual int  GetUpdateFlags(void) const = 0;
 
    /**@name Functions to get an overview of messages in the folder. */
    //@{

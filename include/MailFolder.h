@@ -528,25 +528,6 @@ public:
    const char *GetClassName(void) const
       { return "MailFolder"; }
 
-   /// Flags controlling update behaviour
-   enum UpdateFlags
-   {
-      /// undefined flags, used as default arg
-      UF_Undefined   =   1,
-      /// update the message counter
-      UF_UpdateCount =   2,
-      /// detect new messages as new
-      UF_DetectNewMail = 4,
-      /// default setting
-      UF_Default = (UF_UpdateCount+UF_DetectNewMail)
-   };
-   /** Toggle update behaviour flags.
-       @param updateFlags the flags to set
-   */
-   virtual void SetUpdateFlags(int updateFlags) = 0;
-   /// Get the current update flags
-   virtual int  GetUpdateFlags(void) const = 0;
-
    /**@name Some higher level functionality implemented by the
       MailFolder class on top of the other functions.
       These functions are not used by anything else in the MailFolder
@@ -558,30 +539,26 @@ public:
        NB: this function should eventually replace the other SaveMessages()
    */
    virtual bool SaveMessages(const UIdArray *selections,
-                             MFolder *folder,
-                             bool updateCount = true) = 0;
+                             MFolder *folder) = 0;
 
    /** Save the messages to a folder.
        @param selections the message indices which will be converted using the current listing
        @param folderName the name of the folder to save to
        @param isProfile if true, the folderName will be interpreted as
        a symbolic folder name, otherwise as a filename
-       @param updateCount If true, the number of messages in the
-       folder is updated. If false, they will be detected as new
-       messages.
        @return true on success
    */
    virtual bool SaveMessages(const UIdArray *selections,
-                             String const & folderName,
-                             bool isProfile,
-                             bool updateCount = true) = 0;
+                             const String& folderName,
+                             bool isProfile) = 0;
+
    /** Save the messages to a folder.
        @param selections the message indices which will be converted using the current listing
        @param fileName the name of the folder to save to
        @return true on success
    */
    virtual bool SaveMessagesToFile(const UIdArray *selections,
-                                   String const & fileName) = 0;
+                                   const String& fileName) = 0;
 
    /** Mark messages as deleted or move them to trash.
        @param messages pointer to an array holding the message numbers
@@ -608,8 +585,8 @@ public:
        @parent parent window for dialog
        @return true if messages got saved
    */
-   virtual bool SaveMessagesToFile(const UIdArray *messages, MWindow
-                                   *parent = NULL) = 0;
+   virtual bool SaveMessagesToFile(const UIdArray *messages,
+                                   MWindow *parent = NULL) = 0;
 
    /** Save messages to a folder.
        @param messages pointer to an array holding the message numbers

@@ -2293,13 +2293,9 @@ MailFolderCC::AppendMessage(const String& msg, bool update)
    }
    else
    {
-      if( ( (m_UpdateFlags & UF_DetectNewMail) == 0)
-          && ( (m_UpdateFlags & UF_UpdateCount) != 0) )
-      {
-         // this mail will be stored as uid_last+1 which isn't updated
-         // yet at this point
-         m_LastNewMsgUId = m_MailStream->uid_last+1;
-      }
+      // this mail will be stored as uid_last+1 which isn't updated
+      // yet at this point
+      m_LastNewMsgUId = m_MailStream->uid_last+1;
 
       // if we don't have the listing yet, don't update - we will notice the
       // new messages anyhow when we build it
@@ -2314,8 +2310,7 @@ MailFolderCC::AppendMessage(const String& msg, bool update)
 
 bool
 MailFolderCC::SaveMessages(const UIdArray *selections,
-                           MFolder *folder,
-                           bool updateCount)
+                           MFolder *folder)
 {
    CHECK( folder, false, "SaveMessages() needs a valid folder pointer" );
 
@@ -2357,7 +2352,11 @@ MailFolderCC::SaveMessages(const UIdArray *selections,
    if ( !didServerSideCopy )
    {
       // use the inefficient retrieve-append way
-      return MailFolderCmn::SaveMessages(selections, folder, updateCount);
+      if ( !MailFolderCmn::SaveMessages(selections, folder) )
+      {
+         // oops, this failed too
+         return false;
+      }
    }
 
    // update status of the target folder
@@ -3070,12 +3069,6 @@ MailFolderCC::GetHeaders(void) const
       that->BuildListing();
 
       CHECK(m_Listing, NULL, "failed to build folder listing");
-
-      // if we're configured not to detect new mail, just ignore it
-      if ( !(GetUpdateFlags() & UF_DetectNewMail) )
-      {
-         that->m_GotNewMessages = false;
-      }
 
       // if we have any new messages, reapply filters to them
       if ( m_GotNewMessages )

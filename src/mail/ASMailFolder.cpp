@@ -131,7 +131,7 @@ protected:
 #ifndef USE_THREADS
    virtual void Run(void) { Entry(); }
 #endif
-   
+
    virtual void  WorkFunction(void) = 0;
 
 protected:
@@ -391,20 +391,19 @@ private:
 class MT_SaveMessages : public MailThreadSeq
 {
 public:
-   MT_SaveMessages(ASMailFolder *mf, UserData ud,
+   MT_SaveMessages(ASMailFolder *mf,
+                   UserData ud,
                    const UIdArray *selections,
                    const String &folderName,
-                   bool isProfile, bool updateCount)
+                   bool isProfile)
       : MailThreadSeq(mf, ud, selections)
       {
          m_MfName = folderName;
          m_IsProfile = isProfile;
-         m_Update = updateCount;
       }
    virtual void WorkFunction(void)
       {
-         int rc = m_MailFolder->SaveMessages(m_Seq, m_MfName,
-                                             m_IsProfile, m_Update); 
+         int rc = m_MailFolder->SaveMessages(m_Seq, m_MfName, m_IsProfile);
          SendEvent(ASMailFolder::ResultInt
                    ::Create(m_ASMailFolder,
                             m_Ticket,
@@ -418,7 +417,6 @@ public:
 private:
    String    m_MfName;
    bool      m_IsProfile;
-   bool      m_Update;
 };
 
 class MT_SaveMessagesToFile : public MailThreadSeq
@@ -654,7 +652,7 @@ public:
                                   bool set)
       {
          return (new MT_SetSequenceFlag(this, NULL,
-                                        GetSequenceString(sequence),flag,set))->Start(); 
+                                        GetSequenceString(sequence),flag,set))->Start();
       }
 
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
@@ -701,7 +699,7 @@ public:
       {
          return (new MT_SearchMessages(this, ud, crit))->Start();
       }
-   
+
    /** Old-style interface on single messages. */
    //@{
    /** Delete a message.
@@ -752,18 +750,15 @@ public:
        @param folderName the name of the folder to save to
        @param isProfile if true, the folderName will be interpreted as
        a symbolic folder name, otherwise as a filename
-       @param updateCount If true, the number of messages in the
-       folder is updated. If false, they will be detected as new messages.
        @return ResultInt boolean
    */
    virtual Ticket SaveMessages(const UIdArray *selections,
                                String const & folderName,
                                bool isProfile,
-                               bool updateCount,
                                UserData ud)
       {
-         return (new MT_SaveMessages(this, ud, selections, folderName,
-                                     isProfile, updateCount))->Start();
+         return (new MT_SaveMessages(this, ud, selections,
+                                     folderName, isProfile))->Start();
       }
 
    /** Mark messages as deleted or move them to trash.
@@ -875,7 +870,7 @@ public:
    virtual Ticket ApplyFilterRules(const UIdArray * msgs, UserData ud)
    {
       return (new MT_ApplyFilterRules(this, ud, msgs))->Start();
-   } 
+   }
 
    /**@name Subscription management */
    //@{
@@ -934,20 +929,8 @@ public:
    /** Get the profile.
        @return Pointer to the profile.
    */
-   inline Profile *GetProfile(void) const
+   Profile *GetProfile(void) const
       { AScheck(); return m_MailFolder->GetProfile(); }
-
-
-
-
-   /** Toggle update behaviour flags.
-       @param updateFlags the flags to set
-   */
-   virtual void SetUpdateFlags(int updateFlags)
-      { AScheck(); m_MailFolder->SetUpdateFlags(updateFlags); }
-   /// Get the current update flags
-   virtual int  GetUpdateFlags(void) const
-      { AScheck(); return m_MailFolder->GetUpdateFlags(); }
 
    /**@name Functions to get an overview of messages in the folder. */
    //@{

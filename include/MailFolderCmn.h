@@ -36,23 +36,19 @@ public:
    */
    //@{
    virtual bool SaveMessages(const UIdArray *selections,
-                             MFolder *folder,
-                             bool updateCount = true);
+                             MFolder *folder);
 
    /** Save the messages to a folder.
        @param selections the message indices which will be converted using the current listing
        @param folderName the name of the folder to save to
        @param isProfile if true, the folderName will be interpreted as
        a symbolic folder name, otherwise as a filename
-       @param updateCount If true, the number of messages in the
-       folder is updated. If false, they will be detected as new
-       messages.
        @return true on success
    */
    virtual bool SaveMessages(const UIdArray *selections,
                              String const & folderName,
-                             bool isProfile,
-                             bool updateCount = true);
+                             bool isProfile);
+
    /** Save the messages to a folder.
        @param selections the message indices which will be converted using the current listing
        @param fileName the name of the folder to save to
@@ -161,26 +157,6 @@ public:
    virtual inline void GetAuthInfo(String *login, String *password) const
       { *login = m_Login; *password = m_Password; }
 
-   /** Toggle update behaviour flags.
-       @param updateFlags the flags to set
-   */
-   //@{
-   virtual void SetUpdateFlags(int updateFlags)
-      {
-         int oldFlags = m_UpdateFlags;
-         m_UpdateFlags = updateFlags;
-         if( !(oldFlags & UF_UpdateCount)
-             && (m_UpdateFlags & UF_UpdateCount)
-            )
-         {
-            UpdateStatus();
-            RequestUpdate();// this should be done already...
-         }
-      }
-   /// Get the current update flags
-   virtual int  GetUpdateFlags(void) const
-      { return m_UpdateFlags; }
-   //@}
    /** Apply any filter rules to the folder.
        Applies the rule to all messages listed in msgs.
        @return -1 if no filter module exists, return code otherwise
@@ -273,8 +249,6 @@ protected:
    bool m_FirstListing;
    /// The last seen new UID, to check for new mails:
    UIdType  m_LastNewMsgUId;
-   /// The current update flags
-   int     m_UpdateFlags;
    //@}
    /**@name Common variables might or might not be used */
    //@{

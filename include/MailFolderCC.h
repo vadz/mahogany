@@ -203,8 +203,7 @@ public:
                         bool set = true);
 
    virtual bool SaveMessages(const UIdArray *selections,
-                             MFolder *folder,
-                             bool updateCount);
+                             MFolder *folder);
 
    /** Appends the message to this folder.
        @param msg the message to append

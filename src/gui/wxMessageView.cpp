@@ -1450,10 +1450,6 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
             ASMailFolder *mf = ASMailFolder::OpenFolder(mfolder);
             if ( mf )
             {
-               // we have to reset the default UF_DetectNewMail flag to avoid
-               // getting new mail notification for the message we write to it
-               // ourselves
-               mf->SetUpdateFlags(MailFolder::UF_UpdateCount);
                wxMessageViewFrame * f =
                   new wxMessageViewFrame(mf, 1, NULL, m_Parent);
                f->SetTitle(mimetype);
