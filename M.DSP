@@ -1016,6 +1016,22 @@ SOURCE=.\include\MInterface.mid
 
 !IF  "$(CFG)" == "M - Win32 Release"
 
+# Begin Custom Build
+InputDir=.\include
+InputPath=.\include\MInterface.mid
+
+BuildCmds= \
+	N:\Unix\Cygwin\cygwin-b20\H-i586-cygwin32\bin\M4.exe -DM4FILE=$(InputDir)/mid2cpp.m4 $(InputPath) > $(InputDir)/MInterface.cpp \
+	N:\Unix\Cygwin\cygwin-b20\H-i586-cygwin32\bin\M4.exe -DM4FILE=$(InputDir)/mid2h.m4 $(InputPath) > $(InputDir)/MInterface.h \
+	
+
+"$(InputDir)/MInterface.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(InputDir)/MInterface.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
 # Begin Custom Build - Creating MInterface.h and .cpp
@@ -1054,9 +1070,80 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
+# Begin Custom Build
+InputDir=.\include
+InputPath=.\include\MInterface.mid
+
+BuildCmds= \
+	N:\Unix\Cygwin\cygwin-b20\H-i586-cygwin32\bin\M4.exe -DM4FILE=$(InputDir)/mid2cpp.m4 $(InputPath) > $(InputDir)/MInterface.cpp \
+	N:\Unix\Cygwin\cygwin-b20\H-i586-cygwin32\bin\M4.exe -DM4FILE=$(InputDir)/mid2h.m4 $(InputPath) > $(InputDir)/MInterface.h \
+	
+
+"$(InputDir)/MInterface.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(InputDir)/MInterface.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
 !ENDIF 
 
 # End Source File
 # End Group
+# Begin Source File
+
+SOURCE=.\include\config_nt.h
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Copying $(InputPath) to config.h...
+InputDir=.\include
+InputPath=.\include\config_nt.h
+
+"$(InputDir)\config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\config.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Copying $(InputPath) to config.h...
+InputDir=.\include
+InputPath=.\include\config_nt.h
+
+"$(InputDir)\config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\config.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Copying $(InputPath) to config.h...
+InputDir=.\include
+InputPath=.\include\config_nt.h
+
+"$(InputDir)\config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\config.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Copying $(InputPath) to config.h...
+InputDir=.\include
+InputPath=.\include\config_nt.h
+
+"$(InputDir)\config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\config.h
+
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
 # End Target
 # End Project
