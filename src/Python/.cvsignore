@@ -10,6 +10,7 @@ MObject_wrap.html
 MProfile.py
 MString.py
 MString_wrap.html
+MString_wrap.doc
 MailFolder_swig.cpp
 MailFolder_wrap.doc
 MailFolder_wrap.html
