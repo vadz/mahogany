@@ -61,42 +61,47 @@ static bool CheckPyError()
 bool
 InitPython(void)
 {
-   String
-      tmp, path;
+   // set PYTHONPATH correctly to find our modules
+   String tmp = "PYTHONPATH=";
 
-   // VZ: I don't know why, but Python ignores this variable if it's set from
-   //     here under Windows - so don't waste our efforts...
-#  ifndef OS_WIN
-   // initialise python interpreter
-   tmp = "PYTHONPATH=";
-   path = mApplication->GetProfile()->readEntry(MP_PYTHONPATH,MP_PYTHONPATH_D);
-   if(strutil_isempty(path))
+   String path = READ_APPCONFIG(MP_PYTHONPATH);
+   bool didntHavePath = path.empty();
+   if ( didntHavePath )
    {
-      path += mApplication->GetLocalDir();
-      path += "/scripts";
-      path += PATH_SEPARATOR;
-      path += mApplication->GetGlobalDir();
-      path += "/scripts";
-      tmp += path;
-      mApplication->GetProfile()->writeEntry(MP_PYTHONPATH,path);
+      path << mApplication->GetLocalDir() << "/scripts" << PATH_SEPARATOR;
+      String globaldir = mApplication->GetGlobalDir();
+      if ( globaldir.empty() )
+      {
+          // not installed
+          path << mApplication->GetDataDir() << "/Python/Scripts"
+#ifdef M_TOP_BUILDDIR
+               << PATH_SEPARATOR << M_TOP_BUILDDIR << "/src/Python"
+#endif
+              ;
+      }
+      else
+      {
+          path << globaldir << "/scripts";
+      }
    }
-   else
-      tmp += mApplication->GetProfile()->readEntry(MP_PYTHONPATH,MP_PYTHONPATH_D);
-   if(getenv("PYTHONPATH"))
+
+   tmp += path;
+
+   const char *pathOld = getenv("PYTHONPATH");
+   if ( pathOld )
    {
-      tmp += PATH_SEPARATOR;
-      tmp += getenv("PYTHONPATH");
+      tmp << PATH_SEPARATOR << pathOld;
    }
+
    char *pathstring = strutil_strdup(tmp);  // this string must not be used again or freed
    putenv(pathstring);
-#  endif
 
    // initialise the interpreter - this we do always, just to avoid problems
    Py_Initialize();
 
    if( !READ_CONFIG(mApplication->GetProfile(), MP_USEPYTHON) )
       return true; // it is not an error to have it disabled
-   
+
    // initialise the modules
    initMStringc();
    initMProfilec();
@@ -111,12 +116,14 @@ InitPython(void)
    // run the init script
    Python_MinitModule = PyImport_ImportModule("Minit");
 
-   if( !CheckPyError() || Python_MinitModule == NULL) {
+   if( !CheckPyError() || Python_MinitModule == NULL)
+   {
       ERRORMESSAGE(("Python: Cannot find/evaluate Minit.py initialisation script."));
 
       rc = FALSE;
    }
-   else  {
+   else
+   {
       Py_INCREF(Python_MinitModule); // keep it in memory
       PyObject *minit = PyObject_GetAttrString(Python_MinitModule,
                                                "Minit");
@@ -132,6 +139,12 @@ InitPython(void)
 
          rc = FALSE;
       }
+   }
+
+   if ( rc && didntHavePath )
+   {
+      // rememember the path
+      mApplication->GetProfile()->writeEntry(MP_PYTHONPATH, path);
    }
 
    return rc;
