@@ -63,14 +63,14 @@ __EOF__
 ./poempty.pl $po >> /tmp/mail_pos$$
 echo ----------------------------------------------------------- >>/tmp/mail_pos$$
 cat $po >> /tmp/mail_pos$$
-echo ------wxstd.po for wxWindows: ----------------------------- >>/tmp/mail_pos$$
-if [ -f wxstd/$po ]
-then
-    cat wxstd/$po >>/tmp/mail_pos$$
-else
-    echo "(There is no wxstd.po for your language yet, including the German one as a starting point.)" >>/tmp/mail_pos$$
-    cat wxstd/de.po >>/tmp/mail_pos$$
-fi
+#echo ------wxstd.po for wxWindows: ----------------------------- >>/tmp/mail_pos$$
+#if [ -f wxstd/$po ]
+#then
+#    cat wxstd/$po >>/tmp/mail_pos$$
+#else
+#    echo "(There is no wxstd.po for your language yet, including the German one as a starting point.)" >>/tmp/mail_pos$$
+#    cat wxstd/de.po >>/tmp/mail_pos$$
+#fi
 echo ----------------------------------------------------------- >>/tmp/mail_pos$$
 
 cat /tmp/mail_pos$$ | mail -s "Mahogany translation update" "$translator"

@@ -16,17 +16,12 @@ vpath %.po .src
 	$(MSGFMT) -v -o $@ $<
 
 all:	$(FILES_MO)
-	cd wxstd && $(MAKE)
 
 install: all
 	$(INSTALL) -d $(DATADIR)/locale
 	set -e; for i in $(FILES_MO); \
 	do $(INSTALL) -d $(DATADIR)/locale/`basename $$i .mo`/LC_MESSAGES; \
 	$(INSTALL_DATA) $$i $(DATADIR)/locale/`basename $$i .mo`/LC_MESSAGES/M.mo; \
-	done
-	set -e; for i in wxstd/*.mo; \
-	do $(INSTALL) -d $(DATADIR)/locale/`basename $$i .mo`/LC_MESSAGES; \
-	$(INSTALL_DATA) $$i $(DATADIR)/locale/`basename $$i .mo`/LC_MESSAGES/wxstd.mo; \
 	done
 
 check:
@@ -57,7 +52,7 @@ all install check:
 endif		# MSGFMT
 
 clean:
-	$(RM) $(FILES_MO) wxstd/*.mo
+	$(RM) $(FILES_MO)
 
 mergecat: .src/extra_po
 ifeq "$(TRANSLATIONS)" "yes"
