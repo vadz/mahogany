@@ -21,31 +21,26 @@ $(CXX) -o $@ $(strip $(M_COMPILE_CXX)) $*.cpp
 @f=$(notdir $*); test ! -f $*.d || { sed -e "s,^$$f\.o:,$@:," -e "s,$*.cpp,$<," $*.d >$*.t && rm -f $*.d && mv $*.t $*.d; }
 endef
 
-define M_COMPILE_SWIGLIB
-$(CXX) -o $@ $(strip $(M_COMPILE_CXX)) -DSWIG_GLOBAL $*.cpp
-@rm -f $*.cpp
-@f=$(notdir $*); test ! -f $*.d || { sed -e "s,^$$f\.o:,$@:," -e "s,$*.cpp,$<," $*.d >$*.t && rm -f $*.d && mv $*.t $*.d; }
-endef
+# swiglib.i only exists for global stuff to be compiled in it and for this we
+# must define this symbol when compiling it
+#
+# also see "-c" swig option handling below: it must not be specified for
+# swiglib
+CXXFLAGS_Python_swiglib_o := -DSWIG_GLOBAL
 
 ifdef SWIG
 SWIGFLAGS := -c++ -python -shadow
 vpath %.i .src
 %.o %.py: %.i
-	@rm -f $*.py
-	$(SWIG) -I$(dir $<) $(CPPFLAGS) $(SWIGFLAGS) -c -o $*.cpp $<
+	$(SWIG) -I$(dir $<) $(CPPFLAGS) $(SWIGFLAGS) \
+	 $(if $(subst swiglib,,$(notdir $*)),-c) -o $*.cpp $<
 	$(M_COMPILE_SWIG)
-Python/swiglib.o: Python/swiglib.i
-	$(SWIG) -I$(dir $<) $(SWIGFLAGS) -o $*.cpp $<
-	$(M_COMPILE_SWIGLIB)
 else
 vpath %.cpp-swig .src
 %.o: %.cpp-swig
 	cp -f $< $*.cpp
-	cp -f $(basename $<).py-swig $*.py
+	cp -f $*.py-swig $*.py
 	$(M_COMPILE_SWIG)
-Python/swiglib.o: Python/swiglib.cpp-swig
-	cp -f $< $*.cpp
-	$(M_COMPILE_SWIGLIB)
 endif
 
 CLEAN	+= Python/swiglib.cpp Python/swiglib.py Python/swiglib_wrap.html \
