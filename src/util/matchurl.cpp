@@ -142,34 +142,33 @@ void KeywordDetector::addNewKeyword(const char* key,
                                     KeywordDetectorCell* current,
                                     int toBeAdded) {
   if (! current) {
-    // C'est le premier mot-clef.
-    // Il faut creer et sauver la racine de l'arbre
+    // This is the first keyword inserted
+    // We must create adn save the root of the tree
     KeywordDetectorCell* newCell = new KeywordDetectorCell(key[0]);
     _root = newCell;
     addNewKeyword(key, _root);
     return;
   }
   if (current->_c == key[0]) {
-    // La cellule courante correspond
+    // The key is correct: this is the correct cell
     if (key[1] == '\000') {
-      // Et d'est la fin du mot-clef.
+      // And we have reached the end of a keyword
       // Donc la cellule courante marque la fin
       // d'un mot-clef
       current->_isKey = toBeAdded;
     } else {
-      // le mot clef n'est pas fini
-      // On continue avec la suite
+      // The keyword to add (or remove) is not finished
       if (! current->_son) {
-        // pas de fils, il va falloir le creer
+        // No son yet. We have to create one
         KeywordDetectorCell* newCell = new KeywordDetectorCell(key[1]);
         current->_son = newCell;
       }
       addNewKeyword(key+1, current->_son);
     }
   } else {
-    // La cellule courante n'est pas la bonne
+    // This is not the correct cell
     if (! current->_brother) {
-      // pas de frere, il va falloir le creer
+      // No brother. Let's create one
       KeywordDetectorCell* newCell = new KeywordDetectorCell(key[0]);
       current->_brother = newCell;
     }
@@ -184,30 +183,30 @@ int KeywordDetector::scanAtStart(const char* toBeScanned, KeywordDetectorCell* c
     return lngDernierTrouve;
   }
   if (current->_c == toBeScanned[0]) {
-    // La cellule courante correspond
+    // This is the correct cell
     if (current->_isKey == 1) {
-      // Et c'est la fin du mot-clef.
-      // On continue pour voir si on en trouve
-      // un plus grand, mais en se souvenant qu'on
-      // en a trouve un de longueur longueurDejaVue+1
+      // And this is the end of a keyword
+      // let's try to find a longer one, but do
+      // remember that we already saw one, the length
+      // of which is longueurDejaVue+1
       return scanAtStart(toBeScanned+1, 
                          current->_son, 
                          longueurDejaVue+1, 
                          longueurDejaVue+1);
     } else {
-      // le mot clef n'est pas fini
-      // On continue avec la suite
+      // This is not the end of a keyword
+      // Go on
       assert(current->_son);
       return scanAtStart(toBeScanned+1, current->_son, longueurDejaVue+1, lngDernierTrouve); 
     }
   } else {
-    // La cellule courante n'est pas la bonne
+    // Not a correct cell
     if (! current->_brother) {
-      // Il n'y a plus rien. On renvoie donc la longueur
-      // qu'on a pu deja trouver
+      // And no more cell. Let's return the length
+      // we may have already found
       return lngDernierTrouve;
     } else {
-      // On peut essayer une autre cellule
+      // There is another cell to try
       return scanAtStart(toBeScanned, current->_brother, longueurDejaVue, lngDernierTrouve);  
     }
   }
@@ -227,12 +226,12 @@ int KeywordDetector::scan(const char* toBeScanned, int& lng, KeywordDetectorCell
   bool atRootLevel = true;
   while (toBeScanned[0]) {
     if (current->_c == toBeScanned[0]) {
-      // La cellule courante correspond
+      // This is the correct cell
       if (current->_isKey == 1) {
-        // Et c'est la fin du mot-clef.
-        // On continue pour voir si on en trouve
-        // un plus grand, mais en se souvenant qu'on
-        // en a trouve un de longueur longueurDejaVue+1
+        // And the end of a keyword.
+        // let's try to find a longer one, but do
+        // remember that we already saw one, the length
+        // of which is longueurDejaVue+1
         
         lng =  scanAtStart(toBeScanned+1, 
                            current->_son, 
@@ -240,8 +239,8 @@ int KeywordDetector::scan(const char* toBeScanned, int& lng, KeywordDetectorCell
                            lng+1);
         return currentPosition;
       } else {
-        // le mot clef n'est pas fini
-        // On continue avec la suite
+        // This is not the end of a keyword
+        // Go on
         assert(current->_son);
         current = current->_son;
         atRootLevel = false;
@@ -249,7 +248,7 @@ int KeywordDetector::scan(const char* toBeScanned, int& lng, KeywordDetectorCell
         toBeScanned = toBeScanned + 1;
       }
     } else {
-      // La cellule courante n'est pas la bonne
+      // Not a correct cell
       current = current->_brother;
       if (!current)  {
         current = _root;
@@ -262,7 +261,7 @@ int KeywordDetector::scan(const char* toBeScanned, int& lng, KeywordDetectorCell
         currentPosition = currentPosition + lng;
         lng = 0;
       } else if (current->_c == '\000') {
-        // It is a back link
+        // This is a 'back-link'
         currentPosition = currentPosition + lng - current->_isKey;
         lng = current->_isKey;
         assert (lng > 0);
@@ -471,7 +470,7 @@ int URLDetector::FindURL(const char *text, int& len)
    }
 
    // truncate any punctuation at the end
-   while ( strchr(".:,;", *(p - 1)) )
+   while ( strchr(".:,;)", *(p - 1)) )
       p--;
 
    len = p - start;
