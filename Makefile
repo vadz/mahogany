@@ -124,7 +124,7 @@ install_rpm:
 	@echo "$(DATADIR)/kylemail.wav" >> filelist
 	@echo "$(DATADIR)/afm" >> filelist
 	@echo "$(DATADIR)/icons" >> filelist
-	@echo "$(DATADIR)/locale" >> filelist
+	@echo "$(DESTDIR)/share/locale" >> filelist
 	@echo "$(BINDIR)/M" >> filelist
 	@echo "$(BINDIR)/mahogany" >> filelist
 	@echo "$(DESTDIR)/man/man1/mahogany.1" >> filelist
