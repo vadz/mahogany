@@ -17,11 +17,16 @@
 #   define    gettext_noop(x) x
 #endif
 
+// under Windows 12pt font looks too huge, letters are like in a book for
+// children
+#ifdef OS_WIN
+#  define DEFAULT_FONT_SIZE 10l
+#else
+#  define DEFAULT_FONT_SIZE 12l
+#endif
+
 /** @name The sections of the configuration file. */
 ///@{
-
-// The trailing slashes in the following defines are important,
-// otherwise Profile.cpp will get broken!
 
 /** The section in the global configuration file used for storing
     profiles (trailing '/' required).
@@ -47,6 +52,9 @@
 #ifndef M_FOLDER_CONFIG_SECTION
 #  define   M_FOLDER_CONFIG_SECTION   M_PROFILE_CONFIG_SECTION
 #endif
+
+// The trailing slashes in the following defines are important, otherwise
+// Profile.cpp will get broken!
 
 /** The section in the global configuration file used for storing
     window positions (trailing '/' required).
@@ -1150,7 +1158,6 @@ enum MFolderIndex
           "To:" \
           "Cc:" \
           "Bcc:" \
-          "Sender:" \
           "Reply-To:"
 /// all headers we know about
 #define   MP_MSGVIEW_ALL_HEADERS_D \
@@ -1177,12 +1184,16 @@ enum MFolderIndex
           "Keywords:" \
           "Last-Attempt-Date:" \
           "Lines:" \
-          "List-ID:" \
+          "List-Archive:" \
+          "List-Help:" \
+          "List-Id:" \
+          "List-Post:" \
+          "List-Subscribe:" \
           "List-Unsubscribe:" \
           "Mail-Copies-To:" \
           "Mail-Followup-To:" \
           "Mailing-List:" \
-          "Message-ID:" \
+          "Message-Id:" \
           "MIME-Version:" \
           "NNTP-Posting-Host:" \
           "Note:" \
@@ -1204,6 +1215,7 @@ enum MFolderIndex
           "Resent-To:" \
           "Return-Path:" \
           "Return-Receipt-To:" \
+          "Sender:" \
           "Sent:" \
           "State-Changed-By:" \
           "State-Changed-From-To:" \
@@ -1246,6 +1258,7 @@ enum MFolderIndex
           "X-MSMail-Priority:" \
           "X-MyDeja-Info:" \
           "X-Newsreader:" \
+          "X-Original-Date:" \
           "X-Originating-IP:" \
           "X-Priority:" \
           "X-Sender:" \
@@ -1278,7 +1291,7 @@ enum MFolderIndex
 /// which font to use
 #define   MP_MVIEW_FONT_D         6L
 /// which font size
-#define   MP_MVIEW_FONT_SIZE_D         12L
+#define   MP_MVIEW_FONT_SIZE_D         DEFAULT_FONT_SIZE
 // which foreground colour for the font
 #define   MP_MVIEW_FGCOLOUR_D      "black"
 // which background colour for the font
@@ -1310,7 +1323,7 @@ enum MFolderIndex
 /// which font to use
 #define   MP_FVIEW_FONT_D         4L
 /// which font size
-#define   MP_FVIEW_FONT_SIZE_D         12L
+#define   MP_FVIEW_FONT_SIZE_D         DEFAULT_FONT_SIZE
 /// don't show full e-mail, only sender's name
 #define   MP_FVIEW_NAMES_ONLY_D         0L
 /// which foreground colour for the font
@@ -1337,7 +1350,7 @@ enum MFolderIndex
 /// which font to use
 #define   MP_CVIEW_FONT_D         6L
 /// which font size
-#define   MP_CVIEW_FONT_SIZE_D    12L
+#define   MP_CVIEW_FONT_SIZE_D    DEFAULT_FONT_SIZE
 // which foreground colour for the font
 #define   MP_CVIEW_FGCOLOUR_D      "black"
 // which background colour for the font
@@ -1415,7 +1428,7 @@ enum MFolderIndex
 /// which font to use
 #define   MP_MV_FONT_FAMILY_D   6L
 /// which font size
-#define   MP_MV_FONT_SIZE_D     12L
+#define   MP_MV_FONT_SIZE_D     DEFAULT_FONT_SIZE
 /// support efax style incoming faxes
 #define MP_INCFAX_SUPPORT_D      1L
 /// domains from which to support faxes, semicolon delimited

@@ -2192,7 +2192,13 @@ wxMessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
    result->DecRef();
 }
 
-
+/// scroll down one line:
+void
+wxMessageView::LineDown(void)
+{
+   GetLayoutList()->MoveCursorVertically(1);
+   ScrollToCursor();
+}
 
 /// scroll down one page:
 void

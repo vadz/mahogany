@@ -717,7 +717,8 @@ wxListBox *wxEnhancedPanel::CreateListbox(const char *label,
    c->height.Absolute(150);   // well, what else can we do here?
    box->SetConstraints(c);
 
-   // the buttons vertically on the right of listbox
+   // the buttons vertically on the right of listbox (note that the labels
+   // correspond to the order of wxOptionsPage_BtnXXX enum)
    static const char *aszLabels[] =
    {
       gettext_noop("&Add"),
@@ -734,13 +735,18 @@ wxListBox *wxEnhancedPanel::CreateListbox(const char *label,
 
    long widthMax = GetMaxLabelWidth(labels, this);
 
-   widthMax += 15; // loks better like this
+   widthMax += 3*LAYOUT_X_MARGIN; // looks better like this
 
    // create the buttons: [Modify] in the middle, [Add] above it and [Delete]
    // below
-   wxButton *buttonModify = new wxButton(GetCanvas(),
-                                         wxOptionsPage_BtnModify,
-                                         labels[wxOptionsPage_BtnModify]);
+   wxButton *buttonModify
+      = new wxButton
+            (
+             GetCanvas(),
+             wxOptionsPage_BtnModify,
+             labels[wxOptionsPage_BtnModify - wxOptionsPage_BtnNew]
+            );
+
    c = new wxLayoutConstraints;
    c->centreY.SameAs(box, wxCentreY);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
@@ -750,7 +756,7 @@ wxListBox *wxEnhancedPanel::CreateListbox(const char *label,
 
    wxButton *buttonNew = new wxButton(GetCanvas(),
                                       wxOptionsPage_BtnNew,
-                                      labels[wxOptionsPage_BtnNew]);
+                                      labels[0]);
    c = new wxLayoutConstraints;
    c->bottom.Above(buttonModify, -2*LAYOUT_Y_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
@@ -758,9 +764,14 @@ wxListBox *wxEnhancedPanel::CreateListbox(const char *label,
    c->height.AsIs();
    buttonNew->SetConstraints(c);
 
-   wxButton *buttonDelete = new wxButton(GetCanvas(),
-                                         wxOptionsPage_BtnDelete,
-                                         labels[wxOptionsPage_BtnDelete]);
+   wxButton *buttonDelete
+      = new wxButton
+            (
+             GetCanvas(),
+             wxOptionsPage_BtnDelete,
+             labels[wxOptionsPage_BtnDelete - wxOptionsPage_BtnNew]
+            );
+
    c = new wxLayoutConstraints;
    c->top.Below(buttonModify, 2*LAYOUT_Y_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);

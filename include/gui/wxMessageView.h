@@ -143,6 +143,8 @@ public:
    /// the derived class should react to the result to an asynch operation
    void OnASFolderResultEvent(MEventASFolderResultData &event);
 
+   /// scroll down one line:
+   void LineDown(void);
    /// scroll down one page:
    void PageDown(void);
    /// scroll up one page:

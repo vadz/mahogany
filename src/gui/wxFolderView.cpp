@@ -827,7 +827,7 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
    HeaderInfoList_obj hil = m_FolderView->GetFolder()->GetHeaders();
    CHECK_RET(hil, "no header listing in wxFolderListCtrl");
 
-   const HeaderInfo *hi =hil[focused];
+   const HeaderInfo *hi = hil[focused];
    if ( hi )
    {
       UIdType focused_uid = hi->GetUId();
@@ -852,7 +852,9 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
       // called yet
       m_itemFocus = GetFocusedItem();
 
-      // only preview the message when it is the first one we select
+      // only preview the message when it is the first one we select,
+      // selecting subsequent messages just extends the selection but doesn't
+      // show them
       if ( GetUniqueSelection() != -1 && (event.m_itemIndex == m_itemFocus) )
       {
          // the current message is selected - view it if we don't yet
@@ -868,7 +870,7 @@ void wxFolderListCtrl::OnActivated(wxListEvent& event)
    // called by RETURN press
    UIdType uid = GetUIdFromIndex(event.m_itemIndex);
    if ( IsPreviewed(uid) )
-      m_FolderView->m_MessagePreview->PageDown();
+      m_FolderView->m_MessagePreview->LineDown();
    else
       m_FolderView->PreviewMessage(uid);
 }
@@ -2118,7 +2120,10 @@ wxFolderView::UpdateSelectionInfo(void)
    {
       m_FolderCtrl->Select(curSel, false);
 
-      if ( m_settings.previewOnSingleClick )
+      // do preview the message if we had another one previewed before (like
+      // this we don't have to press <space> after deleting a message or
+      // moving down in !previewOnSingleClick mode)
+      if ( m_previewUId != UID_ILLEGAL || m_settings.previewOnSingleClick )
       {
          PreviewMessage(m_FocusedUId);
       }

@@ -26,7 +26,7 @@ WX_DEFINE_ARRAY(bool, ArrayBool);
 // control ids
 enum
 {
-   wxOptionsPage_BtnNew,
+   wxOptionsPage_BtnNew = 20000,
    wxOptionsPage_BtnModify,
    wxOptionsPage_BtnDelete
 };

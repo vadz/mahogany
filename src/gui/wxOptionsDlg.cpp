@@ -1823,6 +1823,14 @@ bool wxOptionsPage::TransferDataFromWindow()
 
 void wxOptionsPage::OnListBoxButton(wxCommandEvent& event)
 {
+   if ( m_idListbox == -1 )
+   {
+      // see comment in OnUpdateUIListboxBtns()
+      event.Skip();
+
+      return;
+   }
+
    switch ( event.GetId() )
    {
       case wxOptionsPage_BtnNew:
@@ -1913,10 +1921,23 @@ bool wxOptionsPage::OnListBoxDelete()
 
 void wxOptionsPage::OnUpdateUIListboxBtns(wxUpdateUIEvent& event)
 {
-   wxListBox *lbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
-   wxCHECK_RET( lbox, "expected a listbox here" );
+   if ( m_idListbox == -1 )
+   {
+      // unfortunately this does happen sometimes: I discovered it when the
+      // program crashed trying to process UpdateUI event from a popup menu in
+      // the folder tree window shown from an options page because some item had
+      // the same id as wxOptionsPage_BtnModify - I've changed the id now to
+      // make it unique, but it's not impossible that we'll have another one in
+      // the future, so be careful here
+      event.Skip();
+   }
+   else
+   {
+      wxListBox *lbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
+      wxCHECK_RET( lbox, "expected a listbox here" );
 
-   event.Enable(lbox->GetSelection() != -1);
+      event.Enable(lbox->GetSelection() != -1);
+   }
 }
 
 // ----------------------------------------------------------------------------
