@@ -1993,6 +1993,10 @@ CopyEntries(wxConfigBase *src,
             bool recursive,
             wxConfigBase *dest)
 {
+   // we shouldn't expand the env variables when copying entries
+   bool expandEnvVarsOld = src->IsExpandingEnvVars();
+   src->SetExpandEnvVars(false);
+
    wxString oldPath = src->GetPath();
 
    // we count the groups copied, not entries (the former is more interesting
@@ -2104,6 +2108,7 @@ CopyEntries(wxConfigBase *src,
    }
 
    src->SetPath(oldPath);
+   src->SetExpandEnvVars(expandEnvVarsOld);
 
    return numCopied;
 }
