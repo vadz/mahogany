@@ -27,6 +27,7 @@
 #ifndef USE_PCH
    #include "Mcommon.h"
 
+   #include <wx/app.h>        // for wxPostEvent()
    #include <wx/sizer.h>
 
    #include <wx/gauge.h>
@@ -51,6 +52,11 @@
 #include "gui/wxBrowseButton.h"
 
 #include <wx/wizard.h>
+
+// if we're still using old headers
+#ifndef wxRB_SINGLE
+   #define wxRB_SINGLE 0
+#endif
 
 // ----------------------------------------------------------------------------
 // MigrateImapServer: IMAP server parameters
