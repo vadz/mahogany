@@ -225,7 +225,8 @@ public:
    void OnCheckBox(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
    void OnComboBox(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
    void OnChoice(wxCommandEvent& WXUNUSED(event)) { OnEvent(); }
-   void OnUpdateUIPath(wxUpdateUIEvent& event);
+
+   void UpdateOnFolderNameChange();
 
 protected:
    // react to any event - update all the controls
@@ -476,9 +477,6 @@ BEGIN_EVENT_TABLE(wxFolderPropertiesPage, wxNotebookPageBase)
    EVT_COMBOBOX(-1, wxFolderPropertiesPage::OnComboBox)
    EVT_CHOICE  (-1, wxFolderPropertiesPage::OnChoice)
    EVT_TEXT    (-1, wxFolderPropertiesPage::OnChange)
-#if 0 // no, do it dynamically - search for OnUpdateUIPath below
-   EVT_UPDATE_UI(-1, wxFolderPropertiesPage::OnUpdateUIPath)
-#endif
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxFolderSelectionDialog, wxDialog)
@@ -697,6 +695,9 @@ MFolder *wxFolderCreateDialog::DoCreateFolder(FolderType folderType)
 void wxFolderCreateDialog::OnFolderNameChange(wxCommandEvent& event)
 {
    SetDirty();
+
+   wxFolderPropertiesPage *page = GET_FOLDER_PAGE(m_notebook);
+   page->UpdateOnFolderNameChange();
 
    event.Skip();
 }
@@ -939,20 +940,6 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    (void)CreateIconEntry(labels[Label_FolderIcon], widthMax, m_folderSubtype, m_browseIcon);
 
    m_radio->Enable(m_isCreating);
-
-   // an optimisation: as we don't use ids here, we'd have to associate
-   // OnUpdateUIPath() with all text controls (i.e. use id == -1) if we were
-   // doing it using (static) event tables and we'd also have to do even when
-   // just viewing the folder properties (then it's unneeded).
-   //
-   // this would have been too slow, so, instead, connect the event handler to
-   // the control dynamically
-   if ( m_isCreating )
-   {
-      Connect(m_path->GetId(), -1, wxEVT_UPDATE_UI,
-              (wxObjectEventFunction)(wxEventFunction)(wxUpdateUIEventFunction)
-              &wxFolderPropertiesPage::OnUpdateUIPath);
-   }
 }
 
 void
@@ -990,6 +977,17 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
 
    CHECK_RET( dlg, "folder page should be in folder dialog!" );
 
+   wxObject *objEvent = event.GetEventObject();
+
+   // is this event due to a user's action or to something we did ourselves?
+   if ( (objEvent == m_path) && (m_userModifiedPath == -1) )
+   {
+      // this was done by our own UpdateOnFolderNameChange(), not by user
+      m_userModifiedPath = false;
+
+      return;
+   }
+
    dlg->SetDirty();
 
    // the rest doesn't make any sense for the "properties" dialog because the
@@ -998,7 +996,6 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
       return;
 
    // if the path text changed, try to set the folder name
-   wxObject *objEvent = event.GetEventObject();
    if ( objEvent == m_path || objEvent == m_newsgroup )
    {
       switch ( GetCurrentFolderType() )
@@ -1007,8 +1004,15 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
          case MF_MH:
             // set the file name as the default folder name
             {
-               wxString name;
-               wxSplitPath(m_path->GetValue(), NULL, &name, NULL);
+               wxString name, fullname = m_path->GetValue();
+               wxSplitPath(fullname, NULL, &name, NULL);
+
+               if ( !fullname )
+               {
+                  // path has become empty (again), so allow setting it
+                  // automatically from the folder name
+                  m_userModifiedPath = false;
+               }
 
                SetFolderName(name);
             }
@@ -1031,51 +1035,36 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
             ;
       }
    }
-
-   if ( objEvent == m_path )
-   {
-      // don't override the m_path value from the program any more if this
-      // comes really from user (special value -1 means that we're called from
-      // SetValue() - i.e. from our own program, in which case we just reset
-      // the flag to FALSE)
-      m_userModifiedPath = m_userModifiedPath != -1;
-   }
 }
 
 void
-wxFolderPropertiesPage::OnUpdateUIPath(wxUpdateUIEvent& event)
+wxFolderPropertiesPage::UpdateOnFolderNameChange()
 {
-   if ( event.GetEventObject() == m_path )
+   // if the path wasn't set by the user, set it to correspond to the folder
+   // name
+   if ( !m_userModifiedPath )
    {
-      // if the path is empty (or has only spaces) ...
-      if ( !m_userModifiedPath )
+      FolderType folderType = GetCurrentFolderType();
+      if ( folderType == MF_FILE || folderType == MF_MH )
       {
-         FolderType folderType = GetCurrentFolderType();
-         if ( folderType == MF_FILE || folderType == MF_MH )
-         {
-            // ... try to set it from the folder name
-            wxFolderCreateDialog *dlg =
-               GET_PARENT_OF_CLASS(this, wxFolderCreateDialog);
+         // ... try to set it from the folder name
+         wxFolderCreateDialog *dlg =
+            GET_PARENT_OF_CLASS(this, wxFolderCreateDialog);
 
-            CHECK_RET( dlg, "we should be only called when creating" );
+         CHECK_RET( dlg, "we should be only called when creating" );
 
-            // modify the text even if the folder name is empty because
-            // otherwise entering a character into "Folder name" field and
-            // erasing it wouldn't restore the original "Path" value
-            wxString folderName = dlg->GetFolderName();
-            event.SetText(strutil_expandfoldername(folderName, folderType));
+         // modify the text even if the folder name is empty because
+         // otherwise entering a character into "Folder name" field and
+         // erasing it wouldn't restore the original "Path" value
+         wxString folderName = dlg->GetFolderName();
 
-            // so that the OnChange() handler will know that it comes from
-            // us, not from the user
-            m_userModifiedPath = -1;
+         // so that the OnChange() handler will know that it comes from
+         // us, not from the user
+         m_userModifiedPath = -1;
 
-            // skip call to Skip() below
-            return;
-         }
+         m_path->SetValue(strutil_expandfoldername(folderName, folderType));
       }
    }
-
-   event.Skip();
 }
 
 // enable the controls which make sense for a NNTP or News folder

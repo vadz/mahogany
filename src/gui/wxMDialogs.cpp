@@ -724,9 +724,17 @@ private:
 class wxAboutFrame : public wxFrame
 {
 public:
-  wxAboutFrame(bool bCloseOnTimeout);
-   ~wxAboutFrame() { g_pSplashScreen = NULL; }
+   wxAboutFrame(bool bCloseOnTimeout);
+   virtual ~wxAboutFrame()
+   {
+      // remove our temp log redirector
+      delete wxLog::GetActiveTarget();
+
+      g_pSplashScreen = NULL;
+   }
+
    void Close(void) { m_Window->StopTimer(); wxWindow::Close(); }
+
 private:
    wxAboutWindow *m_Window;
 };
@@ -858,6 +866,38 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
                       /* no border styles at all */ wxSTAY_ON_TOP )
 {
    wxCHECK_RET( g_pSplashScreen == NULL, "one splash is more than enough" );
+
+   // getting log messages when splash screen is shown is extremely annoying,
+   // because there is no (easy) way to close the msg box hidden by the splash
+   // screen, so install a temporary log redirector which will close the splash
+   // screen before showing any messages
+   class SplashKillerLog : public wxLog
+   {
+   public:
+      SplashKillerLog() { m_logOld = wxLog::GetActiveTarget(); }
+      virtual ~SplashKillerLog() { wxLog::SetActiveTarget(m_logOld); }
+
+      virtual void DoLog(wxLogLevel level, const wxChar *szString, time_t t)
+      {
+         // all previous ones will show a msg box
+         if ( level < wxLOG_Status )
+         {
+            CloseSplash();
+         }
+
+         if ( m_logOld )
+         {
+            // the cast is bogus, just to be able to call protected DoLog()
+            ((SplashKillerLog *)m_logOld)->DoLog(level, szString, t);
+         }
+      }
+
+   private:
+      wxLog *m_logOld;
+   };
+
+   wxLog::SetActiveTarget(new SplashKillerLog);
+
    m_Window = new wxAboutWindow(this, bCloseOnTimeout);
    g_pSplashScreen = (wxMFrame *)this;
    Centre(wxCENTER_FRAME | wxBOTH);
@@ -1762,7 +1802,7 @@ wxXFaceButton::SetFile(const wxString &filename)
          bmp = XFace::GetXFaceImg(filename, &success, m_Parent).ConvertToBitmap();
       if(! success)
       {
-         bmp = mApplication->GetIconManager()->wxIconManager::GetBitmap("msg_error");
+         bmp = wxBitmap(wxTheApp->GetStdIcon(wxICON_HAND));
          m_XFace = "";
       }
       else

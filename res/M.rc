@@ -100,21 +100,27 @@ miscopt		BITMAP "miscopt.bmp"
 access		BITMAP "access.bmp"
 
 // Folder tree bitmaps (16x16)
-folder_inbox	BITMAP "folder_inbox.bmp"
-folder_file	BITMAP "folder_file.bmp"
-folder_pop	BITMAP "folder_pop.bmp"
-folder_imap	BITMAP "folder_imap.bmp"
-folder_news	BITMAP "folder_news.bmp"
-folder_nntp	BITMAP "folder_news.bmp"
-folder_root	BITMAP "folder_root.bmp"
-folder_group	BITMAP "folder_group.bmp"
-folder_newmail	BITMAP "folder_newmail.bmp"
-folder_sentmail	BITMAP "folder_sentmail.bmp"
+folder_inbox		BITMAP "folder_inbox.bmp"
+folder_file		BITMAP "folder_file.bmp"
+folder_pop		BITMAP "folder_pop.bmp"
+folder_imap		BITMAP "folder_imap.bmp"
+folder_imapdir		BITMAP "folder_imapdir.bmp"
+folder_newshierarchy	BITMAP "folder_newshierarchy.bmp"
+folder_news		BITMAP "folder_news.bmp"
+folder_nntp		BITMAP "folder_news.bmp"
+folder_root		BITMAP "folder_root.bmp"
+folder_group		BITMAP "folder_group.bmp"
+folder_newmail		BITMAP "folder_newmail.bmp"
+folder_sentmail		BITMAP "folder_sentmail.bmp"
+folder_palmpilot	BITMAP "folder_palmpilot.bmp"
 
 // Custom headers dialog image list (16x16)
 image_news	BITMAP	"image_news.bmp"
 image_mail	BITMAP	"image_mail.bmp"
 image_both	BITMAP	"image_both.bmp"
+
+// Others
+noxface		BITMAP	"noxface.bmp"
 
 ///////////////////////////////////////////////////////////////////////////////
 // wxWindows ressources
@@ -144,12 +150,12 @@ BEGIN
         BLOCK "000004b0"
         BEGIN
             VALUE "CompanyName", "\0"
-            VALUE "FileDescription", "M - the ultimate e-mail solution\0"
+            VALUE "FileDescription", "Mahogany - the powerful cross-platform e-mail solution\0"
             VALUE "FileVersion", M_VERSION
-            VALUE "InternalName", "Main M program file\0"
+            VALUE "InternalName", "Main Mahogany program file\0"
             VALUE "LegalCopyright", "Copyright © 1998 Karsten Ballüder and Vadim Zeitlin\0"
             VALUE "OriginalFilename", "M.exe\0"
-            VALUE "ProductName", "M\0"
+            VALUE "ProductName", "Mahogany\0"
             VALUE "ProductVersion", M_VERSION_STRING
         END
     END
