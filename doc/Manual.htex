@@ -95,6 +95,7 @@ added:
 \item Better support for UTF-7/8 encoded headers
 \item ``Paste quoted'' command added
 \item New command to select all text in the viewer added
+\item New \texttt{--userdir} command line option
 \item \texttt{isfromme()} (was message sent by myself?) filter test added
 \end{itemize}
 
@@ -943,6 +944,9 @@ either {\tt /} or {\tt -} but only {\tt -{}-} can be used for the long ones.
    -{}-safe         &  don't do anything automatically on startup \\
                   &  may be useful if Mahogany crashes when trying \\
                   &  to automatically do something after starting up \\
+   \hline
+   -{}-userdir=dir  & specify a non default directory containing all user \\
+                    & data including, but not limited to, the file mailboxes \\
    \hline
    -{}-config=file  &  specify the alternate configuration file to use \\
                   &  may be also used to force using file instead of \\

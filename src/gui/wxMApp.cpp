@@ -2167,9 +2167,11 @@ void wxMApp::ShowLog(bool doShow)
 // command line parsing
 // ----------------------------------------------------------------------------
 
+// the names of cmd line options
 #define OPTION_BCC         _T("bcc")
 #define OPTION_BODY        _T("body")
 #define OPTION_CC          _T("cc")
+#define OPTION_USERDIR     _T("userdir")
 #define OPTION_CONFIG      _T("config")
 #define OPTION_DEBUGMAIL   _T("debug")
 #define OPTION_FOLDER      _T("folder")
@@ -2207,6 +2209,14 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
          _T("c"),
          OPTION_CC,
          gettext_noop("specify the carbon-copy (CC) recipients"),
+      },
+
+      // --userdir=dir to specify an alternative home directory to use
+      {
+         wxCMD_LINE_OPTION,
+         NULL,
+         OPTION_USERDIR,
+         gettext_noop("specify a non default directory for user files"),
       },
 
       // --config=file to specify an alternative config file to use
@@ -2333,7 +2343,25 @@ bool wxMApp::OnCmdLineParsed(wxCmdLineParser& parser)
       }
    }
 
-   parser.Found(OPTION_CONFIG, &m_cmdLineOptions->configFile);
+   // check for non default local dir and config file
+   //
+   // consider that config file is supposed to be in the user dir under Unix.
+   // under Windows we don't use config file at all unless it was specified
+#ifndef OS_WIN
+   const bool hasDir =
+#endif // OS_WIN
+   parser.Found(OPTION_USERDIR, &m_cmdLineOptions->userDir);
+   if ( !parser.Found(OPTION_CONFIG, &m_cmdLineOptions->configFile) )
+   {
+#ifndef OS_WIN
+      if ( hasDir )
+      {
+         m_cmdLineOptions->configFile = m_cmdLineOptions->userDir +
+                                          wxFILE_SEP_PATH + _T("config");
+      }
+#endif // !OS_WIN
+   }
+
    m_cmdLineOptions->useFolder = parser.Found(OPTION_FOLDER,
                                               &m_cmdLineOptions->folder);
 
@@ -2539,7 +2567,7 @@ bool wxMApp::CallAnother()
 #define CMD_LINE_OPTS_SEP _T('\1')
 
 // the version of the CmdLineOptions::ToString() format
-#define CMD_LINE_OPTS_VERSION 1.1
+#define CMD_LINE_OPTS_VERSION 1.2
 
 // the string versions of TRUE and FALSE
 #define CMD_LINE_OPTS_TRUE _T('1')
@@ -2549,6 +2577,7 @@ bool wxMApp::CallAnother()
 enum
 {
    CmdLineOptions_Version,
+   CmdLineOptions_UserDir,
    CmdLineOptions_Config,
    CmdLineOptions_Bcc,
    CmdLineOptions_Body,
@@ -2565,6 +2594,7 @@ String CmdLineOptions::ToString() const
    // only serialize the "interesting" options
    String s;
    s << s.Format(_T("%f"), CMD_LINE_OPTS_VERSION) << CMD_LINE_OPTS_SEP
+     << userDir << CMD_LINE_OPTS_SEP
      << configFile << CMD_LINE_OPTS_SEP
      << composer.bcc << CMD_LINE_OPTS_SEP
      << composer.body << CMD_LINE_OPTS_SEP
@@ -2588,6 +2618,7 @@ bool CmdLineOptions::FromString(const String& s)
    if ( wxAtof(tokens[CmdLineOptions_Version]) != CMD_LINE_OPTS_VERSION )
       return false;
 
+   userDir = tokens[CmdLineOptions_UserDir];
    configFile = tokens[CmdLineOptions_Config];
    composer.bcc = tokens[CmdLineOptions_Bcc];
    composer.body = tokens[CmdLineOptions_Body];

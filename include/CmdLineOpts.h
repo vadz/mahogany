@@ -32,6 +32,9 @@ public:
              to;
    } composer;
 
+   /// the directory with user files (mailboxes, config, ...)
+   String userDir;
+
    /// name of the alt config file
    String configFile;
 

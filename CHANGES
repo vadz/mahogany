@@ -6,10 +6,11 @@
       See at the end of file for the list of contributors (initials appearing
       in the second column of the changelog below).
 
-Release 0.66 'Clio' January 03, 2004
+Release 0.66 'Clio' January 18 2004
 ------------------------------------
 
-28.12.03 VZ: exposed more classes to embedded Python interpreter
+17.01.04 VZ: added --userdir command line option
+28.12.03 VZ: exposed almost all mail classes to embedded Python interpreter
 27.12.03 VZ: added $header template variable (entire original message header)
 26.12.03 VZ: main program icon now indicates whether there is new mail anywhere
 18.12.03 VZ: added command to select all text in the viewer

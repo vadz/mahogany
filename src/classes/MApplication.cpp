@@ -910,7 +910,15 @@ void
 MAppBase::InitDirectories()
 {
    // first the local one: this one contains user-specific files
+   // ----------------------------------------------------------
+
+   // the cmd line value overrides everything
+   m_localDir = m_cmdLineOptions->userDir;
+
+   // if not given, use the one from the config file
    m_localDir = READ_APPCONFIG_TEXT(MP_USERDIR);
+
+   // if still not given, try to find a good default one ourselves
    if ( m_localDir.empty() )
    {
 #ifdef OS_WIN
@@ -969,6 +977,8 @@ MAppBase::InitDirectories()
    }
 
    // and now the global directory: this one is shared by all users
+   // -------------------------------------------------------------
+
    m_globalDir = READ_APPCONFIG_TEXT(MP_GLOBALDIR);
    if ( m_globalDir.empty() || !PathFinder::IsDir(m_globalDir) )
    {
