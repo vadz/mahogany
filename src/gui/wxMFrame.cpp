@@ -118,6 +118,10 @@ bool wxMFrame::RestorePosition(const char *name,
 wxMFrame::wxMFrame(const String &name, wxWindow *parent)
         : MFrameBase(name)
 {
+#ifdef USE_WORKAROUND_FOR_MAXIMIZE
+   m_shouldMaximizeOnShow = FALSE;
+#endif
+
    m_initialised = false;
    Create(name, parent);
 }

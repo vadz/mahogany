@@ -18,6 +18,11 @@
 #   include  "guidef.h"
 #endif
 
+// enable workaround broken maximize?
+#if defined(__WXMSW__) && !wxCHECK_VERSION(2, 3, 0)
+   #define USE_WORKAROUND_FOR_MAXIMIZE
+#endif // wxMSW < 2.3.0
+
 /**
   * A wxWindows Frame class
   */
@@ -54,8 +59,11 @@ public:
    /// return true if initialised
    bool  IsInitialised(void) const { return m_initialised; }
 
+   // if we use this hack, Show() is implemented below
+#ifndef USE_WORKAROUND_FOR_MAXIMIZE
    /// make it visible or invisible
    bool Show(bool visible = true) { return wxFrame::Show(visible); }
+#endif // USE_WORKAROUND_FOR_MAXIMIZE
 
    /// used to set the title of the window class
    void  SetTitle(String const & name);
@@ -96,6 +104,38 @@ protected:
 
    /// is it initialised?
    bool m_initialised;
+
+   // work around wxFrame::Maximize() bug in wxMSW 2.2.x: it shows the frame if
+   // it is hidden and we don't want it
+#ifdef USE_WORKAROUND_FOR_MAXIMIZE
+public:
+   virtual bool Show(bool show = TRUE)
+   {
+      if ( show && m_shouldMaximizeOnShow )
+      {
+         wxFrame::Maximize();
+
+         m_shouldMaximizeOnShow = FALSE;
+      }
+
+      return wxFrame::Show(show);
+   }
+
+   virtual void Maximize(bool maximize = TRUE)
+   {
+      if ( maximize && !IsShown() )
+      {
+         m_shouldMaximizeOnShow = TRUE;
+      }
+      else
+      {
+         wxFrame::Maximize(maximize);
+      }
+   }
+
+private:
+   bool m_shouldMaximizeOnShow;
+#endif // USE_WORKAROUND_FOR_MAXIMIZE
 };
 
 #endif
