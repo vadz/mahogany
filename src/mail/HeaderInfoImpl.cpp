@@ -282,7 +282,7 @@ private:
    MsgnoArray *m_msgnosFound;
 };
 
-// return the first array element in range [from, to[ or UID_ILLEGAL
+// return the first array element in range [from, to] inclusive or UID_ILLEGAL
 static MsgnoType
 FindElementInRange(const MsgnoArray& array, MsgnoType from, MsgnoType to)
 {
@@ -290,7 +290,7 @@ FindElementInRange(const MsgnoArray& array, MsgnoType from, MsgnoType to)
    for ( size_t n = 0; n < count; n++ )
    {
       MsgnoType msgno = array[n];
-      if ( msgno >= from && msgno < to )
+      if ( msgno >= from && msgno <= to )
       {
          return msgno;
       }
@@ -310,6 +310,7 @@ HeaderInfoListImpl::FindHeaderByFlag(MailFolder::MessageStatus flag,
    if ( !results )
       return UID_ILLEGAL;
 
+   // +1 to transform indexFrom in msgno
    return GetIdxFromMsgno(FindElementInRange(*results, indexFrom + 1, m_count));
 }
 
@@ -324,6 +325,7 @@ HeaderInfoListImpl::FindHeaderByFlagWrap(MailFolder::MessageStatus flag,
    if ( !results )
       return INDEX_ILLEGAL;
 
+   // +1 to transform indexFrom in msgno
    MsgnoType msgno = FindElementInRange(*results, indexFrom + 1, m_count);
    if ( msgno == MSGNO_ILLEGAL )
       msgno = FindElementInRange(*results, 0, indexFrom);
