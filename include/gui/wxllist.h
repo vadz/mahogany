@@ -23,6 +23,8 @@
 #include   <wx/generic/printps.h>
 #include   <wx/generic/prntdlgg.h>
 #include   <wx/dataobj.h>
+#include   <wx/font.h>
+#include   <wx/colour.h>
 
 // skip the following defines if embedded in M application
 #ifndef   M_BASEDIR
@@ -1333,6 +1335,7 @@ public:
    DECLARE_NO_COPY_CLASS(wxLayoutDataObject)
 };
 
+#if wxUSE_PRINTING_ARCHITECTURE
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
    The wxLayoutPrintout object for printing within the wxWindows print
@@ -1417,6 +1420,7 @@ private:
 
    DECLARE_NO_COPY_CLASS(wxLayoutPrintout)
 };
+#endif // wxUSE_PRINTING_ARCHITECTURE
 
 
 #endif // WXLLIST_H

@@ -1147,8 +1147,10 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    m_DoThis = new wxStaticText(canvas, -1, _("Then do this:"));
    m_ButtonMore = new wxButton(canvas, Button_MoreTests, _("&More"));
    m_ButtonLess = new wxButton(canvas, Button_LessTests, _("&Fewer"));
+#if wxUSE_TOOLTIPS
    m_ButtonMore->SetToolTip(_("Add another condition"));
    m_ButtonLess->SetToolTip(_("Remove the last condition"));
+#endif // wxUSE_TOOLTIPS
 
    SetDefaultSize(8*wBtn, 18*hBtn);
    m_Panel->Layout();

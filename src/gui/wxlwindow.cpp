@@ -32,6 +32,13 @@
 #     include "gui/wxMenuDefs.h"
 #     include "gui/wxMApp.h"
 #   endif // USE_PCH
+
+#   include <wx/menu.h>
+#   include <wx/statusbr.h>
+#   include <wx/textctrl.h>
+#   include <wx/dcmemory.h>
+#   include <wx/dcclient.h>
+
 #   include "gui/wxlwindow.h"
 #   include "gui/wxlparser.h"
 
@@ -47,11 +54,7 @@
 #endif
 
 #include <wx/clipbrd.h>
-#include <wx/textctrl.h>
 #include <wx/dataobj.h>
-#include <wx/menu.h>
-#include <wx/statusbr.h>
-#include <wx/dcmemory.h>
 
 #ifdef WXLAYOUT_USE_CARET
 #   include <wx/caret.h>

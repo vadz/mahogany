@@ -3074,7 +3074,9 @@ extern wxChoice *CreateIdentCombo(wxWindow *parent)
    if ( !identity.empty() )
       combo->SetStringSelection(identity);
 
+#if wxUSE_TOOLTIPS
    combo->SetToolTip(_("Change the identity"));
+#endif // wxUSE_TOOLTIPS
 
    return combo;
 }
@@ -3096,7 +3098,14 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
    if ( !parent )
       parent = mApplication->TopLevelFrame();
 
-   m_frame = new wxMiniFrame
+   m_frame = new
+#ifdef __WXCOCOA__
+                 // FIXME: no wxMiniFrame in wxCocoa yet but wxUSE_MINIFRAME
+                 //        is still set to 1
+                 wxFrame
+#else
+                 wxMiniFrame
+#endif
                  (
                      parent,
                      -1,

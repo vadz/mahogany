@@ -1448,9 +1448,9 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
    // window for us but not from wxMessageViewFrame)
    CHECK( m_winForDnd, false, _T("this msg view doesn't support dnd") );
 
-#if wxUSE_DRAG_AND_DROP
    bool didDrop = false;
 
+#if wxUSE_DRAG_AND_DROP
    MailFolder_obj mf(GetMailFolder());
    CHECK( mf, false, _T("no mail folder to drag messages from?") );
 
@@ -1542,10 +1542,10 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
    {
       m_UIdsCopiedOk.Empty();
    }
+#endif // wxUSE_DRAG_AND_DROP
 
    // did we do anything?
    return didDrop;
-#endif // wxUSE_DRAG_AND_DROP
 }
 
 void

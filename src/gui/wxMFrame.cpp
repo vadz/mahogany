@@ -1092,6 +1092,7 @@ wxMFrame::OnCommandEvent(wxCommandEvent &event)
 void
 wxMFrame::OnPrintSetup()
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    wxPrintDialogData printDialogData(*mApplication->GetPrintData());
    wxPrintDialog printerDialog(this, &printDialogData);
 
@@ -1101,10 +1102,12 @@ wxMFrame::OnPrintSetup()
       mApplication->SetPrintData(
             printerDialog.GetPrintDialogData().GetPrintData());
    }
+#endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
 void wxMFrame::OnPageSetup()
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    wxPageSetupDialog pageSetupDialog(this, mApplication->GetPageSetupData());
    if ( pageSetupDialog.ShowModal() == wxID_OK )
    {
@@ -1112,12 +1115,14 @@ void wxMFrame::OnPageSetup()
       mApplication->SetPrintData(pageData.GetPrintData());
       mApplication->SetPageSetupData(pageData);
    }
+#endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
 #ifdef USE_PS_PRINTING
 
 void wxMFrame::OnPrintSetupPS()
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
 
    wxPrintDialogData printDialogData(* ((wxMApp *)mApplication)->GetPrintData());
@@ -1129,6 +1134,7 @@ void wxMFrame::OnPrintSetupPS()
       (*((wxMApp *)mApplication)->GetPrintData())
          = printerDialog.GetPrintDialogData().GetPrintData();
    }
+#endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
 #endif // USE_PS_PRINTING
@@ -1160,45 +1166,4 @@ wxMFrame::ProcessModulesMenu(int id)
    return FALSE;
 #endif
 }
-
-
-#if 0
-// unused so far:
-
-
-void wxMFrame::OnPageSetup()
-{
-#ifdef OS_WIN
-      wxGetApp().SetPrintMode(wxPRINT_WINDOWS);
-#else
-      wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
-#endif
-      wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
-      //FIXME data.SetOrientation(orientation);
-
-#ifdef OS_WIN
-      wxPageSetupDialog pageSetupDialog(this, & data);
-#else
-      wxGenericPageSetupDialog pageSetupDialog(this, & data);
-#endif
-      if ( pageSetupDialog.ShowModal() == wxID_OK )
-      {
-         data = pageSetupDialog.GetPageSetupData();
-         //FIXME orientation = data.GetOrientation();
-      }
-}
-
-void wxMFrame::OnPageSetupPS()
-{
-      wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
-
-      wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
-      //data.SetOrientation(orientation);
-
-      wxGenericPageSetupDialog pageSetupDialog(this, & data);
-      (void)pageSetupDialog.ShowModal();
-
-      //FIXME orientation = pageSetupDialog.GetPageSetupData().GetOrientation();
-}
-#endif
 

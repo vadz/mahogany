@@ -432,8 +432,10 @@ wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
                   : new wxButton(this, Btn_More, _("&More matches"));
 
    m_btnDelete = new wxButton(this, Btn_Delete, _("&Delete"));
+#if wxUSE_TOOLTIPS
    m_btnDelete->SetToolTip(_("Don't propose the selected address in this "
                              "dialog any more and remove it from the list now"));
+#endif // wxUSE_TOOLTIPS
 
    // we have to fill the listbox here or it won't have the correct size
    size_t nEntryCount = aEverything.GetCount();
@@ -450,7 +452,9 @@ wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
 
    if ( m_btnMore )
    {
+#if wxUSE_TOOLTIPS
       m_btnMore->SetToolTip(_("Show more matching entries"));
+#endif // wxUSE_TOOLTIPS
 
       c->bottom.SameAs(box, wxCentreY, LAYOUT_Y_MARGIN);
       m_btnMore->SetConstraints(c);

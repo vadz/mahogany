@@ -1114,6 +1114,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    m_isGroup = CreateCheckBox(labels[Label_IsGroup], widthMax, m_canBeOpened);
    m_folderSubtype = CreateChoice(labels[Label_FolderSubtype], widthMax, m_isGroup);
 
+#if wxUSE_TOOLTIPS
    // the checkboxes might not be very clear, so add some explanations in the
    // form of tooltips
    m_keepOpen->SetToolTip(_("Check this to always maintain connection "
@@ -1129,6 +1130,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
                           "for communication with the server."));
    m_acceptUnsignedSSL->SetToolTip(_("Accept unsigned (self-signed) SSL certificates?"));
 #endif // USE_SSL
+#endif // wxUSE_PRINTING_ARCHITECTURE
 
    wxFolderBaseDialog *dlgParent = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
    ASSERT_MSG( dlgParent, _T("should have a parent dialog!") );

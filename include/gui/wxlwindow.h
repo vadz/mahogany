@@ -14,6 +14,8 @@
 
 #include "gui/wxllist.h"
 
+#include <wx/scrolwin.h>
+
 #ifndef WXLOWIN_MENU_FIRST
 #   define WXLOWIN_MENU_FIRST 12000
 #endif

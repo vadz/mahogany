@@ -405,12 +405,18 @@ String LayoutViewer::GetSelection() const
 
 bool LayoutViewer::Print()
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    return wxLayoutPrintout::Print(m_window, m_window->GetLayoutList());
+#else // !wxUSE_PRINTING_ARCHITECTURE
+   return false;
+#endif // wxUSE_PRINTING_ARCHITECTURE/!wxUSE_PRINTING_ARCHITECTURE
 }
 
 void LayoutViewer::PrintPreview()
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    (void)wxLayoutPrintout::PrintPreview(m_window->GetLayoutList());
+#endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
 wxWindow *LayoutViewer::GetWindow() const

@@ -570,7 +570,9 @@ public:
       {
          m_rcptControl = rcptControl;
 
+#if wxUSE_TOOLTIPS
          SetToolTip(_("Create a new recipient entry"));
+#endif // wxUSE_TOOLTIPS
       }
 
    // callback
@@ -602,7 +604,9 @@ public:
       {
          m_rcptControl = rcptControl;
 
+#if wxUSE_TOOLTIPS
          SetToolTip(_("Delete this address from the message recipients list"));
+#endif // wxUSE_TOOLTIPS
       }
 
    // callback
@@ -973,7 +977,9 @@ void wxRcptControl::OnTypeChange(wxComposeView::RecipientType rcptType)
       case Composer::Recipient_Cc:
       case Composer::Recipient_Bcc:
          m_btnExpand->Enable();
+#if wxUSE_TOOLTIPS
          m_btnExpand->SetToolTip(_("Expand the address using address books"));
+#endif // wxUSE_TOOLTIPS
          break;
 
       case Composer::Recipient_Newsgroup:
@@ -984,7 +990,9 @@ void wxRcptControl::OnTypeChange(wxComposeView::RecipientType rcptType)
       case Composer::Recipient_Fcc:
          // browse for folder now
          m_btnExpand->Enable();
+#if wxUSE_TOOLTIPS
          m_btnExpand->SetToolTip(_("Browse for folder"));
+#endif // wxUSE_TOOLTIPS
          break;
 
       case Composer::Recipient_None:

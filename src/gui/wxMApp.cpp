@@ -1202,6 +1202,7 @@ int wxMApp::OnExit()
 
 void wxMApp::CleanUpPrintData()
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    // save our preferred printer settings
    if ( m_PrintData )
    {
@@ -1235,10 +1236,12 @@ void wxMApp::CleanUpPrintData()
       delete m_PageSetupData;
       m_PageSetupData = NULL;
    }
+#endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
 const wxPrintData *wxMApp::GetPrintData()
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    if ( !m_PrintData )
    {
 #ifdef OS_WIN
@@ -1280,19 +1283,23 @@ const wxPrintData *wxMApp::GetPrintData()
       m_PrintData->SetColour(READ_APPCONFIG(MP_PRINT_COLOUR));
 #endif // wxUSE_POSTSCRIPT
    }
+#endif // wxUSE_PRINTING_ARCHITECTURE
 
    return m_PrintData;
 }
 
 void wxMApp::SetPrintData(const wxPrintData& printData)
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    CHECK_RET( m_PrintData, _T("must have called GetPrintData() before!") );
 
    *m_PrintData = printData;
+#endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
 wxPageSetupDialogData *wxMApp::GetPageSetupData()
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    if ( !m_PageSetupData )
    {
       m_PageSetupData = new wxPageSetupDialogData(*GetPrintData());
@@ -1306,15 +1313,18 @@ wxPageSetupDialogData *wxMApp::GetPageSetupData()
          READ_APPCONFIG(MP_PRINT_BOTTOMMARGIN_X)));
 #endif // wxUSE_POSTSCRIPT
    }
+#endif // wxUSE_PRINTING_ARCHITECTURE
 
    return m_PageSetupData;
 }
 
 void wxMApp::SetPageSetupData(const wxPageSetupDialogData& data)
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    CHECK_RET( m_PrintData, _T("must have called GetPageSetupData() before!") );
 
    *m_PageSetupData = data;
+#endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
 // ----------------------------------------------------------------------------

@@ -26,6 +26,8 @@
 #ifndef USE_PCH
 #   include "Mcommon.h"
 #   include "Mdefaults.h"
+
+#   include <wx/frame.h>
 #endif // USE_PCH
 
 #include <wx/fontutil.h>      // for wxNativeFontInfo
@@ -456,13 +458,19 @@ void LayoutEditor::Paste()
 
 bool LayoutEditor::Print()
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    return wxLayoutPrintout::Print(m_LayoutWindow,
                                   m_LayoutWindow->GetLayoutList());
+#else // !wxUSE_PRINTING_ARCHITECTURE
+   return false;
+#endif // wxUSE_PRINTING_ARCHITECTURE/!wxUSE_PRINTING_ARCHITECTURE
 }
 
 void LayoutEditor::PrintPreview()
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    (void)wxLayoutPrintout::PrintPreview(m_LayoutWindow->GetLayoutList());
+#endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
 // ----------------------------------------------------------------------------

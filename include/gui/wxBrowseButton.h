@@ -41,7 +41,12 @@ class wxBrowseButton : public wxButton
 {
 public:
    wxBrowseButton(wxWindow *parent, const wxString& tooltip)
-      : wxButton(parent, -1, _T(">>")) { SetToolTip(tooltip); }
+      : wxButton(parent, -1, _T(">>"))
+   {
+#if wxUSE_TOOLTIPS
+      SetToolTip(tooltip); 
+#endif // wxUSE_TOOLTIPS
+   }
 
    // function which shows the file selection dialog and changes the associated
    // controls contents; it is called in response to the click on the button,

@@ -50,6 +50,8 @@
 
 class TextViewerWindow;
 
+#if wxUSE_PRINTING_ARCHITECTURE
+
 // ----------------------------------------------------------------------------
 // wxTextEasyPrinting: easy way to print text (TODO: move to wxWindows)
 // ----------------------------------------------------------------------------
@@ -66,6 +68,8 @@ public:
 private:
    static wxString ControlToHtml(wxTextCtrl *text);
 };
+
+#endif // wxUSE_PRINTING_ARCHITECTURE
 
 // ----------------------------------------------------------------------------
 // TextViewer: a wxTextCtrl-based MessageViewer implementation
@@ -144,14 +148,16 @@ private:
    // the viewer window
    TextViewerWindow *m_window;
 
-   // the object which does the printing
-   wxTextEasyPrinting *m_printText;
-
    // the position of the last match used by Find() and FindAgain()
    long m_posFind;
 
    // the text we're searched for the last time
    wxString m_textFind;
+
+#if wxUSE_PRINTING_ARCHITECTURE
+   // the object which does the printing
+   wxTextEasyPrinting *m_printText;
+#endif // wxUSE_PRINTING_ARCHITECTURE
 
    DECLARE_MESSAGE_VIEWER()
 };
@@ -231,6 +237,8 @@ private:
    DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(TextViewerWindow)
 };
+
+#if wxUSE_PRINTING_ARCHITECTURE
 
 // ============================================================================
 // wxTextEasyPrinting implementation
@@ -327,6 +335,8 @@ wxString wxTextEasyPrinting::ControlToHtml(wxTextCtrl *text)
 
    return s;
 }
+
+#endif // wxUSE_PRINTING_ARCHITECTURE
 
 // ============================================================================
 // TextViewerWindow implementation
@@ -510,8 +520,11 @@ IMPLEMENT_MESSAGE_VIEWER(TextViewer,
 TextViewer::TextViewer()
 {
    m_window = NULL;
-   m_printText = NULL;
    m_posFind = -1;
+
+#if wxUSE_PRINTING_ARCHITECTURE
+   m_printText = NULL;
+#endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
 // ----------------------------------------------------------------------------
@@ -609,6 +622,7 @@ String TextViewer::GetSelection() const
 
 void TextViewer::InitPrinting()
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    if ( !m_printText )
    {
       m_printText = new wxTextEasyPrinting(_("Mahogany Printing"),
@@ -619,20 +633,27 @@ void TextViewer::InitPrinting()
 
    *m_printText->GetPrintData() = *app->GetPrintData();
    *m_printText->GetPageSetupData() = *app->GetPageSetupData();
+#endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
 bool TextViewer::Print()
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    InitPrinting();
 
    return m_printText->Print(m_window);
+#else // !wxUSE_PRINTING_ARCHITECTURE
+   return false;
+#endif // wxUSE_PRINTING_ARCHITECTURE/!wxUSE_PRINTING_ARCHITECTURE
 }
 
 void TextViewer::PrintPreview()
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    InitPrinting();
 
    (void)m_printText->Preview(m_window);
+#endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
 wxWindow *TextViewer::GetWindow() const

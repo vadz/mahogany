@@ -175,8 +175,10 @@ private:
    // do we have a non default font?
    bool m_hasGlobalFont;
 
+#if wxUSE_PRINTING_ARCHITECTURE
    // the object which does all printing for us
    wxHtmlEasyPrinting *m_printHtml;
+#endif // wxUSE_PRINTING_ARCHITECTURE
 
    DECLARE_MESSAGE_VIEWER()
 };
@@ -574,7 +576,9 @@ HtmlViewer::HtmlViewer()
    m_nPart =
    m_nImage = 0;
 
+#if wxUSE_PRINTING_ARCHITECTURE
    m_printHtml = NULL;
+#endif // wxUSE_PRINTING_ARCHITECTURE
 
    m_htmlText.reserve(4096);
 }
@@ -583,7 +587,9 @@ HtmlViewer::~HtmlViewer()
 {
    FreeMemoryFS();
 
+#if wxUSE_PRINTING_ARCHITECTURE
    delete m_printHtml;
+#endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
 // ----------------------------------------------------------------------------
@@ -662,6 +668,7 @@ String HtmlViewer::GetSelection() const
 
 void HtmlViewer::InitPrinting()
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    if ( !m_printHtml )
    {
       m_printHtml = new wxHtmlEasyPrinting(_("Mahogany Printing"),
@@ -672,20 +679,27 @@ void HtmlViewer::InitPrinting()
 
    *m_printHtml->GetPrintData() = *app->GetPrintData();
    *m_printHtml->GetPageSetupData() = *app->GetPageSetupData();
+#endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
 bool HtmlViewer::Print()
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    InitPrinting();
 
    return m_printHtml->PrintText(m_htmlText);
+#else // !wxUSE_PRINTING_ARCHITECTURE
+   return false;
+#endif // wxUSE_PRINTING_ARCHITECTURE/!wxUSE_PRINTING_ARCHITECTURE
 }
 
 void HtmlViewer::PrintPreview()
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    InitPrinting();
 
    (void)m_printHtml->PreviewText(m_htmlText);
+#endif // wxUSE_PRINTING_ARCHITECTURE
 }
 
 wxWindow *HtmlViewer::GetWindow() const

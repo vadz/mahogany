@@ -213,7 +213,9 @@ void wxFileOrDirBrowseButton::UpdateTooltip()
    wxString msg;
    msg.Printf(_("Browse for a %s"), IsBrowsingForFiles() ? _("file")
                                                          : _("directory"));
+#if wxUSE_TOOLTIPS
    SetToolTip(msg);
+#endif // wxUSE_TOOLTIPS
 }
 
 // ----------------------------------------------------------------------------

@@ -3215,6 +3215,8 @@ wxLayoutList::Debug(void)
 
 extern const MOption MP_PRINT_PREVIEWZOOM;
 
+#if wxUSE_PRINTING_ARCHITECTURE
+
 // ----------------------------------------------------------------------------
 // wxMVPreview: tiny helper class used by wxLayoutPrintout::PrintPreview() to
 //              restore and set the default zoom level
@@ -3273,6 +3275,7 @@ bool wxLayoutPrintout::Print(wxWindow *window, wxLayoutList *llist)
 /* static */
 bool wxLayoutPrintout::PrintPreview(wxLayoutList *llist)
 {
+#if wxUSE_PRINTING_ARCHITECTURE
    // Pass two printout objects: for preview, and possible printing.
    wxPrintDialogData pdd(*mApplication->GetPrintData());
    wxPrintPreview *preview = new wxMVPreview
@@ -3305,9 +3308,17 @@ bool wxLayoutPrintout::PrintPreview(wxLayoutList *llist)
    frame->Show(TRUE);
 
    return true;
+#else // !wxUSE_PRINTING_ARCHITECTURE
+   return false;
+#endif // wxUSE_PRINTING_ARCHITECTURE/!wxUSE_PRINTING_ARCHITECTURE
 }
 
+#endif // wxUSE_PRINTING_ARCHITECTURE
+
 #endif // M_BASEDIR
+
+
+#if wxUSE_PRINTING_ARCHITECTURE
 
 wxLayoutPrintout::wxLayoutPrintout(wxLayoutList *llist,
                                    wxString const & title)
@@ -3461,6 +3472,9 @@ bool wxLayoutPrintout::HasPage(int pageNum)
    return pageNum <= m_NumOfPages;
 }
 
+#endif // wxUSE_PRINTING_ARCHITECTURE
+
+
 wxFont
 wxFontCache::GetFont(int family, int size, int style, int weight,
                      bool underline, wxFontEncoding encoding)
@@ -3519,3 +3533,4 @@ wxLayoutPrintout::DrawHeader(wxDC &dc,
    dc.SetFont(font);
 }
 #endif // 0
+
