@@ -18,6 +18,7 @@ install:
 	$(INSTALL_DATA) afm/*.afm $(DATADIR)/afm
 	$(INSTALL_DATA) newmail.wav $(DATADIR)
 #	$(INSTALL_DATA) mailcap $(DATADIR)
+	$(INSTALL_DATA) M.conf $(DATADIR)
 
 clean:
 
