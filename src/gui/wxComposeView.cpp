@@ -96,14 +96,14 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
                       String const &to, String const &cc, String const &bcc,
                       bool hide)
 {
-  CHECK( !initialised );
+  CHECK_RET( !initialised, "wxComposeView created twice" );
 
   ftCanvas = NULL;
   nextFileID = 0;
 
   if(!parentProfile)
     parentProfile = mApplication.GetProfile();
-  profile = new Profile(iname,parentProfile);
+   profile = new Profile(iname,parentProfile);
 
   // use default values for address fields if none explicitly specified
   const char *cto = strutil_isempty(to) ? READ_CONFIG(profile, MP_COMPOSE_TO) 
@@ -136,12 +136,12 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
     // @@ SetLabelPosition(wxVERTICAL) in wxWin2 ??
   #else
     panel->SetLabelPosition(wxVERTICAL);
-  #endif
+   #endif
 
   txtToLabel = CreateLabel(panel, "To:");
   txtTo      = CreateText(panel, -1, -1, -1, -1, "toField");
 
-  aliasButton = CreateButton(panel, "Expand", "", IDB_EXPAND);
+   aliasButton = CreateButton(panel, "Expand", "", IDB_EXPAND);
 
   if( READ_CONFIG(profile, MP_SHOWCC) )
   {
@@ -254,7 +254,85 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
   c->height.SameAs  (this, wxHeight);
   panel->SetConstraints(c);
 
-  CreateFTCanvas();
+   txtSubjectLabel = CreateLabel(panel, "Subject:");
+   txtSubject = CreateText(panel, -1, -1, -1, -1, "Subject");
+
+   wxStaticBox  *box = new wxStaticBox(panel, -1, "");
+   CreateFTCanvas();
+
+   // fix the constraints
+   // -------------------
+
+   // macro which centers one control vertically with respect to another one
+   #define VCENTER(c, ref) c->height.AsIs();         \
+                          c->centreY.SameAs(ref, wxCentreY, -1)
+
+   SetAutoLayout(TRUE);
+   panel->SetAutoLayout(TRUE);
+
+   // with the constraints, I assume that "Subject" is the longest label
+   // and all labels are right justified to the right edge of "Subject" label
+
+   // first row: "To" fields (label and text entry) and the "Expand" button
+   c = new wxLayoutConstraints;
+   c->top.SameAs(panel, wxTop, 15);
+   c->right.SameAs(txtSubjectLabel, wxRight);
+   c->height.AsIs();
+   c->width.AsIs();
+   txtToLabel->SetConstraints(c);
+
+   c = new wxLayoutConstraints;
+   c->left.SameAs(txtSubjectLabel, wxRight);
+   c->right.SameAs(aliasButton, wxLeft, 1);
+   VCENTER(c, txtToLabel); 
+   txtTo->SetConstraints(c);
+
+   c = new wxLayoutConstraints;
+   c->right.SameAs(panel, wxRight, 7);
+   c->width.AsIs();
+   VCENTER(c, txtToLabel); 
+   aliasButton->SetConstraints(c);
+
+   // this variable holds the last (from top to bottom) text field we created
+   // (we need it because txtCC and txtBCC are optional and the subject field
+   // must be under the last header line)
+   wxText *txtLast = txtTo;
+
+   // second row: "CC" label and text entry
+   if ( txtCCLabel != NULL ) {
+      c = new wxLayoutConstraints;
+      c->top.Below(aliasButton, 2);
+      c->right.SameAs(txtSubjectLabel, wxRight);
+      c->height.AsIs();
+      c->width.AsIs();
+      txtCCLabel->SetConstraints(c);
+
+      c = new wxLayoutConstraints;
+      c->left.SameAs(txtSubjectLabel, wxRight);
+      c->right.SameAs(panel, wxRight, 5);
+      VCENTER(c, txtCCLabel); 
+      txtCC->SetConstraints(c);
+
+      txtLast = txtCC;
+   }
+
+   // third row: "BCC" label and text entry
+   if ( txtBCCLabel != NULL ) {
+      c = new wxLayoutConstraints;
+      c->top.Below(txtLast, 1);
+      c->right.SameAs(txtSubjectLabel, wxRight);
+      c->height.AsIs();
+      c->width.AsIs();
+      txtBCCLabel->SetConstraints(c);
+
+      c = new wxLayoutConstraints;
+      c->left.SameAs(txtSubjectLabel, wxRight);
+      c->right.SameAs(panel, wxRight, 5);
+      VCENTER(c, txtBCCLabel); 
+      txtBCC->SetConstraints(c);
+
+      txtLast = txtBCC;
+   }
 
   if( READ_CONFIG(profile, MP_COMPOSE_USE_SIGNATURE) )
   {
@@ -278,17 +356,20 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
       istr.close();
       ftCanvas->MoveCursorTo(0,0);
     }
-  }
+   }
 
-  initialised = true;
-  if(! hide)
+   CreateStatusBar();
+
+   initialised = true;
+   if(! hide)
     Show(TRUE);
-  //   txtTo->SetFocus();
+   //   txtTo->SetFocus();
 }
 
 void
 wxComposeView::CreateFTCanvas(void)
 {
+   // Canvas
    ftCanvas = new wxFTCanvas(panel, -1,-1,-1,-1, 0, profile);
    // Canvas
    wxLayoutConstraints *c = new wxLayoutConstraints;
@@ -529,7 +610,7 @@ wxComposeView::Send(void)
          cptr = strtok(NULL,";"); // fileID
 //         istr.open(fileMap[atol(cptr)].c_str());
          filename = LookupFileName(atol(cptr));
-         wxCHECK(filename);
+         wxCHECK_RET(filename, "file not found in wxComposeView::Send");
          istr.open(filename);
          if(istr)
          {
