@@ -3435,7 +3435,10 @@ void
 wxComposeView::SetFrom(const String& from)
 {
    m_from = from;
-   m_txtFrom->SetValue(from);
+
+   // be careful here: m_txtFrom might be not shown
+   if ( m_txtFrom )
+      m_txtFrom->SetValue(from);
 }
 
 /// sets From field using the current profile
