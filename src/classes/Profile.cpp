@@ -671,7 +671,7 @@ public:
       m_parent = parent;
       m_parent->IncRef();
 
-      m_ProfileName << GetRootPath() << _T('/') << m_name;
+      m_ProfileName << m_parent->GetName() << _T('/') << m_name;
    }
 
    ~TempProfile()
