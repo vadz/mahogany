@@ -114,6 +114,9 @@ for release:
 ---> done, after merging of profile code, add support for building
      list of these folders and periodically checking them.
 
+- config panels are too small/too full, move font settings somewhere
+  else, i.e. have a "layout" page?
+
 - do we really need to scan /var/lib/news/active?
 - more configurability for news
 - do wxImage changes affect list of available handlers, etc?
@@ -135,7 +138,7 @@ after release:
 STRANGE....
 
 = wxLayout:
-  - delete in empty line doesn't work
+  - merge my colour changes into wxGTK/devel version
   - fix horiz scrollbar size
   - update rectangle (needs support in wxllist and wxWindows)
   - fix(simplify) cursor size calculation
@@ -151,6 +154,7 @@ STRANGE....
     x- add setting of background colour and/or image
     x- composeview: after inserting text (reply), update scrollbars
     x- fix initial scrollbar sizes --> seems ok, what exactly is wrong?
+    L- delete in empty line doesn't work
 
 - add progress indicator to image loading
     (and the one of SentFolder) in VerifySettings()
@@ -162,6 +166,8 @@ STRANGE....
 - when inserting filetype of unknown MIME type, prompt for it
 
 - implement Compose/Reply templates
+
+- merge font settings in wxComposeView/wxMessageView to share code
 
 - speed up copy mail to folder by cusing c-client functionality
   wxComposeView: if replying, only mark message as answered if reply

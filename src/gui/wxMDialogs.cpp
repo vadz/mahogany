@@ -721,7 +721,8 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    // TODO
 #endif // Unix/Win
 
-   Clear(wxROMAN, 30, wxNORMAL, wxBOLD, FALSE, "yellow");
+   wxColour col("yellow");
+   Clear(wxROMAN, 30, (int)wxNORMAL, (int)wxBOLD, FALSE, &col);
 
    ll->Insert(new wxLayoutObjectIcon(wxIcon(mahogany)));
    ll->LineBreak();

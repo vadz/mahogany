@@ -204,7 +204,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
          break;
 #ifdef WXLAYOUT_DEBUG
       case WXK_F1:
-         m_llist->SetFont(-1,-1,-1,-1,true);  // underlined
+         m_llist->SetFont(-1,-1,-1,-1,true, (const char*)NULL);  // underlined
          break;
 #endif
       default:
@@ -367,8 +367,8 @@ wxLayoutWindow::InternalPaint(void)
    // with the translate parameter of Draw().
    m_memDC->SetDeviceOrigin(0,0);
    m_memDC->SetBackgroundMode(wxTRANSPARENT);
-   m_memDC->SetBrush(wxBrush(*m_llist->GetDefaults()->GetBGColour(), wxSOLID));                                  
-   m_memDC->SetPen(wxPen(*m_llist->GetDefaults()->GetBGColour(),0,wxTRANSPARENT));                               
+   m_memDC->SetBrush(wxBrush(m_llist->GetDefaults()->GetBGColour(), wxSOLID));                                  
+   m_memDC->SetPen(wxPen(m_llist->GetDefaults()->GetBGColour(),0,wxTRANSPARENT));                               
    m_memDC->SetLogicalFunction(wxCOPY);
    if(m_BGbitmap)
    {

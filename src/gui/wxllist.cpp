@@ -236,7 +236,7 @@ wxLayoutObjectIcon::GetSize(CoordType *top, CoordType *bottom) const
 
 wxLayoutObjectCmd::wxLayoutObjectCmd(int size, int family, int style, int
                                      weight, bool underline,
-                                     wxColour const *fg, wxColour const *bg)
+                                     wxColour &fg, wxColour &bg)
    
 {
    m_font = new wxFont(size,family,style,weight,underline);
@@ -272,12 +272,12 @@ wxLayoutObjectCmd::GetStyle(wxLayoutStyleInfo *si) const
    si->underline = m_font->GetUnderlined();
    si->weight = m_font->GetWeight();
 
-   si->fg_red = m_ColourFG->Red();
-   si->fg_green = m_ColourFG->Green();
-   si->fg_blue = m_ColourFG->Blue();
-   si->bg_red = m_ColourBG->Red();
-   si->bg_green = m_ColourBG->Green();
-   si->bg_blue = m_ColourBG->Blue();
+   si->fg_red = m_ColourFG.Red();
+   si->fg_green = m_ColourFG.Green();
+   si->fg_blue = m_ColourFG.Blue();
+   si->bg_red = m_ColourBG.Red();
+   si->bg_green = m_ColourBG.Green();
+   si->bg_blue = m_ColourBG.Blue();
 }
 
 void
@@ -285,10 +285,8 @@ wxLayoutObjectCmd::Draw(wxDC &dc, wxPoint const & /* coords */)
 {
    wxASSERT(m_font);
    dc.SetFont(*m_font);
-   if(m_ColourFG)
-      dc.SetTextForeground(*m_ColourFG);
-   if(m_ColourBG)
-      dc.SetTextBackground(*m_ColourBG);
+   dc.SetTextForeground(m_ColourFG);
+   dc.SetTextBackground(m_ColourBG);
 }
 
 void
@@ -884,6 +882,8 @@ wxLayoutList::wxLayoutList()
 {
    m_DefaultSetting = NULL;
    m_FirstLine = NULL;
+   m_ColourFG = *wxBLACK;
+   m_ColourBG = *wxWHITE;
    InvalidateUpdateRect();
    Clear();
 }
@@ -921,8 +921,8 @@ wxLayoutList::InternalClear(void)
 
 void
 wxLayoutList::SetFont(int family, int size, int style, int weight,
-                      int underline, wxColour const *fg,
-                      wxColour const *bg)
+                      int underline, wxColour *fg,
+                      wxColour *bg)
 {
    if(family != -1)    m_FontFamily = family;
    if(size != -1)      m_FontPtSize = size;
@@ -930,8 +930,8 @@ wxLayoutList::SetFont(int family, int size, int style, int weight,
    if(weight != -1)    m_FontWeight = weight;
    if(underline != -1) m_FontUnderline = underline != 0;
 
-   if(fg != NULL)     m_ColourFG = fg;
-   if(bg != NULL)     m_ColourBG = bg;
+   if(fg) m_ColourFG = *fg;
+   if(bg) m_ColourBG = *bg;
    
    Insert(
       new wxLayoutObjectCmd(m_FontPtSize,m_FontFamily,m_FontStyle,m_FontWeight,m_FontUnderline,
@@ -943,21 +943,20 @@ wxLayoutList::SetFont(int family, int size, int style, int weight,
                       int underline, char const *fg, char const *bg)
 
 {
-   wxColour const
-      * cfg = NULL,
-      * cbg = NULL;
+   wxColour
+      cfg,cbg;
 
    if( fg )
-      cfg = wxTheColourDatabase->FindColour(fg);
+      cfg = *wxTheColourDatabase->FindColour(fg);
    if( bg )
-      cbg = wxTheColourDatabase->FindColour(bg);
+      cbg = *wxTheColourDatabase->FindColour(bg);
    
-   SetFont(family,size,style,weight,underline,cfg,cbg);
+   SetFont(family,size,style,weight,underline,&cfg,&cbg);
 }
 
 void
 wxLayoutList::Clear(int family, int size, int style, int weight,
-                    int /* underline */, char const *fg, char const *bg)
+                    int /* underline */, wxColour *fg, wxColour *bg)
 {
    InternalClear();
    
@@ -967,11 +966,9 @@ wxLayoutList::Clear(int family, int size, int style, int weight,
    m_FontFamily = family;
    m_FontStyle = style;
    m_FontWeight = weight;
-   m_ColourFG = wxTheColourDatabase->FindColour(fg);
-   m_ColourBG = wxTheColourDatabase->FindColour(bg);
 
-   if(! m_ColourFG) m_ColourFG = wxBLACK;
-   if(! m_ColourBG) m_ColourBG = wxWHITE;
+   if(fg) m_ColourFG = *fg;
+   if(bg) m_ColourBG = *bg;
    
    if(m_DefaultSetting)
       delete m_DefaultSetting;
@@ -981,8 +978,6 @@ wxLayoutList::Clear(int family, int size, int style, int weight,
                         m_FontWeight,m_FontUnderline,
                         m_ColourFG, m_ColourBG);
 }
-
-
 
 bool
 wxLayoutList::MoveCursorTo(wxPoint const &p)
@@ -1265,9 +1260,8 @@ wxLayoutList::Draw(wxDC &dc, wxPoint const &offset,
 
    Layout(dc, bottom);
    m_DefaultSetting->Draw(dc, wxPoint(0,0));
-   wxBrush *brush = new wxBrush(*m_ColourBG, wxSOLID);
-   dc.SetBrush(*brush);
-   delete brush;
+   wxBrush brush(m_ColourBG, wxSOLID);
+   dc.SetBrush(brush);
    
    while(line)
    {

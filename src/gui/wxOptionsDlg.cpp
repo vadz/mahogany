@@ -93,7 +93,11 @@ enum ConfigFields
    ConfigField_XFace,
    ConfigField_XFaceFile,
    ConfigField_AdbSubstring,
-   ConfigField_ComposeLast = ConfigField_AdbSubstring,
+   ConfigField_ComposeViewFontFamily,
+   ConfigField_ComposeViewFontSize,
+   ConfigField_CopmposViewFGColour,
+   ConfigField_ComposeViewBGColour,
+   ConfigField_ComposeLast = ConfigField_ComposeViewBGColour,
 
    // folders
    ConfigField_FoldersFirst = ConfigField_ComposeLast,
@@ -123,6 +127,8 @@ enum ConfigFields
    ConfigField_MessageViewFirst = ConfigField_PythonLast,
    ConfigField_MessageViewFontFamily,
    ConfigField_MessageViewFontSize,
+   ConfigField_MessageViewFGColour,
+   ConfigField_MessageViewBGColour,
    ConfigField_MessageViewInlineGraphics,
 #ifdef OS_UNIX
    ConfigField_MessageViewConvertGraphicsFormat,
@@ -329,6 +335,11 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Us&e XFace"),                   Field_Bool,    -1,                        },
    { gettext_noop("&XFace file"),                  Field_File,    ConfigField_XFace          },
    { gettext_noop("Mail alias substring ex&pansion"),Field_Bool,    -1,                        },
+   { gettext_noop("Font famil&y:default:decorative:roman:script:swiss:modern:teletype"),
+                                                     Field_Combo,  -1},
+   { gettext_noop("Font si&ze"),                   Field_Number,     -1},
+   { gettext_noop("Foreground c&olour"),           Field_Text,    -1},
+   { gettext_noop("Back&ground colour"),           Field_Text,    -1},
 
    // folders
    { gettext_noop("Folders to open on &startup"),  Field_List |
@@ -354,9 +365,11 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 
    // message views:
    { gettext_noop("&Font family"
-                  ":Default:Decorative:Roman:Script:Swiss:Modern:Teletype"),
+                  ":default:decorative:roman:script:swiss:modern:teletype"),
      Field_Combo,    -1 },
    { gettext_noop("Font &size"),                Field_Number, -1 },
+   { gettext_noop("Foreground c&olour"),           Field_Text,    -1},
+   { gettext_noop("Back&ground colour"),           Field_Text,    -1},
    { gettext_noop("&Inline graphics"),          Field_Bool, -1 },
 #ifdef OS_UNIX
    { gettext_noop("Conversion &graphics format:XPM:PNG:BMP:JPG"), Field_Combo, ConfigField_MessageViewInlineGraphics },
@@ -429,6 +442,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_NNTPHOST),
    CONFIG_ENTRY(MP_PERSONALNAME),
 
+   // compose
    CONFIG_ENTRY(MP_COMPOSE_TO),
    CONFIG_ENTRY(MP_SHOWCC),
    CONFIG_ENTRY(MP_COMPOSE_CC),
@@ -445,6 +459,11 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_COMPOSE_USE_XFACE),
    CONFIG_ENTRY(MP_COMPOSE_XFACE_FILE),
    CONFIG_ENTRY(MP_ADB_SUBSTRINGEXPANSION),
+   CONFIG_ENTRY(MP_CVIEW_FONT),
+   CONFIG_ENTRY(MP_CVIEW_FONT_SIZE),
+   CONFIG_ENTRY(MP_CVIEW_FGCOLOUR),
+   CONFIG_ENTRY(MP_CVIEW_BGCOLOUR),
+
    // folders
    CONFIG_ENTRY(MP_OPENFOLDERS),
    CONFIG_ENTRY(MP_MAINFOLDER),
@@ -464,8 +483,10 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
 #endif // USE_PYTHON
 
    // message views
-   CONFIG_ENTRY(MP_MV_FONT_FAMILY),
-   CONFIG_ENTRY(MP_MV_FONT_SIZE),
+   CONFIG_ENTRY(MP_MVIEW_FONT),
+   CONFIG_ENTRY(MP_MVIEW_FONT_SIZE),
+   CONFIG_ENTRY(MP_MVIEW_FGCOLOUR),
+   CONFIG_ENTRY(MP_MVIEW_BGCOLOUR),
    CONFIG_ENTRY(MP_INLINE_GFX),
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_TMPGFXFORMAT),

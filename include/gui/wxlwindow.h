@@ -63,12 +63,12 @@ public:
               int style=wxNORMAL,
               int weight=wxNORMAL,
               int underline=0,
-              char const *fg="black",
-              char const *bg="white")
+              wxColour *fg=NULL,
+              wxColour *bg=NULL)
       {
          GetLayoutList()->Clear(family,size,style,weight,underline,fg,bg);
          m_maxx = m_maxy = 0;
-         SetBackgroundColour(*GetLayoutList()->GetDefaults()->GetBGColour());
+         SetBackgroundColour(GetLayoutList()->GetDefaults()->GetBGColour());
          ResizeScrollbars(true);
          SetDirty();
          SetModified(false);

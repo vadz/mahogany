@@ -114,8 +114,8 @@ public:
    void Clear(void)
       {
          wxLayoutWindow::Clear(m_ProfileValues.font, m_ProfileValues.size,
-                               m_ProfileValues.style, m_ProfileValues.weight,
-                               0, m_ProfileValues.fg, m_ProfileValues.bg);
+                               (int)wxNORMAL, (int)wxNORMAL, 0,
+                               &m_ProfileValues.fg, &m_ProfileValues.bg);
       }
    /// returns the mail folder
    MailFolder *GetFolder(void);
@@ -165,9 +165,9 @@ protected:
    struct AllProfileValues
    {
       /// Background and foreground colours.
-      String bg, fg;
+      wxColour bg, fg;
       /// font attributes
-      int font, size, style, weight;
+      int font, size;
       /// show headers?
       bool showHeaders;
       /// show forwarded messages as text?

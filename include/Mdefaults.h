@@ -309,18 +309,28 @@
 #define   MP_SHOW_XFACES         "ShowXFaces"
 // show graphics inline
 #define   MP_INLINE_GFX         "InlineGraphics"
+/**@name  Font settings for message view */
+//@{
 /// which font to use
-#define   MP_FTEXT_FONT         "FontFamily"
+#define   MP_MVIEW_FONT         "MViewFont"
 /// which font size
-#define   MP_FTEXT_SIZE         "FontSize"
-/// which font style
-#define   MP_FTEXT_STYLE         "FontStyle"
-/// which font weight
-#define   MP_FTEXT_WEIGHT         "FontWeight"
+#define   MP_MVIEW_FONT_SIZE         "MViewFontSize"
 // which foreground colour for the font
-#define   MP_FTEXT_FGCOLOUR      "FontForeGround"
+#define   MP_MVIEW_FGCOLOUR      "MViewFGColour"
 // which background colour for the font
-#define   MP_FTEXT_BGCOLOUR      "FontBackGround"
+#define   MP_MVIEW_BGCOLOUR      "MViewBGColour"
+//@}
+/**@name Font settings for compose view */
+//@{
+/// which font to use
+#define   MP_CVIEW_FONT         "CViewFont"
+/// which font size
+#define   MP_CVIEW_FONT_SIZE         "CViewFontSize"
+// which foreground colour for the font
+#define   MP_CVIEW_FGCOLOUR      "CViewFGColour"
+// which background colour for the font
+#define   MP_CVIEW_BGCOLOUR      "CViewBGColout"
+//@}
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS      "HighlightURL"
 /// open URLs with
@@ -349,17 +359,10 @@
 #define   MP_AUTOCOLLECT_ADB     "AutoCollectAdb"
 /// Autocollect entries with names only?
 #define   MP_AUTOCOLLECT_NAMED "AutoCollectNamed"
-/**@name message view settings */
-//@{
-/// which font to use
-#define   MP_MV_FONT_FAMILY         "MessageViewFontFamily"
-/// which font size
-#define   MP_MV_FONT_SIZE         "MessageViewFontSize"
 /// support efax style incoming faxes
 #define MP_INCFAX_SUPPORT      "IncomingFaxSupport"
 /// domains from which to support faxes, semicolon delimited
 #define MP_INCFAX_DOMAINS      "IncomingFaxDomains"
-//@}
 
 /// Use substrings in address expansion?
 #define   MP_ADB_SUBSTRINGEXPANSION   "ExpandWithSubstring"
@@ -624,18 +627,28 @@
 #define   MP_SHOW_XFACES_D      1
 // show graphics inline
 #define   MP_INLINE_GFX_D       1
+/**@name  Font settings for message view */
+//@{
 /// which font to use
-#define   MP_FTEXT_FONT_D         (int)wxTELETYPE
+#define   MP_MVIEW_FONT_D         0L
 /// which font size
-#define   MP_FTEXT_SIZE_D         14
-/// which font style
-#define   MP_FTEXT_STYLE_D      (int)wxNORMAL
-/// which font weight
-#define   MP_FTEXT_WEIGHT_D     (int)wxNORMAL
+#define   MP_MVIEW_FONT_SIZE_D         12L
 // which foreground colour for the font
-#define   MP_FTEXT_FGCOLOUR_D      "black"
+#define   MP_MVIEW_FGCOLOUR_D      "black"
 // which background colour for the font
-#define   MP_FTEXT_BGCOLOUR_D      "white"
+#define   MP_MVIEW_BGCOLOUR_D      "white"
+//@}
+/**@name Font settings for compose view */
+//@{
+/// which font to use
+#define   MP_CVIEW_FONT_D         0L
+/// which font size
+#define   MP_CVIEW_FONT_SIZE_D    12L
+// which foreground colour for the font
+#define   MP_CVIEW_FGCOLOUR_D      "black"
+// which background colour for the font
+#define   MP_CVIEW_BGCOLOUR_D      "white"
+//@}
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS_D      1
 
@@ -737,7 +750,7 @@
 /** @name other defines used in M */
 //@{
 /// title for main window
-#define   M_TOPLEVELFRAME_TITLE   "Mahogany - Copyright 1997-1999 by Karsten Ballüder"
+#define   M_TOPLEVELFRAME_TITLE   "Copyright 1997-1999 by Karsten Ballüder"
 /// do we want variable expansion for profiles?
 #define   M_PROFILE_VAREXPAND      1
 /// c-client lib needs a char buffer to write header data

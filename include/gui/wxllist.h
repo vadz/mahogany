@@ -291,12 +291,12 @@ public:
    virtual void Draw(wxDC &dc, wxPoint const &coords);
    wxLayoutObjectCmd(int size, int family, int style, int weight,
                 bool underline,
-                wxColour const *fg, wxColour const *bg);
+                wxColour &fg, wxColour &bg);
    ~wxLayoutObjectCmd();
    /** Stores the current style in the styleinfo structure */
    void GetStyle(wxLayoutStyleInfo *si) const;
    /// return the background colour for setting colour of window
-   wxColour const *GetBGColour(void) const { return m_ColourBG; }
+   wxColour &GetBGColour(void) { return m_ColourBG; }
    /** Makes a copy of this object.
     */
    virtual wxLayoutObject *Copy(void);
@@ -304,9 +304,9 @@ private:
    /// the font to use
    wxFont *m_font;
    /// foreground colour
-   wxColour const *m_ColourFG;
+   wxColour m_ColourFG;
    /// background colour
-   wxColour const *m_ColourBG;
+   wxColour m_ColourBG;
 };
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
@@ -562,14 +562,16 @@ public:
    /// Destructor.
    ~wxLayoutList();
 
+   
    /// Clear the list.
    void Clear(int family = wxROMAN,
               int size=WXLO_DEFAULTFONTSIZE,
               int style=wxNORMAL,
               int weight=wxNORMAL,
               int underline=0,
-              char const *fg="black",
-              char const *bg="white");
+              wxColour *fg=NULL,
+              wxColour *bg=NULL);
+            
    /// Empty: clear the list but leave font settings.
    void Empty(void);
    
@@ -669,8 +671,8 @@ public:
    /// sets font parameters
    void SetFont(int family, int size, int style,
                 int weight, int underline,
-                wxColour const *fg,
-                wxColour const *bg);
+                wxColour *fg = NULL,
+                wxColour *bg = NULL);
    /// sets font parameters, colours by name
    void SetFont(int family=-1, int size = -1, int style=-1,
                 int weight=-1, int underline = -1,
@@ -692,7 +694,8 @@ public:
    /// set font weight
    inline void SetFontWeight(int weight) { SetFont(-1,-1,-1,weight); }
    /// toggle underline flag
-   inline void SetFontUnderline(bool ul) { SetFont(-1,-1,-1,-1,(int)ul); }
+   inline void SetFontUnderline(bool ul) {
+      SetFont(-1,-1,-1,-1,(int)ul, (const char*)NULL); }
    /// set font colours by name
    inline void SetFontColour(char const *fg, char const *bg = NULL) { SetFont(-1,-1,-1,-1,-1,fg,bg); }
    /**
@@ -701,7 +704,7 @@ public:
       anywhere.
       @return the default settings of the list
    */
-   wxLayoutObjectCmd const *GetDefaults(void) const { return m_DefaultSetting ; }
+   wxLayoutObjectCmd *GetDefaults(void) { return m_DefaultSetting ; }
    //@}
 
    /**@name Drawing */
@@ -809,8 +812,8 @@ private:
    int m_FontPtSize;
    bool m_FontUnderline;
    /// colours:
-   wxColour const * m_ColourFG;
-   wxColour const * m_ColourBG;
+   wxColour m_ColourFG;
+   wxColour m_ColourBG;
    /// the default setting:
    wxLayoutObjectCmd *m_DefaultSetting;
    //@}

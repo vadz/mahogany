@@ -165,7 +165,7 @@ wxIconManager::LoadImage(String filename, bool *success)
       String tempfile = filename;
       int format = READ_APPCONFIG(MP_TMPGFXFORMAT);
       if((format < 0 || format > NUMBER_OF_FORMATS)
-         || m_wxBitmapHandlers[format] == 0)
+         || (format != 0 && m_wxBitmapHandlers[format] == 0)) //xpm we do ourselves
       {
          wxLogInfo(_("Unsupported intermediary image format '%s' specified,\n"
                      "reset to '%s'."),

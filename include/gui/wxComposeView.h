@@ -242,8 +242,8 @@ private:
    wxButton *aliasButton;
    //@}
 
-   int m_font, m_size, m_style, m_weight;
-   wxString m_fg, m_bg;
+   int m_font, m_size;
+   wxColour m_fg, m_bg;
    /// the popup menu
    wxMenu *popupMenu;
    /**@name The interface to its canvas. */

@@ -737,20 +737,47 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    }
 }
 
+#define NUM_FONTS 7
+static int wxFonts[NUM_FONTS] =
+{
+  wxDEFAULT,
+  wxDECORATIVE,
+  wxROMAN,
+  wxSCRIPT,
+  wxSWISS,
+  wxMODERN,
+  wxTELETYPE
+};
+
 void
 wxComposeView::CreateFTCanvas(void)
 {
    m_LayoutWindow = new wxLayoutWindow(m_panel);
 
-   m_fg = READ_CONFIG(m_Profile,MP_FTEXT_FGCOLOUR);
-   m_bg = READ_CONFIG(m_Profile,MP_FTEXT_BGCOLOUR);
+   wxString tmp;
+   wxColour *c;
+   tmp = READ_CONFIG(m_Profile,MP_CVIEW_FGCOLOUR);
+   if((c = wxTheColourDatabase->FindColour(tmp)) == NULL)
+   {
+      wxLogError(_("Cannot find a colour named '%s'.\nPlease change settings."), tmp.c_str());
+      m_fg = *wxTheColourDatabase->FindColour("black");
+   }
+   else
+      m_fg = *c;
+   tmp = READ_CONFIG(m_Profile,MP_CVIEW_BGCOLOUR);
+   if((c = wxTheColourDatabase->FindColour(tmp)) == NULL)
+   {
+      wxLogError(_("Cannot find a colour named '%s'.\nPlease change settings."), tmp.c_str());
+      m_bg = *wxTheColourDatabase->FindColour("white");
+   }
+   else
+      m_bg = *c;
+   m_font = READ_CONFIG(m_Profile,MP_CVIEW_FONT);
+   ASSERT(m_font >= 0 && m_font <= NUM_FONTS);
+   m_font = wxFonts[m_font];
+   m_size = READ_CONFIG(m_Profile,MP_CVIEW_FONT_SIZE);
 
-   m_font = READ_CONFIG(m_Profile,MP_FTEXT_FONT);
-   m_size = READ_CONFIG(m_Profile,MP_FTEXT_SIZE);
-   m_style = READ_CONFIG(m_Profile,MP_FTEXT_STYLE);
-   m_weight = READ_CONFIG(m_Profile,MP_FTEXT_WEIGHT);
-
-   m_LayoutWindow->Clear(m_font, m_size, m_style, m_weight, 0, m_fg, m_bg);
+   m_LayoutWindow->Clear(m_font, m_size, (int) wxNORMAL, (int)wxNORMAL, 0, &m_fg, &m_bg);
    EnableEditing(true);
    m_LayoutWindow->SetWrapMargin( READ_CONFIG(m_Profile, MP_COMPOSE_WRAPMARGIN)); 
 }
@@ -852,8 +879,9 @@ wxComposeView::OnMenuCommand(int id)
       break;
 
    case WXMENU_COMPOSE_CLEAR:
-      m_LayoutWindow->Clear(m_font, m_size, m_style, m_weight, 0, m_fg, 
-                            m_bg);
+      m_LayoutWindow->Clear(m_font, m_size, (int) wxNORMAL, (int)
+                            wxNORMAL, 0,
+                            &m_fg, &m_bg);
       break;
 
    case WXMENU_COMPOSE_LOADTEXT:

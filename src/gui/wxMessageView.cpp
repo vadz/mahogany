@@ -86,6 +86,18 @@
 //#  include "MessageCC.h"
 #endif //USE_PCH
 
+#define NUM_FONTS 7
+static int wxFonts[NUM_FONTS] =
+{
+  wxDEFAULT,
+  wxDECORATIVE,
+  wxROMAN,
+  wxSCRIPT,
+  wxSWISS,
+  wxMODERN,
+  wxTELETYPE
+};
+
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
@@ -353,15 +365,31 @@ wxMessageView::SetParentProfile(ProfileBase *profile)
    if(m_Profile) m_Profile->DecRef();
    m_Profile = ProfileBase::CreateProfile("MessageView", profile);
 
-   // We also use this to set all values to be read to speed things up:
-   m_ProfileValues.fg = READ_CONFIG(m_Profile,MP_FTEXT_FGCOLOUR);
-   m_ProfileValues.bg = READ_CONFIG(m_Profile,MP_FTEXT_BGCOLOUR);
-
-   m_ProfileValues.font = READ_CONFIG(m_Profile,MP_FTEXT_FONT);
-   m_ProfileValues.size = READ_CONFIG(m_Profile,MP_FTEXT_SIZE);
-   m_ProfileValues.style = READ_CONFIG(m_Profile,MP_FTEXT_STYLE);
-   m_ProfileValues.weight = READ_CONFIG(m_Profile,MP_FTEXT_WEIGHT);
-
+   // We also use this to set all values to be read to speed things
+   // up:
+   wxString tmp;
+   wxColour *c;
+   tmp = READ_CONFIG(m_Profile,MP_MVIEW_FGCOLOUR);
+   if((c = wxTheColourDatabase->FindColour(tmp)) == NULL)
+   {
+      wxLogError(_("Cannot find a colour named '%s'.\nPlease change settings."), tmp.c_str());
+      m_ProfileValues.fg = *wxTheColourDatabase->FindColour("black");
+   }
+   else
+      m_ProfileValues.fg=*c;
+   tmp = READ_CONFIG(m_Profile,MP_MVIEW_BGCOLOUR);
+   if((c = wxTheColourDatabase->FindColour(tmp)) == NULL)
+   {
+      wxLogError(_("Cannot find a colour named '%s'.\nPlease change settings."), tmp.c_str());
+      m_ProfileValues.bg = *wxTheColourDatabase->FindColour("white");
+   }
+   else
+      m_ProfileValues.bg=*c;
+   m_ProfileValues.font = READ_CONFIG(m_Profile,MP_MVIEW_FONT);
+   ASSERT(m_ProfileValues.font >= 0 && m_ProfileValues.font <=
+          NUM_FONTS);
+   m_ProfileValues.font = wxFonts[m_ProfileValues.font];
+   m_ProfileValues.size = READ_CONFIG(m_Profile,MP_MVIEW_FONT_SIZE);
    m_ProfileValues.showHeaders = READ_CONFIG(m_Profile,MP_SHOWHEADERS) != 0;
    m_ProfileValues.rfc822isText = READ_CONFIG(m_Profile,MP_RFC822_IS_TEXT) != 0;
    m_ProfileValues.highlightURLs = READ_CONFIG(m_Profile,MP_HIGHLIGHT_URLS) != 0;
