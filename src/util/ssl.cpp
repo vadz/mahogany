@@ -13,6 +13,10 @@
 #include "MApplication.h"
 
 #ifdef USE_SSL
+#include "Mdefaults.h"
+#include "Mcommon.h"
+#include "Profile.h"
+#include "MApplication.h"
 
 #include <wx/dynlib.h>
 
