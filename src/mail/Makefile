@@ -1,10 +1,10 @@
 # Makefile for src/mail directory
 
 CWD = mail 
-SRC = MailFolder.cc MailFolderCC.cc MessageCC.cc SendMessageCC.cc
-HDR = $(SRC:.cc=.h)
-DEP = $(SRC:.cc=.d)
-OBJ = $(SRC:.cc=.o)
+SRC = MailFolder.cpp MailFolderCC.cpp MessageCC.cpp SendMessageCC.cpp
+HDR = $(SRC:.cpp=.h)
+DEP = $(SRC:.cpp=.d)
+OBJ = $(SRC:.cpp=.o)
 
 include ../../makeopts
 

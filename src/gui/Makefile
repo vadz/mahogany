@@ -1,17 +1,17 @@
 # Makefile for src/gui directory
 
 CWD = gui
-SRC = wxMApp.cc wxMFrame.cc wxFolderView.cc wxMessageView.cc \
-wxComposeView.cc wxMainFrame.cc \
-wxIconManager.cc wxFontManager.cc wxMDialogs.cc wxMLogFrame.cc \
-wxAdbEdit.cc wxlwindow.cc wxllist.cc wxlparser.cc
+SRC = wxMApp.cpp wxMFrame.cpp wxFolderView.cpp wxMessageView.cpp \
+wxComposeView.cpp wxMainFrame.cpp \
+wxIconManager.cpp wxFontManager.cpp wxMDialogs.cpp wxMLogFrame.cpp \
+wxAdbEdit.cpp wxlwindow.cpp wxllist.cpp wxlparser.cpp
 
 ifdef USE_WXTAB
-SRC += wxtab.cc
+SRC += wxtab.cpp
 endif
 
-HDR = $(SRC:.cc=.h)
-DEP = $(SRC:.cc=.d)
+HDR = $(SRC:.cpp=.h)
+DEP = $(SRC:.cpp=.d)
 
 include ../../makeopts
 
@@ -19,7 +19,7 @@ include ../../makeopts
 
 LINK = ../util/strutil.o ../classes/CommonBase.o $(CCLIENTLIB)
 
-TARGETS = $(SRC:.cc=.o)
+TARGETS = $(SRC:.cpp=.o)
 
 all:	$(TARGETS)
 

@@ -1,12 +1,12 @@
 # Makefile for src/classes directory
 
 CWD = classes
-SRC = CommonBase.cc MApplication.cc appconf.cc PathFinder.cc Profile.cc MimeList.cc MimeTypes.cc \
-Adb.cc XFace.cc kbList.cc # Script.cc
-HDR = $(SRC:.cc=.h)
-DEP = $(SRC:.cc=.d)
+SRC = CommonBase.cpp MApplication.cpp appconf.cpp PathFinder.cpp Profile.cpp MimeList.cpp MimeTypes.cpp \
+Adb.cpp XFace.cpp kbList.cpp # Script.cpp
+HDR = $(SRC:.cpp=.h)
+DEP = $(SRC:.cpp=.d)
 
-TARGETS = $(SRC:.cc=.o)
+TARGETS = $(SRC:.cpp=.o)
 
 all: $(TARGETS)
 

@@ -1,14 +1,14 @@
 # Makefile for src/mail directory
 
 CWD = util
-SRC = strutil.cc #locks.cc
+SRC = strutil.cpp #locks.cpp
 CSRC = #pyembed0.c pyembed1.c pyembed2.c pyembed3.c pyembed4.c
-HDR = $(SRC:.cc=.h) $(CSRC:.c=.h)
+HDR = $(SRC:.cpp=.h) $(CSRC:.c=.h)
 
-TARGETS = $(SRC:.cc=.o) $(CSRC:.c=.o)
+TARGETS = $(SRC:.cpp=.o) $(CSRC:.c=.o)
 
 all:	$(TARGETS)
-strutil.o: strutil.cc
+strutil.o: strutil.cpp
 
 include ../../makeopts
 include ../../makerules

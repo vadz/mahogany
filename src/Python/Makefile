@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.9  1998/07/28 16:20:28  KB
+# Moved sources to .cpp ending.
+#
 # Revision 1.8  1998/06/08 08:19:07  KB
 # Fixed makefiles for wxtab/python. Made Python work with new MAppBase.
 #
@@ -31,10 +34,10 @@
 CWD = Python
 
 SWIGSRC = MAppBase.i MailFolder.i String.i Profile.i Message.i
-CXXSRC = InitPython.cc PythonHelp.cc
+CXXSRC = InitPython.cpp PythonHelp.cpp
 SRC=$(CXXSRC) *.cpp
 
-CXXTARGETS= $(CXXSRC:.cc=.o)
+CXXTARGETS= $(CXXSRC:.cpp=.o)
 SWIGTARGETS = $(SWIGSRC:.i=.o) $(SWIGSRC:.i=.py)
 SOTARGETS	=$(OTARGETS:.o=cmodule.so)
 
