@@ -887,6 +887,7 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
          String msg;
          msg.Printf(_("Cannot open outbox ´%s´"), outbox.c_str());
          ERRORMESSAGE((msg));
+         return FALSE;
       }
    }
 
@@ -894,7 +895,7 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
    {
       mf->Ping();
       mf->DecRef();
-      return;
+      return FALSE;
    }
    else
    {
