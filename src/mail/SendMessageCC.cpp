@@ -522,6 +522,8 @@ SendMessageCC::~SendMessageCC()
    mail_free_envelope (&env);
    mail_free_body (&body);
 
+   rfc822_setextraheaders(NULL,NULL);
+
    int j;
    for(j = 0; m_headerNames[j] ; j++)
    {
