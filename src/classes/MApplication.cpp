@@ -341,6 +341,12 @@ MAppBase::OnStartup()
 
    m_profile = Profile::CreateGlobalConfig(m_cmdLineOptions->configFile);
 
+   if ( !m_profile )
+   {
+      // not much we can do
+      return false;
+   }
+
    // disable the use of environment variables if configured like this (this
    // speeds up things relatively significantly under Windows - and as few
    // people use evironment variables there, it is disabled for Windows by
