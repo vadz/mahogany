@@ -608,7 +608,6 @@ MailFolderCC::OpenFolder(int typeAndFlags,
                          String const &password,
                          String const &symname)
 {
-
    MailFolderCC *mf;
    String mboxpath;
 
@@ -668,7 +667,8 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    // ask the password for the folders which need it but for which it hadn't been
    // specified during creation
    if ( FolderTypeHasUserName( (FolderType) GetFolderType(typeAndFlags))
-        && !(GetFolderType(typeAndFlags) & MF_FLAGS_ANON) && ! pword)
+        && (GetFolderFlags(typeAndFlags) & MF_FLAGS_ANON == 0)
+        && pword.Length() == 0)
    {
       String prompt, fname;
       fname = name;

@@ -79,7 +79,7 @@ protected:
 
 /* static */
 MailFolder *
-MailFolder::OpenFolder(int typeAndFlags,
+MailFolder::OpenFolder(int folderType,
                        String const &i_name,
                        ProfileBase *parentProfile,
                        String const &i_server,
@@ -89,8 +89,8 @@ MailFolder::OpenFolder(int typeAndFlags,
    // open a folder:
    ProfileBase *profile = NULL;
    String login, passwd, name, server;
-   FolderType type = GetFolderType(typeAndFlags);
-   int flags = GetFolderFlags(typeAndFlags);
+   FolderType type = GetFolderType(folderType);
+   int flags = GetFolderFlags(folderType);
 
    String symbolicName = i_name;
 
@@ -214,9 +214,9 @@ MailFolder::OpenFolder(int typeAndFlags,
 #endif
    
    // FIXME calling MailFolderCC::OpenFolder() explicitly here is "anti-OO"
-   typeAndFlags = CombineFolderTypeAndFlags(type, flags);
+   folderType = CombineFolderTypeAndFlags(type, flags);
 
-   MailFolder *mf = MailFolderCC::OpenFolder(typeAndFlags, name, profile,
+   MailFolder *mf = MailFolderCC::OpenFolder(folderType, name, profile,
                                              server, login, passwd, symbolicName);
    profile->DecRef();
 
