@@ -2095,8 +2095,28 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov)
       else
         entry.m_To = ParseAddress(ov->to);
 
-      wxFontEncoding encodingFrom;
-      entry.m_From = DecodeHeader(entry.m_From, &encodingFrom);
+      wxFontEncoding encoding;
+      entry.m_To = DecodeHeader(entry.m_To, &encoding);
+      wxFontEncoding encodingMsg = encoding;
+
+      entry.m_From = DecodeHeader(entry.m_From, &encoding);
+      if ( (encoding != wxFONTENCODING_SYSTEM) &&
+           (encoding != encodingMsg) )
+      {
+         if ( encodingMsg != wxFONTENCODING_SYSTEM )
+         {
+            // VZ: I just want to know if this happens, we can't do anything
+            //     smart about this so far anyhow as we can't display the
+            //     different fields in different encodings
+            wxLogDebug("Different encodings for From and To fields, "
+                       "From may be displayed incorrectly.");
+         }
+         else
+         {
+            encodingMsg = encoding;
+         }
+      }
+
 #if 0
       //FIXME: what on earth are user flags?
       if (i = elt->user_flags)
@@ -2111,33 +2131,28 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov)
       }
 #endif
 
-      wxFontEncoding encodingSubject;
-      entry.m_Subject = DecodeHeader(ov->subject, &encodingSubject);
+      entry.m_Subject = DecodeHeader(ov->subject, &encoding);
+      if ( (encoding != wxFONTENCODING_SYSTEM) &&
+           (encoding != encodingMsg) )
+      {
+         if ( encodingMsg != wxFONTENCODING_SYSTEM )
+         {
+            wxLogDebug("Different encodings for From and Subject fields, "
+                       "subject may be displayed incorrectly.");
+         }
+         else
+         {
+            encodingMsg = encoding;
+         }
+      }
+
       entry.m_Size = ov->optional.octets;
       entry.m_Id = ov->message_id;
       entry.m_References = ov->references;
       entry.m_UId = uid;
 
       // set the font encoding to be used for displaying this entry
-      if ( encodingSubject != encodingFrom )
-      {
-         if ( encodingSubject != wxFONTENCODING_SYSTEM &&
-              encodingFrom != wxFONTENCODING_SYSTEM )
-         {
-            // I just want to know if this happens, we can't do anything smart
-            // about this so far anyhow
-            wxLogDebug("Different encodings for From and Subject fields");
-         }
-
-         if ( encodingSubject != wxFONTENCODING_SYSTEM )
-            entry.m_Encoding = encodingSubject;
-         else
-            entry.m_Encoding = encodingFrom;
-      }
-      else
-      {
-         entry.m_Encoding = encodingFrom;
-      }
+      entry.m_Encoding = encodingMsg;
 
       m_BuildNextEntry++;
 
