@@ -31,30 +31,30 @@
 // ----------------------------------------------------------------------------
 
 // info about one receiver
-struct EventReceiverInfo
+struct MEventReceiverInfo
 {
-   EventReceiverInfo(EventReceiver& who, EventId eventId) : receiver(who)
+   MEventReceiverInfo(MEventReceiver& who, MEventId eventId) : receiver(who)
       { id = eventId; }
 
-   EventReceiver& receiver;
-   EventId        id;
+   MEventReceiver& receiver;
+   MEventId        id;
 };
 
 // array of all registered receivers
-WX_DEFINE_ARRAY(EventReceiverInfo *, EventReceiverInfoArray);
+WX_DEFINE_ARRAY(MEventReceiverInfo *, MEventReceiverInfoArray);
 
 // ----------------------------------------------------------------------------
-// global variables (we don't make them static member vars of EventManager to
+// global variables (we don't make them static member vars of MEventManager to
 // reduce compilation dependencies)
 // ----------------------------------------------------------------------------
 
 // the one and only event manager - it can be safely created statically
 // because it doesn't allocate memory nor does any other dangerous things in
 // its ctor
-static EventManager gs_eventManager;
+static MEventManager gs_eventManager;
 
 // all registered event handlers
-static EventReceiverInfoArray gs_receivers;
+static MEventReceiverInfoArray gs_receivers;
 
 // ============================================================================
 // implementation
@@ -64,21 +64,21 @@ static EventReceiverInfoArray gs_receivers;
 // event manager
 // ----------------------------------------------------------------------------
 
-EventManager::EventManager()
+MEventManager::MEventManager()
 {
 }
 
-void EventManager::Send(EventData& data)
+void MEventManager::Send(MEventData& data)
 {
-   EventId id = data.GetId();
+   MEventId id = data.GetId();
 
    // make a copy of the array because some event handlers might remove
    // themselves from our list while we send the event
-   EventReceiverInfoArray receivers = gs_receivers;
+   MEventReceiverInfoArray receivers = gs_receivers;
    size_t count = receivers.GetCount();
    for ( size_t n = 0; n < count; n++ )
    {
-      EventReceiverInfo *info = receivers[n];
+      MEventReceiverInfo *info = receivers[n];
       
       // check that the object didn't go away!
       if ( gs_receivers.Index(info) == wxNOT_FOUND )
@@ -87,7 +87,7 @@ void EventManager::Send(EventData& data)
       if ( info->id == id )
       {
          // notify this one
-         if ( !info->receiver.OnEvent(data) )
+         if ( !info->receiver.OnMEvent(data) )
          {
             // the handler decided to stop the event propagation
             break;
@@ -99,20 +99,20 @@ void EventManager::Send(EventData& data)
 
 // the return value is justthe pointer to the structure we add to the array
 // (it's opaque for the caller)
-void *EventManager::Register(EventReceiver& who, EventId eventId)
+void *MEventManager::Register(MEventReceiver& who, MEventId eventId)
 {
-   EventReceiverInfo *info = new EventReceiverInfo(who, eventId);
+   MEventReceiverInfo *info = new MEventReceiverInfo(who, eventId);
 
 #ifdef DEBUG
    // check that we don't register the same object twice
    size_t count = gs_receivers.GetCount();
    for ( size_t n = 0; n < count; n++ )
    {
-      EventReceiverInfo *info = gs_receivers[n];
+      MEventReceiverInfo *info = gs_receivers[n];
       if ( info->id == eventId && &(info->receiver) == &who )
       {
          FAIL_MSG( "Registering the same handler twice in "
-                   "EventManager::Register()" );
+                   "MEventManager::Register()" );
       }
    }
 #endif
@@ -122,9 +122,9 @@ void *EventManager::Register(EventReceiver& who, EventId eventId)
    return info;
 }
 
-bool EventManager::Unregister(void *handle)
+bool MEventManager::Unregister(void *handle)
 {
-   int index = gs_receivers.Index((EventReceiverInfo *)handle);
+   int index = gs_receivers.Index((MEventReceiverInfo *)handle);
 
    CHECK( index != wxNOT_FOUND, false,
           "unregistering event handler which was not registered" );

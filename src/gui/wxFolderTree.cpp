@@ -100,7 +100,7 @@ private:
 };
 
 // the tree itself
-class wxFolderTreeImpl : public wxTreeCtrl, public EventReceiver
+class wxFolderTreeImpl : public wxTreeCtrl, public MEventReceiver
 {
 public:
    // constants
@@ -145,7 +145,7 @@ public:
    void OnTreeSelect(wxTreeEvent&);
 
    // event processing function
-   virtual bool OnEvent(EventData& event);
+   virtual bool OnMEvent(MEventData& event);
 
 protected:
    // is the root item chosen?
@@ -538,7 +538,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    (void)new wxFolderTreeNode(this, folderRoot);
 
    // register with the event manager
-   m_eventReg = EventManager::Register(*this, EventId_FolderTreeChange);
+   m_eventReg = MEventManager::Register(*this, MEventId_FolderTreeChange);
    ASSERT_MSG( m_eventReg, "can't register for folder tree change event" );
 }
 
@@ -616,7 +616,7 @@ void wxFolderTreeImpl::DoFolderCreate()
    MFolder *folderNew = m_sink->OnCreate(m_sink->GetSelection());
    if ( folderNew != NULL )
    {
-      // now done in OnEvent()
+      // now done in OnMEvent()
 #if 0
      wxTreeItemId idCurrent = wxTreeCtrl::GetSelection();
      wxFolderTreeNode *parent = (wxFolderTreeNode *)GetItemData(idCurrent);
@@ -643,7 +643,7 @@ void wxFolderTreeImpl::DoFolderDelete()
 
    if ( m_sink->OnDelete(folder) )
    {
-      // now done in OnEvent()
+      // now done in OnMEvent()
 #if 0
      Delete(wxTreeCtrl::GetSelection());
 
@@ -833,11 +833,11 @@ void wxFolderTreeImpl::OnChar(wxKeyEvent& event)
   }
 }
 
-bool wxFolderTreeImpl::OnEvent(EventData& ev)
+bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
 {
-   if ( ev.GetId() == EventId_FolderTreeChange )
+   if ( ev.GetId() == MEventId_FolderTreeChange )
    {
-      EventFolderTreeChangeData& event = (EventFolderTreeChangeData &)ev;
+      MEventFolderTreeChangeData& event = (MEventFolderTreeChangeData &)ev;
 
       String folderName = event.GetFolderFullName();
 
@@ -856,7 +856,7 @@ bool wxFolderTreeImpl::OnEvent(EventData& ev)
       SetItemHasChildren(parent, TRUE);
       Expand(parent);
 
-      if ( event.GetChangeKind() == EventFolderTreeChangeData::Delete )
+      if ( event.GetChangeKind() == MEventFolderTreeChangeData::Delete )
       {
          // if the deleted folder was either the tree ctrl selection or was
          // opened (these 2 folders may be different), refresh
@@ -873,7 +873,7 @@ bool wxFolderTreeImpl::OnEvent(EventData& ev)
 
 wxFolderTreeImpl::~wxFolderTreeImpl()
 {
-   EventManager::Unregister(m_eventReg);
+   MEventManager::Unregister(m_eventReg);
 
    delete GetImageList();
 

@@ -18,38 +18,45 @@
 #define MEVENT_H
 
 // ----------------------------------------------------------------------------
-// Event ids for all kinds of events used in M. The name in the comment is the
-// EventData-derived class which is used with this event
-// ----------------------------------------------------------------------------
-enum EventId
+/**    MEvent ids for all kinds of events used in M. The name in the comment is the
+       MEventData-derived class which is used with this event
+*/
+enum MEventId
 {
-   EventId_Null = -1,                          // (invalid id for an event)
-   EventId_NewMail = 100,                      // EventMailData
-   EventId_FolderTreeChange = 200,             // EventFolderTreeChangeData
-   EventId_Max                                 // (invalid id for an event)
+   /// (invalid id for an event)
+   MEventId_Null = -1,                          
+   /// MEventMailData
+   MEventId_NewMail = 100,                      
+   /// MEventFolderTreeChangeData
+   MEventId_FolderTreeChange = 200,
+   /// MEventFolderUpdateData
+   MEventId_FolderUpdate = 400,
+   /// (invalid id for an event)
+   MEventId_Max                                 
 };
 
 // ----------------------------------------------------------------------------
-// A data associated with an event - more classes can be derived from this
-// one
-// ----------------------------------------------------------------------------
-class EventData
+/** The data associated with an event - more classes can be derived from this
+    one.
+*/
+class MEventData
 {
 public:
-   // ctor takes the (string) id for the event
-   EventData(EventId id = EventId_Null) { m_eventId = id; }
+   /// ctor takes the (string) id for the event
+   MEventData(MEventId id = MEventId_Null) { m_eventId = id; }
 
-   // accessors
-      // set the id
-   void SetId(EventId id) { m_eventId = id; }
-      // retrieve the id
-   EventId GetId() const { return m_eventId; }
+   /**@name accessors */
+   //@{
+   /// set the id
+   void SetId(MEventId id) { m_eventId = id; }
+   /// retrieve the id
+   MEventId GetId() const { return m_eventId; }
+   //@}
 
-   // virtual dtor as in any base class
-   virtual ~EventData() { }
-
+   /// virtual dtor as in any base class
+   virtual ~MEventData() { }
 private:
-   EventId m_eventId;
+   MEventId m_eventId;
 };
 
 // TODO do these event classes really belong here? In principle, no, but with
@@ -57,50 +64,60 @@ private:
 //      because this one still has to be modified (to add the id) whenever a
 //      new event is added. Is this a good reason to use string ids?
 
-// ----------------------------------------------------------------------------
-// EventMailData - the event notifying the app about "new mail"
-// ----------------------------------------------------------------------------
-
+//forward decl
 class MailFolder;
 
-class EventMailData : public EventData
+// ----------------------------------------------------------------------------
+/// MEventNewMailData - the event notifying the app about "new mail"
+class MEventNewMailData : public MEventData
 {
 public:
-   EventMailData(MailFolder *folder,
-                 unsigned long number,
-                 unsigned long *messageIDs)
-      : EventData(EventId_NewMail)
-   {
-      m_folder = folder;
-      m_number = number;
-      m_messageIDs = messageIDs;
-   }
+   /** Constructor.
+       @param folder the mail folder where the new mail was detected
+       @param messageIDs points to an array of the sequence numbers of
+       the new messages in that folder, freed by the caller
+   */
+   MEventNewMailData(MailFolder *folder,
+                    unsigned long *messageIDs)
+      : MEventData(MEventId_NewMail)
+      {
+         m_folder = folder;
+         m_messageIDs = messageIDs;
+      }
 
-   // accessors
-      // get the folder in which there are new messages
+   /**@name accessors */
+   //@{
+   /// get the folder in which there are new messages
    MailFolder *GetFolder() const { return m_folder; }
-      // get the number of new messages
-   unsigned long GetNumberOfMessages() const { return m_number; }
-      // get the index of the Nth new message (for calling GetMessage)
+   /// get the index of the Nth new message (for calling GetMessage)
    unsigned long GetNewMessageIndex(unsigned long n) const
-   {
-      ASSERT( n < m_number );
-
-      return m_messageIDs[n];
-   }
-
+      {
+         return m_messageIDs[n];
+      }
+   //@}   
 private:
    MailFolder    *m_folder;
-   unsigned long  m_number;
    unsigned long *m_messageIDs;
 };
 
+
 // ----------------------------------------------------------------------------
-// EventFolderTreeChangeData - this event is generated whenever a new folder
+/** MEventEmpty Data - Does not carry any data*/
+class MEventFolderUpdateData : public MEventData
+{
+public:
+   /** Constructor.
+   */
+   MEventFolderUpdateData()
+      : MEventData(MEventId_FolderUpdate) {}
+};
+
+// ----------------------------------------------------------------------------
+// MEventFolderTreeChangeData - this event is generated whenever a new folder
 // is created or an existing one is deleted or renamed
 // ----------------------------------------------------------------------------
 
-class EventFolderTreeChangeData : public EventData
+class MEventFolderTreeChangeData : public MEventData
 {
 public:
    // what happened?
@@ -111,11 +128,11 @@ public:
       Rename
    };
 
-   EventFolderTreeChangeData(const String& fullname, ChangeKind what)
-      : EventData(EventId_FolderTreeChange), m_fullname(fullname)
-   {
-      m_what = what;
-   }
+   MEventFolderTreeChangeData(const String& fullname, ChangeKind what)
+      : MEventData(MEventId_FolderTreeChange), m_fullname(fullname)
+      {
+         m_what = what;
+      }
 
    // get the fullname of the folder
    const String& GetFolderFullName() const { return m_fullname; }
@@ -131,13 +148,13 @@ private:
 // ----------------------------------------------------------------------------
 // Derive from this class to be able to process events.
 // ----------------------------------------------------------------------------
-class EventReceiver
+class MEventReceiver
 {
 public:
    // override this method to process the events:
    // return TRUE if it's ok to pass event to other receivers
    // or FALSE to not propagate it any more
-   virtual bool OnEvent(EventData& event) = 0;
+   virtual bool OnMEvent(MEventData& event) = 0;
 };
 
 // ----------------------------------------------------------------------------
@@ -145,18 +162,18 @@ public:
 // for them. There is only one object of this class in the whole program and
 // even this one is never used directly - all functions are static.
 // ----------------------------------------------------------------------------
-class EventManager
+class MEventManager
 {
 public:
-   EventManager();
+   MEventManager();
 
    // send an event
-   static void Send(EventData& data);
+   static void Send(MEventData& data);
 
    // register the event receiever for the events "eventId", the returned
    // pointer is NULL if the function failed, otherwise it should be saved for
    // subsequent call to Unregister()
-   static void *Register(EventReceiver& who, EventId eventId);
+   static void *Register(MEventReceiver& who, MEventId eventId);
 
    // unregister an event receiever - the "handle" parameter is returned by
    // Register(). If the same object is registered for several different

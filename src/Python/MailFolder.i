@@ -94,10 +94,7 @@ public:
    // currently we need to Close() and DecRef() it, that's not
    // nice. We need to change that.
    //@}
-
-   /// check wether object is initialised
-   virtual bool  IsInitialised(void);
-
+   
    /** Register a FolderView derived class to be notified when
        folder contents change.
        @param  view the FolderView to register
@@ -105,10 +102,6 @@ public:
    */
    virtual void RegisterView(FolderView *view, bool reg = true);
    
-   /** is mailbox "ok", i.e. was there an error or not?
-       @return  true if everything succeeded
-   */
-   virtual bool IsOk(void);
 
    /** get name of mailbox
        @return the symbolic name of the mailbox

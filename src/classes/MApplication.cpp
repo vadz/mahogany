@@ -389,7 +389,7 @@ MAppBase::OnStartup()
 
    // register with the event subsystem
    // ---------------------------------
-   m_eventReg = EventManager::Register(*this, EventId_NewMail);
+   m_eventReg = MEventManager::Register(*this, MEventId_NewMail);
 
    // should never fail...
    CHECK( m_eventReg, FALSE,
@@ -409,7 +409,7 @@ MAppBase::OnShutDown()
    // don't want events any more
    if ( m_eventReg )
    {
-      EventManager::Unregister(m_eventReg);
+      MEventManager::Unregister(m_eventReg);
       m_eventReg = NULL;
    }
 
@@ -467,13 +467,13 @@ MAppBase::Exit()
 }
 
 bool
-MAppBase::OnEvent(EventData& event)
+MAppBase::OnMEvent(MEventData& event)
 {
    // we're only registered for new mail events
-   CHECK( event.GetId() == EventId_NewMail, TRUE, "unexpected event" );
+   CHECK( event.GetId() == MEventId_NewMail, TRUE, "unexpected event" );
 
    // get the folder in which the new mail arrived
-   EventMailData& mailevent = (EventMailData &)event;
+   MEventNewMailData& mailevent = (MEventNewMailData &)event;
    MailFolder *folder = mailevent.GetFolder();
 
    // step 1: execute external command if it's configured
@@ -502,7 +502,7 @@ MAppBase::OnEvent(EventData& event)
       {
          String message;
 
-         unsigned long number = mailevent.GetNumberOfMessages();
+         unsigned long number = folder->CountMessages();
          unsigned i;
          if ( number <= (unsigned long) READ_CONFIG(GetProfile(),
                                                     MP_SHOW_NEWMAILINFO)) 

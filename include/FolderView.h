@@ -15,30 +15,37 @@
 /**
    FolderView class, a window displaying a MailFolder.
 */
-class FolderView : public EventReceiver
+class FolderView : public MEventReceiver
 {
 public:
    FolderView()
-   {
-      m_regCookie = EventManager::Register(*this, EventId_FolderTreeChange);
-
-      ASSERT_MSG( m_regCookie, "can't reg folder view with event manager");
-   }
-
+      {
+         m_regCookieTreeChange = MEventManager::Register(*this, MEventId_FolderTreeChange);
+         ASSERT_MSG( m_regCookieTreeChange, "can't reg folder view with event manager");
+         m_regCookieFolderUpdate = MEventManager::Register(*this, MEventId_FolderUpdate);
+         ASSERT_MSG( m_regCookieFolderUpdate, "can't reg folder view with event manager");
+      }
    /// update the user interface
    virtual void Update(void) = 0;
    /// virtual destructor
-   virtual ~FolderView() { EventManager::Unregister(m_regCookie); }
+   virtual ~FolderView()
+      {
+         MEventManager::Unregister(m_regCookieTreeChange);
+         MEventManager::Unregister(m_regCookieFolderUpdate);
+      }
 
    /// event processing function
-   virtual bool OnEvent(EventData& ev)
+   virtual bool OnMEvent(MEventData& ev)
    {
-      if ( ev.GetId() == EventId_FolderTreeChange )
+      if ( ev.GetId() == MEventId_FolderTreeChange )
       {
-         EventFolderTreeChangeData& event = (EventFolderTreeChangeData &)ev;
-
-         if ( event.GetChangeKind() == EventFolderTreeChangeData::Delete )
+         MEventFolderTreeChangeData& event = (MEventFolderTreeChangeData &)ev;
+         if ( event.GetChangeKind() == MEventFolderTreeChangeData::Delete )
             OnFolderDeleteEvent(event.GetFolderFullName());
+      }
+      else if ( ev.GetId() == MEventId_FolderUpdate )
+      {
+         OnFolderUpdateEvent();
       }
 
       return true;
@@ -47,8 +54,10 @@ public:
 protected:
    /// the derived class should close when our folder is deleted
    virtual void OnFolderDeleteEvent(const String& folderName) = 0;
+   /// the derived class should update their display
+   virtual void OnFolderUpdateEvent(void) = 0;
 
 private:
-   void *m_regCookie;
+   void *m_regCookieTreeChange, *m_regCookieFolderUpdate;
 };
 #endif

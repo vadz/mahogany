@@ -37,7 +37,7 @@ class ArrayFrames;
    Application class, doing all non-GUI application specific stuff
 */
 
-class MAppBase : public EventReceiver
+class MAppBase : public MEventReceiver
 {
 public:
    MAppBase(void);
@@ -149,7 +149,7 @@ public:
    bool IsRunning() const { return m_topLevelFrame != NULL; }
 
    /// called when the events we're interested in are generated
-   virtual bool OnEvent(EventData& event);
+   virtual bool OnMEvent(MEventData& event);
 
 protected:
    /** Checks some global configuration settings and makes sure they

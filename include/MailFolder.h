@@ -21,6 +21,22 @@
 class FolderView;
 class ProfileBase;
 
+/** This class essentially maps to the c-client Overview structure,
+    which holds information for showing lists of messages. */
+class HeaderInfo
+{
+public:
+   virtual String const &GetSubject(void) const = 0;
+   virtual String const &GetFrom(void) const = 0;
+   virtual String const &GetDate(void) const = 0;
+   virtual String const &GetId(void) const = 0;
+   virtual String const &GetReferences(void) const = 0;
+   virtual String const &GetStatus(void) const = 0;
+   virtual unsigned long const &GetSize(void) const = 0;
+   virtual ~HeaderInfo() {}
+};
+
+
 /**
    MailFolder base class, represents anything containig mails.
 
@@ -61,6 +77,7 @@ public:
       /// message matched a search
       MSG_STAT_SEARCHED = 16
    };
+
    //@}
 
    /** @name Constructors and destructor */
@@ -96,20 +113,12 @@ public:
    // nice. We need to change that.
    //@}
 
-   /// check wether object is initialised
-   virtual bool  IsInitialised(void) const = 0;
-
    /** Register a FolderViewBase derived class to be notified when
        folder contents change.
        @param  view the FolderView to register
        @param reg if false, unregister it
    */
    virtual void RegisterView(FolderView *view, bool reg = true) = 0;
-
-   /** is mailbox "ok", i.e. was there an error or not?
-       @return  true if everything succeeded
-   */
-   virtual bool IsOk(void) const = 0;
 
    /** get name of mailbox
        @return the symbolic name of the mailbox
@@ -173,6 +182,14 @@ public:
 
    /// Get update interval in seconds
    int GetUpdateInterval(void) const { return m_UpdateInterval; }
+
+   /**@name Functions to get an overview of messages in the folder. */
+   //@{
+   /// Return a pointer to the first message's header info.
+   virtual HeaderInfo const *GetFirstHeaderInfo(void) const = 0;
+   /// Return a pointer to the next message's header info.
+   virtual HeaderInfo const *GetNextHeaderInfo(HeaderInfo const*) const = 0;
+   //@}
 
 protected:
    /**@name Accessor methods */

@@ -833,6 +833,15 @@ void wxFolderView::OnFolderDeleteEvent(const String& folderName)
    }
 }
 
+void
+wxFolderView::OnFolderUpdateEvent(void)
+{
+}
+
+
+/*------------------------------------------------------------------------
+ * wxFolderViewFrame
+ *-----------------------------------------------------------------------*/
 BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)
    EVT_SIZE(    wxFolderViewFrame::OnSize)
    EVT_MENU(-1,    wxFolderViewFrame::OnCommandEvent)

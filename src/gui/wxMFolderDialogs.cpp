@@ -918,9 +918,9 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    {
       // generate an event notifying everybody that a new folder has been
       // created
-      EventFolderTreeChangeData event(fullname,
-                                      EventFolderTreeChangeData::Create);
-      EventManager::Send(event);
+      MEventFolderTreeChangeData event(fullname,
+                                       MEventFolderTreeChangeData::Create);
+      MEventManager::Send(event);
    }
 
    folder->DecRef();

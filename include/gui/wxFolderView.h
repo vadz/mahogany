@@ -18,6 +18,7 @@
 #include "MailFolder.h"
 #include "FolderView.h"
 #include "wxMessageView.h"
+#include "MEvent.h"
 
 #include <wx/persctrl.h>
 #include <wx/splitter.h>
@@ -167,11 +168,10 @@ public:
    /// return pointer to folder
    MailFolder * GetFolder(void) const { return m_MailFolder; }
 
-   /// get folder name
-   const String& GetFullName() const { return m_folderName; }
-
-   // process folder delete event
+   /// process folder delete event
    virtual void OnFolderDeleteEvent(const String& folderName);
+   /// update the folderview
+   virtual void OnFolderUpdateEvent(void);
 
 protected:
    /** Save messages to a folder.

@@ -55,6 +55,7 @@ struct StreamConnection
 KBLIST_DEFINE(StreamConnectionList, StreamConnection);
 KBLIST_DEFINE(FolderViewList, FolderView);
 
+
 /**
    MailFolder class, implemented with the C-client library.
 
@@ -66,7 +67,6 @@ KBLIST_DEFINE(FolderViewList, FolderView);
 */
 class MailFolderCC : public MailFolder
 {
-//   DECLARE_CLASS(MailFolderCC)
 public:
    /** @name Constructors and destructor */
    //@{
@@ -102,10 +102,7 @@ public:
                                     String const &server,
                                     String const &login,
                                     String const &password);
-
-   /// assume object to only be initialised when stream is ok
-   bool IsInitialised(void) const { return okFlag; }
-
+   
    //@}
 
    /// enable/disable debugging:
@@ -116,12 +113,6 @@ public:
                                    String const &login);
 
 public:
-
-   /** Is mailbox ok to use? Did the last operation succeed?
-       @return true if everything is fine
-   */
-   bool   IsOk(void) const { return okFlag; }
-
    /** Register a FolderView derived class to be notified when
        folder contents change.
        @param    view the FolderView to register
@@ -198,6 +189,15 @@ public:
    /** Updates the associated FolderViews */
    void UpdateViews(void);
 
+
+   /**@name Functions to get an overview of messages in the folder. */
+   //@{
+   /// Return a pointer to the first message's header info.
+   virtual HeaderInfo const *GetFirstHeaderInfo(void) const;
+   /// Return a pointer to the next message's header info.
+   virtual HeaderInfo const *GetNextHeaderInfo(HeaderInfo const*) const;
+   //@}
+
 private:
    /// private constructor, does basic initialisation
    MailFolderCC(int typeAndFlags,
@@ -226,13 +226,12 @@ private:
    ///   mailstream associated with this folder
    MAILSTREAM   *m_MailStream;
 
-   /// is the MAILSTREAM ok or was there an error?
-   bool      okFlag;
-
    /// number of messages in mailbox
-   long      numOfMessages;
-   /// for comparison with numOfMessages to find new mail
-   long      oldnum;
+   unsigned long m_numOfMessages;
+   /** Do we want to generate new mail events?
+       Used to supporess new mail events when first opening the folder 
+       and when copying to it. */
+   bool m_GenerateNewMailEvents;
    /// Path to mailbox
    String   m_MailboxPath;
 
@@ -283,6 +282,11 @@ protected:
    void SetType(FolderType type) { m_folderType = type; }
    FolderType GetType(void) const { return m_folderType; }
 
+   /// Gets a complete folder listing from the stream.
+   void BuildListing(void);
+   /* Handles the mm_overview_header callback on a per folder basis. */
+   void OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov);
+   
    /*@name Handling of MailFolderCC internal events.
      Callbacks from the c-client library cannot directly be used to
      call other functions as this might lead to a lock up or recursion
@@ -331,6 +335,12 @@ public:
 protected:
    /// The list of events to be processed.
    static EventQueue ms_EventQueue;
+   /// The current listing of the folders, updated continually.
+   class HeaderInfoCC *m_Listing;
+   /** The index of the next entry in list to fill. Only used for
+       BuildListing()/OverviewHeader() interaction. */
+   unsigned long      m_BuildNextEntry;
+
    //@}
 public:
    /** @name common callback routines
@@ -425,7 +435,10 @@ public:
        */
    static void mm_fatal(char *str);
 
-   //@}
+   /* Handles the mm_overview_header callback on a per folder basis. */
+   static void OverviewHeader (MAILSTREAM *stream, unsigned long uid, OVERVIEW *ov);
+
+//@}
 private:
    /// destructor
    ~MailFolderCC();

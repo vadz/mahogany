@@ -500,9 +500,9 @@ void MFolderFromProfile::Delete()
    profile->DeleteGroup(GetName());
 
    // notify everybody about the disappearance of the folder
-   EventFolderTreeChangeData event(GetFullName(),
-                                   EventFolderTreeChangeData::Delete);
-   EventManager::Send(event);
+   MEventFolderTreeChangeData event(GetFullName(),
+                                    MEventFolderTreeChangeData::Delete);
+   MEventManager::Send(event);
 }
 
 bool MFolderFromProfile::Rename(const String& newName)
