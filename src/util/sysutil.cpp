@@ -73,4 +73,3 @@ bool sysutil_compare_filenames(String const &file1, String const
    return strutil_compare_filenames(file1, file2);
 #endif
 }
-
