@@ -583,6 +583,7 @@ PalmOSModule::~PalmOSModule()
    if(m_Profile) m_Profile->DecRef();
 }
 
+#if 0
 #if defined( wxUSE_THREADS ) && defined( OS_UNIX )
 class PalmOSAcceptThread : public wxThread
 {
@@ -608,7 +609,7 @@ private:
    int m_NewSocket;
 };
 #endif
-
+#endif //0
 
 bool
 PalmOSModule::Connect(void)
@@ -678,6 +679,7 @@ PalmOSModule::Connect(void)
          return false;
       }
 
+#if 0
       // the following code is unsafe under Windows:
 #if defined( wxUSE_THREADS ) && defined( OS_UNIX )
       // We interrupt the connection attempt after some seconds, to
@@ -706,6 +708,10 @@ PalmOSModule::Connect(void)
 #else
       m_PiSocket = pi_accept(m_PiSocket, 0, 0);
 #endif
+#endif //0
+
+      m_PiSocket = pi_accept_to(m_PiSocket, 0, 0, 5000);
+
       if(m_PiSocket < 0)
       {
          ErrorMessage(_("Failed to connect to PalmOS device."));
