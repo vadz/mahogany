@@ -77,7 +77,7 @@ public:
    virtual void StartBody();
    virtual void StartPart();
    virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci);
-   virtual void InsertImage(const wxBitmap& image, ClickableInfo *ci);
+   virtual void InsertImage(const wxImage& image, ClickableInfo *ci);
    virtual void InsertRawContents(const String& data);
    virtual void InsertText(const String& text, const TextStyle& style);
    virtual void InsertURL(const String& url);
@@ -112,7 +112,7 @@ private:
    bool AddFontTag(const wxColour& col);
 
    // create a new image in memory, returns its name
-   wxString CreateImageInMemoryFS(const wxBitmap& bitmap);
+   wxString CreateImageInMemoryFS(const wxImage& image);
 
    // free all images we created in memory
    void FreeMemoryFS();
@@ -398,10 +398,10 @@ void HtmlViewer::AddColourAttr(const wxChar *attr, const wxColour& col)
    }
 }
 
-wxString HtmlViewer::CreateImageInMemoryFS(const wxBitmap& bitmap)
+wxString HtmlViewer::CreateImageInMemoryFS(const wxImage& image)
 {
    wxString filename = wxString::Format("image%d.png", m_nImage++);
-   wxMemoryFSHandler::AddFile(filename, bitmap, wxBITMAP_TYPE_PNG);
+   wxMemoryFSHandler::AddFile(filename, image, wxBITMAP_TYPE_PNG);
    return filename;
 }
 
@@ -521,7 +521,7 @@ void HtmlViewer::EndHeaders()
 
    if ( m_bmpXFace.Ok() )
    {
-      wxString filename = CreateImageInMemoryFS(m_bmpXFace);
+      wxString filename = CreateImageInMemoryFS(wxImage(m_bmpXFace));
       m_htmlText << "</td><td width="
                  << wxString::Format("%d", m_bmpXFace.GetWidth()) << ">"
                     "<img src=\"memory:" << filename << "\">"
@@ -560,7 +560,7 @@ void HtmlViewer::StartPart()
 
 void HtmlViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
 {
-   wxString filename = CreateImageInMemoryFS(icon);
+   wxString filename = CreateImageInMemoryFS(wxImage(icon));
 
    m_htmlText << "<img alt=\"" << ci->GetLabel() << "\" src=\"memory:"
               << filename << "\">";
@@ -569,7 +569,7 @@ void HtmlViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
    delete ci;
 }
 
-void HtmlViewer::InsertImage(const wxBitmap& image, ClickableInfo *ci)
+void HtmlViewer::InsertImage(const wxImage& image, ClickableInfo *ci)
 {
    wxString filename = CreateImageInMemoryFS(image);
 

@@ -79,7 +79,7 @@ public:
    virtual void StartBody();
    virtual void StartPart();
    virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci);
-   virtual void InsertImage(const wxBitmap& image, ClickableInfo *ci);
+   virtual void InsertImage(const wxImage& image, ClickableInfo *ci);
    virtual void InsertRawContents(const String& data);
    virtual void InsertText(const String& text, const TextStyle& style);
    virtual void InsertURL(const String& url);
@@ -560,9 +560,9 @@ void LayoutViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
    llist->Insert(" ");
 }
 
-void LayoutViewer::InsertImage(const wxBitmap& image, ClickableInfo *ci)
+void LayoutViewer::InsertImage(const wxImage& image, ClickableInfo *ci)
 {
-   InsertAttachment(image, ci);
+   InsertAttachment(image.ConvertToBitmap(), ci);
 }
 
 void LayoutViewer::InsertRawContents(const String& data)

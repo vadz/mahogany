@@ -76,7 +76,7 @@ public:
    virtual void StartBody();
    virtual void StartPart();
    virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci);
-   virtual void InsertImage(const wxBitmap& image, ClickableInfo *ci);
+   virtual void InsertImage(const wxImage& image, ClickableInfo *ci);
    virtual void InsertRawContents(const String& data);
    virtual void InsertText(const String& text, const TextStyle& style);
    virtual void InsertURL(const String& url);
@@ -438,7 +438,7 @@ void TextViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
    m_window->InsertClickable(str, ci, GetOptions().AttCol);
 }
 
-void TextViewer::InsertImage(const wxBitmap& image, ClickableInfo *ci)
+void TextViewer::InsertImage(const wxImage& image, ClickableInfo *ci)
 {
    // as we return false from CanInlineImages() this is not supposed to be
    // called

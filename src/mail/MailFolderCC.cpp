@@ -4786,6 +4786,11 @@ void MailFolderCC::StartReading(unsigned long total)
 #ifdef USE_READ_PROGRESS
    ASSERT_MSG( !gs_readProgressInfo, "can't start another read operation" );
 
+   // don't show the progress dialogs for the local folders - in practice, it
+   // will never take really long time to read from them
+   if ( IsLocalQuickFolder(GetType()) )
+      return;
+
    // here is the idea: if the message is big, we show the progress dialog
    // immediately, otherwise we only do it if retrieving it takes longer than
    // the specified time

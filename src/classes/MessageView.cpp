@@ -67,6 +67,7 @@
 #include <wx/file.h>
 #include <wx/mimetype.h>      // for wxFileType::MessageParameters
 #include <wx/process.h>
+#include <wx/mstream.h>
 
 #include <ctype.h>  // for isspace
 #include <time.h>   // for time stamping autocollected addresses
@@ -233,7 +234,7 @@ public:
    virtual void StartBody() { }
    virtual void StartPart() { }
    virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci) { }
-   virtual void InsertImage(const wxBitmap& image, ClickableInfo *ci) { }
+   virtual void InsertImage(const wxImage& image, ClickableInfo *ci) { }
    virtual void InsertRawContents(const String& data) { }
    virtual void InsertText(const String& text, const TextStyle& style) { }
    virtual void InsertURL(const String& url) { }
@@ -737,11 +738,11 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    settings->inlineRFC822 = READ_CONFIG(profile, MP_RFC822_IS_TEXT) != 0;
    settings->highlightURLs = READ_CONFIG(profile, MP_HIGHLIGHT_URLS) != 0;
 
-   // we set inlineGFX to -1 if we don't inline graphics at all and to the
-   // max size limit of graphics to show inline otherwise (0 if no limit)
-   settings->inlineGFX = READ_CONFIG(profile, MP_INLINE_GFX)
-                         ? READ_CONFIG(profile, MP_INLINE_GFX_SIZE)
-                         : -1;
+   // we set inlineGFX to 0 if we don't inline graphics at all and to the
+   // max size limit of graphics to show inline otherwise (-1 if no limit)
+   settings->inlineGFX = READ_CONFIG(profile, MP_INLINE_GFX);
+   if ( settings->inlineGFX )
+      settings->inlineGFX = READ_CONFIG(profile, MP_INLINE_GFX_SIZE);
 
    settings->browser = READ_CONFIG(profile, MP_BROWSER);
    settings->browserInNewWindow = READ_CONFIG(profile, MP_BROWSER_INNW) != 0;
@@ -1308,12 +1309,12 @@ void MessageView::ShowImage(const MimePart *mimepart)
 
             // fall through
 
-         case -1:
+         case 0:
             // never inline
             showInline = false;
             break;
 
-         case 0:
+         case -1:
             // always inline
             break;
       }
@@ -1321,28 +1322,41 @@ void MessageView::ShowImage(const MimePart *mimepart)
 
    if ( showInline )
    {
-      bool ok = false;
+      unsigned long len;
+      const char *data = mimepart->GetContent(&len);
 
-      MTempFileName tmpFN;
-      if ( tmpFN.IsOk() )
+      if ( !data )
       {
-         String filename = tmpFN.GetName();
-         MimeSave(mimepart, filename);
+         wxLogError(_("Cannot get attachment content."));
 
-         wxImage img =  wxIconManager::LoadImage(filename, &ok, true);
-
-         if ( ok )
-         {
-            m_viewer->InsertImage
-                      (
-                        img.ConvertToBitmap(),
-                        GetClickableInfo(mimepart)
-                      );
-         }
+         return;
       }
 
-      if ( !ok )
-         showInline = false;
+      wxMemoryInputStream mis(data, len);
+      wxImage img(mis);
+#ifdef OS_UNIX
+      if ( !img.Ok() )
+      {
+         // try loading via wxIconManager which can use ImageMagik to do the
+         // conversion
+         MTempFileName tmpFN;
+         if ( tmpFN.IsOk() )
+         {
+            String filename = tmpFN.GetName();
+            MimeSave(mimepart, filename);
+
+            bool ok;
+            img =  wxIconManager::LoadImage(filename, &ok, true);
+            if ( !ok )
+               showInline = false;
+         }
+      }
+#endif // OS_UNIX
+
+      if ( showInline )
+      {
+         m_viewer->InsertImage(img, GetClickableInfo(mimepart));
+      }
    }
 
    if ( !showInline )
@@ -1454,7 +1468,14 @@ MessageView::ShowPart(const MimePart *mimepart)
       {
          String data = mimepart->GetContent();
 
-         m_viewer->InsertRawContents(data);
+         if ( !data )
+         {
+            wxLogError(_("Cannot get attachment content."));
+         }
+         else
+         {
+            m_viewer->InsertRawContents(data);
+         }
       }
       //else: skip this part
    }
@@ -1466,8 +1487,7 @@ MessageView::ShowPart(const MimePart *mimepart)
    {
       ShowTextPart(mimepart);
    }
-   else if ( !isAttachment &&
-               (primaryType == MimeType::IMAGE && m_ProfileValues.inlineGFX) )
+   else if ( primaryType == MimeType::IMAGE )
    {
       ShowImage(mimepart);
    }

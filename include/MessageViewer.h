@@ -127,7 +127,7 @@ public:
    virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci) = 0;
 
    /// insert an inline image (only called if CanInlineImages() returned true)
-   virtual void InsertImage(const wxBitmap& image, ClickableInfo *ci) = 0;
+   virtual void InsertImage(const wxImage& image, ClickableInfo *ci) = 0;
 
    /// insert raw message contents (only called if CanProcess() returned true)
    virtual void InsertRawContents(const String& data) = 0;
