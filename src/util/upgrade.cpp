@@ -58,10 +58,7 @@
 #endif // USE_DNS
 
 #ifdef OS_UNIX
-   // mail collection from INBOX makes sense only under Unix
-   #define USE_MAIL_COLLECT
-
-   // as well as INBOX itself - there is no such thing under Windows
+   // INBOX exists only under Unix - there is no such thing under Windows
    #define USE_INBOX
 #endif
 
@@ -84,6 +81,7 @@
 // options we use here
 // ----------------------------------------------------------------------------
 
+extern const MOption MP_COLLECT_INBOX;
 extern const MOption MP_DIALUP_SUPPORT;
 extern const MOption MP_FIRSTRUN;
 extern const MOption MP_FOLDER_COMMENT;
@@ -127,6 +125,11 @@ extern const MOption MP_USER_MDIR;
 extern const MOption MP_USE_OUTBOX;
 extern const MOption MP_USE_TRASH_FOLDER;
 extern const MOption MP_VERSION;
+
+#ifdef USE_INBOX
+   // the INBOX name is not translated -- should it be?
+   static const char *INBOX_NAME = "INBOX";
+#endif // USE_INBOX
 
 // obsolete config names not used any more but needed here to be able to
 // update the old versions of the config
@@ -228,10 +231,10 @@ struct InstallWizardData
 #ifdef USE_PYTHON
    bool   usePython;
 #endif
-#ifdef USE_MAIL_COLLECT
+#ifdef USE_INBOX
    // mail collection from INBOX makes sense only under Unix
    bool   collectAllMail;
-#endif // USE_MAIL_COLLECT
+#endif // USE_INBOX
 
    // dial up page
 #if defined(OS_WIN)
@@ -270,19 +273,7 @@ static bool CheckHostName(const wxString& hostname)
 
 #endif // USE_DNS
 
-// return the name of the main mail folder
-static wxString GetMainMailFolderName()
-{
-   String mainFolderName;
-#ifdef USE_MAIL_COLLECT
-   if ( !gs_installWizardData.collectAllMail )
-      mainFolderName = "INBOX";
-   else
-#endif // USE_MAIL_COLLECT
-      mainFolderName = READ_APPCONFIG_TEXT(MP_NEWMAIL_FOLDER);
-
-   return mainFolderName;
-}
+static bool VerifyStdFolders(void);
 
 // ----------------------------------------------------------------------------
 // wizardry
@@ -592,9 +583,9 @@ public:
 #endif
          m_UseOutboxCheckbox->SetValue(gs_installWizardData.useOutbox != 0);
          m_TrashCheckbox->SetValue(gs_installWizardData.useTrash != 0);
-#ifdef USE_MAIL_COLLECT
+#ifdef USE_INBOX
          m_CollectCheckbox->SetValue(gs_installWizardData.collectAllMail != 0);
-#endif // USE_MAIL_COLLECT
+#endif // USE_INBOX
 
          return TRUE;
       }
@@ -611,9 +602,9 @@ public:
          gs_installWizardData.useDialUp  = m_UseDialUpCheckbox->GetValue();
          gs_installWizardData.useOutbox  = m_UseOutboxCheckbox->GetValue();
          gs_installWizardData.useTrash   = m_TrashCheckbox->GetValue();
-#ifdef USE_MAIL_COLLECT
+#ifdef USE_INBOX
          gs_installWizardData.collectAllMail = m_CollectCheckbox->GetValue();
-#endif // USE_MAIL_COLLECT
+#endif // USE_INBOX
 
          return TRUE;
       }
@@ -622,9 +613,9 @@ private:
    wxCheckBox *m_TrashCheckbox,
               *m_UseOutboxCheckbox,
               *m_UseDialUpCheckbox
-#ifdef USE_MAIL_COLLECT
+#ifdef USE_INBOX
              , *m_CollectCheckbox
-#endif // USE_MAIL_COLLECT
+#endif // USE_INBOX
 #ifdef USE_PISOCK
              , *m_UsePalmOsCheckbox
 #endif
@@ -1032,9 +1023,9 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
    // the enum should be synced with the labels below!
    enum
    {
-#ifdef USE_MAIL_COLLECT
+#ifdef USE_INBOX
       Label_Collect,
-#endif // USE_MAIL_COLLECT
+#endif // USE_INBOX
       Label_UseTrash,
       Label_UseOutbox,
       Label_UseDialUp,
@@ -1049,9 +1040,9 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
    };
 
    wxArrayString labels;
-#ifdef USE_MAIL_COLLECT
+#ifdef USE_INBOX
    labels.Add(_("&Collect new mail:"));
-#endif // USE_MAIL_COLLECT
+#endif // USE_INBOX
    labels.Add(_("Use &Trash mailbox:"));
    labels.Add(_("Use &Outbox queue:"));
    labels.Add(_("&Use dial-up network:"));
@@ -1067,7 +1058,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
 
    wxControl *last = NULL;
 
-#ifdef USE_MAIL_COLLECT
+#ifdef USE_INBOX
    wxStaticText *text = panel->CreateMessage(_(
       "Mahogany can either leave all messages in\n"
       "your system mailbox or create its own\n"
@@ -1078,7 +1069,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
    m_CollectCheckbox = panel->CreateCheckBox(labels[Label_Collect],
                                              widthMax, text);
    last = m_CollectCheckbox;
-#endif // USE_MAIL_COLLECT
+#endif // USE_INBOX
 
    wxStaticText *text2 = panel->CreateMessage(
       _(
@@ -1323,9 +1314,9 @@ bool RunInstallWizard()
 
    gs_installWizardData.useOutbox = GetNumericDefault(MP_USE_OUTBOX) != 0;
    gs_installWizardData.useTrash = GetNumericDefault(MP_USE_TRASH_FOLDER) != 0;
-#ifdef USE_MAIL_COLLECT
+#ifdef USE_INBOX
    gs_installWizardData.collectAllMail = TRUE;
-#endif // USE_MAIL_COLLECT
+#endif // USE_INBOX
    gs_installWizardData.folderType = 0; /* mbx */
 #ifdef USE_PYTHON
    gs_installWizardData.usePython = READ_APPCONFIG(MP_USEPYTHON) != 0;
@@ -1398,9 +1389,9 @@ bool RunInstallWizard()
 #if USE_PISOCK
       gs_installWizardData.usePalmOs = false;
 #endif // USE_PISOCK
-#ifdef USE_MAIL_COLLECT
+#ifdef USE_INBOX
       gs_installWizardData.collectAllMail = false;
-#endif // USE_MAIL_COLLECT
+#endif // USE_INBOX
 
       // don't reset the SMTP server: it won't lead to creation of any
       // (unwanted) folders, so it doesn't hurt to have the default value
@@ -1429,22 +1420,21 @@ bool RunInstallWizard()
 
    CompleteConfiguration(gs_installWizardData);
 
-   SetupServers();
+   String mainFolderName;
+#ifdef USE_INBOX
+   if ( !gs_installWizardData.collectAllMail )
+      mainFolderName = INBOX_NAME;
+   else
+#endif // USE_INBOX
+      mainFolderName = READ_APPCONFIG_TEXT(MP_NEWMAIL_FOLDER);
 
-   String mainFolderName = GetMainMailFolderName();
    mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, mainFolderName);
 
    // create a welcome message unless the user didn't use the wizard (in which
    // case we assume he is so advanced that he doesn't need this stuff)
    if ( wizardDone )
    {
-      MFolder_obj folderMain(MFolder::CreateTemp
-                             (
-                              "",            // no name
-                              MF_FILE,
-                              0,             // no flags
-                              mainFolderName
-                             ));
+      MFolder_obj folderMain(mainFolderName);
 
       MailFolder *mf = MailFolder::OpenFolder(folderMain);
 
@@ -1497,153 +1487,26 @@ bool RunInstallWizard()
 }
 
 
-/** This function uses the wizard data to complete the configuration
-    as needed. It is responsible for setting up INBOX "New Mail" etc.
-
-
-    TODO: the folder flags settings etc here and in verifyinbox could
-    be combined into one function
+/**
+  This function uses the wizard data to complete the configuration
+  as needed.
 */
 static
-void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
+void CompleteConfiguration(const struct InstallWizardData& gs_installWizardData)
 {
-   Profile * profile = mApplication->GetProfile();
+   Profile *profile = mApplication->GetProfile();
 
-   // OUTBOX
-   if(gs_installWizardData.useOutbox)
-   {
-      profile->writeEntry(MP_USE_OUTBOX, 1l);
-      wxString name = READ_CONFIG(profile, MP_OUTBOX_NAME);
-      if(name.Length() == 0)
-      {
-         name = _("Outbox");
-         profile->writeEntry(MP_OUTBOX_NAME, name);
-      }
-      if(! MailFolder::CreateFolder(name, MF_FILE,
-                                    MF_FLAGS_KEEPOPEN,
-                                    name,
-                                    _("Queue of messages to be sent.")))
-      {
-         wxLogError(_("Could not create the outgoing mailbox '%'."),
-                    name.c_str());
-      }
-      else
-      {
-         MFolder_obj folder(name);
-         folder->SetTreeIndex(MFolderIndex_Outbox);
-      }
-   }
-   else
-   {
-      profile->writeEntry(MP_USE_OUTBOX, 0l);
-   }
-
-   // INBOX/NEW MAIL: under Unix, always create both INBOX and NEW MAIL
-   // folders, but keep one of them hidden depending on "Collect all mail"
-   // setting; under Windows we never use INBOX at all
-   int flagInbox, flagNewMail;
-#ifdef USE_MAIL_COLLECT
-   if ( !gs_installWizardData.collectAllMail )
-   {
-      // hide NEW MAIL, show INBOX but don't collect mail from it
-      flagInbox = 0;
-      flagNewMail = MF_FLAGS_HIDDEN;
-   }
-   else // collect all mail
-#endif // USE_MAIL_COLLECT
-   {
-      // hide INBOX and collect mail from it, show the New Mail folder
-      flagInbox = MF_FLAGS_HIDDEN | MF_FLAGS_INCOMING;
-      flagNewMail = 0;
-   }
-
+   // options telling us which standard folders we need among
+   // Inbox/NewMail/SentMail/Trash/Outbox
 #ifdef USE_INBOX
-   // create INBOX
-   static const char *INBOX_NAME = "INBOX";
-   if(! MailFolder::CreateFolder(INBOX_NAME,
-                                 MF_INBOX,
-                                 MF_FLAGS_DONTDELETE |
-                                 flagInbox,
-                                 "",
-                                 _("Default system folder for incoming mail.")))
-   {
-      wxLogError(_("Could not create INBOX mailbox."));
-   }
-   else
-   {
-      MFolder_obj folder(INBOX_NAME);
-      folder->SetTreeIndex(MFolderIndex_Inbox);
-   }
+   profile->writeEntry(MP_COLLECT_INBOX, gs_installWizardData.collectAllMail);
 #endif // USE_INBOX
+   profile->writeEntry(MP_USEOUTGOINGFOLDER, true);
+   profile->writeEntry(MP_USE_TRASH_FOLDER, gs_installWizardData.useTrash);
+   profile->writeEntry(MP_USE_OUTBOX, gs_installWizardData.useOutbox);
 
-   // create New Mail folder:
-   wxString foldername = READ_CONFIG(profile, MP_NEWMAIL_FOLDER);
-   if(foldername.Length() == 0)
-   {
-      // shouldn't happen unless run for the first time
-      foldername = _("New Mail");
-      profile->writeEntry(MP_NEWMAIL_FOLDER, foldername);
-   }
-
-   if(! MailFolder::CreateFolder(foldername,
-                                 MF_FILE,
-                                 MF_FLAGS_NEWMAILFOLDER |
-                                 flagNewMail,
-                                 foldername,
-                                 _("Mailbox in which Mahogany collects all new messages.")))
-   {
-      wxLogError(_("Could not create central incoming mailbox '%s'."), foldername.c_str());
-   }
-   else
-   {
-      MFolder_obj folder(foldername);
-      folder->SetTreeIndex(MFolderIndex_NewMail);
-   }
-
-   // TRASH
-   if(gs_installWizardData.useTrash)
-   {
-      // VZ: why is this one translated and all others are not?
-      String nameTrash = _("Trash");
-      profile->writeEntry(MP_USE_TRASH_FOLDER, 1l);
-      profile->writeEntry(MP_TRASH_FOLDER, nameTrash);
-      if(! MailFolder::CreateFolder(nameTrash,
-                                    MF_FILE,
-                                    MF_FLAGS_DONTDELETE,
-                                    nameTrash,
-                                    _("Trash folder for deleted messages.") ) )
-      {
-         wxLogError(_("Could not create Trash mailbox."));
-      }
-      else
-      {
-         MFolder_obj folder(nameTrash);
-         folder->SetTreeIndex(MFolderIndex_Trash);
-      }
-
-      // the rest is done in Update()
-   }
-   else
-   {
-      profile->writeEntry(MP_USE_TRASH_FOLDER, 0l);
-   }
-
-
-   // local newsspool ?
-   {
-      // calling c-client lib:
-      String newsspool = MailFolderCC::GetNewsSpool();
-      if(wxDirExists(newsspool))
-      {
-         String foldername = _("News-spool");
-         if(! MailFolder::CreateFolder(foldername,
-                                       MF_NEWS,
-                                       MF_FLAGS_GROUP,
-                                       "",
-                                       _("Local news-spool found on your system during installation.")))
-            wxLogError(_("Could not create an entry for the local news spool."));
-      }
-   }
+   // do setup the std folders now
+   VerifyStdFolders();
 
    // Dial-Up network:
    profile->writeEntry(MP_DIALUP_SUPPORT, gs_installWizardData.useDialUp);
@@ -1665,43 +1528,49 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    }
 
 #ifdef USE_PYTHON
-   if(gs_installWizardData.usePython)
-      profile->writeEntry(MP_USEPYTHON, 1l);
-   else
-      profile->writeEntry(MP_USEPYTHON, 0l);
+   profile->writeEntry(MP_USEPYTHON, gs_installWizardData.usePython);
 #endif
 
 #ifdef USE_PISOCK
    // PalmOS-box
    if(gs_installWizardData.usePalmOs)
    {
-      Profile *pp = Profile::CreateModuleProfile("PalmOS");
+      Profile_obj pp = Profile::CreateModuleProfile("PalmOS");
       pp->writeEntry("PalmBox", "PalmBox");
       pp->DecRef();
-      if(! MailFolder::CreateFolder("PalmBox",
-                                    MF_FILE,
-                                    0,
-                                    "PalmBox",
-                                    _("This folder and its configuration settings\n"
-                                      "are used to synchronise with your PalmOS\n"
-                                      "based handheld computer.") ) )
+
+      MFolder_obj folderPalm = MFolder::Create("PalmBox", MF_FILE);
+
+      if( !folderPalm )
+      {
          wxLogError(_("Could not create PalmOS mailbox."));
+      }
       else
       {
-         pp = Profile::CreateProfile("PalmBox");
-         pp->writeEntry("Icon", wxFolderTree::iconPalmPilot);
-         pp->DecRef();
+         folderPalm->SetPath("PalmBox");
+         folderPalm->SetComment
+                     (
+                        _("This folder and its configuration settings\n"
+                          "are used to synchronise with your PalmOS\n"
+                          "based handheld computer."
+                          )
+                     );
+
+         folderPalm->SetIcon(wxFolderTree::iconPalmPilot);
+
          MDialog_Message(_(
             "Set up the `PalmBox' mailbox used to synchronise\n"
             "e-mail with your handheld computer.\n"
             "Please use the Plugin-menu to configure\n"
             "the PalmOS support."));
-
       }
 
       // the rest is done in Update()
    }
-#endif
+#endif // USE_PISOCK
+
+   // setup the standard servers too
+   SetupServers();
 }
 
 #endif // USE_WIZARD
@@ -2584,205 +2453,245 @@ private:
    String m_NewMailFolder;
 };
 
-/** Make sure we have /Profiles/INBOX set up and the global
-    NewMailFolder folder.
-    Returns TRUE if the profile already existed, FALSE if it was just created
+/**
+  Check that the given folder exists and has correct flags, corrects them if
+  not.
+
+  Returns TRUE if ok, FALSE if we failed
  */
-extern bool
-VerifyInbox(void)
+static bool
+VerifyStdFolder(const MOption& optName,
+                const String& nameDefault,
+                int flags,
+                const String& comment,
+                MFolderIndex idxInTree = MFolderIndex_Max,
+                int icon = -1)
 {
-   bool rc = TRUE;
-   Profile *parent = mApplication->GetProfile();
-   // INBOX has no meaning under Windows
-#ifndef OS_WIN
-   // Do we need to create the INBOX (special folder for incoming mail)?
-   if ( parent->HasEntry("INBOX") )
-      rc = TRUE;
-   else
+   wxString name = READ_APPCONFIG(optName);
+
+   if ( name.empty() )
    {
-      rc = FALSE;
-      Profile *ibp = Profile::CreateProfile("INBOX");
-      if(READ_APPCONFIG_TEXT(MP_NEWMAIL_FOLDER) != "INBOX"
-         && MDialog_YesNoDialog(
-            _("Normally Mahogany will automatically collect all mail\n"
-              "from your system's default mail folder (INBOX,\n"
-              "representing your mail spool entry),\n"
-              "and move it to a special 'New Mail' folder.\n"
-              "This is generally considered good practice as you\n"
-              "should not leave your new mail in INBOX.\n"
-              "\n"
-              "Please confirm this. If you select No, your mail\n"
-              "will remain in INBOX and you need to check that\n"
-              "folder manually."
-               ),
-            NULL, _("Collect mail from INBOX?"), true))
-         ibp->writeEntry(MP_FOLDER_TYPE, MF_INBOX|MF_FLAGS_INCOMING|MF_FLAGS_DONTDELETE);
-      else
+      // write the translated folder name to the profile the first time we run
+      name = nameDefault;
+      mApplication->GetProfile()->writeEntry(optName, nameDefault);
+   }
+
+   // all system folders have this flag
+   flags |= MF_FLAGS_DONTDELETE;
+
+   MFolder *folder = MFolder::Get(name);
+   if ( !folder )
+   {
+      folder = MFolder::Create(name, MF_FILE);
+
+      if ( !folder )
       {
-         ibp->writeEntry(MP_FOLDER_TYPE, MF_INBOX|MF_FLAGS_DONTDELETE);
-         MDialog_Message(_(
-            "Mahogany will not automatically collect mail from your\n"
-            "system's default INBOX.\n"
-            "You can change this in the INBOX folder's preferences\n"
-            "dialog at any time."));
+         wxLogError(_("Failed to create system folder '%s'"), name.c_str());
 
+         return false;
       }
-      ibp->writeEntry(MP_FOLDER_COMMENT, _("Default system folder for incoming mail."));
-      ibp->DecRef();
-   }
-#endif // OS_WIN
 
-   /*
-    * Is the newmail folder properly configured?
-    */
-   MFolder_obj folderRoot("");
-   String foldername = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
-   if(foldername.empty()) // this must not be
-   {
-      foldername = _("New Mail");
-      mApplication->GetProfile()->writeEntry(MP_NEWMAIL_FOLDER, foldername);
-   }
-   static const long flagsNewMail = MF_FLAGS_DEFAULT|MF_FLAGS_NEWMAILFOLDER;
-   // Do we need to create the NewMailFolder?
-   Profile *ibp = Profile::CreateProfile(foldername);
-   if (!  parent->HasEntry(foldername) )
-   {
-      ibp->writeEntry(MP_FOLDER_TYPE,
-                      CombineFolderTypeAndFlags(MF_FILE, flagsNewMail));
-      ibp->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
-      ibp->writeEntry(MP_FOLDER_COMMENT,
-                      _("Folder where Mahogany will collect all new mail."));
-      rc = FALSE;
-   }
+      folder->SetPath(name);
+      folder->SetFlags(flags);
+      folder->SetComment(comment);
 
-   // Make sure the flags and type are valid
-   int typeAndFlags = READ_CONFIG(ibp,MP_FOLDER_TYPE);
-   FolderType type = GetFolderType(typeAndFlags);
-   int oldflags = GetFolderFlags(typeAndFlags);
-   int flags = oldflags;
-   if( flags & MF_FLAGS_INCOMING )
-      flags ^= MF_FLAGS_INCOMING;
-   flags |= flagsNewMail;
-   if( (flags != oldflags) || (GetFolderType(typeAndFlags) != MF_FILE) )
-   {
-      ibp->writeEntry(MP_FOLDER_TYPE,
-                      CombineFolderTypeAndFlags(type, flags));
+      if ( idxInTree != MFolderIndex_Max )
+         folder->SetTreeIndex(idxInTree);
+
+      if ( icon != -1 )
+         folder->SetIcon(icon);
    }
-   ibp->DecRef();
-
-   /*
-    * Set up the SentMail folder:
-    */
-   if( READ_APPCONFIG(MP_USEOUTGOINGFOLDER) )
+   else // already exists
    {
-      // this line is for backwards compatibility only
-      foldername = READ_APPCONFIG_TEXT(MP_OUTGOINGFOLDER);
-      strutil_delwhitespace(foldername);
+      // check that it has right flags
+      int flagsCur = folder->GetFlags();
 
-      // We have to stick with the following for now, until we add
-      // some upgrade functionality which can set this to a different
-      // (translated) value.  "SentMail" is the old default name.
-      if(foldername.Length() == 0)
-         foldername = "SentMail";
-      mApplication->GetProfile()->writeEntry(MP_OUTGOINGFOLDER, foldername);
-      bool exists = parent->HasEntry(foldername);
-      Profile *ibp = Profile::CreateProfile(foldername);
-      if (! exists )
+      // i.e. it should have all the flags specified
+      int flagsNew = flagsCur | flags;
+
+      // and it shouldn't have the incoming flag unless explicitly given
+      // because it doesn't make sense to collect mail from any of the system
+      // folders and, especially, it's downright stupid to try to collect it
+      // from NewMail one itself
+      if ( (flagsCur & MF_FLAGS_INCOMING) && !(flags & MF_FLAGS_INCOMING) )
       {
-         ibp->writeEntry(MP_FOLDER_TYPE, MF_FILE);
-         ibp->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
-         ibp->writeEntry(MP_FOLDER_COMMENT,
-                         _("Folder where Mahogany will store copies of outgoing messages."));
-         ibp->writeEntry(MP_FOLDER_TREEINDEX, MFolderIndex_SentMail);
-         rc = FALSE;
+         flagsNew ^= MF_FLAGS_INCOMING;
       }
-      // Make sure the flags are valid:
-      flags = READ_CONFIG(ibp,MP_FOLDER_TYPE);
-      oldflags = flags;
-      if(flags & MF_FLAGS_INCOMING) flags ^= MF_FLAGS_INCOMING;
-      if(flags & MF_FLAGS_DONTDELETE) flags ^= MF_FLAGS_DONTDELETE;
-      if(flags != oldflags)
-         ibp->writeEntry(MP_FOLDER_TYPE, flags);
-      if(ibp->readEntry("Icon", -1) == -1)
-         ibp->writeEntry("Icon", wxFolderTree::iconSentMail);
-      ibp->DecRef();
+
+      if ( flagsNew != flagsCur )
+      {
+         folder->SetFlags(flagsNew);
+      }
    }
 
-   /*
-    * Set up the Trash folder:
-    */
-   if( READ_APPCONFIG(MP_USE_TRASH_FOLDER) )
-   {
-      foldername = READ_APPCONFIG_TEXT(MP_TRASH_FOLDER);
-      strutil_delwhitespace(foldername);
-      if(foldername.Length() == 0)
-      {
-         foldername = _("Trash");
-         wxLogError(_("The name for the trash folder was empty, using default '%s'."),
-                    foldername.c_str());
-      }
-      mApplication->GetProfile()->writeEntry(MP_TRASH_FOLDER, foldername);
-      Profile *p = Profile::CreateProfile(foldername);
-      // Don't overwrite settings if entry already exists:
-      if (!  parent->HasEntry(foldername) )
-      {
-         p->writeEntry(MP_FOLDER_TYPE, MF_FILE);
-         p->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
-         p->writeEntry(MP_FOLDER_COMMENT,
-                         _("Folder where Mahogany will store deleted messages."));
-         rc = FALSE;
-      }
-      // Make sure the flags are valid:
-      flags = READ_CONFIG(p,MP_FOLDER_TYPE);
-      oldflags = flags;
-      if(flags & MF_FLAGS_INCOMING) flags ^= MF_FLAGS_INCOMING;
-      if(flags & MF_FLAGS_DONTDELETE) flags ^= MF_FLAGS_DONTDELETE;
-      if(flags != oldflags)
-         p->writeEntry(MP_FOLDER_TYPE, flags);
-      if(p->readEntry("Icon", -1) == -1)
-         p->writeEntry("Icon", wxFolderTree::iconTrash);
-      p->DecRef();
-   }
-
-   /*
-    * Set up the Outbox folder:
-    */
-   if( READ_APPCONFIG(MP_USE_OUTBOX) )
-   {
-      foldername = READ_APPCONFIG_TEXT(MP_OUTBOX_NAME);
-      strutil_delwhitespace(foldername);
-      if(foldername.Length() == 0)
-      {
-         foldername = _("Outbox");
-         wxLogError(_("The name for the outgoing mailbox was empty, using default '%s'."),
-                    foldername.c_str());
-      }
-      mApplication->GetProfile()->writeEntry(MP_OUTBOX_NAME, foldername);
-      Profile *p = Profile::CreateProfile(foldername);
-      // Don't overwrite settings if entry already exists:
-      if (!  parent->HasEntry(foldername) )
-      {
-         p->writeEntry(MP_FOLDER_TYPE, MF_FILE|MF_FLAGS_KEEPOPEN);
-         p->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
-         p->writeEntry(MP_FOLDER_COMMENT,
-                       _("Folder where Mahogany will store copies of outgoing messages."));
-         rc = FALSE;
-      }
-      // Make sure the flags are valid:
-      flags = READ_CONFIG(p,MP_FOLDER_TYPE);
-      oldflags = flags;
-      if(flags & MF_FLAGS_INCOMING) flags ^= MF_FLAGS_INCOMING;
-      if(flags & MF_FLAGS_DONTDELETE) flags ^= MF_FLAGS_DONTDELETE;
-      if(flags != oldflags)
-         p->writeEntry(MP_FOLDER_TYPE, flags);
-      if(p->readEntry("Icon", -1) == -1)
-         p->writeEntry("Icon", wxFolderTree::iconOutbox);
-      p->DecRef();
-   }
+   folder->DecRef();
 
    return true;
 }
 
+/**
+  Checks that the standard folders (INBOX, NeMail, SentMail, Trash, ...) exist
+  and creates them if it doesn't. Also checks that they have the correct flags
+  and fixes them if they don't.
+
+  Returns TRUE if ok, FALSE if we failed
+ */
+static bool
+VerifyStdFolders(void)
+{
+   // INBOX: the mail spool folder
+   // ----------------------------
+
+#ifdef USE_INBOX
+   bool collectFromInbox = READ_APPCONFIG_BOOL(MP_COLLECT_INBOX);
+
+   MFolder *folderInbox = MFolder::Get(INBOX_NAME);
+   if ( !folderInbox )
+   {
+      folderInbox = MFolder::Create(INBOX_NAME, MF_INBOX);
+
+      if ( !folderInbox )
+      {
+         wxLogError(_("Failed to create the INBOX folder."));
+
+         return false;
+      }
+
+      int flags = MF_FLAGS_DONTDELETE;
+
+      if ( collectFromInbox || MDialog_YesNoDialog
+           (
+             _("Normally Mahogany will automatically collect all mail\n"
+               "from your system's default mail folder (INBOX,\n"
+               "representing your mail spool entry),\n"
+               "and move it to a special 'New Mail' folder.\n"
+               "This is generally considered good practice as you\n"
+               "should not leave your new mail in INBOX.\n"
+               "\n"
+               "Please confirm this. If you select No, your mail\n"
+               "will remain in INBOX and you need to check that\n"
+               "folder manually."
+              ),
+             NULL,
+             _("Collect mail from INBOX?"),
+             true
+           ) )
+      {
+         collectFromInbox = true;
+         flags |= MF_FLAGS_INCOMING;
+      }
+      else
+      {
+         MDialog_Message
+         (
+          _("Mahogany will not automatically collect mail from your\n"
+            "system's default INBOX.\n"
+            "You can change this in the INBOX folder's preferences\n"
+            "dialog at any time."
+           ),
+          NULL,
+          NULL,
+          "WarnInbox"
+         );
+      }
+
+      folderInbox->SetFlags(flags);
+      folderInbox->SetComment(_("Default system folder for incoming mail."));
+      folderInbox->SetTreeIndex(MFolderIndex_Inbox);
+      folderInbox->SetIcon(wxFolderTree::iconInbox);
+   }
+
+   folderInbox->DecRef();
+#else // !USE_INBOX
+   // if there is no INBOX at all, we don't want to hide NewMail folder in the
+   // code below
+   bool collectFromInbox = true;
+#endif // USE_INBOX/!USE_INBOX
+
+   // NewMail: the folder to which all new mail is collected
+   // ------------------------------------------------------
+
+   int flagsNewMail = MF_FLAGS_NEWMAILFOLDER;
+   if ( !collectFromInbox )
+   {
+      // still create it even if we don't collect mail from INBOX as the user
+      // might create other folder from which he does want to collect mail
+      // later but hide it in the folder tree by default then
+      flagsNewMail |= MF_FLAGS_HIDDEN;
+   }
+
+   if ( !VerifyStdFolder
+         (
+            MP_NEWMAIL_FOLDER,
+            _("New Mail"),
+            flagsNewMail,
+            _("Folder where Mahogany will collect all new mail."),
+            MFolderIndex_NewMail,
+            wxFolderTree::iconNewMail
+         ) )
+   {
+      return false;
+   }
+
+   // SentMail: the folder where the copies of sent messages are stored
+   // -----------------------------------------------------------------
+
+   if ( READ_APPCONFIG(MP_USEOUTGOINGFOLDER) )
+   {
+      if ( !VerifyStdFolder
+            (
+               MP_OUTGOINGFOLDER,
+               _("SentMail"),
+               0,
+               _("Folder where Mahogany will store copies of outgoing messages."),
+               MFolderIndex_SentMail,
+               wxFolderTree::iconSentMail
+            ) )
+      {
+         return false;
+      }
+   }
+
+   // Trash: the folder where deleted messages are stored
+   // ---------------------------------------------------
+
+   if ( READ_APPCONFIG(MP_USE_TRASH_FOLDER) )
+   {
+      if ( !VerifyStdFolder
+            (
+               MP_TRASH_FOLDER,
+               _("Trash"),
+               0,
+               _("Folder where Mahogany will store deleted messages."),
+               MFolderIndex_Trash,
+               wxFolderTree::iconTrash
+            ) )
+      {
+         return false;
+      }
+   }
+
+   // Outbox: the folder where the messages queue for being sent
+   // ----------------------------------------------------------
+
+   if ( READ_APPCONFIG(MP_USE_OUTBOX) )
+   {
+      if ( !VerifyStdFolder
+            (
+               MP_OUTBOX_NAME,
+               _("Outbox"),
+               0,
+               _("Folder where Mahogany will queue messages to be sent"),
+               MFolderIndex_Outbox,
+               wxFolderTree::iconOutbox
+            ) )
+      {
+         return false;
+      }
+   }
+
+   return true;
+}
 
 extern bool
 VerifyEMailSendingWorks(void)
@@ -2855,85 +2764,128 @@ void VerifyUserDir(void)
 }
 
 /**
+  Create a folder in the folder tree - just a convenient wrapper around
+  CreateFolderTreeEntry()
+ */
+static inline MFolder *CreateServerEntry(const String& name,
+                                         FolderType type,
+                                         int flags)
+{
+   return CreateFolderTreeEntry(NULL, name, type, flags, "", false);
+}
+
+/**
   This function sets up folder entries for the servers, which can then
   be used for browsing them. Called only once when the application is
   initialised for the first time.
  */
-static
-void
+static void
 SetupServers(void)
 {
    String serverName;
-   MFolder *mfolder;
-   Profile *p;
 
-   /* The NNTP server: */
+   // The NNTP server
    serverName = READ_APPCONFIG_TEXT(MP_NNTPHOST);
-   if ( !!serverName )
+   if ( !serverName.empty() )
    {
-      mfolder = CreateFolderTreeEntry(NULL,
-                                      _("NNTP Server"),
-                                      MF_NNTP,
-                                      MF_FLAGS_ANON|MF_FLAGS_GROUP,
-                                      "",
-                                      FALSE);
-      mfolder->SetTreeIndex(MFolderIndex_NNTP);
+      MFolder_obj mfolder = CreateServerEntry
+                            (
+                              _("NNTP Server"),
+                              MF_NNTP,
+                              MF_FLAGS_ANON | MF_FLAGS_GROUP
+                            );
 
-      p = Profile::CreateProfile(mfolder->GetName());
-      //inherit default instead p->writeEntry(MP_NNTPHOST, serverName);
-      p->DecRef();
-      SafeDecRef(mfolder);
+      if ( !mfolder )
+      {
+         wxLogError(_("Could not create an entry for the NNTP server."));
+      }
+      else
+      {
+         mfolder->SetIcon(wxFolderTree::iconNNTP);
+         mfolder->SetTreeIndex(MFolderIndex_NNTP);
+      }
    }
 
-   /* The IMAP server: */
+   // The IMAP server
    serverName = READ_APPCONFIG_TEXT(MP_IMAPHOST);
-   if ( !!serverName )
+   if ( !serverName.empty() )
    {
-      mfolder = CreateFolderTreeEntry(NULL,
-                                      _("IMAP Server"),
-                                      MF_IMAP,
-                                      MF_FLAGS_GROUP,
-                                      "",
-                                      FALSE);
-      mfolder->SetTreeIndex(MFolderIndex_IMAP);
+      MFolder_obj mfolder = CreateServerEntry
+                            (
+                              _("IMAP Server"),
+                              MF_IMAP,
+                              MF_FLAGS_GROUP
+                            );
 
-      // don't create the INBOX automatically, let the user do it if he wants
-      // later - like this he can use IMAP server entry created above directly
-      // which would be impossible if we created INBOX automatically because
-      // doing this disables the parent folder
+      if ( !mfolder )
+      {
+         wxLogError(_("Could not create an entry for the IMAP server."));
+      }
+      else
+      {
+         mfolder->SetIcon(wxFolderTree::iconIMAP);
+         mfolder->SetTreeIndex(MFolderIndex_IMAP);
+
+         // don't create the INBOX automatically, let the user do it if he wants
+         // later - like this he can use IMAP server entry created above directly
+         // which would be impossible if we created INBOX automatically because
+         // doing this disables the parent folder
 #if 0
-      MFolder *imapInbox = CreateFolderTreeEntry(mfolder,
-                                      _("IMAP INBOX"),
-                                      MF_IMAP,
-                                      MF_FLAGS_DEFAULT,
-                                      "INBOX",
-                                      FALSE);
+         MFolder *imapInbox = CreateFolderTreeEntry(mfolder,
+                                         _("IMAP INBOX"),
+                                         MF_IMAP,
+                                         MF_FLAGS_DEFAULT,
+                                         "INBOX",
+                                         FALSE);
 
-      SafeDecRef(imapInbox);
+         SafeDecRef(imapInbox);
 #endif // 0
-
-      SafeDecRef(mfolder);
+      }
    }
 
-   /* The POP3 server: */
+   // The POP3 server:
    serverName = READ_APPCONFIG_TEXT(MP_POPHOST);
-   if ( !!serverName )
+   if ( !serverName.empty() )
    {
       // the POP3 folder is created as incoming as otherwise it doesn't work
       // really well
-      mfolder = CreateFolderTreeEntry(NULL,
-                                      _("POP3 Server"),
-                                      MF_POP,
-                                      MF_FLAGS_INCOMING,
-                                      "",
-                                      FALSE);
-      mfolder->SetTreeIndex(MFolderIndex_POP);
-      p = Profile::CreateProfile(mfolder->GetName());
-      // inherit default instead:
-      //p->writeEntry(MP_POPHOST, serverName);
-      //p->writeEntry(MP_USERNAME, READ_APPCONFIG(MP_USERNAME));
-      p->DecRef();
-      SafeDecRef(mfolder);
+      MFolder_obj mfolder = CreateServerEntry
+                            (
+                             _("POP3 Server"),
+                             MF_POP,
+                             MF_FLAGS_INCOMING
+                            );
+
+      if ( !mfolder )
+      {
+         wxLogError(_("Could not create an entry for the POP3 server."));
+      }
+      else
+      {
+         mfolder->SetIcon(wxFolderTree::iconPOP);
+         mfolder->SetTreeIndex(MFolderIndex_POP);
+      }
+   }
+
+   // local newsspool ?
+   String newsspool = MailFolderCC::GetNewsSpool();
+   if ( wxDirExists(newsspool) )
+   {
+      MFolder_obj mfolder = CreateServerEntry
+                            (
+                             _("News spool"),
+                             MF_NEWS,
+                             MF_FLAGS_GROUP
+                            );
+      if ( !mfolder )
+      {
+         wxLogError(_("Could not create an entry for the local news spool."));
+      }
+      else
+      {
+         mfolder->SetComment(_("Local news-spool found on your system during installation."));
+         mfolder->SetIcon(wxFolderTree::iconNews);
+      }
    }
 }
 
@@ -3400,10 +3352,13 @@ CheckConfiguration(void)
       profile->writeEntry(MP_VERSION, M_VERSION);
    }
 
-   // VerifyInbox() will always return FALSE during the first run, don't
-   // insult the user (just yet ;-)
-   if ( !VerifyInbox() && !firstRun )
-      wxLogDebug("Evil user corrupted his profile settings - restored.");
+   if ( !VerifyStdFolders() )
+   {
+      wxLogError(_("Some of the standard folders are missing, the program "
+                   "won't function normally."));
+
+      return false;
+   }
 
    if ( !RetrieveRemoteConfigSettings() )
       wxLogError(_("Remote configuration information could not be retrieved."));

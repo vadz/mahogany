@@ -2773,20 +2773,14 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *mf)
       return;
    }
 
-   wxTreeItemId item = GetTreeItemFromName(mf->GetName());
-
-   // it's not an error: MTempFolder objects are not in the tree, yet they
-   // generate MEventId_FolderUpdate events as well
-   if ( !item.IsOk() )
+   String folderName = mf->GetName();
+   if ( !folderName.empty() )
    {
-      return;
+      ProcessMsgNumberChange(folderName);
    }
-
-   MailFolderStatus mfStatus;
-   (void)mf->CountAllMessages(&mfStatus);
-
-   wxFolderTreeNode *node = GetFolderTreeNode(item);
-   node->SetStatus(this, mfStatus);
+   //else: this may happen for folders not in the folder tree (i.e. created
+   //      with MFolder::CreateTemp() - but we're not interested in them anyhow
+   //      so just don't do anything)
 }
 
 // ----------------------------------------------------------------------------
