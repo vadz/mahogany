@@ -1600,7 +1600,6 @@ void
 MailFolderCC::ProcessEventQueue(void)
 {
    Event *evptr;
-
    while(! ms_EventQueue.empty())
    {
       evptr = ms_EventQueue.pop_front();
@@ -1705,9 +1704,12 @@ void
 MailFolderCC::RequestUpdate(void)
 {
    // we want only one update event
-   MailFolderCC::Event *evptr = new MailFolderCC::Event(m_MailStream,Update);
-   MailFolderCC::QueueEvent(evptr);
-   m_UpdateNeeded = true;
+   if(! m_UpdateNeeded)
+   {
+      MailFolderCC::Event *evptr = new MailFolderCC::Event(m_MailStream,Update);
+      MailFolderCC::QueueEvent(evptr);
+      m_UpdateNeeded = true;
+   }
 }
 
 /* Handles the mm_overview_header callback on a per folder basis. */
