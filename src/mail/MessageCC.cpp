@@ -689,8 +689,19 @@ MessageCC::FetchText(void)
 
          if ( m_folder->Lock() )
          {
+            // FIXME: FT_PEEK normally shouldn't be there as this function is
+            //        called from, for example, WriteToString() and in this
+            //        case the message should be marked as read
+            //
+            //        but it is also called when moving a new message from non
+            //        IMAP folder to "New Mail" in which case the message
+            //        status should be unchanged
+            //
+            //        having FT_PEEK here for now is a lesser evil, in the
+            //        future we really must have PeekText() and GetText()!
             m_mailFullText = mail_fetchtext_full(m_folder->Stream(), m_uid,
-                                                 &m_MailTextLen, FT_UID);
+                                                 &m_MailTextLen,
+                                                 FT_UID | FT_PEEK);
             m_folder->UnLock();
 
             ASSERT_MSG(strlen(m_mailFullText) == m_MailTextLen,
