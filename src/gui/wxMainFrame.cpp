@@ -232,23 +232,13 @@ wxMainFrame::OpenFolder(MFolder *folder)
       else
       {
          hasFolder = false;
-
-         delete m_FolderView;
       }
 
       folder->DecRef();
    }
    else
    {
-      if ( m_splitter->IsSplit() )
-         m_splitter->Unsplit();
-   }
-
-   if ( winOldFolderView )
-   {
-      // it's not done by Unsplit() nor by ReplaceWindow(), so we must delete
-      // the window ourselves
-      delete winOldFolderView;
+      hasFolder = false;
    }
 
    if ( !hasFolder )
@@ -261,6 +251,18 @@ wxMainFrame::OpenFolder(MFolder *folder)
       // no folder view
       if ( m_splitter->IsSplit() )
          m_splitter->Unsplit();
+      
+      if ( m_FolderView )
+         delete m_FolderView;
+
+      m_folderName.Empty();
+   }
+
+   if ( winOldFolderView )
+   {
+      // it's not done by Unsplit() nor by ReplaceWindow(), so we must delete
+      // the window ourselves
+      delete winOldFolderView;
    }
 
    return hasFolder;
