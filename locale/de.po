@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Mahogany 0.67\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-09-30 19:08+0200\n"
-"PO-Revision-Date: 2004-09-30 21:30+0200\n"
+"POT-Creation-Date: 2004-10-04 21:28+0200\n"
+"PO-Revision-Date: 2004-10-04 21:40+0100\n"
 "Last-Translator: Martin Jost <mahogany.20.mjost@spamgourmet.com>\n"
 "Language-Team: Deutsch <mahogany.20.mjost@spamgourmet.com>\n"
 "MIME-Version: 1.0\n"
@@ -3464,7 +3464,7 @@ msgstr "Scheint Spam zu sein"
 
 #: gui/wxFiltersDialog.cpp:151
 #: gui/wxFiltersDialog.cpp:262
-#: gui/wxOptionsDlg.cpp:3901
+#: gui/wxOptionsDlg.cpp:3900
 msgid "Python"
 msgstr "Python"
 
@@ -4240,7 +4240,7 @@ msgid "Configure &sort order..."
 msgstr "Sortier-Reihenfolge einstellen..."
 
 #: gui/wxFolderView.cpp:1946
-#: gui/wxOptionsDlg.cpp:1513
+#: gui/wxOptionsDlg.cpp:1512
 msgid "&Thread messages"
 msgstr "Nachrichten nach Diskussion verknüpfen"
 
@@ -4563,7 +4563,7 @@ msgid "Recipient"
 msgstr "Empfänger"
 
 #: gui/wxHeadersDialogs.cpp:380
-#: gui/wxOptionsDlg.cpp:2849
+#: gui/wxOptionsDlg.cpp:2848
 msgid "Default value"
 msgstr "Voreinstellung"
 
@@ -5703,7 +5703,7 @@ msgid "Close this window"
 msgstr "Dieses Fenster schließen"
 
 #: gui/wxMenuDefs.cpp:91
-#: gui/wxOptionsDlg.cpp:3940
+#: gui/wxOptionsDlg.cpp:3939
 msgid "Addresses"
 msgstr "Adressen"
 
@@ -5737,8 +5737,8 @@ msgid "Open folder"
 msgstr "Ordner öffnen"
 
 #: gui/wxMenuDefs.cpp:97
-#: gui/wxOptionsDlg.cpp:3250
-#: gui/wxOptionsDlg.cpp:4608
+#: gui/wxOptionsDlg.cpp:3249
+#: gui/wxOptionsDlg.cpp:4607
 msgid "Compose"
 msgstr "Nachrichteneditor"
 
@@ -6302,7 +6302,7 @@ msgstr "Export-Optionen"
 # Kontext ???
 #: gui/wxMenuDefs.cpp:331
 msgid "&Import preferences..."
-msgstr "Einstellungen importieren"
+msgstr "Einstellungen importieren..."
 
 #: gui/wxMenuDefs.cpp:331
 msgid "Import options"
@@ -7381,7 +7381,7 @@ msgid "Settings successfully exported to file \"%s\""
 msgstr "Einstellungen erfolgreich in die Datei \"%s\" exportiert"
 
 #: gui/wxMFrame.cpp:703
-#: gui/wxOptionsDlg.cpp:4093
+#: gui/wxOptionsDlg.cpp:4092
 #, c-format
 msgid "Failed to export settings to the file \"%s\"."
 msgstr "Konnte Einstellungen nicht in die Datei \"%s\" schreiben."
@@ -7392,7 +7392,7 @@ msgid "Settings successfully imported from \"%s\""
 msgstr "Einstellungen erfolgreich aus der Datei \"%s\" importiert"
 
 #: gui/wxMFrame.cpp:717
-#: gui/wxOptionsDlg.cpp:4096
+#: gui/wxOptionsDlg.cpp:4095
 #, c-format
 msgid "Failed to import settings from the file \"%s\"."
 msgstr "Konnte Einstellungen nicht aus der Datei \"%s\" lesen."
@@ -7554,7 +7554,9 @@ msgstr "Wählen Sie das Verzeichnis, um die Anhänge zu speichern:"
 msgid ""
 "Attachment has a name of existing file,\n"
 "please choose another one:"
-msgstr "Der Anhang hat den Namen einer vorhandenen Datei, bitte wählen Sie einen anderen:"
+msgstr ""
+"Der Anhang hat den Namen einer vorhandenen Datei,\n"
+"bitte wählen Sie einen anderen:"
 
 #: gui/wxModulesDlg.cpp:89
 msgid "Loadable Modules Configuration"
@@ -7832,6 +7834,9 @@ msgstr "%lu Nachricht(en) kopiert."
 msgid "Settings for identity '%s'"
 msgstr "Einstellungen für Identität '%s'"
 
+# origbug (report 3.2.03)
+# authentication
+# ok, 4.10.04
 #: gui/wxOptionsDlg.cpp:903
 msgid ""
 "Your personal name and organization are used only for\n"
@@ -7844,7 +7849,7 @@ msgstr ""
 "Ihr Name und die Organisation werden nur für informelle Zwecke\n"
 "verwendet und können leer gelassen werden oder beliebige Werte erhalten.\n"
 "Dagegen wird der Benutzername als Vorgabe für den Benutzername\n"
-"auf den Server verwendet die eine Authentifizierung erwarten\n"
+"auf den Server verwendet, die eine Authentifizierung erwarten\n"
 "Hierfür sollte also der Wert eingetragen werden, den die Server erwarten."
 
 #: gui/wxOptionsDlg.cpp:909
@@ -7900,6 +7905,9 @@ msgstr "\"From\"-Kopfzeile vom \"To\" Feld setzten"
 msgid "And add personal &name if needed"
 msgstr "Und ggf. einen persönlichen Namen hinzufügen"
 
+# origbug (report 3.2.03)
+# out_g_oing
+# ok, 4.10.04
 #: gui/wxOptionsDlg.cpp:930
 msgid ""
 "You may want to attach your personal information card (vCard)\n"
@@ -8060,7 +8068,8 @@ msgid "Methods NOT to use"
 msgstr "Diese NICHT benutzen"
 
 # untrans, 6.4.2003
-#: gui/wxOptionsDlg.cpp:1019
+# ok, 3.10.04
+#: gui/wxOptionsDlg.cpp:1018
 msgid ""
 "\n"
 "Mahogany can attempt to use either SSL or TLS to send\n"
@@ -8080,26 +8089,26 @@ msgstr ""
 "selbst signierte) Zertifikate zu akzeptieren, wenn Ihre\n"
 "Organisation diese einsetzt."
 
-#: gui/wxOptionsDlg.cpp:1027
+#: gui/wxOptionsDlg.cpp:1026
 msgid "SS&L/TLS for SMTP server:Don't use SSL at all:Use TLS if available:Use TLS only:Use SSL only"
 msgstr "SSL/TLS für SMTP-Server:Verwende überhaupt kein SSL:Verwende TLS, wenn vorhanden:Verwende nur TLS:Verwende nur SSL"
 
-#: gui/wxOptionsDlg.cpp:1038
+#: gui/wxOptionsDlg.cpp:1037
 msgid "&Accept unsigned certificates for SMTP"
 msgstr "Unsignierte Zertifikate für SMTP akzeptieren"
 
-#: gui/wxOptionsDlg.cpp:1039
+#: gui/wxOptionsDlg.cpp:1038
 msgid "SSL/TLS for NNTP s&erver:Don't use SSL at all:Use TLS if available:Use TLS only:Use SSL only"
 msgstr "SSL/TLS für NNTP-Server:Verwende überhaupt kein SSL:Verwende TLS, wenn vorhanden:Verwende nur TLS:Verwende nur SSL"
 
-#: gui/wxOptionsDlg.cpp:1044
+#: gui/wxOptionsDlg.cpp:1043
 msgid "A&ccept unsigned certificates for NNTP"
 msgstr "Unsignierte Zertifikate für NNTP akzeptieren"
 
 # Beacon-Host ???
 # untrans, 6.4.2003
 # ok, 27.7.03
-#: gui/wxOptionsDlg.cpp:1048
+#: gui/wxOptionsDlg.cpp:1047
 msgid ""
 "\n"
 "Mahogany has support for dial-up networks and can detect if the\n"
@@ -8115,30 +8124,30 @@ msgstr ""
 "einen 'Beacon-Host' angeben, einen Rechnernamen im Netz. Falls Sie dies\n"
 "leer lassen wird der SMTP-Server dafür verwendet."
 
-#: gui/wxOptionsDlg.cpp:1055
+#: gui/wxOptionsDlg.cpp:1054
 msgid "&Dial-up network support"
 msgstr "&Dial-up Netzwerk-Unterstützung"
 
 # beacon ???
-#: gui/wxOptionsDlg.cpp:1056
+#: gui/wxOptionsDlg.cpp:1055
 msgid "&Beacon host (e.g. www.yahoo.com)"
 msgstr "&Beacon-Host (z.B. www.yahoo.com)"
 
-#: gui/wxOptionsDlg.cpp:1058
+#: gui/wxOptionsDlg.cpp:1057
 msgid "&RAS connection to use"
 msgstr "Zu verwendende &RAS Verbindung"
 
-#: gui/wxOptionsDlg.cpp:1060
+#: gui/wxOptionsDlg.cpp:1059
 msgid "Command to &activate network"
 msgstr "Befehl um das Netzwerk zu &aktivieren"
 
-#: gui/wxOptionsDlg.cpp:1061
+#: gui/wxOptionsDlg.cpp:1060
 msgid "Command to &deactivate network"
 msgstr "Befehl um das Netzwerk zu &deaktivieren"
 
 # untrans, 6.4.2003
 # ok, 27.7.03
-#: gui/wxOptionsDlg.cpp:1065
+#: gui/wxOptionsDlg.cpp:1064
 msgid ""
 "\n"
 "The following timeout values are used for TCP connections to\n"
@@ -8150,23 +8159,23 @@ msgstr ""
 "zu Mail- oder Newsservern verwendet.\n"
 "Versuchen Sie sie zu erhöhen, wenn die Verbindungen langsam sind."
 
-#: gui/wxOptionsDlg.cpp:1070
+#: gui/wxOptionsDlg.cpp:1069
 msgid "&Open timeout (in seconds)"
 msgstr "Zeitbegrenzung beim &Öffnen (in Sekunden)"
 
-#: gui/wxOptionsDlg.cpp:1072
+#: gui/wxOptionsDlg.cpp:1071
 msgid "&Read timeout"
 msgstr "Zeitbegrenzung beim &Lesen"
 
-#: gui/wxOptionsDlg.cpp:1073
+#: gui/wxOptionsDlg.cpp:1072
 msgid "&Write timeout"
 msgstr "Zeitbegrenzung beim &Schreiben"
 
-#: gui/wxOptionsDlg.cpp:1074
+#: gui/wxOptionsDlg.cpp:1073
 msgid "&Close timeout"
 msgstr "Zeitbegrenzung beim &Schließen"
 
-#: gui/wxOptionsDlg.cpp:1077
+#: gui/wxOptionsDlg.cpp:1076
 msgid ""
 "When Mahogany needs to fetch a header from IMAP server\n"
 "it may also get a couple of adjacent messages which\n"
@@ -8182,11 +8191,11 @@ msgstr ""
 "\n"
 "Setzen Sie diese Einstellung auf 0 um Mahogany entscheiden zu lassen."
 
-#: gui/wxOptionsDlg.cpp:1083
+#: gui/wxOptionsDlg.cpp:1082
 msgid "&Pre-fetch this many msgs"
 msgstr "So viele Nachrichten im &voraus lesen"
 
-#: gui/wxOptionsDlg.cpp:1085
+#: gui/wxOptionsDlg.cpp:1084
 msgid ""
 "If the RSH timeout below is greater than 0, Mahogany will\n"
 "first try to connect to IMAP servers using rsh instead of\n"
@@ -8198,11 +8207,11 @@ msgstr ""
 "den IMAP-Server per RSH zu erreichen, anstatt Passwörter zu senden.\n"
 "Wenn der Server kein rsh verwendet, führt dies zu unnötigen Verzögerungen."
 
-#: gui/wxOptionsDlg.cpp:1090
+#: gui/wxOptionsDlg.cpp:1089
 msgid "&Rsh timeout"
 msgstr "Zeitbegrenzung für &rsh Aufrufe"
 
-#: gui/wxOptionsDlg.cpp:1093
+#: gui/wxOptionsDlg.cpp:1092
 msgid ""
 "Please note that the details of new mail handling must be\n"
 "set separately for each folder, you should select a folder\n"
@@ -8214,7 +8223,7 @@ msgstr ""
 "Wählen Sie dazu einen Ordner und benutzen Sie dann \"Eigenschaften\" aus dem\n"
 "\"Ordner\"-Menü."
 
-#: gui/wxOptionsDlg.cpp:1099
+#: gui/wxOptionsDlg.cpp:1098
 msgid ""
 "Mahogany processes the new mail in several steps:\n"
 "first it applies the filters, if any, to it. Then,\n"
@@ -8243,27 +8252,27 @@ msgstr ""
 "wählen, so dass neue Nachrichten automatisch erkannt werden.\n"
 "Sonst müssen Sie den Ordner öffnen um dies festzustellen.\n"
 
-#: gui/wxOptionsDlg.cpp:1115
+#: gui/wxOptionsDlg.cpp:1114
 msgid "Configure &filters..."
 msgstr "&Filter einrichten..."
 
-#: gui/wxOptionsDlg.cpp:1117
+#: gui/wxOptionsDlg.cpp:1116
 msgid "Treat as junk mail folder"
 msgstr "Als Ordner für Abfall-Nachrichten behandeln"
 
-#: gui/wxOptionsDlg.cpp:1118
+#: gui/wxOptionsDlg.cpp:1117
 msgid "&Collect new mail from this folder"
 msgstr "Neue Nachrichten aus diesem Ordner abholen"
 
-#: gui/wxOptionsDlg.cpp:1121
+#: gui/wxOptionsDlg.cpp:1120
 msgid "&To this folder"
 msgstr "In diesen Ordner"
 
-#: gui/wxOptionsDlg.cpp:1125
+#: gui/wxOptionsDlg.cpp:1124
 msgid "&Leave mail in this folder"
 msgstr "Nachrichten in diesem Ordner lassen"
 
-#: gui/wxOptionsDlg.cpp:1130
+#: gui/wxOptionsDlg.cpp:1129
 msgid ""
 "When new mail message appears in this folder Mahogany\n"
 "may execute an external command and/or show a message about it."
@@ -8271,15 +8280,15 @@ msgstr ""
 "Wenn neue Nachrichten in diesem Ordner eintreffen, kann Mahogany\n"
 "ein externes Programm aufrufen und/oder eine Nachricht anzeigen."
 
-#: gui/wxOptionsDlg.cpp:1133
+#: gui/wxOptionsDlg.cpp:1132
 msgid "E&xecute new mail command"
 msgstr "&Programm für neue Nachrichten ausführen"
 
-#: gui/wxOptionsDlg.cpp:1134
+#: gui/wxOptionsDlg.cpp:1133
 msgid "New mail &command"
 msgstr "&Programmaufruf für neue Nachrichten"
 
-#: gui/wxOptionsDlg.cpp:1137
+#: gui/wxOptionsDlg.cpp:1136
 msgid ""
 "In addition to running an external program, Mahogany may\n"
 "also play a sound when a new message arrives. Leave the\n"
@@ -8288,23 +8297,23 @@ msgstr ""
 "Wenn neue Nachrichten eintreffen, kann Mahogany einen Klang abspielen. \n"
 "Lassen Sie den Namen der Klang-Datei leer um den Standard-Klang zu verwenden."
 
-#: gui/wxOptionsDlg.cpp:1141
+#: gui/wxOptionsDlg.cpp:1140
 msgid "Play a &sound on new mail"
 msgstr "Klang beim Eintreffen neuer Nachrichten abspielen"
 
-#: gui/wxOptionsDlg.cpp:1142
+#: gui/wxOptionsDlg.cpp:1141
 msgid "Sound &file"
 msgstr "Klang-Datei"
 
-#: gui/wxOptionsDlg.cpp:1144
+#: gui/wxOptionsDlg.cpp:1143
 msgid "&Program to play the sound"
 msgstr "Programm um den Klang abzuspielen"
 
-#: gui/wxOptionsDlg.cpp:1147
+#: gui/wxOptionsDlg.cpp:1146
 msgid "Show new mail &notification"
 msgstr "Hinweis auf neue Nachrichten anzeigen"
 
-#: gui/wxOptionsDlg.cpp:1148
+#: gui/wxOptionsDlg.cpp:1147
 msgid ""
 "If there are not too many new messages, Mahogany will\n"
 "show a detailed notification message with the subjects\n"
@@ -8319,11 +8328,11 @@ msgstr ""
 "können die Schwelle auf -1 setzen, um immer die ausführliche Meldung oder\n"
 "0 um immer nur die Anzahl zu erhalten."
 
-#: gui/wxOptionsDlg.cpp:1156
+#: gui/wxOptionsDlg.cpp:1155
 msgid "&Threshold for detailed notification"
 msgstr "Schwelle für die ausführliche Meldung"
 
-#: gui/wxOptionsDlg.cpp:1160
+#: gui/wxOptionsDlg.cpp:1159
 msgid ""
 "Normally only unread messages are considered as \"new\" mail.\n"
 "You can uncheck this checkbox to apply new mail processing\n"
@@ -8333,11 +8342,11 @@ msgstr ""
 "Sie können diese Option löschen, um die Bearbeitung für neue Nachrichten\n"
 "auf alle Nachrichten im Ordner anzuwenden, selbst auf bereits gelesene."
 
-#: gui/wxOptionsDlg.cpp:1163
+#: gui/wxOptionsDlg.cpp:1162
 msgid "New messages must be &unread"
 msgstr "Nachricht als ungelesen behandeln"
 
-#: gui/wxOptionsDlg.cpp:1165
+#: gui/wxOptionsDlg.cpp:1164
 msgid ""
 "The first setting below specifies how often should Mahogany\n"
 "update the currently opened folders while the second one\n"
@@ -8352,15 +8361,15 @@ msgstr ""
 "Sie können die ständig zu überwachenden Ordner in deren Eigenschaften-\n"
 "Dialog bestimmen."
 
-#: gui/wxOptionsDlg.cpp:1172
+#: gui/wxOptionsDlg.cpp:1171
 msgid "&Ping folder interval in seconds"
 msgstr "Prüfungs&intervall in Sekunden"
 
-#: gui/wxOptionsDlg.cpp:1174
+#: gui/wxOptionsDlg.cpp:1173
 msgid "Pol&ling interval in seconds"
 msgstr "Abfrageintervall in Sekunden"
 
-#: gui/wxOptionsDlg.cpp:1177
+#: gui/wxOptionsDlg.cpp:1176
 msgid ""
 "If you check the checkbox below, Mahogany will always monitor\n"
 "this folder in the background even when it is not opened.\n"
@@ -8375,19 +8384,19 @@ msgstr ""
 "\n"
 "Durch die Abfrage vieler Ordner wird das Programm langsamer."
 
-#: gui/wxOptionsDlg.cpp:1184
+#: gui/wxOptionsDlg.cpp:1183
 msgid "Permanently &monitor this folder"
 msgstr "Diesen Ordner ständig überwachen"
 
-#: gui/wxOptionsDlg.cpp:1185
+#: gui/wxOptionsDlg.cpp:1184
 msgid "Polling &interval in seconds"
 msgstr "Abfrageintervall (Sekunden)"
 
-#: gui/wxOptionsDlg.cpp:1187
+#: gui/wxOptionsDlg.cpp:1186
 msgid "Poll only if &opened"
 msgstr "Nur abfragen wenn geöffnet"
 
-#: gui/wxOptionsDlg.cpp:1189
+#: gui/wxOptionsDlg.cpp:1188
 msgid ""
 "Checking the checkbox below will result in checking the folder\n"
 "for the new mail immediately after starting up instead of\n"
@@ -8397,24 +8406,24 @@ msgstr ""
 "dem Start auf neue Nachrichten überprüft, statt auf das oben\n"
 "angegebene Intervall zu warten."
 
-#: gui/wxOptionsDlg.cpp:1194
+#: gui/wxOptionsDlg.cpp:1193
 msgid "Poll folder at s&tartup"
 msgstr "Ordner beim Start abfragen"
 
-#: gui/wxOptionsDlg.cpp:1198
+#: gui/wxOptionsDlg.cpp:1197
 msgid "Sa&ve sent messages"
 msgstr "Ausgehende Nachrichten &speichern"
 
-#: gui/wxOptionsDlg.cpp:1199
+#: gui/wxOptionsDlg.cpp:1198
 msgid "&Folder for sent messages"
 msgstr "Ordner für gesendete Nachrichten"
 
-#: gui/wxOptionsDlg.cpp:1201
-#: gui/wxOptionsDlg.cpp:1442
+#: gui/wxOptionsDlg.cpp:1200
+#: gui/wxOptionsDlg.cpp:1441
 msgid "&Wrap margin"
 msgstr "Rand für &Zeilenumbruch"
 
-#: gui/wxOptionsDlg.cpp:1203
+#: gui/wxOptionsDlg.cpp:1202
 msgid ""
 "There are several different reply commands in Mahogany:\n"
 "reply to sender only replies to the person who sent the\n"
@@ -8432,63 +8441,63 @@ msgstr ""
 "  \"Adressen\" eintragen)\n"
 "Welche Art der Antwort wollen Sie normalerweise ?"
 
-#: gui/wxOptionsDlg.cpp:1212
+#: gui/wxOptionsDlg.cpp:1211
 msgid "Default &reply kind:sender:all:list:newsgroup"
 msgstr "Übliche Art der Antwort: Absender:Alle:Liste:Newsgroup"
 
-#: gui/wxOptionsDlg.cpp:1215
+#: gui/wxOptionsDlg.cpp:1214
 msgid "&Reply string in subject"
 msgstr "&Antworttext im Betreff"
 
-#: gui/wxOptionsDlg.cpp:1216
+#: gui/wxOptionsDlg.cpp:1215
 msgid "&Forward string in subject"
 msgstr "Vorspann im Betreff für weitergeleitete Nachrichten"
 
-#: gui/wxOptionsDlg.cpp:1217
+#: gui/wxOptionsDlg.cpp:1216
 msgid "Co&llapse reply markers:no:collapse:collapse & count"
 msgstr "Antwort&marker sammeln:nein:sammeln:sammeln & zählen"
 
-#: gui/wxOptionsDlg.cpp:1219
+#: gui/wxOptionsDlg.cpp:1218
 msgid "Quote &original message in reply"
 msgstr "Originalnachricht in Antwort zitieren"
 
-#: gui/wxOptionsDlg.cpp:1220
+#: gui/wxOptionsDlg.cpp:1219
 msgid "Quote &selected part only"
 msgstr "Nur den ausgewählten Text zitieren"
 
-#: gui/wxOptionsDlg.cpp:1221
+#: gui/wxOptionsDlg.cpp:1220
 msgid "Reply prefi&x"
 msgstr "Vorspann im Betreff für Antworten"
 
-#: gui/wxOptionsDlg.cpp:1222
+#: gui/wxOptionsDlg.cpp:1221
 msgid "Use &sender attribution"
 msgstr "Initialen vor Zitat angeben"
 
-#: gui/wxOptionsDlg.cpp:1223
+#: gui/wxOptionsDlg.cpp:1222
 msgid "Prepend &sender initials"
 msgstr "Initialen des Absenders voranstellen"
 
-#: gui/wxOptionsDlg.cpp:1224
+#: gui/wxOptionsDlg.cpp:1223
 msgid "&Quote empty lines too"
 msgstr "Auch leere Zeilen &zitieren"
 
-#: gui/wxOptionsDlg.cpp:1226
+#: gui/wxOptionsDlg.cpp:1225
 msgid "&Use signature"
 msgstr "Signaturdatei &verwenden"
 
-#: gui/wxOptionsDlg.cpp:1227
+#: gui/wxOptionsDlg.cpp:1226
 msgid "&Signature file"
 msgstr "&Signaturdatei"
 
-#: gui/wxOptionsDlg.cpp:1228
+#: gui/wxOptionsDlg.cpp:1227
 msgid "Use signature se&parator"
 msgstr "Trenner für Signatur verwenden"
 
-#: gui/wxOptionsDlg.cpp:1230
+#: gui/wxOptionsDlg.cpp:1229
 msgid "Configure &XFace..."
 msgstr "&XFace einstellen..."
 
-#: gui/wxOptionsDlg.cpp:1233
+#: gui/wxOptionsDlg.cpp:1232
 msgid ""
 "\n"
 "The following settings control the appearance\n"
@@ -8497,40 +8506,40 @@ msgstr ""
 "\n"
 "Die folgenden Einstellungen entscheiden über das Aussehen des Editor-Fensters:"
 
-#: gui/wxOptionsDlg.cpp:1237
-#: gui/wxOptionsDlg.cpp:1390
-#: gui/wxOptionsDlg.cpp:1494
+#: gui/wxOptionsDlg.cpp:1236
+#: gui/wxOptionsDlg.cpp:1389
+#: gui/wxOptionsDlg.cpp:1493
 msgid "&Font to use"
 msgstr "Zu benutzende Schrift"
 
-#: gui/wxOptionsDlg.cpp:1239
-#: gui/wxOptionsDlg.cpp:1496
+#: gui/wxOptionsDlg.cpp:1238
+#: gui/wxOptionsDlg.cpp:1495
 msgid "Font famil&y:default:decorative:roman:script:swiss:modern:teletype"
 msgstr "&Schrift-Familie:Standard:Dekorativ:Roman:Skript:Schweitzer:Schreibmaschine"
 
-#: gui/wxOptionsDlg.cpp:1242
-#: gui/wxOptionsDlg.cpp:1395
-#: gui/wxOptionsDlg.cpp:1499
+#: gui/wxOptionsDlg.cpp:1241
+#: gui/wxOptionsDlg.cpp:1394
+#: gui/wxOptionsDlg.cpp:1498
 msgid "Font si&ze"
 msgstr "Schrift&größe"
 
-#: gui/wxOptionsDlg.cpp:1245
-#: gui/wxOptionsDlg.cpp:1397
-#: gui/wxOptionsDlg.cpp:1501
+#: gui/wxOptionsDlg.cpp:1244
+#: gui/wxOptionsDlg.cpp:1396
+#: gui/wxOptionsDlg.cpp:1500
 msgid "Foreground c&olour"
 msgstr "Schrift&farbe"
 
-#: gui/wxOptionsDlg.cpp:1246
-#: gui/wxOptionsDlg.cpp:1398
+#: gui/wxOptionsDlg.cpp:1245
+#: gui/wxOptionsDlg.cpp:1397
 msgid "Back&ground colour"
 msgstr "&Hintergrund-Farbe"
 
-#: gui/wxOptionsDlg.cpp:1247
+#: gui/wxOptionsDlg.cpp:1246
 msgid "Use these settings for &headers too"
 msgstr "Einstellungen auch für Kopfzeilen verwenden"
 
 # geht das kürzer ?
-#: gui/wxOptionsDlg.cpp:1250
+#: gui/wxOptionsDlg.cpp:1249
 msgid ""
 "\n"
 "The settings below allow you to have a last look at the\n"
@@ -8543,27 +8552,27 @@ msgstr ""
 "Sie können damit auch Ihre Meinung ändern, ob Sie sie überhaupt senden\n"
 "wollen, selbst nachdem Sie den \"Senden\"-Knopf gedrückt haben."
 
-#: gui/wxOptionsDlg.cpp:1256
+#: gui/wxOptionsDlg.cpp:1255
 msgid "P&review message before sending"
 msgstr "Vorschau der Nachricht vor dem Senden"
 
-#: gui/wxOptionsDlg.cpp:1258
+#: gui/wxOptionsDlg.cpp:1257
 msgid "&Confirm sending mail"
 msgstr "Senden der Nachrichten bestätigen"
 
-#: gui/wxOptionsDlg.cpp:1263
+#: gui/wxOptionsDlg.cpp:1262
 msgid "Show \"&From\" field"
 msgstr "\"Von\"-Feld anzeigen"
 
-#: gui/wxOptionsDlg.cpp:1265
+#: gui/wxOptionsDlg.cpp:1264
 msgid "Configure &headers..."
 msgstr "Kopfzeilen einstellen..."
 
-#: gui/wxOptionsDlg.cpp:1266
+#: gui/wxOptionsDlg.cpp:1265
 msgid "Configure &templates..."
 msgstr "&Vorlagen einrichten..."
 
-#: gui/wxOptionsDlg.cpp:1269
+#: gui/wxOptionsDlg.cpp:1268
 msgid ""
 "You may choose to not open any folders at all on startup,\n"
 "reopen all folders which were open when the program was closed\n"
@@ -8574,23 +8583,23 @@ msgstr ""
 "- alle Ordner zu öffnen, die offen waren, als das Programm das letzte Mal beendet wurde\n"
 "- die zu öffnenden Ordner ausdrücklich angeben:"
 
-#: gui/wxOptionsDlg.cpp:1273
+#: gui/wxOptionsDlg.cpp:1272
 msgid "Don't open any folders at startup"
 msgstr "Keinen Ordner beim Start öffnen"
 
-#: gui/wxOptionsDlg.cpp:1274
+#: gui/wxOptionsDlg.cpp:1273
 msgid "Reopen last open folders"
 msgstr "Zuletzt offene Ordner öffnen"
 
-#: gui/wxOptionsDlg.cpp:1276
+#: gui/wxOptionsDlg.cpp:1275
 msgid "Folders to open on &startup"
 msgstr "Ordner die beim Programm&start geöffnet werden:"
 
-#: gui/wxOptionsDlg.cpp:1280
+#: gui/wxOptionsDlg.cpp:1279
 msgid "Folder opened in &main frame"
 msgstr "Geöffneter Ordner im Haupt&fenster"
 
-#: gui/wxOptionsDlg.cpp:1284
+#: gui/wxOptionsDlg.cpp:1283
 msgid ""
 "A progress dialog will be shown while retrieving more\n"
 "than specified number of messages. Set it to 0 to never\n"
@@ -8600,15 +8609,15 @@ msgstr ""
 "Zahl an Nachrichten geladen wird. Setzen Sie den Wert auf 0, um nie eine\n"
 "Fortschrittsanzeige zu erhalten."
 
-#: gui/wxOptionsDlg.cpp:1287
+#: gui/wxOptionsDlg.cpp:1286
 msgid "&Threshold for displaying progress dialog"
 msgstr "Anzahl um Fortschrittsanzeige zu verwenden"
 
-#: gui/wxOptionsDlg.cpp:1288
+#: gui/wxOptionsDlg.cpp:1287
 msgid "Show bus&y dialog while sorting/threading"
 msgstr "Aktivitätsanzeige während Sortieren/Verknüpfen"
 
-#: gui/wxOptionsDlg.cpp:1289
+#: gui/wxOptionsDlg.cpp:1288
 msgid ""
 "\n"
 "Mahogany may keep the folder open after closing it\n"
@@ -8630,15 +8639,15 @@ msgstr ""
 "Die erste Einstellung wird für POP3-Server ignoriert; \n"
 "die zweite gilt nur für IMAP und NNTP-Server."
 
-#: gui/wxOptionsDlg.cpp:1298
+#: gui/wxOptionsDlg.cpp:1297
 msgid "&Keep folder open for (seconds)"
 msgstr "Ordner offen halten für (Sekunden)"
 
-#: gui/wxOptionsDlg.cpp:1299
+#: gui/wxOptionsDlg.cpp:1298
 msgid "Keep &connection alive for (seconds)"
 msgstr "Verbindung erhalten für (Sekunden)"
 
-#: gui/wxOptionsDlg.cpp:1301
+#: gui/wxOptionsDlg.cpp:1300
 msgid ""
 "\n"
 "The outgoing messages may be sent out immediately\n"
@@ -8649,15 +8658,15 @@ msgstr ""
 "Die zu sendenden Nachrichten können sofort versendet werden oder nur im\n"
 "Ordner \"Ausgang\" abgelegt und später versendet werden. Wählen Sie hier:"
 
-#: gui/wxOptionsDlg.cpp:1305
+#: gui/wxOptionsDlg.cpp:1304
 msgid "Send outgoing messages later"
 msgstr "Ausgehende Nachrichten später senden"
 
-#: gui/wxOptionsDlg.cpp:1308
+#: gui/wxOptionsDlg.cpp:1307
 msgid "Folder for &outgoing messages"
 msgstr "Ordner für zu sendende Nachrichten"
 
-#: gui/wxOptionsDlg.cpp:1312
+#: gui/wxOptionsDlg.cpp:1311
 msgid ""
 "\n"
 "When you delete a message in the folder it can be\n"
@@ -8673,31 +8682,31 @@ msgstr ""
 "\"Verwerfen\" löschen) oder sie wird in einen anderen Ordner verschoben,\n"
 "der üblicherweise \"Papierkorb\" heißt. Welche Art wollen Sie verwenden ?"
 
-#: gui/wxOptionsDlg.cpp:1319
+#: gui/wxOptionsDlg.cpp:1318
 msgid "Use &Trash folder"
 msgstr "&Papierkorb verwenden"
 
-#: gui/wxOptionsDlg.cpp:1320
+#: gui/wxOptionsDlg.cpp:1319
 msgid "&Trash folder name"
 msgstr "Name des &Papierkorbs"
 
-#: gui/wxOptionsDlg.cpp:1321
+#: gui/wxOptionsDlg.cpp:1320
 msgid "&Drafts folder name"
 msgstr "Name des Ordners für Entwürfe"
 
-#: gui/wxOptionsDlg.cpp:1322
+#: gui/wxOptionsDlg.cpp:1321
 msgid "Delete drafts &automatically"
 msgstr "Entwürfe automatisch löschen"
 
-#: gui/wxOptionsDlg.cpp:1323
+#: gui/wxOptionsDlg.cpp:1322
 msgid "Default format for mailbox files:Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)"
 msgstr "Standardformat für Mailbox-Dateien:Unix mbx Mailbox:Unix Mailbox: MMDF (SCO Unix):Tenex (Unix MM-Format)"
 
-#: gui/wxOptionsDlg.cpp:1326
+#: gui/wxOptionsDlg.cpp:1325
 msgid "Create \"folder internal data\" message"
 msgstr "Nachricht mit den \"folder internal data\" erzeugen."
 
-#: gui/wxOptionsDlg.cpp:1327
+#: gui/wxOptionsDlg.cpp:1326
 msgid ""
 "You can specify the format for the strings shown in the\n"
 "status and title bars. Use %f for the folder name and\n"
@@ -8708,31 +8717,31 @@ msgstr ""
 "Kopfleiste angeben. Verwenden Sie %f für den Mailboxnamen und %t, %r und\n"
 "%n für die Anzahl aller, der kürzlich empfangenen und der neuen Nachrichten."
 
-#: gui/wxOptionsDlg.cpp:1331
+#: gui/wxOptionsDlg.cpp:1330
 msgid "Status &bar format"
 msgstr "Format der Statuszeile"
 
-#: gui/wxOptionsDlg.cpp:1332
+#: gui/wxOptionsDlg.cpp:1331
 msgid "T&itle bar format"
 msgstr "&Kopfleistenformat"
 
-#: gui/wxOptionsDlg.cpp:1336
+#: gui/wxOptionsDlg.cpp:1335
 msgid "Python is the built-in scripting language which can be\n"
 msgstr "Python ist die eingebaute Skriptsprache, mit welcher\n"
 
-#: gui/wxOptionsDlg.cpp:1337
+#: gui/wxOptionsDlg.cpp:1336
 msgid "used to extend Mahogany's functionality. It is not essential\n"
 msgstr "Mahogany erweitert werden kann. Sie ist normalerweise nicht\n"
 
-#: gui/wxOptionsDlg.cpp:1338
+#: gui/wxOptionsDlg.cpp:1337
 msgid "for the program's normal operation."
 msgstr "benötigt."
 
-#: gui/wxOptionsDlg.cpp:1341
+#: gui/wxOptionsDlg.cpp:1340
 msgid "&Enable Python"
 msgstr "&Python aktivieren"
 
-#: gui/wxOptionsDlg.cpp:1344
+#: gui/wxOptionsDlg.cpp:1343
 msgid ""
 "If Mahogany can't find Python shared library in one of\n"
 "the standard locations, you may enter full path to it here\n"
@@ -8740,21 +8749,23 @@ msgstr ""
 "Wenn Mahogany die dynamischen Bibliotheken für Python nicht an den\n"
 "üblichen Stellen finden kann, können Sie den vollen Pfad hier eingeben\n"
 
-#: gui/wxOptionsDlg.cpp:1348
+#: gui/wxOptionsDlg.cpp:1347
 msgid "Python &DLL"
 msgstr "Python DLL"
 
-#: gui/wxOptionsDlg.cpp:1351
+#: gui/wxOptionsDlg.cpp:1350
 msgid ""
-"The option below determines where we should look for\n"
+"The option below determines where Mahogany should look for\n"
 "Python modules (in addition to standard places)"
-msgstr "Die Option unten entscheidet, wo Mahogany nach Python-Modulen suchen soll (Neben den Standard-Stellen)"
+msgstr ""
+"Die Option unten entscheidet, wo Mahogany nach Python-Modulen\n"
+"suchen soll (Neben den Standard-Stellen)"
 
-#: gui/wxOptionsDlg.cpp:1354
+#: gui/wxOptionsDlg.cpp:1353
 msgid "Python &path"
 msgstr "Pfad zu Python"
 
-#: gui/wxOptionsDlg.cpp:1356
+#: gui/wxOptionsDlg.cpp:1355
 msgid ""
 "Mahogany may load a Python module containing functions\n"
 "you use on startup, you will be able to later refer to these\n"
@@ -8766,11 +8777,11 @@ msgstr ""
 "\"modul.\"-Teil verwenden. Wenn dieses Modul eine Funktion\n"
 "Init() enthält, wird diese aufgerufen."
 
-#: gui/wxOptionsDlg.cpp:1362
+#: gui/wxOptionsDlg.cpp:1361
 msgid "Module to load on &startup"
 msgstr "Modul, das beim Programmstart geladen werden soll:"
 
-#: gui/wxOptionsDlg.cpp:1365
+#: gui/wxOptionsDlg.cpp:1364
 msgid ""
 "You may define below the Python function which will be\n"
 "called when the corresponding event happens. You may\n"
@@ -8778,27 +8789,27 @@ msgid ""
 "notation."
 msgstr "Sie können unten die Python-Funktion angeben, die aufgerufenwerden wird, wenn das entsprechende Ereignis eintritt. Sie können nur den Namen der Funktion angeben, oder die Schreibweise \"Modul\".\"Funktion\" verwenden."
 
-#: gui/wxOptionsDlg.cpp:1369
+#: gui/wxOptionsDlg.cpp:1368
 msgid "Folder &open callback"
 msgstr "Aufgerufene Routine beim Öffnen eines Ordners"
 
-#: gui/wxOptionsDlg.cpp:1370
+#: gui/wxOptionsDlg.cpp:1369
 msgid "Folder &update callback"
 msgstr "Routine beim Aktualisieren eines Ordners"
 
-#: gui/wxOptionsDlg.cpp:1371
+#: gui/wxOptionsDlg.cpp:1370
 msgid "Folder e&xpunge callback"
 msgstr "Routine beim Löschen von Nachrichten"
 
-#: gui/wxOptionsDlg.cpp:1372
+#: gui/wxOptionsDlg.cpp:1371
 msgid "Flag &set callback"
 msgstr "Routine beim Setzen einer Markierung"
 
-#: gui/wxOptionsDlg.cpp:1373
+#: gui/wxOptionsDlg.cpp:1372
 msgid "Flag &clear callback"
 msgstr "Routine beim Löschen einer Markierung"
 
-#: gui/wxOptionsDlg.cpp:1378
+#: gui/wxOptionsDlg.cpp:1377
 msgid ""
 "Mahogany has several standard message viewers and more\n"
 "can be plugged in. The default one is the safest choice\n"
@@ -8808,40 +8819,40 @@ msgstr ""
 "können hinzugefügt werden. Der Standard ist die sicherste Wahl,\n"
 "die Anderen können Sie als alternative Ansicht verwenden."
 
-#: gui/wxOptionsDlg.cpp:1383
+#: gui/wxOptionsDlg.cpp:1382
 msgid "&Message viewer"
 msgstr "Nachrichten-Anzeige"
 
-#: gui/wxOptionsDlg.cpp:1386
+#: gui/wxOptionsDlg.cpp:1385
 msgid "Show viewer &bar"
 msgstr "Auswahl für das Anzeigeformat einblenden"
 
 # Übersetzen ???
-#: gui/wxOptionsDlg.cpp:1392
+#: gui/wxOptionsDlg.cpp:1391
 msgid "&Font family:default:decorative:roman:script:swiss:modern:teletype"
 msgstr "&Schrift-Familie:Standard:Dekorativ:Roman:Skript:Schweizer:Modern:Schreibmaschine"
 
-#: gui/wxOptionsDlg.cpp:1399
+#: gui/wxOptionsDlg.cpp:1398
 msgid "Colour for header &names"
 msgstr "Farbe für &Kopfzeilennamen"
 
-#: gui/wxOptionsDlg.cpp:1400
+#: gui/wxOptionsDlg.cpp:1399
 msgid "Colour for header &values"
 msgstr "Farbe für Kopfzeilen&einträge"
 
-#: gui/wxOptionsDlg.cpp:1401
+#: gui/wxOptionsDlg.cpp:1400
 msgid "&Highlight the URLs"
 msgstr "URLs hervorheben"
 
-#: gui/wxOptionsDlg.cpp:1402
+#: gui/wxOptionsDlg.cpp:1401
 msgid "Colour for &URLs"
 msgstr "Farbe für &URLs"
 
-#: gui/wxOptionsDlg.cpp:1403
+#: gui/wxOptionsDlg.cpp:1402
 msgid "Colourize &quoted text"
 msgstr "&Zitierten Text farbig markieren"
 
-#: gui/wxOptionsDlg.cpp:1404
+#: gui/wxOptionsDlg.cpp:1403
 msgid ""
 "You may specify the colours for the first 3 levels of\n"
 "the quoted text individually. If quoting level is greater\n"
@@ -8854,31 +8865,31 @@ msgstr ""
 "Farbe für alle tieferen Ebenen verwenden oder wieder mit der ersten Farbe\n"
 "beginnen, wenn Sie die Einstellung unten auswählen."
 
-#: gui/wxOptionsDlg.cpp:1409
+#: gui/wxOptionsDlg.cpp:1408
 msgid "Colour for the &1st level"
 msgstr "Farbe für erste Zitatebene"
 
-#: gui/wxOptionsDlg.cpp:1410
+#: gui/wxOptionsDlg.cpp:1409
 msgid "Colour for the &2nd level"
 msgstr "Farbe für zweite Zitatebene"
 
-#: gui/wxOptionsDlg.cpp:1411
+#: gui/wxOptionsDlg.cpp:1410
 msgid "Colour for the &3rd level"
 msgstr "Farbe für dritte Zitatebene"
 
-#: gui/wxOptionsDlg.cpp:1412
+#: gui/wxOptionsDlg.cpp:1411
 msgid "Loop over these colours"
 msgstr "Diese Farben reihum verwenden"
 
-#: gui/wxOptionsDlg.cpp:1413
+#: gui/wxOptionsDlg.cpp:1412
 msgid "Highlight the si&gnature"
 msgstr "Signatur hervorheben"
 
-#: gui/wxOptionsDlg.cpp:1414
+#: gui/wxOptionsDlg.cpp:1413
 msgid "Colour for s&ignatures"
 msgstr "Farbe für Signatur"
 
-#: gui/wxOptionsDlg.cpp:1415
+#: gui/wxOptionsDlg.cpp:1414
 msgid ""
 "A progress dialog can be shown during the message download\n"
 "if it is bigger than the given size or takes longer than the\n"
@@ -8889,15 +8900,15 @@ msgstr ""
 "angegebene Größe oder es länger als die angegebene Zeit dauert.\n"
 "(mit -1 können Sie diese Fortschrittsanzeige vollständig abschalten)"
 
-#: gui/wxOptionsDlg.cpp:1418
+#: gui/wxOptionsDlg.cpp:1417
 msgid "Dialog minimal size t&hreshold (kb)"
 msgstr "Schwelle zum Anzeigen des Dialogs (KByte)"
 
-#: gui/wxOptionsDlg.cpp:1419
+#: gui/wxOptionsDlg.cpp:1418
 msgid "Progress dialog &delay (seconds)"
 msgstr "Verzögerung für die Fortschrittsanzeige (Sek.)"
 
-#: gui/wxOptionsDlg.cpp:1420
+#: gui/wxOptionsDlg.cpp:1419
 msgid ""
 "The following setting allows to limit the amount of data\n"
 "retrieved from remote server: if the message size\n"
@@ -8909,11 +8920,11 @@ msgstr ""
 "hier angegebene Wert, werden Sie vor Übertragen der Daten gefragt.\n"
 "('0' um die Abfrage zu unterdrücken)"
 
-#: gui/wxOptionsDlg.cpp:1426
+#: gui/wxOptionsDlg.cpp:1425
 msgid "Ask if size of &message (in Kb) >"
 msgstr "Fragen, wenn die Größe (in KByte) der Nachricht >"
 
-#: gui/wxOptionsDlg.cpp:1427
+#: gui/wxOptionsDlg.cpp:1426
 msgid ""
 "Some of the Mahogany text viewers may show the images\n"
 "included with the message inline, i.e. directly in the\n"
@@ -8938,31 +8949,31 @@ msgstr ""
 "(Nur in der HTML-Ansicht).\n"
 "Dies stellt allerdings ein mögliches Sicherheitsrisiko dar !"
 
-#: gui/wxOptionsDlg.cpp:1437
+#: gui/wxOptionsDlg.cpp:1436
 msgid "Show images &inline"
 msgstr "Bilder in der Nachricht eingebettet anzeigen."
 
-#: gui/wxOptionsDlg.cpp:1438
+#: gui/wxOptionsDlg.cpp:1437
 msgid "But only if size is less than (kb)"
 msgstr "Aber nur, wenn die Größe (in KByte) kleiner ist als"
 
-#: gui/wxOptionsDlg.cpp:1439
+#: gui/wxOptionsDlg.cpp:1438
 msgid "&Enable showing external images"
 msgstr "Externe Darstellung der Bilder einschalten"
 
-#: gui/wxOptionsDlg.cpp:1440
+#: gui/wxOptionsDlg.cpp:1439
 msgid "Display &text attachments inline"
 msgstr "Text-Anhänge eingebettet anzeigen."
 
-#: gui/wxOptionsDlg.cpp:1441
+#: gui/wxOptionsDlg.cpp:1440
 msgid "Display &mail messages as text"
 msgstr "&Nachrichten als Text anzeigen"
 
-#: gui/wxOptionsDlg.cpp:1443
+#: gui/wxOptionsDlg.cpp:1442
 msgid "Wra&p lines automatically"
 msgstr "Zeilen au&tomatisch umbrechen"
 
-#: gui/wxOptionsDlg.cpp:1445
+#: gui/wxOptionsDlg.cpp:1444
 msgid ""
 "Mahogany has built-in support for the faxes sent via eFax\n"
 "or a similar service, use the options below to configure it."
@@ -8971,33 +8982,34 @@ msgstr ""
 "oder einem ähnlichen Anbieter.\n"
 "Benutzen Sie die Einstellung unten um dies einzurichten."
 
-#: gui/wxOptionsDlg.cpp:1447
+#: gui/wxOptionsDlg.cpp:1446
 msgid "Support special &fax mailers"
 msgstr "&Fax-Versender unterstützen"
 
-#: gui/wxOptionsDlg.cpp:1448
+#: gui/wxOptionsDlg.cpp:1447
 msgid "&Domains sending faxes"
 msgstr "&Domains die Faxe senden"
 
-#: gui/wxOptionsDlg.cpp:1449
+#: gui/wxOptionsDlg.cpp:1448
 msgid "Conversion program for fa&xes"
 msgstr "Konvertierungs-Programm für FAXe"
 
 # untrans (reported 16.2.03)
 # List of header-names shown when this is clicked doesn't get translated
-#: gui/wxOptionsDlg.cpp:1451
+# ok, 3.10.04
+#: gui/wxOptionsDlg.cpp:1450
 msgid "Configure &headers to show..."
 msgstr "Angezeigte Spalten..."
 
-#: gui/wxOptionsDlg.cpp:1452
+#: gui/wxOptionsDlg.cpp:1451
 msgid "Configure &format for displaying dates"
 msgstr "Datums&format einstellen"
 
-#: gui/wxOptionsDlg.cpp:1453
+#: gui/wxOptionsDlg.cpp:1452
 msgid "&Title of message view frame"
 msgstr "Titel der Nachrichten-Anzeige"
 
-#: gui/wxOptionsDlg.cpp:1456
+#: gui/wxOptionsDlg.cpp:1455
 msgid ""
 "What happens when the folder is opened? Mahogany may either return\n"
 "to the message which had been previously selected or go to the specified one."
@@ -9005,15 +9017,15 @@ msgstr ""
 "Was soll geschehen, wenn der Ordner geöffnet wird ? Mahogany kann ent-\n"
 "weder zur zuvor ausgewählten Nachricht springen oder zur angegebenen."
 
-#: gui/wxOptionsDlg.cpp:1461
+#: gui/wxOptionsDlg.cpp:1460
 msgid "Return to the &last selected"
 msgstr "Zur letzten ausgewählten Nachricht zurückkehren"
 
-#: gui/wxOptionsDlg.cpp:1462
+#: gui/wxOptionsDlg.cpp:1461
 msgid "&Go to this message:First unread:First:Last"
 msgstr "Gehe zu dieser Nachricht: Erste ungelesene:Erste:Letzte"
 
-#: gui/wxOptionsDlg.cpp:1465
+#: gui/wxOptionsDlg.cpp:1464
 msgid ""
 "\n"
 "When the message is selected Mahogany may preview it immediately\n"
@@ -9027,20 +9039,20 @@ msgstr ""
 "Wenn Sie auch den Ordner öffnen, mag es sinnvoll sein, die automatische\n"
 "Vorschau der ursprünglich gewählten Nachricht abzuschalten."
 
-#: gui/wxOptionsDlg.cpp:1473
+#: gui/wxOptionsDlg.cpp:1472
 msgid "Preview message when &selected"
 msgstr "Vorschau der Nachricht &wenn ausgewählt"
 
-#: gui/wxOptionsDlg.cpp:1474
+#: gui/wxOptionsDlg.cpp:1473
 msgid "&Select the initial message"
 msgstr "Ursprüngliche Nachrichten auswählen"
 
-#: gui/wxOptionsDlg.cpp:1475
+#: gui/wxOptionsDlg.cpp:1474
 msgid "Go to next message on command"
 msgstr "Auf Befehl zur nächsten Nachricht gehen"
 
 # ':' (im Dialog) erscheint besser als '...'
-#: gui/wxOptionsDlg.cpp:1477
+#: gui/wxOptionsDlg.cpp:1476
 msgid ""
 "\n"
 "What happens when you scroll down beyond the end of the current message?\n"
@@ -9050,15 +9062,15 @@ msgstr ""
 "Was soll passieren, wenn Sie über das Ende der Nachricht hinaus blättern ?\n"
 "Mahogany kann automatisch auswählen:"
 
-#: gui/wxOptionsDlg.cpp:1481
+#: gui/wxOptionsDlg.cpp:1480
 msgid "    next unread &message"
 msgstr "    Die nächste ungelesene Nachricht"
 
-#: gui/wxOptionsDlg.cpp:1482
+#: gui/wxOptionsDlg.cpp:1481
 msgid "    next unread &folder"
 msgstr "    Den nächsten Ordner mit ungelesenen Nachrichten"
 
-#: gui/wxOptionsDlg.cpp:1484
+#: gui/wxOptionsDlg.cpp:1483
 msgid ""
 "\n"
 "The settings below specify how should the two windows\n"
@@ -9068,15 +9080,15 @@ msgstr ""
 "Die Angaben unten, legen fest, wie die zwei Fenster (Ordner und\n"
 "Nachricht) innerhalb der Ordner-Anzeige angeordnet werden sollen"
 
-#: gui/wxOptionsDlg.cpp:1487
+#: gui/wxOptionsDlg.cpp:1486
 msgid "Split the view vertically"
 msgstr "Ansicht senkrecht aufteilen"
 
-#: gui/wxOptionsDlg.cpp:1488
+#: gui/wxOptionsDlg.cpp:1487
 msgid "Put folder view on top/to the left"
 msgstr "Anzeige der Ordner nach oben/nach links"
 
-#: gui/wxOptionsDlg.cpp:1490
+#: gui/wxOptionsDlg.cpp:1489
 msgid ""
 "\n"
 "The following settings control appearance of the messages list:"
@@ -9084,39 +9096,42 @@ msgstr ""
 "\n"
 "Einstellungen für die Liste von Nachrichten:"
 
-#: gui/wxOptionsDlg.cpp:1491
+#: gui/wxOptionsDlg.cpp:1490
 msgid "Show only sender's name, not &e-mail"
 msgstr "Nur Namen der Absender anzeigen, nicht die &E-Mail-Adresse"
 
-#: gui/wxOptionsDlg.cpp:1492
+#: gui/wxOptionsDlg.cpp:1491
 msgid "Show \"&To\" for messages from oneself"
 msgstr "Für selbst gesendete Nachrichten \"An:\" anzeigen"
 
-#: gui/wxOptionsDlg.cpp:1502
+# origbug (report 3.2.03)
+# backgrou_n_d
+# ok, 4.10.04
+#: gui/wxOptionsDlg.cpp:1501
 msgid "&Background colour"
 msgstr "&Hintergrund-Farbe"
 
-#: gui/wxOptionsDlg.cpp:1503
+#: gui/wxOptionsDlg.cpp:1502
 msgid "Colour for &new message"
 msgstr "Farbe für &neue Nachricht"
 
-#: gui/wxOptionsDlg.cpp:1504
+#: gui/wxOptionsDlg.cpp:1503
 msgid "Colour for &recent messages"
 msgstr "Farbe für &kürzliche empfangene Nachrichten"
 
-#: gui/wxOptionsDlg.cpp:1505
+#: gui/wxOptionsDlg.cpp:1504
 msgid "Colour for u&nread messages"
 msgstr "Farbe für u&ngelesene Nachrichten"
 
-#: gui/wxOptionsDlg.cpp:1506
+#: gui/wxOptionsDlg.cpp:1505
 msgid "Colour for &deleted messages"
 msgstr "Farbe für ge&löschte Nachrichten"
 
-#: gui/wxOptionsDlg.cpp:1507
+#: gui/wxOptionsDlg.cpp:1506
 msgid "Colour for &flagged messages"
 msgstr "Farbe für markierte Nachrichten"
 
-#: gui/wxOptionsDlg.cpp:1509
+#: gui/wxOptionsDlg.cpp:1508
 msgid ""
 "You may configure how (and if) Mahogany sorts and threads\n"
 "messages in the folder using the buttons below. To access\n"
@@ -9128,25 +9143,25 @@ msgstr ""
 "schneller zu erreichen, können Sie die Kopfzeile jeder Ordner-Ansicht\n"
 "rechts klicken."
 
-#: gui/wxOptionsDlg.cpp:1514
+#: gui/wxOptionsDlg.cpp:1513
 msgid "Threading &options..."
 msgstr "Einstellungen für das Verknüpfen..."
 
-#: gui/wxOptionsDlg.cpp:1515
+#: gui/wxOptionsDlg.cpp:1514
 msgid "&Sort messages by..."
 msgstr "Nachrichten &sortieren nach..."
 
-#: gui/wxOptionsDlg.cpp:1517
+#: gui/wxOptionsDlg.cpp:1516
 msgid "Configure &columns to show..."
 msgstr "Angezeigte Spalten..."
 
 # Geht das so ?
 # (Sync with Enum)
-#: gui/wxOptionsDlg.cpp:1519
+#: gui/wxOptionsDlg.cpp:1518
 msgid "Show size in &units of:automatic:autobytes:bytes:kbytes:mbytes"
 msgstr "Größe in Einheiten von:automatisch:autobytes:Bytes:KBytes:MBytes"
 
-#: gui/wxOptionsDlg.cpp:1521
+#: gui/wxOptionsDlg.cpp:1520
 msgid ""
 "Mahogany may delay previewing the selected message until\n"
 "the timeout specified below expires. This allows to\n"
@@ -9159,11 +9174,14 @@ msgstr ""
 "Nachrichten zu überfliegen, ohne auf die Vorschau zu warten. \n"
 "Setzen Sie den Wert auf 0, um dies abzuschalten."
 
-#: gui/wxOptionsDlg.cpp:1526
+# origbug (report 3.2.03)
+# mil_l_iseconds
+# ok, 4.10.04
+#: gui/wxOptionsDlg.cpp:1525
 msgid "Delay in milliseconds"
 msgstr "Verzögerung in Millisekunden"
 
-#: gui/wxOptionsDlg.cpp:1527
+#: gui/wxOptionsDlg.cpp:1526
 msgid ""
 "You can choose to show the information about\n"
 "the currently selected message in the status bar.\n"
@@ -9174,19 +9192,19 @@ msgstr ""
 "in der Statuszeile angezeigt werden. Sie können die gleichen Makros\n"
 "verwenden, wie bei den Vorlagen (d.h. $subject, $from, ...)"
 
-#: gui/wxOptionsDlg.cpp:1532
+#: gui/wxOptionsDlg.cpp:1531
 msgid "&Use status bar"
 msgstr "Statuszeile verwenden"
 
-#: gui/wxOptionsDlg.cpp:1533
+#: gui/wxOptionsDlg.cpp:1532
 msgid "&Status bar line format"
 msgstr "Format der Statuszeile"
 
-#: gui/wxOptionsDlg.cpp:1536
+#: gui/wxOptionsDlg.cpp:1535
 msgid "Put folder tree on the left side"
 msgstr "Ordner-Baum auf die linke Seite"
 
-#: gui/wxOptionsDlg.cpp:1537
+#: gui/wxOptionsDlg.cpp:1536
 msgid ""
 "The two options below are common for all folders,\n"
 "but note that the first of them may be overridden by setting\n"
@@ -9196,19 +9214,19 @@ msgstr ""
 "Sie, dass die erste überschrieben werden kann, indem Sie die normale Farbe\n"
 "für Ordner in der Seite \"Ordner Ansicht\" einstellen."
 
-#: gui/wxOptionsDlg.cpp:1540
+#: gui/wxOptionsDlg.cpp:1539
 msgid "Tree &foreground colour"
 msgstr "Vordergrund-Farbe des Baums"
 
-#: gui/wxOptionsDlg.cpp:1541
+#: gui/wxOptionsDlg.cpp:1540
 msgid "Tree &background colour"
 msgstr "Hintergrund-Farbe des Baums"
 
-#: gui/wxOptionsDlg.cpp:1542
+#: gui/wxOptionsDlg.cpp:1541
 msgid "Show &opened folder specially"
 msgstr "Geöffnete Ordner speziell anzeigen"
 
-#: gui/wxOptionsDlg.cpp:1543
+#: gui/wxOptionsDlg.cpp:1542
 msgid ""
 "Mahogany can show the number of messages in the folder\n"
 "directly in the folder tree. You may wish to disable\n"
@@ -9223,11 +9241,11 @@ msgstr ""
 "und/oder %u eingeben. Dabei wird %t durch die Gesamtzahl Nachrichten\n"
 "und %t durch die Zahl ungesehener Nachrichten ersetzt."
 
-#: gui/wxOptionsDlg.cpp:1550
+#: gui/wxOptionsDlg.cpp:1549
 msgid "Folder tree &format"
 msgstr "Format des Ordner-Baumes"
 
-#: gui/wxOptionsDlg.cpp:1551
+#: gui/wxOptionsDlg.cpp:1550
 msgid ""
 "By default, if the folder has new/recent/unread messages\n"
 "its parent is shown in the same state as well. Disable\n"
@@ -9239,11 +9257,11 @@ msgstr ""
 "Dies können Sie unten ausschalten, wenn Sie es nicht mögen. (Dies ist vor allem\n"
 "für Ordner wie \"Papierkorb\" oder \"Gesendete Nachrichten\" sinnvoll)."
 
-#: gui/wxOptionsDlg.cpp:1557
+#: gui/wxOptionsDlg.cpp:1556
 msgid "&Parent shows status"
 msgstr "Zustand für übergeordneten Ordner übernehmen"
 
-#: gui/wxOptionsDlg.cpp:1559
+#: gui/wxOptionsDlg.cpp:1558
 msgid ""
 "You may check the option below to skip this folder when\n"
 "navigating in the folder tree using Ctrl-Up/Down arrows\n"
@@ -9260,19 +9278,19 @@ msgstr ""
 "er ungelesenen Nachrichten enthält. Dies ist z.B. für den Ordner\n"
 "\"Papierkorb\" interessant."
 
-#: gui/wxOptionsDlg.cpp:1565
+#: gui/wxOptionsDlg.cpp:1564
 msgid "&Skip this folder"
 msgstr "Überspringe diesen Ordner"
 
-#: gui/wxOptionsDlg.cpp:1566
+#: gui/wxOptionsDlg.cpp:1565
 msgid "Open folders on single &click"
 msgstr "Ordner auf einfachen &Klick öffnen"
 
-#: gui/wxOptionsDlg.cpp:1567
+#: gui/wxOptionsDlg.cpp:1566
 msgid "Show &hidden folders in the folder tree"
 msgstr "Vers&teckte Ordner im Baum anzeigen"
 
-#: gui/wxOptionsDlg.cpp:1568
+#: gui/wxOptionsDlg.cpp:1567
 msgid ""
 "When you press Ctrl-Home in the tree Mahogany will go to\n"
 "the home folder (usually Inbox or NewMail) if any."
@@ -9280,15 +9298,15 @@ msgstr ""
 "Wenn Sie Strg-Pos1 im Baum drücken, so wird Mahogany zu\n"
 "Ihrem Heim-Ordner springen. (Üblicherweise Eingang)"
 
-#: gui/wxOptionsDlg.cpp:1570
+#: gui/wxOptionsDlg.cpp:1569
 msgid "&Home folder"
 msgstr "&Heim-Ordner"
 
-#: gui/wxOptionsDlg.cpp:1571
+#: gui/wxOptionsDlg.cpp:1570
 msgid "Is &home folder"
 msgstr "Ist der &Heim-Ordner"
 
-#: gui/wxOptionsDlg.cpp:1574
+#: gui/wxOptionsDlg.cpp:1573
 msgid ""
 "The addresses listed below are the ones which are\n"
 "recognized as being your own when showing the message\n"
@@ -9300,11 +9318,11 @@ msgstr ""
 "Beantworten von Nachrichten. (Diese Adressen werden aus der Liste der\n"
 "Empfänger der Antwort entfernt werden)"
 
-#: gui/wxOptionsDlg.cpp:1579
+#: gui/wxOptionsDlg.cpp:1578
 msgid "&Addresses to replace with \"To\""
 msgstr "Liste der eigenen &Adressen"
 
-#: gui/wxOptionsDlg.cpp:1580
+#: gui/wxOptionsDlg.cpp:1579
 msgid ""
 "Mahogany will usually extract the mailing list addresses\n"
 "from messages sent to a list automatically but if this\n"
@@ -9316,11 +9334,11 @@ msgstr ""
 "Wenn dies nicht funktioniert, können Sie die Adressen der Listen die Sie\n"
 "abonniert haben unten eintragen."
 
-#: gui/wxOptionsDlg.cpp:1585
+#: gui/wxOptionsDlg.cpp:1584
 msgid "&Mailing list addresses"
 msgstr "Adressen von &Mailing-Listen"
 
-#: gui/wxOptionsDlg.cpp:1586
+#: gui/wxOptionsDlg.cpp:1585
 msgid ""
 "Mahogany may automatically remember all e-mail addresses in the messages you\n"
 "receive in a special address book. This is called 'address\n"
@@ -9330,28 +9348,28 @@ msgstr ""
 "Nachrichten in einem speziellen Adressbuch sammeln.\n"
 "Dies können Sie hier einstellen:"
 
-#: gui/wxOptionsDlg.cpp:1590
+#: gui/wxOptionsDlg.cpp:1589
 msgid "&Autocollect addresses"
 msgstr "&Adressen sammeln"
 
-#: gui/wxOptionsDlg.cpp:1591
+#: gui/wxOptionsDlg.cpp:1590
 msgid "Address &book to use"
 msgstr "&Adressbuch für gesammelte Adressen"
 
 # "automatisch" passt nicht mehr in den vorhandenen Platz !
-#: gui/wxOptionsDlg.cpp:1592
+#: gui/wxOptionsDlg.cpp:1591
 msgid "Autocollect only &senders' addresses"
 msgstr "Nur Absender-Adressen sammeln"
 
-#: gui/wxOptionsDlg.cpp:1593
+#: gui/wxOptionsDlg.cpp:1592
 msgid "Ignore addresses without &names"
 msgstr "Adressen &ohne Namen ignorieren"
 
-#: gui/wxOptionsDlg.cpp:1594
+#: gui/wxOptionsDlg.cpp:1593
 msgid "&Whitelist"
 msgstr "Whitelist"
 
-#: gui/wxOptionsDlg.cpp:1596
+#: gui/wxOptionsDlg.cpp:1595
 msgid ""
 "The following settings configure the support of the Big Brother\n"
 "addressbook (BBDB) format. This is supported only for compatibility\n"
@@ -9363,63 +9381,63 @@ msgstr ""
 "mit anderer Software (Emacs) unterstützt. Die anderen Adressbücher werden\n"
 "von diesen Einstellungen nicht berührt."
 
-#: gui/wxOptionsDlg.cpp:1600
+#: gui/wxOptionsDlg.cpp:1599
 msgid "&Ignore entries without names"
 msgstr "Einträge ohne Namen &ignorieren"
 
-#: gui/wxOptionsDlg.cpp:1601
+#: gui/wxOptionsDlg.cpp:1600
 msgid "&Generate unique aliases"
 msgstr "Eindeutige &Namen erzeugen"
 
-#: gui/wxOptionsDlg.cpp:1602
+#: gui/wxOptionsDlg.cpp:1601
 msgid "&Name for nameless entries"
 msgstr "Name für &unbenannte Einträge"
 
-#: gui/wxOptionsDlg.cpp:1603
+#: gui/wxOptionsDlg.cpp:1602
 msgid "&Save on exit"
 msgstr "Bei Programmende &speichern"
 
-#: gui/wxOptionsDlg.cpp:1607
+#: gui/wxOptionsDlg.cpp:1606
 msgid "The following program will be used to open URLs embedded in messages:"
 msgstr "Das folgende Programm wird verwendet um URLs in Nachrichten zu öffnen:"
 
-#: gui/wxOptionsDlg.cpp:1608
+#: gui/wxOptionsDlg.cpp:1607
 msgid "Open &URLs with"
 msgstr "&URLs öffnen mit"
 
-#: gui/wxOptionsDlg.cpp:1611
+#: gui/wxOptionsDlg.cpp:1610
 msgid "URL &browser is Netscape"
 msgstr "URL Browser ist &Netscape"
 
-#: gui/wxOptionsDlg.cpp:1613
+#: gui/wxOptionsDlg.cpp:1612
 msgid "Open browser in new &window"
 msgstr "Browser in neuem Fenster öffnen"
 
-#: gui/wxOptionsDlg.cpp:1623
+#: gui/wxOptionsDlg.cpp:1622
 msgid "The following program will be used to view the online help system:"
 msgstr "Das folgende Programm wird verwendet um die Online-Hilfe anzuzeigen:"
 
-#: gui/wxOptionsDlg.cpp:1624
+#: gui/wxOptionsDlg.cpp:1623
 msgid "&Help viewer:internal:external"
 msgstr "Anzeige-Programm für Hilfe:intern:extern"
 
-#: gui/wxOptionsDlg.cpp:1627
+#: gui/wxOptionsDlg.cpp:1626
 msgid "&External viewer"
 msgstr "&Externes Anzeige-Programm"
 
-#: gui/wxOptionsDlg.cpp:1628
+#: gui/wxOptionsDlg.cpp:1627
 msgid "Help &viewer is Netscape"
 msgstr "Anzeige für Hilfetexte ist Netscape"
 
-#: gui/wxOptionsDlg.cpp:1632
+#: gui/wxOptionsDlg.cpp:1631
 msgid "&Image format converter"
 msgstr "&Grafikformat-Konverter"
 
-#: gui/wxOptionsDlg.cpp:1633
+#: gui/wxOptionsDlg.cpp:1632
 msgid "Conversion &graphics format:XPM:PNG:BMP:JPG:GIF:PCX:PNM"
 msgstr "Grafik&format für Konvertierungen:XPM:PNG:BMP:JPG:GIF:PCX:PNM"
 
-#: gui/wxOptionsDlg.cpp:1637
+#: gui/wxOptionsDlg.cpp:1636
 msgid ""
 "You may configure the external editor to be used when composing the messages\n"
 "and optionally choose to launch it automatically."
@@ -9427,17 +9445,17 @@ msgstr ""
 "Sie können einen externen Editor zum Schreiben von Nachrichten einrichten\n"
 "und ihn auch automatisch starten lassen."
 
-#: gui/wxOptionsDlg.cpp:1640
+#: gui/wxOptionsDlg.cpp:1639
 msgid "&External editor"
 msgstr "&Externer Editor"
 
-#: gui/wxOptionsDlg.cpp:1641
+#: gui/wxOptionsDlg.cpp:1640
 msgid "Always &use it"
 msgstr "Immer &verwenden"
 
 # untrans, 6.4.2003
 # ok, 27.7.03
-#: gui/wxOptionsDlg.cpp:1643
+#: gui/wxOptionsDlg.cpp:1642
 msgid ""
 "\n"
 "Mahogany can use SSL (Secure Sockets Layer) for secure,\n"
@@ -9449,17 +9467,17 @@ msgstr ""
 "Datenübertragung verwenden, falls Sie die libssl und libcrypto\n"
 "Bibliotheken (shared libraries, DLLs) auf Ihrem System installiert haben."
 
-#: gui/wxOptionsDlg.cpp:1648
+#: gui/wxOptionsDlg.cpp:1647
 msgid "Location of lib&ssl"
 msgstr "Verzeichnis der libssl"
 
-#: gui/wxOptionsDlg.cpp:1649
+#: gui/wxOptionsDlg.cpp:1648
 msgid "Location of libcr&ypto"
 msgstr "Verzeichnis der libcrypto"
 
 # untrans, 6.4.2003
 # ok, 27.7.03
-#: gui/wxOptionsDlg.cpp:1651
+#: gui/wxOptionsDlg.cpp:1650
 msgid ""
 "\n"
 "GNU Privacy Guard or a compatible program may be used\n"
@@ -9471,19 +9489,19 @@ msgstr ""
 "verwendet werden um kryptographische Signaturen von\n"
 "empfangenen Nachrichten zu prüfen und sie zu entschlüsseln."
 
-#: gui/wxOptionsDlg.cpp:1655
+#: gui/wxOptionsDlg.cpp:1654
 msgid "&GPG command"
 msgstr "&GPG-Befehl"
 
-#: gui/wxOptionsDlg.cpp:1656
+#: gui/wxOptionsDlg.cpp:1655
 msgid "GPG &key server"
 msgstr "&GPG-Schlüssel Server"
 
-#: gui/wxOptionsDlg.cpp:1657
+#: gui/wxOptionsDlg.cpp:1656
 msgid "Get GPG key &from server"
 msgstr "&GPG-Schlüssel vom Server holen"
 
-#: gui/wxOptionsDlg.cpp:1667
+#: gui/wxOptionsDlg.cpp:1666
 msgid ""
 "Mahogany may log everything into the log window, a file\n"
 "or both simultaneously. Additionally, you may enable mail\n"
@@ -9505,31 +9523,31 @@ msgstr ""
 "und fügen Sie das Protokoll bei.\n"
 "(Natürlich ist klar, dass Mahogany absolut fehlerfrei ist - nur zur Sicherheit :-)"
 
-#: gui/wxOptionsDlg.cpp:1675
+#: gui/wxOptionsDlg.cpp:1674
 msgid "Show &log window"
 msgstr "Protokoll-Fenster anzeigen"
 
-#: gui/wxOptionsDlg.cpp:1676
+#: gui/wxOptionsDlg.cpp:1675
 msgid "Log to &file"
 msgstr "In Datei protokollieren"
 
-#: gui/wxOptionsDlg.cpp:1677
+#: gui/wxOptionsDlg.cpp:1676
 msgid "Debug server and mailbox access"
 msgstr "Server- und Mailbox-Zugriffe verfolgen"
 
-#: gui/wxOptionsDlg.cpp:1678
+#: gui/wxOptionsDlg.cpp:1677
 msgid "Show &tips at startup"
 msgstr "&Tipps beim Start anzeigen"
 
-#: gui/wxOptionsDlg.cpp:1679
+#: gui/wxOptionsDlg.cpp:1678
 msgid "&Splash screen at startup"
 msgstr "Start&fenster anzeigen"
 
-#: gui/wxOptionsDlg.cpp:1680
+#: gui/wxOptionsDlg.cpp:1679
 msgid "Splash screen &delay"
 msgstr "Maximale Startfenster &Dauer"
 
-#: gui/wxOptionsDlg.cpp:1681
+#: gui/wxOptionsDlg.cpp:1680
 msgid ""
 "Mahogany may expand environment variables in the\n"
 "configuration entries which is useful but takes some\n"
@@ -9539,15 +9557,15 @@ msgstr ""
 "einträgen auswerten. Dies ist nützlich, kostet aber zusätzliche Zeit.\n"
 "Sie können dies hier abschalten, wenn Sie es nicht benötigen."
 
-#: gui/wxOptionsDlg.cpp:1685
+#: gui/wxOptionsDlg.cpp:1684
 msgid "E&xpand variables"
 msgstr "Variablen expandieren"
 
-#: gui/wxOptionsDlg.cpp:1686
+#: gui/wxOptionsDlg.cpp:1685
 msgid "Show toolbar buttons and notebook tabs &as:Images:Text:Both"
 msgstr "Knöpfe in der Werkzeugleiste anzeigen als: Bilder:Text:Beides"
 
-#: gui/wxOptionsDlg.cpp:1688
+#: gui/wxOptionsDlg.cpp:1687
 msgid ""
 "If autosave delay is not 0, the program will periodically\n"
 "save all unsaved information (settings, contents of the\n"
@@ -9558,19 +9576,19 @@ msgstr ""
 "Informationen (Einstellungen, Inhalt des Editor-Fensters, ...) gespeichert, \n"
 "was die Gefahr eines Datenverlustes reduziert."
 
-#: gui/wxOptionsDlg.cpp:1692
+#: gui/wxOptionsDlg.cpp:1691
 msgid "&Autosave delay"
 msgstr "Speicher&intervall"
 
-#: gui/wxOptionsDlg.cpp:1693
+#: gui/wxOptionsDlg.cpp:1692
 msgid "Confirm &exit"
 msgstr "Programm&ende bestätigen"
 
-#: gui/wxOptionsDlg.cpp:1694
+#: gui/wxOptionsDlg.cpp:1693
 msgid "Always run only &one instance"
 msgstr "Immer nur eine Kopie ausführen"
 
-#: gui/wxOptionsDlg.cpp:1696
+#: gui/wxOptionsDlg.cpp:1695
 msgid ""
 "\n"
 "Mahogany may highlight the options having non default\n"
@@ -9580,49 +9598,50 @@ msgstr ""
 "\n"
 "Mahogany kann die Optionen hervorheben, die eine andereEinstellung als die normale habe, egal ob diese speziell fürdiesen Ordner gesetzt oder von den Eltern geerbt wurde."
 
-#: gui/wxOptionsDlg.cpp:1700
+#: gui/wxOptionsDlg.cpp:1699
 msgid "Show option values &origin"
 msgstr "Zeige Urspung der Werte der Optionen"
 
-#: gui/wxOptionsDlg.cpp:1701
+#: gui/wxOptionsDlg.cpp:1700
 msgid "Colour for options set here"
 msgstr "Farbe für hier gesetzte Optionen"
 
-#: gui/wxOptionsDlg.cpp:1702
+#: gui/wxOptionsDlg.cpp:1701
 msgid "Colour for inherited options"
 msgstr "Farbe für geerbte Optionen"
 
-#: gui/wxOptionsDlg.cpp:1704
+#: gui/wxOptionsDlg.cpp:1703
 msgid "Directory with the help files"
 msgstr "Verzeichnis für die Hilfedateien"
 
-#: gui/wxOptionsDlg.cpp:1706
+#: gui/wxOptionsDlg.cpp:1705
 msgid "&Path where to find AFM files"
 msgstr "Such&pfad für AFM Dateien"
 
-#: gui/wxOptionsDlg.cpp:1709
+#: gui/wxOptionsDlg.cpp:1708
 msgid "&Focus follows mouse"
 msgstr "&Fokus folgt der Maus"
 
-#: gui/wxOptionsDlg.cpp:1712
+#: gui/wxOptionsDlg.cpp:1711
 msgid "Use floating &menu-bars"
 msgstr "Verschiebbare &Menübalken"
 
-#: gui/wxOptionsDlg.cpp:1713
+#: gui/wxOptionsDlg.cpp:1712
 msgid "Use floating &tool-bars"
 msgstr "Verschiebbare &Knopfleisten"
 
-#: gui/wxOptionsDlg.cpp:1714
+#: gui/wxOptionsDlg.cpp:1713
 msgid "Tool-bars with f&lat buttons"
 msgstr "Knopfleiste mit f&lachen Knöpfen"
 
-#: gui/wxOptionsDlg.cpp:1716
+#: gui/wxOptionsDlg.cpp:1715
 msgid "&Reenable disabled message boxes..."
 msgstr "Dialogboxen wiede&r aktivieren..."
 
 # untrans
 # Report 27.7.03
-#: gui/wxOptionsDlg.cpp:1717
+# ok, 3.10.04
+#: gui/wxOptionsDlg.cpp:1716
 msgid ""
 "\n"
 "\"Away\", or unattended, state is a special mode in\n"
@@ -9641,19 +9660,19 @@ msgstr ""
 "Dies ist nützlich, wenn Sie nicht von Mahogany abgelenkt werden wollen,\n"
 "aber Mahogany weiter laufen soll."
 
-#: gui/wxOptionsDlg.cpp:1725
+#: gui/wxOptionsDlg.cpp:1724
 msgid "Enter awa&y mode when idle during (min):"
 msgstr "In Abwesenheits-Modus gehen, wenn inaktiv für (Min.):"
 
-#: gui/wxOptionsDlg.cpp:1726
+#: gui/wxOptionsDlg.cpp:1725
 msgid "E&xit away mode automatically"
 msgstr "Abwesenheits-Modus automatisch verlassen"
 
-#: gui/wxOptionsDlg.cpp:1727
+#: gui/wxOptionsDlg.cpp:1726
 msgid "Rememeber a&way status"
 msgstr "Abwesenheits-Modus merken"
 
-#: gui/wxOptionsDlg.cpp:1730
+#: gui/wxOptionsDlg.cpp:1729
 msgid ""
 "Mahogany can synchronise part of its configuration\n"
 "with settings stored in a special folder. This can\n"
@@ -9670,39 +9689,39 @@ msgstr ""
 "Bitte lesen Sie zuerst die Dokumentation hierzu !\n"
 "Sie kann mit dem Hilfe-Knopf aufgerufen werden."
 
-#: gui/wxOptionsDlg.cpp:1737
+#: gui/wxOptionsDlg.cpp:1736
 msgid "Sync options with remote server"
 msgstr "Einstellungen mit externem Server synchronisieren"
 
-#: gui/wxOptionsDlg.cpp:1738
+#: gui/wxOptionsDlg.cpp:1737
 msgid "Remote (IMAP) folder for synchronisation"
 msgstr "(IMAP-)Mailbox für Synchronisation auf dem Server"
 
-#: gui/wxOptionsDlg.cpp:1739
+#: gui/wxOptionsDlg.cpp:1738
 msgid "Sync filter rules"
 msgstr " Filter-Regeln synchronisieren"
 
-#: gui/wxOptionsDlg.cpp:1740
+#: gui/wxOptionsDlg.cpp:1739
 msgid "Sync identities"
 msgstr " Identitäten synchronisieren"
 
-#: gui/wxOptionsDlg.cpp:1741
+#: gui/wxOptionsDlg.cpp:1740
 msgid "Sync part of the folder tree"
 msgstr "Einen Teil des Ordner-Baums synchronisieren"
 
-#: gui/wxOptionsDlg.cpp:1742
+#: gui/wxOptionsDlg.cpp:1741
 msgid "Folder group to synchronise"
 msgstr "Ordnergruppe die synchronisiert werden soll"
 
-#: gui/wxOptionsDlg.cpp:1743
+#: gui/wxOptionsDlg.cpp:1742
 msgid "&Store settings..."
 msgstr "Einstellungen speichern..."
 
-#: gui/wxOptionsDlg.cpp:1744
+#: gui/wxOptionsDlg.cpp:1743
 msgid "&Retrieve settings..."
 msgstr "Einstellungen abholen..."
 
-#: gui/wxOptionsDlg.cpp:1747
+#: gui/wxOptionsDlg.cpp:1746
 msgid ""
 "If a non empty filename is specified here, Mahogany uses\n"
 "this file instead of the registry for storing all of its\n"
@@ -9717,75 +9736,75 @@ msgstr ""
 "Versuchen Sie bitte nicht, die Datei auf Unix zu verwenden,\n"
 "das wird nicht gut funktionieren)"
 
-#: gui/wxOptionsDlg.cpp:1753
+#: gui/wxOptionsDlg.cpp:1752
 msgid "&Config file"
 msgstr "Konfigurations-Datei"
 
-#: gui/wxOptionsDlg.cpp:2842
+#: gui/wxOptionsDlg.cpp:2841
 msgid "Set at this level"
 msgstr "Auf dieser Ebene gesetzt"
 
-#: gui/wxOptionsDlg.cpp:2843
+#: gui/wxOptionsDlg.cpp:2842
 msgid "Inherited from parent"
 msgstr "Von den Eltern geerbt"
 
-#: gui/wxOptionsDlg.cpp:3077
+#: gui/wxOptionsDlg.cpp:3076
 #, c-format
 msgid "String '%s' is already present in the list, not added."
 msgstr "Zeichenkette '%s' ist bereits auf der Liste, nicht noch einmal hinzugefügt."
 
-#: gui/wxOptionsDlg.cpp:3315
+#: gui/wxOptionsDlg.cpp:3314
 msgid "Message View"
 msgstr "Nachrichten-Ansicht"
 
-#: gui/wxOptionsDlg.cpp:3431
+#: gui/wxOptionsDlg.cpp:3430
 msgid "Folder View"
 msgstr "Ordner-Ansicht"
 
-#: gui/wxOptionsDlg.cpp:3531
+#: gui/wxOptionsDlg.cpp:3530
 msgid "Folder Tree"
 msgstr "Ordner-Baum"
 
-#: gui/wxOptionsDlg.cpp:3603
-#: gui/wxOptionsDlg.cpp:4581
+#: gui/wxOptionsDlg.cpp:3602
+#: gui/wxOptionsDlg.cpp:4580
 #: wx/generic/vcarddlg.cpp:330
 msgid "Identity"
 msgstr "Identität"
 
-#: gui/wxOptionsDlg.cpp:3632
-#: gui/wxOptionsDlg.cpp:4594
+#: gui/wxOptionsDlg.cpp:3631
+#: gui/wxOptionsDlg.cpp:4593
 #: wx/generic/vcarddlg.cpp:355
 msgid "Network"
 msgstr "Netzwerk"
 
-#: gui/wxOptionsDlg.cpp:3728
+#: gui/wxOptionsDlg.cpp:3727
 #: util/upgrade.cpp:3228
 msgid "New Mail"
 msgstr "Neue Nachrichten"
 
-#: gui/wxOptionsDlg.cpp:3871
+#: gui/wxOptionsDlg.cpp:3870
 msgid "Failed to restart the timers, please change the delay to a valid value."
 msgstr "Kann Timer nicht neu starten, bitte ändern Sie die Verzögerung auf einen gültigen Wert."
 
-#: gui/wxOptionsDlg.cpp:3948
+#: gui/wxOptionsDlg.cpp:3947
 msgid "My own addresses"
 msgstr "Meine eigenen Adressen"
 
-#: gui/wxOptionsDlg.cpp:3949
-#: gui/wxOptionsDlg.cpp:3955
+#: gui/wxOptionsDlg.cpp:3948
+#: gui/wxOptionsDlg.cpp:3954
 #: wx/generic/vcarddlg.cpp:379
 msgid "Address"
 msgstr "Adresse"
 
-#: gui/wxOptionsDlg.cpp:3954
+#: gui/wxOptionsDlg.cpp:3953
 msgid "Mailing list addresses"
 msgstr "Adressen von Mailing-Listen"
 
-#: gui/wxOptionsDlg.cpp:4001
+#: gui/wxOptionsDlg.cpp:4000
 msgid "Synchronize"
 msgstr "Synchronisieren"
 
-#: gui/wxOptionsDlg.cpp:4039
+#: gui/wxOptionsDlg.cpp:4038
 msgid ""
 "You have activated remote configuration synchronisation.\n"
 "\n"
@@ -9795,19 +9814,19 @@ msgstr ""
 "\n"
 "Möchten Sie die aktuellen Einstellungen nun dort speichern ?"
 
-#: gui/wxOptionsDlg.cpp:4043
+#: gui/wxOptionsDlg.cpp:4042
 msgid "Store settings now?"
 msgstr "Einstellungen jetzt speichern ?"
 
-#: gui/wxOptionsDlg.cpp:4059
+#: gui/wxOptionsDlg.cpp:4058
 msgid "Export settings?"
 msgstr "Einstellungen exportieren ?"
 
-#: gui/wxOptionsDlg.cpp:4060
+#: gui/wxOptionsDlg.cpp:4059
 msgid "Import settings?"
 msgstr "Einstellungen importieren ?"
 
-#: gui/wxOptionsDlg.cpp:4062
+#: gui/wxOptionsDlg.cpp:4061
 msgid ""
 "You have changed the config file option.\n"
 "\n"
@@ -9815,79 +9834,79 @@ msgstr ""
 "Sie haben die Einstellungen für die Konfigurations-Datei geändert.\n"
 "\n"
 
-#: gui/wxOptionsDlg.cpp:4064
+#: gui/wxOptionsDlg.cpp:4063
 msgid "Do you want to export the registry settings to config file?"
 msgstr "Möchten Sie die Einstellungen aus der Registry in eine Datei speichern ?"
 
-#: gui/wxOptionsDlg.cpp:4067
+#: gui/wxOptionsDlg.cpp:4066
 msgid "Do you want to import the existing contents of config file to the registry?"
 msgstr "Wollen Sie den Inhalt der Konfigurations-Datei in die Registry importieren ?"
 
-#: gui/wxOptionsDlg.cpp:4071
+#: gui/wxOptionsDlg.cpp:4070
 msgid "Note that this may overwrite the existing settings."
 msgstr "Beachten Sie, dass dies die bestehenden Einstellungen überschreiben kann."
 
-#: gui/wxOptionsDlg.cpp:4139
+#: gui/wxOptionsDlg.cpp:4138
 #, c-format
 msgid "Failed to save remote configuration to '%s'"
 msgstr "Konnte die Konfigurationsdatei nicht in '%s' auf dem Server speichern"
 
-#: gui/wxOptionsDlg.cpp:4144
+#: gui/wxOptionsDlg.cpp:4143
 #, c-format
 msgid "Failed to retrieve remote configuration from '%s'"
 msgstr "Konnte die Konfigurationsdaten nicht aus '%s' auf dem Server holen"
 
-#: gui/wxOptionsDlg.cpp:4152
+#: gui/wxOptionsDlg.cpp:4151
 #, c-format
 msgid "Successfully saved remote configuration to '%s'."
 msgstr "Konfigurationsdaten erfolgreich in '%s' auf dem Server gespeichert."
 
-#: gui/wxOptionsDlg.cpp:4157
+#: gui/wxOptionsDlg.cpp:4156
 #, c-format
 msgid "Successfully restored remote configuration from '%s'."
 msgstr "Konfigurationsdaten erfolgreich aus '%s' auf dem Server geholt."
 
-#: gui/wxOptionsDlg.cpp:4194
+#: gui/wxOptionsDlg.cpp:4193
 msgid "Miscellaneous"
 msgstr "Sonstiges"
 
-#: gui/wxOptionsDlg.cpp:4261
+#: gui/wxOptionsDlg.cpp:4260
 msgid "Invalid delay value for autosave timer."
 msgstr "Ungültiger Verzögerungswert für Autosave-Timer."
 
-#: gui/wxOptionsDlg.cpp:4273
+#: gui/wxOptionsDlg.cpp:4272
 msgid "Invalid delay value for auto away timer."
 msgstr "Ungültiger Verzögerungswert für die Verzögerung bis zum Abwesenheits-Modus"
 
-#: gui/wxOptionsDlg.cpp:4305
+#: gui/wxOptionsDlg.cpp:4304
 msgid "Helpers"
 msgstr "Helfer"
 
-#: gui/wxOptionsDlg.cpp:4320
+#: gui/wxOptionsDlg.cpp:4319
 msgid "Folders"
 msgstr "Ordner"
 
-#: gui/wxOptionsDlg.cpp:4328
+#: gui/wxOptionsDlg.cpp:4327
 msgid "Folders to open on startup"
 msgstr "Ordner die beim Programmstart geöffnet werden sollen"
 
-#: gui/wxOptionsDlg.cpp:4329
+#: gui/wxOptionsDlg.cpp:4328
 msgid "Folder name"
 msgstr "Name des Ordners"
 
-#: gui/wxOptionsDlg.cpp:4419
+#: gui/wxOptionsDlg.cpp:4418
 msgid "Program options"
 msgstr "Programm-Einstellungen"
 
-#: gui/wxOptionsDlg.cpp:4630
+#: gui/wxOptionsDlg.cpp:4629
 msgid "Restore default options"
 msgstr "Einstellungen auf Voreinstellung zurücksetzen"
 
-#: gui/wxOptionsDlg.cpp:4636
+#: gui/wxOptionsDlg.cpp:4635
 msgid "&All settings"
 msgstr "&Alle Einstellungen"
 
-#: gui/wxOptionsDlg.cpp:4643
+#: gui/wxOptionsDlg.cpp:4642
 msgid ""
 "Please check the settings whose values\n"
 "should be reset to the defaults."
@@ -10253,12 +10272,14 @@ msgstr "Einstellungen für das Verknüpfen"
 
 # untrans: (reported 16.2.03)
 # Doesn't get translated !
+# ok, 3.10.04
 #: gui/wxThrDialog.cpp:189
 msgid "Thread messages on &server"
 msgstr "Nachrichten auf dem Server nach Diskussion verknüpfen"
 
 # untrans: (reported 16.2.03)
 # Doesn't get translated !
+# ok, 3.10.04
 #: gui/wxThrDialog.cpp:190
 msgid "Thread messages by &references only"
 msgstr "Nachrichten nur entsprechend den Verweisen verknüpfen"
@@ -10281,12 +10302,14 @@ msgstr "Listen-Vorspann entfernen, bevor der Betreff zum Verknüpfen verwendet wi
 
 # untrans: (reported 16.2.03)
 # Doesn't get translated !
+# ok, 3.10.04
 #: gui/wxThrDialog.cpp:200
 msgid "&Gather messages with same subject"
 msgstr "Nachricht mit gleichem Betreff sammeln"
 
 # untrans: (reported 16.2.03)
 # Doesn't get translated !
+# ok, 3.10.04
 #: gui/wxThrDialog.cpp:201
 msgid "&Break thread when subject changes"
 msgstr "Verknüpfung unterbrechen, wenn der Betreff sich ändert"
@@ -11002,6 +11025,9 @@ msgstr "Konnte bestehende Datei nicht verkürzen."
 msgid "Saving %d messages to the file '%s'..."
 msgstr "Speichere %d Nachrichten in die Datei '%s'..."
 
+# origbug (report 3.2.03)
+# mes_s_age
+# ok, 4.10.04
 #: mail/MailFolderCmn.cpp:759
 msgid "Failed to get the text of the message to save."
 msgstr "Konnte den Text der Nachricht nicht zum Speichern erhalten."
@@ -11704,39 +11730,39 @@ msgid "Minimal message editor"
 msgstr "Minimaler Nachrichten-Editor"
 
 # ????
-#: modules/BareBonesEditor.cpp:701
+#: modules/BareBonesEditor.cpp:655
 msgid "Message Body"
 msgstr "Nachrichten-Text"
 
-#: modules/BareBonesEditor.cpp:722
+#: modules/BareBonesEditor.cpp:676
 msgid "Wrap &Paragraph"
 msgstr "Absatz umbrechen"
 
-#: modules/BareBonesEditor.cpp:724
+#: modules/BareBonesEditor.cpp:678
 msgid "&Wrap All"
 msgstr "Alles umbrechen"
 
-#: modules/BareBonesEditor.cpp:726
+#: modules/BareBonesEditor.cpp:680
 msgid "Unwrap Paragrap&h"
 msgstr "Umbruch für Paragraph aufheben"
 
-#: modules/BareBonesEditor.cpp:728
+#: modules/BareBonesEditor.cpp:682
 msgid "&Unwrap All"
 msgstr "Umbruch vollständig aufheben"
 
-#: modules/BareBonesEditor.cpp:736
+#: modules/BareBonesEditor.cpp:690
 msgid "Attachments"
 msgstr "Anhänge"
 
-#: modules/BareBonesEditor.cpp:745
+#: modules/BareBonesEditor.cpp:699
 msgid "&Attach file..."
 msgstr "Datei &anhängen..."
 
-#: modules/BareBonesEditor.cpp:748
+#: modules/BareBonesEditor.cpp:702
 msgid "&Remove all"
 msgstr "Alle entfernen"
 
-#: modules/BareBonesEditor.cpp:819
+#: modules/BareBonesEditor.cpp:773
 msgid ""
 "Remove all the attachments from this message\n"
 "(files on the disk will not be affected)?"
@@ -11744,11 +11770,11 @@ msgstr ""
 "Alle Anhänge von dieser Nachricht entfernen ?\n"
 "(Die Dateien auf der Platte werden nicht gelöscht)"
 
-#: modules/BareBonesEditor.cpp:1016
+#: modules/BareBonesEditor.cpp:970
 msgid "Would you like to format all paragraphs first?"
 msgstr "Wollen Sie zuerst alle Absätze umbrechen ?"
 
-#: modules/BareBonesEditor.cpp:1345
+#: modules/BareBonesEditor.cpp:1306
 #, c-format
 msgid "The selected language \"%s\" can't be used to send this message, \"%s\" will be used instead."
 msgstr "Die gewählte Sprache \"%s\" kann nicht benutzt werden um diese Nachricht zu senden. \"%s\" wird statt dessen verwendet."
@@ -13001,6 +13027,9 @@ msgstr "Kann keine Farbe mit Namen '%s' finden, verwende Voreinstellung. (Bitte 
 msgid "Trying to load SSL libraries '%s' and '%s'..."
 msgstr "Versuche die SSL-Bibliotheken '%s' und '%s' zu laden..."
 
+# origbug (report 3.2.03)
+# authentication
+# ok, 4.10.04
 #: util/ssl.cpp:236
 #, c-format
 msgid "Successfully loaded '%s' and '%s' - SSL authentication is now available."
@@ -13020,6 +13049,7 @@ msgstr ""
 
 # origbug (report 3.2.03)
 # authentication
+# ok, 4.10.04
 #: util/ssl.cpp:292
 msgid "This version of the program doesn't support SSL authentication."
 msgstr "Diese Version des Programms unterstützt keine SSL-Authentifizierung"
@@ -13119,9 +13149,9 @@ msgstr ""
 
 # origsize
 # (One Char. wider please)
-#
 # untrans: (report 28.1.03)
 # CANCEL-Button is in english and doesn't seem to change
+# ok, 3.10.04
 #: util/upgrade.cpp:795
 msgid ""
 "Welcome to Mahogany!\n"
@@ -13235,9 +13265,11 @@ msgid "Please specify a valid email address."
 msgstr "Bitte geben Sie eine gültige E-Mailadresse an."
 
 # origbug (report 3.2.03)
-# origsize
+# recieve (ok, 4.10.04)
+# origsize 
 # The entry-fields for the servers are pushed to the right
 # (without obvious reason) and thus _very_ small !!
+# ok, 3.10.04
 #: util/upgrade.cpp:1019
 msgid ""
 "You need an IMAP4 (preferred) or a POP3 server\n"
@@ -13274,12 +13306,11 @@ msgstr "&POP Server:"
 # account for these.
 # This pushes the entry-boxes for the servers so far
 # to the right, that they get ridiciolus small
-#
-#
 # |                Nachrichten auf          |
 # |                  Server lassen: [ ]     |
 # |                    SMTP Server: [    ]  |
 # |                    NNTP Server: [    ]  |
+# ok, 3.10.04
 #: util/upgrade.cpp:1034
 msgid "&Leave mail on it:"
 msgstr ""
