@@ -1285,7 +1285,7 @@ bool RunInstallWizard()
    gs_installWizardData.done = true;
 
    wxIconManager *iconManager = mApplication->GetIconManager();
-   wxWizard *wizard = wxWizard::Create
+   wxWizard *wizard = wxWizardBase::Create
                       (
                         NULL,                         // parent
                         -1,                           // id
