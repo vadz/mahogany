@@ -823,9 +823,9 @@ MFilterFromProfile::DebugDump() const
 // ----------------------------------------------------------------------------
 
 extern FilterRule *
-GetFilterForFolder(const MFolder *folder, MModule_Filters **modFilters)
+GetFilterForFolder(const MFolder *folder)
 {
-   CHECK( folder && modFilters, NULL, "GetFilterForFolder: NULL parameter" );
+   CHECK( folder, NULL, "GetFilterForFolder: NULL parameter" );
 
    // build a single program from all filter rules:
    String filterString;
@@ -845,39 +845,25 @@ GetFilterForFolder(const MFolder *folder, MModule_Filters **modFilters)
       return NULL;
    }
 
-   MModule_Filters *filterModule = *modFilters;
+   MModule_Filters *filterModule = MModule_Filters::GetModule();
    if ( !filterModule )
    {
-      filterModule = MModule_Filters::GetModule();
-      if ( !filterModule )
-      {
-         wxLogWarning(_("Filter module couldn't be loaded."));
+      wxLogWarning(_("Filter module couldn't be loaded."));
 
-         return NULL;
-      }
+      return NULL;
    }
 
    // compile the filter rule into the real filter
    FilterRule *filterRule = filterModule->GetFilter(filterString);
+
+   // filterRule holds a reference to the filterModule if it was successfully
+   // been created, otherwise we don't need filterModule anyhow
+   filterModule->DecRef();
+
    if ( !filterRule )
    {
       wxLogError(_("Error parsing filter '%s' for folder '%s'"),
                  filterString.c_str(), folder->GetFullName().c_str());
-
-      // free the filter module if created it ourselves
-      if ( !*modFilters )
-      {
-         filterModule->DecRef();
-      }
-         
-      return NULL;
-   }
-
-   // return the filter module to the caller if it hadn't provided it
-   if ( !*modFilters )
-   {
-      // now the caller is responsible for freeing it
-      *modFilters = filterModule;
    }
 
    return filterRule;

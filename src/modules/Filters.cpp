@@ -177,11 +177,17 @@ private:
 class FilterRuleImpl : public FilterRule
 {
 public:
-   virtual int Apply(MailFolder *mf, UIdType uid);
-   virtual int Apply(MailFolder *folder, bool newOnly);
-   virtual int Apply(MailFolder *folder,
-                     UIdArray& msgs,
-                     bool ignoreDeleted);
+   // the operations a filter rule can perform on a message
+   enum
+   {
+      None     = 0,
+      Copy     = 1,
+      Delete   = 2,
+      Expunge  = 4
+   };
+
+   // implement the base class pure virtual
+   virtual int Apply(MailFolder *folder, UIdArray& msgs);
 
    static FilterRule * Create(const String &filterrule,
                               MInterface *minterface,
@@ -196,15 +202,6 @@ protected:
                   MInterface *minterface,
                   MModule_Filters *fmodule);
    ~FilterRuleImpl();
-
-   /// get the string to display in the status bar
-   String GetStatusString(Message *msg) const;
-
-   /// common code for the two Apply() functions
-   int ApplyCommonCode(MailFolder *folder,
-                       UIdArray *msgs,
-                       bool newOnly,
-                       bool ignoreDeleted);
 
 public:
    const SyntaxNode * Parse(const String &);
@@ -232,6 +229,7 @@ public:
    Token PeekToken(void) { return token; }
    void Rewind(size_t pos = 0);
    void NextToken(void) { Rewind(m_Peek); }
+
 #ifdef TEST
    virtual // So we can override the Error function
 #endif
@@ -250,45 +248,35 @@ public:
 
    /**@name for runtime information */
    //@{
-   /// Set the message and folder to operate on:
-   void SetMessage(MailFolder *folder = NULL, UIdType uid = UID_ILLEGAL)
-      {
-         SafeDecRef(m_MailFolder);
-         m_MailFolder = folder;
-         SafeIncRef(m_MailFolder);
-         m_MessageUId = uid;
 
-         m_expungeMsgs = FALSE;
-      }
    /// Obtain the mailfolder to operate on:
-   MailFolder * GetFolder(void)
+   MailFolder * GetFolder(void) const
       { SafeIncRef(m_MailFolder); return m_MailFolder; }
+
    /// Obtain the message UId to operate on:
-   UIdType GetMessageUId(void) { return m_MessageUId; }
+   UIdType GetMessageUId(void) const { return m_MessageUId; }
+
    /// Obtain the message itself:
-   Message * GetMessage(void)
-      {
-         return m_MailFolder ?
-            m_MailFolder->GetMessage(m_MessageUId) :
-            NULL ;
-      }
+   Message * GetMessage(void) const
+      { SafeIncRef(m_MailMessage); return m_MailMessage; }
+
    //@}
 
    /// obtain the interface to the main program
    MInterface *GetInterface(void) { return m_MInterface; }
 
    /// called if messages should be expunged from folder
-   void SetExpunged() { m_expungeMsgs = true; }
+   void SetExpunged() { m_operation |= Expunge; }
 
    /// called by func_delete() to tell us that a message was deleted
-   void SetDeleted() { m_deletedMsgs.Add(m_msgno); }
-
-   /// is the current message marked as deleted?
-   bool IsMsgDeleted() const
-      { return m_deletedMsgs.Index(m_msgno) != wxNOT_FOUND; }
+   void SetDeleted() { m_operation |= Delete; }
 
    /// called by func_copytofolder()
-   void SetCopiedTo(const String& copiedTo) { m_copiedTo = copiedTo; }
+   void CopyTo(const String& copiedTo)
+   {
+      m_copiedTo = copiedTo;
+      m_operation = Copy;
+   }
 
 protected:
    void EatWhiteSpace(void)
@@ -312,23 +300,19 @@ private:
    size_t m_Peek;            // seek offset of next token
    const SyntaxNode *m_Program; // compiled filter program
 
+   // the UID of the message we're currently filtering
    UIdType m_MessageUId;
+
+   // the message itself
+   Message *m_MailMessage;
+
+   // the folder we're working in
    MailFolder *m_MailFolder;
 
-   // the number of the message being processed
-   size_t m_msgno;
+   // the operation we should perform with the current message
+   int m_operation;
 
-   // and the total number of messages
-   size_t m_msgnoMax;
-
-   // this flag is set during evalutation if any filter calls Expunge()
-   bool m_expungeMsgs;
-
-   // this array contains the msgnos of the messages which were deleted from
-   // the filter rule action part
-   wxArrayLong m_deletedMsgs;
-
-   // the folder the message was copied to or empty
+   // the folder the message was copied or moved to or empty
    String m_copiedTo;
 
    // the optimization hints - set in FindFunction(), used in Apply()
@@ -2042,8 +2026,7 @@ extern "C"
                                  "%d", &result,
                                  NULL);
       msg->DecRef();
-      p->SetExpunged(); // worst case guess
-      return rc ? (result != 0) : false;
+      return rc ? (result != 0) : 0;
 #else
       return 0;
 #endif
@@ -2202,22 +2185,15 @@ extern "C"
    {
       if(args->Count() != 0)
          return 0;
-      MailFolder *mf = p->GetFolder();
-      if(! mf) return Value(0);
-      UIdType uid = p->GetMessageUId();
-      UIdArray uids;
-      uids.Add(uid);
-      int rc = mf->DeleteMessages(&uids, expunge);
-      mf->DecRef();
-      p->SetDeleted();
 
-      Value v(rc);
-      if ( rc )
-      {
-         // we shouldn't evaluate any subsequent filters after deleting the
-         // message
-         v.Abort();
-      }
+      p->SetDeleted();
+      if ( expunge )
+         p->SetExpunged();
+
+      // we shouldn't evaluate any subsequent filters after deleting the
+      // message
+      Value v = 1;
+      v.Abort();
 
       return v;
    }
@@ -2234,27 +2210,13 @@ extern "C"
 
    static Value func_copytofolder(ArgList *args, FilterRuleImpl *p)
    {
-#ifndef TEST                // UIdArray not instantiated
       if(args->Count() != 1)
          return 0;
+
       const Value fn = args->GetArg(0)->Evaluate();
-      MailFolder *mf = p->GetFolder();
-      UIdType uid = p->GetMessageUId();
-      UIdArray ia;
-      ia.Add(uid);
+      p->CopyTo(fn.ToString());
 
-      String mfName = fn.ToString();
-      bool rc = mf->SaveMessages(&ia, mfName);
-      mf->DecRef();
-      if ( rc )
-      {
-         p->SetCopiedTo(mfName);
-      }
-
-      return Value(rc);
-#else
-      return 0;
-#endif
+      return 1;
    }
 
    static Value func_movetofolder(ArgList *args, FilterRuleImpl *p)
@@ -2268,19 +2230,6 @@ extern "C"
       else
          return 0;
    }
-
-   // unused?
-#if 0
-   static Value func_getstatus(ArgList *args, FilterRuleImpl *p)
-   {
-      if(args->Count() != 0)
-         return Value(-1);
-      Message *msg = p->GetMessage();
-      int rc = msg->GetStatus();
-      msg->DecRef();
-      return Value(rc);
-   }
-#endif // 0
 
    static Value func_date(ArgList *args, FilterRuleImpl *p)
    {
@@ -2378,9 +2327,8 @@ extern "C"
       if(args->Count() != 0)
          return Value(0);
 
-      // can't call ExpungeMessages() now as the mail folder is locked by
-      // filters, it will be called later
       p->SetExpunged();
+
       return 1;
    }
 
@@ -2458,242 +2406,320 @@ BuiltinFunctions(void)
    return &s_builtinFuncList;
 }
 
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *
- * FilterRuleImpl - the class representing a program
- *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-String FilterRuleImpl::GetStatusString(Message *msg) const
-{
-   String text;
-   if ( msg )
-   {
-      // TODO: make the format of the string inside the parentheses
-      //       configurable (i.e. allow showing, for example, "From:"
-      //       and not only subject)
-
-      // NB: the string we return is passed to wxLogStatus() and so shouldn't
-      //     contain any stray '%' in it or we could crash!
-      String subject = msg->Subject();
-      subject.Replace("%", "%%");
-      text.Printf(_("Filtering message %u/%u (%s)"),
-                  m_msgno + 1, m_msgnoMax, subject.c_str());
-   }
-
-   return text;
-}
-
-int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid)
-{
-   if(! m_Program)
-      return 0;
-
-   CHECK( mf, 0, "no mailfolder to apply filter rule to" );
-   CHECK( uid != UID_ILLEGAL, 0, "no message to apply filter rules to" );
-
-   mf->IncRef();
-   SetMessage(mf, uid);
-
-   // put something into the status bar
-   Message *msg = GetMessage();
-   String text;
-   if ( msg )
-   {
-      text = GetStatusString(msg);
-
-      GetInterface()->StatusMessage(text + "...");
-   }
-
-   // do some heuristic optimizations: if our program contains requests for the
-   // entire message header, get it first because like this it will be cached
-   // and all other requests will use it - otherwise we'd have to make several
-   // trips to server to get a few separate fields first and only then retrieve
-   // the header
-   //
-   // in the same way, retrieve all the recipients if we need them anyhow
-   // before retrieving "To" &c
-   if ( m_hasHeaderFunc )
-   {
-      if ( m_hasToFunc || m_hasRcptFunc || m_hasHdrLineFunc )
-      {
-         // pre-retrieve the whole header
-         (void)msg->GetHeader();
-      }
-   }
-   else if ( m_hasRcptFunc )
-   {
-      if ( m_hasToFunc )
-      {
-         // pre-fetch the recipient headers which include "To"
-         (void)msg->GetHeaderLines(headersRecipients);
-      }
-   }
-
-   const Value rc = m_Program->Evaluate();
-
-   bool wasDeleted = IsMsgDeleted();
-
-   // and now show the result in the status bar too
-   if ( msg )
-   {
-      text += " - ";
-
-      if ( !m_copiedTo.empty() )
-      {
-         text << (wasDeleted ? _("moved to ") : _("copied to "))
-              << m_copiedTo;
-
-         m_copiedTo.clear();
-      }
-      else if ( wasDeleted )
-      {
-         text << _("deleted");
-      }
-      else // not moved/copied/deleted
-      {
-         text << _("done");
-      }
-
-      GetInterface()->StatusMessage(text);
-
-      msg->DecRef();
-   }
-
-   // count the messages filtered for the status string message
-   m_msgno++;
-
-   SetMessage(NULL);
-   mf->DecRef();
-
-   if ( !rc.IsNumber() )
-      return FilterRule::Error;
-
-   int retval = 0;
-   if ( wasDeleted )
-      retval |= Deleted;
-   if ( m_expungeMsgs )
-      retval |= Expunged;
-
-   return retval;
-}
+// ----------------------------------------------------------------------------
+// FilterRuleImpl - the class representing a program
+// ----------------------------------------------------------------------------
 
 int
-FilterRuleImpl::Apply(MailFolder *mf, bool newOnly)
+FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
 {
-   // if we apply the filters only to the new messages, we ignore the deleted
-   // ones, otherwise apply them to all messages including the deleted
-   return ApplyCommonCode(mf, NULL, newOnly, newOnly);
-}
-
-int
-FilterRuleImpl::Apply(MailFolder *folder,
-                      UIdArray& msgs,
-                      bool ignoreDeleted)
-{
-#ifndef TEST                // UIdArray not instantiated
-   return ApplyCommonCode(folder, &msgs, false, ignoreDeleted);
-#else
-   return 0;
-#endif
-}
-
-/* Common logic to test if we want to filter a message of this status
-   or not: */
-static inline bool
-CheckStatusMatch(int status, bool newOnly, bool ignoreDeleted)
-{
-   if ( ignoreDeleted && (status & MailFolder::MSG_STAT_DELETED) )
-      return false;
-
-   if ( newOnly )
-   {
-      if ( !(status & MailFolder::MSG_STAT_RECENT) ||
-            (status & MailFolder::MSG_STAT_SEEN) )
-      {
-         // either not recent or recent but seen - hence not new
-         return false;
-      }
-   }
-
-   return true;
-}
-
-int
-FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
-                                UIdArray *msgs,
-                                bool newOnly,
-                                bool ignoreDeleted)
-{
-#ifndef TEST                // UIdArray not instantiated
-   CHECK(mf, 0, "no folder for filtering");
-
-   if(! m_Program)
-      return 0;
+   // note the use of explicit scope qualifier to avoid conflicts with our
+   // Error() member function
+   CHECK( mf, FilterRule::Error, "FilterRule::Apply(): NULL parameter" );
 
    // no error yet
    int rc = 0;
 
-   mf->IncRef();
-
-   HeaderInfoList_obj hil = mf->GetHeaders();
-   CHECK( hil, 0, "can't filter messages - failed to get header info list" );
-
-   // the array holding the indices of the messages deleted by filters
-   wxArrayLong indicesDeleted;
-
-   // apply filter either to all messages in the list or only to the given ones
-   m_msgnoMax = msgs ? msgs->Count() : hil->Count();
-   for ( size_t idx = 0; idx < m_msgnoMax; idx++ )
+#ifndef TEST
+   if ( m_Program )
    {
-      const HeaderInfo *hi;
-      if ( msgs )
-         hi = hil->GetEntryUId((*msgs)[idx]);
-      else
-         hi = hil->GetItemByIndex(idx);
+      // remember the mail folder we operate on
+      m_MailFolder = mf;
+      m_MailFolder->IncRef();
 
-      ASSERT_MSG( hi, "can't filter message - failed to get header info" );
+      // the array holding the indices of the messages deleted by filters
+      wxArrayLong indicesDeleted;
 
-      if ( hi && CheckStatusMatch(hi->GetStatus(),
-                                  newOnly, ignoreDeleted))
+      // show the progress dialog while filtering
+      size_t count = msgs.GetCount();
+
+      wxFrame *frame = m_MailFolder->GetInteractiveFrame();
+      MProgressDialog *pd;
+      if ( frame )
       {
-         int rcThis = Apply(mf, hi->GetUId());
-         if ( msgs && (rcThis & Deleted) )
+         pd = new MProgressDialog
+                  (
+                     wxString::Format
+                     (
+                        _("Filtering %u messages in folder '%s'..."),
+                        count, m_MailFolder->GetName().c_str()
+                     ),
+                     "",
+                     2*count,
+                     frame,
+                     false,   // !"disable parent only"
+                     true     // show "cancel" button
+                  );
+      }
+      else // don't show the progress dialog, just log in the status bar
+      {
+         pd = NULL;
+      }
+
+      // first decide what should we do with the messages: fill the arrays with
+      // the operations to perform and the destination folder if the operation
+      // involves copying the message
+      wxArrayInt operations;
+      wxArrayString destinations;
+
+      bool doExpunge = false;
+
+      String textPD;
+      size_t idx;
+      for ( idx = 0; idx < count; idx++ )
+      {
+         // do it first so that the arrays have the right size even if we hit
+         // "continue" below
+         operations.Add(None);
+         destinations.Add("");
+
+         m_MessageUId = msgs[idx];
+
+         if ( m_MessageUId == UID_ILLEGAL )
          {
-            indicesDeleted.Add(idx);
+            FAIL_MSG( "invalid UID in FilterRule::Apply()!" );
+
+            continue;
          }
 
-         rc |= rcThis;
+         m_MailMessage = m_MailFolder->GetMessage(m_MessageUId);
+
+         if ( !m_MailMessage )
+         {
+            // maybe another session deleted it?
+            wxLogDebug("Filter error: message with UID %ld in folder '%s'"
+                       "doesn't exist any more.",
+                       m_MessageUId, m_MailFolder->GetName().c_str());
+            continue;
+         }
+
+         // update the GUI
+
+         // TODO: make the format of the string inside the parentheses
+         //       configurable
+
+         String subject = m_MailMessage->Subject(),
+                from = m_MailMessage->From();
+         textPD.Printf(_("Filtering message %u ("), idx + 1);
+         if ( !from.empty() )
+         {
+            textPD << _("from ") << from << ' ';
+         }
+
+         if ( !subject.empty() )
+         {
+            textPD << _("about '") << subject << '\'';
+         }
+         else
+         {
+            textPD << _("without subject");
+         }
+
+         textPD << ')';
+
+         if ( pd )
+         {
+            if ( !pd->Update(idx, textPD) )
+            {
+               // cancelled by user
+               m_MailMessage->DecRef();
+
+               break;
+            }
+         }
+         else // no progress dialog
+         {
+            // don't pass it as the first argument because the string might
+            // contain '%' characters!
+            wxLogStatus("%s", textPD.c_str());
+         }
+
+         // do some heuristic optimizations: if our program contains requests
+         // for the entire message header, get it first because like this it
+         // will be cached and all other requests will use it - otherwise we'd
+         // have to make several trips to server to get a few separate fields
+         // first and only then retrieve the header
+         //
+         // in the same way, retrieve all the recipients if we need them anyhow
+         // before retrieving "To" &c
+         if ( m_hasHeaderFunc )
+         {
+            if ( m_hasToFunc || m_hasRcptFunc || m_hasHdrLineFunc )
+            {
+               // pre-retrieve the whole header
+               (void)m_MailMessage->GetHeader();
+            }
+         }
+         else if ( m_hasRcptFunc )
+         {
+            if ( m_hasToFunc )
+            {
+               // pre-fetch the recipient headers which include "To"
+               (void)m_MailMessage->GetHeaderLines(headersRecipients);
+            }
+         }
+
+         // reset the result flags
+         m_operation = None;
+
+         const Value retval = m_Program->Evaluate();
+
+         // remember the result
+         operations[idx] = m_operation;
+         destinations[idx] = m_copiedTo;
+
+         if ( m_operation & Expunge )
+         {
+            doExpunge = true;
+         }
+
+         // and show the result in the progress dialog
+         textPD << " - ";
+
+         if ( !retval.IsNumber() )
+         {
+            textPD << _("error!");
+
+            rc |= FilterRule::Error;
+         }
+         else
+         {
+            bool wasDeleted = m_operation & Deleted;
+            if ( !m_copiedTo.empty() )
+            {
+               textPD << (wasDeleted ? _("moved to ") : _("copied to "))
+                      << m_copiedTo;
+
+               m_copiedTo.clear();
+            }
+            else if ( wasDeleted )
+            {
+               textPD << _("deleted");
+            }
+            else // not moved/copied/deleted
+            {
+               textPD << _("done");
+            }
+         }
+
+         m_MailMessage->DecRef();
+
+         if ( pd )
+         {
+            if ( !pd->Update(idx, textPD) )
+            {
+               // cancelled by user
+               break;
+            }
+         }
+         else // no progress dialog
+         {
+            // see comment above
+            wxLogStatus("%s", textPD.c_str());
+         }
       }
-   }
 
-   mf->DecRef();
-
-   // remove the deleted messages from msgs
-   if ( msgs )
-   {
-      // iterate from end because otherwise the indices would shift while we
-      // traverse them
-      size_t count = indicesDeleted.GetCount();
-      for ( size_t n = count; n > 0; n-- )
+      // check if Cancel wasn't pressed (we'd exit the loop above by break then)
+      if ( idx == count &&
+           (!pd || pd->Update(count, _("Executing filter actions..."))) )
       {
-         msgs->RemoveAt(n - 1);
+         UIdArray uidsToDelete;
+         wxArrayLong indicesDeleted;
+
+         for ( idx = 0; idx < count; idx++ )
+         {
+            // note that our progress meter may accelerate towards the end as
+            // we may copy more than one message initially - but it's ok, it's
+            // better than slowing down towards the end, the users really hate
+            // this!
+
+            if ( pd && !pd->Update(count + idx) )
+            {
+               // cancelled by user
+               break;
+            }
+
+            if ( operations[idx] & Copy )
+            {
+               // copy all messages we are copying to this destination at once
+               UIdArray uidsToCopy;
+               uidsToCopy.Add(msgs[idx]);
+
+               String dst = destinations[idx];
+
+               for ( size_t n = idx + 1; n < count; n++ )
+               {
+                  if ( (operations[n] & Copy) && destinations[n] == dst )
+                  {
+                     uidsToCopy.Add(msgs[n]);
+
+                     // don't try to copy it when we reach it
+                     operations[n] &= ~Copy;
+                  }
+               }
+
+               if ( !m_MailFolder->SaveMessages(&uidsToCopy, dst) )
+               {
+                  rc |= FilterRule::Error;
+               }
+            }
+
+            if ( operations[idx] & Delete )
+            {
+               indicesDeleted.Add(idx);
+               uidsToDelete.Add(msgs[idx]);
+            }
+         }
+
+         // again, stop right now if we were cancelled
+         if ( idx == count )
+         {
+            if ( !uidsToDelete.IsEmpty() )
+            {
+               if ( !m_MailFolder->DeleteMessages(&uidsToDelete) )
+               {
+                  rc |= FilterRule::Error;
+               }
+               else // deleted successfully
+               {
+                  rc |= FilterRule::Deleted;
+
+                  // remove the deleted messages from msgs
+
+                  // iterate from end because otherwise the indices would shift while we
+                  // traverse them
+                  size_t count = indicesDeleted.GetCount();
+                  for ( size_t n = count; n > 0; n-- )
+                  {
+                     msgs.RemoveAt(n - 1);
+                  }
+               }
+            }
+
+            // actual expunging will be done by the calling code
+            if ( doExpunge )
+            {
+               rc |= FilterRule::Expunged;
+            }
+         }
       }
+      //else: cancelled by user
+
+      delete pd;
+
+      m_MailFolder->DecRef();
+      m_MailFolder = NULL;
    }
+#endif // !TEST
 
    return rc;
-#else
-   return 0;
-#endif
 }
 
 FilterRuleImpl::FilterRuleImpl(const String &filterrule,
                                MInterface *minterface,
                                MModule_Filters *mod)
               : m_FilterModule(mod),
-                m_MInterface(minterface),
-                m_MailFolder(NULL)
+                m_MInterface(minterface)
 {
 #ifndef TEST
    // we cannot allow the module to disappear while we exist
@@ -2707,12 +2733,8 @@ FilterRuleImpl::FilterRuleImpl(const String &filterrule,
 
    m_Program = Parse(filterrule);
    m_MessageUId = UID_ILLEGAL;
-
-   m_msgno = 0u;
-
-   // this will be either set by ApplyCommonCode() or should be left as 1 if
-   // Apply(single message) is called directly
-   m_msgnoMax = 1u;
+   m_MailMessage = NULL;
+   m_MailFolder = NULL;
 }
 
 FilterRuleImpl::~FilterRuleImpl()
@@ -2724,11 +2746,9 @@ FilterRuleImpl::~FilterRuleImpl()
 #endif
 }
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *
- * MModule_FiltersImpl - the module
- *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+// ----------------------------------------------------------------------------
+// MModule_FiltersImpl - the module
+// ----------------------------------------------------------------------------
 
 #ifdef DEBUG
 void FilterRuleImpl::Debug(void)
@@ -2789,6 +2809,10 @@ MModule_FiltersImpl::Init(int vmajor, int vminor, int vrelease,
    }
    return new MModule_FiltersImpl();
 }
+
+// ----------------------------------------------------------------------------
+// Testing code from now on
+// ----------------------------------------------------------------------------
 
 #ifdef TEST        // test suite
 #include "../classes/MObject.cpp"        // Gross hack...
@@ -2962,4 +2986,5 @@ main(void)
 
    return errs != 0;
 }
-#endif
+#endif // TEST
+

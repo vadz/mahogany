@@ -12,6 +12,7 @@
 #include "MModule.h"
 #include "Mcommon.h"
 
+class FilterRule;
 class MailFolder;
 
 /// The name of the interface provided.
@@ -21,10 +22,14 @@ class MailFolder;
 class MModule_Filters : public MModule
 {
 public:
-   /** Takes a string representation of a filterrule and compiles it
-       into a class FilterRule object.
+   /**
+     Takes a string representation of a filterrule and compiles it
+     into a class FilterRule object.
+    
+     @param filterrule the text of the filter program
+     @return a filter rule on success or NULL on error
    */
-   virtual class FilterRule * GetFilter(const String &filterrule) const = 0;
+   virtual FilterRule * GetFilter(const String &filterrule) const = 0;
 
    /** To easily obtain a filter module: */
    static MModule_Filters *GetModule(void)
@@ -55,31 +60,15 @@ public:
       Error = 0xf000
    };
 
-   /** Apply the filter to a single message
-       @param folder - the MailFolder object
-       @param uid - the uid of the message
-       @return combination of the flags defined above
-    */
-   virtual int Apply(MailFolder *mf, UIdType uid) = 0;
+   /**
+     Apply the filter to the selected messages in a folder.
+     The messages deleted by the filters are removed from msgs array.
 
-   /** Apply the filter to all [new] messages in a folder.
-       @param folder - the MailFolder object
-       @param newOnly - if true, apply it only to new messages
-       @return combination of the flags defined above
+     @param folder - the MailFolder object
+     @param msgs - the list of messages to apply to
+     @return combination of the flags defined above
    */
-   virtual int Apply(MailFolder *folder, bool newOnly = true) = 0;
-
-   /** Apply the filter to the selected messages in a folder.
-       The messages deleted by the filters are removed from msgs array.
-
-       @param folder - the MailFolder object
-       @param msgs - the list of messages to apply to
-       @param ignoreDeleted - do not filter messages marked as deleted
-       @return combination of the flags defined above
-   */
-   virtual int Apply(MailFolder *folder,
-                     UIdArray& msgs,
-                     bool ignoreDeleted = TRUE) = 0;
+   virtual int Apply(MailFolder *folder, UIdArray& msgs) = 0;
 
    MOBJECT_NAME(FilterRule)
 };
