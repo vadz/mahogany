@@ -343,7 +343,7 @@ private:
         m_hasRcptFunc,
         m_hasHdrLineFunc,
         m_hasHeaderFunc;
-   
+
    // Cache for ContainsSpamTest
    bool m_spamTestValid;
    bool m_spamTest;
@@ -540,7 +540,7 @@ class SyntaxNodeIteratorDriver
 {
 public:
    typedef const SyntaxNode *Type;
-   
+
    const SyntaxNode *GetChild(const SyntaxNode *actual,size_t child)
       { return actual->GetChild(child); }
    const SyntaxNode *GetNext(const SyntaxNode *actual)
@@ -2393,7 +2393,7 @@ static bool CheckWhiteList(const Message *msg)
       "Return-Path",            // Nancy Mc'Gough's Procmail Faq
       NULL
    };
-   
+
    wxArrayString values = msg->GetHeaderLines(headers);
    wxString list = strutil_flatten_array(values, ',');
    list.MakeLower();
@@ -2405,23 +2405,23 @@ static bool CheckWhiteList(const Message *msg)
 
    wxArrayString names;
    book->GetEntryNames(names);
-   
+
    bool found = false;
    for( size_t each = 0; each < names.GetCount(); ++each )
    {
       AdbEntry *entry = book->GetEntry(names[each]);
-      
+
       wxString address;
       entry->GetField(AdbField_EMail,&address);
       address.MakeLower();
-      
+
       found = found || list.find(address) != wxString::npos;
-      
+
       entry->DecRef();
    }
-   
+
    book->DecRef();
-   
+
    return !found;
 }
 
@@ -3338,7 +3338,7 @@ FilterRuleImpl::ContainsSpamTest()
          }
       }
    }
-   
+
    return m_spamTest;
 }
 
@@ -3600,11 +3600,14 @@ FilterRuleApply::UpdateProgressDialog()
       m_parent->m_MailMessage->Subject());
    String from = MailFolder::DecodeHeader(m_parent->m_MailMessage->From());
 
+   // VZ: disabled this test as it is (almost) always true
+#if 0
    if( m_parent->ContainsSpamTest() )
    {
       subject = from = _("(hidden in spam filter)");
    }
-   
+#endif
+
    m_textLog.Printf(_("Filtering message %u/%u"),
       m_idx + 1, m_msgs.GetCount());
 
