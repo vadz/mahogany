@@ -7,6 +7,7 @@ Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
 15.09.02 VZ: added an option to show text [only] in the toolbar buttons
+10.09.02 XN: added a "Move folder" command
 07.09.02 VZ: added possibility to directly edit FCC header in the composer
 02.09.02 VZ: added a dialog for editing the attachment properties in composer
 29.08.02 VZ: show the number of selected messages in the status bar
