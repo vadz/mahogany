@@ -47,7 +47,7 @@
 #include <wx/menu.h>
 #include <wx/statusbr.h>
 #include <wx/fs_mem.h>
-#include <wx/fs_zip.h>
+//#include <wx/fs_zip.h> // for zipped docs
 #include <wx/fs_inet.h>
 #include <wx/cmdline.h>
 
@@ -955,7 +955,7 @@ wxMApp::OnInit()
 
    wxInitAllImageHandlers();
    wxFileSystem::AddHandler(new wxMemoryFSHandler);
-   wxFileSystem::AddHandler(new wxZipFSHandler);
+//   wxFileSystem::AddHandler(new wxZipFSHandler); // for zipped docs
 
    // we need to reference wxInternetFSHandler or it might not be linked into
    // the program at all when linking statically!
@@ -1282,8 +1282,12 @@ wxString wxMApp::BuildHelpInitString(const wxString& dir)
 
 #ifdef OS_WIN
    helpfile += "\\Manual.chm";
-#endif // Windows
-
+#else // !Windows
+   if ( !READ_APPCONFIG(MP_HELPBROWSER_KIND) )
+   {
+      helpfile += _T("/Manual.hhp");
+   }
+#endif // Windows/!Windows
    return helpfile;
 }
 
