@@ -18,11 +18,11 @@
 #include "Mpch.h"
 
 #ifndef   USE_PCH
-#  include  "Mcommon.h"
-#  include  "strutil.h"
-#  include  "kbList.h"
-#  include  "MApplication.h"
-#  include   "MPython.h"
+#  include "Mcommon.h"
+#  include "strutil.h"
+#  include "kbList.h"
+#  include "MApplication.h"
+#  include "MPython.h"
 
 #  include  <wx/dynarray.h>
 #  include  <wx/utils.h> // wxYield
@@ -31,7 +31,6 @@
 #include "Mdefaults.h"
 #include "MFolder.h"
 
-#include "FolderView.h"
 #include "MailFolder.h"
 #include "HeaderInfo.h"
 

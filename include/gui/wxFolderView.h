@@ -186,6 +186,9 @@ public:
    /// for use by the listctrl only:
    bool GetFocusFollowMode(void) const { return m_FocusFollowMode; }
 
+   /// [de]select all items
+   void SelectAll(bool on = true);
+
    /// Update the idea of which messages are selected.
    void UpdateSelectionInfo(void);
 
@@ -201,6 +204,7 @@ protected:
 
    /// The UIds of the last selected messages.
    UIdArray m_SelectedUIds;
+
    /// The last focused UId.
    UIdType  m_FocusedUId;
 
@@ -209,8 +213,6 @@ private:
    wxString m_ProfileName;
    /// first time constructor
    wxFolderView(wxWindow *parent);
-   /// are we to deallocate the folder?
-   bool ownsFolder;
 
    /// the number of messages in the folder when last updated
    unsigned long m_NumOfMessages;
@@ -305,11 +307,13 @@ private:
    String GetFullPersistentKey(MPersMsgBox key);
 
 private:
+   /// handler of options change event, refreshes the view if needed
    void OnOptionsChange(MEventOptionsChangeData& event);
 
+   /// displays the specified header in the given position in the view
    void SetEntry(const HeaderInfo *hi, size_t idx);
 
-   // MEventManager reg info
+   /// MEventManager reg info
    void *m_regOptionsChange;
 
    // allow it to access m_MessagePreview;
@@ -350,6 +354,7 @@ public:
          return m_FolderView ?
             m_FolderView->GetProfile() : NULL;
       }
+
    /// don't even think of using this!
    wxFolderViewFrame(void) { wxFAIL_MSG("unreachable"); }
 

@@ -38,15 +38,14 @@
 #include <errno.h>
 
 #include "MFolder.h"
-#include "FolderView.h"
+#include "FolderView.h"       // for OpenFolderViewFrame()
 #include "MailFolder.h"
 #include "HeaderInfo.h"
 #include "MailCollector.h"
 
-#include "gui/wxFolderView.h"
 #include "gui/wxMainFrame.h"
 #include "gui/wxMApp.h"
-#include "MDialogs.h"   // MDialog_YesNoDialog
+#include "MDialogs.h"         // MDialog_YesNoDialog
 #include "gui/wxIconManager.h"
 #include "adb/AdbManager.h"   // for AdbManager::Delete
 
@@ -59,6 +58,8 @@
 #include <wx/mimetype.h>      // wxMimeTypesManager
 
 #include "wx/persctrl.h"      // for wxPControls::SetSettingsPath
+
+#include "wx/dirdlg.h"        // wxDirDialog
 
 #ifdef OS_UNIX
 #  include <unistd.h>
@@ -429,8 +430,8 @@ MAppBase::OnStartup()
       {
          if((*i)->length() == 0) // empty token
             continue;
-         DBGMESSAGE(("Opening folder '%s'...", (*i)->c_str()));
-         (void)wxFolderViewFrame::Create((**i), m_topLevelFrame);
+
+         OpenFolderViewFrame(**i, m_topLevelFrame);
       }
    }
 

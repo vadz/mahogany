@@ -15,6 +15,7 @@
 class MailFolder;
 class Profile;
 class ASMailFolder;
+class wxWindow;
 
 /**
    FolderView class, a window displaying a MailFolder.
@@ -77,7 +78,10 @@ private:
         *m_regCookieAppExit;
 };
 
+/// open a new frame containing the folder view of this folder
+extern bool OpenFolderViewFrame(const String& name, wxWindow *parent);
+
 /// show a dialog allowing to choose the order of headers in the folder view
-extern bool ConfigureFolderViewHeaders(class Profile *profile, class wxWindow *parent);
+extern bool ConfigureFolderViewHeaders(class Profile *profile, wxWindow *parent);
 
 #endif // FOLDERVIEW_H

@@ -179,11 +179,19 @@ public:
                  String const &date,
                  String const &size);
 
+   /// [de]select the given item
    void Select(long index, bool on = true)
       { SetItemState(index, on ? wxLIST_STATE_SELECTED : 0, wxLIST_STATE_SELECTED); }
 
+   /// select the item currently focused
+   void SelectFocused() { Select(GetFocusedItem(), true); }
+
+   /// focus the given item
    void Focus(long index)
-      { SetItemState(index, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED); }
+      {
+         m_itemFocus = index;
+         SetItemState(index, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
+      }
 
    /// get the next selected item after the given one (use -1 to start)
    long GetNextSelected(long item) const
@@ -205,23 +213,22 @@ public:
    bool IsSelected(long index)
       { return GetItemState(index,wxLIST_STATE_SELECTED) != 0; }
 
+   /// get the only selected item, return -1 if 0 or >= 2 items are selected
+   long GetUniqueSelection() const;
+
+   /// @name the event handlers
+   //@{
    void OnSelected(wxListEvent& event);
    void OnColumnClick(wxListEvent& event);
    void OnChar( wxKeyEvent &event);
    void OnRightClick(wxMouseEvent& event);
-   void OnDoubleClick(wxMouseEvent & /* event */);
+   void OnDoubleClick(wxMouseEvent &event);
    void OnActivated(wxListEvent& event);
    void OnCommandEvent(wxCommandEvent& event)
       { m_FolderView->OnCommandEvent(event); }
    void OnIdle(wxIdleEvent& event);
-
-   bool EnableSelectionCallbacks(bool enabledisable = true)
-      {
-         bool rc = m_SelectionCallbacks;
-         m_SelectionCallbacks = enabledisable;
-         return rc;
-      }
    void OnMouseMove(wxMouseEvent &event);
+   //@}
 
    /// goto next unread message, return true if found
    bool SelectNextUnread(void);
@@ -235,10 +242,6 @@ public:
    void SetPreviewOnSingleClick(bool flag)
       {
          m_PreviewOnSingleClick = flag;
-         if(m_PreviewOnSingleClick)
-            EnableSelectionCallbacks(true);
-         else
-            EnableSelectionCallbacks(false);
       }
 
    /// save the widths of the columns in profile if needed
@@ -266,9 +269,6 @@ protected:
    /// column numbers
    int m_columns[WXFLC_NUMENTRIES];
 
-   /// do we want OnSelect() callbacks?
-   bool m_SelectionCallbacks;
-
    /// do we preview a message on a single mouse click?
    bool m_PreviewOnSingleClick;
 
@@ -284,6 +284,7 @@ protected:
    /// and the folder submenu for it
    wxMenu *m_menuFolders;
 
+private:
    DECLARE_EVENT_TABLE()
 };
 
@@ -427,13 +428,14 @@ static wxArrayString UnpackWidths(const wxString& s)
 // ----------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
-   EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
-   EVT_CHAR              (wxFolderListCtrl::OnChar)
+   EVT_CHAR(wxFolderListCtrl::OnChar)
    EVT_LIST_ITEM_ACTIVATED(-1, wxFolderListCtrl::OnActivated)
-   EVT_RIGHT_DOWN( wxFolderListCtrl::OnRightClick)
+
    EVT_MENU(-1, wxFolderListCtrl::OnCommandEvent)
+
+   EVT_RIGHT_DOWN( wxFolderListCtrl::OnRightClick)
    EVT_LEFT_DCLICK(wxFolderListCtrl::OnDoubleClick)
-   EVT_MOTION (wxFolderListCtrl::OnMouseMove)
+   EVT_MOTION(wxFolderListCtrl::OnMouseMove)
 
    EVT_LIST_COL_CLICK(-1, wxFolderListCtrl::OnColumnClick)
 
@@ -506,95 +508,53 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          newFocus++;
    }
 
-   /** To allow translations:
-       Delete, Undelete, eXpunge, Copytofolder, Savetofile,
-       Movetofolder, ReplyTo, Forward, Open, Print, Show Headers,
-       View, Group reply (==followup)
-   */
-   const char keycodes_en[] = gettext_noop("DUXCSMRFOPHG ");
-   const char *keycodes = _(keycodes_en);
-
-   int idx = 0;
    int key = toupper((int)keyCode);
-   for(;keycodes[idx] && keycodes[idx] != key;idx++)
-      ;
-
-   // extra keys:
-   if(key == '#')
+   switch ( key )
    {
-      // # == expunge for VM compatibility
-      idx = 2;
+      case WXK_BACK:
+      case '*':
+         // leave as is
+         break;
+
+      case '#':
+         // # == expunge for VM compatibility
+         key = 'X';
+         break;
+
+      case WXK_DELETE:
+         // <Del> should delete
+         key = 'D';
+         break;
+
+      default: // translatable key?
+         {
+            /** To allow translations:
+
+                Delete, Undelete, eXpunge, Copytofolder, Savetofile,
+                Movetofolder, ReplyTo, Forward, Open, Print, Show Headers,
+                View, Group reply (== followup)
+            */
+            static const char keycodes_en[] = gettext_noop("DUXCSMRFOPHG");
+            static const char *keycodes = _(keycodes_en);
+
+            int idx = 0;
+            for ( ; keycodes[idx] && keycodes[idx] != key; idx++ )
+               ;
+
+            key = keycodes[idx] ? keycodes_en[idx] : 0;
+         }
    }
 
-   if(key == WXK_DELETE)
-   {
-      // delete
-      idx = 0;
-   }
-
-   // scroll up within the message viewer:
-   if(key == WXK_BACK)
-   {
-      if(m_FolderView->GetPreviewUId() == focused_uid)
-         m_FolderView->m_MessagePreview->PageUp();
-      event.Skip();
-      return;
-   }
-
-   if ( key == '*' )
-   {
-      // toggle the flagged status
-      m_FolderView->ToggleMessages(selections);
-      return;
-   }
-
-   switch(keycodes_en[idx])
+   switch ( key )
    {
       case 'M': // move = copy + delete
-         m_FolderView->SaveMessagesToFolder(selections, NULL, true);
-
-         // FIXME: no, it isn't worth it... there are plenty of other places
-         //        where messages are moved, so we should check for this at
-         //        much lower level - but there we don't have the profile any
-         //        more...
-#if 0
-         // careful here: DeleteOrTrashMessages() will expunge the folder if
-         // we're using trash possibly removing other messages from it as well
-         // if they had been marked as deleted before
-         //
-         // note that normally this won't happen as, if we use trash, there
-         // should be no deleted messages, but in the case it does (the
-         // messages could have been marked as deleted by external program or
-         // the user could have switched "Use Trash" option on only recently),
-         // warn about it
-         if ( (m_FolderView->m_nDeleted > 0) &&
-              READ_CONFIG(m_FolderView->m_Profile, MP_USE_TRASH_FOLDER) &&
-              MDialog_YesNoDialog
-              (
-               _("This folder contains some messages marked as deleted.\n"
-                 "If you choose to really move this message, they will be\n"
-                 "expunged together with the message(s) you move.\n"
-                 "\n"
-                 "Please select [Yes] to confirm this or [No] to just mark\n"
-                 "the moved message(s) as deleted and not expunge it neither."
-                 "\n"
-                 "Do you want to expunge all messages marked as deleted?"),
-               m_Parent,
-               MDIALOG_YESNOTITLE,
-               false, // [No] default
-               m_FolderView->GetFullPersistentKey(M_MSGBOX_MOVE_EXPUNGE_CONFIRM)
-              ) )
+         if ( !m_FolderView->SaveMessagesToFolder(selections, NULL, true) )
          {
-            // mark the messages as deleted only, don't expunge them
-            m_FolderView->GetFolder()->DeleteMessages(&selections, false);
-
-            // don't move focus but do update the selection info
-            m_FolderView->UpdateSelectionInfo();
+            // don't delete the messages if we couldn't save them!
             newFocus = -1;
 
             break;
          }
-#endif // 0
          // fall through
 
       case 'D': // delete
@@ -635,7 +595,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          m_FolderView->GetFolder()->ReplyMessages
             (
                &selections,
-               keycodes_en[idx] == 'G' ? MailFolder::REPLY_FOLLOWUP : 0,
+               key == 'G' ? MailFolder::REPLY_FOLLOWUP : 0,
                GetFrame(this),
                m_FolderView
             );
@@ -666,7 +626,30 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          newFocus = -1;
          break;
 
+      case '*':
+         // toggle the flagged status
+         m_FolderView->ToggleMessages(selections);
+
+         // don't move focus
+         newFocus = -1;
+         break;
+
+      case WXK_BACK:
+         // scroll up within the message viewer:
+         if ( m_FolderView->GetPreviewUId() == focused_uid )
+            m_FolderView->m_MessagePreview->PageUp();
+
+         // don't move focus
+         newFocus = -1;
+         break;
+
       default:
+         // all others should have been mapped to 0 in the code above
+         FAIL_MSG("unexpected key");
+
+         // fall through
+
+      case 0:
          // don't move focus
          newFocus = -1;
 
@@ -675,18 +658,6 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 
    if ( newFocus != -1 )
    {
-      // if we had exactly one selected message and we did something with it,
-      // the message should be unselected to either preview the next message
-      // immediately or allow previewing it simply by pressing space on the
-      // keyboard - if we don't unselect it, we can't preview the next message
-      // as the preview is only shown when we select the first message...
-      long item = GetNextSelected(-1);
-      if ( item != -1 && GetNextSelected(item) == -1 )
-      {
-         // there is exactly one item selected, unselect it
-         Select(item, false);
-      }
-
       // move focus
       Focus(newFocus);
       EnsureVisible(newFocus);
@@ -819,27 +790,6 @@ void wxFolderListCtrl::OnActivated(wxListEvent& event)
       m_FolderView->PreviewMessage(uid);
 }
 
-void wxFolderListCtrl::OnSelected(wxListEvent& event)
-{
-   // check if there is already a selected message, if so, don´t
-   // update the message view:
-   UIdArray selections;
-   if ( GetSelections(selections, true) != 1 )
-      return;
-
-   if ( m_SelectionCallbacks)
-   {
-      HeaderInfoList_obj hil = m_FolderView->GetFolder()->GetHeaders();
-      const HeaderInfo *hi = hil[event.m_itemIndex];
-      CHECK_RET( hi, "no header entry in wxFolderListCtrl" );
-
-      m_FolderView->UpdateSelectionInfo();
-
-      if ( m_PreviewOnSingleClick )
-        m_FolderView->PreviewMessage(hi->GetUId());
-   }
-}
-
 void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
 {
    // get the column which was clicked
@@ -950,7 +900,6 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
    m_profile->IncRef(); // we wish to keep it until dtor
    m_FolderView = fv;
-   m_SelectionCallbacks = true;
    m_Initialised = false;
    m_menu =
    m_menuFolders = NULL;
@@ -1050,6 +999,23 @@ wxFolderListCtrl::GetSelections(UIdArray &selections, bool nofocused) const
 long wxFolderListCtrl::GetFocusedItem() const
 {
    return GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
+}
+
+long wxFolderListCtrl::GetUniqueSelection() const
+{
+   long item = GetNextSelected(-1);
+   if ( item != -1 )
+   {
+      if ( GetNextSelected(item) != -1 )
+      {
+         // > 1 items selected
+         item = -1;
+      }
+      //else: exactly 1 item selected
+   }
+   //else: no items selected
+
+   return item;
 }
 
 UIdType
@@ -1607,18 +1573,8 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
 void
 wxFolderView::SetEntry(const HeaderInfo *hi, size_t index)
 {
-   String   line;
-   UIdType nsize;
-   unsigned day, month, year;
-   String sender, subject, size;
-   bool selected;
-
-   subject = wxString(' ', 3*hi->GetIndentation()) + hi->GetSubject();
-   nsize = day = month = year = 0;
-   size = strutil_ultoa(nsize);
-   selected = (m_SelectedUIds.Index(hi->GetUId()) != wxNOT_FOUND);
-
-   sender = hi->GetFrom();
+   String subject = wxString(' ', 3*hi->GetIndentation()) + hi->GetSubject();
+   String sender = hi->GetFrom();
 
    // optionally replace the "From" with "To: someone" for messages sent by
    // the user himself
@@ -1692,7 +1648,6 @@ wxFolderView::SetEntry(const HeaderInfo *hi, size_t index)
       m_nDeleted++;
    }
 
-   m_FolderCtrl->Select(index,selected);
    m_FolderCtrl->SetItemState
                  (
                   index,
@@ -1982,6 +1937,27 @@ wxFolderView::UpdateSelectionInfo(void)
       }
       //else: no status message
    }
+
+   // What we do here is to automatically preview the currently focused message
+   // if and only if there is exactly one item currently selected.
+   //
+   // Rationale: if there are no items selected, the user is just moving
+   // through the headers list and doesn't want to preview anything at all, so
+   // don't do anything. If there are 2 or more items selected, we shouldn't
+   // deselect them as it would cancel the users work which he did to select
+   // the messages in the first place. But if he just moved to the next
+   // message after previewing the previous one, he does want to preview it
+   // (unless "preview on select" option is off) but to do this he has to
+   // manually unselect the previously selected message and only then select
+   // this one (as selecting this one now won't preview it because it is not
+   // the first selected message, see OnSelected()!)
+   long curSel = m_FolderCtrl->GetUniqueSelection();
+   if ( curSel != -1 )
+   {
+      m_FolderCtrl->Select(curSel, false);
+
+      PreviewMessage(m_FocusedUId);
+   }
 }
 
 void wxFolderView::ExpungeMessages()
@@ -1999,6 +1975,14 @@ void wxFolderView::ExpungeMessages()
    else
    {
       wxLogWarning(_("No deleted messages - nothing to expunge"));
+   }
+}
+
+void wxFolderView::SelectAll(bool on)
+{
+   for ( size_t n = 0; n < m_NumOfMessages; n++ )
+   {
+      m_FolderCtrl->Select(n, on);
    }
 }
 
@@ -2175,21 +2159,11 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          break;
 
       case WXMENU_MSG_SELECTALL:
-      {
-         bool tmp = m_FolderCtrl->EnableSelectionCallbacks(false);
-         for ( size_t n = 0; n < m_NumOfMessages; n++ )
-            m_FolderCtrl->Select(n,TRUE);
-         m_FolderCtrl->EnableSelectionCallbacks(tmp);
+         SelectAll(true);
          break;
-      }
 
       case WXMENU_MSG_DESELECTALL:
-         {
-            bool tmp = m_FolderCtrl->EnableSelectionCallbacks(false);
-            for ( size_t n = 0; n < m_NumOfMessages; n++ )
-               m_FolderCtrl->Select(n,FALSE);
-            m_FolderCtrl->EnableSelectionCallbacks(tmp);
-         }
+         SelectAll(false);
          break;
 
       case WXMENU_HELP_CONTEXT:
@@ -2345,6 +2319,9 @@ wxFolderView::GetSelections(UIdArray& selections)
 void
 wxFolderView::PreviewMessage(long uid)
 {
+   // select the item we preview in the folder control
+   m_FolderCtrl->SelectFocused();
+
    m_MessagePreview->ShowMessage(m_ASMailFolder, uid);
    m_previewUId = uid;
 }
@@ -2706,25 +2683,26 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
          if( value )
          {
             UIdArray *ia = result->GetSequence();
-            msg.Printf(_("Found %lu messages."), (unsigned long)
-                       ia->Count());
-            bool tmp = m_FolderCtrl->EnableSelectionCallbacks(false);
+            unsigned long count = ia->Count();
+
             /* The returned message numbers are UIds which we must map
                to our listctrl indices via the current HeaderInfo
                structure. */
-            HeaderInfoList *hil = GetFolder()->GetHeaders();
-            for(unsigned long n = 0; n < ia->Count(); n++)
+            HeaderInfoList_obj hil = GetFolder()->GetHeaders();
+            for ( unsigned long n = 0; n < ia->Count(); n++ )
             {
                UIdType idx = hil->GetIdxFromUId((*ia)[n]);
-               if(idx != UID_ILLEGAL)
+               if ( idx != UID_ILLEGAL )
                   m_FolderCtrl->Select(idx);
             }
-            hil->DecRef();
-            m_FolderCtrl->EnableSelectionCallbacks(tmp);
 
+            msg.Printf(_("Found %lu messages."), count);
          }
          else
+         {
             msg.Printf(_("No matching messages found."));
+         }
+
          wxLogStatus(m_Frame, msg);
          break;
 
@@ -2802,7 +2780,6 @@ wxFolderViewFrame::InternalCreate(wxFolderView *fv, wxMFrame * /* parent */)
 
 wxFolderViewFrame *
 wxFolderViewFrame::Create(MailFolder *mf, wxMFrame *parent)
-
 {
    CHECK( mf, NULL, "NULL folder passed to wxFolderViewFrame::Create" );
 
@@ -2909,8 +2886,13 @@ wxFolderViewFrame::OnSize( wxSizeEvent & WXUNUSED(event) )
 IMPLEMENT_DYNAMIC_CLASS(wxFolderViewFrame, wxMFrame)
 
 // ----------------------------------------------------------------------------
-// other public functions
+// other public functions (from include/FolderView.h)
 // ----------------------------------------------------------------------------
+
+bool OpenFolderViewFrame(const String& name, wxWindow *parent)
+{
+   return wxFolderViewFrame::Create(name, (wxMFrame *)GetFrame(parent)) != NULL;
+}
 
 // TODO: this code probably should be updated to avoid writing columns width
 //       to the profile if the widths didn't change
