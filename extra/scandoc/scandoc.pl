@@ -93,9 +93,19 @@ exit;
 
 # Read a line of input, and remove blank lines and preprocessor directives.
 sub rdln {
-    while (/^(\s*|#.*)$/ && ($_ = <FILE>)) {}
+  my ($skip_next_line) = 0;
+  if (defined ($_)) {
+    my ($previous_line) = $_;
+    while ( (/^(\s*|\#.*)$/ || $skip_next_line ) && ($_ = <FILE>)) {
+      if ($previous_line =~ m/\\\s*/) { $skip_next_line = 1; }
+      else { $skip_next_line = 0; }
+      $previous_line = $_;
+      $linenumber++;
+      if ($debug) { print STDERR "(0:$srcfile) $linenumber.\n"; }
+    }
+  }
 }
-
+	   
 # Remove comments from current line
 sub removeComment	{
     s|//.*||;
