@@ -395,31 +395,31 @@ void MFolderFromProfile::SetFlags(int flags)
    profile->writeEntry(MP_FOLDER_TYPE, typeAndFlags);
 }
 
+class CountTraversal : public MFolderTraversal
+{
+public:
+  CountTraversal(const MFolderFromProfile *folder) : MFolderTraversal(*folder)
+    { m_count = 0; }
+  
+  virtual bool OnVisitFolder(const wxString& /* folderName */)
+    { m_count++; return TRUE; }
+  
+  size_t GetCount() const { return m_count; }
+  
+private:
+  size_t m_count;
+};
+
 size_t MFolderFromProfile::GetSubfolderCount() const
 {
-   class CountTraversal : public MFolderTraversal
-   {
-   public:
-      CountTraversal(const MFolderFromProfile *folder) : MFolderTraversal(*folder)
-         { m_count = 0; }
 
-      virtual bool OnVisitFolder(const wxString& /* folderName */)
-         { m_count++; return TRUE; }
+  CountTraversal  count(this);
+  // traverse but don't recurse into subfolders
+  count.Traverse(FALSE);
 
-      size_t GetCount() const { return m_count; }
-
-   private:
-      size_t m_count;
-   } count(this);
-
-   // traverse but don't recurse into subfolders
-   count.Traverse(FALSE);
-
-   return count.GetCount();
+  return count.GetCount();
 }
 
-MFolder *MFolderFromProfile::GetSubfolder(size_t n) const
-{
    class IndexTraversal : public MFolderTraversal
    {
    public:
@@ -444,8 +444,11 @@ MFolder *MFolderFromProfile::GetSubfolder(size_t n) const
    private:
       size_t   m_count;
       wxString m_folderName;
-   } index(this, n);
+   };
 
+MFolder *MFolderFromProfile::GetSubfolder(size_t n) const
+{
+   IndexTraversal  index(this, n);
    // don't recurse into subfolders
    if ( index.Traverse(FALSE) )
    {

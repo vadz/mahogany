@@ -394,20 +394,12 @@ UpgradeFrom010()
 #endif
 }
 
-static bool
-UpgradeFrom020()
-{
-   /* Config structure incompatible changes from 0.20a to 0.21a:
-      in the folder settings, HostName has become ServerName
-    */
 
-   // enumerate all folders recursively
-   MFolder_obj folderRoot("");
 
-   class FolderTraversal : public MFolderTraversal
+   class UpgradeFolderTraversal : public MFolderTraversal
    {
    public:
-      FolderTraversal(MFolder* folder) : MFolderTraversal(*folder)
+      UpgradeFolderTraversal(MFolder* folder) : MFolderTraversal(*folder)
          { }
 
       virtual bool OnVisitFolder(const wxString& folderName)
@@ -437,8 +429,18 @@ UpgradeFrom020()
 
          return TRUE;
       }
-   } traverse(folderRoot);
+   };
 
+static bool
+UpgradeFrom020()
+{
+   /* Config structure incompatible changes from 0.20a to 0.21a:
+      in the folder settings, HostName has become ServerName
+    */
+
+   // enumerate all folders recursively
+   MFolder_obj folderRoot("");
+   UpgradeFolderTraversal traverse(folderRoot);
    traverse.Traverse();
 
    // TODO it would be very nice to purge the redundant settings from config
