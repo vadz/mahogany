@@ -112,8 +112,19 @@ M_OVERRIDES(strict,strict compiler options,USE_STRICT,0,
 M_OVERRIDES(nls,i18n support,USE_I18N,1,
 --disable-nls           no internationalization support)
 
-M_OVERRIDES(python,Python scripting,USE_PYTHON,dynamic,
+M_OVERRIDES(python,Python scripting,USE_PYTHON,1,
 --with-python=xxx       one of none/static/dynamic)
+
+dnl choose how to use Python: normally, dynamic loading is preferred, but it
+dnl doesn't work under Mac (we need Python.bundle, but all we have is Python
+dnl framework which is a dylib and not a bundle)
+if test "$USE_PYTHON" = 1; then
+    if test "$USE_MAC" = 1; then
+	USE_PYTHON="static"
+    else
+	USE_PYTHON="dynamic"
+    fi
+fi
 
 case "$USE_PYTHON" in
     static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
@@ -824,6 +835,9 @@ esac
 dnl now check for the Python lib but only if linking statically
 case "$USE_PYTHON" in
 dynamic|Dynamic|DYNAMIC)
+	if test "$USE_MAC" = 1; then
+	    AC_MSG_ERROR([Dynamic Python loading is not supported under Mac OS])
+	fi
 	AC_DEFINE(USE_PYTHON_DYNAMIC)
 	;;
 
