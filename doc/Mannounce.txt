@@ -1,8 +1,8 @@
 A new release of `Mahogany' portable GUI email client has been made.
 ====================================================================
 
-Source and binaries for a of Linux and Unix systems as well
-as binaries for Win32 are available at
+Source and binaries for some of Unix (including Mac OS X) systems as
+well as binaries for Win32 are available at
 
      http://sourceforge.net/project/showfiles.php?group_id=3100
 
@@ -80,6 +80,7 @@ Key changes are:
 
 * new, more usable, composer
 * embedded Python interpreter works again
+* working Mac OS X version
 
 Some of new features:
 
