@@ -985,7 +985,7 @@ wxMApp::UpdateOnlineDisplay(void)
 }
 
 void
-wxMApp::UpdateStatusBar(int nfields, bool isminimum)
+wxMApp::UpdateStatusBar(int nfields, bool isminimum) const
 {
    ASSERT(nfields < SF_MAXIMUM);
    ASSERT(nfields >= 0);
@@ -1006,7 +1006,7 @@ wxMApp::UpdateStatusBar(int nfields, bool isminimum)
 }
 
 void
-wxMApp::UpdateOutboxStatus(void)
+wxMApp::UpdateOutboxStatus(void) const
 {
    ASSERT(m_topLevelFrame);
    

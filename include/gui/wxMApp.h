@@ -93,10 +93,10 @@ public:
    void OnConnected(wxDialUpEvent &event);
    void OnDisconnected(wxDialUpEvent &event);
    /// updates display of outbox status
-   virtual void UpdateOutboxStatus(void);
+   virtual void UpdateOutboxStatus(void) const;
 protected:
    /// makes sure the status bar has enough fields
-   virtual void UpdateStatusBar(int nfields, bool isminimum = FALSE);
+   virtual void UpdateStatusBar(int nfields, bool isminimum = FALSE) const;
    /// sets up the class handling dial up networking
    virtual void SetupOnlineManager(void);
    /** Common code for ThrEnter and ThrLeave, if enter==TRUE, enter,

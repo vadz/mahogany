@@ -844,8 +844,10 @@ MAppBase::SendOutbox(void) const
    // get name of SMTP outbox:
    String outbox = READ_APPCONFIG(MP_OUTBOX_NAME);
    SendOutbox(outbox, Prot_SMTP, true);
+   UpdateOutboxStatus();
    outbox << _(M_NEWSOUTBOX_POSTFIX);
    SendOutbox(outbox, Prot_NNTP, false);
+   UpdateOutboxStatus();
 }
 
 UIdType MAppBase::CheckOutbox(const String &outbox) const
@@ -972,7 +974,7 @@ MAppBase::SendOutbox(const String & outbox, Protocol protocol,
 
 
 int
-MAppBase::GetStatusField(enum StatusFields function)
+MAppBase::GetStatusField(enum StatusFields function) const
 {
    int field = 0;
    if( function > SF_STANDARD)

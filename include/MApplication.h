@@ -220,12 +220,13 @@ public:
    };
    /// return the number of the status bar field to use for a given
    /// function 
-   virtual int GetStatusField(enum StatusFields function);
+   virtual int GetStatusField(enum StatusFields function) const;
    /// updates display of outbox status
-   virtual void UpdateOutboxStatus(void) = 0;
+   virtual void UpdateOutboxStatus(void) const = 0;
 protected:
    /// makes sure the status bar has enough fields
-   virtual void UpdateStatusBar(int nfields, bool isminimum = FALSE) = 0;
+   virtual void UpdateStatusBar(int nfields, bool isminimum = FALSE)
+      const = 0;
    /// Send all messages from the outbox "name"
    void SendOutbox(const String &name, Protocol prot, bool checkOnline) const;
    /// Check if we have messages to send.
