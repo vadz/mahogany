@@ -87,21 +87,15 @@ public:
          m_EndDate = dt;
          // m_EndDate == dt --> no end date
       }
-   inline long int GetDayRepeat(void) const   { return m_DayRepeat; }
-   inline long int GetMonthRepeat(void) const { return m_MonthRepeat; }
-   inline long int GetYearRepeat(void) const  { return m_YearRepeat; }
 
-   inline void SetDayRepeat(long int d)   { m_DayRepeat = d; }
-   inline void SetWeekRepeat(long int w)  { SetDayRepeat(w*7); }
-   inline void SetMonthRepeat(long int m) { m_MonthRepeat = m; }
-   inline void SetYearRepeat(long int y)  { m_YearRepeat = y; }
+   long GetDayRepeat(void) const   { return m_DayRepeat; }
+   long GetMonthRepeat(void) const { return m_MonthRepeat; }
+   long GetYearRepeat(void) const  { return m_YearRepeat; }
 
-   inline void SetDayRepeatEnd(long int d)   { m_EndDate.SetDay(d); }
-   inline void SetMonthRepeatEnd(long int m)
-      {
-         m_EndDate.SetMonth((wxDateTime::Month)m);
-      }
-   inline void SetYearRepeatEnd(long int y)  { m_EndDate.SetYear(y); }
+   void SetDayRepeat(long int d)   { m_DayRepeat = d; }
+   void SetWeekRepeat(long int w)  { SetDayRepeat(w*7); }
+   void SetMonthRepeat(long int m) { m_MonthRepeat = m; }
+   void SetYearRepeat(long int y)  { m_YearRepeat = y; }
 
    bool HasEndDate(void) const
       {
@@ -119,11 +113,15 @@ public:
    const wxDateTime & GetEndDate(void) const { return m_EndDate; }
    void SetEndDate(const wxDateTime &dt) {  m_EndDate = dt; }
 
-   inline long int GetDayRepeatEnd(void) const   { return m_EndDate.GetDay(); }
-   inline long int GetMonthRepeatEnd(void) const { return m_EndDate.GetMonth(); }
-   inline long int GetYearRepeatEnd(void) const  { return m_EndDate.GetYear(); }
+   long GetDayRepeatEnd(void) const   { return m_EndDate.GetDay(); }
+   long GetMonthRepeatEnd(void) const { return m_EndDate.GetMonth(); }
+   long GetYearRepeatEnd(void) const  { return m_EndDate.GetYear(); }
+
 private:
-   long int m_DayRepeat, m_MonthRepeat, m_YearRepeat;
+   long m_DayRepeat,
+        m_MonthRepeat,
+        m_YearRepeat;
+
    wxDateTime m_EndDate;
 };
 
@@ -787,13 +785,20 @@ CalendarFrame::ParseDateLine(const wxString &line)
              &yre, &mre, &dre) != 9)
    {
       m_Module->ErrorMessage(_("Cannot parse date information."));
-      return wxDateTime::Today();
+
+      dt = wxDateTime::Today();
    }
-   dt.SetYear(year); dt.SetMonth((wxDateTime::Month)month); dt.SetDay(day);
-   dt.SetHour(0); dt.SetMinute(0); dt.SetSecond(0);
-   dt.SetMillisecond(0);
-   dt.SetYearRepeat(yr); dt.SetMonthRepeat(mr); dt.SetDayRepeat(dr);
-   dt.SetYearRepeatEnd(yre); dt.SetMonthRepeatEnd(mre); dt.SetDayRepeatEnd(dre);
+   else
+   {
+      dt.Set(day, (wxDateTime::Month)month, year);
+
+      dt.SetYearRepeat(yr);
+      dt.SetMonthRepeat(mr);
+      dt.SetDayRepeat(dr);
+
+      dt.SetEndDate(wxDateTime(dre, (wxDateTime::Month)mre, yre));
+   }
+
    return dt;
 }
 
