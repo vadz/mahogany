@@ -494,7 +494,7 @@ void TextViewer::ShowHeaderName(const String& name)
 {
    const ProfileValues& profileValues = GetOptions();
 
-   wxTextAttr attr(profileValues.HeaderNameCol);
+   MTextStyle attr(profileValues.HeaderNameCol);
    wxFont font = m_window->GetFont();
    font.SetWeight(wxFONTWEIGHT_BOLD);
    attr.SetFont(font);
@@ -515,7 +515,7 @@ void TextViewer::ShowHeaderValue(const String& value,
    if ( !col.Ok() )
       col = profileValues.FgCol;
 
-   wxTextAttr attr(col);
+   MTextStyle attr(col);
    if ( encoding != wxFONTENCODING_SYSTEM )
    {
       wxFont font = profileValues.GetFont(encoding);
@@ -533,7 +533,7 @@ void TextViewer::ShowHeaderURL(const String& text,
 
 void TextViewer::EndHeader()
 {
-   InsertText("\n", wxTextAttr());
+   InsertText("\n", MTextStyle());
 }
 
 void TextViewer::ShowXFace(const wxBitmap& bitmap)

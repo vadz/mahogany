@@ -19,6 +19,12 @@
 // just what we need here as it combines text colours and font info
 class MTextStyle : public wxTextAttr
 {
+public:
+    MTextStyle() { }
+    MTextStyle(const wxColour& colText,
+               const wxColour& colBack = wxNullColour,
+               const wxFont& font = wxNullFont)
+        : wxTextAttr(colText, colBack, font) { }
 };
 
 #endif // _MTEXTSTYLE_H_
