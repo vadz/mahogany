@@ -201,10 +201,21 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    {
       name = fv->GetProfile()->GetName();
       name << '/' << "FolderListCtrl";
+      // If there is no entry for the listctrl, force one by
+      // inheriting from NewMail folder.
+      String entry = fv->GetProfile()->readEntry("FolderListCtrl","");
+      if(! entry.Length())
+      {
+         String newMailFolder = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
+         ProfileBase   *p = ProfileBase::CreateProfile(newMailFolder);
+         fv->GetProfile()->writeEntry("FolderListCtrl",
+                                      p->readEntry("FolderListCtrl",""));
+         p->DecRef();
+      }
    }
    else
       name = "FolderListCtrl";
-   // name is relative to /Setting section, nothing we can do about
+   // Without profile, name is relative to /Setting section, nothing we can do about
    wxPListCtrl::Create(name, parent, -1,
                        wxDefaultPosition, wxSize(w,h), wxLC_REPORT);
 
@@ -426,7 +437,7 @@ wxFolderView::Update(void)
       return; // don't call this code recursively
    m_UpdateSemaphore = true;
 
-   wxWindow *focusWindow = wxWindow::FindFocus();
+//FIXME: does not work!!    wxWindow *focusWindow = wxWindow::FindFocus();
    
    wxBeginBusyCursor();
    wxSafeYield();
