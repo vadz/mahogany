@@ -213,7 +213,8 @@ protected:
    {
       Username,   // login name
       Password,   // password
-      Server,     // server (either POP3, IMAP4 or NNTP)
+      Server,     // server (for POP3 and IMAP4)
+      ServerNews, // server (for NNTP)
       Path,       // path for file based folders, newsgroup for NEWS/NNTP
       MaxProperty
    };
@@ -871,7 +872,8 @@ wxFolderPropertiesPage::WriteEntryIfChanged(FolderProperty property,
       MP_FOLDER_LOGIN,
       MP_FOLDER_PASSWORD,
       MP_FOLDER_HOST,
-      MP_FOLDER_PATH
+      MP_NNTPHOST,
+      MP_FOLDER_PATH,
    };
 
    if ( value != m_originalValues[property] )
@@ -1137,13 +1139,13 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
    if ( FolderTypeHasServer(typeFolder) )
    {
-      WriteEntryIfChanged(Server, m_server->GetValue());
+      WriteEntryIfChanged(typeFolder == Nntp ? ServerNews : Server,
+                          m_server->GetValue());
    }
 
    switch ( typeFolder )
    {
-
-   case POP:
+      case POP:
       case IMAP:
          WriteEntryIfChanged(Path, m_mailboxname->GetValue());
          break;
