@@ -758,12 +758,11 @@ wxMessageView::SetEncoding(wxFontEncoding encoding)
    }
 }
 
+// FIXME: this function is 565 lines long!!! split it!
 void
 wxMessageView::Update(void)
 {
-   char const * cptr;
    String tmp,from,url, fileName, disposition;
-   bool   lastObjectWasIcon = false; // a flag
    ClickableInfo *ci;
 
    wxLayoutList *llist = GetLayoutList();
@@ -783,37 +782,89 @@ wxMessageView::Update(void)
       llist->LineBreak();
    }
 
+   // retrieve all headers at once instead of calling Message::GetHeaderLine()
+   // many times: this is incomparably faster with remote servers (one round
+   // trip to server is much less expensive than a dozen of them!)
+   wxArrayString headerNames;
+
 #ifdef HAVE_XFACES
    if(m_ProfileValues.showFaces)
    {
-      m_mailMessage->GetHeaderLine("X-Face", tmp);
-      if(tmp.length() > 2)   //\r\n
-      {
-         xface = new XFace();
-         xface->CreateFromXFace(tmp.c_str());
-         if(xface->CreateXpm(&xfaceXpm))
-         {
-            llist->Insert(new wxLayoutObjectIcon(new wxBitmap(xfaceXpm)));
-            llist->LineBreak();
-         }
-      }
+      headerNames.Add("X-Face");
    }
 #endif // HAVE_XFACES
 
-   // show the configurable headers
-   wxFontEncoding encInHeaders = wxFONTENCODING_SYSTEM;
-   String headersString(READ_CONFIG(m_Profile, MP_MSGVIEW_HEADERS));
-   String headerName, headerValue;
-   for ( const char *p = headersString.c_str(); *p != '\0'; p++ )
+   // all the others the user configured
+   wxArrayString headersUser =
+      strutil_restore_array(':', READ_CONFIG(m_Profile, MP_MSGVIEW_HEADERS));
+
+   size_t n,
+          countUser = headersUser.GetCount();
+   
+   for ( n = 0; n < countUser; n++ )
    {
-      if ( *p == ':' )
+      const wxString& h = headersUser[n];
+
+      // these 2 headers are handled in special way in the loop below so we
+      // don't need to retrieve them here
+      //
+      // TODO: we probably should take subject, newsgroups, to, cc and bcc
+      //       from the envelope too as c-client does ask the server for them
+      //       even if we already have them locally
+      if ( h != "From" && h != "Date" )
+         headerNames.Add(h);
+   }
+
+   wxFontEncoding encInHeaders = wxFONTENCODING_SYSTEM;
+
+   size_t countHeaders = headerNames.GetCount();
+   if ( countHeaders )
+   {
+      const char **headerPtrs = new const char *[countHeaders + 1];
+
+      // have to copy the headers into a temp buffer unfortunately
+      for ( n = 0; n < countHeaders; n++ )
       {
-         // first get the value of this header
-         wxFontEncoding encHeader;
-         m_mailMessage->GetHeaderLine(headerName, headerValue, &encHeader);
+         headerPtrs[n] = headerNames[n].c_str();
+      }
+
+      headerPtrs[countHeaders] = NULL;
+
+      // get them all at once
+      wxArrayInt headerEncodings;
+      wxArrayString headerValues =
+         m_mailMessage->GetHeaderLines(headerPtrs, &headerEncodings);
+
+      delete [] headerPtrs;
+
+      // for the loop below
+      n = 0;
+
+      // show X-Face if any
+      if ( m_ProfileValues.showFaces )
+      {
+         wxString xfaceString = headerValues[n++];
+         if ( xfaceString.length() > 2 )   //\r\n
+         {
+            xface = new XFace();
+            xface->CreateFromXFace(xfaceString.c_str());
+            if(xface->CreateXpm(&xfaceXpm))
+            {
+               llist->Insert(new wxLayoutObjectIcon(new wxBitmap(xfaceXpm)));
+               llist->LineBreak();
+            }
+         }
+      }
+
+      // show the headers using the correct encoding now
+      wxString headerName, headerValue;
+      for ( ; n < countHeaders; n++ )
+      {
+         wxFontEncoding encHeader = (wxFontEncoding)headerEncodings[n];
+         headerName = headerNames[n];
 
          // we will usually detect the encoding in the headers properly (if a
-         // mailer does use RFC 2047, it will use it properly), but if we
+         // mailer does use RFC 2047, it will use it properly too), but if we
          // found none it might be because the mailer is broken and sends 8
          // bit strings (almost all Web mailers do!) in headers in which case
          // we shall take the user-specified encoding
@@ -836,9 +887,13 @@ wxMessageView::Update(void)
             // might return date in some format different from RFC822 one
             headerValue = m_mailMessage->Date();
          }
+         else // any other header
+         {
+            headerValue = headerValues[n];
+         }
 
          // don't show the header if there is no value
-         if ( !!headerValue )
+         if ( !headerValue.empty() )
          {
             // always terminate the header names with ": " - configurability
             // cannot be endless neither
@@ -867,12 +922,6 @@ wxMessageView::Update(void)
                GetLayoutList()->SetFontEncoding(wxFONTENCODING_DEFAULT);
             }
          }
-
-         headerName.Empty();
-      }
-      else
-      {
-         headerName += *p;
       }
    }
 
@@ -905,8 +954,8 @@ wxMessageView::Update(void)
    String specMsg;
 
    // iterate over all parts
-   int n = m_mailMessage->CountParts();
-   for ( int i = 0; i < n; i++ )
+   int countParts = m_mailMessage->CountParts();
+   for ( int i = 0; i < countParts; i++ )
    {
       String spec = m_mailMessage->GetPartSpec(i);
 
@@ -1041,7 +1090,7 @@ wxMessageView::Update(void)
          }
 
          unsigned long len;
-         cptr = m_mailMessage->GetPartContent(i, &len);
+         const char *cptr = m_mailMessage->GetPartContent(i, &len);
          if(cptr == NULL)
             continue; // error ?
          llist->LineBreak();
@@ -1139,7 +1188,6 @@ wxMessageView::Update(void)
                }
             }
             while( !strutil_isempty(tmp) );
-            lastObjectWasIcon = false;
 #undef SET_QUOTING_COLOR
 #undef SET_QUOTING_LEVEL
          }
@@ -1258,8 +1306,6 @@ wxMessageView::Update(void)
             // be broken:
             llist->Insert(" ");
          }
-
-         lastObjectWasIcon = true;
       }
    }
 
