@@ -458,6 +458,13 @@ private:
    void ProgressDelete();
    void IndicateDeleted();
 
+   static String GetExecuteProgressString(const String& s)
+   {
+      String msg;
+      msg << _("Executing filter actions...") << '\n' << s;
+      return msg;
+   }
+
    FilterRuleImpl *const m_parent;
    UIdArray& m_msgs;
 
@@ -3209,8 +3216,8 @@ FilterRuleApply::Run()
 
    // check if Cancel wasn't pressed (we'd exit the loop above by break then)
    if ( m_idx == m_msgs.GetCount() &&
-        (!m_pd || m_pd->Update(m_msgs.GetCount(),
-        _("Executing filter actions..."))) )
+        (!m_pd ||
+            m_pd->Update(m_msgs.GetCount(), GetExecuteProgressString(""))) )
    {
       if ( !LoopCopy() )
       {
@@ -3571,14 +3578,13 @@ FilterRuleApply::ProgressCopy()
    // we may copy more than one message initially - but it's ok, it's
    // better than slowing down towards the end, the users really hate
    // this!
-
    if ( m_pd )
    {
-      wxString message = _("Executing filter actions...") + '\n'
-         + wxString::Format(_("Copying messages to '%s'..."),
-            m_destinations[m_idx].c_str());
 
-      if( !m_pd->Update(m_msgs.GetCount() + m_idx, message) )
+      if( !m_pd->Update(m_msgs.GetCount() + m_idx,
+                        GetExecuteProgressString(
+                          wxString::Format(_("Copying messages to '%s'..."),
+                                           m_destinations[m_idx].c_str()))) )
       {
          return false;
       }
@@ -3648,8 +3654,7 @@ FilterRuleApply::ProgressDelete()
    if ( m_pd )
    {
       m_pd->Update(2*m_msgs.GetCount(),
-         String(_("Executing filter actions...")) + '\n'
-         + _("Deleting moved messages..."));
+                   GetExecuteProgressString(_("Deleting moved messages...")));
    }
 }
 
