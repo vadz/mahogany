@@ -138,13 +138,13 @@ private:
    DECLARE_NO_COPY_CLASS(wxFolderTemplatesDialog)
 };
 
-// the dialog for choosing/editing all templates of the given kind
-class wxAllTemplatesDialog : public wxManuallyLaidOutDialog
+// common base for wxAllTemplatesDialog and wxChooseTemplateDialog
+class wxTemplatesDialogBase : public wxManuallyLaidOutDialog
 {
 public:
-   wxAllTemplatesDialog(MessageTemplateKind kind,
-                        const TemplatePopupMenuItem& menu,
-                        wxWindow *parent);
+   wxTemplatesDialogBase(MessageTemplateKind kind,
+                         const TemplatePopupMenuItem& menu,
+                         wxWindow *parent);
 
    // get the value of the template chosen
    wxString GetTemplateValue() const;
@@ -152,20 +152,16 @@ public:
    // get the last template kind the user chose
    MessageTemplateKind GetTemplateKind() const { return m_kind; }
 
-   // called by wxWindows when [Ok] button was pressed
+   virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
    // callbacks
-   void OnAddTemplate(wxCommandEvent& event);
-   void OnDeleteTemplate(wxCommandEvent& event);
    void OnListboxSelection(wxCommandEvent& event);
-   void OnComboBoxChange(wxCommandEvent& event);
-   void OnUpdateUIDelete(wxUpdateUIEvent& event);
    void OnCancel(wxCommandEvent& event);
 
-private:
+protected:
    // helper function to get the correct title for the dialog
-   static wxString GetTemplateTitle(MessageTemplateKind kind);
+   virtual wxString GetTemplateTitle(MessageTemplateKind kind) const = 0;
 
    // set the template kind and update the dialog title to match it
    void SetTemplateKind(MessageTemplateKind kind);
@@ -196,6 +192,57 @@ private:
    wxTextCtrl *m_textctrl;
 
    DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxTemplatesDialogBase)
+};
+
+// the dialog for choosing template among all those of given kind
+class wxChooseTemplateDialog : public wxTemplatesDialogBase
+{
+public:
+   wxChooseTemplateDialog(MessageTemplateKind kind,
+                          const TemplatePopupMenuItem& menu,
+                          wxWindow *parent);
+
+protected:
+   // event handlers
+   void OnUpdateUIOk(wxUpdateUIEvent& event);
+   void OnListboxDoubleClick(wxCommandEvent& event);
+
+   virtual wxString GetTemplateTitle(MessageTemplateKind kind) const;
+
+private:
+   DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(wxChooseTemplateDialog)
+};
+
+// the dialog for editing/adding/deleting templates
+class wxAllTemplatesDialog : public wxTemplatesDialogBase
+{
+public:
+   wxAllTemplatesDialog(const TemplatePopupMenuItem& menu, wxWindow *parent);
+
+   virtual bool TransferDataFromWindow();
+
+protected:
+   // event handlers
+   void OnComboBoxChange(wxCommandEvent& event);
+   void OnAddTemplate(wxCommandEvent& event);
+   void OnDeleteTemplate(wxCommandEvent& event);
+   void OnUpdateUIDelete(wxUpdateUIEvent& event);
+
+
+   // helpers
+   static const wxChar *GetEditKindPath()
+   {
+      return _T("/") M_SETTINGS_CONFIG_SECTION _T("/TemplateEditKind");
+   }
+
+   static MessageTemplateKind GetKindLastEdited();
+
+   virtual wxString GetTemplateTitle(MessageTemplateKind kind) const;
+
+private:
+   DECLARE_EVENT_TABLE()
    DECLARE_NO_COPY_CLASS(wxAllTemplatesDialog)
 };
 
@@ -218,13 +265,23 @@ BEGIN_EVENT_TABLE(wxFolderTemplatesDialog, wxOptionsPageSubdialog)
    EVT_LISTBOX(-1, wxFolderTemplatesDialog::OnListboxSelection)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(wxAllTemplatesDialog, wxManuallyLaidOutDialog)
-   EVT_LISTBOX(-1, wxAllTemplatesDialog::OnListboxSelection)
+BEGIN_EVENT_TABLE(wxTemplatesDialogBase, wxManuallyLaidOutDialog)
+   EVT_LISTBOX(-1, wxTemplatesDialogBase::OnListboxSelection)
+
+   EVT_BUTTON(wxID_CANCEL, wxTemplatesDialogBase::OnCancel)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxChooseTemplateDialog, wxTemplatesDialogBase)
+   EVT_LISTBOX_DCLICK(-1, wxChooseTemplateDialog::OnListboxDoubleClick)
+
+   EVT_UPDATE_UI(wxID_OK, wxChooseTemplateDialog::OnUpdateUIOk)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxAllTemplatesDialog, wxTemplatesDialogBase)
    EVT_COMBOBOX(-1, wxAllTemplatesDialog::OnComboBoxChange)
 
    EVT_BUTTON(Button_Template_Add,    wxAllTemplatesDialog::OnAddTemplate)
    EVT_BUTTON(Button_Template_Delete, wxAllTemplatesDialog::OnDeleteTemplate)
-   EVT_BUTTON(wxID_CANCEL, wxAllTemplatesDialog::OnCancel)
 
    EVT_UPDATE_UI(Button_Template_Delete, wxAllTemplatesDialog::OnUpdateUIDelete)
 END_EVENT_TABLE()
@@ -308,12 +365,12 @@ void TemplateEditor::OnMenu(wxCommandEvent& event)
 
          // quote the value if needed - that is if it contains anything but
          // alphanumeric characters
-         bool needsQuotes = FALSE;
+         bool needsQuotes = false;
          for ( const wxChar *pc = value.c_str(); *pc; pc++ )
          {
             if ( !wxIsalnum(*pc) )
             {
-               needsQuotes = TRUE;
+               needsQuotes = true;
 
                break;
             }
@@ -493,7 +550,7 @@ void wxFolderTemplatesDialog::UpdateText()
 
 void wxFolderTemplatesDialog::SaveChanges()
 {
-   m_wasChanged = TRUE;
+   m_wasChanged = true;
 
    // TODO: give the user the possibility to change the auto generated name
    wxString name;
@@ -536,25 +593,232 @@ bool wxFolderTemplatesDialog::TransferDataFromWindow()
       SaveChanges();
    }
 
-   return TRUE;
+   return true;
+}
+
+// ----------------------------------------------------------------------------
+// wxTemplatesDialogBase
+// ----------------------------------------------------------------------------
+
+wxTemplatesDialogBase::wxTemplatesDialogBase(MessageTemplateKind kind,
+                                             const TemplatePopupMenuItem& menu,
+                                             wxWindow *parent)
+                    : wxManuallyLaidOutDialog(parent, _T(""), _T("AllTemplates"))
+{
+   m_kind = kind;
+
+   SetDefaultSize(6*wBtn, 10*hBtn);
+}
+
+bool wxTemplatesDialogBase::TransferDataToWindow()
+{
+   SetTemplateKind(m_kind);
+
+   UpdateText();
+
+   return true;
+}
+
+bool wxTemplatesDialogBase::TransferDataFromWindow()
+{
+   if ( m_textctrl->IsModified() )
+   {
+      // we were editing something, save the changes
+      SaveChanges();
+   }
+
+   return true;
+}
+
+void wxTemplatesDialogBase::FillListBox()
+{
+   wxArrayString names = GetMessageTemplateNames(m_kind);
+   size_t count = names.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      m_listbox->Append(names[n]);
+   }
+}
+
+wxString wxTemplatesDialogBase::GetTemplateValue() const
+{
+   wxString value;
+   if ( !!m_name )
+   {
+      value = GetMessageTemplate(m_kind, m_name);
+   }
+
+   return value;
+}
+
+void wxTemplatesDialogBase::SaveChanges()
+{
+   wxASSERT_MSG( !!m_name, _T("shouldn't try to save") );
+
+   SetMessageTemplate(m_name, m_textctrl->GetValue(), m_kind, NULL);
+}
+
+void wxTemplatesDialogBase::UpdateText()
+{
+   int sel = m_listbox->GetSelection();
+   if ( sel == -1 )
+   {
+      m_textctrl->Clear();
+      m_textctrl->Enable(false);
+
+      m_name.clear();
+   }
+   else // we have selection
+   {
+      m_name = m_listbox->GetString(sel);
+      String value = GetMessageTemplate(m_kind, m_name);
+
+      m_textctrl->Enable(true);
+      m_textctrl->SetValue(value);
+   }
+
+   // in any case, we changed it, not the user
+   m_textctrl->DiscardEdits();
+}
+
+void wxTemplatesDialogBase::CheckForChanges()
+{
+   if ( m_textctrl->IsModified() )
+   {
+      // save it if the user doesn't veto it
+      String msg;
+      msg.Printf(_("You have modified the template '%s', "
+                   "would you like to save it?"),
+                 m_name.c_str());
+      if ( MDialog_YesNoDialog(msg, this,
+                               MDIALOG_YESNOTITLE,
+                               M_DLG_YES_DEFAULT,
+                               M_MSGBOX_SAVE_TEMPLATE) )
+      {
+         SaveChanges();
+      }
+   }
+}
+
+void wxTemplatesDialogBase::SetTemplateKind(MessageTemplateKind kind)
+{
+   m_kind = kind;
+
+   SetTitle(GetTemplateTitle(m_kind));
+}
+
+void wxTemplatesDialogBase::OnListboxSelection(wxCommandEvent& /* event */)
+{
+   CheckForChanges();
+
+   UpdateText();
+}
+
+void wxTemplatesDialogBase::OnCancel(wxCommandEvent& event)
+{
+   CheckForChanges();
+
+   event.Skip();
+}
+
+// ----------------------------------------------------------------------------
+// wxChooseTemplateDialog
+// ----------------------------------------------------------------------------
+
+wxChooseTemplateDialog::wxChooseTemplateDialog(MessageTemplateKind kind,
+                                               const TemplatePopupMenuItem& menu,
+                                               wxWindow *parent)
+                      : wxTemplatesDialogBase(kind, menu, parent)
+{
+   // create the controls
+   // -------------------
+
+   // first the box around everything
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Choose the template to use:"));
+
+   // on the left side there is a listbox with all available templates for kind
+   m_listbox = new wxPListBox(_T("AllTemplates"), this, -1);
+
+   // on the right of listbox there is a text control
+   m_textctrl = new TemplateEditor(menu, this);
+
+   // fill the listbox now to let it auto adjust the width before setting the
+   // constraints
+   FillListBox();
+
+
+   // now lay them out
+   // ----------------
+
+   wxLayoutConstraints *c;
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   m_listbox->SetConstraints(c);
+
+   c = new wxLayoutConstraints;
+   c->top.SameAs(m_listbox, wxTop);
+   c->bottom.SameAs(m_listbox, wxBottom);
+   c->left.RightOf(m_listbox, LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   m_textctrl->SetConstraints(c);
+}
+
+void wxChooseTemplateDialog::OnUpdateUIOk(wxUpdateUIEvent& event)
+{
+   event.Enable( m_listbox->GetSelection() != -1 );
+}
+
+void wxChooseTemplateDialog::OnListboxDoubleClick(wxCommandEvent& /* event */)
+{
+   EndModal(wxID_OK);
+}
+
+wxString
+wxChooseTemplateDialog::GetTemplateTitle(MessageTemplateKind kind) const
+{
+   wxString title, what;
+   switch ( kind )
+   {
+      case MessageTemplate_NewMessage:
+         what = _("the new message");
+         break;
+
+      case MessageTemplate_NewArticle:
+         what = _("the new article");
+         break;
+
+      case MessageTemplate_Reply:
+         what = _("the reply");
+         break;
+
+      case MessageTemplate_Followup:
+         what = _("the follow up");
+         break;
+
+      case MessageTemplate_Forward:
+         what = _("the forwarded message");
+         break;
+
+      default:
+         FAIL_MSG(_T("unknown template kind"));
+   }
+
+   title.Printf(_("Please choose template for %s"), what.c_str());
+
+   return title;
 }
 
 // ----------------------------------------------------------------------------
 // wxAllTemplatesDialog
 // ----------------------------------------------------------------------------
 
-wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
-                                           const TemplatePopupMenuItem& menu,
+wxAllTemplatesDialog::wxAllTemplatesDialog(const TemplatePopupMenuItem& menu,
                                            wxWindow *parent)
-                    : wxManuallyLaidOutDialog(parent, _T(""), _T("AllTemplates"))
+                    : wxTemplatesDialogBase(GetKindLastEdited(), menu, parent)
 {
-   // init member vars
-   // ----------------
-
-   SetTemplateKind(kind);
-
-   // layout the controls
-   // -------------------
    wxLayoutConstraints *c;
 
    // first the box around everything
@@ -597,7 +861,7 @@ wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
    c = new wxLayoutConstraints;
    c->top.Below(msg, 2*LAYOUT_Y_MARGIN);
    c->left.SameAs(msg, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->width.AsIs();
+   c->width.SameAs(m_listbox, wxWidth);
    c->height.AsIs();
    combo->SetConstraints(c);
 
@@ -612,7 +876,7 @@ wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
    c = new wxLayoutConstraints;
    c->top.Below(combo, 2*LAYOUT_Y_MARGIN);
    c->left.SameAs(msg, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->width.SameAs(combo, wxWidth);
+   c->width.AsIs();
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_listbox->SetConstraints(c);
 
@@ -639,23 +903,42 @@ wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
    c->left.RightOf(m_listbox, LAYOUT_X_MARGIN);
    c->right.LeftOf(m_btnAdd, 2*LAYOUT_X_MARGIN);
    m_textctrl->SetConstraints(c);
-
-   SetDefaultSize(6*wBtn, 10*hBtn);
-
-   UpdateText();
 }
 
-void wxAllTemplatesDialog::FillListBox()
+/* static */
+MessageTemplateKind wxAllTemplatesDialog::GetKindLastEdited()
 {
-   wxArrayString names = GetMessageTemplateNames(m_kind);
-   size_t count = names.GetCount();
-   for ( size_t n = 0; n < count; n++ )
+   wxConfigBase *config = wxConfigBase::Get();
+
+   long kindLastEdited = config ? config->Read(GetEditKindPath(),
+                                                   (long)MessageTemplate_Reply)
+                                : MessageTemplate_Reply;
+   if ( kindLastEdited < 0 || kindLastEdited >= MessageTemplate_Max )
    {
-      m_listbox->Append(names[n]);
+      wxLogDebug(_T("Corrupted TemplateEditKind entry in config."));
+
+      kindLastEdited = MessageTemplate_Reply;
    }
+
+   return (MessageTemplateKind)kindLastEdited;
 }
 
-wxString wxAllTemplatesDialog::GetTemplateTitle(MessageTemplateKind kind)
+bool wxAllTemplatesDialog::TransferDataFromWindow()
+{
+   if ( !wxTemplatesDialogBase::TransferDataFromWindow() )
+      return false;
+
+   // remember the last edited template category
+   wxConfigBase *config = wxConfigBase::Get();
+   if ( config )
+   {
+      config->Write(GetEditKindPath(), GetTemplateKind());
+   }
+
+   return true;
+}
+
+wxString wxAllTemplatesDialog::GetTemplateTitle(MessageTemplateKind kind) const
 {
    wxString title, what;
    switch ( kind )
@@ -665,7 +948,7 @@ wxString wxAllTemplatesDialog::GetTemplateTitle(MessageTemplateKind kind)
          break;
 
       case MessageTemplate_NewArticle:
-         what = _("composing newsgroup articles ");
+         what = _("composing newsgroup articles");
          break;
 
       case MessageTemplate_Reply:
@@ -689,73 +972,6 @@ wxString wxAllTemplatesDialog::GetTemplateTitle(MessageTemplateKind kind)
    return title;
 }
 
-wxString wxAllTemplatesDialog::GetTemplateValue() const
-{
-   wxString value;
-   if ( !!m_name )
-   {
-      value = GetMessageTemplate(m_kind, m_name);
-   }
-
-   return value;
-}
-
-void wxAllTemplatesDialog::SaveChanges()
-{
-   wxASSERT_MSG( !!m_name, _T("shouldn't try to save") );
-
-   SetMessageTemplate(m_name, m_textctrl->GetValue(), m_kind, NULL);
-}
-
-void wxAllTemplatesDialog::UpdateText()
-{
-   int sel = m_listbox->GetSelection();
-   if ( sel == -1 )
-   {
-      m_textctrl->Clear();
-      m_textctrl->Enable(FALSE);
-
-      m_name.clear();
-   }
-   else // we have selection
-   {
-      m_name = m_listbox->GetString(sel);
-      String value = GetMessageTemplate(m_kind, m_name);
-
-      m_textctrl->Enable(TRUE);
-      m_textctrl->SetValue(value);
-   }
-
-   // in any case, we changed it, not the user
-   m_textctrl->DiscardEdits();
-}
-
-void wxAllTemplatesDialog::CheckForChanges()
-{
-   if ( m_textctrl->IsModified() )
-   {
-      // save it if the user doesn't veto it
-      String msg;
-      msg.Printf(_("You have modified the template '%s', "
-                   "would you like to save it?"),
-                 m_name.c_str());
-      if ( MDialog_YesNoDialog(msg, this,
-                               MDIALOG_YESNOTITLE,
-                               M_DLG_YES_DEFAULT,
-                               M_MSGBOX_SAVE_TEMPLATE) )
-      {
-         SaveChanges();
-      }
-   }
-}
-
-void wxAllTemplatesDialog::SetTemplateKind(MessageTemplateKind kind)
-{
-   m_kind = kind;
-
-   SetTitle(GetTemplateTitle(m_kind));
-}
-
 void wxAllTemplatesDialog::OnComboBoxChange(wxCommandEvent& event)
 {
    CheckForChanges();
@@ -765,33 +981,6 @@ void wxAllTemplatesDialog::OnComboBoxChange(wxCommandEvent& event)
    m_listbox->Clear();
    FillListBox();
    UpdateText();
-}
-
-void wxAllTemplatesDialog::OnListboxSelection(wxCommandEvent& /* event */)
-{
-   CheckForChanges();
-
-   UpdateText();
-}
-
-void wxAllTemplatesDialog::OnDeleteTemplate(wxCommandEvent& /* event */)
-{
-   wxASSERT_MSG( !!m_name, _T("shouldn't try to delete") );
-
-   String msg;
-   msg.Printf(_("Do you really want to delete the template '%s'?"),
-              m_name.c_str());
-   if ( MDialog_YesNoDialog(msg, this,
-                            MDIALOG_YESNOTITLE,
-                            M_DLG_NO_DEFAULT,
-                            M_MSGBOX_DELETE_TEMPLATE) )
-   {
-      m_listbox->Delete(m_listbox->GetSelection());
-
-      DeleteMessageTemplate(m_kind, m_name);
-
-      UpdateText();
-   }
 }
 
 void wxAllTemplatesDialog::OnAddTemplate(wxCommandEvent& /* event */)
@@ -818,28 +1007,30 @@ void wxAllTemplatesDialog::OnAddTemplate(wxCommandEvent& /* event */)
    m_textctrl->DiscardEdits();
 }
 
-void wxAllTemplatesDialog::OnCancel(wxCommandEvent& event)
+void wxAllTemplatesDialog::OnDeleteTemplate(wxCommandEvent& /* event */)
 {
-   CheckForChanges();
+   wxASSERT_MSG( !!m_name, _T("shouldn't try to delete") );
 
-   event.Skip();
+   String msg;
+   msg.Printf(_("Do you really want to delete the template '%s'?"),
+              m_name.c_str());
+   if ( MDialog_YesNoDialog(msg, this,
+                            MDIALOG_YESNOTITLE,
+                            M_DLG_NO_DEFAULT,
+                            M_MSGBOX_DELETE_TEMPLATE) )
+   {
+      m_listbox->Delete(m_listbox->GetSelection());
+
+      DeleteMessageTemplate(m_kind, m_name);
+
+      UpdateText();
+   }
 }
 
 void wxAllTemplatesDialog::OnUpdateUIDelete(wxUpdateUIEvent& event)
 {
    // only enable delete button if some template was chosen
    event.Enable(!!m_name);
-}
-
-bool wxAllTemplatesDialog::TransferDataFromWindow()
-{
-   if ( m_textctrl->IsModified() )
-   {
-      // we were editing something, save the changes
-      SaveChanges();
-   }
-
-   return TRUE;
 }
 
 // ----------------------------------------------------------------------------
@@ -862,7 +1053,7 @@ String ChooseTemplateFor(MessageTemplateKind kind,
                          const TemplatePopupMenuItem& menu)
 {
    wxString value;
-   wxAllTemplatesDialog dlg(kind, menu, parent);
+   wxChooseTemplateDialog dlg(kind, menu, parent);
    if ( dlg.ShowModal() == wxID_OK )
    {
       value = dlg.GetTemplateValue();
@@ -875,26 +1066,7 @@ String ChooseTemplateFor(MessageTemplateKind kind,
 void EditTemplates(wxWindow *parent,
                    const TemplatePopupMenuItem& menu)
 {
-   String path;
-   path << _T('/') << M_SETTINGS_CONFIG_SECTION << _T("/TemplateEditKind");
-
-   wxConfigBase *config = wxConfigBase::Get();
-
-   long
-      kindLastEdited = config ? config->Read(path, (long)MessageTemplate_Reply)
-                              : MessageTemplate_Reply;
-   if ( kindLastEdited < 0 || kindLastEdited >= MessageTemplate_Max )
-   {
-      wxLogDebug(_T("Corrupted TemplateEditKind entry in config."));
-
-      kindLastEdited = MessageTemplate_Reply;
-   }
-
-   wxAllTemplatesDialog dlg((MessageTemplateKind)kindLastEdited, menu, parent);
-
-   if ( dlg.ShowModal() == wxID_OK && config )
-   {
-      config->Write(path, dlg.GetTemplateKind());
-   }
+   wxAllTemplatesDialog dlg(menu, parent);
+   (void)dlg.ShowModal();
 }
 
