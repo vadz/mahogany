@@ -20,7 +20,7 @@
 // ----------------------------------------------------------------------------
 
 /// a magic value for MObject
-#define   MOBJECT_MAGIC   0x12345678
+#define   MOBJECT_MAGIC   1234567890
 
 /**
   This class uses reference counting.

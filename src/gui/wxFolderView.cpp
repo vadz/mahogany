@@ -255,7 +255,8 @@ wxFolderView::~wxFolderView()
 {
    if(initialised)
    {
-      if(mailFolder) { // mark messages as seen
+      if(mailFolder)
+      { // mark messages as seen
          for(int i = 0; i < m_NumOfMessages; i++)
             mailFolder->SetMessageFlag(i, MSG_STAT_UNREAD, false);
       }
@@ -540,9 +541,9 @@ wxFolderViewFrame::wxFolderViewFrame(const String &folderName, wxFrame *parent)
    m_FolderView = new wxFolderView(folderName,this);
    if ( m_FolderView->IsInitialised() )
       Show(true);
-   else {
+   else
+   {
       delete m_FolderView;
-
       Close(true);
    }
 }

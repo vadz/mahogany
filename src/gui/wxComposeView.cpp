@@ -349,13 +349,13 @@ wxComposeView::CreateFTCanvas(void)
       fg = READ_CONFIG(m_Profile,MP_FTEXT_FGCOLOUR),
       bg = READ_CONFIG(m_Profile,MP_FTEXT_BGCOLOUR);
    
-   m_LayoutWindow->Clear(READ_CONFIG(m_Profile,MP_FTEXT_FONT),
-                         READ_CONFIG(m_Profile,MP_FTEXT_SIZE),
-                         READ_CONFIG(m_Profile,MP_FTEXT_STYLE),
-                         READ_CONFIG(m_Profile,MP_FTEXT_WEIGHT),
-                         0,
-                         fg.c_str(),bg.c_str());
-
+   m_LayoutWindow->Clear(
+      READ_CONFIG(m_Profile,(int)MP_FTEXT_FONT),
+      READ_CONFIG(m_Profile,(int)MP_FTEXT_SIZE),
+      READ_CONFIG(m_Profile,(int)MP_FTEXT_STYLE),
+      READ_CONFIG(m_Profile,(int)MP_FTEXT_WEIGHT),
+      0,
+      fg.c_str(),bg.c_str());
    m_LayoutWindow->GetLayoutList().SetEditable(true);
    //FIXMEm_LayoutWindow->SetWrapMargin(READ_CONFIG(profile, MP_COMPOSE_WRAPMARGIN));
 }

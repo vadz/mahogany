@@ -105,7 +105,8 @@ KBLIST_DEFINE(AdbExpandListType, AdbEntry);
 /**
    Adb: an address database class
 */
-class Adb : public CommonBase{
+class Adb
+{
 private:
    String   fileName;
    AdbEntryListType *list;
@@ -138,8 +139,6 @@ public:
       { return list->begin(); }
    unsigned size(void)
       { return list->size(); }
-   
-   CB_DECLARE_CLASS(Adb, CommonBase);
 };
 
 //@}

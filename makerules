@@ -15,6 +15,12 @@
 %cmodule.so: %.o
 	$(CXX) -shared $< -lswigpy -o $(ODIR)/$@
 
+%.dvi: %.tex
+	$(LATEX) $<
+
+%.ps: %.dvi
+	$(DVIPS) $< -o $@
+
 dep depend:
 	$(CXX) -MM $(CXXFLAGS) $(SRC) >.depend
 #	$(CC) -MM $(CXXFLAGS) $(CSRC) >>.depend

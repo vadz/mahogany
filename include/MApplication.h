@@ -31,7 +31,7 @@
    Application class, doing all non-GUI application specific stuff
 */
 
-class MAppBase : public CommonBase
+class MAppBase
 {
 protected:
    /// the application's toplevel window
@@ -51,9 +51,6 @@ protected:
    // global variables stored in the application object
    // -------------------------------------------------
 
-   /// the config manager which creates/retrieves file config objects
-   ConfigFileManager *m_cfManager;
-
    /** Checks some global configuration settings and makes sure they
        have sensible values. Especially important when M is run for
        the first time.
@@ -64,7 +61,7 @@ protected:
 
 public:
    MAppBase(void);
-   ~MAppBase();
+   virtual ~MAppBase();
 
    /** create the main application window
        This function gets called after the windowing toolkit has been
@@ -139,9 +136,6 @@ public:
    */
    ProfileBase *GetProfile(void) { return m_profile; }
 
-   /** Get the global config manager */
-   ConfigFileManager& GetConfigManager() const { return *m_cfManager; }
-
    /** Toggle display of log output window
        @param display true to show it
    */
@@ -149,8 +143,6 @@ public:
 
    /// return a pointer to the IconManager:
    virtual class wxIconManager *GetIconManager(void) const = 0;
-
-   CB_DECLARE_CLASS(MApplication, CommonBase)
 };
 
 extern MAppBase *mApplication;

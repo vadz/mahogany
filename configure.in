@@ -20,6 +20,9 @@ AC_CONFIG_HEADER(include/config.h)
 AC_CONFIG_AUX_DIR(extra/scripts)
 
 
+dnl --------------------------------------------------------------------------
+dnl overrides, all --with/--without options
+dnl --------------------------------------------------------------------------
 M_OVERRIDES_PREPARE
 
 DEFAULT_USE_EFENCE=0
@@ -27,6 +30,8 @@ DEFAULT_USE_DMALLOC=1
 DEFAULT_USE_DEBUG=1
 DEFAULT_USE_PYTHON=1
 DEFAULT_USE_THREADS=1
+DEFAULT_USE_KDOC=0
+DEFAULT_USE_DOCXX=1
 
 M_OVERRIDES(python,python,
 --with-python   use python scripting,
@@ -48,9 +53,17 @@ M_OVERRIDES(debug,debug,
 --with-debug    use debug info/code,
 USE_DEBUG)
 
-MAKE_LOCAL_LIBS_DEFINE="junk"
+M_OVERRIDES(kdoc,kdoc,
+--with-kdoc   use kdoc for documentation,
+USE_KDOC)
 
-dnl system check
+M_OVERRIDES(docxx,docxx,
+--with-docxx   use doc++ for documentation,
+USE_DOCXX)
+
+dnl --------------------------------------------------------------------------
+dnl testing operating system and compilers
+dnl --------------------------------------------------------------------------
 
 AC_CANONICAL_HOST
 
@@ -108,22 +121,33 @@ AC_ISC_POSIX
 
 AC_LANG_CPLUSPLUS
 
+dnl
+dnl Here we disable support for exceptions if the compiler is gcc and
+dnl new enough to support it.
+dnl
 AC_PATH_PROG(GREP, grep)
-dnl this should be done for GXX, but we assume CC and CXX to be the same
-CFLAGS=`echo "$CFLAGS" | sed 's/-g//g'`
 if test "$GCC" = "yes"
 then
-	AC_MSG_CHECKING(for new gcc or egcs)
+	dnl first, for gcc set our own debug flags
+	CFLAGS=`echo "$CFLAGS" | sed 's/-g//g'`
+	CXXFLAGS=`echo "$CXXFLAGS" | sed 's/-g//g'`
+
+	dnl now check for exception disabling
+	AC_MSG_CHECKING(for gcc with 2.8 style options)
 	CFLAGS="$CFLAGS -DCC_GCC -Wall -pedantic "
 	CXXFLAGS="$CXXFLAGS -DCC_GCC -Wall -pedantic "
 	newgcc=
-	$CC -v 2>&1 | $GREP 2.8 >/dev/null
+	dnl is it gcc 2.8 or newer?
+	$CXX -v 2>&1 | $GREP 2.8 >/dev/null
 	if test $? = 0 ; then newgcc=yes ; fi
-	$CC -v 2>&1 | $GREP egcs >/dev/null
+	dnl is it egcs?
+	$CXX -v 2>&1 | $GREP egcs >/dev/null
+	if test $? = 0 ; then newgcc=yes ; fi
+	dnl or is it pgcc?
+	$CXX -v 2>&1 | $GREP pgcc >/dev/null
 	if test $? = 0 ; then newgcc=yes ; fi
 	if test "x$newgcc" = "xyes"
 	then
-		CFLAGS="$CFLAGS -fno-exceptions "
 		CXXFLAGS="$CXXFLAGS -fno-exceptions "
 		AC_MSG_RESULT(yes)
 	else
@@ -131,16 +155,35 @@ then
 	fi
 fi
 
-dnl some extra paths
+dnl --------------------------------------------------------------------------
+dnl add our extra directories to the search path
+dnl --------------------------------------------------------------------------
+
+dnl set the top level directory
 BUILDDIR=`pwd`
 AC_SUBST(BUILDDIR)
+
+dnl set the extra include and lib directories
 LDFLAGS="$LDFLAGS -L$BUILDDIR/extra/lib"
 CPPFLAGS="$CPPFLAGS -D__WXGTK__ -I$BUILDDIR/extra/include"
 
+dnl add all extra/src directories to the search paths
+EXTRA_SRC_LIB=
+EXTRA_SRC_INC=
+for i in `pwd`/extra/src/*
+do
+	LIBS="$LIBS -L$i"
+	CPPFLAGS="$CPPFLAGS -I$i"
+done
 
-dnl we use C++ so we always have prototypes
+dnl --------------------------------------------------------------------------
+dnl check for featurs and functions
+dnl --------------------------------------------------------------------------
+
+dnl we use C++ so we always have prototypes - Python.h needs this
 AC_DEFINE(HAVE_PROTOTYPES)
 
+dnl used by python
 works=no
 AC_MSG_CHECKING(for variable length prototypes and stdarg.h)
 AC_TRY_COMPILE([
@@ -158,21 +201,12 @@ AC_DEFINE(HAVE_STDARG_PROTOTYPES) works=yes)
 AC_MSG_RESULT($works)
 
 if test "$have_prototypes" = yes; then
-bad_prototypes=no
-AC_MSG_CHECKING(for bad exec* prototypes)
-AC_TRY_COMPILE([#include <unistd.h>], [char **t;execve("@",t,t);], ,
+	bad_prototypes=no
+	AC_MSG_CHECKING(for bad exec* prototypes)
+	AC_TRY_COMPILE([#include <unistd.h>], [char **t;execve("@",t,t);], ,
 	AC_DEFINE(BAD_EXEC_PROTOTYPES) bad_prototypes=yes)
-AC_MSG_RESULT($bad_prototypes)
+	AC_MSG_RESULT($bad_prototypes)
 fi
-
-if test "$USE_WXSTRING" = 1; then
-  AC_DEFINE(USE_WXSTRING)
-fi
-
-if test "$USE_WXCONFIG" = 1; then
-  AC_DEFINE(USE_WXCONFIG)
-fi
-
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -181,19 +215,16 @@ AC_TYPE_SIZE_T
 AC_STRUCT_TM
 AC_CHECK_FUNCS(strerror strstr strsep)
 
-AC_CHECK_HEADERS(strings.h unistd.h)
-AC_CHECK_HEADERS(stdlib.h)
-AC_CHECK_HEADERS(stdarg.h)
+dnl --------------------------------------------------------------------------
+dnl check for header files
+dnl --------------------------------------------------------------------------
 
+AC_CHECK_HEADERS(strings.h unistd.h stdlib.h stdarg.h)
+dnl no longer testing for compface.h because it is included with M
 
-dnl extra lib dirs
-EXTRA_SRC_LIB=
-EXTRA_SRC_INC=
-for i in `pwd`/extra/src/*
-do
-	LIBS="$LIBS -L$i"
-	CPPFLAGS="$CPPFLAGS -I$i"
-done
+dnl --------------------------------------------------------------------------
+dnl check for the overridable options
+dnl --------------------------------------------------------------------------
 
 dnl electric fence
 if test "$USE_EFENCE" = 1; then
@@ -205,30 +236,59 @@ if test "$USE_DMALLOC" = 1; then
 	AC_CHECK_LIB(dmalloc,main,,AC_MSG_WARN("dmalloc library configured but not available."))
 fi
 
-
-
-
-AC_CHECK_LIB(dl,main,,AC_MSG_WARN("dl library might be needed."))
-
 if test "$USE_THREADS" = 1
 then
 	AC_CHECK_LIB(pthread,main,,AC_CHECK_LIB(pthreads,main))
 fi
 
+dnl set debug/optimisation flags
+DBGFLAGS=
+if test "$USE_DEBUG" = 1; then
+	if test "$GCC" = "yes"
+	then
+		DBGFLAGS="-O0 -g3 -DDEBUG"
+	else
+		DBGFLAGS="-g -DDEBUG"
+	fi
+fi
 
-AC_CHECK_LIB(c,crypt,,AC_CHECK_LIB(crypt,crypt,,AC_MSG_ERROR("Cannot find crypt function.")))
 
-dnl do we need this?
+dnl kdoc/docxx have their own section further down
+
+dnl --------------------------------------------------------------------------
+dnl check for other libraries
+dnl --------------------------------------------------------------------------
+
+dnl we might need dl (depending on wxGTK config), so link with it if
+dnl it is available 
+AC_CHECK_LIB(dl,main,,AC_MSG_WARN("dl library might be needed."))
+
+
+dnl c-client library needs the crypt() function which is either in the 
+dnl c library or in libcrypt
+AC_CHECK_LIB(c,crypt,,
+	AC_CHECK_LIB(crypt,crypt,,AC_MSG_ERROR("Cannot find crypt function.")))
+
+dnl If we have a libshadow, link with it. I am not sure whether we
+dnl really need this.
 AC_CHECK_LIB(shadow,main)
 
+dnl Gettext() support, if we have libintl.h check for the existence of 
+dnl the gettext() function in either libc or libintl and set LIBS and
+dnl define accordingly.
 AC_CHECK_HEADERS(libintl.h,
 	AC_CHECK_LIB(c,gettext,AC_DEFINE(HAVE_GETTEXT),
 		AC_CHECK_LIB(intl,gettext,AC_DEFINE(HAVE_GETTEXT) LIBS="$LIBS -lintl")
 	)
 )
 
-MAKE_USE_PYTHON=
 
+dnl --------------------------------------------------------------------------
+dnl check for python ( a bit lengthy thanks to its stupid installation)
+dnl --------------------------------------------------------------------------
+
+MAKE_USE_PYTHON=
+PYTHON_LIBS=
 if test "$USE_PYTHON" = 1 ; then
    M_CHECK_MYHEADER(Python.h,
        [ /usr \
@@ -260,7 +320,7 @@ if test "$USE_PYTHON" = 1 ; then
            [ AC_CHECK_LIB(swigpy,main,
               [ AC_DEFINE(USE_PYTHON)
                 MAKE_USE_PYTHON="USE_PYTHON=yes"
-                LIBS="$libpath_python1_5_main -lpython1.5 -lswigpy $LIBS"
+                PYTHON_LIBS="$libpath_python1_5_main -lpython1.5 -lswigpy"
               ],
               [ AC_MSG_WARN("Cannot find SWIG library for python - disabling python.")
                 MAKE_USE_PYTHON=
@@ -275,39 +335,42 @@ if test "$USE_PYTHON" = 1 ; then
 fi
 AC_SUBST(MAKE_USE_PYTHON)
 
-AC_CHECK_HEADERS(compface.h)
 
-dnl check for gtk libraries
-dnl This must be the last library check, as wxGTK defines a main() function
-dnl which will break all further attemps to test for main() in a library!
+dnl --------------------------------------------------------------------------
+dnl check for (wx)gtk libraries
+dnl --------------------------------------------------------------------------
+
+dnl check for gtk-config
 AC_PATH_PROG(GTK_CONFIG,gtk-config,yes,no)
+dnl we don't set the LIBS directly as libwx_gtk might break other
+dnl checks thanks to its included main() function
 if test "$GTK_CONFIG" = yes
 then
 	GTK_CFLAGS=`gtk-config --cflags`
 	GTK_LDFLAGS=`gtk-config --libs`
 else
-	dnl find the X11 include and library files
+	dnl find the X11 include and library files -- our best guess
 	AC_PATH_XTRA
-	GTK_CFLAGS=$X_CFLAGS
-	GTK_LDFLAGS=$X_EXTRA_LIBS
+	GTK_CFLAGS="$X_CFLAGS"
+	GTK_LDFLAGS="-lgtk -lgdk -lglib $X_EXTRA_LIBS"
 fi
-LIBS="$LIBS $GTK_LDFLAGS"
-CXXFLAGS="$CXXFLAGS $GTK_CFLAGS"
-CFLAGS="$CFLAGS $GTK_CFLAGS"
 
-AC_CHECK_HEADERS(wx/wx.h)
-AC_CHECK_LIB(wx_gtk,main,,AC_MSG_ERROR("wx_gtk library is required."))
+CPPFLAGS="$CPPFLAGS $GTK_CFLAGS"
+dnl only now can we check for wx.h because it would fail without the
+dnl gtk headers
+AC_CHECK_HEADERS(wx/wx.h,,AC_MSG_ERROR("Cannot find wx/wx.h header file."))
 
-dnl set debug/optimisation flags
-dnl we don't use CFLAGS/CXXFLAGS from autoconf
-DBGFLAGS=
-if test "$USE_DEBUG" = 1; then
-	DBGFLAGS="-O0 -g3 -DDEBUG"
-fi
-AC_SUBST(DBGFLAGS)
+dnl We do not explicitly check for all the gtk/gdk/glib libraries. If
+dnl they are not installed, the test for wx_gtk will fail anyway.
+
+AC_CHECK_LIB(wx_gtk,main,,
+	AC_MSG_ERROR("wx_gtk library is required."),$GTK_LDFLAGS)
+
+dnl --------------------------------------------------------------------------
+dnl c-client library: set the proper OSTYPE and compiler variables
+dnl --------------------------------------------------------------------------
 
 dnl we need to set the target for c-client library:
-dnl supported OSTYPE values are linux* and solaris* and freebsd*
 
 AC_MSG_CHECKING(for c-client library OS type)
 CCOSTYPE=
@@ -338,31 +401,77 @@ esac
 
 AC_MSG_RESULT($CCOSTYPE)
 if test "x$CCOSTYPE" = "x" ; then
-  echo "Cannot determine OS type for c-client library. Supported are linux, solaris, freebsd."
-  exit 1
+	AC_MSG_ERROR("Cannot determine OS type for c-client library.")
 fi
 AC_SUBST(CCOSTYPE)
 
+dnl --------------------------------------------------------------------------
+dnl set up generators for class documentation
+dnl --------------------------------------------------------------------------
 
 DOCHTML="echo \"No doc generator(html) available.\""
 DOCTEX="echo \"No doc generator(tex) available.\""
 
-AC_PATH_PROG(DOCXX,docxx,yes,no)
-if test "x$DOCXX" = "x"
+dnl test for doc++ if selected
+if test "$USE_DOCXX" = 1
+then
+	AC_PATH_PROG(DOCXX,docxx,yes,no)
+	if test "x$DOCXX" = "x"
+	then
+		USE_KDOC=1
+	else
+		DOCHTML="\$(DOCXXHTML)"
+		DOCTEX="\$(DOCXXTEX)"
+	fi
+fi
+
+dnl test for kdoc if selected
+if test "$USE_KDOC" = 1
 then
 	AC_PATH_PROG(KDOC,kdoc,yes,no)
-	if test "x$KDOC" != "x"
+	if test "x$KDOC" = "x"
 	then
+		dnl without kdoc, fall back to doc++ if available
+		AC_PATH_PROG(DOCXX,docxx,yes,no)
+		if test "x$DOCXX" != "x"
+		then
+			DOCHTML="\$(DOCXXHTML)"
+			DOCTEX="\$(DOCXXTEX)"
+		fi
+	else
 		DOCHTML="\$(KDOCHTML)"
 		DOCTEX="\$(KDOCTEX)"
 	fi
-else
-	DOCHTML="\$(DOCXXHTML)"
-	DOCTEX="\$(DOCXXTEX)"
 fi
 AC_SUBST(DOCHTML)
 AC_SUBST(DOCTEX)
 
+dnl check for latex/dvips
+
+AC_PATH_PROG(LATEX,latex)
+AC_PATH_PROG(dvips,dvips)
+if test "x$LATEX" = x -o "x$DVIPS" = x
+then
+	LATEX="echo \"No latex available.\""
+	DVIPS="echo \"No dvips available.\""
+	AC_SUBST(LATEX)
+	AC_SUBST(DVIPS)
+fi
+
+dnl --------------------------------------------------------------------------
+dnl final settings, concatenation of args, etc
+dnl --------------------------------------------------------------------------
+
+dnl just a file where to dump some unneeded code in the python dir
+MAKE_LOCAL_LIBS_DEFINE="junk"
+
 dnl compface is included in M source
 LIBS="$LIBS -lcompface"
+
+dnl add other flags
+LIBS="$LIBS $PYTHON_LIBS $GTK_LDFLAGS"
+CXXFLAGS="$CXXFLAGS $DBGFLAGS"
+CFLAGS="$CFLAGS $DBGFLAGS"
+
+
 AC_OUTPUT(makeopts)

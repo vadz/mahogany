@@ -24,9 +24,6 @@
 #include   "PathFinder.h"
 #include   "MimeList.h"
 
-
-//IMPLEMENT_CLASS2(MimeList, CommonBase, list<MimeEntry>)
-
 MimeEntry::MimeEntry(void)
 {
    type = "";

@@ -10,6 +10,7 @@
 
 #include   "Mconfig.h"
 #include   "MObject.h"
+//#include   "Magic.h" // magicobject
 
 #ifdef   HAVE_LIBINTL_H
 #  define   USE_GETTEXT 1
@@ -236,8 +237,6 @@
 "http://web.ukonline.co.uk/julian.smart/wxwin/\n"\
 "for more information."\
 "\n"
-
-#include "CommonBase.h"
 
 /// for convenience, get an icon:
 #define   ICON(name) (mApplication->GetIconManager()->GetIcon(name))

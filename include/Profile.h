@@ -108,38 +108,6 @@ private:
    ProfileBase & operator=(const ProfileBase & );
 };
 
-
-/** ConfigFileManager class, this class allocates and deallocates
-   wxConfig objects for the profile so to ensure that every config
-   file gets opened only once.
-*/
-class ConfigFileManager : public CommonBase
-{
-private:
-   class FCDataList *fcList;
-   
-public:
-   /** Constructor
-     */
-   ConfigFileManager();
-   /** Destructor
-       writes back all entries
-   */
-   ~ConfigFileManager();
-
-   /** Get a wxConfig object.
-       @param fileName name of configuration file
-       @param isApp if we're creating the app config
-       @return the wxConfig object
-   */
-   wxConfigBase *GetConfig(STRINGARG fileName, bool isApp = FALSE);
-
-   /// Prints a list of all entries.
-   DEBUG_DEF
-
-   CB_DECLARE_CLASS(ConfigFileManager, CommonBase);
-};
-
 // ----------------------------------------------------------------------------
 // Helper classes
 // ----------------------------------------------------------------------------

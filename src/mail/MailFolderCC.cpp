@@ -38,9 +38,6 @@ extern "C"
 String MailFolderCC::MF_user;
 String MailFolderCC::MF_pwd;
 
-//IMPLEMENT_CLASS2(MailFolderCC, MailFolder, CommonBase)
-
-
 // a variable telling c-client to shut up
 static bool mm_ignore_errors = false;
 
@@ -177,7 +174,7 @@ MailFolderCC::Create(String const & iname)
       }
       else
       {
-         SetType((FolderType)READ_CONFIG(profile, MP_FOLDER_TYPE));
+         SetType((FolderType)READ_CONFIG(profile, (int)MP_FOLDER_TYPE));
          Open(filename);
       }
    }
@@ -341,15 +338,12 @@ MailFolderCC::ExpungeMessages(void)
 }
 
    
-#ifndef NDEBUG
+#ifdef DEBUG
 void
 MailFolderCC::Debug(void) const
 {
    char buffer[1024];
 
-   CBDEBUG();
-   VAR(numOfMessages);
-   VAR(realName.c_str());
    DBGLOG("--list of streams and objects--");
 
    StreamConnectionList::iterator

@@ -13,8 +13,9 @@
 #   pragma interface "PathFinder.h"
 #endif
 
-#ifndef USE_PCH
-#  include "kbList.h"
+#ifndef STRINGARG
+//#   define   STRINGARG String const &
+#   define   STRINGARG String
 #endif
 
 /**@name PathFinder class for finding files */
@@ -23,7 +24,7 @@
 #ifdef   OS_UNIX
 /// define a delimiter for separating paths
 #  define   PATHFINDER_DELIMITER ":"
-#  include  <unistd.h>
+#  include  <unistd.h>  // for R_OK
 #elif   defined(OS_WIN)
 #  define   PATHFINDER_DELIMITER ";"
 #  define  R_OK                  4       // access() mode
@@ -33,17 +34,17 @@
    PathFinder class which finds a file,  given its name and the list
    of possible paths.
 */
-class PathFinder : public CommonBase
+class PathFinder //: public MagicObject
 {
    /// the list of absolute paths
-   kbStringList *pathList;
+   class kbStringList *pathList;
 public:
    /**
       Constructor.
       @param initial pathlist, separated by either colons (unix) or semicolons (dos)
       @param recursive if true, add all subdirectories
    */
-   PathFinder(String const &ipathlist = "", bool recursive = false);
+   PathFinder(STRINGARG ipathlist = "", bool recursive = false);
 
    /**
       Destructor.
@@ -55,7 +56,7 @@ public:
       @param pathlist like for constructor
       @param recursive if true, add all subdirectories
    */
-   void AddPaths(String const &pathlist, bool recursive = false);
+   void AddPaths(STRINGARG pathlist, bool recursive = false);
    
    /** 
        Returns the path to the file or directory or an empty string.
@@ -64,7 +65,7 @@ public:
        @param mode   the mode to test for access()
        @return full path or an empty string
    */
-   String Find(String const &filename,
+   String Find(STRINGARG filename,
                bool *found = NULL,
                int mode = R_OK) const;
 
@@ -75,7 +76,7 @@ public:
        @param mode   the mode to test for access()
        @return full path or an empty string
    */
-   String FindFile(String const &filename,
+   String FindFile(STRINGARG filename,
                    bool *found = NULL,
                    int mode = R_OK) const;
 
@@ -86,7 +87,7 @@ public:
        @param mode   the mode to test for access()
        @return full path or an empty string
    */
-   String FindDir(String const &filename,
+   String FindDir(STRINGARG filename,
                   bool *found = NULL,
                   int mode = R_OK) const;
 
@@ -97,7 +98,7 @@ public:
        @param mode   the mode to test for access()
        @return full path or an empty string
    */
-   String FindDirFile(String const &filename,
+   String FindDirFile(STRINGARG filename,
                       bool *found = NULL,
                       int mode = R_OK) const;
 
@@ -105,18 +106,13 @@ public:
       check whether pathname is a directory
       @return true if directory
    */
-   static bool IsDir(String const &pathname);
+   static bool IsDir(STRINGARG pathname);
 
    /**
       check whether pathname is a file
       @return true if file
    */
-   static bool IsFile(String const &pathname);
-   
-   /// initialised == there is a list of paths
-   bool  IsInitialised(void) const { return ! pathList->empty(); }
-
-   CB_DECLARE_CLASS(PathFinder,CommonBase);
+   static bool IsFile(STRINGARG pathname);
 };
 
 //@}

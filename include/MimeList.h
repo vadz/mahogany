@@ -64,7 +64,7 @@ public:
 
 KBLIST_DEFINE(MimeEntryList, MimeEntry);
 
-class MimeList : public MimeEntryList, public CommonBase
+class MimeList : public MimeEntryList
 {
 //   DECLARE_CLASS(MimeList)
    
@@ -97,9 +97,6 @@ public:
                         String const &filename,
                         String const &mimetype = "");
    
-   /// always initialised
-   bool   IsInitialised(void) const { return true; }
-   CB_DECLARE_CLASS(MimeList,CommonBase);
 };
 
 #endif

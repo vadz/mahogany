@@ -25,14 +25,14 @@ allclean:
 dep depend: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
-config.status: configure
-	./config.status --recheck
+#config.status: configure
+#	./config.status --recheck
 
 config: configure makeopts.in
 	./configure
 
-configure: configure.in extra/scripts/aclocal.m4
-	autoconf --localdir=extra/scripts
+configure: configure.in aclocal.m4
+	autoconf
 
 makeopts: makeopts.in config.status
 	CONFIG_FILES=$@ CONFIG_HEADERS=./config.status
@@ -50,6 +50,9 @@ install:
 	@echo "Installing M in " $(BINDIR)
 	@echo "        data in " $(DATADIR)
 	@echo "        docs in " $(PREFIX)/doc/M
+	$(INSTALL) -d $(DATADIR) $(BINDIR) $(DOCDIR)
+	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/bin
+	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/lib
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i install; done
 	$(INSTALL_DATA) `find doc -not -type d` $(DOCDIR)
 

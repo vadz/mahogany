@@ -73,7 +73,7 @@ SendMessageCC::Create(ProfileBase *iprof)
 {
      
    profile = iprof;
-
+   profile->IncRef(); // make sure it doesn't go away
    m_headerNames = NULL;
    m_headerValues = NULL;
 }
@@ -384,4 +384,6 @@ SendMessageCC::~SendMessageCC()
 
    if(m_headerNames)  delete [] m_headerNames;
    if(m_headerValues) delete [] m_headerValues;
+
+   profile->DecRef();
 }

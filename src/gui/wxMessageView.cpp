@@ -285,10 +285,10 @@ wxMessageView::Update(void)
       fg = READ_CONFIG(m_Profile,MP_FTEXT_FGCOLOUR),
       bg = READ_CONFIG(m_Profile,MP_FTEXT_BGCOLOUR);
    
-   Clear(READ_CONFIG(m_Profile,MP_FTEXT_FONT),
-         READ_CONFIG(m_Profile,MP_FTEXT_SIZE),
-         READ_CONFIG(m_Profile,MP_FTEXT_STYLE),
-         READ_CONFIG(m_Profile,MP_FTEXT_WEIGHT),
+   Clear(READ_CONFIG(m_Profile,(int)MP_FTEXT_FONT),
+         READ_CONFIG(m_Profile,(int)MP_FTEXT_SIZE),
+         READ_CONFIG(m_Profile,(int)MP_FTEXT_STYLE),
+         READ_CONFIG(m_Profile,(int)MP_FTEXT_WEIGHT),
          0,
          fg.c_str(),bg.c_str());
 
@@ -671,7 +671,6 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
 
    if(filename)
    {
-      VAR(filename.c_str());
       unsigned long len;
       char const *content = mailMessage->GetPartContent(mimeDisplayPart,&len);
       if(! content)

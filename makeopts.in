@@ -16,7 +16,6 @@ CCLIENTOSTYPE=@CCOSTYPE@
 ICONDIR=$(BUILDDIR)/src/icons
 
 # compiler flags
-DBG = @DBGFLAGS@ 
 ODIR=.
 
 # this will be set or unset
@@ -32,12 +31,15 @@ KDOCHTML = kdoc -H -d $(BUILDDIR)/doc/classes -u $(BUILDDIR) -a -i -e M
 KDOCTEX =  kdoc -T -d $(BUILDDIR)/doc/classes -u $(BUILDDIR) -a -i -e M
 DOCHTML=@DOCHTML@
 DOCTEX=@DOCTEX@
+LATEX=@LATEX@
+DVIPS=@DVIPS@
 
 # compiler stuff
 CC = @CC@
 CPP = @CPP@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
+CPPFLAGS =@CPPFLAGS@
 
 # SWIG
 SWIG = @SWIG@
@@ -66,10 +68,9 @@ LD_RUN_PATH=$(DATADIR)/$(CANONICAL_HOST)/$(DATADIR)
 LINK = $(CXX) -Wl-r$(LD_RUN_PATH)
 
 DEF = -DM_BASEDIR="\"$(DATADIR)\"" -DM_DATADIR="\"$(DATADIR)/data\"" -DM_DOCDIR="\"$(DATADIR)/M/doc\""
-INC = -I$(BUILDDIR)/include -I$(BUILDDIR)/extra/include -I$(BUILDDIR)/include/gui -I$(CCLIENTINCLUDE) \
-      $(GUI_INCLUDE) $(PYTHON_INCLUDE) $(XPM_INCLUDE) $(EXTRA_SRC_INC) @CPPFLAGS@
-CFLAGS   = @CFLAGS@ @CPPFLAGS@ $(DBG) $(DEF) $(INC)
-CXXFLAGS = @CXXFLAGS@ @CPPFLAGS@ $(DBG) $(DEF) $(INC)
+INC = -I$(BUILDDIR)/include -I$(BUILDDIR)/extra/include -I$(BUILDDIR)/include/gui -I$(CCLIENTINCLUDE) 
+CFLAGS   = @CFLAGS@  $(CPPFLAGS) $(DEF) $(INC)
+CXXFLAGS = @CXXFLAGS@ $(CPPFLAGS) $(DEF) $(INC)
 LDFLAGS = @LDFLAGS@
 
 LIBS=@LIBS@ $(CCLIENTLIB)

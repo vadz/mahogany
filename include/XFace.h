@@ -16,7 +16,7 @@
 /**
    XFace class for handling XFaces.
 */
-class XFace : public CommonBase
+class XFace
 {
    bool
       initialised;
@@ -68,8 +68,6 @@ class XFace : public CommonBase
 
    /// initialised == there is a list of paths
    bool	IsInitialised(void) const { return initialised; }
-
-   CB_DECLARE_CLASS(XFace, CommonBase);
 };
 
 //@}

@@ -21,7 +21,6 @@
 
 #ifndef  USE_PCH
 #  include "Mcommon.h"
-#  include "CommonBase.h"   // VAR() macro
 #  include "strutil.h"
 #  include "gui/wxMApp.h"
 #  include "Profile.h"
@@ -189,7 +188,7 @@ wxIconManager::GetIcon(String const &_iconName)
    String name;
    for(c = 0; wxIconManagerFileExtensions[c]; c++)
    {
-      name = key + wxIconManagerFileExtensions[c];
+      name = iconName + wxIconManagerFileExtensions[c];
       name = pf.FindFile(name, &found);
 
       if ( !found && IsMimeType(iconName) )

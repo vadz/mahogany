@@ -51,6 +51,43 @@
 // ============================================================================
 
 
+/** ConfigFileManager class, this class allocates and deallocates
+   wxConfig objects for the profile so to ensure that every config
+   file gets opened only once.
+*/
+class ConfigFileManager
+{
+private:
+   class FCDataList *fcList;
+   
+public:
+   /** Constructor
+     */
+   ConfigFileManager();
+   /** Destructor
+       writes back all entries
+   */
+   ~ConfigFileManager();
+
+   /**  Finds a profile if it already exists
+        @param fileName name of configuration file
+    */
+   ProfileBase *Find(STRINGARG fileName);
+
+   /** registers a profile object for reuse
+       @param fileName name of configuration file
+       @param prof pointer to existing profile
+    */
+   void Register(STRINGARG fileName, ProfileBase *prof);
+
+   /** deregisters a profile object for reuse when it no longer exists
+       @param prof pointer to profile
+    */
+   void DeRegister(ProfileBase *prof);
+   /// Prints a list of all entries.
+   DEBUG_DEF
+};
+
 /**
    Profile class, managing configuration options on a per class basis.
    This class does essentially the same as the wxConfig class, but
@@ -65,16 +102,10 @@
 class Profile : public ProfileBase
 {
 public:
-   /** Constructor.
-       @param iClassName the name of this profile
-       @param iParent the parent profile
-       This will try to load the configuration file given by
-       iClassName".profile" and look for it in all the paths specified
-       by GetAppConfig()->readEntry(MC_PROFILEPATH).
-       
-   */
-   Profile(STRINGARG iClassName, ProfileBase const *Parent);
-
+   /// like the constructor, but reuses existing objects
+   static ProfileBase * CreateProfile(STRINGARG iClassName,
+                                      ProfileBase const *Parent);
+   
    /// get the associated config object
    wxConfigBase *GetConfig() const { return m_config; }
 
@@ -117,6 +148,15 @@ public:
       { m_config->SetExpandEnvVars(bDoIt); }
 
 private:
+   /** Constructor.
+       @param iClassName the name of this profile
+       @param iParent the parent profile
+       This will try to load the configuration file given by
+       iClassName".profile" and look for it in all the paths specified
+       by GetAppConfig()->readEntry(MC_PROFILEPATH).
+       
+   */
+   Profile(STRINGARG iClassName, ProfileBase const *Parent);
    /// The wxConfig object.
    wxConfigBase  *m_config;
    /// The parent profile.
@@ -128,8 +168,14 @@ private:
    /** Destructor, writes back those entries that got changed.
    */
    ~Profile();
+   /// config file manager class
+   static ConfigFileManager ms_cfManager;
 };
 //@}
+
+ConfigFileManager Profile::ms_cfManager;
+
+
 
 /** wxConfigProfile, a wrapper around wxConfig.
  */
@@ -185,10 +231,8 @@ private:
 */
 struct FCData
 {
-  String      fileName;
-  wxConfigBase *m_config;
-
-  IMPLEMENT_DUMMY_COMPARE_OPERATORS(FCData)
+  String         className;
+  ProfileBase *profile;
 };
 
 /** A list of all loaded wxConfigs
@@ -207,7 +251,7 @@ KBLIST_DEFINE(FCDataList, FCData);
 ProfileBase *
 ProfileBase::CreateProfile(STRINGARG classname, ProfileBase const *parent)
 {
-   return new Profile(classname, parent);
+   return  Profile::CreateProfile(classname, parent);
 }
 
 ProfileBase *
@@ -220,6 +264,7 @@ String
 ProfileBase::readEntry(STRINGARG key,
                        const char *defaultvalue) const
 {
+   MOcheck(); 
    String str;
    str = readEntry(key, String(defaultvalue));
    return str;
@@ -231,6 +276,19 @@ ProfileBase::readEntry(STRINGARG key,
 
 wxConfigProfile::wxConfigProfile(STRINGARG fileName)
 {
+<<<<<<< Profile.cpp
+   // we shouldn't be called twice normally
+   ASSERT( m_Config == NULL );
+
+   // we don't need the config file manager for this profile
+   PathFinder pf(M_ETC_PATH);
+   String globalconfig = pf.FindFile(M_GLOBAL_CONFIG_NAME);
+   m_Config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
+                           fileName, globalconfig,
+                           wxCONFIG_USE_LOCAL_FILE|wxCONFIG_USE_GLOBAL_FILE);
+   // set the default path for configuration entries
+   m_Config->SetPath(M_APPLICATIONNAME);
+=======
    m_Config = mApplication->GetConfigManager().GetConfig(fileName, TRUE);
 
    // VZ: I don't want to have additional level in the registry
@@ -238,6 +296,7 @@ wxConfigProfile::wxConfigProfile(STRINGARG fileName)
       // set the default path for configuration entries
       m_Config->SetPath(M_APPLICATIONNAME);
 #  endif // Windows
+>>>>>>> 1.36
 }
 
 void wxConfigProfile::SetPath(STRINGARG path)
@@ -328,16 +387,19 @@ wxConfigProfile::writeEntry(STRINGARG key, bool value)
    file. If an entry is not found, it tries to get it from its parent
    profile. Thus, an inheriting profile structure is created.
 */
-
 Profile::Profile(STRINGARG iClassName, ProfileBase const *Parent)
    : profileName(iClassName)
 {
+<<<<<<< Profile.cpp
+   fileConfig = NULL;   // set it before using CHECK()
+=======
    m_config = NULL;   // set it before using CHECK()
 
    // the top entry should already exist and we must have a parent
    CHECK_RET( mApplication->GetProfile(),
               "MApplication profile should have been constructed before" );
 
+>>>>>>> 1.36
    parentProfile = Parent;
 
    // find our config file unless we already have an absolute path name
@@ -347,29 +409,41 @@ Profile::Profile(STRINGARG iClassName, ProfileBase const *Parent)
       String tmp = READ_APPCONFIG(MC_PROFILE_PATH);
       PathFinder pf(tmp);
 
-      String fileName = profileName +
-         mApplication->GetProfile()->readEntry(String(MC_PROFILE_EXTENSION),
-                                               String(MC_PROFILE_EXTENSION_D));
-      //READ_APPCONFIG(MC_PROFILE_EXTENSION);
+      String fileName = profileName + READ_APPCONFIG(MC_PROFILE_EXTENSION);
       fullFileName = pf.FindFile(fileName, &isOk);
-   
       if( !isOk )
          fullFileName = mApplication->GetLocalDir() + DIR_SEPARATOR + fileName;
    }
    else
-   {
       // easy...
       fullFileName << profileName << READ_APPCONFIG(MC_PROFILE_EXTENSION);
-   }
+   fileConfig = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
+                         fullFileName,wxString(""),
+                         wxCONFIG_USE_LOCAL_FILE);
+   ms_cfManager.Register(iClassName,this);
+}
 
+<<<<<<< Profile.cpp
+ProfileBase *
+Profile::CreateProfile(STRINGARG iClassName, ProfileBase const *parent)
+{
+   ProfileBase *profile = ms_cfManager.Find(iClassName);
+   if(! profile)
+      profile = new Profile(iClassName, parent);
+   return profile;
+=======
    m_config = mApplication->GetConfigManager().GetConfig(fullFileName);
    
    isOk = m_config != NULL;
+>>>>>>> 1.36
 }
 
 
 Profile::~Profile()
 {
+   fileConfig->Flush();
+   ms_cfManager.DeRegister(this);
+   delete fileConfig;
 }
 
 
@@ -467,7 +541,18 @@ void
 Profile::DeleteGroup(STRINGARG path)
 {
    MOcheck(); 
+<<<<<<< Profile.cpp
+   fileConfig->DeleteGroup(path);
+=======
    m_config->DeleteGroup(path);
+>>>>>>> 1.36
+}
+
+bool
+Profile::readEntry(STRINGARG key, bool defaultvalue) const
+{
+   MOcheck(); 
+   return readEntry(key, (long) defaultvalue) != 0;
 }
 
 bool
@@ -514,46 +599,94 @@ ConfigFileManager::~ConfigFileManager()
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
       FCData *data = *i;
+<<<<<<< Profile.cpp
+      ProfileBase *p = data->profile;
+      // we cannot do a decref here because MObjets list might no
+      // longer exist - order of cleanup is unknown
+      // p->DecRef();
+      // but we can complain!
+      DBGLOG("Profile left over at exit:" << p->GetProfileName());
+=======
       wxConfigBase *fcp = data->m_config;
       fcp->Flush();
       //FIXME: this must be a DecRef()
       delete fcp;
+>>>>>>> 1.36
       delete data;
    }
 
    delete fcList;
 }
 
-wxConfigBase *
-ConfigFileManager::GetConfig(STRINGARG fileName, bool isApp)
+ProfileBase *
+ConfigFileManager::Find(STRINGARG className)
 {
    FCDataList::iterator i;
 
-   DBGLOG("ConfigFileManager.GetConfig(" << Str(fileName) << ")");
+   DBGLOG("ConfigFileManager.Find(" << Str(className) << ")");
    
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
+<<<<<<< Profile.cpp
+      if((*i)->className == className)
+      {
+         (*i)->profile->IncRef();
+         return (*i)->profile;
+      }
+=======
       if((*i)->fileName == fileName)
          return (*i)->m_config;
+>>>>>>> 1.36
    }
-   FCData   *newEntry = new FCData;
-   newEntry->fileName = fileName;
+   return NULL;
+}
 
-   if(isApp)
+void
+ConfigFileManager::DeRegister(ProfileBase *prof)
+{
+   FCDataList::iterator i;
+
+   DBGLOG("ConfigFileManager.DeRegister()");
+   
+   for(i = fcList->begin(); i != fcList->end(); i++)
    {
+<<<<<<< Profile.cpp
+      if((*i)->profile == prof)
+      {
+         fcList->erase(i);
+         return;
+      }
+=======
       PathFinder pf(M_ETC_PATH);
       String globalconfig = pf.FindFile(M_GLOBAL_CONFIG_NAME);
       newEntry->m_config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
                                           newEntry->fileName, globalconfig,
                                           wxCONFIG_USE_LOCAL_FILE|wxCONFIG_USE_GLOBAL_FILE);
+>>>>>>> 1.36
    }
+<<<<<<< Profile.cpp
+}
+
+void
+ConfigFileManager::Register(STRINGARG className, ProfileBase *profile)
+{
+   DBGLOG("ConfigFileManager.Register(" << Str(className) << ")");
+   
+   FCData   *newEntry = new FCData;
+   newEntry->className = className;
+   newEntry->profile = profile;
+=======
    else
       newEntry->m_config = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
                                           newEntry->fileName,wxString(""),
                                           wxCONFIG_USE_LOCAL_FILE);
+>>>>>>> 1.36
    fcList->push_front(newEntry);
+<<<<<<< Profile.cpp
+=======
    
    return newEntry->m_config;
+>>>>>>> 1.36
 }
 
 #ifdef DEBUG

@@ -37,8 +37,9 @@
 /** Define if you have the <libintl.h> header file.  */
 #undef HAVE_LIBINTL_H
 
-/** Define if you have the <compface.h> header file.  */
-#undef HAVE_COMPFACE_H
+/** Define if you have the <compface.h> header file.  -- we always
+    have it*/
+#define HAVE_COMPFACE_H 1
 
 /** Define if you have the <strings.h> header file.  */
 #undef HAVE_STRINGS_H

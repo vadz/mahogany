@@ -31,7 +31,7 @@
    */
 
 class FolderViewBase;
-class MailFolder : public CommonBase
+class MailFolder
 {
 public:   
    /** @name Constructors and destructor */
@@ -144,7 +144,5 @@ public:
    /// return class name
    const char *GetClassName(void) const
       { return "MailFolder"; }
-   
-   CB_DECLARE_CLASS(MailFolder, CommonBase);
 };
 #endif

@@ -85,8 +85,6 @@ public:
    /// enable/disable debugging:
    void   DoDebug(bool flag = true) { debugFlag = flag; }
 
-   CB_DECLARE_CLASS(MailFolderCC, MailFolder);
-
 protected:
    /** open an existing mailbox:
        @param   filename the name of the "file" to open

@@ -21,7 +21,7 @@ class MailFolderCC;
 
 /** Message class, containing the most commonly used message headers.
    */
-class MessageCC : public Message, public CommonBase
+class MessageCC : public Message
 {
 private:
    /// reference to the folder this mail is stored in
@@ -265,8 +265,6 @@ public:
        @param  true if it is ok
    */
    bool     IsInitialised(void) const { return initialisedFlag; }
-
-   CB_DECLARE_CLASS(MessageCC, Message);
 };
 
 #ifndef  MESSAGECC_FROMLEN

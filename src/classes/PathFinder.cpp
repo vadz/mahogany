@@ -32,14 +32,14 @@
 
 #include   "PathFinder.h"
 
-PathFinder::PathFinder(String const &ipathlist, bool recursive)
+PathFinder::PathFinder(STRINGARG ipathlist, bool recursive)
 {
    pathList = new kbStringList(FALSE);
    AddPaths(ipathlist,recursive);
 }
 
 void
-PathFinder::AddPaths(String const &ipathlist, bool recursive)
+PathFinder::AddPaths(STRINGARG ipathlist, bool recursive)
 {
    char *work = new char[ipathlist.length()+1];
    char   *found;
@@ -76,7 +76,7 @@ PathFinder::AddPaths(String const &ipathlist, bool recursive)
 }
 
 String
-PathFinder::Find(String const &filename, bool *found,
+PathFinder::Find(STRINGARG filename, bool *found,
                  int mode) const
 {
    kbStringList::iterator i;
@@ -99,7 +99,7 @@ PathFinder::Find(String const &filename, bool *found,
 }
 
 String
-PathFinder::FindFile(String const &filename, bool *found,
+PathFinder::FindFile(STRINGARG filename, bool *found,
                      int mode) const
 {
    kbStringList::iterator i;
@@ -122,7 +122,7 @@ PathFinder::FindFile(String const &filename, bool *found,
 }
 
 String
-PathFinder::FindDir(String const &filename, bool *found,
+PathFinder::FindDir(STRINGARG filename, bool *found,
                     int mode) const
 {
    kbStringList::iterator i;
@@ -145,7 +145,7 @@ PathFinder::FindDir(String const &filename, bool *found,
 }
 
 String
-PathFinder::FindDirFile(String const &filename, bool *found,
+PathFinder::FindDirFile(STRINGARG filename, bool *found,
                         int mode) const
 {
    kbStringList::iterator i;
@@ -168,7 +168,7 @@ PathFinder::FindDirFile(String const &filename, bool *found,
 }
 
 bool
-PathFinder::IsDir(String const &pathname)
+PathFinder::IsDir(STRINGARG pathname)
 {
    struct stat buf;
    
@@ -179,7 +179,7 @@ PathFinder::IsDir(String const &pathname)
 }
 
 bool
-PathFinder::IsFile(String const &pathname) 
+PathFinder::IsFile(STRINGARG pathname) 
 {
    struct stat buf;
    if(stat(pathname.c_str(),&buf) == 0 && S_ISREG(buf.st_mode))

@@ -1,3 +1,6 @@
+dnl $Id$
+dnl local macro definitions for M's configure.in
+
 AC_DEFUN(M_OVERRIDES_PREPARE,
 [
 rm -f ${OSTYPE}.system.cache.tmp

@@ -47,7 +47,7 @@ public:
 */
 
 KBLIST_DEFINE(MimeTEntryList, MimeTEntry);
-class MimeTypes : public MimeTEntryList, public CommonBase
+class MimeTypes : public MimeTEntryList
 {
 public:
    /** Constructor
@@ -68,9 +68,6 @@ public:
    bool Lookup(String const & filename, String &mimeType,
 	       int *numericType = NULL);
 
-   /// always initialised
-   bool	IsInitialised(void) const { return true; }
-   CB_DECLARE_CLASS(IconList,CommonBase);
 };
 
 #endif

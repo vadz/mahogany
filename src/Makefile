@@ -14,8 +14,11 @@ MOBJS += Python/*.o
 endif
 
 all: 
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
+	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(LIBS)
+#
+#left over from my attempt to create a M.so shared lib
+#
 #	$(CXX) -shared $(MOBJS) $(LDFLAGS) -lswigpy $(NONPLIBS) -o libM.so
 #	$(LINK) -o M -L. $(LDFLAGS) -lM $(SLIBS)
 
@@ -39,9 +42,6 @@ dep depend:
 
 install: all
 	strip M
-	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/bin
-	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/lib
-	$(INSTALL) -d $(DATADIR)/bin
 	$(INSTALL_PROGRAM) M $(DATADIR)/$(CANONICAL_HOST)/bin
 	ln -fs $(DATADIR)/$(CANONICAL_HOST)/bin/M $(BINDIR)
 	ln -fs $(DATADIR)/$(CANONICAL_HOST)/bin/M $(DATADIR)/bin

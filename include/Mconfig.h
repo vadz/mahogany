@@ -72,15 +72,6 @@
 #   endif
 #endif
 
-/// use one common base class
-#define   USE_COMMONBASE      1
-
-/// do some memory allocation debugging
-#define   USE_MEMDEBUG      1
-
-/// derive common base from wxObject
-#undef   USE_WXOBJECT      
-
 /// debug allocator
 #undef   USE_DEBUGNEW      
 
@@ -106,10 +97,6 @@
 
 /// path for etc directories
 #define   M_ETC_PATH   "/etc:/usr/etc:/usr/local/etc:/opt/etc:/usr/share/etc:/usr/local/share/etc:/opt/share/etc:/usr/local/stow/etc"
-
-#ifdef   USE_BASECLASS
-#   define   BASECLASS   CommonBase
-#endif
 
 #ifdef   HAVE_COMPFACE_H
 #   define   HAVE_XFACES

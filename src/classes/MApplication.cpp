@@ -59,8 +59,8 @@
 // ----------------------------------------------------------------------------
 
 #ifdef  USE_PYTHON
-  // only used here
-  extern bool InitPython(void);
+// only used here
+extern bool InitPython(void);
 #endif //Python
 
 // ============================================================================
@@ -142,8 +142,19 @@ MAppBase::OnStartup()
    
    // initialise the profile(s)
    // -------------------------
-   m_cfManager = new ConfigFileManager;
 
+<<<<<<< MApplication.cpp
+   String strConfFile;
+#ifdef OS_UNIX
+   strConfFile = getenv("HOME");
+   strConfFile << "/." << M_APPLICATIONNAME;
+   // FIXME must create the directory ourselves!
+   struct stat st;
+   if ( stat(strConfFile, &st) != 0 || !S_ISDIR(st.st_mode) ) {
+      if ( mkdir(strConfFile, 0777) != 0 ) {
+         wxLogError(_("Can't create the directory for configuration"
+                      "files '%s'."), strConfFile.c_str());
+=======
    String strConfFile;
 #  ifdef OS_UNIX
       strConfFile = getenv("HOME");
@@ -157,15 +168,26 @@ MAppBase::OnStartup()
             
             return FALSE;
          }
+>>>>>>> 1.44
          
-         wxLogInfo(_("Created directory '%s' for configuration files."),
-                   strConfFile.c_str());
+         return FALSE;
       }
       
+<<<<<<< MApplication.cpp
+      wxLogInfo(_("Created directory '%s' for configuration files."),
+                strConfFile.c_str());
+   }
+   
+   strConfFile += "/config";
+#else  // Windows
+   strConfFile << "wxWindows\\" << M_APPLICATIONNAME;
+#endif // Unix
+=======
       strConfFile += "/config";
 #  else  // Windows
       strConfFile << "wxWindows\\" << M_APPLICATIONNAME;
 #  endif // Unix
+>>>>>>> 1.44
 
    m_profile = ProfileBase::CreateGlobalConfig(strConfFile);
 
@@ -177,9 +199,9 @@ MAppBase::OnStartup()
    // do we have gettext()?
    // ---------------------
 #  ifdef  USE_GETTEXT
-      setlocale (LC_ALL, "");
-      //bindtextdomain (M_APPLICATIONNAME, LOCALEDIR);
-      textdomain (M_APPLICATIONNAME);
+   setlocale (LC_ALL, "");
+   //bindtextdomain (M_APPLICATIONNAME, LOCALEDIR);
+   textdomain (M_APPLICATIONNAME);
 #  endif // USE_GETTEXT
 
 
@@ -193,8 +215,7 @@ MAppBase::OnStartup()
 #  ifdef OS_UNIX
    bool   found;
    String strRootDir = READ_APPCONFIG(MC_ROOTDIRNAME);
-   PathFinder pf(READ_APPCONFIG(MC_PATHLIST));
-   
+   PathFinder pf(READ_APPCONFIG(MC_PATHLIST),true);
    pf.AddPaths(M_DATADIR);
    
    m_globalDir = pf.FindDir(strRootDir, &found);
@@ -210,16 +231,16 @@ MAppBase::OnStartup()
    
    m_localDir = wxExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
 #  else  //Windows
-      // under Windows our directory is always the one where the executable is
-      // located. At least we're sure that it exists this way...
-      wxString strPath;
-      ::GetModuleFileName(::GetModuleHandle(NULL),
-                          strPath.GetWriteBuf(MAX_PATH), MAX_PATH);
-      strPath.UngetWriteBuf();
+   // under Windows our directory is always the one where the executable is
+   // located. At least we're sure that it exists this way...
+   wxString strPath;
+   ::GetModuleFileName(::GetModuleHandle(NULL),
+                       strPath.GetWriteBuf(MAX_PATH), MAX_PATH);
+   strPath.UngetWriteBuf();
 
-      // extract the dir name
-      wxSplitPath(strPath, &m_globalDir, NULL, NULL);
-      m_localDir = m_globalDir;
+   // extract the dir name
+   wxSplitPath(strPath, &m_globalDir, NULL, NULL);
+   m_localDir = m_globalDir;
 #  endif //Unix
 
    // create and show the main program window
@@ -227,22 +248,37 @@ MAppBase::OnStartup()
 
    // it doesn't seem to do anything under Windows (though it should...)
 #  ifndef OS_WIN
-      // extend path for commands, look in M's dirs first
-      tmp = "";
-      tmp += GetLocalDir();
-      tmp += "/scripts";
-      tmp += PATH_SEPARATOR;
-      tmp = GetGlobalDir();
-      tmp += "/scripts";
-      tmp += PATH_SEPARATOR;
-      if(getenv("PATH"))
-         tmp += getenv("PATH");
-      tmp="PATH="+tmp;
-      putenv(tmp.c_str());
+   // extend path for commands, look in M's dirs first
+   tmp = "";
+   tmp += GetLocalDir();
+   tmp += "/scripts";
+   tmp += PATH_SEPARATOR;
+   tmp = GetGlobalDir();
+   tmp += "/scripts";
+   tmp += PATH_SEPARATOR;
+   if(getenv("PATH"))
+      tmp += getenv("PATH");
+   tmp="PATH="+tmp;
+   putenv(tmp.c_str());
 #  endif //OS_WIN
 
    // initialise python interpreter
 #  ifdef  USE_PYTHON
+<<<<<<< MApplication.cpp
+   // having the same error message each time M is started is annoying, so
+   // give the user a possibility to disable it
+   if ( READ_APPCONFIG(MC_USEPYTHON) && !InitPython() ) {
+      CloseSplash();
+
+      const char *msg = "It's possible that you have problems with Python\n"
+         "installation. Would you like to disable Python\n"
+         "support for now (set " MC_USEPYTHON " to 1 to"
+         "reenable it later)?";
+      if ( MDialog_YesNoDialog(_(msg)) )
+      {
+         // disable it
+         m_profile->writeEntry(MC_USEPYTHON, FALSE);
+=======
       // having the same error message each time M is started is annoying, so
       // give the user a possibility to disable it
       if ( READ_APPCONFIG(MC_USEPYTHON) && !InitPython() ) {
@@ -257,17 +293,19 @@ MAppBase::OnStartup()
             // disable it
             m_profile->writeEntry(MC_USEPYTHON, FALSE);
          }
+>>>>>>> 1.44
       }
+   }
 #  endif //USE_PYTHON
 
    if ( bFirstRun ) {
       wxLog *log = wxLog::GetActiveTarget();
       if ( log ) {
-        wxLogMessage(_("As it seems that you're running M for the first\n"
-                       "time, you should probably set up some of the options\n"
-                       "needed by the program (especially network "
-                       "parameters)."));
-        log->Flush();
+         wxLogMessage(_("As it seems that you're running M for the first\n"
+                        "time, you should probably set up some of the options\n"
+                        "needed by the program (especially network "
+                        "parameters)."));
+         log->Flush();
       }
 
       ShowOptionsDialog();
@@ -318,16 +356,20 @@ MAppBase::OnShutDown()
    m_profile->DecRef();
    GLOBAL_DELETE m_mimeList;
    GLOBAL_DELETE m_mimeTypes;
+<<<<<<< MApplication.cpp
+   m_profile->DecRef();
+=======
    GLOBAL_DELETE m_cfManager;
+>>>>>>> 1.44
 }
 
 const char *
 MAppBase::GetText(const char *in)
 {
 #  ifdef   USE_GETTEXT
-      return   gettext(in);
+   return   gettext(in);
 #  else
-      return   in;
+   return   in;
 #  endif
 }
 
@@ -344,11 +386,11 @@ MAppBase::Exit(bool force)
 
 void
 MAppBase::ErrorMessage(String const &message, MFrame *parent, bool
-            modal)
+                       modal)
 {
 #ifdef   USE_WXWINDOWS
    wxMessageBox((char *)message.c_str(), _("Error"),
-      wxOK|wxCENTRE|wxICON_EXCLAMATION, parent);
+                wxOK|wxCENTRE|wxICON_EXCLAMATION, parent);
 #else
 #   error MAppBase::ErrorMessage() not implemented
 #endif 
@@ -356,16 +398,16 @@ MAppBase::ErrorMessage(String const &message, MFrame *parent, bool
 
 void
 MAppBase::SystemErrorMessage(String const &message, MFrame *parent, bool
-            modal)
+                             modal)
 {
    String
       msg;
    
    msg = message + String(("\nSystem error: "))
-         + String(strerror(errno));
+      + String(strerror(errno));
 #ifdef   USE_WXWINDOWS
    wxMessageBox((char *)msg.c_str(), _("System Error"),
-      wxOK|wxCENTRE|wxICON_EXCLAMATION, parent);
+                wxOK|wxCENTRE|wxICON_EXCLAMATION, parent);
 #else
 #   error MAppBase::ErrorMessage() not implemented
 #endif 
@@ -373,7 +415,7 @@ MAppBase::SystemErrorMessage(String const &message, MFrame *parent, bool
 
 void
 MAppBase::FatalErrorMessage(String const &message,
-           MFrame *parent)
+                            MFrame *parent)
 {   
    String msg = message + _("\nExiting application...");
    ErrorMessage(message,parent,true);
@@ -383,11 +425,11 @@ MAppBase::FatalErrorMessage(String const &message,
 
 void
 MAppBase::Message(String const &message, MFrame *parent, bool
-            modal)
+                  modal)
 {
 #ifdef   USE_WXWINDOWS
    wxMessageBox((char *)message.c_str(), _("Information"),
-      wxOK|wxCENTRE|wxICON_INFORMATION, parent);
+                wxOK|wxCENTRE|wxICON_INFORMATION, parent);
 #else
 #   error MAppBase::Message() not implemented
 #endif 

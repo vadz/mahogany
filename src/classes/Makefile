@@ -1,7 +1,7 @@
 # Makefile for src/classes directory
 
 CWD = classes
-SRC = CommonBase.cpp MObject.cpp MApplication.cpp PathFinder.cpp Profile.cpp MimeList.cpp MimeTypes.cpp \
+SRC = MObject.cpp MApplication.cpp PathFinder.cpp Profile.cpp MimeList.cpp MimeTypes.cpp \
 XFace.cpp kbList.cpp # Script.cpp
 HDR = $(SRC:.cpp=.h)
 DEP = $(SRC:.cpp=.d)

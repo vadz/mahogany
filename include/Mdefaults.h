@@ -302,18 +302,18 @@ enum FolderType
 
 // Unix-only entries
 #ifdef OS_UNIX
-   /// path list for M's directory
-   #define   MC_PATHLIST_D   "/usr/local:/usr/:/opt:/opt/local:/usr/opt:/usr/local/opt"
-   /// the name of M's root directory
-   #define   MC_ROOTDIRNAME_D   "M"
-   /// the user's M directory
-   #define   MC_USERDIR_D         ""
-   /// the name of the M directory 
-   #define   MC_USER_MDIR_D         ".M"
-   /// the path where to find .afm files
-   #define   MC_AFMPATH_D "/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript"
-   /// the path to the /etc directories (configuration files)
-   #define   MC_ETCPATH_D   "/etc:/usr/etc:/usr/local/etc"
+/// path list for M's directory
+#define   MC_PATHLIST_D   "/usr/local:/usr/:/opt:/opt/local:/usr/opt:/usr/local/opt"
+/// the name of M's root directory
+#define   MC_ROOTDIRNAME_D   "M"
+/// the user's M directory
+#define   MC_USERDIR_D         ""
+/// the name of the M directory 
+#define   MC_USER_MDIR_D         ".M"
+/// the path where to find .afm files
+#define   MC_AFMPATH_D "/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript"
+/// the path to the /etc directories (configuration files)
+#define   MC_ETCPATH_D "/etc:/usr/etc:/usr/local/etc"
 #endif // Unix
 
 /// the default icon for frames

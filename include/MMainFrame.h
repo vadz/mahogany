@@ -27,7 +27,6 @@ public:
    /// virtual destructor
    virtual ~MainFrameBase() {};
 
-   CB_DECLARE_CLASS(MainFrameBase,CommonBase);
 };
 
 #ifdef	USE_WXWINDOWS
