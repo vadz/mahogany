@@ -632,10 +632,11 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
               doesn't change anything */
          sortOrders[0u] = orderCol;
    }
-   else // not exactly one sort order, so just sort on this column
+   else
    {
-      sortOrders.Empty();
-      sortOrders.Add(orderCol);
+      // not exactly one sort order, so just sort on this column pushing the
+      // previous search criteriums one step down
+      sortOrders.Insert(orderCol, 0);
    }
 
    // save the new sort order and update everything

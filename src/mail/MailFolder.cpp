@@ -1814,6 +1814,8 @@ long BuildSortOrder(const wxArrayInt& sortOrders)
    long sortOrder = 0l;
 
    size_t count = sortOrders.GetCount();
+   if ( count > 8 )
+      count = 8;
    for ( size_t n = count + 1; n > 1; n-- )
    {
       sortOrder <<= 4;
