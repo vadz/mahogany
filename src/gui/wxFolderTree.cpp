@@ -2590,11 +2590,6 @@ void wxFolderTreeImpl::OnChar(wxKeyEvent& event)
          // with Alt => show properties (Windows standard...)
          DoFolderProperties();
       }
-      else
-      {
-         // without Alt it's the same as double click
-         (void)OnDoubleClick();
-      }
       break;
 
     default:
@@ -2938,10 +2933,9 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
       wxLogTrace(M_TRACE_MFSTATUS,
                  "Folder tree: no cached status, calling CountAllMessages()");
 
-      // we don't have the status right now, count the messages now: this will
-      // result in another status update sent to us later but then the status
-      // cache should already be cached
-      MailFolder_obj mf = MailFolder::OpenFolder(folder, MailFolder::ReadOnly);
+      // we don't have the status right now, count the messages (the folder
+      // should be already opened, we don't want to open it just for this)
+      MailFolder_obj mf = MailFolder::GetOpenedFolderFor(folder);
       if ( !mf )
       {
          wxLogDebug("Failed to update status for '%s'", folderName.c_str());
