@@ -56,9 +56,18 @@
 // -----------------------------------------------------------------------------
 
 class WXDLLEXPORT wxFrame;
-class WXDLLEXPORT wxControl;
-class WXDLLEXPORT wxListBox;
 class WXDLLEXPORT wxCheckBox;
+class WXDLLEXPORT wxCheckListBox;
+class WXDLLEXPORT wxChoice;
+class WXDLLEXPORT wxControl;
+class WXDLLEXPORT wxComboBox;
+class WXDLLEXPORT wxListBox;
+class WXDLLEXPORT wxRadioBox;
+class WXDLLEXPORT wxScrolledWindow;
+class WXDLLEXPORT wxStaticBitmap;
+class WXDLLEXPORT wxStaticBox;
+class WXDLLEXPORT wxStaticText;
+
 class /* WXDLLEXPORT */ wxColorBrowseButton;
 class /* WXDLLEXPORT */ wxDirBrowseButton;
 class /* WXDLLEXPORT */ wxFileBrowseButton;
@@ -67,13 +76,6 @@ class /* WXDLLEXPORT */ wxFontBrowseButton;
 class /* WXDLLEXPORT */ wxFolderBrowseButton;
 class /* WXDLLEXPORT */ wxIconBrowseButton;
 class /* WXDLLEXPORT */ wxTextBrowseButton;
-class WXDLLEXPORT wxStaticBitmap;
-class WXDLLEXPORT wxStaticText;
-class WXDLLEXPORT wxStaticBox;
-class WXDLLEXPORT wxCheckListBox;
-class WXDLLEXPORT wxRadioBox;
-class WXDLLEXPORT wxChoice;
-class WXDLLEXPORT wxComboBox;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -548,7 +550,9 @@ public:
    // canvas, not of the page itself
    wxWindow *GetCanvas() const
    {
-       return m_canvas ? m_canvas : (wxWindow *)this;   // const_cast
+      // first cast to wxWindow is needed if wxScrolledWindow is only forward
+      // declared and not visible from here
+      return m_canvas ? (wxWindow *)m_canvas : (wxWindow *)this; // const_cast
    }
 
    // forces a call to Layout() to get everything nicely laid out

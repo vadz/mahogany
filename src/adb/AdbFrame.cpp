@@ -50,6 +50,8 @@
 #   include <wx/textctrl.h>
 #   include <wx/button.h>       // for wxButton
 #   include <wx/filedlg.h>
+#   include <wx/settings.h>
+#   include <wx/dcclient.h>
 #endif // USE_PCH
 
 #include <wx/notebook.h>        // for wxNotebook
