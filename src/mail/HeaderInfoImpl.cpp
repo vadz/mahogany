@@ -167,6 +167,8 @@ HeaderInfo *HeaderInfoListImpl::GetItemByIndex(size_t n) const
       m_mf->GetHeaderInfo(&m_headers[n], n + 1, n + 1);
    }
 
+   ASSERT_MSG( m_headers[n]->IsValid(), "returning invalid HeaderInfo" );
+
    return m_headers[n];
 }
 
@@ -390,7 +392,7 @@ void HeaderInfoListImpl::Cache(size_t idxFrom, size_t idxTo)
    // trying to minimize the number of headers we're asking for is probably not
    // worth it as c-client caches them anyhow internally, so getting them is
    // quick the second time
-   if ( countNotInCache > 1 )
+   if ( countNotInCache )
    {
       m_mf->GetHeaderInfo(&m_headers[idxFrom], idxFrom + 1, idxTo + 1);
    }

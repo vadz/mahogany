@@ -3304,6 +3304,15 @@ MailFolderCC::IsNewMessage(const HeaderInfo *hi)
 void
 MailFolderCC::UpdateMessageStatus(unsigned long msgno)
 {
+   // if we're retrieving the headers right now, we can't use
+   // headers->GetItemByIndex() below as this risks to reenter c-client which
+   // is a fatal error
+   //
+   // besides, we don't need to do it neither as mm_exists() will follow soon
+   // which will invalidate the current status anyhow
+   if ( IsLocked() )
+      return;
+
    MESSAGECACHE *elt = mail_elt(m_MailStream, msgno);
    CHECK_RET( elt, "UpdateMessageStatus: no elt for the given msgno?" );
 
@@ -3315,11 +3324,14 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
    HeaderInfo *hi = headers->GetItemByIndex(idx);
    CHECK_RET( hi, "UpdateMessageStatus: no header info for the given msgno?" );
 
+   // now unneeded because of the test in the beginning
+#if 0
    // it may happen that we get mm_flags notification exactly for the header
    // we're building right now - in this case it doesn't have valid status yet,
    // so don't do anything
    if ( !hi->IsValid() )
       return;
+#endif // 0
 
    int statusNew = GetMsgStatus(elt),
        statusOld = hi->GetStatus();

@@ -1204,14 +1204,22 @@ void wxFolderListCtrl::OnListCacheHint(wxListEvent& event)
    // cache all items which are going to become visible
    if ( m_headers )
    {
-      long from = event.GetCacheFrom(),
-           to = event.GetCacheTo();
+      size_t from = event.GetCacheFrom(),
+             to = event.GetCacheTo();
 
-      // not only this test makes sense to avoid caching unnecessarily but it
-      // also takes care of stupid MSW list ctrl which sends us cache hints
-      // with from == to == 0 when it becomes empty
-      if ( from < to )
-         m_headers->HintCache(from, to);
+      // it may happen that our UpdateListing() hasn't been called yet and then
+      // the control may (briefly) believe that it has got wrong number of
+      // items, so check the range explicitly
+      size_t count = GetHeadersCount();
+      if ( count )
+      {
+         if ( to >= count )
+            to = count - 1;
+         if ( from < to )
+         {
+            m_headers->HintCache(from, to);
+         }
+      }
    }
 }
 
