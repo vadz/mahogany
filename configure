@@ -563,7 +563,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.176 2000/07/20 14:47:44 GN Exp 
+# From configure.in Id: configure.in,v 1.177 2000/07/22 05:54:46 GN Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -4593,7 +4593,7 @@ LIBS=`echo $LIBS | sed 's/-L\.//g'`
 
 OUTPUT="makeopts"
 COPY=Makefile DIR=
-for dir in `cd $srcdir; find * -type d -print`
+for dir in `cd $srcdir; find include extra src doc -type d -print`
 do	case "$dir" in
 	CVS | */CVS)		continue ;;
 	extra/src)		DIR="$DIR $dir" ;;
