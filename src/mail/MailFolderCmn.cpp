@@ -3206,6 +3206,29 @@ MailFolderCmn::FilterNewMail()
       return false;
    }
 
+   // build a single program from all filter rules:
+   String filterString;
+   MFolder_obj folder(GetName());
+   wxArrayString filters;
+   if ( folder )
+      filters = folder->GetFilters();
+   size_t countFilters = filters.GetCount();
+   for ( size_t nFilter = 0; nFilter < countFilters; nFilter++ )
+   {
+      MFilter_obj filter(filters[nFilter]);
+      MFilterDesc fd = filter->GetDesc();
+      filterString += fd.GetRule();
+   }
+
+   // don't do anything if no filters
+   if ( filterString.empty() )
+      return true;
+
+   // or if there is a syntax error in them
+   FilterRule *filterRule = filterModule->GetFilter(filterString);
+   if ( !filterRule )
+      return false;
+
    HeaderInfoList_obj hil = GetHeaders();
    CHECK( hil, false, "FilterNewMail: no headers" );
 
@@ -3242,8 +3265,7 @@ MailFolderCmn::FilterNewMail()
                  hil->GetIdxFromMsgno(msgnoLastNew));
    }
 
-   size_t n;
-   for ( n = 0; n < count; n++ )
+   for ( size_t n = 0; n < count; n++ )
    {
       HeaderInfo *hi = hil->GetItemByMsgno(messages->Item(n));
       if ( !hi )
@@ -3258,66 +3280,41 @@ MailFolderCmn::FilterNewMail()
       }
    }
 
-   // build a single program from all filter rules:
-   String filterString;
-   MFolder_obj folder(GetName());
-   wxArrayString filters;
-   if ( folder )
-      filters = folder->GetFilters();
-   size_t countFilters = filters.GetCount();
-   for ( n = 0; n < countFilters; n++ )
-   {
-      MFilter_obj filter(filters[n]);
-      MFilterDesc fd = filter->GetDesc();
-      filterString += fd.GetRule();
-   }
+   // do apply the filters finally
+   int rc = filterRule->Apply(this, *messages, true /* ignore deleted */);
 
-   // apply it
-   if ( !filterString.empty() )
+   // avoid doing anything harsh (like expunging the messages) if an
+   // error occurs
+   if ( !(rc & FilterRule::Error) )
    {
-      // translate filter program:
-      FilterRule *filterRule = filterModule->GetFilter(filterString);
+      // some of the messages might have been deleted by the filters
+      // and, moreover, the filter code could have called
+      // ExpungeMessages() explicitly, so we may have to expunge some
+      // messages from the folder
 
-      // apply it:
-      if ( filterRule )
+      // calling ExpungeMessages() from filter code is unconditional
+      // and should always be honoured, so check for it first
+      bool expunge = (rc & FilterRule::Expunged) != 0;
+      if ( !expunge )
       {
-         // true here means "ignore deleted"
-         int rc = filterRule->Apply(this, *messages, true);
-
-         // avoid doing anything harsh (like expunging the messages) if an
-         // error occurs
-         if ( !(rc & FilterRule::Error) )
+         if ( rc & FilterRule::Deleted )
          {
-            // some of the messages might have been deleted by the filters
-            // and, moreover, the filter code could have called
-            // ExpungeMessages() explicitly, so we may have to expunge some
-            // messages from the folder
-
-            // calling ExpungeMessages() from filter code is unconditional
-            // and should always be honoured, so check for it first
-            bool expunge = (rc & FilterRule::Expunged) != 0;
-            if ( !expunge )
-            {
-               if ( rc & FilterRule::Deleted )
-               {
-                  // expunging here is dangerous because we can expunge the
-                  // messages which had been deleted by the user manually
-                  // before the filters were applied, so check a special
-                  // option which may be set to prevent us from doing this
-                  expunge = !READ_APPCONFIG(MP_SAFE_FILTERS);
-               }
-            }
-
-            if ( expunge )
-            {
-               // so be it
-               ExpungeMessages();
-            }
+            // expunging here is dangerous because we can expunge the
+            // messages which had been deleted by the user manually
+            // before the filters were applied, so check a special
+            // option which may be set to prevent us from doing this
+            expunge = !READ_APPCONFIG(MP_SAFE_FILTERS);
          }
+      }
 
-         filterRule->DecRef();
+      if ( expunge )
+      {
+         // so be it
+         ExpungeMessages();
       }
    }
+
+   filterRule->DecRef();
 
    delete messages;
 
@@ -3326,57 +3323,68 @@ MailFolderCmn::FilterNewMail()
 
 bool MailFolderCmn::CollectNewMail()
 {
+   if ( !(GetFlags() & MF_FLAGS_INCOMING) )
+   {
+      // we don't collect messages from this folder
+      return true;
+   }
+
+   // where to we move the mails?
+   String newMailFolder = READ_CONFIG(GetProfile(), MP_NEWMAIL_FOLDER);
+   if ( newMailFolder == GetName() )
+   {
+      ERRORMESSAGE((_("Cannot collect mail from folder '%s' into itself, "
+                      "please modify the properties for this folder.\n"
+                      "\n"
+                      "Disabling automatic mail collection for now."),
+                   GetName().c_str()));
+
+      // reset MF_FLAGS_INCOMING flag to avoid the error the next time
+      MFolder_obj folder(GetProfile());
+      if ( folder )
+      {
+         folder->ResetFlags(MF_FLAGS_INCOMING);
+      }
+
+      return false;
+   }
+
    // do we have any messages at all?
    unsigned long count = GetMessageCount();
    if ( count > 0 )
    {
-      // do we have any messages to move?
-      if ( (GetFlags() & MF_FLAGS_INCOMING) != 0 )
+      HeaderInfoList_obj hil = GetHeaders();
+      CHECK( hil, false, "CollectNewMail: no headers" );
+
+      // get all undeleted messages
+      UIdArray messages;
+      for ( unsigned long idx = 0; idx < count; idx++ )
       {
-         // where to we move the mails?
-         String newMailFolder = READ_CONFIG(GetProfile(), MP_NEWMAIL_FOLDER);
-         if ( newMailFolder == GetName() )
+         // check that the message isn't deleted - avoids getting 2 (or
+         // more!) copies of the same "new" message (first normal,
+         // subsequent deleted) if, for whatever reason, we failed to
+         // expunge the messages the last time we collected mail from here
+         HeaderInfo *hi = hil->GetItemByIndex(idx);
+         if ( !(hi->GetStatus() & MSG_STAT_DELETED) )
          {
-            ERRORMESSAGE((_("Cannot collect mail from folder '%s' into itself."),
-                         GetName().c_str()));
-
-            // TODO: reset MF_FLAGS_INCOMING flag
+            messages.Add(hi->GetUId());
          }
-         else // ok, move to another folder
+      }
+
+      // it is possible that all new messages had MSG_STAT_DELETED flag
+      // set and so we have nothing to copy
+      if ( !messages.IsEmpty() )
+      {
+         if ( SaveMessages(&messages, newMailFolder) )
          {
-            HeaderInfoList_obj hil = GetHeaders();
-            CHECK( hil, false, "CollectNewMail: no headers" );
+            // delete and expunge
+            DeleteMessages(&messages, true);
+         }
+         else // don't delete them if we failed to move
+         {
+            ERRORMESSAGE((_("Cannot move newly arrived messages.")));
 
-            UIdArray messages;
-            for ( unsigned long idx = 0; idx < count; idx++ )
-            {
-               // check that the message isn't deleted - avoids getting 2 (or
-               // more!) copies of the same "new" message (first normal,
-               // subsequent deleted) if, for whatever reason, we failed to
-               // expunge the messages the last time we collected mail from here
-               HeaderInfo *hi = hil->GetItemByIndex(idx);
-               if ( !(hi->GetStatus() & MSG_STAT_DELETED) )
-               {
-                  messages.Add(hi->GetUId());
-               }
-            }
-
-            // it is possible that all new messages had MSG_STAT_DELETED flag
-            // set and so we have nothing to copy
-            if ( !messages.IsEmpty() )
-            {
-               if ( SaveMessages(&messages, newMailFolder) )
-               {
-                  // delete and expunge
-                  DeleteMessages(&messages, true);
-               }
-               else // don't delete them if we failed to move
-               {
-                  ERRORMESSAGE((_("Cannot move newly arrived messages.")));
-
-                  return false;
-               }
-            }
+            return false;
          }
       }
    }
