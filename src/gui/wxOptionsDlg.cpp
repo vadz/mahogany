@@ -3098,8 +3098,8 @@ bool wxOptionsPageNetwork::TransferDataToWindow()
 #ifdef USE_DIALUP
    if ( bRc )
    {
-      wxChoice *choice = wxStaticCast(GetControl(ConfigField_NetConnection),
-                                                 wxChoice);
+      wxControl *control = GetControl(ConfigField_NetConnection);
+      wxChoice *choice = control ? wxStaticCast(control, wxChoice) : NULL;
 
       if ( choice )
       {
