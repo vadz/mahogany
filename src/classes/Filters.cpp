@@ -543,12 +543,16 @@ ParserImpl::ParseExpression(void)
          GetToken(); sn = new Expression(sn, new OperatorNone, ParseExpression());break;
       case ')':
          if(needParan)
-            GetToken();
-         else
          {
-            Error("unexpected ')' after expression.");
-            if(sn) delete sn;
-            return NULL;
+            Token t = PeekToken();
+            if(t.GetType() == TT_Char && t.GetChar() == ')')
+               GetToken();
+            else
+            {
+               Error("   ')' needed after expression.");
+               if(sn) delete sn;
+               return NULL;
+            }
          }
          break;
       default:
