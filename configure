@@ -36,7 +36,7 @@ ac_help="$ac_help
 ac_help="$ac_help
   --with-experimental     compile experimental code"
 ac_help="$ac_help
-  --with-threads          multi-threaded version (EXPERIMENTAL)"
+  --with-threads          multi-threaded version (DOES NOT WORK)"
 ac_help="$ac_help
   --with-ccostype=xxx     use OS type xxx for c-client compilation"
 ac_help="$ac_help
@@ -557,7 +557,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.232 2001/06/12 16:36:22 vadz Exp 
+# From configure.in Id: configure.in,v 1.234 2001/06/12 18:34:42 vadz Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null

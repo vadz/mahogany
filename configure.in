@@ -74,7 +74,7 @@ M_OVERRIDES(experimental,experimental code,USE_EXPERIMENTAL,0,
 --with-experimental     compile experimental code)
 
 M_OVERRIDES(threads,multi-threading,USE_THREADS,0,
---with-threads          multi-threaded version (EXPERIMENTAL))
+--with-threads          multi-threaded version (DOES NOT WORK))
 
 M_OVERRIDES(ccostype,c-client OS type,USE_CCOSTYPE,,
 --with-ccostype=xxx     use OS type xxx for c-client compilation)
