@@ -291,6 +291,9 @@ private:
    /// UId of last previewed message (may be UID_ILLEGAL)
    UIdType m_uidPreviewed;
 
+   /// index of the message being previewed in the list control
+   long m_itemPreviewed;
+
    /// UId of the focused message, may be different from m_uidPreviewed!
    UIdType m_uidFocused;
 

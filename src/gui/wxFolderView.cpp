@@ -3026,21 +3026,15 @@ wxFolderView::OnFocusChange(void)
 
       if ( uid != UID_ILLEGAL && READ_CONFIG(m_Profile, MP_FVIEW_STATUS_UPDATE) )
       {
-         String msg;
-         if ( m_uidPreviewed != UID_ILLEGAL )
-         {
-            HeaderInfoList_obj hil = GetFolder()->GetHeaders();
-            if ( hil )
-            {
-               wxString fmt = READ_CONFIG(m_Profile, MP_FVIEW_STATUS_FMT);
-               HeaderVarExpander expander(hil[idx],
-                                          m_settings.dateFormat,
-                                          m_settings.dateGMT);
-               msg = ParseMessageTemplate(fmt, expander);
-            }
-         }
+         HeaderInfoList_obj hil = GetFolder()->GetHeaders();
+         CHECK_RET( hil, "failed to get headers" );
 
-         wxLogStatus(m_Frame, msg);
+         wxString fmt = READ_CONFIG(m_Profile, MP_FVIEW_STATUS_FMT);
+         HeaderVarExpander expander(hil[idx],
+                                    m_settings.dateFormat,
+                                    m_settings.dateGMT);
+
+         wxLogStatus(m_Frame, ParseMessageTemplate(fmt, expander));
       }
       //else: no status message
    }
@@ -3058,6 +3052,7 @@ wxFolderView::SetPreviewUID(UIdType uid)
    wxLogTrace(M_TRACE_SELECTION, "%lx is now previewed", uid);
 
    m_uidPreviewed = uid;
+   m_itemPreviewed = uid == UID_ILLEGAL ? -1 : m_FolderCtrl->GetFocusedItem();
 }
 
 UIdArray
@@ -3499,10 +3494,13 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
       }
 #endif // BROKEN_LISTCTRL
 
-      UIdType uid = m_FolderCtrl->GetUIdFromIndex(item);
-
-      if ( uid == m_uidPreviewed )
+      // we can't use m_FolderCtrl->GetUIdFromIndex(item) here because the item
+      // is not in the headers any more, so we use indices instead of UIDs even
+      // if it is less simple
+      if ( !previewDeleted && (item + (long)n == m_itemPreviewed) )
+      {
          previewDeleted = true;
+      }
 
       itemsDeleted.Add(item);
    }

@@ -1252,8 +1252,6 @@ MailFolderCC::Create(int typeAndFlags)
    m_MailStream = NIL;
    m_nMessages = 0;
 
-   m_hasNewMail = false;
-
    UpdateTimeoutValues();
 
    Init();
@@ -3325,12 +3323,6 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
 
          mfStatusCache->UpdateStatus(GetName(), status);
       }
-      else
-      {
-         // if it isn't, our status calculations elsewhere are going to be
-         // wrong!
-         FAIL_MSG( "status of opened folder SHOULD be cached" );
-      }
 
       hi->m_Status = statusNew;
 
@@ -3759,24 +3751,12 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
       // update to use in the enclosing "if" test the next time
       m_nMessages = msgnoMax;
 
-      // see if we have any new messages (i.e. new messages which are "new")
-      if ( stream->recent )
+      // we may need to apply the filtering code but we can't do it from here
+      // because we're inside c-client now and it is not reentrant, so we
+      // send an event to ourselves to do it slightly later
+      if ( msgnoMax )
       {
-         // we need to apply the filtering code but we can't do it from here
-         // because we're inside c-client now and it is not reentrant, so we
-         // the GUI to filter us later
-         m_hasNewMail = true;
-
          MEventManager::Send(new MEventFolderOnNewMailData(this));
-      }
-      else // recent messages number didn't change
-      {
-         // just update directly unless the folder is empty in which case no
-         // update is needed
-         if ( msgnoMax )
-         {
-            RequestUpdate();
-         }
       }
    }
    else // same number of messages
@@ -3845,14 +3825,23 @@ void MailFolderCC::OnNewMail()
    wxLogTrace(TRACE_MF_EVENTS, "Got new mail notification for '%s'",
               GetName().c_str());
 
-   FilterNewMail();
+   // see if we have any new messages
+   //
+   // FIXME: having recent messages doesn't mean havign new ones and although
+   //        FilterNewMail() does count new messages before doing anything,
+   //        this is still not very efficient - we'd better try to determine if
+   //        we have any really new new messages. The trouble is that it just
+   //        remembering stream->recent in some m_nRecent and comparing it here
+   //        doesn't work as some recent messages could be expunged and new
+   //        arrived without changing the total stream->recent. So then we'd
+   //        have to check in OnMailExpunge() if we're expunging a recent
+   //        message...
+   if ( m_MailStream->recent )
+   {
+      FilterNewMail();
 
-   CollectNewMail();
-
-   // new mail means "unprocessed new mail" really, so even if can still have
-   // some new messages we reset the flag as we don't want to process them any
-   // more
-   m_hasNewMail = false;
+      CollectNewMail();
+   }
 
    // we delayed sending the update notification in OnMailExists() because we
    // wanted to filter the new messages first - now we can notify the GUI

@@ -547,9 +547,6 @@ private:
 
    /// last seen UID, all messages above this one are new
    UIdType m_LastUId;
-
-   /// true if OnNewMail() must be called
-   bool m_hasNewMail;
    //@}
 
    /** @name Temporary operation parameters */
