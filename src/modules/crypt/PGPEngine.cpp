@@ -23,6 +23,7 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+   #include "sysutil.h"
 #endif //USE_PCH
 
 #include "Mpers.h"

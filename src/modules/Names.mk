@@ -18,6 +18,8 @@
 #
 #######################################################################
 
+include $(wildcard .src/modules/*/Names.mk) $(wildcard $(patsubst .src/%/Names.mk,%/*.d,$(wildcard .src/modules/*/Names.mk)))
+
 SRC	:= $(patsubst .src/%,%,$(wildcard .src/modules/*.cpp))
 MOD	:= $(SRC:.cpp=.so)
 
