@@ -415,6 +415,9 @@ wxFolderView::Update(void)
    for(hi = m_MailFolder->GetFirstHeaderInfo(); hi != NULL;
        hi = m_MailFolder->GetNextHeaderInfo(hi))
    {
+      // FIXME vars are not inited here!
+      nsize = day = month = year = 0;
+
       date.Printf(dateFormat, day, month, year);
       size = strutil_ultoa(nsize);
 

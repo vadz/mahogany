@@ -189,7 +189,7 @@ public:
        @param message status
        @return string representation
    */
-   static String ConvertMessageStatusToString(MessageStatus status);
+   static String ConvertMessageStatusToString(int status);
    
    /**@name Functions to get an overview of messages in the folder. */
    //@{
@@ -232,7 +232,7 @@ public:
    virtual const String &GetDate(void) const = 0;
    virtual const String &GetId(void) const = 0;
    virtual const String &GetReferences(void) const = 0;
-   virtual MailFolder::MessageStatus GetStatus(void) const = 0;
+   virtual int GetStatus(void) const = 0;
    virtual unsigned long const &GetSize(void) const = 0;
    virtual ~HeaderInfo() {}
 };

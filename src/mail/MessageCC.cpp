@@ -363,7 +363,7 @@ MessageCC::GetBody(void)
 
 
 /** Return the numeric status of message. */
-MailFolder::MessageStatus
+int
 MessageCC::GetStatus(
    unsigned long *size,
    unsigned int *day,
@@ -382,7 +382,7 @@ MessageCC::GetStatus(
    if(month)   *month = mc->month;
    if(year) *year = mc->year + BASEYEAR;
 
-   MailFolder::MessageStatus status = MailFolder::MSG_STAT_NONE;
+   int status = MailFolder::MSG_STAT_NONE;
    if(mc->seen)      status |= MailFolder::MSG_STAT_SEEN;
    if(mc->answered)  status |= MailFolder::MSG_STAT_ANSWERED;
    if(mc->deleted)   status |= MailFolder::MSG_STAT_DELETED;

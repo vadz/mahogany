@@ -118,11 +118,10 @@ MailFolder::OpenFolder(int typeAndFlags,
 }
 
 /* static */ String 
-MailFolder::ConvertMessageStatusToString(MessageStatus status)
+MailFolder::ConvertMessageStatusToString(int status)
 {
    String strstatus = "";
    
-   strstatus = "";
    if(status & MSG_STAT_RECENT)
    {
       if(status & MSG_STAT_SEEN)

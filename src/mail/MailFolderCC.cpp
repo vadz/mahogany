@@ -58,11 +58,12 @@ public:
    virtual String const &GetDate(void) const { return m_Date; }
    virtual String const &GetId(void) const { return m_Id; }
    virtual String const &GetReferences(void) const { return m_References; }
-   virtual MailFolder::MessageStatus GetStatus(void) const { return m_Status; }
+   virtual int GetStatus(void) const { return m_Status; }
    virtual unsigned long const &GetSize(void) const { return m_Size; }
+
 protected:
    String m_Subject, m_From, m_Date, m_Id, m_References;
-   MailFolder::MessageStatus m_Status;
+   int m_Status;
    unsigned long m_Size;
    friend class MailFolderCC;
 };
@@ -513,6 +514,7 @@ MailFolderCC::RemoveFromMap(MAILSTREAM const * /* stream */)
 void
 MailFolderCC::UpdateCount(void)
 {
+   unsigned long oldnum = m_numOfMessages;
 
    UpdateViews();
 

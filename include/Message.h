@@ -211,7 +211,7 @@ public:
        @param year to store year (19xx)
        @return flags of message
    */
-   virtual MailFolder::MessageStatus GetStatus(
+   virtual int GetStatus(
       unsigned long *size = NULL,
       unsigned int *day = NULL,
       unsigned int *month = NULL,
