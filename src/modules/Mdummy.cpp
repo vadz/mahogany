@@ -29,11 +29,11 @@
 
 class DummyModule : public MModule
 {
-   MMODULE_DEFINE(DummyModule)
+   MMODULE_DEFINE();
 
 private:
    /** Dummy constructor.
-       As the class has no usable interface, this doesn´t do much, but 
+       As the class has no usable interface, this doesn´t do much, but
        it displays a small dialog to say hello.
        A real module would store the MInterface pointer for later
        reference and check if everything is set up properly.
@@ -59,7 +59,7 @@ MMODULE_IMPLEMENT(DummyModule,
 
 /* static */
 MModule *
-DummyModule::Init(int version_major, int version_minor, 
+DummyModule::Init(int version_major, int version_minor,
                   int version_release, MInterface *minterface,
                   int *errorCode)
 {
@@ -74,17 +74,12 @@ DummyModule::Init(int version_major, int version_minor,
 
 
 DummyModule::DummyModule(MInterface *minterface)
+           : MModule(minterface)
 {
-   m_Minterface = minterface;
    minterface->Message(
       "This message is created by the DummyModule plugin\n"
       "for Mahogany. This module has been loaded at runtime\n"
       "and is not part of the normal Mahogany executable.",
       NULL,
       "Welcome from DummyModule!");
-}
-
-DummyModule::~DummyModule()
-{
-    m_Minterface->RemoveModule(this);
 }

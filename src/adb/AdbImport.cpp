@@ -39,6 +39,10 @@
 #include "adb/AdbBook.h"
 #include "adb/AdbImport.h"
 
+#ifdef USE_ADB_MODULES
+   #include "MModule.h"
+#endif // USE_ADB_MODULES
+
 // ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
@@ -132,7 +136,7 @@ bool AdbImport(const String& filename,
    if ( !importer )
    {
       // try to find it
-      AdbImporter::AdbImporterInfo *info = AdbImporter::ms_listImporters;
+      AdbImporter::AdbImporterInfo *info = AdbImporter::GetAdbImpporterInfo();
       while ( info )
       {
          importer = info->CreateImporter();
@@ -147,6 +151,8 @@ bool AdbImport(const String& filename,
 
          info = info->next;
       }
+
+      AdbImporter::FreeAdbImporterInfo(info);
    }
    else
    {
@@ -158,7 +164,7 @@ bool AdbImport(const String& filename,
          wxString msg;
          msg.Printf(_("It seems that the file '%s' is not in the format '%s',\n"
                       "do you still want to try to import it?"),
-                    filename.c_str(), importer->GetDescription().c_str());
+                    filename.c_str(), importer->GetDescription());
 
          if ( !MDialog_YesNoDialog(msg, NULL, _("Address book import"),
                                    FALSE, "ConfirmAdbImporter") )
@@ -238,7 +244,7 @@ exit:
       wxLogMessage(_("Successfully imported address book from file '%s' "
                      "(format '%s')"),
                    adbname.c_str(),
-                   importer->GetDescription().c_str());
+                   importer->GetDescription());
    }
    else
    {
@@ -279,7 +285,7 @@ size_t AdbImporter::EnumImporters(wxArrayString& names, wxArrayString& descs)
    descs.Empty();
 
    AdbImporter *importer = NULL;
-   AdbImporter::AdbImporterInfo *info = AdbImporter::ms_listImporters;
+   AdbImporter::AdbImporterInfo *info = AdbImporter::GetAdbImpporterInfo();
    while ( info )
    {
       importer = info->CreateImporter();
@@ -293,13 +299,15 @@ size_t AdbImporter::EnumImporters(wxArrayString& names, wxArrayString& descs)
       info = info->next;
    }
 
+   FreeAdbImporterInfo(info);
+
    return names.GetCount();
 }
 
 AdbImporter *AdbImporter::GetImporterByName(const String& name)
 {
    AdbImporter *importer = NULL;
-   AdbImporter::AdbImporterInfo *info = AdbImporter::ms_listImporters;
+   AdbImporter::AdbImporterInfo *info = AdbImporter::GetAdbImpporterInfo();
    while ( info )
    {
       importer = info->CreateImporter();
@@ -313,7 +321,53 @@ AdbImporter *AdbImporter::GetImporterByName(const String& name)
       info = info->next;
    }
 
+   FreeAdbImporterInfo(info);
+
    return importer;
+}
+
+// ----------------------------------------------------------------------------
+// AdbImporter functions for working with AdbImporterInfo
+// ----------------------------------------------------------------------------
+
+AdbImporter::AdbImporterInfo *AdbImporter::GetAdbImpporterInfo()
+{
+#ifdef USE_ADB_MODULES
+   ASSERT_MSG( !ms_listImporters, "forgot to call FreeAdbImporterInfo()!" );
+
+   // find all modules implementing AdbImporter interface
+   MModuleListing *listing = MModule::ListAvailableModules("AdbImporter");
+   if ( listing )
+   {
+      size_t count = listing->Count();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         // the object will automatically put itself into the linked list
+         new AdbImporterInfo((*listing)[n].GetName(),
+                             (*listing)[n].GetShortDescription());
+      }
+
+      listing->DecRef();
+   }
+#endif // USE_ADB_MODULES
+
+   return ms_listImporters;
+}
+
+void AdbImporter::FreeAdbImporterInfo(AdbImporter::AdbImporterInfo *info)
+{
+#ifdef USE_ADB_MODULES
+   AdbImporterInfo *next;
+   while ( info )
+   {
+      next = info->next;
+      delete info;
+   }
+
+   ms_listImporters = NULL;
+#else // !USE_ADB_MODULES
+   // nothing to do, the struct is static and no memory is allocated or freed
+#endif // USE_ADB_MODULES/!USE_ADB_MODULES
 }
 
 // ----------------------------------------------------------------------------
@@ -323,12 +377,17 @@ AdbImporter *AdbImporter::GetImporterByName(const String& name)
 AdbImporter::AdbImporterInfo *AdbImporter::ms_listImporters = NULL;
 
 AdbImporter::AdbImporterInfo::AdbImporterInfo(const char *name_,
+#ifndef USE_ADB_MODULES
                                               Constructor ctor,
+#endif // !USE_ADB_MODULES
                                               const char *desc_)
 {
+   // init member vars
    name = name_;
    desc = desc_;
+#ifndef USE_ADB_MODULES
    CreateImporter = ctor;
+#endif // !USE_ADB_MODULES
 
    // insert us in the linked list (in the head because it's simpler and we
    // don't lose anything - order of insertion of different importers is
@@ -336,4 +395,15 @@ AdbImporter::AdbImporterInfo::AdbImporterInfo(const char *name_,
    next = AdbImporter::ms_listImporters;
    AdbImporter::ms_listImporters = this;
 }
+
+#ifdef USE_ADB_MODULES
+
+AdbImporter *AdbImporter::AdbImporterInfo::CreateImporter() const
+{
+   MModule *module = MModule::LoadModule(name);
+
+   return (AdbImporter *)module;
+}
+
+#endif // USE_ADB_MODULES
 

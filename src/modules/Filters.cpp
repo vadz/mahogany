@@ -66,7 +66,7 @@ public:
 #ifdef DEBUG
    void Debug(void);
 #endif
-   
+
 protected:
    FilterRuleImpl(const String &filterrule,
                   MInterface *interface,
@@ -83,7 +83,7 @@ private:
 };
 
 
-   
+
 ///------------------------------
 /// Own functionality:
 ///------------------------------
@@ -111,7 +111,7 @@ public:
       { ASSERT(m_type == TT_Keyword); return m_string; }
    inline long GetNumber(void)
       { ASSERT(m_type == TT_Number); return m_number; }
-   
+
    inline void SetChar(char c)
       { m_type = TT_Char; m_char = c; }
    inline void SetString(String const &s)
@@ -215,7 +215,7 @@ public:
    virtual void Rewind(size_t pos = 0) = 0;
    /// Returns current position in input.
    virtual size_t GetPos(void) const = 0;
-   /** Takes an error message and passes it to the program, sets error 
+   /** Takes an error message and passes it to the program, sets error
        flag.
        @param error message describing error
    */
@@ -283,31 +283,31 @@ private:
 
    PROGRAM :=
      | BLOCK [ BLOCK ]
-    
+
    BLOCK :=
      | CONDITION ;
      | { BLOCK RESTBLOCK}
 
    RESTBLOCK :=
-     | BLOCK ; RESTBLOCK  
+     | BLOCK ; RESTBLOCK
      | EMPTY
-     
+
    CONDITION :=
-     | CONDITION & EXPRESSION  
+     | CONDITION & EXPRESSION
      | CONDITION | EXPRESSION
      | EXPRESSION
 
    EXPRESSION :=
      | EXPR + TERM
      | EXPR - TERM
-     | TERM   
+     | TERM
 
    TERM :=
      | TERM * CONDITION
      | TERM / CONDITION
      | FACTOR
 
-     
+
    FACTOR :=
      | NUMBER
      | IDENTIFIER ( EXPRESSION )
@@ -319,19 +319,19 @@ private:
      CONDITION :=
        | EXPRESSION RESTCONDITION
 
-     RESTCONDITION :=  
+     RESTCONDITION :=
        | & CONDITION
        | | CONDITION
        | EMPTY
-       
+
      EXPRESSION := TERM RESTEXPRESSION
-     RESTEXPRESSION := 
+     RESTEXPRESSION :=
        | + EXPRESSION
        | - EXPRESSION
        | EMPTY
 
      TERM := FACTOR RESTTERM
-     RESTTERM := 
+     RESTTERM :=
        | * TERM
        | / TERM
        | EMPTY
@@ -375,7 +375,7 @@ public:
          msg << imsg;
          m_MInterface->Log(level, msg);
       }
-   /// Returns a list of known function definitions. 
+   /// Returns a list of known function definitions.
    virtual class FunctionList *GetFunctionList(void)
       { return m_FunctionList; }
    /// check if a function is already defined
@@ -403,7 +403,7 @@ public:
    virtual class Message * GetMessage(void)
    {
       return m_MailFolder ?
-         m_MailFolder->GetMessage(m_MessageUId) : 
+         m_MailFolder->GetMessage(m_MessageUId) :
          NULL ;
    }
    //@}
@@ -429,7 +429,7 @@ private:
 
    UIdType m_MessageUId;
    MailFolder *m_MailFolder;
-   
+
    GCC_DTOR_WARN_OFF
 };
 
@@ -513,7 +513,7 @@ private:
    size_t m_NArgs;
    MOBJECT_NAME(ArgList)
 };
-   
+
 
 KBLIST_DEFINE(NodeList, SyntaxNode);
 
@@ -546,7 +546,7 @@ public:
          s << '}';
          return s;
       }
-#endif    
+#endif
 private:
    NodeList  m_Nodes;
    MOBJECT_NAME(Block)
@@ -563,7 +563,7 @@ public:
 #ifdef DEBUG
    virtual String Debug(void) const
       { MOcheck(); String s; s.Printf("%ld",m_value); return s; }
-#endif    
+#endif
 private:
    long m_value;
    MOBJECT_NAME(Number)
@@ -584,7 +584,7 @@ public:
          s << '"' << m_String << '"';
          return s;
       }
-#endif    
+#endif
 private:
    String m_String;
    MOBJECT_NAME(StringConstant)
@@ -612,7 +612,7 @@ public:
          s << "!(" << m_Sn->Debug() << ')';
          return s;
       }
-#endif    
+#endif
 private:
    SyntaxNode *m_Sn;
    MOBJECT_NAME(Negation)
@@ -689,7 +689,7 @@ public:
 #ifdef DEBUG
    virtual String Debug(void) const
       { MOcheck(); return String("FunctionCall(") + m_name + String(")"); }
-#endif    
+#endif
 
 private:
    FunctionPointer m_function;
@@ -710,7 +710,7 @@ FunctionCall::FunctionCall(const String &name, ArgList *args,
    m_fd->IncRef();
    m_function = m_fd->GetFPtr();
 }
-   
+
 
 Value
 FunctionCall::Evaluate() const
@@ -773,7 +773,7 @@ public:
          s << ')';
          return s;
       }
-#endif    
+#endif
 private:
    SyntaxNode *m_Left, *m_Right;
    class Operator *m_Op;
@@ -798,7 +798,7 @@ Value operator oper(const Value &left, const Value &right) \
       ASSERT(0); \
       return Value(); \
    } \
-} 
+}
 
 #ifdef DEBUG
 #define IMPLEMENT_OP(name, oper) \
@@ -821,7 +821,7 @@ class Operator##name : public Operator \
 public: \
    virtual Value Evaluate(SyntaxNode *left, SyntaxNode *right) const \
       { MOcheck(); return left->Evaluate() oper right->Evaluate(); } \
-} 
+}
 #endif
 
 IMPLEMENT_VALUE_OP(||,left.GetString().Length(),right.GetString().Length());
@@ -837,38 +837,38 @@ IMPLEMENT_OP(Times,*);
 IMPLEMENT_OP(Divide,/);
 
 class OperatorAnd : public Operator
-{ 
-public: 
-   virtual Value Evaluate(SyntaxNode *left, SyntaxNode *right) const 
-      { 
-         MOcheck(); ASSERT(left); ASSERT(right); 
+{
+public:
+   virtual Value Evaluate(SyntaxNode *left, SyntaxNode *right) const
+      {
+         MOcheck(); ASSERT(left); ASSERT(right);
          Value lv = left->Evaluate();
          if(lv.ToNumber())
             return lv && right->Evaluate();
          else
             return lv;
-      } 
+      }
 #ifdef DEBUG
-   virtual String Debug(void) const 
-      { MOcheck(); return "And"; } 
+   virtual String Debug(void) const
+      { MOcheck(); return "And"; }
 #endif
 };
 
 class OperatorOr : public Operator
-{ 
-public: 
-   virtual Value Evaluate(SyntaxNode *left, SyntaxNode *right) const 
-      { 
-         MOcheck(); ASSERT(left); ASSERT(right); 
+{
+public:
+   virtual Value Evaluate(SyntaxNode *left, SyntaxNode *right) const
+      {
+         MOcheck(); ASSERT(left); ASSERT(right);
          Value lv = left->Evaluate();
          if(! lv.ToNumber())
-            return lv || right->Evaluate(); 
+            return lv || right->Evaluate();
          else
             return lv;
-      } 
+      }
 #ifdef DEBUG
-   virtual String Debug(void) const 
-      { MOcheck(); return "Or"; } 
+   virtual String Debug(void) const
+      { MOcheck(); return "Or"; }
 #endif
 };
 
@@ -933,7 +933,7 @@ public:
          }
          return s;
       }
-#endif    
+#endif
 private:
    SyntaxNode *m_Condition, *m_IfBlock, *m_ElseBlock;
    MOBJECT_NAME(IfElse)
@@ -1044,7 +1044,7 @@ FunctionDefinition *
 ParserImpl::FindFunction(const String &name)
 {
    FunctionList *fl = GetFunctionList();
-   
+
    for(FunctionList::iterator i = fl->begin();
        i != fl->end();
        i++)
@@ -1084,7 +1084,7 @@ ParserImpl::GetToken(bool remove)
    size_t OldPos = GetPos();
 
    EatWhiteSpace();
-   
+
    if(! Char())
    {
       token.SetEOF();
@@ -1115,7 +1115,7 @@ ParserImpl::GetToken(bool remove)
                m_Position++;
                continue; // skip it
             }
-         }               
+         }
          tokstr += CharInc();
          escaped = false;
       }
@@ -1128,10 +1128,10 @@ ParserImpl::GetToken(bool remove)
    else
       // All other cases: return the character:
       token.SetChar(CharInc());
-                  
+
    if(! remove)
       Rewind(OldPos);
-   /* Now check for keywords, which so far have been treated as normal 
+   /* Now check for keywords, which so far have been treated as normal
       identifiers. */
    if(token.GetType() == TT_Identifier)
    {
@@ -1154,7 +1154,7 @@ SyntaxNode *
 ParserImpl::ParseIfElse(void)
 {
    /* IFELSE :=
-      IF ( CONDITION ) BLOCK [ ELSE BLOCK ] 
+      IF ( CONDITION ) BLOCK [ ELSE BLOCK ]
    */
    MOcheck();
 
@@ -1162,7 +1162,7 @@ ParserImpl::ParseIfElse(void)
       *condition = NULL,
       *ifBlock = NULL,
       *elseBlock = NULL;
-   
+
    Token t = PeekToken();
    ASSERT(t.GetKeyword() == "if");
    (void) GetToken(); // swallow "if"
@@ -1202,7 +1202,7 @@ ParserImpl::ParseIfElse(void)
    // if we reach here, everything was parsed alright:
 
    return new IfElse(condition, ifBlock, elseBlock, this);
-   
+
    // all errors will jump to this label:
  ifElseBailout:
    if(condition) delete condition;
@@ -1216,7 +1216,7 @@ ParserImpl::ParseArgList(void)
 {
    MOcheck();
    ArgList *arglist = new ArgList;
-   
+
    Token t = PeekToken();
    for(;;)
    {
@@ -1252,7 +1252,7 @@ ParserImpl::ParseFunctionCall(void)
    ASSERT(t.GetType() == TT_Identifier);
 
    String functionName = t.GetIdentifier();
-   
+
    // Need to swallow argument list?
    t = PeekToken();
    if(t.GetType() != TT_Char || t.GetChar() != '(')
@@ -1272,7 +1272,7 @@ ParserImpl::ParseFunctionCall(void)
       Error(_("Expected ')' at end of argument list."));
    else
       GetToken(); // swallow it
-   
+
    FunctionDefinition *fd = FindFunction(functionName);
    SyntaxNode *sn = NULL;
    if(fd)
@@ -1298,7 +1298,7 @@ ParserImpl::ParseFactor(void)
    MOcheck();
    /* FACTOR :=
         | ! FACTOR
-        | ( EXRESSION ) 
+        | ( EXRESSION )
         | IDENTIFIER( ARGLIST )
         | NUMBER
         | "STRING"
@@ -1366,7 +1366,7 @@ ParserImpl::ParseRestCondition(Expression *condition)
 {
    MOcheck();
    ASSERT(condition);
-   
+
    /* RESTCONDITION :=
       | & CONDITION
       | | CONDITION
@@ -1379,7 +1379,7 @@ ParserImpl::ParseRestCondition(Expression *condition)
            && t.GetChar() != '&'
            && t.GetChar() != '|')
       )
-      return; 
+      return;
 
    GetToken();
    SyntaxNode * cond = ParseCondition();
@@ -1405,7 +1405,7 @@ ParserImpl::ParseRestExpression(Expression *expression)
 {
    MOcheck();
    ASSERT(expression);
-   
+
    /* RESTEXPRESSION :=
       | + EXPRESSION
       | - EXPRESSION
@@ -1418,7 +1418,7 @@ ParserImpl::ParseRestExpression(Expression *expression)
           && t.GetChar() != '+'
           && t.GetChar() != '-')
       )
-      return; 
+      return;
 
    GetToken();
    SyntaxNode * exp = ParseExpression();
@@ -1456,7 +1456,7 @@ ParserImpl::ParseRestTerm(Expression *expression)
         && t.GetChar() != '/'
         && t.GetChar() != '*'))
       return;
-   
+
    t = GetToken(); // eat operator
    char token = t.GetChar();
    SyntaxNode *term = ParseTerm();
@@ -1485,13 +1485,13 @@ ParserImpl::ParseCondition(void)
    /* CONDITION :=
       | EXPRESSION & EXPRESSION
       | EXPRESSION | EXPRESSION
-      | EXPRESSION   
-      
+      | EXPRESSION
+
       Which is identical to the following expression, resolving the
       left recursion problem:
-      
-      CONDITION := EXPRESSION RESTCONDITION    
-      
+
+      CONDITION := EXPRESSION RESTCONDITION
+
    */
 
    SyntaxNode *expr = ParseExpression();
@@ -1560,7 +1560,7 @@ ParserImpl::ParseBlock(void)
       block->AddNode(ifelse);
       return block;
    }
-   
+
    // Normal block:
    if(t.GetType() == TT_Char && t.GetChar() == '{')
    {
@@ -1601,7 +1601,7 @@ ParserImpl::ParseBlock(void)
       return block;
    }
 }
-      
+
 void
 ParserImpl::ParseRestBlock(Block *parent)
 {
@@ -1627,14 +1627,14 @@ ParserImpl::ParseExpression(void)
    /* EXPRESSION :=
       | EXPRESSION + TERM
       | EXPRESSION - TERM
-      | TERM   
+      | TERM
 
       Which is identical to the following expression, resolving the
       left recursion problem:
-      
+
       EXPRESSION :=
-      | TERM RESTEXPRESSION   
-      
+      | TERM RESTEXPRESSION
+
    */
    SyntaxNode *sn = ParseTerm();
    if(sn)
@@ -1653,14 +1653,14 @@ ParserImpl::ParseTerm(void)
    /* TERM :=
       | TERM * FACTOR
       | TERM / FACTOR
-      | FACTOR   
+      | FACTOR
 
       Which is identical to the following expression, resolving the
       left recursion problem:
-      
+
       EXPRESSION :=
-      | FACTOR RESTTERM   
-      
+      | FACTOR RESTTERM
+
    */
    SyntaxNode *factor = ParseFactor();
    if(factor)
@@ -1718,18 +1718,18 @@ ParserImpl::ParseTerm(void)
 static
 bool CheckRBL( int a, int b, int c, int d, const String & rblDomain)
 {
-   
+
 
    char * answerBuffer = new char[ BUFLEN ];
    int len;
-   
+
    String domain;
    domain.Printf("%d.%d.%d.%d.%s", d, c, b, a, rblDomain.c_str() );
-   
+
    res_init();
    len = res_query( domain.c_str(), C_IN, T_A,
                     (unsigned char *)answerBuffer, PACKETSZ );
-   
+
    if( len != -1 )
    {
       if( len > PACKETSZ ) // buffer was too short, re-alloc:
@@ -1755,7 +1755,7 @@ static bool findIP(String &header,
    String toExamine;
    String ip;
    int pos = 0, closePos;
-   
+
    toExamine = header;
    while(toExamine.Length() > 0)
    {
@@ -1804,7 +1804,7 @@ extern "C"
 
       int a,b,c,d;
       String testHeader = received;
-      
+
       while( (!rc) && (testHeader.Length() > 0) )
       {
          if(findIP(testHeader, '(', ')', &a, &b, &c, &d))
@@ -1933,7 +1933,7 @@ extern "C"
       return rc;
    }
 
-#ifdef USE_PYTHON   
+#ifdef USE_PYTHON
    static Value func_python(ArgList *args, Parser *p)
    {
       ASSERT(args);
@@ -2259,7 +2259,7 @@ FilterRuleImpl::ApplyCommonCode(class MailFolder *mf,
 FilterRuleImpl::FilterRuleImpl(const String &filterrule,
                                MInterface *interface,
                                MModule_Filters *mod
-   ) 
+   )
 {
    m_FilterModule = mod;
    m_Parser = Parser::Create(filterrule, interface);
@@ -2304,16 +2304,16 @@ int FilterTest(MInterface *interface, MModule_Filters *that)
          );
    if( program.Length() == 0)
       return 1;
-   
+
    FilterRule * fr = that->GetFilter(program);
 
    ( (FilterRuleImpl *)fr)->Debug();
-   
+
    String folderName =
       interface->GetMApplication()->GetProfile()->
       readEntry(MP_NEWMAIL_FOLDER,MP_NEWMAIL_FOLDER_D);
 
-   MailFolder * mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, folderName); 
+   MailFolder * mf = MailFolder::OpenFolder(MF_PROFILE_OR_FILE, folderName);
 
    int rc = -1;
    if(mf)
@@ -2334,7 +2334,7 @@ int FilterTest(MInterface *interface, MModule_Filters *that)
 class MModule_FiltersImpl : public MModule_Filters
 {
    /// standard MModule functions
-   MMODULE_DEFINE(MModule_FiltersImpl)
+   MMODULE_DEFINE()
 
    /** Takes a string representation of a filterrule and compiles it
        into a class FilterRule object.
@@ -2342,14 +2342,11 @@ class MModule_FiltersImpl : public MModule_Filters
    virtual class FilterRule * GetFilter(const String &filterrule) const;
    DEFAULT_ENTRY_FUNC
 protected:
-   MModule_FiltersImpl(MInterface *interface)
+   MModule_FiltersImpl(MInterface *minterface)
+      : MModule_Filters(minterface)
       {
-         m_Interface = interface;
-//         (void) FilterTest(m_Interface, this);
+//         (void) FilterTest(m_MInterface, this);
       }
-
-   /// the MInterface
-   MInterface *m_Interface;
 };
 
 MMODULE_IMPLEMENT(MModule_FiltersImpl,
@@ -2361,8 +2358,8 @@ MMODULE_IMPLEMENT(MModule_FiltersImpl,
 FilterRule *
 MModule_FiltersImpl::GetFilter(const String &filterrule) const
 {
-   return FilterRuleImpl::Create(filterrule, m_Interface,
-                                 (MModule_FiltersImpl *) this); 
+   return FilterRuleImpl::Create(filterrule, m_MInterface,
+                                 (MModule_FiltersImpl *) this);
 }
 
 /* static */
@@ -2376,10 +2373,5 @@ MModule_FiltersImpl::Init(int vmajor, int vminor, int vrelease,
       return NULL;
    }
    return new MModule_FiltersImpl(interface);
-}
-
-MModule_FiltersImpl::~MModule_FiltersImpl()
-{
-   m_Interface->GetMApplication()->RemoveModule(this);
 }
 

@@ -614,6 +614,7 @@ static wxArrayString BuildListOfModulesDirs()
 
    // make it possible to use modules without installing them in debug builds
 #ifdef DEBUG
+   dirs.Add("./adb/");
    dirs.Add("./modules/");
 #endif // DEBUG
 

@@ -18,6 +18,9 @@
 
 #include <wx/dynlib.h>
 
+#include "Mversion.h"      // for M_VERSION_MAJOR &c
+
+#include "MInterface.h"
 
 // ----------------------------------------------------------------------------
 // macros
@@ -119,18 +122,31 @@ class MModuleCommon
 {
 public:
    /// ctor sets the ref count to 1 to make the object alive
-   MModuleCommon() { m_nRef = 1; }
+   MModuleCommon(MInterface *minterface)
+      { m_nRef = 1; m_MInterface = minterface; }
 
-   virtual void IncRef() { wxASSERT(m_nRef > 0); m_nRef++; }
-   virtual bool DecRef() { if ( --m_nRef ) return TRUE; delete this; return FALSE; }
+   virtual void IncRef()
+      { wxASSERT(m_nRef > 0); m_nRef++; }
+   virtual bool DecRef()
+      { if ( --m_nRef ) return TRUE; delete this; return FALSE; }
+
+   void SafeIncRef() { if ( this ) IncRef(); }
+   void SafeDecRef() { if ( this ) DecRef(); }
 
 protected:
    /// Removes the module from the global list
-   virtual ~MModuleCommon() { wxASSERT(!m_nRef); }
+   virtual ~MModuleCommon()
+      { ASSERT(!m_nRef); m_MInterface->RemoveModule(this); }
+
+   MInterface *m_MInterface;
 
 private:
    size_t m_nRef;
 };
+
+// for "compatibility" with MObjectRC
+inline void SafeIncRef(MModuleCommon *p) { if ( p != NULL ) p->IncRef(); }
+inline void SafeDecRef(MModuleCommon *p) { if ( p != NULL ) p->DecRef(); }
 
 /**
    This is the interface for Mahogany extension modules.
@@ -141,6 +157,8 @@ private:
 class MModule : public MModuleCommon
 {
 public:
+   MModule(MInterface *minterface) : MModuleCommon(minterface) { }
+
    /** MModule interface, this needs to be implemented by the actual
        modules. */
    //@{
@@ -231,7 +249,7 @@ int MModule_AddStaticModule(const char *Name,
 #endif
 
 
-#define MMODULE_DEFINE_CMN(ClassName) \
+#define MMODULE_DEFINE_CMN() \
 public: \
 virtual const char * GetName(void) const; \
 virtual const char * GetDescription(void) const; \
@@ -240,21 +258,20 @@ virtual const char * GetVersion(void) const; \
 virtual void GetMVersion(int *version_major, \
                          int *version_minor, \
                          int *version_release) const; \
-virtual ~ClassName(); \
-static  MModule *Init(int, int, int, MInterface *, int *);
+static  MModule *Init(int, int, int, MInterface *, int *)
 
 #define DEFAULT_ENTRY_FUNC   virtual int Entry(int /* arg */, ...) { return 0; }
 
 #ifdef DEBUG
-#   define MMODULE_DEFINE(ClassName) \
-      MMODULE_DEFINE_CMN(ClassName) \
-      virtual const char *DebugGetClassName() const { return #ClassName; }
+#   define MMODULE_DEFINE() \
+      MMODULE_DEFINE_CMN(); \
+      virtual const char *DebugGetClassName() const
 #else
-#   define MMODULE_DEFINE(ClassName)      MMODULE_DEFINE_CMN(ClassName)
+#   define MMODULE_DEFINE()      MMODULE_DEFINE_CMN()
 #endif
 
 
-#define MMODULE_IMPLEMENT(ClassName, Name, Interface, Description, Version) \
+#define MMODULE_IMPLEMENT_CMN(ClassName, Name, Interface, Description, Version) \
 const char * ClassName::GetName(void) const { return Name; } \
 const char * ClassName::GetDescription(void) const { return Description; } \
 const char * ClassName::GetInterface(void) const { return Interface; } \
@@ -280,6 +297,16 @@ extern "C" \
    }\
 } \
 MMODULE_INITIALISE(Name, Interface, Description, Version)
+
+#ifdef DEBUG
+#   define MMODULE_IMPLEMENT(ClassName, Name, Interface, Description, Version) \
+      MMODULE_IMPLEMENT_CMN(ClassName, Name, Interface, Description, Version); \
+      const char *ClassName::DebugGetClassName() const { return #ClassName; }
+#else
+#define MMODULE_IMPLEMENT_CMN() \
+#   define MMODULE_IMPLEMENT(ClassName, Name, Interface, Description, Version) \
+           MMODULE_IMPLEMENT_CMN(ClassName, Name, Interface, Description, Version)
+#endif
 
 /** Call this before application exit. */
 extern

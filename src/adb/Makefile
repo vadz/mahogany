@@ -5,10 +5,10 @@ SRC = AdbFrame.cpp AdbManager.cpp AdbProvider.cpp AdbEntry.cpp \
       AdbDialogs.cpp \
       ProvFC.cpp ProvBbdb.cpp ProvPalm.cpp \
       AdbImport.cpp AdbExport.cpp \
-      ImportText.cpp ImportXFMail.cpp ImportMailrc.cpp ImportPine.cpp \
-      ExportPalm.cpp ExportText.cpp 
+      ExportPalm.cpp ExportText.cpp
 
-MOD = ModulesSample.cpp
+#MOD = ImportText.cpp ImportXFMail.cpp ImportMailrc.cpp ImportPine.cpp
+MOD = ImportXFMail.cpp
 
 ifdef DEBUG
 SRC += ProvDummy.cpp
