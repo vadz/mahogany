@@ -1494,7 +1494,7 @@ MailFolderCC::AppendMessage(Message const &msg)
 {
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
-   long rc;
+   long rc = 0; //failure
    /* This is an optimisation: if both mailfolders are IMAP and on the
       same server, we ask the server to copy the message, which is
       more efficient (think of a modem!).
@@ -1525,7 +1525,7 @@ MailFolderCC::AppendMessage(Message const &msg)
          }
       }
    }
-   else
+   if(rc == 0) // no success yet, almost "else" :-)
    {
       // different folders, so we actually copy the message around:
       String tmp;
@@ -1536,7 +1536,7 @@ MailFolderCC::AppendMessage(Message const &msg)
                              (char *)m_ImapSpec.c_str(),
                              &str);
    }
-   if(rc != 0)
+   if(rc == 0)
    {
       ERRORMESSAGE(("cannot append message"));
       return FALSE;
