@@ -2244,8 +2244,8 @@ wxComposeView::Send(bool schedule)
    if ( from && from != m_from )
    {
       msg->SetFrom(from,
-                   "" /* don't change the personal name */,
-                   from /* (return address) FIXME should be reply */);
+                   "" /* don't change the personal name */
+                   /* don't set Reply-To yet FIXME?*/);
    }
 
    if( schedule )

@@ -2018,7 +2018,7 @@ bool wxOptionsPageFolderView::TransferDataToWindow()
       wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
       if ( !listbox->GetCount() )
       {
-         listbox->Append(READ_CONFIG(m_Profile, MP_FROM_ADDRESS)); //FIXME or MP_REPLY_ADDRESS?
+         listbox->Append(READ_CONFIG(m_Profile, MP_FROM_ADDRESS)); 
       }
    }
 
@@ -2035,7 +2035,7 @@ bool wxOptionsPageFolderView::TransferDataFromWindow()
       // default anyhow
       wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
       if ( listbox->GetCount() == 1 &&
-           listbox->GetString(0) == READ_CONFIG(m_Profile, MP_FROM_ADDRESS) ) //FIXME or MP_REPLY_ADDRESS?
+           listbox->GetString(0) == READ_CONFIG(m_Profile, MP_FROM_ADDRESS) ) 
       {
          listbox->Clear();
       }
