@@ -261,17 +261,17 @@ void MModule_AddStaticModule(const char *Name,
                              const char *Version,
                              MModule_InitModuleFuncType init);
 
-#   define MMODULE_INITIALISE(Name, Interface, Description, Version, Author) \
-    static struct MStaticModuleInitializerFor##Name \
+#   define MMODULE_INITIALISE(ClassName, Name, Interface, Description, Version) \
+    static struct MStaticModuleInitializerFor##ClassName \
     { \
-     MStaticModuleInitializerFor##Name() \
+     MStaticModuleInitializerFor##ClassName() \
      { \
         MModule_AddStaticModule(Name, Interface, \
                                 Description, Version, InitMModule); \
      } \
-    } initializerFor##Name;
+    } gs_moduleInitializerFor##ClassName;
 #else // !USE_MODULES_STATIC
-#   define MMODULE_INITIALISE(a,b,c,d)
+#   define MMODULE_INITIALISE(ClassName, Name, Interface, Description, Version)
 #endif // USE_MODULES_STATIC/!USE_MODULES_STATIC
 
 /// this macro must be used inside the class declaration for any module class
@@ -325,7 +325,7 @@ extern "C" \
                              minterface , errorCode);\
    }\
 } \
-MMODULE_INITIALISE(Name, Interface, Description, Version); \
+MMODULE_INITIALISE(ClassName, Name, Interface, Description, Version); \
 \
 const ClassName::Property ClassName::ms_properties[] = \
 { \
