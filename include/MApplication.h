@@ -176,7 +176,7 @@ public:
 
    virtual bool StartTimer(Timer timer) = 0;
    virtual bool StopTimer(Timer timer) = 0;
-
+   
    bool RestartTimer(Timer timer)
       { return StopTimer(timer) && StartTimer(timer); }
 

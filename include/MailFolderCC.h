@@ -382,7 +382,7 @@ private:
    void   AddToMap(MAILSTREAM const *stream) const;
 
    /// remove this object from Map
-   void   RemoveFromMap(MAILSTREAM const *stream) const;
+   void   RemoveFromMap(void) const;
 
    /// Gets first mailfolder in map or NULL.
    static MailFolderCC * GetFirstMapEntry(StreamConnectionList::iterator &i);
@@ -419,6 +419,9 @@ protected:
    /* Handles the mm_overview_header callback on a per folder basis. */
    void OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov);
 
+   /// closes the mailstream
+   void Close(void);
+   
    /*@name Handling of MailFolderCC internal events.
      Callbacks from the c-client library cannot directly be used to
      call other functions as this might lead to a lock up or recursion

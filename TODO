@@ -8,34 +8,26 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-9 		Does wxlwindow something nasty with undefined
-		update rectangles or wxRegion? Crash happened in
-		wxRegion. 
-9		When retrieving only N our of M messages, Mah. will
+9	KB	When retrieving only N our of M messages, Mah. will
 		later say that there are M-N new messages :-(
-9		changing properties for IMAP folder (auto-collect)
-		occasionally dumps core on [OK] click
-9		Is POP collection broken if compiled without python?
-		(seems highly unlikely, can find no connection)
-
-8		Calling events asynchronously can lead to the default
+9	KB	wxLayout editing glitches & cursor positioning bug
+		selections via keyboard still broken
+		speed up wxLayout scrollbar setting, *way* too slow
+		now
+9	KB	Calling events asynchronously can lead to the default
 		object being reset in MailFolderCC
 		streamConnectionList. For threaded operation this will
 		be solved with the mutex, but how can we fix it for
 		non-threaded M? 
-
-7	KB	skip all unprocessed character events in folderview
-		and messageview to make menu accelerators work
-7 gtk	VZ?	message boxes have broken icons under wxGTK
+5	KB	for NNTP only count unread/new messages
+4		Change "only retrieve first X messages" dialog box:
+		1. make it more intuitive (yes/no switch)
+		2. add a [Cancel] button to abort retrieval
+9		changing properties for IMAP folder (auto-collect)
+		occasionally dumps core on [OK] click
 7 gtk		Mahogany occasionally doesn't terminate but remains in
 		gtk event loop without any open windows.
-5		wxLayout editing glitches & cursor positioning bug
-		selections via keyboard still broken
-		speed up wxLayout scrollbar setting, *way* too slow
-		now
-5	KB	fix rfc822 qprint for message from example in M/test folder
 6	VZ	All Folder create dialog pages have no HelpIDs set.
-5	KB	for NNTP only count unread/new messages
 5	KB	make MailFolder timer react to options change
 5	KB	(optionally, but on by default) expunge deleted messages when
 		the folder is closed - as noticed in 32bitonline comparison,
@@ -52,6 +44,7 @@ $Id$
 5	VZ	custom headers are not inherited
 
 4 gtk	VZ	icon selector suffers from several appearance problems
+3 gtk	??	menu acceleratos don't work if we process char events
 
 *********************************************************************
 *** PROJECTS

@@ -242,6 +242,7 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections,
    size_t size;
    bool rc = true;
    const char *cptr;
+   String tmpstr;
    for(i = 0; i < n; i++)
    {
       msg = GetMessage((*selections)[i]);
@@ -262,7 +263,8 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections,
                cptr = msg->GetPartContent(j);
                if(cptr == NULL)
                   continue; // error ?
-               rc &= (file.Write(cptr, size) == size);
+               tmpstr = strutil_enforceNativeCRLF(cptr);
+               rc &= (file.Write(tmpstr, tmpstr.length()) == size);
             }
          }
          if(pd) pd->Update( 2*i + 2);

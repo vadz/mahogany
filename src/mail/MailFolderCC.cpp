@@ -37,8 +37,11 @@
 #define CHECK_DEAD_RC(msg, rc)   if(m_MailStream == NIL && ! PingReopen()) {   ERRORMESSAGE((_(msg), GetName().c_str())); return rc; }
 
 #define ISO8859MARKER "=?" // "=?iso-8859-1?Q?"
-#define QPRINT_MIDDLEMARKER "?Q?"
+#define QPRINT_MIDDLEMARKER_U "?Q?"
+#define QPRINT_MIDDLEMARKER_L "?q?"
 
+
+//#define TEST_REOPEN
 
 /*
  * Small function to translate c-client status flags into ours.
@@ -93,12 +96,14 @@ String MailFolderCC::qprint(const String &in)
    if(pos == -1)
       return in;
    String out = in.substr(0,pos);
-   int pos2 = in.Find(QPRINT_MIDDLEMARKER);
+   // try upper and lowercase versions of middlemarker: "?q?"
+   int pos2 = in.Find(QPRINT_MIDDLEMARKER_U);
+   if(pos2 == -1) pos2 = in.Find(QPRINT_MIDDLEMARKER_L);
    if(pos2 == -1 || pos2 < pos)
       return in;
 
    String quoted;
-   const char *cptr = in.c_str() + pos2 + strlen(QPRINT_MIDDLEMARKER);
+   const char *cptr = in.c_str() + pos2 + strlen(QPRINT_MIDDLEMARKER_U);
    while(*cptr && !(*cptr == '?' && *(cptr+1) == '='))
       quoted << (char) *cptr++;
    if(*cptr)
@@ -586,7 +591,7 @@ MailFolderCC::PingReopen(void) const
    {
       if(m_MailStream)
          ProcessEventQueue(); // flush queue
-      RemoveFromMap(m_MailStream); // will be added again by Open()
+      RemoveFromMap(); // will be added again by Open()
       LOGMESSAGE((M_LOG_WINONLY, _("Mailstream for folder '%s' has been closed, trying to reopen it."),
                   GetName().c_str()));
       rc = t->Open();
@@ -633,6 +638,12 @@ MailFolderCC::Ping(void)
    int ccl = CC_SetLogLevel(M_LOG_WINONLY);
    
    ProcessEventQueue();
+#ifdef TEST_REOPEN
+   DBGMESSAGE(("MailFolderCC::Ping() forcing close on folder %s.",
+               GetName().c_str()));
+   Close();
+#endif
+   
    if(PingReopen())
    {
 //      CCQuiet();
@@ -643,17 +654,12 @@ MailFolderCC::Ping(void)
    CC_SetLogLevel(ccl);
 }
 
-MailFolderCC::~MailFolderCC()
+void
+MailFolderCC::Close(void)
 {
-    // can cause references to this folder, cannot be allowd:
+   // can cause references to this folder, cannot be allowd:
    //ProcessEventQueue();
    CCQuiet(true); // disable all callbacks!
-   if ( m_Timer )
-   {
-      m_Timer->Stop();
-      delete m_Timer;
-   }
-   
    // We cannot run ProcessEventQueue() here as we must not allow any
    // Message to be created from this stream. If we miss an event -
    // that's a pity.
@@ -661,15 +667,29 @@ MailFolderCC::~MailFolderCC()
    {
        mail_check(m_MailStream); // update flags, etc, .newsrc
        mail_close(m_MailStream);
+       m_MailStream = NIL;
    }
    CCVerbose();
-   if( m_Listing ) delete [] m_Listing;
+   RemoveFromMap();
+}
 
-   RemoveFromMap(m_MailStream);
-
+MailFolderCC::~MailFolderCC()
+{
+   CCQuiet(true); // disable all callbacks!
+   if ( m_Timer )
+   {
+      m_Timer->Stop();
+      delete m_Timer;
+   }
+   
+   Close();
+   if( m_Listing )
+   {
+      delete [] m_Listing;
+      m_Listing = NULL;
+   }
    // note that RemoveFromMap already removed our node from streamList, so
    // do not do it here again!
-
    GetProfile()->DecRef();
 }
 
@@ -851,7 +871,7 @@ MailFolderCC::DebugDump() const
 
 /// remove this object from Map
 void
-MailFolderCC::RemoveFromMap(MAILSTREAM const * /* stream */) const
+MailFolderCC::RemoveFromMap(void) const
 {
    StreamConnectionList::iterator i;
    for(i = streamList.begin(); i != streamList.end(); i++)

@@ -94,7 +94,10 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
    wxLogDebug("FolderListCtrl::OnChar, this=%p", this);
 
    if(! m_FolderView || ! m_FolderView->m_MessagePreview)
+   {
+      event.Skip();
       return; // nothing to do
+   }
 
    if(! event.ControlDown())
    {

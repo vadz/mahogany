@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * strutil.cc : utility functions for string handling               *
  *                                                                  *
- * (C) 1998,1999 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1998,1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *                                                                  *
@@ -23,6 +23,8 @@
 #   include <pwd.h>
 #   include <sys/types.h>
 #endif
+
+#include <wx/textfile.h>  // just for strutil_enforceNativeCRLF()
 
 void
 strutil_getstrline(istream &istr, String &str)
@@ -565,6 +567,12 @@ strutil_enforceCRLF(String const &in)
    return out;
 }
 
+
+String
+strutil_enforceNativeCRLF(String const &in)
+{
+   return wxTextFile::Translate(in);
+}
 
 /* This is not strictly a string utility function, but somehow it is,
    so I don't think we need a separate source file for it just yet.

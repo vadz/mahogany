@@ -253,13 +253,21 @@ strutil_path_filename(String const &path, char separator = STRUTIL_PATH_SEPARATO
 bool
 strutil_compare_filenames(const String& path1, const String& path2);
 
-/** Enforces CR/LF newline convention.
+/** Enforces DOS/RFC822 CR/LF newline convention.
 
     @param in string to copy
     @return the DOSified string
 */
 String
 strutil_enforceCRLF(String const &in);
+
+/** Enforces native CR/LF newline convention for this platform.
+    
+    @param in string to copy
+    @return the new string
+*/
+String
+strutil_enforceNativeCRLF(String const &in);
 
 /**@name Simple encryption/decryption functionality. */
 //@{
