@@ -176,10 +176,12 @@
 #define Bool    int
 
 // use builtin wxConfig by default in wxWin2 and appconf otherwise
-#ifndef  USE_WXCONFIG
+#if !defined(USE_APPCONF) && !defined(USE_WXCONFIG)
 #  ifdef USE_WXWINDOWS2
-#     define  USE_WXCONFIG
+#     define  USE_WXCONFIG 1
+#  else
+#     define  USE_APPCONF  1
 #  endif
 #endif
-
+  
 #endif
