@@ -245,6 +245,7 @@ extern const MOption MP_MVIEW_FONT_DESC;
 extern const MOption MP_MVIEW_FONT_SIZE;
 extern const MOption MP_MVIEW_FGCOLOUR;
 extern const MOption MP_MVIEW_BGCOLOUR;
+extern const MOption MP_MVIEW_SIGCOLOUR;
 extern const MOption MP_MVIEW_URLCOLOUR;
 extern const MOption MP_MVIEW_ATTCOLOUR;
 extern const MOption MP_MVIEW_QUOTED_COLOURIZE;
@@ -256,6 +257,7 @@ extern const MOption MP_MVIEW_QUOTED_MAXWHITESPACE;
 extern const MOption MP_MVIEW_QUOTED_MAXALPHA;
 extern const MOption MP_MVIEW_HEADER_NAMES_COLOUR;
 extern const MOption MP_MVIEW_HEADER_VALUES_COLOUR;
+extern const MOption MP_HIGHLIGHT_SIGNATURE;
 extern const MOption MP_HIGHLIGHT_URLS;
 
 // folder view
@@ -844,6 +846,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_MVIEW_FGCOLOUR_NAME      "MViewFgColour"
 /// which background colour for the font
 #define   MP_MVIEW_BGCOLOUR_NAME      "MViewBgColour"
+/// which colour for signature
+#define   MP_MVIEW_SIGCOLOUR_NAME      "MViewSigColour"
 /// which colour for URLS
 #define   MP_MVIEW_URLCOLOUR_NAME      "MViewUrlColour"
 /// colour for attachment labels
@@ -932,6 +936,8 @@ extern const MOption MP_AWAY_STATUS;
 /// which background colour for the font
 #define   MP_CVIEW_BGCOLOUR_NAME      "CViewBGColout"
 //@}
+/// highlight signature?
+#define   MP_HIGHLIGHT_SIGNATURE_NAME      "HighlightSig"
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS_NAME      "HighlightURL"
 
@@ -1729,6 +1735,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_MVIEW_FGCOLOUR_DEFVAL      "black"
 /// which background colour for the font
 #define   MP_MVIEW_BGCOLOUR_DEFVAL      "white"
+/// which colour for signature
+#define   MP_MVIEW_SIGCOLOUR_DEFVAL     "thistle"
 /// which colour for URLS
 #define   MP_MVIEW_URLCOLOUR_DEFVAL     "blue"
 /// colour for attachment labels
@@ -1739,9 +1747,9 @@ extern const MOption MP_AWAY_STATUS;
 /// cycle colours?
 #define   MP_MVIEW_QUOTED_CYCLE_COLOURS_DEFVAL  0L
 /// which colour for quoted text
-#define   MP_MVIEW_QUOTED_COLOUR1_DEFVAL     "gray"
+#define   MP_MVIEW_QUOTED_COLOUR1_DEFVAL     "purple"
 /// which colour for quoted text, seconds level
-#define   MP_MVIEW_QUOTED_COLOUR2_DEFVAL     "gray"
+#define   MP_MVIEW_QUOTED_COLOUR2_DEFVAL     "brown"
 /// which colour for quoted text, seconds level
 #define   MP_MVIEW_QUOTED_COLOUR3_DEFVAL     "gray"
 /// the maximum number of whitespaces prepending >
@@ -1814,6 +1822,8 @@ extern const MOption MP_AWAY_STATUS;
 /// which background colour for the font
 #define   MP_CVIEW_BGCOLOUR_DEFVAL      "white"
 //@}
+/// highlight URLS?
+#define   MP_HIGHLIGHT_SIGNATURE_DEFVAL      1
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS_DEFVAL      1
 /// do we want to use server side sort?

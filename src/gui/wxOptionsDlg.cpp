@@ -343,6 +343,8 @@ enum ConfigFields
    ConfigField_MessageViewQuotedColour2,
    ConfigField_MessageViewQuotedColour3,
    ConfigField_MessageViewQuotedCycleColours,
+   ConfigField_MessageViewHighlightSig,
+   ConfigField_MessageViewSigColour,
    ConfigField_MessageViewProgressHelp,
    ConfigField_MessageViewProgressThresholdSize,
    ConfigField_MessageViewProgressThresholdTime,
@@ -1228,6 +1230,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Colour for the &2nd level"),Field_Color,   ConfigField_MessageViewQuotedColourize },
    { gettext_noop("Colour for the &3rd level"),Field_Color,   ConfigField_MessageViewQuotedColourize },
    { gettext_noop("Loop over these colours"),      Field_Bool,    ConfigField_MessageViewQuotedColourize },
+   { gettext_noop("Highlight the si&gnature"),     Field_Bool,    -1 },
+   { gettext_noop("Colour for s&ignatures"),       Field_Color, ConfigField_MessageViewHighlightSig },
    { gettext_noop("A progress dialog can be shown during the message download\n"
                   "if it is bigger than the given size or takes longer than the\n"
                   "specified time (use -1 to disable progress dialog entirely)"), Field_Message, -1 },
@@ -1701,6 +1705,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MVIEW_QUOTED_COLOUR2),
    CONFIG_ENTRY(MP_MVIEW_QUOTED_COLOUR3),
    CONFIG_ENTRY(MP_MVIEW_QUOTED_CYCLE_COLOURS),
+   CONFIG_ENTRY(MP_HIGHLIGHT_SIGNATURE),
+   CONFIG_ENTRY(MP_MVIEW_SIGCOLOUR),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_MESSAGEPROGRESS_THRESHOLD_SIZE),
    CONFIG_ENTRY(MP_MESSAGEPROGRESS_THRESHOLD_TIME),

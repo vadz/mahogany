@@ -93,6 +93,7 @@ extern const MOption MP_AUTOCOLLECT_NAMED;
 extern const MOption MP_BROWSER;
 extern const MOption MP_BROWSER_INNW;
 extern const MOption MP_BROWSER_ISNS;
+extern const MOption MP_HIGHLIGHT_SIGNATURE;
 extern const MOption MP_HIGHLIGHT_URLS;
 extern const MOption MP_INCFAX_DOMAINS;
 extern const MOption MP_INCFAX_SUPPORT;
@@ -108,6 +109,7 @@ extern const MOption MP_MVIEW_FONT_DESC;
 extern const MOption MP_MVIEW_FONT_SIZE;
 extern const MOption MP_MVIEW_FGCOLOUR;
 extern const MOption MP_MVIEW_BGCOLOUR;
+extern const MOption MP_MVIEW_SIGCOLOUR;
 extern const MOption MP_MVIEW_URLCOLOUR;
 extern const MOption MP_MVIEW_ATTCOLOUR;
 extern const MOption MP_MVIEW_QUOTED_COLOURIZE;
@@ -124,6 +126,14 @@ extern const MOption MP_RFC822_IS_TEXT;
 extern const MOption MP_SHOWHEADERS;
 extern const MOption MP_SHOW_XFACES;
 extern const MOption MP_TIFF2PS;
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// some special level values
+static const size_t LEVEL_INVALID = (size_t)-1;
+static const size_t LEVEL_SIG = (size_t)-2;
 
 // ----------------------------------------------------------------------------
 // helper functions
@@ -340,7 +350,8 @@ MessageView::AllProfileValues::AllProfileValues()
    inlineRFC822 =
    inlinePlainText =
    showFaces =
-   highlightURLs = false;
+   highlightURLs =
+   highlightSig = false;
 
    inlineGFX = -1;
 
@@ -357,8 +368,7 @@ MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
 {
    #define CMP(x) (x == other.x)
 
-   return CMP(msgViewer) && CMP(BgCol) && CMP(FgCol) &&
-          CMP(UrlCol) && CMP(AttCol) &&
+   return CMP(msgViewer) && CMP(BgCol) && CMP(FgCol) && CMP(AttCol) &&
           CMP(QuotedCol[0]) && CMP(QuotedCol[1]) && CMP(QuotedCol[2]) &&
           CMP(quotedColourize) && CMP(quotedCycleColours) &&
           CMP(quotedMaxWhitespace) && CMP(quotedMaxAlpha) &&
@@ -366,7 +376,8 @@ MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
           CMP(fontDesc) &&
           (!fontDesc.empty() || (CMP(fontFamily) && CMP(fontSize))) &&
           CMP(showHeaders) && CMP(inlineRFC822) && CMP(inlinePlainText) &&
-          CMP(highlightURLs) && CMP(inlineGFX) &&
+          CMP(highlightURLs) && CMP(highlightSig) && CMP(inlineGFX) &&
+          (highlightURLs || CMP(UrlCol)) && (highlightSig || CMP(SigCol)) &&
           // even if these fields are different, they don't change our
           // appearance, so ignore them for the purpose of this comparison
 #if 0
@@ -778,6 +789,7 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
 
    wxColour col; // used by the macro
    GET_COLOUR_FROM_PROFILE_IF_NOT_FG(UrlCol, URLCOLOUR);
+   GET_COLOUR_FROM_PROFILE_IF_NOT_FG(SigCol, SIGCOLOUR);
    GET_COLOUR_FROM_PROFILE_IF_NOT_FG(AttCol, ATTCOLOUR);
    GET_COLOUR_FROM_PROFILE_IF_NOT_FG(QuotedCol[0], QUOTED_COLOUR1);
    GET_COLOUR_FROM_PROFILE_IF_NOT_FG(QuotedCol[1], QUOTED_COLOUR2);
@@ -809,6 +821,7 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    settings->inlinePlainText = READ_CONFIG_BOOL(profile, MP_PLAIN_IS_TEXT);
    settings->inlineRFC822 = READ_CONFIG_BOOL(profile, MP_RFC822_IS_TEXT);
    settings->highlightURLs = READ_CONFIG_BOOL(profile, MP_HIGHLIGHT_URLS);
+   settings->highlightSig = READ_CONFIG_BOOL(profile, MP_HIGHLIGHT_SIGNATURE);
 
    // we set inlineGFX to 0 if we don't inline graphics at all and to the
    // max size limit of graphics to show inline otherwise (-1 if no limit)
@@ -1195,6 +1208,11 @@ MessageView::GetQuotedLevel(const char *text) const
 
 wxColour MessageView::GetQuoteColour(size_t qlevel) const
 {
+   if ( qlevel == LEVEL_SIG )
+   {
+      return m_ProfileValues.SigCol;
+   }
+
    if ( qlevel-- == 0 )
    {
       return m_ProfileValues.FgCol;
@@ -1269,12 +1287,10 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
       //else: don't change font - no such encoding anyhow
    }
 
-   // TODO: detect signature as well and call m_viewer->InsertSignature()
-   //       for it
    String url;
    String before;
 
-   size_t levelBeforeURL = (size_t)-1;
+   size_t levelBeforeURL = LEVEL_INVALID;
 
    do
    {
@@ -1299,10 +1315,10 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
          // if we have just inserted an URL, restore the same level we were
          // using before as otherwise foo in a line like "> URL foo" wouldn't
          // be highlighted correctly
-         if ( levelBeforeURL != (size_t)-1 )
+         if ( levelBeforeURL != LEVEL_INVALID )
          {
             level = levelBeforeURL;
-            levelBeforeURL = (size_t)-1;
+            levelBeforeURL = LEVEL_INVALID;
          }
          else // no preceding URL, we're really at the start of line
          {
@@ -1322,7 +1338,68 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
             // skip '\n'
             lineNext++;
 
-            size_t levelNew = GetQuotedLevel(lineNext);
+            size_t levelNew = LEVEL_INVALID;
+
+            // everything after signature should be in sig colour, so don't
+            // bother calculating the level nor changing it
+            if ( level == LEVEL_SIG )
+            {
+               levelNew = LEVEL_SIG;
+            }
+            else if ( m_ProfileValues.highlightSig )
+            {
+               // check for possible signature start
+               if ( lineNext[0] == '-' && lineNext[1] == '-' )
+               {
+                  // although normally signature delimiter is just "--", allow for
+                  // more dashes as people often put 4 or even 75 of them
+                  const char *p = lineNext + 2;
+                  if ( *p == ' ' )
+                  {
+                     // "-- " is also a valid separator
+                     p++;
+                  }
+                  else // maybe "---...---"?
+                  {
+                     while ( *p == '-' )
+                        p++;
+                  }
+
+                  // but we must have only dashes until the end of string - and it
+                  // must not be end of text
+                  if ( p[0] == '\r' && p[1] == '\n' )
+                  {
+                     // this looks like the signature start, but is it? do some
+                     // sanity checks: it shouldn't be just a first occurence
+                     // of "--" if it is used as a separator of a section, for
+                     // example, so check that no more of them occurs at the
+                     // beginning of the line in the rest of the message - but
+                     // only do it if we're reasonably close to its end because
+                     // a signature can't be that far from it and it would be
+                     // very inefficient to grep a multi megabyte message in
+                     // vain
+                     if ( before.length() - (p - before.c_str()) < 0x200 &&
+                           textPart.length() < 0x200 )
+                     {
+                        static const char *SIG_END_MARKER = "--\r\n";
+                        if ( !strstr(p + 1, SIG_END_MARKER) &&
+                              !strstr(textPart, SIG_END_MARKER) )
+                        {
+                           // ok, it passed all our empirical tests
+                           levelNew = LEVEL_SIG;
+                        }
+                     }
+                  }
+               }
+            }
+
+            // calcuate the quoting level for this line if we're not in
+            // signature
+            if ( levelNew == LEVEL_INVALID )
+            {
+               levelNew = GetQuotedLevel(lineNext);
+            }
+
             if ( levelNew != level )
             {
                char chSave = *lineNext;

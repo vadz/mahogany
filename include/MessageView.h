@@ -449,8 +449,9 @@ private:
       /// Background and foreground colours, colours for URLs and headers
       wxColour BgCol,
                FgCol,
-               UrlCol,
+               UrlCol,           // URL colour (used only if highlightURLs)
                AttCol,
+               SigCol,           // signature colour (if highlightSig)
                HeaderNameCol,
                HeaderValueCol;
 
@@ -464,22 +465,30 @@ private:
       int fontSize;
       //@}
 
-      /// @name Quoted text colourizing data
+      /// @name URL highlighting and text quoting colourizing data
       //@{
+
       /// the colours for quoted text (only used if quotedColourize)
       wxColour QuotedCol[QUOTE_LEVEL_MAX];
-
-      /// process quoted text colourizing?
-      bool quotedColourize;
-
-      /// if there is > QUOTE_LEVEL_MAX levels of quoting, cycle colours?
-      bool quotedCycleColours;
 
       /// max number of whitespaces before >
       int quotedMaxWhitespace;
 
       /// max number of A-Z before >
       int quotedMaxAlpha;
+
+      /// process quoted text colourizing?
+      bool quotedColourize:1;
+
+      /// if there is > QUOTE_LEVEL_MAX levels of quoting, cycle colours?
+      bool quotedCycleColours:1;
+
+      /// highlight URLs?
+      bool highlightURLs:1;
+
+      /// highlight the signature?
+      bool highlightSig:1;
+
       //@}
 
       /// @name MIME options
@@ -492,9 +501,6 @@ private:
 
       /// inline TEXT/PLAIN attachments?
       bool inlinePlainText;
-
-      /// highlight URLs?
-      bool highlightURLs;
 
       /// max size of graphics to inline: 0 if none, -1 if not inline at all
       long inlineGFX;
