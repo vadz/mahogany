@@ -34,6 +34,7 @@
     #include "wx/log.h"
     #include "wx/intl.h"
 
+    #include "wx/button.h"
     #include "wx/stattext.h"
     #include "wx/statbox.h"
     #include "wx/checkbox.h"
