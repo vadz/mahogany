@@ -71,8 +71,8 @@ enum MVersion
    Version_Alpha001, // first public version
    Version_Alpha010, // some config strucutre changes (due to wxPTextEntry)
    Version_Alpha020, // folder host name is now ServerName, not HostName
-   Version_Alpha050, // nothing really changed against 0.2x config-wise
-   Version_Alpha060, // templates are organised differently
+   Version_050,      // nothing really changed against 0.2x config-wise
+   Version_060,      // templates are organised differently
    Version_NoChange, // any version from which we don't need to upgrade
    Version_Unknown   // some unrecognized version
 };
@@ -1671,9 +1671,9 @@ Upgrade(const String& fromVersion)
    else if ( fromVersion == "0.20a" )
       oldVersion = Version_Alpha020;
    else if ( fromVersion == "0.21a" || fromVersion == "0.22a" ||
-             fromVersion == "0.23a" || fromVersion == "0.50a" )
-      oldVersion = Version_Alpha050;
-   else if ( fromVersion == "0.60a" )
+             fromVersion == "0.23a" || fromVersion == "0.50" )
+      oldVersion = Version_050;
+   else if ( fromVersion == "0.60" )
       oldVersion = Version_NoChange;
    else
       oldVersion = Version_Unknown;
@@ -1700,7 +1700,7 @@ Upgrade(const String& fromVersion)
          success = UpgradeFrom020();
       // fall through
 
-   case Version_Alpha050:
+   case Version_050:
       if ( success && UpgradeFrom050() )
          wxLogMessage(_("Configuration information and program files were "
                         "successfully upgraded from the version '%s'."),
@@ -1715,7 +1715,7 @@ Upgrade(const String& fromVersion)
                     fromVersion.c_str());
       break;
 
-   case Version_Alpha060:
+   case Version_060:
    case Version_NoChange:
       break;
 

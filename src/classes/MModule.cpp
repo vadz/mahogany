@@ -288,7 +288,8 @@ MModule::GetProvider(const wxString &interfaceName)
       {
 #ifdef USE_MODULES_STATIC
          if( (**i).m_Module == NULL ) // static case not loaded yet
-            (**i).m_Module = FindModule( (**i).m_Name ); // this will
+            return NULL; 
+            //WRONG! (**i).m_Module = FindModule( (**i).m_Name ); // this will
          // initialise it
          else
 #endif
