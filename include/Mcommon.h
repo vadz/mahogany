@@ -153,8 +153,7 @@ typedef long int lcoord_t;
 "M has been written using the cross-platform\n"\
 "class library wxWindows which is freely\n"\
 "available under the GNU Library Public\n"\
-"License. Plase see\n"\
-"http://web.ukonline.co.uk/julian.smart/wxwin/\n"\
+"License. Plase see http://www.wxwindows.org/\n"\
 "for more information."\
 "\n"
 

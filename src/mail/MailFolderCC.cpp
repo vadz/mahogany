@@ -33,6 +33,8 @@
 
 #include <ctype.h>   // isspace()
 
+#define CHECK_DEAD(msg)   if(m_MailStream == NIL) { ERRORMESSAGE((_(msg), GetName().c_str())); return; }
+#define CHECK_DEAD_RC(msg, rc)   if(m_MailStream == NIL) {   ERRORMESSAGE((_(msg), GetName().c_str())); return rc; }
 
 #define ISO8859MARKER "=?" // "=?iso-8859-1?Q?"
 #define QPRINT_MIDDLEMARKER "?Q?"
@@ -144,6 +146,10 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
 
 }
 
+/*
+  This gets called with a folder path as its name, NOT with a symbolic 
+  folder/profile name.
+*/
 MailFolderCC *
 MailFolderCC::OpenFolder(int typeAndFlags,
                          String const &name,
@@ -157,37 +163,35 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    String mboxpath;
 
    ASSERT(profile);
-   
+
    int flags = GetFolderFlags(typeAndFlags);
    int type = GetFolderType(typeAndFlags);
 
-   String path = READ_CONFIG(profile, MP_FOLDER_PATH);
-   
    switch( type )
    {
    case MF_INBOX:
       mboxpath = "INBOX";
       break;
    case MF_FILE:
-      mboxpath = path;
+      mboxpath = name;
       break;
    case MF_MH:
-      mboxpath << "#mh/" << path;
+      mboxpath << "#mh/" << name;
       break;
    case MF_POP:
       mboxpath << '{' << server << "/pop3}";
       break;
    case MF_IMAP:  // do we need /imap flag?
       if(flags & MF_FLAGS_ANON)
-         mboxpath << '{' << server << "/anonymous}" << path;
+         mboxpath << '{' << server << "/anonymous}" << name;
       else
-         mboxpath << '{' << server << "/user=" << login << '}'<< path;
+         mboxpath << '{' << server << "/user=" << login << '}'<< name;
       break;
    case MF_NEWS:
-      mboxpath << "#news." << path;
+      mboxpath << "#news." << name;
       break;
    case MF_NNTP:
-      mboxpath << '{' << server << "/nntp}" << path;
+      mboxpath << '{' << server << "/nntp}" << name;
       break;
    default:
       FAIL_MSG("Unsupported folder type.");
@@ -239,7 +243,7 @@ MailFolderCC::Open(void)
    {
       String lockfile;
       if(GetType() == MF_FILE)
-         lockfile = m_MailboxPath;
+         lockfile = strutil_expandpath(m_MailboxPath);
 #ifdef OS_UNIX
       else // INBOX
       {
@@ -288,6 +292,9 @@ MailFolderCC::Open(void)
    CCQuiet(); // first try, don't log errors (except in debug mode)
 #endif // DEBUG
 
+   if(GetType() == MF_FILE && ! wxFileExists(m_MailboxPath))
+      mail_create(NIL, (char *)m_MailboxPath.c_str());
+   
    m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
                             debugFlag ? OP_DEBUG : NIL);
    ProcessEventQueue();
@@ -334,9 +341,20 @@ MailFolderCC::FindFolder(String const &path, String const &login)
 void
 MailFolderCC::Ping(void)
 {
-   DBGMESSAGE(("MailFolderCC::Ping() on Folder %s.", m_MailboxPath.c_str()));
+   if(! m_MailStream)
+      return;
+   DBGMESSAGE(("MailFolderCC::Ping() on Folder %s.", GetName().c_str()));
 
-   mail_ping(m_MailStream);
+   if(! mail_ping(m_MailStream))
+   {
+      LOGMESSAGE((_("Mailstream for folder '%s' has been closed, trying to reopen it."),
+                  GetName().c_str()));
+      if(! Open())
+         ERRORMESSAGE((_("Re-opening folder '%s' failed."),GetName().c_str()));
+      else
+         m_MailStream = NIL;
+   }
+   mail_check(m_MailStream); // update flags, etc, .newsrc
    ProcessEventQueue();
 }
 
@@ -377,6 +395,8 @@ MailFolderCC::RegisterView(FolderView *view, bool reg)
 void
 MailFolderCC::AppendMessage(String const &msg)
 {
+   CHECK_DEAD("Appending to closed folder '%s' failed.");
+
    STRING str;
 
    INIT(&str, mail_string, (void *) msg.c_str(), msg.Length());
@@ -389,6 +409,7 @@ MailFolderCC::AppendMessage(String const &msg)
 void
 MailFolderCC::AppendMessage(Message const &msg)
 {
+   CHECK_DEAD("Appending to closed folder '%s' failed.");
    String tmp;
 
    msg.WriteToString(tmp);
@@ -441,6 +462,7 @@ MailFolderCC::CountMessages(void) const
 Message *
 MailFolderCC::GetMessage(unsigned long uid)
 {
+   CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", NULL);
 //FIXME: add some test whether uid is valid   ASSERT(index < m_NumOfMessages && index >= 0);
    MessageCC *m = MessageCC::CreateMessageCC(this,uid);
    ProcessEventQueue();
@@ -450,6 +472,7 @@ MailFolderCC::GetMessage(unsigned long uid)
 const class HeaderInfo *
 MailFolderCC::GetHeaderInfo(unsigned long msgno)
 {
+   CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", NULL);
    ASSERT(m_Listing);
    ASSERT(msgno >= 0 && msgno < m_NumOfMessages);
    return m_Listing + msgno;
@@ -460,6 +483,7 @@ MailFolderCC::SetSequenceFlag(String const &sequence,
                               int flag,
                               bool set)
 {
+   CHECK_DEAD("Cannot access closed folder\n'%s'.");
    String flags;
 
    if(flag & MSG_STAT_SEEN)
@@ -496,6 +520,7 @@ MailFolderCC::SetMessageFlag(unsigned long uid,
                              int flag,
                              bool set)
 {
+   CHECK_DEAD("Cannot access closed folder\n'%s'.");
    ASSERT(m_Listing);
 //FIXME uid check   ASSERT(msgno >= 0 && msgno < m_NumOfMessages);
    String sequence = strutil_ultoa(uid);
@@ -505,6 +530,7 @@ MailFolderCC::SetMessageFlag(unsigned long uid,
 void
 MailFolderCC::ExpungeMessages(void)
 {
+   CHECK_DEAD("Cannot access closed folder\n'%s'.");
    if(PY_CALLBACK(MCB_FOLDEREXPUNGE,1,GetProfile()))
       mail_expunge (m_MailStream);
    ProcessEventQueue();
@@ -572,6 +598,7 @@ extern "C"
 void
 MailFolderCC::BuildListing(void)
 {
+   CHECK_DEAD("Cannot access closed folder\n'%s'.");
    m_NumOfMessages = m_MailStream->nmsgs;
    
    if(m_Listing && m_NumOfMessages > m_OldNumOfMessages)

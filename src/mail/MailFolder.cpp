@@ -62,8 +62,7 @@ MailFolder::OpenFolder(int typeAndFlags,
          login = READ_CONFIG(profile, MP_FOLDER_LOGIN);
          passwd = strutil_decrypt(READ_CONFIG(profile, MP_FOLDER_PASSWORD));
          name = READ_CONFIG(profile, MP_FOLDER_PATH);
-         if(strutil_isempty(name))
-            name = i_name;
+         /* name can be empty, i.e. for imap */
       }
    }
    else // type != PROFILE
@@ -111,7 +110,7 @@ MailFolder::OpenFolder(int typeAndFlags,
 
    default:
       profile->DecRef();
-      FAIL_MSG("unkno   wn folder type");
+      FAIL_MSG("unknown folder type");
    }
 
    if((type == MF_POP || type == MF_IMAP)
@@ -119,7 +118,7 @@ MailFolder::OpenFolder(int typeAndFlags,
    {
       String prompt;
       prompt.Printf( _("Password for '%s':"),
-                     name.c_str());
+                     strutil_isempty(name) ? i_name.c_str() : name.c_str());
       if(! MInputBox(&passwd,
                      _("Password prompt"),
                      prompt,

@@ -792,6 +792,7 @@ wxComposeView::wxComposeView(const String &iname,
    m_pidEditor = 0;
    m_procExtEdit = NULL;
    m_fieldLast = Field_Max;
+   m_sent = false;
 }
 
 wxComposeView::~wxComposeView()
@@ -1204,30 +1205,33 @@ wxComposeView::Send(void)
    MimeContent *mc = NULL;
    wxLayoutExportObject *export;
    wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
-   while((export = wxLayoutExport( &status,
-                                   WXLO_EXPORT_AS_TEXT,
-                                   WXLO_EXPORT_WITH_CRLF)) != NULL) 
-   {
-      if(export->type == WXLO_EXPORT_TEXT)
-      {
-         String* text = export->content.text;
-         m_msg->AddPart
-         (
-            Message::MSG_TYPETEXT,
-            text->c_str(), text->length(),
-            "PLAIN"
-         );
-      }
-      else
-      {
-         lo = export->content.object;
-         if(lo->GetType() == WXLO_TYPE_ICON)
-         {
-            mc = (MimeContent *)lo->GetUserData();
 
-            switch( mc->GetType() )
+   if(m_sent) // already sent once, just recycle old SendMessageCC
+   {
+      while((export = wxLayoutExport( &status,
+                                      WXLO_EXPORT_AS_TEXT,
+                                      WXLO_EXPORT_WITH_CRLF)) != NULL) 
+      {
+         if(export->type == WXLO_EXPORT_TEXT)
+         {
+            String* text = export->content.text;
+            m_msg->AddPart
+               (
+                  Message::MSG_TYPETEXT,
+                  text->c_str(), text->length(),
+                  "PLAIN"
+                  );
+         }
+         else
+         {
+            lo = export->content.object;
+            if(lo->GetType() == WXLO_TYPE_ICON)
             {
-            case MimeContent::MIMECONTENT_FILE:
+               mc = (MimeContent *)lo->GetUserData();
+
+               switch( mc->GetType() )
+               {
+               case MimeContent::MIMECONTENT_FILE:
                {
                   String filename = mc->GetFileName();
                   wxFile file;
@@ -1244,13 +1248,13 @@ wxComposeView::Send(void)
                         dlist.push_back(p);
 
                         m_msg->AddPart
-                        (
-                           mc->GetMimeCategory(),
-                           buffer, size,
-                           strutil_after(mc->GetMimeType(),'/'), //subtype
-                           "INLINE",
-                           &dlist
-                        );
+                           (
+                              mc->GetMimeCategory(),
+                              buffer, size,
+                              strutil_after(mc->GetMimeType(),'/'), //subtype
+                              "INLINE",
+                              &dlist
+                              );
                      }
                      else
                      {
@@ -1268,7 +1272,7 @@ wxComposeView::Send(void)
                }
                break;
 
-            case MimeContent::MIMECONTENT_DATA:
+               case MimeContent::MIMECONTENT_DATA:
                {
                   MessageParameterList dlist;
                   if(! strutil_isempty(mc->GetFileName()))
@@ -1279,45 +1283,49 @@ wxComposeView::Send(void)
                      dlist.push_back(p);
                   }
                   m_msg->AddPart
-                  (
-                     mc->GetMimeCategory(),
-                     mc->GetData(), mc->GetSize(),
-                     strutil_after(mc->GetMimeType(),'/'),  //subtype
-                     "INLINE"
-                     ,&dlist,
-                     NULL
-                  );
+                     (
+                        mc->GetMimeCategory(),
+                        mc->GetData(), mc->GetSize(),
+                        strutil_after(mc->GetMimeType(),'/'),  //subtype
+                        "INLINE"
+                        ,&dlist,
+                        NULL
+                        );
                }
                break;
 
-            default:
-               FAIL_MSG(_("Unknwown part type"));
+               default:
+                  FAIL_MSG(_("Unknwown part type"));
+               }
+               mc->DecRef();
             }
-            mc->DecRef();
          }
+
+         delete export;
       }
 
-      delete export;
-   }
-
-   m_msg->SetSubject(m_txtFields[Field_Subject]->GetValue());
-   switch(m_mode)
-   {
-   case Mode_SMTP:
-      m_msg->SetAddresses(
-         m_txtFields[Field_To]->GetValue(),
-         m_txtFields[Field_Cc]->GetValue(),
-         m_txtFields[Field_Bcc]->GetValue());
-      break;
-   case Mode_NNTP:
-      m_msg->SetNewsgroups(m_txtFields[Field_To]->GetValue());
-      break;
-   }
+      m_msg->SetSubject(m_txtFields[Field_Subject]->GetValue());
+      switch(m_mode)
+      {
+      case Mode_SMTP:
+         m_msg->SetAddresses(
+            m_txtFields[Field_To]->GetValue(),
+            m_txtFields[Field_Cc]->GetValue(),
+            m_txtFields[Field_Bcc]->GetValue());
+         break;
+      case Mode_NNTP:
+         m_msg->SetNewsgroups(m_txtFields[Field_To]->GetValue());
+         break;
+      }
+   }// if(m_sent)
    success = m_msg->Send();  // true if sent
    if(success && READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER))
       m_msg->WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER), 
                        MF_PROFILE_OR_FILE);
 
+   m_sent = true;
+   EnableEditing(FALSE);
+   m_panel->Enable(FALSE);
    return success;
 }
 

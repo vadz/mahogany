@@ -273,7 +273,8 @@ private:
 
    /// News or smtp?
    Mode m_mode;
-   
+   /// Has message been sent already?
+   bool m_sent;
    // external editor support
    // -----------------------
 

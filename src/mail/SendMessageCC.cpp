@@ -495,17 +495,18 @@ SendMessageCC::Send(void)
          break;
       }
       if(success)
-         LOGMESSAGE((M_LOG_DEFAULT,"MAIL [Ok]"));
+         LOGMESSAGE((M_LOG_DEFAULT,m_protocol==Prot_SMTP?_("Mail sent."):_("Article posted.")));
       else
       {
-         sprintf (tmpbuf, "[Failed - %s]",stream->reply);
+         sprintf (tmpbuf, _("Failed to send - %s"), stream->reply ?
+                  stream->reply : _("unknown error"));
          ERRORMESSAGE((tmpbuf));
          success = false;
       }
    }
    else
    {   
-      ERRORMESSAGE (("[Cannot open connection to any server]"));
+      ERRORMESSAGE ((_("Cannot open connection to any server")));
       success = false;
    }
    return success;
