@@ -1444,7 +1444,7 @@ MessageView::ShowPart(const MimePart *mimepart)
    {
       // as we're going to need its contents, we'll have to download it: check
       // if it is not too big before doing this
-      if ( !CheckMessagePartSize(mimepart) )
+      if ( CheckMessagePartSize(mimepart) )
       {
          String data = mimepart->GetContent();
 
