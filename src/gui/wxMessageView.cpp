@@ -67,10 +67,10 @@
 
 // @@@@ for testing only
 #ifndef USE_PCH
-extern "C"
-{
+   extern "C"
+   {
 #     include <rfc822.h>
-}
+   }
 #  include "MessageCC.h"
 #endif //USE_PCH
 
@@ -106,56 +106,46 @@ struct ClickableInfo
 // private classes
 // ----------------------------------------------------------------------------
 
+// the popup menu invoked by clicking on an attachment in the mail message
 class MimePopup : public wxMenu
 {
 public:
-   MimePopup()
-      : wxMenu(_("MIME Menu"))
+   MimePopup(wxMessageView *parent, int partno) : wxMenu(_("MIME Menu"))
       {
-         Append(WXMENU_MIME_INFO,_("&Info"));
-         Append(WXMENU_MIME_HANDLE,_("&Open"));
-         Append(WXMENU_MIME_SAVE,_("&Save"));
-      }
-};
-
-#define   BUTTON_HEIGHT 24
-#define   BUTTON_WIDTH  60
-
-class MimeDialog : public wxDialog
-{
-public:
-   MimeDialog(wxMessageView *parent, wxPoint const & pos, int partno)
-      : wxDialog(parent, -1, _("MIME Menu"), pos,
-            wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
-      {
+         // init member vars
          m_PartNo = partno;
          m_MessageView = parent;
-         (void) new wxButton(this, WXMENU_MIME_INFO, _("Info"),wxPoint(0,0),wxSize(BUTTON_WIDTH,BUTTON_HEIGHT));
-         (void) new wxButton(this, WXMENU_MIME_HANDLE, _("Open"),wxPoint(0,BUTTON_HEIGHT),wxSize(BUTTON_WIDTH,BUTTON_HEIGHT));
-         (void) new wxButton(this, WXMENU_MIME_SAVE, _("Save"), wxPoint(0,2*BUTTON_HEIGHT),wxSize(BUTTON_WIDTH,BUTTON_HEIGHT));
-         (void) new wxButton(this, WXMENU_MIME_DISMISS, _("Dismiss"), wxPoint(0,3*BUTTON_HEIGHT),wxSize(BUTTON_WIDTH,BUTTON_HEIGHT));
-         Fit();
+
+         // create the menu items
+         Append(WXMENU_MIME_INFO,_("&Info..."));
+         AppendSeparator();
+         Append(WXMENU_MIME_HANDLE,_("&Open"));
+         Append(WXMENU_MIME_SAVE,_("&Save..."));
       }
+
+   // callbacks
    void OnCommandEvent(wxCommandEvent &event);
-   DECLARE_EVENT_TABLE()
 
 private:
    wxMessageView *m_MessageView;
    int m_PartNo;
+
+   DECLARE_EVENT_TABLE()
 };
 
 // ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(MimeDialog, wxDialog)
-   EVT_BUTTON(-1,    MimeDialog::OnCommandEvent)
+BEGIN_EVENT_TABLE(MimePopup, wxMenu)
+   EVT_MENU(-1, MimePopup::OnCommandEvent)
 END_EVENT_TABLE()
 
 // ============================================================================
 // implementation
 // ============================================================================
+
 void
-MimeDialog::OnCommandEvent(wxCommandEvent &event)
+MimePopup::OnCommandEvent(wxCommandEvent &event)
 {
    switch(event.GetId())
    {
@@ -168,13 +158,9 @@ MimeDialog::OnCommandEvent(wxCommandEvent &event)
    case WXMENU_MIME_SAVE:
       m_MessageView->MimeSave(m_PartNo);
       break;
-   case WXMENU_MIME_DISMISS:
-      Show(false);
-      break;
    }
 }
 
-   
 void
 wxMessageView::Create(wxFolderView *fv, wxWindow *parent, const String &iname)
 {
@@ -372,8 +358,7 @@ wxMessageView::Update(void)
       else // insert an icon
       {
          wxIcon icn;
-         if(t == TYPEIMAGE
-            && m_Profile->readEntry(MP_INLINE_GFX,MP_INLINE_GFX_D))
+         if(t == TYPEIMAGE && READ_CONFIG(m_Profile, MP_INLINE_GFX))
          {
             char *filename = wxGetTempFileName("Mtemp");
             MimeSave(i,filename);
@@ -448,8 +433,9 @@ wxMessageView::~wxMessageView()
       delete xface;
    if(xfaceXpm)
       delete [] xfaceXpm;
-   if(m_MimePopup)
-      delete m_MimePopup;
+
+   wxDELETE(m_MimePopup);
+
    m_Profile->DecRef();
 }
 
@@ -691,12 +677,17 @@ wxMessageView::OnCommandEvent(wxCommandEvent &event)
                }
                GetPosition(&x,&y);
                pos.x += x; pos.y += y;
-               if(m_MimePopup)
-                  delete m_MimePopup;
-               m_MimePopup = new MimeDialog(this,pos,ci->id);
-               m_MimePopup->Show(true);
+
+               if ( m_MimePopup == NULL )
+               {
+                  // create the pop up menu now if not done yet
+                  m_MimePopup = new MimePopup(this, ci->id);
+               }
+
+               PopupMenu(m_MimePopup, pos.x, pos.y);
                break;
             }
+
             case ClickableInfo::CI_URL:
             {
                wxFrame *frame = GetFrame(this);
