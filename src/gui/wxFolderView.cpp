@@ -403,7 +403,7 @@ wxFolderView::OpenFolder(String const &profilename)
    m_MessagePreview->Clear();
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,profilename);
    SetFolder(mf);
-   mf->DecRef();
+   SafeDecRef(mf);
 }
 
 wxFolderView::~wxFolderView()

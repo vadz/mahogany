@@ -212,6 +212,16 @@ private:
    String m_openFolderName,
           m_selectedFolderName;
 
+   // an ugly hack to prevent sending of the "selection changed" notification
+   // when the folder is selected from the program: this is needed because
+   // otherwise popup menu would be never shown for a folder which can't be
+   // opened (bad password...) in the "click to open mode".
+   //
+   // MT-note: but this class is always used only by the GUI thread, so
+   //          it's not too bad
+   bool     m_suppressSelectionChange;
+   MFolder *m_previousFolder;
+
    DECLARE_EVENT_TABLE()
 };
 
@@ -497,6 +507,8 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    m_current = NULL;
    m_sink = sink;
    m_menu = NULL;
+   m_suppressSelectionChange = FALSE;
+   m_previousFolder = NULL;
 
    // create an image list and associate it with this control
    static const char *aszImages[] =
@@ -695,9 +707,22 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
    wxTreeItemId itemId = event.GetItem();
    wxFolderTreeNode *newCurrent = (wxFolderTreeNode *)GetItemData(itemId);
 
-   MFolder *oldsel = m_current ? m_current->GetFolder() : NULL,
-           *newsel = newCurrent ? newCurrent->GetFolder() : NULL;
-   m_sink->OnSelectionChange(oldsel, newsel);
+   MFolder *oldsel = m_current ? m_current->GetFolder() : NULL;
+   if ( !m_suppressSelectionChange )
+   {
+      MFolder *newsel = newCurrent ? newCurrent->GetFolder() : NULL;
+
+      // send the event right now
+      m_sink->OnSelectionChange(oldsel, newsel);
+   }
+   else
+   {
+      // store this to send it later
+      ASSERT_MSG( !m_previousFolder, "can't have previous folder here" );
+
+      m_previousFolder = oldsel;
+      SafeIncRef(m_previousFolder);
+   }
 
    m_current = newCurrent;
    m_selectedFolderName = m_current ? m_current->GetFolder()->GetFullName()
@@ -727,6 +752,9 @@ void wxFolderTreeImpl::OnDoubleClick()
 
 void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
 {
+   // for now... see comments near m_suppressSelectionChange declaration
+   m_suppressSelectionChange = TRUE;
+
    wxPoint pt = event.GetPosition();
    wxTreeItemId item = HitTest(pt);
    if ( item.IsOk() )
@@ -736,6 +764,15 @@ void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
 
    // show menu in any case
    DoPopupMenu(pt);
+
+   // now send the selection change event
+   MFolder *newsel = m_current ? m_current->GetFolder() : NULL;
+   m_sink->OnSelectionChange(m_previousFolder, newsel);
+
+   SafeDecRef(m_previousFolder); // matches IncRef() in OnTreeSelect()
+   m_previousFolder = NULL;
+
+   m_suppressSelectionChange = FALSE;
 }
 
 void wxFolderTreeImpl::OnMenuCommand(wxCommandEvent& event)

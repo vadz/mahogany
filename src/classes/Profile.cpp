@@ -50,8 +50,20 @@
 #include <sys/stat.h>
 #endif
 
-/// a name for the empty profile, like this it is invalid for wxConfig, so it will never conflict with a real profile name
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+/// a name for the empty profile, like this it is invalid for wxConfig, so it
+///  will never conflict with a real profile name
 #define   PROFILE_EMPTY_NAME "EMPTYPROFILE?(*[]{}"
+
+#ifdef DEBUG
+   // there are 2 many of profile trace messages - filter them. They won't
+   // appear by default, if you do want them change the wxLog::ms_ulTraceMask
+   // to include wxTraceProfileCalss bit
+   static const int wxTraceProfileCalss = 0x200;
+#endif
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -877,7 +889,8 @@ readEntryHelper(wxConfigBase *config,
       dbgtmp += value.GetString();
    else
       dbgtmp += strutil_ltoa(value.GetNumber());
-   DBGLOG(Str(dbgtmp));
+
+   wxLogTrace(wxTraceProfileCalss, Str(dbgtmp));
 #  endif
 
    if(read)
@@ -1076,7 +1089,8 @@ ConfigFileManager::DeRegister(ProfileBase *prof)
    {
       if((*i)->profile == prof)
       {
-         TRACEMESSAGE(("ConfigFileManager::DeRegister(%s)",
+         TRACEMESSAGE((wxTraceProfileCalss,
+                       "ConfigFileManager::DeRegister(%s)",
                        (*i)->className.c_str()));
          delete fcList->remove(i);
          return;
@@ -1089,7 +1103,9 @@ ConfigFileManager::DeRegister(ProfileBase *prof)
 void
 ConfigFileManager::Register(const String & className, ProfileBase *profile)
 {
-   TRACEMESSAGE(("ConfigFileManager.Register(%s)", className.c_str()));
+   TRACEMESSAGE((wxTraceProfileCalss,
+                 "ConfigFileManager.Register(%s)",
+                 className.c_str()));
 
    FCData   *newEntry = new FCData;
    newEntry->className = className;
