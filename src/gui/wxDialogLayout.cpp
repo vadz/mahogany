@@ -1192,15 +1192,15 @@ bool wxNotebookDialog::DoApply()
 
 void wxNotebookDialog::OnCancel(wxCommandEvent& /* event */)
 {
+   // discard any changes
+   if ( m_profileForButtons )
+   {
+      m_profileForButtons->Discard();
+   }
+
    // but then only do something non trivial if [Apply] had been pressed
    if ( m_lastBtn == MEventOptionsChangeData::Apply )
    {
-      // discard any changes
-      if ( m_profileForButtons )
-      {
-         m_profileForButtons->Discard();
-      }
-
       // then send the event to allow everything to return to the old state
       m_lastBtn = MEventOptionsChangeData::Cancel;
       SendOptionsChangeEvent();
