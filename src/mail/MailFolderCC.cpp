@@ -1534,7 +1534,10 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
             break;
          }
 
-         if ( encoding != wxFONTENCODING_SYSTEM )
+         wxFontEncoding encTmp = wxFontMapper::Get()->CharsetToEncoding(csName);
+
+#ifdef DEBUG
+         if ( encoding != wxFONTENCODING_SYSTEM && encoding != encTmp )
          {
             // this is a bug (well, missing feature) in Mahogany but so far
             // I've never seen this happen -- in principle, it is, of course,
@@ -1542,8 +1545,9 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
             wxLogDebug(_T("This header contains encoded words with different ")
                        _T("encodings and won't be rendered correctly."));
          }
+#endif // DEBUG
 
-         encoding = wxFontMapper::Get()->CharsetToEncoding(csName);
+         encoding = encTmp;
 
          // get the encoding in RFC 2047 sense
          enum
