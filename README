@@ -1,0 +1,20 @@
+$Id
+
+Preliminary README file for M.
+
+To install:
+  ./configure --help
+  ./configure "with your appropriate options"
+  make depend
+  make
+  make doc
+  make install_all
+
+  to rebuild M source, run make from the src sub directory
+
+Documentation can be found in the doc directory:
+
+doc/README - what this should be
+doc/OSF    - notes about M on DEC OSF/1
+doc/Manual - what will become the manual
+
