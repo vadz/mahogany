@@ -3105,6 +3105,8 @@ wxComposeView::Send(bool schedule)
          wxLogError(_("The message couldn't be sent."));
       }
       //else: cancelled by user, don't give the error
+
+      wxLogStatus(this, _("Message was not sent."));
    }
 
    // reenable the window disabled previously

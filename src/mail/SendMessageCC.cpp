@@ -235,7 +235,7 @@ SendMessageCC::Create(Protocol protocol,
 
    m_profile = prof;
    m_profile->IncRef();
-   
+
    // remember the default hostname to use for addresses without host part
    m_DefaultHost = READ_CONFIG_TEXT(prof, MP_HOSTNAME);
 
@@ -1203,24 +1203,6 @@ SendMessageCC::Send(void)
 
    MCclientLocker locker();
 
-   SENDSTREAM *stream = NIL;
-
-   // SMTP/NNTP server reply
-   String reply;
-
-   String service,
-          server = m_ServerHost;
-
-   if(m_UserName.Length() > 0) // activate authentication
-   {
-      server << "/user=\"" << m_UserName << '"';
-      MailFolderCC::SetLoginData(m_UserName, m_Password);
-   }
-
-   const char *hostlist[2];
-   hostlist[0] = server;
-   hostlist[1] = NIL;
-
 #ifndef OS_UNIX
    // For non-unix systems we make sure that no-one tries to run
    // Sendmail which is unix specific. This could happen if someone
@@ -1229,7 +1211,50 @@ SendMessageCC::Send(void)
    // instead:
    if(m_Protocol == Prot_Sendmail)
       m_Protocol = Prot_SMTP;
-#endif
+#endif // !OS_UNIX
+
+   SENDSTREAM *stream = NIL;
+
+   // SMTP/NNTP server reply
+   String reply;
+
+   // construct the server string for c-client
+   String server = m_ServerHost;
+
+   // use authentification if the user name is specified
+   if ( !m_UserName.empty() )
+   {
+      server << "/user=\"" << m_UserName << '"';
+      MailFolderCC::SetLoginData(m_UserName, m_Password);
+   }
+
+   // do we use SSL for SMTP/NNTP?
+#ifdef USE_SSL
+   if ( m_Protocol == Prot_SMTP )
+   {
+      if ( m_UseSSLforSMTP && InitSSL() )
+      {
+         server << "/ssl";
+         if ( m_UseSSLUnsignedforSMTP )
+            server << "/novalidate-cert";
+      }
+   }
+   else if ( m_Protocol == Prot_NNTP )
+   {
+      if ( m_UseSSLforNNTP && InitSSL() )
+      {
+         server << "/ssl";
+         if ( m_UseSSLUnsignedforNNTP )
+            server << "/novalidate-cert";
+      }
+   }
+   //else: other protocols don't use SSL
+#endif // USE_SSL
+
+   // prepare the hostlist for c-client: we use only one server
+   const char *hostlist[2];
+   hostlist[0] = server;
+   hostlist[1] = NIL;
 
    // preview message being sent if asked for it
    String msgText;
@@ -1262,18 +1287,8 @@ SendMessageCC::Send(void)
    switch ( m_Protocol )
    {
       case Prot_SMTP:
-         service = "smtp";
          wxLogTrace(TRACE_SEND, "Trying to open connection to SMTP server '%s'",
                     m_ServerHost.c_str());
-#ifdef USE_SSL
-         if ( m_UseSSLforSMTP && InitSSL() )
-         {
-            STATUSMESSAGE((_("Sending message via SSL...")));
-            service << "/ssl";
-            if ( m_UseSSLUnsignedforSMTP )
-               service << "/novalidate-cert";
-         }
-#endif // USE_SSL
          if ( READ_CONFIG(m_profile, MP_SMTP_USE_8BIT) )
          {
             options |= SOP_8BITMIME;
@@ -1281,28 +1296,18 @@ SendMessageCC::Send(void)
 
          stream = smtp_open_full(NIL,
                                  (char **)hostlist,
-                                 (char *)service.c_str(),
+                                 "smtp",
                                  SMTPTCPPORT,
                                  options);
          break;
 
       case Prot_NNTP:
-         service = "nntp";
          wxLogTrace(TRACE_SEND, "Trying to open connection to NNTP server '%s'",
                     m_ServerHost.c_str());
-#ifdef USE_SSL
-         if ( m_UseSSLforNNTP && InitSSL() )
-         {
-            STATUSMESSAGE((_("Posting message via SSL...")));
-            service << "/ssl";
-            if ( m_UseSSLUnsignedforNNTP )
-               service << "/novalidate-cert";
-         }
-#endif // USE_SSL
 
          stream = nntp_open_full(NIL,
                                  (char **)hostlist,
-                                 (char *)service.c_str(),
+                                 "nntp",
                                  NNTPTCPPORT,
                                  options);
          break;
@@ -1358,7 +1363,7 @@ SendMessageCC::Send(void)
             {
                ERRORMESSAGE((_("Failed to get a temporary file name")));
             }
-            
+
             if ( success )
             {
                MDialog_Message(_("Message sent."),
@@ -1418,23 +1423,27 @@ SendMessageCC::Send(void)
       }
       else // failed to send/post
       {
-         String tmpbuf = MailFolder::GetLogCircle().GuessError();
-         if ( !tmpbuf.empty() )
-            ERRORMESSAGE((tmpbuf));
+         wxLogWarning(_("%s error: %s"),
+                      m_Protocol == Prot_SMTP ? "SMTP" : "NNTP",
+                      reply.empty() ? _("unknown error") : reply.c_str());
 
-         tmpbuf.Printf(_("Failed to send: %s"),
-                       reply.empty() ? _("unknown error")
-                                     : reply.c_str());
-         ERRORMESSAGE((tmpbuf));
+         String err = MailFolder::GetLogCircle().GuessError();
+         if ( !err.empty() )
+         {
+            ERRORMESSAGE((err));
+         }
       }
    }
    else // error in opening stream
    {
-      String tmpbuf = MailFolder::GetLogCircle().GuessError();
-      if ( !tmpbuf.empty() )
-         ERRORMESSAGE((tmpbuf));
+      ERRORMESSAGE((_("Cannot open connection to the server '%s'."),
+                    m_ServerHost.c_str()));
 
-      ERRORMESSAGE((_("Cannot open connection to any server.")));
+      String err = MailFolder::GetLogCircle().GuessError();
+      if ( !err.empty() )
+      {
+         ERRORMESSAGE((err));
+      }
 
       success = false;
    }

@@ -134,6 +134,9 @@ MLogCircle:: Find(const String needle, String *store) const
          return true;
       }
    }
+
+   // we don't check for this so far, why waste time
+#if 0
    // last attempt:
    String tmp = strerror(errno);
    if(tmp.Contains(needle))
@@ -141,6 +144,8 @@ MLogCircle:: Find(const String needle, String *store) const
       if(store) *store = tmp;
       return true;
    }
+#endif // 0
+
    return false;
 }
 String
@@ -177,6 +182,14 @@ MLogCircle::GuessError(void) const
       addErr = true;
       addLog = true;
    }
+   // the SMTP error messages are not redirected to MLogCircle yet anyhow...
+#if 0
+   // SMTP 554 error
+   else if ( Find("recipients failed", &err) )
+   {
+      guess = _("Mail server didn't accept one or more of the message recipients");
+   }
+#endif // 0
    else if(Find("INVALID_ADDRESS", &err)
            || Find(".SYNTAX-ERROR.", &err))
    {
@@ -212,7 +225,9 @@ void
 MLogCircle::Clear(void)
 {
    for(int i = 0; i < m_N; i++)
-      m_Messages[i] = "";
+   {
+      m_Messages[i].clear();
+   }
 }
 
 // ----------------------------------------------------------------------------

@@ -262,6 +262,8 @@ bool InitSSL(void)
       ERRORMESSAGE((_("This version of the program doesn't support SSL "
                       "authentification.")));
    }
+
+   return false;
 }
 
 #endif // USE_SSL/!USE_SSL
