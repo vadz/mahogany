@@ -26,9 +26,6 @@
 #  endif
 #endif // USE_PCH
 
-// note: this source file is intentionally empty in release mode, all the code
-// here is only for the debugging support, otherwise the functions are inline in
-// the header.
 #include "MObject.h"
 
 #ifdef DEBUG
@@ -149,6 +146,8 @@ void MObject::DeRegister(void)
    gs_aMObjects.Remove(this);
 }
 
+#endif //DEBUG
+
 // ----------------------------------------------------------------------------
 // Reference counting helpers
 // ----------------------------------------------------------------------------
@@ -173,4 +172,3 @@ extern void RefCounterAssign(MObjectRC *target,MObjectRC *source)
       target->DecRef();
 }
 
-#endif //DEBUG
