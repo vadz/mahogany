@@ -42,6 +42,7 @@ WX_DEFINE_ARRAY(UIdType, UIdArray);
 // forward declarations
 class FolderView;
 class Profile;
+class MFrame;
 class MWindow;
 class Message;
 
@@ -166,9 +167,14 @@ public:
    };
    //@}
 
+   /// default ctor
+   MailFolder() { m_frame = NULL; }
+
    /** @name Static functions, implemented in MailFolder.cpp */
    //@{
 
+   /** @name Opening folders */
+   //@{
    /**
       Opens an existing mail folder of a certain type.
       The path argument is as follows:
@@ -211,6 +217,7 @@ public:
    /** Half open the folder using paremeters from MFolder object. */
    static MailFolder * HalfOpenFolder(const class MFolder *mfolder,
                                       Profile *profile = NULL);
+   //@}
 
    /** Phyically deletes this folder.
        @return true on success
@@ -701,8 +708,42 @@ public:
    /// Clean up for program exit.
    static void CleanUp(void);
 
+   /** @name Interactivity control */
+   //@{
+   /**
+      Folder opening functions work differently if SetInteractive() is set:
+      they will put more messages into status bar and possibly ask questions to
+      the user while in non interactive mode this will never be done.
+
+      @param frame the window where the status messages should go (may be NULL)
+   */
+   static void SetInteractive(MFrame *frame) { ms_interactiveFrame = frame; }
+
+   /**
+      Set interactive frame for this folder only: long operations on this folder
+      will put the status messages in this frames status bar.
+
+      @return the old interactive frame for this folder
+   */
+   MFrame *SetInteractiveFrame(MFrame *frame)
+      { MFrame *frameOld = m_frame; m_frame = frame; return frameOld; }
+
+   /**
+      Get the frame to use for interactive messages. May return NULL.
+   */
+   MFrame *GetInteractiveFrame() const
+      { return m_frame ? m_frame : ms_interactiveFrame; }
+   //@}
+
 protected:
+   /// the helper class for determining the exact error msg from cclient log
    static MLogCircle ms_LogCircle;
+
+   /// the frame to which interactive messages go by default
+   static MFrame *ms_interactiveFrame;
+
+   /// the frame to which messages for this folder go by default
+   MFrame *m_frame;
 };
 
 /** This class temporarily locks a mailfolder */

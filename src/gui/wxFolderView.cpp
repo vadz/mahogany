@@ -1294,7 +1294,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
             if ( MDialog_YesNoDialog
                  (
                   msg,
-                  m_Parent,
+                  m_Frame,
                   MDIALOG_YESNOTITLE,
                   true,
                   GetFullPersistentKey(M_MSGBOX_MARK_READ)
@@ -1306,7 +1306,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
             }
          }
 
-         CheckExpungeDialog(m_ASMailFolder, m_Parent);
+         CheckExpungeDialog(m_ASMailFolder, m_Frame);
       }
 
       // This little trick makes sure that we don't react to any final
@@ -1419,7 +1419,11 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_InDeletion = false;
    m_UpdateSemaphore = false;
    m_SetFolderSemaphore = false;
+
    m_Parent = parent;
+   // cast is harmless as we can only have MFrames in this application
+   m_Frame = (MFrame *)GetFrame(m_Parent);
+
    m_MailFolder = NULL;
    m_ASMailFolder = NULL;
    m_regOptionsChange = MEventManager::Register(*this, MEventId_OptionsChange);
@@ -1733,6 +1737,8 @@ wxFolderView::Update(HeaderInfoList *listing)
 
    m_UpdateSemaphore = true;
 
+   MFrame *frameOld = m_MailFolder->SetInteractiveFrame(m_Frame);
+
    if(! listing )
    {
       listing = m_ASMailFolder->GetHeaders();
@@ -1790,7 +1796,7 @@ wxFolderView::Update(HeaderInfoList *listing)
       }
    }
 
-   UpdateTitleAndStatusBars("", "", GetFrame(m_Parent), m_MailFolder);
+   UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
 
    if(focusedIndex != -1 && focusedIndex < (long) n)
       m_FolderCtrl->EnsureVisible(focusedIndex);
@@ -1815,6 +1821,8 @@ wxFolderView::Update(HeaderInfoList *listing)
    }
 
    m_UpdateSemaphore = false;
+
+   m_MailFolder->SetInteractiveFrame(frameOld);
 }
 
 
@@ -1833,7 +1841,7 @@ wxFolderView::OpenFolder(String const &profilename)
    int flags = folder->GetFlags();
    if ( (flags & MF_FLAGS_UNACCESSIBLE) && !(flags & MF_FLAGS_MODIFIED) )
    {
-      wxFrame *frame = GetFrame(m_Parent);
+      wxFrame *frame = m_Frame;
       if ( MDialog_YesNoDialog(_("This folder couldn't be opened last time, "
                                  "do you still want to try to open it (it "
                                  "will probably fail again)?"),
@@ -1863,11 +1871,14 @@ wxFolderView::OpenFolder(String const &profilename)
    }
 
    wxBeginBusyCursor();
+   MailFolder::SetInteractive(m_Frame);
+
    MailFolder *mf = MailFolder::OpenFolder(profilename);
    SetFolder(mf);
    SafeDecRef(mf);
    m_ProfileName = profilename;
 
+   MailFolder::SetInteractive(NULL);
    wxEndBusyCursor();
 
    if ( !mf )
@@ -1950,7 +1961,7 @@ wxFolderView::UpdateSelectionInfo(void)
          }
       }
 
-      wxLogStatus(GetFrame(m_Parent), msg);
+      wxLogStatus(m_Frame, msg);
    }
 }
 
@@ -1962,7 +1973,7 @@ void wxFolderView::ExpungeMessages()
 
       m_ASMailFolder->ExpungeMessages();
 
-      wxLogStatus(GetFrame(m_Parent),
+      wxLogStatus(m_Frame,
                   _("%u deleted messages were expunged"),
                   m_nDeleted - nDeletedOld);
    }
@@ -2007,7 +2018,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    String templ;
    if ( templKind != MessageTemplate_None )
    {
-      templ = ChooseTemplateFor(templKind, GetFrame(m_Parent));
+      templ = ChooseTemplateFor(templKind, m_Frame);
       if ( !templ )
       {
          // cancelled by user
@@ -2069,7 +2080,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
                m_ASMailFolder->ReplyMessages(
                                              &selections,
                                              MailFolder::Params(templ, flags),
-                                             GetFrame(m_Parent),
+                                             m_Frame,
                                              this
                                             )
             );
@@ -2082,7 +2093,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
                m_ASMailFolder->ForwardMessages(
                                                &selections,
                                                MailFolder::Params(templ),
-                                               GetFrame(m_Parent),
+                                               m_Frame,
                                                this
                                               )
             );
@@ -2169,7 +2180,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       case WXMENU_FILE_COMPOSE_WITH_TEMPLATE:
       case WXMENU_FILE_COMPOSE:
          {
-            wxFrame *frame = GetFrame(m_Parent);
+            wxFrame *frame = m_Frame;
 
             wxString templ;
             if ( cmd == WXMENU_FILE_COMPOSE_WITH_TEMPLATE )
@@ -2241,7 +2252,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
                InteractivelyCollectAddresses(addresses,
                                              READ_APPCONFIG(MP_AUTOCOLLECT_ADB),
                                              m_ProfileName,
-                                             (MFrame *)GetFrame(m_Parent));
+                                             (MFrame *)m_Frame);
             }
          }
          break;
@@ -2414,7 +2425,7 @@ wxFolderView::SaveMessagesToFolder(const UIdArray& selections,
 {
    Ticket t =
       m_ASMailFolder->SaveMessagesToFolder(&selections,
-                                           GetFrame(m_Parent),
+                                           m_Frame,
                                            folder,
                                            this);
    m_TicketList->Add(t);
@@ -2441,16 +2452,17 @@ wxFolderView::DropMessagesToFolder(const UIdArray& selections, MFolder *folder)
 void
 wxFolderView::SaveMessagesToFile(const UIdArray& selections)
 {
-   String msg;
-   bool rc;
+   bool rc = m_ASMailFolder->SaveMessagesToFile(&selections,
+                                                m_Frame,
+                                                this) != 0;
 
-   rc = m_ASMailFolder->SaveMessagesToFile(&selections,
-                                 GetFrame(m_Parent), this) != 0;
+   String msg;
    if(rc)
      msg.Printf(_("%d messages saved"), selections.Count());
    else
       msg.Printf(_("Saving messages failed."));
-   wxLogStatus(GetFrame(m_Parent), msg);
+
+   wxLogStatus(m_Frame, msg);
 }
 
 void
@@ -2500,7 +2512,7 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
                  "invalid index in wxFolderView::OnMsgStatusEvent" );
 
       SetEntry(event.GetHeaderInfo(), index);
-      UpdateTitleAndStatusBars("", "", GetFrame(m_Parent), m_MailFolder);
+      UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
    }
 }
 
@@ -2596,7 +2608,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                        result->GetSequence()->Count());
          else
             msg.Printf(_("Saving messages failed."));
-         wxLogStatus(GetFrame(m_Parent), msg);
+         wxLogStatus(m_Frame, msg);
          break;
 
       case ASMailFolder::Op_SaveMessagesToFolder:
@@ -2663,7 +2675,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                }
             }
 
-            wxLogStatus(GetFrame(m_Parent), msg);
+            wxLogStatus(m_Frame, msg);
          }
          break;
 
@@ -2691,20 +2703,23 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
          }
          else
             msg.Printf(_("No matching messages found."));
-         wxLogStatus(GetFrame(m_Parent), msg);
+         wxLogStatus(m_Frame, msg);
          break;
 
       case ASMailFolder::Op_ApplyFilterRules:
       {
          ASSERT(result->GetSequence());
-         if(value == -1)
-            msg.Printf(_("Filtering messages failed."));
+         if ( value == -1 )
+         {
+            wxLogError(_("Filtering messages failed."));
+         }
          else
-            msg.Printf(_("Applied filters to %lu messages, return code %d."),
-                       (unsigned long)
-                       result->GetSequence()->Count(),
-                       value);
-         wxLogStatus(GetFrame(m_Parent), msg);
+         {
+            msg.Printf(_("Applied filters to %lu messages, "
+                         "see log window for details."),
+                       (unsigned long)result->GetSequence()->Count());
+            wxLogStatus(m_Frame, msg);
+         }
          break;
       }
 
@@ -2717,7 +2732,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
          else if (count != 0)
             msg.Printf(_("%lu duplicate messages removed."),
                        (unsigned long) count);
-         wxLogStatus(GetFrame(m_Parent), msg);
+         wxLogStatus(m_Frame, msg);
          break;
       }
       // these cases don't have return values

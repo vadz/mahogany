@@ -507,8 +507,8 @@ String MailFolder::GetImapSpec(int typeOrig,
    if( (flags & MF_FLAGS_SSLAUTH) && !FolderTypeSupportsSSL(type) )
    {
       flags ^= MF_FLAGS_SSLAUTH;
-      STATUSMESSAGE((_("Ignoring SSL authentication for folder '%s'"),
-                     name.c_str()));
+      wxLogWarning(_("Ignoring SSL authentication for folder '%s'"),
+                   name.c_str());
    }
 
    if( (flags & MF_FLAGS_SSLAUTH) != 0 && ! InitSSL() )
@@ -1149,8 +1149,12 @@ MailFolderCC::OpenFolder(int typeAndFlags,
 
 bool MailFolderCC::HalfOpen()
 {
-   // well, we're not going to tell the user we're half opening it...
-   STATUSMESSAGE((_("Opening mailbox %s..."), GetName().c_str()));
+   MFrame *frame = GetInteractiveFrame();
+   if ( frame )
+   {
+      // well, we're not going to tell the user we're half opening it...
+      STATUSMESSAGE((frame, _("Opening mailbox %s..."), GetName().c_str()));
+   }
 
    if( FolderTypeHasUserName(GetType()) )
       SetLoginData(m_Login, m_Password);
@@ -1174,7 +1178,11 @@ bool MailFolderCC::HalfOpen()
 bool
 MailFolderCC::Open(void)
 {
-   STATUSMESSAGE((_("Opening mailbox %s..."), GetName().c_str()));
+   MFrame *frame = GetInteractiveFrame();
+   if ( frame )
+   {
+      STATUSMESSAGE((frame, _("Opening mailbox %s..."), GetName().c_str()));
+   }
 
    FolderType folderType = GetType();
 
@@ -1227,16 +1235,15 @@ MailFolderCC::Open(void)
             {
                int success = remove(lockfile);
                if(success != 0) // error!
-                  MDialog_Message(
-                     _("Could not remove lock-file.\n"
-                     "Other process may have terminated.\n"
-                     "Will try to continue as normal."));
+                  wxLogWarning(_("Could not remove lock-file.\n"
+                                 "Other process may have terminated.\n"
+                                 "Will try to continue as normal."));
             }
             else
             {
-               MDialog_Message(_("Cannot open the folder while "
-                                 "lock-file exists."));
-               STATUSMESSAGE((_("Could not open mailbox %s."), GetName().c_str()));
+               wxLogError(_("Cannot open the folder while lock-file exists."));
+               wxLogError(_("Could not open mailbox %s."), GetName().c_str());
+
                return false;
             }
          }
@@ -1286,10 +1293,16 @@ MailFolderCC::Open(void)
 
                tmp = "#driver.";
                tmp << cclient_drivers[format] << '/';
-                  STATUSMESSAGE((_("Trying to create folder '%s' in %s format."),
-                              GetName().c_str(),
-                              cclient_drivers[format]
-                     ));
+
+               if ( frame )
+               {
+                  STATUSMESSAGE((
+                     frame,
+                     _("Trying to create folder '%s' in %s format."),
+                     GetName().c_str(),
+                     cclient_drivers[format]
+                  ));
+               }
             }
             else // MF_MH folder
             {
@@ -1367,7 +1380,7 @@ MailFolderCC::Open(void)
    // so did we eventually succeed in opening it or not?
    if ( m_MailStream == NIL )
    {
-      STATUSMESSAGE((_("Could not open mailbox '%s'."), GetName().c_str()));
+      wxLogError(_("Could not open mailbox '%s'."), GetName().c_str());
       return false;
    }
 
@@ -1376,8 +1389,13 @@ MailFolderCC::Open(void)
    // now we are known
    AddToMap(m_MailStream);
 
-   STATUSMESSAGE((_("Mailbox %s opened."), GetName().c_str()));
+   if ( frame )
+   {
+      STATUSMESSAGE((frame, _("Mailbox %s opened."), GetName().c_str()));
+   }
+
    PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
+
    return true;   // success
 }
 
@@ -2620,23 +2638,40 @@ MailFolderCC::BuildListing(void)
          {
             nRetrieve = m_RetrievalLimitHard;
          }
-         else // ask
+         else // soft limit exceeded
          {
-            MGuiLocker locker;
+            // ask the user (in interactive mode only)
+            MFrame *frame = GetInteractiveFrame();
+            if ( frame )
+            {
+               MGuiLocker locker;
 
-            String msg, prompt, title;
-            title.Printf(_("How many messages to retrieve from folder '%s'?"),
-                         GetName().c_str());
-            msg.Printf(_("This folder contains %lu messages, which is greater than\n"
-                         "the current threshold of %lu (set it to 0 to avoid this "
-                         "question - or\n"
-                         "you can also choose [Cancel] to download all messages)."),
-                  m_nMessages, m_RetrievalLimit);
-            prompt = _("How many of them do you want to retrieve?");
+               String msg, title;
+               msg.Printf(
+                  _("This folder contains %lu messages, which is greater than\n"
+                    "the current threshold of %lu (set it to 0 to avoid this "
+                    "question - or\n"
+                    "you can also choose [Cancel] to download all messages)."),
+                  m_nMessages, m_RetrievalLimit
+               );
+               title.Printf(_("How many messages to retrieve from folder '%s'?"),
+                            GetName().c_str());
 
-            nRetrieve = MGetNumberFromUser(msg, prompt, title,
-                                           m_RetrievalLimit,
-                                           1, m_nMessages);
+               String prompt = _("How many of them do you want to retrieve?");
+
+               nRetrieve = MGetNumberFromUser(msg, prompt, title,
+                                              m_RetrievalLimit,
+                                              1, m_nMessages,
+                                              frame);
+            }
+            else // not interactive mode
+            {
+               // get all messages - better do this than present the user with
+               // an annoying modal dialog (he can always set the hard limit
+               // if he really doesn't want to limit the number of messages
+               // retrieved)
+               nRetrieve = 0;
+            }
          }
 
          if ( nRetrieve > 0 && (unsigned long)nRetrieve < m_nMessages )

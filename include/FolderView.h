@@ -59,10 +59,14 @@ protected:
 
    /// the profile we use for our settings
    Profile *m_Profile;
+
    /// full folder name of the folder we show
    String m_folderName;
+
    /// the mail folder being displayed
    ASMailFolder *m_ASMailFolder;
+
+   /// the mail folder associated with m_ASMailFolder
    MailFolder *m_MailFolder;
 
 private:

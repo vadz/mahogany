@@ -932,45 +932,57 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                 "</center>");
 
    bottom->SetPage("<body text=#000000 bgcolor=#ffffff>"
-                   "<font face=\"Times New Roman,times\" size-2>"
+                   "<font face=\"Times New Roman,times\">"
 
+                   "<h4>Mahogany information</h4>"
+                   "Version " M_VERSION_STRING "<br>"
 #ifdef DEBUG
-                   "<h3>Debug information:</h3>"
-                   "<h4>Features:</h4>"
+                   "<b>WARNING:</b> This is a debug build"
+#else
+                   "Release build"
+#endif
+                   " (compiled at " __DATE__ ", " __TIME__ ")"
+
+#if defined(USE_SSL) || defined(USE_THREADS) || defined(USE_PYTHON)
+                   "<h4>Extra features:</h4>"
+#ifdef USE_SSL
+                   "SSL support<br>"
+#endif
 #ifdef USE_THREADS
-                   "Threads "
+                   "Threads<br>"
 #endif
 #ifdef USE_PYTHON
-                   "Python "
+                   "Python<br>"
 #endif
-                   "SSL "
+#endif // USE_XXX
+
 #ifdef EXPERIMENTAL
-                   "Experimental Code: " EXPERIMENTAL
+                   "<b>WARNING</b>: Includes experimental code (" EXPERIMENTAL ")"
 #endif
 
                    "<p>"
-#endif
-                   "<b>List of contributors:</b><br>"
-                   "<tt>mahogany-developers@lists.sourceforge.net</tt>:<br>"
-                   "Karsten Ball&uuml;der, "
-                   "Vadim Zeitlin, "
-                   "Vaclav Slavik, "
-                   "Daniel Seifert, "
-                   "Greg Noel, "
+                   "<h4>List of contributors:</h4>"
+                   "<p>"
+                   "Karsten Ball&uuml;der, Vadim Zeitlin,<br> "
+                   "Greg Noel, Vaclav Slavik, Daniel Seifert,<br>"
                    "and many others<br>"
                    "<i>The Mahogany team</i><br>"
-                   "And we couldn't have done it without the wxWindows "
-                   "toolkit..."
+                   "<font size=2>"
+                   "(<tt>mahogany-developers@lists.sourceforge.net</tt>)"
+                   "</font>"
+                   "<p>"
+                   "And we couldn't have done it without the "
+                   "wxWindows toolkit (http://www.wxwindows.org/)!"
                    "<hr>"
                    "This Product includes software developed and copyright "
-                   "by the University of Washington.<br>"
+                   "by the University of Washington."
 #ifdef USE_SSL
                    "<p>"
                    "This product includes software developed by the OpenSSL Project "
                    "for use in the OpenSSL Toolkit. (http://www.openssl.org/).<br>"
                    "This product includes cryptographic software written by Eric Young (eay@cryptsoft.com)<br>"
                    "This product includes software written by Tim Hudson (tjh@cryptsoft.com)<br>"
-#endif
+#endif // USE_SSL
                    "<p>"
                    "The Mahogany Team would like to acknowledge the support of "
                    "Anthemion Software, "
@@ -981,7 +993,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "Simon Shapiro, "
                    "VA Linux, "
                    "and SuSE GmbH."
-      );
+                  );
 
 
    wxMemoryFSHandler::RemoveFile("splash" MEMORY_FS_FILE_EXT);

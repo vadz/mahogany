@@ -219,6 +219,8 @@ private:
 
    /// its parent
    MWindow *m_Parent;
+   /// and the parent frame
+   MFrame *m_Frame;
 
    /// either a listctrl or a treectrl
    wxFolderListCtrl *m_FolderCtrl;

@@ -2417,8 +2417,9 @@ String FilterRuleImpl::GetStatusString(Message *msg) const
    String text;
    if ( msg )
    {
-      text.Printf(_("Filtering message %u (from '%s' about '%s')"),
-                  m_msgno, msg->From().c_str(), msg->Subject().c_str());
+      // only subject is probably enough, no need to have from here
+      text.Printf(_("Filtering message %u (%s)"),
+                  m_msgno, msg->Subject().c_str());
    }
 
    return text;
@@ -2456,7 +2457,7 @@ int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid, bool *changeflag)
    {
       text += " - ";
 
-      if ( m_copiedTo )
+      if ( !m_copiedTo.empty() )
       {
          text << (m_deletedMsgs ? _("moved to ") : _("copied to "))
               << m_copiedTo;

@@ -223,6 +223,12 @@ MLogCircle::Clear(void)
 static void InitStatic(void);
 static void CleanStatic(void);
 
+// ----------------------------------------------------------------------------
+// MailFolder opening
+// ----------------------------------------------------------------------------
+
+MFrame *MailFolder::ms_interactiveFrame = NULL;
+
 /*
  * This function guesses: it checks if such a profile exists,
  * otherwise it tries a file with that name.
@@ -1691,8 +1697,11 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
       return;
    }
 
-   // FIXME: should go to the relevant frame
-   STATUSMESSAGE((_("Threading %u messages..."), count));
+   MFrame *frame = mf->GetInteractiveFrame();
+   if ( frame )
+   {
+      wxLogStatus(frame, _("Threading %u messages..."), count);
+   }
 
    // reset indentation first
    size_t i;
@@ -1761,7 +1770,10 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
    delete [] indents;
    delete [] dependents;
 
-   STATUSMESSAGE((_("Threading %lu messages...done."), count));
+   if ( frame )
+   {
+      wxLogStatus(frame, _("Threading %lu messages... done."), count);
+   }
 }
 
 static void SortListing(MailFolder *mf, HeaderInfoList *hil, long sortOrder)
@@ -1771,6 +1783,12 @@ static void SortListing(MailFolder *mf, HeaderInfoList *hil, long sortOrder)
    size_t count = hil->Count();
    if ( count >= 1 )
    {
+      MFrame *frame = mf->GetInteractiveFrame();
+      if ( frame )
+      {
+         wxLogStatus(frame, _("Sorting %u messages..."), count);
+      }
+
       MLocker lock(gs_SortData.mutex);
       gs_SortData.order = sortOrder;
       gs_SortData.hil = hil;
@@ -1790,6 +1808,11 @@ static void SortListing(MailFolder *mf, HeaderInfoList *hil, long sortOrder)
 
       // just in case
       gs_SortData.hil = NULL;
+
+      if ( frame )
+      {
+         wxLogStatus(frame, _("Sorting %u messages... done."), count);
+      }
    }
    //else: avoid sorting empty listing or listing of 1 element
 
@@ -1852,8 +1875,8 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
    // do we want new mail events?
    if ( m_UpdateFlags & UF_DetectNewMail )
    {
-      if( nextIdx != 0)
-         MEventManager::Send( new MEventNewMailData (this, nextIdx, messageIDs) );
+      if ( nextIdx != 0)
+         MEventManager::Send(new MEventNewMailData(this, nextIdx, messageIDs));
       //else: no new messages found
    }
 
@@ -2081,6 +2104,8 @@ MailFolderCmn::ApplyFilterRulesCommonCode(UIdArray *msgs,
          FilterRule *filterRule = filterModule->GetFilter(filterString);
          if ( filterRule )
          {
+            wxBusyCursor busyCursor;
+
             // This might change the folder contents, so we must set this
             // flag:
             m_FiltersCausedChange = true;
@@ -2090,6 +2115,12 @@ MailFolderCmn::ApplyFilterRulesCommonCode(UIdArray *msgs,
                rc = filterRule->Apply(this, newOnly);
 
             filterRule->DecRef();
+         }
+         else
+         {
+            wxLogWarning(_("Error in filter code for folder '%s', "
+                           "filters not applied"),
+                         filterString.c_str());
          }
 
          filterModule->DecRef();
