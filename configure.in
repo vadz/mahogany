@@ -570,6 +570,7 @@ case "$USE_SSL" in
 	[ \
 		$ssl_inc/openssl \
 		/include/openssl \
+		/usr/include/openssl \
 		/usr/ssl/include/openssl \
 		/usr/local/include/openssl \
 		/usr/local/ssl/include/openssl \
