@@ -375,6 +375,7 @@ strutil_getfilename(const String& path)
    if ( nPos1 == 0 )
       return path;
    else
-      return path.c_str()-(path.length() - nPos1 - 1);
+      //return path.Right(path.Len() - nPos1 - 1);
+      return path.c_str()+ nPos1 + 1;
 }
 
