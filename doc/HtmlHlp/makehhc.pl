@@ -54,9 +54,14 @@ EOF
 		elsif ( /^ +HREF="([^"]+)">(.+)<\/A>$/ ) {
 			# entry body
 			if ( $in_entry ) {
+				# latex2html may generate either just the anchor in the link
+				# or the file name with the anchor but we always need the
+				# latter for HTML Help Workshop to work
+				my $link = $1;
+				$link = "Manual.html$link" unless $link =~ /^Manual.html#/;
 				print OUT_HHC <<EOF
 \t<LI> <OBJECT type=\"text/sitemap\">
-<param name=\"Local\" value=\"$1\">
+<param name=\"Local\" value=\"$link\">
 <param name=\"Name\" value=\"$2\">
 </OBJECT>
 EOF
