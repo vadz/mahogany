@@ -2268,10 +2268,16 @@ void wxOptionsPage::CreateControls()
 
       wxCHECK_RET( last, _T("control creation failed") );
 
-      if ( flags & Field_Vital )
-         m_aVitalControls.Add(last);
-      if ( flags & Field_Restart )
-         m_aRestartControls.Add(last);
+      // only global settings may be vital, we shouldn't bother the user if he
+      // changed some of these settings for one folder only
+      if ( !isFolderDialog )
+      {
+         if ( flags & Field_Vital )
+            m_aVitalControls.Add(last);
+
+         if ( flags & Field_Restart )
+            m_aRestartControls.Add(last);
+      }
 
       m_aControls.Add(last);
       m_aDirtyFlags.Add(false);
