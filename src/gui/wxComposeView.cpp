@@ -244,10 +244,13 @@ public:
 
    // starting from now, all methods are for the wxRcptXXX controls only
 
-   // set this one as last active
+   // set this one as last active - called by text
    void SetLast() { m_composeView->SetLastAddressEntry(m_index); }
 
-   // remove this one
+   // change type of this one - called by choice
+   void OnTypeChange(wxComposeView::RecipientType rcptType);
+
+   // remove this one - called by button
    void OnRemove() { m_composeView->OnRemoveRcpt(m_index); }
 
    // is it enabled (disabled if type == none)?
@@ -596,6 +599,11 @@ wxRcptControls::~wxRcptControls()
    delete m_btn;
 }
 
+void wxRcptControls::OnTypeChange(wxComposeView::RecipientType rcptType)
+{
+   m_composeView->OnRcptTypeChange(rcptType);
+}
+
 bool wxRcptControls::IsEnabled() const
 {
    return m_choice->GetSelection() != wxComposeView::Recipient_None;
@@ -626,9 +634,9 @@ const wxString wxRcptTypeChoice::ms_addrTypes[] =
 
 void wxRcptTypeChoice::OnChoice(wxCommandEvent& event)
 {
-   // notify the composer
-   m_rcptControls->GetComposer()->
-      OnRcptTypeChange((wxComposeView::RecipientType)event.GetSelection());
+   // notify the others (including the composer indirectly)
+   m_rcptControls->
+      OnTypeChange((wxComposeView::RecipientType)event.GetSelection());
 
    event.Skip();
 }
@@ -837,6 +845,9 @@ bool wxAddressTextCtrl::DoExpand()
 
 void wxNewAddressTextCtrl::AddNewRecipients()
 {
+   // expand before adding (make this optional?)
+   DoExpand();
+
    // add new recipient(s)
    m_composeView->AddRecipients(GetValue());
 
@@ -1111,11 +1122,7 @@ void wxComposeView::DeletePlaceHolder()
 wxSizer *wxComposeView::CreateHeaderFields()
 {
    // top level vertical (box) sizer
-   wxStaticBox *box = new wxStaticBox(m_panel, -1, "");
-   wxSizer *sizerTop = new wxStaticBoxSizer(box, wxVERTICAL);
-
-   // add a spacer below the static box bottom - looks nicer
-   sizerTop->Add(0, LAYOUT_MARGIN, 0, wxEXPAND);
+   wxSizer *sizerTop = new wxBoxSizer(wxVERTICAL);
 
    // leave number of rows unspecified, it can eb calculated from number of
    // columns (2)
