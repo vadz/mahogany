@@ -567,19 +567,32 @@ InitRecipients(Composer *cv,
    MailFolder::ReplyKind replyKind;
    bool explicitReplyKind = GetReplyKind(params, profile, replyKind);
 
-   // our own addresses - used in the code below
-   String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
-   wxArrayString ownAddresses = strutil_restore_array(returnAddrs);
-
-   // is this a message from ourselves?
-   bool fromMyself = false;
-
    // is this a follow-up to newsgroup?
    if ( replyKind == MailFolder::FOLLOWUP_TO_NEWSGROUP )
    {
       cv->AddNewsgroup( MailFolder::DecodeHeader(msg->GetNewsgroups()) );
       return;
    }
+
+
+   // collect all of the recipients of the new message and their types in these
+   // arrays
+   //
+   // the reason we use the temp arrays is that the recipients appear in the
+   // reverse order to the one in which they were added in the composer
+   // currently (this makes sense when adding them interactively!) and we want
+   // the first recipient to appear first, not the last one as it would if we
+   // were not postponing adding it to the composer until the very end
+   wxArrayString rcptAddresses;
+   wxArrayInt rcptTypes;
+
+
+   // our own addresses - used in the code below
+   String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
+   wxArrayString ownAddresses = strutil_restore_array(returnAddrs);
+
+   // is this a message from ourselves?
+   bool fromMyself = false;
 
    // first try Reply-To
    wxSortedArrayString replyToAddresses;
@@ -620,18 +633,21 @@ InitRecipients(Composer *cv,
          size_t count = msg->GetAddresses(MAT_TO, addresses);
          for ( n = 0; n < count; n++ )
          {
-            cv->AddTo(addresses[n]);
+            rcptAddresses.Add(addresses[n]);
+            rcptTypes.Add(Composer::Recipient_To);
          }
       }
       else // not from myself
       {
-         cv->AddTo(rcptMain);
+         rcptAddresses.Add(rcptMain);
+         rcptTypes.Add(Composer::Recipient_To);
 
          // add the remaining Reply-To addresses (usually there will be none)
          for ( n = 1; n < countReplyTo; n++ )
          {
             // FIXME: same as above
-            cv->AddTo(MailFolder::DecodeHeader(replyToAddresses[n]));
+            rcptAddresses.Add(MailFolder::DecodeHeader(replyToAddresses[n]));
+            rcptTypes.Add(Composer::Recipient_To);
          }
       }
    }
@@ -755,7 +771,8 @@ InitRecipients(Composer *cv,
       {
          for ( size_t n = 0; n < countLists; n++ )
          {
-            cv->AddTo(uniqueAddresses[addressesList[n]]);
+            rcptAddresses.Add(uniqueAddresses[addressesList[n]]);
+            rcptTypes.Add(Composer::Recipient_To);
          }
       }
       else // no mailing list addresses found
@@ -825,7 +842,18 @@ InitRecipients(Composer *cv,
             break;
       }
 
-      cv->AddRecipients(uniqueAddresses[n], rcptType);
+      rcptAddresses.Add(uniqueAddresses[n]);
+      rcptTypes.Add(rcptType);
+   }
+
+   // finally add all recipients in the composer in the reverse order -- so
+   // that they appear there as we want them
+   n = rcptAddresses.GetCount();
+   CHECK_RET( rcptTypes.GetCount() == n, _T("logic error in InitRecipients") );
+
+   while ( n-- )
+   {
+      cv->AddRecipients(rcptAddresses[n], (Composer::RecipientType)rcptTypes[n]);
    }
 }
 
