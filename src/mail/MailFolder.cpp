@@ -218,7 +218,7 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections,
    if(strutil_isempty(fileName))
       return false;
 
-   wxFile file;
+   wxTextFile file;
    if ( !file.Create(fileName, TRUE /* overwrite */) )
    {
       wxLogError(_("Could not truncate the existing file."));
@@ -381,11 +381,12 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections, MWindow *parent)
                                      parent);
    if(! filename.IsEmpty())
    {
-      // truncate the file
-      wxFile fd;
-      if ( !fd.Create(filename, TRUE /* overwrite */) )
-          wxLogError(_("Could not truncate the existing file."));
-
+      {
+         // truncate the file
+         wxFile fd;
+         if ( !fd.Create(filename, TRUE /* overwrite */) )
+            wxLogError(_("Could not truncate the existing file."));
+      }
       return SaveMessagesToFile(selections,filename);
    }
    else

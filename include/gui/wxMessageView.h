@@ -126,6 +126,7 @@ public:
    /// Find last string again.
    bool FindAgain(void);
 
+   long GetUId(void) const { return m_uid; }
 private:
    /// register with MEventManager
    void RegisterForEvents();

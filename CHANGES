@@ -1,8 +1,10 @@
 (next release) on (date of next release)
 
+09.07.99 KB: made python work again
 07.07.99 VZ: importing of address books added (CSV and TAB formats)
-06.07.99 KB: fixed New Mail dialog showing empty lines 
-06.07.99 KB: icons in messages appear correctly now
+06.07.99 KB: fixed New Mail dialog showing empty lines
+             icons in messages appear correctly now
+             added "Unread" marker to message flags
 05.07.99 VZ: "folder already exists" bug when creating POP3 folder fixed
 04.07.99 VZ: folder icons can now be customized
 03.07.99 VZ: support for adding custom headers from compose view

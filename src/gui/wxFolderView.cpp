@@ -740,7 +740,13 @@ wxFolderView::GetSelections(wxArrayInt& selections)
       Update();
       return 0; // ignore current selection, so user has to re-issue command
    }
-   return m_FolderCtrl->GetSelections(selections);
+   m_FolderCtrl->GetSelections(selections);
+   if(selections.Count() == 0
+      && m_MessagePreview->GetUId() != -1)
+   {
+      selections.Add(m_MessagePreview->GetUId());
+   }
+   return selections.Count();
 }
 
 void

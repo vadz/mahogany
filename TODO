@@ -24,7 +24,7 @@ $Id$
 		selections via keyboard still broken
 		speed up wxLayout scrollbar setting, *way* too slow
 		now
-4		fix MProfile.py/Profile.py name confusion
+5	KB	fix rfc822 qprint for message from example in M/test folder
 6	VZ	All Folder create dialog pages have no HelpIDs set.
 6	VY	folder properties assert when trying to create a
 		subfolder under INBOX
@@ -34,7 +34,7 @@ $Id$
 5	KB	(optionally, but on by default) expunge deleted messages when
 		the folder is closed - as noticed in 32bitonline comparison,
 		otherwise it's a nuisance.
-
+3		"Can't find global dir" msg box cannot be disabled, why?
 3		foldername in password prompt seems wrong
 3		URL highlighting in headers is missing (e.g. X-Url)
 ? win	VZ	lock files are sometimes left
@@ -55,11 +55,14 @@ $Id$
 
 9	KB	Write ASMailFolder API for subscription management.
 		---> FINISH THE WXFOLDERVIEW WITH ASYNC CODE!!!
+		---> Add a "find text in folder" method, too, trivial.
 
-9		MEvents need handlers with different priorities --
+9??? not sure anymore, wait:
+		MEvents need handlers with different priorities --
 		needed to get Filtering and ASMailFolder to work
 		properly 
 6		simple HTML import for wxLayout
+6		threading via References header
 5		integrate wxHTML for help and HTML viewing
 6	VZ	Could you please add a file-browse button/dialog to
 		the folder selection dialog and modify its return
@@ -78,9 +81,9 @@ $Id$
 		wxIconManager, e.g. small/large style
 		More icons needed: INBOX, PopServer, IMAPServer,
 		FolderGroup 
-
+7	VZ	document the new properties dialog entries/pages, please
 3	VZ	XFaces under Windows?
-
+		KB: no problem if you can read XPMs, use the lib included
 5	VZ	Could you have a look at the setting of the default
 		columns sizes in wxFolderView.cpp, please?  Currently
 		it gets called in the constructor which doesn't work
@@ -120,6 +123,9 @@ $Id$
 from 32bitsonline review:
 4		Trash folder, move to trash instead/alternative of of delete
 4		Message menu popup for folderlistctrl
+4		add option to hide messages marked as deleted
+4		in that case ask for auto-expunge on folder close
+
 *********************************************************************
 *** TESTS
 *********************************************************************
