@@ -510,25 +510,18 @@ AC_CHECK_LIB(shadow,main)
 
 dnl libresolv or libbind (or simply libc under FreeBSD)
 USE_RBL=1
-AC_CHECK_LIB(resolv,res_query,,
+AC_CHECK_FUNC(res_query,,
+    AC_CHECK_LIB(resolv,res_query,,
 	AC_CHECK_LIB(bind,res_query,,
-      AC_CHECK_LIB(r,res_query,,
-         [
-            AC_MSG_WARN(cannot use RBL spam checker.)
-            USE_RBL=0
-         ]
-      )
-   )
-)
-
+	    [AC_MSG_WARN(cannot use RBL spam checker.); USE_RBL=0])))
 case "$USE_RBL" in 1) AC_DEFINE(USE_RBL) ;; esac
 
 dnl POSIX.2 regexp support
 HAVE_POSIX_REGEX=0
 AC_CHECK_HEADER(regex.h,
-	AC_CHECK_FUNC(regcomp, HAVE_POSIX_REGEX=1,
-		AC_CHECK_LIB(regex,regcomp, [LIBS="-lregex $LIBS"
-			HAVE_POSIX_REGEX=1])))
+    AC_CHECK_FUNC(regcomp, HAVE_POSIX_REGEX=1,
+	AC_CHECK_LIB(regex,regcomp,
+	    [LIBS="-lregex $LIBS"; HAVE_POSIX_REGEX=1])))
 case "$HAVE_POSIX_REGEX" in 1) AC_DEFINE(HAVE_POSIX_REGEX) ;; esac
 
 dnl --------------------------------------------------------------------------
