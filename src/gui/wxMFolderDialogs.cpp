@@ -1048,7 +1048,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       gettext_noop("Anon&ymous access"),
 #ifdef USE_SSL
       gettext_noop("Use Secure Sockets Layer (SS&L)"),
-      gettext_noop("Accept unsigned (self-signed) certificates"),
+      gettext_noop("Accept &unsigned (self-signed) certificates"),
 #endif // USE_SSL
 #ifdef USE_LOCAL_CHECKBOX
       gettext_noop("Folder can be accessed &without network"),
@@ -1464,6 +1464,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
 
 #ifdef USE_SSL
    m_useSSL->Enable(enableSSL);
+   m_acceptUnsignedSSL->Enable(enableSSL && m_useSSL->GetValue());
 #endif // USE_SSL
 
    m_isAnonymous->Enable(enableAnonymous);
