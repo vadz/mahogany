@@ -1,5 +1,5 @@
-#This file was created by <karsten> Sat Mar 25 19:26:12 2000
-#LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
+#This file was created by <karsten> Wed Mar 29 10:45:11 2000
+#LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
 \begin_preamble
@@ -1472,7 +1472,7 @@ When the top window, the list of messages, is active, certain keyboard bindings
  are active, the following keys are recognized:
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol5
+multicol4
 15 2 0 0 -1 -1 -1 -1
 1 1 0 0
 1 0 0 0
@@ -1489,38 +1489,38 @@ multicol5
 0 1 0 0
 0 1 0 0
 0 1 0 0
-8 1 0 "" ""
-2 1 1 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 1 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
+8 1 0 
+2 1 1 
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 1 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 2 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
 
 English
 \newline 
@@ -1853,7 +1853,7 @@ BCC means Blind Carbon Copy - like CC:, copies will be sent to the addresses
 Key Bindings in the Message Editor
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol5
+multicol4
 13 2 0 0 -1 -1 -1 -1
 1 1 0 0
 1 0 0 0
@@ -1868,34 +1868,34 @@ multicol5
 0 1 0 0
 0 1 0 0
 0 1 0 0
-8 1 0 "" ""
-2 1 1 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
+8 1 0 
+2 1 1 
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 2 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
 
 Key-Combination
 \newline 
@@ -4173,7 +4173,7 @@ import
 List of Callbacks
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol5
+multicol4
 11 5 0 0 -1 -1 -1 -1
 1 1 0 0
 1 0 0 0
@@ -4186,66 +4186,66 @@ multicol5
 0 1 0 0
 0 0 0 0
 0 1 0 0
-2 1 0 "" ""
-8 1 0 "" ""
-2 1 0 "" ""
-2 1 0 "" ""
-2 1 1 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
+2 1 0 
+8 1 0 
+2 1 0 
+2 1 0 
+2 1 1 
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 2 1 0 0 0 0
+0 2 1 0 0 0 0
+0 8 1 0 0 0 0
+0 2 1 0 0 0 0
+0 2 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
+0 8 1 0 0 0 0
 
 Callback Name
 \newline 
@@ -5165,6 +5165,40 @@ make
 \end_inset 
 
 .
+\layout Subsubsection
+
+make fails
+\layout Standard
+
+If Mahogany's own make process fails after configuring it, this is likely
+ caused by the 
+\begin_inset Quotes eld
+\end_inset 
+
+make depend
+\begin_inset Quotes erd
+\end_inset 
+
+ stage.
+ Simply run 
+\begin_inset Quotes eld
+\end_inset 
+
+make -i depend
+\begin_inset Quotes erd
+\end_inset 
+
+ from the toplevel (mahogany-0.50) directory and it will run through, ignoring
+ all errors.
+ After that, a normal 
+\begin_inset Quotes eld
+\end_inset 
+
+make
+\begin_inset Quotes erd
+\end_inset 
+
+ will succeed.
 \layout Subsection
 
 How can I get it to compile on Caldera Linux?
@@ -5298,6 +5332,11 @@ It is not immediately apparent how to set up my POP3 server under 0.23a ,
  can someone give me a hand, please? It appears there is no section in the
  initial configuration utility for this.
  
+\begin_inset LatexCommand \label{POP3}
+
+\end_inset 
+
+
 \layout Standard
 
 Mahogany allows you to have as many folders or mail accounts as you like.
@@ -5329,6 +5368,46 @@ If opening fails, right click on it again and choose "Properties", make
 - If you want Mahogany to collect all mail from that box, you can tick that
  checkbox and whenever Mahogany starts, it will open that box and continue
  collecting all mail from there and move it to the "New Mail" folder.
+\layout Subsection
+
+How can I set up IMAP access?
+\layout Standard
+
+Follow the rules for setting up POP3 access
+\begin_inset LatexCommand \ref{POP3}
+
+\end_inset 
+
+ but set the folder type to be 
+\begin_inset Quotes eld
+\end_inset 
+
+IMAP mailbox
+\begin_inset Quotes erd
+\end_inset 
+
+.
+ Then enter the name of your IMAP server, your username and password (or
+ leave it empty to be asked later) for that server and, optionally, the
+ path to the mailbox on the IMAP server.
+ You can leave the path empty, and it will use the default mailbox (INBOX).
+\layout Standard
+
+If you want to access many IMAP folders on the same server, or a directory
+ there, you can create foldertree entries representing the IMAP server itself
+ (i.e.
+ the top-level directory on it) or a directory on the IMAP server.
+ For these, if not using the Wizard dialog, make sure that the folder properties
+ dialog has the 
+\begin_inset Quotes eld
+\end_inset 
+
+is directory
+\begin_inset Quotes erd
+\end_inset 
+
+ checkbox ticked, which tells Mahogany that it is not a mailbox file to
+ open, but a directory which can be browsed for entries via the popup menu.
 \layout Subsection
 
 Can I have multiple POP or IMAP accounts?
@@ -5534,4 +5613,22 @@ Simple, press '#' or 'x' or select Message/Expunge from the menu.
  folder.
  If you use the Trash folder, this only applies to that one as all other
  folders will move messages straight to Trash instead of marking them deleted.
+\layout Subsection
+
+Commands in the folder viewer get executed twice, keybindings are funny
+\layout Standard
+
+
+\shape italic 
+When copying messages via the 'C' key, I get the folder tree dialog twice.
+ Trying to toggle header display by pressing 'H' toggles it and immediately
+ switches back.
+ What is going on?
+\layout Standard
+
+It's caused by a last minute bug that sneaked into the stable release branch
+ of wxWindows that we compiled our release with.
+ We have reported it and it should be gone soon, so you could try to re-compile
+ Mahogany with the very latest wxWindows version or try one of our daily
+ recompiles which will have the fix in it as soon as it has been fixed.
 \the_end
