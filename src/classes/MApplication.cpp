@@ -1199,7 +1199,8 @@ MAppBase::GetStatusField(StatusFields field)
    if ( m_statusPanes[0] == SF_ILLEGAL )
    {
       m_statusPanes[0] = SF_STANDARD;
-      m_statusPanes[1] = SF_ILLEGAL;
+      for ( size_t n = 1; n < WXSIZEOF(m_statusPanes); n++ )
+         m_statusPanes[n] = SF_ILLEGAL;
    }
 
    // look for the field in the sorted array using linear search (for an array
