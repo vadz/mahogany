@@ -22,9 +22,11 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+   #include "gui/wxMFrame.h"
 
    #include <wx/button.h>
    #include <wx/textctrl.h>
+   #include <wx/sizer.h>
 #endif
 
 #include <wx/ffile.h>
