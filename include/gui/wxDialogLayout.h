@@ -28,6 +28,30 @@
 #endif
 #endif // USE_PCH
 
+// use wxListbook instead of wxNotebook if available
+#if wxUSE_LISTBOOK
+   #define wxNotebook wxListbook
+   #define wxPNotebook wxPListbook
+   #define wxNotebookEvent wxListbookEvent
+
+   #define wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGED wxEVT_COMMAND_LISTBOOK_PAGE_CHANGED
+   #define wxEVT_COMMAND_NOTEBOOK_PAGE_CHANGING wxEVT_COMMAND_LISTBOOK_PAGE_CHANGING
+
+   #undef EVT_NOTEBOOK_PAGE_CHANGED
+   #define EVT_NOTEBOOK_PAGE_CHANGED EVT_LISTBOOK_PAGE_CHANGED
+   #undef EVT_NOTEBOOK_PAGE_CHANGING
+   #define EVT_NOTEBOOK_PAGE_CHANGING EVT_LISTBOOK_PAGE_CHANGING
+
+   #undef wxNB_TOP
+   #define wxNB_TOP wxLB_TOP
+   #undef wxNB_BOTTOM
+   #define wxNB_BOTTOM wxLB_BOTTOM
+   #undef wxNB_LEFT
+   #define wxNB_LEFT wxLB_LEFT
+   #undef wxNB_RIGHT
+   #define wxNB_RIGHT wxLB_RIGHT
+#endif // wxUSE_LISTBOOK
+
 // -----------------------------------------------------------------------------
 // forward declarations
 // -----------------------------------------------------------------------------
