@@ -60,7 +60,7 @@ static: $(MOBJS)
 subdirs:
 	set -e; $(MAKE) -C ../include
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
-	set -e; $(MAKE) -i -C modules all
+	set -e; $(MAKE) -C modules all
 
 doc:
 	$(MAKE) -C ../include $@
