@@ -2,7 +2,7 @@ File:		doc/release.txt
 Summary:	what to do to make a new Mahogany release
 Audience:	Mahogany developers
 Author:		Vadim Zeitlin <vadim@wxwindows.org>
-Last modified:	22.03.01
+Last modified:	2001.06.14
 Version:	the information in this file applies to the cvs sources
 
 1. Updating the version
@@ -81,5 +81,7 @@ c) Freshmeat
 Update the FM record
 
 d) GNOME app map: http://www.gnome.org/applist/
+
+e) OSD: http://www.opensourcedirectory.org/ (not sure if really needed)
 
 vi: ts=8 nolist:
