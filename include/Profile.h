@@ -25,7 +25,7 @@
 
 #include "MObject.h"
 
-class kbStringList;
+class ConfigSource;
 
 // ----------------------------------------------------------------------------
 // profile-related constants
@@ -38,13 +38,11 @@ class kbStringList;
   The section in the global configuration file used for storing
   profiles (without trailing '/')
 */
-#ifndef M_PROFILE_CONFIG_SECTION
-   #define   M_PROFILE_CONFIG_SECTION   _T("/M/Profiles")
-   #define   M_IDENTITY_CONFIG_SECTION  _T("/M/Ids")
-   #define   M_FILTERS_CONFIG_SECTION   _T("/M/Filters")
-   #define   M_FRAMES_CONFIG_SECTION    _T("/M/Frames")
-   #define   M_TEMPLATES_CONFIG_SECTION _T("/M/Templates")
-#endif
+#define   M_PROFILE_CONFIG_SECTION   _T("/Profiles")
+#define   M_IDENTITY_CONFIG_SECTION  _T("/Ids")
+#define   M_FILTERS_CONFIG_SECTION   _T("/Filters")
+#define   M_FRAMES_CONFIG_SECTION    _T("/Frames")
+#define   M_TEMPLATES_CONFIG_SECTION _T("/Templates")
 
 /**
   The section in the global configuration file used for storing
@@ -166,9 +164,14 @@ public:
    virtual int readEntryFromHere(const String& key, int defvalue) const = 0;
 
    /// Write back the character value.
-   virtual bool writeEntry(const String & key, const String & Value) = 0;
+   virtual bool writeEntry(const String& key,
+                           const String& value,
+                           ConfigSource *config = NULL) = 0;
+
    /// Write back the int value.
-   virtual bool writeEntry(const String & key, long Value) = 0;
+   virtual bool writeEntry(const String& key,
+                           long value,
+                           ConfigSource *config = NULL) = 0;
 
    /**
       Write the value in profile only if it is different from the current one.
@@ -184,14 +187,13 @@ public:
     */
    virtual bool writeEntryIfNeeded(const String& key,
                                    long value,
-                                   long defvalue) = 0;
+                                   long defvalue,
+                                   ConfigSource *config = NULL) = 0;
 
    //@}
 
    /// return true if the entry is defined
    virtual bool HasEntry(const String & key) const = 0;
-   /// return the type of entry (Type_String, Type_Integer or Type_Unknown
-   virtual wxConfigBase::EntryType GetEntryType(const String & key) const = 0;
    /// return true if the group exists
    virtual bool HasGroup(const String & name) const = 0;
    /// delete the entry specified by path
@@ -201,45 +203,89 @@ public:
    /// rename a group
    virtual bool Rename(const String& oldName, const String& newName) = 0;
    /// return the name of the profile
-   virtual const String GetName(void) const = 0;
+   virtual const String& GetName(void) const = 0;
 
-   /** @name Enumerating groups/entries
-       again, this is just directly forwarded to wxConfig
-   */
-   /// see wxConfig docs
-   virtual bool GetFirstGroup(String& s, long& l) const = 0;
-   /// see wxConfig docs
-   virtual bool GetNextGroup(String& s, long& l) const = 0;
-   /// see wxConfig docs
-   virtual bool GetFirstEntry(String& s, long& l) const = 0;
-   /// see wxConfig docs
-   virtual bool GetNextEntry(String& s, long& l) const = 0;
+   /**
+     Returns a pointer to the parent profile.
 
-   /// Returns a unique, not yet existing sub-group name: //MT!!
-   virtual String GetUniqueGroupName(void) const = 0;
-
-   /// Returns a pointer to the parent profile.
+     @return pointer to Profile to be DecRef()'d by the caller or NULL
+    */
    virtual Profile *GetParent(void) const = 0;
-   /** @name Managing environment variables
-       just expose wxConfig methods (we do need them to be able to read the
-       real config values, i.e. to disable expansion, sometimes)
-   */
+
+
+   /**
+      @name Enumerating groups/entries
+
+      The enumeration is done over all config sources, i.e. the groups/entries
+      of all of them are returned but no name is returned twice even if it
+      appears in more than one config source.
+
+      All methods below return true if a group/entry is returned in s and
+      false if there are no more of them. For both groups and entries, the
+      cookie passed to GetNextXXX() must be the same as passed to
+      GetFirstXXX().
+    */
+   //@{
+
+   /// Class used with the enumeration methods
+   class EnumData
+   {
+   public:
+      EnumData();
+      ~EnumData();
+
+   private:
+      class ProfileEnumDataImpl *m_impl;
+
+      EnumData(const EnumData&);
+      EnumData& operator=(const EnumData&);
+
+      friend class Profile;
+   };
+
+
+   /// Get the first subgroup under this profile
+   virtual bool GetFirstGroup(String& s, EnumData& cookie) const = 0;
+
+   /// Get the next subgroup of this profile
+   virtual bool GetNextGroup(String& s, EnumData& cookie) const = 0;
+
+   /// Get the first entry in this profile
+   virtual bool GetFirstEntry(String& s, EnumData& cookie) const = 0;
+
+   /// Get the next entry
+   virtual bool GetNextEntry(String& s, EnumData& cookie) const = 0;
+
+   //@}
+
+
+   /**
+      @name Expanding environment variables
+
+      We can (and do, by default) expand the env variables in the values we
+      read from config. Sometimes, however, we need to disable this because,
+      for example, we want to allow the user to edit the real value form
+      profile and not its expansion.
+
+      @sa ProfileEnvVarSave
+    */
+   //@{
+
    /// are we automatically expanding env vars?
-   bool IsExpandingEnvVars() const;
+   bool IsExpandingEnvVars() const { return m_expandEnvVars; }
+
    /// set the flag which tells if we should auto expand env vars
-   void SetExpandEnvVars(bool bDoIt = TRUE);
+   void SetExpandEnvVars(bool expand = true) { m_expandEnvVars = expand; }
+
+   //@}
+
 
    // for internal use by wxWindows related code only: get the pointer to the
-   // underlying wxConfig object. Profile readEntry() functions should be
-   // used for reading/writing the entries!
+   // underlying wxConfig object.
+   //
+   // this is DEPRECATED now as it doesn't make sense with multiple config
+   // sources, do not use it!
    virtual wxConfigBase *GetConfig() const = 0;
-
-   // for internal use only: get the path corresponding to this profile in
-   // config
-   virtual String GetConfigPath() const = 0;
-
-   virtual void SetPath(const String &path) = 0;
-   virtual void ResetPath(void) = 0;
 
    /// Set temporary/suspended operation.
    virtual void Suspend(void) = 0;
@@ -306,16 +352,22 @@ protected:
    /// helper of all GetXXXPath() functions
    static String GetSectionPath(const String& section);
 
-   /// global wxConfig object, shared by all profiles
-   static wxConfigBase *ms_GlobalConfig;
+   /// provide access to ProfileEnumDataImpl for the derived classes
+   ProfileEnumDataImpl& GetEnumData(EnumData& cookie) const
+      { return *cookie.m_impl; }
+
+   /// expand env vars if necessary
+   String ExpandEnvVarsIfNeeded(const String& val) const;
 
 private:
    /// helper for GetAllIdentities/GetAllFilters
    static wxArrayString GetAllGroupsUnder(const String& path);
 
-   /// forbid copy construction
+   /// should we expand the environment variables in string values?
+   bool m_expandEnvVars;
+
+   /// forbid copying
    Profile(const Profile &);
-   /// forbid assignments
    Profile& operator=(const Profile & );
 };
 
@@ -377,34 +429,6 @@ public:
 private:
   Profile *m_profile;
   bool     m_wasExpanding;
-};
-
-
-// ----------------------------------------------------------------------------
-// a tiny utility class which is used to temporary change the config path, for
-// example:
-//    {
-//       ProfilePathChanger ppc(profile->GetConfig(), "/M/Frames");
-//       profile->WriteEntry("x", 400);
-//       ...
-//       // path automatically restored here
-//    }
-// ----------------------------------------------------------------------------
-
-class ProfilePathChanger
-{
-public:
-   ProfilePathChanger(const Profile *config, const String& path)
-      {
-         // we don't really change it, just temporarily change the path
-         m_config = (Profile *)config;
-         m_config->SetPath(path);
-      }
-
-   ~ProfilePathChanger() { m_config->ResetPath(); }
-
-private:
-   Profile *m_config;
 };
 
 // ----------------------------------------------------------------------------

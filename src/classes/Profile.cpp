@@ -1,14 +1,17 @@
-/*-*- c++ -*-********************************************************
- * Profile - managing configuration options on a per class basis    *
- *                                                                  *
- * (C) 1998-2000 by Karsten Ballüder (ballueder@gmx.net)            *
- *                                                                  *
- * $Id$
- *
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   Profile.cpp
+// Purpose:     implementation of Profile &c
+// Author:      Karsten Ballüder
+// Modified by: Vadim Zeitlin at 26.08.03 to use ConfigSource
+// Created:     1998
+// CVS-ID:      $Id$
+// Copyright:   (c) 1998-2003 M-Team
+// Licence:     M licence
+///////////////////////////////////////////////////////////////////////////////
 
 #ifdef __GNUG__
-#   pragma implementation "Profile.h"
+   #pragma implementation "Profile.h"
 #endif
 
 // ============================================================================
@@ -18,47 +21,37 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
-#include  "Mpch.h"
+
+#include "Mpch.h"
 
 #ifndef USE_PCH
-#   include "Mcommon.h"
+   #include "Mcommon.h"
 
-#   include "Profile.h"
-#   include "strutil.h"
-#   include "PathFinder.h"
-#   include "MApplication.h"
-#   ifdef  OS_WIN
-#      include <wx/msw/regconf.h>
-#   else
-#      include <wx/confbase.h>
-#      include <wx/file.h>
-#      include <wx/textfile.h>
-#      include <wx/fileconf.h>
-#   endif
+   #include "Profile.h"
+   #include "strutil.h"
+   #include "MApplication.h"
 
-#   include <wx/config.h>
-#   include <wx/dir.h>
+   #include <wx/confbase.h>
 #endif
 
 #include "Mdefaults.h"
+#include "lists.h"
 
-#include <wx/fileconf.h>
+#include "ConfigSource.h"
 
 #include <ctype.h>
-#include <errno.h>
 
-#ifdef OS_UNIX
-   #include <sys/types.h>
-   #include <unistd.h>
-   #include <sys/stat.h>
-   #include <fcntl.h>
-#endif //Unix
-
+#ifdef DEBUG
+   #define   PCHECK() MOcheck()
+#else
+   #define   PCHECK()
+#endif
 
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
 
+extern const MOption MP_CONFIG_SOURCE_PRIO;
 extern const MOption MP_CURRENT_IDENTITY;
 extern const MOption MP_PROFILEPATH;
 extern const MOption MP_PROFILE_IDENTITY;
@@ -76,13 +69,6 @@ extern const MOption MP_PROFILE_TYPE;
     never appear as part of a profile path name. */
 #define SUSPEND_PATH "__suspended__"
 
-#ifdef DEBUG
-   // there are too many of profile trace messages - filter them. They won't
-   // appear by default, if you do want them change the wxLog::ms_ulTraceMask
-   // to include wxTraceProfileClass bit
-   static const int wxTraceProfileClass = 0x200;
-#endif
-
 /// flags for readEntry
 enum
 {
@@ -96,28 +82,40 @@ enum
    Lookup_All = 7
 };
 
-// ----------------------------------------------------------------------------
+// ============================================================================
 // private classes
-// ----------------------------------------------------------------------------
+// ============================================================================
 
-/// a small struct holding key and value
+class ProfileEnumDataImpl;
+
+
+/**
+   LookupData is just a small struct holding a key and a value of either long
+   or string type.
+
+   It is used to avoid duplicating the same (sometimes complicated) logic for
+   the long/string overloads of our readEntry() functions. The same could be
+   achieved by using templates but LookupData approach works just fine for
+   now.
+ */
 class LookupData
 {
 public:
-   LookupData(const String &key, const String &def)
-      {
-         m_Type = LD_STRING;
-         m_Str = def;
-         m_Key = key;
-         m_Found = Profile::Read_Default;
-      }
-   LookupData(const String &key, long def)
-      {
-         m_Type = LD_LONG;
-         m_Key = key;
-         m_Long = def;
-         m_Found = Profile::Read_Default;
-      }
+   LookupData(const String& key, const String& def)
+      : m_Key(key), m_Str(def)
+   {
+      m_Type = LD_STRING;
+      m_Found = Profile::Read_Default;
+   }
+
+   LookupData(const String& key, long def)
+      : m_Key(key)
+   {
+      m_Type = LD_LONG;
+      m_Key = key;
+      m_Long = def;
+      m_Found = Profile::Read_Default;
+   }
 
    enum Type { LD_LONG, LD_STRING };
 
@@ -145,6 +143,10 @@ public:
       {
          m_Found = found;
       }
+
+   long *GetLongPtr() { ASSERT(m_Type == LD_LONG); return &m_Long; }
+   String *GetStringPtr() { ASSERT(m_Type == LD_STRING); return &m_Str; }
+
 private:
    Type m_Type;
    String m_Key;
@@ -153,168 +155,255 @@ private:
    Profile::ReadResult m_Found;
 };
 
-#ifdef DEBUG
-#   define   PCHECK() MOcheck(); ASSERT(ms_GlobalConfig)
-#else
-#   define   PCHECK()
-#endif
+
+#ifdef OS_UNIX
+
+/**
+   ConfigSourceLocalOld is the class which behaves in exactly the same way as
+   ConfigSourceLocal except that it prepends "/M" to all paths.
+
+   See AllConfigSources constructor for the explanation of why is this needed.
+
+   This class is read-only, all Write() methods silently fail.
+ */
+class ConfigSourceLocalOld : public ConfigSourceLocal
+{
+private:
+   // "fix" the config path
+   static String Fix(const String& path) { return _T("/M") + path; }
+
+public:
+   ConfigSourceLocalOld(const String& filename, const String& name = _T(""))
+      : ConfigSourceLocal(filename, name) { }
+
+   virtual bool Read(const String& name, String *value) const
+      { return ConfigSourceLocal::Read(Fix(name), value); }
+   virtual bool Read(const String& name, long *value) const
+      { return ConfigSourceLocal::Read(Fix(name), value); }
+   virtual bool Write(const String&, const String&) { return true; }
+   virtual bool Write(const String&, long) { return true; }
+   virtual bool GetFirstGroup(const String& key,
+                                 String& group, EnumData& cookie) const
+      { return ConfigSourceLocal::GetFirstGroup(Fix(key), group, cookie); }
+   virtual bool GetFirstEntry(const String& key,
+                                 String& entry, EnumData& cookie) const
+      { return ConfigSourceLocal::GetFirstEntry(Fix(key), entry, cookie); }
+   virtual bool DeleteEntry(const String&) { return true; }
+   virtual bool DeleteGroup(const String&) { return true; }
+   virtual bool CopyEntry(const String&, const String&) { return true; }
+   virtual bool RenameGroup(const String&, const String&) { return true; }
+};
+
+#endif // OS_UNIX
 
 
-/// A dummy Profile just inheriting from the top level
-class EmptyProfile : public Profile
+/**
+   AllConfigSources is a list of all config source the profiles use.
+
+   It is just an ordered, read-only linked list with a smart ctor.
+ */
+class AllConfigSources
 {
 public:
-   /// Create a dummy Profile just inheriting from the top level
-   static Profile * CreateEmptyProfile(const Profile *parent = NULL)
-      { return new EmptyProfile(parent); }
-   /**@name Reading and writing entries.
-      All these functions are just identical to the wxConfig ones.
-   */
+   /// Linked list of the config sources
+   M_LIST_RC_ABSTRACT(List, ConfigSource);
+
+
+   /**
+      Constructor fully initializes the config sources list.
+
+      In order to do this, it first creates the main local config source. It
+      then uses it to find what other config sources are configured and
+      creates them as well. They are inserted in the list in order specified
+      by their priority values.
+
+      @param filename the file used for the default config, may be empty
+    */
+   AllConfigSources(const String& filename);
+
+   // default dtor is ok
+
+
+   /**
+      Reads a value from the first config source containing the requested key.
+
+      The full path of the entry to look for is the concatenation of path and
+      data.GetKey().
+
+      @param path the path to look in (without terminating slash)
+      @param data the key and type of the value to look for and which also
+             contains the value read on successful return
+      @return true if this key was found in any config source, false otherwise
+    */
+   bool Read(const String& path, LookupData& data) const;
+
+   /**
+      Writes the value to the specified or default (local) config.
+
+      The full path of the entry to look for is the concatenation of path and
+      data.GetKey().
+
+      @param path the path to write entry to (without terminating slash)
+      @param data contains the key and value to be written to it
+      @param config contains the config to write to, if it is NULL the
+             default (local) config source is used
+      @return true if the entry was successfully written, false otherwise
+    */
+   bool Write(const String& path, const LookupData& data, ConfigSource *config);
+
+   /**
+      Copies all contents of the specified group to another one.
+
+      This is done for all config sources.
+
+      @param pathSrc path to start copying (without trailing slash)
+      @param pathDst path to copy to (without trailing slash)
+      @return true if there were no errors, false otherwise
+    */
+   bool CopyGroup(const String& pathSrc, const String& pathDst);
+
+   /**
+      @name Entries/subgroups enumeration.
+
+      These methods wrap the corresponding ConfigSource ones and iterate over
+      all config sources we have. They never return the same value twice,
+      however, even if it appears in multiple config sources.
+
+      Only GetFirstXXX() are here, GetNextXXX() are in ProfileEnumDataImpl as
+      we are not needed any more then.
+    */
    //@{
-   /// Read a character entry.
-   virtual String readEntry(const String & key,
-                            const String & defaultvalue = (const char*)NULL,
-                            ReadResult *found = NULL) const
-      {
-         if ( m_Parent )
-            return m_Parent->readEntry(key, defaultvalue, found);
 
-         if ( found )
-            *found = Read_Default;
+   /// Start anumerating the entries.
+   bool GetFirstGroup(const String& path,
+                      String& group,
+                      ProfileEnumDataImpl& data) const;
 
-         return defaultvalue;
-      }
-   /// Read an integer value.
-   virtual long readEntry(const String & key,
-                          long defaultvalue,
-                          ReadResult *found = NULL) const
-      {
-         if ( m_Parent )
-            return m_Parent->readEntry(key, defaultvalue, found);
+   /// Start anumerating the subgroups.
+   bool GetFirstEntry(const String& path,
+                      String& entry,
+                      ProfileEnumDataImpl& data) const;
 
-         if ( found )
-            *found = Read_Default;
 
-         return defaultvalue;
-      }
+   /// Return true if the given group exists in any config source
+   bool HasGroup(const String& path) const;
 
-   virtual int readEntryFromHere(const String& /* key */, int defvalue) const
-   {
-      return defvalue;
-   }
+   /// Return true if the given entry exists in any config source
+   bool HasEntry(const String& path) const;
 
-   /// Write back the character value.
-   virtual bool writeEntry(const String& /* key */, const String& /* value */)
-      { return false ; }
-   /// Write back the int value.
-   virtual bool writeEntry(const String& /* key */, long /* value */)
-      { return false; }
-
-   virtual bool writeEntryIfNeeded(const String& /* key */,
-                                   long /* value */,
-                                   long /* defvalue */)
-      { return false; }
    //@}
 
-   /// return true if the entry is defined
-   virtual bool HasEntry(const String & /* key */) const
-      { return false; }
-   /// return the type of entry
-   virtual wxConfigBase::EntryType GetEntryType(const String & /* key */) const
-      { return wxConfigBase::Type_Unknown; }
-   /// return true if the group exists
-   virtual bool HasGroup(const String & /* name */) const
-      { return false; }
-   /// delete the entry specified by path
-   virtual bool DeleteEntry(const String& /* key */)
-      { return false; }
-   /// delete the entry group specified by path
-   virtual bool DeleteGroup(const String & /* path */)
-      { return false; }
-   /// rename a group
-   virtual bool Rename(const String& /* oldName */,
-                       const String& /* newName */)
-      { return false; }
-   /// return the name of the profile
-   virtual const String GetName(void) const
-      { return String(""); }
 
-   /** @name Enumerating groups/entries
-       again, this is just directly forwarded to wxConfig
-   */
-   /// see wxConfig docs
-   virtual bool GetFirstGroup(String& /* s */, long& /* l */) const
-      { return false; }
-   /// see wxConfig docs
-   virtual bool GetNextGroup(String& /* s */, long& /* l */) const
-      { return false; }
-   /// see wxConfig docs
-   virtual bool GetFirstEntry(String& /* s */, long& /* l */) const
-      { return false; }
-   /// see wxConfig docs
-   virtual bool GetNextEntry(String& /* s */, long& /* l */) const
-      { return false; }
+   /**
+      Flush all config sources.
 
-   /// Returns a unique, not yet existing sub-group name: //MT!!
-   virtual String GetUniqueGroupName(void) const
-      { return "NOSUCHGROUP"; }
+      @return true if all sources were flushed successfully, false if at least
+              one of them failed
+    */
+   bool FlushAll();
 
-   virtual wxConfigBase *GetConfig() const { return NULL; }
-   virtual String GetConfigPath() const
-   {
-      // we don't even have an associated wxConfig!
-      FAIL_MSG( _T("not supposed to be called") );
+   /**
+      Rename a group in all config sources where it exists.
 
-      return "";
-   }
+      @return true if the group was renamed successfully in all configs, false
+              if for at least one of them it failed
+    */
+   bool Rename(const String& nameOld, const String& nameNew);
 
-   /// Returns a pointer to the parent profile.
-   virtual Profile *GetParent(void) const
-      { return m_Parent; }
-   virtual void SetPath(const String & /*path*/ ) {}
-   virtual void ResetPath(void) {} ;
+   /**
+      Delete the entry from all config sources where it exists.
 
-   /// Set temporary/suspended operation.
-   virtual void Suspend(void) { };
-   /// Commit changes from suspended mode.
-   virtual void Commit(void) { };
-   /// Discard changes from suspended mode.
-   virtual void Discard(void) { };
-   /// Is the profile currently suspended?
-   virtual bool IsSuspended(void) const { return false; }
+      @return true if the entry was removed successfully from all configs,
+              false if for at least one of them it failed
+    */
+   bool DeleteEntry(const String& path);
 
-   /// Set the identity to be used for this profile
-   virtual void SetIdentity(const String & /*idName*/) { };
-   /// Unset the identity set by SetIdentity
-   virtual void ClearIdentity(void) { };
-   // Get the currently used identity
-   virtual String GetIdentity(void) const { return ""; };
+   /**
+      Delete the group from all config sources where it exists.
 
-   /// is this profile a (grand) parent of the given one?
-   virtual bool IsAncestor(Profile *profile) const
-      {
-         // if our  parent is one, then so are we
-         return m_Parent ? m_Parent->IsAncestor(profile) : false;
-      };
+      @return true if the group was removed successfully from all configs,
+              false if for at least one of them it failed
+    */
+   bool DeleteGroup(const String& path);
 
-   virtual String GetFolderName() const { return ""; }
+
+   /**
+      Get wxConfig object associated with the local config source.
+
+      This method is deprecated and must not be used, it is there only to
+      avoid breaking some existing code.
+
+      @param config pointer (not to be deleted by caller) or NULL
+    */
+   wxConfigBase *GetConfig() const;
 
 private:
-   Profile *m_Parent;
+   // public CopyGroup() helper
+   bool CopyGroup(ConfigSource *config,
+                  const String& pathSrc,
+                  const String& pathDst);
 
-   EmptyProfile(const Profile *parent)
-      {
-         m_Parent = (Profile *) parent;
-         if(m_Parent) m_Parent->IncRef();
-      }
-   ~EmptyProfile()
-      {
-         if(m_Parent) m_Parent->DecRef();
-      }
+   List m_sources;
 
-   DECLARE_NO_COPY_CLASS(EmptyProfile)
+   // we can't be coppied
+   AllConfigSources(const AllConfigSources&);
+   AllConfigSources& operator=(const AllConfigSources&);
+};
 
-   GCC_DTOR_WARN_OFF
+// the global object containing all config sources used by Profile
+static AllConfigSources *gs_allConfigSources = NULL;
+
+
+/**
+  ProfileEnumDataImpl is used to store state data while iterating over
+  entries/subgroups of a profile.
+
+  The user code only sees EnumData, this class is 100% internal.
+ */
+class ProfileEnumDataImpl
+{
+public:
+   // default ctor, copy ctor, dtor and assignment operators are ok
+
+   // must be called (by AllConfigSources) before calling GetNextXXX()
+   void Init(const String& path,
+             AllConfigSources::List::iterator begin,
+             AllConfigSources::List::iterator end)
+   {
+      m_path = path;
+      m_current = begin;
+      m_end = end;
+      m_started = false;
+   }
+
+   // we provide 2 methods doing exactly the same thing for the entries and
+   // groups but for each instance of ProfileEnumDataImpl object only one of
+   // them should be called as we keep only one state (we don't care for what)
+   bool GetNextEntry(String& s) { return DoGetNext(s, Entry); }
+   bool GetNextGroup(String& s) { return DoGetNext(s, Group); }
+
+private:
+   enum What { Entry, Group };
+
+   // common part of GetNextXXX()s
+   bool DoGetNext(String& s, What what);
+
+
+   // the current and one beyond last config source we're iterating over
+   AllConfigSources::List::iterator m_current,
+                                    m_end;
+
+   // the path of the key whose entries/groups we're enumerating
+   String m_path;
+
+   // the array of the entries/groups we had already encountered
+   wxSortedArrayString m_namesSeen;
+
+   // the cookie used by ConfigSource::GetFirst/NextXXX()
+   ConfigSource::EnumData m_cookie;
+
+   // had we already called GetFirst() for m_current?
+   bool m_started;
 };
 
 
@@ -352,71 +441,43 @@ public:
                   ReadResult * found = NULL) const;
    /// read entry without recursing upwards
    virtual int readEntryFromHere(const String& key, int defvalue) const;
-   /// Read string or integer
-   virtual void readEntry(LookupData &ld,
+
+   /// Read anything, return true if found, falsee otherwise
+   virtual bool readEntry(LookupData &ld,
                           int flags = Lookup_All) const;
 
-   /// Write back the character value.
-   bool writeEntry(const String & key,
-                   const String & Value);
-   /// Write back the int value.
-   bool writeEntry(const String & key,
-                   long Value);
+   virtual bool writeEntry(const String& key,
+                           const String& value,
+                           ConfigSource *config = NULL);
+   virtual bool writeEntry(const String & key,
+                           long value,
+                           ConfigSource *config = NULL);
    virtual bool writeEntryIfNeeded(const String& key,
                                    long value,
-                                   long defvalue);
+                                   long defvalue,
+                                   ConfigSource *config = NULL);
 
    //@}
 
-   /// see wxConfig docs
-   virtual bool GetFirstGroup(String& s, long& l) const;
-   /// see wxConfig docs
-   virtual bool GetNextGroup(String& s, long& l) const;
-   /// see wxConfig docs
-   virtual bool GetFirstEntry(String& s, long& l) const;
-   /// see wxConfig docs
-   virtual bool GetNextEntry(String& s, long& l) const;
-   /// Returns a unique, not yet existing sub-group name:
-   virtual String GetUniqueGroupName(void) const;
+   virtual bool GetFirstGroup(String& s, EnumData& cookie) const;
+   virtual bool GetNextGroup(String& s, EnumData& cookie) const;
+   virtual bool GetFirstEntry(String& s, EnumData& cookie) const;
+   virtual bool GetNextEntry(String& s, EnumData& cookie) const;
 
       /// Returns a pointer to the parent profile.
    virtual Profile *GetParent(void) const;
 
    virtual bool HasEntry(const String & key) const;
-   virtual wxConfigBase::EntryType GetEntryType(const String & key) const;
    virtual bool HasGroup(const String & name) const;
    virtual bool DeleteEntry(const String& key);
    virtual bool DeleteGroup(const String & path);
    virtual bool Rename(const String& oldName, const String& newName);
 
-   virtual const String GetName(void) const { return m_ProfileName;}
+   virtual const String& GetName(void) const { return m_ProfileName; }
 
-   virtual void SetPath(const String &path)
-      {
-         PCHECK();
+   virtual wxConfigBase *GetConfig() const
+      { return gs_allConfigSources ? gs_allConfigSources->GetConfig() : NULL; }
 
-         ASSERT_MSG( path.Length() == 0 || path[0u] != '/',
-                     _T("only relative paths allowed") );
-
-         m_ProfilePath = path;
-      }
-   virtual void ResetPath(void)
-      {
-         PCHECK();
-         m_ProfilePath = "";
-      }
-
-   virtual wxConfigBase *GetConfig() const { return ms_GlobalConfig; }
-
-   virtual String GetConfigPath() const
-   {
-      String path = GetName();
-      if ( !m_ProfilePath.empty() )
-         path << '/' << m_ProfilePath;
-      return path;
-   }
-
-   /// Set temporary/suspended operation.
    virtual void Suspend(void)
       {
          PCHECK();
@@ -450,11 +511,6 @@ public:
 
    virtual String GetFolderName() const;
 
-#ifdef OS_WIN
-   /// true if we use reg config under Windows, false otherwise
-   static bool ms_usingRegConfig;
-#endif // OS_WIN
-
 protected:
    ProfileImpl()
       {
@@ -484,8 +540,15 @@ private:
    */
    ProfileImpl(const String & iClassName, Profile const *Parent);
 
-   /// If not empty, temporarily modified path for this profile.
-   String m_ProfilePath;
+   /// get the full path of our entry/subgroup with this name in config
+   String GetFullPath(const String& name) const
+   {
+      return GetName() + _T('/') + name;
+   }
+
+   /// common part of all writeEntry() overloads
+   bool DoWriteEntry(const LookupData& data, ConfigSource *config);
+
 
    /// suspend count: if positive, we're in suspend mode
    int m_Suspended;
@@ -494,7 +557,7 @@ private:
    bool m_wroteSuspended;
 
    /// Is this profile using a different Identity at present?
-   Profile *m_Identity;
+   ProfileImpl *m_Identity;
 
    /// the count of all suspended profiles: if 0, nothing is suspended
    static size_t ms_suspendCount;
@@ -507,10 +570,6 @@ private:
 };
 
 size_t ProfileImpl::ms_suspendCount = 0;
-
-#ifdef OS_WIN
-   bool ProfileImpl::ms_usingRegConfig = true;
-#endif // OS_WIN
 
 //@}
 
@@ -525,7 +584,7 @@ size_t ProfileImpl::ms_suspendCount = 0;
 class Identity : public ProfileImpl
 {
 public:
-   static Profile * CreateIdentity(const String &name)
+   static Identity * Create(const String &name)
       { return new Identity(name); }
 
    virtual const char * GetProfileSection(void) const
@@ -585,167 +644,444 @@ private:
    DECLARE_NO_COPY_CLASS(FilterProfile)
 };
 
-
-
-
 // ============================================================================
-// implementation
+// AllConfigSources implementation
 // ============================================================================
 
+M_LIST(LongList, long);
+
 // ----------------------------------------------------------------------------
-// Profile
+// AllConfigSources creation
 // ----------------------------------------------------------------------------
 
-void Profile::FlushAll()
+AllConfigSources::AllConfigSources(const String& filename)
 {
-   if ( ms_GlobalConfig )
-      ms_GlobalConfig->Flush();
-}
+   // first create the local config source, if this fails we can't do anything
+   // more
+   ConfigSource *configLocal = ConfigSource::CreateDefault(filename);
+   if ( !configLocal )
+      return;
 
-bool Profile::IsExpandingEnvVars() const
-{
-   PCHECK();
-   return ms_GlobalConfig->IsExpandingEnvVars();
-}
-
-void Profile::SetExpandEnvVars(bool bDoIt)
-{
-   PCHECK();
-   ms_GlobalConfig->SetExpandEnvVars(bDoIt);
-}
-
-//FIXME:MT calling wxWindows from possibly non-GUI code
-bool ProfileImpl::GetFirstGroup(String& s, long& l) const
-{
-   PCHECK();
-   ms_GlobalConfig->SetPath(GetName());
-   if(m_ProfilePath.Length())
-      ms_GlobalConfig->SetPath(m_ProfilePath);
-
-   bool success = ms_GlobalConfig->GetFirstGroup(s, l);
-   if(success && s == SUSPEND_PATH)
-      success = GetNextGroup(s,l);
-
-   return success;
-}
-
-bool ProfileImpl::GetNextGroup(String& s, long& l) const
-{
-   PCHECK();
-   ms_GlobalConfig->SetPath(GetName());
-   if(m_ProfilePath.Length())
-      ms_GlobalConfig->SetPath(m_ProfilePath);
-
-   bool success = ms_GlobalConfig->GetNextGroup(s, l);
-   while(success && s == SUSPEND_PATH)
-      success = ms_GlobalConfig->GetNextGroup(s, l);
-
-   return success;
-}
-
-String ProfileImpl::GetUniqueGroupName(void) const
-{
-   PCHECK();
-   String name; // We use hex numbers
-   unsigned long number = 0;
-   do
+   if ( !configLocal->IsOk() )
    {
-      name.Printf("%lX", number++);
+      configLocal->DecRef();
+      return;
    }
-   while ( HasGroup(name) );
 
-   return name;
+   // local config is always first
+   m_sources.push_back(configLocal);
+
+#ifdef OS_UNIX
+   // under Unix we used to store all config data under /M/Profiles which was
+   // inconsistent with Windows version which used just /Profile and a bit
+   // silly anyhow as what else if not M data can be stored in ~/.M/config
+   // file anyhow
+   //
+   // so starting with 0.66 we use just /Profiles everywhere but this creates
+   // a problem because the location of everything has changed
+   //
+   // to solve this, we create a fallback config source which justs look in
+   // /M/path when reading from /path and which we only use if we detect that
+   // config file is from an older version
+   String ver;
+   bool useOldConfig = configLocal->Read(_T("/M/Profiles/Version"), &ver);
+   if ( useOldConfig )
+   {
+      m_sources.push_back(new ConfigSourceLocalOld(filename));
+   }
+#endif // OS_UNIX
+
+   // now get all the other configs
+   LongList priorities;
+
+   ConfigSource::EnumData cookie;
+   const String key(M_CONFIGSRC_CONFIG_SECTION),
+                valuePrio(_T('/') + GetOptionName(MP_CONFIG_SOURCE_PRIO));
+
+   String name;
+   for ( bool cont = configLocal->GetFirstGroup(key, name, cookie);
+         cont;
+         cont = configLocal->GetNextGroup(name, cookie) )
+   {
+      const String subkey = key + _T('/') + name;
+
+      ConfigSource *config = ConfigSource::Create(*configLocal, subkey);
+      if ( config )
+      {
+         // normally Create() shouldn't return it in this case
+         ASSERT_MSG( config->IsOk(), _T("invalid config source created") );
+
+         // find the place to insert this config source at
+         long prio;
+         if ( !configLocal->Read(valuePrio, &prio) )
+         {
+            // insert at the end by default
+            prio = INT_MAX;
+         }
+
+         List::iterator i = m_sources.begin();
+         ++i;              // skip local config which is always first
+#ifdef OS_UNIX
+         if ( useOldConfig )
+            ++i;           // and compatibility config if we use it
+#endif // OS_UNIX
+
+         LongList::iterator j;
+         for ( j = priorities.begin(); j != priorities.end(); ++i, ++j )
+         {
+            if ( *j > prio )
+               break;
+         }
+
+         m_sources.insert(i, config);
+         priorities.insert(j, prio);
+      }
+      //else: creation failed, don't do anything
+   }
 }
 
+// ----------------------------------------------------------------------------
+// AllConfigSources reading and writing
+// ----------------------------------------------------------------------------
 
-bool ProfileImpl::GetFirstEntry(String& s, long& l) const
+bool AllConfigSources::Read(const String& path, LookupData& data) const
 {
-   PCHECK();
-   ms_GlobalConfig->SetPath(GetName());
-   if(m_ProfilePath.Length())
-      ms_GlobalConfig->SetPath(m_ProfilePath);
+   const String& key = data.GetKey();
+   String fullpath = path + _T('/') + key;
+   const bool isNumeric = data.GetType() == LookupData::LD_LONG;
 
-   return ms_GlobalConfig->GetFirstEntry(s, l);
+   const List::iterator end = m_sources.end();
+   for ( List::iterator i = m_sources.begin(); i != end; ++i )
+   {
+      if ( isNumeric ? i->Read(fullpath, data.GetLongPtr())
+                     : i->Read(fullpath, data.GetStringPtr()) )
+      {
+         return true;
+      }
+   }
+
+   return false;
 }
 
-bool ProfileImpl::GetNextEntry(String& s, long& l) const
+bool
+AllConfigSources::Write(const String& path,
+                        const LookupData& data,
+                        ConfigSource *config)
 {
-   PCHECK();
-   ms_GlobalConfig->SetPath(GetName());
-   if(m_ProfilePath.Length())
-      ms_GlobalConfig->SetPath(m_ProfilePath);
+   if ( !config )
+   {
+      CHECK( !m_sources.empty(), false,
+               _T("can't write to profile if no config sources exist") );
 
-   return ms_GlobalConfig->GetNextEntry(s, l);
+      config = *m_sources.begin().operator->();
+   }
+
+   String fullpath = path + _T('/') + data.GetKey();
+
+   ASSERT_MSG( !fullpath.empty() && fullpath[0u] == _T('/'),
+                  _T("config path must always be absolute") );
+   ASSERT_MSG( fullpath.length() < 3 ||
+                  fullpath[1u] != 'M' ||
+                     fullpath[2u] != _T('/'),
+                        _T("config path must not start with /M") );
+
+   return data.GetType() == LookupData::LD_LONG
+            ? config->Write(fullpath, data.GetLong())
+            : config->Write(fullpath, data.GetString());
 }
 
-
-void
-ProfileImpl::SetIdentity(const String & idName)
+bool
+AllConfigSources::CopyGroup(ConfigSource *config,
+                            const String& pathSrc,
+                            const String& pathDst)
 {
-   PCHECK();
+   ConfigSource::EnumData cookie;
+   String name;
 
-   if ( m_Identity )
-      ClearIdentity();
+   const String pathSrcSlash(pathSrc + _T('/')),
+                pathDstSlash(pathDst + _T('/'));
 
-   if ( !!idName )
-      m_Identity = Profile::CreateIdentity(idName);
-}
+   bool rc = true;
 
-void
-ProfileImpl::ClearIdentity(void)
-{
-   PCHECK();
-   if(m_Identity) m_Identity->DecRef();
-   m_Identity = NULL;
-}
-
-String
-ProfileImpl::GetIdentity(void) const
-{
-   PCHECK();
-   return m_Identity ? m_Identity->GetName() : String("");
-}
-
-wxArrayString Profile::GetAllFilters()
-{
-   return GetAllGroupsUnder(GetFiltersPath());
-}
-
-wxArrayString Profile::GetAllIdentities()
-{
-   return GetAllGroupsUnder(GetIdentityPath());
-}
-
-wxArrayString Profile::GetAllGroupsUnder(const String& path)
-{
-   wxArrayString identities;
-
-   wxString oldpath = ms_GlobalConfig->GetPath();
-   ms_GlobalConfig->SetPath(path);
-
-   long index;
-   wxString name;
-   bool cont = ms_GlobalConfig->GetFirstGroup(name, index);
+   // first copy all the entries
+   bool cont = config->GetFirstEntry(pathSrc, name, cookie);
    while ( cont )
    {
-      if ( name != SUSPEND_PATH )
-      {
-         identities.Add(name);
-      }
+      rc &= config->CopyEntry(pathSrcSlash + name, pathDstSlash + name);
 
-      cont = ms_GlobalConfig->GetNextGroup(name, index);
+      cont = config->GetNextEntry(name, cookie);
    }
 
-   ms_GlobalConfig->SetPath(oldpath);
+   // and then (recursively) copy all subgroups
+   cont = config->GetFirstGroup(pathSrc, name, cookie);
+   while ( cont )
+   {
+      rc &= CopyGroup(config, pathSrcSlash + name, pathDstSlash + name);
 
-   return identities;
+      cont = config->GetNextGroup(name, cookie);
+   }
+
+   return rc;
+}
+
+bool
+AllConfigSources::CopyGroup(const String& pathSrc, const String& pathDst)
+{
+   bool rc = true;
+
+   const List::iterator end = m_sources.end();
+   for ( List::iterator i = m_sources.begin(); i != end; ++i )
+   {
+      rc &= CopyGroup(i.operator->(), pathSrc, pathDst);
+   }
+
+   return rc;
 }
 
 // ----------------------------------------------------------------------------
-// Profile
+// AllConfigSources groups/entries enumeration
 // ----------------------------------------------------------------------------
 
-wxConfigBase * Profile::ms_GlobalConfig;
+bool
+AllConfigSources::GetFirstGroup(const String& path,
+                                String& group,
+                                ProfileEnumDataImpl& data) const
+{
+   data.Init(path, m_sources.begin(), m_sources.end());
+
+   return data.GetNextGroup(group);
+}
+
+bool
+AllConfigSources::GetFirstEntry(const String& path,
+                                String& entry,
+                                ProfileEnumDataImpl& data) const
+{
+   data.Init(path, m_sources.begin(), m_sources.end());
+
+   return data.GetNextEntry(entry);
+}
+
+bool AllConfigSources::HasGroup(const String& path) const
+{
+   const List::iterator end = m_sources.end();
+   for ( List::iterator i = m_sources.begin(); i != end; ++i )
+   {
+      if ( i->HasGroup(path) )
+         return true;
+   }
+
+   return false;
+}
+
+bool AllConfigSources::HasEntry(const String& path) const
+{
+   const List::iterator end = m_sources.end();
+   for ( List::iterator i = m_sources.begin(); i != end; ++i )
+   {
+      if ( i->HasEntry(path) )
+         return true;
+   }
+
+   return false;
+}
+
+// ----------------------------------------------------------------------------
+// miscellaneous AllConfigSources methods
+// ----------------------------------------------------------------------------
+
+bool AllConfigSources::FlushAll()
+{
+   bool rc = true;
+
+   const List::iterator end = m_sources.end();
+   for ( List::iterator i = m_sources.begin(); i != end; ++i )
+   {
+      rc &= i->Flush();
+   }
+
+   return rc;
+}
+
+bool AllConfigSources::Rename(const String& nameOld, const String& nameNew)
+{
+   bool rc = true;
+
+   String parent = nameOld.BeforeLast(_T('/')),
+          name = nameOld.AfterLast(_T('/')),
+          group;
+
+   const List::iterator end = m_sources.end();
+   for ( List::iterator i = m_sources.begin(); i != end; ++i )
+   {
+      ConfigSource::EnumData cookie;
+      for ( bool cont = i->GetFirstGroup(parent, group, cookie);
+            cont;
+            cont = i->GetNextGroup(group, cookie) )
+      {
+         if ( group == name )
+         {
+            // this config has that group, do rename it
+            rc &= i->RenameGroup(nameOld, nameNew);
+
+            break;
+         }
+      }
+   }
+
+   return rc;
+}
+
+bool AllConfigSources::DeleteEntry(const String& path)
+{
+   bool rc = true;
+
+   String parent = path.BeforeLast(_T('/')),
+          name = path.AfterLast(_T('/')),
+          entry;
+
+   const List::iterator end = m_sources.end();
+   for ( List::iterator i = m_sources.begin(); i != end; ++i )
+   {
+      ConfigSource::EnumData cookie;
+      for ( bool cont = i->GetFirstEntry(parent, entry, cookie);
+            cont;
+            cont = i->GetNextEntry(entry, cookie) )
+      {
+         if ( entry == name )
+         {
+            // this config has that entry, do remove it
+            rc &= i->DeleteEntry(path);
+
+            break;
+         }
+      }
+   }
+
+   return rc;
+}
+
+bool AllConfigSources::DeleteGroup(const String& path)
+{
+   bool rc = true;
+
+   String parent = path.BeforeLast(_T('/')),
+          name = path.AfterLast(_T('/')),
+          group;
+
+   const List::iterator end = m_sources.end();
+   for ( List::iterator i = m_sources.begin(); i != end; ++i )
+   {
+      ConfigSource::EnumData cookie;
+      for ( bool cont = i->GetFirstGroup(parent, group, cookie);
+            cont;
+            cont = i->GetNextGroup(group, cookie) )
+      {
+         if ( group == name )
+         {
+            // this config has that group, do remove it
+            rc &= i->DeleteGroup(path);
+
+            break;
+         }
+      }
+   }
+
+   return rc;
+}
+
+
+wxConfigBase *AllConfigSources::GetConfig() const
+{
+   if ( m_sources.empty() )
+      return NULL;
+
+   // we know that the first config source is the local one...
+   ConfigSourceLocal *
+      config = static_cast<ConfigSourceLocal *>(*m_sources.begin());
+
+   return config->GetConfig();
+}
+
+
+// ============================================================================
+// Profile::EnumData and ProfileEnumDataImpl implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// EnumData
+// ----------------------------------------------------------------------------
+
+Profile::EnumData::EnumData()
+{
+   m_impl = new ProfileEnumDataImpl;
+}
+
+Profile::EnumData::~EnumData()
+{
+   delete m_impl;
+}
+
+// ----------------------------------------------------------------------------
+// ProfileEnumDataImpl implementation
+// ----------------------------------------------------------------------------
+
+bool ProfileEnumDataImpl::DoGetNext(String& s, What what)
+{
+   for ( ;; )
+   {
+      if ( m_current == m_end )
+      {
+         // no more config sources to iterate over
+         return false;
+      }
+
+      // try to get "what" from the current config source
+      bool rc;
+      if ( !m_started )
+      {
+         rc = what == Group ? m_current->GetFirstGroup(m_path, s, m_cookie)
+                            : m_current->GetFirstEntry(m_path, s, m_cookie);
+         m_started = true;
+      }
+      else // GetFirst() already called, now do GetNext()
+      {
+         rc = what == Group ? m_current->GetNextGroup(s, m_cookie)
+                            : m_current->GetNextEntry(s, m_cookie);
+      }
+
+      if ( !rc )
+      {
+         // no more "what"s in this config source, pass to the next one
+         ++m_current;
+         m_started = false;
+      }
+      else // we did get something
+      {
+         // skip special subgroups created internally by Profile and those
+         // which we had already seen before (presumably in another config
+         // source)
+         if ( s != SUSPEND_PATH &&
+               m_namesSeen.Index(s) == wxNOT_FOUND )
+         {
+            m_namesSeen.Add(s);
+
+            break;
+         }
+         //else: skip this one
+      }
+   }
+
+   return true;
+}
+
+// ============================================================================
+// Profile implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// Profile creation
+// ----------------------------------------------------------------------------
 
 /** This function sets profile parameters and is applied
     to all profiles directly after creation.
@@ -773,7 +1109,7 @@ Profile::CreateIdentity(const String & idName)
 {
    ASSERT(idName.Length() == 0 ||  // only relative paths allowed
           (idName[0u] != '.' && idName[0u] != '/'));
-   Profile *p =  Identity::CreateIdentity(idName);
+   Identity *p =  Identity::Create(idName);
    EnforcePolicy(p);
    return p;
 }
@@ -807,215 +1143,11 @@ Profile::CreateFolderProfile(const String& foldername)
 }
 
 Profile *
-Profile::CreateEmptyProfile(Profile const *parent)
-{
-   Profile *p =  EmptyProfile::CreateEmptyProfile(parent);
-   EnforcePolicy(p);
-   return p;
-}
-
-Profile *
 Profile::CreateGlobalConfig(const String& filename)
 {
-   // if the filename is empty, use the default one
-   String strConfFile = filename;
+   ASSERT_MSG( !gs_allConfigSources, _T("recreating the configs?") );
 
-#ifdef OS_UNIX
-   if ( strConfFile.empty() )
-   {
-      strConfFile = wxGetHomeDir();
-      if ( strConfFile.empty() )
-      {
-         // don't create our files in the root directory, try the current one
-         // instead
-         strConfFile = wxGetCwd();
-      }
-
-      if ( !strConfFile.empty() )
-      {
-         strConfFile << '/';
-      }
-      //else: it will be in the current one, what else can we do?
-
-      strConfFile << '.' << M_APPLICATIONNAME;
-
-      if ( !wxDir::Exists(strConfFile) )
-      {
-         if ( !wxMkdir(strConfFile, 0700) )
-         {
-            wxLogError(_("Cannot create the directory for configuration "
-                         "files '%s'."), strConfFile.c_str());
-
-            return NULL;
-         }
-
-         wxLogInfo(_("Created directory '%s' for configuration files."),
-                   strConfFile.c_str());
-
-         // also create an empty config file with the right permissions:
-         String filename = strConfFile + "/config";
-
-         // pass false to Create() to avoid overwriting the existing file
-         wxFile file;
-         if ( !file.Create(filename, false, wxS_IRUSR | wxS_IWUSR) &&
-               !wxFile::Exists(filename) )
-         {
-            wxLogError(_("Could not create initial configuration file."));
-         }
-      }
-
-      // Check whether other users can write our config dir.
-      //
-      // This must not be allowed as they could change the behaviour of the
-      // program unknowingly to the user!
-      struct stat st;
-      if ( stat(strConfFile, &st) == 0 )
-      {
-         if ( st.st_mode & (S_IWGRP | S_IWOTH) )
-         {
-            // No other user must have write access to the config dir.
-            String msg;
-            msg.Printf(_("Configuration directory '%s' was writable for other users.\n"
-                         "The programs settings might have been changed without "
-                         "your knowledge and the passwords stored in your config\n"
-                         "file (if any) could have been compromised!\n\n"),
-                       strConfFile.c_str());
-
-            if ( chmod(strConfFile, st.st_mode & ~(S_IWGRP | S_IWOTH)) == 0 )
-            {
-               msg += _("This has been fixed now, the directory is no longer writable for others.");
-            }
-            else
-            {
-               msg << String::Format(_("Failed to correct the directory access "
-                                       "rights (%s), please do it manually and "
-                                       "restart the program!"),
-                                     strerror(errno));
-            }
-
-            wxLogError(msg);
-         }
-      }
-      else
-      {
-         wxLogSysError(_("Failed to access the directory '%s' containing "
-                         "the configuration files."),
-                       strConfFile.c_str());
-      }
-
-      strConfFile += "/config";
-
-      // Check whether other users can read our config file.
-      //
-      // This must not be allowed as we store passwords in it!
-      if ( stat(strConfFile, &st) == 0 )
-      {
-         if ( st.st_mode & (S_IWGRP | S_IWOTH | S_IRGRP | S_IROTH) )
-         {
-            // No other user must have access to the config file.
-            String msg;
-            if ( st.st_mode & (S_IWGRP | S_IWOTH) )
-            {
-               msg.Printf(_("Configuration file %s was writable by other users.\n"
-                            "The program settings could have been changed without\n"
-                            "your knowledge, please consider reinstalling the "
-                            "program!"),
-                          strConfFile.c_str());
-            }
-
-            if ( st.st_mode & (S_IRGRP | S_IROTH) )
-            {
-               if ( !msg.empty() )
-                  msg += "\n\n";
-
-               msg += String::Format
-                      (
-                        _("Configuration file '%s' was readable for other users.\n"
-                          "Passwords may have been compromised, please "
-                          "consider changing them!"),
-                        strConfFile.c_str()
-                      );
-            }
-
-            msg += "\n\n";
-
-            if ( chmod(strConfFile, S_IRUSR | S_IWUSR) == 0 )
-            {
-               msg += _("This has been fixed now, the file is no longer readable for others.");
-            }
-            else
-            {
-               msg << String::Format(_("The attempt to make the file unreadable "
-                                       "for others has failed: %s"),
-                                     strerror(errno));
-            }
-
-            wxLogError(msg);
-         }
-      }
-      //else: not an error, file may be simply not there yet
-   }
-#endif // Unix
-
-#ifdef OS_WIN
-   // no such concerns here, we just use the registry if the filename is not
-   // specified
-   if ( strConfFile.empty() )
-   {
-      // don't give explicit name, but rather use the default logic (it's
-      // perfectly ok, for the registry case our keys are under
-      // vendor\appname)
-      ms_GlobalConfig = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
-                                     "", "",
-                                     wxCONFIG_USE_LOCAL_FILE |
-                                     wxCONFIG_USE_GLOBAL_FILE);
-   }
-   else // we do have the config file name
-   {
-      // use the config file: this allows to use the same file for Windows and
-      // Unix Mahogany installations
-      ms_GlobalConfig = new wxFileConfig(M_APPLICATIONNAME, M_VENDORNAME,
-                                         strConfFile, "",
-                                         wxCONFIG_USE_LOCAL_FILE|
-                                         wxCONFIG_USE_GLOBAL_FILE);
-
-      // we need to modify the path handling under Windows in this case
-      ProfileImpl::ms_usingRegConfig = false;
-   }
-#else  // Unix
-   // look for the global config file in the following places in order:
-   //    1. compile-time specified installation dir
-   //    2. run-time specified installation dir
-   //    3. default installation dir
-   String globalFileName;
-   globalFileName << M_APPLICATIONNAME << ".conf";
-   String globalFile;
-   globalFile << M_PREFIX << "/etc/" << globalFileName;
-   if ( !wxFileExists(globalFile) )
-   {
-      const char *dir = getenv("MAHOGANY_DIR");
-      if ( dir )
-      {
-         globalFile.clear();
-         globalFile << dir << "/etc/" << globalFileName;
-      }
-   }
-   if ( !wxFileExists(globalFile) )
-   {
-      // wxConfig will look for it in the default location(s)
-      globalFile = globalFileName;
-   }
-
-   // we don't need the config file manager for this profile
-   ms_GlobalConfig = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
-                                  strConfFile, globalFile,
-                                  wxCONFIG_USE_LOCAL_FILE|
-                                  wxCONFIG_USE_GLOBAL_FILE);
-
-   // don't give the others even read access to our config file as it stores,
-   // among other things, the passwords
-   ((wxFileConfig *)ms_GlobalConfig)->SetUmask(0077);
-#endif // Unix/Windows
+   gs_allConfigSources = new AllConfigSources(filename);
 
    Profile *p = ProfileImpl::CreateProfile("",NULL);
    EnforcePolicy(p);
@@ -1025,29 +1157,81 @@ Profile::CreateGlobalConfig(const String& filename)
 void
 Profile::DeleteGlobalConfig()
 {
-   if ( ms_GlobalConfig )
+   if ( gs_allConfigSources )
    {
-      delete ms_GlobalConfig;
-      ms_GlobalConfig = NULL;
-
-      // we just deleted it, prevent wxWin from deleting it again!
-      wxConfig::Set(NULL);
+      delete gs_allConfigSources;
+      gs_allConfigSources = NULL;
    }
 }
 
-String
-Profile::readEntry(const String & key,
-                       const char *defaultvalue,
-                       ReadResult * found) const
+// ----------------------------------------------------------------------------
+// Profile accessors to all existing filters/identities/...
+// ----------------------------------------------------------------------------
+
+wxArrayString Profile::GetAllFilters()
 {
-   PCHECK();
-   String str;
-   str = readEntry(key, String(defaultvalue), found);
-   return str;
+   return GetAllGroupsUnder(GetFiltersPath());
+}
+
+wxArrayString Profile::GetAllIdentities()
+{
+   return GetAllGroupsUnder(GetIdentityPath());
+}
+
+wxArrayString Profile::GetAllGroupsUnder(const String& path)
+{
+   wxArrayString groups;
+
+   CHECK( gs_allConfigSources, groups,
+            _T("can't call Profile methods before CreateGlobalConfig()") );
+
+   ProfileEnumDataImpl cookie;
+   String s;
+   for ( bool cont = gs_allConfigSources->GetFirstGroup(path, s, cookie);
+         cont;
+         cont = cookie.GetNextGroup(s) )
+   {
+      groups.Add(s);
+   }
+
+   return groups;
 }
 
 // ----------------------------------------------------------------------------
-// ProfileImpl
+// other Profile methods
+// ----------------------------------------------------------------------------
+
+void Profile::FlushAll()
+{
+   if ( gs_allConfigSources )
+      gs_allConfigSources->FlushAll();
+}
+
+String Profile::ExpandEnvVarsIfNeeded(const String& val) const
+{
+   String valExp = val;
+   if ( IsExpandingEnvVars() )
+      valExp = wxExpandEnvVars(val);
+   return valExp;
+}
+
+String
+Profile::readEntry(const String& key,
+                   const char *defaultvalue,
+                   ReadResult *found) const
+{
+   PCHECK();
+
+   return readEntry(key, String(defaultvalue), found);
+}
+
+
+// ============================================================================
+// ProfileImpl implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// ProfileImpl creation
 // ----------------------------------------------------------------------------
 
 /**
@@ -1084,6 +1268,12 @@ ProfileImpl::CreateProfile(const String & iClassName,
    return new ProfileImpl(iClassName, parent);
 }
 
+Profile *
+ProfileImpl::GetParent(void) const
+{
+   return CreateProfile(GetName().BeforeLast('/'), NULL);
+}
+
 ProfileImpl::~ProfileImpl()
 {
    PCHECK();
@@ -1099,42 +1289,113 @@ ProfileImpl::~ProfileImpl()
       m_Identity->DecRef();
 }
 
-Profile *
-ProfileImpl::GetParent(void) const
-{
-   return CreateProfile(GetName().BeforeLast('/'), NULL);
-}
+// ----------------------------------------------------------------------------
+// ProfileImpl entries/groups enumeration
+// ----------------------------------------------------------------------------
 
-bool
-ProfileImpl::HasGroup(const String & name) const
+bool ProfileImpl::GetFirstGroup(String& s, EnumData& cookie) const
 {
    PCHECK();
-   ms_GlobalConfig->SetPath(GetName());
-   return ms_GlobalConfig->HasGroup(name);
+
+   CHECK( gs_allConfigSources, false,
+            _T("can't call Profile methods before CreateGlobalConfig()") );
+
+   return gs_allConfigSources->GetFirstGroup(GetName(), s, GetEnumData(cookie));
 }
 
-bool
-ProfileImpl::HasEntry(const String & key) const
+bool ProfileImpl::GetNextGroup(String& s, EnumData& cookie) const
 {
    PCHECK();
-   ms_GlobalConfig->SetPath(GetName());
-   return ms_GlobalConfig->HasEntry(key) || ms_GlobalConfig->HasGroup(key);
+
+   return GetEnumData(cookie).GetNextGroup(s);
 }
 
-wxConfigBase::EntryType
-ProfileImpl::GetEntryType(const String & key) const
+bool ProfileImpl::GetFirstEntry(String& s, EnumData& cookie) const
 {
    PCHECK();
-   ms_GlobalConfig->SetPath(GetName());
-   return ms_GlobalConfig->GetEntryType(key);
+
+   CHECK( gs_allConfigSources, false,
+            _T("can't call Profile methods before CreateGlobalConfig()") );
+
+   return gs_allConfigSources->GetFirstEntry(GetName(), s, GetEnumData(cookie));
 }
+
+bool ProfileImpl::GetNextEntry(String& s, EnumData& cookie) const
+{
+   PCHECK();
+
+   return GetEnumData(cookie).GetNextEntry(s);;
+}
+
+bool ProfileImpl::HasGroup(const String& name) const
+{
+   PCHECK();
+
+   CHECK( gs_allConfigSources, false,
+            _T("can't call Profile methods before CreateGlobalConfig()") );
+
+   return gs_allConfigSources->HasGroup(GetFullPath(name));
+}
+
+bool ProfileImpl::HasEntry(const String& entry) const
+{
+   PCHECK();
+
+   CHECK( gs_allConfigSources, false,
+            _T("can't call Profile methods before CreateGlobalConfig()") );
+
+   return gs_allConfigSources->HasEntry(GetFullPath(entry));
+}
+
+// ----------------------------------------------------------------------------
+// ProfileImpl identity handling
+// ----------------------------------------------------------------------------
+
+void
+ProfileImpl::SetIdentity(const String & idName)
+{
+   PCHECK();
+
+   if ( m_Identity )
+      ClearIdentity();
+
+   if ( !idName.empty() )
+      m_Identity = Identity::Create(idName);
+}
+
+void
+ProfileImpl::ClearIdentity(void)
+{
+   PCHECK();
+
+   if ( m_Identity )
+   {
+      m_Identity->DecRef();
+      m_Identity = NULL;
+   }
+}
+
+String
+ProfileImpl::GetIdentity(void) const
+{
+   PCHECK();
+
+   return m_Identity ? m_Identity->GetName() : String("");
+}
+
+// ----------------------------------------------------------------------------
+// ProfileImpl other operations on entries
+// ----------------------------------------------------------------------------
 
 bool
 ProfileImpl::Rename(const String& oldName, const String& newName)
 {
    PCHECK();
-   ms_GlobalConfig->SetPath(GetName());
-   return ms_GlobalConfig->RenameGroup(oldName, newName);
+
+   CHECK( gs_allConfigSources, false,
+            _T("can't call Profile methods before CreateGlobalConfig()") );
+
+   return gs_allConfigSources->Rename(oldName, newName);
 }
 
 bool
@@ -1142,11 +1403,10 @@ ProfileImpl::DeleteEntry(const String& key)
 {
    PCHECK();
 
-   String root = GetName();
-   if ( !m_ProfilePath.empty() )
-       root  << '/' << m_ProfilePath;
-   ms_GlobalConfig->SetPath(root);
-   return ms_GlobalConfig->DeleteEntry(key);
+   CHECK( gs_allConfigSources, false,
+            _T("can't call Profile methods before CreateGlobalConfig()") );
+
+   return gs_allConfigSources->DeleteEntry(GetFullPath(key));
 }
 
 bool
@@ -1154,21 +1414,19 @@ ProfileImpl::DeleteGroup(const String & path)
 {
    PCHECK();
 
-   CHECK( !path.empty(), false, _T("must have a valid group name to delete it") );
+   CHECK( gs_allConfigSources, false,
+            _T("can't call Profile methods before CreateGlobalConfig()") );
 
-   if ( path[0u] != '/' )
-   {
-      String root = GetName();
-      if ( !m_ProfilePath.empty() )
-          root  << '/' << m_ProfilePath;
-      ms_GlobalConfig->SetPath(root);
-   }
-
-   return ms_GlobalConfig->DeleteGroup(path);
+   return gs_allConfigSources->DeleteGroup(GetFullPath(path));
 }
 
+// ----------------------------------------------------------------------------
+// ProfileImpl reading data from config sources
+// ----------------------------------------------------------------------------
+
 String
-ProfileImpl::readEntry(const String & key, const String & def,
+ProfileImpl::readEntry(const String & key,
+                       const String & def,
                        ReadResult * found) const
 {
    LookupData ld(key, def);
@@ -1176,9 +1434,7 @@ ProfileImpl::readEntry(const String & key, const String & def,
    if(found)
       *found = ld.GetFound();
 
-   // normally wxConfig does this for us, but if we didn't find the entry at
-   // all, it won't happen, so do it here
-   return ms_GlobalConfig->ExpandEnvVars(ld.GetString());
+   return ExpandEnvVarsIfNeeded(ld.GetString());
 }
 
 long
@@ -1200,188 +1456,141 @@ int ProfileImpl::readEntryFromHere(const String& key, int defvalue) const
    return (int)ld.GetLong();
 }
 
-// Notice that we always look first under SUSPEND_PATH: if the profile is not
-// in suspend mode, the entry there simply doesn't exist, so it doesn't harm,
-// and if it is it should override the "normal" entry. This is *necessary* for
-// all parent profiles because they may be suspended without us knowing about
-// it.
-//
-// Correction: now we look under SUSPEND_PATH only if at least some profile is
-// suspended, this allows us to gain a lot of time during 99% of normal
-// operation when no profiles are suspended which is quite nice according to
-// the profiling results
-void
+// the worker function which does all the work for both long and string data
+bool
 ProfileImpl::readEntry(LookupData &ld, int flags) const
 {
    PCHECK();
 
-   String pathProfile = GetName();
+   // did we find the requested data in this profile?
+   bool foundHere = false;
 
-   if( m_ProfilePath.length() )
-      pathProfile << '/' << m_ProfilePath;
 
-   ms_GlobalConfig->SetPath(pathProfile);
-
-   // the values read from profile
-   String strResult;
-   long   longResult = 0; // unneeded but suppresses the compiler warning
-
-   // did we find the requested value?
-   bool foundHere;
-
-   String keySuspended;
-   if ( (flags & Lookup_Suspended) && ms_suspendCount )
+   // step 1: check if we havee an identity, this overrides our own settings
+   if ( (flags & Lookup_Identity) && m_Identity )
    {
-      keySuspended << SUSPEND_PATH << '/' << ld.GetKey();
-
-      if( ld.GetType() == LookupData::LD_STRING )
-         foundHere = ms_GlobalConfig->Read(keySuspended, &strResult, ld.GetString());
-      else
-         foundHere = ms_GlobalConfig->Read(keySuspended, &longResult, ld.GetLong());
-   }
-   else
-   {
-      foundHere = false;
+      foundHere = m_Identity->readEntry(ld, flags & ~Lookup_Identity);
    }
 
+
+   // step 2: look in this profile itself
    if ( !foundHere )
    {
-      if( ld.GetType() == LookupData::LD_STRING )
-         foundHere = ms_GlobalConfig->Read(ld.GetKey(), &strResult,
-                                           ld.GetString());
-      else
-         foundHere = ms_GlobalConfig->Read(ld.GetKey(), &longResult,
-                                           ld.GetLong());
-   }
-
-   // if we don't have our own setting, check for identity override before
-   // quering the parent
-   if ( !foundHere && (flags & Lookup_Identity) && m_Identity )
-   {
-      // try suspended path first:
-      ReadResult idFound;
-      if( ld.GetType() == LookupData::LD_STRING )
-         strResult = m_Identity->readEntry(keySuspended, ld.GetString(),
-                                           &idFound);
-      else
-         longResult = m_Identity->readEntry(keySuspended, ld.GetLong(),
-                                            &idFound);
-      if(! idFound)
+      // first look under SUSPEND_PATH: if the profile is not suspended, the
+      // entry there simply doesn't exist, so it doesn't hurt, and if it is it
+      // should override the "normal" entry. This is *necessary* for all
+      // parent profiles because they may be suspended without us knowing
+      // about it.
+      //
+      // there is also a micro-optimization here: now we look under
+      // SUSPEND_PATH only if at least some profile is suspended, this allows
+      // us to gain a lot of time during 99% of normal operation when no
+      // profiles are suspended which is quite nice according to the profiling
+      // (no pun intended) results.
+      if ( ms_suspendCount && (flags & Lookup_Suspended) )
       {
-         if( ld.GetType() == LookupData::LD_STRING )
-            strResult = m_Identity->readEntry(ld.GetKey(), ld.GetString(), &idFound);
-         else
-            longResult = m_Identity->readEntry(ld.GetKey(), ld.GetLong(), &idFound);
-      }
-      if(idFound)
-      {
-         if(ld.GetType() ==  LookupData::LD_STRING)
-            ld.SetResult(strResult);
-         else
-            ld.SetResult(longResult);
-         ld.SetFound(Profile::Read_Default);
-         return;
+         foundHere = gs_allConfigSources->Read(GetFullPath(SUSPEND_PATH), ld);
       }
 
-      // restore the global path possibly changed by readEntry() calls above
-      ms_GlobalConfig->SetPath(pathProfile);
+      // now look in the usual place
+      if ( !foundHere )
+         foundHere = gs_allConfigSources->Read(GetName(), ld);
    }
 
+
+   // step 3: recursively look in the parent profiles
+
+   // we could recursively call ourselves but doing it "manually" is much more
+   // efficient than creating a bunch of new ProfileImpl objects
    bool foundAnywhere = foundHere;
-   while ( !foundAnywhere &&
-           (flags & Lookup_Parent) &&
-           (ms_GlobalConfig->GetPath() != GetRootPath()) )
+   if ( !foundHere && (flags & Lookup_Parent) )
    {
-      ms_GlobalConfig->SetPath("..");
+      // micro-optimization: we should stop once the path becomes equal to the
+      // root path, but comparing their lengths is faster than comparing
+      // strings and leads to the samee result (knowing that the root path is
+      // the prefix of our path)
+      const size_t lenRoot = GetRootPath().length();
 
-      // try suspended global profile first:
-      if ( ms_suspendCount )
+      String path = GetName();
+      do
       {
-         if( ld.GetType() == LookupData::LD_STRING )
+         path = path.BeforeLast(_T('/'));
+
+         // we don't check parents identity as I don't think it should
+         // propagate to us -- should it?
+
+
+         // try suspended parent profile first: wee must do this because
+         // otherwiise when the user edits the parent folders options and
+         // applies them, the child folders wouldn't see the changes
+         if ( ms_suspendCount ) // (same optimization as above)
          {
-            foundAnywhere = ms_GlobalConfig->Read(keySuspended,
-                                                  &strResult,
-                                                  ld.GetString());
+            foundAnywhere = gs_allConfigSources->
+                              Read(path + _T('/') + SUSPEND_PATH, ld);
          }
-         else
+
+         // then try the normal location
+         if ( !foundAnywhere )
          {
-            foundAnywhere = ms_GlobalConfig->Read(keySuspended,
-                                                  &longResult,
-                                                  ld.GetLong());
+            foundAnywhere = gs_allConfigSources->Read(path, ld);
          }
       }
-
-      if ( !foundAnywhere )
-      {
-         if( ld.GetType() == LookupData::LD_STRING )
-         {
-            foundAnywhere = ms_GlobalConfig->Read(ld.GetKey(), &strResult,
-                                                  ld.GetString());
-         }
-         else
-         {
-            foundAnywhere = ms_GlobalConfig->Read(ld.GetKey(), &longResult,
-                                                  ld.GetLong());
-         }
-      }
+      while ( !foundAnywhere && (path.length() > lenRoot) );
    }
 
    // did we find it at all?
-   if ( foundAnywhere )
-   {
-      if( ld.GetType() == LookupData::LD_STRING )
-         ld.SetResult(strResult);
-      else
-         ld.SetResult(longResult);
+   if ( !foundAnywhere )
+      return false;
 
-      ld.SetFound(foundHere ? Profile::Read_FromHere : Profile::Read_FromParent);
-   }
+   // we did, also indicate where
+   ld.SetFound(foundHere ? Profile::Read_FromHere : Profile::Read_FromParent);
+
+   return true;
 }
 
 bool
-ProfileImpl::writeEntry(const String & key, const String & value)
+ProfileImpl::DoWriteEntry(const LookupData& data, ConfigSource *config)
 {
    PCHECK();
-   ms_GlobalConfig->SetPath(GetName());
-   String keypath;
-   if(m_Suspended)
+
+   CHECK( gs_allConfigSources, false,
+            _T("can't call Profile methods before CreateGlobalConfig()") );
+
+   String path = GetName();
+   if ( m_Suspended )
    {
       // set the flag telling us that we did write some suspended entries
       m_wroteSuspended = true;
 
-      keypath << SUSPEND_PATH << '/';
+      path += SUSPEND_PATH;
    }
 
-   if(m_ProfilePath.Length())
-      keypath << m_ProfilePath << '/';
-   keypath << key;
-   return ms_GlobalConfig->Write(keypath, value);
+   return gs_allConfigSources->Write(path, data, config);
 }
 
 bool
-ProfileImpl::writeEntry(const String & key, long value)
+ProfileImpl::writeEntry(const String& key,
+                        const String& value,
+                        ConfigSource *config)
 {
-   PCHECK();
-   ms_GlobalConfig->SetPath(GetName());
-   String keypath;
-   if(m_Suspended)
-   {
-      // set the flag telling us that we did write some suspended entries
-      m_wroteSuspended = true;
+   LookupData ld(key, value);
 
-      keypath << SUSPEND_PATH << '/';
-   }
+   return DoWriteEntry(ld, config);
+}
 
-   if(m_ProfilePath.Length())
-      keypath << m_ProfilePath << '/';
-   keypath << key;
-   return ms_GlobalConfig->Write(keypath, (long) value);
+bool
+ProfileImpl::writeEntry(const String& key, long value, ConfigSource *config)
+{
+   LookupData ld(key, value);
+
+   return DoWriteEntry(ld, config);
 }
 
 bool
 ProfileImpl::writeEntryIfNeeded(const String& key,
                                 long value,
-                                long defvalue)
+                                long defvalue,
+                                ConfigSource *config)
 {
    if ( readEntry(key, defvalue) == value )
    {
@@ -1389,79 +1598,37 @@ ProfileImpl::writeEntryIfNeeded(const String& key,
       return true;
    }
 
-   return writeEntry(key, value);
+   return writeEntry(key, value, config);
 }
 
-
-static void CommitGroup(wxConfigBase *cfg, String truePath, String suspPath)
-{
-   String strValue;
-   long   numValue;
-
-   long index;
-   String name;
-
-   cfg->SetPath(suspPath);
-
-   bool cont = cfg->GetFirstEntry(name, index);
-   while(cont)
-   {
-      switch ( cfg->GetEntryType(name) )
-      {
-         case wxConfig::Type_String:
-            if ( !cfg->Read(name, &strValue) ||
-                 !cfg->Write(truePath + name, strValue) )
-            {
-               FAIL_MSG(_T("failed to copy config entry"));
-            }
-            break;
-
-         case wxConfig::Type_Integer:
-            if ( !cfg->Read(name, &numValue) ||
-                 !cfg->Write(truePath + name, numValue) )
-            {
-               FAIL_MSG(_T("failed to copy config entry"));
-            }
-            break;
-
-         default:
-            FAIL_MSG(_T("unsupported config entry type"));
-      }
-
-      cont = cfg->GetNextEntry(name, index);
-   }
-
-
-   cont = cfg->GetFirstGroup(name, index);
-   while(cont)
-   {
-      CommitGroup(cfg, truePath + name + "/", suspPath + name + "/");
-      cfg->SetPath(suspPath);
-      cont = cfg->GetNextGroup(name, index);
-   }
-}
-
+// ----------------------------------------------------------------------------
+// ProfileImpl suspended mode support
+// ----------------------------------------------------------------------------
 
 void
 ProfileImpl::Commit(void)
 {
    PCHECK();
 
-   CHECK_RET( m_Suspended, _T("calling Commit() without matching Suspend()") );
+   ASSERT_MSG( m_Suspended, _T("calling Commit() without matching Suspend()") );
 
-   String truePath = GetName();
-   truePath << '/';
+   if ( m_wroteSuspended )
+   {
+      CHECK_RET( gs_allConfigSources,
+                  _T("can't call Profile methods before CreateGlobalConfig()") );
 
-   if( m_ProfilePath.length() > 0 )
-      truePath << m_ProfilePath << '/';
+      // copy the suspended settings to their normal locations
+      if ( !gs_allConfigSources->CopyGroup(GetFullPath(SUSPEND_PATH),
+                                           GetName()) )
+      {
+         // TODO: what can we do to recover here?
+         wxLogError(_("Saving previously applied settingss failed."));
+      }
+   }
+   //else: nothing to copy anyhow
 
-   String suspPath = truePath;
-   suspPath << SUSPEND_PATH << '/';
-   ms_GlobalConfig->SetPath(suspPath);
-
-   CommitGroup(ms_GlobalConfig, truePath, suspPath);
-
-   Discard(); // now we just forget the suspended sub-group
+   // now we just forget the suspended subgroup
+   Discard();
 }
 
 void
@@ -1473,23 +1640,17 @@ ProfileImpl::Discard(void)
 
    if ( !--m_Suspended )
    {
-      String path;
-      ms_GlobalConfig->SetPath(GetName());
-      if( m_ProfilePath.length() > 0 )
-         path << m_ProfilePath << '/';
-
-      path << SUSPEND_PATH;
-
       if ( m_wroteSuspended )
       {
-         // avoid warning about unused variable in release builds
-#ifdef DEBUG
-         bool success =
-#endif
-            ms_GlobalConfig->DeleteGroup(path);
+         CHECK_RET( gs_allConfigSources,
+                     _T("can't call Profile methods before CreateGlobalConfig()") );
 
-         ASSERT_MSG( success, _T("failed to delete suspended settings") );
+         if ( !gs_allConfigSources->DeleteGroup(GetFullPath(SUSPEND_PATH)) )
+         {
+            FAIL_MSG( _T("failed to delete suspended settings") );
+         }
       }
+      //else: nothing to do
    }
 
    ASSERT_MSG( ms_suspendCount > 0, _T("suspend count broken") );
@@ -1498,21 +1659,17 @@ ProfileImpl::Discard(void)
 }
 
 #ifdef DEBUG
+
 String
 ProfileImpl::DebugDump() const
 {
    PCHECK();
 
-   String s1 = MObjectRC::DebugDump(), s2;
-   s2.Printf("name '%s'", m_ProfileName.c_str());
-
-   return s1 + s2;
+   return String::Format(_T("%s; name = \"%s\""),
+                         MObjectRC::DebugDump().c_str(), m_ProfileName.c_str());
 }
 
-#endif
-
-
-
+#endif // DEBUG
 
 
 // ----------------------------------------------------------------------------
@@ -1562,7 +1719,7 @@ void SaveArray(Profile *profile, const wxArrayString& astr, const String& key)
    wxConfigBase *conf = profile->GetConfig();
    CHECK_RET( conf, _T("can't be used with non config based profile!") );
 
-   conf->SetPath(profile->GetConfigPath());
+   conf->SetPath(profile->GetName());
 
    SaveArray(conf, astr, key);
 }
@@ -1572,13 +1729,13 @@ void RestoreArray(Profile *profile, wxArrayString& astr, const String& key)
    wxConfigBase *conf = profile->GetConfig();
    CHECK_RET( conf, _T("can't be used with non config based profile!") );
 
-   conf->SetPath(profile->GetConfigPath());
+   conf->SetPath(profile->GetName());
 
    RestoreArray(conf, astr, key);
 }
 
 // ----------------------------------------------------------------------------
-// private functions
+// miscellaneous other Profile functions
 // ----------------------------------------------------------------------------
 
 // some characters are invalid in the profile name, replace them
@@ -1608,10 +1765,6 @@ Profile::FilterProfileName(const String& profileName)
 
    return filteredName;
 }
-
-// ----------------------------------------------------------------------------
-// misc
-// ----------------------------------------------------------------------------
 
 bool ProfileImpl::IsAncestor(Profile *profile) const
 {
