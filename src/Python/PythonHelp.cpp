@@ -302,7 +302,7 @@ PythonStringFunction(const String& func,
       }
    }
 
-   ERRORMESSAGE((_("Calling Python function \"%s\" failed."), func));
+   ERRORMESSAGE((_("Calling Python function \"%s\" failed."), func.c_str()));
 
    return false;
 }
