@@ -684,10 +684,16 @@ CalendarFrame::~CalendarFrame()
 bool
 CalendarFrame::Show(bool show)
 {
-   if(m_Show == FALSE)
-      CheckUpdate();
-   m_Show = show;
-   m_Module->m_CalendarMenu->Check(WXMENU_MODULES_CALENDAR_SHOW, m_Show);
+   // don't do anything when the app is shutting down, if we have somethign to
+   // do it should be done in OnClose() (TODO)
+   if ( m_MInterface->GetMApplication()->IsRunning() )
+   {
+      if(m_Show == FALSE)
+         CheckUpdate();
+      m_Show = show;
+      m_Module->m_CalendarMenu->Check(WXMENU_MODULES_CALENDAR_SHOW, m_Show);
+   }
+
    return wxFrame::Show(show);
 }
 
@@ -713,7 +719,7 @@ CalendarFrame::GetConfig(void)
    m_Show = READ_CONFIG_MOD(m_Profile, MP_MOD_CALENDAR_SHOWONSTARTUP) != 0;
 
    // settings read from folder profile:
-   Profile *fp = m_MInterface->CreateProfile(m_FolderName);
+   Profile *fp = m_MInterface->CreateModuleProfile(m_FolderName);
    m_MyEmail = READ_CONFIG_TEXT(fp, MP_FROM_ADDRESS);
 
    {
@@ -861,13 +867,15 @@ void
 CalendarFrame::ParseFolder(void)
 {
    // we are using synchronous access which is soo much easier:
-   ASSERT(m_Folder);
-   if(! m_Folder) return;
-   
+   CHECK_RET( m_Folder, "no calendar folder in the calendar module" );
+
    MailFolder *mf = m_Folder->GetMailFolder();
-   ASSERT(mf);
    if(! mf)
+   {
+      wxLogError(_("Cannot open calendar folder"));
       return;
+   }
+
    HeaderInfoList *hil = mf->GetHeaders();
    if(hil)
    {
@@ -949,9 +957,14 @@ CalendarFrame::DeleteOrRewrite(MailFolder *mf,
 void
 CalendarFrame::CheckUpdate(MailFolder *eventFolder)
 {
+   CHECK_RET( m_Folder, "no calendar folder in the calendar module" );
+
    MailFolder *mf = m_Folder->GetMailFolder();
-   ASSERT(mf);
-   if(! mf) return;
+   if ( !mf )
+   {
+      wxLogError(_("Cannot open calendar folder"));
+      return;
+   }
 
    // we react to an event which isn't ours, abort
    if(eventFolder != NULL && eventFolder != mf)
@@ -1109,7 +1122,7 @@ CalendarModule::RegisterWithMainFrame()
 {
    m_CalendarMenu = new wxMenu("", wxMENU_TEAROFF);
    m_CalendarMenu->Append(WXMENU_MODULES_CALENDAR_SHOW, _("&Show"), "", TRUE);
-   m_CalendarMenu->Break();
+   m_CalendarMenu->AppendSeparator();
    m_CalendarMenu->Append(WXMENU_MODULES_CALENDAR_CONFIG, _("&Configure"));
 
    MAppBase *mapp = m_MInterface->GetMApplication();
