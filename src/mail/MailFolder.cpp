@@ -149,9 +149,9 @@ MLogCircle::GuessError(void) const
                 "Maybe the network connection or the DNS servers are down?");
       addErr = true;
    }
-   if(Find("username", &err))
+   if(Find("recipients failed", &err))
    {
-      guess = _("There was a problem with a username or email address.\n");
+      guess = _("One or more email addresses were not recognised.\n");
       addErr = true;
       addLog = true;
    }
