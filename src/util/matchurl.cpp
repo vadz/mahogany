@@ -596,6 +596,7 @@ static bool CanBeWrapped(const char *p)
 
 int URLDetector::FindURL(const char *text, int& len)
 {
+   // offset of the current value of text from the initial one
    int offset = 0;
 
 match:
@@ -742,8 +743,6 @@ match:
    while ( strchr(".:,;)!?", *(p - 1)) )
       p--;
 
-   len = p - start;
-
    // '@' matches may result in false positives, as not every '@' character
    // is inside a mailto URL so try to weed them out by requiring that the
    // mail address has a reasonable minimal length ("ab@foo.com" is probably
@@ -751,8 +750,8 @@ match:
    // bare '@'s
    //
    // also check that we have at least one dot in the domain part, otherwise
-   // it probably isn't an address neither
-   if ( (len < 10) || !memchr(text + pos + 1, '.', p - text - pos - 1) )
+   // it probably isn't an address/URL neither
+   if ( (p - start < 10) || !memchr(text + pos + 1, '.', p - text - pos - 1) )
    {
       int offDiff = pos + len + 1;
       offset += offDiff;
@@ -761,6 +760,9 @@ match:
       // slightly more efficient than recursion...
       goto match;
    }
+
+   // return the length of the match
+   len = p - start;
 
    return start - text + offset;
 }
