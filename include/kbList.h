@@ -6,6 +6,9 @@
  * $Id$          *
  *                                                                  *
  * $Log$
+ * Revision 1.5  1998/06/22 22:32:22  VZ
+ * miscellaneous fixes for Windows compilation
+ *
  * Revision 1.4  1998/06/14 12:24:03  KB
  * started to move wxFolderView to be a panel, Python improvements
  *
@@ -59,7 +62,6 @@ struct kbListNode
    /// Destructor.
    ~kbListNode();
 };
-
 
 /** The main list class, handling void pointers as data.
   */
@@ -215,6 +217,7 @@ public:
    */
    bool empty(void) const
       { return first == NULL ; }
+
 private:
    /// if true, list owns entries
    bool        ownsEntries;
@@ -228,7 +231,6 @@ private:
    /// forbid assignments
    kbList& operator=(const kbList& foo);
 };
-
 
 /// just for backward compatibility, will be removed soon
 typedef kbList::iterator kbListIterator;
@@ -255,7 +257,8 @@ public: \
       inline iterator(kbListNode *n = NULL) \
          : kbList::iterator(n) {} \
       inline type * operator*() \
-         { return (type *)kbList::iterator::operator*() ; } \
+         /* the cast is needed for MS VC++ 5.0 */ \
+         { return (type *)((kbList::iterator *)this)->operator*() ; } \
    }; \
    inline name(bool ownsEntriesFlag = true) \
       : kbList(ownsEntriesFlag) {} \
@@ -289,10 +292,9 @@ public: \
 }
 
 /// a simple define
-#define   KBLIST_SDEFINE(type)   KBLIST_DEFINE(type##List, type)
+#define   KBLIST_SDEFINE(type)   KBLIST_DEFINE(kb##type##List, type)
 
 /// define the most commonly used list type once:
 KBLIST_DEFINE(kbStringList, String);
-
 
 #endif // KBLIST_H

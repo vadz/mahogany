@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.8  1998/06/22 22:32:21  VZ
+ * miscellaneous fixes for Windows compilation
+ *
  * Revision 1.7  1998/06/19 08:05:00  KB
  * restructured FolderView, menu handling and added toolbars
  *
@@ -53,13 +56,13 @@
 #ifndef GUIDEF_H
 #define GUIDEF_H
 
-#if   USE_WXWINDOWS
+#ifdef  USE_WXWINDOWS
 
-///   define the class to use for implementing MFrame objects
-#   define   MFrame      wxMFrame
-#   define   FolderView   wxFolderView
-#   define   MainFrame   wxMainFrame
-#   define   MDialogs   wxMDialogs
+/// define the class to use for implementing MFrame objects
+#   define   MFrame        wxMFrame
+#   define   FolderView    wxFolderView
+#   define   MainFrame     wxMainFrame
+#   define   MDialogs      wxMDialogs
 
 
 #   define   Uses_wxFrame
@@ -79,11 +82,11 @@
 #   define   Uses_wxButton
 #   define   Uses_wxDialogBox
 #   define   Uses_wxDialog
-#   include   <wx/wx.h>
-#   include   <wx/splitter.h>
-#   include   <wx/treectrl.h>
-#   include   "gui/wxMenuDefs.h"
-#   include   <wx/toolbar.h>
+#   include  <wx/wx.h>
+#   include  <wx/splitter.h>
+#   include  <wx/treectrl.h>
+#   include  <wx/toolbar.h>
+#   include  "gui/wxMenuDefs.h"
 /// how much space to leave in frame around other items
 #   define   WXFRAME_WIDTH_DELTA   16
 /// how much space to leave in frame around other items
@@ -94,6 +97,8 @@
     tb->AddTool( id, new wxBitmap(xpm), wxNullBitmap, FALSE, -1, -1, \
                   NULL, _(helptext) );
 
-#endif
+#else
+#  error "Implemented only for wxWindows."
+#endif // USE_WXWINDOWS
 
-#endif
+#endif // GUIDEF_H

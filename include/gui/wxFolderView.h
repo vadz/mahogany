@@ -117,6 +117,7 @@ public:
        @return number of selections.
    */
    int   GetSelections(wxArrayInt &selections);
+
 private:
    /// is initialised?
    bool initialised;
@@ -147,7 +148,7 @@ class wxFolderViewFrame : public wxMFrame
 public:
    wxFolderViewFrame(const String &iname, wxFrame *parent = NULL);
    void OnMenuCommand(int id);
-#ifdef   USE_WXWINDOWS2
+#ifdef USE_WXWINDOWS2
       void OnSize( wxSizeEvent &WXUNUSED(event) );
 #endif
 private:

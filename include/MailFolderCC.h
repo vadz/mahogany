@@ -6,6 +6,9 @@
  * $Id$           *
  ********************************************************************
  * $Log$
+ * Revision 1.8  1998/06/22 22:32:18  VZ
+ * miscellaneous fixes for Windows compilation
+ *
  * Revision 1.7  1998/06/14 12:23:59  KB
  * started to move wxFolderView to be a panel, Python improvements
  *
@@ -104,6 +107,8 @@ public:
    */
    void Close(void);
 
+   /// default destructor
+   ~MailFolderCC();
 
    /// assume object to only be initialised when stream is ok
    bool IsInitialised(void) const { return okFlag; }
@@ -131,10 +136,6 @@ protected:
    */
    void   Create(String const & name);
       
-
-   /// default destructor
-   ~MailFolderCC();
-
 public:
 
    /** Is mailbox ok to use? Did the last operation succeed?

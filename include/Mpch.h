@@ -20,30 +20,37 @@
 #include  <stdio.h>
 #include  <time.h>
 
+// VZ: disabled because it might cause IsKindOf() code generation bug
+#if 0
+#  include  <list>
+#  include  <map>
+#endif
+
 extern "C"
 {
-#	include <mail.h>
-#	include <osdep.h>
-#	include <rfc822.h>
-#	include <smtp.h>
-#	include <nntp.h>
+#  include <mail.h>
+#  include <osdep.h>
+#  include <rfc822.h>
+#  include <smtp.h>
+#  include <nntp.h>
 
-  // windows.h included from osdep.h #defines all these
-#	undef   GetMessage
-#	undef   FindWindow
-#	undef   GetCharWidth
-#	undef   LoadAccelerators
+   // windows.h included from osdep.h #defines all these
+#  undef   GetMessage
+#  undef   FindWindow
+#  undef   GetCharWidth
+#  undef   LoadAccelerators
+#  undef   GetClassInfo
 }
 
-#include "kbList.h"
+#include  "kbList.h"
 
 #include  "guidef.h"
 #include  "strutil.h"
 
 #ifdef   USE_WXCONFIG
-   #include "wx/config.h"
+#  include "wx/config.h"
 #else  //standalone appconf
-   #include "appconf.h"
+#  include "appconf.h"
 #endif
 
 #include "Mcommon.h"

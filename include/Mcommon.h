@@ -116,30 +116,30 @@
 
    // these macros do nothing in release build
 #  define ASSERT(x)
-#  define FAIL
+#  define ASSERT_MSG(x, msg)
 #else
 #  define   DEBUG_DEF     void Debug(void) const;
 #  ifdef USE_WXWINDOWS2
-#     define ASSERT(x)     wxASSERT(x)
-#     define FAIL          wxFAIL
-#     define CHECK(x)      wxCHECK(x)
-#     define CHECK2(x, op) wxCHECK2(x, op)
+#     define ASSERT(x)          wxASSERT(x)
+#     define ASSERT_MSG(x, msg) wxASSERT_MSG(x, msg)
 #  else  // !wxWin2
 #     include <assert.h>
-#     define ASSERT(x)     assert(x)
-#     define FAIL          assert(0)
-#     define CHECK(x)      if (!(x)) {FAIL; return; }
-#     define CHECK2(x, op) if (!(x)) {FAIL; op;     }
+
+#     define ASSERT(x)          assert(x)
+#     define ASSERT_MSG(x, msg) DBGMESSAGE((msg)); assert(x)
 #  endif // wxWin2
 #endif
 
+#define FAIL           ASSERT(0)
+#define FAIL_MSG(msg)  ASSERT_MSG(0, msg)
+
 // these definitions work in both modes (debug and release)
 #  ifdef USE_WXWINDOWS2
-#     define CHECK(x)      wxCHECK(x)
-#     define CHECK2(x, op) wxCHECK2(x, op)
+#     define CHECK(x, rc, msg)  wxCHECK_MSG(x, rc, msg)
+#     define CHECK_RET(x, msg)  wxCHECK_RET(x, msg)
 #  else  // !wxWin2
-#     define CHECK(x)      if (!(x)) {FAIL; return; }
-#     define CHECK2(x, op) if (!(x)) {FAIL; op;     }
+#     define CHECK(x, rc, msg)  if (!(x)) {FAIL_MSG(msg); return rc; }
+#     define CHECK_RET(x, msg)  if (!(x)) {FAIL_MSG(msg); return; }
 #  endif // wxWin2
 
 // ----------------------------------------------------------------------------
@@ -257,7 +257,7 @@
     object needs to support the GetClasName() method to get the Python
     class name for the argument.
 */
-#   define   CALLBACK(name,profile,default)        PythonCallback(name,this,this->GetClassName(),profile)
+#   define   PY_CALLBACK(name,profile,default)        PythonCallback(name,this,this->GetClassName(),profile)
 /** This macro takes multiple arguments.
     The last argument is the default return value.
     The first argument is a list of arguments in brackets, it must
@@ -269,11 +269,11 @@
     must follow the format string.
     
 */
-#   define   CALLBACKVA(arg,default)            PythonCallback arg
+#   define   PY_CALLBACKVA(arg,default)            PythonCallback arg
 #else
-#   define   CALLBACK(name, profile, default)   PythonCallback((int)default)
+#   define   PY_CALLBACK(name, profile, default)   PythonCallback((int)default)
     inline int PythonCallback(int def) { return def; }
-#   define   CALLBACKVA(arg,default)      PythonCallback((int)default)
+#   define   PY_CALLBACKVA(arg,default)      PythonCallback((int)default)
 #endif
 //@}
 

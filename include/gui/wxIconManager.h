@@ -6,7 +6,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/06/22 22:32:27  VZ
+ * miscellaneous fixes for Windows compilation
+ *
  * Revision 1.5  1998/06/05 16:56:57  VZ
+ *
  * many changes among which:
  *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
  *     i.e. there is wxMApp inheriting from AppBse and wxApp
@@ -49,12 +53,12 @@
 
 #ifndef USE_PCH
 #  define   Uses_wxIcon
-#  include	<wx/wx.h>
+#  include  <wx/wx.h>
 
-#  include	<Mcommon.h>
+#  include  <Mcommon.h>
 
 #  undef T
-#  include	<list>
+#  include  <list>
 #endif  //USE_PCH
 
 /**
@@ -73,23 +77,25 @@
 /** A structure holding name and wxIcon pointer.
    This is the element of the list.
 */
-struct	IconData
+struct  IconData
 {
-  String	iconName;
-  wxIcon	*iconPtr;
+  String  iconName;
+  wxIcon  *iconPtr;
 
   IMPLEMENT_DUMMY_COMPARE_OPERATORS(IconData);
 };
+
+KBLIST_DEFINE(IconDataList, IconData);
 
 class wxIconManager
 {
    /** A list of all known icons.
        @see IconData
    */
-   std::list<IconData>	*iconList;
+   IconDataList *iconList;
    
    /// An Icon to return for unknown lookup strings.
-   wxIcon	*unknownIcon;
+   wxIcon *unknownIcon;
 public:
    /** Constructor
    */
