@@ -70,7 +70,7 @@ static char *magick[] = {
 "H  c #444444444444",
 "J  c #222222222222",
 "K  c Gray0",
-"L  c #c0c0c0c0c0c0",
+"L  c None",
 "P  c Gray100",
 "I  c Gray100",
 "U  c Gray100",
