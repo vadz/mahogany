@@ -1569,6 +1569,18 @@ wxLayoutList::InternalClear(void)
 }
 
 void
+wxLayoutList::Read(wxString &istr)
+{
+   while(istr.Length())
+   {
+      wxLayoutObject *obj = wxLayoutObject::Read(istr);
+      if(obj)
+         Insert(obj);
+   }
+}
+
+
+void
 wxLayoutList::SetFont(int family, int size, int style, int weight,
                       int underline, wxColour *fg,
                       wxColour *bg)
@@ -2855,7 +2867,6 @@ wxLayoutList::GetSelection(wxLayoutDataObject *wxlo, bool invalidate)
             exp->content.object->Write(string);
          delete exp;
       }
-
       wxlo->SetLayoutData(string);
    }
    return llist;

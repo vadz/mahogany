@@ -294,16 +294,6 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    m_ToolBar = CreateToolBar();
    AddToolbarButtons(m_ToolBar, WXFRAME_MAIN);
 
-#if 0 //FIMXE: too early here
-   m_ModulePopup = wxModulePopup::Create();
-   if(! m_ModulePopup)
-   {
-      m_ToolBar->EnableTool(WXMENU_MODULES, FALSE);
-      delete m_ModulePopup;
-      m_ModulePopup = NULL;
-   }
-#endif
-   
    m_splitter->SetMinimumPaneSize(0);
    m_splitter->SetFocus();
 
@@ -316,6 +306,19 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
      SetSize(x,y);
    }
 #endif // GTK
+}
+
+void
+wxMainFrame::UpdateToolBar(void)
+{
+   if(m_ModulePopup) delete m_ModulePopup;
+   m_ModulePopup = wxModulePopup::Create();
+   if(! m_ModulePopup)
+   {
+      m_ToolBar->EnableTool(WXMENU_MODULES, FALSE);
+      delete m_ModulePopup;
+      m_ModulePopup = NULL;
+   }
 }
 
 void

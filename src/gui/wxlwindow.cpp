@@ -496,20 +496,17 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    if ( IsDirectionKey(keyCode) )
    {
       // just continue the old selection
-      if ( m_Selecting )
-      {
-         if( event.ShiftDown() )
+      if ( m_Selecting && event.ShiftDown() )
             m_llist->ContinueSelection();
-         else
-         {
-            m_llist->DiscardSelection();
-            m_Selecting = false;
-         }
-      }
-      else if( event.ShiftDown() )
+      else
       {
-         m_Selecting = true;
-         m_llist->StartSelection();
+         m_llist->DiscardSelection();
+         m_Selecting = false;
+         if( event.ShiftDown() )
+         {
+            m_Selecting = true;
+            m_llist->StartSelection();
+         }
       }
    }
    
@@ -631,8 +628,12 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                m_llist->DeleteToEndOfLine();
                SetDirty();
                break;
+            case 'c':
+               Copy();
+               break;
             case 'v':
-               Paste();
+               // if SHIFT is down, use primary selection
+               Paste( event.ShiftDown() );
                break;
             case 'x':
                Cut();
@@ -1081,10 +1082,12 @@ wxLayoutWindow::Paste(bool primary)
       wxLayoutDataObject wxldo;
       if (wxTheClipboard->IsSupported( wxldo.GetFormat() ))
       {
-         wxTheClipboard->GetData(wxldo);
+         if(wxTheClipboard->GetData(wxldo))
          {
+            wxString str = wxldo.GetLayoutData();
+            m_llist->Read(str);
+            RequestUpdate();
          }
-         //FIXME: missing functionality  m_llist->Insert(wxldo.GetList());
       }
       else
 #endif
@@ -1113,8 +1116,8 @@ wxLayoutWindow::Copy(bool invalidate)
       m_llist->EndSelection();
    }
 
-   wxLayoutDataObject wldo;
-   wxLayoutList *llist = m_llist->GetSelection(&wldo, invalidate);
+   wxLayoutDataObject *wldo = new wxLayoutDataObject;
+   wxLayoutList *llist = m_llist->GetSelection(wldo, invalidate);
    if(! llist)
       return FALSE;
    // Export selection as text:
@@ -1142,13 +1145,17 @@ wxLayoutWindow::Copy(bool invalidate)
    if (wxTheClipboard->Open())
    {
       wxTextDataObject *data = new wxTextDataObject( text );
-      bool  rc = wxTheClipboard->SetData( data );
+      bool rc;
+
+      rc = wxTheClipboard->SetData( data );
 #if wxUSE_PRIVATE_CLIPBOARD_FORMAT
-      rc |= wxTheClipboard->AddData( &wldo );
+      rc |= wxTheClipboard->SetData( wldo );
 #endif
       wxTheClipboard->Close();
       return rc;
    }
+   else
+      delete wldo;
    
    return FALSE;
 }

@@ -608,9 +608,11 @@ wxMApp::OnInit()
       // reflect settings in menu and statusbar:
       UpdateOnlineDisplay();
       
-      /// Load any modules requested.
+      // Load any modules requested.
       LoadModules();
 
+      // enable/disable modules button:
+      ((wxMainFrame *)m_topLevelFrame)->UpdateToolBar();
       return true;
    }
    else
@@ -1094,7 +1096,8 @@ wxMApp::IsOnline(void) const
    if(! m_DialupSupport)
       return TRUE; // no dialup--> always connected
    else
-      return m_IsOnline; //m_OnlineManager->IsOnline();
+      // make sure we always have the very latest value:
+      return ((wxMApp*)this)->m_IsOnline = m_OnlineManager->IsOnline();
 }
 
 void
