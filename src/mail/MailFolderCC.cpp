@@ -3691,9 +3691,11 @@ MailFolderCC::SetSequenceFlag(SequenceKind kind,
 
    const String sequence = seq.GetString();
 
+#if 0
    if(PY_CALLBACKVA((set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG,
                      1, this, this->GetClassName(),
                      GetProfile(), "ss", sequence.c_str(), flags.c_str()),1)  )
+#endif
    {
       MBusyCursor busyCursor;
 

@@ -2887,19 +2887,17 @@ static Value func_python(ArgList *args, FilterRuleImpl *p)
    ASSERT(args);
    if(args->Count() != 1)
       return 0;
-   Message * msg = p->GetMessage();
-   if(! msg)
-      return Value("");
+   Message_obj msg = p->GetMessage();
+   if ( !msg )
+      return 0;
+
    String funcName = args->GetArg(0)->Evaluate().ToString();
 
    int result = 0;
-   bool rc = PyH_CallFunction(funcName,
-                              "func_python",
-                              msg, "Message",
-                              "i", &result,
-                              NULL);
-   msg->DecRef();
-   return rc ? (result != 0) : 0;
+   if ( !PythonFunction(funcName, msg.Get(), "Message", "i", &result) )
+      return 0;
+
+   return result;
 #else
    return 0;
 #endif

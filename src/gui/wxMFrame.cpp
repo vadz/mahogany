@@ -594,7 +594,7 @@ wxMFrame::OnMenuCommand(int id)
                                 );
             if ( !filename.empty() )
             {
-               PyH_RunScript(filename);
+               PythonRunScript(filename);
             }
             //else: cancelled by user
          }

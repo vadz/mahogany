@@ -49,7 +49,7 @@ static bool CheckPyError()
 {
    if ( PyErr_Occurred() )
    {
-      ERRORMESSAGE((_T("%s"), PyH_GetErrorMessage().c_str()));
+      ERRORMESSAGE((_T("%s"), PythonGetErrorMessage().c_str()));
 
       return FALSE;
    }
@@ -135,7 +135,7 @@ InitPython(void)
    init_MimePart();
    init_Message();
    init_SendMessage();
-   
+
    // the return code
    bool rc = TRUE;
 
