@@ -414,8 +414,8 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
       // other events (possible as we will call wxYield())
       Disable();
 
-      // this is the cclient spec of the folder whose children we enum
-      m_reference = ((MailFolderCC *)m_mailFolder->GetMailFolder())->GetSpec();
+      // this is the IMAP spec of the folder whose children we enum
+      m_reference = ((MailFolderCC *)m_mailFolder->GetMailFolder())->GetImapSpec();
       m_reference += reference;
 
       wxBusyCursor bc;
@@ -1097,7 +1097,7 @@ size_t ListFolderEventReceiver::AddAllFolders(MFolder *folder,
    m_folder = folder;
    m_folder->IncRef();
 
-   m_reference = ((MailFolderCC *)mailFolder->GetMailFolder())->GetSpec();
+   m_reference = ((MailFolderCC *)mailFolder->GetMailFolder())->GetImapSpec();
    m_nFoldersRetrieved = 0u;
    m_finished = false;
 

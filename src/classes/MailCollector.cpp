@@ -395,7 +395,13 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
       RemoveIncomingFolder(mf->GetName());
       return false;
    }
-
+   
+#ifdef EXPERIMENTAL_newnewmail
+   // all this now handled by folder itself
+   mf->Ping(); //update it
+   
+#else
+   
    mf->ApplyFilterRules(false);
 
    wxLogStatus(_("Auto-collecting mail from incoming folder '%s'."),
@@ -449,6 +455,7 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
 
    mf->SetUpdateFlags(updateFlags);
    mf->Ping(); //update it
+#endif
 
    Lock(locked);
 

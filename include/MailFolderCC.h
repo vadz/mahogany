@@ -133,6 +133,9 @@ public:
    */
    inline String GetName(void) const { return m_Name; }
 
+   /// Return IMAP spec
+   inline virtual String GetImapSpec(void) const { return m_ImapSpec; }
+
    /** Get the profile.
        @return Pointer to the profile.
    */
@@ -300,9 +303,6 @@ public:
 
    /** @name Folder names and specifications */
    //@{
-   /** Return the full folder spec
-    */
-   String GetSpec() const { return m_MailboxPath; }
 
    /** Extracts the folder name from the folder specification string used by
        cclient (i.e. {nntp/xxx}news.answers => news.answers and also #mh/Foo
@@ -412,9 +412,8 @@ private:
    unsigned long m_OldNumOfMessages;
    /// set to true before we get the very first folder info
    bool m_FirstListing;
-   /// Path to mailbox
-   String   m_MailboxPath;
-
+   /// Full IMAP spec
+   String   m_ImapSpec;
    /// The symbolic name of the folder
    String m_Name;
 

@@ -175,6 +175,159 @@ void CC_Cleanup(void)
    }
 }
 
+static String GetImapSpec(int type, int flags,
+                          const String &name,
+                          const String &iserver,
+                          const String &login)
+{
+   String mboxpath;
+
+   String server = iserver;
+   strutil_tolower(server);
+   
+#ifdef USE_SSL
+   bool InitSSL(void);
+
+   // SSL only for NNTP/IMAP/POP:
+   if(((flags & MF_FLAGS_SSLAUTH) != 0)
+      && ! FolderTypeSupportsSSL( (FolderType) type))
+   {
+      flags ^= MF_FLAGS_SSLAUTH;
+      STATUSMESSAGE((_("Ignoring SSL authentication for folder '%s'"), name.c_str()));
+   }
+
+   if( (flags & MF_FLAGS_SSLAUTH) != 0
+       && ! InitSSL() )
+#else
+   if( (flags & MF_FLAGS_SSLAUTH) != 0 )
+#endif
+   {
+      ERRORMESSAGE((_("SSL authentication is not available.")));
+      flags ^= MF_FLAGS_SSLAUTH;
+   }
+
+   switch( type )
+   {
+   case MF_INBOX:
+      mboxpath = "INBOX";
+      break;
+
+   case MF_FILE:
+      mboxpath = strutil_expandfoldername(name, (FolderType) type);
+      break;
+
+   case MF_MH:
+      {
+         // accept either absolute or relative filenames here, but the absolute
+         // ones should start with MHROOT
+         wxString mhRoot = MailFolderCC::InitializeMH();
+
+         const char *p;
+         wxString nameReal;
+         if ( name.StartsWith(mhRoot, &nameReal) )
+         {
+            p = nameReal.c_str();
+         }
+         else
+         {
+            p = name.c_str();
+
+            if ( *p == '/' )
+            {
+               wxLogError(_("Invalid MH folder name '%s' not under the "
+                            "root MH directory '%s'."),
+                         p, mhRoot.c_str());
+
+               return "";
+            }
+         }
+
+         // newly created MH folders won't have leading slash, but we may still
+         // have to deal with the old entries in config, so eat both here, but
+         // be sure to remove the leading backslash: we want #mh/inbox, not
+         // #mh//inbox
+         while ( *p == '/' )
+            p++;
+
+         mboxpath << "#mh/" << p;
+      }
+      break;
+
+   case MF_POP:
+      mboxpath << '{' << server << "/pop3";
+      if(flags & MF_FLAGS_SSLAUTH)
+         mboxpath << "/ssl";
+      mboxpath << '}';
+      break;
+   case MF_IMAP:  // do we need /imap flag?
+      if(flags & MF_FLAGS_ANON)
+         mboxpath << '{' << server << "/anonymous";
+      else
+      {
+         if(login.Length())
+            mboxpath << '{' << server << "/user=" << login ;
+         else // we get asked  later FIXME!!
+            mboxpath << '{' << server << '}'<< name;
+      }
+      if(flags & MF_FLAGS_SSLAUTH)
+         mboxpath << "/ssl";
+      mboxpath << '}' << name;
+      break;
+   case MF_NEWS:
+      mboxpath << "#news." << name;
+      break;
+   case MF_NNTP:
+      mboxpath << '{' << server << "/nntp";
+      if(flags & MF_FLAGS_SSLAUTH)
+         mboxpath << "/ssl";
+      mboxpath << '}' << name;
+      break;
+   default:
+      FAIL_MSG("Unsupported folder type.");
+   }
+   return mboxpath;
+}
+
+static
+String GetHostFromImapSpec(const String &imap)
+{
+   if(imap[0] != '{') return "";
+   String host;
+   const char *cptr = imap.c_str()+1;
+   while(*cptr && *cptr != '/' && *cptr != '}')
+      host << *cptr++;
+   return host;
+}
+
+// This does not return driver prefixes such as #mh/ which are
+// considered part of the pathname for now.
+static
+String GetFirstPartFromImapSpec(const String &imap)
+{
+   if(imap[0] != '{') return "";
+   String first;
+   const char *cptr = imap.c_str()+1;
+   while(*cptr && *cptr != '}')
+      first << *cptr++;
+   first << *cptr;
+   return first;
+}
+
+static
+String GetPathFromImapSpec(const String &imap)
+{
+   if(imap[0] != '{') return imap;
+
+   const char *cptr = imap.c_str()+1;
+   while(*cptr && *cptr != '}')
+      cptr++;
+   if(*cptr == '}')
+      return cptr+1;
+   else
+      return ""; // error
+}
+
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -525,12 +678,11 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
       CClientInit();
    Create(typeAndFlags);
    if(GetType() == MF_FILE)
-      m_MailboxPath = strutil_expandpath(path);
+      m_ImapSpec = strutil_expandpath(path);
    else
-         m_MailboxPath = path;
+         m_ImapSpec = path;
    m_Login = login;
    m_Password = password;
-
 }
 
 void
@@ -595,116 +747,6 @@ MailFolderCC::~MailFolderCC()
 }
 
 
-static String GetImapSpec(int type, int flags,
-                          const String &name,
-                          const String &server,
-                          const String &login)
-{
-   String mboxpath;
-
-#ifdef USE_SSL
-   bool InitSSL(void);
-
-   // SSL only for NNTP/IMAP/POP:
-   if(((flags & MF_FLAGS_SSLAUTH) != 0)
-      && ! FolderTypeSupportsSSL( (FolderType) type))
-   {
-      flags ^= MF_FLAGS_SSLAUTH;
-      STATUSMESSAGE((_("Ignoring SSL authentication for folder '%s'"), name.c_str()));
-   }
-
-   if( (flags & MF_FLAGS_SSLAUTH) != 0
-       && ! InitSSL() )
-#else
-   if( (flags & MF_FLAGS_SSLAUTH) != 0 )
-#endif
-   {
-      ERRORMESSAGE((_("SSL authentication is not available.")));
-      flags ^= MF_FLAGS_SSLAUTH;
-   }
-
-   switch( type )
-   {
-   case MF_INBOX:
-      mboxpath = "INBOX";
-      break;
-
-   case MF_FILE:
-      mboxpath = strutil_expandfoldername(name, (FolderType) type);
-      break;
-
-   case MF_MH:
-      {
-         // accept either absolute or relative filenames here, but the absolute
-         // ones should start with MHROOT
-         wxString mhRoot = MailFolderCC::InitializeMH();
-
-         const char *p;
-         wxString nameReal;
-         if ( name.StartsWith(mhRoot, &nameReal) )
-         {
-            p = nameReal.c_str();
-         }
-         else
-         {
-            p = name.c_str();
-
-            if ( *p == '/' )
-            {
-               wxLogError(_("Invalid MH folder name '%s' not under the "
-                            "root MH directory '%s'."),
-                         p, mhRoot.c_str());
-
-               return "";
-            }
-         }
-
-         // newly created MH folders won't have leading slash, but we may still
-         // have to deal with the old entries in config, so eat both here, but
-         // be sure to remove the leading backslash: we want #mh/inbox, not
-         // #mh//inbox
-         while ( *p == '/' )
-            p++;
-
-         mboxpath << "#mh/" << p;
-      }
-      break;
-
-   case MF_POP:
-      mboxpath << '{' << server << "/pop3";
-      if(flags & MF_FLAGS_SSLAUTH)
-         mboxpath << "/ssl";
-      mboxpath << '}';
-      break;
-   case MF_IMAP:  // do we need /imap flag?
-      if(flags & MF_FLAGS_ANON)
-         mboxpath << '{' << server << "/anonymous";
-      else
-      {
-         if(login.Length())
-            mboxpath << '{' << server << "/user=" << login ;
-         else // we get asked  later FIXME!!
-            mboxpath << '{' << server << '}'<< name;
-      }
-      if(flags & MF_FLAGS_SSLAUTH)
-         mboxpath << "/ssl";
-      mboxpath << '}' << name;
-      break;
-   case MF_NEWS:
-      mboxpath << "#news." << name;
-      break;
-   case MF_NNTP:
-      mboxpath << '{' << server << "/nntp";
-      if(flags & MF_FLAGS_SSLAUTH)
-         mboxpath << "/ssl";
-      mboxpath << '}' << name;
-      break;
-   default:
-      FAIL_MSG("Unsupported folder type.");
-   }
-   return mboxpath;
-}
-
 /*
   This gets called with a folder path as its name, NOT with a symbolic
   folder/profile name.
@@ -731,7 +773,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    int type = GetFolderType(typeAndFlags);
 
    String login = loginGiven;
-   mboxpath = GetImapSpec(type, flags, name, server, login);
+   mboxpath = ::GetImapSpec(type, flags, name, server, login);
 
    //FIXME: This should somehow be done in MailFolder.cc
    mf = FindFolder(mboxpath,login);
@@ -921,7 +963,7 @@ bool MailFolderCC::HalfOpen()
    MCclientLocker lock;
    SetDefaultObj();
    CCVerbose();
-   m_MailStream = mail_open(NIL, (char *)m_MailboxPath.c_str(),
+   m_MailStream = mail_open(NIL, (char *)m_ImapSpec.c_str(),
                             (mm_show_debug ? OP_DEBUG : NIL)|OP_HALFOPEN);
    ProcessEventQueue();
    SetDefaultObj(false);
@@ -958,7 +1000,7 @@ MailFolderCC::Open(void)
       {
          String lockfile;
          if(GetType() == MF_FILE)
-            lockfile = m_MailboxPath;
+            lockfile = m_ImapSpec;
 #ifdef OS_UNIX
          else // INBOX
          {
@@ -1018,14 +1060,14 @@ MailFolderCC::Open(void)
       bool exists = TRUE;
       if ( GetType() == MF_FILE )
       {
-         exists = wxFileExists(m_MailboxPath);
+         exists = wxFileExists(m_ImapSpec);
       }
       else if ( GetType() == MF_MH )
       {
          // construct the filename from MH folder name
          String path;
          path << InitializeMH()
-              << m_MailboxPath.c_str() + 4; // 4 == strlen("#mh/")
+              << m_ImapSpec.c_str() + 4; // 4 == strlen("#mh/")
          exists = wxFileExists(path);
       }
       else
@@ -1034,7 +1076,7 @@ MailFolderCC::Open(void)
          // IMAP servers allow us to open a non-existing mailbox but
          // not to write to it, so we force a creation attempt
          CCQuiet(); // always try creation
-         mail_create(NIL, (char *)m_MailboxPath.c_str());
+         mail_create(NIL, (char *)m_ImapSpec.c_str());
          CCVerbose();
       }
       
@@ -1064,22 +1106,22 @@ MailFolderCC::Open(void)
          }
          else
             tmp = "#driver.mh/";
-         tmp += m_MailboxPath;
+         tmp += m_ImapSpec;
          mail_create(NIL, (char *)tmp.c_str());
-         //mail_create(NIL, (char *)m_MailboxPath.c_str());
+         //mail_create(NIL, (char *)m_ImapSpec.c_str());
          alreadyCreated = TRUE;
       }
 
       // first try, don't log errors (except in debug mode)
-      m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
+      m_MailStream = mail_open(m_MailStream,(char *)m_ImapSpec.c_str(),
                                mm_show_debug ? OP_DEBUG : NIL);
 
       // try to create it if hadn't tried yet
       if ( !m_MailStream && !alreadyCreated )
       {
          CCVerbose();
-         mail_create(NIL, (char *)m_MailboxPath.c_str());
-         m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
+         mail_create(NIL, (char *)m_ImapSpec.c_str());
+         m_MailStream = mail_open(m_MailStream,(char *)m_ImapSpec.c_str(),
                                   mm_show_debug ? OP_DEBUG : NIL);
       }
 
@@ -1281,6 +1323,47 @@ MailFolderCC::Ping(void)
          RequestUpdate();
       UnLock();
       ProcessEventQueue();
+      
+#ifdef EXPERIMENTAL_newnewmail
+      // Check if we want to collect all mail from this folder:
+      if( (GetFlags() & MF_FLAGS_INCOMING) != 0)
+      {
+         // build listing of all mails:
+         const HeaderInfo *hi;
+         size_t i;
+         UIdArray selections;
+         HeaderInfoList *hil = GetHeaders();
+         if( hil )
+         {
+            if( hil->Count() > 0 )
+            {
+               for(i = 0; i < hil->Count(); i++)
+               {
+                  hi=(*hil)[i];
+                  selections.Add(hi->GetUId());
+               }
+            }
+         }
+         hil->DecRef();
+         // do we have any messages to move?
+         if(selections.Count() > 0)
+         {
+            // where to we move the mails?
+            String newMailFolder = READ_CONFIG(m_Profile,
+                                               MP_NEWMAIL_FOLDER);
+            if(! SaveMessages(&selections,
+                              newMailFolder,
+                              true /* isProfile */,
+                              false /* update count */))
+            {
+               DeleteMessages(&selections);
+               ExpungeMessages();
+            }
+            else
+               ERRORMESSAGE((_("Cannot move newly arrived messages.")));
+         }
+      }
+#endif
    }
    else
    {
@@ -1378,7 +1461,7 @@ MailFolderCC::AppendMessage(String const &msg)
    ProcessEventQueue();
 
    bool rc = ( mail_append(
-      m_MailStream, (char *)m_MailboxPath.c_str(), &str)
+      m_MailStream, (char *)m_ImapSpec.c_str(), &str)
                != 0);
    if(! rc)
       ERRORMESSAGE(("cannot append message"));
@@ -1410,10 +1493,56 @@ bool
 MailFolderCC::AppendMessage(Message const &msg)
 {
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
-   String tmp;
 
-   msg.WriteToString(tmp);
-   return AppendMessage(tmp);
+   long rc;
+   /* This is an optimisation: if both mailfolders are IMAP and on the
+      same server, we ask the server to copy the message, which is
+      more efficient (think of a modem!).
+      If that is not the case, or it fails, then it simply retrieves
+      the message and appends it to the second folder.
+   */
+   if(GetType() == MF_IMAP)
+   {
+      MailFolder *mf = ((Message &)msg).GetFolder();
+      if(mf->GetType() == MF_IMAP)
+      {
+         // Now we now mf is MailFolderCC:
+         MAILSTREAM *ms = ((MailFolderCC *)mf)->m_MailStream;
+         String tmp1 = GetFirstPartFromImapSpec(mf->GetImapSpec());
+         String tmp2 = GetFirstPartFromImapSpec(GetImapSpec());
+         // Host, protocol, user all identical:
+         if(tmp1 == tmp2)
+         {
+            String sequence;
+            sequence.Printf("%lu", msg.GetUId());
+	    String path = GetPathFromImapSpec(GetImapSpec());
+            rc =
+               mail_copy_full (ms,
+                               (char *)sequence.c_str(),
+                               (char *)path.c_str(),
+                               CP_UID);
+            // if failed, we try to append normally
+         }
+      }
+   }
+   else
+   {
+      // different folders, so we actually copy the message around:
+      String tmp;
+      msg.WriteToString(tmp);
+      STRING str;
+      INIT(&str, mail_string, (void *) tmp.c_str(), tmp.Length());
+      rc =  mail_append(m_MailStream,
+                             (char *)m_ImapSpec.c_str(),
+                             &str);
+   }
+   if(rc != 0)
+   {
+      ERRORMESSAGE(("cannot append message"));
+      return FALSE;
+   }
+   else
+      return TRUE;
 }
 
 
@@ -1547,7 +1676,8 @@ MailFolderCC::GetHeaders(void) const
       {
          /* Suppress recursion from changes caused by filter code. */
          that->m_ListingFrozen = TRUE;
-         if( that->ApplyFilterRules(true) )
+         bool changed = that->ApplyFilterRules(true);
+         if(changed)
          {
             that->m_ListingFrozen = FALSE;
             // we need to re-generate the listing:
@@ -1819,7 +1949,7 @@ String
 MailFolderCC::DebugDump() const
 {
    String str = MObjectRC::DebugDump();
-   str << "mailbox '" << m_MailboxPath << "' of type " << (int) m_folderType;
+   str << "mailbox '" << m_ImapSpec << "' of type " << (int) m_folderType;
 
    return str;
 }
@@ -2404,7 +2534,7 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream) const
    StreamConnection  *conn = new StreamConnection;
    conn->folder = (MailFolderCC *) this;
    conn->stream = stream;
-   conn->name = m_MailboxPath;
+   conn->name = m_ImapSpec;
    conn->login = m_Login;
    streamList.push_front(conn);
 }
@@ -2528,7 +2658,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
    if(mf)
    {
 #ifdef DEBUG
-      String tmp = "MailFolderCC::mm_exists() for folder " + mf->m_MailboxPath
+      String tmp = "MailFolderCC::mm_exists() for folder " + mf->m_ImapSpec
                    + String(" n: ") + strutil_ultoa(number);
       LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
@@ -2651,7 +2781,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
       return;  // oops?!
 
    wxLogDebug("mm_status: folder '%s', %lu messages",
-              mf->m_MailboxPath.c_str(), status->messages);
+              mf->m_ImapSpec.c_str(), status->messages);
 
    if(status->flags & SA_MESSAGES)
       mf->RequestUpdate();
@@ -2754,7 +2884,7 @@ MailFolderCC::mm_critical(MAILSTREAM * stream)
    if(mf)
    {
 #ifdef DEBUG
-      String tmp = "MailFolderCC::mm_critical() for folder " + mf->m_MailboxPath;
+      String tmp = "MailFolderCC::mm_critical() for folder " + mf->m_ImapSpec;
       LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
       mf->m_InCritical = true;
@@ -2772,7 +2902,7 @@ MailFolderCC::mm_nocritical(MAILSTREAM *  stream )
    if(mf)
    {
 #ifdef DEBUG
-      String tmp = "MailFolderCC::mm_nocritical() for folder " + mf->m_MailboxPath;
+      String tmp = "MailFolderCC::mm_nocritical() for folder " + mf->m_ImapSpec;
       LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
       mf->m_InCritical = false;
@@ -2967,7 +3097,7 @@ MailFolderCC::Subscribe(const String &host,
                         const String &mailboxname,
                         bool subscribe)
 {
-   String spec = GetImapSpec(protocol, 0, mailboxname, host, "");
+   String spec = ::GetImapSpec(protocol, 0, mailboxname, host, "");
    return (subscribe ? mail_subscribe (NIL, (char *)spec.c_str())
            : mail_unsubscribe (NIL, (char *)spec.c_str()) ) != NIL;
 }
@@ -2980,7 +3110,7 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
                           UserData ud,
                           Ticket ticket)
 {
-   String spec = m_MailboxPath;
+   String spec = m_ImapSpec;
 
    // make sure that there is a folder name delimiter before pattern - this
    // only makes sense for non empty spec
@@ -3058,11 +3188,11 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
 bool
 MailFolderCC::DeleteFolder(const MFolder *mfolder)
 {
-   String mboxpath = GetImapSpec(mfolder->GetType(),
-                                 mfolder->GetFlags(),
-                                 mfolder->GetPath(),
-                                 mfolder->GetServer(),
-                                 mfolder->GetLogin());
+   String mboxpath = ::GetImapSpec(mfolder->GetType(),
+                                   mfolder->GetFlags(),
+                                   mfolder->GetPath(),
+                                   mfolder->GetServer(),
+                                   mfolder->GetLogin());
 
    String password = mfolder->GetPassword();
    if ( FolderTypeHasUserName( mfolder->GetType() )

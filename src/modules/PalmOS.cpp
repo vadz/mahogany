@@ -47,10 +47,10 @@
 #ifdef USE_PISOCK
 
 #ifdef HAVE_LIBMAL
- extern "C"
- {
+extern "C"
+{
 #   include "libmal.h"
- }
+}
 #endif
 
 #include "MModule.h"
@@ -113,6 +113,8 @@
 #define MP_MOD_PALMOS_SCRIPT2                "Script2"
 #define MP_MOD_PALMOS_SCRIPT2_D              ""
 
+#define MP_MOD_PALMOS_SYNCTIME               "SyncTime"
+#define MP_MOD_PALMOS_SYNCTIME_D             0l
 #define MP_MOD_PALMOS_SYNCMAL                "Sync to MAL server"
 #define MP_MOD_PALMOS_SYNCMAL_D              0l
 #define MP_MOD_PALMOS_MAL_USE_PROXY          "MALUseProxy"
@@ -182,64 +184,64 @@ class wxDeviceLock
 {
 public:
    wxDeviceLock(const wxString &dev)
-   {
-      m_Device = dev;
-      m_Locked = FALSE;
-   }
+      {
+         m_Device = dev;
+         m_Locked = FALSE;
+      }
 
    ~wxDeviceLock()
-   {
-      if(m_Locked) Unlock();
-   }
+      {
+         if(m_Locked) Unlock();
+      }
 
    bool Lock()
-   {
-      wxASSERT(! m_Locked);
-      m_LockFile = "/var/lock/LCK..";
-      m_LockFile << m_Device;
-      int fd = open(m_LockFile,O_CREAT|O_EXCL,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
-
-      if(fd == -1) // lock exists already
       {
-         wxTextFile tf(m_LockFile);
-         if(tf.Open())
+         wxASSERT(! m_Locked);
+         m_LockFile = "/var/lock/LCK..";
+         m_LockFile << m_Device;
+         int fd = open(m_LockFile,O_CREAT|O_EXCL,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+
+         if(fd == -1) // lock exists already
          {
-            pid_t pid = atoi(tf[0]);
-            if(kill(pid,0) == ESRCH) // process no longer exists
+            wxTextFile tf(m_LockFile);
+            if(tf.Open())
             {
-               if(remove(m_LockFile) == 0)
+               pid_t pid = atoi(tf[0]);
+               if(kill(pid,0) == ESRCH) // process no longer exists
                {
-                  // try again
-                  fd = open(m_LockFile,
-                            O_CREAT|O_EXCL,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+                  if(remove(m_LockFile) == 0)
+                  {
+                     // try again
+                     fd = open(m_LockFile,
+                               O_CREAT|O_EXCL,S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+                  }
                }
             }
          }
-      }
 
-      if (fd != -1)
-      {
-         m_Locked = TRUE;
-         wxString pidstr;
-         pidstr.Printf("%lu", (unsigned long) getpid());
-         write(fd, (char *)pidstr.c_str(),pidstr.Length());
-         close(fd);
-      }
-      else
-      {
-         wxString msg;
-         msg.Printf(_("Could not obtain lock for '/dev/%s'"),
+         if (fd != -1)
+         {
+            m_Locked = TRUE;
+            wxString pidstr;
+            pidstr.Printf("%lu", (unsigned long) getpid());
+            write(fd, (char *)pidstr.c_str(),pidstr.Length());
+            close(fd);
+         }
+         else
+         {
+            wxString msg;
+            msg.Printf(_("Could not obtain lock for '/dev/%s'"),
                        m_Device.c_str());
-         wxLogSysError(msg);
+            wxLogSysError(msg);
+         }
+         return m_Locked;
       }
-      return m_Locked;
-   }
 
    void Unlock()
-   {
-      wxASSERT(m_Locked);
-      remove(m_LockFile);
-   }
+      {
+         wxASSERT(m_Locked);
+         remove(m_LockFile);
+      }
 
    bool IsLocked() const { return m_Locked; }
 
@@ -324,7 +326,7 @@ private:
    // variables to store configuration values
    int   m_Dispose;
    int   m_Speed;
-   bool  m_SyncMail, m_SyncAddr, m_Backup, m_LockPort;
+   bool  m_SyncMail, m_SyncAddr, m_Backup, m_LockPort, m_SyncTime;
    bool  m_IncrBackup, m_BackupSync, m_BackupAll;
    bool  m_AutoInstall;
    String m_PilotDev, m_Script1, m_Script2, m_PalmBox;
@@ -355,16 +357,16 @@ class PiConnection
 {
 public:
    PiConnection(class PalmOSModule *mi)
-   {
-      m=mi;
-      if(! m->IsConnected())
       {
-         m->Connect();
-         cleanup = true;
+         m=mi;
+         if(! m->IsConnected())
+         {
+            m->Connect();
+            cleanup = true;
+         }
+         else
+            cleanup = false;
       }
-      else
-         cleanup = false;
-   }
 
    ~PiConnection() { if(cleanup) m->Disconnect(); }
 
@@ -382,23 +384,23 @@ PalmOSModule::ProcessMenuEvent(int id)
 {
    switch(id)
    {
-      case WXMENU_MODULES_PALMOS_SYNC:
-         Synchronise(NULL);
-         return TRUE;
-      case WXMENU_MODULES_PALMOS_BACKUP:
-         Backup();
-         return TRUE;
-      case WXMENU_MODULES_PALMOS_RESTORE:
-         Restore();
-         return TRUE;
-      case WXMENU_MODULES_PALMOS_INSTALL:
-         Install();
-         return TRUE;
-      case WXMENU_MODULES_PALMOS_CONFIG:
-         Configure();
-         return TRUE;
-      default:
-         return FALSE;
+   case WXMENU_MODULES_PALMOS_SYNC:
+      Synchronise(NULL);
+      return TRUE;
+   case WXMENU_MODULES_PALMOS_BACKUP:
+      Backup();
+      return TRUE;
+   case WXMENU_MODULES_PALMOS_RESTORE:
+      Restore();
+      return TRUE;
+   case WXMENU_MODULES_PALMOS_INSTALL:
+      Install();
+      return TRUE;
+   case WXMENU_MODULES_PALMOS_CONFIG:
+      Configure();
+      return TRUE;
+   default:
+      return FALSE;
    }
 }
 
@@ -408,43 +410,43 @@ PalmOSModule::Entry(int arg, ...)
    switch(arg)
    {
       // GetFlags():
-      case MMOD_FUNC_GETFLAGS:
-         return MMOD_FLAG_HASMAIN|MMOD_FLAG_HASCONFIG;
+   case MMOD_FUNC_GETFLAGS:
+      return MMOD_FLAG_HASMAIN|MMOD_FLAG_HASCONFIG;
 
       // Main():
-      case MMOD_FUNC_MAIN:
-         Synchronise(NULL);
-         return 0;
+   case MMOD_FUNC_MAIN:
+      Synchronise(NULL);
+      return 0;
 
       // Configure():
-      case MMOD_FUNC_CONFIG:
-         Configure();
-         return 0;
+   case MMOD_FUNC_CONFIG:
+      Configure();
+      return 0;
 
       // Menu event
-      case MMOD_FUNC_MENUEVENT:
-      {
-         va_list ap;
-         va_start(ap, arg);
-         int id = va_arg(ap, int);
-         va_end(ap);
-         return ProcessMenuEvent(id);
-      }
+   case MMOD_FUNC_MENUEVENT:
+   {
+      va_list ap;
+      va_start(ap, arg);
+      int id = va_arg(ap, int);
+      va_end(ap);
+      return ProcessMenuEvent(id);
+   }
 
-      // module specific functions:
-      // MMOD_FUNC_USER : Synchronise ADB
-      case MMOD_FUNC_USER:
-      {
-         va_list ap;
-         va_start(ap, arg);
-         PalmBook *pbp = va_arg(ap, PalmBook *);
-         va_end(ap);
-         Synchronise(pbp);
-         return 0;
-      }
+   // module specific functions:
+   // MMOD_FUNC_USER : Synchronise ADB
+   case MMOD_FUNC_USER:
+   {
+      va_list ap;
+      va_start(ap, arg);
+      PalmBook *pbp = va_arg(ap, PalmBook *);
+      va_end(ap);
+      Synchronise(pbp);
+      return 0;
+   }
 
-      default:
-         return 0;
+   default:
+      return 0;
    }
 }
 
@@ -471,6 +473,7 @@ PalmOSModule::GetConfig(void)
    m_Backup     = (READ_CONFIG(p, MP_MOD_PALMOS_BACKUP) != 0);
    m_BackupDir  = READ_CONFIG(p, MP_MOD_PALMOS_BACKUPDIR);
    m_SyncMail   = (READ_CONFIG(p, MP_MOD_PALMOS_SYNCMAIL) != 0);
+   m_SyncTime   = (READ_CONFIG(p, MP_MOD_PALMOS_SYNCTIME) != 0);
    m_SyncAddr   = (READ_CONFIG(p, MP_MOD_PALMOS_SYNCADDR) != 0);
    m_LockPort   = (READ_CONFIG(p, MP_MOD_PALMOS_LOCK) != 0);
    m_PilotDev   = READ_CONFIG(p, MP_MOD_PALMOS_PILOTDEV);
@@ -528,7 +531,7 @@ MMODULE_BEGIN_IMPLEMENT(PalmOSModule,
    MMODULE_PROP("description",
                 _("This module provides PalmOS connectivity"))
    MMODULE_PROP("author", "Karsten Ballüder <karsten@phy.hw.ac.uk>")
-MMODULE_END_IMPLEMENT(PalmOSModule)
+   MMODULE_END_IMPLEMENT(PalmOSModule)
 
 
 ///----------------------------------------------------------------------------
@@ -537,7 +540,7 @@ MMODULE_END_IMPLEMENT(PalmOSModule)
 
 /* static */
 
-MModule *
+   MModule *
 PalmOSModule::Init(int version_major, int version_minor,
                    int version_release, MInterface *minterface,
                    int *errorCode)
@@ -554,7 +557,7 @@ PalmOSModule::Init(int version_major, int version_minor,
 
 
 PalmOSModule::PalmOSModule(MInterface *minterface)
-            : MModule()
+   : MModule()
 {
    SetMInterface(minterface);
    
@@ -573,9 +576,9 @@ PalmOSModule::PalmOSModule(MInterface *minterface)
 
    MAppBase *mapp = m_MInterface->GetMApplication();
    ((wxMainFrame *)mapp->TopLevelFrame())->AddModulesMenu(_("&PalmOS Module"),
-                                        _("Functionality to interact with your PalmOS based palmtop."),
-                                        palmOsMenu,
-                                        -1);
+                                                          _("Functionality to interact with your PalmOS based palmtop."),
+                                                          palmOsMenu,
+                                                          -1);
 }
 
 PalmOSModule::~PalmOSModule()
@@ -593,20 +596,20 @@ class PalmOSAcceptThread : public wxThread
 {
 public:
    PalmOSAcceptThread(int *piSocket)
-   {
-      m_PiSocketPtr = piSocket;
-      m_NewSocket = *piSocket;
-      *m_PiSocketPtr = -1; // -2: thread is running, -1: failure
-   }
+      {
+         m_PiSocketPtr = piSocket;
+         m_NewSocket = *piSocket;
+         *m_PiSocketPtr = -1; // -2: thread is running, -1: failure
+      }
 
    // thread execution starts here
    virtual void *Entry()
-   {
-      *m_PiSocketPtr = -2;
-      m_NewSocket = pi_accept(m_NewSocket, 0, 0);
-      *m_PiSocketPtr = m_NewSocket;
-      return NULL;
-   }
+      {
+         *m_PiSocketPtr = -2;
+         m_NewSocket = pi_accept(m_NewSocket, 0, 0);
+         *m_PiSocketPtr = m_NewSocket;
+         return NULL;
+      }
 
 private:
    int * m_PiSocketPtr;
@@ -703,6 +706,15 @@ PalmOSModule::Connect(void)
 
       /* Tell user (via Pilot) that we are starting things up */
       dlp_OpenConduit(m_PiSocket);
+
+         
+      /* set Palm´s time */
+      if (m_SyncTime)
+      {
+         time_t   localTime;
+         time(&localTime);
+         dlp_SetSysDateTime(m_PiSocket, localTime);
+      }
    }
 
    if(m_PiSocket == -1)
@@ -1031,7 +1043,7 @@ PalmOSModule::Backup(void)
       if (f == 0) {
          wxString msg;
          msg.Printf(_("Unable to create file %s!"),
-                       (char*)name.c_str());
+                    (char*)name.c_str());
          ErrorMessage(_(msg));
          continue;
       }
@@ -1039,7 +1051,7 @@ PalmOSModule::Backup(void)
       if (pi_file_retrieve(f, m_PiSocket, 0) < 0) {
          wxString msg;
          msg.Printf(_("Unable to backup database %s!"),
-                       name.c_str());
+                    name.c_str());
          ErrorMessage(_(msg));
       }
       
@@ -1120,7 +1132,7 @@ PalmOSModule::InstallFiles(wxArrayString &fnames, bool delFile)
       if (f==0) {
          wxString msg;
          msg.Printf(_("Could not open file %s or file invalid."),
-                       db[dbcount]->name);
+                    db[dbcount]->name);
          ErrorMessage(_(msg));
          continue;
       }
@@ -1180,7 +1192,7 @@ PalmOSModule::InstallFiles(wxArrayString &fnames, bool delFile)
       if (f == 0) {
          wxString msg;
          msg.Printf(_("Could not open file %s or file invalid!"),
-                       db[dbcount]->name);
+                    db[dbcount]->name);
          ErrorMessage(_(msg));
          continue;
       }
@@ -1201,9 +1213,9 @@ PalmOSModule::InstallFiles(wxArrayString &fnames, bool delFile)
    struct PilotUser U;
    if (dlp_ReadUserInfo(m_PiSocket, &U)>=0) {
       U.lastSyncPC = 0x00000000;  /* Hopefully unique constant, to tell
-                                    any Desktop software that databases
-                                    have been altered, and that a slow
-                                    sync is necessary */
+                                     any Desktop software that databases
+                                     have been altered, and that a slow
+                                     sync is necessary */
       U.lastSyncDate = U.successfulSyncDate = time(0);
       dlp_WriteUserInfo(m_PiSocket, &U);
    }
@@ -1225,7 +1237,7 @@ PalmOSModule::InstallFromDir(wxString directory, bool delFiles)
    if (dir <= 0) {
       wxString msg;
       msg.Printf(_("Could not access directory %s!"),
-                   directory.c_str());
+                 directory.c_str());
       ErrorMessage(_(msg));
       return;
    }
@@ -1248,10 +1260,10 @@ PalmOSModule::Install()
    MAppBase *mapp = m_MInterface->GetMApplication();
 
    /*
-   wxString wxPFileSelector("PalmOS/InstallFilesDlg",
-                            _("Please pick databases to install"),
-                            "","","","*.p*|*",wxOPEN|wxMULTIPLE,
-                            (wxMainFrame *)mapp->TopLevelFrame());
+     wxString wxPFileSelector("PalmOS/InstallFilesDlg",
+     _("Please pick databases to install"),
+     "","","","*.p*|*",wxOPEN|wxMULTIPLE,
+     (wxMainFrame *)mapp->TopLevelFrame());
    */
 
    wxFileDialog fileDialog((wxMainFrame *)mapp->TopLevelFrame() ,
@@ -1289,14 +1301,14 @@ PalmOSModule::GetAddresses(PalmBook *palmbook)
 
    if (!palmbook) {
 /*
-      AdbManager_obj adbManager;
-      adbManager->LoadAll();
+  AdbManager_obj adbManager;
+  adbManager->LoadAll();
 
-      String adbName;
+  String adbName;
 
-      sprintf(adbName, "%s", "PalmOS-ADB (ReadOnly)");
-      // There is no PalmBook, create a new one if possible
-      palmbook = (PalmBook *)adbManager->CreateBook((String)"PalmOS Addressbook", NULL , &adbName);
+  sprintf(adbName, "%s", "PalmOS-ADB (ReadOnly)");
+  // There is no PalmBook, create a new one if possible
+  palmbook = (PalmBook *)adbManager->CreateBook((String)"PalmOS Addressbook", NULL , &adbName);
 */
    }
 
@@ -1711,31 +1723,31 @@ PalmOSModule::SyncMAL(void)
    if ( ! IsConnected())
       return;
 
-    PalmSyncInfo * pInfo = syncInfoNew();
-    if (NULL == pInfo)
-        return; 
+   PalmSyncInfo * pInfo = syncInfoNew();
+   if (NULL == pInfo)
+      return; 
 
-    /* are we using a proxy? */
-    if(m_MALUseProxy)
-    {
-       StatusMessage(_("Setting up MAL proxy..."));
-       setHttpProxy ((char *) m_MALProxyHost.c_str());
-       setHttpProxyPort ( m_MALProxyPort);
-       setProxyUsername ((char *) m_MALProxyLogin.c_str());
-       setProxyPassword ((char *) m_MALProxyPassword.c_str());
-    }
+   /* are we using a proxy? */
+   if(m_MALUseProxy)
+   {
+      StatusMessage(_("Setting up MAL proxy..."));
+      setHttpProxy ((char *) m_MALProxyHost.c_str());
+      setHttpProxyPort ( m_MALProxyPort);
+      setProxyUsername ((char *) m_MALProxyLogin.c_str());
+      setProxyPassword ((char *) m_MALProxyPassword.c_str());
+   }
 
-    /* are we using a SOCKS proxy? */
-    if(m_MALUseSocks)
-    {
-       StatusMessage(_("Setting up SOCKS proxy..."));
-       setSocksProxy ((char *) m_MALSocksHost.c_str());
-       setSocksProxyPort ( m_MALSocksPort );
-    }    
-    StatusMessage(_("Synchronising MAL server/AvantGo..."));
-    malsync (m_PiSocket, pInfo);
-    syncInfoFree(pInfo);
-    StatusMessage("");
+   /* are we using a SOCKS proxy? */
+   if(m_MALUseSocks)
+   {
+      StatusMessage(_("Setting up SOCKS proxy..."));
+      setSocksProxy ((char *) m_MALSocksHost.c_str());
+      setSocksProxyPort ( m_MALSocksPort );
+   }    
+   StatusMessage(_("Synchronising MAL server/AvantGo..."));
+   malsync (m_PiSocket, pInfo);
+   syncInfoFree(pInfo);
+   StatusMessage("");
 }
 #endif
    
@@ -1752,72 +1764,74 @@ PalmOSModule::SyncMAL(void)
 static ConfigValueDefault gs_ConfigValues1 [] =
 {
    ConfigValueDefault(MP_MOD_PALMOS_SYNCMAIL, MP_MOD_PALMOS_SYNCMAIL_D),
+   ConfigValueDefault(MP_MOD_PALMOS_SYNCTIME, MP_MOD_PALMOS_SYNCTIME_D),
 //   ConfigValueDefault(MP_MOD_PALMOS_SYNCADDR, MP_MOD_PALMOS_SYNCADDR_D),
-   ConfigValueDefault(MP_MOD_PALMOS_BACKUP, MP_MOD_PALMOS_BACKUP_D),
+      ConfigValueDefault(MP_MOD_PALMOS_BACKUP, MP_MOD_PALMOS_BACKUP_D),
 #ifdef HAVE_LIBMAL
-   ConfigValueDefault(MP_MOD_PALMOS_SYNCMAL, MP_MOD_PALMOS_SYNCMAL_D),
+      ConfigValueDefault(MP_MOD_PALMOS_SYNCMAL, MP_MOD_PALMOS_SYNCMAL_D),
 #endif
-   ConfigValueNone(),
-   ConfigValueDefault(MP_MOD_PALMOS_AUTOINSTALL, MP_MOD_PALMOS_AUTOINSTALL_D),
-   ConfigValueDefault(MP_MOD_PALMOS_AUTOINSTALLDIR, MP_MOD_PALMOS_AUTOINSTALLDIR_D),
-   ConfigValueDefault(MP_MOD_PALMOS_PILOTDEV, MP_MOD_PALMOS_PILOTDEV_D),
-   ConfigValueDefault(MP_MOD_PALMOS_SPEED, MP_MOD_PALMOS_SPEED_D),
-   ConfigValueDefault(MP_MOD_PALMOS_BOX, MP_MOD_PALMOS_BOX_D),
-   ConfigValueDefault(MP_MOD_PALMOS_DISPOSE, MP_MOD_PALMOS_DISPOSE_D),
-   ConfigValueDefault(MP_MOD_PALMOS_BACKUPDIR, MP_MOD_PALMOS_BACKUPDIR_D),
-   ConfigValueDefault(MP_MOD_PALMOS_BACKUP_SYNC, MP_MOD_PALMOS_BACKUP_SYNC_D),
-   ConfigValueDefault(MP_MOD_PALMOS_BACKUP_INCREMENTAL, MP_MOD_PALMOS_BACKUP_INCREMENTAL_D),
-   ConfigValueDefault(MP_MOD_PALMOS_BACKUP_ALL, MP_MOD_PALMOS_BACKUP_ALL_D),
-   ConfigValueDefault(MP_MOD_PALMOS_BACKUP_EXCLUDELIST, MP_MOD_PALMOS_BACKUP_EXCLUDELIST_D),
-};
+      ConfigValueNone(),
+      ConfigValueDefault(MP_MOD_PALMOS_AUTOINSTALL, MP_MOD_PALMOS_AUTOINSTALL_D),
+      ConfigValueDefault(MP_MOD_PALMOS_AUTOINSTALLDIR, MP_MOD_PALMOS_AUTOINSTALLDIR_D),
+      ConfigValueDefault(MP_MOD_PALMOS_PILOTDEV, MP_MOD_PALMOS_PILOTDEV_D),
+      ConfigValueDefault(MP_MOD_PALMOS_SPEED, MP_MOD_PALMOS_SPEED_D),
+      ConfigValueDefault(MP_MOD_PALMOS_BOX, MP_MOD_PALMOS_BOX_D),
+      ConfigValueDefault(MP_MOD_PALMOS_DISPOSE, MP_MOD_PALMOS_DISPOSE_D),
+      ConfigValueDefault(MP_MOD_PALMOS_BACKUPDIR, MP_MOD_PALMOS_BACKUPDIR_D),
+      ConfigValueDefault(MP_MOD_PALMOS_BACKUP_SYNC, MP_MOD_PALMOS_BACKUP_SYNC_D),
+      ConfigValueDefault(MP_MOD_PALMOS_BACKUP_INCREMENTAL, MP_MOD_PALMOS_BACKUP_INCREMENTAL_D),
+      ConfigValueDefault(MP_MOD_PALMOS_BACKUP_ALL, MP_MOD_PALMOS_BACKUP_ALL_D),
+      ConfigValueDefault(MP_MOD_PALMOS_BACKUP_EXCLUDELIST, MP_MOD_PALMOS_BACKUP_EXCLUDELIST_D),
+      };
 
 static wxOptionsPage::FieldInfo gs_FieldInfos1[] =
 {
    { gettext_noop("Synchronise Mail"), wxOptionsPage::Field_Bool,    -1 },
+      { gettext_noop("Synchronise Time"), wxOptionsPage::Field_Bool, -1 },
 //   { gettext_noop("Synchronise Addressbook"), wxOptionsPage::Field_Bool,    -1 },
       { gettext_noop("Always do Backup on sync"), wxOptionsPage::Field_Bool,    -1 },
 #ifdef HAVE_LIBMAL
-   { gettext_noop("Sync to MAL server (e.g. AvantGo)"), wxOptionsPage::Field_Bool,    -1 }, 
+         { gettext_noop("Sync to MAL server (e.g. AvantGo)"), wxOptionsPage::Field_Bool,    -1 }, 
 #endif
-         { gettext_noop("The Auto-Install function will automatically\n"
-                        "install all databases from a given directory\n"
-                        "on the PalmPilot during synchronisation."),
-              wxOptionsPage::Field_Message, -1},
-            { gettext_noop("Do Auto-Install"), wxOptionsPage::Field_Bool,  -1 },
-      { gettext_noop("Directory for Auto-Install"), wxOptionsPage::Field_Dir, -1 },
-               { gettext_noop("Pilot device"), wxOptionsPage::Field_Text,    -1 },
-   // the speed values must be in sync with the ones in the speeds[]
-   // array in GetConfig() further up:
-   { gettext_noop("Connection speed:9600:19200:38400:57600:115200"), wxOptionsPage::Field_Combo,    -1 },
-   { gettext_noop("Mailbox for exchange"), wxOptionsPage::Field_Text, -1},
-   { gettext_noop("Mail disposal mode:keep:delete:file"), wxOptionsPage::Field_Combo,   -1},
-   { gettext_noop("Directory for backup files"), wxOptionsPage::Field_Text,    -1 },
-   { gettext_noop("Delete backups of no longer existing databases"),
-     wxOptionsPage::Field_Bool,    -1 },
-   { gettext_noop("Backup only modified databases"), wxOptionsPage::Field_Bool,    -1 },
-   { gettext_noop("Force total backup of all databases"), wxOptionsPage::Field_Bool,    -1 },
-   { gettext_noop("Exclude these databases"), wxOptionsPage::Field_Text,    -1 },
-};
+            { gettext_noop("The Auto-Install function will automatically\n"
+                           "install all databases from a given directory\n"
+                           "on the PalmPilot during synchronisation."),
+                 wxOptionsPage::Field_Message, -1},
+               { gettext_noop("Do Auto-Install"), wxOptionsPage::Field_Bool,  -1 },
+                  { gettext_noop("Directory for Auto-Install"), wxOptionsPage::Field_Dir, -1 },
+                     { gettext_noop("Pilot device"), wxOptionsPage::Field_Text,    -1 },
+                        // the speed values must be in sync with the ones in the speeds[]
+                        // array in GetConfig() further up:
+                        { gettext_noop("Connection speed:9600:19200:38400:57600:115200"), wxOptionsPage::Field_Combo,    -1 },
+                           { gettext_noop("Mailbox for exchange"), wxOptionsPage::Field_Text, -1},
+                              { gettext_noop("Mail disposal mode:keep:delete:file"), wxOptionsPage::Field_Combo,   -1},
+                                 { gettext_noop("Directory for backup files"), wxOptionsPage::Field_Text,    -1 },
+                                    { gettext_noop("Delete backups of no longer existing databases"),
+                                         wxOptionsPage::Field_Bool,    -1 },
+                                       { gettext_noop("Backup only modified databases"), wxOptionsPage::Field_Bool,    -1 },
+                                          { gettext_noop("Force total backup of all databases"), wxOptionsPage::Field_Bool,    -1 },
+                                             { gettext_noop("Exclude these databases"), wxOptionsPage::Field_Text,    -1 },
+                                                };
 
 
 static ConfigValueDefault gs_ConfigValues2 [] =
 {
    ConfigValueDefault(MP_MOD_PALMOS_LOCK, MP_MOD_PALMOS_LOCK_D),
-   ConfigValueNone(),
-   ConfigValueDefault(MP_MOD_PALMOS_SCRIPT1, MP_MOD_PALMOS_SCRIPT1_D),
-   ConfigValueDefault(MP_MOD_PALMOS_SCRIPT2, MP_MOD_PALMOS_SCRIPT2_D),
+      ConfigValueNone(),
+      ConfigValueDefault(MP_MOD_PALMOS_SCRIPT1, MP_MOD_PALMOS_SCRIPT1_D),
+      ConfigValueDefault(MP_MOD_PALMOS_SCRIPT2, MP_MOD_PALMOS_SCRIPT2_D),
 #ifdef HAVE_LIBMAL
-   ConfigValueNone(),
-   ConfigValueDefault(MP_MOD_PALMOS_MAL_USE_PROXY, MP_MOD_PALMOS_MAL_USE_PROXY_D),
-   ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_HOST, MP_MOD_PALMOS_MAL_PROXY_HOST_D),
-   ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_PORT, MP_MOD_PALMOS_MAL_PROXY_PORT_D),
-   ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_LOGIN, MP_MOD_PALMOS_MAL_PROXY_LOGIN_D),
-   ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_PASSWORD, MP_MOD_PALMOS_MAL_PROXY_PASSWORD_D),
-   ConfigValueDefault(MP_MOD_PALMOS_MAL_USE_SOCKS, MP_MOD_PALMOS_MAL_USE_SOCKS_D),
-   ConfigValueDefault(MP_MOD_PALMOS_MAL_SOCKS_HOST, MP_MOD_PALMOS_MAL_SOCKS_HOST_D),
-   ConfigValueDefault(MP_MOD_PALMOS_MAL_SOCKS_PORT, MP_MOD_PALMOS_MAL_SOCKS_PORT_D),
+      ConfigValueNone(),
+      ConfigValueDefault(MP_MOD_PALMOS_MAL_USE_PROXY, MP_MOD_PALMOS_MAL_USE_PROXY_D),
+      ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_HOST, MP_MOD_PALMOS_MAL_PROXY_HOST_D),
+      ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_PORT, MP_MOD_PALMOS_MAL_PROXY_PORT_D),
+      ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_LOGIN, MP_MOD_PALMOS_MAL_PROXY_LOGIN_D),
+      ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_PASSWORD, MP_MOD_PALMOS_MAL_PROXY_PASSWORD_D),
+      ConfigValueDefault(MP_MOD_PALMOS_MAL_USE_SOCKS, MP_MOD_PALMOS_MAL_USE_SOCKS_D),
+      ConfigValueDefault(MP_MOD_PALMOS_MAL_SOCKS_HOST, MP_MOD_PALMOS_MAL_SOCKS_HOST_D),
+      ConfigValueDefault(MP_MOD_PALMOS_MAL_SOCKS_PORT, MP_MOD_PALMOS_MAL_SOCKS_PORT_D),
 #endif
-};
+      };
 
 #define MALPROXY 3
 static wxOptionsPage::FieldInfo gs_FieldInfos2[] =
@@ -1828,48 +1842,48 @@ static wxOptionsPage::FieldInfo gs_FieldInfos2[] =
                      "the synchronisation, e.g. to start/stop other\n"
                      "services using the serial port. Leave them\n"
                      "empty unless you know what you are doing."),
-                     wxOptionsPage::Field_Message, -1},
-   { gettext_noop("Script to run before"), wxOptionsPage::Field_File,    -1 },
-   { gettext_noop("Script to run after"), wxOptionsPage::Field_File,    -1 },
-#ifdef HAVE_LIBMAL
-      { gettext_noop("The following options affect only the\n"
-                     "MAL/AvantGo synchronisation:"),
            wxOptionsPage::Field_Message, -1},
-   { gettext_noop("Use Proxy host for MAL"), wxOptionsPage::Field_Bool,  -1 },
-   { gettext_noop("  Proxy host"), wxOptionsPage::Field_Text, MALPROXY },
-   { gettext_noop("  Proxy port number"), wxOptionsPage::Field_Number,MALPROXY},
-   { gettext_noop("  Proxy login"), wxOptionsPage::Field_Text,  MALPROXY },
-   { gettext_noop("  Proxy password"), wxOptionsPage::Field_Passwd, MALPROXY },
-   { gettext_noop("Use SOCKS server for MAL access"), wxOptionsPage::Field_Bool,  -1},
-   { gettext_noop("  SOCKS host"), wxOptionsPage::Field_Text,  MALPROXY+5 },
-   { gettext_noop("  SOCKS port number"), wxOptionsPage::Field_Number,  MALPROXY+5 },
+         { gettext_noop("Script to run before"), wxOptionsPage::Field_File,    -1 },
+            { gettext_noop("Script to run after"), wxOptionsPage::Field_File,    -1 },
+#ifdef HAVE_LIBMAL
+               { gettext_noop("The following options affect only the\n"
+                              "MAL/AvantGo synchronisation:"),
+                    wxOptionsPage::Field_Message, -1},
+                  { gettext_noop("Use Proxy host for MAL"), wxOptionsPage::Field_Bool,  -1 },
+                     { gettext_noop("  Proxy host"), wxOptionsPage::Field_Text, MALPROXY },
+                        { gettext_noop("  Proxy port number"), wxOptionsPage::Field_Number,MALPROXY},
+                           { gettext_noop("  Proxy login"), wxOptionsPage::Field_Text,  MALPROXY },
+                              { gettext_noop("  Proxy password"), wxOptionsPage::Field_Passwd, MALPROXY },
+                                 { gettext_noop("Use SOCKS server for MAL access"), wxOptionsPage::Field_Bool,  -1},
+                                    { gettext_noop("  SOCKS host"), wxOptionsPage::Field_Text,  MALPROXY+5 },
+                                       { gettext_noop("  SOCKS port number"), wxOptionsPage::Field_Number,  MALPROXY+5 },
 #endif
-};
+                                          };
 
 
 static
 struct wxOptionsPageDesc  gs_OptionsPageDesc1 =
 wxOptionsPageDesc(
    gettext_noop("PalmOS module preferences"),
-      "palmpilot",// image
-      MH_MODULES_PALMOS_CONFIG,
-      // the fields description
-      gs_FieldInfos1,
-      gs_ConfigValues1,
-      WXSIZEOF(gs_FieldInfos1)
-);
+   "palmpilot",// image
+   MH_MODULES_PALMOS_CONFIG,
+   // the fields description
+   gs_FieldInfos1,
+   gs_ConfigValues1,
+   WXSIZEOF(gs_FieldInfos1)
+   );
 
 static
 struct wxOptionsPageDesc  gs_OptionsPageDesc2 =
 wxOptionsPageDesc(
    gettext_noop("Advanced settings"),
-      "palmpilot",// image
-      MH_MODULES_PALMOS_CONFIG,
-      // the fields description
-      gs_FieldInfos2,
-      gs_ConfigValues2,
-      WXSIZEOF(gs_FieldInfos2)
-);
+   "palmpilot",// image
+   MH_MODULES_PALMOS_CONFIG,
+   // the fields description
+   gs_FieldInfos2,
+   gs_ConfigValues2,
+   WXSIZEOF(gs_FieldInfos2)
+   );
 
 static
 struct wxOptionsPageDesc g_Pages[] =
