@@ -646,28 +646,46 @@ dnl --------------------------------------------------------------------------
 dnl check for python
 dnl --------------------------------------------------------------------------
 
+dnl which Python version are we going to use?
+PYTHON_VER=
+
 dnl Check for Python headers first: we need this for both dynamic and static
 dnl linking
 case "$USE_PYTHON" in
 static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
         M_CHECK_MYHEADER(Python.h,
         [ \
-	    $prefix/include \
-	    $prefix/include/python1.5 \
-	    $prefix/include/python2.0 \
 	    $prefix/include/python2.1 \
-	    /usr/include/python1.5 \
-	    /usr/include/python2.0 \
 	    /usr/include/python2.1 \
-	    /usr/local/include \
-	    /usr/local/include/python1.5 \
-	    /usr/local/include/python2.0 \
 	    /usr/local/include/python2.1 \
         ],
 	[
+	    PYTHON_VER=2.1
 	],
         [
-	    USE_PYTHON=0
+	    M_CHECK_MYHEADER(Python.h,
+	    [ \
+		$prefix/include/python2.0 \
+		/usr/include/python2.0 \
+		/usr/local/include/python2.0 \
+	    ],
+	    [
+		PYTHON_VER=2.0
+	    ],
+	    [
+		M_CHECK_MYHEADER(Python.h,
+		[ \
+		    $prefix/include/python1.5 \
+		    /usr/include/python1.5 \
+		    /usr/local/include/python1.5 \
+		],
+		[
+		    PYTHON_VER=1.5
+		],
+		[
+		    USE_PYTHON=0
+		])
+	    ])
 	])
 	;;
 
@@ -678,7 +696,6 @@ static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
 esac
 
 dnl now check for the Python lib but only if linking statically
-USE_PYTHON2=0
 case "$USE_PYTHON" in
 dynamic|Dynamic|DYNAMIC|1)
 	dnl FIXME
@@ -688,61 +705,24 @@ dynamic|Dynamic|DYNAMIC|1)
 	;;
 
 static|Static|STATIC)
-	dnl argh, we have to check for 1.5, 2.0 and 2.1 - does any m4 guru
-	dnl care to write a function to automate this
-	M_CHECK_MYLIB(python1.5, main,
+	M_CHECK_MYLIB(python$PYTHON_VER, main,
 	[ \
 	    $prefix/lib \
-	    $prefix/lib/python1.5 \
-	    $prefix/lib/python1.5/config \
+	    $prefix/lib/python$PYTHON_VER \
+	    $prefix/lib/python$PYTHON_VER/config \
 	    /usr/lib \
-	    /usr/lib/python1.5 \
-	    /usr/lib/python1.5/config \
+	    /usr/lib/python$PYTHON_VER \
+	    /usr/lib/python$PYTHON_VER/config \
 	    /usr/local/lib \
-	    /usr/local/lib/python1.5 \
-	    /usr/local/lib/python1.5/config \
+	    /usr/local/lib/python$PYTHON_VER \
+	    /usr/local/lib/python$PYTHON_VER/config \
 	],
         [
-	    PYTHON_LIBS="$libpath_python1_5_main -lpython1.5"
-	    USE_PYTHON2=1
+	    VARNAME="libpath_python`echo $PYTHON_VER | sed 's/\./_/'`_main"
+	    PYTHON_LIBS="`eval echo $\`echo $VARNAME\`` -lpython$PYTHON_VER"
 	],
         [
-	    M_CHECK_MYLIB(python2.0, main,
-	    [ \
-		$prefix/lib \
-		$prefix/lib/python2.0 \
-		$prefix/lib/python2.0/config \
-		/usr/lib \
-		/usr/lib/python2.0 \
-		/usr/lib/python2.0/config \
-		/usr/local/lib \
-		/usr/local/lib/python2.0 \
-		/usr/local/lib/python2.0/config \
-	    ],
-	    [
-		PYTHON_LIBS="$libpath_python2_0_main -lpython2.0"
-		USE_PYTHON2=1
-	    ],
-	    [
-		M_CHECK_MYLIB(python2.1, main,
-		[ \
-		    $prefix/lib \
-		    $prefix/lib/python2.1 \
-		    $prefix/lib/python2.1/config \
-		    /usr/lib \
-		    /usr/lib/python2.1 \
-		    /usr/lib/python2.1/config \
-		    /usr/local/lib \
-		    /usr/local/lib/python2.1 \
-		    /usr/local/lib/python2.1/config \
-		],
-		[
-		    PYTHON_LIBS="$libpath_python2_1_main -lpython2.1"
-		],
-		[
-		    USE_PYTHON=0
-		])
-	    ])
+	    USE_PYTHON=0
 	])
 	if test "$USE_PYTHON" != 0; then
 	    dnl extra libs required by python on freebsd
@@ -753,7 +733,7 @@ static|Static|STATIC)
 
 	    dnl Python2 uses forkpty() and openpty() which are not in libc
 	    dnl under Linux but in libutil
-	    if test "$USE_PYTHON2" != 0; then
+	    if test "$PYTHON_VER" != "1.5"; then
 		AC_CHECK_FUNC(openpty,,
 			AC_CHECK_LIB(util,openpty,
 			    PYTHON_LIBS="-lutil $PYTHON_LIBS"))

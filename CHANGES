@@ -6,6 +6,7 @@
 Release 0.63 'Saugus'
 -------------------------------------------------------------------------------
 
+05.06.01 VZ: (Unix) configure now detects Python 2.x
 28.05.01 NB: added "Next flagged" menu command
 27.05.01 VZ: added URL popup menu
 26.05.01 NB: added possibility to open URLs in new window
