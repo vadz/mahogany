@@ -332,24 +332,28 @@ MailFolderCC::RegisterView(FolderView *view, bool reg)
 
 
 void
-MailFolderCC::AppendMessage(String const &msg)
+MailFolderCC::AppendMessage(String const &msg, bool eventsflag)
 {
    STRING str;
 
+   bool events = m_GenerateNewMailEvents;
+   m_GenerateNewMailEvents = eventsflag;
+   
    INIT(&str, mail_string, (void *) msg.c_str(), msg.Length());
    ProcessEventQueue();
    if(! mail_append(NIL,(char *)m_MailboxPath.c_str(),&str))
       ERRORMESSAGE(("cannot append message"));
    ProcessEventQueue();
+   m_GenerateNewMailEvents = events;
 }
 
 void
-MailFolderCC::AppendMessage(Message const &msg)
+MailFolderCC::AppendMessage(Message const &msg, bool eventsflag)
 {
    String tmp;
 
    msg.WriteToString(tmp);
-   AppendMessage(tmp);
+   AppendMessage(tmp, eventsflag);
 }
 
 void

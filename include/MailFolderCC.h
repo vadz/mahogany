@@ -156,13 +156,15 @@ public:
    
    /** Appends the message to this folder.
        @param msg the message to append
+       @param eventsflag if true, generate new mail events
    */
-   virtual void AppendMessage(Message const &msg);
+   virtual void AppendMessage(Message const &msg, bool eventsflag = false);
 
    /** Appends the message to this folder.
        @param msg text of the  message to append
+       @param eventsflag if true, generate new mail events
    */
-   virtual void AppendMessage(String const &msg);
+   virtual void AppendMessage(String const &msg, bool eventsflag = false);
 
    /** Delete a message.
        @param index the sequence number
@@ -188,7 +190,6 @@ public:
    
    /** Updates the associated FolderViews */
    void UpdateViews(void);
-
 
    /**@name Functions to get an overview of messages in the folder. */
    //@{
