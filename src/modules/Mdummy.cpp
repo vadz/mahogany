@@ -47,8 +47,13 @@ private:
 MMODULE_BEGIN_IMPLEMENT(DummyModule,
                         "Mdummy",
                         "none",
-                        "This module demonstrates the MModule plugin interface.",
+                        "Dummy module for Mahogany",
                         "0.00")
+   MMODULE_PROP(description, "This module does not do anything, "
+                             "it simply gets loaded, opens a dialog and "
+                             "that's all. It's purpose is to serve as an "
+                             "example and template for writing real modules.")
+   MMODULE_PROP(author, "Karsten Ballüder <karsten@phy.hw.ac.uk>")
 MMODULE_END_IMPLEMENT(DummyModule)
 
 

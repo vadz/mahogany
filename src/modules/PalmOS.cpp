@@ -445,8 +445,11 @@ PalmOSModule::GetConfig(void)
 MMODULE_BEGIN_IMPLEMENT(PalmOSModule,
                         "PalmOS",
                         "HandheldSynchronise",
-                        "This module provides PalmOS connectivity.",
+                        "PalmOS module",
                         "0.00")
+   MMODULE_PROP(description,
+                _("This module provides PalmOS connectivity"))
+   MMODULE_PROP(author, "Karsten Ballüder <karsten@phy.hw.ac.uk>")
 MMODULE_END_IMPLEMENT(PalmOSModule)
 
 
