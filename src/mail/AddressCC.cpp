@@ -47,19 +47,25 @@ extern const MOption MP_PERSONALNAME;
 // constants
 // ----------------------------------------------------------------------------
 
-// the max size of the buffer holding the address: this is horribly dangerous
-// as there are *NO* buffer size checks in c-client which means that we just
-// die horribly if the buffer is overflown -- but what to do except
-// complaining to MRC who'd just tell me that he doesn't care about such
-// "minor" problem? #$#$^$%&^%^&!!
-static const size_t MAX_ADDRESS_LEN = 16384;
+// Adr2String parameters
+enum Adr2StringWhich
+{
+   Adr2String_All,
+   Adr2String_FirstOnly
+};
 
 // ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
 // return string containing all addresses or just the first one from this list
-static String Adr2String(ADDRESS *adr, bool all = true);
+static String Adr2String(ADDRESS *adr,
+                         Adr2StringWhich which = Adr2String_All,
+                         bool *error = NULL);
+
+// return the string containing just the email part of the address (this always
+// works with one address only, not the entire list)
+static String Adr2Email(ADDRESS *adr);
 
 // ============================================================================
 // AddressCC implementation
@@ -88,7 +94,7 @@ bool AddressCC::IsValid() const
 
 String AddressCC::GetAddress() const
 {
-   return Adr2String(m_adr, false /* just the first one */);
+   return Adr2String(m_adr, Adr2String_FirstOnly);
 }
 
 String AddressCC::GetName() const
@@ -123,16 +129,7 @@ String AddressCC::GetDomain() const
 
 String AddressCC::GetEMail() const
 {
-   String email;
-
-   // FIXME: again, c-client doesn't check size of the buffer!
-   char *buf = email.GetWriteBuf(MAX_ADDRESS_LEN);
-   *buf = '\0';
-   rfc822_address(buf, m_adr);
-   email.UngetWriteBuf();
-   email.Shrink();
-
-   return email;
+   return Adr2Email(m_adr);
 }
 
 // ----------------------------------------------------------------------------
@@ -178,41 +175,30 @@ AddressListCC::AddressListCC(mail_address *adr)
 
    while ( adr )
    {
-      // c-client generates dummy addresses when it can't parse the original
-      // address, filter them out
-      if ( adr->error ||
-            (adr->mailbox && !strcmp(adr->mailbox, "INVALID_ADDRESS")) ||
-            (adr->host && !strcmp(adr->host, ERRHOST)) )
+      // c-client mungles unqualified addresses, undo it
+      if ( adr->host && !strcmp(adr->host, BADHOST) )
       {
-         DBGMESSAGE(("Skipping bad address '%s'.", Adr2String(adr).c_str()));
+         // the only way to get an address without the hostname is to use
+         // '@' as hostname (try to find this in c-client docs!)
+         fs_give((void **)&(adr->host));
+         adr->host = (char *)fs_get(2);
+         adr->host[0] = '@';
+         adr->host[1] = '\0';;
       }
-      else // good address, store
+
+      AddressCC *addr = new AddressCC(adr);
+
+      if ( !addrCur )
       {
-         // c-client mungles unqualified addresses, undo it
-         if ( adr->host && !strcmp(adr->host, BADHOST) )
-         {
-            // the only way to get an address without the hostname is to use
-            // '@' as hostname (try to find this in c-client docs!)
-            fs_give((void **)&(adr->host));
-            adr->host = (char *)fs_get(2);
-            adr->host[0] = '@';
-            adr->host[1] = '\0';;
-         }
-
-         AddressCC *addr = new AddressCC(adr);
-
-         if ( !addrCur )
-         {
-            // first address, remember as head of the linked list
-            m_addrCC = addr;
-         }
-         else // not first address, add to the linked list
-         {
-            addrCur->m_addrNext = addr;
-         }
-
-         addrCur = addr;
+         // first address, remember as head of the linked list
+         m_addrCC = addr;
       }
+      else // not first address, add to the linked list
+      {
+         addrCur->m_addrNext = addr;
+      }
+
+      addrCur = addr;
 
       adr = adr->next;
    }
@@ -316,7 +302,10 @@ AddressList *AddressList::Create(const String& address, const String& defhost)
       }
    }
 
-   return new AddressListCC(adr);
+   AddressListCC *addrList = new AddressListCC(adr);
+   addrList->m_addressHeader = address;
+
+   return addrList;
 }
 
 // ----------------------------------------------------------------------------
@@ -344,7 +333,15 @@ String AddressListCC::GetAddresses() const
    String address;
    if ( m_addrCC )
    {
-      address = Adr2String(m_addrCC->m_adr);
+      bool error;
+      address = Adr2String(m_addrCC->m_adr, Adr2String_All, &error);
+
+      // when an error occurs, prefer to show the original address as is, if we
+      // have it - this gives max info to the user
+      if ( error && !m_addressHeader.empty() )
+      {
+         address = m_addressHeader;
+      }
    }
    //else: no valid addresses at all
 
@@ -393,28 +390,158 @@ String AddressListCC::DebugDump() const
 // global functions implementation
 // ============================================================================
 
-static String Adr2String(ADDRESS *adr, bool all)
+// we reimplement rfc822_write_address() and related functions here because the
+// c-client function doesn't respect the buffer size which leads to easily
+// reproducible buffer overflows and MRC refuses to fix it! <sigh>
+
+// wspecials and rspecials string from c-client
+static const char *WORD_SPECIALS = " ()<>@,;:\\\"[]";
+const char *ALL_SPECIALS =  "()<>@,;:\\\"[].";
+
+// this one is the replacement for rfc822_cat()
+static String Rfc822Quote(const char *src, const char *specials)
+{
+   String dest;
+
+   // do we have any specials at all?
+   if ( strpbrk(src, specials) )
+   {
+      // need to quote
+      dest = '"';
+
+      while ( *src )
+      {
+         switch ( *src )
+         {
+            case '\\':
+            case '"':
+               // need to quote
+               dest += '\\';
+               break;
+         }
+
+         dest += *src++;
+      }
+
+      // closing quote
+      dest += '"';
+   }
+   else // no specials at all, easy case
+   {
+      dest = src;
+   }
+
+   return dest;
+}
+
+// rfc822_address() replacement
+static String Adr2Email(ADDRESS *adr)
+{
+   String email;
+
+   // do we have email at all?
+   if ( adr && adr->host )
+   {
+      email.reserve(256);
+
+      // deal with the A-D-L
+      if ( adr->adl )
+      {
+         email << adr->adl << ':';
+      }
+
+      // and now the mailbox name: we quote all characters forbidden in a word
+      email << Rfc822Quote(adr->mailbox, WORD_SPECIALS);
+
+      // passing the NULL host suppresses printing the full address
+      if ( *adr->host != '@' )
+      {
+         email << '@' << adr->host;
+      }
+   }
+
+   return email;
+}
+
+// rfc822_write_address() replacement with some extra functionality
+static String Adr2String(ADDRESS *adr, Adr2StringWhich which, bool *error)
 {
    String address;
-   CHECK( adr, address, "invalid address" );
+   address.reserve(1024);
 
-   // if we need only one address, prevent rfc822_write_address() from
-   // traversing the entire address list by temporarily setting the next
-   // pointer to NULL
-   ADDRESS *adrNextOld = all ? NULL : adr->next;
-   if ( adrNextOld )
-      adr->next = NULL;
+   if ( error )
+   {
+      // not yet
+      *error = false;
+   }
 
-   // FIXME: there is no way to get the address length from c-client, how to
-   //        prevent it from overwriting our buffer??
-   char *buf = address.GetWriteBuf(MAX_ADDRESS_LEN);
-   *buf = '\0';
-   rfc822_write_address(buf, adr);
-   address.UngetWriteBuf();
-   address.Shrink();
+   bool first = true;
+   for ( size_t groupDepth = 0; adr; adr = adr->next )
+   {
+      // is this a valid address?
+      if ( adr->host && !strcmp(adr->host, ERRHOST) )
+      {
+         // tell the caller that we had a problem
+         if ( error )
+            *error = true;
 
-   if ( adrNextOld )
-      adr->next = adrNextOld;
+         // stop at the first invalid address, there is nothing (but garbage in
+         // the worst case) following it anyhow
+         break;
+      }
+
+      if ( first )
+      {
+         // no more during the next iteration
+         first = false;
+      }
+      else // not the first address
+      {
+         // do we need the subsequent ones?
+         if ( which != Adr2String_All )
+         {
+            // no
+            break;
+         }
+
+         if ( !groupDepth )
+         {
+            // separate from the previous one
+            address << ", ";
+         }
+      }
+
+      // ordinary address?
+      if ( adr->host )
+      {
+         // simple case?
+         if ( !(adr->personal || adr->adl) )
+         {
+            address << Adr2Email(adr);
+         }
+         else // no, must use phrase <route-addr> form
+         {
+            if ( adr->personal )
+               address << Rfc822Quote(adr->personal, ALL_SPECIALS);
+
+            address << " <" << Adr2Email(adr) << '>';
+         }
+      }
+      else if ( adr->mailbox ) // start of group?
+      {
+         // yes, write group name
+         address << Rfc822Quote(adr->mailbox, ALL_SPECIALS) << ": ";
+
+         // in a group
+         groupDepth++;
+      }
+      else if ( groupDepth ) // must be end of group (but be paranoid)
+      {
+         address += ';';
+
+         groupDepth--;
+      }
+   }
 
    return address;
 }

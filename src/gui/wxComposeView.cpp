@@ -1540,7 +1540,11 @@ wxComposeView::AddRecipients(const String& address, RecipientType addrType)
       Address *addr = addrList->GetFirst();
       while ( addr )
       {
-         AddRecipient(addr->GetAddress(), addrType);
+         String address = addr->GetAddress();
+         if ( !address.empty() )
+         {
+            AddRecipient(address, addrType);
+         }
 
          addr = addrList->GetNext(addr);
       }

@@ -82,6 +82,9 @@ private:
    // pointer to the head of the linked list of addresses
    AddressCC *m_addrCC;
 
+   // the header from which the addresses were extracted (may be empty)
+   String m_addressHeader;
+
    // these methods use our private ctor
    friend AddressList *AddressList::Create(const String&, const String&);
    friend AddressList *AddressList::CreateFromAddress(Profile *profile);
