@@ -65,12 +65,10 @@ extern const MOption MP_COMPOSE_SIGNATURE;
 extern const MOption MP_COMPOSE_USE_SIGNATURE;
 extern const MOption MP_COMPOSE_USE_SIGNATURE_SEPARATOR;
 extern const MOption MP_DATE_FMT;
-extern const MOption MP_REPLY_DETECT_SIG;
 extern const MOption MP_REPLY_MSGPREFIX;
 extern const MOption MP_REPLY_MSGPREFIX_FROM_XATTR;
 extern const MOption MP_REPLY_MSGPREFIX_FROM_SENDER;
 extern const MOption MP_REPLY_QUOTE_EMPTY;
-extern const MOption MP_REPLY_SIG_SEPARATOR;
 extern const MOption MP_WRAPMARGIN;
 
 // ----------------------------------------------------------------------------
@@ -562,20 +560,12 @@ static String GetReplyPrefix(Message *msg, Profile *profile)
    return prefix;
 }
 
-// flags for ExpandOriginalText()
-enum
-{
-   NoDetectSig = 0,
-   DetectSig = 1
-};
-
 // put the text quoted according to our current quoting options with the given
 // reply prefix into value
 static String
 ExpandOriginalText(const String& text,
                    const String& prefix,
-                   Profile *profile,
-                   int flags = DetectSig)
+                   Profile *profile)
 {
    String value;
 
@@ -608,51 +598,17 @@ ExpandOriginalText(const String& text,
       wrapMargin = 0;
    }
 
-   // should we detect the signature and discard it?
-   bool detectSig = (flags & DetectSig) &&
-                        READ_CONFIG_BOOL(profile, MP_REPLY_DETECT_SIG);
-
-   DetectSignature signature;
-   if( detectSig )
-   {
-      if( !signature.Initialize(profile) )
-      {
-         profile->writeEntry(MP_REPLY_DETECT_SIG, false);
-         detectSig = false;
-      }
-   }
-
    // if != 0, then we're at the end of the current line
    size_t lenEOL = 0;
 
    // the current line
    String lineCur;
 
-   // the last detected signature start and the number of new lines after it
-   // which we use at the end to detect if we don't discard a too big part of
-   // the message
-   int posSig = -1;
-   size_t numLinesAfterSig = 0;
-
    for ( const wxChar *cptr = text.c_str(); ; cptr++ )
    {
       // start of [real] new line?
       if ( lineCur.empty() )
       {
-         if ( detectSig )
-         {
-            if ( signature.StartsHere(cptr) )
-            {
-               // remember that the sig apparently starts here
-               posSig = value.length();
-               numLinesAfterSig = 0;
-            }
-            else if ( posSig != -1 )
-            {
-               numLinesAfterSig++;
-            }
-         }
-
          if ( !quoteEmpty && (lenEOL = IsEndOfLine(cptr)) != 0 )
          {
             // this line is empty, skip it entirely (i.e. don't output the
@@ -728,22 +684,6 @@ ExpandOriginalText(const String& text,
             lineCur.Prepend(prefix);
          }
       }
-   }
-
-   // if we had a sig, truncate it now: we have to do it like this because
-   // otherwise we risk discarding a too big part of the message, e.g. if it
-   // contains a quoted message with a sig inside it so we want to discard
-   // everything after the last sig detected
-   if ( posSig != -1 )
-   {
-      // also check that it wasn't just a line of dashes in the middle of the
-      // messages -- the check is empirical, of course, but better than nothing
-      // as it avoids losing bottom half of messages containing ASCII art
-      //
-      // the value of 10 is arbitrary but hopefully no trailer nor signature is
-      // going to be more than 10 lines in length
-      if ( numLinesAfterSig < 10 )
-         value.erase(posSig);
    }
 
    return value;
@@ -1561,13 +1501,7 @@ VarExpander::DoQuoteOriginal(bool isQuote, String *value) const
    }
    //else: template "text", so no reply prefix at all
 
-   *value = ExpandOriginalText
-            (
-               m_msgview->GetText(),
-               prefix,
-               m_profile,
-               NoDetectSig
-            );
+   *value = ExpandOriginalText(m_msgview->GetText(), prefix, m_profile);
 }
 
 // ----------------------------------------------------------------------------
@@ -1619,6 +1553,6 @@ extern String QuoteText(const String& text,
 
    const String prefix = GetReplyPrefix(msgOriginal, profile);
 
-   return ExpandOriginalText(text, prefix, profile, NoDetectSig);
+   return ExpandOriginalText(text, prefix, profile);
 }
 
