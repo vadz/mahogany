@@ -240,6 +240,7 @@ private:
 // ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(MimePopup, wxMenu)
    EVT_MENU(-1, MimePopup::OnCommandEvent)
 END_EVENT_TABLE()
@@ -565,6 +566,12 @@ wxMessageView::SetEncoding(wxFontEncoding encoding)
    m_encodingUser = encoding;
 
    Update();
+
+   if ( READ_CONFIG(m_Profile, MP_MSGVIEW_AUTO_ENCODING) )
+   {
+      // don't keep it for the other messages, just for this one
+      m_encodingUser = wxFONTENCODING_SYSTEM;
+   }
 }
 
 void
@@ -625,6 +632,17 @@ wxMessageView::Update(void)
          // first get the value of this header
          wxFontEncoding encHeader;
          m_mailMessage->GetHeaderLine(headerName, headerValue, &encHeader);
+
+         // we will usually detect the encoding in the headers properly (if a
+         // mailer does use RFC 2047, it will use it properly), but if we
+         // found none it might be because the mailer is broken and sends 8
+         // bit strings (almost all Web mailers do!) in headers in which case
+         // we shall take the user-specified encoding
+         if ( m_encodingUser != wxFONTENCODING_SYSTEM &&
+              encHeader == wxFONTENCODING_SYSTEM )
+         {
+            encHeader = m_encodingUser;
+         }
 
          // check for several special cases
          if ( headerName == "From" )
@@ -764,7 +782,7 @@ wxMessageView::Update(void)
             // user-specified encoding overrides everything
             encPart = m_encodingUser;
          }
-         else
+         else if ( READ_CONFIG(m_Profile, MP_MSGVIEW_AUTO_ENCODING) )
          {
             encPart = m_mailMessage->GetTextPartEncoding(i);
             if ( encPart == wxFONTENCODING_SYSTEM )
@@ -777,6 +795,11 @@ wxMessageView::Update(void)
                // remember the encoding for the next parts
                encBody = encPart;
             }
+         }
+         else
+         {
+            // autodetecting encoding is disabled, don't use any
+            encPart = wxFONTENCODING_SYSTEM;
          }
 
          unsigned long len;

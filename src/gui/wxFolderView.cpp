@@ -45,6 +45,8 @@
 #include "wx/persctrl.h"
 #include <wx/menuitem.h>
 #include <wx/dnd.h>
+#include <wx/fontmap.h>
+#include <wx/encconv.h>
 
 #include "MFolder.h"
 #include "Mdnd.h"
@@ -1262,6 +1264,36 @@ wxFolderView::SetEntry(HeaderInfoList *listing, size_t index)
       sender = Message::GetNameFromAddress(sender);
    }
 
+   // we optionally need to convert sender string
+   wxFontEncoding encoding = hi->GetEncoding();
+   if ( encoding != wxFONTENCODING_SYSTEM )
+   {
+      wxFontEncoding encoding = hi->GetEncoding();
+      if ( !wxTheFontMapper->IsEncodingAvailable(encoding) )
+      {
+         // try to find another encoding
+         wxFontEncoding encAlt;
+         if ( wxTheFontMapper->GetAltForEncoding(encoding, &encAlt) )
+         {
+            wxEncodingConverter conv;
+            if ( conv.Init(encoding, encAlt) )
+            {
+               encoding = encAlt;
+
+               sender = conv.Convert(sender);
+               subject = conv.Convert(subject);
+            }
+            else
+            {
+               // TODO give an error message here
+
+               // don't attempt to do anything with this encoding
+               encoding = wxFONTENCODING_SYSTEM;
+            }
+         }
+      }
+   }
+
    MailFolder *mf = m_ASMailFolder->GetMailFolder();
    m_FolderCtrl->SetEntry(index,
                           MailFolder::ConvertMessageStatusToString(hi->GetStatus(),
@@ -1300,10 +1332,10 @@ wxFolderView::SetEntry(HeaderInfoList *listing, size_t index)
             )
          );
 
-   if ( hi->HasEncoding() )
+   if ( encoding != wxFONTENCODING_SYSTEM )
    {
       wxFont font = m_FolderCtrl->GetFont();
-      font.SetEncoding(hi->GetEncoding());
+      font.SetEncoding(encoding);
       info.SetFont(font);
    }
 

@@ -201,9 +201,9 @@ public:
       {
          wxLogStatus(m_frame, _("Selected folder '%s'."),
                      newsel->GetFullName().c_str());
-      }
 
-      UpdateMenu(m_frame->GetMenuBar()->GetMenu(MMenu_Folder), newsel);
+         UpdateMenu(m_frame->GetMenuBar()->GetMenu(MMenu_Folder), newsel);
+      }
 
       wxFolderTree::OnSelectionChange(oldsel, newsel);
    }
