@@ -46,10 +46,7 @@
 
 // define this to do some (expensive!) run-time checks for translation tables
 // consistency
-#ifdef DEBUG
 //#undef DEBUG_SORTING
-#define DEBUG_SORTING
-#endif
 
 #ifdef DEBUG_SORTING
    #define CHECK_TABLES() VerifyTables(m_count, m_tableMsgno, m_tablePos)
