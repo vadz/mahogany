@@ -30,7 +30,7 @@ static char *tb_mail_replyall[] = {
 "7 c #b5b5ad",
 "8 c gray71",
 "9 c #bdbdb5",
-"0 c gray74",
+"0 c None",
 "q c #c6ad8c",
 "w c #e7deb5",
 "e c #c6c6c6",
