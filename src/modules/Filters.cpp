@@ -48,6 +48,7 @@
 #include <time.h>  // mktime()
 
 #include "modules/Filters.h"
+#include "MFilterLang.h"
 
 #include <wx/regex.h>   // wxRegEx::Flags
 
@@ -1936,7 +1937,7 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
    for ( size_t n = 0; n < count && !rc; n++ )
    {
       const wxString& test = tests[n];
-      if ( test == "subj8bit" )
+      if ( test == SPAM_TEST_SUBJ8BIT )
       {
          // consider that the message is a spam if its subject contains more
          // than half of non alpha numeric chars but isn't properly encoded
@@ -1963,20 +1964,20 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
             }
          }
       }
-      else if ( test == "korean" )
+      else if ( test == SPAM_TEST_KOREAN )
       {
          // detect all Korean charsets -- and do it for all MIME parts, not
          // just the top level one
          rc = CheckMimePartForKoreanCSet(msg->GetTopMimePart());
       }
-      else if ( test == "xauthwarn" )
+      else if ( test == SPAM_TEST_XAUTHWARN )
       {
          // unfortunately not only spams have this header but we consider that
          // only spammers change their address in such way
          rc = msg->GetHeaderLine("X-Authentication-Warning", value) &&
                   CheckXAuthWarning(value);
       }
-      else if ( test == "html" )
+      else if ( test == SPAM_TEST_HTML )
       {
          // we accept the multipart/alternative messages with a text/plain and
          // a text/html part but not the top level text/html messages
@@ -1984,7 +1985,7 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
          rc = part && part->GetType().GetFull() == "TEXT/HTML";
       }
 #ifdef USE_RBL
-      else if ( test == "rbl" )
+      else if ( test == SPAM_TEST_RBL )
       {
          msg->GetHeaderLine("Received", value);
 
