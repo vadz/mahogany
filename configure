@@ -3950,6 +3950,13 @@ fi
 
 
 
+OSINFO=`uname -s -r -m`
+OSINFO="\"$OSINFO\""
+cat >> confdefs.h <<EOF
+#define M_OSINFO $OSINFO
+EOF
+
+
 MAKE_LOCAL_LIBS_DEFINE="junk"
 
 LIBS="$LIBS -lcompface"

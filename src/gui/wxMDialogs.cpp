@@ -599,6 +599,10 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    version += M_VERSION_STRING;
    ll.Insert(version);
    ll.LineBreak();
+   version = _("    running on: ");
+   version += M_OSINFO;
+   ll.Insert(version);
+   ll.LineBreak();
    ll.LineBreak();
    ll.LineBreak();
    ll.Insert(_("  Copyright (c) 1999 by Karsten Ballüder"));

@@ -503,6 +503,11 @@ dnl --------------------------------------------------------------------------
 dnl final settings, concatenation of args, etc
 dnl --------------------------------------------------------------------------
 
+dnl setting the OS type for information
+OSINFO=`uname -s -r -m`
+OSINFO="\"$OSINFO\""
+AC_DEFINE_UNQUOTED(M_OSINFO,$OSINFO)
+
 dnl just a file where to dump some unneeded code in the python dir
 MAKE_LOCAL_LIBS_DEFINE="junk"
 

@@ -1,9 +1,9 @@
 /*-*- c++ -*-********************************************************
  * Mconfig.h: configuration for M                                   *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997-1999 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$                *
+ * $Id$               *
  *******************************************************************/
 #ifndef MCONFIG_H
 #define  MCONFIG_H
