@@ -553,7 +553,7 @@ msgstr "Você realmente deseja sair do Mahogany?"
 #: wxMApp.cpp:506
 #
 msgid "Mahogany : Activity Log"
-msgstr "Mahogany: Registro de atividade"
+msgstr "Mahogany: Registro de atividades"
 
 #: wxMApp.cpp:694
 msgid "Cannot initialise help system.\n"
@@ -1845,7 +1845,7 @@ msgstr "Configurar impressão"
 
 #: wxMenuDefs.cpp:219
 msgid "P&age Setup"
-msgstr "Configur&ar Página"
+msgstr "Configurar &Página"
 
 #: wxMenuDefs.cpp:219
 msgid "Configure page setup"
@@ -1889,7 +1889,7 @@ msgstr "Sair da aplicação"
 
 #: wxMenuDefs.cpp:239
 msgid "C&ut"
-msgstr "&Cortar"
+msgstr "Cor&tar"
 
 #: wxMenuDefs.cpp:239
 msgid "Cut selection and copy it to clipboard"
@@ -1905,7 +1905,7 @@ msgstr "Copiar seleção para a área de transferência"
 
 #: wxMenuDefs.cpp:241 wxMenuDefs.cpp:315
 msgid "&Paste"
-msgstr "&Colar"
+msgstr "Co&lar"
 
 #: wxMenuDefs.cpp:241
 msgid "Paste from clipboard"
@@ -2039,7 +2039,7 @@ msgstr "Mover mensagem para outra pasta"
 #: AdbFrame.cpp:1091 wxHeadersDialogs.cpp:913 wxMenuDefs.cpp:268
 #: wxMenuDefs.cpp:310
 msgid "&Delete"
-msgstr "&Marcar mensagem para remoção"
+msgstr "M&arcar mensagem para remoção"
 
 #: wxMenuDefs.cpp:268
 msgid "Delete this message"
@@ -2047,7 +2047,7 @@ msgstr "Marcar esta mensagem para remoção"
 
 #: wxMenuDefs.cpp:269
 msgid "&Undelete"
-msgstr "Cancelar &remoção"
+msgstr "Cancelar re&moção"
 
 #: wxMenuDefs.cpp:269
 msgid "Undelete message"
@@ -2063,7 +2063,7 @@ msgstr "Efetivar remoção de mensagens"
 
 #: wxMenuDefs.cpp:272
 msgid "Select &all"
-msgstr "Selecion&ar todas"
+msgstr "Se&lecionar todas"
 
 #: wxMenuDefs.cpp:272
 msgid "Select all messages"
@@ -2071,7 +2071,7 @@ msgstr "Selecionar todas as mensagens"
 
 #: wxMenuDefs.cpp:273
 msgid "D&eselect all"
-msgstr "&Cancelar seleção"
+msgstr "Canc&elar seleção"
 
 #: wxMenuDefs.cpp:273
 msgid "Unselect all messages"
@@ -2308,7 +2308,7 @@ msgstr "Ajuda sobre o contexto atual..."
 
 #: wxMenuDefs.cpp:331
 msgid "Help &Contents"
-msgstr "Índice da &Ajuda"
+msgstr "Índice da A&juda"
 
 #: wxMenuDefs.cpp:331
 msgid "Contents of help system..."
@@ -4379,6 +4379,30 @@ msgstr "Erro fatal"
 msgid "Information"
 msgstr "Informação"
 
+msgid "Re"
+msgstr "Re"
+
+msgid "Warning"
+msgstr "Mensagem"
+
+msgid "Log"
+msgstr "Registro"
+
+msgid "Close"
+msgstr "Fechar"
+
+msgid "Clear"
+msgstr "Limpar"
+
+msgid "Clear the log contents"
+msgstr "Limpar o conteúdo do registro"
+
+msgid "Save log contents to file"
+msgstr "Salvar o conteúdo do registro em um arquivo"
+
+msgid "Status: "
+msgstr "Status: "
+
 #~ msgid ""
 #~ "Invalid value '%s' for the date format: it should contain exacty 3 %%u "
 #~ "format specificators. Default value '%s' will be used instead."
@@ -4401,3 +4425,4 @@ msgstr "Informação"
 
 #~ msgid "Select the file to import data from"
 #~ msgstr "Escolha o arquivo donde os dados serão importados"
+
