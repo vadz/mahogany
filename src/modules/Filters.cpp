@@ -54,6 +54,18 @@
 // for the func_print() function:
 #include "gui/wxMessageView.h"
 
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// all recipient headers, more can be added (but always NULL terminate!)
+static const char *headersRecipients[] =
+{
+   "To", "CC", "Bcc",
+   "Resent-To", "Resent-Cc", "Resent-Bcc",
+   NULL
+};
+
 // forward declare all of our classes
 class ArgList;
 class Expression;
@@ -321,6 +333,12 @@ private:
 
    // the folder the message was copied to or empty
    String m_copiedTo;
+
+   // the optimization hints - set in FindFunction(), used in Apply()
+   bool m_hasToFunc,
+        m_hasRcptFunc,
+        m_hasHdrLineFunc,
+        m_hasHeaderFunc;
 
    GCC_DTOR_WARN_OFF
 };
@@ -610,8 +628,9 @@ public:
    FunctionDefinition(const char *name, FunctionPointer fptr)
       : m_Name(name), m_FunctionPtr(fptr)
       { ASSERT(m_Name); ASSERT(m_FunctionPtr); }
-   inline const char *GetName(void) const { return m_Name; }
-   inline FunctionPointer GetFPtr(void) const { return m_FunctionPtr; }
+   const char *GetName(void) const { return m_Name; }
+   FunctionPointer GetFPtr(void) const { return m_FunctionPtr; }
+
 private:
    String          m_Name;
    FunctionPointer m_FunctionPtr;
@@ -940,14 +959,31 @@ private:
 };
 
 static const FunctionList *BuiltinFunctions(void);
+
 const FunctionDefinition *
 FilterRuleImpl::FindFunction(const String &name)
 {
    // SOMEDAY: when user-defined functions, search that list, too
    const FunctionList *list = BuiltinFunctions();
    for (FunctionList::iterator i = list->begin(); i != list->end(); ++i)
-      if (name == i->GetName())
+   {
+      if ( name == i->GetName() )
+      {
+         // remember if we have some particular functions - we use it to
+         // optimize filter execution in Apply()
+         if ( name == "to" )
+            m_hasToFunc = true;
+         else if ( name == "recipients" )
+            m_hasRcptFunc = true;
+         else if ( name == "headerline" )
+            m_hasHdrLineFunc = true;
+         else if ( name == "header" )
+            m_hasHeaderFunc = true;
+
          return i.operator->();
+      }
+   }
+
    return NULL;
 }
 
@@ -2099,19 +2135,13 @@ extern "C"
          Message *msg = p->GetMessage();
          if ( msg )
          {
-            static const char *headers[] =
-            {
-               "To", "CC", "Bcc",
-               "Resent-To", "Resent-Cc", "Resent-Bcc",
-               NULL
-            };
-
-            wxArrayString values = msg->GetHeaderLines(headers);
+            wxArrayString values = msg->GetHeaderLines(headersRecipients);
             result = strutil_flatten_array(values, ',');
 
             msg->DecRef();
          }
       }
+      //else: error in arg count!
 
       return Value(result);
    }
@@ -2242,18 +2272,12 @@ extern "C"
    {
       if(args->Count() != 0)
          return Value(-1);
+
       Message *msg = p->GetMessage();
-      struct tm tms;
-      memset(&tms, 0, sizeof(tms));
-      (void) msg->GetStatus(NULL,
-                            (unsigned int *)&tms.tm_mday,
-                            (unsigned int *)&tms.tm_mon,
-                            (unsigned int *)&tms.tm_year);
-      msg->DecRef();
-      // cclient returns the real year whil mktime() uses 1900 as the origin
-      tms.tm_year -= 1900;
-      time_t today = mktime(&tms);
+      time_t today = msg->GetDate();
       today /= 60 * 60 * 24; // we count in days, not seconds
+      msg->DecRef();
+
       return Value(today);
    }
 
@@ -2270,8 +2294,7 @@ extern "C"
       if(args->Count() != 0)
          return Value(-1);
       Message *msg = p->GetMessage();
-      unsigned long size;
-      (void) msg->GetStatus(&size);
+      unsigned long size = msg->GetSize();
       msg->DecRef();
       return Value(size / 1024); // return KiloBytes
    }
@@ -2453,6 +2476,31 @@ int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid)
       GetInterface()->StatusMessage(text + "...");
    }
 
+   // do some heuristic optimizations: if our program contains requests for the
+   // entire message header, get it first because like this it will be cached
+   // and all other requests will use it - otherwise we'd have to make several
+   // trips to server to get a few separate fields first and only then retrieve
+   // the header
+   //
+   // in the same way, retrieve all the recipients if we need them anyhow
+   // before retrieving "To" &c
+   if ( m_hasHeaderFunc )
+   {
+      if ( m_hasToFunc || m_hasRcptFunc || m_hasHdrLineFunc )
+      {
+         // pre-retrieve the whole header
+         (void)msg->GetHeader();
+      }
+   }
+   else if ( m_hasRcptFunc )
+   {
+      if ( m_hasToFunc )
+      {
+         // pre-fetch the recipient headers which include "To"
+         (void)msg->GetHeaderLines(headersRecipients);
+      }
+   }
+
    const Value rc = m_Program->Evaluate();
 
    // and now show the result in the status bar too
@@ -2597,8 +2645,14 @@ FilterRuleImpl::FilterRuleImpl(const String &filterrule,
 {
 #ifndef TEST
    // we cannot allow the module to disappear while we exist
-   ASSERT(m_FilterModule); m_FilterModule->IncRef();
+   m_FilterModule->IncRef();
 #endif
+
+   m_hasToFunc =
+   m_hasRcptFunc =
+   m_hasHdrLineFunc =
+   m_hasHeaderFunc = false;
+
    m_Program = Parse(filterrule);
    m_MessageUId = UID_ILLEGAL;
 

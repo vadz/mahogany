@@ -12,14 +12,11 @@ $Id$
 
 ************ possible cclient improvements (from reading PINE sources)
 
-1. filtering is awfully slow because:
-  a) message is recreated several times instead of being created only once
-     and kept throughout
+1. filtering speed improved a lot but we still do 2 trips to server because
+   we do "FETCH BODYSTRUCTURE" to just get "From" &c - this is not
+   needed as we have both of them anyhow already in HeaderInfo!
 
-  b) usage of GetHeaderLine() which retrieves the entire header completely
-     unnecessarily: instead it should save ENVELOPE information (i.e. from
-     listing) in the Message and access it - we already have everything we
-     need, why ask the server!!
+   in fact, we should save ENVELOP when we get it in mail_fetch_overview!
 
 2. mail_fetch_overview_x() could be made obsolete by using SET_IMAPEXTRAHEADERS
    to tell cclient to fetch "Newsgroup" header too

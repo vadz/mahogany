@@ -62,12 +62,12 @@ public:
    /** Get a complete header text.
        @return string with multiline text containing the message headers
    */
-   String GetHeader(void) const;
+   virtual String GetHeader(void) const;
 
    /** get Subject line
        @return Subject entry
    */
-   const String   & Subject(void) const;
+   virtual String Subject(void) const;
 
    virtual size_t GetAddresses(MessageAddressType type,
                                wxArrayString& addresses) const;
@@ -89,12 +89,12 @@ public:
    /** get Date line
        @return Date when message was sent
    */
-   String Date(void) const;
+   virtual String Date(void) const;
 
    /** get message text
        @return the uninterpreted message body
    */
-   String FetchText(void);
+   virtual String FetchText(void);
 
    /** decode the MIME structure
      */
@@ -169,18 +169,15 @@ public:
    String const & GetPartDesc(int n = 0);
 
    /** Return the numeric status of message.
-       This only works immediately after allocating the message!
-       @param size if not NULL, size in bytes gets stored here
-       @param day to store day (1..31)
-       @param month to store month (1..12)
-       @param year to store year (19xx)
        @return flags of message
    */
-   virtual int GetStatus(
-      unsigned long *size = NULL,
-      unsigned int *day = NULL,
-      unsigned int *month = NULL,
-      unsigned int *year = NULL) const;
+   virtual int GetStatus() const;
+
+   // get the size in bytes
+   virtual unsigned long GetSize() const;
+
+   /** return the date of the message */
+   virtual time_t GetDate() const;
 
    /** Return message id. */
    virtual String GetId(void) const ;
@@ -214,33 +211,33 @@ public:
    /// Return the numeric uid
    virtual UIdType GetUId(void) const { return m_uid; }
    //@}
-   static class MessageCC * Create(
-      const char * itext,
-      UIdType uid = UID_ILLEGAL,
-      Profile *iprofile = NULL)
-      {
-         return new MessageCC(itext, uid, iprofile);
-      }
+
+   static MessageCC *Create(const char *text,
+                            UIdType uid = UID_ILLEGAL,
+                            Profile *profile = NULL)
+   {
+      return new MessageCC(text, uid, profile);
+   }
+
 protected:
    /**@name Constructors and Destructors */
    //@{
    /** constructor, required associated folder reference
        @param folder where this mail is stored
-       @param uid   unique message id
+       @param hi header info for this message
    */
-   static class MessageCC * CreateMessageCC(
-      MailFolderCC *folder,
-      UIdType uid);
+   static MessageCC *Create(MailFolderCC *folder, const HeaderInfo& hi);
 
    /// The MailFolderCC class creates MessageCC objects.
    friend class MailFolderCC;
    //@}
 protected:
-   /// constructor, called by CreateMessageCC()
-   MessageCC(MailFolderCC *folder,UIdType uid);
-   MessageCC(const char * itext,
+   /// constructors called by Create()
+   MessageCC(MailFolderCC *folder, const HeaderInfo& hi);
+   MessageCC(const char *text,
              UIdType uid = UID_ILLEGAL,
-             Profile *iprofile = NULL);
+             Profile *profile = NULL);
+
    /** destructor */
    ~MessageCC();
 
@@ -255,10 +252,14 @@ private:
    /// common part of all ctors
    void Init();
 
-   /** Get the body information and update body variable.
-       @return the body value, NULL on failure.
-   */
-   BODY * GetBody(void);
+   /// Get the body information and update body variable.
+   void GetBody(void);
+
+   /// call GetBody() if necessary
+   void CheckBody() const { if ( !m_Body ) ((MessageCC *)this)->GetBody(); }
+
+   /// get the cache element for this message
+   MESSAGECACHE *GetCacheElement() const;
 
    /// get the PartInfo struct for the given part number
    const PartInfo *GetPartInfo(int n) const;
@@ -266,25 +267,30 @@ private:
    /// parse the MIME structure of the message and fill m_partInfos array
    bool ParseMIMEStructure();
 
-   /// refresh information in this structure
-   void Refresh(void);
-
    /// reference to the folder this mail is stored in
-   MailFolderCC   *m_folder;
+   MailFolderCC *m_folder;
+
    /// text of the mail if not linked to a folder
    char *m_msgText;
+
    /// unique message id
-   UIdType  m_uid;
+   UIdType m_uid;
+
+   // the (cached) subject
+   String m_subject;
+
+   /// the (cached) date
+   time_t m_date;
+
    /// holds the pointer to a text buffer allocated by cclient lib
    char *m_mailFullText;
+
    /// length of m_mailFullText
    unsigned long m_MailTextLen;
-   /// Subject line
-   String m_headerSubject;
-   /// date line
-   String m_headerDate;
+
    /// body of message
-   BODY  *m_Body;
+   BODY *m_Body;
+
    /// m_Envelope for messages to be sent
    ENVELOPE *m_Envelope;
 

@@ -50,6 +50,8 @@
 
 #include "SendMessage.h"
 
+#include "HeaderInfo.h"
+
 #include <ctype.h>
 
 // ----------------------------------------------------------------------------
@@ -100,11 +102,11 @@ static void decode_body(PartInfoArray& partInfos,
 // ============================================================================
 
 MessageCC *
-MessageCC::CreateMessageCC(MailFolderCC *folder,
-                           unsigned long uid)
+MessageCC::Create(MailFolderCC *folder, const HeaderInfo& hi)
 {
    CHECK(folder, NULL, "NULL m_folder");
-   return new MessageCC(folder, uid);
+
+   return new MessageCC(folder, hi);
 }
 
 void MessageCC::Init()
@@ -121,12 +123,15 @@ void MessageCC::Init()
    m_uid = UID_ILLEGAL;
 }
 
-MessageCC::MessageCC(MailFolderCC *folder,unsigned long uid)
+MessageCC::MessageCC(MailFolderCC *folder, const HeaderInfo& hi)
+         : m_subject(hi.GetSubject())
 {
    Init();
 
-   m_uid = uid;
+   m_uid = hi.GetUId();
+   m_date = hi.GetDate();
    m_folder = folder;
+
    if ( m_folder )
    {
       m_folder->IncRef();
@@ -134,7 +139,6 @@ MessageCC::MessageCC(MailFolderCC *folder,unsigned long uid)
       if ( m_Profile )
       {
          m_Profile->IncRef();
-         Refresh();
       }
       else
       {
@@ -304,30 +308,13 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
    return rc;
 }
 
-void
-MessageCC::Refresh(void)
-{
-   if(GetBody())
-   {
-      if ( m_Envelope->date )
-         m_headerDate = m_Envelope->date;
-      else
-         m_headerDate.clear();
-
-      if ( m_Envelope->subject )
-         m_headerSubject = MailFolderCC::DecodeHeader(m_Envelope->subject);
-      else
-         m_headerSubject.clear();
-   }
-}
-
 // ----------------------------------------------------------------------------
 // headers access
 // ----------------------------------------------------------------------------
 
-const String& MessageCC::Subject(void) const
+String MessageCC::Subject(void) const
 {
-   return m_headerSubject;
+   return m_subject;
 }
 
 String MessageCC::From(void) const
@@ -515,8 +502,8 @@ MessageCC::GetHeaderLines(const char **headersOrig,
 ADDRESS *
 MessageCC::GetAddressStruct(MessageAddressType type) const
 {
-   ((MessageCC *)this)->GetBody();
-   CHECK(m_Envelope, NULL, _("Non-existent message data."))
+   CheckBody();
+   CHECK(m_Envelope, NULL, "no envelop in GetAddressStruct()" )
 
    ADDRESS *addr;
 
@@ -621,7 +608,15 @@ MessageCC::Address(String &nameAll, MessageAddressType type) const
 
 String MessageCC::Date(void) const
 {
-   return m_headerDate;
+   CheckBody();
+
+   String date;
+   if ( m_Envelope )
+      date = m_Envelope->date;
+   else
+      FAIL_MSG( "should have envelop in Date()" );
+
+   return date;
 }
 
 String
@@ -852,11 +847,11 @@ static void decode_body(PartInfoArray& partInfos,
    }
 }
 
-BODY *
+void
 MessageCC::GetBody(void)
 {
-   if(m_folder == NULL) // this message has no m_folder associated
-      return m_Body;
+   if ( !m_folder )
+      return;
 
    int retry = 1;
 
@@ -883,41 +878,70 @@ MessageCC::GetBody(void)
    }
    while (retry-- && ! (m_Envelope && m_Body));
 
-   CHECK(m_Body && m_Envelope, NULL, _("Non-existent message data."));
-   return m_Body;
+   ASSERT_MSG( m_Body && m_Envelope, "Non-existent message data." );
 }
 
+MESSAGECACHE *
+MessageCC::GetCacheElement() const
+{
+   MESSAGECACHE *mc = NULL;
+
+   if ( m_folder && m_folder->Lock() )
+   {
+      MAILSTREAM *stream = m_folder->Stream();
+      mc = mail_elt(stream, mail_msgno(stream, m_uid));
+
+      m_folder->UnLock();
+   }
+
+   return mc;
+}
 
 /** Return the numeric status of message. */
 int
-MessageCC::GetStatus(
-   unsigned long *size,
-   unsigned int *day,
-   unsigned int *month,
-   unsigned int *year) const
+MessageCC::GetStatus() const
 {
-   if(m_folder == NULL
-      || ! ((MessageCC *)this)->GetBody()
-      || ! m_folder->Lock())
-      return MailFolder::MSG_STAT_NONE;
-
-
-   MESSAGECACHE *mc = mail_elt(m_folder->Stream(), mail_msgno(m_folder->Stream(),m_uid));
-   m_folder->UnLock();
-
-   if(size)    *size = mc->rfc822_size;
-   if(day)  *day = mc->day;
-   if(month)   *month = mc->month;
-   if(year) *year = mc->year + BASEYEAR;
+   MESSAGECACHE *mc = GetCacheElement();
 
    int status = MailFolder::MSG_STAT_NONE;
-   if(mc->seen)      status |= MailFolder::MSG_STAT_SEEN;
-   if(mc->answered)  status |= MailFolder::MSG_STAT_ANSWERED;
-   if(mc->deleted)   status |= MailFolder::MSG_STAT_DELETED;
-   if(mc->searched)  status |= MailFolder::MSG_STAT_SEARCHED;
-   if(mc->recent)    status |= MailFolder::MSG_STAT_RECENT;
-   if(mc->flagged)   status |= MailFolder::MSG_STAT_FLAGGED;
+   if ( mc )
+   {
+      if(mc->seen)
+         status |= MailFolder::MSG_STAT_SEEN;
+      if(mc->answered)
+         status |= MailFolder::MSG_STAT_ANSWERED;
+      if(mc->deleted)
+         status |= MailFolder::MSG_STAT_DELETED;
+      if(mc->searched)
+         status |= MailFolder::MSG_STAT_SEARCHED;
+      if(mc->recent)
+         status |= MailFolder::MSG_STAT_RECENT;
+      if(mc->flagged)
+         status |= MailFolder::MSG_STAT_FLAGGED;
+   }
+   else
+   {
+      FAIL_MSG( "no cache element in GetStatus?" );
+   }
+
    return (MailFolder::MessageStatus) status;
+}
+
+/// return the size of the message
+unsigned long
+MessageCC::GetSize() const
+{
+   MESSAGECACHE *mc = GetCacheElement();
+
+   CHECK( mc, 0, "no cache element in GetSize?" );
+
+   return mc->rfc822_size;
+}
+
+time_t
+MessageCC::GetDate() const
+{
+   return m_date;
 }
 
 bool
@@ -936,11 +960,10 @@ MessageCC::ParseMIMEStructure()
 void
 MessageCC::DecodeMIME(void)
 {
-   if(!GetBody())
-      return;
-
    if ( !m_partInfos )
    {
+      CheckBody();
+
       (void)ParseMIMEStructure();
    }
 }
@@ -1098,6 +1121,8 @@ MessageCC::GetPartSize(int n, bool useNaturalUnits)
 {
    DecodeMIME();
 
+   CHECK( m_Body, (size_t)-1, "should have the body in GetPartSize" );
+
    // return the size in lines for the text messages if requested, otherwise
    // return size in bytes
    if( useNaturalUnits &&
@@ -1128,29 +1153,42 @@ MessageCC::GetPartDesc(int n)
    return GetPartInfo(n)->description;
 }
 
-
 String
 MessageCC::GetId(void) const
 {
-   if(m_Body == NULL)
-      ((MessageCC *)this)-> GetBody();
-   ASSERT(m_Body);
-   if(m_Body)
-      return String(m_Body->id);
+   CheckBody();
+
+   String id;
+
+   if ( !m_Body )
+   {
+      FAIL_MSG( "no body in GetId" );
+   }
    else
-      return "";
+   {
+      id = m_Body->id;
+   }
+
+   return id;
 }
 
 String
 MessageCC::GetReferences(void) const
 {
-   if(m_Body == NULL)
-      ((MessageCC *)this)-> GetBody();
-   ASSERT(m_Body);
-   if(m_Body)
-      return String(m_Envelope->references);
+   CheckBody();
+
+   String ref;
+
+   if ( !m_Body )
+   {
+      FAIL_MSG( "no body in GetReferences" );
+   }
    else
-      return "";
+   {
+      ref = m_Envelope->references;
+   }
+
+   return ref;
 }
 
 bool
@@ -1165,7 +1203,7 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
    {
       unsigned long len;
 
-      ((MessageCC *)this)->GetBody(); // circumvene const restriction
+      ((MessageCC *)this)->CheckBody(); // const_cast<>
 
       if(m_folder && m_folder->Lock())
       {
@@ -1191,16 +1229,15 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
          str = m_msgText;
       }
    }
-   return (m_Body != NULL);
+
+   return m_Body != NULL;
 }
 
 
 
 /* static */
 class Message *
-Message::Create(const char * itext,
-               UIdType uid,
-               Profile *iprofile)
+Message::Create(const char *text, UIdType uid, Profile *profile)
 {
-   return MessageCC::Create(itext, uid, iprofile);
+   return MessageCC::Create(text, uid, profile);
 }

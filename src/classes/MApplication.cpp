@@ -420,6 +420,12 @@ MAppBase::OnStartup()
       return false;
    }
 
+   // now we can create the log window (the child of the main frame)
+   if ( READ_APPCONFIG(MP_SHOWLOG) )
+   {
+      ShowLog();
+   }
+
    // now we have finished the vital initialization and so can assume
    // everything mostly works
    m_cycle = Running;
@@ -472,12 +478,6 @@ MAppBase::OnStartup()
 
    // update status of outbox once:
    UpdateOutboxStatus();
-
-   // now we can create the log window (the child of the main frame)
-   if ( READ_APPCONFIG(MP_SHOWLOG) )
-   {
-      ShowLog();
-   }
 
    // open all default mailboxes
    // --------------------------

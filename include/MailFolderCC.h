@@ -471,7 +471,7 @@ private:
    /** for use by class MessageCC
        @return MAILSTREAM of the folder
    */
-   inline MAILSTREAM   *Stream(void) const{  return m_MailStream; }
+   MAILSTREAM *Stream(void) const { return m_MailStream; }
    friend class MessageCC;
 
    /// return the folder type

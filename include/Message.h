@@ -117,7 +117,7 @@ public:
 
    /// return "baz" from address of form "Foo Bar <baz>"
    static String GetEMailFromAddress(const String &address);
-   
+
    /// compare 2 addresses, return TRUE if they're the same
    static bool CompareAddresses(const String& adr1, const String& adr2);
 
@@ -149,12 +149,12 @@ public:
    /** Get the complete header text.
        @return string with multiline text containing the message headers
    */
-   virtual String  GetHeader(void) const = 0;
+   virtual String GetHeader(void) const = 0;
 
    /** get Subject line
        @return Subject entry
    */
-   virtual const String & Subject(void) const = 0;
+   virtual String Subject(void) const = 0;
 
    /**
        Get all addresses of the given type (more efficient than GetHeader as it
@@ -314,18 +314,15 @@ public:
    virtual String const & GetPartSpec(int n = 0) = 0;
 
    /** Return the numeric status of message.
-       @param  msgno sequence no of message
-       @param size if not NULL, size in bytes gets stored here
-       @param day to store day (1..31)
-       @param month to store month (1..12)
-       @param year to store year (19xx)
-       @return flags of message
+       @return flags of message (combination of MailFolder::MSG_STAT_XXX flags)
    */
-   virtual int GetStatus(
-      unsigned long *size = NULL,
-      unsigned int *day = NULL,
-      unsigned int *month = NULL,
-      unsigned int *year = NULL) const = 0;
+   virtual int GetStatus() const = 0;
+
+   /** return the size of the message in bytes */
+   virtual unsigned long GetSize() const = 0;
+
+   /** return the date of the message */
+   virtual time_t GetDate() const = 0;
 
    /** Write the message to a String.
        @param str the string to write message text to

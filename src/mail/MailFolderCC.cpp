@@ -2607,18 +2607,30 @@ MailFolderCC::GetMessage(unsigned long uid)
    HeaderInfoList_obj hil = GetHeaders();
    CHECK( hil, NULL, "no listing in GetMessage" );
 
-   // test to see if the UID is valid:
-   bool uidValid = false;
+   // find the header info object for this message: like this we can reuse
+   // information it already has
+   HeaderInfo *hi = NULL;
    size_t count = hil->Count();
-   for ( size_t idx = 0; idx < count && !uidValid; idx++ )
+   for ( size_t idx = 0; idx < count && !hi; idx++ )
    {
-      if ( hil->GetItemByIndex(idx)->GetUId() == uid )
-         uidValid = true;
+      hi = hil->GetItemByIndex(idx);
+      if ( !hi )
+      {
+         FAIL_MSG( "missign HeaderInfo in HeaderInfoList??" );
+
+         continue;
+      }
+
+      if ( hi->GetUId() != uid )
+      {
+         // continue searching
+         hi = NULL;
+      }
    }
 
-   CHECK( uidValid, NULL, "invalid UID in GetMessage" );
+   CHECK( hi, NULL, "invalid UID in GetMessage" );
 
-   return MessageCC::CreateMessageCC(this, uid);
+   return MessageCC::Create(this, *hi);
 }
 
 UIdArray *

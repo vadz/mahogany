@@ -1970,30 +1970,31 @@ wxMessageView::ShowMessage(Message *mailMessage)
 
    mailMessage->IncRef();
 
-   unsigned long size = 0,
+   // size is measured in KBytes
+   unsigned long size = mailMessage->GetSize() / 1024,
                  maxSize = (unsigned long)READ_CONFIG(m_Profile,
                                                       MP_MAX_MESSAGE_SIZE);
 
-   // we're only interested in the size, not status flags
-   (void)mailMessage->GetStatus(&size);
-   size /= 1024;  // size is measured in KBytes
-
-   if ( size > maxSize && (mailMessage->GetFolder()
-                           &&
-                           GetFolderType(mailMessage->GetFolder()->GetType()) != MF_FILE
-                           && GetFolderType(mailMessage->GetFolder()->GetType()) != MF_MH))
+   if ( size > maxSize )
    {
-      wxString msg;
-      msg.Printf(_("The selected message is %u Kbytes long which is "
-                   "more than the current threshold of %d Kbytes.\n"
-                   "\n"
-                   "Do you still want to download it?"),
-                 size, maxSize);
-      if ( !MDialog_YesNoDialog(msg, this) )
+      MailFolder *mf = mailMessage->GetFolder();
+      CHECK_RET( mf, "message without folder?" );
+
+      // local folders are supposed to be fast
+      if ( !IsLocalQuickFolder(mf->GetType()) )
       {
-         // don't do anything
-         mailMessage->DecRef();
-         return;
+         wxString msg;
+         msg.Printf(_("The selected message is %u Kbytes long which is "
+                      "more than the current threshold of %d Kbytes.\n"
+                      "\n"
+                      "Do you still want to download it?"),
+                    size, maxSize);
+         if ( !MDialog_YesNoDialog(msg, this) )
+         {
+            // don't do anything
+            mailMessage->DecRef();
+            return;
+         }
       }
    }
 
@@ -2180,14 +2181,15 @@ wxMessageView::LaunchProcess(const String& command,
 
       return false;
    }
-   else
+
+   if ( pid != -1 )
    {
       ProcessInfo *procInfo = new ProcessInfo(process, pid, errormsg, filename);
 
       m_processes.Add(procInfo);
-
-      return true;
    }
+
+   return true;
 }
 
 void
