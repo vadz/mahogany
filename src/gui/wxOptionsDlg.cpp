@@ -104,6 +104,11 @@ extern const MPersMsgBox *M_MSGBOX_OPT_STOREREMOTENOW;
 
    // BBDB support only makes sense for Unix
    #define USE_BBDB
+
+   // do we need the OpenSSL libs?
+   #ifdef USE_SSL
+      #define USE_OPENSSL
+   #endif
 #endif
 
 // define this to have additional TCP parameters in the options dialog
@@ -491,6 +496,12 @@ enum ConfigFields
    ConfigField_HelpExternalEditor,
    ConfigField_ExternalEditor,
    ConfigField_AutoLaunchExtEditor,
+#ifdef USE_OPENSSL
+   ConfigField_SslHelp,
+   ConfigField_SslDllName,
+   ConfigField_CryptoDllName,
+#endif // USE_OPENSSL
+   ConfigField_PGPHelp,
    ConfigField_PGPCommand,
 
    ConfigField_HelpersLast = ConfigField_PGPCommand,
@@ -510,11 +521,6 @@ enum ConfigFields
    ConfigField_ConfirmExit,
    ConfigField_RunOneOnly,
    ConfigField_HelpDir,
-#ifdef USE_SSL
-   ConfigField_SslHelp,
-   ConfigField_SslDllName,
-   ConfigField_CryptoDllName,
-#endif // USE_SSL
 #ifdef OS_UNIX
    ConfigField_AFMPath,
 #endif // OS_UNIX
@@ -1494,9 +1500,22 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("You may configure the external editor to be used when composing the messages\n"
                   "and optionally choose to launch it automatically."),
                                                   Field_Message, -1                      },
-   { gettext_noop("&External editor"),            Field_Text,    -1                      },
+   { gettext_noop("&External editor"),            Field_File,    -1                      },
    { gettext_noop("Always &use it"),              Field_Bool, ConfigField_ExternalEditor },
-   { gettext_noop("&PGP command"),                Field_Text,    -1                      },
+#ifdef USE_OPENSSL
+   { "\n"
+     gettext_noop("Mahogany can use SSL (Secure Sockets Layer) for secure,\n"
+                  "encrypted communications, if you have the libssl and libcrypto\n"
+                  "shared libraries (DLLs) on your system."),
+     Field_Message, -1                     },
+   { gettext_noop("Location of lib&ssl"),         Field_File,    -1                     },
+   { gettext_noop("Location of libcr&ypto"),      Field_File,    -1                     },
+#endif // USE_OPENSSL
+   { "\n"
+     gettext_noop("GNU Privacy Guard or a compatible program may be used\n"
+                  "to verify the cryptographic signatures of the messages\n"
+                  "you receive and decrypt them."), Field_Message, -1 },
+   { gettext_noop("&GPG command"),                Field_File,    -1                      },
 
    // other options
    { gettext_noop("Mahogany may log everything into the log window, a file\n"
@@ -1524,19 +1543,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Always run only &one instance"),Field_Bool | Field_Restart, -1                     },
    { gettext_noop("Directory with the help files"), Field_Dir, -1 },
 
-#ifdef USE_SSL
-   /* The two settings are not really Field_Restart, but if one has
-      tried to use SSL before setting them correctly, then
-      MailFolderCC will not attempt to load the libs again. So we just
-      pretent that you always have to restart it to prevent users from
-      complaining to us if it doesn't work. I'm lazy. KB*/
-   { gettext_noop("Mahogany can use SSL (Secure Sockets Layer) for secure,\n"
-                  "encrypted communications, if you have the libssl and libcrypto\n"
-                  "shared libraries (DLLs) on your system."),
-     Field_Message, -1                     },
-   { gettext_noop("Path where to find s&hared libssl"), Field_File|Field_Restart,    -1                     },
-   { gettext_noop("Path where to find sha&red libcrypto"), Field_File|Field_Restart,    -1                     },
-#endif // USE_SSL
 #ifdef OS_UNIX
    { gettext_noop("&Path where to find AFM files"), Field_Dir,    -1                     },
 #endif // OS_UNIX
@@ -1927,6 +1933,12 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_EXTERNALEDITOR),
    CONFIG_ENTRY(MP_ALWAYS_USE_EXTERNALEDITOR),
+#ifdef USE_OPENSSL
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_SSL_DLL_SSL),
+   CONFIG_ENTRY(MP_SSL_DLL_CRYPTO),
+#endif // USE_OPENSSL
+   CONFIG_NONE(), // PGP help
    CONFIG_ENTRY(MP_PGP_COMMAND),
 
    // other
@@ -1943,11 +1955,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_CONFIRMEXIT),
    CONFIG_ENTRY(MP_RUNONEONLY),
    CONFIG_ENTRY(MP_HELPDIR),
-#ifdef USE_SSL
-   CONFIG_NONE(),
-   CONFIG_ENTRY(MP_SSL_DLL_SSL),
-   CONFIG_ENTRY(MP_SSL_DLL_CRYPTO),
-#endif // USE_SSL
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_AFMPATH),
 #endif // OS_UNIX
