@@ -9,11 +9,21 @@ $Id$
  - on Alpha: no XFace inserted, trying to convert ~/.xface to ~/.xface.xpm although already an Xpm
  -  new mail dialog getting stuck?
  - mAppBase::OnExit() gets called twice
+ - creating new folder and immediately after doing a message/copy to
+   folder caused crash
 
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
-
+ - ADB: does not use substring??? (Joen_Doedoe no expansion for
+   "doe" or "Doe")
+ - copying to other folder only writes headers, no content 
+ - folderview listctrl has extra Subject column behind Size field ???
+ - message save to file doesn't work
+ - add message/move to folder
+ - wxlwindow: MIME menu appears at wrong position again
+ - toolbars need to be a bit higher
+ - crash when switching off header display in messageview
  - allow '=' in urls and don't allow ' '
  - forwarding message triggers assert in wxComposeView:119
  - lock file checking for INBOX:
@@ -29,8 +39,6 @@ $Id$
   + after Clear() font becomes smaller
 
  - integrate new c-client lib 4.5
- - help fails to find copyright
- - dirty flag in composeview
  - save and restore printer settings in profile
  - add a wxASSERT() for the correct path in READ_APPCONFIG()
 
@@ -263,6 +271,17 @@ classes in the hierarchy.
 
 - wxMemoryDC and Blit() cannot handle non-(0,0) viewports
 
+*********************************************************************
+*** Fixed, to be tested:
+*********************************************************************
+ - help fails to find copyright
+ - dirty flag in composeview
+ - sometimes mailfolders/messages seem empty
+ - .mo files should be found in M_BASEDIR/locale
+ - wxLayout:
+   + printing needs better scaling how does sample do it?
+   + use smaller fonts for printing.
+
 
 *** Fixed and tested:
 *********************************************************************
@@ -326,13 +345,4 @@ classes in the hierarchy.
    and wxFolderTree.
  - documentation system should support pictures
  - wxComposeView::Print() fails, wxMessageView::Print() works, why?
-
-*********************************************************************
-*** Fixed, to be tested:
-*********************************************************************
- - sometimes mailfolders/messages seem empty
- - .mo files should be found in M_BASEDIR/locale
- - wxLayout:
-   + printing needs better scaling how does sample do it?
-   + use smaller fonts for printing.
 
