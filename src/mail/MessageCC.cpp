@@ -43,14 +43,14 @@ MessageCC::MessageCC(MailFolderCC *ifolder, unsigned long msgno,
    folder = ifolder;
    seq_no = msgno;
    uid = iuid;
-   
+
    Refresh();
 }
 
 MessageCC::MessageCC(const char *itext,  ProfileBase *iprofile)
 {
    Create(iprofile);
-   
+
 #if  0
    char
       *header = NULL;
@@ -60,7 +60,7 @@ MessageCC::MessageCC(const char *itext,  ProfileBase *iprofile)
       *b;
 
    text = strutil_strdup(itext);
-   
+
    unsigned long pos = 0;
    // find end of header "\012\012"
    while(text[pos])
@@ -76,7 +76,7 @@ MessageCC::MessageCC(const char *itext,  ProfileBase *iprofile)
    }
    if(! header)
       return;  // failed
-   
+
    char *buf = GLOBAL_NEW char [headerLen];
    rfc822_parse_msg (&envelope, &body,header,headerLen, b,
                      ""   /*defaulthostname */,  buf);
@@ -118,7 +118,7 @@ MessageCC::~MessageCC()
 }
 
 void
-MessageCC::Refresh(void) 
+MessageCC::Refresh(void)
 {
    char strbuf[M_STRBUFLEN+1];
 
@@ -133,7 +133,7 @@ MessageCC::Refresh(void)
       else
          hdr_date = "";
    }
-   
+
    initialisedFlag = true;
 }
 
@@ -143,11 +143,11 @@ MessageCC::Subject(void) const
    return   hdr_subject;
 }
 
-String const 
+String const
 MessageCC::From(void) const
 {
    String tmp;
-   return Address(tmp, MAT_REPLY);
+   return Address(tmp, MAT_REPLYTO);
 }
 
 const char *
@@ -204,14 +204,14 @@ MessageCC::Address(String &name, MessageAddressType type) const
    name = "";
    if(! addr)
       return "";
-         
+
    email = String(addr->mailbox);
    if(addr->host && strlen(addr->host))
       email += String("@") + String(addr->host);
-   
+
    if(addr->personal && strlen(addr->personal))
       name = String(addr->personal);
-   
+
    return   email;
 }
 
@@ -231,7 +231,7 @@ MessageCC::FetchText(void)
       return mailText = mail_fetchtext_full(folder->Stream(), uid,
                                             NIL, FT_UID);
    else // from a text
-      return text; 
+      return text;
 }
 
 /*
@@ -252,7 +252,7 @@ MessageCC::decode_body (BODY *body, String & pfx,long i,
    MessageParameterList plist(false); // temporary, doesn't own entries
    MessageParameterList dispPlist(false); // temporary, doesn't own entries
    MessageParameterList::iterator plist_iterator;
-   
+
    /* multipart doesn't have a row to itself */
    if (body->type == TYPEMULTIPART)
    {
@@ -365,7 +365,7 @@ MessageCC::decode_body (BODY *body, String & pfx,long i,
 }
 
 BODY *
-MessageCC::GetBody(void) 
+MessageCC::GetBody(void)
 {
    if(body == NULL && folder)
       envelope = mail_fetchstructure_full(folder->Stream(),uid,&body, FT_UID);
@@ -373,11 +373,11 @@ MessageCC::GetBody(void)
 }
 
 void
-MessageCC::DecodeMIME(void) 
+MessageCC::DecodeMIME(void)
 {
    if(!GetBody())
       return;
-   
+
    if(partInfos == NULL)
    {
       int nparts = CountParts();
@@ -389,7 +389,7 @@ MessageCC::DecodeMIME(void)
 }
 
 int
-MessageCC::CountParts(void) 
+MessageCC::CountParts(void)
 {
    if(numOfParts == -1)
    {
@@ -405,34 +405,34 @@ MessageCC::CountParts(void)
 
 
 const char *
-MessageCC::GetPartContent(int n, unsigned long *lenptr) 
+MessageCC::GetPartContent(int n, unsigned long *lenptr)
 {
    DecodeMIME();
    long  unsigned
       len = 0;
    String const
       & sp = GetPartSpec(n);
-   
+
    char *cptr = mail_fetchbody_full(folder->Stream(),
                                     uid,
                                     (char *)sp.c_str(),
                                     &len, FT_UID);
    if(lenptr == NULL)
       lenptr  = &len;   // so to give c-client lib a place where to write to
-   
+
    if(len == 0)
    {
       *lenptr = 0;
       return NULL;
    }
-   
+
    if(partContentPtr)
       GLOBAL_DELETE partContentPtr;
    partContentPtr = GLOBAL_NEW char[len+1];
    strncpy(partContentPtr, cptr, len);
    partContentPtr[len] = '\0';
    //fs_give(&cptr); // c-client's free() function
-   
+
    switch(GetPartEncoding(n))
    {
    case  ENCBINARY:     // 8 bit binary data
@@ -449,7 +449,7 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
       *lenptr = strlen(partContentPtr);
       return partContentPtr;
    }
-   
+
 //   return partContentPtr;
 }
 
@@ -473,7 +473,7 @@ MessageCC::GetDisposition(int n, String *disptype)
 }
 
 Message::ContentType
-MessageCC::GetPartType(int n) 
+MessageCC::GetPartType(int n)
 {
    DecodeMIME();
 
@@ -484,14 +484,14 @@ MessageCC::GetPartType(int n)
 }
 
 int
-MessageCC::GetPartEncoding(int n) 
+MessageCC::GetPartEncoding(int n)
 {
    DecodeMIME();
    return partInfos[n].numericalEncoding;
 }
- 
+
 size_t
-MessageCC::GetPartSize(int n, bool forceBytes) 
+MessageCC::GetPartSize(int n, bool forceBytes)
 {
    DecodeMIME();
 
@@ -505,21 +505,21 @@ MessageCC::GetPartSize(int n, bool forceBytes)
 
 
 String const &
-MessageCC::GetPartMimeType(int n) 
+MessageCC::GetPartMimeType(int n)
 {
    DecodeMIME();
    return partInfos[n].type;
 }
 
 String const &
-MessageCC::GetPartSpec(int n) 
+MessageCC::GetPartSpec(int n)
 {
    DecodeMIME();
    return partInfos[n].mimeId;
 }
 
 String const &
-MessageCC::GetPartDesc(int n) 
+MessageCC::GetPartDesc(int n)
 {
    DecodeMIME();
    return partInfos[n].description;
@@ -541,7 +541,7 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
          str += headerPart;
          fulllen += len;
       }
-   
+
       //rfc822_output(headerBuffer, envelope, body,
       //MessageCCWriteToString, par, 0);
 
@@ -554,7 +554,7 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
       str = text;
       fulllen = strlen(text);
    }
-   
+
    cerr << str << endl;
    cerr << "Len: " << fulllen << endl;
 }
