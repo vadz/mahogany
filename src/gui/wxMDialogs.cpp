@@ -745,6 +745,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    wxBitmap *bm = new wxBitmap(background);
    SetBackgroundBitmap(bm);
 
+   SetCursorVisibility(0);
    wxColour col("yellow");
    Clear(wxROMAN, 30, (int)wxNORMAL, (int)wxBOLD, FALSE, &col);
 

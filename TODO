@@ -109,7 +109,7 @@ wxMSW bugs:
 - if time permits: vcard-import
 - use mm_critical() and delay application exit if necessary
 - add "double click to open" profile option support to folder list ctrl
-
+- enable/disable edit menu entries as needed
 **************** end of KB priorities :-) *********************
 
 - add closing delay for sentmail folder to avoid reopening it each time

@@ -110,6 +110,12 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    AddFileMenu();
    AddEditMenu();
 
+   wxMenuItem *item = m_MenuBar->FindItem(WXMENU_EDIT_CUT);
+   wxASSERT(item);
+   item->Enable(FALSE); // no cut for viewer
+   item = m_MenuBar->FindItem(WXMENU_EDIT_PASTE);
+   wxASSERT(item);
+   item->Enable(FALSE); // no cut for viewer
    CreateStatusBar();
 
    int x,y;
@@ -303,7 +309,8 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 
    if(m_FolderView &&
       (WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
-                   || id == WXMENU_FILE_COMPOSE || id == WXMENU_FILE_POST))
+       || id == WXMENU_FILE_COMPOSE || id == WXMENU_FILE_POST
+       || id == WXMENU_EDIT_COPY ))
       m_FolderView->OnCommandEvent(event);
    else if(id == WXMENU_HELP_CONTEXT)
       mApplication->Help(MH_MAIN_FRAME,this);

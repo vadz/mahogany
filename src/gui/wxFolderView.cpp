@@ -53,6 +53,7 @@
 BEGIN_EVENT_TABLE(wxFolderListCtrl, wxPListCtrl)
    EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
    EVT_CHAR              (wxFolderListCtrl::OnKey)
+   EVT_KEY_DOWN          (wxFolderListCtrl::OnKey)
    EVT_MOTION (wxFolderListCtrl::GrabFocus)
 END_EVENT_TABLE()
 
@@ -555,6 +556,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    case WXMENU_MSG_FIND:
    case WXMENU_MSG_TOGGLEHEADERS:
    case WXMENU_MSG_SHOWRAWTEXT:
+   case WXMENU_EDIT_COPY:
       (void)m_MessagePreview->DoMenuCommand(event.GetId());
       break;
    case WXMENU_LAYOUT_LCLICK:
@@ -860,6 +862,13 @@ wxFolderViewFrame::wxFolderViewFrame(String const &name, wxMFrame *parent)
    // menu
    AddFileMenu();
    AddEditMenu();
+   wxMenuItem *item = m_MenuBar->FindItem(WXMENU_EDIT_CUT);
+   wxASSERT(item);
+   item->Enable(FALSE); // no cut for viewer
+   item = m_MenuBar->FindItem(WXMENU_EDIT_CUT);
+   wxASSERT(item);
+   item->Enable(FALSE); // no cut for viewer
+
    AddMessageMenu();
    SetMenuBar(m_MenuBar);
    // status bar
@@ -891,7 +900,10 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
       default:
          if( WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
              || id == WXMENU_HELP_CONTEXT
-             || id == WXMENU_FILE_COMPOSE || id == WXMENU_FILE_POST)
+             || id == WXMENU_FILE_COMPOSE || id == WXMENU_FILE_POST
+             || id == WXMENU_EDIT_CUT
+             || id == WXMENU_EDIT_COPY
+             || id == WXMENU_EDIT_PASTE)
             m_FolderView->OnCommandEvent(event);
          else
             wxMFrame::OnMenuCommand(id);

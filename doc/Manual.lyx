@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sun May 16 20:28:25 1999
+#This file was created by <karsten> Tue May 18 14:55:26 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -12,7 +12,7 @@
 \graphics default
 \paperfontsize 12
 \spacing single 
-\papersize a4paper
+\papersize letterpaper
 \paperpackage a4
 \use_geometry 0
 \use_amsmath 0
@@ -228,8 +228,7 @@ We are currently working on the implementation of the following:
 Easy to use and powerful filtering system for mails.
 \layout Itemize
 
-Finishing rewrite of message editor: clipboard support, selections, rich
- text editing & HTML
+Finishing rewrite of message editor: rich text editing & HTML
 \layout Itemize
 
 Threading and scoring of messages and news articles.
@@ -255,6 +254,9 @@ Full Drag and Drop interaction with filemanagers of Windows and Gnome/KDE,
 
 Wide character (Unicode) support and other character sets, currently being
  added to wxWindows.
+\layout Itemize
+
+Searching in folders.
 \layout Subsubsection
 
 Further we plan the following:
@@ -660,7 +662,20 @@ f file in either
  Useful settings for a system wide default are servers or mail return addresses.
  Note though, that Mahogany will not run properly as 
 \family typewriter 
-root.
+root
+\family default 
+.
+ Entries prefixed with an exclamation mark 
+\begin_inset Quotes eld
+\end_inset 
+
+!
+\begin_inset Quotes erd
+\end_inset 
+
+ are marked as immutable and cannot be overwritten by the user.
+ This can be used by the system administrator to hard-wire certain settings,
+ like, for example the return mail addresses or mail servers to use.
 \layout Section
 
 The User Interface
@@ -1151,6 +1166,91 @@ folder group
 \end_inset 
 
  folder type not representing any mailbox but just being a group of folders.
+\layout Subsection
+
+Accessing Mail Remotely
+\layout Standard
+
+Mahogany supports two protocols for accessing remote mail servers: POP3
+ and IMAP.
+ While POP3 is more commonly available, IMAP is definitely the superiour
+ protocol and should be used where available.
+ It will generally give you more functionality and will be much faster over
+ slow connections.
+ Both normally require you to log in with a username and password, but can
+ be configured to work anonymously if supported by the server.
+ IMAP additionally allows you to access any mailfolder file on the remote
+ machine.
+ For example, if you use Mahogany on a remote machine 
+\begin_inset Quotes eld
+\end_inset 
+
+
+\family typewriter 
+atwork.company.com
+\family default 
+
+\begin_inset Quotes erd
+\end_inset 
+
+, you might have your local 
+\family typewriter 
+INBOX
+\family default 
+ (which could be 
+\family typewriter 
+/var/spool/mail/MyUserName
+\family default 
+ on a unix box) and also your 
+\begin_inset Quotes eld
+\end_inset 
+
+New Mail
+\begin_inset Quotes erd
+\end_inset 
+
+ folder, which might be 
+\begin_inset Quotes eld
+\end_inset 
+
+
+\family typewriter 
+/home/MyUserName/.M/New Mail
+\family default 
+
+\begin_inset Quotes erd
+\end_inset 
+
+.
+ With IMAP, if you log in from home, you can not only access your INBOX
+ on the atwork.company.com mail server, but also the 
+\begin_inset Quotes eld
+\end_inset 
+
+
+\family typewriter 
+New Mail
+\family default 
+
+\begin_inset Quotes erd
+\end_inset 
+
+ folder there, by telling Mahogany to use 
+\begin_inset Quotes eld
+\end_inset 
+
+
+\family typewriter 
+/home/MyUserName/.M/New Mail
+\family default 
+
+\begin_inset Quotes erd
+\end_inset 
+
+ as the path to the mailbox file.
+ Like this, you can access any mail folder on that machine that you have
+ access to locally, making remote access to your mail much more flexible
+ than just accessing your new messages.
 \layout Section
 
 Sending Mail
@@ -1471,6 +1571,8 @@ end{figure}
 Here several important settings are configured, so it is advised (as the
  program itself will tell you whenit is run for the first time) to set them
  up before starting using Mahogany.
+ These include your personal identity settings as well as your preferred
+ mail and news servers and some network parameters.
 \layout Itemize
 
 
@@ -1597,6 +1699,76 @@ Setting it to advance will allow you more detailed configuration of Mahogany,
  allowing you to make changes to the configuration which potentially make
  no sense.
  Not supported at present.
+\layout Itemize
+
+
+\series bold 
+TCP Timeout Values
+\series default 
+
+\newline 
+These timeouts are used for all accesses to remote servers.
+ Generally it is a good idea to set them to small values to avoid unnecessary
+ delays if something goes wrong.
+ On the other hand, you want to make sure that they are long enough for
+ slow connections, like for example through a modem line.
+ If you get a lot of error messages about failed accesses to remote servers,
+ you should try to increase these settings.
+\begin_deeper 
+\layout Itemize
+
+
+\series bold 
+TCP Open Timeout 
+\series default 
+
+\newline 
+This setting decides after how many seconds the attempt to open a connection
+ to a remote mail or newsserver will time out.
+ I.e.
+ if no connection can be made within this time interval, the request will
+ fail.
+\layout Itemize
+
+
+\series bold 
+TCP Write Timeout 
+\series default 
+
+\newline 
+If the attempt to write data to a remote server takes longer than this,
+ it will fail.
+\layout Itemize
+
+
+\series bold 
+TCP Read Timeout 
+\series default 
+
+\newline 
+If the attempt to read data from a remote server takes longer than this,
+ it will fail.
+\layout Itemize
+
+
+\series bold 
+TCP Close Timeout 
+\series default 
+
+\newline 
+If the attempt to close the connection to a remote server takes longer than
+ this, it will fail.
+\layout Itemize
+
+
+\series bold 
+TCP Rsh Timeout 
+\series default 
+
+\newline 
+If the attempt to open a remote shell connection (used for some mail operations)
+ to a remote server takes longer than this, it will fail.
+\end_deeper 
 \layout Subsubsection
 
 Compose Page_4100_ 

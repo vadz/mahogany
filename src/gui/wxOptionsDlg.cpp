@@ -84,7 +84,13 @@ enum ConfigFields
    ConfigField_NewsServer,
    ConfigField_PersonalName,
    ConfigField_UserLevel,
-   ConfigField_IdentLast = ConfigField_UserLevel,
+   ConfigField_TimeoutInfo,
+   ConfigField_OpenTimeout,
+   ConfigField_ReadTimeout,
+   ConfigField_WriteTimeout,
+   ConfigField_CloseTimeout,
+   ConfigField_RshTimeout,
+   ConfigField_IdentLast = ConfigField_RshTimeout,
 
    // compose
    ConfigField_ComposeFirst = ConfigField_IdentLast,
@@ -203,7 +209,6 @@ enum ConfigFields
 #else // !Unix
    ConfigField_OthersLast = ConfigField_ShowNewMail,
 #endif // Unix/!Unix
-
    // the end
    ConfigField_Max
 };
@@ -360,7 +365,16 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("NNTP (&news) server"),          Field_Text,    -1,                        },
    { gettext_noop("&Personal name"),               Field_Text,    -1,                        },
    { gettext_noop("User &level:novice:advanced"),  Field_Combo,   -1,                        },
-
+   { gettext_noop("The following timeout values are used for TCP connections to\n"
+                  "remote mail or news servers. Their scope is global, but they\n"
+                  "will get set from the folder that has been opened last.\n")
+                  "All values are in seconds.", Field_Message, -1 },
+   { gettext_noop("&Open timeout"),                Field_Number,    -1,                        },
+   { gettext_noop("&Read timeout"),                Field_Number,    -1,                        },
+   { gettext_noop("&Write timeout"),               Field_Number,    -1,                        },
+   { gettext_noop("&rsh timeout"),                 Field_Number,    -1,                        },
+   { gettext_noop("&Close timeout"),               Field_Number,    -1,                        },
+                  
    // compose
    { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
    { gettext_noop("&Folder file for sent messages"),
@@ -506,7 +520,13 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_NNTPHOST),
    CONFIG_ENTRY(MP_PERSONALNAME),
    CONFIG_ENTRY(MP_USERLEVEL),
-
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_TCP_OPENTIMEOUT),
+   CONFIG_ENTRY(MP_TCP_READTIMEOUT),
+   CONFIG_ENTRY(MP_TCP_WRITETIMEOUT),
+   CONFIG_ENTRY(MP_TCP_RSHTIMEOUT),
+   CONFIG_ENTRY(MP_TCP_CLOSETIMEOUT),
+   
    // compose
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER),
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),

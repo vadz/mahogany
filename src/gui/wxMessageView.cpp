@@ -167,11 +167,12 @@ public:
 
    ClickableInfo(const String& url)
       : m_url(url)
-      { m_type = CI_URL; }
-   ClickableInfo(int id)
+      { m_type = CI_URL; SetLabel(url); }
+   ClickableInfo(int id, const String &label)
       {
          m_id = id;
          m_type = CI_ICON;
+         SetLabel(label);
       }
 
    // accessors
@@ -324,6 +325,13 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
 //   SetFocus();
    SetMouseTracking();
    SetParentProfile(fv ? fv->GetProfile() : NULL);
+
+   wxWindow *p = GetParent();
+   while(p && ! p->IsKindOf(CLASSINFO(wxFrame)))
+      p = p->GetParent();
+   if(p && ((wxFrame *)p)->GetStatusBar())
+      SetStatusBar(((wxFrame *)p)->GetStatusBar(),0,1);
+
 }
 
 
@@ -411,7 +419,7 @@ wxMessageView::Update(void)
    wxLayoutObject *obj = NULL;
 
    Clear();
-
+   
    if(! m_mailMessage)  // no message to display
       return;
 
@@ -573,11 +581,15 @@ wxMessageView::Update(void)
          }
          obj = new wxLayoutObjectIcon(icn);
 
-         ci = new ClickableInfo(i);
-         obj->SetUserData(ci); // gets freed by list
-         ci->DecRef();
-         llist->Insert(obj);
-
+         {
+            String label;
+            label << m_mailMessage->GetPartMimeType(i) << ", "
+                  << strutil_ultoa(m_mailMessage->GetPartSize(i, true)) << _(" bytes");
+            ci = new ClickableInfo(i, label);
+            obj->SetUserData(ci); // gets freed by list
+            ci->DecRef();
+            llist->Insert(obj);
+         }
          lastObjectWasIcon = true;
       }
    }
@@ -1239,6 +1251,18 @@ wxMessageView::DoMenuCommand(int id)
    case WXMENU_MSG_SHOWRAWTEXT:
       ShowRawText();
       break;
+   case WXMENU_EDIT_PASTE:
+      Paste();
+      Refresh();
+      break;
+   case WXMENU_EDIT_COPY:
+      Copy();
+      Refresh();
+      break;
+   case WXMENU_EDIT_CUT:
+      Cut();
+      Refresh();
+      break;
 
    default:
       handled = false;
@@ -1509,11 +1533,12 @@ wxMessageViewFrame::wxMessageViewFrame(MailFolder *folder,
    // NB: the buttons must have the same ids as the menu commands
    m_ToolBar = CreateToolBar();
    AddToolbarButtons(m_ToolBar, WXFRAME_MESSAGE);
-   CreateStatusBar();
+   CreateStatusBar(2);
+   static const int s_widths[] = { -1, 70 };
+   SetStatusWidths(WXSIZEOF(s_widths), s_widths);
 
    Show(true);
    m_MessageView = new wxMessageView(folder, num, fv, this);
-
    wxSizeEvent se; // unused
    OnSize(se);
 }

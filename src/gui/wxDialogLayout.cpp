@@ -515,7 +515,7 @@ wxListBox *wxNotebookPageBase::CreateListbox(const char *label,
 void wxNotebookPageBase::EnableTextWithButton(wxTextCtrl *control, bool bEnable)
 {
    // NB: we assume that the control ids are consecutive
-   long id = control->GetId() + 1;
+   long id = control->GetId() - 1;
    wxWindow *win = FindWindow(id);
 
    if ( win == NULL ) {
@@ -539,8 +539,8 @@ void wxNotebookPageBase::EnableTextWithLabel(wxTextCtrl *control, bool bEnable)
 
    // disable the label too: this will grey it out
 
-   // NB: we assume that the control ids are consecutif
-   long id = control->GetId() - 1;
+   // NB: we assume that the control ids are consecutive
+   long id = control->GetId() + 1;
    wxWindow *win = FindWindow(id);
 
    if ( win == NULL ) {

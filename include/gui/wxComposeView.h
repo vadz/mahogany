@@ -233,6 +233,13 @@ private:
 
    /// The message to be composed.
    class SendMessageCC * m_msg;
+
+   /// the edit/cut menu item
+   class wxMenuItem *m_MItemCut;
+   /// the edit/copy menu item
+   class wxMenuItem *m_MItemCopy;
+   /// the edit/paste menu item
+   class wxMenuItem *m_MItemPaste;
    
    /**@name Input fields (arranged into an array) */
    //@{

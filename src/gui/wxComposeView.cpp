@@ -528,16 +528,22 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    // build menu
    // ----------
    AddFileMenu();
-   AddMessageEditMenu();
+   AddEditMenu();
    WXADD_MENU(m_MenuBar, COMPOSE, _("&Compose"));
    AddHelpMenu();
    SetMenuBar(m_MenuBar);
 
+   // FIXME: provide some visual feedback for them, like
+   // enabling/disabling them. Not used yet.
+   m_MItemCut = m_MenuBar->FindItem(WXMENU_EDIT_CUT);
+   m_MItemCopy = m_MenuBar->FindItem(WXMENU_EDIT_COPY);
+   m_MItemPaste = m_MenuBar->FindItem(WXMENU_EDIT_CUT);
+   
    m_ToolBar = CreateToolBar();
    AddToolbarButtons(m_ToolBar, WXFRAME_COMPOSE);
 
    CreateStatusBar(2);
-   static const int s_widths[] = { -1, 50 };
+   static const int s_widths[] = { -1, 70 };
    SetStatusWidths(WXSIZEOF(s_widths), s_widths);
 
    // create the child controls
@@ -567,7 +573,9 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    box->SetConstraints(c);
 
    // compose window
-   CreateFTCanvas();
+   CreateFTCanvas(); // to get a m_LayoutWindow
+   m_LayoutWindow->SetStatusBar(GetStatusBar(),0,1);
+   m_LayoutWindow->SetCursorVisibility(1);
    c = new wxLayoutConstraints;
    c->left.SameAs(m_panel, wxLeft, LAYOUT_MARGIN);
    c->right.SameAs(m_panel, wxRight, LAYOUT_MARGIN);
@@ -808,6 +816,7 @@ static int wxFonts[NUM_FONTS] =
 void
 wxComposeView::CreateFTCanvas(void)
 {
+   wxASSERT(m_LayoutWindow == NULL);
    m_LayoutWindow = new wxLayoutWindow(m_panel);
 
    wxString colourName;
@@ -1093,16 +1102,16 @@ wxComposeView::OnMenuCommand(int id)
          (m_mode == Mode_NNTP)?
          MH_COMPOSE_MAIL : MH_COMPOSE_NEWS, this);
       break;
-   case WXMENU_MSG_EDIT_PASTE:
+   case WXMENU_EDIT_PASTE:
       m_LayoutWindow->Paste();
       m_LayoutWindow->Refresh();
       break;
-   case WXMENU_MSG_EDIT_COPY:
+   case WXMENU_EDIT_COPY:
       m_LayoutWindow->Copy();
       m_LayoutWindow->Refresh();
       break;
-   case WXMENU_MSG_EDIT_CUT:
-//      m_LayoutWindow->Cut();
+   case WXMENU_EDIT_CUT:
+      m_LayoutWindow->Cut();
       m_LayoutWindow->Refresh();
       break;
    default:

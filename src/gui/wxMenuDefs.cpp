@@ -227,23 +227,15 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FILE_EXIT,     gettext_noop("E&xit"),             gettext_noop("Quit the application")     },
 
    // normal edit
+   { WXMENU_EDIT_CUT,  gettext_noop("C&ut"), gettext_noop("Cut selection and copy it to clipboard")           },
+   { WXMENU_EDIT_COPY, gettext_noop("&Copy"), gettext_noop("Copy selection to clipboard")           },
+   { WXMENU_EDIT_PASTE,gettext_noop("&Paste"), gettext_noop("Paste from clipboard")           },
+   { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_EDIT_ADB,      gettext_noop("&Address books..."), gettext_noop("Edit the address book(s)") },
    { WXMENU_EDIT_PREF,     gettext_noop("&Preferences..."),   gettext_noop("Change options")           },
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_EDIT_RESTORE_PREF,
                            gettext_noop("&Restore defaults..."), gettext_noop("Restore default options values") },
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_EDIT_SAVE_PREF,gettext_noop("&Save Preferences"), gettext_noop("Save options")             },
-
-   // edit for composeview
-   { WXMENU_MSG_EDIT_CUT,  gettext_noop("C&ut"), gettext_noop("Cut selection and copy it to clipboard")           },
-   { WXMENU_MSG_EDIT_COPY, gettext_noop("&Copy"), gettext_noop("Copy selection to clipboard")           },
-   { WXMENU_MSG_EDIT_PASTE,gettext_noop("&Paste"), gettext_noop("Paste from clipboard")           },
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_EDIT_ADB,      gettext_noop("&Address books..."), gettext_noop("Edit the address book(s)") },
-   { WXMENU_EDIT_PREF,     gettext_noop("&Preferences..."),   gettext_noop("Change options")           },
-   { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_EDIT_RESTORE_PREF, gettext_noop("&Restore defaults..."), gettext_noop("Restore default options values") },
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_EDIT_SAVE_PREF,gettext_noop("&Save Preferences"), gettext_noop("Save options")             },
 

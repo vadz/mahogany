@@ -567,26 +567,26 @@ MAppBase::Exit()
    // attempt to close splash screen first:
    CloseSplash();
    
-   if ( m_topLevelFrame )
-   {
-      if ( m_topLevelFrame->Close() )
-         m_topLevelFrame = NULL;
-   }
-
    if ( m_framesOkToClose )
    {
 #if 0
       //FIXME: Is this needed?
       for(size_t i = 0; i < m_framesOkToClose->Count(); i++)
       {
-         ((wxMFrame *)(*m_framesOkToClose)[i])->Close();
+         if( (*m_framesOkToClose)[i] != m_topLevelFrame)
+            ((wxMFrame *)(*m_framesOkToClose)[i])->Close();
       }
 #endif
       delete m_framesOkToClose;
       m_framesOkToClose = NULL;
    }
-   // Force exit, as we might have more than one toplevel frame.
-   wxExit();
+   
+   if ( m_topLevelFrame )
+   {
+      if ( m_topLevelFrame->Close() )
+         m_topLevelFrame = NULL;
+   }
+
 }
 
 bool

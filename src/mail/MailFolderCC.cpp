@@ -278,6 +278,25 @@ MailFolderCC::SetUpdateInterval(int seconds)
    m_Timer = new MailFolderTimer(this);
 }
 
+#define UPDATE_TO(name, var)    to = READ_CONFIG(p,MP_TCP_##name); \
+                                if (to != var) \
+                                { \
+                                    var = to; \
+                                    (void) mail_parameters(NIL, \
+                                                           SET_##name, (void *) to); \
+                                }
+
+void
+MailFolderCC::UpdateTimeoutValues(void)
+{
+   ProfileBase *p = GetProfile();
+   int to;
+   UPDATE_TO(OPENTIMEOUT, ms_TcpOpenTimeout);
+   UPDATE_TO(READTIMEOUT, ms_TcpReadTimeout);
+   UPDATE_TO(WRITETIMEOUT, ms_TcpWriteTimeout);
+   UPDATE_TO(CLOSETIMEOUT, ms_TcpCloseTimeout);
+   UPDATE_TO(RSHTIMEOUT, ms_TcpRshTimeout);
+}
 
 bool
 MailFolderCC::Open(void)
@@ -286,6 +305,11 @@ MailFolderCC::Open(void)
    if(! cclientInitialisedFlag)
       CClientInit();
 
+   /** Now, we apply the very latest c-client timeout values, in case
+       they have changed.
+   */
+   UpdateTimeoutValues();
+   
    if(GetType() == MF_POP || GetType() == MF_IMAP)
    {
       MF_user = m_Login;

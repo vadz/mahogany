@@ -11,7 +11,7 @@ SUB_DIRS=$(FILES_TEX:.htex=)
 
 include ../makeopts
 
-all: 
+all: test
 	$(MAKE) -k ps
 	$(MAKE) -k makemap
 
@@ -55,7 +55,17 @@ clean:
 	set -e; for i in $(SUB_DIRS); do $(RM) -r $$i; done
 	$(RM) -r classes classes.tex wxhelp.map
 
-.PHONY: all install ps clean subdirs makemap install2
+test:
+	@if test -f Manual.tex ; then \
+	echo "Found a Manual.tex file. There should not be one."; \
+	echo "The Manual should be exported to a file Manual.ltex instead."; \
+	echo "Usually all you need to do now is:"; \
+	echo "mv Manual.tex Manual.ltex"; \
+	echo "Then run make again." ;\
+	exit 1; \
+	fi 
+
+.PHONY: all install ps clean subdirs makemap install2 test
 
 include ../makerules
 

@@ -375,6 +375,8 @@ private:
    // return the folder type
    FolderType GetType(void) const { return m_folderType; }
 protected:
+   /// Update the timeout values from a profile
+   void UpdateTimeoutValues(void);
    void SetType(FolderType type) { m_folderType = type; }
 
    /// Gets a complete folder listing from the stream.
@@ -538,6 +540,19 @@ private:
    /// destructor
    ~MailFolderCC();
 
+   /** @name Global settings, timeouts for c-client lib */
+   //@{
+   /// TCP/IP open timeout in seconds.
+   int ms_TcpOpenTimeout;
+   /// TCP/IP read timeout in seconds.  
+   int ms_TcpReadTimeout;
+   /// TCP/IP write timeout in seconds. 
+   int ms_TcpWriteTimeout;
+   /// TCP/IP close timeout in seconds. 
+   int ms_TcpCloseTimeout;
+   /// rsh connection timeout in seconds.
+   int ms_TcpRshTimeout;
+//@}
 public:
    DEBUG_DEF
    MOBJECT_DEBUG(MailFolderCC)

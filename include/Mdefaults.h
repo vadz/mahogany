@@ -402,7 +402,19 @@
 /// ask confirmation before retrieveing more headers than this
 #define MP_MAX_HEADERS_NUM    "MaxHeadersNum"
 //@}
-
+/** @name timeout values for c-client mail library */
+//@{
+/// TCP/IP open timeout in seconds.
+#define MP_TCP_OPENTIMEOUT "TCPOpenTimeout"
+/// TCP/IP read timeout in seconds.  
+#define MP_TCP_READTIMEOUT "TCPReadTimeout"
+/// TCP/IP write timeout in seconds. 
+#define  MP_TCP_WRITETIMEOUT "TCPWriteTimeout"
+/// TCP/IP close timeout in seconds. 
+#define  MP_TCP_CLOSETIMEOUT "TCPCloseTimeout"
+/// rsh connection timeout in seconds.
+#define MP_TCP_RSHTIMEOUT "TCPRshTimeout"
+//@}
 /** @name for folder list ctrls: ratios of the width to use for
     columns */
 //@{
@@ -784,6 +796,19 @@
 #define MP_MAX_MESSAGE_SIZE_D 100l
 /// ask confirmation before retrieveing more headers than this
 #define MP_MAX_HEADERS_NUM_D  100l
+//@}
+/** @name timeout values for c-client mail library */
+//@{
+/// TCP/IP open timeout in seconds.
+#define MP_TCP_OPENTIMEOUT_D      120l
+/// TCP/IP read timeout in seconds.  
+#define MP_TCP_READTIMEOUT_D       30l
+/// TCP/IP write timeout in seconds. 
+#define  MP_TCP_WRITETIMEOUT_D    30l
+/// TCP/IP close timeout in seconds. 
+#define  MP_TCP_CLOSETIMEOUT_D 60l
+/// rsh connection timeout in seconds.
+#define MP_TCP_RSHTIMEOUT_D 60l
 //@}
 
 /** @name for folder list ctrls: ratios of the width to use for
