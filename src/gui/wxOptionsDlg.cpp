@@ -90,7 +90,7 @@
 #endif
 
 // define this to have additional TCP parameters in the options dialog
-#undef USE_TCP_TIMEOUTS
+#define USE_TCP_TIMEOUTS
 
 // ----------------------------------------------------------------------------
 // data
@@ -166,6 +166,7 @@ enum ConfigFields
    ConfigField_WriteTimeout,
    ConfigField_CloseTimeout,
 #endif // USE_TCP_TIMEOUTS
+   ConfigField_LookAheadHelp,
    Configfield_IMAPLookAhead,
    ConfigField_RshHelp,
    ConfigField_RshTimeout,
@@ -336,11 +337,12 @@ enum ConfigFields
    ConfigField_FolderViewSortMessagesBy,
    ConfigField_FolderViewHeaders, //"Configure columns to show..."
    ConfigField_FolderViewSizeUnits,
+   ConfigField_FolderViewPreviewDelayHelp,
+   ConfigField_FolderViewPreviewDelay,
    ConfigField_FolderViewStatusHelp,
    ConfigField_FolderViewUpdateStatus,
    ConfigField_FolderViewStatusBarFormat,
-   ConfigField_FolderViewPreviewDelay,
-   ConfigField_FolderViewLast = ConfigField_FolderViewPreviewDelay,
+   ConfigField_FolderViewLast = ConfigField_FolderViewStatusBarFormat,
 
    // folder tree options
    ConfigField_FolderTreeFirst = ConfigField_FolderViewLast,
@@ -814,10 +816,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #ifdef USE_TCP_TIMEOUTS
    { gettext_noop("&Read timeout"),                Field_Number | Field_Global | Field_Advanced,    -1,                        },
    { gettext_noop("&Write timeout"),               Field_Number | Field_Global | Field_Advanced,    -1,                        },
-   { gettext_noop("&Close timeout"),               Field_Number |
-     Field_Global | Field_Advanced,    -1,                        },
+   { gettext_noop("&Close timeout"),               Field_Number | Field_Global | Field_Advanced,    -1,                        },
 #endif // USE_TCP_TIMEOUTS
-   { gettext_noop("&Pre-fetch this many msgs"), Field_Number | Field_Global | Field_Advanced,    -1,                        },
+   { gettext_noop("When Mahogany needs to fetch a header from IMAP server\n"
+                  "it may also fetch a couple of adjacent messages which\n"
+                  "will speed up the access to them if they are needed later\n"
+                  "Set this option to 0 to disable prefetching entirely"), Field_Message | Field_Global | Field_Advanced, -1 },
+   { gettext_noop("&Pre-fetch this many msgs"),    Field_Number | Field_Global | Field_Advanced,    -1,                        },
    { gettext_noop("If the RSH timeout below is greater than 0, Mahogany will\n"
                   "first try to connect to IMAP servers using rsh instead of\n"
                   "sending passwords in clear text. However, if the server\n"
@@ -1044,6 +1049,12 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    // combo choices must be in sync with MessageSizeShow enum values
    { gettext_noop("Show size in &units of:automatic:autobytes:bytes:kbytes:mbytes"),
                                                    Field_Combo,   -1 },
+   { gettext_noop("Mahogany may delay previewing the selected message until\n"
+                  "the timeout specified below expires. This allows to\n"
+                  "quickly browse through the list of messages without\n"
+                  "waiting for them to be previewed. Set it to 0 to disable\n"
+                  "this feature."),                Field_Message | Field_Advanced, -1 },
+   { gettext_noop("Delay in miliseconds:"),        Field_Number | Field_Advanced, -1 },
    { gettext_noop("You can choose to show the information about\n"
                   "the currently selected message in the status bar.\n"
                   "You can use the same macros as in the template\n"
@@ -1051,7 +1062,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Message, -1 },
    { gettext_noop("&Use status bar"),              Field_Bool,    -1 },
    { gettext_noop("&Status bar line format"),      Field_Text,    ConfigField_FolderViewUpdateStatus },
-   { gettext_noop("Delay how many miliseconds before displaying message (please change to smth better;)"),      Field_Number | Field_Advanced, -1 },
 
    // folder tree
    { gettext_noop("Tree &background colour:"), Field_Color, -1 },
@@ -1262,8 +1272,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_TCP_WRITETIMEOUT),
    CONFIG_ENTRY(MP_TCP_CLOSETIMEOUT),
 #endif // USE_TCP_TIMEOUTS
+   CONFIG_NONE(), // IMAP look ahead help
    CONFIG_ENTRY(MP_IMAP_LOOKAHEAD),
-   CONFIG_NONE(),
+   CONFIG_NONE(), // rsh help
    CONFIG_ENTRY(MP_TCP_RSHTIMEOUT),
 
    // compose
@@ -1420,10 +1431,11 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(), // sorting subdialog
    CONFIG_NONE(), // columns subdialog
    CONFIG_ENTRY(MP_FVIEW_SIZE_FORMAT),
+   CONFIG_NONE(), // preview delay help
+   CONFIG_ENTRY(MP_FVIEW_PREVIEW_DELAY),
    CONFIG_NONE(), // status/title format help
    CONFIG_ENTRY(MP_FVIEW_STATUS_UPDATE),
    CONFIG_ENTRY(MP_FVIEW_STATUS_FMT),
-   CONFIG_ENTRY(MP_FVIEW_PREVIEW_DELAY),
 
    // folder tree
    CONFIG_ENTRY(MP_FOLDER_BGCOLOUR),

@@ -136,7 +136,10 @@ extern const MOption MP_MSGS_SERVER_SORT;
 extern const MOption MP_NEWS_SPOOL_DIR;
 extern const MOption MP_RSH_PATH;
 extern const MOption MP_SSH_PATH;
+extern const MOption MP_TCP_CLOSETIMEOUT;
 extern const MOption MP_TCP_OPENTIMEOUT;
+extern const MOption MP_TCP_READTIMEOUT;
+extern const MOption MP_TCP_WRITETIMEOUT;
 extern const MOption MP_TCP_RSHTIMEOUT;
 extern const MOption MP_TCP_SSHTIMEOUT;
 
@@ -1975,9 +1978,9 @@ MailFolderCC::UpdateTimeoutValues(void)
 
    // We now use only one common config setting for all TCP timeouts
    m_TcpOpenTimeout = READ_CONFIG(p, MP_TCP_OPENTIMEOUT);
-   m_TcpReadTimeout = m_TcpOpenTimeout;
-   m_TcpWriteTimeout = m_TcpOpenTimeout;
-   m_TcpCloseTimeout = m_TcpOpenTimeout;
+   m_TcpReadTimeout = READ_CONFIG(p, MP_TCP_READTIMEOUT);
+   m_TcpWriteTimeout = READ_CONFIG(p, MP_TCP_WRITETIMEOUT);
+   m_TcpCloseTimeout = READ_CONFIG(p, MP_TCP_CLOSETIMEOUT);
    m_LookAhead = READ_CONFIG(p, MP_IMAP_LOOKAHEAD);
 
    // but a separate one for rsh timeout to allow enabling/disabling rsh
