@@ -514,7 +514,7 @@ PGPEngine::DoExecCommand(const String& options,
         errEof = false;
    while ( !process.IsDone() || !outEof || !errEof )
    {
-      wxYield();
+      wxYieldIfNeeded();
 
       // the order is important here, lest we deadlock: first get everything
       // gpg has for us and only then try to feed it more data
