@@ -258,7 +258,7 @@ AddressList *AddressList::CreateFromAddress(Profile *profile)
    size_t pos = email.find('@');
    if ( pos != String::npos )
    {
-      adr->mailbox = cpystr(email.substr(0, pos));
+      adr->mailbox = cpystr(email.substr(0, pos).c_str());
       adr->host = cpystr(email.c_str() + pos + 1);
    }
    else // no '@'?
