@@ -563,32 +563,37 @@ static inline const MenuItemInfo& GetMenuItem(int n)
 
 void AppendToMenu(wxMenu *menu, int& n)
 {
-   int id = n > 0 ? GetMenuItem(n).idMenu : WXMENU_SEPARATOR;
-   if ( id == WXMENU_SUBMENU ) {
-      // append all entries until the next one with id == WXMENU_SUBMENU to a
-      // submenu
-      wxMenu *submenu = new wxMenu();
-
-      int nSubMenu = n;
-      for ( n++; GetMenuItem(n).idMenu != WXMENU_SUBMENU; n++ )
-      {
-         AppendToMenu(submenu, n);
-      }
-
-      const MenuItemInfo& mii = GetMenuItem(nSubMenu);
-
-      menu->Append(10000, // FIXME
-                   wxGetTranslation(mii.label),
-                   submenu,
-                   wxGetTranslation(mii.helpstring));
+   if ( n == WXMENU_SEPARATOR ) {
+      menu->AppendSeparator();
    }
    else {
-      const MenuItemInfo& mii = GetMenuItem(n);
+      int id = GetMenuItem(n).idMenu;
+      if ( id == WXMENU_SUBMENU ) {
+         // append all entries until the next one with id == WXMENU_SUBMENU to a
+         // submenu
+         wxMenu *submenu = new wxMenu();
 
-      menu->Append(id,
-                   wxGetTranslation(mii.label),
-                   wxGetTranslation(mii.helpstring),
-                   mii.kind);
+         int nSubMenu = n;
+         for ( n++; GetMenuItem(n).idMenu != WXMENU_SUBMENU; n++ )
+         {
+            AppendToMenu(submenu, n);
+         }
+
+         const MenuItemInfo& mii = GetMenuItem(nSubMenu);
+
+         menu->Append(10000, // FIXME
+                      wxGetTranslation(mii.label),
+                      submenu,
+                      wxGetTranslation(mii.helpstring));
+      }
+      else {
+         const MenuItemInfo& mii = GetMenuItem(n);
+
+         menu->Append(id,
+                      wxGetTranslation(mii.label),
+                      wxGetTranslation(mii.helpstring),
+                      mii.kind);
+      }
    }
 }
 
