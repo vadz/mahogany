@@ -192,14 +192,24 @@ private:
    } m_kind;
 };
 
-inline bool operator==(const MOptionValue& v, long s)
+inline bool operator==(const MOptionValue& v, long l)
 {
-   return s == v.GetNumberValue();
+   return l == v.GetNumberValue();
 }
 
-inline bool operator!=(const MOptionValue& v, long s)
+inline bool operator==(long l, onst MOptionValue& v)
 {
-   return s != v.GetNumberValue();
+   return l == v.GetNumberValue();
+}
+
+inline bool operator!=(const MOptionValue& v, long l)
+{
+   return l != v.GetNumberValue();
+}
+
+inline bool operator!=(long l, onst MOptionValue& v)
+{
+   return l != v.GetNumberValue();
 }
 
 inline bool operator==(const MOptionValue& v, const String& s)
