@@ -1165,7 +1165,7 @@ wxLayoutList::Find(wxPoint coords) const
 
 
 void
-wxLayoutList::SetWrapMargin(long n = -1)
+wxLayoutList::SetWrapMargin(long n)
 {
    m_WrapMargin = n;
 }
