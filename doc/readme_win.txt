@@ -1,13 +1,13 @@
 File: readme_win.txt, the README file for MS Windows version
-Date: 14.06.01
-Version: the information in this file applies to alpha 0.63
+Date: 16.12.01
+Version: the information in this file applies to alpha 0.64
 
 0. Requirements
 --------------
 
- a) Win95/98/NT 4.0/W2K. Mahogany has been tested the most under NT 4.0, but
-    it is also known to work under Windows 9x and Windows 2000. It does not
-    run under Windows 3.1.
+ a) Win95/98/NT 4.0/2000/XP. Mahogany has been mostly tested under NT 4.0, but
+    it is also known to work under Windows 95/98, 2000 and XP. It does not run
+    under Windows 3.1.
 
  b) You need a POP3 or IMAP4 (recommended, especially for slow connection!)
     server to read e-mail and an SMTP server to send it. Reading and sending
@@ -17,15 +17,17 @@ Version: the information in this file applies to alpha 0.63
 
  c) If you plan to use Python scripting with Mahogany, you need to have Python
     1.5, 2.0 (preferred) or 2.1 installed on your system, please refer to
-    http://www.python.org/ for details.
+    http://www.python.org/ for details. Note that in this case you will have
+    to rebuild the program with Python support as the official binaries for
+    this version don't include it.
 
 1. Installation
 ---------------
 
- a) the preferred installation method is to use the provided setup.exe program
-    which will guide you through the installation process and will allow you to
-    uninstall the program automatically later (by going into the "Add/Remove
-    programs" applet in the Control panel).
+ a) the preferred installation method is to use the provided installation
+    program which will guide you through the installation process and will
+    allow you to uninstall the program automatically later (by going into the
+    "Add/Remove programs" applet in the Control panel).
 
     Uninstallation note: all the mail boxes files created by the program will
     be left even if you uninstall it. As by default they're created under the
@@ -39,8 +41,8 @@ Version: the information in this file applies to alpha 0.63
     HKCU\Software\wxWindows\M, so they will have to be deleted manually if you
     later want to uninstall the program.
 
- c) upgrading: don't uninstall Mahogany 0.62 if you want to keep your existing
-    settings. You may install 0.63 either into the same directory as 0.62 or
+ c) upgrading: don't uninstall Mahogany 0.63 if you want to keep your existing
+    settings. You may install 0.64 either into the same directory as 0.63 or
     in another one (in which case you should move your existing mailbox files
     to the new directory before running the program if you wish to continue
     using them)
@@ -73,6 +75,9 @@ Version: the information in this file applies to alpha 0.63
  The features enumerated below work in the Unix version, but are not yet
 implemented under Windows:
 
- a) Windows version doesn't support encrypted communications using SSL
- b) no Palm support (synchronization with hand held devices)
- c) no support for local MTA, mail can be sent only using SMTP
+ a) no Palm support (synchronization with hand held devices)
+ b) no support for local MTA, mail can be sent only using SMTP
+
+ Note that encrypted communications using SSL are now supported in Windows
+version provided you didn't unselect "SSL Support" item during installation
+

@@ -1516,25 +1516,17 @@ SOURCE=.\src\Python\InitPython.cpp
 
 !IF  "$(CFG)" == "M - Win32 Release"
 
-# PROP Exclude_From_Build 1
-
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
-
-# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
 # PROP BASE Exclude_From_Build 1
-# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
 # PROP BASE Exclude_From_Build 1
-# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
-
-# PROP Exclude_From_Build 1
 
 !ENDIF 
 
@@ -1668,7 +1660,6 @@ SOURCE=.\src\Python\MString_swig.cpp
 # Begin Source File
 
 SOURCE=.\src\Python\PythonDll.cpp
-# PROP Exclude_From_Build 1
 # End Source File
 # Begin Source File
 
@@ -1676,25 +1667,17 @@ SOURCE=.\src\Python\PythonHelp.cpp
 
 !IF  "$(CFG)" == "M - Win32 Release"
 
-# PROP Exclude_From_Build 1
-
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
-
-# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
 # PROP BASE Exclude_From_Build 1
-# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
 # PROP BASE Exclude_From_Build 1
-# PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
-
-# PROP Exclude_From_Build 1
 
 !ENDIF 
 

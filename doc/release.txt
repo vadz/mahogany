@@ -32,7 +32,7 @@ d) doc/release.txt to add any steps which are not yet in this file :-)
 
 e) redhat/M.spec
 
-f) extra/setup/M.iss
+f) extra/setup/M.iss and extra/setup/{post|pre}read.txt
 
 g) "cvs rtag" the files
 
