@@ -556,6 +556,9 @@ wxMApp::Help(int id, wxWindow *parent)
    // store help key used in search
    static wxString last_key;
 
+   // first thing: close splash if it's still there
+   CloseSplash();
+
    if(! m_HelpController)
    {
       bool ok;
@@ -567,7 +570,7 @@ wxMApp::Help(int id, wxWindow *parent)
          READ_APPCONFIG(MP_HELPBROWSER_ISNS));
       helpfile = GetGlobalDir()+"/doc";
 #else // Windows
-      helpfile = GetGlobalDir()+"\\doc\\M.hlp";
+      helpfile = GetGlobalDir()+"\\Mahogany.hlp";
 #endif // Unix/Windows
       // initialise the help system
       ok = m_HelpController->Initialize(helpfile);
@@ -596,6 +599,14 @@ wxMApp::Help(int id, wxWindow *parent)
       break;
       // all other help ids, just look them up:
    default:
+#ifdef OS_WIN
+      // context-sensitive help doesn't work currently, try to at least do
+      // something in response to the commands from the program "Help menu"
+      if ( id == MH_CONTENTS )
+         m_HelpController->DisplayContents();
+      else
+#endif // OS_WIN
+
       if(! m_HelpController->DisplaySection(id))
       {
          wxString str;

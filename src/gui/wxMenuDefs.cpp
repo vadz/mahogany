@@ -313,7 +313,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_HELP_CONTEXT, gettext_noop("&Help"),    gettext_noop("Help on current context...")},
    { WXMENU_HELP_CONTENTS, gettext_noop("Help &Contents"),    gettext_noop("Contents of help system...")},
-   { WXMENU_HELP_SEARCH,   gettext_noop("&Search Help"),      gettext_noop("Search help system for keyword...")},
+   { WXMENU_HELP_SEARCH,   gettext_noop("&Search Help..."),      gettext_noop("Search help system for keyword...")},
    { WXMENU_HELP_COPYRIGHT,   gettext_noop("C&opyright"),      gettext_noop("Show Copyright.")}
 };
 

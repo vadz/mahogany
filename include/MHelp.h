@@ -5,47 +5,47 @@
  *                                                                  *
  * $Id$
  *******************************************************************/
-#ifndef	MHELP_H
+#ifndef MHELP_H
 #define MHELP_H
 
-/** Definition of all numeric help IDs.
-*/
-enum
-{
-   MH_CONTENTS = 0,
-   MH_ABOUT,
-   MH_SEARCH,
-   /// general help topics
-   MH_TOPICS = 1000,
-   MH_RELEASE_NOTES = 1001,
-   MH_FAQ = 1002,
-   MH_COPYRIGHT = 1003,
-   /// help about certain controls and dialogs
-   MH_CONTROLS = 2000,
-   MH_MAIN_FRAME = 2001,
-   MH_FOLDER_VIEW = 2002,
-   MH_MESSAGE_VIEW = 2003,
-   MH_FOLDER_OPEN_DIALOG = 2004,
-   MH_FOLDER_CREATE_DIALOG = 2005,
-   MH_FOLDER_VIEW_KEYBINDINGS = MH_FOLDER_VIEW,
-   MH_FOLDER_TREE = 2006,
-   MH_COMPOSE_MAIL = 2100,
-   MH_COMPOSE_NEWS = 2101,
-   MH_ADB = 3000,
-   MH_ADB_ADB = 3001,
-   MH_ADB_BBDB = 3002,
-   MH_ADB_USING = 3100,
-   MH_OPAGE_COMPOSE     = 4100,
-   MH_OPAGE_MESSAGEVIEW = 4101,
-   MH_OPAGE_IDENT       = 4102,
-   MH_OPAGE_PYTHON      = 4103,
-   MH_OPAGE_ADB         = 4104,
-   MH_OPAGE_OTHERS      = 4105,
-   MH_OPAGE_HELPERS     = 4106,
-   MH_OPAGE_FOLDERS     = 4107,
-   MH_OPTIONSNOTEBOOK   = 4120,
-   
-   MH_PYTHON = 5000
-};
+// NB: we use #define here because this file is sourced by MS Help compiler
+//     which doesn't understand things like 'enum' or 'const int'. Also, all
+//     ids *must* start with MH_ prefix for the same reason.
 
-#endif
+/// Definition of all numeric help IDs
+#define MH_CONTENTS 0
+#define MH_ABOUT    1
+#define MH_SEARCH   2
+
+/// general help topics
+#define MH_TOPICS        1000
+#define MH_RELEASE_NOTES 1001
+#define MH_FAQ           1002
+#define MH_COPYRIGHT     1003
+
+/// help about certain controls and dialogs
+#define MH_CONTROLS           2000
+#define MH_MAIN_FRAME         2001
+#define MH_FOLDER_VIEW        2002
+#define MH_MESSAGE_VIEW       2003
+#define MH_FOLDER_OPEN_DIALOG 2004
+#define MH_FOLDER_CREATE_DIALOG 2005
+#define MH_FOLDER_VIEW_KEYBINDINGS MH_FOLDER_VIEW,
+#define MH_FOLDER_TREE       2006
+#define MH_COMPOSE_MAIL      2100
+#define MH_COMPOSE_NEWS      2101
+#define MH_ADB               3000
+#define MH_ADB_ADB           3001
+#define MH_ADB_BBDB          3002
+#define MH_ADB_USING         3100
+#define MH_OPAGE_COMPOSE     4100
+#define MH_OPAGE_MESSAGEVIEW 4101
+#define MH_OPAGE_IDENT       4102
+#define MH_OPAGE_PYTHON      4103
+#define MH_OPAGE_ADB         4104
+#define MH_OPAGE_OTHERS      4105
+#define MH_OPAGE_HELPERS     4106
+#define MH_OPAGE_FOLDERS     4107
+#define MH_OPTIONSNOTEBOOK   4120
+
+#define MH_PYTHON            5000
