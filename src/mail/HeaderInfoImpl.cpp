@@ -463,12 +463,21 @@ inline bool HeaderInfoListImpl::HasTransTable() const
    return m_tableMsgno != NULL;
 }
 
+inline bool HeaderInfoListImpl::ShouldHaveTables() const
+{
+   // note that we can't use IsSorting() here because we don't need need the
+   // table is we just reverse the order (in which case IsSorting() would have
+   // returned true)
+   return IsThreading() ||
+           (GetSortCritDirect(m_sortParams.sortOrder) != MSO_NONE);
+}
+
 inline bool HeaderInfoListImpl::MustRebuildTables() const
 {
    // if the tables exist (m_sizeTables != 0) but are out of date, i.e. we got
    // some new messages since they were built (m_sizeTables < m_count) we
    // surely have to rebuild them
-   if ( m_sizeTables && m_sizeTables < m_count )
+   if ( m_sizeTables < m_count && ShouldHaveTables() )
    {
       ((HeaderInfoListImpl *)this)->FreeSortAndThreadData(); // const_cast
 
@@ -478,15 +487,9 @@ inline bool HeaderInfoListImpl::MustRebuildTables() const
    // if we already have the tables, we don't have to rebuild them (unless the
    // tables are out of date which is checked above)
    //
-   // we also don't need them if we are not really sorting but just reveresing
-   // the indices
-   //
    // and neither we need them if don't have at least 2 messages: otherwise the
    // trans tables are quite useless
-   return !HasTransTable() &&
-          m_count >= 2 &&
-          (IsThreading() ||
-           GetSortCritDirect(m_sortParams.sortOrder) != MSO_NONE);
+   return !HasTransTable() && m_count >= 2 && ShouldHaveTables();
 }
 
 inline bool HeaderInfoListImpl::IsTranslatingIndices() const

@@ -154,6 +154,9 @@ private:
    /// do we do any kind of index mapping (trans tables or reverse order)?
    inline bool IsTranslatingIndices() const;
 
+   /// do we need the translation table at all?
+   inline bool ShouldHaveTables() const;
+
    /// do we need to rebuild the translation table?
    inline bool MustRebuildTables() const;
 
