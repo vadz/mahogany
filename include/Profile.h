@@ -39,8 +39,8 @@
 #  endif
 
    // both types are mapped just on wxConfig
-   typedef  wxConfig       FileConfig;
-   typedef  wxConfig       AppConfig;
+   typedef  wxConfigBase       FileConfig;
+   typedef  wxConfigBase       AppConfig;
 #else
 #  include  "appconf.h"
 
