@@ -47,7 +47,7 @@
 #define   ADB_HEADER_DESC   "Description"
 #define   ADB_ENTRIES       "ADB_Entries"
 
-IMPLEMENT_ADB_PROVIDER(PalmDataProvider, TRUE, "PalmOS-ADB (Broken! Do not use!)", Name_No);
+IMPLEMENT_ADB_PROVIDER(PalmDataProvider, TRUE, "PalmOS-ADB (ReadOnly)", Name_No);
 
 // ============================================================================
 // implementation
@@ -98,6 +98,7 @@ void PalmEntry::Load(struct Address a)
   SetField(AdbField_O_Phone, a.entry[3]);
   SetField(AdbField_H_Phone, a.entry[4]);
   SetField(AdbField_H_Fax, a.entry[5]);
+  SetField(AdbField_EMail, a.entry[7]);
   SetField(AdbField_H_Street, a.entry[8]);
   SetField(AdbField_H_City, a.entry[9]);
 
@@ -106,9 +107,7 @@ void PalmEntry::Load(struct Address a)
   SetField(AdbField_H_Postcode, a.entry[11]);
   SetField(AdbField_H_Country, a.entry[12]);
   SetField(AdbField_Title, a.entry[13]);
-
-  // in 7 is the mailaddress
-  // SetField(???, a.entry[7]);
+  SetField(AdbField_Comments, a.entry[18]);
   
   // where to write "other number"?
   // SetField(???, a.entry[6]);
@@ -118,7 +117,6 @@ void PalmEntry::Load(struct Address a)
   m_bDirty = FALSE;
 }
 
-// save entry to wxFileConfig (doesn't check if it's modified or not)
 bool PalmEntry::Save()
 {
   // TODO: save changed entries to Palm
@@ -158,7 +156,13 @@ PalmEntryGroup::~PalmEntryGroup()
    PalmEntryList::iterator i;
    for(i = m_entries->begin(); i != m_entries->end(); i++)
       (**i).DecRef();
+   
+   PalmGroupList::iterator j;
+   for(j = m_groups->begin(); j != m_groups->end(); j++)
+      (**j).DecRef();
+      
    delete m_entries;
+   delete m_groups;
 }
 
 size_t PalmEntryGroup::GetEntryNames(wxArrayString& aNames) const
