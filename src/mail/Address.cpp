@@ -197,6 +197,46 @@ String Address::NormalizeSubject(const String& subjectOrig)
    return subject;
 }
 
+/// construct the full email address of the form "name <email>"
+/* static */
+String Address::BuildFullForm(const String& name, const String& email)
+{
+   if ( !name )
+   {
+      // don't use unnecessary angle quotes then
+      return email;
+   }
+
+   String personal = name,
+          address;
+
+   // we need to quote the personal part if it's not an atext as defined by RFC
+   // 2822 (TODO: reuse IsATextChar() from matchurl.cpp!)
+   bool doQuote = strpbrk(name, ",;\"") != (const char *)NULL;
+   if ( doQuote )
+   {
+      address = '"';
+
+      // escape all quotes
+      personal.Replace("\"", "\\\"");
+   }
+
+   address += personal;
+
+   if ( doQuote )
+   {
+      address += '"';
+   }
+
+   if ( !email.empty() )
+   {
+      address << " <" << email << '>';
+   }
+   //else: can it really be empty??
+
+   return address;
+}
+
 // ----------------------------------------------------------------------------
 // AddressList
 // ----------------------------------------------------------------------------

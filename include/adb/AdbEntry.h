@@ -147,6 +147,14 @@ public:
     /// get an additional e-mail adderss
   virtual void GetEMail(size_t n, String *pstr) const = 0;
 
+  /// a more convenient wrapper around GetField() version above
+  String GetField(size_t n) const
+  {
+     String s;
+     GetField(n, &s);
+     return s;
+  }
+
   // changing the data
     /// set any text field with this function
   virtual void SetField(size_t n, const String& strValue) = 0;
@@ -167,26 +175,8 @@ public:
   virtual int Matches(const char *str, int where, int how) const = 0;
     /// description of an item is the name and the address
 
-  virtual String GetDescription() const
-  {
-     String name, address;
-     GetField(AdbField_FullName, &name);
-     GetField(AdbField_EMail, &address);
-
-     // the full form is "FullName <email>", but if the "fullname" is empty,
-     // we take "nickname" instead (it can not be empty normally)
-     if ( !name )
-        GetField(AdbField_NickName, &name);
-
-     return GetFullEmailAddress(name, address);
-  }
-
-  String GetField(size_t n) const
-  {
-     String s;
-     GetField(n, &s);
-     return s;
-  }
+  /// return the full address, i.e. "personal-part <address-part>" string
+  virtual String GetDescription() const;
 };
 
 class AdbEntryCommon : public AdbEntry

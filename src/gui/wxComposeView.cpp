@@ -1693,24 +1693,7 @@ wxComposeView::ExpandRecipient(String *textAddress)
             if ( nExp > 0 )
                newText += CANONIC_ADDRESS_SEPARATOR;
 
-            wxString address(expansions[nExp]);
-
-            // sometimes we must quote the address
-            bool doQuote = strpbrk(address, ",;\"") != (const char *)NULL;
-            if ( doQuote )
-            {
-               newText += '"';
-
-               // escape all quotes
-               address.Replace("\"", "\\\"");
-            }
-
-            newText += address;
-
-            if ( doQuote )
-            {
-               newText += '"';
-            }
+            newText += expansions[nExp];
          }
       }
    }

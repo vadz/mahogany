@@ -74,6 +74,10 @@ public:
     */
    static String NormalizeSubject(const String& subject);
 
+   /**
+    */
+   static String BuildFullForm(const String& personal, const String& address);
+
 protected:
    /// must have default ctor because we declare copy ctor private
    Address() { }

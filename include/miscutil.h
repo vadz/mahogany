@@ -24,27 +24,6 @@ class UIdArray;
 /**@name Miscellaneous utility functions */
 //@{
 
-/// construct the full email address of the form "name <email>"
-inline String GetFullEmailAddress(const String& name, const String& email)
-{
-   if ( !name )
-      return email;
-
-   String address(name);
-   if ( !email.empty() )
-   {
-      if ( !name.empty() )
-         address += " <";
-
-      address += email;
-
-      if ( !name.empty() )
-         address += '>';
-   }
-
-   return address;
-}
-
 class wxFrame;
 class MailFolder;
 

@@ -28,9 +28,28 @@
 
 #include "adb/AdbEntry.h"
 
+#include "Address.h"
+
 // ============================================================================
 // implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// AdbEntry
+// ----------------------------------------------------------------------------
+
+String AdbEntry::GetDescription() const
+{
+  String name = GetField(AdbField_FullName),
+         address = GetField(AdbField_EMail);
+
+  // the full form is "FullName <email>", but if the "fullname" is empty,
+  // we take "nickname" instead (it can not be empty normally)
+  if ( !name )
+     GetField(AdbField_NickName, &name);
+
+  return Address::BuildFullForm(name, address);
+}
 
 // ----------------------------------------------------------------------------
 // AdbEntryCommon class
@@ -154,3 +173,4 @@ AdbEntryStoredInMemory::Matches(const char *szWhat, int where, int how) const
   // not found
   return 0;
 }
+
