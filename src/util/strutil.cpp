@@ -37,6 +37,7 @@
 #endif
 
 #include <wx/textfile.h>  // just for strutil_enforceNativeCRLF()
+#include <wx/regex.h>
 
 // ----------------------------------------------------------------------------
 // local functions
@@ -1369,7 +1370,7 @@ strutil_getMailAddress(const String &inputline,
 
 #include <wx/regex.h>
 
-#ifdef WX_HAVE_REGEX
+#if wxUSE_REGEX
 
 class strutil_RegEx : public wxRegEx
 {
@@ -1408,7 +1409,8 @@ strutil_freeRegEx(class strutil_RegEx *regex)
    ASSERT(regex);
    delete regex;
 }
-#else // WX_HAVE_REGEX
+
+#else // !wxUSE_REGEX
 
 class strutil_RegEx *
 strutil_compileRegEx(const String &pattern, int flags)
@@ -1430,7 +1432,7 @@ strutil_freeRegEx(class strutil_RegEx *regex)
    // nothing
 }
 
-#endif // WX_HAVE_REGEX
+#endif // wxUSE_REGEX/!wxUSE_REGEX
 
 // ----------------------------------------------------------------------------
 // array <-> string
