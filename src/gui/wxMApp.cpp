@@ -797,9 +797,21 @@ wxMApp::OnInit()
                m_Locale = new wxLocale(lang);
          }
       }
-      else // we have locale
+      else // the user specified a locale
       {
-         m_Locale = new wxLocale(locale, locale);
+#if wxCHECK_VERSION(2, 5, 0)
+         const wxLanguageInfo *info = wxLocale::FindLanguageInfo(locale);
+         if ( info )
+         {
+            m_Locale = new wxLocale(info->Language);
+         }
+         else // use the same string for locale and the message catalog
+              // locations -- this only really works under Unix but we
+              // can't do much better without FindLanguageInfo()
+#endif // 2.5.0+
+         {
+            m_Locale = new wxLocale(locale, locale);
+         }
       }
 
       if ( m_Locale )
@@ -827,10 +839,20 @@ wxMApp::OnInit()
             wxString strDir;
             wxSplitPath(strPath, &strDir, NULL, NULL);
 
-            String localePath;
-            localePath << strDir << "/locale";
+            // a special hack: when running M from the build dir, we really
+            // want to look in the top level directory
+            if ( strDir.Right(5) == _T("Debug") )
+               strDir.Truncate(strDir.length() - 5);
+            else if ( strDir.Right(7) == _T("Release") )
+               strDir.Truncate(strDir.length() - 7);
+
+            String localePath = strDir;
+            if ( !wxEndsWithPathSeparator(localePath) )
+               localePath += _T('\\');
+
+            localePath += "locale";
 #else
-#   error "don't know where to find message catalogs on this platform"
+            #error "don't know where to find message catalogs on this platform"
 #endif // OS
 
             m_Locale->AddCatalogLookupPathPrefix(localePath);
