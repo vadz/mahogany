@@ -52,7 +52,7 @@ Required software
 
    - wxGTK (GTK port of wxWindows) 2.2.1 or above, 2.2.7 recommended
      (2.3.0 is also known to work)
-   - GTK+ 1.2.3 or above, 1.2.9 recommended
+   - GTK+ 1.2.3 or above, 1.2.10 recommended
 
 If you want to compile Mahogany with SSL support, you must have OpenSSL
 installed first. Then you can configure Mahogany with the additional
