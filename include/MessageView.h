@@ -62,8 +62,11 @@ class MessageView : public MEventReceiver
    //@{
 
 protected:
-   /// ctor takes as argument the parent window for the message viewer one
-   MessageView(wxWindow *parent);
+   /// default ctor: we have to use 2 step construction
+   MessageView();
+
+   /// takes as argument the parent window for the message viewer one
+   void Init(wxWindow *parent);
 
 public:
    /// create a new MessageView
@@ -338,6 +341,13 @@ protected:
    ClickableInfo *GetClickableInfo(const MimePart *part) const;
 
    //@}
+
+   /**
+      Default viewer creation: we must always have at least this viewer
+      available even if no others can be found (they live in modules). This is
+      also the viewer we use when there is no folder selected
+   */
+   virtual MessageViewer *CreateDefaultViewer() const = 0;
 
 private:
    /** @name Preview data */

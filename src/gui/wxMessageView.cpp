@@ -38,6 +38,8 @@
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
 #  include "gui/wxIconManager.h"
+
+#  include "wx/stattext.h"
 #endif //USE_PCH
 
 #include "Mdefaults.h"
@@ -241,6 +243,75 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+// DummyViewer: a trivial implementation of MessageViewer which doesn't do
+//              anything but which we use to avoid crashing if no viewers are
+//              found
+//
+//              this is also the one we use when we have no folder set
+// ----------------------------------------------------------------------------
+
+class DummyViewer : public MessageViewer
+{
+public:
+   // creation
+   DummyViewer() { }
+
+   virtual void Create(MessageView *msgView, wxWindow *parent)
+   {
+      m_window = new wxStaticText(parent, -1, _("\n\nNo message"),
+                                  wxDefaultPosition, wxDefaultSize,
+                                  wxALIGN_CENTER);
+   }
+
+   // operations
+   virtual void Clear() { }
+   virtual void Update() { }
+   virtual void UpdateOptions() { }
+   virtual wxWindow *GetWindow() const { return m_window; }
+
+   virtual bool Find(const String& text) { return false; }
+   virtual bool FindAgain() { return false; }
+   virtual String GetSelection() const { return ""; }
+   virtual void Copy() { }
+   virtual bool Print() { return false; }
+   virtual void PrintPreview() { }
+
+   // header showing
+   virtual void StartHeaders() { }
+   virtual void ShowRawHeaders(const String& header) { }
+   virtual void ShowHeader(const String& name,
+                           const String& value,
+                           wxFontEncoding encoding) { }
+   virtual void ShowXFace(const wxBitmap& bitmap) { }
+   virtual void EndHeaders() { }
+
+   // body showing
+   virtual void StartBody() { }
+   virtual void StartPart() { }
+   virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci) { }
+   virtual void InsertImage(const wxImage& image, ClickableInfo *ci) { }
+   virtual void InsertRawContents(const String& data) { }
+   virtual void InsertText(const String& text, const TextStyle& style) { }
+   virtual void InsertURL(const String& url) { }
+   virtual void InsertSignature(const String& signature) { }
+   virtual void EndPart() { }
+   virtual void EndBody() { }
+
+   // scrolling
+   virtual bool LineDown() { return false; }
+   virtual bool LineUp() { return false; }
+   virtual bool PageDown() { return false; }
+   virtual bool PageUp() { return false; }
+
+   // capabilities querying
+   virtual bool CanInlineImages() const { return false; }
+   virtual bool CanProcess(const String& mimetype) const { return false; }
+
+private:
+   wxWindow *m_window;
+};
+
+// ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
 
@@ -417,8 +488,9 @@ wxMIMETreeDialog::AddToTree(wxTreeItemId idParent, const MimePart *mimepart)
 // ----------------------------------------------------------------------------
 
 wxMessageView::wxMessageView(wxWindow *parent, FolderView *folderView)
-             : MessageView(parent)
 {
+   Init(parent);
+
    m_FolderView = folderView;
 }
 
@@ -484,7 +556,7 @@ wxMessageView::DoShowMessage(Message *mailMessage)
 }
 
 // ----------------------------------------------------------------------------
-// helpers for viewer changing
+// message viewer functions
 // ----------------------------------------------------------------------------
 
 void
@@ -501,6 +573,12 @@ wxMessageView::OnViewerChange(const MessageViewer *viewerOld,
    {
       delete viewerOld->GetWindow();
    }
+}
+
+MessageViewer *
+wxMessageView::CreateDefaultViewer() const
+{
+   return new DummyViewer();
 }
 
 // ----------------------------------------------------------------------------

@@ -67,6 +67,9 @@ public:
    /// show the MIME tree
    virtual void ShowMIMEDialog(const MimePart *part);
 
+protected:
+   virtual MessageViewer *CreateDefaultViewer() const;
+
 private:
    FolderView *m_FolderView;
 };

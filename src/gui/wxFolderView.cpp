@@ -2821,6 +2821,8 @@ wxFolderView::wxFolderView(wxWindow *parent)
 
    m_MessagePreview = MessageView::Create(m_MessageWindow, this);
 
+   m_MessageWindow->SetViewerWindow(m_MessagePreview->GetWindow());
+
    m_msgCmdProc = MsgCmdProc::Create(m_MessagePreview, m_FolderCtrl);
    m_msgCmdProc->SetFrame(GetFrame(m_FolderCtrl));
 

@@ -40,8 +40,6 @@
 #  include <wx/menu.h>
 
 #  include "gui/wxOptionsDlg.h"
-
-#  include "wx/stattext.h"
 #endif //USE_PCH
 
 #include "Mdefaults.h"
@@ -237,79 +235,6 @@ private:
    const MimePart *m_mimepart;
 };
 
-// ----------------------------------------------------------------------------
-// DummyViewer: a trivial implementation of MessageViewer which doesn't do
-//              anything but which we use to avoid crashing if no viewers are
-//              found
-//
-//              this is also the one we use when we have no folder set
-// ----------------------------------------------------------------------------
-
-class DummyViewer : public MessageViewer
-{
-public:
-   // creation
-   DummyViewer() { }
-   DummyViewer(MessageView *msgView, wxWindow *parent)
-   {
-      Create(msgView, parent);
-   }
-
-   virtual void Create(MessageView *msgView, wxWindow *parent)
-   {
-      m_window = new wxStaticText(parent, -1, _("No message"),
-                                  wxDefaultPosition, wxDefaultSize,
-                                  wxALIGN_CENTER);
-   }
-
-   // operations
-   virtual void Clear() { }
-   virtual void Update() { }
-   virtual void UpdateOptions() { }
-   virtual wxWindow *GetWindow() const { return m_window; }
-
-   virtual bool Find(const String& text) { return false; }
-   virtual bool FindAgain() { return false; }
-   virtual String GetSelection() const { return ""; }
-   virtual void Copy() { }
-   virtual bool Print() { return false; }
-   virtual void PrintPreview() { }
-
-   // header showing
-   virtual void StartHeaders() { }
-   virtual void ShowRawHeaders(const String& header) { }
-   virtual void ShowHeader(const String& name,
-                           const String& value,
-                           wxFontEncoding encoding) { }
-   virtual void ShowXFace(const wxBitmap& bitmap) { }
-   virtual void EndHeaders() { }
-
-   // body showing
-   virtual void StartBody() { }
-   virtual void StartPart() { }
-   virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci) { }
-   virtual void InsertImage(const wxImage& image, ClickableInfo *ci) { }
-   virtual void InsertRawContents(const String& data) { }
-   virtual void InsertText(const String& text, const TextStyle& style) { }
-   virtual void InsertURL(const String& url) { }
-   virtual void InsertSignature(const String& signature) { }
-   virtual void EndPart() { }
-   virtual void EndBody() { }
-
-   // scrolling
-   virtual bool LineDown() { return false; }
-   virtual bool LineUp() { return false; }
-   virtual bool PageDown() { return false; }
-   virtual bool PageUp() { return false; }
-
-   // capabilities querying
-   virtual bool CanInlineImages() const { return false; }
-   virtual bool CanProcess(const String& mimetype) const { return false; }
-
-private:
-   wxWindow *m_window;
-};
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -427,11 +352,18 @@ MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
 // MessageView creation
 // ----------------------------------------------------------------------------
 
-MessageView::MessageView(wxWindow *parent)
+MessageView::MessageView()
 {
    Init();
 
-   m_viewer = new DummyViewer(this, parent);
+   m_viewer = NULL;
+}
+
+void
+MessageView::Init(wxWindow *parent)
+{
+   m_viewer = CreateDefaultViewer();
+   m_viewer->Create(this, parent);
 }
 
 void
@@ -550,7 +482,9 @@ MessageView::CreateViewer(wxWindow *parent)
       // pointer: it may seem strange to do it like this but consider that it
       // really is never supposed to happen and it is easier to just check for
       // it once here than to insert "if ( m_viewer )" tests everywhere
-      m_viewer = new DummyViewer;
+      m_viewer = CreateDefaultViewer();
+
+      ASSERT_MSG( m_viewer, "must have default viewer, will crash without it!" );
    }
 
    m_viewer->Create(this, parent);
