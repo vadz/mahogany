@@ -188,7 +188,7 @@ MModule *LoadModuleInternal(const String & name)
       ModuleEntry *me = new ModuleEntry;
       me->m_Name = name;
       me->m_Module = module;
-      gs_ModuleList.push_back(module);
+      gs_ModuleList.push_back(me);
    }
    else
       wxDllLoader::UnloadLibrary(dll);

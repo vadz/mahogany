@@ -209,7 +209,7 @@ void ProfileBase::SetExpandEnvVars(bool bDoIt)
 */
 static void
 ListProfilesHelper(wxConfigBase *config,
-                   kbList *list,
+                   kbStringList *list,
                    int type,
                    String const &path)
 {
