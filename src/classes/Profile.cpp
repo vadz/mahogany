@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/05/14 11:00:16  KB
+ * Code cleanups and conflicts resolved.
+ *
  * Revision 1.4  1998/05/14 09:48:51  KB
  * added IsEmpty() to strutil, minor changes
  *
@@ -121,34 +124,34 @@ Profile::readEntry(const char *szKey, const char *szDefault) const
       rc = fileConfig->readEntry(szKey, (const char *)NULL);
 #endif
    }
-   if( IsEmpty(rc) && parentProfile != NULL)
+   if( strutil_isempty(rc) && parentProfile != NULL)
    {
       DBGLOG("   looking in parentProfile");
       rc = parentProfile->readEntry(szKey, (const char *)NULL);
    }
-if( IsEmpty(rc) )
-{
-   DBGLOG("   looking in mApplication");
-   String tmp = mApplication.getCurrentPath();
-   mApplication.setCurrentPath(M_PROFILE_CONFIG_SECTION);
-   mApplication.changeCurrentPath(profileName.c_str());
-   rc = mApplication.readEntry(szKey, (const char *)NULL);
-   mApplication.setCurrentPath(tmp.c_str());
-}
-if( IsEmpty(rc) )
-{
-   DBGLOG("   writing entry back");
-   fileConfig->WRITE_ENTRY(szKey,szDefault); // so default value can be recorded
-   rc = szDefault;
-}
+   if( strutil_isempty(rc) )
+   {
+      DBGLOG("   looking in mApplication");
+      String tmp = mApplication.getCurrentPath();
+      mApplication.setCurrentPath(M_PROFILE_CONFIG_SECTION);
+      mApplication.changeCurrentPath(profileName.c_str());
+      rc = mApplication.readEntry(szKey, (const char *)NULL);
+      mApplication.setCurrentPath(tmp.c_str());
+   }
+   if( strutil_isempty(rc) )
+   {
+      DBGLOG("   writing entry back");
+      fileConfig->WRITE_ENTRY(szKey,szDefault); // so default value can be recorded
+      rc = szDefault;
+   }
 
-DBGLOG("Profile::readEntry() returned: " << rc);
+   DBGLOG("Profile::readEntry() returned: " << rc);
 
 #ifdef   USE_WXCONFIG
-strncpy(s_szBuffer, rc, SIZEOF(s_szBuffer));
-return s_szBuffer;
+   strncpy(s_szBuffer, rc, SIZEOF(s_szBuffer));
+   return s_szBuffer;
 #else
-return rc;
+   return rc;
 #endif
 }
 

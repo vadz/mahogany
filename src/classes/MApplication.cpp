@@ -6,6 +6,9 @@
  * $Id$         *
  *                                                                  *
  * $Log$
+ * Revision 1.13  1998/05/14 11:00:15  KB
+ * Code cleanups and conflicts resolved.
+ *
  * Revision 1.12  1998/05/14 09:48:50  KB
  * added IsEmpty() to strutil, minor changes
  *
@@ -58,20 +61,7 @@
 #  include  <wx/textfile.h>
 #  include  <wx/fileconf.h>
 
-<<<<<<< MApplication.cc
-#if USE_WXGTK
-  //FIXME wxBell in wxGTK
-  void wxBell(void) { }
-  
-//  IMPLEMENT_WXWIN_MAIN
-#endif
-
-#ifdef OS_UNIX
-MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME, FALSE,
-                    FALSE, TRUE)
-=======
 #  define   CALL_APPCONF_CTOR
->>>>>>> 1.10
 #else
 #  ifdef OS_UNIX
 #     define   CALL_APPCONF_CTOR : AppConfig(M_APPLICATIONNAME,\

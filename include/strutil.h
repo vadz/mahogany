@@ -6,6 +6,9 @@
  * $Id$                *
  *                                                                  *
  * $Log$
+ * Revision 1.7  1998/05/14 11:00:14  KB
+ * Code cleanups and conflicts resolved.
+ *
  * Revision 1.6  1998/05/14 09:48:31  KB
  * added IsEmpty() to strutil, minor changes
  *
@@ -23,9 +26,13 @@
 //@{
 
 
-#ifndef USE_WXSTRING // use std::string
-inline bool IsEmpty(const String& s) { return s.c_str() == '\0'; }
+#ifdef USE_WXSTRING // use std::string
+   inline bool strutil_isempty(const String &s) { return IsEmpty(s); }
+#else
+   inline bool strutil_isempty(const String& s) { return s.c_str() == '\0'; }
 #endif
+/// return true if string is empty
+inline bool strutil_isempty(const char *s) { return s != NULL && *s!= '\0'; }
 
 /** Read a NL terminated line into a string.
 
