@@ -307,6 +307,7 @@ static inline void CCQuiet(bool disableCallbacks = false)
    mm_ignore_errors = true;
    if(disableCallbacks) mm_disable_callbacks = true;
 }
+
 // normal logging
 static inline void CCVerbose(void)
 {
@@ -531,6 +532,7 @@ MailFolderCC::Create(int typeAndFlags)
    m_OldNumOfMessages = 0;
    m_Listing = NULL;
    m_NeedFreshListing = true;
+   m_ListingFrozen = false;
    m_FirstListing = true;
    m_UpdateNeeded = true;
    m_PingReopenSemaphore = false;
@@ -1344,9 +1346,18 @@ MailFolderCC::CountNewMessages(void) const
    return num;
 }
 
+/* FIXME-MT: we must add some clever locking to this function! */
+
 class HeaderInfoList *
 MailFolderCC::GetHeaders(void) const
 {
+   if(m_ListingFrozen)
+   {
+      ASSERT_MSG(m_Listing,"Debug assert - should be harmless"); 
+      if(m_Listing) m_Listing->IncRef();
+      return m_Listing;
+   }
+
    // remove const from this:
    MailFolderCC *that = (MailFolderCC *)this;
 
@@ -1372,12 +1383,18 @@ MailFolderCC::GetHeaders(void) const
       that->BuildListing();
 
       // Apply filters.
-      if( that->ApplyFilterRules(true) )
       {
-         // we need to re-generate the listing:
-         that->BuildListing();
+         /* Suppress recursion from changes caused by filter code. */
+         that->m_ListingFrozen = TRUE;
+         if( that->ApplyFilterRules(true) )
+         {
+            that->m_ListingFrozen = FALSE;
+            // we need to re-generate the listing:
+            that->BuildListing();
+         }
+         else
+            that->m_ListingFrozen = FALSE;
       }
-
       // sort/thread listing:
       that->ProcessHeaderListing(m_Listing);
 

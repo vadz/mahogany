@@ -660,6 +660,8 @@ private:
    class HeaderInfoListCC *m_Listing;
    /// Do we need to generate a new listing?
    bool m_NeedFreshListing;
+   /// do we suppress listing udpates?
+   bool m_ListingFrozen;
    /// Is this folder in a critical c-client section?
    bool m_InCritical;
    /** We remember the last folder to enter a critical section, helps
