@@ -758,7 +758,6 @@ PGPEngine::ExecCommand(const String& options,
       {
          // try to get it
 
-         // TODO: don't hard code the key server name
          const String keyserver = READ_APPCONFIG_TEXT(MP_PGP_KEYSERVER);
          status = DoExecCommand
                   (

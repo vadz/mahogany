@@ -503,8 +503,9 @@ enum ConfigFields
 #endif // USE_OPENSSL
    ConfigField_PGPHelp,
    ConfigField_PGPCommand,
+   ConfigField_PGPKeyServer,
 
-   ConfigField_HelpersLast = ConfigField_PGPCommand,
+   ConfigField_HelpersLast = ConfigField_PGPKeyServer,
 
    // other options
    ConfigField_OthersFirst = ConfigField_HelpersLast,
@@ -1516,6 +1517,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "to verify the cryptographic signatures of the messages\n"
                   "you receive and decrypt them."), Field_Message, -1 },
    { gettext_noop("&GPG command"),                Field_File,    -1                      },
+   { gettext_noop("GPG &key server"),             Field_Text,    -1                      },
 
    // other options
    { gettext_noop("Mahogany may log everything into the log window, a file\n"
@@ -1940,6 +1942,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #endif // USE_OPENSSL
    CONFIG_NONE(), // PGP help
    CONFIG_ENTRY(MP_PGP_COMMAND),
+   CONFIG_ENTRY(MP_PGP_KEYSERVER),
 
    // other
    CONFIG_NONE(),
