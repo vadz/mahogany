@@ -89,12 +89,13 @@ static const TbarItemInfo g_aToolBarData[] =
    { "", -1, "" },
 
    // common for all frames
-   { "tb_close",       WXMENU_FILE_CLOSE,  gettext_noop("Close this window") },
-   { "tb_adrbook",    WXMENU_EDIT_ADB,    gettext_noop("Edit address book") },
-   { "tb_preferences", WXMENU_EDIT_PREF,   gettext_noop("Edit preferences")  },
+   { "tb_close",        WXMENU_FILE_CLOSE,  gettext_noop("Close this window") },
+   { "tb_adrbook",      WXMENU_EDIT_ADB,    gettext_noop("Edit address book") },
+   { "tb_preferences",  WXMENU_EDIT_PREF,   gettext_noop("Edit preferences")  },
 
    // main frame
-   { "tb_open",          WXMENU_FOLDER_OPEN,     gettext_noop("Open folder")           },
+   { "tb_check_mail",    WXMENU_FILE_COLLECT,  gettext_noop("Check for new mail")    },
+   { "tb_open",          WXMENU_FOLDER_OPEN,   gettext_noop("Open folder")           },
    { "tb_mail_compose",  WXMENU_FILE_COMPOSE,  gettext_noop("Compose a new message") },
    { "tb_help",          WXMENU_HELP_CONTEXT,  gettext_noop("Help")                  },
    { "tb_exit",          WXMENU_FILE_EXIT,     gettext_noop("Exit the program")      },
@@ -125,11 +126,13 @@ static const TbarItemInfo g_aToolBarData[] =
 // arrays containing tbar buttons for each frame (must be -1 terminated!)
 // the "Close", "Help" and "Exit" icons are added to all frames (except that
 // "Close" is not added to the main frame because there it's the same as "Exit")
-// FIXME should we also add "Edit adb"/"Preferences" to all frames by default?
+//
+// TODO: should we also add "Edit adb"/"Preferences" to all frames by default?
 
 static const int g_aMainTbar[] =
 {
-   WXTBAR_MAIN_OPEN,
+   WXTBAR_MAIN_COLLECT,
+   WXTBAR_SEP, // WXTBAR_MAIN_OPEN, -- this command is almost useless
    WXTBAR_MAIN_COMPOSE,
    WXTBAR_SEP,
    WXTBAR_MSG_NEXT_UNREAD,
