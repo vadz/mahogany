@@ -37,6 +37,7 @@ DEFAULT_USE_KDOC=0
 DEFAULT_USE_DOCXX=1
 DEFAULT_USE_EXPERIMENTAL=0
 DEFAULT_USE_WXCONFIG=1
+DEFAULT_USE_LIBTOOL=0
 
 M_OVERRIDES(python,python,
 --with-python   use python scripting,
@@ -69,6 +70,10 @@ USE_WXCONFIG)
 M_OVERRIDES(experimental,experimental,
 --with-experimental    use experimental code,
 USE_EXPERIMENTAL)
+
+M_OVERRIDES(libtool,libtool,
+--with-libtool    use GNU libtool,
+USE_LIBTOOL)
 
 M_OVERRIDES_DONE
 
@@ -132,8 +137,17 @@ AC_ISC_POSIX
 
 AC_LANG_CPLUSPLUS
 
-dnl We are now using libtool
-AM_PROG_LIBTOOL
+
+dnl Are we using libtool?
+MAKE_LIBTOOL=	
+if test "$USE_LIBTOOL" = 1; then
+	AM_PROG_LIBTOOL
+	MAKE_LIBTOOL="USE_LIBTOOL=yes"
+else
+	LIBTOOL=
+	AC_SUBST(LIBTOOL)
+fi
+AC_SUBST(MAKE_LIBTOOL)
 
 dnl
 dnl Here we disable support for exceptions if the compiler is gcc and
@@ -586,6 +600,8 @@ CXXFLAGS="$CXXFLAGS $DBGFLAGS"
 CFLAGS="$CFLAGS $DBGFLAGS"
 
 LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk/-Wl,-Bstatic & -Wl,-Bdynamic/g'`
+dnl libtool does not like -L.
+LIBS=`echo $LIBS | sed 's/-L\.//g'`
 AC_SUBST(LIBS_STATIC)
 
 
