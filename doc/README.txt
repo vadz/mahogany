@@ -18,13 +18,18 @@ points were significant in the development of it
 
 * it should have an easy to use graphical user interface 
 
-* it should be powerful, being able to replace awkward tools such as
-  procmail, thus it must have a built in scripting language 
+* it should be as powerful and extensible as possible, being able to
+  replace awkward tools such as procmail, thus it must have a built
+  in scripting language 
 
 * it should have full support for a wide range of standards, including
-  full MIME support 
+  full and intuitive MIME support 
 
-* it should run on a wide variety of systems </enum>
+* it should interact with other programs intuitively, sending MIME
+  mails should be as easy as dropping files from a file manager in
+  the message window
+
+* it should run on a wide variety of systems 
 
 2 Compilation notes
 
@@ -34,7 +39,8 @@ points were significant in the development of it
 
 If compiling with a non-default compiler like egcs, make sure that
 /usr/include is not in the include path, neither should /usr/lib be
-explicitly listed.
+explicitly listed. M has been compiled with egcs and gcc-2.8.x on
+both, libc5 and glibc2 systems.
 
 2.1.2 Solaris/SunOS
 
@@ -46,19 +52,16 @@ it does not compile with the standard C++ compiler.
 M can be compiled under Windows, using wxWindows Version 2.0 and Microsoft
 Visual C++.
 
-FIXME: VADIM?
-
 2.2 Other issues/libraries
 
-2.2.1 STL 
+2.2.1 C-client library
 
-M uses the STL, so you need a sufficiently recent compiler, i.e. egcs
-or gcc-2.8.
-
-2.2.2 C-client library
-
-The c-client library is required and is available from ftp://ftp.cac.washington.edu/imap/imap.tar.Z.
+A copy of the c-client library is required and is included with the
+M sources. It is available separately from ftp://ftp.cac.washington.edu/imap/imap.tar.Z.
 Before compiling it with M, you need to patch it. 
+
+The following information only applies if you use a separate c-client
+library source:
 
 Unpack the archive in the main M directory, then change into the IMAP
 directory and try a first make, i.e. a make linux or make gso. This
@@ -73,13 +76,13 @@ If there is any problem, it helps to edit the CCTYPE or CFLAGS files.
 After creation of the library c-client.a, all object files can be
 deleted.
 
-2.2.3 Python 
+2.2.2 Python 
 
 configure looks for Python in /usr/local/src/Python-1.5. If your Python
 is installed in a different location, change the variable PYTHON_PATH
 at the beginning of configure. 
 
-2.2.4 XFaces 
+2.2.3 XFaces 
 
 If you have the compface library and header file installed, it will
 be used to support XFaces. To install it, unpack it under the main
@@ -172,18 +175,22 @@ must be explicitly named.
 
 5.5 List of Callbacks
 
-+------------------------+-------------+---------------------------------------+-------------------------------+-----------------------------------------+
-|Callback Name           | Object Type |      Additional Arguments/Types       |         Return Value          | Documentaion                            |
-+------------------------+-------------+---------------------------------------+-------------------------------+-----------------------------------------+
-+------------------------+-------------+---------------------------------------+-------------------------------+-----------------------------------------+
-|FolderOpenHook          | MailFolder  |                   -                   |             void              | Called after a folder has been opened.  |
-+------------------------+-------------+---------------------------------------+-------------------------------+-----------------------------------------+
-|FolderUpdateHook        | MailFolder  |                   -                   |             void              | Called after a folder has been updated. |
-+------------------------+-------------+---------------------------------------+-------------------------------+-----------------------------------------+
-|FolderDeleteMessageHook | MailFolder  | (long) index of message to be deleted | 1 if delete is ok,0 otherwise | Called before deleting a mesage.        |
-+------------------------+-------------+---------------------------------------+-------------------------------+-----------------------------------------+
-|FolderExpungeHook       | MailFolder  |                   -                   |   1 to expunge, 0 to abort    | Called before expunging messages.       |
-+------------------------+-------------+---------------------------------------+-------------------------------+-----------------------------------------+
++-----------------------+-------------+----------------------------+---------------------------------------+--------------------------------------------+
+|Callback Name          | Object Type | Additional Arguments/Types | Return Value                          | Documentaion                               |
++-----------------------+-------------+----------------------------+---------------------------------------+--------------------------------------------+
++-----------------------+-------------+----------------------------+---------------------------------------+--------------------------------------------+
+|FolderOpenHook         | MailFolder  |                            | void                                  | Called after a folder has been opened.     |
++-----------------------+-------------+----------------------------+---------------------------------------+--------------------------------------------+
+|FolderUpdateHook       | MailFolder  |                            | void                                  | Called after a folder has been updated.    |
++-----------------------+-------------+----------------------------+---------------------------------------+--------------------------------------------+
+|FolderSetMessageFlag   | MailFolder  | (long) index of message    | 1 if changing flags is ok,0 otherwise | Called before changing flags for a mesage. |
+|                       |             | (string)name of flag       |                                       |                                            |
++-----------------------+-------------+----------------------------+---------------------------------------+--------------------------------------------+
+|FolderClearMessageFlag | MailFolder  | (long) index of message    | 1 if changing flags is ok,0 otherwise | Called before changing flags for a mesage. |
+|                       |             | (string) name of flag      |                                       |                                            |
++-----------------------+-------------+----------------------------+---------------------------------------+--------------------------------------------+
+|FolderExpungeHook      | MailFolder  |                            | 1 to expunge, 0 to abort              | Called before expunging messages.          |
++-----------------------+-------------+----------------------------+---------------------------------------+--------------------------------------------+
 
 
 6 Further Information
@@ -194,5 +201,7 @@ must be explicitly named.
   http://Ballueder.home.ml.org/M/
 
 * wxWindows is available fromhttp://web.ukonline.co.uk/julian.smart/
+
+* The GTK port of wxWindows, wxGTK, is available from: http://www.freiburg.linux.de/~wxxt/
 
 7 FAQ
