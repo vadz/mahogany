@@ -36,6 +36,8 @@
 #  include "MFrame.h"
 
 #  include <wx/menu.h>
+
+#  include "gui/wxOptionsDlg.h"
 #endif //USE_PCH
 
 #include "Mdefaults.h"
@@ -186,6 +188,72 @@ private:
    int m_part;
 };
 
+// ----------------------------------------------------------------------------
+// DummyViewer: a trivial implementation of MessageViewer which doesn't do
+//              anything but which we use to avoid crashing if no viewers are
+//              found
+// ----------------------------------------------------------------------------
+
+class DummyViewer : public MessageViewer
+{
+public:
+   // creation &c
+   virtual void Create(MessageView *msgView, wxWindow *parent) { }
+   virtual void Clear() { }
+   virtual void Update() { }
+   virtual void UpdateOptions() { }
+   virtual wxWindow *GetWindow() const { return NULL; }
+
+   // operations
+   virtual void Find(const String& text) { }
+   virtual void FindAgain() { }
+   virtual void Copy() { }
+   virtual bool Print() { return false; }
+   virtual void PrintPreview() { }
+
+   // header showing
+   virtual void StartHeaders() { }
+   virtual void ShowRawHeaders(const String& header) { }
+   virtual void ShowHeader(const String& name,
+                           const String& value,
+                           wxFontEncoding encoding) { }
+   virtual void ShowXFace(const wxBitmap& bitmap) { }
+   virtual void EndHeaders() { }
+
+   // body showing
+   virtual void StartBody() { }
+   virtual void StartPart() { }
+   virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci) { }
+   virtual void InsertImage(const wxBitmap& image, ClickableInfo *ci) { }
+   virtual void InsertRawContents(const String& data) { }
+   virtual void InsertText(const String& text, const TextStyle& style) { }
+   virtual void InsertURL(const String& url) { }
+   virtual void InsertSignature(const String& signature) { }
+   virtual void EndPart() { }
+   virtual void EndBody() { }
+
+   // scrolling
+   virtual bool LineDown() { return false; }
+   virtual bool LineUp() { return false; }
+   virtual bool PageDown() { return false; }
+   virtual bool PageUp() { return false; }
+
+   // capabilities querying
+   virtual bool CanInlineImages() const { return false; }
+   virtual bool CanProcess(const String& mimetype) const { return false; }
+
+   // implement MModule pure virtuals "manually" as we don't use the usual
+   // macros for this class
+   virtual const char *GetName(void) const { return NULL; }
+   virtual const char *GetInterface(void) const { return NULL; }
+   virtual const char *GetDescription(void) const { return NULL; }
+   virtual const char *GetVersion(void) const { return NULL; }
+   virtual void GetMVersion(int *version_major,
+                            int *version_minor,
+                            int *version_release) const { }
+   virtual int Entry(int /* MMOD_FUNC */, ... ) { return 0; }
+};
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -311,7 +379,11 @@ MessageView::Init()
 void
 MessageView::CreateViewer(wxWindow *parent)
 {
-   SafeDecRef(m_viewer);
+   if ( m_viewer )
+   {
+      m_viewer->DecRef();
+      m_viewer = NULL;
+   }
 
    MModuleListing *listing =
       MModule::ListAvailableModules(MESSAGE_VIEWER_INTERFACE);
@@ -320,21 +392,34 @@ MessageView::CreateViewer(wxWindow *parent)
    {
       wxLogError(_("No message viewer plug ins found. It will be "
                    "impossible to view any messages."));
-
-      // TODO: create a dummy viewer here which just does nothing in all
-      //       of its methods, this would allow us to at least not crash
-
-      return;
    }
-
-   MModule *viewer = MModule::LoadModule((*listing)[0].GetName());
-   if ( viewer )
+   else // have at least one viewer, load it
    {
-      m_viewer = (MessageViewer *)viewer;
-      m_viewer->Create(this, parent);
+      // FIXME: make this configurable
+      String name = (*listing)[0].GetName();
+      MModule *viewer = MModule::LoadModule(name);
+      if ( viewer )
+      {
+         m_viewer = (MessageViewer *)viewer;
+      }
+      else
+      {
+         wxLogError(_("Failed to load message viewer '%s'."), name.c_str());
+      }
+
+      listing->DecRef();
    }
 
-   listing->DecRef();
+   if ( !m_viewer )
+   {
+      // create a dummy viewer to avoid crashing when accessing m_viewer
+      // pointer: it may seem strange to do it like this but consider that it
+      // really is never supposed to happen and it is easier to just check for
+      // it once here than to insert "if ( m_viewer )" tests everywhere
+      m_viewer = new DummyViewer;
+   }
+
+   m_viewer->Create(this, parent);
 }
 
 MessageView::~MessageView()
@@ -354,7 +439,7 @@ MessageView::~MessageView()
 
 wxWindow *MessageView::GetWindow() const
 {
-   return m_viewer ? m_viewer->GetWindow() : NULL;
+   return m_viewer->GetWindow();
 }
 
 wxFrame *MessageView::GetParentFrame() const
@@ -534,7 +619,7 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    };
 
    long idx = READ_CONFIG(profile, MP_MVIEW_FONT);
-   if ( idx < 0 || idx >= WXSIZEOF(fontFamilies) )
+   if ( idx < 0 || (size_t)idx >= WXSIZEOF(fontFamilies) )
    {
       FAIL_MSG( "corrupted config data" );
 
@@ -570,10 +655,7 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    // update the parents menu as the show headers option might have changed
    UpdateShowHeadersInMenu();
 
-   if ( m_viewer )
-   {
-      m_viewer->UpdateOptions();
-   }
+   m_viewer->UpdateOptions();
 }
 
 // ----------------------------------------------------------------------------
@@ -2025,7 +2107,9 @@ void MessageView::OpenURL(const String& url, bool inNewWindow)
       {
          wxString lockfile;
          wxGetHomeDir(&lockfile);
-         lockfile << WXEXTHELP_SEPARATOR << ".netscape/lock";
+         if ( !wxEndsWithPathSeparator(lockfile) )
+            lockfile += '/';
+         lockfile += ".netscape/lock";
          struct stat statbuf;
 
          if(lstat(lockfile.c_str(), &statbuf) == 0)
