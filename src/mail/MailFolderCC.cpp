@@ -142,7 +142,6 @@ extern "C"
 extern const MOption MP_CONN_CLOSE_DELAY;
 extern const MOption MP_DEBUG_CCLIENT;
 extern const MOption MP_FOLDERPROGRESS_THRESHOLD;
-extern const MOption MP_FOLDER_FILE_DRIVER;
 extern const MOption MP_FOLDER_TRY_CREATE;
 extern const MOption MP_IMAP_LOOKAHEAD;
 extern const MOption MP_MESSAGEPROGRESS_THRESHOLD_SIZE;
@@ -1917,15 +1916,10 @@ void MailFolderCC::CreateFileFolder()
             "tenex"
          };
 
-         ASSERT_MSG( WXSIZEOF(cclient_drivers) == FileMbox_Max,
-                     _T("forgot to update something") );
+         wxCOMPILE_TIME_ASSERT2( WXSIZEOF(cclient_drivers) == FileMbox_Max,
+                                 FileMboxFmtMismatch, MfCCCff );
 
-         long format = READ_CONFIG(m_Profile, MP_FOLDER_FILE_DRIVER);
-         if ( format < 0  || (size_t)format > FileMbox_Max )
-         {
-            FAIL_MSG( _T("invalid mailbox format") );
-            format = 0;
-         }
+         const FileMailboxFormat format = m_mfolder->GetFileMboxFormat();
 
          tmp = "#driver.";
          tmp << cclient_drivers[format] << '/';
@@ -2227,17 +2221,8 @@ MailFolderCC::Open(OpenMode openmode)
       {
          mail_close(msHalfOpened);
 
-         MFolder_obj folder(m_Profile);
-         if ( folder )
-         {
-            // remember that we can't open it
-            folder->AddFlags(MF_FLAGS_NOSELECT);
-         }
-         else
-         {
-            // were we deleted without noticing?
-            FAIL_MSG( _T("associated folder somehow disappeared?") );
-         }
+         // remember that we can't open it
+         m_mfolder->AddFlags(MF_FLAGS_NOSELECT);
 
          mApplication->SetLastError(M_ERROR_HALFOPENED_ONLY);
       }
@@ -4356,7 +4341,14 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
             //     all new mail was filtered away because we might have some
             //     non new messages as well and the flags of the existing ones
             //     could have been changed from the outside
-            MfStatusCache::Get()->InvalidateStatus(GetName());
+            //
+            // NB2: don't do it for the temp (nameless) folders as we don't
+            //      cache their status anyhow
+            const String name = GetName();
+            if ( !name.empty() )
+            {
+               MfStatusCache::Get()->InvalidateStatus(name);
+            }
          }
       }
       else // empty folder
@@ -4366,7 +4358,12 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
          MailFolderStatus status;
          status.total = 0; // all the other fields are already 0
 
-         MfStatusCache::Get()->UpdateStatus(GetName(), status);
+         // as above, we're not interested in the temporary folder status
+         const String name = GetName();
+         if ( !name.empty() )
+         {
+            MfStatusCache::Get()->UpdateStatus(name, status);
+         }
       }
    }
    else // same number of messages
@@ -5265,7 +5262,7 @@ char MailFolderCC::GetFolderDelimiter() const
       else
       {
          // not IMAP, let the base class version do it
-         self->m_chDelimiter = MailFolder::GetFolderDelimiter();
+         self->m_chDelimiter = MailFolder::GetFolderDelimiter(m_mfolder);
       }
    }
 
