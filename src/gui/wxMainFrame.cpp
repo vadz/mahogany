@@ -77,6 +77,7 @@ enum
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_CURRENT_IDENTITY;
+extern const MOption MP_FTREE_LEFT;
 extern const MOption MP_FVIEW_AUTONEXT_UNREAD_FOLDER;
 extern const MOption MP_MAINFOLDER;
 extern const MOption MP_OPENFOLDERS;
@@ -580,11 +581,23 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    // insert treectrl in one of the splitter panes
    m_FolderTree = new wxMainFolderTree(m_splitter, this);
    m_FolderView = new wxMainFolderView(m_splitter, this);
-   m_splitter->SplitVertically(m_FolderTree->GetWindow(),
-                               m_FolderView->GetWindow(),
-                               sizeFrame.x/3);
 
-   m_splitter->SetMinimumPaneSize(10);
+   wxWindow *winLeft,
+            *winRight;
+   if ( READ_APPCONFIG_BOOL(MP_FTREE_LEFT) )
+   {
+      winLeft = m_FolderTree->GetWindow();
+      winRight = m_FolderView->GetWindow();
+   }
+   else // folder tre on the right
+   {
+      winLeft = m_FolderView->GetWindow();
+      winRight = m_FolderTree->GetWindow();
+   }
+
+   m_splitter->SplitVertically(winLeft, winRight, sizeFrame.x/3);
+
+   m_splitter->SetMinimumPaneSize(50);
 
    // construct the menu and toolbar
    AddFileMenu();
