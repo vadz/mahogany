@@ -481,4 +481,30 @@ CreateMMenu(wxMenuBar *menubar, int menu_begin, int menu_end, const wxString &ca
 }
 
 
+/// Function to enable/disable a given menu:
+extern void
+EnableMMenu(MMenuId id, wxWindow *win, bool enable)
+{
+   wxFrame *frame = GetFrame(win);
+   ASSERT(frame);
+   wxMenuBar *mb = frame->GetMenuBar();
+   ASSERT(mb);
+   if(id < MMenu_Plugins)
+   {
+      mb->EnableTop(id, enable);
+   }
+   else
+   {
+      if(mb->GetMenuCount() > MMenu_Help)
+         mb->EnableTop(id,enable);
+      else
+      {
+         // no Plugin menu
+         if(id != MMenu_Plugins)
+            mb->EnableTop(id-1,enable);
+      }
+   }
+}
+
+
 /* vi: set tw=0 */

@@ -349,6 +349,7 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
          m_FolderView->PreviewMessage(focused_uid);
       hil->DecRef();
    }
+   EnableMMenu(MMenu_Message, this, true);
 }
 
 void wxFolderListCtrl::OnActivated(wxListEvent& event)
@@ -363,6 +364,7 @@ void wxFolderListCtrl::OnActivated(wxListEvent& event)
    else
       m_FolderView->PreviewMessage(hi->GetUId());
    hil->DecRef();
+   EnableMMenu(MMenu_Message, this, true);
 }
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
@@ -379,6 +381,10 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
       m_FolderView->PreviewMessage(hi->GetUId());
       hil->DecRef();
    }
+   if(GetSelections(selections, false) == 0)
+      EnableMMenu(MMenu_Message, this, false);
+   else
+      EnableMMenu(MMenu_Message, this, true);
 }
 
 
@@ -704,6 +710,8 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          m_FolderCtrl->SetFocus(); // so we can react to keyboard events
 #endif
    }
+   if(! m_ASMailFolder)
+      EnableMMenu(MMenu_Message, m_FolderCtrl, FALSE);
 }
 
 wxFolderView *

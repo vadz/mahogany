@@ -85,6 +85,12 @@ public:
    Ticket Start(void)
       {
          m_Ticket = GetTicket();
+#ifdef USE_THREADS
+         if ( Create() != wxTHREAD_NO_ERROR )
+         {
+            wxLogError(_("Cannot create thread!"));
+         }
+#endif
          Run();
 
          Ticket ticketSave = m_Ticket;  // can't use m_XXX after delete this
@@ -117,8 +123,10 @@ protected:
       }
 
    virtual void *Entry();
+#ifndef USE_THREADS
    virtual void Run(void) { Entry(); }
-
+#endif
+   
    virtual void  WorkFunction(void) = 0;
 
 protected:

@@ -434,7 +434,6 @@ PalmOSModule::~PalmOSModule()
 }
 
 #ifdef wxUSE_THREADS
-
 class PalmOSAcceptThread : public wxThread
 {
 public:
@@ -444,15 +443,11 @@ public:
          m_NewSocket = *piSocket;
          *m_PiSocketPtr = -1;
       }
-   virtual void OnExit()
-      {
-         // only if we exit normally, are we interested in the result:
-         *m_PiSocketPtr = m_NewSocket;
-      }
-protected:
-   virtual void *Entry()
+    // thread execution starts here
+    virtual void *Entry()
       {
          m_NewSocket = pi_accept(m_NewSocket, 0, 0);
+         *m_PiSocketPtr = m_NewSocket;
          return NULL;
       }
 private:
@@ -494,7 +489,7 @@ PalmOSModule::Connect(void)
       Message(_("Please press HotSync button and click on OK."));
       if (!(m_PiSocket = pi_socket(PI_AF_SLP, PI_SOCK_STREAM, PI_PF_PADP)))
       {
-         ErrorMessage(_("Cannot get connection."));
+         ErrorMessage(_("Failed to connect to PalmOS device."));
          if(m_Lock->IsLocked()) m_Lock->Unlock();
          return false;
       }
@@ -511,7 +506,7 @@ PalmOSModule::Connect(void)
       rc = pi_bind(m_PiSocket, (struct sockaddr*)&addr, sizeof(addr));
       if(rc == -1)
       {
-         ErrorMessage(_("pi_bind() failed"));
+         ErrorMessage(_("Failed to connect to PalmOS device."));
          pi_close(m_PiSocket); m_PiSocket = -1;
          if(m_Lock->IsLocked()) m_Lock->Unlock();
          return false;
@@ -520,31 +515,41 @@ PalmOSModule::Connect(void)
       rc = pi_listen(m_PiSocket,1);
       if(rc == -1)
       {
-         ErrorMessage(_("pi_listen() failed"));
+         ErrorMessage(_("Failed to connect to PalmOS device."));
          pi_close(m_PiSocket); m_PiSocket = -1;
          if(m_Lock->IsLocked()) m_Lock->Unlock();
          return false;
       }
-
 #ifdef wxUSE_THREADS
       // We interrupt the connection attempt after some seconds, to
       // provide some kind of timeout that the stupid pilot-link code
       // doesn't. Ugly hack, really. KB
-      PalmOSAcceptThread acceptThread(&m_PiSocket);
-      acceptThread.Run();
-      time_t start = time(NULL);
-      while(time(NULL)-start < 10)
-         ;
-      
-      //wxSleep(10);
-      acceptThread.Kill();
+      PalmOSAcceptThread *acceptThread = new PalmOSAcceptThread(&m_PiSocket);
+      if ( acceptThread->Create() != wxTHREAD_NO_ERROR )
+      {
+         wxLogError(_("Cannot create thread!"));
+         m_PiSocket = pi_accept(m_PiSocket, 0, 0);
+      }
+      else
+      {
+         int oldPiSocket = m_PiSocket;
+         acceptThread->Run();
+         time_t start = time(NULL);
+         while(time(NULL)-start < 5)
+            ;
+         // wxSleep(5);  // using wxSleep() here crashes wxWindows when 
+         // thread gets Killed()
+         acceptThread->Kill();
+         if(m_PiSocket == -1)
+            pi_close(oldPiSocket);
+      }
 #else
       m_PiSocket = pi_accept(m_PiSocket, 0, 0);
 #endif
       if(m_PiSocket == -1)
       {
-         ErrorMessage(_("pi_accept() failed"));
-         pi_close(m_PiSocket); m_PiSocket = -1;
+         ErrorMessage(_("Failed to connect to PalmOS device."));
+         pi_close(m_PiSocket);
          if(m_Lock->IsLocked()) m_Lock->Unlock();
          return false;
       }

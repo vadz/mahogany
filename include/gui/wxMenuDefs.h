@@ -35,6 +35,19 @@ extern void CreateMMenu(class wxMenuBar *menubar,
 #define WXADD_MENU(menubar,menu,caption) \
     CreateMMenu(menubar,  WXMENU_##menu##_BEGIN,WXMENU_##menu##_END,caption)
 
+/// A numeric Id to identify the menu for purpose of enabling/disabling:
+enum MMenuId
+{
+   MMenu_File,
+   MMenu_Edit,
+   MMenu_Message,
+   MMenu_Help,
+   MMenu_Plugins
+};
+
+/// Function to enable/disable a given menu:
+extern void EnableMMenu(MMenuId id, class wxWindow *win, bool enable);
+
 /** Definition of all numeric menu IDs.
     Include each menu in WXMENU_menuname_BEGIN and WXMENU_menuname_END, so it
     can be tested for by WXMENU_CONTAIN(menu,id).
