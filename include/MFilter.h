@@ -134,6 +134,11 @@ public:
    /// ctor creates an uninitialized object, one of Set() below must be used
    MFilterDesc() { m_settings = NULL; }
 
+   /// assignment operator
+   MFilterDesc& operator=(const MFilterDesc& o) { DoCopy(o); return *this; }
+   /// copy ctor
+   MFilterDesc(const MFilterDesc& other) { DoCopy(other); }
+
    /// dtor
   ~MFilterDesc() { SafeDecRef(m_settings); }
 
@@ -173,6 +178,12 @@ public:
    /// should only be called for !IsSimple() filters
    const String& GetProgram() const { return m_program; }
 
+   /// return the rule program, can be called for any filters
+   String GetRule() const
+   {
+      return IsSimple() ? m_settings->WriteRule() : m_program;
+   }
+
    /// returns the name of the filter
    const String& GetName() const { return m_name; }
 
@@ -201,6 +212,14 @@ public:
    bool operator!=(const MFilterDesc& desc) { return !(*this == desc); }
 
 private:
+   void DoCopy(const MFilterDesc& other)
+   {
+      m_name = other.m_name;
+      m_program = other.m_program;
+      m_settings = other.m_settings;
+      SafeIncRef(m_settings);
+   }
+
    MFDialogSettings *m_settings;
    String            m_program,
                      m_name;
@@ -225,6 +244,12 @@ public:
    /// set the filter parameters
    virtual void Set(const MFilterDesc& desc) = 0;
 };
+
+/// smart reference to MFilter
+BEGIN_DECLARE_AUTOPTR(MFilter)
+   public:
+      MFilter_obj(const String& name) { m_ptr = MFilter::CreateFromProfile(name); }
+END_DECLARE_AUTOPTR();
 
 #endif // _MFILTER_H
 

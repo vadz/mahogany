@@ -253,6 +253,8 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,        "",                  ""                         , FALSE },
    { WXMENU_FOLDER_BROWSESUB, gettext_noop("&Browse..."), gettext_noop("Show subfolders of the current folder")               , FALSE },
    { WXMENU_SEPARATOR,        "",                  ""                         , FALSE },
+   { WXMENU_FOLDER_FILTERS,   gettext_noop("&Filters..."), gettext_noop("Edit the filters to use for current folder")               , FALSE },
+   { WXMENU_SEPARATOR,        "",                  ""                         , FALSE },
    { WXMENU_FOLDER_PROP,      gettext_noop("&Properties..."), gettext_noop("Show the properties of the current folder")               , FALSE },
 
    // normal edit

@@ -198,11 +198,13 @@ private:
 #endif
 
 // ----------------------------------------------------------------------------
-// utility classes
+// smart references classes: for an MObjectRC-derived class Foo we provide
+// macros to define a class Foo_obj which is a smart reference to Foo and also
+// more flexible macros to allow adding arbitrary code to Foo_obj declaration
 // ----------------------------------------------------------------------------
 
-// declare an class which is an auto ptr to the given MObjectRC-derived type
-#define DECLARE_AUTOPTR(classname)  \
+// start auto ptr class declaration
+#define BEGIN_DECLARE_AUTOPTR(classname) \
    class classname##_obj \
    { \
    public: \
@@ -225,12 +227,22 @@ private:
  \
       classname *operator->() const { return m_ptr; } \
  \
+      operator bool() const { return m_ptr != NULL; } \
+ \
    private: \
       classname##_obj(const classname##_obj &); \
       classname##_obj& operator=(const classname##_obj &); \
  \
-      classname *m_ptr; \
-   }
+      classname *m_ptr;
+
+
+// finish the class decl
+#define END_DECLARE_AUTOPTR() }
+
+// declare an class which is an auto ptr to the given MObjectRC-derived type
+#define DECLARE_AUTOPTR(classname)  \
+   BEGIN_DECLARE_AUTOPTR(classname) \
+   END_DECLARE_AUTOPTR()
 
 // ----------------------------------------------------------------------------
 // utility functions

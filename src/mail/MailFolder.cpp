@@ -23,9 +23,16 @@
 #   include <errno.h>
 #endif
 
+#include <wx/timer.h>
+#include <wx/datetime.h>
+#include <wx/file.h>
+#include <wx/dynarray.h>
+
 #include "MDialogs.h" // for MDialog_FolderChoose
 
 #include "Mdefaults.h"
+
+#include "MFilter.h"
 
 #include "Message.h"
 #include "MailFolder.h"
@@ -36,15 +43,11 @@
 
 #include "miscutil.h"   // GetFullEmailAddress
 
-#include <wx/file.h>
-#include <wx/dynarray.h>
-
 #include "gui/wxComposeView.h"
 #include "wx/persctrl.h"
 #include "MApplication.h"
 #include "modules/Filters.h"
-#include <wx/timer.h>
-#include <wx/datetime.h>
+
 /*-------------------------------------------------------------------*
  * local classes
  *-------------------------------------------------------------------*/
@@ -1767,28 +1770,43 @@ MailFolderCmn::ApplyFilterRulesCommonCode(UIdArray *msgs,
    {
       int rc = 0;
       String filterString;
-      // apply the filter from the original folder:
-      filterString = READ_CONFIG(GetProfile(), MP_FILTER_RULE);
-      if(filterString.Length()) // otherwise nothing to do
+
+      MFolder_obj folder(GetName());
+      wxArrayString filters = folder->GetFilters();
+      size_t count = filters.GetCount();
+      for ( size_t n = 0; n < count; n++ )
       {
+         MFilter_obj filter(filters[n]);
+         MFilterDesc fd = filter->GetDesc();
+         filterString = fd.GetRule();
+
          FilterRule * filterRule = filterModule->GetFilter(filterString);
-         if(filterRule)
+         if ( filterRule )
          {
-            // This might change the folder contents,
-            // so we must set this flag:
+            wxLogVerbose("Applying filter rule '%s'", fd.GetName().c_str());
+
+            // This might change the folder contents, so we must set this
+            // flag:
             m_FiltersCausedChange = true;
             if(msgs)
                rc = filterRule->Apply(this, *msgs);
             else
                rc = filterRule->Apply(this, newOnly);
+
             filterRule->DecRef();
          }
       }
+
       filterModule->DecRef();
+
       return rc;
    }
    else
+   {
+      wxLogVerbose("Filter module couldn't be loaded.");
+
       return 0; // no filter module
+   }
 }
 
 // ----------------------------------------------------------------------------

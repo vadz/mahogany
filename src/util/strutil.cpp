@@ -1041,20 +1041,24 @@ strutil_freeRegEx(class strutil_RegEx *regex)
 wxArrayString strutil_restore_array(char ch, const String& str)
 {
    wxArrayString array;
-   String s;
-   for ( const char *p = str.c_str(); ; p++ )
+   if ( !str.empty() )
    {
-      if ( *p == ch || *p == '\0' )
+      String s;
+      for ( const char *p = str.c_str(); ; p++ )
       {
-         array.Add(s);
-         s.clear();
+         if ( *p == ch || *p == '\0' )
+         {
+            array.Add(s);
 
-         if ( *p == '\0' )
-            break;
-      }
-      else
-      {
-         s += *p;
+            if ( *p == '\0' )
+               break;
+
+            s.clear();
+         }
+         else
+         {
+            s += *p;
+         }
       }
    }
 

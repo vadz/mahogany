@@ -746,11 +746,19 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
                                              MH_DIALOG_FILTERS_DETAILS);
 
    /// The name of the filter rule:
-   m_NameCtrl = new wxTextCtrl(this, -1);
+   wxStaticText *msg = new wxStaticText(this, -1, _("&Name: "));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->width.AsIs();
    c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   msg->SetConstraints(c);
+
+   m_NameCtrl = new wxTextCtrl(this, -1);
+   c = new wxLayoutConstraints;
+   c->left.RightOf(msg, LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->centreY.SameAs(msg, wxCentreY);
    c->height.AsIs();
    m_NameCtrl->SetConstraints(c);
 
@@ -761,10 +769,13 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
       m_NameCtrl->Disable();
 
    // the control allowing to edit directly the filter program
-   m_textProgram = new wxTextCtrl(this, -1);
+   m_textProgram = new wxTextCtrl(this, -1,
+                                  "",
+                                  wxDefaultPosition, wxDefaultSize,
+                                  wxTE_MULTILINE);
    c = new wxLayoutConstraints;
-   c->height.AsIs();
-   c->bottom.Above(FindWindow(wxID_OK), -6*LAYOUT_Y_MARGIN);
+   c->height.Absolute(4*hBtn);
+   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    m_textProgram->SetConstraints(c);
@@ -774,7 +785,7 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    c->top.Below(m_NameCtrl,  2*LAYOUT_Y_MARGIN);
-   c->bottom.Above(m_textProgram);
+   c->bottom.Above(m_textProgram, -2*LAYOUT_Y_MARGIN);
    m_Panel->SetConstraints(c);
    m_Panel->SetAutoLayout(TRUE);
 
@@ -790,7 +801,6 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
 
    m_OriginalFilterData = *m_FilterData;
 }
-
 
 void
 wxOneFilterDialog::LayoutControls()
@@ -903,15 +913,19 @@ wxOneFilterDialog::TransferDataToWindow()
       for ( size_t n = 0; n < count; n++ )
       {
          AddOneControl();
-         m_CritControl[m_nControls]->SetValues(*settings, n);
+         m_CritControl[n]->SetValues(*settings, n);
       }
 
       m_ActionControl->SetValues(*settings);
-      settings->DecRef();
 
       LayoutControls();
+
+      // show the program text too
+      m_textProgram->SetValue(settings->WriteRule());
+
+      settings->DecRef();
    }
-   else
+   else if ( !m_FilterData->IsEmpty() )
    {
       m_isSimple = false;
 
@@ -949,6 +963,8 @@ wxOneFilterDialog::TransferDataFromWindow()
 
       settings->SetAction(m_ActionControl->GetAction(),
                           m_ActionControl->GetArgument());
+
+      m_FilterData->Set(settings);
    }
 
    return TRUE;
@@ -1121,11 +1137,10 @@ wxFiltersDialog::OnAddFiter(wxCommandEvent &event)
    }
 
    // create the new filter
-   MFilter *filter = MFilter::CreateFromProfile(name);
+   MFilter_obj filter(name);
    filter->Set(fd);
-   filter->DecRef();
 
-   if ( idx != -1 )
+   if ( idx == -1 )
    {
       m_lboxFilters->Append(name);
    }
@@ -1142,7 +1157,7 @@ wxFiltersDialog::OnEditFiter(wxCommandEvent &event)
    String name = m_lboxFilters->GetStringSelection();
    CHECK_RET( !!name, "must have selection in the listbox" );
 
-   MFilter *filter = MFilter::CreateFromProfile(name);
+   MFilter_obj filter(name);
    CHECK_RET( filter, "filter unexpectedly missing" );
 
    MFilterDesc fd = filter->GetDesc();
@@ -1155,7 +1170,6 @@ wxFiltersDialog::OnEditFiter(wxCommandEvent &event)
    m_hasChanges = true;
 
    filter->Set(fd);
-   filter->DecRef();
 }
 
 void
@@ -1297,6 +1311,8 @@ bool wxFolderFiltersDialog::TransferDataFromWindow()
    {
       m_hasChanges = true;
       m_filters = filters;
+
+      m_folder->SetFilters(m_filters);
    }
 
    return TRUE;

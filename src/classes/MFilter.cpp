@@ -59,27 +59,32 @@ struct MFDialogComponent
 bool
 MFDialogComponent::ReadSettings(String *str)
 {
+   // VZ: what's wrong with using sscanf()??
    bool success;
    long number = strutil_readNumber(*str, &success);
-   if(success && number != -1)
-      m_Logical = (MFDialogLogical) number;
-   else
+   if(!success)
       return FALSE;
+   m_Logical = (MFDialogLogical) number;
+
    number = strutil_readNumber(*str, &success);
-   if(success)
-      m_Inverted = number != 0;
-   else
+   if(!success)
       return FALSE;
+   m_Inverted = number != 0;
+
    number = strutil_readNumber(*str, &success);
-   if(! success) return FALSE;
+   if(! success)
+      return FALSE;
    m_Test = (MFDialogTest)number;
+
    m_Argument = strutil_readString(*str, &success);
-   if(! success) return FALSE;
-   number = strutil_readNumber(*str);
-   if(success)
-      m_Target = (MFDialogTarget) number;
-   else
+   if(! success)
       return FALSE;
+
+   number = strutil_readNumber(*str);
+   if(!success)
+      return FALSE;
+   m_Target = (MFDialogTarget) number;
+
    return TRUE;
 }
 
@@ -304,6 +309,9 @@ public:
    String WriteActionSettings(void) const;
    
    String WriteAction(void) const;
+
+   MOBJECT_DEBUG(MFDialogSettingsImpl)
+
 private:
    MFDComponentArray m_Tests;
    MFDialogAction    m_Action;
@@ -360,8 +368,8 @@ MFDialogSettingsImpl::WriteSettings(void) const
    String str;
    str << m_Tests.Count() << ' ';
    for(size_t i = 0; i < m_Tests.Count(); i++)
-      str << m_Tests[i].WriteSettings();
-   str << ' ' << WriteActionSettings();
+      str << m_Tests[i].WriteSettings() << ' ';
+   str << WriteActionSettings();
    return str;
 }
    
@@ -446,6 +454,7 @@ public:
    {
       MFilterDesc fd;
       fd.SetName(m_Name);
+      ((MFilterFromProfile *)this)->UpdateSettings(); // const_cast
       if ( m_Settings )
       {
          m_Settings->IncRef();
@@ -478,6 +487,8 @@ public:
    static MFilterFromProfile * Create(Profile *p)
       { return new MFilterFromProfile(p); }
    
+   MOBJECT_DEBUG(MFilter)
+
 protected:
    MFilterFromProfile(Profile *p)
       {
@@ -487,7 +498,6 @@ protected:
          m_Rule = p->readEntry("Rule", "");
          m_Settings = NULL;
          m_dirty = false;
-         UpdateSettings();
       }
    
    virtual ~MFilterFromProfile()
@@ -509,13 +519,18 @@ protected:
 private:
    void UpdateSettings(void)
       {
-         m_Settings = new MFDialogSettingsImpl;
-         if( m_SettingsStr.Length() == 0
-             ||  m_Settings->ReadSettings(m_SettingsStr) == FALSE)
+         if ( m_SettingsStr.Length() != 0 )
          {
-            delete m_Settings;
-            m_Settings = NULL;
+            // parse the settings string
+            m_Settings = new MFDialogSettingsImpl;
+            if ( !m_Settings->ReadSettings(m_SettingsStr) )
+            {
+               // oops, failed...
+               m_Settings->DecRef();
+               m_Settings = NULL;
+            }
          }
+         //else: we don't have any setting string at all
       }
 
    Profile *m_Profile;
@@ -542,4 +557,24 @@ MFilter::DeleteFromProfile(const String& name)
 
    return false;
 }
+
+// ----------------------------------------------------------------------------
+// debugging helpers
+// ----------------------------------------------------------------------------
+
+#ifdef DEBUG
+
+String
+MFDialogSettingsImpl::DebugDump() const
+{
+   return MObjectRC::DebugDump();
+}
+
+String
+MFilterFromProfile::DebugDump() const
+{
+   return MObjectRC::DebugDump() + " name " + m_Name;
+}
+
+#endif // DEBUG
 

@@ -40,6 +40,8 @@
 #include "gui/wxFolderView.h"
 #include "gui/wxFolderTree.h"
 
+#include "gui/wxFiltersDialog.h" // for ConfigureFiltersForFolder
+
 #include "MFolderDialogs.h"      // for ShowFolderPropertiesDialog
 #include "miscutil.h"            // for UpdateTitleAndStatusBars
 
@@ -482,6 +484,14 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
                }
                if(newfolder)
                   newfolder->DecRef();
+            }
+            break;
+
+         case WXMENU_FOLDER_FILTERS:
+            {
+               MFolder_obj folder(m_folderName);
+               if ( folder )
+                  ConfigureFiltersForFolder(folder, this);
             }
             break;
 

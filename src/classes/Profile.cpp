@@ -657,7 +657,10 @@ wxArrayString Profile::GetAllGroupsUnder(const String& path)
    bool cont = ms_GlobalConfig->GetFirstGroup(name, index);
    while ( cont )
    {
-      identities.Add(name);
+      if ( name != SUSPEND_PATH )
+      {
+         identities.Add(name);
+      }
 
       cont = ms_GlobalConfig->GetNextGroup(name, index);
    }

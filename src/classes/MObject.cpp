@@ -53,6 +53,7 @@ static void *gs_traceObject = NULL;
 // ----------------------------------------------------------------------------
 // debug only functions
 // ----------------------------------------------------------------------------
+
 void MObjectRC::CheckLeaks()
 {
    size_t nCount = gs_aObjects.Count();
@@ -70,37 +71,22 @@ void MObjectRC::CheckLeaks()
 
 String MObjectRC::DebugDump() const
 {
-   MOcheck();
-   String str;
-   str.Printf("%s at 0x%p m_nRef = %d: ", DebugGetClassName(), this, m_nRef);
-
-   return str;
+   return MObject::DebugDump() + String::Format(" m_nRef = %d: ", m_nRef);
 }
 
 void MObject::CheckLeaks()
 {
-   size_t nCount = gs_aMObjects.Count();
-
-   if ( nCount > 0 ) {
-      wxFAIL_MSG("MObjectRmemory leaks detected, see debug log for details.");
-
-      wxLogDebug("%d MObjects leaked:", nCount);
-   }
-
-   for ( size_t n = 0; n < nCount; n++ ) {
-      wxLogDebug("Object %d: %s", n, gs_aMObjects[n]->DebugDump().c_str());
-   }
+   // this is now done in MObjectRC::CheckLeaks()
 }
-#ifdef DEBUG
+
 String MObject::DebugDump() const
 {
    MOcheck();
    String str;
-   str.Printf("%s at 0x%08x\n", DebugGetClassName(), this);
+   str.Printf("%s at 0x%p", DebugGetClassName(), this);
 
    return str;
 }
-#endif
 
 // ----------------------------------------------------------------------------
 // debug implementations of other functions
