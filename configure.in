@@ -1433,6 +1433,10 @@ echo "	wxWindows version used:			${WX_VERSION}"
 echo "	Debug mode:				${debug_option}"
 echo "	SSL support:				${ssl_option}"
 echo "	Modules support:			${m_cv_USE_MODULES}"
+echo "	Embedded Python:			${PYTHON_VER-none}"
+if test "$USE_PYTHON" != 0; then
+    echo "	      with swig:			${SWIG-none}"
+fi
 echo ""
 echo "Please look at config.log for more details."
 
