@@ -21,6 +21,14 @@
 %.ps: %.dvi
 	$(DVIPS) $< -o $@
 
+ifdef HAVE_SGMLTOOLS
+%.html: %.sgml
+	sgml2html $<
+else
+%.html: %.sgml
+	touch $(ODIR)/$@ 
+endif
+
 dep depend:
 	$(CXX) -MM $(CXXFLAGS) $(SRC) >.depend
 #	$(CC) -MM $(CXXFLAGS) $(CSRC) >>.depend

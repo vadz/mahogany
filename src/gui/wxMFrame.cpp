@@ -269,6 +269,12 @@ wxMFrame::OnMenuCommand(int id)
    case WXMENU_HELP_CONTENTS:
       mApplication->Help(MH_CONTENTS,this);
       break;
+   case WXMENU_HELP_RELEASE_NOTES:
+      mApplication->Help(MH_RELEASE_NOTES,this);
+      break;
+   case WXMENU_HELP_FAQ:
+      mApplication->Help(MH_FAQ,this);
+      break;
    case WXMENU_HELP_SEARCH:
       mApplication->Help(MH_SEARCH,this);
       break;

@@ -21,6 +21,7 @@ ODIR=.
 # this will be set or unset
 @MAKE_USE_PYTHON@
 @MAKE_USE_SWIG@
+@MAKE_HAVE_SGMLTOOLS@
 
 # canonical host
 CANONICAL_HOST=@host@
@@ -68,7 +69,7 @@ BINDIR = @bindir@
 # Directory in which to install library files.
 DATADIR = @datadir@/M
 # where to install docs
-DOCDIR = @datadir@/doc
+DOCDIR = @datadir@/M/doc
 
 # for the dynamic linker, better than using -rpath
 LD_RUN_PATH=$(DATADIR)/$(CANONICAL_HOST)/lib

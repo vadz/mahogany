@@ -302,11 +302,11 @@ MAppBase::OnStartup()
    // folder dir
    {
       ProfilePathChanger ppc(m_profile, M_PROFILE_CONFIG_SECTION);
-      tmp = READ_CONFIG(m_profile, MP_MBOXDIR);
+      tmp = READ_CONFIG(m_profile, MC_MBOXDIR);
       if( strutil_isempty(tmp) )
       {
          tmp = m_localDir;
-         m_profile->writeEntry(MP_MBOXDIR, tmp);
+         m_profile->writeEntry(MC_MBOXDIR, tmp);
       }
    }
 

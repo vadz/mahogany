@@ -279,6 +279,8 @@ static const MenuItemInfo g_aMenuItems[] =
    // help
    { WXMENU_HELP_ABOUT,    "&About...",         "Displays the program in"
      "formation and copyright"  },
+   { WXMENU_HELP_RELEASE_NOTES,    "&Release Notes...", "Displays notes about the current release."  },
+   { WXMENU_HELP_FAQ,    "&FAQ...",         "Displays the list of Frequently Asked Questions."  },
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_HELP_CONTEXT, "&Help",    "Help on current context..."},
    { WXMENU_HELP_CONTENTS, "Help &Contents",    "Contents of help system..."},

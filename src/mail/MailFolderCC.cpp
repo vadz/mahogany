@@ -77,9 +77,7 @@ MailFolderCC::OpenFolder(MailFolder::Type type,
       mboxpath = "INBOX";
       break;
    case MailFolder::MF_FILE:
-      if ( !IsAbsPath(name) )
-         mboxpath << READ_APPCONFIG(MP_MBOXDIR) << '/';
-      mboxpath << name;
+      mboxpath = strutil_expandfoldername(name);
       break;
    case MailFolder::MF_POP:
       mboxpath << '{' << name << "/pop3}";
@@ -300,9 +298,7 @@ void
 MailFolderCC::SetMessageFlag(unsigned long index, int flag, bool set)
 {
    String
-      seq;
-
-   seq.Printf("%l",index);
+      seq = strutil_ultoa(index);
 
    const char *flagstr;
 

@@ -11,8 +11,8 @@ include ../makeopts
 
 all: 
 
-install: ps
-	$(INSTALL) -d $(DOCDIR)/txt $(DOCDIR)/ps $(DOCDIR)/html 
+install: ps README.html
+	$(INSTALL) -d $(DOCDIR)/txt $(DOCDIR)/ps $(DOCDIR)/html  wxhelp.map
 
 ps: $(FILES_PS)
 

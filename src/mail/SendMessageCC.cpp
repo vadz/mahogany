@@ -222,7 +222,8 @@ SendMessageCC::AddPart(Message::ContentType type,
       }
    }
 }
-void
+
+bool
 SendMessageCC::Send(void)
 {
    Build();
@@ -233,7 +234,9 @@ SendMessageCC::Send(void)
       *hostlist[2];
    char
       tmpbuf[MAILTMPLEN];
-
+   bool
+      success = true;
+   
    kbStringList::iterator i;
    for(i = m_FccList.begin(); i != m_FccList.end(); i++)
       WriteToFolder(**i);
@@ -251,14 +254,18 @@ SendMessageCC::Send(void)
       {
          sprintf (tmpbuf, "[Failed - %s]",stream->reply);
          ERRORMESSAGE((tmpbuf));
+         success = false;
       }
    }
 
    if (stream)
       smtp_close (stream);
    else
+   {
       ERRORMESSAGE (("[Can't open connection to any server]"));
-
+      success = false;
+   }
+   return success;
 }
 
 void
@@ -358,7 +365,14 @@ SendMessageCC::WriteToFolder(String const &name)
    String str;
 
    WriteToString(str);
-   MailFolder *mf = MailFolder::OpenFolder(MailFolder::MF_PROFILE,name);
+   MailFolder *mf =
+      MailFolder::OpenFolder(MailFolder::MF_PROFILE,name);
+   if(! mf) // there is no profile folder called name
+   {
+      String filename = strutil_expandfoldername(name);
+      mf = MailFolder::OpenFolder(MailFolder::MF_PROFILE,name);
+   }
+   CHECK_RET(mf,String(_("Cannot open folder to save to:")+name));
    mf->AppendMessage(str);
    mf->DecRef();
 }

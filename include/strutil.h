@@ -198,8 +198,7 @@ bool strutil_isabsolutepath(const String &path);
 
 /** Expands tilde in a pathname. A tilde followed by a slash is the
     user's home directory, taken from the environment. Tilde+name will 
-    be expanded to /home/name. This is not looked up in /etc/passwd -
-    so it might be wrong!
+    be expanded to the user's home directory.
     @param ipath the path to look up
     @return the expanded path
 */
@@ -210,6 +209,16 @@ String strutil_expandpath(const String &ipath);
       /// implements the strsep() function found on some Unix systems
       char * strsep(char **stringp, const char *delim);
 #endif
+
+/** A small helper function to expand mailfolder names or path names.
+    This function takes absolute or relative names. Absolute ones are
+    expanded and returned, relative names are expanded relative to the 
+    mail folder directory.
+    @param name name of a mail folder
+    @return the path to the folder file
+*/
+String
+strutil_expandfoldername(const String &name);
 
 //@}
 #endif

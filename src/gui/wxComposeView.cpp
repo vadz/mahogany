@@ -543,8 +543,8 @@ wxComposeView::OnMenuCommand(int id)
       break;
 
    case WXMENU_COMPOSE_SEND:
-      Send();
-      m_LayoutWindow->ResetDirty();
+      if(Send())
+         m_LayoutWindow->ResetDirty();
       Close();
       break;
 
@@ -639,9 +639,10 @@ wxComposeView::InsertFile(const char *filename, const char *mimetype)
    Refresh();
 }
 
-void
+bool
 wxComposeView::Send(void)
 {
+   bool success = false;
    String
       tmp2, mimeType, mimeSubType;
 
@@ -745,7 +746,7 @@ wxComposeView::Send(void)
                break;
 
             default:
-               FAIL_MSG("Unknwown part type");
+               FAIL_MSG(_("Unknwown part type"));
             }
          }
       }
@@ -753,14 +754,18 @@ wxComposeView::Send(void)
       delete export;
    }
 
-   // FIXME no error return???
-   sm.Send();
+   success = sm.Send();  // true if sent
 
    if(READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER))
    {
       String file;
       MailFolder *mf =
-         MailFolder::OpenFolder(MailFolder::MF_PROFILE,READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER));
+         MailFolder::OpenFolder(MailFolder::MF_PROFILE,
+                                READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER));
+      if(! mf) // no profile of such name
+         mf = MailFolder::OpenFolder(MailFolder::MF_FILE,
+                                     strutil_expandfoldername(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER))); 
+               
       if(mf)
       {
          file = READ_CONFIG(m_Profile,MP_FOLDER_PATH);
@@ -770,6 +775,7 @@ wxComposeView::Send(void)
          mf->DecRef();
       }
    }
+   return success;
 }
 
 /// sets To field

@@ -92,10 +92,6 @@ static const char *wxIconManagerFileExtensions[] =
 char **
 wxIconManager::LoadImage(String filename)
 {
-//#if 1 // FIXME
-//   return NULL;
-//#endif
-   
    String tempfile;
    
    // lets convert to xpm using image magick:
@@ -129,7 +125,6 @@ wxIconManager::LoadImage(String filename)
    ASSERT(cpptr);
 
    ifstream in(filename);
-   int len;
    if(in)
    {  
       String str;

@@ -77,8 +77,10 @@ public:
    */
    void WriteToFolder(String const &foldername);
    
-   /// Sends the message.
-   void Send(void);
+   /** Sends the message.
+       @return true on success
+   */
+   bool Send(void);
 
    /// destructor
    ~SendMessageCC();

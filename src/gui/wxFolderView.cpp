@@ -307,7 +307,7 @@ wxFolderView::~wxFolderView()
    {
       if(m_MailFolder)
       { // mark messages as seen
-         for(int i = 0; i < m_NumOfMessages; i++)
+         for(int i = 1; i <= m_NumOfMessages; i++)
             m_MailFolder->SetMessageFlag(i, MailFolder::MSG_STAT_UNREAD, false);
       }
 

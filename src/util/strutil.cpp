@@ -392,7 +392,7 @@ bool
 strutil_isabsolutepath(const String &path)
 {
 #ifdef OS_UNIX
-   return !strutil_isempty(path) && (path[0u] == DIR_SEPARATOR || path[1u] == '~');
+   return !strutil_isempty(path) && (path[0u] == DIR_SEPARATOR || path[0u] == '~');
 #elif defined ( OS_WIN )
    // TODO copy the code from wxIsAbsolutePath() here if Karsten insists on it
    return wxIsAbsolutePath(path);
@@ -404,21 +404,21 @@ strutil_expandpath(const String &ipath)
 {
    String path;
    
-   if(strutil_isempty(path))
+   if(strutil_isempty(ipath))
       return "";
 
-   if(path[0u]=='~')
+   if(ipath[0u]=='~')
    {
-      if(path[1u] == DIR_SEPARATOR)
+      if(ipath[1u] == DIR_SEPARATOR)
       {
          path = getenv("HOME");
-         path << path.c_str() + 1;
+         path << (ipath.c_str() + 1);
          return path;
       }
       else
       {
          String user =
-            strutil_before(String(path.c_str()+1),DIR_SEPARATOR);
+            strutil_before(String(ipath.c_str()+1),DIR_SEPARATOR);
          struct passwd *entry;
          do
          {
@@ -429,12 +429,34 @@ strutil_expandpath(const String &ipath)
          if(entry)
             path << entry->pw_dir;
          else
-            path << "/home/" << user;
+            path << DIR_SEPARATOR << "home" << DIR_SEPARATOR << user; // improvise!
          path << DIR_SEPARATOR
-              << strutil_after(String(path.c_str()+1),DIR_SEPARATOR);
+              << strutil_after(String(ipath.c_str()+1),DIR_SEPARATOR);
          return path;
       }
    }
    else
       return ipath;
+}
+
+//************************************************************************
+//        Profile and other classes dependent functions:
+//************************************************************************
+
+#include   "Profile.h"
+#include   "Mdefaults.h"
+#include   "MApplication.h"
+
+/// A small helper function to expand mailfolder names:
+String
+strutil_expandfoldername(const String &name)
+{
+   String mboxpath;
+   
+   if(strutil_isabsolutepath(name))
+      mboxpath = name;
+   else
+      mboxpath << READ_APPCONFIG(MC_MBOXDIR) << DIR_SEPARATOR << name; 
+   mboxpath = strutil_expandpath(mboxpath);
+   return mboxpath;
 }

@@ -83,6 +83,8 @@
 #define   MC_HELPBROWSER   "HelpBrowser"
 /// is help browser of netscape type?
 #define   MC_HELPBROWSER_ISNS   "HelpBrowserIsNetscape"
+/// the directory for mbox folders
+#define   MC_MBOXDIR         "FolderDir"
 
 // Unix-only entries
 #ifdef OS_UNIX
@@ -164,8 +166,6 @@
 #define   MP_SMTPHOST         "MailHost"
 /// the news server
 #define   MP_NNTPHOST         "NewsHost"
-/// the directory for mbox folders
-#define   MP_MBOXDIR         "FolderDir"
 /// show CC field in message composition?
 #define   MP_SHOWCC         "ShowCC"
 /// show BCC field in message composition?
@@ -305,6 +305,8 @@
 #define   MC_HELPBROWSER_D   "netscape"
 /// is help browser of netscape type?
 #define   MC_HELPBROWSER_ISNS_D   1
+/// the directory for mbox folders
+#define   MC_MBOXDIR_D         ""
 
 // Unix-only entries
 #ifdef OS_UNIX
@@ -381,8 +383,6 @@
 #define   MP_SMTPHOST_D         "localhost"
 /// the news server
 #define   MP_NNTPHOST_D         "news"
-/// the directory for mbox folders
-#define   MP_MBOXDIR_D         ""
 // the username for returned mail
 //#define   MP_RETURN_USERNAME_D      "ReturnUserName"
 // the hostname for returned mail

@@ -126,6 +126,12 @@ private:
 // functions
 // ----------------------------------------------------------------------------
 
+/// returns the argument if it's !NULL of the top-level application frame
+static inline wxWindow *GetParent(wxWindow *parent)
+{
+  return parent == NULL ? mApplication->TopLevelFrame() : parent;
+}
+
 // under Windows we don't use wxCENTRE style which uses the generic message box
 // instead of the native one (and thus it doesn't have icons, for example)
 static inline long Style(long style)
@@ -135,12 +141,6 @@ static inline long Style(long style)
 # else //OS_WIN
     return style | wxCENTRE;
 # endif
-}
-
-// returns the argument if it's !NULL of the top-level application frame
-static inline MWindow *GetParent(MWindow *parent)
-{
-  return parent == NULL ? mApplication->TopLevelFrame() : parent;
 }
 
 // ============================================================================
@@ -924,7 +924,7 @@ class wxMRDialog : public wxDialog
 {
 public:
    wxMRDialog()
-      { Centre(); }
+      { } // we cannot Centre() it here because we don't have a parent yet!
 
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
@@ -1063,10 +1063,14 @@ void
 MDialog_FolderOpen(wxMFrame *parent)
 {
    int rc = 0;
+
+   if(! parent)
+      parent = mApplication->TopLevelFrame();
    wxResourceParseData(OpenFolderDialog);
    wxMROpenFolderDialog *dialog = new wxMROpenFolderDialog;
    if (dialog->LoadFromResource(parent, "OpenFolderDialog"))
    {
+      dialog->Centre();
       dialog->UpdateRadioBox();
       rc = dialog->ShowModal();
       if(rc == wxOK)

@@ -224,7 +224,7 @@ wxMApp::Help(int id, wxWindow *parent)
       last_key = wxGetTextFromUser(_("Search for?"),
                                    _("Search help for keyword"),
                                    last_key,
-                                   parent ? parent : GetTopWindow());
+                                   parent ? parent : TopLevelFrame());
       if(! last_key.IsEmpty())
          m_HelpController->KeywordSearch(last_key);
       break;

@@ -69,6 +69,4 @@ private:
 // created dynamically by wxWindows
 DECLARE_APP(wxMApp);
 
-//#define mApplication (wxGetApp())
-
 #endif

@@ -108,8 +108,10 @@ public:
    /// make a printout of input window
    void Print(void);
 
-   /// send the message
-   void Send(void);
+   /** Send the message.
+       @return true if successful, false otherwise
+   */
+   bool Send(void);
 
    /// called on Menu selection
    void OnMenuCommand(int id);

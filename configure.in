@@ -345,6 +345,13 @@ fi
 AC_SUBST(MAKE_USE_PYTHON)
 AC_SUBST(MAKE_USE_SWIG)
 
+MAKE_HAVE_SGMLTOOLS=
+AC_PATH_PROG(SGML2HTML,sgml2html)
+if test "x$SGML2HTML" != "x"
+then
+  MAKE_HAVE_SGMLTOOLS="HAVE_SGMLTOOLS=yes"
+fi
+
 
 dnl --------------------------------------------------------------------------
 dnl check for (wx)gtk libraries

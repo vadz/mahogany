@@ -66,9 +66,8 @@ MailFolder::OpenFolder(MailFolder::Type i_type,
 
    // @@ calling MailFolderCC::OpenFolder() explicitly here is "anti-OO"
    MailFolder *mf = MailFolderCC::OpenFolder(type, name, profile, login, passwd);
-   if ( mf ) {
+   if ( mf ) 
       mf->m_UpdateInterval = READ_CONFIG(profile, MP_UPDATEINTERVAL);
-   }
 
    profile->DecRef();
 
