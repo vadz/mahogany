@@ -459,14 +459,16 @@ MailCollectorImpl::UpdateFolderList(void)
             (**i).m_folder = MailFolder::OpenFolder((**i).m_name);
             if((**i).m_folder == NULL) // folder inaccessible:
             {
-               ERRORMESSAGE((_("Cannot open incoming folder '%s'."), (**i).m_name.c_str()));
+               ERRORMESSAGE((_("Cannot open incoming folder '%s'."),
+                             (**i).m_name.c_str()));
+               wxString msg;
+               msg.Print(_("Accessing the incoming folder\n"
+                           "'%s' failed.\n\n"
+                           "Do you want to stop collecting\n"
+                           "mail from it in this session?"),
+                         (**i).m_name.c_str());
                if(MDialog_YesNoDialog(
-                  _("Accessing the incoming folder\n"
-                    "'%s' failed.\n\n"
-                    "Do you want to stop collecting\n"
-                    "mail from it in this session?"),
-                  NULL,
-                  _("Mail collection failed"),
+                  msg, NULL, _("Mail collection failed"),
                   TRUE, GetPersMsgBoxName(M_MSGBOX_SUSPENDAUTOCOLLECT)))
                {
                   RemoveIncomingFolder((**i).m_name);
