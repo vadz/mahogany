@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1998-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
- * $Id$         
+ * $Id$
  *                                                                  *
  *******************************************************************/
 
@@ -29,9 +29,10 @@ struct DebugLayout
    M_LIST_NODE;
    M_ITERATOR(DebugLayout);
 
+public:
    /** Function which prints debug information about the iterator.
    */
-   static inline const String DebugIter(iterator *me)
+   static const String DebugIter(iterator *me)
       {
          char ms_debuginfo[512];
          if(me->node == NULL)
@@ -65,7 +66,7 @@ DebugIterator(const void *me)
 #include   <iostream.h>
 
 KBLIST_DEFINE(kbListInt,int);
-   
+
 int main(void)
 {
    int
@@ -74,7 +75,7 @@ int main(void)
       l;
    kbListInt::iterator
       i;
-   
+
    for(n = 0; n < 10; n++)
    {
       ptr = new int;
@@ -100,11 +101,11 @@ int main(void)
    i--;
    --i;
    l.erase(i); // erase 3rd last element (49)
-   
+
    for(i = l.begin(); i != l.end(); i++)
       cout << *i << '\t' << *((int *)*i) << endl;
 
-   
+
    return 0;
 }
 #endif

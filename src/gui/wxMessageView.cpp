@@ -795,7 +795,10 @@ wxMessageView::Update(void)
          - if it is rfc822 and it is configured to be displayed
          - HTML is for now displayed as normal text with the same rules
       */
-      bool isHTML = mimeType == "text/html";
+
+      // FIXME: HTML is broken, so it should be at least an option, disabling
+      //        it entirely for now (VZ)
+      bool isHTML = FALSE; // mimeType == "text/html";
       if ( (disposition != "attachment") &&
            (
                ((mimeType == "text/plain" || isHTML) &&
