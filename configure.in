@@ -428,9 +428,13 @@ if test "$USE_WXGTK" = 1; then
       WX_DEFS=-D__WXGTK__
     else
       AC_MSG_RESULT(no)
+      AC_MSG_ERROR("Cannot find the wxGtk libraries."
+                   "Make a link to the library files in extra/lib .")
     fi
   else
     AC_MSG_RESULT(no)
+    AC_MSG_ERROR("Cannot find the wxGtk include files."
+                 "Make a link to the wxWindows/include/wx directory in extra/include .")
   fi
   AC_MSG_CHECKING(for gtk libraries)
   AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,gtk/gtk.h)
@@ -449,6 +453,8 @@ if test "$USE_WXGTK" = 1; then
       AC_MSG_RESULT(yes)
     else
       AC_MSG_RESULT(no)
+      AC_MSG_ERROR("Cannot find the gtk libraries."
+                   "Make a link to the library files in extra/lib .")
     fi
   else
     AC_MSG_RESULT(no)
@@ -476,9 +482,12 @@ else
 	AC_MSG_RESULT(yes)
       else
         AC_MSG_RESULT(no)
+        AC_MSG_ERROR("Cannot find the wxXt libraries."
+                     "Make a link to the library files in extra/lib .")
       fi
     else
       AC_MSG_RESULT(no)
+      AC_MSG_ERROR("Cannot find the wxXt header files.")
     fi
   fi
 fi
