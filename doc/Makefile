@@ -12,6 +12,9 @@ SUB_DIRS=$(FILES_TEX:.htex=)
 include ../makeopts
 
 all: test
+	if [ ! -f Mdoc.tar.gz ] ; then $(MAKE) all2 ; fi
+
+all2:
 	$(MAKE) -k ps
 	$(MAKE) -k makemap
 
@@ -72,7 +75,7 @@ test:
 	exit 1; \
 	fi 
 
-.PHONY: all install ps clean subdirs makemap install2 test classdoc install_classdoc
+.PHONY: all install ps clean subdirs makemap install2 test classdoc install_classdoc all2
 
 include ../makerules
 
