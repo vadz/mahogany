@@ -418,7 +418,7 @@ void AdbManager::LoadAll()
     if ( n < astrProv.Count() )
       strProv = astrProv[n];
     else
-      strProv.empty();
+      strProv.Empty();
 
     if ( strProv.empty() )
       pProvider = NULL;
