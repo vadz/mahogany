@@ -609,6 +609,11 @@ bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
    String name;
    long dummy;
 
+   wxString rootName(start);
+   if ( !rootName.IsEmpty() )
+      rootName += '/';
+   //else: there should be no leading slash
+
    bool cont = profile->GetFirstGroup(name, dummy);
    while ( cont )
    {
@@ -619,19 +624,17 @@ bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
          if ( READ_CONFIG(profile, MP_PROFILE_TYPE) ==
                   ProfileBase::PT_FolderProfile )
          {
+            wxString fullname(rootName);
+            fullname += name;
+
             // if this folder has children recurse into them (if we should)
             if ( recurse )
             {
-               String fullname(start);
-               if ( !fullname.IsEmpty() )
-                  fullname += '/';
-               fullname += name;
-
                if ( !DoTraverse(fullname, TRUE) )
                   return FALSE;
             }
 
-            if ( !OnVisitFolder(name) )
+            if ( !OnVisitFolder(fullname) )
             {
                return FALSE;
             }
