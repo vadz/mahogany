@@ -8,7 +8,8 @@
 #ifndef MCOMMON_H
 #define  MCOMMON_H
 
-#include "Mconfig.h"
+#include   "Mconfig.h"
+#include   "MObject.h"
 
 #ifdef   HAVE_LIBINTL_H
 #  define   USE_GETTEXT 1
