@@ -636,7 +636,7 @@ extern wxTextCtrl *CreateTextWithLabel(wxWindow *parent,
                                        long widthMax,
                                        wxControl *last,
                                        wxCoord nRightMargin = 0,
-                                       int style = wxALIGN_RIGHT);
+                                       int style = wxTE_LEFT);
 
 extern wxRadioBox *CreateRadioBox(wxWindow *parent,
                                   const char *label,
