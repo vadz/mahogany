@@ -1638,10 +1638,8 @@ int GetDefaultFolderTypeIcon(FolderType folderType)
       { wxFolderTree::iconNews,          MF_NEWS        },
       { wxFolderTree::iconRoot,          MF_ROOT        },
       { wxFolderTree::iconGroup,         MF_GROUP       },
-#ifdef EXPERIMENTAL
       { wxFolderTree::iconFile,          MF_MFILE       },
       { wxFolderTree::iconMH,            MF_MDIR        },
-#endif
      };
 
    int image = -1;

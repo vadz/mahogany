@@ -47,10 +47,11 @@ enum FolderType
    MF_NNTP = 4,                  // newsgroup
    MF_NEWS = 5,                  // newsgroup in local newsspool
    MF_MH = 6,                    // MH folder (directory/files)
-#ifdef EXPERIMENTAL
+
+   // these two are still experimental and not always compiled in:
    MF_MFILE = 7,                 // the Mahogany file type
    MF_MDIR = 8,                  // the Mahogany dir type
-#endif
+
    MF_PROFILE_OR_FILE,           // profile, if it doesn't work, file
    MF_PROFILE = 10,              // read type etc from profile
 
@@ -173,10 +174,8 @@ inline bool FolderTypeHasUserName(FolderType type)
    case MF_FILE:
    case MF_MH:
    case MF_NEWS:
-#ifdef EXPERIMENTAL
    case MF_MFILE:
    case MF_MDIR:
-#endif
       ; // don't put return false here to avoid VC++ warnings
    }
 
@@ -281,9 +280,7 @@ inline bool IsFileOrDirFolder(FolderType folderType)
 {
    FolderType ft = GetFolderType(folderType);
    return ft == MF_FILE || ft == MF_MH
-#ifdef EXPERIMENTAL
       || ft == MF_MFILE || ft == MF_MDIR
-#endif
       ;
 }
 

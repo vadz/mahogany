@@ -270,6 +270,7 @@ do
 	fi
 done
 
+
 dnl --------------------------------------------------------------------------
 dnl check for featurs and functions
 dnl --------------------------------------------------------------------------
@@ -455,6 +456,7 @@ AC_CHECK_LIB(c,crypt,,
 dnl If we have a libshadow, link with it. I am not sure whether we
 dnl really need this.
 AC_CHECK_LIB(shadow,main)
+
 
 dnl libresolv or libbind
 USE_RBL=1
@@ -683,6 +685,7 @@ if test "x$CCOSTYPE" = "x" ; then
 fi
 AC_SUBST(CCOSTYPE)
 
+MAKE_HAVE_LIBMAL=
 dnl this must come after we checked for wxGTK and network libraries
 dnl Check if we have the pi-sock library and headers for PalmOS support.
 MAKE_PISOCKLIB=
@@ -691,13 +694,43 @@ AC_CHECK_HEADERS(pi-source.h,
   [ AC_DEFINE(USE_PISOCK)
     MAKE_PISOCKLIB="PISOCK_LIB=-lpisock"
     AC_CHECK_LIB(pisock, pi_setmaxspeed,AC_DEFINE(HAVE_PI_SETMAXSPEED),
-     AC_MSG_WARN("Your pisock library is old - some functionality will be disabled."))
+    AC_MSG_WARN("Your pisock library is old - some functionality will be disabled."))
   ],
   AC_MSG_WARN("Cannot find pisock library - support for PalmOS disabled.")
  ),
  AC_MSG_WARN("Cannot find pisock library headers - support for PalmOS disabled.")
 )
 AC_SUBST(MAKE_PISOCKLIB)    
+
+if test "x$MAKE_PISOCKLIB" != "x" ; then
+dnl Check if we have libmal source in extra/src
+    AC_MSG_CHECKING(for libmal library source in ./extra/src)
+    if  test -d ./extra/src/libmal 
+    then
+	AC_DEFINE(HAVE_LIBMAL)
+	MAKE_HAVE_LIBMAL="HAVE_LIBMAL=yes"
+	AC_MSG_RESULT(found - MAL synchronisation for PalmOS activated)
+	dnl the following settings are used by the libmal/Makefile
+	dnl MALTOP=$BUILDDIR/extra/src/libmal/malsync_src
+	MALTOP=./malsync_src
+	AC_SUBST(MALTOP)
+	cflags="$CFLAGS -I$MALTOP/mal/client/common -I$MALTOP/mal/common"
+	AC_SUBST(cflags)
+	libs=
+	llibs=
+	ccoptions=
+	AC_SUBST(libs)
+	AC_SUBST(llibs)
+	AC_SUBST(ccoptions)
+	PILOT_FLAGS=
+	AC_SUBST(PILOT_FLAGS)
+	PILOT_LIBS=$PISOCK_LIB
+	AC_SUBST(PILOT_LIBS)
+    else
+      AC_MSG_RESULT(not found - MAL synchronisation for PalmOS not available)
+    fi
+fi
+AC_SUBST(MAKE_HAVE_LIBMAL)
 
 
 dnl --------------------------------------------------------------------------
@@ -835,4 +868,11 @@ dnl libtool does not like -L.
 LIBS=`echo $LIBS | sed 's/-L\.//g'`
 AC_SUBST(LIBS_STATIC)
 
-AC_OUTPUT(makeopts)
+OUTPUT=makeopts
+
+if test "x$MAKE_HAVE_LIBMAL" != "x"; then
+	OUTPUT="$OUTPUT extra/src/libmal/Makefile makeopts"
+fi
+
+AC_OUTPUT($OUTPUT)
+

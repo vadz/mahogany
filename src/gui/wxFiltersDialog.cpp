@@ -703,7 +703,7 @@ static const char * wxOneFButtonLabels[] =
 wxOneFilterDialog::wxOneFilterDialog(class FilterEntryData *fed,
                                      wxWindow *parent)
    : wxManuallyLaidOutDialog(parent,
-                            _("Filter rule"),
+                            _("Filter Rule"),
                             "OneFilterDialog")
 {
    m_FilterData = fed;

@@ -2747,7 +2747,7 @@ msgstr "Dieses Fenster schließen"
 
 #: wxMenuDefs.cpp:84
 msgid "Edit address book"
-msgstr "Adreßbuch editieren"
+msgstr "Adreßbuch bearbeiten"
 
 #: wxMenuDefs.cpp:85
 msgid "Edit preferences"
@@ -2964,7 +2964,7 @@ msgstr "&Adreßbücher...\tCtrl-A"
 
 #: wxMenuDefs.cpp:251
 msgid "Edit the address book(s)"
-msgstr "Adreßbücher editieren"
+msgstr "Adreßbücher bearbeiten"
 
 #: wxMenuDefs.cpp:253
 msgid "Pr&eferences..."
@@ -3265,7 +3265,7 @@ msgstr "Nachrichten&kopf...\tCtrl-H"
 
 #: wxMenuDefs.cpp:311
 msgid "Add/edit header fields not shown on the screen"
-msgstr "Nachrichtenkopf editieren"
+msgstr "Nachrichtenkopf bearbeiten"
 
 #: AdbFrame.cpp:1117 wxMenuDefs.cpp:314
 msgid "&New..."
@@ -3273,7 +3273,7 @@ msgstr "&Neu..."
 
 #: wxMenuDefs.cpp:314
 msgid "Create a new address book"
-msgstr "Adreßbuch editieren"
+msgstr "Adreßbuch bearbeiten"
 
 #: wxMenuDefs.cpp:315
 msgid "&Open..."
@@ -4442,7 +4442,7 @@ msgstr ""
 "Alle Felder in diesem Dialog haben eine etwas andere Bedeutung\n"
 "für Mailbox-Gruppen. Sie beziehen sich nicht auf die Gruppe, sondern\n"
 "werden als Vorgabewerte für alle Mailboxen in dieser Gruppe verwen-\n"
-"det.\n"
+"det."
 
 #: wxMFolderDialogs.cpp:1300
 msgid "Group folders hint"
@@ -4470,23 +4470,21 @@ msgstr "&NNTP-Gruppe (Usenet-News-Server)"
 
 #: wxMFolderDialogs.cpp:1486
 msgid "News group (local newsspool)"
-msgstr ""
+msgstr "News-Gruppe (lokaler News-Spool)"
 
 #: wxMFolderDialogs.cpp:1958
-#, fuzzy, c-format
 msgid "Impossible to create MH folder '%s'."
-msgstr "Mailbox '%s' ausgewählt."
+msgstr "MH-Mailbox '%s' kann nicht angelegt werden."
 
 #: wxMFolderDialogs.cpp:2010
 msgid "a login name"
-msgstr "Benutzername"
+msgstr "ein Benutzername"
 
 #: wxMFolderDialogs.cpp:2015
 msgid "a password"
 msgstr "ein Paßwort"
 
 #: wxMFolderDialogs.cpp:2022
-#, fuzzy, c-format
 msgid ""
 "You have not specified %s for this folder, although it requires one.\n"
 "Alternatively, you might want to select anonymous access.\n"
@@ -4516,37 +4514,32 @@ msgid "Please choose a folder"
 msgstr "Bitte wählen Sie eine Mailbox"
 
 #: wxBrowseButton.cpp:143
-#, fuzzy
 msgid "Please choose a directory"
-msgstr "Bitte wählen Sie einen Eintrag:"
+msgstr "Bitte wählen Sie ein Verzeichnis"
 
 #: wxBrowseButton.cpp:173
-#, fuzzy, c-format
 msgid "Browse for a %s"
-msgstr "Mailbox auswählen"
+msgstr "Auswählen vonh %s"
 
 #: wxBrowseButton.cpp:173
-#, fuzzy
 msgid "file"
 msgstr "Datei"
 
 #: wxBrowseButton.cpp:174
-#, fuzzy
 msgid "directory"
-msgstr "Das Verzeichnis"
+msgstr "Verzeichnis"
 
 #: wxBrowseButton.cpp:185
 msgid "Browse for folder"
 msgstr "Mailbox auswählen"
 
 #: wxBrowseButton.cpp:305
-#, fuzzy
 msgid "Choose icon"
-msgstr "Mailbox auswählen"
+msgstr "Icon auswählen"
 
 #: wxBrowseButton.cpp:397
 msgid "&Current icon"
-msgstr ""
+msgstr "&Aktuelles Icon"
 
 #: wxHeadersDialogs.cpp:346
 msgid "&Cc"
@@ -4565,9 +4558,8 @@ msgid "&Headers"
 msgstr "&Kopfeinträge"
 
 #: wxHeadersDialogs.cpp:383
-#, fuzzy
 msgid "&More..."
-msgstr "&Neu..."
+msgstr "&Mehr..."
 
 #: wxHeadersDialogs.cpp:395
 msgid "Show the field?"
@@ -4590,71 +4582,60 @@ msgid "&Up"
 msgstr "&Höher"
 
 #: wxHeadersDialogs.cpp:710
-#, fuzzy
 msgid "Edit custom header"
-msgstr "Nachrichtenkopf an&zeigen"
+msgstr "Nachrichtenkopf bearbeiten"
 
 #: wxHeadersDialogs.cpp:726
-#, fuzzy, c-format
 msgid "Header value for folder '%s'"
-msgstr "Kann das Adreßbuchnamen '%s' nicht öffnen."
+msgstr "Kopfeintrag für Mailbox '%s'"
 
 #: wxHeadersDialogs.cpp:728
-#, fuzzy
 msgid "Default value for header"
-msgstr "Voreinstellung "
+msgstr "Voreinstellung für Kopf "
 
 #: wxHeadersDialogs.cpp:732
-#, fuzzy
 msgid "&Name: "
-msgstr "&Benutzername: "
+msgstr "&Name: "
 
 #: wxHeadersDialogs.cpp:733
 msgid "&Value: "
-msgstr ""
+msgstr "&Wert: "
 
 #: wxHeadersDialogs.cpp:784
-#, fuzzy
-msgid "news postins"
-msgstr "Einstellungen ändern"
+msgid "news postings"
+msgstr "News-Artikel"
 
 #: wxHeadersDialogs.cpp:785
-#, fuzzy
 msgid "mail messages"
-msgstr "keine Nachrichten"
+msgstr "e-Mail Nachrichten"
 
 #: wxHeadersDialogs.cpp:786
-#, fuzzy
 msgid "all messages"
-msgstr "keine Nachrichten"
+msgstr "alle Nachrichten"
 
 #: wxHeadersDialogs.cpp:799
 msgid "Use this header for:"
-msgstr ""
+msgstr "Eintrag verwenden für:"
 
 #: wxHeadersDialogs.cpp:826
 msgid "Save these values "
-msgstr ""
+msgstr "Diese werte sichern "
 
 #: wxHeadersDialogs.cpp:893
-#, fuzzy
 msgid "Configure custom headers"
-msgstr "Nachrichten&kopf..."
+msgstr "Nachrichten&kopf einstellen"
 
 #: wxHeadersDialogs.cpp:908
-#, fuzzy, c-format
 msgid "Custom &headers for folder '%s'"
-msgstr "Konvertiere Einstellungen für Mailbox '%s'."
+msgstr "Kopf&zeilen einstellen für Mailbox '%s'."
 
 #: wxHeadersDialogs.cpp:910
-#, fuzzy
 msgid "Default custom headers"
-msgstr "Nachrichten&kopf..."
+msgstr "Nachrichtenkopf-Vorgaben"
 
 #: wxHeadersDialogs.cpp:923 wxTemplateDialog.cpp:541
-#, fuzzy
 msgid "&Add..."
-msgstr "&FAQ..."
+msgstr "&Hinzufügen..."
 
 #: wxHeadersDialogs.cpp:931
 #, fuzzy
@@ -4662,135 +4643,125 @@ msgid "&Edit..."
 msgstr "&Bearbeiten"
 
 #: wxHeadersDialogs.cpp:971
-#, fuzzy
 msgid "Name"
-msgstr "am"
+msgstr "Name"
 
 #: wxTemplateDialog.cpp:244
-#, fuzzy
 msgid "Please choose a file"
-msgstr "Bitte wählen Sie eine Mailbox"
+msgstr "Bitte wählen Sie ein Feld"
 
 #: wxTemplateDialog.cpp:260
 msgid "Value for template variable"
-msgstr ""
+msgstr "Wert für Vorlagen-Variable"
 
 #: wxTemplateDialog.cpp:364
 msgid "Please choose"
 msgstr "Bitte wählen Sie"
 
 #: wxTemplateDialog.cpp:378
-#, fuzzy
 msgid "New message"
-msgstr "1 Nachricht"
+msgstr "Neue Nachricht"
 
 #: wxTemplateDialog.cpp:379
-#, fuzzy
 msgid "New article"
-msgstr "Neue Nachrichten"
+msgstr "Neuer Artikel"
 
 #: wxTemplateDialog.cpp:380
-#, fuzzy
 msgid "Reply"
-msgstr "&Beantworten"
+msgstr "Beantworten"
 
 #: wxTemplateDialog.cpp:381
 msgid "Follow-up"
-msgstr ""
+msgstr "Gruppenantwort (Follow-Up)"
 
 #: wxTemplateDialog.cpp:382
 msgid "Forward"
 msgstr "Weiterleiten"
 
 #: wxTemplateDialog.cpp:389
-#, fuzzy
 msgid "Configure message templates"
-msgstr "Seiteneinstellungen"
+msgstr "Nachrichten-Vorlagen bearbeiten"
 
 #: wxTemplateDialog.cpp:408
 msgid ""
 "Select the template to edit in the list first. Then right click the mouse in "
 "the text control to get the list of all available macros."
 msgstr ""
+"Wählen Sie zuerst die zu bearbeitende Vorlage. Dann klicken Sie die rechte "
+"Maustaste im Textfeld um eine Liste der verfügbaren Variablen zu bekommen."
 
 #: wxTemplateDialog.cpp:473
-#, fuzzy, c-format
 msgid ""
 "You have modified the template for message of type '%s', would you like to "
 "save it?"
-msgstr "Das Betreff-Feld ist leer, möchten Sie dies korrigieren?"
+msgstr "Sie haben die Vorlage für Nachrichten vom Typ '%s' geändert.\n"
+"Möchten Sie diese sichern?"
 
 #: wxTemplateDialog.cpp:578
-#, fuzzy
 msgid "composing new messages"
-msgstr "Neue Nachricht"
+msgstr "Neue Nachricht schreiben"
 
 #: wxTemplateDialog.cpp:582
 msgid "composing newsgroup articles "
-msgstr ""
+msgstr "Neuen Artikel schreiben "
 
 #: wxTemplateDialog.cpp:586
-#, fuzzy
 msgid "replying"
-msgstr "&Beantworten"
+msgstr "Antworten"
 
 #: wxTemplateDialog.cpp:590
-#, fuzzy
 msgid "writing follow ups"
-msgstr "Drucken"
+msgstr "Gruppenanwort"
 
 #: wxTemplateDialog.cpp:594
-#, fuzzy
 msgid "forwarding"
 msgstr "Weiterleiten"
 
 #: wxTemplateDialog.cpp:601
 #, fuzzy, c-format
 msgid "Configure templates for %s"
-msgstr "Nachrichten&kopf..."
+msgstr "Vorlage für %s bearbeiten"
 
 #: wxTemplateDialog.cpp:653
 #, fuzzy, c-format
 msgid "You have modified the template '%s', would you like to save it?"
-msgstr "Das Betreff-Feld ist leer, möchten Sie dies korrigieren?"
+msgstr "Die Vorlage '%s' wurde geändert, möchten Sie sie sichern?"
 
 #: wxTemplateDialog.cpp:671
-#, fuzzy, c-format
 msgid "Do you realyl want to delete the template '%s'?"
-msgstr "Möchten Sie die Mailbox '%s' wirklich löschen?"
+msgstr "Möchten Sie die Vorlage '%s' wirklich löschen?"
 
 #: wxTemplateDialog.cpp:688
-#, fuzzy
 msgid "Create new template"
-msgstr "Neuen Eintrag anlegen"
+msgstr "Neue Vorlage anlegen"
 
 #: wxTemplateDialog.cpp:689
-#, fuzzy
 msgid "Name for the new template:"
-msgstr "Symbolischer Name der neuen Mailbox?"
+msgstr "Name für die neue Vorlage:"
 
 #: wxModulesDlg.cpp:79
-#, fuzzy
 msgid "Extension Modules Configuration"
-msgstr "Einstellungen werden geprüft"
+msgstr "Erweiteruns-Modul Einstellungen"
 
 #: wxModulesDlg.cpp:87
 msgid "Available modules"
-msgstr ""
+msgstr "Verfügbare Module"
 
 #: wxModulesDlg.cpp:92
 msgid ""
 "The selected modules will be loaded\n"
 "into Mahogany at the next program start."
 msgstr ""
+"Die ausgewählten Module werden beim\n"
+"nächsten Programmstart geladen werden."
 
 #: wxModulesDlg.cpp:142
 msgid "Module: "
-msgstr ""
+msgstr "Modul: "
 
 #: wxModulesDlg.cpp:143
 msgid "Interface: "
-msgstr ""
+msgstr "Funktionsinterface: "
 
 #: wxModulesDlg.cpp:144
 msgid "Version: "
@@ -4798,53 +4769,47 @@ msgstr "Version: "
 
 #: wxModulesDlg.cpp:145
 msgid "Author: "
-msgstr ""
+msgstr "Author: "
 
 #: wxModulesDlg.cpp:213
 msgid ""
 "Notice: any changes to the modules settings will only\n"
 "take effect the next time you start Mahogany."
 msgstr ""
+"Beachten Sie: Änderungen der Moduleinstellungen werden\n"
+"erst beim nächsten Programmstart wirksam."
 
 #: wxSubfoldersDialog.cpp:261
-#, fuzzy, c-format
 msgid "Subfolders of folder '%s'"
-msgstr "Konvertiere Einstellungen für Mailbox '%s'."
+msgstr "Unter-Mailboxen für Mailbox '%s'"
 
 #: wxSubfoldersDialog.cpp:270
-#, fuzzy
 msgid "&Find: "
-msgstr "&Suchen"
+msgstr "&Suchen: "
 
 #: wxSubfoldersDialog.cpp:287
-#, fuzzy
 msgid "&Select all"
 msgstr "&Alle markieren"
 
 #: wxSubfoldersDialog.cpp:307
-#, fuzzy
 msgid "Retrieving the folder list..."
-msgstr "Mailbox &umbenennen..."
+msgstr "Mailbox-Liste wird geladen..."
 
 #: wxSubfoldersDialog.cpp:518
-#, fuzzy
 msgid "All subfolders"
-msgstr "Alle Mailboxen"
+msgstr "Alle Unter-Mailboxen"
 
 #: wxSubfoldersDialog.cpp:607
-#, fuzzy, c-format
 msgid "%u subfolders"
-msgstr "Alle Mailboxen"
+msgstr "%u Unter-Mailboxen"
 
 #: wxSubfoldersDialog.cpp:617
-#, fuzzy
 msgid "No subfolders"
-msgstr "Alle Mailboxen"
+msgstr "Keine Unter-Mailboxen"
 
 #: wxSubfoldersDialog.cpp:818
-#, fuzzy, c-format
 msgid "Failed to create folder '%s'."
-msgstr "Mailbox '%s' ausgewählt."
+msgstr "Mailbox '%s' konnte nicht angelegt werden."
 
 #: wxSubfoldersDialog.cpp:882
 #, c-format
@@ -4852,206 +4817,177 @@ msgid ""
 "Impossible to browse subfolders of folder '%s' because the folder cannot be "
 "opened."
 msgstr ""
+"Unter-Mailboxen von Mailbox '%s' konnten nicht ausgewählt werden, weil Mailbox sich nicht öffnen ließ."
 
 #: wxFiltersDialog.cpp:97 wxFiltersDialog.cpp:1279 wxFiltersDialog.cpp:1294
 msgid "unnamed"
 msgstr "Unbenannt"
 
 #: wxFiltersDialog.cpp:225
-#, fuzzy
 msgid "Always"
-msgstr "viel "
+msgstr "Immer "
 
 #: wxFiltersDialog.cpp:226
 msgid "Match"
-msgstr ""
+msgstr "Ist gleich"
 
 #: wxFiltersDialog.cpp:226
 msgid "Contains"
-msgstr ""
+msgstr "Enthält"
 
 #: wxFiltersDialog.cpp:227
 msgid "Match Case"
-msgstr ""
+msgstr "Ist gleich (groß/klein verschieden)"
 
 #: wxFiltersDialog.cpp:227
 msgid "Contains Case"
-msgstr ""
+msgstr "Enthält (groß/klein verschieden)"
 
 #: wxFiltersDialog.cpp:228
 msgid "Match RegExp"
-msgstr ""
+msgstr "Paßt zu RegExp"
 
 #: wxFiltersDialog.cpp:229
-#, fuzzy
 msgid "Larger than"
-msgstr "&Größer"
+msgstr "Größer als"
 
 #: wxFiltersDialog.cpp:229
-#, fuzzy
 msgid "Smaller than"
-msgstr "&Kleiner"
+msgstr "Kleiner als"
 
 #: wxFiltersDialog.cpp:230
 msgid "Older than"
-msgstr ""
+msgstr "Älter als"
 
 #: wxFiltersDialog.cpp:230
-#, fuzzy
 msgid "Newer than"
-msgstr "&Größer"
+msgstr "Neuer als"
 
 #: wxFiltersDialog.cpp:231
 msgid "Is SPAM"
-msgstr ""
+msgstr "Ist SPAM"
 
 #: wxFiltersDialog.cpp:257 wxFiltersDialog.cpp:261
-#, fuzzy
 msgid "in Subject"
-msgstr "Betreff"
+msgstr "in Betreff"
 
 #: wxFiltersDialog.cpp:258 wxFiltersDialog.cpp:262
-#, fuzzy
 msgid "in header"
-msgstr "Nachrichtenkopf an&zeigen"
+msgstr "in Kopf"
 
 #: wxFiltersDialog.cpp:259 wxFiltersDialog.cpp:263
-#, fuzzy
 msgid "in From"
-msgstr "Von"
+msgstr "in Von"
 
 #: wxFiltersDialog.cpp:260 wxFiltersDialog.cpp:264
 msgid "in body"
-msgstr ""
+msgstr "in Inhalt"
 
 #: wxFiltersDialog.cpp:261 wxFiltersDialog.cpp:265
-#, fuzzy
 msgid "in message"
-msgstr "Nachricht drucken"
+msgstr "in Nachricht"
 
 #: wxFiltersDialog.cpp:262 wxFiltersDialog.cpp:266
 msgid "in To"
-msgstr ""
+msgstr "in To"
 
 #: wxFiltersDialog.cpp:263 wxFiltersDialog.cpp:267
-#, fuzzy
 msgid "in Sender"
-msgstr "Nachrichtenkopf an&zeigen"
+msgstr "in Sender"
 
 #: wxFiltersDialog.cpp:271 wxFiltersDialog.cpp:275
 msgid "or"
-msgstr ""
+msgstr "oder"
 
 #: wxFiltersDialog.cpp:272 wxFiltersDialog.cpp:276
-#, fuzzy
 msgid "and"
-msgstr "Expandieren"
+msgstr "und"
 
 #: wxFiltersDialog.cpp:306 wxFiltersDialog.cpp:310 wxFiltersDialog.cpp:311
 #: wxFiltersDialog.cpp:315
-#, fuzzy
 msgid "Not"
-msgstr "Nein"
+msgstr "Nicht"
 
 #: wxFiltersDialog.cpp:543 wxFiltersDialog.cpp:551
-#, fuzzy
 msgid "Copy to"
-msgstr "&Kopieren"
+msgstr "Kopieren nach"
 
 #: wxFiltersDialog.cpp:544 wxFiltersDialog.cpp:552
-#, fuzzy
 msgid "Move to"
-msgstr "In Mailbox &verschieben"
+msgstr "Verschieben nach"
 
 #: wxFiltersDialog.cpp:546 wxFiltersDialog.cpp:554
-#, fuzzy
 msgid "MessageBox"
-msgstr "&Nachricht"
+msgstr "DialogBox"
 
 #: wxFiltersDialog.cpp:547 wxFiltersDialog.cpp:555
-#, fuzzy
 msgid "Log Entry"
-msgstr "Eintrag"
+msgstr "Log-Eintrag"
 
 #: wxFiltersDialog.cpp:701 wxFiltersDialog.cpp:716
-#, fuzzy
 msgid "More"
-msgstr "&Neu..."
+msgstr "Mehr"
 
 #: wxFiltersDialog.cpp:701 wxFiltersDialog.cpp:716
-#, fuzzy
 msgid "Less"
-msgstr "Zugriff"
-
-#: wxFiltersDialog.cpp:706 wxFiltersDialog.cpp:721
-msgid "Filter rule"
-msgstr ""
+msgstr "Weniger"
 
 #: wxFiltersDialog.cpp:714 wxFiltersDialog.cpp:729
 msgid "Filter Rule"
-msgstr ""
+msgstr "Filter-Regel"
 
 #: wxFiltersDialog.cpp:738 wxFiltersDialog.cpp:753
 #, fuzzy
 msgid "If Message..."
-msgstr "&Nachricht"
+msgstr "Falls Nachricht..."
 
 #: wxFiltersDialog.cpp:740 wxFiltersDialog.cpp:755
 msgid "Then do this:"
-msgstr ""
+msgstr "Dann:"
 
 #: wxFiltersDialog.cpp:932 wxFiltersDialog.cpp:947
-#, fuzzy
 msgid "New"
-msgstr "News"
+msgstr "Neu"
 
 #: wxFiltersDialog.cpp:932 wxFiltersDialog.cpp:947
-#, fuzzy
 msgid "Edit"
-msgstr "&Bearbeiten"
+msgstr "Bearbeiten"
 
 #: wxFiltersDialog.cpp:933 wxFiltersDialog.cpp:948
-#, fuzzy
 msgid "Up"
-msgstr "&Höher"
+msgstr "Höher"
 
 #: wxFiltersDialog.cpp:933 wxFiltersDialog.cpp:948
-#, fuzzy
 msgid "Down"
-msgstr "&Tiefer"
+msgstr "Tiefer"
 
 #: wxFiltersDialog.cpp:1008 wxFiltersDialog.cpp:1023
-#, fuzzy
 msgid "Configure Filter Rules"
-msgstr "Nachrichten&kopf..."
+msgstr "Filter-Regeln einrichten"
 
 #: wxFiltersDialog.cpp:1025 wxFiltersDialog.cpp:1040
-#, fuzzy
 msgid "Filter Rules for folder: "
-msgstr "Kann das Adreßbuchnamen '%s' nicht öffnen."
+msgstr "Filter-Regeln für Mailbox: "
 
 #: wxFiltersDialog.cpp:1030 wxFiltersDialog.cpp:1045
 msgid "Filter Rules for: "
-msgstr ""
+msgstr "Filter-Regeln für: "
 
 #: wxWizards.cpp:266
-#, fuzzy
 msgid "Import existing mail folders"
-msgstr "Bestehende Mailbox öffnen"
+msgstr "Bestehende Mailboxen importieren"
 
 #: wxWizards.cpp:334
-#, fuzzy
 msgid "Please choose what would you like to do."
-msgstr "Bitte wählen Sie eine Datei zum einfügen."
+msgstr "Bitte wählen Sie, was Sie tun möchten."
 
 #: wxWizards.cpp:338
 msgid "Mahogany didn't find any folders to import on this system."
-msgstr ""
+msgstr "Mahogany hat keine zu importierenden Mailboxen gefunden."
 
 #: wxWizards.cpp:347
-#, fuzzy
 msgid "Import MH folders"
-msgstr "in Mailbox '"
+msgstr "MH-Mailboxen importieren"
 
 #: wxWizards.cpp:412
 msgid ""
@@ -5063,20 +4999,23 @@ msgid ""
 "Don't change the default location of the top of MH tree\n"
 "(the MH root) unless you really know what you are doing."
 msgstr ""
+"Sie können entweder nur die oberste MH-Mailbox eintragen lassen\n"
+"und später alle Unter-Mailboxen manuell eintragen, oder alle\n"
+"MH-Mailboxen auf einmal.\n"
+"Bitte ändern Sie nicht die Voreinstellung für den obersten\n"
+"MH Einbtrag - es sei denn, Sie wissen genau was Sie tun."
 
 #: wxWizards.cpp:423
 msgid "MH root"
-msgstr ""
+msgstr "MH-Hierarchie"
 
 #: wxWizards.cpp:424
-#, fuzzy
 msgid "Import all"
-msgstr "&Information..."
+msgstr "Alle importieren"
 
 #: wxWizards.cpp:464
-#, fuzzy
 msgid "Create a Mailbox Entry"
-msgstr "Neuen Eintrag anlegen"
+msgstr "Neuen Mailbox-Eintrag anlegen"
 
 #: wxWizards.cpp:520
 msgid ""
@@ -5091,10 +5030,19 @@ msgid ""
 "by manually filling in the required\n"
 "parameters (for advanced users only!)"
 msgstr ""
+"Dieser Dialog hilft Ihnen, einen neuen\n"
+"Mailbox-Eintrag anzulegen.\n"
+"Die kann entweder eine existierende\n"
+"Mailbox/Mailaccount oder eine neu zu\n"
+"erzeugende Mailbox sein.\n"
+"\n"
+"Sie können diesen Dialog auch mit der\n"
+"kleinen Box unten umgehen und dies selbst\n"
+"einrichten."
 
 #: wxWizards.cpp:534
 msgid "don't use the wizard"
-msgstr ""
+msgstr "Dialog umgehen"
 
 #: wxWizards.cpp:585
 msgid ""
@@ -5106,11 +5054,17 @@ msgid ""
 "So, first you need to decide what kind\n"
 "of entry you would like to create:"
 msgstr ""
+"Ein Mailbox-Eintrag kann für verschiedens\n"
+"stehen: eine Datei, einen Mailserver oder\n"
+"Mailboxen, Newsgruppen oder News-Hierarchien,\n"
+"lokal, oder woanders im Netz.\n"
+"\n"
+"Zuerst sollten Sie entscheiden, was für einen\n"
+"Eintrag Sie wünschen:"
 
 #: wxWizards.cpp:596
-#, fuzzy
 msgid "Mailbox type"
-msgstr "&Mailbox: "
+msgstr "Mailbox-Typ"
 
 #: wxWizards.cpp:602
 msgid ""
@@ -5118,11 +5072,13 @@ msgid ""
 "Server:NNTP News Server:IMAP Hierarchy:NNTP News Hierarchy:NNTP "
 "Newsgroup:Local News Hierarchy:Local Newsgroup:Folder Group"
 msgstr ""
+"Eintrags-Typ:Lokale Mailbox-Datei:Lokale MH-Mailbox:IMAP-Mailbox:POP3-Mailbox:IMAP-"
+"Server:NNTP-News-Server:IMAP-Hierarchie:NNTP-News-Hierarchie:NNTP-Newsgruppe:"
+"Lokale News-Hierarchie:Lokale Newsgruppe:Mailbox-Gruppe"
 
 #: wxWizards.cpp:655
-#, fuzzy
 msgid "Mailbox name"
-msgstr "&Mailbox: "
+msgstr "Mailbox Name"
 
 #: wxWizards.cpp:656
 #, c-format
@@ -5131,72 +5087,64 @@ msgid ""
 "the following access parameters\n"
 "are needed:\n"
 msgstr ""
+"Zugriff auf '%s'\n"
+"benötigt die folgenden Parameter:\n"
 
 #: wxWizards.cpp:675
-#, fuzzy
 msgid "an IMAP mailbox"
-msgstr "Keine solche Mailbox"
+msgstr "eine IMAP-Mailbox"
 
 #: wxWizards.cpp:683
-#, fuzzy
 msgid "a POP3 mailbox"
-msgstr "Keine solche Mailbox"
+msgstr "eine POP3-Mailbox"
 
 #: wxWizards.cpp:690
-#, fuzzy
 msgid "a NNTP newsgroup"
-msgstr "Newsgruppe"
+msgstr "eine NNTP-Newsgruppe"
 
 #: wxWizards.cpp:693 wxWizards.cpp:727
 msgid "Newsgroup"
 msgstr "Newsgruppe"
 
 #: wxWizards.cpp:697
-#, fuzzy
 msgid "an IMAP server"
-msgstr "&Server: "
+msgstr "ein IMAP-Server"
 
 #: wxWizards.cpp:704
-#, fuzzy
 msgid "a NNTP newsserver"
-msgstr "&NNTP (Usenet-News) Server"
+msgstr "ein NNTP (Usenet-News) Server"
 
 #: wxWizards.cpp:709
 msgid "an IMAP mail hierarchy"
-msgstr ""
+msgstr "eine IMAP-Hierarchie"
 
 #: wxWizards.cpp:714
-#, fuzzy
 msgid "Path on IMAP server"
-msgstr "&Server: "
+msgstr "Pfad auf dem IMAP Server"
 
 #: wxWizards.cpp:718
-#, fuzzy
 msgid "a NNTP news hierarchy"
-msgstr "&NNTP (Usenet-News) Server"
+msgstr "eine NNTP (Usenet-News) Hierarchie"
 
 #: wxWizards.cpp:721 wxWizards.cpp:734
-#, fuzzy
 msgid "Hierarchy name"
-msgstr "&Benutzername: "
+msgstr "Hierarchie-Name"
 
 #: wxWizards.cpp:725
-#, fuzzy
 msgid "a local newsgroup"
-msgstr "Newsgruppe"
+msgstr "eine lokale Newsgruppe"
 
 #: wxWizards.cpp:731
 msgid "a local news hierarchy"
-msgstr ""
+msgstr "eine lokale News-Hierarchie"
 
 #: wxWizards.cpp:738
 msgid "a local mailbox file"
-msgstr ""
+msgstr "eine lokale Mailbox-Datei"
 
 #: wxWizards.cpp:742
-#, fuzzy
 msgid "a local MH mailbox"
-msgstr "Keine solche Mailbox"
+msgstr "eine lokale MH-Mailbox"
 
 #: wxWizards.cpp:750
 msgid ""
@@ -5209,25 +5157,29 @@ msgid ""
 "here, which will be inherited by all\n"
 "entries below this group.\n"
 msgstr ""
+"Eine Mailbox-Gruppe ist keine Mailbox,\n"
+"sonder einfach nur zur Organisation des\n"
+"Mailbox-Baums.\n"
+"Die Unter-Einträge können Einstellungen\n"
+"der Gruppe vererben, so daß alle Unter-\n"
+"Einträge die gleichen Voreinstellungen\n"
+"haben.\n"
 
 #: wxWizards.cpp:768
-#, fuzzy
 msgid "Server Host"
-msgstr "&Server: "
+msgstr "Server"
 
 #: wxWizards.cpp:769
 msgid "Your Login"
-msgstr ""
+msgstr "Benutzerkennung"
 
 #: wxWizards.cpp:770
-#, fuzzy
 msgid "Your Password"
-msgstr "ein Paßwort"
+msgstr "Ihr Paßwort"
 
 #: wxWizards.cpp:772
-#, fuzzy
 msgid "Entry Name"
-msgstr "Eintrag"
+msgstr "Eintrag-Name"
 
 #: wxWizards.cpp:793
 msgid ""
@@ -5235,13 +5187,16 @@ msgid ""
 "You also need to give your new enty\n"
 "a name to appear in the tree."
 msgstr ""
+"\n"
+"Sie müssen dem neuen Eintrag auch\n"
+"einen Namen geben, der im Baum er-\n"
+"scheint."
 
 #: wxWizards.cpp:827
-msgid "You have specified a password here, which is slightly unsafe.\n"
-msgstr ""
+msgid "You have specified a password here, which is relatively unsafe.\n"
+msgstr "Sie haben hier ein Paßwort angeben, was relativ unsicher ist.\n"
 
 #: wxWizards.cpp:828
-#, fuzzy
 msgid ""
 "\n"
 "Notice that the password will be stored in your configuration with\n"
@@ -5249,21 +5204,19 @@ msgid ""
 "empty and Mahogany will prompt you for it whenever needed."
 msgstr ""
 "\n"
-"\n"
 "Beachten Sie, daß das Paßwort in Ihrer Konfiguration mit schwacher\n"
 "Verschlüsselung gespeichter wird. Falls Sie Sorge haben, daß andere\n"
 "dieses lesen können, lassen Sie es leer und Mahogany wird sie danach\n"
 "fragen, wann immer es benötigt wird."
 
 #: wxWizards.cpp:832
-#, fuzzy
 msgid ""
 "\n"
 "Do you want to save the password anyway?"
-msgstr "Möchten Sie Mahogany trotzdem beenden?"
+msgstr "\n"
+"Möchten Sie das Paßwort trotzdem speichern?"
 
 #: wxWizards.cpp:894
-#, fuzzy
 msgid "New Folder"
 msgstr "Neue Mailbox"
 
@@ -5279,16 +5232,21 @@ msgid ""
 "click the right mouse button on the\n"
 "entry in the tree."
 msgstr ""
+"Sie haben jetzt die Grundeinstellungen\n"
+"für den neuen Eintrag angegeben.\n"
+"\n"
+"Falls Sie möchten, können Sie noch weitere\n"
+"Einstellungen angeben. Klicken Sie einfach\n"
+"die rechte Maustaste über dem Eintrag\n"
+"im Mailbox-Baum."
 
 #: Mdnd.cpp:101
-#, fuzzy
 msgid "You can drop mail messages here."
-msgstr "%lu  Nachrichten gefunden."
+msgstr "Sie können hier Nachrichten ablegen."
 
 #: Mdnd.cpp:135
-#, fuzzy, c-format
 msgid "%u messages dropped."
-msgstr "%d Nachrichten gelöscht"
+msgstr "%u Nachrichten abgelegt."
 
 #: MailFolder.cpp:477
 msgid "re"
@@ -5304,9 +5262,8 @@ msgid "Saving %d messages..."
 msgstr "Sichere %d Nachrichten..."
 
 #: MailFolder.cpp:764
-#, fuzzy, c-format
 msgid "Cannot save messages to folder '%s'."
-msgstr "Kann Nachricht nicht in Datei '%s' sichern."
+msgstr "Kann Nachrichten nicht in Mailbox '%s' sichern."
 
 #: MailFolder.cpp:837
 #, c-format
@@ -5323,28 +5280,25 @@ msgid "Threading %lu messages..."
 msgstr "Lese %lu Nachrichtenköpfe..."
 
 #: MailFolder.cpp:1200
-#, fuzzy, c-format
 msgid "Threading %lu messages...done."
-msgstr "Lese %lu Nachrichtenköpfe..."
+msgstr "Sortiere %lu Nachrichten...fertig."
 
 #: MailFolderCC.cpp:591
 #, c-format
 msgid "Ignoring SSL authentication for folder '%s'"
-msgstr ""
+msgstr "Ignoriere SSL-Authentifizierung für Mailbox '%s'"
 
 #: MailFolderCC.cpp:596
 msgid "SSL authentication is not supported."
-msgstr ""
+msgstr "SSL-Authentifizierung ist nicht unterstützt."
 
 #: MailFolderCC.cpp:707
-#, fuzzy, c-format
 msgid "Please enter the password for folder '%s':"
-msgstr "Bitte geben Sie den Programmaufruf ein um '%s' Daten anzuzeigen:"
+msgstr "Bitte geben Sie das Paßwort für Mailbox '%s' an:"
 
 #: MailFolderCC.cpp:709
-#, fuzzy
 msgid "Password required"
-msgstr "&Passwort: "
+msgstr "Passwort benötigt "
 
 #: MailFolderCC.cpp:713
 msgid "Cannot access this folder without a password."
@@ -5357,23 +5311,28 @@ msgid ""
 "available.\n"
 "Would you like to connect to the network now?"
 msgstr ""
+"Mailbox '%s' benötigt Netzwerkzugriff, but dieser ist momentan nicht verfügbar.\n"
+"Möchten Sie jetzt die Netzwerkverbindung aufbauen?"
 
 #: MailFolderCC.cpp:749
 msgid ""
 "Opening this folder will probably fail!\n"
 "Continue anyway?"
 msgstr ""
+"Der Versuch, dise Mailbox zu öffnen wird vermutlich fehlschlagen!\n"
+"Trotzdem versuchen?"
 
 #: MailFolderCC.cpp:784
 msgid ""
 "Would you like to remember the password for this folder?\n"
 "(WARNING: don't do it if you are concerned about security)"
 msgstr ""
+"Möchten Sie das Paßwort für diese Mailbox speichern?\n"
+"(WARNUNG: Dies ist unsicher, falls andere auf Ihren Computer Zugriff haben!)"
 
 #: MailFolderCC.cpp:831 MailFolderCC.cpp:852
-#, fuzzy, c-format
 msgid "Opening mailbox %s..."
-msgstr "Öffne URL '%s'... done."
+msgstr "Öffne Mailbox '%s'..."
 
 #: MailFolderCC.cpp:896
 #, c-format
@@ -5403,14 +5362,12 @@ msgid "Cannot open the folder while lock-file exists."
 msgstr "Kann Mailbox mit '%s' nicht öffen solange lock-Datei besteht."
 
 #: MailFolderCC.cpp:914 MailFolderCC.cpp:993
-#, fuzzy, c-format
 msgid "Could not open mailbox %s."
-msgstr "Kann Mailbox '%s' nicht öffnen."
+msgstr "Konnte Mailbox '%s' nicht öffnen."
 
 #: MailFolderCC.cpp:1002
-#, fuzzy, c-format
 msgid "Mailbox %s opened."
-msgstr "Nachricht gesendet."
+msgstr "Mailbox %s geöffnet."
 
 #: MailFolderCC.cpp:1047
 #, c-format
@@ -5418,6 +5375,8 @@ msgid ""
 "Dial-Up network is down.\n"
 "Do you want to try and check folder '%s' anyway?"
 msgstr ""
+"Netzwerkverbindung ist getrennt.\n"
+"Möchten Sie trotzdem versuchen, Mailbox '%s' zu testen?"
 
 #: MailFolderCC.cpp:1065
 #, c-format
@@ -5437,45 +5396,38 @@ msgstr "Mailbox '%s' ist aktiv. "
 #: MailFolderCC.cpp:1107
 #, c-format
 msgid "System is offline, cannot access mailbox ´%s´"
-msgstr ""
+msgstr "Netzwerkverbindung ist getrennt, kan nichtn auf Mailbox '%s' zugreifen."
 
 #: MailFolderCC.cpp:1355
-#, fuzzy, c-format
 msgid "Cannot get listing for closed mailbox '%s'."
-msgstr "Kann Mailbox '%s' nicht öffnen."
+msgstr "Kann Eintragsliste für geschlossene Mailbox '%s' nicht bekommen."
 
 #: MailFolderCC.cpp:1479 MailFolderCC.cpp:1537
-#, fuzzy, c-format
 msgid "Searching in %lu messages..."
-msgstr "Sichere %d Nachrichten..."
+msgstr "Suche in %lu Nachrichten..."
 
 #: MailFolderCC.cpp:1543
 #, c-format
 msgid " - %lu matches found."
-msgstr ""
+msgstr " - %lu gefunden."
 
 #: MailFolderCC.cpp:1755
-#, fuzzy, c-format
 msgid "How many messages to retrieve from folder '%s'?"
-msgstr "Sie haben %lu neue Nachrichten in Mailbox '%s'.\n"
+msgstr "Wie viele Nachrichten sollen aus Mailbox '%s' abgeholhlt werden?"
 
 #: MailFolderCC.cpp:1757
-#, fuzzy, c-format
 msgid ""
 "This folder contains %lu messages, which is greater than\n"
 "the current threshold of %lu (set it to 0 to avoid this question - or\n"
 "you can also choose [Cancel] to download all messages)."
 msgstr ""
-"Die Mailbox (%s) enthält %lu Nachrichten, mehr als die momentane Begrenzung "
-"von %lu.\n"
-"\n"
-"Möchten Sie nur die ersten %lu Nachrichten holen?\n"
-"([Nein] wird alle Nachrichten holen)"
+"Diese Mailbox enthält %lu Nachrichten, mehr als die momentane\n"
+"Begrenzung von %lu (Setzen Sie dies auf 0 um diese Frage zu um-\n"
+"gehen, oder klicken Sie auf [Abbruch] um alle Nachrichten zu holen)"
 
 #: MailFolderCC.cpp:1762
-#, fuzzy
 msgid "How many of them do you want to retrieve?"
-msgstr "Was für eine Art Adreßbuch möchten Sie anlegen?"
+msgstr "Wie viele von denen möchten Sie abholen?"
 
 #: MailFolderCC.cpp:1784
 #, c-format
@@ -5508,6 +5460,8 @@ msgid ""
 "\n"
 "Last folder in a critical section was: "
 msgstr ""
+"\n"
+"Letze Mailbox in kritischen Zustand war: "
 
 #: MailFolderCC.cpp:2925
 msgid ""
@@ -5530,25 +5484,26 @@ msgid ""
 "MIME type specified without subtype and\n"
 "no default subtype for this type."
 msgstr ""
+"MIME-Typ ohne Untertyp angegeben und\n"
+"kein Vorgabe-Untertype vorhanden."
 
 #: SendMessageCC.cpp:563
 msgid ""
 "No network connection available at present.\n"
 "Message will be queued in outbox."
 msgstr ""
+"Keine Netzwerkverbindung vorhanden.\n"
+"Nachricht wird in Ausgangsmailbox gesichert."
 
 #: SendMessageCC.cpp:587
-#, fuzzy, c-format
 msgid "Message queued in ´%s´."
-msgstr "Nachricht gesendet."
+msgstr "Nachricht in '%s' gesichert."
 
 #: SendMessageCC.cpp:590
-#, fuzzy, c-format
 msgid "Article queued in '%s'."
-msgstr "Nachricht gesendet."
+msgstr "Nachricht gesichert in '%s'."
 
 #: SendMessageCC.cpp:691
-#, fuzzy
 msgid "Message sent."
 msgstr "Nachricht gesendet."
 
@@ -5574,34 +5529,31 @@ msgid "Cannot open folder to save to:"
 msgstr "Kann Mailbox zum sichern nicht öffnen:"
 
 #: ASMailFolder.cpp:91 PalmOS.cpp:622
-#, fuzzy
 msgid "Cannot create thread!"
-msgstr "Kann INBOX nicht anlegen."
+msgstr "Kann Ausführungs-Thread nicht anlegen."
 
 #: MailMH.cpp:212
 msgid "Sorry, support for MH folders is disabled."
-msgstr ""
+msgstr "MH-Mailbox-Unterstützung ist deaktiviert."
 
 #: MailMH.cpp:262
 #, c-format
 msgid ""
 "Invalid MH folder name '%s' - all MH folders should be under '%s' directory."
 msgstr ""
+"Ungültiger MH-Mailbox Name '%s' - alle MH-Mailboxen müsen unter '%s' liegen."
 
 #: MailMH.cpp:313
-#, fuzzy
 msgid "MH folders"
-msgstr "in Mailbox '"
+msgstr "MH-Mailboxen"
 
 #: MailMH.cpp:320
-#, fuzzy, c-format
 msgid "Failed to create root MH folder at '%s'."
-msgstr "Mailbox '%s' ausgewählt."
+msgstr "Konnte MH-Mailbox-Hierarchie in '%s' nicht anlegen."
 
 #: MailMH.cpp:346
-#, fuzzy, c-format
 msgid "Failed to import MH subfolders under '%s'."
-msgstr "Mailbox '%s' ausgewählt."
+msgstr "Konnte MH-Mailboxen unter '%s' nicht importieren."
 
 #: AdbFrame.cpp:426
 msgid "Nick &Name"
@@ -5696,9 +5648,8 @@ msgid "&Fax"
 msgstr "&Fax"
 
 #: AdbFrame.cpp:507
-#, fuzzy
 msgid "Properties..."
-msgstr "&Eigenschaften..."
+msgstr "Eigenschaften..."
 
 #: AdbFrame.cpp:1094
 msgid "&Book"
@@ -5767,7 +5718,6 @@ msgid "Really delete the %s '%s'?"
 msgstr "%s '%s' wirklich löschen?"
 
 #: AdbFrame.cpp:1572
-#, fuzzy
 msgid "Address book editor"
 msgstr "Adreßbucheditor"
 
@@ -5851,22 +5801,20 @@ msgstr ""
 
 #: AdbFrame.cpp:1931
 msgid "Successfully exported address book data."
-msgstr ""
+msgstr "Adreßbuchdaten erfolgreich exportiert."
 
 #: AdbFrame.cpp:1935
-#, fuzzy
 msgid "Address book export failed."
-msgstr "Adreßbucheditor"
+msgstr "Adreßbuch-Export fehlgeschlagen."
 
 #: AdbFrame.cpp:1973
 #, c-format
 msgid "Address book successfully imported into book '%s'."
-msgstr ""
+msgstr "Adreßbuch erfolgreich in Buch '%s' importiert."
 
 #: AdbFrame.cpp:1978
-#, fuzzy
 msgid "Address book import abandoned."
-msgstr "Adreßbucheditor"
+msgstr "Adreßbuch-Import abgebrochen."
 
 #: AdbFrame.cpp:2039
 #, c-format
@@ -5884,7 +5832,7 @@ msgstr "Kann den Inhalt der Zwischenablage hier nicht einfügen."
 #: AdbFrame.cpp:2083
 #, c-format
 msgid "Editing entry '%s'"
-msgstr "Editieren von Eintrag '%s'"
+msgstr "Bearbeiten von Eintrag '%s'"
 
 #: AdbFrame.cpp:2128
 msgid "This group has no entries"
@@ -6009,9 +5957,8 @@ msgid "Can't open the address book '%s'."
 msgstr "Kann Adreßbuchnamen '%s' nicht öffnen."
 
 #: AdbDialogs.cpp:136
-#, fuzzy
 msgid "Import address book"
-msgstr "Adreßbuch editieren"
+msgstr "Adreßbuch importieren"
 
 #: AdbDialogs.cpp:181 AdbDialogs.cpp:210
 msgid ""
@@ -6019,19 +5966,21 @@ msgid ""
 "from or select the import format and check the\n"
 "'location' checkbox below"
 msgstr ""
+"Wählen Sie die Datei oder das Verzeichnis zum Importieren\n"
+"der Daten oder wählen Sie das Importformat und klicken Sie\n"
+"unten auf 'Herkunft'"
 
 #: AdbDialogs.cpp:223
-#, fuzzy
 msgid "&File:"
 msgstr "&Datei"
 
 #: AdbDialogs.cpp:229
 msgid "Determine the &location automatically"
-msgstr ""
+msgstr "Finde &Herkunft automatisch"
 
 #: AdbDialogs.cpp:238
 msgid "Determine the &format automatically"
-msgstr ""
+msgstr "Finde &Format automatisch"
 
 #: AdbDialogs.cpp:356
 #, c-format
@@ -6039,37 +5988,35 @@ msgid ""
 "Sorry, impossible to determine the location of the default address book file "
 "for the format '%s' - please specify the file manually in the next dialog."
 msgstr ""
+"Herkunft des Adreßbuchs für das Format '%s' kann nicht automatisch gefunden "
+"werden - bitte geben Sie die Datei im nächsten Dialog manuell an."
 
 #: AdbDialogs.cpp:373
-#, fuzzy
 msgid "Please select source address book file"
-msgstr "Eine Adreßbuchdatei öffnen"
+msgstr "Bitte wählen Sie eine Herkunfts-Adreßbuchdatei"
 
 #: AdbDialogs.cpp:403 AdbImport.cpp:169
-#, fuzzy
 msgid "Address book import"
-msgstr "Adreßbucheditor"
+msgstr "Adreßbuchimport"
 
 #: AdbDialogs.cpp:404
-#, fuzzy
 msgid "Native address book to create: "
-msgstr "&Adreßbuch für gesammelte Addressen"
+msgstr "Eigenes Adreßbuch anlegen: "
 
 #: AdbDialogs.cpp:442
-#, fuzzy
 msgid "Please choose an export format:"
-msgstr "Bitte wählen Sie einen Eintrag:"
+msgstr "Bitte wählen Sie das Exportformat:"
 
 #: AdbDialogs.cpp:443
-#, fuzzy
 msgid "ADB export options"
-msgstr "Expansions-Einstellungen"
+msgstr "ADB Export-Einstellungen"
 
 #: AdbDialogs.cpp:465
 msgid ""
 "Cannot export address book - the functionality is missing in this version of "
 "the program."
 msgstr ""
+"Kann Adreßbuch nicht exportieren - diese Funktionalität ist in dieser Version nicht vorhanen."
 
 #: ProvFC.cpp:342
 #, c-format
@@ -6125,29 +6072,26 @@ msgid "BBDB"
 msgstr "BBDB"
 
 #: ProvBbdb.cpp:956
-#, fuzzy
 msgid " (Emacs BBDB addressbook)"
-msgstr "Öffnen eines Adreßbuchs"
+msgstr "(Emacs BBDB Adreßbuch)"
 
 #: ProvPalm.cpp:281 ProvPalm.cpp:282
-#, fuzzy
 msgid "PalmOS Addressbook"
-msgstr "Eine Adreßbuchdatei öffnen"
+msgstr "PalmOS-Adreßbuch"
 
 #: AdbImport.cpp:80
-#, fuzzy, c-format
 msgid "Nameless entry %d"
-msgstr "Name für &unbenannte Einträge"
+msgstr "Namenloser Eintrag %d"
 
 #: AdbImport.cpp:86
 #, c-format
 msgid "Import error: cannot create entry '%s/%s'."
-msgstr ""
+msgstr "Importfehler: kann Eintrag '%s/%s' nicht anlegen."
 
 #: AdbImport.cpp:112
 #, c-format
 msgid "Import error: cannot create group '%s/%s'."
-msgstr ""
+msgstr "Importfehler: kann Gruppe '%s/%s' nicht anlegen."
 
 #: AdbImport.cpp:165
 #, c-format
@@ -6198,7 +6142,7 @@ msgstr ""
 #: ExportPalm.cpp:351 ExportText.cpp:287
 #, fuzzy
 msgid "Mahogany: Exporting address book"
-msgstr "Adreßbuch editieren"
+msgstr "Adreßbuch bearbeiten"
 
 #: ExportPalm.cpp:359 ExportText.cpp:295
 #, fuzzy
@@ -6847,7 +6791,7 @@ msgstr "Unbehebbarer Fehler"
 
 #, fuzzy
 #~ msgid "XFMail address book"
-#~ msgstr "Adreßbuch editieren"
+#~ msgstr "Adreßbuch bearbeiten"
 
 #, fuzzy
 #~ msgid "PINE addressbook file"

@@ -27,9 +27,13 @@ SRC = Mdummy.cpp Filters.cpp Calendar.cpp
 
 ifdef PISOCK_LIB
 SRC := $(SRC) PalmOS.cpp
+
 # for MAL:
-CPPFLAGS := $(CPPFLAGS) -I$(BUILDDIR)/extra/src/libmal/malsync_src/mal/client/common -I$(BUILDDIR)/extra/src/libmal/malsync_src/mal/common
-PISOCK_LIB := $(PISOCK_LIB) -L $(BUILDDIR)/extra/src/libmal -lmal
+ifdef HAVE_LIBMAL
+CPPFLAGS := $(CPPFLAGS) -I$(LIBMAL_DIR)/malsync_src/mal/client/common -I$(LIBMAL_DIR)/malsync_src/mal/common
+PISOCK_LIB := $(PISOCK_LIB) -L $(LIBMAL_DIR) -lmal
+endif
+
 endif
 
 HDR = $(SRC:.cpp=.h)

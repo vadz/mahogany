@@ -781,7 +781,7 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(ProfileBase *profile,
    {
       static const char *radioItems[CustomHeader_Max] =
       {
-         gettext_noop("news postins"),
+         gettext_noop("news postings"),
          gettext_noop("mail messages"),
          gettext_noop("all messages")
       };

@@ -791,7 +791,7 @@ if(needs##name) { m_##name = creat; last = m_##name; } else m_##name = NULL
 #undef CREATE_CTRL
    wxStaticText * msg2 = panel->CreateMessage(
       _("\n"
-        "You also need to give your new enty\n"
+        "You also need to give your new entry\n"
         "a name to appear in the tree."
         ), m_Path);
    m_Name = panel->CreateTextWithLabel(labels[4],maxwidth, msg2);
@@ -824,7 +824,7 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
    if(m_Password && params->m_Password != m_Password->GetValue())
    {
       wxString msg;
-      msg = _("You have specified a password here, which is slightly unsafe.\n");
+      msg = _("You have specified a password here, which is relatively unsafe.\n");
       msg << _("\n"
                "Notice that the password will be stored in your configuration with\n"
                "very weak encryption. If you are concerned about security, leave it\n"

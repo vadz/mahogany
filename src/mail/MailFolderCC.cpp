@@ -793,7 +793,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
          profile->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(pword));
       }
    }
-   mf->PingReopen();
+   if(mf) mf->PingReopen();
    return mf;
 }
 

@@ -7,6 +7,23 @@
  * $Id$              *
  *******************************************************************/
 
+/**
+   AvantGo / MAL server support:
+
+   To get this enabled, "libmal" is needed, which is a small wrapper
+   library around AvantGo's MAL source distribution.
+   The same library is used by the jpilot-plugin for MAL
+   synchronisation.
+
+   That source must reside in the ../../extra/src/libmal directory.
+   After placing it there, the config.cache file in the toplevel
+   directory must be removed and ./configure run there again. It will
+   then detect the existence of libmal and set everything up properly
+   to compile and link it in. MAL support in this file will
+   automatically be activated then.
+   
+**/
+
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
@@ -93,8 +110,25 @@
 #define MP_MOD_PALMOS_SCRIPT1_D              ""
 #define MP_MOD_PALMOS_SCRIPT2                "Script2"
 #define MP_MOD_PALMOS_SCRIPT2_D              ""
+
 #define MP_MOD_PALMOS_SYNCMAL                "Sync to MAL server"
 #define MP_MOD_PALMOS_SYNCMAL_D              0l
+#define MP_MOD_PALMOS_MAL_USE_PROXY          "MALUseProxy"
+#define MP_MOD_PALMOS_MAL_USE_SOCKS          "MALUseSocks"
+#define MP_MOD_PALMOS_MAL_PROXY_HOST         "MALProxy"
+#define MP_MOD_PALMOS_MAL_PROXY_PORT         "MALProxyPort"
+#define MP_MOD_PALMOS_MAL_PROXY_LOGIN        "MALProxyLogin"
+#define MP_MOD_PALMOS_MAL_PROXY_PASSWORD     "MALProxyPw"
+#define MP_MOD_PALMOS_MAL_SOCKS_HOST   "MALSocksHost"
+#define MP_MOD_PALMOS_MAL_SOCKS_PORT   "MALSocksPort"
+#define MP_MOD_PALMOS_MAL_USE_PROXY_D        0l
+#define MP_MOD_PALMOS_MAL_PROXY_HOST_D       ""
+#define MP_MOD_PALMOS_MAL_PROXY_PORT_D       80l
+#define MP_MOD_PALMOS_MAL_PROXY_LOGIN_D      ""
+#define MP_MOD_PALMOS_MAL_PROXY_PASSWORD_D   ""
+#define MP_MOD_PALMOS_MAL_USE_SOCKS_D        0l
+#define MP_MOD_PALMOS_MAL_SOCKS_HOST_D ""  
+#define MP_MOD_PALMOS_MAL_SOCKS_PORT_D 80l
 
 #define pi_mktag(c1,c2,c3,c4) (((c1)<<24)|((c2)<<16)|((c3)<<8)|(c4))
 
@@ -296,7 +330,15 @@ private:
    String m_BackupDir;
    String m_AutoInstallDir;
 #ifdef HAVE_LIBMAL
-   String m_SyncMAL;
+   bool m_SyncMAL,
+      m_MALUseProxy,
+      m_MALUseSocks;
+   String m_MALProxyHost,
+      m_MALProxyLogin,
+      m_MALProxyPassword,
+      m_MALSocksHost;
+   long m_MALProxyPort,
+      m_MALSocksPort;
 #endif
 
    class wxDeviceLock *m_Lock;
@@ -441,6 +483,14 @@ PalmOSModule::GetConfig(void)
    m_AutoInstallDir = READ_CONFIG(p, MP_MOD_PALMOS_AUTOINSTALLDIR);
 #ifdef HAVE_LIBMAL
    m_SyncMAL = READ_CONFIG(p, MP_MOD_PALMOS_SYNCMAL);
+   m_MALUseProxy = READ_CONFIG(p, MP_MOD_PALMOS_MAL_USE_PROXY);
+   m_MALUseSocks = READ_CONFIG(p, MP_MOD_PALMOS_MAL_USE_SOCKS);
+   m_MALProxyHost = READ_CONFIG(p, MP_MOD_PALMOS_MAL_PROXY_HOST);
+   m_MALProxyPort = READ_CONFIG(p, MP_MOD_PALMOS_MAL_PROXY_PORT);
+   m_MALProxyLogin = READ_CONFIG(p, MP_MOD_PALMOS_MAL_PROXY_LOGIN);
+   m_MALProxyPassword = READ_CONFIG(p, MP_MOD_PALMOS_MAL_PROXY_PASSWORD);
+   m_MALSocksHost = READ_CONFIG(p, MP_MOD_PALMOS_MAL_SOCKS_HOST);
+   m_MALSocksPort = READ_CONFIG(p, MP_MOD_PALMOS_MAL_SOCKS_PORT);
 #endif
 
    if(m_Speed < 0  || m_Speed > (signed) WXSIZEOF(speeds))
@@ -1686,87 +1736,20 @@ PalmOSModule::SyncMAL(void)
         return; 
 
     /* are we using a proxy? */
-#if 0
-//jp_get_pref (syncmal_prefs, SMPREF_USE_PROXY, &ivalue, &svalue);
-    if (ivalue)
+    if(m_MALUseProxy)
     {
-       StatusMessage("plugin_sync - using http proxy\n");
-       jp_get_pref (syncmal_prefs, SMPREF_PROXY_ADDRESS, &ivalue, &svalue);
-        if (svalue) {
-            jp_logf (LOG_DEBUG, "plugin_sync - setting http proxy: %s\n", svalue);
-            setHttpProxy ((char *)svalue);
-        }
-        else {
-            jp_logf (LOG_FATAL,
-                     "--------------------------------------------\n"
-                     "ERROR: Proxy enabled but no proxy specified.\n"
-                     "Please specify a proxy address or unselect\n"
-                     "the Use Proxy checkbox.\n"
-                     "--------------------------------------------\n");
-            return 1;
-        }
-
-        jp_get_pref (syncmal_prefs, SMPREF_PROXY_PORT, &ivalue, &svalue);
-        if (svalue) {
-            jp_logf (LOG_DEBUG, "plugin_sync - setting http proxy port: %s\n", svalue);
-            setHttpProxyPort (atoi (svalue));
-        }
-        else {
-            jp_logf (LOG_INFO | LOG_GUI,
-                     "SyncMAL: Using default proxy port 80\n");
-            setHttpProxyPort (80);
-        }
-
-        jp_get_pref (syncmal_prefs, SMPREF_PROXY_USERNAME, &ivalue, &svalue);
-        if (svalue) {
-            if (strlen (svalue)) {
-                jp_logf (LOG_DEBUG, "plugin_sync - setting proxy username: %s\n", svalue);
-                setProxyUsername ((char *)svalue);
-            }
-        }
-
-        jp_get_pref (syncmal_prefs, SMPREF_PROXY_PASSWORD, &ivalue, &svalue);
-        if (svalue) {
-            if (strlen (svalue)) {
-                jp_logf (LOG_DEBUG, "plugin_sync - setting proxy password: xxxxxxxx\n");
-                setProxyPassword ((char *)svalue);
-            }
-        }
+       setHttpProxy ((char *) m_MALProxyHost.c_str());
+       setHttpProxyPort ( m_MALProxyPort);
+       setProxyUsername ((char *) m_MALProxyLogin.c_str());
+       setProxyPassword ((char *) m_MALProxyPassword.c_str());
     }
 
-    /* are we using SOCKS? */
-    jp_get_pref (syncmal_prefs, SMPREF_USE_SOCKS, &ivalue, &svalue);
-    if (ivalue) {
-        jp_get_pref (syncmal_prefs, SMPREF_SOCKS_ADDRESS, &ivalue, &svalue);
-        if (svalue) {
-            jp_logf (LOG_DEBUG, "plugin_sync - setting socks address: %s\n", svalue);
-            setSocksProxy ((char *)svalue);
-        }
-        else {
-            jp_logf (LOG_FATAL,
-                     "----------------------------------------------\n"
-                     "ERROR: SOCKS enabled but no address specified.\n"
-                     "Please specify an address or unselect the\n"
-                     "Use SOCKS checkbox.\n"
-                     "----------------------------------------------\n");
-            return 1;
-        }
-
-        jp_get_pref (syncmal_prefs, SMPREF_SOCKS_PORT, &ivalue, &svalue);
-        if (svalue) {
-            jp_logf (LOG_DEBUG, "plugin_sync - setting socks port: %s\n", svalue);
-            setSocksProxyPort (atoi (svalue));
-        }
-        else {
-            jp_logf (LOG_INFO | LOG_GUI,
-                     "SyncMAL: Using default SOCKS port 80\n");
-            setSocksProxyPort (80);
-        }
-
-
-
-#endif
-        
+    /* are we using a SOCKS proxy? */
+    if(m_MALUseSocks)
+    {
+       setSocksProxy ((char *) m_MALSocksHost.c_str());
+       setSocksProxyPort ( m_MALSocksPort );
+    }    
     malsync (m_PiSocket, pInfo);
     syncInfoFree(pInfo);
 }
@@ -1802,6 +1785,14 @@ static ConfigValueDefault gs_ConfigValues [] =
    ConfigValueDefault(MP_MOD_PALMOS_SCRIPT1, MP_MOD_PALMOS_SCRIPT1_D),
    ConfigValueDefault(MP_MOD_PALMOS_SCRIPT2, MP_MOD_PALMOS_SCRIPT2_D),
    ConfigValueDefault(MP_MOD_PALMOS_SYNCMAL, MP_MOD_PALMOS_SYNCMAL_D),
+   ConfigValueDefault(MP_MOD_PALMOS_MAL_USE_PROXY, MP_MOD_PALMOS_MAL_USE_PROXY_D),
+   ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_HOST, MP_MOD_PALMOS_MAL_PROXY_HOST_D),
+   ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_PORT, MP_MOD_PALMOS_MAL_PROXY_PORT_D),
+   ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_LOGIN, MP_MOD_PALMOS_MAL_PROXY_LOGIN_D),
+   ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_PASSWORD, MP_MOD_PALMOS_MAL_PROXY_PASSWORD_D),
+   ConfigValueDefault(MP_MOD_PALMOS_MAL_USE_SOCKS, MP_MOD_PALMOS_MAL_USE_SOCKS_D),
+   ConfigValueDefault(MP_MOD_PALMOS_MAL_SOCKS_HOST, MP_MOD_PALMOS_MAL_SOCKS_HOST_D),
+   ConfigValueDefault(MP_MOD_PALMOS_MAL_SOCKS_PORT, MP_MOD_PALMOS_MAL_SOCKS_PORT_D),
 };
 
 static wxOptionsPage::FieldInfo gs_FieldInfos[] =
@@ -1826,7 +1817,15 @@ static wxOptionsPage::FieldInfo gs_FieldInfos[] =
    { gettext_noop("Try to lock device"), wxOptionsPage::Field_Bool,    -1 },
    { gettext_noop("Script to run before"), wxOptionsPage::Field_File,    -1 },
    { gettext_noop("Script to run after"), wxOptionsPage::Field_File,    -1 },
-   { gettext_noop("Sync to MAL server (e.g. AvantGo)"), wxOptionsPage::Field_Bool,    -1 },
+   { gettext_noop("Sync to MAL server (e.g. AvantGo)"), wxOptionsPage::Field_Bool,    -1 }, // 16
+   { gettext_noop("Use Proxy host for MAL"), wxOptionsPage::Field_Bool,    16 },
+   { gettext_noop("  Proxy host"), wxOptionsPage::Field_Text,    17 },
+   { gettext_noop("  Proxy port number"), wxOptionsPage::Field_Number,    17 },
+   { gettext_noop("  Proxy login"), wxOptionsPage::Field_Text,    17 },
+   { gettext_noop("  Proxy password"), wxOptionsPage::Field_Text,    17 },
+   { gettext_noop("Use SOCKS server for MAL access"), wxOptionsPage::Field_Bool,    16 },//22
+   { gettext_noop("  SOCKS host"), wxOptionsPage::Field_Text,    22 },
+   { gettext_noop("  SOCKS port number"), wxOptionsPage::Field_Number,  22 },
 };
 
 static
