@@ -1,12 +1,17 @@
-/*-*- c++ -*-********************************************************
- * wxMAppl class: all GUI specific application stuff                *
- *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (Balluedergmx.net)             *
- *                                                                  *
- * $Id$
- *******************************************************************/
-#ifndef WXMAPP_H
-#define WXMAPP_H
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   gui/wxMApp.h - GUI-specific part of application logic
+// Purpose:     declares wxMApp class implementing MApplication ABC
+// Author:      Karsten Ballüder, Vadim Zeitlin
+// Modified by:
+// Created:     1997
+// CVS-ID:      $Id$
+// Copyright:   (c) 1997-2002 M-Team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
+
+#ifndef _WXMAPP_H_
+#define _WXMAPP_H_
 
 #ifndef USE_PCH
 #  include "MApplication.h"
@@ -26,6 +31,8 @@ class WXDLLEXPORT wxLog;
 class WXDLLEXPORT wxLogChain;
 class WXDLLEXPORT wxHelpControllerBase;
 class WXDLLEXPORT wxPrintData;
+class WXDLLEXPORT wxServerBase;
+class WXDLLEXPORT wxSingleInstanceChecker;
 class WXDLLEXPORT wxTimer;
 
 class wxIconManager;
@@ -145,6 +152,13 @@ public:
 
    virtual void SetAwayMode(bool isAway = true);
 
+   // multiple program instances handling
+   virtual bool IsAnotherRunning() const;
+   virtual bool CallAnother();
+   virtual bool SetupRemoteCallServer();
+
+   bool OnRemoteRequest(const char *request);
+
    /// Report a fatal error:
    virtual void FatalError(const char *message);
 
@@ -223,11 +237,27 @@ private:
    bool m_IsOnline;
 #endif // USE_DIALUP
 
+   /** @name Log data */
+   //@{
+
    /// the log window (may be NULL)
    class wxMLogWindow *m_logWindow;
 
    /// the chaining log target for file logging (may be NULL)
    wxLogChain *m_logChain;
+
+   //@}
+
+   /// @name IPC data
+   //@{
+
+   /// the wxIPC server
+   wxServerBase *m_serverIPC;
+
+   /// object used to check if another program instance is running
+   wxSingleInstanceChecker *m_snglInstChecker;
+
+   //@}
 
    DECLARE_EVENT_TABLE()
 };
@@ -239,4 +269,5 @@ private:
 // created dynamically by wxWindows
 DECLARE_APP(wxMApp);
 
-#endif
+#endif // _WXMAPP_H_
+

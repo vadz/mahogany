@@ -18,8 +18,9 @@
 #ifndef _CMDLINEOPTS_H_
 #define _CMDLINEOPTS_H_
 
-struct CmdLineOptions
+class CmdLineOptions
 {
+public:
    /// parameters of the composer window to be opened on startup
    struct Compose
    {
@@ -42,6 +43,26 @@ struct CmdLineOptions
 
    /// in safe mode, don't do anything on startup
    bool safe;
+
+   /**
+     @name Conversion to/from string
+
+     We pass CmdLineOptions objcts between different Mahogany processes: if the
+     "run only one instance" option is on we check if a previous instance of
+     Mahogany is already running and if it is we pass it our command line
+     options as a single string using ToString(). The other process then
+     unpacks the string using FromString() and handles the resulting options as
+     if they were specified on its own command line.
+    */
+   //@{
+
+   /// convert the options to a string
+   String ToString() const;
+
+   /// restore the options from string
+   bool FromString(const String& s);
+
+   //@}
 };
 
 #endif // _CMDLINEOPTS_H_

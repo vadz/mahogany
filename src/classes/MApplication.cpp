@@ -84,6 +84,7 @@ extern const MOption MP_MAINFOLDER;
 extern const MOption MP_OPENFOLDERS;
 extern const MOption MP_OUTBOX_NAME;
 extern const MOption MP_REOPENLASTFOLDER;
+extern const MOption MP_RUNONEONLY;
 extern const MOption MP_SHOWADBEDITOR;
 extern const MOption MP_SHOWLOG;
 extern const MOption MP_SHOWSPLASH;
@@ -170,6 +171,51 @@ MAppBase::~MAppBase()
    delete m_framesOkToClose;
 
    mApplication = NULL;
+}
+
+bool
+MAppBase::ProcessSendCmdLineOptions(const CmdLineOptions& cmdLineOpts)
+{
+   Composer *composer;
+   if ( !cmdLineOpts.composer.to.empty() )
+   {
+      composer = Composer::CreateNewMessage();
+   }
+   else if ( !cmdLineOpts.composer.newsgroups.empty() )
+   {
+      composer = Composer::CreateNewArticle();
+   }
+   else
+   {
+      composer = NULL;
+   }
+
+   if ( composer )
+   {
+      composer->AddRecipients(cmdLineOpts.composer.bcc,
+                              Composer::Recipient_Bcc);
+      composer->AddRecipients(cmdLineOpts.composer.cc,
+                              Composer::Recipient_Cc);
+      composer->AddRecipients(cmdLineOpts.composer.newsgroups,
+                              Composer::Recipient_Newsgroup);
+
+      // the "to" parameter may be a mailto: URL, pass it through our expansion
+      // function first
+      String to = cmdLineOpts.composer.to;
+      composer->ExpandRecipient(&to);
+
+      composer->AddRecipients(to, Composer::Recipient_To);
+
+      composer->SetSubject(cmdLineOpts.composer.subject);
+
+      composer->InsertText(cmdLineOpts.composer.body);
+      composer->ResetDirty();
+
+      // the composer should be in front of everything
+      composer->GetFrame()->Raise();
+   }
+
+   return composer != NULL;
 }
 
 void
@@ -281,44 +327,7 @@ MAppBase::ContinueStartup()
    // open the composer if requested on command line
    // ----------------------------------------------
 
-   Composer *composer;
-   if ( !m_cmdLineOptions->composer.to.empty() )
-   {
-      composer = Composer::CreateNewMessage();
-   }
-   else if ( !m_cmdLineOptions->composer.newsgroups.empty() )
-   {
-      composer = Composer::CreateNewArticle();
-   }
-   else
-   {
-      composer = NULL;
-   }
-
-   if ( composer )
-   {
-      composer->AddRecipients(m_cmdLineOptions->composer.bcc,
-                              Composer::Recipient_Bcc);
-      composer->AddRecipients(m_cmdLineOptions->composer.cc,
-                              Composer::Recipient_Cc);
-      composer->AddRecipients(m_cmdLineOptions->composer.newsgroups,
-                              Composer::Recipient_Newsgroup);
-
-      // the "to" parameter may be a mailto: URL, pass it through our expansion
-      // function first
-      String to = m_cmdLineOptions->composer.to;
-      composer->ExpandRecipient(&to);
-
-      composer->AddRecipients(to, Composer::Recipient_To);
-
-      composer->SetSubject(m_cmdLineOptions->composer.subject);
-
-      composer->InsertText(m_cmdLineOptions->composer.body);
-      composer->ResetDirty();
-
-      // the composer should be in front of everything
-      composer->GetFrame()->Raise();
-   }
+   ProcessSendCmdLineOptions(*m_cmdLineOptions);
 }
 
 bool
@@ -345,6 +354,39 @@ MAppBase::OnStartup()
       wxLog::AddTraceMask(masks[nMask]);
    }
 #endif // DEBUG
+
+   // safe mode disables remote calls
+   if ( !m_cmdLineOptions->safe )
+   {
+      // before doing anything else, if the corresponding option is set, check
+      // if another program instance is not already running
+      if ( READ_APPCONFIG_BOOL(MP_RUNONEONLY) )
+      {
+         if ( IsAnotherRunning() )
+         {
+            // try to defer to it
+            if ( CallAnother() )
+            {
+               // succeeded, nothing more to do in this process
+
+               // set the error to indicate that our false return code wasn't, in
+               // fact, an error
+               SetLastError(M_ERROR_CANCEL);
+
+               return false;
+            }
+         }
+
+         // set up a server to listen for the remote calls
+         if ( !SetupRemoteCallServer() )
+         {
+            wxLogError(_("Communication between different Mahogany processes "
+                         "won't work, please disable the \"Always run only "
+                         "one instance\" option if you don't use it to avoid "
+                         "this error message in the future."));
+         }
+      }
+   }
 
    // NB: although this shouldn't normally be here (it's GUI-dependent code),
    //     it's really impossible to put it into wxMApp because some dialogs
@@ -543,41 +585,46 @@ MAppBase::OnAbnormalTermination()
 void
 MAppBase::OnShutDown()
 {
+   bool initialized = m_cycle != Initializing;
+
    m_cycle = ShuttingDown;
 
-   // do we need to save the away mode state?
-   if ( READ_APPCONFIG(MP_AWAY_REMEMBER) )
+   if ( initialized )
    {
-      m_profile->writeEntry(MP_AWAY_STATUS, IsInAwayMode());
-   }
+      // do we need to save the away mode state?
+      if ( READ_APPCONFIG(MP_AWAY_REMEMBER) )
+      {
+         m_profile->writeEntry(MP_AWAY_STATUS, IsInAwayMode());
+      }
 
-   // Try to store our remotely synchronised configuration settings
-   if(! SaveRemoteConfigSettings() )
-      wxLogError(_("Synchronised configuration information could not "
-                   "be stored remotely."));
+      // Try to store our remotely synchronised configuration settings
+      if(! SaveRemoteConfigSettings() )
+         wxLogError(_("Synchronised configuration information could not "
+                      "be stored remotely."));
 
-   // don't want events any more
-   if ( m_eventOptChangeReg )
-   {
-      MEventManager::Deregister(m_eventOptChangeReg);
-      m_eventOptChangeReg = NULL;
-   }
-   if ( m_eventFolderUpdateReg )
-   {
-      MEventManager::Deregister(m_eventFolderUpdateReg);
-      m_eventFolderUpdateReg = NULL;
-   }
+      // don't want events any more
+      if ( m_eventOptChangeReg )
+      {
+         MEventManager::Deregister(m_eventOptChangeReg);
+         m_eventOptChangeReg = NULL;
+      }
+      if ( m_eventFolderUpdateReg )
+      {
+         MEventManager::Deregister(m_eventFolderUpdateReg);
+         m_eventFolderUpdateReg = NULL;
+      }
 
-   if (m_FolderMonitor)
-   {
-      delete m_FolderMonitor;
-      m_FolderMonitor = NULL;
-   }
+      if (m_FolderMonitor)
+      {
+         delete m_FolderMonitor;
+         m_FolderMonitor = NULL;
+      }
 
-   // clean up
-   MEventManager::DispatchPending();
-   AdbManager::Delete();
-   Profile::FlushAll();
+      // clean up
+      MEventManager::DispatchPending();
+      AdbManager::Delete();
+      Profile::FlushAll();
+   }
 
    // The following little hack allows us to decref and delete the
    // global profile without triggering an assert, as this is not
@@ -586,30 +633,33 @@ MAppBase::OnShutDown()
    m_profile = NULL;
    p->DecRef();
 
-   // misc cleanup
-   delete m_mimeManager;
+   if ( initialized )
+   {
+      // misc cleanup
+      delete m_mimeManager;
 
-   MailFolder::CleanUp();
-   MfStatusCache::CleanUp();
+      MailFolder::CleanUp();
+      MfStatusCache::CleanUp();
 
-   // there might have been events queued, get rid of them
-   //
-   // FIXME: there should be no events by now, is this really needed? (VZ)
-   MEventManager::DispatchPending();
+      // there might have been events queued, get rid of them
+      //
+      // FIXME: there should be no events by now, is this really needed? (VZ)
+      MEventManager::DispatchPending();
 
-   // suppress memory leak reports in debug mode - it is not a real memory
-   // leak as memory is allocated only once but still
+      // suppress memory leak reports in debug mode - it is not a real memory
+      // leak as memory is allocated only once but still
 #if defined(OS_WIN) && defined(DEBUG)
-   // clean up after cclient (order is important as sysinbox() uses the
-   // username)
-   free(sysinbox());
-   free(myusername_full(NULL));
+      // clean up after cclient (order is important as sysinbox() uses the
+      // username)
+      free(sysinbox());
+      free(myusername_full(NULL));
 #endif // OS_WIN
 
 #ifdef USE_PYTHON_DYNAMIC
-   // free python DLL: this is ok to call even if it wasn't loaded
-   FreePythonDll();
+      // free python DLL: this is ok to call even if it wasn't loaded
+      FreePythonDll();
 #endif // USE_PYTHON_DYNAMIC
+   }
 }
 
 bool

@@ -33,6 +33,7 @@
 
 #include "MEvent.h"
 
+class CmdLineOptions;
 class FolderMonitor;
 class MAppBase;
 class MailFolder;
@@ -206,7 +207,8 @@ public:
 
    //@}
 
-   /// @name "Away" or unattended mode support
+   /** @name "Away" or unattended mode support
+    */
    //@{
 
    /// are we in "away" mode?
@@ -217,6 +219,39 @@ public:
 
    /// exit away mode if necessary
    void UpdateAwayMode();
+
+   //@}
+
+   /**
+     @name IPC
+
+     Mahogany can communicate with the other running program instances. The
+     first instance launched sets up a server which can then be used by the
+     subsequently launched copies to either execute their command line
+     arguments or simply to bring the previous appllication window to the
+     foreground.
+    */
+   //@{
+
+   /// return true if a previously launched program copy is already running
+   virtual bool IsAnotherRunning() const = 0;
+
+   /**
+     Execute the actions specified by our command line options (i.e.
+     m_cmdLineOptions) in another process.
+
+     @return true on success, false if it couldn't be done
+   */
+   virtual bool CallAnother() = 0;
+
+   /**
+     Setup the server to reply to the remote calls: this must be done for
+     CallAnother() to work from another process.
+
+     @return true on success, false if an error occured while creating server
+   */
+   virtual bool SetupRemoteCallServer() = 0;
+
    //@}
 
 #ifdef USE_DIALUP
@@ -388,6 +423,15 @@ protected:
     */
    void InitDirectories();
 
+   /**
+     Open the composer window(s) as specified by the given options object.
+     Used for handling the options from the command line and also the requests
+     from the remote processes.
+
+     @return true if any composer windows were opened, false otherwise
+    */
+   bool ProcessSendCmdLineOptions(const CmdLineOptions& cmdLineOpts);
+
    // global variables stored in the application object
    // -------------------------------------------------
 
@@ -442,7 +486,7 @@ protected:
    bool m_autoAwayOn;
 
    /// the struct containing the command line options
-   struct CmdLineOptions *m_cmdLineOptions;
+   CmdLineOptions *m_cmdLineOptions;
 
 private:
    /**

@@ -52,6 +52,7 @@ extern const MOption MP_USERDIR;
 extern const MOption MP_LICENSE_ACCEPTED;
 
 extern const MOption MP_GLOBALDIR;
+extern const MOption MP_RUNONEONLY;
 
 #ifdef OS_UNIX
 extern const MOption MP_PATHLIST;
@@ -467,7 +468,10 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_LICENSE_ACCEPTED_NAME   "LicenseAccepted"
 
 /// the complete path to the glocal M directory
-#   define   MP_GLOBALDIR_NAME      "GlobalDir"
+#define MP_GLOBALDIR_NAME      "GlobalDir"
+
+/// run onl one copy of the program at once?
+#define MP_RUNONEONLY_NAME "RunOneOnly"
 
 /// the directory containing the help files
 #define MP_HELPDIR_NAME "HelpDir"
@@ -1238,6 +1242,10 @@ extern const MOption MP_AWAY_STATUS;
 
 /// the acceptance status of the license
 #define MP_LICENSE_ACCEPTED_DEFVAL   0l
+
+/// run onl one copy of the program at once?
+#define MP_RUNONEONLY_DEFVAL 1l
+
 // Unix-only entries
 #ifdef OS_UNIX
 /// path list for M's directory

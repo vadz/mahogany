@@ -498,6 +498,7 @@ enum ConfigFields
    ConfigField_AutosaveHelp,
    ConfigField_AutosaveDelay,
    ConfigField_ConfirmExit,
+   ConfigField_RunOneOnly,
    ConfigField_HelpDir,
 #ifdef USE_SSL
    ConfigField_SslHelp,
@@ -1480,6 +1481,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "of it in case of a crash"),     Field_Message, -1                     },
    { gettext_noop("&Autosave delay"),              Field_Number, -1                      },
    { gettext_noop("Confirm &exit"),                Field_Bool | Field_Restart, -1                     },
+   { gettext_noop("Always run only &one instance"),Field_Bool | Field_Restart, -1                     },
    { gettext_noop("Directory with the help files"), Field_Dir, -1 },
 
 #ifdef USE_SSL
@@ -1885,6 +1887,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_AUTOSAVEDELAY),
    CONFIG_ENTRY(MP_CONFIRMEXIT),
+   CONFIG_ENTRY(MP_RUNONEONLY),
    CONFIG_ENTRY(MP_HELPDIR),
 #ifdef USE_SSL
    CONFIG_NONE(),

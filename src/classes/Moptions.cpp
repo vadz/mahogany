@@ -117,6 +117,7 @@ const MOption MP_USERDIR;
 const MOption MP_LICENSE_ACCEPTED;
 
 const MOption MP_GLOBALDIR;
+const MOption MP_RUNONEONLY;
 
 #ifdef OS_UNIX
 const MOption MP_PATHLIST;
@@ -500,6 +501,7 @@ static const MOptionData MOptions[] =
     DEFINE_OPTION(MP_LICENSE_ACCEPTED),
 
     DEFINE_OPTION(MP_GLOBALDIR),
+    DEFINE_OPTION(MP_RUNONEONLY),
 
 #ifdef OS_UNIX
     DEFINE_OPTION(MP_PATHLIST),

@@ -1,11 +1,15 @@
-/*-*- c++ -*-********************************************************
- * wxMApp class: do all GUI specific  application stuff             *
- *                                                                  *
- * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
- *                                                                  *
- * $Id$
- *
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   gui/wxMApp.cpp - GUI-specific part of application logic
+// Purpose:     program application, startup, non-portable hooks to implement
+//              the functionality needed by MApplication, also log window impl
+// Author:      Karsten Ballüder, Vadim Zeitlin
+// Modified by:
+// Created:     1997
+// CVS-ID:      $Id$
+// Copyright:   (c) 1997-2002 M-Team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
 // declarations
@@ -51,6 +55,22 @@
 
 #include <wx/fontmap.h>
 #include <wx/encconv.h>
+#include <wx/tokenzr.h>
+
+#include <wx/snglinst.h>
+#ifdef OS_WIN
+   #define wxConnection    wxDDEConnection
+   #define wxServer        wxDDEServer
+   #define wxClient        wxDDEClient
+
+   #include <wx/dde.h>
+#else // !Windows
+   #define wxConnection    wxTCPConnection
+   #define wxServer        wxTCPServer
+   #define wxClient        wxTCPClient
+
+   #include <wx/sckipc.h>
+#endif // Windows/!Windows
 
 #include "MObject.h"
 
@@ -447,8 +467,16 @@ wxMApp::wxMApp(void)
    m_DialupSupport = FALSE;
 #endif // USE_DIALUP
 
+   m_PrintData = NULL;
+   m_PageSetupData = NULL;
+
    m_logWindow = NULL;
    m_logChain = NULL;
+
+   m_snglInstChecker = NULL;
+   m_serverIPC = NULL;
+
+   m_topLevelFrame = NULL;
 }
 
 wxMApp::~wxMApp()
@@ -691,9 +719,25 @@ wxMApp::DoExit()
 bool
 wxMApp::OnInit()
 {
+   // in release build we handle any exceptions we generate (i.e. crashes)
+   // ourselves
 #ifndef DEBUG
    wxHandleFatalExceptions();
 #endif
+
+   // create a semaphore indicating that we're running - or check if another
+   // copy already is
+   m_snglInstChecker = new wxSingleInstanceChecker;
+
+   // note that we can't create the lock file in ~/.M because the directory
+   // might not have been created yet...
+   if ( !m_snglInstChecker->Create(".mahogany.lock") )
+   {
+      // this message is in English because translations were not loaded yet as
+      // the locale hadn't been set
+      wxLogWarning("Mahogany will not be able to detect if any other "
+                   "program instances are running.");
+   }
 
 #if wxCHECK_VERSION(2, 3, 2)
    // parse our command line options inside OnInit()
@@ -705,8 +749,6 @@ wxMApp::OnInit()
    // stupidly enough wxWin resets the default timestamp under Windows :-(
    wxLog::SetTimestamp(_T("%X"));
 #endif // OS_WIN
-
-   m_topLevelFrame = NULL;
 
 #ifdef USE_I18N
    // Set up locale first, so everything is in the right language.
@@ -821,9 +863,6 @@ wxMApp::OnInit()
 
    wxInitAllImageHandlers();
    wxFileSystem::AddHandler(new wxMemoryFSHandler);
-
-   m_PrintData = NULL;
-   m_PageSetupData = NULL;
 
    // this is necessary to avoid that the app closes automatically when we're
    // run for the first time and show a modal dialog before opening the main
@@ -944,6 +983,16 @@ int wxMApp::OnRun()
 
 int wxMApp::OnExit()
 {
+   // we won't be able to do anything more (i.e. another program copy can't ask
+   // us to execute any actions for it) so it's as if we were already not
+   // running at all
+   delete m_snglInstChecker;
+   m_snglInstChecker = NULL;
+
+   // no more IPC for us neither
+   delete m_serverIPC;
+   m_serverIPC = NULL;
+
    // disable timers for autosave and mail collection, won't need them any more
    StopTimer(Timer_Autosave);
    StopTimer(Timer_PollIncoming);
@@ -2132,6 +2181,192 @@ extern bool EnsureAvailableTextEncoding(wxFontEncoding *enc,
    }
 
    // we have either the requested encoding or an equivalent one
+   return true;
+}
+
+// ============================================================================
+// IPC and multiple program instances handling
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// IPC constants
+// ----------------------------------------------------------------------------
+
+#define IPC_SOCKET "/tmp/.mahogany.ipc"
+#define IPC_TOPIC  "MRemote"
+
+// ----------------------------------------------------------------------------
+// IPC classes
+// ----------------------------------------------------------------------------
+
+class MAppIPCConnection : public wxConnection
+{
+public:
+   MAppIPCConnection()
+      : wxConnection(m_buffer, WXSIZEOF(m_buffer))
+   {
+   }
+
+   virtual bool OnExecute(const wxString& WXUNUSED(topic),
+                          char *data,
+                          int WXUNUSED(size),
+                          wxIPCFormat WXUNUSED(format))
+   {
+      return wxGetApp().OnRemoteRequest(data);
+   }
+
+private:
+   char m_buffer[4096];
+};
+
+class MAppIPCServer : public wxServer
+{
+public:
+   virtual wxConnectionBase *OnAcceptConnection(const wxString& topic)
+   {
+      if ( topic != IPC_TOPIC )
+         return NULL;
+
+      return new MAppIPCConnection;
+   }
+};
+
+// ----------------------------------------------------------------------------
+// wxMApp IPC methods
+// ----------------------------------------------------------------------------
+
+bool wxMApp::OnRemoteRequest(const char *request)
+{
+   CmdLineOptions cmdLineOpts;
+   if ( !cmdLineOpts.FromString(request) )
+   {
+      wxLogError(_("Ignoring unrecognized remote request '%s'."),
+                 request);
+      return false;
+   }
+
+   if ( !ProcessSendCmdLineOptions(cmdLineOpts) )
+   {
+      // no composer windows were opened, bring the main frame to top to ensure
+      // that we have focus
+      if ( m_topLevelFrame )
+      {
+         m_topLevelFrame->Raise();
+      }
+   }
+
+   return true;
+}
+
+bool wxMApp::IsAnotherRunning() const
+{
+   // it's too early or too late to call us, normally we shouldn't try to do it
+   // then, i.e. this indicates an error in the caller logic
+   CHECK( m_snglInstChecker, false, "IsAnotherRunning() shouldn't be called" );
+
+   return m_snglInstChecker->IsAnotherRunning();
+}
+
+bool wxMApp::SetupRemoteCallServer()
+{
+   ASSERT_MSG( !m_serverIPC, "SetupRemoteCallServer() called twice?" );
+
+   m_serverIPC = new MAppIPCServer;
+   if ( !m_serverIPC->Create(IPC_SOCKET) )
+   {
+      delete m_serverIPC;
+      m_serverIPC = NULL;
+
+      return false;
+   }
+
+   return true;
+}
+
+bool wxMApp::CallAnother()
+{
+   CHECK( IsAnotherRunning(), false,
+          "can't call another copy when it doesn't run!" );
+
+   CHECK( m_cmdLineOptions, false,
+          "we need to parse the options before doing the remote call" );
+
+   wxClient client;
+   wxConnectionBase *conn = client.MakeConnection("", IPC_SOCKET, IPC_TOPIC);
+   if ( !conn )
+   {
+      // failed to connect to server at all
+      return false;
+   }
+
+   // pass m_cmdLineOptions to the other process
+   bool ok = conn->Execute(m_cmdLineOptions->ToString());
+
+   delete conn;
+
+   return ok;
+}
+
+// ----------------------------------------------------------------------------
+// CmdLineOptions
+// ----------------------------------------------------------------------------
+
+// the char to use as separator: don't use NUL as I'm not sure that wxIPC
+// code handlers it correctly
+#define CMD_LINE_OPTS_SEP '\1'
+
+// the version of the CmdLineOptions::ToString() format
+#define CMD_LINE_OPTS_VERSION 1.0
+
+// the positions of the individual members in the string produced by ToString()
+enum
+{
+   CmdLineOptions_Version,
+   CmdLineOptions_Config,
+   CmdLineOptions_Bcc,
+   CmdLineOptions_Body,
+   CmdLineOptions_Cc,
+   CmdLineOptions_Newsgroups,
+   CmdLineOptions_Subject,
+   CmdLineOptions_To,
+   CmdLineOptions_Max
+};
+
+String CmdLineOptions::ToString() const
+{
+   // only serialize the "interesting" options
+   String s;
+   s << s.Format("%f", CMD_LINE_OPTS_VERSION) << CMD_LINE_OPTS_SEP
+     << configFile << CMD_LINE_OPTS_SEP
+     << composer.bcc << CMD_LINE_OPTS_SEP
+     << composer.body << CMD_LINE_OPTS_SEP
+     << composer.cc << CMD_LINE_OPTS_SEP
+     << composer.newsgroups << CMD_LINE_OPTS_SEP
+     << composer.subject << CMD_LINE_OPTS_SEP
+     << composer.to;
+
+   return s;
+}
+
+bool CmdLineOptions::FromString(const String& s)
+{
+   wxArrayString
+      tokens = wxStringTokenize(s, CMD_LINE_OPTS_SEP, wxTOKEN_RET_EMPTY_ALL);
+
+   if ( tokens.GetCount() != CmdLineOptions_Max )
+      return false;
+
+   if ( atof(tokens[CmdLineOptions_Version]) != CMD_LINE_OPTS_VERSION )
+      return false;
+
+   configFile = tokens[CmdLineOptions_Config];
+   composer.bcc = tokens[CmdLineOptions_Bcc];
+   composer.body = tokens[CmdLineOptions_Body];
+   composer.cc = tokens[CmdLineOptions_Cc];
+   composer.newsgroups = tokens[CmdLineOptions_Newsgroups];
+   composer.subject = tokens[CmdLineOptions_Subject];
+   composer.to = tokens[CmdLineOptions_To];
+
    return true;
 }
 
