@@ -88,7 +88,7 @@ public:
    virtual void AddEMail(const String& strEMail) { }
    virtual void ClearExtraEMails() { }
 
-   virtual bool Matches(const char *str, int where, int how);
+   virtual int Matches(const char *str, int where, int how) const;
 
 private:
    // user (==login) name and real name
@@ -273,7 +273,7 @@ void PasswdEntry::GetEMail(size_t n, String *pstr) const
    }
 }
 
-bool PasswdEntry::Matches(const char *what, int where, int how)
+int PasswdEntry::Matches(const char *what, int where, int how) const
 {
    // substring lookup looks for a part of the string, "starts with" means
    // what is says, otherwise the entire string should be matched by the
@@ -298,14 +298,14 @@ bool PasswdEntry::Matches(const char *what, int where, int how)
          if ( (how & AdbLookup_CaseSensitive) == 0 )                 \
             strField.MakeLower();                                    \
          if ( strField.Matches(strWhat) )                            \
-            return TRUE;                                             \
+            return AdbLookup_##field;                                \
    }
 
    CHECK_MATCH(NickName);
    CHECK_MATCH(FullName);
    CHECK_MATCH(EMail);
 
-   return false;
+   return 0;
 }
 
 // ----------------------------------------------------------------------------
