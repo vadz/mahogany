@@ -47,6 +47,11 @@ $Id$
 9               initial dialogs (wxConfig errors) show unknown icon
 
 9	KB	check password prompt in mailfolder
+
+5	KB	subject in embedded rfc822 messages shows filename
+		instead???
+	KB	wxModulesDialog: add decref/load as reaction to check/uncheck
+
 4	KB	Nicer icons for some tabs and message/rfc822 and 
 		message view properties page --> rename to "Viewer?"
 		Rename "File" menu to "Messages" or "Program"?
@@ -54,10 +59,17 @@ $Id$
 
 4	KB	Also, why "hide" parameter to all wxComposeView::CreateXXX()
 		functions is ignored - is it used anywhere?
+
+
 3	KB	Filters: empty rest expression still causes abort of
 		parsing somehow, try FilterTest="5*4+3"
 
 7      ?        We need a generic way to re-enable disabled pControls
+
+8	?	ComposeView/header dialog: unify the way that custom
+		headers are stored and provide a sensible dialog to
+		change them. 
+
 
 	VZ	trying to create a folder under "All Folders" triggers 
 		assert
