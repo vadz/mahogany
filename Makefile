@@ -27,6 +27,7 @@ allclean: clean
 	find . -name \*.bak -exec rm {} \;
 	find . -name \*~ -exec rm {} \; 
 	find . -name .\\\#* -exec rm {} \; || true
+	find . -name .libs -exec rm -rf {} \; || true
 	$(RM) config.status *cache* makeopts *.po config.log src/M
 	find . -name .xvpics -exec rm -r -f {} \; 
 
