@@ -68,11 +68,17 @@
 #include  <wx/utils.h>
 #define   SYSTEM(command) wxExecute(command, FALSE)
 
+// VZ: Karsten, if this is really not used any more, please remove all code
+//     inside USE_ICON_SUBDIRS
+#ifdef USE_ICON_SUBDIRS
+
 // to map icon subdirs to numbers
 static const char *gs_IconSubDirs[] =
 {
    "default", "GNOME", "KDE", "small"
 };
+
+#endif // USE_ICON_SUBDIRS
 
 // ----------------------------------------------------------------------------
 // private types
@@ -339,7 +345,7 @@ MAppBase::OnStartup()
 
       m_profile->writeEntry(MP_GLOBALDIR, m_globalDir);
    }
-#if 0
+#ifdef USE_ICON_SUBDIRS
    // KB: we no longer use different subdirs:
    // We need to set this before wxWindows has a chance to process
    // idle events (splash screen), in case there was any problem with
@@ -753,7 +759,7 @@ MAppBase::OnMEvent(MEventData& event)
    {
       m_UseOutbox = READ_APPCONFIG(MP_USE_OUTBOX) != 0;
       SetupOnlineManager(); // make options change effective
-#if 0
+#ifdef USE_ICON_SUBDIRS
      {
          unsigned long idx = (unsigned long)  READ_APPCONFIG(MP_ICONSTYLE);
          if(idx < sizeof gs_IconSubDirs)

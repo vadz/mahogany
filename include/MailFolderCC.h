@@ -95,6 +95,7 @@ public:
       @param server server host
       @param login only used for POP,IMAP and NNTP (as the newsgroup name)
       @param password only used for POP, IMAP
+      @param halfopen to only half open the folder
 
    */
    static MailFolderCC * OpenFolder(int typeAndFlags,
@@ -103,7 +104,8 @@ public:
                                     String const &server,
                                     String const &login,
                                     String const &password,
-                                    String const &symname);
+                                    String const &symname,
+                                    bool halfopen);
 
    //@}
 
@@ -338,7 +340,10 @@ private:
    /** Try to open the mailstream for this folder.
        @return true on success
    */
-   bool   Open(void);
+   bool Open(void);
+
+   /// half open the folder
+   bool HalfOpen(void);
 
    /// for POP/IMAP boxes, this holds the user id for the callback
    static String MF_user;

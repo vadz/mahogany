@@ -1,4 +1,6 @@
 (next release) on (date of next release)
+08.03.00 VZ: browsing IMAP/NNTP servers and subscribing to them works
+             GUI support for deleting folders physically and not only removing
 03.03.00 VZ: all expanded branches of the folder tree are now saved/restored
 03.03.00 VZ: subscription dialog starts to work
 23.02.00 KB: IMAP code fixes plugging possible memory corruption, message editor fixes.

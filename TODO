@@ -32,7 +32,10 @@ as the MailFolderCC.cpp code should take care of that itself.
 
 1. add MTempFolder.
 2. trailing ",0" in wxPTreeCtrl should probably be discarded?
-
+3. Subfolders dialog must
+ a) disable itself until the folder retrieval is finished
+ b) show the total number of subfolders
+ c) show the progress dialog?
 *** end of VZ section
 
 

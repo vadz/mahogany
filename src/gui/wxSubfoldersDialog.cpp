@@ -279,7 +279,7 @@ void wxSubscriptionDialog::OnNewFolder(String& name)
    if ( name != m_folderPath )
    {
       wxTreeItemId parent = GetParentForFolder(&name);
-      wxTreeItemId itemId = m_treectrl->AppendItem(parent, name);
+      wxTreeItemId itemId = m_treectrl->PrependItem(parent, name);
 
       PushFolder(nameFull, itemId);
    }
@@ -455,44 +455,17 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
 
 bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
 {
-   Profile_obj profile(folder->GetFullName());
-   CHECK( profile, FALSE, "can't create profile" );
-
-   wxString name = folder->GetPath();
-
-   FolderType type = folder->GetType();
-
-   bool doesntEndWithSlash = !name || (name.Last() != '/');
-   if ( (type == MF_MH) && doesntEndWithSlash )
-   {
-      // we don't want to get this folder itself (because it isn't returned
-      // anyhow if we enumerate _all_ MH folders, but is returned in the other
-      // cases - this is too confusing), so construct the pattern of the form
-      // "#mh/foldername/*" which will only retrieve strict subfolders.
-      name += '/';
-   }
-   else
-   {
-      // OpenFolder() will half open folder names ending with '/' - otheriwse
-      // it would try to open something like "{nntp}news" which won't work
-      if ( doesntEndWithSlash )
-      {
-         name += '/';
-      }
-   }
-
-   //int typeAndFlags = CombineFolderTypeAndFlags(type, folder->GetFlags());
-   // The folder must be opened via the profile mode, so it can read
-   // login and password from it. If using MF_IMAP/MF_NNTP here, one
-   // must provide server/login/passwd explicitly.
-   ASMailFolder *asmf = ASMailFolder::OpenFolder(MF_PROFILE, folder->GetName());
+   // The folder must be half opened because we don't really want to read any
+   // messages in it, just enum subfolders
+   ASMailFolder *asmf = ASMailFolder::HalfOpenFolder(folder->GetName());
 
    if ( !asmf )
    {
       if ( mApplication->GetLastError() != M_ERROR_CANCEL )
       {
          wxLogError(_("Impossible to browse subfolders of folder '%s' because "
-                      "the folder cannot be opened."), name.c_str());
+                      "the folder cannot be opened."),
+                    folder->GetPath().c_str());
       }
       //else: the user didn't want to open the folder (for example because it
       //      requires going online and he didn't want it)

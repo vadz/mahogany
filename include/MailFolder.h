@@ -115,19 +115,21 @@ public:
       @param server hostname
       @param login only used for POP,IMAP and NNTP (as the newsgroup name)
       @param password only used for POP, IMAP
-
+      @param halfopen to only half open the folder
    */
    static MailFolder * OpenFolder(int typeAndFlags,
                                   const String &path,
                                   ProfileBase *profile = NULL,
                                   const String &server = NULLstring,
                                   const String &login = NULLstring,
-                                  const String &password = NULLstring);
+                                  const String &password = NULLstring,
+                                  bool halfopen = FALSE);
 
    /** The same OpenFolder function, but taking all arguments from a
        MFolder object. */
    static MailFolder * OpenFolder(const class MFolder *mfolder,
                                   ProfileBase *profile);
+
    /** Phyically deletes this folder.
        @return true on success
    */

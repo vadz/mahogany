@@ -99,7 +99,8 @@ MailFolder::OpenFolder(int folderType,
                        ProfileBase *parentProfile,
                        String const &i_server,
                        String const &i_login,
-                       String const &i_passwd)
+                       String const &i_passwd,
+                       bool halfopen)
 {
    // open a folder:
    ProfileBase *profile = NULL;
@@ -239,7 +240,8 @@ MailFolder::OpenFolder(int folderType,
    folderType = CombineFolderTypeAndFlags(type, flags);
 
    MailFolder *mf = MailFolderCC::OpenFolder(folderType, name, profile,
-                                             server, login, passwd, symbolicName);
+                                             server, login, passwd,
+                                             symbolicName, halfopen);
    profile->DecRef();
 
    return mf;

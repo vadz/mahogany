@@ -250,11 +250,12 @@ public:
                                 ProfileBase *profile = NULL,
                                 const String &server = NULLstring,
                                 const String &login = NULLstring,
-                                const String &password = NULLstring)
+                                const String &password = NULLstring,
+                                bool halfopen = FALSE)
       {
          MailFolder *mf = MailFolder::OpenFolder(typeAndFlags, path,
                                                  profile, server, login,
-                                                 password);
+                                                 password, halfopen);
          if ( !mf ) return NULL;
          ASMailFolder *asmf = Create(mf);
          mf->DecRef();
@@ -272,6 +273,22 @@ public:
          mf->DecRef();
          return asmf;
       }
+
+   /// and a function to create a half opened folder
+   static ASMailFolder *HalfOpenFolder(const String& path)
+   {
+      MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,
+                                              path,
+                                              (ProfileBase *)NULL,
+                                              NULLstring,
+                                              NULLstring,
+                                              NULLstring,
+                                              TRUE /* half open */);
+      if ( !mf ) return NULL;
+      ASMailFolder *asmf = Create(mf);
+      mf->DecRef();
+      return asmf;
+   }
 
    /**@name Asynchronous Access Functions, returning results in events.*/
    //@{

@@ -650,7 +650,8 @@ MailFolderCC::OpenFolder(int typeAndFlags,
                          String const &server,
                          String const &login,
                          String const &password,
-                         String const &symname)
+                         String const &symname,
+                         bool halfopen)
 {
    MailFolderCC *mf;
    String mboxpath;
@@ -738,7 +739,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    // try to really open it
    if ( ok )
    {
-      ok = mf->Open();
+      ok = halfopen ? mf->HalfOpen() : mf->Open();
 
       if ( !ok )
       {
@@ -781,6 +782,27 @@ MailFolderCC::UpdateTimeoutValues(void)
    ms_TcpCloseTimeout = ms_TcpOpenTimeout;
    ms_TcpRshTimeout = ms_TcpOpenTimeout;
    ApplyTimeoutValues();
+}
+
+bool MailFolderCC::HalfOpen()
+{
+   // well, we're not going to tell the user we're half opening it...
+   STATUSMESSAGE((_("Opening mailbox %s..."), GetName().c_str()));
+
+   MCclientLocker lock;
+   SetDefaultObj();
+   CCVerbose();
+   m_MailStream = mail_open(NIL, (char *)m_MailboxPath.c_str(),
+                            (debugFlag ? OP_DEBUG : NIL)|OP_HALFOPEN);
+   ProcessEventQueue();
+   SetDefaultObj(false);
+
+   if ( !m_MailStream )
+      return false;
+
+   AddToMap(m_MailStream);
+
+   return true;
 }
 
 bool
@@ -880,28 +902,6 @@ MailFolderCC::Open(void)
          path << InitializeMH()
               << m_MailboxPath.c_str() + 4; // 4 == strlen("#mh/")
          exists = wxFileExists(path);
-      }
-
-      /* Clever hack: if the folder is IMAP or NNTP and the folder name ends
-         in a slash '/' we only half-open it. The server does not like
-         opening directories, but the half-open stream can still be
-         used for retrieving subfolder listings. */
-      if( ((GetType() == MF_IMAP) || (GetType() == MF_NNTP)) &&
-          m_MailboxPath[m_MailboxPath.Length()-1] == '/' )
-      {
-         String spec = m_MailboxPath.BeforeLast('}') + '}';
-         CCVerbose();
-         m_MailStream = mail_open(NIL,(char *)spec.c_str(),
-                                  (debugFlag ? OP_DEBUG : NIL)|OP_HALFOPEN);
-         ProcessEventQueue();
-         SetDefaultObj(false);
-         if(! m_MailStream)
-            return false;
-         else
-         {
-            AddToMap(m_MailStream); // now we are known
-            return true;
-         }
       }
 
       // if the file folder doesn't exist, we should create it first
