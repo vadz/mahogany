@@ -56,10 +56,14 @@ class PalmBook;
 #define MP_MOD_PALMOS_SYNCMAIL_D 1l
 #define MP_MOD_PALMOS_SYNCADDR   "SyncAddr"
 #define MP_MOD_PALMOS_SYNCADDR_D 1l
-#define MP_MOD_PALMOS_BACKUP     "Backup"       // experimental
-#define MP_MOD_PALMOS_BACKUP_D   0l             // experimental
-#define MP_MOD_PALMOS_BACKUPDIR     "BackupDir"       // experimental
-#define MP_MOD_PALMOS_BACKUPDIR_D   ""             // experimental
+#define MP_MOD_PALMOS_BACKUP     "Backup"      
+#define MP_MOD_PALMOS_BACKUP_D   0l            
+#define MP_MOD_PALMOS_BACKUPDIR     "BackupDir"   
+#define MP_MOD_PALMOS_BACKUPDIR_D   ""            
+#define MP_MOD_PALMOS_BACKUP_SYNC     "BackupSync"
+#define MP_MOD_PALMOS_BACKUP_SYNC_D   1l          
+#define MP_MOD_PALMOS_BACKUP_INCREMENTAL     "BackupIncremental"
+#define MP_MOD_PALMOS_BACKUP_INCREMENTAL_D   1l          
 #define MP_MOD_PALMOS_PILOTDEV   "PilotDev"
 #define MP_MOD_PALMOS_PILOTDEV_D "/dev/pilot"
 #define MP_MOD_PALMOS_SPEED      "Speed"
@@ -1401,6 +1405,8 @@ static ConfigValueDefault gs_ConfigValues [] =
    ConfigValueDefault(MP_MOD_PALMOS_SYNCADDR, MP_MOD_PALMOS_SYNCADDR_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUP, MP_MOD_PALMOS_BACKUP_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUPDIR, MP_MOD_PALMOS_BACKUPDIR_D),
+   ConfigValueDefault(MP_MOD_PALMOS_BACKUP_SYNC, MP_MOD_PALMOS_BACKUP_SYNC_D),
+   ConfigValueDefault(MP_MOD_PALMOS_BACKUP_INCREMENTAL, MP_MOD_PALMOS_BACKUP_INCREMENTAL_D),
    ConfigValueDefault(MP_MOD_PALMOS_PILOTDEV, MP_MOD_PALMOS_PILOTDEV_D),
    ConfigValueDefault(MP_MOD_PALMOS_SPEED, MP_MOD_PALMOS_SPEED_D),
    ConfigValueDefault(MP_MOD_PALMOS_LOCK, MP_MOD_PALMOS_LOCK_D),
@@ -1416,6 +1422,9 @@ static wxOptionsPage::FieldInfo gs_FieldInfos[] =
    { gettext_noop("Synchronise Addressbook"), wxOptionsPage::Field_Bool,    -1 },
    { gettext_noop("Always do Backup"), wxOptionsPage::Field_Bool,    -1 },
    { gettext_noop("Directory for backup files"), wxOptionsPage::Field_Text,    -1 },
+   { gettext_noop("Delete no longer existing backup files"),
+     wxOptionsPage::Field_Bool,    -1 },
+   { gettext_noop("Make incremental backup only"), wxOptionsPage::Field_Bool,    -1 },
    { gettext_noop("Pilot device"), wxOptionsPage::Field_Text,    -1 },
    // the speed values must be in sync with the ones in the speeds[]
    // array in GetConfig() further up:
