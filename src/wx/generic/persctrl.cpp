@@ -812,7 +812,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
 
 #ifdef USE_ICON
     wxStaticBitmap *icon = new wxStaticBitmap(this, -1, wxIcon(icons[which]));
-    const int iconSize = icon->GetBitmap().GetWidth();
+    const int iconSize = icon->GetIcon().GetWidth();
 #endif // use icon
     
     // split the message in lines
