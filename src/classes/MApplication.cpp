@@ -43,6 +43,7 @@
 #include "MailFolder.h"
 #include "HeaderInfo.h"
 #include "FolderMonitor.h"
+#include "Composer.h"         // for RestoreAll()
 
 #include "gui/wxMainFrame.h"
 #include "gui/wxMApp.h"
@@ -529,8 +530,11 @@ MAppBase::OnStartup()
    CHECK( m_eventFolderUpdateReg, FALSE,
           "failed to register event handler for folder status event " );
 
-   // open all folders we open initially
+   // open all windows we open initially
    // ----------------------------------
+
+   // open any composer windows we may have
+   Composer::RestoreAll();
 
    // open the remembered folder in the main frame unless disabled
    if ( !READ_APPCONFIG(MP_DONTOPENSTARTUP) )
