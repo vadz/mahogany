@@ -29,7 +29,6 @@
 #  include "Mcommon.h"
 #  include "guidef.h"
 #  include "Profile.h"
-#  include "Mdefaults.h"
 #  include "MApplication.h"
 #  include "strutil.h"
 #  include "sysutil.h"
@@ -41,6 +40,7 @@
 #  include <wx/app.h>
 #endif //USE_PCH
 
+#include "Mdefaults.h"
 #include "MDialogs.h"
 
 #include "adb/AdbManager.h"
