@@ -241,6 +241,9 @@ wxMApp::OnInit()
       if ( delay > 0 )
          gs_timerAutoSave.Start(delay);
 
+      // start another timer to poll for new mail:
+      
+      
       return true;
    }
    else {

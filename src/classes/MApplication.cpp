@@ -31,7 +31,7 @@
 #  include   "Mdefaults.h"
 #  include   "MApplication.h"
 #  include   "MPython.h"
-
+#   include  "MFolder.h"
 #  include   <wx/dynarray.h>
 #endif   // USE_PCH
 
@@ -70,6 +70,40 @@
 // ----------------------------------------------------------------------------
 
 WX_DEFINE_ARRAY(const wxMFrame *, ArrayFrames);
+
+KBLIST_DEFINE(MailFolderList, MailFolder);
+
+class MAppFolderTraversal : public MFolderTraversal
+{
+public:
+   MAppFolderTraversal(MailFolderList *list)
+      : MFolderTraversal(*(m_folder = MFolder::Get("")))
+      { m_list = list;}
+   ~MAppFolderTraversal()
+      { m_folder->DecRef(); }
+   bool OnVisitFolder(const wxString& folderName)
+      {
+         MFolder *f = MFolder::Get(folderName);
+         if(f->GetFlags() & MF_FLAGS_INCOMING)
+         {
+            wxLogDebug("Found incoming folder '%s'.",
+                       folderName.c_str());
+            ProfileBase *p = ProfileBase::CreateProfile(folderName);
+            MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,
+                                                    folderName,
+                                                    p);
+            m_list->push_back(mf);
+            p->DecRef();
+         }
+         f->DecRef();
+         return true;
+      }
+
+private:
+   MFolder *m_folder;
+   MailFolderList *m_list;
+};
+
 
 // ----------------------------------------------------------------------------
 // functions
@@ -466,6 +500,12 @@ MAppBase::OnStartup()
    CHECK( m_eventReg, FALSE,
           "failed to register event handler for new mail event " );
 
+   // Create list of folders to poll for new mail
+   // -------------------------------------------
+
+   m_IncomingFolderList = new MailFolderList;
+   MAppFolderTraversal t (m_IncomingFolderList);
+   
    return TRUE;
 }
 
@@ -546,12 +586,37 @@ MAppBase::Exit()
 bool
 MAppBase::OnMEvent(MEventData& event)
 {
+   MailFolderList::iterator i;
+   
    // we're only registered for new mail events
    CHECK( event.GetId() == MEventId_NewMail, TRUE, "unexpected event" );
 
    // get the folder in which the new mail arrived
    MEventNewMailData& mailevent = (MEventNewMailData &)event;
    MailFolder *folder = mailevent.GetFolder();
+
+
+   /* First, we need to check whether it is one of our incoming mail
+      folders and if so, move it to the global new mail folder. */
+   for(i = m_IncomingFolderList->begin();
+       i != m_IncomingFolderList->end();
+       i++)
+   {
+      if(folder == *i)
+      {
+         /* bool */
+         INTARRAY selections;
+         unsigned long number = mailevent.GetNumber();
+         unsigned i;
+         for(i = 0; i < number; i++)
+            selections.Add(mailevent.GetNewMessageIndex(i));
+         folder->SaveMessages(&selections,
+                              READ_APPCONFIG(MP_NEWMAIL_FOLDER));
+         break;
+      }
+   }
+
+
 
    // step 1: execute external command if it's configured
    String command = READ_CONFIG(folder->GetProfile(), MP_NEWMAILCOMMAND);
@@ -614,3 +679,4 @@ MAppBase::OnMEvent(MEventData& event)
 
    return TRUE;
 }
+

@@ -150,7 +150,6 @@ public:
 
    /// called when the events we're interested in are generated
    virtual bool OnMEvent(MEventData& event);
-
 protected:
    /** Checks some global configuration settings and makes sure they
        have sensible values. Especially important when M is run for
@@ -178,6 +177,8 @@ protected:
    /// a profile wrapper object for the global configuration
    ProfileBase *m_profile;
 
+   /// the list of all constantly open folders to check for new mail
+   class MailFolderList *m_IncomingFolderList;
    /// registration seed for EventManager
    void *m_eventReg;
 

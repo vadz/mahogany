@@ -878,6 +878,8 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
    // folder flags
    int flags = 0;
+   if(m_isIncoming->GetValue())
+      flags |= MF_FLAGS_INCOMING;
 
    // check that we have the username/password
    String loginName = m_login->GetValue(),
@@ -953,7 +955,6 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
    // 3rd step: store additional data about the newly created folder directly
    // in the profile
-   m_profile->writeEntry(MP_FOLDER_IS_INCOMING, m_isIncoming->GetValue());
 
    String fullname = folder->GetFullName();
    m_profile->DecRef();

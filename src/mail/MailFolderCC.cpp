@@ -81,6 +81,7 @@ String MailFolderCC::MF_pwd;
 
 // a variable telling c-client to shut up
 static bool mm_ignore_errors = false;
+static bool mm_ignore_logs = false;
 
 // be quiet
 static inline void CCQuiet(void) { mm_ignore_errors = true; }
@@ -347,14 +348,16 @@ MailFolderCC::Ping(void)
 
    if(! mail_ping(m_MailStream))
    {
-      LOGMESSAGE((_("Mailstream for folder '%s' has been closed, trying to reopen it."),
+      LOGMESSAGE((M_LOG_DEBUG, _("Mailstream for folder '%s' has been closed, trying to reopen it."),
                   GetName().c_str()));
       if(! Open())
          ERRORMESSAGE((_("Re-opening folder '%s' failed."),GetName().c_str()));
       else
          m_MailStream = NIL;
    }
+   mm_ignore_logs = true;
    mail_check(m_MailStream); // update flags, etc, .newsrc
+   mm_ignore_logs = false;
    ProcessEventQueue();
 }
 
@@ -945,9 +948,9 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
 void
 MailFolderCC::mm_log(String str, long /* errflg */)
 {
-   if(mm_ignore_errors)
+   if(mm_ignore_errors || mm_ignore_logs)
       return;
-
+   
    String  msg = _("c-client log: ");
    msg += str;
 

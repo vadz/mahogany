@@ -109,16 +109,22 @@ CHECK:
    -if mailfolder has been closed due to timeout, reopen it.
  - SendMessageCC: allow re-sending of aborted send, i.e. Send() called
                   more than once
+- make mailfolders collectable:
+  - have a "collect" flag
+---> done, after merging of profile code, add support for building
+     list of these folders and periodically checking them.
+     TEST!!!!
+- suppress mm_log() checkpoint completed messages
 
 TODO:
 
 - MFolder.i
 
 for release:
-- make mailfolders collectable:
-  - have a "collect" flag
----> done, after merging of profile code, add support for building
-     list of these folders and periodically checking them.
+
+- remove dialog box in MailFolderCC::Ping about reopening folder!!!
+- update the list of folders to poll for new mail when the folder
+  properties are changed, tricky.
 
 - config panels are too small/too full, move font settings somewhere
   else, i.e. have a "layout" page?
