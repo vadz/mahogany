@@ -980,14 +980,13 @@ void MessageView::OnOptionsChange(MEventOptionsChangeData& event)
       case MEventOptionsChangeData::Apply:
       case MEventOptionsChangeData::Ok:
       case MEventOptionsChangeData::Cancel:
-         UpdateProfileValues();
+         if ( UpdateProfileValues() )
+            Update();
          break;
 
       default:
          FAIL_MSG(_T("unknown options change event"));
    }
-
-   Update();
 }
 
 void
@@ -1029,7 +1028,7 @@ MessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
 // MessageView options
 // ----------------------------------------------------------------------------
 
-void
+bool
 MessageView::UpdateProfileValues()
 {
    AllProfileValues settings;
@@ -1069,12 +1068,15 @@ MessageView::UpdateProfileValues()
             (void)m_asyncFolder->GetMessage(m_uid, this);
          }
       }
+
+      return true;
    }
-   else // nothing significant changed
-   {
-      // but still reassign to update all options
-      m_ProfileValues = settings;
-   }
+   //else: nothing significant changed
+
+   // but still reassign to update all options
+   m_ProfileValues = settings;
+
+   return false;
 }
 
 void
@@ -2301,7 +2303,9 @@ MessageView::Update()
 
    if( !m_mailMessage )
    {
-      // no message to display
+      // no message to display, but still call Update() after Clear()
+      m_viewer->Update();
+
       return;
    }
 

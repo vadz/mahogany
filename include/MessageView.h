@@ -403,8 +403,8 @@ protected:
    /// read all our options from the current profile (returned by GetProfile())
    void ReadAllSettings(AllProfileValues *settings);
 
-   /// reread the entries from our profile
-   void UpdateProfileValues();
+   /// reread the entries from our profile, return true if anything changed
+   bool UpdateProfileValues();
 
    /// get the profile values (mainly for MessageViewer)
    const AllProfileValues& GetProfileValues() const { return m_ProfileValues; }
