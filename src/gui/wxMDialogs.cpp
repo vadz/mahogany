@@ -62,9 +62,10 @@
 #include "gui/wxDialogLayout.h"
 
 #ifdef    OS_WIN
-#  define M_32x32         "Micon"
+//#  define M_32x32         "Micon"
+#  define background "background"
 #else   //real XPMs
-#  include "../src/icons/M_32x32.xpm"
+//#  include "../src/icons/M_32x32.xpm"
 #  include "../src/icons/background.xpm"
 #endif  //Win/Unix
 
@@ -216,7 +217,7 @@ MProgressDialog::EnableDisableEvents(bool enable)
             node;
             node = node->GetNext() )
       {
-         wxWindow *win = ((wxWindow*)node->GetData());
+         wxWindow *win = node->GetData();
          win->Enable(enable);
       }
    }
@@ -959,7 +960,7 @@ wxPEP_Folder::TransferDataFromWindow(void)
    if ( FolderTypeHasUserName(type) )
    {
       m_Profile->writeEntry(MP_POP_LOGIN,m_UserIdTextCtrl->GetValue());
-      m_Profile->writeEntry(MP_POP_PASSWORD,m_PasswordTextCtrl->GetValue());
+      m_Profile->writeEntry(MP_POP_PASSWORD, strutil_encrypt(m_PasswordTextCtrl->GetValue()));
    }
 
    // if we return FALSE, it means that entered data is invalid and the dialog
@@ -975,7 +976,7 @@ wxPEP_Folder::TransferDataToWindow(void)
    // the trouble is that if INBOX.profile doesn't exist (yet), we get the
    // wrong value here (FIXME: this is not the right solution neither!)
    if ( type == MP_FOLDER_TYPE_D &&
-        ((ProfileBase *)m_Profile)->GetProfileName() == "INBOX" ) { // yuck (FIXME)
+        ((ProfileBase *)m_Profile)->GetName() == "/Profiles/INBOX" ) { // yuck (FIXME)
       type = Inbox;
    }
 
@@ -985,7 +986,7 @@ wxPEP_Folder::TransferDataToWindow(void)
    if ( FolderTypeHasUserName(type) )
    {
       m_UserIdTextCtrl->SetValue(READ_CONFIG(m_Profile,MP_POP_LOGIN));
-      m_PasswordTextCtrl->SetValue(READ_CONFIG(m_Profile,MP_POP_PASSWORD));
+      m_PasswordTextCtrl->SetValue(strutil_encrypt(READ_CONFIG(m_Profile,MP_POP_PASSWORD)));
    }
    UpdateUI();
 

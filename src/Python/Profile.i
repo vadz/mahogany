@@ -38,14 +38,12 @@ public:
    //@}
    /// set the path within the profile,just like cd
    virtual void   SetPath(String & path);
-   /// query the current path
-   virtual String GetPath(void);
    /// return true if the entry is defined
    virtual bool HasEntry(String & key);
    /// delete the entry group specified by path
    virtual void DeleteGroup(String & path);
    /// return the name of the profile
-   virtual String GetProfileName(void);
+   virtual String GetName(void);
 
    /** @name Managing environment variables
 

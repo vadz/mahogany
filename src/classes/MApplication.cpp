@@ -154,7 +154,7 @@ MAppBase::VerifySettings(void)
       }
    }
 #else
-   #error "Don't know how to find local dir under this OS"
+#   error "Don't know how to find local dir under this OS"
 #endif // OS
 
    // now that we have the local dir, we can set up a default mail
@@ -191,21 +191,21 @@ MAppBase::VerifySettings(void)
    bool bFirstRun = READ_APPCONFIG(MP_FIRSTRUN) != 0;
    if ( bFirstRun )
    {
-      // do we need to upgrade something?
-      String version = m_profile->readEntry(MP_VERSION, "");
-      if ( version != M_VERSION ) {
-         if ( ! Upgrade(version) )
-            return false;
-
          if(! SetupInitialConfig())
             ERRORMESSAGE((_("Failed to set up initial configuration.")));
 
          // next time won't be the first one any more
          m_profile->writeEntry(MP_FIRSTRUN, 0);
+   }
 
-         // write the new version
-         m_profile->writeEntry(MP_VERSION, M_VERSION);
-      }
+   // do we need to upgrade something?
+   String version = m_profile->readEntry(MP_VERSION, "");
+   if ( version != M_VERSION )
+   {
+      if ( ! Upgrade(version) )
+         return false;
+      // write the new version
+      m_profile->writeEntry(MP_VERSION, M_VERSION);
    }
 
    if ( !VerifyInbox() )
@@ -232,8 +232,9 @@ MAppBase::OnStartup()
    strConfFile << "/." << M_APPLICATIONNAME;
    // FIXME must create the directory ourselves!
    struct stat st;
-   if ( stat(strConfFile, &st) != 0 || !S_ISDIR(st.st_mode) ) {
-      if ( mkdir(strConfFile, 0777) != 0 )
+   if ( stat(strConfFile, &st) != 0 || !S_ISDIR(st.st_mode) )
+   {
+      if ( mkdir(strConfFile, 0700) != 0 )
       {
          wxLogError(_("Can't create the directory for configuration "
                       "files '%s'."), strConfFile.c_str());
@@ -243,7 +244,6 @@ MAppBase::OnStartup()
       wxLogInfo(_("Created directory '%s' for configuration files."),
                 strConfFile.c_str());
    }
-
    strConfFile += "/config";
 #else  // Windows
    strConfFile = M_APPLICATIONNAME;
@@ -251,7 +251,31 @@ MAppBase::OnStartup()
 
    m_profile = ProfileBase::CreateGlobalConfig(strConfFile);
 
-   // NB: although this shouldn't normally be here (it's GUI-dependent code),
+#ifdef OS_UNIX
+   /* Check whether other users can read our config file. This must
+      not be allowed! */
+   if(stat(strConfFile, &st) == 0)
+      if( (st.st_mode & (S_IRGRP | S_IROTH)) != 0)
+      {
+         // No other user must have access to the config file.
+         String 
+            msg;
+         msg.Printf(_("Configuration file '%s' was readable for other users.\n"
+                      "Passwords may have been compromised, please consider changing them.\n"),
+                    strConfFile.c_str());
+         if(chmod(strConfFile, S_IRUSR|S_IWUSR) == 0)
+            msg += _("This has been fixed now, the file is no longer readable for others.");
+         else
+         {
+            String tmp;
+            tmp.Printf(_("The attempt to make the file unreadable to others has failed.\n(%s)"),
+                       strerror(errno));
+            msg << tmp;
+         }
+         wxLogError(msg);
+      }
+#endif
+            // NB: although this shouldn't normally be here (it's GUI-dependent code),
    //     it's really impossible to put it into wxMApp because some dialogs
    //     can be already shown from here and this initialization must be done
    //     before.
@@ -421,7 +445,13 @@ MAppBase::OnShutDown()
 
    // clean up
    AdbManager::Delete();
-   m_profile->DecRef();
+   ProfileBase::FlushAll();
+   // The following little hack allows us to decref and delete the
+   // global profile without triggering an assert, as this is not
+   // normally allowed.
+   ProfileBase *p = m_profile;
+   m_profile = NULL;
+   p->DecRef();
    delete m_mimeManager;
 }
 

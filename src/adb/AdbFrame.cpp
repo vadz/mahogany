@@ -70,8 +70,8 @@
 // constants
 // ----------------------------------------------------------------------------
 
-// the root path for all our config entries - trailing '/' is needed!
-#define ADB_CONFIG_PATH "/AdbEditor/"
+// the root path for all our config entries
+#define ADB_CONFIG_PATH "AdbEditor"
 
 // ----------------------------------------------------------------------------
 // classes
@@ -1023,7 +1023,7 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   // ----------------------------
   wxPanel *panel = new wxPanel(this, -1);
   wxStaticText *label = new wxStaticText(panel, -1, _("&Lookup:"));
-  m_textKey = new wxPTextEntry(ADB_CONFIG_PATH "FindKey", panel, AdbView_Lookup);
+  m_textKey = new wxPTextEntry(ADB_CONFIG_PATH "/FindKey", panel, AdbView_Lookup);
   m_treeAdb = new wxAdbTree(this, panel, AdbView_Tree);
   m_notebook = new wxAdbNotebook(panel, AdbView_Notebook);
 
@@ -1127,21 +1127,21 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
 
   #define TRANSFER_STRING(var, i)           \
     if ( bSave )                            \
-      conf.writeEntry(aszConfigNames[i], var);   \
+      conf->writeEntry(aszConfigNames[i], var);   \
     else                                    \
-      var = conf.readEntry(aszConfigNames[i], var)
+      var = conf->readEntry(aszConfigNames[i], var)
 
   #define TRANSFER_INT(var, i)                    \
     if ( bSave )                                  \
-      conf.writeEntry(aszConfigNames[i], var);         \
+      conf->writeEntry(aszConfigNames[i], var);         \
     else                                          \
-      var = conf.readEntry(aszConfigNames[i], 0l)
+      var = conf->readEntry(aszConfigNames[i], 0l)
 
   #define TRANSFER_BOOL(var, i)                   \
     if ( bSave )                                  \
-      conf.writeEntry(aszConfigNames[i], var);         \
+      conf->writeEntry(aszConfigNames[i], var);         \
     else                                          \
-      var = conf.readEntry(aszConfigNames[i], 0l) != 0
+      var = conf->readEntry(aszConfigNames[i], 0l) != 0
 
   #define TRANSFER_ARRAY(var, i)                  \
     if ( bSave )                                  \
@@ -1149,8 +1149,7 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
     else                                          \
       RestoreArray(conf, var, aszConfigNames[i])
 
-  ProfileBase &conf = *mApplication->GetProfile();
-  ProfilePathChanger adbPath(&conf, ADB_CONFIG_PATH);
+  ProfileBase *conf = ProfileBase::CreateProfile(ADB_CONFIG_PATH);
 
   TRANSFER_STRING(m_strLastNewEntry, ConfigName_LastNewEntry);
   TRANSFER_STRING(m_strSelection, ConfigName_TreeSelection);
@@ -1163,6 +1162,7 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
   TRANSFER_ARRAY(m_astrProviders, ConfigName_AddressBookProviders);
   TRANSFER_ARRAY(m_astrBranches, ConfigName_ExpandedBranches);
 
+  conf->DecRef();
   // keep your namespace clean
   #undef TRANSFER_STRING
   #undef TRANSFER_BOOL
@@ -1739,7 +1739,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
         // ask for the file name
         strAdbName = wxPFileSelector
                      (
-                      ADB_CONFIG_PATH "AdbFile",
+                      ADB_CONFIG_PATH "/AdbFile",
                       strTitle,
                       READ_APPCONFIG(MP_USERDIR),
                       "M.adb",

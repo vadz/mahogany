@@ -131,8 +131,6 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
    // open the last folder in the main frame by default
    String foldername = READ_APPCONFIG(MP_MAINFOLDER);
-   if ( !foldername.IsEmpty() && foldername[0u] != '/' )
-      foldername.Prepend('/');
    if ( !foldername.IsEmpty() )
    {
       MFolder *folder = MFolder::Get(foldername);
@@ -194,7 +192,7 @@ wxMainFrame::OpenFolder(MFolder *folder)
    {
       // we want save the full folder name in m_folderName 
       ASSERT( folder->GetFullName() == m_folderName );
-      m_FolderView->OpenFolder(folder->GetFullName().c_str()+1);
+      m_FolderView->OpenFolder(folder->GetFullName());
       folder->DecRef(); // done with it
   }
 #ifdef HAS_DYNAMIC_MENU_SUPPORT

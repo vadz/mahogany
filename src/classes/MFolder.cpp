@@ -97,11 +97,19 @@ protected:
    // helpers
       // common part of Create() and Exists()
    static bool GroupExists(ProfileBase *profile, const String& fullname);
-      // get the full name of the subfolder
+   /** Get the full name of the subfolder.
+       As all folder names are relative profile names, we need to
+       check for m_folderName not being empty before appending a slash 
+       and subfolder name.
+       @param name relative subfolder name
+       @return the complete relative folder name of the subfolder
+   */
    wxString GetSubFolderFullName(const String& name) const
    {
       String fullname;
-      fullname << m_folderName << '/' << name;
+      if(m_folderName.Length())
+         fullname << m_folderName << '/';
+      fullname << name;
 
       return fullname;
    }
@@ -249,10 +257,8 @@ MFolder *MFolder::Create(const String& fullname, Type type)
 
    CHECK( folder, NULL, "Get() must succeed if Create() succeeded!" );
 
-   ProfileBase *profile = mApplication->GetProfile();
+   ProfileBase *profile = ProfileBase::CreateProfile(folder->GetFullName());
    CHECK( profile != NULL, NULL, "panic in MFolder: no app profile" );
-
-   FolderPathChanger pathChanger(profile, folder->GetFullName());
    profile->writeEntry(MP_FOLDER_TYPE, type);
 
    return folder;
@@ -287,7 +293,7 @@ MFolderFromProfile::GroupExists(ProfileBase *profile, const String& fullname)
    wxArrayString components;
    wxSplitPath(components, fullname);
 
-   FolderPathChanger changePath(profile, "");
+   //PFIXME FolderPathChanger changePath(profile, "");
 
    size_t n, count = components.GetCount();
    for ( n = 0; n < count; n++ )
@@ -307,23 +313,21 @@ MFolderFromProfile::GroupExists(ProfileBase *profile, const String& fullname)
 
 bool MFolderFromProfile::Exists(const String& fullname)
 {
-   ProfileBase *profile = mApplication->GetProfile();
-   CHECK( profile != NULL, FALSE, "panic in MFolder: no app profile" );
+   ProfileBase *profile = ProfileBase::CreateProfile(fullname);
+   CHECK( profile != NULL, FALSE, "panic in MFolder: no profile" );
 
-   if ( !GroupExists(profile, fullname) )
-      return FALSE;
-
-   // the profile type field must be set for the folder profile group
-   FolderPathChanger changePath(profile, fullname);
-
-   return READ_CONFIG(profile, MP_PROFILE_TYPE) == ProfileBase::PT_FolderProfile;
+   bool exists = (READ_CONFIG(profile, MP_PROFILE_TYPE) ==
+                  ProfileBase::PT_FolderProfile);
+   profile->DecRef();
+   return exists;
 }
 
 bool MFolderFromProfile::Create(const String& fullname)
 {
-   ProfileBase *profile = mApplication->GetProfile();
-   CHECK( profile != NULL, FALSE, "panic in MFolder: no app profile" );
+   ProfileBase *profile = ProfileBase::CreateProfile(fullname);
+   CHECK( profile != NULL, FALSE, "panic in MFolder: no profile" );
 
+   //PFIXME
    if ( GroupExists(profile, fullname) )
    {
       wxLogError(_("Can not create profile folder '%s' because a group "
@@ -332,10 +336,8 @@ bool MFolderFromProfile::Create(const String& fullname)
       return FALSE;
    }
 
-   // this will create everything automatically
-   FolderPathChanger changePath(profile, fullname);
    profile->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
-
+   profile->DecRef();
    return TRUE;
 }
 
@@ -346,56 +348,53 @@ String MFolderFromProfile::GetName() const
 
 FolderType MFolderFromProfile::GetType() const
 {
-   ProfileBase *profile = mApplication->GetProfile();
+   ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
    CHECK( profile != NULL, FolderInvalid, "panic in MFolder: no app profile" );
-
-   FolderPathChanger changePath(profile, m_folderName);
-   return GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
+   FolderType t = GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
+   profile->DecRef();
+   return t;
 }
 
 String MFolderFromProfile::GetComment() const
 {
-   ProfileBase *profile = mApplication->GetProfile();
+   ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
    CHECK( profile != NULL, "", "panic in MFolder: no app profile" );
-
-   FolderPathChanger changePath(profile, m_folderName);
-   return READ_CONFIG(profile, MP_FOLDER_COMMENT);
+   String str = READ_CONFIG(profile, MP_FOLDER_COMMENT);
+   profile->DecRef();
+   return str;
 }
 
 void MFolderFromProfile::SetComment(const String& comment)
 {
-   ProfileBase *profile = mApplication->GetProfile();
+   ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
    CHECK_RET( profile != NULL, "panic in MFolder: no app profile" );
-
-   FolderPathChanger changePath(profile, m_folderName);
+   String str = READ_CONFIG(profile, MP_FOLDER_COMMENT);
    profile->writeEntry(MP_FOLDER_COMMENT, comment);
+   profile->DecRef();
 }
 
 unsigned int MFolderFromProfile::GetFlags() const
 {
-   ProfileBase *profile = mApplication->GetProfile();
-   CHECK( profile != NULL, FALSE, "panic in MFolder: no app profile" );
-
-   FolderPathChanger changePath(profile, m_folderName);
-   return (unsigned int)READ_CONFIG(profile, MP_FOLDER_FLAGS);
+   ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
+   CHECK( profile != NULL, FolderInvalid, "panic in MFolder: no app profile" );
+   unsigned int f = (unsigned int)READ_CONFIG(profile, MP_FOLDER_FLAGS);
+   profile->DecRef();
+   return f;
 }
 
 void MFolderFromProfile::SetFlags(unsigned int flags)
 {
-   ProfileBase *profile = mApplication->GetProfile();
+   ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
    CHECK_RET( profile != NULL, "panic in MFolder: no app profile" );
-
-   FolderPathChanger changePath(profile, m_folderName);
+   String str = READ_CONFIG(profile, MP_FOLDER_COMMENT);
    profile->writeEntry(MP_FOLDER_FLAGS, flags);
+   profile->DecRef();
 }
 
 size_t MFolderFromProfile::GetSubfolderCount() const
 {
-   ProfileBase *profile = mApplication->GetProfile();
+   ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
    CHECK( profile != NULL, FALSE, "panic in MFolder: no app profile" );
-
-   FolderPathChanger changePath(profile, m_folderName);
-
    // enumerate all groups
    String name;
    long dummy;
@@ -418,15 +417,14 @@ size_t MFolderFromProfile::GetSubfolderCount() const
       cont = profile->GetNextGroup(name, dummy);
    }
 
+   profile->DecRef();
    return count;
 }
 
 MFolder *MFolderFromProfile::GetSubfolder(size_t n) const
 {
-   ProfileBase *profile = mApplication->GetProfile();
+   ProfileBase *profile = ProfileBase::CreateProfile(m_folderName);
    CHECK( profile != NULL, FALSE, "panic in MFolder: no app profile" );
-
-   FolderPathChanger changePath(profile, m_folderName);
 
    // count until the group we need by enumerating them
    wxString name;
@@ -454,6 +452,7 @@ MFolder *MFolderFromProfile::GetSubfolder(size_t n) const
 
    CHECK( cont, NULL, "invalid subfolder index" );
 
+   profile->DecRef();
    return Get(GetSubFolderFullName(name));
 }
 
@@ -465,7 +464,6 @@ MFolder *MFolderFromProfile::GetSubfolder(const String& name) const
 MFolder *MFolderFromProfile::GetParent() const
 {
    String path = m_folderName.BeforeLast('/');
-
    return Get(path);
 }
 
@@ -491,14 +489,12 @@ void MFolderFromProfile::Delete()
 {
    CHECK_RET( !m_folderName.IsEmpty(), "can't delete the root pseudo-folder" );
 
-   ProfileBase *profile = mApplication->GetProfile();
+   // Get parent profile:
+   ProfileBase *profile = ProfileBase::CreateProfile(m_folderName.BeforeLast('/'));
    CHECK_RET( profile != NULL, "panic in MFolder: no app profile" );
-
-   FolderPathChanger changePath(profile, m_folderName);
-
-   profile->SetPath("..");
    profile->DeleteGroup(GetName());
-
+   profile->DecRef();
+      
    // notify everybody about the disappearance of the folder
    MEventFolderTreeChangeData event(GetFullName(),
                                     MEventFolderTreeChangeData::Delete);
@@ -532,18 +528,18 @@ bool MFolderFromProfile::Rename(const String& newName)
       return FALSE;
    }
 
-   ProfileBase *profile = mApplication->GetProfile();
-   CHECK( profile != NULL, FALSE, "panic in MFolder: no app profile" );
 
-   FolderPathChanger changePath(profile, path);
+   ProfileBase *profile = ProfileBase::CreateProfile(path);
+   CHECK( profile != NULL, FALSE, "panic in MFolder: no app profile" );
    if ( profile->Rename(name, newName) )
    {
       m_folderName = newFullName;
-
+      profile->DecRef();
       return TRUE;
    }
    else
    {
+      profile->DecRef();
       return FALSE;
    }
 }
@@ -558,7 +554,6 @@ wxArrayFolder MFolderCache::ms_aFolders;
 MFolder *MFolderCache::Get(const String& name)
 {
    Check();
-
    int index = ms_aFolderNames.Index(name);
    return index == wxNOT_FOUND ? NULL : ms_aFolders[(size_t)index];
 }

@@ -564,6 +564,125 @@ strutil_enforceCRLF(String const &in)
 }
 
 
+/* This is not strictly a string utility function, but somehow it is,
+   so I don't think we need a separate source file for it just yet.
+   This is not a safe encryption system!
+*/
+
+#define STRUTIL_ENCRYPT_MIX   1000
+#define STRUTIL_ENCRYPT_DELTA 289  // 17*17
+
+static unsigned char strutil_encrypt_table[256];
+static bool strutil_encrypt_initialised = false;
+
+static void
+strutil_encrypt_initialise(void)
+{
+   for(int c = 0; c < 256; c++)
+      strutil_encrypt_table[c] = (unsigned char )c;
+
+   unsigned char
+      tmp;
+   int
+      a = 0,
+      b = STRUTIL_ENCRYPT_DELTA % 256;
+   for(int i = 0 ; i < STRUTIL_ENCRYPT_MIX ; i++)
+   {
+      tmp = strutil_encrypt_table[a];
+      strutil_encrypt_table[a] = strutil_encrypt_table[b];
+      strutil_encrypt_table[b] = tmp;
+      a += STRUTIL_ENCRYPT_DELTA;
+      b += STRUTIL_ENCRYPT_DELTA;
+      a %= 256;
+      b %= 256;
+   }
+   strutil_encrypt_initialised = true;
+}
+
+static void
+strutil_encrypt_pair(unsigned char pair[2])
+{
+   int
+      a,b;
+   for(a = 0; strutil_encrypt_table[a] != pair[0]; a++)
+      ;
+   for(b = 0; strutil_encrypt_table[b] != pair[1]; b++)
+      ;
+   int r1, r2, c1, c2;
+   r1 = a / 16; r2 = b / 16;
+   c1 = a % 16; c2 = b % 16;
+   pair[0] = strutil_encrypt_table[(r2<<4) + c1];
+   pair[1] = strutil_encrypt_table[(r1<<4) + c2];
+}
+
+String
+strutil_encrypt(const String &original)
+{
+   if(original.Length() == 0)
+      return "";
+   
+   if(! strutil_encrypt_initialised)
+      strutil_encrypt_initialise();
+
+   String
+      tmpstr,
+      newstr;
+   const char
+      *cptr = original.c_str();
+
+   unsigned char pair[2];
+   while(*cptr)
+   {
+      pair[0] = (unsigned char) *cptr;
+      pair[1] = (unsigned char) *(cptr+1);
+      strutil_encrypt_pair(pair);
+      // now we have the encrypted pair, which could be binary data,
+      // so we write hex values instead:
+      tmpstr.Printf("%02x%02x", pair[0], pair[1]);
+      newstr << tmpstr;
+      cptr ++;
+      if(*cptr) cptr++;
+   }
+   return newstr;
+}
+
+String
+strutil_decrypt(const String &original)
+{
+   if(original.Length() == 0)
+      return "";
+   CHECK(original.Length() % 4 == 0, "", _("Decrypt function called with illegal string."));
+      
+   if(! strutil_encrypt_initialised)
+      strutil_encrypt_initialise();
+
+   String
+      tmpstr,
+      newstr;
+   const char
+      *cptr = original.c_str();
+
+   unsigned char pair[2];
+   unsigned int i;
+   while(*cptr)
+   {
+      tmpstr = "";
+      tmpstr << *cptr << *(cptr+1);
+      cptr += 2;
+      sscanf(tmpstr.c_str(), "%02x", &i);
+      pair[0] = (unsigned char) i;
+      tmpstr = "";
+      tmpstr << *cptr << *(cptr+1);
+      cptr += 2;
+      sscanf(tmpstr.c_str(), "%02x", &i);
+      pair[1] = (unsigned char) i;
+      strutil_encrypt_pair(pair);
+      newstr << (char) pair[0] << (char) pair[1];
+   }
+   return newstr;
+}
+
+
 //************************************************************************
 //        Profile and other classes dependent functions:
 //************************************************************************

@@ -6,6 +6,12 @@
  * $Id$          *
  *                                                                  *
  * $Log$
+ * Revision 1.9  1999/04/05 17:17:50  KB
+ * Merged new profile code, TESTING REQUIRED.
+ *
+ * Revision 1.8.4.1  1999/04/05 15:48:51  KB
+ * Apart from AdbEditor, all new settings seem to work.
+ *
  * Revision 1.8  1998/09/23 08:57:27  KB
  * changed deletion behaviour
  *
@@ -164,6 +170,8 @@ kbList::pop_back(void)
    void *data;
    bool ownsFlagBak = ownsEntries;
    i = tail();
+   if(! i.Node())
+      return NULL;
    data = *i;
    ownsEntries = false;
    erase(i);
@@ -179,6 +187,8 @@ kbList::pop_front(void)
    bool ownsFlagBak = ownsEntries;
    
    i = begin();
+   if(! i.Node())
+      return NULL;
    data = *i;
    ownsEntries = false;
    erase(i);

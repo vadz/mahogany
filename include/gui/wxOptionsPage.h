@@ -84,12 +84,20 @@ public:
                  size_t nFirst,
                  size_t nLast,
                  int helpID = -1);
-
+   ~wxOptionsPage()
+      {
+         if(m_Profile) m_Profile->DecRef();
+      }
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
    // to change the profile associated with the page:
-   void SetProfile(ProfileBase *profile) { m_Profile = profile; }
+   void SetProfile(ProfileBase *profile)
+      {
+         if(m_Profile) m_Profile->DecRef();
+         m_Profile = profile;
+         m_Profile->IncRef();
+      }
 
    // callbacks
    void OnChange(wxEvent&);

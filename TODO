@@ -26,6 +26,40 @@ VZ:
   but insists on
   Key = Value
 
+- upgrade.cpp causes three problems that I hope you can understand:
+  - line 154: prints empty or nonsense strings, although both entry
+              and value have the correct values. Somehow wxLogDebug()
+              breaks this. wxLogMessage worked fine here.
+  - p2->DeleteGroup("Folders") triggers an assert deep inside the
+    wxFileConfig/wxDynArray code. The group "Folders" exists, the path 
+    is set to M/Profiles before deleting it, so it's apparently a
+    wxFileConfig bug. (line 165 in upgrade.cpp)
+
+  - the code with GetFirstGroup()/GetNextGroup() does not find all
+    groups under "Folders". The Profile functions change the path
+    before calling wxConfig::GetXXXGroup() but, obviously, always to the
+    same path, not causing any change.
+    This seems to be a bug in wxFileConfig, or at least, some
+    undocumented behaviour. The index parameter suggests that using it is
+    all that's needed for consistency.
+    I could work around it, by removing the functions from the Profile 
+    interface and have a function to obtain a list of subgroups instead,
+    but fixing wxFileConfig seems the better solution. I don't think
+    changing the path between calls to these functions is too unusual.
+
+- a serious problem: wxFileConfig does no preserve the protection
+  flags of the config file. Neither are there any docs telling when it 
+  writes a new file. For now I have added calls to umask() around the
+  wxConfig() constructor and Flush() in Profile.cpp, but this *should*
+  really be in wxFileConfig as it is a wide open security hole.
+  (As a consequence my passwords in university are compromised and I
+  should change them...)
+
+- Initially selected folder is not highlighted in treectrl.
+
+- How can I make wxLogXXx message have appear in the order they were
+  generated?
+
 - wxComboBox textctrl allows editing!
 - MTempFileName is broken: all files remain in /tmp!!!
 - .mailcap should override /etc/mailcap, not other way round
@@ -91,9 +125,18 @@ CHECK:- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
 ---> done, after merging of profile code, add support for building
      list of these folders and periodically checking them.
 - add news posting
-
+- Change MessageCC code to first look for a mail cache entry via
+  mail_elt() instead of always fetching message. (REALLY REQUIRED?)
+  Is already like this, but fetch_overview() does an extra fetch, even 
+  in mtest.
 
 TODO:
+- support for local news spool
+  (Waiting for VZ to support MF_NEWS) then implement /service=news
+  DONE?
+
+
+TESTING!!
 
 - do we really need to scan /var/lib/news/active?
 - more configurability for news
@@ -103,15 +146,9 @@ TODO:
 - add a popup dialog to edit message headers in composeview
 - some html mail import/filtering of tags (easy, quick and dirty)
 - copying message to non-existing folder gives error message but works
-- Change MessageCC code to first look for a mail cache entry via
-  mail_elt() instead of always fetching message. (REALLY REQUIRED?)
-
-- support for local news spool
-  (Waiting for VZ to support MF_NEWS) then implement /service=news
 
 = wxLayout:
   - delete in empty line doesn't work
-  - fix initial scrollbar sizes
   - fix horiz scrollbar size
   - update rectangle (needs support in wxllist and wxWindows)
   - fix(simplify) cursor size calculation
@@ -126,6 +163,7 @@ TODO:
     x- reset scrollbars on Clear()
     x- add setting of background colour and/or image
     x- composeview: after inserting text (reply), update scrollbars
+    x- fix initial scrollbar sizes --> seems ok, what exactly is wrong?
 
 - add progress indicator to image loading
     (and the one of SentFolder) in VerifySettings()
@@ -155,6 +193,12 @@ TODO:
 - possibly have a MIME types editor (similar to netscape's?)
 - if time permits: vcard-import
 
+- support for local news spool
+
+- Let Iconmanager chose handler by format! JPEG crashes program if fed 
+  the wrong filetype! Handler can return extension, caller should do
+  the same.
+- make message view use the new font settings.
 **************** end of KB priorities :-) *********************
 
 
@@ -164,7 +208,13 @@ TODO:
   chosing a different one first
 
 - make message view use the new font settings.
-
+- improve header support
+- add support for faxing mails via tpc.int
+- folderview listctrl has extra Subject column behind Size field ???
+- when inserting filetype of unknown MIME type, prompt for it,
+  possibly have a MIME types editor (similar to netscape's?)
+- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
+  SendMessageCC::AddPart()
 - add "double click to open" profile option support to folder list ctrl
 - allow angle brackets and full name <> in reply-to field.
 - folder set message flag update hook takes too long for really large folders

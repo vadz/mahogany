@@ -294,7 +294,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
                                 m_Parent,
                                 MDIALOG_YESNOTITLE,
                                 true,
-                                m_MailFolder->GetName()+"/MarkRead")) //FIXME OK?
+                                m_Profile->GetName()))
       {
          // build sequence
          wxString sequence;

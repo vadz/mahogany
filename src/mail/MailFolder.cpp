@@ -44,7 +44,7 @@ MailFolder::OpenFolder(int typeAndFlags,
    
    if ( type == MF_PROFILE || type == MF_PROFILE_OR_FILE )
    {
-      profile = ProfileBase::CreateFolderProfile(i_name, parentProfile);
+      profile = ProfileBase::CreateProfile(i_name, parentProfile);
       CHECK(profile, NULL, "can't create profile");   // return if it fails
       int typeflags = READ_CONFIG(profile, MP_FOLDER_TYPE);
       if(typeflags == MF_ILLEGAL)  // no such profile!
@@ -58,7 +58,7 @@ MailFolder::OpenFolder(int typeAndFlags,
          type = GetFolderType(typeflags);
          flags = GetFolderFlags(typeflags);
          login = READ_CONFIG(profile, MP_POP_LOGIN);
-         passwd = READ_CONFIG(profile, MP_POP_PASSWORD);
+         passwd = strutil_decrypt(READ_CONFIG(profile, MP_POP_PASSWORD));
          name = READ_CONFIG(profile, MP_FOLDER_PATH);
       }
    }
@@ -96,7 +96,7 @@ MailFolder::OpenFolder(int typeAndFlags,
          if(strutil_isempty(login))
             login = READ_CONFIG(profile, MP_POP_LOGIN);
          if(strutil_isempty(passwd))
-            passwd = READ_CONFIG(profile, MP_POP_PASSWORD);
+            passwd = strutil_decrypt(READ_CONFIG(profile, MP_POP_PASSWORD));
          if(strutil_isempty(name))
             name = READ_CONFIG(profile, MP_FOLDER_PATH);
          break;

@@ -261,5 +261,29 @@ strutil_compare_filenames(const String& path1, const String& path2);
 String
 strutil_enforceCRLF(String const &in);
 
+/**@name Simple encryption/decryption functionality. */
+//@{
+/**  Encrypts a string into a (printable) string using a simple table
+     based encryption mechanism. TOTALLY UNSAFE!
+     The table is always identical, so anyone using this function can
+     encrypt/decrypt the string.
+     @see strutil_decrypt
+     @param original the clear text to encrypt
+     @return the printable encrypted text
+*/
+String strutil_encrypt(const String &original);
+
+/**  Decrypts a string into a (printable) string using a simple table
+     based encryption mechanism. TOTALLY UNSAFE!
+     The table is always identical, so anyone using this function can
+     encrypt/decrypt the string.
+     This function is the inverse of strutil_encrypt().
+     @see strutil_encrypt
+     @param original the encrypted text to decrypt
+     @return the clear text
+*/
+String strutil_decrypt(const String &original);
+
+//@}
 //@}
 #endif

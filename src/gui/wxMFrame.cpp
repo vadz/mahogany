@@ -70,26 +70,23 @@ bool wxMFrame::RestorePosition(const char *name,
 {
    wxCHECK( x && y && w && h, FALSE ); // no NULL pointers please
 
-   ProfileBase *pConf = mApplication->GetProfile();
+   wxConfigBase *pConf = mApplication->GetProfile()->GetConfig();
    if ( pConf != NULL )
    {
-      ProfilePathChanger ppc(pConf, M_FRAMES_CONFIG_SECTION);
-      pConf->SetPath(name);
-
-      *x = READ_APPCONFIG(MP_XPOS);
-      *y = READ_APPCONFIG(MP_YPOS);
-      *w = READ_APPCONFIG(MP_WIDTH);
-      *h = READ_APPCONFIG(MP_HEIGHT);
-
+      pConf->SetPath(String(M_FRAMES_CONFIG_SECTION)+name);
+      *x = pConf->Read(MP_XPOS, MP_XPOS_D);
+      *y = pConf->Read(MP_YPOS,MP_YPOS_D);
+      *w = pConf->Read(MP_WIDTH, MP_WIDTH_D);
+      *h = pConf->Read(MP_HEIGHT, MP_HEIGHT_D);
       return TRUE;
    }
-   else {
+   else
+   {
       wxLogDebug("Can't restore frame '%s' position.", name);
       *x = MP_XPOS_D;
       *y = MP_YPOS_D;
       *w = MP_WIDTH_D;
       *h = MP_HEIGHT_D;
-
       return FALSE;
    }
 }
@@ -176,18 +173,17 @@ wxMFrame::SavePosition(const char *name, wxWindow *frame)
 {
    int x,y;
 
-   ProfileBase *pConf = mApplication->GetProfile();
-   if ( pConf != NULL ) {
-      ProfilePathChanger ppc(pConf, M_FRAMES_CONFIG_SECTION);
-      pConf->SetPath(name);
-
+   wxConfigBase *pConf = mApplication->GetProfile()->GetConfig();
+   pConf->SetPath(String(M_FRAMES_CONFIG_SECTION)+name);
+   if ( pConf != NULL )
+   {
       frame->GetPosition(&x,&y);
-      pConf->writeEntry(MP_XPOS, x);
-      pConf->writeEntry(MP_YPOS, y);
+      pConf->Write(MP_XPOS, (long)x);
+      pConf->Write(MP_YPOS, (long)y);
 
       frame->GetSize(&x,&y);
-      pConf->writeEntry(MP_WIDTH, x);
-      pConf->writeEntry(MP_HEIGHT, y);
+      pConf->Write(MP_WIDTH, (long)x);
+      pConf->Write(MP_HEIGHT, (long)y);
    }
 }
 
@@ -373,7 +369,6 @@ wxMFrame::OnPrintSetup()
 
       wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
       wxPrintDialog printerDialog(this, & data);
-//      printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
       printerDialog.ShowModal();
 }
 
@@ -383,7 +378,6 @@ void wxMFrame::OnPrintSetupPS()
 
       wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
       wxPrintDialog printerDialog(this, & data);
-//      printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
       printerDialog.ShowModal();
 }
 

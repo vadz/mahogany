@@ -120,6 +120,7 @@ protected:
    MFolder& operator=(const MFolder&);
 };
 
+/*
 // ----------------------------------------------------------------------------
 // a special derivation of ProfilePathChanger which prepends the root of
 // folder branch in the profile tree to the path
@@ -132,5 +133,6 @@ public:
       {
       }
 };
+*/
 
 #endif // _MFOLDER_H

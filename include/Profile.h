@@ -30,18 +30,21 @@ class kbStringList;
 //@{
 
 /// read from the global config section
-#ifdef DEBUG
+#if 0
+//FIXME!!!! Cannot verify correct global profile path settings!
+//#ifdef DEBUG
    // assert(0) is called when the app profile path is incorrect (should never
    // be changed by the app or must be restored until the next call of
    // READ_APPCONFIG() if it is)
-   #define   READ_APPCONFIG(key) ( \
-      mApplication->GetProfile()->GetPath() == M_PROFILE_CONFIG_SECTION ? \
-      (assert(0), mApplication->GetProfile()->readEntry(key, key##_D)) : \
-      mApplication->GetProfile()->readEntry(key, key##_D))
-#else
-   #define READ_APPCONFIG(key) \
+#   define   READ_APPCONFIG(key) ( \
+               mApplication->GetProfile()->GetConfig()->GetPath() == M_PROFILE_CONFIG_SECTION ? \
+               (assert(0), mApplication->GetProfile()->readEntry(key, key##_D)) : \
+              mApplication->GetProfile()->readEntry(key, key##_D))
+//#else
+#endif 
+#   define READ_APPCONFIG(key) \
       (mApplication->GetProfile()->readEntry(key, key##_D))
-#endif
+//#endif
 
 /// read from a normal profile
 #define   READ_CONFIG(profile, key) profile->readEntry(key, key##_D)
@@ -62,14 +65,11 @@ class wxConfigBase;
 class ProfileBase : public MObjectRC
 {
 public:
+   /// Creates the one global config object.
+   static ProfileBase * CreateGlobalConfig(const String & filename);
    /// Create a normal Profile object
    static ProfileBase * CreateProfile(String const & classname,
                                       ProfileBase const *parent = NULL);
-   /// Create a Profile object for a mail folder.
-   static ProfileBase * CreateFolderProfile(const String & iClassName,
-                                            ProfileBase const *Parent);
-   /// Create a global configuration profile object
-   static ProfileBase * CreateGlobalConfig(String const &  filename);
    /// Create a dummy Profile just inheriting from the top level
    static ProfileBase * CreateEmptyProfile(ProfileBase const *parent = NULL);
 
@@ -132,10 +132,6 @@ public:
    virtual bool writeEntry(String const & key, long Value) = 0;
    //@}
 
-   /// set the path within the profile,just like cd
-   virtual void   SetPath(String const & path) = 0;
-   /// query the current path
-   virtual String GetPath(void) const = 0;
    /// return true if the entry is defined
    virtual bool HasEntry(String const & key) const = 0;
    /// return true if the group exists
@@ -145,27 +141,21 @@ public:
    /// rename a group
    virtual bool Rename(const String& oldName, const String& newName) = 0;
    /// return the name of the profile
-   virtual String GetProfileName(void) = 0;
+   virtual const String &GetName(void) const = 0;
 
    /** @name Enumerating groups/entries
-
        again, this is just directly forwarded to wxConfig
    */
-      /// return the number of subgroups in the current group
-   size_t GetGroupCount() const;
-      /// see wxConfig docs
-   bool GetFirstGroup(String& s, long& l) const;
-      /// see wxConfig docs
-   bool GetNextGroup(String& s, long& l) const;
-
-   /** @name Listing all external profiles
-       @return a kbStringList of profile names, must be freed by
-       caller, never NULL
-    */
-   static kbStringList *GetExternalProfiles(void);
+   /// see wxConfig docs
+   virtual bool GetFirstGroup(String& s, long& l) const = 0;
+   /// see wxConfig docs
+   virtual bool GetNextGroup(String& s, long& l) const = 0;
+   /// see wxConfig docs
+   virtual bool GetFirstEntry(String& s, long& l) const = 0;
+   /// see wxConfig docs
+   virtual bool GetNextEntry(String& s, long& l) const = 0;
 
    /** @name Managing environment variables
-
        just expose wxConfig methods (we do need them to be able to read the
        real config values, i.e. to disable expansion, sometimes)
    */
@@ -177,24 +167,19 @@ public:
    // for internal use by wxWindows related code only: get the pointer to the
    // underlying wxConfig object. ProfileBase readEntry() functions should be
    // used for reading/writing the entries!
-   wxConfigBase *GetConfig() const { return m_config; }
+   wxConfigBase *GetConfig() const { return ms_GlobalConfig; }
 
+   virtual void SetPath(const String &path) = 0; 
+   virtual void ResetPath(void) = 0;
+/*     virtual const String GetPath() const = 0;
+*/
+   
 protected:
-   /** The config object we use (may be NULL).
-       A normal profile either has a wxFileConfig associated with it
-       or not. If not, m_config is NULL and all read/write operations
-       will be passed on to the parent profile if it exists or applied
-       to the corresponding section in the global profile. Of course,
-       the global profile must always have a non-NULL pointer here.
-   */
-   wxConfigBase  *m_config;
-
-   /// Do we need to expand environment variables (only if m_config == NULL)
-   bool m_expandEnvVars;
-
    /// why does egcs want this?
    ProfileBase() {}
 
+   /// global wxConfig object, shared by all profiles
+   static wxConfigBase *ms_GlobalConfig;
 private:
    /// forbid copy construction
    ProfileBase(ProfileBase const &);
@@ -230,6 +215,7 @@ private:
   bool         m_wasExpanding;
 };
 
+
 // ----------------------------------------------------------------------------
 // a tiny utility class which is used to temporary change the config path, for
 // example:
@@ -247,22 +233,19 @@ public:
       {
          // we don't really change it, just temporarily change the path
          m_config = (ProfileBase *)config;
-         m_strOldPath = m_config->GetPath();
          m_config->SetPath(path);
       }
 
-   ~ProfilePathChanger() { m_config->SetPath(m_strOldPath); }
+   ~ProfilePathChanger() { m_config->ResetPath(); }
 
 private:
    ProfileBase *m_config;
-   String      m_strOldPath;
 };
-
-
+   
 // ----------------------------------------------------------------------------
 // two handy functions for savings/restoring arrays of strings to/from config
 // ----------------------------------------------------------------------------
-void SaveArray(ProfileBase& conf, const wxArrayString& astr, String const & key);
-void RestoreArray(ProfileBase& conf, wxArrayString& astr, String const & key);
+void SaveArray(ProfileBase *conf, const wxArrayString& astr, String const & key);
+void RestoreArray(ProfileBase * conf, wxArrayString& astr, String const & key);
 //@}
 #endif // PROFILE_H

@@ -533,6 +533,8 @@ wxOptionsPage::wxOptionsPage(wxNotebook *notebook,
    notebook->AddPage(this, title, FALSE /* don't select */, image);
 
    m_Profile = profile;
+   m_Profile->IncRef();
+   
    m_HelpId = helpId;
    // see enum ConfigFields for "+1"
    m_nFirst = nFirst + 1;
@@ -1155,8 +1157,9 @@ void wxOptionsPageFolders::OnModifyFolder(wxCommandEvent&)
    wxCHECK_RET( nSel != -1, "should be disabled" );
 
    ProfileBase *profile = ProfileBase::CreateProfile(l->GetString(nSel), NULL);
-
-   MDialog_FolderProfile(GET_PARENT_OF_CLASS(this, wxDialog), profile);
+   MDialog_FolderProfile(GET_PARENT_OF_CLASS(this, wxDialog),
+                         profile);
+   profile->DecRef();
 }
 
 void wxOptionsPageFolders::OnDeleteFolder(wxCommandEvent& event)
@@ -1264,9 +1267,7 @@ void wxOptionsDialog::ResetDirty()
 wxOptionsDialog::~wxOptionsDialog()
 {
    // save settings
-   wxConfigBase *config = mApplication->GetProfile()->GetConfig();
-   CHECK_RET( config, "no config in ~wxOptionsDialog?" );
-   (void)config->Flush();
+   ProfileBase::FlushAll();
 }
 
 // ----------------------------------------------------------------------------
@@ -1296,7 +1297,7 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
    // don't forget to update both the array above and the enum!
    wxASSERT( WXSIZEOF(s_aszImages) == OptionsPage_Max + 1);
 
-   ProfileBase *profile = mApplication->GetProfile();
+   ProfileBase *profile = ProfileBase::CreateProfile("");
 
    // create and add the pages
    (void)new wxOptionsPageIdent(this, profile);
@@ -1309,6 +1310,8 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
    (void)new wxOptionsPageAdb(this, profile);
    (void)new wxOptionsPageHelpers(this, profile);
    (void)new wxOptionsPageOthers(this, profile);
+
+   profile->DecRef();
 }
 
 // ----------------------------------------------------------------------------

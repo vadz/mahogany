@@ -380,9 +380,7 @@ AdbBook *AdbManager::GetBook(size_t n) const
 // the time to do it right now...
 void AdbManager::LoadAll()
 {
-  ProfileBase & conf = *mApplication->GetProfile();
-  //FIXME: is this correct? SetPath() corrupts the global profile path! (KB)
-  ProfilePathChanger pc(&conf,"/AdbEditor");
+   ProfileBase * conf = ProfileBase::CreateProfile("AdbEditor");
 
   wxArrayString astrAdb, astrProv;
   RestoreArray(conf, astrAdb, "AddressBooks");
@@ -409,6 +407,7 @@ void AdbManager::LoadAll()
 
     SafeDecRef(pProvider);
   }
+  conf->DecRef();
 }
 
 void AdbManager::ClearCache()

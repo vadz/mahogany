@@ -25,6 +25,7 @@
 #   include "MApplication.h"
 #   include "Profile.h"
 #   include "guidef.h"
+#   include "strutil.h"
 #   include <wx/wx.h>
 #endif
 
@@ -176,6 +177,10 @@ public:
                           ProfileBase *profile,
                           wxFolderCreateDialog *dlg = NULL);
 
+   ~wxFolderPropertiesPage()
+      {
+         m_profile->DecRef();
+      }
    // set the profile path to copy the default values from
    void SetDefaults(const String& profilePath)
       { m_defaultsPath = profilePath; }
@@ -474,37 +479,25 @@ bool wxFolderCreateDialog::TransferDataFromWindow()
 
    // for the creation of a folder we don't use the toplevel config
    // section but create a profile of that name first
-   ProfileBase *profile = ProfileBase::CreateProfile
-      (
-         folderName,
-         mApplication->GetProfile()
-         );
-
+   ProfileBase *profile = ProfileBase::CreateProfile(folderName);
+   
    bool ok = TRUE;
 
    // we must restore the path before the profile is released with DecRef(),
    // so take all this in a block
    {
-      FolderPathChanger changePath(profile, folderName);
       profile->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
-
       // tell the pages to use this profile instead of the global one
-      ((wxOptionsPage *)m_notebook->GetPage(FolderCreatePage_Compose))
-         ->SetProfile(profile);
-
+      ((wxOptionsPage *)m_notebook->GetPage(FolderCreatePage_Compose))->SetProfile(profile);
       if ( wxNotebookDialog::TransferDataFromWindow() )
       {
          // do create the new folder
          CHECK( m_parentFolder, false, "should have created parent folder" );
-
          m_newFolder = m_parentFolder->GetSubfolder(m_folderName->GetValue());
-
          CHECK( m_newFolder, false, "new folder not created" );
       }
       else
-      {
          ok = false;
-      }
    }
 
    profile->DecRef();
@@ -566,7 +559,8 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    // ------------
    m_notebook = notebook;
    m_profile = profile;
-
+   m_profile->IncRef();
+   
    wxLayoutConstraints *c;
 
    // create controls
@@ -795,14 +789,14 @@ wxFolderPropertiesPage::SetDefaultValues(bool firstTime)
    // we want to read settings from the default section under
    // M_FOLDER_CONFIG_SECTION or from M_PROFILE_CONFIG_SECTION if the section
    // is empty (i.e. we have no parent folder)
-   String profilePath = !m_defaultsPath ? String(M_PROFILE_CONFIG_SECTION)
-      : String(M_FOLDER_CONFIG_SECTION) + m_defaultsPath;
-   ProfilePathChanger fpc(m_profile, profilePath);
+
+   ProfileBase *profile = ProfileBase::CreateProfile("");
+   if(m_defaultsPath) profile->SetPath(m_defaultsPath);
 
    MFolder::Type typeFolder;
    if ( firstTime )
    {
-      typeFolder = (MFolder::Type)GetFolderType(READ_CONFIG(m_profile, MP_FOLDER_TYPE));
+      typeFolder = (MFolder::Type)GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
       if(typeFolder == FolderInvalid)
          typeFolder = File;
       m_radio->SetSelection(typeFolder);
@@ -814,29 +808,30 @@ wxFolderPropertiesPage::SetDefaultValues(bool firstTime)
 
    if ( FolderTypeHasUserName(typeFolder) )
    {
-      String value = READ_CONFIG(m_profile,MP_POP_LOGIN);
+      String value = READ_CONFIG(profile,MP_POP_LOGIN);
       if ( !value )
          value = READ_APPCONFIG(MP_USERNAME);
       m_login->SetValue(value);
 
-      m_password->SetValue(READ_CONFIG(m_profile,MP_POP_PASSWORD));
+      m_password->SetValue(strutil_decrypt(READ_CONFIG(profile,MP_POP_PASSWORD)));
 
       if ( typeFolder == POP || typeFolder == IMAP )
-         value = READ_CONFIG(m_profile, MP_POP_HOST);
-      else if ( typeFolder == MF_NNTP)
-         value = READ_CONFIG(m_profile, MP_NNTPHOST);
+         value = READ_CONFIG(profile, MP_POP_HOST);
+      else if ( typeFolder == News )
+         value = READ_CONFIG(profile, MP_NNTPHOST);
       else
          value.Empty();
       m_server->SetValue(value);
    }
 
    if ( typeFolder == File && !m_isCreating )
-      m_path->SetValue(READ_CONFIG(m_profile,MP_FOLDER_PATH));
-   else if ( typeFolder == News || typeFolder == MF_NNTP )
-      m_newsgroup->SetValue(READ_CONFIG(m_profile,MP_FOLDER_PATH));
+      m_path->SetValue(READ_CONFIG(profile,MP_FOLDER_PATH));
+   else if ( typeFolder == News )
+      m_newsgroup->SetValue(READ_CONFIG(profile,MP_FOLDER_PATH));
 
    if ( !m_isCreating )
-      m_comment->SetValue(READ_CONFIG(m_profile, MP_FOLDER_COMMENT));
+      m_comment->SetValue(READ_CONFIG(profile, MP_FOLDER_COMMENT));
+   profile->DecRef();
 }
 
 bool
@@ -891,9 +886,9 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    // 3rd step: store additional data about the newly created folder directly
    // in the profile
    m_profile->writeEntry(MP_FOLDER_IS_INCOMING,m_isIncoming->GetValue());
-   
    String fullname = folder->GetFullName();
-   FolderPathChanger changePath(m_profile, fullname);
+   m_profile->DecRef();
+   m_profile = ProfileBase::CreateProfile(fullname);
    switch ( typeFolder )
    {
    case POP:
@@ -906,11 +901,11 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       else
          m_profile->writeEntry(MP_FOLDER_TYPE,typeFolder);
       m_profile->writeEntry(MP_POP_LOGIN,m_login->GetValue());
-      m_profile->writeEntry(MP_POP_PASSWORD,m_password->GetValue());
+      m_profile->writeEntry(MP_POP_PASSWORD,
+                            strutil_encrypt(m_password->GetValue()));
       m_profile->writeEntry(MP_POP_HOST,m_server->GetValue());
       m_profile->writeEntry(MP_FOLDER_PATH,m_mailboxname->GetValue());
       break;
-
    case MF_NNTP:
       m_profile->writeEntry(MP_NNTPHOST,m_server->GetValue());
       m_profile->writeEntry(MP_FOLDER_PATH,m_newsgroup->GetValue());
@@ -968,11 +963,13 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent,
    // don't forget to update both the array above and the enum!
    wxASSERT( WXSIZEOF(s_aszImages) == FolderCreatePage_Max + 1 );
 
-   ProfileBase *profile = mApplication->GetProfile();
+   ProfileBase *profile = ProfileBase::CreateProfile("");
 
    // create and add the pages
    (void)new wxOptionsPageCompose(this, profile);
    (void)new wxFolderPropertiesPage(this, profile, dlg);
+   
+   profile->DecRef();
 }
 
 // -----------------------------------------------------------------------------
