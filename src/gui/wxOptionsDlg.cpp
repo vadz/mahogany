@@ -820,7 +820,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("When replying to a message, a regex can be used to detect\n"
                   "the beginning of the signature of the message replied to.\n"
                   "(Do not try to detect the end of the line: a \\r\\n pair will\n"
-                  "be added for that at the end of the specified regex. On the\n)"
+                  "be added for that at the end of the specified regex. On the\n"
                   "other hand, do not forget '^' at the beginning...)"),
    Field_Message | Field_AppWide, -1 },
                   { gettext_noop("Signature separator"),          Field_Text,    -1,                        },
