@@ -159,7 +159,10 @@ public:
         Postal   = 0x0004,
         Parcel   = 0x0008,
         Home     = 0x0010,
-        Work     = 0x0020
+        Work     = 0x0020,
+
+        // the default flags for address entries
+        Default  = Intl | Postal | Parcel | Work
     };
 
     // get the address flags
@@ -168,6 +171,11 @@ public:
 protected:
     // ctor from existing property
     wxVCardAddrOrLabel(VObject *vObj) : wxVCardObject(vObj) { }
+
+    // create properties corresponding to our flags in vObject
+    static void SetFlags(VObject *vObj, int flags);
+
+    friend wxVCard; // calls SetFlags
 };
 
 // this is the broken-down address
@@ -239,6 +247,9 @@ public:
 
 protected:
     wxVCardPhoneNumber(VObject *vObj);
+
+    // create properties corresponding to our flags in vObject
+    static void SetFlags(VObject *vObj, int flags);
 
     friend class wxVCard; // it creates us using protected ctor
 };
@@ -390,11 +401,16 @@ public:
     void ClearEMails();
 
     // add a new copy of a multiply occuring property
-#if 0
-    void AddAddress(const wxVCardAddress& adr);
-    void AddAddressLabel(const wxVCardAddressLabel& label);
-    void AddPhoneNumber(const wxVCardPhoneNumber& phone);
-#endif
+    void AddAddress(const wxString& postoffice,
+                    const wxString& extaddr,
+                    const wxString& street,
+                    const wxString& city,
+                    const wxString& region,
+                    const wxString& postalcode,
+                    const wxString& country,
+                    int flags);
+    void AddAddressLabel(const wxString& label, int flags);
+    void AddPhoneNumber(const wxString& phone, int flags);
     void AddEMail(const wxString& email,
                   wxVCardEMail::Type type = wxVCardEMail::Internet);
 

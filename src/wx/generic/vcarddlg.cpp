@@ -30,9 +30,9 @@
 #endif
 
 #ifndef WX_PRECOMP
+    #include "wx/dynarray.h"
     #include "wx/log.h"
     #include "wx/intl.h"
-    #include "wx/datetime.h"
 
     #include "wx/stattext.h"
     #include "wx/statbox.h"
@@ -40,9 +40,11 @@
     #include "wx/listbox.h"
     #include "wx/textctrl.h"
     #include "wx/sizer.h"
-    #include "wx/notebook.h"
     #include "wx/textdlg.h"
 #endif //WX_PRECOMP
+
+#include "wx/datetime.h"
+#include "wx/notebook.h"
 
 #include "wx/vcard.h"
 
@@ -62,10 +64,68 @@ enum
     Addr_Modify,
     Addr_Delete,
 
-    Addr_List,
-
     Max
 };
+
+// ----------------------------------------------------------------------------
+// some macros to make writing sizer-based dialog slightly less painful
+// ----------------------------------------------------------------------------
+
+#define ADD_TEXT_LABEL_TO_SIZER(sizer, label, var)  \
+    var = new wxTextCtrl(panel, -1);                \
+    sizer->Add(CreateLabelSizer(panel, label, var), \
+               0, wxGROW | wxALL, 5)
+
+#define ADD_TEXT_LABEL_TO_GRIDSIZER(sizer, label, var)     \
+    var = new wxTextCtrl(panel, -1);                       \
+    sizer->Add(new wxStaticText(panel, -1, label), 0,      \
+               wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);   \
+    sizer->Add(var, 1, wxGROW | wxALIGN_CENTER_VERTICAL)
+
+#define ADD_CHECKBOX_TO_SIZER(sizer, label, var)    \
+    var = new wxCheckBox(panel, -1, label);         \
+    sizer->Add(var, 0, wxALIGN_CENTER_VERTICAL)
+
+// ----------------------------------------------------------------------------
+// helper class for address editing
+// ----------------------------------------------------------------------------
+
+struct wxVCardAddressData
+{
+    wxVCardAddressData(wxVCardAddress* addr)
+    {
+        if ( addr )
+        {
+            postoffice = addr->GetPostOffice();
+            extaddr = addr->GetExtAddress();
+            street = addr->GetStreet();
+            city = addr->GetLocality();
+            region = addr->GetRegion();
+            postalcode = addr->GetPostalCode();
+            country = addr->GetCountry();
+            flags = addr->GetFlags();
+        }
+        else
+        {
+            flags = wxVCardAddress::Default;
+        }
+    }
+
+    wxString postoffice,
+             extaddr,
+             street,
+             city,
+             region,
+             postalcode,
+             country;
+    int flags;
+};
+
+WX_DECLARE_OBJARRAY(wxVCardAddressData, wxVCardAddresses);
+
+#include "wx/arrimpl.cpp"
+
+WX_DEFINE_OBJARRAY(wxVCardAddresses);
 
 // ----------------------------------------------------------------------------
 // vCard editing dialog
@@ -89,9 +149,8 @@ protected:
     void OnAddrModify(wxCommandEvent&);
     void OnAddrDelete(wxCommandEvent&);
 
-    void OnAddressChange(wxCommandEvent&);
-
     void OnUpdateEMail(wxUpdateUIEvent&);
+    void OnUpdateAddress(wxUpdateUIEvent&);
 
     // creates a vertical sizer containing the buttons used with listboxes:
     // add/modify/remove
@@ -102,8 +161,11 @@ protected:
                               const wxString& label,
                               wxControl *control);
 
-    // fill the address data fields from an address entry
-    void UpdateAddressData(int n);
+    // returns the label in the lbox for this address
+    wxString GetAddressLabel(const wxVCardAddressData& data) const;
+
+    // adds an address to the list
+    void AddAddress(const wxVCardAddressData& data);
 
 private:
     wxTextCtrl *m_fullname,
@@ -116,13 +178,38 @@ private:
                *m_department,
                *m_title,
                *m_birthday,
-               *m_url,
-               *m_postoffice,
+               *m_url;
+
+    wxListBox *m_emails,
+              *m_addresses;
+
+    wxVCard *m_vcard;
+    wxVCardAddresses m_addrData;
+
+    DECLARE_EVENT_TABLE()
+};
+
+// ----------------------------------------------------------------------------
+// address editing dialog
+// ----------------------------------------------------------------------------
+
+class wxVCardAddressDialog : public wxDialog
+{
+public:
+    wxVCardAddressDialog(wxWindow *parent, const wxVCardAddressData& data);
+
+    virtual bool TransferDataToWindow();
+    virtual bool TransferDataFromWindow();
+
+    const wxVCardAddressData& GetData() const { return m_data; }
+
+protected:
+    wxTextCtrl *m_postoffice,
                *m_extaddr,
                *m_street,
                *m_city,
                *m_region,
-               *m_postcode,
+               *m_postalcode,
                *m_country;
 
     wxCheckBox *m_domesticAddr,
@@ -132,12 +219,7 @@ private:
                *m_homeAddr,
                *m_workAddr;
 
-    wxListBox *m_emails,
-              *m_addresses;
-
-    wxVCard *m_vcard;
-
-    DECLARE_EVENT_TABLE()
+    wxVCardAddressData m_data;
 };
 
 // ----------------------------------------------------------------------------
@@ -156,7 +238,8 @@ BEGIN_EVENT_TABLE(wxVCardDialog, wxDialog)
     EVT_UPDATE_UI(Email_Modify, wxVCardDialog::OnUpdateEMail)
     EVT_UPDATE_UI(Email_Delete, wxVCardDialog::OnUpdateEMail)
 
-    EVT_LISTBOX(Addr_List, wxVCardDialog::OnAddressChange)
+    EVT_UPDATE_UI(Addr_Modify, wxVCardDialog::OnUpdateAddress)
+    EVT_UPDATE_UI(Addr_Delete, wxVCardDialog::OnUpdateAddress)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -190,21 +273,6 @@ wxVCardDialog::wxVCardDialog(wxVCard *vcard)
     sizerTop->Add(sizerNotebook, 1, wxGROW | wxALL, 5);
     sizerTop->Add(CreateButtonSizer(wxOK | wxCANCEL), 0,
                   wxALIGN_RIGHT | (wxALL & ~wxRIGHT), 10);
-
-    #define ADD_TEXT_LABEL_TO_SIZER(sizer, label, var)  \
-        var = new wxTextCtrl(panel, -1);                \
-        sizer->Add(CreateLabelSizer(panel, label, var), \
-                   0, wxGROW | wxALL, 5)
-
-    #define ADD_TEXT_LABEL_TO_GRIDSIZER(sizer, label, var)     \
-        var = new wxTextCtrl(panel, -1);                       \
-        sizer->Add(new wxStaticText(panel, -1, label), 0,      \
-                   wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL);   \
-        sizer->Add(var, 1, wxGROW | wxALIGN_CENTER_VERTICAL)
-
-    #define ADD_CHECKBOX_TO_SIZER(sizer, label, var)    \
-        var = new wxCheckBox(panel, -1, label);         \
-        sizer->Add(var, 0, wxALIGN_CENTER_VERTICAL)
 
     // first page: the identity fields
     // ----------------------------------------------------------------------
@@ -288,8 +356,8 @@ wxVCardDialog::wxVCardDialog(wxVCard *vcard)
 
     notebook->AddPage(panel, _("Network"));
 
-    // third page: address
-    // -------------------
+    // third page: addresses and address labels
+    // ----------------------------------------
 
     panel = new wxPanel(notebook);
 
@@ -301,39 +369,9 @@ wxVCardDialog::wxVCardDialog(wxVCard *vcard)
                                wxHORIZONTAL
                               );
 
-    m_addresses = new wxListBox(panel, Addr_List);
+    m_addresses = new wxListBox(panel, -1);
     sizerAddr->Add(m_addresses, 1, wxGROW | wxALL, 5);
     sizerAddr->Add(CreateLboxButtonsSizer(panel, Addr_Add), 0, wxCENTRE);
-
-    sizerPanel->Add(sizerAddr, 1, wxGROW | wxALL, 5);
-
-    sizerAddr = new wxStaticBoxSizer
-                    (
-                     new wxStaticBox(panel, -1, _("&Data")),
-                     wxVERTICAL
-                    );
-
-    sizer2Col = new wxFlexGridSizer(2, 5, 5);
-    sizer2Col->AddGrowableCol(1);
-    ADD_TEXT_LABEL_TO_GRIDSIZER(sizer2Col, _("&Post office:"), m_postoffice);
-    ADD_TEXT_LABEL_TO_GRIDSIZER(sizer2Col, _("&Extended:"), m_extaddr);
-    ADD_TEXT_LABEL_TO_GRIDSIZER(sizer2Col, _("&Street:"), m_street);
-    ADD_TEXT_LABEL_TO_GRIDSIZER(sizer2Col, _("&City:"), m_city);
-    ADD_TEXT_LABEL_TO_GRIDSIZER(sizer2Col, _("&Region:"), m_region);
-    ADD_TEXT_LABEL_TO_GRIDSIZER(sizer2Col, _("&Postal code:"), m_postcode);
-    ADD_TEXT_LABEL_TO_GRIDSIZER(sizer2Col, _("&Country:"), m_country);
-
-    sizerAddr->Add(sizer2Col, 0, wxGROW | wxALL, 5);
-
-    sizer2Col = new wxFlexGridSizer(2, 5, 5);
-    ADD_CHECKBOX_TO_SIZER(sizer2Col, _("Domestic"), m_domesticAddr);
-    ADD_CHECKBOX_TO_SIZER(sizer2Col, _("International"), m_internationalAddr);
-    ADD_CHECKBOX_TO_SIZER(sizer2Col, _("Postal"), m_postalAddr);
-    ADD_CHECKBOX_TO_SIZER(sizer2Col, _("Parcel"), m_parcelAddr);
-    ADD_CHECKBOX_TO_SIZER(sizer2Col, _("Home"), m_homeAddr);
-    ADD_CHECKBOX_TO_SIZER(sizer2Col, _("Work"), m_workAddr);
-
-    sizerAddr->Add(sizer2Col, 0, wxGROW | wxALL, 5);
 
     sizerPanel->Add(sizerAddr, 1, wxGROW | wxALL, 5);
 
@@ -436,8 +474,23 @@ bool wxVCardDialog::TransferDataToWindow()
         while ( email )
         {
             m_emails->Append(email->GetEMail());
+            delete email;
 
             email = m_vcard->GetNextEMail(&cookie);
+        }
+    }
+
+    // address page
+    {
+        void *cookie;
+        wxVCardAddress *addr = m_vcard->GetFirstAddress(&cookie);
+        while ( addr )
+        {
+            AddAddress(wxVCardAddressData(addr));
+
+            delete addr;
+
+            addr = m_vcard->GetNextAddress(&cookie);
         }
     }
 
@@ -489,6 +542,23 @@ bool wxVCardDialog::TransferDataFromWindow()
         for ( size_t n = 0; n < count; n++ )
         {
             m_vcard->AddEMail(m_emails->GetString(n));
+        }
+    }
+
+    // address page
+    {
+        size_t count = m_addrData.GetCount();
+        for ( size_t n = 0; n < count; n++ )
+        {
+            const wxVCardAddressData& d = m_addrData[n];
+            m_vcard->AddAddress(d.postoffice,
+                                d.extaddr,
+                                d.street,
+                                d.region,
+                                d.postalcode,
+                                d.city,
+                                d.country,
+                                d.flags);
         }
     }
 
@@ -547,19 +617,33 @@ void wxVCardDialog::OnEmailDelete(wxCommandEvent& WXUNUSED(event))
 
 void wxVCardDialog::OnAddrAdd(wxCommandEvent& WXUNUSED(event))
 {
+    wxVCardAddressDialog dlg(this, wxVCardAddressData(NULL));
+    if ( dlg.ShowModal() == wxID_OK )
+    {
+        AddAddress(dlg.GetData());
+    }
 }
 
 void wxVCardDialog::OnAddrModify(wxCommandEvent& WXUNUSED(event))
 {
+    int sel = m_addresses->GetSelection();
+    wxCHECK_RET( sel != -1, _T("button should be disabled") );
+
+    wxVCardAddressDialog dlg(this, m_addrData[sel]);
+    if ( dlg.ShowModal() == wxID_OK )
+    {
+        m_addrData[sel] = dlg.GetData();
+        m_addresses->SetString(sel, GetAddressLabel(m_addrData[sel]));
+    }
 }
 
 void wxVCardDialog::OnAddrDelete(wxCommandEvent& WXUNUSED(event))
 {
-}
+    int sel = m_addresses->GetSelection();
+    wxCHECK_RET( sel != -1, _T("button should be disabled") );
 
-void wxVCardDialog::OnAddressChange(wxCommandEvent& event)
-{
-    UpdateAddressData(event.GetInt());
+    m_addrData.RemoveAt(sel);
+    m_addresses->Delete(sel);
 }
 
 void wxVCardDialog::OnUpdateEMail(wxUpdateUIEvent& event)
@@ -567,12 +651,150 @@ void wxVCardDialog::OnUpdateEMail(wxUpdateUIEvent& event)
     event.Enable( m_emails->GetSelection() != -1 );
 }
 
+void wxVCardDialog::OnUpdateAddress(wxUpdateUIEvent& event)
+{
+    event.Enable( m_addresses->GetSelection() != -1 );
+}
+
 // ----------------------------------------------------------------------------
-//
+// address helpers
 // ----------------------------------------------------------------------------
 
-void wxVCardDialog::UpdateAddressData(int n)
+wxString wxVCardDialog::GetAddressLabel(const wxVCardAddressData& data) const
 {
+    // take the address start as the string to appear in the listbox
+    wxString label;
+    label << data.extaddr << _T(' ') << data.street;
+    return label;
+}
+
+void wxVCardDialog::AddAddress(const wxVCardAddressData& data)
+{
+    m_addrData.Add(data);
+    m_addresses->Append(GetAddressLabel(data));
+}
+
+// ----------------------------------------------------------------------------
+// wxVCardAddressDialog
+// ----------------------------------------------------------------------------
+
+wxVCardAddressDialog::wxVCardAddressDialog(wxWindow *parent,
+                                           const wxVCardAddressData& data)
+                    : wxDialog(NULL, -1, _("Edit Address"),
+                               wxDefaultPosition, wxDefaultSize,
+                               wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER ),
+                      m_data(data)
+{
+    // create controls
+    // ---------------
+
+    wxSizer *sizerTop = new wxBoxSizer(wxVERTICAL);
+
+    wxWindow *panel = this; // macros use this variable
+
+    wxStaticBoxSizer *sizerAddr = new wxStaticBoxSizer
+                                        (
+                                         new wxStaticBox(panel, -1, _("&Data")),
+                                         wxVERTICAL
+                                        );
+
+    wxFlexGridSizer *sizer2Col = new wxFlexGridSizer(2, 5, 5);
+    sizer2Col->AddGrowableCol(1);
+    ADD_TEXT_LABEL_TO_GRIDSIZER(sizer2Col, _("&Post office:"), m_postoffice);
+    ADD_TEXT_LABEL_TO_GRIDSIZER(sizer2Col, _("&Extended:"), m_extaddr);
+    ADD_TEXT_LABEL_TO_GRIDSIZER(sizer2Col, _("&Street:"), m_street);
+    ADD_TEXT_LABEL_TO_GRIDSIZER(sizer2Col, _("&City:"), m_city);
+    ADD_TEXT_LABEL_TO_GRIDSIZER(sizer2Col, _("&Region:"), m_region);
+    ADD_TEXT_LABEL_TO_GRIDSIZER(sizer2Col, _("&Postal code:"), m_postalcode);
+    ADD_TEXT_LABEL_TO_GRIDSIZER(sizer2Col, _("&Country:"), m_country);
+
+    sizerAddr->Add(sizer2Col, 0, wxGROW | wxALL, 5);
+
+    sizer2Col = new wxFlexGridSizer(2, 5, 5);
+    ADD_CHECKBOX_TO_SIZER(sizer2Col, _("Domestic"), m_domesticAddr);
+    ADD_CHECKBOX_TO_SIZER(sizer2Col, _("International"), m_internationalAddr);
+    ADD_CHECKBOX_TO_SIZER(sizer2Col, _("Postal"), m_postalAddr);
+    ADD_CHECKBOX_TO_SIZER(sizer2Col, _("Parcel"), m_parcelAddr);
+    ADD_CHECKBOX_TO_SIZER(sizer2Col, _("Home"), m_homeAddr);
+    ADD_CHECKBOX_TO_SIZER(sizer2Col, _("Work"), m_workAddr);
+
+    wxStaticBoxSizer *sizerAddrType = new wxStaticBoxSizer
+                                            (
+                                             new wxStaticBox(panel, -1, _("&Type")),
+                                             wxVERTICAL
+                                            );
+    sizerAddrType->Add(sizer2Col, 0, wxGROW);
+
+    sizerAddr->Add(sizerAddrType, 0, wxCENTRE | wxALL, 5);
+
+    sizerTop->Add(sizerAddr, 1, wxGROW | wxALL, 5);
+    sizerTop->Add(CreateButtonSizer(wxOK | wxCANCEL), 0,
+                  wxALIGN_RIGHT | (wxALL & ~wxRIGHT), 10);
+
+    SetAutoLayout(TRUE);
+    SetSizer(sizerTop);
+    sizerTop->Fit(this);
+    sizerTop->SetSizeHints(this);
+
+    CentreOnParent();
+}
+
+bool wxVCardAddressDialog::TransferDataToWindow()
+{
+    #define ADDR_TO_DLG(field) m_##field->SetValue(m_data.field)
+
+    ADDR_TO_DLG(postoffice);
+    ADDR_TO_DLG(extaddr);
+    ADDR_TO_DLG(street);
+    ADDR_TO_DLG(region);
+    ADDR_TO_DLG(postalcode);
+    ADDR_TO_DLG(city);
+    ADDR_TO_DLG(country);
+
+    #define SET_ADDR_FLAG(flag, ctrl) \
+        if ( m_data.flags & wxVCardAddress::flag ) ctrl->SetValue(TRUE)
+
+    SET_ADDR_FLAG(Domestic, m_domesticAddr);
+    SET_ADDR_FLAG(Intl, m_internationalAddr);
+    SET_ADDR_FLAG(Postal, m_postalAddr);
+    SET_ADDR_FLAG(Parcel, m_parcelAddr);
+    SET_ADDR_FLAG(Home, m_homeAddr);
+    SET_ADDR_FLAG(Work, m_workAddr);
+
+    #undef SET_ADDR_FLAG
+    #undef ADDR_TO_DLG
+
+    return TRUE;
+}
+
+bool wxVCardAddressDialog::TransferDataFromWindow()
+{
+    #define DLG_TO_ADDR(field) m_data.field = m_##field->GetValue()
+
+    DLG_TO_ADDR(postoffice);
+    DLG_TO_ADDR(extaddr);
+    DLG_TO_ADDR(street);
+    DLG_TO_ADDR(region);
+    DLG_TO_ADDR(postalcode);
+    DLG_TO_ADDR(city);
+    DLG_TO_ADDR(country);
+
+    #define GET_ADDR_FLAG(flag, ctrl) \
+        if ( ctrl->GetValue() ) m_data.flags |= wxVCardAddress::flag
+
+    m_data.flags = 0;
+
+    GET_ADDR_FLAG(Domestic, m_domesticAddr);
+    GET_ADDR_FLAG(Intl, m_internationalAddr);
+    GET_ADDR_FLAG(Postal, m_postalAddr);
+    GET_ADDR_FLAG(Parcel, m_parcelAddr);
+    GET_ADDR_FLAG(Home, m_homeAddr);
+    GET_ADDR_FLAG(Work, m_workAddr);
+
+    #undef GET_ADDR_FLAG
+    #undef DLG_TO_ADDR
+
+    return TRUE;
 }
 
 // ----------------------------------------------------------------------------

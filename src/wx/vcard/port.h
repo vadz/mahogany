@@ -36,24 +36,11 @@ DFARS 252.227-7013 or 48 CFR 52.227-19, as applicable.
 
 ***************************************************************************/
 
-#ifndef __PORT_H__
-#define __PORT_H__ 1
-
+#ifndef _VCARD_PORT_H__
+#define _VCARD_PORT_H__ 1
 
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)
 extern "C" {
-#endif
-
-#if 0
- some of these #defines are commented out because
- Visual C++ sets them on the compiler command line instead
-
-#define _DEBUG
-#define WIN32
-#define WIN16
-#define _WINDOWS
-#define __MWERKS__
-#define INCLUDEMFC
 #endif
 
 #define	vCardClipboardFormat		"+//ISBN 1-887687-00-9::versit::PDI//vCard"
@@ -72,7 +59,13 @@ For example:
 #define vCardMimeType		"text/x-vCard"
 #define vCalendarMimeType	"text/x-vCalendar"
 
+#ifdef _WINDOWS
+#define DLLEXPORT(t) __declspec(dllexport) t
+#define stricmp _stricmp
+#else
 #define DLLEXPORT(t) t
+#define stricmp strcasecmp
+#endif
 
 #ifndef FALSE
 #define FALSE	0
@@ -81,10 +74,8 @@ For example:
 #define TRUE	1
 #endif
 
-#define stricmp strcasecmp
-	
 #if defined(__CPLUSPLUS__) || defined(__cplusplus)
 }
 #endif
 
-#endif // __PORT_H__
+#endif // _VCARD_PORT_H__

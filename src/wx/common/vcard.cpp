@@ -32,17 +32,36 @@
     #include "wx/string.h"
     #include "wx/log.h"
     #include "wx/intl.h"
-    #include "wx/datetime.h"
     #include "wx/app.h"
     #include "wx/dynarray.h"
     #include "wx/filefn.h"
 #endif //WX_PRECOMP
+
+#include "wx/module.h"
+#include "wx/datetime.h"
 
 #include "../vcard/vcc.h"
 
 #define VOBJECT_DEFINED
 
 #include "wx/vcard.h"
+
+// ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
+
+// a module to clean up memory used by vCard lib
+class wxVCardModule : public wxModule
+{
+public:
+    virtual bool OnInit() { return TRUE; }
+    virtual void OnExit() { cleanStrTbl(); }
+
+private:
+    DECLARE_DYNAMIC_CLASS(wxVCardModule)
+};
+
+IMPLEMENT_DYNAMIC_CLASS(wxVCardModule, wxModule);
 
 // ============================================================================
 // implementation: generic vObject API wrappers
@@ -593,6 +612,49 @@ void wxVCard::SetBirthDay(const wxDateTime& datetime)
     SetProperty(VCBirthDateProp, datetime.FormatISODate());
 }
 
+void wxVCard::AddAddress(const wxString& postoffice,
+                         const wxString& extaddr,
+                         const wxString& street,
+                         const wxString& city,
+                         const wxString& region,
+                         const wxString& postalcode,
+                         const wxString& country,
+                         int flags)
+{
+    VObject *vObj = addProp(m_vObj, VCAdrProp);
+    if ( !!postoffice )
+        addPropValue(vObj, VCPostalBoxProp, postoffice);
+    if ( !!extaddr )
+        addPropValue(vObj, VCExtAddressProp, extaddr);
+    if ( !!street )
+        addPropValue(vObj, VCStreetAddressProp, street);
+    if ( !!city )
+        addPropValue(vObj, VCCityProp, city);
+    if ( !!region )
+        addPropValue(vObj, VCRegionProp, region);
+    if ( !!postalcode )
+        addPropValue(vObj, VCPostalCodeProp, postalcode);
+    if ( !!country )
+        addPropValue(vObj, VCCountryNameProp, country);
+
+    wxVCardAddrOrLabel::SetFlags(vObj, flags);
+}
+
+void wxVCard::AddAddressLabel(const wxString& label, int flags)
+{
+    VObject *vObj = addPropValue(m_vObj, VCDeliveryLabelProp, label);
+    addProp(vObj, VCQuotedPrintableProp);
+
+    wxVCardAddrOrLabel::SetFlags(vObj, flags);
+}
+
+void wxVCard::AddPhoneNumber(const wxString& phone, int flags)
+{
+    VObject *vObj = addPropValue(m_vObj, VCTelephoneProp, phone);
+
+    wxVCardPhoneNumber::SetFlags(vObj, flags);
+}
+
 void wxVCard::AddEMail(const wxString& email, wxVCardEMail::Type type)
 {
     addPropValue(m_vObj, VCEmailAddressProp, email);
@@ -634,7 +696,7 @@ void wxVCardObject::Dump(const wxString& filename)
 // implementation of wxVCardObject subclasses
 // ============================================================================
 
-// a macro which allows to abbreviate GetFlags() methods: to sue it, you must
+// a macro which allows to abbreviate GetFlags() methods: to use it, you must
 // have local variables like in wxVCardAddrOrLabel::GetFlags() below
 #define CHECK_FLAG(propname, flag)  \
     prop = GetProperty(propname);   \
@@ -643,6 +705,9 @@ void wxVCardObject::Dump(const wxString& filename)
         flags |= flag;              \
         delete prop;                \
     }
+
+    // anothero ne to set flags in vObject
+#define SET_FLAG(propname, flag) if ( flags & flag ) addProp(vObj, propname)
 
 // ----------------------------------------------------------------------------
 // wxVCardAddrOrLabel
@@ -668,6 +733,19 @@ int wxVCardAddrOrLabel::GetFlags() const
     }
 
     return flags;
+}
+
+/* static */ void wxVCardAddrOrLabel::SetFlags(VObject *vObj, int flags)
+{
+    if ( flags == Default )
+        return;
+
+    SET_FLAG(VCDomesticProp, Domestic);
+    SET_FLAG(VCInternationalProp, Intl);
+    SET_FLAG(VCPostalProp, Postal);
+    SET_FLAG(VCParcelProp, Parcel);
+    SET_FLAG(VCHomeProp, Home);
+    SET_FLAG(VCWorkProp, Work);
 }
 
 // ----------------------------------------------------------------------------
@@ -776,6 +854,23 @@ int wxVCardPhoneNumber::GetFlags() const
     }
 
     return flags;
+}
+
+/* static */ void wxVCardPhoneNumber::SetFlags(VObject *vObj, int flags)
+{
+    SET_FLAG(VCPreferredProp, Preferred);
+    SET_FLAG(VCWorkProp, Work);
+    SET_FLAG(VCHomeProp, Home);
+    SET_FLAG(VCVoiceProp, Voice);
+    SET_FLAG(VCFaxProp, Fax);
+    SET_FLAG(VCMessageProp, Messaging);
+    SET_FLAG(VCCellularProp, Cellular);
+    SET_FLAG(VCPagerProp, Pager);
+    SET_FLAG(VCBBSProp, BBS);
+    SET_FLAG(VCModemProp, Modem);
+    SET_FLAG(VCCarProp, Car);
+    SET_FLAG(VCISDNProp, ISDN);
+    SET_FLAG(VCVideoProp, Video);
 }
 
 // ----------------------------------------------------------------------------
