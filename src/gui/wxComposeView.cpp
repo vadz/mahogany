@@ -716,6 +716,14 @@ bool wxAddressTextCtrl::DoExpand(bool quiet)
    text.Trim(FALSE); // trim spaces from both sides
    text.Trim(TRUE);
 
+   // remove "mailto:" prefix if it's there - this is convenient when you paste
+   // in an URL from the web browser
+   if ( text.StartsWith("mailto:", &text) )
+   {
+      // in case we return below
+      SetValue(text);
+   }
+
    // check for the lone '"' simplifies the code for finding the starting
    // position below: it should be done here, otherwise the following loop
    // will crash!
@@ -779,10 +787,6 @@ bool wxAddressTextCtrl::DoExpand(bool quiet)
    }
 
    String textOrig = text.c_str() + nLastAddr;
-
-   // remove "mailto:" prefix if it's there - this is convenient when you paste
-   // in an URL from the web browser
-   (void)textOrig.StartsWith("mailto:", &textOrig);
 
    wxArrayString expansions;
    if ( AdbExpand(expansions, textOrig, m_lookupMode,
