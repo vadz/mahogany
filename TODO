@@ -19,6 +19,7 @@ wxGTK bug:
    wxFolderView.cpp:85 can be triggered
 
  - wxTreeCtrl::HitTest() doesn't work well with non standard icon sizes
+ - printing to printer broken, preview/print to file work
 
 wxMSW bugs:
  - memory leaks (some from cclient, others - not sure)
@@ -58,15 +59,6 @@ VZ:
     first and then traversing them afterwards. Not important for M anymore.
 
 - Initially selected folder is not highlighted in treectrl.
-
-- How can I make wxLogXXX message have appear in the order they were
-  generated?
-  + VZ: derive your own log target :-) But I think the default order
-        is more sensible
-
-- MTempFileName is broken: all files remain in /tmp!!!
-  + VZ: sure about it? Files remain when the program crashes, but I don't
-        see it otherwise
 
 - help button and more fields for folder creation dialog
 
@@ -128,13 +120,8 @@ DONE:
   Like it is now, MessageCC might access it.
 - add support for POLLINCOMINGDELAY in preferences
   and threshold for progress dialog
-
-
-CHECK:
-- MailFolderCC:
-   -if mailfolder has been closed due to timeout, reopen it.
- - SendMessageCC: allow re-sending of aborted send, i.e. Send() called
-                  more than once
+- remove dialog box in MailFolderCC::Ping about reopening folder!!!
+- filter messages in mm_log/mm_notify
 - make mailfolders collectable:
   - have a "collect" flag
 ---> done, after merging of profile code, add support for building
@@ -148,12 +135,17 @@ CHECK:
       and keep a list of the folder names and MailFolder pointers.
       Regularly check the incoming folders for validity, i.e. Ping() them.
 - locale not found
+
+
+CHECK:
+- MailFolderCC:
+   -if mailfolder has been closed due to timeout, reopen it.
+ - SendMessageCC: allow re-sending of aborted send, i.e. Send() called
+                  more than once
 - message status etc in title bar
 - afm path in config
 - NewMail folder INCOMING flag reset
 - INBOX by default INCOMING
-- remove dialog box in MailFolderCC::Ping about reopening folder!!!
-- filter messages in mm_log/mm_notify
 
 TODO:
 - printer settings seem to have no effect : are persistent, do they get used?

@@ -31,3294 +31,3293 @@ msgstr ""
 "Content-Transfer-Encoding: 8-bit\n"
 
 #, fuzzy
-#~ msgid "no protection"
-#~ msgstr "Kein Schutz"
+msgid "no protection"
+msgstr "Kein Schutz"
 
-#~ msgid "integrity protection"
-#~ msgstr "Integritätsschutz"
+msgid "integrity protection"
+msgstr "Integritätsschutz"
 
-#~ msgid "unknown"
-#~ msgstr "unbekannt"
+msgid "unknown"
+msgstr "unbekannt"
 
-#~ msgid "cannot get local Kerberos realm"
-#~ msgstr "Kann lokalen Kerberos Bereich nicht bekommen"
+msgid "cannot get local Kerberos realm"
+msgstr "Kann lokalen Kerberos Bereich nicht bekommen"
 
-#~ msgid "No suitable protection mechanism"
-#~ msgstr "Kein passender Schutzmechanismus"
+msgid "No suitable protection mechanism"
+msgstr "Kein passender Schutzmechanismus"
 
-#~ msgid "Out of memory"
-#~ msgstr "Nicht genung Speicher"
+msgid "Out of memory"
+msgstr "Nicht genung Speicher"
 
-#~ msgid "Kerberos authenticator too long"
-#~ msgstr "Kerberos Authentifikator zu lang"
+msgid "Kerberos authenticator too long"
+msgstr "Kerberos Authentifikator zu lang"
 
-#~ msgid "Incorrect checksum in Kerberos authenticator"
-#~ msgstr "Falsche Prüfsumme in Kerberos Authentifikator"
+msgid "Incorrect checksum in Kerberos authenticator"
+msgstr "Falsche Prüfsumme in Kerberos Authentifikator"
 
-#~ msgid "Kerberos authenticator has incorrect length"
-#~ msgstr "Kerberos Authentifikator hat falsche Länge"
+msgid "Kerberos authenticator has incorrect length"
+msgstr "Kerberos Authentifikator hat falsche Länge"
 
-#~ msgid "No suitable protection mechanism selected"
-#~ msgstr "Kein passender Schutzmechanismus gewählt"
+msgid "No suitable protection mechanism selected"
+msgstr "Kein passender Schutzmechanismus gewählt"
 
-#~ msgid "Multiple protection mechanisms selected"
-#~ msgstr "Mehrere Schutzmechanismen gewählt"
+msgid "Multiple protection mechanisms selected"
+msgstr "Mehrere Schutzmechanismen gewählt"
 
 #, fuzzy
-#~ msgid "Can't open mailbox: %s"
-#~ msgstr "Kann temporäre Datei nicht öffnen"
+msgid "Can't open mailbox: %s"
+msgstr "Kann temporäre Datei nicht öffnen"
 
 #, fuzzy
-#~ msgid "Mailbox is empty"
-#~ msgstr "Mailboxen"
+msgid "Mailbox is empty"
+msgstr "Mailboxen"
 
 #, fuzzy
-#~ msgid "Unable to write message: %s"
-#~ msgstr "Nachricht löschen"
+msgid "Unable to write message: %s"
+msgstr "Nachricht löschen"
 
 #, fuzzy
-#~ msgid "Can't open append mailbox: %s"
-#~ msgstr "Kann Adreßbuch '%s' nicht öffnen."
+msgid "Can't open append mailbox: %s"
+msgstr "Kann Adreßbuch '%s' nicht öffnen."
 
 #, fuzzy
-#~ msgid "Message append failed: %s"
-#~ msgstr "Anhängenden der Nachricht schlug fehl: %s"
+msgid "Message append failed: %s"
+msgstr "Anhängenden der Nachricht schlug fehl: %s"
 
-#~ msgid "Invalid mailbox name: %s"
-#~ msgstr "Ungültiger Mailboxname: %s"
+msgid "Invalid mailbox name: %s"
+msgstr "Ungültiger Mailboxname: %s"
 
-#~ msgid "Mailbox shrank from %ld to %ld!"
-#~ msgstr "Mailbox verkleinerte sich von %ld zu %ld!"
+msgid "Mailbox shrank from %ld to %ld!"
+msgstr "Mailbox verkleinerte sich von %ld zu %ld!"
 
-#~ msgid "Unparsable date: "
-#~ msgstr "Unverständliches Datum: "
+msgid "Unparsable date: "
+msgstr "Unverständliches Datum: "
 
-#~ msgid "Mailbox format invalidated (consult an expert), aborted"
-#~ msgstr ""
-#~ "Mailboxformat wurde ungültig (fragen Sie einen Fachmann), abgebrochen"
+msgid "Mailbox format invalidated (consult an expert), aborted"
+msgstr ""
+"Mailboxformat wurde ungültig (fragen Sie einen Fachmann), abgebrochen"
 
-#~ msgid "Line too long in mailbox"
-#~ msgstr "Zeile in Mailbox zu lang"
+msgid "Line too long in mailbox"
+msgstr "Zeile in Mailbox zu lang"
 
-#~ msgid "[ALERT] Password expires in %ld day(s)"
-#~ msgstr "[ALARM] Paßwort verliert Gültigkeit in %ld Tagen"
+msgid "[ALERT] Password expires in %ld day(s)"
+msgstr "[ALARM] Paßwort verliert Gültigkeit in %ld Tagen"
 
-#~ msgid "[ALERT] Password expires today!"
-#~ msgstr "[ALARM] Paßwort läuft heute ab!"
+msgid "[ALERT] Password expires today!"
+msgstr "[ALARM] Paßwort läuft heute ab!"
 
-#~ msgid "[ALERT] Account expires in %ld day(s)"
-#~ msgstr "[ALARM] Account läuft in %ld Tagen ab"
+msgid "[ALERT] Account expires in %ld day(s)"
+msgstr "[ALARM] Account läuft in %ld Tagen ab"
 
-#~ msgid "[ALERT] Account expires today!"
-#~ msgstr "[ALARM] Account läuft heute ab!"
+msgid "[ALERT] Account expires today!"
+msgstr "[ALARM] Account läuft heute ab!"
 
-#~ msgid "Can't subscribe %s: not a mailbox"
-#~ msgstr "Kann %s nicht abonnieren: keine Mailbox"
+msgid "Can't subscribe %s: not a mailbox"
+msgstr "Kann %s nicht abonnieren: keine Mailbox"
 
 #, fuzzy
-#~ msgid "Can't create %s: invalid name"
-#~ msgstr "Kann %s nicht anlegen: ungültiger Name"
+msgid "Can't create %s: invalid name"
+msgstr "Kann %s nicht anlegen: ungültiger Name"
 
 #, fuzzy
-#~ msgid "Can't create mailbox node %s: %s"
-#~ msgstr "Kann Mailbox mit Namen %s nicht anlegen: %s."
+msgid "Can't create mailbox node %s: %s"
+msgstr "Kann Mailbox mit Namen %s nicht anlegen: %s."
 
 #, fuzzy
-#~ msgid "Can't delete mailbox %s: %s"
-#~ msgstr "Kann Mailbox '%s' nicht löschen: %s"
+msgid "Can't delete mailbox %s: %s"
+msgstr "Kann Mailbox '%s' nicht löschen: %s"
 
-#~ msgid "Can't rename %s to %s: invalid name"
-#~ msgstr "Kann %s nicht zu %s umbenennen: ungültiger Name"
+msgid "Can't rename %s to %s: invalid name"
+msgstr "Kann %s nicht zu %s umbenennen: ungültiger Name"
 
 #, fuzzy
-#~ msgid "Can't rename mailbox %s to %s: %s"
-#~ msgstr "Kann Mailbox %s nicht zu %s umbenennen: %s"
+msgid "Can't rename mailbox %s to %s: %s"
+msgstr "Kann Mailbox %s nicht zu %s umbenennen: %s"
 
-#~ msgid "Can't open %s: not a selectable mailbox"
-#~ msgstr "Kann %s nicht öffnen: keine wählbare Mailbox"
+msgid "Can't open %s: not a selectable mailbox"
+msgstr "Kann %s nicht öffnen: keine wählbare Mailbox"
 
-#~ msgid "Can't open %s (file %s): not in valid mailbox format"
-#~ msgstr "Kann %s nicht öffnen (Datei %s): ungültiges Mailboxformat"
+msgid "Can't open %s (file %s): not in valid mailbox format"
+msgstr "Kann %s nicht öffnen (Datei %s): ungültiges Mailboxformat"
 
-#~ msgid "Impossible dummy_copy"
-#~ msgstr "Unmögliche dummy-Kopie"
+msgid "Impossible dummy_copy"
+msgstr "Unmögliche dummy-Kopie"
 
-#~ msgid "Indeterminate mailbox format: %s"
-#~ msgstr "Unbestimmtes Mailboxformat: %s"
+msgid "Indeterminate mailbox format: %s"
+msgstr "Unbestimmtes Mailboxformat: %s"
 
-#~ msgid "Not a mailbox: %s"
-#~ msgstr "Keine Mailbox: %s"
+msgid "Not a mailbox: %s"
+msgstr "Keine Mailbox: %s"
 
 #, fuzzy
-#~ msgid "Can't append to %s"
-#~ msgstr "Kann URL '%s' nicht öffnen"
+msgid "Can't append to %s"
+msgstr "Kann URL '%s' nicht öffnen"
 
 #, fuzzy
-#~ msgid "UID"
-#~ msgstr "Benutzerkennung"
+msgid "UID"
+msgstr "Benutzerkennung"
 
 #, fuzzy
-#~ msgid "SystemDrive"
-#~ msgstr "Systemfehler"
+msgid "SystemDrive"
+msgstr "Systemfehler"
 
 #, fuzzy
-#~ msgid "C:"
-#~ msgstr "Verteiler:"
+msgid "C:"
+msgstr "Verteiler:"
 
 #, fuzzy
-#~ msgid "/.mminit"
-#~ msgstr "Drucken"
+msgid "/.mminit"
+msgstr "Drucken"
 
 #, fuzzy
-#~ msgid "set new-folder-format"
-#~ msgstr "Mailbox anlegen"
+msgid "set new-folder-format"
+msgstr "Mailbox anlegen"
 
 #, fuzzy
-#~ msgid "set local-host"
-#~ msgstr "Mailserver"
+msgid "set local-host"
+msgstr "Mailserver"
 
 #, fuzzy
-#~ msgid "Can't resize free storage"
-#~ msgstr "Kann Position von Fenster '%s' nicht wiederherstellen."
+msgid "Can't resize free storage"
+msgstr "Kann Position von Fenster '%s' nicht wiederherstellen."
 
 #, fuzzy
-#~ msgid "Create"
-#~ msgstr "Datum"
+msgid "Create"
+msgstr "Datum"
 
 #, fuzzy
-#~ msgid "Delete"
-#~ msgstr "&Löschen"
+msgid "Delete"
+msgstr "&Löschen"
 
 #, fuzzy
-#~ msgid "Rename"
-#~ msgstr "&Umbenennen..."
+msgid "Rename"
+msgstr "&Umbenennen..."
 
 #, fuzzy
-#~ msgid "Reusing connection to %s"
-#~ msgstr "Kann keine Verbindung zum Server herstellen."
+msgid "Reusing connection to %s"
+msgstr "Kann keine Verbindung zum Server herstellen."
 
 #, fuzzy
-#~ msgid " UID"
-#~ msgstr "Benutzerkennung"
+msgid " UID"
+msgstr "Benutzerkennung"
 
 #, fuzzy
-#~ msgid "\\Deleted"
-#~ msgstr "&Löschen"
+msgid "\\Deleted"
+msgstr "&Löschen"
 
 #, fuzzy
-#~ msgid "CC"
-#~ msgstr "Verteiler:"
+msgid "CC"
+msgstr "Verteiler:"
 
 #, fuzzy
-#~ msgid "BCC"
-#~ msgstr "Blind-Verteiler:"
+msgid "BCC"
+msgstr "Blind-Verteiler:"
 
-#~ msgid "OK"
-#~ msgstr "OK"
+msgid "OK"
+msgstr "OK"
 
 #, fuzzy
-#~ msgid "Unexpected untagged message: %.80s"
-#~ msgstr "Alle Markierungen entfernen"
+msgid "Unexpected untagged message: %.80s"
+msgstr "Alle Markierungen entfernen"
 
 #, fuzzy
-#~ msgid "Missing message data"
-#~ msgstr "Nichtexistente Nachrichtendaten."
+msgid "Missing message data"
+msgstr "Nichtexistente Nachrichtendaten."
 
-#~ msgid "Bogus header field list: %.80s"
-#~ msgstr "Verdächtige Kopffeldliste: %.80s"
+msgid "Bogus header field list: %.80s"
+msgstr "Verdächtige Kopffeldliste: %.80s"
 
-#~ msgid "Unterminated header section: %.80s"
-#~ msgstr "Kopfsektion ohne Ende: %.80s"
+msgid "Unterminated header section: %.80s"
+msgstr "Kopfsektion ohne Ende: %.80s"
 
-#~ msgid "Unterminated partial data: %.80s"
-#~ msgstr "Teildaten ohne Ende: %.80s"
+msgid "Unterminated partial data: %.80s"
+msgstr "Teildaten ohne Ende: %.80s"
 
-#~ msgid "Junk after section: %.80s"
-#~ msgstr "Unsinn nach Abschnitt: %.80s"
+msgid "Junk after section: %.80s"
+msgstr "Unsinn nach Abschnitt: %.80s"
 
-#~ msgid "Unknown body message property: %.80s"
-#~ msgstr "Unbekannte Nachrichtenkörpereigenschaft: %.80s"
+msgid "Unknown body message property: %.80s"
+msgstr "Unbekannte Nachrichtenkörpereigenschaft: %.80s"
 
-#~ msgid "Unknown RFC822 message property: %.80s"
-#~ msgstr "Unbekannte RFC822 Nachrichteneigenschaft: %.80s"
+msgid "Unknown RFC822 message property: %.80s"
+msgstr "Unbekannte RFC822 Nachrichteneigenschaft: %.80s"
 
-#~ msgid "Unknown message property: %.80s"
-#~ msgstr "Unbekannte Nachrichteneigenschaft: %.80s"
+msgid "Unknown message property: %.80s"
+msgstr "Unbekannte Nachrichteneigenschaft: %.80s"
 
-#~ msgid "Unknown message data: %ld %.80s"
-#~ msgstr "Unbekannte Nachrichtendaten: %ld %.80s"
+msgid "Unknown message data: %ld %.80s"
+msgstr "Unbekannte Nachrichtendaten: %ld %.80s"
 
-#~ msgid "Junk after namespace list: %.80s"
-#~ msgstr "Unsinn nach Namespace-Liste: %.80s"
+msgid "Junk after namespace list: %.80s"
+msgstr "Unsinn nach Namespace-Liste: %.80s"
 
-#~ msgid "Missing namespace list"
-#~ msgstr "Fehlende Namespace-Liste"
+msgid "Missing namespace list"
+msgstr "Fehlende Namespace-Liste"
 
-#~ msgid "Junk at end of thread: %.80s"
-#~ msgstr "Unsinn am Ende der Thread: %.80s"
+msgid "Junk at end of thread: %.80s"
+msgstr "Unsinn am Ende der Thread: %.80s"
 
-#~ msgid "Missing STATUS data"
-#~ msgstr "Fehlende STATUS Daten"
+msgid "Missing STATUS data"
+msgstr "Fehlende STATUS Daten"
 
-#~ msgid "Missing MAILBOX data"
-#~ msgstr "Fehlende Mailboxdaten"
+msgid "Missing MAILBOX data"
+msgstr "Fehlende Mailboxdaten"
 
-#~ msgid "Missing delimiter in namespace: %.80s"
-#~ msgstr "Fehlendes Trennzeichn im Namespace: %.80s"
+msgid "Missing delimiter in namespace: %.80s"
+msgstr "Fehlendes Trennzeichn im Namespace: %.80s"
 
-#~ msgid "Missing namespace extension attribute"
-#~ msgstr "Fehlendes Namespace-Erweiterungsattribut"
+msgid "Missing namespace extension attribute"
+msgstr "Fehlendes Namespace-Erweiterungsattribut"
 
-#~ msgid "Missing value for namespace attribute %.80s"
-#~ msgstr "Fehlender Wert für Namespace-Attribut %.80s"
+msgid "Missing value for namespace attribute %.80s"
+msgstr "Fehlender Wert für Namespace-Attribut %.80s"
 
-#~ msgid "Junk at end of namespace: %.80s"
-#~ msgstr "Unsinn am Ende des Namespace: %.802"
+msgid "Junk at end of namespace: %.80s"
+msgstr "Unsinn am Ende des Namespace: %.802"
 
-#~ msgid "Not a namespace: %.80s"
-#~ msgstr "Kein Namespace: %.80s"
+msgid "Not a namespace: %.80s"
+msgstr "Kein Namespace: %.80s"
 
-#~ msgid "Junk at end of envelope: %.80s"
-#~ msgstr "Unsinn am Ende der Hülle: %.80s"
+msgid "Junk at end of envelope: %.80s"
+msgstr "Unsinn am Ende der Hülle: %.80s"
 
-#~ msgid "Not an envelope: %.80s"
-#~ msgstr "Keine Hülle: %.80s"
+msgid "Not an envelope: %.80s"
+msgstr "Keine Hülle: %.80s"
 
-#~ msgid "Junk at end of address list: %.80s"
-#~ msgstr "Unsinn am Ende der Adreßliste: %.80s"
+msgid "Junk at end of address list: %.80s"
+msgstr "Unsinn am Ende der Adreßliste: %.80s"
 
 #, fuzzy
-#~ msgid "Not an address: %.80s"
-#~ msgstr "Keine Adresse: %.80s"
+msgid "Not an address: %.80s"
+msgstr "Keine Adresse: %.80s"
 
-#~ msgid "Junk at end of address: %.80s"
-#~ msgstr "Unsinn am Ende der Adresse: %.80s"
+msgid "Junk at end of address: %.80s"
+msgstr "Unsinn am Ende der Adresse: %.80s"
 
-#~ msgid "Not a string: %c%.80s"
-#~ msgstr "Keine Zeichenkette: %c%.80s"
+msgid "Not a string: %c%.80s"
+msgstr "Keine Zeichenkette: %c%.80s"
 
-#~ msgid "Unknown section number: %.80s"
-#~ msgstr "Unbekannte Abschnittnummer: %.80s"
+msgid "Unknown section number: %.80s"
+msgstr "Unbekannte Abschnittnummer: %.80s"
 
-#~ msgid "Unknown section specifier: %.80s.%.80s"
-#~ msgstr "Unbekannte Abschnittsangabe: %.80s.%.80s"
+msgid "Unknown section specifier: %.80s.%.80s"
+msgstr "Unbekannte Abschnittsangabe: %.80s.%.80s"
 
-#~ msgid "Missing multipart subtype"
-#~ msgstr "Fehlender Multipart-Untertyp"
+msgid "Missing multipart subtype"
+msgstr "Fehlender Multipart-Untertyp"
 
-#~ msgid "Junk at end of multipart body: %.80s"
-#~ msgstr "Unsinn am Ende des Multipart-Körpers: %.80s"
+msgid "Junk at end of multipart body: %.80s"
+msgstr "Unsinn am Ende des Multipart-Körpers: %.80s"
 
-#~ msgid "Missing body subtype"
-#~ msgstr "Fehlender Körperuntertyp"
+msgid "Missing body subtype"
+msgstr "Fehlender Körperuntertyp"
 
-#~ msgid "Junk at end of body part: %.80s"
-#~ msgstr "Unsinn am Ende des Teils: %.80s"
+msgid "Junk at end of body part: %.80s"
+msgstr "Unsinn am Ende des Teils: %.80s"
 
-#~ msgid "Bogus body structure: %.80s"
-#~ msgstr "Verdächtige Körperstruktur: %.80s"
+msgid "Bogus body structure: %.80s"
+msgstr "Verdächtige Körperstruktur: %.80s"
 
-#~ msgid "Missing parameter attribute"
-#~ msgstr "Fehlendes Parameterattribut"
+msgid "Missing parameter attribute"
+msgstr "Fehlendes Parameterattribut"
 
-#~ msgid "Missing value for parameter %.80s"
-#~ msgstr "Fehlender Wert für Parameter %.80s"
+msgid "Missing value for parameter %.80s"
+msgstr "Fehlender Wert für Parameter %.80s"
 
-#~ msgid "Junk at end of parameter: %.80s"
-#~ msgstr "Unsinn am Ende des Parameters: %.80s"
+msgid "Junk at end of parameter: %.80s"
+msgstr "Unsinn am Ende des Parameters: %.80s"
 
-#~ msgid "Bogus body parameter: %c%.80s"
-#~ msgstr "Verdächtiger Körperparameter: %c%.80s"
+msgid "Bogus body parameter: %c%.80s"
+msgstr "Verdächtiger Körperparameter: %c%.80s"
 
-#~ msgid "Junk at end of disposition: %.80s"
-#~ msgstr "Unsinn am Ende der Disposition: %.80s"
+msgid "Junk at end of disposition: %.80s"
+msgstr "Unsinn am Ende der Disposition: %.80s"
 
-#~ msgid "Unknown body disposition: %.80s"
-#~ msgstr "Unbekannte Körperdisposition: %.80s"
+msgid "Unknown body disposition: %.80s"
+msgstr "Unbekannte Körperdisposition: %.80s"
 
-#~ msgid "Bogus string list member: %.80s"
-#~ msgstr "Verdächtiges Zeichenkettenlistenelement: %.80s"
+msgid "Bogus string list member: %.80s"
+msgstr "Verdächtiges Zeichenkettenlistenelement: %.80s"
 
-#~ msgid "Unknown extension token: %.80s"
-#~ msgstr "Unbekanntes Erweiterungstoken: %.80s"
+msgid "Unknown extension token: %.80s"
+msgstr "Unbekanntes Erweiterungstoken: %.80s"
 
-#~ msgid "Bad mm_cache op"
-#~ msgstr "Ungültige mm_cache Operation"
+msgid "Bad mm_cache op"
+msgstr "Ungültige mm_cache Operation"
 
-#~ msgid "SET_THREADERS not permitted"
-#~ msgstr "SET_THREADERS nicht erlaubt"
+msgid "SET_THREADERS not permitted"
+msgstr "SET_THREADERS nicht erlaubt"
 
-#~ msgid "SET_DRIVERS not permitted"
-#~ msgstr "SET_DRIVERS nicht erlaubt"
+msgid "SET_DRIVERS not permitted"
+msgstr "SET_DRIVERS nicht erlaubt"
 
-#~ msgid "SET_DRIVER not permitted"
-#~ msgstr "SET_DRIVER nicht erlaubt"
+msgid "SET_DRIVER not permitted"
+msgstr "SET_DRIVER nicht erlaubt"
 
-#~ msgid "Can't %s %.80s: %s"
-#~ msgstr "Kann nicht %s %.80s: %s"
+msgid "Can't %s %.80s: %s"
+msgstr "Kann nicht %s %.80s: %s"
 
-#~ msgid "invalid remote specification"
-#~ msgstr "ungültige Serverspezifikation"
+msgid "invalid remote specification"
+msgstr "ungültige Serverspezifikation"
 
-#~ msgid "no such mailbox"
-#~ msgstr "Keine solche Mailbox"
+msgid "no such mailbox"
+msgstr "Keine solche Mailbox"
 
-#~ msgid "subscribe to mailbox"
-#~ msgstr "Mailbox abonnieren"
+msgid "subscribe to mailbox"
+msgstr "Mailbox abonnieren"
 
 #, fuzzy
-#~ msgid "Can't create %.80s: %s"
-#~ msgstr "Kann nicht anlegen %.80s: %s"
+msgid "Can't create %.80s: %s"
+msgstr "Kann nicht anlegen %.80s: %s"
 
 #, fuzzy
-#~ msgid "Can't create INBOX"
-#~ msgstr "Kann INBOX nicht anlegen."
+msgid "Can't create INBOX"
+msgstr "Kann INBOX nicht anlegen."
 
-#~ msgid "Can't create mailbox name with 8-bit character"
-#~ msgstr "Kann keinen Mailboxnamen mit 8-Bit anlegen."
+msgid "Can't create mailbox name with 8-bit character"
+msgstr "Kann keinen Mailboxnamen mit 8-Bit anlegen."
 
 #, fuzzy
-#~ msgid "delete mailbox"
-#~ msgstr "Nachricht löschen"
+msgid "delete mailbox"
+msgstr "Nachricht löschen"
 
 #, fuzzy
-#~ msgid "Can't rename to mailbox %.80s: mailbox already exists"
-#~ msgstr "Kann Mailbox mit namen '%s' nicht anlegen: existiert bereits."
+msgid "Can't rename to mailbox %.80s: mailbox already exists"
+msgstr "Kann Mailbox mit namen '%s' nicht anlegen: existiert bereits."
 
 #, fuzzy
-#~ msgid "Closing connection to %.80s"
-#~ msgstr "Kann keine Verbindung zum Server herstellen."
+msgid "Closing connection to %.80s"
+msgstr ""
 
 #, fuzzy
-#~ msgid "\\Seen"
-#~ msgstr "&Senden"
+msgid "\\Seen"
+msgstr ""
 
 #, fuzzy
-#~ msgid "Can't append %.80s: %s"
-#~ msgstr "Kann %s mit Namen '%s' nicht anlegen %s."
+msgid "Can't append %.80s: %s"
+msgstr "Kann %s mit Namen '%s' nicht anlegen %s."
 
 #, fuzzy
-#~ msgid "Sat"
-#~ msgstr "Status"
+msgid "Sat"
+msgstr ""
 
 #, fuzzy
-#~ msgid "Nov"
-#~ msgstr "Nein"
+msgid "Nov"
+msgstr ""
 
 #, fuzzy
-#~ msgid "N"
-#~ msgstr "Nein"
+msgid "N"
+msgstr "Nein"
 
 #, fuzzy
-#~ msgid "O"
-#~ msgstr "OK"
+msgid "O"
+msgstr "OK"
 
 #, fuzzy
-#~ msgid "date"
-#~ msgstr "Datum"
+msgid "date"
+msgstr "Datum"
 
 #, fuzzy
-#~ msgid ">from"
-#~ msgstr "Von"
+msgid ">from"
+msgstr ""
 
 #, fuzzy
-#~ msgid "from"
-#~ msgstr "Von"
+msgid "from"
+msgstr "Von"
 
 #, fuzzy
-#~ msgid "cc"
-#~ msgstr "&Blindverteiler"
+msgid "cc"
+msgstr ""
 
 #, fuzzy
-#~ msgid "subject"
-#~ msgstr "Betreff"
+msgid "subject"
+msgstr "Betreff"
 
 #, fuzzy
-#~ msgid "Unknown sort function"
-#~ msgstr "Unbekannte Mausaktion"
+msgid "Unknown sort function"
+msgstr "Unbekannte Mausaktion"
 
 #, fuzzy
-#~ msgid "Sequence invalid"
-#~ msgstr "ungültig"
+msgid "Sequence invalid"
+msgstr "ungültig"
 
 #, fuzzy
-#~ msgid "Can't create %.80s: invalid name"
-#~ msgstr "Kann %s mit Namen '%s' nicht anlegen %s."
+msgid "Can't create %.80s: invalid name"
+msgstr "Kann %s mit Namen '%s' nicht anlegen %s."
 
 #, fuzzy
-#~ msgid "Can't delete mailbox %.80s: %s"
-#~ msgstr "Kann temporäre Datei '%s' nicht löschen"
+msgid "Can't delete mailbox %.80s: %s"
+msgstr "Kann temporäre Datei '%s' nicht löschen"
 
 #, fuzzy
-#~ msgid "Expunged %lu messages"
-#~ msgstr "Nachricht öffnen"
+msgid "Expunged %lu messages"
+msgstr "Nachricht öffnen"
 
 #, fuzzy
-#~ msgid "path:"
-#~ msgstr "Datum"
+msgid "path:"
+msgstr "Datum"
 
 #, fuzzy
-#~ msgid "Can't create mailbox %.80s: mailbox already exists"
-#~ msgstr "Kann Mailbox mit namen '%s' nicht anlegen: existiert bereits."
+msgid "Can't create mailbox %.80s: mailbox already exists"
+msgstr "Kann Mailbox mit namen '%s' nicht anlegen: existiert bereits."
 
 #, fuzzy
-#~ msgid "Can't create mailbox %.80s: %s"
-#~ msgstr "Kann %s mit Namen '%s' nicht anlegen %s."
+msgid "Can't create mailbox %.80s: %s"
+msgstr "Kann %s mit Namen '%s' nicht anlegen %s."
 
 #, fuzzy
-#~ msgid "Can't rename to mailbox %.80s: destination already exists"
-#~ msgstr "Kann Mailbox mit Namen '%s' nicht anlegen: existiert bereits."
+msgid "Can't rename to mailbox %.80s: destination already exists"
+msgstr "Kann Mailbox mit Namen '%s' nicht anlegen: existiert bereits."
 
 #, fuzzy
-#~ msgid "Message copy to MH mailbox failed"
-#~ msgstr "Mailbox-Datei"
+msgid "Message copy to MH mailbox failed"
+msgstr "Mailbox-Datei"
 
 #, fuzzy
-#~ msgid "Can't add message: %s"
-#~ msgstr "Nachricht öffnen"
+msgid "Can't add message: %s"
+msgstr "Nachricht öffnen"
 
 #, fuzzy
-#~ msgid "Expunged %ld messages"
-#~ msgstr "Nachricht öffnen"
+msgid "Expunged %ld messages"
+msgstr "Nachricht öffnen"
 
 #, fuzzy
-#~ msgid " \\Deleted"
-#~ msgstr "&Löschen"
+msgid " \\Deleted"
+msgstr "&Löschen"
 
 #, fuzzy
-#~ msgid "Can't open append message: %s"
-#~ msgstr "Nachricht öffnen"
+msgid "Can't open append message: %s"
+msgstr "Nachricht öffnen"
 
-#~ msgid "Status"
-#~ msgstr "Status"
+msgid "Status"
+msgstr "Status"
 
 #, fuzzy
-#~ msgid "X-Status"
-#~ msgstr "Status"
+msgid "X-Status"
+msgstr "Status"
 
 #, fuzzy
-#~ msgid "Mailbox checkpointed, but no messages expunged"
-#~ msgstr "Gelöschte Nachrichten wurden entfernt"
+msgid "Mailbox checkpointed, but no messages expunged"
+msgstr "Gelöschte Nachrichten wurden entfernt"
 
 #, fuzzy
-#~ msgid "Message copy failed: %s"
-#~ msgstr "Mailbox-Datei"
+msgid "Message copy failed: %s"
+msgstr "Mailbox-Datei"
 
 #, fuzzy
-#~ msgid "Can't open mailbox: %.80s"
-#~ msgstr "Kann temporäre Datei nicht öffnen"
+msgid "Can't open mailbox: %.80s"
+msgstr "Kann temporäre Datei nicht öffnen"
 
 #, fuzzy
-#~ msgid "Can't expunge because mailbox is in use by another process"
-#~ msgstr ""
-#~ "Temporäre Datie '%s' wurde nicht gelöscht, da sie noch von einem "
-#~ "externenProzeß benutzt wird."
+msgid "Can't expunge because mailbox is in use by another process"
+msgstr ""
+"Temporäre Datie '%s' wurde nicht gelöscht, da sie noch von einem "
+"externenProzeß benutzt wird."
 
 #, fuzzy
-#~ msgid "Can't delete mailbox %.80s: %.80s"
-#~ msgstr "Kann temporäre Datei '%s' nicht löschen"
+msgid "Can't delete mailbox %.80s: %.80s"
+msgstr "Kann temporäre Datei '%s' nicht löschen"
 
 #, fuzzy
-#~ msgid "Can't create mailbox leaf %.80s: %s"
-#~ msgstr "Kann %s mit Namen '%s' nicht anlegen %s."
+msgid "Can't create mailbox leaf %.80s: %s"
+msgstr "Kann %s mit Namen '%s' nicht anlegen %s."
 
 #, fuzzy
-#~ msgid "Can't create mailbox index %.80s: %s"
-#~ msgstr "Kann %s mit Namen '%s' nicht anlegen %s."
+msgid "Can't create mailbox index %.80s: %s"
+msgstr "Kann %s mit Namen '%s' nicht anlegen %s."
 
 #, fuzzy
-#~ msgid "Can't delete mailbox %.80s index: %s"
-#~ msgstr "Kann temporäre Datei '%s' nicht löschen"
+msgid "Can't delete mailbox %.80s index: %s"
+msgstr "Kann temporäre Datei '%s' nicht löschen"
 
 #, fuzzy
-#~ msgid "Can't create append message: %s"
-#~ msgstr "Nachricht öffnen"
+msgid "Can't create append message: %s"
+msgstr "Nachricht öffnen"
 
 #, fuzzy
-#~ msgid "Unable to create scratch file to write message data"
-#~ msgstr "Konnte den Nachrichtentext nicht bekommen."
+msgid "Unable to create scratch file to write message data"
+msgstr "Konnte den Nachrichtentext nicht bekommen."
 
 #, fuzzy
-#~ msgid "news"
-#~ msgstr " Zeilen\n"
+msgid "news"
+msgstr " Zeilen\n"
 
 #, fuzzy
-#~ msgid "Newsgroup %s is empty"
-#~ msgstr "Newsgruppen: "
+msgid "Newsgroup %s is empty"
+msgstr "Newsgruppen: "
 
 #, fuzzy
-#~ msgid "Creating news state %s"
-#~ msgstr "Adreßbuch wird angelegt"
+msgid "Creating news state %s"
+msgstr "Adreßbuch wird angelegt"
 
 #, fuzzy
-#~ msgid "Can't create backup news state %s"
-#~ msgstr "Kann %s mit Namen '%s' nicht anlegen %s."
+msgid "Can't create backup news state %s"
+msgstr "Kann %s mit Namen '%s' nicht anlegen %s."
 
 #, fuzzy
-#~ msgid "Can't rewrite news state %s"
-#~ msgstr "Kann nicht in temporäre Datei schreiben."
+msgid "Can't rewrite news state %s"
+msgstr "Kann nicht in temporäre Datei schreiben."
 
 #, fuzzy
-#~ msgid "XHDR Date"
-#~ msgstr "Datum"
+msgid "XHDR Date"
+msgstr "Datum"
 
 #, fuzzy
-#~ msgid "ip-address"
-#~ msgstr "Adresse ändern"
+msgid "ip-address"
+msgstr "Adresse ändern"
 
 #, fuzzy
-#~ msgid "phile"
-#~ msgstr "Datei"
+msgid "phile"
+msgstr "Datei"
 
 #, fuzzy
-#~ msgid "Unable to open file %s"
-#~ msgstr "Fehler beim Senden - %s"
+msgid "Unable to open file %s"
+msgstr "Fehler beim Senden - %s"
 
 #, fuzzy
-#~ msgid "name"
-#~ msgstr "Rechnername"
+msgid "name"
+msgstr "Rechnername"
 
 #, fuzzy
-#~ msgid "Newsgroups"
-#~ msgstr "Nachricht öffnen"
+msgid "Newsgroups"
+msgstr "Nachricht öffnen"
 
-#~ msgid "Date"
-#~ msgstr "Datum"
+msgid "Date"
+msgstr "Datum"
 
-#~ msgid "From"
-#~ msgstr "Von"
+msgid "From"
+msgstr "Von"
 
 #, fuzzy
-#~ msgid "Sender"
-#~ msgstr "&Senden"
+msgid "Sender"
+msgstr "&Senden"
 
 #, fuzzy
-#~ msgid "Reply-To"
-#~ msgstr "Beantworten"
+msgid "Reply-To"
+msgstr "Beantworten"
 
-#~ msgid "Subject"
-#~ msgstr "Betreff"
+msgid "Subject"
+msgstr "Betreff"
 
 #, fuzzy
-#~ msgid "To"
-#~ msgstr "An:"
+msgid "To"
+msgstr "An:"
 
 #, fuzzy
-#~ msgid "In-Reply-To"
-#~ msgstr "Beantworten"
+msgid "In-Reply-To"
+msgstr "Beantworten"
 
 #, fuzzy
-#~ msgid "Message-ID"
-#~ msgstr "&Nachricht"
+msgid "Message-ID"
+msgstr "&Nachricht"
 
 #, fuzzy
-#~ msgid "References"
-#~ msgstr "Einstellungen ändern"
+msgid "References"
+msgstr "Einstellungen ändern"
 
 #, fuzzy
-#~ msgid ": "
-#~ msgstr "An:"
+msgid ": "
+msgstr "An:"
 
 #, fuzzy
-#~ msgid "Content-Description: %s\r\n"
-#~ msgstr "Beschreibung: "
+msgid "Content-Description: %s\r\n"
+msgstr "Beschreibung: "
 
 #, fuzzy
-#~ msgid "Content-Disposition: %s"
-#~ msgstr "Verwendung: "
+msgid "Content-Disposition: %s"
+msgstr "Verwendung: "
 
 #, fuzzy
-#~ msgid "Missing parameter"
-#~ msgstr ""
-#~ "\n"
-#~ "Parameter:\n"
+msgid "Missing parameter"
+msgstr ""
+"\n"
+"Parameter:\n"
 
 #, fuzzy
-#~ msgid "No subscriptions"
-#~ msgstr "Beschreibung: "
+msgid "No subscriptions"
+msgstr "Beschreibung: "
 
 #, fuzzy
-#~ msgid "Can't create subscription temporary file"
-#~ msgstr "Kann temporäre Datei nicht anlegen"
+msgid "Can't create subscription temporary file"
+msgstr "Kann temporäre Datei nicht anlegen"
 
 #, fuzzy
-#~ msgid "Can't write subscription temporary file"
-#~ msgstr "Kann nicht in temporäre Datei schreiben."
+msgid "Can't write subscription temporary file"
+msgstr "Kann nicht in temporäre Datei schreiben."
 
 #, fuzzy
-#~ msgid "localhost"
-#~ msgstr "Mailserver"
+msgid "localhost"
+msgstr "Mailserver"
 
 #, fuzzy
-#~ msgid "Secure "
-#~ msgstr "&Server: "
+msgid "Secure "
+msgstr "&Server: "
 
 #, fuzzy
-#~ msgid "Host not found: %s"
-#~ msgstr "' nicht gefunden."
+msgid "Host not found: %s"
+msgstr "' nicht gefunden."
 
 #, fuzzy
-#~ msgid "Unknown error"
-#~ msgstr "Unbekannter Fehler"
+msgid "Unknown error"
+msgstr "Unbekannter Fehler"
 
 #, fuzzy
-#~ msgid "Syntax error in name"
-#~ msgstr "eine Login-Kennung"
+msgid "Syntax error in name"
+msgstr "eine Login-Kennung"
 
 #, fuzzy
-#~ msgid "Can't create TCP stream"
-#~ msgstr "Kann temporäre Datei nicht umbenennen."
+msgid "Can't create TCP stream"
+msgstr "Kann temporäre Datei nicht umbenennen."
 
 #, fuzzy
-#~ msgid "TCPRelease lossage"
-#~ msgstr "Bitte wählen Sie"
+msgid "TCPRelease lossage"
+msgstr "Bitte wählen Sie"
 
 #, fuzzy
-#~ msgid "Can't connect to %s,%d server"
-#~ msgstr "Kann keine Verbindung zum Server herstellen."
+msgid "Can't connect to %s,%d server"
+msgstr "Kann keine Verbindung zum Server herstellen."
 
 #, fuzzy
-#~ msgid "c-client"
-#~ msgstr "c-client log: "
+msgid "c-client"
+msgstr "c-client log: "
 
-#~ msgid "Deleted illegal folder profile: '"
-#~ msgstr "Ungültige Mailbox-Konfiguration gelöscht: '"
+msgid "Deleted illegal folder profile: '"
+msgstr "Ungültige Mailbox-Konfiguration gelöscht: '"
 
 #, fuzzy
-#~ msgid "Converting information for folder '%s'."
-#~ msgstr "Konvertiere Information für Mailbox '%s'."
+msgid "Converting information for folder '%s'."
+msgstr "Konvertiere Information für Mailbox '%s'."
 
-#~ msgid ""
-#~ "Configuration information and program files were successfully upgraded from "
-#~ "the version '%s'."
-#~ msgstr ""
-#~ "Konfigurationsdaten und Dateien wurden erfolgreich von Version '%s' "
-#~ "übernommen."
+msgid ""
+"Configuration information and program files were successfully upgraded from "
+"the version '%s'."
+msgstr ""
+"Konfigurationsdaten und Dateien wurden erfolgreich von Version '%s' "
+"übernommen."
 
-#~ msgid ""
-#~ "Configuration information and program files could not be upgraded from "
-#~ "version '%s', some settings might be lost.\n"
-#~ "\n"
-#~ "It is recommended that you uninstall and reinstall the program before using "
-#~ "it."
-#~ msgstr ""
-#~ "Konfiguration und Programmdateien konnten nicht von Version '%s' "
-#~ "konvertiertwerden,\n"
-#~ "einige Einstellungen könnten verloren gegangen sein.\n"
-#~ "Es wird empfohlen, daß Sie das Programm entfernen und neu installieren bevor "
-#~ "Sie es verwenden."
+msgid ""
+"Configuration information and program files could not be upgraded from "
+"version '%s', some settings might be lost.\n"
+"\n"
+"It is recommended that you uninstall and reinstall the program before using "
+"it."
+msgstr ""
+"Konfiguration und Programmdateien konnten nicht von Version '%s' "
+"konvertiertwerden,\n"
+"einige Einstellungen könnten verloren gegangen sein.\n"
+"Es wird empfohlen, daß Sie das Programm entfernen und neu installieren bevor "
+"Sie es verwenden."
 
 #, fuzzy
-#~ msgid ""
-#~ "The previously installed version of Mahogany was probably newer than this "
-#~ "one. Cannot upgrade."
-#~ msgstr ""
-#~ "Die vorher installierte Version von Mahogany war vermutlich neuer als diese. "
-#~ "Kann kein Upgrade durchführen."
+msgid ""
+"The previously installed version of Mahogany was probably newer than this "
+"one. Cannot upgrade."
+msgstr ""
+"Die vorher installierte Version von Mahogany war vermutlich neuer als diese. "
+"Kann kein Upgrade durchführen."
 
-#~ msgid "Default system folder for incoming mail."
-#~ msgstr "Standard Mailbox für neu eingegangene Nachrichten."
+msgid "Default system folder for incoming mail."
+msgstr "Standard Mailbox für neu eingegangene Nachrichten."
 
 #, fuzzy
-#~ msgid "Mahogany Test Message"
-#~ msgstr "Mahogany Testnachricht"
+msgid "Mahogany Test Message"
+msgstr "Mahogany Testnachricht"
 
-#~ msgid ""
-#~ "If you have received this mail, your Mahogany configuration works.\n"
-#~ "You should also try to reply to this mail and check that your reply arrives."
-#~ msgstr ""
-#~ "Wenn Sie diese Mail erhalten haven, sind Ihre Mahogany Einstellungen "
-#~ "korrekt.\n"
-#~ "Sie sollten versuchen, auf die Mail zu antworten und prüfen ob die Antwort "
-#~ "Sie erreicht."
+msgid ""
+"If you have received this mail, your Mahogany configuration works.\n"
+"You should also try to reply to this mail and check that your reply arrives."
+msgstr ""
+"Wenn Sie diese Mail erhalten haven, sind Ihre Mahogany Einstellungen "
+"korrekt.\n"
+"Sie sollten versuchen, auf die Mail zu antworten und prüfen ob die Antwort "
+"Sie erreicht."
 
-#~ msgid "Sent email message to:\n"
-#~ msgstr "Nachricht gesendet an:\n"
+msgid "Sent email message to:\n"
+msgstr "Nachricht gesendet an:\n"
 
-#~ msgid ""
-#~ "\n"
-#~ "\n"
-#~ "Please check whether it arrives."
-#~ msgstr ""
-#~ "\n"
-#~ "\n"
-#~ "Bitte prüfen Sie, ob sie ankommt."
+msgid ""
+"\n"
+"\n"
+"Please check whether it arrives."
+msgstr ""
+"\n"
+"\n"
+"Bitte prüfen Sie, ob sie ankommt."
 
-#~ msgid "Testing your configuration"
-#~ msgstr "Einstellungen werden geprüft"
+msgid "Testing your configuration"
+msgstr "Einstellungen werden geprüft"
 
-#~ msgid ""
-#~ "Failed to create the address book '%s' for autocollected e-mail addresses."
-#~ msgstr "Kann Adreßbuch '%s' zum automatischen Adreßsammeln nicht anlegen."
+msgid ""
+"Failed to create the address book '%s' for autocollected e-mail addresses."
+msgstr "Kann Adreßbuch '%s' zum automatischen Adreßsammeln nicht anlegen."
 
-#~ msgid "Auto collected e-mail address '%s' (added to the entry '%s')."
-#~ msgstr "E-Mail Adresse '%s' gesammelt (in Eintrag '%s')."
+msgid "Auto collected e-mail address '%s' (added to the entry '%s')."
+msgstr "E-Mail Adresse '%s' gesammelt (in Eintrag '%s')."
 
-#~ msgid "Add new e-mail entry to database?"
-#~ msgstr "Neue E-Mail Addresse in Datenbank aufnehmen?"
+msgid "Add new e-mail entry to database?"
+msgstr "Neue E-Mail Addresse in Datenbank aufnehmen?"
 
-#~ msgid ""
-#~ "Couldn't create an entry in the address book '%s' for autocollected address."
-#~ msgstr ""
-#~ "Kann  keinen automatisch gesammelten Eintrag in Adreßbuch '%s' anlegen."
+msgid ""
+"Couldn't create an entry in the address book '%s' for autocollected address."
+msgstr ""
+"Kann  keinen automatisch gesammelten Eintrag in Adreßbuch '%s' anlegen."
 
-#~ msgid "This entry was automatically added on %s."
-#~ msgstr "Dieser Eintrag wurde automatisch gesammelt (%s)."
+msgid "This entry was automatically added on %s."
+msgstr "Dieser Eintrag wurde automatisch gesammelt (%s)."
 
 #, fuzzy
-#~ msgid ""
-#~ "Auto collected e-mail address '%s' (created new entry '%s' in group '%s')."
-#~ msgstr "E-Mail Adresse '%s' gesammelt (neuer Eintrag '%s' in Gruppe '%s')."
+msgid ""
+"Auto collected e-mail address '%s' (created new entry '%s' in group '%s')."
+msgstr "E-Mail Adresse '%s' gesammelt (neuer Eintrag '%s' in Gruppe '%s')."
 
-#~ msgid "'%s': the name is missing, address was not autocollected."
-#~ msgstr "'%s': der Name fehlt, Adresse wurde nicht gesammelt."
+msgid "'%s': the name is missing, address was not autocollected."
+msgstr "'%s': der Name fehlt, Adresse wurde nicht gesammelt."
 
-#~ msgid "Cannot build list of incoming mail folders."
-#~ msgstr "Kann keine Liste der Eingangsmailboxen erstellen."
+msgid "Cannot build list of incoming mail folders."
+msgstr "Kann keine Liste der Eingangsmailboxen erstellen."
 
-#~ msgid "Auto-collecting mail from incoming folder '%s'."
-#~ msgstr "Hole alle mail von Eingangsmailbox '%s'."
+msgid "Auto-collecting mail from incoming folder '%s'."
+msgstr "Hole alle mail von Eingangsmailbox '%s'."
 
 #, fuzzy
-#~ msgid ""
-#~ "Cannot find your Mahogany directory, please specify it in the options dialog."
-#~ msgstr ""
-#~ "Kann das Mahogany Verzeichnis nicht finden, bitte geben Sie es im "
-#~ "Optionendialog an."
+msgid ""
+"Cannot find your Mahogany directory, please specify it in the options dialog."
+msgstr ""
+"Kann das Mahogany Verzeichnis nicht finden, bitte geben Sie es im "
+"Optionendialog an."
 
-#~ msgid "Failed to set up initial configuration."
-#~ msgstr "Kann Ausgangskonfiguration nicht einrichten."
+msgid "Failed to set up initial configuration."
+msgstr "Kann Ausgangskonfiguration nicht einrichten."
 
-#~ msgid "Cannot create the directory for configuration files '%s'."
-#~ msgstr "Kann Verzeichnis '%s' für Konfigurationsdateien nicht anlegen."
+msgid "Cannot create the directory for configuration files '%s'."
+msgstr "Kann Verzeichnis '%s' für Konfigurationsdateien nicht anlegen."
 
-#~ msgid "Created directory '%s' for configuration files."
-#~ msgstr "Verzeichnis '%s' für Konfigurationsdateien angelegt."
+msgid "Created directory '%s' for configuration files."
+msgstr "Verzeichnis '%s' für Konfigurationsdateien angelegt."
 
 #, fuzzy
-#~ msgid ""
-#~ "Could not create initial empty configuration file\n"
-#~ "'%s'\n"
-#~ "%s"
-#~ msgstr ""
-#~ "Kann Verzeichnis '%s' für Konfigurationsdateien nicht anlegen.\n"
-#~ "%s"
+msgid ""
+"Could not create initial empty configuration file\n"
+"'%s'\n"
+"%s"
+msgstr ""
+"Kann Verzeichnis '%s' für Konfigurationsdateien nicht anlegen.\n"
+"%s"
 
-#~ msgid ""
-#~ "Configuration directory '%s' was writable for other users.\n"
-#~ "Passwords may have been compromised, please consider changing them.\n"
-#~ msgstr ""
-#~ "Konfigurationsverzeichnis '%s' war schreibbar für andere Benutzer.\n"
-#~ "Ihre Paßwörter könnten gelesen worden sein, bitte ändern Sie diese falls "
-#~ "nötig.\n"
+msgid ""
+"Configuration directory '%s' was writable for other users.\n"
+"Passwords may have been compromised, please consider changing them.\n"
+msgstr ""
+"Konfigurationsverzeichnis '%s' war schreibbar für andere Benutzer.\n"
+"Ihre Paßwörter könnten gelesen worden sein, bitte ändern Sie diese falls "
+"nötig.\n"
 
-#~ msgid ""
-#~ "This has been fixed now, the directory is no longer writable for others."
-#~ msgstr ""
-#~ "Dies ist nun korrigiert, das Verzeichnis ist für andere Benutzer nicht mehr "
-#~ "schreibbar."
+msgid ""
+"This has been fixed now, the directory is no longer writable for others."
+msgstr ""
+"Dies ist nun korrigiert, das Verzeichnis ist für andere Benutzer nicht mehr "
+"schreibbar."
 
-#~ msgid ""
-#~ "The attempt to make the directory unwritable for others has failed.\n"
-#~ "(%s)"
-#~ msgstr ""
-#~ "Der Versuch, das Verzeichnis gegen Schreibzugriffe anderer Benutzer\n"
-#~ "zu schützen, schlug fehl: %s."
+msgid ""
+"The attempt to make the directory unwritable for others has failed.\n"
+"(%s)"
+msgstr ""
+"Der Versuch, das Verzeichnis gegen Schreibzugriffe anderer Benutzer\n"
+"zu schützen, schlug fehl: %s."
 
-#~ msgid ""
-#~ "Configuration file '%s' was readable for other users.\n"
-#~ "Passwords may have been compromised, please consider changing them.\n"
-#~ msgstr ""
-#~ "Konfigurationdatei '%s' war für andere Benutzer lesbar.\n"
-#~ "Paßwörter konnten gelesen werden, bitte ändern Sie diese falls nötig.\n"
+msgid ""
+"Configuration file '%s' was readable for other users.\n"
+"Passwords may have been compromised, please consider changing them.\n"
+msgstr ""
+"Konfigurationdatei '%s' war für andere Benutzer lesbar.\n"
+"Paßwörter konnten gelesen werden, bitte ändern Sie diese falls nötig.\n"
 
-#~ msgid "This has been fixed now, the file is no longer readable for others."
-#~ msgstr ""
-#~ "Dies ist nun korrigiert, die Datei ist nicht länger für andere lesbar."
+msgid "This has been fixed now, the file is no longer readable for others."
+msgstr ""
+"Dies ist nun korrigiert, die Datei ist nicht länger für andere lesbar."
 
-#~ msgid ""
-#~ "The attempt to make the file unreadable for others has failed.\n"
-#~ "(%s)"
-#~ msgstr ""
-#~ "Der Versuch, die Datei für andere unlesbar zu machen schlug fehl.\n"
-#~ "(%s)"
+msgid ""
+"The attempt to make the file unreadable for others has failed.\n"
+"(%s)"
+msgstr ""
+"Der Versuch, die Datei für andere unlesbar zu machen schlug fehl.\n"
+"(%s)"
 
-#~ msgid ""
-#~ "Cannot find global directory \"%s\" in\n"
-#~ "\"%s\"\n"
-#~ "Would you like to specify its location now?"
-#~ msgstr ""
-#~ "Kann das systemweite Verzeichnis '%s' in \n"
-#~ "'%s'\n"
-#~ "nicht finden. Möchten Sie es nun manuell angeben?"
+msgid ""
+"Cannot find global directory \"%s\" in\n"
+"\"%s\"\n"
+"Would you like to specify its location now?"
+msgstr ""
+"Kann das systemweite Verzeichnis '%s' in \n"
+"'%s'\n"
+"nicht finden. Möchten Sie es nun manuell angeben?"
 
-#~ msgid "Specify global directory for Mahogany"
-#~ msgstr "Systemweites Verzeichnis für Mahogany"
+msgid "Specify global directory for Mahogany"
+msgstr "Systemweites Verzeichnis für Mahogany"
 
-#~ msgid "Program execution aborted due to installation problems."
-#~ msgstr "Programmausführung wegen Installationsproblems abgebrochen."
+msgid "Program execution aborted due to installation problems."
+msgstr "Programmausführung wegen Installationsproblems abgebrochen."
 
-#~ msgid "Could not collect mail from incoming folder '%s'."
-#~ msgstr "Konnte Nachrichten von Eingangsmailbox '%s' nicht abholen."
+msgid "Could not collect mail from incoming folder '%s'."
+msgstr "Konnte Nachrichten von Eingangsmailbox '%s' nicht abholen."
 
-#~ msgid "Command '%s' (to execute on new mail reception) failed."
-#~ msgstr "Befehlsausführung '%s' (wegen neuen Mailempfangs) gescheitert."
+msgid "Command '%s' (to execute on new mail reception) failed."
+msgstr "Befehlsausführung '%s' (wegen neuen Mailempfangs) gescheitert."
 
 #, fuzzy
-#~ msgid "Subject: "
-#~ msgstr "Betreff: "
+msgid "Subject: "
+msgstr "Betreff: "
 
 #, fuzzy
-#~ msgid "From: "
-#~ msgstr "Von: "
+msgid "From: "
+msgstr "Von: "
 
 #, fuzzy
-#~ msgid "in folder '"
-#~ msgstr "in Mailbox '"
+msgid "in folder '"
+msgstr "in Mailbox '"
 
 #, fuzzy
-#~ msgid ""
-#~ "You have received %lu new messages\n"
-#~ "in folder '%s'."
-#~ msgstr "Sie haben %lu neue Nachrichten."
+msgid ""
+"You have received %lu new messages\n"
+"in folder '%s'."
+msgstr "Sie haben %lu neue Nachrichten."
 
-#~ msgid "New Mail"
-#~ msgstr "Neue Nachrichten"
+msgid "New Mail"
+msgstr "Neue Nachrichten"
 
 #, fuzzy
-#~ msgid ""
-#~ "Cannot create profile folder '%s' because a group with this name already "
-#~ "exists."
-#~ msgstr "Kann Konfiguration mit Namen '%s' nicht anlegen: existiert bereits."
+msgid ""
+"Cannot create profile folder '%s' because a group with this name already "
+"exists."
+msgstr "Kann Konfiguration mit Namen '%s' nicht anlegen: existiert bereits."
 
-#~ msgid ""
-#~ "INBOX folder is a special folder used by the mail system and can not be "
-#~ "renamed."
-#~ msgstr ""
-#~ "INBOX ist eine spezielle Mailbox die vom System verwaltet wird und kann "
-#~ "nicht umbenannt werden."
+msgid ""
+"INBOX folder is a special folder used by the mail system and can not be "
+"renamed."
+msgstr ""
+"INBOX ist eine spezielle Mailbox die vom System verwaltet wird und kann "
+"nicht umbenannt werden."
 
-#~ msgid ""
-#~ "Cannot rename folder '%s' to '%s': the folder with the new name already "
-#~ "exists."
-#~ msgstr ""
-#~ "Kann Mailbox '%s' nicht zu '%s' umbenennen: eine Mailbox mit diesem Namen "
-#~ "existiert bereits."
+msgid ""
+"Cannot rename folder '%s' to '%s': the folder with the new name already "
+"exists."
+msgstr ""
+"Kann Mailbox '%s' nicht zu '%s' umbenennen: eine Mailbox mit diesem Namen "
+"existiert bereits."
 
-#~ msgid ""
-#~ "The application is terminating abnormally.\n"
-#~ "Please report the bug to m-developers@makelist.com\n"
-#~ "Thank you!"
-#~ msgstr ""
-#~ "Das Programm wurde abgebrochen.\n"
-#~ "Bitte berichten Sie diesen Fehler an m-developers@makelist.com\n"
-#~ "Danke!"
+msgid ""
+"The application is terminating abnormally.\n"
+"Please report the bug to m-developers@makelist.com\n"
+"Thank you!"
+msgstr ""
+"Das Programm wurde abgebrochen.\n"
+"Bitte berichten Sie diesen Fehler an m-developers@makelist.com\n"
+"Danke!"
 
 #, fuzzy
-#~ msgid "Mahogany: Activity Log"
-#~ msgstr "Mahogany: Aktions-Log"
+msgid "Mahogany: Activity Log"
+msgstr "Mahogany: Aktions-Log"
 
 #, fuzzy
-#~ msgid "Cannot initialise help system.\n"
-#~ msgstr "Kann Hilfesystem nicht initialisieren\n"
+msgid "Cannot initialise help system.\n"
+msgstr "Kann Hilfesystem nicht initialisieren\n"
 
-#~ msgid "Help file '"
-#~ msgstr "Hilfedatei '"
+msgid "Help file '"
+msgstr "Hilfedatei '"
 
-#~ msgid "Search for?"
-#~ msgstr "Suche nach?"
+msgid "Search for?"
+msgstr "Suche nach?"
 
-#~ msgid "Search help for keyword"
-#~ msgstr "In Hilfe nach Schlüsselbegriff suchen"
+msgid "Search help for keyword"
+msgstr "In Hilfe nach Schlüsselbegriff suchen"
 
 #, fuzzy
-#~ msgid "No help found for current context (%d)."
-#~ msgstr "Keine Hilfe für aktuellen Kontext (%d)."
+msgid "No help found for current context (%d)."
+msgstr "Keine Hilfe für aktuellen Kontext (%d)."
 
-#~ msgid "Sorry"
-#~ msgstr "Tut mir leid."
+msgid "Sorry"
+msgstr "Tut mir leid."
 
-#~ msgid "&File"
-#~ msgstr "&Datei"
+msgid "&File"
+msgstr "&Datei"
 
-#~ msgid "&Edit"
-#~ msgstr "&Bearbeiten"
+msgid "&Edit"
+msgstr "&Bearbeiten"
 
-#~ msgid "&Help"
-#~ msgstr "&Hilfe"
+msgid "&Help"
+msgstr "&Hilfe"
 
-#~ msgid "Folder Open"
-#~ msgstr "Mailbox öffnen"
+msgid "Folder Open"
+msgstr "Mailbox öffnen"
 
-#~ msgid "Name of the folder?"
-#~ msgstr "Name der Mailbox?"
+msgid "Name of the folder?"
+msgstr "Name der Mailbox?"
 
-#~ msgid "Program preferences successfully saved."
-#~ msgstr "Programmeinstellungen erfolgreich gesichert."
+msgid "Program preferences successfully saved."
+msgstr "Programmeinstellungen erfolgreich gesichert."
 
 #, fuzzy
-#~ msgid "Couldn't save preferences."
-#~ msgstr "Konnte Einstellungen nicht speichern."
+msgid "Couldn't save preferences."
+msgstr "Konnte Einstellungen nicht speichern."
 
-#~ msgid "Help not implemented for current context, yet."
-#~ msgstr "Noch keine Hilfe für den aktuellen Kontext implementiert."
+msgid "Help not implemented for current context, yet."
+msgstr "Noch keine Hilfe für den aktuellen Kontext implementiert."
 
-#~ msgid "Size"
-#~ msgstr "Größe"
+msgid "Size"
+msgstr "Größe"
 
-#~ msgid ""
-#~ "Mark all articles in\n"
-#~ "%s\n"
-#~ "as read?"
-#~ msgstr ""
-#~ "Alle Artikel in\n"
-#~ "%s\n"
-#~ "als gelesen markieren?"
+msgid ""
+"Mark all articles in\n"
+"%s\n"
+"as read?"
+msgstr ""
+"Alle Artikel in\n"
+"%s\n"
+"als gelesen markieren?"
 
 #, fuzzy
-#~ msgid ""
-#~ "Invalid value '%s' for the date format: it should contain exacty 3 %%u "
-#~ "format specificators. Default value '%s' will be used instead."
-#~ msgstr ""
-#~ "Falsches Format '%s' für Datum: es sollte genau 3 %%u Formatangaben "
-#~ "enhalten. Standardwert '%s' wird verwendet."
+msgid ""
+"Invalid value '%s' for the date format: it should contain exacty 3 %%u "
+"format specificators. Default value '%s' will be used instead."
+msgstr ""
+"Falsches Format '%s' für Datum: es sollte genau 3 %%u Formatangaben "
+"enhalten. Standardwert '%s' wird verwendet."
 
-#~ msgid "The folder '%s' could not be opened, please check its settings."
-#~ msgstr ""
-#~ "Die Mailbox '%s' konnte nicht geöffnet werden, bitte überprüfen Sie ihre "
-#~ "Einstellungen."
+msgid "The folder '%s' could not be opened, please check its settings."
+msgstr ""
+"Die Mailbox '%s' konnte nicht geöffnet werden, bitte überprüfen Sie ihre "
+"Einstellungen."
 
-#~ msgid "%d messages saved"
-#~ msgstr "%d Nachrichten gesichert"
+msgid "%d messages saved"
+msgstr "%d Nachrichten gesichert"
 
 #, fuzzy
-#~ msgid "Saving messages failed."
-#~ msgstr "Nachrichten konnten nicht gesichert werden."
+msgid "Saving messages failed."
+msgstr "Nachrichten konnten nicht gesichert werden."
 
-#~ msgid "Closing folder '%s' because the underlying mail folder was deleted."
-#~ msgstr "Schließe Mailbox '%s' weil die Mailbox gelöscht wurde."
+msgid "Closing folder '%s' because the underlying mail folder was deleted."
+msgstr "Schließe Mailbox '%s' weil die Mailbox gelöscht wurde."
 
 #, fuzzy
-#~ msgid "&Info..."
-#~ msgstr "&Information..."
+msgid "&Info..."
+msgstr "&Information..."
 
-#~ msgid "&Open"
-#~ msgstr "&Öffnen"
+msgid "&Open"
+msgstr "&Öffnen"
 
-#~ msgid "&Save..."
-#~ msgstr "&Sichern..."
+msgid "&Save..."
+msgstr "&Sichern..."
 
-#~ msgid ""
-#~ "Cannot find a colour named '%s'.\n"
-#~ "Please change settings."
-#~ msgstr ""
-#~ "Kann keine Farbe mit Namen '%s' finden.\n"
-#~ "Bitte ändern Sie die Einstellungen."
+msgid ""
+"Cannot find a colour named '%s'.\n"
+"Please change settings."
+msgstr ""
+"Kann keine Farbe mit Namen '%s' finden.\n"
+"Bitte ändern Sie die Einstellungen."
 
 #, fuzzy
-#~ msgid "Date: "
-#~ msgstr "Datum"
+msgid "Date: "
+msgstr "Datum"
 
-#~ msgid "MIME type: "
-#~ msgstr "MIME Typ:"
+msgid "MIME type: "
+msgstr "MIME Typ:"
 
-#~ msgid "Size: "
-#~ msgstr "Größe: "
+msgid "Size: "
+msgstr "Größe: "
 
 #, fuzzy
-#~ msgid " bytes"
-#~ msgstr " Bytes\n"
+msgid " bytes"
+msgstr " Bytes\n"
 
-#~ msgid ""
-#~ "\n"
-#~ "Parameters:\n"
-#~ msgstr ""
-#~ "\n"
-#~ "Parameter:\n"
+msgid ""
+"\n"
+"Parameters:\n"
+msgstr ""
+"\n"
+"Parameter:\n"
 
-#~ msgid ""
-#~ "\n"
-#~ "Disposition Parameters:\n"
-#~ msgstr ""
-#~ "\n"
-#~ "Verwendungsparameter:\n"
+msgid ""
+"\n"
+"Disposition Parameters:\n"
+msgstr ""
+"\n"
+"Verwendungsparameter:\n"
 
-#~ msgid "Please enter the command to handle '%s' data:"
-#~ msgstr "Bitte geben Sie den Programmaufruf ein um '%s' Daten anzuzeigen:"
+msgid "Please enter the command to handle '%s' data:"
+msgstr "Bitte geben Sie den Programmaufruf ein um '%s' Daten anzuzeigen:"
 
-#~ msgid "Unknown MIME type"
-#~ msgstr "Unbekannter MIME-Typ"
+msgid "Unknown MIME type"
+msgstr "Unbekannter MIME-Typ"
 
-#~ msgid "Do not know how to handle data of type '%s'."
-#~ msgstr "Keine Information über die Behandlung von Typ '%s'."
+msgid "Do not know how to handle data of type '%s'."
+msgstr "Keine Information über die Behandlung von Typ '%s'."
 
-#~ msgid "Cannot rename temporary file."
-#~ msgstr "Kann temporäre Datei nicht umbenennen."
+msgid "Cannot rename temporary file."
+msgstr "Kann temporäre Datei nicht umbenennen."
 
 #, fuzzy
-#~ msgid "Error opening attachment: command '%s' failed"
-#~ msgstr "Kann Anlage nicht öffnen: Fehler bei Programmaufruf '%s'."
+msgid "Error opening attachment: command '%s' failed"
+msgstr "Kann Anlage nicht öffnen: Fehler bei Programmaufruf '%s'."
 
-#~ msgid "Save attachment as:"
-#~ msgstr "Anhang sichern als:"
+msgid "Save attachment as:"
+msgstr "Anhang sichern als:"
 
 #, fuzzy
-#~ msgid "Cannot get attachment content."
-#~ msgstr "Kann Nachrichtenanhang nicht erhalten."
+msgid "Cannot get attachment content."
+msgstr "Kann Nachrichtenanhang nicht erhalten."
 
-#~ msgid "Wrote %lu bytes to file '%s'"
-#~ msgstr "%lu Bytes in Datei '%s' geschrieben"
+msgid "Wrote %lu bytes to file '%s'"
+msgstr "%lu Bytes in Datei '%s' geschrieben"
 
 #, fuzzy
-#~ msgid "Could not save the attachment."
-#~ msgstr "Konnte Anhang nicht sichern."
+msgid "Could not save the attachment."
+msgstr "Konnte Anhang nicht sichern."
 
-#~ msgid ""
-#~ "No command configured to view URLs.\n"
-#~ "Would you like to choose one now?"
-#~ msgstr ""
-#~ "Kein Programmaufruf zum Betrachten von URLs\n"
-#~ "konfiguriert. Möchten Sie einen auswählen?"
+msgid ""
+"No command configured to view URLs.\n"
+"Would you like to choose one now?"
+msgstr ""
+"Kein Programmaufruf zum Betrachten von URLs\n"
+"konfiguriert. Möchten Sie einen auswählen?"
 
-#~ msgid "No command configured to view URLs."
-#~ msgstr "Kein Programmaufruf zum Betradchten von URLs konfiguriert."
+msgid "No command configured to view URLs."
+msgstr "Kein Programmaufruf zum Betradchten von URLs konfiguriert."
 
-#~ msgid "Could not launch browser: '%s' failed."
-#~ msgstr "Kann Browser nicht starten: '%s' fehlgeschlagen."
+msgid "Could not launch browser: '%s' failed."
+msgstr "Kann Browser nicht starten: '%s' fehlgeschlagen."
 
-#~ msgid "Opening URL '%s'... done."
-#~ msgstr "Öffne URL '%s'... done."
+msgid "Opening URL '%s'... done."
+msgstr "Öffne URL '%s'... done."
 
-#~ msgid "Opening URL '%s' failed."
-#~ msgstr "Fehler beim Öffnen von URL '%s'."
+msgid "Opening URL '%s' failed."
+msgstr "Fehler beim Öffnen von URL '%s'."
 
 #, fuzzy
-#~ msgid "Raw message text"
-#~ msgstr "Nachrichtentext"
+msgid "Raw message text"
+msgstr "Nachrichtentext"
 
-#~ msgid ""
-#~ "The selected message is %u Kbytes long which is more than the current "
-#~ "threshold of %d Kbytes.\n"
-#~ "\n"
-#~ "Do you still want to download it?"
-#~ msgstr ""
-#~ "Die gewählte Nachricht ist %u KB lang, mehr als die aktuelle Maximalgröße "
-#~ "von %d KB.\n"
-#~ "\n"
-#~ "Möchten Sie sie trotzdem öffnen?"
+msgid ""
+"The selected message is %u Kbytes long which is more than the current "
+"threshold of %d Kbytes.\n"
+"\n"
+"Do you still want to download it?"
+msgstr ""
+"Die gewählte Nachricht ist %u KB lang, mehr als die aktuelle Maximalgröße "
+"von %d KB.\n"
+"\n"
+"Möchten Sie sie trotzdem öffnen?"
 
 #, fuzzy
-#~ msgid "Mahogany: Printout"
-#~ msgstr "Mahogany: Ausdruck"
+msgid "Mahogany: Printout"
+msgstr "Mahogany: Ausdruck"
 
-#~ msgid ""
-#~ "There was a problem with printing the message:\n"
-#~ "perhaps your current printer is not set up correctly?"
-#~ msgstr ""
-#~ "Es gab ein Problem beim Drucken der Nachricht:\n"
-#~ "Vielleicht ist Ihr Drucker nicht richtig eingestellt?"
+msgid ""
+"There was a problem with printing the message:\n"
+"perhaps your current printer is not set up correctly?"
+msgstr ""
+"Es gab ein Problem beim Drucken der Nachricht:\n"
+"Vielleicht ist Ihr Drucker nicht richtig eingestellt?"
 
 #, fuzzy
-#~ msgid "Printing"
-#~ msgstr "Drucken"
+msgid "Printing"
+msgstr "Drucken"
 
-#~ msgid ""
-#~ "There was a problem with showing the preview:\n"
-#~ "perhaps your current printer is not set correctly?"
-#~ msgstr ""
-#~ "Es gab ein Problem mit der Druckvoransicht:\n"
-#~ "Vielleicht ist Ihr Durcker nicht richtig eingestellt?"
+msgid ""
+"There was a problem with showing the preview:\n"
+"perhaps your current printer is not set correctly?"
+msgstr ""
+"Es gab ein Problem mit der Druckvoransicht:\n"
+"Vielleicht ist Ihr Durcker nicht richtig eingestellt?"
 
-#~ msgid "Previewing"
-#~ msgstr "Duckvoransicht"
+msgid "Previewing"
+msgstr "Duckvoransicht"
 
 #, fuzzy
-#~ msgid "Print Preview"
-#~ msgstr "Druckvoransicht"
+msgid "Print Preview"
+msgstr "Druckvoransicht"
 
-#~ msgid "%s (external viewer exited with non null exit code)"
-#~ msgstr "%s (externer Betracher terminierte mit Fehlercode)"
+msgid "%s (external viewer exited with non null exit code)"
+msgstr "%s (externer Betracher terminierte mit Fehlercode)"
 
-#~ msgid "Nothing to expand - please enter something."
-#~ msgstr "Nichts zum expandieren - bitte geben Sie erst etwas ein."
+msgid "Nothing to expand - please enter something."
+msgstr "Nichts zum expandieren - bitte geben Sie erst etwas ein."
 
 #, fuzzy
-#~ msgid "Article Composition"
-#~ msgstr "Artikeleditor"
+msgid "Article Composition"
+msgstr "Artikeleditor"
 
 #, fuzzy
-#~ msgid "Message Composition"
-#~ msgstr "Nachrichteneditor"
+msgid "Message Composition"
+msgstr "Nachrichteneditor"
 
 #, fuzzy
-#~ msgid "&Compose"
-#~ msgstr "&Nachricht schreiben"
+msgid "&Compose"
+msgstr "&Nachricht schreiben"
 
 #, fuzzy
-#~ msgid "Subject:"
-#~ msgstr "Betreff"
+msgid "Subject:"
+msgstr "Betreff"
 
 #, fuzzy
-#~ msgid "Expand the address using address books"
-#~ msgstr "Adresse mit Hilfe der Adreßbücher expandieren"
+msgid "Expand the address using address books"
+msgstr "Adresse mit Hilfe der Adreßbücher expandieren"
 
-#~ msgid "You haven't configured your signature file."
-#~ msgstr "Sie haben keine Signaturdatei konfiguriert."
+msgid "You haven't configured your signature file."
+msgstr "Sie haben keine Signaturdatei konfiguriert."
 
-#~ msgid "Signature file '%s' couldn't be opened."
-#~ msgstr "Signaturdatei '%s' konnte nicht geöffnet werden."
+msgid "Signature file '%s' couldn't be opened."
+msgstr "Signaturdatei '%s' konnte nicht geöffnet werden."
 
 #, fuzzy
-#~ msgid ""
-#~ "\n"
-#~ "\n"
-#~ "Would you like to choose your signature right now (otherwise no signature "
-#~ "will be used)?"
-#~ msgstr ""
-#~ "Keine Signaturdatei gefunden. Möchten Sie jetzt eine\n"
-#~ "auswählen (andernfalls wird keine Signatur angehängt)?"
+msgid ""
+"\n"
+"\n"
+"Would you like to choose your signature right now (otherwise no signature "
+"will be used)?"
+msgstr ""
+"Keine Signaturdatei gefunden. Möchten Sie jetzt eine\n"
+"auswählen (andernfalls wird keine Signatur angehängt)?"
 
-#~ msgid "Choose signature file"
-#~ msgstr "Signaturdatei wählen"
+msgid "Choose signature file"
+msgstr "Signaturdatei wählen"
 
-#~ msgid "All files (*.*)|*.*"
-#~ msgstr "Alle Dateien (*.*)|*.*"
+msgid "All files (*.*)|*.*"
+msgstr "Alle Dateien (*.*)|*.*"
 
 #, fuzzy
-#~ msgid "Your signature is %stoo long: it should not be more than %d lines."
-#~ msgstr ""
-#~ "Ihre Singatur ist %s zu lang: sie sollte nicht mehr als %d Zeilen haben"
+msgid "Your signature is %stoo long: it should not be more than %d lines."
+msgstr ""
+"Ihre Singatur ist %s zu lang: sie sollte nicht mehr als %d Zeilen haben"
 
 #, fuzzy
-#~ msgid "way "
-#~ msgstr "viel"
+msgid "way "
+msgstr "viel"
 
-#~ msgid ""
-#~ "Please terminate the external editor (pid %d) before closing this window."
-#~ msgstr ""
-#~ "Bitte beenden Sie den externen Editor (pid %d) bevor Sie dieses Fenster "
-#~ "schließen."
+msgid ""
+"Please terminate the external editor (pid %d) before closing this window."
+msgstr ""
+"Bitte beenden Sie den externen Editor (pid %d) bevor Sie dieses Fenster "
+"schließen."
 
-#~ msgid "There are unsaved changes, close anyway?"
-#~ msgstr "Änderungen nicht gesichert, trotzdem schließen?"
+msgid "There are unsaved changes, close anyway?"
+msgstr "Änderungen nicht gesichert, trotzdem schließen?"
 
 #, fuzzy
-#~ msgid "Please choose a file to insert."
-#~ msgstr "Bitte wählen Sie eine Datei zum einfügen."
+msgid "Please choose a file to insert."
+msgstr "Bitte wählen Sie eine Datei zum einfügen."
 
 #, fuzzy
-#~ msgid "Cancelled"
-#~ msgstr "Abgebrochen"
+msgid "Cancelled"
+msgstr "Abgebrochen"
 
 #, fuzzy
-#~ msgid "Inserted file '%s'."
-#~ msgstr "Datei '%s' eingefügt."
+msgid "Inserted file '%s'."
+msgstr "Datei '%s' eingefügt."
 
-#~ msgid "Failed to insert the text file '%s'."
-#~ msgstr "Konte Textdatei '%s' nicht einfügen."
+msgid "Failed to insert the text file '%s'."
+msgstr "Konte Textdatei '%s' nicht einfügen."
 
 #, fuzzy
-#~ msgid "Choose file to save message to"
-#~ msgstr "Wählen Sie eine Datei zum speichern"
+msgid "Choose file to save message to"
+msgstr "Wählen Sie eine Datei zum speichern"
 
 #, fuzzy
-#~ msgid "Failed to save the message."
-#~ msgstr "Konnte Nachricht nicht sichern."
+msgid "Failed to save the message."
+msgstr "Konnte Nachricht nicht sichern."
 
-#~ msgid "External editor is already running (PID %d)"
-#~ msgstr "Externer Editor läuft schon (PID %d)"
+msgid "External editor is already running (PID %d)"
+msgstr "Externer Editor läuft schon (PID %d)"
 
 #, fuzzy
-#~ msgid "External editor not configured."
-#~ msgstr "Kein externer Editor konfiguriert."
+msgid "External editor not configured."
+msgstr "Kein externer Editor konfiguriert."
 
-#~ msgid "Failed to pass message to external editor."
-#~ msgstr "Konnte Nachricht nicht an externen Editor übergeben."
+msgid "Failed to pass message to external editor."
+msgstr "Konnte Nachricht nicht an externen Editor übergeben."
 
 #, fuzzy
-#~ msgid "Execution of '%s' failed."
-#~ msgstr "Fehler beim Ausführen von '%s'."
+msgid "Execution of '%s' failed."
+msgstr "Fehler beim Ausführen von '%s'."
 
-#~ msgid "Started external editor (PID %d)"
-#~ msgstr "Externen Editor gestarted (PID %d)"
+msgid "Started external editor (PID %d)"
+msgstr "Externen Editor gestarted (PID %d)"
 
-#~ msgid "Would you like to change the external editor setting now?"
-#~ msgstr "Möchten Sie die Einstellungen für den externen Editor ändern?"
+msgid "Would you like to change the external editor setting now?"
+msgstr "Möchten Sie die Einstellungen für den externen Editor ändern?"
 
-#~ msgid "Set up external editor"
-#~ msgstr "Externen Editor konfigurieren"
+msgid "Set up external editor"
+msgstr "Externen Editor konfigurieren"
 
-#~ msgid ""
-#~ "Enter the command name (%%s will be replaced with the name of the file):"
-#~ msgstr ""
-#~ "Geben Sie den Befehl ein (%%s wird durch den Dateinamen ersetzt werden):"
+msgid ""
+"Enter the command name (%%s will be replaced with the name of the file):"
+msgstr ""
+"Geben Sie den Befehl ein (%%s wird durch den Dateinamen ersetzt werden):"
 
-#~ msgid "External editor terminated with non null exit code."
-#~ msgstr "Externer Editor terminierte mit Fehlercode."
+msgid "External editor terminated with non null exit code."
+msgstr "Externer Editor terminierte mit Fehlercode."
 
-#~ msgid "Failed to insert back the text from external editor."
-#~ msgstr "Konnte Text vom externen Editor nicht einfügen."
+msgid "Failed to insert back the text from external editor."
+msgstr "Konnte Text vom externen Editor nicht einfügen."
 
-#~ msgid "Inserted text from external editor."
-#~ msgstr "Text vom externen Editor eingefügt."
+msgid "Inserted text from external editor."
+msgstr "Text vom externen Editor eingefügt."
 
-#~ msgid "The text was left in the file '%s'."
-#~ msgstr "Der Text wurde in Datei '%s' hinterlassen."
+msgid "The text was left in the file '%s'."
+msgstr "Der Text wurde in Datei '%s' hinterlassen."
 
-#~ msgid "Inserted file '%s' (as '%s')"
-#~ msgstr "Datei '%s' eingefügt (als '%s')"
+msgid "Inserted file '%s' (as '%s')"
+msgstr "Datei '%s' eingefügt (als '%s')"
 
-#~ msgid "Cannot read file '%s' included in this message!"
-#~ msgstr "Kann die in der Nachricht enhaltene Datei '%s' nicht lesen!"
+msgid "Cannot read file '%s' included in this message!"
+msgstr "Kann die in der Nachricht enhaltene Datei '%s' nicht lesen!"
 
-#~ msgid "Cannot open file '%s' included in this message!"
-#~ msgstr "Kann die in der Nachricht enhaltene Datei '%s' nicht lesen!"
+msgid "Cannot open file '%s' included in this message!"
+msgstr "Kann die in der Nachricht enhaltene Datei '%s' nicht lesen!"
 
 #, fuzzy
-#~ msgid "Unknwown part type"
-#~ msgstr "Unbekannter MIME-Typ"
+msgid "Unknwown part type"
+msgstr "Unbekannter MIME-Typ"
 
-#~ msgid ""
-#~ "The external editor is still opened, please close it before sending the "
-#~ "message."
-#~ msgstr ""
-#~ "Der externe Editor läuft noch, bitte schließen Sie ihn before Sie "
-#~ "dieNachricht senden."
+msgid ""
+"The external editor is still opened, please close it before sending the "
+"message."
+msgstr ""
+"Der externe Editor läuft noch, bitte schließen Sie ihn before Sie "
+"dieNachricht senden."
 
-#~ msgid ""
-#~ "The message can not be sent because the network settings are either not "
-#~ "configured or incorrect. Would you like to change them now?"
-#~ msgstr ""
-#~ "Die Nachricht kann nicht gesendet werden. Netzwerkeinstellungen sind "
-#~ "fehlerhaft. Möchten Sie sie ändern?"
+msgid ""
+"The message can not be sent because the network settings are either not "
+"configured or incorrect. Would you like to change them now?"
+msgstr ""
+"Die Nachricht kann nicht gesendet werden. Netzwerkeinstellungen sind "
+"fehlerhaft. Möchten Sie sie ändern?"
 
 #, fuzzy
-#~ msgid "Cannot send message - network is not configured."
-#~ msgstr "Kann Nachricht nicht senden - Netzwerk ist nicht konfiguriert."
+msgid "Cannot send message - network is not configured."
+msgstr "Kann Nachricht nicht senden - Netzwerk ist nicht konfiguriert."
 
-#~ msgid "Please specify at least one recipient in the \"To:\" field!"
-#~ msgstr "Bitte geben Sie mindestens einen Empfänger an!"
+msgid "Please specify at least one recipient in the \"To:\" field!"
+msgstr "Bitte geben Sie mindestens einen Empfänger an!"
 
-#~ msgid "The subject of your message is empty, would you like to change it?"
-#~ msgstr "Das Betreff-Feld ist leer, möchten Sie dies korrigieren?"
+msgid "The subject of your message is empty, would you like to change it?"
+msgstr "Das Betreff-Feld ist leer, möchten Sie dies korrigieren?"
 
 #, fuzzy
-#~ msgid "Cannot insert text file into the message."
-#~ msgstr "Kann die Textdatei nicht einfügen."
+msgid "Cannot insert text file into the message."
+msgstr "Kann die Textdatei nicht einfügen."
 
 #, fuzzy
-#~ msgid "Cannot write message to file '%s'."
-#~ msgstr "Kann Nachricht nicht in Datei '%s' schreiben."
+msgid "Cannot write message to file '%s'."
+msgstr "Kann Nachricht nicht in Datei '%s' schreiben."
 
 #, fuzzy
-#~ msgid "Selected folder '%s'."
-#~ msgstr "Mailbox '%s' ausgewählt."
+msgid "Selected folder '%s'."
+msgstr "Mailbox '%s' ausgewählt."
 
-#~ msgid ""
-#~ "This folder couldn't be opened last time, do you still want to try to open "
-#~ "it (it will probably fail again)?"
-#~ msgstr ""
-#~ "Diese Mailbox konnte das letzte Mal nicht geöffnet werden, möchten Sie es "
-#~ "trotzdem versuchen?"
+msgid ""
+"This folder couldn't be opened last time, do you still want to try to open "
+"it (it will probably fail again)?"
+msgstr ""
+"Diese Mailbox konnte das letzte Mal nicht geöffnet werden, möchten Sie es "
+"trotzdem versuchen?"
 
-#~ msgid "Would you like to change folder settings before trying to open it?"
-#~ msgstr ""
-#~ "Möchten Sie die Mailboxeinstellungen ändern bevor Sie versuchen sie zu "
-#~ "öffnen?"
+msgid "Would you like to change folder settings before trying to open it?"
+msgstr ""
+"Möchten Sie die Mailboxeinstellungen ändern bevor Sie versuchen sie zu "
+"öffnen?"
 
-#~ msgid "Opened folder '%s' (%lu messages, %lu new)"
-#~ msgstr "Mailbox '%s' geöffnet (%lu Nachrichten, %lu neu)"
+msgid "Opened folder '%s' (%lu messages, %lu new)"
+msgstr "Mailbox '%s' geöffnet (%lu Nachrichten, %lu neu)"
 
-#~ msgid "Do you really want to exit Mahogany?"
-#~ msgstr "Möchten Sie Mahogany wirklich beenden?"
+msgid "Do you really want to exit Mahogany?"
+msgstr "Möchten Sie Mahogany wirklich beenden?"
 
-#~ msgid ""
-#~ "Unsupported intermediary image format '%s' specified,\n"
-#~ "reset to '%s'."
-#~ msgstr ""
-#~ "Nicht unterstütztes Grafikformat zur Umwandlung '%s' angegeben,\n"
-#~ "zurückgesetzt auf '%s'."
+msgid ""
+"Unsupported intermediary image format '%s' specified,\n"
+"reset to '%s'."
+msgstr ""
+"Nicht unterstütztes Grafikformat zur Umwandlung '%s' angegeben,\n"
+"zurückgesetzt auf '%s'."
 
-#~ msgid ""
-#~ "The setting for image conversion program should include exactly two '%%s' "
-#~ "format specificators.\n"
-#~ "The current format specificators are incorrect and the default value will be "
-#~ "used instead."
-#~ msgstr ""
-#~ "Die Einstellung für das Grafikformat-Konvertierprogramm sollte exakt zwei "
-#~ "'%%s' Formatangaben enthalten.\n"
-#~ "Die aktuelle Einstellung ist fehlerhaft und der Vorgabewert wird stattdessen "
-#~ "verwendet."
+msgid ""
+"The setting for image conversion program should include exactly two '%%s' "
+"format specificators.\n"
+"The current format specificators are incorrect and the default value will be "
+"used instead."
+msgstr ""
+"Die Einstellung für das Grafikformat-Konvertierprogramm sollte exakt zwei "
+"'%%s' Formatangaben enthalten.\n"
+"Die aktuelle Einstellung ist fehlerhaft und der Vorgabewert wird stattdessen "
+"verwendet."
 
-#~ msgid "Cancel"
-#~ msgstr "Abbruch"
+msgid "Cancel"
+msgstr "Abbruch"
 
 #, fuzzy
-#~ msgid ""
-#~ "\n"
-#~ "System error: "
-#~ msgstr ""
-#~ "\n"
-#~ "Systemfehler: "
+msgid ""
+"\n"
+"System error: "
+msgstr ""
+"\n"
+"Systemfehler: "
 
-#~ msgid ""
-#~ "\n"
-#~ "Exiting application..."
-#~ msgstr ""
-#~ "\n"
-#~ "Programm wird beendet..."
+msgid ""
+"\n"
+"Exiting application..."
+msgstr ""
+"\n"
+"Programm wird beendet..."
 
-#~ msgid "Please choose an entry:"
-#~ msgstr "Bitte wählen Sie einen Eintrag:"
+msgid "Please choose an entry:"
+msgstr "Bitte wählen Sie einen Eintrag:"
 
-#~ msgid "Expansion options"
-#~ msgstr "Expansions-Einstellungen"
+msgid "Expansion options"
+msgstr "Expansions-Einstellungen"
 
-#~ msgid "    Version: "
-#~ msgstr "    Version: "
+msgid "    Version: "
+msgstr "    Version: "
 
 #, fuzzy
-#~ msgid "        compiled for: "
-#~ msgstr "         für: "
+msgid "        compiled for: "
+msgstr "         für: "
 
-#~ msgid "  Copyright (c) 1999 by Karsten Ballüder"
-#~ msgstr "  Alle Rechte (c) 1999: Karsten Ballüder"
+msgid "  Copyright (c) 1999 by Karsten Ballüder"
+msgstr "  Alle Rechte (c) 1999: Karsten Ballüder"
 
-#~ msgid "          Written by Karsten Ballüder"
-#~ msgstr "          Geschrieben von Karsten Ballüder"
+msgid "          Written by Karsten Ballüder"
+msgstr "          Geschrieben von Karsten Ballüder"
 
-#~ msgid "                      and Vadim Zeitlin"
-#~ msgstr "                      und Vadim Zeitlin"
+msgid "                      and Vadim Zeitlin"
+msgstr "                      und Vadim Zeitlin"
 
-#~ msgid "This software is provied 'as is' and without any express or implied"
-#~ msgstr "Dieses Programm wird ohne jede ausdrückliche oder implizierte"
+msgid "This software is provied 'as is' and without any express or implied"
+msgstr "Dieses Programm wird ohne jede ausdrückliche oder implizierte"
 
-#~ msgid "warranties, including, without limitation, the implied warranties"
-#~ msgstr ""
-#~ "Garantien zur Verfügung gestellt, einschließlich, ohne Begrenzungen, die "
-#~ "Annahme"
+msgid "warranties, including, without limitation, the implied warranties"
+msgstr ""
+"Garantien zur Verfügung gestellt, einschließlich, ohne Begrenzungen, die Annahme"
 
-#~ msgid "of merchantibility and fitness for a particular purpose."
-#~ msgstr "der Verwendungsfähigkeit für einen bestimmten Zweck."
+msgid "of merchantibility and fitness for a particular purpose."
+msgstr "der Verwendungsfähigkeit für einen bestimmten Zweck."
 
-#~ msgid "This is OpenSource(TM) software."
-#~ msgstr "Dies ist OpenSource(TM) Software."
+msgid "This is OpenSource(TM) software."
+msgstr "Dies ist OpenSource(TM) Software."
 
-#~ msgid "Welcome"
-#~ msgstr "Willkommen"
+msgid "Welcome"
+msgstr "Willkommen"
 
 #, fuzzy
-#~ msgid "Folder properties"
-#~ msgstr "Mailboxeinstellungen"
+msgid "Folder properties"
+msgstr "Mailboxeinstellungen"
 
 #, fuzzy
-#~ msgid "Folder Type"
-#~ msgstr "Mailbox öffnen"
+msgid "Folder Type"
+msgstr "Mailbox öffnen"
 
 #, fuzzy
-#~ msgid "Pathname or name of folder"
-#~ msgstr "Name oder Datei der Mailbox?"
+msgid "Pathname or name of folder"
+msgstr "Name oder Datei der Mailbox?"
 
-#~ msgid "New Folder"
-#~ msgstr "Neue Mailbox"
+msgid "New Folder"
+msgstr "Neue Mailbox"
 
 #, fuzzy
-#~ msgid "Symbolic name for the new folder"
-#~ msgstr "Symbolischer Name der neuen Mailbox?"
+msgid "Symbolic name for the new folder"
+msgstr "Symbolischer Name der neuen Mailbox?"
 
 #, fuzzy
-#~ msgid "Choose folder"
-#~ msgstr "Mailbox auswählen"
+msgid "Choose folder"
+msgstr "Mailbox auswählen"
 
 #, fuzzy
-#~ msgid "Folder Name"
-#~ msgstr "Mailbox öffnen"
+msgid "Folder Name"
+msgstr "Mailbox öffnen"
 
-#~ msgid "Mailhost"
-#~ msgstr "Mailserver"
+msgid "Mailhost"
+msgstr "Mailserver"
 
-#~ msgid "Newsgroup"
-#~ msgstr "Newsgruppe"
+msgid "Newsgroup"
+msgstr "Newsgruppe"
 
-#~ msgid "&Larger"
-#~ msgstr "&Größer"
+msgid "&Larger"
+msgstr "&Größer"
 
-#~ msgid "Switch to larger font."
-#~ msgstr "Größere Schrift wählen."
+msgid "Switch to larger font."
+msgstr "Größere Schrift wählen."
 
-#~ msgid "&Smaller"
-#~ msgstr "&Kleiner"
+msgid "&Smaller"
+msgstr "&Kleiner"
 
-#~ msgid "Switch to smaller font."
-#~ msgstr "Kleinere Schrift wählen."
+msgid "Switch to smaller font."
+msgstr "Kleinere Schrift wählen."
 
 #, fuzzy
-#~ msgid "&Underline on"
-#~ msgstr "&Unterstreichen"
+msgid "&Underline on"
+msgstr "&Unterstreichen"
 
 #, fuzzy
-#~ msgid "Activate underline mode."
-#~ msgstr "Unterstreichen ein-/ausschalten."
+msgid "Activate underline mode."
+msgstr "Unterstreichen ein-/ausschalten."
 
 #, fuzzy
-#~ msgid "&Underline off"
-#~ msgstr "&Unterstreichen ein"
+msgid "&Underline off"
+msgstr "&Unterstreichen ein"
 
 #, fuzzy
-#~ msgid "Deactivate underline mode."
-#~ msgstr "Unterstreichen ein-/ausschalten."
+msgid "Deactivate underline mode."
+msgstr "Unterstreichen ein-/ausschalten."
 
 #, fuzzy
-#~ msgid "&Bold on"
-#~ msgstr "&Fett ein"
+msgid "&Bold on"
+msgstr "&Fett ein"
 
 #, fuzzy
-#~ msgid "Activate bold mode."
-#~ msgstr "Fettdruck ein-/ausschalten."
+msgid "Activate bold mode."
+msgstr "Fettdruck ein-/ausschalten."
 
 #, fuzzy
-#~ msgid "&Bold off"
-#~ msgstr "&Fett aus"
+msgid "&Bold off"
+msgstr "&Fett aus"
 
 #, fuzzy
-#~ msgid "Deactivate bold mode."
-#~ msgstr "Fettdruck ein-/ausschalten."
+msgid "Deactivate bold mode."
+msgstr "Fettdruck ein-/ausschalten."
 
 #, fuzzy
-#~ msgid "&Italics on"
-#~ msgstr "Kur&siv ein"
+msgid "&Italics on"
+msgstr "Kur&siv ein"
 
 #, fuzzy
-#~ msgid "Activate italics mode."
-#~ msgstr "Kursiv ein-/ausschalten."
+msgid "Activate italics mode."
+msgstr "Kursiv ein-/ausschalten."
 
 #, fuzzy
-#~ msgid "&Italics off"
-#~ msgstr "Kur&siv aus"
+msgid "&Italics off"
+msgstr "Kur&siv aus"
 
 #, fuzzy
-#~ msgid "Deactivate italics mode."
-#~ msgstr "Kursiv ein-/ausschalten."
+msgid "Deactivate italics mode."
+msgstr "Kursiv ein-/ausschalten."
 
-#~ msgid "&Roman"
-#~ msgstr "&Roman"
+msgid "&Roman"
+msgstr "&Roman"
 
 #, fuzzy
-#~ msgid "Switch to roman font."
-#~ msgstr "Kleinere Schrift wählen."
+msgid "Switch to roman font."
+msgstr "Kleinere Schrift wählen."
 
-#~ msgid "&Typewriter"
-#~ msgstr "&Courier"
+msgid "&Typewriter"
+msgstr "&Courier"
 
 #, fuzzy
-#~ msgid "Switch to typewriter font."
-#~ msgstr "Größere Schrift wählen."
+msgid "Switch to typewriter font."
+msgstr "Größere Schrift wählen."
 
-#~ msgid "&Sans Serif"
-#~ msgstr "&Helvetica"
+msgid "&Sans Serif"
+msgstr "&Helvetica"
 
 #, fuzzy
-#~ msgid "Switch to sans serif font."
-#~ msgstr "Kleinere Schrift wählen."
+msgid "Switch to sans serif font."
+msgstr "Kleinere Schrift wählen."
 
-#~ msgid "Close this window"
-#~ msgstr "Dieses Fenster schließen"
+msgid "Close this window"
+msgstr "Dieses Fenster schließen"
 
-#~ msgid "Edit address book"
-#~ msgstr "Adreßbuch editieren"
+msgid "Edit address book"
+msgstr "Adreßbuch editieren"
 
-#~ msgid "Edit preferences"
-#~ msgstr "Einstellungen ändern"
+msgid "Edit preferences"
+msgstr "Einstellungen ändern"
 
-#~ msgid "Open folder"
-#~ msgstr "Mailbox öffnen"
+msgid "Open folder"
+msgstr "Mailbox öffnen"
 
-#~ msgid "Compose a new message"
-#~ msgstr "Neue Nachricht"
+msgid "Compose a new message"
+msgstr "Neue Nachricht"
 
-#~ msgid "Help"
-#~ msgstr "Hilfe"
+msgid "Help"
+msgstr "Hilfe"
 
-#~ msgid "Exit the program"
-#~ msgstr "Programm beenden"
+msgid "Exit the program"
+msgstr "Programm beenden"
 
-#~ msgid "Print"
-#~ msgstr "Drucken"
+msgid "Print"
+msgstr "Drucken"
 
-#~ msgid "Clear Window"
-#~ msgstr "Fenster löschen"
+msgid "Clear Window"
+msgstr "Fenster löschen"
 
-#~ msgid "Insert File"
-#~ msgstr "Datei einfügen"
+msgid "Insert File"
+msgstr "Datei einfügen"
 
 #, fuzzy
-#~ msgid "Call external editor"
-#~ msgstr "Kann Nachricht nicht senden - Netzwerk ist nicht konfiguriert."
+msgid "Call external editor"
+msgstr "Kann Nachricht nicht senden - Netzwerk ist nicht konfiguriert."
 
-#~ msgid "Send Message"
-#~ msgstr "Nachricht senden"
+msgid "Send Message"
+msgstr "Nachricht senden"
 
-#~ msgid "Open message"
-#~ msgstr "Nachricht öffnen"
+msgid "Open message"
+msgstr "Nachricht öffnen"
 
-#~ msgid "Forward message"
-#~ msgstr "Nachricht weiterleiten"
+msgid "Forward message"
+msgstr "Nachricht weiterleiten"
 
-#~ msgid "Reply to message"
-#~ msgstr "Nachricht beantworten"
+msgid "Reply to message"
+msgstr "Nachricht beantworten"
 
-#~ msgid "Print message"
-#~ msgstr "Nachricht drucken"
+msgid "Print message"
+msgstr "Nachricht drucken"
 
-#~ msgid "Delete message"
-#~ msgstr "Nachricht löschen"
+msgid "Delete message"
+msgstr "Nachricht löschen"
 
-#~ msgid "Create new entry"
-#~ msgstr "Neuer Eintrag"
+msgid "Create new entry"
+msgstr "Neuer Eintrag"
 
-#~ msgid "Undo"
-#~ msgstr "Rückgängig"
+msgid "Undo"
+msgstr "Rückgängig"
 
-#~ msgid "Find next"
-#~ msgstr "Nächsten finden"
+msgid "Find next"
+msgstr "Nächsten finden"
 
-#~ msgid "&Open Folder..."
-#~ msgstr "Mailbox &öffnen..."
+msgid "&Open Folder..."
+msgstr "Mailbox &öffnen..."
 
-#~ msgid "Open an existing message folder"
-#~ msgstr "Bestehende Mailbox öffnen"
+msgid "Open an existing message folder"
+msgstr "Bestehende Mailbox öffnen"
 
-#~ msgid "&Compose Message"
-#~ msgstr "&Nachricht schreiben"
+msgid "&Compose Message"
+msgstr "&Nachricht schreiben"
 
 #, fuzzy
-#~ msgid "Start a new message"
-#~ msgstr "Neue Nachricht"
+msgid "Start a new message"
+msgstr "Neue Nachricht"
 
-#~ msgid "Post &News Article"
-#~ msgstr "News&artikel schreiben"
+msgid "Post &News Article"
+msgstr "News&artikel schreiben"
 
-#~ msgid "Write a news article and post it"
-#~ msgstr "Neuen Newsartikel schreiben und senden"
+msgid "Write a news article and post it"
+msgstr "Neuen Newsartikel schreiben und senden"
 
 #, fuzzy
-#~ msgid "P&rint Setup"
-#~ msgstr "Druck&erinstellungen"
+msgid "P&rint Setup"
+msgstr "Druck&erinstellungen"
 
-#~ msgid "Configure printing"
-#~ msgstr "Druckereinstellungen"
+msgid "Configure printing"
+msgstr "Druckereinstellungen"
 
 #, fuzzy
-#~ msgid "&Print PS Setup"
-#~ msgstr "&Postscript Druckereinstellungen"
+msgid "&Print PS Setup"
+msgstr "&Postscript Druckereinstellungen"
 
-#~ msgid "Configure PostScript printing"
-#~ msgstr "Postscript Druckereinstellungen"
+msgid "Configure PostScript printing"
+msgstr "Postscript Druckereinstellungen"
 
-#~ msgid "Create &Folder..."
-#~ msgstr "Mailbox &anlegen..."
+msgid "Create &Folder..."
+msgstr "Mailbox &anlegen..."
 
-#~ msgid "Creates a new folder definition"
-#~ msgstr "Legt eine neue Mailboxeinstellung an"
+msgid "Creates a new folder definition"
+msgstr "Legt eine neue Mailboxeinstellung an"
 
-#~ msgid "Run &Script..."
-#~ msgstr "Skript aus&führen..."
+msgid "Run &Script..."
+msgstr "Skript aus&führen..."
 
-#~ msgid "Run a simple python script"
-#~ msgstr "Pythonskript ausführen"
+msgid "Run a simple python script"
+msgstr "Pythonskript ausführen"
 
-#~ msgid "&Close Window"
-#~ msgstr "Fenster &schließen"
+msgid "&Close Window"
+msgstr "Fenster &schließen"
 
-#~ msgid "E&xit"
-#~ msgstr "&Ende"
+msgid "E&xit"
+msgstr "&Ende"
 
 #, fuzzy
-#~ msgid "Quit the application"
-#~ msgstr "Nicht behebbarer Programmfehler"
+msgid "Quit the application"
+msgstr "Nicht behebbarer Programmfehler"
 
-#~ msgid "&Address books..."
-#~ msgstr "&Adreßbücher..."
+msgid "&Address books..."
+msgstr "&Adreßbücher..."
 
 #, fuzzy
-#~ msgid "Edit the address book(s)"
-#~ msgstr "Adreßbuch editieren"
+msgid "Edit the address book(s)"
+msgstr "Adreßbuch editieren"
 
-#~ msgid "&Preferences..."
-#~ msgstr "&Einstellungen..."
+msgid "&Preferences..."
+msgstr "&Einstellungen..."
 
-#~ msgid "Change options"
-#~ msgstr "Einstellungen ändern"
+msgid "Change options"
+msgstr "Einstellungen ändern"
 
-#~ msgid "&Save Preferences"
-#~ msgstr "Einstellungen &sichern"
+msgid "&Save Preferences"
+msgstr "Einstellungen &sichern"
 
-#~ msgid "Save options"
-#~ msgstr "Einstellungen sichern"
+msgid "Save options"
+msgstr "Einstellungen sichern"
 
 #, fuzzy
-#~ msgid "View selected message"
-#~ msgstr "Ausgewählte Nachrichten ansehen"
+msgid "View selected message"
+msgstr "Ausgewählte Nachrichten ansehen"
 
-#~ msgid "&Print"
-#~ msgstr "&Drucken"
+msgid "&Print"
+msgstr "&Drucken"
 
 #, fuzzy
-#~ msgid "Print this message"
-#~ msgstr "Nachricht drucken"
+msgid "Print this message"
+msgstr "Nachricht drucken"
 
 #, fuzzy
-#~ msgid "Print Pre&view"
-#~ msgstr "Druckvoransicht"
+msgid "Print Pre&view"
+msgstr "Druckvoransicht"
 
 #, fuzzy
-#~ msgid "Preview a printout of this message"
-#~ msgstr "Betrachten eines Ausrucks dieser Nachricht"
+msgid "Preview a printout of this message"
+msgstr "Betrachten eines Ausrucks dieser Nachricht"
 
 #, fuzzy
-#~ msgid "PS-Prin&t"
-#~ msgstr "&PS-Drucken"
+msgid "PS-Prin&t"
+msgstr "&PS-Drucken"
 
 #, fuzzy
-#~ msgid "Print this message as PostScript"
-#~ msgstr "Nachricht als PostScript drucken"
+msgid "Print this message as PostScript"
+msgstr "Nachricht als PostScript drucken"
 
 #, fuzzy
-#~ msgid "PS&-Print Preview"
-#~ msgstr "PS-Druckvo&ransicht"
+msgid "PS&-Print Preview"
+msgstr "PS-Druckvo&ransicht"
 
-#~ msgid "View PostScript printout"
-#~ msgstr "Druckvoransicht für PostScript Ausdruck"
+msgid "View PostScript printout"
+msgstr "Druckvoransicht für PostScript Ausdruck"
 
-#~ msgid "&Reply"
-#~ msgstr "&Beantworten"
+msgid "&Reply"
+msgstr "&Beantworten"
 
 #, fuzzy
-#~ msgid "Reply to this message"
-#~ msgstr "Nachricht beantworten"
+msgid "Reply to this message"
+msgstr "Nachricht beantworten"
 
-#~ msgid "&Forward"
-#~ msgstr "&Weiterleiten"
+msgid "&Forward"
+msgstr "&Weiterleiten"
 
 #, fuzzy
-#~ msgid "Forward this message"
-#~ msgstr "Nachricht weiterleiten"
+msgid "Forward this message"
+msgstr "Nachricht weiterleiten"
 
-#~ msgid "&Save as File"
-#~ msgstr "Als &Datei sichern"
+msgid "&Save as File"
+msgstr "Als &Datei sichern"
 
 #, fuzzy
-#~ msgid "Export message to a file"
-#~ msgstr "Nachricht Sichern"
+msgid "Export message to a file"
+msgstr "Nachricht Sichern"
 
-#~ msgid "&Copy to Folder"
-#~ msgstr "In Mailbox &kopieren"
+msgid "&Copy to Folder"
+msgstr "In Mailbox &kopieren"
 
 #, fuzzy
-#~ msgid "Save message to another folder"
-#~ msgstr "Nachricht Sichern"
+msgid "Save message to another folder"
+msgstr "Nachricht Sichern"
 
 #, fuzzy
-#~ msgid "&Move to Folder"
-#~ msgstr "In Mailbox &kopieren"
+msgid "&Move to Folder"
+msgstr "In Mailbox &kopieren"
 
 #, fuzzy
-#~ msgid "Move message to another folder"
-#~ msgstr "Nachricht Sichern"
+msgid "Move message to another folder"
+msgstr "Nachricht Sichern"
 
-#~ msgid "&Delete"
-#~ msgstr "&Löschen"
+msgid "&Delete"
+msgstr "&Löschen"
 
 #, fuzzy
-#~ msgid "Delete this message"
-#~ msgstr "Nachricht löschen"
+msgid "Delete this message"
+msgstr "Nachricht löschen"
 
-#~ msgid "&Undelete"
-#~ msgstr "&Wiederherstellen"
+msgid "&Undelete"
+msgstr "&Wiederherstellen"
 
-#~ msgid "Ex&punge"
-#~ msgstr "&Verwerfen"
+msgid "Ex&punge"
+msgstr "&Verwerfen"
 
 #, fuzzy
-#~ msgid "Expunge"
-#~ msgstr "&Verwerfen"
+msgid "Expunge"
+msgstr "&Verwerfen"
 
-#~ msgid "Select &all"
-#~ msgstr "&Alle markieren"
+msgid "Select &all"
+msgstr "&Alle markieren"
 
 #, fuzzy
-#~ msgid "Select all messages"
-#~ msgstr "Nachricht löschen"
+msgid "Select all messages"
+msgstr "Nachricht löschen"
 
-#~ msgid "D&eselect all"
-#~ msgstr "&Keine markieren"
+msgid "D&eselect all"
+msgstr "&Keine markieren"
 
 #, fuzzy
-#~ msgid "Show &header"
-#~ msgstr "Nachrichten&kopf anzeigen"
+msgid "Show &header"
+msgstr "Nachrichten&kopf anzeigen"
 
-#~ msgid "Toggle display of message header"
-#~ msgstr "Anzeige der Nachrichtenköpfe ein-/ausschalten"
+msgid "Toggle display of message header"
+msgstr "Anzeige der Nachrichtenköpfe ein-/ausschalten"
 
 #, fuzzy
-#~ msgid "Show ra&w message"
-#~ msgstr "Nachrichten&text anzeigen"
+msgid "Show ra&w message"
+msgstr "Nachrichten&text anzeigen"
 
 #, fuzzy
-#~ msgid "Show the raw message text"
-#~ msgstr "Anzeigen des reinen Nachrichtentext"
+msgid "Show the raw message text"
+msgstr "Anzeigen des reinen Nachrichtentext"
 
-#~ msgid "&Insert file..."
-#~ msgstr "Datei &einfügen..."
+msgid "&Insert file..."
+msgstr "Datei &einfügen..."
 
 #, fuzzy
-#~ msgid "Insert a file"
-#~ msgstr "Datei einfügen"
+msgid "Insert a file"
+msgstr "Datei einfügen"
 
 #, fuzzy
-#~ msgid "Send the message now"
-#~ msgstr "Nachricht jetzt senden"
+msgid "Send the message now"
+msgstr "Nachricht jetzt senden"
 
 #, fuzzy
-#~ msgid "Print the message"
-#~ msgstr "Nachricht drucken"
+msgid "Print the message"
+msgstr "Nachricht drucken"
 
 #, fuzzy
-#~ msgid "Save &text..."
-#~ msgstr "&Text sichern..."
+msgid "Save &text..."
+msgstr "&Text sichern..."
 
 #, fuzzy
-#~ msgid "Save message text to file"
-#~ msgstr "Nachrichtentext in Datei sichern"
+msgid "Save message text to file"
+msgstr "Nachrichtentext in Datei sichern"
 
 #, fuzzy
-#~ msgid "In&sert text..."
-#~ msgstr "Textdatei &einfügen..."
+msgid "In&sert text..."
+msgstr "Textdatei &einfügen..."
 
 #, fuzzy
-#~ msgid "Insert text file"
-#~ msgstr "Textdatei einfügen"
+msgid "Insert text file"
+msgstr "Textdatei einfügen"
 
-#~ msgid "&Clear"
-#~ msgstr "&Löschen"
+msgid "&Clear"
+msgstr "&Löschen"
 
 #, fuzzy
-#~ msgid "Delete message contents"
-#~ msgstr "Nachrichteninhalt löschen"
+msgid "Delete message contents"
+msgstr "Nachrichteninhalt löschen"
 
 #, fuzzy
-#~ msgid "&External editor"
-#~ msgstr "&Externer Editor"
+msgid "&External editor"
+msgstr "&Externer Editor"
 
-#~ msgid "Invoke alternative editor"
-#~ msgstr "Aufrufen des externen Editors"
+msgid "Invoke alternative editor"
+msgstr "Aufrufen des externen Editors"
 
-#~ msgid "&New..."
-#~ msgstr "&Neu..."
+msgid "&New..."
+msgstr "&Neu..."
 
 #, fuzzy
-#~ msgid "Create a new address book"
-#~ msgstr "Adreßbuch editieren"
+msgid "Create a new address book"
+msgstr "Adreßbuch editieren"
 
-#~ msgid "&Open..."
-#~ msgstr "&Öffnen..."
+msgid "&Open..."
+msgstr "&Öffnen..."
 
 #, fuzzy
-#~ msgid "Open an address book file"
-#~ msgstr "Ein Adreßbuch öffnen"
+msgid "Open an address book file"
+msgstr "Ein Adreßbuch öffnen"
 
-#~ msgid "&Properties..."
-#~ msgstr "&Eigenschaften..."
+msgid "&Properties..."
+msgstr "&Eigenschaften..."
 
 #, fuzzy
-#~ msgid "View properties of the current address book"
-#~ msgstr "Eigenschaften des aktuellen Adreßbuchs"
+msgid "View properties of the current address book"
+msgstr "Eigenschaften des aktuellen Adreßbuchs"
 
-#~ msgid "&New entry..."
-#~ msgstr "&Neuer Eintrag..."
+msgid "&New entry..."
+msgstr "&Neuer Eintrag..."
 
 #, fuzzy
-#~ msgid "Create new entry/group"
-#~ msgstr "Neuen Eintrag/Gruppe anlegen"
+msgid "Create new entry/group"
+msgstr "Neuen Eintrag/Gruppe anlegen"
 
 #, fuzzy
-#~ msgid "Delete the selected items"
-#~ msgstr "Die ausgewählten Einträge löschen"
+msgid "Delete the selected items"
+msgstr "Die ausgewählten Einträge löschen"
 
-#~ msgid "Rename the selected items"
-#~ msgstr "Die ausgewählten Einträge umbenennen"
+msgid "Rename the selected items"
+msgstr "Die ausgewählten Einträge umbenennen"
 
 #, fuzzy
-#~ msgid "Cu&t"
-#~ msgstr "&Ausschneiden"
+msgid "Cu&t"
+msgstr "&Ausschneiden"
 
-#~ msgid "Copy and delete selected items"
-#~ msgstr "Ausgewählte Einträge kopieren und löschen"
+msgid "Copy and delete selected items"
+msgstr "Ausgewählte Einträge kopieren und löschen"
 
 #, fuzzy
-#~ msgid "&Copy"
-#~ msgstr "&Kopieren"
+msgid "&Copy"
+msgstr "&Kopieren"
 
 #, fuzzy
-#~ msgid "Copy selected items"
-#~ msgstr "Ausgewählte Einträge kopieren"
+msgid "Copy selected items"
+msgstr "Ausgewählte Einträge kopieren"
 
 #, fuzzy
-#~ msgid "&Paste"
-#~ msgstr "&Einfügen"
+msgid "&Paste"
+msgstr "&Einfügen"
 
 #, fuzzy
-#~ msgid "Paste here"
-#~ msgstr "Hier einfügen"
+msgid "Paste here"
+msgstr "Hier einfügen"
 
-#~ msgid "&Undo changes"
-#~ msgstr "&Rückggängig"
+msgid "&Undo changes"
+msgstr "&Rückggängig"
 
-#~ msgid "Undo all changes to the entry being edited"
-#~ msgstr "Alle Änderungen rückggängig machen"
+msgid "Undo all changes to the entry being edited"
+msgstr "Alle Änderungen rückggängig machen"
 
 #, fuzzy
-#~ msgid "&Find..."
-#~ msgstr "&Suchen..."
+msgid "&Find..."
+msgstr "&Suchen..."
 
-#~ msgid "Find entry by name or contents"
-#~ msgstr "Eintrag nach Namen oder Inhalt suchen"
+msgid "Find entry by name or contents"
+msgstr "Eintrag nach Namen oder Inhalt suchen"
 
 #, fuzzy
-#~ msgid "Find &next"
-#~ msgstr "&Nächsten finden"
+msgid "Find &next"
+msgstr "&Nächsten finden"
 
-#~ msgid "Go to the next match"
-#~ msgstr "Nächten gefunden Eintrag anzeigen"
+msgid "Go to the next match"
+msgstr "Nächten gefunden Eintrag anzeigen"
 
-#~ msgid "&Go To..."
-#~ msgstr "&Gehen zu.."
+msgid "&Go To..."
+msgstr "&Gehen zu.."
 
-#~ msgid "Go to specified entry"
-#~ msgstr "Den angegebenen Eintrag anzeigen"
+msgid "Go to specified entry"
+msgstr "Den angegebenen Eintrag anzeigen"
 
-#~ msgid "&About..."
-#~ msgstr "&Über..."
+msgid "&About..."
+msgstr "&Über..."
 
 #, fuzzy
-#~ msgid "Displays the program in formation and copyright"
-#~ msgstr "Zeigt Programminformation und Lizenz an."
+msgid "Displays the program in formation and copyright"
+msgstr "Zeigt Programminformation und Lizenz an."
 
-#~ msgid "&Release Notes..."
-#~ msgstr "&Zu dieser Version..."
+msgid "&Release Notes..."
+msgstr "&Zu dieser Version..."
 
-#~ msgid "Displays notes about the current release."
-#~ msgstr "Zeigt aktuelle Infos über diese Version an."
+msgid "Displays notes about the current release."
+msgstr "Zeigt aktuelle Infos über diese Version an."
 
-#~ msgid "&FAQ..."
-#~ msgstr "&FAQ..."
+msgid "&FAQ..."
+msgstr "&FAQ..."
 
-#~ msgid "Displays the list of Frequently Asked Questions."
-#~ msgstr "Zeigt die Liste der häufig gestellten Fragen (FAQ)."
+msgid "Displays the list of Frequently Asked Questions."
+msgstr "Zeigt die Liste der häufig gestellten Fragen (FAQ)."
 
-#~ msgid "Help on current context..."
-#~ msgstr "Hilfe zum aktuellen Kontext..."
+msgid "Help on current context..."
+msgstr "Hilfe zum aktuellen Kontext..."
 
-#~ msgid "Help &Contents"
-#~ msgstr "&Inhalt"
+msgid "Help &Contents"
+msgstr "&Inhalt"
 
-#~ msgid "Contents of help system..."
-#~ msgstr "Inhaltsverzeichnis des Hilfesystems..."
+msgid "Contents of help system..."
+msgstr "Inhaltsverzeichnis des Hilfesystems..."
 
-#~ msgid "&Search Help"
-#~ msgstr "&Suchen"
+msgid "&Search Help"
+msgstr "&Suchen"
 
-#~ msgid "Search help system for keyword..."
-#~ msgstr "Suche in Hilfe nach Stichwort..."
+msgid "Search help system for keyword..."
+msgstr "Suche in Hilfe nach Stichwort..."
 
-#~ msgid "C&opyright"
-#~ msgstr "&Copyright"
+msgid "C&opyright"
+msgstr "&Copyright"
 
-#~ msgid "Show Copyright."
-#~ msgstr "Copyright Notiz und Nutzungsbedingungen anzeigen."
+msgid "Show Copyright."
+msgstr "Copyright Notiz und Nutzungsbedingungen anzeigen."
 
-#~ msgid ""
-#~ "The user and host names are used to compose the return address, unless\n"
-#~ "a differenent return address is explicitly specified."
-#~ msgstr ""
-#~ "Der Benutzername und der Rechnername werden für die Absenderadresse "
-#~ "verwendet,\n"
-#~ "es sei denn, Sie geben explizit eine Rücksendeadresse an."
+msgid ""
+"The user and host names are used to compose the return address, unless\n"
+"a differenent return address is explicitly specified."
+msgstr ""
+"Der Benutzername und der Rechnername werden für die Absenderadresse "
+"verwendet,\n"
+"es sei denn, Sie geben explizit eine Rücksendeadresse an."
 
 #, fuzzy
-#~ msgid "&Username"
-#~ msgstr "&Benutzername"
+msgid "&Username"
+msgstr "&Benutzername"
 
-#~ msgid ""
-#~ "The host name is also used as a default host name for local mail addresses."
-#~ msgstr ""
-#~ "Der Rechnername wird auch als Vorgabe für lokale Adressen verwendet."
+msgid ""
+"The host name is also used as a default host name for local mail addresses."
+msgstr ""
+"Der Rechnername wird auch als Vorgabe für lokale Adressen verwendet."
 
 #, fuzzy
-#~ msgid "&Hostname"
-#~ msgstr "&Rechnername"
+msgid "&Hostname"
+msgstr "&Rechnername"
 
-#~ msgid "&Return/Reply address"
-#~ msgstr "&Rücksendeadresse"
+msgid "&Return/Reply address"
+msgstr "&Rücksendeadresse"
 
-#~ msgid "SMTP (&mail) server"
-#~ msgstr "SMTP (&Mail) Server"
+msgid "SMTP (&mail) server"
+msgstr "SMTP (&Mail) Server"
 
-#~ msgid "NNTP (&news) server"
-#~ msgstr "&NNTP (Usenet-News) Server"
+msgid "NNTP (&news) server"
+msgstr "&NNTP (Usenet-News) Server"
 
 #, fuzzy
-#~ msgid "&Personal name"
-#~ msgstr "&Persönlicher Name"
+msgid "&Personal name"
+msgstr "&Persönlicher Name"
 
-#~ msgid "User &level:novice:advanced"
-#~ msgstr "Benutzer&level:Anfänger:Fortgeschrittener"
+msgid "User &level:novice:advanced"
+msgstr "Benutzer&level:Anfänger:Fortgeschrittener"
 
 #, fuzzy
-#~ msgid "Sa&ve sent messages"
-#~ msgstr "Ausgehende Mails &sichern"
+msgid "Sa&ve sent messages"
+msgstr "Ausgehende Mails &sichern"
 
 #, fuzzy
-#~ msgid "&Folder file for sent messages"
-#~ msgstr "&Mailbox für ausgehende Mails"
+msgid "&Folder file for sent messages"
+msgstr "&Mailbox für ausgehende Mails"
 
-#~ msgid "&Wrap margin"
-#~ msgstr "Rand für &Zeilenumbruch"
+msgid "&Wrap margin"
+msgstr "Rand für &Zeilenumbruch"
 
-#~ msgid "&Reply character"
-#~ msgstr "&Quotierungszeichen"
+msgid "&Reply character"
+msgstr "&Quotierungszeichen"
 
 #, fuzzy
-#~ msgid "&Use signature"
-#~ msgstr "Signaturdatei &verwenden"
+msgid "&Use signature"
+msgstr "Signaturdatei &verwenden"
 
 #, fuzzy
-#~ msgid "&Signature file"
-#~ msgstr "&Signaturdatei"
+msgid "&Signature file"
+msgstr "&Signaturdatei"
 
 #, fuzzy
-#~ msgid "Use signature se&parator"
-#~ msgstr "Signaturs&eparator verwenden"
+msgid "Use signature se&parator"
+msgstr "Signaturs&eparator verwenden"
 
-#~ msgid "Us&e XFace"
-#~ msgstr "&XFace verwenden"
+msgid "Us&e XFace"
+msgstr "&XFace verwenden"
 
 #, fuzzy
-#~ msgid "&XFace file"
-#~ msgstr "XFAce &Datei"
+msgid "&XFace file"
+msgstr "XFAce &Datei"
 
-#~ msgid "Mail alias substring ex&pansion"
-#~ msgstr "Aliase in ganzem Text ex&pandieren"
+msgid "Mail alias substring ex&pansion"
+msgstr "Aliase in ganzem Text ex&pandieren"
 
-#~ msgid "Font famil&y:default:decorative:roman:script:swiss:modern:teletype"
-#~ msgstr ""
-#~ "&Zeichensatz:Standard:Dekorativ:Roman:Skript:Schweitzer:Schreibmaschine"
+msgid "Font famil&y:default:decorative:roman:script:swiss:modern:teletype"
+msgstr ""
+"&Zeichensatz:Standard:Dekorativ:Roman:Skript:Schweitzer:Schreibmaschine"
 
-#~ msgid "Font si&ze"
-#~ msgstr "Zeichen&größe"
+msgid "Font si&ze"
+msgstr "Zeichen&größe"
 
-#~ msgid "Foreground c&olour"
-#~ msgstr "Schrift&farbe"
+msgid "Foreground c&olour"
+msgstr "Schrift&farbe"
 
-#~ msgid "Back&ground colour"
-#~ msgstr "&Hintergrundfarbe"
+msgid "Back&ground colour"
+msgstr "&Hintergrundfarbe"
 
-#~ msgid "Configure &headers..."
-#~ msgstr "Nachrichten&kopf..."
+msgid "Configure &headers..."
+msgstr "Nachrichten&kopf..."
 
 #, fuzzy
-#~ msgid "Folders to open on &startup"
-#~ msgstr "Mailboxen die zu Programm&start geöffnet werden"
+msgid "Folders to open on &startup"
+msgstr "Mailboxen die zu Programm&start geöffnet werden"
 
 #, fuzzy
-#~ msgid "Folder opened in &main frame"
-#~ msgstr "Mailbox für Haupt&fenster"
+msgid "Folder opened in &main frame"
+msgstr "Mailbox für Haupt&fenster"
 
-#~ msgid "Folder where to collect &new mail"
-#~ msgstr "Mailbox für &neue Nachrichten"
+msgid "Folder where to collect &new mail"
+msgstr "Mailbox für &neue Nachrichten"
 
-#~ msgid "&Poll for new mail delay in seconds"
-#~ msgstr "&Alle wieviel Sekunden nach neuer Mail testen"
+msgid "&Poll for new mail delay in seconds"
+msgstr "&Alle wieviel Sekunden nach neuer Mail testen"
 
-#~ msgid "&Threshold for displaying progress dialog"
-#~ msgstr "&Minimale Anzahl um Statusbalken anzuzeigen"
+msgid "&Threshold for displaying progress dialog"
+msgstr "&Minimale Anzahl um Statusbalken anzuzeigen"
 
-#~ msgid "Python is the built-in scripting language which can be\n"
-#~ msgstr "Python ist die eingebaute Skripsprache, mit welcher\n"
+msgid "Python is the built-in scripting language which can be\n"
+msgstr "Python ist die eingebaute Skripsprache, mit welcher\n"
 
-#~ msgid "used to extend M's functionality. It is not essential\n"
-#~ msgstr "Mahogany erweitert werden kann. Sie ist normalerweise nicht\n"
+msgid "used to extend M's functionality. It is not essential\n"
+msgstr "Mahogany erweitert werden kann. Sie ist normalerweise nicht\n"
 
-#~ msgid "for the program's normal operation."
-#~ msgstr "benötigt."
+msgid "for the program's normal operation."
+msgstr "benötigt."
 
 #, fuzzy
-#~ msgid "&Enable Python"
-#~ msgstr "&Python aktivieren"
+msgid "&Enable Python"
+msgstr "&Python aktivieren"
 
 #, fuzzy
-#~ msgid "Python &Path"
-#~ msgstr "Python &Suchpfad"
+msgid "Python &Path"
+msgstr "Python &Suchpfad"
 
-#~ msgid "&Startup script"
-#~ msgstr "&Skript für Programmstart"
+msgid "&Startup script"
+msgstr "&Skript für Programmstart"
 
 #, fuzzy
-#~ msgid "&Folder open callback"
-#~ msgstr "&Mailbox öffnen-Routine"
+msgid "&Folder open callback"
+msgstr "&Mailbox öffnen-Routine"
 
 #, fuzzy
-#~ msgid "Folder &update callback"
-#~ msgstr "Mailbox &aktualisieren-Routine"
+msgid "Folder &update callback"
+msgstr "Mailbox &aktualisieren-Routine"
 
 #, fuzzy
-#~ msgid "Folder e&xpunge callback"
-#~ msgstr "Mail löschen-Routine"
+msgid "Folder e&xpunge callback"
+msgstr "Mail löschen-Routine"
 
 #, fuzzy
-#~ msgid "Flag &set callback"
-#~ msgstr "Mail &Status setzen-Routine"
+msgid "Flag &set callback"
+msgstr "Mail &Status setzen-Routine"
 
 #, fuzzy
-#~ msgid "Flag &clear callback"
-#~ msgstr "Mail Status &löschen-Routine"
+msgid "Flag &clear callback"
+msgstr "Mail Status &löschen-Routine"
 
-#~ msgid "&Font family:default:decorative:roman:script:swiss:modern:teletype"
-#~ msgstr ""
-#~ "&Zeichensatz:Standard:Dekorativ:Roman:Skrip:Schweitzer:Modern:Schreibmaschine"
+msgid "&Font family:default:decorative:roman:script:swiss:modern:teletype"
+msgstr ""
+"&Zeichensatz:Standard:Dekorativ:Roman:Skrip:Schweitzer:Modern:Schreibmaschine"
 
-#~ msgid "Font &size"
-#~ msgstr "Zeichen&größe"
+msgid "Font &size"
+msgstr "Zeichen&größe"
 
-#~ msgid "Colour for &URLs"
-#~ msgstr "Farbe für &URLs"
+msgid "Colour for &URLs"
+msgstr "Farbe für &URLs"
 
-#~ msgid "&Inline graphics"
-#~ msgstr "&Bilder anzeigen"
+msgid "&Inline graphics"
+msgstr "&Bilder anzeigen"
 
-#~ msgid "Conversion &graphics format:XPM:PNG:BMP:JPG"
-#~ msgstr "Grafik&format für Konvertierungen:XPM:PNG:BMP:JPG"
+msgid "Conversion &graphics format:XPM:PNG:BMP:JPG"
+msgstr "Grafik&format für Konvertierungen:XPM:PNG:BMP:JPG"
 
-#~ msgid "Support special &fax mailers"
-#~ msgstr "&Fax-Versender unterstützen"
+msgid "Support special &fax mailers"
+msgstr "&Fax-Versender unterstützen"
 
-#~ msgid "&Domains sending faxes"
-#~ msgstr "&Domains die Faxe senden"
+msgid "&Domains sending faxes"
+msgstr "&Domains die Faxe senden"
 
-#~ msgid ""
-#~ "The following settings allow to limit the amount of data retrieved from\n"
-#~ "remote server: if the message size or number is greater than the value\n"
-#~ "specified here, you will be asked for confirmation before transfering data."
-#~ msgstr "The folgenden Einstellungen begrenzen die Datenmende die von"
+msgid ""
+"The following settings allow to limit the amount of data retrieved from\n"
+"remote server: if the message size or number is greater than the value\n"
+"specified here, you will be asked for confirmation before transfering data."
+msgstr "The folgenden Einstellungen begrenzen die Datenmende die von"
 
-#~ msgid ""
-#~ "Mahogany may automatically remember all e-mail addresses in the messages you "
-#~ "receive in a special addresss book. This is called 'address autocollection' "
-#~ "and may be turned on or off from this page."
-#~ msgstr ""
-#~ "Mahogany kann automatisch alle e-Mail Adressen aus eingehenden Nachrichten\n"
-#~ "in einem speziellen Adreßbuch sammeln. Dies können Sie hier konfigurieren."
+msgid ""
+"Mahogany may automatically remember all e-mail addresses in the messages you "
+"receive in a special addresss book. This is called 'address autocollection' "
+"and may be turned on or off from this page."
+msgstr ""
+"Mahogany kann automatisch alle e-Mail Adressen aus eingehenden Nachrichten\n"
+"in einem speziellen Adreßbuch sammeln. Dies können Sie hier konfigurieren."
 
-#~ msgid "&Autocollect addresses"
-#~ msgstr "&Adressen sammeln"
+msgid "&Autocollect addresses"
+msgstr "&Adressen sammeln"
 
 #, fuzzy
-#~ msgid "Address &book to use"
-#~ msgstr "&Adreßbuch für gesammelte Addressen"
+msgid "Address &book to use"
+msgstr "&Adreßbuch für gesammelte Addressen"
 
 #, fuzzy
-#~ msgid "Ignore addresses without &names"
-#~ msgstr "Adressen &ohne Namen ignorieren"
+msgid "Ignore addresses without &names"
+msgstr "Adressen &ohne Namen ignorieren"
 
-#~ msgid ""
-#~ "The following settings configure the support of the Big Brother\n"
-#~ "addressbook (BBDB) format. This is supported only for compatibility\n"
-#~ "with other software (emacs). The normal addressbook is unaffected by\n"
-#~ "these settings."
-#~ msgstr ""
-#~ "Die folgenden Einstellungen betreffen die Unterstützung des 'Big Brother\n"
-#~ "Database' (BBDB) Adreßbuchformats. Dieses wird nur aus Kompatibilität mit\n"
-#~ "anderer Software (Emacs) unterstützt. Die normalen Adreßbücher werden "
-#~ "hiervon\n"
-#~ "nicht betroffen"
+msgid ""
+"The following settings configure the support of the Big Brother\n"
+"addressbook (BBDB) format. This is supported only for compatibility\n"
+"with other software (emacs). The normal addressbook is unaffected by\n"
+"these settings."
+msgstr ""
+"Die folgenden Einstellungen betreffen die Unterstützung des 'Big Brother\n"
+"Database' (BBDB) Adreßbuchformats. Dieses wird nur aus Kompatibilität mit\n"
+"anderer Software (Emacs) unterstützt. Die normalen Adreßbücher werden "
+"hiervon\n"
+"nicht betroffen"
 
 #, fuzzy
-#~ msgid "&Ignore entries without names"
-#~ msgstr "Einträge ohne Namen &ignorieren"
+msgid "&Ignore entries without names"
+msgstr "Einträge ohne Namen &ignorieren"
 
-#~ msgid "&Generate unique aliases"
-#~ msgstr "Eindeutige &Namen erzeugen"
+msgid "&Generate unique aliases"
+msgstr "Eindeutige &Namen erzeugen"
 
-#~ msgid "&Name for nameless entries"
-#~ msgstr "Name für &unbenannte Einträge"
+msgid "&Name for nameless entries"
+msgstr "Name für &unbenannte Einträge"
 
 #, fuzzy
-#~ msgid "&Save on exit"
-#~ msgstr "Bei Programmende &sichern"
+msgid "&Save on exit"
+msgstr "Bei Programmende &sichern"
 
-#~ msgid ""
-#~ "The following program will be used to open URLs embedded in messages:"
-#~ msgstr ""
-#~ "Das folgende Programm wird verwendet um URLs in Nachrichten zu öffnen:"
+msgid ""
+"The following program will be used to open URLs embedded in messages:"
+msgstr ""
+"Das folgende Programm wird verwendet um URLs in Nachrichten zu öffnen:"
 
-#~ msgid "Open &URLs with"
-#~ msgstr "&URLs öffnent mit"
+msgid "Open &URLs with"
+msgstr "&URLs öffnent mit"
 
-#~ msgid "URL &browser is Netscape"
-#~ msgstr "URL Browser ist &Netscape"
+msgid "URL &browser is Netscape"
+msgstr "URL Browser ist &Netscape"
 
-#~ msgid "The following program will be used to view the online help system:"
-#~ msgstr ""
-#~ "Das folgende Programm wird verwendet um die Online-Hilfe anzuzeigen:"
+msgid "The following program will be used to view the online help system:"
+msgstr ""
+"Das folgende Programm wird verwendet um die Online-Hilfe anzuzeigen:"
 
 #, fuzzy
-#~ msgid "&Help viewer"
-#~ msgstr "&Hilfe-Betrachter"
+msgid "&Help viewer"
+msgstr "&Hilfe-Betrachter"
 
-#~ msgid "Help &viewer is Netscape"
-#~ msgstr "Betrachter ist Net&Scape"
+msgid "Help &viewer is Netscape"
+msgstr "Betrachter ist Net&Scape"
 
-#~ msgid "&Image format converter"
-#~ msgstr "&Grafikformat-Konverter"
+msgid "&Image format converter"
+msgstr "&Grafikformat-Konverter"
 
-#~ msgid "The following line will be executed each time new mail is received:"
-#~ msgstr "Der folgende Befehl wird ausgeführt, wenn neue Mail eintrifft:"
+msgid "The following line will be executed each time new mail is received:"
+msgstr "Der folgende Befehl wird ausgeführt, wenn neue Mail eintrifft:"
 
 #, fuzzy
-#~ msgid "&New Mail Command"
-#~ msgstr "Neue Mail &Befehl"
+msgid "&New Mail Command"
+msgstr "Neue Mail &Befehl"
 
 #, fuzzy
-#~ msgid "Show &log window"
-#~ msgstr "&Log-Fenster anzeigen"
+msgid "Show &log window"
+msgstr "&Log-Fenster anzeigen"
 
-#~ msgid "&Splash screen at startup"
-#~ msgstr "Start&fenster anzeigen"
+msgid "&Splash screen at startup"
+msgstr "Start&fenster anzeigen"
 
-#~ msgid "Splash screen &delay"
-#~ msgstr "Maximale Startfenster &Dauer"
+msgid "Splash screen &delay"
+msgstr "Maximale Startfenster &Dauer"
 
-#~ msgid "&Autosave delay"
-#~ msgstr "Speicher&intervall"
+msgid "&Autosave delay"
+msgstr "Speicher&intervall"
 
-#~ msgid "Confirm &exit"
-#~ msgstr "Programm&ende bestätigen"
+msgid "Confirm &exit"
+msgstr "Programm&ende bestätigen"
 
-#~ msgid "Open folder on single &click"
-#~ msgstr "Mailbox auf einfachen &Klick öffnen"
+msgid "Open folder on single &click"
+msgstr "Mailbox auf einfachen &Klick öffnen"
 
-#~ msgid "&Format for the date"
-#~ msgstr "&Anzeigeformat für Datum"
+msgid "&Format for the date"
+msgstr "&Anzeigeformat für Datum"
 
-#~ msgid "Show new mail &notifications"
-#~ msgstr "Ne&ue Mail Nachricht anzeigen"
+msgid "Show new mail &notifications"
+msgstr "Ne&ue Mail Nachricht anzeigen"
 
-#~ msgid "&Path where to find AFM files"
-#~ msgstr "Such&pfad für AFM Dateien"
+msgid "&Path where to find AFM files"
+msgstr "Such&pfad für AFM Dateien"
 
 #, fuzzy
-#~ msgid "Compose"
-#~ msgstr "Nachrichteneditor"
+msgid "Compose"
+msgstr "Nachrichteneditor"
 
 #, fuzzy
-#~ msgid "Message Viewer"
-#~ msgstr "Nachrichtenbetrachter"
+msgid "Message Viewer"
+msgstr "Nachrichtenbetrachter"
 
-#~ msgid "Identity"
-#~ msgstr "Identität"
+msgid "Identity"
+msgstr "Identität"
 
-#~ msgid "Python"
-#~ msgstr "Python"
+msgid "Python"
+msgstr "Python"
 
 #, fuzzy
-#~ msgid "Adressbook"
-#~ msgstr "Adreßbuch"
+msgid "Adressbook"
+msgstr "Adreßbuch"
 
-#~ msgid "Miscellaneous"
-#~ msgstr "Sonstiges"
+msgid "Miscellaneous"
+msgstr "Sonstiges"
 
 #, fuzzy
-#~ msgid "Helpers"
-#~ msgstr "Helfer"
+msgid "Helpers"
+msgstr "Helfer"
 
-#~ msgid "Folders to open on startup"
-#~ msgstr "Mailboxen die zu Programmstart geöffnet werden"
+msgid "Folders to open on startup"
+msgstr "Mailboxen die zu Programmstart geöffnet werden"
 
 #, fuzzy
-#~ msgid "Folder name"
-#~ msgstr "Mailboxname"
+msgid "Folder name"
+msgstr "Mailboxname"
 
-#~ msgid "Folder '%s' is already present in the list, not added."
-#~ msgstr ""
-#~ "Mailbox '%s' ist bereits auf der Liste, nicht nocheinmal hinzugefügt."
+msgid "Folder '%s' is already present in the list, not added."
+msgstr ""
+"Mailbox '%s' ist bereits auf der Liste, nicht nocheinmal hinzugefügt."
 
-#~ msgid "Program options"
-#~ msgstr "Programmoptionen"
+msgid "Program options"
+msgstr "Programmoptionen"
 
-#~ msgid ""
-#~ "Some important program settings were changed.\n"
-#~ "\n"
-#~ "Would you like to test the new setup (recommended)?"
-#~ msgstr ""
-#~ "Einige wichtige Einstellungen wurden geändert.\n"
-#~ "\n"
-#~ "Möchten Sie die neuen Einstellungen testen (empfohlen)?"
+msgid ""
+"Some important program settings were changed.\n"
+"\n"
+"Would you like to test the new setup (recommended)?"
+msgstr ""
+"Einige wichtige Einstellungen wurden geändert.\n"
+"\n"
+"Möchten Sie die neuen Einstellungen testen (empfohlen)?"
 
-#~ msgid "Test setup?"
-#~ msgstr "Einstellungen testen?"
+msgid "Test setup?"
+msgstr "Einstellungen testen?"
 
-#~ msgid ""
-#~ "Some of the changes to the program options will\n"
-#~ "only take effect when the progam will be run the\n"
-#~ "next time and not during this session."
-#~ msgstr ""
-#~ "Einige der geänderten Einstellungen werden\n"
-#~ "erst beim nächsten Programmstart übernommen werden\n"
-#~ "und nicht schon in dieser Sitzung."
+msgid ""
+"Some of the changes to the program options will\n"
+"only take effect when the progam will be run the\n"
+"next time and not during this session."
+msgstr ""
+"Einige der geänderten Einstellungen werden\n"
+"erst beim nächsten Programmstart übernommen werden\n"
+"und nicht schon in dieser Sitzung."
 
 #, fuzzy
-#~ msgid "Folder '"
-#~ msgstr "Mailbox '"
+msgid "Folder '"
+msgstr "Mailbox '"
 
 #, fuzzy
-#~ msgid "Create &new folder..."
-#~ msgstr "Neue Mailbox &anlegen..."
+msgid "Create &new folder..."
+msgstr "Neue Mailbox &anlegen..."
 
 #, fuzzy
-#~ msgid "&Delete folder"
-#~ msgstr "Mailbox &löschen"
+msgid "&Delete folder"
+msgstr "Mailbox &löschen"
 
 #, fuzzy
-#~ msgid "&Rename folder..."
-#~ msgstr "Mailbox &umbenennen..."
+msgid "&Rename folder..."
+msgstr "Mailbox &umbenennen..."
 
 #, fuzzy
-#~ msgid "&Properties"
-#~ msgstr "&Eigenschaften..."
+msgid "&Properties"
+msgstr "&Eigenschaften..."
 
-#~ msgid ""
-#~ "You should not delete the INBOX folder:\n"
-#~ "it is automatically created by Mahogany to store your incoming mail."
-#~ msgstr ""
-#~ "Sie sollten die INBOX nicht löschen:\n"
-#~ "sie ist automatisch erzeugt und enthält die eingehende Mail."
+msgid ""
+"You should not delete the INBOX folder:\n"
+"it is automatically created by Mahogany to store your incoming mail."
+msgstr ""
+"Sie sollten die INBOX nicht löschen:\n"
+"sie ist automatisch erzeugt und enthält die eingehende Mail."
 
-#~ msgid "The root folder can not be deleted."
-#~ msgstr "Dieser Eintrag kann nicht gelöscht werden."
+msgid "The root folder can not be deleted."
+msgstr "Dieser Eintrag kann nicht gelöscht werden."
 
-#~ msgid ""
-#~ "Do you really want to delete folder '%s' and all of its\n"
-#~ "subfolders? You will permanently lose all the settings\n"
-#~ "for the deleted folders!"
-#~ msgstr ""
-#~ "Möchten Sie Mailbox '%s' und alle darunterliegenden\n"
-#~ "Mailboxen wirklich löschen? All deren Einstellungen \n"
-#~ "werden permanent gelöscht!"
+msgid ""
+"Do you really want to delete folder '%s' and all of its\n"
+"subfolders? You will permanently lose all the settings\n"
+"for the deleted folders!"
+msgstr ""
+"Möchten Sie Mailbox '%s' und alle darunterliegenden\n"
+"Mailboxen wirklich löschen? All deren Einstellungen \n"
+"werden permanent gelöscht!"
 
 #, fuzzy
-#~ msgid "Do you really want to delete folder '%s'?"
-#~ msgstr "Möchten Sie die Mailbox '%s' wirklich löschen?"
+msgid "Do you really want to delete folder '%s'?"
+msgstr "Möchten Sie die Mailbox '%s' wirklich löschen?"
 
-#~ msgid "All folders"
-#~ msgstr "Alle Mailboxen"
+msgid "All folders"
+msgstr "Alle Mailboxen"
 
 #, fuzzy
-#~ msgid "Please select the folder to delete first."
-#~ msgstr "Bitte wählen Sie erst die Mailbox zum löschen."
+msgid "Please select the folder to delete first."
+msgstr "Bitte wählen Sie erst die Mailbox zum löschen."
 
-#~ msgid "Folder '%s' deleted"
-#~ msgstr "Mailbox '%s' gelöscht"
+msgid "Folder '%s' deleted"
+msgstr "Mailbox '%s' gelöscht"
 
 #, fuzzy
-#~ msgid "Cannot open this folder."
-#~ msgstr "Kann diese Mailbox nicht öffnen."
+msgid "Cannot open this folder."
+msgstr "Kann diese Mailbox nicht öffnen."
 
-#~ msgid "Ask"
-#~ msgstr "Fragen"
+msgid "Ask"
+msgstr "Fragen"
 
-#~ msgid "Yes"
-#~ msgstr "Ja"
+msgid "Yes"
+msgstr "Ja"
 
 #, fuzzy
-#~ msgid "&OK"
-#~ msgstr "&OK"
+msgid "&OK"
+msgstr "&OK"
 
-#~ msgid "&Cancel"
-#~ msgstr "&Abbruch"
+msgid "&Cancel"
+msgstr "&Abbruch"
 
 #, fuzzy
-#~ msgid "&Apply"
-#~ msgstr "&Übernehmen"
+msgid "&Apply"
+msgstr "&Übernehmen"
 
 #, fuzzy
-#~ msgid "Folder Name: "
-#~ msgstr "Mailboxname:"
+msgid "Folder Name: "
+msgstr "Mailboxname:"
 
 #, fuzzy
-#~ msgid "Parent folder: "
-#~ msgstr "Übergeordnete Mailbox:"
+msgid "Parent folder: "
+msgstr "Übergeordnete Mailbox:"
 
-#~ msgid "Access"
-#~ msgstr "Zugriff"
+msgid "Access"
+msgstr "Zugriff"
 
 #, fuzzy
-#~ msgid "&User name: "
-#~ msgstr "&Benutzername: "
+msgid "&User name: "
+msgstr "&Benutzername: "
 
 #, fuzzy
-#~ msgid "&Password: "
-#~ msgstr "&Passwort: "
+msgid "&Password: "
+msgstr "&Passwort: "
 
 #, fuzzy
-#~ msgid "&File name: "
-#~ msgstr "&Dateiname: "
+msgid "&File name: "
+msgstr "&Dateiname: "
 
 #, fuzzy
-#~ msgid "&Mailbox: "
-#~ msgstr "&Mailbox: "
+msgid "&Mailbox: "
+msgstr "&Mailbox: "
 
 #, fuzzy
-#~ msgid "&Newsgroup: "
-#~ msgstr "&Newsgruppe: "
+msgid "&Newsgroup: "
+msgstr "&Newsgruppe: "
 
 #, fuzzy
-#~ msgid "&Comment: "
-#~ msgstr "&Kommentar: "
+msgid "&Comment: "
+msgstr "&Kommentar: "
 
-#~ msgid "C&ollect all mail from this folder: "
-#~ msgstr "&Alle Mails aus dieser Box einsammeln: "
+msgid "C&ollect all mail from this folder: "
+msgstr "&Alle Mails aus dieser Box einsammeln: "
 
-#~ msgid "&Anonymous access: "
-#~ msgstr "&Anonymer Zugriff: "
+msgid "&Anonymous access: "
+msgstr "&Anonymer Zugriff: "
 
 #, fuzzy
-#~ msgid "a password"
-#~ msgstr "ein Paßwort"
+msgid "a password"
+msgstr "ein Paßwort"
 
-#~ msgid ""
-#~ "You have not specified %s for this folder, although it requires one.\n"
-#~ "\n"
-#~ "Would you like to do it now?"
-#~ msgstr ""
-#~ "Sie haben für diese Mailbox k%s angegeben, obwohl dies benötigt wird.\n"
-#~ "\n"
-#~ "Möchten Sie dies ändern?"
+msgid ""
+"You have not specified %s for this folder, although it requires one.\n"
+"\n"
+"Would you like to do it now?"
+msgstr ""
+"Sie haben für diese Mailbox k%s angegeben, obwohl dies benötigt wird.\n"
+"\n"
+"Möchten Sie dies ändern?"
 
-#~ msgid ""
-#~ "\n"
-#~ "\n"
-#~ "Notice that the password will be stored in your configuration with\n"
-#~ "very weak encryption. If you are concerned about security, leave it\n"
-#~ "empty and Mahogany will prompt you for it whenever needed."
-#~ msgstr ""
-#~ "\n"
-#~ "\n"
-#~ "Beachten Sie, daß das Paßwort in Ihrer Konfiguration mit schwacher\n"
-#~ "Verschlüsselung gespeichter wird. Falls Sie Sorge haben, daß andere\n"
-#~ "dieses lesen können, lassen Sie es leer und Mahogany wird sie danach\n"
-#~ "fragen, wann immer es benötigt wird."
+msgid ""
+"\n"
+"\n"
+"Notice that the password will be stored in your configuration with\n"
+"very weak encryption. If you are concerned about security, leave it\n"
+"empty and Mahogany will prompt you for it whenever needed."
+msgstr ""
+"\n"
+"\n"
+"Beachten Sie, daß das Paßwort in Ihrer Konfiguration mit schwacher\n"
+"Verschlüsselung gespeichter wird. Falls Sie Sorge haben, daß andere\n"
+"dieses lesen können, lassen Sie es leer und Mahogany wird sie danach\n"
+"fragen, wann immer es benötigt wird."
 
 #, fuzzy
-#~ msgid "Please choose a folder"
-#~ msgstr "Bitte wählen Sie eine Mailbox"
+msgid "Please choose a folder"
+msgstr "Bitte wählen Sie eine Mailbox"
 
 #, fuzzy
-#~ msgid "Browse for folder"
-#~ msgstr "Mailbox auswählen"
+msgid "Browse for folder"
+msgstr "Mailbox auswählen"
 
-#~ msgid "&To"
-#~ msgstr "&An"
+msgid "&To"
+msgstr "&An"
 
 #, fuzzy
-#~ msgid "&Cc"
-#~ msgstr "&Verteiler"
+msgid "&Cc"
+msgstr "&Verteiler"
 
-#~ msgid "Configure headers for message composition"
-#~ msgstr "Nachrichtenkopf konfigurieren"
+msgid "Configure headers for message composition"
+msgstr "Nachrichtenkopf konfigurieren"
 
 #, fuzzy
-#~ msgid "&Headers"
-#~ msgstr "&Kopfeinträge"
+msgid "&Headers"
+msgstr "&Kopfeinträge"
 
 #, fuzzy
-#~ msgid "Show the field?"
-#~ msgstr "Feld anzeigen?"
+msgid "Show the field?"
+msgstr "Feld anzeigen?"
 
 #, fuzzy
-#~ msgid "Default value"
-#~ msgstr "Voreinstellung "
+msgid "Default value"
+msgstr "Voreinstellung "
 
 #, fuzzy
-#~ msgid "Password for '%s':"
-#~ msgstr "Paßwort für '%s':"
+msgid "Password for '%s':"
+msgstr "Paßwort für '%s':"
 
 #, fuzzy
-#~ msgid "Password prompt"
-#~ msgstr "Paßwortabfrage"
+msgid "Password prompt"
+msgstr "Paßwortabfrage"
 
 #, fuzzy
-#~ msgid "Cannot access this folder without a password."
-#~ msgstr "Kann diese Mailbox ohne Paßwort nicht öffnen."
+msgid "Cannot access this folder without a password."
+msgstr "Kann diese Mailbox ohne Paßwort nicht öffnen."
 
 #, fuzzy
-#~ msgid "Cannot open folder '%s'."
-#~ msgstr "Kann Mailbox '%s' nicht öffnen."
+msgid "Cannot open folder '%s'."
+msgstr "Kann Mailbox '%s' nicht öffnen."
 
 #, fuzzy
-#~ msgid "Saving %d messages..."
-#~ msgstr "Sichere %d Nachrichten..."
+msgid "Saving %d messages..."
+msgstr "Sichere %d Nachrichten..."
 
-#~ msgid "Could not truncate the existing file."
-#~ msgstr "Konnte bestehende Datei nicht leeren."
+msgid "Could not truncate the existing file."
+msgstr "Konnte bestehende Datei nicht leeren."
 
-#~ msgid ""
-#~ "Found lock-file:\n"
-#~ "'%s'\n"
-#~ "Some other process may be using the folder.\n"
-#~ "Shall I forcefully override the lock?"
-#~ msgstr ""
-#~ "Zugriffskontrolle (lock) gefunden:\n"
-#~ "'%s'\n"
-#~ "Ein anderes Programm scheint auf die Mailbox\n"
-#~ "zuzugreifen. Trotzdem fortfahren?"
+msgid ""
+"Found lock-file:\n"
+"'%s'\n"
+"Some other process may be using the folder.\n"
+"Shall I forcefully override the lock?"
+msgstr ""
+"Zugriffskontrolle (lock) gefunden:\n"
+"'%s'\n"
+"Ein anderes Programm scheint auf die Mailbox\n"
+"zuzugreifen. Trotzdem fortfahren?"
 
-#~ msgid ""
-#~ "Could not remove lock-file.\n"
-#~ "Other process may have terminated.\n"
-#~ "Will try to continue as normal."
-#~ msgstr ""
-#~ "Konnte lock-Datei nicht entfernen.\n"
-#~ "Das andere Programm ist möglicherweise fertig.\n"
-#~ "Fahre fort."
+msgid ""
+"Could not remove lock-file.\n"
+"Other process may have terminated.\n"
+"Will try to continue as normal."
+msgstr ""
+"Konnte lock-Datei nicht entfernen.\n"
+"Das andere Programm ist möglicherweise fertig.\n"
+"Fahre fort."
 
 #, fuzzy
-#~ msgid "Cannot open the folder while lock-file exists."
-#~ msgstr "Kann Mailbox mit '%s' nicht öffen solange lock-Datei besteht."
+msgid "Cannot open the folder while lock-file exists."
+msgstr "Kann Mailbox mit '%s' nicht öffen solange lock-Datei besteht."
 
-#~ msgid "Mailstream for folder '%s' has been closed, trying to reopen it."
-#~ msgstr ""
-#~ "Verbindung mit Mailbox '%s' wurde geschlossen. Wird wieder geöffnet."
+msgid "Mailstream for folder '%s' has been closed, trying to reopen it."
+msgstr ""
+"Verbindung mit Mailbox '%s' wurde geschlossen. Wird wieder geöffnet."
 
 #, fuzzy
-#~ msgid "Re-opening folder '%s' failed."
-#~ msgstr "Konnte Mailbox '%s' nicht wieder öffnen."
+msgid "Re-opening folder '%s' failed."
+msgstr "Konnte Mailbox '%s' nicht wieder öffnen."
 
-#~ msgid ""
-#~ "This folder contains %lu messages which is greater than the current "
-#~ "threshold of %lu.\n"
-#~ "\n"
-#~ "Would you like to retrieve only the first %lu messages?\n"
-#~ "(selecting [No] will retrieve all messages)"
-#~ msgstr ""
-#~ "Diese Mailbox enthält %lu Nachrichten, mehr als die momentane Begrenzung von "
-#~ "%lu.\n"
-#~ "\n"
-#~ "Möchten Sie nur die ersten %lu Nachrichten holen?\n"
-#~ "([Nein] wird alle Nachrichten holen)"
+msgid ""
+"This folder contains %lu messages which is greater than the current "
+"threshold of %lu.\n"
+"\n"
+"Would you like to retrieve only the first %lu messages?\n"
+"(selecting [No] will retrieve all messages)"
+msgstr ""
+"Diese Mailbox enthält %lu Nachrichten, mehr als die momentane Begrenzung von "
+"%lu.\n"
+"\n"
+"Möchten Sie nur die ersten %lu Nachrichten holen?\n"
+"([Nein] wird alle Nachrichten holen)"
 
 #, fuzzy
-#~ msgid "Reading %lu message headers..."
-#~ msgstr "Lese %lu Nachrichtenköpfe..."
+msgid "Reading %lu message headers..."
+msgstr "Lese %lu Nachrichtenköpfe..."
 
-#~ msgid "<address missing>"
-#~ msgstr "<Adresse fehlt>"
+msgid "<address missing>"
+msgstr "<Adresse fehlt>"
 
-#~ msgid " error level: "
-#~ msgstr " Fehlergrad:"
+msgid " error level: "
+msgstr " Fehlergrad:"
 
-#~ msgid "c-client debug: "
-#~ msgstr "c-client debug: "
+msgid "c-client debug: "
+msgstr "c-client debug: "
 
-#~ msgid " , compiled for "
-#~ msgstr " , für "
+msgid " , compiled for "
+msgstr " , für "
 
 #, fuzzy
-#~ msgid "Mail sent."
-#~ msgstr "Nachricht gesendet."
+msgid "Mail sent."
+msgstr "Nachricht gesendet."
 
-#~ msgid "Article posted."
-#~ msgstr "Artikel gesendet."
+msgid "Article posted."
+msgstr "Artikel gesendet."
 
 #, fuzzy
-#~ msgid "Cannot open folder to save to:"
-#~ msgstr "Kann Mailbox zum sichern nicht öffnen:"
+msgid "Cannot open folder to save to:"
+msgstr "Kann Mailbox zum sichern nicht öffnen:"
 
-#~ msgid "Nick &Name"
-#~ msgstr "&Alias"
+msgid "Nick &Name"
+msgstr "&Alias"
 
 #, fuzzy
-#~ msgid "F&ull Name"
-#~ msgstr "Vo&ller Name"
+msgid "F&ull Name"
+msgstr "Vo&ller Name"
 
 #, fuzzy
-#~ msgid "&First Name"
-#~ msgstr "&Vorname"
+msgid "&First Name"
+msgstr "&Vorname"
 
 #, fuzzy
-#~ msgid "F&amily Name"
-#~ msgstr "&Nachname"
+msgid "F&amily Name"
+msgstr "&Nachname"
 
 #, fuzzy
-#~ msgid "&Prefix"
-#~ msgstr "&Prefix"
+msgid "&Prefix"
+msgstr "&Prefix"
 
 #, fuzzy
-#~ msgid "&Title"
-#~ msgstr "&Titel"
+msgid "&Title"
+msgstr "&Titel"
 
-#~ msgid "&Organization"
-#~ msgstr "&Organisation"
+msgid "&Organization"
+msgstr "&Organisation"
 
-#~ msgid "&Birthday date"
-#~ msgstr "&Geburtsdatum"
+msgid "&Birthday date"
+msgstr "&Geburtsdatum"
 
 #, fuzzy
-#~ msgid "&Comments"
-#~ msgstr "&Kommentar"
+msgid "&Comments"
+msgstr "&Kommentar"
 
-#~ msgid "&E-Mail"
-#~ msgstr "&E-Mail"
+msgid "&E-Mail"
+msgstr "&E-Mail"
 
 #, fuzzy
-#~ msgid "&Home Page"
-#~ msgstr "&Home Page"
+msgid "&Home Page"
+msgstr "&Home Page"
 
-#~ msgid "Prefers &HTML mail"
-#~ msgstr "Wünscht &HTML-Nachrichten"
+msgid "Prefers &HTML mail"
+msgstr "Wünscht &HTML-Nachrichten"
 
 #, fuzzy
-#~ msgid "&Additional e-mail addresses"
-#~ msgstr "&Zusätzliche E-Mail Adressen"
+msgid "&Additional e-mail addresses"
+msgstr "&Zusätzliche E-Mail Adressen"
 
-#~ msgid "Street &Number"
-#~ msgstr "&Hausnummer"
+msgid "Street &Number"
+msgstr "&Hausnummer"
 
-#~ msgid "&Street"
-#~ msgstr "&Straße"
+msgid "&Street"
+msgstr "&Straße"
 
-#~ msgid "&Locality"
-#~ msgstr "&Umgebung"
+msgid "&Locality"
+msgstr "&Umgebung"
 
 #, fuzzy
-#~ msgid "C&ity"
-#~ msgstr "&Ort"
+msgid "C&ity"
+msgstr "&Ort"
 
 #, fuzzy
-#~ msgid "&Postcode"
-#~ msgstr "&PLZ"
+msgid "&Postcode"
+msgstr "&PLZ"
 
 #, fuzzy
-#~ msgid "&Country"
-#~ msgstr "&Land"
+msgid "&Country"
+msgstr "&Land"
 
-#~ msgid "PO &Box"
-#~ msgstr "&Postfach"
+msgid "PO &Box"
+msgstr "&Postfach"
 
 #, fuzzy
-#~ msgid "P&hone"
-#~ msgstr "&Telefon"
+msgid "P&hone"
+msgstr "&Telefon"
 
 #, fuzzy
-#~ msgid "&Book"
-#~ msgstr "&Buch"
+msgid "&Book"
+msgstr "&Buch"
 
 #, fuzzy
-#~ msgid "&Find"
-#~ msgstr "&Suchen"
+msgid "&Find"
+msgstr "&Suchen"
 
-#~ msgid "&Lookup:"
-#~ msgstr "&Suchen:"
+msgid "&Lookup:"
+msgstr "&Suchen:"
 
 #, fuzzy
-#~ msgid "Address Book Editor"
-#~ msgstr "&Adreßbucheditor"
+msgid "Address Book Editor"
+msgstr "&Adreßbucheditor"
 
-#~ msgid ""
-#~ "Address book '%s' couldn't be opened:\n"
-#~ "this format is not supported."
-#~ msgstr ""
-#~ "Adreßbuch '%s' konnte nicht geöffnet werden:\n"
-#~ "Diese Format ist nicht unterstützt."
+msgid ""
+"Address book '%s' couldn't be opened:\n"
+"this format is not supported."
+msgstr ""
+"Adreßbuch '%s' konnte nicht geöffnet werden:\n"
+"Diese Format ist nicht unterstützt."
 
-#~ msgid "Not all address books could be reopened."
-#~ msgstr "Nicht alle Adreßbücher konnten wieder geöffnet werden."
+msgid "Not all address books could be reopened."
+msgstr "Nicht alle Adreßbücher konnten wieder geöffnet werden."
 
-#~ msgid "Not all tree branches could be reopened."
-#~ msgstr "Nicht alle Zweige konnten wieder geöffnet werden."
+msgid "Not all tree branches could be reopened."
+msgstr "Nicht alle Zweige konnten wieder geöffnet werden."
 
-#~ msgid "The address book '%s' is already opened."
-#~ msgstr "Das Adreßbuch '%s' ist bereits geöffnet."
+msgid "The address book '%s' is already opened."
+msgstr "Das Adreßbuch '%s' ist bereits geöffnet."
 
-#~ msgid "New entry creation cancelled."
-#~ msgstr "Anlegen des neuen Eintrags abgebrochen."
+msgid "New entry creation cancelled."
+msgstr "Anlegen des neuen Eintrags abgebrochen."
 
-#~ msgid "%s '%s' already exists %s."
-#~ msgstr "%s '%s' existiert bereits %s."
+msgid "%s '%s' already exists %s."
+msgstr "%s '%s' existiert bereits %s."
 
-#~ msgid "Created new %s '%s' %s."
-#~ msgstr "Neues %s '%s' %s angelegt."
+msgid "Created new %s '%s' %s."
+msgstr "Neues %s '%s' %s angelegt."
 
 #, fuzzy
-#~ msgid "Address book"
-#~ msgstr "Adreßbuch"
+msgid "Address book"
+msgstr "Adreßbuch"
 
-#~ msgid "Really delete the %s '%s'?"
-#~ msgstr "%s '%s' wirklich löschen?"
+msgid "Really delete the %s '%s'?"
+msgstr "%s '%s' wirklich löschen?"
 
-#~ msgid "Cancelled: '%s' not deleted."
-#~ msgstr "Abgebrochen: '%s' nicht gelöscht."
+msgid "Cancelled: '%s' not deleted."
+msgstr "Abgebrochen: '%s' nicht gelöscht."
 
 #, fuzzy
-#~ msgid "%s '%s' deleted."
-#~ msgstr "%d '%s' gelöscht."
+msgid "%s '%s' deleted."
+msgstr "%d '%s' gelöscht."
 
 #, fuzzy
-#~ msgid "Cannot find any matches for '%s'."
-#~ msgstr "Kann keine passenden Einträge für '%s' finden."
+msgid "Cannot find any matches for '%s'."
+msgstr "Kann keine passenden Einträge für '%s' finden."
 
-#~ msgid "Search for '%s' found %d entries."
-#~ msgstr "Suche nach '%s' fand %d Einträge."
+msgid "Search for '%s' found %d entries."
+msgstr "Suche nach '%s' fand %d Einträge."
 
-#~ msgid "Search wrapped to the beginning."
-#~ msgstr "Suche am Beginn neu begonnen."
+msgid "Search wrapped to the beginning."
+msgstr "Suche am Beginn neu begonnen."
 
-#~ msgid "Changes to '%s' undone"
-#~ msgstr "Änderungen an '%s' rückgängig gemacht."
+msgid "Changes to '%s' undone"
+msgstr "Änderungen an '%s' rückgängig gemacht."
 
-#~ msgid "Go to entry/group"
-#~ msgstr "Geh zu Eintrag/Gruppe"
+msgid "Go to entry/group"
+msgstr "Geh zu Eintrag/Gruppe"
 
-#~ msgid "Full entry &name:"
-#~ msgstr "Voller Eintrags&name:"
+msgid "Full entry &name:"
+msgstr "Voller Eintrags&name:"
 
-#~ msgid "What kind of address book do you want to create?"
-#~ msgstr "Was für ein Adreßbuch möchten Sie anlegen?"
+msgid "What kind of address book do you want to create?"
+msgstr "Was für ein Adreßbuch möchten Sie anlegen?"
 
-#~ msgid "Open an address book"
-#~ msgstr "Öffnen eines Adreßbuchs"
+msgid "Open an address book"
+msgstr "Öffnen eines Adreßbuchs"
 
-#~ msgid "Address books (*.adb)|*.adb|All files (*.*)|*.*"
-#~ msgstr "Adreßbücher (*.adb)|*.adb|Alle Dateien (*.*)|*.*"
+msgid "Address books (*.adb)|*.adb|All files (*.*)|*.*"
+msgstr "Adreßbücher (*.adb)|*.adb|Alle Dateien (*.*)|*.*"
 
 #, fuzzy
-#~ msgid "Enter the address book name"
-#~ msgstr "Geben Sie den Adreßbuchnamen an"
+msgid "Enter the address book name"
+msgstr "Geben Sie den Adreßbuchnamen an"
 
-#~ msgid ""
-#~ "Address book '%s' was created, but could not be flushed. It might be "
-#~ "unaccessible until the program is restarted."
-#~ msgstr ""
-#~ "Adreßbuch '%s' wurde angelegt, konnte aber nicht völlig geschrieben werden. "
-#~ "Es kann sein, daß es erst beim nächsten Programmstart zur Verfügung steht."
+msgid ""
+"Address book '%s' was created, but could not be flushed. It might be "
+"unaccessible until the program is restarted."
+msgstr ""
+"Adreßbuch '%s' wurde angelegt, konnte aber nicht völlig geschrieben werden. "
+"Es kann sein, daß es erst beim nächsten Programmstart zur Verfügung steht."
 
-#~ msgid ""
-#~ "Cannot paste entry '%s' %s: an entry with\n"
-#~ "the same name already exists."
-#~ msgstr ""
-#~ "Kann Eintrag '%s' %s nicht einfügen: ein Eintrag mit\n"
-#~ "diesem Namen existiert bereits."
+msgid ""
+"Cannot paste entry '%s' %s: an entry with\n"
+"the same name already exists."
+msgstr ""
+"Kann Eintrag '%s' %s nicht einfügen: ein Eintrag mit\n"
+"diesem Namen existiert bereits."
 
-#~ msgid "Cannot paste the clipboard contents here."
-#~ msgstr "Kann den Inhalt der Zwischenablage hier nicht einfügen."
+msgid "Cannot paste the clipboard contents here."
+msgstr "Kann den Inhalt der Zwischenablage hier nicht einfügen."
 
-#~ msgid "Editing entry '%s'"
-#~ msgstr "Editieren von Eintrag '%s'"
+msgid "Editing entry '%s'"
+msgstr "Editieren von Eintrag '%s'"
 
-#~ msgid "This group has no entries"
-#~ msgstr "Diese Gruppe hat keine Einträge"
+msgid "This group has no entries"
+msgstr "Diese Gruppe hat keine Einträge"
 
-#~ msgid ""
-#~ "No entry '%s':\n"
-#~ "'%s' has no entry/subgroup '%s'."
-#~ msgstr ""
-#~ "Kein Eintrag '%s':\n"
-#~ "'%s' hat keinen Eintrag oder Untergruppe '%s'"
+msgid ""
+"No entry '%s':\n"
+"'%s' has no entry/subgroup '%s'."
+msgstr ""
+"Kein Eintrag '%s':\n"
+"'%s' hat keinen Eintrag oder Untergruppe '%s'"
 
-#~ msgid "Entry '%s' cannot have subgroup/entry '%s'!"
-#~ msgstr "Eintrag '%s' kann keine Untergruppe/Eintrag '%s' haben!"
+msgid "Entry '%s' cannot have subgroup/entry '%s'!"
+msgstr "Eintrag '%s' kann keine Untergruppe/Eintrag '%s' haben!"
 
 #, fuzzy
-#~ msgid "Find address book entry"
-#~ msgstr "Suche Adreßbucheintrag"
+msgid "Find address book entry"
+msgstr "Suche Adreßbucheintrag"
 
-#~ msgid "Find &what:"
-#~ msgstr "Suche &nach:"
+msgid "Find &what:"
+msgstr "Suche &nach:"
 
-#~ msgid "Please specify where to search!"
-#~ msgstr "Bitte geben Sie den Suchbegriff an!"
+msgid "Please specify where to search!"
+msgstr "Bitte geben Sie den Suchbegriff an!"
 
-#~ msgid "Create a new entry/group"
-#~ msgstr "Neuen Eintrag/Gruppe anlegen"
+msgid "Create a new entry/group"
+msgstr "Neuen Eintrag/Gruppe anlegen"
 
-#~ msgid "&New entry/group name:"
-#~ msgstr "&Name des neuen Eintrags/Gruppe:"
+msgid "&New entry/group name:"
+msgstr "&Name des neuen Eintrags/Gruppe:"
 
-#~ msgid "Create a &group"
-#~ msgstr "&Gruppe anlegen"
+msgid "Create a &group"
+msgstr "&Gruppe anlegen"
 
 #, fuzzy
-#~ msgid "Please specify a name for the new %s!"
-#~ msgstr "Bitte geben Sie dem neuen '%s' einen Namen!"
+msgid "Please specify a name for the new %s!"
+msgstr "Bitte geben Sie dem neuen '%s' einen Namen!"
 
 #, fuzzy
-#~ msgid "Properties for '%s'"
-#~ msgstr "Eigenschaften für '%s'"
+msgid "Properties for '%s'"
+msgstr "Eigenschaften für '%s'"
 
-#~ msgid "Entry '%s' saved."
-#~ msgstr "Eintrag '%s' gesichert."
+msgid "Entry '%s' saved."
+msgstr "Eintrag '%s' gesichert."
 
-#~ msgid "Add another address"
-#~ msgstr "Weitere Adresse hinzufügen"
+msgid "Add another address"
+msgstr "Weitere Adresse hinzufügen"
 
 #, fuzzy
-#~ msgid "E-mail &address:"
-#~ msgstr "E-Mail &Adresse:"
+msgid "E-mail &address:"
+msgstr "E-Mail &Adresse:"
 
 #, fuzzy
-#~ msgid "Please select an entry to modify it."
-#~ msgstr "Bitte wählen Sie einen Eintrag zum ändern."
+msgid "Please select an entry to modify it."
+msgstr "Bitte wählen Sie einen Eintrag zum ändern."
 
 #, fuzzy
-#~ msgid "Please select an entry to delete."
-#~ msgstr "Bitte wählen Sie einen Eintrag zum löschen."
+msgid "Please select an entry to delete."
+msgstr "Bitte wählen Sie einen Eintrag zum löschen."
 
 #, fuzzy
-#~ msgid "Address Books"
-#~ msgstr "&Adreßbücher..."
+msgid "Address Books"
+msgstr "&Adreßbücher..."
 
-#~ msgid "Group"
-#~ msgstr "Gruppe"
+msgid "Group"
+msgstr "Gruppe"
 
-#~ msgid "Entry"
-#~ msgstr "Eintrag"
+msgid "Entry"
+msgstr "Eintrag"
 
-#~ msgid "%s '%s' already exists in this group."
-#~ msgstr "%s '%s' existiert bereits in dieser Gruppe."
+msgid "%s '%s' already exists in this group."
+msgstr "%s '%s' existiert bereits in dieser Gruppe."
 
-#~ msgid "at the root level of the addressbook '"
-#~ msgstr "am obersten Level des Adreßbuchs '"
+msgid "at the root level of the addressbook '"
+msgstr "am obersten Level des Adreßbuchs '"
 
-#~ msgid "in group '"
-#~ msgstr "in Gruppe '"
+msgid "in group '"
+msgstr "in Gruppe '"
 
-#~ msgid "Expanded '%s' using entries from group '%s'"
-#~ msgstr "'%s' expandiert mit den Einträgen aus Gruppe '%s'"
+msgid "Expanded '%s' using entries from group '%s'"
+msgstr "'%s' expandiert mit den Einträgen aus Gruppe '%s'"
 
-#~ msgid "Expanded '%s' using entry '%s'"
-#~ msgstr "'%s' expandiert mit Eintrag '%s'"
+msgid "Expanded '%s' using entry '%s'"
+msgstr "'%s' expandiert mit Eintrag '%s'"
 
 #, fuzzy
-#~ msgid "No matches for '%s'."
-#~ msgstr "Keine passenden Einträge für '%s'."
+msgid "No matches for '%s'."
+msgstr "Keine passenden Einträge für '%s'."
 
-#~ msgid "Entry '%s' has too many fields, extra ones ignored."
-#~ msgstr "Eintrag '%s' hat zu viele Felder, extra Felder ignoriert."
+msgid "Entry '%s' has too many fields, extra ones ignored."
+msgstr "Eintrag '%s' hat zu viele Felder, extra Felder ignoriert."
 
-#~ msgid "Trailing backslash discarded in entry '%s'."
-#~ msgstr "Backslash '\\' am Ende von Eintrag '%s' ignoriert."
+msgid "Trailing backslash discarded in entry '%s'."
+msgstr "Backslash '\\' am Ende von Eintrag '%s' ignoriert."
 
 #, fuzzy
-#~ msgid "Couldn't create or write address book file '%s'."
-#~ msgstr "Kann Adreßbuch '%s' nicht öffnen."
+msgid "Couldn't create or write address book file '%s'."
+msgstr "Kann Adreßbuch '%s' nicht öffnen."
 
-#~ msgid "Bbdb::ReadListOfVectors expected ')', found '%s'"
-#~ msgstr "Bbdb::ReadListOfVectors erwartete ')', gefunden: '%s'"
+msgid "Bbdb::ReadListOfVectors expected ')', found '%s'"
+msgstr "Bbdb::ReadListOfVectors erwartete ')', gefunden: '%s'"
 
-#~ msgid "BBDB: file has wrong header line: '%s'"
-#~ msgstr "BBDB: Datei hat falsche KopfzeileL '%s'"
+msgid "BBDB: file has wrong header line: '%s'"
+msgstr "BBDB: Datei hat falsche KopfzeileL '%s'"
 
-#~ msgid "BBDB: file format version '%s'"
-#~ msgstr "BBDB: Dateiformat Version '%s'"
+msgid "BBDB: file format version '%s'"
+msgstr "BBDB: Dateiformat Version '%s'"
 
-#~ msgid "BBDB: read %d entries."
-#~ msgstr "BBDB: %d Einträge gelesen."
+msgid "BBDB: read %d entries."
+msgstr "BBDB: %d Einträge gelesen."
 
-#~ msgid "BBDB: ignored %d entries with neither first nor last names."
-#~ msgstr "BBDB: %d Einträge mit weder Vor- noch Nachnamen ignoriert."
+msgid "BBDB: ignored %d entries with neither first nor last names."
+msgstr "BBDB: %d Einträge mit weder Vor- noch Nachnamen ignoriert."
 
-#~ msgid ""
-#~ "Save BBDB address book '%s'?\n"
-#~ "This might lead to loss of some of the original data."
-#~ msgstr ""
-#~ "BBDB Adreßbuch '%s' sichern?\n"
-#~ "Dies kann zum Verlust eines Teils der Originaldaten führen."
+msgid ""
+"Save BBDB address book '%s'?\n"
+"This might lead to loss of some of the original data."
+msgstr ""
+"BBDB Adreßbuch '%s' sichern?\n"
+"Dies kann zum Verlust eines Teils der Originaldaten führen."
 
-#~ msgid "BBDB"
-#~ msgstr "BBDB"
+msgid "BBDB"
+msgstr "BBDB"
 
-#~ msgid "Don't show this message again "
-#~ msgstr "Diese Meldung nicht wieder zeigen "
+msgid "Don't show this message again "
+msgstr "Diese Meldung nicht wieder zeigen "
 
-#~ msgid "Cannot run script: "
-#~ msgstr "Kann Skript nicht ausführen: "
+msgid "Cannot run script: "
+msgstr "Kann Skript nicht ausführen: "
 
-#~ msgid "CC field &default value"
-#~ msgstr "Voreinstellung für Ver&teiler'"
+msgid "CC field &default value"
+msgstr "Voreinstellung für Ver&teiler'"
 
-#~ msgid "Show &BCC field"
-#~ msgstr "&Blindverteiler-Feld anzeigen"
+msgid "Show &BCC field"
+msgstr "&Blindverteiler-Feld anzeigen"
 
-#~ msgid "BCC field d&efault value"
-#~ msgstr "Voreinstellung für B&lindverteiler"
+msgid "BCC field d&efault value"
+msgstr "Voreinstellung für B&lindverteiler"
 
-#~ msgid "&Click folder to open"
-#~ msgstr "&Cliquer pour ouvrir"
+msgid "&Click folder to open"
+msgstr "&Cliquer pour ouvrir"
 
-#~ msgid "Forward"
-#~ msgstr "Weiterleiten"
+msgid "Forward"
+msgstr "Weiterleiten"
 
-#~ msgid "Open any folder"
-#~ msgstr "Generelle Mailbox öffnen"
+msgid "Open any folder"
+msgstr "Generelle Mailbox öffnen"
 
-#~ msgid "Open &Any Folder..."
-#~ msgstr "Beliebige Mail&box öffnen..."
+msgid "Open &Any Folder..."
+msgstr "Beliebige Mail&box öffnen..."
 
 #, fuzzy
-#~ msgid "Open any existing message folder"
-#~ msgstr "Generelle Mailbox öffnen"
+msgid "Open any existing message folder"
+msgstr "Generelle Mailbox öffnen"
 
-#~ msgid "If you can read this, your M configuration works."
-#~ msgstr "Falls Sie dies lesen können, funktionieren die M Einstellungen."
+msgid "If you can read this, your M configuration works."
+msgstr "Falls Sie dies lesen können, funktionieren die M Einstellungen."
 
-#~ msgid "%d messages deleted"
-#~ msgstr "%d Nachrichten gelöscht"
+msgid "%d messages deleted"
+msgstr "%d Nachrichten gelöscht"
 
-#~ msgid "%d messages undeleted"
-#~ msgstr "%d Nachrichten vor Löschen bewahrt"
+msgid "%d messages undeleted"
+msgstr "%d Nachrichten vor Löschen bewahrt"
 
-#~ msgid "%d messages forwarded"
-#~ msgstr "%d Nachrichten weitergeleitet"
+msgid "%d messages forwarded"
+msgstr "%d Nachrichten weitergeleitet"
 
 #, fuzzy
-#~ msgid "Demo Print Preview"
-#~ msgstr "Druckvoransicht"
+msgid "Demo Print Preview"
+msgstr "Druckvoransicht"
 
-#~ msgid "   Welcome"
-#~ msgstr "   Willkommen"
+msgid "   Welcome"
+msgstr "   Willkommen"
 
 #, fuzzy
-#~ msgid "Printing message..."
-#~ msgstr "Drucke Nachricht..."
+msgid "Printing message..."
+msgstr "Drucke Nachricht..."
 
 #, fuzzy
-#~ msgid "Open any message folder"
-#~ msgstr "Generelle Mailbox öffnen"
+msgid "Open any message folder"
+msgstr "Generelle Mailbox öffnen"
 
-#~ msgid "Please choose a filename to save as:"
-#~ msgstr "Sichern unter Name:"
+msgid "Please choose a filename to save as:"
+msgstr "Sichern unter Name:"
 
-#~ msgid "Cannot write file."
-#~ msgstr "Kann Datei nicht schreiben."
+msgid "Cannot write file."
+msgstr "Kann Datei nicht schreiben."
 
 #, fuzzy
-#~ msgid "Please choose a message first."
-#~ msgstr "Sichern unter Name:"
+msgid "Please choose a message first."
+msgstr "Sichern unter Name:"
 
 #, fuzzy
-#~ msgid "file:"
-#~ msgstr "&Datei"
+msgid "file:"
+msgstr "&Datei"
 
 #, fuzzy
-#~ msgid "unknown size field"
-#~ msgstr "Unbekanntes Größenfeld"
+msgid "unknown size field"
+msgstr "Unbekanntes Größenfeld"
 
-#~ msgid ""
-#~ "As it seems that you're running M for the first\n"
-#~ "time, you should probably set up some of the options\n"
-#~ "needed by the program (especially network parameters)."
-#~ msgstr ""
-#~ "Es scheint, daß Sie M zum ersten Mal aufrufen\n"
-#~ "Sie sollten daher zunächste die Einstellungen\n"
-#~ "(insbesondere die Netzwerkparameter) überprüfen."
+msgid ""
+"As it seems that you're running M for the first\n"
+"time, you should probably set up some of the options\n"
+"needed by the program (especially network parameters)."
+msgstr ""
+"Es scheint, daß Sie M zum ersten Mal aufrufen\n"
+"Sie sollten daher zunächste die Einstellungen\n"
+"(insbesondere die Netzwerkparameter) überprüfen."
 
-#~ msgid "invalid version value"
-#~ msgstr "Ungültiger Versionswert"
+msgid "invalid version value"
+msgstr "Ungültiger Versionswert"
 
-#~ msgid "Evil user removed his /Profiles/INBOX - restored."
-#~ msgstr ""
-#~ "Böser Benutzer hat seine /Profiles/INBOX entfernt - wiederhergestellt."
+msgid "Evil user removed his /Profiles/INBOX - restored."
+msgstr ""
+"Böser Benutzer hat seine /Profiles/INBOX entfernt - wiederhergestellt."
 
 #, fuzzy
-#~ msgid " to 1 to re-enable it later)"
-#~ msgstr " auf 1 um es später wieder zu aktivieren)?"
+msgid " to 1 to re-enable it later)"
+msgstr " auf 1 um es später wieder zu aktivieren)?"
 
 #, fuzzy
-#~ msgid "Opening folder '%s'..."
-#~ msgstr "Öffne Mailbox '%s'..."
+msgid "Opening folder '%s'..."
+msgstr "Öffne Mailbox '%s'..."
 
 #, fuzzy
-#~ msgid "MApplication"
-#~ msgstr "Nicht behebbarer Programmfehler"
+msgid "MApplication"
+msgstr "Nicht behebbarer Programmfehler"
 
 #, fuzzy
-#~ msgid "can not delete root folder."
-#~ msgstr "Kann den obersten Eintrag nicht löschen."
+msgid "can not delete root folder."
+msgstr "Kann den obersten Eintrag nicht löschen."
 
 #, fuzzy
-#~ msgid "can not rename root folder."
-#~ msgstr "Kann obersten Eintrag nicht umbenennen."
+msgid "can not rename root folder."
+msgstr "Kann obersten Eintrag nicht umbenennen."
 
 #, fuzzy
-#~ msgid "invalid subfolder index"
-#~ msgstr "Mailbox öffnen"
+msgid "invalid subfolder index"
+msgstr "Mailbox öffnen"
 
-#~ msgid "can't delete the root pseudo-folder"
-#~ msgstr "Kann den obersten Eintrag nicht löschen."
+msgid "can't delete the root pseudo-folder"
+msgstr "Kann den obersten Eintrag nicht löschen."
 
 #, fuzzy
-#~ msgid "can't rename the root pseudo-folder"
-#~ msgstr "Kann obersten Eintrag nicht umbenennen."
+msgid "can't rename the root pseudo-folder"
+msgstr "Kann obersten Eintrag nicht umbenennen."
 
-#~ msgid "Fatal application error"
-#~ msgstr "Nicht behebbarer Programmfehler"
+msgid "Fatal application error"
+msgstr "Nicht behebbarer Programmfehler"
 
-#~ msgid "Can't initialize application, terminating."
-#~ msgstr "Programm kann nicht initialisiert werden, wird beendet."
+msgid "Can't initialize application, terminating."
+msgstr "Programm kann nicht initialisiert werden, wird beendet."
 
-#~ msgid "wxMFrame created twice"
-#~ msgstr "wxMFrame wurde zweimal erzeugt"
+msgid "wxMFrame created twice"
+msgstr "wxMFrame wurde zweimal erzeugt"
 
 #, fuzzy
-#~ msgid "MFrame"
-#~ msgstr "Von"
+msgid "MFrame"
+msgstr "Von"
 
 #, fuzzy
-#~ msgid "OpenFolderName"
-#~ msgstr "Mailbox öffnen"
+msgid "OpenFolderName"
+msgstr "Mailbox öffnen"
 
 #, fuzzy
-#~ msgid "scripts"
-#~ msgstr "Beschreibung: "
+msgid "scripts"
+msgstr "Beschreibung: "
 
-#~ msgid "Please select a Python script to run."
-#~ msgstr "Bitte wählen Sie ein Pythonskript zum Ausführen."
+msgid "Please select a Python script to run."
+msgstr "Bitte wählen Sie ein Pythonskript zum Ausführen."
 
 #, fuzzy
-#~ msgid "FolderSplit"
-#~ msgstr "Mailbox öffnen"
+msgid "FolderSplit"
+msgstr "Mailbox öffnen"
 
 #, fuzzy
-#~ msgid "open"
-#~ msgstr "&Öffnen"
+msgid "open"
+msgstr "&Öffnen"
 
-#~ msgid "unknown embedded object type"
-#~ msgstr "Unbekannter Objekttyp"
+msgid "unknown embedded object type"
+msgstr "Unbekannter Objekttyp"
 
 #, fuzzy
-#~ msgid "no MailFolder in message view"
-#~ msgstr "Nachricht löschen"
+msgid "no MailFolder in message view"
+msgstr "Nachricht löschen"
 
 #, fuzzy
-#~ msgid "RawMsgPreview"
-#~ msgstr "&Nachricht"
+msgid "RawMsgPreview"
+msgstr "&Nachricht"
 
-#~ msgid "can't get AdbManager"
-#~ msgstr "Kann Adb-Manager nicht erhalten"
+msgid "can't get AdbManager"
+msgstr "Kann Adb-Manager nicht erhalten"
 
 #, fuzzy
-#~ msgid "wxComposeView created twice"
-#~ msgstr "wxMFrame wurde zweimal erzeugt"
+msgid "wxComposeView created twice"
+msgstr "wxMFrame wurde zweimal erzeugt"
 
-#~ msgid "Expand"
-#~ msgstr "Expandieren"
+msgid "Expand"
+msgstr "Expandieren"
 
 #, fuzzy
-#~ msgid "dead.letter"
-#~ msgstr "&Wiederherstellen"
+msgid "dead.letter"
+msgstr "&Wiederherstellen"
 
 #, fuzzy
-#~ msgid "unknown program terminated"
-#~ msgstr "Unbekannte Mausaktion"
+msgid "unknown program terminated"
+msgstr "Unbekannte Mausaktion"
 
 #, fuzzy
-#~ msgid "Stale temp file '%s' left."
-#~ msgstr "&Löschen"
+msgid "Stale temp file '%s' left."
+msgstr "&Löschen"
 
 #, fuzzy
-#~ msgid "MsgInsert"
-#~ msgstr "Datei einfügen"
+msgid "MsgInsert"
+msgstr "Datei einfügen"
 
-#~ msgid "Update interval in seconds"
-#~ msgstr "Aktualisierungsintervall in Sekunden"
+msgid "Update interval in seconds"
+msgstr "Aktualisierungsintervall in Sekunden"
 
-#~ msgid "User ID"
-#~ msgstr "Benutzerkennung"
+msgid "User ID"
+msgstr "Benutzerkennung"
 
 #, fuzzy
-#~ msgid "&Undo"
-#~ msgstr "&Rückgängig"
+msgid "&Undo"
+msgstr "&Rückgängig"
 
-#~ msgid "MailHost"
-#~ msgstr "Mailserver"
+msgid "MailHost"
+msgstr "Mailserver"
 
 #, fuzzy
-#~ msgid "Foldername"
-#~ msgstr "Mailboxname"
+msgid "Foldername"
+msgstr "Mailboxname"
 
 #, fuzzy
-#~ msgid "ident"
-#~ msgstr "Drucken"
+msgid "ident"
+msgstr "Drucken"
 
 #, fuzzy
-#~ msgid "folders"
-#~ msgstr "Alle Mailboxen"
+msgid "folders"
+msgstr "Alle Mailboxen"
 
 #, fuzzy
-#~ msgid "adrbook"
-#~ msgstr "&Adreßbücher..."
+msgid "adrbook"
+msgstr "&Adreßbücher..."
 
 #, fuzzy
-#~ msgid "can't open root pseudo-folder"
-#~ msgstr "Kann obersten Eintrag nicht umbenennen."
+msgid "can't open root pseudo-folder"
+msgstr "Kann obersten Eintrag nicht umbenennen."
 
 #, fuzzy
-#~ msgid "folder_news"
-#~ msgstr "Alle Mailboxen"
+msgid "folder_news"
+msgstr "Alle Mailboxen"
 
 # MDialogs.h
 #, fuzzy
-#~ msgid "Fatal Error:"
-#~ msgstr "Fehler"
+msgid "Fatal Error:"
+msgstr "Fehler"
 
 #, fuzzy
-#~ msgid "# of Messages: "
-#~ msgstr "&Nachricht"
+msgid "# of Messages: "
+msgstr "&Nachricht"
 
 #, fuzzy
-#~ msgid " lines)"
-#~ msgstr " Zeilen\n"
+msgid " lines)"
+msgstr " Zeilen\n"
 
 #, fuzzy
-#~ msgid " bytes)"
-#~ msgstr " Bytes\n"
+msgid " bytes)"
+msgstr " Bytes\n"
 
 #, fuzzy
-#~ msgid "[Can't write message to string.]"
-#~ msgstr "Kann Nachrichteninhalt nicht erhalten."
+msgid "[Can't write message to string.]"
+msgstr "Kann Nachrichteninhalt nicht erhalten."
 
 #, fuzzy
-#~ msgid "FindKey"
-#~ msgstr "&Datei"
+msgid "FindKey"
+msgstr "&Datei"
 
 #, fuzzy
-#~ msgid "AddressBooks"
-#~ msgstr "&Adreßbücher..."
+msgid "AddressBooks"
+msgstr "&Adreßbücher..."
 
 #, fuzzy
-#~ msgid "Open"
-#~ msgstr "&Öffnen"
+msgid "Open"
+msgstr "&Öffnen"
 
 #, fuzzy
-#~ msgid "AdbFile"
-#~ msgstr "&Datei"
+msgid "AdbFile"
+msgstr "&Datei"
 
 #, fuzzy
-#~ msgid "unknown ADB name format"
-#~ msgstr "Unbekannte Mausaktion"
+msgid "unknown ADB name format"
+msgstr "Unbekannte Mausaktion"
 
 #, fuzzy
-#~ msgid "&Home page"
-#~ msgstr "&Nachricht schreiben"
+msgid "&Home page"
+msgstr "&Nachricht schreiben"
 
 #, fuzzy
-#~ msgid "&Description: "
-#~ msgstr "Beschreibung: "
+msgid "&Description: "
+msgstr "Beschreibung: "
 
 #, fuzzy
-#~ msgid "unknown tree element type"
-#~ msgstr "Unbekannter Objekttyp"
+msgid "unknown tree element type"
+msgstr "Unbekannter Objekttyp"
 
 #, fuzzy
-#~ msgid "not implemented"
-#~ msgstr "Noch nicht implementiert."
+msgid "not implemented"
+msgstr "Noch nicht implementiert."
 
 #, fuzzy
-#~ msgid "can't expand address: no AdbManager"
-#~ msgstr "Kann Adb-Manager nicht erhalten"
+msgid "can't expand address: no AdbManager"
+msgstr "Kann Adb-Manager nicht erhalten"
 
 #, fuzzy
-#~ msgid "AdbManager deleted."
-#~ msgstr "%d Nachrichten gelöscht"
+msgid "AdbManager deleted."
+msgstr "%d Nachrichten gelöscht"
 
 #, fuzzy
-#~ msgid "Saving..."
-#~ msgstr "&Sichern..."
+msgid "Saving..."
+msgstr "&Sichern..."
 
 #, fuzzy
-#~ msgid "Not implemented"
-#~ msgstr "Noch nicht implementiert."
+msgid "Not implemented"
+msgstr "Noch nicht implementiert."
 
 #, fuzzy
-#~ msgid "Sash"
-#~ msgstr "Status"
+msgid "Sash"
+msgstr "Status"
 
 #, fuzzy
-#~ msgid "Messages/"
-#~ msgstr "&Nachricht"
+msgid "Messages/"
+msgstr ""
 
 #, fuzzy
-#~ msgid "MDialog_Message"
-#~ msgstr "&Nachricht"
+msgid "MDialog_Message"
+msgstr ""
 
 #, fuzzy
-#~ msgid "_int"
-#~ msgstr "Drucken"
+msgid "_int"
+msgstr ""
 
 #, fuzzy
-#~ msgid "_MObject"
-#~ msgstr "Betreff"
+msgid "_MObject"
+msgstr ""
 
 #, fuzzy
-#~ msgid "MObjectc"
-#~ msgstr "Betreff"
+msgid "MObjectc"
+msgstr "Betreff"
 
 #, fuzzy
-#~ msgid "_Message_p"
-#~ msgstr "&Nachricht"
+msgid "_Message_p"
+msgstr "&Nachricht"
 
 #, fuzzy
-#~ msgid "MailFolder_UnDeleteMessage"
-#~ msgstr "Nachricht löschen"
+msgid "MailFolder_UnDeleteMessage"
+msgstr "Nachricht löschen"
 
 #, fuzzy
-#~ msgid "MailFolder_DeleteMessage"
-#~ msgstr "Nachricht löschen"
+msgid "MailFolder_DeleteMessage"
+msgstr "Nachricht löschen"
 
 #, fuzzy
-#~ msgid "MailFolder_OpenFolder"
-#~ msgstr "Mailbox öffnen"
+msgid "MailFolder_OpenFolder"
+msgstr "Mailbox öffnen"
 
 #, fuzzy
-#~ msgid "_Message"
-#~ msgstr "&Nachricht"
+msgid "_Message"
+msgstr "&Nachricht"
 
 #, fuzzy
-#~ msgid "_class_Message"
-#~ msgstr "&Nachricht"
+msgid "_class_Message"
+msgstr "&Nachricht"
 
 #, fuzzy
-#~ msgid "s:Message_From"
-#~ msgstr "&Nachricht"
+msgid "s:Message_From"
+msgstr "&Nachricht"
 
 #, fuzzy
-#~ msgid "s:Message_Date"
-#~ msgstr "&Nachricht"
+msgid "s:Message_Date"
+msgstr "&Nachricht"
 
 #, fuzzy
-#~ msgid "s:delete_Message"
-#~ msgstr "Nachricht löschen"
+msgid "s:delete_Message"
+msgstr "Nachricht löschen"
 
 #, fuzzy
-#~ msgid "delete_Message"
-#~ msgstr "Nachricht löschen"
+msgid "delete_Message"
+msgstr "Nachricht löschen"
 
 #, fuzzy
-#~ msgid "Message_WriteString"
-#~ msgstr "&Nachricht"
+msgid "Message_WriteString"
+msgstr "&Nachricht"
 
 #, fuzzy
-#~ msgid "Message_GetPartSize"
-#~ msgstr "&Nachricht"
+msgid "Message_GetPartSize"
+msgstr "&Nachricht"
 
 #, fuzzy
-#~ msgid "Message_Date"
-#~ msgstr "&Nachricht"
+msgid "Message_Date"
+msgstr "&Nachricht"
 
 #, fuzzy
-#~ msgid "Message_From"
-#~ msgstr "&Nachricht"
+msgid "Message_From"
+msgstr "&Nachricht"
 
 #, fuzzy
-#~ msgid "Message_Address"
-#~ msgstr "&Nachricht"
+msgid "Message_Address"
+msgstr "&Nachricht"
 
 #, fuzzy
-#~ msgid "Message_Subject"
-#~ msgstr "Betreff"
+msgid "Message_Subject"
+msgstr "Betreff"
 
 #, fuzzy
-#~ msgid "Messagec"
-#~ msgstr "&Nachricht"
+msgid "Messagec"
+msgstr "&Nachricht"
 
-#~ msgid "Name of the folder to write to?"
-#~ msgstr "Name der Mailbox zum Sichern?"
-
-#, fuzzy
-#~ msgid "Can't create the directory for configurationfiles '%s'."
-#~ msgstr "Kann Verzeichnis '%s' für Konfigurationsdateien nicht anlegen."
-
-#~ msgid ""
-#~ "It's possible that you have problems with Python\n"
-#~ "installation. Would you like to disable Python\n"
-#~ "support for now (set "
-#~ msgstr ""
-#~ "Es ist möglich, daß Python nicht korrekt installiert\n"
-#~ "ist. Möchten Sie die Python-Unterstützung vorerst de-\n"
-#~ "aktivieren (setzen Sie "
-
-#~ msgid " to 1 to reenable it later)?"
-#~ msgstr " auf 1 um es später wieder zu aktivieren)?"
-
-#~ msgid ""
-#~ "Folder '%s': duplicate subfolder name '%s', only the first subfolder loaded."
-#~ msgstr ""
-#~ "Mailbox '%s': doppelter Eintrag für '%s', nur die erste Mailbox geladen."
-
-#~ msgid "no profile to load folders from"
-#~ msgstr "Kein Profileintrag zum Laden der Mailbox"
-
-#~ msgid "configured language"
-#~ msgstr "eingestellte Sprache"
-
-#~ msgid "No help found for current context."
-#~ msgstr "Keine Hilfe für aktuellen Kontext."
+msgid "Name of the folder to write to?"
+msgstr "Name der Mailbox zum Sichern?"
 
 #, fuzzy
-#~ msgid "Can not send message - network is not configured."
-#~ msgstr "Kann Nachricht nicht senden - Netzwerk ist nicht konfiguriert."
+msgid "Can't create the directory for configurationfiles '%s'."
+msgstr "Kann Verzeichnis '%s' für Konfigurationsdateien nicht anlegen."
+
+msgid ""
+"It's possible that you have problems with Python\n"
+"installation. Would you like to disable Python\n"
+"support for now (set "
+msgstr ""
+"Es ist möglich, daß Python nicht korrekt installiert\n"
+"ist. Möchten Sie die Python-Unterstützung vorerst de-\n"
+"aktivieren (setzen Sie "
+
+msgid " to 1 to reenable it later)?"
+msgstr " auf 1 um es später wieder zu aktivieren)?"
+
+msgid ""
+"Folder '%s': duplicate subfolder name '%s', only the first subfolder loaded."
+msgstr ""
+"Mailbox '%s': doppelter Eintrag für '%s', nur die erste Mailbox geladen."
+
+msgid "no profile to load folders from"
+msgstr "Kein Profileintrag zum Laden der Mailbox"
+
+msgid "configured language"
+msgstr "eingestellte Sprache"
+
+msgid "No help found for current context."
+msgstr "Keine Hilfe für aktuellen Kontext."
 
 #, fuzzy
-#~ msgid "  Copyright (c) 1998 by Karsten Ballüder"
-#~ msgstr "  Alle Rechte (c) 1999: Karsten Ballüder"
+msgid "Can not send message - network is not configured."
+msgstr "Kann Nachricht nicht senden - Netzwerk ist nicht konfiguriert."
 
 #, fuzzy
-#~ msgid "Open address book file"
-#~ msgstr "Adreßbuch editieren"
+msgid "  Copyright (c) 1998 by Karsten Ballüder"
+msgstr "  Alle Rechte (c) 1999: Karsten Ballüder"
 
 #, fuzzy
-#~ msgid "Open an existing message  folder"
-#~ msgstr "Bestehende Mailbox öffnen"
+msgid "Open address book file"
+msgstr "Adreßbuch editieren"
 
 #, fuzzy
-#~ msgid "Open any existing message  folder"
-#~ msgstr "Generelle Mailbox öffnen"
+msgid "Open an existing message  folder"
+msgstr "Bestehende Mailbox öffnen"
 
 #, fuzzy
-#~ msgid "print"
-#~ msgstr "Drucken"
+msgid "Open any existing message  folder"
+msgstr "Generelle Mailbox öffnen"
 
 #, fuzzy
-#~ msgid "edit"
-#~ msgstr "&Bearbeiten"
+msgid "print"
+msgstr "Drucken"
 
 #, fuzzy
-#~ msgid "From:"
-#~ msgstr "Von"
+msgid "edit"
+msgstr "&Bearbeiten"
 
 #, fuzzy
-#~ msgid "in folder "
-#~ msgstr "Mailbox öffnen"
+msgid "From:"
+msgstr "Von"
 
 #, fuzzy
-#~ msgid "About: "
-#~ msgstr "&Über M..."
+msgid "in folder "
+msgstr "Mailbox öffnen"
 
 #, fuzzy
-#~ msgid "MIME Information"
-#~ msgstr "MIME Information"
+msgid "About: "
+msgstr "&Über M..."
 
-#~ msgid "Really exit M?"
-#~ msgstr "M wirklich beenden?"
+#, fuzzy
+msgid "MIME Information"
+msgstr "MIME Information"
 
-#~ msgid "Don't show this message again"
-#~ msgstr "Diese Meldung nicht wieder zeigen"
+msgid "Really exit M?"
+msgstr "M wirklich beenden?"
+
+msgid "Don't show this message again"
+msgstr "Diese Meldung nicht wieder zeigen"

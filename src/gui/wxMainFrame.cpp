@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxMainFrame: the main window class                               *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998-1999 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
  * $Id$
  *
@@ -104,6 +104,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    : wxMFrame(iname,parent)
 {
    SetIcon(ICON("MainFrame"));
+   SetTitle(M_TOPLEVELFRAME_TITLE);
 
    AddFileMenu();
    AddEditMenu();

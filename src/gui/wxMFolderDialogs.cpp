@@ -795,13 +795,6 @@ wxFolderPropertiesPage::UpdateUI(int sel)
 
    m_isAnonymous->Enable(hasPassword);
 
-   {  // set incoming checkbox to right value
-      MFolder_obj folder(m_folderPath);
-      m_isIncoming->SetValue(
-         (folder->GetFlags() && MF_FLAGS_INCOMING) ? TRUE : FALSE
-         );
-   }
-   
    // only enable password and login fields if anonymous access is disabled
    EnableTextWithLabel(m_password, hasPassword && !m_isAnonymous->GetValue());
    EnableTextWithLabel(m_login, hasPassword && !m_isAnonymous->GetValue());
@@ -985,6 +978,15 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
 
    // this will also call SetDefaultValues()
    m_radio->SetSelection(typeFolder);
+
+   if(m_folderPath)
+   {  // set incoming checkbox to right value
+      MFolder_obj folder(m_folderPath);
+      m_isIncoming->SetValue(
+         (folder->GetFlags() && MF_FLAGS_INCOMING) ? TRUE : FALSE
+         );
+   }
+
 #ifdef __WXMSW__
    // the notification is sent automatically under GTK
    UpdateUI(typeFolder);

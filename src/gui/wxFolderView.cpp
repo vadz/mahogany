@@ -426,6 +426,8 @@ wxFolderView::Update(void)
       return; // don't call this code recursively
    m_UpdateSemaphore = true;
 
+   wxWindow *focusWindow = wxWindow::FindFocus();
+   
    wxBeginBusyCursor();
    wxSafeYield();
 
@@ -490,6 +492,7 @@ wxFolderView::Update(void)
    }
    m_NumOfMessages = n;
    wxEndBusyCursor(); wxSafeYield();
+   focusWindow->SetFocus();
    m_UpdateSemaphore = false;
 }
 

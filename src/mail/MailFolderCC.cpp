@@ -135,6 +135,7 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    m_NumOfMessages = 0;
    m_OldNumOfMessages = 0;
    m_Listing = NULL;
+   m_FirstListing = true;
    m_GenerateNewMailEvents = false; // for now don't!
    m_UpdateMsgCount = true; // normal operation
    m_UpdateNeeded = true;
@@ -209,6 +210,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
 
    mf = new
       MailFolderCC(typeAndFlags,mboxpath,profile,server,login,password);
+   mf->SetName(symname);
    if(mf && profile)
       mf->SetRetrievalLimit(READ_CONFIG(profile, MP_MAX_HEADERS_NUM));
    if( mf->Open() )
@@ -676,10 +678,9 @@ MailFolderCC::BuildListing(void)
    unsigned long numMessages = m_NumOfMessages;
 
    /** The value of 0 disables the limit.
-       m_OldNumMessage == -1: only test the first time the folder is
-       opened
+       Ask only once.
    */
-   if ( (m_RetrievalLimit > 0) && m_OldNumOfMessages == -1 && (m_NumOfMessages > m_RetrievalLimit) )
+   if ( (m_RetrievalLimit > 0) && m_FirstListing && (m_NumOfMessages > m_RetrievalLimit) )
    {
       // TODO should really ask the user how many of them he wants (like slrn)
       wxString msg;
@@ -763,6 +764,7 @@ MailFolderCC::BuildListing(void)
    if(m_UpdateMsgCount) // this will suppress more new mail events
       m_OldNumOfMessages = m_NumOfMessages;
    m_UpdateNeeded = false;
+   m_FirstListing = false;
 }
 
 void

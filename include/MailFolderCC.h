@@ -275,6 +275,8 @@ private:
    unsigned long m_NumOfMessages;
    /// last number of messages
    unsigned long m_OldNumOfMessages;
+   /// set to true before we get the very first folder info
+   bool m_FirstListing;
    /** Do we want to generate new mail events?
        Used to supporess new mail events when first opening the folder
        and when copying to it. */
