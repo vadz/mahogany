@@ -41,5 +41,5 @@
 #undef USE_I18N
 
 /** Define this to build M with dialup support */
-#undef USE_DIALUP
+#define USE_DIALUP
 
