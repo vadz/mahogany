@@ -632,7 +632,7 @@
 /// the icon directoy
 #define   MP_ICONPATH_D         "icons"
 /// sub-directory for icons
-#define MP_ICONSTYLE_D         ""
+#define MP_ICONSTYLE_D         0L // 0=default, 1=GNOME, 2=KDE, 3=small
 /// the profile path
 #define   MP_PROFILE_PATH_D      "."
 /// the extension to use for profile files

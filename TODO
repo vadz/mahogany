@@ -8,6 +8,10 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
+9	KB	dialup.cpp: OnTerminate() must not call the test
+                again or we get recursion! Must find a way around it.
+
+
 9	KB	wxLayout:
 		- selecting backwards and deleting gets into endless
 		  loop 

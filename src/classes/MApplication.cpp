@@ -68,6 +68,12 @@
 #include  <wx/utils.h>
 #define   SYSTEM(command) wxExecute(command, FALSE)
 
+// to map icon subdirs to numbers
+static const char *gs_IconSubDirs[] =
+{
+   "default", "GNOME", "KDE", "small"
+};
+
 // ----------------------------------------------------------------------------
 // private types
 // ----------------------------------------------------------------------------
@@ -438,7 +444,11 @@ MAppBase::OnStartup()
    // We need to set this before wxWindows has a chance to process
    // idle events (splash screen), in case there was any problem with
    // the config file, or it will show the unknown icon.
-   GetIconManager()->SetSubDirectory(READ_APPCONFIG(MP_ICONSTYLE));
+   {
+      unsigned long idx = (unsigned long) READ_APPCONFIG(MP_ICONSTYLE);
+      if(idx < sizeof gs_IconSubDirs)
+         GetIconManager()->SetSubDirectory(gs_IconSubDirs[idx]);
+   }
 
    // show the splash screen (do it as soon as we have profile to read
    // MP_SHOWSPLASH from)
@@ -809,6 +819,11 @@ MAppBase::OnMEvent(MEventData& event)
    {
       m_UseOutbox = READ_APPCONFIG(MP_USE_OUTBOX) != 0;
       SetupOnlineManager(); // make options change effective
+      {
+         unsigned long idx = (unsigned long)  READ_APPCONFIG(MP_ICONSTYLE);
+         if(idx < sizeof gs_IconSubDirs)
+            GetIconManager()->SetSubDirectory(gs_IconSubDirs[idx]);
+      }
       return TRUE;
    }
    // else

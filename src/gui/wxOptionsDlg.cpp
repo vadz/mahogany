@@ -232,8 +232,13 @@ enum ConfigFields
    ConfigField_DockableMenubars,
    ConfigField_DockableToolbars,
    ConfigField_ToolbarsFlatButtons,
-   ConfigField_OthersLast = ConfigField_ToolbarsFlatButtons,
-   // the end
+#ifdef OS_UNIX
+   ConfigField_IconStyle,
+   ConfigField_OthersLast = ConfigField_IconStyle,
+#else
+   ConfigField_OthersLast = ToolbarsFlatButtons,
+#endif
+// the end
    ConfigField_Max
 };
 
@@ -563,7 +568,10 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 #endif
    { gettext_noop("Use floating &menu-bars"), Field_Bool,    -1                     },
    { gettext_noop("Use floating &tool-bars"), Field_Bool,    -1                     },
-   { gettext_noop("Tool-bars with f&lat buttons"), Field_Bool,    -1                     }
+   { gettext_noop("Tool-bars with f&lat buttons"), Field_Bool,    -1                     },
+#ifdef OS_UNIX
+   { gettext_noop("&Icon style:default:GNOME:KDE:small"), Field_Combo,   -1 }
+#endif
 };
 
 // FIXME ugly, ugly, ugly... config settings should be living in an array from
@@ -714,7 +722,10 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
 #endif
    CONFIG_ENTRY(MP_DOCKABLE_MENUBARS),
    CONFIG_ENTRY(MP_DOCKABLE_TOOLBARS),
-   CONFIG_ENTRY(MP_FLAT_TOOLBARS)
+   CONFIG_ENTRY(MP_FLAT_TOOLBARS),
+#ifdef OS_UNIX
+   CONFIG_ENTRY(MP_ICONSTYLE)
+#endif
 };
 
 #undef CONFIG_ENTRY

@@ -135,7 +135,7 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
 {
    bool loaded = false;
    wxImage *img = new wxImage();
-
+   
    // If we haven't been called yet, find out which image handlers
    // are supported:
    if(! m_knowHandlers) // first time initialisation
