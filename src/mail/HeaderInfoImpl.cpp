@@ -372,7 +372,9 @@ inline bool HeaderInfoListImpl::HasTransTable() const
 
 inline bool HeaderInfoListImpl::IsTranslatingIndices() const
 {
-   return HasTransTable() || m_reverseOrder;
+   // if we must rebuild the tables, it means that we are going to have them
+   // and we will do the index translations
+   return MustRebuildTables() || HasTransTable() || m_reverseOrder;
 }
 
 inline bool HeaderInfoListImpl::MustRebuildTables() const
