@@ -2289,6 +2289,8 @@ unsigned long wxComposeView::ComputeTextHash() const
       {
          len += exp->content.text->length();
       }
+
+      delete exp;
    }
 
    return len;
@@ -3224,13 +3226,17 @@ wxComposeView::SaveMsgTextToFile(const String& filename) const
    while( (exp = wxLayoutExport(&status, WXLO_EXPORT_AS_TEXT)) != NULL )
    {
       // non text objects get ignored
-      if(exp->type == WXLO_EXPORT_TEXT)
+      if ( exp->type == WXLO_EXPORT_TEXT )
+      {
          if ( !file.Write(*exp->content.text) )
          {
             wxLogError(_("Cannot write message to file."));
 
             return false;
          }
+      }
+
+      delete exp;
    }
 
    ((wxComposeView *)this)->ResetDirty(); // const_cast

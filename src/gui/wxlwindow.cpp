@@ -1262,7 +1262,11 @@ wxLayoutWindow::Copy(bool invalidate, bool privateFormat, bool primary)
    wxLayoutDataObject *wldo = new wxLayoutDataObject;
    wxLayoutList *llist = m_llist->GetSelection(wldo, invalidate);
    if(! llist)
+   {
+      delete wldo;
       return FALSE;
+   }
+
    // Export selection as text:
    wxString text;
    wxLayoutExportObject *exp;
