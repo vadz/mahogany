@@ -4487,10 +4487,10 @@ void MailFolderCC::OnNewMail()
       MLocker filterLock(m_mutexNewMail);
 
       // only find the new new messages, i.e. the ones which we hadn't reported
-      // yet
+      // yet by searching only the messages after m_uidLastNew
       UIdArray *uidsNew = SearchByFlag
                           (
-                           MSG_STAT_NEW,
+                           MSG_STAT_RECENT,  // not necessarily unread
                            SEARCH_SET | SEARCH_UNDELETED | SEARCH_UID,
                            m_uidLastNew == UID_ILLEGAL ? 0 : m_uidLastNew
                           );
