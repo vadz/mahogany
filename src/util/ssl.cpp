@@ -52,6 +52,12 @@ extern const MOption MP_SSL_DLL_SSL;
 #else // old ssl
    #define ssl_data_t char *
 #endif
+// starting from 0.9.7, OpenSSL uses void instead of char
+#if defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER >= 0x0090700fL)
+   #define ssl_parg void *
+#else // old ssl
+   #define ssl_parg char *
+#endif
 
 /* This is our interface to the library and auth_ssl.c in c-client
    which are all in "C" */
@@ -110,14 +116,14 @@ SSL_DEF( X509 *, SSL_get_peer_certificate, (SSL *s), (s) );
 
 SSL_DEF_VOID( RAND_seed, (const void *buf,int num), (buf, num) );
 SSL_DEF( BIO *, BIO_new_socket, (int sock, int close_flag), (sock, close_flag) );
-SSL_DEF( long, SSL_CTX_ctrl, (SSL_CTX *ctx,int cmd, long larg, char *parg), (ctx,cmd,larg,parg) );
+SSL_DEF( long, SSL_CTX_ctrl, (SSL_CTX *ctx,int cmd, long larg, ssl_parg parg), (ctx,cmd,larg,parg) );
 SSL_DEF_VOID( SSL_CTX_set_verify, (SSL_CTX *ctx,int mode, int (*callback)(int, X509_STORE_CTX *)), (ctx,mode,callback) );
 SSL_DEF( int, SSL_CTX_load_verify_locations, (SSL_CTX *ctx, const char *CAfile, const char *CApath), (ctx, CAfile, CApath) );
 SSL_DEF( int, SSL_CTX_set_default_verify_paths, (SSL_CTX *ctx), (ctx) );
 SSL_DEF_VOID( SSL_set_bio, (SSL *s, BIO *rbio,BIO *wbio), (s,rbio,wbio) );
 SSL_DEF_VOID( SSL_set_connect_state, (SSL *s), (s) );
 SSL_DEF( int, SSL_state, (SSL *ssl), (ssl) );
-SSL_DEF( long,    SSL_ctrl, (SSL *ssl,int cmd, long larg, char *parg), (ssl,cmd,larg,parg) );
+SSL_DEF( long,    SSL_ctrl, (SSL *ssl,int cmd, long larg, ssl_parg parg), (ssl,cmd,larg,parg) );
 SSL_DEF_VOID( ERR_load_crypto_strings, (void), () );
 SSL_DEF( SSL_METHOD *,TLSv1_server_method, (void), () );
 SSL_DEF( SSL_METHOD *,SSLv23_server_method, (void), () );
