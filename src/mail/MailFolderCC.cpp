@@ -881,7 +881,6 @@ MailFolderCC::GetMessage(unsigned long uid)
 class HeaderInfoList *
 MailFolderCC::GetHeaders(void) const
 {
-   CHECK(m_Listing, NULL, "no listing");
    if(m_Listing) m_Listing->IncRef();
    return m_Listing;
 }
