@@ -1314,6 +1314,7 @@ THREADNODE* ReOrderTree(THREADNODE* thrNode, MsgnoType *sortTable,
    return fakeRoot.next;
 }
 
+#if 0
 
 static size_t FillThreadTables(THREADNODE* node, ThreadData* thrData,
                                size_t &threadedIndex, size_t indent, bool indentIfDummyNode)
@@ -1344,6 +1345,48 @@ static size_t FillThreadTables(THREADNODE* node, ThreadData* thrData,
    return nbChildren + (node->num == 0 ? 0 : 1);  // + 1 for oneself if not dummy
 }
 
+#else
+
+static size_t FillThreadTables(THREADNODE* node, ThreadData* thrData,
+                               size_t &threadedIndex, size_t indent, bool indentIfDummyNode)
+{
+   size_t nbChildrenAndBrothers = 0;
+   while (node)
+   {
+      if (node->num > 0) {
+         // This is not a dummy node
+         thrData->m_tableThread[threadedIndex++] = node->num;
+         thrData->m_indents[node->num-1] = indent;
+      }
+   
+      size_t nbChildren = 0;
+      if (node->next != 0)
+      {
+         // Node has at least one child
+         size_t indentForKid = indent;
+         if (indentIfDummyNode)
+         {
+            // No need to wonder: always indent
+            indentForKid++;
+         } else {
+            // Indent if current node is not dummy
+            indentForKid += (node->num == 0) ? 0 : 1;
+         }         
+         nbChildren += FillThreadTables(node->next, thrData, threadedIndex,
+                                        indentForKid, indentIfDummyNode);
+      }
+      if (node->num > 0) {
+         thrData->m_children[node->num-1] = nbChildren;
+      } // else: dummy node, don't store anything
+
+      nbChildrenAndBrothers += nbChildren + (node->num == 0 ? 0 : 1);
+      node = node->branch;
+   }
+
+   return nbChildrenAndBrothers;
+}
+
+#endif
 
 
 void HeaderInfoListImpl::CombineSortAndThread()
