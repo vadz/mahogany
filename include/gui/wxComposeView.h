@@ -523,5 +523,17 @@ extern bool ExpandTemplate(Composer& cv,
                            Message *msgOriginal,
                            const MessageView *msgview = NULL);
 
+/**
+   Return the string containing quoted (i.e. prefixed with reply marker) text.
+
+   @param text the text to quote
+   @param profile to get the options from
+   @param msg the message we're replying to (for attribution)
+   @return the quoted text
+ */
+extern String QuoteText(const String& text,
+                        Profile *profile,
+                        Message *msgOriginal);
+
 #endif // WXCOMPOSEVIEW_H
 

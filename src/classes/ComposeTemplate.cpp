@@ -345,30 +345,9 @@ protected:
    // get the signature to use (including the signature separator, if any)
    String GetSignature() const;
 
-   // return the reply prefix to use for message quoting when replying
-   String GetReplyPrefix() const;
-
-   // put the text quoted according to our current quoting options with the
-   // given reply prefix into value
-   enum
-   {
-      NoDetectSig = 0,
-      DetectSig = 1
-   };
-   void ExpandOriginalText(const String& text,
-                           const String& prefix,
-                           String *value,
-                           int flags = DetectSig) const;
-
 private:
    // helper used by GetCategory and GetVariable
    static int FindStringInArray(const wxChar *strs[], int max, const String& s);
-
-   // helper used by ExpandOriginal(): return the personal name part of the
-   // first address of the given type
-   //
-   // FIXME: this function is bad as it completely ignores the other addresses
-   void GetNameForAddress(String *value, MessageAddressType type) const;
 
    // the sink we use when expanding pseudo variables
    ExpansionSink& m_sink;
@@ -486,6 +465,269 @@ const TemplatePopupMenuItem& g_ComposeViewTemplatePopupMenu =
 // ============================================================================
 // implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// helper functions
+// ----------------------------------------------------------------------------
+
+// return the personal name part of the first address of the given type
+//
+// FIXME: this function is bad as it completely ignores the other addresses
+static String GetNameForAddress(Message *msg, MessageAddressType type)
+{
+   String value;
+
+   AddressList_obj addrList(msg->GetAddressList(type));
+   if ( addrList )
+   {
+      Address *addr = addrList->GetFirst();
+      if ( addr )
+         value = addr->GetName();
+   }
+
+   return value;
+}
+
+// return the reply prefix to use for message quoting when replying
+static String GetReplyPrefix(Message *msg, Profile *profile)
+{
+   String prefix;
+
+   // X-Attribution header value overrides everything else if it exists
+   if ( msg && READ_CONFIG_BOOL(profile, MP_REPLY_MSGPREFIX_FROM_XATTR) )
+   {
+      msg->GetHeaderLine("X-Attribution", prefix);
+   }
+
+   // prepend the senders initials to the reply prefix (this
+   // will make reply prefix like "VZ>")
+   if ( prefix.empty() &&
+            READ_CONFIG(profile, MP_REPLY_MSGPREFIX_FROM_SENDER) )
+   {
+      // take from address, not reply-to which can be set to
+      // reply to a mailing list, for example
+      String name = GetNameForAddress(msg, MAT_FROM);
+      if ( name.empty() )
+      {
+         // no from address? try to find anything else
+         name = GetNameForAddress(msg, MAT_REPLYTO);
+      }
+
+      name = MailFolder::DecodeHeader(name);
+
+      // it's (quite) common to have quotes around the personal
+      // part of the address, remove them if so
+
+      // remove spaces
+      name.Trim(TRUE);
+      name.Trim(FALSE);
+      if ( !name.empty() )
+      {
+         if ( name[0u] == '"' && name.Last() == '"' )
+         {
+            name = name.Mid(1, name.length() - 2);
+         }
+
+         // take the first letter of each word
+         wxStringTokenizer tk(name);
+         while ( tk.HasMoreTokens() )
+         {
+            char chInitial = tk.GetNextToken()[0u];
+
+            if ( chInitial == '<' )
+            {
+               // this must be the start of embedded "<...>"
+               // address, skip it completely
+               break;
+            }
+
+            // only take letters as initials
+            if ( isalpha(chInitial) )
+            {
+               prefix += chInitial;
+            }
+         }
+      }
+   }
+
+   // and then the standard reply prefix too
+   prefix += READ_CONFIG(profile, MP_REPLY_MSGPREFIX);
+
+   return prefix;
+}
+
+// flags for ExpandOriginalText()
+enum
+{
+   NoDetectSig = 0,
+   DetectSig = 1
+};
+
+// put the text quoted according to our current quoting options with the given
+// reply prefix into value
+static String
+ExpandOriginalText(const String& text,
+                   const String& prefix,
+                   Profile *profile,
+                   int flags = DetectSig)
+{
+   String value;
+
+   // should we quote the empty lines?
+   //
+   // this option is ignored when we're inserting text verbatim (hence without
+   // reply prefix) and not quoting it
+   bool quoteEmpty = !prefix.empty() &&
+                        READ_CONFIG(profile, MP_REPLY_QUOTE_EMPTY);
+
+   // where to break lines (if at all)?
+   size_t wrapMargin;
+   if ( READ_CONFIG(profile, MP_WRAP_QUOTED) )
+   {
+      wrapMargin = READ_CONFIG(profile, MP_WRAPMARGIN);
+      if ( wrapMargin <= prefix.length() )
+      {
+         wxLogError(_("The configured automatic wrap margin (%u) is too "
+                      "small, please increase it.\n"
+                      "\n"
+                      "Disabling automatic wrapping for now."), wrapMargin);
+
+         profile->writeEntry(MP_WRAP_QUOTED, false);
+         wrapMargin = 0;
+      }
+   }
+   else
+   {
+      // don't wrap
+      wrapMargin = 0;
+   }
+
+   // should we detect the signature and discard it?
+   bool detectSig = (flags & DetectSig) &&
+                        READ_CONFIG_BOOL(profile, MP_REPLY_DETECT_SIG);
+
+   DetectSignature signature;
+   if( detectSig )
+   {
+      if( !signature.Initialize(profile) )
+      {
+         profile->writeEntry(MP_REPLY_DETECT_SIG, false);
+         detectSig = false;
+      }
+   }
+
+   // if != 0, then we're at the end of the current line
+   size_t lenEOL = 0;
+
+   // the current line
+   String lineCur;
+
+   // the last detected signature start
+   int posSig = -1;
+
+   for ( const wxChar *cptr = text.c_str(); ; cptr++ )
+   {
+      // start of [real] new line?
+      if ( lineCur.empty() )
+      {
+         if ( detectSig )
+         {
+            if ( signature.StartsHere(cptr) )
+            {
+               // remember that the sig apparently starts here
+               posSig = value.length();
+            }
+         }
+
+         if ( !quoteEmpty && (lenEOL = IsEndOfLine(cptr)) != 0 )
+         {
+            // this line is empty, skip it entirely (i.e. don't output the
+            // prefix for it)
+            cptr += lenEOL - 1;
+
+            value += '\n';
+
+            continue;
+         }
+
+         lineCur += prefix;
+      }
+
+      if ( !*cptr || (lenEOL = IsEndOfLine(cptr)) != 0 )
+      {
+         // sanity test
+         ASSERT_MSG( !wrapMargin || lineCur.length() <= wrapMargin,
+                     _T("logic error in auto wrap code") );
+
+         value += lineCur;
+
+         if ( !*cptr )
+         {
+            // end of text
+            break;
+         }
+
+         // put just '\n' in output, we don't need "\r\n"
+         value += '\n';
+
+         lineCur.clear();
+
+         // -1 to compensate for ++ in the loop
+         cptr += lenEOL - 1;
+      }
+      else // !EOL
+      {
+         lineCur += *cptr;
+
+         // we don't need to wrap a line if it is its last character anyhow
+         if ( wrapMargin && lineCur.length() >= wrapMargin
+               && !IsEndOfLine(cptr + 1) )
+         {
+            // break the line before the last word
+            size_t n = wrapMargin - 1;
+            while ( n > prefix.length() )
+            {
+               if ( isspace(lineCur[n]) )
+                  break;
+
+               n--;
+            }
+
+            if ( n == prefix.length() )
+            {
+               // no space found in the line or it is in prefix which
+               // we don't want to wrap - so just cut the line right here
+               n = wrapMargin;
+            }
+
+            value.append(lineCur, n);
+            value += '\n';
+
+            // we don't need to start the new line with spaces so remove them
+            // from the tail
+            while ( n < lineCur.length() && isspace(lineCur[n]) )
+            {
+               n++;
+            }
+
+            lineCur.erase(0, n);
+            lineCur.Prepend(prefix);
+         }
+      }
+   }
+
+   // if we had a sig, truncate it now: we have to do it like this because
+   // otherwise we risk discarding a too big part of the message, e.g. if it
+   // contains a quoted message with a sig inside it so we want to discard
+   // everything after the last sig detected
+   if ( posSig != -1 )
+   {
+      value.erase(posSig);
+   }
+
+   return value;
+}
+
 
 // ----------------------------------------------------------------------------
 // ExpansionSink - the sink used with wxComposeView
@@ -1032,15 +1274,6 @@ VarExpander::ExpandMessage(const String& name, String *value) const
    return TRUE;
 }
 
-void
-VarExpander::GetNameForAddress(String *value, MessageAddressType type) const
-{
-   AddressList_obj addrList(m_msg->GetAddressList(type));
-   Address *addr = addrList ? addrList->GetFirst() : NULL;
-   if ( addr )
-      *value = addr->GetName();
-}
-
 bool
 VarExpander::ExpandOriginal(const String& Name, String *value) const
 {
@@ -1074,7 +1307,7 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
             break;
 
          case OriginalHeader_ReplyTo:
-            GetNameForAddress(value, MAT_REPLYTO);
+            *value = GetNameForAddress(m_msg, MAT_REPLYTO);
             break;
 
          case OriginalHeader_To:
@@ -1086,16 +1319,16 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
             break;
 
          case OriginalHeader_PersonalName:
-            GetNameForAddress(value, MAT_FROM);
+            *value = GetNameForAddress(m_msg, MAT_FROM);
             break;
 
          case OriginalHeader_FirstName:
-            GetNameForAddress(value, MAT_FROM);
+            *value = GetNameForAddress(m_msg, MAT_FROM);
             *value = Message::GetFirstNameFromAddress(*value);
             break;
 
          case OriginalHeader_LastName:
-            GetNameForAddress(value, MAT_FROM);
+            *value = GetNameForAddress(m_msg, MAT_FROM);
             *value = Message::GetLastNameFromAddress(*value);
             break;
 
@@ -1305,7 +1538,9 @@ VarExpander::DoQuotePart(const MimePart *mimePart,
    switch ( mimeType.GetPrimary() )
    {
       case MimeType::TEXT:
-         ExpandOriginalText(mimePart->GetTextContent(), prefix, value);
+         *value = ExpandOriginalText(mimePart->GetTextContent(),
+                                     prefix,
+                                     m_profile);
 
          quoted = true;
          break;
@@ -1351,7 +1586,7 @@ VarExpander::DoQuoteOriginal(bool isQuote, String *value) const
    String prefix;
    if ( isQuote )
    {
-      prefix = GetReplyPrefix();
+      prefix = GetReplyPrefix(m_msg, m_profile);
    }
    //else: template "text", so no reply prefix at all
 
@@ -1379,7 +1614,7 @@ VarExpander::DoQuoteOriginal(bool isQuote, String *value) const
       else
       {
          // include the selection only in the template expansion
-         ExpandOriginalText(selection, prefix, value, NoDetectSig);
+         *value = ExpandOriginalText(selection, prefix, m_profile, NoDetectSig);
       }
    }
 
@@ -1648,5 +1883,16 @@ extern bool ExpandTemplate(Composer& cv,
    sink.InsertTextInto(cv);
 
    return true;
+}
+
+extern String QuoteText(const String& text,
+                        Profile *profile,
+                        Message *msgOriginal)
+{
+   CHECK( profile && msgOriginal, _T(""), _T("NULL parameters in QuoteText") );
+
+   const String prefix = GetReplyPrefix(msgOriginal, profile);
+
+   return ExpandOriginalText(text, prefix, profile, NoDetectSig);
 }
 
