@@ -423,7 +423,7 @@ wxMFrame::SavePositionInternal(const char *name, wxWindow *frame, bool isFrame)
          else // !iconized in config
          {
             if ( isIconized )
-               pConf->Write(MP_ICONISED, TRUE);
+               pConf->Write(MP_ICONISED, isIconized);
          }
 
          if ( pConf->Read(MP_MAXIMISED, MP_MAXIMISED_D) )
@@ -434,7 +434,7 @@ wxMFrame::SavePositionInternal(const char *name, wxWindow *frame, bool isFrame)
          else // !maximized in config
          {
             if ( isMaximized )
-               pConf->Write(MP_MAXIMISED, TRUE);
+               pConf->Write(MP_MAXIMISED, isMaximized);
          }
 
          if ( isMaximized || isIconized )
