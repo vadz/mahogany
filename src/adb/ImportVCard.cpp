@@ -40,8 +40,8 @@
 class AdbVCardImporter : public AdbImporter
 {
 public:
-   AdbVCardImporter() { m_vcard = NULL; }
-   virtual ~AdbVCardImporter() { delete m_vcard; }
+   AdbVCardImporter() { }
+   virtual ~AdbVCardImporter() { DeleteCards(); }
 
    // implement base class pure virtuals
    virtual String GetDefaultFilename() const { return ""; }
@@ -55,6 +55,10 @@ public:
                             size_t index,
                             AdbEntry *entry);
 
+protected:
+   // delete all cards we have
+   void DeleteCards();
+
 private:
    // import address info
    void CopyAddress(wxVCardAddress *addr, int fieldFirst, AdbEntry *entry);
@@ -62,8 +66,8 @@ private:
    // the filename which was tested by CanImport() the last time
    wxString m_filename;
 
-   // and the vCard we loaded from it - if we did
-   wxVCard *m_vcard;
+   // and the vCards we loaded from it - if we did
+   wxArrayCards m_cards;
 
    DECLARE_ADB_IMPORTER();
 };
@@ -85,28 +89,29 @@ IMPLEMENT_ADB_IMPORTER(AdbVCardImporter,
 // AdbVCardImporter
 // ----------------------------------------------------------------------------
 
+void AdbVCardImporter::DeleteCards()
+{
+   size_t count = m_cards.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      delete m_cards[n];
+   }
+
+   m_cards.Empty();
+}
+
 bool AdbVCardImporter::CanImport(const String& filename)
 {
-   if ( filename == m_filename )
+   if ( filename != m_filename )
    {
-      // we already tried loading this file
-      return m_vcard != NULL;
+      m_filename = filename;
+      DeleteCards(); // if we had any old ones, harmles otherwise
+
+      m_cards = wxVCard::CreateFromFile(filename);
    }
+   // else: we already tried loading cards from this file
 
-   m_filename = filename;
-   delete m_vcard; // if we had an old one
-
-   m_vcard = new wxVCard(filename);
-   if ( !m_vcard->IsOk() )
-   {
-      delete m_vcard;
-      m_vcard = NULL;
-
-      return false;
-   }
-
-   // ok, loaded successfully
-   return true;
+   return !m_cards.IsEmpty();
 }
 
 bool AdbVCardImporter::StartImport(const String& filename)
@@ -122,13 +127,21 @@ size_t AdbVCardImporter::GetEntryNames(const String& path,
    // we suppose that vCard contains info for just one person
 
    // how to construct a nick name for a vCard? there doesn't seem to be any
-   // natural choice for this, so just take the file basename instead
-   wxString nickname;
-   wxSplitPath(m_filename, NULL, &nickname, NULL);
+   // natural choice for this, so just take the family name instead
+   wxString familyname;
+   size_t countImported = 0,
+          countAll = m_cards.GetCount();
+   for ( size_t n = 0; n < countAll; n++ )
+   {
+      if ( m_cards[n]->GetName(&familyname) )
+      {
+         countImported++;
+         entries.Add(familyname);
+      }
+      //else: what to do with unnamed properties?
+   }
 
-   entries.Add(nickname);
-
-   return 1;
+   return countImported;
 }
 
 size_t AdbVCardImporter::GetGroupNames(const String& path,
@@ -143,13 +156,15 @@ bool AdbVCardImporter::ImportEntry(const String& path,
                                    size_t index,
                                    AdbEntry *entry)
 {
-   wxCHECK_MSG( !path && !index, false, "unexpected params in AdbVCardImporter" );
+   wxCHECK_MSG( !path && (index < m_cards.GetCount()), false,
+                "unexpected params in AdbVCardImporter" );
 
    // set all simple fields
    wxString val;
+   wxVCard *vcard = m_cards[index];
 
    #define COPY_FIELD(field, prop)  \
-      if ( m_vcard->Get##prop(&val) ) entry->SetField(AdbField_##field, val)
+      if ( vcard->Get##prop(&val) ) entry->SetField(AdbField_##field, val)
 
    COPY_FIELD(FullName, FullName);
    COPY_FIELD(Title, BusinessRole);
@@ -161,7 +176,7 @@ bool AdbVCardImporter::ImportEntry(const String& path,
 
    // now transfer name properties
    wxString familyName, givenName, namePrefix;
-   if ( m_vcard->GetName(&familyName, &givenName, NULL, &namePrefix) )
+   if ( vcard->GetName(&familyName, &givenName, NULL, &namePrefix) )
    {
       if ( !!familyName )
          entry->SetField(AdbField_FamilyName, familyName);
@@ -173,7 +188,7 @@ bool AdbVCardImporter::ImportEntry(const String& path,
 
    // and org ones
    wxString org, dept;
-   if ( m_vcard->GetOrganization(&org, &dept) )
+   if ( vcard->GetOrganization(&org, &dept) )
    {
       // merge them together
       wxString orgfull;
@@ -185,7 +200,7 @@ bool AdbVCardImporter::ImportEntry(const String& path,
    void *cookie;
 
    bool hasPrimaryEMail = false;
-   wxVCardEMail *email = m_vcard->GetFirstEMail(&cookie);
+   wxVCardEMail *email = vcard->GetFirstEMail(&cookie);
    while ( email )
    {
       if ( hasPrimaryEMail )
@@ -201,7 +216,7 @@ bool AdbVCardImporter::ImportEntry(const String& path,
 
       delete email;
 
-      email = m_vcard->GetNextEMail(&cookie);
+      email = vcard->GetNextEMail(&cookie);
    }
 
    // and with addresses: the problem here is that vCard has an arbitrary number
@@ -209,7 +224,7 @@ bool AdbVCardImporter::ImportEntry(const String& path,
    // once, and we want exactly one of each
    wxVCardAddress *addrHome = NULL,
                   *addrWork = NULL;
-   wxVCardAddress *addr = m_vcard->GetFirstAddress(&cookie);
+   wxVCardAddress *addr = vcard->GetFirstAddress(&cookie);
    while ( addr && (!addrHome || !addrWork) )
    {
       int flags = addr->GetFlags();
@@ -259,7 +274,7 @@ bool AdbVCardImporter::ImportEntry(const String& path,
          delete addr;
       }
 
-      addr = m_vcard->GetNextAddress(&cookie);
+      addr = vcard->GetNextAddress(&cookie);
    }
 
    // import and delete one or both addresses
@@ -289,7 +304,7 @@ bool AdbVCardImporter::ImportEntry(const String& path,
                       *phoneHome = NULL,
                       *faxWork = NULL,
                       *faxHome = NULL;
-   wxVCardPhoneNumber *phone = m_vcard->GetFirstPhoneNumber(&cookie);
+   wxVCardPhoneNumber *phone = vcard->GetFirstPhoneNumber(&cookie);
    while ( phone )
    {
       int flags = phone->GetFlags();
@@ -338,7 +353,7 @@ bool AdbVCardImporter::ImportEntry(const String& path,
 
       delete phone;
 
-      phone = m_vcard->GetNextPhoneNumber(&cookie);
+      phone = vcard->GetNextPhoneNumber(&cookie);
    }
 
    return TRUE;
