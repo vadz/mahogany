@@ -155,7 +155,7 @@ protected:
 #define UU_BEGIN_PREFIX _T("\r\nbegin ")
 
 // UUencoded data ends at a line consisting solely of "end"
-#define UU_END_PREFIX _T("\r\nend")
+#define UU_END_PREFIX _T("\r\nend\r\n")
 
 // ============================================================================
 // UUDecodeFilter implementation
@@ -273,7 +273,10 @@ bool UUdecodeFile(const wxChar* input, String& output, const wxChar** endOfEncod
 
    delete[] buffer;
    if (decodedBytesInLine < 0)
+   {
+      wxLogWarning(_("Invalid character in uuencoded text."));
       return false;
+   }
 
    decodedFile.Shrink();
    output = decodedFile;
@@ -350,14 +353,23 @@ UUDecodeFilter::DoProcess(String& text,
 
       String decodedFile;
       const wxChar* endOfEncodedStream = 0;
-      if ( UUdecodeFile(start_data, decodedFile, &endOfEncodedStream) )
+      bool ok = UUdecodeFile(start_data, decodedFile, &endOfEncodedStream);
+      if ( ok )
       {
          static const size_t lenEnd = wxStrlen(UU_END_PREFIX);
          if ( wxStrncmp(endOfEncodedStream, UU_END_PREFIX, lenEnd) == 0 )
          {
             endOfEncodedStream += lenEnd;
          }
+         else
+         {
+            wxLogError(_("No \"end\" line at the end of uuencoded text."));
+            ok = false;
+         }
+      }
 
+      if ( ok )
+      {
          // output the part before the BEGIN line, if any
          String prolog(nextToOutput, startBeginLine - lenEOL);
          if ( !prolog.empty() )
@@ -384,7 +396,7 @@ UUDecodeFilter::DoProcess(String& text,
       }
       else
       {
-         wxLogWarning(_("This message seems to contain uuencoded data, but in fact it does not."));
+         wxLogWarning(_("Corrupted message with uuencoded attachment."));
       }
    }
 
