@@ -2,7 +2,26 @@
 import MailFolderc
 
 from MString import *
-class MailFolderPtr :
+
+from MProfile import *
+
+from MObject import *
+
+from Message import *
+class MailFolderPtr(MObjectRCPtr):
+    MF_INBOX = MailFolderc.MailFolder_MF_INBOX
+    MF_FILE = MailFolderc.MailFolder_MF_FILE
+    MF_POP = MailFolderc.MailFolder_MF_POP
+    MF_IMAP = MailFolderc.MailFolder_MF_IMAP
+    MF_NNTP = MailFolderc.MailFolder_MF_NNTP
+    MF_PROFILE = MailFolderc.MailFolder_MF_PROFILE
+    MF_TYPEMASK = MailFolderc.MailFolder_MF_TYPEMASK
+    MF_FLAGS = MailFolderc.MailFolder_MF_FLAGS
+    MSG_STAT_UNREAD = MailFolderc.MailFolder_MSG_STAT_UNREAD
+    MSG_STAT_DELETED = MailFolderc.MailFolder_MSG_STAT_DELETED
+    MSG_STAT_REPLIED = MailFolderc.MailFolder_MSG_STAT_REPLIED
+    MSG_STAT_RECENT = MailFolderc.MailFolder_MSG_STAT_RECENT
+    MSG_STAT_SEARCHED = MailFolderc.MailFolder_MSG_STAT_SEARCHED
     def __init__(self,this):
         self.this = this
         self.thisown = 0
@@ -10,7 +29,7 @@ class MailFolderPtr :
         val = MailFolderc.MailFolder_IsInitialised(self.this)
         return val
     def RegisterView(self,arg0,*args):
-        val = apply(MailFolderc.MailFolder_RegisterView,(self.this,arg0,)+args)
+        val = apply(MailFolderc.MailFolder_RegisterView,(self.this,arg0.this,)+args)
         return val
     def IsOk(self):
         val = MailFolderc.MailFolder_IsOk(self.this)
@@ -18,6 +37,7 @@ class MailFolderPtr :
     def GetName(self):
         val = MailFolderc.MailFolder_GetName(self.this)
         val = StringPtr(val)
+        val.thisown = 1
         return val
     def CountMessages(self):
         val = MailFolderc.MailFolder_CountMessages(self.this)
@@ -30,15 +50,32 @@ class MailFolderPtr :
         return val
     def GetMessage(self,arg0):
         val = MailFolderc.MailFolder_GetMessage(self.this,arg0)
+        val = MessagePtr(val)
         return val
     def DeleteMessage(self,arg0):
         val = MailFolderc.MailFolder_DeleteMessage(self.this,arg0)
+        return val
+    def UnDeleteMessage(self,arg0):
+        val = MailFolderc.MailFolder_UnDeleteMessage(self.this,arg0)
+        return val
+    def SetMessageFlag(self,arg0,arg1,*args):
+        val = apply(MailFolderc.MailFolder_SetMessageFlag,(self.this,arg0,arg1,)+args)
+        return val
+    def AppendMessage(self,arg0):
+        val = MailFolderc.MailFolder_AppendMessage(self.this,arg0.this)
         return val
     def ExpungeMessages(self):
         val = MailFolderc.MailFolder_ExpungeMessages(self.this)
         return val
     def GetProfile(self):
         val = MailFolderc.MailFolder_GetProfile(self.this)
+        val = ProfileBasePtr(val)
+        return val
+    def GetClassName(self):
+        val = MailFolderc.MailFolder_GetClassName(self.this)
+        return val
+    def GetUpdateInterval(self):
+        val = MailFolderc.MailFolder_GetUpdateInterval(self.this)
         return val
     def __repr__(self):
         return "<C MailFolder instance>"
@@ -52,6 +89,19 @@ class MailFolder(MailFolderPtr):
 
 
 #-------------- FUNCTION WRAPPERS ------------------
+
+def MailFolder_OpenFolder(arg0,arg1,*args):
+    argl = map(None,args)
+    try: argl[0] = argl[0].this
+    except: pass
+    try: argl[1] = argl[1].this
+    except: pass
+    try: argl[2] = argl[2].this
+    except: pass
+    args = tuple(argl)
+    val = apply(MailFolderc.MailFolder_OpenFolder,(arg0,arg1.this,)+args)
+    val = MailFolderPtr(val)
+    return val
 
 
 

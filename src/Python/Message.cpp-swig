@@ -53,13 +53,123 @@ extern PyObject *SWIG_newvarlink(void);
 
 #define SWIG_name    "Messagec"
 
-#include   "Mcommon.h"
-#include   <wx/config.h>
+#include   "Mpch.h"
+#include   "Mcommon.h"   
 #include   "Message.h"
-
+#include   "kbList.h"
+   
 // we don't want to export our functions as we don't build a shared library
 #undef SWIGEXPORT
 #define SWIGEXPORT(a,b) a b
+
+#define MessageParameter_name_set(_swigobj,_swigval) (_swigobj->name = *(_swigval),_swigval)
+static PyObject *_wrap_MessageParameter_name_set(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    String * _result;
+    MessageParameter * _arg0;
+    String * _arg1;
+    char * _argc0 = 0;
+    char * _argc1 = 0;
+    char _ptemp[128];
+
+    self = self;
+    if(!PyArg_ParseTuple(args,"ss:MessageParameter_name_set",&_argc0,&_argc1)) 
+        return NULL;
+    if (_argc0) {
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_MessageParameter_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of MessageParameter_name_set. Expected _MessageParameter_p.");
+        return NULL;
+        }
+    }
+    if (_argc1) {
+        if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_String_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of MessageParameter_name_set. Expected _String_p.");
+        return NULL;
+        }
+    }
+    _result = (String *)MessageParameter_name_set(_arg0,_arg1);
+    SWIG_MakePtr(_ptemp, (char *) _result,"_String_p");
+    _resultobj = Py_BuildValue("s",_ptemp);
+    return _resultobj;
+}
+
+#define MessageParameter_name_get(_swigobj) (&_swigobj->name)
+static PyObject *_wrap_MessageParameter_name_get(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    String * _result;
+    MessageParameter * _arg0;
+    char * _argc0 = 0;
+    char _ptemp[128];
+
+    self = self;
+    if(!PyArg_ParseTuple(args,"s:MessageParameter_name_get",&_argc0)) 
+        return NULL;
+    if (_argc0) {
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_MessageParameter_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of MessageParameter_name_get. Expected _MessageParameter_p.");
+        return NULL;
+        }
+    }
+    _result = (String *)MessageParameter_name_get(_arg0);
+    SWIG_MakePtr(_ptemp, (char *) _result,"_String_p");
+    _resultobj = Py_BuildValue("s",_ptemp);
+    return _resultobj;
+}
+
+#define MessageParameter_value_set(_swigobj,_swigval) (_swigobj->value = *(_swigval),_swigval)
+static PyObject *_wrap_MessageParameter_value_set(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    String * _result;
+    MessageParameter * _arg0;
+    String * _arg1;
+    char * _argc0 = 0;
+    char * _argc1 = 0;
+    char _ptemp[128];
+
+    self = self;
+    if(!PyArg_ParseTuple(args,"ss:MessageParameter_value_set",&_argc0,&_argc1)) 
+        return NULL;
+    if (_argc0) {
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_MessageParameter_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of MessageParameter_value_set. Expected _MessageParameter_p.");
+        return NULL;
+        }
+    }
+    if (_argc1) {
+        if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_String_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of MessageParameter_value_set. Expected _String_p.");
+        return NULL;
+        }
+    }
+    _result = (String *)MessageParameter_value_set(_arg0,_arg1);
+    SWIG_MakePtr(_ptemp, (char *) _result,"_String_p");
+    _resultobj = Py_BuildValue("s",_ptemp);
+    return _resultobj;
+}
+
+#define MessageParameter_value_get(_swigobj) (&_swigobj->value)
+static PyObject *_wrap_MessageParameter_value_get(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    String * _result;
+    MessageParameter * _arg0;
+    char * _argc0 = 0;
+    char _ptemp[128];
+
+    self = self;
+    if(!PyArg_ParseTuple(args,"s:MessageParameter_value_get",&_argc0)) 
+        return NULL;
+    if (_argc0) {
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_MessageParameter_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of MessageParameter_value_get. Expected _MessageParameter_p.");
+        return NULL;
+        }
+    }
+    _result = (String *)MessageParameter_value_get(_arg0);
+    SWIG_MakePtr(_ptemp, (char *) _result,"_String_p");
+    _resultobj = Py_BuildValue("s",_ptemp);
+    return _resultobj;
+}
+
 #define Message_GetHeaderLine(_swigobj,_swigarg0,_swigarg1)  (_swigobj->GetHeaderLine(_swigarg0,_swigarg1))
 static PyObject *_wrap_Message_GetHeaderLine(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
@@ -97,6 +207,27 @@ static PyObject *_wrap_Message_GetHeaderLine(PyObject *self, PyObject *args) {
     return _resultobj;
 }
 
+#define Message_GetHeader(_swigobj)  (_swigobj->GetHeader())
+static PyObject *_wrap_Message_GetHeader(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    char * _result;
+    Message * _arg0;
+    char * _argc0 = 0;
+
+    self = self;
+    if(!PyArg_ParseTuple(args,"s:Message_GetHeader",&_argc0)) 
+        return NULL;
+    if (_argc0) {
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Message_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Message_GetHeader. Expected _Message_p.");
+        return NULL;
+        }
+    }
+    _result = (char *)Message_GetHeader(_arg0);
+    _resultobj = Py_BuildValue("s", _result);
+    return _resultobj;
+}
+
 #define Message_Subject(_swigobj)  (_swigobj->Subject())
 static PyObject *_wrap_Message_Subject(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
@@ -117,6 +248,38 @@ static PyObject *_wrap_Message_Subject(PyObject *self, PyObject *args) {
     const String & _result_ref = Message_Subject(_arg0);
     _result = (String *) &_result_ref;
     SWIG_MakePtr(_ptemp, (char *) _result,"_String_p");
+    _resultobj = Py_BuildValue("s",_ptemp);
+    return _resultobj;
+}
+
+#define Message_Address(_swigobj,_swigarg0,_swigarg1)  (_swigobj->Address(_swigarg0,_swigarg1))
+static PyObject *_wrap_Message_Address(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    String * _result;
+    Message * _arg0;
+    String * _arg1;
+    MessageAddressType  _arg2 = (MAT_FROM);
+    char * _argc0 = 0;
+    char * _argc1 = 0;
+    char _ptemp[128];
+
+    self = self;
+    if(!PyArg_ParseTuple(args,"ss|i:Message_Address",&_argc0,&_argc1,&_arg2)) 
+        return NULL;
+    if (_argc0) {
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Message_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Message_Address. Expected _Message_p.");
+        return NULL;
+        }
+    }
+    if (_argc1) {
+        if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_String_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of Message_Address. Expected _String_p.");
+        return NULL;
+        }
+    }
+    _result = new String (Message_Address(_arg0,*_arg1,_arg2));
+    SWIG_MakePtr(_ptemp, (void *) _result,"_String_p");
     _resultobj = Py_BuildValue("s",_ptemp);
     return _resultobj;
 }
@@ -311,6 +474,109 @@ static PyObject *_wrap_Message_GetPartSize(PyObject *self, PyObject *args) {
     return _resultobj;
 }
 
+#define Message_GetParameters(_swigobj,_swigarg0)  (_swigobj->GetParameters(_swigarg0))
+static PyObject *_wrap_Message_GetParameters(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    MessageParameterList * _result;
+    Message * _arg0;
+    int  _arg1 = -1;
+    char * _argc0 = 0;
+    char _ptemp[128];
+
+    self = self;
+    if(!PyArg_ParseTuple(args,"s|i:Message_GetParameters",&_argc0,&_arg1)) 
+        return NULL;
+    if (_argc0) {
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Message_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Message_GetParameters. Expected _Message_p.");
+        return NULL;
+        }
+    }
+    MessageParameterList & _result_ref = Message_GetParameters(_arg0,_arg1);
+    _result = (MessageParameterList *) &_result_ref;
+    SWIG_MakePtr(_ptemp, (char *) _result,"_MessageParameterList_p");
+    _resultobj = Py_BuildValue("s",_ptemp);
+    return _resultobj;
+}
+
+#define Message_GetDisposition(_swigobj,_swigarg0,_swigarg1)  (_swigobj->GetDisposition(_swigarg0,_swigarg1))
+static PyObject *_wrap_Message_GetDisposition(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    MessageParameterList * _result;
+    Message * _arg0;
+    int  _arg1 = -1;
+    String * _arg2 = NULL;
+    char * _argc0 = 0;
+    char * _argc2 = 0;
+    char _ptemp[128];
+
+    self = self;
+    if(!PyArg_ParseTuple(args,"s|is:Message_GetDisposition",&_argc0,&_arg1,&_argc2)) 
+        return NULL;
+    if (_argc0) {
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Message_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Message_GetDisposition. Expected _Message_p.");
+        return NULL;
+        }
+    }
+    if (_argc2) {
+        if (SWIG_GetPtr(_argc2,(void **) &_arg2,"_String_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 3 of Message_GetDisposition. Expected _String_p.");
+        return NULL;
+        }
+    }
+    MessageParameterList & _result_ref = Message_GetDisposition(_arg0,_arg1,_arg2);
+    _result = (MessageParameterList *) &_result_ref;
+    SWIG_MakePtr(_ptemp, (char *) _result,"_MessageParameterList_p");
+    _resultobj = Py_BuildValue("s",_ptemp);
+    return _resultobj;
+}
+
+#define Message_ExpandParameter(_swigobj,_swigarg0,_swigarg1,_swigarg2)  (_swigobj->ExpandParameter(_swigarg0,_swigarg1,_swigarg2))
+static PyObject *_wrap_Message_ExpandParameter(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    bool  _result;
+    Message * _arg0;
+    MessageParameterList * _arg1;
+    String * _arg2;
+    String * _arg3;
+    char * _argc0 = 0;
+    char * _argc1 = 0;
+    char * _argc2 = 0;
+    char * _argc3 = 0;
+
+    self = self;
+    if(!PyArg_ParseTuple(args,"ssss:Message_ExpandParameter",&_argc0,&_argc1,&_argc2,&_argc3)) 
+        return NULL;
+    if (_argc0) {
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Message_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Message_ExpandParameter. Expected _Message_p.");
+        return NULL;
+        }
+    }
+    if (_argc1) {
+        if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_MessageParameterList_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of Message_ExpandParameter. Expected _MessageParameterList_p.");
+        return NULL;
+        }
+    }
+    if (_argc2) {
+        if (SWIG_GetPtr(_argc2,(void **) &_arg2,"_String_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 3 of Message_ExpandParameter. Expected _String_p.");
+        return NULL;
+        }
+    }
+    if (_argc3) {
+        if (SWIG_GetPtr(_argc3,(void **) &_arg3,"_String_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 4 of Message_ExpandParameter. Expected _String_p.");
+        return NULL;
+        }
+    }
+    _result = (bool )Message_ExpandParameter(_arg0,*_arg1,*_arg2,_arg3);
+    _resultobj = Py_BuildValue("i",_result);
+    return _resultobj;
+}
+
 #define Message_GetPartMimeType(_swigobj,_swigarg0)  (_swigobj->GetPartMimeType(_swigarg0))
 static PyObject *_wrap_Message_GetPartMimeType(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
@@ -329,7 +595,7 @@ static PyObject *_wrap_Message_GetPartMimeType(PyObject *self, PyObject *args) {
         return NULL;
         }
     }
-    const String & _result_ref = Message_GetPartMimeType(_arg0,_arg1);
+    String & _result_ref = Message_GetPartMimeType(_arg0,_arg1);
     _result = (String *) &_result_ref;
     SWIG_MakePtr(_ptemp, (char *) _result,"_String_p");
     _resultobj = Py_BuildValue("s",_ptemp);
@@ -354,7 +620,7 @@ static PyObject *_wrap_Message_GetPartDesc(PyObject *self, PyObject *args) {
         return NULL;
         }
     }
-    const String & _result_ref = Message_GetPartDesc(_arg0,_arg1);
+    String & _result_ref = Message_GetPartDesc(_arg0,_arg1);
     _result = (String *) &_result_ref;
     SWIG_MakePtr(_ptemp, (char *) _result,"_String_p");
     _resultobj = Py_BuildValue("s",_ptemp);
@@ -379,10 +645,39 @@ static PyObject *_wrap_Message_GetPartSpec(PyObject *self, PyObject *args) {
         return NULL;
         }
     }
-    const String & _result_ref = Message_GetPartSpec(_arg0,_arg1);
+    String & _result_ref = Message_GetPartSpec(_arg0,_arg1);
     _result = (String *) &_result_ref;
     SWIG_MakePtr(_ptemp, (char *) _result,"_String_p");
     _resultobj = Py_BuildValue("s",_ptemp);
+    return _resultobj;
+}
+
+#define Message_WriteString(_swigobj,_swigarg0)  (_swigobj->WriteString(_swigarg0))
+static PyObject *_wrap_Message_WriteString(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    Message * _arg0;
+    String * _arg1;
+    char * _argc0 = 0;
+    char * _argc1 = 0;
+
+    self = self;
+    if(!PyArg_ParseTuple(args,"ss:Message_WriteString",&_argc0,&_argc1)) 
+        return NULL;
+    if (_argc0) {
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Message_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Message_WriteString. Expected _Message_p.");
+        return NULL;
+        }
+    }
+    if (_argc1) {
+        if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_String_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of Message_WriteString. Expected _String_p.");
+        return NULL;
+        }
+    }
+    Message_WriteString(_arg0,*_arg1);
+    Py_INCREF(Py_None);
+    _resultobj = Py_None;
     return _resultobj;
 }
 
@@ -460,13 +755,39 @@ static PyObject *_wrap_Message_IsInitialised(PyObject *self, PyObject *args) {
     return _resultobj;
 }
 
+#define Message_GetClassName(_swigobj)  (_swigobj->GetClassName())
+static PyObject *_wrap_Message_GetClassName(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    char * _result;
+    Message * _arg0;
+    char * _argc0 = 0;
+
+    self = self;
+    if(!PyArg_ParseTuple(args,"s:Message_GetClassName",&_argc0)) 
+        return NULL;
+    if (_argc0) {
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_Message_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of Message_GetClassName. Expected _Message_p.");
+        return NULL;
+        }
+    }
+    _result = (char *)Message_GetClassName(_arg0);
+    _resultobj = Py_BuildValue("s", _result);
+    return _resultobj;
+}
+
 static PyMethodDef MessagecMethods[] = {
+	 { "Message_GetClassName", _wrap_Message_GetClassName, 1 },
 	 { "Message_IsInitialised", _wrap_Message_IsInitialised, 1 },
 	 { "delete_Message", _wrap_delete_Message, 1 },
 	 { "Message_WriteToString", _wrap_Message_WriteToString, 1 },
+	 { "Message_WriteString", _wrap_Message_WriteString, 1 },
 	 { "Message_GetPartSpec", _wrap_Message_GetPartSpec, 1 },
 	 { "Message_GetPartDesc", _wrap_Message_GetPartDesc, 1 },
 	 { "Message_GetPartMimeType", _wrap_Message_GetPartMimeType, 1 },
+	 { "Message_ExpandParameter", _wrap_Message_ExpandParameter, 1 },
+	 { "Message_GetDisposition", _wrap_Message_GetDisposition, 1 },
+	 { "Message_GetParameters", _wrap_Message_GetParameters, 1 },
 	 { "Message_GetPartSize", _wrap_Message_GetPartSize, 1 },
 	 { "Message_GetPartEncoding", _wrap_Message_GetPartEncoding, 1 },
 	 { "Message_GetPartType", _wrap_Message_GetPartType, 1 },
@@ -475,8 +796,14 @@ static PyMethodDef MessagecMethods[] = {
 	 { "Message_FetchText", _wrap_Message_FetchText, 1 },
 	 { "Message_Date", _wrap_Message_Date, 1 },
 	 { "Message_From", _wrap_Message_From, 1 },
+	 { "Message_Address", _wrap_Message_Address, 1 },
 	 { "Message_Subject", _wrap_Message_Subject, 1 },
+	 { "Message_GetHeader", _wrap_Message_GetHeader, 1 },
 	 { "Message_GetHeaderLine", _wrap_Message_GetHeaderLine, 1 },
+	 { "MessageParameter_value_get", _wrap_MessageParameter_value_get, 1 },
+	 { "MessageParameter_value_set", _wrap_MessageParameter_value_set, 1 },
+	 { "MessageParameter_name_get", _wrap_MessageParameter_name_get, 1 },
+	 { "MessageParameter_name_set", _wrap_MessageParameter_name_set, 1 },
 	 { NULL, NULL }
 };
 static PyObject *SWIG_globals;
@@ -488,24 +815,45 @@ SWIGEXPORT(void,initMessagec)() {
 	 SWIG_globals = SWIG_newvarlink();
 	 m = Py_InitModule("Messagec", MessagecMethods);
 	 d = PyModule_GetDict(m);
+	 PyDict_SetItemString(d,"MAT_FROM", PyInt_FromLong((long) MAT_FROM));
+	 PyDict_SetItemString(d,"MAT_SENDER", PyInt_FromLong((long) MAT_SENDER));
+	 PyDict_SetItemString(d,"MAT_REPLYTO", PyInt_FromLong((long) MAT_REPLYTO));
+	 PyDict_SetItemString(d,"Message_MSG_TYPETEXT", PyInt_FromLong((long) Message::MSG_TYPETEXT));
+	 PyDict_SetItemString(d,"Message_MSG_TYPEMULTIPART", PyInt_FromLong((long) Message::MSG_TYPEMULTIPART));
+	 PyDict_SetItemString(d,"Message_MSG_TYPEMESSAGE", PyInt_FromLong((long) Message::MSG_TYPEMESSAGE));
+	 PyDict_SetItemString(d,"Message_MSG_TYPEAPPLICATION", PyInt_FromLong((long) Message::MSG_TYPEAPPLICATION));
+	 PyDict_SetItemString(d,"Message_MSG_TYPEAUDIO", PyInt_FromLong((long) Message::MSG_TYPEAUDIO));
+	 PyDict_SetItemString(d,"Message_MSG_TYPEIMAGE", PyInt_FromLong((long) Message::MSG_TYPEIMAGE));
+	 PyDict_SetItemString(d,"Message_MSG_TYPEVIDEO", PyInt_FromLong((long) Message::MSG_TYPEVIDEO));
+	 PyDict_SetItemString(d,"Message_MSG_TYPEMODEL", PyInt_FromLong((long) Message::MSG_TYPEMODEL));
+	 PyDict_SetItemString(d,"Message_MSG_TYPEOTHER", PyInt_FromLong((long) Message::MSG_TYPEOTHER));
+	 PyDict_SetItemString(d,"Message_MSG_TYPEMAX", PyInt_FromLong((long) Message::MSG_TYPEMAX));
 /*
  * These are the pointer type-equivalency mappings. 
  * (Used by the SWIG pointer type-checker).
  */
 	 SWIG_RegisterMapping("_signed_long","_long",0);
 	 SWIG_RegisterMapping("_Message","_class_Message",0);
+	 SWIG_RegisterMapping("_ProfileBase","_class_ProfileBase",0);
 	 SWIG_RegisterMapping("_long","_unsigned_long",0);
 	 SWIG_RegisterMapping("_long","_signed_long",0);
 	 SWIG_RegisterMapping("_class_Message","_Message",0);
 	 SWIG_RegisterMapping("_unsigned_long","_long",0);
 	 SWIG_RegisterMapping("_signed_int","_int",0);
+	 SWIG_RegisterMapping("_MObject","_class_MObject",0);
 	 SWIG_RegisterMapping("_unsigned_short","_short",0);
 	 SWIG_RegisterMapping("_signed_short","_short",0);
+	 SWIG_RegisterMapping("_MObjectRC","_class_MObjectRC",0);
 	 SWIG_RegisterMapping("_unsigned_int","_int",0);
+	 SWIG_RegisterMapping("_class_ProfileBase","_ProfileBase",0);
 	 SWIG_RegisterMapping("_short","_unsigned_short",0);
 	 SWIG_RegisterMapping("_short","_signed_short",0);
 	 SWIG_RegisterMapping("_String","_class_String",0);
+	 SWIG_RegisterMapping("_MessageParameter","_class_MessageParameter",0);
 	 SWIG_RegisterMapping("_int","_unsigned_int",0);
 	 SWIG_RegisterMapping("_int","_signed_int",0);
+	 SWIG_RegisterMapping("_class_MObjectRC","_MObjectRC",0);
+	 SWIG_RegisterMapping("_class_MObject","_MObject",0);
 	 SWIG_RegisterMapping("_class_String","_String",0);
+	 SWIG_RegisterMapping("_class_MessageParameter","_MessageParameter",0);
 }

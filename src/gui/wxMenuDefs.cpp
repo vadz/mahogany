@@ -204,6 +204,8 @@ static const MenuItemInfo g_aMenuItems[] =
    // file
    { WXMENU_FILE_OPEN,     "&Open Folder...",   "Open an existing message "
      " folder"                  },
+   { WXMENU_FILE_OPENANY,  "&Open Any Folder...",   "Open any existing message "
+     " folder"                  },
    { WXMENU_FILE_CREATE,   "Create &Folder...", "Creates a new folder "
      "definition"               },
    { WXMENU_FILE_COMPOSE,  "&Compose Message",  "Start a new message"      },

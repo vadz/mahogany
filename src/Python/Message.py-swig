@@ -2,16 +2,65 @@
 import Messagec
 
 from MString import *
+
+from MProfile import *
+
+from MObject import *
+class MessageParameterPtr :
+    def __init__(self,this):
+        self.this = this
+        self.thisown = 0
+    def __setattr__(self,name,value):
+        if name == "name" :
+            Messagec.MessageParameter_name_set(self.this,value.this)
+            return
+        if name == "value" :
+            Messagec.MessageParameter_value_set(self.this,value.this)
+            return
+        self.__dict__[name] = value
+    def __getattr__(self,name):
+        if name == "name" : 
+            return StringPtr(Messagec.MessageParameter_name_get(self.this))
+        if name == "value" : 
+            return StringPtr(Messagec.MessageParameter_value_get(self.this))
+        raise AttributeError,name
+    def __repr__(self):
+        return "<C MessageParameter instance>"
+class MessageParameter(MessageParameterPtr):
+    def __init__(self,this):
+        self.this = this
+
+
+
+
 class MessagePtr :
+    MSG_TYPETEXT = Messagec.Message_MSG_TYPETEXT
+    MSG_TYPEMULTIPART = Messagec.Message_MSG_TYPEMULTIPART
+    MSG_TYPEMESSAGE = Messagec.Message_MSG_TYPEMESSAGE
+    MSG_TYPEAPPLICATION = Messagec.Message_MSG_TYPEAPPLICATION
+    MSG_TYPEAUDIO = Messagec.Message_MSG_TYPEAUDIO
+    MSG_TYPEIMAGE = Messagec.Message_MSG_TYPEIMAGE
+    MSG_TYPEVIDEO = Messagec.Message_MSG_TYPEVIDEO
+    MSG_TYPEMODEL = Messagec.Message_MSG_TYPEMODEL
+    MSG_TYPEOTHER = Messagec.Message_MSG_TYPEOTHER
+    MSG_TYPEMAX = Messagec.Message_MSG_TYPEMAX
     def __init__(self,this):
         self.this = this
         self.thisown = 0
     def GetHeaderLine(self,arg0,arg1):
         val = Messagec.Message_GetHeaderLine(self.this,arg0.this,arg1.this)
         return val
+    def GetHeader(self):
+        val = Messagec.Message_GetHeader(self.this)
+        return val
     def Subject(self):
         val = Messagec.Message_Subject(self.this)
         val = StringPtr(val)
+        return val
+    def Address(self,arg0,*args):
+        val = apply(Messagec.Message_Address,(self.this,arg0.this,)+args)
+        val = StringPtr(val)
+        val.thisown = 1
         return val
     def From(self):
         val = Messagec.Message_From(self.this)
@@ -40,6 +89,19 @@ class MessagePtr :
     def GetPartSize(self,*args):
         val = apply(Messagec.Message_GetPartSize,(self.this,)+args)
         return val
+    def GetParameters(self,*args):
+        val = apply(Messagec.Message_GetParameters,(self.this,)+args)
+        return val
+    def GetDisposition(self,*args):
+        argl = map(None,args)
+        try: argl[1] = argl[1].this
+        except: pass
+        args = tuple(argl)
+        val = apply(Messagec.Message_GetDisposition,(self.this,)+args)
+        return val
+    def ExpandParameter(self,arg0,arg1,arg2):
+        val = Messagec.Message_ExpandParameter(self.this,arg0,arg1.this,arg2.this)
+        return val
     def GetPartMimeType(self,*args):
         val = apply(Messagec.Message_GetPartMimeType,(self.this,)+args)
         val = StringPtr(val)
@@ -52,6 +114,9 @@ class MessagePtr :
         val = apply(Messagec.Message_GetPartSpec,(self.this,)+args)
         val = StringPtr(val)
         return val
+    def WriteString(self,arg0):
+        val = Messagec.Message_WriteString(self.this,arg0.this)
+        return val
     def WriteToString(self,arg0,*args):
         val = apply(Messagec.Message_WriteToString,(self.this,arg0.this,)+args)
         return val
@@ -60,6 +125,9 @@ class MessagePtr :
             Messagec.delete_Message(self.this)
     def IsInitialised(self):
         val = Messagec.Message_IsInitialised(self.this)
+        return val
+    def GetClassName(self):
+        val = Messagec.Message_GetClassName(self.this)
         return val
     def __repr__(self):
         return "<C Message instance>"
@@ -78,3 +146,6 @@ class Message(MessagePtr):
 
 #-------------- VARIABLE WRAPPERS ------------------
 
+MAT_FROM = Messagec.MAT_FROM
+MAT_SENDER = Messagec.MAT_SENDER
+MAT_REPLYTO = Messagec.MAT_REPLYTO
