@@ -845,12 +845,11 @@ public:
    /**
       build the IMAP spec for its components
 
-      @return the full IMAP spec for the folder
+      @param folder the folder to build spec for
+      @param login for the folder, if empty folder->GetLogin() is used
+      @return the full IMAP spec for the given folder
    */
-   static String GetImapSpec(int type, int flags,
-                             const String &name,
-                             const String &server,
-                             const String &login);
+   static String GetImapSpec(const MFolder *folder, const String& login = _T(""));
 
    /** Extracts the folder name from the folder specification string used by
        cclient (i.e. {nntp/xxx}news.answers => news.answers and also #mh/Foo
