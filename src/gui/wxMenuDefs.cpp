@@ -530,14 +530,17 @@ extern void
 EnableMMenu(MMenuId id, wxWindow *win, bool enable)
 {
    wxFrame *frame = GetFrame(win);
-   ASSERT(frame);
+   CHECK_RET(frame, "no parent frame in EnableMMenu");
    wxMenuBar *mb = frame->GetMenuBar();
-   ASSERT(mb);
-   if(id < MMenu_Plugins)
+   CHECK_RET(mb, "no menu bar in EnableMMenu");
+
+   // only the main frame has MMenu_Folder, so adjust the menu index
+   if ( frame->GetParent() && (id > MMenu_Folder) )
    {
-      mb->EnableTop(id, enable);
+      id = (MMenuId)(id - 1);
    }
-   else
+
+   if(id == MMenu_Plugins)
    {
       if(mb->GetMenuCount() > MMenu_Help)
          mb->EnableTop(id,enable);
@@ -547,6 +550,10 @@ EnableMMenu(MMenuId id, wxWindow *win, bool enable)
          if(id != MMenu_Plugins)
             mb->EnableTop(id-1,enable);
       }
+   }
+   else
+   {
+      mb->EnableTop(id, enable);
    }
 }
 
