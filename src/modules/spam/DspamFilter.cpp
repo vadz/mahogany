@@ -406,8 +406,28 @@ void DspamFilter::Train(wxWindow *parent)
    }
 
    const size_t count = hil->Count();
+   MProgressDialog pd
+                   (
+                     _("Training DSPAM, please wait..."),
+                     _(""),
+                     count,
+                     parent,
+                     wxPD_CAN_ABORT
+                   );
+
    for ( size_t n = 0; n < count; n++ )
    {
+      if ( !pd.Update(n + 1, String::Format
+                             (
+                                 _("Message %lu of %lu"),
+                                 (unsigned long)n,
+                                 (unsigned long)count
+                             )) )
+      {
+         // cancelled by user
+         break;
+      }
+
       HeaderInfo *hi = hil->GetItemByIndex(n);
       if ( hi )
       {
