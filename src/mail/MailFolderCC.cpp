@@ -688,7 +688,11 @@ public:
    {
       ms_mailstatus = mailstatus;
       memset(ms_mailstatus, 0, sizeof(*ms_mailstatus));
-      ms_mailbox = mailbox;
+
+      if ( !mail_valid_net_parse((char *)mailbox.c_str(), &ms_mailbox) )
+      {
+         FAIL_MSG( "c-client failed to parse our spec?" );
+      }
 
       gs_mmStatusRedirect = MMStatusRedirectorHandler;
    }
@@ -702,7 +706,7 @@ public:
    }
 
 private:
-   static String ms_mailbox;
+   static NETMBX ms_mailbox;
    static MAILSTATUS *ms_mailstatus;
 
    static void MMStatusRedirectorHandler(MAILSTREAM * /* stream */,
@@ -710,14 +714,30 @@ private:
                                          MAILSTATUS *mailstatus)
    {
       // we can get the status events from other mailboxes, ignore them
-      if ( strcmp(ms_mailbox, name) == 0 )
+      //
+      // NB: note that simply comparing the names doesn't work because the
+      //     name we have might not be in the canonical form while c-client's
+      //     name already is
+      NETMBX mb;
+      if ( !mail_valid_net_parse((char *)name, &mb) )
       {
-         memcpy(ms_mailstatus, mailstatus, sizeof(*ms_mailstatus));
+         FAIL_MSG( "c-client failed to parse its own spec?" );
+      }
+      else
+      {
+         if ( !strcmp(ms_mailbox.host, mb.host) &&
+              !strcmp(ms_mailbox.user, mb.user) &&
+              !strcmp(ms_mailbox.mailbox, mb.mailbox) &&
+              !strcmp(ms_mailbox.service, mb.service) &&
+              (!ms_mailbox.port || (ms_mailbox.port == mb.port)) )
+         {
+            memcpy(ms_mailstatus, mailstatus, sizeof(*ms_mailstatus));
+         }
       }
    }
 };
 
-String MMStatusRedirector::ms_mailbox;
+NETMBX MMStatusRedirector::ms_mailbox;
 MAILSTATUS *MMStatusRedirector::ms_mailstatus = NULL;
 
 // ----------------------------------------------------------------------------
@@ -2217,34 +2237,35 @@ MailFolderCC::CloseFolder(const MFolder *folder)
    return true;
 }
 
+// ----------------------------------------------------------------------------
+// MailFolderCC: operations on all opened folders
+// ----------------------------------------------------------------------------
+
 /* static */
-int
-MailFolderCC::CloseAll()
+MailFolder **
+MailFolderCC::GetAllOpened()
 {
+   CHECK_STREAM_LIST();
+
    size_t count = ms_StreamList.size();
-   StreamConnection **connections = new StreamConnection *[count];
+   MailFolder **mfOpened = new MailFolder *[count + 1];
 
    size_t n = 0;
    for ( StreamConnectionList::iterator i = ms_StreamList.begin();
          i != ms_StreamList.end();
          i++ )
    {
-      connections[n++] = *i;
+      StreamConnection *conn = *i;
+      if ( conn->stream && !conn->stream->halfopen )
+      {
+         mfOpened[n++] = conn->folder;
+      }
    }
 
-   for ( n = 0; n < count; n++ )
-   {
-      MailFolderCC *mf = connections[n]->folder;
+   // terminate the array
+   mfOpened[n] = NULL;
 
-      mf->Close();
-
-      // notify any opened folder views
-      MEventManager::Send(new MEventFolderClosedData(mf) );
-   }
-
-   delete [] connections;
-
-   return count;
+   return mfOpened;
 }
 
 // ----------------------------------------------------------------------------
@@ -2636,77 +2657,95 @@ MailFolderCC::PingReopen(void)
    return rc;
 }
 
-/* static */ bool
-MailFolderCC::PingReopenAll(bool fullPing)
-{
-   // try to reopen all streams
-   bool rc = true;
-
-   CHECK_STREAM_LIST();
-
-   /*
-      Ping() might close/reopen a mailfolder, which means that some folder we
-      had already pinged might be readded to the list, so we have to make a
-      copy of the list before iterating
-    */
-   size_t count = ms_StreamList.size();
-   StreamConnection **connections = new StreamConnection *[count];
-
-   size_t n = 0;
-   for ( StreamConnectionList::iterator i = ms_StreamList.begin();
-         i != ms_StreamList.end();
-         i++ )
-   {
-      // skip half opened streams, we can't ping them
-      if ( (*i)->stream && !(*i)->stream->halfopen )
-      {
-         connections[n++] = *i;
-      }
-   }
-
-   // we can have fewer of them because of half opened streams
-   count = n;
-   for ( n = 0; n < count; n++ )
-   {
-      MailFolderCC *mf = connections[n]->folder;
-
-      // don't ping locked folders, they will have to wait for the next time
-      if ( !mf->IsLocked() )
-      {
-         wxLogTrace("collect",
-                    "Checking for new mail in folder '%s'...",
-                    mf->GetName().c_str());
-
-         if ( !(fullPing ? mf->PingReopen() : mf->Ping()) )
-         {
-            // failed to ping at least one folder
-            rc = false;
-         }
-      }
-   }
-
-   delete [] connections;
-
-   return rc;
-}
-
 bool
 MailFolderCC::Ping(void)
 {
    if ( NeedsNetwork() && ! mApplication->IsOnline() )
    {
       ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"), GetName().c_str()));
-      return FALSE;
+      return false;
    }
 
-   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Ping() on Folder %s.",
-              GetName().c_str());
+   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Ping(%s)", GetName().c_str());
 
    // we don't want to reopen the folder from here, this leads to inifinite
    // loops if the network connection goes down because we are called from a
    // timer event and so if folder pinging taks too long, we will be called
    // again and again and again ... before we get the chance to do anything
    return m_MailStream ? PingReopen() : true;
+}
+
+/* static */
+bool MailFolderCC::CheckStatus(const MFolder *folder)
+{
+   CHECK( folder, false, "MailFolderCC::CheckStatus(): NULL folder" );
+
+   // remember the old status of the folder
+   MfStatusCache *mfStatusCache = MfStatusCache::Get();
+   MailFolderStatus status;
+   (void)mfStatusCache->GetStatus(folder->GetFullName(), &status);
+
+   static const int STATUS_FLAGS = SA_MESSAGES | SA_RECENT | SA_UNSEEN;
+
+   // and check for the new one
+   MAILSTATUS mailstatus;
+   {
+      String login = folder->GetLogin(),
+             password = folder->GetPassword();
+
+      String spec = MailFolder::GetImapSpec(folder->GetType(),
+                                            folder->GetFlags(),
+                                            folder->GetPath(),
+                                            folder->GetServer(),
+                                            login);
+
+      if ( !GetAuthInfoForFolder(folder, login, password ) )
+      {
+         return false;
+      }
+
+      SetLoginData(login, password);
+
+      MMStatusRedirector statusRedir(spec, &mailstatus);
+
+      mail_status(NULL, (char *)spec.c_str(), STATUS_FLAGS);
+   }
+
+   // did we succeed?
+   if ( (mailstatus.flags & STATUS_FLAGS) != STATUS_FLAGS )
+   {
+      ERRORMESSAGE(( _("Failed to check status of the folder '%s'"),
+                     folder->GetFullName().c_str() ));
+      return false;
+   }
+
+   // has anything changed?
+   if ( mailstatus.messages != status.total ||
+        mailstatus.recent != status.recent ||
+        mailstatus.unseen != status.unread )
+   {
+      // do we have any new mail? there is no way to [efficiently] test for new
+      // messages but assume that if there are unread and recent ones, then
+      // there are new ones as well - and also take this as the guess for their
+      // number
+      MsgnoType newmsgs = mailstatus.recent < mailstatus.unseen
+                                 ? mailstatus.recent
+                                 : mailstatus.unseen;
+
+      if ( newmsgs )
+      {
+         ProcessNewMail(folder, newmsgs);
+      }
+
+      // update the status shown in the tree anyhow
+      status.total = mailstatus.messages;
+      status.recent = mailstatus.recent;
+      status.unread = mailstatus.unseen;
+
+      mfStatusCache->UpdateStatus(folder->GetFullName(), status);
+   }
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -3402,7 +3441,7 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit)
                case SearchCriterium::SC_FULL:
                case SearchCriterium::SC_BODY:
                   // FIXME: wrong for body as it checks the whole message
-                  // including header
+                  //        including header
                   what = msg->FetchText();
                   break;
 
@@ -4797,7 +4836,7 @@ MailFolderCC::mm_list(MAILSTREAM * stream,
    // wxYield() is needed to send the events resulting from (previous) calls
    // to MEventManager::Send(), but don't forget to prevent any other calls to
    // c-client from happening - this will result in a fatal error as it is not
-   // reentrant (FIXME!!!)
+   // reentrant
 #if wxCHECK_VERSION(2, 2, 6)
    wxYieldIfNeeded();
 #else // wxWin <= 2.2.5
@@ -5664,7 +5703,7 @@ mm_log(char *str, long errflg)
    // TODO: what's going on here?
    if(errflg >= 4) // fatal imap error, reopen-mailbox
    {
-      if(!MailFolderCC::PingReopenAll())
+      if ( !MailFolderCC::PingAllOpened() )
          msg << _("\nAttempt to re-open all folders failed.");
    }
 

@@ -104,7 +104,8 @@ enum FolderFlags
    MF_FLAGS_GROUP         = 0x00040000, // contains subfolders
    MF_FLAGS_SSLAUTH       = 0x00080000, // use SSL authentication/encryption
    MF_FLAGS_NOSELECT      = 0x00100000, // folder can't be opened
-   MF_FLAGS_SSLUNSIGNED   = 0x00200000  // accept unsigned certificates
+   MF_FLAGS_SSLUNSIGNED   = 0x00200000, // accept unsigned certificates
+   MF_FLAGS_MONITOR       = 0x00400000  // poll this folder periodically
 };
 
 // ----------------------------------------------------------------------------

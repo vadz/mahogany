@@ -239,7 +239,92 @@ MailFolder::CloseFolder(const MFolder *mfolder)
 int
 MailFolder::CloseAll()
 {
-   return MailFolderCC::CloseAll();
+   MailFolder **mfOpened = GetAllOpened();
+   if ( !mfOpened )
+      return 0;
+
+   size_t n = 0;
+   while ( mfOpened[n] )
+   {
+      MailFolder *mf = mfOpened[n++];
+
+      mf->Close();
+
+      // notify any opened folder views
+      MEventManager::Send(new MEventFolderClosedData(mf) );
+   }
+
+   delete [] mfOpened;
+
+   return n;
+}
+
+// ----------------------------------------------------------------------------
+// MailFolder: other operations
+// ----------------------------------------------------------------------------
+
+/* static */
+MailFolder **
+MailFolder::GetAllOpened()
+{
+   // if we ever have other kinds of folders, we should append them to the
+   // same array too
+   return MailFolderCC::GetAllOpened();
+}
+
+MailFolder *
+MailFolder::GetOpenedFolderFor(const MFolder *folder)
+{
+   return MailFolderCC::FindFolder(folder);
+}
+
+/* static */
+bool MailFolder::PingAllOpened(void)
+{
+   MailFolder **mfOpened = GetAllOpened();
+   if ( !mfOpened )
+      return 0;
+
+   bool rc = true;
+   for ( size_t n = 0; mfOpened[n]; n++ )
+   {
+      MailFolder *mf = mfOpened[n];
+
+      if ( !mf->Ping() )
+      {
+         // failed with at least one folder
+         rc = false;
+      }
+   }
+
+   delete [] mfOpened;
+
+   return rc;
+}
+
+/* static */
+bool
+MailFolder::CheckFolder(const MFolder *folder)
+{
+   if ( !Init() )
+      return false;
+
+   bool rc;
+
+   MailFolder *mf = MailFolder::GetOpenedFolderFor(folder);
+   if ( mf )
+   {
+      // just pinging it is enough
+      rc = mf->Ping();
+      mf->DecRef();
+   }
+   else // not opened
+   {
+      // check its status without opening it
+      return MailFolderCC::CheckStatus(folder);
+   }
+
+   return rc;
 }
 
 /* static */
@@ -513,18 +598,6 @@ String FormatFolderStatusString(const String& format,
    }
 
    return result;
-}
-
-// ----------------------------------------------------------------------------
-// ping
-// ----------------------------------------------------------------------------
-
-/* static */
-bool MailFolder::PingAllOpened(void)
-{
-   // FIXME this should be fixed by moving the list of all opened folders into
-   //       MailFolder itself from MailFolderCC
-   return MailFolderCC::PingAllOpened();
 }
 
 /* static */

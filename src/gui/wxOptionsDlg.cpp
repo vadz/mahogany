@@ -69,7 +69,7 @@
 // to another file maybe?
 #include "MFolder.h"
 #include "gui/wxFiltersDialog.h"
-#include "MailCollector.h"
+#include "FolderMonitor.h"
 
 #include "MessageView.h" // for list of available viewers
 
@@ -153,7 +153,7 @@ enum ConfigFields
    ConfigField_GuessSender,
    ConfigField_Sender,
 #ifdef USE_SSL
-   ConfigField_SSLtext,
+   ConfigField_SSLHelp,
    ConfigField_SmtpServerSSL,
    ConfigField_SmtpServerSSLUnsigned,
    ConfigField_NntpServerSSL,
@@ -195,7 +195,15 @@ enum ConfigFields
    ConfigField_NewMailNotify,
    ConfigField_NewMailNotifyThresholdHelp,
    ConfigField_NewMailNotifyDetailsThreshold,
-   ConfigField_NewMailLast = ConfigField_NewMailNotifyDetailsThreshold,
+   ConfigField_NewMailUpdateHelp,
+   ConfigField_NewMailUpdateInterval,
+   ConfigField_NewMailMonitorIntervalDefault,
+   ConfigField_NewMailMonitorHelp,
+   ConfigField_NewMailMonitor,
+   ConfigField_NewMailMonitorInterval,
+   ConfigField_NewMailPingOnStartupHelp,
+   ConfigField_NewMailPingOnStartup,
+   ConfigField_NewMailLast = ConfigField_NewMailPingOnStartup,
 
    // compose
    ConfigField_ComposeFirst = ConfigField_NewMailLast,
@@ -248,9 +256,6 @@ enum ConfigFields
    ConfigField_FolderMaxHeadersNumHard,
    ConfigField_FolderMaxHeadersNum,
    ConfigField_FolderMaxMsgSize,
-   ConfigField_PollIncomingDelay,
-   ConfigField_CollectAtStartup,
-   ConfigField_UpdateInterval,
    ConfigField_CloseDelay_HelpText,
    ConfigField_CloseDelay,
    ConfigField_UseOutbox,
@@ -898,6 +903,36 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Number,
                                                    ConfigField_NewMailNotify },
 
+   { gettext_noop("The first setting below specifies how often should Mahogany\n"
+                  "update the currently opened folders while the second one\n"
+                  "specifies the default polling interval for the folders which\n"
+                  "are monitored permanently (even when they are not opened).\n"
+                  "You can configure a folder to be monitored in its properties dialog."),
+                                                   Field_Message |
+                                                   Field_AppWide, -1 },
+   { gettext_noop("&Ping folder interval in seconds"), Field_Number |
+                                                       Field_AppWide, -1 },
+   { gettext_noop("Pol&ling interval in seconds"), Field_Number |
+                                                   Field_AppWide, -1 },
+
+   { gettext_noop("If you check the checkbox below, Mahogany will always monitor\n"
+                  "this folder in the background even when it is not opened.\n"
+                  "This allows to detect new mail in the folder without opening it.\n"
+                  "\n"
+                  "Please note that monitoring many folders may slow down the program!"),
+                                                   Field_Message |
+                                                   Field_NotApp, -1 },
+   { gettext_noop("Permanently &monitor this folder"), Field_Bool | Field_NotApp, -1},
+   { gettext_noop("Polling &interval in seconds"), Field_Number | Field_NotApp,
+                                                   ConfigField_NewMailMonitor },
+   { gettext_noop("Checking the checkbox below will result in checking the folder\n"
+                  "for the new mail immediately after staring up instead of\n"
+                  "waiting until the interval above expires."),
+                                                   Field_Message | Field_NotApp,
+                                                   ConfigField_NewMailMonitor },
+   { gettext_noop("Poll folder at s&tartup"),      Field_Bool | Field_NotApp,
+                                                   ConfigField_NewMailMonitor },
+
    // compose
    { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
    { gettext_noop("&Folder for sent messages"),
@@ -983,9 +1018,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Hard message limit"),  Field_Number,   -1 },
    { gettext_noop("Ask if &number of messages >"),  Field_Number,   -1 },
    { gettext_noop("Ask if size of &message (in Kb) >"), Field_Number,   -1 },
-   { gettext_noop("Poll for &new mail interval in seconds"), Field_Number, -1},
-   { gettext_noop("Poll for new mail at s&tartup"), Field_Bool | Field_AppWide, -1},
-   { gettext_noop("&Ping/check folder interval in seconds"), Field_Number, -1},
    { gettext_noop("Mahogany may keep the folder open after closing it\n"
                   "for some time to make reopening the folder faster.\n"
                   "This is useful for folders you often reopen."), Field_Message, -1 },
@@ -1373,6 +1405,15 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(), // details threshold help
    CONFIG_ENTRY(MP_SHOW_NEWMAILINFO),
 
+   CONFIG_NONE(), // update help
+   CONFIG_ENTRY(MP_UPDATEINTERVAL),
+   CONFIG_ENTRY(MP_POLLINCOMINGDELAY),
+   CONFIG_NONE(), // monitor help
+   CONFIG_NONE(), // monitor folder (MF_FLAGS_MONITOR)
+   CONFIG_ENTRY(MP_POLLINCOMINGDELAY),
+   CONFIG_NONE(), // poll at startup help
+   CONFIG_ENTRY(MP_COLLECTATSTARTUP),
+
    // compose
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER), // where to keep copies of messages sent
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),
@@ -1419,9 +1460,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MAX_HEADERS_NUM_HARD),
    CONFIG_ENTRY(MP_MAX_HEADERS_NUM),
    CONFIG_ENTRY(MP_MAX_MESSAGE_SIZE),
-   CONFIG_ENTRY(MP_POLLINCOMINGDELAY),
-   CONFIG_ENTRY(MP_COLLECTATSTARTUP),
-   CONFIG_ENTRY(MP_UPDATEINTERVAL),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FOLDER_CLOSE_DELAY),
    CONFIG_ENTRY(MP_USE_OUTBOX), // where to store message before sending them
@@ -2010,7 +2048,7 @@ bool wxOptionsPage::TransferDataToWindow()
    long lValue = 0;
    for ( size_t n = m_nFirst; n < m_nLast; n++ )
    {
-      if ( strcmp(m_aDefaults[n].name, "none") == 0 )
+      if ( !*m_aDefaults[n].name )
       {
          // it doesn't have any associated value
          continue;
@@ -2136,6 +2174,12 @@ bool wxOptionsPage::TransferDataFromWindow()
 
       wxControl *control = GetControl(n);
       if ( !control )
+         continue;
+
+      // some controls are not transfered to config in the normal way, this is
+      // indicated by using CONFIG_NONE() in the ms_aConfigDefaults array for
+      // which the name is empty
+      if ( !*m_aDefaults[n].name )
          continue;
 
       switch ( GetFieldType(n) )
@@ -2781,6 +2825,9 @@ wxOptionsPageNewMail::wxOptionsPageNewMail(wxNotebook *parent,
                                     ConfigField_NewMailLast,
                                     MH_OPAGE_NEWMAIL)
 {
+   m_nIncomingDelay =
+   m_nPingDelay = -1;
+
    m_folder = NULL;
 }
 
@@ -2809,54 +2856,119 @@ bool wxOptionsPageNewMail::GetFolderFromProfile()
 
 bool wxOptionsPageNewMail::TransferDataToWindow()
 {
-   bool bRc = wxOptionsPage::TransferDataToWindow();
-
-   if ( bRc )
+   // the "collect new mail" checkbox corresponds to the value of
+   // MF_FLAGS_INCOMING flag
+   wxWindow *win = GetControl(ConfigField_NewMailCollect);
+   if ( win )
    {
-      // the "collect new mail" checkbox corresponds to the value of
-      // MF_FLAGS_INCOMING flag
-      wxWindow *win = GetControl(ConfigField_NewMailCollect);
+      if ( GetFolderFromProfile() )
+      {
+         m_collectOld = (m_folder->GetFlags() & MF_FLAGS_INCOMING) != 0;
+      }
+      else
+      {
+         // may happen if we're creating the folder (but didn't yet)
+         m_collectOld = false;
+      }
+
+      wxStaticCast(win, wxCheckBox)->SetValue(m_collectOld);
+
+      // we should also have the "monitor this folder" checkbox
+      win = GetControl(ConfigField_NewMailMonitor);
       if ( win )
       {
-         if ( GetFolderFromProfile() )
-         {
-            m_collectOld = (m_folder->GetFlags() & MF_FLAGS_INCOMING) != 0;
-         }
-         else
-         {
-            // may happen if we're creating the folder (but didn't yet)
-            m_collectOld = false;
-         }
+         m_monitorOld = m_folder
+                           ? (m_folder->GetFlags() & MF_FLAGS_MONITOR) != 0
+                           : false;
 
-         wxStaticCast(win, wxCheckBox)->SetValue(m_collectOld);
+         wxStaticCast(win, wxCheckBox)->SetValue(m_monitorOld);
       }
-      //else: happens when editing the global settings
+      else
+      {
+         FAIL_MSG( "where is the monitor checkbox?" );
+      }
    }
+   //else: happens when editing the global settings
 
-   return bRc;
+   m_nIncomingDelay = READ_CONFIG(m_Profile, MP_POLLINCOMINGDELAY);
+   m_nPingDelay = READ_CONFIG(m_Profile, MP_UPDATEINTERVAL);
+
+   return wxOptionsPage::TransferDataToWindow();
 }
 
 bool wxOptionsPageNewMail::TransferDataFromWindow()
 {
-   wxCheckBox *checkbox = wxStaticCast(GetControl(ConfigField_NewMailCollect),
-                                       wxCheckBox);
+   bool rc = wxOptionsPage::TransferDataFromWindow();
 
-   if ( checkbox && checkbox->GetValue() != m_collectOld )
+   if ( rc )
    {
-      // by now we must have a valid folder
-      if ( !m_folder )
+      // collect mail checkbox (MF_FLAGS_INCOMING)
+      wxCheckBox *checkbox =
+         wxStaticCast(GetControl(ConfigField_NewMailCollect), wxCheckBox);
+
+      if ( checkbox && checkbox->GetValue() != m_collectOld )
       {
-         if ( !GetFolderFromProfile() )
+         // by now we must have a valid folder
+         if ( !m_folder )
          {
-            FAIL_MSG( "failed to create the folder in new mail page" );
+            if ( !GetFolderFromProfile() )
+            {
+               FAIL_MSG( "failed to create the folder in new mail page" );
+            }
+         }
+
+         if ( m_folder )
+         {
+            if ( m_collectOld )
+               m_folder->ResetFlags(MF_FLAGS_INCOMING);
+            else
+               m_folder->AddFlags(MF_FLAGS_INCOMING);
          }
       }
 
-      // remember that it was toggled
-      MailCollector::AddOrRemoveIncoming(m_folder, !m_collectOld);
+      // monitor folder checkbox (MF_FLAGS_MONITOR)
+      checkbox =
+         wxStaticCast(GetControl(ConfigField_NewMailMonitor), wxCheckBox);
+
+      if ( checkbox && checkbox->GetValue() != m_monitorOld )
+      {
+         if ( m_folder )
+         {
+            // NB: remember that it was toggled, hence "!m_monitorOld"
+            FolderMonitor *folderMonitor = mApplication->GetFolderMonitor();
+            if ( folderMonitor )
+               folderMonitor->AddOrRemoveFolder(m_folder, !m_monitorOld);
+         }
+      }
    }
 
-   return wxOptionsPage::TransferDataFromWindow();
+   if ( rc )
+   {
+      long nIncomingDelay = READ_CONFIG(m_Profile, MP_POLLINCOMINGDELAY),
+           nPingDelay = READ_CONFIG(m_Profile, MP_UPDATEINTERVAL);
+
+      if ( nIncomingDelay != m_nIncomingDelay )
+      {
+         wxLogTrace("timer", "Restarting timer for polling incoming folders");
+
+         rc = mApplication->RestartTimer(MAppBase::Timer_PollIncoming);
+      }
+
+      if ( rc && (nPingDelay != m_nPingDelay) )
+      {
+         wxLogTrace("timer", "Restarting timer for pinging folders");
+
+         rc = mApplication->RestartTimer(MAppBase::Timer_PingFolder);
+      }
+
+      if ( !rc )
+      {
+         wxLogError(_("Failed to restart the timers, please change the "
+                      "delay to a valid value."));
+      }
+   }
+
+   return rc;
 }
 
 void wxOptionsPageNewMail::OnButton(wxCommandEvent& event)
@@ -3195,9 +3307,6 @@ wxOptionsPageFolders::wxOptionsPageFolders(wxNotebook *parent,
                    ConfigField_FoldersLast,
                    MH_OPAGE_FOLDERS)
 {
-   m_nIncomingDelay =
-   m_nPingDelay = -1;
-
    m_lboxData = new LboxData;
    m_lboxData->m_idListbox = ConfigField_OpenFolders;
    m_lboxData->m_lboxDlgTitle = _("Folders to open on startup");
@@ -3225,9 +3334,6 @@ bool wxOptionsPageFolders::TransferDataToWindow()
          }
       }
       //else: the listbox is not created in this dialog at all
-
-      m_nIncomingDelay = READ_CONFIG(m_Profile, MP_POLLINCOMINGDELAY);
-      m_nPingDelay = READ_CONFIG(m_Profile, MP_UPDATEINTERVAL);
    }
 
    return bRc;
@@ -3250,31 +3356,6 @@ bool wxOptionsPageFolders::TransferDataFromWindow()
    }
 
    bool rc = wxOptionsPage::TransferDataFromWindow();
-   if ( rc )
-   {
-      long nIncomingDelay = READ_CONFIG(m_Profile, MP_POLLINCOMINGDELAY),
-           nPingDelay = READ_CONFIG(m_Profile, MP_UPDATEINTERVAL);
-
-      if ( nIncomingDelay != m_nIncomingDelay )
-      {
-         wxLogTrace("timer", "Restarting timer for polling incoming folders");
-
-         rc = mApplication->RestartTimer(MAppBase::Timer_PollIncoming);
-      }
-
-      if ( rc && (nPingDelay != m_nPingDelay) )
-      {
-         wxLogTrace("timer", "Restarting timer for pinging folders");
-
-         rc = mApplication->RestartTimer(MAppBase::Timer_PingFolder);
-      }
-
-      if ( !rc )
-      {
-         wxLogError(_("Failed to restart the timers, please change the "
-                      "delay to a valid value."));
-      }
-   }
 
    if ( rc )
    {

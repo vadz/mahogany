@@ -1362,31 +1362,161 @@ MailFolderCmn::FilterNewMail(FilterRule *filterRule, UIdArray& uidsNew)
 // ----------------------------------------------------------------------------
 
 /*
-   ProcessNewMail() is very confusing as it is really a merge of two different
-   functions: one which processes the new mail in the folder itself and the
-   other which processes new mail in _another_ folder. I realize that it is
-   very unclear but it was the only way I found to share the code for these
-   two tasks.
+   DoProcessNewMail() is very confusing as it is really a merge of three
+   different functions: one which processes the new mail in the folder itself,
+   the other which processes new mail in another folder which were copied there
+   from this one and yet another which processes new mail in another folder but
+   when we don't know what the new messages are. I realize that it is very
+   unclear but it was the only way I found to share the code for these two
+   tasks (or, to be precise, the others were even worse). The only thing I did
+   was to make it private and provide 2 wrappers for it as public
+   ProcessNewMail() methods.
 
-   So there are two cases:
+   So there are three cases:
 
-   1. we have new mail in this folder, in this case there is no folderDst (it
-      is the same as this folder) and we do the usual sequence of events
+   1. we have new mail in this folder, in this case mf is the opened folder for
+      folder and mfNew is the same as mf and we do the usual sequence of events
       (filter/collect/report) without any problems as this folder is already
       opened and so we can do everything we want.
 
-   2. we have copied some new mail from this folder to folderDst for which we
+   2. we have copied some new mail from this folder to another one for which we
       don't have an opened MailFolder (this condition is important as it
-      explains why do we go through all these troubles). Then we do the sam
-      steps as above (filter/collect/report) except that if we notice that we
-      do need to filter or collect messages we just open folderDst and return -
-      opening it is enough to ensure that its own ProcessNewMail() is called in
-      its 1st version. But if we don't need to filter not collect we
-      ReportNewMail() without ever opening the folderDst - which is a big gain
+      explains why do we go through all these troubles). In this case, mf is
+      NULL and the folder where the new mail is is only identified by folder
+      parameter but mfNew is the folder where the new mail had originally been.
+
+      We do the same steps as above (filter/collect/report) except that if we
+      notice that we do need to filter or collect messages we just open folder
+      and return - opening it is enough to ensure that its own ProcessNewMail()
+      is called in its 1st version. But if we don't need to filter not collect
+      we ReportNewMail() without ever opening the folder - which is a big gain
       (imagine that we filter 10 messages we just got and they go to 5
       different folders: we really don't need to open all 5 of them just to
       report new mail in them, we can do it immediately)
+
+   3. we have new mail in some not opened folder and it wasn't copied there by
+      us - this is like (2) except that mfNew is also NULL and uidsNew is NULL
+      is well but countNew is provided instead
  */
+
+/* static */
+bool
+MailFolderCmn::DoProcessNewMail(const MFolder *folder,
+                                MailFolder *mf,
+                                UIdArray *uidsNew,
+                                MsgnoType countNew,
+                                MailFolder *mfNew)
+{
+   // if we don't have uidsNew, the folder can't be opened
+   if ( !uidsNew )
+   {
+      CHECK( !mf, false, "ProcessNewMail: bad parameters" );
+
+      // and we are also supposed to have at least the number of new messages
+      ASSERT_MSG( countNew, "ProcessNewMail: no new mail at all?" );
+   }
+
+   Profile_obj profile(folder->GetProfile());
+
+   // first filter the messages
+   // -------------------------
+
+   FilterRule *filterRule = GetFilterForFolder(folder);
+   if ( filterRule )
+   {
+      bool ok;
+
+      if ( !mf )
+      {
+         // we need to open the folder where the new mail is
+         mf = OpenFolder(folder);
+         if ( !mf )
+         {
+            ok = false;
+         }
+
+         mf->DecRef();
+
+         // important for test below
+         mf = NULL;
+
+         ok = true;
+      }
+      else // new mail in this folder, filter it
+      {
+         ok = ((MailFolderCmn *)mf)->FilterNewMail(filterRule, *uidsNew);
+      }
+
+      filterRule->DecRef();
+
+      // return if an error occured or if we had opened the folder - in this
+      // case we have nothing to do here any more as this folder processed (or
+      // is going to process) the new mail in it itself
+      if ( !ok || !mf )
+         return ok;
+
+      if ( uidsNew->IsEmpty() )
+      {
+         // all new mail was deleted by the filters, nothing more to do
+         return true;
+      }
+   }
+
+   // next copy/move all new mail to the central new mail folder if needed
+   // --------------------------------------------------------------------
+
+   // do we collect messages from this folder at all?
+   if ( folder->GetFlags() & MF_FLAGS_INCOMING )
+   {
+      // where do we collect the mail?
+      String newMailFolder = READ_CONFIG(profile, MP_NEWMAIL_FOLDER);
+      if ( newMailFolder == folder->GetFullName() )
+      {
+         ERRORMESSAGE((_("Cannot collect mail from folder '%s' into itself, "
+                         "please modify the properties for this folder.\n"
+                         "\n"
+                         "Disabling automatic mail collection for now."),
+                      newMailFolder.c_str()));
+
+         ((MFolder *)folder)->ResetFlags(MF_FLAGS_INCOMING); // const_cast
+
+         return false;
+      }
+
+      if ( !mf )
+      {
+         // we need to open the folder where the new mail is
+         mf = OpenFolder(folder);
+         if ( !mf )
+         {
+            return false;
+         }
+
+         mf->DecRef();
+
+         return true;
+      }
+      //else: new mail in this folder, collect it
+
+      if ( !((MailFolderCmn *)mf)->CollectNewMail(*uidsNew, newMailFolder) )
+      {
+         return false;
+      }
+
+      if ( uidsNew->IsEmpty() )
+      {
+         // we moved everything elsewhere, nothing left
+         return true;
+      }
+   }
+
+   // finally, notify the user about it
+   // ---------------------------------
+
+   ReportNewMail(folder, uidsNew, countNew, mfNew);
+
+   return true;
+}
 
 bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
                                    const MFolder *folderDst)
@@ -1415,103 +1545,14 @@ bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
 
    MFolder_obj folder = folderWithNewMail;
 
-   Profile_obj profile(folder->GetProfile());
-
-   // first filter the messages
-   // -------------------------
-
-   FilterRule *filterRule = GetFilterForFolder(folder);
-   if ( filterRule )
-   {
-      bool ok;
-
-      if ( folderDst )
-      {
-         // we need to open the folder where the new mail is
-         MailFolder *mf = OpenFolder(folderDst);
-         if ( !mf )
-         {
-            ok = false;
-         }
-
-         mf->DecRef();
-
-         ok = true;
-      }
-      else // new mail in this folder, filter it
-      {
-         ok = FilterNewMail(filterRule, uidsNew);
-      }
-
-      filterRule->DecRef();
-
-      // return if an error occured or if we had opened the folderDst - in this
-      // case we have nothing to do here any more as this folder processed (or
-      // is going to process) the new mail in it itself
-      if ( !ok || folderDst )
-         return ok;
-
-      if ( uidsNew.IsEmpty() )
-      {
-         // all new mail was deleted by the filters, nothing more to do
-         return true;
-      }
-   }
-
-   // next copy/move all new mail to the central new mail folder if needed
-   // --------------------------------------------------------------------
-
-   // do we collect messages from this folder at all?
-   if ( folder->GetFlags() & MF_FLAGS_INCOMING )
-   {
-      // where do we collect the mail?
-      String newMailFolder = READ_CONFIG(profile, MP_NEWMAIL_FOLDER);
-      if ( newMailFolder == folder->GetFullName() )
-      {
-         ERRORMESSAGE((_("Cannot collect mail from folder '%s' into itself, "
-                         "please modify the properties for this folder.\n"
-                         "\n"
-                         "Disabling automatic mail collection for now."),
-                      newMailFolder.c_str()));
-
-         folder->ResetFlags(MF_FLAGS_INCOMING);
-
-         return false;
-      }
-
-      if ( folderDst )
-      {
-         // we need to open the folder where the new mail is
-         MailFolder *mf = OpenFolder(folderDst);
-         if ( !mf )
-         {
-            return false;
-         }
-
-         mf->DecRef();
-
-         return true;
-      }
-      //else: new mail in this folder, collect it
-
-      if ( !CollectNewMail(uidsNew, newMailFolder) )
-      {
-         return false;
-      }
-
-      if ( uidsNew.IsEmpty() )
-      {
-         // we moved everything elsewhere, nothing left
-         return true;
-      }
-   }
-
-   // finally, notify the user about it
-   // ---------------------------------
-
-   ReportNewMail(uidsNew, folder);
-
-   return true;
+   return DoProcessNewMail
+          (
+            folderWithNewMail,
+            folderDst ? NULL : this,   // folder where new mail is
+            &uidsNew,
+            0,                         // count of new messages is unused
+            this                       // folder contains UIDs from uidsNew
+          );
 }
 
 bool
@@ -1547,8 +1588,12 @@ MailFolderCmn::CollectNewMail(UIdArray& uidsNew, const String& newMailFolder)
    return true;
 }
 
+/* static */
 void
-MailFolderCmn::ReportNewMail(const UIdArray& uidsNew, const MFolder *folder)
+MailFolderCmn::ReportNewMail(const MFolder *folder,
+                             const UIdArray *uidsNew,
+                             MsgnoType countNew,
+                             MailFolder *mf)
 {
    CHECK_RET( folder, "ReportNewMail: NULL folder" );
 
@@ -1559,8 +1604,12 @@ MailFolderCmn::ReportNewMail(const UIdArray& uidsNew, const MFolder *folder)
       return;
    }
 
+   // the count is only given if the array itself is not
+   if ( uidsNew )
+      countNew = uidsNew->GetCount();
+
    wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::ReportNewMail(%u msgs)",
-              folder->GetFullName().c_str(), uidsNew.GetCount());
+              folder->GetFullName().c_str(), countNew);
 
    // step 1: execute external command if it's configured
    Profile_obj profile(folder->GetProfile());
@@ -1595,29 +1644,41 @@ MailFolderCmn::ReportNewMail(const UIdArray& uidsNew, const MFolder *folder)
       {
          if ( READ_CONFIG(profile, MP_SHOW_NEWMAILMSG) )
          {
-            unsigned long number = uidsNew.GetCount();
-
             String message;
             message.Printf(_("You have received %lu new messages "
                              "in the folder '%s'"),
-                           number, folder->GetFullName().c_str());
-
+                           countNew, folder->GetFullName().c_str());
 
             // we give the detailed new mail information when there are few new
             // mail messages, otherwise we just give a brief message with their
             // number
+            long detailsThreshold;
+
+            // we can't show the detailed new mail information if the folder is
+            // not opened and it seems wasteful to open it just for this
             //
-            // the threshold may be set to -1 to always give the detailed
-            // message
-            long detailsThreshold = READ_CONFIG(profile, MP_SHOW_NEWMAILINFO);
+            // OTOH, the user can already configure the folder to never show
+            // the details of new mail if he wants it to behave like this so
+            // maybe we should still open it here? (TODO)
+            if ( !uidsNew || !mf )
+            {
+               detailsThreshold = 0;
+            }
+            else // we have the new messages
+            {
+               // the threshold may be set to -1 to always give the detailed
+               // message
+               detailsThreshold = READ_CONFIG(profile, MP_SHOW_NEWMAILINFO);
+            }
+
             if ( detailsThreshold == -1 ||
-                 number < (unsigned long)detailsThreshold )
+                 countNew < (unsigned long)detailsThreshold )
             {
                message += ':';
 
-               for( unsigned long i = 0; i < number; i++)
+               for( unsigned long i = 0; i < countNew; i++)
                {
-                  Message *msg = GetMessage(uidsNew[i]);
+                  Message *msg = mf->GetMessage(uidsNew->Item(i));
                   if ( msg )
                   {
                      String from = msg->From();
@@ -1647,7 +1708,8 @@ MailFolderCmn::ReportNewMail(const UIdArray& uidsNew, const MFolder *folder)
                   {
                      // this may happen if another session deleted it
                      wxLogDebug("New message %lu disappeared from folder '%s'",
-                                uidsNew[i], folder->GetFullName().c_str());
+                                uidsNew->Item(i),
+                                folder->GetFullName().c_str());
                   }
                }
             }

@@ -168,7 +168,8 @@ enum MVersion
    Version_062 = Version_061, // no changes in config since 0.61
    Version_063 = Version_062, // no changes in config since 0.62
    Version_064,      // folder profiles moved, MP_PROFILE_TYPE disappeared
-   Version_Last = Version_064,// last existing version
+   Version_064_1,    // MF_FLAGS_MONITOR added, half-replaces INCOMING
+   Version_Last = Version_064_1,// last existing version
    Version_Unknown   // some unrecognized version
 };
 
@@ -1861,10 +1862,10 @@ UpgradeFrom010()
 // 0.20 -> 0.21
 // ----------------------------------------------------------------------------
 
-class UpgradeFolderTraversal : public MFolderTraversal
+class UpgradeFolderFrom020Traversal : public MFolderTraversal
 {
 public:
-   UpgradeFolderTraversal(MFolder* folder) : MFolderTraversal(*folder)
+   UpgradeFolderFrom020Traversal(MFolder* folder) : MFolderTraversal(*folder)
       { }
 
    virtual bool OnVisitFolder(const wxString& folderName)
@@ -1906,7 +1907,7 @@ UpgradeFrom020()
 
    // enumerate all folders recursively
    MFolder_obj folderRoot("");
-   UpgradeFolderTraversal traverse(folderRoot);
+   UpgradeFolderFrom020Traversal traverse(folderRoot);
    traverse.Traverse();
 
    // TODO it would be very nice to purge the redundant settings from config
@@ -2294,6 +2295,40 @@ UpgradeFrom061()
 }
 
 // ----------------------------------------------------------------------------
+// 0.64 -> 0.64.1
+// ----------------------------------------------------------------------------
+
+class UpgradeFolderFrom064Traversal : public MFolderTraversal
+{
+public:
+   UpgradeFolderFrom064Traversal(MFolder* folder) : MFolderTraversal(*folder)
+      { }
+
+   virtual bool OnVisitFolder(const wxString& folderName)
+      {
+         MFolder_obj folder(folderName);
+         CHECK( folder, false, "traversed folder which doesn't exist?" );
+
+         if ( folder->GetFlags() & MF_FLAGS_INCOMING )
+         {
+            folder->AddFlags(MF_FLAGS_MONITOR);
+         }
+
+         return true;
+      }
+};
+
+static bool
+UpgradeFrom064()
+{
+   // add MF_FLAGS_MONITOR to all folders with MF_FLAGS_INCOMING flag
+   MFolder_obj folderRoot("");
+   UpgradeFolderFrom064Traversal traverse(folderRoot);
+
+   return traverse.Traverse();
+}
+
+// ----------------------------------------------------------------------------
 // global functions
 // ----------------------------------------------------------------------------
 
@@ -2329,6 +2364,8 @@ Upgrade(const String& fromVersion)
          oldVersion = Version_061;
       else if ( version == "0.64" )
          oldVersion = Version_064;
+      else if ( version == "0.64.1" )
+         oldVersion = Version_064_1;
       else
          oldVersion = Version_Unknown;
    }
@@ -2366,7 +2403,12 @@ Upgrade(const String& fromVersion)
          // fall through
 
       case Version_061:
-         if ( success && UpgradeFrom061() )
+         if ( success )
+            success = UpgradeFrom061();
+         // fall through
+
+      case Version_064:
+         if ( success && UpgradeFrom064() )
             wxLogMessage(_("Configuration information and program files were "
                            "successfully upgraded from the version '%s'."),
                          fromVersion.c_str());
@@ -2558,7 +2600,7 @@ VerifyStdFolders(void)
          return false;
       }
 
-      int flags = MF_FLAGS_DONTDELETE;
+      int flags = MF_FLAGS_DONTDELETE | MF_FLAGS_MONITOR;
 
       if ( collectFromInbox || MDialog_YesNoDialog
            (

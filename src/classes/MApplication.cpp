@@ -41,7 +41,7 @@
 #include "FolderView.h"       // for OpenFolderViewFrame()
 #include "MailFolder.h"
 #include "HeaderInfo.h"
-#include "MailCollector.h"
+#include "FolderMonitor.h"
 
 #include "gui/wxMainFrame.h"
 #include "gui/wxMApp.h"
@@ -77,7 +77,6 @@ extern const MOption MP_AWAY_AUTO_ENTER;
 extern const MOption MP_AWAY_AUTO_EXIT;
 extern const MOption MP_AWAY_REMEMBER;
 extern const MOption MP_AWAY_STATUS;
-extern const MOption MP_COLLECTATSTARTUP;
 extern const MOption MP_DONTOPENSTARTUP;
 extern const MOption MP_EXPAND_ENV_VARS;
 extern const MOption MP_FIRSTRUN;
@@ -151,7 +150,7 @@ MAppBase::MAppBase()
 
    m_topLevelFrame = NULL;
    m_framesOkToClose = NULL;
-   m_MailCollector = NULL;
+   m_FolderMonitor = NULL;
    m_profile = NULL;
    m_DialupSupport = FALSE;
 
@@ -539,10 +538,11 @@ MAppBase::OnStartup()
    // initialise collector object for incoming mails
    // ----------------------------------------------
 
-   // only do it if we are using the NewMail folder at all
-   m_MailCollector = MailCollector::Create();
-   if( READ_APPCONFIG_BOOL(MP_COLLECTATSTARTUP) )
-      m_MailCollector->Collect();
+   // TODO: only do it if we are using the NewMail folder at all?
+   m_FolderMonitor = FolderMonitor::Create();
+
+   // also start the mail auto collection timer
+   StartTimer(MAppBase::Timer_PollIncoming);
 
    // show the ADB editor if it had been shown the last time when we ran
    // ------------------------------------------------------------------
@@ -598,10 +598,10 @@ MAppBase::OnShutDown()
       m_eventFolderUpdateReg = NULL;
    }
 
-   if (m_MailCollector)
+   if (m_FolderMonitor)
    {
-      m_MailCollector->DecRef();
-      m_MailCollector = NULL;
+      delete m_FolderMonitor;
+      m_FolderMonitor = NULL;
    }
 
    // clean up

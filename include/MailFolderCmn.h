@@ -154,6 +154,19 @@ public:
    virtual bool ProcessNewMail(UIdArray& uidsNew,
                                const MFolder *folderDst = NULL);
 
+   /**
+     Process new mail in some other folder when it appeared there independently
+     of our actions and we don't know which messages exactly are new.
+
+     @param folder is the folder where the new mail is in
+     @param countNew is the (guess for the) number of new messages
+     @return true if ok, false on error
+    */
+   static bool ProcessNewMail(const MFolder *folder, MsgnoType countNew)
+   {
+      return DoProcessNewMail(folder, NULL, NULL, countNew, NULL);
+   }
+
    virtual int ApplyFilterRules(const UIdArray& msgs);
 
    /** Update the folder to correspond to the new parameters: called from
@@ -251,6 +264,22 @@ protected:
    class MailFolderTimer *m_Timer;
 
 private:
+   /**
+     public ProcessNewMail()s helper
+
+     @param folder where the new mail is (must be non NULL)
+     @param mf mail folder for folder or NULL if it is not opened
+     @param uidsNew the UIDs of new messages or NULL if unknown
+     @param countNew the count of new messages if uidsNew == NULL
+     @param mfNew folder containing UIDs from uidsNew
+     @return true if ok, false on error
+    */
+   static bool DoProcessNewMail(const MFolder *folder,
+                                MailFolder *mf,
+                                UIdArray *uidsNew,
+                                MsgnoType countNew,
+                                MailFolder *mfNew);
+
    /// apply the filter to the messages, return false on error
    bool FilterNewMail(FilterRule *filterRule, UIdArray& uidsNew);
 
@@ -258,7 +287,10 @@ private:
    bool CollectNewMail(UIdArray& uidsNew, const String& newMailFolder);
 
    /// report new mail in the given folder to the user
-   void ReportNewMail(const UIdArray& uidsNew, const MFolder *folder);
+   static void ReportNewMail(const MFolder *folder,
+                             const UIdArray *uidsNew,
+                             MsgnoType countNew,
+                             MailFolder *mf);
 
    /// We react to config change events.
    class MEventReceiver *m_MEventReceiver;

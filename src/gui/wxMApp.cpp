@@ -55,7 +55,7 @@
 
 #include "gui/wxMainFrame.h"
 #include "gui/wxIconManager.h"
-#include "MailCollector.h"
+#include "FolderMonitor.h"
 #include "MModule.h"
 #include "MThread.h"
 #include "Mpers.h"
@@ -251,9 +251,9 @@ void MailCollectionTimer::Notify()
 
    mApplication->UpdateOutboxStatus();
 
-   MailCollector *collector = mApplication->GetMailCollector();
+   FolderMonitor *collector = mApplication->GetFolderMonitor();
    if ( collector )
-      collector->Collect();
+      collector->CheckNewMail();
 }
 
 // ----------------------------------------------------------------------------
@@ -841,9 +841,9 @@ wxMApp::OnInit()
       // start a timer to autosave the profile entries
       StartTimer(Timer_Autosave);
 
-      // the timer to poll for new mail will be started when/if MailCollector
+      // the timer to poll for new mail will be started when/if FolderMonitor
       // is created
-      StartTimer(Timer_PollIncoming);
+      //StartTimer(Timer_PollIncoming);
 
       // start away timer if necessary
       StartTimer(Timer_Away);

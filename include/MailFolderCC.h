@@ -93,8 +93,10 @@ public:
                                     OpenMode openmode);
 
    static bool CloseFolder(const MFolder *mfolder);
-   static int CloseAll();
    //@}
+
+   static int CloseAll();
+   static MailFolder **GetAllOpened();
 
    /** Phyically deletes this folder.
        @return true on success
@@ -104,6 +106,8 @@ public:
    static bool Rename(const MFolder *mfolder, const String& name);
 
    static long ClearFolder(const MFolder *folder);
+
+   static bool CheckStatus(const MFolder *folder);
 
    /// return the directory of the newsspool:
    static String GetNewsSpool(void);
@@ -214,7 +218,7 @@ public:
    /** Check whether mailbox has changed.
        @return FALSE on error
    */
-   bool Ping(void);
+   virtual bool Ping(void);
 
    /** Perform a checkpoint on the folder. */
    virtual void Checkpoint(void);
@@ -222,6 +226,7 @@ public:
    /**@name Semi-public functions, shouldn't usually be called by
       normal code. */
    //@{
+
    /** Most of the Ping() functionality, but without updating the
        mailbox status (mail_check()), a bit quicker. Returns true if
        mailstream is still valid.
@@ -229,16 +234,7 @@ public:
        @return true if stream still valid
    */
    bool PingReopen(void);
-   /** Like PingReopen() but works on all folders, returns true if all
-       folders are fine.
-       @param fullPing does a full Ping() instead of a PingReopen()
-       only. If doing a full
-   */
-   static bool PingReopenAll(bool fullPing = FALSE);
 
-   /** Call Ping() on all opened mailboxes. */
-   static bool PingAllOpened(void)
-      { return PingReopenAll(TRUE) ; }
    //@}
 
    /**@name Subscription management */

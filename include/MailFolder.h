@@ -325,6 +325,34 @@ public:
    static bool CloseFolder(const MFolder *mfolder);
 
    /**
+     Check the folder status without opening it (if possible).
+
+     @return true if ok, false if an error occured
+    */
+   static bool CheckFolder(const MFolder *mfolder);
+
+   //@}
+
+   /** @name Operations on all folders at once */
+   //@{
+
+   /**
+     Get all currently opened folders. The returned pointer must be delete[]d
+     by the caller if not NULL.
+
+     @return the NULL-terminated array of currently opened MailFolders
+    */
+   static MailFolder **GetAllOpened();
+
+   /**
+     Return the currently opened mailfolder for the given MFolder or NULL if it
+     is not opened.
+
+     @return the opened mailfolder or NULL
+    */
+   static MailFolder *GetOpenedFolderFor(const MFolder *folder);
+
+   /**
       Closes all currently opened folders
 
       @return the number of folders closed, -1 on error
@@ -335,6 +363,7 @@ public:
      Call Ping() on all opened mailboxes.
     */
    static bool PingAllOpened(void);
+
    //@}
 
    /** Phyically deletes this folder.
@@ -565,13 +594,13 @@ public:
 
    /** @name Operations on the folder */
    //@{
-   /** Check whether mailbox has changed.
+   /** Check whether mailbox has changed and also keeps it alive.
        @return FALSE on error, TRUE otherwise
    */
    virtual bool Ping(void) = 0;
 
    /** Perform a checkpoint on the folder. What this does depends on the server
-       but, quoting from RFC 2060: " A checkpoint MAY take a non-instantaneous
+       but, quoting from RFC 2060: "A checkpoint MAY take a non-instantaneous
        amount of real time to complete."
     */
    virtual void Checkpoint(void) = 0;
@@ -782,8 +811,13 @@ public:
      filtering it or just reporting it depending on the folder options. It
      removes all messages deleted as results of its actions from uidsNew array.
 
+     If uidsNew is NULL, it means that we detected new mail in the folderDst
+     but we don't know which messages are new - but we still know at least how
+     many of them there are.
+
      @param uidsNew the array containing UIDs of the new messages
      @param folderDst if not NULL, folder where the new messages really are
+     @param countNew the number of new messages if uidsNew == NULL
      @return true if ok, false on error
    */
    virtual bool ProcessNewMail(UIdArray& uidsNew,

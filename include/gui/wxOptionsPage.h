@@ -64,7 +64,7 @@ struct ConfigValueDefault
 
 struct ConfigValueNone : public ConfigValueDefault
 {
-   ConfigValueNone() : ConfigValueDefault("none",0L) { }
+   ConfigValueNone() : ConfigValueDefault("",0L) { }
 };
 
 typedef const ConfigValueDefault *ConfigValuesArray;
@@ -404,8 +404,14 @@ private:
    // create m_folder for our m_Profile
    bool GetFolderFromProfile();
 
-   bool m_collectOld;
+   // remember the old values for the settings in these variables
+   long m_nIncomingDelay,
+        m_nPingDelay;
 
+   bool m_collectOld,
+        m_monitorOld;
+
+   // the folder we're editing properties of or NULL if this is a global dialog
    MFolder *m_folder;
 
    DECLARE_EVENT_TABLE()
@@ -480,11 +486,6 @@ public:
    void OnNewFolder(wxCommandEvent&);
    void OnModifyFolder(wxCommandEvent&);
    void OnDeleteFolder(wxCommandEvent&);
-
-protected:
-   // remember the old values for the global timers settings in these vars
-   long m_nIncomingDelay,
-        m_nPingDelay;
 
 private:
    DECLARE_EVENT_TABLE()

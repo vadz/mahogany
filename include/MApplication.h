@@ -31,9 +31,9 @@
 
 #include "MEvent.h"
 
+class FolderMonitor;
 class MAppBase;
 class MailFolder;
-class MailCollector;
 class MModuleCommon;
 class ArrayFrames;
 
@@ -173,10 +173,10 @@ public:
    */
    virtual Profile *GetProfile(void) const { return m_profile; }
 
-   /** Get the MailCollector object, not reference counted.
+   /** Get the FolderMonitor object, not reference counted.
        @return reference to the mailcollector object.
    */
-   virtual MailCollector *GetMailCollector(void) const { return m_MailCollector; }
+   FolderMonitor *GetFolderMonitor(void) const { return m_FolderMonitor; }
 
    /// return a pointer to the IconManager:
    virtual class wxIconManager *GetIconManager(void) const = 0;
@@ -378,7 +378,7 @@ protected:
    MError m_error;
 
    /// the list of all constantly open folders to check for new mail
-   MailCollector *m_MailCollector;
+   FolderMonitor *m_FolderMonitor;
 
    /// registration seed for EventManager
    void *m_eventOptChangeReg;

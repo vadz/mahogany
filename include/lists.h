@@ -250,6 +250,12 @@ public: \
          delete i.node; \
          return next; \
       } \
+   /** Erase all elements of the list */ \
+   inline void clear() \
+   { \
+      while ( !empty() ) \
+         (void)erase(begin()); \
+   } \
    /** Delete element at head of list. \
    */ \
    inline void pop_front(void) { erase(begin()); } \
@@ -276,22 +282,17 @@ public: \
          i.NodeCheck(); \
          i = new ListNode(element, i.node->prev, i.node); \
       } \
+   inline ~name(void) \
+      { \
+         clear(); \
+      } \
 }
 
 /** Macro to define a list with a given name, having elements of the given
     type; i.e. M_LIST(Int,int) would create an Int type holding ints.
 */
 #define M_LIST(name,type) \
-M_LIST_common(name##_common,type); \
-class name : public name##_common \
-{ \
-public: \
-   inline ~name(void) \
-      { \
-         while (!empty()) \
-            erase(begin()); \
-      } \
-}
+M_LIST_common(name,type);
 
 /** Macro to define a list with a given name, having elements of pointer
     to the given dynamic type; i.e. M_LIST_PTR(MyPtr,obj) will create a
@@ -314,11 +315,6 @@ public: \
       inline value_type operator->(void) \
          { return name##_common::iterator::operator*(); } \
    }; \
-   inline ~name(void) \
-      { \
-         while (!empty()) \
-            erase(begin()); \
-      } \
 }
 
 /** Macro to define a list with a given name, having elements of pointer
@@ -349,10 +345,14 @@ public: \
          delete i.operator->(); \
          return (iterator)name##_common::erase(i); \
       } \
+   inline void clear() \
+   { \
+      while ( !empty() ) \
+         (void)erase(begin()); \
+   } \
    inline ~name(void) \
       { \
-         while (!empty()) \
-            erase(begin()); \
+         clear(); \
       } \
 }
 
@@ -382,10 +382,14 @@ public: \
          i->DecRef(); \
          return name##_common::erase(i); \
       } \
+   inline void clear() \
+   { \
+      while ( !empty() ) \
+         (void)erase(begin()); \
+   } \
    inline ~name(void) \
       { \
-         while (!empty()) \
-            erase(begin()); \
+         clear(); \
       } \
 }
 

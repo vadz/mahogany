@@ -53,7 +53,7 @@
 #include "MHelp.h"
 #include "MFolder.h"
 
-#include "MailCollector.h"
+#include "FolderMonitor.h"
 
 #include "MessageTemplate.h"
 #include "TemplateDialog.h"
@@ -554,9 +554,12 @@ wxMFrame::OnMenuCommand(int id)
 
       case WXMENU_FILE_COLLECT:
          {
-            MailCollector *mailCollector = mApplication->GetMailCollector();
+            FolderMonitor *mailCollector = mApplication->GetFolderMonitor();
             if ( mailCollector )
-               mailCollector->Collect();
+            {
+               mailCollector->CheckNewMail(FolderMonitor::Interactive |
+                                           FolderMonitor::Opened);
+            }
          }
          break;
 
