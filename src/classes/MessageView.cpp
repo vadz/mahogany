@@ -1490,7 +1490,7 @@ MessageView::ShowPart(const MimePart *mimepart)
    {
       // ignore empty parts but warn user as it might indicate a problem
       wxLogStatus(GetParentFrame(),
-                  _("Skipping the empty MIME part #%d."),
+                  _("Skipping the empty MIME part #%s."),
                   mimepart->GetPartSpec().c_str());
 
       return;
