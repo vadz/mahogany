@@ -954,7 +954,7 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
             break;
 
          case OriginalHeader_To:
-            GetNameForAddress(value, MAT_TO);
+            *value = m_msg->GetAddressesString(MAT_TO);
             break;
 
          case OriginalHeader_PersonalName:
