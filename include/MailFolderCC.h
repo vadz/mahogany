@@ -110,9 +110,6 @@ public:
    /// return the directory of the newsspool:
    static String GetNewsSpool(void);
    
-   /// enable/disable debugging:
-   void   DoDebug(bool flag = true) { debugFlag = flag; }
-
    /// checks whether a folder with that path exists
    static MailFolderCC *FindFolder(String const &path,
                                    String const &login);
@@ -391,8 +388,6 @@ private:
 
    /// The symbolic name of the folder
    String m_Name;
-   /// do we want c-client's debug messages?
-   bool   debugFlag;
 
    /** If we are searching, this points to an UIdArray where to store
        the entries found.

@@ -310,7 +310,12 @@ static bool mm_ignore_errors = false;
 /// a variable disabling all events
 static bool mm_disable_callbacks = false;
 /// show cclient debug output
+#ifdef DEBUG
+static bool mm_show_debug = true;
+#else
 static bool mm_show_debug = false;
+#endif
+
 
 // be quiet
 static inline void CCQuiet(bool disableCallbacks = false)
@@ -533,12 +538,6 @@ void
 MailFolderCC::Create(int typeAndFlags)
 {
    m_MailStream = NIL;
-
-#ifdef DEBUG
-   debugFlag = true;
-#else // !DEBUG
-   debugFlag = false;
-#endif
 
    m_InCritical = false;
 
@@ -857,7 +856,7 @@ bool MailFolderCC::HalfOpen()
    SetDefaultObj();
    CCVerbose();
    m_MailStream = mail_open(NIL, (char *)m_MailboxPath.c_str(),
-                            (debugFlag ? OP_DEBUG : NIL)|OP_HALFOPEN);
+                            (mm_show_debug ? OP_DEBUG : NIL)|OP_HALFOPEN);
    ProcessEventQueue();
    SetDefaultObj(false);
 
@@ -983,7 +982,7 @@ MailFolderCC::Open(void)
 
       // first try, don't log errors (except in debug mode)
       m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
-                               debugFlag ? OP_DEBUG : NIL);
+                               mm_show_debug ? OP_DEBUG : NIL);
 
       // try to create it if hadn't tried yet
       if ( !m_MailStream && !alreadyCreated )
@@ -991,30 +990,12 @@ MailFolderCC::Open(void)
          CCVerbose();
          mail_create(NIL, (char *)m_MailboxPath.c_str());
          m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
-                                  debugFlag ? OP_DEBUG : NIL);
+                                  mm_show_debug ? OP_DEBUG : NIL);
       }
 
       ProcessEventQueue();
       SetDefaultObj(false);
    }
-
-#if 0 // VZ: this seems to duplicate the code just above - is it needed?
-   CCVerbose();
-   if(m_MailStream == NIL)
-   {
-      // this will fail if file already exists, but it makes sure we can open it
-      // try again:
-      // if this fails, we want to know it, so no CCQuiet()
-      MCclientLocker lock;
-      SetDefaultObj();
-      mail_create(NIL, (char *)m_MailboxPath.c_str());
-      ProcessEventQueue();
-      m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
-                               debugFlag ? OP_DEBUG : NIL);
-      ProcessEventQueue();
-      SetDefaultObj(false);
-   }
-#endif // 0
 
    if(m_MailStream == NIL)
    {
