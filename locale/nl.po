@@ -1,19 +1,19 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Mahogany 0.22\n"
-"POT-Creation-Date: 1999-06-09 21:57+0100\n"
-"PO-Revision-Date: 1999-05-21 11:09+0200\n"
+"POT-Creation-Date: 1999-06-15 11:12+0100\n"
+"PO-Revision-Date: 1999-06-15 19:50+0200\n"
 "Last-Translator: Arthur Muller <muller@cybercomm.nl>\n"
 "Language-Team: M-Team <m-developers@makelist.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: upgrade.cpp:274
+#: upgrade.cpp:275
 msgid "Deleted illegal folder profile: '"
 msgstr "Illegaal mapprofiel verwijderd: '"
 
-#: upgrade.cpp:388
+#: upgrade.cpp:389
 #, c-format
 msgid ""
 "Configuration information and program files were successfully upgraded from "
@@ -22,7 +22,7 @@ msgstr ""
 "Configuratie informatie en programmabestanden met succes opgewaardeerd van "
 "versie '%s'."
 
-#: upgrade.cpp:392
+#: upgrade.cpp:393
 #, c-format
 msgid ""
 "Configuration information and program files could not be upgraded from "
@@ -37,7 +37,7 @@ msgstr ""
 "Aanbevolen wordt om het programma te deïnstalleren en daarna opnieuw te "
 "installeren voor het te gebruiken."
 
-#: upgrade.cpp:407
+#: upgrade.cpp:408
 msgid ""
 "The previously installed version of Mahogany was probably newer than this "
 "one. Cannot upgrade."
@@ -45,7 +45,7 @@ msgstr ""
 "De vorige geïnstalleerde versie van Mahogany was waarschijnlijk nieuwer dan "
 "deze. Kan niet opwaarderen."
 
-#: upgrade.cpp:434
+#: upgrade.cpp:437
 msgid ""
 "Normally Mahogany will automatically collect all mail\n"
 "from your system's default mail folder (INBOX,\n"
@@ -55,21 +55,27 @@ msgid ""
 "Is this ok? If you select No, your mail will remain in\n"
 "INBOX and you need to check that folder manually."
 msgstr ""
+"Normaal zal Mahogany automatisch alle post uit de\n"
+"standaard postmap op uw systeem (INBOX, waar uw post
+"binnenkomt) verzamelen,\n"
+"en het verplaatsen naar een special 'Nieuw Post' map.\n"
+"\n"
+"Mag dit? Als u Nee selecteert, zal uw post blijven staan\n"
+"in INBOX en moet u die map handmatig controleren."
 
-#: upgrade.cpp:444
-#, fuzzy
+#: upgrade.cpp:445 upgrade.cpp:448
 msgid "Collect mail from INBOX?"
-msgstr "Verzamel alle p&ost uit deze map:"
+msgstr "Alle post uit INBOX verzamelen?"
 
-#: upgrade.cpp:448 upgrade.cpp:465
+#: upgrade.cpp:449 upgrade.cpp:460 upgrade.cpp:467 upgrade.cpp:478
 msgid "Default system folder for incoming mail."
 msgstr "Standaard mailbox voor inkomende post."
 
-#: upgrade.cpp:505
+#: upgrade.cpp:513 upgrade.cpp:524
 msgid "Mahogany Test Message"
 msgstr "Mahogany testbericht"
 
-#: upgrade.cpp:508
+#: upgrade.cpp:516 upgrade.cpp:527
 msgid ""
 "If you have received this mail, your Mahogany configuration works.\n"
 "You should also try to reply to this mail and check that your reply arrives."
@@ -78,11 +84,11 @@ msgstr ""
 "U kunt proberen te antwoorden op dit bericht om te verifiëren dat uw "
 "antwoord aankomt."
 
-#: upgrade.cpp:514
+#: upgrade.cpp:522 upgrade.cpp:533
 msgid "Sent email message to:\n"
 msgstr "Bericht verstuurd aan:\n"
 
-#: upgrade.cpp:516
+#: upgrade.cpp:524 upgrade.cpp:535
 msgid ""
 "\n"
 "\n"
@@ -92,7 +98,7 @@ msgstr ""
 "\n"
 "Controleer aub. of het aankomt."
 
-#: upgrade.cpp:517
+#: upgrade.cpp:525 upgrade.cpp:536
 msgid "Testing your configuration"
 msgstr "Instellingen worden getest"
 
@@ -277,29 +283,45 @@ msgstr "Map '%s' geopend voor het bewaren van uitgaande berichten."
 msgid "Cannot open folder '%s' for saving outgoing messages."
 msgstr "Kan map '%s' niet openen voor het bewaren van uitgaande berichten."
 
-#: MApplication.cpp:602
+#: MApplication.cpp:549
+msgid ""
+"Some folders are in critical sections and should be allowed\n"
+"to finish whatever operation is pending on them before exiting\n"
+"the application.\n"
+"These folders are:\n"
+msgstr ""
+"Enkele mappen bevinden zich in kritieke gebieden en er moeten\n"
+"uitgestelde operaties op uitgevoerd worden alvorens de\n"
+"applicatie te beëindigen.\n"
+"Deze mappen zijn:\n"
+
+#: MApplication.cpp:554
+msgid "Do you want to exit anyway?"
+msgstr "Wilt u Mahogany werkelijk beëindigen?"
+
+#: MApplication.cpp:616
 #, c-format
 msgid "Could not collect mail from incoming folder '%s'."
 msgstr "Kon post niet verzamelen uit In map '%s'"
 
-#: MApplication.cpp:614 MailCollector.cpp:160
+#: MApplication.cpp:628 MailCollector.cpp:160
 #, c-format
 msgid "Command '%s' (to execute on new mail reception) failed."
 msgstr "Commando '%s' (te starten bij ontvangst nieuwe post) mislukt."
 
-#: MApplication.cpp:644
+#: MApplication.cpp:658
 msgid "Subject: "
 msgstr "Onderwerp: "
 
-#: MApplication.cpp:645
+#: MApplication.cpp:659
 msgid "From: "
 msgstr "Van: "
 
-#: MApplication.cpp:647
+#: MApplication.cpp:661
 msgid "in folder '"
 msgstr "in map '"
 
-#: MApplication.cpp:658
+#: MApplication.cpp:672
 #, c-format
 msgid ""
 "You have received %lu new messages\n"
@@ -308,7 +330,7 @@ msgstr ""
 "U heeft %lu% nieuwe berichten ontvangen\n"
 "in map '%s'."
 
-#: MApplication.cpp:663 MailCollector.cpp:183
+#: MApplication.cpp:677 MailCollector.cpp:183
 msgid "New Mail"
 msgstr "Nieuwe berichten"
 
@@ -389,7 +411,7 @@ msgstr "  Onderwerp: "
 msgid "  From: "
 msgstr "  Van:"
 
-#: wxMApp.cpp:209
+#: wxMApp.cpp:210
 msgid ""
 "The application is terminating abnormally.\n"
 "Please report the bug to m-developers@makelist.com\n"
@@ -399,36 +421,40 @@ msgstr ""
 "Rapporteer aub. de bug aan m-developers@makelist.com\n"
 "Dank u!"
 
-#: wxMApp.cpp:298
+#: wxMApp.cpp:228
+msgid "Do you really want to exit Mahogany?"
+msgstr "Wilt u Mahogany werkelijk beëindigen?"
+
+#: wxMApp.cpp:320
 msgid "Mahogany: Activity Log"
 msgstr "Mahogany: Activiteitenlog"
 
-#: wxMApp.cpp:446
+#: wxMApp.cpp:468
 msgid "Cannot initialise help system.\n"
 msgstr "Kan helpsysteem niet initialiseren.\n"
 
-#: wxMApp.cpp:447
+#: wxMApp.cpp:469
 msgid "Help file '"
 msgstr "Help bestand '"
 
-#: wxMApp.cpp:447
+#: wxMApp.cpp:469
 msgid "' not found."
 msgstr "' niet gevonden"
 
-#: wxMApp.cpp:460
+#: wxMApp.cpp:482
 msgid "Search for?"
 msgstr "Zoeken naar?"
 
-#: wxMApp.cpp:461
+#: wxMApp.cpp:483
 msgid "Search help for keyword"
 msgstr "Zoek naar sleutelwoord in help"
 
-#: wxMApp.cpp:472
+#: wxMApp.cpp:494
 #, c-format
 msgid "No help found for current context (%d)."
 msgstr "Geen hulp gevonden voor huidige context (%d)."
 
-#: wxMApp.cpp:473 wxMFrame.cpp:305
+#: wxMApp.cpp:495 wxMFrame.cpp:305
 msgid "Sorry"
 msgstr "Sorry"
 
@@ -499,7 +525,7 @@ msgstr "Onderwerp"
 #: wxFolderView.cpp:111
 #, fuzzy
 msgid "DUXCSMRFOPHV "
-msgstr "DUXCSMRFOPH "
+msgstr "DUXCSMRFOPHV "
 
 #: wxFolderView.cpp:342
 #, c-format
@@ -826,7 +852,7 @@ msgstr ""
 msgid "Choose signature file"
 msgstr "Kies handtekeningbestand"
 
-#: MailFolder.cpp:294 wxBrowseButton.cpp:64 wxComposeView.cpp:739
+#: MailFolder.cpp:300 wxBrowseButton.cpp:64 wxComposeView.cpp:739
 #: wxComposeView.cpp:956 wxComposeView.cpp:981 wxComposeView.cpp:1219
 msgid "All files (*.*)|*.*"
 msgstr "Alle bestanden (*.*)|*.*"
@@ -852,12 +878,11 @@ msgstr "Er zijn niet-bewaarde veranderingen, toch sluiten?"
 
 #: wxComposeView.cpp:935
 msgid "Message has been sent."
-msgstr ""
+msgstr "Bericht is verstuurd."
 
 #: wxComposeView.cpp:936
-#, fuzzy
 msgid "Message sent"
-msgstr "&Bericht"
+msgstr "Bericht verstuurd"
 
 #: wxComposeView.cpp:954 wxComposeView.cpp:1217
 msgid "Please choose a file to insert."
@@ -877,7 +902,7 @@ msgstr "Bestand '%s' ingevoegd."
 msgid "Failed to insert the text file '%s'."
 msgstr "Invoegen van bestand '%s' mislukt."
 
-#: MailFolder.cpp:292 wxComposeView.cpp:979
+#: MailFolder.cpp:298 wxComposeView.cpp:979
 msgid "Choose file to save message to"
 msgstr "Kies bestand om bericht in te bewaren"
 
@@ -1026,10 +1051,6 @@ msgstr "Wilt u de mapinstellingen veranderen alvorens deze te openen"
 msgid "Opened folder '%s'"
 msgstr "Map '%s' geopend"
 
-#: wxMainFrame.cpp:287
-msgid "Do you really want to exit Mahogany?"
-msgstr "Wilt u Mahogany werkelijk beëindigen?"
-
 #: wxIconManager.cpp:168
 msgid "Please wait"
 msgstr "Even geduld"
@@ -1118,8 +1139,7 @@ msgstr "                       en Vadim Zeitlin"
 #: wxMDialogs.cpp:786
 #, fuzzy
 msgid "This software is provied 'as is' and without any expressed or implied"
-msgstr ""
-"Deze software wordt geleverd zonder enige uitdrukkelijke of geïmpliceerde"
+msgstr "Deze software wordt geleverd zonder enige uitdrukkelijke of geïmpliceerde"
 
 #: wxMDialogs.cpp:789
 msgid "warranties, including, without limitation, the implied warranties"
@@ -1612,12 +1632,12 @@ msgstr "Verstuur het bericht nu"
 
 #: wxMenuDefs.cpp:272
 msgid "&Send and keep"
-msgstr ""
+msgstr "Ver&sturen en bewaren"
 
 #: wxMenuDefs.cpp:273
 #, fuzzy
 msgid "Send the message now and keep the editor open"
-msgstr "Verstuur het bericht nu"
+msgstr "Verstuur het bericht nu en hou de editor open"
 
 #: wxMenuDefs.cpp:274
 msgid "Print the message"
@@ -1804,9 +1824,8 @@ msgid ""
 "The user and host names are used to compose the return address, unless\n"
 "a different return address is explicitly specified."
 msgstr ""
-"De gebruiker- en hostnamen worden gebruikt om het retour-adres samen te "
-"stellen\n"
-"tenzij een ander retour-adres gespecificeerd wordt."
+"De gebruiker- en hostnamen worden gebruikt om het retour-adres samen te\n"
+"stellen tenzij een ander retour-adres gespecificeerd wordt."
 
 #: wxOptionsDlg.cpp:359
 msgid "&Username"
@@ -1824,7 +1843,7 @@ msgstr "&Hostnaam"
 
 #: wxOptionsDlg.cpp:364
 msgid "&Add this hostname if none specified"
-msgstr ""
+msgstr "Deze hostname toevoegen als geen andere is gegeven"
 
 #: wxOptionsDlg.cpp:365
 msgid "&Return/Reply address"
@@ -1903,8 +1922,7 @@ msgstr "&Antwoord string in onderwerp"
 #: wxOptionsDlg.cpp:389
 msgid "Co&llapse reply markers:no:collapse:collapse & count"
 msgstr ""
-"Ink&lappen van\n"
-"antwoordmarkeringen:geen:inklappen:inklappen & tellen"
+"Ink&lappen van antwoordmarkeringen:geen:inklappen:inklappen & tellen"
 
 #: wxOptionsDlg.cpp:391
 msgid "Quote &character"
@@ -2028,7 +2046,7 @@ msgstr "Post-status verwijder-routine"
 
 #: wxOptionsDlg.cpp:436
 msgid "Preview message when &selected"
-msgstr ""
+msgstr "Afdrukvoorbeeld bij &selecteren bericht"
 
 #: wxOptionsDlg.cpp:437
 msgid "&Font family:default:decorative:roman:script:swiss:modern:teletype"
@@ -2565,25 +2583,25 @@ msgstr "Paswoordvraag"
 msgid "Cannot access this folder without a password."
 msgstr "Kan deze map niet openen zonder paswoord"
 
-#: MailFolder.cpp:212
+#: MailFolder.cpp:218
 #, c-format
 msgid "Cannot open folder '%s'."
 msgstr "Kan map '%s' niet openen."
 
-#: MailFolder.cpp:227
+#: MailFolder.cpp:233
 #, c-format
 msgid "Saving %d messages..."
 msgstr "Bewaren van %d berichten..."
 
-#: MailFolder.cpp:302
+#: MailFolder.cpp:308
 msgid "Could not truncate the existing file."
 msgstr "Kon bestaand bestand niet afkappen."
 
-#: MailFolder.cpp:406
+#: MailFolder.cpp:412
 msgid "re"
 msgstr "re"
 
-#: MailFolderCC.cpp:350
+#: MailFolderCC.cpp:366
 #, c-format
 msgid ""
 "Found lock-file:\n"
@@ -2596,7 +2614,7 @@ msgstr ""
 "Andere processen gebruiken wellicht de map.\n"
 "Moet ik het slot negeren en verwijderen?"
 
-#: MailFolderCC.cpp:360
+#: MailFolderCC.cpp:376
 msgid ""
 "Could not remove lock-file.\n"
 "Other process may have terminated.\n"
@@ -2606,32 +2624,31 @@ msgstr ""
 "Ander proces is misschien afgelopen.\n"
 "Zal proberen als normaal verder te gaan."
 
-#: MailFolderCC.cpp:366
+#: MailFolderCC.cpp:382
 msgid "Cannot open the folder while lock-file exists."
 msgstr "Kan map niet openen zolang lock-file bestaat."
 
-#: MailFolderCC.cpp:461
+#: MailFolderCC.cpp:477
 #, c-format
 msgid "Mailstream for folder '%s' has been closed, trying to reopen it."
 msgstr "Poststream voor map '%s' is afgesloten, probeer hem te heropenen."
 
-#: MailFolderCC.cpp:466
+#: MailFolderCC.cpp:482
 #, c-format
 msgid "Re-opening closed folder '%s' failed."
 msgstr "Heropenen van gesloten map '%s' mislukt."
 
-#: MailFolderCC.cpp:474
+#: MailFolderCC.cpp:490
 #, c-format
 msgid "Folder '%s' is alive."
 msgstr "Map '%s' is actief."
 
-#: MailFolderCC.cpp:851
-#, c-format
+#: MailFolderCC.cpp:812
 msgid ""
 "This folder (%s) contains %lu messages, which is greater than the current "
 "threshold of %lu.\n"
 "\n"
-"Would you like to retrieve only the first %lu messages?\n"
+"Would you like to retrieve only the last %lu messages?\n"
 "(selecting [No] will retrieve all messages)"
 msgstr ""
 "Deze map (%s) bevat %lu berichten, dit is meer dan de huidige drempelwaarde "
@@ -2640,33 +2657,33 @@ msgstr ""
 "Wilt u slechts de eerste %lu berichten ophalen?\n"
 "(als u [Nee] selecteert worden alle berichten opgehaald)"
 
-#: MailFolderCC.cpp:872
+#: MailFolderCC.cpp:834
 #, c-format
 msgid "Reading %lu message headers..."
 msgstr "%lu berichtkoppen worden gelezen..."
 
-#: MailFolderCC.cpp:999
+#: MailFolderCC.cpp:956
 msgid "<address missing>"
 msgstr "<adres ontbreekt>"
 
-#: MailFolderCC.cpp:1229
+#: MailFolderCC.cpp:1201
 #, c-format
 msgid "Folder '%s' : "
 msgstr "Map '%s' : "
 
-#: MailFolderCC.cpp:1231
+#: MailFolderCC.cpp:1203
 msgid "Folder Log: "
 msgstr "Map log: "
 
-#: MailFolderCC.cpp:1234
+#: MailFolderCC.cpp:1206
 msgid ", error level: "
 msgstr ", fout niveau: "
 
-#: MailFolderCC.cpp:1248
+#: MailFolderCC.cpp:1220
 msgid "c-client debug: "
 msgstr "c-client debug: "
 
-#: MailFolderCC.cpp:1572
+#: MailFolderCC.cpp:1583
 msgid ""
 "\n"
 "Attempt to re-open all folders failed."
@@ -2678,32 +2695,32 @@ msgstr ""
 msgid "Non-existent message data."
 msgstr "Niet-bestaande bericht data."
 
-#: SendMessageCC.cpp:297 SendMessageCC.cpp:300
+#: SendMessageCC.cpp:306 SendMessageCC.cpp:309
 msgid " , compiled for "
 msgstr " , gecompileerd onder "
 
-#: SendMessageCC.cpp:514
+#: SendMessageCC.cpp:523
 msgid "Mail sent."
 msgstr "Bericht verstuurd."
 
-#: SendMessageCC.cpp:514
+#: SendMessageCC.cpp:523
 msgid "Article posted."
 msgstr "Artikel gepost."
 
-#: SendMessageCC.cpp:521
+#: SendMessageCC.cpp:530
 #, c-format
 msgid "Failed to send - %s"
 msgstr "Kon - %s niet versturen"
 
-#: SendMessageCC.cpp:522
+#: SendMessageCC.cpp:531
 msgid "unknown error"
 msgstr "onbekende fout"
 
-#: SendMessageCC.cpp:529
+#: SendMessageCC.cpp:538
 msgid "Cannot open connection to any server"
 msgstr "Kan geen verbinding openen met een server"
 
-#: SendMessageCC.cpp:593
+#: SendMessageCC.cpp:602
 msgid "Cannot open folder to save to:"
 msgstr "Kan map om in te bewaren niet openen:"
 
@@ -3148,9 +3165,38 @@ msgstr "BBDB"
 msgid "Don't show this message again "
 msgstr "Laat die bericht niet meer zien "
 
-#: PythonHelp.cpp:380
-msgid "Cannot run script: "
-msgstr "Kan script niet uitvoeren: "
+#: upgrade.cpp:437
+msgid ""
+"Normally Mahogany will automatically collect all mail\n"
+"from your system's default mail folder (INBOX,\n"
+"representing your mail spool entry),\n"
+"and move it to a special 'New Mail' folder.\n"
+"This is generally considered good practice as you\n"
+"should not leave your new mail in INBOX.\n"
+"\n"
+"Please confirm this. If you select No, your mail\n"
+"will remain in INBOX and you need to check that\n"
+"folder manually."
+msgstr ""
+"Normaal zal Mahogany automatisch alle post uit de\n"
+"standaard postmap op uw systeem (INBOX, waar uw post
+"binnenkomt) verzamelen,\n"
+"en het verplaatsen naar een special 'Nieuw Post' map.\n"
+"\n"
+"Mag dit? Als u Nee selecteert, zal uw post blijven staan\n"
+"in INBOX en moet u die map handmatig controleren."
+
+#: upgrade.cpp:454
+msgid ""
+"Mahogany will not automatically collect mail from your\n"
+"system's default INBOX.\n"
+"You can change this in the INBOX folder's preferences\n"
+"dialog at any time."
+msgstr ""
+"Mahogany zal niet automatisch post verzamelen uit uw\n"
+"de standaard INBOX van uw systeem.\n"
+"U kunt dit veranderen in de voorkeuren van de INBOX map\n"
+"op ieder moment."
 
 # MDialogs.h
 msgid "Error"
@@ -3168,5 +3214,9 @@ msgstr "Informatie"
 msgid "Please choose"
 msgstr "Kies aub."
 
+#~ msgid "Cannot run script: "
+#~ msgstr "Kan script niet uitvoeren: "
+
 #~ msgid "Font &size"
 #~ msgstr "Font &grootte"
+
