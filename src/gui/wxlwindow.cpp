@@ -327,7 +327,7 @@ wxLayoutWindow::OnPaint( wxPaintEvent &WXUNUSED(event))  // or: OnDraw(wxDC& dc)
 }
 
 void
-wxLayoutWindow::DoPaint(bool cursorOnly)  // or: OnDraw(wxDC& dc)
+wxLayoutWindow::DoPaint(bool /* cursorOnly */)  // or: OnDraw(wxDC& dc)
 {
    wxPaintDC dc( this );
    PrepareDC( dc );
@@ -469,6 +469,8 @@ wxLayoutWindow::OnSetFocus(wxFocusEvent &ev)
 {
    m_llist.SetBoldCursor(true);
    DoPaint(true);
+
+   ev.Skip();
 }
 
 void
@@ -476,4 +478,6 @@ wxLayoutWindow::OnKillFocus(wxFocusEvent &ev)
 {
    m_llist.SetBoldCursor(false);
    Update();
+
+   ev.Skip();
 }

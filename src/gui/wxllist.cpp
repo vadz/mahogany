@@ -120,7 +120,9 @@ wxLayoutObjectText::Draw(wxDC &dc, wxPoint const &translate)
 
 
 void
-wxLayoutObjectText::Layout(wxDC &dc, wxPoint position, CoordType baseLine)
+wxLayoutObjectText::Layout(wxDC &dc,
+                           wxPoint position,
+                           CoordType /* baseLine */)
 {
    long descent = 0l;
 
@@ -163,7 +165,9 @@ wxLayoutObjectIcon::Draw(wxDC &dc, wxPoint const &translate)
 }
 
 void
-wxLayoutObjectIcon::Layout(wxDC &dc, wxPoint position, CoordType baseLine)
+wxLayoutObjectIcon::Layout(wxDC & /* dc */,
+                           wxPoint position,
+                           CoordType /* baseLine */)
 {
    if(m_Position.x != position.x || m_Position.y != position.y)
       m_IsDirty = true;
@@ -218,7 +222,7 @@ wxLayoutObjectCmd::GetStyle(void) const
 }
 
 void
-wxLayoutObjectCmd::Draw(wxDC &dc, wxPoint const &translate)
+wxLayoutObjectCmd::Draw(wxDC &dc, wxPoint const & /* translate */)
 {
    wxASSERT(m_font);
    dc.SetFont(*m_font);
@@ -228,7 +232,7 @@ wxLayoutObjectCmd::Draw(wxDC &dc, wxPoint const &translate)
       dc.SetTextBackground(*m_ColourBG);
 }
 void
-wxLayoutObjectCmd::Layout(wxDC &dc, wxPoint p, CoordType baseline)
+wxLayoutObjectCmd::Layout(wxDC &dc, wxPoint p, CoordType /* baseline */)
 {
    m_Position = p; // required so we can find the right object for cursor
    // this get called, so that recalculation uses right font sizes
@@ -1139,7 +1143,7 @@ wxLayoutList::GetLineLength(wxLayoutObjectList::iterator i, CoordType offs)
 
 void
 wxLayoutList::Clear(int family, int size, int style, int weight,
-                    int underline, char const *fg, char const *bg)
+                    int /* underline */, char const *fg, char const *bg)
 {
    m_bModified = true;
    m_CursorMoved = true;

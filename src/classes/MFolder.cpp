@@ -125,14 +125,14 @@ public:
       { FAIL_MSG("can not set root folder attributes."); }
 
    virtual unsigned int GetFlags() const { return 0u; }
-   virtual void SetFlags(unsigned int flags)
+   virtual void SetFlags(unsigned int /* flags */)
       { FAIL_MSG("can not set root folder attributes."); }
 
    virtual MFolder *GetParent() const { return NULL; }
 
    virtual void Delete()
       { FAIL_MSG("can not delete root folder."); }
-   virtual bool Rename(const String& newName)
+   virtual bool Rename(const String& /* newName */)
       { FAIL_MSG("can not rename root folder."); return FALSE; }
 };
 

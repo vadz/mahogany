@@ -306,9 +306,10 @@ strutil_extract_formatspec(const char *format)
                sizePrefix = Size_None;
          }
 
-         // these are all types I know about
-         char ch;
+         // keep the compiler happy by initializing the var in any case
+         char ch = '\0';
          switch ( *format ) {
+            // these are all types I know about
             case 'c':
             case 'C':
                ch = 'c';
@@ -355,9 +356,6 @@ strutil_extract_formatspec(const char *format)
             case 'S':
                ch = 's';
                break;
-
-            default:
-               ch = '\0';
          }
 
          if ( ch != '\0' ) {

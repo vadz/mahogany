@@ -324,7 +324,7 @@ IMPLEMENET_ADB_PROVIDER(BbdbDataProvider, TRUE, "BBDB version 2", Name_File);
 // BbdbEntry
 // ----------------------------------------------------------------------------
 
-BbdbEntry::BbdbEntry(BbdbEntryGroup *pGroup, const String& strName)
+BbdbEntry::BbdbEntry(BbdbEntryGroup *pGroup, const String& /* strName */)
 {
    m_pGroup = pGroup;
    m_bDirty = FALSE;
@@ -930,7 +930,7 @@ BbdbEntryGroup::Exists(const String& path) const
    return GetEntry(path) != NULL;
 }
 
-AdbEntryGroup *BbdbEntryGroup::GetGroup(const String& name) const
+AdbEntryGroup *BbdbEntryGroup::GetGroup(const String& /* name */) const
 {
    MOcheck();
    return NULL;
@@ -944,7 +944,7 @@ BbdbEntryGroup::CreateEntry(const String& strName)
    return  e;
 }
 
-AdbEntryGroup *BbdbEntryGroup::CreateGroup(const String& strName)
+AdbEntryGroup *BbdbEntryGroup::CreateGroup(const String& /* strName */)
 {
    MOcheck();
    return NULL;
@@ -967,14 +967,14 @@ BbdbEntryGroup::DeleteEntry(const String& strName)
 }
 
 void
-BbdbEntryGroup::DeleteGroup(const String& strName)
+BbdbEntryGroup::DeleteGroup(const String& /* strName */)
 {
    MOcheck();
    wxFAIL_MSG("Not implemented");
 }
 
 AdbEntry *
-BbdbEntryGroup::FindEntry(const char *szName)
+BbdbEntryGroup::FindEntry(const char * /* szName */)
 {
    MOcheck();
    return NULL;
@@ -1063,13 +1063,13 @@ BbdbDataProvider::CreateBook(const String& name)
 }
 
 bool
-BbdbDataProvider::EnumBooks(wxArrayString& aNames)
+BbdbDataProvider::EnumBooks(wxArrayString& /* aNames */)
 {
    return FALSE;
 }
 
 bool
-BbdbDataProvider::TestBookAccess(const String& name, AdbTests test)
+BbdbDataProvider::TestBookAccess(const String& name, AdbTests /* test */)
 {
    if(wxFileExists(name))
    {
@@ -1082,7 +1082,7 @@ BbdbDataProvider::TestBookAccess(const String& name, AdbTests test)
 }
 
 bool
-BbdbDataProvider::DeleteBook(AdbBook *book)
+BbdbDataProvider::DeleteBook(AdbBook * /* book */)
 {
    return FALSE;
 }

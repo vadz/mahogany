@@ -17,7 +17,9 @@ $Id$
  - forwarding message triggers assert in wxComposeView:119
  - lock file checking for INBOX:
    + need to check for xxx.lock.* not just xxx.lock !
- - can't open autocollect.adb in AdbEditor if already opened
+   + it does locking under Windows too, but the lock file names are different
+ - can't open autocollect.adb in AdbEditor if already opened (can't reproduce
+   any more)
 
  - wxLayout:
   + Refresh!!
@@ -60,6 +62,11 @@ $Id$
     as ProvBBDB for consistency
   + config entry names should allow  ',' (needed for mail names which
     might contain it, just received one from "john doe, archeology")  
+  + autocollect.adb should be flashed as soon as it is created to allow
+    opening it from the editor
+  + add "add current address to ADB" to compose view
+  + should be updated when new entries are created (can't be deleted from
+    elsewhere for now...), add an event for this
 
 (Windows)
  - list ctrl resizing columns doesn't propagate the event to the app

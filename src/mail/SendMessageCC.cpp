@@ -331,9 +331,9 @@ SendMessageCC::Build(void)
       if(xpmarray)
       {
          XFace xface;
-         for(int i = 0; xpmarray[i]; i++)
+         for(j = 0; xpmarray[j]; j++)
          {
-            xpmdata += xpmarray[i];
+            xpmdata += xpmarray[j];
             xpmdata += '\n';
          }
          wxIconManager::FreeImage(xpmarray);

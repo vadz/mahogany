@@ -995,14 +995,14 @@ wxFolderSelectionDialog::wxFolderSelectionDialog(wxWindow *parent,
    Centre(wxCENTER_FRAME | wxBOTH);
 }
 
-void wxFolderSelectionDialog::OnOK(wxCommandEvent& event)
+void wxFolderSelectionDialog::OnOK(wxCommandEvent& /* event */)
 {
    m_folder = m_tree->GetSelection();
 
    EndModal(TRUE);
 }
 
-void wxFolderSelectionDialog::OnCancel(wxCommandEvent& event)
+void wxFolderSelectionDialog::OnCancel(wxCommandEvent& /* event */)
 {
    m_folder = NULL;
 

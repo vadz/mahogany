@@ -47,7 +47,7 @@ MessageCC::MessageCC(MailFolderCC *ifolder, unsigned long msgno,
    Refresh();
 }
 
-MessageCC::MessageCC(const char *itext,  ProfileBase *iprofile)
+MessageCC::MessageCC(const char * /* itext */,  ProfileBase *iprofile)
 {
    Create(iprofile);
 

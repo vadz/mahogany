@@ -91,7 +91,8 @@ public:
                    const wxString& strText,
                    const wxString& strCaption,
                    const wxString& strPrompt,
-                   const wxString& strConfigPath);
+                   const wxString& strConfigPath,
+                   const wxString& strDefault);
 
   // accessors
   const wxString& GetText() const { return m_strText; }
@@ -192,7 +193,8 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
                                    const wxString& strText,
                                    const wxString& strCaption,
                                    const wxString& strPrompt,
-                                   const wxString& strConfigPath)
+                                   const wxString& strConfigPath,
+                                   const wxString& strDefault)
    : wxDialog(parent, -1, wxString("M:")+strCaption,
               wxDefaultPosition,
               wxDefaultSize,
@@ -224,7 +226,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
   // label and the text
   (void)new wxStaticText(this, -1, strPrompt, wxPoint(x, y + dy),
                          wxSize(widthLabel, heightLabel));
-  m_text = new wxPTextEntry(strConfigPath, this, -1, "",
+  m_text = new wxPTextEntry(strConfigPath, this, -1, strDefault,
                             wxPoint(x + widthLabel + LAYOUT_X_MARGIN, y),
                             wxSize(widthText, heightText));
 
@@ -281,7 +283,7 @@ bool MInputBox(wxString *pstr,
   strConfigPath << "/Prompts/" << szKey;
 
   MTextInputDialog dlg(GetParent(parent), *pstr,
-                       strCaption, strPrompt, strConfigPath);
+                       strCaption, strPrompt, strConfigPath, def);
 
   if ( dlg.ShowModal() == wxID_OK ) {
     *pstr = dlg.GetText();
@@ -427,7 +429,7 @@ MDialog_FileRequester(String const & message,
                       String extension,
                       String wildcard,
                       bool save,
-                      ProfileBase *profile)
+                      ProfileBase * /* profile */)
 {
    // VZ: disabling this code because it is almost useless now with the advent
    //     of wxPFileSelector()
@@ -848,7 +850,7 @@ wxPEP_Folder::TransferDataToWindow(void)
 }
 
 void
-MDialog_FolderProfile(const MWindow *parent, ProfileBase *profile)
+MDialog_FolderProfile(const MWindow * /* parent */, ProfileBase *profile)
 {
    // show a modal dialog
    wxPEP_Folder dlg(profile, NULL);
@@ -1053,7 +1055,7 @@ BEGIN_EVENT_TABLE(wxMROpenFolderDialog, wxMRDialog)
 END_EVENT_TABLE()
 
 void
-wxMROpenFolderDialog::OnRadio(wxCommandEvent &event)
+wxMROpenFolderDialog::OnRadio(wxCommandEvent & /* event */)
 {
    UpdateRadioBox();
 }

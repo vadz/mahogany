@@ -75,22 +75,22 @@ public:
    };
 
    /// return the type of this object
-   virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_INVALID; } ;
+   virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_INVALID; }
    /** Calculates the position etc of an object.
        @param dc the wxDC to draw on
        @param position where to draw the top left corner
        @param baseLine the baseline for alignment, from top of box
    */
-   virtual void Layout(wxDC & dc,
+   virtual void Layout(wxDC & /* dc */,
                        wxPoint position,
-                       CoordType baseLine)
+                       CoordType /* baseLine */)
       { m_Position = position; }
 
    /** Draws an object.
        @param dc the wxDC to draw on
        @param translation to be added to coordinates
    */
-   virtual void Draw(wxDC & dc, wxPoint const &translate) {}
+   virtual void Draw(wxDC & /* dc */, wxPoint const & /* translate */)  { }
 
    /** Calculates and returns the size of the object. 
        @param baseLine pointer where to store the baseline position of 
@@ -98,7 +98,7 @@ public:
        baseline)
        @return the size of the object's box in pixels
    */
-   virtual wxPoint GetSize(CoordType * baseLine = NULL) const
+   virtual wxPoint GetSize(CoordType * /* baseLine */ = NULL) const
       { return wxPoint(0,0); }
 
    /** Calculates and returns the position of the object.

@@ -411,7 +411,7 @@ MailFolderCC::Debug(void) const
 
 /// remove this object from Map
 void
-MailFolderCC::RemoveFromMap(MAILSTREAM const *stream)
+MailFolderCC::RemoveFromMap(MAILSTREAM const * /* stream */)
 {
    StreamConnectionList::iterator i;
    for(i = streamList.begin(); i != streamList.end(); i++)
@@ -516,7 +516,8 @@ MailFolderCC::SetDefaultObj(bool setit)
 
 /// this message matches a search
 void
-MailFolderCC::mm_searched(MAILSTREAM *stream, unsigned long number)
+MailFolderCC::mm_searched(MAILSTREAM * /* stream */,
+                          unsigned long /* number */)
 {
    //FIXME
 }
@@ -558,7 +559,7 @@ MailFolderCC::mm_expunged(MAILSTREAM *stream, unsigned long number)
 
 /// flags have changed for a message
 void
-MailFolderCC::mm_flags(MAILSTREAM *stream, unsigned long number)
+MailFolderCC::mm_flags(MAILSTREAM *stream, unsigned long /* number */)
 {
    //String msg = "Flags changed for msg no. " + strutil_ltoa(number);
    //LOGMESSAGE((M_LOG_DEFAULT, Str(msg)));
@@ -574,8 +575,7 @@ MailFolderCC::mm_flags(MAILSTREAM *stream, unsigned long number)
        @param errflg error level
        */
 void
-MailFolderCC::mm_notify(MAILSTREAM *stream, char *str, long
-             errflg)
+MailFolderCC::mm_notify(MAILSTREAM * /* stream */, char *str, long errflg)
 {
    mm_log(str,errflg);
 }
@@ -588,8 +588,10 @@ MailFolderCC::mm_notify(MAILSTREAM *stream, char *str, long
        @param attrib mailbox attributes
        */
 void
-MailFolderCC::mm_list(MAILSTREAM *stream, char delim, char *name,
-           long attrib)
+MailFolderCC::mm_list(MAILSTREAM * /* stream */,
+                      char /* delim */,
+                      char * /* name */,
+                      long /* attrib */)
 {
    //FIXME
 }
@@ -602,8 +604,10 @@ MailFolderCC::mm_list(MAILSTREAM *stream, char delim, char *name,
        @param attrib mailbox attributes
        */
 void
-MailFolderCC::mm_lsub(MAILSTREAM *stream, char delim, char *name,
-           long attrib)
+MailFolderCC::mm_lsub(MAILSTREAM * /* stream */,
+                      char /* delim */,
+                      char * /* name */,
+                      long /* attrib */)
 {
    //FIXME
 }
@@ -614,8 +618,9 @@ MailFolderCC::mm_lsub(MAILSTREAM *stream, char delim, char *name,
     @param status structure with new mailbox status
 */
 void
-MailFolderCC::mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS
-             *status)
+MailFolderCC::mm_status(MAILSTREAM *stream,
+                        char * /* mailbox */,
+                        MAILSTATUS *status)
 {
    MailFolderCC *mf = LookupObject(stream);
    if(mf == NULL)
@@ -637,7 +642,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS
     @param errflg error level
 */
 void
-MailFolderCC::mm_log(const char *str, long errflg)
+MailFolderCC::mm_log(const char *str, long /* errflg */)
 {
    if(mm_ignore_errors)
       return;
@@ -663,7 +668,10 @@ MailFolderCC::mm_dlog(const char *str)
        @param  trial number of prior login attempts
        */
 void
-MailFolderCC::mm_login(NETMBX *mb, char *user, char *pwd, long trial)
+MailFolderCC::mm_login(NETMBX * /* mb */,
+                       char *user,
+                       char *pwd,
+                       long /* trial */)
 {
    strcpy(user,MF_user.c_str());
    strcpy(pwd,MF_pwd.c_str());
@@ -673,7 +681,7 @@ MailFolderCC::mm_login(NETMBX *mb, char *user, char *pwd, long trial)
        @param  stream   mailstream
    */
 void
-MailFolderCC::mm_critical(MAILSTREAM *stream)
+MailFolderCC::mm_critical(MAILSTREAM * /* stream */)
 {
    // ignore
 }
@@ -682,7 +690,7 @@ MailFolderCC::mm_critical(MAILSTREAM *stream)
    @param   stream mailstream
      */
 void
-MailFolderCC::mm_nocritical(MAILSTREAM *stream)
+MailFolderCC::mm_nocritical(MAILSTREAM * /* stream */)
 {
    // ignore
 }
@@ -694,7 +702,9 @@ MailFolderCC::mm_nocritical(MAILSTREAM *stream)
        @return abort flag: if serious error and abort non-zero: abort, else retry
        */
 long
-MailFolderCC::mm_diskerror(MAILSTREAM *stream, long errcode, long serious)
+MailFolderCC::mm_diskerror(MAILSTREAM *stream,
+                           long /* errcode */,
+                           long /* serious */)
 {
    MailFolderCC *mf = LookupObject(stream);
    if(mf)

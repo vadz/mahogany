@@ -307,7 +307,7 @@ wxWindow *wxFolderTree::GetWindow() const
 }
 
 // open this folder in the current frame's folder view
-void wxFolderTree::OnSelectionChange(MFolder *oldsel, MFolder *newsel)
+void wxFolderTree::OnSelectionChange(MFolder * /* oldsel */, MFolder *newsel)
 {
    // MP_OPEN_ON_CLICK profile setting tells us if we should open the folder
    // in the main frame when it's just clicked - otherwise it must be double

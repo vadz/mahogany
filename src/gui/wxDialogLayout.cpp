@@ -311,7 +311,7 @@ wxListBox *wxNotebookPageBase::CreateListbox(const char *label,
    box->SetConstraints(c);
 
    // the buttons vertically on the right of listbox
-   wxButton *button;
+   wxButton *button = NULL;
    static const char *aszLabels[] =
    {
       "&Add",

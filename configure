@@ -3665,7 +3665,7 @@ solaris*|SunOS*)
     CCOSTYPE=sol
   fi
   ;;
-fFreebBsSdD*)
+[fF]ree[bB][sS][dD]*)
   CCOSTYPE=bsf
   ;;
 OSF1*)

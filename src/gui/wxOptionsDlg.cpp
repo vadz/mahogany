@@ -686,7 +686,7 @@ bool wxOptionsPage::TransferDataToWindow()
    wxASSERT( WXSIZEOF(wxOptionsPage::ms_aFields) == ConfigField_Max );
 
    String strValue;
-   long lValue;
+   long lValue = 0;
    for ( size_t n = m_nFirst; n < m_nLast; n++ )
    {
       if ( gs_aConfigDefaults[n].IsNumeric() )
@@ -769,7 +769,7 @@ bool wxOptionsPage::TransferDataFromWindow()
    // @@@ should only write the entries which really changed
 
    String strValue;
-   long lValue;
+   long lValue = 0;
    for ( size_t n = m_nFirst; n < m_nLast; n++ )
    {
       wxControl *control = GetControl(n);

@@ -2850,7 +2850,7 @@ wxListBox *wxAdbPage::CreateListBox(const char *label, wxControl *last)
   box->SetConstraints(c);
 
   // the buttons vertically on the right of listbox
-  wxButton *button;
+  wxButton *button = NULL;
   static const char *aszLabels[] =
   {
     "&Add",

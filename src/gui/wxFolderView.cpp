@@ -687,7 +687,7 @@ BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)
 END_EVENT_TABLE()
 
 void
-wxFolderViewFrame::InternalCreate(wxFolderView *fv, wxMFrame *parent)
+wxFolderViewFrame::InternalCreate(wxFolderView *fv, wxMFrame * /* parent */)
 {
    m_FolderView = fv;
    SetTitle(String("M: " + m_FolderView->GetFolder()->GetName()));
