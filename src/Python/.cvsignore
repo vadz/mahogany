@@ -1,2 +1,11 @@
 .depend
-junk
+MString.py
+MProfile.py
+MObject.py
+MAppBase_wrap.doc
+MailFolder_wrap.doc
+Profile_wrap.doc
+String_wrap.doc
+MObject.cpp
+Message_wrap.doc
+MObject_wrap.doc
