@@ -548,12 +548,12 @@ bool ConfigSourceLocal::HasEntry(const String& path) const
 
 bool ConfigSourceLocal::DeleteEntry(const String& name)
 {
-   return DeleteEntry(name);
+   return m_config->DeleteEntry(name);
 }
 
 bool ConfigSourceLocal::DeleteGroup(const String& name)
 {
-   return DeleteGroup(name);
+   return m_config->DeleteGroup(name);
 }
 
 bool ConfigSourceLocal::CopyEntry(const String& nameSrc, const String& nameDst)
