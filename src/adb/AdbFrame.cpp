@@ -987,7 +987,7 @@ class wxAdbNamePage : public wxAdbPage
 {
 public:
   wxAdbNamePage(wxNotebook *notebook)
-    : wxAdbPage(notebook, _T("General"), wxAdbNotebook::General,
+    : wxAdbPage(notebook, _("General"), wxAdbNotebook::General,
                 AdbField_NamePageFirst, AdbField_NamePageLast) { }
 
 private:
@@ -999,7 +999,7 @@ class wxAdbEMailPage : public wxAdbPage
 {
 public:
   wxAdbEMailPage(wxNotebook *notebook)
-    : wxAdbPage(notebook, _T("Email"), wxAdbNotebook::EMail,
+    : wxAdbPage(notebook, _("Email"), wxAdbNotebook::EMail,
                 AdbField_EMailPageFirst, AdbField_EMailPageLast) { }
 
   virtual void SetData(const AdbEntry& data);
@@ -1041,7 +1041,7 @@ class wxAdbOfficeAddrPage : public wxAdbAddrPage
 {
 public:
   wxAdbOfficeAddrPage(wxNotebook *notebook)
-    : wxAdbAddrPage(notebook, _T("Office"), wxAdbNotebook::Work, TRUE) { }
+    : wxAdbAddrPage(notebook, _("Office"), wxAdbNotebook::Work, TRUE) { }
 
 private:
   DECLARE_NO_COPY_CLASS(wxAdbOfficeAddrPage)
@@ -1052,7 +1052,7 @@ class wxAdbHomeAddrPage : public wxAdbAddrPage
 {
 public:
   wxAdbHomeAddrPage(wxNotebook *notebook)
-    : wxAdbAddrPage(notebook, _T("Home"), wxAdbNotebook::Home, FALSE) { }
+    : wxAdbAddrPage(notebook, _("Home"), wxAdbNotebook::Home, FALSE) { }
 
 private:
   DECLARE_NO_COPY_CLASS(wxAdbHomeAddrPage)
@@ -1670,7 +1670,7 @@ ask_name:
 
   // prepare strings for diagnostic messages
   wxString strWhere, strGroup = group->GetWhere();
-  wxString strWhat = wxGetTranslation(m_bLastNewWasGroup ? _T("group") : _T("entry"));
+  wxString strWhat = m_bLastNewWasGroup ? _("group") : _("entry");
 
   // first check that it doesn't already exist
   wxASSERT( !m_strLastNewEntry.IsEmpty() ); // don't add empty entries
@@ -1763,7 +1763,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
   }
   else {
     // it's a normal entry or group
-    strWhat = wxGetTranslation(m_current->IsGroup() ? _T("group") : _T("entry"));
+    strWhat = m_current->IsGroup() ? _("group") : _("entry");
     strName = m_current->GetName();
 
     if ( bAskConfirmation ) {
@@ -2984,7 +2984,7 @@ bool wxADBCreateDialog::TransferDataFromWindow()
   m_bGroup = m_checkGroup->GetValue();
   if ( m_strName.IsEmpty() ) {
     wxLogError(_("Please specify a name for the new %s!"),
-               wxGetTranslation(m_bGroup ? _T("group") : _T("entry")));
+               m_bGroup ? _("group") : _("entry"));
     return FALSE;
   }
 
