@@ -80,6 +80,7 @@ MailFolderCC::OpenFolder(MailFolder::Type type,
    MailFolderCC *mf;
    String mboxpath;
 
+   int flags = (int) (type & MailFolder::MF_FLAGSMASK);
    type = (MailFolder::Type)(type & MailFolder::MF_TYPEMASK);
 
    switch(type)
@@ -97,7 +98,10 @@ MailFolderCC::OpenFolder(MailFolder::Type type,
       mboxpath << '{' << server << "/pop3}";
       break;
    case MailFolder::MF_IMAP:  // do we need /imap flag?
-      mboxpath << '{' << server << "/user=" << login << '}'<< name;
+      if(flags & MF_FLAGS_ANON)
+         mboxpath << '{' << server << "/anonymous}" << name;
+      else
+         mboxpath << '{' << server << "/user=" << login << '}'<< name;
       break;
    case MailFolder::MF_NNTP:
       mboxpath << '{' << server << "/nntp}" << name;
