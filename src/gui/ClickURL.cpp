@@ -348,7 +348,7 @@ void ClickableURL::OpenInBrowser(int options) const
          ShowOptionsDialog();
       }
 
-      browser = READ_CONFIG(GetProfile(), MP_BROWSER);
+      browser = String (READ_CONFIG(GetProfile(), MP_BROWSER));
       if ( browser.empty() )
       {
          wxLogError(_("No command configured to view URLs."));
