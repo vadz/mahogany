@@ -340,7 +340,7 @@ then
   then
     echo "Updating build script..."
     ( cd $BUILDDIR/$MNAME-$MVERSION/extra/scripts && \
-      $CVS update $MTAG )
+      $CVS update -d $MTAG )
     cp $BUILDDIR/$MNAME-$MVERSION/extra/scripts/makeM_all /tmp/makeM_all$$ && \
     chmod +x /tmp/makeM_all$$
     echo "Restarting script..."
