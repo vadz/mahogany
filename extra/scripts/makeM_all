@@ -63,7 +63,7 @@ export DESTDIR
 
 USESTABLE=no
 
-FTPLOCATION="karsten@ronnie.phy.hw.ac.uk:/usr/local/ftp/pub/Mahogany/daily"
+FTPLOCATION="ballueder@shell1.sourceforge.net:/home/groups/ftp/pub/mahogany/daily/"
 
 # Need to hardwire this as we run it as root for rpm/deb generation:
 REALHOME=$HOME
