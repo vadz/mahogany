@@ -771,6 +771,7 @@ void wxMainFrame::OnIdle(wxIdleEvent &event)
          WXTBAR_MSG_NEXT_UNREAD,
          WXTBAR_MSG_OPEN,
          WXTBAR_MSG_REPLY,
+         WXTBAR_MSG_REPLYALL,
          WXTBAR_MSG_FORWARD,
          WXTBAR_MSG_PRINT,
          WXTBAR_MSG_DELETE,
