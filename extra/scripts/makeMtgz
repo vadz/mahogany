@@ -1,0 +1,58 @@
+#!/bin/sh
+#
+# Purpose: creates a Mahogany tarball
+# Usage:   makeMtgz [output_dir]
+# Author:  VZ
+# Created: 03.11.01
+# Version: $Id$
+###############################################################################
+
+# change the configuration by editing these vars
+CVSROOT=:pserver:anonymous@cvs.sourceforge.net:/cvsroot/mahogany
+TMPDIR=/tmp/makeMtgz-$$
+
+# no need to edit anything below
+###############################################################################
+
+# always clean up after us
+cleanup() {
+   rm -rf $TMPDIR
+}
+
+trap 'cleanup; exit 4' INT TERM
+
+# where to place the output file?
+OUTPUT_DIR=${1-`pwd`}
+
+# create temp dir
+if ! mkdir $TMPDIR; then
+   echo "Failed to create temporary directory $TMPDIR"
+   exit 1
+fi
+
+cd $TMPDIR
+
+# and check out the sources in it
+if ! cvs -z3 -Q -d $CVSROOT co M; then
+   echo "Checking out Mahogany sources failed."
+   cleanup
+   exit 2
+fi
+
+# extract version info from the source tree
+eval `grep "M_VERSION_M\(AJ\|IN\)OR=" M/makeversion.in`
+
+# and create the approproately named output file
+M_FULLNAME="mahogany-$M_VERSION_MAJOR.$M_VERSION_MINOR"
+mv M $M_FULLNAME
+OUTPUT_FILE=$OUTPUT_DIR/$M_FULLNAME.tar.gz
+if ! tar cf - $M_FULLNAME --exclude="CVS" | gzip -c9 > $OUTPUT_FILE; then
+   echo "Creating $OUTPUT_FILE failed."
+   RC=3
+fi
+
+# finally, clean up
+cd -
+cleanup
+
+exit ${RC-0}

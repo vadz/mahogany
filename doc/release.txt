@@ -42,7 +42,7 @@ g) "cvs rtag" the files
 a) tarball
 
 Just do a fresh checkout, rename the directory to mahogany-%{VERSION} and tar
-gzip.
+gzip. The script extra/scripts/makeMtgz automates it.
 
 b) RPM
 
