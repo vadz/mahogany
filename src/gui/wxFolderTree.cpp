@@ -826,7 +826,8 @@ void wxFolderTreeImpl::OnMenuCommand(wxCommandEvent& event)
          break;
 
       default:
-         FAIL_MSG("unexpected menu command in wxFolderTree");
+         //FAIL_MSG("unexpected menu command in wxFolderTree");
+         event.Skip();
    }
 }
 
