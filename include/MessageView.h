@@ -671,7 +671,7 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// global functions
+// global functions (implemented in gui/wxMessageView.cpp)
 // ----------------------------------------------------------------------------
 
 /// create and show a new message in a separate frame, return its message view
@@ -679,37 +679,7 @@ extern MessageView *ShowMessageViewFrame(wxWindow *parent,
                                          ASMailFolder *asmf,
                                          UIdType uid);
 
-// convert a string in UTF-8 into the string in the current encoding: of
-// course, this doesn't work in general as Unicode is not representable as an 8
-// bit charset but it works in some common cases and is better than no UTF-8
-// support at all
-//
-// FIXME this won't be needed when full Unicode support is available
-static wxFontEncoding ConvertUnicodeToSystem(wxString *strUtf)
-{
-   CHECK( strUtf, wxFONTENCODING_SYSTEM,
-          "NULL string in ConvertUnicodeToSystem" );
-
-   if ( !strUtf->empty() )
-   {
-      wxString str(strUtf->wc_str(wxConvUTF8), wxConvLocal);
-      if ( str.empty() )
-      {
-         // conversion failed - use original text (and display incorrectly,
-         // unfortunately)
-         wxLogDebug("conversion from UTF-8 to default encoding failed");
-      }
-      else
-      {
-         *strUtf = str;
-      }
-   }
-
-#if wxUSE_INTL
-   return wxLocale::GetSystemEncoding();
-#else // !wxUSE_INTL
-   return wxFONTENCODING_ISO8859_1;
-#endif // wxUSE_INTL/!wxUSE_INTL
-}
+/// try to convert text in UTF-8 to the current encoding in place
+extern wxFontEncoding ConvertUnicodeToSystem(wxString *strUtf);
 
 #endif // MESSAGEVIEW_H
