@@ -1058,12 +1058,15 @@ MailFolder::ForwardMessage(Message *msg,
 }
 
 // ----------------------------------------------------------------------------
-// misc
+// folder delimiter stuff
 // ----------------------------------------------------------------------------
 
-char MailFolder::GetFolderDelimiter() const
+/* static */
+char MailFolder::GetFolderDelimiter(const MFolder *folder)
 {
-   switch ( GetType() )
+   CHECK( folder, '\0', _T("NULL folder in MailFolder::GetFolderDelimiter") );
+
+   switch ( folder->GetType() )
    {
       default:
          FAIL_MSG( _T("Don't call GetFolderDelimiter() for this type") );
@@ -1086,11 +1089,15 @@ char MailFolder::GetFolderDelimiter() const
          return '.';
 
       case MF_IMAP:
-         // for IMAP this depends on server!
-         FAIL_MSG( _T("shouldn't be called for IMAP, unknown delimiter") );
+         // for IMAP this depends on server
+         MailFolder_obj mfTmp = OpenFolder(folder, HalfOpen);
+         if ( !mfTmp )
+         {
+            // guess :-(
+            return '/';
+         }
 
-         // guess :-(
-         return '/';
+         return mfTmp->GetFolderDelimiter();
    }
 }
 

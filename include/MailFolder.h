@@ -468,9 +468,18 @@ public:
       Returns the delimiter used to separate the components of the folder
       name
 
-      @return character dependind on the folder type and server
+      @return character depending on the folder type and server
     */
-   virtual char GetFolderDelimiter() const;
+   virtual char GetFolderDelimiter() const = 0;
+
+   /**
+     This function allows to get the folder hierarchy delimiter without
+     necessarily creating a MailFolder object just for this.
+
+     @param folder the MFolder describing the folder we'd like to get info for
+     @return the delimiter character or NUL
+    */
+   static char GetFolderDelimiter(const MFolder *folder);
 
    //@}
 
