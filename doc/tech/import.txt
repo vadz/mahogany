@@ -1,0 +1,94 @@
+                       How to create an importer module
+                       ================================
+
+0. Introduction
+---------------
+
+   This tech note describes how to write a new importer module for Mahogany
+(and will also be helpful if you want to enhance an existing importer).
+An importer module is a class which knows how to import some of the settings
+from another mail client. Currently, importers may import address books,
+filter rules, folder information and generic configuration information (for
+example, personal name or reply-to address), however an importer doesn't have
+to support all of these operations at once.
+
+1. Overview
+-----------
+
+   Here is a sequence of steps for creating a new importer from program Foo:
+
+1. Create a new source file src/modules/FooImport.cpp
+2. Declara a class MFooImporter deriving from MImporter and implementing all
+   the pure virtual functions of it except GetProgName(). You must use
+   DECLARE_M_IMPORTER() macro in the class declaration and IMPLEMENT_M_IMPORTER()
+   macro outside it.
+3. You must implement Applies() and GetFeatures()
+4. Other methods are optional: if they're supported, do implement them,
+   otherwise - just return FALSE
+
+   You may look at the existing importers (for example PineImport.cpp) for an
+example.
+
+2. Importer macros
+------------------
+
+   Just as all M modules must use MMODULE_DEFINE and ADB importers
+DECLARE_ADB_IMPORTER and IMPLEMENT_ADB_IMPORTER, the importers must use
+DECLARE_M_IMPORTER and IMPLEMENT_M_IMPORTER macros.
+
+   The arguments of IMPLEMENT_M_IMPORTER(cname, progname, desc) are:
+
+a) cname: the class name (MFooImporter)
+b) progname: the name of the program we import from ("Foo 98 v 1.2 or later")
+c) desc: general module description ("import settings from MS Foo")
+
+3. Overview of operation
+------------------------
+
+   When the user invokes the "import" dialog, he is presented with the list of
+all importers available (to be precise, of the "progname" arguments of
+IMPLEMENT_M_IMPORTER macro from above) and which apply: this means that
+all importers are found and loaded and their Applies() function is called. If
+it returns TRUE, the importers is shown in the dialog, otherwise it is not.
+
+   If the user selects an importer, its GetFeatures() is called. Depending on
+its return values, the checkboxes in the dialog shown (one per each
+ImportXXX() method) will be enabled or not. When the user chooses "Do import"
+from the dialog, all ImportXXX() will be called one after another.
+
+4. Implementing Applies()
+-------------------------
+
+   Here you should check if the program is installed on the system. Under
+Unix, this is usually achieved checking for some file ~/.foorc or directory
+~/.foo. Under Windows - by checking some registry key.
+
+5. Implementing ImportFolders()
+-------------------------------
+
+   First, you need to create a folder in a format "natively" supported by
+Mahogany: for example, MBX (or MH). Then call CreateFolderTreeEntry() function
+as many times as needed (it creates only one folder at a time) and, when you
+are done, call
+
+         MEventManager::Send
+          (
+            new MEventFolderTreeChangeData
+               (
+                "",
+                MEventFolderTreeChangeData::CreateUnder
+               )
+          );
+
+which will generate an event telling everybody that new folder(s) have been
+created.
+
+6. Testing
+----------
+
+   It is recommended to compile Mahogany --with-modules=static for debugging
+as it is very difficult (if not impossible) to debug dynamically loaded shared
+libraries with gdb.
+
+NB: currently there is a bug which messes up the importer names if the modules
+    are dynamic, I didn't yet have time to fix this.
