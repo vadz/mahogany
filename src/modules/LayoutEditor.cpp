@@ -457,6 +457,7 @@ void LayoutEditor::InsertAttachment(const wxBitmap& icon, EditorContentPart *mc)
    data->DecRef();
 
    m_LayoutWindow->GetLayoutList()->Insert(obj);
+   m_LayoutWindow->SetModified();
    m_LayoutWindow->ResizeScrollbars(true /* exactly */);
    m_LayoutWindow->ScrollToCursor();
    m_LayoutWindow->Refresh();
