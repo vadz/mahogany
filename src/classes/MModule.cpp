@@ -285,8 +285,8 @@ MModule::LoadModule(const String & name)
    for ( size_t n = 0; n < nDirs; n++ )
    {
       if ( !path.empty() )
-         path += ":";
-      path += dirs[nDirs];
+         path += ':';
+      path += dirs[n];
    }
 
    wxLogTrace(M_TRACE_MODULES, "Looking for module '%s' in the path '%s'.",
