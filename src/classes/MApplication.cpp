@@ -482,11 +482,8 @@ MAppBase::OnStartup()
    // initialise collector object for incoming mails
    // ----------------------------------------------
    // only do it if we are using the NewMail folder at all
-   if ( READ_APPCONFIG(MP_MAINFOLDER) == READ_APPCONFIG(MP_NEWMAIL_FOLDER) )
-   {
-      m_MailCollector = MailCollector::Create();
-      m_MailCollector->Collect(); // empty all at beginning
-   }
+   m_MailCollector = MailCollector::Create();
+   m_MailCollector->Collect(); // empty all at beginning
 
 
    // show the ADB editor if it had been shown the last time when we ran
