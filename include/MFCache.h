@@ -31,14 +31,12 @@ WX_DEFINE_ARRAY(MailFolderStatus *, MfStatusArray);
 // tree)
 // ----------------------------------------------------------------------------
 
-class MfStatusCache
+class MfStatusCache : public MObjectRC
 {
 public:
    // this is a singleton class and this function is the only way to access it
-   static MfStatusCache *Create();
-
-   // but it can be deleted directly
-   ~MfStatusCache();
+   // (you have to call DecRef() on the returned pointer, of course)
+   static MfStatusCache *Get();
 
    // query the status info: return true and fill the provided pointer with
    // info if we have it, return false otherwise
@@ -50,6 +48,9 @@ public:
 protected:
    // protected ctor for CreateStatusCache()
    MfStatusCache();
+
+   // and protected dtor as always in MObjectRC
+   virtual ~MfStatusCache();
 
    // get the full cache file name
    String GetFileName() const;

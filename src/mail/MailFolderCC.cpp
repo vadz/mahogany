@@ -106,6 +106,8 @@
 
 #include "modules/Filters.h"
 
+#include "MFCache.h"
+
 // just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking and
 // wxFile::Exists() too
 #include <wx/filefn.h>
@@ -1951,7 +1953,7 @@ MailFolderCC::UnLock(void) const
 // ----------------------------------------------------------------------------
 
 bool
-MailFolderCC::AppendMessage(String const &msg, bool update)
+MailFolderCC::AppendMessage(const String& msg, bool update)
 {
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
@@ -1986,9 +1988,12 @@ MailFolderCC::AppendMessage(String const &msg, bool update)
 }
 
 bool
-MailFolderCC::AppendMessage(Message const &msg, bool update)
+MailFolderCC::AppendMessage(const Message& msg, bool update)
 {
    CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
+
+   // the target folder
+   MailFolder *mf = msg.GetFolder();
 
    // we didn't append the message yet
    long rc = 0;
@@ -1999,10 +2004,9 @@ MailFolderCC::AppendMessage(Message const &msg, bool update)
       If that is not the case, or it fails, then it simply retrieves
       the message and appends it to the second folder.
    */
-   if(GetType() == MF_IMAP)
+   if( GetType() == MF_IMAP )
    {
-      MailFolder *mf = ((Message &)msg).GetFolder();
-      if(mf->GetType() == MF_IMAP)
+      if ( mf && mf->GetType() == MF_IMAP )
       {
          // Now we know mf is MailFolderCC:
          MAILSTREAM *ms = ((MailFolderCC *)mf)->m_MailStream;
@@ -2037,6 +2041,7 @@ MailFolderCC::AppendMessage(Message const &msg, bool update)
         mail_date(datebuf, &mc);
         dateptr = datebuf;
       }
+
       // different folders, so we actually copy the message around:
       String tmp;
       if( msg.WriteToString(tmp) )
@@ -2065,9 +2070,49 @@ MailFolderCC::AppendMessage(Message const &msg, bool update)
 
       wxLogError(_("Failed to save message to the folder '%s'"),
                  GetName().c_str());
+
+      return false;
    }
 
-   return rc != 0;
+   // update status of the target folder
+   if ( mf )
+   {
+      MfStatusCache *mfStatusCache = GetStatusCache();
+      MailFolderStatus status;
+      if ( mfStatusCache->GetStatus(mf->GetName(), &status) )
+      {
+         int flags = msg.GetStatus();
+
+         // deleted messages don't count, except for the total number
+         if ( !(flags & MailFolder::MSG_STAT_DELETED) )
+         {
+            bool isRecent = (flags & MailFolder::MSG_STAT_RECENT) != 0;
+
+            if ( !(flags & MailFolder::MSG_STAT_SEEN) )
+            {
+               if ( isRecent )
+                  status.newmsgs++;
+               else
+                  status.unseen++;
+            }
+            else if ( isRecent )
+            {
+               status.recent++;
+            }
+
+            if ( flags & MailFolder::MSG_STAT_FLAGGED )
+               status.flagged++;
+            if ( flags & MailFolder::MSG_STAT_SEARCHED )
+               status.searched++;
+         }
+
+         status.total++;
+
+         mfStatusCache->UpdateStatus(mf->GetName(), status);
+      }
+   }
+
+   return true;
 }
 
 void
@@ -2170,16 +2215,16 @@ bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
 {
    CHECK( status, false, "NULL pointer in CountInterestingMessages" );
 
+   MfStatusCache *mfStatusCache = GetStatusCache();
+
    // do we already have the number of messages?
-   if ( m_status.IsValid() )
+   if ( mfStatusCache->GetStatus(GetName(), status) )
    {
       // do at least a simple consistency check
-      ASSERT_MSG( m_status.total == m_nMessages,
+      ASSERT_MSG( status->total == m_nMessages,
                   "caching of number of messages broken" );
-
-      *status = m_status;
    }
-   else
+   else // need to really calculate
    {
       status->Init();
 
@@ -2218,8 +2263,9 @@ bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
       }
 
       // cache the number of messages
+      mfStatusCache->UpdateStatus(GetName(), *status);
+
       MailFolderCC *self = (MailFolderCC *)this; // const_cast
-      self->m_status = *status;
       self->m_nRecent = status->recent;
    }
 
@@ -3303,6 +3349,20 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
    // added
    if ( msgno != mf->m_msgnoMax )
    {
+      if ( msgno > mf->m_msgnoMax )
+      {
+         // update the number of new messages - we have some more of them
+         MailFolderStatus status;
+         MfStatusCache *mfStatusCache = mf->GetStatusCache();
+         if ( mfStatusCache->GetStatus(mf->GetName(), &status) )
+         {
+            status.newmsgs += msgno - mf->m_msgnoMax;
+
+            mfStatusCache->UpdateStatus(mf->GetName(), status);
+         }
+      }
+      //else: I don't know what to do with the cache - invalidate completely?
+
       mf->m_msgnoMax = msgno;
 
       // new message(s) arrived, we need to reapply the filters
@@ -3326,10 +3386,6 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
             delete mf->m_expungedIndices;
             mf->m_expungedIndices = NULL;
          }
-
-         // invalidate it as the number of messages changed and we don't have
-         // the status of the new message(s) here unfortunately
-         mf->m_status.total = UID_ILLEGAL;
       }
    }
    else // the messages were expunged
@@ -3403,11 +3459,19 @@ MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long msgno)
       mf->m_nMessages--;
       mf->m_msgnoMax--;
 
-      // it is not necessary to update the other m_status fields because they
+      // it is not necessary to update the other status fields because they
       // were already updated when the message was deleted, but this one must
       // be kept in sync manually as it wasn't updated before
-      if ( mf->m_status.IsValid() )
-         mf->m_status.total--;
+      MailFolderStatus status;
+      MfStatusCache *mfStatusCache = mf->GetStatusCache();
+      if ( mfStatusCache->GetStatus(mf->GetName(), &status) )
+      {
+         ASSERT_MSG( status.total--, "total number of messages miscached" );
+
+         status.total--;
+
+         mfStatusCache->UpdateStatus(mf->GetName(), status);
+      }
    }
    //else: no need to do anything right now
 }
@@ -3766,31 +3830,33 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
    CHECK_RET( hi, "no HeaderInfo in mm_flags" );
 
    MESSAGECACHE *elt = mail_elt (m_MailStream, msgno);
-   int status = GetMsgStatus(elt),
+   int statusNew = GetMsgStatus(elt),
        statusOld = hi->GetStatus();
-   if ( status != statusOld )
+   if ( statusNew != statusOld )
    {
-      // update the cached message number
-      if ( m_status.IsValid() )
+      // update the cached status
+      MailFolderStatus status;
+      MfStatusCache *mfStatusCache = GetStatusCache();
+      if ( mfStatusCache->GetStatus(GetName(), &status) )
       {
          bool wasDeleted = (statusOld & MSG_STAT_DELETED) != 0,
-              isDeleted = (status & MSG_STAT_DELETED) != 0;
+              isDeleted = (statusNew & MSG_STAT_DELETED) != 0;
 
          MsgStatus msgStatusOld = AnalyzeStatus(statusOld),
-                   msgStatus = AnalyzeStatus(status);
+                   msgStatusNew = AnalyzeStatus(statusNew);
 
          // we consider that a message has some flag only if it is not deleted
          // (which is discussable at least for flagged and searched flags
          // although, OTOH, why flag a deleted message?)
 
          #define UPDATE_NUM_OF(what)   \
-            if ( (!isDeleted && msgStatus.what) && \
+            if ( (!isDeleted && msgStatusNew.what) && \
                  (wasDeleted || !msgStatusOld.what) ) \
-               m_status.what++; \
+               status.what++; \
             else if ( (!wasDeleted && msgStatusOld.what) && \
-                      (isDeleted || !msgStatus.what) ) \
-               if ( m_status.what > 0 ) \
-                  m_status.what--; \
+                      (isDeleted || !msgStatusNew.what) ) \
+               if ( status.what > 0 ) \
+                  status.what--; \
                else \
                   FAIL_MSG( "error in msg status change logic" )
 
@@ -3801,9 +3867,11 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
          UPDATE_NUM_OF(searched);
 
          #undef UPDATE_NUM_OF
+
+         mfStatusCache->UpdateStatus(GetName(), status);
       }
 
-      ((HeaderInfoImpl *)hi)->m_Status = status;
+      ((HeaderInfoImpl *)hi)->m_Status = statusNew;
 
       // tell all interested that status changed unless we're inside the
       // filtering code: in this case we stay silent as the listing is

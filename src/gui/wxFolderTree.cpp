@@ -47,6 +47,8 @@
 #include "gui/wxFolderView.h"
 #include "gui/wxMainFrame.h"
 
+#include "MFCache.h"
+
 // wxMSW treectrl has a bug: it's impossible to prevent it from
 // collapsing/expanding a branch when it is double clicked, even if we do
 // process the activate message
@@ -168,6 +170,9 @@ public:
       // set the "own" status for this folder, this doesn't always change the
       // folder appearance as GetShownStatus() might stay unchanged
    void SetStatus(wxTreeCtrl *tree, Status status);
+
+      // translate MailFolder status to tree item status
+   static Status GetTreeStatusFromMf(const MailFolderStatus& status);
 
 protected:
       // get the current "own" status, i.e. don't take children into account
@@ -893,6 +898,38 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    if ( folder )
    {
       tree->SetItemHasChildren(GetId(), folder->GetSubfolderCount() != 0);
+   }
+
+   // restore cached status
+   MfStatusCache *mfStatusCache = MfStatusCache::Get();
+   MailFolderStatus status;
+   if ( mfStatusCache->GetStatus(folder->GetFullName(), &status) )
+   {
+      SetStatus(tree, GetTreeStatusFromMf(status));
+   }
+
+   mfStatusCache->DecRef();
+}
+
+/* static */
+wxFolderTreeNode::Status
+wxFolderTreeNode::GetTreeStatusFromMf(const MailFolderStatus& mfStatus)
+{
+   if ( mfStatus.newmsgs > 0 )
+   {
+      return wxFolderTreeNode::Folder_New;
+   }
+   else if ( mfStatus.unseen > 0 )
+   {
+      return wxFolderTreeNode::Folder_Unseen;
+   }
+   else if ( mfStatus.flagged > 0 )
+   {
+      return wxFolderTreeNode::Folder_Flagged;
+   }
+   else // no unseen, no new, no flagged
+   {
+      return wxFolderTreeNode::Folder_Normal;
    }
 }
 
@@ -1803,6 +1840,10 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
    return true;
 }
 
+// ----------------------------------------------------------------------------
+// folder status stuff
+// ----------------------------------------------------------------------------
+
 void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *folder)
 {
    wxTreeItemId item = GetTreeItemFromName(folder->GetName());
@@ -1824,26 +1865,18 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *folder)
       // only "normal" messages, nothing interesting
       status = wxFolderTreeNode::Folder_Normal;
    }
-   else if ( mfStatus.newmsgs > 0 )
+   else
    {
-      status = wxFolderTreeNode::Folder_New;
-   }
-   else if ( mfStatus.unseen > 0 )
-   {
-      status = wxFolderTreeNode::Folder_Unseen;
-   }
-   else if ( mfStatus.flagged > 0 )
-   {
-      status = wxFolderTreeNode::Folder_Flagged;
-   }
-   else // no unseen, no new, no flagged
-   {
-      status = wxFolderTreeNode::Folder_Normal;
+      status = wxFolderTreeNode::GetTreeStatusFromMf(mfStatus);
    }
 
    wxFolderTreeNode *node = GetFolderTreeNode(item);
    node->SetStatus(this, status);
 }
+
+// ----------------------------------------------------------------------------
+// folder icons
+// ----------------------------------------------------------------------------
 
 // update the icon of the selected folder: called with tmp == FALSE when [Ok]
 // button is pressed or TRUE if it was the [Apply] button
@@ -1908,6 +1941,10 @@ bool wxFolderTreeImpl::FindItemWithChangedIcon(const wxTreeItemId& item,
 
    return FALSE;
 }
+
+// ----------------------------------------------------------------------------
+// misc
+// ----------------------------------------------------------------------------
 
 #ifdef USE_TREE_ACTIVATE_BUGFIX
 

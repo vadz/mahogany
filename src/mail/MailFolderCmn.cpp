@@ -1620,6 +1620,11 @@ MailFolderCmn::DeleteDuplicates()
 // MailFolderCmn message counting
 // ----------------------------------------------------------------------------
 
+MfStatusCache *MailFolderCmn::GetStatusCache() const
+{
+   return gs_MfStatusCache;
+}
+
 bool MailFolderCmn::CountInterestingMessages(MailFolderStatus *status) const
 {
    String name = GetName();
@@ -1688,7 +1693,7 @@ extern bool MailFolderCmnInit()
    {
       gs_MailFolderCloser = new MfCloser;
 
-      gs_MfStatusCache = MfStatusCache::Create();
+      gs_MfStatusCache = MfStatusCache::Get();
    }
 
    return true;
@@ -1706,7 +1711,7 @@ extern void MailFolderCmnCleanup()
       delete mfCloser;
 
       // save the cache
-      delete gs_MfStatusCache;
+      gs_MfStatusCache->DecRef();
       gs_MfStatusCache = NULL;
    }
 }

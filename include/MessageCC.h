@@ -114,7 +114,7 @@ public:
        guaranteed for as long as the message exists.
        @return folder pointer (not incref'ed)
    */
-   virtual MailFolder * GetFolder(void) { return m_folder; }
+   virtual MailFolder * GetFolder(void) const { return m_folder; }
 
    /**@name Methods accessing individual parts of a message. */
    //@{

@@ -68,11 +68,15 @@ static MfStatusCache *gs_mfStatusCache = NULL;
 // ----------------------------------------------------------------------------
 
 /* static */
-MfStatusCache *MfStatusCache::Create()
+MfStatusCache *MfStatusCache::Get()
 {
    if ( !gs_mfStatusCache )
    {
       gs_mfStatusCache = new MfStatusCache;
+   }
+   else
+   {
+      gs_mfStatusCache->IncRef();
    }
 
    return gs_mfStatusCache;
