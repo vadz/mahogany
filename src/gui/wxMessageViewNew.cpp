@@ -1413,6 +1413,7 @@ wxMessageView::ShowMessage(Message *mailMessage)
    m_uid = mailMessage->GetUId();
 
    if( GetFolder() && ! (m_mailMessage->GetStatus() & MailFolder::MSG_STAT_SEEN))
+   {
       m_mailMessage->GetFolder()->SetMessageFlag(m_uid, MailFolder::MSG_STAT_SEEN, true);
 
    /* FIXME for now it's here, should go somewhere else: */
@@ -1437,6 +1438,7 @@ wxMessageView::ShowMessage(Message *mailMessage)
                            m_ProfileValues.autocollectBookName,
                            folderName,
                            (MFrame *)GetFrame(this));
+   }
    }
    Update();
 }

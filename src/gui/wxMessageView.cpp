@@ -1763,12 +1763,18 @@ wxMessageView::ShowMessage(Message *mailMessage)
    m_mailMessage = mailMessage;
    m_uid = mailMessage->GetUId();
 
-   if( GetFolder() && ! (m_mailMessage->GetStatus() & MailFolder::MSG_STAT_SEEN))
-      m_mailMessage->GetFolder()->SetMessageFlag(m_uid, MailFolder::MSG_STAT_SEEN, true);
-
-   /* FIXME for now it's here, should go somewhere else: */
-   if ( m_ProfileValues.autocollect )
+   //have we not seen the message before?
+   if( GetFolder() && 
+     ! (m_mailMessage->GetStatus() & MailFolder::MSG_STAT_SEEN))
    {
+      // mark it as seen
+      m_mailMessage->GetFolder()->
+        SetMessageFlag(m_uid, MailFolder::MSG_STAT_SEEN, true);
+
+     // autocollect the address:
+     /* FIXME for now it's here, should go somewhere else: */
+     if ( m_ProfileValues.autocollect )
+     { 
       String addr, name;
       addr = m_mailMessage->Address(name, MAT_REPLYTO);
 
@@ -1788,8 +1794,8 @@ wxMessageView::ShowMessage(Message *mailMessage)
                            m_ProfileValues.autocollectBookName,
                            folderName,
                            (MFrame *)GetFrame(this));
+    }
    }
-
    Update();
 }
 
