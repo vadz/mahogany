@@ -161,6 +161,7 @@ public:
    void OnListboxSelection(wxCommandEvent& event);
    void OnComboBoxChange(wxCommandEvent& event);
    void OnUpdateUIDelete(wxUpdateUIEvent& event);
+   void OnCancel(wxCommandEvent& event);
 
 private:
    // helper function to get the correct title for the dialog
@@ -223,6 +224,7 @@ BEGIN_EVENT_TABLE(wxAllTemplatesDialog, wxManuallyLaidOutDialog)
 
    EVT_BUTTON(Button_Template_Add,    wxAllTemplatesDialog::OnAddTemplate)
    EVT_BUTTON(Button_Template_Delete, wxAllTemplatesDialog::OnDeleteTemplate)
+   EVT_BUTTON(wxID_CANCEL, wxAllTemplatesDialog::OnCancel)
 
    EVT_UPDATE_UI(Button_Template_Delete, wxAllTemplatesDialog::OnUpdateUIDelete)
 END_EVENT_TABLE()
@@ -814,6 +816,13 @@ void wxAllTemplatesDialog::OnAddTemplate(wxCommandEvent& /* event */)
    m_listbox->SetSelection(m_listbox->GetCount() - 1);
    m_textctrl->Clear();
    m_textctrl->DiscardEdits();
+}
+
+void wxAllTemplatesDialog::OnCancel(wxCommandEvent& event)
+{
+   CheckForChanges();
+
+   event.Skip();
 }
 
 void wxAllTemplatesDialog::OnUpdateUIDelete(wxUpdateUIEvent& event)
