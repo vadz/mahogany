@@ -218,6 +218,7 @@ inline bool FolderTypeHasUserName(MFolderType type)
    case MF_NEWS:
    case MF_MFILE:
    case MF_MDIR:
+   case MF_VIRTUAL:
       ; // don't put return false here to avoid VC++ warnings
    }
 
@@ -325,6 +326,7 @@ inline bool CanCreateMessagesInFolder(MFolderType folderType)
       case MF_NEWS:
       case MF_GROUP:
       case MF_ROOT:
+      case MF_VIRTUAL:     // so far we don't support this, maybe later
          return false;
 
       case MF_ILLEGAL:
@@ -378,6 +380,7 @@ inline bool CanOpenFolder(MFolderType folderType, int folderFlags)
       case MF_POP:
       case MF_MFILE:
       case MF_MDIR:
+      case MF_VIRTUAL:
          ; // don't put return here to avoid VC++ warnings
    }
 
