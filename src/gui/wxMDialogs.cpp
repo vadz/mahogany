@@ -682,18 +682,11 @@ MDialog_FileRequester(String const & message,
 }
 
 String MDialog_DirRequester(const String& message,
-                            const String& path,
-                            MWindow *parent)
+                            const String& pathOrig,
+                            MWindow *parent,
+                            const char *confpath)
 {
-   wxDirDialog dlg(parent, message, path);
-
-   String dir;
-   if ( dlg.ShowModal() == wxID_OK )
-   {
-      dir = dlg.GetPath();
-   }
-
-   return dir;
+   return wxPDirSelector(confpath, message, pathOrig, parent);
 }
 
 int

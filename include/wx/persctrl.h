@@ -601,6 +601,18 @@ extern WXDLLMAYEXP size_t wxPFilesSelector(wxArrayString& filenames,
                                            wxConfigBase *config = NULL);
 
 // ----------------------------------------------------------------------------
+// Persistent directory selector: remember the last directory entered
+// ----------------------------------------------------------------------------
+
+// return the selected directory or an empty string if the dialog was
+// cancelled
+extern WXDLLMAYEXP wxString wxPDirSelector(const wxString& configPath,
+                                           const wxString& message,
+                                           const wxString& pathDefault = _T(""),
+                                           wxWindow *parent = NULL,
+                                           wxConfigBase *config = NULL);
+
+// ----------------------------------------------------------------------------
 // Persistent (a.k.a. "don't remind me again") message boxes functions.
 //
 // This function shows to the user a message box with a "don't show this

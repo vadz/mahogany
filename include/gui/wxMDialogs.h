@@ -181,11 +181,13 @@ const char *MDialog_FileRequester(const String &message,
   @param message the explanatory message
   @param path the initially selected directory (if not empty)
   @param parent the parent frame
+  @param configPath the profile path to use (may be NULL)
   @return the path of the selected directory or an empty string
  */
 String MDialog_DirRequester(const String& message,
                             const String& path = NULLstring,
-                            MWindow *parent = NULL);
+                            MWindow *parent = NULL,
+                            const char *configPath = NULL);
 
 /** show a (modal) dialog with the given text
 

@@ -43,6 +43,7 @@
 #   include  "wx/settings.h"
 #   include  "wx/statbox.h"
 #   include  "wx/filedlg.h"
+#   include  "wx/dirdlg.h"
 #   include  "wx/app.h"
 #   include  "wx/msgdlg.h"
 #endif //WX_PRECOMP
@@ -1838,6 +1839,43 @@ size_t wxPFilesSelector(wxArrayString& filenames,
     dialog->Destroy();
 
     return filenames.GetCount();
+}
+
+// ----------------------------------------------------------------------------
+// Persistent directory selector dialog box
+// ----------------------------------------------------------------------------
+
+wxString wxPDirSelector(const wxString& configPath,
+                        const wxString& message,
+                        const wxString& pathDefault,
+                        wxWindow *parent = NULL,
+                        wxConfigBase *config = NULL)
+{
+    wxPHelper persist(configPath, _T("DirPrompt"), config);
+    wxString configKey = persist.GetKey();
+
+    // if config was NULL, wxPHelper already has the global one
+    config = persist.GetConfig();
+
+    wxString path = pathDefault;
+    if ( path.empty() && !configPath.empty() )
+    {
+        // use the last directory
+        path = config->Read(configKey, _T(""));
+    }
+
+    wxDirDialog dlg(parent, message, path);
+
+    wxString dir;
+    if ( dlg.ShowModal() == wxID_OK )
+    {
+        dir = dlg.GetPath();
+
+        persist.ChangePath();
+        config->Write(configKey, dir);
+    }
+
+    return dir;
 }
 
 // ----------------------------------------------------------------------------
