@@ -1978,23 +1978,19 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
    // set user data (retrieved by mm_list)
    m_UserData = ud;
 
-   // temporarily assign us a corresponding ASMailFolder object:
-   ASSERT_MSG( !streamListDefaultObj, "can't list folders" );
-   SetDefaultObj();
    m_ASMailFolder = asmf;
    m_ASMailFolder->IncRef();
    char *ref = reference.length() == 0 ? NULL : (char *)reference.c_str();
    if ( subscribedOnly )
    {
-      mail_lsub (NIL, ref, (char *) spec.c_str());
+      mail_lsub (m_MailStream, ref, (char *) spec.c_str());
    }
    else
    {
-      mail_list (NIL, ref, (char *) spec.c_str());
+      mail_list (m_MailStream, ref, (char *) spec.c_str());
    }
    m_ASMailFolder->DecRef();
    m_ASMailFolder = NULL;
-   SetDefaultObj(false);
 }
 
 
