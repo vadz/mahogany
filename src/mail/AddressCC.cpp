@@ -210,7 +210,11 @@ AddressListCC::AddressListCC(mail_address *adr)
 
    while ( adr )
    {
-      if ( adr->error )
+      // c-client generates dummy addresses when it can't parse the original
+      // address, filter them out
+      if ( adr->error ||
+            (adr->mailbox && !strcmp(adr->mailbox, "INVALID_ADDRESS")) ||
+            (adr->host && !strcmp(adr->host, ERRHOST)) )
       {
          DBGMESSAGE(("Skipping bad address '%s'.", Adr2String(adr).c_str()));
       }
@@ -256,14 +260,21 @@ AddressListCC::~AddressListCC()
 /* static */
 AddressList *AddressListCC::Create(const mail_address *adr)
 {
-   if ( !adr )
+   ADDRESS *adrCopy;
+   if ( adr )
    {
-      // it's not an error, MessageCC::GetAddressList() uses us like this
-      return NULL;
+      // copy the address as AddressListCC takes ownership of it and will free
+      // it
+      adrCopy = rfc822_cpy_adr((ADDRESS *)adr);
+   }
+   else
+   {
+      // it's not an error, this may happen if there are no valid addresses in
+      // the message
+      adrCopy = NULL;
    }
 
-   // copy the address as AddressListCC takes ownership of it and will free it
-   return new AddressListCC(rfc822_cpy_adr((ADDRESS *)adr));
+   return new AddressListCC(adrCopy);
 }
 
 /* static */
@@ -313,6 +324,7 @@ String AddressListCC::GetAddresses() const
    {
       address = Adr2String(m_addrCC->m_adr);
    }
+   //else: no valid addresses at all
 
    return address;
 }

@@ -36,6 +36,7 @@
 #include "MDialogs.h"
 #include "FolderView.h"
 
+#include "AddressCC.h"
 #include "MailFolderCC.h"
 #include "MessageCC.h"
 
@@ -3541,41 +3542,11 @@ MsgnoType MailFolderCC::GetHeaderInfo(ArrayHeaderInfo& headers,
 String
 MailFolderCC::ParseAddress(ADDRESS *adr)
 {
-   String from;
+   AddressList *addrList = AddressListCC::Create(adr);
+   String address = addrList->GetAddresses();
+   addrList->DecRef();
 
-   // ignore the addresses without any interesting parts, they can be only
-   // bogus
-   while ( adr && !adr->host && !adr->mailbox && !adr->personal )
-   {
-      wxLogDebug("Ignoring empty address.");
-
-      adr = adr->next;
-   }
-
-   if ( adr )
-   {
-      if ( adr->personal )
-         from << adr->personal;
-
-      if ( adr->mailbox )
-      {
-         if ( adr->personal )
-            from << " <";
-         from << adr->mailbox;
-         if ( adr->host && *adr->host && (strcmp(adr->host,BADHOST) != 0) )
-            from << '@' << adr->host;
-         if ( adr->personal )
-            from << '>';
-      }
-   }
-   else // no valid addresses at all
-   {
-      // poor c-client crashes if we pass it the string "address missing" as
-      // address, so use this one instead now
-      from = _("<address@missing>");
-   }
-
-   return from;
+   return address;
 }
 
 bool

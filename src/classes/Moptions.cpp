@@ -781,7 +781,8 @@ extern MOptionValue GetOptionValue(Profile *profile, const MOption opt)
 
 extern const char *GetOptionName(const MOption opt)
 {
-   ASSERT_MSG( opt.GetId() < WXSIZEOF(MOptions), "invalid option index!" );
+   ASSERT_MSG( (size_t)opt.GetId() < WXSIZEOF(MOptions),
+               "invalid option index!" );
 
    return MOptions[opt.GetId()].name;
 }

@@ -33,7 +33,7 @@ public:
    // create the address from cclient ADDRESS struct
    AddressCC(mail_address *adr);
 
-   // implement the base class pure virtuals  
+   // implement the base class pure virtuals
    virtual bool IsValid() const;
    virtual String GetAddress() const;
    virtual String GetName() const;
@@ -66,7 +66,7 @@ public:
    // ownership of it)
    static AddressList *Create(const mail_address *adr);
 
-   // implement the base class pure virtuals  
+   // implement the base class pure virtuals
    virtual Address *GetFirst() const;
    virtual Address *GetNext(const Address *addr) const;
    virtual String GetAddresses() const;
