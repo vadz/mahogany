@@ -635,5 +635,11 @@ extern bool RetrieveRemoteConfigSettings(bool confirm = true);
 /// save (parts) of config on the remote server
 extern bool SaveRemoteConfigSettings(bool confirm = true);
 
+extern int
+CopyEntries(wxConfigBase *src,
+            const wxString &from,
+            const wxString &to,
+            bool recursive = true,
+            wxConfigBase *dest = NULL)
 
 #endif   // MAPPLICATION_H

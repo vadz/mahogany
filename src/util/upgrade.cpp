@@ -1836,12 +1836,12 @@ UpgradeFrom001()
     @param dest      if NULL, the global config will be used
     @return number of groups copied (may be 0) or -1 on error
 */
-static int
+int
 CopyEntries(wxConfigBase *src,
             const wxString &from,
             const wxString &to,
-            bool recursive = true,
-            wxConfigBase *dest = NULL)
+            bool recursive,
+            wxConfigBase *dest)
 {
    wxString oldPath = src->GetPath();
 

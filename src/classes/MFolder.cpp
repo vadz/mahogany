@@ -1127,67 +1127,15 @@ bool MFolderFromProfile::Move(MFolder *newParent)
       return false;
    }
 
-   // We will now copy in the profile of the newly created folder all the
-   // information found in the profile of the moved (old) folder.
-   // XNOTODO(?): make this some method of the Profile class
-   Profile_obj newProfile(newSubfolder->GetProfile());
-   CHECK( newProfile, false, _T("panic in MFolder: no profile") );
-   Profile_obj oldProfile(m_folderName);
-
-   bool isExpendingEnvVars = oldProfile->IsExpandingEnvVars();
-   oldProfile->SetExpandEnvVars(false);
-   // Copy all the profile entries 
-   String entryName;
-   long dummy;
-   bool rc = true;
-   bool bCont = oldProfile->GetFirstEntry(entryName, dummy);
-   while ( bCont ) {
-      wxConfigBase::EntryType type = oldProfile->GetEntryType(entryName);
-      switch (type)
-      {
-         case wxConfigBase::Type_String:
-            {
-               String value;
-               bool found = false;
-               value = oldProfile->readEntry(entryName, "", &found);
-               if ( !found )
-               {
-                  wxLogError(_("Problem reading original profile."));
-                  return false;
-               }
-               rc = newProfile->writeEntry(entryName, value);
-               if ( !rc )
-               {
-                  wxLogError(_("Problem writing new profile."));
-                  return false;
-               }
-               break;
-            }
-         case wxConfigBase::Type_Integer:
-            {
-               long value;
-               bool found = false;
-               value = oldProfile->readEntry(entryName, -1, &found);
-               if ( !found )
-               {
-                  wxLogError(_("Problem reading original profile."));
-                  return false;
-               }
-               rc = newProfile->writeEntry(entryName, value);
-               if ( !rc )
-               {
-                  wxLogError(_("Problem writing new profile."));
-                  return false;
-               }
-               break;
-            }
-         default:
-            wxLogError(_("Unkown type for key '%s'."),
-                         entryName.c_str());
-      }
-      bCont = oldProfile->GetNextEntry(entryName, dummy);
+   wxString oldProfilePath, newProfilePath;
+   oldProfilePath << Profile::GetProfilePath() << '/' << m_folderName;
+   newProfilePath << Profile::GetProfilePath() << '/' << newFullName;
+   if ( CopyEntries(mApplication->GetProfile()->GetConfig(), oldProfilePath, newProfilePath, false) == -1 )
+   {
+      wxLogError(_("Could not copy profile."));
+      return false;
    }
-   oldProfile->SetExpandEnvVars(isExpendingEnvVars);
+   bool rc = true;
 
    if ( GetFolderType(GetType()) == MF_IMAP )
    {
@@ -1197,9 +1145,6 @@ bool MFolderFromProfile::Move(MFolder *newParent)
       // and no RENAME command should be issued).
       CHECK( false, false, _T("RENAME command to server not yet implemented") );
    }
-
-   // Now, we can delete the old folder from the hierarchy
-   Delete();
 
    // We should update the cache, but I (XNO) did not find a way to do it correctly.
    //MFolderCache::Remove(this);
@@ -1251,6 +1196,9 @@ bool MFolderFromProfile::Move(MFolder *newParent)
       new MEventFolderTreeChangeData(newFullName,
                                      MEventFolderTreeChangeData::Create)
       );
+
+   // Now, we can delete the old folder from the hierarchy
+   Delete();
 
    struct MailFolderStatus status;
    MfStatusCache* cache = MfStatusCache::Get();
