@@ -163,13 +163,6 @@ extern void CC_Cleanup(void)
 
 
 
-/* static */
-void
-MailFolderCC::UpdateCClientConfig()
-{
-   mm_show_debug = READ_APPCONFIG(MP_DEBUG_CCLIENT);
-}
-
 // ============================================================================
 // implementation
 // ============================================================================
@@ -332,6 +325,13 @@ static inline void CCVerbose(void)
 {
    MCclientLocker lock;
    mm_ignore_errors = mm_disable_callbacks = false;
+}
+
+/* static */
+void
+MailFolderCC::UpdateCClientConfig()
+{
+   mm_show_debug = READ_APPCONFIG(MP_DEBUG_CCLIENT);
 }
 
 // loglevel for cclient error messages:

@@ -121,7 +121,7 @@ SendMessageCC::Create(Protocol protocol,
       m_ServerHost = READ_CONFIG(prof, MP_SMTPHOST);
       if(READ_CONFIG(prof,MP_SMTPHOST_LOGIN) != "")
          m_ServerHost = 
-            << m_ServerHost
+            m_ServerHost
             << String("/user=")
             << String(READ_CONFIG(prof,MP_SMTPHOST_LOGIN));
    }
@@ -130,7 +130,7 @@ SendMessageCC::Create(Protocol protocol,
       m_ServerHost = READ_CONFIG(prof, MP_NNTPHOST);
       if(READ_CONFIG(prof,MP_USERNAME) != "")
          m_ServerHost = 
-            << m_ServerHost
+            m_ServerHost
             << String("/user=")
             << String(READ_CONFIG(prof,MP_USERNAME));
    }
