@@ -980,10 +980,10 @@ String MDialog_DirRequester(const String& message,
 // simple AboutDialog to be displayed at startup
 
 // timer which calls our DoClose() when it expires
-class LogCloseTimer : public wxTimer
+class SplashCloseTimer : public wxTimer
 {
 public:
-   LogCloseTimer(class wxAboutWindow *window)
+   SplashCloseTimer(class wxAboutWindow *window)
       {
          m_window = window;
          Start(READ_APPCONFIG(MP_SPLASHDELAY)*1000);
@@ -1023,17 +1023,18 @@ public:
   {
      StopTimer();
 
-     wxWindow *parent = GetParent();
-     if ( parent )
-        parent->Close();
+     wxFrame *parent = wxDynamicCast(GetParent(), wxFrame);
+     CHECK_RET( parent, "should have the splash frame as parent!" );
+
+     ReallyCloseTopLevelWindow(parent);
   }
 
 private:
-  LogCloseTimer  *m_pTimer;
+  SplashCloseTimer  *m_pTimer;
 };
 
 void
-LogCloseTimer::Notify()
+SplashCloseTimer::Notify()
 {
    m_window->DoClose();
 }
@@ -1232,7 +1233,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    bottom->SetFocus();
    // start a timer which will close us (if not disabled)
    if ( bCloseOnTimeout ) {
-     m_pTimer = new LogCloseTimer(this);
+     m_pTimer = new SplashCloseTimer(this);
    }
    else {
      // must initialize to NULL because we delete it later unconditionally
