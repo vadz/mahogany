@@ -25,11 +25,15 @@
 #include   "Mpch.h"
 
 #ifndef   USE_PCH
-#   include   "Mcommon.h"
-#   include   "guidef.h"
-#   include   "MFrame.h"
-#   include   "Mdefaults.h"
-#   include   "strutil.h"
+#  include "Mcommon.h"
+#  include "guidef.h"
+#  include "MFrame.h"
+#  include "Mdefaults.h"
+#  include "strutil.h"
+
+#  include <wx/menu.h>
+#  include <wx/dirdlg.h>
+#  include <wx/statusbr.h>
 #endif
 
 #include "wx/persctrl.h"

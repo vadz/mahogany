@@ -18,10 +18,10 @@
 #   pragma interface "wxMessageView.h"
 #endif
 
+class MsgCmdProc;
+
 #include "FolderType.h"
 #include "MessageView.h"
-
-#include "gui/wxlwindow.h"
 
 #ifndef USE_PCH
 #  include "gui/wxMFrame.h"
@@ -74,19 +74,16 @@ public:
 class wxMessageViewFrame : public wxMFrame
 {
 public:
-   wxMessageViewFrame(wxWindow *parent = NULL);
+   wxMessageViewFrame(wxWindow *parent, ASMailFolder *asmf, UIdType uid);
 
-   wxMessageView *GetMessageView() { return m_MessageView; }
+   MessageView *GetMessageView() { return m_MessageView; }
 
    virtual void OnMenuCommand(int id);
 
-   void ShowMessage(Message *msg)
-      { m_MessageView->DoShowMessage(msg); }
-
 private:
-   wxMessageView *m_MessageView;
+   MessageView *m_MessageView;
 
-   DECLARE_DYNAMIC_CLASS(wxMessageViewFrame)
+   MsgCmdProc *m_msgCmdProc;
 };
 
 #endif // WXMESSAGEVIEW_H

@@ -59,7 +59,7 @@ void AutoCollectAddresses(const String &email,
                           bool collectNamed,
                           const String& bookName,
                           const String& groupName,
-                          MFrame *frame)
+                          wxFrame *frame)
 {
    // we need an address and a name
    bool hasEmailAndName = true;
@@ -262,7 +262,7 @@ void AutoCollectAddresses(const String &email,
 int InteractivelyCollectAddresses(const wxArrayString& addresses,
                                   const String& bookNameOrig,
                                   const String& groupNameOrig,
-                                  MFrame *parent)
+                                  wxFrame *parent)
 {
    // by default, select all addresses
     wxArrayInt selections;

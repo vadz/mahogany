@@ -39,7 +39,7 @@ extern void AutoCollectAddresses(const String &email,
                                  bool collectNamed,
                                  const String& bookName,
                                  const String& groupName,
-                                 class MFrame *frame = NULL);
+                                 class wxFrame *frame = NULL);
 
 /**
    Interactive collection of email addresses: present the user with a dialog
@@ -55,7 +55,7 @@ extern void AutoCollectAddresses(const String &email,
 extern int InteractivelyCollectAddresses(const wxArrayString& addresses,
                                          const String& bookName,
                                          const String& groupName,
-                                         MFrame *parent = NULL);
+                                         wxFrame *parent = NULL);
 
 /// construct the full email address of the form "name <email>"
 inline String GetFullEmailAddress(const String& name, const String& email)

@@ -51,9 +51,6 @@
 
 #include <wx/regex.h>   // wxRegEx::Flags
 
-// for the func_print() function:
-#include "gui/wxMessageView.h"
-
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -2069,6 +2066,8 @@ extern "C"
       if(! msg)
          return Value("");
 
+      // FIXME: this can't work like this!!
+#if 0
       wxMessageViewFrame *mvf = new wxMessageViewFrame(NULL);
       mvf->Show(FALSE);
       mvf->ShowMessage(msg);
@@ -2078,6 +2077,9 @@ extern "C"
 
       return Value(rc);
 #else
+      return 0;
+#endif
+#else // TEST
       return 0;
 #endif
    }

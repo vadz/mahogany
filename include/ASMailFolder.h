@@ -24,8 +24,8 @@
 // forward declarations
 class FolderView;
 class Profile;
-class MWindow;
 class MailFolder;
+class wxWindow;
 
 #include "MailFolder.h"
 #include "Message.h"
@@ -421,7 +421,7 @@ public:
        @return ResultInt boolean
    */
    virtual Ticket SaveMessagesToFile(const UIdArray *messages,
-                                     MWindow *parent = NULL,
+                                     wxWindow *parent = NULL,
                                      UserData ud = 0) = 0;
 
    /** Save messages to a folder.
@@ -431,7 +431,7 @@ public:
        @return true if messages got saved
    */
    virtual Ticket SaveMessagesToFolder(const UIdArray *messages,
-                                       MWindow *parent = NULL,
+                                       wxWindow *parent = NULL,
                                        MFolder *folder = NULL,
                                        UserData ud = 0) = 0;
 
@@ -443,7 +443,7 @@ public:
    */
    virtual Ticket ReplyMessages(const UIdArray *messages,
                                 const MailFolder::Params& params,
-                                MWindow *parent = NULL,
+                                wxWindow *parent = NULL,
                                 UserData ud = 0) = 0;
 
    /** Forward selected messages.
@@ -452,7 +452,7 @@ public:
    */
    virtual Ticket ForwardMessages(const UIdArray *messages,
                                   const MailFolder::Params& params,
-                                  MWindow *parent = NULL,
+                                  wxWindow *parent = NULL,
                                   UserData ud = 0) = 0;
 
    /** Apply filter rules to the folder.

@@ -20,7 +20,6 @@
 #include "Mdefaults.h"
 #include "wxMFrame.h"
 #include "FolderView.h"
-#include "wxMessageView.h"
 #include "MEvent.h"
 #include "Mpers.h"
 
@@ -31,14 +30,13 @@ class wxFolderViewPanel;
 class wxFolderView;
 class wxFolderListCtrl;
 class wxMFrame;
-class wxMessageView;
 class MailFolder;
+class MessageView;
+class MsgCmdProc;
 class ASMailFolder;
 class ASTicketList;
 class HeaderInfoList_obj;
 class FolderViewAsyncStatus;
-
-WX_DEFINE_ARRAY(FolderViewAsyncStatus *, ArrayAsyncStatus);
 
 enum wxFolderListCtrlFields
 {
@@ -89,63 +87,6 @@ public:
    */
    void OpenMessages(UIdArray const &messages);
 
-   /** Print messages.
-       @param messages array holding the message numbers
-   */
-   void PrintMessages(UIdArray const &messages);
-
-   /** Print-preview messages.
-       @param message array holding the message numbers
-   */
-   void PrintPreviewMessages(UIdArray const &messages);
-
-   /** For use by the listctrl: get last previewed uid: */
-   UIdType GetPreviewUId(void) const { return m_uidPreviewed; }
-
-   /** Are we previewing anything? */
-   bool HasPreview() const { return GetPreviewUId() != UID_ILLEGAL; }
-
-   /** Save messages to a file.
-       @param pointer array holding the message numbers
-   */
-   void SaveMessagesToFile(UIdArray const &messages);
-
-   /** Save messages to a folder.
-       @param messages array holding the message UIDs
-       @param folder is the folder to save to, ask the user if NULL
-       @return the ticket for the save operation
-   */
-   Ticket SaveMessagesToFolder(const UIdArray &messages,
-                               MFolder *folder = NULL);
-
-
-   /** Move messages to a folder: SaveMessagesToFolder() and then delete
-       them if they had been saved successfully
-
-       @param messages array holding the message UIDs
-       @param folder is the folder to move to, ask the user if NULL
-       @return the ticket for the save operation
-   */
-   Ticket MoveMessagesToFolder(const UIdArray& messages,
-                               MFolder *folder = NULL);
-
-   /** Save messages to a folder and possibly delete them later.
-       This function should be used by drop targets accepting the message
-       objects as the folder view must know whether it has to delete the
-       messages or not after saving (depending on whether copy or move was
-       done)
-
-       @param n number of messages
-       @param messages pointer to an array holding the message numbers
-       @param folder is the folder to save to, ask the user if NULL
-       @param del if TRUE, delete them when they are saved
-   */
-   void DropMessagesToFolder(UIdArray const &messages, MFolder *folder);
-
-   /** Delete messages
-    */
-   void DeleteOrTrashMessages(const UIdArray& messages);
-
    /**
        Expunge messages
     */
@@ -157,20 +98,21 @@ public:
     */
    Ticket MarkRead(const UIdArray& messages, bool read);
 
-   /** Toggle the "flagged" status of the messages.
-       @param pointer to an array holding the message numbers
-   */
-   void ToggleMessages(UIdArray const &messages);
+   /** For use by the listctrl: get last previewed uid: */
+   UIdType GetPreviewUId(void) const { return m_uidPreviewed; }
+
+   /** Are we previewing anything? */
+   bool HasPreview() const { return GetPreviewUId() != UID_ILLEGAL; }
 
    /** Returns false if no items are selected
-   */
+    */
    bool HasSelection() const;
 
    /** Gets an array containing the uids of the selected messages. If there is
        no selection, the array will contain the focused UID (if any)
 
        @return the array of selections, may be empty
-   */
+    */
    UIdArray GetSelections() const;
 
    /** Get either the the currently focused message
@@ -180,17 +122,11 @@ public:
    /// Show a message in the preview window.
    void PreviewMessage(long uid);
 
-   /// Show the raw text of the specified message
-   void ShowRawText(long uid);
-
    /// [de]select all items
    void SelectAll(bool on = true);
 
    /// select all messages by some status/flag
    void SelectAllByStatus(MailFolder::MessageStatus status, bool isSet = true);
-
-   /// called by wxFolderListCtrl to drag and drop messages
-   bool DragAndDropMessages();
 
    /// return the MWindow pointer:
    MWindow *GetWindow(void) const { return m_SplitterWindow; }
@@ -239,19 +175,7 @@ public:
    /// get the parent frame of the folder view
    MFrame *GetParentFrame() const { return m_Frame; }
 
-   /// add an async status object to m_arrayAsyncStatus
-   void AddAsyncStatus(FolderViewAsyncStatus *asyncStatus);
-
-   /// remove the given async status object from m_arrayAsyncStatus
-   void RemoveAsyncStatus(FolderViewAsyncStatus *asyncStatus);
-
 protected:
-   /** Save messages to a folder.
-       @param messages array holding the message numbers
-       @param file filename
-   */
-   void SaveMessages(UIdArray const &messages, String const &file);
-
    /// update the view after new messages appeared in the folder
    void Update();
 
@@ -290,10 +214,15 @@ private:
 
    /// either a listctrl or a treectrl
    wxFolderListCtrl *m_FolderCtrl;
+
    /// a splitter window
    wxSplitterWindow *m_SplitterWindow;
+
    /// the preview window
-   wxMessageView *m_MessagePreview;
+   MessageView *m_MessagePreview;
+
+   /// the command processor object
+   MsgCmdProc *m_msgCmdProc;
 
    /// UId of last previewed message (may be UID_ILLEGAL)
    UIdType m_uidPreviewed;
@@ -306,24 +235,6 @@ private:
 
    /// a list of pending tickets from async operations
    ASTicketList *m_TicketList;
-   /// a list of tickets we should delete if copy operation succeeded
-   ASTicketList *m_TicketsToDeleteList;
-
-   // drag and dropping messages is complicated because all operations
-   // (message saving, deletion *and* DoDragDrop() call) are async, so
-   // everything may happen in any order, yet we should never delete the
-   // messages which couldn't be copied successfully. To deal with this we
-   // maintain the following lists:
-   //  * m_TicketsDroppedList which contains all tickets created by
-   //    DropMessagesToFolder()
-   //  * m_UIdsCopiedOk which contains messages from tickets of
-   //    m_TicketsDroppedList which have been already saved successfully.
-
-   /// a list of tickets which we _might_ have to delete
-   ASTicketList *m_TicketsDroppedList;
-
-   /// a list of UIDs we might have to delete
-   UIdArray m_UIdsCopiedOk;
 
    /// do we have focus-follow enabled?
    bool m_FocusFollowMode;
@@ -373,9 +284,6 @@ private:
 
    /// handler of options change event, refreshes the view if needed
    void OnOptionsChange(MEventOptionsChangeData& event);
-
-   /// the array containing the progress objects for all async operations
-   ArrayAsyncStatus m_arrayAsyncStatus;
 
    /// MEventManager reg info
    void *m_regOptionsChange;

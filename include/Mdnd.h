@@ -19,18 +19,18 @@
 
 #include <wx/dnd.h>
 
-class wxFolderView;
+class MsgCmdProc;
 
 /// the clipboard/dnd format for Mahogany messages
 #define MMESSAGE_FORMAT "MMessage"
 
 /**
   MMessagesDataObject is used for the mail messages transfer. It has a
-  wxFolderView pointer and the list of UIDs which allows the drop target to
-  call SaveMessagesToFolder() or do anything else it wishes with these
-  messages.
+  MsgCmdProc pointer (on which it will call ProcessCommand(DROP)) and the list
+  of UIDs which allows the drop target to call SaveMessagesToFolder() or do
+  anything else it wishes with these messages.
 
-  NB: this only works for intraprocess dnd, passing a wxFolderView pointer
+  NB: this only works for intraprocess dnd, passing a MsgCmdProc pointer
       between processes won't work!
 */
 class MMessagesDataObject : public wxCustomDataObject
@@ -38,14 +38,14 @@ class MMessagesDataObject : public wxCustomDataObject
 public:
    MMessagesDataObject() : wxCustomDataObject(MMESSAGE_FORMAT) { }
 
-   MMessagesDataObject(wxFolderView *view,
+   MMessagesDataObject(MsgCmdProc *msgProc,
                        MailFolder *folder,
                        const UIdArray& messages);
 
    virtual ~MMessagesDataObject();
 
    // accessors
-   wxFolderView *GetFolderView() const { return GetMData()->view; }
+   MsgCmdProc *GetMsgCmdProc() const { return GetMData()->msgProc; }
 
    /// return the inc-refed folder pointer
    MailFolder *GetFolder() const
@@ -64,7 +64,7 @@ private:
    struct Data
    {
       MailFolder *folder;
-      wxFolderView *view;
+      MsgCmdProc *msgProc;
       size_t number;
 
       // UIdType messages[]; -- a variable sized array follows

@@ -1206,7 +1206,7 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
                   level = GetQuotedLevel(before.c_str() + line_pos + 1);
 
                   m_viewer->InsertText(before.Mid(line_from,
-                                                 line_pos - line_from + 1),
+                                                  line_pos - line_from + 1),
                                        style);
 
                   style.SetTextColour(GetQuoteColour(level));
@@ -1214,11 +1214,10 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
                }
             }
 
-            if ( line_from < line_lng-1 )
+            // anything left?
+            if ( line_from < line_lng )
             {
-               m_viewer->InsertText(before.Mid(line_from,
-                                               line_lng - line_from),
-                                    style);
+               m_viewer->InsertText(before.Mid(line_from), style);
             }
          }
          else // no quoted text colourizing
@@ -1774,12 +1773,9 @@ MessageView::MimeHandle(const MimePart *mimepart)
             ASMailFolder *asmf = ASMailFolder::OpenFolder(mfolder);
             if ( asmf )
             {
-               MessageView *msgView = ShowMessageViewFrame(GetParentFrame());
-               msgView->SetFolder(asmf);
-
                // FIXME: assume UID of the first message in new MBX folder is
                //        always 1
-               msgView->ShowMessage(1);
+               ShowMessageViewFrame(GetParentFrame(), asmf, 1);
 
                ok = true;
 
@@ -2376,55 +2372,6 @@ MessageView::DoMenuCommand(int id)
          m_viewer->FindAgain();
          break;
 
-      case WXMENU_MSG_REPLY:
-         MailFolder::ReplyMessage(m_mailMessage,
-                                  MailFolder::Params(),
-                                  profile,
-                                  GetParentFrame());
-         break;
-
-      case WXMENU_MSG_FOLLOWUP:
-         MailFolder::ReplyMessage(m_mailMessage,
-                                  MailFolder::Params(MailFolder::REPLY_FOLLOWUP),
-                                  profile,
-                                  GetParentFrame());
-         break;
-      case WXMENU_MSG_FORWARD:
-         MailFolder::ForwardMessage(m_mailMessage,
-                                    MailFolder::Params(),
-                                    profile,
-                                    GetParentFrame());
-         break;
-
-      case WXMENU_MSG_SAVE_TO_FOLDER:
-         GetFolder()->SaveMessagesToFolder(&msgs, GetParentFrame());
-         break;
-
-      case WXMENU_MSG_SAVE_TO_FILE:
-         GetFolder()->SaveMessagesToFile(&msgs, GetParentFrame());
-         break;
-
-      case WXMENU_MSG_DELETE:
-         GetFolder()->DeleteMessages(&msgs);
-         break;
-
-      case WXMENU_MSG_UNDELETE:
-         GetFolder()->UnDeleteMessages(&msgs);
-         break;
-
-      case WXMENU_MSG_PRINT:
-         Print();
-         break;
-
-      case WXMENU_MSG_PRINT_PREVIEW:
-         PrintPreview();
-         break;
-
-#ifdef USE_PS_PRINTING
-      case WXMENU_MSG_PRINT_PS:
-         break;
-#endif
-
       case WXMENU_HELP_CONTEXT:
          mApplication->Help(MH_MESSAGE_VIEW, GetParentFrame());
          break;
@@ -2436,57 +2383,23 @@ MessageView::DoMenuCommand(int id)
          Update();
          break;
 
-      case WXMENU_MSG_SAVEADDRESSES:
-         {
-            MailFolder *mf = GetFolder()->GetMailFolder();
-            CHECK( mf, false, "message preview without folder?" );
-
-            Message *msg = mf->GetMessage(m_uid);
-            if ( !msg )
-            {
-               FAIL_MSG( "no message in message view?" );
-            }
-            else
-            {
-               wxSortedArrayString addressesSorted;
-               if ( !msg->ExtractAddressesFromHeader(addressesSorted) )
-               {
-                  // very strange
-                  wxLogWarning(_("Selected message doesn't contain any valid addresses."));
-               }
-
-               wxArrayString addresses = strutil_uniq_array(addressesSorted);
-               if ( !addresses.IsEmpty() )
-               {
-                  InteractivelyCollectAddresses
-                  (
-                     addresses,
-                     READ_APPCONFIG(MP_AUTOCOLLECT_ADB),
-                     mf->GetName(),
-                     (MFrame *)GetParentFrame()
-                  );
-               }
-
-               msg->DecRef();
-            }
-
-            mf->DecRef();
-         }
-         break;
-
       case WXMENU_MSG_SHOWMIME:
          ShowMIMEDialog(m_mailMessage->GetTopMimePart());
          break;
 
       default:
-         if ( WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT) )
+         if ( WXMENU_CONTAINS(LANG, id) )
          {
-            SetLanguage(id);
-            break;
+            if ( id != WXMENU_LANG_SET_DEFAULT )
+            {
+               SetLanguage(id);
+            }
          }
-
-         // not handled
-         return false;
+         else
+         {
+            // not handled
+            return false;
+         }
    }
 
    // message handled

@@ -30,11 +30,12 @@
 #  include "MailFolder.h"
 
 #  include "guidef.h"
+#  include "gui/wxMenuDefs.h"    // for WXMENU_MSG_DROP_TO_FOLDER
 #endif // USE_PCH
 
 #include "MFolder.h"
 
-#include "gui/wxFolderView.h"
+#include "MsgCmdProc.h"
 
 #include "Mdnd.h"
 
@@ -46,18 +47,18 @@
 // MMessagesDataObject
 // ----------------------------------------------------------------------------
 
-MMessagesDataObject::MMessagesDataObject(wxFolderView *view,
+MMessagesDataObject::MMessagesDataObject(MsgCmdProc *msgProc,
                                          MailFolder *folder,
                                          const UIdArray& messages)
                    : wxCustomDataObject(MMESSAGE_FORMAT)
 {
-   // we store the wxFolderView pointer first followed by the number of
+   // we store the MsgCmdProc pointer first followed by the number of
    // messages - and then all messages after it
    size_t len = sizeof(MMessagesDataObject::Data) +
                   messages.GetCount()*sizeof(UIdType);
    void *buf = new char[len];
    Data *data = (Data *)buf;
-   data->view = view;
+   data->msgProc = msgProc;
    data->number = messages.GetCount();
    data->folder = folder;
    
@@ -158,19 +159,19 @@ wxDragResult MMessagesDropTarget::OnMsgDrop(wxCoord x, wxCoord y,
 
       UIdArray messages = data->GetMessages();
 
-      wxFolderView *folderView = data->GetFolderView();
+      MsgCmdProc *msgCmdProc = data->GetMsgCmdProc();
 
       // TODO: check here if the folder can be written to?
 
       // check that we are not copying to the same folder
-      if ( folderView->GetFullName() == folder->GetFullName() )
+      if ( msgCmdProc->GetFolderName() == folder->GetFullName() )
       {
          wxLogStatus(m_frame, _("Can't drop messages to the same folder."));
 
          return wxDragNone;
       }
 
-      folderView->DropMessagesToFolder(messages, folder);
+      msgCmdProc->ProcessCommand(WXMENU_MSG_DROP_TO_FOLDER, messages, folder);
 
       // it's ok even if m_frame is NULL
       wxLogStatus(m_frame, _("%u messages dropped."), messages.GetCount());

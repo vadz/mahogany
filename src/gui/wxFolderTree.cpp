@@ -26,6 +26,8 @@
 #  include "Profile.h"
 
 #  include <wx/confbase.h>
+#  include <wx/menu.h>
+#  include <wx/textdlg.h>
 #endif // USE_PCH
 
 #include "MDialogs.h"

@@ -51,6 +51,7 @@
 
 #include "MessageView.h"
 #include "MessageViewer.h"
+#include "MsgCmdProc.h"
 
 #include "MessageTemplate.h"
 #include "Composer.h"
@@ -418,6 +419,12 @@ wxMessageView::~wxMessageView()
 {
 }
 
+/* static */
+MessageView *MessageView::Create(wxWindow *parent)
+{
+   return new wxMessageView(parent);
+}
+
 // ----------------------------------------------------------------------------
 // popup menus
 // ----------------------------------------------------------------------------
@@ -460,7 +467,7 @@ wxMessageView::DoShowMessage(Message *mailMessage)
    MessageView::DoShowMessage(mailMessage);
 
    wxFrame *frame = GetParentFrame();
-   if ( wxDynamicCast(frame, wxMessageViewFrame) )
+   if ( frame != wxTheApp->GetTopWindow() )
    {
       wxString fmt = READ_CONFIG(GetProfile(), MP_MVIEW_TITLE_FMT);
       MsgVarExpander expander(mailMessage);
@@ -495,16 +502,74 @@ wxMessageView::OnViewerChange(const MessageViewer *viewerOld,
 // wxMessageViewFrame
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(wxMessageViewFrame, wxMFrame)
-
-wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent)
+wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent,
+                                       ASMailFolder *asmf,
+                                       UIdType uid)
                   : wxMFrame(_("Mahogany: Message View"), parent)
 {
-   m_MessageView = new wxMessageView(this);
+   m_MessageView = MessageView::Create(this);
+   m_MessageView->SetFolder(asmf);
+
+   m_msgCmdProc = MsgCmdProc::Create(m_MessageView);
+   m_msgCmdProc->SetFolder(asmf);
 
    AddFileMenu();
    AddEditMenu();
-   AddMessageMenu();
+
+   // don't use AddMessageMenu() as some commands in this menu don't make
+   // sense for standalone message preview
+   static const int menuCommands[] =
+   {
+      WXMENU_MSG_PRINT,
+      WXMENU_MSG_PRINT_PREVIEW,
+#ifdef USE_PS_PRINTING
+      // extra postscript printing
+      WXMENU_MSG_PRINT_PS,
+      WXMENU_MSG_PRINT_PREVIEW_PS,
+#endif
+      WXMENU_MSG_SEP1,
+      WXMENU_MSG_SEND_SUBMENU_BEGIN,
+         WXMENU_MSG_REPLY,
+         WXMENU_MSG_REPLY_WITH_TEMPLATE,
+         WXMENU_MSG_FOLLOWUP,
+         WXMENU_MSG_FOLLOWUP_WITH_TEMPLATE,
+         WXMENU_MSG_FORWARD,
+         WXMENU_MSG_FORWARD_WITH_TEMPLATE,
+      WXMENU_MSG_SEND_SUBMENU_END,
+      WXMENU_MSG_SEP2,
+      WXMENU_MSG_SAVE_TO_FILE,
+      WXMENU_MSG_SAVE_TO_FOLDER,
+      WXMENU_MSG_MOVE_TO_FOLDER,
+      WXMENU_MSG_DELETE,
+      WXMENU_MSG_UNDELETE,
+      WXMENU_MSG_SEP3,
+      WXMENU_MSG_ADVANCED_SUBMENU_BEGIN,
+         WXMENU_MSG_SAVEADDRESSES,
+         WXMENU_MSG_TOGGLEHEADERS,
+         WXMENU_MSG_SHOWRAWTEXT,
+#ifdef EXPERIMENTAL_show_uid
+         WXMENU_MSG_SHOWUID,
+#endif // EXPERIMENTAL_show_uid
+         WXMENU_MSG_SHOWMIME,
+      WXMENU_MSG_ADVANCED_SUBMENU_END
+   };
+
+   wxMenu *menu = new wxMenu("", wxMENU_TEAROFF);
+   for ( size_t n = 0; n < WXSIZEOF(menuCommands); n++ )
+   {
+      int cmd = menuCommands[n];
+      AppendToMenu(menu, cmd);
+
+      // AppendToMenu() might have advanced cmd to the end of the submenu, so
+      // advance n accordingly
+      while ( n < WXSIZEOF(menuCommands) && menuCommands[n] < cmd )
+      {
+         n++;
+      }
+   }
+
+   GetMenuBar()->Append(menu, _("Me&ssage"));
+
    AddLanguageMenu();
 
    // add a toolbar to the frame
@@ -515,21 +580,30 @@ wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent)
    static const int s_widths[] = { -1, 70 };
    SetStatusWidths(WXSIZEOF(s_widths), s_widths);
 
+   // do it after creating the menu as it access the "Toggle headers" item in
+   // it
+   m_MessageView->ShowMessage(uid);
+
    Show(true);
 }
 
 void
 wxMessageViewFrame::OnMenuCommand(int id)
 {
-   if( !m_MessageView->DoMenuCommand(id) )
+   UIdArray messages;
+   messages.Add(m_MessageView->GetUId());
+
+   if ( !m_msgCmdProc->ProcessCommand(id, messages) )
    {
       wxMFrame::OnMenuCommand(id);
    }
 }
 
-extern MessageView *ShowMessageViewFrame(wxWindow *parent)
+extern MessageView *ShowMessageViewFrame(wxWindow *parent,
+                                         ASMailFolder *asmf,
+                                         UIdType uid)
 {
-   wxMessageViewFrame *frame = new wxMessageViewFrame(parent);
+   wxMessageViewFrame *frame = new wxMessageViewFrame(parent, asmf, uid);
 
    return frame->GetMessageView();
 }

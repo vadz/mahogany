@@ -38,6 +38,7 @@
 
 #  include <wx/dynarray.h>
 #  include <wx/colour.h>
+#  include <wx/menu.h>
 #endif
 
 #include <ctype.h>
@@ -52,7 +53,6 @@
 #include "wx/persctrl.h"
 
 #include "MFolder.h"
-#include "Mdnd.h"
 
 #include "FolderView.h"
 #include "MailFolder.h"
@@ -61,12 +61,13 @@
 #include "MessageView.h"
 #include "TemplateDialog.h"
 #include "Composer.h"
+#include "MsgCmdProc.h"
 
 #include "gui/wxFolderView.h"
-#include "gui/wxMessageView.h"
 #include "gui/wxFolderMenu.h"
 #include "gui/wxFiltersDialog.h" // for ConfigureFiltersForFolder()
 #include "MFolderDialogs.h"      // for ShowFolderPropertiesDialog
+#include "Mdnd.h"
 
 #include "gui/wxMIds.h"
 #include "MDialogs.h"
@@ -99,9 +100,6 @@ static const char *wxFLC_ColumnNames[] =
 // the default widths for the columns: the number of entries must be equal to
 // WXFLC_NUMENTRIES!
 static const char *FOLDER_LISTCTRL_WIDTHS_D = "60:300:200:80:80";
-
-// the trace mask for dnd messages
-#define M_TRACE_DND "msgdnd"
 
 // the trace mask for selection/focus handling
 #define M_TRACE_SELECTION "msgsel"
@@ -458,120 +456,6 @@ public:
 };
 
 // ----------------------------------------------------------------------------
-// FolderViewAsyncStatus: this object is constructed before launching an async
-// operation to show some initial message
-//
-// Then it must be given the ticket to monitor - if the ticket is invalid, it
-// deletes itself (with an error message) and the story stops here, otherwise
-// it waits untiul OnASFolderResultEvent() deletes it and gives the final
-// message indicating either success (default) or failure (if Fail() was
-// called)
-// ----------------------------------------------------------------------------
-
-class FolderViewAsyncStatus
-{
-public:
-   FolderViewAsyncStatus(wxFolderView *fv, const char *fmt, ...)
-   {
-      m_folderView = fv;
-      m_ticket = ILLEGAL_TICKET;
-
-      va_list argptr;
-      va_start(argptr, fmt);
-      m_msgInitial.PrintfV(fmt, argptr);
-      va_end(argptr);
-
-      m_folderView->AddAsyncStatus(this);
-
-      wxLogStatus(m_folderView->GetParentFrame(), m_msgInitial);
-      wxBeginBusyCursor();
-      wxLog::Suspend();
-   }
-
-   // monitor the given ticket, give error message if the corresponding
-   // operation terminates with an error
-   bool Monitor(Ticket ticket, const char *fmt, ...)
-   {
-      va_list argptr;
-      va_start(argptr, fmt);
-      m_msgError.PrintfV(fmt, argptr);
-      va_end(argptr);
-
-      m_ticket = ticket;
-
-      if ( ticket == ILLEGAL_TICKET )
-      {
-         // self delete as wxFolderView will never do it as it will never get
-         // the notifications for the invalid ticket
-         m_folderView->RemoveAsyncStatus(this);
-
-         delete this;
-
-         return FALSE;
-      }
-
-      m_folderView->GetTicketList()->Add(ticket);
-
-      return TRUE;
-   }
-
-   // used by OnASFolderResultEvent() to find the matching progress indicator
-   Ticket GetTicket() const { return m_ticket; }
-
-   // use to indicate that our operation finally failed
-   void Fail() { m_ticket = ILLEGAL_TICKET; }
-
-   // use different message on success (default is initial message + done)
-   void SetSuccessMsg(const char *fmt, ...)
-   {
-      va_list argptr;
-      va_start(argptr, fmt);
-      m_msgOk.PrintfV(fmt, argptr);
-      va_end(argptr);
-   }
-
-   // give the appropariate message
-   ~FolderViewAsyncStatus()
-   {
-      wxLog::Resume();
-
-      if ( m_ticket == ILLEGAL_TICKET )
-      {
-         // also put it into the status bar to overwrite the previous message
-         // there
-         wxLogStatus(m_folderView->GetParentFrame(), m_msgError);
-
-         // and show the error to the user
-         wxLogError(m_msgError);
-      }
-      else // success
-      {
-         if ( m_msgOk.empty() )
-         {
-            m_msgOk << m_msgInitial << _(" done.");
-         }
-         //else: set explicitly, use it as is
-
-         wxLogStatus(m_folderView->GetParentFrame(), m_msgOk);
-      }
-
-      wxEndBusyCursor();
-   }
-
-private:
-   // the folder view which initiated the async operation
-   wxFolderView *m_folderView;
-
-   // the ticket for our operation
-   Ticket m_ticket;
-
-   // the initial message and the final message in case of success and failure
-   wxString m_msgInitial,
-            m_msgOk,
-            m_msgError;
-};
-
-// ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
@@ -872,10 +756,12 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          }
    }
 
+   MsgCmdProc *msgCmdProc = m_FolderView->m_msgCmdProc;
    switch ( key )
    {
       case 'M': // move
-         if ( !m_FolderView->MoveMessagesToFolder(selections) )
+         if ( !msgCmdProc->ProcessCommand(WXMENU_MSG_MOVE_TO_FOLDER,
+                                          selections) )
          {
             // don't delete the messages if we couldn't save them!
             newFocus = -1;
@@ -883,7 +769,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          break;
 
       case 'D': // delete
-         m_FolderView->DeleteOrTrashMessages(selections);
+         msgCmdProc->ProcessCommand(WXMENU_MSG_DELETE, selections);
 
          // only move on if we mark as deleted, for trash usage, selection
          // remains the same:
@@ -895,65 +781,54 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          break;
 
       case 'U': // undelete
-         m_FolderView->GetTicketList()->
-            Add(m_FolderView->GetFolder()->UnDeleteMessages(&selections,
-                                                            m_FolderView));
+         msgCmdProc->ProcessCommand(WXMENU_MSG_UNDELETE, selections);
          break;
 
       case 'X': // expunge
-         m_FolderView->ExpungeMessages();
+         msgCmdProc->ProcessCommand(WXMENU_MSG_EXPUNGE, selections);
          newFocus = -1;
          break;
 
       case 'C': // copy (to folder)
-         m_FolderView->SaveMessagesToFolder(selections);
+         msgCmdProc->ProcessCommand(WXMENU_MSG_SAVE_TO_FOLDER, selections);
          break;
 
       case 'S': // save (to file)
-         m_FolderView->SaveMessagesToFile(selections);
+         msgCmdProc->ProcessCommand(WXMENU_MSG_SAVE_TO_FILE, selections);
          break;
 
       case 'G': // group reply
+         msgCmdProc->ProcessCommand(WXMENU_MSG_FOLLOWUP, selections);
+         newFocus = -1;
+         break;
+
       case 'R': // reply
-         m_FolderView->GetFolder()->ReplyMessages
-            (
-               &selections,
-               key == 'G' ? MailFolder::REPLY_FOLLOWUP : 0,
-               GetFrame(this),
-               m_FolderView
-            );
+         msgCmdProc->ProcessCommand(WXMENU_MSG_REPLY, selections);
          newFocus = -1;
          break;
 
       case 'F': // forward
-         m_FolderView->GetFolder()->ForwardMessages
-         (
-            &selections,
-            MailFolder::Params(),
-            GetFrame(this),
-            m_FolderView
-         );
+         msgCmdProc->ProcessCommand(WXMENU_MSG_FORWARD, selections);
          newFocus = -1;
          break;
 
       case 'O': // open
-         m_FolderView->OpenMessages(selections);
+         msgCmdProc->ProcessCommand(WXMENU_MSG_OPEN, selections);
          break;
 
       case 'P': // print
-         m_FolderView->PrintMessages(selections);
+         msgCmdProc->ProcessCommand(WXMENU_MSG_PRINT, selections);
          break;
 
       case 'H': // headers
-         m_FolderView->m_MessagePreview->DoMenuCommand(WXMENU_MSG_TOGGLEHEADERS);
+         msgCmdProc->ProcessCommand(WXMENU_MSG_TOGGLEHEADERS, selections);
 
          // don't move focus
          newFocus = -1;
          break;
 
       case '*':
-         // toggle the flagged status
-         m_FolderView->ToggleMessages(selections);
+         msgCmdProc->ProcessCommand(WXMENU_MSG_FLAG, selections);
 
          // don't move focus
          newFocus = -1;
@@ -1040,7 +915,10 @@ void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
       // start the drag and drop operation
       if ( event.Dragging() )
       {
-         if ( m_FolderView->DragAndDropMessages() )
+         const UIdArray& selections = m_FolderView->GetSelections();
+         if ( !selections.IsEmpty() &&
+                  m_FolderView->m_msgCmdProc->
+                     ProcessCommand(WXMENU_MSG_DRAG, selections) )
          {
             // skipping event.Skip() below
             return;
@@ -1160,9 +1038,7 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
    if ( m_PreviewOnSingleClick )
    {
       // view on double click then
-      MessageView *msgView = ShowMessageViewFrame(GetFrame(this));
-      msgView->SetFolder(m_FolderView->GetFolder());
-      msgView->ShowMessage(uid);
+      ShowMessageViewFrame(GetFrame(this), m_FolderView->GetFolder(), uid);
    }
    else // preview on double click
    {
@@ -1968,9 +1844,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_ASMailFolder = NULL;
    m_regOptionsChange = MEventManager::Register(*this, MEventId_OptionsChange);
 
-   m_TicketList =  ASTicketList::Create();
-   m_TicketsToDeleteList = ASTicketList::Create();
-   m_TicketsDroppedList = NULL;
+   m_TicketList = ASTicketList::Create();
 
    m_nDeleted = 0;
    InvalidatePreviewUID();
@@ -1978,7 +1852,9 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_Profile = Profile::CreateEmptyProfile(mApplication->GetProfile());
    m_SplitterWindow = new wxFolderSplitterWindow(m_Parent);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow, this);
-   m_MessagePreview = new wxMessageView(m_SplitterWindow);
+   m_MessagePreview = MessageView::Create(m_SplitterWindow);
+
+   m_msgCmdProc = MsgCmdProc::Create(m_MessagePreview, m_FolderCtrl);
 
    ReadProfileSettings(&m_settings);
    m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
@@ -1999,10 +1875,8 @@ wxFolderView::~wxFolderView()
    MEventManager::Deregister(m_regOptionsChange);
    DeregisterEvents();
 
-   m_TicketList->DecRef();
-   m_TicketsToDeleteList->DecRef();
-
-   SafeDecRef(m_TicketsDroppedList);
+   if ( m_TicketList )
+      m_TicketList->DecRef();
 
    delete m_MessagePreview;
    m_MessagePreview = NULL;
@@ -2309,6 +2183,8 @@ wxFolderView::Clear()
 
       m_ASMailFolder->DecRef();
       m_ASMailFolder = NULL;
+
+      m_msgCmdProc->SetFolder(NULL);
    }
    //else: no old folder
 
@@ -2336,6 +2212,7 @@ wxFolderView::ShowFolder(MailFolder *mf)
    CHECK_RET( mf, "NULL MailFolder in wxFolderView::ShowFolder" );
 
    m_ASMailFolder = ASMailFolder::Create(mf);
+   m_msgCmdProc->SetFolder(m_ASMailFolder);
 
    // this is not supposed to happen, it's an internal operation
    CHECK_RET( m_ASMailFolder, "ASMailFolder::Create() failed??" );
@@ -2616,6 +2493,23 @@ wxFolderView::OpenFolder(MFolder *folder)
 // ----------------------------------------------------------------------------
 
 void
+wxFolderView::PreviewMessage(long uid)
+{
+   if ( (unsigned long)uid != m_uidPreviewed )
+   {
+      // remember which item we preview first as OnPreview() can call us back
+      // under wxGTK!
+      SetPreviewUID(uid);
+
+      // select the item we preview in the folder control
+      m_FolderCtrl->OnPreview();
+
+      // show it in the preview window
+      m_MessagePreview->ShowMessage(uid);
+   }
+}
+
+void
 wxFolderView::SearchMessages(void)
 {
    SearchCriterium criterium;
@@ -2690,38 +2584,19 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
 
    int cmd = event.GetId();
 
-   // first process commands which can be reduced to other commands
-   MessageTemplateKind templKind;
-   switch ( cmd )
+   const UIdArray& selections = GetSelections();
+   if ( selections.IsEmpty() )
    {
-      case WXMENU_MSG_REPLY_WITH_TEMPLATE:
-         cmd = WXMENU_MSG_REPLY;
-         templKind = MessageTemplate_Reply;
-         break;
-
-      case WXMENU_MSG_FORWARD_WITH_TEMPLATE:
-         cmd = WXMENU_MSG_FORWARD;
-         templKind = MessageTemplate_Forward;
-         break;
-
-      case WXMENU_MSG_FOLLOWUP_WITH_TEMPLATE:
-         cmd = WXMENU_MSG_FOLLOWUP;
-         templKind = MessageTemplate_Followup;
-         break;
-
-      default:
-         templKind = MessageTemplate_None;
+      // nothing to do
+      return;
    }
 
-   String templ;
-   if ( templKind != MessageTemplate_None )
+   // first check if it is not something which can be directly processed by
+   // the message viewer
+   if ( m_MessagePreview )
    {
-      templ = ChooseTemplateFor(templKind, m_Frame);
-      if ( !templ )
-      {
-         // cancelled by user
+      if ( m_msgCmdProc->ProcessCommand(cmd, selections) )
          return;
-      }
    }
 
    switch ( cmd )
@@ -2730,137 +2605,9 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
          SearchMessages();
          break;
 
-      case WXMENU_EDIT_FIND:
-      case WXMENU_EDIT_FINDAGAIN:
-      case WXMENU_EDIT_COPY:
-      case WXMENU_MSG_TOGGLEHEADERS:
-         if ( m_MessagePreview )
-         {
-            (void)m_MessagePreview->DoMenuCommand(cmd);
-         }
-         break;
-
-      case WXMENU_MSG_SHOWRAWTEXT:
-         ShowRawText(GetFocus());
-         break;
-
-      case WXMENU_LAYOUT_LCLICK:
-      case WXMENU_LAYOUT_RCLICK:
-      case WXMENU_LAYOUT_DBLCLICK:
-         //FIXME m_MessagePreview->OnMouseEvent(event);
-         break;
-
-      case  WXMENU_MSG_EXPUNGE:
-         ExpungeMessages();
-         break;
-
-      case WXMENU_MSG_MARK_READ:
-         MarkRead(GetSelections(), true);
-         break;
-
-      case WXMENU_MSG_MARK_UNREAD:
-         MarkRead(GetSelections(), false);
-         break;
-
-      case WXMENU_MSG_OPEN:
-         OpenMessages(GetSelections());
-         break;
-
-      case WXMENU_MSG_SAVE_TO_FOLDER:
-         SaveMessagesToFolder(GetSelections());
-         break;
-
-      case WXMENU_MSG_MOVE_TO_FOLDER:
-         MoveMessagesToFolder(GetSelections());
-         break;
-
-      case WXMENU_MSG_SAVE_TO_FILE:
-         SaveMessagesToFile(GetSelections());
-         break;
-
-      case WXMENU_MSG_REPLY:
-      case WXMENU_MSG_FOLLOWUP:
-         {
-            int flags = cmd == WXMENU_MSG_FOLLOWUP ? MailFolder::REPLY_FOLLOWUP
-                                                   : 0;
-
-            UIdArray selections = GetSelections();
-
-            m_TicketList->Add(
-               m_ASMailFolder->ReplyMessages(
-                                             &selections,
-                                             MailFolder::Params(templ, flags),
-                                             m_Frame,
-                                             this
-                                            )
-            );
-         }
-         break;
-
-      case WXMENU_MSG_FORWARD:
-         {
-            UIdArray selections = GetSelections();
-
-            m_TicketList->Add(
-                  m_ASMailFolder->ForwardMessages(
-                                                  &selections,
-                                                  MailFolder::Params(templ),
-                                                  m_Frame,
-                                                  this
-                                                 )
-               );
-         }
-         break;
-
       case WXMENU_MSG_QUICK_FILTER:
          // create a filter for the (first of) currently selected message(s)
-         m_TicketList->Add(
-               m_ASMailFolder->GetMessage(GetFocus(), this)
-            );
-         break;
-
-      case WXMENU_MSG_FILTER:
-         {
-            UIdArray selections = GetSelections();
-
-            size_t count = selections.GetCount();
-            if ( count )
-            {
-               FolderViewAsyncStatus *status =
-                  new FolderViewAsyncStatus(this,
-                                            _("Applying filter rules to %u "
-                                              "messages..."), count);
-               Ticket t = m_ASMailFolder->ApplyFilterRules(&selections, this);
-               if ( status->Monitor(t, _("Failed to apply filter rules.")) )
-               {
-                  status->SetSuccessMsg(_("Applied filters to %u messages, "
-                                          "see log window for details."),
-                                        count);
-               }
-            }
-            else // no messages
-            {
-               wxLogStatus(m_Frame, _("Please select messages to filter."));
-            }
-         }
-         break;
-
-      case WXMENU_MSG_UNDELETE:
-         {
-            UIdArray selections = GetSelections();
-
-            m_TicketList->Add(
-                  m_ASMailFolder->UnDeleteMessages(&selections, this)
-               );
-         }
-         break;
-
-      case WXMENU_MSG_DELETE:
-         DeleteOrTrashMessages(GetSelections());
-         break;
-
-      case WXMENU_MSG_FLAG:
-         ToggleMessages(GetSelections());
+         m_TicketList->Add(m_ASMailFolder->GetMessage(GetFocus(), this));
          break;
 
       case WXMENU_MSG_NEXT_UNREAD:
@@ -2869,20 +2616,6 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
 
       case WXMENU_MSG_NEXT_FLAGGED:
          m_FolderCtrl->SelectNextByStatus(MailFolder::MSG_STAT_FLAGGED, TRUE);
-         break;
-
-      case WXMENU_MSG_PRINT:
-         PrintMessages(GetSelections());
-         break;
-
-#ifdef USE_PS_PRINTING
-      case WXMENU_MSG_PRINT_PS:
-         //FIXME PrintMessages(GetSelections());
-         break;
-#endif // USE_PS_PRINTING
-
-      case WXMENU_MSG_PRINT_PREVIEW:
-         PrintPreviewMessages(GetSelections());
          break;
 
       case WXMENU_MSG_SELECTALL:
@@ -2902,9 +2635,11 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
          break;
 
       case WXMENU_HELP_CONTEXT:
-         mApplication->Help(MH_FOLDER_VIEW,GetWindow());
+         mApplication->Help(MH_FOLDER_VIEW, GetWindow());
          break;
 
+         // FIXME: why should we have it here and not use code in wxMFrame?
+#if 0
       case WXMENU_FILE_COMPOSE_WITH_TEMPLATE:
       case WXMENU_FILE_COMPOSE:
          {
@@ -2935,109 +2670,10 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
             composeView->InitText();
          }
          break;
-
-      case WXMENU_MSG_SAVEADDRESSES:
-         // this is probably not the way it should be done, but I don't know
-         // how to get the folder to do all this synchronously otherwise -
-         // and I don't think this operation gains anything from being async
-         if ( m_MessagePreview )
-         {
-            MailFolder_obj mf = GetMailFolder();
-            CHECK_RET( mf, "message preview without folder?" );
-
-            const UIdArray& selections = GetSelections();
-
-            // extract all addresses from the selected messages to this array
-            wxSortedArrayString addressesSorted;
-            size_t count = selections.GetCount();
-
-            MProgressDialog *dlg;
-            if ( count > 10 )  // FIXME: hardcoded
-            {
-               dlg = new MProgressDialog
-                         (
-                           _("Extracting addresses"),
-                           _("Scanning messages..."),
-                           count,
-                           m_Frame,     // parent
-                           true,        // disable parent only
-                           true         // abort button
-                         );
-            }
-            else
-            {
-               dlg = NULL;
-            }
-
-            for ( size_t n = 0; n < count; n++ )
-            {
-               Message *msg = mf->GetMessage(selections[n]);
-               if ( !msg )
-               {
-                  FAIL_MSG( "selected message disappeared?" );
-
-                  continue;
-               }
-
-               if ( !msg->ExtractAddressesFromHeader(addressesSorted) )
-               {
-                  // very strange
-                  wxLogWarning(_("Selected message doesn't contain any valid addresses."));
-               }
-
-               msg->DecRef();
-
-               if ( dlg && !dlg->Update(n) )
-               {
-                  // interrupted
-                  break;
-               }
-            }
-
-            delete dlg;
-
-            wxArrayString addresses = strutil_uniq_array(addressesSorted);
-            if ( !addresses.IsEmpty() )
-            {
-               InteractivelyCollectAddresses(addresses,
-                                             READ_APPCONFIG(MP_AUTOCOLLECT_ADB),
-                                             m_fullname,
-                                             (MFrame *)m_Frame);
-            }
-         }
-         break;
-
-#ifdef EXPERIMENTAL_show_uid
-      case WXMENU_MSG_SHOWUID:
-         {
-            MailFolder_obj mf = GetMailFolder();
-
-            if ( mf )
-            {
-               String uidString = mf->GetMessageUID(GetFocus());
-               if ( uidString.empty() )
-                  wxLogWarning("This message doesn't have a valid UID.");
-               else
-                  wxLogMessage("The UID of this message is '%s'.",
-                               uidString.c_str());
-            }
-         }
-         break;
-#endif // EXPERIMENTAL_show_uid
+#endif // 0
 
       default:
-         if ( m_MessagePreview )
-         {
-            if ( WXMENU_CONTAINS(MSG, cmd) )
-            {
-               m_MessagePreview->DoMenuCommand(cmd);
-            }
-            else if ( WXMENU_CONTAINS(LANG, cmd) )
-            {
-               m_MessagePreview->SetLanguage(cmd);
-            }
-         }
-         else if ( cmd >= WXMENU_POPUP_FOLDER_MENU )
+         if ( cmd >= WXMENU_POPUP_FOLDER_MENU )
          {
             // it might be a folder from popup menu
             wxFolderMenu *menu = m_FolderCtrl->GetFolderMenu();
@@ -3047,18 +2683,19 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
                if ( folder )
                {
                   // it is, move messages there (it is "quick move" menu)
-                  MoveMessagesToFolder(GetSelections(), folder);
+                  m_msgCmdProc->ProcessCommand(WXMENU_MSG_MOVE_TO_FOLDER,
+                                               selections, folder);
 
                   folder->DecRef();
                }
             }
          }
          break;
-      }
+   }
 }
 
 // ----------------------------------------------------------------------------
-// selection/focus management
+// wxFolderView selection/focus management
 // ----------------------------------------------------------------------------
 
 void
@@ -3115,364 +2752,6 @@ UIdType
 wxFolderView::GetFocus() const
 {
    return m_FolderCtrl->GetFocusedUId();
-}
-
-// ----------------------------------------------------------------------------
-// operations on messages
-// ----------------------------------------------------------------------------
-
-void
-wxFolderView::ShowRawText(long uid)
-{
-   // do it synchronously (FIXME should we?)
-   MailFolder_obj mf = GetMailFolder();
-   CHECK_RET( mf, "no folder in wxFolderView::ShowRawText" );
-
-   String text;
-   Message *msg = mf->GetMessage(uid);
-   if ( msg )
-   {
-      msg->WriteToString(text, true);
-      msg->DecRef();
-   }
-
-   if ( text.IsEmpty() )
-   {
-      wxLogError(_("Failed to get the raw text of the message."));
-   }
-   else
-   {
-      MDialog_ShowText(m_Parent, _("Raw message text"), text, "RawMsgPreview");
-   }
-}
-
-void
-wxFolderView::PreviewMessage(long uid)
-{
-   if ( (unsigned long)uid != m_uidPreviewed )
-   {
-      // remember which item we preview first as OnPreview() can call us back
-      // under wxGTK!
-      SetPreviewUID(uid);
-
-      // select the item we preview in the folder control
-      m_FolderCtrl->OnPreview();
-
-      // show it in the preview window
-      m_MessagePreview->ShowMessage(uid);
-   }
-}
-
-void
-wxFolderView::OpenMessages(const UIdArray& selections)
-{
-   if ( !selections.Count() )
-      return;
-
-   String title;
-
-   int n = selections.Count();
-   int i;
-   for(i = 0; i < n; i++)
-   {
-      MessageView *msgView = ShowMessageViewFrame(GetFrame(m_FolderCtrl));
-      msgView->SetFolder(m_ASMailFolder);
-      msgView->ShowMessage(selections[i]);
-   }
-}
-
-void
-wxFolderView::PrintMessages(const UIdArray& selections)
-{
-   int n = selections.Count();
-
-   if ( n == 1 )
-   {
-      m_MessagePreview->Print();
-   }
-   else if ( n != 0 )
-   {
-      int i;
-      for(i = 0; i < n; i++)
-      {
-         PreviewMessage(selections[i]);
-         m_MessagePreview->Print();
-      }
-   }
-}
-
-void
-wxFolderView::PrintPreviewMessages(const UIdArray& selections)
-{
-   if ( !selections.Count() )
-      return;
-
-   int n = selections.Count();
-
-   if(n == 1)
-   {
-      m_MessagePreview->PrintPreview();
-   }
-   else
-   {
-      int i;
-      for(i = 0; i < n; i++)
-      {
-         PreviewMessage(selections[i]);
-         m_MessagePreview->PrintPreview();
-      }
-   }
-}
-
-void
-wxFolderView::DeleteOrTrashMessages(const UIdArray& selections)
-{
-   if ( !selections.Count() )
-      return;
-
-   FolderViewAsyncStatus *status =
-      new FolderViewAsyncStatus(this, _("Deleting messages..."));
-   status->Monitor(m_ASMailFolder->DeleteOrTrashMessages(&selections, this),
-                   _("Failed to delete messages"));
-}
-
-void
-wxFolderView::ToggleMessages(const UIdArray& messages)
-{
-   HeaderInfoList *hil = GetFolder()->GetHeaders();
-   CHECK_RET( hil, "can't toggle messages without folder listing" );
-
-   size_t count = messages.GetCount();
-   for ( size_t n = 0; n < count; n++ )
-   {
-      UIdType uid = messages[n];
-      UIdType idx = hil->GetIdxFromUId(uid);
-      if ( idx == UID_ILLEGAL )
-      {
-         wxLogDebug("Inexistent message (uid = %lu) selected?", uid);
-
-         continue;
-      }
-
-      // find the corresponding entry in the listing
-      // is the message currently flagged?
-      bool flagged = (hil->GetItemByIndex(idx)->GetStatus() &
-                       MailFolder::MSG_STAT_FLAGGED) != 0;
-
-      // invert the flag
-      m_ASMailFolder->SetMessageFlag(uid, MailFolder::MSG_STAT_FLAGGED,
-                                     !flagged);
-   }
-
-   hil->DecRef();
-}
-
-Ticket
-wxFolderView::SaveMessagesToFolder(const UIdArray& selections, MFolder *folder)
-{
-   size_t count = selections.GetCount();
-   CHECK( count, ILLEGAL_TICKET, "no messages to save" );
-
-   if ( !folder )
-   {
-      folder = MDialog_FolderChoose(GetFrame(m_Parent));
-      if ( !folder )
-      {
-         // cancelled by user
-         return ILLEGAL_TICKET;
-      }
-   }
-   else
-   {
-      folder->IncRef(); // to match DecRef() below
-   }
-
-   FolderViewAsyncStatus *status =
-      new FolderViewAsyncStatus(this, _("Saving %d message(s) to '%s'..."),
-                                count, folder->GetFullName().c_str());
-
-   Ticket t = m_ASMailFolder->
-                  SaveMessagesToFolder(&selections, m_Frame, folder, this);
-
-   status->Monitor(t,
-                   _("Failed to save messages to the folder '%s'."),
-                   folder->GetFullName().c_str());
-
-   folder->DecRef();
-
-   return t;
-}
-
-Ticket
-wxFolderView::MarkRead(const UIdArray& selections, bool read)
-{
-   size_t count = selections.GetCount();
-   CHECK( count, ILLEGAL_TICKET, "no messages to mark" );
-
-   FolderViewAsyncStatus *status =
-      new FolderViewAsyncStatus(this, _("Marking %d message(s) ..."),
-                                count, (read ? "read" : "unread"));
-
-   Ticket t = m_ASMailFolder->
-                  MarkRead(&selections, this, read);
-
-   status->Monitor(t,
-                   _("Failed to mark messages."));
-
-      return t;
-}
-
-Ticket
-wxFolderView::MoveMessagesToFolder(const UIdArray& messages, MFolder *folder)
-{
-   Ticket t = SaveMessagesToFolder(messages, folder);
-   if ( t != ILLEGAL_TICKET )
-   {
-      // delete messages once they're successfully saved
-      m_TicketsToDeleteList->Add(t);
-   }
-
-   return t;
-}
-
-void
-wxFolderView::DropMessagesToFolder(const UIdArray& selections, MFolder *folder)
-{
-   if ( !selections.Count() )
-      return;
-
-   wxLogTrace(M_TRACE_DND, "Saving %d message(s) to folder '%s'",
-              selections.Count(), folder->GetFullName().c_str());
-
-   Ticket t = SaveMessagesToFolder(selections, folder);
-
-   if ( !m_TicketsDroppedList )
-   {
-      wxLogTrace(M_TRACE_DND, "Creating m_TicketsDroppedList");
-
-      m_TicketsDroppedList = ASTicketList::Create();
-   }
-
-   m_TicketsDroppedList->Add(t);
-}
-
-void
-wxFolderView::SaveMessagesToFile(const UIdArray& selections)
-{
-   size_t count = selections.Count();
-   if ( !count )
-      return;
-
-   FolderViewAsyncStatus *status =
-      new FolderViewAsyncStatus(this, _("Saving %d message(s) to file..."),
-                                count);
-
-   Ticket t = m_ASMailFolder->SaveMessagesToFile(&selections, m_Frame, this);
-   status->Monitor(t, _("Saving message(s) to file failed."));
-}
-
-bool
-wxFolderView::DragAndDropMessages()
-{
-   CHECK( GetFolder(), false, "can't drag and drop without opened folder" );
-
-   bool didDrop = false;
-
-   const UIdArray& selections = GetSelections();
-   size_t countSel = selections.Count();
-   if ( countSel > 0 )
-   {
-      MailFolder_obj mf = GetMailFolder();
-      CHECK( mf, false, "no mail folder to drag messages from?" );
-
-      MMessagesDataObject dropData(this, mf, selections);
-
-      // setting up the dnd icons can't be done in portable way :-(
-#ifdef __WXMSW__
-      wxDropSource dropSource(dropData, m_FolderCtrl,
-                              wxCursor("msg_copy"),
-                              wxCursor("msg_move"));
-#else // Unix
-      wxIconManager *iconManager = mApplication->GetIconManager();
-      wxIcon icon = iconManager->GetIcon(countSel > 1 ? "dnd_msgs"
-                                                      : "dnd_msg");
-      wxDropSource dropSource(dropData, m_FolderCtrl, icon);
-#endif // OS
-
-      switch ( dropSource.DoDragDrop(true /* allow move */) )
-      {
-         default:
-            wxFAIL_MSG( "unexpected DoDragDrop return value" );
-            // fall through
-
-         case wxDragError:
-            // always give this one in debug mode, it is not supposed to
-            // happen!
-            wxLogDebug("An error occured during drag and drop operation");
-            break;
-
-         case wxDragNone:
-         case wxDragCancel:
-            wxLogTrace(M_TRACE_DND, "Drag and drop aborted by user.");
-            break;
-
-         case wxDragMove:
-            if ( m_TicketsDroppedList )
-            {
-               // we have to delete the messages as they were moved
-               while ( !m_TicketsDroppedList->IsEmpty() )
-               {
-                  Ticket t = m_TicketsDroppedList->Pop();
-
-                  // the message hasn't been saved yet, wait with deletion
-                  // until it is copied successfully
-                  m_TicketsToDeleteList->Add(t);
-               }
-
-               // also delete the messages which have been already saved
-               if ( !m_UIdsCopiedOk.IsEmpty() )
-               {
-                  DeleteOrTrashMessages(m_UIdsCopiedOk);
-                  m_UIdsCopiedOk.Empty();
-
-                  wxLogTrace(M_TRACE_DND, "Deleted previously dropped msgs.");
-               }
-               else
-               {
-                  // maybe we didn't have time to really copy the messages
-                  // yet, then they will be deleted later
-                  wxLogTrace(M_TRACE_DND, "Dropped msgs will be deleted later");
-               }
-            }
-            break;
-
-         case wxDragCopy:
-            // nothing special to do
-            break;
-      }
-
-      if ( m_TicketsDroppedList )
-      {
-         didDrop = true;
-
-         m_TicketsDroppedList->DecRef();
-         m_TicketsDroppedList = NULL;
-
-         wxLogTrace(M_TRACE_DND, "DragAndDropMessages() done ok");
-      }
-      else
-      {
-         wxLogTrace(M_TRACE_DND, "Nothing dropped");
-      }
-
-      if ( !m_UIdsCopiedOk.IsEmpty() )
-      {
-         m_UIdsCopiedOk.Empty();
-      }
-   }
-
-   // did we do anything?
-   return didDrop;
 }
 
 // ----------------------------------------------------------------------------
@@ -3638,138 +2917,20 @@ void
 wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
 {
    ASMailFolder::Result *result = event.GetResult();
-   const Ticket& t = result->GetTicket();
 
    if ( result->GetUserData() == this )
    {
+      const Ticket& t = result->GetTicket();
+
       ASSERT_MSG( m_TicketList->Contains(t), "unexpected async result ticket" );
 
       m_TicketList->Remove(t);
 
       int ok = ((ASMailFolder::ResultInt *)result)->GetValue() != 0;
 
-      // find the corresponding FolderViewAsyncStatus object, if any
-      bool hadStatusObject = false;
-      size_t progressCount = m_arrayAsyncStatus.GetCount();
-      for ( size_t n = 0; n < progressCount; n++ )
-      {
-         FolderViewAsyncStatus *asyncStatus = m_arrayAsyncStatus[n];
-         if ( asyncStatus->GetTicket() == t )
-         {
-            if ( !ok )
-            {
-               // tell it to show the error message, not success one
-               asyncStatus->Fail();
-            }
-
-            delete asyncStatus;
-            m_arrayAsyncStatus.RemoveAt(n);
-
-            hadStatusObject = true;
-
-            break;
-         }
-      }
-
       String msg;
       switch ( result->GetOperation() )
       {
-         case ASMailFolder::Op_SaveMessagesToFolder:
-            ASSERT(result->GetSequence());
-
-            // we may have to do a few extra things here:
-            //
-            //  - if the message was marked for deletion (its ticket is in
-            //    m_TicketsToDeleteList), we have to delete it and give a
-            //    message about a successful move and not copy operation
-            //
-            //  - if we're inside DoDragDrop(), m_TicketsDroppedList is !NULL
-            //    but we don't know yet if we will have to delete dropped
-            //    messages or not, so just remember those of them which were
-            //    copied successfully
-            {
-               bool toDelete = m_TicketsToDeleteList->Contains(t);
-               bool wasDropped = m_TicketsDroppedList &&
-                                    m_TicketsDroppedList->Contains(t);
-
-               // remove from lists before testing value: this should be done
-               // whether we succeeded or failed
-               if ( toDelete )
-               {
-                  m_TicketsToDeleteList->Remove(t);
-               }
-
-               if ( wasDropped )
-               {
-                  m_TicketsDroppedList->Remove(t);
-
-                  wxLogTrace(M_TRACE_DND, "Dropped msgs copied ok");
-               }
-
-               if ( !ok )
-               {
-                  // something failed - what?
-                  if ( toDelete )
-                     msg = _("Moving messages failed.");
-                  else if ( wasDropped )
-                     msg = _("Dragging messages failed.");
-                  else
-                     msg = _("Copying messages failed.");
-
-                  wxLogError(msg);
-
-                  // avoid logging status message as well below
-                  msg.clear();
-               }
-               else // success
-               {
-                  // message was copied ok, what else to do with it?
-                  UIdArray *seq = result->GetSequence();
-                  unsigned long count = seq->Count();
-
-                  if ( wasDropped )
-                  {
-                     if ( !toDelete )
-                     {
-                        // remember the UIDs as we may have to delete them later
-                        // even if they are not in m_TicketsToDeleteList yet
-                        WX_APPEND_ARRAY(m_UIdsCopiedOk, (*seq));
-                     }
-                     //else: dropped and already marked for deletion, delete below
-
-                     msg.Printf(_("Dropped %lu messages."), count);
-                  }
-                  //else: not dropped
-
-                  if ( toDelete )
-                  {
-                     // delete right now
-                     m_TicketList->Add(
-                           m_ASMailFolder->DeleteOrTrashMessages(seq, this));
-
-                     if ( !wasDropped )
-                     {
-                        msg.Printf(_("Moved %lu messages."), count);
-                     }
-                     //else: message already given above
-                  }
-                  else // simple copy, not move
-                  {
-                     if ( !hadStatusObject )
-                     {
-                        msg.Printf(_("Copied %lu messages."), count);
-                     }
-                     //else: status message already given
-                  }
-               }
-
-               if ( !msg.empty() )
-               {
-                  wxLogStatus(m_Frame, msg);
-               }
-            }
-            break;
-
          case ASMailFolder::Op_SearchMessages:
             ASSERT(result->GetSequence());
             if( ok )
@@ -3815,18 +2976,6 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
             }
 
             wxLogStatus(m_Frame, msg);
-            break;
-
-         // nothing special to do for these cases
-         case ASMailFolder::Op_ApplyFilterRules:
-         case ASMailFolder::Op_SaveMessagesToFile:
-         case ASMailFolder::Op_ReplyMessages:
-         case ASMailFolder::Op_ForwardMessages:
-         case ASMailFolder::Op_DeleteMessages:
-         case ASMailFolder::Op_DeleteOrTrashMessages:
-         case ASMailFolder::Op_UnDeleteMessages:
-         case ASMailFolder::Op_MarkRead:
-         case ASMailFolder::Op_MarkUnread:
             break;
 
          case ASMailFolder::Op_GetMessage:
@@ -3878,27 +3027,6 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
    //else: not out result at all
 
    result->DecRef();
-}
-
-void wxFolderView::RemoveAsyncStatus(FolderViewAsyncStatus *asyncStatus)
-{
-   size_t progressCount = m_arrayAsyncStatus.GetCount();
-   for ( size_t n = 0; n < progressCount; n++ )
-   {
-      if ( asyncStatus == m_arrayAsyncStatus[n] )
-      {
-         m_arrayAsyncStatus.RemoveAt(n);
-
-         return;
-      }
-   }
-
-   wxFAIL_MSG( "async status not found in m_arrayAsyncStatus" );
-}
-
-void wxFolderView::AddAsyncStatus(FolderViewAsyncStatus *asyncStatus)
-{
-   m_arrayAsyncStatus.Add(asyncStatus);
 }
 
 // ============================================================================

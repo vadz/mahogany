@@ -136,7 +136,7 @@ public:
 
    virtual bool IsOpened(void) const { return m_MailStream != NULL; }
 
-   /** return a symbolic name for mail folder
+   /** return the full folder name
        @return the folder's name
    */
    virtual String GetName(void) const { return m_Name; }
@@ -514,7 +514,7 @@ private:
 
    // TODO: m_Name and m_folderType/Flags should be replaced with an MFolder!
 
-   /// The symbolic name of the folder (i.e. the name shown in the tree)
+   /// The full folder name
    String m_Name;
 
    /// Type of this folder

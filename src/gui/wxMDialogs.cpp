@@ -21,20 +21,36 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-#   include "Mcommon.h"
-#   include "Mdefaults.h"
-#   include "guidef.h"
-#   include "strutil.h"
-#   include "MFrame.h"
-#   include "MDialogs.h"
-#   include "Profile.h"
-#   include "MApplication.h"
-#   include "MailFolder.h"
-#   include "Profile.h"
-#   include "MModule.h"
-#   include "MHelp.h"
+#  include "Mcommon.h"
+#  include "Mdefaults.h"
+#  include "guidef.h"
+#  include "strutil.h"
+#  include "MFrame.h"
+#  include "MDialogs.h"
+#  include "Profile.h"
+#  include "MApplication.h"
+#  include "MailFolder.h"
+#  include "Profile.h"
+#  include "MModule.h"
+#  include "MHelp.h"
 
-#   include <wx/sizer.h>
+#  include <wx/layout.h>
+#  include <wx/sizer.h>
+#  include <wx/window.h>
+#  include <wx/menu.h>
+#  include <wx/radiobox.h>
+#  include <wx/confbase.h>
+#  include <wx/checklst.h>
+#  include <wx/gauge.h>
+#  include <wx/stattext.h>
+#  include <wx/statbmp.h>
+#  include <wx/statbox.h>
+#  include <wx/choice.h>
+#  include <wx/textdlg.h>
+#  include <wx/treectrl.h>
+#  include <wx/utils.h>
+#  include <wx/msgdlg.h>
+#  include <wx/choicdlg.h>
 #endif
 
 #include "Mpers.h"
@@ -50,22 +66,10 @@
 
 #include "gui/wxIconManager.h"
 
-#include <wx/dynarray.h>
 #include <wx/ffile.h>
-#include <wx/window.h>
-#include <wx/radiobox.h>
-#include <wx/confbase.h>
 #include "wx/persctrl.h"
-#include <wx/gauge.h>
-#include <wx/stattext.h>
-#include <wx/statbmp.h>
-#include <wx/choice.h>
-#include <wx/textdlg.h>
-#include <wx/treectrl.h>
-#include <wx/utils.h>
 #include <wx/help.h>
 #include <wx/tipdlg.h>
-#include <wx/checklst.h>
 #include <wx/statline.h>
 #include <wx/minifram.h>
 #include <wx/fs_mem.h> // memory filesystem for startup screen

@@ -45,7 +45,7 @@ public:
    /// return pointer to async mail folder (NOT IncRef()'d!)
    ASMailFolder *GetFolder(void) const { return m_ASMailFolder; }
 
-   /// return pointer to associated mail folder (NOT IncRef()'d!)
+   /// return pointer to associated mail folder (IncRef()'d as usual)
    MailFolder *GetMailFolder() const
       { return m_ASMailFolder ? m_ASMailFolder->GetMailFolder() : NULL; }
 

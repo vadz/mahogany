@@ -144,6 +144,8 @@ enum
    WXMENU_EDIT_RESTORE_PREF,
    WXMENU_EDIT_END = WXMENU_EDIT_RESTORE_PREF,
 
+   // if you modify the entries in the message menu don't forget to update
+   // MSGVIEW entries below too!
    WXMENU_MSG_BEGIN = WXMENU_EDIT_END,
    WXMENU_MSG_OPEN,
    WXMENU_MSG_PRINT,
@@ -338,6 +340,10 @@ enum
    WXMENU_POPUP_MIME_OFFS = WXMENU_LAYOUT_END,
    WXMENU_POPUP_MODULES_OFFS = WXMENU_POPUP_MIME_OFFS + 100,
    WXMENU_POPUP_FOLDER_MENU = WXMENU_POPUP_MIME_OFFS + 100,
+
+   // pseudo messages used to communicate with MsgCmdProc
+   WXMENU_MSG_DROP_TO_FOLDER = 5000,
+   WXMENU_MSG_DRAG,
 
    // The following entries are reserved for use by plugin modules
    WXMENU_MODULES_BEGIN = 10000,

@@ -38,6 +38,7 @@ class MEventData;
 class MEventOptionsChangeData;
 class MEventASFolderResultData;
 class MimePart;
+class MsgCmdProc;
 class ProcessEvtHandler;
 class ProcessInfo;
 
@@ -54,16 +55,19 @@ WX_DEFINE_ARRAY(ProcessInfo *, ArrayProcessInfo);
 
 class MessageView : public MEventReceiver
 {
-public:
    /** @name Ctors and dtor
 
-       MessageView can be created normally, there is no need to have a factory
-       function for it.
+       MessageView can only be created by Create(), hence ctor is protected
     */
    //@{
 
+protected:
    /// ctor takes as argument the parent window for the message viewer one
    MessageView(wxWindow *parent);
+
+public:
+   /// create a new MessageView
+   static MessageView *Create(wxWindow *parent);
 
    /// dtor
    virtual ~MessageView();
@@ -93,6 +97,9 @@ public:
        itself normally
     */
    //@{
+
+   /// get the menu command processor we use
+   MsgCmdProc *GetCmdProc() const { return m_msgCmdProc; }
 
    /// handle the command from the menu, return true if processed
    bool DoMenuCommand(int id);
@@ -548,6 +555,8 @@ private:
 
    //@}
 
+   MsgCmdProc *m_msgCmdProc;
+
    friend class ProcessEvtHandler;
    friend class MessageViewer;
 };
@@ -629,8 +638,10 @@ private:
 // global functions
 // ----------------------------------------------------------------------------
 
-/// create and show a new message view frame, return its message view
-extern MessageView *ShowMessageViewFrame(wxWindow *parent);
+/// create and show a new message in a separate frame, return its message view
+extern MessageView *ShowMessageViewFrame(wxWindow *parent,
+                                         ASMailFolder *asmf,
+                                         UIdType uid);
 
 #endif // MESSAGEVIEW_H
 

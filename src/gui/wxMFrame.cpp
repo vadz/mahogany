@@ -40,6 +40,8 @@
 #  include "MEvent.h"
 
 #  include <wx/confbase.h>
+#  include <wx/menu.h>
+#  include <wx/toolbar.h>
 #endif
 
 #ifdef USE_PYTHON
@@ -77,9 +79,9 @@
    #include <wx/ffile.h>
 #endif // USE_PYTHON
 
-#ifdef OS_WIN
-    // ok, wxPrintDialog is the right one
-#else
+#include <wx/printdlg.h>
+
+#ifndef OS_WIN
     typedef wxGenericPrintDialog wxPrintDialog;
 #endif
 
