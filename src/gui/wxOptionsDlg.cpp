@@ -20,6 +20,10 @@
 
 #include "Mpch.h"
 
+#ifdef USE_PYTHON
+#    include  "Mcallbacks.h"		// Python fix for MCB_* declares
+#endif	//USE_PYTHON
+
 #ifndef USE_PCH
 #  include "Mcommon.h"
 #  include "MHelp.h"

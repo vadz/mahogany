@@ -27,6 +27,12 @@
 
 #include  "Mpch.h"
 
+#ifdef USE_PYTHON
+#    include  "MPython.h"		// Python fix for Pyobject / presult
+#    include  "PythonHelp.h"		// Python fix for PythonCallback
+#    include  "Mcallbacks.h"		// Python fix for MCB_* declares
+#endif	//USE_PYTHON
+
 #ifndef USE_PCH
 #  include "Mcommon.h"
 #  include "guidef.h"
