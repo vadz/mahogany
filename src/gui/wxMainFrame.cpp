@@ -66,23 +66,20 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
    // insert treectrl in one of the splitter panes
    m_FolderTree = new wxFolderTree(m_splitter);
-
+   
    if(! strutil_isempty(foldername))
-   {
       m_FolderView = wxFolderView::Create(foldername, m_splitter);
-   }
 
    if ( m_FolderView && m_FolderView->IsOk() )
    {
       m_splitter->SplitVertically(m_FolderTree->GetWindow(),
                                   m_FolderView->GetWindow(),
                                   x/3);
-
       AddMessageMenu();
    }
-   else {
+   else
+   {
       m_splitter->Initialize(m_FolderTree->GetWindow());
-
       delete m_FolderView; // may be NULL, ok
    }
 

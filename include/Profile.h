@@ -42,8 +42,6 @@ class wxConfigBase;
     order to allow it to inherit values from an AppConfig class
     instance, the wrapper class ProfileAppConfig is available.
     @see Profile
-    @see ProfileAppConfig (VZ: there is no such class??)
-    @see AppConfig
 */
 class ProfileBase : public MObjectRC
 {
@@ -113,8 +111,13 @@ public:
    wxConfigBase *GetConfig() const { return m_config; }
 
 protected:
-   /// the config object we use (may be NULL)
-   // VZ: when can it be NULL exactly??
+   /** The config object we use (may be NULL).
+       A normal profile either has a wxFileConfig associated with it
+       or not. If not, m_config is NULL and all read/write operations
+       will be passed on to the parent profile if it exists or applied 
+       to the corresponding section in the global profile. Of course,
+       the global profile must always have a non-NULL pointer here.
+   */
    wxConfigBase  *m_config;
 
    /// why does egcs want this?
