@@ -201,7 +201,7 @@ wxLayoutObjectCmd::Draw(wxDC &dc,
       dc.SetTextBackground(*m_ColourBG);
 }
 
-//-------------------------- wxwxLayoutList
+//-------------------------- wxLayoutList
 
 wxLayoutList::wxLayoutList()
 {
@@ -841,7 +841,10 @@ wxLayoutList::Delete(CoordType count)
 void
 wxLayoutList::Insert(wxLayoutObjectBase *obj)
 {
-   wxASSERT(obj);
+   wxCHECK_RET( obj, "no object to insert" );
+
+   m_bModified = TRUE;
+
    CoordType offs;
    wxLayoutObjectList::iterator i = FindCurrentObject(&offs);
 
@@ -991,6 +994,8 @@ void
 wxLayoutList::Clear(int family, int size, int style, int weight,
                     int WXUNUSED(underline), char const *fg, char const *bg)
 {
+   m_bModified = FALSE;
+
    wxLayoutObjectList::iterator i = begin();
 
    while(i != end()) // == while valid

@@ -52,8 +52,8 @@ public:
    virtual ~wxLayoutWindow() {}
 
    // dirty flag access
-   bool IsDirty() const { return m_bDirty; }
-   void ResetDirty() { m_bDirty = FALSE; }
+   bool IsDirty() const { return m_llist.IsDirty(); }
+   void ResetDirty() { m_llist.ResetDirty(); }
 
 private:
    /// for sending events

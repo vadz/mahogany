@@ -249,6 +249,8 @@ MAppBase::OnStartup()
       // having the same error message each time M is started is annoying, so
       // give the user a possibility to disable it
       if ( READ_APPCONFIG(MC_USEPYTHON) && !InitPython() ) {
+         CloseSplash();
+
          const char *msg = "It's possible that you have problems with Python\n"
                            "installation. Would you like to disable Python\n"
                            "support for now (set " MC_USEPYTHON " to 1 to"
@@ -321,11 +323,7 @@ MAppBase::GetText(const char *in)
 void
 MAppBase::Exit(bool force)
 {
-   if ( force || MDialog_YesNoDialog(_("Really exit M?")) )
-   {
-      m_topLevelFrame->Close(TRUE);
-      m_topLevelFrame = NULL;
-   }
+   m_topLevelFrame->Close(force);
 }
 
 // ----------------------------------------------------------------------------

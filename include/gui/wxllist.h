@@ -273,7 +273,12 @@ public:
    void ShowCurrentObject();
 #endif
 
-   
+   /// dirty?
+   bool IsDirty() const { return m_bModified; }
+
+   /// called after the contents is saved, for example
+   void ResetDirty() { m_bModified = FALSE; }
+
    /// for access by wxLayoutWindow:
    void GetSize(CoordType *max_x, CoordType *max_y,
                 CoordType *lineHeight);
@@ -321,6 +326,9 @@ protected:
    /// needs recalculation?
    bool m_dirty;
 
+   /// needs saving (i.e., was modified?)
+   bool m_bModified;
+
    // the currently updated line:
    /// where do we draw next:
    wxPoint   m_Position;
@@ -341,7 +349,6 @@ protected:
    /// find the object to the cursor position and returns the offset
    /// in there
    wxLayoutObjectList::iterator FindObjectCursor(wxPoint *cpos, CoordType *offset = NULL);
-   
 };
 
 class wxLayoutPrintout: public wxPrintout

@@ -91,7 +91,7 @@ static const TbarItemInfo g_aToolBarData[] =
   // compose frame
   { "tb_print",     WXMENU_COMPOSE_PRINT,     "Print"         },
   { "tb_new",       WXMENU_COMPOSE_CLEAR,     "Clear Window"  },
-  { "tb_paste",     WXMENU_COMPOSE_INSERTFILE,"Insert File"   },
+  { "tb_attach",    WXMENU_COMPOSE_INSERTFILE,"Insert File"   },
   { "tb_mail_send", WXMENU_COMPOSE_SEND,      "Send Message"  },
 
   // folder and message view frames

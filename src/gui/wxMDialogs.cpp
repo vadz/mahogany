@@ -59,6 +59,21 @@
 #endif  //Win/Unix
 
 // ----------------------------------------------------------------------------
+// global vars and functions
+// ----------------------------------------------------------------------------
+MFrame *g_pSplashScreen = NULL;
+
+extern void CloseSplash()
+{
+  if ( g_pSplashScreen ) {
+    g_pSplashScreen->Show(FALSE);
+
+    // and it will be closed when timeout elapses (it's the most fool proof
+    // solution, if not the most direct one)
+  }
+}
+
+// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
@@ -423,7 +438,10 @@ MDialog_AdbLookupList(ArrayAdbEntries& aEntries,
 // simple AboutDialog to be displayed at startup
 
 // the main difference is that it goes away as soon as you click it
-// or after some time (if not disabled in the ctor)
+// or after some time (if not disabled in the ctor).
+//
+// It is also unique and must be removed before showing any message boxes
+// (because it has on top attribute) with CloseSplash() function.
 class wxAboutWindow : public wxLayoutWindow
 {
 public:
@@ -455,6 +473,13 @@ private:
   } *m_pTimer;
   
   DECLARE_EVENT_TABLE();
+};
+
+class wxAboutFrame : public wxFrame
+{
+public:
+  wxAboutFrame(bool bCloseOnTimeout);
+  ~wxAboutFrame() { g_pSplashScreen = NULL; }
 };
 
 BEGIN_EVENT_TABLE(wxAboutWindow, wxLayoutWindow)
@@ -513,17 +538,24 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    }
 }
 
+wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
+            : wxFrame(NULL, -1, _("Welcome"),
+                      wxDefaultPosition, wxSize(220, 300),
+                      wxDOUBLE_BORDER | wxSTAY_ON_TOP)
+{
+   wxCHECK_RET( g_pSplashScreen == NULL, "one splash is more than enough" );
+   g_pSplashScreen = (MFrame *)this;
+
+   (void)new wxAboutWindow(this, bCloseOnTimeout);
+
+   Centre(wxBOTH);
+   Show(TRUE);
+}
+
 void
 MDialog_AboutDialog( MWindow * /* parent */, bool bCloseOnTimeout)
 {
-   wxFrame *frame = new wxFrame(NULL, -1, _("Welcome"),
-                                wxDefaultPosition, wxSize(220, 300),
-                                wxDOUBLE_BORDER | wxSTAY_ON_TOP);
-
-   (void)new wxAboutWindow(frame, bCloseOnTimeout);
-
-   frame->Centre(wxBOTH);
-   frame->Show(TRUE);
+   (void)new wxAboutFrame(bCloseOnTimeout);
 }
 
 
@@ -572,7 +604,7 @@ private:
    wxTextCtrl *m_PasswordTextCtrl;
    wxStaticText *m_PathStaticText;
    wxButton   *m_CancelButton, *m_OkButton, *m_UndoButton;
-   wxString choices[5];
+   wxString    m_choices[Folder_Max];
 
    DECLARE_EVENT_TABLE()
 };
@@ -644,17 +676,17 @@ wxPEP_Folder::wxPEP_Folder(ProfileBase *profile, wxWindow *parent)
    MkTextCtrl(m_UserIdTextCtrl, "User ID",-1);
    MkTextCtrl(m_PasswordTextCtrl, "Password",-1);
    
-   choices[0] = _("INBOX");
-   choices[1] = _("Message box file");
-   choices[2] = _("POP3");
-   choices[3] = _("IMAP");
-   choices[4] = _("NNTP/News");
+   m_choices[Folder_Inbox] = _("INBOX");
+   m_choices[Folder_File]  = _("Message box file");
+   m_choices[Folder_POP]   = _("POP3");
+   m_choices[Folder_IMAP]  = _("IMAP");
+   m_choices[Folder_News]  = _("News");
    long xRadio = labelWidth + inputWidth + 20;
    m_FolderTypeRadioBox = new wxRadioBox( this, M_WXID_PEP_RADIO,
                                           _("Folder Type"),
                                           wxPoint(xRadio, 2*LAYOUT_Y_MARGIN),
                                           wxSize(-1,-1),
-                                          5, choices,
+                                          5, m_choices,
                                           1, wxRA_VERTICAL );
 
    int widthRadio, heightRadio;
@@ -681,7 +713,7 @@ wxPEP_Folder::UpdateUI(void)
    int type = m_FolderTypeRadioBox->GetSelection();
 
    m_FolderPathTextCtrl->Enable(TRUE);
-   if(type == 2 || type == 3) // we need defines for that: pop/imap
+   if ( type == Folder_POP || type == Folder_IMAP )
    {
       m_UserIdTextCtrl->Enable(TRUE);
       m_PasswordTextCtrl->Enable(TRUE);
@@ -708,7 +740,7 @@ wxPEP_Folder::TransferDataFromWindow(void)
    m_Profile->writeEntry(MP_FOLDER_PATH,m_FolderPathTextCtrl->GetValue());
    m_Profile->writeEntry(MP_UPDATEINTERVAL,atoi(m_UpdateIntervalTextCtrl->GetValue()));
    
-   if(type == 2 || type == 3) // we need defines for that: pop/imap
+   if ( type == Folder_POP || type == Folder_IMAP )
    {
       m_Profile->writeEntry(MP_POP_LOGIN,m_UserIdTextCtrl->GetValue());
       m_Profile->writeEntry(MP_POP_PASSWORD,m_PasswordTextCtrl->GetValue());
@@ -722,12 +754,19 @@ wxPEP_Folder::TransferDataFromWindow(void)
 bool
 wxPEP_Folder::TransferDataToWindow(void)
 {
-   int type = READ_CONFIG(m_Profile,MP_FOLDER_TYPE);
+   int type = READ_CONFIG(m_Profile, MP_FOLDER_TYPE);
    
+   // the trouble is that if INBOX.profile doesn't exist (yet), we get the
+   // wrong value here (FIXME: this is not the right solution neither!)
+   if ( type == MP_FOLDER_TYPE_D && 
+        ((Profile *)m_Profile)->GetProfileName() == "INBOX" ) { // yuck (FIXME)
+      type = Folder_Inbox;
+   }
+
    m_FolderTypeRadioBox->SetSelection(type);
    m_FolderPathTextCtrl->SetValue(READ_CONFIG(m_Profile,MP_FOLDER_PATH));
    m_UpdateIntervalTextCtrl->SetValue(strutil_ltoa(READ_CONFIG(m_Profile,MP_UPDATEINTERVAL)));
-   if(type == 2 || type == 3) // we need defines for that: pop/imap
+   if ( type == Folder_POP || type == Folder_IMAP )
    {
       m_UserIdTextCtrl->SetValue(READ_CONFIG(m_Profile,MP_POP_LOGIN));
       m_PasswordTextCtrl->SetValue(READ_CONFIG(m_Profile,MP_POP_PASSWORD));

@@ -93,6 +93,8 @@ public:
 #	define	CBDEBUG()	CommonBase::Debug()
 #	ifndef NDEBUG
 #		define	VAR(x)		wxLogTrace(#x " = %s", x)
+#  else
+#     define   VAR(x)
 #	endif
 #else
 // empty definition

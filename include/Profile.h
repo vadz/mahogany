@@ -199,6 +199,9 @@ public:
    /// get the associated config object
    wxConfig *GetConfig() const { return fileConfig; }
 
+   /// get our name
+   const String& GetProfileName() const { return profileName; }
+
    /**@name Reading and writing entries.
       All these functions are just identical to the wxConfig ones.
    */

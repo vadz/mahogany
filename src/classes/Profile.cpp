@@ -91,15 +91,22 @@ Profile::Profile(String const &iClassName, ProfileBase const *Parent)
 
    parentProfile = Parent;
 
-   // find our config file
-   String tmp = READ_APPCONFIG(MC_PROFILE_PATH);
-   PathFinder pf(tmp);
+   // find our config file unless we already have an absolute path name
+   String fullFileName;
+   if ( !IsAbsPath(profileName) ) {
+      String tmp = READ_APPCONFIG(MC_PROFILE_PATH);
+      PathFinder pf(tmp);
 
-   String fileName = profileName + READ_APPCONFIG(MC_PROFILE_EXTENSION);
-   String fullFileName = pf.FindFile(fileName, &isOk);
+      String fileName = profileName + READ_APPCONFIG(MC_PROFILE_EXTENSION);
+      fullFileName = pf.FindFile(fileName, &isOk);
    
-   if( !isOk )
-      fullFileName = mApplication.GetLocalDir() + DIR_SEPARATOR + fileName;
+      if( !isOk )
+         fullFileName = mApplication.GetLocalDir() + DIR_SEPARATOR + fileName;
+   }
+   else {
+      // easy...
+      fullFileName << profileName << READ_APPCONFIG(MC_PROFILE_EXTENSION);
+   }
 
    fileConfig = mApplication.GetConfigManager().GetConfig(fullFileName);
    
@@ -169,7 +176,7 @@ Profile::readEntry(const char *szKey, int Default) const
 
    if ( !fileConfig->Read((long *)&rc, szKey, Default) ) {
       if ( !parentProfile ||
-           parentProfile->readEntry(szKey, Default) == Default ) {
+           (rc = parentProfile->readEntry(szKey, Default)) == Default ) {
          if ( appConfig ) {
             if ( !appConfig->Read((long *)&rc, szKey, Default) ) {
                if ( READ_APPCONFIG(MC_RECORDDEFAULTS) )

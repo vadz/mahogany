@@ -283,6 +283,19 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE) )
    {
       String strSignFile = READ_CONFIG(m_Profile, MP_COMPOSE_SIGNATURE);
+      if ( strSignFile.IsEmpty() ) {
+         // propose to choose it now
+         if ( MDialog_YesNoDialog(
+               _("No signature file found. Would you like to choose one\n"
+               "right now (otherwise no signature will be used)?"), this) ) {
+            wxFileDialog dialog(this, "", "", "", _("All files (*.*)|*.*"),
+                                wxHIDE_READONLY | wxFILE_MUST_EXIST);
+            if ( dialog.ShowModal() == wxID_OK ) {
+               strSignFile = dialog.GetPath();
+            }
+         }
+      }
+
       if ( !strSignFile.IsEmpty() ) {
          wxTextFile fileSig(strSignFile);
          if ( fileSig.Open() ) {
@@ -308,6 +321,10 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
 
             m_LayoutWindow->GetLayoutList().SetCursor(wxPoint(0,0));
          }
+      }
+      else {
+         // no signature file
+         m_Profile->writeEntry(MP_COMPOSE_USE_SIGNATURE, false);
       }
    }
 
@@ -492,9 +509,13 @@ wxComposeView::InsertData(const char *data,
    mc->m_Length = length;
    mc->m_Type = MimeContent::MIMECONTENT_DATA;
    
-   wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(mApplication.GetIconManager()->GetIcon(mc->m_MimeType));
+   wxIcon icon = mApplication.GetIconManager()->GetIconFromMimeType(mc->m_MimeType);
+
+   wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(icon);
    obj->SetUserData(mc);
    m_LayoutWindow->GetLayoutList().Insert(obj);
+
+   Refresh();
 }
 
 void
@@ -523,10 +544,25 @@ wxComposeView::InsertFile(const char *filename, const char *mimetype,
 
    mc->m_FileName = filename;
    mc->m_Type = MimeContent::MIMECONTENT_FILE;
-   wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(mApplication.GetIconManager()->GetIcon(mc->m_MimeType));
+
+   wxIconManager *iconManager = mApplication.GetIconManager();
+
+#  ifdef OS_WIN
+      wxString strExt = wxString(filename).After('.');
+      wxIcon icon = iconManager->GetIconFromExtension(strExt);
+#  else
+      wxIcon icon = iconManager->GetIconFromMimeType(mc->m_MimeType);
+#  endif // Win/Unix
+
+   wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(icon);
    obj->SetUserData(mc);
 
    m_LayoutWindow->GetLayoutList().Insert(obj);
+
+   wxLogStatus(this, _("Inserted file '%s' (as '%s')"),
+               filename, mc->m_MimeType.c_str());
+
+   Refresh();
 }
 
 void

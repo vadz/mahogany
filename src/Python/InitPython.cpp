@@ -26,7 +26,7 @@
 extern "C"
 {
    void initMStringc();
-   void initProfilec();
+   void initMProfilec();
    void initMailFolderc();
    void initMAppBasec();
    void initMessagec();
@@ -86,7 +86,7 @@ InitPython(void)
       
    // initialise the modules
    initMStringc();
-   initProfilec();
+   initMProfilec();
    initMailFolderc();
    initMAppBasec();
    initMessagec();

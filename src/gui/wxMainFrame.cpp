@@ -64,14 +64,21 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    if(! strutil_isempty(foldername))
    {
       m_FolderView = new wxFolderView(foldername,m_splitter);
+   }
+
+   if ( m_FolderView && m_FolderView->IsInitialised() )
+   {
       //m_splitter->SplitVertically(new wxPanel(m_splitter), //FIXME: insert treectrl
       //                            m_FolderView->GetWindow(),x/3);
       // FIXME for now:
       m_splitter->Initialize(m_FolderView->GetWindow());
       AddMessageMenu();
    }
-   else
+   else {
       m_splitter->Initialize(new wxPanel(m_splitter));  //FIXME: insert treectrl
+
+      delete m_FolderView; // may be NULL
+   }
 
    AddHelpMenu();
    SetMenuBar(m_MenuBar);
@@ -86,10 +93,13 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 void
 wxMainFrame::OnCloseWindow(wxCloseEvent&)
 {
-   // FIXME: ask user if he really wants to exit...
-   delete m_FolderView;
+   // ask the user unless disabled
+   if ( READ_APPCONFIG(MC_CONFIRMEXIT) == 0 || 
+        MDialog_YesNoDialog(_("Really exit M?")) ) {
+      delete m_FolderView;
 
-   Destroy();
+      Destroy();
+   }
 }
 
 void
@@ -101,8 +111,10 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
    {
       if(WXMENU_CONTAINS(MSG,id) || id == WXMENU_LAYOUT_CLICK)
          m_FolderView->OnCommandEvent(event);
+#if 0 // VZ: why? (FIXME)
       else if(id == WXMENU_EDIT_PREF)
          MDialog_FolderProfile(this, m_FolderView->GetProfile());
+#endif
       else
          wxMFrame::OnMenuCommand(id);
    }

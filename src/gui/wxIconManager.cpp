@@ -6,6 +6,13 @@
  * $Id$
  *******************************************************************/
 
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
 #ifdef __GNUG__
 #pragma implementation "wxIconManager.h"
 #endif
@@ -54,13 +61,30 @@
 #  include  "../src/icons/MainFrame.xpm"
 #endif  //Win/Unix
 
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+/// @@ a bit lame, but should work in any reasonable case
+inline bool IsMimeType(const wxString& str) { return str.Find('/') != -1; }
+
+// ============================================================================
+// implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// private date
+// ----------------------------------------------------------------------------
+
 /// valid filename extensions for icon files
 static const char *wxIconManagerFileExtensions[] =
 { 
-   ".xpm", ".png", ".gif", "*.jpg", NULL
+   ".xpm", ".png", ".gif", ".jpg", NULL
 };
 
-
+// ----------------------------------------------------------------------------
+// wxIconManager implementation
+// ----------------------------------------------------------------------------
 wxIconManager::wxIconManager()
 {
    m_iconList = new IconDataList();
@@ -116,7 +140,8 @@ wxIconManager::GetIcon(String const &_iconName)
 
    strutil_tolower(iconName);
    wxLogTrace("wxIconManager::GetIcon(%s) called...", iconName.c_str());
-   
+
+   // first always look in the cache
    for(i = m_iconList->begin(); i != m_iconList->end(); i++)
    {
       if(strcmp((*i)->iconName.c_str(), iconName.c_str())==0) {
@@ -126,29 +151,31 @@ wxIconManager::GetIcon(String const &_iconName)
       }
    }
 
-   // not found, now look for MIME subtype, after '/':
-   key = strutil_after(iconName, '/');
-   for(i = m_iconList->begin(); i != m_iconList->end(); i++)
-   {
-      if(strcmp((*i)->iconName.c_str(), key.c_str())==0) {
-        wxLogTrace("... icon was in the cache.");
+   if ( IsMimeType(iconName) ) {
+     // not found, now look for MIME subtype, after '/':
+     key = strutil_after(iconName, '/');
+     for(i = m_iconList->begin(); i != m_iconList->end(); i++)
+     {
+        if(strcmp((*i)->iconName.c_str(), key.c_str())==0) {
+          wxLogTrace("... icon was in the cache.");
 
-        return (*i)->iconRef;
-      }
+          return (*i)->iconRef;
+        }
+     }
+
+     // not found, now look for iconName without '/':
+     key = strutil_before(iconName, '/');
+     for(i = m_iconList->begin(); i != m_iconList->end(); i++)
+     {
+        if(strcmp((*i)->iconName.c_str(), key.c_str())==0) {
+          wxLogTrace("... icon was in the cache.");
+
+          return (*i)->iconRef;
+        }
+     }
    }
 
-   // not found, now look for iconName without '/':
-   key = strutil_before(iconName, '/');
-   for(i = m_iconList->begin(); i != m_iconList->end(); i++)
-   {
-      if(strcmp((*i)->iconName.c_str(), key.c_str())==0) {
-        wxLogTrace("... icon was in the cache.");
-
-        return (*i)->iconRef;
-      }
-   }
-
-   // new step: try to load the icon files .png,.xpm,.gif:
+   // next step: try to load the icon files .png,.xpm,.gif:
    wxIcon icn;
    int c;
    bool found;
@@ -161,31 +188,39 @@ wxIconManager::GetIcon(String const &_iconName)
    String name;
    for(c = 0; wxIconManagerFileExtensions[c]; c++)
    {
-      key = strutil_after(iconName,'/');
       name = key + wxIconManagerFileExtensions[c];
       name = pf.FindFile(name, &found);
-      if(! found)
-      {
-         key  = strutil_before(iconName,'/');
+
+      if ( !found && IsMimeType(iconName) ) {
+         key = strutil_after(iconName,'/');
          name = key + wxIconManagerFileExtensions[c];
          name = pf.FindFile(name, &found);
+
+         if ( !found )
+         {
+            key  = strutil_before(iconName,'/');
+            name = key + wxIconManagerFileExtensions[c];
+            name = pf.FindFile(name, &found);
+         }
       }
-      if(! found)
-         continue;
-      if(icn.LoadFile(Str(name),0))
+
+      if( found )
       {
-         id = new IconData;
-         id->iconRef = icn;
-         id->iconName = key;
-         wxLogTrace("... icon found in '%s'", name.c_str());
-         m_iconList->push_front(id);
-         return icn;
+         if(icn.LoadFile(Str(name),0))
+         {
+            id = new IconData;
+            id->iconRef = icn;
+            id->iconName = key;
+            wxLogTrace("... icon found in '%s'", name.c_str());
+            m_iconList->push_front(id);
+            return icn;
+         }
       }
    }
 
 #  ifdef    OS_WIN
+   // last, look in the ressources
    {
-      // last, look in the ressources
       wxIcon icon(_iconName);
       if ( icon.Ok() ) {
          wxLogTrace("... icon found in the ressources.");
@@ -200,6 +235,47 @@ wxIconManager::GetIcon(String const &_iconName)
 
    return m_unknownIcon;
 }
+
+wxIcon wxIconManager::GetIconFromMimeType(const String& type)
+{
+   wxIcon icon;
+
+#  ifdef    OS_WIN
+      // for MIME types, we can find the standard extension
+      wxString strExt;
+      if ( GetExtensionFromMimeType(&strExt, type) ) {
+         icon = GetIconFromExtension(strExt);
+      }
+      else {
+         icon = m_unknownIcon;
+      }
+#  else
+      icon = GetIcon(type);
+      if ( icon == m_unknownIcon )
+         icon = GetIcon(type.Before('/'));
+      if ( icon == m_unknownIcon )
+         icon = GetIcon(type.After('/'));
+#  endif // Windows
+
+   return icon;
+}
+
+#ifdef OS_WIN
+
+wxIcon wxIconManager::GetIconFromExtension(const String& ext)
+{
+   wxIcon icon = GetIcon(ext);
+   if ( icon == m_unknownIcon ) {
+      wxString strType;
+      if ( GetFileTypeFromExtension(&strType, ext) ) {
+         GetFileTypeIcon(&icon, strType);
+      }
+   }
+
+   return icon;
+}
+
+#endif //Windows
 
 void
 wxIconManager::AddIcon(String const &iconName,  IconResourceType data)

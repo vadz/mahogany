@@ -6,6 +6,13 @@
  * $Id$        *
  *******************************************************************/
 
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
 #ifdef __GNUG__
 #pragma implementation "wxMessageView.h"
 #endif
@@ -62,6 +69,26 @@ extern "C"
 #  include "MessageCC.h"
 #endif //USE_PCH
 
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+// go up the window hierarchy until we find the frame
+static wxFrame *GetFrame(wxWindow *win)
+{
+   // find our frame for the status message
+   while ( win && !win->IsKindOf(CLASSINFO(wxFrame)) ) {
+      win = win->GetParent();
+   }
+
+   // might be NULL!
+   return (wxFrame *)win;
+}
+
+// ----------------------------------------------------------------------------
+// private types
+// ----------------------------------------------------------------------------
+
 // for clickable objects
 struct ClickableInfo
 {
@@ -74,8 +101,9 @@ struct ClickableInfo
 static void popup_callback(wxMenu& menu, wxCommandEvent& ev);
 #endif // wxWin 1/2
 
-//do we need it?IMPLEMENT_CLASS(wxMessageView, wxPanel)
-
+// ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
 class myPopup : public wxMenu
 {
 protected:
@@ -149,13 +177,17 @@ public:
    int m_PartNo;
 };
 
-
-
+// ----------------------------------------------------------------------------
+// event tables
+// ----------------------------------------------------------------------------
 BEGIN_EVENT_TABLE(MimeDialog, wxDialog)
    EVT_BUTTON(-1,    MimeDialog::OnCommandEvent)
    END_EVENT_TABLE()
 
-   void
+// ============================================================================
+// implementation
+// ============================================================================
+void
 MimeDialog::OnCommandEvent(wxCommandEvent &event)
 {
    switch(event.GetId())
@@ -382,12 +414,16 @@ wxMessageView::Update(void)
                obj = new wxLayoutObjectIcon(icn);
             else
             {
-               icn = mApplication.GetIconManager()->GetIcon(mailMessage->GetPartMimeType(i));
+               icn = mApplication.GetIconManager()->
+                        GetIconFromMimeType(mailMessage->GetPartMimeType(i));
             }
             wxRemoveFile(filename);
          }
-         else
-            icn = mApplication.GetIconManager()->GetIcon(mailMessage->GetPartMimeType(i));
+         else {
+            icn = mApplication.GetIconManager()->
+               GetIconFromMimeType(mailMessage->GetPartMimeType(i));
+         }
+
          obj = new wxLayoutObjectIcon(icn);
 
          ci = new ClickableInfo;
@@ -502,6 +538,7 @@ wxMessageView::MimeInfo(int mimeDisplayPart)
                 wxOK|wxCENTRE|wxICON_INFORMATION, this);
 }
 
+// @@@@ FIXME it's a mess here
 void
 wxMessageView::MimeHandle(int mimeDisplayPart)
 {
@@ -524,50 +561,88 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
    else
       message += String(_(" bytes"));
 
-   MimeList *ml = mApplication.GetMimeList();
-   String command, flags;
-   bool found = ml->GetCommand(mimetype, command, flags);
-   if(found)
-   {
+#  ifdef OS_WIN
+      // @@@@ FIXME should somehow adapt MimeList interface for this...
+      wxString strExt;
+      if ( !GetExtensionFromMimeType(&strExt, mimetype) ) {
+         ERRORMESSAGE((_("Unknown MIME type '%s', can't execute."), mimetype));
+         return;
+      }
+
       const char *filename = tmpnam(NULL);
       FILE *out = fopen(filename,"wb");
-      if(out)
-      {
-         content = mailMessage->GetPartContent(mimeDisplayPart,&len);
-         if(fwrite(content,1,len,out) != len)
-         {
-            ERRORMESSAGE((_("Cannot write file.")));
-            fclose(out);
-            return;
-         }
-         fclose(out);
-         command = ml->ExpandCommand(command,filename,mimetype);
+      if( !out ) {
+         ERRORMESSAGE((_("Can't open temporary file.")));
+         return;
+      }
 
-#ifdef OS_UNIX
-         // @@@@ what about error handling here (fork, system, ...)?
-         if(fork() == 0)
-         {
-            system(command.c_str());
-            unlink(command.c_str());
-         }
-#elif   defined(OS_WIN)
-         system(command.c_str());
-#else   // unknown OS
-#    error  "Command execution not implemented!"
-#endif
-      }
-   }
-   else // what can we handle internally?
-   {
-      if(mimetype == "MESSAGE/RFC822")
+      content = mailMessage->GetPartContent(mimeDisplayPart,&len);
+      if(fwrite(content,1,len,out) != len)
       {
-         char *filename = wxGetTempFileName("Mtemp");
-         MimeSave(mimeDisplayPart,filename);
-         MailFolderCC *mf = MailFolderCC::OpenFolder(filename);
-         (void) GLOBAL_NEW wxMessageViewFrame(mf, 1, m_FolderView, m_Parent);
-         mf->Close();
-         wxRemoveFile(filename);
+         ERRORMESSAGE((_("Cannot write file.")));
+         fclose(out);
+         return;
       }
+      fclose(out);
+
+      wxString strNewName = filename;
+      strNewName += strExt;
+      if ( rename(filename, strNewName) != 0 ) {
+         ERRORMESSAGE((_("Can't rename '%s' to '%s'."),
+                      filename, strNewName.c_str()));
+         return;
+      }
+
+      bool bOk = (int)ShellExecute(NULL, "open", strNewName,
+                              NULL, NULL, SW_SHOWNORMAL ) > 32;
+      if ( !bOk ) {
+         wxLogSysError(_("Can't open attachment"));
+         return;
+      }
+
+      return;
+
+#  else // Unix
+      MimeList *ml = mApplication.GetMimeList();
+      String command, flags;
+      bool found = ml->GetCommand(mimetype, command, flags);
+      if(found)
+      {
+         const char *filename = tmpnam(NULL);
+         FILE *out = fopen(filename,"wb");
+         if(out)
+         {
+            content = mailMessage->GetPartContent(mimeDisplayPart,&len);
+            if(fwrite(content,1,len,out) != len)
+            {
+               ERRORMESSAGE((_("Cannot write file.")));
+               fclose(out);
+               return;
+            }
+            fclose(out);
+            command = ml->ExpandCommand(command,filename,mimetype);
+
+            // @@@@ what about error handling here (fork, system, ...)?
+            if(fork() == 0)
+            {
+               system(command.c_str());
+               unlink(command.c_str());
+            }
+         }
+
+         return;
+      }
+#  endif // Unix
+
+   // what can we handle internally?
+   if(mimetype == "MESSAGE/RFC822")
+   {
+      char *filename = wxGetTempFileName("Mtemp");
+      MimeSave(mimeDisplayPart,filename);
+      MailFolderCC *mf = MailFolderCC::OpenFolder(filename);
+      (void) GLOBAL_NEW wxMessageViewFrame(mf, 1, m_FolderView, m_Parent);
+      mf->Close();
+      wxRemoveFile(filename);
    }
 }
 
@@ -588,6 +663,8 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
                                        NULLstring, NULLstring, true,
                                        folder ? folder->GetProfile() :
                                        NULL); 
+      if ( strutil_isempty(filename) )
+         return;
    }
    else
       filename = ifilename;
@@ -609,10 +686,8 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
             ERRORMESSAGE((_("Cannot write file.")));
          else if(! ifilename) // only display in interactive mode
          {
-            message = String(_("Wrote ")) + strutil_ultoa(len)
-               + String(_(" bytes to file\n"))
-               + filename + String(".");
-            INFOMESSAGE((message.c_str(),this));
+            wxLogStatus(GetFrame(this), _("Wrote %lu bytes to file '%s'"),
+                        len, filename.c_str());
          }
          fclose(out);
       }
@@ -656,22 +731,22 @@ wxMessageView::OnCommandEvent(wxCommandEvent &event)
             }
             case ClickableInfo::CI_URL:
             {
-               // find our frame for the status message
-               wxWindow *win = GetParent();
-               while ( win && !win->IsKindOf(CLASSINFO(wxFrame)) ) {
-                  win = win->GetParent();
-               }
-
-               wxFrame *frame = (wxFrame *)win;
+               wxFrame *frame = GetFrame(this);
+               
+               // wxYield() hangs the program in the release build under Windows
+               /*
                wxLogStatus(frame, _("Opening URL '%s'..."), ci->url.c_str());
                wxYield();  // let the status bar update itself
+               */
+
+               wxBeginBusyCursor();
 
                bool bOk;
                String cmd = m_Profile->readEntry(MP_BROWSER,MP_BROWSER_D);
                if ( cmd.IsEmpty() ) {
 #                 ifdef OS_WIN
                      bOk = (int)ShellExecute(NULL, "open", ci->url,
-                                             NULL, NULL, SW_SHOWNORMAL ) <= 32;
+                                             NULL, NULL, SW_SHOWNORMAL ) > 32;
                      if ( !bOk ) {
                         wxLogSysError(_("Can't open URL '%s'"), ci->url.c_str());
                      }
@@ -687,6 +762,8 @@ wxMessageView::OnCommandEvent(wxCommandEvent &event)
                   cmd += ci->url;
                   bOk = wxExecute(Str(cmd)) != 0;
                }
+
+               wxEndBusyCursor();
 
                if ( bOk ) {
                   wxLogStatus(frame, _("Opening URL '%s'... done."),

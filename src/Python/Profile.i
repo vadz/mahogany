@@ -6,7 +6,12 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/08/26 00:32:05  VZ
+ * my final Windows rel. 0.01 sources merged with the recent changes (no warranty
+ * about their compilability under Unix, sorry...)
+ *
  * Revision 1.2  1998/08/22 23:19:27  VZ
+ *
  * many, many changes (I finally had to correct all the small things I was delaying
  * before). Among more or less major changes:
  *  1) as splash screen now looks more or less decently, show it on startup
@@ -23,7 +28,7 @@
  * first try at a complete archive
  *
  *******************************************************************/
-%module Profile
+%module MProfile
 
 %{
 #include  "Mcommon.h"

@@ -48,19 +48,21 @@
 //
 // only the wxOptionsPage ctor knows about it, so if this is (for some reason)
 // changed, it would be the only place to change.
+//
+// if you modify this enum, you must modify the data below too (search for
+// DONT_FORGET_TO_MODIFY to find it)
 enum ConfigFields
 {
-  // network
-  ConfigField_NetworkFirst = -1,
+  // network & identity
+  ConfigField_IdentFirst = -1,
   ConfigField_Username,
   ConfigField_Hostname,
   ConfigField_MailServer,
-  ConfigField_NetworkLast = ConfigField_MailServer,
-
-  // identity
-  ConfigField_IdentFirst = ConfigField_NetworkLast,
   ConfigField_PersonalName,
+  ConfigField_IdentLast = ConfigField_PersonalName,
 
+  // compose
+  ConfigField_ComposeFirst = ConfigField_IdentLast,
   ConfigField_FromLabel,
   ConfigField_ToLabel,
   ConfigField_ShowCC,
@@ -68,13 +70,16 @@ enum ConfigFields
   ConfigField_ShowBCC,
   ConfigField_BCCLabel,
 
+  ConfigField_WrapMargin,
+  ConfigField_ReplyCharacter,
+
   ConfigField_Signature,
   ConfigField_SignatureFile,
   ConfigField_SignatureSeparator,
-  ConfigField_IdentLast = ConfigField_SignatureSeparator,
+  ConfigField_ComposeLast = ConfigField_SignatureSeparator,
 
   // folders
-  ConfigField_FoldersFirst = ConfigField_IdentLast,
+  ConfigField_FoldersFirst = ConfigField_ComposeLast,
   ConfigField_OpenFolders,
   ConfigField_MainFolder,
   ConfigField_FoldersLast = ConfigField_MainFolder,
@@ -95,6 +100,7 @@ enum ConfigFields
   ConfigField_ShowLog,
   ConfigField_Splash,
   ConfigField_SplashDelay,
+  ConfigField_ConfirmExit,
   ConfigField_DateFormat,
   ConfigField_OthersLast = ConfigField_DateFormat,
 
@@ -153,16 +159,6 @@ private:
 class wxOptionsDialog : public wxFrame
 {
 public:
-  enum Icon
-  {
-    Icon_Network,
-    Icon_Ident,
-    Icon_Folders,
-    Icon_Python,
-    Icon_Others,
-    Icon_Max
-  };
-
   wxOptionsDialog(wxFrame *parent);
 
   // set dirty flag because our data somehow changed
@@ -184,6 +180,23 @@ private:
   bool        m_bDirty;     // any changes?
 
   DECLARE_EVENT_TABLE()
+};
+
+class wxOptionsNotebook : public wxNotebook
+{
+public:
+  enum Icon
+  {
+    Icon_Ident,
+    Icon_Compose,
+    Icon_Folders,
+    Icon_Python,
+    Icon_Others,
+    Icon_Max
+  };
+
+  wxOptionsNotebook(wxWindow *parent);
+  virtual ~wxOptionsNotebook();
 };
 
 class wxOptionsPage : public wxPanel
@@ -212,7 +225,7 @@ public:
   // ctor will add this page to the notebook
   wxOptionsPage(wxNotebook *parent,
                 const char *title,
-                wxOptionsDialog::Icon image,
+                wxOptionsNotebook::Icon image,
                 size_t nFirst,
                 size_t nLast);
 
@@ -245,19 +258,32 @@ protected:
   size_t        m_nFirst,
                 m_nLast;
 
+  // get the control with "right" index
+  wxControl *GetControl(size_t /* ConfigFields */ n) const
+    { return m_aControls[n - m_nFirst]; }
+
+  // type safe access to the control text
+  wxString GetControlText(size_t /* ConfigFields */ n) const
+  {
+    wxASSERT( GetControl(n)->IsKindOf(CLASSINFO(wxTextCtrl)) );
+
+    return ((wxTextCtrl *)GetControl(n))->GetValue();
+  }
+
+private:
   // the controls themselves (indexes in this array are shifted by m_nFirst
-  // with respect to ConfigFields enum!)
+  // with respect to ConfigFields enum!) - use GetControl()
   ArrayControls m_aControls;
 
   DECLARE_EVENT_TABLE()
 };
 
-class wxOptionsPageNetwork : public wxOptionsPage
+class wxOptionsPageCompose : public wxOptionsPage
 {
 public:
-  wxOptionsPageNetwork(wxNotebook *parent)
-    : wxOptionsPage(parent, _("Network"), wxOptionsDialog::Icon_Network,
-                    ConfigField_NetworkFirst, ConfigField_NetworkLast) { }
+  wxOptionsPageCompose(wxNotebook *parent)
+    : wxOptionsPage(parent, _("Compose"), wxOptionsNotebook::Icon_Compose,
+                    ConfigField_ComposeFirst, ConfigField_ComposeLast) { }
 
 private:
 };
@@ -266,7 +292,7 @@ class wxOptionsPageIdent : public wxOptionsPage
 {
 public:
   wxOptionsPageIdent(wxNotebook *parent)
-    : wxOptionsPage(parent, _("Identity"), wxOptionsDialog::Icon_Ident,
+    : wxOptionsPage(parent, _("Identity"), wxOptionsNotebook::Icon_Ident,
                     ConfigField_IdentFirst, ConfigField_IdentLast) { }
 
 private:
@@ -276,8 +302,11 @@ class wxOptionsPageFolders : public wxOptionsPage
 {
 public:
   wxOptionsPageFolders(wxNotebook *parent)
-    : wxOptionsPage(parent, _("Mail boxes"), wxOptionsDialog::Icon_Folders,
+    : wxOptionsPage(parent, _("Mail boxes"), wxOptionsNotebook::Icon_Folders,
                     ConfigField_FoldersFirst, ConfigField_FoldersLast) { }
+
+  virtual bool TransferDataToWindow();
+  virtual bool TransferDataFromWindow();
 
   void OnIdle(wxIdleEvent&);
 
@@ -293,7 +322,7 @@ class wxOptionsPagePython : public wxOptionsPage
 {
 public:
   wxOptionsPagePython(wxNotebook *parent)
-    : wxOptionsPage(parent, _("Python"), wxOptionsDialog::Icon_Python,
+    : wxOptionsPage(parent, _("Python"), wxOptionsNotebook::Icon_Python,
                     ConfigField_PythonFirst, ConfigField_PythonLast) { }
 
 private:
@@ -303,7 +332,7 @@ class wxOptionsPageOthers : public wxOptionsPage
 {
 public:
   wxOptionsPageOthers(wxNotebook *parent)
-    : wxOptionsPage(parent, _("Others"), wxOptionsDialog::Icon_Others,
+    : wxOptionsPage(parent, _("Others"), wxOptionsNotebook::Icon_Others,
                     ConfigField_OthersFirst, ConfigField_OthersLast) { }
 
 private:
@@ -342,22 +371,27 @@ END_EVENT_TABLE()
 // the labels of all fields, their types and also the field they "depend on"
 // (being dependent on another field only means that if that field is disabled
 //  or unchecked, we're disabled too)
+//
+// if you modify this array, search for DONT_FORGET_TO_MODIFY and modify data
+// there too
 wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 {
-  // network config
+  // network config and identity
   { "&Username",                    Field_Text,    -1,                        },
   { "&Hostname",                    Field_Text,    -1,                        },
   { "SMTP (&mail) server",          Field_Text,    -1,                        },
-
-  // identity
   { "&Personal name",               Field_Text,    -1,                        },
 
+  // compose
   { "&From field label",            Field_Text,    -1,                        },
   { "&To field label",              Field_Text,    -1,                        },
   { "Show &CC field",               Field_Bool,    -1,                        },
   { "CC field &label",              Field_Text,    ConfigField_ShowCC         },
   { "Show &BCC field",              Field_Bool,    -1,                        },
   { "BCC field l&abel",             Field_Text,    ConfigField_ShowBCC        },
+
+  { "&Wrap margin",                 Field_Number,  -1,                        },
+  { "&Reply character",             Field_Text,    -1,                        },
 
   { "&Use signature",               Field_Bool,    -1,                        },
   { "&Signature file",              Field_File,    ConfigField_Signature      },
@@ -381,6 +415,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
   { "Show &log window",             Field_Bool,    -1,                        },
   { "&Splash screen at startup",    Field_Bool,    -1,                        },
   { "Splash screen &delay",         Field_Number,  ConfigField_Splash         },
+  { "Confirm &exit",                Field_Bool,    -1,                        },
   { "&Format for the date",         Field_Text,    -1,                        },
 };
 
@@ -388,14 +423,14 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 //     the beginning which would avoid us all these contorsions
 #define CONFIG_ENTRY(name)  ConfigValueDefault(name, name##_D)
 
+// if you modify this array, search for DONT_FORGET_TO_MODIFY and modify data
+// there too
 static const ConfigValueDefault gs_aConfigDefaults[] =
 {
-  // network
+  // network and identity
   CONFIG_ENTRY(MP_USERNAME),
   CONFIG_ENTRY(MP_HOSTNAME),
   CONFIG_ENTRY(MP_SMTPHOST),
-
-  // identity
   CONFIG_ENTRY(MP_PERSONALNAME),
 
   CONFIG_ENTRY(MC_FROM_LABEL),
@@ -404,6 +439,9 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
   CONFIG_ENTRY(MC_CC_LABEL),
   CONFIG_ENTRY(MP_SHOWBCC),
   CONFIG_ENTRY(MC_BCC_LABEL),
+
+  CONFIG_ENTRY(MP_COMPOSE_WRAPMARGIN),
+  CONFIG_ENTRY(MP_REPLY_MSGPREFIX),
 
   CONFIG_ENTRY(MP_COMPOSE_USE_SIGNATURE),
   CONFIG_ENTRY(MP_COMPOSE_SIGNATURE),
@@ -426,15 +464,18 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
   CONFIG_ENTRY(MC_SHOWLOG),
   CONFIG_ENTRY(MC_SHOWSPLASH),
   CONFIG_ENTRY(MC_SPLASHDELAY),
+  CONFIG_ENTRY(MC_CONFIRMEXIT),
   CONFIG_ENTRY(MC_DATE_FMT),
 };
+
+#undef CONFIG_ENTRY
 
 // ============================================================================
 // implementation
 // ============================================================================
 wxOptionsPage::wxOptionsPage(wxNotebook *notebook,
                              const char *title,
-                             wxOptionsDialog::Icon image,
+                             wxOptionsNotebook::Icon image,
                              size_t nFirst,
                              size_t nLast)
              : wxPanel(notebook, -1)
@@ -720,10 +761,10 @@ void wxOptionsPage::Refresh()
       wxASSERT( nCheck >= m_nFirst && nCheck < m_nLast );
 
       // enable only if the checkbox is checked
-      wxCheckBox *checkbox = (wxCheckBox *)m_aControls[nCheck - m_nFirst];
+      wxCheckBox *checkbox = (wxCheckBox *)GetControl(nCheck);
       wxASSERT( checkbox->IsKindOf(CLASSINFO(wxCheckBox)) );
 
-      wxControl *control = m_aControls[n - m_nFirst];
+      wxControl *control = GetControl(n);
       bool bEnable = checkbox->GetValue();
 
       control->Enable(bEnable);
@@ -802,7 +843,7 @@ bool wxOptionsPage::TransferDataToWindow()
                             gs_aConfigDefaults[n].szValue);
     }
 
-    wxControl *control = m_aControls[n - m_nFirst];
+    wxControl *control = GetControl(n);
     switch ( ms_aFields[n].type ) {
       case Field_Text:
       case Field_File:
@@ -873,7 +914,7 @@ bool wxOptionsPage::TransferDataFromWindow()
   String strValue;
   long lValue;
   for ( size_t n = m_nFirst; n < m_nLast; n++ ) {
-    wxControl *control = m_aControls[n - m_nFirst];
+    wxControl *control = GetControl(n);
     switch ( ms_aFields[n].type ) {
       case Field_Text:
       case Field_File:
@@ -935,14 +976,14 @@ bool wxOptionsPage::TransferDataFromWindow()
 
 #if 0 // unused now
 // ----------------------------------------------------------------------------
-// wxOptionsPageNetwork
+// wxOptionsPageCompose
 // ----------------------------------------------------------------------------
-bool wxOptionsPageNetwork::TransferDataToWindow()
+bool wxOptionsPageCompose::TransferDataToWindow()
 {
   return TRUE;
 }
 
-bool wxOptionsPageNetwork::TransferDataFromWindow()
+bool wxOptionsPageCompose::TransferDataFromWindow()
 {
   return TRUE;
 }
@@ -956,19 +997,6 @@ bool wxOptionsPageIdent::TransferDataToWindow()
 }
 
 bool wxOptionsPageIdent::TransferDataFromWindow()
-{
-  return TRUE;
-}
-
-// ----------------------------------------------------------------------------
-// wxOptionsPageFolders
-// ----------------------------------------------------------------------------
-bool wxOptionsPageFolders::TransferDataToWindow()
-{
-  return TRUE;
-}
-
-bool wxOptionsPageFolders::TransferDataFromWindow()
 {
   return TRUE;
 }
@@ -1000,6 +1028,41 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
 }
 #endif
 
+// ----------------------------------------------------------------------------
+// wxOptionsPageFolders
+// ----------------------------------------------------------------------------
+
+bool wxOptionsPageFolders::TransferDataToWindow()
+{
+  bool bRc = wxOptionsPage::TransferDataToWindow();
+  if ( bRc ) {
+    // we add the folder opened in the main frame to the list of folders
+    // opened on startup if it's not yet among them
+    wxListBox *listbox = (wxListBox *)GetControl(ConfigField_OpenFolders);
+    wxString strMain = GetControlText(ConfigField_MainFolder);
+    int n = listbox->FindString(strMain);
+    if ( n == -1 ) {
+      listbox->Append(strMain);
+    }
+  }
+
+  return bRc;
+}
+
+bool wxOptionsPageFolders::TransferDataFromWindow()
+{
+  // undo what we did in TransferDataToWindow: remove the main folder from
+  // the list of folders to be opened on startup
+  wxListBox *listbox = (wxListBox *)GetControl(ConfigField_OpenFolders);
+  wxString strMain = GetControlText(ConfigField_MainFolder);
+  int n = listbox->FindString(strMain);
+  if ( n != -1 ) {
+    listbox->Delete(n);
+  }
+  
+  return wxOptionsPage::TransferDataFromWindow();
+}
+
 void wxOptionsPageFolders::OnNewFolder(wxCommandEvent&)
 {
   wxString str;
@@ -1008,12 +1071,23 @@ void wxOptionsPageFolders::OnNewFolder(wxCommandEvent&)
     return;
   }
 
-  ((wxListBox *)m_aControls[ConfigField_OpenFolders - m_nFirst])->Append(str);
+  // check that it's not already there
+  wxListBox *listbox = (wxListBox *)GetControl(ConfigField_OpenFolders);
+  if ( listbox->FindString(str) != -1 ) {
+    wxLogError(_("Folder '%s' is already present in the list, not added."),
+               str.c_str());
+  }
+  else {
+    // ok, do add it
+    listbox->Append(str);
+
+    GetFrame()->SetDirty();
+  }
 }
 
 void wxOptionsPageFolders::OnModifyFolder(wxCommandEvent&)
 {
-  wxListBox *l = (wxListBox *)m_aControls[ConfigField_OpenFolders - m_nFirst];
+  wxListBox *l = (wxListBox *)GetControl(ConfigField_OpenFolders);
   int nSel = l->GetSelection();
 
   wxCHECK_RET( nSel != -1, "should be disabled" );
@@ -1025,21 +1099,22 @@ void wxOptionsPageFolders::OnModifyFolder(wxCommandEvent&)
 
 void wxOptionsPageFolders::OnDeleteFolder(wxCommandEvent&)
 {
-  wxListBox *l = (wxListBox *)m_aControls[ConfigField_OpenFolders - m_nFirst];
+  wxListBox *l = (wxListBox *)GetControl(ConfigField_OpenFolders);
   int nSel = l->GetSelection();
 
   wxCHECK_RET( nSel != -1, "should be disabled" );
 
   l->Delete(nSel);
+  GetFrame()->SetDirty();
 }
 
 void wxOptionsPageFolders::OnIdle(wxIdleEvent&)
 {
-  bool bEnable = ((wxListBox *)m_aControls[ConfigField_OpenFolders - m_nFirst])
+  bool bEnable = ((wxListBox *)GetControl(ConfigField_OpenFolders))
                     ->GetSelection() != -1;
 
   long id;
-  for ( id = wxOptionsPage_BtnNew; id <= wxOptionsPage_BtnNew; id++ ) {
+  for ( id = wxOptionsPage_BtnModify; id <= wxOptionsPage_BtnDelete; id++ ) {
     wxWindow *win = FindWindow(id);
     if ( win ) {
       win->Enable(bEnable);
@@ -1084,37 +1159,13 @@ wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
   // -------------------
 
   // create the control itself
-  m_notebook = new wxNotebook(panel, -1);
+  m_notebook = new wxOptionsNotebook(panel);
   c = new wxLayoutConstraints;
   c->left.SameAs(panel, wxLeft, LAYOUT_X_MARGIN);
   c->right.SameAs(panel, wxRight, LAYOUT_X_MARGIN);
   c->top.SameAs(panel, wxTop, LAYOUT_Y_MARGIN);
   c->bottom.SameAs(panel, wxBottom, 2*LAYOUT_Y_MARGIN + hBtn);
   m_notebook->SetConstraints(c);
-
-  // create and fill the imagelist
-  static const char *aszImages[] =
-  { 
-    // should be in sync with the corresponding enum
-    "network", "ident", "folders", "python", "miscopt"
-  };
-
-  wxASSERT( WXSIZEOF(aszImages) == Icon_Max );  // don't forget to update both!
-
-  wxImageList *imageList = new wxImageList(32, 32, FALSE, WXSIZEOF(aszImages));
-  size_t n;
-  for ( n = 0; n < Icon_Max; n++ ) {
-    imageList->Add(wxBitmap(aszImages[n]));
-  }
-
-  m_notebook->SetImageList(imageList);
-
-  // create and add the pages
-  (void)new wxOptionsPageNetwork(m_notebook);
-  (void)new wxOptionsPageIdent(m_notebook);
-  (void)new wxOptionsPageFolders(m_notebook);
-  (void)new wxOptionsPagePython(m_notebook);
-  (void)new wxOptionsPageOthers(m_notebook);
 
   // create the buttons
   // ------------------
@@ -1149,20 +1200,20 @@ wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
 
   // set position
   // ------------
-  SetSizeHints(6*wBtn, 16*hBtn);
+  SetSizeHints(6*wBtn, 17*hBtn);
   Centre(wxCENTER_FRAME | wxBOTH);
 
   TransferDataToWindow();
 
   m_bDirty = FALSE;
-  for ( size_t nPage = 0; nPage < Icon_Max; nPage++ ) {
+  for ( size_t nPage = 0; nPage < wxOptionsNotebook::Icon_Max; nPage++ ) {
     ((wxOptionsPage *)m_notebook->GetPage(nPage))->Refresh();
   }
 }
 
 bool wxOptionsDialog::TransferDataToWindow()
 {
-  for ( size_t nPage = 0; nPage < Icon_Max; nPage++ ) {
+  for ( size_t nPage = 0; nPage < wxOptionsNotebook::Icon_Max; nPage++ ) {
     if ( !m_notebook->GetPage(nPage)->TransferDataToWindow() ) {
       return FALSE;
     }
@@ -1173,7 +1224,7 @@ bool wxOptionsDialog::TransferDataToWindow()
 
 bool wxOptionsDialog::TransferDataFromWindow()
 {
-  for ( size_t nPage = 0; nPage < Icon_Max; nPage++ ) {
+  for ( size_t nPage = 0; nPage < wxOptionsNotebook::Icon_Max; nPage++ ) {
     if ( !m_notebook->GetPage(nPage)->TransferDataFromWindow() ) {
       return FALSE;
     }
@@ -1219,6 +1270,44 @@ void wxBrowseButton::DoBrowse()
   if ( dialog.ShowModal() == wxID_OK ) {
     m_text->SetValue(dialog.GetPath());
   }
+}
+
+// ----------------------------------------------------------------------------
+// wxOptionsNotebook manages its own image list
+// ----------------------------------------------------------------------------
+
+// create the control and add pages too
+wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
+                 : wxNotebook(parent, -1)
+{
+  // create and fill the imagelist
+  static const char *aszImages[] =
+  { 
+    // should be in sync with the corresponding enum
+    "ident", "compose", "folders", "python", "miscopt"
+  };
+
+  wxASSERT( WXSIZEOF(aszImages) == Icon_Max );  // don't forget to update both!
+
+  wxImageList *imageList = new wxImageList(32, 32, FALSE, WXSIZEOF(aszImages));
+  size_t n;
+  for ( n = 0; n < Icon_Max; n++ ) {
+    imageList->Add(wxBitmap(aszImages[n]));
+  }
+
+  SetImageList(imageList);
+
+  // create and add the pages
+  (void)new wxOptionsPageIdent(this);
+  (void)new wxOptionsPageCompose(this);
+  (void)new wxOptionsPageFolders(this);
+  (void)new wxOptionsPagePython(this);
+  (void)new wxOptionsPageOthers(this);
+}
+
+wxOptionsNotebook::~wxOptionsNotebook()
+{
+  delete GetImageList();
 }
 
 // ----------------------------------------------------------------------------

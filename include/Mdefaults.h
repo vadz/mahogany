@@ -38,6 +38,17 @@
 #endif
 //@}
 
+/// folder types
+enum FolderType
+{
+   Folder_Inbox,     // system inbox
+   Folder_File,      // local file
+   Folder_POP,       // POP3 server
+   Folder_IMAP,      // IMAP4 server
+   Folder_News,      // NNTP server
+   Folder_Max
+};
+
 /** @name Levels of  interaction, do something or not? */
 //@{
 /// never do this action
@@ -126,15 +137,17 @@
 /// name of folder to open in mainframe
 #define   MC_MAINFOLDER          "MainFolder"
 /// path for Python
-#define   MC_PYTHONPATH         "PythonPath"
+#define   MC_PYTHONPATH        "PythonPath"
 /// is Python enabled (this is a run-time option)?
-#define   MC_USEPYTHON           "UsePython"
+#define   MC_USEPYTHON         "UsePython"
 /// start-up script to run
 #define   MC_STARTUPSCRIPT     "StartupScript"
 /// show splash screen on startup?
 #define   MC_SHOWSPLASH        "ShowSplash"
 /// how long should splash screen stay (0 disables timeout)?
-#define   MC_SPLASHDELAY    "SplashDelay"
+#define   MC_SPLASHDELAY       "SplashDelay"
+/// ask user if he really wants to exit?
+#define   MC_CONFIRMEXIT       "ConfirmExit"
 /**@name For Profiles: */
 //@{
 /// the user's full name
@@ -195,7 +208,7 @@
 #define   MP_COMPOSE_USE_SIGNATURE_SEPARATOR   "ComposeSeparateSignature"
 /// filename of signature file
 #define   MP_COMPOSE_SIGNATURE      "SignatureFile"   
-/// the folder type for a mailbox (0 = system inbox, 1 = file, 2 =pop3, 3 = imap, 4 = nntp
+/// the folder type for a mailbox (see FolderType enum)
 #define   MP_FOLDER_TYPE         "Type"
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH         "Path"
@@ -343,6 +356,8 @@
 #define     MC_SHOWSPLASH_D      1
 /// how long should splash screen stay (0 disables timeout)?
 #define MC_SPLASHDELAY_D        5000L
+/// ask user if he really wants to exit?
+#define   MC_CONFIRMEXIT_D      1L
 /**@name For Profiles: */
 //@{
 //@}
@@ -404,8 +419,8 @@
 #else
 #  define   MP_COMPOSE_SIGNATURE_D      "$HOME/.signature"
 #endif
-/// the folder type for a mailbox (0 = system inbox, 1 = file, 2 =pop3, 3 = imap, 4 = nntp
-#define   MP_FOLDER_TYPE_D         1
+/// the folder type for a mailbox (see FolderType enum)
+#define   MP_FOLDER_TYPE_D         Folder_File
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH_D      ((const char *)NULL) // don't change this!
 /// update interval for folders in seconds

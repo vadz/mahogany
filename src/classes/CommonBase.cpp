@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/08/26 00:32:18  VZ
+ * my final Windows rel. 0.01 sources merged with the recent changes (no warranty
+ * about their compilability under Unix, sorry...)
+ *
  * Revision 1.4  1998/05/30 17:56:04  KB
  * Python integration mostly complete, added hooks and sample callbacks.
  * Wrote documentation on how to use it.
@@ -31,6 +35,7 @@
 CB_IMPLEMENT_CLASS(CommonBase, CommonBase);
 DEFINE_MAGIC(CommonBase, MAGIC_COMMONBASE);
 
+#ifndef NDEBUG
 void
 CommonBase::Debug(void) const
 {
@@ -38,6 +43,7 @@ CommonBase::Debug(void) const
 	<< "this = " << this << endl
 	<< "size = " << sizeof (*this) << endl;
 }
+#endif // NDEBUG
 
 #if USE_MEMDEBUG
 void
