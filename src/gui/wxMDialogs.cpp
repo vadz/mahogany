@@ -1,5 +1,5 @@
 /*-*- c++ -*-********************************************************
- * wxMDialogs.h : wxWindows version of dialog boxes                 *
+ * wxMDialogs.cpp : wxWindows version of dialog boxes               *
  *                                                                  *
  * (C) 1998-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
