@@ -147,7 +147,7 @@ String const
 MessageCC::From(void) const
 {
    String tmp;
-   return Address(tmp, MAT_FROM);
+   return Address(tmp, MAT_REPLY);
 }
 
 const char *
@@ -196,13 +196,15 @@ MessageCC::Address(String &name, MessageAddressType type) const
       addr = envelope->reply_to;
       if(! addr)
          addr = envelope->from;
+      if(! addr)
+         addr = envelope->sender;
       break;
    }
 
    name = "";
    if(! addr)
       return "";
-   
+         
    email = String(addr->mailbox);
    if(addr->host && strlen(addr->host))
       email += String("@") + String(addr->host);
