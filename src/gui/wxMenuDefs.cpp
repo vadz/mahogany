@@ -311,7 +311,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_EDIT_FINDAGAIN, gettext_noop("Find a&gain\tCtrl-F3"), gettext_noop("Find the same text again") , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_EDIT_ADB,      gettext_noop("&Address books...\tCtrl-D"), gettext_noop("Edit the address book(s)") , wxITEM_NORMAL },
-   { WXMENU_EDIT_PREF,     gettext_noop("Pr&eferences..."),   gettext_noop("Change options")           , wxITEM_NORMAL },
+   { WXMENU_EDIT_PREF,     gettext_noop("Pr&eferences...\tCtrl-Shift-E"),   gettext_noop("Change options")           , wxITEM_NORMAL },
    { WXMENU_EDIT_MODULES,  gettext_noop("&Modules..."), gettext_noop("Choose which extension modules to use")           , wxITEM_NORMAL },
    { WXMENU_EDIT_FILTERS,  gettext_noop("Filter &rules..."), gettext_noop("Edit rules for message filtering")   , wxITEM_NORMAL },
    { WXMENU_EDIT_TEMPLATES,gettext_noop("&Templates..."), gettext_noop("Edit templates used for message composition")   , wxITEM_NORMAL },
