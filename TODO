@@ -35,6 +35,9 @@ $Id$
 
 5	KB	let all message sorting use the translation table
 
+		Printing multiple messages should only use one config
+		dialog.
+
 	KB	properties/access shows wrong help
 	KB	properties/custom headers/more shows corrupted title
 
