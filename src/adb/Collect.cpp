@@ -34,10 +34,11 @@
 #include "Collect.h"
 #include "Message.h"
 #include "MailFolder.h"
+#include "pointers.h"
 
 #include "adb/AdbManager.h"
 #include "adb/AdbBook.h"
-
+#include "adb/AdbDataProvider.h"
 #include "adb/AdbEntry.h"
 #include "adb/AdbImport.h"
 
@@ -143,7 +144,13 @@ void AutoCollectAddress(const String& email,
       AdbManager_obj manager;
       CHECK_RET( manager, _T("can't get AdbManager") );
 
-      AdbBook *autocollectbook = manager->CreateBook(bookName);
+      String providerName;
+      
+      AdbBook *autocollectbook = manager->CreateBook(
+         bookName, NULL, &providerName );
+         
+      RefCounter<AdbDataProvider> bookProvider(
+         AdbDataProvider::GetProviderByName(providerName));
 
       if ( !autocollectbook )
       {
@@ -165,20 +172,20 @@ void AutoCollectAddress(const String& email,
       //     better to create a duplicate entry than to annoy the user with a
       //     long delay
 
-      wxString adbGroupName;
-      if ( groupName[0u] == '/' )
-         adbGroupName = groupName.c_str() + 1;
+      AdbEntryGroup *group;
+      if( !groupName.empty() )
+      {
+         wxString adbGroupName;
+         if ( groupName[0u] == '/' )
+            adbGroupName = groupName.c_str() + 1;
+         else
+            adbGroupName = groupName;
+
+         group = autocollectbook->CreateGroup(adbGroupName);
+      }
       else
-         adbGroupName = groupName;
+         group = NULL;
 
-      // ok, but why exactly is this bad??
-#if 0
-      // avoid creating groups with '/'s in the names - this would create
-      // nested groups!
-      adbGroupName.Replace("/", "_");
-#endif // 0
-
-      AdbEntryGroup *group = autocollectbook->CreateGroup(adbGroupName);
       if ( !group )
       {
          // fall back to the root

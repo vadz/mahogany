@@ -94,6 +94,7 @@
 #include "Address.h"
 #include "SendMessage.h"
 #include "Message.h"
+#include "Collect.h"
 
 #include "modules/Calendar.h"
 
@@ -126,6 +127,7 @@ extern const MOption MP_USEOUTGOINGFOLDER;
 extern const MOption MP_USEVCARD;
 extern const MOption MP_USE_SENDMAIL;
 extern const MOption MP_VCARD;
+extern const MOption MP_WHITE_LIST;
 
 #ifdef OS_UNIX
 extern const MOption MP_USE_SENDMAIL;
@@ -2397,37 +2399,87 @@ bool wxComposeView::IsRecipientEnabled(size_t index) const
    return m_rcptExtra[index]->IsEnabled();
 }
 
+void wxComposeView::CollectWhitelist()
+{
+   static RecipientType all[]
+      = { Recipient_To, Recipient_Cc, Recipient_Bcc };
+   
+   for( size_t type = 0; type < sizeof(all) / sizeof(all[0]); ++type )
+   {
+      wxArrayString list;
+      GetRecipients(all[type], list);
+      
+      for( size_t address = 0; address < list.GetCount(); ++address )
+      {
+         RefCounter<AddressList> parser(AddressList::Create(list[address]));
+
+         for( Address *field = parser->GetFirst();
+            field;
+            field = parser->GetNext(field) )
+         {
+#if 0 // AutoCollectAddress is severely broken
+            AutoCollectAddress(
+               field->GetEMail(),
+               field->GetName(),
+               2, // Don't ask user, just autocollect it
+               false, // Collect addresses without name too
+               READ_APPCONFIG_TEXT(MP_WHITE_LIST),
+               _T(""), // Root group
+               this // Status bar messages to soon to be destroyed frame
+            );
+#endif
+         }
+      }
+   }
+}
+
 // helper of GetRecipients(): add the address from this control if it is of
-// correct type, to the address string, separating it from the previous
-// addresses if necessary
+// correct type, to the address array
 static void
 GetRecipientFromControl(wxComposeView::RecipientType type,
                         wxRcptControl *rcpt,
-                        wxString& address)
+                        wxArrayString& list)
 {
    if ( rcpt->GetType() == type )
    {
       wxString value = rcpt->GetValue();
       if ( !value.empty() )
       {
-         if ( !address.empty() )
-            address += CANONIC_ADDRESS_SEPARATOR;
-
-         address += rcpt->GetValue();
+         list.Add(rcpt->GetValue());
       }
+   }
+}
+
+void wxComposeView::GetRecipients(RecipientType type,
+   wxArrayString list) const
+{
+   list.Empty();
+
+   GetRecipientFromControl(type, m_rcptMain, list);
+
+   size_t count = m_rcptExtra.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      GetRecipientFromControl(type, m_rcptExtra[n], list);
    }
 }
 
 String wxComposeView::GetRecipients(RecipientType type) const
 {
+   wxArrayString list;
+   GetRecipients(type, list);
+   
    String address;
 
-   GetRecipientFromControl(type, m_rcptMain, address);
-
-   size_t count = m_rcptExtra.GetCount();
-   for ( size_t n = 0; n < count; n++ )
+   size_t count = list.GetCount();
+   if( count > 0 )
    {
-      GetRecipientFromControl(type, m_rcptExtra[n], address);
+      address += list[0];
+      for ( size_t n = 1; n < count; n++ )
+      {
+         address += CANONIC_ADDRESS_SEPARATOR;
+         address += list[n];
+      }
    }
 
    return address;

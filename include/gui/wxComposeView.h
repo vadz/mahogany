@@ -134,7 +134,12 @@ public:
    String GetFrom() const;
 
    /// get (all) addresses of this type
+   virtual void GetRecipients(RecipientType type, wxArrayString list) const;
+
+   /// get addresses of this type formatted into string
    virtual String GetRecipients(RecipientType type) const;
+
+   void CollectWhitelist();
 
    /// get the currently entered subject
    virtual String GetSubject() const;
