@@ -2275,10 +2275,11 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          break;
 
       case WXMENU_MSG_SELECTUNREAD:
+         SelectAllUnread();
          break;
 
       case WXMENU_MSG_SELECTALL:
-         SelectAllUnread();
+         SelectAll(true);
          break;
 
       case WXMENU_MSG_DESELECTALL:

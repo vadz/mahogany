@@ -616,12 +616,6 @@ public:
    virtual inline void GetAuthInfo(String *login, String *password) const = 0;
    //@}
 
-   /** Apply any filter rules to the folder. Only does anything if a
-       filter module is loaded and a filter configured.
-       @param NewOnly if true, only apply filter to recent messages
-       @return -1 if no filter module exists, return code otherwise
-   */
-   virtual int ApplyFilterRules(bool NewOnly = true) = 0;
    /** Apply any filter rules to the folder.
        Applies the rule to all messages listed in msgs.
        @return -1 if no filter module exists, return code otherwise

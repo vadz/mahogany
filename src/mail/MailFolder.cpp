@@ -2092,26 +2092,8 @@ MailFolderCmn::DeleteMessages(const UIdArray *selections, bool expunge)
 // ----------------------------------------------------------------------------
 
 int
-MailFolderCmn::ApplyFilterRules(bool newOnly)
-{
-   return ApplyFilterRulesCommonCode(NULL, newOnly);
-}
-
-int
 MailFolderCmn::ApplyFilterRules(UIdArray msgs)
 {
-   return ApplyFilterRulesCommonCode(&msgs);
-}
-
-/// common code for ApplyFilterRules:
-int
-MailFolderCmn::ApplyFilterRulesCommonCode(UIdArray *msgs,
-                                          bool newOnly)
-{
-   // Maybe we are lucky and have nothing to do?
-   if ( newOnly && CountRecentMessages() == 0 )
-         return 0;
-
    // Has the folder got any filter rules set? Concat all its filters together
    String filterString;
 
@@ -2139,13 +2121,8 @@ MailFolderCmn::ApplyFilterRulesCommonCode(UIdArray *msgs,
          {
             wxBusyCursor busyCursor;
 
-            // This might change the folder contents, so we must set this
-            // flag:
-            m_FiltersCausedChange = true;
-            if ( msgs )
-               rc = filterRule->Apply(this, *msgs);
-            else
-               rc = filterRule->Apply(this, newOnly);
+            // don't ignore deleted messages here
+            rc = filterRule->Apply(this, msgs, false, &m_FiltersCausedChange);
 
             filterRule->DecRef();
          }
@@ -2166,11 +2143,7 @@ MailFolderCmn::ApplyFilterRulesCommonCode(UIdArray *msgs,
    }
    else // no filters to apply
    {
-      if ( !newOnly )
-      {
-         wxLogVerbose(_("No filters configured for this folder."));
-      }
-      //else: we're doing this automatically, so avoid giving any messages
+      wxLogVerbose(_("No filters configured for this folder."));
    }
 
    return rc;

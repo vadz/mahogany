@@ -113,48 +113,49 @@ public:
    };
 
    Token() { m_type = TT_Invalid; }
-   inline TokenType GetType(void) const
+   TokenType GetType(void) const
       { return m_type; }
-   inline void SetChar(char c)
+   void SetChar(char c)
       { m_type = TT_Char; m_number = (unsigned)c; }
    void SetOperator(OperatorType oper)
       { m_type = TT_Operator; m_number = oper; }
-   inline void SetString(String const &s)
+   void SetString(String const &s)
       { m_type = TT_String; m_string = s; }
-   inline void SetNumber(long n)
+   void SetNumber(long n)
       { m_type = TT_Number; m_number = n; }
-   inline void SetIdentifier(String const &s)
+   void SetIdentifier(String const &s)
       { m_type = TT_Identifier; m_string = s; }
-   inline void SetEOF(void)
+   void SetEOF(void)
       { m_type = TT_EOF; }
-   inline void SetInvalid(void)
+   void SetInvalid(void)
       { m_type = TT_Invalid; }
 
-   inline int IsChar(char c) const
+   int IsChar(char c) const
       { return m_type == TT_Char && (unsigned char)m_number == (unsigned)c; }
-   inline int IsOperator(void) const
+   int IsOperator(void) const
       { return m_type == TT_Operator; }
-   inline int IsOperator(OperatorType t) const
+   int IsOperator(OperatorType t) const
       { return (m_type == TT_Operator) && ((OperatorType)m_number) == t; }
-   inline int IsString(void) const
+   int IsString(void) const
       { return m_type == TT_String; }
-   inline int IsNumber(void) const
+   int IsNumber(void) const
       { return m_type == TT_Number; }
-   inline int IsIdentifier(const char *s) const
+   int IsIdentifier(const char *s) const
       { return m_type == TT_Identifier && m_string == s; }
-   inline int IsEOF(void) const
+   int IsEOF(void) const
       { return m_type == TT_EOF; }
 
-   inline char GetChar(void) const
+   char GetChar(void) const
       { ASSERT(m_type == TT_Char); return m_number; }
-   inline OperatorType GetOperator() const
+   OperatorType GetOperator() const
       { ASSERT(m_type == TT_Operator); return (OperatorType)m_number; }
-   inline const String & GetString(void) const
+   const String & GetString(void) const
       { ASSERT(m_type == TT_String); return m_string; }
-   inline long GetNumber(void) const
+   long GetNumber(void) const
       { ASSERT(m_type == TT_Number); return m_number; }
-   inline const String & GetIdentifier(void) const
+   const String & GetIdentifier(void) const
       { ASSERT(m_type == TT_Identifier); return m_string; }
+
 private:
    TokenType m_type;
    long      m_number;
@@ -224,7 +225,7 @@ public:
    Token GetToken(bool remove = true);
    Token PeekToken(void) { return token; }
    void Rewind(size_t pos = 0);
-   inline void NextToken(void) { Rewind(m_Peek); }
+   void NextToken(void) { Rewind(m_Peek); }
 #ifdef TEST
    virtual // So we can override the Error function
 #endif
@@ -237,23 +238,20 @@ public:
          msg << imsg;
          m_MInterface->Log(level, msg);
       }
+
    /// check if a function is already defined
    const FunctionDefinition *FindFunction(const String &name);
 
    /**@name for runtime information */
    //@{
    /// Set the message and folder to operate on:
-   void SetMessage(MailFolder *folder = NULL,
-                           UIdType uid = UID_ILLEGAL)
+   void SetMessage(MailFolder *folder = NULL, UIdType uid = UID_ILLEGAL)
       {
          SafeDecRef(m_MailFolder);
          m_MailFolder = folder;
          SafeIncRef(m_MailFolder);
          m_MessageUId = uid;
 
-         m_copiedTo.clear();
-
-         m_deletedMsgs =
          m_expungedMsgs = FALSE;
       }
    /// Has filter rule caused a change to the folder/message?
@@ -281,10 +279,14 @@ public:
    MInterface * GetInterface(void) { return m_MInterface; }
 
    /// called if messages were expunged from folder
-   void SetExpunged() { m_expungedMsgs = true; m_deletedMsgs = false; }
+   void SetExpunged() { m_expungedMsgs = true; m_deletedMsgs.Empty(); }
 
    /// called by func_delete() to tell us that a message was deleted
-   void SetDeleted() { m_deletedMsgs = true; }
+   void SetDeleted() { m_deletedMsgs.Add(m_msgno); }
+
+   /// is the current message marked as deleted?
+   bool IsMsgDeleted() const
+      { return m_deletedMsgs.Index(m_msgno) != wxNOT_FOUND; }
 
    /// called by func_copytofolder()
    void SetCopiedTo(const String& copiedTo) { m_copiedTo = copiedTo; }
@@ -315,9 +317,12 @@ private:
    size_t m_msgno;
    MailFolder *m_MailFolder;
 
-   // flags set during filter evaluation
-   bool m_expungedMsgs,
-        m_deletedMsgs;      // some messages were marked as deleted
+   // this flag is set during evalutation if any filter calls Expunge()
+   bool m_expungedMsgs;
+
+   // this array contains the msgnos of the messages which were deleted from the
+   // filter rule action part
+   wxArrayLong m_deletedMsgs;
 
    // the folder the message was copied to or empty
    String m_copiedTo;
@@ -338,19 +343,14 @@ class Value : public MObject
       Type_Error,  /// Undefined value (used for expression error)
       Type_Number, /// Value is a long int number
       Type_String, /// Value is a string
-
-      // VZ: IMNSHO this doesn't work as intended (in fact, this doesn't work
-      //     at all currently as this type is unused): "Finis" (what a strange
-      //     spelling) should be a flag and not a separate type as otherwise
-      //     any attemps to convert it to anything fail with an assert
-      Type_Finis   /// Expression processing was aborted
+      Type_Max
    };
 
 public:
    // constructors
-   Value() : m_Type(Type_Error) {}
-   Value(long num) : m_Type(Type_Number), m_Num(num) {}
-   Value(const String &str) : m_Type(Type_String), m_String(str) {}
+   Value() : m_Type(Type_Error) { Init(); }
+   Value(long num) : m_Type(Type_Number), m_Num(num) { Init(); }
+   Value(const String &str) : m_Type(Type_String), m_String(str) { Init(); }
 
    bool IsValid(void) const
       { MOcheck(); return m_Type != Type_Error; }
@@ -358,8 +358,6 @@ public:
       { MOcheck(); return m_Type == Type_Number; }
    bool IsString(void) const
       { MOcheck(); return m_Type == Type_String; }
-   bool IsFinis(void) const
-      { MOcheck(); return m_Type == Type_Finis; }
    bool IsSame(const Value &v) const
       { MOcheck(); v.MOcheck(); return v.m_Type == m_Type; }
    long GetNumber(void) const
@@ -410,17 +408,22 @@ public:
          return str;
       }
 
-   static const Value Finis(void)
-      {
-         Value v;
-         v.m_Type = Type_Finis;
-         return v;
-      }
+   void Abort() { m_abort = true; }
+   bool ShouldAbort() const { return m_abort; }
+
 private:
+   void Init() { m_abort = false; }
+
    Type m_Type;
+
    // Can't use union here because m_String needs constructor.
    long   m_Num;
    const String m_String;
+
+   // if this flag is set, it means that the filter evaluation must be aborted
+   // (e.g. because the message was deleted)
+   bool m_abort;
+
    MOBJECT_NAME(Value)
 };
 
@@ -456,20 +459,31 @@ public:
    virtual const Value Evaluate() const
       {
          MOcheck();
-         if (m_Rule->Evaluate().IsFinis())
-            return Value::Finis();
+
+         Value v = m_Rule->Evaluate();
+         if ( v.ShouldAbort() )
+         {
+            // don't evaluate the rest
+            return v;
+         }
+
          // tail recursion, so no add'l stack frame
          return m_Next->Evaluate();
       }
+
 protected:
-   const SyntaxNode *m_Rule, *m_Next;
+   const SyntaxNode *m_Rule,
+                    *m_Next;
 };
 
 class Filter : public SequentialEval
 {
 public:
    Filter(const SyntaxNode *r, const SyntaxNode *n)
-      : SequentialEval(r, n) {}
+      : SequentialEval(r, n)
+   {
+   }
+
 #ifdef DEBUG
    virtual String Debug(void) const
       {
@@ -479,6 +493,10 @@ public:
          return s;
       }
 #endif
+
+protected:
+   FilterRuleImpl *m_Parser;
+
    MOBJECT_NAME(Filter)
 };
 
@@ -2166,7 +2184,16 @@ extern "C"
       int rc = mf->DeleteMessage(uid);    // without expunging
       mf->DecRef();
       p->SetDeleted();
-      return Value(rc);
+
+      Value v(rc);
+      if ( rc )
+      {
+         // we shouldn't evaluate any subsequent filters after deleting the
+         // message
+         v.Abort();
+      }
+
+      return v;
    }
 
    static Value func_copytofolder(ArgList *args, FilterRuleImpl *p)
@@ -2421,9 +2448,6 @@ int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid, bool *changeflag)
    mf->IncRef();
    SetMessage(mf, uid);
 
-   // count the messages
-   m_msgno++;
-
    // put something into the status bar
    Message *msg = GetMessage();
    String text;
@@ -2442,12 +2466,15 @@ int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid, bool *changeflag)
    {
       text += " - ";
 
+      bool wasDeleted = IsMsgDeleted();
       if ( !m_copiedTo.empty() )
       {
-         text << (m_deletedMsgs ? _("moved to ") : _("copied to "))
+         text << (wasDeleted ? _("moved to ") : _("copied to "))
               << m_copiedTo;
+
+         m_copiedTo.clear();
       }
-      else if ( m_deletedMsgs )
+      else if ( wasDeleted )
       {
          text << _("deleted");
       }
@@ -2462,31 +2489,16 @@ int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid, bool *changeflag)
       msg->DecRef();
    }
 
-   // if the messages were deleted we might want to expunge them now
-   if ( m_deletedMsgs )
-   {
-      // but only expunge them if it is safe, i.e. either we're using trash
-      // (in which case we will keep a copy there) or if the messages are from
-      // incoming folder - which is supposed to never contain any other
-      // messages, so we don't risk to expunge any messages not deleted by the
-      // filter itself
-      //
-      // TODO: currently we have no way to know if we use the trash from here,
-      //       so we only check for the second case
-      if ( mf->GetFlags() & MF_FLAGS_INCOMING )
-      {
-         mf->ExpungeMessages();
-         SetExpunged();
-      }
-   }
-
    if ( changeflag )
       *changeflag = GetChanged();
+
+   // count the messages filtered for the status string message
+   m_msgno++;
 
    SetMessage(NULL);
    mf->DecRef();
 
-   return (int) rc.GetNumber();
+   return rc.IsNumber() ? (int) rc.GetNumber() : -1;
 }
 
 int
@@ -2519,8 +2531,11 @@ CheckStatusMatch(int status, bool newOnly, bool ignoreDeleted)
    if ( newOnly )
    {
       if ( !(status & MailFolder::MSG_STAT_RECENT) ||
-               (status & MailFolder::MSG_STAT_SEEN) )
+            (status & MailFolder::MSG_STAT_SEEN) )
+      {
+         // either not recent or recent but seen - hence not new
          return false;
+      }
    }
 
    return true;
@@ -2534,15 +2549,17 @@ FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
                                 bool *changeflag)
 {
 #ifndef TEST                // UIdArray not instantiated
+   CHECK(mf, 0, "no folder for filtering");
+
    if(! m_Program)
       return 0;
-   int rc = 1; // no error yet
-   CHECK(mf, 0, "no folder for filtering");
+
+   int rc = true; // no error yet
    mf->IncRef();
 
    bool changed = FALSE;
    bool changedtemp;
-   HeaderInfoList *hil = mf->GetHeaders();
+   HeaderInfoList_obj hil = mf->GetHeaders();
    CHECK(hil, 0, "Cannot get header info list");
 
    if (msgs) // apply to all messages in list
@@ -2553,15 +2570,18 @@ FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
          ASSERT(hi);
          if(hi && CheckStatusMatch(hi->GetStatus(),
                                    newOnly, ignoreDeleted))
+         {
             rc &= Apply(mf, (*msgs)[idx], &changedtemp);
-         changed |= changedtemp;
+            changed |= changedtemp;
+         }
       }
    }
    else // apply to all or all recent messages
    {
-      for(size_t i = 0; i < hil->Count(); ++i)
+      size_t count = hil->Count();
+      for(size_t i = 0; i < count; ++i)
       {
-         const HeaderInfo * hi = (*hil)[i];
+         const HeaderInfo * hi = hil->GetItemByIndex(i);
          ASSERT(hi);
          if(hi && CheckStatusMatch(hi->GetStatus(),
                                    newOnly, ignoreDeleted))
@@ -2571,9 +2591,12 @@ FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
          }
       }
    }
-   hil->DecRef();
+
    mf->DecRef();
-   if(changeflag) *changeflag = changed;
+
+   if ( changeflag )
+      *changeflag = changed;
+
    return rc;
 #else
    return 0;

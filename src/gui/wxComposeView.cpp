@@ -88,6 +88,9 @@ enum
    IDB_EXPAND = 100
 };
 
+// the default message title
+#define COMPOSER_TITLE (_("Message Composition"))
+
 #define CANONIC_ADDRESS_SEPARATOR   ", "
 
 // code here was written with assumption that x and y margins are the same
@@ -853,7 +856,7 @@ wxComposeView::CreateNewArticle(const MailFolder::Params& params,
    cv->m_mode = Mode_News;
    cv->m_kind = Message_New;
    cv->m_template = params.templ;
-   cv->SetTitle(_("Article Composition"));
+   cv->SetTitle(COMPOSER_TITLE);
    cv->Create(parent, parentProfile);
 
    return cv;
@@ -874,7 +877,7 @@ wxComposeView::CreateNewMessage(const MailFolder::Params& params,
    cv->m_mode = Mode_Mail;
    cv->m_kind = Message_New;
    cv->m_template = params.templ;
-   cv->SetTitle(_("Message Composition"));
+   cv->SetTitle(COMPOSER_TITLE);
    cv->Create(parent,parentProfile);
 
    return cv;
@@ -1864,7 +1867,7 @@ bool wxComposeView::StartExternalEditor()
          {
             wxLogError(_("Execution of '%s' failed."), command.c_str());
          }
-         else
+         else // editor launched
          {
             tmpFileName.Ok();
             m_tmpFileName = tmpFileName.GetName();
@@ -1875,6 +1878,21 @@ bool wxComposeView::StartExternalEditor()
             // disable editing with the internal editor to avoid
             // interference with the external one
             EnableEditing(false);
+
+            // and reflect it in the title
+            wxFrame *frame = GetFrame(this);
+            if ( frame )
+            {
+               wxString title;
+               title << COMPOSER_TITLE
+                     << _(" (frozen: external editor running)");
+
+               frame->SetTitle(title);
+            }
+            else
+            {
+               FAIL_MSG( "composer without frame?" );
+            }
 
             launchedOk = true;
          }
@@ -1921,10 +1939,20 @@ bool wxComposeView::StartExternalEditor()
 
 void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
 {
+   CHECK_RET( event.GetPid() == m_pidEditor , "unknown program terminated" );
+
    // reenable editing the text in the built-in editor
    EnableEditing(true);
 
-   CHECK_RET( event.GetPid() == m_pidEditor , "unknown program terminated" );
+   wxFrame *frame = GetFrame(this);
+   if ( frame )
+   {
+      frame->SetTitle(COMPOSER_TITLE);
+   }
+   else
+   {
+      FAIL_MSG( "composer without frame?" );
+   }
 
    bool ok = false;
 

@@ -6,11 +6,11 @@ $Id$
 
 1. TABs in msg view?
 
-2. deleted msgs still filtered (not updated yet!)
-
 3. problems with calling wxYield() multiple times (under wxGTK) - what to do?
 
 4. folder opened in the main frame is still sometimes leaked on exit!
+
+5. dropping msgs to a newly created folder doesn't show them there
 
 *********************************************************************
 *** BUGS

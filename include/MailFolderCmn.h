@@ -177,12 +177,6 @@ public:
    virtual int  GetUpdateFlags(void) const
       { return m_UpdateFlags; }
    //@}
-   /** Apply any filter rules to the folder. Only does anything if a
-       filter module is loaded and a filter configured.
-       @param NewOnly if true, only apply filter to new messages
-       @return -1 if no filter module exists, return code otherwise
-   */
-   virtual int ApplyFilterRules(bool NewOnly);
    /** Apply any filter rules to the folder.
        Applies the rule to all messages listed in msgs.
        @return -1 if no filter module exists, return code otherwise
@@ -243,8 +237,6 @@ protected:
    /// Read options from profile into the options struct
    void ReadConfig(MailFolderCmn::MFCmnOptions& config);
 
-   /// common code for ApplyFilterRules:
-   int ApplyFilterRulesCommonCode(UIdArray *msgs, bool NewOnly = FALSE);
    /// Update the folder status, number of messages, etc
    virtual void UpdateStatus(void) = 0;
    /// Constructor

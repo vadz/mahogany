@@ -1275,15 +1275,15 @@ static PyObject *_wrap_MailFolder_GetAuthInfo(PyObject *self, PyObject *args) {
 static PyObject *_wrap_MailFolder_ApplyFilterRules(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MailFolder *arg0 ;
-    bool arg1 ;
+    UIdArray *arg1 ;
     PyObject * argo0 =0 ;
-    int tempbool1 ;
+    PyObject * argo1 =0 ;
     int result ;
     
-    if(!PyArg_ParseTuple(args,"Oi:MailFolder_ApplyFilterRules",&argo0,&tempbool1)) return NULL;
+    if(!PyArg_ParseTuple(args,"OO:MailFolder_ApplyFilterRules",&argo0,&argo1)) return NULL;
     if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_MailFolder,1)) == -1) return NULL;
-    arg1 = (bool ) tempbool1;
-    result = (int )arg0->ApplyFilterRules(arg1);
+    if ((SWIG_ConvertPtr(argo1,(void **) &arg1,SWIGTYPE_p_UIdArray,1)) == -1) return NULL;
+    result = (int )arg0->ApplyFilterRules(*arg1);
     resultobj = PyInt_FromLong((long)result);
     return resultobj;
 }
