@@ -66,7 +66,8 @@
 #ifdef OS_UNIX
    #include <signal.h>
 
-   static void sigpipe_handler(int)
+   // wxTYPE_SA_HANDLER is defined by wxWindows configure script in its setup.h
+   extern "C" void sigpipe_handler(wxTYPE_SA_HANDLER)
    {
       // do nothing
    }
