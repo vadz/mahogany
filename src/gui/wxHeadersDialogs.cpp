@@ -528,6 +528,8 @@ wxMsgViewHeadersDialog::wxMsgViewHeadersDialog(Profile *profile,
 {
    m_profile = profile;
    SafeIncRef(profile);
+
+   SetDefaultSize(3*wBtn, 10*hBtn);
 }
 
 wxMsgViewHeadersDialog::~wxMsgViewHeadersDialog()

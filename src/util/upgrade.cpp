@@ -1223,8 +1223,8 @@ bool RunInstallWizard()
    gs_installWizardData.hangupCommand = READ_APPCONFIG(MP_NET_OFF_COMMAND);
 #endif // platform
 
-   gs_installWizardData.useOutbox = TRUE;
-   gs_installWizardData.useTrash = TRUE;
+   gs_installWizardData.useOutbox = MP_USE_OUTBOX_D;
+   gs_installWizardData.useTrash = MP_USE_TRASH_FOLDER_D;
 #ifdef USE_MAIL_COLLECT
    gs_installWizardData.collectAllMail = TRUE;
 #endif // USE_MAIL_COLLECT

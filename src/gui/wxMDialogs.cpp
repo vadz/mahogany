@@ -3531,7 +3531,7 @@ MText2Dialog::MText2Dialog(wxWindow *parent,
    m_text2->SetConstraints(c);
 
    Layout();
-   SetDefaultSize(5*wBtn, 10*hBtn);
+   SetDefaultSize(5*wBtn, 6*hBtn);
 }
 
 bool MText2Dialog::TransferDataToWindow()
