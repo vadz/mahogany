@@ -282,8 +282,10 @@ wxMainFrame::OpenFolder(MFolder *pFolder)
 
          m_folderName.clear();
       }
-
-      m_FolderTree->SelectFolder(folder);
+      else // select the folder on screen as well
+      {
+         m_FolderTree->SelectFolder(folder);
+      }
   }
 #ifdef HAS_DYNAMIC_MENU_SUPPORT
    // only add the msg menu once
