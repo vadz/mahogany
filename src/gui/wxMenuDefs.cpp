@@ -554,7 +554,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_HELP_RELEASE_NOTES,    gettext_noop("&Release Notes..."), gettext_noop("Displays notes about the current release.")  , wxITEM_NORMAL },
    { WXMENU_HELP_FAQ,    gettext_noop("&FAQ..."),         gettext_noop("Displays the list of Frequently Asked Questions.")  , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
-   { WXMENU_HELP_CONTEXT, gettext_noop("&Help\tCtrl-H"),    gettext_noop("Help on current context..."), wxITEM_NORMAL },
+   { WXMENU_HELP_CONTEXT, gettext_noop("&Help\tCtrl-F1"),    gettext_noop("Help on current context..."), wxITEM_NORMAL },
    { WXMENU_HELP_CONTENTS, gettext_noop("Help &Contents\tF1"),    gettext_noop("Contents of help system..."), wxITEM_NORMAL },
    { WXMENU_HELP_SEARCH,   gettext_noop("&Search Help..."),      gettext_noop("Search help system for keyword..."), wxITEM_NORMAL },
    { WXMENU_HELP_COPYRIGHT,   gettext_noop("C&opyright"), gettext_noop("Show Copyright."), wxITEM_NORMAL },
