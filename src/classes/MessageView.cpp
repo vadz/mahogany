@@ -2309,11 +2309,6 @@ void MessageView::OpenURL(const String& url, bool inNewWindow)
          bOk = (int)ShellExecute(NULL, "open", url,
                                  NULL, NULL, SW_SHOWNORMAL ) > 32;
       }
-
-      if ( !bOk )
-      {
-         wxLogSysError(_("Cannot open URL '%s'"), url.c_str());
-      }
 # else  // Unix
       // propose to choose program for opening URLs
       if (
@@ -2384,13 +2379,15 @@ void MessageView::OpenURL(const String& url, bool inNewWindow)
 
          bOk = LaunchProcess(command, errmsg);
       }
+   }
 
-      if ( bOk )
-         wxLogStatus(frame, _("Opening URL '%s'... done."),
-                     url.c_str());
-      else
-         wxLogStatus(frame, _("Opening URL '%s' failed."),
-                     url.c_str());
+   if ( bOk )
+   {
+      wxLogStatus(frame, _("Opening URL '%s'... done."), url.c_str());
+   }
+   else
+   {
+      wxLogStatus(frame, _("Opening URL '%s' failed."), url.c_str());
    }
 }
 
