@@ -657,12 +657,23 @@ match:
    {
       for ( ;; )
       {
+         size_t lenURL = 0;
          while ( IsURLChar(*p) )
+         {
+            lenURL++;
             p++;
+         }
 
          // URLs are frequently so long that they're spread across multiple
          // lines, so try to see if this might be the case here
-         if ( p[0] != '\r' || p[1] != '\n' || !IsURLChar(p[2]) )
+         //
+         // first of all: is it at the end of line and can it be continued on
+         // the next one? also check if it's really long enough to be wrapped:
+         // the short URLs normally shouldn't be wrapped
+         static const size_t URL_WRAP_LEN = 50; // min len of wrapped URL
+         if ( p[0] != '\r' || p[1] != '\n'
+               || lenURL < URL_WRAP_LEN
+               || !IsURLChar(p[2]) )
          {
             // it isn't
             break;
