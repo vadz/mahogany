@@ -51,6 +51,7 @@ void MimePartCCBase::Init()
    m_dispositionParameterList = NULL;
 
    m_content = NULL;
+   m_lenContent = 0;
    m_ownsContent = false;
 
 }
@@ -282,7 +283,11 @@ const void *MimePartCCBase::GetContent(unsigned long *lenptr) const
 {
    // first check if we don't already have it
    if ( m_content )
+   {
+      *lenptr = m_lenContent;
+
       return m_content;
+   }
 
    // no, get the raw text
    const void *cptr = GetRawContent(lenptr);
@@ -434,6 +439,8 @@ MimePartCCBase::DecodeRawContent(const void *cptr, unsigned long *lenptr)
             m_ownsContent = true;
          }
    }
+
+   m_lenContent = *lenptr;
 
    return m_content;
 }

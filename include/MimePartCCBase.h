@@ -132,6 +132,9 @@ protected:
    */
    void *m_content;
 
+   /// length of m_content if it is not NULL
+   size_t m_lenContent;
+
    /// Flag telling whether we should free m_content or not
    bool m_ownsContent;
 };
