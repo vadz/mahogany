@@ -109,8 +109,8 @@ private:
 // MMODULE_DEFINE macro
 #define DECLARE_ADB_MODULE()                                               \
    virtual const char *GetFormatDesc() const;                              \
-   MMODULE_DEFINE();                                                       \
-   DEFAULT_ENTRY_FUNC
+   DEFAULT_ENTRY_FUNC                                                      \
+   MMODULE_DEFINE()
 
 // parameters of this macro are:
 //    modint - the interface of the module (AdbImporter or AdbExporter)

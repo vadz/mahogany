@@ -342,7 +342,7 @@ public: \
                             int *version_minor, \
                             int *version_release) const; \
    static  MModule *Init(int, int, int, MInterface *, int *); \
-   static const ModuleProperty ms_properties[];
+   static const ModuleProperty ms_properties[]
 
 /// this macro may be used for modules which don't do anything in their Entry()
 #define DEFAULT_ENTRY_FUNC   virtual int Entry(int /* arg */, ...) { return 0; }
