@@ -136,7 +136,8 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    m_FolderTree = new wxMainFolderTree(m_splitter, this);
    m_FolderView = wxFolderView::Create(m_splitter);
    m_splitter->SplitVertically(m_FolderTree->GetWindow(),
-                               m_FolderView->GetWindow());
+                               m_FolderView->GetWindow(),
+                               x/3);
 
 
    // open the last folder in the main frame by default

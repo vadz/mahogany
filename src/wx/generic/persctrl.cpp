@@ -53,6 +53,11 @@
 #   define   MAX(a,b) (((a) > (b))?(a):(b))
 #endif
 
+// use icon in msg box? doesn't work under GTK yet...
+#ifndef __WXGTK__
+    #define USE_ICON
+#endif
+
 // ----------------------------------------------------------------------------
 // icons
 // ----------------------------------------------------------------------------
@@ -808,7 +813,9 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
 
     static const int iconSize = 32; // x32 pixels
 
-    //FIXME-GTK wxStaticBitmap *icon = new wxStaticBitmap(this, -1, wxIcon(icons[which]));
+#ifdef USE_ICON
+    wxStaticBitmap *icon = new wxStaticBitmap(this, -1, wxIcon(icons[which]));
+#endif // use icon
     
     // split the message in lines
     // --------------------------
@@ -938,7 +945,10 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     c->height.Absolute(iconSize);
     c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
     c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-//FIXME-GTK    icon->SetConstraints(c);
+
+#ifdef USE_ICON
+    icon->SetConstraints(c);
+#endif
 
     wxStaticText *text = NULL;
     for ( size_t nLine = 0; nLine < nLineCount; nLine++ ) {
@@ -947,8 +957,13 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
             c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
         else
             c->top.Below(text);
-//FIXME-GTK        c->left.RightOf(icon, 2*LAYOUT_X_MARGIN);
+
+#ifdef USE_ICON
+        c->left.RightOf(icon, 2*LAYOUT_X_MARGIN);
+#else
         c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+#endif
+
         c->width.Absolute(widthTextMax);
         c->height.Absolute(heightTextLine);
         text = new wxStaticText(this, -1, lines[nLine]);

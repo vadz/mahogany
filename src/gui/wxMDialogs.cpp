@@ -747,8 +747,9 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
              : wxLayoutWindow(parent)
 {
    // strings used for primitive alignment of text
-   static const char *justify = "                 ";
-   static const char *justify2 = "        ";
+   static const char *align = "                 ";
+   static const char *align2 = "        ";
+   static const char *align4 = "    ";
 
    wxLayoutList *ll = GetLayoutList();
    wxBitmap *bm = new wxBitmap(background);
@@ -761,7 +762,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    // unfortunately, I can't make it transparent under Windows, so it looks
    // really ugly - disabling for now
 #ifdef __WXMSW__
-   ll->Insert(align2);
+   ll->Insert(align4);
    ll->Insert("Welcome to ");
    ll->LineBreak();
    ll->Insert(align2);

@@ -681,7 +681,7 @@
 /// the folder type for a mailbox
 #define   MP_FOLDER_TYPE_D         (int)(0x00ff)  // MF_ILLEGAL
 /// Where to store all new mail
-#define MP_NEWMAIL_FOLDER_D      "" // empty, no longer used
+#define MP_NEWMAIL_FOLDER_D      "NewMail" // empty, no longer used
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH_D      ((const char *)NULL) // don't change this!
 /// comment
