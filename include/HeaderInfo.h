@@ -37,9 +37,10 @@ class MailFolder;
 class HeaderInfo
 {
 public:
+   HeaderInfo();
+
    /** @name Access header information */
    //@{
-
    /// return the message subject
    const String& GetSubject(void) const { return m_Subject; }
 
@@ -94,6 +95,9 @@ public:
    /// Return true if we have non default encoding
    bool HasEncoding() const { return GetEncoding() != wxFONTENCODING_SYSTEM; }
    //@}
+
+   /// is this header valid (may be false while we're retrieving it)
+   bool IsValid() const { return m_UId != UID_ILLEGAL; }
 
    /// the kind of header returned by GetFromOrTo()
    enum HeaderKind

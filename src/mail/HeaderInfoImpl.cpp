@@ -38,6 +38,16 @@
 // HeaderInfo
 // ----------------------------------------------------------------------------
 
+HeaderInfo::HeaderInfo()
+{
+   m_Status = 0;
+   m_Size =
+   m_Lines = 0;
+   m_UId = UID_ILLEGAL;
+   m_Date = (time_t)-1;
+   m_Encoding = wxFONTENCODING_SYSTEM;
+}
+
 /* static */
 HeaderInfo::HeaderKind
 HeaderInfo::GetFromOrTo(const HeaderInfo *hi,
