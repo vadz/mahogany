@@ -484,8 +484,8 @@ wxMApp::OnInit()
    bool hasLocale = false;
 
 #ifdef OS_UNIX
-   wxString locale = getenv("LANG");
-   hasLocale = locale.Length() &&
+   const char *locale = getenv("LANG");
+   hasLocale = locale &&
                (strcmp(locale, "C") != 0) &&
                (strcmp(locale, "en") != 0) &&
                (strcmp(locale, "us") != 0);
@@ -528,12 +528,14 @@ wxMApp::OnInit()
 #   error "don't know how to get the current locale on this platform."
 #endif // OS
 
+#ifdef __LINUX__
    /* This is a hack for SuSE Linux which sets LANG="german" instead
       of LANG="de". Once again, they do their own thing...
    */
-   if( hasLocale && locale.CmpNoCase("german") == 0)
+   if( hasLocale && (wxStricmp(locale, "german") == 0) )
       locale = "de";
-   
+#endif // __LINUX__
+
    // if we fail to load the msg catalog, remember it in this variable because
    // we can't remember this in the profile yet - it is not yet created
    bool failedToLoadMsgs = false;
