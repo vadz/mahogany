@@ -107,7 +107,11 @@ static MModuleList *gs_MModuleList = NULL;
 static
 MModuleList *GetMModuleList(void)
 {
-   if(! gs_MModuleList) gs_MModuleList = new MModuleList;
+   if ( !gs_MModuleList )
+   {
+      gs_MModuleList = new MModuleList;
+   }
+
    return gs_MModuleList;
 }
 
@@ -115,8 +119,12 @@ void MAppBase::UnloadDLLs()
 {
    while ( !m_dllsToUnload.empty() )
    {
-      // FIXME: crashes because modules are unloaded too soon now!
-      //delete *m_dllsToUnload.begin();
+      // FIXME: if we do unload the library, M crashes because modules are
+      //        unloaded too soon -- they should really remain in memory for as
+      //        long as they're used
+      m_dllsToUnload.begin()->Detach(); // prevent the DLL from being unloaded
+
+      delete *m_dllsToUnload.begin();
       m_dllsToUnload.pop_front();
    }
 }
