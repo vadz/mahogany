@@ -215,7 +215,7 @@ bool wxMLogWindow::OnFrameClose(wxFrame *frame)
                    MDIALOG_MSGTITLE,
                    "ShowLogWinHint");
 
-   return TRUE; //FIXME!!!return wxLogWindow::OnFrameClose(frame); // TRUE, normally
+   return wxLogWindow::OnFrameClose(frame); // TRUE, normally
 }
 
 void wxMLogWindow::OnFrameDelete(wxFrame *frame)
@@ -608,12 +608,9 @@ wxMApp::OnInit()
          //      don't complain any more about missing catalogs
       }
 
-      // now we can create the log window
-      if ( READ_APPCONFIG(MP_SHOWLOG) )
+      // we want the main window to be above the log frame
+      if ( IsLogShown() )
       {
-         ShowLog();
-
-         // we want it to be above the log frame
          m_topLevelFrame->Raise();
       }
 
@@ -1124,7 +1121,7 @@ wxMApp::UpdateStatusBar(int nfields, bool isminimum) const
 #endif
    if(m_DialupSupport)
       widths[GetStatusField(SF_ONLINE)] = 70;
-   if(m_UseOutbox)
+   if(READ_APPCONFIG(MP_USE_OUTBOX))
       widths[GetStatusField(SF_OUTBOX)] = 100;
    //FIXME: wxGTK crashes after calling this repeatedly sbar->SetFieldsCount(n, widths);
 }
@@ -1140,11 +1137,14 @@ wxMApp::UpdateOutboxStatus(MailFolder *mf) const
 
    // only enable menu item if outbox is used and contains messages:
    ASSERT(m_topLevelFrame->GetMenuBar());
-   m_topLevelFrame->GetMenuBar()->Enable(
-      (int)WXMENU_FILE_SEND_OUTBOX,enable && m_UseOutbox);
 
-   if(! m_UseOutbox)
+   bool useOutbox = READ_APPCONFIG(MP_USE_OUTBOX);
+   m_topLevelFrame->GetMenuBar()->Enable(
+      (int)WXMENU_FILE_SEND_OUTBOX,enable && useOutbox);
+
+   if ( !useOutbox )
          return;
+
    // update status bar
    String msg;
    if(nNNTP == 0 && nSMTP == 0)

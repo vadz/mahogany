@@ -421,24 +421,11 @@ wxFolderTree::Init(wxWindow *parent, wxWindowID id,
                    const wxPoint& pos, const wxSize& size)
 {
    m_tree = new wxFolderTreeImpl(this, parent, id, pos, size);
-
-   // this setting is obsolete as now the tree control remembers its expanded
-   // branches itself and restores them itself as well - I think we should
-   // remove all mentions of MP_EXPAND_TREECTRL completely (VZ)
-#if 0
-   if( READ_APPCONFIG(MP_EXPAND_TREECTRL) )
-      m_tree->Expand(m_tree->GetRootItem());
-#endif // 0
 }
 
 wxFolderTree::~wxFolderTree()
 {
    ProfilePathChanger p(mApplication->GetProfile(), M_SETTINGS_CONFIG_SECTION);
-
-#if 0
-   mApplication->GetProfile()->writeEntry(MP_EXPAND_TREECTRL,
-      m_tree->IsExpanded(m_tree->GetRootItem()));
-#endif // 0
 
    delete m_tree;
 }

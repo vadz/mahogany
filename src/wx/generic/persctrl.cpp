@@ -1285,7 +1285,16 @@ void wxPTreeCtrl::RestoreExpandedBranches()
     if ( m_persist->ChangePath() ) {
         wxString data = m_persist->GetConfig()->Read(m_persist->GetKey());
 
-        RestoreExpandedBranches(GetRootItem(), data);
+        if ( !data )
+        {
+            // it is probably the first time we run, expand the top level of the
+            // tree by default
+            Expand(GetRootItem());
+        }
+        else // restore saved state
+        {
+            RestoreExpandedBranches(GetRootItem(), data);
+        }
 
         m_persist->RestorePath();
     }

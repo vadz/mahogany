@@ -138,7 +138,6 @@ MAppBase::MAppBase()
    m_KeepOpenFolders = new MailFolderList;
    m_profile = NULL;
    m_DialupSupport = FALSE;
-   m_UseOutbox = FALSE;
 
    ResetLastError();
 }
@@ -395,13 +394,17 @@ MAppBase::OnStartup()
    // must be done before using the network
    SetupOnlineManager();
 
-   m_UseOutbox = READ_APPCONFIG(MP_USE_OUTBOX) != 0;
-
    // create and show the main program window
    CreateTopLevelFrame();
 
    // update status of outbox once:
    UpdateOutboxStatus();
+
+   // now we can create the log window (the child of the main frame)
+   if ( READ_APPCONFIG(MP_SHOWLOG) )
+   {
+      ShowLog();
+   }
 
    // it doesn't seem to do anything under Windows (though it should...)
 #  ifndef OS_WIN
@@ -758,7 +761,6 @@ MAppBase::OnMEvent(MEventData& event)
    }
    else if (event.GetId() == MEventId_OptionsChange)
    {
-      m_UseOutbox = READ_APPCONFIG(MP_USE_OUTBOX) != 0;
       SetupOnlineManager(); // make options change effective
 #ifdef USE_ICON_SUBDIRS
      {
@@ -769,7 +771,6 @@ MAppBase::OnMEvent(MEventData& event)
 #endif
      // re-generate the mailcollector object:
      m_MailCollector->RequestReInit();
-      
    }
    else if (event.GetId() == MEventId_FolderStatus)
    {
