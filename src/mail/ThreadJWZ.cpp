@@ -576,12 +576,15 @@ static
 String RemoveListPrefix(const String &subject)
 {
    String s = subject;
-   if (s.empty())
-      return s;
-   if (s[0] != '[')
-      return s;
-   s = s.AfterFirst(']');
-   s = s.Trim(false);
+   if ( !s.empty() )
+   {
+      if ( s[0u] == '[' )
+      {
+         s = s.AfterFirst(']');
+         s.Trim(false /* trim from left */);
+      }
+   }
+
    return s;
 }
 
