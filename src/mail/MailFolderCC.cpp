@@ -1740,7 +1740,6 @@ void MailFolderCC::Init()
       }
    }
 
-   m_gotUnprocessedNewMail =
    m_InCritical = false;
 
    m_chDelimiter = ILLEGAL_DELIMITER;
@@ -4358,45 +4357,26 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
       // status
       if ( msgnoMax )
       {
-         // we often receive two "* EXISTS" in a row (this seems to be a bug in
-         // the IMAP server I use but it does happen all the time) and in this
-         // case we don't want to send two MEventFolderOnNewMails
-         if ( !m_gotUnprocessedNewMail )
+         // we want to apply the filtering code but we can't do it from here
+         // because we're inside c-client now and it is not reentrant, so we
+         // send an event to ourselves to do it slightly later
+         MEventManager::Send(new MEventFolderOnNewMailData(this));
+
+         // the number of unread/marked/... messages may have changed (there
+         // could be some more of them among the new ones), so forget the
+         // old values
+         //
+         // NB: we can't assume that the status hasn't changed just because
+         //     all new mail was filtered away because we might have some
+         //     non new messages as well and the flags of the existing ones
+         //     could have been changed from the outside
+         //
+         // NB2: don't do it for the temp (nameless) folders as we don't
+         //      cache their status anyhow
+         const String name = GetName();
+         if ( !name.empty() )
          {
-            // set a flag to avoid sending expunge events until we process the
-            // new mail event: this is unnecessary anyhow but, even worse, it
-            // may result in the c-client reentrancy as new mail invalidates
-            // the msgno -> position mapping in m_headers and so a call to
-            // GetPosFromIdx() in OnMailExpunge() below could result in another
-            // call to c-client if we use server side sorting and/or threading
-            m_gotUnprocessedNewMail = true;
-
-            // NB: if we have m_expungeData, leave it for now and don't
-            //     discard it as we used to do because if all new mail is
-            //     filtered away, we'd still have to notify the GUI about these
-            //     expunged messages
-
-            // we want to apply the filtering code but we can't do it from here
-            // because we're inside c-client now and it is not reentrant, so we
-            // send an event to ourselves to do it slightly later
-            MEventManager::Send(new MEventFolderOnNewMailData(this));
-
-            // the number of unread/marked/... messages may have changed (there
-            // could be some more of them among the new ones), so forget the
-            // old values
-            //
-            // NB: we can't assume that the status hasn't changed just because
-            //     all new mail was filtered away because we might have some
-            //     non new messages as well and the flags of the existing ones
-            //     could have been changed from the outside
-            //
-            // NB2: don't do it for the temp (nameless) folders as we don't
-            //      cache their status anyhow
-            const String name = GetName();
-            if ( !name.empty() )
-            {
-               MfStatusCache::Get()->InvalidateStatus(name);
-            }
+            MfStatusCache::Get()->InvalidateStatus(name);
          }
       }
       else // empty folder
@@ -4438,29 +4418,25 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
       size_t idx = msgno - 1;
       if ( idx < m_headers->Count() )
       {
-         // if we'll send a FolderUpdate later, there is no need to send a
-         // FolderExpunge one
-         //
-         // otherwise prepare for sending it from RequestUpdateAfterExpunge()
-         // a bit later
-         if ( !m_gotUnprocessedNewMail )
+         // let all the others know that some messages were expunged: we
+         // don't do it right now but wait until mm_exists() which is sent
+         // after all mm_expunged() as it is much faster to delete all
+         // messages at once instead of one at a time
+         if ( !m_expungeData )
          {
-            // let all the others know that some messages were expunged: we
-            // don't do it right now but wait until mm_exists() which is sent
-            // after all mm_expunged() as it is much faster to delete all
-            // messages at once instead of one at a time
-            if ( !m_expungeData )
-            {
-               // create new arrays
-               m_expungeData = new ExpungeData;
-            }
-
-            // add the msgno to the list of expunged messages
-            m_expungeData->msgnos.Add(msgno);
-
-            // and remember its position as well
-            m_expungeData->positions.Add(m_headers->GetPosFromIdx(idx));
+            // create new arrays
+            m_expungeData = new ExpungeData;
          }
+
+         // add the msgno to the list of expunged messages
+         m_expungeData->msgnos.Add(msgno);
+
+         // and remember its position as well: notice that we must use the
+         // old, known position, as if we called GetPosFromIdx() from here
+         // it could try to reenter cclient in order to sort/thread the
+         // folder if its sorting/threading information is out of date (this
+         // happens if there has been a new mail notification recently)
+         m_expungeData->positions.Add(m_headers->GetOldPosFromIdx(idx));
 
          wxLogTrace(TRACE_MF_EVENTS, _T("Removing msgno %u from headers"), (unsigned int)msgno);
 
@@ -4474,9 +4450,14 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
    //else: no headers, nothing to do
 
    // update the total number of messages
-   ASSERT_MSG( m_nMessages > 0, _T("expunged message from an empty folder?") );
-
-   m_nMessages--;
+   if ( m_nMessages > 0 )
+   {
+      m_nMessages--;
+   }
+   else
+   {
+      FAIL_MSG( _T("expunged message from an empty folder?") );
+   }
 
    // we don't change the cached status here as it will be done in
    // RequestUpdateAfterExpunge() later
@@ -4500,10 +4481,6 @@ void MailFolderCC::OnNewMail()
    // c-client is not reentrant, this is why we have to call this function
    // when we are not inside any c-client call!
    CHECK_RET( !m_MailStream->lock, _T("OnNewMail: folder is locked") );
-
-   // OnMailExists() sets this before calling us, so how could it have been
-   // reset?
-   ASSERT_MSG( m_gotUnprocessedNewMail, _T("OnNewMail: why are we called?") );
 
    wxLogTrace(TRACE_MF_EVENTS, _T("Got new mail notification for '%s'"),
               GetName().c_str());
@@ -4585,9 +4562,6 @@ void MailFolderCC::OnNewMail()
       //    handle such madness
       shouldNotify = true;
    }
-
-   // no more
-   m_gotUnprocessedNewMail = false;
 
    // we delayed sending the update notification in OnMailExists() because we
    // wanted to filter the new messages first - now it is done and we can notify

@@ -475,22 +475,23 @@ inline bool HeaderInfoListImpl::ShouldHaveTables() const
 
 inline bool HeaderInfoListImpl::MustRebuildTables() const
 {
-   // if the tables exist (m_sizeTables != 0) but are out of date, i.e. we got
-   // some new messages since they were built (m_sizeTables < m_count) we
-   // surely have to rebuild them
-   if ( m_sizeTables < m_count && ShouldHaveTables() )
+   // if we don't have tables anyhow, we surely are not going to rebuild them
+   if ( !ShouldHaveTables() )
+      return false;
+
+   // if the tables exist but are out of date, i.e. we got some new messages
+   // since they were built we have to rebuild them -- as we do if they don't
+   // exist at all yet
+   if ( !HasTransTable() || m_sizeTables < m_count || m_mustRebuildTables )
    {
       ((HeaderInfoListImpl *)this)->FreeSortAndThreadData(); // const_cast
 
+      // there is no need to rebuild tables for 1 msesage onl
       return m_count >= 2;
    }
 
-   // if we already have the tables, we don't have to rebuild them (unless the
-   // tables are out of date which is checked above)
-   //
-   // and neither we need them if don't have at least 2 messages: otherwise the
-   // trans tables are quite useless
-   return !HasTransTable() && m_count >= 2 && ShouldHaveTables();
+   // nothing to do: tables are up to date
+   return false;
 }
 
 inline bool HeaderInfoListImpl::IsTranslatingIndices() const
@@ -498,6 +499,13 @@ inline bool HeaderInfoListImpl::IsTranslatingIndices() const
    // if we must rebuild the tables, it means that we are going to have them
    // and we will do the index translations
    return MustRebuildTables() || HasTransTable() || m_reverseOrder;
+}
+
+inline void HeaderInfoListImpl::ScheduleTableRebuild()
+{
+   // simply set the flag: we keep the table data for GetOldPosFromIdx() needs,
+   // but we will rebuild them as soon as possible
+   m_mustRebuildTables = true;
 }
 
 // ----------------------------------------------------------------------------
@@ -540,6 +548,7 @@ HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
 
    m_reverseOrder = false;
    m_reversedTables = false;
+   m_mustRebuildTables = false;
 }
 
 void HeaderInfoListImpl::CleanUp()
@@ -666,6 +675,14 @@ MsgnoType HeaderInfoListImpl::GetPosFromIdx(MsgnoType n) const
       ((HeaderInfoListImpl *)this)->BuildTables(); // const_cast
    }
 
+   return GetOldPosFromIdx(n);
+}
+
+MsgnoType HeaderInfoListImpl::GetOldPosFromIdx(MsgnoType n) const
+{
+   // use the information which we have, do *not* rebuild the tables from here
+   // as we are called from a cclient callback and so can't call cclient again
+
    if ( m_reverseOrder )
    {
       ASSERT_MSG( !IsThreading(), _T("can't reverse threaded listing!") );
@@ -771,8 +788,8 @@ void HeaderInfoListImpl::OnRemove(MsgnoType n)
       // don't try to free them
       if ( m_sizeTables && n <= m_sizeTables )
       {
-         // resort/thread everything
-         FreeSortAndThreadData();
+         // we will resort/thread everything as soon as possible
+         ScheduleTableRebuild();
       }
       //else: nothing to do
    }
@@ -1452,6 +1469,9 @@ void HeaderInfoListImpl::BuildTables()
 
    // what is it inverse for?
    ASSERT_MSG( !m_tablePos, _T("shouldn't have inverse table neither!") );
+
+   // we are rebuilding them, so reset the flag
+   m_mustRebuildTables = false;
 
    // we are going to have the valid tables for that many messages only:
    // m_count may change under our feet from inside Sort() and/or Thread() if

@@ -62,6 +62,7 @@ public:
 
    virtual MsgnoType GetIdxFromPos(MsgnoType pos) const;
    virtual MsgnoType GetPosFromIdx(MsgnoType n) const;
+   virtual MsgnoType GetOldPosFromIdx(MsgnoType n) const;
 
    virtual void OnRemove(MsgnoType n);
    virtual void OnAdd(MsgnoType countNew);
@@ -147,11 +148,14 @@ private:
    /// do we do any kind of index mapping (trans tables or reverse order)?
    inline bool IsTranslatingIndices() const;
 
-   /// do we need the translation table at all?
+   /// do we need the translation tables at all?
    inline bool ShouldHaveTables() const;
 
    /// do we need to rebuild the translation table?
    inline bool MustRebuildTables() const;
+
+   /// mark the translation table as dirty but don't free it just yet
+   inline void ScheduleTableRebuild();
 
    /// get the msgno which should appear at the given display position
    MsgnoType GetMsgnoFromPos(MsgnoType pos) const;
@@ -207,12 +211,6 @@ private:
    /// the translation table containing the msgnos in sorted order
    MsgnoType *m_tableSort;
 
-   /// should we reverse the order of messages in the folder?
-   bool m_reverseOrder;
-
-   /// Were the tables built with a reversed criterion
-   bool m_reversedTables;
-
    /// the threading data, NULL if not threading
    ThreadData *m_thrData;
 
@@ -228,11 +226,20 @@ private:
    /// threading parameters
    ThreadParams m_thrParams;
 
+   /// should we reverse the order of messages in the folder?
+   bool m_reverseOrder;
+
+   /// were the tables built with a reversed criterion
+   bool m_reversedTables;
+
    /// if true, don't free the msgno table as it's the same as thread/sort
    bool m_dontFreeMsgnos;
 
    /// true if sorting/threading for the first time
    bool m_firstSort;
+
+   /// true if the sort/thread data is out of date and should be regenerated
+   bool m_mustRebuildTables;
 
    //@}
 

@@ -240,6 +240,25 @@ public:
    /** Returns the position at which this item should be displayed. */
    virtual MsgnoType GetPosFromIdx(MsgnoType n) const = 0;
 
+   /**
+       Returns the old position at which the item should be displayed.
+
+       The existence of this method alongside GetPosFromIdx() merits some
+       explanations. The problem is that we may need to call GetPosFromIdx()
+       from inside cclient callback. The trouble is that at that moment we can
+       not call any other cclient functions again because this would result in
+       fatal reentrancy and so we can't resort/rethread the folder right then
+       and this could be needed if we had got a new mail notification before
+       which resulted in invalidating the old sort/thread information. We can't
+       wait until later neither because the item we're interested in won't be
+       there any more.
+
+       So our solution is to keep the old sort/thread info around when we
+       invalidate it and this function provides access to it. Unlike
+       GetPosFromIdx() it is always safe to call.
+    */
+   virtual MsgnoType GetOldPosFromIdx(MsgnoType n) const = 0;
+
    //@}
 
    /** @name Appearance parameters */

@@ -2268,6 +2268,19 @@ HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
 {
    CHECK( m_headers, NULL, _T("no listing hence no header info") );
 
+   if ( m_mutexHeaders.IsLocked() )
+   {
+      // this is crazy enough to deserve an explanation: under Windows we may
+      // be called from deep inside wxYield() which is called from some
+      // progress dialog or another shown from inside mail code when we call
+      // CachePositions() from OnIdle() -- and if we start using HeaderInfo
+      // methods from here, completely unexpected reentrancies occur and we die
+      // horribly
+      //
+      // so don't do it
+      return NULL;
+   }
+
    wxFolderListCtrl *self = wxConstCast(this, wxFolderListCtrl);
 
    if ( m_headers->HasChanged(m_cacheLastMod) )
@@ -2341,10 +2354,18 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
 
          Sequence seq;
 
-         size_t count = m_headersToGet.GetCount();
-         for ( size_t n = 0; n < count; n++ )
+         const size_t countHdrs = m_headers->Count();
+
+         const size_t countToGet = m_headersToGet.GetCount();
+         for ( size_t n = 0; n < countToGet; n++ )
          {
             int pos = m_headersToGet[n];
+
+            // we could have been asked to fetch the headers which had been
+            // removed since, so avoid asking for invalid messages here
+            if ( (size_t)pos >= countHdrs )
+               continue;
+
             if ( pos < posMin )
                posMin = pos;
 
