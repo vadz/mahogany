@@ -1,0 +1,43 @@
+A small CREDITS file for Mahogany
+=================================
+
+This should serve as somethink like a contact database.
+
+** This is currently incomplete! Don't be offended if you don't
+   appear here, I'm contantly adding entries. KB
+
+Idea, Concept, Main Author
+	Karsten Ballüder <karsten@phy.hw.ac.uk>
+
+Windows Port, ADB, other major contributions
+	Vadim Zeitlin
+
+MacOS Port
+	Neill Cox <neillc@ingenious.com.au>
+
+
+Translations
+============
+
+
+Brazilian-Portuguese
+
+Czech
+
+Dutch
+	Arthur Muller <muller@cybercomm.nl>
+French
+	Vadim Zeitlin
+German
+	Karsten Ballüder <karsten@phy.hw.ac.uk>
+Italian
+
+Spanish
+
+
+
+wxWindows itself:
+=================
+
+Lots of contributors, including
+Julian Smart, Robert Röbling, Vadim Zeitlin, Stefan Csomor, Karsten Ballüder,....
