@@ -45,6 +45,7 @@
 // define this to do some (expensive!) run-time checks for translation tables
 // consistency
 #undef DEBUG_SORTING
+#define DEBUG_SORTING
 
 #ifdef DEBUG_SORTING
    #define CHECK_TABLES() VerifyTables(m_count, m_tableMsgno, m_tablePos)
@@ -835,7 +836,12 @@ void HeaderInfoListImpl::Thread()
 {
    if ( !m_thrParams.useThreading )
    {
+      // this one is surely not needed any longer
       FreeIndentTable();
+
+      // but the trouble is that we also have to resort the messages as we
+      // can't "unthread" them
+      Sort();
    }
    else // do thread
    {
