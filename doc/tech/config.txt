@@ -208,7 +208,7 @@ MP_REPLY_ADDRESS	ReplyAddress	M_EMPTYSTRING	Reply address
 MP_RFC822_IS_TEXT	Rfc822IsText	0l
 MP_ROOTDIRNAME	RootDirectoryName	"Mahogany"
 MP_RSH_PATH	RshPath	"rsh"
-MP_SENDMAILCMD	SendmailCmd	"/usr/lib/sendmail -t"
+MP_SENDMAILCMD	SendmailCmd	"/usr/sbin/sendmail -t"
 MP_SET_REPLY_FROM_TO	ReplyEqualsTo	0l
 MP_SHOWADBEDITOR	ShowAdb	0L
 MP_SHOWBCC	ShowBCC	1

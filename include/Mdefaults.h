@@ -1095,7 +1095,7 @@ enum MFolderIndex
 /// the mail host
 #define   MP_SMTPHOST_USE_SSL_D   0l
 /// sendmail command
-#define MP_SENDMAILCMD_D "/usr/lib/sendmail -t"
+#define MP_SENDMAILCMD_D "/usr/sbin/sendmail -t"
 /// use sendmail?
 #ifdef OS_UNIX
 #  define MP_USE_SENDMAIL_D 1l
