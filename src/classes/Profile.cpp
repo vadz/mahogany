@@ -814,7 +814,7 @@ Profile::CreateGlobalConfig(const String& filename)
       }
       //else: it will be in the current one, what else can we do?
 
-      strConfFile << "/." << M_APPLICATIONNAME;
+      strConfFile << '.' << M_APPLICATIONNAME;
 
       if ( !wxDir::Exists(strConfFile) )
       {
@@ -825,11 +825,9 @@ Profile::CreateGlobalConfig(const String& filename)
 
             return NULL;
          }
-         else
-         {
-            wxLogInfo(_("Created directory '%s' for configuration files."),
-                      strConfFile.c_str());
-         }
+
+         wxLogInfo(_("Created directory '%s' for configuration files."),
+                   strConfFile.c_str());
 
          // also create an empty config file with the right permissions:
          String filename = strConfFile + "/config";
