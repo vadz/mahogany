@@ -2,6 +2,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.8  1998/06/08 08:19:04  KB
+# Fixed makefiles for wxtab/python. Made Python work with new MAppBase.
+#
 # Revision 1.7  1998/05/19 17:02:42  KB
 # several small bugfixes
 #
@@ -19,14 +22,14 @@ MOBJS=util/*.o classes/*.o gui/*.o  mail/*.o
 
 include ../makeopts
 
-ifdef	USE_PYTHON
+ifdef USE_PYTHON
 SUB_DIRS += Python
 MOBJS += Python/*.o
 endif
 
 all: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
-	$(LINK) -o M util/*.o classes/*.o gui/*.o mail/*.o Python/*.o $(LIBS)
+	$(LINK) -o M $(MOBJS) $(LIBS)
 #	$(CXX) -shared $(MOBJS) -lswigpy $(NONPLIBS) -o libM.so
 #	$(LINK) -o M -L. -lM $(SLIBS)
 

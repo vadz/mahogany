@@ -6,7 +6,11 @@
  * $Id$         *
  *                                                                  *
  * $Log$
+ * Revision 1.18  1998/06/08 08:19:12  KB
+ * Fixed makefiles for wxtab/python. Made Python work with new MAppBase.
+ *
  * Revision 1.17  1998/06/05 16:56:10  VZ
+ *
  * many changes among which:
  *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
  *     i.e. there is wxMApp inheriting from AppBse and wxApp
@@ -249,10 +253,6 @@ MAppBase::OnStartup()
 #  ifdef  USE_PYTHON
       // only used here
       InitPython();
-
-      ExternalScript   echo("echo \"Hello World!\"", "", "");
-//      echo.Run("\"and so on\"");
-      cout << echo.GetOutput() << endl;
 #  endif //Python
 
    mimeList = GLOBAL_NEW MimeList();

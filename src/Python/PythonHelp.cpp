@@ -6,6 +6,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.3  1998/06/08 08:19:08  KB
+ * Fixed makefiles for wxtab/python. Made Python work with new MAppBase.
+ *
  * Revision 1.2  1998/05/30 17:59:34  KB
  * some more python
  *
@@ -20,6 +23,7 @@
 #include   "Mcommon.h"
 #include   "Profile.h"
 #include   "MApplication.h"
+#include   "gui/wxMApp.h"
 #include   "Python.h"
 #include   "PythonHelp.h"
 #include   "strutil.h"
@@ -94,7 +98,7 @@ PythonCallback(const char *name, void *obj, const char *classname,
    if(profile)
       realname = profile->readEntry(name,NULL);
    if(! profile || realname == NULL)
-      realname = mApplication.readEntry(name,NULL);
+      realname = mApplication.GetProfile()->readEntry(name,NULL);
 
    if(strutil_isempty(realname))
       return 0;    // no callback called, default value 0

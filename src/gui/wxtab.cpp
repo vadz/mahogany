@@ -672,7 +672,7 @@ wxPanelTabView::wxPanelTabView(wxPanel *pan, long style): wxTabView(style), tabP
   currentPanel = NULL;
 
   if (panel->IsKindOf(CLASSINFO(wxTabbedDialogBox)))
-    ((wxTabbedDialogBox *)panel)->SetTabView(this);
+     ((wxTabbedDialogBox *)panel)->SetTabView(this);
   else if (panel->IsKindOf(CLASSINFO(wxTabbedPanel)))
     ((wxTabbedPanel *)panel)->SetTabView(this);
 

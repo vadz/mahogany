@@ -4,7 +4,11 @@ CWD = gui
 SRC = wxMApp.cc wxMFrame.cc wxFolderView.cc wxMessageView.cc \
 wxComposeView.cc wxMainFrame.cc wxFText.cc wxFTCanvas.cc \
 wxIconManager.cc wxFontManager.cc wxMDialogs.cc wxMLogFrame.cc \
-wxAdbEdit.cc wxtab.cc
+wxAdbEdit.cc
+
+ifdef USE_WXTAB
+SRC += wxtab.cc
+endif
 
 HDR = $(SRC:.cc=.h)
 DEP = $(SRC:.cc=.d)

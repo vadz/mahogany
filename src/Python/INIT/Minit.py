@@ -12,7 +12,7 @@
 #                                                                  #
 ####################################################################
 
-import String, MApplication, MailFolder, Profile, Message
+import String, MAppBase, MailFolder, Profile, Message
 
 ####################################################################
 #                                                                  #
@@ -23,9 +23,8 @@ import String, MApplication, MailFolder, Profile, Message
 def Minit():
     print "------------------------- This is Minit.py"
     import os
-    msg = String.String(
-	"Welcome, " + os.environ['USER'] +", to the wonderful world\nof M/Python integration!")
-    MApplication.mApplication.Message(msg);
+    msg = "Welcome, " + os.environ['USER'] +", to the wonderful world\nof M/Python integration!"
+    MAppBase.MDialog_Message(msg);
     print "------------------------- Minit.py finished."
 
 ####################################################################

@@ -3,6 +3,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.8  1998/06/08 08:19:07  KB
+# Fixed makefiles for wxtab/python. Made Python work with new MAppBase.
+#
 # Revision 1.7  1998/05/30 17:55:54  KB
 # Python integration mostly complete, added hooks and sample callbacks.
 # Wrote documentation on how to use it.
@@ -27,7 +30,7 @@
 
 CWD = Python
 
-SWIGSRC = MApplication.i MailFolder.i String.i Profile.i Message.i
+SWIGSRC = MAppBase.i MailFolder.i String.i Profile.i Message.i
 CXXSRC = InitPython.cc PythonHelp.cc
 SRC=$(CXXSRC) *.cpp
 
