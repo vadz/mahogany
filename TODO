@@ -6,6 +6,9 @@ $Id$
 
 (I've sorted them a bit by "responsible person". :-) )
 
+- fix Python problems
+- fix Adb auto-collection
+
 - wxLayout mouse clicks don't work, for two reasons:
      1. event ids are not the ones expected, easy to fix
      2. for some reasons ProcessEvents() does not call any event handler...why?

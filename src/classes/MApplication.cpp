@@ -36,7 +36,6 @@
 #include <errno.h>
 
 #include "FolderView.h"
-#include "Script.h"
 #include "MailFolder.h"
 #include "MailFolderCC.h"
 
