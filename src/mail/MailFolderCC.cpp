@@ -3129,7 +3129,8 @@ MailFolderCC::GetMessage(unsigned long uid)
 // MailFolderCC: searching
 // ----------------------------------------------------------------------------
 
-MsgnoArray *MailFolderCC::DoSearch(struct search_program *pgm) const
+MsgnoArray *MailFolderCC::DoSearch(struct search_program *pgm,
+                                   int ccSearchFlags) const
 {
    CHECK( m_MailStream, NULL, "SearchAndCountResults: folder is closed" );
 
@@ -3140,7 +3141,7 @@ MsgnoArray *MailFolderCC::DoSearch(struct search_program *pgm) const
    MailFolderCC *self = (MailFolderCC *)this; // const_cast
    self->m_SearchMessagesFound = new UIdArray;
 
-   mail_search_full(m_MailStream, NIL, pgm, SE_FREE | SE_NOPREFETCH);
+   mail_search_full(m_MailStream, NIL, pgm, ccSearchFlags);
 
    CHECK( m_SearchMessagesFound, NULL, "who deleted m_SearchMessagesFound?" );
 
@@ -3153,7 +3154,7 @@ MsgnoArray *MailFolderCC::DoSearch(struct search_program *pgm) const
 unsigned long
 MailFolderCC::SearchAndCountResults(struct search_program *pgm) const
 {
-   MsgnoArray *searchResults = DoSearch(pgm);
+   MsgnoArray *searchResults = DoSearch(pgm, SE_FREE | SE_NOPREFETCH);
 
    unsigned long count;
    if ( searchResults )
@@ -3249,7 +3250,7 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag, int flags) const
       pgm->undeleted = 1;
    }
 
-   return DoSearch(pgm);
+   return DoSearch(pgm, SE_FREE | (flags & SEARCH_UID ? SE_UID : 0));
 }
 
 UIdArray *

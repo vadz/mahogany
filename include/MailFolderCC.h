@@ -394,7 +394,7 @@ private:
    unsigned long SearchAndCountResults(struct search_program *pgm) const;
 
    /// helper of SearchAndCountResults() and SearchByFlag()
-   MsgnoArray *DoSearch(struct search_program *pgm) const;
+   MsgnoArray *DoSearch(struct search_program *pgm, int ccSearchFlags) const;
 
    /// called by CountAllMessages() to perform actual counting
    virtual bool DoCountMessages(MailFolderStatus *status) const;
