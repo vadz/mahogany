@@ -470,7 +470,7 @@ inline bool HeaderInfoListImpl::MustRebuildTables() const
    // surely have to rebuild them
    if ( m_sizeTables && m_sizeTables < m_count )
    {
-      FreeSortAndThreadData();
+      ((HeaderInfoListImpl *)this)->FreeSortAndThreadData(); // const_cast
 
       return true;
    }
