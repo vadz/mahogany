@@ -1510,7 +1510,7 @@ extern const MOption MP_AWAY_STATUS;
 
 #if defined(OS_WIN)
 /// the RAS connection to use
-#define MP_NET_CONNECTION_DEFVAL "RasConnection"
+#define MP_NET_CONNECTION_DEFVAL ""
 #elif defined(OS_UNIX)
 /// the command to go online
 #define MP_NET_ON_COMMAND_DEFVAL   "wvdial"
