@@ -53,9 +53,6 @@ class MailFolder : public MObjectRC
 public:
    /** @name Constants and Types */
    //@{
-   // compatibility
-   typedef FolderType Type;
-
    /** What is the status of a given message in the folder?
        Recent messages are those that we never saw in a listing
        before. Once we open a folder, the messages will no longer be
@@ -124,7 +121,7 @@ public:
          @return false on error or true on success
    */
    static bool CreateFolder(const String &name,
-                            FolderType type,
+                            MFolderType type,
                             int flags,
                             const String &path,
                             const String &comment);
@@ -152,7 +149,7 @@ public:
        @return true on success
    */
    static bool Subscribe(const String &host,
-                         FolderType protocol,
+                         MFolderType protocol,
                          const String &mailboxname,
                          bool subscribe = true);
    /** Get a listing of all mailboxes.
@@ -340,7 +337,7 @@ public:
    virtual class HeaderInfoList *GetHeaders(void);
    //@}
    /// Return the folder's type.
-   virtual FolderType GetType(void);
+   virtual MFolderType GetType(void);
    /// return the folder flags
    virtual int GetFlags(void);
 
