@@ -1045,13 +1045,13 @@ MailFolder::ReplyMessage(Message *msg,
       cv->AddHeaderEntry(_T("In-Reply-To"), messageid);
    }
 
-   // if configured, set Reply-To to the same address the message we're
+   // if configured, set "From" value to the same address the message we're
    // replying to was sent
    if ( READ_CONFIG(profile, MP_SET_REPLY_FROM_TO) )
    {
-      String rt;
-      msg->GetHeaderLine(_T("To"), rt);
-      cv->AddHeaderEntry(_T("Reply-To"), rt);
+      String to;
+      msg->GetHeaderLine(_T("To"), to);
+      cv->SetFrom(to);
    }
 
    cv->InitText(msg, params.msgview);
