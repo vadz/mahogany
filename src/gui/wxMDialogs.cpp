@@ -277,12 +277,18 @@ public:
                                 wxTE_MULTILINE | wxTE_READONLY);
         m_text->SetFont(wxFont(12, wxFONTFAMILY_TELETYPE,
                                wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+        Resize();
+    }
+
+    void Resize()
+    {
+       wxSize size = GetClientSize();
+       m_text->SetSize(0, 0, size.x, size.y);
     }
 
     void OnSize(wxSizeEvent& WXUNUSED(event))
     {
-       wxSize size = GetClientSize();
-       m_text->SetSize(0, 0, size.x, size.y);
+        Resize();
     }
 
 private:
@@ -831,12 +837,12 @@ class wxAboutFrame : public wxFrame
 {
 public:
    wxAboutFrame(bool bCloseOnTimeout);
-   virtual ~wxAboutFrame() 
+   virtual ~wxAboutFrame()
    {
-      g_pSplashScreen = NULL; 
+      g_pSplashScreen = NULL;
 #ifdef USE_SPLASH_LOG
       wxLog *log = wxLog::SetActiveTarget(NULL);
-      delete log; 
+      delete log;
       // this will remove SplashKillerLog and restore the original one
 #endif // USE_SPLASH_LOG
    }
@@ -1318,7 +1324,7 @@ void MDialog_ShowText(MWindow *parent,
       w = 500;
       h = 300;
    }
-      
+
 
    MTextDialog dlg(parent, title, text,
                    wxPoint(x, y), wxSize(w, h));
@@ -1522,7 +1528,7 @@ bool wxMessageSortingDialog::TransferDataFromWindow()
          // reverse the sort order: MSO_XXX_REV == MSO_XXX + 1
          selection++;
       }
-         
+
       sortOrder += selection;
    }
 
@@ -2234,7 +2240,7 @@ protected:
 BEGIN_EVENT_TABLE(wxGlobalPasswdDialog, wxOptionsPageSubdialog)
    EVT_UPDATE_UI(-1, wxGlobalPasswdDialog::OnUpdateUI)
 END_EVENT_TABLE()
- 
+
 void wxGlobalPasswdDialog::OnUpdateUI(wxUpdateUIEvent& event)
 {
    DoUpdateUI();
@@ -2290,7 +2296,7 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
    c->height.AsIs();
    m_UseGlobalPassword->SetConstraints(c);
 
-   
+
    m_text1 = new wxStaticText(this, -1, _("New password:"));
    c = new wxLayoutConstraints;
    c->top.Below(m_UseGlobalPassword, 4*LAYOUT_Y_MARGIN);
@@ -2308,7 +2314,7 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
    c->width.AsIs();
    c->height.AsIs();
    m_nPassword->SetConstraints(c);
-   
+
    m_text2 = new wxStaticText(this, -1, _("New password:"));
    c = new wxLayoutConstraints;
    c->top.Below(m_nPassword, 4*LAYOUT_Y_MARGIN);
@@ -2482,7 +2488,7 @@ static const struct
    { "TestMailSent",             gettext_noop("show successful test message") },
       { "AdbDeleteEntry",           gettext_noop("ask for confirmation before deleting the address book entries") },
   { "ModulesWarning",           gettext_noop("Warning that module changes take effect only after restart") },
-         
+
    { "ConfirmAdbImporter",       gettext_noop("ask for confirmation before importing unrecognized address book files") },
    { "BbdbSaveDialog",           gettext_noop("ask for confirmation before saving address books in BBDB format") },
    { "FolderGroupHint",          gettext_noop("show explanation after creating a folder group") },
@@ -2499,12 +2505,10 @@ static const struct
    { "FilterReplace",            gettext_noop("ask whether to replace filter when adding a new filter") },
    { "AddAllSubfolders",         gettext_noop("create all subfolders automatically instead of browsing them") },
    { "StoreRemoteNow",         gettext_noop("Question whether to store remote configuration from options dialog") },
-      { "GetRemoteNow",           gettext_noop("Question whether to retrieve remote configuration from options dialog") },
-         { "RetrieveRemote", gettext_noop("Question whether to retrieve remote settings at startup.") },
-         { "StoreRemote", gettext_noop("Question whether to store remote settings at shutdown.") },   { "OverwriteRemote",gettext_noop("Question whether to overwrite newer remote config settings") },
-            { "StoredRemote", gettext_noop("Confirmation that remote config was saved") },                                                                                                         
-                                                                                                         
-                                                                                                         //{ "", gettext_noop("") },
+   { "GetRemoteNow",           gettext_noop("Question whether to retrieve remote configuration from options dialog") },
+   { "RetrieveRemote", gettext_noop("Question whether to retrieve remote settings at startup.") },
+   { "StoreRemote", gettext_noop("Question whether to store remote settings at shutdown.") },   { "OverwriteRemote",gettext_noop("Question whether to overwrite newer remote config settings") },
+   { "StoredRemote", gettext_noop("Confirmation that remote config was saved") },
 };
 
 /// return the name to use for the given persistent msg box
