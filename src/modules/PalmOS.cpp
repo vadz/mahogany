@@ -686,7 +686,7 @@ PalmOSModule::Connect(void)
       m_PiSocket = pi_accept_to(m_PiSocket, 0, 0, 5000);
 #else
       // horrible old interface, hangs if fails:
-      m_PiSocket = pi_accept(m_PiSocket);
+      m_PiSocket = pi_accept(m_PiSocket, 0, 0);
 #endif
       if(m_PiSocket < 0)
       {
