@@ -14,8 +14,22 @@
 #include   "Mpch.h"
 #include   "Mcommon.h"
 
-#include   "Profile.h"
-#include   "FolderView.h"
+#ifndef USE_PCH
+#  include "strutil.h"
+
+   // includes for c-client library
+   extern "C"
+   {
+#     include   <stdio.h>
+#     include   <osdep.h>
+#     include   <rfc822.h>
+#     include   <smtp.h>
+#     include   <nntp.h>
+   }
+#endif // USE_PCH
+
+#include "Profile.h"
+#include "FolderView.h"
 
 #include "Mdefaults.h"
 
@@ -25,23 +39,8 @@
 #include "Message.h"
 #include "MessageCC.h"
 
-#ifndef USE_PCH
-#include  "strutil.h"
-
-// includes for c-client library
-extern "C"
-{
-#include   <stdio.h>
-#include   <osdep.h>
-#include   <rfc822.h>
-#include   <smtp.h>
-#include   <nntp.h>
-}
-#endif
-
 /// temporary buffer for storing message headers, be generous:
 #define   HEADERBUFFERSIZE 100*1024
-
 
 MessageCC::MessageCC(MailFolderCC *ifolder, unsigned long msgno,
                      unsigned long iuid)
@@ -462,7 +461,7 @@ MessageCC::GetParameters(int n)
 
 
 MessageParameterList const &
-MessageCC::GetDisposition(int n = -1,String *disptype)
+MessageCC::GetDisposition(int n, String *disptype)
 {
    DecodeMIME();
 
