@@ -8,6 +8,7 @@ $Id$
     (file is still open and in use when deleted)
   + occasional Xlib error messages from MimePopup/Handle  WHAT's that?
   + fix MessageCC::GetParameters()
+  + add a "save as html" option, using wxLayoutWindow functionality
 
 - ComposeView:
    + extra header lines don't get set, why? Profile bug?
