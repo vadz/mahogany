@@ -2734,30 +2734,40 @@ public:
          // also check SMTP/NNTP server flags: need to replace bools with
          // SSLSupport_XXX values
 
-         // we should avoid using READ_CONFIG() because it uses the new default
-         // value as fallback and we need the old one
          const char *key = GetOptionName(MP_SMTPHOST_USE_SSL);
-         if ( !profile->writeEntryIfNeeded
-                        (
-                           key,
-                           profile->readEntry(key, 0)
-                              ? SSLSupport_SSL : SSLSupport_TLSIfAvailable,
-                           GetNumericDefault(MP_SMTPHOST_USE_SSL)
-                        ) )
+         Profile::ReadResult readFrom;
+         bool wasUsingSSL = profile->readEntry(key, false, &readFrom);
+
+         // only replace the value if it is present in this folder as it is
+         // going to be changed in the parent when we visit it anyhow
+         if ( readFrom == Profile::Read_FromHere )
          {
-            return false;
+            if ( !profile->writeEntryIfNeeded
+                           (
+                              key,
+                              wasUsingSSL ? SSLSupport_SSL
+                                          : SSLSupport_TLSIfAvailable,
+                              GetNumericDefault(MP_SMTPHOST_USE_SSL)
+                           ) )
+            {
+               return false;
+            }
          }
 
          key = GetOptionName(MP_NNTPHOST_USE_SSL);
-         if ( !profile->writeEntryIfNeeded
-                        (
-                           key,
-                           profile->readEntry(key, 0)
-                              ? SSLSupport_SSL : SSLSupport_TLSIfAvailable,
-                           GetNumericDefault(MP_NNTPHOST_USE_SSL)
-                        ) )
+         wasUsingSSL = profile->readEntry(key, false, &readFrom);
+         if ( readFrom == Profile::Read_FromHere )
          {
-            return false;
+            if ( !profile->writeEntryIfNeeded
+                           (
+                              key,
+                              wasUsingSSL ? SSLSupport_SSL
+                                          : SSLSupport_TLSIfAvailable,
+                              GetNumericDefault(MP_NNTPHOST_USE_SSL)
+                           ) )
+            {
+               return false;
+            }
          }
 
          return true;
