@@ -1357,9 +1357,8 @@ static MsgStatus AnalyzeStatus(int stat)
    NB: don't be confused by 2 meanings of encoding here: it is both the
        charset encoding for us and also QP/Base64 encoding for RFC 2047
  */
-
-/* static */
-String MailFolder::DecodeHeader(const String &in, wxFontEncoding *pEncoding)
+static
+String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
 {
    // we don't enforce the sanity checks on charset and encoding - should we?
    // const char *specials = "()<>@,;:\\\"[].?=";
@@ -1509,6 +1508,25 @@ String MailFolder::DecodeHeader(const String &in, wxFontEncoding *pEncoding)
       *pEncoding = encoding;
 
    return out;
+}
+
+/* static */
+String MailFolder::DecodeHeader(const String& in, wxFontEncoding *pEncoding)
+{
+   // some brain dead mailer encode the already encoded headers so to obtain
+   // the real header we keep decoding it until it stabilizes
+   String header,
+          headerOrig = in;
+   for ( ;; )
+   {
+      header = DecodeHeaderOnce(headerOrig, pEncoding);
+      if ( header == headerOrig )
+         break;
+
+      headerOrig = header;
+   }
+
+   return header;
 }
 
 // ----------------------------------------------------------------------------
