@@ -80,6 +80,10 @@ M_OVERRIDES(libtool,libtool,
 --with-libtool    use GNU libtool,
 USE_LIBTOOL)
 
+M_OVERRIDES(ccostype,ccostype,
+--with-ccostype=xxx    use OS type xxx for c-client compilation,
+USE_CCOSTYPE)
+
 M_OVERRIDES_DONE
 
 dnl --------------------------------------------------------------------------
@@ -494,32 +498,43 @@ dnl --------------------------------------------------------------------------
 
 dnl we need to set the target for c-client library:
 
-AC_MSG_CHECKING(for c-client library OS type)
-CCOSTYPE=
-case "${OSTYPE}" in
-linux* | Linux*)
-  CCOSTYPE=slx
-  ;;
-Solaris* | solaris* | SunOS*)
-  if test "$GCC" = "yes"
-  then
-    CCOSTYPE=gso
-  else
-    CCOSTYPE=sol
-  fi
-  ;;
-freebsd* | FreeBSD*)
-  CCOSTYPE=bsf
-  ;;
-OSF1*)
-  if test "$GCC" = "yes"
-  then
-    CCOSTYPE=gof
-  else
-    CCOSTYPE=osf
-  fi
-  ;;
-esac
+
+if test "x$USE_CCOSTYPE" != "x"; then
+	CCOSTYPE="$USE_CCOSTYPE"
+else
+	CCOSTYPE=
+	AC_MSG_CHECKING(for c-client library OS type)
+	case "${OSTYPE}" in
+	linux* | Linux*)
+	  CCOSTYPE=slx
+	  ;;
+	Solaris* | solaris* | SunOS*)
+	  if test "$GCC" = "yes"
+	  then
+	    CCOSTYPE=gso
+	  else
+	    CCOSTYPE=sol
+	  fi
+	  ;;
+	freebsd* | FreeBSD*)
+	  CCOSTYPE=bsf
+	  ;;
+	hpux_9*)
+	  CCOSTYPE=hpp
+	  ;;
+	hpux_10*)
+	  CCOSTYPE=hpx
+	  ;;
+	OSF1*)
+	  if test "$GCC" = "yes"
+	  then
+	    CCOSTYPE=gof
+	  else
+			    CCOSTYPE=osf
+	  fi
+	  ;;
+	esac
+fi
 
 AC_MSG_RESULT($CCOSTYPE)
 if test "x$CCOSTYPE" = "x" ; then
