@@ -5,14 +5,14 @@
  *                                                                  *
  * $Id$               *
  *******************************************************************/
-#ifndef	WXMFRAME_H
+#ifdefndef	WXMFRAME_H
 #define WXMFRAME_H
 
-#ifdef __GNUG__
+#ifdefdef __GNUG__
 #pragma interface "wxMFrame.h"
 #endif
 
-#ifndef	USE_PCH
+#ifdefndef	USE_PCH
 #	include	"MFrame.h"
 #	include	"guidef.h"
 #endif
@@ -57,7 +57,7 @@ public:
    bool	IsInitialised(void) const { return initialised; }
 
    /// make it visible or invisible
-#if     USE_WXWINDOWS2
+#ifdef     USE_WXWINDOWS2
    bool Show(bool visible = true) { return wxFrame::Show(visible); }
 #else
    void	Show(bool visible = true) { wxFrame::Show(visible); }
@@ -72,7 +72,7 @@ public:
    /// handle basic menu callbacks
    void OnMenuCommand(int id);
 
-#if     USE_WXWINDOWS2
+#ifdef     USE_WXWINDOWS2
 
    //@{ Menu callbacks
     /// 

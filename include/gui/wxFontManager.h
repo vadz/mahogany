@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/05/01 14:02:41  KB
+ * Ran sources through conversion script to enforce #if/#ifdef and space/TAB
+ * conventions.
+ *
  * Revision 1.2  1998/03/26 23:05:38  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -15,14 +19,14 @@
  *
  *******************************************************************/
 
-#ifndef WXFONTMANAGER_H
+#ifdefndef WXFONTMANAGER_H
 #define WXFONTMANAGER_H
 
-#ifdef __GNUG__
+#ifdefdef __GNUG__
 #pragma interface "wxFontManager.h"
 #endif
 
-#if         !USE_PCH
+#ifdef         !USE_PCH
   #define	Uses_wxFont
   #include	<wx/wx.h>
 

@@ -36,7 +36,7 @@
  *            Added recordDefaults() method (KB)                             *
 \*****************************************************************************/
 
-#ifndef   _APPCONF_H
+#ifdefndef   _APPCONF_H
 #define   _APPCONF_H
 
 
@@ -96,7 +96,7 @@
  */
 //@{
 
-#if APPCONF_USE_CONFIG_H
+#ifdef APPCONF_USE_CONFIG_H
 #	include <config.h>
 #	ifdef	HAVE_LIBINTL
 #		undef 	APPCONF_USE_GETTEXT
@@ -104,11 +104,11 @@
 #	endif
 #endif
 
-#ifndef USE_IOSTREAMH
+#ifdefndef USE_IOSTREAMH
   #define USE_IOSTREAMH 1
 #endif
 
-#if     USE_IOSTREAMH
+#ifdef     USE_IOSTREAMH
   #include  <iostream.h>
 #else   // old C style headers
   #include  <iostream>
@@ -117,12 +117,12 @@
 #include  <stdlib.h>
 
 // make sure we have a Bool type
-#ifndef Bool
+#ifdefndef Bool
 #	define	Bool	int
 #endif
 
 //typedef   int Bool;
-#ifndef    TRUE
+#ifdefndef    TRUE
 # define    TRUE  1
 # define    FALSE 0
 #endif
@@ -141,34 +141,34 @@
 
 /// can we use gettext() for multi language support?
 
-#ifndef	APPCONF_USE_GETTEXT
+#ifdefndef	APPCONF_USE_GETTEXT
 #		define	APPCONF_USE_GETTEXT	0
 #else
 #		define	APPCONF_DOMAIN	"appconf"
 #endif
 
 /// shall we be case sensitive in parsing variable names?
-#ifndef APPCONF_CASE_SENSITIVE
+#ifdefndef APPCONF_CASE_SENSITIVE
 #	define	APPCONF_CASE_SENSITIVE	0
 #endif
 
 /// separates group and entry names
-#ifndef APPCONF_PATH_SEPARATOR
+#ifdefndef APPCONF_PATH_SEPARATOR
 #	define   APPCONF_PATH_SEPARATOR     '/'
 #endif
 
 /// introduces immutable entries
-#ifndef APPCONF_IMMUTABLE_PREFIX
+#ifdefndef APPCONF_IMMUTABLE_PREFIX
 #	define   APPCONF_IMMUTABLE_PREFIX   '!'
 #endif
 
 /// length for internal character array for expansion (e.g. for gcvt())
-#ifndef APPCONF_STRBUFLEN
+#ifdefndef APPCONF_STRBUFLEN
 #	define   APPCONF_STRBUFLEN          1024
 #endif
 
 /// should we use registry instead of configuration files under Win32?
-#ifndef	  APPCONF_WIN32_NATIVE
+#ifdefndef	  APPCONF_WIN32_NATIVE
 #	define APPCONF_WIN32_NATIVE 		1 	// default: TRUE
 #endif
 
@@ -704,7 +704,7 @@ private:
 // ----------------------------------------------------------------------------
 /// RegistryConfig uses Win32 registry API to store configuration info
 // ----------------------------------------------------------------------------
-#ifdef  __WIN32__
+#ifdefdef  __WIN32__
 
 class RegistryConfig : public BaseConfig
 {
@@ -774,7 +774,7 @@ private:
 #endif  // WIN32
 
 /// AppConfig is mapped on the class most appropriate for the target platform
-#if	  APPCONF_WIN32_NATIVE && defined(__WIN32__)
+#ifdef	  APPCONF_WIN32_NATIVE && defined(__WIN32__)
   typedef class RegistryConfig AppConfig;
 #else
   typedef class FileConfig     AppConfig;

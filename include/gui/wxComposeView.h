@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/01 14:02:41  KB
+ * Ran sources through conversion script to enforce #if/#ifdef and space/TAB
+ * conventions.
+ *
  * Revision 1.3  1998/03/26 23:05:38  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -17,14 +21,14 @@
  * first try at a complete archive
  *
  *******************************************************************/
-#ifndef	WXCOMPOSEVIEW_H
+#ifdefndef	WXCOMPOSEVIEW_H
 #define WXCOMPOSEVIEW_H
 
-#ifdef __GNUG__
+#ifdefdef __GNUG__
 #pragma interface "wxComposeView.h"
 #endif
 
-#if !USE_PCH
+#ifdef !USE_PCH
   #include	<map>
 
   #include	<Message.h>

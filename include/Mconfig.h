@@ -5,7 +5,7 @@
  *                                                                  *
  * $Id$                *
  *******************************************************************/
-#ifndef MCONFIG_H
+#ifdefndef MCONFIG_H
 #define	MCONFIG_H
 
 #include	"config.h"
@@ -16,7 +16,7 @@
 #undef	CC_GCC
 #undef	CC_MSC
 
-#ifdef unix
+#ifdefdef unix
 #	define	OS_UNIX		1
 #	define	OS_TYPE		"unix"
 #elif defined(__WIN__) || defined (__WIN32__)
@@ -30,12 +30,12 @@
 # error   "Unknown platform (forgot to #define unix?)"
 #endif
 
-#ifdef	__WINDOWS__
+#ifdefdef	__WINDOWS__
 #error windows
 #endif
 
 // Are we using GCC?
-#ifdef	__GNUG__
+#ifdefdef	__GNUG__
 #	undef	CC_GCC	// might already be defined thanks to configure
 #	define	CC_GCC	1
         /// gcc does not support precompiled headers
@@ -50,7 +50,7 @@
 #endif
 
 // Are we using Microsoft Visual C++ ?
-#ifdef	_MSC_VER 
+#ifdefdef	_MSC_VER 
 #		define	CC_MSC	1
                 /// are we using precompiled headers?
 #		ifndef USE_PCH
@@ -60,7 +60,7 @@
 #		endif
 #endif
 
-#ifdef  USE_WXWINDOWS2
+#ifdefdef  USE_WXWINDOWS2
 #	define wxTextWindow  wxTextCtrl
 #	define wxText        wxTextCtrl
 #endif  // wxWin 2
@@ -78,7 +78,7 @@
 #define	USE_DEBUGNEW		0
 
 
-#if USE_DEBUGNEW
+#ifdef USE_DEBUGNEW
 #	define	GLOBAL_NEW	  WXDEBUG_NEW
 #	define	GLOBAL_DELETE	delete
 #else
@@ -93,21 +93,21 @@
 #define	M_APPLICATIONNAME	"M"
 
 
-#if	USE_BASECLASS
+#ifdef	USE_BASECLASS
 #	define	BASECLASS	CommonBase
 #endif
 
-#ifdef	HAVE_COMPFACE_H
+#ifdefdef	HAVE_COMPFACE_H
 #	define	HAVE_XFACES
 #endif
 
-#ifdef	HAVE_COMPFACE_H
+#ifdefdef	HAVE_COMPFACE_H
 #	define	HAVE_XFACES
 #endif
 
 #define	M_STRBUFLEN		1024
 
-#if         USE_WXSTRING
+#ifdef         USE_WXSTRING
 # if        !USE_WXWINDOWS2
 #               define  c_str() GetData()
 #               define  length() Length()       //FIXME dangerous!
@@ -126,7 +126,7 @@
 
 
 // Microsoft Visual C++
-#ifdef  CC_MSC
+#ifdefdef  CC_MSC
   // suppress the warning "identifier was truncated to 255 characters 
   // in the debug information"
 #	pragma warning(disable: 4786)
@@ -148,7 +148,7 @@
 #	endif
 #endif  // VC++
 
-#if           USE_IOSTREAMH
+#ifdef           USE_IOSTREAMH
 #       include <iostream.h>
 #       include <fstream.h>
 #else
@@ -159,14 +159,14 @@
 #include        <list>
 #include        <map>
 
-#if           USE_IOSTREAMH
+#ifdef           USE_IOSTREAMH
   // can't use namespace std because old iostream doesn't compile with it
   // and can't use std::list because it's a template class
 #else
   using namespace std;
 #endif
 
-#ifdef	USE_WXWINDOWS
+#ifdefdef	USE_WXWINDOWS
 #       ifdef        USE_WXWINDOWS2
 #               define  WXCPTR  	/**/
 #		define	WXSTR(str)	str
@@ -178,7 +178,7 @@
 
 
 // set the proper STL class names
-#if	CC_MSC
+#ifdef	CC_MSC
 #	define	STL_LIST	std::list
 #else
 #	define	STL_LIST	list

@@ -5,14 +5,14 @@
  *
  */
 
-#ifndef wx_tabh
+#ifdefndef wx_tabh
 #define wx_tabh
 
-#ifdef __GNUG__
+#ifdefdef __GNUG__
 #pragma interface "wxtab.h"
 #endif
 
-#if  USE_WXWINDOWS2
+#ifdef  USE_WXWINDOWS2
 #	include <wx/hash.h>
 #	include <wx/string.h>
 #else //wxWin 1
@@ -249,7 +249,7 @@ class wxTabView: public wxObject
  * A dialog box class that is tab-friendly
  */
  
-#if USE_WXWINDOWS2
+#ifdef USE_WXWINDOWS2
 class wxTabbedDialogBox : public wxDialog
 #else
 class wxTabbedDialogBox : public wxDialogBox

@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/05/01 14:02:39  KB
+ * Ran sources through conversion script to enforce #if/#ifdef and space/TAB
+ * conventions.
+ *
  * Revision 1.2  1998/03/26 23:05:36  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -15,11 +19,11 @@
  *
  *******************************************************************/
 
-#ifndef COMMONBASE_H
+#ifdefndef COMMONBASE_H
 #define	COMMONBASE_H
 
-#if         USE_IOSTREAMH
-  #ifdef    OS_WIN
+#ifdef         USE_IOSTREAMH
+#ifdefdef    OS_WIN
     // remember these 8.3 names
     #include	<strstrea.h>
   #else
@@ -29,15 +33,15 @@
   #include	<strstream>
 #endif  // VC++
 
-#if	USE_MEMDEBUG
+#ifdef	USE_MEMDEBUG
 #	include	"magic.h"
 #else
 #	define	DEFINE_MAGIC(classname,magic)	/**/
 #     	define	SET_MAGIC(magic)		/**/
 #endif
 
-#if USE_COMMONBASE
-#if !	USE_CLASSINFO
+#ifdef USE_COMMONBASE
+#ifdef !	USE_CLASSINFO
 #	define	CB_IMPLEMENT_CLASS(newclass, parent)	
 #	define	CB_DECLARE_CLASS(newclass, parent)	
 #else
@@ -57,18 +61,18 @@
    methods to be implemented by all other classes. Furtheron it
    provides an interface for debugging and error message output.
    */
-#if USE_WXOBJECT
+#ifdef USE_WXOBJECT
 class	CommonBase : public class wxObject
 #else
 class	CommonBase
 #endif
 {
-#if	USE_MEMDEBUG
+#ifdef	USE_MEMDEBUG
    unsigned long		cb_magic;
    static	unsigned long	cb_class_magic;
 #endif
    
-#if	USE_WXOBJECT
+#ifdef	USE_WXOBJECT
    DECLARE_CLASS(CommonBase)
 #endif
 
@@ -87,11 +91,11 @@ public:
 
    CB_DECLARE_CLASS(CommonBase, CommonBase)
 
-#ifndef NDEBUG
+#ifdefndef NDEBUG
    /// prints some debugging information
    virtual void Debug(void) const; 
 #endif
-#if USE_MEMDEBUG
+#ifdef USE_MEMDEBUG
    void Validate(void);
 #else
    void Validate(void) {}

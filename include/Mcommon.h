@@ -5,12 +5,12 @@
  *                                                                  *
  * $Id$           *
  *******************************************************************/
-#ifndef MCOMMON_H
+#ifdefndef MCOMMON_H
 #define	MCOMMON_H
 
 #include	"Mconfig.h"
 
-#ifdef	HAVE_LIBINTL_H
+#ifdefdef	HAVE_LIBINTL_H
 #	define 	USE_GETTEXT	1
 #	include	<libintl.h>
 #else
@@ -25,15 +25,15 @@
     bool operator> (const classname&) const { assert(0); return false; }
 
 // wxWindows 2 has/will have native gettext support
-#if     !USE_WXWINDOWS2
+#ifdef     !USE_WXWINDOWS2
   #define	_(string)	mApplication.GetText(string)
 #endif  // wxWin 2
 
 // hide differences between wxWin versions
-#if  USE_WXWINDOWS2
+#ifdef  USE_WXWINDOWS2
   // screen coordinates type
   typedef int coord_t;
-  #if USE_WXGTK
+#ifdef USE_WXGTK
     // @@: at least in wxGTK both 'long' and 'int' are used!
     typedef long int lcoord_t;
   #else
@@ -41,14 +41,14 @@
   #endif
   
   // @@@ wxGTK alpha 10 doesn't have validators (yet)
-  #ifdef  USE_WXGTK
+#ifdefdef  USE_WXGTK
     #define DEFAULT_VALIDATOR
   #else
     #define DEFAULT_VALIDATOR wxDefaultValidator, 
   #endif //GTK
     
   // @@@ wxFrame::SetIcon doesn't exist in wxGTK
-  #ifdef  USE_WXGTK  
+#ifdefdef  USE_WXGTK  
     #define SetIcon(x)
   #endif  //GTK
     
@@ -110,7 +110,7 @@
 #endif
 
 
-#ifndef NDEBUG
+#ifdefndef NDEBUG
 /// macro to define debug method
 #	define DEBUG_DEF		void Debug(void) const;
 #	define	DBGLOG(x)		cerr << x << endl;
@@ -124,7 +124,7 @@
 // LOG_INFO defined in yunchanc-client/.h
 #undef  LOG_INFO
 
-#if 0	//FIXME: does not work for wxGTK, use internal logging    USE_WXWINDOWS2
+#if   0	//FIXME: does not work for wxGTK, use internal logging    USE_WXWINDOWS2
   // wxWindows 2 has built in logging capabilities
 #	include  <wx/log.h>
 
@@ -177,7 +177,7 @@
 #	endif
 #endif
 
-#if   defined(OS_UNIX)
+#ifdef   defined(OS_UNIX)
 #	include	"Munix.h"
 #elif defined(OS_WIN)
 #	include "Mwin.h"

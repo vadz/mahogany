@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/05/01 14:02:41  KB
+ * Ran sources through conversion script to enforce #if/#ifdef and space/TAB
+ * conventions.
+ *
  * Revision 1.2  1998/03/26 23:05:38  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -15,14 +19,14 @@
  *
  *******************************************************************/
 
-#ifndef WXICONMANAGER_H
+#ifdefndef WXICONMANAGER_H
 #define WXICONMANAGER_H
 
-#ifdef __GNUG__
+#ifdefdef __GNUG__
 #pragma interface "wxIconManager.h"
 #endif
 
-#if !USE_PCH
+#ifdef !USE_PCH
   #define	  Uses_wxIcon
   #include	<wx/wx.h>
 
@@ -38,7 +42,7 @@
 */
 
 /// IconResourceType is XPM under Unix and name of ICO resource under Windows
-#ifdef  OS_WIN
+#ifdefdef  OS_WIN
   typedef const char *IconResourceType;
 #else   //Unix
   typedef char *IconResourceType[];

@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/05/01 14:02:39  KB
+ * Ran sources through conversion script to enforce #if/#ifdef and space/TAB
+ * conventions.
+ *
  * Revision 1.2  1998/03/26 23:05:37  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -15,14 +19,14 @@
  *
  *******************************************************************/
 
-#ifndef PATHFINDER_H
+#ifdefndef PATHFINDER_H
 #define PATHFINDER_H
 
-#ifdef __GNUG__
+#ifdefdef __GNUG__
 #pragma interface "PathFinder.h"
 #endif
 
-#if !USE_PCH
+#ifdef !USE_PCH
   #include	<Mcommon.h>
   #include	<CommonBase.h>
 
@@ -32,7 +36,7 @@
 /**@name PathFinder class for finding files */
 //@{
 
-#if     defined(OS_UNIX)
+#ifdef     defined(OS_UNIX)
 /// define a delimiter for separating paths
 #	define	PATHFINDER_DELIMITER	":"
 #	include	<unistd.h>

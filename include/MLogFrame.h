@@ -6,7 +6,7 @@
  * $Id$              *
  *******************************************************************/
 
-#ifndef MLOGFRAME_H
+#ifdefndef MLOGFRAME_H
 #define MLOGFRAME_H
 
 #include	"Mconfig.h"
@@ -27,7 +27,7 @@ public:
    virtual void Write(const char *str) = 0;
 };
 
-#if USE_WXWINDOWS
+#ifdef USE_WXWINDOWS
 #	include	"gui/wxMLogFrame.h"
 #	define	MLogFrame	wxMLogFrame
 #else
