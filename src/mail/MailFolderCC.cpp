@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.9  1998/05/30 17:52:43  KB
+ * addes some more classes to python interface
+ *
  * Revision 1.8  1998/05/24 14:48:33  KB
  * lots of progress on Python, but cannot call functions yet
  * kbList fixes again?
@@ -107,19 +110,8 @@ MailFolderCC::Open(String const & filename)
    mail_fetchfast(mailstream, (char *)sequence.c_str());
    
    okFlag = true;
-#ifdef   USE_PYTHON
    if(okFlag)
-   {
-      const char *callback =
-         profile->readEntry(MP_FOLDER_OPEN_CALLBACK,MP_FOLDER_OPEN_CALLBACK_D);
-      if(!strutil_isempty(callback))
-      {
-         //FIXME: this doesnt work:
-         //PyH_RunFunction(callback,M_PYTHON_MODULE,"",NULL,"",NULL);
-         PyRun_SimpleString(callback);
-      }
-   }
-#endif
+      CALLBACK(MCB_FOLDEROPEN, profile,0);
    return true;   // success
 }
 
@@ -247,6 +239,7 @@ MailFolderCC::UpdateViews(void)
       i;
    for(i = viewList.begin(); i != viewList.end(); i++)
       (*i)->Update();
+   CALLBACK(MCB_FOLDERUPDATE, profile,0);
 }
 
 const String &
@@ -294,14 +287,17 @@ MailFolderCC::GetMessage(unsigned long index)
 void
 MailFolderCC::DeleteMessage(unsigned long index)
 {
-   String seq = strutil_ultoa(index);
-   mail_setflag(mailstream, (char *)seq.c_str(), "\\Deleted");
+   String
+      seq = strutil_ultoa(index);
+   if(CALLBACKVA((MCB_FOLDERDELMSG, this, this->GetClassName(), profile, "l", (signed long) index),1)  )
+      mail_setflag(mailstream, (char *)seq.c_str(), "\\Deleted");
 }
 
 void
 MailFolderCC::ExpungeMessages(void)
 {
-   mail_expunge (mailstream);
+   if(CALLBACK(MCB_FOLDEREXPUNGE,profile,1))
+      mail_expunge (mailstream);
 }
 
    
@@ -745,7 +741,6 @@ int main(void)
       cerr << "Object initialised correctly." << endl;
    else
       cerr << "Object initialisation failed." << endl;
-   
    mf.Debug();    // show debug info
    cout << "----------------------------------------------------------" << endl;
    
