@@ -48,7 +48,7 @@ install: M
 	ln -s $(DATADIR)/$(CANONICAL_HOST)/bin/M $(BINDIR)
 	ln -s $(DATADIR)/$(CANONICAL_HOST)/bin/M $(DATADIR)/bin
 	$(INSTALL) -d $(DATADIR)/icons
-	$(INSTALL_DATA) `find icons/* -prune \! -type d` $(DATADIR)/icons
+	for i in icons/*.xpm ; do $(INSTALL_DATA) $$i $(DATADIR)/icons; done
 	$(MAKE) -C Python $@
 
 .PHONY: all dep clean doc semistatic static allclean install

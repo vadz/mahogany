@@ -39,10 +39,9 @@ endif
 
 install:
 	$(INSTALL) -d $(DATADIR)/scripts
-	$(INSTALL_DATA) *.py $(DATADIR)/scripts
-	$(INSTALL_DATA) Scripts/*.py $(DATADIR)/scripts
+	for i in *.py Scripts/*.py; do $(INSTALL_DATA) $$i $(DATADIR)/scripts; done
 	$(INSTALL) -d $(DOCDIR)/Python
-	$(INSTALL_DATA) *.html $(DOCDIR)/Python
+	for i in *.html; do $(INSTALL_DATA) $$i $(DOCDIR)/Python; done
 	$(RM) $(DATADIR)/scripts/dummy.py $(DOCDIR)/Python/dummy.html
 
 #%.py: %.i
