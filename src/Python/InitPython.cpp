@@ -73,19 +73,19 @@ InitPython(void)
       if ( globaldir.empty() )
       {
          // not installed
-         pythondir = mApplication->GetDataDir();
+         pythondir << mApplication->GetDataDir() << DIR_SEPARATOR << "Python";
       }
       else
       {
          pythondir = globaldir;
       }
 
-      pythondir << DIR_SEPARATOR << "Python";
-
+      // note that "scripts" has small 's'
       path << pythondir << PATH_SEPARATOR
-           << pythondir << DIR_SEPARATOR << "Scripts"
+           << pythondir << DIR_SEPARATOR << "scripts"
            // add also the uninstalled locations
 #ifdef M_TOP_BUILDDIR
+           // but "Python/Scripts" has a capital 'S'!
            << PATH_SEPARATOR << M_TOP_BUILDDIR << "/src/Python"
            << PATH_SEPARATOR << M_TOP_BUILDDIR << "/src/Python/Scripts"
 #endif
