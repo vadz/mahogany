@@ -30,7 +30,7 @@
 
 #  include "guidef.h"
 
-#  include "wx/toolbar.h"
+#  include <wx/toolbar.h>
 #endif
 
 #include <wx/menu.h>

@@ -8,6 +8,9 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
+9		first time message retrieval can happen twice, so all
+		new messages appear twice in NewMail
+
 6		implement temporary/fake Profile mode
 		--> add Suspend()/Discard()/Commit() methods to normal 
 		    profile which work with a temporary subgroup
@@ -22,7 +25,7 @@ $Id$
 		  across start behaves correctly
 		- selecting with keyboard uses mouse cursor as
 		  starting position :-)
-		- selection mit cursor a bit funny
+		- selection with cursor a bit funny
 		- editing leaks MObjects
 		- write editor plugin translating keysyms to actions
 		- scroll to cursor after Find()
@@ -165,12 +168,19 @@ $Id$
 *********************************************************************
 * PRI	WHO	DESCRIPTION
 *********************************************************************
+		add acknowledge/approve button for replying-default
+		text to messages
+
+		Allow MH type folders to have arbitrary message file
+		names, not just 1 2 3 4 ...
+
+9		Add option to import a directory of mailfolder files.
 
 		Config and wxWin support for different character sets
 
 	KB	wxModulesDialog: add decref/load as reaction to check/uncheck?
 
-MFrame classname obsolete?
+		MFrame classname obsolete?
 
 9	KB	add xface button to composeview
 
