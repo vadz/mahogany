@@ -225,10 +225,10 @@ LineBook::LineBook(const String& file)
    m_bad = false;
    m_dirty = false;
    
-   ifstream stream(m_file.c_str());
+   ifstream stream(m_file.fn_str());
    if ( !stream.good() )
    {
-      ofstream create(m_file.c_str(), ios::out|ios::ate);
+      ofstream create(m_file.fn_str(), ios::out|ios::ate);
       if ( !create.good() )
          goto FileError;
       create.close();
@@ -343,7 +343,7 @@ bool LineBook::Flush()
    {
       String commit = wxFileName::CreateTempFileName(_T(""));
       
-      ofstream stream(commit.c_str());
+      ofstream stream(commit.fn_str());
       if ( !stream.good() )
          goto FileError;
       
@@ -359,7 +359,7 @@ bool LineBook::Flush()
       if ( !stream.good() )
          goto FileError;
          
-      if ( rename(commit.c_str(), m_file.c_str()) )
+      if ( rename(commit.fn_str(), m_file.fn_str()) )
          goto FileError;
          
       ClearDirty();
@@ -587,7 +587,7 @@ bool LineDataProvider::TestBookAccess(const String& name, AdbTests test)
       case Test_Open:
       case Test_OpenReadOnly:
       {
-         FILE *fp = fopen(fullname, Test_Open ? "a" : "r");
+         FILE *fp = fopen(fullname.fn_str(), Test_Open ? "a" : "r");
          if ( fp != NULL )
          {
             fclose(fp);
