@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Project:     M
-// File name:   gui/wxMenuDefs.cpp - definitions of al application menus
+// File name:   gui/wxMenuDefs.cpp - definitions of all application menus
 // Purpose:     gathering all the menus in one place makes it easier to find
 //              and modify them
 // Author:      Vadim Zeitlin
