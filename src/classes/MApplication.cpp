@@ -375,6 +375,14 @@ MAppBase::OnStartup()
 
          // continue nevertheless
       }
+      else // imported ok
+      {
+         // give a message as otherwise the user has no way to know that we did
+         // anything at all (this shouldn't be annoying as import is not
+         // supposed to be used often)
+         wxLogMessage(_("Successfully imported Mahogany settings from \"%s\"."),
+                      m_cmdLineOptions->configImport.c_str());
+      }
    }
 
    // disable the use of environment variables if configured like this (this
