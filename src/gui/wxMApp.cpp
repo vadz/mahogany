@@ -46,6 +46,9 @@
 
 #include <wx/dialup.h>
 
+#include <wx/fontmap.h>
+#include <wx/encconv.h>
+
 #include "MObject.h"
 
 #include "Mdefaults.h"
@@ -1752,5 +1755,47 @@ void wxMApp::ShowLog(bool doShow)
       // reuse the existing one
       m_logWindow->Show(doShow);
    }
+}
+
+// ----------------------------------------------------------------------------
+// global functions implemented here
+// ----------------------------------------------------------------------------
+
+extern bool EnsureAvailableTextEncoding(wxFontEncoding *enc,
+                                        wxString *text,
+                                        bool mayAskUser)
+{
+   CHECK( enc, false, "CheckEncodingAvailability: NULL encoding" );
+
+   if ( !wxTheFontMapper->IsEncodingAvailable(*enc) )
+   {
+      // try to find another encoding
+      wxFontEncoding encAlt;
+      if ( wxTheFontMapper->GetAltForEncoding(*enc, &encAlt, "", mayAskUser) )
+      {
+         // translate the text (if any) to the equivalent encoding
+         if ( text )
+         {
+            wxEncodingConverter conv;
+            if ( conv.Init(*enc, encAlt) )
+            {
+               *enc = encAlt;
+
+               *text = conv.Convert(*text);
+            }
+            else // failed to convert the text
+            {
+               return false;
+            }
+         }
+      }
+      else //no equivalent encoding
+      {
+         return false;
+      }
+   }
+
+   // we have either the requested encoding or an equivalent one
+   return true;
 }
 

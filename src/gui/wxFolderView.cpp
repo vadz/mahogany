@@ -56,8 +56,6 @@
 #include <wx/file.h>
 #include <wx/listctrl.h>
 #include <wx/menuitem.h>
-#include <wx/fontmap.h>
-#include <wx/encconv.h>
 #include "wx/persctrl.h"
 
 #include "MThread.h"
@@ -2219,6 +2217,37 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
             //else: hmm, can it happen at all?
          }
 
+         // check that we have the fonts to display the encodings of the
+         // messages: we won't be able to do this when displaying them because
+         // EnsureAvailableTextEncoding() uses wxFontMapper which may pop up a
+         // message box asking the user for the replacement font - and it is
+         // absolutely forbidden to do this from OnGetItemXXX() methods which
+         // are called from OnPaint() as this would lead to infinite reentrancy
+         size_t cookie;
+         for ( UIdType idx = seq.GetFirst(cookie);
+               idx != UID_ILLEGAL;
+               idx = seq.GetNext(idx, cookie) )
+         {
+            HeaderInfo *hi = GetHeaderInfo((size_t)idx);
+
+            if ( !hi )
+            {
+               // headers couldn't be retrieved for whatever reason
+               break;
+            }
+
+            // here we can call it with the last parameter being true which
+            // allows it to use interactive message boxes
+            wxFontEncoding encoding = hi->GetEncoding();
+            if ( !EnsureAvailableTextEncoding(&encoding, NULL, true) )
+            {
+               // no such encoding, don't try to show it
+               hi->SetEncoding(wxFONTENCODING_SYSTEM);
+            }
+            //else: do *not* change the encoding in HeaderInfo as we will
+            //      have to translate text as well
+         }
+
          // now the header info should be in cache, so GetHeaderInfo() will
          // return it
          RefreshItems(posMin, posMax);
@@ -2687,6 +2716,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
             text = textOrig;
             wxLogDebug("conversion from UTF-8 to environment's default encoding failed");
          }
+
          encoding = wxLocale::GetSystemEncoding();
       }
 
@@ -2694,30 +2724,8 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
       if ( encoding != wxFONTENCODING_SYSTEM )
       {
          wxFontEncoding encoding = hi->GetEncoding();
-         if ( !wxTheFontMapper->IsEncodingAvailable(encoding) )
-         {
-            // try to find another encoding
-            wxFontEncoding encAlt;
-            if ( wxTheFontMapper->GetAltForEncoding(encoding, &encAlt) )
-            {
-               wxEncodingConverter conv;
-               if ( conv.Init(encoding, encAlt) )
-               {
-                  encoding = encAlt;
-
-                  text = conv.Convert(text);
-               }
-               else
-               {
-                  // TODO give an error message here
-
-                  // don't attempt to do anything with this encoding
-                  encoding = wxFONTENCODING_SYSTEM;
-               }
-            }
-         }
+         EnsureAvailableTextEncoding(&encoding, &text);
       }
-
    }
 
    return text;
@@ -2800,6 +2808,11 @@ wxListItemAttr *wxFolderListCtrl::OnGetItemAttr(long item) const
       // As we converted text to environment's default encoding above, encoding
       // is no longer wxFONTENCODING_UTF8, but wxLocale::GetSystemEncoding().
       enc = wxLocale::GetSystemEncoding();
+   }
+
+   if ( enc != wxFONTENCODING_SYSTEM )
+   {
+      EnsureAvailableTextEncoding(&enc);
    }
 
    if ( enc != wxFONTENCODING_SYSTEM )

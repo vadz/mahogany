@@ -60,4 +60,19 @@ inline wxFrame *GetFrame(const wxWindow *win)
    return  GET_PARENT_OF_CLASS(win, wxFrame);
 }
 
+/**
+  Check if the given font encoding is available on this system. If not, try to
+  find a replacement encoding - if this succeeds, the text is translated into
+  this encoding and the encoding parameter is modified in place.
+
+  Note that this function is implemented in wxMApp.cpp.
+
+  @param encoding the encoding to check, may be modified
+  @param text the text we want to show in this encoding, may be translated
+  @return true if this or equivalent encoding is available, false otherwise
+ */
+extern bool EnsureAvailableTextEncoding(wxFontEncoding *encoding,
+                                        wxString *text = NULL,
+                                        bool mayAskUser = false);
+
 #endif // GUIDEF_H
