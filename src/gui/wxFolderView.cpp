@@ -846,12 +846,6 @@ inline bool CheckStatusBit(int status, int bit, bool isSet)
    return !(status & bit) == !isSet;
 }
 
-// used for array sorting
-int CMPFUNC_CONV compareLongsReverse(long *first, long *second)
-{
-   return *second - *first;
-}
-
 // ============================================================================
 // wxFolderMsgWindow and wxFolderMsgViewerEvtHandler implementation
 // ============================================================================
@@ -3781,10 +3775,10 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData& event)
       itemsDeleted.Add(item);
    }
 
-   // really delete the items: do it from end to avoid changing the indices
-   // while we are doing it
-   itemsDeleted.Sort(compareLongsReverse);
-
+   // really delete the items: notice that is is just fine that the indices
+   // change while we delete the items because the msgnos we get from the event
+   // are adjusted like this too (i.e. when the first 2 messages are expunged,
+   // the msgnos are going to be "1,1" and not "1,2")
    count = itemsDeleted.GetCount();
    for ( n = 0; n < count; n++ )
    {
