@@ -467,11 +467,11 @@ bool wxMessageView::AllProfileValues::operator==(const AllProfileValues& other)
           CMP(font) && CMP(size) &&
           CMP(showHeaders) && CMP(inlineRFC822) && CMP(inlinePlainText) &&
           CMP(highlightURLs) && CMP(inlineGFX) &&
-          CMP(browser) && CMP(browserIsNS) &&
+          CMP(browser) && CMP(browserInNewWindow) &&
           CMP(autocollect) && CMP(autocollectNamed) &&
           CMP(autocollectBookName) &&
 #ifdef OS_UNIX
-          CMP(afmpath) &&
+          CMP(browserIsNS) && CMP(afmpath) &&
 #endif // Unix
           CMP(showFaces);
 
@@ -696,14 +696,15 @@ wxMessageView::ReadAllSettings(AllProfileValues *settings)
                          : -1;
 
    settings->browser = READ_CONFIG(m_Profile, MP_BROWSER);
-   settings->browserIsNS = READ_CONFIG(m_Profile, MP_BROWSER_ISNS) != 0;
    settings->browserInNewWindow = READ_CONFIG(m_Profile, MP_BROWSER_INNW) != 0;
    settings->autocollect =  READ_CONFIG(m_Profile, MP_AUTOCOLLECT);
    settings->autocollectNamed =  READ_CONFIG(m_Profile, MP_AUTOCOLLECT_NAMED);
    settings->autocollectBookName = READ_CONFIG(m_Profile, MP_AUTOCOLLECT_ADB);
    settings->showFaces = READ_CONFIG(m_Profile, MP_SHOW_XFACES) != 0;
 
+   // these settings are used under Unix only
 #ifdef OS_UNIX
+   settings->browserIsNS = READ_CONFIG(m_Profile, MP_BROWSER_ISNS) != 0;
    settings->afmpath = READ_APPCONFIG(MP_AFMPATH);
 #endif // Unix
 
@@ -1958,6 +1959,7 @@ void wxMessageView::OpenURL(const String& url, bool inNewWindow)
    {
       // not empty, user provided his script - use it
       bOk = false;
+
 #ifdef OS_UNIX
       if ( m_ProfileValues.browserIsNS ) // try re-loading first
       {

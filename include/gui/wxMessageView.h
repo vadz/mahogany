@@ -255,8 +255,10 @@ protected:
       long inlineGFX;
       /// URL viewer
       String browser;
+#ifdef OS_UNIX
       /// Is URL viewer of the netscape variety?
       bool browserIsNS;
+#endif // Unix
       /// open netscape in new window?
       bool browserInNewWindow;
       /// Autocollect email addresses?
