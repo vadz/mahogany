@@ -2144,8 +2144,7 @@ static const struct
    const char *desc;
 } gs_persMsgBoxData[] =
 {
-   { "AskSpecifyDir",
-        gettext_noop("prompt for global directory if not found") },
+   { "AskSpecifyDir",            gettext_noop("prompt for global directory if not found") },
 #ifdef OS_UNIX
    { "AskRunAsRoot",             gettext_noop("warn if Mahogany is run as root") },
 #endif // OS_UNIX
@@ -2190,11 +2189,12 @@ static const struct
    { "RememberPwd",              gettext_noop("propose to remember passwords entered interactively") },
    { "ShowLogWinHint",           gettext_noop("show the hint about reopening the log window when it is being closed") },
    { "AutoExpunge",              gettext_noop("ask to expunge deleted messages before closing the folder") },
-      { "SuspendAutoCollectFolder", gettext_noop("ask to suspend auto-collecting messages from failed incoming folder") },
-         {"RulesMismatchWarn1",
-             gettext_noop("Warning that filter rules do not match dialog")},
-      { "RulesMismatchWarn2",
-           gettext_noop("Warning that filter rules have been edited") },
+   { "SuspendAutoCollectFolder", gettext_noop("ask to suspend auto-collecting messages from failed incoming folder") },
+#if 0 // unused any more
+   { "RulesMismatchWarn1",       gettext_noop("Warning that filter rules do not match dialog")},
+   { "RulesMismatchWarn2",       gettext_noop("Warning that filter rules have been edited") },
+#endif // 0
+   { "FilterReplace",            gettext_noop("ask whether to replace filter when adding a new filter") },
    //{ "", gettext_noop("") },
 };
 

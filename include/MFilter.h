@@ -5,12 +5,15 @@
  *                                                                  *
  * $Id$
  *******************************************************************/
-#ifndef MFILTER_H
-#define MFILTER_H
+
+#ifndef _MFILTER_H
+#define _MFILTER_H
 
 #ifdef __GNUG__
 #   pragma interface "MFilter.h"
 #endif
+
+class WXDLLEXPORT wxWindow;
 
 /**@name Some commonly used enums for the different parts of a simple
    dialog-constructed filter rule. */
@@ -77,9 +80,12 @@ enum MFDialogLogical
 /** This is a set of dialog settings representing a filter rule. A
     single filter rule consists of one or more Tests connected by
     logical operators, and a single Action to be applied. */
-class MFDialogSettings : public MObject
+class MFDialogSettings : public MObjectRC
 {
 public:
+   /// create an object implementing this interface
+   static MFDialogSettings *Create();
+
    /// The number of tests in the rule:
    virtual size_t CountTests() const = 0;
    /// Return the n-th test:
@@ -88,6 +94,8 @@ public:
    virtual bool IsInverted(size_t n) const = 0;
    /// Return the n-th logical operator, i.e. the one after the n-th test:
    virtual MFDialogLogical GetLogical(size_t n) const = 0;
+   /// Return where to apply the n-th test
+   virtual MFDialogTarget GetTestTarget(size_t n) const = 0;
    /// Return the n-th test's argument if any:
    virtual String GetTestArgument(size_t n) const = 0;
    /// Return the action component
@@ -109,19 +117,114 @@ public:
                         String argument = ""
       ) = 0;
 
+   /// sets the action and its argument
+   virtual void SetAction(MFDialogAction action, const String& arg) = 0;
+
    /// This produces a filter rule for this set of settings
    virtual String WriteRule(void) const = 0;
+
+   /// Compare 2 objects
+   virtual bool operator==(const MFDialogSettings& other) const = 0;
 };
 
+/// filter description: it is either MFDialogSettings or a filter rule as is
+class MFilterDesc
+{
+public:
+   /// ctor creates an uninitialized object, one of Set() below must be used
+   MFilterDesc() { m_settings = NULL; }
+
+   /// dtor
+  ~MFilterDesc() { SafeDecRef(m_settings); }
+
+   /// will take ownership of the pointer and will delete it itself
+   void Set(MFDialogSettings *settings)
+      { SafeDecRef(m_settings); m_settings = settings; m_program.clear(); }
+
+   /// from a filter rule
+   void Set(const String& program)
+   {
+      if ( m_settings )
+      {
+         m_settings->DecRef();
+         m_settings = NULL;
+      }
+
+      m_program = program;
+   }
+
+   /// set the name of the filter
+   void SetName(const String& name) { m_name = name; }
+
+   /// returns TRUE if we can be represented as MFDialogSettings
+   bool IsSimple() const { return m_settings != NULL; }
+
+   /// returns TRUE if we're uninitialized
+   bool IsEmpty() const { return !IsSimple() && !m_program; }
+
+   /// only can be called if IsSimple()
+   MFDialogSettings *GetSettings() /* logically */ const
+   {
+      MFDialogSettings *settings = m_settings;
+      settings->IncRef();
+      return settings;
+   }
+
+   /// should only be called for !IsSimple() filters
+   const String& GetProgram() const { return m_program; }
+
+   /// returns the name of the filter
+   const String& GetName() const { return m_name; }
+
+   /// compare 2 filters
+   bool operator==(const MFilterDesc& desc)
+   {
+      if ( m_name != desc.m_name )
+         return false;
+
+      if ( m_settings )
+      {
+         if ( !desc.m_settings )
+            return false;
+         else
+            return *m_settings == *desc.m_settings;
+      }
+      else
+      {
+         if ( desc.m_settings )
+            return false;
+         else
+            return m_program == desc.m_program;
+      }
+   }
+
+   bool operator!=(const MFilterDesc& desc) { return !(*this == desc); }
+
+private:
+   MFDialogSettings *m_settings;
+   String            m_program,
+                     m_name;
+};
+
+/// class encapsulating an entire filter
 class MFilter : public MObjectRC
 {
 public:
-   static MFilter * CreateFromProfile(const String &name);
-   
-   /// return the filter rule string
-   virtual String GetFilterRule(void) const = 0;
-   /// return the dialog settings for this filter if possible, or NULL
-   virtual MFDialogSettings * GetDialogSettings(void) const = 0;
+   /// create the filter by name
+   static MFilter *CreateFromProfile(const String &name);
+
+   /// delete the filter by name
+   static bool DeleteFromProfile(const String &name);
+
+   /// get the list of all defined filters
+   static wxArrayString GetAllFilters();
+
+   /// return the filter descrption
+   virtual MFilterDesc GetDesc(void) const = 0;
+
+   /// set the filter parameters
+   virtual void Set(const MFilterDesc& desc) = 0;
 };
 
-#endif
+#endif // _MFILTER_H
+

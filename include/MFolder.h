@@ -128,6 +128,19 @@ public:
    void ResetFlags(int flags) { SetFlags(GetFlags() & ~flags); }
    //@}
 
+   /**@name flags */
+   //@{
+      /// get the array of filters to use for this folder
+   virtual wxArrayString GetFilters() const = 0;
+      /// set the filters (this replaces the old value)
+   virtual void SetFilters(const wxArrayString& filters) = 0;
+
+      /// adds a filter without changing the other ones
+   virtual void AddFilter(const String& filter) = 0;
+      /// remove a filter without changing the other ones
+   virtual void RemoveFilter(const String& filter) = 0;
+   //@}
+
    /**@name sub folders access */
    //@{
    /// get the number of subfolders

@@ -411,6 +411,9 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_HELP_CONTENTS, gettext_noop("Help &Contents"),    gettext_noop("Contents of help system..."), FALSE },
    { WXMENU_HELP_SEARCH,   gettext_noop("&Search Help..."),      gettext_noop("Search help system for keyword..."), FALSE },
    { WXMENU_HELP_COPYRIGHT,   gettext_noop("C&opyright"), gettext_noop("Show Copyright."), FALSE },
+
+   // misc entries
+   { WXMENU_MSG_QUICK_FILTER, gettext_noop("Quick &filter..."), gettext_noop("Create a new filter for the selected message")     , FALSE },
 };
 
 // ============================================================================
@@ -455,7 +458,7 @@ void AppendToMenu(wxMenu *menu, int nFirst, int nLast)
 {
    // consistency check which ensures (well, helps to ensure) that the array
    // and enum are in sync
-   wxASSERT( WXSIZEOF(g_aMenuItems) == WXMENU_END + 1 );
+   wxASSERT( WXSIZEOF(g_aMenuItems) == WXMENU_END );
 
    // in debug mode we also verify if the keyboard accelerators are ok
 #ifdef DEBUG

@@ -84,6 +84,11 @@ public:
    virtual int GetFlags() const { return m_flags; }
    virtual void SetFlags(int flags) { m_flags = flags; }
 
+   virtual wxArrayString GetFilters() const { return wxArrayString(); }
+   virtual void SetFilters(const wxArrayString& /* filters */) { }
+   virtual void AddFilter(const String& /* filter */) { }
+   virtual void RemoveFilter(const String& /* filter */) { }
+
    // we're outside the tree, so none of these functions make sense for us
    virtual size_t GetSubfolderCount() const { return 0; }
    virtual MFolder *GetSubfolder(size_t) const { return NULL; }
@@ -155,6 +160,11 @@ public:
 
    virtual int GetFlags() const;
    virtual void SetFlags(int flags);
+
+   virtual wxArrayString GetFilters() const;
+   virtual void SetFilters(const wxArrayString& filters);
+   virtual void AddFilter(const String& filter);
+   virtual void RemoveFilter(const String& filter);
 
    virtual size_t GetSubfolderCount() const;
    virtual MFolder *GetSubfolder(size_t n) const;
@@ -571,6 +581,75 @@ void MFolderFromProfile::SetFlags(int flags)
    profile->writeEntry(MP_FOLDER_TYPE, typeAndFlags);
 }
 
+// ----------------------------------------------------------------------------
+// filters stuff
+// ----------------------------------------------------------------------------
+
+wxArrayString MFolderFromProfile::GetFilters() const
+{
+   Profile_obj profile(m_folderName);
+   CHECK( profile, wxArrayString(), "panic in MFolder: no profile" );
+
+   return strutil_restore_array(':', READ_CONFIG(profile, MP_FOLDER_FILTERS));
+}
+
+void MFolderFromProfile::SetFilters(const wxArrayString& filters)
+{
+   Profile_obj profile(m_folderName);
+   CHECK_RET( profile, "panic in MFolder: no profile" );
+
+   profile->writeEntry(MP_FOLDER_FILTERS, strutil_flatten_array(filters, ':'));
+}
+
+void MFolderFromProfile::AddFilter(const String& filter)
+{
+   Profile_obj profile(m_folderName);
+   CHECK_RET( profile, "panic in MFolder: no profile" );
+
+   String filters = READ_CONFIG(profile, MP_FOLDER_FILTERS);
+   if ( !!filters )
+      filters += ':';
+   filters += filter;
+
+   profile->writeEntry(MP_FOLDER_FILTERS, filters);
+}
+
+void MFolderFromProfile::RemoveFilter(const String& filter)
+{
+   Profile_obj profile(m_folderName);
+   CHECK_RET( profile, "panic in MFolder: no profile" );
+
+   String filters = READ_CONFIG(profile, MP_FOLDER_FILTERS);
+
+   if ( filters == filter )
+      filters.clear();
+   else
+   {
+      String others;
+      if ( filters.StartsWith(filter + ':', &others) )
+      {
+         filters = others;
+      }
+      else
+      {
+         const char *start = strstr(filters, ':' + filter);
+         if ( !start )
+         {
+            // we don't have such filter
+            return;
+         }
+
+         filters.erase(start - filter.c_str(), filter.length() + 1);
+      }
+   }
+
+   profile->writeEntry(MP_FOLDER_FILTERS, filters);
+}
+
+// ----------------------------------------------------------------------------
+// subfolders
+// ----------------------------------------------------------------------------
+
 class CountTraversal : public MFolderTraversal
 {
 public:
@@ -665,6 +744,10 @@ MFolder *MFolderFromProfile::CreateSubfolder(const String& name, FolderType type
    // ok, it is: do create it
    return MFolder::Create(GetSubFolderFullName(name), type);
 }
+
+// ----------------------------------------------------------------------------
+// operations
+// ----------------------------------------------------------------------------
 
 void MFolderFromProfile::Delete()
 {

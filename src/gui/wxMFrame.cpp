@@ -51,7 +51,7 @@
 #include "MModule.h"
 #include "MImport.h"
 
-#include "gui/wxFiltersDialog.h" // for ConfigureFilterRules()
+#include "gui/wxFiltersDialog.h" // for ConfigureAllFilters()
 #include "gui/wxIconManager.h"
 #include "gui/wxOptionsDlg.h"
 #include "adb/AdbFrame.h"
@@ -314,7 +314,7 @@ wxMFrame::OnMenuCommand(int id)
          break;
       case WXMENU_EDIT_FILTERS:
       {
-         (void) ConfigureFilterRules(mApplication->GetProfile(), this);
+         (void) ConfigureAllFilters(this);
          break;
       }
       case WXMENU_EDIT_MODULES:

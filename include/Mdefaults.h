@@ -470,8 +470,10 @@
 #define  MP_MSGVIEW_AUTO_ENCODING   "MsgViewAutoDetectEnc"
 /// the type of the last created folder
 #define   MP_LAST_CREATED_FOLDER_TYPE  "LastFolderType"
-/// the filter program to apply
+/// the filter program to apply (OBSOLETE)
 #define MP_FILTER_RULE   "Filter"
+/// the filters to use for this folder
+#define MP_FOLDER_FILTERS   "Filters"
 /// the default folder file format
 #define MP_FOLDER_FILE_DRIVER   "MailboxFileFormat"
 /**@name  Font settings for message view */
@@ -984,8 +986,10 @@
 #define  MP_MSGVIEW_AUTO_ENCODING_D   1
 /// the type of the last created folder
 #define   MP_LAST_CREATED_FOLDER_TYPE_D  (int)File
-/// the filter program to apply
+/// the filter program to apply (OBSOLETE)
 #define MP_FILTER_RULE_D   ""
+/// the filters to use for this folder
+#define MP_FOLDER_FILTERS_D   ""
 /// the default folder file format
 #define MP_FOLDER_FILE_DRIVER_D 0L
 /* format: mbx:unix:mmdf:tenex defined in MailFolderCC.cpp */

@@ -40,6 +40,20 @@ struct MFDialogComponent
    
    /// Writes a rule
    String WriteTest();
+
+   bool operator==(const MFDialogComponent& other) const
+   {
+      return m_Inverted == other.m_Inverted &&
+             m_Test == other.m_Test &&
+             m_Logical == other.m_Logical &&
+             m_Target == other.m_Target &&
+             m_Argument == other.m_Argument;
+   }
+
+   bool operator!=(const MFDialogComponent& other) const
+   {
+      return !(*this == other);
+   }
 };
 
 bool
@@ -239,6 +253,12 @@ public:
          return m_Tests[n].m_Argument;
       }
    
+   virtual MFDialogTarget GetTestTarget(size_t n) const
+      {
+         MOcheck();
+         return m_Tests[n].m_Target;
+      }
+
    /// Return the action component
    virtual MFDialogAction GetAction() const
       {
@@ -269,9 +289,15 @@ public:
          m_Tests.Add(c);
       }
 
+   virtual void SetAction(MFDialogAction action, const String& arg)
+   {
+      m_Action = action;
+      m_ActionArgument = arg;
+   }
+
    virtual String WriteRule(void) const;
 
-
+   virtual bool operator==(const MFDialogSettings& other) const;
    
    bool ReadSettings(const String & str);
    String WriteSettings(void) const;
@@ -284,6 +310,25 @@ private:
    String            m_ActionArgument;
 };
 
+bool
+MFDialogSettingsImpl::operator==(const MFDialogSettings& o) const
+{
+   // FIXME urgh
+   const MFDialogSettingsImpl& other = (const MFDialogSettingsImpl &)o;
+
+   size_t count = m_Tests.GetCount();
+   if ( count != other.m_Tests.GetCount() )
+      return false;
+
+   for ( size_t n = 0; n < count; n++ )
+   {
+      if ( m_Tests[n] != other.m_Tests[n] )
+         return false;
+   }
+
+   return m_Action == other.m_Action &&
+          m_ActionArgument == other.m_ActionArgument;
+}
 
 bool
 MFDialogSettingsImpl::ReadSettings(const String & istr)
@@ -384,26 +429,52 @@ MFDialogSettingsImpl::WriteRule(void) const
    return program;
 }
 
+/* static */
+MFDialogSettings *MFDialogSettings::Create()
+{
+   return new MFDialogSettingsImpl;
+}
+
+// ----------------------------------------------------------------------------
+// MFilterFromProfile
+// ----------------------------------------------------------------------------
 
 class MFilterFromProfile : public MFilter
 {
 public:
-   
-   /// return the filter rule string
-   virtual String GetFilterRule(void) const
+   virtual MFilterDesc GetDesc(void) const
+   {
+      MFilterDesc fd;
+      fd.SetName(m_Name);
+      if ( m_Settings )
       {
-         if(m_Settings)
-            return m_Settings->WriteRule();
-         else
-            return m_Rule;
+         m_Settings->IncRef();
+         fd.Set(m_Settings);
       }
-   /// return the dialog settings for this filter if possible, or NULL
-   virtual MFDialogSettings * GetDialogSettings(void) const
+      else
       {
-         ((MFilterFromProfile *)this)->UpdateSettings();
-         return m_Settings;
+         fd.Set(m_Rule);
       }
 
+      return fd;
+   }
+
+   virtual void Set(const MFilterDesc& fd)
+   {
+      m_Name = fd.GetName();
+      if ( fd.IsSimple() )
+      {
+         SafeDecRef(m_Settings);
+         m_Settings = (MFDialogSettingsImpl *)fd.GetSettings();
+      }
+      else
+      {
+         m_Rule = fd.GetProgram();
+      }
+
+      m_dirty = true;
+   }
+   
    static MFilterFromProfile * Create(Profile *p)
       { return new MFilterFromProfile(p); }
    
@@ -415,12 +486,23 @@ protected:
          m_SettingsStr = p->readEntry("Settings", "");
          m_Rule = p->readEntry("Rule", "");
          m_Settings = NULL;
+         m_dirty = false;
          UpdateSettings();
       }
    
-   ~MFilterFromProfile()
+   virtual ~MFilterFromProfile()
       {
-         if(m_Settings) delete m_Settings;
+         if ( m_dirty )
+         {
+            // write the values to the profile
+            m_Profile->writeEntry("Name", m_Name);
+            if ( m_Settings )
+               m_Profile->writeEntry("Settings", m_Settings->WriteSettings());
+            else
+               m_Profile->writeEntry("Rule", m_Rule);
+         }
+
+         SafeDecRef(m_Settings);
          m_Profile->DecRef();
       }
    
@@ -435,13 +517,14 @@ private:
             m_Settings = NULL;
          }
       }
+
    Profile *m_Profile;
    String m_Name;
    String m_Rule;
    String m_SettingsStr;
    MFDialogSettingsImpl *m_Settings;
+   bool m_dirty;
 };
-
 
 /* static */
 MFilter *
@@ -449,5 +532,14 @@ MFilter::CreateFromProfile(const String &name)
 {
    Profile * p = Profile::CreateFilterProfile(name);
    return MFilterFromProfile::Create(p);
+}
+
+/* static */
+bool
+MFilter::DeleteFromProfile(const String& name)
+{
+   FAIL_MSG("Karsten, please implement this");
+
+   return false;
 }
 

@@ -639,7 +639,7 @@ void wxAddressTextCtrl::OnEnter(wxCommandEvent& /* event */)
     event.SetWindowChange(FALSE);   // control change
     event.SetEventObject(this);
 
-    GetEventHandler()->ProcessEvent(event);
+    GetParent()->GetEventHandler()->ProcessEvent(event);
 }
 
 // mark this ctrl as being the last active - so the [Expand] btn will expand us

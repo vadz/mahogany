@@ -482,8 +482,11 @@ void wxFolderTree::UpdateMenu(wxMenu *menu, const MFolder *folder)
    //      default 'All folders' label for it, but for now we don't
    menu->Enable(WXMENU_FOLDER_RENAME, !isRoot && folderType != MF_INBOX);
 
-   menu->Enable(WXMENU_FOLDER_REMOVE, !isRoot);
-   menu->Enable(WXMENU_FOLDER_PROP, !isRoot);
+   if ( menu->FindItem(WXMENU_FOLDER_REMOVE) )
+   {
+      menu->Enable(WXMENU_FOLDER_REMOVE, !isRoot);
+      menu->Enable(WXMENU_FOLDER_PROP, !isRoot);
+   }
 
    if ( !isRoot )
    {

@@ -15,7 +15,7 @@
 #define _WXFILTERSDIALOG_H_
 
 #ifdef __GNUG__
-   #pragma interface "Mdnd.h"
+   #pragma interface "wxFiltersDialog.h"
 #endif
 
 // ----------------------------------------------------------------------------
@@ -33,9 +33,15 @@
 // functions
 // ----------------------------------------------------------------------------
 
-/// configure the filters
-extern
-bool ConfigureFilterRules(Profile *profile, wxWindow *parent);
+/// configure all existing filters
+extern bool ConfigureAllFilters(wxWindow *parent = NULL);
+
+/// configure the filters to use for the folder
+extern bool ConfigureFiltersForFolder(MFolder *folder, wxWindow *parent = NULL);
+
+/// a function to edit/create a filter: will modify provided filterDesc
+extern bool ConfigureFilter(MFilterDesc *filterDesc,
+                            wxWindow *parent = NULL);
 
 /// write the filter to the given profile
 extern

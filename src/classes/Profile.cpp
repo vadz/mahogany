@@ -635,12 +635,22 @@ ProfileImpl::GetIdentity(void) const
    return m_Identity ? m_Identity->GetName() : String("");
 }
 
+wxArrayString Profile::GetAllFilters()
+{
+   return GetAllGroupsUnder(M_FILTERS_CONFIG_SECTION);
+}
+
 wxArrayString Profile::GetAllIdentities()
+{
+   return GetAllGroupsUnder(M_IDENTITY_CONFIG_SECTION);
+}
+
+wxArrayString Profile::GetAllGroupsUnder(const String& path)
 {
    wxArrayString identities;
 
    wxString oldpath = ms_GlobalConfig->GetPath();
-   ms_GlobalConfig->SetPath(M_IDENTITY_CONFIG_SECTION);
+   ms_GlobalConfig->SetPath(path);
 
    long index;
    wxString name;

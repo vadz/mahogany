@@ -190,6 +190,9 @@ public:
    /// return the array containing the names of all existing identities
    static wxArrayString GetAllIdentities();
 
+   /// return the array containing the names of all existing filters
+   static wxArrayString GetAllFilters();
+
    /// Set the identity to be used for this profile
    virtual void SetIdentity(const String & idName) = 0;
    /// Unset the identity set by SetIdentity
@@ -206,7 +209,11 @@ protected:
 
    /// global wxConfig object, shared by all profiles
    static wxConfigBase *ms_GlobalConfig;
+
 private:
+   /// helper for GetAllIdentities/GetAllFilters
+   static wxArrayString GetAllGroupsUnder(const String& path);
+
    /// forbid copy construction
    Profile(const Profile &);
    /// forbid assignments

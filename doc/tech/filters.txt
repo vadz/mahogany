@@ -1,0 +1,54 @@
+                  All you ever wanted to know about filters
+                  =========================================
+
+0. About this note
+   ---------------
+
+   Everything in this document only applies to the versions of M starting from
+0.61, the filters were handled differently before it.
+
+1. Filters and profiles
+   --------------------
+
+   The filters themselves are stored under M_FILTERS_CONFIG_SECTION with one
+config group per filter, i.e. the filter Foo is stored in /M/Filters/Foo. To
+write/read the filters MFilter class is used, it should not be done manually.
+
+   Additionally, each folder has a Filters setting in its profile which
+contains a colon separated list of filters (in order) which apply to this
+folder. Again, this shouldn't be read/written directly but via MFolder methods
+GetFilters() and SetFilters() or AddFilter() and RemoveFilter().
+
+   Finally, to get the array of all defined filters use
+Profile::GetAllFilters().
+
+2. Internal representation
+   -----------------------
+
+   Each filter is a program in a special (C like) filter language. The simple
+filters can also be represented in a broken-down form as MFDialogSettings
+class. Notice that MFDialogSettings can be compiled into a filter program, but
+a generic filter program can't be decompiled into MFDialogSettings.
+
+   MFilter itself is a very simple class which doesn't know much currently
+(this may change and more convenience functions might be added to it) and
+which basicly only knows to read its state from somewhere (currently from
+profile)) and write it there.
+
+   The filter state is represented by MFilterDesc which is a struct-like class
+containing the name of the filter and either a pointer to MFDialogSettings or
+the filter rule. The filter is a simple one if MFilterDesc::IsSimple() returns
+TRUE, that is if it can be expressed with MFDialogSettings only.
+
+   To modify a filter, you get its description form it using GetDesc(), then
+do whatever you want with it and set it back using MFilter::Set().
+
+3. Filters and GUI
+   ---------------
+
+   There are 3 different dialogs for filter editing: one for editing all
+existing filters (wxFiltersDialog), second one for editing the filters to use
+for the given folder (wxFolderFiltersDialog) and the last one for editing an
+individual filter (wxOneFilterDialog).
+
+   The functions to invoke these dialogs are defined in gui/wxFilterDialogs.h.

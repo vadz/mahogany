@@ -61,7 +61,7 @@
 #include "gui/wxMessageView.h"
 #include "gui/wxComposeView.h"
 #include "gui/wxFolderMenu.h"
-#include "gui/wxFiltersDialog.h" // for ConfigureFilterRules()
+#include "gui/wxFiltersDialog.h" // for ConfigureFiltersForFolder()
 
 #include "gui/wxMIds.h"
 #include "MDialogs.h"
@@ -498,6 +498,8 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
    {
       static const int popupMenuEntries[] =
       {
+         WXMENU_MSG_QUICK_FILTER,
+         WXMENU_SEPARATOR,
          WXMENU_MSG_OPEN,
          WXMENU_SEPARATOR,
          WXMENU_MSG_REPLY,
@@ -1592,6 +1594,11 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          );
       break;
 
+   case WXMENU_MSG_QUICK_FILTER:
+      // create a filter for the currently selected message
+      FAIL_MSG("TODO");
+      break;
+
    case WXMENU_MSG_FILTER:
       GetSelections(selections);
       m_TicketList->Add(m_ASMailFolder->ApplyFilterRules(&selections, this));
@@ -2255,8 +2262,9 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
 
       case WXMENU_EDIT_FILTERS:
          {
-            ASMailFolder *amf = m_FolderView->GetFolder();
-            (void) ConfigureFilterRules(amf->GetProfile(), this);
+            MFolder *folder = MFolder::Get(m_FolderView->GetFullName());
+            (void) ConfigureFiltersForFolder(folder, this);
+            folder->DecRef();
          }
          break;
 

@@ -265,7 +265,10 @@ enum
    WXMENU_HELP_COPYRIGHT,
    WXMENU_HELP_END = WXMENU_HELP_COPYRIGHT,
 
-   WXMENU_END = WXMENU_HELP_END,
+   // misc entries appearing in the folder view popup menu
+   WXMENU_MSG_QUICK_FILTER,
+
+   WXMENU_END,
 
    WXMENU_MIME_BEGIN = WXMENU_END,
    WXMENU_MIME_HANDLE,
