@@ -861,9 +861,137 @@ wxComposeView::CreateFwdMessage(const MailFolder::Params& params,
 void
 wxComposeView::InitText(Message *msg)
 {
-   CHECK_RET( (msg != NULL) || (m_kind == Message_New),
-              "no message in InitText" );
+   if ( m_kind == Message_New )
+   {
+      // writing a new message/article: wait until the headers are filled
+      // before evacuating the template
+      if ( !m_template )
+      {
+         m_template = GetMessageTemplate(m_mode == Mode_SMTP
+                                          ? MessageTemplate_NewMessage
+                                          : MessageTemplate_NewArticle,
+                                         m_Profile);
+      }
 
+      if ( !!m_template )
+      {
+         InsertText(_("--- Please choose evaluate template from ---\n"
+                      "--- the menu after filling the headers.  ---"));
+         ResetDirty();
+      }
+   }
+   else
+   {
+      // replying or forwarding - evaluate the template right now
+      CHECK_RET( msg, "no message in InitText" );
+
+      DoInitText(msg);
+   }
+}
+
+void
+wxComposeView::DoInitText(Message *msg)
+{
+   // first append signature - everything else will be inserted before it
+   if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE) )
+   {
+      wxTextFile fileSig;
+
+      bool hasSign = false;
+      while ( !hasSign )
+      {
+         String strSignFile = READ_CONFIG(m_Profile, MP_COMPOSE_SIGNATURE);
+         if ( !strSignFile.IsEmpty() )
+            hasSign = fileSig.Open(strSignFile);
+
+         if ( !hasSign )
+         {
+            // no signature at all or sig file not found, propose to choose or
+            // change it now
+            wxString msg;
+            if ( strSignFile.IsEmpty() )
+            {
+               msg = _("You haven't configured your signature file.");
+            }
+            else
+            {
+               // to show message from wxTextFile::Open()
+               wxLog *log = wxLog::GetActiveTarget();
+               if ( log )
+                  log->Flush();
+
+               msg.Printf(_("Signature file '%s' couldn't be opened."),
+                          strSignFile.c_str());
+            }
+
+            msg += _("\n\nWould you like to choose your signature "
+                     "right now (otherwise no signature will be used)?");
+            if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
+                                     true, "AskForSig") )
+            {
+               strSignFile = wxPFileSelector("sig",
+                                             _("Choose signature file"),
+                                             NULL, ".signature", NULL,
+                                             _(wxALL_FILES),
+                                             0, this);
+            }
+            else
+            {
+               // user doesn't want to use signature file
+               break;
+            }
+
+            if ( strSignFile.IsEmpty() )
+            {
+               // user canceled "choose signature" dialog
+               break;
+            }
+
+            m_Profile->writeEntry(MP_COMPOSE_SIGNATURE, strSignFile);
+         }
+      }
+
+      if ( hasSign )
+      {
+         wxLayoutList *layoutList = m_LayoutWindow->GetLayoutList();
+         // insert separator optionally
+         if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) ) {
+            layoutList->LineBreak();
+            layoutList->Insert("--");
+            layoutList->LineBreak();
+         }
+
+         // read the whole file
+         size_t nLineCount = fileSig.GetLineCount();
+         for ( size_t nLine = 0; nLine < nLineCount; nLine++ ) {
+            layoutList->Insert(fileSig[nLine]);
+            layoutList->LineBreak();;
+         }
+
+         // let's respect the netiquette
+         static const size_t nMaxSigLines = 4;
+         if ( nLineCount > nMaxSigLines )
+         {
+            wxString msg;
+            msg.Printf(_("Your signature is %stoo long: it should "
+                        "not be more than %d lines."),
+                       nLineCount > 10 ? _("way ") : "", nMaxSigLines);
+            MDialog_Message(msg, m_LayoutWindow,
+                            _("Signature is too long"),
+                            GetPersMsgBoxName(M_MSGBOX_SIGNATURE_LENGTH));
+   
+         }
+
+         layoutList->MoveCursorTo(wxPoint(0,0));
+      }
+      else
+      {
+         // don't ask the next time
+         m_Profile->writeEntry(MP_COMPOSE_USE_SIGNATURE, false);
+      }
+   }
+
+   // now deal with templates: first decide what kind of template do we need
    MessageTemplateKind kind;
    switch ( m_kind )
    {
@@ -956,6 +1084,8 @@ wxComposeView::InitText(Message *msg)
          }
       }
    } while ( templateChanged );
+
+   m_LayoutWindow->Refresh();
 }
 
 void
@@ -1159,105 +1289,6 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    if(m_txtFields[Field_Bcc])
       m_txtFields[Field_Bcc]->SetValue(READ_CONFIG(m_Profile, MP_COMPOSE_BCC));
 
-   // append signature
-   if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE) )
-   {
-      wxTextFile fileSig;
-
-      bool hasSign = false;
-      while ( !hasSign )
-      {
-         String strSignFile = READ_CONFIG(m_Profile, MP_COMPOSE_SIGNATURE);
-         if ( !strSignFile.IsEmpty() )
-            hasSign = fileSig.Open(strSignFile);
-
-         if ( !hasSign )
-         {
-            // no signature at all or sig file not found, propose to choose or
-            // change it now
-            wxString msg;
-            if ( strSignFile.IsEmpty() )
-            {
-               msg = _("You haven't configured your signature file.");
-            }
-            else
-            {
-               // to show message from wxTextFile::Open()
-               wxLog *log = wxLog::GetActiveTarget();
-               if ( log )
-                  log->Flush();
-
-               msg.Printf(_("Signature file '%s' couldn't be opened."),
-                          strSignFile.c_str());
-            }
-
-            msg += _("\n\nWould you like to choose your signature "
-                     "right now (otherwise no signature will be used)?");
-            if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
-                                     true, "AskForSig") )
-            {
-               strSignFile = wxPFileSelector("sig",
-                                             _("Choose signature file"),
-                                             NULL, ".signature", NULL,
-                                             _(wxALL_FILES),
-                                             0, this);
-            }
-            else
-            {
-               // user doesn't want to use signature file
-               break;
-            }
-
-            if ( strSignFile.IsEmpty() )
-            {
-               // user canceled "choose signature" dialog
-               break;
-            }
-
-            m_Profile->writeEntry(MP_COMPOSE_SIGNATURE, strSignFile);
-         }
-      }
-
-      if ( hasSign )
-      {
-         wxLayoutList *layoutList = m_LayoutWindow->GetLayoutList();
-         // insert separator optionally
-         if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) ) {
-            layoutList->LineBreak();
-            layoutList->Insert("--");
-            layoutList->LineBreak();
-         }
-
-         // read the whole file
-         size_t nLineCount = fileSig.GetLineCount();
-         for ( size_t nLine = 0; nLine < nLineCount; nLine++ ) {
-            layoutList->Insert(fileSig[nLine]);
-            layoutList->LineBreak();;
-         }
-
-         // let's respect the netiquette
-         static const size_t nMaxSigLines = 4;
-         if ( nLineCount > nMaxSigLines )
-         {
-            wxString msg;
-            msg.Printf(_("Your signature is %stoo long: it should "
-                        "not be more than %d lines."),
-                       nLineCount > 10 ? _("way ") : "", nMaxSigLines);
-            MDialog_Message(msg, m_LayoutWindow,
-                            _("Signature is too long"),
-                            GetPersMsgBoxName(M_MSGBOX_SIGNATURE_LENGTH));
-   
-         }
-
-         layoutList->MoveCursorTo(wxPoint(0,0));
-      }
-      else
-      {
-         // don't ask the next time
-         m_Profile->writeEntry(MP_COMPOSE_USE_SIGNATURE, false);
-      }
-   }
-
    // show the frame
    // --------------
    initialised = true;
@@ -1301,9 +1332,16 @@ wxComposeView::CreateFTCanvas(void)
 #endif
    
    EnableEditing(true);
-   m_LayoutWindow->Clear(m_font, m_size, (int) wxNORMAL, (int)wxNORMAL, 0, &m_fg, &m_bg);
+   DoClear();
    m_LayoutWindow->SetWrapMargin( READ_CONFIG(m_Profile, MP_WRAPMARGIN));
    m_LayoutWindow->SetWordWrap( READ_CONFIG(m_Profile, MP_AUTOMATIC_WORDWRAP) != 0);
+}
+
+void wxComposeView::DoClear()
+{
+   m_LayoutWindow->Clear(m_font, m_size, (int) wxNORMAL, (int) wxNORMAL, 0,
+                         &m_fg, &m_bg);
+   ResetDirty();
 }
 
 wxComposeView::wxComposeView(const String &iname,
@@ -1423,10 +1461,17 @@ wxComposeView::OnMenuCommand(int id)
       break;
 
    case WXMENU_COMPOSE_CLEAR:
-      m_LayoutWindow->Clear(m_font, m_size, (int) wxNORMAL, (int)
-                            wxNORMAL, 0,
-                            &m_fg, &m_bg);
-      ResetDirty();
+      DoClear();
+      break;
+
+   case WXMENU_COMPOSE_EVAL_TEMPLATE:
+      if ( !m_LayoutWindow->IsModified() )
+      {
+         // remove our prompt
+         DoClear();
+      }
+
+      DoInitText(NULL);
       break;
 
    case WXMENU_COMPOSE_LOADTEXT:

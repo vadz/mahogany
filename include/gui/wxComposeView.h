@@ -283,6 +283,12 @@ protected:
    // helpers
    // -------
 
+   /// clear the window
+   void DoClear();
+
+   /// InitText() helper
+   void DoInitText(Message *msg);
+
    /// verify that the message can be sent
    bool IsReadyToSend() const;
 
