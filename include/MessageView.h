@@ -49,6 +49,24 @@ WX_DEFINE_ARRAY(ProcessInfo *, ArrayProcessInfo);
 #define QUOTE_LEVEL_MAX 3
 
 // ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+/// the kind of the URL for PopupURLMenu()
+enum URLKind
+{
+   URL_Mailto,
+   URL_Other
+};
+
+/// options for OpenURL() (these are bit masks)
+enum
+{
+   URLOpen_Default    = 0,
+   URLOpen_New_Window = 1
+};
+
+// ----------------------------------------------------------------------------
 // MessageView: this class does MIME handling and uses MessageViewer to really
 //              show things on screen
 // ----------------------------------------------------------------------------
@@ -92,6 +110,9 @@ public:
    /// get the UID of the currently shown message (UID_ILLEGAL if none)
    UIdType GetUId() const { return m_uid; }
 
+   /// return the name of the folder which messages we're viewing
+   String GetFolderName() const;
+
    //@}
 
    /** @name Commands
@@ -113,8 +134,14 @@ public:
    /// show the message view contents in the given language
    void SetLanguage(int cmdLang);
 
-   /// open the URL (in a new browser window if inNewWindow)
-   void OpenURL(const String& url, bool inNewWindow);
+   /// open the URL (in a new browser window if options has NewWindow flag)
+   void OpenURL(const String& url, int options = URLOpen_Default);
+
+   /// open an address, i.e. start writing message to it normally
+   void OpenAddress(const String& address);
+
+   /// add an address to the address book
+   void AddToAddressBook(const String& address);
 
    //@}
 
@@ -286,7 +313,8 @@ protected:
    /// show the URL popup menu
    virtual void PopupURLMenu(wxWindow *window,
                              const String& url,
-                             const wxPoint& pt) = 0;
+                             const wxPoint& pt,
+                             URLKind urlkind) = 0;
 
    /// show the MIME popup menu for this message part
    virtual void PopupMIMEMenu(wxWindow *window,

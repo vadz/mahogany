@@ -159,14 +159,36 @@ private:
 class UrlPopup : public wxMenu
 {
 public:
-   UrlPopup(wxMessageView *parent, const String& url)
+   UrlPopup(wxMessageView *parent, const String& url, URLKind kind)
       : m_url(url)
    {
       m_MessageView = parent;
 
-      SetTitle(url.BeforeFirst(':').Upper() + _(" url"));
-      Append(WXMENU_URL_OPEN, _("&Open"));
-      Append(WXMENU_URL_OPEN_NEW, _("Open in &new window"));
+      // set a descriptive title
+      String title;
+      if ( kind == URL_Mailto )
+      {
+         title = _("EMail address");
+      }
+      else // !mailto
+      {
+         title = url.BeforeFirst(':').Upper() + _(" url");
+      }
+
+      SetTitle(title);
+
+      // create the menu
+      if ( kind == URL_Mailto )
+      {
+         Append(WXMENU_URL_COMPOSE, _("&Write to"));
+         Append(WXMENU_URL_ADD_TO_ADB, _("&Add to address book..."));
+      }
+      else // !mailto
+      {
+         Append(WXMENU_URL_OPEN, _("&Open"));
+         Append(WXMENU_URL_OPEN_NEW, _("Open in &new window"));
+      }
+
       Append(WXMENU_URL_COPY, _("&Copy to clipboard"));
    }
 
@@ -303,14 +325,25 @@ MimePopup::OnCommandEvent(wxCommandEvent &event)
 void
 UrlPopup::OnCommandEvent(wxCommandEvent &event)
 {
-   switch ( event.GetId() )
+   int id = event.GetId();
+   switch ( id )
    {
       case WXMENU_URL_OPEN:
-         m_MessageView->OpenURL(m_url, FALSE);
+      case WXMENU_URL_OPEN_NEW:
+         m_MessageView->OpenURL
+                        (
+                           m_url,
+                           id == WXMENU_URL_OPEN ? URLOpen_Default
+                                                 : URLOpen_New_Window
+                        );
          break;
 
-      case WXMENU_URL_OPEN_NEW:
-         m_MessageView->OpenURL(m_url, TRUE);
+      case WXMENU_URL_COMPOSE:
+         m_MessageView->OpenAddress(m_url);
+         break;
+
+      case WXMENU_URL_ADD_TO_ADB:
+         m_MessageView->AddToAddressBook(m_url);
          break;
 
       case WXMENU_URL_COPY:
@@ -365,9 +398,10 @@ MessageView *MessageView::Create(wxWindow *parent, FolderView *folderView)
 
 void wxMessageView::PopupURLMenu(wxWindow *window,
                                  const String& url,
-                                 const wxPoint& pt)
+                                 const wxPoint& pt,
+                                 URLKind urlkind)
 {
-   UrlPopup menu(this, url);
+   UrlPopup menu(this, url, urlkind);
 
    window->PopupMenu(&menu, pt);
 }

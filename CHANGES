@@ -6,6 +6,7 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
+26.04.02 VZ: added popup menu for the email addresses in the message view
 25.04.02 VZ: detect more URLs, including email addresses and wrapped URLs
 24.04.02 XN: implemented much more efficient URL matching algorithm
 22.04.02 VZ: added "--debug" command line option to enable mail debugging

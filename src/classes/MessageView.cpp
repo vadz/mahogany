@@ -593,6 +593,14 @@ wxFrame *MessageView::GetParentFrame() const
    return GetFrame(GetWindow());
 }
 
+String MessageView::GetFolderName() const
+{
+   CHECK( m_mailMessage->GetFolder(), "unknown",
+          "no folder in MessageView?" );
+
+   return m_mailMessage->GetFolder()->GetName();
+}
+
 void
 MessageView::Clear()
 {
@@ -2409,8 +2417,10 @@ MessageView::MimeViewText(const MimePart *mimepart)
 // URL handling
 // ----------------------------------------------------------------------------
 
-void MessageView::OpenURL(const String& url, bool inNewWindow)
+void MessageView::OpenURL(const String& url, int options)
 {
+   bool inNewWindow = (options & URLOpen_New_Window) != 0;
+
    wxFrame *frame = GetParentFrame();
    wxLogStatus(frame, _("Opening URL '%s'..."), url.c_str());
 
@@ -2552,6 +2562,25 @@ void MessageView::OpenURL(const String& url, bool inNewWindow)
    }
 }
 
+void MessageView::OpenAddress(const String& address)
+{
+   Composer *cv = Composer::CreateNewMessage(GetProfile());
+
+   cv->SetAddresses(address);
+   cv->InitText();
+}
+
+void MessageView::AddToAddressBook(const String& address)
+{
+   wxArrayString addresses;
+   addresses.Add(address);
+
+   InteractivelyCollectAddresses(addresses,
+                                 READ_APPCONFIG(MP_AUTOCOLLECT_ADB),
+                                 GetFolderName(),
+                                 GetParentFrame());
+}
+
 // ----------------------------------------------------------------------------
 // MessageView menu command processing
 // ----------------------------------------------------------------------------
@@ -2673,32 +2702,30 @@ MessageView::DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
 
          // treat mail urls separately: we handle them ourselves
          wxString protocol = url.BeforeFirst(':');
-         if ( protocol == url )
+
+         bool isMail = protocol == "mailto";
+         if ( isMail )
          {
-            protocol.clear();
+            // leave only the mail address
+            url.erase(0, 7); // 7 == strlen("mailto:")
+         }
+         else if ( protocol == url && url.find('@') != String::npos )
+         {
+            // a bare mail address
+            isMail = true;
          }
 
-         if ( protocol == "mailto" ||
-               (protocol.empty() && url.find('@') != String::npos) )
+         if ( id == WXMENU_LAYOUT_RCLICK )
          {
-            Composer *cv = Composer::CreateNewMessage(GetProfile());
-
-            String address = url;
-            if ( !protocol.empty() )
-            {
-               address.erase(0, 7); // 7 == strlen("mailto:")
-            }
-
-            cv->SetAddresses(address);
-            cv->InitText();
+            PopupURLMenu(GetWindow(), url, pt, isMail ? URL_Mailto : URL_Other);
          }
-         else // not mailto URL
+         else // left or double click
          {
-            if ( id == WXMENU_LAYOUT_RCLICK )
+            if ( isMail )
             {
-               PopupURLMenu(GetWindow(), url, pt);
+               OpenAddress(url);
             }
-            else // left or double click
+            else // non mailto URL
             {
                OpenURL(url, m_ProfileValues.browserInNewWindow);
             }
@@ -2887,14 +2914,11 @@ MessageView::DoShowMessage(Message *mailMessage)
       // autocollect the addresses from it if configured
       if ( m_ProfileValues.autocollect )
       {
-         String folderName = m_mailMessage->GetFolder() ?
-            m_mailMessage->GetFolder()->GetName() : String(_("unknown"));
-
          AutoCollectAddresses(m_mailMessage,
                               m_ProfileValues.autocollect,
                               m_ProfileValues.autocollectNamed != 0,
                               m_ProfileValues.autocollectBookName,
-                              folderName,
+                              GetFolderName(),
                               GetParentFrame());
       }
    }
