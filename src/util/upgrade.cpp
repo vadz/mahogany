@@ -111,19 +111,28 @@ UpgradeFrom001()
    return true;
 }
 
-#define COPYENTRY(type)  { type val; rc &= _this->Read(entry, &val); rc &= _this->Write(newentry,val); }
+#define COPYENTRY(type)  { type val; rc &= _this->Read(entry, &val); rc &= dest->Write(newentry,val); }
 
 /** Copies all entries and optionally subgroups from path from to path 
     to in the wxConfig.
+    NOTE: Currently both from and to should be absolute paths!
+    @param from  absolute group from where to copy entries
+    @param to    absolute group where to copy to
+    @param recursive if true, copy all subgroups, too
+    @param dest      if non-NULL, use that config as the destination otherwise use this
     @return false on error
 */
 static bool
 CopyEntries(wxConfigBase *_this,
-            const wxString &from, const wxString &to, bool recursive = TRUE)
+            const wxString &from, const wxString &to,
+            bool recursive = TRUE,
+            wxConfigBase *dest = NULL)
 {
    wxString oldPath = _this->GetPath();
    bool rc = TRUE;
 
+   if(dest == NULL) dest = _this;
+   
    // Build a list of all entries to copy:
    _this->SetPath(from);
 
@@ -176,7 +185,7 @@ CopyEntries(wxConfigBase *_this,
          fromgroup << '/' << groups[idx];
          togroup = to;
          togroup << '/' << groups[idx];
-         CopyEntries(_this, fromgroup, togroup, recursive);
+         CopyEntries(_this, fromgroup, togroup, recursive, dest);
       }
       delete [] groups;
    }
