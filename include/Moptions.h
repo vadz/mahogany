@@ -176,6 +176,8 @@ extern const MOption MP_DEFAULT_LOAD_EXTENSION;
 extern const MOption MP_COMPOSE_TO;
 extern const MOption MP_COMPOSE_CC;
 extern const MOption MP_COMPOSE_BCC;
+extern const MOption MP_DEFAULT_REPLY_KIND;
+extern const MOption MP_LIST_ADDRESSES;
 extern const MOption MP_REPLY_PREFIX;
 extern const MOption MP_FORWARD_PREFIX;
 extern const MOption MP_REPLY_COLLAPSE_PREFIX;
@@ -694,6 +696,10 @@ extern const MOption MP_AWAY_STATUS;
 /// default value for Bcc: field in composition
 #define   MP_COMPOSE_BCC_NAME         "ComposeBccDefault"
 
+/// default reply kind
+#define   MP_DEFAULT_REPLY_KIND_NAME "ReplyDefault"
+/// the mailing list addresses
+#define   MP_LIST_ADDRESSES_NAME "MLAddresses"
 /// prefix for subject in replies
 #define   MP_REPLY_PREFIX_NAME         "ReplyPrefix"
 /// prefix for subject in forwards
@@ -1420,6 +1426,10 @@ extern const MOption MP_AWAY_STATUS;
 /// default value for Bcc: field in composition
 #define   MP_COMPOSE_BCC_DEFVAL      M_EMPTYSTRING
 
+/// default reply kind
+#define   MP_DEFAULT_REPLY_KIND_DEFVAL 0l  // MailFolder::REPLY_SENDER
+/// the mailing list addresses
+#define   MP_LIST_ADDRESSES_DEFVAL ""
 /// prefix for subject in replies
 #define   MP_REPLY_PREFIX_DEFVAL      "Re: "
 /// prefix for subject in forwards

@@ -205,8 +205,8 @@ static const int *g_aFrameToolbars[WXFRAME_MAX] =
 //     should end with an ellipsis (`...')
 //
 // The following accelerators are still unused:
-//    with Ctrl:           E    JKLM      T      
-//    with Shift-Ctrl:  B DE  HIJKLM OPQ  T VWXY 
+//    with Ctrl:           E    JK M      T      
+//    with Shift-Ctrl:  B DE  HIJK M OPQ  T VWXY 
 static const MenuItemInfo g_aMenuItems[] =
 {
    // ABCDEFGHIJKLMNOPQRSTUVWXYZ (VZ: leave it here, it's a cut-&-paste buffer)
@@ -311,14 +311,66 @@ static const MenuItemInfo g_aMenuItems[] =
 #endif // USE_PS_PRINTING
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_SUBMENU,       gettext_noop("Rep&ly"), "", FALSE },
-      { WXMENU_MSG_REPLY,     gettext_noop("&Reply to sender\tCtrl-R"),            gettext_noop("Reply to this message")    , FALSE },
-      { WXMENU_MSG_REPLY_WITH_TEMPLATE, gettext_noop("Reply with &template...\tShift-Ctrl-R"), gettext_noop("Reply to this message after choosing a template to use ")    , FALSE },
-      { WXMENU_MSG_FOLLOWUP,  gettext_noop("Reply to a&ll\tCtrl-G"), gettext_noop("Reply to all recipients of this message")    , FALSE },
-      { WXMENU_MSG_FOLLOWUP_WITH_TEMPLATE,
-                              gettext_noop("Repl&y to all with template...\tShift-Ctrl-G"),      gettext_noop("Reply to all recipients of this message after choosing a template to use ")    , FALSE },
-      { WXMENU_MSG_FORWARD,   gettext_noop("&Forward\tCtrl-F"),          gettext_noop("Forward this message")     , FALSE },
-      { WXMENU_MSG_FORWARD_WITH_TEMPLATE,
-                              gettext_noop("Forward with &template...\tShift-Ctrl-F"), gettext_noop("Forward this message after choosing a template to use ")     , FALSE },
+      {
+         WXMENU_MSG_REPLY,
+         gettext_noop("&Reply\tCtrl-R"),
+         gettext_noop("Reply to this message using default reply command"),
+         FALSE
+      },
+      {
+         WXMENU_MSG_REPLY_WITH_TEMPLATE,
+         gettext_noop("Reply with &template...\tShift-Ctrl-R"),
+         gettext_noop("Reply to this message after choosing a template to use"),
+         FALSE
+      },
+      {
+         WXMENU_MSG_REPLY_SENDER,
+         gettext_noop("&Reply to sender"),
+         gettext_noop("Reply to the sender of this message only"),
+         FALSE
+      },
+      {
+         WXMENU_MSG_REPLY_SENDER_WITH_TEMPLATE,
+         gettext_noop("Reply to sender with &template..."),
+         gettext_noop("Reply to the sender of this message after choosing a template to use"),
+         FALSE
+      },
+      {
+         WXMENU_MSG_REPLY_ALL,
+         gettext_noop("Reply to a&ll\tCtrl-G"),
+         gettext_noop("Reply to all recipients of this message (group reply)"),
+         FALSE
+      },
+      {
+         WXMENU_MSG_REPLY_ALL_WITH_TEMPLATE,
+         gettext_noop("Repl&y to all with template...\tShift-Ctrl-G"),
+         gettext_noop("Reply to all recipients of this message after choosing a template to use"),
+         FALSE
+      },
+      {
+         WXMENU_MSG_REPLY_LIST,
+         gettext_noop("Reply to &list\tCtrl-L"),
+         gettext_noop("Reply to the mailing list this message was sent to"),
+         FALSE
+      },
+      {
+         WXMENU_MSG_REPLY_LIST_WITH_TEMPLATE,
+         gettext_noop("Reply to list &with template...\tShift-Ctrl-L"),
+         gettext_noop("Reply to the mailing list after choosing a template to use"),
+         FALSE
+      },
+      {
+         WXMENU_MSG_FORWARD,
+         gettext_noop("&Forward\tCtrl-F"),
+         gettext_noop("Forward this message to another recipient"),
+         FALSE
+      },
+      {
+         WXMENU_MSG_FORWARD_WITH_TEMPLATE,
+         gettext_noop("Forward with t&emplate...\tShift-Ctrl-F"),
+         gettext_noop("Forward this message after choosing a template to use"),
+         FALSE
+      },
    { WXMENU_SUBMENU,       "", "", FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_FILTER,    gettext_noop("&Apply filter rules..."), gettext_noop("Apply filter rules to selected messages")     , FALSE },

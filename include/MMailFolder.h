@@ -121,7 +121,7 @@ public:
                               MWindow *parent = NULL);
    /** Reply to one message.
        @param message message to reply to
-       @param flags 0, or REPLY_FOLLOWUP
+       @param params reply parameters
        @param profile environment
        @param parent window for dialog
    */

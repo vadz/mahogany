@@ -428,9 +428,8 @@ public:
 
    /** Reply to selected messages.
        @param messages pointer to an array holding the message numbers
+       @param params reply parameters
        @param parent window for dialog
-       @param profile pointer for environment
-       @param flags 0, or REPLY_FOLLOWUP
    */
    virtual Ticket ReplyMessages(const UIdArray *messages,
                                 const MailFolder::Params& params,

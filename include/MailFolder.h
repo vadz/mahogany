@@ -222,11 +222,26 @@ public:
       MSG_STAT_FLAGGED = 64
    };
 
-   /** Flags for several operations. */
-   enum Flags
+   /**
+     Different ways to reply to a message
+
+     NB: don't change the numeric values of the enum elements, they are
+         stored in the profile and also because wxOptionsDlg relies on
+         them being what they are!
+    */
+   enum ReplyKind
    {
-      NONE = 0,
-      REPLY_FOLLOWUP
+      /// reply to the sender of this message only
+      REPLY_SENDER,
+
+      /// reply to all recipients of this message
+      REPLY_ALL,
+
+      /// reply to the mailing list this message was sent to
+      REPLY_LIST,
+
+      /// default reply: may go to the sender, all or list
+      REPLY
    };
 
    /// flags for OpenFolder()
@@ -243,13 +258,13 @@ public:
     */
    struct Params
    {
-      Params(int f = 0) { Init(f); }
-      Params(const String& t, int f = 0) : templ(t) { Init(f); }
+      Params(ReplyKind rk = REPLY) { Init(rk); }
+      Params(const String& t, ReplyKind rk = REPLY) : templ(t) { Init(rk); }
 
-      void Init(int f) { flags = f; msgview = NULL; }
+      void Init(ReplyKind rk) { replyKind = rk; msgview = NULL; }
 
-      /// combination of Flags enum above (i.e. 0 or REPLY_FOLLOWUP)
-      int flags;
+      /// see ReplyKind enum above
+      ReplyKind replyKind;
 
       /// the template to use for the new message, use default if empty
       String templ;

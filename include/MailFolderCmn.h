@@ -121,9 +121,8 @@ public:
    //@}
    /** Reply to selected messages.
        @param messages pointer to an array holding the message numbers
+       @param params reply parameters
        @param parent window for dialog
-       @param profile pointer for environment
-       @param flags 0, or REPLY_FOLLOWUP
    */
    virtual void ReplyMessages(const UIdArray *messages,
                               const Params& params,

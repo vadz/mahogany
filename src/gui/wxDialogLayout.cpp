@@ -336,7 +336,7 @@ void wxEnhancedPanel::SetTopConstraint(wxLayoutConstraints *c,
       size_t margin = LAYOUT_Y_MARGIN;
       if ( last->IsKindOf(CLASSINFO(wxListBox)) ) {
          // listbox has a surrounding box, so leave more space
-         margin *= 2;
+         margin *= 4;
       }
 
       c->top.Below(last, margin + extraSpace);

@@ -181,6 +181,8 @@ enum ConfigFields
    ConfigField_OutgoingFolder,
    ConfigField_WrapMargin,
    ConfigField_WrapAuto,
+   ConfigField_ReplyDefKindHelp,
+   ConfigField_ReplyDefKind,
    ConfigField_ReplyString,
    ConfigField_ForwardString,
    ConfigField_ReplyCollapse,
@@ -306,7 +308,6 @@ enum ConfigFields
    ConfigField_FolderViewHelpText2,
    ConfigField_FolderViewOnlyNames,
    ConfigField_FolderViewReplaceFrom,
-   ConfigField_FolderViewReplaceFromAddresses,
    ConfigField_FolderViewFontFamily,
    ConfigField_FolderViewFontSize,
    ConfigField_FolderViewFGColour,
@@ -348,6 +349,10 @@ enum ConfigFields
 
    // autocollecting and address books options
    ConfigField_AdbFirst = ConfigField_FolderTreeLast,
+   ConfigField_OwnAddressesHelp,
+   ConfigField_OwnAddresses,
+   ConfigField_MLAddressesHelp,
+   ConfigField_MLAddresses,
    ConfigField_AutoCollect_HelpText,
    ConfigField_AutoCollect,
    ConfigField_AutoCollectAdb,
@@ -829,8 +834,20 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Folder,    ConfigField_UseOutgoingFolder },
    { gettext_noop("&Wrap margin"),                 Field_Number | Field_Global,  -1,                        },
    { gettext_noop("Wra&p lines automatically"),    Field_Bool | Field_Global,  -1,                        },
+   { gettext_noop("There are several different reply commands in Mahogany:\n"
+                  "reply to sender only replies to the person who sent the\n"
+                  "message, reply to all - to all message recipients and\n"
+                  "reply to list replies to the mailing list address only\n"
+                  "(for this to work you need to configure the mailing list\n"
+                  "addresses in the \"Addresses\" page).\n"
+                  "What do you want the default reply command to do?"),
+                                                   Field_Message |
+                                                   Field_Advanced, -1},
+   { gettext_noop("Default &reply kind:sender:all:list"),
+                                                   Field_Combo |
+                                                   Field_Advanced, -1},
    { gettext_noop("&Reply string in subject"),     Field_Text,    -1,                        },
-   { gettext_noop("Forward string in subject"),     Field_Text,    -1,                        },
+   { gettext_noop("&Forward string in subject"),   Field_Text,    -1,                        },
    { gettext_noop("Co&llapse reply markers"
                   ":no:collapse:collapse & count"),Field_Combo,   -1,                        },
    { gettext_noop("Quote &original message in reply"), Field_Action,   -1,                        },
@@ -998,7 +1015,6 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("\nThe following settings control appearance of the messages list:"), Field_Message,  -1 },
    { gettext_noop("Show only sender's name, not &e-mail"), Field_Bool,    -1 },
    { gettext_noop("Show \"&To\" for messages from oneself"), Field_Bool,    -1 },
-   { gettext_noop("&Addresses to replace with \"To\""),  Field_List, ConfigField_FolderViewReplaceFrom,           },
    { gettext_noop("Font famil&y"
                   ":default:decorative:roman:script:swiss:modern:teletype"),
                                                    Field_Combo,   -1},
@@ -1068,6 +1084,17 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Skip this folder:"), Field_Bool, -1 },
 
    // adb: autocollect and bbdb options
+   { gettext_noop("The addresses listed below are the ones which are\n"
+                  "reckognized as being your own when showing the message\n"
+                  "headers and also answering to the messages (they are\n"
+                  "excluded from the list of your reply recipients)"),
+                                                   Field_Message, -1 },
+   { gettext_noop("&Addresses to replace with \"To\""),  Field_List, -1,           },
+   { gettext_noop("If you want to take advantage of \"Reply to list\" command,\n"
+                  "you need to specify the addresses of the mailing lists\n"
+                  "you are subscribed to below\n"),
+                                                   Field_Message, -1 },
+   { gettext_noop("&Mailing list addresses"),  Field_List, -1,           },
    { gettext_noop("Mahogany may automatically remember all e-mail addresses in the messages you\n"
                   "receive in a special addresss book. This is called 'address\n"
                   "autocollection' and may be turned on or off from this page."),
@@ -1270,6 +1297,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),
    CONFIG_ENTRY(MP_WRAPMARGIN),
    CONFIG_ENTRY(MP_AUTOMATIC_WORDWRAP),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_DEFAULT_REPLY_KIND),
    CONFIG_ENTRY(MP_REPLY_PREFIX),
    CONFIG_ENTRY(MP_FORWARD_PREFIX),
    CONFIG_ENTRY(MP_REPLY_COLLAPSE_PREFIX),
@@ -1383,7 +1412,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FVIEW_NAMES_ONLY),
    CONFIG_ENTRY(MP_FVIEW_FROM_REPLACE),
-   CONFIG_ENTRY(MP_FROM_REPLACE_ADDRESSES),
    CONFIG_ENTRY(MP_FVIEW_FONT),
    CONFIG_ENTRY(MP_FVIEW_FONT_SIZE),
    CONFIG_ENTRY(MP_FVIEW_FGCOLOUR),
@@ -1419,7 +1447,11 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FTREE_NEVER_UNREAD),
 
-   // autocollect
+   // addresses
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_FROM_REPLACE_ADDRESSES),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_LIST_ADDRESSES),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_AUTOCOLLECT),
    CONFIG_ENTRY(MP_AUTOCOLLECT_ADB),
@@ -2439,48 +2471,13 @@ bool wxOptionsPageMessageView::TransferDataFromWindow()
 
 wxOptionsPageFolderView::wxOptionsPageFolderView(wxNotebook *parent,
                                                  Profile *profile)
-   : wxOptionsPageStandard(parent,
-                           _("Folder View"),
-                           profile,
-                           ConfigField_FolderViewFirst,
-                           ConfigField_FolderViewLast,
-                           MH_OPAGE_MESSAGEVIEW)
+                       : wxOptionsPageStandard(parent,
+                                               _("Folder View"),
+                                               profile,
+                                               ConfigField_FolderViewFirst,
+                                               ConfigField_FolderViewLast,
+                                               MH_OPAGE_MESSAGEVIEW)
 {
-   m_idListbox = ConfigField_FolderViewReplaceFromAddresses;
-   m_lboxDlgTitle = _("My own addresses");
-   m_lboxDlgPrompt = _("Address");
-   m_lboxDlgPers = "LastMyAddress";
-}
-
-bool wxOptionsPageFolderView::TransferDataToWindow()
-{
-   bool bRc = wxOptionsPage::TransferDataToWindow();
-
-   if ( bRc )
-   {
-      // if the listbox is empty, add the reply-to address to it
-      wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
-      if ( !listbox->GetCount() )
-      {
-         listbox->Append(READ_CONFIG(m_Profile, MP_FROM_ADDRESS));
-      }
-   }
-
-   return bRc;
-}
-
-bool wxOptionsPageFolderView::TransferDataFromWindow()
-{
-   // if the listbox contains just the return address, empty it: it is the
-   // default anyhow and this avoids remembering it in config
-   wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
-   if ( listbox->GetCount() == 1 &&
-        listbox->GetString(0) == READ_CONFIG(m_Profile, MP_FROM_ADDRESS) )
-   {
-      listbox->Clear();
-   }
-
-   return wxOptionsPage::TransferDataFromWindow();
 }
 
 void wxOptionsPageFolderView::OnButton(wxCommandEvent& event)
@@ -2626,16 +2623,50 @@ wxOptionsPagePython::wxOptionsPagePython(wxNotebook *parent,
 // wxOptionsPageAdb
 // ----------------------------------------------------------------------------
 
-
 wxOptionsPageAdb::wxOptionsPageAdb(wxNotebook *parent,
                                     Profile *profile)
                 : wxOptionsPageStandard(parent,
-                                _("Addressbook"),
+                                _("Addresses"),
                                 profile,
                                 ConfigField_AdbFirst,
                                 ConfigField_AdbLast,
                                 MH_OPAGE_ADB)
 {
+   m_idListbox = ConfigField_OwnAddresses;
+   m_lboxDlgTitle = _("My own addresses");
+   m_lboxDlgPrompt = _("Address");
+   m_lboxDlgPers = "LastMyAddress";
+}
+
+bool wxOptionsPageAdb::TransferDataToWindow()
+{
+   bool bRc = wxOptionsPage::TransferDataToWindow();
+
+   if ( bRc )
+   {
+      // if the listbox is empty, add the reply-to address to it
+      wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
+      if ( !listbox->GetCount() )
+      {
+         listbox->Append(READ_CONFIG(m_Profile, MP_FROM_ADDRESS));
+      }
+   }
+
+   return bRc;
+}
+
+bool wxOptionsPageAdb::TransferDataFromWindow()
+{
+   // if the listbox contains just the return address, empty it: it is the
+   // default anyhow and this avoids remembering it in config
+   wxListBox *listbox = wxStaticCast(GetControl(m_idListbox), wxListBox);
+   if ( listbox->GetCount() == 1 &&
+        listbox->GetString(0) == READ_CONFIG(m_Profile, MP_FROM_ADDRESS) )
+   {
+      listbox->Clear();
+   }
+
+   return wxOptionsPage::TransferDataFromWindow();
 }
 
 // ----------------------------------------------------------------------------

@@ -1173,8 +1173,8 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
          WXMENU_SEPARATOR,
          WXMENU_MSG_REPLY,
          WXMENU_MSG_REPLY_WITH_TEMPLATE,
-         WXMENU_MSG_FOLLOWUP,
-         WXMENU_MSG_FOLLOWUP_WITH_TEMPLATE,
+         WXMENU_MSG_REPLY_ALL,
+         WXMENU_MSG_REPLY_ALL_WITH_TEMPLATE,
          WXMENU_MSG_FORWARD,
          WXMENU_MSG_FORWARD_WITH_TEMPLATE,
          WXMENU_SEPARATOR,
@@ -3374,7 +3374,7 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
          break;
 
       case 'G': // group reply
-         m_msgCmdProc->ProcessCommand(WXMENU_MSG_FOLLOWUP, selections);
+         m_msgCmdProc->ProcessCommand(WXMENU_MSG_REPLY_ALL, selections);
          newFocus = -1;
          break;
 

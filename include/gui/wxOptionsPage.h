@@ -381,9 +381,6 @@ class wxOptionsPageFolderView : public wxOptionsPageStandard
 public:
    wxOptionsPageFolderView(wxNotebook *parent, Profile *profile);
 
-   virtual bool TransferDataToWindow();
-   virtual bool TransferDataFromWindow();
-
    void OnButton(wxCommandEvent&);
 
 private:
@@ -459,6 +456,9 @@ class wxOptionsPageAdb : public wxOptionsPageStandard
 {
 public:
    wxOptionsPageAdb(wxNotebook *parent, Profile *profile);
+
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
 };
 
 

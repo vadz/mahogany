@@ -56,6 +56,7 @@
 // options we use here
 // ----------------------------------------------------------------------------
 
+extern const MOption MP_DEFAULT_REPLY_KIND;
 extern const MOption MP_FOLDER_COMMENT;
 extern const MOption MP_FOLDER_LOGIN;
 extern const MOption MP_FOLDER_PASSWORD;
@@ -64,6 +65,7 @@ extern const MOption MP_FOLDER_TYPE;
 extern const MOption MP_FORWARD_PREFIX;
 extern const MOption MP_FROM_REPLACE_ADDRESSES;
 extern const MOption MP_IMAPHOST;
+extern const MOption MP_LIST_ADDRESSES;
 extern const MOption MP_NNTPHOST;
 extern const MOption MP_POPHOST;
 extern const MOption MP_REPLY_COLLAPSE_PREFIX;
@@ -540,8 +542,238 @@ MailFolder::Subscribe(const String &host, FolderType protocol,
 }
 
 // ----------------------------------------------------------------------------
-// message operations
+// reply/forward messages
 // ----------------------------------------------------------------------------
+
+// add the recipients addresses extracted from the message being replied to to
+// the composer according to the MailFolder::Params::replyKind value
+static void
+InitRecipients(Composer *cv,
+               Message *msg,
+               const MailFolder::Params& params,
+               Profile *profile)
+{
+   // first get the real reply kind
+   MailFolder::ReplyKind replyKind = params.replyKind;
+
+   bool explicitReplyKind;
+   if ( replyKind == MailFolder::REPLY )
+   {
+      // this means we should use the default reply kind for this folder
+      long rk = READ_CONFIG(profile, MP_DEFAULT_REPLY_KIND);
+
+      if ( rk < 0 || rk >= MailFolder::REPLY )
+      {
+         wxLogDebug("Corrupted config data: invalid MP_DEFAULT_REPLY_KIND!");
+
+         rk = MailFolder::REPLY_SENDER;
+      }
+
+      // now cast is safe
+      replyKind = (MailFolder::ReplyKind)rk;
+
+      // implicit because we used the default value
+      explicitReplyKind = false;
+   }
+   else
+   {
+      explicitReplyKind = true;
+   }
+
+   wxSortedArrayString replyToAddresses;
+   size_t n,
+          countReplyTo = msg->GetAddresses(MAT_REPLYTO, replyToAddresses);
+
+   // REPLY_LIST overrides any Reply-To in the header
+   if ( replyKind != MailFolder::REPLY_LIST )
+   {
+      // otherwise reply to Reply-To address, if any, by default
+      if ( !countReplyTo )
+      {
+         // try from address
+         //
+         // FIXME: original encoding is lost here
+         cv->AddTo(MailFolder::DecodeHeader(msg->From()));
+      }
+      else // have Reply-To
+      {
+         for ( n = 0; n < countReplyTo; n++ )
+         {
+            // FIXME: same as above
+            cv->AddTo(MailFolder::DecodeHeader(replyToAddresses[n]));
+         }
+      }
+   }
+
+   // don't bother extracting the other addresses if we know in advance that
+   // we don't need them anyhow
+   //
+   // this is sort of a hack: if the user really chose "Reply to sender" from
+   // the menu, then we won't even add the other addresses to the composer at
+   // all because it clearly means that he doesn't need them
+   //
+   // OTOH, if REPLY_SENDER just happens to be the default reply value (and so
+   // could be invoked just by one key press and is the fastest way to reply
+   // anyhow), then we'll still add the other recipients to the composer but
+   // just disable them by default
+   //
+   // IMHO this does the right thing in all cases, but maybe we need an
+   // additional option to handle this ("add unused addresses to composer")?
+   if ( replyKind == MailFolder::REPLY_SENDER && explicitReplyKind )
+      return;
+
+   // now get all other addresses
+   wxSortedArrayString otherAddresses;
+
+   if ( replyKind == MailFolder::REPLY_LIST )
+   {
+      // take all address because we didn't use them yet
+      WX_APPEND_ARRAY(otherAddresses, replyToAddresses);
+
+      otherAddresses.Add(msg->From());
+
+      // don't want to exclude the Reply-To addresses in the code below
+      replyToAddresses.Clear();
+   }
+   else // we already have used some addresses
+   {
+      // use From only if not done already above
+      if ( countReplyTo > 0 )
+         otherAddresses.Add(msg->From());
+   }
+
+   msg->GetAddresses(MAT_CC, otherAddresses);
+   msg->GetAddresses(MAT_TO, otherAddresses);
+
+   // this is probably an overkill - you never want to reply to the sender
+   // address, do you?
+#if 0
+   msg->GetAddresses(MAT_SENDER, otherAddresses);
+#endif // 0
+
+   // decode headers before comparing them - the problem is that we lost their
+   // original encoding when doing this
+   for ( n = 0; n < otherAddresses.GetCount(); n++ )
+   {
+      otherAddresses[n] = MailFolder::DecodeHeader(otherAddresses[n]);
+   }
+
+   // remove duplicates
+   wxArrayString uniqueAddresses = strutil_uniq_array(otherAddresses);
+
+   // and also filter out the addresses used in to as well as our own
+   // address(es) by putting their indices into addressesToIgnore array
+   String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
+   wxArrayString ownAddresses = strutil_restore_array(returnAddrs);
+
+   // finally, if we're in REPLY_LIST mode, also remember which reply
+   // addresses correspond to the mailing lists as we want to reply to them
+   // only
+   wxArrayString listAddresses;
+   if ( replyKind == MailFolder::REPLY_LIST )
+   {
+      listAddresses = strutil_restore_array(READ_CONFIG(profile,
+                                                        MP_LIST_ADDRESSES));
+   }
+
+   // some addresses may appear also in Reply-To (assuming we used it) and
+   // some also may correpond to our own addresses - we exclude them as we
+   // don't usually want to reply to ourselves
+   //
+   // and in the same loop we also detect which addresses correspond to the
+   // mailing lists
+   wxArrayInt addressesToIgnore,
+              addressesList;
+   for ( n = 0; n < uniqueAddresses.GetCount(); n++ )
+   {
+      String addr = uniqueAddresses[n];
+      if ( Message::FindAddress(replyToAddresses, addr) != wxNOT_FOUND ||
+           Message::FindAddress(ownAddresses, addr) != wxNOT_FOUND )
+      {
+         addressesToIgnore.Add(n);
+      }
+
+      // if we're not in REPLY_LIST mode the listAddresses array is empty
+      // anyhow so it doesn't hurt
+      if ( Message::FindAddress(listAddresses, addr) != wxNOT_FOUND )
+      {
+         addressesList.Add(n);
+      }
+   }
+
+   if ( replyKind == MailFolder::REPLY_LIST )
+   {
+      // again special case for list reply: we wish to have the list addresses
+      // first and all the others later
+      size_t countLists = addressesList.GetCount();
+      if ( countLists )
+      {
+         for ( size_t n = 0; n < countLists; n++ )
+         {
+            cv->AddTo(uniqueAddresses[addressesList[n]]);
+         }
+      }
+      else // no mailing list addresses found
+      {
+         // again, the same logic: if we explicitly asked to reply to the list
+         // than we must think that the message was sent to the list and so we
+         // should complain loudly if this is not the case - OTOH, if replying
+         // to the list is just the default reply mode, it should work for all
+         // messages without errors
+         if ( explicitReplyKind )
+         {
+            wxLogWarning(_("None of the message recipients is a configured "
+                           "mailing list, maybe you should configure the "
+                           "list of the mailing list addresses?"));
+         }
+
+         // in any case fall back to group reply - this seems to be the safest
+         // solution
+         replyKind = MailFolder::REPLY_ALL;
+      }
+   }
+
+   size_t count = uniqueAddresses.GetCount();
+   for ( n = 0; n < count; n++ )
+   {
+      if ( addressesToIgnore.Index(n) != wxNOT_FOUND )
+      {
+         // ignore this one
+         continue;
+      }
+
+      // what we do with this address depends on the kind of reply
+      Composer::RecipientType rcptType;
+      switch ( replyKind )
+      {
+         default:
+            FAIL_MSG( "unexpected reply kind" );
+            // fall through
+
+         case MailFolder::REPLY_SENDER:
+            // still add addresses  to allow easily adding them to the
+            // recipient list - just disable them by default
+            rcptType = Composer::Recipient_None;
+            break;
+
+         case MailFolder::REPLY_ALL:
+            // reply to everyone and their dog
+            rcptType = Composer::Recipient_To;
+            break;
+
+         case MailFolder::REPLY_LIST:
+            // if it is a list address, we already dealt with it above
+            if ( addressesList.Index(n) != wxNOT_FOUND )
+               continue;
+
+            // do keep the others but disabled by default
+            rcptType = Composer::Recipient_None;
+            break;
+      }
+
+      cv->AddRecipients(uniqueAddresses[n], rcptType);
+   }
+}
 
 void
 MailFolder::ReplyMessage(Message *msg,
@@ -558,90 +790,7 @@ MailFolder::ReplyMessage(Message *msg,
                                                profile,
                                                msg);
 
-   // set the recipient address: use Reply-To for this
-   wxSortedArrayString replyToAddresses;
-   size_t n,
-          countReplyTo = msg->GetAddresses(MAT_REPLYTO, replyToAddresses);
-
-   if ( !countReplyTo )
-   {
-      // try from address
-      //
-      // FIXME: original encoding is lost here
-      cv->AddTo(DecodeHeader(msg->From()));
-   }
-   else // have Reply-To
-   {
-      for ( n = 0; n < countReplyTo; n++ )
-      {
-         // FIXME: same as above
-         cv->AddTo(DecodeHeader(replyToAddresses[n]));
-      }
-   }
-
-   // now get all other addresses
-   wxSortedArrayString otherAddresses;
-
-   // use From only if not done already
-   if ( countReplyTo > 0 )
-      otherAddresses.Add(msg->From());
-
-   msg->GetAddresses(MAT_CC, otherAddresses);
-   msg->GetAddresses(MAT_TO, otherAddresses);
-
-   // this is probably an overkill - you never want to reply to the sender
-   // address, do you?
-#if 0
-   msg->GetAddresses(MAT_SENDER, otherAddresses);
-#endif // 0
-
-   // decode headers before comparing them - the problem is that we lost their
-   // original encoding when doing this
-   for ( n = 0; n < otherAddresses.GetCount(); n++ )
-   {
-      otherAddresses[n] = DecodeHeader(otherAddresses[n]);
-   }
-
-   // remove duplicates
-   wxArrayString uniqueAddresses = strutil_uniq_array(otherAddresses);
-
-   // and also filter out the addresses used in to as well as our own
-   // address(es) by putting their indices into addressesToIgnore array
-   String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
-   wxArrayString ownAddresses = strutil_restore_array(':', returnAddrs);
-
-   wxArrayInt addressesToIgnore;
-   for ( n = 0; n < uniqueAddresses.GetCount(); n++ )
-   {
-      String addr = uniqueAddresses[n];
-      if ( Message::FindAddress(replyToAddresses, addr) != wxNOT_FOUND ||
-           Message::FindAddress(ownAddresses, addr) != wxNOT_FOUND )
-      {
-         addressesToIgnore.Add(n);
-      }
-   }
-
-   size_t count = uniqueAddresses.GetCount();
-   for ( n = 0; n < count; n++ )
-   {
-      if ( addressesToIgnore.Index(n) != wxNOT_FOUND )
-      {
-         // ignore this one
-         continue;
-      }
-
-      // reply to all?
-      if ( params.flags & REPLY_FOLLOWUP )
-      {
-         cv->AddTo(uniqueAddresses[n]);
-      }
-      else // don't reply to all
-      {
-         // but still add addresses  to allow easily adding them to the
-         // recipient list - just disable them by default
-         cv->AddRecipients(uniqueAddresses[n], Composer::Recipient_None);
-      }
-   }
+   InitRecipients(cv, msg, params, profile);
 
    // construct the new subject
    String newSubject;
@@ -825,6 +974,10 @@ MailFolder::ForwardMessage(Message *msg,
                      DecodeHeader(msg->Subject()));
    cv->InitText(msg, params.msgview);
 }
+
+// ----------------------------------------------------------------------------
+// misc
+// ----------------------------------------------------------------------------
 
 char MailFolder::GetFolderDelimiter() const
 {

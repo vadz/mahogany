@@ -411,13 +411,23 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
          templKind = MessageTemplate_Reply;
          break;
 
+      case WXMENU_MSG_REPLY_SENDER_WITH_TEMPLATE:
+         cmd = WXMENU_MSG_REPLY_SENDER;
+         templKind = MessageTemplate_Reply;
+         break;
+
+      case WXMENU_MSG_REPLY_LIST_WITH_TEMPLATE:
+         cmd = WXMENU_MSG_REPLY_LIST;
+         templKind = MessageTemplate_Reply;
+         break;
+
       case WXMENU_MSG_FORWARD_WITH_TEMPLATE:
          cmd = WXMENU_MSG_FORWARD;
          templKind = MessageTemplate_Forward;
          break;
 
-      case WXMENU_MSG_FOLLOWUP_WITH_TEMPLATE:
-         cmd = WXMENU_MSG_FOLLOWUP;
+      case WXMENU_MSG_REPLY_ALL_WITH_TEMPLATE:
+         cmd = WXMENU_MSG_REPLY_ALL;
          templKind = MessageTemplate_Followup;
          break;
 
@@ -467,38 +477,55 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
 
 
       case WXMENU_MSG_REPLY:
-      case WXMENU_MSG_FOLLOWUP:
+      case WXMENU_MSG_REPLY_SENDER:
+      case WXMENU_MSG_REPLY_ALL:
+      case WXMENU_MSG_REPLY_LIST:
          {
-            bool followUp = cmd == WXMENU_MSG_FOLLOWUP; // otherwise reply
+            int quote = READ_CONFIG(m_asmf->GetProfile(), MP_REPLY_QUOTE_ORIG);
 
-            int quoteRule = READ_CONFIG(m_asmf->GetProfile(),
-                                        MP_REPLY_QUOTE_ORIG);
-
-            if ( quoteRule == M_ACTION_PROMPT )
+            if ( quote == M_ACTION_PROMPT )
             {
-               String msg;
-               msg.Printf(_("Do you want to include the original message "
-                            "text in your %s?"),
-                          followUp ? _("follow up") : _("reply"));
-
-               if ( !MDialog_YesNoDialog(msg, GetFrame()) )
+               if ( !MDialog_YesNoDialog
+                     (
+                        _("Do you want to include the original message "
+                          "text in your reply?"),
+                        GetFrame()
+                     ) )
                {
-                  quoteRule = M_ACTION_NEVER;
+                  quote = M_ACTION_NEVER;
                }
             }
 
             // disable the template if we don't want to quote the original
             // message
-            if ( quoteRule == M_ACTION_NEVER )
+            if ( quote == M_ACTION_NEVER )
             {
-               // can't just empty it because wxComposeView::DoInitText() would
-               // use the default for it then
+               // can't just leave it empty because wxComposeView::DoInitText()
+               // would use the default for it then
                templ = "$cursor";
             }
 
-            MailFolder::Params params(templ,
-                                      followUp ? MailFolder::REPLY_FOLLOWUP
-                                               : 0);
+#define CASE_REPLY(kind) \
+   case WXMENU_MSG_##kind: \
+      replyKind = MailFolder::kind; \
+      break
+
+            MailFolder::ReplyKind replyKind;
+            switch ( cmd )
+            {
+               default:
+                  FAIL_MSG( "unknown reply menu command" );
+                  // fall through
+
+               CASE_REPLY(REPLY);
+               CASE_REPLY(REPLY_SENDER);
+               CASE_REPLY(REPLY_ALL);
+               CASE_REPLY(REPLY_LIST);
+            }
+
+#undef CASE_REPLY
+
+            MailFolder::Params params(templ, replyKind);
             params.msgview = m_msgView;
 
             m_TicketList->Add(m_asmf->ReplyMessages
