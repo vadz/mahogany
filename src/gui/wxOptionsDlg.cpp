@@ -278,7 +278,9 @@ enum ConfigFields
    ConfigField_ComposePreview,
    ConfigField_ComposeConfirm,
 
+   ConfigField_ComposeSpacer,
    ConfigField_ComposeShowFrom,
+
    ConfigField_ComposeHeaders,
    ConfigField_ComposeTemplates,
 
@@ -1146,7 +1148,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Advanced,
                                                   -ConfigField_ComposePreview },
 
-   { gettext_noop("\nShow \"&From\" field:"),        Field_Bool |
+   { gettext_noop("\n"),                           Field_Message, -1},
+   { gettext_noop("Show \"&From\" field:"),        Field_Bool |
                                                    Field_Advanced,  -1},
    { gettext_noop("Configure &headers..."),        Field_SubDlg,  -1},
    { gettext_noop("Configure &templates..."),      Field_SubDlg,  -1},
@@ -1729,7 +1732,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_PREVIEW_SEND),
    CONFIG_ENTRY(MP_CONFIRM_SEND),
 
+   CONFIG_NONE(), // spacer
    CONFIG_ENTRY(MP_COMPOSE_SHOW_FROM),
+
    CONFIG_NONE(), // headers button
    CONFIG_NONE(), // templates button
 
