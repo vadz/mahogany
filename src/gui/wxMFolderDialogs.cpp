@@ -56,16 +56,16 @@ class wxFolderBaseDialog : public wxNotebookDialog
 {
 public:
    wxFolderBaseDialog(wxWindow *parent, const wxString& title);
-   ~wxFolderBaseDialog()
-      {
-         SafeDecRef(m_newFolder);
-         SafeDecRef(m_parentFolder);
-      }
+   virtual ~wxFolderBaseDialog()
+   {
+      SafeDecRef(m_newFolder);
+      SafeDecRef(m_parentFolder);
+   }
 
    // initialization (should be called before the dialog is shown)
    // set folder we're working with
    void SetFolder(MFolder *folder)
-      { m_newFolder = folder; }
+      { m_newFolder = folder; SafeIncRef(m_newFolder); }
    // set the parent folder: if it's !NULL, it can't be changed by user
    void SetParentFolder(MFolder *parentFolder)
       { m_parentFolder = parentFolder; }
@@ -181,8 +181,8 @@ public:
    ~wxFolderPropertiesPage() { m_profile->DecRef(); }
 
    // set the profile path to copy the default values from
-   void SetDefaults(const String& profilePath)
-      { m_defaultsPath = profilePath; }
+   void SetFolderPath(const String& profilePath)
+      { m_folderPath = profilePath; }
 
    virtual bool TransferDataToWindow(void);
    virtual bool TransferDataFromWindow(void);
@@ -217,8 +217,12 @@ protected:
    // what we're doing
    bool m_isCreating;
 
-   wxNotebook * m_notebook;
-   ProfileBase * m_profile;
+   /// the parent notebook control
+   wxNotebook *m_notebook;
+
+   /// the profile we use to read our settings from/write them to
+   ProfileBase *m_profile;
+
    /// type of the folder
    int m_type;
    /// folder type
@@ -244,14 +248,20 @@ protected:
    /// Use anonymous access for this folder?
    wxCheckBox *m_isAnonymous;
 
-   /// the path to the profile section with the defautl values
-   wxString m_defaultsPath;
+   /// the path to the profile section with values for this folder
+   wxString m_folderPath;
 
    /// the "create folder dialog" or NULL if we're showing folder properties
    wxFolderCreateDialog *m_dlgCreate;
 
    /// the array with the initial values of the settings for this folder
    wxString m_originalValues[MaxProperty];
+
+   /// the initial value of the "is incoming" flag
+   bool m_originalIncomingValue;
+
+   /// the current folder type or -1 if none
+   int m_selection;
 
    DECLARE_EVENT_TABLE()
 };
@@ -493,7 +503,7 @@ bool wxFolderCreateDialog::TransferDataToWindow()
    // by default, take the same values as for the parent
    if ( m_parentFolder )
    {
-      page->SetDefaults(m_parentFolder->GetFullName());
+      page->SetFolderPath(m_parentFolder->GetFullName());
    }
 
    if ( !m_parentFolder )
@@ -550,9 +560,9 @@ bool wxFolderPropertiesDialog::TransferDataToWindow()
    wxString folderName = m_newFolder->GetFullName();
    ProfileBase *profile = ProfileBase::CreateProfile(folderName);
 
-   // lame hack: use SetDefaults() so the page will read its data from the
+   // lame hack: use SetFolderPath() so the page will read its data from the
    // profile section corresponding to our folder
-   GET_FOLDER_PAGE(m_notebook)->SetDefaults(folderName);
+   GET_FOLDER_PAGE(m_notebook)->SetFolderPath(folderName);
    GET_COMPOSE_PAGE(m_notebook)->SetProfile(profile);
    GET_MSGVIEW_PAGE(m_notebook)->SetProfile(profile);
 
@@ -586,6 +596,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    // init members
    // ------------
    m_notebook = notebook;
+   m_selection = -1;
    m_profile = profile;
    m_profile->IncRef();
 
@@ -673,13 +684,17 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    // are we in "view properties" or "create" mode?
    m_isCreating = m_dlgCreate != NULL;
    m_radio->Enable(m_isCreating);
-
-   UpdateUI();
 }
 
 void
 wxFolderPropertiesPage::OnEvent(wxCommandEvent& event)
 {
+   wxFolderBaseDialog *dlg = GET_PARENT_OF_CLASS(this, wxFolderBaseDialog);
+
+   CHECK_RET( dlg, "folder page should be in folder dialog!" );
+
+   dlg->SetDirty();
+
    int sel = -1;
    if ( event.GetEventObject() == m_radio )
    {
@@ -710,25 +725,25 @@ wxFolderPropertiesPage::OnChange(wxKeyEvent& event)
    {
       switch ( m_radio->GetSelection() )
       {
-      case File:
-         // set the file name as the default folder name
-      {
-         wxString name;
-         wxSplitPath(m_path->GetValue(), NULL, &name, NULL);
+         case File:
+            // set the file name as the default folder name
+         {
+            wxString name;
+            wxSplitPath(m_path->GetValue(), NULL, &name, NULL);
 
-         dlg->SetFolderName(name);
-      }
-      break;
-
-      case News:
-      case MF_NNTP:
-         // set the newsgroup name as the default folder name
-         dlg->SetFolderName(m_newsgroup->GetValue());
+            dlg->SetFolderName(name);
+         }
          break;
 
-      default:
-         // nothing
-         ;
+         case News:
+         case MF_NNTP:
+            // set the newsgroup name as the default folder name
+            dlg->SetFolderName(m_newsgroup->GetValue());
+            break;
+
+         default:
+            // nothing
+            ;
       }
    }
 }
@@ -741,11 +756,9 @@ wxFolderPropertiesPage::UpdateUI(int sel)
 
    bool enableOk = true;
 
-   static int s_selection = -1;
-
    int selection = sel == -1 ? m_radio->GetSelection() : sel;
 
-   if ( selection != s_selection )
+   if ( selection != m_selection )
    {
       // clear all fields because some of them won't make sense for new
       // selection unless the selection didn't change
@@ -755,7 +768,7 @@ wxFolderPropertiesPage::UpdateUI(int sel)
       m_password->SetValue("");
       m_server->SetValue("");
       m_mailboxname->SetValue("");
-      s_selection = selection;
+      m_selection = selection;
 
       if ( selection == MF_NNTP )
       {
@@ -850,7 +863,7 @@ wxFolderPropertiesPage::WriteEntryIfChanged(FolderProperty property,
       // this function has a side effect: it also sets the "modified" flag so
       // that the other functions know that the folder settings have been
       // changed and so the "unaccessible" flag may be not valid any longer
-      MFolder_obj folder(m_defaultsPath);
+      MFolder_obj folder(m_folderPath);
 
       folder->AddFlags(MF_FLAGS_MODIFIED);
    }
@@ -871,8 +884,9 @@ wxFolderPropertiesPage::SetDefaultValues()
    // is empty (i.e. we have no parent folder)
 
    Profile_obj profile("");
-   if ( m_defaultsPath )
-      profile->SetPath(m_defaultsPath);
+   profile->SetPath(m_folderPath);
+
+   wxLogDebug("Reading the folder settings from '%s'...", m_folderPath.c_str());
 
    FolderType typeFolder = (FolderType)m_radio->GetSelection();
 
@@ -925,18 +939,27 @@ wxFolderPropertiesPage::SetDefaultValues()
 
    if ( !m_isCreating )
       m_comment->SetValue(READ_CONFIG(profile, MP_FOLDER_COMMENT));
+
+   // set the incoming value and remember it: we will only write it back if it
+   // changes later
+   int flags = GetFolderFlags(READ_CONFIG(profile, MP_FOLDER_TYPE));
+   m_originalIncomingValue = (flags & MF_FLAGS_INCOMING) != 0;
+   m_isIncoming->SetValue(m_originalIncomingValue);
 }
 
 bool
 wxFolderPropertiesPage::TransferDataToWindow(void)
 {
    Profile_obj profile("");
-   if ( m_defaultsPath )
-      profile->SetPath(m_defaultsPath);
+   if ( m_folderPath )
+      profile->SetPath(m_folderPath);
 
    FolderType typeFolder = GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
    if ( typeFolder == FolderInvalid )
-      typeFolder = File;
+   {
+      // get the last used value from the profile
+      typeFolder = (FolderType)READ_APPCONFIG(MP_LAST_CREATED_FOLDER_TYPE);
+   }
 
    // this will also call SetDefaultValues()
    m_radio->SetSelection(typeFolder);
@@ -962,7 +985,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
    // folder flags
    int flags = 0;
-   if(m_isIncoming->GetValue())
+   if ( m_isIncoming->GetValue() )
       flags |= MF_FLAGS_INCOMING;
 
    // check that we have the username/password
@@ -1091,6 +1114,34 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
          wxFAIL_MSG("Unexpected folder type.");
    }
 
+   // mark the folder as being autocollectable or not
+   bool isIncoming = m_isIncoming->GetValue();
+   if ( m_originalIncomingValue != isIncoming )
+   {
+      MailCollector *collector = mApplication->GetMailCollector();
+
+      if ( collector )
+      {
+         if ( isIncoming )
+         {
+            collector->AddIncomingFolder(fullname);
+
+            folder->AddFlags(MF_FLAGS_INCOMING);
+         }
+         else
+         {
+            collector->RemoveIncomingFolder(fullname);
+
+            folder->ResetFlags(MF_FLAGS_INCOMING);
+         }
+      }
+      else
+      {
+         wxFAIL_MSG("can't set the isIncoming setting: no mail collector");
+      }
+   }
+   //else: nothing changed, nothing to do
+
    if ( m_dlgCreate )
    {
       // generate an event notifying everybody that a new folder has been
@@ -1101,6 +1152,11 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    }
 
    folder->DecRef();
+
+   // remember the type of the last created folder - it will be the default
+   // type the next time (TODO we don't have persistent radioboxes yet)
+   mApplication->GetProfile()->writeEntry(MP_LAST_CREATED_FOLDER_TYPE,
+                                          typeFolder);
 
    return true;
 }
@@ -1242,10 +1298,23 @@ bool ShowFolderPropertiesDialog(MFolder *folder, wxWindow *parent)
 {
    wxFolderPropertiesDialog dlg(parent, folder);
 
-   // notice that we do *not* need to DecRef() the return value of
-   // DoShowFolderDialog() because it's done in wxFolderPropertiesDialog()
-   // dtor!
-   return DoShowFolderDialog(dlg, FolderCreatePage_Folder) != NULL;
+   MFolder *folderNew = DoShowFolderDialog(dlg, FolderCreatePage_Folder);
+   if ( folderNew != NULL )
+   {
+      // what else can it return?
+      ASSERT_MSG( folderNew == folder, "unexpected folder change" );
+
+      // as DoShowFolderDialog() calls GetFolder() which calls IncRef() on
+      // folder, compensate for it here
+      folderNew->DecRef();
+
+      return TRUE;
+   }
+   else
+   {
+      // dialog was cancelled
+      return FALSE;
+   }
 }
 
 MFolder *ShowFolderSelectionDialog(MFolder *folder, wxWindow *parent)

@@ -257,7 +257,7 @@ void wxPNotebook::RestorePage()
 {
     if ( m_persist->ChangePath() ) {
         int nPage = (int)m_persist->GetConfig()->Read(m_persist->GetKey(), 0l);
-        if ( (nPage > 0) && (nPage < GetPageCount()) ) {
+        if ( (nPage >= 0) && (nPage < GetPageCount()) ) {
             SetSelection(nPage);
         }
         else {

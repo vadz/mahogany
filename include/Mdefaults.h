@@ -305,8 +305,10 @@
 #define   MP_FORWARD_PREFIX         "ForwardPrefix"
 /// show XFaces?
 #define   MP_SHOW_XFACES         "ShowXFaces"
-// show graphics inline
+/// show graphics inline
 #define   MP_INLINE_GFX         "InlineGraphics"
+/// the type of the last created folder
+#define   MP_LAST_CREATED_FOLDER_TYPE  "LastFolderType"
 /**@name  Font settings for message view */
 //@{
 /// which font to use
@@ -629,6 +631,8 @@
 #define   MP_SHOW_XFACES_D      1
 // show graphics inline
 #define   MP_INLINE_GFX_D       1
+/// the type of the last created folder
+#define   MP_LAST_CREATED_FOLDER_TYPE_D  (int)File
 /**@name  Font settings for message view */
 //@{
 /// which font to use
