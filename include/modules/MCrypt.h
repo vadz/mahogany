@@ -1,117 +1,35 @@
-/*-*- c++ -*-**********************************************************
- * Project    : M                                                     *
- * File name  : MCrypt.h: Crypto base classes                         *
- * Author     : Carlos Henrique Bauer                                 *
- * Modified by:                                                       *
- * CVS-ID     : $Id$      *
- * Copyright  : (C) 2000 by Carlos H. Bauer <chbauer@acm.org>         *
- *                                          <bauer@atlas.unisinos.br> *
- * License    : M license                                             *
- **********************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   modules/MCrypt.h: declaration of MCryptoEngine ABC
+// Purpose:     MCryptoEngine defines the interface of a crypto engine
+//              which can be used for en/decrypting messages and so on
+// Author:      Carlos H. Bauer <chbauer@acm.org>
+// Modified by: Vadim Zeitlin at 02.12.02 to integrate it with the rest of M
+// Created:     2000
+// CVS-ID:      $Id$
+// Copyright:   (c) 2000-2002 M-Team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
-#ifdef EXPERIMENTAL_crypto
+#ifndef _MODULES_MCRYPT_H_
+#define _MODULES_MCRYPT_H_
 
-#ifndef MCRYPT_H
-#define MCRYPT_H
+#include "MModule.h"
 
-#ifndef MPASSPHRASE_H
-#include "modules/MPassphrase.h"
-#endif // MPASSPHRASE_H
+/**
+   MCryptoEngine defines an abstract interface for all supported cryptographic
+   engines.
 
-#ifdef __GNUG__
-#pragma interface "MCrypt.h"
-#endif // __GNUG__
-
-#ifndef _WX_PROCESSH__
-#include <wx/process.h>
-#endif // _WX_PROCESSH__
-
-// MCRYPT Trace Mask, for use in wxLogTrace
-#define MCRYPT_TRM "MCrypt"
-
-/** Definition of the crypto interface.
-    This class define the interface for all email crypto methods.
-
-    @doc
-    Here is an example of how to use a derived class:
-
-    \begin{verbatim}
-    MPassphrase passphrase(TRUE);
-    wxString user("joe@domain");
-    
-    MPGPCrypt pgp();
-
-    wxString msgTextIn("A message");
-    wxString msgTextOut;
-    
-    int status;
-
-    status  = pgp.Sign(user, passphrase, msgTextIn, msgTextOut);
-    \end{verbatim}
-
-    The crypto classes should not make copies of an user email address
-    and/or its passphrase. The crypto classes are utility
-    classes and are supposed to be transient.
-
-    A programmer may give the users of his/her program the ability to
-    set several email identities. He/she can associate a passphrase
-    to each identity. The programmer is responsible for keeping that
-    association not the crypto classes.
-
-    {\bf BEGIN:}
-    
-    A message can have included:
-
-    \begin{itemize}
-       \item signed message
-       \item encrypted messages
-       \item encrypted and signed messages
-       \item public keys
-    \end{itemize}
-
-    Signed, encrypted, encrypted and signed messages can have included:
-
-    \begin{itemize}
-       \item goto BEGIN; ;)
-    \end{itemize}
-
-    When we:
-    a) decrypt, verify a signature, or
-    b) check if a message is signed, encrypted or have public keys,
-    we must scan almost every line of that message.
-
-    Of course we usually do b) before a). We can choose if we want do
-    repeat the b) process every time we show a message to the user of
-    just in the first time we see that message. The old {\bf speed X
-    memory} tradeoff issue.
-
-    What we must cache about each message part:
-    
-    \begin{verbatim}
-                        +----------------------+
-                        |       Value          |
-    +-------------------+----------------------+
-    | Part Type         | begin | end | signer |
-    +-------------------+-------+-----+--------+
-    | encrypted message |   X   |  X  |        |
-    | signed message    |   X   |  X  |   X    |
-    | public key        |   X   |  X  |        |
-    +-------------------+-------+-----+--------+
-    \end{verbatim}
-
-    @see MPassphrase
-*/
-
-
-class MCrypt
+   Note that this class doesn't need a virtual dtor because the objects are
+   never deleted anyhow -- they are only created and destroyed by
+   MCryptoEngineFactory
+ */
+class MCryptoEngine
 {
 public:
-
-   // MCrypt functions return status values
-
-   // temporary values
-
-   enum {
+   /// return codes for all the crypto operations
+   enum Status
+   {
       OK = 0,
       CANNOT_EXEC_PROGRAM,
       OPERATION_CANCELED_BY_USER,
@@ -135,30 +53,38 @@ public:
       SIGNATURE_CHECK_ERROR,
       PUBLIC_KEY_DECRIPTION_ERROR,
       DECRIPTION_ERROR,
-      DECOMPRESSION_ERROR
+      DECOMPRESSION_ERROR,
+      NO_SIG_ERROR,                 // no signature in VerifySignature()
+      NOT_IMPLEMENTED_ERROR,        // operation not implemented by this engine
+      MAX_ERROR
    };
-
-
-   // Encryption methods IDs
-   enum {
-      M_PGP = 1
-   };
-
-public:
-
-   /// Default constructor.
-   MCrypt();
-
-   /// Virtual destructor
-   virtual ~MCrypt();
-
-   virtual int Decrypt(MPassphrase & passphrase,
-		       const wxString & messageIn,
-		       wxString & messageOut) = 0;
 
    /**
-      
-      This message encrypts and signs a message.
+      @name Crypto operations
+
+      All methods in this section return a Status enum code, in particular they
+      all return OK (0) on success.
+    */
+   //@{
+
+   /**
+      Decryptes an encrypted message and returns the result.
+
+      @param user the user id to use for decryption
+      @param messageIn the encrypted text
+      @param messageOut the decrypted text (only valid if OK is returned)
+      @return Status code, OK if decryption succeeded
+    */
+   virtual int Decrypt(const String& user,
+                       const String& messageIn,
+                       String& messageOut) = 0;
+
+   /**
+      This method encrypts and signs a message.
+
+      To sign the message the function must receives valid
+      {\bf user} and {\bf passphrase} arguments. If either of them is
+      NULL or empty message signing will be disabled.
 
       @param recipient The ID of the public key used to encrypt the
       message. Usually is the email address of the recipient.
@@ -169,73 +95,98 @@ public:
 
       @param user A pointer to the Id of the private key of the
       sender, usually is the email address used to create that key.
-
-      @param passphrase A pointer of the passphrase for unlocking the
-      private key.
-
-      @doc
-      To sign the message the function must receives valid
-      {\bf user} and {\bf passphrase} arguments. If one of them is
-      NULL message signing will be disabled.
-      
    */
+   virtual int Encrypt(const String& recipient,
+                       const String& messageIn,
+                       String &messageOut,
+                       const String& user = _T("")) = 0;
 
-   virtual int Encrypt(const wxString & recipient,
-		       const wxString & messageIn,
-		       wxString & messageOut,
-		       const wxString * user = NULL,
-		       MPassphrase * passphrase = NULL ) = 0;
+   /**
+      Just signs the message.
 
-   virtual int Sign(const wxString & user,
-		    MPassphrase & passphrase,
-		    const wxString & messageIn,
-		    wxString & messageOut) = 0;
+      Takes the user id to use and creates a signed message on output.
+    */
+   virtual int Sign(const String& user,
+                    const String& messageIn,
+                    String& messageOut) = 0;
 
-   virtual int VerifySignature(const wxString & messageIn, wxString &
-			       messageOut) const = 0;
+   /**
+      Verifies the message signature.
 
-   virtual int CheckRecipient(const wxString & recipient) const = 0;
+      On success, returns OK and puts the message text without the signature in
+      messageOut. If no signature was found, returns NO_SIG_ERROR
+    */
+   virtual int VerifySignature(const String& messageIn,
+                               String& messageOut) = 0;
 
-   virtual int GetFingerprint(wxString & fp) const = 0;
+   //@}
 
-   virtual int GetPublicKey(wxString & pk) const = 0;
+#if 0
+   virtual int CheckRecipient(const String & recipient) const = 0;
 
-   static void SetComment(const wxString & comment);
+   virtual int GetFingerprint(String & fp) const = 0;
 
-   static const wxString & GetComment();
-
-   static int IsEncrypted(const wxString & messageIn);
-   static int IsSigned(const wxString & messageIn);
-
-
-protected:
-   static wxString ms_comment;
+   virtual int GetPublicKey(String & pk) const = 0;
+#endif // 0
 };
 
+// ----------------------------------------------------------------------------
+// Loading the crypto engines from modules is done using MCryptoEngineFactory
+// ----------------------------------------------------------------------------
 
-inline MCrypt::MCrypt()
+class MCryptoEngineFactory : public MModule
 {
-}
+public:
+   /// returns a pointer to the crypton engine, should @b not be deleted by the
+   /// caller
+   virtual MCryptoEngine *Get() = 0;
+};
 
+/// the interface implemented by crypto modules
+#define CRYPTO_ENGINE_INTERFACE _T("CryptoEngine")
 
+/**
+   This macro must be used inside the declaration of MCryptoEngine-derived
+   classes.
 
-inline MCrypt::~MCrypt()
-{
-}
+   @param cname the name of the class in which declaration this macro is used
+ */
+#define DECLARE_CRYPTO_ENGINE(cname)                                          \
+   public:                                                                    \
+      static MCryptoEngine *Get()                                             \
+      {                                                                       \
+         static cname s_The ## cname ## Engine;                               \
+         return &s_The ## cname ## Engine;                                    \
+      }
 
+/**
+   This macro must be used anywehere in the implementation part.
 
-inline const wxString & MCrypt::GetComment()
-{
-   return ms_comment;
-}
+   @param cname the name of the class in which declaration this macro is used
+   @param desc     the short description shown in the filters dialog
+   @param cpyright the module author/copyright string
+ */
+#define IMPLEMENT_CRYPTO_ENGINE(cname, desc, cpyright)                        \
+   class cname ## Factory : public MCryptoEngineFactory                       \
+   {                                                                          \
+   public:                                                                    \
+      virtual MCryptoEngine *Get() { return cname::Get(); }                   \
+                                                                              \
+      MMODULE_DEFINE();                                                       \
+      DEFAULT_ENTRY_FUNC;                                                     \
+   };                                                                         \
+   MMODULE_BEGIN_IMPLEMENT(cname ## Factory, #cname,                          \
+                           CRYPTO_ENGINE_INTERFACE, desc, _T("1.00"))         \
+      MMODULE_PROP(_T("author"), cpyright)                                    \
+   MMODULE_END_IMPLEMENT(cname ## Factory)                                    \
+   MModule *cname ## Factory::Init(int version_major,                         \
+                                   int version_minor,                         \
+                                   int version_release,                       \
+                                   MInterface *minterface,                    \
+                                   int *errorCode)                            \
+   {                                                                          \
+      return new cname ## Factory();                                          \
+   }
 
+#endif // _MODULES_MCRYPT_H_
 
-inline void MCrypt::SetComment(const wxString & comment)
-{
-   // PGP doesn't like not escaped spaces
-   (ms_comment = comment).Replace(" ", "\\ ", TRUE);
-}
-
-
-#endif // MCRYPT_H
-#endif // EXPERIMENTAL_crypto

@@ -1829,6 +1829,14 @@ SOURCE=.\src\modules\XFMailImport.cpp
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=.\src\modules\viewflt\PGP.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\modules\viewflt\QuoteURL.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\modules\viewflt\Rot13.cpp
 # End Source File
 # Begin Source File
@@ -1838,6 +1846,30 @@ SOURCE=.\src\modules\viewflt\Signature.cpp
 # Begin Source File
 
 SOURCE=.\src\modules\viewflt\Trailer.cpp
+# End Source File
+# End Group
+# Begin Group "viewers"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\src\modules\HtmlViewer.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\modules\LayoutViewer.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\modules\TextViewer.cpp
+# End Source File
+# End Group
+# Begin Group "editors"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\src\modules\LayoutEditor.cpp
 # End Source File
 # End Group
 # Begin Source File
@@ -1850,23 +1882,11 @@ SOURCE=.\src\modules\Filters.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\modules\HtmlViewer.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\modules\LayoutEditor.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\modules\LayoutViewer.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\modules\Migrate.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\modules\TextViewer.cpp
+SOURCE=.\src\modules\crypt\PGPEngine.cpp
 # End Source File
 # End Group
 # Begin Group "util"

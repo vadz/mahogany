@@ -26,6 +26,8 @@
 
 #include "ViewFilter.h"
 
+#include "modules/MCrypt.h"
+
 // ----------------------------------------------------------------------------
 // PGPFilter declaration
 // ----------------------------------------------------------------------------
@@ -33,13 +35,14 @@
 class PGPFilter : public ViewFilter
 {
 public:
-   PGPFilter(MessageView *msgView, ViewFilter *next, bool enable)
-      : ViewFilter(msgView, next, enable) { }
+   PGPFilter(MessageView *msgView, ViewFilter *next, bool enable);
 
 protected:
    virtual void DoProcess(String& text,
                           MessageViewer *viewer,
                           MTextStyle& style);
+
+   MCryptoEngine *m_engine;
 };
 
 // ----------------------------------------------------------------------------
@@ -63,12 +66,8 @@ protected:
 #define PGP_END_SIG_SUFFIX "SIGNATURE-----"
 
 // ============================================================================
-// implementation
+// PGPFilter implementation
 // ============================================================================
-
-// ----------------------------------------------------------------------------
-// PGPFilter
-// ----------------------------------------------------------------------------
 
 // this filter has a rather high priority because it should be applied before
 // all the filters working on the "real" message body, but after the trailer
@@ -79,6 +78,58 @@ IMPLEMENT_VIEWER_FILTER(PGPFilter,
                         false,      // initially disabled
                         _("PGP"),
                         "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
+
+// ----------------------------------------------------------------------------
+// PGPFilter ctor
+// ----------------------------------------------------------------------------
+
+PGPFilter::PGPFilter(MessageView *msgView, ViewFilter *next, bool enable)
+         : ViewFilter(msgView, next, enable)
+{
+   MModuleListing *listing =
+      MModule::ListAvailableModules(CRYPTO_ENGINE_INTERFACE);
+   if ( listing )
+   {
+      const size_t count = listing->Count();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         const MModuleListingEntry& entry = (*listing)[n];
+
+         const String& name = entry.GetName();
+         if ( name == _T("PGPEngine") )
+         {
+            MCryptoEngineFactory * const factory
+               = (MCryptoEngineFactory *)MModule::LoadModule(name);
+            if ( factory )
+            {
+               m_engine = factory->Get();
+
+               factory->DecRef();
+            }
+            else
+            {
+               FAIL_MSG( _T("failed to create PGPEngineFactory") );
+            }
+         }
+      }
+
+      listing->DecRef();
+   }
+
+   if ( !m_engine )
+   {
+      wxLogError(_("Failed to load PGP engine module.\n"
+                   "\n"
+                   "Support for PGP in message viewer will be unavailable") );
+
+      // TODO: disable completely
+      Enable(false);
+   }
+}
+
+// ----------------------------------------------------------------------------
+// PGPFilter work function
+// ----------------------------------------------------------------------------
 
 void
 PGPFilter::DoProcess(String& text,
@@ -202,60 +253,27 @@ PGPFilter::DoProcess(String& text,
             m_next->Process(prolog, viewer, style);
          }
 
+         CHECK_RET( m_engine, _T("PGP filter can't work without PGP engine") );
+
          if ( isSigned )
          {
-            // TODO: pass everything between start and end to PGP for
-            //       verification
-
-            // if ( verified ok )
+            // pass everything between start and end to PGP for verification
+            String in(start, end),
+                   out;
+            if ( m_engine->VerifySignature(in, out) != MCryptoEngine::OK )
             {
-               // remove the PGP signature and show just the text
+               // TODO: more details...
+               wxLogWarning(_("The PGP signature of this message is invalid!"));
 
-               // (a) skip the header: it ends at first blank line
-               const char *pc = start;
-               while ( pc && (pc[1] != '\r' || pc[2] != '\n') )
-               {
-                  pc = strchr(pc + 1, '\n');
-               }
-
-               if ( !pc )
-               {
-                  FAIL_MSG( _T("no blank line after PGP BEGIN line?") );
-                  pc = start;
-               }
-               else
-               {
-                  // skip "\n\r\n"
-                  pc += 3;
-               }
-
-               // (b) cut off the signature block
-               end -= 2; // skip "\r\n"
-               for ( ;; )
-               {
-                  while ( *end != '\n' && end >= start )
-                  {
-                     end--;
-                  }
-
-                  end++;
-
-                  if ( strncmp(end, PGP_BEGIN_SIG, strlen(PGP_BEGIN_SIG)) == 0 )
-                     break;
-
-                  if ( end == start )
-                  {
-                     FAIL_MSG( _T("no PGP signature block in signed msg?") );
-
-                     end = start + text.length() - 1;
-                  }
-
-                  end -= 2; // skip "\r\n" again
-               }
-
-               m_next->Process(String(pc, end), viewer, style);
+               // use unmodified text
+               out = in;
             }
-            //else: complain about bad signature
+            else
+            {
+               // TODO: create an icon for the sig...
+            }
+
+            m_next->Process(out, viewer, style);
          }
          else // encrypted
          {
