@@ -60,7 +60,7 @@
 #define MP_MOD_PALMOS_BACKUPDIR     "BackupDir"
 #define MP_MOD_PALMOS_BACKUPDIR_D   ""
 #define MP_MOD_PALMOS_BACKUP_SYNC     "BackupSync"
-#define MP_MOD_PALMOS_BACKUP_SYNC_D   1l
+#define MP_MOD_PALMOS_BACKUP_SYNC_D   0l
 #define MP_MOD_PALMOS_BACKUP_INCREMENTAL     "BackupIncremental"
 #define MP_MOD_PALMOS_BACKUP_INCREMENTAL_D   1l
 #define MP_MOD_PALMOS_PILOTDEV   "PilotDev"
@@ -401,6 +401,11 @@ PalmOSModule::GetConfig(void)
    m_Script1 = READ_CONFIG(p, MP_MOD_PALMOS_SCRIPT1);
    m_Script2 = READ_CONFIG(p, MP_MOD_PALMOS_SCRIPT2);
    p->DecRef();
+
+   if(m_BackupDir.Length()
+      && m_BackupDir[m_BackupDir.Length()-1] != DIR_SEPARATOR)
+      m_BackupDir << DIR_SEPARATOR;
+
    
    String dev;
    dev = m_PilotDev;
@@ -745,7 +750,7 @@ PalmOSModule::CreateFileList(char ***list, DIR * dir)
          filelist = (char **) realloc(filelist, sizeof(char*) * file_len);
       }
 
-      sprintf(name, "%s/%s", m_BackupDir.c_str(), dirent->d_name);
+      sprintf(name, "%s%s", m_BackupDir.c_str(), dirent->d_name);
       filelist[filecount++] = strdup(name);
    }
 
@@ -785,13 +790,15 @@ PalmOSModule::DeleteFileList(char **list, int filecount)
 void
 PalmOSModule::Backup(void) 
 {
+   // connect to the Palm
    PiConnection conn(this);
    if( ! IsConnected())
       return;
 
+   // access backup directory
    DIR * dir;
-
    dir = opendir(m_BackupDir);
+   
    if (dir <= 0)
    {
       String msg;
@@ -805,11 +812,10 @@ PalmOSModule::Backup(void)
    int     ofile_total;
    char ** orig_files = 0;
 
-   if (m_IncrBackup)
-     ofile_total = CreateFileList(&orig_files, dir);
-
+   ofile_total = CreateFileList(&orig_files, dir);
    closedir(dir);
 
+   // count files on the palm
    int max = 0;
    int i = 0;
    
@@ -821,16 +827,16 @@ PalmOSModule::Backup(void)
       i = info.index + 1;
    }
    
+   // open progress dialog
    MProgressDialog *pd;
    pd = new MProgressDialog(_("Palm Backup"), _("Backing up files"),
                             max, NULL, false, true); 
+
+   // resetting values
    max = 0;
    i = 0;
 
-   if(m_BackupDir.Length()
-      && m_BackupDir[m_BackupDir.Length()-1] != DIR_SEPARATOR)
-      m_BackupDir << DIR_SEPARATOR;
-   
+   // for each file on the palm do ...
    while (true) {
       struct DBInfo   info;
       struct pi_file *f;
@@ -840,45 +846,44 @@ PalmOSModule::Backup(void)
 
       if (dlp_ReadDBList(m_PiSocket, 0, 0x80, i, &info) < 0)
          break;
-         
+
       i = info.index + 1;
-      
+
       if (dlp_OpenConduit(m_PiSocket) < 0) {
          ErrorMessage(_("Exiting on cancel, backup process incomplete!"));
          delete pd;
          return;
       }
 
+      // don´t keep DB_open flag
+      info.flags &= 0xff;
+
+      // construct filename
       strncpy(name, m_BackupDir, 256);
       protect_name(strlen(name) + name, info.name);
       if (info.flags & dlpDBFlagResource)
          strcat(name, ".prc");
       else
          strcat(name, ".pdb");
-         
+
+      // update progress dialog, exit on "cancel"   
       if( ! pd->Update(max++, name) )
       {
-         // user cancelled
          DeleteFileList(orig_files, ofile_total);
          delete pd;
          return;
-         break;
       }
-      
-      if (m_IncrBackup) {
-         if (stat(name, &statb) == 0) {
+
+      if (m_IncrBackup)
+         if (stat(name, &statb) == 0)
             if (info.modifyDate == statb.st_mtime) {
                RemoveFromList(name, orig_files, ofile_total);
                continue;
             }
-         }
-      }
-      
-      // don´t keep DB_open flag
-      info.flags &= 0xff;
       
       // create file
       f = pi_file_create(name, &info);
+
       if (f == 0) {
          ErrorMessage(_("Unable to create file!"));
          break;
@@ -889,7 +894,7 @@ PalmOSModule::Backup(void)
       
       pi_file_close(f);
       
-      /* Note: This is no guarantee that the times on the host syst
+      /* Note: This is no guarantee that the times on the host system
          actually match the GMT times on the Pilot. We only check to
          see whether they are the same or different, and do not treat
          them as real times. */
@@ -903,11 +908,10 @@ PalmOSModule::Backup(void)
    delete pd;
 
    // Remaining files are outdated
-   if (orig_files)
+   if ( (m_BackupSync) && (orig_files) )
       for (i = 0; i < ofile_total; i++)
          if (orig_files[i] != NULL)
-            if (m_BackupSync)
-               unlink(orig_files[i]);  // delete
+            unlink(orig_files[i]);  // delete
 
    // All files are backed up now. 
    DeleteFileList(orig_files, ofile_total);
@@ -948,37 +952,37 @@ PalmOSModule::InstallFiles(char **fnames, int files_total)
    MProgressDialog *pd;
       
    for ( j = 0; j < files_total; j++) {
-   	db[dbcount] = (struct db*)malloc(sizeof(struct db));
+      db[dbcount] = (struct db*)malloc(sizeof(struct db));
 
       // remember filename
       sprintf(db[dbcount]->name, "%s", fnames[j]);
 
       f = pi_file_open(db[dbcount]->name);
 
-  	   if (f==0) {
+      if (f==0) {
          // TODO: show filename
          ErrorMessage(_("Unable to open file!"));
          delete pd;
          break;
       }
   	
-  	   pi_file_get_info(f, &info);
+      pi_file_get_info(f, &info);
   	
-     	db[dbcount]->creator = info.creator;
-  	   db[dbcount]->type = info.type;
-     	db[dbcount]->flags = info.flags;
-     	db[dbcount]->maxblock = 0;
+      db[dbcount]->creator = info.creator;
+      db[dbcount]->type = info.type;
+      db[dbcount]->flags = info.flags;
+      db[dbcount]->maxblock = 0;
   	
-        pi_file_get_entries(f, &max);
+      pi_file_get_entries(f, &max);
   	
-     	for (i=0; i<max; i++) {
-  	      if (info.flags & dlpDBFlagResource)
-  	         pi_file_read_resource(f, i, 0, &size, 0, 0);
-  	      else
+      for (i=0; i<max; i++) {
+  	     if (info.flags & dlpDBFlagResource)
+  	        pi_file_read_resource(f, i, 0, &size, 0, 0);
+  	     else
             pi_file_read_record(f, i, 0, &size, 0, 0,0 );
   	    
-        if (size > db[dbcount]->maxblock)
-           db[dbcount]->maxblock = size;
+         if (size > db[dbcount]->maxblock)
+            db[dbcount]->maxblock = size;
       }
   	
       pi_file_close(f);
