@@ -643,12 +643,8 @@ MAppBase::OnShutDown()
 
    if ( m_profile )
    {
-      // The following little hack allows us to decref and delete the
-      // global profile without triggering an assert, as this is not
-      // normally allowed.
-      Profile *p = m_profile;
+      m_profile->DecRef();
       m_profile = NULL;
-      p->DecRef();
    }
 
    if ( initialized )

@@ -1058,7 +1058,6 @@ ProfileImpl::CreateProfile(const String & iClassName,
 ProfileImpl::~ProfileImpl()
 {
    PCHECK();
-   ASSERT(this != mApplication->GetProfile());
 
    if ( m_Suspended )
    {
@@ -1067,7 +1066,8 @@ ProfileImpl::~ProfileImpl()
       Discard(); // but we tidy up, no big deal
    }
 
-   if(m_Identity) m_Identity->DecRef();
+   if(m_Identity)
+      m_Identity->DecRef();
 }
 
 Profile *
