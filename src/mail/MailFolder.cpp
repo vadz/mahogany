@@ -539,11 +539,11 @@ struct MfCloseEntry
    wxDateTime m_dt;
    ~MfCloseEntry()
       {
+         wxLogDebug("Mailfolder '%s': close timed out.", m_mf->GetName().c_str());
          if(m_mf) m_mf->RealDecRef();
       }
    MfCloseEntry(MailFolderCmn *mf, int secs)
       {
-         mf->IncRef();
          m_mf = mf;
          m_dt = wxDateTime::Now();
          m_dt.Add(wxTimeSpan::Seconds(secs));
@@ -603,8 +603,15 @@ static CloseTimer *gs_CloseTimer = NULL;
 bool
 MailFolderCmn::DecRef()
 {
-   gs_MailFolderCloser->Add(this);
-   return MObjectRC::DecRef();
+   /// just in case some folder is kept open until after we cleaned up
+   if(gs_MailFolderCloser)
+   {
+     wxLogDebug("Mailfolder '%s': close delayed.", GetName().c_str());
+     gs_MailFolderCloser->Add(this);
+     return FALSE;
+   }
+   else  // shouldn't happen, but who knows...
+	return RealDecRef();
 }
 
 bool
@@ -1802,6 +1809,7 @@ static void CleanStatic()
    gs_CloseTimer = NULL;
    gs_MailFolderCloser->CleanUp();
    delete gs_MailFolderCloser;
+   gs_MailFolderCloser = NULL;
 }
 
 /* static */

@@ -553,8 +553,6 @@ MAppBase::OnAbnormalTermination()
 void
 MAppBase::OnShutDown()
 {
-   MailFolder::CleanUp();
-
    // don't want events any more
    if ( m_eventNewMailReg )
    {
@@ -575,6 +573,8 @@ MAppBase::OnShutDown()
    if (m_MailCollector)
       m_MailCollector->DecRef();
    delete m_KeepOpenFolders;
+
+   MailFolder::CleanUp();
 
    // clean up
    AdbManager::Delete();
