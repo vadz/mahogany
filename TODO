@@ -16,9 +16,11 @@ $Id$
 *********************************************************************
 - retrieve messages starting from last one
 - folderview listctrl has extra Subject column behind Size field ???
-- mime popup position in wxlwindow
 - reimplement some form of IsDirty() / HasBeenModified() for
   wxComposeView.
+
+- IMAP progress updates don't appear because there is too much to be
+  done in wxYield()?xvv
 
 - do not redraw messageview if the message is the one currently being
   shown
