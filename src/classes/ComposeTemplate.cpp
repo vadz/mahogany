@@ -1148,13 +1148,20 @@ String VarExpander::GetReplyPrefix() const
    return prefix;
 }
 
-inline bool IsEndOfLine(const char *p)
+// return the length of the line terminator if we're at the end of line or 0
+// otherwise
+static inline size_t IsEndOfLine(const char *p)
 {
-   return p[0] == '\r' && p[1] == '\n';
-}
+   // although the text of the mail message itself has "\r\n" at the end of
+   // each line, when we quote the selection only (which we got from the text
+   // control) it has just "\n"s, so we should really understand both of them
+   if ( p[0] == '\n' )
+      return 1;
+   else if ( p[0] == '\r' && p[1] == '\n' )
+      return 2;
 
-// length of end of line suffix ("\r\n")
-static const size_t EOL_LEN = 2;
+   return 0;
+}
 
 void VarExpander::ExpandOriginalText(const String& text,
                                      const String& prefix,
@@ -1219,6 +1226,9 @@ void VarExpander::ExpandOriginalText(const String& text,
    }
 #endif // wxUSE_REGEX
 
+   // if != 0, then we're at the end of the current line
+   size_t lenEOL = 0;
+
    // the current line
    String lineCur;
 
@@ -1247,11 +1257,11 @@ void VarExpander::ExpandOriginalText(const String& text,
 #endif // wxUSE_REGEX/!wxUSE_REGEX
          }
 
-         if ( !quoteEmpty && IsEndOfLine(cptr) )
+         if ( !quoteEmpty && (lenEOL = IsEndOfLine(cptr)) )
          {
             // this line is empty, skip it entirely (i.e. don't output the
             // prefix for it)
-            cptr += EOL_LEN - 1;
+            cptr += lenEOL - 1;
 
             *value += '\n';
 
@@ -1261,7 +1271,7 @@ void VarExpander::ExpandOriginalText(const String& text,
          lineCur += prefix;
       }
 
-      if ( !*cptr || IsEndOfLine(cptr) )
+      if ( !*cptr || (lenEOL = IsEndOfLine(cptr)) )
       {
          // sanity test
          ASSERT_MSG( !wrapMargin || lineCur.length() <= wrapMargin,
@@ -1281,7 +1291,7 @@ void VarExpander::ExpandOriginalText(const String& text,
          lineCur.clear();
 
          // -1 to compensate for ++ in the loop
-         cptr += EOL_LEN - 1;
+         cptr += lenEOL - 1;
       }
       else // !EOL
       {
