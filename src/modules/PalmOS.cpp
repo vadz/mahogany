@@ -216,7 +216,7 @@ private:
        As the class has no usable interface, this doesn´t do much, but
        it displays a small dialog to say hello.
    */
-   PalmOSModule();
+   PalmOSModule(MInterface *mi);
 
    ~PalmOSModule();
 
@@ -450,13 +450,15 @@ PalmOSModule::Init(int version_major, int version_minor,
       return NULL;
    }
 
-   return new PalmOSModule();
+   return new PalmOSModule(minterface);
 }
 
 
-PalmOSModule::PalmOSModule()
+PalmOSModule::PalmOSModule(MInterface *minterface)
             : MModule()
 {
+   SetMInterface(minterface);
+   
    m_PiSocket = -1;
    m_Profile = NULL;
    m_Lock = NULL;
