@@ -1257,7 +1257,7 @@ EditorContentPart *BareBonesEditor::GetFirstPart()
       SetFontEncoding(encPart);
    }
 #else
-   encPart = m_encoding;
+   wxFontEncoding encPart = m_encoding;
 #endif // wxUSE_WCHAR_T
 
    wxString text = m_textControl->GetValue();
