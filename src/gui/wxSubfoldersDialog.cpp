@@ -47,6 +47,9 @@
    #define wxYield wxYieldIfNeeded
 #endif // wxWin 2.2.6+
 
+// TODO: this code doesn't work yet, finish it
+//#define USE_SELECT_BUTTONS
+
 // ----------------------------------------------------------------------------
 // options we use here
 // ----------------------------------------------------------------------------
@@ -63,12 +66,16 @@ extern const MPersMsgBox *M_MSGBOX_ADD_ALL_SUBFOLDERS;
 // constants
 // ----------------------------------------------------------------------------
 
+#ifdef USE_SELECT_BUTTONS
+
 // control ids
 enum
 {
    Button_SelectAll = 100,
    Button_UnselectAll
 };
+
+#endif // USE_SELECT_BUTTONS
 
 // how often to update the progress display?
 static const size_t PROGRESS_THRESHOLD = 10;
@@ -143,8 +150,11 @@ private:
    // the name of the root folder
    String m_folderPath;
 
-   // the folder itself
+   // the root folder itself
    MFolder *m_folder;
+
+   // the folder whose children we're currently enumerating, may be NULL
+   MFolder *m_folderCur;
 
    // and the corresponding (halfopened) mail folder
    ASMailFolder *m_mailFolder;
@@ -188,9 +198,11 @@ public:
    // events from "quick search" text control
    void OnText(wxCommandEvent& event);
 
+#ifdef USE_SELECT_BUTTONS
    // select/unselect all button handlers
    void OnSelectAll(wxCommandEvent& event);
    void OnUnselectAll(wxCommandEvent& event);
+#endif // USE_SELECT_BUTTONS
 
    // called by wxFolderNameTextCtrl (see below)
    bool OnComplete(wxTextCtrl *textctrl);
@@ -341,6 +353,8 @@ wxSubfoldersTree::wxSubfoldersTree(wxWindow *parent,
    // init members
    m_folder = folderRoot;
    m_folder->IncRef();
+   m_folderCur = folderRoot;
+   m_folderCur->IncRef();
 
    m_mailFolder = mailFolder;
    m_mailFolder->IncRef();
@@ -430,6 +444,12 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
       // construct the IMAP spec of the folder whose children we enum
       wxString refOld = m_reference;
       wxString reference = GetRelativePath(m_idParent);
+
+      // and remember this folder itself, if we already have it in the tree: we
+      // use it to check whether its children are already in the main tree
+      if ( m_folderCur )
+         m_folderCur->DecRef();
+      m_folderCur = m_folder->GetSubfolder(reference);
 
       // we may need a separator
       if ( !m_reference.empty() )
@@ -528,16 +548,17 @@ wxSubfoldersTree::OnListFolder(const String& spec,
                SetItemData(id, new wxTreeItemData());
             }
 
-            // this doesn't make much sense... someone proposed to show
-            // instead the folders already existing in the tree in bold (or
-            // maybe the folders not existing in the tree) - this might be
-            // more useful (TODO?)
-#if 0
-            if ( attr & ASMailFolder::ATT_MARKED )
+            // show the folders not already present in the tree in bold
+            // so that new folders are immediately visible
+            //
+            // note that if the parent folder is not in the tree, its children
+            // don't risk to be there neither
+            MFolder_obj folder(m_folderCur ? m_folderCur->GetSubfolder(name)
+                                           : NULL);
+            if ( !folder )
             {
                SetItemBold(id);
             }
-#endif // 0
          }
       }
    }
@@ -642,6 +663,8 @@ wxTreeItemId wxSubfoldersTree::InsertInOrder(wxTreeItemId parent,
 
 wxSubfoldersTree::~wxSubfoldersTree()
 {
+   if ( m_folderCur )
+      m_folderCur->DecRef();
    m_folder->DecRef();
    m_mailFolder->DecRef();
 }
@@ -887,6 +910,7 @@ void wxSubscriptionDialog::SelectRecursively(const wxString& path)
       m_settingFromProgram = false;
    }
 }
+
 
 #ifdef USE_SELECT_BUTTONS
 
