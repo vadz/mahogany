@@ -66,6 +66,7 @@
 // options we use here
 // ----------------------------------------------------------------------------
 
+extern const MOption MP_COLLECTATSTARTUP;
 extern const MOption MP_FOLDER_PASSWORD;
 extern const MOption MP_FOLDER_PATH;
 extern const MOption MP_IMAPHOST;
@@ -93,14 +94,21 @@ enum MWizardPageId
    MWizard_CreateFolder_First,
    MWizard_CreateFolder_Welcome = MWizard_CreateFolder_First,     // say hello
    MWizard_CreateFolder_Type,
+
    MWizard_CreateFolder_File,
    MWizard_CreateFolder_MH,
    MWizard_CreateFolder_Imap,
    MWizard_CreateFolder_Pop3,
+
+   // the new mail page is displayed only for the folder types <= than this one
+   MWizard_CreateFolder_LastNewMail = MWizard_CreateFolder_Pop3,
+
    MWizard_CreateFolder_Nntp,
    MWizard_CreateFolder_News,
    MWizard_CreateFolder_Group,
-   MWizard_CreateFolder_Final,                            // say that everything is ok
+
+   MWizard_CreateFolder_NewMail,    // should we monitor this folder?
+   MWizard_CreateFolder_Final,      // say that everything is ok
    MWizard_CreateFolder_FirstType  = MWizard_CreateFolder_File,
    MWizard_CreateFolder_LastType = MWizard_CreateFolder_Group,
    MWizard_CreateFolder_Last = MWizard_CreateFolder_Final,
@@ -110,9 +118,9 @@ enum MWizardPageId
    MWizard_ImportFolders_MH,
    MWizard_ImportFolders_Last = MWizard_ImportFolders_MH,
 
-   MWizard_PagesMax,  // the number of pages
+   MWizard_PagesMax,                // the number of pages
 
-   MWizard_PageNone = -1          // illegal value
+   MWizard_PageNone = -1            // illegal value
 };
 
 
@@ -155,7 +163,6 @@ public:
    bool Run(void);
    class MWizardPage * GetPageById(MWizardPageId id);
 
-   MWizardPageId m_ServerPageId; // used as last by final page
 private:
    MWizardType m_Type;
    class MWizardPage * m_WizardPages[MWizard_PagesMax];
@@ -461,8 +468,24 @@ bool MWizard_ImportFolders_MHPage::TransferDataFromWindow()
    return true;
 }
 
+// ============================================================================
+// CreateFolderWizard and its pages
+// ============================================================================
+
+enum FolderEntryType
+{
+   FOLDERTYPE_FILE = 0,
+   FOLDERTYPE_MH,
+   FOLDERTYPE_IMAP,
+   FOLDERTYPE_POP3,
+   FOLDERTYPE_NNTP,
+   FOLDERTYPE_NEWS,
+   FOLDERTYPE_GROUP,
+   FOLDERTYPE_MAX
+};
+
 // ----------------------------------------------------------------------------
-// The CreateFolderWizard
+// CreateFolderWizard
 // ----------------------------------------------------------------------------
 
 class CreateFolderWizard : public MWizard
@@ -490,34 +513,53 @@ public:
       FolderParams()
          : m_Name(_("New Folder"))
       {
-         m_FolderType =
+         m_FolderType = MF_ILLEGAL;
          m_FolderFlags = 0;
-         m_LeaveOnServer = false;
+
+         m_LeaveOnServer =
+         m_CheckOnStartup = false;
       }
 
-      int m_FolderType;
+      MFolderType m_FolderType;
       int m_FolderFlags;
+
       wxString m_Name;
       wxString m_Path;
       wxString m_Server;
       wxString m_Login;
       wxString m_Password;
+
       bool m_LeaveOnServer;
+      bool m_CheckOnStartup;
    };
 
-   FolderParams * GetParams() { return &m_Params; }
+   FolderParams *GetParams() { return &m_Params; }
    MFolder *GetParentFolder() { m_ParentFolder->IncRef(); return m_ParentFolder; }
 
    void SetUserWantsDialog() { m_wantsDialog = true; }
    bool UserWantsDialog() const { return m_wantsDialog; }
 
+   // accessors for the pages
+   bool HasNewMailPage() const
+      { return m_idServerPage <= MWizard_CreateFolder_LastNewMail; }
+
+   void SetServerPageId(MWizardPageId id) { m_idServerPage = id; }
+   MWizardPageId GetServerPageId() const { return m_idServerPage; }
+
 protected:
-   MFolder * m_ParentFolder;
+   MFolder *m_ParentFolder;
    FolderParams m_Params;
-   bool m_wantsDialog;     // user wants to use dialog instead of wizard
+
+   // the id of the server page we use, filled by MWizard_CreateFolder_TypePage
+   // and used by the subsequent ones
+   MWizardPageId m_idServerPage;
+
+   // does the user want to use dialog instead of wizard?
+   bool m_wantsDialog;
 };
 
 
+// ----------------------------------------------------------------------------
 // CreateFolderWizardWelcomePage
 // ----------------------------------------------------------------------------
 
@@ -553,12 +595,9 @@ MWizard_CreateFolder_WelcomePage::MWizard_CreateFolder_WelcomePage(MWizard *wiza
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(msg);
    wxArrayString labels;
-   labels.Add(_("Don't use the wizard"));
+   labels.Add(_("&Don't use the wizard"));
 
    long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
-
-   // VZ: hmm, the checkbox label is truncated under wxGTK - bug?
-   maxwidth += 10;
 
    m_checkNoWizard = panel->CreateCheckBox(labels[0], maxwidth, NULL);
 
@@ -578,20 +617,9 @@ MWizardPageId MWizard_CreateFolder_WelcomePage::GetNextPageId() const
    return MWizardPage::GetNextPageId();
 }
 
+// ----------------------------------------------------------------------------
 // CreateFolderWizardTypePage
 // ----------------------------------------------------------------------------
-
-enum FolderEntryType
-{
-   FOLDERTYPE_FILE = 0,
-   FOLDERTYPE_MH,
-   FOLDERTYPE_IMAP,
-   FOLDERTYPE_POP3,
-   FOLDERTYPE_NNTP,
-   FOLDERTYPE_NEWS,
-   FOLDERTYPE_GROUP,
-   FOLDERTYPE_MAX
-};
 
 class MWizard_CreateFolder_TypePage : public MWizardPage
 {
@@ -651,14 +679,26 @@ MWizard_CreateFolder_TypePage::GetNextPageId() const
    // some next page
    if ( sel == -1 )
        sel = 0;
+
    sel += MWizard_CreateFolder_FirstType;
 
-   CHECK(sel >= MWizard_CreateFolder_FirstType
-         && sel <= MWizard_CreateFolder_LastType,
-         MWizard_CreateFolder_Final, "Unknown folder type");
-   return (MWizardPageId) sel;
+   if ( sel < MWizard_CreateFolder_FirstType ||
+         sel > MWizard_CreateFolder_LastType )
+   {
+      FAIL_MSG("Unknown folder type");
+
+      sel = MWizard_CreateFolder_Final;
+   }
+
+   MWizardPageId id = (MWizardPageId)sel;
+
+   // remember the server page id in the wizard
+   ((CreateFolderWizard *)GetWizard())->SetServerPageId(id);
+
+   return id;
 }
 
+// ----------------------------------------------------------------------------
 // CreateFolderServerPage - common page for different server/hierarchy types
 // ----------------------------------------------------------------------------
 
@@ -668,12 +708,22 @@ public:
    MWizard_CreateFolder_ServerPage(MWizard *wizard,
                                    MWizardPageId id,
                                    FolderEntryType type);
+
    virtual bool TransferDataFromWindow();
    virtual bool TransferDataToWindow();
+
    virtual MWizardPageId GetNextPageId() const
-      { return MWizard_CreateFolder_Final; }
+   {
+      CreateFolderWizard *wiz = (CreateFolderWizard*)GetWizard();
+
+      return wiz->HasNewMailPage() ? MWizard_CreateFolder_NewMail
+                                   : MWizard_CreateFolder_Final;
+   }
+
    virtual MWizardPageId GetPreviousPageId() const
-      { return MWizard_CreateFolder_Type; }
+   {
+      return MWizard_CreateFolder_Type;
+   }
 
 private:
    wxTextCtrl *m_Name,
@@ -820,12 +870,12 @@ MWizard_CreateFolder_ServerPage(MWizard *wizard,
    };
 
    wxArrayString labels;
-   labels.Add(_("Server Host"));
-   labels.Add(_("Your Login"));
-   labels.Add(_("Your Password"));
+   labels.Add(_("&Server host"));
+   labels.Add(_("Your &login"));
+   labels.Add(_("Your &password"));
    labels.Add(pathName);
-   labels.Add(_("Entry Name"));
-   labels.Add(_("Leave mail on server"));
+   labels.Add(_("Folder &name"));
+   labels.Add(_("&Leave mail on server"));
    long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
 
 #define CREATE_CTRL(name, creat) \
@@ -933,9 +983,6 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
       params->m_LeaveOnServer = m_LeaveOnServer->GetValue();
    }
 
-   params->m_FolderType = 0;
-   params->m_FolderFlags = MF_FLAGS_DEFAULT;
-
    if(m_Server)
    {
       String server = params->m_Server;
@@ -960,7 +1007,7 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
 
       case FOLDERTYPE_IMAP:
          params->m_FolderType = MF_IMAP;
-         params->m_FolderFlags = MF_FLAGS_GROUP;
+         params->m_FolderFlags |= MF_FLAGS_GROUP;
          break;
 
       case FOLDERTYPE_POP3:
@@ -969,12 +1016,12 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
 
       case FOLDERTYPE_NNTP:
          params->m_FolderType = MF_NNTP;
-         params->m_FolderFlags = MF_FLAGS_ANON | MF_FLAGS_GROUP;
+         params->m_FolderFlags |= MF_FLAGS_ANON | MF_FLAGS_GROUP;
          break;
 
       case FOLDERTYPE_NEWS:
          params->m_FolderType = MF_NEWS;
-         params->m_FolderFlags = MF_FLAGS_GROUP;
+         params->m_FolderFlags |= MF_FLAGS_GROUP;
          break;
 
       case FOLDERTYPE_FILE:
@@ -1078,11 +1125,10 @@ MWizard_CreateFolder_ServerPage::TransferDataToWindow()
       m_UserId->SetValue(READ_CONFIG(p, MP_USERNAME));
    }
 
-   // store our page id for use by the final page:
-   ((CreateFolderWizard*)GetWizard())->m_ServerPageId = GetPageId();
    return true;
 }
 
+// ----------------------------------------------------------------------------
 // CreateFolderWizardXXXPage - the various folder types
 // ----------------------------------------------------------------------------
 
@@ -1105,8 +1151,101 @@ DEFINE_TYPEPAGE(Pop3,POP3);
 DEFINE_TYPEPAGE(Nntp,NNTP);
 DEFINE_TYPEPAGE(News,NEWS);
 DEFINE_TYPEPAGE(Group,GROUP);
+
 #undef DEFINE_TYPEPAGE
 
+// ----------------------------------------------------------------------------
+// CreateFolderWizard new mail page
+// ----------------------------------------------------------------------------
+
+class MWizard_CreateFolder_NewMailPage : public MWizardPage
+{
+public:
+   MWizard_CreateFolder_NewMailPage(MWizard *wizard);
+
+   virtual bool TransferDataFromWindow();
+
+   virtual MWizardPageId GetPreviousPageId() const
+      { return ((CreateFolderWizard *)GetWizard())->GetServerPageId(); }
+
+   virtual MWizardPageId GetNextPageId() const
+      { return MWizard_CreateFolder_Final; }
+
+protected:
+   void OnCheckbox(wxCommandEvent& WXUNUSED(event))
+   {
+      m_checkOnStartup->Enable(m_checkMonitor->GetValue());
+   }
+
+private:
+   wxCheckBox *m_checkMonitor,
+              *m_checkOnStartup;
+
+   DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(MWizard_CreateFolder_NewMailPage, MWizardPage)
+   EVT_CHECKBOX(-1, MWizard_CreateFolder_NewMailPage::OnCheckbox)
+END_EVENT_TABLE()
+
+MWizard_CreateFolder_NewMailPage::
+MWizard_CreateFolder_NewMailPage(MWizard *wizard)
+   : MWizardPage(wizard, MWizard_CreateFolder_NewMail)
+{
+   wxStaticText *msg = new wxStaticText(this, -1, _(
+                           "Mahogany may check this folder for new mail\n"
+                           "automatically (otherwise, it will only be\n"
+                           "detected when you open it). You can configure\n"
+                           "the delay between the checks in the folder\n"
+                           "properties dialog after creating it.\n"
+                           "\n"
+                           "Would you like to monitor this folder for new\n"
+                           "messages in the background?\n"
+                           ));
+
+   wxEnhancedPanel *panel = CreateEnhancedPanel(msg);
+
+   wxArrayString labels;
+   labels.Add(_("&Monitor this folder:"));
+   labels.Add(_("&Check it on startup:"));
+
+   long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
+
+   m_checkMonitor = panel->CreateCheckBox(labels[0],
+                                          maxwidth, NULL);
+   m_checkOnStartup = panel->CreateCheckBox(labels[1],
+                                            maxwidth, m_checkMonitor);
+
+   // should only be enabled if "monitor" is checked
+   m_checkOnStartup->Disable();
+
+   panel->Layout();
+}
+
+bool MWizard_CreateFolder_NewMailPage::TransferDataFromWindow()
+{
+   CreateFolderWizard::FolderParams *params =
+      ((CreateFolderWizard*)GetWizard())->GetParams();
+
+   if ( m_checkMonitor->GetValue() )
+   {
+      params->m_FolderFlags |= MF_FLAGS_MONITOR;
+   }
+   else
+   {
+      params->m_FolderFlags &= ~MF_FLAGS_MONITOR;
+   }
+
+   if ( (params->m_FolderFlags & MF_FLAGS_MONITOR) &&
+         m_checkOnStartup->GetValue() )
+   {
+      params->m_CheckOnStartup = TRUE;
+   }
+
+   return true;
+}
+
+// ----------------------------------------------------------------------------
 // CreateFolderWizard final page
 // ----------------------------------------------------------------------------
 
@@ -1114,10 +1253,8 @@ class MWizard_CreateFolder_FinalPage : public MWizardPage
 {
 public:
    MWizard_CreateFolder_FinalPage(MWizard *wizard);
-   virtual MWizardPageId GetPreviousPageId() const
-      { return ((CreateFolderWizard *)GetWizard())->m_ServerPageId; }
-   virtual MWizardPageId GetNextPageId() const
-      { return MWizard_PageNone; }
+   virtual MWizardPageId GetPreviousPageId() const;
+   virtual MWizardPageId GetNextPageId() const { return MWizard_PageNone; }
 };
 
 
@@ -1126,30 +1263,49 @@ MWizard_CreateFolder_FinalPage::MWizard_CreateFolder_FinalPage(MWizard *wizard)
 {
    CreateFolderWizard::FolderParams *params =
       ((CreateFolderWizard*)GetWizard())->GetParams();
-   MFolderType ftype;
-   if ( CanHaveSubfolders((MFolderType)params->m_FolderType,
-                          params->m_FolderFlags, &ftype)
-        && ftype != MF_ILLEGAL )
-   {
-      // TODO propose to add all subfolders to the created entry
-   }
 
-   (void)new wxStaticText(this, -1, _(
-      "You have now specified the basic\n"
-      "parameters for the new mailbox entry.\n"
+   wxString msg =  wxString::Format(_(
+      "You are now ready to create the new folder\n"
+      "'%s', press \"Finish\" to do it.\n"
       "\n"
       "If you want to use any more advanced\n"
       "access options, you can modify the\n"
       "complete set of parameters by invoking\n"
-      "the folder properties dialog. Simply\n"
+      "the folder properties dialog later. Simply\n"
       "click the right mouse button on the\n"
-      "entry in the tree and choose \"Properties\".\n"
-      "\n"
-      "In particular, you may tell Mahogany to\n"
-      "monitor this folder for new mail automatically\n"
-      "from the \"New Mail\" page of that dialog."));
+      "entry in the tree and choose \"Properties\"."
+   ), params->m_Name.c_str());
+
+   MFolderType ftype;
+   if ( CanHaveSubfolders(params->m_FolderType, params->m_FolderFlags, &ftype)
+        && ftype != MF_ILLEGAL )
+   {
+      // TODO propose to add all subfolders to the created entry from here
+      //      (or, better, show a separate page for this before)
+      msg += _(
+            "\n"
+            "Note: this folder may contain the subfolders.\n"
+            "If you want to add them to the tree as well,\n"
+            "simply select the \"Browse\" command from the\n"
+            "\"Folder\" menu or right click popup menu and\n"
+            "follow the instructions."
+      );
+   }
+
+   (void)new wxStaticText(this, -1, msg);
 }
 
+MWizardPageId MWizard_CreateFolder_FinalPage::GetPreviousPageId() const
+{
+   CreateFolderWizard *wiz = (CreateFolderWizard *)GetWizard();
+
+   // if we have the new mail page, it is just before us - otherwise it is the
+   // server/mailbox params page
+   MWizardPageId id = wiz->HasNewMailPage() ? MWizard_CreateFolder_NewMail
+                                            : wiz->GetServerPageId();
+
+   return id;
+}
 
 // ============================================================================
 // implementation
@@ -1174,6 +1330,7 @@ MWizard::GetPageById(MWizardPageId id)
       {
          CREATE_PAGE(CreateFolder_Welcome);
          CREATE_PAGE(CreateFolder_Type);
+         CREATE_PAGE(CreateFolder_NewMail);
          CREATE_PAGE(CreateFolder_Final);
          CREATE_PAGE(CreateFolder_File);
          CREATE_PAGE(CreateFolder_MH);
@@ -1226,10 +1383,16 @@ RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
       else // wizard completed successfully, create folder
       {
          CreateFolderWizard::FolderParams *params = wizard->GetParams();
-         MFolderType type = (MFolderType) params->m_FolderType;
+         MFolderType type = params->m_FolderType;
+
+         // collect mail from the POP3 folders by default
+         if ( type == MF_POP )
+         {
+            params->m_FolderFlags |= MF_FLAGS_INCOMING;
+         }
 
          newfolder = CreateFolderTreeEntry(
-            parent,
+            NULL,    // don't use parent for the folders created with wizard
             params->m_Name,
             type,
             params->m_FolderFlags,
@@ -1274,6 +1437,11 @@ RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
                   p->writeEntry(MP_FOLDER_PASSWORD,
                                 strutil_encrypt(params->m_Password));
                }
+            }
+
+            if ( params->m_CheckOnStartup )
+            {
+               p->writeEntry(MP_COLLECTATSTARTUP, false);
             }
 
             if ( params->m_LeaveOnServer )

@@ -6,6 +6,7 @@
 Release 0.64 'Sparc' ???, 2001
 -------------------------------------------------------------------------------
 
+09.01.02 VZ: added "New Mail" page to the create folder wizard
 08.01.02 VZ: added "Leave mail on server" to the insall/folder create wizards
 04.12.01 VZ: added more commands to the folder view header popup menu
 04.12.01 VZ: added an option to send 8 bit data directly
