@@ -41,6 +41,8 @@ MessageCC::MessageCC(MailFolderCC *ifolder, unsigned long msgno,
    Create(ifolder->GetProfile());
 
    folder = ifolder;
+   if(folder)
+      folder->IncRef();
    seq_no = msgno;
    uid = iuid;
 
@@ -115,6 +117,8 @@ MessageCC::~MessageCC()
       GLOBAL_DELETE  partContentPtr;
    if(text)
       GLOBAL_DELETE [] text;
+   if(folder)
+      folder->DecRef();
 }
 
 void

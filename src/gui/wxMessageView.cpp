@@ -575,16 +575,19 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
 
    // this we handle internally
    //if(mimetype == "MESSAGE/RFC822")
-   if(mimetype.length() >= strlen("MESSAGE") && mimetype.Left(strlen("MESSAGE")) == "MESSAGE")
+   if(mimetype.length() >= strlen("MESSAGE") &&
+      mimetype.Left(strlen("MESSAGE")) == "MESSAGE") 
    {
       char *filename = wxGetTempFileName("Mtemp");
-      MimeSave(mimeDisplayPart,filename);
-      MailFolder *mf = MailFolder::OpenFolder(MailFolder::MF_PROFILE,
-                                              filename);
-      wxMessageViewFrame * f = GLOBAL_NEW wxMessageViewFrame(mf, 1,
-                                                             m_FolderView, m_Parent);
-      f->SetTitle("M : " + mimetype);
-      mf->DecRef();
+      if(MimeSave(mimeDisplayPart,filename))
+      {
+         MailFolder *mf = MailFolder::OpenFolder(MailFolder::MF_PROFILE,
+                                                 filename);
+         wxMessageViewFrame * f = GLOBAL_NEW
+            wxMessageViewFrame(mf, 1, m_FolderView, m_Parent);
+         f->SetTitle("M : " + mimetype);
+         mf->DecRef();
+      }
       wxRemoveFile(filename);
       return;
    }
@@ -681,7 +684,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
    }
 }
 
-void
+bool
 wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
 {
    String message;
@@ -700,7 +703,7 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
                                        NULL);
       if ( strutil_isempty(filename) ) {
          // cancelled
-         return;
+         return false;
       }
    }
    else
@@ -712,14 +715,20 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
       char const *content = mailMessage->GetPartContent(mimeDisplayPart,&len);
       if(! content)
       {
-         ERRORMESSAGE((_("Cannot get message content.")));
-         return;
+         wxLogError(_("Cannot get message content."));
+         return false;
       }
       FILE *out = fopen(filename,"wb");
       if(out)
       {
-         if(fwrite(content,1,len,out) != len)
-            ERRORMESSAGE((_("Cannot write file.")));
+         size_t written;
+         written = fwrite(content,1,len,out);
+         if(written != len)
+         {
+            wxLogSysError(_("Cannot write file."));
+            fclose(out);
+            return false;
+         }
          else if(! ifilename) // only display in interactive mode
          {
             wxLogStatus(GetFrame(this), _("Wrote %lu bytes to file '%s'"),
@@ -728,6 +737,9 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
          fclose(out);
       }
    }
+   else
+      return false;
+   return true;
 }
 
 void

@@ -140,7 +140,7 @@ protected:
    /// handles the currently selected MIME content
    void MimeHandle(int num);
    /// saves the currently selected MIME content
-   void MimeSave(int num, const char *filename = NULL);
+   bool MimeSave(int num, const char *filename = NULL);
 
    DECLARE_EVENT_TABLE()
 };

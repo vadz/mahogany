@@ -27,7 +27,7 @@ class MessageCC : public Message
 {
 private:
    /// reference to the folder this mail is stored in
-   const MailFolderCC   *folder;
+   MailFolderCC   *folder;
    /// text of the mail if not linked to a folder
    char *text; 
    /// sequence number in folder

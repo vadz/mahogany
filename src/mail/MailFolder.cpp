@@ -37,13 +37,7 @@ MailFolder::OpenFolder(MailFolder::Type i_type,
 
    if(i_type == MF_PROFILE)
    {
-      String profileName;
-      if ( !i_name.IsEmpty() && i_name[0u] == '/' )
-         profileName = i_name.c_str() + 1;
-      else
-         profileName = i_name;
-
-      profile = ProfileBase::CreateFolderProfile(profileName,parentProfile);
+      profile = ProfileBase::CreateFolderProfile(i_name, parentProfile);
       CHECK(profile, NULL, "can't create profile");   // return if it fails
 
       login = READ_CONFIG(profile, MP_POP_LOGIN);
@@ -62,7 +56,7 @@ MailFolder::OpenFolder(MailFolder::Type i_type,
          name = READ_CONFIG(profile, MP_FOLDER_PATH);
          if( strutil_isempty(name) )
          {
-            name = profileName; // i_name is wrong here because we
+            name = i_name; // i_name is wrong here because we
                                 // need a relative path
             if(name == "INBOX")
                type = MF_INBOX;

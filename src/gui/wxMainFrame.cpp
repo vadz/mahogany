@@ -205,7 +205,7 @@ wxMainFrame::OpenFolder(MFolder *folder)
    bool hasFolder = true;
    if ( folder )
    {
-      m_FolderView = wxFolderView::Create(m_folderName, m_splitter);
+      m_FolderView = wxFolderView::Create(m_folderName.c_str()+1, m_splitter);
 
       if ( m_FolderView && m_FolderView->IsOk() )
       {

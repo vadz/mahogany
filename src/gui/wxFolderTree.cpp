@@ -349,8 +349,12 @@ void wxFolderTree::OnOpen(MFolder *folder)
 {
    if ( folder->GetType() != MFolder::Root )
    {
-      (void)wxFolderViewFrame::Create(folder->GetFullName(),
-                                      mApplication->TopLevelFrame());
+      (void)wxFolderViewFrame::Create(
+         // we need to pass relative names (profile names) into
+         // the MailFolder class, or it will be interpreted as an
+         // absolute path on the filesystem
+         folder->GetFullName().c_str()+1,
+         mApplication->TopLevelFrame());
    }
    else
    {
