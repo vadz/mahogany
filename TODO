@@ -9,7 +9,7 @@ $Id$
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
 9	KB	finish filters dialog
-
+9	KB	fix filters, don't quite work correctly yet	
 9	KB	wxLayout:
 		- delete in empty line
 		- undo
@@ -17,6 +17,8 @@ $Id$
 		- ctrl keys not recognised when CAPSLOCK is down
 		- add blinking cursor
 		- add HTML import
+		- selection can get confused, when selecting with
+		  pagedown beyond end of text
 		MessageView:
 		 - should show cursor only on demand
 		 - remember focused message not by index but by UID
