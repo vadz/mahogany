@@ -167,7 +167,7 @@ msgstr "Quitter le programme"
 
 #: wxMenuDefs.cpp:229 wxMenuDefs.cpp:230 wxMenuDefs.cpp:234
 msgid "&Address books..."
-msgstr "&Carnets d'adresses..."
+msgstr "Carnets d'&adresses..."
 
 #: wxMenuDefs.cpp:229 wxMenuDefs.cpp:230 wxMenuDefs.cpp:234
 msgid "Edit the address book(s)"
@@ -275,7 +275,7 @@ msgstr "Déplacer le message dans un autre répertoire"
 #: AdbFrame.cpp:1032 AdbFrame.cpp:1067 wxMenuDefs.cpp:249 wxMenuDefs.cpp:250
 #: wxMenuDefs.cpp:257 wxMenuDefs.cpp:283 wxMenuDefs.cpp:284 wxMenuDefs.cpp:292
 msgid "&Delete"
-msgstr "&Effacer"
+msgstr "E&ffacer"
 
 #: wxMenuDefs.cpp:249 wxMenuDefs.cpp:250 wxMenuDefs.cpp:257
 msgid "Delete this message"
@@ -283,7 +283,7 @@ msgstr "Effacer ce message"
 
 #: wxMenuDefs.cpp:250 wxMenuDefs.cpp:251 wxMenuDefs.cpp:258
 msgid "&Undelete"
-msgstr "&Annuler effacer"
+msgstr "A&nnuler effacer"
 
 #: wxMenuDefs.cpp:250 wxMenuDefs.cpp:251 wxMenuDefs.cpp:258
 msgid "Undelete message"
@@ -307,7 +307,7 @@ msgstr "Sélectionner tous les messages"
 
 #: wxMenuDefs.cpp:254 wxMenuDefs.cpp:255 wxMenuDefs.cpp:262
 msgid "D&eselect all"
-msgstr "&Desélectionner tout"
+msgstr "Desé&lectionner tout"
 
 #: wxMenuDefs.cpp:254 wxMenuDefs.cpp:255 wxMenuDefs.cpp:262
 msgid "Unselect all messages"
@@ -462,7 +462,7 @@ msgstr ""
 
 #: wxMenuDefs.cpp:293 wxMenuDefs.cpp:294 wxMenuDefs.cpp:302
 msgid "&Find..."
-msgstr "&Rechercher..."
+msgstr "Rec&hercher..."
 
 #: wxMenuDefs.cpp:293 wxMenuDefs.cpp:294 wxMenuDefs.cpp:302
 msgid "Find entry by name or contents"
@@ -511,7 +511,7 @@ msgstr "Afficher la liste des questions et réponses."
 #: wxDialogLayout.cpp:681 wxMFrame.cpp:152 wxMFrame.cpp:153 wxMenuDefs.cpp:303
 #: wxMenuDefs.cpp:304 wxMenuDefs.cpp:312
 msgid "&Help"
-msgstr "&Aide"
+msgstr "A&ide"
 
 #: wxMenuDefs.cpp:303 wxMenuDefs.cpp:304 wxMenuDefs.cpp:312
 msgid "Help on current context..."
@@ -1974,7 +1974,7 @@ msgstr "&Carnet"
 
 #: AdbFrame.cpp:1007 AdbFrame.cpp:1042
 msgid "&Find"
-msgstr "&Rechercher"
+msgstr "R&echercher"
 
 #: AdbFrame.cpp:1025 AdbFrame.cpp:1060
 msgid "&Lookup:"
@@ -3039,7 +3039,7 @@ msgstr "Restaurer les option par défaut"
 
 #: wxMenuDefs.cpp:266
 msgid "F&ind..."
-msgstr "&Rechercher..."
+msgstr "R&echercher..."
 
 #: wxMenuDefs.cpp:266
 msgid "Find text in message"
