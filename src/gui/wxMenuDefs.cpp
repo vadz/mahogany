@@ -361,7 +361,9 @@ void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
 {
    wxASSERT( WXSIZEOF(g_aToolBarData) == WXTBAR_MAX );
 
+#ifndef __WXGTK__
    toolbar->SetMargins( 2, 2 );
+#endif
 
    // if the buttons were of other size we'd have to use this function
    // (standard size is 16x15 under MSW)

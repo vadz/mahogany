@@ -990,7 +990,10 @@ wxMROpenFolderDialog::OnRadio(wxCommandEvent &event)
 
 void wxMROpenFolderDialog::UpdateRadioBox(void)
 {
-   ProfileBase *profile;
+   // FIXME: this profile will later inherit from a higher level passed 
+   // in when creating the dialog.
+   ProfileBase *profile = ProfileBase::CreateEmptyProfile();
+
 
    wxRadioBox * win = (wxRadioBox *)wxFindWindowByName("FolderType",
                                                        this);
@@ -1021,9 +1024,7 @@ void wxMROpenFolderDialog::UpdateRadioBox(void)
       UserID->Enable(true);
       Password->Enable(true);
       Hostname->Enable(true);
-      profile = ProfileBase::CreateEmptyProfile();
       Hostname->SetValue(READ_CONFIG(profile,MP_SMTPHOST));
-      profile->DecRef();
       break;
    case 4: // NNTP
       HostLabel->SetLabel(_("Newsserver"));
@@ -1038,7 +1039,7 @@ void wxMROpenFolderDialog::UpdateRadioBox(void)
       /* nothing, keep compiler happy */
       ;
    }
-
+   profile->DecRef();
 }
 
 bool

@@ -46,6 +46,9 @@
 
 #include <ctype.h>
 
+/// a name for the empty profile, like this it is invalid for wxConfig, so it will never conflict with a real profile name
+#define   PROFILE_EMPTY_NAME "EMPTYPROFILE?(*[]{}"
+
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
@@ -162,8 +165,10 @@ private:
    ProfileBase const *parentProfile;
    /// Name of this profile
    String   profileName;
-   // true if the object was successfully initialized
+   /// true if the object was successfully initialized
    bool isOk;
+   /// true for empty dummy profile
+   bool m_isEmpty;
    /** Destructor, writes back those entries that got changed.
    */
    ~Profile();
@@ -430,6 +435,7 @@ Profile::Profile(const String & iClassName, ProfileBase const *Parent)
    m_config = NULL;   // set it before using CHECK()
    parentProfile = Parent;
    profileName = iClassName;
+   m_isEmpty = false; // by default we are no dummy
    
    // find our config file unless we already have an absolute path name
    String fullName;
@@ -466,10 +472,11 @@ Profile::Profile(const String & iClassName, ProfileBase const *Parent)
 
 // constructor for empty profile
 Profile::Profile(ProfileBase const *Parent)
-       : profileName("anonymous")
+       : profileName(PROFILE_EMPTY_NAME)
 {
    m_config = NULL;   // set it before using CHECK()
    parentProfile = Parent;
+   m_isEmpty = true; // don't de-register with config file manager
 }
 
 ProfileBase *
@@ -491,7 +498,8 @@ Profile::~Profile()
 {
    if ( m_config )
       m_config->Flush();
-   ms_cfManager.DeRegister(this);
+   if( ! m_isEmpty)
+      ms_cfManager.DeRegister(this);
    delete m_config;
 }
 
