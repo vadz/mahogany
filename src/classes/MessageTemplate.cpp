@@ -555,7 +555,7 @@ GetMessageTemplate(MessageTemplateKind kind, const String& name)
                       "Subject: ${ORIGINAL:SUBJECT}\n"
                       "To: ${ORIGINAL:TO}\n"
                       "\n"
-                      "$QUOTE\n"
+                      "${ORIGINAL:TEXT}\n"
                       "-------- End of message -------");
             break;
 

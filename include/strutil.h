@@ -205,12 +205,10 @@ int strutil_countquotinglevels(const char *string, int max_white, int max_alpha)
 String strutil_extract_formatspec(const char *format);
 
 /// checks a character to be a valid part of an URL
-#define strutil_isurlchar(c) \
-   (isalnum(c)  || c == '.' || c == '/' || c == ':' \
-    || c == '_' || c == '&' || c == '#' || c == '-' \
-    || c == '%' || c == '~' || c == '!' || c == '?' \
-    || c == '*' || c == '+' || c == '$' || c == '@' \
-    || c == '=' || c == ',')
+inline bool strutil_isurlchar(char c)
+{
+   return isalnum(c) || strchr("./:_&#-%~!?*+$@=,;", c);
+}
 
 /// If path is an absolute path, return true.
 bool strutil_isabsolutepath(const String &path);
