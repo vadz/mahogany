@@ -96,9 +96,8 @@ void AdbEntryStoredInMemory::GetFieldInternal(size_t n, String *pstr) const
 // m_astrFields array, so we need to add some before setting n-th field
 void AdbEntryStoredInMemory::SetField(size_t n, const wxString& strValue)
 {
-  size_t nCur = m_astrFields.Count();
   // add some empty fields if needed
-  for ( int nAdd = 0; nAdd < (int)(n - nCur + 1); nAdd++ )
+  while ( m_astrFields.Count() <= n )
     m_astrFields.Add(wxGetEmptyString());
 
   if ( m_astrFields[n] != strValue ) {

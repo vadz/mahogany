@@ -118,30 +118,47 @@ class wxAdbExpandDialog : public wxManuallyLaidOutDialog
 public:
    wxAdbExpandDialog(ArrayAdbElements& aEverything,
                      ArrayAdbEntries& aMoreEntries,
+                     size_t nGroups,
                      wxFrame *parent);
 
    // get the index of the selected item in the listbox
    int GetSelection() const { return m_listbox->GetSelection(); }
 
+   // control ids
    enum
    {
-      Btn_More = 100
+      Btn_More = 100,
+      Btn_Delete
    };
 
 protected:
    // event handlers
    void OnLboxDblClick(wxCommandEvent& /* event */) { EndModal(wxID_OK); }
    void OnBtnMore(wxCommandEvent& event);
+   void OnBtnDelete(wxCommandEvent& event);
+   void OnUpdateBtnDelete(wxUpdateUIEvent& event)
+   {
+      // this catches both the case when there is no selection at all and when
+      // a group is selected: as we can't delete groups (yet?), we disable the
+      // delete button then as well
+      event.Enable(m_listbox->GetSelection() >= (int)m_nGroups);
+   }
 
 private:
    // the listbox containing the expansion possibilities
    wxListBox *m_listbox;
 
-   // the button to show more entries (may be NULL)
-   wxButton *m_btnMore;
+   // the buttons to show more entries (may be NULL) and to delete the selected
+   // one (never NULL)
+   wxButton *m_btnMore,
+            *m_btnDelete;
 
-   // the entries array
+   // the main and additional alements array
+   ArrayAdbElements& m_aEverything;
    ArrayAdbEntries& m_aMoreEntries;
+
+   // the number of groups in the beginning of m_aEverything
+   size_t m_nGroups;
 
    DECLARE_EVENT_TABLE()
 };
@@ -157,7 +174,12 @@ END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxAdbExpandDialog, wxManuallyLaidOutDialog)
    EVT_LISTBOX_DCLICK(-1, wxAdbExpandDialog::OnLboxDblClick)
+
    EVT_BUTTON(wxAdbExpandDialog::Btn_More, wxAdbExpandDialog::OnBtnMore)
+   EVT_BUTTON(wxAdbExpandDialog::Btn_Delete, wxAdbExpandDialog::OnBtnDelete)
+
+   EVT_UPDATE_UI(wxAdbExpandDialog::Btn_Delete,
+                 wxAdbExpandDialog::OnUpdateBtnDelete)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -377,11 +399,14 @@ wxAdbImportDialog::~wxAdbImportDialog()
 
 wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
                                      ArrayAdbEntries& aMoreEntries,
+                                     size_t nGroups,
                                      wxFrame *parent)
                  : wxManuallyLaidOutDialog(parent,
                                            _("Expansion options"),
                                            "AdrListSelect"),
-                   m_aMoreEntries(aMoreEntries)
+                   m_aEverything(aEverything),
+                   m_aMoreEntries(aMoreEntries),
+                   m_nGroups(nGroups)
 {
    /*
       the dialog layout is like this:
@@ -403,6 +428,10 @@ wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
                   ? NULL
                   : new wxButton(this, Btn_More, _("&More matches"));
 
+   m_btnDelete = new wxButton(this, Btn_Delete, _("&Delete"));
+   m_btnDelete->SetToolTip(_("Don't propose the selected address in this "
+                             "dialog any more and remove it from the list now"));
+
    // we have to fill the listbox here or it won't have the correct size
    size_t nEntryCount = aEverything.GetCount();
    for( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ )
@@ -411,18 +440,31 @@ wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
    }
 
    wxLayoutConstraints *c;
+   c = new wxLayoutConstraints;
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
 
    if ( m_btnMore )
    {
       m_btnMore->SetToolTip(_("Show more matching entries"));
 
+      c->bottom.SameAs(box, wxCentreY, LAYOUT_Y_MARGIN);
+      m_btnMore->SetConstraints(c);
+
       c = new wxLayoutConstraints;
       c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-      c->width.AsIs();
-      c->centreY.SameAs(box, wxCentreY);
+      c->width.SameAs(m_btnMore, wxWidth);
       c->height.AsIs();
-      m_btnMore->SetConstraints(c);
+      c->top.Below(m_btnMore, 2*LAYOUT_Y_MARGIN);
    }
+   else // no "More" button
+   {
+      // just position the "Delete" button in the centre
+      c->centreY.SameAs(box, wxCentreY);
+   }
+
+   m_btnDelete->SetConstraints(c);
 
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -433,6 +475,8 @@ wxAdbExpandDialog::wxAdbExpandDialog(ArrayAdbElements& aEverything,
    c->top.SameAs(box, wxTop, 3*LAYOUT_Y_MARGIN);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_listbox->SetConstraints(c);
+
+   m_listbox->SetFocus();
 
    SetDefaultSize(5*wBtn, 10*hBtn);
 }
@@ -447,6 +491,37 @@ void wxAdbExpandDialog::OnBtnMore(wxCommandEvent& event)
 
    // nothing more to add
    m_btnMore->Disable();
+}
+
+void wxAdbExpandDialog::OnBtnDelete(wxCommandEvent& WXUNUSED(event))
+{
+   size_t n = (size_t)m_listbox->GetSelection();
+   CHECK_RET( n >= m_nGroups, "should be disabled" );
+
+   // first remove it from the listbox
+   m_listbox->Delete(n);
+
+   // now remove it from the internal data as well
+   AdbEntry *entry;
+
+   size_t countMain = m_aEverything.GetCount();
+   if ( n < countMain )
+   {
+      entry = (AdbEntry *)m_aEverything[n];
+      m_aEverything.RemoveAt(n);
+   }
+   else // an additional entry
+   {
+      n -= countMain;
+
+      entry = m_aMoreEntries[n];
+      m_aMoreEntries.RemoveAt(n);
+   }
+
+   // remember to not use it for the expansion again
+   entry->SetField(AdbField_ExpandPriority, "-1");
+
+   entry->DecRef();
 }
 
 // ----------------------------------------------------------------------------
@@ -608,6 +683,7 @@ bool AdbShowExportDialog(const AdbEntryGroup& group)
 int
 AdbShowExpandDialog(ArrayAdbElements& aEverything,
                     ArrayAdbEntries& aMoreEntries,
+                    size_t nGroups,
                     wxFrame *parent)
 {
    int choice;
@@ -627,7 +703,7 @@ AdbShowExpandDialog(ArrayAdbElements& aEverything,
 
       default:
          // do show the dialog
-         wxAdbExpandDialog dialog(aEverything, aMoreEntries, parent);
+         wxAdbExpandDialog dialog(aEverything, aMoreEntries, nGroups, parent);
 
          choice = dialog.ShowModal() == wxID_OK ? dialog.GetSelection() : -1;
    }

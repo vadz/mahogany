@@ -141,6 +141,13 @@ static void GroupLookup(ArrayAdbEntries& aEntries,
   for ( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ ) {
     AdbEntry *pEntry = pGroup->GetEntry(aNames[nEntry]);
 
+    if ( pEntry->GetField(AdbField_ExpandPriority) == "-1" )
+    {
+      // never use this one for expansion
+      pEntry->DecRef();
+      continue;
+    }
+
     // we put the entries which match with their nick name in one array and
     // the entries which match anywhere else in the other one: see AdbExpand()
     // to see why
@@ -274,7 +281,7 @@ AdbExpand(wxArrayString& results, const String& what, int how, wxFrame *frame)
     }
 
     // let the user choose the one he wants
-    int rc = AdbShowExpandDialog(aEverything, aMoreEntries, frame);
+    int rc = AdbShowExpandDialog(aEverything, aMoreEntries, nGroupCount, frame);
 
     if ( rc != -1 ) {
       size_t index = (size_t)rc;

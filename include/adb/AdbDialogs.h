@@ -42,12 +42,14 @@ extern bool AdbShowExportDialog(const AdbEntryGroup& group);
   @param aEverything the array of groups and entries to show initially
   @param aMoreEntries the array of entries to show if the user chooses
                       to see all possible matches
+  @param nGroups first nGroups elements of aEverything are groups, not entries
   @param parent the parent frame
   @return the index in the concatenation of aEverything and aMoreEntries arrays
           or -1 if the dialog was cancelled
  */
 extern int AdbShowExpandDialog(ArrayAdbElements& aEverything,
                                ArrayAdbEntries& aMoreEntries,
+                               size_t nGroups,
                                wxFrame *parent);
 
 #endif // _ADB_DIALOGS_H
