@@ -6,6 +6,14 @@
  * $Id$
  *******************************************************************/
 
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
 #ifdef __GNUG__
 #   pragma implementation "Message.h"
 #endif
@@ -15,6 +23,22 @@
 #include   "Message.h"
 
 #include   "strutil.h"
+
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+static void SplitAddress(const String& addr,
+                         String *firstName,
+                         String *lastName);
+
+// ============================================================================
+// implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// parameters handling
+// ----------------------------------------------------------------------------
 
 /** Get a parameter value from the list.
     @param list a MessageParameterList
@@ -40,6 +64,73 @@ Message::ExpandParameter(MessageParameterList const & list, String
    }
    return false;
 }
+
+// ----------------------------------------------------------------------------
+// working with email addresses
+// ----------------------------------------------------------------------------
+
+static void SplitAddress(const String& addr,
+                         String *firstName,
+                         String *lastName)
+{
+   // assume that in general the email address will have the form "First Last
+   // <address>", but be prepared to handle anything here
+
+   // first look whether we have "<address>" part at all
+   const char *addrStart = strchr(addr, '<');
+   if ( !addrStart )
+   {
+      addrStart = addr.c_str() + addr.length();
+   }
+
+   // the last name is the last word in the name part
+   const char *lastNameStart = addrStart;
+   while ( lastNameStart >= addr.c_str() && !isspace(*lastNameStart) )
+   {
+      lastNameStart--;
+   }
+
+   if ( isspace(lastNameStart) )
+   {
+      lastNameStart++;
+   }
+
+   String last(lastNameStart, addrStart);
+
+   // first name(s) is everything preceding the last name
+   String first(addr.c_str(), lastNameStart);
+
+   if ( firstName )
+      *firstName = first;
+   if ( lastName )
+      *lastName = last;
+}
+
+String Message::GetAddressFirstName(MessageAddressType type) const
+{
+   String addr;
+   Address(addr, type);
+
+   String first;
+   SplitAddress(addr, &first, NULL);
+
+   return first;
+}
+
+String Message::GetAddressLastName(MessageAddressType type) const
+{
+   String addr;
+   Address(addr, type);
+
+   String last;
+   SplitAddress(addr, NULL, &last);
+
+   return last;
+}
+
+// ----------------------------------------------------------------------------
+// Message creation
+// ----------------------------------------------------------------------------
 
 /*
   The following function is implemented in MessageCC.cpp:

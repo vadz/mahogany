@@ -41,6 +41,9 @@
 
 #include "MailCollector.h"
 
+#include "MessageTemplate.h"
+#include "TemplateDialog.h"
+
 #include "FolderView.h"
 #include "MDialogs.h"
 
@@ -240,16 +243,25 @@ wxMFrame::OnMenuCommand(int id)
       }
       break;
 
+   case WXMENU_FILE_COMPOSE_WITH_TEMPLATE:
    case WXMENU_FILE_COMPOSE:
       {
-         wxComposeView *composeView = wxComposeView::CreateNewMessage(this);
+         wxString templ;
+         if ( id == WXMENU_FILE_COMPOSE_WITH_TEMPLATE )
+         {
+            templ = ChooseTemplateFor(MessageTemplate_NewMessage, this);
+         }
+
+         wxComposeView *composeView = wxComposeView::CreateNewMessage(templ, this);
          composeView->InitText();
          composeView->Show();
       }
       break;
+
    case WXMENU_FILE_SEND_OUTBOX:
       mApplication->SendOutbox();
       break;
+
    case WXMENU_FILE_POST:
       {
          wxComposeView *composeView = wxComposeView::CreateNewArticle(this);
@@ -316,6 +328,10 @@ wxMFrame::OnMenuCommand(int id)
    case WXMENU_EDIT_MODULES:
       ShowModulesDialog(this);
       break;
+   case WXMENU_EDIT_TEMPLATES:
+      EditTemplates(this);
+      break;
+
    case WXMENU_EDIT_RESTORE_PREF:
       (void)ShowRestoreDefaultsDialog(mApplication->GetProfile(), this);
       break;

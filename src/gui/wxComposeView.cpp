@@ -321,6 +321,8 @@ public:
       OriginalHeader_From,
       OriginalHeader_Subject,
       OriginalHeader_PersonalName,
+      OriginalHeader_FirstName,
+      OriginalHeader_LastName,
       OriginalHeader_To,
       OriginalHeader_ReplyTo,
       OriginalHeader_Newsgroups,
@@ -787,13 +789,15 @@ void wxComposeView::EnableEditing(bool enable)
     @return pointer to the new compose view
 */
 wxComposeView *
-wxComposeView::CreateNewArticle(wxWindow *parent,
+wxComposeView::CreateNewArticle(const MailFolder::Params& params,
+                                wxWindow *parent,
                                 ProfileBase *parentProfile,
                                 bool hide)
 {
    wxComposeView *cv = new wxComposeView("ComposeViewNews", parent);
    cv->m_mode = Mode_NNTP;
    cv->m_kind = Message_New;
+   cv->m_template = params.templ;
    cv->SetTitle(_("Article Composition"));
    cv->Create(parent,parentProfile);
 
@@ -807,13 +811,15 @@ wxComposeView::CreateNewArticle(wxWindow *parent,
     @return pointer to the new compose view
 */
 wxComposeView *
-wxComposeView::CreateNewMessage(wxWindow *parent,
+wxComposeView::CreateNewMessage(const MailFolder::Params& params,
+                                wxWindow *parent,
                                 ProfileBase *parentProfile,
                                 bool hide)
 {
    wxComposeView *cv = new wxComposeView("ComposeViewMail", parent);
    cv->m_mode = Mode_SMTP;
    cv->m_kind = Message_New;
+   cv->m_template = params.templ;
    cv->SetTitle(_("Message Composition"));
    cv->Create(parent,parentProfile);
 
@@ -2428,6 +2434,8 @@ const char *VarExpander::ms_templateOriginalVars[] =
    "from",
    "subject",
    "fullname",
+   "firstname",
+   "lastname",
    "to",
    "replyto",
    "newsgroups",
@@ -2721,6 +2729,14 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
 
          case OriginalHeader_PersonalName:
             m_msg->Address(*value);
+            break;
+
+         case OriginalHeader_FirstName:
+            *value = m_msg->GetAddressFirstName();
+            break;
+
+         case OriginalHeader_LastName:
+            *value = m_msg->GetAddressLastName();
             break;
 
          case OriginalHeader_Newsgroups:

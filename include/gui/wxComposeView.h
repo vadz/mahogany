@@ -91,9 +91,10 @@ public:
        @param hide if true, do not show frame
        @return pointer to the new compose view
     */
-   static wxComposeView * CreateNewArticle(wxWindow *parent = NULL,
-                                            ProfileBase *parentProfile = NULL,
-                                            bool hide = false);
+   static wxComposeView * CreateNewArticle(const MailFolder::Params& params,
+                                           wxWindow *parent = NULL,
+                                           ProfileBase *parentProfile = NULL,
+                                           bool hide = false);
 
    /** Constructor for sending mail.
        @param parent parent window
@@ -101,7 +102,8 @@ public:
        @param hide if true, do not show frame
        @return pointer to the new compose view
     */
-   static wxComposeView * CreateNewMessage(wxWindow *parent = NULL,
+   static wxComposeView * CreateNewMessage(const MailFolder::Params& params,
+                                           wxWindow *parent = NULL,
                                            ProfileBase *parentProfile = NULL,
                                            bool hide = false);
 
@@ -237,6 +239,27 @@ public:
 
    /// reset the "dirty" flag
    void ResetDirty();
+
+   // these functions are for backwards compatibility only
+   static wxComposeView * CreateNewArticle(wxWindow *parent = NULL,
+                                           ProfileBase *parentProfile = NULL,
+                                           bool hide = false)
+   {
+      return CreateNewArticle(MailFolder::Params(""),
+                              parent,
+                              parentProfile,
+                              hide);
+   }
+
+   static wxComposeView * CreateNewMessage(wxWindow *parent = NULL,
+                                           ProfileBase *parentProfile = NULL,
+                                           bool hide = false)
+   {
+      return CreateNewMessage(MailFolder::Params(""),
+                              parent,
+                              parentProfile,
+                              hide);
+   }
 
 protected:
    /** quasi-Constructor

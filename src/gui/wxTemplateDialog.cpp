@@ -36,6 +36,7 @@
 #  include <wx/textctrl.h>
 #  include <wx/menu.h>
 #  include <wx/listbox.h>
+#  include <wx/choicdlg.h>
 #endif
 
 #include "Mdefaults.h"
@@ -534,7 +535,7 @@ wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
    c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->width.AsIs();
-   c->height.Absolute(5*hBtn);
+   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_listbox->SetConstraints(c);
 
    // put 2 buttons to add/delete templates along the right edge
@@ -559,7 +560,7 @@ wxAllTemplatesDialog::wxAllTemplatesDialog(MessageTemplateKind kind,
    m_textctrl = new TemplateEditor(menu, this);
    c = new wxLayoutConstraints;
    c->top.SameAs(m_listbox, wxTop);
-   c->height.SameAs(m_listbox, wxHeight);
+   c->bottom.SameAs(m_listbox, wxBottom);
    c->left.RightOf(m_listbox, LAYOUT_X_MARGIN);
    c->right.LeftOf(m_btnAdd, 2*LAYOUT_X_MARGIN);
    m_textctrl->SetConstraints(c);
@@ -754,3 +755,33 @@ String ChooseTemplateFor(MessageTemplateKind kind,
 
    return value;
 }
+
+// edit any templates
+void EditTemplates(wxWindow *parent,
+                   const TemplatePopupMenuItem& menu)
+{
+   // first get the kind of templates to edit
+   wxString templateKinds[MessageTemplate_Max];
+   templateKinds[MessageTemplate_NewMessage] = _("Composing new messages");
+   templateKinds[MessageTemplate_NewArticle] = _("Writing new articles");
+   templateKinds[MessageTemplate_Reply] = _("Replying");
+   templateKinds[MessageTemplate_Forward] = _("Forwarding");
+   templateKinds[MessageTemplate_Followup] = _("Following up");
+
+   int index = wxGetSingleChoiceIndex
+               (
+                _("What kind of templates would you like to edit?\n"
+                  "Mahogany uses different templates for:"),
+                _("Mahogany: edit templates"),
+                WXSIZEOF(templateKinds), templateKinds,
+                parent
+               );
+
+   if ( index != -1 )
+   {
+      wxAllTemplatesDialog dlg((MessageTemplateKind)index, menu, parent);
+
+      dlg.ShowModal();
+   }
+}
+

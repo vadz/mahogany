@@ -31,10 +31,17 @@
 // ----------------------------------------------------------------------------
 
 /// a type used by Address():
-enum MessageAddressType { MAT_FROM, MAT_SENDER, MAT_REPLYTO, MAT_TO, MAT_CC };
+enum MessageAddressType
+{
+   MAT_FROM,
+   MAT_SENDER,
+   MAT_REPLYTO,
+   MAT_TO,
+   MAT_CC
+};
 
 /// a define to make scandoc work
-#define   MessageContentType Message::ContentType
+#define MessageContentType Message::ContentType
 
 /// a type to store parameters and their values
 class MessageParameter
@@ -116,6 +123,14 @@ public:
    */
    virtual const String Address(String &name,
                                 MessageAddressType type = MAT_REPLYTO) const = 0;
+
+   /** Extract the first name from the result returned by calling Address()
+   */
+   virtual String GetAddressFirstName(MessageAddressType type = MAT_REPLYTO) const;
+
+   /** Extract the last name from the result returned by calling Address()
+   */
+   virtual String GetAddressLastName(MessageAddressType type = MAT_REPLYTO) const;
 
    /** get From line
        @return From entry

@@ -213,6 +213,8 @@ static const MenuItemInfo g_aMenuItems[] =
    // file
    { WXMENU_FILE_OPEN,     gettext_noop("&Open Folder...\tCtrl-O"),   gettext_noop("Open an existing message folder")                  , FALSE },
    { WXMENU_FILE_COMPOSE,  gettext_noop("Compose &New Message\tCtrl-N"),  gettext_noop("Start a new message")      , FALSE },
+   { WXMENU_FILE_COMPOSE_WITH_TEMPLATE,
+                           gettext_noop("Compose with &template..."),  gettext_noop("Compose a new message using after choosing a temple for it")      , FALSE },
    { WXMENU_FILE_POST,     gettext_noop("Post News &Article\tCtrl-A"),   gettext_noop("Write a news article and post it")      , FALSE },
    { WXMENU_FILE_COLLECT,  gettext_noop("&Check mail\tCtrl-C"), gettext_noop("Check all incoming folder for new mail and download it now") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
@@ -253,6 +255,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_EDIT_PREF,     gettext_noop("Pr&eferences..."),   gettext_noop("Change options")           , FALSE },
    { WXMENU_EDIT_MODULES,  gettext_noop("&Modules..."), gettext_noop("Choose which extension modules to use")           , FALSE },
    { WXMENU_EDIT_FILTERS,  gettext_noop("&Filter Rules..."), gettext_noop("Edit rules for message filtering")   , FALSE },
+   { WXMENU_EDIT_TEMPLATES,gettext_noop("&Templates..."), gettext_noop("Edit templates used for message composition")   , FALSE },
    { WXMENU_EDIT_RESTORE_PREF,
                            gettext_noop("&Restore defaults..."), gettext_noop("Restore default options values") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },

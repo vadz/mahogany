@@ -1299,17 +1299,28 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       mApplication->Help(MH_FOLDER_VIEW,GetWindow());
       break;
 
+   case WXMENU_FILE_COMPOSE_WITH_TEMPLATE:
    case WXMENU_FILE_COMPOSE:
-   {
-      wxComposeView *composeView = wxComposeView::CreateNewMessage
-                                   (
-                                    GetFrame(m_Parent),
-                                    GetProfile()
-                                   );
-      composeView->InitText();
-      composeView->Show();
-   }
-   break;
+      {
+         wxFrame *frame = GetFrame(m_Parent);
+
+         wxString templ;
+         if ( cmd == WXMENU_FILE_COMPOSE_WITH_TEMPLATE )
+         {
+            templ = ChooseTemplateFor(MessageTemplate_NewMessage, frame);
+         }
+
+         wxComposeView *composeView = wxComposeView::CreateNewMessage
+                                      (
+                                       templ,
+                                       frame,
+                                       GetProfile()
+                                      );
+         composeView->InitText();
+         composeView->Show();
+      }
+      break;
+
    case WXMENU_FILE_POST:
    {
       wxComposeView *composeView = wxComposeView::CreateNewArticle

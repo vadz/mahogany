@@ -105,4 +105,12 @@ extern String ChooseTemplateFor(MessageTemplateKind kind,
                                 const TemplatePopupMenuItem& menu =
                                  g_ComposeViewTemplatePopupMenu);
 
+/** Propose to the user to either edit all templates.
+
+    @param parent the parent window
+ */
+extern void EditTemplates(wxWindow *parent,
+                          const TemplatePopupMenuItem& menu =
+                           g_ComposeViewTemplatePopupMenu);
+
 #endif // _TEMPLATEDIALOG_H
