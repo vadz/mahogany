@@ -1070,39 +1070,41 @@ void wxOptionsPage::UpdateUI()
          wxControl *control = GetControl(n);
          control->Enable(bEnable);
 
-         switch ( GetFieldType(n) ) {
+         switch ( GetFieldType(n) )
+         {
             // for file entries, also disable the browse button
-            case Field_File:
-            case Field_Color:
-               wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
+         case Field_File:
+         case Field_Color:
+            wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
 
-               EnableTextWithButton((wxTextCtrl *)control, bEnable);
-               break;
-
-            case Field_Text:
-               wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
-
-               EnableTextWithLabel((wxTextCtrl *)control, bEnable);
-               break;
-
-            case Field_List:
-               // also disable the buttons
-            {
-               long i;
-               for ( i = wxOptionsPage_BtnNew; i <= wxOptionsPage_BtnNew; i++ ) {
-                  wxWindow *win = FindWindow(i);
-                  if ( win ) {
-                     win->Enable(bEnable);
-                  }
-                  else {
-                     wxFAIL_MSG("can't find listbox buttons by id");
-                  }
-               }
-            }
+            EnableTextWithButton((wxTextCtrl *)control, bEnable);
             break;
 
+         case Field_Number:
+         case Field_Text:
+            wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
+
+            EnableTextWithLabel((wxTextCtrl *)control, bEnable);
+            break;
+
+         case Field_List:
+            // also disable the buttons
+         {
+            long i;
+            for ( i = wxOptionsPage_BtnNew; i <= wxOptionsPage_BtnNew; i++ ) {
+               wxWindow *win = FindWindow(i);
+               if ( win ) {
+                  win->Enable(bEnable);
+               }
+               else {
+                  wxFAIL_MSG("can't find listbox buttons by id");
+               }
+            }
+         }
+         break;
+
          default:
-               ;
+            ;
          }
       }
       // this field is always enabled
