@@ -87,6 +87,7 @@ public:
    // operations
    virtual bool Find(const String& text);
    virtual bool FindAgain();
+   virtual void SelectAll();
    virtual String GetSelection() const;
    virtual void Copy();
    virtual bool Print();
@@ -590,6 +591,11 @@ bool TextViewer::FindAgain()
 void TextViewer::Copy()
 {
    m_window->Copy();
+}
+
+void TextViewer::SelectAll()
+{
+   m_window->SelectAll();
 }
 
 String TextViewer::GetSelection() const

@@ -68,6 +68,7 @@ public:
    // operations
    virtual bool Find(const String& text);
    virtual bool FindAgain();
+   virtual void SelectAll();
    virtual String GetSelection() const;
    virtual void Copy();
    virtual bool Print();
@@ -354,6 +355,14 @@ bool LayoutViewer::FindAgain()
 void LayoutViewer::Copy()
 {
    m_window->Copy();
+}
+
+void LayoutViewer::SelectAll()
+{
+   wxLayoutList *llist = m_window->GetLayoutList();
+   llist->StartSelection(wxPoint(0, 0));
+   llist->EndSelection(wxPoint(1000, 1000));
+   m_window->Refresh();
 }
 
 String LayoutViewer::GetSelection() const

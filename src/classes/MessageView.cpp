@@ -2830,6 +2830,10 @@ MessageView::DoMenuCommand(int id)
          m_viewer->Copy();
          break;
 
+      case WXMENU_EDIT_SELECT_ALL:
+         m_viewer->SelectAll();
+         break;
+
       case WXMENU_EDIT_FIND:
          if ( m_uid != UID_ILLEGAL )
          {

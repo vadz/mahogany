@@ -76,6 +76,7 @@ public:
    // operations
    virtual bool Find(const String& text);
    virtual bool FindAgain();
+   virtual void SelectAll();
    virtual String GetSelection() const;
    virtual void Copy();
    virtual bool Print();
@@ -637,6 +638,15 @@ bool HtmlViewer::FindAgain()
 void HtmlViewer::Copy()
 {
    m_window->Copy();
+}
+
+void HtmlViewer::SelectAll()
+{
+   // you need http://www.volny.cz/v.slavik/wx/wx-htmlwin-selectall.patch
+   // to enable this
+#ifdef wxHAVE_HTML_SELECTALL
+   m_window->SelectAll();
+#endif // wxHAVE_HTML_SELECTALL
 }
 
 String HtmlViewer::GetSelection() const

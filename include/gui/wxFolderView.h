@@ -180,8 +180,11 @@ public:
    /// get the parent frame of the folder view
    wxFrame *GetParentFrame() const { return m_Frame; }
 
-   /// process a keyboard event, return true if processed
-   bool HandleCharEvent(wxKeyEvent& event);
+   /// process a keyboard event in the list control, return true if processed
+   bool HandleFolderViewCharEvent(wxKeyEvent& event);
+
+   /// process a keyboard event in the message view part
+   bool HandleMsgViewCharEvent(wxKeyEvent& event);
 
 protected:
    /// update the view after new messages appeared in the folder

@@ -45,6 +45,7 @@
 #  include <wx/stattext.h>
 
 #  include <wx/sizer.h>
+#  include <wx/accel.h>
 #endif // USE_PCH
 
 #include <ctype.h>
@@ -1127,6 +1128,13 @@ void wxFolderMsgWindow::SetViewerWindow(wxWindow *winViewerNew)
 
       m_winViewer->PushEventHandler(m_evtHandlerMsgView);
 
+      // override some keys to be processed differently in the viewer: we can't
+      // simply do it in OnChar() because they're menu accels and so never
+      // reach OnChar() in the first place
+      wxAcceleratorEntry accEntry(wxACCEL_CTRL, 'A', WXMENU_EDIT_SELECT_ALL);
+      wxAcceleratorTable accTable(1, &accEntry);
+      m_winViewer->SetAcceleratorTable(accTable);
+
       Resize();
    }
    else // we don't have any viewer any longer
@@ -1388,8 +1396,8 @@ void wxFolderMsgWindow::Resize()
 
 void wxFolderMsgViewerEvtHandler::OnChar(wxKeyEvent& event)
 {
-   // HandleCharEvent() will skip the event if it doesn't process it
-   m_folderView->HandleCharEvent(event);
+   // this function will skip the event if it doesn't process it
+   m_folderView->HandleMsgViewCharEvent(event);
 }
 
 // ============================================================================
@@ -1591,7 +1599,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       return;
    }
 
-   (void)m_FolderView->HandleCharEvent(event);
+   (void)m_FolderView->HandleFolderViewCharEvent(event);
 }
 
 void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
@@ -4206,7 +4214,17 @@ void wxFolderView::SelectAll(bool on)
 // ----------------------------------------------------------------------------
 
 bool
-wxFolderView::HandleCharEvent(wxKeyEvent& event)
+wxFolderView::HandleMsgViewCharEvent(wxKeyEvent& event)
+{
+   // this function exists to make it possible to treat some keys differently
+   // in the viewer window than in the list control but for now we don't use
+   // this possibility (we probably will later, so don't remove it)
+
+   return HandleFolderViewCharEvent(event);
+}
+
+bool
+wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
 {
    // which command?
    // --------------
@@ -5297,10 +5315,7 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
               WXMENU_CONTAINS(VIEW, id) ||
               WXMENU_CONTAINS(VIEW_FILTERS, id) ||
               WXMENU_CONTAINS(VIEW_VIEWERS, id) ||
-              id == WXMENU_HELP_CONTEXT ||
-              id == WXMENU_EDIT_CUT ||
-              id == WXMENU_EDIT_COPY ||
-              id == WXMENU_EDIT_PASTE )
+              WXMENU_CONTAINS(EDIT, id) )
             m_FolderView->OnCommandEvent(event);
          else
             wxMFrame::OnMenuCommand(id);

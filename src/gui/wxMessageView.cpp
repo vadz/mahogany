@@ -127,6 +127,7 @@ public:
 
    virtual bool Find(const String& /* text */) { return false; }
    virtual bool FindAgain() { return false; }
+   virtual void SelectAll() { }
    virtual String GetSelection() const { return _T(""); }
    virtual void Copy() { }
    virtual bool Print() { return false; }

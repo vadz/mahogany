@@ -74,6 +74,9 @@ public:
    /// find the same string again (i.e. resume search)
    virtual bool FindAgain() = 0;
 
+   /// select the entire contents of the viewer
+   virtual void SelectAll() = 0;
+
    /// return the selection
    virtual String GetSelection() const = 0;
 
