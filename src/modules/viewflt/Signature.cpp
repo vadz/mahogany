@@ -137,9 +137,10 @@ SignatureFilter::DoProcess(String& text,
       // is it a signature delimiter?
       //
       // NB: we accept "-- " (canonical) but also just "--" which is
-      //     unfortunately used by some people
+      //     unfortunately used by some people.
+      //     But we always make sure that the line ends just after.
       if ( pc[0] == '-' && pc[1] == '-' &&
-               (pc[2] == ' ' || pc[2] == '\r' || pc[2] == '\n') )
+               ((pc[2] == ' ' && (pc[3] == '\r' || pc[3] == '\n')) || pc[2] == '\r' || pc[2] == '\n') )
       {
          // remember the signature and cut it off
          signature = pc;
