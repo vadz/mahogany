@@ -14,4 +14,7 @@
 /// separating directories in a search path
 #define	PATH_SEPARATOR	';'
 
+// @@@@ wxGetHomeDir
+#define wxGetHomeDir(pszBuf)  strcpy(pszBuf, "c:\\")
+
 #endif
