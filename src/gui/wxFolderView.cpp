@@ -57,6 +57,7 @@
 #include <wx/encconv.h>
 #include "wx/persctrl.h"
 
+#include "MThread.h"
 #include "MFolder.h"
 
 #include "FolderView.h"
@@ -396,14 +397,12 @@ public:
 
      It will always focus the message it found, if any.
 
-     @param hil the headers to use
      @param indexStart the index after which to look (exclusive)
      @param status the status bit to look for
      @param isSet if true, check that status bit is set, otherwise - cleared
      @return uid of the item we found or UID_ILLEGAL if no more
     */
-   UIdType SelectNextUnreadAfter(const HeaderInfoList_obj& hil,
-                                 long indexStart = -1,
+   UIdType SelectNextUnreadAfter(long indexStart = -1,
                                  MailFolder::MessageStatus status =
                                     MailFolder::MSG_STAT_SEEN,
                                  bool isSet = FALSE);
@@ -563,6 +562,9 @@ protected:
 
    /// the listing to use
    HeaderInfoList *m_headers;
+
+   /// are we inside a call to some HeaderInfoList method?
+   MMutex m_mutexHeaders;
 
    /// cached header info (used by OnGetItemXXX())
    HeaderInfo *m_hiCached;
@@ -1270,6 +1272,8 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
 
       if ( uid == UID_ILLEGAL )
       {
+         MLocker lock(m_mutexHeaders);
+
          if ( !m_headers->ReallyGet(m_itemFocus) )
          {
             // we failed to get it, what can we do?
@@ -1636,6 +1640,8 @@ void wxFolderListCtrl::UpdateListing(HeaderInfoList *headers)
       // might have changed if the sort order in the folder changed
       if ( m_uidFocus != UID_ILLEGAL )
       {
+         MLocker lockHeaders(m_mutexHeaders);
+
          MFInteractiveLock lock(m_FolderView->GetMailFolder(),
                                 (MFrame *)GetFrame(this));
 
@@ -1744,7 +1750,7 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
 {
    event.Skip();
 
-   if ( !m_headersToGet.IsEmpty() )
+   if ( !m_mutexHeaders.IsLocked() && !m_headersToGet.IsEmpty() )
    {
       CHECK_RET( m_headers, "can't get headers without listing" );
 
@@ -1769,6 +1775,8 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
       m_headersToGet.Empty();
 
       {
+         MLocker lockHeaders(m_mutexHeaders);
+
          MFInteractiveLock lock(m_FolderView->GetMailFolder(),
                                 (MFrame *)GetFrame(this));
 
@@ -2390,15 +2398,14 @@ bool
 wxFolderListCtrl::SelectNextByStatus(MailFolder::MessageStatus status,
                                      bool isSet)
 {
-   HeaderInfoList_obj hil = m_FolderView->GetFolder()->GetHeaders();
-   if( !hil || hil->Count() == 0 )
+   if( !m_headers || m_headers->Count() == 0 )
    {
       // cannot do anything without listing
       return false;
    }
 
    long idxFocused = GetFocusedItem();
-   UIdType uid = SelectNextUnreadAfter(hil, idxFocused, status, isSet);
+   UIdType uid = SelectNextUnreadAfter(idxFocused, status, isSet);
    if ( uid != UID_ILLEGAL )
    {
       // always preview the selected message, if we did "Show next unread"
@@ -2414,7 +2421,8 @@ wxFolderListCtrl::SelectNextByStatus(MailFolder::MessageStatus status,
 
    String msg;
    if ( (idxFocused != -1) &&
-            CheckStatusBit(hil[idxFocused]->GetStatus(), status, isSet) )
+            CheckStatusBit(m_headers->GetItem(idxFocused)->GetStatus(),
+                           status, isSet) )
    {
       // "more" because the one selected previously was unread
       msg = _("No more unread or flagged messages in this folder.");
@@ -2432,16 +2440,19 @@ wxFolderListCtrl::SelectNextByStatus(MailFolder::MessageStatus status,
 
 
 UIdType
-wxFolderListCtrl::SelectNextUnreadAfter(const HeaderInfoList_obj& hil,
-                                        long idxFocused,
+wxFolderListCtrl::SelectNextUnreadAfter(long idxFocused,
                                         MailFolder::MessageStatus status,
                                         bool isSet)
 {
-   size_t idx = hil->FindHeaderByFlagWrap(status, isSet, idxFocused);
+   CHECK( m_headers, UID_ILLEGAL, "no headers in SelectNextUnreadAfter" );
+
+   MLocker lockHeaders(m_mutexHeaders);
+
+   size_t idx = m_headers->FindHeaderByFlagWrap(status, isSet, idxFocused);
 
    if ( idx != INDEX_ILLEGAL )
    {
-      const HeaderInfo *hi = hil[idx];
+      const HeaderInfo *hi = m_headers->GetItem(idx);
       CHECK( hi, UID_ILLEGAL, "failed to get header" );
 
       Focus(idx);
