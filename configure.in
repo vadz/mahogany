@@ -281,10 +281,9 @@ dnl --------------------------------------------------------------------------
 dnl check for other libraries
 dnl --------------------------------------------------------------------------
 
-dnl we might need dl (depending on wxGTK config), so link with it if
+dnl we might need dl (depending on wxGTK and python config), so link with it if
 dnl it is available 
 AC_CHECK_LIB(dl,main,,AC_MSG_WARN("dl library might be needed."))
-
 
 dnl c-client library needs the crypt() function which is either in the 
 dnl c library or in libcrypt
@@ -403,7 +402,7 @@ else
 	dnl check for gtk-config
 	if test "x$GTK_CONFIG" = "x"
 	then
-		AC_PATH_PROG(GTK_CONFIG,gtk-config,yes,no)
+		AC_PATH_PROG(GTK_CONFIG,gtk-config)
 	fi
 	if test ! -x $GTK_CONFIG
 	then
@@ -412,7 +411,7 @@ else
 
 	dnl we don't set the LIBS directly as libwx_gtk might break other
 	dnl checks thanks to its included main() function
-	if test "$GTK_CONFIG" = yes
+	if test "x$GTK_CONFIG" != "x"
 	then
 		GTK_CFLAGS=`gtk-config --cflags`
 		GTK_LDFLAGS=`gtk-config --libs`
@@ -422,6 +421,9 @@ else
 		GTK_CFLAGS="$X_CFLAGS"
 		GTK_LDFLAGS="-lgtk -lgdk -lglib $X_EXTRA_LIBS"
 	fi
+	dnl we might need posix4 (depending on OS), so link with it if
+	dnl it is available 
+	AC_CHECK_LIB(posix4,nanosleep)
 fi
 
 CPPFLAGS="$CPPFLAGS $GTK_CFLAGS"
