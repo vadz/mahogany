@@ -170,7 +170,8 @@ UrlPopup::OnCommandEvent(wxCommandEvent &event)
                                   msgview ? msgview->GetMessage() : NULL,
                                   params,
                                   m_clickableURL->GetProfile(),
-                                  msgview ? msgview->GetWindow() : NULL
+                                  msgview ? msgview->GetWindow() : NULL,
+                                  NULL
                                 );
 
             if ( cv )
