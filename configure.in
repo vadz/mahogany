@@ -443,7 +443,8 @@ if test "$USE_WXGTK" = 1; then
       WX_DEFS=-D__WXGTK__
       AC_MSG_RESULT(yes)
       WX_DEFS=-D__WXGTK__
-      MAKE_LOCAL_LIBS_DEFINE="LOCAL_LIBS=$ac_path_to_link/libwx_gtk*"
+      MAKE_LOCAL_LIBS_DEFINE="LOCAL_LIBS=$ac_path_to_link/libwx_gtk.so*"
+      MAKE_LOCAL_LIBS_DEFINE=`echo $MAKE_LOCAL_LIBS_DEFINE | sed "1,$s/^-L//g"`
   else
       AC_MSG_RESULT(no)
       AC_MSG_ERROR("Cannot find the wxGtk libraries."

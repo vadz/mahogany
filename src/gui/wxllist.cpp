@@ -1042,6 +1042,7 @@ wxLayoutList::Find(wxPoint coords) const
          if(coords.x <= bottomright.x && coords.y <= bottomright.y)
             return *i;
       }
+      i++;
    }
    return NULL;
 }

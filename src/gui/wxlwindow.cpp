@@ -42,14 +42,19 @@ wxLayoutWindow::MSWGetDlgCode()
 void
 wxLayoutWindow::OnMouse(wxMouseEvent& event)
 {
+   wxPaintDC dc( this );
+   PrepareDC( dc );     
+
    SetFocus();
 
    if(m_EventId == -1) // nothing to do
       return;
-   
-   m_FindPos.x = event.GetX();
-   m_FindPos.y = event.GetY();
+
+   cerr << "Y:" << event.GetY() << endl;
+   m_FindPos.x = dc.DeviceToLogicalX(event.GetX());
+   m_FindPos.y = dc.DeviceToLogicalY(event.GetY());
    m_FoundObject = NULL;
+   cerr << "Y:" << m_FindPos.y << endl;
 
 #ifdef   WXLAYOUT_DEBUG
    //doesn't work, undefined functions
