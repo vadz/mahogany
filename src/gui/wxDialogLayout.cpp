@@ -230,7 +230,9 @@ wxEnhancedPanel::wxEnhancedPanel(wxWindow *parent, bool enableScrolling)
 {
    if ( enableScrolling )
    {
-      m_canvas = new wxScrolledWindow(this);
+      m_canvas = new wxScrolledWindow(this, -1,
+                                      wxDefaultPosition, wxDefaultSize,
+                                      wxHSCROLL | wxVSCROLL | wxTAB_TRAVERSAL);
    }
    //else: no need for it... just use the panel directly (canvas is already
    //      initialized to NULL above)

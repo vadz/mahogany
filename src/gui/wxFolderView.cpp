@@ -2243,6 +2243,7 @@ wxFolderViewFrame::wxFolderViewFrame(String const &name, wxMFrame *parent)
    menuBar->Enable(WXMENU_EDIT_CUT, FALSE);
 
    AddMessageMenu();
+   AddLanguageMenu();
 
    // status bar
    CreateStatusBar();
