@@ -522,6 +522,7 @@ private:
    void *m_eventFolderChange;    // for folder creation/destruction
    void *m_eventOptionsChange;   // options change (update icons)
    void *m_eventFolderStatus;    // number of messages changed
+   void *m_eventFolderClose;     // folder has been closed
 
    // the full names of the folder currently opened in the main frame and
    // of the current selection in the tree ctrl (empty if none)
@@ -1765,6 +1766,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
             MEventId_FolderTreeChange, &m_eventFolderChange,
             MEventId_OptionsChange, &m_eventOptionsChange,
             MEventId_FolderStatus, &m_eventFolderStatus,
+            MEventId_FolderClosed, &m_eventFolderClose,
             MEventId_Null
          ) )
     {
@@ -2904,6 +2906,14 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
 
       ProcessMsgNumberChange(event.GetFolderName());
    }
+   else if ( ev.GetId() == MEventId_FolderClosed )
+   {
+      MEventWithFolderData& event = (MEventWithFolderData &)ev;
+      if ( m_openFolderName == event.GetFolder()->GetName() )
+      {
+         SetOpenFolderName(_T(""));
+      }
+   }
 
    return true;
 }
@@ -3265,6 +3275,7 @@ wxFolderTreeImpl::~wxFolderTreeImpl()
    MEventManager::DeregisterAll(&m_eventFolderChange,
                                 &m_eventOptionsChange,
                                 &m_eventFolderStatus,
+                                &m_eventFolderClose,
                                 NULL);
 
    delete GetImageList();
