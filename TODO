@@ -54,6 +54,9 @@ $Id$
 		---> FINISH THE WXFOLDERVIEW WITH ASYNC CODE!!!
 		---> Add a "find text in folder" method, too, trivial.
 
+9	KB	Profile: add enumeration of entries for profile and
+		its subgroups
+
 9??? not sure anymore, wait:
 		MEvents need handlers with different priorities --
 		needed to get Filtering and ASMailFolder to work
