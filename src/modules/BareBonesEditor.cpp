@@ -127,6 +127,9 @@ private:
    wxTextCtrl *m_textControl;
    wxListCtrl *m_attachments;
 
+   // the encoding to use for the text in the control (and the font)
+   wxFontEncoding m_encoding;
+
    int m_getNextAttachement;
 };
 
@@ -668,8 +671,9 @@ wxBareBonesTextControl::wxBareBonesTextControl(BareBonesEditor *editor,
                       : wxTextCtrl(parent,-1,_T(""),
                                    wxDefaultPosition,wxDefaultSize,
                                    // use wxTE_RICH to allow for more than 64Kb
-                                   // of text under Win9x
-                                   wxTE_MULTILINE | wxTE_RICH)
+                                   // of text under Win9x and wxTE_RICH2 for
+                                   // better charset support (also for Win32)
+                                   wxTE_MULTILINE | wxTE_RICH2)
 {
    m_editor = editor;
 
@@ -713,6 +717,9 @@ void wxBareBonesTextControl::OnFocus(wxFocusEvent& event)
 BareBonesEditor::BareBonesEditor()
 {
    m_textControl = NULL;
+
+   m_encoding = wxFONTENCODING_SYSTEM;
+
    m_getNextAttachement = -1;
 }
 
@@ -842,23 +849,7 @@ void BareBonesEditor::ResetDirty()
 
 void BareBonesEditor::SetEncoding(wxFontEncoding encoding)
 {
-   const wxFont& previous = m_textControl->GetFont();
-#if 0 // FIXME: wxGtk2.4/wxFont::SetEncoding doesn't work for some reason
-   wxFont next(previous);
-   next.SetEncoding(encoding);
-#else
-   wxFont next(
-      previous.GetPointSize(),
-      previous.GetFamily(),
-      previous.GetStyle(),
-      previous.GetWeight(),
-      previous.GetUnderlined(),
-      previous.GetFaceName(),
-      encoding
-   );
-#endif
-   if ( next.Ok() )
-      m_textControl->SetFont(next);
+   m_encoding = encoding;
 }
 
 void BareBonesEditor::MoveCursorTo(unsigned long x, unsigned long y)
@@ -932,8 +923,8 @@ void BareBonesEditor::PrintPreview()
 // BareBonesEditor contents: adding data/text
 // ----------------------------------------------------------------------------
 
-void BareBonesEditor::InsertAttachment(
-   const wxBitmap& icon, EditorContentPart *mc)
+void
+BareBonesEditor::InsertAttachment(const wxBitmap& icon, EditorContentPart *mc)
 {
    wxListItem item;
 
@@ -947,16 +938,53 @@ void BareBonesEditor::InsertAttachment(
    m_attachments->InsertItem(item);
 }
 
-void BareBonesEditor::InsertText(const String& text, InsertMode insMode)
+void BareBonesEditor::InsertText(const String& textOrig, InsertMode insMode)
 {
-   if(insMode == Insert_Replace)
-      m_textControl->Clear();
-   m_textControl->Freeze();
    // Translate CRLF to LF. Internal strings should have only LF, but
    // obviously they don't. All strings returned from c-client have CRLF
    // and not all code translates it to LF, so we have to do it here.
-   m_textControl->WriteText(strutil_enforceLF(text));
-   m_textControl->Thaw();
+   //
+   // VZ: this really shouldn't be necessary and it could be a big performance
+   //     problem with huge messages (FIXME)
+   String text(strutil_enforceLF(textOrig));
+
+
+   // we may have to translate the text in another encoding if exactly this one
+   // is not available (but equivalent one is)
+   if ( EnsureAvailableTextEncoding(&m_encoding, &text, true /* may ask */) )
+   {
+      wxFont fontOld = m_textControl->GetFont();
+#if 0 // FIXME: wxGtk2.4/wxFont::SetEncoding doesn't work for some reason
+      wxFont fontNew(fontOld);
+      fontNew.SetEncoding(m_encoding);
+#else
+      wxFont fontNew(
+         fontOld.GetPointSize(),
+         fontOld.GetFamily(),
+         fontOld.GetStyle(),
+         fontOld.GetWeight(),
+         fontOld.GetUnderlined(),
+         fontOld.GetFaceName(),
+         m_encoding
+      );
+#endif
+
+      if ( fontNew.Ok() )
+      {
+         m_textControl->SetFont(fontNew);
+      }
+   }
+   //else: don't change the font, encoding is not supported anyhow
+
+
+   if ( insMode == Insert_Replace )
+   {
+      m_textControl->SetValue(text);
+   }
+   else // Insert_Append
+   {
+      m_textControl->AppendText(text);
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -966,12 +994,14 @@ void BareBonesEditor::InsertText(const String& text, InsertMode insMode)
 EditorContentPart *BareBonesEditor::GetFirstPart()
 {
    m_getNextAttachement = 0;
+
    // Translate LF to CRLF. All internal strings should have only LF, but
    // due to long bug tradition, many strings that contain messages have
    // CRLF newlines. They are passed to c-client, which expects CRLF, so
    // think twice before changing it.
-   return new EditorContentPart(strutil_enforceCRLF(
-      m_textControl->GetValue()));
+   //
+   // VZ: see above (FIXME)
+   return new EditorContentPart(strutil_enforceCRLF(m_textControl->GetValue()));
 }
 
 EditorContentPart *BareBonesEditor::GetNextPart()
