@@ -206,59 +206,64 @@ MailCollector::CollectOneFolder(MailFolder *mf)
       RemoveIncomingFolder(mf->GetName());
       return false;
    }
-   wxLogStatus(_("Auto-collecting mail from incoming folder '%s'."),
-               mf->GetName().c_str());
-   wxYield(); // normal wxYield() should be ok here, this code never
-   // gets called from a menu or such
-   long oldcount = m_NewMailFolder->CountMessages();
-   bool sendsEvents = mf->SendsNewMailEvents();
-   mf->EnableNewMailEvents(false,true);
-   mf->Ping(); //update it
-   INTARRAY selections;
-   
-   const HeaderInfo *hi = mf->GetFirstHeaderInfo();
-   if(hi)
+   /* Obtain exclusive access: */
+   MailFolderLock lock(mf);
+   if(lock.Locked())
    {
-      m_Message << _("From folder '") << mf->GetName() << "':\n";
-      for(;
-          hi;
-          hi = mf->GetNextHeaderInfo(hi))
+      wxLogStatus(_("Auto-collecting mail from incoming folder '%s'."),
+               mf->GetName().c_str());
+      wxYield(); // normal wxYield() should be ok here, this code never
+      // gets called from a menu or such
+      long oldcount = m_NewMailFolder->CountMessages();
+      bool sendsEvents = mf->SendsNewMailEvents();
+      mf->EnableNewMailEvents(false,true);
+      mf->Ping(); //update it
+      INTARRAY selections;
+   
+      const HeaderInfo *hi = mf->GetFirstHeaderInfo();
+      if(hi)
       {
-         selections.Add(hi->GetUId());
-         m_Count ++;
-         m_Message << _("  Subject: ") << hi->GetSubject()
-                   << _("  From: ") << hi->GetFrom()
-                   << '\n';
-      }
-      if(mf->SaveMessages(&selections,
-                          READ_APPCONFIG(MP_NEWMAIL_FOLDER),
-                          true /* isProfile */, true /* update count */))
-      {
-         mf->DeleteMessages(&selections);
-         mf->ExpungeMessages();
-         rc = true;
-      }
-      else
-         rc = false;
-      long i = 0;
-      String seq;
-      for(hi = m_NewMailFolder->GetFirstHeaderInfo();
-          hi;
-          hi = m_NewMailFolder->GetNextHeaderInfo(hi))
-      {
-         if(i >= oldcount)
+         m_Message << _("From folder '") << mf->GetName() << "':\n";
+         for(;
+             hi;
+             hi = mf->GetNextHeaderInfo(hi))
          {
-            if(seq.Length()) seq << ',';
-            seq << strutil_ultoa(hi->GetUId());
+            selections.Add(hi->GetUId());
+            m_Count ++;
+            m_Message << _("  Subject: ") << hi->GetSubject()
+                      << _("  From: ") << hi->GetFrom()
+                      << '\n';
          }
-         i++;
+         if(mf->SaveMessages(&selections,
+                             READ_APPCONFIG(MP_NEWMAIL_FOLDER),
+                             true /* isProfile */, true /* update count */))
+         {
+            mf->DeleteMessages(&selections);
+            mf->ExpungeMessages();
+            rc = true;
+         }
+         else
+            rc = false;
+         long i = 0;
+         String seq;
+         for(hi = m_NewMailFolder->GetFirstHeaderInfo();
+             hi;
+             hi = m_NewMailFolder->GetNextHeaderInfo(hi))
+         {
+            if(i >= oldcount)
+            {
+               if(seq.Length()) seq << ',';
+               seq << strutil_ultoa(hi->GetUId());
+            }
+            i++;
+         }
+         // mark new messages as new:
+         m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_RECENT, true);
+         m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_SEEN, false);
       }
-      // mark new messages as new:
-      m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_RECENT, true);
-      m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_SEEN, false);
+      mf->EnableNewMailEvents(sendsEvents);
+      mf->Ping(); //update it
    }
-   mf->EnableNewMailEvents(sendsEvents);
-   mf->Ping(); //update it
    Lock(locked);
    return rc;
 }

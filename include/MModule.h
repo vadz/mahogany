@@ -36,6 +36,25 @@ enum MModule_Errors
    MMODULE_ERR_INCOMPATIBLE_VERSIONS
 };
 
+class MModuleListingEntry
+{
+public:
+   virtual const String &GetName(void) const = 0;
+   virtual const String &GetDescription(void) const = 0;
+   virtual const String &GetVersion(void) const = 0;
+   virtual const String &GetAuthor(void) const = 0;
+   virtual ~MModuleListingEntry() {}
+};
+
+class MModuleListing : public MObjectRC
+{
+public:
+   /// returns the number of entries
+   virtual size_t Count(void) const = 0;
+   /// returns the n-th entry
+   virtual const MModuleListingEntry & operator[] (size_t n) const = 0;
+};
+
 /**
    This is the interface for Mahogany extension modules.
 */
@@ -58,7 +77,12 @@ public:
    /// Returns the Mahogany version this module was compiled for.
    virtual void GetMVersion(int *version_major, int *version_minor,
                             int *version_release) = 0;
+
+/** Returns a pointer to a listing of available modules. Must be
+    DecRef()'d by the caller. */
+   static MModuleListing * GetListing(void);
 };
+
 
 /** @name This is the API that each MModule shared lib must
     implement. */

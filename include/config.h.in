@@ -99,9 +99,6 @@
     precompiling headers */
 #undef USE_PCH
 
-/** Define if you want to use the asynchronous mail folder code. (experimental) */
-#undef USE_ASYNC
-
 /** Define if you want to use wxThreads. (experimental) */
 #undef USE_THREADS
 

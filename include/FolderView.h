@@ -65,7 +65,7 @@ public:
    ProfileBase *GetProfile(void) const { return m_Profile; }
 
    /// return pointer to folder
-   MailFolder * GetFolder(void) const { return m_MailFolder; }
+   ASMailFolder * GetFolder(void) const { return m_ASMailFolder; }
 
 protected:
    /// the derived class should close when our folder is deleted

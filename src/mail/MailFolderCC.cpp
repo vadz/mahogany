@@ -185,6 +185,36 @@ private:
 };
 
 
+/** Builds an IMAP specification */
+static
+String ImapSpec(const String &host, FolderType protocol, const String
+                &mailbox = "")
+{
+   String imap_spec;
+
+   switch(protocol)
+   {
+   case MF_INBOX:
+      imap_spec = "INBOX"; break;
+   case MF_IMAP:
+      imap_spec << '{' << host << "/imap}" << mailbox; break;
+   case MF_NNTP:
+      imap_spec << '{' << host << "/nntp}" << mailbox; break;
+   case MF_NEWS:
+      imap_spec << "#news." << mailbox; break;
+   case MF_POP:
+      imap_spec << '{' << host << "/pop}" << mailbox; break;
+   case MF_MH:
+      imap_spec << "#mh/" << mailbox; break;
+   default:
+      ASSERT_MSG(0,"unsupported protocol for folder listing");
+   }
+   return imap_spec;
+}
+
+
+
+
 /*----------------------------------------------------------------------------------------
  * MailFolderCC code
  *---------------------------------------------------------------------------------------*/
@@ -307,7 +337,33 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    
    if( !FolderTypeHasUserName(type) )
       m_Login = ""; // empty login for these types
+#ifdef USE_THREADS
+   m_Mutex = new MMutex;
+#endif
+}
 
+MailFolderCC::~MailFolderCC()
+{
+   CCQuiet(true); // disable all callbacks!
+   if ( m_Timer )
+   {
+      m_Timer->Stop();
+      delete m_Timer;
+   }
+   
+   Close();
+#ifdef USE_THREADS
+   delete m_Mutex;
+#endif
+
+   if( m_Listing )
+   {
+      delete [] m_Listing;
+      m_Listing = NULL;
+   }
+   // note that RemoveFromMap already removed our node from streamList, so
+   // do not do it here again!
+   GetProfile()->DecRef();
 }
 
 /*
@@ -505,15 +561,16 @@ MailFolderCC::Open(void)
       SetDefaultObj();
       if(GetType() == MF_FILE && ! wxFileExists(m_MailboxPath))
          mail_create(NIL, (char *)m_MailboxPath.c_str());
+      // If we don't have a mailstram yet, we half-open one:
+      if(m_MailStream == NIL)
+         m_MailStream = mail_open(NIL,(char *)m_MailboxPath.c_str(),
+                                  (debugFlag ? OP_DEBUG : NIL)|OP_HALFOPEN);
+      
+
+
       if(m_MailStream != NIL)
          m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
                                   debugFlag ? OP_DEBUG : NIL);
-      // if we didn't have a ma   ilstre   am or the re-use of the old one
-      // failed, we try again:      
-      if(m_MailStream == NIL)
-         m_MailStream = mail_open(NIL,(char *)m_MailboxPath.c_str(),
-                                  debugFlag ? OP_DEBUG : NIL);
-      
          ProcessEventQueue();
          SetDefaultObj(false);
    }
@@ -675,25 +732,33 @@ MailFolderCC::Close(void)
    RemoveFromMap();
 }
 
-MailFolderCC::~MailFolderCC()
+bool
+MailFolderCC::Lock(void) const
 {
-   CCQuiet(true); // disable all callbacks!
-   if ( m_Timer )
+#ifdef USE_THREADS
+   ((MailFolderCC *)this)->m_Mutex.Lock();
+   return true;
+#else
+   if(m_Mutex == false)
    {
-      m_Timer->Stop();
-      delete m_Timer;
+      ((MailFolderCC *)this)->m_Mutex = true;
+      return true;
    }
-   
-   Close();
-   if( m_Listing )
-   {
-      delete [] m_Listing;
-      m_Listing = NULL;
-   }
-   // note that RemoveFromMap already removed our node from streamList, so
-   // do not do it here again!
-   GetProfile()->DecRef();
+   else
+      return false;
+#endif
 }
+
+void
+MailFolderCC::UnLock(void) const
+{
+#ifdef USE_THREADS
+   ((MailFolderCC *)this)->m_Mutex.UnLock();
+#else
+   ((MailFolderCC *)this)->m_Mutex = false;
+#endif
+}
+
 
 
 
@@ -1617,31 +1682,37 @@ MailFolderCC::OverviewHeader (MAILSTREAM *stream, unsigned long uid, OVERVIEW *o
 }
 
 
-
+/* static */
 bool
-MailFolderCC::Subscribe(const String &mailboxname,
-                        bool subscribe) const
+MailFolderCC::Subscribe(const String &host,
+                        FolderType protocol,
+                        const String &mailboxname,
+                        bool subscribe)
 {
+   String imap_spec = ImapSpec(host, protocol, mailboxname);
    return (subscribe ?
-           mail_subscribe (m_MailStream, (char *)mailboxname.c_str())
-           : mail_unsubscribe (m_MailStream, (char *)mailboxname.c_str()) )
+           mail_subscribe (NIL, (char *)imap_spec.c_str())
+           : mail_unsubscribe (NIL, (char *)imap_spec.c_str()) )
       != NIL;
 }
 
-
+/* static */
 FolderListing *
-MailFolderCC::ListFolders(const String &pattern,
+MailFolderCC::ListFolders(const String &host,
+                          FolderType protocol,
+                          const String &pattern,
                           bool subscribedOnly,
-                          const String &reference) const
+                          const String &reference)
 {
+   String imap_spec = ImapSpec(host, protocol, pattern);
    FolderListingCC *m_FolderListing = new FolderListingCC;
    if(subscribedOnly)
    {
-      mail_lsub (m_MailStream, (char *) reference.c_str(), (char *) pattern.c_str());
+      mail_lsub (NIL, (char *) reference.c_str(), (char *) imap_spec.c_str());
    }
    else
    {
-      mail_list (m_MailStream, (char *) reference.c_str(), (char *) pattern.c_str());
+      mail_list (NIL, (char *) reference.c_str(), (char *) imap_spec.c_str());
    }
    FolderListing * fl = m_FolderListing;
    m_FolderListing = NULL;

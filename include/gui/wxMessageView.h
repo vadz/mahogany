@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxMessageView.h: a window displaying a mail message              *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -13,6 +13,7 @@
 #   pragma interface "wxMessageView.h"
 #endif
 
+#include "FolderType.h"
 #include "MessageView.h"
 
 #include "gui/wxlwindow.h"
@@ -33,7 +34,7 @@ class wxMessageView;
 class wxFolderView;
 class XFace;
 class Message;
-class MailFolder;
+class ASMailFolder;
 
 /** A wxWindows MessageView class
   */
@@ -62,7 +63,7 @@ public:
        @param num    sequence number of message (0 based)
        @param parent parent window
    */
-   wxMessageView(MailFolder *folder,
+   wxMessageView(ASMailFolder *folder,
                  long num,
                  wxFolderView *fv,
                  wxWindow  *parent = NULL);
@@ -77,7 +78,8 @@ public:
        @param mailfolder the folder
        @param num the message uid
    */
-   void ShowMessage(MailFolder *folder, long uid);
+   void ShowMessage(ASMailFolder *folder, UIdType uid);
+   void ShowMessage(class Message *msg);
 
    /// update it
    void   Update(void);
@@ -109,7 +111,7 @@ public:
    virtual bool OnMEvent(MEventData& event);
 
    /// call to show the raw text of the current message (modal dialog)
-   bool ShowRawText(MailFolder *folder = NULL);
+   bool ShowRawText(void);
 
    /// for use by wxMessageViewFrame, to be removed after
    /// OnCommandEvent() is cleaned up:
@@ -119,14 +121,16 @@ public:
    void Clear(void);
 
    /// returns the mail folder
-   MailFolder *GetFolder(void);
+   ASMailFolder *GetFolder(void);
 
    /// Find a string in message, true if found
    bool Find(const wxString &what = "");
    /// Find last string again.
    bool FindAgain(void);
 
-   long GetUId(void) const { return m_uid; }
+   UIdType GetUId(void) const { return m_uid; }
+   /// the derived class should react to the result to an asynch operation
+   void OnASFolderResultEvent(MEventASFolderResultData &event);
 private:
    /// register with MEventManager
    void RegisterForEvents();
@@ -137,11 +141,11 @@ private:
    /// the parent window
    wxWindow   *m_Parent;
    /// uid of the message
-   long m_uid;
+   UIdType m_uid;
    /// the current message
    Message   *m_mailMessage;
    /// the mail folder (only used if m_FolderView is NULL)
-   MailFolder   *m_folder;
+   ASMailFolder   *m_folder;
    /// the folder view, which handles some actions for us
    wxFolderView *m_FolderView;
    /// the message part selected for MIME display
@@ -159,6 +163,7 @@ private:
 
    /// event registration handle
    void *m_eventReg;
+   void *m_regCookieASFolderResult;
 
 protected:
    friend class MimePopup;
@@ -225,7 +230,7 @@ private:
 class wxMessageViewFrame : public wxMFrame
 {
 public:
-   wxMessageViewFrame(MailFolder *folder,
+   wxMessageViewFrame(ASMailFolder *folder,
                       long num,
                       wxFolderView *folderview,
                       wxWindow  *parent = NULL,

@@ -39,6 +39,7 @@ DEFAULT_USE_EXPERIMENTAL=0
 DEFAULT_USE_ASYNC=1
 DEFAULT_USE_WXCONFIG=1
 DEFAULT_USE_LIBTOOL=0
+DEFAULT_USE_DOCXX=0
 
 M_OVERRIDES(python,python,
 --with-python   use python scripting,
@@ -72,10 +73,6 @@ M_OVERRIDES(experimental,experimental,
 --with-experimental    use experimental code,
 USE_EXPERIMENTAL)
 
-M_OVERRIDES(async,async,
---with-async    use ASMailFolder code,
-USE_ASYNC)
-
 M_OVERRIDES(libtool,libtool,
 --with-libtool    use GNU libtool,
 USE_LIBTOOL)
@@ -83,6 +80,10 @@ USE_LIBTOOL)
 M_OVERRIDES(ccostype,ccostype,
 --with-ccostype=xxx    use OS type xxx for c-client compilation,
 USE_CCOSTYPE)
+
+M_OVERRIDES(doc++,doc++,
+--with-doc++      use DOC++ for class documentation generation,
+USE_DOCXX)
 
 M_OVERRIDES_DONE
 
@@ -551,37 +552,17 @@ dnl --------------------------------------------------------------------------
 
 AC_PATH_PROG(PERL,perl)
 
-DOCHTML="echo \"No doc generator(html) available.\""
-DOCTEX="echo \"No doc generator(tex) available.\""
+dnl use scandoc
+DOCHTML="\$(SCANDOCHTML)"
 
-dnl test for doc++ first
-
-AC_PATH_PROG(DOCXX,doc++)
-if test "x$DOCXX" != "x"
-then
-	DOCHTML="\$(DOCXXHTML)"
-	DOCTEX="\$(DOCXXTEX)"
-else
-	dnl test for kdoc if selected
-	AC_PATH_PROG(KDOC,kdoc)
-	if test "x$KDOC" != "x"
+if test "x$USE_DOCXX" != "x"; then
+	AC_PATH_PROG(DOCXX,doc++)
+	if test "x$DOCXX" != "x"
 	then
-		DOCHTML="\$(KDOCHTML)"
-		DOCTEX="\$(KDOCTEX)"
-	else
-		dnl fall back to scandoc
-		if test "x$PERL" = "x"
-		then
-			AC_MSG_WARN("Cannot generate class documentation!")
-		else 
-			dnl use scandoc
-			DOCHTML="\$(SCANDOCHTML)"
-			DOCTEX="\$(SCANDOCTEX)"
-		fi
+		DOCHTML="\$(DOCXXHTML)"
 	fi
 fi
 AC_SUBST(DOCHTML)
-AC_SUBST(DOCTEX)
 
 dnl check for latex/dvips
 

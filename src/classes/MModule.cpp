@@ -17,11 +17,11 @@
 #include "Mpch.h"
 
 #ifndef  USE_PCH
-   #include "Mconfig.h"
-   #include "Mcommon.h"
-   #include "MApplication.h"
-
-   #include "kbList.h"
+#   include "Mconfig.h"
+#   include "Mcommon.h"
+#   include "MApplication.h"
+#   include "gui/wxMApp.h"
+#   include "kbList.h"
 #endif
 
 #include "Mversion.h"
@@ -29,6 +29,7 @@
 
 #include <wx/dynlib.h>
 #include <wx/utils.h>
+#include <wx/textfile.h>
 
 // ----------------------------------------------------------------------------
 // Implementation of the MInterface 
@@ -42,6 +43,8 @@
 // ----------------------------------------------------------------------------
 // Actual MModule code
 // ----------------------------------------------------------------------------
+
+#define MMD_SIGNATURE "Mahogany-Module-Definition"
 
 /** Structure for holding information about a loaded module. */
 struct ModuleEntry
@@ -197,13 +200,11 @@ MModule::LoadModule(const String & name)
       $HOME/.M/CANONICAL_HOST/modules/
       $HOME/.M/modules/
    */
-      #define STRINGIZE(x) #x
-
       dirs[0] = mApplication->GetGlobalDir();
-      dirs[0] << DIR_SEPARATOR << STRINGIZE(M_CANONICAL_HOST)
+      dirs[0] << DIR_SEPARATOR << M_CANONICAL_HOST
               << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
       dirs[1] = mApplication->GetLocalDir();
-      dirs[1] << DIR_SEPARATOR << STRINGIZE(M_CANONICAL_HOST)
+      dirs[1] << DIR_SEPARATOR << M_CANONICAL_HOST
               << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
       dirs[2] = mApplication->GetLocalDir();
       dirs[2] << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
@@ -240,3 +241,135 @@ extern "C"
 }
 
 
+
+class MModuleListingEntryImpl : public MModuleListingEntry
+{
+public:
+   virtual const String &GetName(void) const
+      { return m_Name; }
+   virtual const String &GetDescription(void) const
+      { return m_Desc; }
+   virtual const String &GetVersion(void) const
+      { return m_Version; }
+   virtual const String &GetAuthor(void) const
+      { return m_Author; }
+
+   MModuleListingEntryImpl(const String &name = "",
+                           const String &desc = "",
+                           const String &version = "",
+                           const String &author = "")
+      {
+         m_Name = name; m_Desc = desc;
+         m_Version = version; m_Author = author;
+      }
+private:
+   String m_Name, m_Desc, m_Version, m_Author;
+   GCC_DTOR_WARN_OFF();
+};
+
+class MModuleListingImpl : public MModuleListing
+{
+public:
+   /// returns the number of entries
+   virtual size_t Count(void) const
+      { return m_count; }
+   /// returns the n-th entry
+   virtual const MModuleListingEntry & operator[] (size_t n) const
+      { ASSERT(n <= m_count); return m_entries[n]; }
+   /// returns the n-th entry
+   MModuleListingEntryImpl & operator[] (size_t n)
+      { ASSERT(n <= m_count); return m_entries[n]; }
+   static MModuleListingImpl *Create(size_t n)
+      { return new MModuleListingImpl(n); }
+   void SetCount(size_t n)
+      { ASSERT(n <= m_count); m_count = n; }
+protected:
+   MModuleListingImpl(size_t n)
+      {
+         m_count = n;
+         m_entries = new MModuleListingEntryImpl[m_count];
+      }
+   ~MModuleListingImpl()
+      { delete [] m_entries; }
+private:
+   MModuleListingEntryImpl *m_entries;
+   size_t m_count;
+   GCC_DTOR_WARN_OFF();
+};
+
+/* static */
+MModuleListing *MModule::GetListing(void)
+{
+   kbStringList modules;
+   
+   const int nDirs = 3;
+   wxString
+      pathname,
+      filename,
+      dirs[nDirs];
+
+   dirs[0] = mApplication->GetGlobalDir();
+   dirs[0] << DIR_SEPARATOR << M_CANONICAL_HOST
+           << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
+   dirs[1] = mApplication->GetLocalDir();
+   dirs[1] << DIR_SEPARATOR << M_CANONICAL_HOST
+           << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
+   dirs[2] = mApplication->GetLocalDir();
+   dirs[2] << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
+   
+   /// First, build list of all .mmd files:
+   for(int i = 0; i < nDirs ; i++)
+   {
+      pathname = dirs[i];
+      pathname << "*.mmd";
+      filename = wxFindFirstFile(pathname);
+      while(filename.Length())
+      {
+         modules.push_back(new // without ".mmd" :
+                           String(filename.Mid(0,filename.Length()-4))); 
+         filename = wxFindNextFile();
+      }
+   }
+   /// Second: load list info:
+   MModuleListingImpl *listing = MModuleListingImpl::Create(modules.size());
+   kbStringList::iterator it;
+   bool errorflag;
+   size_t count = 0;
+   for(it = modules.begin(); it != modules.end(); it ++)
+   {
+      filename = **it << ".mmd";
+      errorflag = false;
+      wxTextFile tf(filename);
+      /*
+        We need at least the following lines:
+        Mahogany-Module-Definition"
+        Name:
+        Version:
+        Author:
+      */
+      if(tf.GetLineCount() < 4)
+         errorflag = true;
+      else
+      {
+         String first = tf[0].Mid(0,strlen(MMD_SIGNATURE));
+         if(first != MMD_SIGNATURE)
+            errorflag = true;
+         else
+         {
+            String description;
+            for(size_t l = 5; l < tf.GetLineCount(); l++)
+               description << tf[l] << '\n';
+            MModuleListingEntryImpl entry(tf[1], tf[2], tf[3], description);
+            (*listing)[count++] = entry;
+         }
+      }
+      if(errorflag)
+      {
+         String msg;
+         msg.Printf(_("Cannot parse MMD file for module '%s'."),
+                    filename.c_str());
+         MDialog_ErrorMessage(msg);
+      }
+   }
+   return listing;
+}

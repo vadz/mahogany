@@ -10,9 +10,9 @@ $2
 };')
 
 define(STRING, string)
-define(INT, int)
+define(INT, long)
 define(ARG, in $1 $2)
-define(FUNCTION, $2 $1 `(' $3`);')
+define(FUNCTION, $2 $1 $3;)
 
 define(FILE_HEADER,`')
 define(FILE_FOOTER,`')

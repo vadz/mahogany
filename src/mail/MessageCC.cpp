@@ -74,17 +74,23 @@ MessageCC::~MessageCC()
       folder->DecRef();
 }
 
-#if  0
-MessageCC::MessageCC(const char * /* itext */,  ProfileBase *iprofile)
+MessageCC::MessageCC(const char * itext, UIdType uid, ProfileBase *iprofile)
 {
-   Create(iprofile);
-
    char
-      *header = NULL;
+      *header = NULL,
+      *bodycptr = NULL;
    unsigned long
       headerLen;
-   STRING
-      *b;
+   
+   mailText = NULL;
+   bodycptr = NULL;
+   envelope = NULL;
+   partInfos = NULL; // this vector gets initialised when needed
+   numOfParts = -1;
+   partContentPtr = NULL;
+   text = NULL;
+   folder = NULL;
+   m_uid = uid;
 
    text = strutil_strdup(itext);
 
@@ -98,19 +104,18 @@ MessageCC::MessageCC(const char * /* itext */,  ProfileBase *iprofile)
          strncpy(header, text, pos+1);
          header[pos+1] = '\0';
          headerLen = pos+1;
+         bodycptr = text + pos + 2;
          break;
       }
    }
    if(! header)
       return;  // failed
 
-   char *buf = new char [headerLen];
-   rfc822_parse_msg (&envelope, &body,header,headerLen, b,
-                     ""   /*defaulthostname */,  buf);
-   delete [] buf;
-   initialisedFlag = true;
+   STRING str;
+   INIT(&str, mail_string, (void *) bodycptr, strlen(bodycptr));
+   rfc822_parse_msg (&envelope, &body, header, headerLen,
+                     &str, ""   /*defaulthostname */, 0);
 }
-#endif
 
 
 void

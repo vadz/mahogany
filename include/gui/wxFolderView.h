@@ -45,6 +45,7 @@ enum wxFolderListCtrlFields
 /** a wxWindows FolderView class */
 class wxFolderView : public FolderView
 {
+
 public:
    /** Constructor
        @param parent   the parent window
@@ -93,16 +94,15 @@ public:
    /** Save messages to a file.
        @param n number of messages
        @messages pointer to an array holding the message numbers
-       @return true if all messages got saved
    */
-   bool SaveMessagesToFile(wxArrayInt const &messages);
+   void SaveMessagesToFile(wxArrayInt const &messages);
 
    /** Save messages to a folder.
        @param n number of messages
-       @messages pointer to an array holding the message numbers
-       @return true if all messages got saved
+       @param messages pointer to an array holding the message numbers
+       @param del if TRUE, delete them when they are saved
    */
-   bool SaveMessagesToFolder(wxArrayInt const &messages);
+   void SaveMessagesToFolder(wxArrayInt const &messages, bool del = FALSE);
 
    /** Returns false if no items are selected
    */
@@ -132,7 +132,8 @@ public:
    virtual void OnASFolderResultEvent(MEventASFolderResultData &event);
    /// return profile name for persistent controls
    wxString const &GetFullName(void) const { return m_ProfileName; }
-
+   /// for use by the listctrl:
+   class ASTicketList *GetTicketList(void) const { return m_TicketList; }
 protected:
    /** Save messages to a folder.
        @param n number of messages
@@ -175,6 +176,8 @@ private:
    bool m_InDeletion;
    /// a list of pending tickets from async operations
    class ASTicketList *m_TicketList;
+   /// Used by SaveMessagesToFolder: ticket from moving messages
+   ASMailFolder::Ticket m_DeleteSavedMessagesTicket;
 };
 
 class wxFolderViewFrame : public wxMFrame
@@ -239,7 +242,7 @@ public:
    void Select(long index, bool on=true)
       { SetItemState(index,on ? wxLIST_STATE_SELECTED : 0, wxLIST_STATE_SELECTED); }
 
-   int GetSelections(wxArrayInt &selections) const;
+   int GetSelections(INTARRAY &selections) const;
    bool IsSelected(long index)
       { return GetItemState(index,wxLIST_STATE_SELECTED) != 0; }
 

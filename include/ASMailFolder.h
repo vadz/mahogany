@@ -2,13 +2,15 @@
  * ASMailFolder class: ABC defining the interface for asynchronous  *
  *                     mail folders                                 *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)              *
  *                                                                  *
  * $Id$
  *******************************************************************/
 
-
-
+/**
+   @package Mailfolder access
+   @author  Karsten Ballüder
+*/
 #ifndef ASMAILFOLDER_H
 #define ASMAILFOLDER_H
 
@@ -62,6 +64,9 @@ public:
    /** Each operation returns a unique number, to identify it. */
    typedef int Ticket;
 
+   /// A ticket value which must never appear.
+   static const Ticket IllegalTicket;
+   
    /** Each operation can carry some user data. */
    typedef void * UserData;
    
@@ -128,6 +133,8 @@ public:
       virtual ASMailFolder *GetFolder(void) const = 0;
       /// Returns an OperationId to tell what happened.
       virtual OperationId GetOperation(void) const = 0;
+      /// Returns the list of message uids affected by the operation.
+      virtual INTARRAY * GetSequence(void) const = 0;
    };
 
    /** Common code shared by all class Result implementations. */
@@ -137,24 +144,30 @@ public:
       virtual UserData GetUserData(void) const { return m_UserData; }
       virtual Ticket GetTicket(void) const { return m_Ticket; }
       virtual OperationId   GetOperation(void) const { return m_Id; }
-      virtual ASMailFolder *GetFolder(void) const{ return m_Mf; }
+      virtual ASMailFolder *GetFolder(void) const { return m_Mf; }
+      virtual INTARRAY * GetSequence(void) const { return m_Seq; }
    protected:
-      ResultImpl(ASMailFolder *mf, Ticket t, OperationId id,
+      ResultImpl(ASMailFolder *mf, Ticket t, OperationId id, INTARRAY * mc,
                  UserData ud)
          {
             m_Id = id;
             m_Ticket = t;
             m_Mf = mf;
             m_UserData = ud;
+            m_Seq = mc;
             if(m_Mf) m_Mf->IncRef();
          }
       virtual ~ResultImpl()
-         { if(m_Mf) m_Mf->DecRef(); }
+         {
+            if(m_Mf) m_Mf->DecRef();
+            if(m_Seq) delete m_Seq;
+         }
    private:
       OperationId   m_Id;
       ASMailFolder *m_Mf;
       Ticket        m_Ticket;
       UserData      m_UserData;
+      INTARRAY *    m_Seq;
    };
    /** Holds the result from an operation which can be expressed as an 
        integer value. Used for all boolean success values.
@@ -166,16 +179,18 @@ public:
       static ResultInt *Create(ASMailFolder *mf,
                                Ticket t,
                                OperationId id,
+                               INTARRAY * mc,
                                int value,
                                UserData ud)
-         { return new ResultInt(mf, t, id, value, ud); }
+         { return new ResultInt(mf, t, id, mc, value, ud); }
    protected:
       ResultInt(ASMailFolder *mf,
                 Ticket t,
                 OperationId id,
+                INTARRAY * mc,
                 int value, 
                 UserData ud)
-         : ResultImpl(mf, t, id, ud)
+         : ResultImpl(mf, t, id, mc, ud)
          { m_Value = value; }
    private:
       int         m_Value;
@@ -187,16 +202,18 @@ public:
    public:
       static ResultMessage *Create(ASMailFolder *mf,
                                    Ticket t,
+                                   INTARRAY * mc,
                                    Message *msg,
-                                   unsigned long uid,
+                                   UIdType uid,
                                    UserData ud)
-         { return new ResultMessage(mf, t, msg, uid, ud); }
+         { return new ResultMessage(mf, t, mc, msg, uid, ud); }
       Message * GetMessage(void) const { return m_Message; }
       unsigned long GetUId(void) const { return m_uid; }
    protected:
-      ResultMessage(ASMailFolder *mf, Ticket t, Message *msg, unsigned
-                    long uid, UserData ud)
-         : ResultImpl(mf, t, Op_GetMessage, ud)
+      ResultMessage(ASMailFolder *mf, Ticket t, 
+                    INTARRAY * mc, Message *msg,
+                    UIdType uid, UserData ud)
+         : ResultImpl(mf, t, Op_GetMessage, mc, ud)
          {
             m_Message = msg;
             if(m_Message) m_Message->IncRef();
@@ -205,7 +222,7 @@ public:
       ~ResultMessage() { if(m_Message) m_Message->DecRef(); }
    private:
       Message *m_Message;
-      unsigned long m_uid;
+      UIdType  m_uid;
    };
    /** Holds the result from a ListFolders() call.
    */
@@ -221,7 +238,7 @@ public:
    protected:
       ResultFolderListing(ASMailFolder *mf, Ticket t, FolderListing *list,
                           UserData ud)
-         : ResultImpl(mf, t, Op_ListFolders, ud)
+         : ResultImpl(mf, t, Op_ListFolders, NULL, ud)
          {
             m_List = list;
          }
@@ -235,7 +252,23 @@ public:
 
 
    static ASMailFolder * Create(MailFolder *mf);
+   //FIXME: temporary kludge till we have a nicer interface
+   static ASMailFolder * OpenFolder(int typeAndFlags,
+                                  const String &path,
+                                  ProfileBase *profile = NULL,
+                                  const String &server = NULLstring,
+                                  const String &login = NULLstring,
+                                  const String &password = NULLstring)
+      {
+         MailFolder *mf = MailFolder::OpenFolder(typeAndFlags, path,
+                                                 profile, server, login,
+                                                 password);
+         ASMailFolder *asmf = Create(mf);
+         mf->DecRef();
+         return asmf;
+      }
 
+   
    /**@name Asynchronous Access Functions, returning results in events.*/
    //@{
    /** Check whether mailbox has changed.
@@ -371,25 +404,36 @@ public:
                                   ProfileBase *profile = NULL,
                                   UserData ud = 0) = 0;
 
-   /**@name Subscription management */
+   /**@name Subscription management.
+      These functions are statically defined and are implemented in
+      ASMailFolder.cpp.
+   */
    //@{
    /** Subscribe to a given mailbox (related to the
        mailfolder/mailstream underlying this folder.
+       @param host the server host, or empty for local newsspool
+       @param protocol MF_IMAP or MF_NNTP or MF_NEWS
        @param mailboxname name of the mailbox to subscribe to
        @param bool if true, subscribe, else unsubscribe
    */
-   virtual Ticket Subscribe(const String &mailboxname,
-                            bool subscribe = true,
-                            UserData ud = 0) const = 0 ;
+   static Ticket Subscribe(const String &host,
+                           FolderType protocol,
+                           const String &mailboxname,
+                           bool subscribe = true,
+                           UserData ud = 0);
    /** Get a listing of all mailboxes.
+       @param host the server host, or empty for local newsspool
+       @param protocol MF_IMAP or MF_NNTP or MF_NEWS
        @param pattern a wildcard matching the folders to list
        @param subscribed_only if true, only the subscribed ones
        @param reference implementation dependend reference
     */
-   virtual Ticket ListFolders(const String &pattern = "*",
-                              bool subscribed_only = false,
-                              const String &reference = "",
-                              UserData ud = 0) const = 0;
+   static Ticket ListFolders(const String &host,
+                             FolderType protocol,
+                             const String &pattern = "*",
+                             bool subscribed_only = false,
+                             const String &reference = "",
+                             UserData ud = 0);
    //@}
    //@}   
    //@}
@@ -451,7 +495,8 @@ public:
 
    /**@name Function for access control and event handling. */
    //@{
-   virtual void LockFolder(void) = 0;
+   /// Returns true if we have obtained the lock.
+   virtual bool LockFolder(void) = 0;
    virtual void UnLockFolder(void) = 0;
    //@}
 

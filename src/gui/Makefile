@@ -2,7 +2,7 @@
 
 CWD = gui
 SRC = wxMApp.cpp wxMFrame.cpp wxFolderView.cpp wxMessageView.cpp \
-wxComposeView.cpp wxMainFrame.cpp wxIconManager.cpp wxFontManager.cpp wxMDialogs.cpp  \
+wxComposeView.cpp wxMainFrame.cpp wxIconManager.cpp wxMDialogs.cpp  \
 wxlwindow.cpp wxllist.cpp wxlparser.cpp wxMenuDefs.cpp wxOptionsDlg.cpp \
 wxFolderTree.cpp wxDialogLayout.cpp wxMFolderDialogs.cpp wxBrowseButton.cpp \
 wxHeadersDialogs.cpp wxTemplateDialog.cpp

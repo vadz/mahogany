@@ -33,13 +33,10 @@ dep depend: all
 
 
 doc:
+	if [ ! -d ../doc/classes ] ; then mkdir ../doc/classes ; fi
 	$(DOCHTML) *.h
-	$(DOCTEX) *.h
 
-scandoc:
-	$(SCANDOCHTML) *.h
-
-.PHONY: clean doc doc2 dep all install msgcat scandoc interface
+.PHONY: clean doc dep all install msgcat interface
 
 %.h: %.mid
 	$(M4) -DM4FILE=mid2h.m4 >$(ODIR)/$@ $<

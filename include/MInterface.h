@@ -1,4 +1,4 @@
-/*
+/* -*- c++ -*-
  * $Id$
  *
  *.mid file for generating IDL and .h files for Mahogany C interface

@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Message class: entries for message                               *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *
@@ -12,6 +12,7 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
+#include "FolderType.h"
 #include "MObject.h"
 #include "kbList.h"
 #include "MailFolder.h"
@@ -230,6 +231,8 @@ public:
    */
    virtual void WriteToString(String &str, bool headerFlag = true) const = 0;
 
+   /// Return the numeric uid
+   virtual UIdType GetUId(void) const = 0;
    //@}
 protected:
    /** virtual destructor */

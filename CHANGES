@@ -1,6 +1,9 @@
 (next release) on (date of next release)
 
-17.07.99 KB: folder flag to force re-open on ping for broken POP servers added
+17.07.99 KB: more async code, non-async compilation no longer supported
+             scandoc now produces usable docs, MModule produces listing of modules,
+             subscription management
+16.07.99 KB: folder flag to force re-open on ping for broken POP servers added
              quoted printable parsing bug removed
              messages now get saved with right CR/LF convention
 16.07.99 VZ: it's now impossible to lock oneself in the program by choosing the

@@ -37,12 +37,7 @@ install2:
 
 install_classdoc:
 	$(INSTALL) -d $(DOCDIR) $(DOCDIR)/Postscript $(DOCDIR)/classes $(DOCDIR)/classes/images
-	$(INSTALL_DATA) classes/*.htm $(DOCDIR)/classes
-	if [ "$(SCANDOCHTML)" = "$(DOCHTML)" ] ; then $(INSTALL_DATA) $(BUILDDIR)/extra/scandoc/images/* $(DOCDIR)/classes/images ; fi
-	$(INSTALL_DATA) classes/images/*.gif $(DOCDIR)/classes/images || echo no gifs to install
-	$(INSTALL_DATA) classes/images/*.jpg $(DOCDIR)/classes/images || echo no jpegs to install
-
-classdoc: classes.ps
+	$(INSTALL_DATA) classes/* $(DOCDIR)/classes
 
 ps:
 	for i in $(FILES_PS); do $(MAKE) -k $$i; done   # one after another
@@ -50,8 +45,9 @@ ps:
 install:
 	if [ -f Mdocs.tar.gz ] ; then gzip -dc < Mdocs.tar.gz | (cd $(DOCDIR) && tar xvf - ); else $(MAKE) install2 ; fi
 
-classes.tex: ../include/*.h ../include/adb/*.h ../include/gui/*.h
+classdoc: 
 	$(MAKE) -C ../include doc
+	cp ../src/icons/Micon.jpg ../extra/scandoc/images/*.gif ../extra/scandoc/images/*.jpg classes
 
 makemap: subdirs
 	cp wxhelp.map0 wxhelp.tmp

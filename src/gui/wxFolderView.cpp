@@ -118,7 +118,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
             return;
       // in this case we operate on the highlighted  message
       const HeaderInfo *hi = m_FolderView->GetFolder()->GetHeaderInfo(focused);
-      unsigned long focused_uid = hi->GetUId();
+      UIdType focused_uid = hi->GetUId();
       if(nselected == 0 && hi)
          selections.Add(focused_uid);
 
@@ -141,13 +141,15 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       switch(keycodes_en[idx])
       {
       case 'D':
-         m_FolderView->GetFolder()->DeleteMessages(&selections);
+         m_FolderView->GetTicketList()->Add(
+            m_FolderView->GetFolder()->DeleteMessages(&selections, m_FolderView)); 
          break;
       case 'U':
-         m_FolderView->GetFolder()->UnDeleteMessages(&selections);
+         m_FolderView->GetTicketList()->Add(
+            m_FolderView->GetFolder()->UnDeleteMessages(&selections, m_FolderView));
          break;
       case 'X':
-         m_FolderView->GetFolder()->ExpungeMessages();
+            m_FolderView->GetFolder()->ExpungeMessages();
          break;
       case 'C':
          m_FolderView->SaveMessagesToFolder(selections);
@@ -156,8 +158,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          m_FolderView->SaveMessagesToFile(selections);
          break;
       case 'M':
-         if(m_FolderView->SaveMessagesToFolder(selections))
-            m_FolderView->GetFolder()->DeleteMessages(&selections);
+         m_FolderView->SaveMessagesToFolder(selections, true);
          break;
       case 'G':
       case 'R':
@@ -165,13 +166,14 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
             &selections,
             GetFrame(this),
             m_FolderView->GetProfile(),
-            (keycodes_en[idx] == 'G')?MailFolder::REPLY_FOLLOWUP:0);
+            (keycodes_en[idx] == 'G')?MailFolder::REPLY_FOLLOWUP:0,
+            m_FolderView);
          break;
       case 'F':
          m_FolderView->GetFolder()->ForwardMessages(
             &selections,
             GetFrame(this),
-            m_FolderView->GetProfile());
+            m_FolderView->GetProfile(), m_FolderView);
          break;
       case 'O':
          m_FolderView->OpenMessages(selections);
@@ -299,7 +301,7 @@ int
 wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
 {
    long item = -1;
-   MailFolder *mf = m_FolderView->GetFolder();
+   ASMailFolder *mf = m_FolderView->GetFolder();
    const HeaderInfo *hi;
    while((item = GetNextItem(item,
                              wxLIST_NEXT_ALL,wxLIST_STATE_SELECTED))
@@ -492,7 +494,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl, m_MessagePreview, y/3);
    m_SplitterWindow->SetMinimumPaneSize(0);
    m_SplitterWindow->SetFocus();
-
+   m_DeleteSavedMessagesTicket = ASMailFolder::IllegalTicket;
 }
 
 wxFolderView::~wxFolderView()
@@ -512,7 +514,7 @@ wxFolderView::Update(void)
 
    long i;
    String   line;
-   unsigned long nsize;
+   UIdType nsize;
    unsigned day, month, year;
    String dateFormat;
    int n;
@@ -663,8 +665,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       break;
    case WXMENU_MSG_MOVE_TO_FOLDER:
       GetSelections(selections);
-      if(SaveMessagesToFolder(selections))
-         m_MF->DeleteMessages(&selections);
+      SaveMessagesToFolder(selections, true);
       break;
    case WXMENU_MSG_SAVE_TO_FILE:
       GetSelections(selections);
@@ -673,21 +674,21 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    case WXMENU_MSG_REPLY:
    case WXMENU_MSG_FOLLOWUP:
       GetSelections(selections);
-      m_MF->ReplyMessages(&selections, GetFrame(m_Parent), m_Profile,
-                          (event.GetId() == WXMENU_MSG_FOLLOWUP)
-                          ? MailFolder::REPLY_FOLLOWUP:0);
+      m_TicketList->Add(m_MF->ReplyMessages(&selections, GetFrame(m_Parent), m_Profile,
+                                            (event.GetId() == WXMENU_MSG_FOLLOWUP)
+                                            ? MailFolder::REPLY_FOLLOWUP:0));
       break;
    case WXMENU_MSG_FORWARD:
       GetSelections(selections);
-      m_MF->ForwardMessages(&selections, GetFrame(m_Parent), m_Profile);
+      m_TicketList->Add(m_MF->ForwardMessages(&selections, GetFrame(m_Parent), m_Profile));
       break;
    case WXMENU_MSG_UNDELETE:
       GetSelections(selections);
-      m_MF->UnDeleteMessages(&selections);
+      m_TicketList->Add(m_MF->UnDeleteMessages(&selections));
       break;
    case WXMENU_MSG_DELETE:
       GetSelections(selections);
-      m_MF->DeleteMessages(&selections);
+      m_TicketList->Add(m_MF->DeleteMessages(&selections));
       break;
    case WXMENU_MSG_PRINT:
       GetSelections(selections);
@@ -772,32 +773,19 @@ wxFolderView::GetSelections(wxArrayInt& selections)
 void
 wxFolderView::PreviewMessage(long uid)
 {
-   m_MessagePreview->ShowMessage(m_MailFolder, uid);
+   m_MessagePreview->ShowMessage(m_ASMailFolder, uid);
 }
 
 void
 wxFolderView::OpenMessages(const wxArrayInt& selections)
 {
    String title;
-#ifndef USE_ASYNC
-   Message *mptr;
-   wxMessageViewFrame *mv;
-#endif
    
    int n = selections.Count();
    int i;
    for(i = 0; i < n; i++)
    {
-#ifdef USE_ASYNC
-      m_TicketList->Add(m_MF->GetMessage(selections[i], this));
-#else
-      mptr = m_MF->GetMessage(selections[i]);
-      title = mptr->Subject() + " - " + mptr->From();
-      mv = GLOBAL_NEW wxMessageViewFrame(m_MailFolder,selections[i],
-                                         this);
-      mv->SetTitle(title);
-      SafeDecRef(mptr);
-#endif
+      new wxMessageViewFrame(m_ASMailFolder, selections[i], this);
    }
 }
 
@@ -838,35 +826,30 @@ wxFolderView::PrintPreviewMessages(const wxArrayInt& selections)
 }
 
 
-bool
-wxFolderView::SaveMessagesToFolder(const wxArrayInt& selections)
+void
+wxFolderView::SaveMessagesToFolder(const wxArrayInt& selections, bool del)
 {
    String msg;
-   bool rc;
-   rc = m_MF->SaveMessagesToFolder(&selections,
-                                           GetFrame(m_Parent));
-   if(rc)
-     msg.Printf(_("%d messages saved"), selections.Count());
-   else
-      msg.Printf(_("Saving messages failed."));
-   wxLogStatus(GetFrame(m_Parent), msg);
-   return rc;
+   ASMailFolder::Ticket t =
+      m_MF->SaveMessagesToFolder(&selections,GetFrame(m_Parent), this);
+   m_TicketList->Add(t);
+   if(del)
+      m_DeleteSavedMessagesTicket = t;
 }
 
-bool
+void
 wxFolderView::SaveMessagesToFile(const wxArrayInt& selections)
 {
    String msg;
    bool rc;
 
    rc = m_MF->SaveMessagesToFile(&selections,
-                                         GetFrame(m_Parent));
+                                 GetFrame(m_Parent), this);
    if(rc)
      msg.Printf(_("%d messages saved"), selections.Count());
    else
       msg.Printf(_("Saving messages failed."));
    wxLogStatus(GetFrame(m_Parent), msg);
-   return rc;
 }
 
 void
@@ -913,25 +896,42 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
    ASSERT_MSG(0, "unreachable code");
 #else
 
+   String msg;
    ASMailFolder::Result *result = event.GetResult();
    if(m_TicketList->Contains(result->GetTicket()))
    {
+      ASSERT(result->GetUserData() == this);
       m_TicketList->Remove(result->GetTicket());
+      
       switch(result->GetOperation())
       {
-      case ASMailFolder::Op_GetMessage:
-         /* The only situation where we receive a Message, is if we
-            want to open it in a separate viewer. */
-         // Is it for us?
-         if(result->GetUserData() == this)
+      case ASMailFolder::Op_SaveMessagesToFile:
+         ASSERT(result->GetSequence());
+         if( ((ASMailFolder::ResultInt *)result)->GetValue() )
+            msg.Printf(_("Saved %lu messages."), (unsigned long)
+                       result->GetSequence()->Count()); 
+         else
+            msg.Printf(_("Saving messages failed."));
+         wxLogStatus(GetFrame(m_Parent), msg);
+         ;
+      case ASMailFolder::Op_SaveMessagesToFolder:
+         ASSERT(result->GetSequence());
+         if( ((ASMailFolder::ResultInt *)result)->GetValue() )
+            msg.Printf(_("Copied %lu messages."), (unsigned long)
+                       result->GetSequence()->Count()); 
+         else
+            msg.Printf(_("Copying messages failed."));
+         wxLogStatus(GetFrame(m_Parent), msg);
+         if(result->GetTicket() == m_DeleteSavedMessagesTicket)
          {
-            Message *mptr = ((ASMailFolder::ResultMessage *)result)->GetMessage();
-            long uid = ((ASMailFolder::ResultMessage *)result)->GetUId();
-            (new
-             wxMessageViewFrame(m_MailFolder, uid, this)
-               )->SetTitle(mptr->Subject() + " - " + mptr->From());
-            // not needed, happens when event is processed:  SafeDecRef(mptr);
+            m_TicketList->Add(m_MF->DeleteMessages(result->GetSequence(),this));
          }
+         break;
+      // these cases don't have return values
+      case ASMailFolder::Op_ReplyMessages:
+      case ASMailFolder::Op_ForwardMessages:
+      case ASMailFolder::Op_DeleteMessages:
+      case ASMailFolder::Op_UnDeleteMessages:
          break;
       default:
          wxASSERT_MSG(0,"MEvent handling not implemented yet");

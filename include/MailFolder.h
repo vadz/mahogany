@@ -6,7 +6,11 @@
  * $Id$
  *******************************************************************/
 
-
+/**
+   @package Mailfolder access
+   @version $Revision$
+   @author  Karsten Ballüder
+*/
 
 #ifndef MAILFOLDER_H
 #define MAILFOLDER_H
@@ -22,6 +26,7 @@
     to provide a int Count() method to return the number of elements
     and an int operator[int] to access them.
     We use wxArrayInt for this.
+    @deffunc INTARRAY
 */
 #define INTARRAY wxArrayInt
 
@@ -31,6 +36,7 @@ class ProfileBase;
 class INTARRAY;
 class MWindow;
 class Message;
+
 
 /**
    MailFolder base class, represents anything containig mails.
@@ -250,21 +256,29 @@ public:
    //@{
    /** Subscribe to a given mailbox (related to the
        mailfolder/mailstream underlying this folder.
+       @param host the server host, or empty for local newsspool
+       @param protocol MF_IMAP or MF_NNTP or MF_NEWS
        @param mailboxname name of the mailbox to subscribe to
        @param bool if true, subscribe, else unsubscribe
        @return true on success
    */
-   virtual bool Subscribe(const String &mailboxname,
-                          bool subscribe = true) const = 0;
+   static bool Subscribe(const String &host,
+                         FolderType protocol,
+                         const String &mailboxname,
+                         bool subscribe = true);
    /** Get a listing of all mailboxes.
+       @param host the server host, or empty for local newsspool
+       @param protocol MF_IMAP or MF_NNTP or MF_NEWS
        @param pattern a wildcard matching the folders to list
        @param subscribed_only if true, only the subscribed ones
        @param reference implementation dependend reference
     */
-   virtual class FolderListing *
-   ListFolders(const String &pattern = "*",
-                            bool subscribed_only = false,
-                            const String &reference = "") const = 0;
+   static class FolderListing *
+   ListFolders(const String &host,
+               FolderType protocol,
+               const String &pattern = "*",
+               bool subscribed_only = false,
+               const String &reference = "");
    //@}
 
    /**@name Some higher level functionality implemented by the
@@ -343,6 +357,17 @@ public:
 
    //@}
 
+   /**@name Access control */
+   //@{
+   /** Locks a mailfolder for exclusive access. In multi-threaded mode 
+       it really locks it and always returns true. In single-threaded
+       mode it returns false if we cannot get a lock.
+       @return TRUE if we have the lock
+   */
+   virtual bool Lock(void) const = 0;
+   /** Releases the lock on the mailfolder. */
+   virtual void UnLock(void) const = 0;
+   //@}
    /**@name Functions to get an overview of messages in the folder. */
    //@{
    /// Return a pointer to the first message's header info.
@@ -378,6 +403,22 @@ protected:
    //@}
 };
 
+/** This class temporarily locks a mailfolder */
+class MailFolderLock
+{
+public:
+   /// Attempts to lock the folder.
+   MailFolderLock(const MailFolder *mf)
+      { m_Mf = mf; m_Locked = mf->Lock(); }
+   /// Automatically releases lock.
+   ~MailFolderLock()
+      { if(m_Mf) m_Mf->UnLock(); }
+   /// Call this to check that we have a lock.
+   bool Locked(void) { return m_Locked; }
+private:
+   const MailFolder *m_Mf;
+   bool              m_Locked;
+};
 
 /** This class essentially maps to the c-client Overview structure,
     which holds information for showing lists of messages. */

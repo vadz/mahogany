@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Mahogany 0.21\n"
-"POT-Creation-Date: 1999-07-06 13:19+0100\n"
+"POT-Creation-Date: 1999-07-17 15:59+0100\n"
 "PO-Revision-Date: 1999-07-07 16:30+0200\n"
 "Last-Translator: Lauri Jutila <ljuti@hangar.keskiespoo.net>\n"
 "Language-Team: M-Team <m-developers@makelist.com>\n"
@@ -21,7 +21,6 @@ msgid ""
 msgstr ""
 "Asetustiedot ja ohjelmatiedostot p‰ivitettiin onnistuneesti versiosta '%s'."
 
-
 #: upgrade.cpp:394
 #, c-format
 msgid ""
@@ -31,8 +30,7 @@ msgid ""
 "It is recommended that you uninstall and reinstall the program before using "
 "it."
 msgstr ""
-"Asetustietoja sek‰ ohjelmatiedostoja ei voitu p‰ivitt‰‰ versiosta '%s',"
-"\n"
+"Asetustietoja sek‰ ohjelmatiedostoja ei voitu p‰ivitt‰‰ versiosta '%s',\n"
 "joitakin asetuksia saattoi h‰vit‰.\n"
 "On suositeltavaa ett‰ ohjelma poistetaan ja asennetaan uudelleen ennen "
 "k‰yttˆ‰."
@@ -121,7 +119,7 @@ msgstr "Kansio, johon Mahogany tallentaa kopiot l‰hetetyist‰ viesteist‰."
 msgid "Sent Mail"
 msgstr "L‰hetetyt viestit"
 
-#: MApplication.cpp:761 MailCollector.cpp:187 upgrade.cpp:602
+#: MApplication.cpp:759 MailCollector.cpp:187 upgrade.cpp:602
 msgid "New Mail"
 msgstr "Uudet viestit"
 
@@ -161,7 +159,8 @@ msgstr "Testaan asetuksiasi"
 #, c-format
 msgid ""
 "Failed to create the address book '%s' for autocollected e-mail addresses."
-msgstr "Osoitekirja '%s'n luonti automaattisesti ker‰tt‰ville viesteille ep‰onnistui."
+msgstr ""
+"Osoitekirja '%s'n luonti automaattisesti ker‰tt‰ville viesteille ep‰onnistui."
 
 #: miscutil.cpp:103
 #, c-format
@@ -176,8 +175,7 @@ msgstr "Lis‰‰ uusi e-mail osoite tietokantaan?"
 #, c-format
 msgid ""
 "Couldn't create an entry in the address book '%s' for autocollected address."
-msgstr ""
-"Osoitekirjan kohdan '%s' luonti ep‰onnistui."
+msgstr "Osoitekirjan kohdan '%s' luonti ep‰onnistui."
 
 #: miscutil.cpp:165
 #, c-format
@@ -231,7 +229,8 @@ msgstr ""
 msgid ""
 "Cannot find your Mahogany directory, please specify it in the options dialog."
 msgstr ""
-"Mahoganyn hakemiston haku ep‰onnistui, m‰‰rittele hakemisto options-ikkunassa."
+"Mahoganyn hakemiston haku ep‰onnistui, m‰‰rittele hakemisto "
+"options-ikkunassa."
 
 #: MApplication.cpp:229
 msgid "Failed to set up initial configuration."
@@ -287,8 +286,7 @@ msgstr ""
 msgid ""
 "The attempt to make the directory unwritable for others has failed.\n"
 "(%s)"
-msgstr ""
-"Hakemiston (%s) k‰ytt‰j‰oikeuksien muutos ep‰onnistui."
+msgstr "Hakemiston (%s) k‰ytt‰j‰oikeuksien muutos ep‰onnistui."
 
 #: MApplication.cpp:367
 #, c-format
@@ -308,8 +306,7 @@ msgstr "Asia korjattu. Hakemisto ei ole en‰‰ toisten k‰ytt‰jien luettavissa."
 msgid ""
 "The attempt to make the file unreadable for others has failed.\n"
 "(%s)"
-msgstr ""
-"Hakemiston (%s) k‰ytt‰j‰oikeuksien muutos ep‰onnistui."
+msgstr "Hakemiston (%s) k‰ytt‰j‰oikeuksien muutos ep‰onnistui."
 
 #: MApplication.cpp:412
 #, c-format
@@ -328,7 +325,8 @@ msgstr "M‰‰rittele Mahoganyn globaali hakemisto"
 
 #: MApplication.cpp:446
 msgid "Program execution aborted due to installation problems."
-msgstr "Ohjelman ajaminen keskeytettiin asennuksessa tapahtuneiden \n"
+msgstr ""
+"Ohjelman ajaminen keskeytettiin asennuksessa tapahtuneiden \n"
 "ongelmien vuoksi."
 
 #: MApplication.cpp:531
@@ -397,13 +395,13 @@ msgid "Cannot create subfolder '%s': folder with this name already exists."
 msgstr ""
 "Alakansion '%s' luonti ep‰onnistui: samanniminen kansio on jo olemassa."
 
-
 #: MFolder.cpp:546
 msgid ""
 "INBOX folder is a special folder used by the mail system and can not be "
 "renamed."
 msgstr ""
-"INBOX kansio on postij‰rjestelm‰n k‰ytˆss‰ ja se ei ole nimett‰viss‰ uudelleen."
+"INBOX kansio on postij‰rjestelm‰n k‰ytˆss‰ ja se ei ole nimett‰viss‰ "
+"uudelleen."
 
 #: MFolder.cpp:560
 #, c-format
@@ -411,7 +409,8 @@ msgid ""
 "Cannot rename folder '%s' to '%s': the folder with the new name already "
 "exists."
 msgstr ""
-"Kansion '%s' nimen muutos'%s' ep‰onnistui: samanniminen kansio on jo olemassa."
+"Kansion '%s' nimen muutos'%s' ep‰onnistui: samanniminen kansio on jo "
+"olemassa."
 
 #: MailCollector.cpp:78
 #, c-format
@@ -424,8 +423,7 @@ msgstr "Saapuvat-kansioiden luettelon luonti ep‰onnistui."
 
 #: MailCollector.cpp:133
 msgid "Cannot collect mail without New Mail folder."
-msgstr ""
-"Viestej‰ ei voida ker‰t‰ ilman New Mail kansiota."
+msgstr "Viestej‰ ei voida ker‰t‰ ilman New Mail kansiota."
 
 #: MailCollector.cpp:182
 #, c-format
@@ -440,22 +438,48 @@ msgstr ""
 "Yrit‰t ker‰t‰ viestej‰ New Mail keskuskansiosta.\n"
 "Se ei ole j‰rkev‰‰. Korjaa kansion asetukset."
 
-#: MailCollector.cpp:209
+#: MailCollector.cpp:213
 #, c-format
 msgid "Auto-collecting mail from incoming folder '%s'."
 msgstr "Ker‰t‰‰n viestej‰ saapuvat-kansiosta '%s'."
 
-#: MailCollector.cpp:222
+#: MailCollector.cpp:226
 msgid "From folder '"
 msgstr "Kansiosta '"
 
-#: MailCollector.cpp:229
+#: MailCollector.cpp:233
 msgid "  Subject: "
 msgstr "  Aihe: "
 
-#: MailCollector.cpp:230
+#: MailCollector.cpp:234
 msgid "  From: "
 msgstr "  L‰hett‰j‰: "
+
+#: MessageTemplate.cpp:111
+#, fuzzy, c-format
+msgid "Unexpected end of file '%s'."
+msgstr "Tiedosto '%s' lis‰tty."
+
+#: MessageTemplate.cpp:123
+#, c-format
+msgid "Unexpected character at position %d in line %d in the file '%s'."
+msgstr ""
+
+#: MessageTemplate.cpp:194 MessageTemplate.cpp:277
+#, c-format
+msgid "Unexpected character '%c' at line %d, position %d in the file '%s'."
+msgstr ""
+
+#: MessageTemplate.cpp:237
+#, c-format
+msgid ""
+"Incorrect alignment width value at line %d, position %d in the file '%s'."
+msgstr ""
+
+#: MessageTemplate.cpp:298
+#, c-format
+msgid "Unknown variable '%s' at line %d, position %d in the file '%s'."
+msgstr ""
 
 #: wxMApp.cpp:235
 msgid ""
@@ -514,11 +538,11 @@ msgstr "Moduulin '%s' lataaminen ep‰onnistui."
 msgid "&File"
 msgstr "&Tiedosto"
 
-#: AdbFrame.cpp:1055 wxMFrame.cpp:148
+#: AdbFrame.cpp:1056 wxMFrame.cpp:148
 msgid "&Edit"
 msgstr "&Muokkaa"
 
-#: wxDialogLayout.cpp:738 wxMFrame.cpp:154 wxMenuDefs.cpp:320
+#: wxDialogLayout.cpp:811 wxMFrame.cpp:154 wxMenuDefs.cpp:320
 msgid "&Help"
 msgstr "&Apua"
 
@@ -562,32 +586,32 @@ msgstr "Kyseiselle asiayhteydelle ei ole viel‰ apua."
 msgid "Mahogany Toolbar"
 msgstr "Mahogany Tyˆkalupalkki"
 
-#: wxFolderView.cpp:80
+#: wxFolderView.cpp:83
 msgid "Status"
 msgstr "Tila"
 
-#: wxFolderView.cpp:81
+#: wxFolderView.cpp:84
 msgid "Date"
 msgstr "P‰iv‰ys"
 
-#: wxFolderView.cpp:82
+#: wxFolderView.cpp:85
 msgid "Size"
 msgstr "Koko"
 
-#: wxFolderView.cpp:83
+#: wxFolderView.cpp:86
 msgid "From"
 msgstr "L‰hett‰j‰"
 
-#: wxFolderView.cpp:84
+#: wxFolderView.cpp:87
 msgid "Subject"
 msgstr "Aihe"
 
-#: wxFolderView.cpp:121
+#: wxFolderView.cpp:125
 #, fuzzy
 msgid "DUXCSMRFOPHVG "
 msgstr "DUXCSMRFOPHV "
 
-#: wxFolderView.cpp:359
+#: wxFolderView.cpp:382
 #, c-format
 msgid ""
 "Mark all articles in\n"
@@ -598,95 +622,110 @@ msgstr ""
 "%s\n"
 "luetuiksi?"
 
-#: wxFolderView.cpp:519
+#: wxFolderView.cpp:544
 msgid ""
 "Invalid value '%s' for the date format: it should contain exacty 3 %%u "
 "format specificators. Default value '%s' will be used instead."
 msgstr ""
-"'%s' on v‰‰r‰ arvo p‰iv‰yksess‰: sen pit‰isi sis‰lt‰‰ 3 %%u muotoa."
-"K‰ytet‰‰n oletusarvoa '%s'."
+"'%s' on v‰‰r‰ arvo p‰iv‰yksess‰: sen pit‰isi sis‰lt‰‰ 3 %%u muotoa.K‰ytet‰‰n "
+"oletusarvoa '%s'."
 
-#: wxFolderView.cpp:568
+#: wxFolderView.cpp:593
 #, c-format
 msgid "Folder '%s'"
 msgstr "Kansio '%s'"
 
-#: wxFolderView.cpp:594
+#: wxFolderView.cpp:619
 #, c-format
 msgid "The folder '%s' could not be opened, please check its settings."
-msgstr ""
-"Kansiota '%s' ei voida avata, tarkista sen asetukset."
+msgstr "Kansiota '%s' ei voida avata, tarkista sen asetukset."
 
-#: wxFolderView.cpp:624
+#: wxFolderView.cpp:649
 msgid "Deleted messages were expunged"
 msgstr "Poistetut viestit tuhottu"
 
-#: wxFolderView.cpp:821 wxFolderView.cpp:837
+#: wxFolderView.cpp:853
 #, c-format
 msgid "%d messages saved"
 msgstr "%d viesti‰ talletettu"
 
-#: wxFolderView.cpp:823 wxFolderView.cpp:839
+#: wxFolderView.cpp:855 wxFolderView.cpp:930
 msgid "Saving messages failed."
 msgstr "Viestien tallennus ep‰onnistui."
 
-#: wxFolderView.cpp:859
+#: wxFolderView.cpp:874
 #, c-format
 msgid "Closing folder '%s' because the underlying mail folder was deleted."
 msgstr "Kansio '%s' suljetaan, koska allaoleva kansio tuhottiin."
 
-#: wxMessageView.cpp:197
+#: wxFolderView.cpp:927
+#, fuzzy, c-format
+msgid "Saved %lu messages."
+msgstr "Tallennetaan %d viesti‰..."
+
+#: wxFolderView.cpp:936
+#, fuzzy, c-format
+msgid "Copied %lu messages."
+msgstr "ei viestej‰"
+
+#: wxFolderView.cpp:939
+#, fuzzy
+msgid "Copying messages failed."
+msgstr "Viestien tallennus ep‰onnistui."
+
+#: wxMessageView.cpp:196
 msgid "MIME Menu"
 msgstr "MIME Valikko"
 
-#: wxMessageView.cpp:204
+#: wxMessageView.cpp:203
 msgid "&Info..."
 msgstr "&Tiedoksi..."
 
-#: wxFolderTree.cpp:234 wxMenuDefs.cpp:244 wxMessageView.cpp:206
+#: wxFolderTree.cpp:234 wxMenuDefs.cpp:244 wxMessageView.cpp:205
 msgid "&Open"
 msgstr "&Avaa"
 
-#: wxMessageView.cpp:207
+#: wxMessageView.cpp:206
 msgid "&Save..."
 msgstr "&Tallenna..."
 
-#: wxMessageView.cpp:623 wxMessageView.cpp:747
+#: wxMessageView.cpp:622 wxMessageView.cpp:746
 msgid " bytes"
 msgstr " bytes"
 
-#: wxMessageView.cpp:675
+#: wxMessageView.cpp:674
 msgid "Find string in message"
 msgstr "Etsi viestist‰ merkkijono"
 
-#: wxMessageView.cpp:676
+#: wxMessageView.cpp:675
 msgid "   Find:"
 msgstr "   Etsi:"
 
-#: wxMessageView.cpp:712
+#: wxMessageView.cpp:711
 #, c-format
 msgid ""
 "Temporary file '%s' left because it is still in use by an external process"
 msgstr ""
-"V‰liaikainen tiedosto '%s' s‰ilytettiin, sill‰ jokin ulkoinen prosessi k‰ytt‰‰ sit‰"
+"V‰liaikainen tiedosto '%s' s‰ilytettiin, sill‰ jokin ulkoinen prosessi "
+"k‰ytt‰‰ sit‰"
 
-#: wxMessageView.cpp:732
+#: wxMessageView.cpp:731
 msgid "MIME type: "
 msgstr "MIME Tyyppi:"
 
-#: wxMessageView.cpp:738
+#: wxMessageView.cpp:737
 msgid "Description: "
 msgstr "Kuvaus: "
 
-#: wxMessageView.cpp:740
+#: wxMessageView.cpp:739
 msgid "Size: "
 msgstr "Koko: "
 
-#: wxMessageView.cpp:745
+#: wxMessageView.cpp:744
 msgid " lines"
 msgstr " rivi‰"
 
-#: wxMessageView.cpp:755
+#: wxMessageView.cpp:754
 msgid ""
 "\n"
 "Parameters:\n"
@@ -694,7 +733,7 @@ msgstr ""
 "\n"
 "Parametrit:\n"
 
-#: wxMessageView.cpp:768
+#: wxMessageView.cpp:767
 msgid ""
 "\n"
 "Disposition: "
@@ -702,7 +741,7 @@ msgstr ""
 "\n"
 "Luonne (?): "
 
-#: wxMessageView.cpp:771
+#: wxMessageView.cpp:770
 msgid ""
 "\n"
 "Disposition Parameters:\n"
@@ -710,56 +749,56 @@ msgstr ""
 "\n"
 "Luonteen parametrit (?):\n"
 
-#: wxMessageView.cpp:778
+#: wxMessageView.cpp:777
 msgid "MIME information"
 msgstr "MIME informaatio"
 
-#: wxMessageView.cpp:927
+#: wxMessageView.cpp:926
 #, c-format
 msgid "Please enter the command to handle '%s' data:"
 msgstr "Anna komento k‰sitell‰ksesi '%s' tietoa:"
 
-#: wxMessageView.cpp:929
+#: wxMessageView.cpp:928
 msgid "Unknown MIME type"
 msgstr "Tuntematon MIME-tyyppi"
 
-#: wxMessageView.cpp:938
+#: wxMessageView.cpp:937
 #, c-format
 msgid "Do not know how to handle data of type '%s'."
 msgstr "Ei osaa k‰sitell‰ dataa, joka on tyyppi‰ '%s'."
 
-#: wxMessageView.cpp:975
+#: wxMessageView.cpp:974
 msgid "Cannot rename temporary file."
 msgstr "V‰liaikaistiedoston nime‰minen ep‰onnistui."
 
-#: wxMessageView.cpp:982
+#: wxMessageView.cpp:981
 #, c-format
 msgid "Error opening attachment: command '%s' failed"
 msgstr "Liitetiedoston avaus ep‰onnistui: komento '%s' pys‰htyi."
 
-#: wxMessageView.cpp:1007
+#: wxMessageView.cpp:1006
 msgid "Save attachment as:"
 msgstr "Tallenna liitetiedosto nimell‰:"
 
-#: wxMessageView.cpp:1024
+#: wxMessageView.cpp:1023
 msgid "Cannot get attachment content."
 msgstr "Liitetiedoston sis‰ltˆ‰ ei voida hakea."
 
-#: wxMessageView.cpp:1037
+#: wxMessageView.cpp:1036
 #, c-format
 msgid "Wrote %lu bytes to file '%s'"
 msgstr "Kirjoitettu %lu bytes tiedostoon '%s'"
 
-#: wxMessageView.cpp:1046
+#: wxMessageView.cpp:1045
 msgid "Could not save the attachment."
 msgstr "Liitetiedoston tallennus ep‰onnistui."
 
-#: wxMessageView.cpp:1180
+#: wxMessageView.cpp:1179
 #, c-format
 msgid "Cannot open URL '%s'"
 msgstr "Ei voida avata URL:‰‰ '%s'"
 
-#: wxMessageView.cpp:1188
+#: wxMessageView.cpp:1187
 msgid ""
 "No command configured to view URLs.\n"
 "Would you like to choose one now?"
@@ -767,39 +806,39 @@ msgstr ""
 "URL:i‰ k‰sittelev‰‰ komentoa ei ole m‰‰ritelty.\n"
 "Haluatko m‰‰ritell‰ sen nyt?"
 
-#: wxMessageView.cpp:1200
+#: wxMessageView.cpp:1199
 msgid "No command configured to view URLs."
 msgstr "URL:i‰ k‰sittelev‰‰ komentoa ei ole m‰‰ritelty."
 
-#: wxMessageView.cpp:1224
+#: wxMessageView.cpp:1223
 #, c-format
 msgid "Could not launch browser: '%s' failed."
 msgstr "Selaimen k‰ynnistys pys‰htynyt: '%s' ep‰onnistui."
 
-#: wxMessageView.cpp:1237
+#: wxMessageView.cpp:1236
 #, c-format
 msgid "Couldn't launch browser: '%s' failed"
 msgstr "Selaimen k‰ynnistys pys‰htynyt: '%s' ep‰onnistui."
 
-#: wxMessageView.cpp:1246
+#: wxMessageView.cpp:1245
 #, c-format
 msgid "Opening URL '%s'... done."
 msgstr "Avataan URL '%s'... valmis."
 
-#: wxMessageView.cpp:1249
+#: wxMessageView.cpp:1248
 #, c-format
 msgid "Opening URL '%s' failed."
 msgstr "Ei voida avata URL:‰‰ '%s'."
 
-#: wxMessageView.cpp:1276
+#: wxMessageView.cpp:1275
 msgid "Failed to get the raw text of the message."
 msgstr "Viestin tekstin haku ep‰onnistui."
 
-#: wxMessageView.cpp:1281
+#: wxMessageView.cpp:1280
 msgid "Raw message text"
 msgstr "Viestiteksti"
 
-#: wxMessageView.cpp:1395
+#: wxMessageView.cpp:1394
 #, c-format
 msgid ""
 "The selected message is %u Kbytes long which is more than the current "
@@ -807,16 +846,15 @@ msgid ""
 "\n"
 "Do you still want to download it?"
 msgstr ""
-"Valittu viesti on %u KB:n kokoinen, suurempi kuin maksimikoko eli "
-"%d KB.\n"
+"Valittu viesti on %u KB:n kokoinen, suurempi kuin maksimikoko eli %d KB.\n"
 "\n"
 "Haluatko silti hakea sen?"
 
-#: wxComposeView.cpp:1575 wxMessageView.cpp:1464
+#: wxComposeView.cpp:1672 wxMessageView.cpp:1463
 msgid "Mahogany: Printout"
 msgstr "Mahogany: Listaus"
 
-#: wxComposeView.cpp:1578 wxMessageView.cpp:1466
+#: wxComposeView.cpp:1675 wxMessageView.cpp:1465
 msgid ""
 "There was a problem with printing the message:\n"
 "perhaps your current printer is not set up correctly?"
@@ -824,11 +862,11 @@ msgstr ""
 "Viestin tulostuksessa ongelmia:\n"
 "ehk‰ tulostimesi ei ole oikein asennettu?"
 
-#: wxComposeView.cpp:1580 wxMessageView.cpp:1468
+#: wxComposeView.cpp:1677 wxMessageView.cpp:1467
 msgid "Printing"
 msgstr "Tulostetaan"
 
-#: wxMessageView.cpp:1524
+#: wxMessageView.cpp:1523
 msgid ""
 "There was a problem with showing the preview:\n"
 "perhaps your current printer is not set correctly?"
@@ -836,73 +874,73 @@ msgstr ""
 "Viestin esikatselu ep‰onnistui:\n"
 "ehk‰ tulostimesi ei ole oikein asennettu?"
 
-#: wxMessageView.cpp:1526
+#: wxMessageView.cpp:1525
 msgid "Previewing"
 msgstr "Avataan esikatselua varten"
 
-#: wxMessageView.cpp:1534
+#: wxMessageView.cpp:1533
 msgid "Print Preview"
 msgstr "Esikatselu"
 
-#: wxMessageView.cpp:1589
+#: wxMessageView.cpp:1588
 #, c-format
 msgid "%s (external viewer exited with non null exit code)"
 msgstr "%s (erillinen katseluohjelma lopetti)"
 
-#: wxComposeView.cpp:348
+#: wxComposeView.cpp:415
 msgid "Nothing to expand - please enter something."
 msgstr "Ei mit‰‰n laajennettavissa - kirjoita jotain."
 
-#: wxComposeView.cpp:492
+#: wxComposeView.cpp:559
 msgid "Article Composition"
 msgstr "Artikkelin kirjoitus"
 
-#: wxComposeView.cpp:510
+#: wxComposeView.cpp:616
 msgid "Message Composition"
 msgstr "Viestin kirjoitus"
 
-#: wxComposeView.cpp:533
+#: wxComposeView.cpp:639
 msgid "&Compose"
 msgstr "&Kirjoita viesti"
 
-#: wxComposeView.cpp:592
+#: wxComposeView.cpp:698
 msgid "To:"
 msgstr "Vastaanottaja:"
 
-#: wxComposeView.cpp:592
+#: wxComposeView.cpp:698
 msgid "Newsgroups:"
 msgstr "Uutisryhm‰:"
 
-#: wxComposeView.cpp:593
+#: wxComposeView.cpp:699
 msgid "Subject:"
 msgstr "Aihe:"
 
-#: wxComposeView.cpp:594
+#: wxComposeView.cpp:700
 msgid "CC:"
 msgstr "CC:"
 
-#: wxComposeView.cpp:595
+#: wxComposeView.cpp:701
 msgid "BCC:"
 msgstr "BCC:"
 
-#: wxComposeView.cpp:640
+#: wxComposeView.cpp:746
 msgid "Expand"
 msgstr "Laajenna"
 
-#: wxComposeView.cpp:649
+#: wxComposeView.cpp:755
 msgid "Expand the address using address books"
 msgstr "Laajenna osoite k‰ytt‰en osoitekirjaa"
 
-#: wxComposeView.cpp:723
+#: wxComposeView.cpp:829
 msgid "You haven't configured your signature file."
 msgstr "Et ole asettanut allekirjoitustasi."
 
-#: wxComposeView.cpp:732
+#: wxComposeView.cpp:838
 #, c-format
 msgid "Signature file '%s' couldn't be opened."
 msgstr "Allekirjoitusta '%s' ei voida avata."
 
-#: wxComposeView.cpp:736
+#: wxComposeView.cpp:842
 msgid ""
 "\n"
 "\n"
@@ -914,192 +952,200 @@ msgstr ""
 "Haluatko valita allekirjoituksesi nyt?\n"
 "(muuten allekirjoitusta ei k‰ytet‰)"
 
-#: wxComposeView.cpp:742
+#: wxComposeView.cpp:848
 msgid "Choose signature file"
 msgstr "Valitse allekirjoitus"
 
-#: AdbFrame.cpp:1885 MailFolder.cpp:313 wxBrowseButton.cpp:133
-#: wxComposeView.cpp:744 wxComposeView.cpp:961 wxComposeView.cpp:986
-#: wxComposeView.cpp:1246 wxMFolderDialogs.cpp:1626
+#: MailFolder.cpp:380 wxBrowseButton.cpp:133 wxComposeView.cpp:850
+#: wxComposeView.cpp:1067 wxComposeView.cpp:1092 wxComposeView.cpp:1354
+#: wxMFolderDialogs.cpp:1626
 msgid "All files (*.*)|*.*"
 msgstr "Kaikki tiedostot (*.*)|*.*"
 
-#: wxComposeView.cpp:783
+#: wxComposeView.cpp:889
 #, c-format
 msgid "Your signature is %stoo long: it should not be more than %d lines."
-msgstr "Allekirjoituksesi on liian pitk‰: sen ei tulisi olla kuin %d rivi‰ pitk‰"
+msgstr ""
+"Allekirjoituksesi on liian pitk‰: sen ei tulisi olla kuin %d rivi‰ pitk‰"
 
-#: wxComposeView.cpp:785
+#: wxComposeView.cpp:891
 msgid "way "
 msgstr "way "
 
-#: wxComposeView.cpp:890
+#: wxComposeView.cpp:996
 #, c-format
 msgid ""
 "Please terminate the external editor (PID %d) before closing this window."
-msgstr ""
-"Lopeta ulkoinen muistio (PID %d) ennen kuin suljet t‰m‰n ikkunan."
+msgstr "Lopeta ulkoinen muistio (PID %d) ennen kuin suljet t‰m‰n ikkunan."
 
-#: wxComposeView.cpp:900
+#: wxComposeView.cpp:1006
 msgid "There are unsaved changes, close anyway?"
 msgstr "Et ole tallentanut kaikkia muutoksia, sulje kuitenkin?"
 
-#: wxComposeView.cpp:940
+#: wxComposeView.cpp:1046
 msgid "Message has been sent."
 msgstr "Viesti on l‰hetetty."
 
-#: wxComposeView.cpp:941
+#: wxComposeView.cpp:1047
 msgid "Message sent"
 msgstr "Viesti l‰hetetty."
 
-#: wxComposeView.cpp:959 wxComposeView.cpp:1244
+#: wxComposeView.cpp:1065 wxComposeView.cpp:1352
 msgid "Please choose a file to insert."
 msgstr "Valitse lis‰tt‰v‰ tiedosto."
 
-#: wxComposeView.cpp:967 wxComposeView.cpp:992
+#: wxComposeView.cpp:1073 wxComposeView.cpp:1098
 msgid "Cancelled"
 msgstr "Peruutettu"
 
-#: wxComposeView.cpp:971
+#: wxComposeView.cpp:1077
 #, c-format
 msgid "Inserted file '%s'."
 msgstr "Tiedosto '%s' lis‰tty."
 
-#: wxComposeView.cpp:975
+#: wxComposeView.cpp:1081
 #, c-format
 msgid "Failed to insert the text file '%s'."
 msgstr "Tekstitiedosto '%s' lis‰ys ep‰onnistui."
 
-#: MailFolder.cpp:311 wxComposeView.cpp:984
+#: MailFolder.cpp:378 wxComposeView.cpp:1090
 msgid "Choose file to save message to"
 msgstr "Valitse tiedosto johon viesti tallennetaan"
 
-#: wxComposeView.cpp:996
+#: wxComposeView.cpp:1102
 #, c-format
 msgid "Message text saved to file '%s'."
 msgstr "Viesti tallennettu tiedostoon '%s'."
 
-#: wxComposeView.cpp:1001
+#: wxComposeView.cpp:1107
 msgid "Failed to save the message."
 msgstr "Viestin tallennus ep‰onnistui."
 
-#: wxComposeView.cpp:1010
+#: wxComposeView.cpp:1116
 #, c-format
 msgid "External editor is already running (PID %d)"
 msgstr "Ulkoinen muistio on jo p‰‰ll‰ (PID %d)"
 
-#: wxComposeView.cpp:1029
+#: wxComposeView.cpp:1135
 msgid "External editor not configured."
 msgstr "Ulkoista muistiota ei ole m‰‰ritelty."
 
-#: wxComposeView.cpp:1037
+#: wxComposeView.cpp:1143
 msgid "Cannot create temporary file"
 msgstr "V‰liaikaisen tiedoston luonti ep‰onnistui."
 
-#: wxComposeView.cpp:1045
+#: wxComposeView.cpp:1151
 msgid "Failed to pass message to external editor."
 msgstr "Viestin siirto ulkoiselle muistiolle ep‰onnistui."
 
-#: wxComposeView.cpp:1062
+#: wxComposeView.cpp:1168
 #, c-format
 msgid "Execution of '%s' failed."
 msgstr "Komennon '%s' ajo ep‰onnistui."
 
-#: wxComposeView.cpp:1069
+#: wxComposeView.cpp:1175
 #, c-format
 msgid "Started external editor (PID %d)"
 msgstr "Ulkoinen muistio k‰ynnistetty (PID %d)"
 
-#: wxComposeView.cpp:1088
+#: wxComposeView.cpp:1194
 msgid "Would you like to change the external editor setting now?"
 msgstr "Haluatko muuttaa ulkoisen muistion asetuksia?"
 
-#: wxComposeView.cpp:1094
+#: wxComposeView.cpp:1200
 msgid "Set up external editor"
 msgstr "Asenna ulkoinen muistio"
 
-#: wxComposeView.cpp:1095
+#: wxComposeView.cpp:1201
 msgid ""
 "Enter the command name (%%s will be replaced with the name of the file):"
-msgstr ""
-"Anna komentonimi (%%s korvataan tiedostonimell‰):"
+msgstr "Anna komentonimi (%%s korvataan tiedostonimell‰):"
 
-#: wxComposeView.cpp:1130
+#: wxComposeView.cpp:1238
 #, fuzzy, c-format
 msgid "Added custom header '%s' to the message."
 msgstr "Muokattu otsikko '%s' lis‰ttiin viestiin."
 
-#: wxComposeView.cpp:1171
+#: wxComposeView.cpp:1279
 msgid "External editor terminated with non null exit code."
 msgstr "Ulkoinen muistio keskeytettin."
 
-#: wxComposeView.cpp:1178
+#: wxComposeView.cpp:1286
 msgid "Failed to insert back the text from external editor."
 msgstr "Tekstin siirto ulkoisesta muistiosta ep‰onnistui."
 
-#: wxComposeView.cpp:1188
+#: wxComposeView.cpp:1296
 msgid "Inserted text from external editor."
 msgstr "Teksti siirretty ulkoisesta muistiosta."
 
-#: wxComposeView.cpp:1194
+#: wxComposeView.cpp:1302
 #, c-format
 msgid "The text was left in the file '%s'."
 msgstr "Teksti j‰tettiin tiedostoon '%s'."
 
-#: wxComposeView.cpp:1293
+#: wxComposeView.cpp:1401
 #, c-format
 msgid "Inserted file '%s' (as '%s')"
 msgstr "Tiedosto '%s' lis‰tty (nimell‰ '%s')"
 
-#: wxComposeView.cpp:1375
+#: wxComposeView.cpp:1483
 #, c-format
 msgid "Cannot read file '%s' included in this message!"
 msgstr "Viestiss‰ olevan tiedoston '%s' luku ep‰onnistui!"
 
-#: wxComposeView.cpp:1383
+#: wxComposeView.cpp:1491
 #, c-format
 msgid "Cannot open file '%s' included in this message!"
 msgstr "Viestiss‰ olevan tiedoston '%s' luku ep‰onnistui!"
 
-#: wxComposeView.cpp:1412
+#: wxComposeView.cpp:1520
 msgid "Unknwown part type"
 msgstr "Tuntematon MIME-tyyppi"
 
-#: wxComposeView.cpp:1596
+#: wxComposeView.cpp:1693
 msgid ""
 "The external editor is still opened, please close it before sending the "
 "message."
-msgstr ""
-"Ulkoinen muistio on edelleen auki, sulje se ennen viestin l‰hetyst‰."
+msgstr "Ulkoinen muistio on edelleen auki, sulje se ennen viestin l‰hetyst‰."
 
-#: wxComposeView.cpp:1610
+#: wxComposeView.cpp:1707
 msgid ""
 "The message can not be sent because the network settings are either not "
 "configured or incorrect. Would you like to change them now?"
 msgstr ""
-"Viesti‰ ei voida l‰hett‰‰ sill‰ verkkoasetukset ovat v‰‰rin tai niit‰ ei "
-"ole tehty. Haluatko muuttaa niit‰ nyt?"
+"Viesti‰ ei voida l‰hett‰‰ sill‰ verkkoasetukset ovat v‰‰rin tai niit‰ ei ole "
+"tehty. Haluatko muuttaa niit‰ nyt?"
 
-#: wxComposeView.cpp:1622
+#: wxComposeView.cpp:1719
 msgid "Cannot send message - network is not configured."
 msgstr "Viestin l‰hetys ep‰onnistui - verkkoasetuksia ei ole tehty."
 
-#: wxComposeView.cpp:1637
+#: wxComposeView.cpp:1734
 msgid "Please specify at least one recipient in the \"To:\" field!"
 msgstr "M‰‰rit‰ ainakin yksi vastaanottaja!"
 
-#: wxComposeView.cpp:1649
+#: wxComposeView.cpp:1746
 msgid "The subject of your message is empty, would you like to change it?"
 msgstr "Viestill‰si ei ole aihetta, haluatko muuttaa sit‰?"
 
-#: wxComposeView.cpp:1687
+#: wxComposeView.cpp:1784
 msgid "Cannot insert text file into the message."
 msgstr "Tekstitiedoston liitt‰minen viestiin ep‰onnistui."
 
-#: wxComposeView.cpp:1772
+#: wxComposeView.cpp:1869
 #, c-format
 msgid "Cannot write message to file '%s'."
 msgstr "Viestin kirjoittaminen tiedostoon '%s' ep‰onnistui."
+
+#: wxComposeView.cpp:1949
+#, fuzzy, c-format
+msgid "Failed to insert file '%s' into the message."
+msgstr "Tekstitiedoston liitt‰minen viestiin ep‰onnistui."
+
+#: wxComposeView.cpp:1975
+#, fuzzy, c-format
+msgid "Failed to execute the command '%s'"
+msgstr "Tekstitiedosto '%s' lis‰ys ep‰onnistui."
 
 #: wxMainFrame.cpp:72
 #, c-format
@@ -1111,13 +1157,12 @@ msgid ""
 "This folder couldn't be opened last time, do you still want to try to open "
 "it (it will probably fail again)?"
 msgstr ""
-"T‰t‰ kansiota ei voitu avata viimeksi, haluatko yritt‰‰ avata sit‰ uudelleen?"
-" (se ei mahdollisesti onnistu)"
+"T‰t‰ kansiota ei voitu avata viimeksi, haluatko yritt‰‰ avata sit‰ "
+"uudelleen? (se ei mahdollisesti onnistu)"
 
 #: wxMainFrame.cpp:216
 msgid "Would you like to change folder settings before trying to open it?"
-msgstr ""
-"Haluatko vaihtaa kansion asetuksia ennen sen avaamista?"
+msgstr "Haluatko vaihtaa kansion asetuksia ennen sen avaamista?"
 
 #: wxMainFrame.cpp:254
 #, c-format
@@ -1148,15 +1193,16 @@ msgid ""
 "The current format specificators are incorrect and the default value will be "
 "used instead."
 msgstr ""
-"Kuvanmuokkausohjelman asetuksen tulisi sis‰lt‰‰ tasan kaksi '%%s' formaattim‰‰rityst‰.\n"
+"Kuvanmuokkausohjelman asetuksen tulisi sis‰lt‰‰ tasan kaksi '%%s' "
+"formaattim‰‰rityst‰.\n"
 "Nykyiset formaattim‰‰ritykset ovat virheellisi‰, k‰ytet‰‰n oletusarvoa."
 
-#: AdbFrame.cpp:2514 AdbFrame.cpp:2634 persctrl.cpp:845 wxDialogLayout.cpp:655
+#: AdbFrame.cpp:2506 AdbFrame.cpp:2626 persctrl.cpp:946 wxDialogLayout.cpp:725
 #: wxMDialogs.cpp:280 wxMDialogs.cpp:823 wxMFolderDialogs.cpp:1584
 msgid "OK"
 msgstr "OK"
 
-#: AdbFrame.cpp:2518 AdbFrame.cpp:2638 persctrl.cpp:852 wxDialogLayout.cpp:664
+#: AdbFrame.cpp:2510 AdbFrame.cpp:2630 persctrl.cpp:953 wxDialogLayout.cpp:734
 #: wxMDialogs.cpp:284 wxMDialogs.cpp:813 wxMFolderDialogs.cpp:1593
 msgid "Cancel"
 msgstr "Peruuta"
@@ -1611,7 +1657,8 @@ msgstr "&Siirr‰ kansioon"
 msgid "Move message to another folder"
 msgstr "Siirr‰ viesti toiseen kansioon"
 
-#: AdbFrame.cpp:1081 wxMenuDefs.cpp:259 wxMenuDefs.cpp:300
+#: AdbFrame.cpp:1082 wxHeadersDialogs.cpp:960 wxMenuDefs.cpp:259
+#: wxMenuDefs.cpp:300
 msgid "&Delete"
 msgstr "&Poista"
 
@@ -1744,7 +1791,7 @@ msgstr "Muokattu &otsikko..."
 msgid "Add/edit header fields not shown on the screen"
 msgstr "Lis‰‰/muokkaa otsikkokentti‰, jotka eiv‰t n‰y ruudulla"
 
-#: AdbFrame.cpp:1080 wxMenuDefs.cpp:287
+#: AdbFrame.cpp:1081 wxMenuDefs.cpp:287
 msgid "&New..."
 msgstr "&Uusi..."
 
@@ -1943,8 +1990,10 @@ msgid ""
 "The following fields are used as default values for the\n"
 "corresponding server names. You may set them independently\n"
 "for each folder as well, overriding the values specified here"
-msgstr "Seuraavia kentti‰ k‰ytet‰‰n oletusarvoina vastaaville palvelinnimille.\n"
-"Voit asettaa ne erikseen jokaiselle kansiolle, n‰in korvaten t‰ss‰ asetetut arvot."
+msgstr ""
+"Seuraavia kentti‰ k‰ytet‰‰n oletusarvoina vastaaville palvelinnimille.\n"
+"Voit asettaa ne erikseen jokaiselle kansiolle, n‰in korvaten t‰ss‰ asetetut "
+"arvot."
 
 #: wxOptionsDlg.cpp:393
 msgid "&POP server"
@@ -2042,8 +2091,7 @@ msgstr "Mail alias substring ex&pansion"
 
 #: wxOptionsDlg.cpp:424
 msgid "Font famil&y:default:decorative:roman:script:swiss:modern:teletype"
-msgstr ""
-"&Kirjasinlaji:oletus:koriste:Roman:skripti:swiss:moderni:teletype"
+msgstr "&Kirjasinlaji:oletus:koriste:Roman:skripti:swiss:moderni:teletype"
 
 #: wxOptionsDlg.cpp:427 wxOptionsDlg.cpp:464
 msgid "Font si&ze"
@@ -2135,8 +2183,7 @@ msgstr "&Esikatsele valittu viesti"
 
 #: wxOptionsDlg.cpp:461
 msgid "&Font family:default:decorative:roman:script:swiss:modern:teletype"
-msgstr ""
-"&Kirjasinlaji:oletus:koriste:Roman:skripti:swiss:moderni:teletype"
+msgstr "&Kirjasinlaji:oletus:koriste:Roman:skripti:swiss:moderni:teletype"
 
 #: wxOptionsDlg.cpp:467
 msgid "Colour for &URLs"
@@ -2220,8 +2267,10 @@ msgid ""
 "with other software (emacs). The normal addressbook is unaffected by\n"
 "these settings."
 msgstr ""
-"Seuraavat asetukset m‰‰ritt‰v‰t tuen Big Brother osoitekirjaformaatille (BBDB).\n"
-"Tuki on olemassa yhteensopivuudeksi muiden ohjelmien kanssa (emacs). Tavallinen\n"
+"Seuraavat asetukset m‰‰ritt‰v‰t tuen Big Brother osoitekirjaformaatille "
+"(BBDB).\n"
+"Tuki on olemassa yhteensopivuudeksi muiden ohjelmien kanssa (emacs). "
+"Tavallinen\n"
 "osoitekirja s‰ilyy koskemattomana, vaikka k‰ytt‰isit BBDB-tukea."
 
 #: wxOptionsDlg.cpp:499
@@ -2293,7 +2342,8 @@ msgid ""
 "If autosave delay is not 0, the program will periodically\n"
 "save all unsaved information which reduces the risk of loss\n"
 "of information"
-msgstr "Jos automaattisen tallennuksen viive on 0, ohjelma tallentaa\n"
+msgstr ""
+"Jos automaattisen tallennuksen viive on 0, ohjelma tallentaa\n"
 "kaiken tallentamattoman tiedon ajoittain. T‰m‰ v‰hent‰‰ tiedon\n"
 "h‰vi‰misen riski‰."
 
@@ -2342,7 +2392,8 @@ msgid "Python"
 msgstr "Python"
 
 #: wxOptionsDlg.cpp:1225
-msgid "Adressbook"
+#, fuzzy
+msgid "Addressbook"
 msgstr "Osoitekirja"
 
 #: wxOptionsDlg.cpp:1241
@@ -2470,40 +2521,40 @@ msgstr "Haluatko poistaa kansion '%s'?"
 msgid "All folders"
 msgstr "Kaikki kansiot"
 
-#: wxFolderTree.cpp:676
+#: wxFolderTree.cpp:679
 msgid "Please select the folder to delete first."
 msgstr "Valitse ensiksi poistettava kansio."
 
-#: wxFolderTree.cpp:683
+#: wxFolderTree.cpp:686
 #, c-format
 msgid "Folder '%s' deleted"
 msgstr "Kansio '%s' poistettu"
 
-#: wxFolderTree.cpp:768
+#: wxFolderTree.cpp:771
 msgid "Cannot open this folder."
 msgstr "Kansion avaus ep‰onnistui."
 
-#: persctrl.cpp:835 wxDialogLayout.cpp:426
+#: persctrl.cpp:936 wxDialogLayout.cpp:460
 msgid "No"
 msgstr "Ei"
 
-#: wxDialogLayout.cpp:427
+#: wxDialogLayout.cpp:461
 msgid "Ask"
 msgstr "Kysy"
 
-#: persctrl.cpp:834 wxDialogLayout.cpp:428
+#: persctrl.cpp:935 wxDialogLayout.cpp:462
 msgid "Yes"
 msgstr "Kyll‰"
 
-#: wxDialogLayout.cpp:747
+#: wxDialogLayout.cpp:820
 msgid "&OK"
 msgstr "&OK"
 
-#: AdbFrame.cpp:1082 wxDialogLayout.cpp:756
+#: AdbFrame.cpp:1083 wxDialogLayout.cpp:829
 msgid "&Cancel"
 msgstr "&Peruuta"
 
-#: wxDialogLayout.cpp:764
+#: wxDialogLayout.cpp:837
 msgid "&Apply"
 msgstr "&Aseta"
 
@@ -2551,7 +2602,7 @@ msgstr "NNTP"
 msgid "News"
 msgstr "News"
 
-#: AdbFrame.cpp:3532 wxMFolderDialogs.cpp:737
+#: AdbFrame.cpp:3524 wxMFolderDialogs.cpp:737
 msgid "Group"
 msgstr "Ryhm‰"
 
@@ -2682,68 +2733,131 @@ msgstr "Valitse kuvake"
 msgid "&Current icon"
 msgstr "&Nykyinen kuvake"
 
-#: wxHeadersDialogs.cpp:252
+#: wxHeadersDialogs.cpp:392
 msgid "&To"
 msgstr "&Vastaanottaja"
 
-#: wxHeadersDialogs.cpp:253
+#: wxHeadersDialogs.cpp:393
 msgid "&Cc"
 msgstr "&Cc"
 
-#: wxHeadersDialogs.cpp:254
+#: wxHeadersDialogs.cpp:394
 msgid "&Bcc"
 msgstr "&Bcc"
 
-#: wxHeadersDialogs.cpp:274
+#: wxHeadersDialogs.cpp:414
 msgid "Configure headers for message composition"
 msgstr "Aseta otsikot viestin kirjoitukseen"
 
-#: wxHeadersDialogs.cpp:283 wxHeadersDialogs.cpp:440
+#: wxHeadersDialogs.cpp:423 wxHeadersDialogs.cpp:603
 msgid "&Headers"
 msgstr "&Otsikot"
 
-#: wxHeadersDialogs.cpp:286
+#: wxHeadersDialogs.cpp:430
+#, fuzzy
+msgid "&More..."
+msgstr "&Uusi..."
+
+#: wxHeadersDialogs.cpp:442
 msgid "Show the field?"
 msgstr "N‰yt‰ kentt‰?"
 
-#: wxHeadersDialogs.cpp:287
+#: wxHeadersDialogs.cpp:443
 msgid "Default value"
 msgstr "Oletusarvo"
 
-#: wxHeadersDialogs.cpp:431
+#: wxHeadersDialogs.cpp:594
 msgid "Configure headers to show in message view"
 msgstr "Configure headers to show in message view"
 
-#: wxHeadersDialogs.cpp:443
+#: wxHeadersDialogs.cpp:606
 msgid "&Down"
 msgstr "&Alas"
 
-#: wxHeadersDialogs.cpp:453
+#: wxHeadersDialogs.cpp:616
 msgid "&Up"
 msgstr "&Ylˆs"
 
-#: wxHeadersDialogs.cpp:593
+#: wxHeadersDialogs.cpp:757
 #, fuzzy
-msgid "Configure custom header"
-msgstr "Aseta &muokattu otsikko"
-
-#: wxHeadersDialogs.cpp:601
-#, fuzzy
-msgid "Edit header"
+msgid "Edit custom header"
 msgstr "Muokkaa otsikkoa"
 
-#: wxHeadersDialogs.cpp:604
-#, fuzzy
-msgid "Header name: "
-msgstr "&Otsikkonimi: "
-
-#: wxHeadersDialogs.cpp:605
-msgid "Header value: "
+#: wxHeadersDialogs.cpp:773
+#, fuzzy, c-format
+msgid "Header value for folder '%s'"
 msgstr "Otsikon arvo: "
 
-#: wxHeadersDialogs.cpp:653
-msgid "Remember these values "
+#: wxHeadersDialogs.cpp:775
+#, fuzzy
+msgid "Default value for header"
+msgstr "Oletusarvo"
+
+#: wxHeadersDialogs.cpp:779
+#, fuzzy
+msgid "&Name: "
+msgstr "&K‰ytt‰j‰nimi: "
+
+#: wxHeadersDialogs.cpp:780
+msgid "&Value: "
+msgstr ""
+
+#: wxHeadersDialogs.cpp:831
+#, fuzzy
+msgid "news postins"
+msgstr "Muuta asetuksia"
+
+#: wxHeadersDialogs.cpp:832
+#, fuzzy
+msgid "mail messages"
+msgstr "ei viestej‰"
+
+#: wxHeadersDialogs.cpp:833
+#, fuzzy
+msgid "all messages"
+msgstr "ei viestej‰"
+
+#: wxHeadersDialogs.cpp:845
+msgid "Use this header for:"
+msgstr ""
+
+#: wxHeadersDialogs.cpp:872
+#, fuzzy
+msgid "Save these values "
 msgstr "Muista n‰m‰ arvot "
+
+#: wxHeadersDialogs.cpp:938
+#, fuzzy
+msgid "Configure custom headers"
+msgstr "Aseta &muokattu otsikko"
+
+#: wxHeadersDialogs.cpp:953
+#, c-format
+msgid "Custom &headers for folder '%s'"
+msgstr ""
+
+#: wxHeadersDialogs.cpp:955
+#, fuzzy
+msgid "Default custom headers"
+msgstr "Aseta &muokattu otsikko"
+
+#: wxHeadersDialogs.cpp:968
+#, fuzzy
+msgid "&Add..."
+msgstr "&FAQ..."
+
+#: wxHeadersDialogs.cpp:976
+#, fuzzy
+msgid "&Edit..."
+msgstr "&Muokkaa"
+
+#: wxHeadersDialogs.cpp:1016
+msgid "Name"
+msgstr ""
+
+#: wxHeadersDialogs.cpp:1017
+msgid "Value"
+msgstr ""
 
 #: MailFolder.cpp:139
 #, c-format
@@ -2758,25 +2872,25 @@ msgstr "Salasanan kysely"
 msgid "Cannot access this folder without a password."
 msgstr "Kansioon p‰‰sy estetty ilman salasanaa."
 
-#: MailFolder.cpp:229
-#, c-format
-msgid "Cannot open folder '%s'."
-msgstr "Kansion '%s' avaus ep‰onnistui."
+#: MailFolder.cpp:224 MailFolder.cpp:389
+msgid "Could not truncate the existing file."
+msgstr "Olemassaolevan tiedoston katkaisu ep‰onnistui."
 
-#: MailFolder.cpp:244
+#: MailFolder.cpp:236 MailFolder.cpp:311
 #, c-format
 msgid "Saving %d messages..."
 msgstr "Tallennetaan %d viesti‰..."
 
-#: MailFolder.cpp:321
-msgid "Could not truncate the existing file."
-msgstr "Olemassaolevan tiedoston katkaisu ep‰onnistui."
+#: MailFolder.cpp:296
+#, c-format
+msgid "Cannot open folder '%s'."
+msgstr "Kansion '%s' avaus ep‰onnistui."
 
-#: MailFolder.cpp:434
+#: MailFolder.cpp:502
 msgid "re"
 msgstr "vast"
 
-#: MailFolderCC.cpp:469
+#: MailFolderCC.cpp:507
 #, c-format
 msgid ""
 "Found lock-file:\n"
@@ -2790,7 +2904,7 @@ msgstr ""
 "Joku toinen prosessi saattaa k‰ytt‰‰ kansiota.\n"
 "Kumotaanko lukitus?"
 
-#: MailFolderCC.cpp:479
+#: MailFolderCC.cpp:517
 msgid ""
 "Could not remove lock-file.\n"
 "Other process may have terminated.\n"
@@ -2800,26 +2914,26 @@ msgstr ""
 "Toiset prosessit saattoivat pys‰hty‰.\n"
 "Yritet‰‰n jatkaa normaalisti."
 
-#: MailFolderCC.cpp:485
+#: MailFolderCC.cpp:523
 msgid "Cannot open the folder while lock-file exists."
 msgstr "Kansiota ei voida avata, sill‰ lukitustiedosto on olemassa."
 
-#: MailFolderCC.cpp:589
+#: MailFolderCC.cpp:628
 #, c-format
 msgid "Mailstream for folder '%s' has been closed, trying to reopen it."
 msgstr "Viestivirta kansiolle '%s' on suljettu, yritet‰‰n uudelleenavausta."
 
-#: MailFolderCC.cpp:594
+#: MailFolderCC.cpp:633
 #, c-format
 msgid "Re-opening closed folder '%s' failed."
 msgstr "Kansion '%s' uudelleenavaus ep‰onnistui."
 
-#: MailFolderCC.cpp:602
+#: MailFolderCC.cpp:641
 #, c-format
 msgid "Folder '%s' is alive."
 msgstr "Kansio '%s' on hengiss‰."
 
-#: MailFolderCC.cpp:941
+#: MailFolderCC.cpp:982
 #, c-format
 msgid ""
 "This folder (%s) contains %lu messages, which is greater than the current "
@@ -2828,38 +2942,38 @@ msgid ""
 "Would you like to retrieve only the last %lu messages?\n"
 "(selecting [No] will retrieve all messages)"
 msgstr ""
-"Kansio (%s) sis‰lt‰‰ &lu viesti‰, joka on suurempi kuin nykyinen raja (%lu)."
-"\n"
+"Kansio (%s) sis‰lt‰‰ &lu viesti‰, joka on suurempi kuin nykyinen raja "
+"(%lu).\n"
 "Haluatko hakea vain viimeiset %lu viesti‰?\n"
 "(valitse [Ei], jos haluat hakea kaikki viestit)"
 
-#: MailFolderCC.cpp:963
+#: MailFolderCC.cpp:1004
 #, c-format
 msgid "Reading %lu message headers..."
 msgstr "Luetaan %lu viestiotsikkoa..."
 
-#: MailFolderCC.cpp:1086
+#: MailFolderCC.cpp:1127
 msgid "<address missing>"
 msgstr "<osoite puutteellinen>"
 
-#: MailFolderCC.cpp:1339
+#: MailFolderCC.cpp:1380
 #, c-format
 msgid "Folder '%s' : "
 msgstr "Kansio '%s' : "
 
-#: MailFolderCC.cpp:1341
+#: MailFolderCC.cpp:1382
 msgid "Folder Log: "
 msgstr "Kansioloki:"
 
-#: MailFolderCC.cpp:1344
+#: MailFolderCC.cpp:1385
 msgid ", error level: "
 msgstr ", virheraja: "
 
-#: MailFolderCC.cpp:1358
+#: MailFolderCC.cpp:1399
 msgid "c-client debug: "
 msgstr "c-client debug: "
 
-#: MailFolderCC.cpp:1755
+#: MailFolderCC.cpp:1798
 msgid ""
 "\n"
 "Attempt to re-open all folders failed."
@@ -2908,115 +3022,115 @@ msgstr "Yhteyden avaus palvelimeen ep‰onnistui"
 msgid "Cannot open folder to save to:"
 msgstr "Kansion avaus tallennusta varten ep‰onnistui:"
 
-#: AdbFrame.cpp:423
+#: AdbFrame.cpp:424
 msgid "Nick &Name"
 msgstr "&Alias"
 
-#: AdbFrame.cpp:424
+#: AdbFrame.cpp:425
 msgid "F&ull Name"
 msgstr "Koko &nimi"
 
-#: AdbFrame.cpp:425
+#: AdbFrame.cpp:426
 msgid "&First Name"
 msgstr "&Etunimi"
 
-#: AdbFrame.cpp:426
+#: AdbFrame.cpp:427
 msgid "F&amily Name"
 msgstr "&Sukunimi"
 
-#: AdbFrame.cpp:427
+#: AdbFrame.cpp:428
 msgid "&Prefix"
 msgstr "&Prefix"
 
-#: AdbFrame.cpp:428
+#: AdbFrame.cpp:429
 msgid "&Title"
 msgstr "&Teht‰v‰nimike"
 
-#: AdbFrame.cpp:429
+#: AdbFrame.cpp:430
 msgid "&Organization"
 msgstr "&Organisaatio"
 
-#: AdbFrame.cpp:430
+#: AdbFrame.cpp:431
 msgid "&Birthday date"
 msgstr "&Syntym‰p‰iv‰"
 
-#: AdbFrame.cpp:431
+#: AdbFrame.cpp:432
 msgid "&Comments"
 msgstr "&Kommentit"
 
-#: AdbFrame.cpp:433
+#: AdbFrame.cpp:434
 msgid "&E-Mail"
 msgstr "&E-Mail"
 
-#: AdbFrame.cpp:434
+#: AdbFrame.cpp:435
 msgid "&Home Page"
 msgstr "&Kotisivu"
 
-#: AdbFrame.cpp:435
+#: AdbFrame.cpp:436
 msgid "&ICQ"
 msgstr "&ICQ"
 
-#: AdbFrame.cpp:436
+#: AdbFrame.cpp:437
 msgid "Prefers &HTML mail"
 msgstr "&Haluaa HTML-viestej‰"
 
-#: AdbFrame.cpp:437
+#: AdbFrame.cpp:438
 msgid "&Additional e-mail addresses"
 msgstr "&Erilliset e-mail osoitteet"
 
-#: AdbFrame.cpp:440 AdbFrame.cpp:450
+#: AdbFrame.cpp:441 AdbFrame.cpp:451
 msgid "Street &Number"
 msgstr "Ka&dun numero"
 
-#: AdbFrame.cpp:441 AdbFrame.cpp:451
+#: AdbFrame.cpp:442 AdbFrame.cpp:452
 msgid "&Street"
 msgstr "&Katu"
 
-#: AdbFrame.cpp:442 AdbFrame.cpp:452
+#: AdbFrame.cpp:443 AdbFrame.cpp:453
 msgid "&Locality"
 msgstr "&Paikkakunta"
 
-#: AdbFrame.cpp:443 AdbFrame.cpp:453
+#: AdbFrame.cpp:444 AdbFrame.cpp:454
 msgid "C&ity"
 msgstr "&Kaupunki"
 
-#: AdbFrame.cpp:444 AdbFrame.cpp:454
+#: AdbFrame.cpp:445 AdbFrame.cpp:455
 msgid "&Postcode"
 msgstr "P&ostiosoite"
 
-#: AdbFrame.cpp:445 AdbFrame.cpp:455
+#: AdbFrame.cpp:446 AdbFrame.cpp:456
 msgid "&Country"
 msgstr "&Maa"
 
-#: AdbFrame.cpp:446 AdbFrame.cpp:456
+#: AdbFrame.cpp:447 AdbFrame.cpp:457
 msgid "PO &Box"
 msgstr "P&L"
 
-#: AdbFrame.cpp:447 AdbFrame.cpp:457
+#: AdbFrame.cpp:448 AdbFrame.cpp:458
 msgid "P&hone"
 msgstr "P&uhelin"
 
-#: AdbFrame.cpp:448 AdbFrame.cpp:458
+#: AdbFrame.cpp:449 AdbFrame.cpp:459
 msgid "&Fax"
 msgstr "&Fax"
 
-#: AdbFrame.cpp:1054
+#: AdbFrame.cpp:1055
 msgid "&Book"
 msgstr "Kir&ja"
 
-#: AdbFrame.cpp:1056
+#: AdbFrame.cpp:1057
 msgid "&Find"
 msgstr "&Etsi"
 
-#: AdbFrame.cpp:1074
+#: AdbFrame.cpp:1075
 msgid "&Lookup:"
 msgstr "&Etsi:"
 
-#: AdbFrame.cpp:1134
+#: AdbFrame.cpp:1135
 msgid "Address Book Editor"
 msgstr "Osoitekirjan muokkaus"
 
-#: AdbFrame.cpp:1281
+#: AdbFrame.cpp:1282
 #, c-format
 msgid ""
 "Address book '%s' couldn't be opened:\n"
@@ -3025,140 +3139,141 @@ msgstr ""
 "Osoitekirjaa '%s' ei voitu avata:\n"
 "kyseinen formaatti ei ole tuettu."
 
-#: AdbFrame.cpp:1301
+#: AdbFrame.cpp:1302
 msgid "Not all address books could be reopened."
 msgstr "Kaikkia osoitekirjoja ei onnistuttu avata."
 
-#: AdbFrame.cpp:1327
+#: AdbFrame.cpp:1328
 msgid "Not all tree branches could be reopened."
 msgstr "Kaikkia hakemistopuun oksia ei voitu avata."
 
-#: AdbFrame.cpp:1379
+#: AdbFrame.cpp:1380
 #, c-format
 msgid "The address book '%s' is already opened."
 msgstr "Osoitekirja '%s' on jo avoinna."
 
-#: AdbFrame.cpp:1447
+#: AdbFrame.cpp:1451
 msgid "New entry creation cancelled."
 msgstr "Uuden kohdan luonti peruutettu."
 
-#: AdbFrame.cpp:1464
+#: AdbFrame.cpp:1468
 #, c-format
 msgid "%s '%s' already exists %s."
 msgstr "%s '%s' on jo olemassa %s."
 
-#: AdbFrame.cpp:1473
+#: AdbFrame.cpp:1477
 #, c-format
 msgid "Can't create %s named '%s' %s."
 msgstr "%s luonti nimelle '%s' %s ep‰onnistui."
 
-#: AdbFrame.cpp:1481
+#: AdbFrame.cpp:1485
 #, c-format
 msgid "Created new %s '%s' %s."
 msgstr "Luotiin uusi %s '%s' %s."
 
-#: AdbFrame.cpp:1496
+#: AdbFrame.cpp:1500
 msgid "Address book"
 msgstr "Osoitekirja"
 
-#: AdbFrame.cpp:1524
+#: AdbFrame.cpp:1528
 #, c-format
 msgid "Really delete the %s '%s'?"
 msgstr "Poistetaanko %s '%s'?"
 
-#: AdbFrame.cpp:1527 AdbFrame.cpp:1900
+#: AdbFrame.cpp:1531
 #, fuzzy
 msgid "Address book editor"
 msgstr "Osoitekirjan muokkaus"
 
-#: AdbFrame.cpp:1530
+#: AdbFrame.cpp:1534
 #, c-format
 msgid "Cancelled: '%s' not deleted."
 msgstr "Peruutettu: '%s' ei ole poistettu."
 
-#: AdbFrame.cpp:1546
+#: AdbFrame.cpp:1550
 #, c-format
 msgid "%s '%s' deleted."
 msgstr "%d '%s' poistettu."
 
-#: AdbFrame.cpp:1558
+#: AdbFrame.cpp:1562
 #, c-format
 msgid "Cannot find any matches for '%s'."
 msgstr "Mit‰‰n '%s' vastaavaa ei lˆydetty."
 
-#: AdbFrame.cpp:1563
+#: AdbFrame.cpp:1567
 #, c-format
 msgid "Search for '%s' found %d entries."
 msgstr "Etsint‰ '%s' lˆysi %d kohtaa."
 
-#: AdbFrame.cpp:1567
+#: AdbFrame.cpp:1571
 msgid "Search wrapped to the beginning."
 msgstr "Etsint‰ aloitettu alusta."
 
-#: AdbFrame.cpp:1628
+#: AdbFrame.cpp:1632
 #, c-format
 msgid "Changes to '%s' undone"
 msgstr "Muutokset '%s' peruutettu."
 
-#: AdbFrame.cpp:1677
+#: AdbFrame.cpp:1681
 msgid "Go to entry/group"
 msgstr "Siirry kohtaan/ryhm‰‰n"
 
-#: AdbFrame.cpp:1678
+#: AdbFrame.cpp:1682
 msgid "Full entry &name:"
 msgstr "Kohdan koko &nimi:"
 
-#: AdbFrame.cpp:1773
+#: AdbFrame.cpp:1777
 msgid "Which kind of address book do you want to create?"
 msgstr "Mink‰laisen osoitekirjan haluat luoda?"
 
-#: AdbFrame.cpp:1774
+#: AdbFrame.cpp:1778
 msgid "Which kind of address book do you want to open?"
 msgstr "Mink‰laisen osoitekirjan haluat avata?"
 
-#: AdbFrame.cpp:1776
+#: AdbFrame.cpp:1780
 msgid "Creating new address book"
 msgstr "Luodaan uutta osoitekirjaa"
 
-#: AdbFrame.cpp:1777
+#: AdbFrame.cpp:1781
 msgid "Opening an address book"
 msgstr "Avataan osoitekirjaa"
 
-#: AdbFrame.cpp:1805
+#: AdbFrame.cpp:1809
 msgid "Create an address book"
 msgstr "Luo osoitekirja"
 
-#: AdbFrame.cpp:1807
+#: AdbFrame.cpp:1811
 msgid "Open an address book"
 msgstr "Avaa osoitekirja"
 
-#: AdbFrame.cpp:1823
+#: AdbFrame.cpp:1827
 msgid "Address books (*.adb)|*.adb|All files (*.*)|*.*"
 msgstr "Osoitekirjat (*.adb)|*.adb|Kaikki tiedostot (*.*)|*.*"
 
-#: AdbFrame.cpp:1837
+#: AdbFrame.cpp:1841
 msgid "Enter the address book name"
 msgstr "Anna osoitekirjan nimi"
 
-#: AdbFrame.cpp:1860
+#: AdbFrame.cpp:1864
 #, c-format
 msgid ""
 "Address book '%s' was created, but could not be flushed. It might be "
 "unaccessible until the program is restarted."
 msgstr ""
-"Osoitekirja '%s' luotu, mutta ei voitu tyhjent‰‰."
-"Osoitekirja saattaa olla suljettu kunnes ohjelma k‰ynnistet‰‰n uudelleen."
+"Osoitekirja '%s' luotu, mutta ei voitu tyhjent‰‰.Osoitekirja saattaa olla "
+"suljettu kunnes ohjelma k‰ynnistet‰‰n uudelleen."
 
-#: AdbFrame.cpp:1881
-msgid "Select the file to import data from"
-msgstr "Valitse tuotava tiedosto"
+#: AdbFrame.cpp:1913
+#, c-format
+msgid "Address book successfully imported into book '%s'."
+msgstr ""
 
-#: AdbFrame.cpp:1899
+#: AdbFrame.cpp:1918
 #, fuzzy
-msgid "The address book to create: "
-msgstr "Luotava osoitekirja: "
+msgid "Address book import abandoned."
+msgstr "Osoitekirjan muokkaus"
 
-#: AdbFrame.cpp:1987
+#: AdbFrame.cpp:1979
 #, c-format
 msgid ""
 "Cannot paste entry '%s' %s: an entry with\n"
@@ -3167,20 +3282,20 @@ msgstr ""
 "Kohtaan '%s' %s liitt‰minen ep‰onnistui:\n"
 "samanniminen kohta on olemassa."
 
-#: AdbFrame.cpp:1997
+#: AdbFrame.cpp:1989
 msgid "Cannot paste the clipboard contents here."
 msgstr "Leikepˆyd‰n sis‰llˆn liitt‰minen t‰h‰n ei onnistu."
 
-#: AdbFrame.cpp:2031
+#: AdbFrame.cpp:2023
 #, c-format
 msgid "Editing entry '%s'"
 msgstr "Muokataan kohtaa '%s'"
 
-#: AdbFrame.cpp:2076
+#: AdbFrame.cpp:2068
 msgid "This group has no entries"
 msgstr "Ryhm‰ss‰ ei ole kohtia"
 
-#: AdbFrame.cpp:2198
+#: AdbFrame.cpp:2190
 #, c-format
 msgid ""
 "No entry '%s':\n"
@@ -3189,96 +3304,96 @@ msgstr ""
 "Ei kohtaa '%s':\n"
 "'%s' ei ole kohtaa/alaryhm‰‰ '%s'"
 
-#: AdbFrame.cpp:2206
+#: AdbFrame.cpp:2198
 #, c-format
 msgid "Entry '%s' cannot have subgroup/entry '%s'!"
 msgstr "Kohta '%s' ei voi omistaa alaryhm‰‰/kohta '%s'!"
 
-#: AdbFrame.cpp:2300
+#: AdbFrame.cpp:2292
 msgid "Find address book entry"
 msgstr "Etsi osoitekirjan kohta"
 
-#: AdbFrame.cpp:2321
+#: AdbFrame.cpp:2313
 msgid "Find &what:"
 msgstr "Etsi &mit‰:"
 
-#: AdbFrame.cpp:2452
+#: AdbFrame.cpp:2444
 msgid "Please specify where to search!"
 msgstr "Tarkenna hakusi kohdetta!"
 
-#: AdbFrame.cpp:2467
+#: AdbFrame.cpp:2459
 msgid "Create a new entry/group"
 msgstr "Luo uusi kohta/ryhm‰"
 
-#: AdbFrame.cpp:2473
+#: AdbFrame.cpp:2465
 msgid "&New entry/group name:"
 msgstr "&Uusi kohdan/ryhm‰n nimi:"
 
-#: AdbFrame.cpp:2508
+#: AdbFrame.cpp:2500
 msgid "Create a &group"
 msgstr "&Luo ryhm‰"
 
-#: AdbFrame.cpp:2545
+#: AdbFrame.cpp:2537
 #, c-format
 msgid "Please specify a name for the new %s!"
 msgstr "M‰‰rittele nimi uudelle %s!"
 
-#: AdbFrame.cpp:2647
+#: AdbFrame.cpp:2639
 #, c-format
 msgid "Properties for '%s'"
 msgstr "'%s' asetukset"
 
-#: AdbFrame.cpp:2667
+#: AdbFrame.cpp:2659
 msgid "unknown"
 msgstr "tuntematon"
 
-#: AdbFrame.cpp:2761
+#: AdbFrame.cpp:2753
 msgid "No selection"
 msgstr "Ei valintaa"
 
-#: AdbFrame.cpp:2825
+#: AdbFrame.cpp:2817
 #, c-format
 msgid "Entry '%s' saved."
 msgstr "Kohta '%s' tallennettu."
 
-#: AdbFrame.cpp:3226
+#: AdbFrame.cpp:3218
 msgid "Add another address"
 msgstr "Lis‰‰ uusi osoite"
 
-#: AdbFrame.cpp:3227 AdbFrame.cpp:3246
+#: AdbFrame.cpp:3219 AdbFrame.cpp:3238
 msgid "E-mail &address:"
 msgstr "E-Mail &osoite:"
 
-#: AdbFrame.cpp:3240
+#: AdbFrame.cpp:3232
 msgid "Please select an entry to modify it."
 msgstr "Valitse muokattava kohta."
 
-#: AdbFrame.cpp:3246
+#: AdbFrame.cpp:3238
 msgid "Modify address"
 msgstr "Muokkaa osoitetta"
 
-#: AdbFrame.cpp:3259
+#: AdbFrame.cpp:3251
 msgid "Please select an entry to delete."
 msgstr "Valitse poistettava kohta."
 
-#: AdbFrame.cpp:3349
+#: AdbFrame.cpp:3341
 msgid "Address Books"
 msgstr "Osoitekirjat"
 
-#: AdbFrame.cpp:3532
+#: AdbFrame.cpp:3524
 msgid "Entry"
 msgstr "Kohta"
 
-#: AdbFrame.cpp:3538
+#: AdbFrame.cpp:3530
 #, c-format
 msgid "%s '%s' already exists in this group."
 msgstr "%s '%s' on jo olemassa t‰ss‰ ryhm‰ss‰."
 
-#: AdbFrame.cpp:3642
+#: AdbFrame.cpp:3634
 msgid "at the root level of the addressbook '"
 msgstr "p‰‰tasolla osoitekirjassa '"
 
-#: AdbFrame.cpp:3646
+#: AdbFrame.cpp:3638
 msgid "in group '"
 msgstr "ryhm‰ss‰ '"
 
@@ -3302,6 +3417,53 @@ msgstr "Ei lˆytynyt: '%s'."
 msgid "Can't open the address book '%s'."
 msgstr "Osoitekirjaa '%s' ei voi avata."
 
+#: AdbDialogs.cpp:134
+#, fuzzy
+msgid "Import address book"
+msgstr "Muokkaa osoitekirjaa"
+
+#: AdbDialogs.cpp:175
+msgid ""
+"Select the file or directory to import the data\n"
+"from or select the import format and check the\n"
+"'location' checkbox below"
+msgstr ""
+
+#: AdbDialogs.cpp:205
+#, fuzzy
+msgid "&File:"
+msgstr "&Tiedosto"
+
+#: AdbDialogs.cpp:211
+msgid "Determine the &location automatically"
+msgstr ""
+
+#: AdbDialogs.cpp:220
+msgid "Determine the &format automatically"
+msgstr ""
+
+#: AdbDialogs.cpp:338
+#, c-format
+msgid ""
+"Sorry, impossible to determine the location of the default address book file "
+"for the format '%s' - please specify the file manually in the next dialog."
+msgstr ""
+
+#: AdbDialogs.cpp:346
+#, fuzzy
+msgid "Please select source address book file"
+msgstr "Avaa osoitekirja"
+
+#: AdbDialogs.cpp:376 AdbImport.cpp:163
+#, fuzzy
+msgid "Address book import"
+msgstr "Osoitekirjan muokkaus"
+
+#: AdbDialogs.cpp:377
+#, fuzzy
+msgid "Native address book to create: "
+msgstr "Luotava osoitekirja: "
+
 #: ProvFC.cpp:342
 #, c-format
 msgid "Entry '%s' has too many fields, extra ones ignored."
@@ -3312,7 +3474,7 @@ msgstr "Kohdalla '%s' on liian monta kentt‰‰, ylim‰‰r‰iset ohitetaan."
 msgid "Trailing backslash discarded in entry '%s'."
 msgstr ""
 
-#: ProvFC.cpp:720
+#: ProvFC.cpp:722
 #, c-format
 msgid "Couldn't create or write address book file '%s'."
 msgstr "Osoitekirjatiedostoa '%s' ei voitu luoda eik‰ kirjoittaa."
@@ -3355,7 +3517,121 @@ msgstr ""
 msgid "BBDB"
 msgstr "BBDB"
 
-#: persctrl.cpp:875
+#: AdbImport.cpp:76
+#, fuzzy, c-format
+msgid "Nameless entry %d"
+msgstr "&Nimettˆmien kohtien nimi"
+
+#: AdbImport.cpp:82
+#, c-format
+msgid "Import error: cannot create entry '%s/%s'."
+msgstr ""
+
+#: AdbImport.cpp:108
+#, c-format
+msgid "Import error: cannot create group '%s/%s'."
+msgstr ""
+
+#: AdbImport.cpp:159
+#, c-format
+msgid ""
+"It seems that the file '%s' is not in the format '%s',\n"
+"do you still want to try to import it?"
+msgstr ""
+
+#: AdbImport.cpp:185
+msgid "unsupported format."
+msgstr ""
+
+#: AdbImport.cpp:203
+#, fuzzy, c-format
+msgid "cannot create native address book '%s'."
+msgstr "Osoitekirjaa '%s' ei voi avata."
+
+#: AdbImport.cpp:217
+#, fuzzy, c-format
+msgid "couldn't start importing from file '%s'."
+msgstr "Osoitekirjatiedostoa '%s' ei voitu luoda eik‰ kirjoittaa."
+
+#: AdbImport.cpp:238
+#, c-format
+msgid "Successfully imported address book from file '%s' (format '%s')"
+msgstr ""
+
+#: AdbImport.cpp:245
+#, fuzzy, c-format
+msgid "Import of address book from file '%s' failed"
+msgstr "Osoitekirjatiedostoa '%s' ei voitu luoda eik‰ kirjoittaa."
+
+#: ImportText.cpp:113
+msgid "Comma separated values"
+msgstr ""
+
+#: ImportText.cpp:114
+msgid "TAB separated values"
+msgstr ""
+
+#: ImportXFMail.cpp:72
+#, fuzzy
+msgid "XFMail address book"
+msgstr "Muokkaa osoitekirjaa"
+
+#: ImportMailrc.cpp:85
+msgid "Unix .mailrc file"
+msgstr ""
+
+#: ImportMailrc.cpp:126
+#, c-format
+msgid "Invalid mailrc alias entry '%s' discarded."
+msgstr ""
+
+#: ImportMailrc.cpp:184
+#, c-format
+msgid "Mailrc entry '%s' doesn't have any addresses and will be ignored."
+msgstr ""
+
+#: ImportPine.cpp:129
+#, fuzzy
+msgid "PINE addressbook file"
+msgstr "Avaa osoitekirja"
+
+#: ImportPine.cpp:167
+#, c-format
+msgid ""
+"Unterminated mailing address list at line %d in the PINE address book file "
+"'%s'."
+msgstr ""
+
+#: ImportPine.cpp:187
+#, c-format
+msgid ""
+"TAB character expected at position %d in line %d of the address book file "
+"'%s'; the entry will be ignored."
+msgstr ""
+
+#: ImportPine.cpp:231
+#, c-format
+msgid ""
+"Unexpected line end at position %d in line %d of the address book file '%s'; "
+"the entry will be ignored."
+msgstr ""
+
+#: ImportPine.cpp:272
+#, fuzzy, c-format
+msgid "Unreckognized address book entry '%s'."
+msgstr "Etsi osoitekirjan kohta"
+
+#: ImportPine.cpp:409
+#, c-format
+msgid "Invalid format for list of addresses of PINE mailing list entry: '%s'."
+msgstr ""
+
+#: ImportPine.cpp:446
+#, fuzzy, c-format
+msgid "No matching '>' in the address '%s'."
+msgstr "Osoitekirjaa '%s' ei voi avata."
+
+#: persctrl.cpp:976
 msgid "Don't show this message again "
 msgstr "ƒl‰ n‰yt‰ en‰‰ t‰t‰ viesti‰ "
 
@@ -3380,3 +3656,12 @@ msgstr "Informaatio"
 msgid "Please choose"
 msgstr "Valitse"
 
+#~ msgid "Adressbook"
+#~ msgstr "Osoitekirja"
+
+#, fuzzy
+#~ msgid "Header name: "
+#~ msgstr "&Otsikkonimi: "
+
+#~ msgid "Select the file to import data from"
+#~ msgstr "Valitse tuotava tiedosto"

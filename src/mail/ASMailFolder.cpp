@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * ASMailFolder class: asynchronous handling of mail folders        *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)              *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -27,6 +27,9 @@
 #include "MailFolder.h"
 #include "ASMailFolder.h"
 #include "MailFolderCC.h"
+
+/// A ticket number that never appears.
+#define ILLEGAL_TICKET   -1
 
 /// Call this always before using it.
 #ifdef DEBUG
@@ -75,6 +78,7 @@ public:
    MailThread(ASMailFolder *mf, ASMailFolder::UserData ud)
       {
          m_ASMailFolder = mf;
+         if(mf) mf->IncRef();
          m_MailFolder = mf->GetMailFolder();
          m_UserData = ud;
       }
@@ -91,7 +95,8 @@ public:
          return m_Ticket;
       }
 #ifndef USE_THREADS
-   virtual ~MailThread() { }
+   virtual ~MailThread()
+      { if(m_ASMailFolder) m_ASMailFolder->DecRef(); }
 #endif
    
 protected:
@@ -121,7 +126,7 @@ protected:
 
 /* static */
 ASMailFolder::Ticket
-MailThread::ms_Ticket = 0;
+MailThread::ms_Ticket = ILLEGAL_TICKET + 1;
 
 void *
 MailThread::Entry()
@@ -160,7 +165,13 @@ public:
       {
          m_Seq = Copy(selections);
       }
-   ~MailThreadSeq() { delete m_Seq; }
+   ~MailThreadSeq()
+      {
+         // We don't delete the m_Seq array, this will be deleted by
+         // the Result object when no longer needed.
+         // After passing it to the Result, we set it to NULL to check.
+         ASSERT(m_Seq == NULL);
+      }
 protected:
    INTARRAY *m_Seq;
 };
@@ -232,7 +243,7 @@ public:
       {
          Message *msg = m_MailFolder->GetMessage(m_UId);
          SendEvent(ASMailFolder::ResultMessage::Create(
-            m_ASMailFolder, m_Ticket,
+            m_ASMailFolder, m_Ticket, NULL,
             msg, m_UId, m_UserData));
       }
 protected:
@@ -273,7 +284,8 @@ public:
             : m_MailFolder->AppendMessage(m_MsgString);
          SendEvent(ASMailFolder::ResultInt::
                    Create(m_ASMailFolder, m_Ticket,
-                          ASMailFolder::Op_AppendMessage,  rc,
+                          ASMailFolder::Op_AppendMessage,  NULL,
+                          rc,
                           m_UserData));  
       }
 protected:
@@ -310,7 +322,11 @@ public:
          SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder,
                                                    m_Ticket,
                                                    ASMailFolder::Op_SaveMessages,
-                                                   rc, m_UserData)); 
+                                                   m_Seq,
+                                                   rc, m_UserData));
+#ifdef DEBUG
+         m_Seq = NULL;
+#endif
       }
 private:
    String    m_MfName;
@@ -334,7 +350,11 @@ public:
          SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder,
                                                    m_Ticket,
                                                    ASMailFolder::Op_SaveMessagesToFile,
-                                                   rc, m_UserData)); 
+                                                   m_Seq,
+                                                   rc, m_UserData));
+#ifdef DEBUG
+         m_Seq = NULL;
+#endif
       }
 private:
    String    m_Name;
@@ -360,7 +380,13 @@ public:
          int rc = m_Op == ASMailFolder::Op_SaveMessagesToFile ?
             m_MailFolder->SaveMessagesToFile(m_Seq, m_Parent)
             : m_MailFolder->SaveMessagesToFolder(m_Seq, m_Parent);
-         SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder, m_Ticket, m_Op, rc, m_UserData));
+         SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder,
+                                                   m_Ticket, m_Op,
+                                                   m_Seq,
+                                                   rc, m_UserData));
+#ifdef DEBUG
+         m_Seq = NULL;
+#endif   
       }
 private:
    MWindow *m_Parent;
@@ -405,19 +431,28 @@ class MT_Subscribe : public MailThread
 {
 public:
    MT_Subscribe(ASMailFolder *mf, ASMailFolder::UserData ud,
+                  const String &host,
+                  FolderType protocol,
                 const String &mailboxname,
                 bool subscribe)
       : MailThread(mf, ud)
       {
+         m_Host = host;
+         m_Prot = protocol;
          m_Name = mailboxname;
          m_Sub = subscribe;
       }
    virtual void WorkFunction(void)
       {
-         int rc = m_MailFolder->Subscribe(m_Name, m_Sub);
-         SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder, m_Ticket, ASMailFolder::Op_Subscribe, rc, m_UserData));
+         int rc = m_MailFolder->Subscribe(m_Host, m_Prot, m_Name, m_Sub);
+         SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder,
+                                                   m_Ticket,
+                                                   ASMailFolder::Op_Subscribe,
+                                                   NULL, rc, m_UserData));
       }
 private:
+   String  m_Host;
+   FolderType m_Prot;
    String  m_Name;
    bool    m_Sub;
 };
@@ -427,22 +462,29 @@ class MT_ListFolders : public MailThread
 public:
    MT_ListFolders(ASMailFolder *mf,
                   ASMailFolder::UserData ud,
+                  const String &host,
+                  FolderType protocol,
                   const String &pattern,
                   bool sub_only,
                   const String &reference)
       : MailThread(mf, ud)
       {
+         m_Host = host;
+         m_Prot = protocol;
          m_Pattern = pattern;
          m_SubOnly = sub_only;
          m_Reference = reference;
       }
    virtual void WorkFunction(void)
       {
-         FolderListing *fl = m_MailFolder->ListFolders(m_Pattern, m_SubOnly, m_Reference);
+         FolderListing *fl = MailFolderCC::ListFolders(m_Host, m_Prot, 
+                                                       m_Pattern, m_SubOnly, m_Reference);
          SendEvent(ASMailFolder::ResultFolderListing::Create(
-            m_ASMailFolder, m_Ticket, fl, m_UserData));
+            NULL, m_Ticket, fl, m_UserData));
       }
 private:
+   String  m_Host;
+   FolderType m_Prot;
    String  m_Pattern;
    String  m_Reference;
    bool  m_SubOnly;
@@ -453,6 +495,11 @@ private:
    ASMailFolderImpl implementation, common code
 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/* static */
+const ASMailFolder::Ticket
+ASMailFolder::IllegalTicket = ILLEGAL_TICKET;
+
 
 class ASMailFolderImpl : public ASMailFolder
 {
@@ -472,7 +519,8 @@ public:
 
    /**@name Function for access control and event handling. */
    //@{
-   void LockFolder(void);
+   /// Returns true if we have obtained the lock.
+   bool LockFolder(void);
    void UnLockFolder(void);
    //@}
 
@@ -699,27 +747,36 @@ public:
    //@{
    /** Subscribe to a given mailbox (related to the
        mailfolder/mailstream underlying this folder.
+       @param host the server host, or empty for local newsspool
+       @param protocol MF_IMAP or MF_NNTP or MF_NEWS
        @param mailboxname name of the mailbox to subscribe to
        @param bool if true, subscribe, else unsubscribe
    */
-   virtual Ticket Subscribe(const String &mailboxname,
-                            bool subscribe,
-                            UserData ud) const
+   static Ticket Subscribe(const String &host,
+                           FolderType protocol,
+                           const String &mailboxname,
+                           bool subscribe,
+                           UserData ud)
       {
-         return (new MT_Subscribe((ASMailFolder *)this, ud, mailboxname,
-                            subscribe))->Start();
+         return (new MT_Subscribe(NULL, ud, host, protocol,
+                                  mailboxname, subscribe))->Start();
       }
    /** Get a listing of all mailboxes.
+       @param host the server host, or empty for local newsspool
+       @param protocol MF_IMAP or MF_NNTP or MF_NEWS
        @param pattern a wildcard matching the folders to list
        @param subscribed_only if true, only the subscribed ones
        @param reference implementation dependend reference
     */
-   virtual Ticket ListFolders(const String &pattern,
-                              bool subscribed_only,
-                              const String &reference,
-                              ASMailFolder::UserData ud) const
+   static Ticket ListFolders(const String &host,
+                             FolderType protocol,
+                             const String &pattern,
+                             bool subscribed_only,
+                             const String &reference,
+                             ASMailFolder::UserData ud)
    {
-      return (new MT_ListFolders((ASMailFolder *)this, ud,
+      return (new MT_ListFolders(NULL, ud,
+                                 host, protocol,
                                  pattern,
                                  subscribed_only,
                                  reference))->Start();
@@ -812,8 +869,6 @@ private:
    bool m_Locked;
    /// Next ticket Id to use.
    static Ticket ms_Ticket;
-   /// A mutex to control access to the folder
-   MMutex m_Mutex;
 };
 
 
@@ -837,28 +892,18 @@ ASMailFolderImpl::~ASMailFolderImpl()
    m_MailFolder->DecRef();
 }
 
-/* For now the following lock/unlock functions don't do
-   anything. Later, they need to control access to the same underlying 
-   m_MailFolder via a mutex. For this, no more than one
-   ASMailFolderImpl object must use the same MailFolder object or
-   things will go wrong.
-*/
-void
+bool
 ASMailFolderImpl::LockFolder(void)
 {
    AScheck();
-   ASSERT(m_Locked == false);
-   m_Locked = true;
-   m_Mutex.Lock();
+   return m_MailFolder->Lock();
 }
 
 void
 ASMailFolderImpl::UnLockFolder(void)
 {
    AScheck();
-   ASSERT(m_Locked == true);
-   m_Locked = false;
-   m_Mutex.Unlock();
+   m_MailFolder->UnLock();
 }
 
 
@@ -903,5 +948,42 @@ private:
 ASTicketList * ASTicketList::Create(void)
 {
    return new ASTicketListImpl();
+}
+
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+   Static functions from ASMailFolder base class.
+
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+/** Subscribe to a given mailbox (related to the
+    mailfolder/mailstream underlying this folder.
+    @param mailboxname name of the mailbox to subscribe to
+    @param bool if true, subscribe, else unsubscribe
+*/
+/* static */
+ASMailFolder::Ticket
+ASMailFolder::Subscribe(const String &host,
+                        FolderType protocol,
+                        const String &mailboxname,
+                        bool subscribe,
+                        UserData ud)
+{
+   return ASMailFolderImpl::Subscribe(host, protocol, mailboxname, subscribe, ud);
+}
+
+/* static */
+ASMailFolder::Ticket
+ASMailFolder::ListFolders(const String &host,
+                          FolderType protocol,
+                          const String &pattern,
+                          bool subscribed_only,
+                          const String &reference,
+                          UserData ud)
+{
+   return ASMailFolderImpl::ListFolders(host, protocol, pattern,
+                                        subscribed_only, reference,
+                                        ud);
 }
 

@@ -8,6 +8,16 @@
 # edit this file.
 # (KB)
 #
+# Don't forget to add a .mmd (Mahogany Module Definition) file, which
+# must contain the following lines:
+# Mahogany-Module-Definition
+# Name: Modulename
+# Version: any kind of version id
+# Author: who wrote it
+# <empty line>
+# Any descriptive text...
+#
+#
 #######################################################################
 ##
 ##  DO NOT EDIT THIS MAKEFILE - JUST PLACE YOUR SOURCE IN THE DIRECTORY
@@ -22,7 +32,7 @@ SRC = $(wildcard *.cpp)
 HDR = $(SRC:.cpp=.h)
 DEP = $(SRC:.cpp=.d)
 
-TARGETS = $(SRC:.cpp=.so)
+TARGETS = $(SRC:.cpp=.so) $(SRC:.cpp=.mmd)
 
 all: $(TARGETS)
 

@@ -2,7 +2,7 @@
  * Message class: entries for message header                        *
  *                      implementation for MailFolderCC             *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -80,8 +80,7 @@ public:
        guaranteed for as long as the message exists.
        @return folder pointer (not incref'ed)
    */
-   virtual MailFolder * GetFolder(void)
-      { return folder; }
+   virtual MailFolder * GetFolder(void) { return folder; }
 
    /**@name Methods accessing individual parts of a message. */
    //@{
@@ -168,7 +167,9 @@ public:
        @param headerFlag if true, include header
    */
    void WriteToString(String &str, bool headerFlag = true) const;
-   
+
+   /// Return the numeric uid
+   virtual UIdType GetUId(void) const { return m_uid; }
    //@}
 protected:
    /**@name Constructors and Destructors */
@@ -179,14 +180,24 @@ protected:
    */
    static class MessageCC * CreateMessageCC(
       MailFolderCC *folder,
-      unsigned long uid);
-   
+      UIdType uid);
+
+   static class MessageCC * Create(
+      const char * itext,
+      UIdType uid = UID_ILLEGAL,
+      ProfileBase *iprofile = NULL)
+      {
+         return new MessageCC(itext, uid, iprofile);
+      }
    /// The MailFolderCC class creates MessageCC objects.
    friend class MailFolderCC;
    //@}
 protected:
    /// constructor, called by CreateMessageCC()
-   MessageCC(MailFolderCC *folder,unsigned long uid);
+   MessageCC(MailFolderCC *folder,UIdType uid);
+   MessageCC(const char * itext,
+             UIdType uid = UID_ILLEGAL,
+             ProfileBase *iprofile = NULL);
    /** destructor */
    ~MessageCC();
 private:
@@ -195,7 +206,7 @@ private:
    /// text of the mail if not linked to a folder
    char *text; 
    /// unique message id
-   unsigned long  m_uid;
+   UIdType  m_uid;
    /// holds the pointer to a text buffer allocated by cclient lib
    char *mailText;
    /// refresh information in this structure

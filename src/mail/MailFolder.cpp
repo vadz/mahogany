@@ -606,3 +606,22 @@ MailFolder::ForwardMessages(const INTARRAY *selections,
    }
 }
 
+/* static */
+bool
+MailFolder::Subscribe(const String &host, FolderType protocol,
+                      const String &mailboxname, bool subscribe)
+{
+   return MailFolderCC::Subscribe(host, protocol, mailboxname, subscribe);
+}
+
+/* static */
+class FolderListing *
+MailFolder::ListFolders(const String &host,
+                        FolderType protocol,
+                        const String &pattern,
+                        bool subscribed_only,
+                        const String &reference)
+{
+   return MailFolderCC::ListFolders(host, protocol,pattern,
+                                    subscribed_only, reference);
+}

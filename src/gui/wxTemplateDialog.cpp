@@ -31,6 +31,7 @@
 #  include <wx/layout.h>
 #  include <wx/statbox.h>
 #  include <wx/stattext.h>
+#  include <wx/statbmp.h>
 #  include <wx/textctrl.h>
 #endif
 

@@ -12,7 +12,7 @@ $2
 };')
 
 define(STRING, const char *)
-define(INT, int)
+define(INT, long)
 define(ARG, $1 $2 $3)
 define(FUNCTION, `
 virtual $2 $1 $3 = 0;

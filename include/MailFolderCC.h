@@ -1,11 +1,16 @@
 /*-*- c++ -*-********************************************************
  * MailFolderCC class: handling of mail folders through C-Client lib*
  *                                                                  *
- * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1997,1998 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *
  *******************************************************************/
+
+/**
+   @package Mailfolder access
+   @author  Karsten Ballüder
+*/
 
 #ifndef MAILFOLDERCC_H
 #define MAILFOLDERCC_H
@@ -262,21 +267,40 @@ public:
    //@{
    /** Subscribe to a given mailbox (related to the
        mailfolder/mailstream underlying this folder.
+       @param host the server host, or empty for local newsspool
+       @param protocol MF_IMAP or MF_NNTP or MF_NEWS
        @param mailboxname name of the mailbox to subscribe to
        @param bool if true, subscribe, else unsubscribe
        @return true on success
    */
-   virtual bool Subscribe(const String &mailboxname,
-                          bool subscribe = true) const;
+   static  bool Subscribe(const String &host,
+                          FolderType protocol,
+                          const String &mailboxname,
+                          bool subscribe = true);
    /** Get a listing of all mailboxes.
+       @param host the server host, or empty for local newsspool
+       @param protocol MF_IMAP or MF_NNTP or MF_NEWS
        @param pattern a wildcard matching the folders to list
        @param subscribed_only if true, only the subscribed ones
        @param reference implementation dependend reference
     */
-   virtual FolderListing *
-   ListFolders(const String &pattern = "*",
+   static FolderListing *
+   ListFolders(const String &host,
+               FolderType protocol,
+               const String &pattern = "*",
                bool subscribed_only = false,
-               const String &reference = "") const;
+               const String &reference = "");
+   //@}
+   /**@name Access control */
+   //@{
+   /** Locks a mailfolder for exclusive access. In multi-threaded mode 
+       it really locks it and always returns true. In single-threaded
+       mode it returns false if we cannot get a lock.
+       @return TRUE if we have the lock
+   */
+   bool Lock(void) const;
+   /** Releases the lock on the mailfolder. */
+   void UnLock(void) const;
    //@}
 
    /**@name Functions to get an overview of messages in the folder. */
@@ -418,10 +442,15 @@ protected:
    void BuildListing(void);
    /* Handles the mm_overview_header callback on a per folder basis. */
    void OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov);
-
    /// closes the mailstream
    void Close(void);
-   
+
+   /// A Mutex to control access to this folder.
+#ifdef USE_THREADS
+   class MMutex *m_Mutex;
+#else
+   bool m_Mutex;
+#endif    
    /*@name Handling of MailFolderCC internal events.
      Callbacks from the c-client library cannot directly be used to
      call other functions as this might lead to a lock up or recursion

@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////////////
+//-*- c++ -*-//////////////////////////////////////////////////////////////////
 // Project:     M - cross platform e-mail GUI client
 // File name:   FolderType.h - constants for folder types
 // Purpose:     collect all folder types and flags in one place
@@ -13,9 +13,16 @@
 #ifndef  _FOLDERTYPE_H
 #define  _FOLDERTYPE_H
 
+#include <limits.h>
+
 // ----------------------------------------------------------------------------
 // Type of a mail folder
 // ----------------------------------------------------------------------------
+
+/// A Type used for message UIds
+typedef unsigned long UIdType;
+/// An illegal, never happening UId number:
+#define UID_ILLEGAL   ULONG_MAX
 
 // use this with AND to obtain pure type from an int which also contains
 // the folder flags (see FolderFlags enum)

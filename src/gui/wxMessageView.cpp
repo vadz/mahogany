@@ -43,8 +43,7 @@
 #include "Message.h"
 
 #include "FolderView.h"
-#include "MailFolder.h"
-#include "MailFolderCC.h"
+#include "ASMailFolder.h"
 
 #include "MDialogs.h"
 
@@ -52,7 +51,6 @@
 
 #include "XFace.h"
 
-#include "gui/wxFontManager.h"
 #include "gui/wxIconManager.h"
 #include "gui/wxMessageView.h"
 #include "gui/wxFolderView.h"
@@ -322,7 +320,7 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
    m_Parent = parent;
    m_FolderView = fv;
    m_MimePopup = NULL;
-   m_uid = -1;
+   m_uid = UID_ILLEGAL;
    SetMouseTracking();
    SetParentProfile(fv ? fv->GetProfile() : NULL);
 
@@ -336,7 +334,6 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
          SetStatusBar(statusBar, 0, -1);
       }
    }
-
    RegisterForEvents();
 }
 
@@ -350,17 +347,51 @@ wxMessageView::wxMessageView(wxFolderView *fv, wxWindow *parent)
    Show(TRUE);
 }
 
-wxMessageView::wxMessageView(MailFolder *folder,
+wxMessageView::wxMessageView(ASMailFolder *folder,
                              long num,
                              wxFolderView *fv,
                              wxWindow *parent)
              : wxLayoutWindow(parent)
 {
    m_folder = folder;
+   if(m_folder) m_folder->IncRef();
    m_Profile = NULL;
    Create(fv,parent);
    ShowMessage(folder,num);
    Show(TRUE);
+}
+
+wxMessageView::~wxMessageView()
+{
+   if ( m_eventReg )
+      MEventManager::Deregister(m_eventReg);
+   if(m_regCookieASFolderResult)
+      MEventManager::Deregister(m_regCookieASFolderResult);
+
+   size_t procCount = m_processes.GetCount();
+   for ( size_t n = 0; n < procCount; n++ )
+   {
+      ProcessInfo *info = m_processes[n];
+      info->Detach();
+
+      MTempFileName *tempfile = info->GetTempFile();
+      if ( tempfile )
+      {
+         String tempFileName = tempfile->GetName();
+         wxLogWarning(_("Temporary file '%s' left because it is still in "
+                        "use by an external process"), tempFileName.c_str());
+      }
+
+      delete info;
+   }
+
+   if(m_mailMessage) m_mailMessage->DecRef();
+   if(xface) delete xface;
+   if(xfaceXpm) wxIconManager::FreeImage(xfaceXpm);
+   if(m_Profile) m_Profile->DecRef();
+   if(m_folder) m_folder->DecRef();
+   
+   wxDELETE(m_MimePopup);
 }
 
 void
@@ -368,11 +399,12 @@ wxMessageView::RegisterForEvents()
 {
    // register with the event manager
    m_eventReg = MEventManager::Register(*this, MEventId_OptionsChange);
-
-   ASSERT_MSG( m_eventReg, "can't register for options change event" );
+   ASSERT_MSG( m_eventReg, "can't register for options change event");
+   m_regCookieASFolderResult = MEventManager::Register(*this, MEventId_ASFolderResult);
+   ASSERT_MSG( m_regCookieASFolderResult, "can't reg folder view with event manager");
 }
 
-MailFolder *
+ASMailFolder *
 wxMessageView::GetFolder(void)
 {
    return m_FolderView ? m_FolderView->GetFolder() : m_folder;
@@ -692,37 +724,6 @@ wxMessageView::FindAgain(void)
    return rc;
 }
 
-wxMessageView::~wxMessageView()
-{
-   if ( m_eventReg )
-   {
-      MEventManager::Deregister(m_eventReg);
-   }
-
-   size_t procCount = m_processes.GetCount();
-   for ( size_t n = 0; n < procCount; n++ )
-   {
-      ProcessInfo *info = m_processes[n];
-      info->Detach();
-
-      MTempFileName *tempfile = info->GetTempFile();
-      if ( tempfile )
-      {
-         String tempFileName = tempfile->GetName();
-         wxLogWarning(_("Temporary file '%s' left because it is still in "
-                        "use by an external process"), tempFileName.c_str());
-      }
-
-      delete info;
-   }
-
-   if(m_mailMessage) m_mailMessage->DecRef();
-   if(xface) delete xface;
-   if(xfaceXpm) wxIconManager::FreeImage(xfaceXpm);
-   if(m_Profile) m_Profile->DecRef();
-
-   wxDELETE(m_MimePopup);
-}
 
 // show information about an attachment
 void
@@ -838,9 +839,8 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       char *filename = wxGetTempFileName("Mtemp");
       if(MimeSave(mimeDisplayPart,filename))
       {
-         MailFolder *mf = MailFolder::OpenFolder(MF_FILE, filename);
-         wxMessageViewFrame * f = GLOBAL_NEW
-            wxMessageViewFrame(mf, 1, NULL, m_Parent);
+         ASMailFolder *mf = ASMailFolder::OpenFolder(MF_FILE, filename);
+         wxMessageViewFrame * f = new wxMessageViewFrame(mf, 1, NULL, m_Parent);
          f->SetTitle(mimetype);
          mf->DecRef();
       }
@@ -1104,7 +1104,8 @@ wxMessageView::OnMEvent(MEventData& ev)
 
       Update();
    }
-
+   else if( ev.GetId() == MEventId_ASFolderResult )
+      OnASFolderResultEvent((MEventASFolderResultData &) ev);
    return true;
 }
 
@@ -1260,16 +1261,8 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
 }
 
 bool
-wxMessageView::ShowRawText(MailFolder *folder)
+wxMessageView::ShowRawText(void)
 {
-   if ( !folder )
-      folder = m_folder;
-
-   if ( !folder )
-      folder = m_FolderView->GetFolder();
-
-   CHECK( folder, false, "no MailFolder in message view" );
-
    String text;
    m_mailMessage->WriteToString(text, true);
    if ( text.IsEmpty() )
@@ -1278,9 +1271,7 @@ wxMessageView::ShowRawText(MailFolder *folder)
 
       return false;
    }
-
    MDialog_ShowText(m_Parent, _("Raw message text"), text, "RawMsgPreview");
-
    return true;
 }
 
@@ -1288,41 +1279,41 @@ bool
 wxMessageView::DoMenuCommand(int id)
 {
    wxArrayInt msgs;
-   if( m_uid != -1 )
+   if( m_uid != UID_ILLEGAL )
       msgs.Add(m_uid);
 
    bool handled = true;
    switch ( id )
    {
    case WXMENU_MSG_FIND:
-      if(m_uid != -1)
+      if(m_uid != UID_ILLEGAL)
          Find();
       break;
    case WXMENU_MSG_REPLY:
-      if(m_uid != -1)
+      if(m_uid != UID_ILLEGAL)
          GetFolder()->ReplyMessages(&msgs, GetFrame(this), m_Profile);
       break;
    case WXMENU_MSG_FORWARD:
-      if(m_uid != -1)
+      if(m_uid != UID_ILLEGAL)
          GetFolder()->ForwardMessages(&msgs, GetFrame(this), m_Profile);
       break;
 
    case WXMENU_MSG_SAVE_TO_FOLDER:
-      if(m_uid != -1)
+      if(m_uid != UID_ILLEGAL)
          GetFolder()->SaveMessagesToFolder(&msgs, GetFrame(this));
       break;
    case WXMENU_MSG_SAVE_TO_FILE:
-      if(m_uid != -1)
+      if(m_uid != UID_ILLEGAL)
          GetFolder()->SaveMessagesToFile(&msgs, GetFrame(this));
       break;
 
    case WXMENU_MSG_DELETE:
-      if(m_uid != -1)
+      if(m_uid != UID_ILLEGAL)
          GetFolder()->DeleteMessages(&msgs);
       break;
 
    case WXMENU_MSG_UNDELETE:
-      if(m_uid != -1)
+      if(m_uid != UID_ILLEGAL)
          GetFolder()->UnDeleteMessages(&msgs);
       break;
 
@@ -1373,13 +1364,18 @@ wxMessageView::DoMenuCommand(int id)
 }
 
 void
-wxMessageView::ShowMessage(MailFolder *folder, long uid)
+wxMessageView::ShowMessage(ASMailFolder *folder, UIdType uid)
 {
    if ( m_uid == uid )
       return;
-
    // check the message size
-   Message *mailMessage = folder->GetMessage(uid);
+   (void) m_folder->GetMessage(uid, this); // file request
+}
+
+void
+wxMessageView::ShowMessage(Message *mailMessage)
+{
+
    CHECK_RET( mailMessage, "no message with such uid" );
 
    unsigned long size = 0,
@@ -1390,7 +1386,9 @@ wxMessageView::ShowMessage(MailFolder *folder, long uid)
    (void)mailMessage->GetStatus(&size);
    size /= 1024;  // size is measured in KBytes
 
-   if ( size > maxSize && (folder && GetFolderType(folder->GetType()) != MF_FILE))
+   if ( size > maxSize && (mailMessage->GetFolder()
+                           &&
+                           GetFolderType(mailMessage->GetFolder()->GetType()) != MF_FILE))  
    {
       wxString msg;
       msg.Printf(_("The selected message is %u Kbytes long which is "
@@ -1402,7 +1400,6 @@ wxMessageView::ShowMessage(MailFolder *folder, long uid)
       {
          // don't do anything
          mailMessage->DecRef();
-
          return;
       }
    }
@@ -1410,11 +1407,11 @@ wxMessageView::ShowMessage(MailFolder *folder, long uid)
    // ok, make this our new current message
    SafeDecRef(m_mailMessage);
 
-   m_uid = uid;
    m_mailMessage = mailMessage;
+   m_uid = mailMessage->GetUId();
 
    if(! (m_mailMessage->GetStatus() & MailFolder::MSG_STAT_SEEN))
-      folder->SetMessageFlag(m_uid, MailFolder::MSG_STAT_SEEN, true);
+      m_mailMessage->GetFolder()->SetMessageFlag(m_uid, MailFolder::MSG_STAT_SEEN, true);
 
    /* FIXME for now it's here, should go somewhere else: */
    if ( m_ProfileValues.autocollect )
@@ -1422,7 +1419,7 @@ wxMessageView::ShowMessage(MailFolder *folder, long uid)
       String addr, name;
       addr = m_mailMessage->Address(name, MAT_REPLYTO);
 
-      String folderName = folder->GetName();
+      String folderName = m_mailMessage->GetFolder()->GetName();
 
       AutoCollectAddresses(addr, name,
                            m_ProfileValues.autocollect,
@@ -1614,7 +1611,7 @@ BEGIN_EVENT_TABLE(wxMessageViewFrame, wxMFrame)
    EVT_TOOL(-1, wxMessageViewFrame::OnCommandEvent)
 END_EVENT_TABLE()
 
-wxMessageViewFrame::wxMessageViewFrame(MailFolder *folder,
+wxMessageViewFrame::wxMessageViewFrame(ASMailFolder *folder,
                                        long num,
                                        wxFolderView *fv,
                                        MWindow  *parent,
@@ -1671,4 +1668,24 @@ wxMessageViewFrame::OnSize( wxSizeEvent & WXUNUSED(event) )
    GetClientSize( &x, &y );
    if(m_MessageView)
       m_MessageView->SetSize(0,0,x,y);
+}
+
+void
+wxMessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
+{
+   ASMailFolder::Result *result = event.GetResult();
+   switch(result->GetOperation())
+   {
+   case ASMailFolder::Op_GetMessage:
+   {
+      /* The only situation where we receive a Message, is if we
+         want to open it in a separate viewer. */
+      Message *mptr = ((ASMailFolder::ResultMessage *)result)->GetMessage();
+      ShowMessage(mptr);
+   }
+   break;
+   default:
+      ASSERT_MSG(0,"Unexpected async result event");
+   }
+   result->DecRef();
 }
