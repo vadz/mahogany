@@ -768,6 +768,21 @@ END_EVENT_TABLE()
 InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
                         : InstallWizardPage(wizard, InstallWizard_WelcomePage)
 {
+   m_useWizard = true;
+
+   m_checkbox = new wxCheckBox
+                (
+                  this, -1,
+                  _("I'm an &expert and don't need the wizard")
+                );
+
+#if !wxCHECK_VERSION(2,5,0)
+   wxSize sizeBox = m_checkbox->GetSize(),
+          sizePage = wizard->GetPageSize();
+
+   // adjust the vertical position
+   m_checkbox->Move(5, sizePage.y - 2*sizeBox.y);
+#else // 2.5.x
    wxStaticText *introduction = new wxStaticText(this, -1, _(
       "Welcome to Mahogany!\n"
       "\n"
@@ -787,21 +802,6 @@ InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
       "the box below or press [Cancel] at any moment."
                                          ));
 
-   m_useWizard = true;
-
-   m_checkbox = new wxCheckBox
-                (
-                  this, -1,
-                  _("I'm an &expert and don't need the wizard")
-                );
-
-#if !wxCHECK_VERSION(2,5,0)
-   wxSize sizeBox = m_checkbox->GetSize(),
-          sizePage = wizard->GetPageSize();
-
-   // adjust the vertical position
-   m_checkbox->Move(5, sizePage.y - 2*sizeBox.y);
-#else
    wxBoxSizer *pageSizer = new wxBoxSizer(wxVERTICAL);
    pageSizer->Add(
       introduction,
@@ -818,7 +818,7 @@ InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
 
    SetSizer(pageSizer);
    pageSizer->Fit(this);
-#endif
+#endif // 2.5.x
 }
 
 InstallWizardPageId InstallWizardWelcomePage::GetNextPageId() const
