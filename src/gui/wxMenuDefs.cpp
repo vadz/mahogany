@@ -296,7 +296,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_MOVE_TO_FOLDER, gettext_noop("&Move to Folder"),gettext_noop("Move message to another folder")   , FALSE },
    { WXMENU_MSG_DELETE,    gettext_noop("&Delete"),           gettext_noop("Delete this message")      , FALSE },
    { WXMENU_MSG_UNDELETE,  gettext_noop("&Undelete"),         gettext_noop("Undelete message")         , FALSE },
-   { WXMENU_MSG_DELDUPLICATES,gettext_noop("Remove D&uplicates"),
+   { WXMENU_MSG_DELDUPLICATES,gettext_noop("Remove Duplica&tes"),
      gettext_noop("Delete all duplicate messages")      , FALSE },
    { WXMENU_MSG_EXPUNGE,   gettext_noop("Ex&punge"),          gettext_noop("Expunge")                  , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
