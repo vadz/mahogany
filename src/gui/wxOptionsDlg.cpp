@@ -281,6 +281,11 @@ enum ConfigFields
    ConfigField_ShowHiddenFolders,
    ConfigField_ShowNewMail,
    ConfigField_DebugCClient,
+#ifdef USE_SSL
+   ConfigField_SslHelp,
+   ConfigField_SslDllName,
+   ConfigField_CryptoDllName,
+#endif
 #ifdef OS_UNIX
    ConfigField_AFMPath,
    ConfigField_FocusFollowsMouse,
@@ -595,7 +600,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("NNTP server user &ID"),         Field_Text,   -1,           },
    { gettext_noop("NNTP server pass&word"),        Field_Passwd, ConfigField_NewsServerLogin,           },
 #ifdef USE_SSL
-   { gettext_noop("Mahogany can use SSL (secure sockets layer) to send\n"
+   { gettext_noop("Mahogany can attempt to use SSL (secure sockets layer) to send\n"
                   "mail or news. Tick the following boxes to activate this.")
      , Field_Message, -1 },
    { gettext_noop("POP server uses SS&L"), Field_Bool,    -1,                        },
@@ -784,9 +789,23 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Open folder on single &click"), Field_Bool,    -1                     },
    { gettext_noop("Show &hidden folders in the folder tree"), Field_Bool,    -1                     },
    { gettext_noop("Show new mail &notifications"), Field_Bool,    -1                     },
-   { gettext_noop("Debug server and mailbox access"), Field_Bool, -1 },
+   { gettext_noop("Debug server and mailbox access"), Field_Bool, -1
+   },
+#ifdef USE_SSL
+   /* The two settings are not really Field_Restart, but if one has
+      tried to use SSL before setting them correctly, then
+      MailFolderCC will not attempt to load the libs again. So we just
+      pretent that you always have to restart it to prevent users from
+      complaining to us if it doesn't work. I'm lazy. KB*/
+   { gettext_noop("Mahogany can use SSL (Secure Sockets Layer) for secure,\n"
+                  "encrypted communications, if you have the libssl and libcrypto\n"
+                  "shared libraries (DLLs) on your system."),
+     Field_Message, -1                     },
+   { gettext_noop("Path where to find s&hared libssl"), Field_File|Field_Restart,    -1                     },
+   { gettext_noop("Path where to find sha&red libcrypto"), Field_File|Field_Restart,    -1                     },
+#endif
 #ifdef OS_UNIX
-   { gettext_noop("&Path where to find AFM files"), Field_Text,    -1                     },
+   { gettext_noop("&Path where to find AFM files"), Field_Dir,    -1                     },
    { gettext_noop("&Focus follows mouse"), Field_Bool,    -1                     },
 #endif
    { gettext_noop("Use floating &menu-bars"), Field_Bool,    -1                     },
@@ -978,6 +997,11 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_SHOW_HIDDEN_FOLDERS),
    CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
    CONFIG_ENTRY(MP_DEBUG_CCLIENT),
+#ifdef USE_SSL
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_SSL_DLL_SSL),
+   CONFIG_ENTRY(MP_SSL_DLL_CRYPTO),
+#endif
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_AFMPATH),
    CONFIG_ENTRY(MP_FOCUS_FOLLOWSMOUSE),
@@ -1044,21 +1068,22 @@ void wxOptionsPage::CreateControls()
 
       // do it only for text control labels
       switch ( GetFieldType(n) ) {
-         case Field_Passwd:
-         case Field_Number:
-         case Field_File:
-         case Field_Color:
-         case Field_Folder:
-         case Field_Bool:
-            // fall through: for this purpose (finding the longest label)
-            // they're the same as text
-         case Field_Action:
-         case Field_Text:
-            break;
+      case Field_Passwd:
+      case Field_Number:
+      case Field_Dir:
+      case Field_File:
+      case Field_Color:
+      case Field_Folder:
+      case Field_Bool:
+         // fall through: for this purpose (finding the longest label)
+         // they're the same as text
+      case Field_Action:
+      case Field_Text:
+         break;
 
-         default:
-            // don't take into account the other types
-            continue;
+      default:
+         // don't take into account the other types
+         continue;
       }
 
       aLabels.Add(_(m_aFields[n].label));
@@ -1081,6 +1106,10 @@ void wxOptionsPage::CreateControls()
       }
 
       switch ( GetFieldType(n) ) {
+         case Field_Dir:
+            last = CreateDirEntry(_(m_aFields[n].label), widthMax, last);
+            break;
+            
          case Field_File:
             last = CreateFileEntry(_(m_aFields[n].label), widthMax, last);
             break;
@@ -1264,6 +1293,7 @@ void wxOptionsPage::UpdateUI()
          {
                // for file entries, also disable the browse button
             case Field_File:
+            case Field_Dir:
             case Field_Color:
             case Field_Folder:
                wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
@@ -1331,80 +1361,81 @@ bool wxOptionsPage::TransferDataToWindow()
          continue;
 
       switch ( GetFieldType(n) ) {
-         case Field_Text:
-         case Field_Number:
-            if ( GetFieldType(n) == Field_Number ) {
-               wxASSERT( m_aDefaults[n].IsNumeric() );
-
-               strValue.Printf("%ld", lValue);
-            }
-            else {
-               wxASSERT( !m_aDefaults[n].IsNumeric() );
-            }
-
-            // can only have text value
-         case Field_Passwd:
-         case Field_File:
-         case Field_Color:
-         case Field_Folder:
-            wxStaticCast(control, wxTextCtrl)->SetValue(strValue);
-            break;
-
-         case Field_Bool:
+      case Field_Text:
+      case Field_Number:
+         if ( GetFieldType(n) == Field_Number ) {
             wxASSERT( m_aDefaults[n].IsNumeric() );
-            wxStaticCast(control, wxCheckBox)->SetValue(lValue != 0);
-            break;
 
-         case Field_Action:
-            wxStaticCast(control, wxRadioBox)->SetSelection(lValue);
-            break;
-
-         case Field_Combo:
-            wxStaticCast(control, wxComboBox)->SetSelection(lValue);
-            break;
-
-         case Field_List:
+            strValue.Printf("%ld", lValue);
+         }
+         else {
             wxASSERT( !m_aDefaults[n].IsNumeric() );
+         }
 
-            // split it (FIXME what if it contains ';'?)
-            {
-               wxListBox *lbox = wxStaticCast(control, wxListBox);
-               String str;
-               for ( size_t m = 0; m < strValue.Len(); m++ ) {
-                  if ( strValue[m] == ';' ) {
-                     if ( !str.IsEmpty() ) {
-                        lbox->Append(str);
-                        str.Empty();
-                     }
-                     //else: nothing to do, two ';' one after another
+         // can only have text value
+      case Field_Passwd:
+      case Field_Dir:
+      case Field_File:
+      case Field_Color:
+      case Field_Folder:
+         wxStaticCast(control, wxTextCtrl)->SetValue(strValue);
+         break;
+
+      case Field_Bool:
+         wxASSERT( m_aDefaults[n].IsNumeric() );
+         wxStaticCast(control, wxCheckBox)->SetValue(lValue != 0);
+         break;
+
+      case Field_Action:
+         wxStaticCast(control, wxRadioBox)->SetSelection(lValue);
+         break;
+
+      case Field_Combo:
+         wxStaticCast(control, wxComboBox)->SetSelection(lValue);
+         break;
+
+      case Field_List:
+         wxASSERT( !m_aDefaults[n].IsNumeric() );
+
+         // split it (FIXME what if it contains ';'?)
+         {
+            wxListBox *lbox = wxStaticCast(control, wxListBox);
+            String str;
+            for ( size_t m = 0; m < strValue.Len(); m++ ) {
+               if ( strValue[m] == ';' ) {
+                  if ( !str.IsEmpty() ) {
+                     lbox->Append(str);
+                     str.Empty();
                   }
-                  else {
-                     str << strValue[m];
-                  }
+                  //else: nothing to do, two ';' one after another
                }
-
-               if ( !str.IsEmpty() ) {
-                  lbox->Append(str);
+               else {
+                  str << strValue[m];
                }
             }
-            break;
 
-         case Field_XFace:
-            {
-               wxXFaceButton *btnXFace = (wxXFaceButton *)control;
-               if ( READ_CONFIG(m_Profile, MP_COMPOSE_USE_XFACE) )
-                  btnXFace->SetFile(READ_CONFIG(m_Profile, MP_COMPOSE_XFACE_FILE));
-               else
-                  btnXFace->SetFile("");
+            if ( !str.IsEmpty() ) {
+               lbox->Append(str);
             }
-            break;
+         }
+         break;
 
-         case Field_Message:
-         case Field_SubDlg:      // these settings will be read later
-            break;
+      case Field_XFace:
+      {
+         wxXFaceButton *btnXFace = (wxXFaceButton *)control;
+         if ( READ_CONFIG(m_Profile, MP_COMPOSE_USE_XFACE) )
+            btnXFace->SetFile(READ_CONFIG(m_Profile, MP_COMPOSE_XFACE_FILE));
+         else
+            btnXFace->SetFile("");
+      }
+      break;
 
-         default:
-            wxFAIL_MSG("unexpected field type");
+      case Field_Message:
+      case Field_SubDlg:      // these settings will be read later
+         break;
+
+      default:
+         wxFAIL_MSG("unexpected field type");
       }
 
       // the dirty flag was set from the OnChange() callback, reset it!
@@ -1431,71 +1462,72 @@ bool wxOptionsPage::TransferDataFromWindow()
 
       switch ( GetFieldType(n) )
       {
-         case Field_Passwd:
-         case Field_Text:
-         case Field_File:
-         case Field_Color:
-         case Field_Folder:
-         case Field_Number:
-            wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
+      case Field_Passwd:
+      case Field_Text:
+      case Field_Dir:
+      case Field_File:
+      case Field_Color:
+      case Field_Folder:
+      case Field_Number:
+         wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
 
-            strValue = ((wxTextCtrl *)control)->GetValue();
+         strValue = ((wxTextCtrl *)control)->GetValue();
 
-            if ( GetFieldType(n) == Field_Number ) {
-               wxASSERT( m_aDefaults[n].IsNumeric() );
-
-               lValue = atol(strValue);
-            }
-            else {
-               wxASSERT( !m_aDefaults[n].IsNumeric() );
-            }
-            break;
-
-         case Field_Bool:
+         if ( GetFieldType(n) == Field_Number ) {
             wxASSERT( m_aDefaults[n].IsNumeric() );
-            wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
 
-            lValue = ((wxCheckBox *)control)->GetValue();
-            break;
-
-         case Field_Action:
-            wxASSERT( m_aDefaults[n].IsNumeric() );
-            wxASSERT( control->IsKindOf(CLASSINFO(wxRadioBox)) );
-
-            lValue = ((wxRadioBox *)control)->GetSelection();
-            break;
-
-         case Field_Combo:
-            wxASSERT( m_aDefaults[n].IsNumeric() );
-            wxASSERT( control->IsKindOf(CLASSINFO(wxComboBox)) );
-
-            lValue = ((wxComboBox *)control)->GetSelection();
-            break;
-
-         case Field_List:
+            lValue = atol(strValue);
+         }
+         else {
             wxASSERT( !m_aDefaults[n].IsNumeric() );
-            wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
+         }
+         break;
+
+      case Field_Bool:
+         wxASSERT( m_aDefaults[n].IsNumeric() );
+         wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
+
+         lValue = ((wxCheckBox *)control)->GetValue();
+         break;
+
+      case Field_Action:
+         wxASSERT( m_aDefaults[n].IsNumeric() );
+         wxASSERT( control->IsKindOf(CLASSINFO(wxRadioBox)) );
+
+         lValue = ((wxRadioBox *)control)->GetSelection();
+         break;
+
+      case Field_Combo:
+         wxASSERT( m_aDefaults[n].IsNumeric() );
+         wxASSERT( control->IsKindOf(CLASSINFO(wxComboBox)) );
+
+         lValue = ((wxComboBox *)control)->GetSelection();
+         break;
+
+      case Field_List:
+         wxASSERT( !m_aDefaults[n].IsNumeric() );
+         wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
 
             // join it (FIXME what if it contains ';'?)
-            {
-               wxListBox *listbox = (wxListBox *)control;
-               for ( size_t m = 0; m < (size_t)listbox->Number(); m++ ) {
-                  if ( !strValue.IsEmpty() ) {
-                     strValue << ';';
-                  }
-
-                  strValue << listbox->GetString(m);
+         {
+            wxListBox *listbox = (wxListBox *)control;
+            for ( size_t m = 0; m < (size_t)listbox->Number(); m++ ) {
+               if ( !strValue.IsEmpty() ) {
+                  strValue << ';';
                }
+
+               strValue << listbox->GetString(m);
             }
-            break;
+         }
+         break;
 
-         case Field_Message:
-         case Field_SubDlg:      // already done
-         case Field_XFace:      // already done
-            break;
+      case Field_Message:
+      case Field_SubDlg:      // already done
+      case Field_XFace:      // already done
+         break;
 
-         default:
-            wxFAIL_MSG("unexpected field type");
+      default:
+         wxFAIL_MSG("unexpected field type");
       }
 
       if ( m_aDefaults[n].IsNumeric() )

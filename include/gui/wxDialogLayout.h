@@ -376,7 +376,6 @@ public:
                                    GetBtnType(FileBtn, open, existingOnly),
                                    (wxTextBrowseButton **)ppButton);
    }
-
       // if ppButton != NULL, it's filled with the pointer to the ">>" browse
       // button created by this function (it will be wxFileOrDirBrowseButton)
    wxTextCtrl *CreateFileOrDirEntry(const char *label,
@@ -391,7 +390,7 @@ public:
                                    (wxTextBrowseButton **)ppButton);
    }
 
-      // create an entry with a button to brose for the directories
+      // create an entry with a button to browse for the directories
    wxTextCtrl *CreateDirEntry(const char *label,
                               long widthMax,
                               wxControl *last,

@@ -173,7 +173,7 @@ wxMFrame::AddHelpMenu(void)
 void
 wxMFrame::AddMessageMenu(void)
 {
-   WXADD_MENU(GetMenuBar(), MSG, _("&Message"));
+   WXADD_MENU(GetMenuBar(), MSG, _("Me&ssage"));
 }
 
 wxMFrame::~wxMFrame()

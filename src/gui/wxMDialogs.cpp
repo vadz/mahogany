@@ -39,7 +39,6 @@
 
 #include "Mpers.h"
 
-#include "modules/Scoring.h"
 #include "XFace.h"
 
 #include "MHelp.h"
@@ -875,22 +874,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 #ifdef USE_PYTHON
                    "Python "
 #endif
-#ifdef USE_SSL
                    "SSL "
-#   if defined(NO_IDEA) || defined (NO_DSA) || defined (NO_RSA)
-                   "("
-#      ifdef NO_IDEA
-                   "no-IDEA "
-#      endif
-#      ifdef NO_RSA
-                   "no-RSA "
-#      endif
-#      ifdef _NO_DSA
-                   "no-DSA"
-#      endif
-                   ")"
-#   endif
-#endif
 #ifdef EXPERIMENTAL
                    "Experimental Code "
 #endif
@@ -1468,23 +1452,6 @@ bool wxMessageSortingDialog::TransferDataFromWindow()
    GetProfile()->writeEntry(MP_MSGS_RESORT_ON_CHANGE,
                          m_ReSortOnChange->GetValue());
 
-   if(uses_scoring)
-   {
-      MModule *module = MModule::GetProvider(MMODULE_INTERFACE_SCORING);
-      if(module)
-         module->DecRef();
-      else
-      {
-         wxString msg;
-         msg.Printf(_("You have selected message score as a sort criterium\n"
-                      "but not loaded any scoring plugin module yet.\n"
-                      "Scoring will only work if you load an extension\n"
-                      "module providing the '%s' interface.\n"
-                      "Otherwise all messages will have score 0."),
-                    MMODULE_INTERFACE_SCORING);
-         MDialog_ErrorMessage(msg,this);
-      }
-   }
    return TRUE;
 }
 
@@ -2200,7 +2167,9 @@ static const struct
    { "RememberPwd",              gettext_noop("propose to remember passwords entered interactively") },
    { "ShowLogWinHint",           gettext_noop("show the hint about reopening the log window when it is being closed") },
    { "AutoExpunge",              gettext_noop("ask to expunge deleted messages before closing the folder") },
-   { "SuspendAutoCollectFolder", gettext_noop("ask to suspend auto-collecting messages from failed incoming folder") },
+      { "SuspendAutoCollectFolder", gettext_noop("ask to suspend auto-collecting messages from failed incoming folder") },
+   {"RulesMismatchWarn", gettext_noop("Warning that filter rules do
+ not match dialog")}
    //{ "", gettext_noop("") },
 };
 

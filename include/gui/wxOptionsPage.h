@@ -93,6 +93,7 @@ public:
       Field_XFace  = 0x0400, // a wxXFaceButton invoking another dialog
       Field_Folder = 0x0800, // a text entry with a "Browse for folder" button
       Field_Passwd = 0x1000, // a masked text entry for the password
+      Field_Dir    = 0x2000, // a text entry with a "Browse..." button
       Field_Type   = 0xffff  // bit mask selecting the type
    };
 

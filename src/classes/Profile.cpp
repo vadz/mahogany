@@ -1173,7 +1173,7 @@ bool ProfileImpl::IsAncestor(Profile *profile) const
    // can't compare as strings because '/' are sometimes duplicated...
    wxArrayString aMyComponents, aOtherComponents;
    wxSplitPath(aMyComponents, m_ProfileName);
-   wxSplitPath(aOtherComponents, ((ProfileImpl *)profile)->m_ProfileName);
+   wxSplitPath(aOtherComponents, profile->GetName());
 
    if ( aOtherComponents.GetCount() < aMyComponents.GetCount() )
       return false;

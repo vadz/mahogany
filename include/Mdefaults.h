@@ -557,6 +557,10 @@
 #define MP_INCFAX_SUPPORT      "IncomingFaxSupport"
 /// domains from which to support faxes, semicolon delimited
 #define MP_INCFAX_DOMAINS      "IncomingFaxDomains"
+/// Default name for the SSL library
+#define MP_SSL_DLL_SSL      "SSLDll"
+/// Default name for the SSL/crypto library
+#define MP_SSL_DLL_CRYPTO "CryptoDll"
 
 /// Use substrings in address expansion?
 #define   MP_ADB_SUBSTRINGEXPANSION   "ExpandWithSubstring"
@@ -1070,6 +1074,17 @@
 #define   MP_AUTOCOLLECT_ADB_D    "autocollect.adb"
 /// Autocollect entries with names only?
 #define   MP_AUTOCOLLECT_NAMED_D 0l
+#ifdef OS_UNIX
+/// Default name for the SSL library
+#define MP_SSL_DLL_SSL_D   "libssl.so.0"
+/// Default name for the SSL/crypto library
+#define MP_SSL_DLL_CRYPTO_D "libcrypto.so.0"
+#else
+/// Default name for the SSL library
+#define MP_SSL_DLL_SSL_D   "libssl.dll"
+/// Default name for the SSL/crypto library
+#define MP_SSL_DLL_CRYPTO_D "libcrypto.dll"
+#endif
 
 /**@name message view settings */
 //@{

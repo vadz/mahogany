@@ -1318,6 +1318,8 @@ ParserImpl::ParseFactor(void)
         | ( EXRESSION )
         | IDENTIFIER( ARGLIST )
         | NUMBER
+        | + NUMBER
+        | - NUMBER
         | "STRING"
    */
    SyntaxNode *sn = NULL;
@@ -1351,6 +1353,18 @@ ParserImpl::ParseFactor(void)
          }
          else
             return new Negation(sn, this);
+      }
+      else if(t.GetChar() == '-' || t.GetChar() == '+')
+      { // might be a number
+         int factor = t.GetChar() == '-' ? -1 : +1;
+         GetToken();
+         if(t.GetType() != TT_Number)
+            Error(_("Expected a number."));
+         else
+         {
+            sn = new Number( factor * t.GetNumber(), this);
+            GetToken();
+         }
       }
    }
    else if( t.GetType() == TT_String )
@@ -2167,6 +2181,56 @@ extern "C"
       return Value(size / 1024); // return KiloBytes
    }
 
+   static Value func_score(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 0)
+         return Value(0);
+      int score = 0;
+      Message *msg = p->GetMessage();
+      HeaderInfoList *hil = p->GetFolder()->GetHeaders();
+      if(hil)
+      {
+         score = hil->GetEntryUId( msg->GetUId() )->GetScore();
+         hil->DecRef();
+      }
+      msg->DecRef();
+      return Value(score);
+   }
+
+   static Value func_addscore(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 1)
+         return Value(-1);
+      Value d = args->GetArg(0)->Evaluate();
+      int delta = d.ToNumber();
+      Message *msg = p->GetMessage();
+      HeaderInfoList *hil = p->GetFolder()->GetHeaders();
+      if(hil)
+      {
+         hil->GetEntryUId( msg->GetUId() )->AddScore(delta);
+         hil->DecRef();
+      }
+      msg->DecRef();
+      return Value(0);
+   }
+   static Value func_setcolour(ArgList *args, Parser *p)
+   {
+      if(args->Count() != 1)
+         return Value(-1);
+      Value c = args->GetArg(0)->Evaluate();
+      String col = c.ToString();
+      Message *msg = p->GetMessage();
+      HeaderInfoList *hil = p->GetFolder()->GetHeaders();
+      if(hil)
+      {
+         hil->GetEntryUId( msg->GetUId() )->SetColour(col);
+         hil->DecRef();
+      }
+      msg->DecRef();
+      return Value(0);
+   }
+
+   
 /* * * * * * * * * * * * * * *
  *
  * Folder functionality
@@ -2213,6 +2277,9 @@ ParserImpl::AddBuiltinFunctions(void)
    DefineFunction("python", func_python);
 #endif
    DefineFunction("matchregexi", func_matchregexi);
+   DefineFunction("setcolour", func_setcolour);
+   DefineFunction("score", func_score);
+   DefineFunction("addscore", func_addscore);
 }
 
 

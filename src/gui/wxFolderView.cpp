@@ -674,10 +674,31 @@ wxFolderListCtrl::SelectNextUnread()
 
    long idx = -1;
    bool foundFocused = false;
-   while((idx = GetNextItem(idx)) != -1)
+   bool failedOnce = false;
+   while(1)
    {
+      idx = GetNextItem(idx);
+      if(idx == -1)
+      {
+         if(failedOnce)
+            break; // we really haven't found one
+         // else: we didn't find an unread *below*, so try above:
+         foundFocused = false;
+         idx = -1;
+         idx = GetNextItem(idx);
+      }
+      
       const HeaderInfo *hi = (*hil)[idx];
-      if(foundFocused) // we are looking for the next unread now:
+      if(hi->GetUId() == focusedUId)
+         foundFocused = true;
+      else
+         continue;
+      
+      if(
+         ((! failedOnce) && foundFocused)// we are looking for the next unread now:
+         || (failedOnce && ! foundFocused) // now we look for the once
+                                           // before the focused one
+         )
       {
          if((hi->GetStatus() & MailFolder::MSG_STAT_SEEN) == 0)
          {
@@ -689,9 +710,6 @@ wxFolderListCtrl::SelectNextUnread()
             return;
          }
       }
-      if(hi->GetUId() == focusedUId)
-            foundFocused = true;
-      // semantics changed idx++;
    }
    SafeDecRef(hil);
 }
@@ -1024,16 +1042,24 @@ wxFolderView::SetEntry(HeaderInfoList *listing, size_t index)
    info.m_itemId = index;
    m_FolderCtrl->GetItem(info);
    int status = hi->GetStatus();
-   info.SetTextColour(
-      ((status & MailFolder::MSG_STAT_DELETED) != 0 ) ? m_settingsCurrent.DeletedCol
-      : ( ( (status & MailFolder::MSG_STAT_RECENT) != 0 ) ?
-          ( ( (status & MailFolder::MSG_STAT_SEEN) != 0 ) ? m_settingsCurrent.RecentCol
-            : m_settingsCurrent.NewCol )
-          : ( ((status & MailFolder::MSG_STAT_SEEN) != 0 ) ?
-              m_settingsCurrent.FgCol :
-              m_settingsCurrent.UnreadCol)
-         )
-      );
+
+   if(hi->GetColour()[0]) // entry has a colour setting
+   {
+      wxColour col;
+      GetColourByName(&col, hi->GetColour(), MP_FVIEW_FGCOLOUR_D);
+      info.SetTextColour(col);
+   }
+   else
+      info.SetTextColour(
+         ((status & MailFolder::MSG_STAT_DELETED) != 0 ) ? m_settingsCurrent.DeletedCol
+         : ( ( (status & MailFolder::MSG_STAT_RECENT) != 0 ) ?
+             ( ( (status & MailFolder::MSG_STAT_SEEN) != 0 ) ? m_settingsCurrent.RecentCol
+               : m_settingsCurrent.NewCol )
+             : ( ((status & MailFolder::MSG_STAT_SEEN) != 0 ) ?
+                 m_settingsCurrent.FgCol :
+                 m_settingsCurrent.UnreadCol)
+            )
+         );
    m_FolderCtrl->SetItem(info);
 }
 

@@ -378,6 +378,16 @@ public:
    virtual unsigned GetIndentation() const { return m_Indentation; }
    /// Set the indentation level for message threading.
    virtual void SetIndentation(unsigned level) { m_Indentation = level; }
+   /// Get Colour setting (name or empty string)
+   virtual String GetColour(void) const { return m_Colour; }
+   /// Get Score setting (name or empty string)
+   virtual int GetScore(void) const { return m_Score; }
+   /// Change Score setting (default = 0)
+   virtual void AddScore(int delta) { m_Score += delta; }
+   /// Set Colour setting (name or empty string)
+   virtual void SetColour(const String &col) { m_Colour = col; }
+
+
    /// Assignment operator.
    HeaderInfo & operator= (const HeaderInfo &);
 
@@ -389,12 +399,15 @@ protected:
    unsigned long m_Uid;
    time_t m_Date;
    unsigned m_Indentation;
+   String m_Colour;
+   int m_Score;
    friend class MailFolderCC;
 };
 
 HeaderInfoCC::HeaderInfoCC()
 {
    m_Indentation = 0;
+   m_Score = 0;
    // all other fields are filled in by the MailFolderCC when creating
    // it
 }
@@ -447,6 +460,19 @@ public:
          }
          return & m_Listing[n];
       }
+
+   /// Returns pointer to entry with this UId
+   virtual HeaderInfo * GetEntryUId(UIdType uid)
+      {
+         MOcheck();
+         for(size_t i = 0; i < m_NumEntries; i++)
+         {
+            if( m_Listing[i].GetUId() == uid )
+               return & m_Listing[i];
+         }
+         return NULL;
+      }
+
    /// Returns pointer to array of data:
    virtual HeaderInfo *GetArray(void) { MOcheck(); return m_Listing; }
 
@@ -3123,43 +3149,53 @@ mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW *ov)
 
 #include <openssl/ssl.h>
 
+/* This is our interface to the library and auth_ssl.c in c-client
+   which are all in "C" */
 extern "C" {
-#define FUNC(returnval, name, args) \
+
+extern long ssl_init_Mahogany();
+
+
+#define SSL_DEF(returnval, name, args) \
    typedef returnval (* name##_TYPE) args ; \
    name##_TYPE stub_##name = NULL
 
-#define LOAD(name) \
-      stub_##name = (name##_TYPE) wxDllLoader::GetSymbol(dll, #name); \
-      if(stub_##name == NULL)  success = FALSE
+#define SSL_LOOKUP(name) \
+      stub_##name = (name##_TYPE) wxDllLoader::GetSymbol(slldll, #name); \
+      if(stub_##name == NULL) success = FALSE
+#define CRYPTO_LOOKUP(name) \
+      stub_##name = (name##_TYPE) wxDllLoader::GetSymbol(cryptodll, #name); \
+      if(stub_##name == NULL) success = FALSE
 
-FUNC( SSL *, SSL_new, (SSL_CTX *ctx) );
-FUNC( void, SSL_free, (SSL *ssl) );
-FUNC( int,  SSL_set_rfd, (SSL *s, int fd) );
-FUNC( int,  SSL_set_wfd, (SSL *s, int fd) );
-FUNC( void, SSL_set_read_ahead, (SSL *s, int yes) );
-FUNC( int,  SSL_connect, (SSL *ssl) );
-FUNC( int,  SSL_read, (SSL *ssl,char *buf,int num) );
-FUNC( int,  SSL_write, (SSL *ssl,const char *buf,int num) );
-FUNC( int,  SSL_pending, (SSL *s) );
-FUNC( int,  SSL_library_init, (void ) );
-FUNC( void, SSL_load_error_strings, (void ) );
-FUNC( SSL_CTX *,SSL_CTX_new, (SSL_METHOD *meth) );
-FUNC( unsigned long, ERR_get_error, (void) );
-FUNC( char *, ERR_error_string, (unsigned long e, char *p));
+SSL_DEF( SSL *, SSL_new, (SSL_CTX *ctx) );
+SSL_DEF( void, SSL_free, (SSL *ssl) );
+SSL_DEF( int,  SSL_set_rfd, (SSL *s, int fd) );
+SSL_DEF( int,  SSL_set_wfd, (SSL *s, int fd) );
+SSL_DEF( void, SSL_set_read_ahead, (SSL *s, int yes) );
+SSL_DEF( int,  SSL_connect, (SSL *ssl) );
+SSL_DEF( int,  SSL_read, (SSL *ssl,char *buf,int num) );
+SSL_DEF( int,  SSL_write, (SSL *ssl,const char *buf,int num) );
+SSL_DEF( int,  SSL_pending, (SSL *s) );
+SSL_DEF( int,  SSL_library_init, (void ) );
+SSL_DEF( void, SSL_load_error_strings, (void ) );
+SSL_DEF( SSL_CTX *,SSL_CTX_new, (SSL_METHOD *meth) );
+SSL_DEF( unsigned long, ERR_get_error, (void) );
+SSL_DEF( char *, ERR_error_string, (unsigned long e, char *p));
 //extern SSL_get_cipher_bits();
-FUNC( const char *, SSL_CIPHER_get_name, (SSL_CIPHER *c) );
-FUNC( int, SSL_CIPHER_get_bits, (SSL_CIPHER *c, int *alg_bits) );
+SSL_DEF( const char *, SSL_CIPHER_get_name, (SSL_CIPHER *c) );
+SSL_DEF( int, SSL_CIPHER_get_bits, (SSL_CIPHER *c, int *alg_bits) );
 //extern SSL_get_cipher();
-FUNC( SSL_CIPHER *, SSL_get_current_cipher ,(SSL *s) );
+SSL_DEF( SSL_CIPHER *, SSL_get_current_cipher ,(SSL *s) );
 #   if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
-FUNC(SSL_METHOD *, SSLv3_client_method, (void) );
+SSL_DEF(SSL_METHOD *, SSLv3_client_method, (void) );
 #   elif defined(TLSV1ONLYSERVER) && !defined(SSLV3ONLYSERVER)
-FUNC(int, TLSv1_client_method, () );
+SSL_DEF(int, TLSv1_client_method, () );
 #   else
-FUNC(SSL_METHOD *, SSLv23_client_method, (void) );
+SSL_DEF(SSL_METHOD *, SSLv23_client_method, (void) );
 #   endif
 
-
+#undef SSL_DEF
+   
 SSL     * SSL_new(SSL_CTX *ctx)
 { return (*stub_SSL_new)(ctx); }
 void	  SSL_free(SSL *ssl)
@@ -3216,43 +3252,66 @@ SSL_METHOD * SSLv23_client_method(void)
 bool gs_SSL_loaded = FALSE;
 bool gs_SSL_available = FALSE;
 
+
+
 bool InitSSL(void) /* FIXME: MT */
 {
    if(gs_SSL_loaded)
       return gs_SSL_available;
 
+   String ssl_dll = READ_APPCONFIG(MP_SSL_DLL_SSL);
+   String crypto_dll = READ_APPCONFIG(MP_SSL_DLL_CRYPTO);
+
+   STATUSMESSAGE((_("Trying to load '%s' and '%s'..."),
+                  crypto_dll.c_str(),
+                  ssl_dll.c_str()));
+
    bool success = FALSE;
-   wxDllType cryptodll = wxDllLoader::LoadLibrary("/usr/lib/libcrypto.so.0", &success);
-   wxDllType dll = wxDllLoader::LoadLibrary("/usr/lib/libssl.so.0", &success);
+   wxDllType cryptodll = wxDllLoader::LoadLibrary(crypto_dll, &success);
+   if(! success) return FALSE;
+   wxDllType slldll = wxDllLoader::LoadLibrary(ssl_dll, &success);
    if(! success) return FALSE;
    
-   LOAD(SSL_new );
-   LOAD(SSL_free );
-   LOAD(SSL_set_rfd );
-   LOAD(SSL_set_wfd );
-   LOAD(SSL_set_read_ahead );
-   LOAD(SSL_connect );
-   LOAD(SSL_read );
-   LOAD(SSL_write );
-   LOAD(SSL_pending );
-   LOAD(SSL_library_init );
-   LOAD(SSL_load_error_strings );
-   LOAD(SSL_CTX_new );
-   LOAD(SSL_CIPHER_get_name );
-   LOAD(SSL_get_current_cipher );
-   LOAD(ERR_get_error);
-   LOAD(ERR_error_string);
-   LOAD(SSL_CIPHER_get_bits);
+   SSL_LOOKUP(SSL_new );
+   SSL_LOOKUP(SSL_free );
+   SSL_LOOKUP(SSL_set_rfd );
+   SSL_LOOKUP(SSL_set_wfd );
+   SSL_LOOKUP(SSL_set_read_ahead );
+   SSL_LOOKUP(SSL_connect );
+   SSL_LOOKUP(SSL_read );
+   SSL_LOOKUP(SSL_write );
+   SSL_LOOKUP(SSL_pending );
+   SSL_LOOKUP(SSL_library_init );
+   SSL_LOOKUP(SSL_load_error_strings );
+   SSL_LOOKUP(SSL_CTX_new );
+   SSL_LOOKUP(SSL_CIPHER_get_name );
+   SSL_LOOKUP(SSL_get_current_cipher );
+   CRYPTO_LOOKUP(ERR_get_error);
+   CRYPTO_LOOKUP(ERR_error_string);
+   SSL_LOOKUP(SSL_CIPHER_get_bits);
 #   if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
-   LOAD(SSLv3_client_method );
+   SSL_LOOKUP(SSLv3_client_method );
 #   elif defined(TLSV1ONLYSERVER) && !defined(SSLV3ONLYSERVER)
-   LOAD(TLSv1_client_method );
-   LOAD(SSLv23_client_method );
+   SSL_LOOKUP(TLSv1_client_method );
+#else
+   SSL_LOOKUP(SSLv23_client_method );
 #   endif
    gs_SSL_available = success;
    gs_SSL_loaded = TRUE;
+
+   if(success) // only now is it safe to call this
+   {
+      STATUSMESSAGE((_("Successfully loaded '%s' and '%s' - "
+                       "SSL authentification now available."),
+                     crypto_dll.c_str(),
+                     ssl_dll.c_str()));
+
+      ssl_init_Mahogany();
+   }
    return success;
 }
+
+#undef SSL_LOOKUP
 #endif
 
 // ----------------------------------------------------------------------------

@@ -324,8 +324,8 @@ bool MPineImporter::ImportSettingsFromFile(const wxString& filename)
    wxTextFile file(filename);
    if ( !file.Open() )
    {
-      wxLogError(_("Couldn't open PINE configuration file '%s'."),
-                 filename.c_str());
+      wxLogError(_("Couldn't open %s configuration file '%s'."),
+                 "PINE", filename.c_str());
 
       return FALSE;
    }

@@ -224,7 +224,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FILE_SEND_OUTBOX, gettext_noop("&Send messages...\tShift-Ctrl-S"), gettext_noop("Sends messages still in outgoing mailbox"), FALSE },
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_FILE_NET_ON,    gettext_noop("Conn&ect to Network\tCtrl-U"), gettext_noop("Activate dial-up networking")        , FALSE },
+   { WXMENU_FILE_NET_ON,    gettext_noop("Conn&ect to Network\tCtrl-K"), gettext_noop("Activate dial-up networking")        , FALSE },
    { WXMENU_FILE_NET_OFF,   gettext_noop("Shut&down Network\tCtrl-D"), gettext_noop("Shutdown dial-up networking")        , FALSE },
 
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
@@ -287,7 +287,7 @@ static const MenuItemInfo g_aMenuItems[] =
                            gettext_noop("Forward with te&mplate...\tShift-Ctrl-F"), gettext_noop("Forward this message after choosing a template to use ")     , FALSE },
    { WXMENU_MSG_FILTER,    gettext_noop("Appl&y filter rules..."), gettext_noop("Apply filter rules to selected messages")     , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_MSG_FORWARD,   gettext_noop("Next &unread\tCtrl-U"), gettext_noop("Select next unread message")     , FALSE },
+   { WXMENU_MSG_NEXT_UNREAD,   gettext_noop("Next &unread\tCtrl-U"), gettext_noop("Select next unread message")     , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_SAVE_TO_FILE,
                            gettext_noop("Save as F&ile"),

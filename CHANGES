@@ -1,4 +1,7 @@
 (next release) on (date of next release)
+10.06.00 KB: Finished OpenSSL dynamic loading
+             Fixed next-unread-menu and some translations/keybindings
+             Added score and colour support to filters
 09.06.00 VZ: Added option to autolaunch the ext editor
 08.06.00 KB: added OpenSSL dynamic loading
              improvements/streamlining of Profile code

@@ -37,6 +37,8 @@ enum ORC_Types_Enum
    ORC_T_IsSpam,
    ORC_T_Python,
    ORC_T_MatchRegEx,
+   ORC_T_ScoreAbove,
+   ORC_T_ScoreBelow,
    ORC_T_Max
 };
 
@@ -63,6 +65,8 @@ enum OAC_Types_Enum
    OAC_T_MessageBox,
    OAC_T_LogEntry,
    OAC_T_Python,
+   OAC_T_ChangeScore,
+   OAC_T_SetColour,
    OAC_T_Max
 };
 

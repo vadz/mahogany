@@ -23,8 +23,6 @@
 #   include <errno.h>
 #endif
 
-#include "modules/Scoring.h"
-
 #include "MDialogs.h" // for MDialog_FolderChoose
 
 #include "Mdefaults.h"
@@ -1078,7 +1076,6 @@ MailFolderCmn::ForwardMessages(const UIdArray *selections,
 static MMutex gs_SortListingMutex;
 
 static long gs_SortOrder = 0;
-static MModule_Scoring *gs_ScoreModule = NULL;
 static MailFolder * gs_MailFolder = NULL;
 
 static int CompareStatus(int stat1, int stat2, int flag)
@@ -1183,12 +1180,8 @@ extern "C"
          case MSO_SCORE_REV:
             flag = criterium == MSO_SCORE_REV ? -1 : 1;
             {
-               long score1 = 0, score2 = 0;
-               if(gs_ScoreModule)
-               {
-                  score1 = gs_ScoreModule->ScoreMessage(gs_MailFolder, i1);
-                  score2 = gs_ScoreModule->ScoreMessage(gs_MailFolder, i2);
-               }
+               int score1 = i1->GetScore(),
+                  score2 = i2->GetScore();
                result = score1 > score2 ?
                   flag : score2 > score1 ?
                   -flag : 0;
@@ -1313,7 +1306,6 @@ static void SortListing(MailFolder *mf, HeaderInfoList *hil, long SortOrder)
    gs_SortListingMutex.Lock();
    gs_MailFolder = mf;
    gs_SortOrder = SortOrder;
-   gs_ScoreModule = (MModule_Scoring *)MModule::GetProvider(MMODULE_INTERFACE_SCORING);
 
    // no need to incref/decref, done in UpdateListing()
    if(hil->Count() > 1)
@@ -1322,7 +1314,6 @@ static void SortListing(MailFolder *mf, HeaderInfoList *hil, long SortOrder)
             (*hil)[0]->SizeOf(),
             ComparisonFunction);
 
-   if(gs_ScoreModule) gs_ScoreModule->DecRef();
    gs_MailFolder = NULL;
    gs_SortListingMutex.Unlock();
 }

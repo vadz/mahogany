@@ -74,6 +74,8 @@ wxString ORC_Types[] =
    gettext_noop("Is SPAM"),
    gettext_noop("Python"),
    gettext_noop("Match RegExp"),
+   gettext_noop("Score above"),
+   gettext_noop("Score below")
 };
 
 static const
@@ -115,7 +117,9 @@ wxString OAC_Types[] =
    gettext_noop("Expunge"),
    gettext_noop("MessageBox"),
    gettext_noop("Log Entry"),
-   gettext_noop("Python")
+   gettext_noop("Python"),
+   gettext_noop("Change Score"),
+   gettext_noop("Set Colour")
 };
 
 static const
@@ -536,10 +540,16 @@ OneCritControl::TranslateToString(wxString & criterium)
    case ORC_T_LargerThan:
    case ORC_T_SmallerThan:
    case ORC_T_OlderThan:
+   case ORC_T_ScoreAbove:
+   case ORC_T_ScoreBelow:
       needsArgument = true;
       needsWhere = false;
       switch(type)
       {
+      case ORC_T_ScoreAbove:
+         program << "score() > "; break;
+      case ORC_T_ScoreBelow:
+         program << "score() < "; break;
       case ORC_T_LargerThan:
          program << "size() > "; break;
       case ORC_T_SmallerThan:
@@ -669,6 +679,13 @@ OneActionControl::TranslateToString(wxString & action)
       program << "log("; break;
    case OAC_T_Python:
       program << "python("; break;
+   case OAC_T_ChangeScore:
+      program << "addscore("
+              << argument;
+      needsArgument = false;
+      break;
+   case OAC_T_SetColour:
+      program << "setcolour("; break;
    }
    if(needsArgument)
       program << '"' << argument << '"';
@@ -1000,7 +1017,8 @@ enum ButtonIndices
 // ----------------------------------------------------------------------------
 
 // FIXME VZ: I will want more - why impose arbitrary restrictions??
-#define MAX_FILTERS   128 // who would want more?
+// Because I still don't know how to use wxDynArray properly. :-) KB
+#define MAX_FILTERS   256 // who would want more?
 
 class wxFiltersDialog : public wxOptionsPageSubdialog
 {
@@ -1039,6 +1057,8 @@ protected:
    size_t          m_OriginalFilterDataCount;
 
    wxCheckListBox *m_ListBox;
+   wxTextCtrl     *m_ProgramListing;
+   
    wxButton       *m_Buttons[WXSIZEOF(ButtonLabels)];
 
 // data
@@ -1130,6 +1150,15 @@ wxFiltersDialog::wxFiltersDialog(Profile *profile, wxWindow *parent)
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_ListBox = new wxCheckListBox(this, -1);
    m_ListBox->SetConstraints(c);
+
+   // create the listbox in the area which is left
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(m_Buttons[0], wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   // m_ProgramListing = new wxTextCtrl(this, -1, );
+   // m_ProgramListing->SetConstraints(c);
 
    SetDefaultSize(380, 280, TRUE);
    TransferDataToWindow();
@@ -1339,6 +1368,28 @@ wxFiltersDialog::TransferDataToWindow()
       m_FilterData[i].SetActive(
          m_FiltersProfile->readEntry(name+FILTER_ACTIVE, 0L) != 0);
       m_FilterDataCount++;
+   }
+
+   /* We now check if the rules read back actually match the filter
+      program stored there. */
+   String filterCheck;
+   for(unsigned i = 0; i < m_FilterDataCount; i++)
+   {
+      if(m_FilterData[i].GetActive())
+         filterCheck <<
+            TranslateOneRuleToProgram(m_FilterData[i].GetCriterium(),
+                                      m_FilterData[i].GetAction());
+   }
+
+   if(filterCheck != m_Filter)
+   {
+      MDialog_Message(_("The filter rule dialog settings stored in the configuration settings\n"
+                        "do not match the actual filter rules there. Maybe you have edited the\n"
+                        "filter rules manually?\n"
+                        "If you make any changes here, the old rules will be overwritten."),
+                      NULL,
+                      _("Manually set Filterrules?")
+                      );
    }
    DoUpdate();
    return true;

@@ -587,6 +587,14 @@ public:
    virtual unsigned GetIndentation() const = 0;
    /// Set the indentation level for message threading.
    virtual void SetIndentation(unsigned level) = 0;
+   /// Get Colour setting (name or empty string)
+   virtual String GetColour(void) const = 0;
+   /// Get Score setting (default = 0)
+   virtual int GetScore(void) const = 0;
+   /// Change Score setting (default = 0)
+   virtual void AddScore(int delta) = 0;
+   /// Set Colour setting (name or empty string)
+   virtual void SetColour(const String &col) = 0;
 private:
    /// Disallow copy construction
    HeaderInfo(const HeaderInfo &);
@@ -606,6 +614,8 @@ public:
    virtual HeaderInfo * operator[](size_t n) = 0;
    /// Returns pointer to array of data:
    virtual HeaderInfo * GetArray(void) = 0;
+   /// Returns pointer to entry with this UId
+   virtual HeaderInfo * GetEntryUId(UIdType uid) = 0;
    /// Swaps two elements:
    virtual void Swap(size_t index1, size_t index2) = 0;
    /** Sets a translation table re-mapping index values.
