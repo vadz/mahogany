@@ -9,4 +9,4 @@ MOBJS	+= $(SRC:.cpp=.o) $(CSRC:.c=.o)
 MSGSRC	+= $(SRC)
 
 # strutil.cpp #includes some charset files from c-client src/charset directory
-CPPFLAGS_util_strutil_o := -I$(BUILDDIR)/lib/imap/src
+CPPFLAGS_util_strutil_o := -I$(SOURCEDIR)/lib/imap/src
