@@ -53,9 +53,18 @@ extern "C" {
 // defined in cclient auth_ssl.c (but not declared in any public header)
 extern void ssl_onceonlyinit();
 
-#define SSL_DEF(returnval, name, args) \
+/*
+   This macro is used to do the following things:
+
+   1. define the type for the given SSL functions
+   2. declare a variable of this type named stub_SSL_XXX and init it to NULL
+   3. declare our SSL_XXX which simply forwards to stub_SSL_XXX
+ */
+#define SSL_DEF(returnval, name, args, params) \
    typedef returnval (* name##_TYPE) args ; \
-   name##_TYPE stub_##name = NULL
+   name##_TYPE stub_##name = NULL; \
+   returnval name args \
+      { return (*stub_##name) params; }
 
 #define SSL_LOOKUP(name) \
       stub_##name = (name##_TYPE) gs_dllSll.GetSymbol(#name); \
@@ -67,83 +76,62 @@ extern void ssl_onceonlyinit();
       if ( !stub_##name ) \
          goto error
 
-SSL_DEF( SSL *, SSL_new, (SSL_CTX *ctx) );
-SSL_DEF( void, SSL_free, (SSL *ssl) );
-SSL_DEF( int,  SSL_set_rfd, (SSL *s, int fd) );
-SSL_DEF( int,  SSL_set_wfd, (SSL *s, int fd) );
-SSL_DEF( void, SSL_set_read_ahead, (SSL *s, int yes) );
-SSL_DEF( int,  SSL_connect, (SSL *ssl) );
-SSL_DEF( int,  SSL_read, (SSL *ssl,ssl_data_t buf,int num) );
-SSL_DEF( int,  SSL_write, (SSL *ssl,const ssl_data_t buf,int num) );
-SSL_DEF( int,  SSL_pending, (SSL *s) );
-SSL_DEF( int,  SSL_library_init, (void ) );
-SSL_DEF( void, SSL_load_error_strings, (void ) );
-SSL_DEF( SSL_CTX *,SSL_CTX_new, (SSL_METHOD *meth) );
-SSL_DEF( unsigned long, ERR_get_error, (void) );
-SSL_DEF( char *, ERR_error_string, (unsigned long e, char *p));
-//extern SSL_get_cipher_bits();
-SSL_DEF( const char *, SSL_CIPHER_get_name, (SSL_CIPHER *c) );
-SSL_DEF( int, SSL_CIPHER_get_bits, (SSL_CIPHER *c, int *alg_bits) );
-//extern SSL_get_cipher();
-SSL_DEF( SSL_CIPHER *, SSL_get_current_cipher ,(SSL *s) );
+SSL_DEF( SSL *, SSL_new, (SSL_CTX *ctx), (ctx) );
+SSL_DEF( void, SSL_free, (SSL *s), (s) );
+SSL_DEF( int,  SSL_set_rfd, (SSL *s, int fd), (s, fd) );
+SSL_DEF( int,  SSL_set_wfd, (SSL *s, int fd), (s, fd) );
+SSL_DEF( void, SSL_set_read_ahead, (SSL *s, int yes), (s, yes) );
+SSL_DEF( int,  SSL_connect, (SSL *s), (s) );
+SSL_DEF( int,  SSL_read, (SSL *s,ssl_data_t buf,int num), (s, buf, num) );
+SSL_DEF( int,  SSL_write, (SSL *s,const ssl_data_t buf,int num), (s, buf, num) );
+SSL_DEF( int,  SSL_pending, (SSL *s), (s) );
+SSL_DEF( int,  SSL_library_init, (void ), () );
+SSL_DEF( void, SSL_load_error_strings, (void ), () );
+SSL_DEF( SSL_CTX *,SSL_CTX_new, (SSL_METHOD *meth), (meth) );
+SSL_DEF( unsigned long, ERR_get_error, (void), () );
+SSL_DEF( char *, ERR_error_string, (unsigned long e, char *p), (e, p) );
+SSL_DEF( const char *, SSL_CIPHER_get_name, (SSL_CIPHER *c), (c) );
+SSL_DEF( int, SSL_CIPHER_get_bits, (SSL_CIPHER *c, int *alg_bits), (c,alg_bits) );
+SSL_DEF( SSL_CIPHER *, SSL_get_current_cipher ,(SSL *s), (s) );
+SSL_DEF( int, SSL_get_fd, (SSL *s), (s) );
+SSL_DEF( int, SSL_set_fd, (SSL *s, int fd), (s, fd) );
+
+SSL_DEF( void, RAND_seed, (const void *buf,int num), (buf, num) );
+SSL_DEF( BIO *, BIO_new_socket, (int sock, int close_flag), (sock, close_flag) );
+SSL_DEF( long, SSL_CTX_ctrl, (SSL_CTX *ctx,int cmd, long larg, char *parg), (ctx,cmd,larg,parg) );
+SSL_DEF( void, SSL_CTX_set_verify, (SSL_CTX *ctx,int mode, int (*callback)(int, X509_STORE_CTX *)), (ctx,mode,callback) );
+SSL_DEF( int, SSL_CTX_load_verify_locations, (SSL_CTX *ctx, const char *CAfile, const char *CApath), (ctx, CAfile, CApath) );
+SSL_DEF( int, SSL_CTX_set_default_verify_paths, (SSL_CTX *ctx), (ctx) );
+SSL_DEF( void, SSL_set_bio, (SSL *s, BIO *rbio,BIO *wbio), (s,rbio,wbio) );
+SSL_DEF( void, SSL_set_connect_state, (SSL *s), (s) );
+SSL_DEF( int, SSL_state, (SSL *ssl), (ssl) );
+SSL_DEF( long,    SSL_ctrl, (SSL *ssl,int cmd, long larg, char *parg), (ssl,cmd,larg,parg) );
+SSL_DEF( void, ERR_load_crypto_strings, (void), () );
+SSL_DEF( SSL_METHOD *,TLSv1_server_method, (void), () );
+SSL_DEF( SSL_METHOD *,SSLv23_server_method, (void), () );
+SSL_DEF( int, SSL_CTX_set_cipher_list, (SSL_CTX *ctx,const char *str), (ctx,str) );
+SSL_DEF( int, SSL_CTX_use_certificate_chain_file, (SSL_CTX *ctx, const char *file), (ctx,file) );
+SSL_DEF( int, SSL_CTX_use_RSAPrivateKey_file, (SSL_CTX *ctx, const char *file, int type), (ctx,file,type) );
+SSL_DEF( void, SSL_CTX_set_tmp_rsa_callback, (SSL_CTX *ctx, RSA *(*cb)(SSL *,int, int)), (ctx,cb) );
+SSL_DEF( int,  SSL_accept, (SSL *ssl), (ssl) );
+SSL_DEF( int, X509_STORE_CTX_get_error, (X509_STORE_CTX *ctx), (ctx) );
+SSL_DEF( const char *, X509_verify_cert_error_string, (long n), (n) );
+SSL_DEF( X509 *, X509_STORE_CTX_get_current_cert, (X509_STORE_CTX *ctx), (ctx) );
+SSL_DEF( X509_NAME *, X509_get_subject_name, (X509 *a), (a) );
+SSL_DEF( char *, X509_NAME_oneline, (X509_NAME *a,char *buf,int size), (a,buf,size) );
+SSL_DEF( int, SSL_shutdown, (SSL *s), (s) );
+SSL_DEF( void, SSL_CTX_free, (SSL_CTX *ctx), (ctx) );
+SSL_DEF( RSA *, RSA_generate_key, (int bits, unsigned long e,void (*cb)(int,int,void *),void *cb_arg), (bits,e,cb,cb_arg) );
+
 #   if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
-SSL_DEF(SSL_METHOD *, SSLv3_client_method, (void) );
+SSL_DEF(SSL_METHOD *, SSLv3_client_method, (void), () );
 #   elif defined(TLSV1ONLYSERVER) && !defined(SSLV3ONLYSERVER)
-SSL_DEF(int, TLSv1_client_method, () );
+SSL_DEF(int, TLSv1_client_method, (void), () );
 #   else
-SSL_DEF(SSL_METHOD *, SSLv23_client_method, (void) );
+SSL_DEF(SSL_METHOD *, SSLv23_client_method, (void), () );
 #   endif
 
 #undef SSL_DEF
-
-SSL     * SSL_new(SSL_CTX *ctx)
-{ return (*stub_SSL_new)(ctx); }
-void  SSL_free(SSL *ssl)
-{ (*stub_SSL_free)(ssl); }
-int  SSL_set_rfd(SSL *s, int fd)
-{ return (*stub_SSL_set_rfd)(s,fd); }
-int  SSL_set_wfd(SSL *s, int fd)
-{ return (*stub_SSL_set_wfd)(s,fd); }
-void  SSL_set_read_ahead(SSL *s, int yes)
-{ (*stub_SSL_set_read_ahead)(s,yes); }
-int   SSL_connect(SSL *ssl)
-{ return (*stub_SSL_connect)(ssl); }
-int   SSL_read(SSL *ssl,ssl_data_t buf, int num)
-{ return (*stub_SSL_read)(ssl, buf, num); }
-int   SSL_write(SSL *ssl,const ssl_data_t buf,int num)
-{ return (*stub_SSL_write)(ssl, buf, num); }
-int  SSL_pending(SSL *s)
-{ return (*stub_SSL_pending)(s); }
-int       SSL_library_init(void )
-{ return (*stub_SSL_library_init)(); }
-void  SSL_load_error_strings(void )
-{ (*stub_SSL_load_error_strings)(); }
-SSL_CTX * SSL_CTX_new(SSL_METHOD *meth)
-{ return (*stub_SSL_CTX_new)(meth); }
-unsigned long ERR_get_error(void)
-{ return (*stub_ERR_get_error)(); }
-char * ERR_error_string(unsigned long e, char *p)
-{ return (*stub_ERR_error_string)(e,p); }
-const char * SSL_CIPHER_get_name(SSL_CIPHER *c)
-{ return (*stub_SSL_CIPHER_get_name)(c); }
-SSL_CIPHER * SSL_get_current_cipher(SSL *s)
-{ return (*stub_SSL_get_current_cipher)(s); }
-int SSL_CIPHER_get_bits(SSL_CIPHER *c, int *alg_bits)
-{
-  return (*stub_SSL_CIPHER_get_bits)(c,alg_bits);
-}
-
-
-#   if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
-SSL_METHOD *  SSLv3_client_method(void)
-{ return (*stub_SSLv3_client_method)(); }
-#   elif defined(TLSV1ONLYSERVER) && !defined(SSLV3ONLYSERVER)
-int TLSv1_client_method(void)
-{ (* stub_TLSv1_client_method)(); }
-#   else
-SSL_METHOD * SSLv23_client_method(void)
-{ return (* stub_SSLv23_client_method)(); }
-#   endif
 
 } // extern "C"
 
@@ -193,6 +181,8 @@ bool InitSSL(void) /* FIXME: MT */
    CRYPTO_LOOKUP(ERR_get_error);
    CRYPTO_LOOKUP(ERR_error_string);
    SSL_LOOKUP(SSL_CIPHER_get_bits);
+   SSL_LOOKUP(SSL_get_fd);
+   SSL_LOOKUP(SSL_set_fd);
 #if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
    SSL_LOOKUP(SSLv3_client_method );
 #elif defined(TLSV1ONLYSERVER) && !defined(SSLV3ONLYSERVER)
