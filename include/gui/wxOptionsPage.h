@@ -388,9 +388,11 @@ class wxOptionsPageNetwork : public wxOptionsPageStandard
 public:
    wxOptionsPageNetwork(wxNotebook *parent, Profile *profile);
 
-#ifdef OS_WIN
    virtual bool TransferDataToWindow();
-#endif // OS_WIN
+   virtual bool TransferDataFromWindow();
+
+private:
+   wxString m_oldAuthsDisabled;
 };
 
 // new mail handling options
