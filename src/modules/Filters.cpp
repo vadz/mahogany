@@ -2784,36 +2784,34 @@ static Value func_subject(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
       return Value("");
-   Message * msg = p->GetMessage();
+   Message_obj msg = p->GetMessage();
    if(! msg)
       return Value("");
-   String subj = msg->Subject();
-   msg->DecRef();
-   return Value(subj);
+
+   return Value(msg->Subject());
 }
 
 static Value func_from(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
       return Value("");
-   Message * msg = p->GetMessage();
+   Message_obj msg(p->GetMessage());
    if(! msg)
       return Value("");
-   String subj = msg->From();
-   msg->DecRef();
-   return Value(subj);
+
+   return Value(msg->From());
 }
 
 static Value func_to(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 0)
       return Value("");
-   Message * msg = p->GetMessage();
+   Message_obj msg(p->GetMessage());
    if(! msg)
       return Value("");
+
    String tostr;
    msg->GetHeaderLine("To", tostr);
-   msg->DecRef();
    return Value(tostr);
 }
 
@@ -2868,6 +2866,18 @@ static Value func_istome(ArgList *args, FilterRuleImpl *p)
 
    // this message doesn't seem to be addresses to us
    return Value(false);
+}
+
+static Value func_isfromme(ArgList *args, FilterRuleImpl *p)
+{
+   Value value = func_from(args, p);
+
+   MailFolder_obj mf(p->GetFolder());
+   if ( !mf )
+      return Value(false);
+
+   return p->GetInterface()->contains_own_address(value.GetString(),
+                                                  mf->GetProfile());
 }
 
 static Value func_hasflag(ArgList *args, FilterRuleImpl *p)
@@ -3185,7 +3195,6 @@ static Value func_clearflag(ArgList *args, FilterRuleImpl *p)
    return func_do_setflag(args, p, false);
 }
 
-
 /* * * * * * * * * * * * * * *
 *
 * Folder functionality
@@ -3265,6 +3274,7 @@ BuiltinFunctions(void)
          Define("istome", func_istome);
          Define("setflag", func_setflag);
          Define("clearflag", func_clearflag);
+         Define("isfromme", func_isfromme);
 #ifdef TEST
          Define("nargs", func_nargs);
          Define("arg", func_arg);
