@@ -8,14 +8,19 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
+9	KB	Crash from ~PathFinder() in wxMessageView::Print()
+		when printing more than one page
 9	KB	wxLayout:
 		- scrollbars don't appear immediately
-                  --> check why
+		  --> check why
+		- printing: top of second page no laid-out correctly
+                  enforce one full layout before printing
 		- temporarily disable layout while inserting/clearing
 		  window? Should speed up things N*(N-1) fold...
 		- scroll window if mouse is selecting outside
 		- wxIcon <-> wxBitmap which one to use?
 		- last line contains garbage
+		- editing behaves a bit funny still
 
 9	KB	add xface button to composeview
 
@@ -142,10 +147,13 @@ $Id$
 		b) "Apply template" command in compose view
 
 7		dnd for messages between folders and treectrl
-6	KB	implement temporary/fake Profile mode
+
+6		implement temporary/fake Profile mode
 5		add goto_next_unread to folderview
 5		add more buttons to folderview, such as
-		next/previous/goto_next_unread
+		next/previous/goto_next_unread/catch up
+
+
 5	VZ?	Add DND for messages between folders
 5	?	Add DND for MIME content from composeView/messageView
                 to file managers
