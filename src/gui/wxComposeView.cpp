@@ -2451,7 +2451,7 @@ GetRecipientFromControl(wxComposeView::RecipientType type,
 }
 
 void wxComposeView::GetRecipients(RecipientType type,
-   wxArrayString list) const
+   wxArrayString& list) const
 {
    list.Empty();
 
