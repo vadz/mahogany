@@ -1135,8 +1135,10 @@ HeaderInfoListImpl::FindFirstInRange(const MsgnoArray& array,
 {
    MsgnoType posFirst = UID_ILLEGAL;
 
-   size_t count = array.GetCount();
-   for ( size_t n = 0; n < count; n++ )
+   // test for m_count in the loop to detect if the folder is unexpectedly
+   // closed
+   const size_t count = array.GetCount();
+   for ( size_t n = 0; m_count && n < count; n++ )
    {
       MsgnoType pos = GetPosFromIdx(array[n] - 1);
       if ( pos >= posFrom && pos <= posTo && pos < posFirst )
