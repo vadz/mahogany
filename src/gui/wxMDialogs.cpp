@@ -767,6 +767,18 @@ MDialog_YesNoDialog(const char *message,
          {
             // use this path instead, there is nothing at the global level
             path << Profile::FilterProfileName(folderName) << '/' << configPath;
+
+            // an added complication: in the older versions of the program
+            // FilterProfileName() prefixed the folder path with
+            // M_PROFILE_CONFIG_SECTION - which it doesn't do any more, but we
+            // should still honour the old settings
+
+            // skip the leading slash
+            String pathOld = M_PROFILE_CONFIG_SECTION + 1;
+            pathOld.Replace("/", "_");
+            pathOld << "_" << path;
+
+            storedValue = wxPMessageBoxIsDisabled(pathOld);
          }
          //else: we won't show it at all
       }
@@ -806,7 +818,7 @@ MDialog_YesNoDialog(const char *message,
    bool wasDisabled;
    int rc = wxPMessageBox
             (
-               configPath,
+               path,
                message,
                caption,
                // these bits are equal to the corresponding wx constants
@@ -826,16 +838,17 @@ MDialog_YesNoDialog(const char *message,
          // folderName)
          String msg = String::Format
                       (
-                        _("You have chosen to disabled the previous dialog.\n"
-                          "\n"
-                          "You have the choice between doing it only for this "
-                          "folder (%s) or for all folders.\n"
+                        _("You have chosen to disabled the previous dialog and "
+                          "now you have the choice between doing it\n"
+                          "only for this folder (%s) or for all folders.\n"
                           "\n"
                           "If you answer \"Yes\", it will be disabled for all "
                           "folders, otherwise only for this one. In either case\n"
                           "you may use the \"Reenable message boxes\" button in "
                           "the last page of the preferences dialog to restore\n"
-                          "this message box later."),
+                          "this message box later.\n"
+                          "\n"
+                          "Disable this question for all folders?"),
                         folderName
                       );
 
