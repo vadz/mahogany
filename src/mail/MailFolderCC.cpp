@@ -761,8 +761,14 @@ private:
          // what have we got?
          if ( filename.empty() )
          {
+            // FIXME: how to compare the hosts? many servers are multi homed so
+            //        neither string nor IP address comparison works!
+            //
+            // the way to fix it is probably use mail_open() before
+            // mail_status() and compare MAILSTREAMs instead of NETMBXs
+
             // remote spec
-            if ( strcmp(ms_mbx.host, mbx.host) ||
+            if ( // strcmp(ms_mbx.host, mbx.host) ||
                  strcmp(ms_mbx.user, mbx.user) ||
                  strcmp(ms_mbx.mailbox, mbx.mailbox) ||
                  strcmp(ms_mbx.service, mbx.service) ||
