@@ -185,6 +185,9 @@ static const char *FOLDER_LISTCTRL_WIDTHS_D = "60:300:200:80:80";
 // the trace mask folder view events handling tracing
 #define M_TRACE_FV_UPDATE    "fvupdate"
 
+// ugly hack for Thaw()
+#define FREEZE_COUNT 1
+
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
@@ -511,7 +514,7 @@ public:
    wxFolderMenu *GetFolderMenu() const { return m_menuFolders; }
 
    /// reenable redrawing
-   void Thaw() { if ( m_isFrozen ) { m_isFrozen = false; Refresh(); } }
+   void Thaw() { if ( m_isFrozen == FREEZE_COUNT ) m_isFrozen--; }
 
 protected:
    /// go to the next unread message or to the next folder
@@ -596,8 +599,20 @@ protected:
    /// the associated folder view
    wxFolderView *m_FolderView;
 
-   /// true until SelectInitialMessage() is called, don't update the control
-   bool m_isFrozen;
+   /**
+     While m_isFrozen != 0, OnGetItemXXX() methods don't try to retrieve the
+     real items text so that we don't retrieve the headers (which may be very
+     slow) for the items which are going to be scrolled out of view when
+     SelectInitialMessage() is called later anyhow.
+
+     So it is reset to 0 when Thaw() is called from SelectInitialMessage() but
+     it is done in two steps: first it is set to 1 and then reset to 0 during
+     the next OnIdle() because of some internal wxGenericListCtrl quirks (it
+     recomputes its geometry during the idle time and so we should let it do it
+     before really thawing the control or we'd still retrieve the headers we
+     don't really need)
+    */
+   size_t m_isFrozen;
 
    /**
      @name Currently selected item data
@@ -988,7 +1003,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_isInPopupMenu = false;
 
    // start in frozen state, wxFolderView should call Thaw() later
-   m_isFrozen = true;
+   m_isFrozen = FREEZE_COUNT;
 
    // no items focused/previewed yet
    m_uidFocus =
@@ -1813,60 +1828,69 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
 
    // there are many various reasons which can prevent us from being able to
    // call c-client (safely) from here
-   if ( !m_headersToGet.IsEmpty() &&
-        !m_mutexHeaders.IsLocked() &&
-        mApplication->AllowBgProcessing() )
+   if ( mApplication->AllowBgProcessing() )
    {
-      CHECK_RET( m_headers, "can't get headers without listing" );
-
-      int posMin = INT_MAX,
-          posMax = 0;
-
-      Sequence seq;
-
-      size_t count = m_headersToGet.GetCount();
-      for ( size_t n = 0; n < count; n++ )
+      if ( !m_headersToGet.IsEmpty() && !m_mutexHeaders.IsLocked() )
       {
-         int pos = m_headersToGet[n];
-         if ( pos < posMin )
-            posMin = pos;
+         CHECK_RET( m_headers, "can't get headers without listing" );
 
-         if ( pos > posMax )
-            posMax = pos;
+         int posMin = INT_MAX,
+             posMax = 0;
 
-         seq.Add(pos);
-      }
+         Sequence seq;
 
-      m_headersToGet.Empty();
-
-      {
-         MLocker lockHeaders(m_mutexHeaders);
-
-         MFInteractiveLock lock(m_FolderView->GetMailFolder(), GetFrame(this));
-
-         m_headers->CachePositions(seq);
-      }
-
-      // we may now (quickly!) update m_uidFocus, see comment in UpdateFocus()
-      // to understand why we do it here
-      if ( m_uidFocus == UID_ILLEGAL && m_itemFocus != -1 )
-      {
-         if ( m_headers->IsInCache(m_itemFocus) )
+         size_t count = m_headersToGet.GetCount();
+         for ( size_t n = 0; n < count; n++ )
          {
-            m_uidFocus = GetUIdFromIndex(m_itemFocus);
+            int pos = m_headersToGet[n];
+            if ( pos < posMin )
+               posMin = pos;
 
-            wxLogTrace(M_TRACE_FV_SELECTION,
-                       "Updated focused UID from OnIdle(), now %08x (index = %ld)",
-                       m_uidFocus, m_itemFocus);
+            if ( pos > posMax )
+               posMax = pos;
 
-            m_FolderView->OnFocusChange(m_itemFocus, m_uidFocus);
+            seq.Add(pos);
          }
-         //else: hmm, can it happen at all?
+
+         m_headersToGet.Empty();
+
+         {
+            MLocker lockHeaders(m_mutexHeaders);
+
+            MFInteractiveLock lock(m_FolderView->GetMailFolder(), GetFrame(this));
+
+            m_headers->CachePositions(seq);
+         }
+
+         // we may now (quickly!) update m_uidFocus, see comment in UpdateFocus()
+         // to understand why we do it here
+         if ( m_uidFocus == UID_ILLEGAL && m_itemFocus != -1 )
+         {
+            if ( m_headers->IsInCache(m_itemFocus) )
+            {
+               m_uidFocus = GetUIdFromIndex(m_itemFocus);
+
+               wxLogTrace(M_TRACE_FV_SELECTION,
+                          "Updated focused UID from OnIdle(), now %08x (index = %ld)",
+                          m_uidFocus, m_itemFocus);
+
+               m_FolderView->OnFocusChange(m_itemFocus, m_uidFocus);
+            }
+            //else: hmm, can it happen at all?
+         }
+
+         // now the header info should be in cache, so GetHeaderInfo() will
+         // return it
+         RefreshItems(posMin, posMax);
       }
 
-      // now the header info should be in cache, so GetHeaderInfo() will
-      // return it
-      RefreshItems(posMin, posMax);
+#if FREEZE_COUNT > 1
+      // unthaw the control a bit more
+      if ( m_isFrozen && m_isFrozen < FREEZE_COUNT )
+      {
+         m_isFrozen--;
+      }
+#endif // FREEZE_COUNT > 1
    }
 
    // check if we [still] have exactly one selection
@@ -2694,6 +2718,9 @@ wxFolderView::SelectInitialMessage(const HeaderInfoList_obj& hil)
                                                              : numMessages - 1;
 
       m_FolderCtrl->Focus(idx);
+
+      // update the scrollbars to show the visible item
+      wxYield();
    }
 
    // the item is already focused, now preview it automatically too if we're
