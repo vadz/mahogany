@@ -98,13 +98,10 @@ GENERAL ROADMAP/ORDER OF THINGS:
 *********************************************************************
 
 - move setting of -fPIC to configure
-- suppress many new mail dialogs while one is being displayed
-  (caused by asynchronous event processing)
 - check handling of missing hostnames,
   suppress missing hostname c-client error message
-- test if root test works.
-- create profile entry for SentMail folder by default
 
+- check folder dialog settings
 - foldername in password prompt
 - URL highlighting in Headers
 - fix printing overlap

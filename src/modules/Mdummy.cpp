@@ -85,13 +85,13 @@ DummyModule::DummyModule(void)
    Though, I'm still trying to find a more intelligent solution...
 */
 
-/*   MDialog_Message(
+   MDialog_Message(
       "This message is created by the DummyModule plugin\n"
       "for Mahogany. This module has been loaded at runtime\n"
       "and is not part of the normal Mahogany executable.",
       NULL,
       "Welcome from DummyModule!");
-*/
+
 }
 
 

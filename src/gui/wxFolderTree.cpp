@@ -394,21 +394,16 @@ bool wxFolderTree::OnDelete(MFolder *folder)
 {
    CHECK( folder, FALSE, "can't delete NULL folder" );
 
-   switch ( folder->GetType() )
+   if(folder->GetFlags() & MF_FLAGS_DONTDELETE)
    {
-      case Inbox:
-         wxLogError(_("You should not delete the INBOX folder:\n"
-                      "it is automatically created by Mahogany to store your "
-                      "incoming mail."));
-         return FALSE;
-
-      case FolderRoot:
-         wxLogError(_("The root folder can not be deleted."));
-         return FALSE;
-
-      default:
-         // no check
-         break;
+      wxLogError(_("You cannot delete the '%s' folder.\n"),
+                 folder->GetName().c_str());
+      return FALSE;
+   }
+   if(folder->GetType() == FolderRoot)
+   {
+      wxLogError(_("The root folder can not be deleted."));
+      return FALSE;
    }
 
    const char *configPath;

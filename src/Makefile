@@ -20,8 +20,12 @@ all: subdirs
 #
 #left over from my attempt to create a M.so shared lib
 #
-#	$(CXX) -shared $(MOBJS) $(LDFLAGS) -lswigpy $(NONPLIBS) -o libM.so
-#	$(LINK) -o M -L. $(LDFLAGS) -lM $(SLIBS)
+
+Mx:	libM.so
+	$(LINK) -o M -L. $(LDFLAGS) -lM $(LDFLAGS) $(GUI_LIBS) $(LIBS)
+
+libM.so:
+	$(CXX) -shared $(MOBJS) $(LDFLAGS) -lswigpy $(NONPLIBS) -o libM.so
 
 # build the binary which is statically linked to wxGTK, dynamically to
 # everything else

@@ -97,7 +97,6 @@ enum ConfigFields
    ConfigField_ComposeFirst = ConfigField_IdentLast,
    ConfigField_UseOutgoingFolder,
    ConfigField_OutgoingFolder,
-   ConfigField_OutgoingFolderKeepOpen,
    ConfigField_WrapMargin,
    ConfigField_ReplyString,
    ConfigField_ReplyCollapse,
@@ -122,7 +121,7 @@ enum ConfigFields
    ConfigField_FoldersFirst = ConfigField_ComposeLast,
    ConfigField_OpenFolders,
    ConfigField_MainFolder,
-   ConfigField_NewMailFolder,
+//   ConfigField_NewMailFolder,
    ConfigField_PollIncomingDelay,
    ConfigField_UpdateInterval,
    ConfigField_FolderProgressThreshold,
@@ -382,8 +381,6 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
    { gettext_noop("&Folder file for sent messages"),
                                                    Field_File,    ConfigField_UseOutgoingFolder },
-   { gettext_noop("&Keep this folder always open"),
-                                                   Field_Bool,    ConfigField_UseOutgoingFolder },
    { gettext_noop("&Wrap margin"),                 Field_Number,  -1,                        },
    { gettext_noop("&Reply string in subject"),     Field_Text,    -1,                        },
    { gettext_noop("Co&llapse reply markers"
@@ -410,7 +407,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Folders to open on &startup"),  Field_List |
                                                    Field_Restart, -1,           },
    { gettext_noop("Folder opened in &main frame"), Field_Text,    -1,                        },
-   { gettext_noop("Folder where to collect &new mail"), Field_Text, -1},
+//   { gettext_noop("Folder where to collect &new mail"), Field_Text, -1},
    { gettext_noop("Poll for &new mail interval in seconds"), Field_Number, -1},
    { gettext_noop("&Ping/check folder interval in seconds"), Field_Number, -1},
    { gettext_noop("&Automatically select first message in viewer"), Field_Bool, -1},
@@ -535,7 +532,6 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    // compose
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER),
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),
-   CONFIG_ENTRY(MP_OUTGOINGFOLDER_KEEP_OPEN),
    CONFIG_ENTRY(MP_COMPOSE_WRAPMARGIN),
    CONFIG_ENTRY(MP_REPLY_PREFIX),
    CONFIG_ENTRY(MP_REPLY_COLLAPSE_PREFIX),
@@ -556,7 +552,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    // folders
    CONFIG_ENTRY(MP_OPENFOLDERS),
    CONFIG_ENTRY(MP_MAINFOLDER),
-   CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
+//   CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
    CONFIG_ENTRY(MP_POLLINCOMINGDELAY),
    CONFIG_ENTRY(MP_UPDATEINTERVAL),
    CONFIG_ENTRY(MP_AUTOSHOW_FIRSTMESSAGE),

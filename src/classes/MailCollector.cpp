@@ -42,21 +42,21 @@
 #include  <wx/utils.h>
 #define   SYSTEM(command) wxExecute(command, FALSE)
 
-struct MailFolderEntry
+struct MailCollectorFolderEntry
 {
    String      m_name;
    MailFolder *m_folder;
 };
 
-KBLIST_DEFINE(MailFolderList, MailFolderEntry);
+KBLIST_DEFINE(MailCollectorFolderList, MailCollectorFolderEntry);
 
 /// only used by MailCollector to find incoming folders
 class MAppFolderTraversal : public MFolderTraversal
 {
 public:
-   MAppFolderTraversal(MailFolderList *list)
+   MAppFolderTraversal(MailCollectorFolderList *list)
       : MFolderTraversal(*(m_folder = MFolder::Get("")))
-      { m_list = list;}
+      { m_list = list; }
    ~MAppFolderTraversal()
       { m_folder->DecRef(); }
    bool OnVisitFolder(const wxString& folderName)
@@ -69,7 +69,7 @@ public:
             MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,folderName);
             if(mf)
             {
-               MailFolderEntry *e = new MailFolderEntry;
+               MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
                e->m_name = folderName;
                e->m_folder = mf;
                m_list->push_back(e);
@@ -80,10 +80,10 @@ public:
          if(f)f->DecRef();
          return true;
       }
-
+   
 private:
    MFolder *m_folder;
-   MailFolderList *m_list;
+   MailCollectorFolderList *m_list;
 };
 
 
@@ -91,7 +91,7 @@ private:
 MailCollector::MailCollector()
 {
    Lock(false);
-   m_list = new MailFolderList;
+   m_list = new MailCollectorFolderList;
    MAppFolderTraversal t (m_list);
    if(! t.Traverse(true))
       wxLogError(_("Cannot build list of incoming mail folders."));
@@ -102,7 +102,7 @@ MailCollector::MailCollector()
 
 MailCollector::~MailCollector()
 {
-   MailFolderList::iterator i;
+   MailCollectorFolderList::iterator i;
    for(i = m_list->begin();i != m_list->end(); i++)
       (**i).m_folder->DecRef();
    if(m_NewMailFolder)
@@ -116,7 +116,7 @@ MailCollector::~MailCollector()
 bool
 MailCollector::IsIncoming(MailFolder *mf)
 {
-   MailFolderList::iterator i;
+   MailCollectorFolderList::iterator i;
    for(i = m_list->begin();i != m_list->end();i++)
       if((**i).m_folder == mf)
          return true;
@@ -138,7 +138,7 @@ MailCollector::Collect(MailFolder *mf)
    bool locked = Lock();
    if(mf == NULL)
    {
-      MailFolderList::iterator i;
+      MailCollectorFolderList::iterator i;
       for(i = m_list->begin();i != m_list->end();i++)
       {
          // set flags each time because they get reset by SaveMessages()
@@ -263,6 +263,7 @@ MailCollector::CollectOneFolder(MailFolder *mf)
    return rc;
 }
 
+
 void
 MailCollector::SetNewMailFolder(const String &name)
 {
@@ -275,13 +276,14 @@ MailCollector::SetNewMailFolder(const String &name)
    m_NewMailProfile = ProfileBase::CreateProfile(name);
 }
 
+
 bool
 MailCollector::AddIncomingFolder(const String &name)
 {
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,name);
    if(mf)
    {
-      MailFolderEntry *e = new MailFolderEntry;
+      MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
       e->m_name = name;
       e->m_folder = mf;
       m_list->push_back(e);
@@ -294,7 +296,7 @@ MailCollector::AddIncomingFolder(const String &name)
 bool
 MailCollector::RemoveIncomingFolder(const String &name)
 {
-   MailFolderList::iterator i;
+   MailCollectorFolderList::iterator i;
    for(i = m_list->begin();i != m_list->end();i++)
    {
       if((**i).m_name == name)

@@ -124,6 +124,7 @@ public:
       }
    class SyntaxNode * Parse(void);
    class SyntaxNode * ParseExpression(void);
+   class ArgList    * ParseArgList(void);
    class SyntaxNode *ParseFunctionCall(void);
    class SyntaxNode * ParseFunctionOrConstant(void);
    virtual size_t GetPos(void) const { return m_Position; }
@@ -148,7 +149,7 @@ private:
 // ----------------------------------------------------------------------------
 
 /** This class represents logical operators. */
-class Operator : MObject
+class Operator : public MObject
 {
 public:
    virtual long Evaluate(const class SyntaxNode *left,
@@ -164,7 +165,7 @@ public:
 // ----------------------------------------------------------------------------
 /** This class is used to build a syntax tree.
  */
-class SyntaxNode : MObject
+class SyntaxNode : public MObject
 {
 public:
    virtual long Evaluate(void) const = 0;
@@ -174,25 +175,71 @@ public:
 };
 
 
+
+#define ARGLIST_DEFAULT_LENGTH 64
+
+class ArgList : public MObject
+{
+public:
+   typedef SyntaxNode *SyntaxNodePtr;
+   ArgList()
+      {
+         m_MaxArgs = ARGLIST_DEFAULT_LENGTH;
+         m_Args = new SyntaxNodePtr[m_MaxArgs];
+         m_NArgs = 0;
+      }
+   ~ArgList()
+      {
+         for(size_t i = 0; i < m_NArgs; i++)
+            delete m_Args[i];
+         delete [] m_Args;
+      }
+   void Add(SyntaxNode *arg)
+      {
+         MOcheck();
+         if(m_NArgs == m_MaxArgs)
+            return; // FIXME realloc?
+         m_Args[m_NArgs++] = arg;
+      }
+   size_t Count(void) const
+      {
+         MOcheck();
+         return m_NArgs;
+      }
+   SyntaxNode * GetArg(size_t n) const
+      {
+         MOcheck();
+         ASSERT(n < m_NArgs);
+         return m_Args[n];
+      }
+private:
+   SyntaxNodePtr *m_Args;
+   size_t m_MaxArgs;
+   size_t m_NArgs;
+};
+   
+
+
 class Value : public SyntaxNode
 {
 public:
    Value(long v) { m_value = v; }
-   virtual long Evaluate(void) const { return m_value; }
+   virtual long Evaluate(void) const { MOcheck(); return m_value; }
 #ifdef DEBUG
-   virtual String Debug(void) const { String s; s.Printf("Value(%ld)",m_value); return s; }
+   virtual String Debug(void) const { MOcheck(); String s; s.Printf("Value(%ld)",m_value); return s; }
 #endif    
 private:
    long m_value;
 };
 
+
 /** Functioncall handling */
 
 extern "C" {
-   typedef long (*FunctionPointer)(const char *arguments);
+   typedef long (*FunctionPointer)(ArgList *args);
 
-   static long echo_func(const char *arguments)
-      {  INFOMESSAGE((arguments)); return 1; }
+   static long echo_func(ArgList *args)
+      {  INFOMESSAGE(("echo_func")); return 1; }
 };
 
 struct FunctionDefinition
@@ -204,22 +251,23 @@ struct FunctionDefinition
 class FunctionCall : public SyntaxNode
 {
 public:
-   FunctionCall(const String &name, const String &args);
+   FunctionCall(const String &name, ArgList *args);
+   ~FunctionCall() { delete m_args; }
    virtual long Evaluate(void) const;
 #ifdef DEBUG
    virtual String Debug(void) const
-      { return String("FunctionCall(") + m_name + String(")"); }
+      { MOcheck(); return String("FunctionCall(") + m_name + String(")"); }
 #endif    
 private:
    FunctionPointer FindFunction(void);
 
    FunctionPointer m_function;
-   String m_args;
-   String m_name;
+   ArgList *m_args;
+   String      m_name;
    static FunctionDefinition ms_Functions[];
 };
 
-FunctionCall::FunctionCall(const String &name, const String &args)
+FunctionCall::FunctionCall(const String &name, ArgList *args)
 {
    m_name = name;
    m_args = args;
@@ -238,6 +286,7 @@ FunctionCall::ms_Functions[] =
 FunctionPointer
 FunctionCall::FindFunction(void)
 {
+   MOcheck();
    FunctionDefinition *fd = ms_Functions;
    while(fd->m_name != NULL)
    {
@@ -252,8 +301,9 @@ FunctionCall::FindFunction(void)
 long
 FunctionCall::Evaluate(void) const
 {
+   MOcheck();
    ASSERT(m_function);
-   return (*m_function)(m_args.c_str());
+   return (*m_function)(m_args);
 }
 
 /** An expression consisting of more than one token. */
@@ -263,9 +313,10 @@ public:
    Expression(const SyntaxNode *left, class Operator *op, const SyntaxNode *right)
       { m_left = left; m_right = right; m_operator = op; }
    long Evaluate(void) const
-      { return m_operator->Evaluate(m_left, m_right); }
+      { MOcheck(); return m_operator->Evaluate(m_left, m_right); }
    ~Expression()
       {
+         MOcheck();
          if(m_left)  delete m_left;
          if(m_right) delete m_right;
          if(m_operator) delete m_operator;
@@ -273,6 +324,7 @@ public:
 #ifdef DEBUG
    virtual String Debug(void) const
       {
+         MOcheck();
          String s = "Expression(";
          if(m_operator) s << m_operator->Debug(m_left, m_right);
          s << ')';
@@ -285,6 +337,7 @@ private:
 };
 
 
+
 /* This operator evaluates both operands and returns the value of the 
    right one, like ',' in C. */
 class OperatorNone : public Operator
@@ -293,6 +346,7 @@ public:
    virtual long Evaluate(const class SyntaxNode *left,
                         const class SyntaxNode *right) const
       {
+         MOcheck();
          (void) left->Evaluate();
          return right->Evaluate();
       }
@@ -300,6 +354,7 @@ public:
    String Debug(const class SyntaxNode *left, const class SyntaxNode
                 *right) const
       {
+         MOcheck();
          String s;
          if(left) s << left->Debug();
          s << ";";
@@ -316,10 +371,10 @@ class Operator##name : public Operator \
 public: \
    virtual long Evaluate(const class SyntaxNode *left, \
                         const class SyntaxNode *right) const \
-      { return left->Evaluate() operator right->Evaluate(); } \
+      { MOcheck(); return left->Evaluate() operator right->Evaluate(); } \
    virtual String Debug(const class SyntaxNode *left, \
                         const class SyntaxNode *right) const \
-                           { String s; if(left) s << left->Debug(); \
+                           { MOcheck(); String s; if(left) s << left->Debug(); \
                            s << "operator"; \
                            if(right) s << right->Debug(); return s; } \
 }
@@ -353,6 +408,7 @@ Parser::Create(const String &input)
 void
 ParserImpl::Error(const String &error)
 {
+   MOcheck();
    unsigned long pos = GetPos();
    String before, after, tmp;
    before = m_Input.Left(pos);
@@ -369,6 +425,7 @@ ParserImpl::Error(const String &error)
 Token
 ParserImpl::GetToken(bool remove)
 {
+   MOcheck();
    Token token;
    String tokstr;
 
@@ -424,17 +481,49 @@ ParserImpl::GetToken(bool remove)
 SyntaxNode *
 ParserImpl::Parse(void)
 {
+   MOcheck();
    return ParseExpression();
+}
+
+ArgList *
+ParserImpl::ParseArgList(void)
+{
+   MOcheck();
+   ArgList *arglist = new ArgList;
+   
+   Token t = PeekToken();
+   for(;;)
+   {
+      // end of arglist?
+      if(t.GetType() == TT_Char && t.GetChar() == ')')
+         break;
+      SyntaxNode *expr = ParseExpression();
+      if(expr)
+         arglist->Add(expr);
+      t = PeekToken();
+      if(t.GetType() != TT_Char)
+      {
+         Error("Expected ',' or ')' behind argument.");
+         delete arglist;
+         arglist = NULL;
+      }
+      else
+      {
+         if(t.GetChar() == ',')
+            GetToken(); // swallow the argument
+      }
+   }
+   return arglist;
 }
 
 SyntaxNode *
 ParserImpl::ParseFunctionCall(void)
 {
+   MOcheck();
    Token t = GetToken();
    ASSERT(t.GetType() == TT_Identifier);
 
    const String & functionName = t.GetIdentifier();
-   String arguments;
    
    // Need to swallow argument list?
    t = PeekToken();
@@ -447,31 +536,22 @@ ParserImpl::ParseFunctionCall(void)
       return NULL;
    }
    (void) GetToken(); // swallow '('
+
+   ArgList *args = ParseArgList();
+
    EatWhiteSpace();
-   bool escaped = false;
-   while(Char() && (Char() != ')' || escaped))
-   {
-      if(Char() == '\\')
-      {
-         if(escaped)
-            arguments += CharInc();
-         else
-            escaped = true;
-      }
-      else
-         arguments += CharInc();
-   }
    if(Char() != ')')
       Error("Expected ')' at end of argument list.");
    else
       GetToken(); // swallow it
    
-   return new FunctionCall(functionName, arguments);
+   return new FunctionCall(functionName, args);
 }
 
 SyntaxNode *
 ParserImpl::ParseFunctionOrConstant(void)
 {
+   MOcheck();
    /* FuncionOrConstant :=
         | IDENTIFIER( ARGLIST )
         | NUMBER
@@ -501,6 +581,7 @@ ParserImpl::ParseFunctionOrConstant(void)
 SyntaxNode *
 ParserImpl::ParseExpression(void)
 {
+   MOcheck();
    /* Expression :=
         | FunctonOrConstant
         | ( Expression )

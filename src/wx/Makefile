@@ -17,8 +17,11 @@ depend:
 clean:
 	$(RM) common/*.o generic/*.o
 
+msgcat:
+	for i in $(SUBDIRS); do $(MAKE) -C $$i $@ ; done
+
 %: force
-	@$(MAKE) -f Makefile2 $@
+	$(MAKE) -f Makefile2 $@ 
 force: ;
 
 .PHONY: clean all

@@ -60,7 +60,7 @@ protected:
    bool CollectOneFolder(MailFolder *mf);
 private:
    /// a list of folder names and mailfolder pointers
-   class MailFolderList *m_list;
+   class MailCollectorFolderList *m_list;
    /// the folder to save new mail to
    MailFolder     *m_NewMailFolder;
    /// profile for the new mail folder

@@ -413,6 +413,49 @@ Upgrade(const String& fromVersion)
    return TRUE;
 }
 
+
+
+
+/// only used to find new mail folder
+class NewMailFolderTraversal : public MFolderTraversal
+{
+public:
+   NewMailFolderTraversal(MFolder* folder) : MFolderTraversal(*folder)
+      { }
+
+   String GetNewMailFolder(void) const { return m_NewMailFolder; }
+   bool OnVisitFolder(const wxString& folderName)
+      {
+         MFolder *f = MFolder::Get(folderName);
+         if(f && f->GetFlags() & MF_FLAGS_NEWMAILFOLDER)
+         {
+            if(m_NewMailFolder.Length())
+            {
+               ERRORMESSAGE((_(
+                  "Found additional folder '%s'\n"
+                  "marked as central new mail folder. Ignoring it."),
+                             f->GetName().c_str()));
+               f->SetFlags(f->GetFlags() & !MF_FLAGS_NEWMAILFOLDER);
+            }
+            else
+            {
+               m_NewMailFolder = f->GetName();
+               if(f->GetFlags() & MF_FLAGS_INCOMING)
+               {
+                  ERRORMESSAGE((_("Cannot auto-collect mail from the new mail folder\n"
+                                  "'%s'\n"
+                                  "Corrected configuration data."),
+                                f->GetName().c_str()));
+                  f->SetFlags(f->GetFlags() & !MF_FLAGS_INCOMING);
+               }
+            }
+         }
+         return true;
+      }
+private:
+   String m_NewMailFolder;
+};
+
 /** Make sure we have /Profiles/INBOX set up and the global
     NewMailFolder folder.
     Returns TRUE if the profile already existed, FALSE if it was just created
@@ -446,10 +489,10 @@ VerifyInbox(void)
               "folder manually."
                ),
             NULL, _("Collect mail from INBOX?"), true))
-         ibp->writeEntry(MP_FOLDER_TYPE, MF_INBOX|MF_FLAGS_INCOMING);
+         ibp->writeEntry(MP_FOLDER_TYPE, MF_INBOX|MF_FLAGS_INCOMING|MF_FLAGS_DONTDELETE);
       else
       {
-         ibp->writeEntry(MP_FOLDER_TYPE, MF_INBOX);
+         ibp->writeEntry(MP_FOLDER_TYPE, MF_INBOX|MF_FLAGS_DONTDELETE);
          MDialog_Message(_(
             "Mahogany will not automatically collect mail from your\n"
             "system's default INBOX.\n"
@@ -462,25 +505,66 @@ VerifyInbox(void)
    }
 #endif
 
-   // Is the newmail folder properly configured?
-   String foldername = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
-   strutil_delwhitespace(foldername);
+   /*
+    * Is the newmail folder properly configured?
+    */
+   MFolder_obj folderRoot("");
+   NewMailFolderTraversal traverse(folderRoot);
+   traverse.Traverse(true); // ignore result
+   String foldername = traverse.GetNewMailFolder();
+   if(foldername.Length() == 0) // shouldn't happen unless run for the first time
+      foldername = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
    if(foldername.IsEmpty()) // this must not be
-      foldername = MP_NEWMAIL_FOLDER_D; // reset to default
+      foldername = _("New Mail");
+   strutil_delwhitespace(foldername);
    // Do we need to create the NewMailFolder?
    ProfileBase *ibp = ProfileBase::CreateProfile(foldername);
    if (!  parent->HasEntry(foldername) )
    {
       ibp->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
-      ibp->writeEntry(MP_FOLDER_TYPE, MF_FILE);
+      ibp->writeEntry(MP_FOLDER_TYPE, MF_FILE|MF_FLAGS_NEWMAILFOLDER|MF_FLAGS_DONTDELETE);
       ibp->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
       ibp->writeEntry(MP_FOLDER_COMMENT,
-                      _("Default system folder for incoming mail."));
+                      _("Folder where Mahogany will collect all new mail."));
       rc = FALSE;
    }
-   if(READ_CONFIG(ibp,MP_FOLDER_TYPE) & MF_FLAGS_INCOMING)
-      ibp->writeEntry(MP_FOLDER_TYPE, (READ_CONFIG(ibp, MP_FOLDER_TYPE) ^ MF_FLAGS_INCOMING));
+   // Make sure the flags are valid:
+   int flags = READ_CONFIG(ibp,MP_FOLDER_TYPE);
+   int oldflags = flags;
+   if(flags & MF_FLAGS_INCOMING) flags ^= MF_FLAGS_INCOMING;
+   flags |= MF_FLAGS_DONTDELETE;
+   flags |= MF_FLAGS_KEEPOPEN;
+   if(flags != oldflags)
+      ibp->writeEntry(MP_FOLDER_TYPE, flags);
    ibp->DecRef();
+
+   /*
+    * Set up the SentMail folder:
+    */
+   // this line is for backwards compatibility only
+   foldername = READ_APPCONFIG(MP_OUTGOINGFOLDER);
+   strutil_delwhitespace(foldername);
+   if(foldername.Length() != 0) // AHA, we want it
+   {
+      ProfileBase *ibp = ProfileBase::CreateProfile(foldername);
+      if (!  parent->HasEntry(foldername) )
+      {
+         ibp->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
+         ibp->writeEntry(MP_FOLDER_TYPE, MF_FILE|MF_FLAGS_KEEPOPEN);
+         ibp->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
+         ibp->writeEntry(MP_FOLDER_COMMENT,
+                         _("Folder where Mahogany will store copies of outgoing messages."));
+         rc = FALSE;
+      }
+      // Make sure the flags are valid:
+      flags = READ_CONFIG(ibp,MP_FOLDER_TYPE);
+      oldflags = flags;
+      if(flags & MF_FLAGS_INCOMING) flags ^= MF_FLAGS_INCOMING;
+      if(flags & MF_FLAGS_DONTDELETE) flags ^= MF_FLAGS_DONTDELETE;
+      if(flags != oldflags)
+         ibp->writeEntry(MP_FOLDER_TYPE, flags);
+      ibp->DecRef();
+   }
    return rc;
 }
 

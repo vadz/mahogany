@@ -161,6 +161,11 @@ public:
    /// called when the events we're interested in are generated
    virtual bool OnMEvent(MEventData& event);
 
+   /// Add folder to list of folders to keep open:
+   void AddKeepOpenFolder(const String name);
+   /// Remove folder from list of folders to keep open:, true on success
+   bool RemoveKeepOpenFolder(const String name);
+   
 protected:
    /// really (and unconditionally) terminate the app
    virtual void DoExit() = 0;
@@ -191,13 +196,13 @@ protected:
    /// a profile wrapper object for the global configuration
    ProfileBase *m_profile;
 
-   /// a pointer to the outgoing mail folder
-   class MailFolder * m_OutgoingFolder;
+   /// a list of folders to keep open at all times
+   class MailFolderList *m_KeepOpenFolders;
    /// the list of all constantly open folders to check for new mail
    class MailCollector *m_MailCollector;
    /// registration seed for EventManager
    void *m_eventReg;
-
+   
    /// list of frames to not ask again in CanClose()
    ArrayFrames *m_framesOkToClose;
 };

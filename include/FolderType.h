@@ -61,9 +61,12 @@ enum FolderFlags
    MF_FLAGS_ANON = 0x100,           // use anonymous access
    MF_FLAGS_INCOMING = 0x200,       // collect all new mail from it
    MF_FLAGS_UNACCESSIBLE = 0x400,   // folder can't be opened
-   MF_FLAGS_MODIFIED = 0x800        // [essential] folder settings have been
+   MF_FLAGS_MODIFIED = 0x800,       // [essential] folder settings have been
                                     // modified: invalidates "unaccessible"
                                     // flag
+   MF_FLAGS_NEWMAILFOLDER = 0x1000, // the central new mail folder
+   MF_FLAGS_DONTDELETE    = 0x2000, // forbid deletion of this folder
+   MF_FLAGS_KEEPOPEN      = 0x4000  // keep this folder open at all times
 };
 
 // ----------------------------------------------------------------------------

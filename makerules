@@ -8,6 +8,10 @@ ifdef USE_LIBTOOL
 	$(LIBTOOL) --mode=compile $(CXX)  -fPIC $(CXXFLAGS) -c $<
 %.o: %.c
 	$(LIBTOOL) --mode=compile $(CC)  -fPIC $(CFLAGS) -c $<
+%.lo: %.cpp
+	$(LIBTOOL) --mode=compile $(CXX)  -fPIC $(CXXFLAGS) -c $<
+%.so: %.lo
+	$(LIBTOOL) $(CXX) -export-dynamic -fPIC $(CXXFLAGS) -o $@ $<
 else
 %.o: %.cc
 	$(CXX)  -fPIC $(CXXFLAGS) -c $<
@@ -15,10 +19,10 @@ else
 	$(CXX)  -fPIC $(CXXFLAGS) -c $<
 %.o: %.c
 	$(CC)  -fPIC $(CFLAGS) -c $<
-endif
 
 %.so: %.cpp
-	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $<
+	$(CXX) -shared -fPIC $(CXXFLAGS) -L.. -lM -o $@ $<
+endif
 
 %.cpp: %.i
 	$(SWIG) $(SWIGFLAGS) -o $(ODIR)/$@ $<
@@ -65,4 +69,4 @@ msgcat:
 	@for i in $(SRC) $(CSRC) ; do $(XGETTEXT) -C -k_ -j -o $(BUILDDIR)/messages.po $$i ; done
 
 stdclean:
-	$(RM) $(ODIR)/*.o $(ODIR)/*.so $(ODIR)/*.a $(ODIR)/*.lo 
+	$(RM) $(ODIR)/*.o $(ODIR)/*.so $(ODIR)/*.a $(ODIR)/*.lo libM.so

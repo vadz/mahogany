@@ -381,8 +381,6 @@
 #define   MP_USEOUTGOINGFOLDER   "KeepCopies"
 /// write outgoing mail to folder:
 #define   MP_OUTGOINGFOLDER      "SentMailFolder"
-/// keep outoing folder open
-#define   MP_OUTGOINGFOLDER_KEEP_OPEN   "SentMailKeepOpen"
 /// Show all message headers?
 #define   MP_SHOWHEADERS         "ShowHeaders"
 /// Autocollect email addresses? 0=no 1=ask 2=always
@@ -773,8 +771,6 @@
 #define   MP_USEOUTGOINGFOLDER_D  1
 /// write outgoing mail to folder:
 #define   MP_OUTGOINGFOLDER_D  "SentMail"
-/// keep outoing folder open
-#define   MP_OUTGOINGFOLDER_KEEP_OPEN_D 0l
 /// Show all message headers?
 #define   MP_SHOWHEADERS_D         0l
 /// Autocollect email addresses? 0=no 1=ask 2=always

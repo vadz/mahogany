@@ -93,6 +93,30 @@ WX_DEFINE_ARRAY(const wxMFrame *, ArrayFrames);
 
 MAppBase *mApplication = NULL;
 
+/** Each entry of this class keeps one mail folder open all the time
+    it exists. */
+class MailFolderEntry
+{
+public:
+   MailFolderEntry(const String name)
+      {
+         m_name = name;
+         m_folder = MailFolder::OpenFolder(MF_PROFILE, m_name);
+      }
+   ~MailFolderEntry()
+      {
+         if(m_folder) m_folder->DecRef();
+      }
+   MailFolder *GetMailFolder(void) const { return m_folder; }
+   const String GetName(void) const { return m_name; }
+private:
+   String      m_name;
+   MailFolder *m_folder;
+   
+};
+
+KBLIST_DEFINE(MailFolderList, MailFolderEntry);
+
 // ----------------------------------------------------------------------------
 // MAppBase - the class which defines the "application object" interface
 // ----------------------------------------------------------------------------
@@ -102,6 +126,13 @@ MAppBase::MAppBase()
    m_topLevelFrame = NULL;
    m_framesOkToClose = NULL;
    m_MailCollector = NULL;
+   m_KeepOpenFolders = new MailFolderList;
+}
+
+MAppBase::~MAppBase()
+{
+   if ( m_framesOkToClose )
+      delete m_framesOkToClose;
 }
 
 /* The code in VerifySettings somehow overlaps with the purpose of
@@ -222,11 +253,34 @@ MAppBase::VerifySettings(void)
    return true;
 }
 
-MAppBase::~MAppBase()
+
+
+
+/// only used to find list of folders to keep open at all times
+class KeepOpenFolderTraversal : public MFolderTraversal
 {
-   if ( m_framesOkToClose )
-      delete m_framesOkToClose;
-}
+public:
+   KeepOpenFolderTraversal(MailFolderList *list)
+      : MFolderTraversal(*(m_folder = MFolder::Get("")))
+      { m_list = list; }
+   ~KeepOpenFolderTraversal()
+      { m_folder->DecRef(); }
+   bool OnVisitFolder(const wxString& folderName)
+      {
+         MFolder *f = MFolder::Get(folderName);
+         if(f && f->GetFlags() & MF_FLAGS_KEEPOPEN)
+         {
+            wxLogDebug("Found folder to keep open'%s'.", folderName.c_str());
+            m_list->push_back( new MailFolderEntry(folderName) );
+         }
+         if(f)f->DecRef();
+         return true;
+      }
+private:
+   MailFolderList *m_list;
+   MFolder *m_folder;
+};
+
 
 bool
 MAppBase::OnStartup()
@@ -479,23 +533,12 @@ MAppBase::OnStartup()
       (void)wxFolderViewFrame::Create((**i), m_topLevelFrame);
    }
 
-   // If we want the outgoing folder open all the time, open it here
-   // --------------------------------------------------------------
-   if(READ_APPCONFIG(MP_OUTGOINGFOLDER_KEEP_OPEN))
+   KeepOpenFolderTraversal t(m_KeepOpenFolders);
+
+   if(! t.Traverse(true))
    {
-      String name = READ_APPCONFIG(MP_OUTGOINGFOLDER);
-      LOGMESSAGE((M_LOG_WINONLY,
-                  _("Opening folder '%s' for saving outgoing messages."),
-                  name.c_str()));
-      m_OutgoingFolder = MailFolder::OpenFolder(
-         MF_PROFILE_OR_FILE, name);
-      if(! m_OutgoingFolder)
-         ERRORMESSAGE((
-            _("Cannot open folder '%s' for saving outgoing messages."),
-            name.c_str()));
+      ERRORMESSAGE((_("Cannot build list of folders to keep open.")));
    }
-   else
-      m_OutgoingFolder = NULL;
 
    // initialise collector object for incoming mails
    // ----------------------------------------------
@@ -522,9 +565,7 @@ MAppBase::OnStartup()
 #ifdef EXPERIMENTAL
    /* Test the MModule subsystem. Completely disabled in release
       build. */
-//   MModule *dummyMod = MModule::LoadModule("/home/karsten/src/Projects/M/src/modules/Mdummy.so");
-   MModule *dummyMod =
-      MModule::LoadModule("/home/karsten/tmp/M/src/modules/Mdummy.so");
+   MModule *dummyMod = MModule::LoadModule("/home/karsten/src/Projects/M/src/modules/Mdummy.so");
    if(dummyMod)
    {
       INFOMESSAGE(("Successfully loaded Mdummy module:\nName: %s\nDescr: %s\nVersion: %s\n",
@@ -536,6 +577,36 @@ MAppBase::OnStartup()
 #endif
 return TRUE;
 }
+
+void
+MAppBase::AddKeepOpenFolder(const String name)
+{
+#ifdef DEBUG
+   MailFolderList::iterator i;
+   for(i = m_KeepOpenFolders->begin();
+       i != m_KeepOpenFolders->end();
+       i++)
+      ASSERT(name != (**i).GetName());
+#endif
+   m_KeepOpenFolders->push_back( new MailFolderEntry(name) );
+}
+
+bool
+MAppBase::RemoveKeepOpenFolder(const String name)
+{
+   MailFolderList::iterator i;
+   for(i = m_KeepOpenFolders->begin();
+       i != m_KeepOpenFolders->end();
+       i++)
+      if(name == (**i).GetName())
+      {
+         m_KeepOpenFolders->erase(i);
+         return true;
+      }
+   return false;
+}
+
+
 
 void
 MAppBase::OnAbnormalTermination()
@@ -552,7 +623,7 @@ MAppBase::OnShutDown()
       m_eventReg = NULL;
    }
    if(m_MailCollector) delete m_MailCollector;
-   if(m_OutgoingFolder) m_OutgoingFolder->DecRef();
+   delete m_KeepOpenFolders;
 
    // clean up
    AdbManager::Delete();

@@ -246,6 +246,8 @@ protected:
    wxTextCtrl *m_comment;
    /// Is incoming folder?
    wxCheckBox *m_isIncoming;
+   /// Keep it always open?
+   wxCheckBox *m_keepOpen;
    /// Use anonymous access for this folder?
    wxCheckBox *m_isAnonymous;
 
@@ -260,6 +262,8 @@ protected:
 
    /// the initial value of the "is incoming" flag
    bool m_originalIncomingValue;
+   /// the initial value of the "keep open" flag
+   bool m_originalKeepOpenValue;
 
    /// the current folder type or -1 if none
    int m_selection;
@@ -648,6 +652,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       Label_Newsgroup,
       Label_Comment,
       Label_IsIncoming,
+      Label_KeepOpen,
       Label_IsAnonymous,
       Label_Max
    };
@@ -662,6 +667,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
       gettext_noop("&Newsgroup: "),
       gettext_noop("&Comment: "),
       gettext_noop("C&ollect all mail from this folder: "),
+      gettext_noop("&Keep folder always open: "),
       gettext_noop("&Anonymous access: ")
    };
 
@@ -683,7 +689,8 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
    m_comment = CreateTextWithLabel(labels[Label_Comment], widthMax, m_newsgroup);
    m_path = CreateFileEntry(labels[Label_Path], widthMax, m_comment, &m_browsePath);
    m_isIncoming = CreateCheckBox(labels[Label_IsIncoming], widthMax, m_path);
-   m_isAnonymous = CreateCheckBox(labels[Label_IsAnonymous], widthMax, m_isIncoming);
+   m_keepOpen = CreateCheckBox(labels[Label_KeepOpen], widthMax, m_isIncoming);
+   m_isAnonymous = CreateCheckBox(labels[Label_IsAnonymous], widthMax, m_keepOpen);
 
    // are we in "view properties" or "create" mode?
    m_isCreating = m_dlgCreate != NULL;
@@ -960,6 +967,10 @@ wxFolderPropertiesPage::SetDefaultValues()
    int flags = GetFolderFlags(READ_CONFIG(profile, MP_FOLDER_TYPE));
    m_originalIncomingValue = (flags & MF_FLAGS_INCOMING) != 0;
    m_isIncoming->SetValue(m_originalIncomingValue);
+   // set the keepOpen value and remember it: we will only write it back if it
+   // changes later
+   m_originalKeepOpenValue = (flags & MF_FLAGS_KEEPOPEN) != 0;
+   m_keepOpen->SetValue(m_originalKeepOpenValue);
 }
 
 bool
@@ -984,6 +995,9 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
       MFolder_obj folder(m_folderPath);
       m_isIncoming->SetValue(
          (folder->GetFlags() && MF_FLAGS_INCOMING) ? TRUE : FALSE
+         );
+      m_keepOpen->SetValue(
+         (folder->GetFlags() && MF_FLAGS_KEEPOPEN) ? TRUE : FALSE
          );
    }
 
@@ -1015,6 +1029,8 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    int flags = 0;
    if ( m_isIncoming->GetValue() )
       flags |= MF_FLAGS_INCOMING;
+   if ( m_keepOpen->GetValue() )
+      flags |= MF_FLAGS_KEEPOPEN;
 
    // check that we have the username/password
    String loginName = m_login->GetValue(),
@@ -1119,7 +1135,8 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
    switch ( typeFolder )
    {
-      case POP:
+
+   case POP:
       case IMAP:
          WriteEntryIfChanged(Path, m_mailboxname->GetValue());
          break;
@@ -1166,6 +1183,20 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       else
       {
          wxFAIL_MSG("can't set the isIncoming setting: no mail collector");
+      }
+   }
+   bool isKeepOpen = m_keepOpen->GetValue();
+   if ( m_originalKeepOpenValue != isKeepOpen )
+   {
+      if(isKeepOpen)
+         mApplication->AddKeepOpenFolder(fullname);
+      else
+      {
+#ifdef DEBUG
+         ASSERT(mApplication->RemoveKeepOpenFolder(fullname));
+#else
+         mApplication->RemoveKeepOpenFolder(fullname)
+#endif
       }
    }
    //else: nothing changed, nothing to do
