@@ -41,57 +41,7 @@
 
 DECLARE_REF_COUNTER(Profile)
 
-/**
-   A fixed-size array.
- */
-class BoundArrayCommon
-{
-public:
-   BoundArrayCommon() : m_size(0) {}
-
-   size_t Size() const { return m_size; }
-
-protected:
-   size_t m_size;
-};
-
-#define BOUND_ARRAY(type,name) \
-   class name : public BoundArrayCommon \
-   { \
-   public: \
-      typedef type HostType; \
-   \
-      name() : m_array(NULL) {} \
-      ~name() { Destroy(); } \
-   \
-      void Initialize(size_t count); \
-      type *Get() { return m_array; } \
-      type& At(size_t offset); \
-      type& operator[](size_t offset) { return At(offset); } \
-   \
-   private: \
-      void Destroy(); \
-   \
-      type *m_array; \
-   }
-
-#define IMPLEMENT_BOUND_ARRAY(name) \
-   void name::Destroy() { delete[] m_array; } \
-   \
-   void name::Initialize(size_t count) \
-   { \
-      ASSERT( !m_array ); \
-      m_array = new name::HostType[m_size = count]; \
-   } \
-   \
-   name::HostType& name::At(size_t offset) \
-   { \
-      ASSERT( offset < m_size ); \
-      return m_array[offset]; \
-   }
-
-BOUND_ARRAY(ConfigValueNone,ConfigValueArray);
-BOUND_ARRAY(wxOptionsPage::FieldInfo,FieldInfoArray);
+typedef scoped_array<wxOptionsPage::FieldInfo> FieldInfoArray;
 
 
 /*
@@ -326,7 +276,7 @@ private:
 
    size_t GetConfigEntryCount();
 
-   ConfigValueArray m_configValues;
+   scoped_array<ConfigValueDefault> m_configValues;
    FieldInfoArray m_fieldInfo;
 
    SpamOptionAssassin m_checkSpamAssassin;
@@ -419,9 +369,6 @@ const SpamOptionManagerBody::PickMember SpamOptionManagerBody::ms_members[] =
 const size_t SpamOptionManagerBody::ms_count
    = WXSIZEOF(SpamOptionManagerBody::ms_members);
 
-
-IMPLEMENT_BOUND_ARRAY(ConfigValueArray)
-IMPLEMENT_BOUND_ARRAY(FieldInfoArray)
 
 SpamOptionManagerBody::SpamOptionManagerBody()
 {
@@ -552,7 +499,9 @@ void SpamOptionManagerBody::DeleteProfile(Profile *profile)
 
 void SpamOptionManagerBody::BuildConfigValues()
 {
-   m_configValues.Initialize(GetConfigEntryCount());
+   // ConfigValueDefault doesn't have default ctor, so use this hack knowing
+   // that ConfigValueNone has exactly the same binary layout as ValueDefault
+   m_configValues.reset(new ConfigValueNone[GetConfigEntryCount()]);
 
    size_t n = 1;
    for ( SpamOptionManagerBody::Iterator option(this);
@@ -570,7 +519,7 @@ void SpamOptionManagerBody::BuildConfigValues()
 
 void SpamOptionManagerBody::BuildFieldInfo()
 {
-   m_fieldInfo.Initialize(GetConfigEntryCount());
+   m_fieldInfo.reset(new wxOptionsPage::FieldInfo[GetConfigEntryCount()]);
 
    m_fieldInfo[0].label
       = gettext_noop("Mahogany may use several heuristic tests to detect spam.\n"
@@ -607,8 +556,8 @@ bool SpamOptionManagerBody::ShowDialog(wxFrame *parent)
          -1,
 
          // the fields description
-         m_fieldInfo.Get(),
-         m_configValues.Get(),
+         m_fieldInfo.get(),
+         m_configValues.get(),
          GetConfigEntryCount()
       );
 
