@@ -176,19 +176,20 @@ wxMainFrame::OpenFolder(MFolder *folder)
    if ( folder && m_folderName == folder->GetFullName() )
    {
       folder->DecRef();
-      return true;
+      return;
    }
    else if ( folder )
       m_folderName = folder->GetFullName();
    else if ( m_folderName.IsEmpty() )
-      return true;
+      return;
    else
       m_folderName.Empty();
 
-   m_FolderView->OpenFolder(folder->GetFullName().c_str()+1);
+   // we want save the full folder name in m_folderName 
+   ASSERT( folder->GetFullName() == m_folderName );
 
-#if 0
-   
+   m_FolderView->OpenFolder(m_folderName.c_str() + 1);
+
 #ifdef HAS_DYNAMIC_MENU_SUPPORT
    // only add the msg menu once   
    if ( !s_hasMsgMenu )
@@ -202,7 +203,6 @@ wxMainFrame::OpenFolder(MFolder *folder)
       // TODO remove the message menu - wxMenuBar::Delete() not implemented
       //      currently in wxGTK and is somewhat broken in wxMSW
 #endif // HAS_DYNAMIC_MENU_SUPPORT
-#endif
 }
 
 void
