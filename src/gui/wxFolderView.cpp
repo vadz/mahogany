@@ -441,21 +441,6 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          break;
       case ' ': // mark:
          // should just be the default behaviour
-#if 0
-         // If shift is not used, deselect all items before having
-         // wxListCtrl selects this one.
-         if(!event.ShiftDown())
-         {
-            long idx = -1;
-            while((idx = GetNextItem(idx, wxLIST_NEXT_ALL,
-                                     wxLIST_STATE_SELECTED)) != -1)
-            {
-               if(idx != focused)  // allow us to toggle the focused item
-                  SetItemState(idx,0,wxLIST_STATE_SELECTED);
-               //new wxGTK semantics idx++;
-            }
-         }
-#endif
          break;
       }
    }
@@ -896,8 +881,8 @@ wxFolderListCtrl::SelectNextUnread()
          if((hi->GetStatus() & MailFolder::MSG_STAT_SEEN) == 0)
          {
             SetItemState(idx, wxLIST_STATE_FOCUSED,wxLIST_STATE_FOCUSED);
-//            SetItemState(idx, wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
-            m_FolderView->PreviewMessage(hi->GetUId());
+            if(m_PreviewOnSingleClick)
+               m_FolderView->PreviewMessage(hi->GetUId());
             m_FolderView->UpdateSelectionInfo();
             SafeDecRef(hil);
             return;
@@ -1025,8 +1010,6 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          if(hil && hil->Count() > 0)
             PreviewMessage ((*hil)[0]->GetUId());
          SafeDecRef(hil);
-         //  m_FolderCtrl->SetItemState(0,wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
-         // the callback will preview the (just) selected message
       }
 #ifndef OS_WIN
       m_FocusFollowMode = READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE);
