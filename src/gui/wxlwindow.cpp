@@ -238,7 +238,11 @@ void
 wxLayoutWindow::DoClearWindow(bool noUpdate)
 {
    SetBackgroundColour(GetLayoutList()->GetDefaultStyleInfo().GetBGColour());
+#if wxCHECK_VERSION(2, 5, 0)
+   ClearBackground();
+#else
    wxScrolledWindow::Clear();
+#endif
    ResizeScrollbars(true);
    SetDirty();
    SetModified(FALSE);
