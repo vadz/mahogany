@@ -8,6 +8,7 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
+9	KB	finish filters dialog
 9	KB	wxLayout:
 		- delete in empty line
 		- undo
@@ -17,16 +18,21 @@ $Id$
 		- ctrl keys not recognised when CAPSLOCK is down
 		- add blinking cursor
 		- add HTML import
-	KB	MessageView:
+		MessageView:
 		 - should show cursor only on demand
 		 - remember focused message not by index but by UID
 		   and find it again after re-sort
 		 - shouldn't preview messages unless configured to do so
                    (currently does preview on delete)
 
-8	KB	no handler found for this image in html help
-
+8	KB	modules:
+		- use new config stuff / no direct gui calls
+		- PalmOS: sync adb and check linkage on solaris
 8	KB	integrate imap 4.7 and recently received patches
+7	KB	why do newsgroups seem empty after closing even if
+		I answered no to catchup? Mark undeleted?
+7	KB	crash after changing update times in prefs
+
 5	KB	let all message sorting use the translation table
 
 	KB	properties/access shows wrong help
@@ -38,6 +44,21 @@ KB		add python hook for filters
 
 7	KB	selecting/deselecting only message in folder
 		--fixed?
+
+
+9	VZ	Selecting a folder group tries to open it and produces a
+		dialog that it couldn't be opened. Gets expanded anyway.
+		As a consequence of this, it is not possible to create new
+		entries under a group as "Create..." is disabled in the
+		popup.
+
+9	VZ	Creating a new entry under "all Folders" is possible, i.e.
+		you get the dialog, but, clicking on "OK" does not close it,
+		the only way out is "Cancel" so at present one cannot create
+		new folders in Mahogany.
+
+9	VZ	When trying to create a new NNTP folder, the anonymous
+		flag should really be on by default.
 
 9	VZ	can we have *all* log messages (incl status) appear in 
 		the log window?
