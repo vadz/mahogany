@@ -4019,57 +4019,62 @@ done
 
 
 EXTRA_LINK=
-NEED_LIB_CRYPT=0
-echo $ac_n "checking for crypt""... $ac_c" 1>&6
-echo "configure:4025: checking for crypt" >&5
-if eval "test \"`echo '$''{'ac_cv_func_crypt'+set}'`\" = set"; then
+for ac_func in crypt
+do
+echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
+echo "configure:4026: checking for $ac_func" >&5
+if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4030 "configure"
+#line 4031 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
-    which can conflict with char crypt(); below.  */
+    which can conflict with char $ac_func(); below.  */
 #include <assert.h>
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
     builtin and then its argument prototype would still apply.  */
-char crypt();
+char $ac_func();
 
 int main() {
 
 /* The GNU C library defines this for functions which it implements
     to always fail with ENOSYS.  Some functions are actually named
     something starting with __ and the normal name is an alias.  */
-#if defined (__stub_crypt) || defined (__stub___crypt)
+#if defined (__stub_$ac_func) || defined (__stub___$ac_func)
 choke me
 #else
-crypt();
+$ac_func();
 #endif
 
 ; return 0; }
 EOF
-if { (eval echo configure:4053: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
+if { (eval echo configure:4054: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest; then
   rm -rf conftest*
-  eval "ac_cv_func_crypt=yes"
+  eval "ac_cv_func_$ac_func=yes"
 else
   echo "configure: failed program was:" >&5
   cat conftest.$ac_ext >&5
   rm -rf conftest*
-  eval "ac_cv_func_crypt=no"
+  eval "ac_cv_func_$ac_func=no"
 fi
 rm -f conftest*
 fi
 
-if eval "test \"`echo '$ac_cv_func_'crypt`\" = yes"; then
+if eval "test \"`echo '$ac_cv_func_'$ac_func`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  NEED_LIB_CRYPT=0
+    ac_tr_func=HAVE_`echo $ac_func | tr 'abcdefghijklmnopqrstuvwxyz' 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'`
+  cat >> confdefs.h <<EOF
+#define $ac_tr_func 1
+EOF
+ 
 else
   echo "$ac_t""no" 1>&6
-NEED_LIB_CRYPT=1
 fi
+done
 
-if test "$NEED_LIB_CRYPT" = 1; then
+if test "$HAVE_CRYPT" = ""; then
 	EXTRA_LINK="$EXTRA_LINK -lcrypt"
 fi
 
@@ -4109,7 +4114,7 @@ fi
 
 
 echo $ac_n "checking for c-client library OS type""... $ac_c" 1>&6
-echo "configure:4113: checking for c-client library OS type" >&5
+echo "configure:4118: checking for c-client library OS type" >&5
 CCOSTYPE=
 case "${OSTYPE}" in
 linux*libc5*)

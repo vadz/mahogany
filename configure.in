@@ -160,7 +160,7 @@ MAKE_USE_WXTAB="USE_WXTAB=1"
 
 dnl ================ User editable settings ============================
 dnl where to find Python source
-PYTHON_PATH="/usr/local/src/Python-1.5"
+PYTHON_PATH="/usr/local/src/Python-1.5.1"
 dnl name of the python library, omit "lib" and ".a" or ".so"
 PYTHON_LIB="python1.5"
 dnl which extra compiler flags to use
@@ -666,9 +666,8 @@ AC_CHECK_FUNCS(strerror strstr strsep)
 
 EXTRA_LINK=
 dnl glibc2 has crypt in extra library
-NEED_LIB_CRYPT=0
-AC_CHECK_FUNC(crypt, NEED_LIB_CRYPT=0,NEED_LIB_CRYPT=1)
-if test "$NEED_LIB_CRYPT" = 1; then
+AC_CHECK_FUNCS(crypt)
+if test "$HAVE_CRYPT" = ""; then
 	EXTRA_LINK="$EXTRA_LINK -lcrypt"
 fi
 

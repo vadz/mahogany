@@ -1,4 +1,4 @@
-#This file was created by <karsten> Thu Aug  6 20:28:03 1998
+#This file was created by <karsten> Tue Aug 11 19:28:47 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -49,7 +49,8 @@ Ballueder@usa.net, http://Ballueder.home.ml.org
 
 This document is a set of notes about how to compile and install M.
  It also covers some frequently asked questions.
- 
+ If you want to know about configuration issues and how to use it, please
+ refer to the document Manual.
 \layout Standard
 
 

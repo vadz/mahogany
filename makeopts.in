@@ -50,12 +50,12 @@ ODIR = .
 DOCDIR = $(BUILDDIR)/doc/
 
 # DOC++
-DOCXXHTML=doc++ -f -k -u -k $(DXXTBL) -H -d $(BUILDDIR)/$(CWD)
-DOCXXTEX =doc++ -f -k -u -k $(DXXTBL) -H -t -o $(BUILDDIR)/M.tex
+DOCXXHTML=doc++ -f -k -u -k $(DXXTBL) -H -d $(BUILDDIR)/doc/classes
+DOCXXTEX =doc++ -f -k -u -k $(DXXTBL) -H -t -o $(BUILDDIR)/doc/M.tex
 
 # kdoc
-KDOCHTML = kdoc -H -d $(DOCDIR)/$(CWD) -u $(BUILDDIR)/$(CWD) -a -i -e M  
-KDOCTEX =  kdoc -T -d $(DOCDIR)/$(CWD) -u $(BUILDDIR)/$(CWD) -a -i -e M
+KDOCHTML = kdoc -H -d $(BUILDDIR)/doc/classes -u $(BUILDDIR) -a -i -e M  
+KDOCTEX =  kdoc -T -d $(BUILDDIR)/doc/classes -u $(BUILDDIR) -a -i -e M
 
 DOCHTML=@DOCHTML@
 DOCTEX=@DOCTEX@
@@ -97,7 +97,7 @@ DATADIR = @datadir@/M
 #INFODIR = @infodir@/M
 
 # where to install docs
-DOCDIR = @docdir@
+DOCDIR = @datadir@/doc
 
 # for the dynamic linker, better than using -rpath
 LD_RUN_PATH=$(DATADIR)/$(CANONICAL_HOST)/$(DATADIR)

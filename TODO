@@ -5,8 +5,6 @@ $Id$
 
 - new mail callback
 
-- wxGTK/GTK when scrolled, mouse events in wxScrolledWindow carry wrong coordinates (>16000)
-
 - wxLayout:
   + fix wxGTK postscript printing which is pretty broken, compare with wxXt?
   + backspace sometimes goes wrong, occasional editing problems ??
@@ -17,12 +15,10 @@ $Id$
 
 - Profile/wxMDialogs
   + fix usage of readEntry to use String objects
-  + wxMDialogs completely broken as it is now
-    --> fixed this by using String parameters in FileRequester
   + who cleans up CPYSTR() generated strings?
   + find path to global configuration file and use it?
 
-- drop Script classes and wxtab
+- drop Script classes
 
 
 - Python
@@ -40,6 +36,7 @@ $Id$
 
 - WINDOWS: how to do MIME handling?
 
+- DND with gmc (dead easy, see dnd example :-) )
 
 *** to implement in near future ***
 
