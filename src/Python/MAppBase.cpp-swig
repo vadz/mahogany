@@ -505,8 +505,10 @@ static swig_type_info *swig_types[7];
 
 #define SWIG_name    "MAppBasec"
 
-#include   <wx/app.h>
-#include   "MDialogs.h"
+#include "Mswig.h"
+#include "gui/wxMApp.h"
+#include "MDialogs.h"
+#include "MFrame.h"
 
 // SWIG bug: it generates code which assignes the default argument to "char *"
 // variable. To make it compile we need this hack
