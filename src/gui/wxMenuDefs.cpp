@@ -461,21 +461,24 @@ static const MenuItemInfo g_aMenuItems[] =
    // compose
 
    // the available accelerators for this menu:
-   // ABFGJMOQRUXYZ
+   // ABFGJMQRUXYZ
    { WXMENU_COMPOSE_INSERTFILE,     gettext_noop("&Insert file...\tCtrl-I"),
                                     gettext_noop("Attach a file to the message")            , wxITEM_NORMAL },
    { WXMENU_COMPOSE_LOADTEXT,       gettext_noop("I&nsert text...\tCtrl-T"),
                                     gettext_noop("Insert text file")         , wxITEM_NORMAL },
+   { WXMENU_SEPARATOR,     wxEmptyString,                  wxEmptyString                         , wxITEM_NORMAL },
    { WXMENU_COMPOSE_SEND,           gettext_noop("&Send\tShift-Ctrl-X"),
-                                    gettext_noop("Send the message now")     , wxITEM_NORMAL },
+                                    gettext_noop("Send the message (either now or later depending on the options)")     , wxITEM_NORMAL },
+   { WXMENU_COMPOSE_SEND_NOW,       gettext_noop("Send right n&ow"),
+                                    gettext_noop("Send the message immediately")     , wxITEM_NORMAL },
    { WXMENU_COMPOSE_SAVE_AS_DRAFT,  gettext_noop("Close and save as &draft"),
                                     gettext_noop("Close the window and save the message in the drafts folder")     , wxITEM_NORMAL },
    { WXMENU_COMPOSE_SEND_LATER,     gettext_noop("Send &Later\tShift-Ctrl-L"),
                                     gettext_noop("Schedule the message to be send at a later time.")     , wxITEM_NORMAL },
    { WXMENU_COMPOSE_SEND_KEEP_OPEN, gettext_noop("Send and &keep\tShift-Ctrl-K"),
                                     gettext_noop("Send the message now and keep the editor open")     , wxITEM_NORMAL },
-   { WXMENU_COMPOSE_PRINT,          gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print the message")        , wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     wxEmptyString,                  wxEmptyString                         , wxITEM_NORMAL },
+   { WXMENU_COMPOSE_PRINT,          gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print the message")        , wxITEM_NORMAL },
    { WXMENU_COMPOSE_PREVIEW, gettext_noop("Previe&w..."),   gettext_noop("View the message as it would be sent"), wxITEM_NORMAL },
    { WXMENU_COMPOSE_SAVETEXT,gettext_noop("Save &text..."),   gettext_noop("Save (append) message text to file"), wxITEM_NORMAL },
    { WXMENU_COMPOSE_CLEAR, gettext_noop("&Clear"),            gettext_noop("Delete message contents")  , wxITEM_NORMAL },

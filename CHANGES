@@ -9,6 +9,7 @@
 Release 0.67 'Constance' ??? ??, 2004
 ------------------------------------
 
+17.07.04 VZ: added "Send now" command to the composer "Compose" menu
 16.07.04 VZ: show threading indicator in the status column
 12.07.04 VZ: use plain, not encrypted, text in replies to PGP messages
 11.07.04 VZ: integrated DSPAM statistical spam filter

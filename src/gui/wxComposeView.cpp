@@ -3047,16 +3047,28 @@ wxComposeView::OnMenuCommand(int id)
 
 
       case WXMENU_COMPOSE_SEND:
+      case WXMENU_COMPOSE_SEND_NOW:
       case WXMENU_COMPOSE_SEND_KEEP_OPEN:
       case WXMENU_COMPOSE_SEND_LATER:
          if ( IsReadyToSend() )
-            if ( Send( (id == WXMENU_COMPOSE_SEND_LATER) ) )
+         {
+            SendMode mode;
+            if ( id == WXMENU_COMPOSE_SEND_LATER )
+               mode = SendMode_Later;
+            else if ( id == WXMENU_COMPOSE_SEND_NOW )
+               mode = SendMode_Now;
+            else
+               mode = SendMode_Default;
+
+            if ( Send(mode) )
             {
                if ( id != WXMENU_COMPOSE_SEND_KEEP_OPEN )
                {
                   Close();
                }
+               //else: sending failed, don't close the window
             }
+         }
          break;
 
       case WXMENU_COMPOSE_SAVE_AS_DRAFT:
@@ -4069,7 +4081,7 @@ wxComposeView::BuildMessage() const
 }
 
 bool
-wxComposeView::Send(bool schedule)
+wxComposeView::Send(SendMode mode)
 {
    CHECK( !m_sending, false, _T("wxComposeView::Send() reentered") );
 
@@ -4090,7 +4102,7 @@ wxComposeView::Send(bool schedule)
 
    // and now do send the message
    bool success;
-   if ( schedule )
+   if ( mode == SendMode_Later )
    {
       MModule_Calendar *calmod =
          (MModule_Calendar *) MModule::GetProvider(MMODULE_INTERFACE_CALENDAR);
@@ -4109,7 +4121,11 @@ wxComposeView::Send(bool schedule)
    }
    else
    {
-      success = msg->SendOrQueue();
+      int flags = 0;
+      if ( mode == SendMode_Now )
+         flags |= SendMessage::NeverQueue;
+
+      success = msg->SendOrQueue(flags);
    }
 
    delete msg;

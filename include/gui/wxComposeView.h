@@ -54,6 +54,22 @@ WX_DEFINE_ARRAY(wxRcptExtraControl *, ArrayRcptControls);
 // constants
 // ----------------------------------------------------------------------------
 
+/// when to send the message
+enum SendMode
+{
+   /// either now or later, depending on the options
+   SendMode_Default,
+
+   /// send it immediately
+   SendMode_Now,
+
+   /// just put it in outbox
+   SendMode_Later,
+
+   /// end of enum marker
+   SendMode_Max
+};
+
 // ----------------------------------------------------------------------------
 // wxComposeView: composer frame
 // ----------------------------------------------------------------------------
@@ -171,11 +187,13 @@ public:
    */
    bool AutoSave();
 
-   /** Send the message.
-       @param schedule if TRUE, call calendar module to schedule sending
-       @return true if successful, false otherwise
+   /**
+     Send the message.
+
+     @param mode when to send it
+     @return true if successful, false if message was not ready to be sent
    */
-   bool Send(bool schedule = FALSE);
+   bool Send(SendMode mode = SendMode_Default);
 
    /** wxWindows callbacks
    */
