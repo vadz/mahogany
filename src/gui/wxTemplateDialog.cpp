@@ -474,6 +474,7 @@ void wxFolderTemplatesDialog::SaveChanges()
    // TODO: give the user the possibility to change the auto generated name
    wxString name;
    name << m_profile->GetName() << '_' << _(gs_templateNames[m_kind]);
+   name.Replace("/", "_"); // we want it flat
    SetMessageTemplate(name, m_textctrl->GetValue(), m_kind, m_profile);
 }
 
