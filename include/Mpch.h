@@ -34,6 +34,7 @@ extern "C"
 #  undef   GetCharWidth
 #  undef   LoadAccelerators
 #  undef   GetClassInfo
+#  undef   StartDoc
 }
 
 #include  "kbList.h"
@@ -56,9 +57,13 @@ extern "C"
 
 #include "MFrame.h"
 #include "gui/wxMFrame.h"
-#include "MLogFrame.h"
 
 #include "Profile.h"
+#include "Mdefaults.h"
+
+#include "MApplication.h"
+#include "gui/wxMApp.h"
+#include "gui/wxMFrame.h"
 
 #endif  //USE_PCH
 #endif  //MPCH_H

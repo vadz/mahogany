@@ -27,12 +27,12 @@
 #  include   "MimeList.h"
 #  include   "MimeTypes.h"
 #  include   "kbList.h"
+#  include   "Mdefaults.h"
+#  include   "MApplication.h"
 #endif   // USE_PCH
 
 #include   <locale.h>
 #include   <errno.h>
-
-#include "Mdefaults.h"
 
 #include "FolderView.h"
 #include "Adb.h"
@@ -42,11 +42,8 @@
 
 #include "gui/wxFolderView.h"
 #include "gui/wxMainFrame.h"
-#include "gui/wxMLogFrame.h"
 
 #include "MDialogs.h"
-
-#include "MApplication.h"
 
 #ifdef USE_WXCONFIG
 #  include  <wx/file.h>
@@ -72,7 +69,6 @@
 // ----------------------------------------------------------------------------
 MAppBase::MAppBase()
 {
-   logFrame = NULL;
    adb = NULL;
 }
 
@@ -119,7 +115,6 @@ MAppBase::~MAppBase()
 {
    GLOBAL_DELETE mimeList;
    GLOBAL_DELETE mimeTypes;
-   GLOBAL_DELETE logFrame;
    GLOBAL_DELETE adb;
 }
 
@@ -154,14 +149,16 @@ MAppBase::OnStartup()
 #  endif // USE_GETTEXT
 
 
-   // create log window
-   logFrame = new wxMLogFrame;
-
    String   tmp;
    bool   found;
    String strRootDir = READ_APPCONFIG(MC_ROOTDIRNAME);
    PathFinder pf(READ_APPCONFIG(MC_PATHLIST));
-   pf.AddPaths(M_DATADIR);
+
+#  if OS_UNIX
+      pf.AddPaths(M_DATADIR);
+#  else
+      // don't know how to get it from makeopts under Windows...
+#  endif
 
    globalDir = pf.FindDir(strRootDir, &found);
 
@@ -247,10 +244,6 @@ MAppBase::Exit(bool force)
 {
    if(force || MDialog_YesNoDialog(_("Really exit M?")))
    {
-      // avoid any more output being printed
-      GLOBAL_DELETE logFrame;
-      logFrame = NULL;
-
       // FIXME @@@@ this doesn't terminate the application in wxWin2
       // (other frames are still left on screen)
       if ( topLevelFrame != NULL )

@@ -28,15 +28,22 @@
 #  include  "MimeList.h"
 #  include  "MimeTypes.h"
 #  include  "Profile.h"
+#  include "Mdefaults.h"
+#  include "MApplication.h"
+#  include "gui/wxMApp.h"
 #endif
 
-#include "Mdefaults.h"
-
-#include "MApplication.h"
-#include "gui/wxMApp.h"
 #include "gui/wxMainFrame.h"
-#include "gui/wxMLogFrame.h"
 #include "gui/wxIconManager.h"
+
+#include <wx/log.h>
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// the name of config section where the log window position is saved
+#define  LOG_FRAME_SECTION    "LogWindow"
 
 // ============================================================================
 // implementation
@@ -63,9 +70,21 @@ wxFrame *
 #endif
 wxMApp::OnInit()
 {
+   // first of all, create the log
+   wxLogWindow *log = new wxLogWindow(_("M Activity Log"), FALSE /* !show */);
+
    m_IconManager = new wxIconManager();
 
    if ( OnStartup() ) {
+      // now that we have config, restore the log frame position and show it
+      int x, y, w, h;
+      wxMFrame::RestorePosition(LOG_FRAME_SECTION, &x, &y, &w, &h);
+      log->GetFrame()->SetSize(x, y, w, h);
+      log->Show();
+
+      // we want it to be above the log frame
+      topLevelFrame->Raise();
+
 #     ifdef  USE_WXWINDOWS2
          return true;
 #     else
@@ -85,11 +104,16 @@ MFrame *wxMApp::CreateTopLevelFrame()
    topLevelFrame->SetTitle(M_TOPLEVELFRAME_TITLE);
    topLevelFrame->Show(true);
 
-#ifdef  USE_WXWINDOWS2
-   SetTopWindow(topLevelFrame);
-#endif
-      
    return topLevelFrame;
+}
+
+int wxMApp::OnExit()
+{
+   // save log window position
+   wxFrame *frame = ((wxLogWindow *)wxLog::GetActiveTarget())->GetFrame();
+   wxMFrame::SavePosition(LOG_FRAME_SECTION, frame);
+
+   return 0;
 }
 
 // ----------------------------------------------------------------------------

@@ -46,8 +46,6 @@ protected:
    MimeList *mimeList;
    /// a list mapping extensions to mime types
    MimeTypes  *mimeTypes;
-   /// a window for logging messages
-   MLogFrameBase *logFrame;
    
    /// a profile wrapper object for this object
    Profile *profile;
@@ -130,49 +128,6 @@ public:
        @param display true to show it
    */
    void   ShowConsole(bool display = true);
-
-   // !wxWindows2 from here on
-#ifndef  USE_WXWINDOWS2
-   /** display error message:
-       @param message the text to display
-       @param parent the parent frame
-       @param modal  true to make messagebox modal
-     */
-   void  ErrorMessage(String const &message,
-           MFrame *parent = NULL,
-           bool modal = false);
-
-   /** display system error message:
-       @param message the text to display
-       @param parent the parent frame
-       @param modal  true to make messagebox modal
-     */
-   void  SystemErrorMessage(String const &message,
-           MFrame *parent = NULL,
-         bool modal = false);
-   
-   /** display error message and exit application
-       @param message the text to display
-       @param parent the parent frame
-     */
-   void  FatalErrorMessage(String const &message,
-         MFrame *parent = NULL);
-   
-   /** display normal message:
-       @param message the text to display
-       @param parent the parent frame
-       @param modal  true to make messagebox modal
-     */
-   void  Message(String const &message,
-      MFrame *parent = NULL,
-      bool modal = false);
-
-   /** Write a message to the console.
-       @param message the message  itself
-       @param level urgency of message (errorlevel)
-   */
-   void Log(int level, String const &message);
-#endif
 
    CB_DECLARE_CLASS(MApplication, CommonBase)
 };

@@ -35,12 +35,9 @@ public:
    /// create the main application window
    virtual MFrame *CreateTopLevelFrame();
 
-   // wxWin callback
-#ifdef  USE_WXWINDOWS2
+   // wxWin calls these functions on application init/termination
    virtual bool OnInit();
-#else   // wxWin1
-   virtual wxFrame *OnInit(void);
-#endif  // wxWin ver
+   virtual int  OnExit();
 
    /// return a pointer to the IconManager:
    wxIconManager *GetIconManager(void) { return m_IconManager; }
