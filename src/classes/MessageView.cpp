@@ -368,6 +368,8 @@ MessageView::Init(wxWindow *parent)
 {
    m_viewer = CreateDefaultViewer();
    m_viewer->Create(this, parent);
+
+   m_usingDefViewer = true;
 }
 
 void
@@ -428,6 +430,12 @@ MessageView::SetViewer(MessageViewer *viewer, wxWindow *parent)
       viewer = CreateDefaultViewer();
 
       ASSERT_MSG( viewer, "must have default viewer, will crash without it!" );
+
+      m_usingDefViewer = true;
+   }
+   else // we have a real viewer now
+   {
+      m_usingDefViewer = false;
    }
 
    viewer->Create(this, parent);
@@ -587,6 +595,11 @@ MessageView::OnMEvent(MEventData& event)
 
 void MessageView::OnOptionsChange(MEventOptionsChangeData& event)
 {
+   // if we don't have a viewer, we don't have to react to this event now -
+   // we'll do it later when we create the viewer
+   if ( !HasRealViewer() )
+      return;
+
    // first of all, are we interested in this profile or not?
    Profile *profileChanged = event.GetProfile();
    if ( !profileChanged || !profileChanged->IsAncestor(GetProfile()) )

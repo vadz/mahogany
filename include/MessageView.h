@@ -566,9 +566,14 @@ private:
    */
    virtual MessageViewer *CreateDefaultViewer() const = 0;
 
+   /// returns true if we have a non default viewer
+   bool HasRealViewer() const { return m_viewer && !m_usingDefViewer; }
+
    /// the viewer we use
    MessageViewer *m_viewer;
 
+   /// is it the default one?
+   bool m_usingDefViewer;
    //@}
 
    MsgCmdProc *m_msgCmdProc;
