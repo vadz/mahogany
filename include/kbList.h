@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * kbList.h : a double linked list                                  *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *
@@ -18,6 +18,11 @@
 
 #ifndef   NULL
 #   define   NULL   0
+#endif
+
+#ifndef ASSERT
+#   include   <assert.h>
+#   define   ASSERT(x) assert(0);
 #endif
 
 /**@name Double linked list implementation. */
@@ -236,7 +241,7 @@ protected:
        param iterator i
    */
    inline void deleteContent(iterator i)
-      { if(ownsEntries) delete *i; }
+      { ASSERT(0); /* if(ownsEntries) delete *i; */ }
 
 
 private:
