@@ -350,7 +350,7 @@ MessageCC::FetchText(void)
    {
       CHECK_DEAD_RC("");
       mailText = mail_fetchtext_full(folder->Stream(), m_uid,
-                                            &m_MailTextLen, FT_UID);
+                                     &m_MailTextLen, FT_UID);
       MailFolderCC::ProcessEventQueue();
       return String(mailText, (size_t) m_MailTextLen);
    }
@@ -760,30 +760,29 @@ MessageCC::GetReferences(void) const
 void
 MessageCC::WriteToString(String &str, bool headerFlag) const
 {
-   unsigned long len;
-   unsigned long fulllen = 0;
-
-   ((MessageCC *)this)->GetBody(); // circumvene const restriction
-
-   if(folder)
+   if(! headerFlag)
    {
-      CHECK_DEAD();
-      if(headerFlag)
-      {
-         char *headerPart = mail_fetchheader_full(folder->Stream(),m_uid,NIL,&len,FT_UID);
-         str += String(headerPart, (size_t)len);
-         fulllen += len;
-      }
-
-      char *bodyPart = mail_fetchtext_full(folder->Stream(),m_uid,&len,FT_UID);
-      str += String(bodyPart, (size_t)len);
-      fulllen += len;
-      MailFolderCC::ProcessEventQueue();
+      str = ((MessageCC*)this)->FetchText();
    }
    else
    {
-      str = text;
-      fulllen = strlen(text);
+      unsigned long len;
+
+      ((MessageCC *)this)->GetBody(); // circumvene const restriction
+
+      if(folder)
+      {
+         str = "";
+         CHECK_DEAD();
+         char *headerPart = mail_fetchheader_full(folder->Stream(),m_uid,NIL,&len,FT_UID);
+         str += String(headerPart, (size_t)len);
+         str += ((MessageCC*)this)->FetchText();
+         MailFolderCC::ProcessEventQueue();
+      }
+      else
+      {
+         str = text;
+      }
    }
 }
 

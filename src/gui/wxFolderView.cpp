@@ -618,7 +618,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
 //   wxSafeYield();
 
-   mf->IncRef();
+   SafeIncRef(mf);
    
    if(m_ASMailFolder)  // clean up old folder
    {
@@ -662,7 +662,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
    m_MailFolder = mf;
    m_ASMailFolder = mf ? ASMailFolder::Create(mf) : NULL;
    m_Profile = NULL;
-   mf->DecRef(); // now held by m_ASMailFfolder
+   SafeDecRef(mf); // now held by m_ASMailFfolder
    
    if(m_ASMailFolder)
    {

@@ -1303,7 +1303,7 @@ MailFolderCC::GetHeaders(void) const
 
       UIdType new_nNewMessages = that->CountNewMessages();
       if(new_nNewMessages != old_nNewMessages)
-         MEventManager::Send( new MEventFolderStatusData (this) );
+         MEventManager::Send( new MEventFolderStatusData ((MailFolderCC*)this) );
    }
 
    m_Listing->IncRef(); // for the caller who uses it
@@ -2476,6 +2476,7 @@ MailFolderCC::UpdateMessageStatus(unsigned long seqno)
 
    // tell all interested that status changed
    MEventManager::Send( new MEventMsgStatusData (this, i, m_Listing) );
+   MEventManager::Send( new MEventFolderStatusData (this) );
 }
 
 /* static */
@@ -2551,7 +2552,11 @@ MailFolderCC::ProcessEventQueue(void)
       {
          MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
          ASSERT(mf);
-         if(mf) mf->m_UpdateNeeded = true;
+         if(mf)
+         {
+            mf->UpdateStatus();
+            mf->m_UpdateNeeded = true;
+         }
          break;
       }
       }// switch
