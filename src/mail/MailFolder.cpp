@@ -889,9 +889,9 @@ MailFolder::ReplyMessage(Message *msg,
       // reply to the reply &c)
       size_t replyLevel = 0;
 
-            // the search is case insensitive
+      // the search is case insensitive, so transform everything to lower case
       wxString subjectLower(subject.Lower()),
-         replyPrefixLower(replyPrefixWithoutColon.Lower());
+               replyPrefixLower(replyPrefixWithoutColon.Lower());
       const char *pStart = subjectLower.c_str();
       for ( ;; )
       {
@@ -901,70 +901,77 @@ MailFolder::ReplyMessage(Message *msg,
          // everything to lower case)
          static const char *replyPrefixStandard = gettext_noop("re");
 
-         size_t matchLen = 0;
-         const char *pMatch = strstr(pStart, replyPrefixLower);
-         if ( !pMatch )
-            pMatch = strstr(pStart, replyPrefixStandard);
-         else if ( !matchLen )
-            matchLen = replyPrefixLower.length();
-         if ( !pMatch )
-            pMatch = strstr(pStart, _(replyPrefixStandard));
-         else if ( !matchLen )
+         // first configured string
+         size_t matchLen = replyPrefixLower.length();
+         if ( strncmp(pStart, replyPrefixLower, matchLen) != 0 )
+         {
+            // next the standard string
             matchLen = strlen(replyPrefixStandard);
-         if ( !pMatch
-              || (*(pMatch+matchLen) != '[' &&
-                  *(pMatch+matchLen) != ':'
-                  && *(pMatch+matchLen) != '(')
-            )
+            if ( strncmp(pStart, replyPrefixStandard, matchLen) != 0 )
+            {
+               // finally the translation of the standard string
+               const char * const replyPrefixTrans =
+                  wxGetTranslation(replyPrefixStandard);
+               matchLen = strlen(replyPrefixTrans);
+               if ( strncmp(pStart, replyPrefixTrans, matchLen) != 0 )
+               {
+                  // failed to find any reply prefix
+                  break;
+               }
+            }
+         }
+
+         // we found the reply prefix, now check that it is followed by
+         // one of the allowed symbols -- it has to for it to count as reply
+         // prefix
+         char chNext = pStart[matchLen];
+         if ( chNext == '[' || chNext == '(')
+         {
+            // try to see if we don't have "Re[N]" string already
+            int replyLevelOld;
+            if ( sscanf(pStart + matchLen, "[%d]", &replyLevelOld) == 1 ||
+                 sscanf(pStart + matchLen, "(%d)", &replyLevelOld) == 1 )
+            {
+               // we've got a "Re[N]"
+               matchLen++; // opening [ or (
+               while( isdigit(pStart[matchLen]) )
+                  matchLen++;
+               matchLen++; // closing ] or )
+
+               // we're going to add 1 to replyLevel below anyhpw
+               replyLevel += replyLevelOld - 1;
+               chNext = pStart[matchLen];
+            }
+            else // doesn't seem like a reply prefix neither
+            {
+               break;
+            }
+         }
+
+         if ( chNext == ':' )
+         {
+            replyLevel++;
+            pStart++;
+         }
+         else // not a reply prefix
+         {
             break;
-         else if ( !matchLen )
-            matchLen = strlen(_(replyPrefixStandard));
-         pStart = pMatch + matchLen;
-         replyLevel++;
-      }
+         }
 
-      //            if ( replyLevel == 1 )
-      //            {
-      // try to see if we don't have "Re[N]" string already
-      int replyLevelOld;
-      if ( sscanf(pStart, "[%d]", &replyLevelOld) == 1 ||
-           sscanf(pStart, "(%d)", &replyLevelOld) == 1 )
-      {
-         replyLevel += replyLevelOld;
-         replyLevel --; // one was already counted
-         pStart++; // opening [ or (
-         while( isdigit(*pStart) )
-            pStart ++;
-         pStart++; // closing ] or )
-      }
-      //            }
+         pStart += matchLen;
 
-            // skip spaces
-      while ( isspace(*pStart) )
-         pStart++;
-
-            // skip also the ":" after "Re" is there was one
-      if ( replyLevel > 0 && *pStart == ':' )
-      {
-         pStart++;
-
-         // ... and the spaces after ':' if any too
+         // skip spaces
          while ( isspace(*pStart) )
             pStart++;
       }
 
-      // this is the start of real subject
-      subject = subject.Mid(pStart - subjectLower.c_str());
+      // now pStart points to the start of the real subject but in the lower
+      // case string
+      subject = subject.c_str() + (pStart - subjectLower.c_str());
 
       if ( collapse == SmartCollapse && replyLevel > 0 )
       {
-         // TODO not configurable enough, allow the user to specify the
-         //      format string himself and also decide whether we use powers
-         //      of 2, just multiply by 2 or nothing at all
-         // for now we just increment the replyLevel by one,
-         // everything else is funny as it doesn't maintain
-         // powers of two :-) KB
-         replyLevel ++;
+         replyLevel++;
          newSubject.Printf("%s[%d]: %s",
                            replyPrefixWithoutColon.c_str(),
                            replyLevel,
@@ -972,9 +979,9 @@ MailFolder::ReplyMessage(Message *msg,
       }
    }
 
-   // in cases of {No|Dumb}Collapse we fall here
    if ( !newSubject )
    {
+      // we get here in cases of {No|Dumb}Collapse
       newSubject = replyPrefix + subject;
    }
 
