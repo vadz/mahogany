@@ -118,7 +118,7 @@ MModuleCommon::~MModuleCommon()
           i != gs_MModuleList->end();
           i++)
          if( (**i).m_Module == this )
-            gs_MModuleList.erase(i); // remove our entry
+            gs_MModuleList->erase(i); // remove our entry
    }
 }
 
