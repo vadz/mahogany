@@ -557,7 +557,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.218 2001/04/12 17:08:00 vadz Exp 
+# From configure.in Id: configure.in,v 1.220 2001/04/27 11:29:39 chbauer Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -4999,6 +4999,10 @@ case "$GXX" in yes)
 		CXXFLAGS="$CXXFLAGS -Wall" ;;
 	esac ;;	
 esac
+
+
+
+
 
 
 LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk./-Wl,-Bstatic & -Wl,-Bdynamic/g'`
