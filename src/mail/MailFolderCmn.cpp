@@ -2230,6 +2230,20 @@ MailFolderCmn::SendMsgStatusChangeEvent()
 
       mfStatusCache->UpdateStatus(GetName(), status);
    }
+   else // no cached status
+   {
+      // we still have to weed out the expunged messages, just as we do above
+      size_t count = m_statusChangeData->msgnos.GetCount();
+      for ( size_t n = 0; n < count; )
+      {
+         if ( m_statusChangeData->msgnos[n] == MSGNO_ILLEGAL )
+         {
+            m_statusChangeData->Remove(n);
+
+            count--;
+         }
+      }
+   }
 
    // next notify everyone else about the status change
    wxLogTrace(TRACE_MF_EVENTS,

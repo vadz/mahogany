@@ -4127,8 +4127,11 @@ static bool MailStreamHasThreader(MAILSTREAM *stream, const char *thrName)
 //
 // Copy the tree given to us to some 'known' memory
 //
-static THREADNODE* CopyTree(THREADNODE* th) {
-   if (th == NULL) return NULL;
+static THREADNODE *CopyTree(THREADNODE* th)
+{
+   if ( !th )
+      return NULL;
+
    THREADNODE* thrNode = new THREADNODE;
    thrNode->num = th->num;
    thrNode->next = CopyTree(th->next);
@@ -4187,29 +4190,25 @@ bool MailFolderCC::ThreadMessages(const ThreadParams& thrParams,
          wxLogTrace(TRACE_MF_CALLS, _T("MailFolderCC(%s)::ThreadMessages()"),
                     GetName().c_str());
 
-         THREADNODE *thrRoot = mail_thread
-                               (
-                                 m_MailStream,
-                                 (char *)threadingAlgo,
-                                 NULL,                // default charset
-                                 mail_newsearchpgm(), // thread all messages
-                                 SE_FREE
-                               );
+         ASSERT_MSG( !thrData->m_root, _T("will leak THREADNODE tree!") );
 
-         if ( thrRoot )
+         thrData->m_root = mail_thread
+                           (
+                            m_MailStream,
+                            (char *)threadingAlgo,
+                            NULL,                // default charset
+                            mail_newsearchpgm(), // thread all messages
+                            SE_FREE
+                           );
+
+         if ( thrData->m_root )
          {
-            // We copy the tree so that we can release the c-client
-            // memory right now. After that, we know that whatever
-            // the algo that was used, we can destroy the tree the
-            // same way.
-            thrData->m_root = CopyTree(thrRoot);
-
-            mail_free_threadnode(&thrRoot);
-
             // everything done
             return true;
          }
-         else if ( IsOpened() )
+
+         // failed to thread, why?
+         if ( IsOpened() )
          {
             // it was really an error with threading, how strange
             wxLogWarning(_("Server side threading failed, trying to thread "
