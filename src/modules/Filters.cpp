@@ -2092,27 +2092,27 @@ extern "C"
 
    static Value func_recipients(ArgList *args, FilterRuleImpl *p)
    {
-      if(args->Count() != 0)
-         return Value("");
-      Message * msg = p->GetMessage();
-      if(! msg)
-         return Value("");
       String result;
-      static const char *headers[] =
+
+      if ( args->Count() == 0 )
       {
-         "To", "CC", "Bcc",
-         "Resent-To", "Resent-Cc", "Resent-Bcc",
-         NULL
-      };
-      String tmp;
-      for(int i = 0; headers[i]; ++i)
-      {
-         msg->GetHeaderLine(headers[i], tmp);
-         if(tmp[0] && result[0])
-            result << ',';
-         result << tmp;
+         Message *msg = p->GetMessage();
+         if ( msg )
+         {
+            static const char *headers[] =
+            {
+               "To", "CC", "Bcc",
+               "Resent-To", "Resent-Cc", "Resent-Bcc",
+               NULL
+            };
+
+            wxArrayString values = msg->GetHeaderLines(headers);
+            result = strutil_flatten_array(values, ',');
+
+            msg->DecRef();
+         }
       }
-      msg->DecRef();
+
       return Value(result);
    }
 

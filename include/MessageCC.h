@@ -55,13 +55,9 @@ public:
       long  size_bytes;
    };
 
-   /** get any header line
-       @line name of header line
-       @value string where result will be stored, or empty string
-   */
-   bool GetHeaderLine(const String &line,
-                      String &value,
-                      wxFontEncoding *encoding = NULL) const;
+   // get specfied header lines
+   virtual wxArrayString GetHeaderLines(const char **headers,
+                                        wxArrayInt *encodings = NULL) const;
 
    /** Get a complete header text.
        @return string with multiline text containing the message headers
@@ -82,18 +78,18 @@ public:
        @param type which address
        @return address entry
    */
-   virtual const String Address(String &name,
-                                MessageAddressType type = MAT_REPLYTO) const;
+   virtual String Address(String &name,
+                          MessageAddressType type = MAT_REPLYTO) const;
 
    /** get From line
        @return From entry
    */
-   virtual const String From(void) const;
+   virtual String From(void) const;
 
    /** get Date line
        @return Date when message was sent
    */
-   const String & Date(void) const;
+   String Date(void) const;
 
    /** get message text
        @return the uninterpreted message body

@@ -4,6 +4,8 @@
 SRC :=	$(patsubst .src/%,%,$(wildcard .src/mail/*.cpp))
 SRC :=	$(filter-out mail/SendMessage.cpp, $(SRC))
 SRC :=	$(filter-out mail/MMailFolder.cpp, $(SRC))
+SRC :=	$(filter-out mail/Address.cpp, $(SRC))
+SRC :=	$(filter-out mail/AddressCC.cpp, $(SRC))
 
 ifdef EXPERIMENTAL
 #commenting out for now as it doesn't do anything and gives tons of warnings

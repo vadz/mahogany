@@ -125,14 +125,26 @@ public:
    static int FindAddress(const wxArrayString& addresses, const String& addr);
 
    /** get any header line
+
+       USE GetHeaderLines() INSTEAD OF MULTIPLE CALLS To GetHeaderLine(),
+       IT IS MUCH MORE EFFICIENT AS IT INVOLVES ONLY ONE TRIP TO SERVER!
+
        @param line name of header line
        @param value string where result will be stored, or empty string
-       @param encoding will hold the encoding used in header if not NULL
        @return true if header was found in the headers
    */
-   virtual bool GetHeaderLine(const String &line,
-                              String &value,
-                              wxFontEncoding *encoding = NULL) const = 0;
+   bool GetHeaderLine(const String &line,
+                      String &value,
+                      wxFontEncoding *encoding = NULL) const;
+
+   /** Get the values of the specified headers.
+
+       @param headers the NULL-terminated array of the headers to retrieve
+       @param encodings if non NULL, filled with encodings of the headers
+       @return the array containing the header values
+   */
+   virtual wxArrayString GetHeaderLines(const char **headers,
+                                        wxArrayInt *encodings = NULL) const = 0;
 
    /** Get the complete header text.
        @return string with multiline text containing the message headers
@@ -163,8 +175,8 @@ public:
        @param type which address
        @return address entry
    */
-   virtual const String Address(String &name,
-                                MessageAddressType type = MAT_REPLYTO) const = 0;
+   virtual String Address(String &name,
+                          MessageAddressType type = MAT_REPLYTO) const = 0;
 
    /** Extract the first name from the result returned by calling Address()
    */
@@ -177,12 +189,12 @@ public:
    /** get From line
        @return From entry
    */
-   virtual const String From() const = 0;
+   virtual String From() const = 0;
 
    /** get Date line
        @return Date when message was sent
    */
-   virtual const String & Date(void) const = 0;
+   virtual String Date(void) const = 0;
 
    /** Return message id. */
    virtual String GetId(void) const = 0;

@@ -327,6 +327,44 @@ size_t Message::ExtractAddressesFromHeader(wxArrayString& addresses)
 // TODO: write a function to extract addresses from the body as well
 
 // ----------------------------------------------------------------------------
+// wrapper around GetHeaderLines
+// ----------------------------------------------------------------------------
+
+bool Message::GetHeaderLine(const String& line,
+                            String& value,
+                            wxFontEncoding *encoding) const
+{
+   const char *headers[2];
+   headers[0] = line.c_str();
+   headers[1] = NULL;
+
+   wxArrayString values;
+   if ( encoding )
+   {
+      wxArrayInt encodings;
+      values = GetHeaderLines(headers, &encodings);
+
+      *encoding = encodings.IsEmpty() ? wxFONTENCODING_SYSTEM
+                                      : (wxFontEncoding)encodings[0];
+   }
+   else // don't need the encoding
+   {
+      values = GetHeaderLines(headers);
+   }
+
+   if ( values.IsEmpty() )
+   {
+      value.clear();
+
+      return false;
+   }
+
+   value = values[0];
+
+   return true;
+}
+
+// ----------------------------------------------------------------------------
 // Message creation
 // ----------------------------------------------------------------------------
 

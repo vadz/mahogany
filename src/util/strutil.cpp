@@ -1359,9 +1359,9 @@ String strutil_flatten_array(const wxArrayString& array, char ch)
    size_t count = array.GetCount();
    for ( size_t n = 0; n < count; n++ )
    {
-      s += array[n];
-      if ( n < count - 1 )
+      if ( n > 0 )
          s += ch;
+      s += array[n];
    }
 
    return s;

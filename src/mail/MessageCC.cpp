@@ -235,11 +235,10 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
    {
       case Prot_SMTP:
       {
-         String to, cc, bcc;
-         GetHeaderLine("To", to);
-         GetHeaderLine("CC", cc);
-         GetHeaderLine("BCC",bcc);
-         sendMsg->SetAddresses(to, cc, bcc);
+         static const char *headers[] = { "To", "Cc", "Bcc", NULL };
+         wxArrayString recipients = GetHeaderLines(headers);
+
+         sendMsg->SetAddresses(recipients[0], recipients[1], recipients[2]);
          sendMsg->SetFrom(From(), name, reply);
       }
       break;
@@ -322,22 +321,23 @@ MessageCC::Refresh(void)
    }
 }
 
-String const &
-MessageCC::Subject(void) const
+// ----------------------------------------------------------------------------
+// headers access
+// ----------------------------------------------------------------------------
+
+const String& MessageCC::Subject(void) const
 {
    return m_headerSubject;
 }
 
-String const
-MessageCC::From(void) const
+String MessageCC::From(void) const
 {
    String name;
    String email = Address(name, MAT_FROM);
    return GetFullEmailAddress(name, email);
 }
 
-String
-MessageCC::GetHeader(void) const
+String MessageCC::GetHeader(void) const
 {
    String str;
 
@@ -355,50 +355,157 @@ MessageCC::GetHeader(void) const
    return str;
 }
 
-bool
-MessageCC::GetHeaderLine(const String &line,
-                         String &value, wxFontEncoding *encoding) const
+wxArrayString
+MessageCC::GetHeaderLines(const char **headersOrig,
+                          wxArrayInt *encodings) const
 {
-   CHECK_DEAD_RC(false);
-   if(! m_folder)
-      return false;
+   wxArrayString values;
 
-   STRINGLIST  slist;
-   slist.next = NULL;
-   slist.text.size = line.length();
-   slist.text.data = (unsigned char *)strutil_strdup(line);
+   CHECK_DEAD_RC(values);
+   if ( !m_folder || !m_folder->Lock() )
+      return values;
 
-   if(!m_folder->Lock())
-      return false;
-
-   unsigned long len;
-   char *
-      rc = mail_fetchheader_full (m_folder->Stream(),
-                                  m_uid,
-                                  &slist,
-                                  &len,FT_UID);
-   m_folder->UnLock();
-   value = String(rc, (size_t)len);
-   char *val = strutil_strdup(value);
-   // trim off trailing newlines/crs
-   if(strlen(val))
+   // construct the string list containing all the headers we're interested in
+   STRINGLIST *slist = mail_newstringlist();
+   STRINGLIST *scur = slist;
+   const char **headers = headersOrig;
+   for ( ;; )
    {
-      // start by the last char and move backwards until we don't throw off all
-      // line termination chars - be careful to not underflow the (almost)
-      // empty string!
-      char *cptr  = val + strlen(val) - 1;
-      while( cptr >= val && (*cptr == '\n' || *cptr == '\r') )
-         cptr--;
-      cptr++;
-      *cptr = '\0';
-   }
-   value = strutil_after(val,':');
-   delete [] val;
-   strutil_delwhitespace(value);
-   value = MailFolderCC::DecodeHeader(value, encoding);
-   delete [] slist.text.data;
+      scur->text.size = strlen(*headers);
+      scur->text.data = (unsigned char *)cpystr(*headers);
+      if ( !*++headers )
+      {
+         // terminating NULL
+         break;
+      }
 
-   return value.length() != 0;
+      scur =
+      scur->next = mail_newstringlist();
+   }
+
+   // go fetch it
+   unsigned long len;
+   char *rc = mail_fetchheader_full(m_folder->Stream(),
+                                    m_uid,
+                                    slist,
+                                    &len,
+                                    FT_UID);
+   m_folder->UnLock();
+   mail_free_stringlist(&slist);
+
+   // now extract the headers values
+   if ( rc )
+   {
+      // first look at what we got: I don't assume here that the headers
+      // are return in the order requested. This complicates the code a bit
+      // but assuming otherwise would be probably unsafe.
+      wxArrayString names;
+      wxArrayString valuesInDisorder;
+
+      String s;
+      s.reserve(1024);
+
+      // we are first looking for the name (before ':') and the value (after)
+      bool inName = true;
+      for ( const char *pc = rc; ; pc++ )
+      {
+         switch ( *pc )
+         {
+            case '\r':
+               if ( pc[1] != '\n' )
+               {
+                  // this is not supposed to happen in RFC822 headers!
+                  wxLogDebug("Bare '\\r' in header ignored");
+                  continue;
+               }
+
+               // skip '\n' too
+               pc++;
+
+               // fall through
+
+            case '\0':
+               if ( inName )
+               {
+                  if ( !s.empty() )
+                  {
+                     wxLogDebug("Header without contents part ignored");
+                  }
+                  //else: blank line, ignore
+               }
+               else if ( !s.empty() ) // end of correctly formed line
+               {
+                  valuesInDisorder.Add(s);
+                  inName = true;
+
+                  s.clear();
+               }
+               break;
+
+            case ':':
+               if ( inName )
+               {
+                  names.Add(s);
+                  if ( *++pc != ' ' )
+                  {
+                     // oops... skip back
+                     pc--;
+
+                     wxLogDebug("Header without space after colon?");
+                  }
+
+                  s.clear();
+
+                  inName = false;
+
+                  break;
+               }
+               //else: fall through
+
+            default:
+               s += *pc;
+         }
+
+         if ( !*pc )
+         {
+            // have to exit the loop here to not lose the last string if it's
+            // not "\r\n" terminated
+            break;
+         }
+      }
+
+      // and finally copy the headers in order into the dst array
+      wxFontEncoding encoding;
+      headers = headersOrig;
+      while ( *headers )
+      {
+         int n = names.Index(*headers);
+         if ( n != wxNOT_FOUND )
+         {
+            values.Add(MailFolderCC::DecodeHeader(valuesInDisorder[(size_t)n],
+                                                  &encoding));
+         }
+         else // no such header
+         {
+            values.Add("");
+            encoding = wxFONTENCODING_SYSTEM;
+         }
+
+         if ( encodings )
+         {
+            encodings->Add(encoding);
+         }
+
+         headers++;
+      }
+   }
+   else // mail_fetchheader_full() failed
+   {
+      wxLogError(_("Failed to retrieve headers of the message from '%s'."),
+                 m_folder->GetName().c_str());
+   }
+
+   return values;
 }
 
 // ----------------------------------------------------------------------------
@@ -473,7 +580,7 @@ MessageCC::GetAddresses(MessageAddressType type,
    return addresses.GetCount();
 }
 
-const String
+String
 MessageCC::Address(String &nameAll, MessageAddressType type) const
 {
    ADDRESS *addr = GetAddressStruct(type);
@@ -512,8 +619,7 @@ MessageCC::Address(String &nameAll, MessageAddressType type) const
    return emailAll;
 }
 
-String const &
-MessageCC::Date(void) const
+String MessageCC::Date(void) const
 {
    return m_headerDate;
 }
