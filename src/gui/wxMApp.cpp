@@ -1543,8 +1543,8 @@ wxMApp::LoadModules(void)
    kbStringList::iterator i;
 
    String moduleString = READ_APPCONFIG(MP_MODULES);
-   char *modulestring = strutil_strdup(wxConvertWX2MB(moduleString));
-   strutil_tokenise(modulestring, ":", modules);
+   wxChar *modulestring = strutil_strdup(moduleString);
+   strutil_tokenise(modulestring, _T(":"), modules);
    delete [] modulestring;
 
    MModule *module;

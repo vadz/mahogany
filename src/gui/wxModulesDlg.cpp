@@ -156,8 +156,8 @@ bool wxModulesDialog::TransferDataToWindow()
 {
    // get list of configured modules
    wxString modules = READ_APPCONFIG(MP_MODULES);
-   char *tmp = strutil_strdup(wxConvertWX2MB(modules));
-   strutil_tokenise(tmp, ":", m_Modules);
+   wxChar *tmp = strutil_strdup(modules);
+   strutil_tokenise(tmp, _T(":"), m_Modules);
 
    size_t count = m_Listing ? m_Listing->Count() : 0;
 

@@ -1267,7 +1267,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Advanced,
                                                   -ConfigField_ComposePreview },
 
-   { "",                                           Field_Message, -1},
+   { _T(""),                                           Field_Message, -1},
    { gettext_noop("Show \"&From\" field"),         Field_Bool |
                                                    Field_Advanced,  -1},
    { gettext_noop("Configure &headers..."),        Field_SubDlg,  -1},
