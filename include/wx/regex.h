@@ -36,7 +36,15 @@ class wxRegExBase
        @param Flags only allowed values: RE_NOTBOL/RE_NOTEOL
        @return true if found
    */
-   virtual int Match(const wxString &str, Flags flags = RE_NONE) const = 0;
+   virtual bool Match(const wxString &str, Flags flags = RE_NONE) const = 0;
+   /** Replaces the current regular expression in the string pointed
+       to by pattern, with the text in replacement.
+       @param pattern the string to change
+       @param replacement the new string to put there
+       @return number of matches replaced or -1 on error
+   */
+   virtual int Replace(wxString *pattern,
+                        const wxString &replacement) const = 0;
    virtual bool IsValid(void) const = 0;
    virtual ~wxRegExBase() {}
 };
@@ -44,6 +52,11 @@ class wxRegExBase
 #ifdef HAVE_POSIX_REGEX
 
 #include <regex.h>
+
+
+#ifndef WX_REGEX_MAXMATCHES
+#   define WX_REGEX_MAXMATCHES 1024
+#endif
 
 class wxRegExPOSIX : public wxRegExBase
 {
@@ -53,11 +66,13 @@ class wxRegExPOSIX : public wxRegExBase
       {
          SetFlags(flags);
          m_Valid = Compile(expr);
+         m_nMatches = WX_REGEX_MAXMATCHES;
+         m_Matches = new regmatch_t[m_nMatches];
       }
    ~wxRegExPOSIX()
       {
-         if(m_Valid)
-		regfree(&m_RegEx);
+         if(m_Valid) regfree(&m_RegEx);
+         delete [] m_Matches;
       }
    virtual bool IsValid(void) const
       {
@@ -68,7 +83,7 @@ class wxRegExPOSIX : public wxRegExBase
       {
          m_Flags = flags;
       }
-   virtual int Match(const wxString &str, Flags flags) const
+   virtual bool Match(const wxString &str, Flags flags) const
       {
          if( ! m_Valid )
          {
@@ -85,17 +100,52 @@ class wxRegExPOSIX : public wxRegExBase
          if(flags & RE_NOTBOL) myflags |= REG_NOTBOL;
          if(flags & RE_NOTEOL) myflags |= REG_NOTEOL;
 	return 
-          regexec((regex_t *)&m_RegEx, str.c_str(), 0, NULL, myflags) == 0;
+          regexec((regex_t *)&m_RegEx, str.c_str(),
+                  m_nMatches, m_Matches,
+                  myflags) == 0;
       }
 
 
+   /** Replaces the current regular expression in the string pointed
+       to by pattern, with the text in replacement.
+       @param pattern the string to change
+       @param replacement the new string to put there
+       @return number of matches replaced or -1 on error
+   */
+   virtual int Replace(wxString *pattern,
+                        const wxString &replacement) const
+      {
+         ASSERT(pattern);
+         if(! IsValid()) return -1;
+         
+         int replaced = 0;
+         size_t lastpos = 0;
+         wxString newstring;
+         
+         for(size_t idx = 0;
+             m_Matches[idx].rm_so != -1 && idx < m_nMatches;
+             idx++)
+         {
+            // copy non-matching bits:
+            newstring << pattern->Mid(lastpos,
+                                      m_Matches[idx].rm_so - lastpos);
+            // copy replacement:
+            newstring << replacement;
+            // remember how far we got:
+            lastpos = m_Matches[idx].rm_eo;
+            replaced ++;
+         }
+         if(replaced > 0)
+            *pattern = newstring;
+         return replaced;
+      }
    /** Compile string into regular expression.
        @param expr string expression
        @return true on success
    */
    bool Compile(const wxString &expr)
       {
-         if(m_Valid) regfree(&m_RegEx);
+         if(IsValid()) regfree(&m_RegEx);
          int errorcode = regcomp(&m_RegEx, expr, GetCFlags());
          if(errorcode)
          {
@@ -122,9 +172,11 @@ private:
          if( m_Flags & RE_NEWLINE ) flags |= REG_NEWLINE;
          return flags;
       }
-   bool     m_Valid;
-   int      m_Flags;
-   regex_t  m_RegEx;
+   bool        m_Valid;
+   int         m_Flags;
+   regex_t     m_RegEx;
+   regmatch_t *m_Matches;
+   size_t      m_nMatches;
 };
 
 
