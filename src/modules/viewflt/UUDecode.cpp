@@ -59,7 +59,7 @@ protected:
 
 // all UUencoded data start with a line whose prefix is "begin" and preceded by
 // a blank line
-#define UU_BEGIN_PREFIX _T("\r\nbegin ")
+#define UU_BEGIN_PREFIX _T("begin ")
 
 // UUencoded data ends at a line consisting solely of "end"
 #define UU_END_PREFIX _T("\r\nend\r\n")
@@ -196,7 +196,18 @@ UUDecodeFilter::DoProcess(String& text,
    const wxChar *nextToOutput = start;
    while ( *start )
    {
-      if ( wxStrncmp(start, UU_BEGIN_PREFIX, lenBegin) != 0 )
+      bool hasBegin = wxStrncmp(start, UU_BEGIN_PREFIX, lenBegin) == 0;
+      if ( hasBegin )
+      {
+         // check that we're either at the start of the text or after a blank
+         // line
+         if ( start >= text.c_str() + 2 )
+         {
+            hasBegin = start[-1] == _T('\n') && start[-2] == _T('\r');
+         }
+      }
+
+      if ( !hasBegin )
       {
          // try the next line (but only if not already at the end)
          start = wxStrchr(start, _T('\n'));
