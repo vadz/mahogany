@@ -85,7 +85,7 @@ install_bin:
 	done
 	set -e; for i in $(SUB_DIRS) extra; do $(MAKE) -C $$i install; done
 	set -e; for i in .src/doc/Tips/Tips*.txt; \
-	do $(INSTALL_DATA) $$i $(DOCDIR)/Tips/$$i; \
+	do $(INSTALL_DATA) $$i $(DOCDIR)/Tips; \
 	done
 
 install_strip:
