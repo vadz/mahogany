@@ -870,7 +870,10 @@ wxFolderListCtrl::SelectNextUnread()
       
       const HeaderInfo *hi = (*hil)[idx];
       if(hi->GetUId() == focusedUId)
+      {
          foundFocused = true;
+         continue; // we don't want the current one
+      }
       
       if(
          ((! failedOnce) && foundFocused)// we are looking for the next unread now:
