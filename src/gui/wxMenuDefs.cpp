@@ -280,7 +280,7 @@ static const MenuItemInfo g_aMenuItems[] =
    // msg
 
    // the available accelerators for this menu:
-   // BJKQXZ
+   // BGJKQXZ
 
    { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message")    , FALSE },
    { WXMENU_MSG_PRINT,     gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print this message")       , FALSE },
@@ -291,13 +291,13 @@ static const MenuItemInfo g_aMenuItems[] =
 #endif // USE_PS_PRINTING
    { WXMENU_MSG_REPLY,     gettext_noop("&Reply\tCtrl-R"),            gettext_noop("Reply to this message")    , FALSE },
    { WXMENU_MSG_REPLY_WITH_TEMPLATE, gettext_noop("Reply with &template...\tShift-Ctrl-R"), gettext_noop("Reply to this message after choosing a template to use ")    , FALSE },
-   { WXMENU_MSG_FOLLOWUP,  gettext_noop("&Group reply\tCtrl-G"),      gettext_noop("Followup/group-reply to this message")    , FALSE },
+   { WXMENU_MSG_FOLLOWUP,  gettext_noop("Reply to a&ll\tCtrl-G"), gettext_noop("Reply to all recipients of this message")    , FALSE },
    { WXMENU_MSG_FOLLOWUP_WITH_TEMPLATE,
-                           gettext_noop("G&roup reply with template...\tShift-Ctrl-G"),      gettext_noop("Followup/group-reply to this message")    , FALSE },
+                           gettext_noop("Repl&y to all with template...\tShift-Ctrl-G"),      gettext_noop("Reply to all recipients of this message after choosing a template to use ")    , FALSE },
    { WXMENU_MSG_FORWARD,   gettext_noop("&Forward\tCtrl-F"),          gettext_noop("Forward this message")     , FALSE },
    { WXMENU_MSG_FORWARD_WITH_TEMPLATE,
                            gettext_noop("Forward with te&mplate...\tShift-Ctrl-F"), gettext_noop("Forward this message after choosing a template to use ")     , FALSE },
-   { WXMENU_MSG_FILTER,    gettext_noop("Appl&y filter rules..."), gettext_noop("Apply filter rules to selected messages")     , FALSE },
+   { WXMENU_MSG_FILTER,    gettext_noop("&Apply filter rules..."), gettext_noop("Apply filter rules to selected messages")     , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_NEXT_UNREAD,   gettext_noop("&Next unread\tCtrl-U"), gettext_noop("Select next unread message")     , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
@@ -306,7 +306,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_MOVE_TO_FOLDER, gettext_noop("&Move to Folder..."),gettext_noop("Move message to another folder")   , FALSE },
    { WXMENU_MSG_DELETE,    gettext_noop("&Delete"),           gettext_noop("Delete this message")      , FALSE },
    { WXMENU_MSG_UNDELETE,  gettext_noop("&Undelete"),         gettext_noop("Undelete message")         , FALSE },
-   { WXMENU_MSG_FLAG,      gettext_noop("F&lag\tCtrl-I"), gettext_noop("Mark message as flagged/unflagged")         , FALSE },
+   { WXMENU_MSG_FLAG,      gettext_noop("Fla&g\tCtrl-I"), gettext_noop("Mark message as flagged/unflagged")         , FALSE },
    { WXMENU_MSG_EXPUNGE,   gettext_noop("Ex&punge"),          gettext_noop("Expunge")                  , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_SELECTALL, gettext_noop("Select &all\tCtrl-A"),       gettext_noop("Select all messages")      , FALSE },

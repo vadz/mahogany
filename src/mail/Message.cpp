@@ -259,6 +259,11 @@ String Message::GetEMailFromAddress(const String &address)
    return email;
 }
 
+// ----------------------------------------------------------------------------
+// address comparison
+// ----------------------------------------------------------------------------
+
+/* static */
 bool Message::CompareAddresses(const String& adr1, const String& adr2)
 {
    String email1, email2;
@@ -285,6 +290,19 @@ bool Message::CompareAddresses(const String& adr1, const String& adr2)
    //      bar@baz.com, for now it is not...
 
    return email1 == email2;
+}
+
+/* static */
+int Message::FindAddress(const wxArrayString& addresses, const String& addr)
+{
+   size_t count = addresses.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      if ( CompareAddresses(addresses[n], addr) )
+         return n;
+   }
+
+   return wxNOT_FOUND;
 }
 
 // ----------------------------------------------------------------------------

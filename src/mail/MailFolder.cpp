@@ -724,18 +724,31 @@ MailFolder::ReplyMessage(class Message *msg,
    // remove duplicates
    wxArrayString uniqueAddresses = strutil_uniq_array(otherAddresses);
 
-   // and also filter out the addresses used in to
+   // and also filter out the addresses used in to as well as our own
+   // address(es) by putting their indices into addressesToIgnore array
+   String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
+   wxArrayString ownAddresses = strutil_restore_array(':', returnAddrs);
+
+   wxArrayInt addressesToIgnore;
    for ( n = 0; n < uniqueAddresses.GetCount(); n++ )
    {
-      if ( replyToAddresses.Index(uniqueAddresses[n]) != wxNOT_FOUND )
+      String addr = uniqueAddresses[n];
+      if ( Message::FindAddress(replyToAddresses, addr) != wxNOT_FOUND ||
+           Message::FindAddress(ownAddresses, addr) != wxNOT_FOUND )
       {
-         uniqueAddresses.Remove(n);
+         addressesToIgnore.Add(n);
       }
    }
 
    size_t count = uniqueAddresses.GetCount();
    for ( n = 0; n < count; n++ )
    {
+      if ( addressesToIgnore.Index(n) != wxNOT_FOUND )
+      {
+         // ignore this one
+         continue;
+      }
+
       // reply to all?
       if ( params.flags & REPLY_FOLLOWUP )
       {
