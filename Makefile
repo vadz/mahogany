@@ -38,7 +38,7 @@ dep depend:
 	@echo "They should disappear if you run it again."
 	@echo "----------------------------------------------------------"
 	set -e; $(MAKE) -C include # generate some headers first
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
+	set -e; for i in $(SUB_DIRS); do $(MAKE) -i -C $$i $@; done
 
 config.status: 
 	@echo "You should really run ./configure with appropriate arguments."
