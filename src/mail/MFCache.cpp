@@ -54,7 +54,8 @@
 #define CACHE_VERSION_MINOR 1
 
 // the delimiter in the text file lines
-#define CACHE_DELIMITER ":"      // yes, it's a string, not a char
+#define CACHE_DELIMITER ":"      // string, not char, to allow concatenating
+#define CACHE_DELIMITER_CH (CACHE_DELIMITER[0])
 
 // the versions of the file format we know about
 enum CacheFileFormat
@@ -261,35 +262,23 @@ bool MfStatusCache::Load(const String& filename)
 
       MailFolderStatus status;
 
-      // almost a constant...
-      static const char chDelim = CACHE_DELIMITER[0];
-
       for ( size_t n = 1; n < count; n++ )
       {
          str = file[n];
 
-         // we have to unquote CACHE_DELIMITER which could occur in the folder
-         // name - see Save()
-         //
-         // this is safe to do as we can only have 2 consecutive delimiters in
-         // the folder name
-         str.Replace(CACHE_DELIMITER CACHE_DELIMITER, CACHE_DELIMITER);
-
-         // now tokenize it (can't use wxStringTokenizer because we can still
-         // have consecutive delimiters if the folder name contained double
-         // colon (unlikely but not impossible) and we'd have to code around
-         // it - better do it manually)
-
-         // first get the full folder name
-         const char *p = strchr(str, chDelim);
-         while ( p && p[0] && p[1] == chDelim )
+         // first get the end of the full folder name knowing that we should
+         // skip all "::" as they could have only resulted from quoting a ':'
+         // in the folder name and so the loop below looks for the first ':'
+         // not followed by another ':'
+         const char *p = strchr(str, CACHE_DELIMITER_CH);
+         while ( p && p[1] == CACHE_DELIMITER_CH )
          {
-            p = strchr(p, chDelim);
+            p = strchr(p + 2, CACHE_DELIMITER_CH);
          }
 
-         if ( !p || !p[0] )
+         if ( !p )
          {
-            wxLogError(_("Missing '%c' at line %d."), chDelim, n + 1);
+            wxLogError(_("Missing '%c' at line %d."), CACHE_DELIMITER_CH, n + 1);
 
             isFmtOk = false;
 
@@ -297,6 +286,9 @@ bool MfStatusCache::Load(const String& filename)
          }
 
          name = wxString(str.c_str(), p);
+
+         // now unquote ':' which were doubled by Save()
+         name.Replace(CACHE_DELIMITER CACHE_DELIMITER, CACHE_DELIMITER);
 
          // get the rest
          status.Init();
