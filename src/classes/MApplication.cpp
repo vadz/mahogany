@@ -303,8 +303,13 @@ MAppBase::ContinueStartup()
                               Composer::Recipient_Cc);
       composer->AddRecipients(m_cmdLineOptions->composer.newsgroups,
                               Composer::Recipient_Newsgroup);
-      composer->AddRecipients(m_cmdLineOptions->composer.to,
-                              Composer::Recipient_To);
+
+      // the "to" parameter may be a mailto: URL, pass it through our expansion
+      // function first
+      String to = m_cmdLineOptions->composer.to;
+      composer->ExpandRecipient(&to, true /* quiet */);
+
+      composer->AddRecipients(to, Composer::Recipient_To);
 
       composer->SetSubject(m_cmdLineOptions->composer.subject);
 

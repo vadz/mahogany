@@ -330,22 +330,9 @@ public:
                    wxTE_PROCESS_ENTER | wxTE_PROCESS_TAB)
    {
       m_composeView = composer;
-
-      m_lookupMode = READ_CONFIG(composer->GetProfile(),
-                                 MP_ADB_SUBSTRINGEXPANSION)
-                        ? AdbLookup_Substring : AdbLookup_StartsWith;
    }
 
-   // expand the text in the control using the address book(s): returns FALSE
-   // if no expansion took place (and also show a message in the status bar
-   // about this unless quiet is true)
-   //
-   // return the type of the address inferred from it: i.e. if the address
-   // starts with "To:", it will be Recipient_To &c - and if no explicit
-   // recipient type given, Recipient_Max will be returned.
-   //
-   // finally, if the address wasn't expanded at all (or is invalid), return
-   // Recipient_None
+   // expand the text in the control using the address book(s)
    Composer::RecipientType DoExpand(bool quiet = false);
 
    // callbacks
@@ -362,9 +349,6 @@ protected:
 private:
    // the composer
    wxComposeView *m_composeView;
-
-   // ADB lookup mode (substring or any)
-   int m_lookupMode;
 
    DECLARE_EVENT_TABLE()
 };
@@ -717,200 +701,18 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
 
 Composer::RecipientType wxAddressTextCtrl::DoExpand(bool quiet)
 {
-   // don't do anything for the newsgroups (TODO-NEWS: expand using .newsrc?)
-   if ( m_composeView->GetMode() == wxComposeView::Mode_News )
-   {
-      return Composer::Recipient_Newsgroup;
-   }
-
-   // try to expand the last component
    String text = GetValue();
-   text.Trim(FALSE); // trim spaces from both sides
-   text.Trim(TRUE);
 
-   // check for the lone '"' simplifies the code for finding the starting
-   // position below: it should be done here, otherwise the following loop
-   // will crash!
-   if ( text.empty() || text == '"' )
+   Composer::RecipientType
+      rcptType = m_composeView->ExpandRecipient(&text, quiet);
+
+   if ( rcptType != Composer::Recipient_None )
    {
-      // don't do anything
-      if ( !quiet )
-      {
-         wxLogStatus(GetComposer(),
-                     _("Nothing to expand - please enter something."));
-      }
-
-      return Composer::Recipient_None;
+      SetValue(text);
+      SetInsertionPointEnd();
    }
 
-   // find the starting position of the last address in the address list
-   size_t nLastAddr;
-   bool quoted = text.Last() == '"';
-   if ( quoted )
-   {
-      // just find the matching quote (not escaped)
-      const char *pStart = text.c_str();
-      const char *p;
-      for ( p = pStart + text.length() - 2; p >= pStart; p-- )
-      {
-         if ( *p == '"' )
-         {
-            // check that it's not escaped
-            if ( (p == pStart) || (*(p - 1) != '\\') )
-            {
-               // ok, found it!
-               break;
-            }
-         }
-      }
-
-      nLastAddr = p - pStart;
-   }
-   else // unquoted
-   {
-      // search back until the last address separator
-      for ( nLastAddr = text.length() - 1; nLastAddr > 0; nLastAddr-- )
-      {
-         char c = text[nLastAddr];
-         if ( (c == ',') || (c == ';') )
-            break;
-      }
-
-      if ( nLastAddr > 0 )
-      {
-         // move beyond the ',' or ';' which stopped the scan
-         nLastAddr++;
-      }
-
-      // the address will probably never start with spaces but if it does, it
-      // will be enough to just take it into quotes
-      while ( isspace(text[nLastAddr]) )
-      {
-         nLastAddr++;
-      }
-   }
-
-   // so now we've got the text we'll be trying to expand
-   String textOrig = text.c_str() + nLastAddr;
-
-   // do we have an explicit address type specifier
-   Composer::RecipientType addrType = Composer::Recipient_Max;
-   if ( textOrig.length() > 3 )
-   {
-      if ( textOrig[2u] == ':' )
-      {
-         if ( toupper(textOrig[0u]) == 'T' && toupper(textOrig[1u]) == 'O' )
-            addrType = Composer::Recipient_To;
-         else if ( toupper(textOrig[0u]) == 'C' && toupper(textOrig[1u]) == 'C' )
-            addrType = Composer::Recipient_Cc;
-      }
-      else if ( textOrig[3u] == ':' && textOrig(0, 3).Upper() == "BCC" )
-      {
-         addrType = Composer::Recipient_Bcc;
-      }
-
-      if ( addrType != Composer::Recipient_Max )
-      {
-         // erase the colon as well
-         textOrig.erase(0, addrType == Composer::Recipient_Bcc ? 4 : 3);
-      }
-   }
-
-   // remove "mailto:" prefix if it's there - this is convenient when you paste
-   // in an URL from the web browser
-   //
-   // TODO: add support for the mailto URL parameters, i.e. should support
-   //       things like "mailto:foo@bar.com?subject=Please%20help"
-   String newText;
-   if ( !textOrig.StartsWith("mailto:", &newText) )
-   {
-      // if the text already has a '@' inside it and looks like a full email
-      // address assume that it doesn't need to be expanded (this saves a lot
-      // of time as expanding a non existing address looks through all address
-      // books...)
-      size_t pos = textOrig.find('@');
-      if ( pos != String::npos && pos > 0 && pos < textOrig.length() )
-      {
-         // also check that the host part of the address is expanded - it
-         // should contain at least one dot normally
-         if ( strchr(textOrig.c_str() + pos + 1, '.') )
-         {
-            // looks like a valid address - nothing to do
-            newText = textOrig;
-         }
-      }
-
-      if ( newText.empty() )
-      {
-         wxArrayString expansions;
-         if ( !AdbExpand(expansions, textOrig, m_lookupMode,
-                        quiet ? NULL : GetComposer()) )
-         {
-            // cancelled, don't do anything
-            return Composer::Recipient_None;
-         }
-
-         // construct the replacement string(s)
-         size_t nExpCount = expansions.GetCount();
-         for ( size_t nExp = 0; nExp < nExpCount; nExp++ )
-         {
-            if ( nExp > 0 )
-               newText += CANONIC_ADDRESS_SEPARATOR;
-
-            wxString address(expansions[nExp]);
-
-            // sometimes we must quote the address
-            bool doQuote = strpbrk(address, ",;\"") != (const char *)NULL;
-            if ( doQuote )
-            {
-               newText += '"';
-
-               // escape all quotes
-               address.Replace("\"", "\\\"");
-            }
-
-            newText += address;
-
-            if ( doQuote )
-            {
-               newText += '"';
-            }
-         }
-      }
-   }
-
-   // find the end of the previous address
-   size_t nPrevAddrEnd;
-   if ( nLastAddr > 0 )
-   {
-      // undo "++" above
-      nLastAddr--;
-   }
-
-   for ( nPrevAddrEnd = nLastAddr; nPrevAddrEnd > 0; nPrevAddrEnd-- )
-   {
-      char c = text[nPrevAddrEnd];
-      if ( !isspace(c) && (c != ',') && (c != ';') )
-      {
-         // this character is a part of previous string, leave it there
-         nPrevAddrEnd++;
-
-         break;
-      }
-   }
-
-   // keep the text up to the address we expanded/processed
-   wxString oldText(text, nPrevAddrEnd);  // first nPrevAddrEnd chars
-   if ( !oldText.empty() )
-   {
-      // there was something before, add separator
-      oldText += CANONIC_ADDRESS_SEPARATOR;
-   }
-
-   SetValue(oldText + newText);
-   SetInsertionPointEnd();
-
-   return addrType;
+   return rcptType;
 }
 
 // ----------------------------------------------------------------------------
@@ -1616,6 +1418,209 @@ void wxComposeView::DoClear()
 // ----------------------------------------------------------------------------
 // wxComposeView address headers stuff
 // ----------------------------------------------------------------------------
+
+Composer::RecipientType
+wxComposeView::ExpandRecipient(String *textAddress, bool quiet)
+{
+   // don't do anything for the newsgroups (TODO-NEWS: expand using .newsrc?)
+   if ( m_mode == wxComposeView::Mode_News )
+   {
+      return Composer::Recipient_Newsgroup;
+   }
+
+   // try to expand the last component
+   String& text = *textAddress;
+   text.Trim(FALSE); // trim spaces from both sides
+   text.Trim(TRUE);
+
+   // check for the lone '"' simplifies the code for finding the starting
+   // position below: it should be done here, otherwise the following loop
+   // will crash!
+   if ( text.empty() || text == '"' )
+   {
+      // don't do anything
+      if ( !quiet )
+      {
+         wxLogStatus(GetFrame(),
+                     _("Nothing to expand - please enter something."));
+      }
+
+      return Composer::Recipient_None;
+   }
+
+   // find the starting position of the last address in the address list
+   size_t nLastAddr;
+   bool quoted = text.Last() == '"';
+   if ( quoted )
+   {
+      // just find the matching quote (not escaped)
+      const char *pStart = text.c_str();
+      const char *p;
+      for ( p = pStart + text.length() - 2; p >= pStart; p-- )
+      {
+         if ( *p == '"' )
+         {
+            // check that it's not escaped
+            if ( (p == pStart) || (*(p - 1) != '\\') )
+            {
+               // ok, found it!
+               break;
+            }
+         }
+      }
+
+      nLastAddr = p - pStart;
+   }
+   else // unquoted
+   {
+      // search back until the last address separator
+      for ( nLastAddr = text.length() - 1; nLastAddr > 0; nLastAddr-- )
+      {
+         char c = text[nLastAddr];
+         if ( (c == ',') || (c == ';') )
+            break;
+      }
+
+      if ( nLastAddr > 0 )
+      {
+         // move beyond the ',' or ';' which stopped the scan
+         nLastAddr++;
+      }
+
+      // the address will probably never start with spaces but if it does, it
+      // will be enough to just take it into quotes
+      while ( isspace(text[nLastAddr]) )
+      {
+         nLastAddr++;
+      }
+   }
+
+   // so now we've got the text we'll be trying to expand
+   String textOrig = text.c_str() + nLastAddr;
+
+   // do we have an explicit address type specifier
+   Composer::RecipientType addrType = Composer::Recipient_Max;
+   if ( textOrig.length() > 3 )
+   {
+      if ( textOrig[2u] == ':' )
+      {
+         if ( toupper(textOrig[0u]) == 'T' && toupper(textOrig[1u]) == 'O' )
+            addrType = Composer::Recipient_To;
+         else if ( toupper(textOrig[0u]) == 'C' && toupper(textOrig[1u]) == 'C' )
+            addrType = Composer::Recipient_Cc;
+      }
+      else if ( textOrig[3u] == ':' && textOrig(0, 3).Upper() == "BCC" )
+      {
+         addrType = Composer::Recipient_Bcc;
+      }
+
+      if ( addrType != Composer::Recipient_Max )
+      {
+         // erase the colon as well
+         textOrig.erase(0, addrType == Composer::Recipient_Bcc ? 4 : 3);
+      }
+   }
+
+   // remove "mailto:" prefix if it's there - this is convenient when you paste
+   // in an URL from the web browser
+   //
+   // TODO: add support for the mailto URL parameters, i.e. should support
+   //       things like "mailto:foo@bar.com?subject=Please%20help"
+   String newText;
+   if ( !textOrig.StartsWith("mailto:", &newText) )
+   {
+      // if the text already has a '@' inside it and looks like a full email
+      // address assume that it doesn't need to be expanded (this saves a lot
+      // of time as expanding a non existing address looks through all address
+      // books...)
+      size_t pos = textOrig.find('@');
+      if ( pos != String::npos && pos > 0 && pos < textOrig.length() )
+      {
+         // also check that the host part of the address is expanded - it
+         // should contain at least one dot normally
+         if ( strchr(textOrig.c_str() + pos + 1, '.') )
+         {
+            // looks like a valid address - nothing to do
+            newText = textOrig;
+         }
+      }
+
+      if ( newText.empty() )
+      {
+         wxArrayString expansions;
+
+         if ( !AdbExpand(expansions,
+                         textOrig,
+                         READ_CONFIG(GetProfile(), MP_ADB_SUBSTRINGEXPANSION)
+                           ? AdbLookup_Substring
+                           : AdbLookup_StartsWith,
+                         quiet ? NULL : this) )
+         {
+            // cancelled, don't do anything
+            return Composer::Recipient_None;
+         }
+
+         // construct the replacement string(s)
+         size_t nExpCount = expansions.GetCount();
+         for ( size_t nExp = 0; nExp < nExpCount; nExp++ )
+         {
+            if ( nExp > 0 )
+               newText += CANONIC_ADDRESS_SEPARATOR;
+
+            wxString address(expansions[nExp]);
+
+            // sometimes we must quote the address
+            bool doQuote = strpbrk(address, ",;\"") != (const char *)NULL;
+            if ( doQuote )
+            {
+               newText += '"';
+
+               // escape all quotes
+               address.Replace("\"", "\\\"");
+            }
+
+            newText += address;
+
+            if ( doQuote )
+            {
+               newText += '"';
+            }
+         }
+      }
+   }
+
+   // find the end of the previous address
+   size_t nPrevAddrEnd;
+   if ( nLastAddr > 0 )
+   {
+      // undo "++" above
+      nLastAddr--;
+   }
+
+   for ( nPrevAddrEnd = nLastAddr; nPrevAddrEnd > 0; nPrevAddrEnd-- )
+   {
+      char c = text[nPrevAddrEnd];
+      if ( !isspace(c) && (c != ',') && (c != ';') )
+      {
+         // this character is a part of previous string, leave it there
+         nPrevAddrEnd++;
+
+         break;
+      }
+   }
+
+   // keep the text up to the address we expanded/processed
+   wxString oldText(text, nPrevAddrEnd);  // first nPrevAddrEnd chars
+   if ( !oldText.empty() )
+   {
+      // there was something before, add separator
+      oldText += CANONIC_ADDRESS_SEPARATOR;
+   }
+
+   text = oldText + newText;
+
+   return addrType;
+}
 
 void
 wxComposeView::AddRecipientControls(const String& value, RecipientType rt)

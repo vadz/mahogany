@@ -178,6 +178,16 @@ public:
    */
    virtual void AddHeaderEntry(const String& entry, const String& value) = 0;
 
+   /**
+      Expand the given string: this method handles address book completion and
+      mailto: URLs parsing. It modifies the string passed to it in place.
+
+      @param text the text to expand, modified by the method
+      @param quite suppresses any interaction with the user if true
+      @return the inferred recipient type or Recipient_None if invalid address
+   */
+   virtual RecipientType ExpandRecipient(String *text, bool quiet = false) = 0;
+
    //@}
 
    /** @name Add/insert stuff into composer */
