@@ -5273,7 +5273,7 @@ case "$GCC" in yes)
 esac
 
 DEPFLAGS=
-if test "x$GXX" = "xyes"; then -o "x$CCOSTYPE" = "xosf"; then
+if test "x$GXX" = "xyes" -o "x$CCOSTYPE" = "xosf"; then
     DEPFLAGS="-MMD"
 else
             case "$OSTYPE" in

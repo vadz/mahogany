@@ -1173,7 +1173,7 @@ dnl
 dnl for now, we just support -MD on g++ and also OSF/1 Compaq cc compiler which
 dnl supports the same options
 DEPFLAGS=
-if test "x$GXX" = "xyes"; then -o "x$CCOSTYPE" = "xosf"; then
+if test "x$GXX" = "xyes" -o "x$CCOSTYPE" = "xosf"; then
     DEPFLAGS="-MMD"
 else
     dnl non-gcc compiler switches depend on platform (we assume that we use
