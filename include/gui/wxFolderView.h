@@ -198,6 +198,8 @@ public:
    /// update the folderview
    virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event);
    /// update the folderview
+   virtual void OnFolderStatusEvent(MEventFolderStatusData &event);
+   /// update the folderview
    virtual void OnFolderExpungeEvent(MEventFolderExpungeData &event);
    /// close the folder
    virtual void OnFolderClosedEvent(MEventFolderClosedData &event);

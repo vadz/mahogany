@@ -517,6 +517,11 @@ wxMApp::OnInit()
    wxHandleFatalExceptions();
 #endif
 
+#ifdef OS_WIN
+   // stupidly enough wxWin resets the default timestamp under Windows :-(
+   wxLog::SetTimestamp(_T("%X"));
+#endif // OS_WIN
+
    m_topLevelFrame = NULL;
 
 #ifdef USE_I18N

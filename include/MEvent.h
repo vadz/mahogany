@@ -19,9 +19,9 @@
 
 #include "MObject.h"
 
-// ----------------------------------------------------------------------------
-/**    MEvent ids for all kinds of events used in M. The name in the comment is the
-       MEventData-derived class which is used with this event
+/**
+   MEvent ids for all kinds of events used in M. The name in the comment is the
+   MEventData-derived class which is used with this event
 */
 enum MEventId
 {
@@ -170,6 +170,9 @@ private:
 
 /** MEventFolderUpdate Data - Does not carry any data apart from pointer to
     mailfolder.
+
+    This event should have been called MEventFolderNewMailData as it is sent by
+    MailFolderCC only when new mail arrives to the folder.
  */
 class MEventFolderUpdateData : public MEventWithFolderData
 {
@@ -182,7 +185,7 @@ public:
 };
 
 /**
- MEventFolderExpungeData: notifies about message expunge
+   MEventFolderExpungeData: notifies about message expunge
  */
 class MEventFolderExpungeData : public MEventWithFolderData
 {
@@ -259,6 +262,11 @@ private:
    (or the number of new, unread or other interesting categories of messages)
    changes. It is processed by the folder tree. When this event is received,
    you can query MfStatusCache for the number of messages in the folder.
+
+   The difference between this event and FolderUpdate one is that the latter is
+   only sent for an open folder and only if new mail appears in it (similarly,
+   FolderExpunge event is only sent when messages are expunged) while this
+   event is sent even if the folder is not opened and in both cases.
  */
 class MEventFolderStatusData : public MEventData
 {

@@ -3162,6 +3162,16 @@ wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
    }
 }
 
+// this function gets called when number of messages in this folder changed
+void
+wxFolderView::OnFolderStatusEvent(MEventFolderStatusData &event)
+{
+   if ( event.GetFolderName() == m_folderName )
+   {
+      Update();
+   }
+}
+
 // this is called when the status of one message changes
 void
 wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
