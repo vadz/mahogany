@@ -75,8 +75,7 @@ enum wxLayoutObjectType
 };
 
 /// Type used for coordinates in drawing. Must be signed.
-typedef int CoordType;  // changed from long to int, another
-// incompatible wxGTK change :-(
+typedef wxCoord CoordType;
 
 // Forward declarations.
 class wxLayoutList;
