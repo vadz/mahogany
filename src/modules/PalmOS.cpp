@@ -60,8 +60,6 @@
 #define MP_MOD_PALMOS_SCRIPT2_D ""
 
 
-
-
 // to prevent a warning from linux headers
 #define __STRICT_ANSI__
 #include <stdio.h>
@@ -70,10 +68,11 @@
 #include <unistd.h>
 #include <signal.h>
 
+#include <pi-address.h>     // for the addressbook
 #include <pi-source.h>
 #include <pi-socket.h>
 #include <pi-file.h>
-#include <pi-mail.h>
+#include <pi-mail.h>        // for the mailbox
 #include <pi-dlp.h>
 
 #include <sys/types.h>
@@ -157,6 +156,7 @@ public:
          remove(m_LockFile);
       }
    bool IsLocked() const { return m_Locked; }
+
 private:
    wxString m_Device;
    wxString m_LockFile;
@@ -177,6 +177,7 @@ class PalmOSModule : public MModule
    void Synchronise(void);
    void Configure(void);
    MMODULE_DEFINE(PalmOSModule)
+
 private:
    /** PalmOS constructor.
        As the class has no usable interface, this doesn´t do much, but 
@@ -194,9 +195,18 @@ private:
    bool IsConnected(void) const { return m_PiSocket != -1; }
    
    void GetConfig(void);
+
+   void GetAddresses(void);
    
    void SendEMails(void);
    void StoreEMails(void);
+
+// !!! for GetAddresses, will only be temporarily available
+   int write_field(FILE * out, char * source, int more);
+   int write_file(FILE * out, int db, struct AddressAppInfo * aai);
+   int match_category(char * buf, struct AddressAppInfo * aai);
+   void outchar(char c, FILE *out);
+// ---
    
    inline void ErrorMessage(const String &msg)
       { m_MInterface->Message(msg,NULL,"PalmOS module error!");wxYield(); }
@@ -209,6 +219,7 @@ private:
 private:
    int m_PiSocket;
    int m_MailDB;
+   int m_AddrDB;
    ProfileBase *m_Profile;
 
    int m_Dispose;
@@ -431,19 +442,210 @@ void PalmOSModule::Synchronise(void)
         m_Profile=NULL;
         return;
      }
+
      if(m_SyncMail)
      {
         SendEMails();
         StoreEMails();
+        
+        // here we close the opened database
+        if (m_MailDB) {
+            dlp_CloseDB(m_PiSocket, m_MailDB);
+        }
      }
+
      if(m_SyncAddr)
      {
-        ErrorMessage(_("Addressbook synchronisation not yet implemented."));
+        // this does currently nothing more but save the
+        // whole addressbook to /tmp/palm
+        GetAddresses();
+        
+        // close the database again
+        if (m_AddrDB) {
+            dlp_CloseDB(m_PiSocket, m_AddrDB);
+        }
      }
+     
      Disconnect();
      m_Profile->DecRef();
      m_Profile=NULL;
   }
+}
+
+/* I N C O M P L E T E !!!
+** and does by no mean what you´d expect ;-)
+**
+** I promise to tidy it up!
+*/
+
+int defaultcategory = 0;
+int augment;
+int realentry[19] =   { 0, 1, 13, 2, 
+                        3, 4, 5, 6, 7, 
+                        8, 9, 10, 11, 12,
+                        14, 15, 16, 17,
+                        18 };
+
+int encodechars = 0;
+
+void
+PalmOSModule::GetAddresses(void) {
+  int l;
+  char buf[0xffff];
+  struct AddressAppInfo aai;
+  char * defaultcategoryname = 0;
+
+  FILE* f = fopen("/tmp/palm", "w");
+  if (f == NULL) {
+    ErrorMessage(_("Could not open output file to save addresses!"));
+    return;
+  }
+
+  /* Open the Address database, store access handle in db */
+  if(dlp_OpenDB(m_PiSocket, 0, 0x80|0x40, "AddressDB", &m_AddrDB) < 0) {
+    ErrorMessage(_("Unable to open AddressDB"));
+    dlp_AddSyncLogEntry(m_PiSocket, "Unable to open AddressDB.\n");
+    fclose(f);
+    exit(1);
+  }
+ErrorMessage(_("AddressBook opened"));
+  l = dlp_ReadAppBlock(m_PiSocket, m_AddrDB, 0, (unsigned char *)buf, 0xffff);
+  unpack_AddressAppInfo(&aai, (unsigned char *)buf, l);
+
+  if (defaultcategoryname)
+    defaultcategory = match_category(defaultcategoryname,&aai);
+  else
+    defaultcategory = 0; /* Unfiled */
+    
+  write_file(f, m_AddrDB, &aai);
+  fclose(f);
+}
+
+int
+PalmOSModule::match_category(char * buf, struct AddressAppInfo * aai)
+{
+  int i;
+  for (i=0;i<16;i++)
+    if (strcasecmp(buf, aai->category.name[i])==0)
+      return i;
+  return atoi(buf); /* 0 is default */
+}
+
+int
+PalmOSModule::write_field(FILE * out, char * source, int more) {
+
+  putc('"', out);
+  while (*source) {
+    outchar(*source, out);
+    source++;
+  }
+  putc('"',out);
+  
+  if (more==1)
+    putc(',',out);
+  else if (more==2)
+    putc(';',out);
+  else if (more==0)
+    putc('\n',out);
+  
+  return 0;
+}
+
+
+int 
+PalmOSModule::write_file(FILE * out, int db, struct AddressAppInfo * aai)
+{
+  struct Address a;
+  int i,j,l;
+  char buf[0xffff];
+  int category,attribute;
+  
+  for(i=0;
+      (j=dlp_ReadRecordByIndex(m_PiSocket, db, i, (unsigned char *)buf, 0, &l, &attribute, &category))>=0;
+      i++)
+      {
+    if (attribute & dlpRecAttrDeleted)
+      continue;
+    unpack_Address(&a, (unsigned char *)buf, l);
+
+/* Simplified system */
+#if 0    
+    write_field(out, "Category", 1);
+    write_field(out, aai->CategoryName[category],-1);
+    
+    for (j=0;j<19;j++) {
+      if (a.entry[j]) {
+        putc(',',out);
+        putc('\n',out);
+        if ( (j>=4) && (j<=8) )
+          write_field(out, aai->phoneLabels[a.phoneLabel[j-4]], 1);
+        else
+          write_field(out, aai->labels[j], 1);
+        write_field(out, a.entry[j], -1);
+      }
+    }
+    putc('\n',out);
+#endif
+    
+/* Complex system */
+#if 1
+    if (augment && (category || a.showPhone)) {
+      write_field(out,aai->category.name[category],2);
+      if (a.showPhone) {
+        write_field(out,aai->phoneLabels[a.showPhone],2);
+      }
+    }
+
+    for (j=0;j<19;j++) {
+#ifdef NOT_ALL_LABELS
+      if (augment && (j >= 4) && (j<=8))
+        if (a.phoneLabel[j-4] != j-4)
+          write_field(out, aai->phoneLabels[a.phoneLabel[j-4]], 2);
+      if (a.entry[realentry[j]])
+        write_field(out, a.entry[realentry[j]], 1);
+
+#else  /* print the phone labels if there is something in the field */
+      if (a.entry[realentry[j]]) {
+	if (augment && (j >= 4) && (j<=8))
+	  write_field(out, aai->phoneLabels[a.phoneLabel[j-4]], 2);
+        write_field(out, a.entry[realentry[j]], 1);
+      }
+#endif
+      else
+        write_field(out, "", 1);
+    }
+    
+    sprintf(buf, "%d", (attribute & dlpRecAttrSecret) ? 1 : 0);
+    write_field(out, buf, 0);
+    
+#endif
+  }
+  
+  return 0;
+}
+
+
+void 
+PalmOSModule::outchar(char c, FILE *out) {
+
+/*  if (encodechars) {
+    switch(c) {
+      case '"':   putc('"',  out);   putc('"',  out);  break;
+      case '\b':  putc('\\', out);   putc('b',  out);  break;
+      case '\f':  putc('\\', out);   putc('f',  out);  break;
+      case '\n':  putc('\\', out);   putc('n',  out);  break;
+      case '\t':  putc('\\', out);   putc('t',  out);  break;
+      case '\r':  putc('\\', out);   putc('r',  out);  break;
+      case '\v':  putc('\\', out);   putc('v',  out);  break;
+      case '\\':  putc('\\', out);   putc('\\', out);  break;
+      default:    putc(c, out);                        break;
+    }
+  }
+  else {
+*/
+    putc(c, out);
+    if (c == '"')
+      putc('"', out);
 }
 
 void
@@ -1025,13 +1227,11 @@ PalmOSModule::Configure(void)
 {
    ProfileBase * p= m_MInterface->CreateModuleProfile(MODULE_NAME);
 
-   ShowCustomOptionsDialog(gs_OptionsPageDesc, NULL);
+//   ShowCustomOptionsDialog(gs_OptionsPageDesc, NULL);
 
 
-#if 0
    wxPalmOSDialog dlg(p);
    (void) dlg.ShowModal();
-#endif
    p->DecRef();
    
 }
