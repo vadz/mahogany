@@ -598,8 +598,7 @@ wxFolderView::OpenMessages(const wxArrayInt& selections)
    int i;
    for(i = 0; i < n; i++)
    {
-      unsigned long uid = m_MailFolder->GetHeaderInfo(selections[i])->GetUId();
-      mptr = m_MailFolder->GetMessage(uid);
+      mptr = m_MailFolder->GetMessage(selections[i]);
       title = mptr->Subject() + " - " + mptr->From();
       mv = GLOBAL_NEW wxMessageViewFrame(m_MailFolder,selections[i],
                                          this);
