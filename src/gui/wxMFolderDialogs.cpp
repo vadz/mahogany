@@ -2688,9 +2688,11 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(bool isAdvancedUser,
                         )
 {
    // don't forget to update both the array above and the enum!
-   wxASSERT( WXSIZEOF(s_aszImages) == FolderCreatePage_Max + 1 );
+   ASSERT( WXSIZEOF(s_aszImages) == FolderCreatePage_Max + 1 );
 
-   Profile *profile = Profile::CreateProfile("");
+   // use the parent profile for the default values
+   Profile_obj profile(dlg->GetParentFolderName());
+   CHECK_RET( profile, "failed to create profile in wxFolderCreateNotebook" );
 
    // create and add the pages: some are always present, others are only shown
    // to "advanced" users (because they're not generally useful and may confuse
@@ -2715,8 +2717,6 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(bool isAdvancedUser,
       (void)new wxOptionsPageAdb(this, profile);
       (void)new wxOptionsPageHelpers(this, profile);
    }
-
-   profile->DecRef();
 }
 
 // -----------------------------------------------------------------------------
