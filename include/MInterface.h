@@ -17,7 +17,7 @@
 
 
 
-class mApplication;
+#include "MApplication.h"
 #include "gui/wxMDialogs.h"
 
 
