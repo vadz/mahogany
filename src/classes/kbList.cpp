@@ -6,6 +6,9 @@
  * $Id$          *
  *                                                                  *
  * $Log$
+ * Revision 1.6  1998/07/08 11:56:56  KB
+ * M compiles and runs on Solaris 2.5/gcc 2.8/c-client gso
+ *
  * Revision 1.5  1998/06/27 20:07:18  KB
  * several bug fixes for kbList
  * started adding my layout stuff
@@ -33,6 +36,7 @@
 #   pragma implementation "kbList.h"
 #endif
 
+#include   "Mconfig.h"
 #include   "kbList.h"
 
 

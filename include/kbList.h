@@ -5,6 +5,9 @@
  *                                                                  *
  * $Id$
  * $Log$
+ * Revision 1.7  1998/07/08 11:56:49  KB
+ * M compiles and runs on Solaris 2.5/gcc 2.8/c-client gso
+ *
  * Revision 1.6  1998/06/27 20:06:10  KB
  * Added my layout code.
  *
@@ -264,7 +267,7 @@ public: \
    inline void insert(iterator & i, type *element) \
       { kbList::insert(i, (void *) element); } \
    \
-   void erase(iterator & i) \
+   inline void erase(iterator & i) \
       { kbList::erase(i); } \
    \
    inline iterator begin(void) const \

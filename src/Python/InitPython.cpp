@@ -6,6 +6,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.8  1998/07/08 11:56:52  KB
+ * M compiles and runs on Solaris 2.5/gcc 2.8/c-client gso
+ *
  * Revision 1.7  1998/06/14 12:24:10  KB
  * started to move wxFolderView to be a panel, Python improvements
  *
@@ -66,7 +69,7 @@ InitPython(void)
       tmp;
 
    // initialise python interpreter
-   tmp = "";
+   tmp = "PYTHONPATH=";
    tmp += mApplication.GetLocalDir();
    tmp += "/scripts";
    tmp += PATH_SEPARATOR;
@@ -79,7 +82,7 @@ InitPython(void)
       tmp += PATH_SEPARATOR;
       tmp += getenv("PYTHONPATH");
    }
-   setenv("PYTHONPATH", tmp.c_str(), 1);
+   putenv(tmp.c_str());
    // initialise the interpreter
    Py_Initialize();
       

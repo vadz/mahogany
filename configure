@@ -621,6 +621,7 @@ SEARCH_INCLUDE="\
                               \
     /usr/openwin/include      \
     /usr/openwin/share/include \
+    /opt/include              \
     "
 
 # add additional src directories:
@@ -2510,7 +2511,7 @@ echo "configure:2509: checking for wxWindows(wxGTK) libraries" >&5
 ac_find_includes=
 for ac_dir in $SEARCH_INCLUDE;
   do
-    if test -f "$ac_dir/wxWindows/include/wx/wx.h" || test -L "$ac_dir/libwxWindows/include/wx/wx.h.$ac_extension"; then
+    if test -f "$ac_dir/wxWindows/include/wx/wx.h" ; then
       ac_find_includes=$ac_dir
       break
     fi
@@ -2522,7 +2523,7 @@ ac_find_libraries=
 for ac_dir in $SEARCH_LIB;
   do
     for ac_extension in a so sl; do
-      if test -f "$ac_dir/libwx_gtk.$ac_extension" || test -L "$ac_dir/libwx_gtk.$ac_extension"; then
+      if test -f "$ac_dir/libwx_gtk.$ac_extension"; then
         ac_find_libraries=$ac_dir
         break 2
       fi
@@ -2571,7 +2572,7 @@ echo "configure:2570: checking for gtk libraries" >&5
 ac_find_includes=
 for ac_dir in $SEARCH_INCLUDE;
   do
-    if test -f "$ac_dir/gtk/gtk.h" || test -L "$ac_dir/libgtk/gtk.h.$ac_extension"; then
+    if test -f "$ac_dir/gtk/gtk.h" ; then
       ac_find_includes=$ac_dir
       break
     fi
@@ -2583,7 +2584,7 @@ ac_find_libraries=
 for ac_dir in $SEARCH_LIB;
   do
     for ac_extension in a so sl; do
-      if test -f "$ac_dir/libgtk.$ac_extension" || test -L "$ac_dir/libgtk.$ac_extension"; then
+      if test -f "$ac_dir/libgtk.$ac_extension"; then
         ac_find_libraries=$ac_dir
         break 2
       fi
@@ -2644,7 +2645,7 @@ echo "configure:2643: checking for wxWindows(Xt) libraries" >&5
 ac_find_includes=
 for ac_dir in $SEARCH_INCLUDE;
   do
-    if test -f "$ac_dir/wxxt/wx/wx.h" || test -L "$ac_dir/libwxxt/wx/wx.h.$ac_extension"; then
+    if test -f "$ac_dir/wxxt/wx/wx.h"; then
       ac_find_includes=$ac_dir
       break
     fi
@@ -2656,7 +2657,7 @@ ac_find_libraries=
 for ac_dir in $SEARCH_LIB;
   do
     for ac_extension in a so sl; do
-      if test -f "$ac_dir/libwx_xt.$ac_extension" || test -L "$ac_dir/libwx_xt.$ac_extension"; then
+      if test -f "$ac_dir/libwx_xt.$ac_extension"; then
         ac_find_libraries=$ac_dir
         break 2
       fi
@@ -2731,7 +2732,7 @@ echo "configure:2730: checking for XPM library" >&5
 ac_find_includes=
 for ac_dir in $SEARCH_INCLUDE;
   do
-    if test -f "$ac_dir/X11/xpm.h" || test -L "$ac_dir/libX11/xpm.h.$ac_extension"; then
+    if test -f "$ac_dir/X11/xpm.h" ; then
       ac_find_includes=$ac_dir
       break
     fi
@@ -2743,7 +2744,7 @@ ac_find_libraries=
 for ac_dir in $SEARCH_LIB;
   do
     for ac_extension in a so sl; do
-      if test -f "$ac_dir/libXpm.$ac_extension" || test -L "$ac_dir/libXpm.$ac_extension"; then
+      if test -f "$ac_dir/libXpm.$ac_extension" ; then
         ac_find_libraries=$ac_dir
         break 2
       fi
@@ -2797,7 +2798,7 @@ echo "configure:2796: checking for Python" >&5
 ac_find_includes=
 for ac_dir in $SEARCH_INCLUDE;
   do
-    if test -f "$ac_dir/Python.h" || test -L "$ac_dir/libPython.h.$ac_extension"; then
+    if test -f "$ac_dir/Python.h"; then
       ac_find_includes=$ac_dir
       break
     fi
@@ -2809,7 +2810,7 @@ ac_find_libraries=
 for ac_dir in $SEARCH_LIB;
   do
     for ac_extension in a so sl; do
-      if test -f "$ac_dir/lib$PYTHON_LIB.$ac_extension" || test -L "$ac_dir/lib$PYTHON_LIB.$ac_extension"; then
+      if test -f "$ac_dir/lib$PYTHON_LIB.$ac_extension" ; then
         ac_find_libraries=$ac_dir
         break 2
       fi
@@ -2905,7 +2906,7 @@ ac_find_libraries=
 for ac_dir in $SEARCH_LIB;
   do
     for ac_extension in a so sl; do
-      if test -f "$ac_dir/libswigpy.$ac_extension" || test -L "$ac_dir/libswigpy.$ac_extension"; then
+      if test -f "$ac_dir/libswigpy.$ac_extension"; then
         ac_find_libraries=$ac_dir
         break 2
       fi
@@ -2947,7 +2948,7 @@ ac_find_libraries=
 for ac_dir in $SEARCH_LIB;
   do
     for ac_extension in a so sl; do
-      if test -f "$ac_dir/libdl.$ac_extension" || test -L "$ac_dir/libdl.$ac_extension"; then
+      if test -f "$ac_dir/libdl.$ac_extension"; then
         ac_find_libraries=$ac_dir
         break 2
       fi
@@ -2983,7 +2984,7 @@ ac_find_libraries=
 for ac_dir in $SEARCH_LIB;
   do
     for ac_extension in a so sl; do
-      if test -f "$ac_dir/libintl.$ac_extension" || test -L "$ac_dir/libintl.$ac_extension"; then
+      if test -f "$ac_dir/libintl.$ac_extension"; then
         ac_find_libraries=$ac_dir
         break 2
       fi
@@ -3017,7 +3018,7 @@ echo "configure:3016: checking for compface library" >&5
 ac_find_includes=
 for ac_dir in $SEARCH_INCLUDE;
   do
-    if test -f "$ac_dir/compface.h" || test -L "$ac_dir/libcompface.h.$ac_extension"; then
+    if test -f "$ac_dir/compface.h"; then
       ac_find_includes=$ac_dir
       break
     fi

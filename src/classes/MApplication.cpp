@@ -6,6 +6,9 @@
  * $Id$         *
  *                                                                  *
  * $Log$
+ * Revision 1.24  1998/07/08 11:56:55  KB
+ * M compiles and runs on Solaris 2.5/gcc 2.8/c-client gso
+ *
  * Revision 1.23  1998/06/23 08:46:45  KB
  * fixed #pragma
  *
@@ -256,12 +259,8 @@ MAppBase::OnStartup()
    tmp += PATH_SEPARATOR;
    if(getenv("PATH"))
       tmp += getenv("PATH");
-#  ifdef  __WINDOWS__
-      // FIXME @@@@ what are setenv() params? can putenv be used instead?
-#  else
-      setenv("PATH", tmp.c_str(), 1);
-#  endif
-
+   tmp="PATH="+tmp;
+   putenv(tmp.c_str());
    // initialise python interpreter
 #  ifdef  USE_PYTHON
       InitPython();

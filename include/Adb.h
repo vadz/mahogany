@@ -14,9 +14,8 @@
 #endif
 
 #ifndef   USE_PCH
-//#   include   <list>
-#   include   "kbList.h"
 #   include   <Mcommon.h>
+#   include   "kbList.h"
 #   include   <CommonBase.h>
 #   include   <MFrame.h>
 #   include   <guidef.h>
