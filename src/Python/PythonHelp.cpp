@@ -1,11 +1,22 @@
-/*-*- c++ -*-********************************************************
- * PythonHelp.cc - Helper functions for the python interface        *
- *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
- *                                                                  *
- * $Id$
- *
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M
+// File name:   PythonHelp.cpp: functions for working with Python interpreter
+// Purpose:     Python C API is too low level, we wrap it in functions below
+// Author:      Karsten Ballueder, Vadim Zeitlin
+// Modified by:
+// Created:     1997
+// CVS-ID:      $Id$
+// Copyright:   (c) 1997-2004 Mahogany Team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
+
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
 
 #include   "Mpch.h"
 
@@ -23,10 +34,35 @@
 
 #include   "Mdefaults.h"
 
+// ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
 extern const MOption MP_USEPYTHON;
 
-// from InitPython.cc:
+// from InitPython.cpp
 extern PyObject *Python_MinitModule;
+
+// ----------------------------------------------------------------------------
+// M_PyObject: safe wrapper for PyObject which never forgets to Py_DECREF()
+// ----------------------------------------------------------------------------
+
+class M_PyObject
+{
+public:
+   M_PyObject(PyObject *pyObj) : m_pyObj(pyObj) { }
+
+   operator PyObject *() const { return m_pyObj; }
+
+   ~M_PyObject() { if ( m_pyObj ) Py_DECREF(m_pyObj); }
+
+private:
+   PyObject *m_pyObj;
+};
+
+// ============================================================================
+// implementation
+// ============================================================================
 
 PyObject *PyH_LoadModule(const char *modname);            /* returns module object */
 
@@ -334,50 +370,100 @@ PyH_RunFunction(const char *funcname, const char *modname,          /* load from
     return PyH_ConvertResult(presult, resfmt, cresult);  /* convert result to C */
 }
 
-void
-PyH_RunScript(FILE *file, const char *filename)
+bool
+PyH_RunScript(const char *filename)
 {
    // first check if Python is not disabled
-   if ( READ_APPCONFIG(MP_USEPYTHON) )
+   if ( !READ_APPCONFIG(MP_USEPYTHON) )
    {
-      if ( PyRun_SimpleFile(file, (char *) filename) != 0 )
-      {
-          // for some reason PyH_GetErrorMessage() does return anything in this
-          // case, why? (FIXME)
-          ERRORMESSAGE(("Python error while executing '%s'", filename));
-      }
+      // normally we shouldn't even get here
+      FAIL_MSG( _T("Python is disabled, can't run script!") );
+
+      return false;
    }
+
+   // the canonical Python API for what we want is PyRun_SimpleFile() but we
+   // can't use it here because it takes a "FILE *" and STDIO data structures
+   // are compiler and build (debug/release) dependent and so this call crashes
+   // unless the program was built using the same settings as python.dll which
+   // is unacceptable for us
+   //
+   // so emulate this call manually
+   String execCmd = _T("execfile('");
+
+   // backslashes are special in Python strings, escape them (could also use
+   // raw strings...)
+   for ( const char *p = filename; *p; p++ )
+   {
+      if ( *p == _T('\\') || *p == _T('\'') )
+         execCmd += _T('\\');
+
+      execCmd += *p;
+   }
+
+   execCmd += _T("')");
+
+   // PyImport_AddModule() and PyModule_GetDict() return borrowed references so
+   // we shouldn't free them
+   PyObject *dict;
+   PyObject *mainMod = PyImport_AddModule("__main__");
+   if ( mainMod )
+      dict = PyModule_GetDict(mainMod);
    else
+      dict = NULL;
+
+   if ( !dict )
    {
-       FAIL_MSG( _T("Python is disabled, can't run script!") );
+      // this is not supposed to ever happen but what can we do if it does??
+      ERRORMESSAGE((_("Fatal Python problem: no main module dictionary.")));
+
+      return false;
    }
+
+   M_PyObject rc = PyRun_String(execCmd, Py_file_input, dict, dict);
+   if ( !rc )
+   {
+      String err = PyH_GetErrorMessage();
+      if ( !err.empty() )
+      {
+         ERRORMESSAGE((_T("%s"), err.c_str()));
+      }
+
+      ERRORMESSAGE((_("Execution of the Python script \"%s\" failed."),
+                    filename));
+
+      return false;
+   }
+
+   return true;
 }
 
 
-void
+bool
 PyH_RunMScript(const char *scriptname)
 {
    wxString filename = mApplication->GetGlobalDir();
+   if ( filename.empty() )
+      filename = mApplication->GetDataDir();
 
    filename << DIR_SEPARATOR << _T("scripts") << DIR_SEPARATOR << scriptname;
 
-   FILE *file = fopen(filename,"rb");
-   if(file)
-   {
-      PyH_RunScript(file,filename);
-      fclose(file);
-   }
-   else
-   {
-      ERRORMESSAGE((_("Cannot run Python script \"%s\""), scriptname));
-   }
+   return PyH_RunScript(filename);
 }
 
 #define GPEM_ERROR(what) {errorMsg = "<Error getting traceback - " what ">";goto done;}
 
 
-void PyH_GetErrorMessage(String *errString)
+String PyH_GetErrorMessage()
 {
+   PyObject *exc_typ, *exc_val, *exc_tb;
+   /* Fetch the error state now before we cruch it */
+   PyErr_Fetch(&exc_typ, &exc_val, &exc_tb);
+   if ( !exc_typ )
+   {
+      return String();
+   }
+
    char *result = NULL;
    char *errorMsg = NULL;
    PyObject *modStringIO = NULL;
@@ -387,9 +473,6 @@ void PyH_GetErrorMessage(String *errString)
    PyObject *obFuncTB = NULL;
    PyObject *argsTB = NULL;
    PyObject *obResult = NULL;
-   PyObject *exc_typ, *exc_val, *exc_tb;
-   /* Fetch the error state now before we cruch it */
-   PyErr_Fetch(&exc_typ, &exc_val, &exc_tb);
 
    /* Import the modules we need - StringIO and traceback */
    modStringIO = PyImport_ImportModule("StringIO");
@@ -425,9 +508,6 @@ void PyH_GetErrorMessage(String *errString)
    obResult = PyObject_CallObject(obFuncStringIO, NULL);
    if (obResult==NULL) GPEM_ERROR("getvalue() failed.");
 
-   /* And it should be a string all ready to go - duplicate it. */
-   if (!PyString_Check(obResult))
-      GPEM_ERROR("getvalue() did not return a string");
    result = strutil_strdup(PyString_AsString(obResult));
  done:
    if (result==NULL && errorMsg != NULL)
@@ -441,12 +521,13 @@ void PyH_GetErrorMessage(String *errString)
    Py_XDECREF(obResult);
 
    /* Restore the exception state */
+   String errString;
    PyErr_Restore(exc_typ, exc_val, exc_tb);
    if(result)
-      *errString = result;
-   else
-      *errString = "Unknown error";
+      errString = result;
    free(result);
+
+   return errString;
 }
 
 #endif // USE_PYTHON

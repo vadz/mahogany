@@ -82,19 +82,25 @@ PyH_RunFunction(const char *funcname, const char *modname,          /* load from
                 const char *resfmt,  void *cresult,           /* convert to c/c++ */
                 const char *argfmt,  ... /* arg, arg... */ );  /* convert to python */
 
-/** Function to run a simple python script in the global namespace.
-    @param file FILE * of open file
-    @param filename just for debugging purposes
-*/
-void
-PyH_RunScript(FILE *file, const char *filename);
+/**
+   Function to run a simple python script in the global namespace.
 
-/** Function to run a simple python script in the global namespace.
-    The scriptname is relative to M's script directory. Really just a
-    convenient wrapper around PyH_RunScript().
-    @param scriptname name of the script to execute
+   @param filename to load the script from
+   @return true if script was executed successfully, false otherwise
 */
-void
+bool
+PyH_RunScript(const char *filename);
+
+/**
+   Function to run a simple python script in the global namespace.
+
+   The scriptname is relative to M's script directory. Really just a
+   convenient wrapper around PyH_RunScript().
+
+   @param scriptname name of the script to execute
+   @return true if script was executed successfully, false otherwise
+*/
+bool
 PyH_RunMScript(const char *scriptname);
 
 
@@ -115,10 +121,12 @@ PyH_RunMScript(const char *scriptname);
 */
 int PyH_ConvertResult(PyObject *presult, const char *resFormat, void *resTarget);
 
-/** Gets the last error message/traceback from Python and stores it in a String.
-    @param errString where to store the error message/traceback
+/**
+  Gets the last error message/traceback from Python and stores it in a String.
+
+  @return the error message
 */
-void PyH_GetErrorMessage(String *errString);
+String PyH_GetErrorMessage();
 
 #endif // PYTHONHELP_H
 
