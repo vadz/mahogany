@@ -65,6 +65,7 @@ ADDON=
 
 RESTARTED=no
 ORIGINALSCRIPT=
+SKIPRESTART=no
 
 while [ ! -z "$1" ]
 do
@@ -96,6 +97,9 @@ do
 	"x--restart--")
                 RESTARTED=yes
                 ORIGINALSCRIPT=$0
+	;;
+	"x--norestart")
+		SKIPRESTART=yes
 	;;
 	*)
 	echo "Illegal argument $1"
@@ -320,6 +324,10 @@ if [ ! -d $MPREFIX ] ; then mkdir $MPREFIX ; fi
 #
 SCRIPT=$0 # where are we
 
+if [ $SKIPRESTART = yes ]
+then
+  echo "Skipping script update."
+else
 if [ $RESTARTED = no ]
 then
   echo "This is script $CVSID"
@@ -343,7 +351,7 @@ else
   echo "This is script $CVSID"
   echo "Continuing..."
 fi
-
+fi
 
 echo "OSTYPE=$OSTYPE"
 echo "OSTYPE_ADDON=$OSTYPE_ADDON"
