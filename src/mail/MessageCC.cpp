@@ -1000,16 +1000,23 @@ MessageCC::GetPartData(const MimePart& mimepart, unsigned long *lenptr)
          m_partContentPtr = rfc822_base64((unsigned char *)cptr, size, lenptr);
          break;
 
-      case ENCQUOTEDPRINTABLE:   // human-readable 8-as-7 bit data
-         m_partContentPtr = rfc822_qprint((unsigned char *)cptr, size, lenptr);
-         break;
-
       case  ENCBINARY:     // 8 bit binary data
          // don't use string functions, string may contain NULs
          *lenptr = size;
          m_partContentPtr = fs_get(size);
          memcpy(m_partContentPtr, cptr, size);
          break;
+
+      case ENCQUOTEDPRINTABLE:   // human-readable 8-as-7 bit data
+         m_partContentPtr = rfc822_qprint((unsigned char *)cptr, size, lenptr);
+
+         // some broken mailers sent messages with QP specified as the content
+         // transfer encoding in the headers but don't encode the message
+         // properly - in this case show it as plain text which is better than
+         // not showing it at all
+         if ( m_partContentPtr )
+            break;
+         //else: fall through and treat it as plain text
 
       case ENC7BIT:        // 7 bit SMTP semantic data
       case ENC8BIT:        // 8 bit SMTP semantic data
