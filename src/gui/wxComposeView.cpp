@@ -2919,6 +2919,8 @@ wxComposeView::OnIdentChange(wxCommandEvent& event)
       {
          DoClear();
 
+         // forget previously read template, it could have changed
+         m_template.clear();
          DoInitText();
       }
    }
