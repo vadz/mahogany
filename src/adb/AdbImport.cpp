@@ -28,6 +28,7 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
+   #include "MApplication.h"
 
    #include <wx/log.h>          // for wxLogDebug
 #endif // USE_PCH

@@ -34,6 +34,8 @@
 
 #ifndef USE_PCH
 #   include "Mcommon.h"
+
+#   include <wx/frame.h>                // for wxFrame
 #endif // USE_PCH
 
 #include "modules/Filters.h"

@@ -28,12 +28,14 @@
 #  include "Mcommon.h"
 #  include "gui/wxMApp.h"
 #  include "MHelp.h"
+#  include "gui/wxIconManager.h"
 
 #  include <wx/menu.h>
 #  include <wx/dirdlg.h>
 #endif // USE_PCH
 
 #include "MFolder.h"
+#include "ASMailFolder.h"
 
 // these 3 are needed only for SEARCH command processing
 #include "MSearch.h"

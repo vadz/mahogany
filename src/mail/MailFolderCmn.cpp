@@ -29,6 +29,7 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
+#  include "guidef.h"
 #  include "strutil.h"
 #  include "MApplication.h"
 #  include "Mdefaults.h"
@@ -43,6 +44,7 @@
 #include "UIdArray.h"
 
 #include "MSearch.h"
+#include "Message.h"
 
 #include "MFilter.h"
 #include "modules/Filters.h"

@@ -23,8 +23,6 @@
 
 #include "MThread.h"
 
-#include "MFolder.h"
-
 #include "MailFolderCmn.h"
 
 #include <wx/fontenc.h>    // for wxFontEncoding
@@ -93,13 +91,13 @@ public:
    /** return the full folder name
        @return the folder's name
    */
-   virtual String GetName(void) const { return m_mfolder->GetFullName(); }
+   virtual String GetName(void) const;
 
    /// return the folder type
-   virtual MFolderType GetType(void) const { return m_mfolder->GetType(); }
+   virtual MFolderType GetType(void) const;
 
    /// return the folder flags
-   virtual int GetFlags(void) const { return m_mfolder->GetFlags(); }
+   virtual int GetFlags(void) const;
 
    /// Return IMAP spec
    virtual String GetImapSpec(void) const { return m_ImapSpec; }
@@ -446,8 +444,7 @@ private:
    bool HasLogin() const { return !m_login.empty() && !m_password.empty(); }
 
    /// do we need to authentificate?
-   bool NeedsAuthInfo() const
-      { return !HasLogin() && m_mfolder->NeedsLogin(); }
+   bool NeedsAuthInfo() const;
 
    //@}
 

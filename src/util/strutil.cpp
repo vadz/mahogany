@@ -21,12 +21,15 @@
 #  include "Mcommon.h"
 #  include "strutil.h"
 #  include "Profile.h"
+#  include "kbList.h"
+#  include "MApplication.h"
 #  include "Mcclient.h"
 #  include "Mdefaults.h"
 #endif // USE_PCH
 
 #include "gui/wxMDialogs.h"
 #include "Mpers.h"
+#include "MailFolder.h"
 
 #ifdef OS_UNIX
 #   include <pwd.h>

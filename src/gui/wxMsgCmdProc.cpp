@@ -27,6 +27,9 @@
    #include "Mcommon.h"
    #include "strutil.h"          // for strutil_uniq_array()
    #include "Mdefaults.h"
+   #include "guidef.h"
+   #include "MApplication.h"
+   #include "gui/wxIconManager.h"
 
    #include <wx/layout.h>
    #include <wx/statbox.h>
@@ -48,6 +51,7 @@
 #include "Composer.h"
 #include "SendMessage.h"
 #include "MFolder.h"
+#include "ASMailFolder.h"
 
 #include "MsgCmdProc.h"
 

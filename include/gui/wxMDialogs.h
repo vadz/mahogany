@@ -14,8 +14,7 @@
 #endif
 
 #ifndef     USE_PCH
-#   include "gui/wxIconManager.h"
-#   include "MApplication.h"
+#   include "FolderType.h"
 
 #   include <wx/bmpbuttn.h>
 #endif // USE_PCH
@@ -539,14 +538,7 @@ public:
 class wxXFaceButton : public wxBitmapButton
 {
 public:
-   wxXFaceButton(wxWindow *parent, int id,  wxString filename)
-      {
-         m_Parent = parent;
-         wxBitmap bmp = mApplication->GetIconManager()->GetBitmap(_T("noxface"));
-         wxBitmapButton::Create(parent,id, bmp, wxDefaultPosition,
-                                wxSize(64,64));
-         SetFile(filename);
-      }
+   wxXFaceButton(wxWindow *parent, int id,  wxString filename);
    void SetFile(const wxString &filename);
    wxString GetFile(void) const { return m_XFace; }
 private:
@@ -557,10 +549,6 @@ private:
 };
 
 /// returns the argument if it's !NULL of the top-level application frame
-inline wxWindow *GetDialogParent(const wxWindow *parent)
-{
-  return parent == NULL ? mApplication->TopLevelFrame()
-                        : GetFrame(parent);
-}
+extern wxWindow *GetDialogParent(const wxWindow *parent);
 
 #endif  //WXMDIALOGS_H

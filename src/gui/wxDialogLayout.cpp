@@ -23,10 +23,15 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
+#  include "guidef.h"
+#  include "MApplication.h"
+#  include "Profile.h"
 #  include "strutil.h"
 #  include "MHelp.h"
 #  include "gui/wxMIds.h"
 #  include "Mdefaults.h"
+#  include "gui/wxMFrame.h"
+#  include "gui/wxIconManager.h"
 
 #  include <wx/layout.h>
 #  include <wx/stattext.h>      // for wxStaticText
@@ -1165,6 +1170,31 @@ wxManuallyLaidOutDialog::CreateStdButtonsAndBox(const wxString& boxTitle,
    box->SetConstraints(c);
 
    return box;
+}
+
+void wxManuallyLaidOutDialog::OnHelp(wxCommandEvent & /*ev*/)
+{
+   mApplication->Help(m_helpId, this);
+}
+
+// ----------------------------------------------------------------------------
+// wxProfileSettingsEditDialog
+// ----------------------------------------------------------------------------
+
+wxProfileSettingsEditDialog::wxProfileSettingsEditDialog(Profile *profile,
+                                    const wxString& profileKey,
+                                    wxWindow *parent,
+                                    const wxString& title)
+   : wxManuallyLaidOutDialog(parent, title, profileKey)
+{
+   m_profile = profile;
+   m_profile->IncRef(); // paranoid
+   m_hasChanges = FALSE;
+}
+
+wxProfileSettingsEditDialog::~wxProfileSettingsEditDialog()
+{
+   m_profile->DecRef();
 }
 
 // -----------------------------------------------------------------------------

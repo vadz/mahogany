@@ -25,6 +25,8 @@
 #ifndef USE_PCH
 #  include "Mcommon.h"
 #  include "Mdefaults.h"
+#  include "guidef.h"
+#  include "MApplication.h"
 
 #  include <wx/statbox.h>
 #  include <wx/stattext.h>      // for wxStaticText
@@ -33,6 +35,7 @@
 
 #include <wx/tokenzr.h>
 
+#include "ASMailFolder.h"
 #include "MFolder.h"
 #include "ListReceiver.h"
 

@@ -26,6 +26,7 @@
 class ASMailFolder;
 class MessageView;
 class MFolder;
+class UIdArray;
 
 class WXDLLEXPORT wxFrame;
 

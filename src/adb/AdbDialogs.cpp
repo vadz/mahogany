@@ -23,6 +23,9 @@
 #ifndef  USE_PCH
 #   include "Mcommon.h"
 #   include "MApplication.h"
+#   include "guidef.h"
+#   include "Profile.h"
+#   include "gui/wxIconManager.h"
 
 #   include <wx/layout.h>
 #   include <wx/listbox.h>              // for wxListBox

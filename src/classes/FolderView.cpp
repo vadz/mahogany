@@ -28,6 +28,7 @@
 
 #include "FolderView.h"
 
+#include "ASMailFolder.h"
 #include "gui/wxMainFrame.h"
 
 // ----------------------------------------------------------------------------
@@ -141,3 +142,7 @@ Profile *FolderView::GetFolderProfile() const
    return profile;
 }
 
+MailFolder *FolderView::GetMailFolder() const
+{
+   return m_ASMailFolder ? m_ASMailFolder->GetMailFolder() : NULL;
+}

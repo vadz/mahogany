@@ -28,6 +28,10 @@
 #  include "Mcommon.h"
 #  include "strutil.h"
 #  include "Mdefaults.h"
+#  include "MApplication.h"
+#  include "Profile.h"
+
+#  include <wx/frame.h>                 // for wxFrame
 #endif // USE_PCH
 
 #include "Mversion.h"
@@ -36,6 +40,8 @@
 #include "LogCircle.h"
 
 #include "AddressCC.h"
+#include "Message.h"
+#include "MFolder.h"
 
 // has to be included before SendMessage.h, as it includes windows.h which
 // defines SendMessage under Windows

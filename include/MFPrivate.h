@@ -11,6 +11,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "MEvent.h"
+#include "MailFolder.h"
 
 /**
    MFSuspendInteractivity: resets the folders interactive frame thus preventing

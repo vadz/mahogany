@@ -24,6 +24,8 @@
 #ifndef USE_PCH
    #include "Mcommon.h"
    #include "Mdefaults.h"
+   #include "guidef.h"
+   #include "MApplication.h"
 
    #include <wx/menu.h>
    #ifdef OS_WIN // cygwin and mingw

@@ -22,6 +22,8 @@
 #endif
 
 #ifndef USE_PCH
+#  include "gui/wxMFrame.h"
+#  include "kbList.h"
 #endif // USE_PCH
 
 #include "Composer.h"         // for Composer

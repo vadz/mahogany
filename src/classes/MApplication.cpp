@@ -24,6 +24,7 @@
 #ifndef   USE_PCH
 #  include "Mcommon.h"
 #  include "strutil.h"
+#  include "kbList.h"
 #  include "Profile.h"
 #  include "MApplication.h"
 #  include "Mcclient.h"         // For env_parameters
@@ -36,6 +37,7 @@
 #include "MPython.h"
 
 #include "MFolder.h"
+#include "Message.h"
 #include "FolderView.h"       // for OpenFolderViewFrame()
 #include "MailFolder.h"
 #include "HeaderInfo.h"

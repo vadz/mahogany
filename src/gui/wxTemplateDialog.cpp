@@ -24,6 +24,8 @@
 #ifndef USE_PCH
 #  include "Mcommon.h"
 #  include "strutil.h"
+#  include "guidef.h"
+#  include "Profile.h"
 
 #  include <wx/layout.h>
 #  include <wx/statbox.h>

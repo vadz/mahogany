@@ -28,6 +28,8 @@
 #   include "MHelp.h"
 #   include "Profile.h"
 #   include "Mdefaults.h"
+#   include "gui/wxMFrame.h"
+#   include "gui/wxIconManager.h"
 #endif //USE_PCH
 
 #include "wx/persctrl.h"

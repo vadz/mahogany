@@ -19,14 +19,13 @@
 // -----------------------------------------------------------------------------
 
 #ifndef USE_PCH
-#  include "Profile.h"
-
 #  include <wx/textctrl.h>
 #endif // USE_PCH
 
 #include <wx/persctrl.h>   // needed for wxPNotebook
 
 #include "gui/wxMDialogs.h"
+#include "MEvent.h"
 
 // use wxListbook instead of wxNotebook if available
 #if wxUSE_LISTBOOK
@@ -156,8 +155,7 @@ public:
    virtual inline wxSize GetButtonSize() const { return wxSize(wBtn, hBtn); }
 
    // event handlers
-   virtual inline void OnHelp(wxCommandEvent & /*ev*/)
-      { mApplication->Help(m_helpId, this); }
+   virtual void OnHelp(wxCommandEvent & /*ev*/);
 
 protected:
    // the constants for CreateStdButtonsAndBox() second argument
@@ -325,18 +323,9 @@ public:
    wxProfileSettingsEditDialog(Profile *profile,
                                        const wxString& profileKey,
                                        wxWindow *parent,
-                                       const wxString& title)
-      : wxManuallyLaidOutDialog(parent, title, profileKey)
-   {
-      m_profile = profile;
-      m_profile->IncRef(); // paranoid
-      m_hasChanges = FALSE;
-   }
+                                       const wxString& title);
 
-   virtual ~wxProfileSettingsEditDialog()
-      {
-         m_profile->DecRef();
-      }
+   virtual ~wxProfileSettingsEditDialog();
    virtual Profile *GetProfile() const { return m_profile; }
 
    virtual bool HasChanges() const { return m_hasChanges; }

@@ -30,12 +30,15 @@
    #include "Mcommon.h"
    #include "Mdefaults.h"
    #include "Mcclient.h"      // need THREADNODE
+   
+   #include <wx/frame.h>                // for wxFrame
 #endif // USE_PCH
 
 #include "HeaderInfoImpl.h"
 
 #include "Sequence.h"
 #include "UIdArray.h"
+#include "Message.h"
 
 #include "gui/wxMDialogs.h"         // for MProgressInfo
 

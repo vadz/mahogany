@@ -22,6 +22,8 @@
    #include "Sorting.h"
    #include "Mdefaults.h"
    #include "MHelp.h"
+   #include "guidef.h"
+   #include "Profile.h"
 
    #include <wx/layout.h>
    #include <wx/stattext.h>     // for wxStaticText

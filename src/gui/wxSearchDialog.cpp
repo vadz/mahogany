@@ -25,6 +25,7 @@
 
    #include "MHelp.h"
    #include "Mdefaults.h"
+   #include "guidef.h"
 
    #include <wx/layout.h>
    #include <wx/stattext.h>     // for wxStaticText

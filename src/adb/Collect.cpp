@@ -25,6 +25,7 @@
    #include "Mcommon.h"
 
    #include <wx/log.h>
+   #include <wx/frame.h>
 #endif // USE_PCH
 
 #include "gui/wxMDialogs.h"
@@ -32,6 +33,7 @@
 #include "Address.h"
 #include "Collect.h"
 #include "Message.h"
+#include "MailFolder.h"
 
 #include "adb/AdbManager.h"
 #include "adb/AdbBook.h"

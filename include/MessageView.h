@@ -43,6 +43,7 @@ class MsgCmdProc;
 class ProcessEvtHandler;
 class ProcessInfo;
 class ViewFilter;
+class FolderView;
 
 WX_DEFINE_ARRAY(ProcessInfo *, ArrayProcessInfo);
 

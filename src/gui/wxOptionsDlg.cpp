@@ -28,6 +28,8 @@
 #  include "Sorting.h"
 #  include "Threading.h"
 #  include "Mdefaults.h"
+#  include "MApplication.h"
+#  include "guidef.h"
 
 #  include <wx/statbox.h>
 #  include <wx/stattext.h>
@@ -2972,6 +2974,13 @@ void wxOptionsPage::OnUpdateUIListboxBtns(wxUpdateUIEvent& event)
          event.Enable(lbox->GetSelection() != -1);
       }
    }
+}
+
+void wxOptionsPage::SetProfile(Profile *profile)
+{
+   SafeDecRef(m_Profile);
+   m_Profile = profile;
+   SafeIncRef(m_Profile);
 }
 
 // ----------------------------------------------------------------------------

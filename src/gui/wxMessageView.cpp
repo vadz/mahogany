@@ -42,6 +42,7 @@
 #include "UIdArray.h"
 
 #include "MessageTemplate.h"
+#include "Message.h"
 
 #include "gui/wxMessageView.h"
 

@@ -23,6 +23,7 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
+#  include "guidef.h"
 #  include "MApplication.h"
 #  include "Mdefaults.h"
 #  include "Profile.h"            // FIXME: Why is this header needed?
@@ -31,6 +32,7 @@
 #  include <wx/toolbar.h>
 #  include <wx/choice.h>
 #  include <wx/menu.h>
+#  include <wx/frame.h>                 // for wxFrame
 #endif // USE_PCH
 
 #include "gui/wxIdentityCombo.h"        // for CreateIdentCombo

@@ -32,6 +32,7 @@
 #  include "strutil.h"
 #  include "Mdefaults.h"
 
+#  include <wx/utils.h>      // for wxRemoveFile
 #  include <wx/dynarray.h>      // for WX_DEFINE_ARRAY
 #endif // USE_PCH
 

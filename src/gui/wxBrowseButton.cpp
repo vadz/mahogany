@@ -22,6 +22,9 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
+#  include "guidef.h"
+#  include "MApplication.h"
+#  include "gui/wxIconManager.h"
 
 #  include <wx/statbmp.h>
 #  include <wx/layout.h>

@@ -36,7 +36,7 @@
 // compiled in -- but keep it for the future
 //#define USE_SUBSCRIBE
 
-ASMailFolder::ResultImpl::~ResultImpl()
+ASMailFolderResultImpl::~ASMailFolderResultImpl()
 {
    if ( m_Mf )
       m_Mf->DecRef();

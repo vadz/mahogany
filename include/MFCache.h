@@ -24,6 +24,7 @@
 #include "CacheFile.h"           // base class
 
 #include "MEvent.h"
+#include "MFStatus.h"
 
 WX_DEFINE_ARRAY(MailFolderStatus *, MfStatusArray);
 

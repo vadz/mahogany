@@ -25,6 +25,7 @@
    #include "Mcommon.h"
    #include "sysutil.h"
    #include "Mdefaults.h"
+   #include "MApplication.h"
 
    #include <wx/textdlg.h>
 #endif //USE_PCH

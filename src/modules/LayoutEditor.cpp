@@ -349,7 +349,7 @@ unsigned long LayoutEditor::ComputeHash() const
 
 void LayoutEditor::Clear()
 {
-   Options& options = (Options &)GetOptions();     // const_cast
+   ComposerOptions& options = (ComposerOptions &)GetOptions(); // const_cast
 
    wxFont font;
    if ( !options.m_font.empty() )

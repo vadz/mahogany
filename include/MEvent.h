@@ -90,20 +90,16 @@ private:
 // forward decl
 class MailFolder;
 
-// FIXME: this shouldn't be needed! Opaque type?
-#include "ASMailFolder.h"
-
 /// MEventWithFolderData - an event data object containing a folder pointer
 class MEventWithFolderData : public MEventData
 {
 public:
    /// ctor takes the (string) id for the event
    MEventWithFolderData(MEventId id = MEventId_Null,
-                        MailFolder *mf = NULL)
-      : MEventData(id) { m_Folder = mf; SafeIncRef(m_Folder); }
+                        MailFolder *mf = NULL);
 
    /// virtual dtor as in any base class
-   virtual ~MEventWithFolderData() { SafeDecRef(m_Folder); }
+   virtual ~MEventWithFolderData();
 
    /** Get the folder associated.
        If you need the folder after the MEvent object disappears, you
@@ -420,6 +416,7 @@ private:
 /** MEventASFolderResult Data - Carries a ASMailFolder::Result object
     with the result of an asynchronous operation on the folder.
  */
+class ASMailFolderResult;
 class MEventASFolderResultData : public MEventData
 {
 public:
@@ -431,10 +428,10 @@ public:
       }
    ~MEventASFolderResultData()
       { m_ResultData->DecRef(); }
-   ASMailFolder::Result *GetResult(void) const
+   ASMailFolderResult *GetResult(void) const
       {
          m_ResultData->IncRef();
-         return ( ASMailFolder::Result *) m_ResultData;
+         return ( ASMailFolderResult *) m_ResultData;
       }
 private:
    MObjectRC  *m_ResultData;

@@ -28,6 +28,7 @@
 #   include "Mcommon.h"
 #   include "MApplication.h"
 #   include "strutil.h"
+#   include "kbList.h"
 #endif // USE_PCH
 
 #include "MModule.h"

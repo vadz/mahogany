@@ -14,9 +14,13 @@
 #   include "MApplication.h"
 #   include "gui/wxIconManager.h"
 #   include "Mdefaults.h"
+#   include "gui/wxMFrame.h"
+
+#   include <wx/frame.h>                // for wxFrame
 #endif // USE_PCH
 
 #include "MFStatus.h"
+#include "MailFolder.h"
 
 #include "miscutil.h"
 

@@ -28,6 +28,13 @@ class wxWindow;
 #include "MailFolder.h"
 #include "Message.h"
 
+class ASMailFolderResult;
+class ASMailFolderResultImpl;
+class ASMailFolderResultInt;
+class ASMailFolderResultUIdType;
+class ASMailFolderResultMessage;
+class ASMailFolderResultFolderExists;
+
 /**
    ASMailFolder abstract base class, represents anything containig mails.
 
@@ -64,6 +71,7 @@ public:
    /**@name Result classes containing return values from
    operations. */
    //@{
+
    /** For the Result class, we need one identifier for every
        asynchronous operation to identify what happened.
    */
@@ -87,180 +95,14 @@ public:
       Op_MarkRead,
       Op_MarkUnread
    };
-    /** A structure containing the return values from an operation.
-        This will get passed in an MEvent to notify other parts of the
-        application that an operation has finished.
-    */
-   class Result : public MObjectRC
-   {
-   public:
-      /// Returns the user data.
-      virtual UserData GetUserData(void) const = 0;
-      /** Returns a pointer to the ASMailFolder from which this
-          event originated.
-      */
-      /// Returns the ticket for this operation.
-      virtual Ticket GetTicket(void) const = 0;
-      /// Returns the ASMailFolder issuing this result.
-      virtual ASMailFolder *GetFolder(void) const = 0;
-      /// Returns an OperationId to tell what happened.
-      virtual OperationId GetOperation(void) const = 0;
-      /// Returns the list of message uids affected by the operation.
-      virtual UIdArray * GetSequence(void) const = 0;
-   };
 
-   /** Common code shared by all class Result implementations. */
-   class ResultImpl : public Result
-   {
-   public:
-      virtual UserData GetUserData(void) const { return m_UserData; }
-      virtual Ticket GetTicket(void) const { return m_Ticket; }
-      virtual OperationId   GetOperation(void) const { return m_Id; }
-      virtual ASMailFolder *GetFolder(void) const { return m_Mf; }
-      virtual UIdArray * GetSequence(void) const { return m_Seq; }
-   protected:
-      ResultImpl(ASMailFolder *mf,
-                 Ticket t,
-                 OperationId id,
-                 UIdArray * mc,
-                 UserData ud)
-         {
-            m_Id = id;
-            m_Ticket = t;
-            m_UserData = ud;
-            m_Seq = mc;
-
-            m_Mf = mf;
-            if ( m_Mf )
-               m_Mf->IncRef();
-         }
-
-      virtual ~ResultImpl();
-
-   private:
-      OperationId   m_Id;
-      ASMailFolder *m_Mf;
-      Ticket        m_Ticket;
-      UserData      m_UserData;
-      UIdArray *    m_Seq;
-
-      MOBJECT_DEBUG(ASMailFolder::ResultImpl)
-   };
-   /** Holds the result from an operation which can be expressed as an
-       integer value. Used for all boolean success values.
-   */
-   class ResultInt : public ResultImpl
-   {
-   public:
-      int GetValue(void) const { return m_Value; }
-      static ResultInt *Create(ASMailFolder *mf,
-                               Ticket t,
-                               OperationId id,
-                               UIdArray * mc,
-                               int value,
-                               UserData ud)
-         { return new ResultInt(mf, t, id, mc, value, ud); }
-   protected:
-      ResultInt(ASMailFolder *mf,
-                Ticket t,
-                OperationId id,
-                UIdArray * mc,
-                int value,
-                UserData ud)
-         : ResultImpl(mf, t, id, mc, ud)
-         { m_Value = value; }
-   private:
-      int         m_Value;
-   };
-   /** Holds the result from an operation which can be expressed as an
-       UIdType value. Used for all boolean success values.
-   */
-   class ResultUIdType : public ResultImpl
-   {
-   public:
-      UIdType GetValue(void) const { return m_Value; }
-      static ResultUIdType *Create(ASMailFolder *mf,
-                                   Ticket t,
-                                   OperationId id,
-                                   UIdArray * mc,
-                                   UIdType value,
-                                   UserData ud)
-         { return new ResultUIdType(mf, t, id, mc, value, ud); }
-   protected:
-      ResultUIdType(ASMailFolder *mf,
-                    Ticket t,
-                    OperationId id,
-                    UIdArray * mc,
-                    int value,
-                    UserData ud)
-         : ResultImpl(mf, t, id, mc, ud)
-         { m_Value = value; }
-   private:
-      UIdType         m_Value;
-   };
-   /** Holds the result from a GetMessage() and returns the message pointer.
-   */
-   class ResultMessage : public ResultImpl
-   {
-   public:
-      static ResultMessage *Create(ASMailFolder *mf,
-                                   Ticket t,
-                                   UIdArray * mc,
-                                   Message *msg,
-                                   UIdType uid,
-                                   UserData ud)
-         { return new ResultMessage(mf, t, mc, msg, uid, ud); }
-      Message * GetMessage(void) const { return m_Message; }
-      unsigned long GetUId(void) const { return m_uid; }
-   protected:
-      ResultMessage(ASMailFolder *mf, Ticket t,
-                    UIdArray * mc, Message *msg,
-                    UIdType uid, UserData ud)
-         : ResultImpl(mf, t, Op_GetMessage, mc, ud)
-         {
-            m_Message = msg;
-            if(m_Message) m_Message->IncRef();
-            m_uid =  uid;
-         }
-      ~ResultMessage() { if(m_Message) m_Message->DecRef(); }
-   private:
-      Message *m_Message;
-      UIdType  m_uid;
-   };
-   /** Holds a single folder name found in a ListFolders() call.
-   */
-   class ResultFolderExists : public ResultImpl
-   {
-   public:
-      static ResultFolderExists *Create(ASMailFolder *mf,
-                                         Ticket t,
-                                         const String &name,
-                                         char delimiter,
-                                         long attrib,
-                                         UserData ud)
-         { return new ResultFolderExists(mf, t, name, delimiter, attrib, ud); }
-
-      String GetName(void) const { return m_Name; }
-      char GetDelimiter(void) const { return m_Delim; }
-      long GetAttributes(void) const { return m_Attrib; }
-
-   protected:
-      ResultFolderExists(ASMailFolder *mf, Ticket t,
-                          const String &name, char delimiter, long attrib,
-                          UserData ud)
-         : ResultImpl(mf, t, Op_ListFolders, NULL, ud)
-         {
-            m_Name = name;
-            m_Delim = delimiter;
-            m_Attrib = attrib;
-         }
-   private:
-      String m_Name;
-      long m_Attrib;
-      char m_Delim;
-   };
-
-
+   typedef ASMailFolderResult Result;
+   typedef ASMailFolderResultImpl ResultImpl;
+   typedef ASMailFolderResultInt ResultInt;
+   typedef ASMailFolderResultUIdType ResultUIdType;
+   typedef ASMailFolderResultMessage ResultMessage;
+   typedef ASMailFolderResultFolderExists ResultFolderExists;
+   
    //@}
 
 
@@ -530,6 +372,179 @@ public:
    virtual void UnLockFolder(void) = 0;
    //@}
 
+};
+
+ /** A structure containing the return values from an operation.
+     This will get passed in an MEvent to notify other parts of the
+     application that an operation has finished.
+ */
+class ASMailFolderResult : public MObjectRC
+{
+public:
+   /// Returns the user data.
+   virtual UserData GetUserData(void) const = 0;
+   /** Returns a pointer to the ASMailFolder from which this
+       event originated.
+   */
+   /// Returns the ticket for this operation.
+   virtual Ticket GetTicket(void) const = 0;
+   /// Returns the ASMailFolder issuing this result.
+   virtual ASMailFolder *GetFolder(void) const = 0;
+   /// Returns an ASMailFolder::OperationId to tell what happened.
+   virtual ASMailFolder::OperationId GetOperation(void) const = 0;
+   /// Returns the list of message uids affected by the operation.
+   virtual UIdArray * GetSequence(void) const = 0;
+};
+   
+/** Common code shared by all class Result implementations. */
+class ASMailFolderResultImpl : public ASMailFolder::Result
+{
+public:
+   virtual UserData GetUserData(void) const { return m_UserData; }
+   virtual Ticket GetTicket(void) const { return m_Ticket; }
+   virtual ASMailFolder::OperationId GetOperation(void) const { return m_Id; }
+   virtual ASMailFolder *GetFolder(void) const { return m_Mf; }
+   virtual UIdArray * GetSequence(void) const { return m_Seq; }
+protected:
+   ASMailFolderResultImpl(ASMailFolder *mf,
+              Ticket t,
+              ASMailFolder::ASMailFolder::OperationId id,
+              UIdArray * mc,
+              UserData ud)
+      {
+         m_Id = id;
+         m_Ticket = t;
+         m_UserData = ud;
+         m_Seq = mc;
+
+         m_Mf = mf;
+         if ( m_Mf )
+            m_Mf->IncRef();
+      }
+
+   virtual ~ASMailFolderResultImpl();
+
+private:
+   ASMailFolder::OperationId   m_Id;
+   ASMailFolder *m_Mf;
+   Ticket        m_Ticket;
+   UserData      m_UserData;
+   UIdArray *    m_Seq;
+
+   MOBJECT_DEBUG(ASMailFolder::ResultImpl)
+};
+/** Holds the result from an operation which can be expressed as an
+    integer value. Used for all boolean success values.
+*/
+class ASMailFolderResultInt : public ASMailFolder::ResultImpl
+{
+public:
+   int GetValue(void) const { return m_Value; }
+   static ASMailFolder::ResultInt *Create(ASMailFolder *mf,
+                            Ticket t,
+                            ASMailFolder::OperationId id,
+                            UIdArray * mc,
+                            int value,
+                            UserData ud)
+      { return new ASMailFolder::ResultInt(mf, t, id, mc, value, ud); }
+protected:
+   ASMailFolderResultInt(ASMailFolder *mf,
+             Ticket t,
+             ASMailFolder::OperationId id,
+             UIdArray * mc,
+             int value,
+             UserData ud)
+      : ASMailFolder::ResultImpl(mf, t, id, mc, ud)
+      { m_Value = value; }
+private:
+   int         m_Value;
+};
+/** Holds the result from an operation which can be expressed as an
+    UIdType value. Used for all boolean success values.
+*/
+class ASMailFolderResultUIdType : public ASMailFolder::ResultImpl
+{
+public:
+   UIdType GetValue(void) const { return m_Value; }
+   static ASMailFolder::ResultUIdType *Create(ASMailFolder *mf,
+                                Ticket t,
+                                ASMailFolder::OperationId id,
+                                UIdArray * mc,
+                                UIdType value,
+                                UserData ud)
+      { return new ASMailFolder::ResultUIdType(mf, t, id, mc, value, ud); }
+protected:
+   ASMailFolderResultUIdType(ASMailFolder *mf,
+                 Ticket t,
+                 ASMailFolder::OperationId id,
+                 UIdArray * mc,
+                 int value,
+                 UserData ud)
+      : ASMailFolder::ResultImpl(mf, t, id, mc, ud)
+      { m_Value = value; }
+private:
+   UIdType         m_Value;
+};
+/** Holds the result from a GetMessage() and returns the message pointer.
+*/
+class ASMailFolderResultMessage : public ASMailFolder::ResultImpl
+{
+public:
+   static ASMailFolder::ResultMessage *Create(ASMailFolder *mf,
+                                Ticket t,
+                                UIdArray * mc,
+                                Message *msg,
+                                UIdType uid,
+                                UserData ud)
+      { return new ASMailFolder::ResultMessage(mf, t, mc, msg, uid, ud); }
+   Message * GetMessage(void) const { return m_Message; }
+   unsigned long GetUId(void) const { return m_uid; }
+protected:
+   ASMailFolderResultMessage(ASMailFolder *mf, Ticket t,
+                 UIdArray * mc, Message *msg,
+                 UIdType uid, UserData ud)
+      : ASMailFolder::ResultImpl(mf, t, ASMailFolder::Op_GetMessage, mc, ud)
+      {
+         m_Message = msg;
+         if(m_Message) m_Message->IncRef();
+         m_uid =  uid;
+      }
+   ~ASMailFolderResultMessage() { if(m_Message) m_Message->DecRef(); }
+private:
+   Message *m_Message;
+   UIdType  m_uid;
+};
+/** Holds a single folder name found in a ListFolders() call.
+*/
+class ASMailFolderResultFolderExists : public ASMailFolder::ResultImpl
+{
+public:
+   static ASMailFolder::ResultFolderExists *Create(ASMailFolder *mf,
+                                      Ticket t,
+                                      const String &name,
+                                      char delimiter,
+                                      long attrib,
+                                      UserData ud)
+      { return new ASMailFolder::ResultFolderExists(mf, t, name, delimiter, attrib, ud); }
+
+   String GetName(void) const { return m_Name; }
+   char GetDelimiter(void) const { return m_Delim; }
+   long GetAttributes(void) const { return m_Attrib; }
+
+protected:
+   ASMailFolderResultFolderExists(ASMailFolder *mf, Ticket t,
+                       const String &name, char delimiter, long attrib,
+                       UserData ud)
+      : ASMailFolder::ResultImpl(mf, t, ASMailFolder::Op_ListFolders, NULL, ud)
+      {
+         m_Name = name;
+         m_Delim = delimiter;
+         m_Attrib = attrib;
+      }
+private:
+   String m_Name;
+   long m_Attrib;
+   char m_Delim;
 };
 
 /** A useful helper class to keep tickets for us. */

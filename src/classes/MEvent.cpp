@@ -22,6 +22,7 @@
 #ifndef  USE_PCH
 #   include "Mcommon.h"
 #   include "kbList.h"
+#   include "guidef.h"
 #   include "Profile.h"
 #   include "MApplication.h"
 
@@ -331,3 +332,14 @@ MEventOptionsChangeData::~MEventOptionsChangeData()
    SafeDecRef(m_profile);
 }
 
+MEventWithFolderData::MEventWithFolderData(MEventId id,MailFolder *mf)
+   : MEventData(id)
+{
+   m_Folder = mf;
+   SafeIncRef(m_Folder);
+}
+
+MEventWithFolderData::~MEventWithFolderData()
+{
+   SafeDecRef(m_Folder);
+}

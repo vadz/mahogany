@@ -28,6 +28,7 @@
    #include <wx/menu.h>
 #endif //USE_PCH
 
+#include "MimePart.h"
 #include "MessageView.h"
 #include "gui/wxMenuDefs.h"
 

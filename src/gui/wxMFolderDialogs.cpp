@@ -63,6 +63,8 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
+#  include "guidef.h"
+#  include "MApplication.h"
 #  include "strutil.h"
 #  include "Mdefaults.h"
 
@@ -72,6 +74,7 @@
 
 #include "MFolderDialogs.h"
 #include "MFolder.h"
+#include "MailFolder.h"
 
 #include "gui/wxOptionsPage.h"
 #include "gui/wxBrowseButton.h"

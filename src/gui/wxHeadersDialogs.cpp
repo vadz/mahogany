@@ -48,6 +48,10 @@
 
 #  include "strutil.h"   // strutil_flatten_array()
 #  include "Mdefaults.h"
+#  include "Profile.h"
+#  include "guidef.h"
+#  include "MApplication.h"
+#  include "gui/wxIconManager.h"
 #endif // USE_PCH
 
 #include <wx/imaglist.h>        // for wxImageList

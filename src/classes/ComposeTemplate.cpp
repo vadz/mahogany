@@ -28,6 +28,8 @@
 #  include "MApplication.h"
 #  include "Profile.h"
 #  include "Mdefaults.h"
+
+#  include <wx/frame.h>
 #endif // USE_PCH
 
 #include "TemplateDialog.h"
@@ -36,6 +38,7 @@
 #include "gui/wxMDialogs.h"
 
 #include "Address.h"
+#include "Message.h"
 
 #include "MessageView.h"
 

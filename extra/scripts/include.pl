@@ -369,6 +369,8 @@ sub FindIncludesRecursivelyHelper
    {
       next if ! /^ *# *include *[<"]([^"]*)[">]/; # Count system includes too
       my ($include) = $1;
+      next if $nosystemincludes && /<[^"]*>/;
+      next if $noccincludes && IncludePath($file,$include) =~ /c-client/;
       if( $dependencies{$include} != 1 )
       {
          $dependencies{$include} = 1;
@@ -432,6 +434,10 @@ sub CalculateStatistics
    StatisticsForExtension(".h");
    print "Recursive usage counts for headers\n";
    InvertedDependencies();
+   print "Recursive in-project include counts for headers\n";
+   $nosystemincludes = 1;
+   $noccincludes = 1;
+   StatisticsForExtension(".h");
    if( -e $ARGV[1] )
    {
       print "One file dependencies\n";

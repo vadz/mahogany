@@ -28,6 +28,8 @@
    #include "Mcommon.h"
 #endif // USE_PCH
 
+#include "ASMailFolder.h"
+
 #include "ListReceiver.h"
 
 // needed to be able to use DECLARE_AUTOREF() macro

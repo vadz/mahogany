@@ -19,13 +19,15 @@ class WXDLLEXPORT wxTextAttr;
 class WXDLLEXPORT wxWindow;
 
 class EditorContentPart;
+class Composer;
+class Profile;
+class ComposerOptions;
 
 #include <wx/fontenc.h>         // for wxFontEncoding
 
 #include "MimePart.h"         // for MimeType
 
 #include "MModule.h"
-#include "Composer.h"
 
 // the message editor module interface name
 #define MESSAGE_EDITOR_INTERFACE "MessageEditor"
@@ -177,19 +179,17 @@ protected:
     */
    //@{
 
-   typedef Composer::Options Options;
-
    /// get the profile to use (NOT IncRef()'d!)
-   Profile *GetProfile() const { return m_composer->GetProfile(); }
+   Profile *GetProfile() const;
 
    /// get the msg view options
-   const Options& GetOptions() const { return m_composer->GetOptions(); }
+   const ComposerOptions& GetOptions() const;
 
    /// call the Composer method on derived class behalf
-   bool OnFirstTimeFocus() { return m_composer->OnFirstTimeFocus(); }
+   bool OnFirstTimeFocus();
 
    /// call the Composer method on derived class behalf
-   void OnFirstTimeModify() { m_composer->OnFirstTimeModify(); }
+   void OnFirstTimeModify();
 
    //@}
 

@@ -27,6 +27,30 @@ class wxComposeView;
 // Composer provides GUI-independent interface for the compose frame
 // ----------------------------------------------------------------------------
 
+/// the composer options (i.e. values read from profile)
+struct ComposerOptions
+{
+   /// font description
+   String m_font;
+
+   /// font family and size used only if m_font is empty
+   int m_fontFamily,
+       m_fontSize;
+
+   /// composer colours
+   wxColour m_fg,
+            m_bg;
+
+   /// ctor initializes everything to some invalid values
+   ComposerOptions();
+
+   /// read the options from the given profile
+   void Read(Profile *profile);
+
+   /// get the font using either m_font or m_fontFamily/Size
+   wxFont GetFont() const;
+};
+
 class Composer
 {
 public:
@@ -274,29 +298,7 @@ public:
    //@}
 
 protected:
-   /// the composer options (i.e. values read from profile)
-   struct Options
-   {
-      /// font description
-      String m_font;
-
-      /// font family and size used only if m_font is empty
-      int m_fontFamily,
-          m_fontSize;
-
-      /// composer colours
-      wxColour m_fg,
-               m_bg;
-
-      /// ctor initializes everything to some invalid values
-      Options();
-
-      /// read the options from the given profile
-      void Read(Profile *profile);
-
-      /// get the font using either m_font or m_fontFamily/Size
-      wxFont GetFont() const;
-   };
+   typedef ComposerOptions Options;
 
 private:
    /**

@@ -15,10 +15,10 @@
 
 #ifndef   USE_PCH
 #   include "Merror.h"
-#   include "gui/wxMFrame.h"
 #endif // USE_PCH
 
 #include "MEvent.h"
+#include "lists.h"
 
 class CmdLineOptions;
 class FolderMonitor;
@@ -26,12 +26,14 @@ class MAppBase;
 class MailFolder;
 class MModuleCommon;
 class ArrayFrames;
+class wxMFrame;
 
 class WXDLLEXPORT wxDynamicLibrary;
 class WXDLLEXPORT wxMimeTypesManager;
 class WXDLLEXPORT wxPageSetupDialogData;
 class WXDLLEXPORT wxPrintData;
 class WXDLLEXPORT wxConfigBase;
+class WXDLLEXPORT wxWindow;
 
 M_LIST_PTR(ListLibraries, wxDynamicLibrary);
 

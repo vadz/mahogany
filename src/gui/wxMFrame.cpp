@@ -30,6 +30,7 @@
 #  include "MHelp.h"
 #  include "gui/wxMFrame.h"
 #  include "Mdefaults.h"
+#  include "gui/wxIconManager.h"
 
 #  include <wx/menu.h>
 #  include <wx/toolbar.h>

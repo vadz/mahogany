@@ -37,6 +37,7 @@
 #include "MThread.h"
 #include "lists.h"
 #include "MFolder.h"
+#include "MailFolder.h"
 
 #include "FolderMonitor.h"
 

@@ -31,6 +31,8 @@
 #   include "MApplication.h"
 #   include "strutil.h"
 #   include "Mdefaults.h"
+
+#   include <wx/frame.h>                // for wxFrame
 #endif // USE_PCH
 
 #include <wx/file.h>
@@ -46,6 +48,7 @@
 #include "mail/ServerInfo.h"
 
 #include "Composer.h"
+#include "Message.h"
 
 class MPersMsgBox;
 

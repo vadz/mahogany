@@ -24,6 +24,9 @@
 #   include "Mcommon.h"
 #   include "strutil.h"
 #   include "Mdefaults.h"
+#   include "MApplication.h"
+#   include "guidef.h"
+#   include "gui/wxIconManager.h"
 
 #   include <wx/stattext.h>        // for wxStaticText
 #endif // USE_PCH
@@ -31,6 +34,7 @@
 #include "Mpers.h"
 
 #include "MailFolderCC.h"
+#include "MFolder.h"
 
 #include <wx/wizard.h>
 

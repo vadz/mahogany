@@ -32,6 +32,7 @@
 #endif
 #endif // USE_PCH
 
+#include "ASMailFolder.h"
 #include "MFolder.h"
 #include "MEvent.h"
 

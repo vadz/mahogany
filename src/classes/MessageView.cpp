@@ -30,6 +30,7 @@
 #ifndef USE_PCH
 #  include "Mcommon.h"
 #  include "strutil.h"
+#  include "guidef.h"
 
 #  include "Profile.h"
 

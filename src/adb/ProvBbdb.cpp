@@ -33,6 +33,7 @@
 #  include "sysutil.h"
 #  include "kbList.h"                   // for KBLIST_DEFINE
 #  include "Mdefaults.h"
+#  include "guidef.h"
 
 #  include <wx/string.h>                // for wxString
 #  include <wx/log.h>                   // for wxLogWarning

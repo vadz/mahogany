@@ -24,6 +24,10 @@
 #  include "Mcommon.h"
 #  include "strutil.h"
 #  include "Mdefaults.h"
+#  include "guidef.h"
+#  include "MApplication.h"
+#  include "Profile.h"
+#  include "gui/wxIconManager.h"
 
 #  include <wx/stattext.h>              // for wxStaticText
 #  if wxCHECK_VERSION(2,5,0)
@@ -33,6 +37,8 @@
 
 #include "Mpers.h"
 #include "SendMessage.h"
+#include "MFolder.h"
+#include "Message.h"
 
 #include <wx/version.h>               // for wxCHECK_VERSION
 #include <wx/file.h>                    // for wxFile

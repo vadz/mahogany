@@ -24,6 +24,7 @@
 #  include "Mcommon.h"
 #  include "Profile.h"
 #  include "MApplication.h"
+#  include "guidef.h"
 
 #  include <wx/log.h>           // for wxLogStatus
 #  include <wx/config.h>

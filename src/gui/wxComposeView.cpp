@@ -34,10 +34,12 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
+#  include "MApplication.h"
 #  include "sysutil.h"
 #  include "strutil.h"
 #  include "Mdefaults.h"
 #  include "MHelp.h"
+#  include "gui/wxIconManager.h"
 
 #  include <wx/sizer.h>
 #  include <wx/menu.h>
@@ -88,6 +90,7 @@
 #include "MFolder.h"
 #include "Address.h"
 #include "SendMessage.h"
+#include "Message.h"
 
 #include "modules/Calendar.h"
 
@@ -662,13 +665,13 @@ END_EVENT_TABLE()
 // Composer::Options
 // ----------------------------------------------------------------------------
 
-Composer::Options::Options()
+ComposerOptions::ComposerOptions()
 {
    m_fontFamily =
    m_fontSize = -1;
 }
 
-void Composer::Options::Read(Profile *profile)
+void ComposerOptions::Read(Profile *profile)
 {
    CHECK_RET( profile, _T("NULL profile in Composer::Options::Read") );
 
@@ -685,7 +688,7 @@ void Composer::Options::Read(Profile *profile)
    }
 }
 
-wxFont Composer::Options::GetFont() const
+wxFont ComposerOptions::GetFont() const
 {
    wxFont font;
    if ( !m_font.empty() )
@@ -4464,3 +4467,22 @@ MessageEditor::EditAttachmentProperties(EditorContentPart *part)
    //else: cancelled by user or nothing changed
 }
 
+Profile *MessageEditor::GetProfile() const
+{
+   return m_composer->GetProfile();
+}
+
+const ComposerOptions& MessageEditor::GetOptions() const
+{
+   return m_composer->GetOptions();
+}
+
+bool MessageEditor::OnFirstTimeFocus()
+{
+   return m_composer->OnFirstTimeFocus();
+}
+
+void MessageEditor::OnFirstTimeModify()
+{
+   m_composer->OnFirstTimeModify();
+}

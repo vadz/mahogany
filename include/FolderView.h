@@ -13,10 +13,12 @@
 #define FOLDERVIEW_H
 
 #include "MEvent.h"
+#include "MailFolder.h"         // for OpenMode
 
 class MailFolder;
 class Profile;
 class ASMailFolder;
+class MFolder;
 
 class WXDLLEXPORT wxWindow;
 
@@ -85,8 +87,7 @@ public:
    ASMailFolder *GetFolder(void) const { return m_ASMailFolder; }
 
    /// return pointer to associated mail folder (IncRef()'d as usual)
-   MailFolder *GetMailFolder() const
-      { return m_ASMailFolder ? m_ASMailFolder->GetMailFolder() : NULL; }
+   MailFolder *GetMailFolder() const;
 
    //@}
 

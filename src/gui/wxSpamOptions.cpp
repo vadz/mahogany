@@ -28,6 +28,7 @@
 #   include "Mcommon.h"
 #   include "strutil.h"
 #   include "Profile.h"
+#   include "MApplication.h"
 #endif // USE_PCH
 
 #include <stdlib.h>

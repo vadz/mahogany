@@ -26,6 +26,7 @@
 
 #ifndef USE_PCH
 #   include "Mcommon.h"
+#   include "guidef.h"
 #   include "strutil.h"
 #   include "Profile.h"
 #   include "MApplication.h"

@@ -26,6 +26,7 @@
 
 #   include "Mdefaults.h"
 #   include "gui/wxMApp.h"
+#   include "guidef.h"
 #endif // USE_PCH
 
 #include "MessageViewer.h"

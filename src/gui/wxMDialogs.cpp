@@ -34,6 +34,7 @@
 #  include "gui/wxIconManager.h"
 #  include "sysutil.h"    // for sysutil_compare_filenames
 #  include "MHelp.h"
+#  include "gui/wxMFrame.h"
 
 #  include <wx/layout.h>
 #  include <wx/sizer.h>
@@ -74,6 +75,7 @@
 
 #include "MFolderDialogs.h"
 #include "FolderView.h"
+#include "ASMailFolder.h"
 
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
@@ -1776,6 +1778,15 @@ bool ConfigureDateFormat(Profile *profile, wxWindow *parent)
    return dlg.ShowModal() == wxID_OK && dlg.WasChanged();
 }
 
+wxXFaceButton::wxXFaceButton(wxWindow *parent, int id,  wxString filename)
+{
+   m_Parent = parent;
+   wxBitmap bmp = mApplication->GetIconManager()->GetBitmap(_T("noxface"));
+   wxBitmapButton::Create(parent,id, bmp, wxDefaultPosition,
+                          wxSize(64,64));
+   SetFile(filename);
+}
+
 void
 wxXFaceButton::SetFile(const wxString &filename)
 {
@@ -3420,3 +3431,8 @@ bool MDialog_GetPassword(Protocol protocol,
    return dlg.ShowModal() == wxID_OK;
 }
 
+extern wxWindow *GetDialogParent(const wxWindow *parent)
+{
+  return parent == NULL ? mApplication->TopLevelFrame()
+                        : GetFrame(parent);
+}

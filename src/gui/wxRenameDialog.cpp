@@ -21,6 +21,7 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
+#  include "guidef.h"
 
 #  include <wx/layout.h>
 #  include <wx/statbox.h>
@@ -31,6 +32,7 @@
 #include <wx/filename.h>
 
 #include "MFolder.h"
+#include "MailFolder.h"
 
 #include "gui/wxDialogLayout.h"
 

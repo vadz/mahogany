@@ -151,12 +151,7 @@ public:
    virtual bool TransferDataFromWindow();
 
    // to change the profile associated with the page:
-   void SetProfile(Profile *profile)
-   {
-      SafeDecRef(m_Profile);
-      m_Profile = profile;
-      SafeIncRef(m_Profile);
-   }
+   void SetProfile(Profile *profile);
 
    // callbacks
       // called when text zone content changes

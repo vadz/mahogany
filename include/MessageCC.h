@@ -21,7 +21,6 @@
 #  include "Mcclient.h"         // for ADDRESS
 #endif  //USE_PCH
 
-#include "MailFolderCC.h"
 #include "Message.h"
 
 // fwd decl

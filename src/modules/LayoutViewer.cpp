@@ -26,6 +26,7 @@
 #ifndef USE_PCH
 #   include "Mcommon.h"
 #   include "Mdefaults.h"
+#   include "guidef.h"
 #endif // USE_PCH
 
 #include "MessageViewer.h"

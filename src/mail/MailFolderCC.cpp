@@ -28,8 +28,11 @@
 #   include "Mcommon.h"
 #   include "MApplication.h"
 #   include "strutil.h"
+#   include "guidef.h"
 #   include "Mdefaults.h"
+#   include "gui/wxMFrame.h"
 #   include <wx/timer.h>                // for wxTimer
+#   include <wx/frame.h>                // for wxFrame
 #endif // USE_PCH
 
 #include "UIdArray.h"
@@ -47,6 +50,7 @@
 
 #include "modules/Filters.h"
 
+#include "ASMailFolder.h"
 #include "MFCache.h"
 #include "MFStatus.h"
 #include "Sequence.h"
@@ -3808,6 +3812,26 @@ bool MailFolderCC::CanSetFlag(int flags) const
    }
 
    return canSet != 0;
+}
+
+String MailFolderCC::GetName(void) const
+{
+   return m_mfolder->GetFullName();
+}
+
+MFolderType MailFolderCC::GetType(void) const
+{
+   return m_mfolder->GetType();
+}
+
+int MailFolderCC::GetFlags(void) const
+{
+   return m_mfolder->GetFlags();
+}
+
+bool MailFolderCC::NeedsAuthInfo() const
+{
+   return !HasLogin() && m_mfolder->NeedsLogin();
 }
 
 // ----------------------------------------------------------------------------

@@ -28,6 +28,8 @@
    #include <wx/log.h>                  // for wxLogMessage
 
    #include "MApplication.h"
+   #include "guidef.h"
+   #include "Profile.h"
 
    #include <wx/layout.h>
    #include <wx/stattext.h>             // for wxStaticText
