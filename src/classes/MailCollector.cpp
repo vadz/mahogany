@@ -196,7 +196,9 @@ public:
             wxLogDebug("Found incoming folder '%s'.",
                        folderName.c_str());
             mf = MailFolder::OpenFolder(folderName);
-            if(mf || (!mApplication->IsOnline()))
+//            if(mf || (!mApplication->IsOnline()))
+// better like this, otherwise folders disappear from the list:
+            if(1) // always add to list
             {
                MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
                e->m_name = folderName;
