@@ -145,10 +145,11 @@ AdbImporter *FindImporter(const String& filename, AdbImporter *importer)
    if ( !importer )
    {
       // try to find it
-      AdbImporter::AdbImporterInfo *info = AdbImporter::GetAdbImpporterInfo();
+      AdbModule::AdbModuleInfo *info =
+         AdbModule::GetAdbModuleInfo(ADB_IMPORTER_INTERFACE);
       while ( info )
       {
-         importer = info->CreateImporter();
+         importer = (AdbImporter *)info->CreateModule();
          if ( importer->CanImport(filename) )
          {
             // found
@@ -161,7 +162,7 @@ AdbImporter *FindImporter(const String& filename, AdbImporter *importer)
          info = info->next;
       }
 
-      AdbImporter::FreeAdbImporterInfo(info);
+      AdbModule::FreeAdbModuleInfo(info);
    }
    else
    {
@@ -330,151 +331,3 @@ bool AdbImport(const String& filename,
 
    return ok;
 }
-
-// ----------------------------------------------------------------------------
-// static AdbImporter functions
-// ----------------------------------------------------------------------------
-
-size_t AdbImporter::EnumImporters(wxArrayString& names, wxArrayString& descs)
-{
-   names.Empty();
-   descs.Empty();
-
-   AdbImporter *importer = NULL;
-   AdbImporter::AdbImporterInfo *info = AdbImporter::GetAdbImpporterInfo();
-   while ( info )
-   {
-      importer = info->CreateImporter();
-      if ( importer )
-      {
-         names.Add(importer->GetName());
-         descs.Add(importer->GetFormatDesc());
-
-         importer->DecRef();
-         importer = NULL;
-      }
-      else
-      {
-         wxLogDebug("Failed to load ADB importer '%s'.", info->name);
-      }
-
-      info = info->next;
-   }
-
-   FreeAdbImporterInfo(info);
-
-   return names.GetCount();
-}
-
-AdbImporter *AdbImporter::GetImporterByName(const String& name)
-{
-   AdbImporter *importer = NULL;
-   AdbImporter::AdbImporterInfo *info = AdbImporter::GetAdbImpporterInfo();
-   while ( info )
-   {
-      importer = info->CreateImporter();
-
-      if ( importer )
-      {
-         if ( importer->GetName() == name )
-            break;
-
-         importer->DecRef();
-      }
-      else
-      {
-         wxLogDebug("Failed to load ADB importer '%s'.", info->name);
-      }
-
-      importer = NULL;
-
-      info = info->next;
-   }
-
-   FreeAdbImporterInfo(info);
-
-   return importer;
-}
-
-// ----------------------------------------------------------------------------
-// AdbImporter functions for working with AdbImporterInfo
-// ----------------------------------------------------------------------------
-
-AdbImporter::AdbImporterInfo *AdbImporter::GetAdbImpporterInfo()
-{
-#ifdef USE_ADB_MODULES
-   ASSERT_MSG( !ms_listImporters, "forgot to call FreeAdbImporterInfo()!" );
-
-   // find all modules implementing AdbImporter interface
-   MModuleListing *listing = MModule::ListAvailableModules("AdbImporter");
-   if ( listing )
-   {
-      size_t count = listing->Count();
-      for ( size_t n = 0; n < count; n++ )
-      {
-         // the object will automatically put itself into the linked list
-         new AdbImporterInfo((*listing)[n].GetName(),
-                             (*listing)[n].GetShortDescription());
-      }
-
-      listing->DecRef();
-   }
-#endif // USE_ADB_MODULES
-
-   return ms_listImporters;
-}
-
-void AdbImporter::FreeAdbImporterInfo(AdbImporter::AdbImporterInfo *info)
-{
-#ifdef USE_ADB_MODULES
-   AdbImporterInfo *next;
-   while ( info )
-   {
-      next = info->next;
-      delete info;
-      info = next;
-   }
-
-   ms_listImporters = NULL;
-#else // !USE_ADB_MODULES
-   // nothing to do, the struct is static and no memory is allocated or freed
-#endif // USE_ADB_MODULES/!USE_ADB_MODULES
-}
-
-// ----------------------------------------------------------------------------
-// AdbImporterInfo
-// ----------------------------------------------------------------------------
-
-AdbImporter::AdbImporterInfo *AdbImporter::ms_listImporters = NULL;
-
-AdbImporter::AdbImporterInfo::AdbImporterInfo(const char *name_,
-#ifndef USE_ADB_MODULES
-                                              Constructor ctor,
-#endif // !USE_ADB_MODULES
-                                              const char *desc_)
-{
-   // init member vars
-   name = name_;
-   desc = desc_;
-#ifndef USE_ADB_MODULES
-   CreateImporter = ctor;
-#endif // !USE_ADB_MODULES
-
-   // insert us in the linked list (in the head because it's simpler and we
-   // don't lose anything - order of insertion of different importers is
-   // undefined anyhow)
-   next = AdbImporter::ms_listImporters;
-   AdbImporter::ms_listImporters = this;
-}
-
-#ifdef USE_ADB_MODULES
-
-AdbImporter *AdbImporter::AdbImporterInfo::CreateImporter() const
-{
-   MModule *module = MModule::LoadModule(name);
-
-   return (AdbImporter *)module;
-}
-
-#endif // USE_ADB_MODULES
-

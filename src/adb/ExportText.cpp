@@ -135,7 +135,10 @@ END_EVENT_TABLE()
 // macros for dynamic exporter creation
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_ADB_EXPORTER(AdbTextExporter, gettext_noop("Simple text format"));
+IMPLEMENT_ADB_EXPORTER(AdbTextExporter,
+                       gettext_noop("Text format address book exporter"),
+                       gettext_noop("Simple text format"),
+                       "Vadim Zeitlin <vadim@wxwindows.org>");
 
 // ----------------------------------------------------------------------------
 // AdbTextExporter

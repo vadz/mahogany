@@ -132,7 +132,11 @@ private:
 // macros for dynamic exporter creation
 // ----------------------------------------------------------------------------
 
-IMPLEMENT_ADB_EXPORTER(AdbPalmExporter, gettext_noop("PalmOS addressbook format"));
+IMPLEMENT_ADB_EXPORTER(AdbPalmExporter,
+                       gettext_noop("PalmOS format address book exporter"),
+                       gettext_noop("PalmOS addressbook"),
+                       "Karsten Ballüder <ballueder@gmx.net>");
+
 
 // ----------------------------------------------------------------------------
 // AdbPalmExporter

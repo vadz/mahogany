@@ -18,24 +18,14 @@
    #pragma interface "AdbImport.h"
 #endif
 
-// undef this to statically link all ADB importers into the executable (old
-// behaviour, will be r
-#define USE_ADB_MODULES
-
-// include the base class declaration
-#ifdef USE_ADB_MODULES
-   #include "MModule.h"
-
-   typedef MModule AdbImporterBase;
-#else // !USE_ADB_MODULES
-   #include "MObject.h"
-
-   typedef MObjectRC AdbImporterBase;
-#endif // USE_ADB_MODULES/!USE_ADB_MODULES
+#include "AdbModule.h"     // the base class
 
 // some forward declarations
 class wxArrayString;
 class AdbEntry;
+
+// the interface we implement
+#define ADB_IMPORTER_INTERFACE "AdbImporter"
 
 // ----------------------------------------------------------------------------
 // AdbImporter - this class imports data from ADBs in foreign formats.
@@ -57,48 +47,22 @@ class AdbEntry;
 // (see MObject.h for basic rules or dealing with ref counted objects).
 // ----------------------------------------------------------------------------
 
-class AdbImporter : public AdbImporterBase
+class AdbImporter : public AdbModule
 {
 public:
-   // dynamic creation helpers
-#ifndef USE_ADB_MODULES
-   typedef AdbImporter *(*Constructor)();
-#endif // !USE_ADB_MODULES
-
-   // list holding information about all ADB importers we have
-   struct AdbImporterInfo
-   {
-      const char *name;    // internal name
-      const char *desc;    // descriptive name (shown to the user)
-
-      AdbImporterInfo *next;  // next node in the linked list
-
-#ifdef USE_ADB_MODULES
-      AdbImporter *CreateImporter() const;
-
-      AdbImporterInfo(const char *name, const char *desc);
-#else // !USE_ADB_MODULES
-      Constructor CreateImporter;   // creator function
-
-      // ctor for the struct
-      AdbImporterInfo(const char *name,
-                      Constructor ctor,
-                      const char *desc);
-#endif // USE_ADB_MODULES/!USE_ADB_MODULES
-   };
-
-   // access the linked list of AdbImporterInfo, you must call
-   // FreeAdbImporterInfo() after you have used the list
-   static AdbImporterInfo *GetAdbImpporterInfo();
-   static void FreeAdbImporterInfo(AdbImporterInfo *info);
-
    // enumerate all available importers: return the names (to make it possible
    // to create import objects) and the descriptions (to show to the user);
    // returns the number of different importers
-   static size_t EnumImporters(wxArrayString& names, wxArrayString& descs);
+   static size_t EnumImporters(wxArrayString& names, wxArrayString& descs)
+   {
+      return EnumModules(ADB_IMPORTER_INTERFACE, names, descs);
+   }
 
    // get importer by name (it's a new pointer, caller must DecRef() it)
-   static AdbImporter *GetImporterByName(const String& name);
+   static AdbImporter *GetImporterByName(const String& name)
+   {
+      return (AdbImporter *)GetModuleByName(ADB_IMPORTER_INTERFACE, name);
+   }
 
    // test address book in the filename - can we import it?
    virtual bool CanImport(const String& filename) = 0;
@@ -134,61 +98,14 @@ public:
    virtual bool ImportEntry(const String& path,
                             size_t index,
                             AdbEntry *entry) = 0;
-
-   // get the name and description (shown to the user) of the format imported
-   // by this class (these functions are automatically generated during
-   // IMPLEMENT_ADB_IMPORTER macro expansion
-   virtual const char *GetName() const = 0;
-   virtual const char *GetFormatDesc() const = 0;
-   virtual const char *GetDescription() const = 0;
-
-private:
-   friend AdbImporterInfo; // give it access to ms_listImporters
-   static AdbImporterInfo *ms_listImporters;
 };
 
 // ----------------------------------------------------------------------------
 // dynamic object creation macros
 // ----------------------------------------------------------------------------
 
-#ifdef USE_ADB_MODULES
-
-#define DECLARE_ADB_IMPORTER()                                             \
-   const char *GetFormatDesc() const;                                      \
-   MMODULE_DEFINE();                                                       \
-   DEFAULT_ENTRY_FUNC
-
-#define IMPLEMENT_ADB_IMPORTER(cname, desc, format, Author)                \
-   MMODULE_BEGIN_IMPLEMENT(cname, #cname, "AdbImporter", _(desc), "1.00")  \
-      MMODULE_PROP(author, Author)                                         \
-      MMODULE_PROP(adbformat, format)                                      \
-   MMODULE_END_IMPLEMENT(cname)                                            \
-   const char *cname::GetFormatDesc() const                                \
-   {                                                                       \
-      return GetMModuleProperty("adbformat");                              \
-   }                                                                       \
-   MModule *cname::Init(int version_major, int version_minor,              \
-                        int version_release, MInterface *minterface,       \
-                        int *errorCode)                                    \
-   {                                                                       \
-      return new cname();                                                  \
-   }
-
-#else // !USE_ADB_MODULES
-
-#define DECLARE_ADB_IMPORTER()                                             \
-   const char *GetName() const;                                            \
-   const char *GetFormatDesc() const;                                      \
-   const char *GetDescription() const;                                     \
-   static AdbImporterInfo ms_info
-#define IMPLEMENT_ADB_IMPORTER(name, desc, format, author)                 \
-   const char *name::GetName() const { return #name; }                     \
-   const char *name::GetFormatDesc() const { return _(format); }           \
-   const char *name::GetDescription() const { return _(desc); }            \
-   AdbImporter *ConstructorFor##name() { return new name; }                \
-   AdbImporter::AdbImporterInfo name::ms_info(#name, ConstructorFor##name, \
-                                             desc)
-
-#endif // USE_ADB_MODULES/!USE_ADB_MODULES
+#define DECLARE_ADB_IMPORTER() DECLARE_ADB_MODULE()
+#define IMPLEMENT_ADB_IMPORTER(cname, desc, format, author) \
+   IMPLEMENT_ADB_MODULE(ADB_IMPORTER_INTERFACE, cname, desc, format, author)
 
 #endif // _ADBIMPORT_H
