@@ -6,6 +6,9 @@
  * $Id$         *
  *                                                                  *
  * $Log$
+ * Revision 1.14  1998/05/15 22:04:44  VZ
+ * small USE_WXCONFIG-only change
+ *
  * Revision 1.13  1998/05/14 11:00:15  KB
  * Code cleanups and conflicts resolved.
  *
@@ -76,18 +79,18 @@ MApplication::MApplication(void) CALL_APPCONF_CTOR
    initialisedFlag = false;
    logFrame = NULL;
    
-#ifdef USE_WXCONFIG
-      wxConfig::Set(GLOBAL_NEW wxFileConfig(M_APPLICATIONNAME));
-
+#  ifdef USE_WXCONFIG
+      wxConfig::Set(GLOBAL_NEW wxFileConfig(
+                    wxFileConfig::GetLocalFileName(M_APPLICATIONNAME)));
       // TODO: recordDefaults & expandVariables
-#else
+#  else
       //  activate recording of configuration entries
       if(readEntry(MC_RECORDDEFAULTS,MC_RECORDDEFAULTS_D))
          recordDefaults(TRUE);
 
       // activate variable expansion as default
       expandVariables(TRUE);
-#endif
+#  endif
 
    // set the default path for configuration entries
    setCurrentPath(M_APPLICATIONNAME);
