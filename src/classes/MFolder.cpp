@@ -59,7 +59,6 @@ extern const MOption MP_FOLDER_LOGIN;
 extern const MOption MP_FOLDER_PASSWORD;
 extern const MOption MP_FOLDER_PATH;
 extern const MOption MP_FOLDER_TREEINDEX;
-extern const MOption MP_FOLDER_TREEINDEX_D;
 extern const MOption MP_FOLDER_TRY_CREATE;
 extern const MOption MP_FOLDER_TYPE;
 extern const MOption MP_IMAPHOST;
@@ -477,7 +476,11 @@ MFolder *MFolder::Create(const String& fullname, FolderType type)
 
    // the physical folder might not exist yet, we will try to create it when
    // opening fails the next time
-   if ( folder->CanOpen() )
+   //
+   // NB: if we CanDeleteFolderOfType(), then we can create them, too and, vice
+   //     versa, if we can't delete folders of this type there is no sense in
+   //     trying to create them neither
+   if ( CanDeleteFolderOfType(type) && folder->CanOpen() )
    {
       profile->writeEntry(MP_FOLDER_TRY_CREATE, 1);
    }

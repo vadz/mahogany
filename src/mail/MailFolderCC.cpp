@@ -1705,6 +1705,10 @@ void MailFolderCC::CreateFileFolder()
 
       tmp += m_ImapSpec;
       mail_create(NIL, (char *)tmp.c_str());
+
+      // we already tried to create it once
+      Profile_obj profile(m_mfolder->GetProfile());
+      profile->DeleteEntry(MP_FOLDER_TRY_CREATE);
    }
 }
 
