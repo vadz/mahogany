@@ -1,11 +1,14 @@
-Source: m-mail
-Section: unknown
+Source: mahogany
+Section: mail
 Priority: optional
 Maintainer: Karsten Ballüder <m-developers@egroups.com>
 Standards-Version: 2.4.1
 
-Package: m-mail
+Package: mahogany
 Architecture: any
 Depends: ${shlibs:Depends}
-Description: Missing
- Missing
+Description: Mahogany Mail
+Mahogany Mail is a powerful, scriptable mail user agent and news reader. It features
+an intuitive gtk based X11 user interface and a built-in python interpreter. In addition
+to the major unix flavours, it is also available for MS Windows, allowing you to use the
+same interface on different systems.

@@ -205,7 +205,7 @@ private:
 // ----------------------------------------------------------------------------
 // event tables &c
 // ----------------------------------------------------------------------------
-IMPLEMENT_DYNAMIC_CLASS(wxComposeView, wxMFrame)
+IMPLEMENT_CLASS(wxComposeView, wxMFrame)
 
 BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
    // process termination notification
@@ -410,9 +410,44 @@ void wxComposeView::EnableEditing(bool enable)
 // ----------------------------------------------------------------------------
 // wxComposeView creation
 // ----------------------------------------------------------------------------
+/** Constructor for posting news.
+    @param parentProfile parent profile
+    @param parent parent window
+    @param hide if true, do not show frame
+    @return pointer to the new compose view
+*/
+wxComposeView *
+wxComposeView::CreateNewArticle(wxWindow *parent,
+                                ProfileBase *parentProfile,
+                                bool hide)
+{
+   wxComposeView *cv = new wxComposeView("_ComposeViewNews", parent);
+   cv->m_mode = Mode_NNTP;
+   cv->SetTitle(_("Mahogany Mail : Article Composition"));
+   cv->Create(parent,parentProfile);
+   return cv;
+}
+   
+/** Constructor for sending mail.
+    @param parentProfile parent profile
+    @param parent parent window
+    @param hide if true, do not show frame
+    @return pointer to the new compose view
+*/
+wxComposeView *
+wxComposeView::CreateNewMessage(wxWindow *parent,
+                                        ProfileBase *parentProfile,
+                                        bool hide)
+{
+   wxComposeView *cv = new wxComposeView("_ComposeViewMail", parent);
+   cv->m_mode = Mode_SMTP;
+   cv->SetTitle(_("Mahogany Mail : Message Composition"));
+   cv->Create(parent,parentProfile);
+   return cv;
+}
 
 void
-wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
+wxComposeView::Create(wxWindow * WXUNUSED(parent),
                       ProfileBase *parentProfile,
                       bool hide)
 {
@@ -420,10 +455,20 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
 
    m_LayoutWindow = NULL;
    nextFileID = 0;
-
+   
    if(!parentProfile)
       parentProfile = mApplication->GetProfile();
-   m_Profile = ProfileBase::CreateProfile(iname,parentProfile);
+   m_Profile = ProfileBase::CreateProfile(m_name,parentProfile);
+
+   switch(m_mode)
+   {
+   case Mode_SMTP:
+      m_msg = new SendMessageCC(m_Profile, SendMessageCC::Prot_SMTP);
+      break;
+   case Mode_NNTP:
+      m_msg = new SendMessageCC(m_Profile, SendMessageCC::Prot_NNTP);
+      break;
+   }      
 
    // build menu
    // ----------
@@ -478,14 +523,22 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    bool bDoShow[Field_Max];
    bDoShow[Field_To] =
    bDoShow[Field_Subject] = TRUE;  // To and subject always there
-   bDoShow[Field_Cc] = READ_CONFIG(m_Profile, MP_SHOWCC) != 0;
-   bDoShow[Field_Bcc] = READ_CONFIG(m_Profile, MP_SHOWBCC) != 0;
+   if(m_mode == Mode_SMTP)
+   {
+      bDoShow[Field_Cc] = READ_CONFIG(m_Profile, MP_SHOWCC) != 0;
+      bDoShow[Field_Bcc] = READ_CONFIG(m_Profile, MP_SHOWBCC) != 0;
+   }
+   else
+      bDoShow[Field_Cc] = bDoShow[Field_Bcc] = FALSE; // never for news
+   
 
    // first determine the longest label caption
-   static const char *aszLabels[Field_Max] =
-   {
-      "To:", "Subject:", "CC:", "BCC:",
-   };
+   const char *aszLabels[Field_Max];
+
+   aszLabels[Field_To]      = (m_mode == Mode_SMTP) ?  _("To:") : _("Newsgroups:");
+   aszLabels[Field_Subject] = _("Subject:");
+   aszLabels[Field_Cc]      = _("CC:");
+   aszLabels[Field_Bcc]     = _("BCC:");
 
    // don't forget to update the labels when you add a new field
    ASSERT( WXSIZEOF(aszLabels) == Field_Max );
@@ -703,19 +756,15 @@ wxComposeView::CreateFTCanvas(void)
 }
 
 wxComposeView::wxComposeView(const String &iname,
-                             wxWindow *parent,
-                             ProfileBase *parentProfile,
-                             bool hide)
+                             wxWindow *parent)
    : wxMFrame(iname,parent)
 {
    initialised = false;
 
+   m_name = iname;
    m_pidEditor = 0;
    m_procExtEdit = NULL;
    m_fieldLast = Field_Max;
-   Create(iname,parent,parentProfile);
-   m_msg = new SendMessageCC(m_Profile);
-   SetTitle(_("M : Message Composition"));
 }
 
 wxComposeView::~wxComposeView()
@@ -1173,7 +1222,7 @@ wxComposeView::Send(void)
                      }
                      else
                      {
-                        wxLogError(_("Can't read file '%s' included in "
+                        wxLogError(_("Cannot read file '%s' included in "
                                      "this message!"), filename.c_str());
                      }
 
@@ -1181,7 +1230,7 @@ wxComposeView::Send(void)
                   }
                   else
                   {
-                     wxLogError(_("Can't open file '%s' included in "
+                     wxLogError(_("Cannot open file '%s' included in "
                                   "this message!"), filename.c_str());
                   }
                }
@@ -1220,12 +1269,19 @@ wxComposeView::Send(void)
    }
 
    m_msg->SetSubject(m_txtFields[Field_Subject]->GetValue());
-   m_msg->SetAddresses(
-      m_txtFields[Field_To]->GetValue(),
-      m_txtFields[Field_Cc]->GetValue(),
-      m_txtFields[Field_Bcc]->GetValue());
-      success = m_msg->Send();  // true if sent
-
+   switch(m_mode)
+   {
+   case Mode_SMTP:
+      m_msg->SetAddresses(
+         m_txtFields[Field_To]->GetValue(),
+         m_txtFields[Field_Cc]->GetValue(),
+         m_txtFields[Field_Bcc]->GetValue());
+      break;
+   case Mode_NNTP:
+      m_msg->SetNewsgroups(m_txtFields[Field_To]->GetValue());
+      break;
+   }
+   success = m_msg->Send();  // true if sent
    if(success && READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER))
       m_msg->WriteToFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER), 
                        MF_PROFILE_OR_FILE);

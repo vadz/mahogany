@@ -56,6 +56,8 @@ public:
                      const String &CC = "",
                      const String & = "");
    
+   void SetNewsgroups(const String &groups);
+   
    /** Get the profile.
        @return pointer to the profile
    */
@@ -108,8 +110,10 @@ public:
    /// destructor
    ~SendMessageCC();
 
+   enum Mode
+   { Mode_SMTP, Mode_NNTP };
 protected:
-   /// Builds the message, i.e. prepare to send it.
+   /** Builds the message, i.e. prepare to send it. */
    void Build(void);
 private:
    /// 2nd stage constructor, see constructor

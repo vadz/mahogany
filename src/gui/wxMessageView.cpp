@@ -1013,7 +1013,7 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
             if(ci->GetUrl().Left(7) == "mailto:")
             {
                wxEndBusyCursor();
-               wxComposeView *cv = new wxComposeView("Reply",frame,m_Profile);
+               wxComposeView *cv = wxComposeView::CreateNewMessage(frame, m_Profile);
                cv->SetAddresses(ci->GetUrl().Right(ci->GetUrl().Length()-7));
                cv->Show(TRUE);
                break;

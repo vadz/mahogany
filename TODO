@@ -85,11 +85,11 @@ CHECK:- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
   - have a global "NewMail" folder setting and ensure its existence
 ---> done, after merging of profile code, add support for building
      list of these folders and periodically checking them.
+- add news posting
 
 
 TODO:
 
-- add news posting
 - do we really need to scan /var/lib/news/active?
 - more configurability for news
 

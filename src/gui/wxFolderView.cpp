@@ -196,8 +196,8 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
       parent->GetClientSize(&w,&h);
 
    wxString name = fv->GetFullName();
-   name.Replace("/", "_");
-   if ( name.IsEmpty() )
+   name = ProfileBase::FilterProfileName(name);
+   if( name.IsEmpty() )
       name = "FolderView";
    wxPListCtrl::Create(name, parent, -1,
                        wxDefaultPosition, wxSize(w,h), wxLC_REPORT);
@@ -421,9 +421,9 @@ wxFolderView::Update(void)
             s_bErrorMessageGiven = true;
 
             wxLogError(_("Invalid value '%s' for the date format: it should "
-                         "contain exactyly 3 %%u format specificators. Default "
+                         "contain exacty 3 %%u format specificators. Default "
                          "value '%s' will be used instead."),
-                         dateFormat.c_str(), MP_DATE_FMT_D);
+                         dateFormat.c_str(), (unsigned int)MP_DATE_FMT_D);
          }
 
          dateFormat = MP_DATE_FMT_D;

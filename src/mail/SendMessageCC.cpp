@@ -144,6 +144,7 @@ SendMessageCC::SetAddresses(const String &to,
    // If Build() has already been called, then it's too late to change 
    // anything.
    ASSERT(m_headerNames == NULL);
+   ASSERT(m_protocol == Prot_SMTP);
    
    if(to.Length())
    {
@@ -172,6 +173,22 @@ SendMessageCC::SetAddresses(const String &to,
    }
 }
 
+void
+SendMessageCC::SetNewsgroups(const String &groups)
+{
+   // If Build() has already been called, then it's too late to change 
+   // anything.
+   ASSERT(m_headerNames == NULL);
+   ASSERT(m_protocol == Prot_NNTP);
+
+   if(groups.Length())
+   {
+      ASSERT(env->newsgroups == NIL);
+      env->newsgroups = strutil_strdup(groups);
+   }
+
+}
+   
 void
 SendMessageCC::ExtractFccFolders(String &addresses)
 {

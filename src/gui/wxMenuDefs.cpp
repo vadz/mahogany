@@ -204,8 +204,9 @@ static const MenuItemInfo g_aMenuItems[] =
    // file
    { WXMENU_FILE_OPEN,     gettext_noop("&Open Folder..."),   gettext_noop("Open an existing message folder")                  },
    { WXMENU_FILE_COMPOSE,  gettext_noop("&Compose Message"),  gettext_noop("Start a new message")      },
+   { WXMENU_FILE_POST,  gettext_noop("Post &News Article"),   gettext_noop("Write a news article and post it")      },
    { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_FILE_PRINT_SETUP,    gettext_noop("&Print Setup"),     gettext_noop("Configure printing")  },
+   { WXMENU_FILE_PRINT_SETUP,    gettext_noop("Print &Setup"),     gettext_noop("Configure printing")  },
 //   { WXMENU_FILE_PAGE_SETUP,    gettext_noop("P&age Setup"),     gettext_noop("Configure page setup")  },
 #ifdef USE_PS_PRINTING
    // extra postscript printing

@@ -300,8 +300,6 @@ KBLIST_DEFINE(FCDataList, FCData);
 // private functions
 // ----------------------------------------------------------------------------
 
-// some characters are invalid in the profile name, replace them
-static String FilterProfileName(const String& profileName);
 
 // ============================================================================
 // implementation
@@ -442,6 +440,32 @@ ProfileBase::CreateFolderProfile(const String & iClassName,
    return p;
 }
 
+// some characters are invalid in the profile name, replace them
+String
+ProfileBase::FilterProfileName(const String& profileName)
+{
+   // the list of characters which are allowed in the profile names (all other
+   // non alphanumeric chars are not)
+   static const char *aValidChars = "_-.";   // NOT '/' and '\\'!
+
+   String filteredName;
+   size_t len = profileName.Len();
+   for ( size_t n = 0; n < len; n++ )
+   {
+      char ch = profileName[n];
+      if ( isalnum(ch) || strchr(aValidChars, ch) )
+      {
+         filteredName << ch;
+      }
+      else
+      {
+         // replace it -- hopefully the name will stay unique (@@)
+         filteredName << '_';
+      }
+   }
+
+   return filteredName;
+}
 
 String
 ProfileBase::readEntry(const String & key,
@@ -1172,28 +1196,3 @@ void RestoreArray(ProfileBase& conf, wxArrayString& astr, const String & key)
 // private functions
 // ----------------------------------------------------------------------------
 
-// some characters are invalid in the profile name, replace them
-static String FilterProfileName(const String& profileName)
-{
-   // the list of characters which are allowed in the profile names (all other
-   // non alphanumeric chars are not)
-   static const char *aValidChars = "_-.";   // NOT '/' and '\\'!
-
-   String filteredName;
-   size_t len = profileName.Len();
-   for ( size_t n = 0; n < len; n++ )
-   {
-      char ch = profileName[n];
-      if ( isalnum(ch) || strchr(aValidChars, ch) )
-      {
-         filteredName << ch;
-      }
-      else
-      {
-         // replace it -- hopefully the name will stay unique (@@)
-         filteredName << '_';
-      }
-   }
-
-   return filteredName;
-}

@@ -82,6 +82,9 @@ public:
    /// Flush all (disk-based) profiles now
    static void FlushAll();
 
+   /// some characters are invalid in the profile name, replace them
+   static String FilterProfileName(const String& profileName);
+
    /** An enum explaining the possible types of profiles. In fact,
        just a number stored as a normal profile entry which must be
        maintained manually.

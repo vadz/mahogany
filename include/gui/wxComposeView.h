@@ -73,31 +73,35 @@ public:
       Field_Max
    };
 
-   /** quasi-Constructor
-       @param iname  name of windowclass
-       @param parent parent window
-       @param parentProfile parent profile
-       @param to default value for To field
-       @param cc default value for Cc field
-       @param bcc default value for Bcc field
-       @param hide if true, do not show frame
-   */
-   void Create(const String &iname = String("wxComposeView"),
-        wxWindow *parent = NULL,
-        ProfileBase *parentProfile = NULL,
-        bool hide = false);
+   /// Do we want to send mail or post a news article?
+   enum Mode
+   {
+      Mode_SMTP,
+      Mode_NNTP
+   };
+   
 
-   /** Constructor
-       @param iname  name of windowclass
+   /** Constructor for posting news.
        @param parentProfile parent profile
        @param parent parent window
        @param hide if true, do not show frame
-   */
-   wxComposeView(const String &iname = String("wxComposeView"),
-                 wxWindow *parent = NULL,
-                 ProfileBase *parentProfile = NULL,
-                 bool hide = false);
-
+       @return pointer to the new compose view
+    */
+   static wxComposeView * CreateNewArticle(wxWindow *parent = NULL,
+                                            ProfileBase *parentProfile = NULL,
+                                            bool hide = false);
+   
+   /** Constructor for sending mail.
+       @param parentProfile parent profile
+       @param parent parent window
+       @param hide if true, do not show frame
+       @return pointer to the new compose view
+    */
+   static wxComposeView * CreateNewMessage(wxWindow *parent = NULL,
+                                           ProfileBase *parentProfile = NULL,
+                                           bool hide = false);
+       
+       
    /// Destructor
    ~wxComposeView();
 
@@ -132,6 +136,11 @@ public:
                      const String &CC = "",
                      const String & = "");
 
+   /** Set the newsgroups to post to.
+       @param groups the list of newsgroups
+   */
+   void SetNewsgroups(const String &groups);
+   
    /// sets Subject field
    void SetSubject(const String &subj);
 
@@ -174,6 +183,24 @@ public:
    */
    void AddHeaderEntry(const String &entry, const String &value);
 protected:
+   /** quasi-Constructor
+       @param parent parent window
+       @param parentProfile parent profile
+       @param to default value for To field
+       @param cc default value for Cc field
+       @param bcc default value for Bcc field
+       @param hide if true, do not show frame
+   */
+   void Create(wxWindow *parent = NULL,
+               ProfileBase *parentProfile = NULL,
+               bool hide = false);
+
+   /** Constructor
+       @param iname  name of windowclass
+       @param parent parent window
+   */
+   wxComposeView(const String &iname, wxWindow *parent = NULL);
+
    // helpers
    // -------
    
@@ -191,7 +218,9 @@ protected:
 private:
    /// a profile
    ProfileBase * m_Profile;
-
+   /// the name of the class
+   String m_name;
+   
    /// the panel
    wxPanel *m_panel;
 
@@ -242,6 +271,9 @@ private:
       HelperProcess_Editor = 1
    };
 
+   /// News or smtp?
+   Mode m_mode;
+   
    // external editor support
    // -----------------------
 
@@ -249,9 +281,8 @@ private:
    String     m_tmpFileName;  // temporary file we passed to the editor
    int        m_pidEditor;    // pid of external editor (0 if none)
 
-private:
    DECLARE_EVENT_TABLE()
-   DECLARE_DYNAMIC_CLASS(wxComposeView)
+   DECLARE_CLASS(wxComposeView)
 };
 
 #endif

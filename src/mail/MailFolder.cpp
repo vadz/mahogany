@@ -263,7 +263,7 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
    prefix = READ_CONFIG(profile, MP_REPLY_MSGPREFIX);
    for(i = 0; i < n; i++)
    {
-      cv = GLOBAL_NEW wxComposeView(_("Reply"), parent, profile);
+      cv = wxComposeView::CreateNewMessage(parent, profile);
       str = "";
       msg = GetMessage((*selections)[i]);
       np = msg->CountParts();
@@ -335,8 +335,7 @@ MailFolder::ForwardMessages(const INTARRAY *selections,
    {
       str = "";
       msg = GetMessage((*selections)[i]);
-      cv = GLOBAL_NEW wxComposeView(_("Forward"),parent,
-                                    GetProfile());
+      cv = wxComposeView::CreateNewMessage(parent,GetProfile());
       cv->SetSubject(READ_CONFIG(GetProfile(), MP_FORWARD_PREFIX)
                                  + msg->Subject());
 

@@ -2,7 +2,7 @@
 static char * folder_news_xpm[] = {
 "32 32 5 1",
 " 	c None",
-".	c #BEBEBE",
+".	c None",
 "+	c #000000",
 "@	c #FFFFFF",
 "#	c #708090",
