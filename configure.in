@@ -40,10 +40,7 @@ dnl DEFAULT_USE_LIBTOOL=0
 DEFAULT_USE_MODULES=auto
 DEFAULT_USE_LEAKTRACER=0
 DEFAULT_USE_STRICT=0
-DEFAULT_USE_SSL=0
-DEFAULT_USE_NO_DSA=0
-DEFAULT_USE_NO_IDEA=1	# illegal to use in most of Europe due to ASCOM patent
-DEFAULT_USE_NO_RSA=0
+DEFAULT_USE_SSL=1
 
 M_OVERRIDES(python,python,
 --with-python   use python scripting,
@@ -110,18 +107,6 @@ USE_STRICT)
 M_OVERRIDES(ssl,ssl,
 --with-ssl      compile in SSL support (requires openSSL),
 USE_SSL)
-
-M_OVERRIDES(no_dsa,no_dsa,
---with-no_dsa      use SSL without DSA,
-USE_NO_DSA)
-
-M_OVERRIDES(no_idea,no_idea,
---with-no_idea      use SSL without IDEA,
-USE_NO_IDEA)
-
-M_OVERRIDES(no_rsa,no_rsa,
---with-no_rsa      use SSL without RSA,
-USE_NO_RSA)
 
 M_OVERRIDES(wxconfigprg,wxconfigprg,
 --with-wxconfigprg=xxx    use wx-config program named xxx e.g. wxgtkd-config,
@@ -407,29 +392,19 @@ CCLIENT_EXTRAAUTHENTICATORS=
 CCLIENT_EXTRACFLAGS=
 EXTRACFLAGS=
 if test "$USE_SSL" = 1; then
-
-	if test "$USE_NO_IDEA" = 1; then
-		EXTRACFLAGS="$EXTRACFLAGS -DNO_IDEA"
-		CPPFLAGS="$CPPFLAGS -DNO_IDEA"
-	fi
-
-	if test "$USE_NO_DSA" = 1; then
-		EXTRACFLAGS="$EXTRACFLAGS -DNO_DSA"
-		CPPFLAGS="$CPPFLAGS -DNO_DSA"
-	fi
-	if test "$USE_NO_RSA" = 1; then
-		EXTRACFLAGS="$EXTRACFLAGS -DNO_RSA"
-		CPPFLAGS="$CPPFLAGS -DNO_RSA"
-	fi
+dnl we assume no idea/no dsa/no rsa as this is easiest to compile
+dnl doesn't matter anyway as we load openssl later, but we must be
+dnl able to compile the header file
+	EXTRACFLAGS="$EXTRACFLAGS -DNO_IDEA -DNO_DSA -DNO_RSA"
+	CPPFLAGS="$CPPFLAGS -DNO_IDEA -DNO_DSA -DNO_RSA"
 	AC_CHECK_LIB(c, socket,, AC_CHECK_LIB(socket,socket))
 	AC_CHECK_LIB(c, gethostname,, AC_CHECK_LIB(resolv,gethostname))
 	AC_CHECK_LIB(c, gethostbyname,, AC_CHECK_LIB(nsl,gethostbyname))
-	AC_CHECK_HEADERS(openssl/ssl.h,
-		[ 	MAKE_USESSL="USESSL=yes"
-			AC_DEFINE(USE_SSL)
-			CCLIENT_EXTRAAUTHENTICATORS="\"EXTRAAUTHENTICATORS=ssl\""
-		] ,AC_MSG_WARN("Cannot find openSSL headers, check config.log.")
-		)
+	AC_CHECK_HEADERS(openssl/ssl.h,[
+		MAKE_USESSL="USESSL=yes"
+		AC_DEFINE(USE_SSL)
+		CCLIENT_EXTRAAUTHENTICATORS="\"EXTRAAUTHENTICATORS=ssl\""
+	], AC_MSG_WARN("Cannot find openssl/ssl.h - SSL support disabled."))
 	CCLIENT_EXTRACFLAGS="\"EXTRACFLAGS=$EXTRACFLAGS\""
 fi
 AC_SUBST(MAKE_USESSL)
