@@ -313,8 +313,8 @@ public:
       // find the next/previous folder with unread status in the tree
    wxTreeItemId FindNextUnreadFolder(wxTreeItemId id, bool next = true) const;
 
-      // go to the next folder with unread messages after the given one
-   bool GoToNextUnreadFolder(wxFolderTreeNode *nodeStart, bool next = true);
+      // go to the next folder with unread messages after the current one
+   bool GoToNextUnreadFolder(bool next = true);
 
       // go to the home folder, if any
    bool GoToHomeFolder();
@@ -2190,9 +2190,17 @@ wxFolderTreeImpl::FindNextUnreadFolder(wxTreeItemId id, bool next) const
    return id;
 }
 
-bool wxFolderTreeImpl::GoToNextUnreadFolder(wxFolderTreeNode *node, bool next)
+bool wxFolderTreeImpl::GoToNextUnreadFolder(bool next)
 {
-   wxTreeItemId id = FindNextUnreadFolder(node->GetId(), next);
+   // start from the beginning if no current node
+   wxFolderTreeNode *node = GetSelection();
+   wxTreeItemId id; // NB: gcc 2.91 dies if we use operator ?: here 
+   if ( node )
+      id = node->GetId();
+   else
+      id = GetRootItem();
+
+   id = FindNextUnreadFolder(id, next);
    if ( !id.IsOk() )
    {
       wxLogStatus(GetFrame(this), _("No more folders with unread messages."));
@@ -2647,7 +2655,7 @@ void wxFolderTreeImpl::OnKeyDown(wxTreeEvent& event)
          case WXK_DOWN:
          case WXK_UP:
             // do go to next or previous folder
-            (void)GoToNextUnreadFolder(GetSelection(), keycode == WXK_DOWN);
+            (void)GoToNextUnreadFolder(keycode == WXK_DOWN);
             break;
 
          case WXK_HOME:
