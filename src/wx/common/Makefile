@@ -5,7 +5,7 @@
 # If you change the number of subdirectories, make sure you modify Makefile, too!
 
 CWD = wx
-SRC = pprocess.cpp phone.cpp
+SRC = pprocess.cpp phone.cpp vcard.cpp
 HDR = $(SRC:.cpp=.h)
 DEP = $(SRC:.cpp=.d)
 
