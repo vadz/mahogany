@@ -30,19 +30,12 @@ $Id$
   + fix usage of readEntry to use String objects
   + wxMDialogs completely broken as it is now
   + who cleans up CPYSTR() generated strings?
-
-- add support for popping window open and reading a folder of one's choice
-  (for being controlled from xbiff like programs)
-  idea: read from ~/.M/control whenever being sent a certain signal,
-        execute that text as a python script
+  + find path to global configuration file and use it
 
 - write some first configuration dialogs and for opening a folder
 
 - configure: USE_WXCONFIG does not get defined!
 
-- not all windows get closed when application exits.
-  MessageViews stay open, why?
-  
 - suppress superfluous message popup-windows (i.e. c-client status messages)
 
 - WINDOWS: how to do MIME handling?
@@ -61,6 +54,14 @@ $Id$
 
 
 *** to implement in near future ***
+
+- add support for popping window open and reading a folder of one's choice
+  (for being controlled from xbiff like programs)
+  idea: read from ~/.M/control whenever being sent a certain signal,
+        execute that text as a python script
+
+- threading of messages via MessageId/References header lines
+  Follow examples in SunExpert journal.
 
 - drag and drop interaction with gmc and kfm
 
