@@ -112,7 +112,8 @@
 #define   MP_HELPBROWSER_ISNS   "HelpBrowserIsNetscape"
 /// the directory for mbox folders
 #define   MP_MBOXDIR         "FolderDir"
-
+/// command to convert tiff faxes to postscript
+#define   MP_TIFF2PS         "FaxToPS"
 /// the user's M directory
 #   define   MP_USERDIR         "UserDirectory"
 
@@ -402,6 +403,8 @@
 #define   MP_HELPBROWSER_ISNS_D   1
 /// the directory for mbox folders
 #define   MP_MBOXDIR_D         M_EMPTYSTRING
+/// command to convert tiff faxes to postscript
+#define   MP_TIFF2PS_D         "tiff2ps -ap2"
 /// expand folder tree control?
 #define   MP_EXPAND_TREECTRL_D   1
 

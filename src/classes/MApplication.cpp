@@ -324,8 +324,11 @@ MAppBase::OnStartup()
       return false;
    }
 
+   /* Initialise mailcap/mime.types managing subsystem. */
    m_mimeManager = new wxMimeTypesManager();
-
+   // attempt to load the extra information supplied with M:
+   m_mimeManager->ReadMailcap(GetGlobalDir()+"/mailcap");
+   m_mimeManager->ReadMimeTypes(GetGlobalDir()+"/mime.types");
 
    // create and show the main program window
    CreateTopLevelFrame();

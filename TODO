@@ -31,6 +31,7 @@ $Id$
   - copy/cut/selections
   - DragNDrop (waiting for GNOME 1.0 / Debian Slink)
   - occasionally wraps lines wongly (twice)
+  - reset scrollbars on Clear()
 
 - IMAP progress updates don't appear because there is too much to be
   done in wxYield()?
@@ -46,10 +47,14 @@ $Id$
 - check in new options panels
   - add help button in notebook, linked to help ids in panels
 
+- add ext editor icon to toolbar in composeview, nicer icon for insert file
+
 - make mailfolders collectable:
   - have a "collect" flag
   - have a global "NewMail" folder setting and ensure its existence
     (and the one of SentFolder) in VerifySettings()
+
+- .newsrc read/write  --> should be there?!
 
 - Change MessageCC code to first look for a mail cache entry via
   mail_elt() instead of always fetching message.
@@ -74,6 +79,8 @@ $Id$
  - save and restore printer settings in profile
 
 ---> simplify Profiles on separate branch
+
+- if time permits: vcard-import
 **************** end of KB priorities :-) *********************
 
 - fix occasional segfault/memory corruption in MailfolderCC.cpp
@@ -187,6 +194,9 @@ ctrl
 - configuration dialog for columns in folderview
 - alternative treecontrol instead of listctrl for folderview
 - anonymous IMAP access (VZ: I'll do it)
+
+- use wxURL to retrieve remote configuration files and import them,
+  maybe even retrieve files to use as folders or address books`?
 
 - wxFolderCreateNotebook should be split into base class and 2 derivations:
   wxFolderCreateNotebook and wxFolderPropNotebook

@@ -207,10 +207,10 @@ private:
 };
 
 // the message parameters for the MIME type manager
-class MailMessageParamaters : public wxFileType::MessageParameters
+class MailMessageParameters : public wxFileType::MessageParameters
 {
 public:
-   MailMessageParamaters(const wxString& filename,
+   MailMessageParameters(const wxString& filename,
          const wxString& mimetype,
          Message *mailMessage,
          int part)
@@ -256,7 +256,7 @@ MimePopup::OnCommandEvent(wxCommandEvent &event)
 }
 
 wxString
-MailMessageParamaters::GetParamValue(const wxString& name) const
+MailMessageParameters::GetParamValue(const wxString& name) const
 {
    const MessageParameterList &plist = m_mailMessage->GetParameters(m_part);
    MessageParameterList::iterator i;
@@ -477,7 +477,7 @@ wxMessageView::Update(void)
    llist->LineBreak();
    llist->LineBreak();
 
-// iterate over all parts
+   // iterate over all parts
    n = mailMessage->CountParts();
    for(i = 0; i < n; i++)
    {
@@ -520,7 +520,11 @@ wxMessageView::Update(void)
             lastObjectWasIcon = false;
          }
       }
-      else // insert an icon
+      else
+         /* This block captures all non-text message parts. They get
+            represented by an icon.
+            In case of image content, we check whether it might be a
+            Fax message. */
       {
          wxBitmap icn;
          if(t == Message::MSG_TYPEIMAGE && m_ProfileValues.inlineGFX)
@@ -723,6 +727,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
    }
 #  endif // Win
 
+   /* First, we check for those contents that we handle in M itself: */
    // this we handle internally
    //if(mimetype == "MESSAGE/RFC822")
    if(mimetype.length() >= strlen("MESSAGE") &&
@@ -741,10 +746,45 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       wxRemoveFile(filename);
       return;
    }
-   // need a filename for GetOpenCommand()
-   String filename = tmpnam(NULL);
-   MailMessageParamaters params(filename, mimetype,
-                                mailMessage, mimeDisplayPart);
+
+   String
+      filename = wxGetTempFileName("Mtemp"),
+      filename2 = "";
+
+   MailMessageParameters
+      params(filename, mimetype, mailMessage, mimeDisplayPart);
+   
+#ifdef OS_UNIX
+   /* For IMAGE/TIFF content, check whether it comes from one of the
+      fax domains. If so, change the mimetype to "IMAGE/TIFF-G3" and
+      proceed in the usual fashion. This allows the use of a special
+      image/tiff-g3 mailcap entry. */
+   if ( wxMimeTypesManager::IsOfType(mimetype, "IMAGE/TIFF") )
+   {
+      if(/*isfax*/ 1
+         && MimeSave(mimeDisplayPart,filename))
+      {
+         // use TIFF2PS command to create a postscript file, open that 
+         // one with the usual ps viewer
+         String command = READ_CONFIG(m_Profile,MP_TIFF2PS);
+         filename2 = filename + ".ps";
+         command = command << ' ' << filename << " >" << filename2;
+         // we ignore the return code, because next viewer will fail
+         // or succeed depending on this:
+         (void) RunProcess(command);  // this produces a postscript file on success
+         wxRemoveFile(filename);
+         filename = filename2;
+         mimetype = "application/postscript";
+         if(fileType) delete fileType;
+         fileType = mimeManager.GetFileTypeFromMimeType(mimetype);
+         // proceed as usual
+         MailMessageParameters new_params(filename, mimetype,
+                                          mailMessage,
+                                          mimeDisplayPart);
+         params = new_params;
+      }
+   }
+#endif
    String command;
    if ( (fileType == NULL) || !fileType->GetOpenCommand(&command, params) ) {
       // unknown MIME type, ask the user for the command to use
