@@ -41,7 +41,7 @@
 #include "MessageViewer.h"
 #include "MTextStyle.h"
 
-#include "miscutil.h"         // for GetColourByName()
+#include "ColourNames.h"
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -245,9 +245,7 @@ QuoteURLFilter::ReadOptions(QuoteURLFilter::Options& options,
 {
    // a macro to make setting many colour options less painful
    #define GET_COLOUR_FROM_PROFILE(col, name) \
-      GetColourByName(&col, \
-                      READ_CONFIG(profile, MP_MVIEW_##name), \
-                      GetStringDefault(MP_MVIEW_##name))
+      ReadColour(&col, profile, MP_MVIEW_ ## name)
 
    GET_COLOUR_FROM_PROFILE(options.QuotedCol[1], QUOTED_COLOUR1);
    GET_COLOUR_FROM_PROFILE(options.QuotedCol[2], QUOTED_COLOUR2);

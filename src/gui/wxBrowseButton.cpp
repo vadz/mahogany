@@ -41,10 +41,9 @@
 #include "MFolder.h"
 
 #include "gui/wxDialogLayout.h"
-
 #include "gui/wxBrowseButton.h"
 
-#include "miscutil.h" // for ParseColorString and GetColorName
+#include "ColourNames.h"
 
 // ----------------------------------------------------------------------------
 // private classes

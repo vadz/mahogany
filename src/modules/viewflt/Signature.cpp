@@ -29,7 +29,7 @@
 #include "ViewFilter.h"
 #include "MessageViewer.h"
 
-#include "miscutil.h"         // for GetColourByName()
+#include "ColourNames.h"
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -87,9 +87,7 @@ SignatureFilter::ReadOptions(SignatureFilter::Options& options,
 {
    // a macro to make setting many colour options less painful
    #define GET_COLOUR_FROM_PROFILE(col, name) \
-      GetColourByName(&col, \
-                      READ_CONFIG(profile, MP_MVIEW_##name), \
-                      GetStringDefault(MP_MVIEW_##name))
+      ReadColour(&col, profile, MP_MVIEW_ ## name)
 
    GET_COLOUR_FROM_PROFILE(options.SigCol, SIGCOLOUR);
 

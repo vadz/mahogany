@@ -97,6 +97,8 @@
 
 #include "MDialogs.h"
 
+#include "ColourNames.h"
+
 // use XPMs under MSW as well as it's the simplest way to have transparent
 // bitmaps like we need here
 #include "../icons/sortdown.xpm"
@@ -3597,27 +3599,13 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
    settings->dateFormat = READ_CONFIG_TEXT(profile, MP_DATE_FMT);
    settings->dateGMT = READ_CONFIG_BOOL(profile, MP_DATE_GMT);
 
-   GetColourByName(&settings->FgCol,
-                   READ_CONFIG(profile, MP_FVIEW_FGCOLOUR),
-                   GetStringDefault(MP_FVIEW_FGCOLOUR));
-   GetColourByName(&settings->BgCol,
-                   READ_CONFIG(profile, MP_FVIEW_BGCOLOUR),
-                   GetStringDefault(MP_FVIEW_BGCOLOUR));
-   GetColourByName(&settings->FlaggedCol,
-                   READ_CONFIG(profile, MP_FVIEW_FLAGGEDCOLOUR),
-                   GetStringDefault(MP_FVIEW_FLAGGEDCOLOUR));
-   GetColourByName(&settings->NewCol,
-                   READ_CONFIG(profile, MP_FVIEW_NEWCOLOUR),
-                   GetStringDefault(MP_FVIEW_NEWCOLOUR));
-   GetColourByName(&settings->RecentCol,
-                   READ_CONFIG(profile, MP_FVIEW_RECENTCOLOUR),
-                   GetStringDefault(MP_FVIEW_RECENTCOLOUR));
-   GetColourByName(&settings->DeletedCol,
-                   READ_CONFIG(profile, MP_FVIEW_DELETEDCOLOUR),
-                   GetStringDefault(MP_FVIEW_DELETEDCOLOUR));
-   GetColourByName(&settings->UnreadCol,
-                   READ_CONFIG(profile, MP_FVIEW_UNREADCOLOUR),
-                   GetStringDefault(MP_FVIEW_UNREADCOLOUR));
+   ReadColour(&settings->FgCol, profile, MP_FVIEW_FGCOLOUR);
+   ReadColour(&settings->BgCol, profile, MP_FVIEW_BGCOLOUR);
+   ReadColour(&settings->FlaggedCol, profile, MP_FVIEW_FLAGGEDCOLOUR);
+   ReadColour(&settings->NewCol, profile, MP_FVIEW_NEWCOLOUR);
+   ReadColour(&settings->RecentCol, profile, MP_FVIEW_RECENTCOLOUR);
+   ReadColour(&settings->DeletedCol, profile, MP_FVIEW_DELETEDCOLOUR);
+   ReadColour(&settings->UnreadCol, profile, MP_FVIEW_UNREADCOLOUR);
 
    settings->font = READ_CONFIG_TEXT(profile, MP_FVIEW_FONT_DESC);
    if ( settings->font.empty() )

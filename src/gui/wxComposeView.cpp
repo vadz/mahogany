@@ -95,6 +95,7 @@
 #include "SendMessage.h"
 #include "Message.h"
 #include "Collect.h"
+#include "ColourNames.h"
 
 #include "modules/Calendar.h"
 
@@ -799,8 +800,8 @@ void ComposerOptions::Read(Profile *profile)
    CHECK_RET( profile, _T("NULL profile in Composer::Options::Read") );
 
    // colours
-   GetColourByName(&m_fg, READ_CONFIG(profile, MP_CVIEW_FGCOLOUR), _T("black"));
-   GetColourByName(&m_bg, READ_CONFIG(profile, MP_CVIEW_BGCOLOUR), _T("white"));
+   ReadColour(&m_fg, profile, MP_CVIEW_FGCOLOUR);
+   ReadColour(&m_bg, profile, MP_CVIEW_BGCOLOUR);
 
    // font
    m_font = READ_CONFIG_TEXT(profile, MP_CVIEW_FONT_DESC);

@@ -15,8 +15,6 @@
 
 #include "MObject.h"    // the base class declaration
 
-#include "miscutil.h"   // GetFullEmailAddress
-
 // forward declaration for classes we use
 class AdbElement;
 class AdbEntry;

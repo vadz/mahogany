@@ -63,7 +63,7 @@
 #include "wx/persctrl.h"
 #include "XFace.h"
 #include "Collect.h"
-#include "miscutil.h"         // for GetColourByName()
+#include "ColourNames.h"
 
 #include "Composer.h"
 
@@ -1056,9 +1056,7 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
 
    // a macro to make setting many colour options less painful
    #define GET_COLOUR_FROM_PROFILE(col, name) \
-      GetColourByName(&col, \
-                      READ_CONFIG(profile, MP_MVIEW_##name), \
-                      GetStringDefault(MP_MVIEW_##name))
+      ReadColour(&col, profile, MP_MVIEW_ ## name)
 
    #define GET_COLOUR_FROM_PROFILE_IF_NOT_FG(which, name) \
       GET_COLOUR_FROM_PROFILE(col, name); \

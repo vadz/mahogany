@@ -40,10 +40,10 @@
 #include "MFolderDialogs.h"
 #include "FolderView.h"
 
-#include "miscutil.h" // for ParseColourString()
+#include "ColourNames.h"               // for ParseColourString()
 
 #include <wx/tokenzr.h>
-#include <wx/imaglist.h>        // for wxImageList
+#include <wx/imaglist.h>               // for wxImageList
 #include <wx/persctrl.h>
 
 #include "gui/wxOptionsDlg.h"
