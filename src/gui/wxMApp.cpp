@@ -769,69 +769,78 @@ wxMApp::OnInit()
 
 #ifdef USE_I18N
    // Set up locale first, so everything is in the right language.
-   bool hasLocale = false;
-
+   wxString locale = m_cmdLineOptions->lang;
+   if ( locale.empty() )
+   {
+      // auto detect the language to use
+      //
+      // TODO: we can probably replace all this mess now with a call to
+      //       wxLocale::Init(wxLANGUAGE_DEFAULT)?
 #ifdef OS_UNIX
-   const char *locale = getenv("LANG");
-   hasLocale =
-      locale &&
-      (strcmp(locale, "C") != 0) &&
-      (strcmp(locale, "en") != 0) &&
-      (strncmp(locale,"en_", 3) != 0) &&
-      (strcmp(locale, "us") != 0);
-#elif defined(OS_WIN)
-   // this variable is not usually set under Windows, but give the user a
-   // chance to override our locale detection logic in case it doesn't work
-   // (which is well possible because it's totally untested)
-   wxString locale = getenv("LANG");
-   if ( locale.Length() > 0 )
-   {
-      // setting LANG to "C" disables all this
-      hasLocale = (locale[0] != 'C') || (locale[1] != '\0');
-   }
-   else
-   {
-      // try to detect locale ourselves
-      LCID lcid = GetThreadLocale(); // or GetUserDefaultLCID()?
-      WORD idLang = PRIMARYLANGID(LANGIDFROMLCID(lcid));
-      hasLocale = idLang != LANG_ENGLISH;
-      if ( hasLocale )
+      locale = getenv("LANG");
+      if ( !locale.empty() )
       {
-         static char s_countryName[256];
-         int rc = GetLocaleInfo(lcid, LOCALE_SABBREVCTRYNAME,
-                                s_countryName, WXSIZEOF(s_countryName));
-         if ( !rc )
+         if ( (strcmp(locale, "C") == 0) ||
+              (strcmp(locale, "en") == 0) ||
+              (strncmp(locale,"en_", 3) == 0) ||
+              (strcmp(locale, "us") == 0) )
          {
-            // this string is intentionally not translated
-            wxLogSysError("Can not get current locale setting.");
-
-            hasLocale = FALSE;
-         }
-         else
-         {
-            // TODO what if the buffer was too small?
-            locale = s_countryName;
+            locale.clear();
          }
       }
-   }
+
+#ifdef __LINUX__
+      /* This is a hack for SuSE Linux which sets LANG="german" instead
+         of LANG="de". Once again, they do their own thing...
+      */
+      if ( wxStricmp(locale, "german") == 0 )
+         locale = "de_DE";
+#endif // __LINUX__
+
+#elif defined(OS_WIN)
+      // this variable is not usually set under Windows, but give the user a
+      // chance to override our locale detection logic in case it doesn't work
+      // (which is well possible because it's totally untested)
+      locale = getenv("LANG");
+      if ( !locale.empty() )
+      {
+         // setting LANG to "C" disables all this
+         if ( locale == "C" )
+            locale.clear();
+      }
+      else // LANG not set
+      {
+         // try to detect locale ourselves
+         LCID lcid = GetThreadLocale(); // or GetUserDefaultLCID()?
+         WORD idLang = PRIMARYLANGID(LANGIDFROMLCID(lcid));
+         if ( idLang != LANG_ENGLISH )
+         {
+            static char s_countryName[256];
+            int rc = GetLocaleInfo(lcid, LOCALE_SABBREVCTRYNAME,
+                                   s_countryName, WXSIZEOF(s_countryName));
+            if ( !rc )
+            {
+               // this string is intentionally not translated
+               wxLogSysError("Can not get current locale setting.");
+            }
+            else
+            {
+               // TODO what if the buffer was too small?
+               locale = s_countryName;
+            }
+         }
+      }
 #else // Mac?
 #   error "don't know how to get the current locale on this platform."
 #endif // OS
-
-#ifdef __LINUX__
-   /* This is a hack for SuSE Linux which sets LANG="german" instead
-      of LANG="de". Once again, they do their own thing...
-   */
-   if( hasLocale && (wxStricmp(locale, "german") == 0) )
-      locale = "de_DE";
-#endif // __LINUX__
+   }
 
    // if we fail to load the msg catalog, remember it in this variable because
    // we can't remember this in the profile yet - it is not yet created
    bool failedToLoadMsgs = false,
         failedToSetLocale = false;
 
-   if ( hasLocale )
+   if ( !locale.empty() )
    {
       // TODO should catch the error messages and save them for later
       wxLogNull noLog;
@@ -844,22 +853,28 @@ wxMApp::OnInit()
 
          failedToSetLocale = true;
       }
-      else
+      else // set locale successfully
       {
+         // now load the message catalogs
 #ifdef OS_UNIX
          String localePath;
          localePath << M_BASEDIR << "/locale";
 #elif defined(OS_WIN)
-         // we can't use InitGlobalDir() here as the profile is not created yet,
-         // but I don't have time to fix it right now - to do later!!
-         #error "this code is broken and will crash"  // FIXME
+         // the program directory is not initialized yet so we can't do much
+         // more than looking in the current directory...
+         wxString strPath;
+         ::GetModuleFileName(NULL, wxStringBuffer(strPath, MAX_PATH), MAX_PATH);
 
-         InitGlobalDir();
+         // get just the path
+         wxString strDir;
+         wxSplitPath(strPath, &strDir, NULL, NULL);
+
          String localePath;
-         localePath << m_globalDir << "/locale";
+         localePath << strDir << "/locale";
 #else
 #   error "don't know where to find message catalogs on this platform"
 #endif // OS
+
          m_Locale->AddCatalogLookupPathPrefix(localePath);
 
          if ( !m_Locale->AddCatalog(M_APPLICATIONNAME) )
@@ -2025,6 +2040,7 @@ void wxMApp::ShowLog(bool doShow)
 #define OPTION_CONFIG      "config"
 #define OPTION_DEBUGMAIL   "debug"
 #define OPTION_FOLDER      "folder"
+#define OPTION_LANG        "lang"
 #define OPTION_NEWSGROUP   "newsgroup"
 #define OPTION_SAFE        "safe"
 #define OPTION_SUBJECT     "subject"
@@ -2082,6 +2098,14 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
          "f",
          OPTION_FOLDER,
          gettext_noop("specify the folder to open in the main window"),
+      },
+
+      // --lang option to specify the language to use
+      {
+         wxCMD_LINE_OPTION,
+         NULL,
+         OPTION_LANG,
+         gettext_noop("the language to use for the program messages"),
       },
 
       // --newsgroup to specify the newsgroup to post the message to
@@ -2179,6 +2203,8 @@ bool wxMApp::OnCmdLineParsed(wxCmdLineParser& parser)
    parser.Found(OPTION_CONFIG, &m_cmdLineOptions->configFile);
    m_cmdLineOptions->useFolder = parser.Found(OPTION_FOLDER,
                                               &m_cmdLineOptions->folder);
+
+   (void)parser.Found(OPTION_LANG, &m_cmdLineOptions->lang);
 
    return true;
 }

@@ -35,6 +35,9 @@ public:
    /// name of the alt config file
    String configFile;
 
+   /// the locale/language to use, override LANG env var and auto detection
+   String lang;
+
    /// the folder to open in the main frame, only use if useFolder is true
    String folder;
 
