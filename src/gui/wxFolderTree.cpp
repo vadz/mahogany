@@ -1678,7 +1678,9 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
 
          // disable the items which don't make sense for some kinds of folders:
          // groups can't be opened
-         (*menu)->Enable(FolderMenu::Open, CanOpenFolder(folderType, folderFlags));
+         bool canOpen = CanOpenFolder(folderType, folderFlags);
+         (*menu)->Enable(FolderMenu::Open, canOpen);
+         (*menu)->Enable(FolderMenu::View, canOpen);
 
          // these items only make sense when a folder can, in principle, have
          // inferiors (and browsing doesn't make sense for "simple" groups - what

@@ -2841,6 +2841,8 @@ bool MailFolderCC::CheckStatus(const MFolder *folder)
    // and check for the new one
    MAILSTATUS mailstatus;
    {
+      wxBusyCursor busyCursor;
+
       String login = folder->GetLogin(),
              password = folder->GetPassword();
 

@@ -101,8 +101,12 @@ public:
    {
       if ( newsel )
       {
+         // these messages are not very useful but often overwrite others, more
+         // useful ones
+#if 0
          wxLogStatus(m_frame, _("Selected folder '%s'."),
                      newsel->GetFullName().c_str());
+#endif // 0
 
          m_frame->UpdateFolderMenuUI(newsel);
       }
