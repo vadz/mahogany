@@ -21,6 +21,10 @@
 
 // disable some VC++ warnings
 #ifdef _MSC_VER
+#  pragma warning(disable:4284) // return type for 'identifier::operator->' is
+                                // not a UDT or reference to a UDT. Will
+                                // produce errors if applied using infix
+                                // notation
 #  pragma warning(disable:4355) // 'this': used in base member initializer list
 #endif // Visual C++
 
