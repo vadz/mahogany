@@ -985,7 +985,7 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
       }
    }
 
-   if( mf->IsEmpty() )
+   if( !mf->IsEmpty() )
    {
       HeaderInfoList *hil = mf->GetHeaders();
       if( hil )
