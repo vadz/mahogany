@@ -600,7 +600,8 @@ wxComposeView::Send(void)
                                   i,WXLO_EXPORT_AS_TEXT)) != NULL)
    {
       if(export->type == WXLO_EXPORT_TEXT)
-         sm.AddPart(TYPETEXT,export->content.text->c_str(),export->content.text->length());
+         sm.AddPart(TYPETEXT,export->content.text->c_str(),export->content.text->length(),
+                    "PLAIN");
       else
       {
          lo = export->content.object;
@@ -632,57 +633,6 @@ wxComposeView::Send(void)
       }
       delete export;
    }
-#if 0
-   while(ftoType != LI_ILLEGAL)
-   {
-      switch(ftoType)
-      {
-      case LI_TEXT:
-         sm.AddPart(TYPETEXT,tmp->c_str(),tmp->length());
-         break;
-
-      case LI_ICON:
-         // <IMG SRC="xxx"; mimetype; numMimeType;fileID >
-         cptr = ocptr = strutil_strdup(tmp->c_str());
-         cptr = strtok(cptr,";"); // IMG
-         cptr = strtok(NULL,";"); // mimetype
-         mimeType = cptr;
-         mimeSubType = strutil_after(mimeType,'/');
-         mimeType = strutil_before(mimeType, '/');
-         cptr = strtok(NULL,";"); // numericMimeType
-         numMimeType = atoi(cptr);
-         cptr = strtok(NULL,";"); // fileID
-//         istr.open(fileMap[atol(cptr)].c_str());
-         filename = LookupFileName(atol(cptr));
-         wxCHECK_RET(filename, "file not found in wxComposeView::Send");
-         istr.open(filename);
-         if(istr)
-         {
-            istr.seekg(0,ios::end);
-            size = istr.tellg();
-            buffer = new char [size];
-            istr.seekg(0,ios::beg);
-            istr.read(buffer, size);
- 
-            if(! istr.fail())
-               sm.AddPart(numMimeType, buffer, size, mimeSubType);
-            else
-               SYSERRMESSAGE((_("Cannot read file."),this));
-            delete [] buffer;
-            istr.close();
-         }
-         delete [] ocptr;
-         break;
-
-      case LI_ILLEGAL:
-         break;
-
-      default:
-         break;
-      }
-//FIXME      tmp = m_LayoutWindow->GetContent(&ftoType, false);
-   }
-#endif
    sm.Send();
 }
 

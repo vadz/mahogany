@@ -6,6 +6,9 @@
  * $Id$               *
  *                                                                  *
  * $Log$
+ * Revision 1.8  1998/07/08 19:17:50  KB
+ * Several fixes for mail display.
+ *
  * Revision 1.7  1998/07/05 12:20:28  KB
  * wxMessageView works and handles mime (segfault on deletion)
  * wsIconManager loads files
@@ -292,4 +295,31 @@ strutil_tokenise(char *string, const char *delim, kbStringList &tlist)
 	 break;
       tlist.push_back(new String(found));
    }
+}
+
+static const char *urlnames[] =
+{ "http:", "ftp:", "gopher:", "wysiwyg:", "telnet:", "wais:",
+  "mailto:", NULL };
+
+String
+strutil_matchurl(const char *string)
+{
+   int i;
+   String url = "";
+   const char * cptr = string;
+
+
+   // this is wrong (strncmp >= 0), broken )why?) and inefficient!
+#warning FIXME
+   for(i = 0; urlnames[i]; i++)
+      if(strcmp(string,urlnames[i]) >= 0) // found
+      {
+         while(*cptr && ! isspace(cptr))
+         {
+            url += *cptr;
+            cptr++;
+         }
+         return url;
+      }
+   return String("");
 }

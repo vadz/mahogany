@@ -6,6 +6,9 @@
  * $Id$                *
  *                                                                  *
  * $Log$
+ * Revision 1.13  1998/07/08 19:17:43  KB
+ * Several fixes for mail display.
+ *
  * Revision 1.12  1998/07/05 12:20:06  KB
  * wxMessageView works and handles mime (segfault on deletion)
  * wsIconManager loads files
@@ -197,6 +200,12 @@ void strutil_splitlist(String const &str, std::map<String,String> &table);
    @param tlist          reference to an STL String list to append the tokens to
   */
 void strutil_tokenise(char *string, const char *delim, kbStringList &tlist);
+
+/** Check whether string starts with an URL, if so, return URL.
+    @param string the string to check
+    @return either the url or an empty string
+  */
+String strutil_matchurl(const char *string);
 
 #ifndef     HAVE_STRSEP
 char * strsep(char **stringp, const char *delim);

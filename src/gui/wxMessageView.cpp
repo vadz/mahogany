@@ -243,7 +243,7 @@ wxMessageView::Update(void)
 {
    int i,n,t;
    char const * cptr;
-   String tmp,from;
+   String tmp,from,url;
    bool   lastObjectWasIcon = false; // a flag
 
    wxLayoutList &llist = m_LWindow->GetLayoutList();
@@ -288,7 +288,7 @@ wxMessageView::Update(void)
    llist.SetFontWeight(wxNORMAL);
    from = mailMessage->Address(tmp,MAT_FROM);
    if(tmp.length() > 0)
-     from = tmp + String(" <") + from + '>';
+      from = tmp + String(" <") + from + '>';
    llist.Insert(from);
    llist.LineBreak();
    llist.SetFontWeight(wxBOLD);
@@ -302,61 +302,77 @@ wxMessageView::Update(void)
    llist.Insert(mailMessage->Date());
    llist.LineBreak();llist.LineBreak();
 
+   // iterate over all parts
    n = mailMessage->CountParts();
    for(i = 0; i < n; i++)
    {
       t = mailMessage->GetPartType(i);
-      if(mailMessage->GetPartSize(i))
+      if(mailMessage->GetPartSize(i) == 0)
+         continue; // ignore empty parts
+      // insert text:
+      if(t == TYPETEXT || (t == TYPEMESSAGE && folder->GetProfile()
+                           && folder->GetProfile()->
+                           readEntry(MP_RFC822_IS_TEXT,MP_RFC822_IS_TEXT_D)))
       {
-        if(t == TYPETEXT || (t == TYPEMESSAGE && folder->GetProfile()
-            && folder->GetProfile()->
-            readEntry(MP_RFC822_IS_TEXT,MP_RFC822_IS_TEXT_D)))
-        {
-          cptr = mailMessage->GetPartContent(i);
-          if(cptr)
-          {
-            llist.LineBreak();
-            if(folder->GetProfile() &&
-                folder->GetProfile()->readEntry(MP_HIGHLIGHT_URLS,
-                    MP_HIGHLIGHT_URLS_D))
+         cptr = mailMessage->GetPartContent(i);
+         if(cptr == NULL)
+            continue; // error ?
+         llist.LineBreak();
+         if(folder->GetProfile() &&
+            folder->GetProfile()->readEntry(MP_HIGHLIGHT_URLS,
+                                            MP_HIGHLIGHT_URLS_D))
+         {
+            // check for urls and highlight them:
+            tmp = "";
+            while(*cptr)
             {
-              tmp = "";
-              HighLightURLs(cptr, tmp);  //FIXME - cannot work!
-              wxLayoutImportText(llist,tmp);
+               url = strutil_matchurl(cptr);
+               if(!strutil_isempty(url))
+               {
+                  if(tmp.length())
+                     wxLayoutImportText(llist,tmp);
+
+                  llist.SetFontColour("BLUE");
+                  llist.Insert(url);
+                  llist.SetFontColour("BLACK");
+                  cptr += url.length();
+                  tmp = "";
+               }
+               else
+                  tmp += *cptr++;
+            }
+            if(tmp.length())
+               llist.Insert(tmp);
+            lastObjectWasIcon = false;
+         }
+         else // insert an icon
+         {
+            wxIcon *icn;
+            if(t == TYPEIMAGE
+               && folder->GetProfile()
+               && folder->GetProfile()->readEntry(MP_INLINE_GFX,MP_INLINE_GFX_D))
+            {
+               char *filename = wxGetTempFileName("Mtemp");
+               MimeSave(i,filename);
+               icn = new wxIcon();
+               if(icn->LoadFile(filename,0))
+                  obj = new wxLayoutObjectIcon(icn);
+               else
+               {
+                  delete icn;
+                  icn = mApplication.GetIconManager()->GetIcon(mailMessage->GetPartMimeType(i));
+               }
+               wxRemoveFile(filename);
             }
             else
-              llist.Insert(tmp.c_str());
-            lastObjectWasIcon = false;
-          }
-        }
-        else
-        {
-           wxIcon *icn;
-           if(t == TYPEIMAGE
-              && folder->GetProfile()
-              && folder->GetProfile()->readEntry(MP_INLINE_GFX,MP_INLINE_GFX_D))
-           {
-              char *filename = wxGetTempFileName("Mtemp");
-              MimeSave(i,filename);
-              icn = new wxIcon();
-              if(icn->LoadFile(filename,0))
-                 obj = new wxLayoutObjectIcon(icn);
-              else
-              {
-                 delete icn;
-                 icn = mApplication.GetIconManager()->GetIcon(mailMessage->GetPartMimeType(i));
-              }
-              wxRemoveFile(filename);
-           }
-           else
-              icn = mApplication.GetIconManager()->GetIcon(mailMessage->GetPartMimeType(i));
-           obj = new wxLayoutObjectIcon(icn);
-           int *num = new int;
-           *num = i;
-           obj->SetUserData(num); // gets freed by list
-           llist.Insert(obj);
-           lastObjectWasIcon = true;
-        }
+               icn = mApplication.GetIconManager()->GetIcon(mailMessage->GetPartMimeType(i));
+            obj = new wxLayoutObjectIcon(icn);
+            int *num = new int;
+            *num = i;
+            obj->SetUserData(num); // gets freed by list
+            llist.Insert(obj);
+            lastObjectWasIcon = true;
+         }
       }
    }
 
