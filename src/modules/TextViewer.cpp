@@ -37,6 +37,7 @@
 
 #include "MessageView.h"
 #include "MessageViewer.h"
+#include "ClickURL.h"
 
 class TextViewerWindow;
 
@@ -96,7 +97,7 @@ public:
    virtual void InsertRawContents(const String& data);
    virtual void InsertText(const String& text, const MTextStyle& style);
    virtual void InsertURL(const String& text, const String& url);
-   virtual void InsertSignature(const String& signature);
+   virtual void EndText();
    virtual void EndPart();
    virtual void EndBody();
 
@@ -594,13 +595,14 @@ void TextViewer::InsertText(const String& text, const MTextStyle& style)
 
 void TextViewer::InsertURL(const String& text, const String& url)
 {
-   m_window->InsertClickable(text, new ClickableInfo(url), GetOptions().UrlCol);
+   m_window->InsertClickable(text,
+                             new ClickableURL(m_msgView, url),
+                             GetOptions().UrlCol);
 }
 
-void TextViewer::InsertSignature(const String& signature)
+void TextViewer::EndText()
 {
-   // this is not called by MessageView yet, but should be implemented when it
-   // starts recognizing signatures in the messages
+   // we don't need to do anything special here
 }
 
 void TextViewer::EndPart()

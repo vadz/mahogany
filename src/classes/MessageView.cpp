@@ -66,6 +66,8 @@
 #include "MessageTemplate.h"
 #include "Composer.h"
 
+#include "ClickAtt.h"
+
 #include "gui/wxIconManager.h"
 
 #include <wx/dynarray.h>
@@ -93,9 +95,6 @@ extern const MOption MP_AUTOCOLLECT;
 extern const MOption MP_AUTOCOLLECT_ADB;
 extern const MOption MP_AUTOCOLLECT_SENDER;
 extern const MOption MP_AUTOCOLLECT_NAMED;
-extern const MOption MP_BROWSER;
-extern const MOption MP_BROWSER_INNW;
-extern const MOption MP_BROWSER_ISNS;
 extern const MOption MP_HIGHLIGHT_URLS;
 extern const MOption MP_INCFAX_DOMAINS;
 extern const MOption MP_INCFAX_SUPPORT;
@@ -427,11 +426,6 @@ MessageView::AllProfileValues::AllProfileValues()
    inlineGFX = -1;
    showExtImages = false;
 
-#ifdef OS_UNIX
-   browserIsNS =
-#endif // Unix
-   browserInNewWindow = false;
-
    autocollect = false;
 }
 
@@ -450,12 +444,8 @@ MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
           // even if these fields are different, they don't change our
           // appearance, so ignore them for the purpose of this comparison
 #if 0
-          CMP(browser) && CMP(browserInNewWindow) &&
           CMP(autocollect) && CMP(autocollectSenderOnly) &&
           CMP (autocollectNamed) CMP(autocollectBookName) &&
-#ifdef OS_UNIX
-          CMP(browserIsNS)
-#endif // Unix
 #endif // 0
           CMP(showFaces);
 
@@ -1013,8 +1003,6 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
       settings->showExtImages = READ_CONFIG_BOOL(profile, MP_INLINE_GFX_EXTERNAL);
    }
 
-   settings->browser = READ_CONFIG_TEXT(profile, MP_BROWSER);
-   settings->browserInNewWindow = READ_CONFIG_BOOL(profile, MP_BROWSER_INNW);
    settings->autocollect =  READ_CONFIG(profile, MP_AUTOCOLLECT);
    settings->autocollectSenderOnly =  READ_CONFIG(profile, MP_AUTOCOLLECT_SENDER);
    settings->autocollectNamed =  READ_CONFIG(profile, MP_AUTOCOLLECT_NAMED);
@@ -1022,11 +1010,6 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    settings->showFaces = READ_CONFIG_BOOL(profile, MP_SHOW_XFACES);
 
    settings->highlightURLs = READ_CONFIG_BOOL(profile, MP_HIGHLIGHT_URLS);
-
-   // these settings are used under Unix only
-#ifdef OS_UNIX
-   settings->browserIsNS = READ_CONFIG_BOOL(profile, MP_BROWSER_ISNS);
-#endif // Unix
 
    // update the parents menu as the show headers option might have changed
    UpdateShowHeadersInMenu();
@@ -1673,37 +1656,9 @@ void MessageView::ShowImage(const MimePart *mimepart)
 }
 
 /* static */
-String MessageView::GetLabelFor(const MimePart *mimepart)
-{
-   wxString label = mimepart->GetFilename();
-   if ( !label.empty() )
-      label << " : ";
-
-   MimeType type = mimepart->GetType();
-   label << type.GetFull();
-
-   // multipart always have size of 0, don't show
-   if ( type.GetPrimary() != MimeType::MULTIPART )
-   {
-      label << ", ";
-
-      size_t lines;
-      if ( type.IsText() && (lines = mimepart->GetNumberOfLines()) )
-      {
-         label << strutil_ultoa(lines) << _(" lines");
-      }
-      else
-      {
-         label << strutil_ultoa(mimepart->GetSize()) << _(" bytes");
-      }
-   }
-
-   return label;
-}
-
 ClickableInfo *MessageView::GetClickableInfo(const MimePart *mimepart) const
 {
-   return new ClickableInfo(mimepart, GetLabelFor(mimepart));
+   return new ClickableAttachment(const_cast<MessageView *>(this), mimepart);
 }
 
 // ----------------------------------------------------------------------------
@@ -2520,174 +2475,6 @@ MessageView::MimeViewText(const MimePart *mimepart)
 }
 
 // ----------------------------------------------------------------------------
-// URL handling
-// ----------------------------------------------------------------------------
-
-void MessageView::OpenURL(const String& url, int options)
-{
-   bool inNewWindow = (options & URLOpen_New_Window) != 0;
-
-   wxFrame *frame = GetParentFrame();
-   wxLogStatus(frame, _("Opening URL '%s'..."), url.c_str());
-
-   wxBusyCursor bc;
-
-   // the command to execute
-   wxString command;
-
-   bool bOk = false;
-   if ( m_ProfileValues.browser.empty() )
-   {
-#ifdef OS_WIN
-      // ShellExecute() always opens in the same window,
-      // so do it manually for new window
-      if ( inNewWindow )
-      {
-         wxRegKey key(wxRegKey::HKCR, url.BeforeFirst(':') + "\\shell\\open");
-         if ( key.Exists() )
-         {
-            wxRegKey keyDDE(key, "DDEExec");
-            if ( keyDDE.Exists() )
-            {
-               wxString ddeTopic = wxRegKey(keyDDE, "topic");
-
-               // we only know the syntax of WWW_OpenURL DDE request
-               if ( ddeTopic == "WWW_OpenURL" )
-               {
-                  wxString ddeCmd = keyDDE;
-
-                  // this is a bit naive but should work as -1 can't appear
-                  // elsewhere in the DDE topic, normally
-                  if ( ddeCmd.Replace("-1", "0",
-                                      FALSE /* only first occurence */) == 1 )
-                  {
-                     // and also replace the parameters
-                     if ( ddeCmd.Replace("%1", url, FALSE) == 1 )
-                     {
-                        // magic incantation understood by wxMSW
-                        command << "WX_DDE#"
-                                << wxString(wxRegKey(key, "command")) << '#'
-                                << wxString(wxRegKey(keyDDE, "application"))
-                                << '#' << ddeTopic << '#'
-                                << ddeCmd;
-                     }
-                  }
-               }
-            }
-         }
-      }
-
-      if ( !command.empty() )
-      {
-         wxString errmsg;
-         errmsg.Printf(_("Could not launch browser: '%s' failed."),
-                       command.c_str());
-         bOk = LaunchProcess(command, errmsg);
-      }
-      else // easy case: open in the same window
-      {
-         bOk = (int)ShellExecute(NULL, "open", url,
-                                 NULL, NULL, SW_SHOWNORMAL ) > 32;
-      }
-#else  // Unix
-      // propose to choose program for opening URLs
-      if ( MDialog_YesNoDialog
-           (
-            _("No command configured to view URLs.\n"
-              "Would you like to choose one now?"),
-            frame,
-            MDIALOG_YESNOTITLE,
-            M_DLG_YES_DEFAULT,
-            M_MSGBOX_ASK_URL_BROWSER
-           )
-         )
-      {
-         ShowOptionsDialog();
-      }
-
-      if ( m_ProfileValues.browser.empty() )
-      {
-         wxLogError(_("No command configured to view URLs."));
-         bOk = false;
-      }
-#endif // Win/Unix
-   }
-   else // browser setting non empty, use it
-   {
-#ifdef OS_UNIX
-      if ( m_ProfileValues.browserIsNS ) // try re-loading first
-      {
-         wxString lockfile;
-         wxGetHomeDir(&lockfile);
-         if ( !wxEndsWithPathSeparator(lockfile) )
-            lockfile += '/';
-         lockfile += ".netscape/lock";
-         struct stat statbuf;
-
-         // cannot use wxFileExists here, because it's a link pointing to a
-         // non-existing location!
-         if ( lstat(lockfile.mb_str(), &statbuf) == 0 )
-         {
-            command << m_ProfileValues.browser << " -remote openURL(" << url;
-            if ( inNewWindow )
-            {
-               command << ",new-window)";
-            }
-            else
-            {
-               command << ")";
-            }
-            wxString errmsg;
-            errmsg.Printf(_("Could not launch browser: '%s' failed."),
-                          command.c_str());
-            bOk = LaunchProcess(command, errmsg);
-         }
-      }
-#endif // Unix
-      // either not netscape or ns isn't running or we have non-UNIX
-      if(! bOk)
-      {
-         command = m_ProfileValues.browser;
-         command << ' ' << url;
-
-         wxString errmsg;
-         errmsg.Printf(_("Couldn't launch browser: '%s' failed"),
-                       command.c_str());
-
-         bOk = LaunchProcess(command, errmsg);
-      }
-   }
-
-   if ( bOk )
-   {
-      wxLogStatus(frame, _("Opening URL '%s'... done."), url.c_str());
-   }
-   else
-   {
-      wxLogStatus(frame, _("Opening URL '%s' failed."), url.c_str());
-   }
-}
-
-void MessageView::OpenAddress(const String& address)
-{
-   Composer *cv = Composer::CreateNewMessage(GetProfile());
-
-   cv->SetAddresses(address);
-   cv->InitText();
-}
-
-void MessageView::AddToAddressBook(const String& address)
-{
-   wxArrayString addresses;
-   addresses.Add(address);
-
-   InteractivelyCollectAddresses(addresses,
-                                 READ_APPCONFIG(MP_AUTOCOLLECT_ADB),
-                                 GetFolderName(),
-                                 GetParentFrame());
-}
-
-// ----------------------------------------------------------------------------
 // MessageView menu command processing
 // ----------------------------------------------------------------------------
 
@@ -2769,78 +2556,22 @@ MessageView::DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
 {
    CHECK_RET( ci, _T("MessageView::DoMouseCommand(): NULL ClickableInfo") );
 
-   switch ( ci->GetType() )
+   switch ( id )
    {
-      case ClickableInfo::CI_ICON:
-      {
-         switch ( id )
-         {
-            case WXMENU_LAYOUT_RCLICK:
-               PopupMIMEMenu(GetWindow(), ci->GetPart(), pt);
-               break;
+      case WXMENU_LAYOUT_LCLICK:
+         ci->OnLeftClick(pt);
+         break;
 
-            case WXMENU_LAYOUT_LCLICK:
-               // for now, do the same thing as double click: perhaps the
-               // left button behaviour should be configurable?
+      case WXMENU_LAYOUT_RCLICK:
+         ci->OnRightClick(pt);
+         break;
 
-            case WXMENU_LAYOUT_DBLCLICK:
-               // open
-               MimeHandle(ci->GetPart());
-               break;
-
-            default:
-               FAIL_MSG(_T("unknown mouse action"));
-         }
-      }
-      break;
-
-      case ClickableInfo::CI_URL:
-      {
-         // URL taken from the text may contain the line breaks if it had been
-         // broken so remove them
-         wxString url;
-         url.reserve(ci->GetUrl().length());
-         for ( const wxChar *p = ci->GetUrl().c_str(); *p; p++ )
-         {
-            if ( *p != '\r' && *p != '\n' )
-               url += *p;
-         }
-
-         // treat mail urls separately: we handle them ourselves
-         wxString protocol = url.BeforeFirst(':');
-
-         bool isMail = protocol == "mailto";
-         if ( isMail )
-         {
-            // leave only the mail address
-            url.erase(0, 7); // 7 == strlen("mailto:")
-         }
-         else if ( protocol == url && url.find('@') != String::npos )
-         {
-            // a bare mail address
-            isMail = true;
-         }
-
-         if ( id == WXMENU_LAYOUT_RCLICK )
-         {
-            PopupURLMenu(GetWindow(), url, pt, isMail ? URL_Mailto : URL_Other);
-         }
-         else // left or double click
-         {
-            if ( isMail )
-            {
-               OpenAddress(url);
-            }
-            else // non mailto URL
-            {
-               OpenURL(url, m_ProfileValues.browserInNewWindow);
-            }
-         }
-      }
-      break;
+      case WXMENU_LAYOUT_DBLCLICK:
+         ci->OnDoubleClick(pt);
+         break;
 
       default:
-         FAIL_MSG(_T("unknown embedded object type"));
+         FAIL_MSG(_T("unknown mouse action"));
    }
 }
 

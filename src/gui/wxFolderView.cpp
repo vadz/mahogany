@@ -314,7 +314,9 @@ private:
 class wxFolderMsgWindow : public wxPanel
 {
 public:
-   wxFolderMsgWindow(wxWindow *parent, wxFolderView *fv);
+   wxFolderMsgWindow(wxWindow *parent,
+                     wxFolderView *folderView,
+                     wxFolderListCtrl *listCtrl);
    virtual ~wxFolderMsgWindow();
 
    // called when the old viewer window is about to be destroyed and replaced
@@ -347,6 +349,9 @@ protected:
 private:
    // the associated folder view (never NULL)
    wxFolderView *m_folderView;
+
+   // the folder view list part
+   wxFolderListCtrl *m_listCtrl;
 
    // the current viewer window (may be NULL)
    wxWindow *m_winViewer;
@@ -1053,14 +1058,17 @@ END_EVENT_TABLE()
 // wxFolderMsgWindow
 // ----------------------------------------------------------------------------
 
-wxFolderMsgWindow::wxFolderMsgWindow(wxWindow *parent, wxFolderView *fv)
+wxFolderMsgWindow::wxFolderMsgWindow(wxWindow *parent,
+                                     wxFolderView *folderView,
+                                     wxFolderListCtrl *listCtrl)
                  : wxPanel(parent, -1,
                             wxDefaultPosition, wxDefaultSize,
-                            fv ? wxBORDER_NONE : wxBORDER_DEFAULT)
+                            folderView ? wxBORDER_NONE : wxBORDER_DEFAULT)
 {
    m_winViewer = NULL;
    m_winBar = NULL;
-   m_folderView = fv;
+   m_folderView = folderView;
+   m_listCtrl = listCtrl;
    m_winViewer = NULL;
    m_evtHandlerMsgView = NULL;
 }
@@ -1366,6 +1374,13 @@ void wxFolderMsgWindow::OnChoice(wxCommandEvent& event)
                             profile,
                             MEventOptionsChangeData::Ok
                            ));
+
+   // the user will usually use the mouse to select the viewer because it isn't
+   // easy to access it from keyboard (if it's possible at all? hmm...) but he
+   // normally doesn't want to keep the focus on it later any more after
+   // choosing the viewer he wants
+   if ( m_listCtrl )
+      m_listCtrl->SetFocus();
 }
 
 void wxFolderMsgWindow::OnToggleButton(wxCommandEvent& event)
@@ -3204,7 +3219,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
 
    m_SplitterWindow = new wxFolderSplitterWindow(m_Parent);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow, this);
-   m_MessageWindow = new wxFolderMsgWindow(m_SplitterWindow, this);
+   m_MessageWindow = new wxFolderMsgWindow(m_SplitterWindow, this, m_FolderCtrl);
 
    m_MessagePreview = MessageView::Create(m_MessageWindow, this);
 

@@ -25,6 +25,7 @@
 #endif //USE_PCH
 
 #include "MTextStyle.h"
+#include "MessageViewer.h"
 
 #include "ViewFilter.h"
 
@@ -119,6 +120,9 @@ TrailerFilter::DoProcess(String& text,
          // trailers may be embedded, so call ourselves recursively to check
          // for them again
          Process(text, viewer, style);
+
+         // the main message text ends here
+         viewer->EndText();
 
          // and now show the trailer in special style
          wxColour colOld = style.GetTextColour();

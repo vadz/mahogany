@@ -11,8 +11,8 @@
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef MESSAGEVIEW_H
-#define MESSAGEVIEW_H
+#ifndef _M_MESSAGEVIEW_H_
+#define _M_MESSAGEVIEW_H_
 
 #ifdef __GNUG__
    #pragma interface "MessageView.h"
@@ -43,24 +43,6 @@ class ProcessEvtHandler;
 class ProcessInfo;
 
 WX_DEFINE_ARRAY(ProcessInfo *, ArrayProcessInfo);
-
-// ----------------------------------------------------------------------------
-// constants
-// ----------------------------------------------------------------------------
-
-/// the kind of the URL for PopupURLMenu()
-enum URLKind
-{
-   URL_Mailto,
-   URL_Other
-};
-
-/// options for OpenURL() (these are bit masks)
-enum
-{
-   URLOpen_Default    = 0,
-   URLOpen_New_Window = 1
-};
 
 // ----------------------------------------------------------------------------
 // MessageView: this class does MIME handling and uses ViewFilters (which, in
@@ -129,15 +111,6 @@ public:
 
    /// show the message view contents in the given language
    void SetLanguage(int cmdLang);
-
-   /// open the URL (in a new browser window if options has NewWindow flag)
-   void OpenURL(const String& url, int options = URLOpen_Default);
-
-   /// open an address, i.e. start writing message to it normally
-   void OpenAddress(const String& address);
-
-   /// add an address to the address book
-   void AddToAddressBook(const String& address);
 
    //@}
 
@@ -229,9 +202,6 @@ public:
 
    //@}
 
-   /// return a descriptive label for this MIME part
-   static String GetLabelFor(const MimePart *mimepart);
-
    /** @name Accessors
 
        Some trivial accessors
@@ -245,6 +215,11 @@ public:
    ASMailFolder *GetFolder() const { return m_asyncFolder; }
 
    //@}
+
+   /// launch a process, returns FALSE if it failed
+   bool LaunchProcess(const String& command,    // cmd to execute
+                      const String& errormsg,   // err msg to give on failure
+                      const String& tempfile = ""); // temp file name if any
 
 protected:
    /** @name Initialization
@@ -282,11 +257,6 @@ protected:
     */
    //@{
 
-   /// launch a process, returns FALSE if it failed
-   bool LaunchProcess(const String& command,    // cmd to execute
-                      const String& errormsg,   // err msg to give on failure
-                      const String& tempfile = ""); // temp file name if any
-
    /**
        synchronous versions of LaunchProcess(): launch a process and wait for
        its termination, returns FALSE it exitcode != 0
@@ -307,26 +277,6 @@ protected:
 
    /// the event handler which forwards process events to us
    ProcessEvtHandler *m_evtHandlerProc;
-
-   //@}
-
-   /** @name GUI hooks
-
-       MessageView doesn't know anything about GUI so these methods must be
-       implemented in the derived class
-    */
-   //@{
-
-   /// show the URL popup menu
-   virtual void PopupURLMenu(wxWindow *window,
-                             const String& url,
-                             const wxPoint& pt,
-                             URLKind urlkind) = 0;
-
-   /// show the MIME popup menu for this message part
-   virtual void PopupMIMEMenu(wxWindow *window,
-                              const MimePart *part,
-                              const wxPoint& pt) = 0;
 
    //@}
 
@@ -524,17 +474,6 @@ private:
       /// the colour to use for URL highlighting (if highlightURLs is true)
       wxColour UrlCol;
 
-      /// URL viewer
-      String browser;
-
-#ifdef OS_UNIX
-      /// Is URL viewer of the netscape variety?
-      bool browserIsNS:1;
-#endif // Unix
-
-      /// open netscape in new window?
-      bool browserInNewWindow:1;
-
       //@}
 
       /// @name Address autocollection
@@ -629,79 +568,6 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// ClickableInfo: data associated with the clickable objects in MessageView
-// ----------------------------------------------------------------------------
-
-class ClickableInfo
-{
-public:
-   enum Type
-   {
-      CI_ICON,
-      CI_URL
-   };
-
-   /** @name Ctors
-    */
-   //@{
-
-   /// ctor for URL
-   ClickableInfo(const String& url)
-      : m_label(url)
-      {
-         m_type = CI_URL;
-      }
-
-   /// ctor for all the rest
-   ClickableInfo(const MimePart *part, const String& label)
-      : m_label(label)
-      {
-         m_part = part;
-         m_type = CI_ICON;
-      }
-
-   //@}
-
-   /** @name Accessors
-    */
-   //@{
-
-   /// is it an URL or an attachment?
-   Type GetType() const { return m_type; }
-
-   /// get the URL text
-   const String& GetUrl() const
-   {
-      ASSERT_MSG( m_type == CI_URL, _T("no URL for this ClickableInfo!") );
-
-      return m_label;
-   }
-
-   /// get the MIME part (not for URLs)
-   const MimePart *GetPart() const
-   {
-      ASSERT_MSG( m_type != CI_URL, _T("no part number for this ClickableInfo!") );
-
-      return m_part;
-   }
-
-   /// get the label
-   const String& GetLabel() const
-   {
-      ASSERT_MSG( m_type != CI_URL, _T("Use GetUrl() for URLs!") );
-
-      return m_label;
-   }
-
-   //@}
-
-private:
-   Type   m_type;
-   String m_label;
-   const MimePart *m_part;
-};
-
-// ----------------------------------------------------------------------------
 // global functions (implemented in gui/wxMessageView.cpp)
 // ----------------------------------------------------------------------------
 
@@ -710,4 +576,4 @@ extern MessageView *ShowMessageViewFrame(wxWindow *parent,
                                          ASMailFolder *asmf,
                                          UIdType uid);
 
-#endif // MESSAGEVIEW_H
+#endif // _M_MESSAGEVIEW_H_

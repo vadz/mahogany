@@ -16,6 +16,8 @@
 
 #include "MModule.h"
 
+class WXDLLEXPORT wxWindow;
+
 /**
    MCryptoEngine defines an abstract interface for all supported cryptographic
    engines.
@@ -117,8 +119,6 @@ public:
    virtual int VerifySignature(const String& messageIn,
                                String& messageOut) = 0;
 
-   //@}
-
 #if 0
    virtual int CheckRecipient(const String & recipient) const = 0;
 
@@ -126,6 +126,19 @@ public:
 
    virtual int GetPublicKey(String & pk) const = 0;
 #endif // 0
+   //@}
+
+   /** @name Other */
+   //@{
+
+   /**
+      Shows the engine configuration dialog.
+
+      @param window the parent window for the dialog we show
+    */
+   //virtual void Configure(wxWindow *parent) = 0;
+
+   //@}
 };
 
 // ----------------------------------------------------------------------------

@@ -70,7 +70,6 @@
 #include <wx/file.h>
 #include <wx/mimetype.h>
 #include <wx/fontmap.h>
-#include <wx/clipbrd.h>
 #include <wx/splitter.h>
 
 // ----------------------------------------------------------------------------
@@ -121,94 +120,6 @@ public:
 
 private:
     Message *m_msg;
-};
-
-// ----------------------------------------------------------------------------
-// popup menu classes
-// ----------------------------------------------------------------------------
-
-// the popup menu invoked by clicking on an attachment in the mail message
-class MimePopup : public wxMenu
-{
-public:
-   MimePopup(wxMessageView *parent, const MimePart *mimepart)
-   {
-      // init member vars
-      m_mimepart = mimepart;
-      m_MessageView = parent;
-
-      // create the menu items
-      Append(WXMENU_MIME_INFO, _("&Info"));
-      AppendSeparator();
-      Append(WXMENU_MIME_OPEN, _("&Open"));
-      Append(WXMENU_MIME_OPEN_WITH, _("Open &with..."));
-      Append(WXMENU_MIME_SAVE, _("&Save..."));
-      Append(WXMENU_MIME_VIEW_AS_TEXT, _("&View as text"));
-   }
-
-   // callbacks
-   void OnCommandEvent(wxCommandEvent &event);
-
-private:
-   wxMessageView *m_MessageView;
-
-   const MimePart *m_mimepart;
-
-   DECLARE_EVENT_TABLE()
-};
-
-// the popup menu used with URLs
-class UrlPopup : public wxMenu
-{
-public:
-   UrlPopup(wxMessageView *parent, const String& url, URLKind kind)
-      : m_url(url)
-   {
-      m_MessageView = parent;
-
-      // set a descriptive title
-      String title;
-      if ( kind == URL_Mailto )
-      {
-         title = _("EMail address");
-      }
-      else // !mailto
-      {
-         title = url.BeforeFirst(':').Upper();
-         if ( title.length() == url.length() )
-         {
-            // no ':' in the URL, so it must be HTTP by default
-            title = _T("HTTP");
-         }
-
-         title += _(" url");
-      }
-
-      SetTitle(title);
-
-      // create the menu
-      if ( kind == URL_Mailto )
-      {
-         Append(WXMENU_URL_COMPOSE, _("&Write to"));
-         Append(WXMENU_URL_ADD_TO_ADB, _("&Add to address book..."));
-      }
-      else // !mailto
-      {
-         Append(WXMENU_URL_OPEN, _("&Open"));
-         Append(WXMENU_URL_OPEN_NEW, _("Open in &new window"));
-      }
-
-      Append(WXMENU_URL_COPY, _("&Copy to clipboard"));
-   }
-
-   // callbacks
-   void OnCommandEvent(wxCommandEvent &event);
-
-private:
-   wxMessageView *m_MessageView;
-   String m_url;
-
-   DECLARE_EVENT_TABLE()
 };
 
 // ----------------------------------------------------------------------------
@@ -265,7 +176,7 @@ public:
    virtual void InsertRawContents(const String& data) { }
    virtual void InsertText(const String& text, const MTextStyle& style) { }
    virtual void InsertURL(const String& text, const String& url) { }
-   virtual void InsertSignature(const String& signature) { }
+   virtual void EndText() { }
    virtual void EndPart() { }
    virtual void EndBody() { }
 
@@ -282,102 +193,6 @@ public:
 private:
    wxWindow *m_window;
 };
-
-// ----------------------------------------------------------------------------
-// event tables
-// ----------------------------------------------------------------------------
-
-BEGIN_EVENT_TABLE(MimePopup, wxMenu)
-   EVT_MENU(-1, MimePopup::OnCommandEvent)
-END_EVENT_TABLE()
-
-BEGIN_EVENT_TABLE(UrlPopup, wxMenu)
-   EVT_MENU(-1, UrlPopup::OnCommandEvent)
-END_EVENT_TABLE()
-
-// ============================================================================
-// implementation of misc private classes
-// ============================================================================
-
-// ----------------------------------------------------------------------------
-// MimePopup
-// ----------------------------------------------------------------------------
-
-void
-MimePopup::OnCommandEvent(wxCommandEvent &event)
-{
-   switch ( event.GetId() )
-   {
-      case WXMENU_MIME_INFO:
-         m_MessageView->MimeInfo(m_mimepart);
-         break;
-
-      case WXMENU_MIME_OPEN:
-         m_MessageView->MimeHandle(m_mimepart);
-         break;
-
-      case WXMENU_MIME_OPEN_WITH:
-         m_MessageView->MimeOpenWith(m_mimepart);
-         break;
-
-      case WXMENU_MIME_VIEW_AS_TEXT:
-         m_MessageView->MimeViewText(m_mimepart);
-         break;
-
-      case WXMENU_MIME_SAVE:
-         m_MessageView->MimeSave(m_mimepart);
-         break;
-   }
-}
-
-// ----------------------------------------------------------------------------
-// UrlPopup
-// ----------------------------------------------------------------------------
-
-void
-UrlPopup::OnCommandEvent(wxCommandEvent &event)
-{
-   int id = event.GetId();
-   switch ( id )
-   {
-      case WXMENU_URL_OPEN:
-      case WXMENU_URL_OPEN_NEW:
-         m_MessageView->OpenURL
-                        (
-                           m_url,
-                           id == WXMENU_URL_OPEN ? URLOpen_Default
-                                                 : URLOpen_New_Window
-                        );
-         break;
-
-      case WXMENU_URL_COMPOSE:
-         m_MessageView->OpenAddress(m_url);
-         break;
-
-      case WXMENU_URL_ADD_TO_ADB:
-         m_MessageView->AddToAddressBook(m_url);
-         break;
-
-      case WXMENU_URL_COPY:
-         {
-            wxClipboardLocker lockClip;
-            if ( !lockClip )
-            {
-               wxLogError(_("Failed to lock clipboard, URL not copied."));
-            }
-            else
-            {
-               wxTheClipboard->UsePrimarySelection();
-               wxTheClipboard->SetData(new wxTextDataObject(m_url));
-            }
-         }
-         break;
-
-      default:
-         FAIL_MSG( _T("unexpected URL popup menu command") );
-         break;
-   }
-}
 
 // ============================================================================
 // wxMessageView implementation
@@ -402,29 +217,6 @@ wxMessageView::~wxMessageView()
 MessageView *MessageView::Create(wxWindow *parent, FolderView *folderView)
 {
    return new wxMessageView(parent, folderView);
-}
-
-// ----------------------------------------------------------------------------
-// popup menus
-// ----------------------------------------------------------------------------
-
-void wxMessageView::PopupURLMenu(wxWindow *window,
-                                 const String& url,
-                                 const wxPoint& pt,
-                                 URLKind urlkind)
-{
-   UrlPopup menu(this, url, urlkind);
-
-   window->PopupMenu(&menu, pt);
-}
-
-void wxMessageView::PopupMIMEMenu(wxWindow *window,
-                                  const MimePart *part,
-                                  const wxPoint& pt)
-{
-   MimePopup mimePopup(this, part);
-
-   window->PopupMenu(&mimePopup, pt);
 }
 
 // ----------------------------------------------------------------------------

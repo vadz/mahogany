@@ -94,9 +94,6 @@ protected:
 
    struct Options
    {
-      // URL colour (used only if highlightURLs)
-      wxColour UrlCol;
-
       // the colours for quoted text (only used if quotedColourize)
       //
       // the first element in this array is the normal foreground colour, i.e.
@@ -152,8 +149,6 @@ QuoteURLFilter::ReadOptions(Profile *profile)
    GET_COLOUR_FROM_PROFILE(m_options.QuotedCol[1], QUOTED_COLOUR1);
    GET_COLOUR_FROM_PROFILE(m_options.QuotedCol[2], QUOTED_COLOUR2);
    GET_COLOUR_FROM_PROFILE(m_options.QuotedCol[3], QUOTED_COLOUR3);
-
-   GET_COLOUR_FROM_PROFILE(m_options.UrlCol, URLCOLOUR);
 
    #undef GET_COLOUR_FROM_PROFILE
 

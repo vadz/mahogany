@@ -33,6 +33,7 @@
 
 #include "MessageView.h"
 #include "MessageViewer.h"
+#include "ClickURL.h"
 
 #include <wx/dynarray.h>
 
@@ -113,7 +114,7 @@ public:
    virtual void InsertRawContents(const String& data);
    virtual void InsertText(const String& text, const MTextStyle& style);
    virtual void InsertURL(const String& text, const String& url);
-   virtual void InsertSignature(const String& signature);
+   virtual void EndText();
    virtual void EndPart();
    virtual void EndBody();
 
@@ -128,11 +129,8 @@ public:
    virtual bool CanProcess(const String& mimetype) const;
 
    // methods used by HtmlViewerWindow only
+   MessageView *GetMessageView() const { return m_msgView; }
    bool ShouldInlineImage(const String& url) const;
-   void DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
-   {
-      m_msgView->DoMouseCommand(id, ci, pt);
-   }
 
 private:
    // HTML helpers
@@ -397,7 +395,7 @@ void HtmlViewerWindow::OnCellMouseHover(wxHtmlCell *cell, wxCoord x, wxCoord y)
    if ( link )
    {
       ClickableInfo *ci = GetClickable(link->GetHref());
-      if ( !ci || ci->GetType() == ClickableInfo::CI_URL )
+      if ( ci )
       {
          // let the base class process it
          return;
@@ -420,17 +418,19 @@ void HtmlViewerWindow::OnCellClicked(wxHtmlCell *cell, wxCoord x, wxCoord y,
 
       if ( !ci )
       {
-         ci = new ClickableInfo(url);
+         ci = new ClickableURL(m_viewer->GetMessageView(), url);
          StoreClickable(ci, url);
       }
 
       // left click becomes double click as we want to open the URLs on simple
       // click
-      m_viewer->DoMouseCommand(event.LeftDown()
-                                 ? WXMENU_LAYOUT_DBLCLICK
-                                 : WXMENU_LAYOUT_RCLICK,
-                               ci,
-                               event.GetPosition());
+      m_viewer->GetMessageView()->DoMouseCommand
+                                  (
+                                    event.LeftDown() ? WXMENU_LAYOUT_DBLCLICK
+                                                     : WXMENU_LAYOUT_RCLICK,
+                                    ci,
+                                    event.GetPosition()
+                                  );
    }
 
    // don't call the base class version, we don't want it to automatically
@@ -892,11 +892,9 @@ void HtmlViewer::InsertURL(const String& text, const String& url)
               << "</a>";
 }
 
-void HtmlViewer::InsertSignature(const String& signature)
+void HtmlViewer::EndText()
 {
-   // this is not called by MessageView yet, but should be implemented when it
-   // starts recognizing signatures in the messages
-   FAIL_MSG( _T("not implemented") );
+   // nothing to do here
 }
 
 void HtmlViewer::EndPart()

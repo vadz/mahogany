@@ -27,6 +27,7 @@
 #include "MTextStyle.h"
 #include "ViewFilter.h"
 #include "MessageView.h"
+#include "MessageViewer.h"
 
 #include "miscutil.h"         // for GetColourByName()
 
@@ -172,6 +173,9 @@ SignatureFilter::DoProcess(String& text,
    // and then show the signature specially, if any
    if ( !signature.empty() )
    {
+      // the main message text ends here
+      viewer->EndText();
+
       // and now show the trailer in special style
       wxColour colOld = style.GetTextColour();
       style.SetTextColour(m_options.SigCol);

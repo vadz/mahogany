@@ -43,6 +43,7 @@
 
 #include "TemplateDialog.h"
 #include "MessageView.h"
+#include "ClickAtt.h"
 #include "Composer.h"
 
 #include "MsgCmdProc.h"
@@ -447,10 +448,7 @@ wxMIMETreeDialog::AddToTree(wxTreeItemId idParent, const MimePart *mimepart)
       image = MimeType::OTHER + 1;
    }
 
-   wxString label = MessageView::GetLabelFor(mimepart);
-#ifdef DEBUG
-   label << " (" << mimepart->GetPartSpec() << ')';
-#endif // DEBUG
+   wxString label = ClickableAttachment::GetLabelFor(mimepart);
 
    wxTreeItemId id  = m_treectrl->AppendItem(idParent,
                                              label,
@@ -475,7 +473,8 @@ void wxMIMETreeDialog::OnTreeItemRightClick(wxTreeEvent& event)
       wxMIMETreeData *data =
          (wxMIMETreeData *)m_treectrl->GetItemData(event.GetItem());
 
-      m_msgView->PopupMIMEMenu(m_treectrl, data->GetMimePart(), event.GetPoint());
+      ClickableAttachment att(m_msgView, data->GetMimePart());
+      att.ShowPopupMenu(m_treectrl, event.GetPoint());
    }
 }
 

@@ -35,6 +35,7 @@
 
 #include "MessageView.h"
 #include "MessageViewer.h"
+#include "ClickURL.h"
 
 #include "gui/wxllist.h"
 #include "gui/wxlwindow.h"
@@ -95,7 +96,7 @@ public:
    virtual void InsertRawContents(const String& data);
    virtual void InsertText(const String& text, const MTextStyle& style);
    virtual void InsertURL(const String& text, const String& url);
-   virtual void InsertSignature(const String& signature);
+   virtual void EndText();
    virtual void EndPart();
    virtual void EndBody();
 
@@ -162,8 +163,7 @@ public:
    {
       m_ci = ci;
 
-      SetLabel(m_ci->GetType() == ClickableInfo::CI_URL ? m_ci->GetUrl()
-                                                        : m_ci->GetLabel());
+      SetLabel(m_ci->GetLabel());
    }
 
    virtual ~LayoutUserData() { delete m_ci; }
@@ -555,7 +555,7 @@ void LayoutViewer::InsertURL(const String& textOrig, const String& url)
 {
    wxLayoutList *llist = m_window->GetLayoutList();
 
-   LayoutUserData* data = new LayoutUserData(new ClickableInfo(url));
+   LayoutUserData* data = new LayoutUserData(new ClickableURL(m_msgView, url));
    SetTextColour(GetOptions().UrlCol);
 
    // the text can contain newlines (when we have a wrapped URL) but a single
@@ -598,10 +598,9 @@ void LayoutViewer::InsertURL(const String& textOrig, const String& url)
    data->DecRef();
 }
 
-void LayoutViewer::InsertSignature(const String& signature)
+void LayoutViewer::EndText()
 {
-   // this is not called by MessageView yet, but should be implemented when it
-   // starts recognizing signatures in the messages
+   // nothing to do here
 }
 
 void LayoutViewer::EndPart()

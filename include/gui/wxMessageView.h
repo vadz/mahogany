@@ -54,17 +54,6 @@ public:
    virtual void OnViewerChange(const MessageViewer *viewerOld,
                                const MessageViewer *viewerNew);
 
-   /// show the URL popup menu
-   virtual void PopupURLMenu(wxWindow *window,
-                             const String& url,
-                             const wxPoint& pt,
-                             URLKind urlkind);
-
-   /// show the MIME popup menu for this message part
-   virtual void PopupMIMEMenu(wxWindow *window,
-                              const MimePart *part,
-                              const wxPoint& pt);
-
 protected:
    virtual MessageViewer *CreateDefaultViewer() const;
 
