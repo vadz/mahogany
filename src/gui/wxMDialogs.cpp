@@ -3451,6 +3451,11 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
 void MProgressInfo::SetValue(size_t numDone)
 {
    m_label->SetLabel(wxString::Format(_("%u done"), numDone));
+
+   // update the frame
+#if wxCHECK_VERSION(2, 2, 6)
+   wxYieldIfNeeded();
+#endif // wxWin 2.2.6+
 }
 
 MProgressInfo::~MProgressInfo()

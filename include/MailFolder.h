@@ -613,7 +613,14 @@ public:
    /**@name Accessor methods */
    //@{
    /// Get authorisation information
-   virtual inline void GetAuthInfo(String *login, String *password) const = 0;
+   virtual void GetAuthInfo(String *login, String *password) const = 0;
+   /**
+      Returns the delimiter used to separate the components of the folder
+      name
+
+      @return character dependind on the folder type and server
+    */
+   virtual char GetFolderDelimiter() const;
    //@}
 
    /** Apply any filter rules to the folder.

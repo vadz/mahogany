@@ -1125,6 +1125,39 @@ MailFolder::ForwardMessage(class Message *msg,
    SafeDecRef(msg);
 }
 
+char MailFolder::GetFolderDelimiter() const
+{
+   switch ( GetType() )
+   {
+      default:
+         FAIL_MSG( "Don't call GetFolderDelimiter() for this type" );
+         // fall through nevertheless
+
+      case MF_FILE:
+      case MF_MFILE:
+      case MF_POP:
+         // the folders of this type don't have subfolders at all
+         return '\0';
+
+      case MF_MH:
+      case MF_MDIR:
+         // the filenames use slash as separator
+         return '/';
+
+      case MF_NNTP:
+      case MF_NEWS:
+         // newsgroups components are separated by periods
+         return '.';
+
+      case MF_IMAP:
+         // for IMAP this depends on server!
+         FAIL_MSG( "shouldn't be called for IMAP, unknown delimiter" );
+
+         // guess :-(
+         return '/';
+   }
+}
+
 // ----------------------------------------------------------------------------
 // MFCmnEventReceiver
 // ----------------------------------------------------------------------------

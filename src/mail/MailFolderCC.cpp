@@ -180,6 +180,9 @@ static const char * cclient_drivers[] =
 
 #define NO_PROGRESS_DLG ((MProgressDialog *)1)
 
+/// invalid value for MailFolderCC::m_chDelimiter
+#define ILLEGAL_DELIMITER ((char)-1)
+
 // ----------------------------------------------------------------------------
 // trace masks used (you have to wxLog::AddTraceMask() to enable the
 // correpsonding kind of messages)
@@ -243,6 +246,11 @@ extern "C"
    void mail_fetch_overview_x (MAILSTREAM *stream,char *sequence,overview_x_t ofn);
 };
 
+typedef void (*mm_list_handler)(MAILSTREAM * stream,
+                                char delim,
+                                String  name,
+                                long  attrib);
+
 // ----------------------------------------------------------------------------
 // globals
 // ----------------------------------------------------------------------------
@@ -250,11 +258,8 @@ extern "C"
 /// exactly one object
 static CCStreamCleaner *gs_CCStreamCleaner = NULL;
 
-/// This allows us to temporarily redirect mm_list calls
-static void (*gs_mmListRedirect)(MAILSTREAM * stream,
-                                 char delim,
-                                 String  name,
-                                 long  attrib) = NULL;
+/// handler for temporarily redirected mm_list calls
+static mm_list_handler gs_mmListRedirect = NULL;
 
 // a variable telling c-client to shut up
 static bool mm_ignore_errors = false;
@@ -456,6 +461,25 @@ private:
 };
 
 #endif // TIMER_SUSPENDING_WORKS
+
+// temporarily redirect mm_list callbacks to the given function
+class MMListRedirector
+{
+public:
+   MMListRedirector(mm_list_handler handler)
+   {
+      // this would be a mess and mm_list() calls would surely go to a wrong
+      // handler!
+      ASSERT_MSG( !gs_mmListRedirect, "not supposed to be used recursively" );
+
+      gs_mmListRedirect = handler;
+   }
+
+   ~MMListRedirector()
+   {
+      gs_mmListRedirect = NULL;
+   }
+};
 
 // ============================================================================
 // implementation
@@ -942,6 +966,8 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
       m_ImapSpec = path;
    m_Login = login;
    m_Password = password;
+
+   m_chDelimiter = ILLEGAL_DELIMITER;
 
    // do this at the very end as it calls RequestUpdate() and so anything may
    // happen from now on
@@ -3789,33 +3815,16 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
 
    // make sure that there is a folder name delimiter before pattern - this
    // only makes sense for non empty spec
-   if ( !!spec )
+   if ( !spec.empty() )
    {
       char ch = spec.Last();
 
-      switch ( GetType() )
+      if ( ch != '}' )
       {
-         case MF_IMAP:
-            // FIXME: this is totally bogus, IMAP delimiter may be any char,
-            //        not only '/' or '.' even if they are the most common
-            //        ones - why do we do this at all?
-            if ( ch != '/' && ch != '.' && ch != '}' )
-               spec += '/';
-            break;
+         char chDelim = GetFolderDelimiter();
 
-         case MF_MH:
-            if ( ch != '/' )
-               spec += '/';
-            break;
-
-         case MF_NNTP:
-         case MF_NEWS:
-            if ( ch != '.' && ch != '}' )
-               spec += '.';
-            break;
-
-         default:
-            FAIL_MSG( "unexpected folder type in ListFolders" );
+         if ( ch != chDelim )
+            spec += chDelim;
       }
    }
 
@@ -3858,10 +3867,75 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
    m_ASMailFolder = NULL;
 }
 
+// ----------------------------------------------------------------------------
+// gettting the folder delimiter separator
+// ----------------------------------------------------------------------------
 
-/** Physically deletes this folder.
-    @return true on success
-    */
+static char gs_delimiter = '\0';
+
+static void GetDelimiterMMList(MAILSTREAM *stream,
+                               char delim,
+                               String name,
+                               long attrib)
+{
+   if ( delim )
+      gs_delimiter = delim;
+}
+
+char MailFolderCC::GetFolderDelimiter() const
+{
+   // may be we already have it cached?
+   if ( m_chDelimiter == ILLEGAL_DELIMITER )
+   {
+      MailFolderCC *self = (MailFolderCC *)this; // const_cast
+
+      // the only really interesting case is IMAP as we need to query the
+      // server for this one: to do it we issue 'LIST "" ""' command which is
+      // guaranteed by RFC 2060 to return the delimiter
+      if ( GetType() == MF_IMAP )
+      {
+         CHECK( m_MailStream, '\0', "folder closed in GetFolderDelimiter" );
+
+         MMListRedirector redirect(GetDelimiterMMList);
+
+         // pass the spec for the IMAP server itself to mail_list()
+         String spec = m_ImapSpec.BeforeFirst('}');
+         if ( !spec.empty() )
+            spec += '}';
+
+         gs_delimiter = '\0';
+         mail_list(m_MailStream, NULL, (char *)spec.c_str());
+
+         // well, except that in practice some IMAP servers do *not* return
+         // anything in reply to this command! try working around this bug
+         if ( !gs_delimiter )
+         {
+            spec += '%';
+            mail_list(m_MailStream, NULL, (char *)spec.c_str());
+         }
+
+         // we must have got something!
+         ASSERT_MSG( gs_delimiter,
+                     "broken IMAP server returned no folder name delimiter" );
+
+         self->m_chDelimiter = gs_delimiter;
+      }
+      else
+      {
+         // not IMAP, let the base class version do it
+         self->m_chDelimiter = MailFolder::GetFolderDelimiter();
+      }
+   }
+
+   ASSERT_MSG( m_chDelimiter != ILLEGAL_DELIMITER, "should have delimiter" );
+
+   return m_chDelimiter;
+}
+
+// ----------------------------------------------------------------------------
+// delete folder
+// ----------------------------------------------------------------------------
+
 /* static */
 bool
 MailFolderCC::DeleteFolder(const MFolder *mfolder)
@@ -3873,7 +3947,7 @@ MailFolderCC::DeleteFolder(const MFolder *mfolder)
                                              mfolder->GetLogin());
 
    String password = mfolder->GetPassword();
-   if ( FolderTypeHasUserName( mfolder->GetType() )
+   if ( FolderTypeHasUserName(mfolder->GetType())
         && ((mfolder->GetFlags() & MF_FLAGS_ANON) == 0)
         && (password.Length() == 0)
       )
@@ -3908,7 +3982,7 @@ MailFolderCC::DeleteFolder(const MFolder *mfolder)
   not, i.e. if it is a mailbox or a directory on the server.
 */
 
-static int gs_HasInferiorsFlag;
+static int gs_HasInferiorsFlag = -1;
 
 static void HasInferiorsMMList(MAILSTREAM *stream,
                                char delim,
@@ -3935,15 +4009,16 @@ MailFolderCC::HasInferiors(const String &imapSpec,
    CCCallbackDisabler noCallbacks;
 
    SetLoginData(login, passwd);
+   gs_HasInferiorsFlag = -1;
+
    MAILSTREAM *mailStream = mail_open(NIL, (char *)imapSpec.c_str(),
                                       OP_HALFOPEN);
 
    if(mailStream != NIL)
    {
-     gs_HasInferiorsFlag = -1;
-     gs_mmListRedirect = HasInferiorsMMList;
+     MMListRedirector redirect(HasInferiorsMMList);
      mail_list (mailStream, NULL, (char *) imapSpec.c_str());
-     gs_mmListRedirect = NULL;
+
      /* This does happen for for folders where the server does not know
         if they have inferiors, i.e. if they don't exist yet.
         I.e. -1 is an unknown/undefined status
@@ -3951,6 +4026,7 @@ MailFolderCC::HasInferiors(const String &imapSpec,
      */
      mail_close(mailStream);
    }
+
    return gs_HasInferiorsFlag == 1;
 }
 

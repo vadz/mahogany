@@ -633,6 +633,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
                GetFrame(this),
                m_FolderView
             );
+         newFocus = -1;
          break;
 
       case 'F': // forward
@@ -643,6 +644,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
             GetFrame(this),
             m_FolderView
          );
+         newFocus = -1;
          break;
 
       case 'O': // open

@@ -318,6 +318,8 @@ public:
    */
    virtual void SetRetrievalLimits(unsigned long soft, unsigned long hard);
 
+   virtual char GetFolderDelimiter() const;
+
    /** RFC 2047 compliant message decoding: all encoded words from the header
        are decoded, but only the encoding of the first of them is returned in
        encoding output parameter (if non NULL).
@@ -664,6 +666,9 @@ private:
    /// the path to ssh
    String m_SshPath;
    //@}
+
+   /// the folder name delimiter, (char)-1 if unknown yet
+   char m_chDelimiter;
 
    /// Used by the subscription management.
    class FolderListingCC *m_FolderListing;

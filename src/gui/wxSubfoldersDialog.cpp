@@ -416,7 +416,7 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
       m_nFoldersRetrieved = 0;
 
       // disable the tree right now to prevent it from getting other events
-      // (possible as we call wxYield)
+      // (possible as we call wxYield from MProgressInfo::SetValue)
       Disable();
 
       // construct the IMAP spec of the folder whose children we enum
@@ -448,10 +448,10 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
                              this         // data to pass to the callback
                           );
 
-      // wait until the expansion ends
+      // process the events from ListFolders
       do
       {
-         wxYield();
+         MEventManager::DispatchPending();
       }
       while ( m_idParent.IsOk() );
 
@@ -1147,7 +1147,7 @@ size_t ListFolderEventReceiver::AddAllFolders(MFolder *folder,
    // wait until the expansion ends
    do
    {
-      wxYield();
+      MEventManager::DispatchPending();
    }
    while ( !m_finished );
 

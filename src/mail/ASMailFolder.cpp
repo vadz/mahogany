@@ -1107,130 +1107,16 @@ ASMailFolder::ListFolders(const String &pattern,
                                                   reference, ud);
 }
 
-// get the folder name separator: it is easy for most protocols except IMAP
-// where it has to be retrieved from the server
-class DummyListReceiver : public MEventReceiver
-{
-public:
-   DummyListReceiver()
-   {
-      m_chDelimiter = '\0';
-
-      m_gotAny = FALSE;
-
-      m_regCookie = MEventManager::Register(*this, MEventId_ASFolderResult);
-   }
-   virtual ~DummyListReceiver()
-   {
-      MEventManager::Deregister(m_regCookie);
-   }
-
-   virtual bool OnMEvent(MEventData& event);
-
-   bool GotAny() const { return m_gotAny; }
-   char GetDelimiter() const { return m_chDelimiter; }
-
-private:
-   // MEventReceiver cookie for the event manager
-   void *m_regCookie;
-
-   // the delimiterwe get from OnMEvent
-   char m_chDelimiter;
-
-   // have we got anything in reply?
-   bool m_gotAny;
-};
-
-// needed to be able to use DECLARE_AUTOREF() macro
-typedef ASMailFolder::ResultFolderExists ASFolderExistsResult;
-DECLARE_AUTOPTR(ASFolderExistsResult);
-
-bool DummyListReceiver::OnMEvent(MEventData& event)
-{
-   // we're only subscribed to the ASFolder events
-   CHECK( event.GetId() == MEventId_ASFolderResult, FALSE,
-          "unexpected event type" );
-
-   MEventASFolderResultData &data = (MEventASFolderResultData &)event;
-
-   ASFolderExistsResult_obj result((ASFolderExistsResult *)data.GetResult());
-
-   // is this message really for us?
-   if ( result->GetUserData() != this )
-   {
-      // no: continue with other event handlers
-      return TRUE;
-   }
-
-   if ( result->GetOperation() != ASMailFolder::Op_ListFolders )
-   {
-      FAIL_MSG( "unexpected operation notification" );
-
-      // eat the event - it was for us but we didn't process it...
-      return FALSE;
-   }
-
-   // the problem here is that we can get an entry for IMAP INBOX with NUL
-   // delimiter but we don't know when we're going to get it (in the beginning
-   // or in the end or in the middle of the list), so we just wait for the
-   // first event with a non NUL delimiter, remember it and ignore any
-   // subsequent ones
-   if ( !m_chDelimiter )
-   {
-      m_gotAny = TRUE;
-      m_chDelimiter = result->GetDelimiter();
-   }
-
-   // we don't want anyone else to receive this message - it was for us only
-   return FALSE;
-}
-
 char ASMailFolder::GetFolderDelimiter() const
 {
-   switch ( GetType() )
-   {
-      default:
-         FAIL_MSG( "Don't call GetHierarchyDelimiter() for this type" );
-         // fall through nevertheless
+   MailFolder *mf = GetMailFolder();
 
-      case MF_FILE:
-      case MF_MFILE:
-      case MF_POP:
-         // the folders of this type don't have subfolders at all
-         return '\0';
+   CHECK( mf, '\0', "no folder in GetFolderDelimiter" );
 
-      case MF_MH:
-      case MF_MDIR:
-         // the filenames use slash as separator
-         return '/';
+   char chDelim = mf->GetFolderDelimiter();
+   mf->DecRef();
 
-      case MF_NNTP:
-      case MF_NEWS:
-         // newsgroups components are separated by periods
-         return '.';
-
-      case MF_IMAP:
-         // ah, the really interesting case: we need to query the server for
-         // this one: to do it we issue 'LIST "" ""' command which is
-         // guaranteed by RFC 2060 to return the delimiter
-         {
-            DummyListReceiver rcv;
-            MailFolder *mf = GetMailFolder();
-            ASMailFolder *self = (ASMailFolder *)this; // const_cast
-            mf->ListFolders(self, "", false, "", &rcv);
-
-            // well, except that in practice some IMAP servers do *not* return
-            // anything in reply to this command! try working around this bug
-            if ( !rcv.GotAny() )
-            {
-               mf->ListFolders(self, "%", false, "", &rcv);
-            }
-
-            mf->DecRef();
-
-            return rcv.GetDelimiter();
-         }
-   }
+   return chDelim;
 }
 
 String ASMailFolder::GetImapSpec(void) const
