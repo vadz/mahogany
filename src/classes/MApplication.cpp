@@ -1001,7 +1001,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
    // will be deleted from it just after sending (that is, inside
    // the loop)
    UIdType i = 0;
-   while (hil->Count() > 0)
+   while (i < hil->Count())
    {
       hi = (*hil)[i];
       ASSERT(hi);
@@ -1038,6 +1038,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
                msg.Printf(_("Cannot send message ´%s´."),
                           hi->GetSubject().c_str());
                ERRORMESSAGE((msg));
+               ++i;
             }
          }
          msg->GetHeaderLine("Newsgroups", target);
@@ -1061,6 +1062,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
                msg.Printf(_("Cannot post article ´%s´."),
                           hi->GetSubject().c_str());
                ERRORMESSAGE((msg));
+               ++i;
             }
          }
       }
