@@ -82,6 +82,8 @@ $Id$
 6	VZ	Adbframe: When listing addressbooktypes, show native
 		format first.
 
+6	VZ	double click on new folder in treectrl opens not the
+		folder clicked on but the one previously selected
 
 	VZ	templates need "First Name" field
 	VZ	icons in icons-dialog are scaled --> ugly
