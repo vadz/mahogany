@@ -1,25 +1,24 @@
 *.pyc
-M InitPython.cpp
-U MAppBase.cpp-swig
-U MAppBase.i
-U MAppBase.py-swig
-U MObject.cpp-swig
-U MObject.i
-U MObject.py-swig
-U MProfile.cpp-swig
-U MProfile.i
-U MProfile.py-swig
-U MString.cpp-swig
-U MString.i
-U MString.py-swig
-U MTest.cpp-swig
-U MailFolder.cpp-swig
-U MailFolder.i
-U MailFolder.py-swig
-U Message.cpp-swig
-U Message.i
-U Message.py-swig
-U swiglib.cpp-swig
-U swiglib.i
-U swiglib.py-swig
+MAppBase.cpp-swig
+MAppBase.i
+MAppBase.py-swig
+MObject.cpp-swig
+MObject.i
+MObject.py-swig
+MProfile.cpp-swig
+MProfile.i
+MProfile.py-swig
+MString.cpp-swig
+MString.i
+MString.py-swig
+MTest.cpp-swig
+MailFolder.cpp-swig
+MailFolder.i
+MailFolder.py-swig
+Message.cpp-swig
+Message.i
+Message.py-swig
+swiglib.cpp-swig
+swiglib.i
+swiglib.py-swig
 
