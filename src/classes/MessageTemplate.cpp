@@ -626,25 +626,25 @@ GetMessageTemplateNames(MessageTemplateKind kind)
    return names;
 }
 
+class StringTemplateSink : public MessageTemplateSink
+{
+public:
+    virtual bool Output(const String& text)
+    {
+         m_output += text;
+         return true;
+    }
+
+    const String& GetOutput() const { return m_output; }
+
+private:
+    String m_output;
+} sink;
+
 extern String
 ParseMessageTemplate(const String& templateText,
                      MessageTemplateVarExpander& expander)
 {
-   class StringTemplateSink : public MessageTemplateSink
-   {
-   public:
-      virtual bool Output(const String& text)
-      {
-         m_output += text;
-         return true;
-      }
-
-      const String& GetOutput() const { return m_output; }
-
-   private:
-      String m_output;
-   } sink;
-
    MessageTemplateParser parser(templateText, _("no file"), &expander);
 
    String text;
@@ -653,4 +653,3 @@ ParseMessageTemplate(const String& templateText,
 
    return text;
 }
-
