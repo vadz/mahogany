@@ -53,9 +53,6 @@ protected:
    // global variables stored in the application object
    // -------------------------------------------------
 
-   /// the address database
-   Adb *adb;
-
    /// the config manager which creates/retrieves file config objects
    ConfigFileManager *m_cfManager;
 
@@ -126,11 +123,6 @@ public:
        @return a pointer to the profile.
    */
    ProfileBase *GetProfile(void) { return m_profile; }
-
-   /** Get this object's address database.
-       @return a pointer to the adb object.
-   */
-   Adb *GetAdb(void) { return adb; }
 
    /** Get the global config manager */
    ConfigFileManager& GetConfigManager() const { return *m_cfManager; }
