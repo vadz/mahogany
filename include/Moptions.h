@@ -1269,7 +1269,7 @@ extern const MOption MP_AWAY_STATUS;
 #ifdef OS_WIN
 #define MP_FOCUS_FOLLOWSMOUSE_DEFVAL    0l
 #else
-#define MP_FOCUS_FOLLOWSMOUSE_DEFVAL    0l
+#define MP_FOCUS_FOLLOWSMOUSE_DEFVAL    1l
 #endif
 /// dockable menu bars?
 #define   MP_DOCKABLE_MENUBARS_DEFVAL   1l
