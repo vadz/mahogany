@@ -20,6 +20,9 @@
 
 \newcommand{\noun}[1]{\textsc{#1}}
 
+
+\newcommand{\MenuCmd}[1]{\texttt{"#1"}}
+
 \usepackage{html, epsfig}
 \makeatletter
 
@@ -72,6 +75,14 @@ any problems with building it.
 
 
 \subsection{Changes against the previous versions}
+
+
+\subsubsection{0.66 against 0.65}
+
+\begin{itemize}
+\item Quick search commands in the folder view (see \ref{keybindings} and
+      \ref{searching})
+\end{itemize}
 
 
 \subsubsection{0.65 against 0.64}
@@ -282,8 +293,7 @@ A couple of new features, most importantly:
 \item Possibility to save (to the address book) all addresses from a message
 appearinganywhere in the headers.
 \item It is now possible to import all folder files in MBOX (Unix) format
-using \noun{{}''Folder|Import folder tree...{}''} command (see
-\ref{Import})
+using \MenuCmd{Folder|Import folder tree...} command (see \ref{Import})
 \end{itemize}
 
 \subsubsection{0.60 against 0.50}
@@ -1220,7 +1230,7 @@ can be changed from the folder view page of the options dialog, as
 usual.
 
 
-\subsubsection{Keyboard and mouse handling}
+\subsubsection{Keyboard and mouse handling}\label{keybindings}
 
 The reaction to a mouse click in the list of messages depends on the
 preferences setting {}``Preview message when selected{}``. When
@@ -1233,7 +1243,8 @@ like a single mouse click in the window and will only cause a message
 to be previewed if a single mouse click is configured to do so. The
 space key can be used to view the message under the current cursor.
 
-Other keyboard bindings are summarized in the following table:
+Other keyboard bindings are summarized in the following table (except where
+explicitly noticed, lower and uppe case keys work do the same thing):
 
 \vspace{0.3cm}
 {\centering \begin{tabular}{|c|c|}
@@ -1289,6 +1300,18 @@ scroll the message preview one page down\\
 \hline
 Ctrl-U&
 view next unread message\\
+\hline
+/&
+start forward search for a string\\
+\hline
+?&
+start reverse search for a string\\
+\hline
+n&
+go to the next match (after doing a search)\\
+\hline
+N&
+go to the previous match (after doing a search)\\
 \end{tabular}\par}
 \vspace{0.3cm}
 
@@ -1307,8 +1330,8 @@ a few other popular mail clients. The current list includes Netscape,
 Pine, XFMail and Eudora. Depending on the mail client only part of
 its settings may be imported but in the best case Mahogany can import
 the address books, the configuration settings, the filter rules and
-the list of folders to use. To use this feature, choose \noun{{}``Mail|Import...{}''}
-command and follow the dialogs.
+the list of folders to use. To use this feature, choose
+\MenuCmd{Mail|Import...} command and follow the dialogs.
 
 Even if you don't find your email client in the list proposed in the
 dialog, everything is not lost. You won't be able to import its configuration
@@ -1321,7 +1344,7 @@ Finally, \emph{Mahogany} can automatically create the entries in the
 folder tree for all MBOX (standard Unix format, also used by Eudora)
 files under the given directory. To do this, select the folder in
 the tree which you want the new folders to appear under and choose
-\noun{{}``Folder|Import folder tree...{}''} command.
+\MenuCmd{Folder|Import folder tree...} command.
 
 
 \section{Reading Mail}
@@ -1386,6 +1409,22 @@ as the path to the mailbox file. Like this, you can access any mail
 folder on that machine that you have access to locally, making remote
 access to your mail much more flexible than just accessing your new
 messages.
+
+
+\subsection{Searching for Messages}\label{searching}
+
+There are two ways to search for the messages in Mahogany. One is very simple:
+just press \texttt{'/'} or \texttt{'?'} in the folder view and then use
+\texttt{'n'} and \texttt{'N'} keys to go to the next and previous matches
+respectively (see also \ref{keybindings}). This allows to only search for a
+string in the message header and to do it inside one folder only -- but to do
+it quickly.
+
+If you need more powerful search, you should use \MenuCmd{Folder|Search...}
+command which opens the search dialog where you can choose more options. In
+particular, you can use buttons there to add other folders to search (by
+default only the current folder is searched). If any messages are found, they
+are shown in a separate folder view.
 
 
 \subsection{Filters}
@@ -3313,13 +3352,14 @@ just check the {}``Leave mail in this folder{}'' checkbox as well.
 Mahogany tries to preserve some sanity by disabling \char`\"{}Create
 new folder\char`\"{} in the popup menu when you select a folder of
 a non hierarchical format (such as MBX) but you can still circumvent
-this by doing \char`\"{}Folder|Create...\char`\"{} and selecting the
+this by doing \MenuCmd{Folder|Create...} and selecting the
 folder you want as the parent.
 
 
 \subsection{Can I {}``Follow-up{}'' to the message?}
 
-You can open the message in the Sent Mail folder and do \char`\"{}Message|Edit
-in composer\char`\"{}. It is sort of like \char`\"{}replying to yourself\char`\"{}
+You can open the message in the Sent Mail folder and do \MenuCmd{Message|Edit
+in composer}. It is sort of like \char`\"{}replying to yourself\char`\"{}
 but the to/from fields remain the same.
+
 \end{document}

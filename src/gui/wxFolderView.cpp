@@ -80,6 +80,7 @@
 
 #include "Sequence.h"
 #include "UIdArray.h"
+#include "MSearch.h"
 
 #include "MFStatus.h"
 #include "gui/wxMDialogs.h"
@@ -3311,6 +3312,72 @@ bool wxFolderView::MoveToNextUnread(bool takeNextIfNoUnread)
    return SelectNextUnread(takeNextIfNoUnread);
 }
 
+void wxFolderView::MoveToNextSearchMatch(bool forward)
+{
+   const size_t count = m_searchData.uids.GetCount();
+
+   if ( !count )
+   {
+      // do nothing if no search results anyhow
+      return;
+   }
+
+   CHECK_RET( m_searchData.idx < count,
+               _T("invalid match index in MoveToNextSearchMatch") );
+
+   // usually m_searchData.idx is the index of the currently shown message
+   // except if justStarted flag is true in which case it is the index of the
+   // message to be shown
+   String status;
+   if ( m_searchData.justStarted )
+   {
+      // use the starting index and reset the flag for the next call
+      m_searchData.justStarted = false;
+   }
+   else // we have the old index, go to the new one
+   {
+      if ( forward )
+      {
+         if ( m_searchData.idx++ == count - 1 )
+         {
+            status = _("Search wrapped to the folder top");
+
+            m_searchData.idx = 0;
+         }
+      }
+      else // backwards
+      {
+         if ( m_searchData.idx-- == 0 )
+         {
+            status = _("Search wrapped to the folder bottom");
+
+            m_searchData.idx = count - 1;
+         }
+      }
+   }
+
+   long pos = m_FolderCtrl->GetPosFromUID(m_searchData.uids[m_searchData.idx]);
+   if ( pos == -1 )
+   {
+      wxLogError(_("Searched message has disappeared from the folder."));
+   }
+   else
+   {
+      m_FolderCtrl->GoToItem(pos);
+
+      if ( !status.empty() )
+      {
+         status = String(_T(" (")) + status + String(_T(')'));
+      }
+
+      wxLogStatus(m_Frame, _("Search result %lu of %lu for \"%s\"%s"),
+                  (unsigned long)(m_searchData.idx + 1),
+                  (unsigned long)count,
+                  m_searchData.str.c_str(),
+                  status.c_str());
+   }
+}
+
 bool wxFolderView::SelectNextUnread(bool takeNextIfNoUnread)
 {
    HeaderInfoList_obj hil(m_ASMailFolder->GetHeaders());
@@ -4153,17 +4220,18 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
          // toupper() below: for non alnum chars toupper() can return
          // absolutely anything, in particular it used to map WXK_INSERT (324)
          // to 'D' so that pressing Ins could actually delete a message...
-         if ( key < 128 )
+         if ( key < 0x7f && isalpha(key) )
          {
             /** To allow translations:
 
                 Delete, Undelete, eXpunge, Copytofolder, Savetofile,
                 Movetofolder, ReplyTo, Forward, Open, Print, Show Headers,
-                View, Group reply (== followup), List reply
+                View, Group reply (== followup), List reply, Next match
             */
-            static const char keycodes_en[] = gettext_noop("DUXCSMRFOPHGL");
+            static const char keycodes_en[] = gettext_noop("DUXCSMRFOPHGLN");
             static const char *keycodes = _(keycodes_en);
 
+            long keyOrig = key;
             key = toupper(key);
 
             int idx = 0;
@@ -4171,18 +4239,17 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
                ;
 
             key = keycodes[idx] ? keycodes_en[idx] : 0;
-         }
-         else
-         {
-            key = 0;
+
+            if ( key == 'N' && islower(keyOrig) )
+            {
+               // keep 'n'/'N' distinction
+               key = 'n';
+            }
          }
    }
 
-   // we only process unmodified key presses normally - except for Ctrl-Del
-   // and '*' (which may need Shift on some keyboards (including US))
-   if ( event.AltDown() ||
-        (event.ShiftDown() && key != '*') ||
-        (event.ControlDown() && key != 'D') )
+   // we only process unmodified key presses normally, except for Ctrl-Del
+   if ( event.AltDown() || (event.ControlDown() && key != 'D') )
    {
       event.Skip();
       return false;
@@ -4301,6 +4368,47 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
          newFocus = -1;
          break;
 
+
+      case '/':   // start search forward
+      case '?':   // start search backwards
+         {
+            // don't move focus below
+            newFocus = -1;
+
+            m_searchData.uids.Clear();
+
+            if ( !MInputBox
+                  (
+                     &m_searchData.str,
+                     _("Search for messages"),
+                     _("String to search for:"),
+                     m_Frame,
+                     _T("MsgSearch"),
+                     m_searchData.str
+                  ) )
+            {
+               // cancelled
+               break;
+            }
+
+            m_searchData.forward = key == '/';
+
+            SearchCriterium crit;
+            crit.m_What = SearchCriterium::SC_HEADER;
+            crit.m_Key = m_searchData.str;
+            m_TicketList->Add(m_ASMailFolder->SearchMessages(&crit, this));
+         }
+         break;
+
+      case 'n':   // find next match
+      case 'N':   // find previous match
+         MoveToNextSearchMatch(key == 'n');
+
+         // don't move focus below
+         newFocus = -1;
+         break;
+
+
       case WXK_NEXT:
          // scroll down the preview window
          if ( m_FolderCtrl->IsPreviewed(focused) )
@@ -4337,20 +4445,24 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
             event.Skip();
          }
 
-
          // don't move focus
          newFocus = -1;
          break;
 
-      default:
-         // all others should have been mapped to 0 in the code above
-         FAIL_MSG(_T("unexpected key"));
-
-         // fall through
+#ifdef OS_WIN
+      case 0:
+         // pressing any alphanumeric character in the list control starts
+         // incremental search in it which is worse than useless in our case
+         // because it's never going to find anything (the first column is
+         // always flags in this case and won't match...) and we just lost the
+         // current selection, so prevent this from happening
+         newFocus = -1;
+         break;
+#endif // OS_WIN
 
       case WXK_UP:
       case WXK_DOWN:
-      case 0:
+      default:
          event.Skip();
          return false;
    }
@@ -4957,6 +5069,31 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
          case ASMailFolder::Op_ApplyFilterRules:
             // we get this one when applying newly created Quick Filter rule
             // from the code above
+            break;
+
+         case ASMailFolder::Op_SearchMessages:
+            {
+               if ( ((ASMailFolder::ResultInt *)result)->GetValue() )
+               {
+                  UIdArray *uidsSearched = result->GetSequence();
+                  if ( uidsSearched )
+                  {
+                     m_searchData.Init(*uidsSearched);
+
+                     MoveToNextSearchMatch(m_searchData.forward);
+                  }
+                  else
+                  {
+                     FAIL_MSG( _T("search succeeded but no search results?") );
+                  }
+               }
+               else // nothing found
+               {
+                  wxLogStatus(m_Frame,
+                              _("No messages matching \"%s\" found."),
+                              m_searchData.str.c_str());
+               }
+            }
             break;
 
          default:

@@ -220,6 +220,9 @@ protected:
    unsigned long GetDeletedCount() const;
 
 private:
+   /// show the next or previous message matching the search criteria
+   void MoveToNextSearchMatch(bool forward);
+
    /// the full name of the folder opened in this folder view
    wxString m_fullname;
 
@@ -320,6 +323,36 @@ private:
 
    /// the last message we the user has jumped to
    long m_nLastJump;
+
+   /// the search parameters
+   struct SearchData
+   {
+      /// what we searched for
+      String str;
+
+      /// the UIDs of the messages we found during last search
+      UIdArray uids;
+
+      /// the index of the next matching message to show (used by
+      /// MoveToNextSearchMatch())
+      size_t idx;
+
+      /// true if we are doing fwd sesrch ('/'), false if backwards ('?')
+      bool forward;
+
+      /// true if the new search has just been started, reset by first call to
+      /// MoveToNextSearchMatch()
+      bool justStarted;
+
+      /// should be called to initialize with the search results data
+      void Init(const UIdArray& uidsSearched)
+      {
+         uids = uidsSearched;
+         idx = forward ? 0 : uidsSearched.GetCount() - 1;
+         justStarted = true;
+      }
+   } m_searchData;
+
 
    /// read the values from the profile into AllProfileSettings structure
    void ReadProfileSettings(AllProfileSettings *settings);
