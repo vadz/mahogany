@@ -23,7 +23,7 @@
 
 #ifndef USE_PCH
    #include "Mcommon.h"
-   
+
    #include <wx/textctrl.h>
    #include <wx/panel.h>
    #include <wx/button.h>
@@ -117,15 +117,15 @@ public:
 
    friend class FormattedParagraph;
    friend class wxBareBonesEditorNotebook;
-   
+
 private:
    wxBareBonesEditorNotebook *m_notebook;
    wxTextCtrl *m_textControl;
    wxListCtrl *m_attachments;
-   
+
    wxFont m_originalFont;
    bool m_originalFontValid;
-   
+
    int m_getNextAttachement;
 };
 
@@ -143,7 +143,7 @@ public:
    bool NeedsFormat();
    void FormatAll();
    void UnformatAll();
-   
+
 private:
    bool IsWhiteLine(int line);
    int FindLineByWhite(int start,bool white);
@@ -157,7 +157,7 @@ private:
    int FindLineLength(
       const String &paragraph,int lineStart,int paragraphEnd) const;
    size_t FindLastSpace(const String &paragraph,size_t start) const;
-   
+
    wxTextCtrl *m_control;
    int m_from;
    int m_to;
@@ -169,7 +169,7 @@ class wxBareBonesEditorNotebook : public wxNotebook
 {
 public:
    wxBareBonesEditorNotebook(BareBonesEditor *editor,wxWindow *parent);
-   
+
    wxTextCtrl *GetTextControl() const { return m_textControl; }
    wxListCtrl *GetList() const { return m_attachments; }
 
@@ -179,11 +179,11 @@ protected:
    void OnUnformatParagraph(wxCommandEvent& event);
    void OnUnformatAll(wxCommandEvent& event);
    void OnItemActivate(wxListEvent& event);
-   
+
 private:
    wxSizer *CreateButtonRow(wxWindow *parent);
    void CreateAttachmentPage();
-   
+
    BareBonesEditor *m_editor;
    wxTextCtrl *m_textControl;
    wxListCtrl *m_attachments;
@@ -217,7 +217,7 @@ public:
       : wxListView(parent,ListCtrl_Attachments,wxDefaultPosition,
          wxDefaultSize,wxLC_ICON | wxLC_SINGLE_SEL | wxSUNKEN_BORDER)
       {}
-   
+
 protected:
    void OnKeyDown(wxKeyEvent& event);
 
@@ -253,7 +253,7 @@ void FormattedParagraph::FromCursor()
    long currentLine;
    m_control->PositionToXY(m_control->GetInsertionPoint(),
       &throwAwayX,&currentLine);
-   
+
    if(IsWhiteLine(currentLine) && !(currentLine > 0
       && !IsWhiteLine(currentLine-1)))
    {
@@ -392,10 +392,10 @@ String FormattedParagraph::FormatCommon()
    String modified;
    int lineStart;
    int lineLength;
-   
+
    const String old(UnformatCommon());
    const int contentSize = SizeWithoutNewline(old);
-   
+
    for(lineStart = 0; contentSize-lineStart > m_margin;
       lineStart += lineLength+1)
    {
@@ -403,22 +403,22 @@ String FormattedParagraph::FormatCommon()
       modified.append(old,lineStart,lineLength);
       modified.append(1,'\n');
    }
-   
+
    if(lineStart < contentSize)
       modified.append(old,lineStart,old.size()-lineStart);
-   
+
    return modified;
 }
 
 int FormattedParagraph::SizeWithoutNewline(const String &paragraph)
 {
    int contentSize;
-   
+
    if(!paragraph.empty() && paragraph[paragraph.size()-1] == '\n')
       contentSize = paragraph.size()-1;
    else
       contentSize = paragraph.size();
-      
+
    return contentSize;
 }
 
@@ -426,7 +426,7 @@ int FormattedParagraph::FindLineLength(
    const String &paragraph,int lineStart,int paragraphEnd) const
 {
    int lineLength;
-   
+
    size_t findSpace = FindLastSpace(paragraph,lineStart+m_margin+1);
    if(findSpace != paragraph.npos && (int)findSpace >= lineStart)
    {
@@ -444,7 +444,7 @@ int FormattedParagraph::FindLineLength(
       else
          lineLength = paragraphEnd-lineStart;
    }
-   
+
    return lineLength;
 }
 
@@ -456,7 +456,7 @@ size_t FormattedParagraph::FindLastSpace(
 #else
    size_t findSpace = paragraph.npos;
    int tryFindSpace;
-   
+
    for( tryFindSpace = start-1; tryFindSpace >= 0; --tryFindSpace )
    {
       if( paragraph[tryFindSpace] == ' ' )
@@ -493,13 +493,13 @@ wxBareBonesEditorNotebook::wxBareBonesEditorNotebook(
 {
    wxPanel *body = new wxPanel(this);
    AddPage(body,_T("Message Body"));
-   
+
    wxSizer *textColumn = new wxBoxSizer(wxVERTICAL);
    body->SetSizer(textColumn);
-   
+
    m_textControl = new wxBareBonesTextControl(editor,body);
    textColumn->Add(m_textControl,1,wxEXPAND);
-   
+
    textColumn->Add(CreateButtonRow(body),0,wxALL | wxALIGN_LEFT,10);
 
    CreateAttachmentPage();
@@ -508,7 +508,7 @@ wxBareBonesEditorNotebook::wxBareBonesEditorNotebook(
 wxSizer *wxBareBonesEditorNotebook::CreateButtonRow(wxWindow *parent)
 {
    wxSizer *buttonRow = new wxGridSizer(1,4,0,10);
-   
+
    buttonRow->Add(new wxButton(parent,Button_FormatParagraph,
       _T("Format Paragraph")),0,wxEXPAND);
    buttonRow->Add(new wxButton(parent,Button_FormatAll,
@@ -517,7 +517,7 @@ wxSizer *wxBareBonesEditorNotebook::CreateButtonRow(wxWindow *parent)
       _T("Unformat Paragraph")),0,wxEXPAND);
    buttonRow->Add(new wxButton(parent,Button_UnformatAll,
       _T("Unformat All")),0,wxEXPAND);
-      
+
    return buttonRow;
 }
 
@@ -525,13 +525,13 @@ void wxBareBonesEditorNotebook::CreateAttachmentPage()
 {
    wxPanel *files = new wxPanel(this);
    AddPage(files,_T("Attachments"));
-   
+
    wxBoxSizer *fileSizer = new wxBoxSizer(wxVERTICAL);
    files->SetSizer(fileSizer);
-   
+
    m_attachments = new wxBareBonesAttachments(files);
    fileSizer->Add(m_attachments,1,wxEXPAND);
-   
+
    m_attachments->AssignImageList(
       new wxImageList(32,32),wxIMAGE_LIST_NORMAL);
 }
@@ -539,10 +539,10 @@ void wxBareBonesEditorNotebook::CreateAttachmentPage()
 void wxBareBonesEditorNotebook::OnFormatParagraph(wxCommandEvent& event)
 {
    FormattedParagraph paragraph(m_textControl,m_editor);
-   
+
    paragraph.FromCursor();
    paragraph.Format();
-   
+
    event.Skip();
 }
 
@@ -556,10 +556,10 @@ void wxBareBonesEditorNotebook::OnFormatAll(wxCommandEvent& event)
 void wxBareBonesEditorNotebook::OnUnformatParagraph(wxCommandEvent& event)
 {
    FormattedParagraph paragraph(m_textControl,m_editor);
-   
+
    paragraph.FromCursor();
    paragraph.Unformat();
-   
+
    event.Skip();
 }
 
@@ -593,15 +593,15 @@ void wxBareBonesAttachments::OnKeyDown(wxKeyEvent& event)
          wxListItem item;
          item.SetId(selected);
          GetItem(item);
-         
+
          EditorContentPart *part = (EditorContentPart *)item.GetData();
-         
+
          DeleteItem(selected);
-         
+
          part->DecRef();
       }
    }
-   
+
    event.Skip();
 }
 
@@ -668,25 +668,18 @@ BareBonesEditor::BareBonesEditor()
 BareBonesEditor::~BareBonesEditor()
 {
    int itemIndex;
-   
+
    // DecRef all EditorContentPart objects in wxListCtrl, that's all
    for(itemIndex = 0; itemIndex < m_attachments->GetItemCount(); ++itemIndex)
    {
       wxListItem itemProperties;
-      
+
       itemProperties.SetId(itemIndex);
       m_attachments->GetItem(itemProperties);
-      
-      EditorContentPart *file
-         = (EditorContentPart *)itemProperties.GetData();
-      
-      itemProperties.SetData((void *)NULL);
-#if !wxCHECK_VERSION(2,5,0)
-      itemProperties.SetMask(itemProperties.GetMask() & ~wxLIST_MASK_DATA);
-#endif
-      m_attachments->SetItem(itemProperties);
-      
-      file->DecRef();
+
+      EditorContentPart *file = (EditorContentPart *)itemProperties.GetData();
+      if ( file )
+         file->DecRef();
    }
 }
 
@@ -696,10 +689,10 @@ void BareBonesEditor::Create(Composer *composer, wxWindow *parent)
    m_composer = composer;
 
    m_notebook = new wxBareBonesEditorNotebook(this,parent);
-   
+
    m_textControl = m_notebook->GetTextControl();
    m_attachments = m_notebook->GetList();
-   
+
    Enable(true);
    Clear();
 }
@@ -712,11 +705,11 @@ void BareBonesEditor::UpdateOptions()
 bool BareBonesEditor::FinishWork()
 {
    FormattedParagraph paragraph(m_textControl,this);
-   
+
    bool needsFormat = false;
    for(paragraph.First(); !paragraph.Empty(); paragraph.Next())
       needsFormat = needsFormat || paragraph.NeedsFormat();
-   
+
    if(needsFormat)
    {
       switch
@@ -740,7 +733,7 @@ bool BareBonesEditor::FinishWork()
             return false;
       }
    }
-   
+
    return true;
 }
 
@@ -796,7 +789,7 @@ void BareBonesEditor::SetEncoding(wxFontEncoding encoding)
       m_originalFont = m_textControl->GetFont();
       m_originalFontValid = true;
    }
-   
+
    wxFont next(
       m_originalFont.GetPointSize(),
       m_originalFont.GetFamily(),
@@ -806,7 +799,7 @@ void BareBonesEditor::SetEncoding(wxFontEncoding encoding)
       m_originalFont.GetFaceName(),
       encoding
    );
-   
+
    m_textControl->SetFont(next);
 }
 
@@ -818,14 +811,14 @@ void BareBonesEditor::MoveCursorTo(unsigned long x, unsigned long y)
    long countY = m_textControl->GetNumberOfLines();
    if(countY > 0 && correctedY >= countY)
       correctedY = countY - 1;
-   
+
    long correctedX = x;
    if(correctedX < 0)
       correctedX = 0;
    long countX = m_textControl->GetLineLength(correctedY);
    if(countX >= 0 && correctedX > countX)
       correctedX = countX;
-   
+
    long position = m_textControl->XYToPosition(correctedX,correctedY);
    m_textControl->SetInsertionPoint(position);
    m_textControl->ShowPosition(position);
@@ -885,16 +878,14 @@ void BareBonesEditor::InsertAttachment(
    const wxBitmap& icon, EditorContentPart *mc)
 {
    wxListItem item;
-   
+
    item.SetData(mc);
    item.SetText(mc->GetName());
    item.SetId(m_attachments->GetItemCount());
    item.SetImage(
       m_attachments->GetImageList(wxIMAGE_LIST_NORMAL)->Add(icon));
-#if !wxCHECK_VERSION(2,5,0)
    item.SetMask(wxLIST_MASK_TEXT | wxLIST_MASK_IMAGE | wxLIST_MASK_DATA);
-#endif
-   
+
    m_attachments->InsertItem(item);
 }
 
@@ -919,23 +910,33 @@ EditorContentPart *BareBonesEditor::GetFirstPart()
 
 EditorContentPart *BareBonesEditor::GetNextPart()
 {
-   if(m_getNextAttachement < 0)
-      return NULL;
+   const int count = m_attachments->GetItemCount();
 
-   if(m_getNextAttachement >= m_attachments->GetItemCount())
+   CHECK( m_getNextAttachement >= 0 || m_getNextAttachement < count, NULL,
+            _T("forgot to call BareBonesEditor::GetFirstPart()?") );
+
+   if ( m_getNextAttachement == count )
    {
+      // no more parts
       m_getNextAttachement = -1;
       return NULL;
    }
-   
+
    wxListItem item;
-   item.SetId(m_getNextAttachement);
+   item.SetId(m_getNextAttachement++);
+   item.SetMask(wxLIST_MASK_DATA);
    m_attachments->GetItem(item);
-   
+
    EditorContentPart *file = (EditorContentPart *)item.GetData();
-   file->IncRef();
-   
-   ++m_getNextAttachement;
-   
+   if ( file )
+   {
+      file->IncRef();
+   }
+   else
+   {
+      FAIL_MSG( _T("NULL attachment in wxBareBonesAttachments?") );
+   }
+
    return file;
 }
+
