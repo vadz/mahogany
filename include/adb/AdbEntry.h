@@ -80,7 +80,7 @@ enum AdbField
   // priority for expansion
   AdbField_ExpandPriority,
 
-  AdbField_Max = AdbField_ExpandPriority
+  AdbField_Max
 };
 
 // where AdbEntry::Matches() should look for a match
