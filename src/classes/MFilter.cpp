@@ -106,7 +106,7 @@ const char * ORC_T_Names[] =
 {
    "1", // ORC_T_Always = 0,
    "matchi(", // ORC_T_Match,
-   "matchi(", // ORC_T_Contains,
+   "containsi(", // ORC_T_Contains,
    "match(", // ORC_T_MatchC,
    "contains(", // ORC_T_ContainsC,
    "matchregex(", // ORC_T_MatchRegExC,
