@@ -15,6 +15,13 @@
 #endif
 
 #include "Mpch.h"
+
+
+#include "wx/wxprec.h"
+#ifdef __BORLANDC__
+#  pragma hdrstop
+#endif
+
 #ifdef M_PREFIX
 #   include "gui/wxllist.h"
 #else
@@ -567,9 +574,9 @@ wxLayoutLine::DeleteWord(CoordType xpos)
          str = str.substr(offset,str.Length()-offset);
          // Find out how many positions we need to delete:
          // 1. eat leading space
-         while(isspace(str[count])) count++;
+         while(isspace(str.c_str()[count])) count++;
          // 2. eat the word itself:
-         while(isalnum(str[count])) count++;
+         while(isalnum(str.c_str()[count])) count++;
          // now delete it:
          wxASSERT(count+offset <= (size_t) (**i).GetLength());
          ((wxLayoutObjectText *)*i)->GetText().erase(offset,count);
@@ -832,7 +839,7 @@ wxLayoutLine::GetWrapPosition(CoordType column)
       {
          do
          {
-            if( isspace(((wxLayoutObjectText*)*i)->GetText()[(size_t)offset]))
+            if( isspace(((wxLayoutObjectText*)*i)->GetText().c_str()[(size_t)offset]))
                return column;
             else
             {

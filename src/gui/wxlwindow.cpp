@@ -12,6 +12,11 @@
 
 #include "Mpch.h"
 
+#include "wx/wxprec.h"
+#ifdef __BORLANDC__
+#  pragma hdrstop
+#endif
+
 #ifdef M_BASEDIR
 #   ifndef USE_PCH
 #     include "Mcommon.h"
