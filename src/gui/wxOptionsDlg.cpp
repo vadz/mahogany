@@ -1085,7 +1085,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 
    // adb: autocollect and bbdb options
    { gettext_noop("The addresses listed below are the ones which are\n"
-                  "reckognized as being your own when showing the message\n"
+                  "recognized as being your own when showing the message\n"
                   "headers and also answering to the messages (they are\n"
                   "excluded from the list of your reply recipients)"),
                                                    Field_Message, -1 },
@@ -1096,7 +1096,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_Message, -1 },
    { gettext_noop("&Mailing list addresses"),  Field_List, -1,           },
    { gettext_noop("Mahogany may automatically remember all e-mail addresses in the messages you\n"
-                  "receive in a special addresss book. This is called 'address\n"
+                  "receive in a special address book. This is called 'address\n"
                   "autocollection' and may be turned on or off from this page."),
                                                    Field_Message, -1                     },
    { gettext_noop("&Autocollect addresses"),       Field_Action,  -1,                    },
