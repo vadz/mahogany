@@ -17,7 +17,7 @@
 #include	"strutil.h"
 #include	<stdio.h>
 
-#ifdef 	HAVE_COMPFACE_H
+#if HAVE_COMPFACE_H
 extern "C" {
 #include	<compface.h>
 	   };
@@ -41,7 +41,7 @@ XFace::XFace()
 bool
 XFace::CreateFromXpm(const char *xpmdata)
 {
-#ifndef	HAVE_COMPFACE_H
+#if	!HAVE_COMPFACE_H
    return false;
 #else
    if(data)
@@ -120,13 +120,16 @@ XFace::CreateFromXpm(const char *xpmdata)
    //GenFace();
    //CompAll(xface);
 //#if 0
-   if(compface(xface) < 0)
-   {
-      delete [] xface;
-      delete [] data;
-      xface = data = NULL;
-      return false;
-   }
+   // @@@ VZ: compface gives link errors to me (undef reference), why?
+   #if  !USE_WXGTK
+     if(compface(xface) < 0)
+     {
+        delete [] xface;
+        delete [] data;
+        xface = data = NULL;
+        return false;
+     }
+   #endif // wxGTK
 //#endif
    initialised = true;
    return true;
@@ -137,7 +140,7 @@ XFace::CreateFromXpm(const char *xpmdata)
 bool
 XFace::CreateFromXFace(const char *xfacedata)
 {
-#ifndef	HAVE_COMPFACE_H
+#if !HAVE_COMPFACE_H
    return false;
 #else
    if(data) delete [] data;
@@ -163,7 +166,7 @@ XFace::CreateFromXFace(const char *xfacedata)
 bool
 XFace::CreateXpm(String &xpm)
 {
-#ifndef	HAVE_COMPFACE_H
+#if !HAVE_COMPFACE_H
    return false;
 #else
    int
@@ -250,7 +253,7 @@ XFace::CreateXpm(String &xpm)
 bool
 XFace::CreateXpm(char ***xpm)
 {
-#ifndef	HAVE_COMPFACE_H
+#if !HAVE_COMPFACE_H
    return false;
 #else
    int
