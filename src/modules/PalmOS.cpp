@@ -988,7 +988,8 @@ PalmOSModule::InstallFiles(char **fnames, int files_total)
    // sort list in alphabetical order
    for (i=0; i < dbcount; i++)
       for (j = i+1; j<dbcount; j++) 
-         if (pdbCompare(db[i], db[j]) > 0) {
+         if (pdbCompare(db[i], db[j]) > 0) 
+         {
             struct db * temp = db[i];
             db[i] = db[j];
             db[j] = temp;
@@ -998,22 +999,28 @@ PalmOSModule::InstallFiles(char **fnames, int files_total)
                             dbcount, NULL, false, true);
 
    // Install files
-   for (i=0; i < dbcount; i++) {
-      pd->Update(i, db[i]->name);
-      if ( dlp_OpenConduit(m_PiSocket) < 0) {
+   for (i=0; i < dbcount; i++) 
+   {
+      if (!pd->Update(i, db[i]->name)) 
+      {
+         delete pd;
+         return;
+      }
+
+      if ( dlp_OpenConduit(m_PiSocket) < 0) 
+      {
          ErrorMessage(_("Exiting on cancel, all data not restored"));
          delete pd;
          return;
       }
 
       f = pi_file_open(db[i]->name);
-     	if (f == 0) {
+      if (f == 0) 
+      {
          // TODO: display filename
-  	      ErrorMessage(_("Unable to open file."));
+  	     ErrorMessage(_("Unable to open file."));
          break;
       }
-
-      // TODO: update status window
 
       fflush(stdout);
       pi_file_install(f, m_PiSocket, 0);
@@ -1031,9 +1038,7 @@ PalmOSModule::InstallFiles(char **fnames, int files_total)
                                     sync is necessary */
       U.lastSyncDate = U.successfulSyncDate = time(0);
       dlp_WriteUserInfo(m_PiSocket, &U);
-   } 
-
-   // TODO: close status window
+   }
 }
 
 
