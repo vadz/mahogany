@@ -29,13 +29,11 @@
 #  include "Profile.h"
 
 #  include "MFrame.h"
-#  include "MLogFrame.h"
+#  include "Mdefaults.h"
+
+#  include "MApplication.h"
+#  include "gui/wxMApp.h"
 #endif
-
-#include "Mdefaults.h"
-
-#include "MApplication.h"
-#include "gui/wxMApp.h"
 
 #include "FolderView.h"
 #include "MailFolder.h"
@@ -43,18 +41,20 @@
 #include "Message.h"
 #include "MessageCC.h"
 #include "SendMessageCC.h"
+
 #include "Adb.h"
 #include "MDialogs.h"
 
 #include "gui/wxFontManager.h"
 #include "gui/wxIconManager.h"
 
-#include   "gui/wxllist.h"
-#include   "gui/wxlwindow.h"
-#include   "gui/wxlparser.h"
-#include   "gui/wxlparser.h"
-#include   "gui/wxComposeView.h"
-#include   "gui/wxAdbEdit.h"
+#include "gui/wxllist.h"
+#include "gui/wxlwindow.h"
+#include "gui/wxlparser.h"
+#include "gui/wxComposeView.h"
+#include "gui/wxAdbEdit.h"
+
+#include <wx/textfile.h>
 
 // ----------------------------------------------------------------------------
 // constants
@@ -89,22 +89,22 @@ IMPLEMENT_DYNAMIC_CLASS(wxComposeView, wxMFrame)
 #endif
 
 
-   struct MimeContent
-   {
-      enum { MIMECONTENT_FILE, MIMECONTENT_DATA } m_Type;
-      const char *m_Data;
-      size_t m_Length;
-      String m_FileName;
-      int    m_NumericMimeType;
-      String m_MimeType;
-      MimeContent()
-         { m_Type = MIMECONTENT_FILE; m_Data = NULL; } // safe settings
-      ~MimeContent()
-         {
-            if(m_Type == MIMECONTENT_DATA && m_Data != NULL)
-               delete [] m_Data;
-         }
-   };
+struct MimeContent
+{
+   enum { MIMECONTENT_FILE, MIMECONTENT_DATA } m_Type;
+   char *m_Data;
+   size_t m_Length;
+   String m_FileName;
+   int    m_NumericMimeType;
+   String m_MimeType;
+   MimeContent()
+      { m_Type = MIMECONTENT_FILE; m_Data = NULL; } // safe settings
+   ~MimeContent()
+      {
+         if(m_Type == MIMECONTENT_DATA && m_Data != NULL)
+            delete m_Data;
+      }
+};
 
 // ============================================================================
 // implementation
@@ -127,23 +127,9 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
    // build menu
    // ----------
    AddFileMenu();
-
-   composeMenu = new wxMenu;
-   composeMenu->Append(WXMENU_COMPOSE_INSERTFILE, WXCPTR _("Insert &File"));
-   composeMenu->Append(WXMENU_COMPOSE_SEND,WXCPTR _("&Send"));
-   composeMenu->Append(WXMENU_COMPOSE_PRINT,WXCPTR _("&Print"));
-   composeMenu->AppendSeparator();
-   composeMenu->Append(WXMENU_COMPOSE_CLEAR,WXCPTR _("&Clear"));
-   menuBar->Append(composeMenu, WXCPTR _("&Compose"));
-
+   WXADD_MENU(m_MenuBar, COMPOSE, "&Compose");
    AddHelpMenu();
-   SetMenuBar(menuBar);
-
-#ifdef USE_WXWINDOWS2
-   // @@ SetLabelPosition(wxVERTICAL) in wxWin2 ??
-#else
-   m_panel->SetLabelPosition(wxVERTICAL);
-#endif
+   SetMenuBar(m_MenuBar);
 
    CreateStatusBar();
 
@@ -186,8 +172,8 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
    bool bDoShow[Field_Max];
    bDoShow[Field_To] =
       bDoShow[Field_Subject] = TRUE;  // To and subject always there
-   bDoShow[Field_Cc] = READ_CONFIG(m_Profile, MP_SHOWCC);
-   bDoShow[Field_Bcc] = READ_CONFIG(m_Profile, MP_SHOWBCC);
+   bDoShow[Field_Cc] = READ_CONFIG(m_Profile, MP_SHOWCC) != 0;
+   bDoShow[Field_Bcc] = READ_CONFIG(m_Profile, MP_SHOWBCC) != 0;
 
    // first determine the longest label caption
    static const char *aszLabels[Field_Max] =
@@ -250,7 +236,7 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
          c = new wxLayoutConstraints;
          c->left.SameAs(box, wxLeft, LAYOUT_MARGIN);
          c->right.Absolute(widthMax);
-         c->centreY.SameAs(last, wxCentreY, 3); // @@ looks better...
+         c->centreY.SameAs(last, wxCentreY, 2); // @@ looks better with 2...
          c->height.AsIs();
          label->SetConstraints(c);
       }
@@ -280,28 +266,28 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
    // append signature
    if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE) )
    {
-      size_t size;
-      ifstream istr;
-      char *buffer;
-      istr.open(READ_CONFIG(m_Profile, MP_COMPOSE_SIGNATURE));
-      if(istr)
-      {
-         istr.seekg(0,ios::end);
-         size = istr.tellg();
-         buffer = new char [size+1];
-         if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) )
-         {
-            m_LayoutWindow->GetLayoutList().LineBreak();
+      wxTextFile fileSig(READ_CONFIG(m_Profile, MP_COMPOSE_SIGNATURE));
+      if ( fileSig.Open() ) {
+         // insert separator optionally
+         if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) ) {
             m_LayoutWindow->GetLayoutList().Insert("--");
-            m_LayoutWindow->GetLayoutList().LineBreak();
+            m_LayoutWindow->GetLayoutList().LineBreak();;
          }
-         istr.seekg(0,ios::beg);
-         istr.read(buffer, size);
-         buffer[size] = '\0';
-         if(! istr.fail())
-            wxLayoutImportText(m_LayoutWindow->GetLayoutList(),buffer);
-         delete [] buffer;
-         istr.close();
+
+         // read the whole file
+         size_t nLineCount = fileSig.GetLineCount();
+         for ( size_t nLine = 0; nLine < nLineCount; nLine++ ) {
+            m_LayoutWindow->GetLayoutList().Insert(fileSig[nLine]);
+            m_LayoutWindow->GetLayoutList().LineBreak();;
+         }
+
+         // let's respect the netiquette
+         static const size_t nMaxSigLines = 4; 
+         if ( nLineCount > nMaxSigLines ) {
+            wxLogWarning(_("Your signature is too long: it should not be more"
+                           " than %d lines"), nMaxSigLines);
+         }
+
          m_LayoutWindow->GetLayoutList().SetCursor(wxPoint(0,0));
       }
    }
@@ -459,7 +445,7 @@ wxComposeView::InsertData(const char *data,
       mc->m_NumericMimeType = num_mimetype;
       mc->m_MimeType = mimetype;
    }
-   mc->m_Data = data;
+   mc->m_Data = (char *)data; // @@@
    mc->m_Length = length;
    mc->m_Type = MimeContent::MIMECONTENT_DATA;
    

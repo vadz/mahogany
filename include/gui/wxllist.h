@@ -138,8 +138,9 @@ public:
                      bool draw = true);
    virtual wxPoint GetSize(CoordType *baseLine) const;
    wxLayoutObjectIcon(wxIcon *icon);
+
 private:
-   wxIcon * m_Icon;
+   wxIcon *m_Icon;
 };
 
 /// for export to html:

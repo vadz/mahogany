@@ -22,12 +22,17 @@
 #pragma implementation "wxllist.h"
 #endif
 
-#include   "wxllist.h"
-#include   "iostream.h"
+#include "Mpch.h"
 
-#include   <wx/dc.h>
-#include   <wx/postscrp.h>
-#include   <wx/print.h>
+#include "gui/wxllist.h"
+
+#ifndef USE_PCH
+#  include   "iostream.h"
+
+#  include   <wx/dc.h>
+#  include   <wx/postscrp.h>
+#  include   <wx/print.h>
+#endif
 
 #define   BASELINESTRETCH   12
 
@@ -43,13 +48,13 @@ wxLayoutObjectBase::Debug(void)
         << GetSize(&bl).y << " bl=" << bl; 
 }
 
-#  define   VAR(x)   cerr << #x"=" << x << endl;
-#  define   DBG_POINT(p)   cerr << #p << ": " << p.x << ',' << p.y << endl
-#  define   TRACE(f)   cerr << #f":" << endl;
+#  define   WXL_VAR(x)   cerr << #x"=" << x << endl;
+#  define   WXL_DBG_POINT(p)   cerr << #p << ": " << p.x << ',' << p.y << endl
+#  define   WXL_TRACE(f)   cerr << #f":" << endl;
 #else 
-#  define   VAR(x)   
-#  define   DBG_POINT(p)   
-#  define   TRACE(f)   
+#  define   WXL_VAR(x)   
+#  define   WXL_DBG_POINT(p)   
+#  define   WXL_TRACE(f)   
 #endif
 
 //-------------------------- wxLayoutObjectText
@@ -99,8 +104,8 @@ wxLayoutObjectText::Debug(void)
 //-------------------------- wxLayoutObjectIcon
 
 wxLayoutObjectIcon::wxLayoutObjectIcon(wxIcon *icon)
+                  : m_Icon(icon)
 {
-   m_Icon = icon;
 }
 
 void
@@ -205,7 +210,7 @@ wxLayoutList::SetFont(int family, int size, int style, int weight,
    if(size != -1)      m_FontPtSize = size;
    if(style != -1)     m_FontStyle = style;
    if(weight != -1)    m_FontWeight = weight;
-   if(underline != -1) m_FontUnderline = underline;
+   if(underline != -1) m_FontUnderline = underline != 0;
 
    if(fg != NULL)     m_ColourFG = fg;
    if(bg != NULL)     m_ColourBG = bg;
@@ -295,7 +300,7 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const &findCoords)
 #endif
       dc.IsKindOf(CLASSINFO(wxPostScriptDC)))
    {
-      VAR(wxThePrintSetupData);
+      WXL_VAR(wxThePrintSetupData);
       
       dc.GetSize(&pageWidth, &pageHeight);
       dc.StartDoc(_("Printing..."));
@@ -314,7 +319,7 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const &findCoords)
    position.y = margins.right;
    position.x = margins.left;
    
-   VAR(findObject); VAR(findCoords.x); VAR(findCoords.y);
+   WXL_VAR(findObject); WXL_VAR(findCoords.x); WXL_VAR(findCoords.y);
    // if the cursorobject is a cmd, we need to find the first
    // printable object:
    while(cursorObject != end()
@@ -370,13 +375,15 @@ wxLayoutList::Draw(wxDC &dc, bool findObject, wxPoint const &findCoords)
             long descent = 0l; long width, height;
             tobj = (wxLayoutObjectText *)*i;
             String  str = tobj->GetText();
-            VAR(m_CursorPosition.x); VAR(cursor.x);
+            WXL_VAR(m_CursorPosition.x); WXL_VAR(cursor.x);
             str = str.substr(0, cursorOffset);
-            VAR(str);
+            WXL_VAR(str);
             dc.GetTextExtent(Str(str), &width,&height, &descent);
-            VAR(height);
-            VAR(width); VAR(descent);
-            if(width < 1) width = 1;
+            WXL_VAR(height);
+            WXL_VAR(width);
+            WXL_VAR(descent);
+            if(width < 1)
+               width = 1;
             dc.DrawLine(position.x+width,
                         position.y+(baseLineSkip-height),
                         position.x+width, position.y+baseLineSkip);
@@ -665,12 +672,12 @@ wxLayoutList::MoveCursor(int dx, int dy)
 void
 wxLayoutList::Delete(CoordType count)
 {
-   TRACE(Delete);
+   WXL_TRACE(Delete);
 
    if(!m_Editable)
       return;
 
-   VAR(count);
+   WXL_VAR(count);
 
    CoordType offs, len;
    wxLayoutObjectList::iterator i;
@@ -714,7 +721,8 @@ wxLayoutList::Delete(CoordType count)
          else
          {
             len = count;
-            VAR(offs); VAR(len);
+            WXL_VAR(offs);
+            WXL_VAR(len);
             tobj->GetText().erase(offs,len);
             return; // we are done
          }
@@ -739,7 +747,7 @@ wxLayoutList::Insert(wxLayoutObjectBase *obj)
    CoordType offs;
    wxLayoutObjectList::iterator i = FindCurrentObject(&offs);
 
-   TRACE(Insert(obj));
+   WXL_TRACE(Insert(obj));
 
    if(i == end())
       push_back(obj);
@@ -751,12 +759,12 @@ wxLayoutList::Insert(wxLayoutObjectBase *obj)
          wxLayoutObjectText *tobj = (wxLayoutObjectText *) *i;
 #ifdef WXLAYOUT_DEBUG
          cerr << "text: '" << tobj->GetText() << "'" << endl;
-         VAR(offs);
+         WXL_VAR(offs);
 #endif
          String left = tobj->GetText().substr(0,offs); // get part before cursor
-         VAR(left);
+         WXL_VAR(left);
          tobj->GetText() = tobj->GetText().substr(offs,(*i)->CountPositions()-offs); // keeps the right half
-         VAR(tobj->GetText());
+         WXL_VAR(tobj->GetText());
          insert(i,obj);
          insert(i,new wxLayoutObjectText(left)); // inserts before
       }
@@ -779,7 +787,7 @@ void
 wxLayoutList::Insert(String const &text)
 {
    wxLayoutObjectText *tobj = NULL;
-   TRACE(Insert(text));
+   WXL_TRACE(Insert(text));
 
    if(! m_Editable)
       return;
@@ -789,7 +797,7 @@ wxLayoutList::Insert(String const &text)
 
    if(i != end() && (*i)->GetType() == WXLO_TYPE_TEXT)
    {  // insert into an existing text object:
-      TRACE(inserting into existing object);
+      WXL_TRACE(inserting into existing object);
       tobj = (wxLayoutObjectText *)*i ;
       wxASSERT(tobj);
       tobj->GetText().insert(offs,text);
@@ -798,7 +806,7 @@ wxLayoutList::Insert(String const &text)
    {
       wxLayoutObjectList::iterator j = i;
       j--;
-      TRACE(checking previous object);
+      WXL_TRACE(checking previous object);
       if(0 && j != end() && (*j)->GetType() == WXLO_TYPE_TEXT)
       {
          tobj = (wxLayoutObjectText *)*i;
@@ -807,7 +815,7 @@ wxLayoutList::Insert(String const &text)
       }
       else  // insert a new text object
       {
-         TRACE(creating new object);
+         WXL_TRACE(creating new object);
          Insert(new wxLayoutObjectText(text));  //FIXME not too optimal, slow
          return;  // position gets incremented in Insert(obj)
       }

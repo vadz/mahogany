@@ -13,16 +13,17 @@
 #include "Mpch.h"
 
 #ifndef  USE_PCH
-#  include  "Mcommon.h"
-#  include  "CommonBase.h"   // VAR() macro
-#  include  "strutil.h"
+#  include "Mcommon.h"
+#  include "CommonBase.h"   // VAR() macro
+#  include "strutil.h"
+#  include "gui/wxMApp.h"
+#  include "Mdefaults.h"
+#  include "Profile.h"
+#  include "PathFinder.h"
+#  include "MApplication.h"
 #endif
 
-#include "Mdefaults.h"
-#include "Profile.h"
-#include "PathFinder.h"
-#include "MApplication.h"
-#include "wxMApp.h"
+#include "gui/wxIconManager.h"
 
 #ifdef    OS_WIN
 #  define   unknown_xpm     "unknown"
@@ -33,9 +34,10 @@
 #  define   video_xpm       "video"
 #  define   postscript_xpm  "postscript"
 #  define   dvi_xpm         "dvi"
-#  define   hlink_xpm   "hlink"
-#  define   ftplink_xpm "ftplink"
-#  define   mframe_xpm  "mframe"
+#  define   hlink_xpm       "hlink"
+#  define   ftplink_xpm     "ftplink"
+#  define   MFrame_xpm      "mframe"
+#  define   MainFrame_xpm          "MainFrame"
 #  define   MainFrame_xpm          "MainFrame"
 #  define   tb_exit                "tb_exit"
 #  define   tb_help                "tb_help"
@@ -51,23 +53,23 @@
 #  include  "../src/icons/MainFrame.xpm"
 #endif  //Win/Unix
 
-#include    "gui/wxIconManager.h"
-
-
 /// valid filename extensions for icon files
-static const char *wxIconManagerFileExtensions[] = { ".xpm", ".png", ".gif",
-                                           "*.jpg", NULL };
+static const char *wxIconManagerFileExtensions[] =
+{ 
+   ".xpm", ".png", ".gif", "*.jpg", NULL
+};
 
 
+// hide the difference
 wxIconManager::wxIconManager()
 {
-   iconList = new IconDataList;
+   m_iconList = new IconDataList;
 
    AddIcon(M_ICON_HLINK_HTTP, hlink_xpm);
    AddIcon(M_ICON_HLINK_FTP, ftplink_xpm);
    AddIcon("MFrame", MFrame_xpm);
    AddIcon("MainFrame", MainFrame_xpm);
-   unknownIcon = new wxIcon(unknown_xpm,-1,-1);
+   m_unknownIcon = new wxIcon(unknown_xpm);
 }
 
 
@@ -75,26 +77,55 @@ wxIconManager::~wxIconManager()
 {
    IconDataList::iterator i;
 
-   for(i = iconList->begin(); i != iconList->end(); i++)
-      if((*i)->iconPtr)
-         delete (*i)->iconPtr;
-   if(unknownIcon)
-      delete unknownIcon;
+   for(i = m_iconList->begin(); i != m_iconList->end(); i++)
+      delete (*i)->iconPtr;
+
+   delete m_unknownIcon;
+}
+
+wxBitmap *
+wxIconManager::GetBitmap(const String& bmpName)
+{
+#  ifdef    OS_WIN
+   {
+      // look in the ressources
+      wxBitmap *bmp = new wxBitmap(bmpName);
+      if ( bmp->Ok() )
+         return bmp;
+      else
+         delete bmp;
+
+      // try the other standard locations now
+   }
+#  endif  //Windows
+
+   return GetIcon(bmpName);
 }
 
 wxIcon *
 wxIconManager::GetIcon(String const &_iconName)
 {
+#  ifdef    OS_WIN
+   {
+      // first, look in the ressources
+      wxIcon *icon = new wxIcon(_iconName);
+      if ( icon->Ok() )
+         return icon;
+      else
+         delete icon;
+
+      // ok, it failed - now do all the usual stuff
+   }
+#  endif  //Windows
+
    IconDataList::iterator i;
    String key;
    String iconName = _iconName;
    
    strutil_tolower(iconName);
-#ifdef   DEBUG
-   cerr << "wxIconManager::GetIcon() request for: " << iconName << endl;
-#endif
+   wxLogTrace("wxIconManager::GetIcon(%s) called.", iconName.c_str());
    
-   for(i = iconList->begin(); i != iconList->end(); i++)
+   for(i = m_iconList->begin(); i != m_iconList->end(); i++)
    {
       if(strcmp((*i)->iconName.c_str(), iconName.c_str())==0)
         return (*i)->iconPtr;
@@ -102,7 +133,7 @@ wxIconManager::GetIcon(String const &_iconName)
 
    // not found, now look for MIME subtype, after '/':
    key = strutil_after(iconName, '/');
-   for(i = iconList->begin(); i != iconList->end(); i++)
+   for(i = m_iconList->begin(); i != m_iconList->end(); i++)
    {
       if(strcmp((*i)->iconName.c_str(), key.c_str())==0)
         return (*i)->iconPtr;
@@ -110,7 +141,7 @@ wxIconManager::GetIcon(String const &_iconName)
 
    // not found, now look for iconName without '/':
    key = strutil_before(iconName, '/');
-   for(i = iconList->begin(); i != iconList->end(); i++)
+   for(i = m_iconList->begin(); i != m_iconList->end(); i++)
    {
       if(strcmp((*i)->iconName.c_str(), key.c_str())==0)
         return (*i)->iconPtr;
@@ -145,11 +176,11 @@ wxIconManager::GetIcon(String const &_iconName)
          id = new IconData;
          id->iconPtr = icn;
          id->iconName = key;
-         iconList->push_front(id);
+         m_iconList->push_front(id);
          return icn;
       }
    }   
-   return unknownIcon;
+   return m_unknownIcon;
 }
 
 void
@@ -158,8 +189,8 @@ wxIconManager::AddIcon(String const &iconName,  IconResourceType data)
    IconData *id = new IconData;
 
    id->iconName = iconName;
-   id->iconPtr = GLOBAL_NEW wxIcon(data,-1,-1);
-   iconList->push_front(id);
+   id->iconPtr = GLOBAL_NEW wxIcon(data);
+   m_iconList->push_front(id);
 }
 
 

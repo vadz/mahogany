@@ -21,15 +21,14 @@
 #  include "MimeList.h"
 #  include "MimeTypes.h"
 #  include "Profile.h"
+#  include "Mdefaults.h"
+#  include "MApplication.h"
 #  include "gui/wxMApp.h"
-#  include "MDialogs.h"
 #endif
 
 #include <XFace.h>
 
-#include "Mdefaults.h"
-
-#include "MApplication.h"
+#include <wx/file.h>
 
 #include "FolderView.h"
 #include "MailFolder.h"
@@ -40,7 +39,9 @@
 #include "gui/wxMessageView.h"
 #include "gui/wxComposeView.h"
 
-#include   "gui/wxMIds.h"
+#include "gui/wxIconManager.h"
+#include "gui/wxMIds.h"
+#include "MDialogs.h"
 
 BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
    EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
@@ -397,8 +398,11 @@ wxFolderView::SaveMessagesToFile(const wxArrayInt& selections)
    String
       filename =
       MDialog_FileRequester(NULL,parent,NULL,NULL,NULL,NULL,true,mailFolder->GetProfile());
-   ofstream out(filename,ios::out|ios::trunc|ios::create);
-   out.close(); // now we have truncated the file
+
+   // truncate the file
+   wxFile file(filename, wxFile::write);
+   file.Close();
+
    SaveMessages(selections,filename);
 }
 
@@ -466,7 +470,7 @@ wxFolderView::ForwardMessages(const wxArrayInt& selections)
                      ->readEntry(MP_FORWARD_PREFIX,MP_FORWARD_PREFIX_D) + msg->Subject());
 
       mailFolder->GetMessage(selections[i]+1)->WriteToString(str);
-#pragma warning FIXME: needs completion or even easier interface
+#pragma message("FIXME: needs completion or even easier interface")
 //      cv->InsertFile(tmpfilename,"MESSAGE/RFC822",TYPEMESSAGE);
    }
 
@@ -486,16 +490,20 @@ BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)
    EVT_TOOL(-1,    wxFolderViewFrame::OnCommandEvent)
 END_EVENT_TABLE()
 
-   wxFolderViewFrame::wxFolderViewFrame(const String &folderName,
-                                        wxFrame *parent)
-      : MFrame(folderName, parent)
+wxFolderViewFrame::wxFolderViewFrame(const String &folderName, wxFrame *parent)
+                 : MFrame(folderName, parent)
 {
    VAR(folderName);
+
+   // menu
    m_FolderView = NULL;
    AddFileMenu();
    AddEditMenu();
    AddMessageMenu();
-   SetMenuBar(menuBar);
+   SetMenuBar(m_MenuBar);
+
+   // status bar
+   CreateStatusBar();
 
    // add a toolbar to the frame
    // NB: the buttons must have the same ids as the menu commands
@@ -506,21 +514,21 @@ END_EVENT_TABLE()
    m_ToolBar->SetSize( -1, -1, width, 30 );
    m_ToolBar->SetMargins( 2, 2 );
    m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, ICON("tb_open"), WXMENU_MSG_OPEN, "Open message");
-   TB_AddTool(m_ToolBar, ICON("tb_close"), WXMENU_FILE_CLOSE, "Close folder");
+   TB_AddTool(m_ToolBar, "tb_open", WXMENU_MSG_OPEN, "Open message");
+   TB_AddTool(m_ToolBar, "tb_close", WXMENU_FILE_CLOSE, "Close folder");
    m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, ICON("tb_mail_compose"), WXMENU_FILE_COMPOSE, "Compose message");
-   TB_AddTool(m_ToolBar, ICON("tb_mail_forward"), WXMENU_MSG_FORWARD, "Forward message");
-   TB_AddTool(m_ToolBar, ICON("tb_mail_reply"), WXMENU_MSG_REPLY, "Reply to message");
-   TB_AddTool(m_ToolBar, ICON("tb_print"), WXMENU_MSG_PRINT, "Print message");
-   TB_AddTool(m_ToolBar, ICON("tb_trash"), WXMENU_MSG_DELETE, "Delete message");
+   TB_AddTool(m_ToolBar, "tb_mail_compose", WXMENU_FILE_COMPOSE, "Compose message");
+   TB_AddTool(m_ToolBar, "tb_mail_forward", WXMENU_MSG_FORWARD, "Forward message");
+   TB_AddTool(m_ToolBar, "tb_mail_reply", WXMENU_MSG_REPLY, "Reply to message");
+   TB_AddTool(m_ToolBar, "tb_print", WXMENU_MSG_PRINT, "Print message");
+   TB_AddTool(m_ToolBar, "tb_trash", WXMENU_MSG_DELETE, "Delete message");
    m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, ICON("tb_book_open"), WXMENU_EDIT_ADB, "Edit Database");
-   TB_AddTool(m_ToolBar, ICON("tb_preferences"), WXMENU_EDIT_PREFERENCES, "Edit Preferences");
+   TB_AddTool(m_ToolBar, "tb_book_open", WXMENU_EDIT_ADB, "Edit Database");
+   TB_AddTool(m_ToolBar, "tb_preferences", WXMENU_EDIT_PREF, "Edit Preferences");
    m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, ICON("tb_help"), WXMENU_HELP_ABOUT, "Help");
+   TB_AddTool(m_ToolBar, "tb_help", WXMENU_HELP_ABOUT, "Help");
    m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, ICON("tb_exit"), WXMENU_FILE_EXIT, "Exit M");
+   TB_AddTool(m_ToolBar, "tb_exit", WXMENU_FILE_EXIT, "Exit M");
 #endif
 
    m_FolderView = new wxFolderView(folderName,this);

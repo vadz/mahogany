@@ -49,7 +49,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    AddFileMenu();
    AddEditMenu();
    AddHelpMenu();
-   SetMenuBar(menuBar);
+   SetMenuBar(m_MenuBar);
 
 #ifdef USE_WXWINDOWS2
    
@@ -57,14 +57,14 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    m_ToolBar->SetSize( -1, -1, width-2, 30 );
    m_ToolBar->SetMargins( 2, 2 );
    m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, ICON("tb_open"), WXMENU_FILE_OPEN, "Open Folder");
-   TB_AddTool(m_ToolBar, ICON("tb_mail_compose"), WXMENU_FILE_COMPOSE, "Compose Message");
-   TB_AddTool(m_ToolBar, ICON("tb_book_open"), WXMENU_EDIT_ADB, "Edit Database");
-   TB_AddTool(m_ToolBar, ICON("tb_preferences"), WXMENU_EDIT_PREFERENCES, "Edit Preferences");
+   TB_AddTool(m_ToolBar, "tb_open", WXMENU_FILE_OPEN, "Open Folder");
+   TB_AddTool(m_ToolBar, "tb_mail_compose", WXMENU_FILE_COMPOSE, "Compose Message");
+   TB_AddTool(m_ToolBar, "tb_book_open", WXMENU_EDIT_ADB, "Edit Database");
+   TB_AddTool(m_ToolBar, "tb_preferences", WXMENU_EDIT_PREF, "Edit Preferences");
    m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, ICON("tb_help"), WXMENU_HELP_ABOUT, "Help");
+   TB_AddTool(m_ToolBar, "tb_help", WXMENU_HELP_ABOUT, "Help");
    m_ToolBar->AddSeparator();
-   TB_AddTool(m_ToolBar, ICON("tb_exit"), WXMENU_FILE_EXIT, "Exit M");
+   TB_AddTool(m_ToolBar, "tb_exit", WXMENU_FILE_EXIT, "Exit M");
 
 #	ifdef OS_WIN
 		m_ToolBar->CreateTools();

@@ -18,7 +18,6 @@
 #  include "strutil.h"
 
 #  include "MFrame.h"
-#  include "MLogFrame.h"
 
 #  include "kbList.h"
 
@@ -26,10 +25,10 @@
 #  include "MimeList.h"
 #  include "MimeTypes.h"
 #  include "Profile.h"
+#  include "Mdefaults.h"
+#  include "MApplication.h"
+#  include "gui/wxMApp.h"
 #endif
-
-#include "MApplication.h"
-#include "gui/wxMApp.h"
 
 // VZ: please don't change the order of headers, "Adb.h" must be the first one
 //     or it doesn't compile under VC++ (don't yet know why @@@)
@@ -42,7 +41,7 @@
 
 #include "MDialogs.h"
 
-#include "Mdefaults.h"
+#include "gui/wxIconManager.h"
 
 // test:
 #include   "SendMessageCC.h"
@@ -60,25 +59,44 @@ IMPLEMENT_DYNAMIC_CLASS(wxMFrame, wxFrame)
       EVT_MENU(-1,    wxMFrame::OnCommandEvent)
       EVT_TOOL(-1,    wxMFrame::OnCommandEvent)
    END_EVENT_TABLE()
-
-
-void
-wxMFrame::OnSize( wxSizeEvent &WXUNUSED(event) )
-   
-{
-  int x,y;
-  GetClientSize( &x, &y );
-  if(m_ToolBar)
-     m_ToolBar->SetSize( 1, 0, x-2, 30 );
-};
-
 #endif
+
+bool wxMFrame::RestorePosition(const char *name,
+                               int *x, int *y, int *w, int *h)
+{
+   wxCHECK( x && y && w && h, FALSE ); // no NULL pointers please
+
+   FileConfig *pConf = Profile::GetAppConfig();
+   if ( pConf != NULL )
+   {
+      String oldPath = Str(pConf->GET_PATH());
+      pConf->SET_PATH(M_FRAMES_CONFIG_SECTION);
+      pConf->CHANGE_PATH(name);
+
+      *x = READ_APPCONFIG(MC_XPOS);
+      *y = READ_APPCONFIG(MC_YPOS);
+      *w = READ_APPCONFIG(MC_WIDTH);
+      *h = READ_APPCONFIG(MC_HEIGHT);
+
+      pConf->SET_PATH(oldPath.c_str());
+
+      return TRUE;
+   }
+   else {
+      wxLogDebug("Can't restore frame '%s' position.", name);
+      *x = MC_XPOS_D;
+      *y = MC_YPOS_D;
+      *w = MC_WIDTH_D;
+      *h = MC_HEIGHT_D;
+
+      return FALSE;
+   }
+}
 
 wxMFrame::wxMFrame(const String &iname, wxWindow *parent)
         : MFrameBase(iname)
 {
    initialised = false;
-   wxASSERT(parent);
    Create(iname,parent);
 }
 
@@ -87,129 +105,67 @@ wxMFrame::Create(const String &iname, wxWindow *parent)
 {
    wxCHECK_RET( !initialised, "wxMFrame created twice" );
 
-   int xpos = MC_XPOS_D,
-       ypos = MC_YPOS_D,
-       width = MC_WIDTH_D,
-       height = MC_HEIGHT_D;
-
    SetName(Str(iname));
 
-   FileConfig *pConf = Profile::GetAppConfig();
-   if ( pConf != NULL )
-   {
-      String tmp = Str(pConf->GET_PATH());
-      pConf->SET_PATH(M_FRAMES_CONFIG_SECTION);
-      pConf->CHANGE_PATH(MFrameBase::GetName());
+   const char *name = MFrameBase::GetName();
+   int xpos, ypos, width, height;
+   RestorePosition(name, &xpos, &ypos, &width, &height);
 
-      xpos = READ_APPCONFIG(MC_XPOS);
-      ypos = READ_APPCONFIG(MC_YPOS);
-      width = READ_APPCONFIG(MC_WIDTH);
-      height = READ_APPCONFIG(MC_HEIGHT);
-
-      pConf->SET_PATH(tmp.c_str());
-   }
-   
    // use name as default title
-   wxFrame::CreateFrame(parent, MFrameBase::GetName(), xpos, ypos, width, height);
+   wxFrame::CreateFrame(parent, name, xpos, ypos, width, height);
    //Show(true);
 
    SetIcon(ICON("MFrame"));
   
    initialised = true;
-   menuBar = new wxMenuBar;
+   m_MenuBar = new wxMenuBar;
    m_ToolBar = NULL;
-   //SetMenuBar(menuBar);
 }
 
 void
 wxMFrame::AddFileMenu(void)
 {
-   fileMenu = new wxMenu;
-
-   fileMenu->Append(WXMENU_FILE_COMPOSE,(char *)_("&Compose Message"));
-//   fileMenu->Append(WXMENU_FILE_TEST,(char *)_("&Test"));
-   fileMenu->Append(WXMENU_FILE_OPEN,(char *)_("&Open Folder"));
+   wxMenu *fileMenu = new wxMenu;
+   AppendToMenu(fileMenu, WXMENU_FILE_BEGIN + 1, WXMENU_FILE_CLOSE);
 
 #ifdef USE_WXWINDOWS2
    wxWindow *parent = GetParent();
 #endif
 
-   if(parent != NULL)
-      fileMenu->Append(WXMENU_FILE_CLOSE,(char *)_("&Close Window"));
-   fileMenu->AppendSeparator();
-   fileMenu->Append(WXMENU_FILE_EXIT,(char *)_("&Exit"));
+   if ( parent != NULL )
+      AppendToMenu(fileMenu, WXMENU_FILE_CLOSE);
+   AppendToMenu(fileMenu, WXMENU_FILE_CLOSE + 1, WXMENU_FILE_END);
 
-   menuBar->Append(fileMenu, (char *)_("&File"));
+   m_MenuBar->Append(fileMenu, _("&File"));
 }
 
 void
 wxMFrame::AddEditMenu(void)
 {
-   m_EditMenu = new wxMenu;
-
-   m_EditMenu->Append(WXMENU_EDIT_ADB,_("&Database"));
-   m_EditMenu->Append(WXMENU_EDIT_PREFERENCES,(char
-                                               *)_("&Preferences"));
-   m_EditMenu->AppendSeparator();
-   m_EditMenu->Append(WXMENU_EDIT_SAVE_PREFERENCES,(char *)_("&Save Preferences"));
-
-   menuBar->Append(m_EditMenu, _("&Edit"));
+   WXADD_MENU(m_MenuBar, EDIT, "&Edit");
 }
 
 void
 wxMFrame::AddHelpMenu(void)
 {
-   helpMenu = new wxMenu;
-   helpMenu->Append(WXMENU_HELP_ABOUT,(char *)_("&About"));
-
-   menuBar->Append(helpMenu, (char *)_("&Help"));
+   WXADD_MENU(m_MenuBar, HELP, "&Help");
 }
 
 void
 wxMFrame::AddMessageMenu(void)
 {
-   wxMenu   *messageMenu;
-
-   messageMenu = GLOBAL_NEW wxMenu;
-   messageMenu->Append(WXMENU_MSG_OPEN, (char *)_("&Open"));
-   messageMenu->Append(WXMENU_MSG_REPLY, (char *)_("&Reply"));
-   messageMenu->Append(WXMENU_MSG_FORWARD, (char *)_("&Forward"));
-   messageMenu->Append(WXMENU_MSG_DELETE,(char *)_("&Delete"));
-   messageMenu->Append(WXMENU_MSG_UNDELETE,(char *)_("&Undelete"));
-   messageMenu->Append(WXMENU_MSG_SAVE_TO_FOLDER,(char *)_("&Save to Folder"));
-   messageMenu->Append(WXMENU_MSG_SAVE_TO_FILE,(char *)_("&Save to File"));
-   messageMenu->Append(WXMENU_MSG_PRINT,(char *)_("&Print"));
-   messageMenu->Append(WXMENU_MSG_SELECTALL, (char *)_("Select &all"));
-   messageMenu->Append(WXMENU_MSG_DESELECTALL, (char *)_("&Deselect all"));
-   messageMenu->AppendSeparator();
-   messageMenu->Append(WXMENU_MSG_EXPUNGE,(char *)_("Ex&punge"));
-
-   menuBar->Append(messageMenu, _("&Message"));
-}
-
-void
-wxMFrame::AddMenu(wxMenu *menu, String const &title)
-{
-   menuBar->Append(menu, _(Str(title)));
+   WXADD_MENU(m_MenuBar, MSG, "&Message");
 }
 
 wxMFrame::~wxMFrame()
 {
-   SavePosition();
+   SavePosition(MFrameBase::GetName(), this);
 }
 
 ON_CLOSE_TYPE wxMFrame::OnClose(void)
 {
-   if(this == mApplication.TopLevelFrame())
-   {
-      mApplication.Exit();
-      return FALSE;
-   }
-   else   // we can safely close this
-   {
-      Show(FALSE);
-      return TRUE;
-   }
+   // @@@ check that we have no unsaved data!
+   return TRUE;
 }
 
 void
@@ -220,7 +176,7 @@ wxMFrame::SetTitle(String const &title)
 }
 
 void
-wxMFrame::SavePosition(void)
+wxMFrame::SavePosition(const char *name, wxFrame *frame)
 {
    int x,y;
 
@@ -228,13 +184,13 @@ wxMFrame::SavePosition(void)
    if ( pConf != NULL ) {
       String tmp = Str(pConf->GET_PATH());
       pConf->SET_PATH(M_FRAMES_CONFIG_SECTION);
-      pConf->CHANGE_PATH(MFrameBase::GetName());
+      pConf->CHANGE_PATH(name);
    
-      GetPosition(&x,&y);
+      frame->GetPosition(&x,&y);
       pConf->WRITE_ENTRY(MC_XPOS, (long int) x);
       pConf->WRITE_ENTRY(MC_YPOS, (long int) y);
 
-      GetSize(&x,&y);
+      frame->GetSize(&x,&y);
       pConf->WRITE_ENTRY(MC_WIDTH, (long int) x);
       pConf->WRITE_ENTRY(MC_HEIGHT, (long int) y);
 
@@ -281,8 +237,8 @@ wxMFrame::OnMenuCommand(int id)
    case WXMENU_EDIT_ADB:
       (void) new wxAdbEditFrame(this);
       break;
-   case WXMENU_EDIT_PREFERENCES:
-   case WXMENU_EDIT_SAVE_PREFERENCES:
+   case WXMENU_EDIT_PREF:
+   case WXMENU_EDIT_SAVE_PREF:
       MDialog_Message(_("Not implemented yet."),this,_("Sorry"));
       break;
    case WXMENU_HELP_ABOUT:

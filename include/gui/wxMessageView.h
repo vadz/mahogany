@@ -12,10 +12,12 @@
 #pragma interface "wxMessageView.h"
 #endif
 
+#include "MessageView.h"
+
+#include   "gui/wxlwindow.h"
+
 #ifndef USE_PCH
-#   include   "MessageView.h"
 #   include   "gui/wxMFrame.h"
-#   include   "gui/wxlwindow.h"
 #endif
 
 
