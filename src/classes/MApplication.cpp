@@ -6,6 +6,11 @@
  * $Id$         *
  *                                                                  *
  * $Log$
+ * Revision 1.16  1998/05/24 08:22:41  KB
+ * changed the creation/destruction of MailFolders, now done through
+ * MailFolder::Open/CloseFolder, made constructor/destructor private,
+ * this allows multiple view on the same folder
+ *
  * Revision 1.15  1998/05/18 17:48:29  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -21,7 +26,7 @@
  *
  * Revision 1.11  1998/05/13 19:02:08  KB
  * added kbList, adapted MimeTypes for it, more python, new icons
- *         *
+ *
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -259,21 +264,21 @@ MApplication::OnInit(void)
 
    // Open all default mailboxes:
    char *folders = strutil_strdup(readEntry(MC_OPENFOLDERS,MC_OPENFOLDERS_D));
-   kbList openFoldersList;
+   kbStringList openFoldersList;
    strutil_tokenise(folders,";",openFoldersList);
    GLOBAL_DELETE [] folders;
-   kbListIterator i;
+   kbStringList::iterator i;
    for(i = openFoldersList.begin(); i != openFoldersList.end(); i++)
    {
-      if(kbListICast(String,i)->length() == 0) // empty token
+      if((*i)->length() == 0) // empty token
          continue;
       
-      wxLogDebug("Opening folder '%s'...", kbListICast(String,i)->c_str());
-      MailFolderCC *mf = GLOBAL_NEW MailFolderCC(*kbListICast(String,i));
+      wxLogDebug("Opening folder '%s'...", (*i)->c_str());
+      MailFolderCC *mf = MailFolderCC::OpenFolder(**i);
       if(mf->IsInitialised())
-         (GLOBAL_NEW wxFolderView(mf,kbListICast(String, i)->c_str(), topLevelFrame))->Show();
+         (GLOBAL_NEW wxFolderView(mf,(*i)->c_str(), topLevelFrame))->Show();
       else
-         GLOBAL_DELETE mf;
+         mf->CloseFolder();
    }
    
    return topLevelFrame;

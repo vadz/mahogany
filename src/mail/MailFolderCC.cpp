@@ -6,6 +6,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.7  1998/05/24 08:23:30  KB
+ * changed the creation/destruction of MailFolders, now done through
+ * MailFolder::Open/CloseFolder, made constructor/destructor private,
+ * this allows multiple view on the same folder
+ *
  * Revision 1.6  1998/05/18 17:48:48  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -99,6 +104,37 @@ MailFolderCC::Open(String const & filename)
    return true;   // success
 }
 
+static MailFolderCC *
+MailFolderCC::OpenFolder(String const &name)
+{
+   StreamConnectionList::iterator i;
+   for(i = streamList.begin(); i != streamList.end(); i++)
+      if( (*i)->name == name )
+      {
+         (*i)->refcount++;
+         return (*i)->folder;
+      }
+   // not found:
+   return new MailFolderCC(name);
+}
+
+void
+MailFolderCC::CloseFolder(void)
+{
+   StreamConnectionList::iterator i;
+   for(i = streamList.begin(); i != streamList.end(); i++)
+      if( (*i)->folder == this )
+      {
+         (*i)->refcount--;
+         if((*i)->refcount == 0)
+         {
+            streamList.erase(i);
+            delete this;
+         }
+      }
+   //FIXME error!
+}
+
 void
 MailFolderCC::Create(String const & iname)
 {
@@ -169,14 +205,14 @@ MailFolderCC::~MailFolderCC()
 void
 MailFolderCC::RegisterView(FolderViewBase *view, bool reg)
 {
-   kbListIterator
+   FolderViewList::iterator
       i;
    if(reg)
       viewList.push_front(view);
    else  
       for(i = viewList.begin(); i != viewList.end(); i++)
       {
-    if(kbListICast(FolderViewBase,i) == view)
+    if((*i) == view)
     {
        viewList.erase(i);
        return;
@@ -188,10 +224,10 @@ MailFolderCC::RegisterView(FolderViewBase *view, bool reg)
 void
 MailFolderCC::UpdateViews(void)
 {
-   kbListIterator
+   FolderViewList::iterator
       i;
    for(i = viewList.begin(); i != viewList.end(); i++)
-      kbListICast(FolderViewBase,i)->Update();
+      (*i)->Update();
 }
 
 const String &
@@ -261,13 +297,13 @@ MailFolderCC::Debug(void) const
    VAR(realName);
    DBGLOG("--list of streams and objects--");
 
-   kbListIterator
+   StreamConnectionList::iterator
       i;
 
    for(i = streamList.begin(); i != streamList.end(); i++)
    {
       sprintf(buffer,"\t%p -> %p \"%s\"",
-              kbListICast(StreamConnection,i)->stream, kbListICast(StreamConnection,i)->folder, kbListICast(StreamConnection,i)->folder->GetName().c_str());
+              (*i)->stream, (*i)->folder, (*i)->folder->GetName().c_str());
       DBGLOG(buffer);
    }
    DBGLOG("--end of list--");
@@ -278,9 +314,9 @@ MailFolderCC::Debug(void) const
 void
 MailFolderCC::RemoveFromMap(MAILSTREAM const *stream)
 {
-   kbListIterator i;
+   StreamConnectionList::iterator i;
    for(i = streamList.begin(); i != streamList.end(); i++)
-      if( kbListICast(StreamConnection,i)->stream == stream )
+      if( (*i)->stream == stream )
       {
     streamList.erase(i);
     break;
@@ -294,7 +330,7 @@ MailFolderCC::RemoveFromMap(MAILSTREAM const *stream)
 // static class member functions:
 //-------------------------------------------------------------------
 
-StreamListType MailFolderCC::streamList;
+StreamConnectionList MailFolderCC::streamList;
 
 bool MailFolderCC::cclientInitialisedFlag = false;
 
@@ -314,6 +350,8 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream)
    StreamConnection  *conn = new StreamConnection;
    conn->folder = this;
    conn->stream = stream;
+   conn->name = symbolicName;
+   conn->refcount = 1;
    streamList.push_front(conn);
 }
 
@@ -322,10 +360,10 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream)
 MailFolderCC *
 MailFolderCC::LookupObject(MAILSTREAM const *stream)
 {
-   kbListIterator i;
+   StreamConnectionList::iterator i;
    for(i = streamList.begin(); i != streamList.end(); i++)
-      if( kbListICast(StreamConnection,i)->stream == stream )
-    return kbListICast(StreamConnection,i)->folder;
+      if( (*i)->stream == stream )
+    return (*i)->folder;
    if(streamListDefaultObj)
    {
       LOGMESSAGE((LOG_DEBUG, "Routing call to default mailfolder."));

@@ -6,6 +6,11 @@
  * $Id$           *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/05/24 08:22:31  KB
+ * changed the creation/destruction of MailFolders, now done through
+ * MailFolder::Open/CloseFolder, made constructor/destructor private,
+ * this allows multiple view on the same folder
+ *
  * Revision 1.5  1998/05/18 17:48:17  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -58,13 +63,18 @@ struct StreamConnection
 {
    /// pointer to a MailFolderCC object
    MailFolderCC    *folder;
+   /// reference counter
+   int refcount;
    /// pointer to the associated MAILSTREAM
    MAILSTREAM   const *stream;
-
+   /// name of the MailFolderCC object
+   String name;
+   
    IMPLEMENT_DUMMY_COMPARE_OPERATORS(StreamConnection)
       };
-/// map type for mapping mailstreams to objects:
-typedef   kbList StreamListType;
+
+KBLIST_DEFINE(StreamConnectionList, StreamConnection);
+KBLIST_DEFINE(FolderViewList, FolderViewBase);
 
 /**
    MailFolder class, implemented with the C-client library.
@@ -82,19 +92,15 @@ public:
    /** @name Constructors and destructor */
    //@{
 
-   /** creation of the object
+   /** opens a mail folder in a save way.
        @param name name of the folder
    */
-   void   Create(String const & name);
-      
-   /** creates an object representing a folder
-       @param name name of the folder (relative name!)
+   static MailFolderCC* OpenFolder(String const &name);
+   
+   /** closes a mail folder in a save way.
    */
-   MailFolderCC(String const & name);
+   void CloseFolder(void);
 
-
-   /// default destructor
-   ~MailFolderCC();
 
    /// assume object to only be initialised when stream is ok
    bool IsInitialised(void) const { return okFlag; }
@@ -111,6 +117,21 @@ protected:
        @param   filename the name of the "file" to open
        */
    bool   Open(String const & filename);
+
+   /** creates an object representing a folder
+       @param name name of the folder (relative name!)
+   */
+   MailFolderCC(String const & name);
+
+   /** creation of the object
+       @param name name of the folder
+   */
+   void   Create(String const & name);
+      
+
+   /// default destructor
+   ~MailFolderCC();
+
 public:
 
    /** Is mailbox ok to use? Did the last operation succeed?
@@ -180,9 +201,9 @@ private:
    static String MF_user;
    /// for POP/IMAP boxes, this holds the password for the callback
    static String MF_pwd;
-
+   
    /// a list of FolderViews to be notified when this folder changes
-   kbList   viewList;
+   FolderViewList   viewList;
    
    /// which type is this mailfolder?
    FolderType   folderType;
@@ -213,8 +234,8 @@ private:
    /// a pointer to the object to use as default if lookup fails
    static MailFolderCC   *streamListDefaultObj;
    
-   /// mapping MAILSTREAM* to objects of this class
-   static StreamListType   streamList;
+   /// mapping MAILSTREAM* to objects of this class and their names
+   static StreamConnectionList   streamList;
 
    /// has c-client library been initialised?
    static bool   cclientInitialisedFlag;
@@ -345,6 +366,8 @@ public:
    DEBUG_DEF
 };
 
+/* FIXME: are these actully used ???? */
+
 class MailFolderPopCC : public MailFolderCC
 {
 private:
@@ -352,7 +375,7 @@ private:
    String   popLogin;
    String   popPassword;
    
-public:
+protected:
    MailFolderPopCC(String const & name);
    void Create(String const &name);
    bool Open(void);
@@ -361,21 +384,21 @@ public:
 
 class MailFolderIMAPCC : public MailFolder
 {
-public:
+protected:
    MailFolderIMAPCC();
    ~MailFolderIMAPCC() {};
 };
 
 class MailFolderFileCC : public MailFolder
 {
-public:
+protected:
    MailFolderFileCC();
    ~MailFolderFileCC() {};
 };
 
 class MailFolderINBOXCC : public MailFolder
 {
-public:
+protected:
    MailFolderINBOXCC();
    ~MailFolderINBOXCC() {};
 };

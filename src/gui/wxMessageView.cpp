@@ -513,10 +513,10 @@ wxMessageView::MimeHandle(void)
      {
        char *filename = wxGetTempFileName("Mtemp");
        MimeSave(filename);
-       MailFolderCC *mf = GLOBAL_NEW MailFolderCC(filename);
+       MailFolderCC *mf = MailFolderCC::OpenFolder(filename);
        (void) GLOBAL_NEW wxMessageView(mf, 1, "message/rfc822",this);
-       wxRemoveFile(filename);
-       GLOBAL_DELETE mf;
+       wxRemoveFile(filename);//FIXME: does this work for non-UNIX systems?
+       mf->CloseFolder();
      }
    }
 }

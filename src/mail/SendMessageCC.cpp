@@ -6,6 +6,11 @@
  * $Id$ *
  *                                                                  *
  * $Log$
+ * Revision 1.7  1998/05/24 08:23:31  KB
+ * changed the creation/destruction of MailFolders, now done through
+ * MailFolder::Open/CloseFolder, made constructor/destructor private,
+ * this allows multiple view on the same folder
+ *
  * Revision 1.6  1998/05/18 17:48:49  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  * *
@@ -177,9 +182,9 @@ SendMessageCC::Send(void)
       *hostlist [2],
       **headerNames,
       **headerValues;
-   kbList
+   kbStringList
       headerList;
-   kbListIterator
+   kbStringList::iterator
       i;
    
    headers = strutil_strdup(profile->readEntry(MP_EXTRAHEADERS,MP_EXTRAHEADERS_D));

@@ -6,6 +6,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.7  1998/05/24 08:22:58  KB
+ * changed the creation/destruction of MailFolders, now done through
+ * MailFolder::Open/CloseFolder, made constructor/destructor private,
+ * this allows multiple view on the same folder
+ *
  * Revision 1.6  1998/05/18 17:48:40  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -273,9 +278,9 @@ wxFolderView::SaveMessages(int n, int *selections)
    {
       str = "";
       mailFolder->GetMessage(selections[i]+1)->WriteToString(str);
-      mf = GLOBAL_NEW MailFolderCC((const char *)folderName);
+      mf = MailFolderCC::OpenFolder(folderName);
       mf->AppendMessage(str.c_str());
-      GLOBAL_DELETE mf;
+      mf->CloseFolder();
    }
 }
 
