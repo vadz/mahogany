@@ -12,6 +12,11 @@ $Id$
 		--> add Suspend()/Discard()/Commit() methods to normal 
 		    profile which work with a temporary subgroup
 
+9		immediate crash when switching tabs in options dialog
+		wxGTK bug??
+
+3		wxDialUpManager ping method is broken and does not
+		work, need source code of ping command.
 
 9	KB	wxLayout:
 		- speed up by only running Layout() for recalculations 

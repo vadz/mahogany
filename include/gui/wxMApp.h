@@ -103,6 +103,9 @@ protected:
    void LoadModules(void);
    /// Unload modules loaded at startup
    void UnloadModules(void);
+
+   /// update display of online connection status
+   void UpdateOnlineDisplay();
 private:
    // implement base class pure virtual
    virtual void DoExit();

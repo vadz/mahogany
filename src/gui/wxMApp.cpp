@@ -232,12 +232,7 @@ void
 wxMApp::OnConnected(wxDialUpEvent &event)
 {
    m_IsOnline = TRUE;
-   m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_ON, FALSE);
-   m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_OFF, TRUE);
-//   m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, FALSE);
-//   m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, TRUE);
-   m_topLevelFrame->GetStatusBar()->SetStatusText(_("Online"), 1);
-
+   UpdateOnlineDisplay();
    MDialog_Message(_("Dial-Up network connection established."),
                    m_topLevelFrame,
                    _("Information"),
@@ -248,11 +243,7 @@ void
 wxMApp::OnDisconnected(wxDialUpEvent &event)
 {
    m_IsOnline = FALSE;
-   m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_ON, TRUE);
-   m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_OFF, FALSE);
-//   m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, TRUE);
-//   m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, FALSE);
-   m_topLevelFrame->GetStatusBar()->SetStatusText(_("Offline"), 1);
+   UpdateOnlineDisplay();
    MDialog_Message(_("Dial-Up network shut down."),
                    m_topLevelFrame,
                    _("Information"),
@@ -964,19 +955,36 @@ wxMApp::GetStdIcon(int which) const
 }
 
 void
+wxMApp::UpdateOnlineDisplay(void)
+{
+   if(! m_DialupSupport || ! m_topLevelFrame || ! m_topLevelFrame->GetStatusBar() )
+      return; // nothing to update
+
+   bool online = IsOnline();
+   wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
+   wxMenuBar *mbar = m_topLevelFrame->GetMenuBar();
+
+   if(online)
+   {
+      mbar->Enable((int)WXMENU_FILE_NET_OFF, m_DialupSupport);
+//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, m_DialupSupport);
+   }
+   else
+   {
+      mbar->Enable((int)WXMENU_FILE_NET_ON, m_DialupSupport);
+//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, m_DialupSupport);
+   }
+   
+   static int widths[2] = { -1, 80 };
+   sbar->SetFieldsCount(2, widths);
+   sbar->SetStatusText(online ? _("Online"):_("Offline"), 1);
+}
+
+void
 wxMApp::SetupOnlineManager(void)
 {
    ASSERT(m_OnlineManager);
    m_DialupSupport = READ_APPCONFIG(MP_DIALUP_SUPPORT) != 0;
-   if(m_topLevelFrame)
-   {
-      m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_ON, m_DialupSupport);
-      m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_OFF, m_DialupSupport);
-//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, m_DialupSupport);
-//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, m_DialupSupport);
-      static int widths[2] = { -1, 80 };
-      m_topLevelFrame->GetStatusBar()->SetFieldsCount(2, widths);
-   }
    
    String beaconhost = READ_APPCONFIG(MP_BEACONHOST);
    strutil_delwhitespace(beaconhost);
@@ -992,17 +1000,9 @@ wxMApp::SetupOnlineManager(void)
       READ_APPCONFIG(MP_NET_ON_COMMAND),
       READ_APPCONFIG(MP_NET_OFF_COMMAND));
 
-   if(m_DialupSupport && m_topLevelFrame)
-   {
-      m_IsOnline = m_OnlineManager->IsOnline();
-      bool online = IsOnline();
-      m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_ON, !online);
-      m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_OFF, online);
-//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, !online);
-//    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, online);
-      m_topLevelFrame->GetStatusBar()->SetStatusText(online ? _("Online"):_("Offline"), 1);
-   }
+   m_IsOnline = m_OnlineManager->IsOnline();
 
+   UpdateOnlineDisplay();
 }
 
 bool
