@@ -947,7 +947,7 @@ bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
 }
 
 // ----------------------------------------------------------------------------
-// functions to work with folder tree
+// functions to create new folders in the tree
 // ----------------------------------------------------------------------------
 
 extern MFolder *CreateFolderTreeEntry(MFolder *parent,
@@ -957,14 +957,23 @@ extern MFolder *CreateFolderTreeEntry(MFolder *parent,
                                       const String& path,
                                       bool notify)
 {
-   MFolder *folder = parent ? parent->CreateSubfolder(name, folderType)
-                            : MFolder::Create(name, folderType);
+   // construct the full name by prepending the parent name (if we have parent
+   // and its name is non empty - only root entry is empty)
+   String fullname;
+   if ( parent && parent->GetType() != MF_ROOT )
+   {
+      fullname << parent->GetFullName() << '/';
+   }
+   fullname << name;
 
-   if(folder == NULL)
+   MFolder *folder = MFolder::Create(fullname, folderType);
+
+   if ( folder == NULL )
    {
       wxLogError(_("Cannot create a folder '%s'.\n"
                    "Maybe a folder of this name already exists?"),
-                 name.c_str());
+                 fullname.c_str());
+
       return NULL;
    }
 
@@ -977,7 +986,7 @@ extern MFolder *CreateFolderTreeEntry(MFolder *parent,
    if ( notify )
    {
       MEventManager::Send(
-         new MEventFolderTreeChangeData(name,
+         new MEventFolderTreeChangeData(fullname,
                                         MEventFolderTreeChangeData::Create)
          );
    }

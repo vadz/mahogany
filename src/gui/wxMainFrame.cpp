@@ -368,9 +368,13 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 
          case WXMENU_FOLDER_CREATE:
             {
+               MFolder_obj parent = m_FolderTree->GetSelection();
+
                wxWindow *winTop = ((wxMApp *)mApplication)->GetTopWindow();
                bool wantsDialog;
-               MFolder *newfolder = RunCreateFolderWizard(&wantsDialog, NULL, winTop);
+               MFolder *newfolder = RunCreateFolderWizard(&wantsDialog,
+                                                          parent,
+                                                          winTop);
                if ( wantsDialog )
                {
                   // users wants to use the dialog directly instead of the

@@ -1954,13 +1954,11 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
 
             Delete(item);
 
-            // do we need something like this (FIXME)?
-#if 0
+            // remove "+" button if no children left
             if ( GetChildrenCount(parent, false /* not recursively */) == 0 )
             {
-               SetItemHasChildren(parent, );
+               SetItemHasChildren(parent, false);
             }
-#endif // 0
          }
          break;
    }

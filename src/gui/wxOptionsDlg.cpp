@@ -607,7 +607,7 @@ BEGIN_EVENT_TABLE(wxOptionsPage, wxNotebookPageBase)
    // any change should make us dirty
    EVT_CHECKBOX(-1, wxOptionsPage::OnControlChange)
    EVT_RADIOBOX(-1, wxOptionsPage::OnControlChange)
-   EVT_COMBOBOX(-1, wxOptionsPage::OnControlChange)
+   EVT_CHOICE(-1, wxOptionsPage::OnControlChange)
    EVT_TEXT(-1, wxOptionsPage::OnChange)
 
    // listbox events handling
@@ -1475,11 +1475,11 @@ void wxOptionsPage::CreateControls()
                   }
                }
 
-               last = CreateComboBox(title, widthMax, last);
+               last = CreateChoice(title, widthMax, last);
             }
             else
 #endif // OS_WIN
-                last = CreateComboBox(_(m_aFields[n].label), widthMax, last);
+                last = CreateChoice(_(m_aFields[n].label), widthMax, last);
             break;
 
          case Field_Passwd:
@@ -1758,7 +1758,7 @@ bool wxOptionsPage::TransferDataToWindow()
          break;
 
       case Field_Combo:
-         wxStaticCast(control, wxComboBox)->SetSelection(lValue);
+         wxStaticCast(control, wxChoice)->SetSelection(lValue);
          break;
 
       case Field_List:
@@ -1823,79 +1823,73 @@ bool wxOptionsPage::TransferDataFromWindow()
 
       switch ( GetFieldType(n) )
       {
-      case Field_Passwd:
-      case Field_Text:
-      case Field_Dir:
-      case Field_File:
-      case Field_Color:
-      case Field_Folder:
-      case Field_Number:
-         wxASSERT( control->IsKindOf(CLASSINFO(wxTextCtrl)) );
+         case Field_Passwd:
+         case Field_Text:
+         case Field_Dir:
+         case Field_File:
+         case Field_Color:
+         case Field_Folder:
+         case Field_Number:
+            strValue = wxStaticCast(control, wxTextCtrl)->GetValue();
 
-         strValue = ((wxTextCtrl *)control)->GetValue();
+            if( GetFieldType(n) == Field_Passwd )
+               strValue = strutil_encrypt(strValue);
 
-         if( GetFieldType(n) == Field_Passwd )
-            strValue = strutil_encrypt(strValue);
+            if ( GetFieldType(n) == Field_Number ) {
+               wxASSERT( m_aDefaults[n].IsNumeric() );
 
-         if ( GetFieldType(n) == Field_Number ) {
+               lValue = atol(strValue);
+            }
+            else {
+               wxASSERT( !m_aDefaults[n].IsNumeric() );
+            }
+            break;
+
+         case Field_Bool:
             wxASSERT( m_aDefaults[n].IsNumeric() );
 
-            lValue = atol(strValue);
-         }
-         else {
+            lValue = wxStaticCast(control, wxCheckBox)->GetValue();
+            break;
+
+         case Field_Action:
+            wxASSERT( m_aDefaults[n].IsNumeric() );
+
+            lValue = wxStaticCast(control, wxRadioBox)->GetSelection();
+            break;
+
+         case Field_Combo:
+            wxASSERT( m_aDefaults[n].IsNumeric() );
+
+            lValue = wxStaticCast(control, wxChoice)->GetSelection();
+            break;
+
+         case Field_List:
             wxASSERT( !m_aDefaults[n].IsNumeric() );
-         }
-         break;
 
-      case Field_Bool:
-         wxASSERT( m_aDefaults[n].IsNumeric() );
-         wxASSERT( control->IsKindOf(CLASSINFO(wxCheckBox)) );
+            // join it using a separator char: this is ':' for everything except
+            // ConfigField_OpenFolders where it is ';' for config backwards
+            // compatibility
+            {
+               char ch = n == ConfigField_OpenFolders ? ';' : ':';
+               wxListBox *listbox = wxStaticCast(control, wxListBox);
+               size_t count = listbox->GetCount();
+               for ( size_t m = 0; m < count; m++ ) {
+                  if ( !strValue.IsEmpty() ) {
+                     strValue << ch;
+                  }
 
-         lValue = ((wxCheckBox *)control)->GetValue();
-         break;
-
-      case Field_Action:
-         wxASSERT( m_aDefaults[n].IsNumeric() );
-         wxASSERT( control->IsKindOf(CLASSINFO(wxRadioBox)) );
-
-         lValue = ((wxRadioBox *)control)->GetSelection();
-         break;
-
-      case Field_Combo:
-         wxASSERT( m_aDefaults[n].IsNumeric() );
-         wxASSERT( control->IsKindOf(CLASSINFO(wxComboBox)) );
-
-         lValue = ((wxComboBox *)control)->GetSelection();
-         break;
-
-      case Field_List:
-         wxASSERT( !m_aDefaults[n].IsNumeric() );
-         wxASSERT( control->IsKindOf(CLASSINFO(wxListBox)) );
-
-         // join it using a separator char: this is ':' for everything except
-         // ConfigField_OpenFolders where it is ';' for config backwards
-         // compatibility
-         {
-            char ch = n == ConfigField_OpenFolders ? ';' : ':';
-            wxListBox *listbox = (wxListBox *)control;
-            size_t count = listbox->GetCount();
-            for ( size_t m = 0; m < count; m++ ) {
-               if ( !strValue.IsEmpty() ) {
-                  strValue << ch;
+                  strValue << listbox->GetString(m);
                }
-
-               strValue << listbox->GetString(m);
             }
-         }
-         break;
+            break;
 
-      case Field_Message:
-      case Field_SubDlg:      // already done
-      case Field_XFace:      // already done
-         break;
+         case Field_Message:
+         case Field_SubDlg:      // already done
+         case Field_XFace:       // already done
+            break;
 
-      default:
-         wxFAIL_MSG("unexpected field type");
+         default:
+            wxFAIL_MSG("unexpected field type");
       }
 
       if ( m_aDefaults[n].IsNumeric() )

@@ -83,12 +83,7 @@ enum MWizardPageId
    MWizard_CreateFolder_MH,
    MWizard_CreateFolder_Imap,
    MWizard_CreateFolder_Pop3,
-   MWizard_CreateFolder_ImapServer,
-   MWizard_CreateFolder_NntpServer,
-   MWizard_CreateFolder_ImapHier,
-   MWizard_CreateFolder_NntpHier,
    MWizard_CreateFolder_Nntp,
-   MWizard_CreateFolder_NewsHier,
    MWizard_CreateFolder_News,
    MWizard_CreateFolder_Group,
    MWizard_CreateFolder_Final,                            // say that everything is ok
@@ -472,8 +467,16 @@ public:
       {
          SafeDecRef(m_ParentFolder);
       }
+
    struct FolderParams
    {
+      FolderParams()
+         : m_Name(_("New Folder"))
+      {
+         m_FolderType =
+         m_FolderFlags = 0;
+      }
+
       int m_FolderType;
       int m_FolderFlags;
       wxString m_Name;
@@ -484,7 +487,7 @@ public:
    };
 
    FolderParams * GetParams() { return &m_Params; }
-   MFolder * GetPFolder() { return m_ParentFolder; }
+   MFolder *GetParentFolder() { m_ParentFolder->IncRef(); return m_ParentFolder; }
 
    void SetUserWantsDialog() { m_wantsDialog = true; }
    bool UserWantsDialog() const { return m_wantsDialog; }
@@ -561,18 +564,14 @@ MWizardPageId MWizard_CreateFolder_WelcomePage::GetNextPageId() const
 
 enum FolderEntryType
 {
-   ET_FILE = 0,
-   ET_MH,
-   ET_IMAP,
-   ET_POP3,
-   ET_IMAP_SERVER,
-   ET_NNTP_SERVER,
-   ET_IMAP_HIER,
-   ET_NNTP_HIER,
-   ET_NNTP,
-   ET_NEWS_HIER,
-   ET_NEWS,
-   ET_GROUP
+   FOLDERTYPE_FILE = 0,
+   FOLDERTYPE_MH,
+   FOLDERTYPE_IMAP,
+   FOLDERTYPE_POP3,
+   FOLDERTYPE_NNTP,
+   FOLDERTYPE_NEWS,
+   FOLDERTYPE_GROUP,
+   FOLDERTYPE_MAX
 };
 
 class MWizard_CreateFolder_TypePage : public MWizardPage
@@ -605,17 +604,22 @@ MWizard_CreateFolder_TypePage::MWizard_CreateFolder_TypePage(MWizard *wizard)
 
    long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
 
-      // a choice control, the entries are taken from the label string which is
-      // composed as: "LABEL:entry1:entry2:entry3:...."
+   // a choice control, the entries are taken from the label string which is
+   // composed as: "LABEL:entry1:entry2:entry3:...."
    m_TypeCtrl = panel->CreateChoice(_("Entry type:"
                                       "Local Mailbox File:"
                                       "Local MH Folder:"
-                                      "IMAP Mailbox:POP3 Mailbox:"
-                                      "IMAP Server:NNTP News Server:"
-                                      "IMAP Hierarchy:NNTP News Hierarchy:"
-                                      "NNTP Newsgroup:Local News Hierarchy:"
-                                      "Local Newsgroup:Folder Group"),
+                                      "IMAP Mailbox:"
+                                      "POP3 Mailbox:"
+                                      "NNTP Newsgroup:"
+                                      "Local Newsgroup:"
+                                      "Folder Group"),
                                     maxwidth, NULL);
+
+   // should be always in sync
+   ASSERT_MSG( m_TypeCtrl->GetCount() == FOLDERTYPE_MAX,
+               "forgot to update something" );
+
    panel->ForceLayout();
 }
 
@@ -651,14 +655,23 @@ public:
       { return MWizard_CreateFolder_Final; }
    virtual MWizardPageId GetPreviousPageId() const
       { return MWizard_CreateFolder_Type; }
+
 private:
-   wxTextCtrl *m_Name, *m_Server, *m_UserId, *m_Password, *m_Path;
+   wxTextCtrl *m_Name,
+              *m_Server,
+              *m_UserId,
+              *m_Password,
+              *m_Path;
+
    wxFileOrDirBrowseButton *m_browsePath;
+
    FolderEntryType m_Type;
 };
 
-MWizard_CreateFolder_ServerPage::MWizard_CreateFolder_ServerPage(
-   MWizard *wizard, MWizardPageId id, FolderEntryType type)
+MWizard_CreateFolder_ServerPage::
+MWizard_CreateFolder_ServerPage(MWizard *wizard,
+                                MWizardPageId id,
+                                FolderEntryType type)
    : MWizardPage(wizard, id)
 {
    m_Type = type;
@@ -669,96 +682,82 @@ MWizard_CreateFolder_ServerPage::MWizard_CreateFolder_ServerPage(
       msg = _("To create %s\n"
               "the following access parameters\n"
               "are needed:\n");
-      bool
-         needsServer = FALSE,
-         needsUserId = FALSE,
-         needsPassword = FALSE,
-         needsPath = FALSE,
-         canBrowse = TRUE;
+
+   bool
+      needsServer,
+      needsUserId,
+      needsPath,
+      canBrowse;
 
    switch(type)
    {
-   case ET_GROUP:
-      needsServer = FALSE; // don't know which server :-)
-      needsUserId = TRUE;
-      needsPassword = TRUE;
-      needsPath = TRUE;
-      break;
-   case ET_IMAP:
-      entry = _("an IMAP folder");
-      needsServer = TRUE;
-      needsUserId = TRUE;
-      needsPassword = TRUE;
-      needsPath = TRUE;
-      canBrowse = FALSE;
-      break;
-   case ET_POP3:
-      entry = _("a POP3 mailbox");
-      needsServer = TRUE;
-      needsUserId = TRUE;
-      needsPassword = TRUE;
-      canBrowse = FALSE;
-      break;
-   case ET_NNTP:
-      entry = _("a NNTP newsgroup");
-      needsServer = TRUE;
-      needsPath = TRUE;
-      pathName = _("Newsgroup");
-      canBrowse = FALSE;
-      break;
-   case ET_IMAP_SERVER:
-      entry = _("an IMAP server");
-      needsServer = TRUE;
-      needsUserId = TRUE;
-      needsPassword = TRUE;
-      canBrowse = FALSE;
-      break;
-   case ET_NNTP_SERVER:
-      entry = _("a NNTP newsserver");
-      needsServer = TRUE;
-      canBrowse = FALSE;
-      break;
-   case ET_IMAP_HIER:
-      entry = _("an IMAP mail hierarchy");
-      needsServer = TRUE;
-      needsUserId = TRUE;
-      needsPassword = TRUE;
-      needsPath = TRUE;
-      pathName = _("Path on IMAP server");
-      canBrowse = FALSE;
-      break;
-   case ET_NNTP_HIER:
-      entry = _("a NNTP news hierarchy");
-      needsServer = TRUE;
-      needsPath = TRUE;
-      pathName = _("Hierarchy name");
-      canBrowse = FALSE;
-      break;
-   case ET_NEWS:
-      entry = _("a local newsgroup");
-      needsPath = TRUE;
-      pathName = _("Newsgroup");
-      canBrowse = FALSE;
-      break;
-   case ET_NEWS_HIER:
-      entry = _("a local news hierarchy");
-      needsServer = FALSE;
-      needsPath = TRUE;
-      pathName = _("Hierarchy name");
-      canBrowse = FALSE;
-      break;
-   case ET_FILE:
-      entry = _("a local mailbox file");
-      needsPath = TRUE;
-      break;
-   case ET_MH:
-      entry = _("a local MH mailbox");
-      needsPath = TRUE;
-      break;
+      case FOLDERTYPE_MAX:
+         FAIL_MSG("unknown folder type");
+         // fall through
+
+      case FOLDERTYPE_GROUP:
+         needsServer = FALSE; // don't know which server :-)
+         needsUserId = TRUE;
+         needsPath = FALSE;
+         canBrowse = FALSE;
+         break;
+
+         // IMAP server, mailbox or group
+      case FOLDERTYPE_IMAP:
+         entry = _("an IMAP folder");
+         needsServer = TRUE;
+         needsUserId = TRUE;
+         needsPath = TRUE;
+         canBrowse = TRUE;
+         break;
+
+      case FOLDERTYPE_POP3:
+         entry = _("a POP3 mailbox");
+         needsServer = TRUE;
+         needsUserId = TRUE;
+         needsPath = FALSE;
+         canBrowse = FALSE;
+         break;
+
+      case FOLDERTYPE_NNTP:
+      case FOLDERTYPE_NEWS:
+         if ( type == FOLDERTYPE_NEWS )
+         {
+            entry = _("a local newsgroup");
+            needsServer = FALSE;
+         }
+         else // NNTP
+         {
+            entry = _("a NNTP newsgroup");
+            needsServer = TRUE;
+         }
+
+         // NNTP may have authentification, but it is an advanced setting, don't
+         // present it here
+         needsUserId = FALSE;
+         needsPath = TRUE;
+         canBrowse = TRUE;
+
+         pathName = _("Newsgroup");
+         msg += _("\n"
+                  "Note that you can either leave newsgroup empty or enter\n"
+                  "news., news.announce or news.announce.newgroups\n"
+                  "here, for example");
+         break;
+
+      case FOLDERTYPE_MH:
+      case FOLDERTYPE_FILE:
+         entry = type == FOLDERTYPE_FILE ? _("a local mailbox file")
+                                         : _("a local MH mailbox");
+         needsServer = FALSE;
+         needsUserId = FALSE;
+         needsPath = TRUE;
+         canBrowse = type == FOLDERTYPE_MH;
+         break;
    }
 
    wxString text;
-   if(type == ET_GROUP)
+   if ( type == FOLDERTYPE_GROUP )
    {
       text = _("A folder group is not a mailbox itself\n"
                "but simply helps you organise the tree.\n"
@@ -770,10 +769,18 @@ MWizard_CreateFolder_ServerPage::MWizard_CreateFolder_ServerPage(
                "entries below this group.\n");
    }
    else
-      text.Printf(msg, entry.c_str());
+   {
+      if ( needsUserId )
+      {
+         msg += _("\n"
+                  "Password is not required, if you don't enter\n"
+                  "it here you will be asked for it later.");
+      }
 
-   wxStaticText *msgCtrl = new wxStaticText(
-      this, -1,text);
+      text.Printf(msg, entry.c_str());
+   }
+
+   wxStaticText *msgCtrl = new wxStaticText(this, -1, text);
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(msgCtrl);
 
@@ -787,6 +794,10 @@ MWizard_CreateFolder_ServerPage::MWizard_CreateFolder_ServerPage(
 
 #define CREATE_CTRL(name, creat) \
 if(needs##name) { m_##name = creat; last = m_##name; } else m_##name = NULL
+
+   // if we ask for login name, we ask for password as well
+   // (and we do need this var to be able to use the macro above)
+   bool needsPassword = needsUserId;
 
    wxControl *last = NULL;
    CREATE_CTRL(Server,
@@ -802,6 +813,7 @@ if(needs##name) { m_##name = creat; last = m_##name; } else m_##name = NULL
                                                  &m_browsePath : NULL,
                                                  TRUE,FALSE));
 #undef CREATE_CTRL
+
    last = panel->CreateMessage(
       _("\n"
         "You also need to give your new entry\n"
@@ -810,11 +822,24 @@ if(needs##name) { m_##name = creat; last = m_##name; } else m_##name = NULL
 
    m_Name = panel->CreateTextWithLabel(labels[4], maxwidth, last);
 
-   if ( type == ET_MH )
+   switch ( type )
    {
-      // the browser button should allow to select directories, not folders
-      // then
-      m_browsePath->BrowseForDirectories();
+      case FOLDERTYPE_MH:
+         // the browser button should allow to select directories, not folders
+         // then
+         m_browsePath->BrowseForDirectories();
+         break;
+
+      case FOLDERTYPE_NEWS:
+      case FOLDERTYPE_NNTP:
+      case FOLDERTYPE_IMAP:
+         // we don't support browsing the remote servers yet (TODO)
+         m_browsePath->wxButton::Enable(FALSE);
+         break;
+
+      default:
+         // suppress gcc warning
+         ;
    }
 
    panel->ForceLayout();
@@ -864,124 +889,133 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
 
    switch(m_Type)
    {
-   case ET_IMAP:
-   case ET_IMAP_SERVER:
-   case ET_IMAP_HIER:
-      params->m_FolderType = MF_IMAP;
-      if(m_Type == ET_IMAP_HIER || m_Type == ET_IMAP_SERVER)
-         params->m_FolderFlags |= MF_FLAGS_GROUP;
-      break;
-   case ET_POP3:
-      params->m_FolderType = MF_POP;
-      break;
-   case ET_NNTP:
-   case ET_NNTP_SERVER:
-   case ET_NNTP_HIER:
-      params->m_FolderType = MF_NNTP;
-      params->m_FolderFlags |= MF_FLAGS_ANON; // by default
-      if(m_Type == ET_NNTP_HIER || m_Type == ET_NNTP_SERVER)
-         params->m_FolderFlags |= MF_FLAGS_GROUP;
-      break;
-   case ET_NEWS:
-   case ET_NEWS_HIER:
-      params->m_FolderType = MF_NEWS;
-      if(m_Type == ET_NEWS_HIER)
-         params->m_FolderFlags |= MF_FLAGS_GROUP;
-      break;
-   case ET_FILE:
-      params->m_FolderType = MF_FILE;
-      break;
-   case ET_MH:
-      {
-         wxString name,
-                  root = MailFolderCC::InitializeMH();
-         if ( params->m_Path.StartsWith(root, &name) )
+      case FOLDERTYPE_MAX:
+         FAIL_MSG("unknown folder type");
+         // fall through
+
+      case FOLDERTYPE_GROUP:
+         params->m_FolderType = MF_GROUP;
+         break;
+
+      case FOLDERTYPE_IMAP:
+         params->m_FolderType = MF_IMAP;
+         params->m_FolderFlags = MF_FLAGS_GROUP;
+         break;
+
+      case FOLDERTYPE_POP3:
+         params->m_FolderType = MF_POP;
+         break;
+
+      case FOLDERTYPE_NNTP:
+         params->m_FolderType = MF_NNTP;
+         params->m_FolderFlags = MF_FLAGS_ANON | MF_FLAGS_GROUP;
+         break;
+
+      case FOLDERTYPE_NEWS:
+         params->m_FolderType = MF_NEWS;
+         params->m_FolderFlags = MF_FLAGS_GROUP;
+         break;
+
+      case FOLDERTYPE_FILE:
+         params->m_FolderType = MF_FILE;
+         break;
+
+      case FOLDERTYPE_MH:
          {
-            // remove extra slashes
-            const char *p = name.c_str();
-            while ( *p == '/' )
-               p++;
-            if ( p != name.c_str() )
-               name = p;
+            wxString name,
+                     root = MailFolderCC::InitializeMH();
+            if ( params->m_Path.StartsWith(root, &name) )
+            {
+               // remove extra slashes
+               const char *p = name.c_str();
+               while ( *p == '/' )
+                  p++;
+               if ( p != name.c_str() )
+                  name = p;
 
-            params->m_Path = name;
+               params->m_Path = name;
+            }
+            else
+            {
+               wxLogError(_("The path '%s' is invalid for a MH folder. All MH "
+                            "folders should be under the directory '%s'."),
+                         name.c_str(), root.c_str());
+
+               return false;
+            }
+
+            params->m_FolderType = MF_MH;
          }
-         else
-         {
-            wxLogError(_("The path '%s' is invalid for a MH folder. All MH "
-                         "folders should be under the directory '%s'."),
-                      name.c_str(), root.c_str());
-
-            return false;
-         }
-
-         params->m_FolderType = MF_MH;
-      }
-      break;
-   case ET_GROUP:
-      params->m_FolderType = MF_GROUP;
-      break;
+         break;
    }
+
    return TRUE;
 }
 
 bool
 MWizard_CreateFolder_ServerPage::TransferDataToWindow()
 {
-   MFolder *f = ((CreateFolderWizard*)GetWizard())->GetPFolder();
-   Profile * p = Profile::CreateProfile(f->GetName());
-   CHECK(p,FALSE,"No profile?");
+   CreateFolderWizard *wiz = (CreateFolderWizard*)GetWizard();
+   CreateFolderWizard::FolderParams *params = wiz->GetParams();
 
-   m_Name->SetValue(_("New Folder"));
-   if ( GetPageId() == MWizard_CreateFolder_MH )
+   MFolder_obj f = wiz->GetParentFolder();
+   Profile_obj p(f->GetName());
+   CHECK(p, FALSE, "No profile?");
+
+   // don't overwrite the settings previously entered by user
+   if ( m_Name->GetValue().empty() )
    {
-      // start from the MHROOT
-      m_Path->SetValue(MailFolderCC::InitializeMH());
-   }
-   else if ( GetPageId() != MWizard_CreateFolder_ImapServer &&
-             GetPageId() != MWizard_CreateFolder_NntpServer &&
-             GetPageId() != MWizard_CreateFolder_Pop3 )
-   {
-      m_Path->SetValue(READ_CONFIG(p, MP_FOLDER_PATH));
+      m_Name->SetValue(params->m_Name);
    }
 
-   if(GetPageId() != MWizard_CreateFolder_MH
-      && GetPageId() != MWizard_CreateFolder_File
-      && GetPageId() != MWizard_CreateFolder_News
-      && GetPageId() != MWizard_CreateFolder_NewsHier
-      && GetPageId() != MWizard_CreateFolder_Group
-      )
+   if ( m_Path && m_Path->GetValue().empty() )
    {
-      switch(GetPageId())
+      switch ( GetPageId() )
       {
-      case MWizard_CreateFolder_Imap:
-      case MWizard_CreateFolder_ImapServer:
-      case MWizard_CreateFolder_ImapHier:
-         m_Server->SetValue(READ_CONFIG(p, MP_IMAPHOST));
-         break;
-      case MWizard_CreateFolder_Nntp:
-      case MWizard_CreateFolder_NntpServer:
-      case MWizard_CreateFolder_NntpHier:
-         m_Server->SetValue(READ_CONFIG(p, MP_NNTPHOST));
-         break;
-      case MWizard_CreateFolder_Pop3:
-         m_Server->SetValue(READ_CONFIG(p, MP_POPHOST));
-         break;
-      default:
-         ASSERT_MSG(0,"This folder has no server setting!");
-      }
-      if(GetPageId() != MWizard_CreateFolder_Nntp
-         && GetPageId() != MWizard_CreateFolder_NntpHier
-         && GetPageId() != MWizard_CreateFolder_NntpServer
-         && GetPageId() != MWizard_CreateFolder_News
-         && GetPageId() != MWizard_CreateFolder_NewsHier)
-      {
-         m_UserId->SetValue(READ_CONFIG(p, MP_USERNAME));
-         m_Password->SetValue(READ_CONFIG(p,
-                                          MP_FOLDER_PASSWORD));
+         case MWizard_CreateFolder_MH:
+            // start from the MHROOT
+            m_Path->SetValue(MailFolderCC::InitializeMH());
+            break;
+
+         case MWizard_CreateFolder_Imap:
+         case MWizard_CreateFolder_Nntp:
+         case MWizard_CreateFolder_Pop3:
+            // they have their own value, don't change
+            break;
+
+         default:
+            m_Path->SetValue(READ_CONFIG(p, MP_FOLDER_PATH));
       }
    }
-   p->DecRef();
+
+   if ( m_Server && m_Server->GetValue().empty() )
+   {
+      String serverKey;
+      switch ( GetPageId() )
+      {
+         case MWizard_CreateFolder_Imap:
+            serverKey = MP_IMAPHOST;
+            break;
+
+         case MWizard_CreateFolder_Nntp:
+            serverKey = MP_NNTPHOST;
+            break;
+
+         case MWizard_CreateFolder_Pop3:
+            serverKey = MP_POPHOST;
+            break;
+
+         default:
+            FAIL_MSG("This folder has no server setting!");
+      }
+
+      m_Server->SetValue(p->readEntry(serverKey, ""));
+   }
+
+   if ( m_UserId && m_UserId->GetValue().empty() )
+   {
+      m_UserId->SetValue(READ_CONFIG(p, MP_USERNAME));
+   }
 
    // store our page id for use by the final page:
    ((CreateFolderWizard*)GetWizard())->m_ServerPageId = GetPageId();
@@ -999,7 +1033,7 @@ public: \
    MWizard_CreateFolder_##type##Page(MWizard *wizard) \
       : MWizard_CreateFolder_ServerPage(wizard,\
                                         MWizard_CreateFolder_##type,\
-                                        ET_##type2)\
+                                        FOLDERTYPE_##type2)\
  { } \
 }
 
@@ -1007,13 +1041,8 @@ DEFINE_TYPEPAGE(File,FILE);
 DEFINE_TYPEPAGE(MH,MH);
 DEFINE_TYPEPAGE(Imap,IMAP);
 DEFINE_TYPEPAGE(Pop3,POP3);
-DEFINE_TYPEPAGE(ImapServer,IMAP_SERVER);
-DEFINE_TYPEPAGE(NntpServer,NNTP_SERVER);
-DEFINE_TYPEPAGE(ImapHier,IMAP_HIER);
-DEFINE_TYPEPAGE(NntpHier,NNTP_HIER);
 DEFINE_TYPEPAGE(Nntp,NNTP);
 DEFINE_TYPEPAGE(News,NEWS);
-DEFINE_TYPEPAGE(NewsHier,NEWS_HIER);
 DEFINE_TYPEPAGE(Group,GROUP);
 #undef DEFINE_TYPEPAGE
 
@@ -1085,13 +1114,8 @@ MWizard::GetPageById(MWizardPageId id)
          CREATE_PAGE(CreateFolder_MH);
          CREATE_PAGE(CreateFolder_Imap);
          CREATE_PAGE(CreateFolder_Pop3);
-         CREATE_PAGE(CreateFolder_ImapServer);
-         CREATE_PAGE(CreateFolder_NntpServer);
-         CREATE_PAGE(CreateFolder_ImapHier);
-         CREATE_PAGE(CreateFolder_NntpHier);
          CREATE_PAGE(CreateFolder_Nntp);
          CREATE_PAGE(CreateFolder_News);
-         CREATE_PAGE(CreateFolder_NewsHier);
          CREATE_PAGE(CreateFolder_Group);
 
          CREATE_PAGE(ImportFolders_Choice);
@@ -1137,36 +1161,55 @@ RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
       else // wizard completed successfully, create folder
       {
          CreateFolderWizard::FolderParams *params = wizard->GetParams();
+         FolderType type = (FolderType) params->m_FolderType;
+
          newfolder = CreateFolderTreeEntry(
-            parent, params->m_Name,
-            (FolderType) params->m_FolderType,
+            parent,
+            params->m_Name,
+            type,
             params->m_FolderFlags,
-            params->m_Path, TRUE);
-         if(newfolder)
+            params->m_Path,
+            TRUE // notify about folder creation
+         );
+
+         if ( newfolder )
          {
-            Profile *p =
-               Profile::CreateProfile(newfolder->GetName());
-            p->writeEntry(MP_FOLDER_PASSWORD, params->m_Password);
-            FolderType type = (FolderType) params->m_FolderType;
-            switch(type)
+            Profile_obj p(newfolder->GetFullName());
+
+            String serverKey;
+            switch ( type )
             {
-            case MF_IMAP:
-               p->writeEntry(MP_IMAPHOST, params->m_Server);
-            case MF_NNTP:
-               p->writeEntry(MP_NNTPHOST, params->m_Server);
-               break;
-            case MF_POP:
-               p->writeEntry(MP_POPHOST, params->m_Server);
-               break;
-            default:
-               ; // nothing
+               case MF_IMAP:
+                  serverKey = MP_IMAPHOST;
+                  break;
+
+               case MF_NNTP:
+                  serverKey = MP_NNTPHOST;
+                  break;
+
+               case MF_POP:
+                  serverKey = MP_POPHOST;
+                  break;
+
+               default:
+                  ; // nothing
             }
-            if(FolderTypeHasUserName(type))
+
+            if ( !serverKey.empty() )
+            {
+               p->writeEntry(serverKey, params->m_Server);
+            }
+
+            if ( FolderTypeHasUserName(type) )
             {
                p->writeEntry(MP_USERNAME, params->m_Login);
-               p->writeEntry(MP_FOLDER_PASSWORD, params->m_Password);
+
+               if ( !params->m_Password.empty() )
+               {
+                  p->writeEntry(MP_FOLDER_PASSWORD,
+                                strutil_encrypt(params->m_Password));
+               }
             }
-            p->DecRef();
          }
       }
    }
