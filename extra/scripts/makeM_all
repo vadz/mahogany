@@ -61,6 +61,8 @@ USESTABLE=no
 FTPLOCATION="karsten@ronnie.phy.hw.ac.uk:/usr/local/ftp/pub/Mahogany/daily"
 DOCSLOCATION="karsten@ronnie.phy.hw.ac.uk:/usr/local/ftp/pub/Mahogany/daily/Mdocs.tar.gz"
 
+# Need to hardwire this as we run it as root for rpm/deb generation:
+HOME=/home/karsten
 WWWDIR=$HOME/WWW/Mahogany/daily
 
 MNAME=mahogany
@@ -150,11 +152,6 @@ then
   USESTABLE=yes
   SCP=scp1
   MCONFOPT=--without-opt
-fi
-
-if [ x$DEBIAN = xyes ]
-then
-  DOINSTALL=no
 fi
 
 if [ ! -d $BUILDDIR ] ; then  mkdir $BUILDDIR ; fi
@@ -307,7 +304,7 @@ then
     echo "Build of $NAME-$VERSION failed."
   else
     if [ "$DOINSTALL" = "yes" ] ; then
-        (cd $NAME-$VERSION && super debi)
+	# do not install locally        (cd $NAME-$VERSION && super debi)
         $SCP mahogany_* $FTPLOCATION
         #mv ${NAME}_$VERSION*deb ${NAME}_$VERSION.tar.gz  /usr/local/ftp/pub/Mahogany/daily
         cd /usr/share/Mahogany/doc && \
@@ -343,7 +340,7 @@ else
 fi
 
 if [ "$DOINSTALL" = "yes" ] ; then
-	(cd $BUILDDIR; $SCP $NAME-* $FTPLOCATION) 
+	(cd $BUILDDIR; $SCP $NAME-*.gz $FTPLOCATION) 
 fi
 
 ############################
