@@ -140,7 +140,8 @@ export DESTDIR
 
 USESTABLE=no
 
-#FTPLOCATION="ballueder@shell1.sourceforge.net:/home/groups/ftp/pub/mahogany/daily/"
+FTPLOCATION="ballueder@mahogany.sourceforge.net:FTP/daily/"
+
 #WWWDOCLOCATION="ballueder@shell1.sourceforge.net:/home/groups/mahogany/htdocs/doc"
 FTPLOCATION="karsten@wxwindows.org:Mftp/daily/"
 LIBMALLOCATION="karsten@wxwindows.org:Mftp/Libraries/libmal.tar.gz"
