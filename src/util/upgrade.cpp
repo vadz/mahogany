@@ -125,7 +125,9 @@ struct InstallWizardData
    int    useDialUp; // initially -1
    bool   useOutbox;
    bool   useTrash;
+#ifdef USE_PISOCK
    bool   usePalmOs;
+#endif
 #ifdef USE_PYTHON
    bool   usePython;
 #endif
@@ -315,7 +317,9 @@ public:
          m_UsePythonCheckbox->SetValue(gs_installWizardData.usePython != 0);
 #endif
          m_UseDialUpCheckbox->SetValue(gs_installWizardData.useDialUp != 0);
+#ifdef USE_PISOCK
          m_UsePalmOsCheckbox->SetValue(gs_installWizardData.usePalmOs != 0);
+#endif
          m_UseOutboxCheckbox->SetValue(gs_installWizardData.useOutbox != 0);
          m_TrashCheckbox->SetValue(gs_installWizardData.useTrash != 0);
          m_CollectCheckbox->SetValue(gs_installWizardData.collectAllMail != 0);
@@ -327,7 +331,9 @@ public:
 #ifdef USE_PYTHON
          gs_installWizardData.usePython  = m_UsePythonCheckbox->GetValue();
 #endif
+#ifdef USE_PISOCK
          gs_installWizardData.usePalmOs  = m_UsePalmOsCheckbox->GetValue();
+#endif
          gs_installWizardData.useDialUp  = m_UseDialUpCheckbox->GetValue();
          gs_installWizardData.useOutbox  = m_UseOutboxCheckbox->GetValue();
          gs_installWizardData.useTrash   = m_TrashCheckbox->GetValue();
@@ -336,8 +342,10 @@ public:
       }
 private:
    wxCheckBox *m_CollectCheckbox, *m_TrashCheckbox,
-         *m_UseOutboxCheckbox, *m_UseDialUpCheckbox,
-         *m_UsePalmOsCheckbox
+         *m_UseOutboxCheckbox, *m_UseDialUpCheckbox
+#ifdef USE_PISOCK
+   , *m_UsePalmOsCheckbox
+#endif
 #ifdef USE_PYTHON
    , *m_UsePythonCheckbox
 #endif
@@ -730,15 +738,18 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
          ), m_UseOutboxCheckbox);
    m_UseDialUpCheckbox = panel->CreateCheckBox(labels[3], widthMax, text4);
 
+   wxControl *last = m_UseDialUpCheckbox;
+#ifdef USE_PISOCK
    wxStaticText *text5 = panel->CreateMessage(
       _(
          "\n"
          "Do you have a PalmOS based handheld computer?\n"
          "Mahogany has special support build in to connect\n"
          "to these."
-         ), m_UseDialUpCheckbox);
+         ), last);
    m_UsePalmOsCheckbox = panel->CreateCheckBox(labels[4], widthMax, text5);
-
+   last = m_UsePalmOsCheckbox;
+#endif
 #ifdef USE_PYTHON
    wxStaticText *text6 = panel->CreateMessage(
       _(
@@ -747,7 +758,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
          "the scripting language `Python'.\n"
          "This can be used to further customise and\n"
          "expand Mahogany.\n"
-         "Would you like to enable it?"), m_UsePalmOsCheckbox);
+         "Would you like to enable it?"), last);
    m_UsePythonCheckbox = panel->CreateCheckBox(labels[5], widthMax, text6);
 #endif
 
@@ -866,7 +877,9 @@ bool RunInstallWizard()
 #ifdef USE_PYTHON
    gs_installWizardData.usePython = FALSE;
 #endif
+#ifdef USE_PISOCK
    gs_installWizardData.usePalmOs = TRUE;
+#endif
 
    gs_installWizardData.email = READ_APPCONFIG(MP_RETURN_ADDRESS);
    if(gs_installWizardData.email.Length() == 0)
@@ -909,9 +922,11 @@ bool RunInstallWizard()
       profile->writeEntry(MP_NNTPHOST, gs_installWizardData.nntp);
 
       // load all modules by default:
+#ifdef USE_PISOCK
       if(gs_installWizardData.usePalmOs)
          profile->writeEntry(MP_MODULES,"Filters:PalmOS");
       else
+#endif
          profile->writeEntry(MP_MODULES,"Filters");
 
       CompleteConfiguration(gs_installWizardData);
@@ -1067,6 +1082,14 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
 #endif // platform
    }
 
+#ifdef USE_PYTHON
+   if(gs_installWizardData.usePalmOs)
+      profile->writeEntry(MP_USEPYTHON, 1l);
+   else
+      profile->writeEntry(MP_USEPYTHON, 0l);
+#endif
+   
+#ifdef USE_PISOCK
    // PalmOS-box
    if(gs_installWizardData.usePalmOs)
    {
@@ -1096,6 +1119,7 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
 
       // the rest is done in Update()
    }
+#endif
 }
 
 #endif // USE_WIZARD
