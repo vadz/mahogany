@@ -840,11 +840,10 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    wxHtmlWindow *bottom = new MyHtmlWindow(this,sp);
    sp->SplitHorizontally(top,bottom,200);
 
-
-   wxMemoryFSHandler::AddFile("splash.bmp", wxBITMAP(mahogany), wxBITMAP_TYPE_BMP);
+   wxMemoryFSHandler::AddFile("splash.png", wxBITMAP(mahogany), wxBITMAP_TYPE_PNG);
 
    top->SetPage("<body text=#ffffff bgcolor=#000000>"
-                "<center><img src=\"memory:splash.bmp\"></center><br>"
+                "<center><img src=\"memory:splash.png\"></center><br>"
                 "<center>Welcome to Mahogany!</center>");
 
    bottom->SetPage("<body text=#ffffff bgcolor=#000000>"
@@ -882,7 +881,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "<b>List of contributors:</b><p>"
                    "Karsten Ball&uuml;der (ballueder@gmx.net)<br>"
                    "Vadim Zeitlin (vadim@wxwindows.org)<br>"
-                   "Vaclav Slavik (slavik2@czn.cz)<br>"
+                   "Vaclav Slavik (vaclav@wxwindows.org)<br>"
                    "Daniel Seifert (dseifert@student.hu-berlin.de)<br>"
                    "<i>The wxWindows team</i><br><hr>"
                    "<p>This Product includes software developed and copyright "
@@ -900,7 +899,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
       );
    
 
-   wxMemoryFSHandler::RemoveFile("splash.bmp");
+   wxMemoryFSHandler::RemoveFile("splash.png");
 
    bottom->SetFocus();
    // start a timer which will close us (if not disabled)
