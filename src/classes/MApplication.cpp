@@ -1066,7 +1066,11 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
 
    const HeaderInfo *hi;
    Message *msg;
-   for(UIdType i = 0; i < hil->Count(); i++)
+   // We can't have a for loop over the HeaderInfoList as messages
+   // will be deleted from it just after sending (that is, inside
+   // the loop)
+   UIdType i = 0;
+   while (hil->Count() > 0)
    {
       hi = (*hil)[i];
       ASSERT(hi);
