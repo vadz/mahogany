@@ -245,11 +245,11 @@ SOURCE=.\src\classes\Moptions.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\classes\PathFinder.cpp
+SOURCE=.\src\classes\Mpers.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\classes\Mpers.cpp
+SOURCE=.\src\classes\PathFinder.cpp
 # End Source File
 # Begin Source File
 
@@ -1875,6 +1875,10 @@ SOURCE=.\src\modules\Filters.cpp
 # Begin Source File
 
 SOURCE=.\src\modules\HtmlViewer.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\modules\LayoutEditor.cpp
 # End Source File
 # Begin Source File
 
