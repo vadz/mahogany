@@ -2447,10 +2447,7 @@ void MessageView::OpenURL(const String& url, bool inNewWindow)
          // non-existing location!
          if ( lstat(lockfile.c_str(), &statbuf) == 0 )
          {
-            // we should quote the URL because otherwise Netscape barfs if it
-            // contains a comma
-            command << m_ProfileValues.browser
-                    << " -remote openURL('" << url << '\'';
+            command << m_ProfileValues.browser << " -remote openURL(" << url;
             if ( inNewWindow )
             {
                command << ",new-window)";
