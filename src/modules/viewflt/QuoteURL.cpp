@@ -324,7 +324,7 @@ CountQuoteLevel(const char *string,
          const char *nextnext = strchr(nextStart + 1 /* skip '\n' */, '\n');
          if ( !nextnext ||
                (!IsBlankLine(nextnext + 1) &&
-                strncmp(string, nextnext + 1, next - nextStart + 1) != 0) )
+                strncmp(string, nextnext + 1, next - nextStart) != 0) )
          {
             // the line after next doesn't start with the same prefix as
             // this one so it's improbable that the next line was garbled
