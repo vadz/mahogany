@@ -233,7 +233,18 @@ void TextViewerWindow::Clear()
 
 void TextViewerWindow::OnLinkEvent(wxTextUrlEvent& event)
 {
-   ProcessMouseEvent(event.GetMouseEvent(), event.GetURLStart());
+   wxMouseEvent eventMouse = event.GetMouseEvent();
+   wxEventType type = eventMouse.GetEventType();
+   if ( type == wxEVT_RIGHT_UP ||
+        type == wxEVT_LEFT_UP ||
+        type == wxEVT_LEFT_DCLICK )
+   {
+      ProcessMouseEvent(eventMouse, event.GetURLStart());
+   }
+   else
+   {
+      event.Skip();
+   }
 }
 
 #else // !__WXMSW__
