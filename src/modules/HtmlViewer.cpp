@@ -460,7 +460,8 @@ private:
 
 HtmlViewerWindow::HtmlViewerWindow(HtmlViewer *viewer, wxWindow *parent)
                 : wxHtmlWindow(parent, -1,
-                               wxDefaultPosition, wxDefaultSize,
+                               wxDefaultPosition,
+                               parent->GetClientSize(),
                                wxHW_SCROLLBAR_AUTO | wxBORDER_SIMPLE)
 {
    m_viewer = viewer;

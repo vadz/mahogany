@@ -354,7 +354,8 @@ END_EVENT_TABLE()
 
 TextViewerWindow::TextViewerWindow(TextViewer *viewer, wxWindow *parent)
                 : wxTextCtrl(parent, -1, _T(""),
-                             wxDefaultPosition, wxDefaultSize,
+                             wxDefaultPosition,
+                             parent->GetClientSize(),
                              wxTE_RICH2 |
 #ifdef USE_AUTO_URL_DETECTION
                              wxTE_AUTO_URL |
