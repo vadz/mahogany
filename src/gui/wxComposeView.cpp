@@ -2229,7 +2229,7 @@ wxComposeView::OnMenuCommand(int id)
          break;
 
       default:
-         if ( WXMENU_CONTAINS(LANG, id) )
+         if ( WXMENU_CONTAINS(LANG, id) && id != WXMENU_LANG_SET_DEFAULT )
          {
             SetEncoding(GetEncodingFromMenuCommand(id));
          }
