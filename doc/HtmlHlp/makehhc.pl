@@ -56,7 +56,7 @@ EOF
 			if ( $in_entry ) {
 				print OUT_HHC <<EOF
 \t<LI> <OBJECT type=\"text/sitemap\">
-<param name=\"Local\" value=\"Manual.html$1\">
+<param name=\"Local\" value=\"$1\">
 <param name=\"Name\" value=\"$2\">
 </OBJECT>
 EOF
