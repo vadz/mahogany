@@ -141,6 +141,9 @@ private:
    // the folder name separator
    char m_chDelimiter;
 
+   // the reference: the path under which we enumerate the folders
+   wxString m_reference;
+
    // the item which we're currently populating in the tree
    wxTreeItemId m_idParent;
 
@@ -360,21 +363,21 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
       m_nFoldersRetrieved = 0;
 
       // start from the folder being expanded
-      wxString relPath = GetRelativePath(m_idParent);
+      m_reference = GetRelativePath(m_idParent);
 
       // disable the tree (it will be reenabled in OnNoMoreFolders) to prevent
       // other events (possible as we will call wxYield())
       Disable();
-      
+
       wxBusyCursor bc;
 
       // now OnNewFolder() and OnNoMoreFolders() will be called
       (void)m_mailFolder->ListFolders
                           (
-                             "%",      // everything at this tree level
-                             FALSE,    // subscribed only?
-                             relPath,  // reference (path relative to the folder)
-                             this      // data to pass to the callback
+                             "%",         // everything at this tree level
+                             FALSE,       // subscribed only?
+                             m_reference, // path relative to the folder
+                             this         // data to pass to the callback
                           );
 
       // wait until the expansion ends
@@ -446,17 +449,18 @@ bool wxSubfoldersTree::OnMEvent(MEventData& event)
       wxString name;
       if ( MailFolderCC::SpecToFolderName(spec, m_folderType, &name) )
       {
-         // leave only the last componenet if we have a delimiter (the
-         // delimiter may be NUL for IMAP INBOX)
-         if ( !!name && chDelimiter )
-         {
-            name = name.AfterLast(chDelimiter);
-         }
+         // we have to deal here with broken IMAP servers too: it seems like
+         // some servers completely ignore the reference argument and will
+         // always send us the entire list of folders whatever we ask for
+         //
+         // so we ignore everything which doesn't start with the reference we
+         // gave and, if it does, leave only the part after the reference
 
-         // ListFolders() will also return the folder itself, ignore it
-         if ( !!name )
+         wxString relName;
+         if ( name.StartsWith(m_reference, &relName) && !!relName &&
+              (!m_chDelimiter || !strchr(relName, m_chDelimiter)) )
          {
-            wxTreeItemId id = OnNewFolder(name);
+            wxTreeItemId id = OnNewFolder(relName);
             if ( id.IsOk() )
             {
                long attr = result->GetAttributes();
@@ -663,7 +667,7 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
 #ifdef USE_SELECT_BUTTONS
    m_btnSelectAll = new wxButton(this, , _("&Select all"));
 #endif // USE_SELECT_BUTTONS
-                                 
+
    m_treectrl = new wxSubfoldersTree(this, folder, mailFolder);
    c = new wxLayoutConstraints;
    c->top.SameAs(m_box, wxTop, 4*LAYOUT_Y_MARGIN);
