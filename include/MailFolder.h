@@ -232,13 +232,13 @@ public:
    */
    virtual Message *GetMessage(unsigned long uid) = 0;
 
-   /** Delete a message.
+   /** Delete a message, really delete, not move to trash. UNSUPPORTED!
        @param uid the message uid
        @return true on success
    */
    virtual bool DeleteMessage(unsigned long uid) = 0;
 
-   /** UnDelete a message.
+   /** UnDelete a message.  UNSUPPORTED!
        @param uid the message uid
        @return true on success
    */
@@ -342,6 +342,12 @@ public:
    */
    virtual bool SaveMessagesToFile(const INTARRAY *selections,
                                    String const & fileName) = 0;
+
+   /** Mark messages as deleted or move them to trash.
+       @param messages pointer to an array holding the message numbers
+       @return true on success
+   */
+   virtual bool DeleteOrTrashMessages(const INTARRAY *messages) = 0;
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers

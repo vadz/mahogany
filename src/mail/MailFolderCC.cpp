@@ -611,11 +611,10 @@ MailFolderCC::OpenFolder(int typeAndFlags,
 #ifdef USE_SSL
    // SSL only for NNTP/IMAP/POP:
    if(((flags & MF_FLAGS_SSLAUTH) != 0)
-      && ! FolderTypeSupportsSSL(type))
+      && ! FolderTypeSupportsSSL( (FolderType) type))
    {
       flags ^= MF_FLAGS_SSLAUTH;
-      STATUSMESSAGE((_("Ignoring SSL authentication for folder '%s'"), 
-                     GetName().c_str()));
+      STATUSMESSAGE((_("Ignoring SSL authentication for folder '%s'"), name.c_str()));
    }
 #else
    if( (flags & MF_FLAGS_SSLAUTH) != 0)
@@ -668,6 +667,8 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    default:
       FAIL_MSG("Unsupported folder type.");
    }
+
+   mboxpath = strutil_expandfoldername(mboxpath, (FolderType) type);
 
    //FIXME: This should somehow be done in MailFolder.cc
    mf = FindFolder(mboxpath,login);

@@ -56,10 +56,6 @@ $Id$
 
 9		disabling "collect mail" in properties has no effect!
 
-9	KB	only Filters appear in list of statically linked
-                modules -why?
-
-	
 
 9	KB	wxLayout:
 		- delete in empty line (works at home...)
@@ -77,14 +73,13 @@ $Id$
 		- PalmOS: sync adb and check linkage on solaris
 		- use new config stuff / no direct gui calls (DEFERRED?)
 
-8	KB	integrate imap 4.7 and recently received patches
-
 	KB	properties/access shows wrong help
 	KB	properties/custom headers/more shows corrupted title
 
 	KB	wxMessageView: message/rfc822 display via MessageCC(string)
 
 1	KB	copyright display accept/cancel dialog at fist startup
+
 1	KB	SendMessageCC should not use profile but get settings
 		told, so sending from queue can use original settings
 		from folder - at least don't use profile at sending
@@ -94,6 +89,7 @@ $Id$
 
 3		new mail handling in MApplication should use
 		headerinfo for consistency (different from/reply-to lines)
+
 7	KB	selecting/deselecting only message in folder
 		--fixed?
 
@@ -637,5 +633,11 @@ fixed?	KB	only one new mail dialog at any given time, suppress
 
 6	KB	wxFolderView.cpp:123 in wxFolderListCtrl::ApplyOptions()
 		leaks memory - the font will be never freed.
+9	KB	only Filters appear in list of statically linked
+                modules -why?
+
+8	KB	integrate imap 4.7 and recently received patches
+
+	
 
 vi: set si ts=8 sw=8 noet nolist tw=80:

@@ -707,11 +707,11 @@ strutil_decrypt(const String &original)
 String
 strutil_expandfoldername(const String &name, FolderType folderType)
 {
-   ASSERT_MSG( folderType == MF_FILE || folderType == MF_MH,
-               "unsupported folder type in strutil_expandfoldername()" );
+   if( folderType != MF_FILE && folderType != MF_MH)
+       return name;
 
    if( strutil_isabsolutepath(name) )
-      return name;
+      return strutil_expandpath(name);
 
    if ( folderType == MF_FILE )
    {

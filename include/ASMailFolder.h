@@ -90,6 +90,7 @@ public:
       Op_Ping,
       Op_GetMessage,
       Op_AppendMessage,
+      Op_DeleteOrTrashMessages,
       Op_DeleteMessages,
       Op_UnDeleteMessages,
       Op_SaveMessages,
@@ -351,6 +352,12 @@ public:
    virtual Ticket SaveMessagesToFile(const INTARRAY *selections,
                                      String const & folderName,
                                      UserData ud = 0) = 0;
+
+   /** Mark messages as deleted or move them to trash.
+       @param messages pointer to an array holding the message numbers
+       @return ResultInt boolean
+   */
+   virtual Ticket DeleteOrTrashMessages(const INTARRAY *messages, UserData ud = 0) = 0;
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers

@@ -24,13 +24,7 @@
 #  undef USE_IPC  // it's in conflict with a standard Windows constant
 #endif   //Windows
 
-extern "C"
-{
-#  include <mail.h>
-#  include <osdep.h>
-#  include <rfc822.h>
-#  include <smtp.h>
-#  include <nntp.h>
+#include "Mcclient.h"
 
    // windows.h included from osdep.h #defines all these
 #  undef   DrawText
@@ -40,7 +34,6 @@ extern "C"
 #  undef   LoadAccelerators
 #  undef   GetClassInfo
 #  undef   StartDoc
-}
 
 #include <wx/config.h>
 #include <wx/help.h>

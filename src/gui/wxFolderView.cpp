@@ -236,7 +236,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       {
       case 'D':
          m_FolderView->GetTicketList()->Add(
-            m_FolderView->GetFolder()->DeleteMessages(&selections, m_FolderView));
+            m_FolderView->GetFolder()->DeleteOrTrashMessages(&selections, m_FolderView));
          break;
       case 'U':
          m_FolderView->GetTicketList()->Add(
@@ -251,7 +251,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       case 'S':
          m_FolderView->SaveMessagesToFile(selections);
          break;
-      case 'M':
+      case 'v': // moVe
          m_FolderView->SaveMessagesToFolder(selections, true);
          break;
       case 'G':
@@ -275,10 +275,10 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       case 'H':
          m_FolderView->m_MessagePreview->DoMenuCommand(WXMENU_MSG_TOGGLEHEADERS);
          break;
-      case 'V':
+      case ' ': // space:
          m_FolderView->PreviewMessage(focused_uid);
          break;
-      case ' ':
+      case 'm': // mark:
          // If shift is not used, deselect all items before having
          // wxListCtrl selects this one.
          if(!event.ShiftDown())
@@ -1062,7 +1062,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       break;
    case WXMENU_MSG_DELETE:
       GetSelections(selections);
-      m_TicketList->Add(m_ASMailFolder->DeleteMessages(&selections));
+      m_TicketList->Add(m_ASMailFolder->DeleteOrTrashMessages(&selections));
       break;
    case WXMENU_MSG_NEXT_UNREAD:
       m_FolderCtrl->SelectNextUnread();

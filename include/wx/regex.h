@@ -22,16 +22,21 @@ class wxRegExBase
    /// just like POSIX flags
    enum Flags
    {
-      RE_DEFAULT = -1,
-      RE_EXTENDED,
-      RE_ICASE,
-      RE_NOSUB,
-      RE_NEWLINE,
-      RE_NOTBOL,
-      RE_NOTEOL
+      RE_NONE     = 0,
+      RE_EXTENDED = 2,
+      RE_ICASE    = 4,
+      RE_NOSUB    = 8,
+      RE_NEWLINE  = 16,
+      RE_NOTBOL   = 32,
+      RE_NOTEOL   = 64
    };
    virtual void SetFlags(Flags flags) = 0;
-   virtual int Match(const wxString &str, Flags flags = RE_DEFAULT) = 0;
+   /** Matches the precompiled regular expression against a string.
+       @param Flags only allowed values: RE_NOTBOL/RE_NOTEOL
+       @return true if found
+   */
+   virtual int Match(const wxString &str, Flags flags = RE_NONE) const = 0;
+   virtual bool IsValid(void) const = 0;
 };
 
 #ifdef HAVE_POSIX_REGEX
@@ -42,13 +47,70 @@ class wxRegExPOSIX : public wxRegExBase
 {
  public:
    wxRegExPOSIX(const wxString &expr,
-                Flags flags = RE_DEFAULT);
-   virtual void SetFlags(Flags flags);
-   virtual int Match(const wxString &str, Flags flags = RE_DEFAULT);
-
-   void Compile(const wxString &expr)
+                Flags flags = RE_DEFAULT)
       {
-         regcomp(&m_RegEx, expr, GetCFlags());
+         SetFlags(flags);
+         m_Valid = Compile(expr);
+      }
+   virtual bool IsValid(void) const
+      {
+         return m_Valid;
+      }
+   
+   virtual void SetFlags(Flags flags)
+      {
+         m_Flags = flags;
+      }
+   virtual int Match(const wxString &str, Flags flags)
+      {
+         if( ! m_Valid )
+         {
+            wxLogError(_("Cannot match string with invalid regular expression."));
+            return FALSE;
+         }
+         if( (flags & (RE_NOTBOL|RE_NOTEOL)) != flags)
+         {
+            wxLogError(_("Regular expression matching called with illegal flags."));
+            return FALSE;
+         }
+         size_t nmatch;
+         regmatch_t *pmatch = NULL;
+         if( (GetCFlags() & RE_NOSUB) != 0)
+         {
+            nmatch = 256;
+            pmatch = new regmatch_t[nmatch];
+         }
+         else
+            nmatch = 0;
+         int myflags = 0;
+         
+         if(flags & RE_NOTBOL) myflags |= REG_NOTBOL;
+         if(flags & RE_NOTEOL) myflags |= REG_NOTEOL;
+         regcomp(m_RegEx, str.c_str(),
+                 nmatch, pmatch,
+                 myflags);
+         //FIXME: The list of matches is currently unused
+         if(pmatch) delete [] pmatch;
+      }
+
+
+   /** Compile string into regular expression.
+       @param expr string expression
+       @return true on success
+   */
+   bool Compile(const wxString &expr)
+      {
+         int errorcode = regcomp(&m_RegEx, expr, GetCFlags());
+         if(errorcode)
+         {
+            char buffer[256];
+            regerrror(errorcode, &m_RegEx, buffer, 256);
+            wxLogError(_("Regular expression syntax error: '%s'"),
+                       buffer);
+            return FALSE;
+         }
+         else
+            return TRUE;
       }
 private:
    int GetCFLags(void)
@@ -60,6 +122,7 @@ private:
          if( m_Flags & RE_NEWLINE ) flags |= REG_NEWLINE;
          return flags;
       }
+   bool     m_Valid;
    int      m_Flags;
    regex_t  m_RegEx;
 };

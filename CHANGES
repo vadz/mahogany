@@ -1,5 +1,9 @@
 (next release) on (date of next release)
 
+05.02.00 KB: Folderlisting now uses colour highlighting.
+             Imap4.7a integrated and patches simplified.
+             POP3 headers cache patch added
+             SSL support added, using OpenSSL
 27.01.00 KB: Filters dialog changes, creates working (?) Filter rules now
              hidden folder flag added to config dialog,
              NewMail dialog changes

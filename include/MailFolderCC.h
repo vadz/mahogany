@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MailFolderCC class: handling of mail folders through C-Client lib*
  *                                                                  *
- * (C) 1997,1998 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *
@@ -24,16 +24,7 @@
 #   include  "MObject.h"
 
 // includes for c-client library
-extern "C"
-{
-#     include <stdio.h>
-#     include <mail.h>
-#     include <osdep.h>
-#     include <rfc822.h>
-#     include <smtp.h>
-#     include <nntp.h>
-#     include <misc.h>
-}
+#include "Mcclient.h"
 #endif
 
 #include  "MailFolderCmn.h"

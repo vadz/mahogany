@@ -1,5 +1,5 @@
-#This file was created by <karsten> Tue Jan 18 11:44:44 2000
-#LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
+#This file was created by <karsten> Sat Feb  5 17:57:23 2000
+#LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
 \begin_preamble
@@ -1308,12 +1308,81 @@ If selected, Mahogany will attempt to open the folder at program start and
 
 
 \series bold 
+Force re-open on ping
+\series default 
+
+\newline 
+This forces Mahogany to close and re-open the mailbox when trying to update
+ the information about it.
+ This is required for some POP servers to correctly detect nw mail.
+ Usually this should not be needed.
+\layout Itemize
+
+
+\series bold 
+Use Secure Sockets Layer (SSL)
+\series default 
+
+\newline 
+This option is not always available, as the use of strong cryptographie
+ is outlawed in some dictatorical countries.
+ If your copy of Mahogany supports SSL, tick this box to access a secure
+ IMAP/POP/NNTP server.
+ Must be supported by the server side, too.
+ It will ensure that your communication with the server is encrypted and
+ safe from eavesdropping.
+\layout Itemize
+
+
+\series bold 
 Anonymous access
 \series default 
 
 \newline 
 This marks the folder as anonymous, such as for anonymous IMAP access, telling
  Mahogany that no user name or password are required to access it.
+\layout Itemize
+
+
+\series bold 
+Is directory
+\series default 
+
+\newline 
+Select this if the mailbox represents not a mailbox or newsgroup but a hierarchy
+ on an IMAP or NNTP server.
+ E.g.
+ comp.os.linux.announce would be a normal newsgroup (unticked), while comp.os.linux
+ would be a new hierarchy (ticket).
+\layout Itemize
+
+
+\series bold 
+Hide folder in tree
+\series default 
+
+\newline 
+If you do not want this mailbox to be shown in the folder tree (unless you
+ select the option to show all hidden folders), tick this box.
+\layout Itemize
+
+
+\series bold 
+Folder subtype
+\series default 
+
+\newline 
+Here you can select some sub-type, e.g.
+ different mailbox formats.
+\layout Itemize
+
+
+\series bold 
+Icon for this folder
+\series default 
+
+\newline 
+Allows you to set a different icon for the mailbox.
 \layout Subsection
 
 Folder Views_2002_
@@ -1371,7 +1440,7 @@ When the top window, the list of messages, is active, certain keyboard bindings
  are active, the following keys are recognized:
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol4
+multicol5
 15 2 0 0 -1 -1 -1 -1
 1 1 0 0
 1 0 0 0
@@ -1388,53 +1457,53 @@ multicol4
 0 1 0 0
 0 1 0 0
 0 1 0 0
-8 1 0 
-2 1 1 
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 1 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 2 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
+8 1 0 "" ""
+2 1 1 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 1 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
 
 English
 \newline 
 Action performed
 \newline 
-SPACE
+M
 \newline 
-select/deselect message under cursor
+mark/unmark message under cursor
 \newline 
 
 \newline 
 If message are to be previewed on selection, this will also preview the
  message.
 \newline 
-V
+SPACE
 \newline 
 preview message under cursor
 \newline 
@@ -1454,7 +1523,7 @@ C
 \newline 
 copy marked messages to another folder
 \newline 
-M
+V
 \newline 
 move marked messages to another folder
 \newline 
@@ -1752,7 +1821,7 @@ BCC means Blind Carbon Copy - like CC:, copies will be sent to the addresses
 Key Bindings in the Message Editor
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol4
+multicol5
 13 2 0 0 -1 -1 -1 -1
 1 1 0 0
 1 0 0 0
@@ -1767,34 +1836,34 @@ multicol4
 0 1 0 0
 0 1 0 0
 0 1 0 0
-8 1 0 
-2 1 1 
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 2 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
+8 1 0 "" ""
+2 1 1 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
 
 Key-Combination
 \newline 
@@ -4014,7 +4083,7 @@ import
 List of Callbacks
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol4
+multicol5
 11 5 0 0 -1 -1 -1 -1
 1 1 0 0
 1 0 0 0
@@ -4027,66 +4096,66 @@ multicol4
 0 1 0 0
 0 0 0 0
 0 1 0 0
-2 1 0 
-8 1 0 
-2 1 0 
-2 1 0 
-2 1 1 
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 2 1 0 0 0 0
-0 2 1 0 0 0 0
-0 8 1 0 0 0 0
-0 2 1 0 0 0 0
-0 2 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
+2 1 0 "" ""
+8 1 0 "" ""
+2 1 0 "" ""
+2 1 0 "" ""
+2 1 1 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
 
 Callback Name
 \newline 

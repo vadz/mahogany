@@ -232,6 +232,27 @@ protected:
    bool m_Set;
 };
 
+class MT_DeleteOrTrashMessages : public MailThreadSeq
+{
+public:
+   MT_DeleteOrTrashMessages(ASMailFolder *mf, UserData ud,
+                            const INTARRAY *sequence)
+      : MailThreadSeq(mf, ud, sequence)
+      {
+      }
+   virtual void WorkFunction(void)
+      {
+         m_MailFolder->DeleteOrTrashMessages(m_Seq);
+         // we don´t send a result event, so we need to delete it:
+         delete m_Seq;
+#ifdef DEBUG
+         m_Seq = NULL;
+#endif
+      }
+protected:
+   String m_Sequence;
+};
+
 class MT_DeleteMessages : public MailThreadSeq
 {
 public:
@@ -696,6 +717,15 @@ public:
                                      isProfile, updateCount))->Start();
       }
 
+   /** Mark messages as deleted or move them to trash.
+       @param messages pointer to an array holding the message numbers
+       @return ResultInt boolean
+   */
+   virtual Ticket DeleteOrTrashMessages(const INTARRAY *messages,
+                                        UserData ud)
+      {
+         return (new MT_DeleteOrTrashMessages(this, ud, messages))->Start();
+      }
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean

@@ -1172,7 +1172,7 @@ MailFolderCmn::DeleteMessage(unsigned long uid)
 
 
 bool
-MailFolderCmn::DeleteMessages(const INTARRAY *selections)
+MailFolderCmn::DeleteOrTrashMessages(const INTARRAY *selections)
 {
    bool reallyDelete = ! READ_CONFIG(GetProfile(), MP_USE_TRASH_FOLDER);
    // If we are the trash folder, we *really* delete.
@@ -1194,7 +1194,13 @@ MailFolderCmn::DeleteMessages(const INTARRAY *selections)
       return rc;
    }
    else
-      return SetSequenceFlag(GetSequenceString(selections), MailFolder::MSG_STAT_DELETED);
+      return DeleteMessages(selections);
+}
+
+bool
+MailFolderCmn::DeleteMessages(const INTARRAY *selections)
+{
+   return SetSequenceFlag(GetSequenceString(selections), MailFolder::MSG_STAT_DELETED);
 }
 
 int

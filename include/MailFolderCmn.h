@@ -50,6 +50,12 @@ public:
    */
    virtual bool SaveMessagesToFile(const INTARRAY *selections,
                                    String const & fileName);
+   
+   /** Mark messages as deleted or move them to trash.
+       @param messages pointer to an array holding the message numbers
+       @return true on success
+   */
+   virtual bool DeleteOrTrashMessages(const INTARRAY *messages);
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers

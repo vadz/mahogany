@@ -30,11 +30,7 @@
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
 
-   extern "C"
-   {
-#     include <mail.h>
-#     include <osdep.h>  // for sysinbox() &c
-   }
+#  include "Mcclient.h"
 
 #  include <wx/log.h>
 #  include <wx/config.h>
@@ -221,6 +217,7 @@ void wxMLogWindow::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
    }
 }
 
+#if 0
 // ----------------------------------------------------------------------------
 // wxMStatusBar
 // ----------------------------------------------------------------------------
@@ -271,6 +268,7 @@ private:
    /// are we online?
    bool m_isOnline;
 };
+#endif
 
 // ----------------------------------------------------------------------------
 // wxMApp
@@ -953,12 +951,6 @@ wxMApp::ThrEnterLeave(bool enter, SectionId what)
 }
 #endif
 
-wxStatusBar *
-wxMApp::CreateStatusBar(wxWindow *parent)
-{
-   return new wxMStatusBar(parent); //3, wxST_SIZEGRIP, 12345); // 3 fields, id 12345 fo
-}
-
 wxIcon
 wxMApp::GetStdIcon(int which) const
 {
@@ -1016,11 +1008,12 @@ void
 wxMApp::UpdateOnlineDisplay(void)
 {
    // Can be called during  application startup, in this case do
-   // nothing:
+   // nothing: 
    if(! m_topLevelFrame)
-      return;
-   
+      return; 
+   wxStatusBar *sbar = m_topLevelFrame->GetStatusBar();
    wxMenuBar *mbar = m_topLevelFrame->GetMenuBar();
+   ASSERT(sbar);
    ASSERT(mbar);
 
    if(! m_DialupSupport)
@@ -1043,10 +1036,9 @@ wxMApp::UpdateOnlineDisplay(void)
          mbar->Enable((int)WXMENU_FILE_NET_OFF, FALSE);
 //    m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, m_DialupSupport);
       }
-#ifdef USE_STATUSBARICON
-      wxMStatusBar *sbar = (wxMStatusBar *) m_topLevelFrame->GetStatusBar();
-      sbar->UpdateOnlineStatus(true, online);
-#endif
+      int field = GetStatusField(SF_ONLINE);
+      UpdateStatusBar(field+1, TRUE);
+      sbar->SetStatusText(online ? _("Online"):_("Offline"), field);
    }
 }
 
@@ -1067,7 +1059,10 @@ wxMApp::UpdateStatusBar(int nfields, bool isminimum) const
       n = sbar->GetFieldsCount();
 
    int widths[SF_MAXIMUM];
-   widths[0] = -1; //flexible
+   widths[0] = 100; //flexible
+   widths[1] = 10; // small empty field
+   
+#if 0
    if(m_DialupSupport)
    {
       if(statusIconWidth == -1)
@@ -1078,9 +1073,12 @@ wxMApp::UpdateStatusBar(int nfields, bool isminimum) const
       }
       widths[GetStatusField(SF_ONLINE)] = statusIconWidth;
    }
+#endif
+   if(m_DialupSupport)
+      widths[GetStatusField(SF_ONLINE)] = 70;
    if(m_UseOutbox)
       widths[GetStatusField(SF_OUTBOX)] = 100;
-   sbar->SetFieldsCount(n, widths);
+   //FIXME: wxGTK crashes after calling this repeatedly sbar->SetFieldsCount(n, widths);
 }
 
 void

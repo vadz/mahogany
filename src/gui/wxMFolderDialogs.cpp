@@ -973,7 +973,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
                                   m_forceReOpen);
    wxControl *lastCtrl = m_isAnonymous;
 #ifdef USE_SSL
-   m_useSSL = CreateCheckBox(labels[Label_useSSL], widthMax,
+   m_useSSL = CreateCheckBox(labels[Label_UseSSL], widthMax,
                              lastCtrl);
    lastCtrl = m_useSSL;
 #endif
@@ -1243,7 +1243,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
       // enable all fields for these folders (see the message above)
       enableAnonymous = enableLogin = true;
 #ifdef USE_SSL
-      bool enableSSL = false;
+      enableSSL = false;
 #endif
    }
    else
@@ -1259,7 +1259,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
       enableLogin = hasPassword && !isAnon;
 
 #ifdef USE_SSL
-      bool enableSSL = FolderTypeSupportsSSL(m_folderType);
+      enableSSL = FolderTypeSupportsSSL(m_folderType);
 #endif
 
    }
