@@ -191,7 +191,7 @@ protected:
    void PreviewMessage(long uid);
 
    /// select the first interesting message in the folder
-   void SelectInitialMessage(const HeaderInfoList_obj& hil);
+   void SelectInitialMessage();
 
    /// select the next unread message, return false if no more
    bool SelectNextUnread();
