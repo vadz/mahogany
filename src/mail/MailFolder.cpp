@@ -633,10 +633,7 @@ MailFolderCmn::RealDecRef()
 /* static */
 bool MailFolder::CanExit(String *which)
 {
-   bool rc = MailFolderCC::CanExit(which);
-   if(rc)
-      CleanStatic();
-   return rc;
+   return MailFolderCC::CanExit(which);
 }
 
 /* static */
