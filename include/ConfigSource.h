@@ -407,9 +407,10 @@ public:
 /**
    This macro is used to create ConfigSourceFactoryModule-derived classes.
 
-   The implementation of classes deriving from ConfigSourceFactoryModule is
-   straightforward: we just have to create an object of the specified class in
-   Create() and return it so we provide a macro to automate this.
+   For each new ConfigSource implementation you write you also have to write a
+   factory fopr creating it and, if you want to make it a module, a
+   MModule-derived class as well. Doing this is completely straightforward and
+   so we provide a macro to automate this.
 
    This macro relies on cname having a ctor taking the same parameters as our
    Create().
@@ -421,9 +422,20 @@ public:
    @param cpyright the module author/copyright string
  */
 #define IMPLEMENT_CONFIG_SOURCE(cname, type, desc, cpyright)               \
-   class cname##Factory : public ConfigSourceFactoryModule                 \
+   class cname##Factory : public ConfigSourceFactory                       \
    {                                                                       \
    public:                                                                 \
+      cname##Factory(MModule *module)                                      \
+      {                                                                    \
+         m_module = module;                                                \
+      }                                                                    \
+                                                                           \
+      virtual ~cname##Factory()                                            \
+      {                                                                    \
+         if ( m_module )                                                   \
+            m_module->DecRef();                                            \
+      }                                                                    \
+                                                                           \
       virtual const char *GetType() const { return type; }                 \
                                                                            \
       virtual ConfigSource *Create(const ConfigSource& config,             \
@@ -439,21 +451,35 @@ public:
          return configNew;                                                 \
       }                                                                    \
                                                                            \
+   private:                                                                \
+      MModule *m_module;                                                   \
+   };                                                                      \
+                                                                           \
+   class cname##FactoryModule : public ConfigSourceFactoryModule           \
+   {                                                                       \
+   public:                                                                 \
+      virtual ConfigSourceFactory *CreateFactory()                         \
+      {                                                                    \
+         return new cname##Factory(this);                                  \
+      }                                                                    \
+                                                                           \
       MMODULE_DEFINE();                                                    \
       DEFAULT_ENTRY_FUNC;                                                  \
    };                                                                      \
-   MMODULE_BEGIN_IMPLEMENT(cname##Factory, #cname,                         \
+                                                                           \
+   MMODULE_BEGIN_IMPLEMENT(cname##FactoryModule, #cname,                   \
                            CONFIG_SOURCE_INTERFACE, desc, "1.00")          \
       MMODULE_PROP("author", cpyright)                                     \
-   MMODULE_END_IMPLEMENT(cname##Factory)                                   \
-   MModule *cname##Factory::Init(int /* version_major */,                  \
-                                 int /* version_minor */,                  \
-                                 int /* version_release */,                \
-                                 MInterface * /* minterface */,            \
-                                 int * /* errorCode */)                    \
+   MMODULE_END_IMPLEMENT(cname##FactoryModule)                             \
+   MModule *                                                               \
+   cname##FactoryModule::Init(int /* version_major */,                     \
+                              int /* version_minor */,                     \
+                              int /* version_release */,                   \
+                              MInterface * /* minterface */,               \
+                              int * /* errorCode */)                       \
    {                                                                       \
-      return new cname##Factory();                                         \
-   }
+      return new cname##FactoryModule();                                   \
+   }                                                                       \
 
 #endif // _M_CONFIGSOURCE_H_
 
