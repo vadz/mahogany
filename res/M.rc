@@ -44,7 +44,7 @@ video		BITMAP	"video.bmp"
 unknown 	ICON	"unknown.ico"
 
 // toolbar bitmaps (32x32)
-tb_adr_book	BITMAP	"tb_adr_book.bmp"
+tb_adrbook	BITMAP	"tb_adrbook.bmp"
 tb_book_open	BITMAP	"tb_book_open.bmp"
 tb_open		BITMAP	"tb_open.bmp"
 tb_attach	BITMAP	"tb_attach.bmp"
