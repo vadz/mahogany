@@ -231,7 +231,6 @@ enum ConfigFields
    ConfigField_UseTrash,
    ConfigField_TrashName,
    ConfigField_FoldersFileFormat,
-   ConfigField_FolderTreeBgColour,
    ConfigField_StatusFormatHelp,
    ConfigField_StatusFormat_StatusBar,
    ConfigField_StatusFormat_TitleBar,
@@ -338,6 +337,7 @@ enum ConfigFields
 
    // folder tree options
    ConfigField_FolderTreeFirst = ConfigField_FolderViewLast,
+   ConfigField_FolderTreeBgColour,
    ConfigField_FolderTreeFormatHelp,
    ConfigField_FolderTreeFormat,
    ConfigField_FolderTreePropagateHelp,
@@ -905,14 +905,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Trash folder name"), Field_Folder, ConfigField_UseTrash},
    { gettext_noop("Default format for mailbox files"
       ":Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)"),
-     Field_Combo | Field_AppWide, -1},
-   { gettext_noop("Folder tree &background"), Field_Color | Field_AppWide, -1 },
+     Field_Combo | Field_AppWide | Field_Advanced, -1},
    { gettext_noop("You can specify the format for the strings shown in the\n"
                   "status and title bars. Use %f for the folder name and\n"
                   "%t, %r and %n for the number of all, recent and new\n"
-                  "messages respectively."), Field_Message, -1 },
-   { gettext_noop("Status &bar format"), Field_Text, -1 },
-   { gettext_noop("T&itle bar format"), Field_Text, -1 },
+                  "messages respectively."), Field_Message | Field_Advanced, -1 },
+   { gettext_noop("Status &bar format"), Field_Text | Field_Advanced, -1 },
+   { gettext_noop("T&itle bar format"), Field_Text | Field_Advanced, -1 },
 
 #ifdef USE_PYTHON
    // python
@@ -1037,6 +1036,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Status bar line format"),      Field_Text,    ConfigField_FolderViewUpdateStatus                     },
 
    // folder tree
+   { gettext_noop("Tree &background colour:"), Field_Color, -1 },
    { gettext_noop("Mahogany can show the number of messages in the folder\n"
                   "directly in the folder tree. You may wish to disable\n"
                   "this feature to speed it up slightly by leaving the text\n"
@@ -1044,12 +1044,12 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "to be replaced with the total number of messages and the\n"
                   "number of unseen messages respectively."),
                   Field_Message, -1 },
-   { gettext_noop("Folder tree format:"), Field_Text | Field_Restart, -1 },
+   { gettext_noop("Folder tree &format:"), Field_Text | Field_Restart, -1 },
    { gettext_noop("By default, if the folder has new/recent/unread messages\n"
                   "its parent is shown in the same state as well. Disable\n"
                   "it below if you don't like it (this makes sense mostly\n"
                   "for folders such as \"Trash\" or \"Sent Mail\")."), Field_Message, -1 },
-   { gettext_noop("Parent shows status"), Field_Bool, -1 },
+   { gettext_noop("&Parent shows status:"), Field_Bool, -1 },
 
    // adb: autocollect and bbdb options
    { gettext_noop("Mahogany may automatically remember all e-mail addresses in the messages you\n"
@@ -1303,7 +1303,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_USE_TRASH_FOLDER),
    CONFIG_ENTRY(MP_TRASH_FOLDER),
    CONFIG_ENTRY(MP_FOLDER_FILE_DRIVER),
-   CONFIG_ENTRY(MP_FOLDER_BGCOLOUR),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FOLDERSTATUS_STATBAR),
    CONFIG_ENTRY(MP_FOLDERSTATUS_TITLEBAR),
@@ -1402,6 +1401,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FVIEW_STATUS_FMT),
 
    // folder tree
+   CONFIG_ENTRY(MP_FOLDER_BGCOLOUR),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FTREE_FORMAT),
    CONFIG_NONE(),

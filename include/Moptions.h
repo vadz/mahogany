@@ -222,7 +222,7 @@ extern const MOption MP_LAST_CREATED_FOLDER_TYPE;
 extern const MOption MP_FILTER_RULE;
 extern const MOption MP_FOLDER_FILTERS;
 extern const MOption MP_FOLDER_FILE_DRIVER;
-extern const MOption MP_FOLDER_BGCOLOUR;
+
 extern const MOption MP_MVIEW_TITLE_FMT;
 extern const MOption MP_MVIEW_FONT;
 extern const MOption MP_MVIEW_FONT_SIZE;
@@ -239,6 +239,9 @@ extern const MOption MP_MVIEW_QUOTED_MAXWHITESPACE;
 extern const MOption MP_MVIEW_QUOTED_MAXALPHA;
 extern const MOption MP_MVIEW_HEADER_NAMES_COLOUR;
 extern const MOption MP_MVIEW_HEADER_VALUES_COLOUR;
+extern const MOption MP_HIGHLIGHT_URLS;
+
+// folder view
 extern const MOption MP_FVIEW_FONT;
 extern const MOption MP_FVIEW_FONT_SIZE;
 extern const MOption MP_FVIEW_NAMES_ONLY;
@@ -251,13 +254,19 @@ extern const MOption MP_FVIEW_UNREADCOLOUR;
 extern const MOption MP_FVIEW_FLAGGEDCOLOUR;
 extern const MOption MP_FVIEW_STATUS_UPDATE;
 extern const MOption MP_FVIEW_STATUS_FMT;
+
+// folder tree
+extern const MOption MP_FOLDER_BGCOLOUR;
 extern const MOption MP_FTREE_FORMAT;
 extern const MOption MP_FTREE_PROPAGATE;
+
+// composer
 extern const MOption MP_CVIEW_FONT;
 extern const MOption MP_CVIEW_FONT_SIZE;
 extern const MOption MP_CVIEW_FGCOLOUR;
 extern const MOption MP_CVIEW_BGCOLOUR;
-extern const MOption MP_HIGHLIGHT_URLS;
+
+// sorting/threading
 extern const MOption MP_MSGS_SORTBY;
 extern const MOption MP_MSGS_RESORT_ON_CHANGE;
 extern const MOption MP_MSGS_USE_THREADING;
@@ -772,8 +781,6 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_FOLDER_FILTERS_NAME   "Filters"
 /// the default folder file format
 #define MP_FOLDER_FILE_DRIVER_NAME   "MailboxFileFormat"
-/// the background colour for the folder tree
-#define MP_FOLDER_BGCOLOUR_NAME "FTreeBgColour"
 /**@name  Font settings for message view */
 //@{
 /// message view title
@@ -844,6 +851,8 @@ extern const MOption MP_AWAY_STATUS;
 //@}
 /**@name  Font settings for folder tree */
 //@{
+/// the background colour for the folder tree
+#define MP_FOLDER_BGCOLOUR_NAME "FTreeBgColour"
 /// format for the folder tree entries
 #define MP_FTREE_FORMAT_NAME "FTreeFormat"
 /// reflect the folder status in its parent
@@ -1608,8 +1617,6 @@ extern const MOption MP_AWAY_STATUS;
 /// the default folder file format
 #define MP_FOLDER_FILE_DRIVER_DEFVAL 0L
 /* format: mbx:unix:mmdf:tenex defined in MailFolderCC.cpp */
-/// the background colour for the folder tree
-#define MP_FOLDER_BGCOLOUR_DEFVAL ""
 /**@name  Font settings for message view */
 //@{
 /// message view title
@@ -1675,6 +1682,8 @@ extern const MOption MP_AWAY_STATUS;
 //@}
 /**@name  Font settings for folder tree */
 //@{
+/// the background colour for the folder tree
+#define MP_FOLDER_BGCOLOUR_DEFVAL ""
 /// format for the folder tree entries
 #define MP_FTREE_FORMAT_DEFVAL " (%t, %u)"
 /// reflect the folder status in its parent?
