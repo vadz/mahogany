@@ -544,6 +544,8 @@ EditorContentPart *LayoutEditor::GetNextPart()
                }
                else // another object type
                {
+                  delete exp;
+
                   // skip return at the end of the loop
                   continue;
                }
