@@ -230,6 +230,9 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_EDIT_ADB,      gettext_noop("&Address books..."), gettext_noop("Edit the address book(s)") },
    { WXMENU_EDIT_PREF,     gettext_noop("&Preferences..."),   gettext_noop("Change options")           },
    { WXMENU_SEPARATOR,     "",                  ""                         },
+   { WXMENU_EDIT_RESTORE_PREF,
+                           gettext_noop("&Restore defaults..."), gettext_noop("Restore default options values") },
+   { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_EDIT_SAVE_PREF,gettext_noop("&Save Preferences"), gettext_noop("Save options")             },
 
    // msg

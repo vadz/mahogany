@@ -13,8 +13,9 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
 #ifdef __GNUG__
-#pragma implementation "wxIconManager.h"
+   #pragma implementation "wxIconManager.h"
 #endif
 
 #include "Mpch.h"
@@ -139,7 +140,8 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
 #ifdef DEBUG
       wxLogDebug("Checking for natively supported image formats:");
       wxString formats;
-#endif
+#endif // DEBUG
+
       ms_NumOfHandlers = 0;
       for(int i = 0; m_wxBitmapHandlers[i] != -1; i++)
          if(wxImage::FindHandler( m_wxBitmapHandlers[i] ) == NULL)
@@ -149,10 +151,13 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
             ms_NumOfHandlers ++;
 #ifdef DEBUG
             formats << HandlerNames[i] << ',';
+#endif // DEBUG
          }
+
+#ifdef DEBUG
       formats << "xpm";
       wxLogDebug(formats);
-#endif
+#endif // DEBUG
       m_knowHandlers = true;
    }
 

@@ -278,6 +278,10 @@ wxMFrame::OnMenuCommand(int id)
       ShowOptionsDialog(this);
       break;
 
+   case WXMENU_EDIT_RESTORE_PREF:
+      (void)ShowRestoreDefaultsDialog(mApplication->GetProfile(), this);
+      break;
+
    case WXMENU_EDIT_SAVE_PREF:
       {
          // FIXME any proper way to flush all profiles at once?

@@ -17,6 +17,7 @@
 // -----------------------------------------------------------------------------
 // forward declarations
 // -----------------------------------------------------------------------------
+
 class wxPNotebook;
 class wxFrame;
 class wxControl;
@@ -25,34 +26,74 @@ class wxCheckBox;
 class wxFileBrowseButton;
 class wxBrowseButton;
 class wxStaticText;
+class wxStaticBox;
+class wxCheckListBox;
 class wxRadioBox;
 class wxComboBox;
 
 #undef CreateButton
 
-// -----------------------------------------------------------------------------
-// classes
-// -----------------------------------------------------------------------------
+// =============================================================================
+// GUI classes declared in this file
+// =============================================================================
 
-// a notebook with images
-class wxNotebookWithImages : public wxPNotebook
+// ----------------------------------------------------------------------------
+// a stand-in for the wxPDialog class which is not written yet...
+// ----------------------------------------------------------------------------
+
+class wxPDialog : public wxDialog
 {
 public:
-   // configPath is used to store the last active page, aszImages is the NULL
-   // terminated array of the icon names (image size should be 32x32)
-   wxNotebookWithImages(const wxString& configPath,
-                        wxWindow *parent,
-                        const char *aszImages[]);
+   // ctor restores position/size
+   wxPDialog(const wxString& profileKey,
+             wxWindow *parent,
+             const wxString& title,
+             long style = 0);
 
-   virtual ~wxNotebookWithImages();
+   // dtor saves position/size
+   virtual ~wxPDialog();
+
+   bool LastSizeRestored() const { return m_didRestoreSize; }
+
+private:
+   wxString m_profileKey;
+   bool     m_didRestoreSize;
 };
 
+// ----------------------------------------------------------------------------
+// a class containing common code for dialog layout
+// ----------------------------------------------------------------------------
 
+class wxManuallyLaidOutDialog : public wxPDialog
+{
+public:
+   // this class should have default ctor for the derived class convenience,
+   // although this makes absolutely no sense for us
+   wxManuallyLaidOutDialog(wxWindow *parent = NULL,
+                           const wxString& title = "",
+                           const wxString& profileKey = "");
+
+protected:
+   // set the diaqlog size if it wasn't restored from profile
+   void SetDefaultSize(int width, int height,
+                       bool setAsMinimalSizeToo = TRUE);
+
+   // create Ok and Cancel buttons and a static box around all other ctrls
+   wxStaticBox *CreateStdButtonsAndBox(const wxString& boxTitle);
+
+   // these variables are set in the ctor and are the basic measurement unites
+   // for us (we allow direct access to them for derived classes for
+   // compatibility with existing code)
+   int hBtn, wBtn;
+};
+
+// ----------------------------------------------------------------------------
 // a dialog which contains a notebook with the standard Ok/Cancel/Apply buttons
 // below it and, optionally, some extra controls above/below the notebook. For
 // example, options dialog and folder creation dialogs in M derive from this
 // class.
-class wxNotebookDialog : public wxDialog
+// ----------------------------------------------------------------------------
+class wxNotebookDialog : public wxManuallyLaidOutDialog
 {
 public:
    // ctor
@@ -103,7 +144,7 @@ public:
    void OnCancel(wxCommandEvent& event);
 
    // unimplemented default ctor for DECLARE_DYNAMIC_CLASS
-   wxNotebookDialog() { }
+   wxNotebookDialog() { wxFAIL_MSG("unaccessible"); }
 
    // disable or reenable Ok and Apply buttons
    void EnableButtons(bool enable)
@@ -137,9 +178,41 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
+// ----------------------------------------------------------------------------
+// a base class for all dialogs which are used to edit the profile settings: it
+// adds the member profile variable and the "hasChanges" flag. As it derives
+// from wxPDialog, it saves and restores its position.
+// ----------------------------------------------------------------------------
+
+class wxProfileSettingsEditDialog : public wxManuallyLaidOutDialog
+{
+public:
+   wxProfileSettingsEditDialog(ProfileBase *profile,
+                               const wxString& profileKey,
+                               wxWindow *parent,
+                               const wxString& title)
+      : wxManuallyLaidOutDialog(parent, title, profileKey)
+   {
+      m_profile = profile;
+
+      m_hasChanges = FALSE;
+   }
+
+   ProfileBase *GetProfile() const { return m_profile; }
+
+   bool HasChanges() const { return m_hasChanges; }
+   void MarkDirty() { m_hasChanges = TRUE; }
+
+protected:
+   ProfileBase *m_profile;
+   bool         m_hasChanges;
+};
+
+// ----------------------------------------------------------------------------
 // a base class for notebook pages which provides some handy functions for
 // layin out the controls inside the page. It is well suited for the pages
 // showing the controls in a row (text fields with labels for example).
+// ----------------------------------------------------------------------------
 class wxNotebookPageBase : public wxPanel
 {
 public:
@@ -244,9 +317,24 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+// a notebook with images
+// ----------------------------------------------------------------------------
+class wxNotebookWithImages : public wxPNotebook
+{
+public:
+   // configPath is used to store the last active page, aszImages is the NULL
+   // terminated array of the icon names (image size should be 32x32)
+   wxNotebookWithImages(const wxString& configPath,
+                        wxWindow *parent,
+                        const char *aszImages[]);
+
+   virtual ~wxNotebookWithImages();
+};
+
+// =============================================================================
 // helper functions
-// -----------------------------------------------------------------------------
+// =============================================================================
 
 // determine the maximal width of the given strings (win is the window to use
 // for font calculations)

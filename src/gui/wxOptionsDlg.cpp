@@ -26,21 +26,27 @@
 #  include "guidef.h"
 #  include "MHelp.h"
 
+#  include <wx/dynarray.h>
 #  include <wx/checkbox.h>
 #  include <wx/listbox.h>
 #  include <wx/radiobox.h>
-#  include <wx/stattext.h>
-#  include <wx/dynarray.h>
+#  include <wx/statbox.h>
 #  include <wx/stattext.h>
 #  include <wx/textctrl.h>
+
+#  include <wx/utils.h>    // for wxStripMenuCodes
 #endif
 
 #include <wx/log.h>
 #include <wx/imaglist.h>
 #include <wx/notebook.h>
-#include <wx/dynarray.h>
 #include <wx/resource.h>
 #include <wx/confbase.h>
+
+#include <wx/menuitem.h>
+#include <wx/checklst.h>
+
+#include <wx/layout.h>
 
 #include <wx/persctrl.h>
 
@@ -279,6 +285,18 @@ private:
    DECLARE_DYNAMIC_CLASS(wxOptionsDialog)
 };
 
+class wxRestoreDefaultsDialog : public wxProfileSettingsEditDialog
+{
+public:
+   wxRestoreDefaultsDialog(ProfileBase *profile, wxFrame *parent);
+
+   // reset the selected options to their default values
+   virtual bool TransferDataFromWindow();
+
+private:
+   wxCheckListBox *m_checklistBox;
+};
+
 // ----------------------------------------------------------------------------
 // event tables and such
 // ----------------------------------------------------------------------------
@@ -323,11 +341,13 @@ END_EVENT_TABLE()
 wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 {
    // network config and identity
-   { gettext_noop("The user and host names are used to compose the return address, unless\n"
+   { gettext_noop("The user and host names are used to compose "
+                  "the return address, unless\n"
                   "a different return address is explicitly specified."),
                                                    Field_Message, -1 },
    { gettext_noop("&Username"),                    Field_Text,    -1 },
-   { gettext_noop("The host name is also used as a default host name for local mail addresses."),
+   { gettext_noop("The host name is also used as a default host "
+                  "name for local mail addresses."),
                                                    Field_Message, -1 },
    { gettext_noop("&Hostname"),                    Field_Text | Field_Vital,   -1, },
    { gettext_noop("&Return/Reply address"),        Field_Text | Field_Vital,   -1, },
@@ -1327,7 +1347,7 @@ void wxOptionsPageFolders::OnIdle(wxIdleEvent&)
 // ----------------------------------------------------------------------------
 
 wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
-   : wxNotebookDialog(parent, _("Program options"))
+               : wxNotebookDialog(parent, _("Program options"))
 {
 }
 
@@ -1447,6 +1467,92 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
 }
 
 // ----------------------------------------------------------------------------
+// wxRestoreDefaultsDialog implementation
+// ----------------------------------------------------------------------------
+
+wxRestoreDefaultsDialog::wxRestoreDefaultsDialog(ProfileBase *profile,
+                                                 wxFrame *parent)
+                       : wxProfileSettingsEditDialog
+                         (
+                           profile,
+                           "RestoreOptionsDlg",
+                           parent,
+                           _("Restore default options")
+                         )
+{
+   wxLayoutConstraints *c;
+
+   // create the Ok and Cancel buttons in the bottom right corner
+   wxStaticBox *box = CreateStdButtonsAndBox(_("&All settings"));
+
+   // create a short help message above
+   wxStaticText *msg = new wxStaticText
+                           (
+                              this, -1,
+                              _("Please check the settings whose values\n"
+                                "should be reset to the defaults.")
+                           );
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
+   c->height.AsIs();
+   msg->SetConstraints(c);
+
+   // create the checklistbox in the area which is left
+   c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->top.Below(msg, 2*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+
+   m_checklistBox = new wxCheckListBox(this, -1);
+   m_checklistBox->SetConstraints(c);
+
+   // add the items to the checklistbox
+   for ( size_t n = 0; n < ConfigField_Max; n++ )
+   {
+      switch ( wxOptionsPage::GetFieldType(n) )
+      {
+         case wxOptionsPage::Field_Message:
+            // this is not a setting, just some help text
+            continue;
+
+         case wxOptionsPage::Field_SubDlg:
+            // TODO inject in the checklistbox the settings of subdlg
+            continue;
+
+         default:
+            break;
+      }
+
+      m_checklistBox->Append(
+            wxStripMenuCodes(_(wxOptionsPage::ms_aFields[n].label)));
+   }
+
+   // set the initial and minimal size
+   SetDefaultSize(4*wBtn, 10*hBtn);
+}
+
+bool wxRestoreDefaultsDialog::TransferDataFromWindow()
+{
+   // delete the values of all selected settings in this profile - this will
+   // effectively restore their default values
+   size_t count = (size_t)m_checklistBox->Number();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      if ( m_checklistBox->IsChecked(n) )
+      {
+         MarkDirty();
+
+         GetProfile()->GetConfig()->DeleteEntry(gs_aConfigDefaults[n].name);
+      }
+   }
+
+   return TRUE;
+}
+
+// ----------------------------------------------------------------------------
 // our public interface
 // ----------------------------------------------------------------------------
 
@@ -1458,4 +1564,10 @@ void ShowOptionsDialog(wxFrame *parent, OptionsPage page)
    (void)dlg.ShowModal();
 }
 
-/* vi: set tw=0: */
+bool ShowRestoreDefaultsDialog(ProfileBase *profile, wxFrame *parent)
+{
+   wxRestoreDefaultsDialog dlg(profile, parent);
+   (void)dlg.ShowModal();
+
+   return dlg.HasChanges();
+}

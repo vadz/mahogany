@@ -44,8 +44,11 @@ enum OptionsPage
 // functions
 // -----------------------------------------------------------------------------
 
-/// creates and shows the options dialog (dialog is modal)
-void ShowOptionsDialog(wxFrame *parent = NULL,
-                       OptionsPage page = OptionsPage_Default);
+/// creates and shows the (modal) options dialog
+extern void ShowOptionsDialog(wxFrame *parent = NULL,
+                              OptionsPage page = OptionsPage_Default);
+
+/// creates and shows the dialog allowing to restore default settings
+extern bool ShowRestoreDefaultsDialog(ProfileBase *profile, wxFrame *parent);
 
 #endif  //_WXOPTIONSDLG_H

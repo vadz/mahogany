@@ -33,16 +33,22 @@
 #  include <wx/textctrl.h>
 #endif
 
-#include  <wx/menuitem.h>
-#include  <wx/checklst.h>
+#include <wx/layout.h>
+#include <wx/notebook.h>
+#include <wx/menuitem.h>
+#include <wx/checklst.h>
+
+#include <wx/persctrl.h>
 
 #include "Mdefaults.h"
+
+#include "gui/wxDialogLayout.h"
 
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
-class wxOptionsPageSubdialog : public wxDialog
+class wxOptionsPageSubdialog : public wxProfileSettingsEditDialog
 {
 public:
    wxOptionsPageSubdialog(ProfileBase *profile,
@@ -50,21 +56,9 @@ public:
                           const wxString& label,
                           const wxString& windowName);
 
-   virtual ~wxOptionsPageSubdialog();
-
    void OnChange(wxEvent& event);
 
-   bool HasChanges() const { return m_hasChanges; }
-   bool LastSizeRestored() const { return m_didRestoreSize; }
-
-protected:
-   ProfileBase *m_profile;
-   bool         m_hasChanges,
-                m_didRestoreSize;
-
 private:
-   wxString m_windowName;
-
    DECLARE_EVENT_TABLE()
 };
 
@@ -196,19 +190,14 @@ wxOptionsPageSubdialog::wxOptionsPageSubdialog(ProfileBase *profile,
                                                wxWindow *parent,
                                                const wxString& label,
                                                const wxString& windowName)
-                      : wxDialog(GET_PARENT_OF_CLASS(parent, wxFrame),
-                                 -1, label,
-                                 wxDefaultPosition, wxDefaultSize,
-                                 wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL),
-                        m_windowName(windowName)
+                      : wxProfileSettingsEditDialog
+                        (
+                           profile,
+                           windowName,
+                           GET_PARENT_OF_CLASS(parent, wxFrame),
+                           label
+                        )
 {
-   m_profile = profile;
-
-   m_hasChanges = FALSE;
-
-   int x, y, w, h;
-   m_didRestoreSize = wxMFrame::RestorePosition(m_windowName, &x, &y, &w, &h);
-   SetSize(x, y, w, h);
 }
 
 void wxOptionsPageSubdialog::OnChange(wxEvent&)
@@ -216,11 +205,6 @@ void wxOptionsPageSubdialog::OnChange(wxEvent&)
    // we don't do anything, but just eat these messages - otherwise they will
    // confuse wxOptionsPage which is our parent because it only processes
    // messages from its own controls
-}
-
-wxOptionsPageSubdialog::~wxOptionsPageSubdialog()
-{
-   wxMFrame::SavePosition(m_windowName, this);
 }
 
 // ----------------------------------------------------------------------------
@@ -256,44 +240,12 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(ProfileBase *profile,
                                                  "message composition"),
                                                "ComposeHeaders")
 {
-   SetAutoLayout(TRUE);
-
-   // basic unit is the height of a char, from this we fix the sizes of all
-   // other controls
-   size_t heightLabel = AdjustCharHeight(GetCharHeight());
-   int hBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
-       wBtn = BUTTON_WIDTH_FROM_HEIGHT(hBtn);
-
    // layout the controls
    // -------------------
    wxLayoutConstraints *c;
 
-   // first the 2 buttons in the bottom/right corner
-   wxButton *btnOk = new wxButton(this, wxID_OK, _("OK"));
-   btnOk->SetDefault();
-   c = new wxLayoutConstraints;
-   c->left.SameAs(this, wxRight, -2*(LAYOUT_X_MARGIN + wBtn));
-   c->width.Absolute(wBtn);
-   c->height.Absolute(hBtn);
-   c->bottom.SameAs(this, wxBottom, LAYOUT_Y_MARGIN);
-   btnOk->SetConstraints(c);
-
-   wxButton *btnCancel = new wxButton(this, wxID_CANCEL, _("Cancel"));
-   c = new wxLayoutConstraints;
-   c->left.SameAs(this, wxRight, -(LAYOUT_X_MARGIN + wBtn));
-   c->width.Absolute(wBtn);
-   c->height.Absolute(hBtn);
-   c->bottom.SameAs(this, wxBottom, LAYOUT_Y_MARGIN);
-   btnCancel->SetConstraints(c);
-
-   // a box around all the other controls
-   wxStaticBox *box = new wxStaticBox(this, -1, _("&Headers"));
-   c = new wxLayoutConstraints();
-   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
-   c->top.SameAs(this, wxTop, LAYOUT_Y_MARGIN);
-   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
-   c->bottom.SameAs(btnOk, wxTop, LAYOUT_Y_MARGIN);
-   box->SetConstraints(c);
+   // Ok and Cancel buttons and a static box around everything else
+   wxStaticBox *box = CreateStdButtonsAndBox(_("&Headers"));
 
    // a static message telling where is what
    wxStaticText *msg1 = new wxStaticText(this, -1, _("Show the field?"));
@@ -353,9 +305,7 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(ProfileBase *profile,
    m_checkboxes[Header_To]->Enable(FALSE);
 
    // set the minimal and initial window size
-   if ( !LastSizeRestored() )
-      SetSize(4*wBtn, 8*hBtn);
-   SetSizeHints(4*wBtn, 8*hBtn);
+   SetDefaultSize(4*wBtn, 8*hBtn);
 }
 
 void wxComposeHeadersDialog::OnUpdateUI(wxUpdateUIEvent& event)
@@ -447,78 +397,43 @@ wxMsgViewHeadersDialog::wxMsgViewHeadersDialog(ProfileBase *profile,
                                                  "in message view"),
                                                "MsgViewHeaders")
 {
-   SetAutoLayout(TRUE);
-
-   // basic unit is the height of a char, from this we fix the sizes of all
-   // other controls
-   size_t heightLabel = AdjustCharHeight(GetCharHeight());
-   int hBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
-       wBtn = BUTTON_WIDTH_FROM_HEIGHT(hBtn);
-
    // layout the controls
    // -------------------
    wxLayoutConstraints *c;
 
-   // first the 2 buttons in the bottom/right corner
-   wxButton *btnOk = new wxButton(this, wxID_OK, _("OK"));
-   btnOk->SetDefault();
-   c = new wxLayoutConstraints;
-   c->left.SameAs(this, wxRight, -2*(LAYOUT_X_MARGIN + wBtn));
-   c->width.Absolute(wBtn);
-   c->height.Absolute(hBtn);
-   c->bottom.SameAs(this, wxBottom, LAYOUT_Y_MARGIN);
-   btnOk->SetConstraints(c);
-
-   wxButton *btnCancel = new wxButton(this, wxID_CANCEL, _("Cancel"));
-   c = new wxLayoutConstraints;
-   c->left.SameAs(this, wxRight, -(LAYOUT_X_MARGIN + wBtn));
-   c->width.Absolute(wBtn);
-   c->height.Absolute(hBtn);
-   c->bottom.SameAs(this, wxBottom, LAYOUT_Y_MARGIN);
-   btnCancel->SetConstraints(c);
-
-   // a box around all the other controls
-   wxStaticBox *box = new wxStaticBox(this, -1, _("&Headers"));
-   c = new wxLayoutConstraints();
-   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
-   c->top.SameAs(this, wxTop, LAYOUT_Y_MARGIN);
-   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
-   c->bottom.SameAs(btnOk, wxTop, LAYOUT_Y_MARGIN);
-   box->SetConstraints(c);
+   // Ok and Cancel buttons and a static box around everything else
+   wxStaticBox *box = CreateStdButtonsAndBox(_("&Headers"));
 
    // buttons to move items up/down
-   wxButton *btn = new wxButton(this, Btn_Down, _("&Down"));
+   wxButton *btnDown = new wxButton(this, Btn_Down, _("&Down"));
    c = new wxLayoutConstraints();
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(box, wxCentreY, LAYOUT_Y_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
-   btn->SetConstraints(c);
+   btnDown->SetConstraints(c);
 
-   // NB: set constraints before creating the btn because we use the width of
-   //     the btn we created previously. We also assume that "Down" is longer
-   //     than "Up" - which is of course false after translation (FIXME)
+   // FIXME: we also assume that "Down" is longer than "Up" - which is of course
+   // false after translation
+   wxButton *btnUp = new wxButton(this, Btn_Up, _("&Up"));
    c = new wxLayoutConstraints();
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    c->bottom.SameAs(box, wxCentreY, LAYOUT_Y_MARGIN);
-   c->width.SameAs(btn, wxWidth);
+   c->width.SameAs(btnDown, wxWidth);
    c->height.AsIs();
-   btn = new wxButton(this, Btn_Up, _("&Up"));
-   btn->SetConstraints(c);
+   btnUp->SetConstraints(c);
 
    // a checklistbox with headers on the space which is left
    m_checklstBox = new wxCheckListBox(this, -1);
    c = new wxLayoutConstraints();
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.LeftOf(btn, 2*LAYOUT_X_MARGIN);
+   c->right.LeftOf(btnDown, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_checklstBox->SetConstraints(c);
 
    // set the minimal window size
-   if ( !LastSizeRestored() )
-      SetSize(4*wBtn, 10*hBtn);
-   wxWindow::SetSizeHints(3*wBtn, 7*hBtn);
+   SetDefaultSize(3*wBtn, 7*hBtn);
 }
 
 bool wxMsgViewHeadersDialog::TransferDataToWindow()

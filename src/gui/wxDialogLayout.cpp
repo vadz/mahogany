@@ -21,35 +21,38 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-#   include   "Mcommon.h"
-#   include   "MApplication.h"
-#   include   "Profile.h"
-#   include   "guidef.h"
-#   include   "strutil.h"
-#   include   "MHelp.h"
-#   include   "gui/wxMIds.h"
+#   include "Mcommon.h"
+#   include "MApplication.h"
+#   include "Profile.h"
+#   include "guidef.h"
+#   include "strutil.h"
+#   include "MHelp.h"
+#   include "gui/wxMIds.h"
 #endif
 
-#include   <wx/log.h>
-#include   <wx/imaglist.h>
-#include   <wx/notebook.h>
-#include   <wx/persctrl.h>
-#include   <wx/control.h>
-#include   <wx/dcclient.h>
-#include   <wx/layout.h>
-#include   <wx/dynarray.h>
-#include   <wx/stattext.h>
-#include   <wx/settings.h>
-#include   <wx/listbox.h>
-#include   <wx/checkbox.h>
-#include   <wx/radiobox.h>
-#include   <wx/combobox.h>
-#include   <wx/statbox.h>
+#include <wx/log.h>
+#include <wx/imaglist.h>
+#include <wx/notebook.h>
+#include <wx/persctrl.h>
+#include <wx/control.h>
+#include <wx/dcclient.h>
+#include <wx/layout.h>
+#include <wx/dynarray.h>
+#include <wx/stattext.h>
+#include <wx/settings.h>
+#include <wx/listbox.h>
+#include <wx/checkbox.h>
+#include <wx/radiobox.h>
+#include <wx/combobox.h>
+#include <wx/statbox.h>
 
-#include   "gui/wxIconManager.h"
-#include   "gui/wxDialogLayout.h"
-#include   "gui/wxOptionsPage.h"
-#include   "gui/wxBrowseButton.h"
+#include <wx/menuitem.h>
+#include <wx/checklst.h>
+
+#include "gui/wxIconManager.h"
+#include "gui/wxDialogLayout.h"
+#include "gui/wxOptionsPage.h"
+#include "gui/wxBrowseButton.h"
 
 // ============================================================================
 // implementation
@@ -105,6 +108,40 @@ long GetMaxLabelWidth(const wxArrayString& labels, wxWindow *win)
    }
 
    return widthMax;
+}
+
+// ----------------------------------------------------------------------------
+// wxPDialog
+// ----------------------------------------------------------------------------
+
+wxPDialog::wxPDialog(const wxString& profileKey,
+                     wxWindow *parent,
+                     const wxString& title,
+                     long style)
+         : wxDialog(parent, -1, title,
+                    wxDefaultPosition, wxDefaultSize,
+                    style),
+           m_profileKey(profileKey)
+{
+   int x, y, w, h;
+
+   m_didRestoreSize = !m_profileKey.IsEmpty() &&
+                      wxMFrame::RestorePosition(m_profileKey, &x, &y, &w, &h);
+
+   if ( m_didRestoreSize )
+   {
+      SetSize(x, y, w, h);
+   }
+   //else: it should be set by the derived class or the default size will be
+   //      used - not too bad neither
+}
+
+wxPDialog::~wxPDialog()
+{
+   if ( !m_profileKey.IsEmpty() )
+   {
+      wxMFrame::SavePosition(m_profileKey, this);
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -517,17 +554,87 @@ void wxNotebookPageBase::EnableTextWithLabel(wxTextCtrl *control, bool bEnable)
    }
 }
 
+// ----------------------------------------------------------------------------
+// wxManuallyLaidOutDialog
+// ----------------------------------------------------------------------------
+
+wxManuallyLaidOutDialog::wxManuallyLaidOutDialog(wxWindow *parent,
+                                                 const wxString& title,
+                                                 const wxString& profileKey)
+                       : wxPDialog(profileKey,
+                                   parent,
+                                   title,
+                                   wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
+{
+   // basic unit is the height of a char, from this we fix the sizes of all
+   // other controls
+   size_t heightLabel = AdjustCharHeight(GetCharHeight());
+
+   hBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
+   wBtn = BUTTON_WIDTH_FROM_HEIGHT(hBtn);
+
+   // the controls will be positioned with the constraints
+   SetAutoLayout(TRUE);
+}
+
+void wxManuallyLaidOutDialog::SetDefaultSize(int width, int height,
+                                             bool setAsMinimalSizeToo)
+{
+   if ( !LastSizeRestored() )
+   {
+      SetSize(width, height);
+   }
+
+   if ( setAsMinimalSizeToo )
+   {
+      SetSizeHints(width, height);
+   }
+
+   Centre(wxCENTER_FRAME | wxBOTH);
+}
+
+wxStaticBox *
+wxManuallyLaidOutDialog::CreateStdButtonsAndBox(const wxString& boxTitle)
+{
+   wxLayoutConstraints *c;
+
+   // first the 2 buttons in the bottom/right corner
+   wxButton *btnOk = new wxButton(this, wxID_OK, _("OK"));
+   btnOk->SetDefault();
+   c = new wxLayoutConstraints;
+   c->left.SameAs(this, wxRight, -2*(LAYOUT_X_MARGIN + wBtn));
+   c->width.Absolute(wBtn);
+   c->height.Absolute(hBtn);
+   c->bottom.SameAs(this, wxBottom, LAYOUT_Y_MARGIN);
+   btnOk->SetConstraints(c);
+
+   wxButton *btnCancel = new wxButton(this, wxID_CANCEL, _("Cancel"));
+   c = new wxLayoutConstraints;
+   c->left.SameAs(this, wxRight, -(LAYOUT_X_MARGIN + wBtn));
+   c->width.Absolute(wBtn);
+   c->height.Absolute(hBtn);
+   c->bottom.SameAs(this, wxBottom, LAYOUT_Y_MARGIN);
+   btnCancel->SetConstraints(c);
+
+   // a box around all the other controls
+   wxStaticBox *box = new wxStaticBox(this, -1, boxTitle);
+   c = new wxLayoutConstraints();
+   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   c->top.SameAs(this, wxTop, LAYOUT_Y_MARGIN);
+   c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
+   c->bottom.SameAs(btnOk, wxTop, LAYOUT_Y_MARGIN);
+   box->SetConstraints(c);
+
+   return box;
+}
+
 // -----------------------------------------------------------------------------
 // wxNotebookDialog
 // -----------------------------------------------------------------------------
 
 wxNotebookDialog::wxNotebookDialog(wxFrame *parent, const wxString& title)
-                : wxDialog(parent, -1, title,
-                           wxDefaultPosition, wxDefaultSize,
-                           wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
+                : wxManuallyLaidOutDialog(parent, title)
 {
-   SetAutoLayout(TRUE);
-
    m_btnOk =
    m_btnApply = NULL;
 }
@@ -538,16 +645,6 @@ void wxNotebookDialog::CreateAllControls()
 
    // calculate the controls size
    // ---------------------------
-
-   // basic unit is the height of a char, from this we fix the sizes of all
-   // other controls
-   size_t heightLabel = AdjustCharHeight(GetCharHeight());
-   int hBtn = TEXT_HEIGHT_FROM_LABEL(heightLabel),
-       wBtn = BUTTON_WIDTH_FROM_HEIGHT(hBtn);
-
-   // FIXME these are more or less arbitrary numbers
-   const int wDlg = 6*wBtn;
-   const int hDlg = 27*hBtn;
 
    // create the panel
    // ----------------
@@ -617,11 +714,8 @@ void wxNotebookDialog::CreateAllControls()
 
    Layout();
 
-   // set position
-   // ------------
-   wxWindow::SetSize(wDlg, hDlg);
-   SetSizeHints(wDlg, hDlg);
-   Centre(wxCENTER_FRAME | wxBOTH);
+   // set dialog size (FIXME these are more or less arbitrary numbers)
+   SetDefaultSize(6*wBtn, 27*hBtn, TRUE /* set as min size too */);
 }
 
 // transfer the data to/from notebook pages
