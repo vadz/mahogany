@@ -1554,7 +1554,7 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
                        pEncWordStart);
             out += pEncWordStart;
 
-            continue;
+            break;
          }
 
          // skip '=' following '?'
