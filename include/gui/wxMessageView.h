@@ -115,7 +115,9 @@ public:
       {
          wxLayoutWindow::Clear(m_ProfileValues.font, m_ProfileValues.size,
                                (int)wxNORMAL, (int)wxNORMAL, 0,
-                               &m_ProfileValues.fg, &m_ProfileValues.bg);
+                               &m_ProfileValues.FgCol,
+                               &m_ProfileValues.BgCol);
+         SetBackgroundColour( m_ProfileValues.BgCol );
       }
    /// returns the mail folder
    MailFolder *GetFolder(void);
@@ -165,7 +167,7 @@ protected:
    struct AllProfileValues
    {
       /// Background and foreground colours.
-      wxColour bg, fg;
+      wxColour BgCol, FgCol, UrlCol;
       /// font attributes
       int font, size;
       /// show headers?

@@ -576,6 +576,18 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    case WXMENU_MSG_SHOWRAWTEXT:
       (void)m_MessagePreview->DoMenuCommand(event.GetId());
       break;
+   case WXMENU_FILE_COMPOSE:
+   {
+      wxComposeView *composeView = wxComposeView::CreateNewMessage(m_Parent, GetProfile());
+      composeView->Show();
+   }
+   break;
+   case WXMENU_FILE_POST:
+   {
+      wxComposeView *composeView = wxComposeView::CreateNewArticle(m_Parent, GetProfile());
+      composeView->Show();
+   }
+   break;
 
    default:
       wxFAIL_MSG("wxFolderView::OnMenuCommand() called with illegal id.");
@@ -806,16 +818,19 @@ void
 wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
 {
    int id = event.GetId();
-   if(id == WXMENU_EDIT_PREF) // edit folder profile
+   switch(id)
    {
+   case WXMENU_EDIT_PREF: // edit folder profile
       MDialog_FolderProfile(this, m_FolderView->GetProfile());
-      return;
+      break;
+   default:
+      if( WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
+          || id == WXMENU_HELP_CONTEXT
+          || id == WXMENU_FILE_COMPOSE || id == WXMENU_FILE_POST)
+         m_FolderView->OnCommandEvent(event);
+      else
+         wxMFrame::OnMenuCommand(id);
    }
-   if( WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
-       || id == WXMENU_HELP_CONTEXT)
-      m_FolderView->OnCommandEvent(event);
-   else
-      wxMFrame::OnMenuCommand(id);
 }
 
 void

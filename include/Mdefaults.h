@@ -316,9 +316,11 @@
 /// which font size
 #define   MP_MVIEW_FONT_SIZE         "MViewFontSize"
 // which foreground colour for the font
-#define   MP_MVIEW_FGCOLOUR      "MViewFGColour"
+#define   MP_MVIEW_FGCOLOUR      "MViewFgColour"
 // which background colour for the font
-#define   MP_MVIEW_BGCOLOUR      "MViewBGColour"
+#define   MP_MVIEW_BGCOLOUR      "MViewBgColour"
+// which colour for URLS 
+#define   MP_MVIEW_URLCOLOUR      "MViewUrlColour"
 //@}
 /**@name Font settings for compose view */
 //@{
@@ -637,6 +639,8 @@
 #define   MP_MVIEW_FGCOLOUR_D      "black"
 // which background colour for the font
 #define   MP_MVIEW_BGCOLOUR_D      "white"
+// which colour for URLS 
+#define   MP_MVIEW_URLCOLOUR_D     "blue"
 //@}
 /**@name Font settings for compose view */
 //@{

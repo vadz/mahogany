@@ -323,9 +323,6 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
    m_uid = -1;
    SetFocus();
    SetMouseTracking();
-
-   SetBackgroundColour( wxColour("White") );
-
    SetParentProfile(fv ? fv->GetProfile() : NULL);
 }
 
@@ -373,18 +370,26 @@ wxMessageView::SetParentProfile(ProfileBase *profile)
    if((c = wxTheColourDatabase->FindColour(tmp)) == NULL)
    {
       wxLogError(_("Cannot find a colour named '%s'.\nPlease change settings."), tmp.c_str());
-      m_ProfileValues.fg = *wxTheColourDatabase->FindColour("black");
+      m_ProfileValues.FgCol = *wxTheColourDatabase->FindColour(MP_MVIEW_FGCOLOUR_D);
    }
    else
-      m_ProfileValues.fg=*c;
+      m_ProfileValues.FgCol=*c;
    tmp = READ_CONFIG(m_Profile,MP_MVIEW_BGCOLOUR);
    if((c = wxTheColourDatabase->FindColour(tmp)) == NULL)
    {
       wxLogError(_("Cannot find a colour named '%s'.\nPlease change settings."), tmp.c_str());
-      m_ProfileValues.bg = *wxTheColourDatabase->FindColour("white");
+      m_ProfileValues.BgCol = *wxTheColourDatabase->FindColour(MP_MVIEW_BGCOLOUR_D);
    }
    else
-      m_ProfileValues.bg=*c;
+      m_ProfileValues.BgCol=*c;
+   tmp = READ_CONFIG(m_Profile,MP_MVIEW_URLCOLOUR);
+   if((c = wxTheColourDatabase->FindColour(tmp)) == NULL)
+   {
+      wxLogError(_("Cannot find a colour named '%s'.\nPlease change settings."), tmp.c_str());
+      m_ProfileValues.UrlCol = *wxTheColourDatabase->FindColour(MP_MVIEW_URLCOLOUR_D);
+   }
+   else
+      m_ProfileValues.UrlCol=*c;
    m_ProfileValues.font = READ_CONFIG(m_Profile,MP_MVIEW_FONT);
    ASSERT(m_ProfileValues.font >= 0 && m_ProfileValues.font <=
           NUM_FONTS);
@@ -403,6 +408,7 @@ wxMessageView::SetParentProfile(ProfileBase *profile)
    m_ProfileValues.afmpath = READ_APPCONFIG(MP_AFMPATH);
 #endif // Unix
    m_ProfileValues.showFaces = READ_CONFIG(m_Profile, MP_SHOW_XFACES) != 0;
+   Clear();
 }
    
 void
@@ -418,6 +424,7 @@ wxMessageView::Update(void)
    wxLayoutObject *obj = NULL;
 
    Clear();
+
    if(! mailMessage)  // no message to display
       return;
    
@@ -548,9 +555,9 @@ wxMessageView::Update(void)
                   obj = new wxLayoutObjectText(url);
                   obj->SetUserData(ci);
                   ci->DecRef();
-                  llist->SetFontColour("BLUE");  // @@PERS
+                  llist->SetFontColour(& m_ProfileValues.UrlCol);
                   llist->Insert(obj);
-                  llist->SetFontColour("BLACK"); // @@PERS
+                  llist->SetFontColour(& m_ProfileValues.FgCol); 
                }
             }
             while( !strutil_isempty(tmp) );

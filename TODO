@@ -97,17 +97,19 @@ DONE:
 - gtk 1.2 support seems to work
 - add -ljpeg to linker options and JPG as intermediary image format
 - have a global "NewMail" folder setting and ensure its existence
-
-
-CHECK:
 - MessageCC::GetBody() can return with body/envelope == NULL if
   message no longer exists. Just got a crash in Refresh().
   Add a CHECK() wherever it is called.
 - do wxImage changes affect list of available handlers, etc?
+
+
+CHECK:
 - printer settings seem to have no effect : are persistent, do they get used?
 
 TODO:
 
+- MFolder.i
+- MailFolderCC: if mailfolder has been closed due to timeout, reopen it.
 for release:
 - make mailfolders collectable:
   - have a "collect" flag
@@ -119,10 +121,10 @@ for release:
 
 - do we really need to scan /var/lib/news/active?
 - more configurability for news
-- do wxImage changes affect list of available handlers, etc?
-- printer settings seem to have no effect
 
 doc: add note about news active file
+
+- add URL highlight colour
 
 after release:
 

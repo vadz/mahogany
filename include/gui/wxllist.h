@@ -697,7 +697,12 @@ public:
    inline void SetFontUnderline(bool ul) {
       SetFont(-1,-1,-1,-1,(int)ul, (const char*)NULL); }
    /// set font colours by name
-   inline void SetFontColour(char const *fg, char const *bg = NULL) { SetFont(-1,-1,-1,-1,-1,fg,bg); }
+   inline void SetFontColour(char const *fg, char const *bg = NULL)
+      { SetFont(-1,-1,-1,-1,-1,fg,bg); }
+   /// set font colours by name
+   inline void SetFontColour(wxColour *fg, wxColour *bg = NULL)
+      { SetFont(-1,-1,-1,-1,-1,fg,bg); }
+   
    /**
       Returns a pointer to the default settings.
       This is only valid temporarily and should not be stored

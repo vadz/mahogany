@@ -790,8 +790,8 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
 
    (void)new wxAboutWindow(this, bCloseOnTimeout);
 
-   Centre(wxBOTH);
    Show(TRUE);
+   Centre(wxCENTER_FRAME | wxBOTH);
 }
 
 void

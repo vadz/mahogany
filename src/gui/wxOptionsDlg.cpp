@@ -129,6 +129,7 @@ enum ConfigFields
    ConfigField_MessageViewFontSize,
    ConfigField_MessageViewFGColour,
    ConfigField_MessageViewBGColour,
+   ConfigField_MessageViewUrlColour,
    ConfigField_MessageViewInlineGraphics,
 #ifdef OS_UNIX
    ConfigField_MessageViewConvertGraphicsFormat,
@@ -370,6 +371,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Font &size"),                   Field_Number, -1 },
    { gettext_noop("Foreground c&olour"),           Field_Color,    -1},
    { gettext_noop("Back&ground colour"),           Field_Color,    -1},
+   { gettext_noop("Colour for &URLs"),             Field_Color,    -1},
    { gettext_noop("&Inline graphics"),             Field_Bool, -1 },
 #ifdef OS_UNIX
    { gettext_noop("Conversion &graphics format:XPM:PNG:BMP:JPG"), Field_Combo, ConfigField_MessageViewInlineGraphics },
@@ -487,6 +489,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MVIEW_FONT_SIZE),
    CONFIG_ENTRY(MP_MVIEW_FGCOLOUR),
    CONFIG_ENTRY(MP_MVIEW_BGCOLOUR),
+   CONFIG_ENTRY(MP_MVIEW_URLCOLOUR),
    CONFIG_ENTRY(MP_INLINE_GFX),
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_TMPGFXFORMAT),

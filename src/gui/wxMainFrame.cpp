@@ -241,7 +241,8 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
    int id = event.GetId();
 
    if(m_FolderView &&
-      (WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)))
+      (WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
+                   || id == WXMENU_FILE_COMPOSE || id == WXMENU_FILE_POST))
       m_FolderView->OnCommandEvent(event);
    else if(id == WXMENU_HELP_CONTEXT)
       mApplication->Help(MH_MAIN_FRAME,this);
