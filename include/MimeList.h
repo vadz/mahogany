@@ -56,9 +56,7 @@ public:
        @return true if a new entry was found
    */
    bool   Parse(String const & str);
-
-   IMPLEMENT_DUMMY_COMPARE_OPERATORS(MimeEntry)
-      };
+};
 
 /**
    MimeList - mapping of Mime types to icons and handlers

@@ -113,6 +113,11 @@ wxLayoutObjectText::Debug(void)
 
 //-------------------------- wxLayoutObjectIcon
 
+wxLayoutObjectIcon::wxLayoutObjectIcon(wxIcon const &icon)
+   : m_Icon(new wxIcon(icon))
+{
+}
+
 wxLayoutObjectIcon::wxLayoutObjectIcon(wxIcon *icon)
    : m_Icon(icon)
 {

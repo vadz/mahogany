@@ -62,18 +62,19 @@ static const char *wxIconManagerFileExtensions[] =
 
 wxIconManager::wxIconManager()
 {
-   m_iconList = new IconDataList(FALSE);
+   m_iconList = new IconDataList();
 
    AddIcon(M_ICON_HLINK_HTTP, hlink_xpm);
    AddIcon(M_ICON_HLINK_FTP, ftplink_xpm);
    AddIcon("MFrame", MFrame_xpm);
    AddIcon("MainFrame", MainFrame_xpm);
-   m_unknownIcon = new wxIcon(unknown_xpm);
+   m_unknownIcon = wxIcon(unknown_xpm);
 }
 
 
 wxIconManager::~wxIconManager()
 {
+#if 0
    IconDataList::iterator i;
    for ( i = m_iconList->begin(); i != m_iconList->end(); i++ ) {
       // against what your common sense may tell you, the icons we manage
@@ -81,7 +82,7 @@ wxIconManager::~wxIconManager()
       IconData *id = *i;
 #     ifndef OS_WIN
          // now we do!
-      delete id->iconPtr;
+      delete id->iconRef;
 #     else  // Windows
          // ok, you can delete it if you want but it provokes crash under
          // Windows and if I don't delete it I don't have memory leaks, so:
@@ -89,21 +90,22 @@ wxIconManager::~wxIconManager()
 #     endif //OS_WIN
       delete id;
    }
-
+#endif
+   
    delete m_iconList;
 }
 
-wxBitmap *
+wxBitmap &
 wxIconManager::GetBitmap(const String& bmpName)
 {
 #  ifdef    OS_WIN
    {
       // look in the ressources
-      wxBitmap *bmp = new wxBitmap(bmpName);
-      if ( bmp->Ok() )
+      wxBitmap &bmp =wxBitmap(bmpName);
+      if ( bmp.Ok() )
          return bmp;
-      else
-         delete bmp;
+//      else
+//         delete bmp;
 
       // try the other standard locations now
    }
@@ -124,13 +126,13 @@ wxIconManager::GetBitmap(const String& bmpName)
   time anyway.
 */
 
-wxIcon *
+wxIcon &
 wxIconManager::GetIcon(String const &_iconName)
 {
    IconDataList::iterator i;
    String key;
    String iconName = _iconName;
-   
+
    strutil_tolower(iconName);
    wxLogTrace("wxIconManager::GetIcon(%s) called...", iconName.c_str());
    
@@ -139,7 +141,7 @@ wxIconManager::GetIcon(String const &_iconName)
       if(strcmp((*i)->iconName.c_str(), iconName.c_str())==0) {
         wxLogTrace("... icon was in the cache.");
 
-        return new wxIcon((*i)->iconPtr);
+        return (*i)->iconRef;
       }
    }
 
@@ -150,7 +152,7 @@ wxIconManager::GetIcon(String const &_iconName)
       if(strcmp((*i)->iconName.c_str(), key.c_str())==0) {
         wxLogTrace("... icon was in the cache.");
 
-        return new wxIcon((*i)->iconPtr);
+        return (*i)->iconRef;
       }
    }
 
@@ -161,12 +163,12 @@ wxIconManager::GetIcon(String const &_iconName)
       if(strcmp((*i)->iconName.c_str(), key.c_str())==0) {
         wxLogTrace("... icon was in the cache.");
 
-        return new wxIcon((*i)->iconPtr);
+        return (*i)->iconRef;
       }
    }
 
    // new step: try to load the icon files .png,.xpm,.gif:
-   wxIcon *icn = new wxIcon();
+   wxIcon icn;
    int c;
    bool found;
    PathFinder pf(READ_APPCONFIG(MC_ICONPATH), true);
@@ -189,14 +191,14 @@ wxIconManager::GetIcon(String const &_iconName)
       }
       if(! found)
          continue;
-      if(icn->LoadFile(Str(name),0))
+      if(icn.LoadFile(Str(name),0))
       {
          id = new IconData;
-         id->iconPtr = icn;
+         id->iconRef = icn;
          id->iconName = key;
          wxLogTrace("... icon found in '%s'", name.c_str());
          m_iconList->push_front(id);
-         return new wxIcon(icn);
+         return icn;
       }
    }
 
@@ -215,17 +217,17 @@ wxIconManager::GetIcon(String const &_iconName)
 
    wxLogTrace("... icon not found.");
 
-   return new wxIcon(m_unknownIcon);
+   return m_unknownIcon;
 }
 
 void
 wxIconManager::AddIcon(String const &iconName,  IconResourceType data)
 {
    // load icon
-   wxIcon *icon = new wxIcon(data);
-   if ( !icon->Ok() ) {
-      delete icon;
-
+   wxIcon & icon = wxIcon(data);
+   if ( !icon.Ok() )
+   {
+//      delete icon;
       return;
    }
 
@@ -233,7 +235,7 @@ wxIconManager::AddIcon(String const &iconName,  IconResourceType data)
    IconData *id = new IconData;
 
    id->iconName = iconName;
-   id->iconPtr  = icon;
+   id->iconRef  = icon;
    m_iconList->push_front(id);
 }
 

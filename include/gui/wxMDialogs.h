@@ -174,7 +174,11 @@ int MDialog_AdbLookupList(ArrayAdbEntries& aEntries,
 void
 MDialog_AboutDialog( MWindow *parent);
 
+/// dialog to creat a new folder
+void
+MDialog_FolderCreate(MWindow *parent);
 
+/// edit an existing folder profile
 void
 MDialog_FolderProfile(MWindow *parent, ProfileBase *profile);
 

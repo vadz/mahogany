@@ -3,54 +3,7 @@
  *                                                                  *
  * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$              *
- ********************************************************************
- * $Log$
- * Revision 1.8  1998/08/08 22:29:14  VZ
- * memory leaks and crashes and memory corruptio and ... fixes
- *
- * Revision 1.7  1998/06/05 16:56:11  VZ
- *
- * many changes among which:
- *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
- *     i.e. there is wxMApp inheriting from AppBse and wxApp
- *  2) wxMLogFrame changed (but will probably change again because I wrote a
- *     generic wxLogFrame for wxWin2 - we can as well use it instead)
- *  3) Profile stuff simplified (but still seems to work :-), at least with
- *     wxConfig), no more AppProfile separate class.
- *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
- *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
- *     Classes
- *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
- *  6) constraints in wxComposeView changed to work under both wxGTK and
- *     wxMSW (but there is an annoying warning about unsatisfied constraints
- *     coming from I don't know where)
- *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
- *  8) many other minor changes I completely forgot about.
- *
- * Revision 1.6  1998/05/24 14:47:56  KB
- * lots of progress on Python, but cannot call functions yet
- * kbList fixes again?
- *
- * Revision 1.5  1998/05/18 17:48:30  KB
- * more list<>->kbList changes, fixes for wxXt, improved makefiles
- *
- * Revision 1.4  1998/05/11 20:57:27  VZ
- * compiles again under Windows + new compile option USE_WXCONFIG
- *
- * Revision 1.3  1998/04/22 19:55:49  KB
- * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
- * precompiled headers. Compiles and runs again under Linux/wxXt. Header
- * organisation is not optimal yet and needs further
- * cleanup. Reintroduced some older fixes which apparently got lost
- * before.
- *
- * Revision 1.2  1998/03/26 23:05:39  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:19  karsten
- * first try at a complete archive
+ * $Id$              
  *
  *******************************************************************/
 
@@ -220,11 +173,6 @@ String MimeList::ExpandCommand(String const &commandline,
 
 MimeList::~MimeList()
 {
-   MimeEntryList::iterator i;
-   for ( i = begin(); i != end(); i++ ) {
-      MimeEntry *entry = *i;
-      delete entry;
-   }
 }
 
 

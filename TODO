@@ -3,21 +3,16 @@ $Id$
 
 *** things to fix/implement next ***
 
-- new mail callback
-
 - wxLayout:
   + fix wxGTK postscript printing which is pretty broken, compare with wxXt?
     + check printing example
-  + scroll to cursos
+  + scroll to cursor
 
 
 - Profile/wxMDialogs
   + fix usage of readEntry to use String objects
   + who cleans up CPYSTR() generated strings?
   + find path to global configuration file and use it?
-
-- drop Script classes
-
 
 - Python
   + in src/Python: improve rules to always redo .cpp/.py
@@ -35,6 +30,11 @@ $Id$
 - WINDOWS: how to do MIME handling?
 
 - DND with gmc (dead easy, see dnd example :-) )
+
+- new mail callback
+
+- drop Script classes and old Adb from source
+
 
 *** to implement in near future ***
 

@@ -372,18 +372,16 @@ wxMessageView::Update(void)
       }
       else // insert an icon
       {
-         wxIcon *icn;
+         wxIcon icn;
          if(t == TYPEIMAGE
             && m_Profile->readEntry(MP_INLINE_GFX,MP_INLINE_GFX_D))
          {
             char *filename = wxGetTempFileName("Mtemp");
             MimeSave(i,filename);
-            icn = new wxIcon();
-            if(icn->LoadFile(filename,0))
+            if(icn.LoadFile(filename,0))
                obj = new wxLayoutObjectIcon(icn);
             else
             {
-               delete icn;
                icn = mApplication.GetIconManager()->GetIcon(mailMessage->GetPartMimeType(i));
             }
             wxRemoveFile(filename);

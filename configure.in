@@ -148,6 +148,7 @@ DEFAULT_USE_WXSTRING=1
 DEFAULT_USE_WXCONFIG=1
 DEFAULT_USE_APPCONF=0
 DEFAULT_USE_EFENCE=0
+DEFAULT_USE_DMALLOC=0
 DEFAULT_USE_DEBUG=1
 DEFAULT_USE_DOCXX=0
 DEFAULT_USE_KDOC=1
@@ -271,6 +272,10 @@ USE_APPCONF)
 AC_OVERRIDES(efence,efence,
 --with-efence             use ElectricFence,
 USE_EFENCE)
+
+AC_OVERRIDES(dmalloc,dmalloc,
+--with-dmalloc             use dmalloc library for debugging,
+USE_DMALLOC)
 
 AC_OVERRIDES(threads,threads,
 --with-threads            link with libpthread,
@@ -674,6 +679,11 @@ fi
 dnl electric fence
 if test "$USE_EFENCE" = 1; then
 	EXTRA_LINK="$EXTRA_LINK -lefence"
+fi
+
+dnl dmalloc debugging lib
+if test "$USE_DMALLOC" = 1; then
+	EXTRA_LINK="$EXTRA_LINK -ldmalloc"
 fi
 
 dnl add pthreads to libraries

@@ -147,6 +147,7 @@ public:
                      bool draw = true);
    virtual wxPoint GetSize(CoordType *baseLine) const;
    wxLayoutObjectIcon(wxIcon *icon);
+   wxLayoutObjectIcon(wxIcon const &icon);
 
 private:
    wxIcon *m_Icon;

@@ -38,7 +38,6 @@ public:
                wxFrame *parent = NULL);
 
    // callbacks
-   void OnMenuCommand(int id);
    void OnCommandEvent(wxCommandEvent &);
    void OnCloseWindow(wxCloseEvent &);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}

@@ -1,4 +1,4 @@
-#This file was created by <karsten> Sat Aug 15 15:40:29 1998
+#This file was created by <karsten> Sun Aug 16 10:05:10 1998
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
@@ -32,73 +32,60 @@ M
  - README
 \layout Author
 
-Karsten Ballüder
-\latex latex 
-
+Karsten Ballüder 
 \backslash 
 
 \backslash 
-
-\latex default 
- (
+(
 \family typewriter 
-Ballueder@usa.net, http://Ballueder.home.ml.org
+Ballueder@usa.net
 \family default 
 )
+\backslash 
+
+\backslash 
+Contact us: 
+\family typewriter 
+m-developers@findmail.com
 \layout Abstract
 
+These are the release notes for M.
+ Some more detailed information on how to compile, install und use it are
+ in the Information files.
 \layout Abstract
 
-Some more up to date information can be found in the ReleaseNotes files.
-\layout Standard
-
-
-\begin_inset LatexCommand \tableofcontents
-
-\end_inset 
-
-
+This information relates to the first public alpha release, 17.
+ August 1998.
 \layout Section
 
-Introduction 
+WARNING - this is (pre-?)alpha
 \layout Standard
 
-M is intended to be a powerful mail and news client.
- The following points were significant in the development of it 
+When you do a large free software project, you have two choices: either
+ continue hacking without releases and risk to never get it finished, or
+ set yourself a release date, no matter what the situation is.
+ As we got several requests from people who want to play with it, we decided
+ on a release date and did our best to get it into a working shape.
+ BUT THIS SOFTWARE IS STILL UNDER DEVELOPMENT! This means
 \layout Itemize
 
-it should have an easy to use graphical user interface 
+it is incomplete and awkward to use
 \layout Itemize
 
-it should be as powerful and extensible as possible, being able to replace
- awkward tools such as procmail, thus it must have a built in scripting
- language 
-\layout Itemize
-
-it should have full support for a wide range of standards, including full
- and intuitive MIME support 
-\layout Itemize
-
-it should interact with other programs intuitively, sending MIME mails should
- be as easy as dropping files from a file manager in the message window
-\layout Itemize
-
-it should run on a wide variety of systems 
-\layout Subsection
-
-Current Status
+it may crash occasionally or often or be completely unusable
 \layout Standard
 
-As of the time of writing this document, M is under active development.
- A first public alpha release has been made.
-\layout Subsection
+M is not ready for the end user yet, but we present it in its current state
+ to give you an impression of what it is going to be.
+ We also hope to attract a bit of attention and maybe even some outside
+ help for it.
+\layout Section
 
-Features already implemented
+Which features are implemented?
 \layout Standard
 
-Many of the features planned are already available and new ones are added
- all the time.
- This list will change constantly.
+Quite some already, but more are still missing.
+ What we have so far:
 \layout Itemize
 
 Cross-platform.
@@ -129,33 +116,64 @@ Easy MIME support.
  represented by icons.
 \layout Itemize
 
-Inline displaying of images.
-\layout Itemize
-
-Clickable URLs.
-\layout Itemize
-
-XFace support.
+Inline displaying of images, clickable URLs, XFace support.
 \layout Itemize
 
 Multiple mail folders.
 \layout Itemize
 
-Powerful address database and contact manager with automated collection
- of data from mails.
+Powerful address database and contact manager 
 \layout Itemize
 
 Printing of nicely formatted messages.
 \layout Itemize
 
-Full internationalisation support, M speaks multiple languages.
-\layout Subsection
+Full internationalisation support, M speaks multiple languages, but no translati
+ons yet.
+\layout Section
 
-Features still missing
+TODO, features to implement
 \layout Standard
 
 This is a list of features on our TODO list that we are currently working
  on.
+ Before adding new features, we'll clean up a few things:
+\layout Itemize
+
+First comes a rewrite of the class hierarchy.
+ For better modularisation and CORBA support (Python will profit from this,
+ too.), we will clean up header files and remove some interdependencies.
+ GUI and non-GUI code will be better separated, class implementations and
+ interface definitions will be sorted out more clearly.
+ This includes a common base object with reference couting.
+\layout Itemize
+
+Plug the (very few remaining) memory holes.
+\layout Standard
+
+Then we fix some GUI issues:
+\layout Itemize
+
+add keyboard accelerators and proper tab traversal
+\layout Itemize
+
+add a context sensitive help system
+\layout Itemize
+
+add more dialogs and a tree control for folder selection
+\layout Standard
+
+After that we reach the list of serious improvements:
+\layout Itemize
+
+Better Python support.
+ We have some callbacks in place, but after the class hierarchy rewrite
+ we have to generate new interface files for the complete class hierarchy.
+ Also by this time wxPython might be integrated, so we can actually write
+ some of the configuration dialogs in python which should speed things up.
+ 
+\shape italic 
+Help welcome.
 \layout Itemize
 
 Full Drag and Drop interaction with filemanagers of Windows and Gnome (will
@@ -211,6 +229,9 @@ Support for Drag and Drop interaction with KDE, once that wxQt is available.
 \layout Itemize
 
 CORBA support, possible cooperation with PINN project.
+\layout Itemize
+
+ANY OTHER SUGGESTION
 \layout Subsection
 
 Help Needed
@@ -221,14 +242,10 @@ As you can see, we have big plans for M.
  Areas where we would use some help are
 \layout Itemize
 
-The Python support could be improved (We are absolute beginners in Python,
- so help is very welcome.).
- 
+Python 
 \layout Itemize
 
-Also, if you want to add support for further mail protocols, please get
- in touch with us.
- 
+support for further mail protocols, LDAP
 \layout Itemize
 
 The wxQt project, a port of wxWindows to the Qt toolkit, will also be happy
@@ -240,691 +257,30 @@ The wxQt project, a port of wxWindows to the Qt toolkit, will also be happy
 If you have access to other systems apart from Linux/Solaris/Windows, you
  are very welcome to help us port M to those platforms, or to other hardware
  than Intel.
+\layout Section
+
+Online resources
 \layout Itemize
 
-If you have anything that you would like to change, improve or add to M,
- please get in touch with us.
- We want M to be the best and if you miss a feature, we can always add it.
-\layout Section
-
-Compilation notes
-\layout Standard
-
-These compilation notes are probably a bit outdated.
- The best start is to use the 
-\family typewriter 
---help
-\family default 
- option of configure to see which options it supports.
-\layout Subsection
-
-Operating systems specific
-\layout Subsubsection
-
-Linux
-\layout Standard
-
-If compiling with a non-default compiler like 
-\family typewriter 
-egcs
-\family default 
-, make sure that 
-\family typewriter 
-/usr/include
-\family default 
- is not in the include path, neither should 
-\family typewriter 
-/usr/lib
-\family default 
- be explicitly listed.
- M has been compiled with 
-\family typewriter 
-egcs
-\family default 
- and 
-\family typewriter 
-gcc-2.8.x
-\family default 
- on both, 
-\family typewriter 
-libc5
-\family default 
- and 
-\family typewriter 
-glibc2
-\family default 
- systems.
-\layout Subsubsection
-
-Solaris/SunOS
-\layout Standard
-
-M has been successfully compiled with 
-\family typewriter 
-gcc-2.8.0
-\family default 
- on Solaris.
- Currently it does not compile with the standard 
-\family typewriter 
-C++
-\family default 
- compiler.
-\layout Subsubsection
-
-Microsoft Windows 
-\layout Standard
-
-M can be compiled under Windows, using wxWindows Version 2.0 and Microsoft
- Visual C++.
-\layout Subsection
-
-Other issues/libraries
-\layout Subsubsection
-
-C-client library
-\layout Standard
-
-A copy of the
-\family typewriter 
- c-client library
-\family default 
- is required and is included with the M sources.
- It is available separately from
-\latex latex 
-
-\backslash 
-
-\backslash 
-
-\latex default 
- 
-\family typewriter 
-ftp://ftp.cac.washington.edu/imap/imap.tar.Z
-\family default 
-.
- Before compiling it with M, you need to patch it.
- 
-\layout Standard
-
-The following information only applies if you use a separate 
-\family typewriter 
-c-client
-\family default 
- library source:
-\layout Standard
-
-Unpack the archive in the main M directory, then change into the IMAP directory
- and try a first 
-\family typewriter 
-make
-\family default 
-, i.e.
- a 
-\family typewriter 
-make linux
-\family default 
- or 
-\family typewriter 
-make gso
-\family default 
-.
- This will create a source directory 
-\family typewriter 
-c-client
-\family default 
- with lots of links to other source files in it.
- 
-\layout Standard
-
-Then install the 
-\family typewriter 
-rfc822.c.patch
-\family default 
- on c-client's 
-\family typewriter 
-rfc822.c
-\family default 
- file from the 
-\family typewriter 
-extra/patches
-\family default 
- subdirectory of M and run the 
-\family typewriter 
-c-client++
-\family default 
- script from the 
-\family typewriter 
-extra/scripts
-\family default 
- subdirectory in the c-client source directory, which will rename variables
- in the c-client code to make it C++ compliant.
- If there is any problem, it helps to edit the 
-\family typewriter 
-CCTYPE
-\family default 
- or 
-\family typewriter 
-CFLAGS
-\family default 
- files.
- After creation of the library 
-\family typewriter 
-c-client.a
-\family default 
-, all object files can be deleted.
-\layout Subsubsection
-
-Python 
-\layout Standard
-
-
-\family typewriter 
-configure
-\family default 
- looks for Python in 
-\family typewriter 
-/usr/local/src/Python-1.5
-\family default 
-.
- If your Python is installed in a different location, change the variable
- 
-\family typewriter 
-PYTHON_PATH
-\family default 
- at the beginning of 
-\family typewriter 
-configure
-\family default 
-.
- 
-\layout Subsubsection
-
-XFaces 
-\layout Standard
-
-If you have the 
-\family typewriter 
-compface
-\family default 
- library and header file installed, it will be used to support XFaces.
- To install it, unpack it under the main M directory and apply the patch
- 
-\family typewriter 
-compface.patch
-\family default 
- from the 
-\family typewriter 
-extra/patches
-\family default 
- directory to its sources.
- Compile it and link its header and library to the 
-\family typewriter 
-extra/include
-\family default 
- and 
-\family typewriter 
-extra/lib
-\family default 
- directories.
-\layout Section
-
-Installation
-\layout Subsection
-
-Configuration and Compilation
-\layout Standard
-
-Follow these steps: 
-\layout Enumerate
-
-Edit 
-\family typewriter 
-configure
-\family default 
- so it will find your installation of Python.
- If you do not have it, just skip this step.
-\layout Enumerate
-
-Run 
-\family typewriter 
-configure
-\family default 
- to create the 
-\family typewriter 
-include/config.h
-\family default 
- and 
-\family typewriter 
-makeopts
-\family default 
- file.
- It may be required to edit 
-\family typewriter 
-makeopts
-\family default 
- by hand.
-\layout Enumerate
-
-Run 
-\family typewriter 
-make dep
-\family default 
- and 
-\family typewriter 
-cd src
-\family default 
- and 
-\family typewriter 
-make
-\family default 
- to compile and link M.
- Compiling some of the source files will take an enormous amount of memory,
- so make sure you have enough virtual memory.
- 
-\layout Section
-
-Configuration and Testing
-\layout Subsection
-
-Configuration settings
-\layout Standard
-
-Under Unix all configuration settings are stored in 
-\family typewriter 
-~/.M/config
-\family default 
- under Windows in the registry.
- To get an overview over all possible configuration options and their default
- values, set the value 
-\family typewriter 
-RecordDefaults=1
-\family default 
-.
- Under Unix, do this by creating a new 
-\family typewriter 
-~/.M/config
-\family default 
- file containig the lines
-\layout Standard
-
-
-\latex latex 
-
-\backslash 
-verb|[M]|
-\layout Standard
-
-
-\latex latex 
-
-\backslash 
-verb|RecordDefaults=1|
-\layout Standard
-
-After running M, this file will then contain all default settings.
- Most of them are easily understood.
- Otherwise, the file 
-\family typewriter 
-include/Mdefaults.h
-\family default 
- contains them all with some short comments.
-\layout Subsection
-
-Reading mail/news
-\layout Standard
-
-To read news, you need to open a folder.
- The default incoming mail folder has the name 
-\family typewriter 
-INBOX
-\family default 
-.
- Any other name will be interpreted as a filename relative to the folder
- directory.
- 
-\layout Subsection
-
-Writing mail/news
-\layout Standard
-
-Before being able to send mail, you need to configure the 
-\family typewriter 
-MailHost
-\family default 
- setting to tell it where to send the mail.
- 
-\layout Section
-
-Configuration Settings
-\layout Standard
-
-Configuration settings are stored in configuration files under Unix and
- in the Registry under Windows.
- There are two types of configuration entries, global settings and profile
- settings.
- Global settings are all top-level configuration entries.
-\layout Standard
-
-To get a list of all default entries under Unix, create an empty configuration
- file 
-\family typewriter 
-$HOME/.M/config
-\family default 
- with the content
-\layout Standard
-
-
-\family typewriter 
-[M]
-\layout Standard
-
-
-\family typewriter 
-RecordDefaults=1
-\layout Subsection
-
-Profile Settings
-\layout Standard
-
-M uses a system of inheriting configurations for most of its settings.
- Each profile is represented by one entry in the configuration hierarchy.
- For example, the settings for a standard message window (MessageView) are
- stored in an entry 
-\family typewriter 
-[M/Profiles/MessageView]
-\family default 
-.
-\layout Standard
-
-As the message window is opened from within a mail folder, it also inherits
- the profile from the mail folder, which might be 
-\family typewriter 
-[M/Profiles/INBOX]
-\family default 
-or 
-\family typewriter 
-[M/Profiles/ReallyInterestingMail]
-\family default 
-, depending on which folder you are using at the moment.
- The mail folder setup itself might inherit from some other profile and
- eventually all profiles inherit from 
-\family typewriter 
-[M/Profiles]
-\family default 
-.
-\layout Section
-
-Scripting and Python integration
-\layout Subsection
-
-Introduction
-\layout Standard
-
-M uses Python as an embedded scripting language.
- A large number of user definable callback functions are available.
- Scripts have access most objects living in M.
-\layout Subsection
-
-Initialisation 
-\layout Standard
-
-At startup, M will load a file called 
-\family typewriter 
-Minit.py
-\family default 
- and call the 
-\family typewriter 
-Minit()
-\family default 
- function defined in there, without any arguments.
-\layout Subsection
-
-Callback Functions (Hooks)
-\layout Standard
-
-There are a large number of callbacks available which will be called from
- different places withing M.
- These are documented in 
-\family typewriter 
-Mcallbacks.h
-\family default 
-.
- All of these callbacks are called with at least two arguments:
-\layout Enumerate
-
-The name of the hook for which the function got called, e.g.
- 
-\family typewriter 
-FolderOpenHook
-\layout Enumerate
-
-A pointer to the object from which it was called.
- E.g.
- for 
-\family typewriter 
-FolderOpenHook
-\family default 
-, this would be a pointer to a 
-\family typewriter 
-MailFolder
-\family default 
- object.
- This object does not carry a useable type with it and needs to be converted
- in the callback, e.g.
- if the argument is called 
-\family typewriter 
-arg
-\family default 
- and the object is a 
-\family typewriter 
-MailFolder
-\family default 
-, the object must either be used as 
-\family typewriter 
-MailFolder.MailFolder(arg)
-\family default 
- or be converted as 
-\family typewriter 
-mf = MailFolder.MailFolder(arg)
-\family default 
-.
- 
-\layout Enumerate
-
-Some callbacks have a third argument.
- This is either a single value or a tuple holding several values.
-\layout Subsection
-
-Namespaces
-\layout Standard
-
-To avoid repeatedly typing in the name of the module (
-\family typewriter 
-MailFolder
-\family default 
- in this case), it can be imported into the global namespace with 
-\begin_inset Quotes eld
-\end_inset 
-
-
-\family typewriter 
-from~MailFolder~import~*
-\family default 
-
-\begin_inset Quotes erd
-\end_inset 
-
-.
- By default modules are not imported into the global namespace and must
- be explicitly named.
-\layout Subsection
-
-List of Callbacks
-\layout Standard
-\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol4
-8 5 0 0 -1 -1 -1 -1
-1 1 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-0 0 0 0
-1 0 0 0
-0 0 0 0
-1 1 0 0
-2 1 0 
-8 1 0 
-2 1 0 
-2 1 0 
-2 1 1 
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 2 1 0 0 0 0
-0 2 1 0 0 0 0
-0 8 1 0 0 0 0
-0 2 1 0 0 0 0
-0 2 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-0 8 1 0 0 0 0
-
-Callback Name
-\newline 
-Object Type
-\newline 
-Additional Arguments/Types
-\newline 
-Return Value
-\newline 
-Documentaion
-\newline 
-FolderOpenHook
-\newline 
-MailFolder
-\newline 
-
-\newline 
-void
-\newline 
-Called after a folder has been opened.
-\newline 
-FolderUpdateHook
-\newline 
-MailFolder
-\newline 
-
-\newline 
-void
-\newline 
-Called after a folder has been updated.
-\newline 
-FolderSetMessageFlag
-\newline 
-MailFolder
-\newline 
-(long) index of message
-\newline 
-1 if changing flags is ok,0 otherwise
-\newline 
-Called before changing flags for a mesage.
-\newline 
-
-\newline 
-
-\newline 
-(string)name of flag
-\newline 
-
-\newline 
-
-\newline 
-FolderClearMessageFlag
-\newline 
-MailFolder
-\newline 
-(long) index of message
-\newline 
-1 if changing flags is ok,0 otherwise
-\newline 
-Called before changing flags for a mesage.
-\newline 
-
-\newline 
-
-\newline 
-(string) name of flag
-\newline 
-
-\newline 
-
-\newline 
-FolderExpungeHook
-\newline 
-MailFolder
-\newline 
-
-\newline 
-1 to expunge, 0 to abort
-\newline 
-Called before expunging messages.
-\layout Section
-
-Further Information
-\layout Itemize
-
-You can download the latest version of M from 
+M has a homepage at 
 \family typewriter 
 http://Ballueder.home.ml.org/M/
 \family default 
  
 \layout Itemize
 
-You can also get up-to-date information on M from the M WWW Page:
+The wxWindows homepage is 
 \family typewriter 
- http://Ballueder.home.ml.org/M/
-\layout Itemize
-
-wxWindows is available from
-\latex latex 
- 
-\family typewriter 
-\latex default 
 http://web.ukonline.co.uk/julian.smart/
 \layout Itemize
 
-The GTK port of wxWindows, wxGTK, is available from: http://www.freiburg.linux.de/~
-wxxt/
+wxGTK, the GTK port of wxWindows, is available from 
+\family typewriter 
+http://www.freiburg.linux.de/~wxxt/
 \layout Section
 
 FAQ
+\layout Standard
+
+There will be some after this release - surely.
 \the_end

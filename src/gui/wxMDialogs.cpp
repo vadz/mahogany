@@ -649,6 +649,14 @@ MDialog_FolderCreate(MWindow *parent)
       return;
 
    ProfileBase *profile = new Profile(name, NULL);
-   MDialog_FolderProfile(parent, profile);
+
+   wxDialog *dlg = new wxDialog(parent, -1, _("M - Folder Profile Settings"),
+                             wxDefaultPosition,
+                             wxDefaultSize,
+                             wxDIALOG_MODAL);
+
+   (void) new wxPEP_Folder(profile,dlg);
+   dlg->Fit();
+   dlg->ShowModal();
    delete profile;
 }

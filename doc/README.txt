@@ -1,207 +1,166 @@
 
 
-M - Release Notes 
+M - README
 
-Karsten Ballüder (Ballueder@usa.net, http://Ballueder.home.ml.org)
+Karsten Ballüder \\(Ballueder@usa.net)\\Contact us: m-developers@findmail.com
 
 Abstract
 
-This document is a set of notes about how to compile and install M.
-It also covers some frequently asked questions. 
+These are the release notes for M. Some more detailed information on
+how to compile, install und use it are in the Information files.
 
-\tableofcontents
+Abstract
 
-1 Introduction 
+This information relates to the first public alpha release, 17. August
+1998.
 
-M is intended to be a powerful mail and news client. The following
-points were significant in the development of it 
+1 WARNING - this is (pre-?)alpha
 
-* it should have an easy to use graphical user interface 
+When you do a large free software project, you have two choices: either
+continue hacking without releases and risk to never get it finished,
+or set yourself a release date, no matter what the situation is. As
+we got several requests from people who want to play with it, we decided
+on a release date and did our best to get it into a working shape.
+BUT THIS SOFTWARE IS STILL UNDER DEVELOPMENT! This means
 
-* it should be as powerful and extensible as possible, being able to
-  replace awkward tools such as procmail, thus it must have a built
-  in scripting language 
+* it is incomplete and awkward to use
 
-* it should have full support for a wide range of standards, including
-  full and intuitive MIME support 
+* it may crash occasionally or often or be completely unusable
 
-* it should interact with other programs intuitively, sending MIME
-  mails should be as easy as dropping files from a file manager in
-  the message window
+M is not ready for the end user yet, but we present it in its current
+state to give you an impression of what it is going to be. We also
+hope to attract a bit of attention and maybe even some outside help
+for it.
 
-* it should run on a wide variety of systems 
+2 Which features are implemented?
 
-2 Compilation notes
+Quite some already, but more are still missing. What we have so far:
 
-2.1 Operating systems specific
+* Cross-platform. M compiles on a variety of Unix systems and on Microsoft
+  Windows. Use one mail client, no matter what system you use.
 
-2.1.1 Linux
+* Based on the c-client library from the University of Washington,
+  therefore full access to a wide range of protocols and file formats,
+  including SMTP, MAP, POP3, NNTP and several mailbox formats.
 
-If compiling with a non-default compiler like egcs, make sure that
-/usr/include is not in the include path, neither should /usr/lib be
-explicitly listed. M has been compiled with egcs and gcc-2.8.x on
-both, libc5 and glibc2 systems.
+* Wide (extreme?) user configurability. Whatever makes sense to override
+  or change, can be changed by the user. Configuration supports several
+  configuration files on Unix, with special administrator support
+  for making entries immutable, and the registry on Windows.
 
-2.1.2 Solaris/SunOS
+* Scriptable and extendable. M includes an embedded Python interpreter
+  with full access to its object hierarchy. Write object-oriented
+  scripts to extend and control M.
 
-M has been successfully compiled with gcc-2.8.0 on Solaris. Currently
-it does not compile with the standard C++ compiler.
+* Easy MIME support. Text and other content can be freely mixed and
+  different filetypes are represented by icons.
 
-2.1.3 Microsoft Windows 
+* Inline displaying of images, clickable URLs, XFace support.
 
-M can be compiled under Windows, using wxWindows Version 2.0 and Microsoft
-Visual C++.
+* Multiple mail folders.
 
-2.2 Other issues/libraries
+* Powerful address database and contact manager 
 
-2.2.1 C-client library
+* Printing of nicely formatted messages.
 
-A copy of the c-client library is required and is included with the
-M sources. It is available separately from ftp://ftp.cac.washington.edu/imap/imap.tar.Z.
-Before compiling it with M, you need to patch it. 
+* Full internationalisation support, M speaks multiple languages, but
+  no translations yet.
 
-The following information only applies if you use a separate c-client
-library source:
+3 TODO, features to implement
 
-Unpack the archive in the main M directory, then change into the IMAP
-directory and try a first make, i.e. a make linux or make gso. This
-will create a source directory c-client with lots of links to other
-source files in it. 
+This is a list of features on our TODO list that we are currently working
+on. Before adding new features, we'll clean up a few things:
 
-Then install the rfc822.c.patch on c-client's rfc822.c file from the
-extra/patches subdirectory of M and run the c-client++ script from
-the extra/scripts subdirectory in the c-client source directory, which
-will rename variables in the c-client code to make it C++ compliant.
-If there is any problem, it helps to edit the CCTYPE or CFLAGS files.
-After creation of the library c-client.a, all object files can be
-deleted.
+* First comes a rewrite of the class hierarchy. For better modularisation
+  and CORBA support (Python will profit from this, too.), we will
+  clean up header files and remove some interdependencies. GUI and
+  non-GUI code will be better separated, class implementations and
+  interface definitions will be sorted out more clearly. This includes
+  a common base object with reference couting.
 
-2.2.2 Python 
+* Plug the (very few remaining) memory holes.
 
-configure looks for Python in /usr/local/src/Python-1.5. If your Python
-is installed in a different location, change the variable PYTHON_PATH
-at the beginning of configure. 
+Then we fix some GUI issues:
 
-2.2.3 XFaces 
+* add keyboard accelerators and proper tab traversal
 
-If you have the compface library and header file installed, it will
-be used to support XFaces. To install it, unpack it under the main
-M directory and apply the patch compface.patch from the extra/patches
-directory to its sources. Compile it and link its header and library
-to the extra/include and extra/lib directories.
+* add a context sensitive help system
 
-3 Installation
+* add more dialogs and a tree control for folder selection
 
-3.1 Configuration and Compilation
+After that we reach the list of serious improvements:
 
-Follow these steps: 
+* Better Python support. We have some callbacks in place, but after
+  the class hierarchy rewrite we have to generate new interface files
+  for the complete class hierarchy. Also by this time wxPython might
+  be integrated, so we can actually write some of the configuration
+  dialogs in python which should speed things up. Help welcome.
 
-1. Edit configure so it will find your installation of Python. If you
-  do not have it, just skip this step.
+* Full Drag and Drop interaction with filemanagers of Windows and Gnome
+  (will be added real soon, easy).
 
-2. Run configure to create the include/config.h and makeopts file. It
-  may be required to edit makeopts by hand.
+* Easy to use filtering system for mails.
 
-3. Run make dep and cd src and make to compile and link M. Compiling
-  some of the source files will take an enormous amount of memory,
-  so make sure you have enough virtual memory. 
+* Support for V-cards.
 
-4 Configuration and Testing
+* Nested mail folder hierarchy.
 
-4.1 Configuration settings
+* Spam-Ex spam fighting/auto-complaint function.
 
-Under Unix all configuration settings are stored in ~/.M/config under
-Windows in the registry. To get an overview over all possible configuration
-options and their default values, set the value RecordDefaults=1.
-Under Unix, do this by creating a new ~/.M/config file containig the
-lines
+* Richt-text editing and HTML mail support
 
+* Support for PGP and GNU Privacy Guard to encrypt mails.
 
+* Threading of messages and proper usenet news support.
 
+* Compression of mail folders.
 
+* Delay-Folder to keep mails and re-present them at a later date.
 
-After running M, this file will then contain all default settings.
-Most of them are easily understood. Otherwise, the file include/Mdefaults.h
-contains them all with some short comments.
+* Context sensitive help system (HTML based).
 
-4.2 Reading mail/news
+* Translations to German, French and Italian.
 
-To read news, you need to open a folder. The default incoming mail
-folder has the name INBOX. Any other name will be interpreted as a
-filename relative to the folder directory. 
+* Wide character (Unicode) support and other character sets.
 
-4.3 Writing mail/news
+* Import, export and synchronisation with other programs' address databases.
 
-Before being able to send mail, you need to configure the MailHost
-setting to tell it where to send the mail. 
+* Voice mail.
 
-5 Scripting and Python integration
+* More Python support through wxPython.
 
-5.1 Introduction
+* Support for Drag and Drop interaction with KDE, once that wxQt is
+  available.
 
-M uses Python as an embedded scripting language. A large number of
-user definable callback functions are available. Scripts have access
-most objects living in M.
+* CORBA support, possible cooperation with PINN project.
 
-5.2 Initialisation 
+* ANY OTHER SUGGESTION
 
-At startup, M will load a file called Minit.py and call the Minit()
-function defined in there, without any arguments.
+3.1 Help Needed
 
-5.3 Callback Functions (Hooks)
+As you can see, we have big plans for M. To achieve all this, we need
+some help. Areas where we would use some help are
 
-There are a large number of callbacks available which will be called
-from different places withing M. These are documented in Mcallbacks.h.
-All of these callbacks are called with at least two arguments:
+* Python 
 
-1. The name of the hook for which the function got called, e.g. FolderOpenHook
+* support for further mail protocols, LDAP
 
-2. A pointer to the object from which it was called. E.g. for FolderOpenHook,
-  this would be a pointer to a MailFolder object. This object does
-  not carry a useable type with it and needs to be converted in the
-  callback, e.g. if the argument is called arg and the object is a
-  MailFolder, the object must either be used as MailFolder.MailFolder(arg)
-  or be converted as mf = MailFolder.MailFolder(arg). 
+* The wxQt project, a port of wxWindows to the Qt toolkit, will also
+  be happy for any help. We are not directly involved in this, but
+  being involved with wxWindows, we are happy to support that port.
 
-3. Some callbacks have a third argument. This is either a single value
-  or a tuple holding several values.
+* If you have access to other systems apart from Linux/Solaris/Windows,
+  you are very welcome to help us port M to those platforms, or to
+  other hardware than Intel.
 
-5.4 Namespaces
+4 Online resources
 
-To avoid repeatedly typing in the name of the module (MailFolder in
-this case), it can be imported into the global namespace with ``from~MailFolder~import~*''.
-By default modules are not imported into the global namespace and
-must be explicitly named.
+* M has a homepage at http://Ballueder.home.ml.org/M/ 
 
-5.5 List of Callbacks
+* The wxWindows homepage is http://web.ukonline.co.uk/julian.smart/
 
-+-----------------------+-------------+----------------------------+---------------------------------------+--------------------------------------------+
-|Callback Name          | Object Type | Additional Arguments/Types | Return Value                          | Documentaion                               |
-+-----------------------+-------------+----------------------------+---------------------------------------+--------------------------------------------+
-+-----------------------+-------------+----------------------------+---------------------------------------+--------------------------------------------+
-|FolderOpenHook         | MailFolder  |                            | void                                  | Called after a folder has been opened.     |
-+-----------------------+-------------+----------------------------+---------------------------------------+--------------------------------------------+
-|FolderUpdateHook       | MailFolder  |                            | void                                  | Called after a folder has been updated.    |
-+-----------------------+-------------+----------------------------+---------------------------------------+--------------------------------------------+
-|FolderSetMessageFlag   | MailFolder  | (long) index of message    | 1 if changing flags is ok,0 otherwise | Called before changing flags for a mesage. |
-|                       |             | (string)name of flag       |                                       |                                            |
-+-----------------------+-------------+----------------------------+---------------------------------------+--------------------------------------------+
-|FolderClearMessageFlag | MailFolder  | (long) index of message    | 1 if changing flags is ok,0 otherwise | Called before changing flags for a mesage. |
-|                       |             | (string) name of flag      |                                       |                                            |
-+-----------------------+-------------+----------------------------+---------------------------------------+--------------------------------------------+
-|FolderExpungeHook      | MailFolder  |                            | 1 to expunge, 0 to abort              | Called before expunging messages.          |
-+-----------------------+-------------+----------------------------+---------------------------------------+--------------------------------------------+
+* wxGTK, the GTK port of wxWindows, is available from http://www.freiburg.linux.de/~wxxt/
 
+5 FAQ
 
-6 Further Information
-
-* You can download the latest version of M from http://Ballueder.home.ml.org/M/ 
-
-* You can also get up-to-date information on M from the M WWW Page:
-  http://Ballueder.home.ml.org/M/
-
-* wxWindows is available fromhttp://web.ukonline.co.uk/julian.smart/
-
-* The GTK port of wxWindows, wxGTK, is available from: http://www.freiburg.linux.de/~wxxt/
-
-7 FAQ
+There will be some after this release - surely.
