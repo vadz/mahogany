@@ -466,8 +466,14 @@ wxMessageView::SetParentProfile(ProfileBase *profile)
 {
    SafeDecRef(m_Profile);
 
-   m_Profile = ProfileBase::CreateProfile("MessageView", profile);
-
+   if(profile)
+   {
+      m_Profile = profile;/*ProfileBase::CreateProfile("MessageView", profile);*/
+      m_Profile->IncRef();
+   }
+   else
+      m_Profile = ProfileBase::CreateEmptyProfile();
+   
    UpdateProfileValues();
 
    Clear();
