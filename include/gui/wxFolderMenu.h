@@ -28,6 +28,9 @@ public:
    static MFolder *GetFolder(wxMenu *menu, int id);
 
    /// call this immediately after youfinished using the menu
+   static void Remove(wxMenu *menu);
+
+   /// save as Remove but will also delete the menu
    static void Delete(wxMenu *menu);
 
 private:

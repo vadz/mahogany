@@ -494,7 +494,14 @@ void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
 void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
 {
    // create popup menu if not done yet
-   if ( !m_menu )
+   if (m_menu) delete m_menu;
+
+   m_menuFolders = wxFolderMenu::Create();
+
+   m_menu = new wxMenu;
+   m_menu->Append(WXMENU_POPUP_FOLDER_MENU, _("&Quick move"), m_menuFolders);
+   m_menu->AppendSeparator();
+   
    {
       static const int popupMenuEntries[] =
       {
@@ -520,7 +527,6 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
          WXMENU_MSG_SHOWRAWTEXT,
       };
 
-      m_menu = new wxMenu;
       for ( size_t n = 0; n < WXSIZEOF(popupMenuEntries); n++ )
       {
          int id = popupMenuEntries[n];
@@ -528,23 +534,9 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
       }
    }
 
-   // add a folder menu for quick moving messages: we do it dynamically as the
-   // folder tree could have changed since the last invocation
-   m_menuFolders = wxFolderMenu::Create();
-   wxMenuItem *menuItem = wxMenuItem::New(m_menu, WXMENU_POPUP_FOLDER_MENU,
-                                          _("&Quick move"), "",
-                                          FALSE, m_menuFolders);
-   wxMenuItem *menuItemSep = wxMenuItem::New(m_menu);
-   m_menu->Insert(0, menuItem);
-   m_menu->Insert(1, menuItemSep);
-
    PopupMenu(m_menu, event.GetX(), event.GetY());
 
-   // remove the 2 first items we added
-   m_menu->Delete(menuItemSep);
-   m_menu->Delete(WXMENU_POPUP_FOLDER_MENU);
-
-   wxFolderMenu::Delete(m_menuFolders);
+   wxFolderMenu::Remove(m_menuFolders);
    m_menuFolders = NULL;
 }
 

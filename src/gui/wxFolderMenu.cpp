@@ -131,12 +131,19 @@ MFolder *wxFolderMenu::GetFolder(wxMenu *menu, int id)
    return MFolder::Get(gs_folderNames[(size_t)id]);
 }
 
+void wxFolderMenu::Remove(wxMenu *menu)
+{
+   ASSERT_MSG( menu == gs_menuFolders, "bad parameter in wxFolderMenu::Delete()" );
+
+   gs_menuFolders = NULL;
+
+   gs_folderNames.Empty();
+}
+
 void wxFolderMenu::Delete(wxMenu *menu)
 {
    ASSERT_MSG( menu == gs_menuFolders, "bad parameter in wxFolderMenu::Delete()" );
 
-   delete gs_menuFolders;
-   gs_menuFolders = NULL;
-
-   gs_folderNames.Empty();
+   Remove(menu);
+   delete menu;
 }
