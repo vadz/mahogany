@@ -194,7 +194,7 @@ public:
    virtual void DeleteEntry(const String& strName);
    virtual void DeleteGroup(const String& strName);
 
-   virtual AdbEntry *FindEntry(const wxChar *szName);
+   virtual AdbEntry *FindEntry(const wxChar *szName) const;
 
 private:
    virtual ~BbdbEntryGroup();
@@ -240,7 +240,7 @@ public:
    virtual void DeleteGroup(const String& strName)
       { m_pRootGroup->DeleteGroup(strName); }
 
-   virtual AdbEntry *FindEntry(const wxChar *szName)
+   virtual AdbEntry *FindEntry(const wxChar *szName) const
       { return m_pRootGroup->FindEntry(szName); }
 
       // AdbBook
@@ -952,7 +952,7 @@ BbdbEntryGroup::DeleteGroup(const String& strName)
 }
 
 AdbEntry *
-BbdbEntryGroup::FindEntry(const wxChar *szName)
+BbdbEntryGroup::FindEntry(const wxChar *szName) const
 {
    MOcheck();
 //   wxLogDebug(_T("BbdbEntryGroup::FindEntry() called with: %s"), szName);

@@ -124,7 +124,7 @@ public:
    virtual void DeleteEntry(const String& strName);
    virtual void DeleteGroup(const String& strName);
 
-   virtual AdbEntry *FindEntry(const wxChar *szName);
+   virtual AdbEntry *FindEntry(const wxChar *szName) const;
 
 private:
    // read /etc/passwd
@@ -178,7 +178,7 @@ public:
    virtual void DeleteGroup(const String& strName)
       { m_pRootGroup->DeleteGroup(strName); }
 
-   virtual AdbEntry *FindEntry(const wxChar *szName)
+   virtual AdbEntry *FindEntry(const wxChar *szName) const
       { return m_pRootGroup->FindEntry(szName); }
 
    // AdbBook
@@ -385,7 +385,7 @@ void PasswdEntryGroup::DeleteGroup(const String& strName)
    // we're read only
 }
 
-AdbEntry *PasswdEntryGroup::FindEntry(const wxChar *szName)
+AdbEntry *PasswdEntryGroup::FindEntry(const wxChar *szName) const
 {
    // TODO
    return NULL;

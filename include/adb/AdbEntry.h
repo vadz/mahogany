@@ -224,7 +224,7 @@ public:
   virtual void DeleteGroup(const String& strName) = 0;
 
     /// find entry by name (returns NULL if not found)
-  virtual AdbEntry *FindEntry(const wxChar *szName) = 0;
+  virtual AdbEntry *FindEntry(const wxChar *szName) const = 0;
 
   // misc
     /// description of a group is just its name

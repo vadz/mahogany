@@ -108,7 +108,7 @@ public:
   virtual void DeleteEntry(const String& strName);
   virtual void DeleteGroup(const String& strName);
 
-  virtual AdbEntry *FindEntry(const wxChar *szName);
+  virtual AdbEntry *FindEntry(const wxChar *szName) const;
   virtual bool IsReadOnly() const
      {
         /*ASSERT(m_pParent); return m_pParent->IsReadOnly();*/
@@ -175,7 +175,7 @@ public:
   virtual void DeleteGroup(const String& strName)
     { m_pRootGroup->DeleteGroup(strName); }
 
-  virtual AdbEntry *FindEntry(const wxChar *szName)
+  virtual AdbEntry *FindEntry(const wxChar *szName) const
     { return m_pRootGroup->FindEntry(szName); }
 
   // there can be only one PalmADB

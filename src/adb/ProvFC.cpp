@@ -155,7 +155,7 @@ public:
   virtual void DeleteEntry(const String& strName);
   virtual void DeleteGroup(const String& strName);
 
-  virtual AdbEntry *FindEntry(const wxChar *szName);
+  virtual AdbEntry *FindEntry(const wxChar *szName) const;
 
   // gte the config object
   wxFileConfig *GetConfig() const { return m_pConfig; }
@@ -249,7 +249,7 @@ public:
   virtual void DeleteGroup(const String& strName)
     { m_pRootGroup->DeleteGroup(strName); }
 
-  virtual AdbEntry *FindEntry(const wxChar *szName)
+  virtual AdbEntry *FindEntry(const wxChar *szName) const
     { return m_pRootGroup->FindEntry(szName); }
 
     // AdbBook
@@ -661,7 +661,7 @@ void FCEntryGroup::DeleteGroup(const String& strName)
   GetConfig()->DeleteGroup(strName);
 }
 
-AdbEntry *FCEntryGroup::FindEntry(const wxChar * /* szName */)
+AdbEntry *FCEntryGroup::FindEntry(const wxChar * /* szName */) const
 {
   return NULL;
 }

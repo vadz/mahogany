@@ -2308,9 +2308,10 @@ after you re-started Mahogany!}
 
 Mahogany has a built-in address book system with flexible support
 for different addressbook formats. It can easily expanded to handle
-other programs' file formats and at present supports two formats,
-it's own ADB format (\ref{ADB}) and (X)Emacs' BBDB (\ref{ADB}) address
-book format. Generally the address books are ordered hierarchical,
+other programs' file formats and at present supports three formats,
+it's own ADB format (\ref{ADB}), (X)Emacs' BBDB (\ref{BBDB}) address
+book format, and simple one address per line file (\ref{LineADB}).
+Generally the address books are ordered hierarchical,
 with the possibility to order entries in groups and sub-groups in
 a tree-like fashion. Alias expansion is configurable and also handles
 group names, to expand to the full list of email addresses within
@@ -2408,6 +2409,15 @@ the address editor window. Currently saving of phone numbers to BBDB
 files is unsupported as it uses a different format from Mahogany.
 \textit{Therefore, reading a BBDB file and saving it back to disk
 may lead to a loss of information!}
+
+
+\subsection{One Address per Line File Address Books\_3002\_}
+
+\label{LineADB}This is probably the simplest possible address book format.
+It is useful for integration with external programs and scripts. Addresses
+are stored without name and angle brackets. Mahogany doesn't attempt to lock
+the file, so care must be taken when writing to it from both Mahogany and
+external program.
 
 
 \subsection{Support for Palm Address Books}

@@ -121,7 +121,7 @@ public:
   virtual void DeleteEntry(const String& strName);
   virtual void DeleteGroup(const String& strName);
 
-  virtual AdbEntry *FindEntry(const wxChar *szName);
+  virtual AdbEntry *FindEntry(const wxChar *szName) const;
 
   // get the full path to our group (not '/' terminated)
   wxString GetPath() const;
@@ -170,7 +170,7 @@ public:
   virtual void DeleteGroup(const String& strName)
     { m_pRootGroup->DeleteGroup(strName); }
 
-  virtual AdbEntry *FindEntry(const wxChar *szName)
+  virtual AdbEntry *FindEntry(const wxChar *szName) const
     { return m_pRootGroup->FindEntry(szName); }
 
     // AdbBook
@@ -338,7 +338,7 @@ void DummyEntryGroup::DeleteGroup(const String& /* strName */)
   wxFAIL_MSG(_T("Not implemented"));
 }
 
-AdbEntry *DummyEntryGroup::FindEntry(const wxChar * /* szName */)
+AdbEntry *DummyEntryGroup::FindEntry(const wxChar * /* szName */) const
 {
   return NULL;
 }

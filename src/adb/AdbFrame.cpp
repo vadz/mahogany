@@ -934,6 +934,10 @@ private:
 
 WX_DEFINE_ARRAY(wxControl *, ArrayControls);
 
+static bool gs_constantTrue = true;
+static bool gs_constantFalse = false;
+WX_DEFINE_ARRAY(bool *, ArrayBoolPtr);
+
 // the base class for all of them
 class wxAdbPage : public wxPanel
 {
@@ -974,6 +978,7 @@ protected:
   wxTextCtrl *CreateTextWithLabel(const wxChar *label, long w, wxControl *last);
 
   ArrayControls  m_aEntries;
+  ArrayBoolPtr m_checkBoxOldValue;
 
   // first and last fields of this page in AdbField enum
   size_t m_nFirstField, m_nLastField;
@@ -3376,6 +3381,8 @@ wxAdbPage::wxAdbPage(wxNotebook *notebook, const wxChar *title, int idImage,
   LayoutControls(m_nLastField - m_nFirstField, m_aEntries,
                  &AdbTreeEntry::ms_aFields[m_nFirstField]);
   SetAutoLayout(TRUE);
+  
+  m_checkBoxOldValue.Add(&gs_constantFalse, m_aEntries.GetCount());
 }
 
 // we implement the data transfer for the text fields and check boxes
@@ -3383,6 +3390,7 @@ void wxAdbPage::SetData(const AdbEntry& data)
 {
   wxString str;
   wxTextCtrl *text;
+  int checkBox;
   for ( size_t n = m_nFirstField; n < m_nLastField; n++ ) {
     switch ( AdbTreeEntry::ms_aFields[n].type ) {
       case AdbTreeEntry::FieldDate:
@@ -3400,7 +3408,10 @@ void wxAdbPage::SetData(const AdbEntry& data)
 
       case AdbTreeEntry::FieldBool:
         data.GetField(n, &str);
-        CHECKBOX(n - m_nFirstField)->SetValue(str == _T("1"));
+        checkBox = n - m_nFirstField;
+        m_checkBoxOldValue[checkBox] = str == _T("1")
+          ? &gs_constantTrue : &gs_constantFalse;
+        CHECKBOX(checkBox)->SetValue(*m_checkBoxOldValue[checkBox]);
         break;
 
       default:
@@ -3413,6 +3424,7 @@ void wxAdbPage::SetData(const AdbEntry& data)
 void wxAdbPage::SaveChanges(AdbEntry& data)
 {
   wxTextCtrl *text;
+  int checkBox;
   for ( size_t n = m_nFirstField; n < m_nLastField; n++ ) {
     switch ( AdbTreeEntry::ms_aFields[n].type ) {
       case AdbTreeEntry::FieldDate:
@@ -3429,10 +3441,15 @@ void wxAdbPage::SaveChanges(AdbEntry& data)
         break;
 
       case AdbTreeEntry::FieldBool:
-        if ( CHECKBOX(n - m_nFirstField)->GetValue() )
-          data.SetField(n, _T("1"));
-        else
-          data.SetField(n, _T("0"));
+        checkBox = n - m_nFirstField;
+        if ( *m_checkBoxOldValue[checkBox]
+          != CHECKBOX(checkBox)->GetValue() )
+        {
+          if ( CHECKBOX(checkBox)->GetValue() )
+            data.SetField(n, _T("1"));
+          else
+            data.SetField(n, _T("0"));
+        }
         break;
 
       default:
