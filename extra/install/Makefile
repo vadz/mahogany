@@ -10,6 +10,7 @@ install:
 	$(INSTALL) -d $(DATADIR)/scripts
 	$(INSTALL) -d $(DATADIR)/bin
 	$(INSTALL) -d $(DATADIR)/doc/classes
+	$(INSTALL) -d $(DATADIR)/doc/python
 	ln -fs $(DATADIR)/doc $(PREFIX)/doc/M
 	$(INSTALL) `find scripts/* -not -type d` $(DATADIR)/bin
 	$(INSTALL) `find scripts/py/* -not -type d | fgrep -v config.` $(DATADIR)/scripts
@@ -17,6 +18,7 @@ install:
 	$(INSTALL) $(BUILDDIR)/doc/*.lyx $(DATADIR)/doc/
 	$(INSTALL) $(BUILDDIR)/doc/*.tex $(DATADIR)/doc/
 	$(INSTALL) $(BUILDDIR)/doc/*.ps $(DATADIR)/doc/
+	$(INSTALL) $(BUILDDIR)/src/Python/*.doc $(DATADIR)/doc/python
 
 include ../../makerules
 

@@ -19,9 +19,13 @@ all:
 #	$(CXX) -shared $(MOBJS) -lswigpy $(NONPLIBS) -o libM.so
 #	$(LINK) -o M -L. -lM $(SLIBS)
 
+semistatic:
+	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
+	$(LINK) -o M.semistatic $(LDFLAGS) $(MOBJS) $(SLIBS) 
+
 static:
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
-	$(LINK) -o M.static $(LDFLAGS) $(MOBJS) $(SLIBS) 
+	$(LINK) -static -o M.static $(LDFLAGS) $(MOBJS) $(SLIBS) 
 
 doc:
 	$(MAKE) -C ../include $@
@@ -42,7 +46,7 @@ install: all
 	$(INSTALL) -d $(DATADIR)/icons
 	$(INSTALL_DATA) `find icons/* -not -type d` $(DATADIR)/icons
 
-.PHONY: all dep clean doc static allclean install
+.PHONY: all dep clean doc semistatic static allclean install
 
 
 

@@ -153,6 +153,7 @@ DEFAULT_USE_DOCXX=0
 DEFAULT_USE_KDOC=1
 DEFAULT_USE_SHADOW=1
 DEFAULT_USE_OLDLIBC=0
+DEFAULT_USE_LIBINTL=0
 
 MAKE_USE_WXTAB="USE_WXTAB=1"
 
@@ -294,6 +295,10 @@ USE_SHADOW)
 AC_OVERRIDES(libc5,libc5,
 --with-libc5              compile for old libc5 on Linux,
 USE_OLDLIBC)
+
+AC_OVERRIDES(libintl,libintl,
+--with-libintl              compile with libintl (not needed for glibc2),
+USE_LIBINTL)
 
 AC_CONFIG_AUX_DIR(extra/scripts)
 
@@ -578,6 +583,9 @@ fi
 AC_SUBST(LIBDL_LINK)
 
 
+if  test "x$USE_OLDLIBC" = "x1" ; then USE_LIBINTL=1; fi
+if  test "x$USE_LIBINTL" = "x1"
+then 
 LIBINTL_LINK=
 AC_MSG_CHECKING(for intl library)
 AC_PATH_FIND_LIBRARIES($SEARCH_LIB,intl)
@@ -590,6 +598,17 @@ else
 AC_MSG_RESULT(no)
 fi
 AC_SUBST(LIBINTL_LINK)
+fi
+
+AC_MSG_CHECKING(for libintl.h header)
+AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,libintl.h)
+if test "$ac_find_includes" != "" ; then
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(HAVE_LIBINTL_H)
+else
+  AC_MSG_RESULT(no)
+fi
+
 
 COMPFACE_LINK=
 AC_MSG_CHECKING(for compface library)

@@ -101,6 +101,7 @@ bool	MDialog_YesNoDialog(char const *message,
        @param profile	the profile to use
        @return pointer to a temporarily allocated buffer with he filename, or NULL
    */
+#if 0
 const char *MDialog_FileRequester(char const *message,
 				      MWindow *parent = NULL,
 				      char const *path = NULL,
@@ -109,6 +110,17 @@ const char *MDialog_FileRequester(char const *message,
 				      char const *wildcard = NULL,
 				      bool save = false,
 				      ProfileBase *profile = NULL
+   );
+#endif
+
+const char *MDialog_FileRequester(String const &message,
+                                  MWindow *parent = NULL,
+                                  String path = NULLstring,
+                                  String filename = NULLstring,
+                                  String extension = NULLstring,
+                                  String wildcard = NULLstring,
+                                  bool save = false,
+                                  ProfileBase *profile = NULL
    );
 
 /** simple Yes/No dialog

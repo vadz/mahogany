@@ -63,7 +63,19 @@ MDialog_Message = MAppBasec.MDialog_Message
 
 MDialog_YesNoDialog = MAppBasec.MDialog_YesNoDialog
 
-MDialog_FileRequester = MAppBasec.MDialog_FileRequester
+def MDialog_FileRequester(arg0,*args):
+    argl = map(None,args)
+    try: argl[1] = argl[1].this
+    except: pass
+    try: argl[2] = argl[2].this
+    except: pass
+    try: argl[3] = argl[3].this
+    except: pass
+    try: argl[4] = argl[4].this
+    except: pass
+    args = tuple(argl)
+    val = apply(MAppBasec.MDialog_FileRequester,(arg0.this,)+args)
+    return val
 
 MDialog_AdbLookupList = MAppBasec.MDialog_AdbLookupList
 

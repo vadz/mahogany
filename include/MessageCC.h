@@ -142,6 +142,11 @@ public:
    */
    void GetHeaderLine(const String &line, String &value);
 
+   /** Get a complete header text.
+       @return pointer to an internal buffer
+   */
+   const char * GetHeader(void) const;
+
    /** get Subject line
        @return Subject entry
    */

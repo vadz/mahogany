@@ -206,6 +206,8 @@
 #define   MP_USEOUTGOINGFOLDER   "KeepCopies"
 /// write outgoing mail to folder:
 #define   MP_OUTGOINGFOLDER      "SentMailFolder"
+/// Show all message headers?
+#define   MP_SHOWHEADERS         "ShowHeaders"
 /** @name for folder list ctrls: ratios of the width to use for
     columns */
 //@{
@@ -392,6 +394,8 @@
 #define   MP_USEOUTGOINGFOLDER_D  1
 /// write outgoing mail to folder:
 #define   MP_OUTGOINGFOLDER_D  "SentMail"
+/// Show all message headers?
+#define   MP_SHOWHEADERS_D         0
 
 /** @name for folder list ctrls: ratios of the width to use for
     columns */

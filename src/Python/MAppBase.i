@@ -3,31 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.1  1998/06/08 08:34:55  KB
- * Python adapted to use MAppBase/MDialog instead of MApplication.
- *
- * Revision 1.5  1998/05/30 17:55:52  KB
- * Python integration mostly complete, added hooks and sample callbacks.
- * Wrote documentation on how to use it.
- *
- * Revision 1.4  1998/05/24 07:54:13  KB
- * works?
- *
- * Revision 1.3  1998/05/24 08:28:56  KB
- * eventually fixed the type problem, now python works as expected
- *
- * Revision 1.2  1998/05/13 19:01:54  KB
- * added kbList, adapted MimeTypes for it, more python, new icons
- *
- * Revision 1.1  1998/04/29 19:55:42  KB
- * some more scripting and configure changes for python
- *
- * Revision 1.1  1998/03/14 12:21:11  karsten
- * first try at a complete archive
- *
+ * $Id$
  *******************************************************************/
 %module 	MAppBase
 %{
@@ -94,14 +70,14 @@ bool	MDialog_YesNoDialog(char  *message,
 		    char  *title = MDIALOG_YESNOTITLE,
 		    bool YesDefault = true);
 
- char *MDialog_FileRequester(char *message,
-				      MFrame *parent = NULL,
-				      char  *path = NULL,
-				      char  *filename = NULL,
-				      char  *extension = NULL,
-				      char  *wildcard = NULL,
-				      bool save = false,
-				      ProfileBase *profile = NULL
+char *MDialog_FileRequester(String  &message,
+                            MWindow *parent = NULL,
+                            String path = NULLstring,
+                            String filename = NULLstring,
+                            String extension = NULLstring,
+                            String wildcard = NULLstring,
+                            bool save = false,
+                            ProfileBase *profile = NULL
    );
 
 AdbEntry *

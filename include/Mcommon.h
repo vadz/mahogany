@@ -278,4 +278,7 @@
 #endif
 //@}
 
+/// define a NULL for strings (FIXME: is this valid for std::string ?)
+#define   NULLstring String((const char *)NULL)
+
 #endif	// MCOMMON_H

@@ -124,19 +124,21 @@ LDFLAGS  = $(OPT) $(GUI_LDFLAGS)
 
 LIBS= \
   -L$(BUILDDIR)/extra/lib \
-  $(EXTRALIBS) $(EXTRA_SRC_LIB) $(CCLIENTLIB) \
+  $(EXTRA_SRC_LIB) $(CCLIENTLIB) \
   $(GUI_LINK) \
   $(XPM_LINK) \
   $(PYTHON_LINK) $(SWIG_LINK) \
+  $(EXTRALIBS) \
   $(X_EXTRA_LIBS) \
   $(X_PRE_LIBS) \
   $(X_LIBS) -lX11 -lm
 
 SLIBS= \
-  $(EXTRALIBS) $(EXTRA_SRC_LIB) $(CCLIENTLIB) \
+  $(EXTRA_SRC_LIB) $(CCLIENTLIB) \
   $(GUI_SLINK) \
   $(XPM_LINK) \
   $(PYTHON_LINK) $(SWIG_LINK) \
+  $(EXTRALIBS) \
   $(X_EXTRA_LIBS) \
   $(X_PRE_LIBS) \
   $(X_LIBS) -lX11 -lm

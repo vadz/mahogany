@@ -3,60 +3,50 @@ $Id$
 
 *** things to fix/implement next ***
 
-- toolbar/Send button in ComposeView ?
-
 - new mail callback
 
-- SendMessageCC
-  + add folder aliases (trivial)
-
-- MessageView:
-  + use parameters from list as default filenames
-
-- wxMainFrame:
-  + add message menu
-  + unsplit for now
+- wxGTK/GTK when scrolled, mouse events in wxScrolledWindow carry wrong coordinates (>16000)
 
 - wxLayout:
   + fix wxGTK postscript printing which is pretty broken, compare with wxXt?
   + backspace sometimes goes wrong, occasional editing problems ??
   + flicker
   + key bindings for wxLayoutWindow
-  + selection with a mouse (and the keys?)
   + cursor not seen if at (0, 0), hide it if we don't have focus.
     it could also be made to blink (use a timer...)
 
 - Profile/wxMDialogs
   + fix usage of readEntry to use String objects
   + wxMDialogs completely broken as it is now
+    --> fixed this by using String parameters in FileRequester
   + who cleans up CPYSTR() generated strings?
-  + find path to global configuration file and use it
+  + find path to global configuration file and use it?
 
-- write some first configuration dialogs and for opening a folder
+- drop Script classes and wxtab
 
-- configure: USE_WXCONFIG does not get defined!
-
-- WINDOWS: how to do MIME handling?
-
-- fix non-ASCII characters in header lines
 
 - Python
   + in src/Python: improve rules to always redo .cpp/.py
-  + drop Script classes
   + add remaining (important) interface definitions
   + add an InputBox dialog
   + user/global Minit files, security issues
-  + add documentation to installation target
   + add OnNewMail callback by counting messages in mailbox
     + add sample callback showing new messages
   + update interface files
+
+- write some first configuration dialogs and for opening a folder
+
+- configure: USE_WXCONFIG does not get defined ?
+
+- WINDOWS: how to do MIME handling?
+
 
 *** to implement in near future ***
 
 - add support for popping window open and reading a folder of one's choice
   (for being controlled from xbiff like programs)
-  idea: read from ~/.M/control whenever being sent a certain signal,
-        execute that text as a python script
+  idea: listen() on a socket and write socket number to a file ~/.M/socket 
+
 
 - threading of messages via MessageId/References header lines
   Follow examples in SunExpert journal.
@@ -73,6 +63,9 @@ $Id$
 - lots of dialogs for profile settings required
 
 - support for external editor (WHAT!? KB)
+
+- fix non-ASCII characters in header lines
+
 
 *** long-term projects ***
 
