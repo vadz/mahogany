@@ -338,34 +338,35 @@ void ProfileBase::SetExpandEnvVars(bool bDoIt)
     @return a pointer to kbStringList of profile names to be freed by caller.
 */
 static void 
-ListProfilesHelper(wxConfigBase *global_config,
-                   kbList *list, int type, String const &path)
+ListProfilesHelper(wxConfigBase *config,
+                   kbList *list,
+                   int type,
+                   String const &path)
 {
+   wxString oldpath = config->GetPath();
+   config->SetPath(path);
+
+   int ptype;
+
+   // these variables will be filled by GetFirstGroup/GetNextGroup
    long index = 0;
    wxString name;
-   wxString pathname;
-   int ptype;
-   wxString oldpath = global_config->GetPath();
-   global_config->SetPath(path);
-   if(global_config->GetFirstGroup(name, index))
+
+   bool ok = config->GetFirstGroup(name, index);
+   while ( ok )
    {
-      global_config->Read(name+MP_PROFILE_TYPE, &ptype, MP_PROFILE_TYPE_D);
-      pathname = path;
+      config->Read(name + '/' + MP_PROFILE_TYPE, &ptype, MP_PROFILE_TYPE_D);
+      wxString pathname = path;
       pathname << '/' << name;
       if(type == ProfileBase::PT_Any || ptype == type)
          list->push_back(new String(pathname));
-      ListProfilesHelper(global_config, list, type, pathname);
+      ListProfilesHelper(config, list, type, pathname);
+
+      ok = config->GetNextGroup (name, index);
    }
-   while(global_config->GetNextGroup (name, index))
-   {
-      global_config->Read(name+MP_PROFILE_TYPE, &ptype, MP_PROFILE_TYPE_D);
-      pathname = path;
-      pathname << '/' << name;
-      if(type == ProfileBase::PT_Any || ptype == type)
-         list->push_back(new String(pathname));
-      ListProfilesHelper(global_config, list, type, pathname);
-   }
-   global_config->SetPath(oldpath);
+
+   // restore path
+   config->SetPath(oldpath);
 }
 
 kbStringList *
@@ -373,9 +374,12 @@ ProfileBase::ListProfiles(int type)
 {
    kbStringList *list = new kbStringList;
    wxConfigBase *global_config = mApplication->GetProfile()->m_config;
-   if(! global_config)
-      return list;
-   ListProfilesHelper(global_config, list, type, "");
+   if( global_config )
+   {
+      // may be give a (debug) warning here?
+      ListProfilesHelper(global_config, list, type, "");
+   }
+
    return list;
 }
 
