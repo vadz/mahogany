@@ -1206,14 +1206,14 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    if ( gs_installWizardData.collectAllMail )
    {
       // hide INBOX, show the other one
-      flagInbox = MF_FLAGS_HIDDEN | MF_FLAGS_KEEPOPEN;
+      flagInbox = MF_FLAGS_HIDDEN;
       flagNewMail = 0;
    }
    else
    {
-      // hie NEW MAIL, show INBOX
+      // hide NEW MAIL, show INBOX
       flagInbox = 0;
-      flagNewMail = MF_FLAGS_HIDDEN | MF_FLAGS_KEEPOPEN;
+      flagNewMail = MF_FLAGS_HIDDEN;
    }
 
    // create hidden INBOX
@@ -1253,7 +1253,7 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
       profile->writeEntry(MP_TRASH_FOLDER, _("Trash"));
       if(! MailFolder::CreateFolder(_("Trash"),
                                     MF_FILE,
-                                    MF_FLAGS_DONTDELETE|MF_FLAGS_KEEPOPEN,
+                                    MF_FLAGS_DONTDELETE,
                                     _("Trash"),
                                     _("Trash folder for deleted messages.") ) )
          wxLogError(_("Could not create Trash mailbox."));
@@ -1908,8 +1908,7 @@ VerifyInbox(void)
    strutil_delwhitespace(foldername);
 
    static const long flagsNewMail = MF_FLAGS_NEWMAILFOLDER |
-                                    MF_FLAGS_DONTDELETE |
-                                    MF_FLAGS_KEEPOPEN;
+                                    MF_FLAGS_DONTDELETE;
 
    // Do we need to create the NewMailFolder?
    Profile *ibp = Profile::CreateProfile(foldername);
@@ -1956,7 +1955,7 @@ VerifyInbox(void)
       if (!  parent->HasEntry(foldername) )
       {
          ibp->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
-         ibp->writeEntry(MP_FOLDER_TYPE, MF_FILE|MF_FLAGS_KEEPOPEN);
+         ibp->writeEntry(MP_FOLDER_TYPE, MF_FILE);
          ibp->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
          ibp->writeEntry(MP_FOLDER_COMMENT,
                          _("Folder where Mahogany will store copies of outgoing messages."));
@@ -1993,7 +1992,7 @@ VerifyInbox(void)
       if (!  parent->HasEntry(foldername) )
       {
          p->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
-         p->writeEntry(MP_FOLDER_TYPE, MF_FILE|MF_FLAGS_KEEPOPEN);
+         p->writeEntry(MP_FOLDER_TYPE, MF_FILE);
          p->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
          p->writeEntry(MP_FOLDER_COMMENT,
                          _("Folder where Mahogany will store deleted messages."));
