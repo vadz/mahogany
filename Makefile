@@ -103,6 +103,10 @@ install_doc:
 	done
 
 install: install_bin install_locale install_doc
+ifdef USE_MAC
+	@echo "Mahogany.app has been built in $(top_builddir)/src,"
+	@echo "now you can simply drag and drop it anywhere you want."
+endif
 
 locales:
 	$(MAKE) -C locale all

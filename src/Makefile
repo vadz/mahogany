@@ -40,13 +40,6 @@ endif
 
 include ../makerules
 
-# under Mac OS we need to build a bundle and not just a single binary
-ifdef USE_MAC
-M_APP := M_bundle
-else
-M_APP := M
-endif
-
 # for cygwin/mingw we need to add resources to the main binary
 # and use -mwindows in order to make GUI binary
 ifdef USE_RESOURCES
@@ -64,7 +57,7 @@ endif
 
 # OK, we've got all the names and the rules to generate them; we can
 # now actually specify the dependencies.
-binary:	$(M_APP) $(MSOS)
+binary:	M $(MSOS)
 	@true
 
 M:	$(MOBJS)
@@ -78,7 +71,9 @@ ifdef USE_MAC
 
 include ../makeversion
 
-BUNDLE := M.app/Contents
+M_BUNDLE := M_bundle
+
+BUNDLE := Mahogany.app/Contents
 
 # Target to build a Mac OS X application bundle
 M_bundle: $(BUNDLE)/MacOS/M \
@@ -97,7 +92,7 @@ $(BUNDLE)/PkgInfo:
 
 $(BUNDLE)/MacOS/M: M
 	@$(INSTALL) -d `dirname $@`
-	@mv $< $@
+	@cp $< $@
 
 $(BUNDLE)/Resources/M.rsrc: $(SOURCEDIR)/macosx/M.rsrc
 	@$(INSTALL) -d `dirname $@`
@@ -107,7 +102,11 @@ $(BUNDLE)/Resources/M.icns: $(SOURCEDIR)/macosx/M.icns
 	@$(INSTALL) -d `dirname $@`
 	@cp $< $@
 
-endif # USE_MAC
+else # !USE_MAC
+
+M_BUNDLE :=
+
+endif # USE_MAC/!USE_MAC
 
 Mdll:	libM.so
 	$(LINK) -o M $(LDFLAGS) libM.so
@@ -137,7 +136,7 @@ clean:
 	$(RM) $(MOBJS) $(MSOS)
 	$(RM) $(MOBJS:.o=.d) $(MSOS:.so=.d)
 
-install:
+install: $(M_BUNDLE)
 	$(INSTALL_PROGRAM) $(INSTALL_OPTIONS) M $(BINDIR)
 	$(RM) $(BINDIR)/mahogany
 	ln -s M $(BINDIR)/mahogany

@@ -102,6 +102,15 @@ INSTALL_PROGRAM	:= @INSTALL_PROGRAM@
 INSTALL_DATA	:= @INSTALL_DATA@
 INSTALL_OPTIONS := -m 755
 
+ifdef USE_MAC
+# under Mac OS X we "install" into our bundle which the user can then simply
+# drag and drop whenever he wishes
+DESTDIR = $(top_builddir)/src/Mahogany.app/Contents
+BINDIR = $(DESTDIR)/MacOS
+# LIBDIR and MODULEDIR are unused under Mac so far
+LOCALEDIR = $(DESTDIR)/Resources/locale
+DATADIR = $(DESTDIR)/Resources
+else # normal Unix stuff
 DESTDIR = @prefix@
 # Directory in which to install binaries and scripts
 BINDIR = $(DESTDIR)/bin
@@ -113,6 +122,8 @@ MODULEDIR = $(LIBDIR)/modules
 LOCALEDIR = $(DESTDIR)/share/locale
 # Directory in which to install arch-independent data files
 DATADIR = $(DESTDIR)/share/mahogany
+endif
+
 # where to install docs
 DOCDIR = $(DATADIR)/doc
 

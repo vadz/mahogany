@@ -130,7 +130,9 @@ WX_DEFINE_ARRAY(const wxMFrame *, ArrayFrames);
 // constants
 // ----------------------------------------------------------------------------
 
-static const wxChar *MAHOGANY_DATADIR = _T("share/mahogany");
+#if defined(OS_UNIX) && !defined(OS_MAC)
+   static const wxChar *MAHOGANY_DATADIR = _T("share/mahogany");
+#endif
 
 // ----------------------------------------------------------------------------
 // functions
@@ -993,7 +995,8 @@ MAppBase::InitDirectories()
             if ( path )
             {
                // hmm, do we need to use CFStringGetCString() here instead?
-               m_globalDir = CFStringGetCStringPtr(path, CFStringGetSystemEncoding);
+               m_globalDir = CFStringGetCStringPtr(path,
+                                                   CFStringGetSystemEncoding());
 
                CFRelease(path);
             }
@@ -1380,12 +1383,23 @@ String MAppBase::GetDataDir() const
 {
    String dir = GetGlobalDir();
 
-#ifdef OS_UNIX
-   // if we used local directory as fall back for the global one because we
-   // couldn't find the latter, there is no sense to append "share/..." to it
+   // do we have a real global dir or was it just set to local dir as
+   // fallback?
    if ( dir != GetLocalDir() )
+   {
+#if defined(OS_MAC)
+      // global dir is the bundle directory, our files are under it
+      dir << _T("/Contents/Resources");
+#elif defined(OS_UNIX)
+      // if we used local directory as fall back for the global one because we
+      // couldn't find the latter, there is no sense to append share/mahogany
+      // to it
       dir << _T('/') << MAHOGANY_DATADIR;
-#endif // OS_UNIX
+#elif !defined(OS_WIN)
+      // under Windows the data directory is the same as the program one
+      #error "Don't know how to find data directory on this platform!"
+#endif // OS_XXX
+   }
 
    return dir;
 }
