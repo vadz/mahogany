@@ -455,6 +455,7 @@ enum ConfigFields
    ConfigField_AutoCollectAdb,
    ConfigField_AutoCollectSenderOnly,
    ConfigField_AutoCollectNameless,
+   ConfigField_WhiteList,
 #ifdef USE_BBDB
    ConfigField_Bbdb_HelpText,
    ConfigField_Bbdb_IgnoreAnonymous,
@@ -463,7 +464,7 @@ enum ConfigFields
    ConfigField_Bbdb_SaveOnExit,
    ConfigField_AdbLast = ConfigField_Bbdb_SaveOnExit,
 #else // !USE_BBDB
-   ConfigField_AdbLast = ConfigField_AutoCollectNameless,
+   ConfigField_AdbLast = ConfigField_WhiteList,
 #endif // USE_BBDB/!USE_BBDB
 
    // helper programs
@@ -1523,6 +1524,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Address &book to use"),         Field_Text, ConfigField_AutoCollect   },
    { gettext_noop("Autocollect only &senders' addresses"), Field_Bool, ConfigField_AutoCollect},
    { gettext_noop("Ignore addresses without &names"), Field_Bool, ConfigField_AutoCollect},
+   { gettext_noop("&Whitelist"),                   Field_Text | Field_AppWide, -1 },
 #ifdef USE_BBDB
    { gettext_noop("The following settings configure the support of the Big Brother\n"
                   "addressbook (BBDB) format. This is supported only for compatibility\n"
@@ -1998,6 +2000,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_AUTOCOLLECT_ADB),
    CONFIG_ENTRY(MP_AUTOCOLLECT_SENDER),
    CONFIG_ENTRY(MP_AUTOCOLLECT_NAMED),
+   CONFIG_ENTRY(MP_WHITE_LIST),
 #ifdef USE_BBDB
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_BBDB_IGNOREANONYMOUS),

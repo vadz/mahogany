@@ -45,6 +45,9 @@
 /// suspicious MIME structure?
 #define SPAM_TEST_MIME "badmime"
 
+/// no address in whitelist?
+#define SPAM_TEST_WHITE_LIST "whitelist"
+
 /// blacklisted by the RBL?
 #define SPAM_TEST_RBL "rbl"
 

@@ -34,6 +34,7 @@
 
 #ifndef USE_PCH
 #   include "Mcommon.h"
+#   include "Mdefaults.h"
 
 #   include <wx/frame.h>                // for wxFrame
 #endif // USE_PCH
@@ -44,10 +45,21 @@
 
 #include "UIdArray.h"
 #include "Message.h"
+#include "adb/AdbManager.h"
+#include "adb/AdbBook.h"
+#include "adb/AdbEntry.h"
 
 #include "gui/wxMDialogs.h"             // for MProgressDialog
 
 #include <wx/regex.h>   // wxRegEx::Flags
+
+class MOption;
+
+// ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_WHITE_LIST;
 
 // ----------------------------------------------------------------------------
 // global variables
@@ -2271,6 +2283,83 @@ static bool CheckForHTMLOnly(const Message *msg)
    return false;
 }
 
+// check whether any address field (sender or recipient) matches whitelist
+// FIXME: Match address groups (wx-*@wxwindows.org) and domains
+static bool CheckWhiteList(const Message *msg)
+{
+   static const char *headers[] =
+   {
+      // Source
+      "From",
+      "Sender",
+      "Reply-To",
+      // Destination
+      "To",
+      "Cc",
+      "Bcc",
+      // List
+      "List-Id",
+      "List-Help",
+      "List-Subscribe",
+      "List-Unsubscribe",
+      "List-Post",
+      "List-Owner",
+      "List-Archive",
+      // Obscure
+      "Resent-To",
+      "Resent-Cc",
+      "Resent-Bcc",
+      "Resent-From",
+      "Resent-Sender",
+      // Non-standard - some entries can be probably removed without danger
+      "Envelope-To",            // Exim
+      "X-Envelope-To",          // Sendmail
+      "Apparently-To",          // Procmail ^TO
+      "X-Envelope-From",        // Procmail ^FROM_DAEMON
+      "Mailing-List",           // Ezmlm and Yahoo
+      "X-Mailing-List",         // SmartList
+      "X-BeenThere",            // Mailman
+      "Delivered-To",           // qmail
+      "X-Delivered-To",         // fastmail.fm
+      "X-Original-To",          // postfix 2.0
+      "X-Rcpt-To",              // best.com
+      "X-Real-To",              // CommuniGate Pro
+      "X-MDMailing-List",       // Nancy Mc'Gough's Procmail Faq
+      "Return-Path",            // Nancy Mc'Gough's Procmail Faq
+      NULL
+   };
+   
+   wxArrayString values = msg->GetHeaderLines(headers);
+   wxString list = strutil_flatten_array(values, ',');
+   list.MakeLower();
+
+   AdbManager *manager = AdbManager::Get();
+   manager->LoadAll(); // HACK: So that AdbEditor's provider list is utilized
+   AdbBook *book = manager->CreateBook(READ_APPCONFIG_TEXT(MP_WHITE_LIST));
+   manager->Unget();
+
+   wxArrayString names;
+   book->GetEntryNames(names);
+   
+   bool found = false;
+   for( size_t each = 0; each < names.GetCount(); ++each )
+   {
+      AdbEntry *entry = book->GetEntry(names[each]);
+      
+      wxString address;
+      entry->GetField(AdbField_EMail,&address);
+      address.MakeLower();
+      
+      found = found || list.find(address) != wxString::npos;
+      
+      entry->DecRef();
+   }
+   
+   book->DecRef();
+   
+   return !found;
+}
+
 // check if we have a message with "suspicious" MIME structure
 static bool CheckForSuspiciousMIME(const Message *msg)
 {
@@ -2396,6 +2485,11 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
       {
          if ( CheckForHTMLOnly(msg.Get()) )
             gs_spamTest = _("pure HTML content");
+      }
+      else if ( test == SPAM_TEST_WHITE_LIST )
+      {
+         if ( CheckWhiteList(msg.Get()) )
+            gs_spamTest = _("not in whitelist");
       }
 #ifdef USE_RBL
       else if ( test == SPAM_TEST_RBL )

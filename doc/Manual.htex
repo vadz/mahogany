@@ -2048,7 +2048,10 @@ You may with to autocollect only addresses which have a full name
 - in this case you should check this option. If it is off and the
 address has no name, the first part of e-mail address (the one preceding
 the '@' symbol) will be used instead of the name.
+\item \textbf{Whitelist}\\
+Spam filter option "No match in whitelist" uses this address book.
 \end{itemize}
+
 In addition to its own built-in addressbook format, Mahogany also
 supports the addressbook files of the BBDB addressbook used with Emacs
 (see \ref{BBDB}). Some settings can be set here which apply only

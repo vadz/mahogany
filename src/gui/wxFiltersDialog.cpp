@@ -45,8 +45,6 @@
 #include "MailFolder.h"
 #include "MModule.h"
 
-#include "MFilterLang.h"      // for SPAM_TEST_XXX constants
-
 #include "gui/wxBrowseButton.h"
 #include "gui/wxDialogLayout.h"
 #include "gui/wxFiltersDialog.h"

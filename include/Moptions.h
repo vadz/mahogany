@@ -412,6 +412,7 @@ extern const MOption MP_AWAY_AUTO_EXIT;
 extern const MOption MP_AWAY_REMEMBER;
 extern const MOption MP_AWAY_STATUS;
 extern const MOption MP_CREATE_INTERNAL_MESSAGE;
+extern const MOption MP_WHITE_LIST;
 
 // ----------------------------------------------------------------------------
 // the option names
@@ -1227,6 +1228,9 @@ extern const MOption MP_CREATE_INTERNAL_MESSAGE;
 
 /// stop "folder internal data" message
 #define MP_CREATE_INTERNAL_MESSAGE_NAME   "CreateInternalMessage"
+
+/// name of addressbook to use in whitelist spam filter
+#define MP_WHITE_LIST_NAME "WhiteList"
 
 //@}
 
@@ -2228,6 +2232,9 @@ extern const MOption MP_CREATE_INTERNAL_MESSAGE;
 
 /// stop "folder internal data" message
 #define MP_CREATE_INTERNAL_MESSAGE_DEFVAL   1
+
+/// name of addressbook to use in whitelist spam filter
+#define MP_WHITE_LIST_DEFVAL "whitelist.adb"
 
 //@}
 

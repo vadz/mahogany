@@ -168,6 +168,19 @@ public:
 };
 
 
+class SpamOptionWhiteList : public SpamOption
+{
+public:
+   virtual bool DefaultValue() const { return false; }
+   virtual const char *Token() const
+      { return SPAM_TEST_WHITE_LIST; }
+   virtual const char *ProfileHackName() const
+      { return "SpameWhiteList"; }
+   virtual const char *Title() const
+      { return gettext_noop("No match in &whitelist"); }
+};
+
+
 #ifdef USE_RBL
 
 class SpamOptionRbl : public SpamOption
@@ -239,6 +252,9 @@ private:
    SpamOptionMime m_checkMime;
    SpamOption *PickMime() { return &m_checkMime; }
    
+   SpamOptionWhiteList m_whitelist;
+   SpamOption *PickWhiteList() { return &m_whitelist; }
+   
 #ifdef USE_RBL
    SpamOptionRbl m_checkRBL;
    SpamOption *PickRBL() { return &m_checkRBL; }
@@ -281,6 +297,7 @@ const SpamOptionManagerBody::PickMember SpamOptionManagerBody::ms_members[] =
    &SpamOptionManagerBody::PickReceived,
    &SpamOptionManagerBody::PickHtml,
    &SpamOptionManagerBody::PickMime,
+   &SpamOptionManagerBody::PickWhiteList,
 #ifdef USE_RBL
    &SpamOptionManagerBody::PickRBL,
 #endif // USE_RBL
