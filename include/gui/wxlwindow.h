@@ -38,7 +38,8 @@ enum
    WXLOWIN_MENU_RCLICK,
    WXLOWIN_MENU_LCLICK,
    WXLOWIN_MENU_DBLCLICK,
-   WXLOWIN_MENU_LAST = WXLOWIN_MENU_DBLCLICK
+   WXLOWIN_MENU_MOUSEMOVE,
+   WXLOWIN_MENU_LAST = WXLOWIN_MENU_MOUSEMOVE
 };
 
 /**
@@ -129,6 +130,7 @@ public:
    void OnLeftMouseClick(wxMouseEvent& event)  { OnMouse(WXLOWIN_MENU_LCLICK, event); }
    void OnRightMouseClick(wxMouseEvent& event) { OnMouse(WXLOWIN_MENU_RCLICK, event); }
    void OnMouseDblClick(wxMouseEvent& event)   { OnMouse(WXLOWIN_MENU_DBLCLICK, event); }
+   void OnMouseMove(wxMouseEvent &event)       { OnMouse(WXLOWIN_MENU_MOUSEMOVE, event) ; }
    void OnSetFocus(wxFocusEvent &ev);
    void OnKillFocus(wxFocusEvent &ev);
    //@}
@@ -168,6 +170,8 @@ protected:
    bool m_DoPopupMenu;
    /// Should InternalPaint() scroll to cursor.
    bool m_ScrollToCursor;
+   /// Do we currently have a non-standard cursor?
+   bool m_HandCursor;
    /// the menu
    wxMenu * m_PopupMenu;
    /// for derived classes, set when mouse is clicked

@@ -57,6 +57,7 @@ BEGIN_EVENT_TABLE(wxLayoutWindow,wxScrolledWindow)
    EVT_LEFT_DOWN(wxLayoutWindow::OnLeftMouseClick)
    EVT_RIGHT_DOWN(wxLayoutWindow::OnRightMouseClick)
    EVT_LEFT_DCLICK(wxLayoutWindow::OnMouseDblClick)
+   EVT_MOTION (wxLayoutWindow::OnMouseMove)
    EVT_MENU_RANGE(WXLOWIN_MENU_FIRST, WXLOWIN_MENU_LAST, wxLayoutWindow::OnMenu)
    EVT_SET_FOCUS(wxLayoutWindow::OnSetFocus)
    EVT_KILL_FOCUS(wxLayoutWindow::OnKillFocus)
@@ -82,6 +83,7 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
    SetScrollbars(10, 20 /*lineHeight*/, max.x/10+1, max.y/20+1);
    EnableScrolling(true,true);
    m_maxx = max.x; m_maxy = max.y;
+   m_HandCursor = FALSE;
    SetCursor(wxCURSOR_IBEAM);
    SetDirty();
 }
@@ -138,7 +140,24 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
    else
       wxLogDebug("wxLayoutWindow::OnMouse: Found no object.");
 #endif
-
+   //has the mouse only been moved?
+   if(eventId == WXLOWIN_MENU_MOUSEMOVE)
+   {
+      if(obj && obj->GetUserData() != NULL)
+      {
+         if(!m_HandCursor)
+            SetCursor(wxCURSOR_HAND);
+         m_HandCursor = TRUE;
+      }
+      else
+      {
+         if(m_HandCursor)
+            SetCursor(wxCURSOR_IBEAM);
+         m_HandCursor = FALSE;
+      }
+      return;
+   }
+   
    // always move cursor to mouse click:
    if(obj && eventId == WXLOWIN_MENU_LCLICK)
    {
