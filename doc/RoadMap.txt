@@ -1,0 +1,22 @@
+$Id$
+
+--------------- Roadmap for M releases ----------------------------------
+
+First Alpha release "Fountainbridge":
+-------------------------------------
+
+Feature freeze:  August  3, 1998
+Release date:    August 17, 1998
+Release number:  0.1 (?)
+
+Supported platforms: Linux intel, Win32, Solaris(?)
+Binary only, 3 month expiration date?
+
+Features that have to be added before:
+
+adb & edit, initial config dialog, opening screen,
+expiration control, new FolderView with listCtrl, possibly new
+main window layout, more Python callbacks and interface definitions
+(at the last moment)
+
+Fixes as from TODO file.
