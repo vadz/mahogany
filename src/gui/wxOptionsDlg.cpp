@@ -1356,7 +1356,7 @@ void wxOptionsPageFolders::OnIdle(wxIdleEvent&)
 // ----------------------------------------------------------------------------
 
 wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
-               : wxNotebookDialog(parent, _("Program options"))
+               : wxNotebookDialog(parent, _("Program options"), "OptionsDlg")
 {
 }
 

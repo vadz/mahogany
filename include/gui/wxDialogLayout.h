@@ -101,7 +101,9 @@ class wxNotebookDialog : public wxManuallyLaidOutDialog
 {
 public:
    // ctor
-   wxNotebookDialog(wxFrame *parent, const wxString& title);
+   wxNotebookDialog(wxFrame *parent,
+                    const wxString& title,
+                    const wxString& profileKey = "");
 
    // populate the dialog
       // create the controls above the main notebook, return the last control

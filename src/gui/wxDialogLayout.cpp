@@ -586,14 +586,14 @@ void wxManuallyLaidOutDialog::SetDefaultSize(int width, int height,
    if ( !LastSizeRestored() )
    {
       SetSize(width, height);
+
+      Centre(wxCENTER_FRAME | wxBOTH);
    }
 
    if ( setAsMinimalSizeToo )
    {
       SetSizeHints(width, height);
    }
-
-   Centre(wxCENTER_FRAME | wxBOTH);
 }
 
 wxStaticBox *
@@ -635,8 +635,10 @@ wxManuallyLaidOutDialog::CreateStdButtonsAndBox(const wxString& boxTitle)
 // wxNotebookDialog
 // -----------------------------------------------------------------------------
 
-wxNotebookDialog::wxNotebookDialog(wxFrame *parent, const wxString& title)
-                : wxManuallyLaidOutDialog(parent, title)
+wxNotebookDialog::wxNotebookDialog(wxFrame *parent,
+                                   const wxString& title,
+                                   const wxString& profileKey)
+                : wxManuallyLaidOutDialog(parent, title, profileKey)
 {
    m_btnOk =
    m_btnApply = NULL;
