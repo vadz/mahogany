@@ -971,6 +971,9 @@ wxMessageView::ShowRawText(MailFolder *folder)
    if ( !folder )
       folder = m_folder;
 
+   if ( !folder )
+      folder = m_FolderView->GetFolder();
+
    CHECK( folder, false, "no MailFolder in message view" );
 
    String text;

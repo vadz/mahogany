@@ -147,7 +147,7 @@ public:
 
     void OnSize(wxSizeEvent& event)
     {
-       m_text->SetSize(event.GetSize().GetX(), event.GetSize().GetY(), -1, -1);
+       m_text->SetSize(-1, -1, event.GetSize().GetX(), event.GetSize().GetY());
     }
 
 private:
