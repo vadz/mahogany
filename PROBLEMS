@@ -1,10 +1,4 @@
 
-- the top level appconf (i.e. mApplication) doesn't get written back
-  and seems to be _very_ buggy (empty?), I think I over-improved
-  appconf.cc
-
-- XFace support does not work yet, I am hand over the xpm information in
-  the wrong format
-
 - doc++ dumps core when generating documentation
 
+- the highlighted  urls in message view don't work yet

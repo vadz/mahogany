@@ -2,38 +2,38 @@
 
 <!doctype linuxdoc system>
 
-<article>
+  <article>
 
-<title><em/M/ release notes
-<author>by Karsten Ball&uuml;der &lt;<tt/Ballueder@usa.net/&gt;
-<date>0.0 ($Revision$)
-<abstract>
+      <title><em/M/ release notes
+      <author>by Karsten Ball&uuml;der &lt;<tt/Ballueder@usa.net/&gt;
+      <date>0.0 ($Revision$)
+      <abstract>
 This document is a set of notes about how to compile and install M. It
 also covers some frequently asked questions.
 </abstract>
 
-<toc>
+    <toc>
 
-<sect>Introduction
-<p>
+    <sect>Introduction
+      <p>
 <em/M/ is intended to be a powerful mail and news client. The
 following points were significant in the development of it
 <enum>
-<item>
+	  <item>
 it should have an easy to use graphical user interface
-<item>
+	  <item>
 it should be powerful, being able to replace awkward tools such as
 procmail, thus it must have a built in scripting language
-<item>
+	  <item>
 it should have full support for a wide range of standards, including
 full MIME support
-<item>
+	  <item>
 it should run on a wide variety of systems
-</enum>
+	</enum>
 
-<sect>Compilation notes
+    <sect>Compilation notes
 
-<sect1>Operating systems specific
+      <sect1>Operating systems specific
 
 <sect2>Linux
 
@@ -41,15 +41,15 @@ If compiling with a non-default compiler like egcs, make sure that
 <tt>/usr/include</tt> is not in the include path, neither should
 <tt>/usr/lib</tt> be explicitly listed.
 
-<sect2>Solaris/SunOS
+	<sect2>Solaris/SunOS
 
-<sect1>Other issues/libraries
+      <sect1>Other issues/libraries
 
-<sect2>STL
+	<sect2>STL
 <em/M/ uses the STL, so you need a sufficiently recent compiler,
 i.e. <tt/egcs/ or <tt/gcc-2.8/.
 
-<sect2>
+	<sect2>
 The <tt/c-client library/ is required and is available from
 <tt>ftp://ftp.cac.washington.edu/imap/imap.tar.Z</tt>. Before
 compiling it with <em/M/, you need to patch it.
@@ -68,41 +68,45 @@ beginning of <tt/configure/.
 
 <sect2>XFaces
 If you have the <tt/compface/ library and header file installed, it
-will be used to support XFaces.
+will be used to support XFaces. To install it, unpack it under the
+main M directory and apply the patch <tt/compface.patch/ from the
+<tt>extra/patches</tt> directory to its sources. Compile it and link
+its header and library to the <tt>extra/include</tt> and
+<tt>extra/lib</tt> directories.
 
 <sect>Installation
 
-<sect1>Configuration and Compilation
+		<sect1>Configuration and Compilation
 
-<p>
+		  <p>
 Follow these steps:
 <enum>
 
-<item>
+		      <item>
 Edit <tt/configure/ so it will find your installation  of
 <tt/Python/. If you do not have it, just skip this step.
 
-<item>
+		      <item>
 Run <tt>./configure</tt> to create the <tt>include/config.h</tt> and
 <tt>makeopts</tt> file. It may be required to edit <tt/makeopts/ by
 hand.
 
-<item>
+		      <item>
 Run <tt/make dep/ and <tt/cd src/ and <tt/make/ to compile and link
 <em/M/. Compiling some of the source files will take an enormous
 amount of memory, so make sure you have enough virtual memory.
 
-</enum>
+		    </enum>
 
-<p>
+		  <p>
 You can download the latest version of M from
 <itemize>
-<item><htmlurl url="http://Ballueder.home.ml.org/M/"
-name="http://Ballueder.home.ml.org/M/">
-</itemize>
+		      <item><htmlurl url="http://Ballueder.home.ml.org/M/"
+			  name="http://Ballueder.home.ml.org/M/">
+		    </itemize>
 
 You can also get up-to-date information on M from the 
 <url url="http://Ballueder.home.ml.org/M/" name="M WWW Page">.
 
 
-</article>
+  </article>

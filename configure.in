@@ -1,8 +1,3 @@
-dnl ================ User editable settings ============================
-dnl where to find Python source
-PYTHON_PATH="/usr/local/src/Python-1.3"
-
-dnl ================ do not edit below here ============================
 
 AC_DEFUN(AC_OVERRIDES_PREPARE,
 [
@@ -148,11 +143,18 @@ DEFAULT_USE_WXWINDOWS=1
 DEFAULT_USE_WXWINDOWS2=0
 DEFAULT_USE_WXSTRING=0
 
+dnl ================ User editable settings ============================
+dnl where to find Python source
+PYTHON_PATH="/usr/local/src/Python-1.5"
+dnl name of the python library, omit "lib" and ".a" or ".so"
+PYTHON_LIB="python1.5"
+dnl ================ do not edit below here ============================
+
+
 dnl search path for includes and libraries
 
 SEARCH_INCLUDE="\
     ./extra/include	      \
-    $PYTHON_PATH/Include \
     /usr/include              \
     /usr/Motif1.2/include     \
 			      \
@@ -198,6 +200,7 @@ SEARCH_INCLUDE="   \
 $PWD               \
 $PWD/include       \
 $PWD/extra/include \
+$PYTHON_PATH/Include \
 $SEARCH_INCLUDE    \
 "
 
@@ -206,8 +209,7 @@ SEARCH_LIB="`echo "$SEARCH_INCLUDE" | sed s/include/lib/g` \
                               \
 SEARCH_LIB="\
     $SEARCH_LIB \
-    $PYTHON_PATH/Python \
-    $PYTHON_PATH/Modules \
+    $PYTHON_PATH \
 "
 
 AC_CONFIG_HEADER(include/config.h)
@@ -397,15 +399,13 @@ PYTHON_LINK=
 AC_MSG_CHECKING(for Python)
 AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,Python.h)
 if test "$ac_find_includes" != "" ; then
-  AC_PATH_FIND_LIBRARIES($SEARCH_LIB,Python)
+  AC_PATH_FIND_LIBRARIES($SEARCH_LIB,$PYTHON_LIB)
   if test "$ac_find_libraries" != "" ; then
     AC_INCLUDE_PATH_EXIST($ac_find_includes,$CHECK_INCLUDE)
     AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
     CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
     CHECK_INCLUDE="$CHECK_INCLUDE $ac_path_to_include"
-    PYTHON_LINK="$ac_path_to_link $PYTHON_PATH/Modules/config.o $PYTHON_PATH/Modules/getpath.o -L$PYTHON_PATH/Python \
-    -L$PYTHON_PATH/Modules -lModules -lPython -L$PYTHON_PATH/Objects -lObjects \
-    -L$PYTHON_PATH/Parser -lParser"
+    PYTHON_LINK="$ac_path_to_link -l$PYTHON_LIB"
     PYTHON_INCLUDE="$ac_path_to_include"
     AC_DEFINE(USE_PYTHON)
     AC_MSG_RESULT(yes)

@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/22 20:44:50  KB
+ * fixed global profile bug in MApplication.cc
+ * adopted configure/makeopts to Python 1.5
+ *
  * Revision 1.1  1998/03/14 12:21:19  karsten
  * first try at a complete archive
  *
@@ -28,8 +32,16 @@
 
 #include	<MailFolderCC.h>
 
+#if 0
+#ifdef	USE_PYTHON
+#	include	"pyembed.h"
+#endif
+#endif
+
+
 #ifdef OS_UNIX
-MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME, FALSE, TRUE)
+MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME, FALSE,
+					     FALSE, TRUE)
 #else
 MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME)
 #endif
@@ -57,6 +69,7 @@ MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME)
    //bindtextdomain (M_APPLICATIONNAME, LOCALEDIR);
    textdomain (M_APPLICATIONNAME);
 #endif
+
 
 }
 
@@ -144,7 +157,25 @@ MApplication::OnInit(void)
    char *cptr = ExpandEnvVars(readEntry(MC_USERDIR,MC_USERDIR_D));
    localDir = String(cptr);
    DELETE [] cptr;
-   
+
+      // initialise python interpreter
+#ifdef	USE_PYTHON
+   String	tmp;
+   tmp = GetGlobalDir();
+   tmp += "/scripts:";
+   tmp += GetLocalDir();
+   tmp += "/scripts:";
+   VAR(readEntry(MC_PYTHONPATH,MC_PYTHONPATH_D));
+   tmp += readEntry(MC_PYTHONPATH,MC_PYTHONPATH_D);
+   if(getenv("PYTHONPATH"))
+      tmp += getenv("PYTHONPATH");
+   setenv("PYTHONPATH", tmp.c_str(), 1);
+   VAR(tmp);
+   Py_Initialize();
+   PyRun_SimpleString("import sys,os");
+   PyRun_SimpleString("print 'Hello,', os.environ['USER'] + '.'");
+#endif
+
    // now the icon is available, so do this again:
    topLevelFrame->SetTitle(M_TOPLEVELFRAME_TITLE);
 

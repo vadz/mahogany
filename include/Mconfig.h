@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.2  1998/03/22 20:44:46  KB
+ * fixed global profile bug in MApplication.cc
+ * adopted configure/makeopts to Python 1.5
+ *
  * Revision 1.1  1998/03/14 12:21:11  karsten
  * first try at a complete archive
  *
@@ -54,6 +58,10 @@
 
 #if	USE_BASECLASS
 #	define	BASECLASS	CommonBase
+#endif
+
+#ifdef	HAVE_COMPFACE_H
+#	define	HAVE_XFACES
 #endif
 
 #define	M_STRBUFLEN		1024
