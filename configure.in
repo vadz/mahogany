@@ -132,6 +132,9 @@ AC_ISC_POSIX
 
 AC_LANG_CPLUSPLUS
 
+dnl We are now using libtool
+AM_PROG_LIBTOOL
+
 dnl
 dnl Here we disable support for exceptions if the compiler is gcc and
 dnl new enough to support it.

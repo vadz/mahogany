@@ -5,6 +5,7 @@
 #
 # set build root directory:
 BUILDDIR = @BUILDDIR@
+top_builddir=@BUILDDIR@
 
 # the c-client library:
 CCLIENTDIR=$(BUILDDIR)/extra/src/c-client
@@ -48,6 +49,7 @@ PERL=@PERL@
 CC = @CC@
 CPP = @CPP@
 CXX = @CXX@
+LIBTOOL = @LIBTOOL@
 CXXCPP = @CXXCPP@
 CPPFLAGS =@CPPFLAGS@
 
@@ -80,7 +82,7 @@ PREFIX=@prefix@
 # for the dynamic linker, better than using -rpath
 LD_RUN_PATH=$(DATADIR)/$(CANONICAL_HOST)/lib
 
-LINK = $(CXX) -Wl-r$(LD_RUN_PATH)
+LINK = $(LIBTOOL) --mode=link $(CXX) -Wl-r$(LD_RUN_PATH)
 
 DEF = -DM_PREFIX="\"$(PREFIX)/\""
 INC = -I$(BUILDDIR)/include -I$(BUILDDIR)/extra/include -I$(BUILDDIR)/include/gui -I$(CCLIENTINCLUDE) 

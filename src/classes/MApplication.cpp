@@ -35,6 +35,12 @@
 #  include   <wx/dynarray.h>
 #endif   // USE_PCH
 
+
+#ifdef EXPERIMENTAL
+#   include "MModule.h"
+#endif
+
+
 #include <errno.h>
 
 #include "FolderView.h"
@@ -498,7 +504,22 @@ MAppBase::OnStartup()
    extern void FilterTest(void);
    FilterTest();
 #endif
-   return TRUE;
+
+
+#ifdef EXPERIMENTAL
+   /* Test the MModule subsystem. Completely disabled in release
+      build. */
+   MModule *dummyMod = MModule::LoadModule("Mdummy");
+   if(dummyMod)
+   {
+      INFOMESSAGE(("Successfully loaded Mdummy module:\nName: %s\nDescr: %s\nVersion: %s\n",
+                   dummyMod->GetName(),
+                   dummyMod->GetDescription(),
+                   dummyMod->GetVersion()));
+   }
+   
+#endif
+return TRUE;
 }
 
 void

@@ -2,11 +2,11 @@
 # rules to create object files:
 #
 %.o: %.cc
-	$(CXX) $(CXXFLAGS) -c -o $(ODIR)/$@ $<
+	$(LIBTOOL) --mode=compile $(CXX) $(CXXFLAGS) -c $<
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c -o $(ODIR)/$@ $<
+	$(LIBTOOL) --mode=compile $(CXX) $(CXXFLAGS) -c $<
 %.o: %.c
-	$(CC) $(CFLAGS) -c -o $(ODIR)/$@ $<
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) -c $<
 
 %.cpp: %.i
 	$(SWIG) $(SWIGFLAGS) -o $(ODIR)/$@ $<
