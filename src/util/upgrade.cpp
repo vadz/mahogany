@@ -387,7 +387,7 @@ wxWizardPage *InstallWizardPage::GetPageById(InstallWizardPageId id) const
          CREATE_PAGE(DialUp);
          CREATE_PAGE(Misc);
 #ifdef USE_HELPERS_PAGE
-         CREATE_PAGE(Helpers)
+         CREATE_PAGE(Helpers);
 #endif // USE_HELPERS_PAGE
          CREATE_PAGE(Import);
          CREATE_PAGE(Final);
@@ -402,7 +402,8 @@ wxWizardPage *InstallWizardPage::GetPageById(InstallWizardPageId id) const
 wxEnhancedPanel *InstallWizardPage::CreateEnhancedPanel(wxStaticText *text)
 {
    wxSize sizeLabel = text->GetSize();
-   wxSize sizePage = ((wxWizard *)GetParent())->GetPageSize();
+//   wxSize sizePage = ((wxWizard *)GetParent())->GetPageSize();
+   wxSize sizePage = ((wxWizard *)GetParent())->GetSize();
    wxCoord y = sizeLabel.y + 2*LAYOUT_Y_MARGIN;
 
    wxEnhancedPanel *panel = new wxEnhancedPanel(this, FALSE /* no scrolling */);
@@ -442,8 +443,9 @@ InstallWizardWelcomePage::InstallWizardWelcomePage(wxWizard *wizard)
                 );
 
    wxSize sizeBox = m_checkbox->GetSize(),
-          sizePage = wizard->GetPageSize();
-
+//          sizePage = wizard->GetPageSize();
+      sizePage = wizard->GetSize();
+   
    // adjust the vertical position
    m_checkbox->Move(-1, sizePage.y - 2*sizeBox.y);
 }

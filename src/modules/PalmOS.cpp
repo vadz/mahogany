@@ -23,7 +23,6 @@
 #ifdef USE_PISOCK
 
 #include "MModule.h"
-#include "modules/PalmOS.h"
 
 #include "Mversion.h"
 #include "MInterface.h"

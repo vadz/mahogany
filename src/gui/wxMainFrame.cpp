@@ -46,7 +46,6 @@
 #include "MDialogs.h"
 
 #include "MModule.h"
-#include "modules/PalmOS.h"
 
 // define this for future, less broken versions of wxWindows to dynamically
 // insert/remove the message menu depending on whether we have or not a folder
