@@ -18,9 +18,6 @@
 #  include  <wx/wx.h>
 
 #  include  <Mcommon.h>
-
-#  undef T
-#  include  <list>
 #endif  //USE_PCH
 
 /**
@@ -42,7 +39,7 @@
 struct  IconData
 {
   String  iconName;
-  wxIcon  *iconPtr;
+  wxIcon *iconPtr;
 };
 
 KBLIST_DEFINE(IconDataList, IconData);
@@ -52,10 +49,11 @@ class wxIconManager
    /** A list of all known icons.
        @see IconData
    */
-   IconDataList *iconList;
+   IconDataList *m_iconList;
    
    /// An Icon to return for unknown lookup strings.
-   wxIcon *unknownIcon;
+   wxIcon *m_unknownIcon;
+
 public:
    /** Constructor
    */
@@ -71,13 +69,19 @@ public:
        @param iconName  the name of the icon
        @return the wxIcon
    */
-   wxIcon *GetIcon(String const &iconName = String("unknown"));
+   wxIcon *GetIcon(String const &iconName);
 
    /** Add a name/icon pair to the list
        @param iconName the name for the icon
        @param data the xpm data array (Unix) or the icon resource name (Win)
    */
    void AddIcon(String const &iconName, IconResourceType data);
+
+   /** Get a bitmap: only different from GetIcon under Windows where it looks
+       for th bitmap in resources first and then calls GetIcon
+       @param bmpName the name of the bitmap
+   */
+   wxBitmap *GetBitmap(const String& bmpName);
 };
 
 #endif
