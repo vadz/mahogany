@@ -1264,7 +1264,7 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
 
       if ( m_ProfileValues.quotedColourize )
       {
-         size_t level = GetQuotedLevel(textPart);
+         size_t level = GetQuotedLevel(before);
          style.SetTextColour(GetQuoteColour(level));
 
          // the string shouldn't be shared as only we use it and, although the
@@ -1275,6 +1275,9 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
          char *lineNext = strchr(lineCur, '\n');
          while ( lineNext )
          {
+            // skip '\n'
+            lineNext++;
+
             size_t levelNew = GetQuotedLevel(lineNext);
             if ( levelNew != level )
             {
