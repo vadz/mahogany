@@ -402,78 +402,184 @@ SendMessageCC::SetHeaderEncoding(wxFontEncoding enc)
    m_encHeaders = enc;
 }
 
+// returns true if the character must be encoded in an SMTP header
+static inline bool NeedsEncodingInHeader(unsigned char c)
+{
+   return iscntrl(c) || c > 127 || strchr("()<>@,;:\"/[]?.=", c);
+}
+
 String
 SendMessageCC::EncodeHeaderString(const String& header)
 {
    // only encode the strings which contain the characters unallowed in RFC
-   // 822 headers (FIXME should we quote RFC 822 specials? probably too...)
+   // 822 headers
    const unsigned char *p;
    for ( p = (unsigned char *)header.c_str(); *p; p++ )
    {
-      if ( *p < 32 || *p > 127 )
+      if ( NeedsEncodingInHeader(*p) )
          break;
    }
 
    if ( !*p )
    {
-      // string has only 7bit chars, don't encode
+      // string has only valid chars, don't encode
       return header;
    }
 
-   // get the encoding in RFC 2047 sense: we must get use some encoding so
-   // choose some reasonable one by default
+   // get the encoding in RFC 2047 sense: choose the most reasonable one
    wxFontEncoding enc = m_encHeaders == wxFONTENCODING_SYSTEM
                            ? wxFONTENCODING_ISO8859_1
                            : m_encHeaders;
 
    MimeEncoding enc2047 = GetMimeEncodingForFontEncoding(enc);
 
-   ASSERT_MSG( enc2047 != MimeEncoding_Unknown,
-               "should have valid MIME encoding" );
+   if ( enc2047 == MimeEncoding_Unknown )
+   {
+      FAIL_MSG( "should have valid MIME encoding" );
 
-   // do encode the header
-   unsigned long len; // length of the encoded text
-   unsigned char *text = (unsigned char *)header.c_str(); // cast for cclient
-   unsigned char *textEnc;
-   if ( enc2047 == MimeEncoding_QuotedPrintable )
-   {
-         textEnc = rfc822_8bit(text, header.length(), &len);
-   }
-   else // MimeEncoding_Base64
-   {
-         textEnc = rfc822_binary(text, header.length(), &len);
-         if ( textEnc[len - 2] == '\r' && textEnc[len - 1] == '\n' )
-         {
-            // discard eol
-            len -= 2;
-         }
+      enc2047 = MimeEncoding_QuotedPrintable;
    }
 
-   // FIXME should we check that the length is not greater than 76 here or
-   //       does cclient take care of it?
-
-   String encword(textEnc, (size_t)len);
-
-   // hack: rfc822_8bit() doesn't encode spaces normally but we must
-   // do it inside the headers
-   //
-   // FIXME: what about TABs and other NLs?
-   if ( enc2047 == MimeEncoding_QuotedPrintable )
-   {
-      encword.Replace(" ", "=20");
-   }
-
-   // create a RFC 2047 encoded word
+   // get the name of the charset to use
    String csName = EncodingToCharset(enc);
-   ASSERT_MSG( !csName.empty(), "should have a valid charset name!" );
+   if ( csName.empty() )
+   {
+      FAIL_MSG( "should have a valid charset name!" );
 
+      csName = "UNKNOWN";
+   }
+
+   // the entire encoded header
    String headerEnc;
-   headerEnc.reserve(csName.length() + encword.length() + 16);
-   headerEnc << "=?" << csName << '?' << (char)enc2047 << '?'
-             << encword
-             << "?=";
+   headerEnc.reserve(csName.length() + 2*header.length() + 16);
 
-   fs_give((void **)&textEnc);
+   // encode the header splitting it in the chunks such that they will be no
+   // longer than 75 characters each
+   const char *s = header.c_str();
+   while ( *s )
+   {
+      // if this is not the first line, insert a line break
+      if ( !headerEnc.empty() )
+      {
+         headerEnc << "\r\n ";
+      }
+
+      static const size_t RFC2047_MAXWORD_LEN = 75;
+
+      // how many characters may we put in this encoded word?
+      size_t len = 0;
+
+      // take into account the length of "=?charset?...?="
+      int lenRemaining = RFC2047_MAXWORD_LEN - (5 + csName.length());
+
+      // for QP we need to examine all characters
+      if ( enc2047 == MimeEncoding_QuotedPrintable )
+      {
+         for ( ; s[len]; len++ )
+         {
+            const char c = s[len];
+
+            // normal characters stand for themselves in QP, the encoded ones
+            // take 3 positions (=XX)
+            lenRemaining -= (NeedsEncodingInHeader(c) || c == ' ') ? 3 : 1;
+
+            if ( lenRemaining <= 0 )
+            {
+               // can't put any more chars into this word
+               break;
+            }
+         }
+      }
+      else // Base64
+      {
+         // we can calculate how many characters we may put into lenRemaining
+         // directly
+         len = (lenRemaining / 4) * 3 - 2;
+
+         // but not more than what we have
+         size_t lenMax = strlen(s);
+         if ( len > lenMax )
+         {
+            len = lenMax;
+         }
+      }
+
+      // do encode this word
+      unsigned char *text = (unsigned char *)s; // cast for cclient
+
+      // length of the encoded text and the text itself
+      unsigned long lenEnc;
+      unsigned char *textEnc;
+
+      if ( enc2047 == MimeEncoding_QuotedPrintable )
+      {
+            textEnc = rfc822_8bit(text, len, &lenEnc);
+      }
+      else // MimeEncoding_Base64
+      {
+            textEnc = rfc822_binary(text, len, &lenEnc);
+            while ( textEnc[lenEnc - 2] == '\r' && textEnc[lenEnc - 1] == '\n' )
+            {
+               // discard eol which we don't need in the header
+               lenEnc -= 2;
+            }
+      }
+
+      // put into string as we might want to do some more replacements...
+      String encword(textEnc, (size_t)lenEnc);
+
+      // hack: rfc822_8bit() doesn't encode spaces normally but we must
+      // do it inside the headers
+      //
+      // we also have to encode '?'s in the headers which are not encoded by it
+      if ( enc2047 == MimeEncoding_QuotedPrintable )
+      {
+         String encword2;
+         encword2.reserve(encword.length());
+
+         bool replaced = false;
+         for ( const char *p = encword.c_str(); *p; p++ )
+         {
+            switch ( *p )
+            {
+               case ' ':
+                  encword2 += "=20";
+                  break;
+
+               case '\t':
+                  encword2 += "=09";
+                  break;
+
+               case '?':
+                  encword2 += "=3F";
+                  break;
+
+               default:
+                  encword2 += *p;
+
+                  // skip assignment to replaced below
+                  continue;
+            }
+
+            replaced = true;
+         }
+
+         if ( replaced )
+         {
+            encword = encword2;
+         }
+      }
+
+      // append this word to the header
+      headerEnc << "=?" << csName << '?' << (char)enc2047 << '?'
+                << encword
+                << "?=";
+
+      fs_give((void **)&textEnc);
+
+      // skip the already encoded part
+      s += len;
+   }
 
    return headerEnc;
 }
