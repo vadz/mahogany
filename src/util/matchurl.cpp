@@ -429,7 +429,10 @@ static inline bool IsAlnum(unsigned char c)
 inline bool IsURLMark(char c)
 {
    return c == '-' || c == '_' || c == '.' || c == '!' || c == '~' ||
-          c == '*' || c == '\'' || c == '(' || c == ')';
+          c == '*'
+          // these don't appear in the URLs in practice
+          //|| c == '\'' || c == '(' || c == ')'
+          ;
 }
 
 /// checks a character to be 'reserved' as from RFC2396
@@ -758,13 +761,26 @@ match:
 
    // '@' matches may result in false positives, as not every '@' character
    // is inside a mailto URL so try to weed them out by requiring that the
-   // mail address has a reasonable minimal length ("ab@foo.com" is probably
-   // the shortest we can have, hence 10) which at least avoids matching the
-   // bare '@'s
+   // mail address has a reasonable minimal length ("ab@foo.com" and
+   // "www.xyz.fr" are probably the shortest ones we can have, hence 10) which
+   // at least avoids matching the bare '@'s
    //
-   // also check that we have at least one dot in the domain part, otherwise
-   // it probably isn't an address/URL neither
-   if ( (p - start < 10) || !memchr(text + pos + 1, '.', p - text - pos - 1) )
+   // also check that we have at least one dot in the domain part for the mail
+   // addresses and two dots for the other URLs, otherwise it probably isn't an
+   // address/URL neither
+   bool good = (p - start) >= 10;
+
+   if ( good )
+   {
+      const char *
+         pDot = (char *)memchr(text + pos + 1, '.', p - text - pos - 1);
+      if ( !pDot )
+         good = false;
+      else if ( !isMail )
+         good = memchr(pDot + 1, '.', p - pDot - 1) != NULL;
+   }
+
+   if ( !good )
    {
       int offDiff = pos + len + 1;
       offset += offDiff;
