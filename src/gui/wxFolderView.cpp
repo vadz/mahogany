@@ -2703,12 +2703,22 @@ void wxFolderListCtrl::UpdateStatusBar()
       String msg;
       if ( m_countSelected )
          msg.Printf(_("%lu messages selected"), (unsigned long)m_countSelected);
-      else
-         msg = "";
 
-      wxFrame *frame = mApplication->TopLevelFrame();
-      frame->SetStatusText(msg,
-                           mApplication->GetStatusField(MAppBase::SF_FOLDER));
+      // determine where should this message go
+      wxFrame *frame = GetFrame(this);
+      CHECK_RET( frame, _T("wxFolderListCtrl: no parent frame?") );
+
+      int field;
+      if ( frame == mApplication->TopLevelFrame() )
+      {
+         field = mApplication->GetStatusField(MAppBase::SF_FOLDER);
+      }
+      else // we're opened in another window
+      {
+         field = 0;
+      }
+
+      frame->SetStatusText(msg, field);
    }
 }
 
