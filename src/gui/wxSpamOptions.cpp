@@ -90,14 +90,45 @@ protected:
       return m_array[offset]; \
    }
 
+BOUND_ARRAY(ConfigValueNone,ConfigValueArray);
+BOUND_ARRAY(wxOptionsPage::FieldInfo,FieldInfoArray);
+
+
+/*
+   Represents a single spam option.
+
+   This is an ABC, derived classes below are for the concrete options.
+ */
 class SpamOption
 {
 public:
+   /// Is it on or off by default?
    virtual bool DefaultValue() const = 0;
-   virtual const wxChar *Token() const = 0;
-   virtual const wxChar *ProfileHackName() const = 0;
-   virtual const wxChar *Title() const = 0;
 
+   /// The token used in spam filter string for this option
+   virtual const wxChar *Token() const = 0;
+
+   /// The name of the profile entry used to pass the value to config dialog
+   virtual const wxChar *TempProfileEntryName() const = 0;
+
+   /// The label of the correponding checkbox in the dialog
+   virtual const wxChar *DialogLabel() const = 0;
+
+   /// The number of entries created by BuildFields()
+   virtual size_t GetEntriesCount() const { return 1; }
+
+   /// Initialize the entries needed by this option in fieldInfo
+   virtual size_t BuildFieldInfo(FieldInfoArray& fields, size_t n) const
+   {
+      wxOptionsPage::FieldInfo& info = fields[n];
+      info.label = DialogLabel();
+      info.flags = wxOptionsPage::Field_Bool;
+      info.enable = -1;
+
+      return 1;
+   }
+
+   /// Is it currently active/checked?
    bool m_active;
 };
 
@@ -108,9 +139,9 @@ public:
    virtual bool DefaultValue() const { return true; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_SPAMASSASSIN; }
-   virtual const wxChar *ProfileHackName() const
+   virtual const wxChar *TempProfileEntryName() const
       { return _T("SpamAssassin"); }
-   virtual const wxChar *Title() const
+   virtual const wxChar *DialogLabel() const
       { return gettext_noop("Been tagged as spam by Spam&Assassin"); }
 };
 
@@ -121,9 +152,9 @@ public:
    virtual bool DefaultValue() const { return true; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_SUBJ8BIT; }
-   virtual const wxChar *ProfileHackName() const
+   virtual const wxChar *TempProfileEntryName() const
       { return _T("Spam8BitSubject"); }
-   virtual const wxChar *Title() const
+   virtual const wxChar *DialogLabel() const
       { return gettext_noop("Too many &8 bit characters in subject"); }
 };
 
@@ -134,9 +165,9 @@ public:
    virtual bool DefaultValue() const { return true; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_SUBJCAPS; }
-   virtual const wxChar *ProfileHackName() const
+   virtual const wxChar *TempProfileEntryName() const
       { return _T("SpamCapsSubject"); }
-   virtual const wxChar *Title() const
+   virtual const wxChar *DialogLabel() const
       { return gettext_noop("Only &capitals in subject"); }
 };
 
@@ -147,9 +178,9 @@ public:
    virtual bool DefaultValue() const { return true; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_SUBJENDJUNK; }
-   virtual const wxChar *ProfileHackName() const
+   virtual const wxChar *TempProfileEntryName() const
       { return _T("JunkEndSubject"); }
-   virtual const wxChar *Title() const
+   virtual const wxChar *DialogLabel() const
       { return gettext_noop("&Junk at end of subject"); }
 };
 
@@ -160,9 +191,9 @@ public:
    virtual bool DefaultValue() const { return true; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_KOREAN; }
-   virtual const wxChar *ProfileHackName() const
+   virtual const wxChar *TempProfileEntryName() const
       { return _T("SpamKoreanCharset"); }
-   virtual const wxChar *Title() const
+   virtual const wxChar *DialogLabel() const
       { return gettext_noop("&Korean charset"); }
 };
 
@@ -171,9 +202,9 @@ class SpamOptionExeAttach : public SpamOption
    virtual bool DefaultValue() const { return true; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_EXECUTABLE_ATTACHMENT; }
-   virtual const wxChar *ProfileHackName() const
+   virtual const wxChar *TempProfileEntryName() const
       { return _T("SpamExeAttachment"); }
-   virtual const wxChar *Title() const
+   virtual const wxChar *DialogLabel() const
       { return gettext_noop("E&xecutable attachment"); }
 };
 
@@ -183,9 +214,9 @@ public:
    virtual bool DefaultValue() const { return false; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_XAUTHWARN; }
-   virtual const wxChar *ProfileHackName() const
+   virtual const wxChar *TempProfileEntryName() const
       { return _T("SpamXAuthWarning"); }
-   virtual const wxChar *Title() const
+   virtual const wxChar *DialogLabel() const
       { return gettext_noop("X-Authentication-&Warning header"); }
 };
 
@@ -196,9 +227,9 @@ public:
    virtual bool DefaultValue() const { return false; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_RECEIVED; }
-   virtual const wxChar *ProfileHackName() const
+   virtual const wxChar *TempProfileEntryName() const
       { return _T("SpamReceived"); }
-   virtual const wxChar *Title() const
+   virtual const wxChar *DialogLabel() const
       { return gettext_noop("Suspicious \"&Received\" headers"); }
 };
 
@@ -209,9 +240,9 @@ public:
    virtual bool DefaultValue() const { return false; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_HTML; }
-   virtual const wxChar *ProfileHackName() const
+   virtual const wxChar *TempProfileEntryName() const
       { return _T("SpamHtml"); }
-   virtual const wxChar *Title() const
+   virtual const wxChar *DialogLabel() const
       { return gettext_noop("Only &HTML content"); }
 };
 
@@ -222,9 +253,9 @@ public:
    virtual bool DefaultValue() const { return false; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_MIME; }
-   virtual const wxChar *ProfileHackName() const
+   virtual const wxChar *TempProfileEntryName() const
       { return _T("SpamMime"); }
-   virtual const wxChar *Title() const
+   virtual const wxChar *DialogLabel() const
       { return gettext_noop("Unusual &MIME structure"); }
 };
 
@@ -235,9 +266,9 @@ public:
    virtual bool DefaultValue() const { return false; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_WHITE_LIST; }
-   virtual const wxChar *ProfileHackName() const
+   virtual const wxChar *TempProfileEntryName() const
       { return _T("SpameWhiteList"); }
-   virtual const wxChar *Title() const
+   virtual const wxChar *DialogLabel() const
       { return gettext_noop("No match in &whitelist"); }
 };
 
@@ -250,9 +281,9 @@ public:
    virtual bool DefaultValue() const { return false; }
    virtual const wxChar *Token() const
       { return SPAM_TEST_RBL; }
-   virtual const wxChar *ProfileHackName() const
+   virtual const wxChar *TempProfileEntryName() const
       { return _T("SpamIsInRBL"); }
-   virtual const wxChar *Title() const
+   virtual const wxChar *DialogLabel() const
       { return gettext_noop("Been &blacklisted by RBL"); }
 };
 
@@ -280,11 +311,9 @@ private:
    void ReadProfile(Profile *profile);
    void DeleteProfile(Profile *profile);
 
-   size_t ConfigEntryCount() const { return ms_count+1; }
+   size_t GetConfigEntryCount();
 
-   BOUND_ARRAY(ConfigValueNone,ConfigValueArray);
    ConfigValueArray m_configValues;
-   BOUND_ARRAY(wxOptionsPage::FieldInfo,FieldInfoArray);
    FieldInfoArray m_fieldInfo;
 
    SpamOptionAssassin m_checkSpamAssassin;
@@ -324,6 +353,11 @@ private:
    SpamOptionRbl m_checkRBL;
    SpamOption *PickRBL() { return &m_checkRBL; }
 #endif // USE_RBL
+
+   // the number of entries in controls/config arrats we need, initially 0 but
+   // computed by GetConfigEntryCount() when it is called for the first time
+   size_t m_nEntries;
+
 
    typedef SpamOption *(SpamOptionManagerBody::*PickMember)();
    static const PickMember ms_members[];
@@ -373,13 +407,33 @@ const size_t SpamOptionManagerBody::ms_count
    = WXSIZEOF(SpamOptionManagerBody::ms_members);
 
 
-IMPLEMENT_BOUND_ARRAY(SpamOptionManagerBody::ConfigValueArray)
-IMPLEMENT_BOUND_ARRAY(SpamOptionManagerBody::FieldInfoArray)
+IMPLEMENT_BOUND_ARRAY(ConfigValueArray)
+IMPLEMENT_BOUND_ARRAY(FieldInfoArray)
 
 SpamOptionManagerBody::SpamOptionManagerBody()
 {
+   m_nEntries = 0;
+
    BuildConfigValues();
    BuildFieldInfo();
+}
+
+size_t SpamOptionManagerBody::GetConfigEntryCount()
+{
+   if ( !m_nEntries )
+   {
+      // sum up the entries of all option
+      for ( SpamOptionManagerBody::Iterator
+               option(this); !option.IsEnd(); ++option )
+      {
+         m_nEntries += option->GetEntriesCount();
+      }
+
+      // for the explanation text in the beginning
+      m_nEntries++;
+   }
+
+   return m_nEntries;
 }
 
 void SpamOptionManagerBody::SetDefaults()
@@ -460,7 +514,7 @@ void SpamOptionManagerBody::WriteProfile(Profile *profile)
    for ( SpamOptionManagerBody::Iterator option(this);
       !option.IsEnd(); ++option )
    {
-      profile->writeEntry(option->ProfileHackName(), option->m_active);
+      profile->writeEntry(option->TempProfileEntryName(), option->m_active);
    }
 }
 
@@ -470,7 +524,7 @@ void SpamOptionManagerBody::ReadProfile(Profile *profile)
       !option.IsEnd(); ++option )
    {
       option->m_active = profile->readEntry(
-         option->ProfileHackName(), 0l) != 0l;
+         option->TempProfileEntryName(), 0l) != 0l;
    }
 }
 
@@ -479,26 +533,31 @@ void SpamOptionManagerBody::DeleteProfile(Profile *profile)
    for ( SpamOptionManagerBody::Iterator option(this);
       !option.IsEnd(); ++option )
    {
-      profile->DeleteEntry(option->ProfileHackName());
+      profile->DeleteEntry(option->TempProfileEntryName());
    }
 }
 
 void SpamOptionManagerBody::BuildConfigValues()
 {
-   m_configValues.Initialize(ConfigEntryCount());
+   m_configValues.Initialize(GetConfigEntryCount());
 
+   size_t n = 1;
    for ( SpamOptionManagerBody::Iterator option(this);
       !option.IsEnd(); ++option )
    {
-      ConfigValueDefault &value = m_configValues[option.Index()+1];
-      value = ConfigValueDefault(
-         option->ProfileHackName(),option->DefaultValue());
+      ConfigValueDefault& value = m_configValues[n];
+      value = ConfigValueDefault
+              (
+                  option->TempProfileEntryName(),
+                  option->DefaultValue()
+              );
+      n += option->GetEntriesCount();
    }
 }
 
 void SpamOptionManagerBody::BuildFieldInfo()
 {
-   m_fieldInfo.Initialize(ConfigEntryCount());
+   m_fieldInfo.Initialize(GetConfigEntryCount());
 
    m_fieldInfo[0].label
       = gettext_noop("Mahogany may use several heuristic tests to detect spam.\n"
@@ -509,13 +568,11 @@ void SpamOptionManagerBody::BuildFieldInfo()
    m_fieldInfo[0].flags = wxOptionsPage::Field_Message;
    m_fieldInfo[0].enable = -1;
 
+   size_t n = 1;
    for ( SpamOptionManagerBody::Iterator option(this);
       !option.IsEnd(); ++option )
    {
-      wxOptionsPage::FieldInfo &info = m_fieldInfo[option.Index()+1];
-      info.label = option->Title();
-      info.flags = wxOptionsPage::Field_Bool;
-      info.enable = -1;
+      n += option->BuildFieldInfo(m_fieldInfo, n);
    }
 }
 
@@ -539,7 +596,7 @@ bool SpamOptionManagerBody::ShowDialog(wxFrame *parent)
          // the fields description
          m_fieldInfo.Get(),
          m_configValues.Get(),
-         ConfigEntryCount()
+         GetConfigEntryCount()
       );
 
    bool status = ShowCustomOptionsDialog(page, profile, parent);
