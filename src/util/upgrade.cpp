@@ -1893,7 +1893,9 @@ UpgradeFrom050()
         "You might have to re-set some of these server hosts.\n"
         "\n"
         "The filter handling has also changed significantly and the\n"
-        "old filters won't work anymore, sorry."));
+        "old filter rules won't work anymore, sorry.\n"
+        "You will have to set up new filter rules and assign them\n"
+        "to the folders."));
 
    return true;
 }
@@ -2163,8 +2165,9 @@ VerifyInbox(void)
       if(foldername.Length() == 0)
          foldername = "SentMail";
       mApplication->GetProfile()->writeEntry(MP_OUTGOINGFOLDER, foldername);
+      bool exists = parent->HasEntry(foldername);
       Profile *ibp = Profile::CreateProfile(foldername);
-      if (!  parent->HasEntry(foldername) )
+      if (! exists )
       {
          ibp->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
          ibp->writeEntry(MP_FOLDER_TYPE, MF_FILE);

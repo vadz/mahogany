@@ -363,6 +363,10 @@
 #define   MP_NNTPHOST_PASSWORD  "NewsHostPw"
 /// the mail host
 #define   MP_SMTPHOST_USE_SSL         "MailHostSSL"
+/// sendmail command
+#define MP_SENDMAILCMD "SendmailCmd"
+/// use sendmail?
+#define MP_USE_SENDMAIL "UseSendmail"
 /// the news server
 #define   MP_NNTPHOST_USE_SSL         "NewsHostSSL"
 /// the beacon host to test for net connection
@@ -626,6 +630,8 @@
 //@}
 /** @name timeout values for c-client mail library */
 //@{
+/// IMAP lookahead value
+#define MP_IMAP_LOOKAHEAD "IMAPlookahead"
 /// TCP/IP open timeout in seconds.
 #define MP_TCP_OPENTIMEOUT "TCPOpenTimeout"
 #if 0 // no longer used
@@ -850,7 +856,7 @@
 /// program used to convert image files?
 #define   MP_CONVERTPROGRAM_D      "convert %s -compress None %s"
 /// list of modules to load at startup
-#define MP_MODULES_D   ""
+#define MP_MODULES_D   "Filters"
 /// the format string for status bar folder status display
 #define MP_FOLDERSTATUS_STATBAR_D "%f (%t messages, %r recent, %n new)"
 /// the format string for title bar folder status display
@@ -921,6 +927,10 @@
 #define   MP_SMTPHOST_PASSWORD_D   ""
 /// the mail host
 #define   MP_SMTPHOST_USE_SSL_D   0l
+/// sendmail command
+#define MP_SENDMAILCMD_D "/usr/lib/sendmail -t"
+/// use sendmail?
+#define MP_USE_SENDMAIL_D 0l
 /// tyhe mail server fallback
 #define   MP_SMTPHOST_FB        "localhost"
 /// the news server
@@ -1338,6 +1348,8 @@
 //@}
 /** @name timeout values for c-client mail library */
 //@{
+/// IMAP lookahead value
+#define MP_IMAP_LOOKAHEAD_D 0l
 /// TCP/IP open timeout in seconds.
 #define MP_TCP_OPENTIMEOUT_D      10l
 #if 0 // obsolete

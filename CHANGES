@@ -1,4 +1,11 @@
 (next release) on (date of next release)
+30.09.00 KB: added mail delivery via sendmail
+             removed assert for wxFONTENCODING_DEFAULT encoding in SendMessageCC.cpp
+             improved libmal error/status reporting, updated German translations
+             Added option for IMAP header pre-fetch/lookahead with default set to 1.
+             Fixed OVERVIEW_X bug for IMAP by always building overview on client side. :-(
+             Fixed (hopefully) deletion behaviour for Trash in folderlistctrl.
+             Fixed creation of SentMail folder.
 18.09.00 KB: status/error message display for MAL synchronisation, copying
              messages now preserves status flags
 07.09.00 KB: Copying messages now uses IMAP server-side copies where available,

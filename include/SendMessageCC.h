@@ -6,8 +6,6 @@
  * $Id$
  *******************************************************************/
 
-
-
 #ifndef SENDMESSAGECC_H
 #define SENDMESSAGECC_H
 
@@ -168,7 +166,9 @@ private:
    String m_CharSet;
    /// default hostname
    String m_DefaultHost;
-
+   /// command for Sendmail if needed
+   String m_SendmailCmd;
+   
    /// the header encoding (wxFONTENCODING_SYSTEM if none)
    wxFontEncoding m_encHeaders;
 

@@ -714,6 +714,9 @@ wxMApp::OnInit()
       // reflect settings in menu and statusbar:
       UpdateOnlineDisplay();
 
+      // make sure this is displayed correctly:
+      UpdateOutboxStatus();
+
       // show tip dialog unless disabled
       if ( READ_APPCONFIG(MP_SHOWTIPS) )
       {

@@ -1,16 +1,12 @@
 $Id$
 
 --------------------------------------------------------------------
-README file for Mahogany, Release 0.60 "???"
+README file for Mahogany, Release 0.60 "Redmond"
 --------------------------------------------------------------------
 
 --------------------------------------------------------------------
 Issues with the current release
 --------------------------------------------------------------------
-
-Mahogany, just like wxGTK, works best with gtk+ 1.2.6.  gtk+ 1.2.7
-might cause some minor problems. Please understand that this is not
-a Mahogany-specific problem and that we cannot do anything about it.
 
 More detailed information about Mahogany, how to get support for it,
 how to contribute it, and last not least, how to use it, can be found
@@ -30,7 +26,8 @@ Internet resources
 The Mahogany web page is http://mahogany.sourceforge.net/ or
 http://mahogany.home.dhs.org/
 
-The wxWindows home page is http://wxwindows.org/
+The wxWindows home page is http://wxwindows.org/ or
+http://wxwindows.sourceforge.net/ 
 
 More info on Mahogany can be found on the SourceForge project page,
 including links to the FAQ, docs and mailing lists:
@@ -62,9 +59,6 @@ wxWindows compiled for the GTK library (wxGTK).
 - wxWindows should be configured with the following option:
      ./configure --with-gtk
 
-  If you experience compilation problems, add the option
-  --disable-optimise     # this is also needed for gcc 2.8.0
-
 Doing a "make" and "make install" in the wxWindows directory should
 install the header files and libraries on your system.
 
@@ -75,9 +69,6 @@ install the header files and libraries on your system.
   make    # or "make all" to try to build message catalogs as well
   make doc
   make install
-
-  If you built wxWindows with debug enabled, specify the --with-debug
-  option when configuring Mahogany.
 
   Depending on whether you have installed all required programs in the
   right versions, "make doc" and "make install" might
@@ -92,3 +83,10 @@ install the header files and libraries on your system.
 Also, if you change into the src directory, the additional targets
 "make static" and "make semistatic" are available, to produce binaries
 with less dependencies on external libraries.
+
+If you built wxWindows with debug enabled, specify the --with-debug
+and  --with-wxdebug options when configuring Mahogany.
+
+If you want AvantGo/MAL synchronisation for the PalmOS module, you will
+need to get the libmal.tar.gz library source from the mahogany ftp server
+and unpack it in the extra/src directory.

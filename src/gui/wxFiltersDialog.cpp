@@ -91,7 +91,7 @@ wxString ORC_Types[] =
    gettext_noop("Smaller than"),
    gettext_noop("Older than"),
    gettext_noop("Newer than"),
-   gettext_noop("Is SPAM"),
+   gettext_noop("Is RBL filtered (SPAM)"),
    gettext_noop("Python"),
    gettext_noop("Match RegExp"),
    gettext_noop("Score above"),

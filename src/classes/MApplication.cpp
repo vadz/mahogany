@@ -975,10 +975,11 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
       String target;
       bool alreadyCounted = false;
       msg->GetHeaderLine("To", target);
-      protocol = Prot_SMTP; // default
+      protocol = Prot_Illegal;
       if(target.Length() > 0)
       {
-         protocol = Prot_SMTP;
+         protocol = READ_APPCONFIG(MP_USE_SENDMAIL) ?
+            Prot_Sendmail : Prot_SMTP;
          STATUSMESSAGE(( _("Sending message %lu/%lu: %s"),
                          (unsigned long)(i+1),
                          (unsigned long)(hil->Count()),

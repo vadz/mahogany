@@ -106,7 +106,6 @@ enum ConfigFields
    ConfigField_UserLevelHelp,
    ConfigField_UserLevel,
    ConfigField_SetPassword,
-   
    ConfigField_IdentLast = ConfigField_SetPassword,
 
    // network
@@ -123,8 +122,12 @@ enum ConfigFields
    ConfigField_NewsServerPassword,
 #ifdef USE_SSL
    ConfigField_SSLtext,
-   ConfigField_PopServerSSL,
-   ConfigField_NewsServerSSL,
+   ConfigField_SmtpServerSSL,
+   ConfigField_NntpServerSSL,
+#endif
+#ifdef OS_UNIX
+   ConfigField_UseSendmail,
+   ConfigField_SendmailCmd,
 #endif
    ConfigField_DialUpHelp,
    ConfigField_DialUpSupport,
@@ -142,6 +145,7 @@ enum ConfigFields
    ConfigField_WriteTimeout,
    ConfigField_CloseTimeout,
 #endif // USE_TCP_TIMEOUTS
+   Configfield_IMAPLookAhead,
    ConfigField_RshHelp,
    ConfigField_RshTimeout,
    ConfigField_NetworkLast = ConfigField_RshTimeout,
@@ -659,8 +663,12 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Mahogany can attempt to use SSL (secure sockets layer) to send\n"
                   "mail or news. Tick the following boxes to activate this.")
      , Field_Message, -1 },
-   { gettext_noop("POP server uses SS&L"), Field_Bool,    -1,                        },
-   { gettext_noop("IMAP s&erver uses SSL"),Field_Bool,    -1,                        },
+   { gettext_noop("SMTP server uses SS&L"), Field_Bool,    -1,                        },
+   { gettext_noop("NNTP s&erver uses SSL"),Field_Bool,    -1,                        },
+#endif
+#ifdef OS_UNIX
+   { gettext_noop("Use local send&mail for delivery"), Field_Bool, -1,           },
+   { gettext_noop("Sendmail &command"), Field_Text, ConfigField_UseSendmail },
 #endif
    { gettext_noop("Mahogany contains support for dial-up networks and can detect if the\n"
                   "network is up or not. It can also be used to connect and disconnect the\n"
@@ -682,8 +690,10 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #ifdef USE_TCP_TIMEOUTS
    { gettext_noop("&Read timeout"),                Field_Number | Field_Global | Field_Advanced,    -1,                        },
    { gettext_noop("&Write timeout"),               Field_Number | Field_Global | Field_Advanced,    -1,                        },
-   { gettext_noop("&Close timeout"),               Field_Number | Field_Global | Field_Advanced,    -1,                        },
+   { gettext_noop("&Close timeout"),               Field_Number |
+     Field_Global | Field_Advanced,    -1,                        },
 #endif // USE_TCP_TIMEOUTS
+   { gettext_noop("&Pre-fetch this many msgs"), Field_Number | Field_Global | Field_Advanced,    -1,                        },
    { gettext_noop("If the RSH timeout below is greater than 0, Mahogany will\n"
                   "first try to connect to IMAP servers using rsh instead of\n"
                   "sending passwords in clear text. However, if the server\n"
@@ -949,6 +959,10 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_SMTPHOST_USE_SSL),
    CONFIG_ENTRY(MP_NNTPHOST_USE_SSL),
 #endif
+#ifdef OS_UNIX
+   CONFIG_ENTRY(MP_USE_SENDMAIL),
+   CONFIG_ENTRY(MP_SENDMAILCMD),
+#endif
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_DIALUP_SUPPORT),
    CONFIG_ENTRY(MP_BEACONHOST),
@@ -965,6 +979,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_TCP_WRITETIMEOUT),
    CONFIG_ENTRY(MP_TCP_CLOSETIMEOUT),
 #endif // USE_TCP_TIMEOUTS
+   CONFIG_ENTRY(MP_IMAP_LOOKAHEAD),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_TCP_RSHTIMEOUT),
 

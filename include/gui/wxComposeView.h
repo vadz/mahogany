@@ -73,8 +73,8 @@ public:
    /// Do we want to send mail or post a news article?
    enum Mode
    {
-      Mode_SMTP,
-      Mode_NNTP
+      Mode_Mail,
+      Mode_News
    };
 
    // a message kind - combined with the mode this determines the template

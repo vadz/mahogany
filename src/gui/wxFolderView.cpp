@@ -1414,17 +1414,18 @@ wxFolderView::Update(HeaderInfoList *listing)
 
    size_t n = listing->Count();
 
+#ifdef __WXMSW__
+   m_FolderCtrl->Hide(); // optimise for speed under MSW
+#endif
+   long focusedIndex, tmp = -1;
+   focusedIndex = m_FolderCtrl->GetNextItem(tmp, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
+
    if(n < (size_t) m_NumOfMessages)  // messages have been deleted, start over
    {
       m_FolderCtrl->Clear();
       m_NumOfMessages = 0;
    }
 
-#ifdef __WXMSW__
-   m_FolderCtrl->Hide(); // optimise for speed under MSW
-#endif
-   long focusedIndex, tmp = -1;
-   focusedIndex = m_FolderCtrl->GetNextItem(tmp, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
    bool foundFocus = false;
    HeaderInfo const *hi;
    for(size_t i = 0; i < n; i++)
@@ -1439,13 +1440,13 @@ wxFolderView::Update(HeaderInfoList *listing)
    }
    if(! foundFocus) // old focused UId is gone, so we use the list
       // index instead
-      if(focusedIndex != -1)
+      if(focusedIndex != -1 && focusedIndex < (long) n)
          m_FolderCtrl->SetItemState(focusedIndex,
                                     wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
 
    UpdateTitleAndStatusBars("", "", GetFrame(m_Parent), m_MailFolder);
 
-   if(focusedIndex != -1)
+   if(focusedIndex != -1 && focusedIndex < (long) n)
       m_FolderCtrl->EnsureVisible(focusedIndex);
 
 #ifdef __WXMSW__

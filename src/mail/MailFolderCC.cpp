@@ -945,6 +945,8 @@ MailFolderCC::ApplyTimeoutValues(void)
    (void) mail_parameters(NIL, SET_RSHTIMEOUT, (void *) m_TcpRshTimeout);
    (void) mail_parameters(NIL, SET_SSHTIMEOUT, (void *) m_TcpSshTimeout);
 
+   (void) mail_parameters(NIL, SET_LOOKAHEAD, (void *) m_LookAhead);
+
    // only set the paths if we do use rsh/ssh
    if ( m_TcpRshTimeout )
       (void) mail_parameters(NIL, SET_RSHPATH, (char *)m_RshPath.c_str());
@@ -964,7 +966,8 @@ MailFolderCC::UpdateTimeoutValues(void)
    m_TcpReadTimeout = m_TcpOpenTimeout;
    m_TcpWriteTimeout = m_TcpOpenTimeout;
    m_TcpCloseTimeout = m_TcpOpenTimeout;
-
+   m_LookAhead = READ_CONFIG(p, MP_IMAP_LOOKAHEAD);
+   
    // but a separate one for rsh timeout to allow enabling/disabling rsh
    // independently of TCP timeout
    m_TcpRshTimeout = READ_CONFIG(p, MP_TCP_RSHTIMEOUT);
@@ -1803,6 +1806,7 @@ MailFolderCC::ExpungeMessages(void)
    CHECK_DEAD("Cannot access closed folder\n'%s'.");
    if(PY_CALLBACK(MCB_FOLDEREXPUNGE,1,GetProfile()))
       mail_expunge (m_MailStream);
+   RequestUpdate();
    ProcessEventQueue();
 }
 
@@ -2266,7 +2270,8 @@ MailFolderCC::ParseAddress(ADDRESS *adr)
 }
 
 int
-MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov)
+MailFolderCC::OverviewHeaderEntry (unsigned long uid,
+                                   OVERVIEW_X *ov)
 {
    ASSERT(m_Listing);
 
@@ -2318,7 +2323,9 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov)
          entry.m_To = ""; // no To: for news postings
       }
       else
-        entry.m_To = ParseAddress(ov->to);
+      {
+         entry.m_To = ParseAddress( ov->to );
+      }
 
       wxFontEncoding encoding;
       entry.m_To = DecodeHeader(entry.m_To, &encoding);
@@ -3271,9 +3278,16 @@ extern "C"
 
 void mail_fetch_overview_x (MAILSTREAM *stream,char *sequence,overview_x_t ofn)
 {
-  if (stream->dtb && !(stream->dtb->overview &&
-                       (*stream->dtb->overview) (stream,sequence,(overview_t)ofn)) &&
-      mail_uid_sequence (stream,sequence) && mail_ping (stream)) {
+   if (stream->dtb 
+//
+// We are not using the driver's overview function as we need the
+// OVERVIEW_X structure with the extra To field. This might be
+// a bit inefficient, but the alternative would be to patch all
+// c-client drivers or to check somehow which structure we get.
+//       
+// && !(stream->dtb->overview && (*stream->dtb->overview)(stream,sequence,(overview_t)ofn)) 
+       && mail_uid_sequence (stream,sequence) && mail_ping (stream))
+   {
     MESSAGECACHE *elt;
     ENVELOPE *env = NULL;  // initialisation not needed but keeps compiler happy
     OVERVIEW_X ov;
@@ -3282,16 +3296,17 @@ void mail_fetch_overview_x (MAILSTREAM *stream,char *sequence,overview_x_t ofn)
     ov.optional.xref = NIL;
     for (i = stream->nmsgs; i>= 1; i--)
       if (((elt = mail_elt (stream,i))->sequence) &&
-          (env = mail_fetch_structure (stream,i,NIL,NIL)) && ofn) {
-        ov.subject = env->subject;
-        ov.from = env->from;
-        ov.to = env->to;
-        ov.date = env->date;
-        ov.message_id = env->message_id;
-        ov.references = env->references;
-        ov.optional.octets = elt->rfc822_size;
-        if(! (*ofn) (stream,mail_uid (stream,i),&ov))
-           break;
+          (env = mail_fetch_structure (stream,i,NIL,NIL)) && ofn)
+      {
+         ov.subject = env->subject;
+         ov.from = env->from;
+         ov.to = env->to;
+         ov.date = env->date;
+         ov.message_id = env->message_id;
+         ov.references = env->references;
+         ov.optional.octets = elt->rfc822_size;
+         if(! (*ofn) (stream,mail_uid (stream,i),&ov))
+            break;
       }
   }
 }

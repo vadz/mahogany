@@ -56,6 +56,7 @@
 #include "gui/wxIconManager.h"
 
 #include <wx/utils.h> // wxGetFullHostName()
+#include <wx/file.h>
 
 extern "C"
 {
@@ -113,6 +114,9 @@ SendMessageCC::Create(Protocol protocol,
    m_CharSet = READ_CONFIG(prof,MP_CHARSET);
 
    m_DefaultHost = miscutil_GetDefaultHost(prof);
+
+   m_SendmailCmd = READ_CONFIG(prof, MP_USE_SENDMAIL) ?
+      READ_CONFIG(prof,MP_SENDMAILCMD) : String("");
 
    if(protocol == Prot_SMTP)
    {
@@ -343,7 +347,7 @@ SendMessageCC::SetAddresses(const String &to,
    // If Build() has already been called, then it's too late to change
    // anything.
    ASSERT(m_headerNames == NULL);
-   ASSERT(m_Protocol == Prot_SMTP);
+   ASSERT(m_Protocol == Prot_SMTP || m_Protocol == Prot_Sendmail);
 
    if(to.Length())
    {
@@ -645,6 +649,7 @@ SendMessageCC::EncodingToCharset(wxFontEncoding enc)
          FAIL_MSG( "unknown encoding" );
 
       case wxFONTENCODING_SYSTEM:
+      case wxFONTENCODING_DEFAULT:
          // no special encoding
          break;
    }
@@ -809,7 +814,7 @@ SendMessageCC::SendOrQueue(void)
       if(success)
       {
          wxString msg;
-         if(m_Protocol == Prot_SMTP)
+         if(m_Protocol == Prot_SMTP || m_Protocol == Prot_Sendmail)
             msg.Printf(_("Message queued in ´%s´."),
                        m_OutboxName.c_str());
          else
@@ -823,6 +828,7 @@ SendMessageCC::SendOrQueue(void)
    {
       WriteToFolder(m_SentMailName);
    }
+   mApplication->UpdateOutboxStatus();
    return success;
 }
 
@@ -861,6 +867,16 @@ SendMessageCC::Send(void)
       MailFolderCC::SetLoginData(m_UserName, m_Password);
    }
 
+#ifndef OS_UNIX
+   // For non-unix systems we make sure that no-one tries to run
+   // Sendmail which is unix specific. This could happen if someone
+   // imports a configuration from a remote server or something like
+   // this, so we play it safe and map all sendmail calls to SMTP
+   // instead:
+   if(m_Protocol == Prot_Sendmail)
+      m_Protocol = Prot_SMTP;
+#endif
+   
    switch(m_Protocol)
    {
    case Prot_SMTP:
@@ -890,6 +906,44 @@ SendMessageCC::Send(void)
       stream = nntp_open_full
          (NIL,(char **)hostlist,"nntp/ssl",SMTPTCPPORT,OP_DEBUG);
       break;
+#ifdef OS_UNIX
+   case Prot_Sendmail:
+   {
+      String msgText;
+      WriteToString(msgText);
+      bool success = false;
+      /// write to temp file:
+      const char *filename = wxGetTempFileName("Mtemp");
+      if(filename)
+      {
+         wxFile out(filename, wxFile::write);
+         if ( out.IsOpened() )
+         {
+            size_t written = out.Write(msgText, msgText.Length());
+            out.Close();
+            if ( written == msgText.Length() )
+            {
+               String command;
+               command.Printf(
+                  "cat \"%s\" | %s",
+                  filename, m_SendmailCmd.c_str());
+               success = (wxExecute(command) == 0);
+               wxRemove(filename);
+            }
+         }
+      }
+      if(success)
+         MDialog_Message(_("Message sent."),
+                         NULL, // parent window
+                         MDIALOG_MSGTITLE,
+                         "MailSentMessage");
+      else
+         ERRORMESSAGE((_("Failed to send message via '%s'"),
+                       m_SendmailCmd.c_str()));
+      return success;
+   }
+#endif
+   break;
       // make gcc happy
       case Prot_Illegal:
       default:
@@ -911,7 +965,6 @@ SendMessageCC::Send(void)
          reply = stream->reply;
          nntp_close (stream);
          break;
-
       // make gcc happy
       case Prot_Illegal:
       default:
@@ -938,7 +991,7 @@ SendMessageCC::Send(void)
          success = false;
       }
    }
-   else
+   else // error in opening stream
    {
       tmpbuf = MailFolder::GetLogCircle().GuessError();
       if(tmpbuf[0])

@@ -85,6 +85,7 @@ ifdef USE_PYTHON
 endif
 
 msgcat:
+	echo > $(BUILDDIR)/messages.po
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 #	$(MAKE) -C $(BUILDDIR)/locale mergecat
 

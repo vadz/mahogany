@@ -5,4 +5,4 @@
 
 cat $1 |
 sed '1,$ s/msgstr ""/msgstr/g' |
-msgfmt -v - 2>&1 | sed "1,$ s/^.*:\(.*\):.*$/missing translation before line: \1/g"
+msgfmt -v - 2>&1 | sed "1,$ s/^.*:\(.*\):.*$/$1:\1:missing translation/g"

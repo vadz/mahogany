@@ -852,7 +852,7 @@ wxComposeView::CreateNewArticle(const MailFolder::Params& params,
 {
    wxWindow *parent = mApplication->TopLevelFrame();
    wxComposeView *cv = new wxComposeView("ComposeViewNews", parent);
-   cv->m_mode = Mode_NNTP;
+   cv->m_mode = Mode_News;
    cv->m_kind = Message_New;
    cv->m_template = params.templ;
    cv->SetTitle(_("Article Composition"));
@@ -873,7 +873,7 @@ wxComposeView::CreateNewMessage(const MailFolder::Params& params,
 {
    wxWindow *parent = mApplication->TopLevelFrame();
    wxComposeView *cv = new wxComposeView("ComposeViewMail", parent);
-   cv->m_mode = Mode_SMTP;
+   cv->m_mode = Mode_Mail;
    cv->m_kind = Message_New;
    cv->m_template = params.templ;
    cv->SetTitle(_("Message Composition"));
@@ -925,7 +925,7 @@ wxComposeView::InitText(Message *msg)
       // before evacuating the template
       if ( !m_template )
       {
-         m_template = GetMessageTemplate(m_mode == Mode_SMTP
+         m_template = GetMessageTemplate(m_mode == Mode_Mail
                                           ? MessageTemplate_NewMessage
                                           : MessageTemplate_NewArticle,
                                          m_Profile);
@@ -1059,12 +1059,12 @@ wxComposeView::DoInitText(Message *msg)
    switch ( m_kind )
    {
       case Message_Reply:
-         kind = m_mode == Mode_SMTP ? MessageTemplate_Reply
+         kind = m_mode == Mode_Mail ? MessageTemplate_Reply
                                     : MessageTemplate_Followup;
          break;
 
       case Message_Forward:
-         ASSERT_MSG( m_mode == Mode_SMTP, "can't forward article in news" );
+         ASSERT_MSG( m_mode == Mode_Mail, "can't forward article in news" );
 
          kind = MessageTemplate_Forward;
          break;
@@ -1074,7 +1074,7 @@ wxComposeView::DoInitText(Message *msg)
          // still fall through
 
       case Message_New:
-         kind = m_mode == Mode_SMTP ? MessageTemplate_NewMessage
+         kind = m_mode == Mode_Mail ? MessageTemplate_NewMessage
                                     : MessageTemplate_NewArticle;
          break;
    }
@@ -1316,7 +1316,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    // To and subject always there
    bDoShow[Field_To] =
    bDoShow[Field_Subject] = TRUE;
-   if( m_mode == Mode_SMTP )
+   if( m_mode == Mode_Mail )
    {
       bDoShow[Field_Cc] = READ_CONFIG(m_Profile, MP_SHOWCC) != 0;
       bDoShow[Field_Bcc] = READ_CONFIG(m_Profile, MP_SHOWBCC) != 0;
@@ -1329,7 +1329,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    const char *aszLabels[Field_Max];
 
    aszLabels[Field_From]    = _("From:");
-   aszLabels[Field_To]      = (m_mode == Mode_SMTP) ?  _("To:") : _("Newsgroups:");
+   aszLabels[Field_To]      = (m_mode == Mode_Mail) ?  _("To:") : _("Newsgroups:");
    aszLabels[Field_Subject] = _("Subject:");
    aszLabels[Field_Cc]      = _("CC:");
    aszLabels[Field_Bcc]     = _("BCC:");
@@ -1753,7 +1753,7 @@ wxComposeView::OnMenuCommand(int id)
          if ( ConfigureCustomHeader(m_Profile, this,
                                     &headerName, &headerValue,
                                     &storedInProfile,
-                                    m_mode == Mode_NNTP ? CustomHeader_News
+                                    m_mode == Mode_News ? CustomHeader_News
                                                         : CustomHeader_Mail) )
          {
             if ( !storedInProfile )
@@ -1771,7 +1771,7 @@ wxComposeView::OnMenuCommand(int id)
 
    case WXMENU_HELP_CONTEXT:
       mApplication->Help(
-         (m_mode == Mode_SMTP)?
+         (m_mode == Mode_Mail)?
          MH_COMPOSE_MAIL : MH_COMPOSE_NEWS, this);
       break;
    case WXMENU_EDIT_PASTE:
@@ -2074,10 +2074,13 @@ wxComposeView::Send(bool schedule)
 
    switch(m_mode)
    {
-   case Mode_SMTP:
-      msg = new SendMessageCC(m_Profile, Prot_SMTP);
+   case Mode_Mail:
+      if( READ_CONFIG(m_Profile, MP_USE_SENDMAIL) != 0)
+         msg = new SendMessageCC(m_Profile, Prot_Sendmail);
+      else
+         msg = new SendMessageCC(m_Profile, Prot_SMTP);
       break;
-   case Mode_NNTP:
+   case Mode_News:
       msg = new SendMessageCC(m_Profile, Prot_NNTP);
       break;
    }
@@ -2207,7 +2210,7 @@ wxComposeView::Send(bool schedule)
 
    wxArrayString headerNames, headerValues;
    size_t nHeaders = GetCustomHeaders(m_Profile,
-                                      m_mode == Mode_SMTP ? CustomHeader_Mail
+                                      m_mode == Mode_Mail ? CustomHeader_Mail
                                                           : CustomHeader_News,
                                       &headerNames,
                                       &headerValues);
@@ -2219,7 +2222,7 @@ wxComposeView::Send(bool schedule)
    msg->SetSubject(GetHeaderValue(Field_Subject));
    switch(m_mode)
    {
-      case Mode_SMTP:
+      case Mode_Mail:
       {
          // although 'To' field is always present, the others may not be shown
          // (nor created) at all (but now this is checked in GetHeaderValue
@@ -2232,7 +2235,7 @@ wxComposeView::Send(bool schedule)
       }
       break;
 
-      case Mode_NNTP:
+      case Mode_News:
          msg->SetNewsgroups(GetHeaderValue(Field_To));
          break;
    }

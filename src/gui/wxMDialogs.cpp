@@ -2508,9 +2508,8 @@ static const struct
    { "AddAllSubfolders",         gettext_noop("create all subfolders automatically instead of browsing them") },
    { "StoreRemoteNow",         gettext_noop("Question whether to store remote configuration from options dialog") },
       { "GetRemoteNow",           gettext_noop("Question whether to retrieve remote configuration from options dialog") },
-         { "RetrieveRemote", gettext_noop("Question whether to
- retrieve remote settings at startup.") },
-         { "StoreRemote", gettext_noop("Question whether to store remote settings at startup.") },   { "OverwriteRemote",gettext_noop("Question whether to overwrite newer remote config settings") },
+         { "RetrieveRemote", gettext_noop("Question whether to retrieve remote settings at startup.") },
+         { "StoreRemote", gettext_noop("Question whether to store remote settings at shutdown.") },   { "OverwriteRemote",gettext_noop("Question whether to overwrite newer remote config settings") },
    //{ "", gettext_noop("") },
 };
 

@@ -53,8 +53,9 @@ extern "C"
 }
 #endif
 
-// causes Pilot to crash
-#undef PALMOS_SYNC_TIME
+//broken, causes PalmOS to crash:
+//#define PALMOS_SYNCTIME
+#undef PALMOS_SYNCTIME
 
 #include "MModule.h"
 #include "Mversion.h"
@@ -759,7 +760,7 @@ PalmOSModule::Connect(void)
       /* Tell user (via Pilot) that we are starting things up */
       dlp_OpenConduit(m_PiSocket);
 
-#ifdef PALMOS_SYNC_TIME         
+#ifdef PALMOS_SYNCTIME         
       /* set Palm´s time */
       if (m_SyncTime)
       {
@@ -1845,10 +1846,10 @@ PalmOSModule::SyncMAL(void)
 
 static ConfigValueDefault gs_ConfigValues1 [] =
 {
-#ifdef PALMOS_SYNC_TIME
    ConfigValueDefault(MP_MOD_PALMOS_SYNCMAIL, MP_MOD_PALMOS_SYNCMAIL_D),
-#endif
+#ifdef PALMOS_SYNCTIME
    ConfigValueDefault(MP_MOD_PALMOS_SYNCTIME, MP_MOD_PALMOS_SYNCTIME_D),
+#endif
 //   ConfigValueDefault(MP_MOD_PALMOS_SYNCADDR, MP_MOD_PALMOS_SYNCADDR_D),
       ConfigValueDefault(MP_MOD_PALMOS_BACKUP, MP_MOD_PALMOS_BACKUP_D),
 #ifdef HAVE_LIBMAL
@@ -1871,7 +1872,7 @@ static ConfigValueDefault gs_ConfigValues1 [] =
 static wxOptionsPage::FieldInfo gs_FieldInfos1[] =
 {
    { gettext_noop("Synchronise Mail"), wxOptionsPage::Field_Bool,    -1 },
-#ifdef PALMOS_SYNC_TIME
+#ifdef PALMOS_SYNCTIME
       { gettext_noop("Synchronise Time"), wxOptionsPage::Field_Bool, -1 },
 #endif
 //   { gettext_noop("Synchronise Addressbook"), wxOptionsPage::Field_Bool,    -1 },

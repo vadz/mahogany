@@ -20,7 +20,10 @@ all:	$(FILES_MO)
 clean:
 	$(RM) $(FILES_MO) wxstd/*.mo
 
-update: msgcat mergecat check
+update: 
+	$(MAKE) msgcat 
+	$(MAKE) mergecat
+	$(MAKE) check
 	@true
 
 check:

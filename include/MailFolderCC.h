@@ -725,6 +725,8 @@ private:
    int  m_FolderFlags;
    /** @name Global settings, timeouts for c-client lib */
    //@{
+   /// IMAP lookahead value
+   int m_LookAhead;
    /// TCP/IP open timeout in seconds.
    int m_TcpOpenTimeout;
    /// TCP/IP read timeout in seconds.
