@@ -1315,36 +1315,69 @@ MailFolderCC::PingReopen(void) const
 }
 
 /* static */ bool
-MailFolderCC::PingReopenAll(void)
+MailFolderCC::PingReopenAll(bool fullPing)
 {
    // try to reopen all streams
    bool rc = true;
+
+   /* We cannot simply traverse the list of mailfolders here, as they
+      might get closed/reopened by Ping(), which invalidates the
+      iterators into the list. Instead, we use the m_PROAflag on the
+      entry which exists solely for this function's use. */
    StreamConnectionList::iterator i;
-   const MailFolderCC *mf;
-   for(mf = MailFolderCC::GetFirstMapEntry(i);
-       mf;
-       mf = MailFolderCC::GetNextMapEntry(i))
+   // First, set the flag to FALSE on all entries:
+   for(i = streamList.begin(); i != streamList.end(); i++)
+      (**i).m_PROAflag = FALSE;
+   /* Now we keep fetching the first entry and pinging it, until we
+      find an entry that we already treated. */
+   StreamConnection *scp;
+   for(;;)
    {
-      rc &= mf->PingReopen();
+#ifdef DEBUG
+   MailFolderCC::DebugStreams();
+#endif
+      scp = streamList.pop_front();
+      // If no entries or this entry has been processed already, then
+      // abort
+      if(scp == NULL || scp->m_PROAflag == TRUE)
+      {
+         streamList.push_front(scp); // put it back
+         break;
+      }
+      MailFolderCC *mf = scp->folder;
+      scp->m_PROAflag = TRUE;
+      streamList.push_back(scp);
+#ifdef DEBUG
+   MailFolderCC::DebugStreams();
+#endif
+      if(fullPing)
+         rc &= mf->Ping();
+      else
+         rc &= mf->PingReopen();
+#ifdef DEBUG
+   MailFolderCC::DebugStreams();
+#endif
    }
    return rc;
 }
 
-void
+bool
 MailFolderCC::Ping(void)
 {
    if ( gs_lockCclient ) // FIXME: MT
-      return;
+      return FALSE;
 
    if(NeedsNetwork() && ! mApplication->IsOnline())
    {
       ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"), GetName().c_str()));
-      return;
+      return FALSE;
    }
    UIdType count = CountMessages();
    DBGMESSAGE(("MailFolderCC::Ping() on Folder %s.",
                GetName().c_str()));
 
+   bool rc = FALSE;
+      
    if(Lock())
    {
       int ccl = CC_SetLogLevel(M_LOG_WINONLY);
@@ -1362,12 +1395,15 @@ MailFolderCC::Ping(void)
 
       if(PingReopen())
       {
-         mail_ping(m_MailStream);
+         rc = TRUE;
+         if(! mail_ping(m_MailStream))
+            rc = FALSE;
          //mail_check(m_MailStream); // update flags, etc, .newsrc
          UnLock();
          ProcessEventQueue();
          Lock();
       }
+
       CC_SetLogLevel(ccl);
       if(CountMessages() != count)
          RequestUpdate();
@@ -1419,27 +1455,11 @@ MailFolderCC::Ping(void)
    {
       ASSERT_MSG(0,"Ping() called on locked folder");
    }
-}
-
-/* static */
-void MailFolderCC::PingAllOpened(void)
-{
-   DBGMESSAGE(("Pinging all opened folders."));
-
-#ifdef DEBUG
-   MailFolderCC::DebugStreams();
-#endif
-   StreamConnectionList::iterator i;
-   for ( const MailFolderCC *mf = MailFolderCC::GetFirstMapEntry(i);
-         mf;
-         mf = MailFolderCC::GetNextMapEntry(i) )
-  {
-     ((MailFolderCC *)mf)->Ping();
-   }
+   return rc;
 }
 
 void
-MailFolderCC::Close(void)
+MailFolderCC::Close()
 {
    /*
      DO NOT SEND EVENTS FROM HERE, ITS CALLED FROM THE DESTRUCTOR AND
@@ -1472,7 +1492,6 @@ MailFolderCC::Close(void)
       m_MailStream = NIL;
    }
    CCVerbose();
-   RemoveFromMap();
 }
 
 bool
@@ -2031,6 +2050,7 @@ MailFolderCC::DebugDump() const
 void
 MailFolderCC::RemoveFromMap(void) const
 {
+   DBGMESSAGE(("MailFolderCC::RemoveFromMap() for folder %s", GetName().c_str()));
 #ifdef DEBUG
    MailFolderCC::DebugStreams();
 #endif
@@ -2614,6 +2634,7 @@ bool MailFolderCC::SpecToFolderName(const String& specification,
 void
 MailFolderCC::AddToMap(MAILSTREAM const *stream) const
 {
+   DBGMESSAGE(("MailFolderCC::RemoveFromMap() for folder %s", GetName().c_str()));
 #ifdef DEBUG
    MailFolderCC::DebugStreams();
 #endif
@@ -2622,7 +2643,12 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream) const
    conn->stream = stream;
    conn->name = m_ImapSpec;
    conn->login = m_Login;
-   streamList.push_front(conn);
+   /** A push_front() would be slightly faster as the folder is likely
+       to be accessed often after opening it, but PingReopenAll()
+       relies on the fact that newly (re-)opened folders are appended
+       to the list, not pre-pended.
+   */
+   streamList.push_back(conn);
 #ifdef DEBUG
    MailFolderCC::DebugStreams();
 #endif
@@ -3200,8 +3226,11 @@ MailFolderCC::OverviewHeader(MAILSTREAM *stream,
                              unsigned long uid,
                              OVERVIEW_X *ov)
 {
+#ifdef DEBUG
+   MailFolderCC::DebugStreams();
+#endif
    MailFolderCC *mf = MailFolderCC::LookupObject(stream);
-   ASSERT(mf);
+   CHECK(mf, 0, "trying to build overview for non-existent");
    return mf->OverviewHeaderEntry(uid, ov);
 }
 

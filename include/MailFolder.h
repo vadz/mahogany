@@ -298,11 +298,13 @@ public:
    */
    virtual unsigned long CountNewMessagesQuick(void) const = 0;
 
-   /** Check whether mailbox has changed. */
-   virtual void Ping(void) = 0;
+   /** Check whether mailbox has changed.
+       @return FALSE on error, TRUE otherwise
+   */
+   virtual bool Ping(void) = 0;
 
    /** Call Ping() on all opened mailboxes. */
-   static void PingAllOpened(void);
+   static bool PingAllOpened(void);
 
    /** Perform a checkpoint on the folder. */
    virtual void Checkpoint(void) = 0;

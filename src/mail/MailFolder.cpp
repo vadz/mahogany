@@ -618,11 +618,11 @@ MailFolderCmn::DeleteDuplicates()
 }
 
 /* static */
-void MailFolder::PingAllOpened(void)
+bool MailFolder::PingAllOpened(void)
 {
    // FIXME this should be fixed by moving the list of all opened folders into
    //       MailFolder itself from MailFolderCC
-   MailFolderCC::PingAllOpened();
+   return MailFolderCC::PingAllOpened();
 }
 
 /* Before actually closing a mailfolder, we keep it around for a
@@ -676,6 +676,8 @@ public:
          {
             if( (**i).m_dt > wxDateTime::Now() )
                m_MfList.erase(i);
+            if( i == m_MfList.end() )
+               break;
          }
       }
    void CleanUp(void)

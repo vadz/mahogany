@@ -72,6 +72,13 @@ struct StreamConnection
    String name;
    /// for POP3/IMAP/NNTP: login or newsgroup
    String login;
+   /// this is a flag used only by PingReOpenAll():
+   bool m_PROAflag;
+
+   StreamConnection()
+      {
+         folder = NULL; stream = NULL; m_PROAflag = FALSE;
+      }
 };
 
 KBLIST_DEFINE(StreamConnectionList, StreamConnection);
@@ -223,8 +230,10 @@ public:
    */
    virtual UIdArray *SearchMessages(const class SearchCriterium *crit);
 
-   /** Check whether mailbox has changed. */
-   void Ping(void);
+   /** Check whether mailbox has changed.
+       @return FALSE on error
+   */
+   bool Ping(void);
 
    /** Perform a checkpoint on the folder. */
    virtual void Checkpoint(void);
@@ -241,11 +250,14 @@ public:
    bool PingReopen(void) const;
    /** Like PingReopen() but works on all folders, returns true if all
        folders are fine.
+       @param fullPing does a full Ping() instead of a PingReopen()
+       only. If doing a full 
    */
-   static bool PingReopenAll(void);
+   static bool PingReopenAll(bool fullPing = FALSE);
 
    /** Call Ping() on all opened mailboxes. */
-   static void PingAllOpened(void);
+   static bool PingAllOpened(void)
+      { return PingReopenAll(TRUE) ; }
    //@}
 
    /**@name Subscription management */
@@ -515,7 +527,6 @@ protected:
       It returns 0 to abort overview generation, 1 to continue.*/
    int OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov);
 
-   /// closes the mailstream
    void Close(void);
 
 #ifdef USE_THREADS

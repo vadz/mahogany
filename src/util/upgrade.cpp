@@ -2540,6 +2540,9 @@ bool RetrieveRemoteConfigSettings(void)
    if(READ_APPCONFIG(MP_SYNC_REMOTE) == 0)
       return TRUE; // nothing to do
 
+   // this forces the disappearance of the startup splash or wxGTK
+   // will crash :-)
+   LOGMESSAGE((M_LOG_WINONLY,_("Asking to retrieve configuration settings...")));
    if (! MDialog_YesNoDialog(
       _("Retrieve remote configuration settings now?"), NULL,
       _("Retrieve remote settings?"), true,
