@@ -885,6 +885,13 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
    {
       // move focus
       Focus(newFocus);
+
+      long sel = GetUniqueSelection();
+      if ( sel != -1 )
+      {
+         Select(sel, false);
+      }
+
       UpdateFocus();
    }
 }
@@ -1238,10 +1245,13 @@ void wxFolderListCtrl::OnPreview()
    wxFolderListCtrlBlockOnSelect noselect(this);
 
    long selOld = GetUniqueSelection();
-   if ( selOld != -1 )
-      Select(selOld, false);
+   if ( selOld != m_itemPreviewed )
+   {
+      if ( selOld != -1 )
+         Select(selOld, false);
 
-   Select(m_itemPreviewed, true);
+      Select(m_itemPreviewed, true);
+   }
 }
 
 // ----------------------------------------------------------------------------
