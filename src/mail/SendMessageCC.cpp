@@ -700,7 +700,7 @@ SendMessageCC::EncodingToCharset(wxFontEncoding enc)
 
 #if wxCHECK_VERSION(2, 3, 0)
       case wxFONTENCODING_UTF8:
-         cs = "utf8";
+         cs = "UTF-8";
          break;
 #endif // 2.3.0
 
