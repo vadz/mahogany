@@ -130,7 +130,7 @@ private:
 };
 
 // declare a list (owning the objects in it) of FolderMonitorFolderEntries
-M_LIST_PTR(FolderMonitorFolderList, FolderMonitorFolderEntry);
+M_LIST_OWN(FolderMonitorFolderList, FolderMonitorFolderEntry);
 
 // ----------------------------------------------------------------------------
 // FolderMonitorTraversal used by FolderMonitor to find all incoming folders
