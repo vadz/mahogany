@@ -227,8 +227,6 @@ static void CleanStatic(void);
 // MailFolder opening
 // ----------------------------------------------------------------------------
 
-MFrame *MailFolder::ms_interactiveFrame = NULL;
-
 /*
  * This function guesses: it checks if such a profile exists,
  * otherwise it tries a file with that name.
@@ -2381,5 +2379,43 @@ MailFolder::CleanUp(void)
 
    // clean up CClient driver memory
    CC_Cleanup();
+}
+
+// ----------------------------------------------------------------------------
+// interactive frame stuff
+// ----------------------------------------------------------------------------
+
+String MailFolder::ms_interactiveFolder;
+MFrame *MailFolder::ms_interactiveFrame = NULL;
+
+/* static */
+void MailFolder::SetInteractive(MFrame *frame, const String& foldername)
+{
+   ms_interactiveFolder = foldername;
+   ms_interactiveFrame = frame;
+}
+
+/* static */
+void MailFolder::ResetInteractive()
+{
+   SetInteractive(NULL, "");
+}
+
+MFrame *MailFolder::SetInteractiveFrame(MFrame *frame)
+{
+   MFrame *frameOld = m_frame;
+   m_frame = frame;
+   return frameOld;
+}
+
+MFrame *MailFolder::GetInteractiveFrame() const
+{
+   if ( m_frame )
+      return m_frame;
+
+   if ( GetName() == ms_interactiveFolder )
+      return ms_interactiveFrame;
+
+   return NULL;
 }
 

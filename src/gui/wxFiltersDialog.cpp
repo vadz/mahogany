@@ -825,6 +825,12 @@ wxOneFilterDialog::OnButton(wxCommandEvent &event)
    if(event.GetEventObject() == m_ButtonLess)
    {
       RemoveOneControl();
+
+      // make the and/or clause disappear
+      UpdateProgram(event);
+
+      // UpdateProgram() calls Skip() on the event, undo it
+      event.Skip(FALSE);
    }
    else if(event.GetEventObject() == m_ButtonMore)
    {

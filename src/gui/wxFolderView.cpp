@@ -307,6 +307,10 @@ protected:
    /// and the folder submenu for it
    wxMenu *m_menuFolders;
 
+   // temp hack around the message preview window bug, only used by WXK_NEXT
+   // handling code in our OnChar(), see comments there
+   UIdType m_uidScrolled;
+
 private:
    // allow it to use EnableOnSelect()
    friend class wxFolderListCtrlBlockOnSelect;
@@ -662,6 +666,24 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          // scroll down the preview window
          if ( IsPreviewed(focused) )
          {
+            // wxMessageView is broken as its PageDown() doesn't really
+            // scrolls the window one page down - instead if moves the cursor
+            // a page down.
+            //
+            // As initially the cursor is at (0, 0), pressing PageDown the
+            // first time doesn't scroll the window at all as the cursor stays
+            // inside the visible area, so we have to press PageDown _twice_
+            // to make it scroll - to avoid frustrating the user we do it here
+            // automatically by calling PageDown() twice when we scroll the
+            // given message for the first time
+            UIdType uid = m_FolderView->GetPreviewUId();
+            if ( uid != m_uidScrolled )
+            {
+               m_FolderView->m_MessagePreview->PageDown();
+
+               m_uidScrolled = uid;
+            }
+
             m_FolderView->m_MessagePreview->PageDown();
          }
          else
@@ -1914,14 +1936,14 @@ wxFolderView::OpenFolder(String const &profilename)
    }
 
    wxBeginBusyCursor();
-   MailFolder::SetInteractive(m_Frame);
+   MailFolder::SetInteractive(m_Frame, profilename);
 
    MailFolder *mf = MailFolder::OpenFolder(profilename);
    SetFolder(mf);
    SafeDecRef(mf);
    m_ProfileName = profilename;
 
-   MailFolder::SetInteractive(NULL);
+   MailFolder::ResetInteractive();
    wxEndBusyCursor();
 
    if ( !mf )
@@ -2051,6 +2073,22 @@ void wxFolderView::ExpungeMessages()
    else
    {
       wxLogWarning(_("No deleted messages - nothing to expunge"));
+   }
+}
+
+void wxFolderView::SelectAllUnread()
+{
+   wxFolderListCtrlBlockOnSelect dontHandleOnSelect(m_FolderCtrl);
+
+   HeaderInfoList_obj hil = GetFolder()->GetHeaders();
+   CHECK_RET( hil, "can't select unread messages without folder listing" );
+
+   for ( size_t n = 0; n < m_NumOfMessages; n++ )
+   {
+      if ( !(hil[n]->GetStatus() & MailFolder::MSG_STAT_SEEN) )
+      {
+         m_FolderCtrl->Select(n, true);
+      }
    }
 }
 
@@ -2236,8 +2274,11 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          PrintPreviewMessages(selections);
          break;
 
+      case WXMENU_MSG_SELECTUNREAD:
+         break;
+
       case WXMENU_MSG_SELECTALL:
-         SelectAll(true);
+         SelectAllUnread();
          break;
 
       case WXMENU_MSG_DESELECTALL:
@@ -2402,7 +2443,10 @@ wxFolderView::PreviewMessage(long uid)
       // select the item we preview in the folder control
       m_FolderCtrl->SelectFocused();
 
+      // show it in the preview window
       m_MessagePreview->ShowMessage(m_ASMailFolder, uid);
+
+      // remember which item we preview
       m_previewUId = uid;
    }
 }

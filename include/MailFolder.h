@@ -709,11 +709,18 @@ public:
    /**
       Folder opening functions work differently if SetInteractive() is set:
       they will put more messages into status bar and possibly ask questions to
-      the user while in non interactive mode this will never be done.
+      the user while in non interactive mode this will never be done. This
+      method associates such frame with the folder with given name.
 
       @param frame the window where the status messages should go (may be NULL)
+      @param foldername the folder for which we set this frame
    */
-   static void SetInteractive(MFrame *frame) { ms_interactiveFrame = frame; }
+   static void SetInteractive(MFrame *frame, const String& foldername);
+
+   /**
+      Undo SetInteractive()
+   */
+   static void ResetInteractive();
 
    /**
       Set interactive frame for this folder only: long operations on this folder
@@ -721,21 +728,22 @@ public:
 
       @return the old interactive frame for this folder
    */
-   MFrame *SetInteractiveFrame(MFrame *frame)
-      { MFrame *frameOld = m_frame; m_frame = frame; return frameOld; }
+   MFrame *SetInteractiveFrame(MFrame *frame);
 
    /**
       Get the frame to use for interactive messages. May return NULL.
    */
-   MFrame *GetInteractiveFrame() const
-      { return m_frame ? m_frame : ms_interactiveFrame; }
+   MFrame *GetInteractiveFrame() const;
    //@}
 
 protected:
    /// the helper class for determining the exact error msg from cclient log
    static MLogCircle ms_LogCircle;
 
-   /// the frame to which interactive messages go by default
+   /// the folder for which we had set default interactive frame
+   static String ms_interactiveFolder;
+
+   /// the frame to which interactive messages for ms_interactiveFolder go
    static MFrame *ms_interactiveFrame;
 
    /// the frame to which messages for this folder go by default

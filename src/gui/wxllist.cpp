@@ -229,7 +229,9 @@ void wxLayoutObjectText::SetText(const wxString& txt)
    // Draw() doesn't handle the TABs properly, so apply this ugly hack for now
    // or otherwise they appear as "unknown char" on screen which is really ugly
    m_Text = txt;
-   m_Text.Replace("\t", "        ");   // TAB = 8 spaces by default...
+
+   // VZ: doesn't work - why?
+   //m_Text.Replace("\t", "        ");   // TAB = 8 spaces by default...
 }
 
 wxLayoutObject *

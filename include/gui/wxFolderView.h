@@ -189,6 +189,9 @@ public:
    /// [de]select all items
    void SelectAll(bool on = true);
 
+   /// select all unread messages
+   void SelectAllUnread();
+
    /// Update the idea of which messages are selected.
    void UpdateSelectionInfo(void);
 

@@ -289,7 +289,7 @@ static const MenuItemInfo g_aMenuItems[] =
 #ifdef USE_PS_PRINTING
    { WXMENU_MSG_PRINT_PS,     gettext_noop("PS-Prin&t"),      gettext_noop("Print this message as PostScript")       , FALSE },
    { WXMENU_MSG_PRINT_PREVIEW_PS,     gettext_noop("PS&-Print Preview"),      gettext_noop("View PostScript printout")       , FALSE },
-#endif
+#endif // USE_PS_PRINTING
    { WXMENU_MSG_REPLY,     gettext_noop("&Reply\tCtrl-R"),            gettext_noop("Reply to this message")    , FALSE },
    { WXMENU_MSG_REPLY_WITH_TEMPLATE, gettext_noop("Reply with &template...\tShift-Ctrl-R"), gettext_noop("Reply to this message after choosing a template to use ")    , FALSE },
    { WXMENU_MSG_FOLLOWUP,  gettext_noop("&Group reply\tCtrl-G"),      gettext_noop("Followup/group-reply to this message")    , FALSE },
@@ -308,16 +308,12 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_DELETE,    gettext_noop("&Delete"),           gettext_noop("Delete this message")      , FALSE },
    { WXMENU_MSG_UNDELETE,  gettext_noop("&Undelete"),         gettext_noop("Undelete message")         , FALSE },
    { WXMENU_MSG_FLAG,      gettext_noop("F&lag\tCtrl-I"), gettext_noop("Mark message as flagged/unflagged")         , FALSE },
-#if 0
-   { WXMENU_MSG_DELDUPLICATES,gettext_noop("Remove dup&licates"),
-                           gettext_noop("Delete all duplicate messages")      , FALSE },
-#endif // 0
    { WXMENU_MSG_EXPUNGE,   gettext_noop("Ex&punge"),          gettext_noop("Expunge")                  , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_SELECTALL, gettext_noop("Select &all\tCtrl-A"),       gettext_noop("Select all messages")      , FALSE },
+   { WXMENU_MSG_SELECTUNREAD, gettext_noop("Select all &unread"), gettext_noop("Select all unread messages")      , FALSE },
    { WXMENU_MSG_DESELECTALL,gettext_noop("D&eselect all\tCtrl-B"),    gettext_noop("Deselect all messages")    , FALSE },
-   { WXMENU_MSG_SEARCH,  gettext_noop("&Search..."),
-     gettext_noop("Search and select messages") , FALSE },
+   { WXMENU_MSG_SEARCH,  gettext_noop("&Search..."), gettext_noop("Search and select messages") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_SAVEADDRESSES, gettext_noop("E&xtract addresses..."), gettext_noop("Save all or some addresses of the message in an address book"), FALSE },
    { WXMENU_MSG_TOGGLEHEADERS, gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , TRUE },
@@ -328,14 +324,14 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_FIND,  gettext_noop("Fi&nd...\tCtrl-F"), gettext_noop("Find text in message") , FALSE },
 
    // compose
-   { WXMENU_COMPOSE_INSERTFILE,
-                           gettext_noop("&Insert file...\tCtrl-I"),   gettext_noop("Insert a file")            , FALSE },
+   { WXMENU_COMPOSE_INSERTFILE, gettext_noop("&Insert file...\tCtrl-I"),
+                                gettext_noop("Insert a file")            , FALSE },
    { WXMENU_COMPOSE_LOADTEXT,gettext_noop("I&nsert text...\tCtrl-T"), gettext_noop("Insert text file")         , FALSE },
    { WXMENU_COMPOSE_SEND,  gettext_noop("&Send\tShift-Ctrl-S"),             gettext_noop("Send the message now")     , FALSE },
-   { WXMENU_COMPOSE_SEND_LATER,  gettext_noop("Send &Later\tShift-Ctrl-L"),
-     gettext_noop("Schedule the message to be send at a later time.")     , FALSE },
-   { WXMENU_COMPOSE_SEND_KEEP_OPEN,  gettext_noop("Send and &keep\tShift-Ctrl-K"),
-     gettext_noop("Send the message now and keep the editor open")     , FALSE },
+   { WXMENU_COMPOSE_SEND_LATER, gettext_noop("Send &Later\tShift-Ctrl-L"),
+                                gettext_noop("Schedule the message to be send at a later time.")     , FALSE },
+   { WXMENU_COMPOSE_SEND_KEEP_OPEN, gettext_noop("Send and &keep\tShift-Ctrl-K"),
+                                    gettext_noop("Send the message now and keep the editor open")     , FALSE },
    { WXMENU_COMPOSE_PRINT, gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print the message")        , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_COMPOSE_SAVETEXT,gettext_noop("Save &text..."),   gettext_noop("Save (append) message text to file"), FALSE },
