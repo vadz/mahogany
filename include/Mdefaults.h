@@ -164,6 +164,8 @@ enum MFolderIndex
 #define   MP_HEIGHT         "Height"
 /// window iconisation status
 #define   MP_ICONISED         "Iconised"
+/// window maximized?
+#define   MP_MAXIMISED         "Maximised"
 
 /// show log window?
 #define   MP_SHOWLOG          "ShowLog"
@@ -785,6 +787,8 @@ enum MFolderIndex
 #define   MP_HEIGHT_D   400
 /// window iconisation status
 #define   MP_ICONISED_D 0l
+/// window maximized?
+#define   MP_MAXIMISED_D 0l
 /// show log window?
 #define   MP_SHOWLOG_D  1
 /// debug protocols and folder access?
@@ -1126,7 +1130,7 @@ enum MFolderIndex
 /// do automatic word wrap in message view?
 #define MP_VIEW_AUTOMATIC_WORDWRAP_D   1l
 /// wrapmargin for message view (set to -1 to disable it)
-#define   MP_VIEW_WRAPMARGIN_D      70
+#define   MP_VIEW_WRAPMARGIN_D      80
 /// show TEXT/PLAIN as inlined text?
 #define   MP_PLAIN_IS_TEXT_D      1l
 /// show MESSAGE/RFC822 as text?
@@ -1358,8 +1362,8 @@ enum MFolderIndex
 //@}
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS_D      1
-/// sort criterium for folder listing (55=0x37 = status/subject)
-#define MP_MSGS_SORTBY_D         55l
+/// sort criterium for folder listing (== MSO_DATE)
+#define MP_MSGS_SORTBY_D         2l
 /// re-sort messages on status change?
 #define MP_MSGS_RESORT_ON_CHANGE_D 0l
 /// use threading
@@ -1367,7 +1371,7 @@ enum MFolderIndex
 /// search criterium for searching in folders
 #define MP_MSGS_SEARCH_CRIT_D   0l
 /// search argument
-#define MP_MSGS_SEARCH_ARG_D   "foo"
+#define MP_MSGS_SEARCH_ARG_D   ""
 /// open URLs with
 #ifdef  OS_UNIX
 #  define   MP_BROWSER_D         "netscape"

@@ -31,17 +31,18 @@
 
 #define   BASE_SIZE 12
 
-inline static bool IsEndOfLine(const char *p)
+static inline bool IsEndOfLine(const char *p)
 {
-   // the end of line is either just '\n' or "\r\n" - we understand both (even
-   // though the second is used only under DOS/Windows) to be able to import
-   // DOS text files even under Unix
-   return (*p == '\n') || ((*p == '\r') && (*(p + 1) == '\n'));
+   // the end of line is either just '\n' or "\r\n" or even '\r' - we
+   // understand Unix, DOS and Mac conventions here as we get all kinds of text
+   // in the emails
+   return (*p == '\n') || (*p == '\r');
 }
 
-static void
-SetEncoding(wxLayoutList *list, wxFontEncoding encoding,
-            bool *useConverter, wxEncodingConverter *conv)
+static void SetEncoding(wxLayoutList *list,
+                        wxFontEncoding encoding,
+                        bool *useConverter,
+                        wxEncodingConverter *conv)
 {
    // check that we have fonts available for this encoding if it is a non
    // default one
@@ -79,42 +80,55 @@ SetEncoding(wxLayoutList *list, wxFontEncoding encoding,
 }
 
 static void wxLayoutImportTextInternal(wxLayoutList *list,
-                                       wxString const &str,
+                                       const wxString& str,
                                        bool useConverter,
                                        wxEncodingConverter &conv)
 {
-   char * buffer = new char [ str.Length() + 1 ];
-   char * cptr = buffer;
-   strcpy(buffer, str.c_str());
-   const char * begin = cptr;
-   char  backup;
+   wxString s;
+   s.Alloc(str.length());
 
-   for(;;)
+   for ( const char *cptr = str.c_str(); *cptr; cptr++ )
    {
-      begin = cptr;
-      while( *cptr && !IsEndOfLine(cptr) )
-         cptr++;
-      backup = *cptr;
-      *cptr = '\0';
-      if ( useConverter )
-         list->Insert(conv.Convert(begin));
-      else
-         list->Insert(begin);
-      *cptr = backup;
-
-      // check if it's the end of this line
-      if ( IsEndOfLine(cptr) )
+      while ( *cptr && !IsEndOfLine(cptr) )
       {
-         // if it was "\r\n", skip the following '\n'
-         if ( *cptr == '\r' )
-            cptr++;
-         list->LineBreak();
+         s += *cptr++;
       }
-      else if(backup == '\0') // reached end of string
+
+      // wxLayoutWindow doesn't show tabs correctly, so turn them into spaces
+      s.Replace("\t", "        ");
+
+      if ( useConverter )
+         list->Insert(conv.Convert(s));
+      else
+         list->Insert(s);
+
+      if ( !*cptr )
+      {
+         // it was the end of text
          break;
-      cptr++;
+      }
+
+      s.clear();
+
+      // what kind of end of line did we find?
+      if ( *cptr == '\r' )
+      {
+         // I've seen some weird messages with "\r\r\n" which should be
+         // indicated as one line break, not 2 in this case
+         if ( cptr[1] == '\r' )
+         {
+            cptr++;
+         }
+
+         // if it was "\r\n", skip the following '\n'
+         if ( cptr[1] == '\n' )
+         {
+            cptr++;
+         }
+      }
+
+      list->LineBreak();
    }
-   delete [] buffer;
 }
 
 void wxLayoutImportHTML(wxLayoutList *list,

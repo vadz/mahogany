@@ -41,14 +41,16 @@ MainFrameNewMail ICON	"frame_new.ico"
 Adbedit 	ICON	"adbedit.ico"
 
 // MIME icons (32x32)
-application	BITMAP	"application.bmp"
-audio		BITMAP	"audio.bmp"
-binary		BITMAP	"binary.bmp"
-dvi		BITMAP	"dvi.bmp"
-image		BITMAP	"image.bmp"
-postscript	BITMAP	"postscript.bmp"
-txt		BITMAP	"txt.bmp"
-video		BITMAP	"video.bmp"
+application	ICON	"application.ico"
+audio		ICON	"audio.ico"
+binary		ICON	"binary.ico"
+dvi		ICON	"dvi.ico"
+image		ICON	"image.ico"
+postscript	ICON	"postscript.ico"
+text		ICON	"text.ico"
+video		ICON	"video.ico"
+
+// misc
 hlink		ICON	"hlink.ico"
 ftplink		ICON	"ftplink.ico"
 

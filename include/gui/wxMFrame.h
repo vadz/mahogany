@@ -33,7 +33,9 @@ public:
       // initialized, they will receive some values in any case), returns FALSE
       // if there is no config object to read settings from
    static bool RestorePosition(const char *name,
-                               int *x, int *y, int *w, int *h, bool *iconised = NULL);
+                               int *x, int *y, int *w, int *h,
+                               bool *iconised = NULL, bool *maximised = NULL);
+
       //  save the given frame's position and size in config file
    static void SavePosition(const char *name, wxFrame *frame);
    static void SavePosition(const char *name, wxWindow *frame);
@@ -80,13 +82,12 @@ public:
    void OnPrintSetup();
    void OnPrintSetupPS();
    void OnPageSetup();
-//   void OnPageSetupPS();
+   //void OnPageSetupPS();
 
    // callbacks
    virtual void OnMenuCommand(int id);
    void OnCommandEvent(wxCommandEvent & event);
    void OnCloseWindow(wxCloseEvent& event);
-   void OnCreate(wxWindowCreateEvent& event);
 
    DECLARE_EVENT_TABLE()
 
@@ -95,9 +96,6 @@ protected:
 
    /// is it initialised?
    bool m_initialised;
-
-   /// should the frame be initially iconized?
-   bool m_startIconised;
 };
 
 #endif

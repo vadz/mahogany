@@ -46,6 +46,12 @@
 
 #include "gui/wxDialogLayout.h"
 
+// this gets rid of the assert warning, but not of the real problem: we should
+// be able to redraw the window without calling wxYield() at all
+#if wxCHECK_VERSION(2, 2, 6)
+   #define wxYield wxYieldIfNeeded
+#endif // wxWin 2.2.6+
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------

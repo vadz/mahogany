@@ -1588,7 +1588,7 @@ wxFolderView::~wxFolderView()
    SafeDecRef(m_TicketsDroppedList);
 
    m_InDeletion = true;
-   SetFolder(NULL, FALSE);
+   SetFolder(NULL, false);
 }
 
 String wxFolderView::GetFullPersistentKey(MPersMsgBox key)
@@ -1972,24 +1972,91 @@ wxFolderView::OpenFolder(String const &profilename)
       return NULL;
    }
 
+   // just a cast
+   wxFrame *frame = m_Frame;
+
    int flags = folder->GetFlags();
+
+   // special check for IMAP servers (i.e. IMAP folders withotu path): we
+   // create by default just the entry for the server but the user needs to
+   // work with the mailboxes on the IMAP server, at least with INBOX, so ask
+   // him if he wants to do it first
+   //
+   // if the IMAP server already has some subfolders, we don't need to do this,
+   // of course, as we either already did or the user was smart enough to
+   // create the subfolders himself anyhow
+   if ( (folder->GetType() == MF_IMAP) &&
+        folder->GetPath().empty() &&
+        (folder->GetSubfolderCount() == 0) )
+   {
+      if ( MDialog_YesNoDialog
+           (
+             _("You are trying to open an IMAP server: this will usually\n"
+               "open the special mailbox called INBOX, however there may\n"
+               "exist other mailboxes on this server which don't appear\n"
+               "in Mahogany folder tree yet.\n"
+               "\n"
+               "Would you like to retrieve all existing mailboxes from\n"
+               "the IMAP server right now? If you reply [No], you can\n"
+               "also choose \"Browse subfolders...\" from the folder\n"
+               "popup menu later and selectively choose the mailboxes\n"
+               "to create in the tree from there. If you reply [Yes],\n"
+               "all existing mailboxes on the server will be created in\n"
+               "the folder tree unconditionally."),
+             frame,
+             MDIALOG_YESNOTITLE,
+             true,
+             GetFullPersistentKey(M_MSGBOX_BROWSE_IMAP_SERVERS)
+           ) )
+      {
+         // create all folders under the IMAP server
+         ASMailFolder *asmf = ASMailFolder::HalfOpenFolder(folder, NULL);
+         if ( !asmf )
+         {
+            wxLogError(_("Impossible to add IMAP folders to the folder tree."));
+         }
+         else
+         {
+            if ( AddAllSubfoldersToTree(folder, asmf) > 0 )
+            {
+               wxLogStatus(_("You can now open any of folders on the "
+                             "IMAP server '%s'"), folder->GetName().c_str());
+            }
+
+            asmf->DecRef();
+         }
+
+         return NULL;
+      }
+      //else: continue opening the server, this will just open INBOX on it
+   }
+
+   // check if we didn't mark this folder as unopenable the last time
    if ( (flags & MF_FLAGS_UNACCESSIBLE) && !(flags & MF_FLAGS_MODIFIED) )
    {
-      wxFrame *frame = m_Frame;
-      if ( MDialog_YesNoDialog(_("This folder couldn't be opened last time, "
-                                 "do you still want to try to open it (it "
-                                 "will probably fail again)?"),
-                               frame,
-                               MDIALOG_YESNOTITLE,
-                               FALSE,
-                               "OpenUnaccessibleFolder") )
+      // note that we don't use GetFullPersistentKey() here as we want this
+      // setting to be global (it isn't very useful to disable this msg box
+      // only for one folder)
+      if ( MDialog_YesNoDialog
+           (
+            _("This folder couldn't be opened last time, "
+              "do you still want to try to open it (it "
+              "will probably fail again)?"),
+            frame,
+            MDIALOG_YESNOTITLE,
+            false,
+            GetPersMsgBoxName(M_MSGBOX_OPEN_UNACCESSIBLE_FOLDER)
+           ) )
       {
-         if ( MDialog_YesNoDialog(_("Would you like to change folder "
-                                    "settings before trying to open it?"),
-                                  frame,
-                                  MDIALOG_YESNOTITLE,
-                                  FALSE,
-                                  "ChangeUnaccessibleFolderSettings") )
+         if ( MDialog_YesNoDialog
+              (
+               _("Would you like to change folder "
+                 "settings before trying to open it?"),
+               frame,
+               MDIALOG_YESNOTITLE,
+               false,
+               GetPersMsgBoxName(M_MSGBOX_CHANGE_UNACCESSIBLE_FOLDER_SETTINGS)
+            ) )
          {
             // invoke the folder properties dialog
             if ( !ShowFolderPropertiesDialog(folder, frame) )
@@ -2730,7 +2797,7 @@ void wxFolderView::OnFolderDeleteEvent(const String& folderName)
    }
    else // main frame splitter
    {
-      SetFolder(NULL, TRUE);
+      SetFolder(NULL, true);
    }
 }
 
@@ -2783,7 +2850,7 @@ wxFolderView::DragAndDropMessages()
       wxDropSource dropSource(dropData, m_FolderCtrl, icon);
 #endif // OS
 
-      switch ( dropSource.DoDragDrop(TRUE /* allow move */) )
+      switch ( dropSource.DoDragDrop(true /* allow move */) )
       {
          default:
          case wxDragError:
@@ -2824,12 +2891,12 @@ wxFolderView::DragAndDropMessages()
             m_TicketsDroppedList = NULL;
 
             // we did something
-            return TRUE;
+            return true;
       }
    }
 
    // we didn't do anything
-   return FALSE;
+   return false;
 }
 
 void
@@ -3094,8 +3161,8 @@ wxFolderViewFrame::wxFolderViewFrame(String const &name, wxMFrame *parent)
 
    // no cut/paste for viewer
    wxMenuBar *menuBar = GetMenuBar();
-   menuBar->Enable(WXMENU_EDIT_CUT, FALSE);
-   menuBar->Enable(WXMENU_EDIT_CUT, FALSE);
+   menuBar->Enable(WXMENU_EDIT_CUT, false);
+   menuBar->Enable(WXMENU_EDIT_CUT, false);
 
    AddMessageMenu();
    AddLanguageMenu();

@@ -68,7 +68,6 @@ BEGIN_EVENT_TABLE(wxMFrame, wxFrame)
    EVT_MENU(-1,    wxMFrame::OnCommandEvent)
    EVT_TOOL(-1,    wxMFrame::OnCommandEvent)
    EVT_CLOSE(wxMFrame::OnCloseWindow)
-   EVT_WINDOW_CREATE(wxMFrame::OnCreate)
 END_EVENT_TABLE()
 
 #ifdef OS_WIN
@@ -78,7 +77,8 @@ END_EVENT_TABLE()
 #endif
 
 bool wxMFrame::RestorePosition(const char *name,
-                               int *x, int *y, int *w, int *h, bool *i)
+                               int *x, int *y, int *w, int *h,
+                               bool *i, bool *m)
 {
    // only i can be NULL
    CHECK( x && y && w && h, FALSE,
@@ -92,8 +92,11 @@ bool wxMFrame::RestorePosition(const char *name,
       *y = pConf->Read(MP_YPOS,MP_YPOS_D);
       *w = pConf->Read(MP_WIDTH, MP_WIDTH_D);
       *h = pConf->Read(MP_HEIGHT, MP_HEIGHT_D);
-      if(i)
+
+      if ( i )
           *i = pConf->Read(MP_ICONISED, MP_ICONISED_D) != 0;
+      if ( m )
+          *m = pConf->Read(MP_MAXIMISED, MP_MAXIMISED_D) != 0;
 
       // assume that if one entry existed, then the other existed too
       return pConf->HasEntry(MP_XPOS);
@@ -107,6 +110,8 @@ bool wxMFrame::RestorePosition(const char *name,
       *h = MP_HEIGHT_D;
       if ( i )
          *i = MP_ICONISED_D;
+      if ( m )
+         *m = MP_MAXIMISED_D;
 
       return FALSE;
    }
@@ -129,24 +134,24 @@ wxMFrame::Create(const String &iname, wxWindow *parent)
 
    const char *name = MFrameBase::GetName();
    int xpos, ypos, width, height;
-   RestorePosition(name, &xpos, &ypos, &width, &height, &m_startIconised);
+   bool startIconised, startMaximised;
+   RestorePosition(name, &xpos, &ypos, &width, &height,
+                   &startIconised, &startMaximised);
+
+   SetIcon(ICON("MFrame"));
 
    // use name as default title
    wxFrame::Create(parent, -1, name, wxPoint(xpos, ypos), wxSize(width,height));
 
-   SetIcon(ICON("MFrame"));
+   // no "else": a frame can be maximized and iconized, meaning that it will
+   // become maximized when restored
+   if ( startMaximised )
+      Maximize();
+   if ( startIconised )
+      Iconize();
 
    m_initialised = true;
    SetMenuBar(new wxMenuBar(wxMB_DOCKABLE));
-}
-
-void
-wxMFrame::OnCreate(wxWindowCreateEvent& event)
-{
-   if ( m_startIconised )
-      Iconize();
-
-   event.Skip();
 }
 
 void
@@ -221,13 +226,13 @@ wxMFrame::SetTitle(String const &title)
 void
 wxMFrame::SavePosition(const char *name, wxWindow *frame)
 {
-	SavePositionInternal(name, frame, FALSE);
+   SavePositionInternal(name, frame, FALSE);
 }
 
 void
 wxMFrame::SavePosition(const char *name, wxFrame *frame)
 {
-	SavePositionInternal(name, frame, TRUE);
+   SavePositionInternal(name, frame, TRUE);
 }
 
 void
@@ -247,8 +252,12 @@ wxMFrame::SavePositionInternal(const char *name, wxWindow *frame, bool isFrame)
       pConf->Write(MP_WIDTH, (long)x);
       pConf->Write(MP_HEIGHT, (long)y);
 
-      if(isFrame)
-        pConf->Write(MP_ICONISED, ((wxFrame *)frame)->IsIconized());
+      if ( isFrame )
+      {
+         wxFrame *fr = (wxFrame *)frame;
+         pConf->Write(MP_ICONISED, fr->IsIconized());
+         pConf->Write(MP_MAXIMISED, fr->IsMaximized());
+      }
    }
 }
 

@@ -153,8 +153,6 @@ struct InstallWizardData
           smtp,
           nntp;
 
-   bool imapAll;        // import all folders from IMAP server too
-
    // operations page:
    int    useDialUp; // initially -1
    bool   useOutbox;
@@ -340,11 +338,11 @@ public:
       {
          gs_installWizardData.pop  = m_pop->GetValue();
          gs_installWizardData.imap = m_imap->GetValue();
-         gs_installWizardData.imapAll = m_imapAll->GetValue();
          gs_installWizardData.smtp = m_smtp->GetValue();
          gs_installWizardData.nntp = m_nntp->GetValue();
          if(gs_installWizardData.smtp.Length() == 0)
          {
+            // FIXME: they could use an MTA under Unix instead...
             wxLogError(_("You need to specify the SMTP server to be able "
                          "to send email, please do it!"));
             return FALSE;
@@ -354,7 +352,7 @@ public:
          // MApp::IsOnline() here yet because this stuff is not yet
          // configured, so use wxDialUpManager directly
          wxDialUpManager *dialupMan =
-                  ((wxMApp *)mApplication)->GetDialUpManager();;
+                  ((wxMApp *)mApplication)->GetDialUpManager();
          if ( dialupMan->IsOnline() )
          {
             String check, tmp;
@@ -412,7 +410,6 @@ public:
       {
          m_pop->SetValue(gs_installWizardData.pop);
          m_imap->SetValue(gs_installWizardData.imap);
-         m_imapAll->SetValue(!gs_installWizardData.imap.empty());
          m_smtp->SetValue(gs_installWizardData.smtp);
          m_nntp->SetValue(gs_installWizardData.nntp);
          return TRUE;
@@ -437,15 +434,10 @@ public:
       }
 
 private:
-   void OnText(wxCommandEvent& event);
-
    wxTextCtrl *m_pop,
               *m_imap,
               *m_smtp,
               *m_nntp;
-   wxCheckBox *m_imapAll;
-
-   DECLARE_EVENT_TABLE()
 };
 
 class InstallWizardDialUpPage : public InstallWizardPage
@@ -864,10 +856,6 @@ InstallWizardIdentityPage::InstallWizardIdentityPage(wxWizard *wizard)
 // InstallWizardServersPage
 // ----------------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(InstallWizardServersPage, InstallWizardPage)
-   EVT_TEXT(-1, InstallWizardServersPage::OnText)
-END_EVENT_TABLE()
-
 InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
                         : InstallWizardPage(wizard, InstallWizard_ServersPage)
 {
@@ -898,26 +886,7 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
    m_smtp = panel->CreateTextWithLabel(labels[2], widthMax, m_imap);
    m_nntp = panel->CreateTextWithLabel(labels[3], widthMax, m_smtp);
 
-   wxStaticText *imapMsg = panel->CreateMessage(_(
-      "Mahogany can search the IMAP server to\n"
-      "find all folders on it (warning: this may\n"
-      "take a long time over slow connection)."), m_nntp);
-   labels.Empty();
-   labels.Add(_("&Search for all IMAP folders:"));
-   widthMax = GetMaxLabelWidth(labels, panel);
-   m_imapAll = panel->CreateCheckBox(labels[0], widthMax, imapMsg);
-
    panel->ForceLayout();
-}
-
-void InstallWizardServersPage::OnText(wxCommandEvent& event)
-{
-   if ( event.GetEventObject() == m_imap )
-   {
-      m_imapAll->Enable(!m_imap->GetValue().empty());
-   }
-
-   event.Skip();
 }
 
 // InstallWizardDialUpPage
@@ -2553,23 +2522,9 @@ SetupServers(void)
       SafeDecRef(imapInbox);
 
       p = Profile::CreateProfile(mfolder->GetName());
-      //inherit default instead p->writeEntry(MP_IMAPHOST, serverName);
 
-      /* The folders under the IMAP server */
-      if ( gs_installWizardData.imapAll )
-      {
-         ASMailFolder *asmf = ASMailFolder::HalfOpenFolder(mfolder, NULL);
-         if ( !asmf )
-         {
-            wxLogError(_("Impossible to add IMAP folders to the folder tree."));
-         }
-         else
-         {
-            AddAllSubfoldersToTree(mfolder, asmf);
-
-            asmf->DecRef();
-         }
-      }
+      // inherit default instead
+      //p->writeEntry(MP_IMAPHOST, serverName);
 
       p->DecRef();
       SafeDecRef(mfolder);
