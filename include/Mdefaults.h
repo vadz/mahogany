@@ -547,6 +547,8 @@ enum MFolderIndex
 #define   MP_INLINE_GFX         "InlineGraphics"
 /// limit size for inline graphics
 #define   MP_INLINE_GFX_SIZE     "InlineGraphicsSize"
+/// which viewer to use in the message view?
+#define MP_MSGVIEW_VIEWER "MsgViewer"
 /// which headers to show in the message view?
 #define   MP_MSGVIEW_HEADERS     "MsgViewHeaders"
 /// all headers we know about
@@ -1246,6 +1248,8 @@ enum MFolderIndex
 #define   MP_INLINE_GFX_D       1
 /// limit size for inline graphics in Kb (0 for no limit)
 #define   MP_INLINE_GFX_SIZE_D  40
+/// which viewer to use in the message view?
+#define MP_MSGVIEW_VIEWER_D "LayoutViewer"
 /// which headers to show in the message view?
 #define   MP_MSGVIEW_HEADERS_D     \
           "Date:" \

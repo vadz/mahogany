@@ -428,16 +428,46 @@ MessageView::CreateViewer(wxWindow *parent)
    }
    else // have at least one viewer, load it
    {
-      // FIXME: make this configurable
-      String name = (*listing)[0].GetName();
+      Profile *profile = GetProfile();
+
+      String nameFirst = (*listing)[0].GetName();
+
+      String name;
+      if ( profile )
+      {
+         name = READ_CONFIG(profile, MP_MSGVIEW_VIEWER);
+      }
+      else
+      {
+         // not fatal but unexpected
+         FAIL_MSG( "no profile in MessageView::CreateViewer" );
+
+         name = nameFirst;
+      }
+
       MModule *viewer = MModule::LoadModule(name);
       if ( viewer )
       {
          m_viewer = (MessageViewer *)viewer;
       }
-      else
+      else // failed to load the ocnfigured viewer
       {
-         wxLogError(_("Failed to load message viewer '%s'."), name.c_str());
+         if ( name != nameFirst )
+         {
+            wxLogError(_("Failed to load the configured message viewer '%s'.\n"
+                         "\n"
+                         "Reverting to the default message viewer."),
+                       name.c_str());
+
+            viewer = MModule::LoadModule(nameFirst);
+         }
+
+         if ( !viewer )
+         {
+            wxLogError(_("Failed to load the default message viewer '%s'.\n"
+                         "\n"
+                         "Message preview will not work!"), nameFirst.c_str());
+         }
       }
 
       listing->DecRef();
