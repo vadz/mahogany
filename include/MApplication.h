@@ -40,9 +40,12 @@ class MailFolder;
 class MModuleCommon;
 class ArrayFrames;
 
+class WXDLLEXPORT wxDynamicLibrary;
 class WXDLLEXPORT wxMimeTypesManager;
 class WXDLLEXPORT wxPageSetupDialogData;
 class WXDLLEXPORT wxPrintData;
+
+M_LIST_PTR(ListLibraries, wxDynamicLibrary);
 
 /// the global application object pointer
 extern MAppBase *mApplication;
@@ -462,6 +465,8 @@ protected:
    /// Unload modules loaded at startup
    virtual void UnloadModules(void) = 0;
 
+   /// process m_dllsToUnload list, must be called when it is safe to do it
+   void UnloadDLLs();
 
    /**
       m_statusPanes is a sorted array containing all the status bar fields
@@ -555,6 +560,9 @@ protected:
 
    /// the struct containing the command line options
    CmdLineOptions *m_cmdLineOptions;
+
+   /// the list of DLLs to unload a.s.a.p.
+   ListLibraries m_dllsToUnload;
 
 private:
    /**

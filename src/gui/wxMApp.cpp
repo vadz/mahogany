@@ -59,6 +59,7 @@
 #include <wx/tokenzr.h>
 
 #include <wx/snglinst.h>
+
 #ifdef OS_WIN
    #define wxConnection    wxDDEConnection
    #define wxServer        wxDDEServer
@@ -464,6 +465,9 @@ wxMApp::~wxMApp()
 void
 wxMApp::OnIdle(wxIdleEvent &event)
 {
+   // now it should be safe to unload any unused DLLs
+   UnloadDLLs();
+
    if ( AllowBgProcessing() )
    {
       MEventManager::DispatchPending();
@@ -800,7 +804,7 @@ wxMApp::OnInit()
       else // the user specified a locale
       {
 #if wxCHECK_VERSION(2, 5, 0)
-         const wxLanguageInfo *info = wxLocale::FindLanguageInfo(locale);
+         const wxLanguageInfo *info = 0;// wxLocale::FindLanguageInfo(locale);
          if ( info )
          {
             m_Locale = new wxLocale(info->Language);
@@ -1125,7 +1129,7 @@ const wxPrintData *wxMApp::GetPrintData()
       String afmpath = pf.FindDirFile("Cour.afm", &found);
       if(found)
       {
-        wxThePrintSetupData->SetAFMPath(afmpath);
+        //wxThePrintSetupData->SetAFMPath(afmpath);
       }
 #endif // Win/Unix
 
@@ -1139,7 +1143,7 @@ const wxPrintData *wxMApp::GetPrintData()
 #endif // !OS_WIN
 
 #if wxUSE_POSTSCRIPT
-      *m_PrintData = *wxThePrintSetupData;
+      //*m_PrintData = *wxThePrintSetupData;
 
       m_PrintData->SetPrinterCommand(READ_APPCONFIG(MP_PRINT_COMMAND));
       m_PrintData->SetPrinterOptions(READ_APPCONFIG(MP_PRINT_OPTIONS));

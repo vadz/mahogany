@@ -19,7 +19,7 @@
 // headers
 // ----------------------------------------------------------------------------
 
-#include <wx/dynlib.h>
+class WXDLLEXPORT wxDynamicLibrary;
 
 #include "Mversion.h"      // for M_VERSION_MAJOR &c
 
@@ -177,10 +177,24 @@ class MModuleCommon
 public:
    /// ctor sets the ref count to 1 to make the object alive
    MModuleCommon(MInterface *minterface = NULL)
-      { m_nRef = 1; m_MInterface = minterface; }
+   {
+      m_nRef = 1;
+      m_MInterface = minterface;
+#ifndef USE_MODULES_STATIC
+      m_dll = NULL;
+#endif // !USE_MODULES_STATIC
+   }
 
    /// must be used if not specified in the ctor
    void SetMInterface(MInterface *minterface) { m_MInterface = minterface; }
+
+#ifndef USE_MODULES_STATIC
+   /// must be used to let the module know about the DLL that it must unload
+   void SetDLL(wxDynamicLibrary *dll) { m_dll = dll; }
+
+   /// for MAppBase::RemoveModule() only, in fact
+   wxDynamicLibrary *GetDLL() const { return m_dll; }
+#endif // !USE_MODULES_STATIC
 
    virtual MInterface *GetMInterface() { return m_MInterface; }
 
@@ -195,7 +209,13 @@ protected:
    MInterface *m_MInterface;
 
 private:
+   /// ref count of the module, when it reaches 0, the module is unloaded
    size_t m_nRef;
+
+#ifndef USE_MODULES_STATIC
+   /// DLL from which the module was loaded, it is deleted when it's unloaded
+   wxDynamicLibrary *m_dll;
+#endif // !USE_MODULES_STATIC
 };
 
 // for "compatibility" with MObjectRC

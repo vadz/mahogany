@@ -111,10 +111,32 @@ MModuleList *GetMModuleList(void)
    return gs_MModuleList;
 }
 
+void MAppBase::UnloadDLLs()
+{
+   while ( !m_dllsToUnload.empty() )
+   {
+      // FIXME: crashes because modules are unloaded too soon now!
+      //delete *m_dllsToUnload.begin();
+      m_dllsToUnload.pop_front();
+   }
+}
+
 /* When a module gets deleted it must make sure that it is no longer
    in the module list. */
 void MAppBase::RemoveModule(MModuleCommon *module)
 {
+   CHECK_RET( module, _T("NULL module in MApp::RemoveModule()?") );
+
+   wxLogTrace(M_TRACE_MODULES, _T("Unloading module %p"), module);
+
+#ifndef USE_MODULES_STATIC
+   // we can't unload the DLL right now because we're still executing in the
+   // modules dtor which is in this DLL (and so doing it would result in
+   // immediate crash) -- instead put it in the list of the DLLs to unload
+   // which will be processed in wxMApp::OnIdle()
+   m_dllsToUnload.push_back(module->GetDLL());
+#endif // USE_MODULES_STATIC
+
    if(gs_MModuleList)
    {
       MModuleList::iterator i;
@@ -209,8 +231,7 @@ void MModule_AddStaticModule(const char *Name,
 static
 MModule *LoadModuleInternal(const String & name, const String &pathname)
 {
-   // FIXME: this pointer is never freed/unloaded!
-   wxPluginLibrary *dll = wxPluginManager::LoadLibrary(pathname);
+   wxDynamicLibrary *dll = new wxDynamicLibrary(pathname);
    if ( !dll )
    {
       wxLogTrace(M_TRACE_MODULES, _T("Failed to load module '%s' from '%s'."),
@@ -230,13 +251,23 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
    MModule *module = NULL;
    if(initFunc)
    {
-      module = (*initFunc)(
-      M_VERSION_MAJOR, M_VERSION_MINOR, M_VERSION_RELEASE,
-      &gs_MInterface, &errorCode);
+      module = (*initFunc)
+               (
+                  M_VERSION_MAJOR,
+                  M_VERSION_MINOR,
+                  M_VERSION_RELEASE,
+                  &gs_MInterface,
+                  &errorCode
+               );
    }
 
    if(module)
    {
+      // the module will delete the DLL when it's going to be unloaded
+      module->SetDLL(dll);
+
+      wxLogTrace(M_TRACE_MODULES, _T("Loaded module %p"), module);
+
       MModuleListEntry *me = new MModuleListEntry;
       me->m_Name = name;
       me->m_Module = module;
@@ -252,6 +283,8 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
    }
    else
    {
+      delete dll;
+
       String msg;
       msg.Printf(_("Cannot initialise module '%s', error code %d."),
                  pathname.c_str(), errorCode);
