@@ -8,7 +8,8 @@ all: doc
 include ../makeopts
 
 clean:
-dep:
+
+dep depend:
 
 doc:
 	#$(MKDIR) $(DOCDIR)/$(CWD)
