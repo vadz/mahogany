@@ -1340,15 +1340,28 @@ public:
 class wxLayoutPrintout: public wxPrintout
 {
 public:
+   /**
+     @name Static methods which may be used simply by external clients
+   */
+   //@{
+
+   /// print the contents of the given layout list
+   static bool Print(wxWindow *window, wxLayoutList *llist);
+
+   /// show the print preview
+   static bool PrintPreview(wxLayoutList *llist);
+
+   //@}
+
    /** Constructor.
        @param llist pointer to the wxLayoutList to be printed
        @param title title for PS file or windows
    */
    wxLayoutPrintout(wxLayoutList *llist,
-                    wxString const & title =
-                    "wxLayout Printout");
+                    const wxString& title = _("Mahogany: Printout"));
+
    /// Destructor.
-   ~wxLayoutPrintout();
+   virtual ~wxLayoutPrintout();
 
    /** Called to set things up */
    bool OnBeginDocument(int startPage, int endPage);

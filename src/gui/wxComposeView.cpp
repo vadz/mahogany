@@ -46,6 +46,9 @@
 #  include "gui/wxMApp.h"
 
 #  include <wx/process.h>
+#  include <wx/sizer.h>
+#  include <wx/menu.h>
+#  include <wx/stattext.h>
 
 #  include <ctype.h>          // for isspace()
 #endif
@@ -55,7 +58,6 @@
 #include <wx/ffile.h>
 #include <wx/process.h>
 #include <wx/mimetype.h>
-#include <wx/fontutil.h>
 
 #include "wx/persctrl.h"
 
@@ -74,13 +76,12 @@
 
 #include "gui/wxIconManager.h"
 
-#include "gui/wxllist.h"
-#include "gui/wxlwindow.h"
-#include "gui/wxlparser.h"
 #include "gui/wxIdentityCombo.h"
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxDialogLayout.h"
 #include "gui/wxComposeView.h"
+
+#include "MessageEditor.h"
 
 #include "adb/AdbEntry.h"
 #include "adb/AdbManager.h"
@@ -96,9 +97,7 @@
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_ADB_SUBSTRINGEXPANSION;
-extern const MOption MP_AFMPATH;
 extern const MOption MP_ALWAYS_USE_EXTERNALEDITOR;
-extern const MOption MP_AUTOMATIC_WORDWRAP;
 extern const MOption MP_COMPOSE_BCC;
 extern const MOption MP_COMPOSE_CC;
 extern const MOption MP_COMPOSE_TO;
@@ -109,14 +108,12 @@ extern const MOption MP_CVIEW_FONT;
 extern const MOption MP_CVIEW_FONT_DESC;
 extern const MOption MP_CVIEW_FONT_SIZE;
 extern const MOption MP_EXTERNALEDITOR;
-extern const MOption MP_FOCUS_FOLLOWSMOUSE;
 extern const MOption MP_HOSTNAME;
 extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
 extern const MOption MP_SMTPHOST;
 extern const MOption MP_USERLEVEL;
 extern const MOption MP_USEVCARD;
 extern const MOption MP_VCARD;
-extern const MOption MP_WRAPMARGIN;
 
 #ifdef OS_UNIX
 extern const MOption MP_USE_SENDMAIL;
@@ -186,68 +183,6 @@ static wxString GetMimeTypeFromFilename(const wxString& filename)
 class wxRcptRemoveButton;
 class wxRcptTextCtrl;
 class wxRcptTypeChoice;
-
-// ----------------------------------------------------------------------------
-// MimeContent represents an attachement in the composer
-// ----------------------------------------------------------------------------
-
-class MimeContent : public wxLayoutObject::UserData
-{
-public:
-   // constants
-   enum MimeContentType
-   {
-      MIMECONTENT_NONE,
-      MIMECONTENT_FILE,
-      MIMECONTENT_DATA
-   };
-
-   // ctor & dtor
-   MimeContent()
-      {
-         m_Type = MIMECONTENT_NONE;
-      }
-   // initialize
-   void SetMimeType(const String& mimeType);
-   void SetData(void *data,
-                size_t length,
-                const char *filename = NULL); // we'll delete data!
-   void SetFile(const String& filename);
-
-   // accessors
-   MimeContentType GetType() const { return m_Type; }
-
-   String GetMimeType() const { return m_MimeType.GetFull(); }
-   MimeType::Primary GetMimeCategory() const { return m_MimeType.GetPrimary(); }
-
-   const String& GetFileName() const
-      { return m_FileName; }
-
-   const void *GetData() const
-      { ASSERT( m_Type == MIMECONTENT_DATA ); return m_Data; }
-   size_t GetSize() const
-      { ASSERT( m_Type == MIMECONTENT_DATA ); return m_Length; }
-
-protected:
-   ~MimeContent()
-      {
-         if ( m_Type == MIMECONTENT_DATA )
-         {
-            // FIXME: should be "char *" everywhere!
-            delete [] (char *)m_Data;
-         }
-      }
-
-
-private:
-   MimeContentType m_Type;
-
-   void     *m_Data;
-   size_t    m_Length;
-   String    m_FileName;
-
-   MimeType m_MimeType;
-};
 
 // ----------------------------------------------------------------------------
 // wxRcptControls: all controls in the row corresponding to one recipient
@@ -490,63 +425,6 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// a slightly different wxLayoutWindow: it calls back the composer the first
-// time it gets focus which allows us to launch an external editor then (if
-// configured to do so, of course)
-// ----------------------------------------------------------------------------
-
-class wxComposerLayoutWindow : public wxLayoutWindow
-{
-public:
-   wxComposerLayoutWindow(wxComposeView *composer, wxWindow *parent)
-      : wxLayoutWindow(parent)
-   {
-      m_composer = composer;
-
-      m_firstTimeModify =
-      m_firstTimeFocus = TRUE;
-   }
-
-protected:
-   void OnKeyDown(wxKeyEvent& event)
-   {
-      if ( m_firstTimeModify )
-      {
-         m_firstTimeModify = FALSE;
-
-         m_composer->OnFirstTimeModify();
-      }
-
-      event.Skip();
-   }
-
-   void OnFocus(wxFocusEvent& event)
-   {
-      if ( m_firstTimeFocus )
-      {
-         m_firstTimeFocus = FALSE;
-
-         if ( m_composer->OnFirstTimeFocus() )
-         {
-            // composer doesn't need first modification notification any more
-            // because it modified the text itself
-            m_firstTimeModify = FALSE;
-         }
-      }
-
-      event.Skip();
-   }
-
-private:
-   wxComposeView *m_composer;
-
-   bool m_firstTimeModify,
-        m_firstTimeFocus;
-
-   DECLARE_EVENT_TABLE()
-};
-
-// ----------------------------------------------------------------------------
 // event tables &c
 // ----------------------------------------------------------------------------
 
@@ -586,43 +464,87 @@ BEGIN_EVENT_TABLE(wxRcptRemoveButton, wxButton)
    EVT_BUTTON(-1, wxRcptRemoveButton::OnButton)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(wxComposerLayoutWindow, wxLayoutWindow)
-   EVT_KEY_DOWN(wxComposerLayoutWindow::OnKeyDown)
-   EVT_SET_FOCUS(wxComposerLayoutWindow::OnFocus)
-END_EVENT_TABLE()
-
 // ============================================================================
 // implementation
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// MimeContent
+// Composer::Options
 // ----------------------------------------------------------------------------
 
-void MimeContent::SetMimeType(const String& mimeType)
+Composer::Options::Options()
+{
+   m_fontFamily =
+   m_fontSize = -1;
+}
+
+void Composer::Options::Read(Profile *profile)
+{
+   CHECK_RET( profile, "NULL profile in Composer::Options::Read" );
+
+   // colours
+   GetColourByName(&m_fg, READ_CONFIG(profile, MP_CVIEW_FGCOLOUR), "black");
+   GetColourByName(&m_bg, READ_CONFIG(profile, MP_CVIEW_BGCOLOUR), "white");
+
+   // font
+   m_font = READ_CONFIG_TEXT(profile, MP_CVIEW_FONT_DESC);
+   if ( m_font.empty() )
+   {
+      m_fontFamily = GetFontFamilyFromProfile(profile, MP_CVIEW_FONT);
+      m_fontSize = READ_CONFIG(profile, MP_CVIEW_FONT_SIZE);
+   }
+}
+
+// ----------------------------------------------------------------------------
+// EditorContentPart
+// ----------------------------------------------------------------------------
+
+void EditorContentPart::Init()
+{
+   m_Data = NULL;
+}
+
+void EditorContentPart::SetMimeType(const String& mimeType)
 {
    m_MimeType = mimeType;
 }
 
-void MimeContent::SetData(void *data,
-                          size_t length,
-                          const char *filename)
+void EditorContentPart::SetData(void *data,
+                                size_t length,
+                                const char *filename)
 {
-   ASSERT( data != NULL );
+   ASSERT_MSG( data != NULL, "NULL data is invalid in EditorContentPart::SetData!" );
 
    m_Data = data;
    m_Length = length;
-   m_Type = MIMECONTENT_DATA;
-   if(filename)
+   m_Type = Type_Data;
+
+   if ( filename )
       m_FileName = filename;
 }
 
-void MimeContent::SetFile(const String& filename)
+void EditorContentPart::SetFile(const String& filename)
 {
-   ASSERT( !filename.empty() );
+   ASSERT_MSG( !filename.empty(), "a file attachment must have a valid file" );
 
    m_FileName = filename;
-   m_Type = MIMECONTENT_FILE;
+   m_Type = Type_File;
+}
+
+void EditorContentPart::SetText(const String& text)
+{
+   SetMimeType("TEXT/PLAIN");
+
+   m_Type = Type_Text;
+   m_Text = text;
+}
+
+EditorContentPart::~EditorContentPart()
+{
+   if ( m_Type == Type_Data )
+   {
+      delete [] (char *)m_Data;
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -1101,13 +1023,10 @@ wxComposeView::wxComposeView(const String &name,
 
    m_indexLast = -1;
 
-   m_fontFamily = -1;
-   m_fontSize = -1;
-
    // by default new recipients are "to"
    m_rcptTypeLast = Recipient_To;
 
-   m_LayoutWindow = NULL;
+   m_editor = NULL;
    m_encoding = wxFONTENCODING_SYSTEM;
 }
 
@@ -1117,7 +1036,7 @@ wxComposeView::~wxComposeView()
 
    SafeDecRef(m_Profile);
 
-   delete m_LayoutWindow;
+   delete m_editor;
 
    SafeDecRef(m_OriginalMessage);
 }
@@ -1348,6 +1267,8 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    // make sure we use the current identity for the new message composition
    m_Profile->SetIdentity(READ_APPCONFIG(MP_CURRENT_IDENTITY));
 
+   m_options.Read(m_Profile);
+
    // build menu
    CreateMenu();
 
@@ -1373,11 +1294,11 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    sizerHeaders->Fit(m_panel);
 
    // create the composer window itself
-   CreateFTCanvas();
+   CreateEditor();
 
    // configure splitter
    wxCoord heightHeaders = m_panel->GetSize().y;
-   m_splitter->SplitHorizontally(m_panel, m_LayoutWindow, heightHeaders);
+   m_splitter->SplitHorizontally(m_panel, m_editor->GetWindow(), heightHeaders);
    m_splitter->SetMinimumPaneSize(heightHeaders);
 
    // initialize the controls
@@ -1401,68 +1322,76 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
 
 /// create the compose window itself
 void
-wxComposeView::CreateFTCanvas(void)
+wxComposeView::CreateEditor(void)
 {
-   wxASSERT_MSG( m_LayoutWindow == NULL, "creating layout window twice?" );
+   wxASSERT_MSG( m_editor == NULL, "creating the editor twice?" );
 
-   // create the window
-   m_LayoutWindow = new wxComposerLayoutWindow(this, m_splitter);
+   MModuleListing *listing =
+      MModule::ListAvailableModules(MESSAGE_EDITOR_INTERFACE);
 
-   // and set its params from config:
-
-   // colours
-   GetColourByName(&m_fg, READ_CONFIG(m_Profile, MP_CVIEW_FGCOLOUR), "black");
-   GetColourByName(&m_bg, READ_CONFIG(m_Profile, MP_CVIEW_BGCOLOUR), "white");
-
-   // font
-   m_font = READ_CONFIG_TEXT(m_Profile, MP_CVIEW_FONT_DESC);
-   if ( m_font.empty() )
+   if ( !listing  )
    {
-      m_fontFamily = GetFontFamilyFromProfile(m_Profile, MP_CVIEW_FONT);
-      m_fontSize = READ_CONFIG(m_Profile, MP_CVIEW_FONT_SIZE);
+      wxLogError(_("No message editor plugins found. You will have to "
+                   "use an external editor to compose the messages."));
+   }
+   else // have at least one editor, load it
+   {
+      // TODO: make it configurable
+      String name = (*listing)[0].GetName();
+
+      MModule *editorFactory = MModule::LoadModule(name);
+      if ( !editorFactory ) // failed to load the configured editor
+      {
+         // try any other
+         String nameFirst = (*listing)[0].GetName();
+
+         if ( name != nameFirst )
+         {
+            wxLogWarning(_("Failed to load the configured message editor '%s'.\n"
+                           "\n"
+                           "Reverting to the default message editor."),
+                         name.c_str());
+
+            editorFactory = MModule::LoadModule(nameFirst);
+         }
+
+         if ( !editorFactory )
+         {
+            wxLogError(_("Failed to load the default message editor '%s'.\n"
+                         "\n"
+                         "Builtin message editing will not work!"),
+                       nameFirst.c_str());
+         }
+      }
+
+      if ( editorFactory )
+      {
+         m_editor = ((MessageEditorFactory *)editorFactory)->Create();
+         editorFactory->DecRef();
+      }
+
+      listing->DecRef();
    }
 
-   // others
-#ifndef OS_WIN
-   m_LayoutWindow->
-      SetFocusFollowMode(READ_CONFIG_BOOL(m_Profile, MP_FOCUS_FOLLOWSMOUSE));
-#endif
+   // TODO: have a DummyEditor as we have a DummyViewer to avoid crashing
+   //       if we failed to create any editor?
+   m_editor->Create(this, m_splitter);
+}
 
-   EnableEditing(true);
-   m_LayoutWindow->SetCursorVisibility(1);
-   DoClear();
-
-   m_LayoutWindow->SetWrapMargin( READ_CONFIG(m_Profile, MP_WRAPMARGIN));
-   m_LayoutWindow->
-      SetWordWrap(READ_CONFIG_BOOL(m_Profile, MP_AUTOMATIC_WORDWRAP));
-
-   // tell it which status bar pane to use
-   m_LayoutWindow->SetStatusBar(GetStatusBar(), 0, 1);
+void
+wxComposeView::InitAppearance()
+{
+   m_options.Read(m_Profile);
 }
 
 void wxComposeView::DoClear()
 {
-   wxFont font;
-   if ( !m_font.empty() )
-   {
-      wxNativeFontInfo fontInfo;
-      if ( fontInfo.FromString(m_font) )
-      {
-         font.SetNativeFontInfo(fontInfo);
-      }
-   }
-
-   if ( font.Ok() )
-      m_LayoutWindow->Clear(font, &m_fg, &m_bg);
-   else
-      m_LayoutWindow->Clear(m_fontFamily, m_fontSize,
-                            (int) wxNORMAL, (int) wxNORMAL, 0,
-                            &m_fg, &m_bg);
-
+   m_editor->Clear();
 
    // set the default encoding if any
-   SetEncoding(wxFONTENCODING_DEFAULT);
+   m_editor->SetEncoding(wxFONTENCODING_DEFAULT);
 
+   // we're not modified [any more]
    ResetDirty();
 }
 
@@ -1821,7 +1750,7 @@ wxComposeView::DoInitText(Message *mailmsg, MessageView *msgview)
 
    // finally, attach a vCard if requested
    //
-   // TODO: this should be handled by the template as well
+   // TODO: should this be handled by the template as well?
    if ( READ_CONFIG(m_Profile, MP_USEVCARD) )
    {
       // read the vCard from the file specified in config
@@ -1889,10 +1818,8 @@ wxComposeView::DoInitText(Message *mailmsg, MessageView *msgview)
       }
    }
 
-   m_LayoutWindow->Refresh();
-
    // the text hasn't been modified by the user
-   m_LayoutWindow->ResetDirty();
+   ResetDirty();
 }
 
 void wxComposeView::OnFirstTimeModify()
@@ -1925,10 +1852,7 @@ void wxComposeView::SetEncoding(wxFontEncoding encoding)
    }
 
    m_encoding = encoding;
-   wxLayoutList *llist = m_LayoutWindow->GetLayoutList();
-   llist->SetFontEncoding(m_encoding);
-   llist->GetDefaultStyleInfo().enc = encoding;
-   m_LayoutWindow->Refresh();
+   m_editor->SetEncoding(encoding);
 
    // check "Default" menu item if we use the system default encoding in absence
    // of any user-configured default
@@ -1962,7 +1886,8 @@ void wxComposeView::EnableEditing(bool enable)
 {
    // indicate the current state in the status bar
    SetStatusText(enable ? "" : _("RO"), 1);
-   m_LayoutWindow->SetEditable(enable);
+
+   m_editor->Enable(enable);
 }
 
 // ----------------------------------------------------------------------------
@@ -2032,7 +1957,7 @@ wxComposeView::CanClose() const
 
       canClose = false;
    }
-   else if ( m_LayoutWindow && m_LayoutWindow->IsModified() )
+   else if ( m_editor->IsModified() )
    {
       // ask the user if he wants to save the changes
       canClose = MDialog_YesNoDialog
@@ -2117,7 +2042,7 @@ wxComposeView::OnMenuCommand(int id)
          break;
 
       case WXMENU_COMPOSE_EVAL_TEMPLATE:
-         if ( !m_LayoutWindow->IsModified() )
+         if ( !m_editor->IsModified() )
          {
             // remove our prompt
             DoClear();
@@ -2142,7 +2067,7 @@ wxComposeView::OnMenuCommand(int id)
             {
                wxLogStatus(this, _("Cancelled"));
             }
-            else if ( InsertFileAsText(filename) )
+            else if ( InsertFileAsText(filename, MessageEditor::Insert_Append) )
             {
                wxLogStatus(this, _("Inserted file '%s'."), filename.c_str());
             }
@@ -2216,18 +2141,15 @@ wxComposeView::OnMenuCommand(int id)
          break;
 
       case WXMENU_EDIT_PASTE:
-         m_LayoutWindow->Paste( WXLO_COPY_FORMAT, FALSE );
-         m_LayoutWindow->Refresh();
+         m_editor->Paste();
          break;
 
       case WXMENU_EDIT_COPY:
-         m_LayoutWindow->Copy( WXLO_COPY_FORMAT, FALSE );
-         m_LayoutWindow->Refresh();
+         m_editor->Copy();
          break;
 
       case WXMENU_EDIT_CUT:
-         m_LayoutWindow->Cut( WXLO_COPY_FORMAT, FALSE );
-         m_LayoutWindow->Refresh();
+         m_editor->Cut();
          break;
 
       default:
@@ -2275,24 +2197,7 @@ bool wxComposeView::OnFirstTimeFocus()
 
 unsigned long wxComposeView::ComputeTextHash() const
 {
-   // TODO: our hash is quite lame actually - it is just the text length!
-   unsigned long len = 0;
-
-   wxLayoutExportObject *exp;
-   wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
-
-   while( (exp = wxLayoutExport(&status, WXLO_EXPORT_AS_TEXT)) != NULL )
-   {
-      // non text objects get ignored
-      if (exp->type == WXLO_EXPORT_TEXT )
-      {
-         len += exp->content.text->length();
-      }
-
-      delete exp;
-   }
-
-   return len;
+   return m_editor->ComputeHash();
 }
 
 bool wxComposeView::StartExternalEditor()
@@ -2459,8 +2364,7 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
    }
    else // exit code ok
    {
-      // 'true' means "replace the first text part"
-      if ( !InsertFileAsText(m_tmpFileName, true) )
+      if ( !InsertFileAsText(m_tmpFileName, MessageEditor::Insert_Replace) )
       {
          wxLogError(_("Failed to insert back the text from external editor."));
       }
@@ -2504,7 +2408,7 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
 
    // the text could have been scrolled down but it might have become shorter
    // after editing, so reset the scrollbars to ensure that it is visible
-   m_LayoutWindow->Scroll(0, 0);
+   m_editor->MoveCursorTo(0, 0);
 
    // show the frame which might had been obscured by the other windows
    Raise();
@@ -2514,6 +2418,21 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
 // inserting stuff into wxComposeView
 // ----------------------------------------------------------------------------
 
+// common part of InsertData() and InsertFile()
+void
+wxComposeView::DoInsertAttachment(EditorContentPart *mc, const char *mimetype)
+{
+   mc->SetMimeType(mimetype);
+
+   String ext;
+   wxSplitPath(mc->GetFileName(), NULL, NULL, &ext);
+
+   wxIconManager *iconManager = mApplication->GetIconManager();
+   wxIcon icon = iconManager->GetIconFromMimeType(mimetype, ext);
+
+   m_editor->InsertAttachment(icon, mc);
+}
+
 // insert any data
 void
 wxComposeView::InsertData(void *data,
@@ -2521,8 +2440,6 @@ wxComposeView::InsertData(void *data,
                           const char *mimetype,
                           const char *filename)
 {
-   MimeContent *mc = new MimeContent();
-
    String mt = mimetype;
    if ( mt.empty() )
    {
@@ -2536,19 +2453,10 @@ wxComposeView::InsertData(void *data,
       }
    }
 
-   mc->SetMimeType(mimetype);
+   EditorContentPart *mc = new EditorContentPart();
    mc->SetData(data, length, filename);
 
-   wxIcon icon =
-      mApplication->GetIconManager()->GetIconFromMimeType(mimetype,
-                                                          wxString(filename).AfterLast('.'));
-
-   wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(icon);
-   obj->SetUserData(mc);
-   mc->DecRef();
-   m_LayoutWindow->GetLayoutList()->Insert(obj);
-
-   Refresh();
+   DoInsertAttachment(mc, mimetype);
 }
 
 // insert file data
@@ -2556,8 +2464,6 @@ void
 wxComposeView::InsertFile(const char *fileName, const char *mimetype)
 {
    CHECK_RET( !strutil_isempty(fileName), "filename can't be empty" );
-
-   MimeContent *mc = new MimeContent();
 
    // if there is a slash after the dot, it is not extension (otherwise it
    // might be not an extension too, but consider that it is - how can we
@@ -2590,32 +2496,28 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
       if(MInputBox(&newtype, _("MIME type"),
                    _("Please enter new MIME type:"),
                    this))
+      {
          strMimeType = newtype;
+      }
    }
-   mc->SetMimeType(strMimeType);
+
+   EditorContentPart *mc = new EditorContentPart();
    mc->SetFile(filename);
 
-   wxIconManager *iconManager = mApplication->GetIconManager();
-   wxIcon icon = iconManager->GetIconFromMimeType(strMimeType, strExt);
-
-   wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(icon);
-   obj->SetUserData(mc);
-   mc->DecRef();
-   m_LayoutWindow->GetLayoutList()->Insert(obj);
+   DoInsertAttachment(mc, strMimeType);
 
    wxLogStatus(this, _("Inserted file '%s' (as '%s')"),
                filename.c_str(), strMimeType.c_str());
 
-   m_LayoutWindow->Refresh();
 }
 
 /// insert a text file at the current cursor position
 bool
 wxComposeView::InsertFileAsText(const String& filename,
-                                bool replaceFirstTextPart)
+                                MessageEditor::InsertMode insMode)
 {
    // read the text from the file
-   char *text = NULL;
+   wxString text;
    off_t lenFile = 0;      // suppress warning
    wxFile file(filename);
 
@@ -2630,106 +2532,31 @@ wxComposeView::InsertFileAsText(const String& filename,
          return true;
       }
 
-      text = new char[lenFile + 1];
-      text[lenFile] = '\0';
+      char *p = text.GetWriteBuf(lenFile + 1);
+      p[lenFile] = '\0';
 
-      ok = file.Read(text, lenFile) != wxInvalidOffset;
+      ok = file.Read(p, lenFile) != wxInvalidOffset;
+
+      text.UngetWriteBuf();
    }
 
    if ( !ok )
    {
       wxLogError(_("Cannot insert text file into the message."));
 
-      if ( text )
-         delete [] text;
-
       return false;
    }
 
-   // insert the text in the beginning of the message replacing the old
-   // text if asked for this, otherwise just append it at the end
-   wxLayoutList *listNonTextObjects = NULL;
-   if ( replaceFirstTextPart )
-   {
-      // VZ: I don't know why exactly does this happen but exporting text and
-      //     importing it back adds a '\n' at the end, so this is useful as a
-      //     quick workaround for this bug - of course, it's not a real solution
-      //     (FIXME)
-      size_t index = (size_t)lenFile - 1;
-      if ( text[index] == '\n' )
-      {
-         // check for "\r\n" too
-         if ( index > 0 && text[index - 1] == '\r' )
-         {
-            // truncate one char before
-            index--;
-         }
-
-         text[index] = '\0';
-      }
-
-      // this is not as simple as it sounds, because we normally exported all
-      // the text which was in the beginning of the message and it's not one
-      // text object, but possibly several text objects and line break
-      // objects, so now we must delete them and then recreate the new ones...
-
-      wxLayoutList *layoutList = m_LayoutWindow->GetLayoutList();
-      wxLayoutObject *obj;
-      wxLayoutExportStatus status(layoutList);
-      wxLayoutExportObject *exp;
-      while( (exp = wxLayoutExport(&status, WXLO_EXPORT_AS_OBJECTS)) != NULL )
-      {
-         if ( exp->type == WXLO_EXPORT_OBJECT )
-         {
-            obj = exp->content.object;
-            if ( obj->GetType() == WXLO_TYPE_ICON )
-            {
-               if ( !listNonTextObjects )
-                  listNonTextObjects = new wxLayoutList;
-
-               listNonTextObjects->Insert(obj->Copy());
-            }
-            //else: ignore text and cmd objects
-         }
-         delete exp;
-      }
-      layoutList->Empty();
-   }
-
-   // now insert the new text
-   wxLayoutImportText(m_LayoutWindow->GetLayoutList(), text);
-   m_LayoutWindow->ResizeScrollbars(true);
-   m_LayoutWindow->SetModified();
-   m_LayoutWindow->SetDirty();
-   m_LayoutWindow->Refresh();
-   delete [] text;
-
-   // and insert the non-text objects back if we had removed them
-   if ( listNonTextObjects )
-   {
-      wxLayoutList *layoutList = m_LayoutWindow->GetLayoutList();
-      wxLayoutExportObject *exp;
-      wxLayoutExportStatus status2(listNonTextObjects);
-      while((exp = wxLayoutExport( &status2,
-                                      WXLO_EXPORT_AS_OBJECTS)) != NULL)
-         if(exp->type == WXLO_EXPORT_EMPTYLINE)
-            layoutList->LineBreak();
-         else
-            layoutList->Insert(exp->content.object->Copy());
-      delete listNonTextObjects;
-   }
+   m_editor->InsertText(text, insMode);
 
    return true;
 }
 
 /// inserts a text
 void
-wxComposeView::InsertText(const String &txt)
+wxComposeView::InsertText(const String &text)
 {
-   wxLayoutImportText(m_LayoutWindow->GetLayoutList(), txt);
-   m_LayoutWindow->ResizeScrollbars(true);
-   m_LayoutWindow->SetDirty();
-   m_LayoutWindow->GetLayoutList()->ForceTotalLayout();
+   m_editor->InsertText(text, MessageEditor::Insert_Append);
 }
 
 // ----------------------------------------------------------------------------
@@ -2868,39 +2695,28 @@ wxComposeView::BuildMessage() const
    // compose the body
    // ----------------
 
-   wxLayoutObject *lo = NULL;
-   MimeContent *mc = NULL;
-   wxLayoutExportObject *exp;
-   wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
-   while((exp = wxLayoutExport( &status,
-                                   WXLO_EXPORT_AS_TEXT,
-                                   WXLO_EXPORT_WITH_CRLF)) != NULL)
+   for ( EditorContentPart *part = m_editor->GetFirstPart();
+         part;
+         part = m_editor->GetNextPart() )
    {
-      if(exp->type == WXLO_EXPORT_TEXT)
+      switch ( part->GetType() )
       {
-         String* text = exp->content.text;
-         msg->AddPart(
-                        MimeType::TEXT,
-                        text->c_str(), text->length(),
-                        "PLAIN",
-                        "INLINE",   // disposition
-                        NULL,       // disposition parameters
-                        NULL,       // other parameters
-                        m_encoding
-                     );
-      }
-      else
-      {
-         lo = exp->content.object;
-         if(lo->GetType() == WXLO_TYPE_ICON)
-         {
-            mc = (MimeContent *)lo->GetUserData();
+         case EditorContentPart::Type_Text:
+            msg->AddPart(
+                           MimeType::TEXT,
+                           part->GetText(),
+                           part->GetLength(),
+                           "PLAIN",
+                           "INLINE",   // disposition
+                           NULL,       // disposition parameters
+                           NULL,       // other parameters
+                           m_encoding
+                        );
+            break;
 
-            switch( mc->GetType() )
+         case EditorContentPart::Type_File:
             {
-            case MimeContent::MIMECONTENT_FILE:
-            {
-               String filename = mc->GetFileName();
+               String filename = part->GetFileName();
                wxFile file;
                if ( file.Open(filename) )
                {
@@ -2914,24 +2730,24 @@ wxComposeView::BuildMessage() const
                      String basename = wxFileNameFromPath(filename);
 
                      MessageParameterList plist, dlist;
+                     MessageParameter *p;
 
                      // some mailers want "FILENAME" in disposition parameters
-                     MessageParameter *p =
-                         new MessageParameter("FILENAME", basename);
+                     p = new MessageParameter("FILENAME", basename);
                      dlist.push_back(p);
 
-                     // some mailers want "NAME" in parameters:
+                     // and some mailers want "NAME" in parameters:
                      p = new MessageParameter("NAME", basename);
                      plist.push_back(p);
 
                      msg->AddPart
-                        (
-                           mc->GetMimeCategory(),
-                           buffer, size,
-                           strutil_after(mc->GetMimeType(),'/'), //subtype
-                           "INLINE",
-                           &dlist, &plist
-                           );
+                          (
+                            part->GetMimeCategory(),
+                            buffer, size,
+                            strutil_after(part->GetMimeType(),'/'), //subtype
+                            "INLINE",
+                            &dlist, &plist
+                          );
                   }
                   else
                   {
@@ -2949,40 +2765,39 @@ wxComposeView::BuildMessage() const
             }
             break;
 
-            case MimeContent::MIMECONTENT_DATA:
+         case EditorContentPart::Type_Data:
             {
                MessageParameterList dlist, plist;
-               if(! strutil_isempty(mc->GetFileName()))
+
+               String filename = part->GetFileName();
+
+               if ( !filename.empty() )
                {
-                  MessageParameter *p
-                      = new MessageParameter("FILENAME", mc->GetFileName());
+                  MessageParameter *p;
+
+                  p = new MessageParameter("FILENAME", filename);
                   dlist.push_back(p);
 
-                  p = new MessageParameter("NAME", mc->GetFileName());
+                  p = new MessageParameter("NAME", filename);
                   plist.push_back(p);
                }
 
                msg->AddPart
-                  (
-                     mc->GetMimeCategory(),
-                     (char *)mc->GetData(),
-                     mc->GetSize(),
-                     strutil_after(mc->GetMimeType(),'/'),  //subtype
-                     "INLINE",
-                     &dlist,
-                     &plist
-                  );
+                    (
+                      part->GetMimeCategory(),
+                      (char *)part->GetData(),
+                      part->GetSize(),
+                      strutil_after(part->GetMimeType(),'/'),  //subtype
+                      "INLINE",
+                      &dlist,
+                      &plist
+                    );
             }
             break;
 
-            default:
-               FAIL_MSG(_("Unknwown part type"));
-            }
-            mc->DecRef();
-         }
+         default:
+            FAIL_MSG( "Unknown editor content part type!" );
       }
-
-      delete exp;
    }
 
    // setup the headers
@@ -3180,53 +2995,32 @@ wxComposeView::SetSubject(const String &subj)
 
 void wxComposeView::ResetDirty()
 {
-   if ( m_LayoutWindow )
-      m_LayoutWindow->SetModified(false);
+   m_editor->ResetDirty();
 }
 
 // ----------------------------------------------------------------------------
 // other wxComposeView operations
 // ----------------------------------------------------------------------------
 
+void
+wxComposeView::SetFocusToComposer()
+{
+   if ( m_editor )
+      m_editor->SetFocus();
+}
+
 /// position the cursor in the composer window
 void
 wxComposeView::MoveCursorTo(int x, int y)
 {
-   m_LayoutWindow->GetLayoutList()->MoveCursorTo(wxPoint(x, y));
+   m_editor->MoveCursorTo(x, y);
 }
 
 /// print the message
 void
 wxComposeView::Print(void)
 {
-#ifdef OS_WIN
-   wxGetApp().SetPrintMode(wxPRINT_WINDOWS);
-#else
-   bool found;
-   wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
-   //    set AFM path
-   PathFinder pf(mApplication->GetGlobalDir()+"/afm", false);
-   pf.AddPaths(READ_CONFIG(m_Profile,MP_AFMPATH), false);
-   pf.AddPaths(mApplication->GetLocalDir(), true);
-   String afmpath = pf.FindDirFile("Cour.afm", &found);
-   if(found)
-      wxSetAFMPath(afmpath);
-#endif
-
-   wxPrintDialogData pdd(*((wxMApp *)mApplication)->GetPrintData());
-   wxPrinter printer(& pdd);
-#ifndef OS_WIN
-   wxThePrintSetupData->SetAFMPath(afmpath);
-#endif
-   wxLayoutPrintout printout(m_LayoutWindow->GetLayoutList(),_("Mahogany: Printout"));
-   if ( !printer.Print(this, &printout, TRUE)
-        && printer.GetLastError() != wxPRINTER_CANCELLED )
-      wxMessageBox(_("There was a problem with printing the message:\n"
-                     "perhaps your current printer is not set up correctly?"),
-                   _("Printing"), wxOK);
-   else
-      (* ((wxMApp *)mApplication)->GetPrintData())
-         = printer.GetPrintDialogData().GetPrintData();
+   m_editor->Print();
 }
 
 /// save the first text part of the message to the given file
@@ -3244,25 +3038,21 @@ wxComposeView::SaveMsgTextToFile(const String& filename) const
       return false;
    }
 
-   // export first text part of the message
-
-   wxLayoutExportObject *exp;
-   wxLayoutExportStatus status(m_LayoutWindow->GetLayoutList());
-
-   while( (exp = wxLayoutExport(&status, WXLO_EXPORT_AS_TEXT)) != NULL )
+   // export all text parts of the message
+   for ( EditorContentPart *part = m_editor->GetFirstPart();
+         part;
+         part = m_editor->GetNextPart() )
    {
-      // non text objects get ignored
-      if ( exp->type == WXLO_EXPORT_TEXT )
+      if ( part->GetType() == EditorContentPart::Type_Text )
       {
-         if ( !file.Write(*exp->content.text) )
+         if ( !file.Write(part->GetText()) )
          {
             wxLogError(_("Cannot write message to file."));
 
-            return false;
+            // continue nevertheless with the other parts, we must finish
+            // enumerating them
          }
       }
-
-      delete exp;
    }
 
    ((wxComposeView *)this)->ResetDirty(); // const_cast

@@ -193,12 +193,61 @@ public:
 
    /** @name Implementation only */
    //@{
+
    /// get the real private composer class
    virtual wxComposeView *GetComposeView() = 0;
 
    /// get the parent frame for the composer window
    virtual wxFrame *GetFrame() = 0;
+
    //@}
+
+protected:
+   /// the composer options (i.e. values read from profile)
+   struct Options
+   {
+      /// font description
+      String m_font;
+
+      /// font family and size used only if m_font is empty
+      int m_fontFamily,
+          m_fontSize;
+
+      /// composer colours
+      wxColour m_fg,
+               m_bg;
+
+      /// ctor initializes everything to some invalid values
+      Options();
+
+      /// read the options from the given profile
+      void Read(Profile *profile);
+   };
+
+private:
+   /**
+     @name MessageEditor callbacks
+
+     These functions are called by MessageEditor only and shouldn't be used
+     from any outside code.
+   */
+   //@{
+
+   /// called when composer window gets focus for the 1st time
+   virtual bool OnFirstTimeFocus() = 0;
+
+   /// called just before text in composer is modified for the 1st time
+   virtual void OnFirstTimeModify() = 0;
+
+   /// get the profile to use for options (NOT IncRef()'d!)
+   virtual Profile *GetProfile() const = 0;
+
+   /// get the options
+   virtual const Options& GetOptions() const = 0;
+
+   //@}
+
+   friend class MessageEditor;
 };
 
 #endif // _COMPOSER_H_

@@ -14,19 +14,21 @@
 #endif
 
 #ifndef   USE_PCH
-#   include   "Mcommon.h"
-#   include   "Merror.h"
-#   include   "Mdefaults.h"
+#   include "Mcommon.h"
+#   include "Merror.h"
+#   include "Mdefaults.h"
 
-#   include   "kbList.h"
-#   include   "PathFinder.h"
-#   include   "Profile.h"
+#   include "kbList.h"
+#   include "PathFinder.h"
+#   include "Profile.h"
 
-#   include   "guidef.h"
-#   include   "MFrame.h"
-#   include   "gui/wxMFrame.h"
-#   include   "MLogFrame.h"
-#   include   "FolderType.h"
+#   include "guidef.h"
+#   include "MFrame.h"
+#   include "gui/wxMFrame.h"
+#   include "MLogFrame.h"
+#   include "FolderType.h"
+
+#   include <wx/cmndata.h>  // wxPageSetupDialogData
 #endif
 
 #include "MEvent.h"
@@ -38,6 +40,8 @@ class MModuleCommon;
 class ArrayFrames;
 
 class WXDLLEXPORT wxMimeTypesManager;
+class WXDLLEXPORT wxPageSetupDialogData;
+class WXDLLEXPORT wxPrintData;
 
 /// the global application object pointer
 extern MAppBase *mApplication;
@@ -234,12 +238,39 @@ public:
    //@}
 #endif // USE_DIALUP
 
+   /**
+     @name Printing support
+   */
+   //@{
+
+   /**
+     returns data to use with wxPrintDialogData must be called before printing
+   */
+   virtual const wxPrintData *GetPrintData() = 0;
+
+   /// store the print data (after the user modified it)
+   virtual void SetPrintData(const wxPrintData& printData) = 0;
+
+   virtual wxPageSetupDialogData *GetPageSetupData() = 0;
+
+   virtual void SetPageSetupData(const wxPageSetupDialogData& data) = 0;
+
+   //@}
+
+   /**
+     @name Outbox management
+   */
+   //@{
+
    /// Send all messages from the outbox
    virtual void SendOutbox(void) const;
+
    /// Check if we have messages to send.
    virtual bool CheckOutbox(UIdType *nSMTP = NULL,
                             UIdType *nNNTP = NULL,
                             class MailFolder *mf = NULL) const;
+
+   //@}
 
    /// called when the events we're interested in are generated
    virtual bool OnMEvent(MEventData& event);

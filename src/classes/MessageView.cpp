@@ -86,7 +86,6 @@
 // options we use here
 // ----------------------------------------------------------------------------
 
-extern const MOption MP_AFMPATH;
 extern const MOption MP_AUTOCOLLECT;
 extern const MOption MP_AUTOCOLLECT_ADB;
 extern const MOption MP_AUTOCOLLECT_NAMED;
@@ -395,7 +394,7 @@ MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
           CMP(autocollect) && CMP(autocollectNamed) &&
           CMP(autocollectBookName) &&
 #ifdef OS_UNIX
-          CMP(browserIsNS) && CMP(afmpath) &&
+          CMP(browserIsNS)
 #endif // Unix
 #endif // 0
           CMP(showFaces);
@@ -862,7 +861,6 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    // these settings are used under Unix only
 #ifdef OS_UNIX
    settings->browserIsNS = READ_CONFIG_BOOL(profile, MP_BROWSER_ISNS);
-   settings->afmpath = READ_APPCONFIG_TEXT(MP_AFMPATH);
 #endif // Unix
 
    // update the parents menu as the show headers option might have changed
@@ -2954,48 +2952,15 @@ String MessageView::GetSelection() const
 // printing
 // ----------------------------------------------------------------------------
 
-void
-MessageView::PrepareForPrinting()
-{
-   static bool s_printingPrepared = false;
-   if ( s_printingPrepared )
-      return;
-
-   s_printingPrepared = true;
-
-#ifdef OS_WIN
-   wxGetApp().SetPrintMode(wxPRINT_WINDOWS);
-#else // Unix
-   wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
-
-   // set AFM path
-   PathFinder pf(mApplication->GetGlobalDir()+"/afm", false);
-   pf.AddPaths(m_ProfileValues.afmpath, false);
-   pf.AddPaths(mApplication->GetLocalDir(), true);
-
-   bool found;
-   String afmpath = pf.FindDirFile("Cour.afm", &found);
-   if(found)
-   {
-      ((wxMApp *)mApplication)->GetPrintData()->SetFontMetricPath(afmpath);
-      wxThePrintSetupData->SetAFMPath(afmpath);
-   }
-#endif // Win/Unix
-}
-
 bool
 MessageView::Print(void)
 {
-   PrepareForPrinting();
-
    return m_viewer->Print();
 }
 
 void
 MessageView::PrintPreview(void)
 {
-   PrepareForPrinting();
-
    m_viewer->PrintPreview();
 }
 

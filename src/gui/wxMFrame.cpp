@@ -1071,30 +1071,26 @@ wxMFrame::OnCommandEvent(wxCommandEvent &event)
 void
 wxMFrame::OnPrintSetup()
 {
-#ifdef OS_WIN
-   wxGetApp().SetPrintMode(wxPRINT_WINDOWS);
-#endif
-   wxPrintDialogData printDialogData(* ((wxMApp *)mApplication)->GetPrintData());
-   wxPrintDialog printerDialog(this, & printDialogData);
+   wxPrintDialogData printDialogData(*mApplication->GetPrintData());
+   wxPrintDialog printerDialog(this, &printDialogData);
 
    printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
-   printerDialog.ShowModal();
-
-   (*((wxMApp *)mApplication)->GetPrintData())
-      = printerDialog.GetPrintDialogData().GetPrintData();
+   if ( printerDialog.ShowModal() == wxID_OK )
+   {
+      mApplication->SetPrintData(
+            printerDialog.GetPrintDialogData().GetPrintData());
+   }
 }
 
 void wxMFrame::OnPageSetup()
 {
-   wxMApp *app = (wxMApp *)mApplication;
-
-   *app->GetPageSetupData() = *app->GetPrintData();
-
-   wxPageSetupDialog pageSetupDialog(this, app->GetPageSetupData());
-   pageSetupDialog.ShowModal();
-
-   *app->GetPrintData() = pageSetupDialog.GetPageSetupData().GetPrintData();
-   *app->GetPageSetupData() = pageSetupDialog.GetPageSetupData();
+   wxPageSetupDialog pageSetupDialog(this, mApplication->GetPageSetupData());
+   if ( pageSetupDialog.ShowModal() == wxID_OK )
+   {
+      wxPageSetupData& pageData = pageSetupDialog.GetPageSetupData();
+      mApplication->SetPrintData(pageData.GetPrintData());
+      mApplication->SetPageSetupData(pageData);
+   }
 }
 
 #ifdef USE_PS_PRINTING

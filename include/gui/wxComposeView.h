@@ -30,7 +30,9 @@
 #   include   "kbList.h"
 #endif // USE_PCH
 
-#include "Composer.h"   // the base class
+#include "Composer.h"         // the base class
+
+#include "MessageEditor.h"    // for MessageEditor::InsertMode enum
 
 // ----------------------------------------------------------------------------
 // forward declarations
@@ -41,8 +43,10 @@ class wxRcptControls;
 class wxComposeView;
 class wxEnhancedPanel;
 
+class MessageEditor;
+
 class WXDLLEXPORT wxChoice;
-class WXDLLEXPORT wxLayoutWindow;
+class WXDLLEXPORT wxMenuItem;
 class WXDLLEXPORT wxProcess;
 class WXDLLEXPORT wxProcessEvent;
 class WXDLLEXPORT wxSplitterWindow;
@@ -115,7 +119,7 @@ public:
    void MoveCursorTo(int x, int y);
 
    /// set the focus to the composer window
-   void SetFocusToComposer() { m_LayoutWindow->SetFocus(); }
+   void SetFocusToComposer();
 
    /** Set the newsgroups to post to.
        @param groups the list of newsgroups
@@ -172,10 +176,10 @@ public:
    void OnExtEditorTerm(wxProcessEvent& event);
 
       /// called when composer window gets focus for the 1st time
-   bool OnFirstTimeFocus();
+   virtual bool OnFirstTimeFocus();
 
       /// called just before text in composer is modified for the 1st time
-   void OnFirstTimeModify();
+   virtual void OnFirstTimeModify();
 
       /// called when rcpt type is changed
    void OnRcptTypeChange(RecipientType type);
@@ -187,11 +191,11 @@ public:
    /// for wxAddressTextCtrl usage: remember last focused field
    void SetLastAddressEntry(int field) { m_indexLast = field; }
 
-   /// get the profile to use for options
-   Profile *GetProfile(void) const { return m_Profile; }
-
    /// is the control with this index enabled?
    bool IsRecipientEnabled(size_t index) const;
+
+   /// get the profile to use for options
+   Profile *GetProfile(void) const { return m_Profile; }
 
    /** Adds an extra header line.
        @param entry name of header entry
@@ -234,6 +238,9 @@ protected:
    /// InitText() helper
    void DoInitText(Message *msg, MessageView *msgview = NULL);
 
+   /// InsertData() and InsertFile() helper
+   void DoInsertAttachment(EditorContentPart *mc, const char *mimetype);
+
    /// set the message encoding to be equal to the encoding of this msg
    void SetEncodingToSameAs(Message *msg);
 
@@ -245,7 +252,7 @@ protected:
 
    /// insert a text file at the current cursor position
    bool InsertFileAsText(const String& filename,
-                         bool replaceFirstTextPart = false);
+                         MessageEditor::InsertMode insMode);
 
    /// save the first text part of the message to the given file
    bool SaveMsgTextToFile(const String& filename) const;
@@ -277,8 +284,11 @@ private:
    /// initialize the toolbar and statusbar
    void CreateToolAndStatusBars();
 
-   /// makes the canvas
-   void CreateFTCanvas(void);
+   /// create and initialize the editor
+   void CreateEditor(void);
+
+   /// init our various appearance parameters
+   void InitAppearance();
 
    /// create the header fields
    wxSizer *CreateHeaderFields();
@@ -318,6 +328,9 @@ private:
    /// enable/disable editing of the message text
    void EnableEditing(bool enable);
 
+   /// get the options (for MessageEditor)
+   const Options& GetOptions() const { return m_options; }
+
    /// the profile (never NULL)
    Profile *m_Profile;
 
@@ -334,14 +347,17 @@ private:
    wxPanel *m_panel;
 
    /// the edit/cut menu item
-   class wxMenuItem *m_MItemCut;
+   wxMenuItem *m_MItemCut;
+
    /// the edit/copy menu item
-   class wxMenuItem *m_MItemCopy;
+   wxMenuItem *m_MItemCopy;
+
    /// the edit/paste menu item
-   class wxMenuItem *m_MItemPaste;
+   wxMenuItem *m_MItemPaste;
 
    /**@name Child controls */
    //@{
+
       /// the from address - may be NULL if not shown
    wxTextCtrl *m_txtFrom;
 
@@ -360,8 +376,9 @@ private:
       /// the additional recipients: array of corresponding controls
    ArrayRcptControls m_rcptControls;
 
-      /// the canvas for displaying the mail
-   wxLayoutWindow *m_LayoutWindow;
+      /// the editor where the message is really edited
+   MessageEditor *m_editor;
+
    //@}
 
    /// the last focused address field: index of -1 means m_txtRecipient itself
@@ -373,20 +390,8 @@ private:
    /// the type of the last recipient
    RecipientType m_rcptTypeLast;
 
-   /** @name font options */
-   //@{
-
-   /// font description
-   String m_font;
-
-   /// font family and size used only if m_font is empty
-   int m_fontFamily,
-       m_fontSize;
-
-   //@}
-
-   /// composer colours
-   wxColour m_fg, m_bg;
+   /// the options
+   Options m_options;
 
    /// News or smtp?
    Mode m_mode;
@@ -406,8 +411,9 @@ private:
    /// the (main) encoding (== charset) to use for the message
    wxFontEncoding m_encoding;
 
-   // external editor support
-   // -----------------------
+   /**
+     @name external editor support
+    */
    //@{
 
    /// compute the text hash to see if it was changed by external editor

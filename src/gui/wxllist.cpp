@@ -1180,7 +1180,7 @@ wxLayoutLine::Layout(wxDC &dc,
    bool cursorFound = false;
 
    RecalculatePosition(llist);
-   
+
    if(cursorPos)
    {
       *cursorPos = m_Position;
@@ -1227,7 +1227,7 @@ wxLayoutLine::Layout(wxDC &dc,
                   cursorSize->x = width;
                   cursorSize->y = height;
                }
-               
+
                cursorFound = true; // no more checks
             }
             else
@@ -1295,7 +1295,7 @@ wxLayoutLine::Layout(wxDC &dc,
    {
       m_Next->MarkDirty();
    }
-   
+
    // We need to check whether we found a valid cursor size:
    if(cursorPos && cursorSize)
    {
@@ -1369,13 +1369,13 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
 {
    if(GetLength() < wrapmargin)
       return FALSE; // nothing to do
-   
+
    // find the object which covers the wrapmargin:
    CoordType offset;
    wxLOiterator i = FindObject(wrapmargin, &offset);
    wxCHECK_MSG( i != m_ObjectList.end(), FALSE,
       "Cannot find object covering wrapmargin.");
-   
+
    // from this object on, the rest of the line must be copied to the
    // next one:
    wxLOiterator copyObject = m_ObjectList.end();
@@ -1388,7 +1388,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
    size_t shorter = 0;
    // remember cursor location of object
    size_t objectCursorPos = 0;
-   
+
    size_t breakpos = offset;
 
    if( (**i).GetType() != WXLO_TYPE_TEXT )
@@ -1459,7 +1459,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
    (void) new wxLayoutLine(this, llist);
    wxASSERT(m_Next);
    // We need to move this and all following objects to the next
-   // line. Starting from the end of line, to keep the order right. 
+   // line. Starting from the end of line, to keep the order right.
    if(copyObject != m_ObjectList.end())
    {
       wxLOiterator j;
@@ -1474,7 +1474,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
       }
    }
    m_Length -= shorter;
-   
+
    if(prependText.Length() > 0)
       m_Next->Insert(0, prependText);
 
@@ -1494,7 +1494,7 @@ wxLayoutLine::ReNumber(void)
 {
    CoordType lineNo = m_Previous ? m_Previous->m_LineNumber+1 : 0;
    m_LineNumber = lineNo++;
-   
+
    for(wxLayoutLine *next = GetNextLine();
        next; next = next->GetNextLine())
       next->m_LineNumber = lineNo++;
@@ -2272,7 +2272,7 @@ wxLayoutList::LineBreak(void)
 
    // The following code will produce a height which is guaranteed to
    // be too high: old lineheight + the height of both new lines.
-   // We can probably drop the old line height and start with height = 
+   // We can probably drop the old line height and start with height =
    // 0. FIXME
    wxLayoutLine *prev = m_CursorLine->GetPreviousLine();
    if(prev)
@@ -2458,14 +2458,14 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
    // needed, optimise it later
    ApplyStyle(m_DefaultStyleInfo, dc);
 
-   
+
    if(m_ReLayoutAll)
    {
       forceAll = TRUE;
       bottom = -1;
    }
    ForceTotalLayout(FALSE);
-   
+
 
    // If one line was dirty, we need to re-calculate all
    // following lines, too.
@@ -2480,7 +2480,7 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
          ApplyStyle(line->GetStyleInfo(), dc);
       if(
          // if any previous line was dirty, we need to layout all
-         // following lines:   
+         // following lines:
          wasDirty
          // go on until we find the cursorline
          || ! cursorReached
@@ -2490,7 +2490,7 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
          // position and size:
          || line == m_CursorLine
          // or if it's the line we are asked to look for:
-         || (cpos && line->GetLineNumber() == cpos->y) 
+         || (cpos && line->GetLineNumber() == cpos->y)
          // layout at least the desired region:
          || (bottom == -1 )
          || (line->GetPosition().y <= bottom)
@@ -2498,7 +2498,7 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
       {
          if(line->IsDirty())
             wasDirty = true;
-         
+
          // The following Layout() calls will update our
          // m_CurrentStyleInfo if needed.
          if(line == m_CursorLine)
@@ -2516,7 +2516,7 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
                   *csize = m_CursorSize;
             }
             cursorReached = TRUE;
-         } 
+         }
          else
          {
             if(cpos && line->GetLineNumber() == cpos->y)
@@ -2532,7 +2532,7 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
       }
       line = line->GetNextLine();
    }
-   
+
 #ifndef WXLAYOUT_USE_CARET
    // can only be 0 if we are on the first line and have no next line
    wxASSERT(m_CursorSize.x != 0 || (m_CursorLine &&
@@ -2580,7 +2580,7 @@ wxLayoutList::Draw(wxDC &dc,
       marked as dirty.
    */
    Layout(dc, bottom);
-   
+
    ApplyStyle(m_DefaultStyleInfo, dc);
    wxBrush brush(m_CurrentStyleInfo.m_bg, wxSOLID);
    dc.SetBrush(brush);
@@ -2718,7 +2718,7 @@ wxLayoutList::DrawCursor(wxDC &dc, bool active, wxPoint const &translate)
 #ifdef WXLAYOUT_DEBUG
    WXLO_DEBUG(("Drawing cursor (%ld,%ld) at %ld,%ld, size %ld,%ld, line: %ld, len %ld",
                (long)m_CursorPos.x, (long)m_CursorPos.y,
-               (long)coords.x, (long)coords.y, 
+               (long)coords.x, (long)coords.y,
                (long)m_CursorSize.x, (long)m_CursorSize.y,
                (long)m_CursorLine->GetLineNumber(),
                (long)m_CursorLine->GetLength()));
@@ -2822,7 +2822,7 @@ wxLayoutList::EndSelection(const wxPoint& cposOrig, const wxPoint& spos)
    }
    m_Selection.m_selecting = false;
    m_Selection.m_valid = true;
-   /// In case we just clicked somewhere, the selection will have zero 
+   /// In case we just clicked somewhere, the selection will have zero
    /// size, so we discard it immediately.
    if(m_Selection.m_CursorA == m_Selection.m_CursorB)
       DiscardSelection();
@@ -2853,7 +2853,7 @@ wxLayoutList::IsSelected(const wxPoint &cursor) const
 
    return (
       (m_Selection.m_CursorA <= cursor
-       && cursor <= m_Selection.m_CursorB) 
+       && cursor <= m_Selection.m_CursorB)
       || (m_Selection.m_CursorB <= cursor
           && cursor <= m_Selection.m_CursorA)
       );
@@ -2949,7 +2949,7 @@ wxLayoutList::DeleteSelection(void)
    // be a bit paranoid:
    if(! firstLine || ! lastLine)
       return;
-   
+
    // First, delete what's left of this line:
    MoveCursorTo(m_Selection.m_CursorA);
    DeleteToEndOfLine();
@@ -3002,7 +3002,7 @@ wxLayoutList::GetLine(CoordType index) const
 #ifdef DEBUG
    CoordType lineNo = 0;
 #endif
-       
+
    for ( line = m_FirstLine; line && n-- > 0; line =
             line->GetNextLine() )
    {
@@ -3174,12 +3174,111 @@ wxLayoutList::Debug(void)
 
 #endif
 
+// ============================================================================
+// printing
+// ============================================================================
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+#ifdef M_BASEDIR
 
-   wxLayoutPrintout
+#ifndef USE_PCH
+   #include "Profile.h"
+   #include "Mdefaults.h"
+   #include "MApplication.h"
+#endif
 
-   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+extern const MOption MP_PRINT_PREVIEWZOOM;
+
+// ----------------------------------------------------------------------------
+// wxMVPreview: tiny helper class used by wxLayoutPrintout::PrintPreview() to
+//              restore and set the default zoom level
+// ----------------------------------------------------------------------------
+
+class wxMVPreview : public wxPrintPreview
+{
+public:
+   wxMVPreview(Profile *prof,
+               wxPrintout *p1, wxPrintout *p2,
+               wxPrintDialogData *dd)
+      : wxPrintPreview(p1, p2, dd)
+      {
+         m_profile = prof;
+         m_profile->IncRef();
+         SetZoom(READ_CONFIG(m_profile, MP_PRINT_PREVIEWZOOM));
+      }
+   ~wxMVPreview()
+      {
+         m_profile->writeEntry(MP_PRINT_PREVIEWZOOM, (long) GetZoom());
+         m_profile->DecRef();
+      }
+
+private:
+   Profile *m_profile;
+};
+
+
+// ----------------------------------------------------------------------------
+// wxLayoutPrintout
+// ----------------------------------------------------------------------------
+
+/* static */
+bool wxLayoutPrintout::Print(wxWindow *window, wxLayoutList *llist)
+{
+   wxPrintDialogData pdd(*mApplication->GetPrintData());
+   wxPrinter printer(& pdd);
+   wxLayoutPrintout printout(llist);
+
+   if ( !printer.Print(window, &printout, TRUE)
+        && printer.GetLastError() != wxPRINTER_CANCELLED )
+   {
+      wxMessageBox(_("There was a problem with printing the message:\n"
+                     "perhaps your current printer is not set up correctly?"),
+                   _("Printing"), wxOK);
+      return FALSE;
+   }
+
+   mApplication->SetPrintData(printer.GetPrintDialogData().GetPrintData());
+
+   return TRUE;
+}
+
+/* static */
+bool wxLayoutPrintout::PrintPreview(wxLayoutList *llist)
+{
+   // Pass two printout objects: for preview, and possible printing.
+   wxPrintDialogData pdd(*mApplication->GetPrintData());
+   wxPrintPreview *preview = new wxMVPreview
+                                 (
+                                  mApplication->GetProfile(),
+                                  new wxLayoutPrintout(llist),
+                                  new wxLayoutPrintout(llist),
+                                  &pdd
+                                 );
+   if( !preview->Ok() )
+   {
+      wxMessageBox(_("There was a problem with showing the preview:\n"
+                     "perhaps your current printer is not set correctly?"),
+                   _("Previewing"), wxOK);
+      return false;
+   }
+
+   mApplication->SetPrintData(preview->GetPrintDialogData().GetPrintData());
+
+   wxPreviewFrame *frame = new wxPreviewFrame
+                               (
+                                 preview,
+                                 NULL, //GetFrame(m_Parent),
+                                 _("Print Preview"),
+                                 wxPoint(100, 100),
+                                 wxSize(600, 650)
+                               );
+   frame->Centre(wxBOTH);
+   frame->Initialize();
+   frame->Show(TRUE);
+
+   return true;
+}
+
+#endif // M_BASEDIR
 
 wxLayoutPrintout::wxLayoutPrintout(wxLayoutList *llist,
                                    wxString const & title)
@@ -3263,7 +3362,7 @@ bool wxLayoutPrintout::OnPrintPage(int page)
 
    if (!dc)
       return false;
-   
+
    int top, bottom;
    int marginX = 20;   // HACK ALERT
    int marginY = 20;   // HACK ALERT

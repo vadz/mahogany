@@ -14,8 +14,6 @@
 #  include <wx/app.h>
 #  include <wx/help.h>
 #  include <wx/icon.h>
-
-#  include <wx/cmndata.h>  // for wxPageSetupData, can't fwd declare it
 #endif  //USE_PCH
 
 // fwd decl
@@ -99,9 +97,16 @@ public:
    ~wxMApp();
 
    /// get a pointer to the print data
-   wxPrintData * GetPrintData(void) { return m_PrintData; }
+   virtual const wxPrintData *GetPrintData();
+
+   /// store the print data (after the user modified it)
+   virtual void SetPrintData(const wxPrintData& printData);
+
    /// get the page setup data
-   wxPageSetupData * GetPageSetupData(void) { return m_PageSetupData; }
+   virtual wxPageSetupDialogData *GetPageSetupData();
+
+   /// change it
+   virtual void SetPageSetupData(const wxPageSetupDialogData& data);
 
    /** @name Thread control */
    //@{
@@ -184,12 +189,17 @@ private:
    wxLocale *m_Locale;
 #endif // USE_I18N
 
+   /// save the printing parameters
+   void CleanUpPrintData();
+
    /// data for printing
    wxPrintData *m_PrintData;
    /// page setup for printing
-   wxPageSetupData *m_PageSetupData;
-   /// to recylce the last CanClose() result
+   wxPageSetupDialogData *m_PageSetupData;
+
+   /// to recycle the last CanClose() result
    bool m_CanClose;
+
    /// timer used to call OnIdle for MEvent handling
    wxTimer *m_IdleTimer;
 

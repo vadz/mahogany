@@ -47,7 +47,6 @@ class LayoutViewerWindow;
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_FOCUS_FOLLOWSMOUSE;
-extern const MOption MP_PRINT_PREVIEWZOOM;
 extern const MOption MP_VIEW_AUTOMATIC_WORDWRAP;
 extern const MOption MP_VIEW_WRAPMARGIN;
 
@@ -174,33 +173,6 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// wxMVPreview: tiny helper class used by LayoutViewer::PrintPreview() to
-//              restore and set the default zoom level
-// ----------------------------------------------------------------------------
-
-class wxMVPreview : public wxPrintPreview
-{
-public:
-   wxMVPreview(Profile *prof,
-               wxPrintout *p1, wxPrintout *p2,
-               wxPrintDialogData *dd)
-      : wxPrintPreview(p1, p2, dd)
-      {
-         m_profile = prof;
-         m_profile->IncRef();
-         SetZoom(READ_CONFIG(m_profile, MP_PRINT_PREVIEWZOOM));
-      }
-   ~wxMVPreview()
-      {
-         m_profile->writeEntry(MP_PRINT_PREVIEWZOOM, (long) GetZoom());
-         m_profile->DecRef();
-      }
-
-private:
-   Profile *m_profile;
-};
-
-// ----------------------------------------------------------------------------
 // ScrollPositionChangeChecker: helper class used by {Line/Page}{Up/Down} to
 // check if the y-scroll position of the window has changed or not
 // ----------------------------------------------------------------------------
@@ -299,7 +271,7 @@ void LayoutViewerWindow::OnMouseEvent(wxCommandEvent& event)
 
 IMPLEMENT_MESSAGE_VIEWER(LayoutViewer,
                          _("Default message viewer"),
-                         "(c) 2001 Vadim Zeitlin <vadimn@wxwindows.org>");
+                         "(c) 1997-2001 Mahogany Team");
 
 LayoutViewer::LayoutViewer()
 {
@@ -416,55 +388,12 @@ String LayoutViewer::GetSelection() const
 
 bool LayoutViewer::Print()
 {
-   wxMApp *app = (wxMApp *)mApplication;
-
-   wxPrintDialogData pdd(*app->GetPrintData());
-   wxPrinter printer(& pdd);
-   wxLayoutPrintout printout(m_window->GetLayoutList(), _("Mahogany: Printout"));
-
-   if ( !printer.Print(m_window, &printout, TRUE)
-        && printer.GetLastError() != wxPRINTER_CANCELLED )
-   {
-      wxMessageBox(_("There was a problem with printing the message:\n"
-                     "perhaps your current printer is not set up correctly?"),
-                   _("Printing"), wxOK);
-      return FALSE;
-   }
-   else
-   {
-      *app->GetPrintData() = printer.GetPrintDialogData().GetPrintData();
-      return TRUE;
-   }
+   return wxLayoutPrintout::Print(m_window, m_window->GetLayoutList());
 }
 
 void LayoutViewer::PrintPreview()
 {
-   wxMApp *app = (wxMApp *)mApplication;
-
-   // Pass two printout objects: for preview, and possible printing.
-   wxPrintDialogData pdd(*app->GetPrintData());
-   wxPrintPreview *preview = new wxMVPreview(
-      GetProfile(),
-      new wxLayoutPrintout(m_window->GetLayoutList()),
-      new wxLayoutPrintout(m_window->GetLayoutList()),
-      &pdd
-      );
-   if( !preview->Ok() )
-   {
-      wxMessageBox(_("There was a problem with showing the preview:\n"
-                     "perhaps your current printer is not set correctly?"),
-                   _("Previewing"), wxOK);
-      return;
-   }
-
-   *app->GetPrintData() = preview->GetPrintDialogData().GetPrintData();
-
-   wxPreviewFrame *frame = new wxPreviewFrame(preview, NULL, //GetFrame(m_Parent),
-                                              _("Print Preview"),
-                                              wxPoint(100, 100), wxSize(600, 650));
-   frame->Centre(wxBOTH);
-   frame->Initialize();
-   frame->Show(TRUE);
+   (void)wxLayoutPrintout::PrintPreview(m_window->GetLayoutList());
 }
 
 wxWindow *LayoutViewer::GetWindow() const

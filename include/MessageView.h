@@ -540,11 +540,6 @@ private:
       String autocollectBookName;
       //@}
 
-#ifdef OS_UNIX
-      /// Where to find AFM files.
-      String afmpath;
-#endif // Unix
-
       AllProfileValues();
 
       bool operator==(const AllProfileValues& other) const;
