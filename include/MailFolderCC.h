@@ -207,14 +207,6 @@ public:
 
    virtual bool SortMessages(MsgnoType *msgnos, const SortParams& sortParams);
 
-   /** Get a string uniquely identifying the message in this folder, will be
-       empty if not supported by this folder type
-
-       @param msgno the number of the message in folder
-       @return string uniquely identifying the message in this folder
-   */
-   virtual String GetMessageUID(unsigned long msgno) const;
-
    enum SequenceKind
    {
       SEQ_UID,
@@ -469,9 +461,6 @@ private:
    /// Updates the status of a single message.
    void UpdateMessageStatus(unsigned long seqno);
 
-   /// Apply filters to the new messages
-   virtual bool FilterNewMail();
-
    /// update the folder after appending messages to it
    void UpdateAfterAppend();
 
@@ -601,8 +590,8 @@ private:
    /// when this mutex is locked, this folder can't be accessed at all
    MMutex *m_Mutex;
 
-   /// Locked while we're applying filter rules
-   MMutex *m_InFilterCode;
+   /// locked while we're processing the new mail which just arrived
+   MMutex *m_mutexNewMail;
    //@}
 
    /** @name functions for mapping mailstreams and objects

@@ -180,7 +180,10 @@ static const char *wxFLC_ColumnNames[WXFLC_NUMENTRIES] =
 static const char *FOLDER_LISTCTRL_WIDTHS_D = "60:300:200:80:80";
 
 // the trace mask for selection/focus handling
-#define M_TRACE_SELECTION "msgsel"
+#define M_TRACE_FV_SELECTION "msgsel"
+
+// the trace mask folder view events handling tracing
+#define M_TRACE_FV_UPDATE    "fvupdate"
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -1252,7 +1255,7 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
    long item = event.m_itemIndex;
 
-   wxLogTrace(M_TRACE_SELECTION, "%ld was selected", item);
+   wxLogTrace(M_TRACE_FV_SELECTION, "%ld was selected", item);
 
    if ( m_enableOnSelect )
    {
@@ -2803,6 +2806,9 @@ wxFolderView::Update()
 
    m_FolderCtrl->UpdateListing(mf->GetHeaders());
 
+   wxLogTrace(M_TRACE_FV_UPDATE, "wxFolderView::Update(): %ld headers.",
+              m_FolderCtrl->GetItemCount());
+
    m_nDeleted = mf->CountDeletedMessages();
 
    UpdateTitleAndStatusBars("", "", m_Frame, mf);
@@ -3658,7 +3664,7 @@ void wxFolderView::OnHeaderPopupMenu(int cmd)
 void
 wxFolderView::OnFocusChange(long idx, UIdType uid)
 {
-   wxLogTrace(M_TRACE_SELECTION, "item %ld (uid = %lx) is now focused",
+   wxLogTrace(M_TRACE_FV_SELECTION, "item %ld (uid = %lx) is now focused",
               idx, uid);
 
    if ( uid != UID_ILLEGAL && READ_CONFIG(m_Profile, MP_FVIEW_STATUS_UPDATE) )
@@ -3719,6 +3725,8 @@ void wxFolderView::OnFolderClosedEvent(MEventFolderClosedData& event)
 
    if ( event.GetFolder() == mf )
    {
+      wxLogTrace(M_TRACE_FV_UPDATE, "wxFolderView::Clear()");
+
       Clear();
    }
 }
@@ -3763,6 +3771,8 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData& event)
 
    size_t n,
           count = event.GetCount();
+
+   wxLogTrace(M_TRACE_FV_UPDATE, "wxFolderView::Expunge() (%u items)", count);
 
    HeaderInfoList_obj hil = GetFolder()->GetHeaders();
 

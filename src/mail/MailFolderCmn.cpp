@@ -63,6 +63,7 @@
 
 extern const MOption MP_FOLDERPROGRESS_THRESHOLD;
 extern const MOption MP_FOLDER_CLOSE_DELAY;
+extern const MOption MP_MOVE_NEWMAIL;
 extern const MOption MP_MSGS_RESORT_ON_CHANGE;
 extern const MOption MP_NEWMAIL_FOLDER;
 extern const MOption MP_SAFE_FILTERS;
@@ -1575,12 +1576,15 @@ bool MailFolderCmn::CollectNewMail()
       UIdArray messages;
       for ( unsigned long idx = 0; idx < count; idx++ )
       {
-         // check that the message isn't deleted - avoids getting 2 (or
-         // more!) copies of the same "new" message (first normal,
-         // subsequent deleted) if, for whatever reason, we failed to
-         // expunge the messages the last time we collected mail from here
          HeaderInfo *hi = hil->GetItemByIndex(idx);
-         if ( !(hi->GetStatus() & MSG_STAT_DELETED) )
+         int status = hi->GetStatus();
+
+         // note that we also check that the message isn't deleted - avoids
+         // getting 2 (or more!) copies of the same "new" message (first normal,
+         // subsequent deleted) if, for whatever reason, we failed to expunge
+         // the messages the last time we collected mail from here
+         if ( (status & MSG_STAT_RECENT) &&
+               !(status & (MSG_STAT_SEEN | MSG_STAT_DELETED)) )
          {
             messages.Add(hi->GetUId());
          }
@@ -1590,14 +1594,22 @@ bool MailFolderCmn::CollectNewMail()
       // set and so we have nothing to copy
       if ( !messages.IsEmpty() )
       {
+         bool move = READ_CONFIG_BOOL(GetProfile(), MP_MOVE_NEWMAIL);
+
          if ( SaveMessages(&messages, newMailFolder) )
          {
-            // delete and expunge
-            DeleteMessages(&messages, true);
+            if ( move )
+            {
+               // delete and expunge
+               DeleteMessages(&messages, true);
+            }
          }
          else // don't delete them if we failed to move
          {
-            ERRORMESSAGE((_("Cannot move newly arrived messages.")));
+            ERRORMESSAGE((_("Cannot %s new mail from folder '%s' to '%s'."),
+                          move ? _("move") : _("copy"),
+                          GetName().c_str(),
+                          newMailFolder.c_str()));
 
             return false;
          }

@@ -25,12 +25,9 @@
 #include  "Mpch.h"
 
 #ifndef USE_PCH
-   #include "MApplication.h"
    #include "MEvent.h"
 #endif // USE_PCH
 
-#include <wx/log.h>           // for wxLogNull
-#include <wx/filefn.h>        // for wxMkdir
 #include <wx/file.h>
 #include <wx/textfile.h>
 
@@ -43,15 +40,7 @@
 // ----------------------------------------------------------------------------
 
 // location of the cache file
-#define CACHE_DIRNAME "cache"
 #define CACHE_FILENAME "status"
-
-// the cache file header format
-#define CACHE_HEADER "Mahogany Folder Status Cache File (version %d.%d)\n"
-
-// the cache file format version
-#define CACHE_VERSION_MAJOR 1
-#define CACHE_VERSION_MINOR 1
 
 // the delimiter in the text file lines
 #define CACHE_DELIMITER ":"      // string, not char, to allow concatenating
@@ -107,7 +96,7 @@ void MfStatusCache::CleanUp()
 MfStatusCache::MfStatusCache()
              : m_folderNames(TRUE /* auto sorted array */)
 {
-   Load(GetFileName());
+   Load();
 
    // register for folder rename events
    m_evtmanHandle = MEventManager::Register(*this, MEventId_FolderTreeChange);
@@ -123,7 +112,7 @@ MfStatusCache::~MfStatusCache()
       MEventManager::Deregister(m_evtmanHandle);
    }
 
-   Save(GetFileName());
+   Save();
 
    // delete the elements too
    WX_CLEAR_ARRAY(m_folderData);
@@ -238,164 +227,133 @@ void MfStatusCache::InvalidateStatus(const String& folderName)
 String MfStatusCache::GetFileName() const
 {
    String filename;
-   filename << mApplication->GetLocalDir() << DIR_SEPARATOR
-            << CACHE_DIRNAME << DIR_SEPARATOR
-            << CACHE_FILENAME;
+   filename << GetCacheDirName() << DIR_SEPARATOR << CACHE_FILENAME;
 
    return filename;
 }
 
-bool MfStatusCache::Load(const String& filename)
+String MfStatusCache::GetFileHeader() const
 {
-   wxTextFile file;
+   return "Mahogany Folder Status Cache File (version %d.%d)";
+}
+
+int MfStatusCache::GetFormatVersion() const
+{
+   return BuildVersion(1, 1);
+}
+
+bool MfStatusCache::DoLoad(const wxTextFile& file, int version)
+{
+   bool isFmtOk = true;
+
+   CacheFileFormat fmt;
+   if ( version == BuildVersion(1, 1) )
    {
-      wxLogNull noLog;
-      if ( !file.Open(filename) )
-      {
-         // cache file can perfectly well not exist, it's not an error
-         return true;
-      }
+      fmt = CacheFile_1_1;
+   }
+   else if ( version == BuildVersion(1, 0) )
+   {
+      fmt = CacheFile_1_0;
+   }
+   else
+   {
+      fmt = CacheFile_Max;
    }
 
-   // check the headers
+   // read the data
+   wxString str, name;
+   str.Alloc(1024);     // avoid extra memory allocations
+   name.Alloc(1024);
+
+   MailFolderStatus status;
+
    size_t count = file.GetLineCount();
-
-   // first line is the header but we never write just the header
-   bool isFmtOk = count > 1;
-
-   // get the version
-   CacheFileFormat fmt = CacheFile_Current;
-   if ( isFmtOk )
+   for ( size_t n = 1; n < count; n++ )
    {
-      int verMaj, verMin;
-      isFmtOk = sscanf(file[0u], CACHE_HEADER, &verMaj, &verMin) == 2;
+      str = file[n];
 
-      if ( isFmtOk )
+      // first get the end of the full folder name knowing that we should
+      // skip all "::" as they could have only resulted from quoting a ':'
+      // in the folder name and so the loop below looks for the first ':'
+      // not followed by another ':'
+      const char *p = strchr(str, CACHE_DELIMITER_CH);
+      while ( p && p[1] == CACHE_DELIMITER_CH )
       {
-         if ( verMaj > CACHE_VERSION_MAJOR ||
-               (verMaj == CACHE_VERSION_MAJOR && verMin > CACHE_VERSION_MINOR) )
-         {
-            // I don't know what should we really do (refuse to overwrite it?
-            // this would be stupid, it's just a cache file...), but at least
-            // tell the user about it
-            wxLogWarning(_("Your mail folder status cache file (%s) was "
-                           "created by a newer version of Mahogany but "
-                           "will be overwritten when the program exits "
-                           "in older format."), filename.c_str());
+         p = strchr(p + 2, CACHE_DELIMITER_CH);
+      }
 
-            // don't try to read it
-            return true;
-         }
-         else if ( verMaj < CACHE_VERSION_MAJOR ||
-                     (verMaj == CACHE_VERSION_MAJOR &&
-                        verMin < CACHE_VERSION_MINOR) )
-         {
-            // read the old format
-            fmt = CacheFile_1_0;
-         }
+      if ( !p )
+      {
+         wxLogError(_("Missing '%c' at line %d."), CACHE_DELIMITER_CH, n + 1);
+
+         isFmtOk = false;
+
+         break;
+      }
+
+      name = wxString(str.c_str(), p);
+
+      // now unquote ':' which were doubled by Save()
+      name.Replace(CACHE_DELIMITER CACHE_DELIMITER, CACHE_DELIMITER);
+
+      // get the rest
+      status.Init();
+      switch ( fmt )
+      {
+         case CacheFile_1_0:
+            isFmtOk = sscanf(p + 1,
+                             "%lu" CACHE_DELIMITER
+                             "%lu" CACHE_DELIMITER
+                             "%lu",
+                             &status.total,
+                             &status.unread,
+                             &status.flagged) == 3;
+            break;
+
+         default:
+            FAIL_MSG( "unknown cache file format" );
+            // fall through nevertheless
+
+         case CacheFile_1_1:
+            isFmtOk = sscanf(p + 1,
+                             "%lu" CACHE_DELIMITER
+                             "%lu" CACHE_DELIMITER 
+                             "%lu" CACHE_DELIMITER
+                             "%lu",
+                             &status.total,
+                             &status.newmsgs,
+                             &status.unread,
+                             &status.flagged) == 4;
+      }
+
+      if ( !isFmtOk )
+      {
+         wxLogError(_("Missing field(s) at line %d."), n + 1);
+
+         break;
+      }
+
+      // ignore the folders which were deleted during the last program run
+      MFolder *folder = MFolder::Get(name);
+      if ( folder )
+      {
+         folder->DecRef();
+
+         // do add the entry to the cache
+         size_t entry = m_folderNames.Add(name);
+         m_folderData.Insert(new MailFolderStatus(status), entry);
       }
       else
       {
-         wxLogError(_("Missing header at line 1."));
-      }
-   }
-
-   // now read the data
-   if ( isFmtOk )
-   {
-      wxString str, name;
-      str.Alloc(1024);     // avoid extra memory allocations
-      name.Alloc(1024);
-
-      MailFolderStatus status;
-
-      for ( size_t n = 1; n < count; n++ )
-      {
-         str = file[n];
-
-         // first get the end of the full folder name knowing that we should
-         // skip all "::" as they could have only resulted from quoting a ':'
-         // in the folder name and so the loop below looks for the first ':'
-         // not followed by another ':'
-         const char *p = strchr(str, CACHE_DELIMITER_CH);
-         while ( p && p[1] == CACHE_DELIMITER_CH )
-         {
-            p = strchr(p + 2, CACHE_DELIMITER_CH);
-         }
-
-         if ( !p )
-         {
-            wxLogError(_("Missing '%c' at line %d."), CACHE_DELIMITER_CH, n + 1);
-
-            isFmtOk = false;
-
-            break;
-         }
-
-         name = wxString(str.c_str(), p);
-
-         // now unquote ':' which were doubled by Save()
-         name.Replace(CACHE_DELIMITER CACHE_DELIMITER, CACHE_DELIMITER);
-
-         // get the rest
-         status.Init();
-         switch ( fmt )
-         {
-            case CacheFile_1_0:
-               isFmtOk = sscanf(p + 1,
-                                "%lu" CACHE_DELIMITER
-                                "%lu" CACHE_DELIMITER
-                                "%lu",
-                                &status.total,
-                                &status.unread,
-                                &status.flagged) == 3;
-               break;
-
-            default:
-               FAIL_MSG( "unknown cache file format" );
-               // fall through nevertheless
-
-            case CacheFile_1_1:
-               isFmtOk = sscanf(p + 1,
-                                "%lu" CACHE_DELIMITER
-                                "%lu" CACHE_DELIMITER 
-                                "%lu" CACHE_DELIMITER
-                                "%lu",
-                                &status.total,
-                                &status.newmsgs,
-                                &status.unread,
-                                &status.flagged) == 4;
-         }
-
-         if ( !isFmtOk )
-         {
-            wxLogError(_("Missing field(s) at line %d."), n + 1);
-
-            break;
-         }
-
-         // ignore the folders which were deleted during the last program run
-         MFolder *folder = MFolder::Get(name);
-         if ( folder )
-         {
-            folder->DecRef();
-
-            // do add the entry to the cache
-            size_t entry = m_folderNames.Add(name);
-            m_folderData.Insert(new MailFolderStatus(status), entry);
-         }
-         else
-         {
-            wxLogDebug("Removing deleted folder '%s' from status cache.",
-                       name.c_str());
-         }
+         wxLogDebug("Removing deleted folder '%s' from status cache.",
+                    name.c_str());
       }
    }
 
    if ( !isFmtOk )
    {
       wxLogWarning(_("Your mail folder status cache file (%s) was corrupted."),
-                   filename.c_str());
+                   file.GetName());
 
       return false;
    }
@@ -403,93 +361,57 @@ bool MfStatusCache::Load(const String& filename)
    return true;
 }
 
-bool MfStatusCache::Save(const String& filename)
+bool MfStatusCache::Save()
 {
    // avoid doing anything if we don't have anything to cache
-   size_t count = m_folderNames.GetCount();
-   if ( !count )
+   if ( !m_folderNames.IsEmpty() )
    {
-      m_isDirty = false;
-
-      return true;
-   }
-
-   // create the directory for the file if needed
-   String dirname;
-   wxSplitPath(filename, &dirname, NULL, NULL);
-
-   if ( !wxDirExists(dirname) )
-   {
-      if ( !wxMkdir(dirname) )
-      {
-         wxLogError(_("Failed to create directory for cache files."));
-
+      if ( !CacheFile::Save() )
          return false;
-      }
-   }
-
-   wxTempFile file;
-   bool ok = file.Open(filename);
-
-   wxString str;
-   str.Alloc(1024);     // avoid extra memory allocations
-
-   // write header
-   if ( ok )
-   {
-      str.Printf(CACHE_HEADER, CACHE_VERSION_MAJOR, CACHE_VERSION_MINOR);
-
-      ok = file.Write(str);
-   }
-
-   if ( ok )
-   {
-      wxString name;
-      name.Alloc(512);
-
-      // write data
-      for ( size_t n = 0; ok && (n < count); n++ )
-      {
-         const MailFolderStatus *status = m_folderData[n];
-
-         // double all delimiters in the folder name
-         name = m_folderNames[n];
-         name.Replace(CACHE_DELIMITER, CACHE_DELIMITER CACHE_DELIMITER);
-
-         // and write info to file: note that we don't remember the number of
-         // recent messages because they won't be recent the next time we run
-         // anyhow nor the number of messages matching the search criteria as
-         // this is hardly ever useful
-         str.Printf("%s" CACHE_DELIMITER
-                    "%lu" CACHE_DELIMITER
-                    "%lu" CACHE_DELIMITER
-                    "%lu" CACHE_DELIMITER
-                    "%lu\n",
-                    name.c_str(),
-                    status->total,
-                    status->newmsgs,
-                    status->unread,
-                    status->flagged);
-
-         ok = file.Write(str);
-      }
-   }
-
-   if ( ok )
-   {
-      // ensure that data has been flushed to disk
-      ok = file.Commit();
-   }
-
-   if ( !ok )
-   {
-      wxLogError(_("Failed to write cache file."));
-
-      return false;
    }
 
    // reset the dirty flag - we're saved now
    m_isDirty = false;
+
+   return true;
+}
+
+bool MfStatusCache::DoSave(wxTempFile& file)
+{
+   wxString str, name;
+   str.reserve(1024);
+   name.reserve(512);
+
+   // write data
+   size_t count = m_folderNames.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      const MailFolderStatus *status = m_folderData[n];
+
+      // double all delimiters in the folder name
+      name = m_folderNames[n];
+      name.Replace(CACHE_DELIMITER, CACHE_DELIMITER CACHE_DELIMITER);
+
+      // and write info to file: note that we don't remember the number of
+      // recent messages because they won't be recent the next time we run
+      // anyhow nor the number of messages matching the search criteria as
+      // this is hardly ever useful
+      str.Printf("%s" CACHE_DELIMITER
+                 "%lu" CACHE_DELIMITER
+                 "%lu" CACHE_DELIMITER
+                 "%lu" CACHE_DELIMITER
+                 "%lu\n",
+                 name.c_str(),
+                 status->total,
+                 status->newmsgs,
+                 status->unread,
+                 status->flagged);
+
+      if ( !file.Write(str) )
+      {
+         return false;
+      }
+   }
 
    return true;
 }
@@ -499,7 +421,7 @@ void MfStatusCache::Flush()
 {
    if ( gs_mfStatusCache && gs_mfStatusCache->IsDirty() )
    {
-      (void)gs_mfStatusCache->Save(gs_mfStatusCache->GetFileName());
+      (void)gs_mfStatusCache->Save();
    }
 }
 

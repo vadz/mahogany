@@ -648,13 +648,6 @@ public:
    */
    virtual UIdArray *SearchMessages(const class SearchCriterium *crit) = 0;
 
-   /** Get a string uniquely identifying the message in this folder, will be
-       empty if not supported by this folder type
-
-       @param msgno the number of the message in folder
-       @return string uniquely identifying the message in this folder
-   */
-   virtual String GetMessageUID(unsigned long msgno) const = 0;
    //@}
 
    /**@name Some higher level functionality implemented by the

@@ -17,7 +17,9 @@
 #   pragma interface "MFCache.h"
 #endif
 
-#include "MailFolder.h"         // for MailFolderStatus
+#include "MailFolder.h"          // for MailFolderStatus
+
+#include "CacheFile.h"           // base class
 
 #include "MEvent.h"
 
@@ -33,7 +35,8 @@ WX_DEFINE_ARRAY(MailFolderStatus *, MfStatusArray);
 // tree)
 // ----------------------------------------------------------------------------
 
-class MfStatusCache : public MEventReceiver
+class MfStatusCache : public CacheFile,
+                      public MEventReceiver
 {
 public:
    // this is a singleton class and this function is the only way to access it
@@ -69,17 +72,21 @@ protected:
    // implement MEventReceiver pure virtual to process folder rename events
    virtual bool OnMEvent(MEventData& event);
 
-   // get the full cache file name
-   String GetFileName() const;
-
-   // load cache file
-   bool Load(const String& filename);
-
-   // save cache file
-   bool Save(const String& filename);
-
    // do we need to be saved at all?
    bool IsDirty() const { return m_isDirty; }
+
+   // override some CacheFile methods
+
+   virtual bool Save();
+
+   // implement CacheFile pure virtuals
+
+   virtual String GetFileName() const;
+   virtual String GetFileHeader() const;
+   virtual int GetFormatVersion() const;
+
+   virtual bool DoLoad(const wxTextFile& file, int version);
+   virtual bool DoSave(wxTempFile& file);
 
 private:
    // the names of the folders we have cached status for

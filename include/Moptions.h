@@ -197,6 +197,7 @@ extern const MOption MP_FOLDER_TYPE;
 extern const MOption MP_FOLDER_TRY_CREATE;
 extern const MOption MP_FOLDER_ICON;
 extern const MOption MP_FOLDER_TREEINDEX;
+extern const MOption MP_MOVE_NEWMAIL;
 extern const MOption MP_NEWMAIL_FOLDER;
 extern const MOption MP_OUTBOX_NAME;
 extern const MOption MP_USE_OUTBOX;
@@ -741,6 +742,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_FOLDER_ICON_NAME         "Icon"
 /// the position of the folder in the tree
 #define MP_FOLDER_TREEINDEX_NAME "Index"
+/// Move new mail to the NewMail folder (if not, only copy)?
+#define MP_MOVE_NEWMAIL_NAME      "MoveNewMail"
 /// Where to store all new mail (obsolete)
 #define MP_NEWMAIL_FOLDER_NAME      "NewMailFolder"
 /// Where to store outgoing mail
@@ -1475,6 +1478,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_FOLDER_ICON_DEFVAL         (long)-1        // no special icon
 /// the position of the folder in the tree
 #define MP_FOLDER_TREEINDEX_DEFVAL      (long)-1        // see enum MFolderIndex
+/// Move new mail to the NewMail folder (if not, only copy)?
+#define MP_MOVE_NEWMAIL_DEFVAL      1l
 /// Where to store all new mail
 #define MP_NEWMAIL_FOLDER_DEFVAL      "" // obsolete
 /// Which folder to use as Outbox

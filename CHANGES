@@ -6,6 +6,7 @@
 Release 0.64 'Sparc' ???, 2001
 -------------------------------------------------------------------------------
 
+15.10.01 VZ: remember POP3 flags between sessions
 12.10.01 VZ: use "List-Post" header, if any, when doing "Reply to list"
 12.10.01 XN: message sorting and threading now work together
 09.10.01 VZ: added "Rename" and "Copy" buttons in the filters dialog

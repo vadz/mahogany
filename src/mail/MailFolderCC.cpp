@@ -78,9 +78,7 @@
 
 extern "C"
 {
-   #undef LOCAL         // previously defined in other cclient headers
-   #include <pop3.h>    // for pop3_xxx() in GetMessageUID()
-   #undef LOCAL         // now defined by pop3.h
+   #undef LOCAL         // before including imap4r1.h which defines it too
 
    #define namespace cc__namespace
    #include <imap4r1.h> // for LEVELSORT/THREAD in CanSort()/Thread()
@@ -168,6 +166,13 @@ extern const MOption MP_TCP_SSHTIMEOUT;
 
 // turn on logging of events sent by MailFolderCC
 #define TRACE_MF_EVENTS "mfevent"
+
+// ----------------------------------------------------------------------------
+// global functions prototypes
+// ----------------------------------------------------------------------------
+
+extern void Pop3_SaveFlags(const String& folderName, MAILSTREAM *stream);
+extern void Pop3_RestoreFlags(const String& folderName, MAILSTREAM *stream);
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -1110,7 +1115,9 @@ String GetPathFromImapSpec(const String &imap)
 // ----------------------------------------------------------------------------
 
 // Small function to translate c-client status flags into ours.
-static int GetMsgStatus(const MESSAGECACHE *elt)
+//
+// NB: not static as also used by Pop3.cpp
+int GetMsgStatus(const MESSAGECACHE *elt)
 {
    int status = 0;
    if (elt->recent)
@@ -1384,7 +1391,7 @@ MailFolderCC::Create(FolderType type, int flags)
    m_SearchMessagesFound = NULL;
 
    m_Mutex = new MMutex;
-   m_InFilterCode = new MMutex;
+   m_mutexNewMail = new MMutex;
 }
 
 void MailFolderCC::Init()
@@ -1446,7 +1453,7 @@ MailFolderCC::~MailFolderCC()
    RemoveFromMap();
 
    delete m_Mutex;
-   delete m_InFilterCode;
+   delete m_mutexNewMail;
 
    m_Profile->DecRef();
    m_mfolder->DecRef();
@@ -1873,6 +1880,11 @@ MailFolderCC::Open(OpenMode openmode)
       if ( tryOpen )
       {
          m_MailStream = mail_open(NIL, (char *)m_ImapSpec.c_str(), ccOptions);
+
+         if ( m_MailStream && GetType() == MF_POP )
+         {
+            Pop3_RestoreFlags(GetName(), m_MailStream);
+         }
       }
    } // end of cclient lock block
 
@@ -1979,6 +1991,11 @@ MailFolderCC::Close()
 
    if ( m_MailStream )
    {
+      if ( GetType() == MF_POP )
+      {
+         Pop3_SaveFlags(GetName(), m_MailStream);
+      }
+
       /*
          DO NOT SEND EVENTS FROM HERE, ITS CALLED FROM THE DESTRUCTOR AND
          THE OBJECT *WILL* DISAPPEAR!
@@ -2598,7 +2615,7 @@ MailFolderCC::Lock(void) const
 bool
 MailFolderCC::IsLocked(void) const
 {
-   return m_Mutex->IsLocked() || m_InFilterCode->IsLocked();
+   return m_Mutex->IsLocked() || m_mutexNewMail->IsLocked();
 }
 
 void
@@ -2997,54 +3014,6 @@ MailFolderCC::GetMessage(unsigned long uid)
    CHECK( hi, NULL, "invalid UID in GetMessage" );
 
    return MessageCC::Create(this, *hi);
-}
-
-String
-MailFolderCC::GetMessageUID(unsigned long msgno) const
-{
-   CHECK( m_MailStream, "", "GetMessageUID(): folder is closed" );
-
-   String uidString;
-
-   if ( GetType() == MF_POP )
-   {
-      // no real UID in the IMAP sense of the word, but we can use POP3 UIDL
-      // instead
-      if ( pop3_send_num(m_MailStream, "UIDL", msgno) )
-      {
-         char *reply = ((POP3LOCAL *)m_MailStream->local)->reply;
-         unsigned long msgnoFromUIDL;
-
-         // RFC says 70 characters max, but avoid buffer overflows just in case
-         char *buf = new char[strlen(reply) + 1];
-         if ( (sscanf(reply, "%lu %s", &msgnoFromUIDL, buf) != 2) ||
-              (msgnoFromUIDL != msgno) )
-         {
-            // something is wrong
-            wxLogDebug("Unexpected POP3 server UIDL response to UIDL %lu: %s",
-                       msgno, reply);
-         }
-         else // parsed UIDL successfully
-         {
-            uidString = buf;
-         }
-
-         delete [] buf;
-      }
-      //else: failed to get the UIDL from POP3 server
-   }
-   else // try to get the real UID for all other folders
-   {
-      unsigned long uid = mail_uid(m_MailStream, msgno);
-      if ( uid )
-      {
-         // ok, got the real thing
-         uidString = strutil_ultoa(uid);
-      }
-      //else: no way to get an UID, leave uidString empty
-   }
-
-   return uidString;
 }
 
 // ----------------------------------------------------------------------------
@@ -4305,7 +4274,7 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
    // notified about existence of these messages yet, so we don't need to
    // notify it about their disappearance neither - it just will never know
    // they were there at all
-   if ( !m_InFilterCode->IsLocked() )
+   if ( !m_mutexNewMail->IsLocked() )
    {
       // let all the others know that some messages were expunged: we don't do it
       // right now but wait until mm_exists() which is sent after all
@@ -4375,7 +4344,7 @@ void MailFolderCC::OnNewMail()
       MEventManagerSuspender suspendEvents;
 
       // don't allow changing the folder while we're filtering it
-      MLocker filterLock(m_InFilterCode);
+      MLocker filterLock(m_mutexNewMail);
 
       FilterNewMail();
 
@@ -4386,11 +4355,6 @@ void MailFolderCC::OnNewMail()
    // wanted to filter the new messages first - now we can notify the GUI
    // about the change
    RequestUpdate();
-}
-
-bool MailFolderCC::FilterNewMail()
-{
-   return MailFolderCmn::FilterNewMail();
 }
 
 // ----------------------------------------------------------------------------
