@@ -32,7 +32,7 @@ Provides: mua
 
 # doesn't seem to work for the programs?
 # BuildPreReq: wx-config
-BuildPrereq: byacc tetex-latex
+BuildPrereq: bison byacc tetex-latex
 
 %if !%{static}
 Requires: wxwin
