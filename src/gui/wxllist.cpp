@@ -1252,7 +1252,7 @@ wxLayoutList::Draw(wxDC &dc, wxPoint const &offset,
       if((top == -1 || line->GetPosition().y >= top))
          line->Draw(dc, offset);
       // little condition to speed up redrawing:
-      if(bottom != -1 && line->GetPosition().y > bottom) break;
+      if(bottom != -1 && line->GetPosition().y + line->GetHeight() > bottom) break;
       line = line->GetNextLine();
    }
    // can only be 0 if we are on the first line and have no next line

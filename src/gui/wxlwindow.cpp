@@ -298,8 +298,11 @@ wxLayoutWindow::InternalPaint(void)
    // Get the size of the visible window:
    GetClientSize(&x1,&y1);
    wxASSERT(x1 > 0);
-
    wxASSERT(y1 > 0);
+   // As we have the values anyway, use them to avoid unnecessary
+   // scrollbar updates.
+   if(x1 > m_maxx) m_maxx = x1;  
+   if(y1 > m_maxy) m_maxy = y1;
 
    // Maybe we need to change the scrollbar sizes or positions,
    // so layout the list and check:
@@ -354,7 +357,6 @@ wxLayoutWindow::InternalPaint(void)
    // Now copy everything to the screen:
    dc.Blit(x0,y0,x1,y1,m_memDC,0,0,wxCOPY,FALSE);
 
-   
    ResetDirty();
 }
 
@@ -363,9 +365,9 @@ void
 wxLayoutWindow::ResizeScrollbars(bool exact)
 {
    wxPoint max = m_llist->GetSize();
-
+   
    if(max.x > m_maxx || max.y > m_maxy
-      || max.x < (7*m_maxx)/10 || max.y << (7*m_maxy)/10
+      || max.x > (7*m_maxx)/10 || max.y > (7*m_maxy)/10
       || exact)
    {
       if(! exact)  // add an extra 20% to the sizes to avoid future updates

@@ -14,6 +14,10 @@ $Id$
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
+
+- reimplement some form of IsDirt6y() / HasBeenModified() for
+  wxComposeView.
+
 - do not redraw messageview if the message is the one currently being
   shown
   -- option to keep wxLayoutList around for reuse?
