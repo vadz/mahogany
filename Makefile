@@ -8,6 +8,9 @@ SUB_DIRS = extra src include
 FILES = makeopts makerules Makefile makeopts.in configure.in configure
 EXTRA = extra
 
+# FIXME: VZ where can I take the version from?
+M = mahogany-0.22a
+
 include makeopts
 
 all:
@@ -75,10 +78,52 @@ install_doc:
 	$(MAKE) -C doc install
 	$(INSTALL_DATA) TODO README $(DOCDIR)
 
+# create the file list for the RPM installation
+install_rpm:
+	@echo "Creating the list of files for the RPM"
+	@echo "%doc $(DOCDIR)" > filelist
+	@echo "%config $(DATADIR)/scripts" >> filelist
+	@echo "%config $(DATADIR)/M.conf" >> filelist
+	@echo "$(DATADIR)/newmail.wav" >> filelist
+	@echo "$(DATADIR)/afm" >> filelist
+	@echo "$(DATADIR)/bin" >> filelist
+	@echo "$(DATADIR)/$(CANONICAL_HOST)" >> filelist
+	@echo "$(DATADIR)/icons" >> filelist
+	@echo "$(DATADIR)/lib" >> filelist
+	@echo "$(DATADIR)/locale" >> filelist
+	@echo "$(BINDIR)/M" >> filelist
+	@echo "$(BINDIR)/mahogany" >> filelist
+	@# the second subsitution takes care of RPM_BUILD_ROOT
+	@perl -i -npe 's/^/%attr(-, root, root) /; s: /.*//: /:' filelist
+
 install_all: install install_doc install_locale
 
 install_locale:
 	$(MAKE) -C locale install
+
+# prepare the scene for building the RPM
+rpm_prep:
+	@export RPM_ROOT=`rpm --showrc | grep topdir | cut -d: -f 2 | sed 's/^ //'`; \
+	echo "Preparing to build the RPM under $$RPM_ROOT..."; \
+	cd ..; \
+	mv M $(M); \
+	tar cvzf $$RPM_ROOT/SOURCES/$(M).tar.gz \
+		--exclude="*.o" --exclude="M" --exclude="CVS" \
+		--exclude=".cvsignore" --exclude="*~" --exclude="*.swp" \
+		--exclude="Python" --exclude="*.mo" --exclude="*.a" \
+		$(M)/README $(M)/TODO $(M)/INSTALL $(M)/Makefile \
+		$(M)/aclocal.m4 $(M)/config.status $(M)/configure.* \
+		$(M)/doc $(M)/extra/Makefile $(M)/include $(M)/locale \
+		$(M)/makeopts.in $(M)/makerules $(M)/src $(M)/extra/install \
+		$(M)/extra/scripts $(M)/extra/src; \
+	mv $(M) M; \
+	cd M; \
+	cp redhat/mahogany.gif $$RPM_ROOT/SOURCES; \
+	cp redhat/M.spec $$RPM_ROOT/SPECS
+
+rpm:
+	cd $(RPM_ROOT)/SPECS
+	rpm -bb M.spec
 
 msgcat:
 	$(MAKE) -C src msgcat

@@ -3,16 +3,19 @@
 
 # version and release
 %define VERSION 0.22a
-%define RELEASE 1
+%define RELEASE 2
 
 # so far I didn't find how to make a relocatable package...
 %define prefix /usr/local
 
-# the location of the global config file (subject to change)
-%define CONFFILE %prefix/share/M.conf
+# we can build 2 different packages from this spec file: a semistatically
+# linked version (only common libs linked dynamically) or a quartstatically
+# one (only wxGTK linked statically, GTK libs dynamically)
+#%define MAKETARGET semistatic
+%define MAKETARGET quartstatic
 
 Summary: Mahogany email and news client
-Name: mahogany
+Name: mahogany-dynamic
 Version: %VERSION
 Release: %RELEASE
 Copyright: Mahogany Artistic License
@@ -20,12 +23,9 @@ Group: X11/Applications/Networking
 Source: ftp://ronnie.phy.hw.ac.uk/pub/Mahogany/mahogany-%{VERSION}.tar.gz
 URL: http://mahogany.home.dhs.org/
 Packager: Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
-# although we can build M with any version of GTK from 1.0.6 till 1.2.3, the
-# binary package will depend on the version we built it with! How to deal with
-# it?
-Requires: gtk+ >= 1.2.2
 Provides: mua
 Prefix: %prefix
+BuildRoot: /home/zeitlin/build/rpm
 Icon: mahogany.gif
 
 %description
@@ -34,14 +34,16 @@ using GTK+ toolkit. Mahogany supports remote POP3, IMAP4, NNTP servers as well
 as local MBOX and news spool folders and sending mail using SMTP.
 
 %prep
-%setup
+# the name is the same whether the package name is mahogany or mahogany-dynamic
+%setup -n mahogany-%{VERSION}
 
 %build
 if [ ! -f configure ]; then
   autoconf
 fi
 
-CFLAGS="$RPM_OPT_FLAGS" ./configure --without-threads --prefix=%prefix
+CFLAGS="$RPM_OPT_FLAGS" ./configure --without-threads --without-python \
+	--prefix=$RPM_BUILD_ROOT/%prefix
 
 make dep
 make clean
@@ -50,19 +52,14 @@ if [ "$SMP" != "" ]; then
   export MAKE="make -j $SMP"
 fi
 
-(cd extra && make all && cd ../src && make semistatic)
+(cd extra && make all && cd ../src && make %MAKETARGET)
 
 (make doc; exit 0)
 
 %install
 export PATH=/sbin:$PATH
 make -k install_all
-cat > %CONFFILE <<END
-# this is the global config file for Mahogany, it is created
-# empty but you may put any global settings into it
-END
-
-ln -sf %prefix/share/Mahogany/doc %prefix/doc/Mahogany
+make install_rpm
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -71,9 +68,4 @@ rm -rf $RPM_BUILD_ROOT
 
 %postun
 
-%files
-%doc %prefix/doc/Mahogany
-%config %CONFFILE
-%prefix/bin/M
-%prefix/bin/mahogany
-%prefix/share/Mahogany
+%files -f filelist

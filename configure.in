@@ -579,7 +579,7 @@ LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PNG $LIB_JPEG"
 CXXFLAGS="$CXXFLAGS $DBGFLAGS"
 CFLAGS="$CFLAGS $DBGFLAGS"
 
-LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk2/-Wl,-Bstatic -lwx_gtk2 -Wl,-Bdynamic/g'`
+LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk2/-Wl,-Bstatic & -Wl,-Bdynamic/g'`
 AC_SUBST(LIBS_STATIC)
 
 
