@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Mahogany 0.22\n"
-"POT-Creation-Date: 2000-09-21 11:08+0100\n"
+"POT-Creation-Date: 2000-09-21 17:13+0100\n"
 "PO-Revision-Date: 2000-01-30 19:50+0200\n"
 "Last-Translator: Arthur Muller <muller@cybercomm.nl>\n"
 "Language-Team: M-Team <mahogany-developers@lists.sourceforge.net>\n"
