@@ -71,8 +71,14 @@ protected:
                              wxString *nickname,
                              wxArrayString *addresses = NULL) const;
 
+   // the indices of the alias line in m_textfile
    wxArrayInt m_lineNumbers;
+
+   // the file we're working with
    wxTextFile m_textfile;
+
+   // the first "interesting" (i.e. non blank, non comment) line in the file
+   size_t m_nLineStart;
 };
 
 // ============================================================================
@@ -226,11 +232,42 @@ String AdbMailrcImporter::GetDefaultFilename() const
 
 bool AdbMailrcImporter::CanImport(const String& filename)
 {
-   // check the name: the file should be called .mailrc, we don't have any
-   // other reasonable way of identifying it
-   wxString name = filename.AfterLast('/');
+   // load the file into memory
+   if ( !m_textfile.Open(filename) )
+       return FALSE;
 
-   return name == ".mailrc";
+   // according to the mailrc docs I could find, the only allowed keywords in
+   // mailrc file are alias, ignore, set and unset, so find the first non
+   // comment line and check if it has this format
+   size_t nLines = m_textfile.GetLineCount();
+   for ( m_nLineStart = 0; m_nLineStart < nLines; m_nLineStart++ )
+   {
+      wxString line(m_textfile[m_nLineStart]);
+
+      if ( !line || line[0u] == '#' )
+      {
+         // skip empty lines and comments
+         continue;
+      }
+
+      line.Trim(FALSE /* from left */);
+
+      if ( line.StartsWith("alias ") ||
+           line.StartsWith("ignore ") ||
+           line.StartsWith("set ") ||
+           line.StartsWith("unset ") )
+      {
+         // good line, assume it's ok
+         break;
+      }
+
+      // unexpected line
+      return FALSE;
+   }
+
+   // do return TRUE even if we broke out of the loop because we exhausted all
+   // lines - this allows us to import successfully even a default ~/.mailrc
+   return TRUE;
 }
 
 bool AdbMailrcImporter::StartImport(const String& filename)
@@ -241,14 +278,7 @@ bool AdbMailrcImporter::StartImport(const String& filename)
       return TRUE;
    }
 
-   if ( !CanImport(filename) )
-   {
-      // don't even try
-      return FALSE;
-   }
-
-   // load the file into memory
-   return m_textfile.Open(filename);
+   return CanImport(filename);
 }
 
 size_t AdbMailrcImporter::GetEntryNames(const String& path,
@@ -262,7 +292,7 @@ size_t AdbMailrcImporter::GetEntryNames(const String& path,
    lineNumbers.Empty();
 
    size_t nLines = m_textfile.GetLineCount();
-   for ( size_t nLine = 0; nLine < nLines; nLine++ )
+   for ( size_t nLine = m_nLineStart; nLine < nLines; nLine++ )
    {
       wxString line(m_textfile[nLine]);
 
