@@ -342,7 +342,7 @@ void TemplateEditor::OnMenu(wxCommandEvent& event)
          ASSERT_MSG( strutil_extract_formatspec(menuitem->format) == _T("s"),
                      _T("incorrect format string") );
 
-         value.Printf(menuitem->format, value.c_str());
+         value = String::Format(menuitem->format, value.c_str());
          break;
    }
 
