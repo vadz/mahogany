@@ -233,12 +233,15 @@ private:
    private: \
       classname *m_ptr;
 
-// due to gcc bug we can't declare the copy ctor and assignment operator as
-// private (otherwise it refuses to compile things like "Foo_obj foo = pFoo"
+// some compilers don't let us declare the copy ctor and assignment operator as
+// private (otherwise they refuse to compile things like "Foo_obj foo = pFoo"
 // with obscure error messages), but we do want to do it for other compilers
 // as copying smart pointers *is* illegal (whatever C++ standard says)
+#if defined(__GNUG__) || defined(__BORLANDC__)
+   #define NO_PRIVATE_COPY
+#endif
 
-#ifndef __GNUG__
+#ifndef NO_PRIVATE_COPY
     #define BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname)   \
             BEGIN_DECLARE_AUTOPTR_NO_BOOL_0(classname) \
             classname##_obj(const classname##_obj &);  \

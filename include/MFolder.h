@@ -267,11 +267,11 @@ public:
 private:
    // workaround for g++ bug: see BEGIN_DECLARE_AUTOPTR() definition in
    // MObject.h for details
-#ifndef __GNUG__
+#ifndef NO_PRIVATE_COPY
    // no copy ctor/assignment operator
    MFolder_obj(const MFolder_obj&);
    MFolder_obj& operator=(const MFolder_obj&);
-#endif // __GNUG__
+#endif // !NO_PRIVATE_COPY
 
    // create folder by name
    void Init(const String& name);

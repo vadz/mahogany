@@ -127,8 +127,9 @@ public:
            const wxBitmap * bitmap = NULL,
            wxWindow *parent = NULL)
       : wxWizard( parent, -1, title,
-                  bitmap ? *bitmap
-                  : mApplication->GetIconManager()->GetBitmap("install_welcome"))
+                  bitmap ? wxBitmap(*bitmap)
+                         : mApplication->GetIconManager()
+                              ->GetBitmap("install_welcome"))
       {
          m_Type = type;
          m_First = first;
