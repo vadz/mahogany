@@ -128,19 +128,23 @@ public:
    bool OnVisitFolder(const wxString& folderName)
       {
          MFolder *f = MFolder::Get(folderName);
+         MailFolder *mf = NULL;
          if(f && f->GetFlags() & MF_FLAGS_INCOMING)
          {
             wxLogDebug("Found incoming folder '%s'.",
                        folderName.c_str());
-            MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,folderName);
-            MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
-            e->m_name = folderName;
-            e->m_folder = mf; // might be NULL!
-            m_list->push_back(e);
-            if(! mf)
-               INFOMESSAGE((_("Cannot open incoming folder '%s'."), folderName.c_str()));
+            mf = MailFolder::OpenFolder(MF_PROFILE,folderName);
+            if(mf)
+            {
+               MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
+               e->m_name = folderName;
+               e->m_folder = mf; // might be NULL!
+               m_list->push_back(e);
+            }
+            else
+               ERRORMESSAGE((_("Cannot open incoming folder '%s'."), folderName.c_str()));
          }
-         if(f)f->DecRef();
+         if(f) f->DecRef();
          return true;
       }
    
@@ -220,7 +224,7 @@ MailCollectorImpl::Collect(MailFolder *mf)
    m_NewMailFolder->Ping();
 
 #if 0
-   <if(m_Count)
+   if(m_Count)
    {
       // step 1: execute external command if it's configured
       String command = READ_CONFIG(m_NewMailFolder->GetProfile(), MP_NEWMAILCOMMAND);
@@ -362,6 +366,8 @@ MailCollectorImpl::AddIncomingFolder(const String &name)
 {
    MOcheck();
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,name);
+   if(mf == NULL)
+      return false;
    MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
    e->m_name = name;
    e->m_folder = mf; // might be NULL

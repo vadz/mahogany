@@ -736,6 +736,9 @@ MailFolderCC::UpdateTimeoutValues(void)
 bool
 MailFolderCC::Open(void)
 {
+   STATUSMESSAGE((_("Opening mailbox %s..."), GetName().c_str()));
+
+   
    /** Now, we apply the very latest c-client timeout values, in case
        they have changed.
    */
@@ -798,6 +801,7 @@ MailFolderCC::Open(void)
             {
                MDialog_Message(_("Cannot open the folder while "
                                  "lock-file exists."));
+               STATUSMESSAGE((_("Could not open mailbox %s."), GetName().c_str()));
                return false;
             }
          }
@@ -888,11 +892,16 @@ MailFolderCC::Open(void)
       SetDefaultObj(false);
    }
    if(m_MailStream == NIL)
-      return false;
+   {
+         STATUSMESSAGE((_("Could not open mailbox %s."), GetName().c_str()));
+         return false;
+   }
 
    AddToMap(m_MailStream); // now we are known
 
    // listing already built
+
+   STATUSMESSAGE((_("Mailbox %s opened."), GetName().c_str()));
 
    PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
    return true;   // success
