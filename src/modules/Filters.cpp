@@ -1902,11 +1902,41 @@ static bool CheckXSpamStatus(const String& value)
 static bool CheckXAuthWarning(const String& value)
 {
    // check for "^.*Host.+claimed to be.+$" regex manually
-   const char *pc = strstr(value, "Host");
+   static const char *HOST_STRING = "Host ";
+   static const char *CLAIMED_STRING = "claimed to be ";
+
+   const char *pc = strstr(value, HOST_STRING);
    if ( !pc )
       return false;
 
-   return strstr(pc + 1, "claimed to be") != NULL;
+   const char *pc2 = strstr(pc + 1, CLAIMED_STRING);
+   if ( !pc )
+      return false;
+
+   // there seems to be a common mosconfiguration problem with some LANs which
+   // results in values of X-Authentication-Warning header like
+   //
+   //    smtpserver.domain.com: Host host.domain.com [ip] claimed to be host
+   //
+   // which are, of course, harmless, i.e. don't mean that this is spam, so we
+   // try to filter them out
+
+   // skip to the hostnames
+   pc += strlen(HOST_STRING);
+   pc2 += strlen(CLAIMED_STRING);
+
+   // check if they're equal
+   while ( *pc != '.' && *pc2 != '\r' )
+   {
+      if ( *pc++ != *pc2++ )
+      {
+         // hosts don't match, so it's a serious warning
+         return true;
+      }
+   }
+
+   // did the host names match?
+   return *pc == '.' && *pc2 == '\r';
 }
 
 static Value func_isspam(ArgList *args, FilterRuleImpl *p)
