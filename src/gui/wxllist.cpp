@@ -34,6 +34,7 @@
 #include "Mpch.h"
 
 #ifdef M_BASEDIR
+#   include "Mcommon.h"
 #   include "gui/wxllist.h"
 #   include "gui/wxlparser.h"
 #   define  SHOW_SELECTIONS 1

@@ -19,7 +19,7 @@
 
 
 #include "MApplication.h"
-#include "gui/wxMDialogs.h"
+#include "MDialogs.h"
 
 
 /* Interface MInterface*/

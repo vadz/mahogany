@@ -30,6 +30,7 @@
 
 #  include <wx/listbox.h>
 #  include <wx/statbox.h>
+#  include <wx/layout.h>
 #endif
 
 #include "MFolder.h"
