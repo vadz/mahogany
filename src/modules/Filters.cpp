@@ -2598,7 +2598,7 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
          }
          else
          {
-            bool wasDeleted = m_operation & Deleted;
+            bool wasDeleted = (m_operation & Deleted) != 0;
             if ( !m_copiedTo.empty() )
             {
                textPD << (wasDeleted ? _("moved to ") : _("copied to "))

@@ -871,6 +871,30 @@ M_LIST_OWN(AuthInfoList, AuthInfoEntry);
 
 static AuthInfoList gs_authInfoList;
 
+// ----------------------------------------------------------------------------
+// LastNewUIDList: stores the UID of the last seen new message permanently,
+//                 i.e. keeps it even after the folder was closed
+// ----------------------------------------------------------------------------
+
+struct LastNewUIDEntry
+{
+   LastNewUIDEntry(const String& folderName, UIdType uidLastNew)
+      : m_folderName(folderName),
+        m_uidLastNew(uidLastNew)
+   {
+   }
+
+   // the full folder name in the tree
+   String m_folderName;
+
+   // the UID of the last processed new message in this folder
+   UIdType m_uidLastNew;
+};
+
+M_LIST_OWN(LastNewUIDList, LastNewUIDEntry);
+
+static LastNewUIDList gs_lastNewUIDList;
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -1440,6 +1464,19 @@ void MailFolderCC::Init()
 {
    m_uidLast =
    m_uidLastNew = UID_ILLEGAL;
+
+   // maybe we had stored the UID of the last new message for this folder?
+   for ( LastNewUIDList::iterator i = gs_lastNewUIDList.begin();
+         i != gs_lastNewUIDList.end();
+         ++i )
+   {
+      if ( i->m_folderName == GetName() )
+      {
+         m_uidLastNew = i->m_uidLastNew;
+
+         break;
+      }
+   }
 
    m_expungedMsgnos =
    m_expungedPositions =
@@ -2215,9 +2252,27 @@ MailFolderCC::Close()
    }
 
    // normally the folder won't be reused any more but reset them just in case
-   m_uidLast =
-   m_uidLastNew = UID_ILLEGAL;
+   m_uidLast = UID_ILLEGAL;
    m_nMessages = 0;
+
+   // save our last new UID in case this folder is going to be reopened later
+   String folderName = GetName();
+
+   LastNewUIDList::iterator i;
+   for ( i = gs_lastNewUIDList.begin(); i != gs_lastNewUIDList.end(); ++i )
+   {
+      if ( i->m_folderName == folderName )
+      {
+         i->m_uidLastNew = m_uidLastNew;
+
+         break;
+      }
+   }
+
+   if ( i == gs_lastNewUIDList.end() )
+   {
+      gs_lastNewUIDList.push_front(new LastNewUIDEntry(folderName, m_uidLastNew));
+   }
 }
 
 /* static */
@@ -4546,6 +4601,10 @@ void MailFolderCC::OnNewMail()
 
       // don't allow changing the folder while we're filtering it
       MLocker filterLock(m_mutexNewMail);
+
+      // use "%ld" to print UID_ILLEGAL as -1 although it's really unsigned
+      wxLogTrace(TRACE_MF_NEWMAIL, "Folder %s: last new UID %ld -> %ld",
+                 GetName().c_str(), m_uidLastNew, m_uidLast);
 
       // only find the new new messages, i.e. the ones which we hadn't reported
       // yet

@@ -1617,8 +1617,10 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
    if ( uidsNew )
       countNew = uidsNew->GetCount();
 
-   wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::ReportNewMail(%u msgs)",
-              folder->GetFullName().c_str(), countNew);
+   wxLogTrace(TRACE_MF_NEWMAIL, "MF(%s)::ReportNewMail(%u msgs) (folder is %s)",
+              folder->GetFullName().c_str(),
+              countNew,
+              mf ? "opened" : "closed");
 
    // step 1: execute external command if it's configured
    Profile_obj profile(folder->GetProfile());

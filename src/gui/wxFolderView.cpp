@@ -1648,8 +1648,6 @@ long wxFolderListCtrl::GetPosFromUID(UIdType uid)
 {
    MLocker lockHeaders(m_mutexHeaders);
 
-   MFInteractiveLock lock(m_FolderView->GetMailFolder(), GetFrame(this));
-
    size_t idx = m_headers->GetIdxFromUId(uid);
 
    return idx == INDEX_ILLEGAL ? -1 : (long)m_headers->GetPosFromIdx(idx);
@@ -1854,8 +1852,6 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
 
          {
             MLocker lockHeaders(m_mutexHeaders);
-
-            MFInteractiveLock lock(m_FolderView->GetMailFolder(), GetFrame(this));
 
             m_headers->CachePositions(seq);
          }

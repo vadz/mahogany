@@ -3312,6 +3312,8 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
 #ifdef __WXMSW__
    m_frame->SetBackgroundColour(wxSystemSettings::
                                 GetSystemColour(wxSYS_COLOUR_BTNFACE));
+
+   m_frame->EnableCloseButton(FALSE);
 #endif // __WXMSW__
 
    wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
