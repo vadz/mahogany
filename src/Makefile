@@ -29,13 +29,18 @@ ifeq ($(USE_MODULES), static)
 MOBJS += modules/*.o
 endif
 
+
+ifeq ($(USE_MODULES),dynamic)
 # build the dynamically linked binary by default
 all:	Mdll modules main
+else
+all:	M
+endif
 
 main:   Mdll
 
 M:	subdirs
-	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)
+	$(LINK) -symbolic -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)
 
 #$(MOBJS): subdirs
 
@@ -44,10 +49,10 @@ M:	subdirs
 #
 
 Mdll:	libM.so
-	$(LINK) -o M -L. $(LDFLAGS) -lM 
+	$(LINK) -symbolic -o M -L. $(LDFLAGS) -lM 
 
 libM.so: subdirs
-	$(CXX) -shared $(MOBJS) $(LDFLAGS) $(NONPLIBS) $(LDFLAGS) $(GUI_LIBS) $(LIBS) -o libM.so
+	$(CXX) -shared -Xlinker -z -Xlinker nodefs $(MOBJS) $(LDFLAGS) $(NONPLIBS) $(LDFLAGS) $(GUI_LIBS) $(LIBS) -o libM.so
 
 # build the binary which is statically linked to wxGTK, dynamically to
 # everything else

@@ -728,7 +728,7 @@ if test "x$USE_MODULES" != "x"; then
 	dnl check for wxGTK dynamic linkage?
 	echo "main() { return 0; }" >conftest.c
 	$CXX -o conftest conftest.c `wx-config --libs` && \
-	ldd conftest | fgrep -q libwx 
+	ldd conftest | fgrep libwx  >/dev/null
 	if test $? = 0
 	then
 		MAKE_USE_MODULES="USE_MODULES=dynamic"
