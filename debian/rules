@@ -17,6 +17,7 @@ build:
 	make depend || true
 	make -C include 
 	make doc
+	echo "############### DEBIAN COMPILATION STARTED #################"
 	# If we are on Debian Slink, we need to build a semistatic binary:
 	if test "`cat /etc/debian_version`" = "2.1" ; \
 	then \
@@ -26,6 +27,7 @@ build:
 		( $(MAKE) all ; \
 		cd src && make ) \
 	fi
+	echo "############### DEBIAN COMPILATION ENDED #################"
 	touch build
 
 clean:
