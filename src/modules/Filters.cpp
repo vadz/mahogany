@@ -94,6 +94,7 @@ class StringConstant;
 class SyntaxNode;
 class Token;
 class Value;
+class FilterRuleApply;
 
 /// Type for functions to be called.
 typedef Value (* FunctionPointer)(ArgList *args, FilterRuleImpl *p);
@@ -334,6 +335,8 @@ private:
         m_hasHdrLineFunc,
         m_hasHeaderFunc;
 
+   friend class FilterRuleApply;
+
    GCC_DTOR_WARN_OFF
 };
 
@@ -430,16 +433,63 @@ private:
 
    // Can't use union here because m_String needs constructor.
    long   m_Num;
-   const String m_String;
+   String m_String;
 
    // if this flag is set, it means that the filter evaluation must be aborted
    // (e.g. because the message was deleted)
    bool m_abort;
 
-   // not needed nor implemented for now
-   Value& operator=(const Value&);
-
    MOBJECT_NAME(Value)
+};
+
+// an object of this class is created to apply the given rule to the specified
+// messages, it is a sort of "filter runner"
+class FilterRuleApply
+{
+public:
+   FilterRuleApply(FilterRuleImpl *parent, UIdArray& msgs);
+   ~FilterRuleApply();
+
+   int Run();
+
+private:
+   bool LoopEvaluate();
+   bool LoopCopy();
+   bool DeleteAll();
+
+   void CreateProgressDialog();
+   bool GetMessage();
+   bool UpdateProgressDialog();
+   void HeaderCacheHints();
+   bool Evaluate();
+   bool ProgressResults();
+   bool ProgressCopy();
+   bool CopyToOneFolder();
+   void CollectForDelete();
+   void ProgressDelete();
+   void IndicateDeleted();
+
+   FilterRuleImpl *const m_parent;
+   UIdArray& m_msgs;
+
+   MProgressDialog *m_pd;
+   wxArrayInt m_allOperations;
+   wxArrayString m_destinations;
+   bool m_doExpunge;
+   UIdArray m_uidsToDelete;
+
+   // the array holding the indices of the messages deleted by filters
+   wxArrayLong m_indicesDeleted;
+
+   // Index of actual message in m_messageList
+   size_t m_idx;
+
+   // the text for the progress dialog (verbose) and for the log (terse)
+   String m_textPD,
+          m_textLog;
+
+   // Result of evaluating filter
+   Value m_retval;
 };
 
 // ----------------------------------------------------------------------------
@@ -1730,7 +1780,7 @@ FilterRuleImpl::ParseFunctionCall(Token id)
 {
    MOcheck();
    ASSERT(id.GetType() == Token::TT_Identifier);
-   
+
    // marshall arg list
    if(!token.IsChar('('))
    {
@@ -3070,7 +3120,6 @@ BuiltinFunctions(void)
 // FilterRuleImpl - the class representing a program
 // ----------------------------------------------------------------------------
 
-// TODO: this function should be factorized into several smaller ones
 int
 FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
 {
@@ -3088,335 +3137,9 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
       m_MailFolder = mf;
       m_MailFolder->IncRef();
 
-      // the array holding the indices of the messages deleted by filters
-      wxArrayLong indicesDeleted;
+      FilterRuleApply apply(this, msgs);
 
-      // show the progress dialog while filtering
-      size_t count = msgs.GetCount();
-
-      wxFrame *frame = m_MailFolder->GetInteractiveFrame();
-      MProgressDialog *pd;
-      if ( frame )
-      {
-         pd = new MProgressDialog
-                  (
-                     wxString::Format
-                     (
-                        _("Filtering %u messages in folder '%s'..."),
-                        count, m_MailFolder->GetName().c_str()
-                     ),
-                     "\n\n",  // must be tall enough for 3 lines
-                     2*count,
-                     frame,
-                     false,   // !"disable parent only"
-                     true     // show "cancel" button
-                  );
-      }
-      else // don't show the progress dialog, just log in the status bar
-      {
-         pd = NULL;
-      }
-
-      // first decide what should we do with the messages: fill the arrays with
-      // the operations to perform and the destination folder if the operation
-      // involves copying the message
-      wxArrayInt operations;
-      wxArrayString destinations;
-
-      bool doExpunge = false;
-
-      // the text for the progress dialog (verbose) and for the log (terse)
-      String textPD,
-             textLog;
-      size_t idx;
-      for ( idx = 0; idx < count; idx++ )
-      {
-         // do it first so that the arrays have the right size even if we hit
-         // "continue" below
-         operations.Add(None);
-         destinations.Add("");
-
-         m_MessageUId = msgs[idx];
-
-         if ( m_MessageUId == UID_ILLEGAL )
-         {
-            FAIL_MSG( _T("invalid UID in FilterRule::Apply()!") );
-
-            continue;
-         }
-
-         m_MailMessage = m_MailFolder->GetMessage(m_MessageUId);
-
-         if ( !m_MailMessage )
-         {
-            // maybe another session deleted it?
-            wxLogDebug(
-               _T("Filter error: message with UID %ld in folder '%s' doesn't exist any more."),
-                       m_MessageUId, m_MailFolder->GetName().c_str());
-            continue;
-         }
-
-         // update the GUI
-
-         // TODO: make the format of the string inside the parentheses
-         //       configurable
-
-         String subject = MailFolder::DecodeHeader(m_MailMessage->Subject()),
-                from = MailFolder::DecodeHeader(m_MailMessage->From());
-
-         textLog.Printf(_("Filtering message %u/%u"), idx + 1, count);
-
-         // make a multiline label for the progress dialog and a more concise
-         // one for the status bar
-         if ( pd )
-         {
-            textPD.clear();
-            textPD << textLog << '\n'
-                   << _("From: ") << from << '\n'
-                   << _("Subject: ") << subject;
-         }
-
-         textLog << " (";
-
-         if ( !from.empty() )
-         {
-            textLog << _("from ") << from << ' ';
-         }
-
-         if ( !subject.empty() )
-         {
-            textLog << _("about '") << subject << '\'';
-         }
-         else
-         {
-            textLog << _("without subject");
-         }
-
-         textLog << ')';
-
-         // and use both of them
-         if ( pd )
-         {
-            if ( !pd->Update(idx, textPD) )
-            {
-               // cancelled by user
-               m_MailMessage->DecRef();
-
-               break;
-            }
-         }
-         else // no progress dialog
-         {
-            // don't pass it as the first argument because the string might
-            // contain '%' characters!
-            wxLogStatus("%s", textLog.c_str());
-         }
-
-         // do some heuristic optimizations: if our program contains requests
-         // for the entire message header, get it first because like this it
-         // will be cached and all other requests will use it - otherwise we'd
-         // have to make several trips to server to get a few separate fields
-         // first and only then retrieve the header
-         //
-         // in the same way, retrieve all the recipients if we need them anyhow
-         // before retrieving "To" &c
-         if ( m_hasHeaderFunc )
-         {
-            if ( m_hasToFunc || m_hasRcptFunc || m_hasHdrLineFunc )
-            {
-               // pre-retrieve the whole header
-               (void)m_MailMessage->GetHeader();
-            }
-         }
-         else if ( m_hasRcptFunc )
-         {
-            if ( m_hasToFunc )
-            {
-               // pre-fetch the recipient headers which include "To"
-               (void)m_MailMessage->GetHeaderLines(headersRecipients);
-            }
-         }
-
-         // reset the result flags
-         m_operation = None;
-
-         const Value retval = m_Program->Evaluate();
-
-         // remember the result
-         operations[idx] = m_operation;
-         destinations[idx] = m_copiedTo;
-
-         if ( m_operation & Expunge )
-         {
-            doExpunge = true;
-         }
-
-         // and show the result in the progress dialog
-         String textExtra = " - ";
-
-         if ( !retval.IsNumber() )
-         {
-            textExtra << _("error!");
-
-            rc |= FilterRule::Error;
-         }
-         else // filter executed ok
-         {
-            // if it was caught as a spam, tell the user why do we think so
-            if ( !gs_spamTest.empty() )
-            {
-               textExtra += String::Format
-                                    (
-                                       _("recognized as spam (%s); "),
-                                       gs_spamTest.c_str()
-                                    );
-               gs_spamTest.clear();
-            }
-
-            bool wasDeleted = (m_operation & Deleted) != 0;
-            if ( !m_copiedTo.empty() )
-            {
-               textExtra << (wasDeleted ? _("moved to ") : _("copied to "))
-                         << m_copiedTo;
-
-               m_copiedTo.clear();
-            }
-            else if ( wasDeleted )
-            {
-               textExtra << _("deleted");
-            }
-            else // not moved/copied/deleted
-            {
-               textExtra << _("done");
-            }
-         }
-
-         textLog += textExtra;
-
-         m_MailMessage->DecRef();
-
-         if ( pd )
-         {
-            if ( !pd->Update(idx, textPD + textExtra) )
-            {
-               // cancelled by user
-               break;
-            }
-
-            // show it in the log window so that the user knows what has
-            // happened to the messages
-            //
-            // NB: textLog may contain '%'s itself, so don't let it be
-            //     interpreted as a format string
-            wxLogGeneric(M_LOG_WINONLY, "%s", textLog.c_str());
-         }
-         else // no progress dialog
-         {
-            // see comment above
-            wxLogStatus("%s", textLog.c_str());
-         }
-      }
-
-      // check if Cancel wasn't pressed (we'd exit the loop above by break then)
-      wxString pdExecText = _("Executing filter actions...");
-      if ( idx == count &&
-           (!pd || pd->Update(count, pdExecText)) )
-      {
-         UIdArray uidsToDelete;
-         wxArrayLong indicesDeleted;
-
-         for ( idx = 0; idx < count; idx++ )
-         {
-            // note that our progress meter may accelerate towards the end as
-            // we may copy more than one message initially - but it's ok, it's
-            // better than slowing down towards the end, the users really hate
-            // this!
-
-            if ( pd && !pd->Update(count + idx) )
-            {
-               // cancelled by user
-               break;
-            }
-
-            if ( operations[idx] & Copy )
-            {
-               // copy all messages we are copying to this destination at once
-               UIdArray uidsToCopy;
-               uidsToCopy.Add(msgs[idx]);
-
-               String dst = destinations[idx];
-
-               for ( size_t n = idx + 1; n < count; n++ )
-               {
-                  if ( (operations[n] & Copy) && destinations[n] == dst )
-                  {
-                     uidsToCopy.Add(msgs[n]);
-
-                     // don't try to copy it when we reach it
-                     operations[n] &= ~Copy;
-                  }
-               }
-
-               if ( pd )
-               {
-                  pd->Update(count + idx, pdExecText + '\n' +
-                             wxString::Format(_("Copying messages to '%s'..."),
-                                           dst.c_str()));
-               }
-
-               if ( !m_MailFolder->SaveMessages(&uidsToCopy, dst) )
-               {
-                  rc |= FilterRule::Error;
-               }
-            }
-
-            if ( operations[idx] & Delete )
-            {
-               indicesDeleted.Add(idx);
-               uidsToDelete.Add(msgs[idx]);
-            }
-         }
-
-         // again, stop right now if we were cancelled
-         if ( idx == count )
-         {
-            if ( !uidsToDelete.IsEmpty() )
-            {
-               if ( pd )
-               {
-                  pd->Update(2*count, pdExecText + '\n' +
-                            wxString::Format(_("Deleting moved messages...")));
-               }
-
-               if ( !m_MailFolder->DeleteMessages(&uidsToDelete) )
-               {
-                  rc |= FilterRule::Error;
-               }
-               else // deleted successfully
-               {
-                  rc |= FilterRule::Deleted;
-
-                  // remove the deleted messages from msgs
-                  // iterate from end because otherwise the indices would shift
-                  // while we traverse them
-                  size_t count = indicesDeleted.GetCount();
-                  for ( size_t n = count; n > 0; n-- )
-                  {
-                     msgs.RemoveAt(indicesDeleted[n - 1]);
-                  }
-               }
-            }
-
-            // actual expunging will be done by the calling code
-            if ( doExpunge )
-            {
-               rc |= FilterRule::Expunged;
-            }
-         }
-      }
-      //else: cancelled by user
-
-      delete pd;
+      rc = apply.Run();
 
       m_MailFolder->DecRef();
       m_MailFolder = NULL;
@@ -3457,16 +3180,505 @@ FilterRuleImpl::~FilterRuleImpl()
 #endif
 }
 
-// ----------------------------------------------------------------------------
-// MModule_FiltersImpl - the module
-// ----------------------------------------------------------------------------
-
 #ifdef DEBUG
+
 void FilterRuleImpl::Debug(void)
 {
    Output(m_Program->Debug());
 }
-#endif
+
+#endif // DEBUG
+
+// ----------------------------------------------------------------------------
+// FilterRuleApply
+// ----------------------------------------------------------------------------
+
+FilterRuleApply::FilterRuleApply(FilterRuleImpl *parent, UIdArray& msgs)
+               : m_parent(parent), m_msgs(msgs)
+{
+   m_pd = NULL;
+   m_doExpunge = false;
+}
+
+FilterRuleApply::~FilterRuleApply()
+{
+   delete m_pd;
+}
+
+int
+FilterRuleApply::Run()
+{
+   // no error yet
+   int rc = 0;
+
+   CreateProgressDialog();
+
+   if( !LoopEvaluate() )
+   {
+      rc |= FilterRule::Error;
+   }
+
+   // check if Cancel wasn't pressed (we'd exit the loop above by break then)
+   if ( m_idx == m_msgs.GetCount() &&
+        (!m_pd || m_pd->Update(m_msgs.GetCount(),
+        _("Executing filter actions..."))) )
+   {
+      if ( !LoopCopy() )
+      {
+         rc |= FilterRule::Error;
+      }
+
+      // again, stop right now if we were cancelled
+      if ( m_idx == m_msgs.GetCount() )
+      {
+         if ( !DeleteAll() )
+         {
+            rc |= FilterRule::Error;
+         }
+         else // deleted successfully
+         {
+            rc |= FilterRule::Deleted;
+         }
+
+         // actual expunging will be done by the calling code
+         if ( m_doExpunge )
+         {
+            rc |= FilterRule::Expunged;
+         }
+      }
+   }
+   //else: cancelled by user
+
+   return rc;
+}
+
+bool
+FilterRuleApply::LoopEvaluate()
+{
+   bool allOk = true;
+
+   // first decide what should we do with the messages: fill the arrays with
+   // the operations to perform and the destination folder if the operation
+   // involves copying the message
+   for ( m_idx = 0; m_idx < m_msgs.GetCount(); m_idx++ )
+   {
+      // do it first so that the arrays have the right size even if we hit
+      // "continue" below
+      m_allOperations.Add(FilterRuleImpl::None);
+      m_destinations.Add("");
+
+      if ( !GetMessage() )
+      {
+         continue;
+      }
+
+      if ( !UpdateProgressDialog() )
+      {
+         m_parent->m_MailMessage->DecRef();
+
+         break;
+      }
+
+      HeaderCacheHints();
+
+      if ( !Evaluate() )
+      {
+         allOk = false;
+      }
+
+      if ( !ProgressResults() )
+      {
+         break;
+      }
+   }
+
+   return allOk;
+}
+
+bool
+FilterRuleApply::LoopCopy()
+{
+   bool allOk = true;
+
+   for ( m_idx = 0; m_idx < m_msgs.GetCount(); m_idx++ )
+   {
+      if ( m_allOperations[m_idx] & FilterRuleImpl::Copy )
+      {
+         if ( !ProgressCopy() )
+         {
+            // cancelled by user
+            break;
+         }
+
+         if ( !CopyToOneFolder() )
+         {
+            allOk = false;
+         }
+      }
+   }
+
+   return allOk;
+}
+
+bool
+FilterRuleApply::DeleteAll()
+{
+   CollectForDelete();
+
+   if ( !m_uidsToDelete.IsEmpty() )
+   {
+      ProgressDelete();
+
+      if ( !m_parent->m_MailFolder->DeleteMessages(&m_uidsToDelete) )
+      {
+         return false;
+      }
+
+      // deleted successfully
+      IndicateDeleted();
+   }
+
+   return true;
+}
+
+void
+FilterRuleApply::CreateProgressDialog()
+{
+   wxFrame *frame = m_parent->m_MailFolder->GetInteractiveFrame();
+   if ( frame )
+   {
+      m_pd = new MProgressDialog
+               (
+                  wxString::Format
+                  (
+                     _("Filtering %u messages in folder '%s'..."),
+                     m_msgs.GetCount(),
+                     m_parent->m_MailFolder->GetName().c_str()
+                  ),
+                  "\n\n",  // must be tall enough for 3 lines
+                  2*m_msgs.GetCount(),
+                  frame,
+                  false,   // !"disable parent only"
+                  true     // show "cancel" button
+               );
+   }
+   // else: don't show the progress dialog, just log in the status bar
+}
+
+bool
+FilterRuleApply::GetMessage()
+{
+   m_parent->m_MessageUId = m_msgs[m_idx];
+
+   if ( m_parent->m_MessageUId == UID_ILLEGAL )
+   {
+      FAIL_MSG( _T("invalid UID in FilterRule::Apply()!") );
+
+      return false;
+   }
+
+   m_parent->m_MailMessage
+      = m_parent->m_MailFolder->GetMessage(m_parent->m_MessageUId);
+
+   if ( !m_parent->m_MailMessage )
+   {
+      // maybe another session deleted it?
+      wxLogDebug(
+         _T("Filter error: message with UID %ld in folder '%s' doesn't exist any more."),
+                 m_parent->m_MessageUId,
+                 m_parent->m_MailFolder->GetName().c_str());
+      return false;
+   }
+
+   return true;
+}
+
+bool
+FilterRuleApply::UpdateProgressDialog()
+{
+   // update the GUI
+
+   // TODO: make the format of the string inside the parentheses
+   //       configurable
+
+   String subject = MailFolder::DecodeHeader(
+      m_parent->m_MailMessage->Subject());
+   String from = MailFolder::DecodeHeader(m_parent->m_MailMessage->From());
+
+   m_textLog.Printf(_("Filtering message %u/%u"),
+      m_idx + 1, m_msgs.GetCount());
+
+   // make a multiline label for the progress dialog and a more concise
+   // one for the status bar
+   m_textPD.clear();
+   if ( m_pd )
+   {
+      m_textPD << m_textLog << '\n'
+             << _("From: ") << from << '\n'
+             << _("Subject: ") << subject;
+   }
+
+   m_textLog << " (";
+
+   if ( !from.empty() )
+   {
+      m_textLog << _("from ") << from << ' ';
+   }
+
+   if ( !subject.empty() )
+   {
+      m_textLog << _("about '") << subject << '\'';
+   }
+   else
+   {
+      m_textLog << _("without subject");
+   }
+
+   m_textLog << ')';
+
+   // and use both of them
+   if ( m_pd )
+   {
+      if ( !m_pd->Update(m_idx, m_textPD) )
+      {
+         // cancelled by user
+         return false;
+      }
+   }
+   else // no progress dialog
+   {
+      // don't pass it as the first argument because the string might
+      // contain '%' characters!
+      wxLogStatus("%s", m_textLog.c_str());
+   }
+
+   return true;
+}
+
+void
+FilterRuleApply::HeaderCacheHints()
+{
+   // do some heuristic optimizations: if our program contains requests
+   // for the entire message header, get it first because like this it
+   // will be cached and all other requests will use it - otherwise we'd
+   // have to make several trips to server to get a few separate fields
+   // first and only then retrieve the header
+   //
+   // in the same way, retrieve all the recipients if we need them anyhow
+   // before retrieving "To" &c
+   if ( m_parent->m_hasHeaderFunc )
+   {
+      if ( m_parent->m_hasToFunc || m_parent->m_hasRcptFunc
+         || m_parent->m_hasHdrLineFunc )
+      {
+         // pre-retrieve the whole header
+         (void)m_parent->m_MailMessage->GetHeader();
+      }
+   }
+   else if ( m_parent->m_hasRcptFunc )
+   {
+      if ( m_parent->m_hasToFunc )
+      {
+         // pre-fetch the recipient headers which include "To"
+         (void)m_parent->m_MailMessage->GetHeaderLines(headersRecipients);
+      }
+   }
+}
+
+bool
+FilterRuleApply::Evaluate()
+{
+   // reset the result flags
+   m_parent->m_operation = FilterRuleImpl::None;
+
+   m_retval = m_parent->m_Program->Evaluate();
+
+   // remember the result
+   m_allOperations[m_idx] = m_parent->m_operation;
+   m_destinations[m_idx] = m_parent->m_copiedTo;
+
+   if ( m_parent->m_operation & FilterRuleImpl::Expunge )
+   {
+      m_doExpunge = true;
+   }
+
+   m_parent->m_MailMessage->DecRef();
+
+   return m_retval.IsNumber();
+}
+
+bool
+FilterRuleApply::ProgressResults()
+{
+   // and show the result in the progress dialog
+   String textExtra = " - ";
+
+   if ( !m_retval.IsNumber() )
+   {
+      textExtra << _("error!");
+   }
+   else // filter executed ok
+   {
+      // if it was caught as a spam, tell the user why do we think so
+      if ( !gs_spamTest.empty() )
+      {
+         textExtra += String::Format
+                              (
+                                 _("recognized as spam (%s); "),
+                                 gs_spamTest.c_str()
+                              );
+         gs_spamTest.clear();
+      }
+
+      bool wasDeleted = (m_parent->m_operation
+         & FilterRuleImpl::Deleted) != 0;
+      if ( !m_parent->m_copiedTo.empty() )
+      {
+         textExtra << (wasDeleted ? _("moved to ") : _("copied to "))
+                   << m_parent->m_copiedTo;
+
+         m_parent->m_copiedTo.clear();
+      }
+      else if ( wasDeleted )
+      {
+         textExtra << _("deleted");
+      }
+      else // not moved/copied/deleted
+      {
+         textExtra << _("done");
+      }
+   }
+
+   m_textLog += textExtra;
+
+   if ( m_pd )
+   {
+      if ( !m_pd->Update(m_idx, m_textPD + textExtra) )
+      {
+         // cancelled by user
+         return false;
+      }
+
+      // show it in the log window so that the user knows what has
+      // happened to the messages
+      //
+      // NB: textLog may contain '%'s itself, so don't let it be
+      //     interpreted as a format string
+      wxLogGeneric(M_LOG_WINONLY, "%s", m_textLog.c_str());
+   }
+   else // no progress dialog
+   {
+      // see comment above
+      wxLogStatus("%s", m_textLog.c_str());
+   }
+
+   return true;
+}
+
+bool
+FilterRuleApply::ProgressCopy()
+{
+   // note that our progress meter may accelerate towards the end as
+   // we may copy more than one message initially - but it's ok, it's
+   // better than slowing down towards the end, the users really hate
+   // this!
+
+   if ( m_pd )
+   {
+      wxString message = _("Executing filter actions...") + '\n'
+         + wxString::Format(_("Copying messages to '%s'..."),
+            m_destinations[m_idx].c_str());
+
+      if( !m_pd->Update(m_msgs.GetCount() + m_idx, message) )
+      {
+         return false;
+      }
+   }
+
+   return true;
+}
+
+bool
+FilterRuleApply::CopyToOneFolder()
+{
+   // copy all messages we are copying to this destination at once
+   UIdArray uidsToCopy;
+   wxArrayLong indexesToCopy;
+
+   uidsToCopy.Add(m_msgs[m_idx]);
+   indexesToCopy.Add(m_idx);
+
+   for ( size_t n = m_idx + 1; n < m_msgs.GetCount(); n++ )
+   {
+      if ( (m_allOperations[n] & FilterRuleImpl::Copy)
+         && m_destinations[n] == m_destinations[m_idx] )
+      {
+         uidsToCopy.Add(m_msgs[n]);
+         indexesToCopy.Add(n);
+      }
+   }
+
+   bool copyOk = m_parent->m_MailFolder->SaveMessages(
+      &uidsToCopy, m_destinations[m_idx]);
+
+   for ( size_t copiedIndex = 0; copiedIndex < indexesToCopy.GetCount();
+      ++copiedIndex )
+   {
+      // don't try to copy it when we reach it
+      m_allOperations[copiedIndex] &= ~FilterRuleImpl::Copy;
+
+      if ( !copyOk )
+      {
+         m_allOperations[copiedIndex] &= ~FilterRuleImpl::Delete;
+      }
+   }
+
+   return copyOk;
+}
+
+void
+FilterRuleApply::CollectForDelete()
+{
+   m_uidsToDelete.Empty();
+   m_indicesDeleted.Empty();
+
+   for ( m_idx = 0; m_idx < m_msgs.GetCount(); m_idx++ )
+   {
+      if ( m_allOperations[m_idx] & FilterRuleImpl::Delete )
+      {
+         m_indicesDeleted.Add(m_idx);
+         m_uidsToDelete.Add(m_msgs[m_idx]);
+      }
+   }
+}
+
+void
+FilterRuleApply::ProgressDelete()
+{
+   if ( m_pd )
+   {
+      m_pd->Update(2*m_msgs.GetCount(),
+         String(_("Executing filter actions...")) + '\n'
+         + _("Deleting moved messages..."));
+   }
+}
+
+void
+FilterRuleApply::IndicateDeleted()
+{
+   // remove the deleted messages from msgs
+   // iterate from end because otherwise the indices would shift
+   // while we traverse them
+   size_t count = m_indicesDeleted.GetCount();
+   for ( size_t n = count; n > 0; n-- )
+   {
+      m_msgs.RemoveAt(m_indicesDeleted[n - 1]);
+   }
+}
+
+// ----------------------------------------------------------------------------
+// MModule_FiltersImpl - the module
+// ----------------------------------------------------------------------------
 
 /** Filtering Module class. */
 class MModule_FiltersImpl : public MModule_Filters
