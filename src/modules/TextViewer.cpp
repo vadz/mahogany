@@ -349,6 +349,12 @@ BEGIN_EVENT_TABLE(TextViewerWindow, wxTextCtrl)
    EVT_RIGHT_UP(TextViewerWindow::OnMouseEvent)
    EVT_LEFT_UP(TextViewerWindow::OnMouseEvent)
    EVT_LEFT_DCLICK(TextViewerWindow::OnMouseEvent)
+
+#ifdef __WXGTK20__
+   // we need to catch right clicks under GTK 2 to get right up events,
+   // otherwise they're eaten by the control
+   EVT_RIGHT_DOWN(TextViewerWindow::OnMouseEvent)
+#endif // GTK+ 2.0
 END_EVENT_TABLE()
 
 TextViewerWindow::TextViewerWindow(TextViewer *viewer, wxWindow *parent)
@@ -498,6 +504,14 @@ bool TextViewerWindow::ProcessMouseEvent(const wxMouseEvent& event, long pos)
 
             id = WXMENU_LAYOUT_LCLICK;
          }
+#ifdef __WXGTK20__
+         else if ( event.RightDown() )
+         {
+            // just don't skip this event -- otherwise we're not going to get
+            // RightUp() as the internal context menu would be shown
+            return true;
+         }
+#endif // GTK+ 2.0
          else // must be double click, what else?
          {
             ASSERT_MSG( event.LeftDClick(), _T("unexpected mouse event") );
