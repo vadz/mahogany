@@ -132,8 +132,8 @@ extern const MOption MP_TIFF2PS;
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
-extern const MPersMsgBox M_MSGBOX_GFX_NOT_INLINED;
-extern const MPersMsgBox M_MSGBOX_ASK_URL_BROWSER;
+extern const MPersMsgBox *M_MSGBOX_GFX_NOT_INLINED;
+extern const MPersMsgBox *M_MSGBOX_ASK_URL_BROWSER;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -1519,8 +1519,8 @@ void MessageView::ShowImage(const MimePart *mimepart)
                      msg,
                      GetParentFrame(),
                      MDIALOG_YESNOTITLE,
-                     false, // [No] default
-                     GetPersMsgBoxName(M_MSGBOX_GFX_NOT_INLINED)
+                     M_DLG_NO_DEFAULT,
+                     M_MSGBOX_GFX_NOT_INLINED
                     ) )
                {
                   // will inline
@@ -2534,18 +2534,19 @@ void MessageView::OpenURL(const String& url, bool inNewWindow)
       }
 #else  // Unix
       // propose to choose program for opening URLs
-      if (
-         MDialog_YesNoDialog
-         (
+      if ( MDialog_YesNoDialog
+           (
             _("No command configured to view URLs.\n"
               "Would you like to choose one now?"),
             frame,
             MDIALOG_YESNOTITLE,
-            true,
-            GetPersMsgBoxName(M_MSGBOX_ASK_URL_BROWSER)
-            )
+            M_DLG_YES_DEFAULT,
+            M_MSGBOX_ASK_URL_BROWSER
+           )
          )
+      {
          ShowOptionsDialog();
+      }
 
       if ( m_ProfileValues.browser.empty() )
       {

@@ -112,6 +112,13 @@ extern const MOption MP_SPLASHDELAY;
 extern const MOption MP_WIDTH;
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox *M_MSGBOX_AUTOEXPUNGE;
+extern const MPersMsgBox *M_MSGBOX_REENABLE_HINT;
+
+// ----------------------------------------------------------------------------
 // the images names
 // ----------------------------------------------------------------------------
 
@@ -704,11 +711,12 @@ void
 MDialog_Message(const char *message,
                 const wxWindow *parent,
                 const char *title,
-                const char *configPath)
+                const char *configPath,
+                int flags)
 {
    // if the msg box is disabled, don't make the splash disappear, return
    // immediately
-   if ( !wxPMessageBoxEnabled(configPath) )
+   if ( wxPMessageBoxIsDisabled(configPath) )
       return;
 
    wxString caption = "Mahogany : ";
@@ -717,53 +725,147 @@ MDialog_Message(const char *message,
    CloseSplash();
    NoBusyCursor noBC;
 
-   wxPMessageBox(configPath, message, caption,
-                 GetMsgBoxStyle(wxOK | wxICON_INFORMATION),
-                 GetDialogParent(parent));
+   wxPMessageBox
+   (
+      configPath,
+      message,
+      caption,
+      GetMsgBoxStyle(wxOK | wxICON_INFORMATION) | (flags & M_DLG_DISABLE),
+      GetDialogParent(parent)
+   );
 }
 
 
 /** simple Yes/No dialog
-       @param message the text to display
-       @param parent the parent frame
-       @param title  title for message box window
-       @param modal  true to make messagebox modal
-       @param YesDefault true if Yes button is default, false for No as default
-       @return true if Yes was selected
-   */
+    @param message the text to display
+    @param parent the parent frame
+    @param title  title for message box window
+    @param modal  true to make messagebox modal
+    @param YesDefault true if Yes button is default, false for No as default
+    @return true if Yes was selected
+*/
 bool
 MDialog_YesNoDialog(const char *message,
                     const wxWindow *parent,
                     const char *title,
-                    bool yesDefault,
-                    const char *configPath)
+                    int flags,
+                    const MPersMsgBox *msgBox,
+                    const char *folderName)
 {
+   String configPath, path;
+   if ( msgBox )
+   {
+      configPath = GetPersMsgBoxName(msgBox);
+
+      // if this is a folder-specific message box, first look if it's not
+      // disabled globally
+      int storedValue;
+      if ( folderName )
+      {
+         storedValue = wxPMessageBoxIsDisabled(configPath);
+         if ( !storedValue )
+         {
+            // use this path instead, there is nothing at the global level
+            path << Profile::FilterProfileName(folderName) << '/' << configPath;
+         }
+         //else: we won't show it at all
+      }
+      else
+      {
+         storedValue = 0;
+         path = configPath;
+
+         ASSERT_MSG( !strchr(configPath, '/'), "configPath must be simple!" );
+      }
+
+      if ( !storedValue )
+      {
+         // try again (if we had tried without folderName above) or for the
+         // first time
+         storedValue = wxPMessageBoxIsDisabled(path);
+      }
+
+      if ( storedValue )
+      {
+         // don't execute the code below at all, it has a nice side effect of
+         // _not_ closing the splash unless the message box is really shown
+         return storedValue == wxYES;
+      }
+   }
+
+   NoBusyCursor noBC;
+   CloseSplash();
+
    wxString caption = "Mahogany : ";
    caption += title;
 
    int style = GetMsgBoxStyle(wxYES_NO | wxICON_QUESTION);
-   if(! yesDefault)
+   if ( flags & M_DLG_NO_DEFAULT )
       style |= wxNO_DEFAULT;
 
-   // if the msg box is disabled, don't make the splash disappear
-   NoBusyCursor *noBC;
-   if ( wxPMessageBoxEnabled(configPath) )
+   bool wasDisabled;
+   int rc = wxPMessageBox
+            (
+               configPath,
+               message,
+               caption,
+               // these bits are equal to the corresponding wx constants
+               style | (flags & (M_DLG_NOT_ON_NO | M_DLG_DISABLE)),
+               GetDialogParent(parent),
+               NULL,
+               &wasDisabled
+            );
+
+   if ( wasDisabled )
    {
-      CloseSplash();
-      noBC = new NoBusyCursor;
+      // a folder-specific message box can be disabled just for this folder or
+      // for all of them globally
+      if ( folderName )
+      {
+         // no recursion here as we call ourselves without configPath (nor
+         // folderName)
+         String msg = String::Format
+                      (
+                        _("You have chosen to disabled the previous dialog.\n"
+                          "\n"
+                          "You have the choice between doing it only for this "
+                          "folder (%s) or for all folders.\n"
+                          "\n"
+                          "If you answer \"Yes\", it will be disabled for all "
+                          "folders, otherwise only for this one. In either case\n"
+                          "you may use the \"Reenable message boxes\" button in "
+                          "the last page of the preferences dialog to restore\n"
+                          "this message box later."),
+                        folderName
+                      );
+
+         if ( MDialog_YesNoDialog(msg, parent) )
+         {
+            // we don't need the local key
+            wxPMessageBoxEnable(path);
+
+            // as we disable it globally anyhow
+            wxPMessageBoxDisable(configPath, rc);
+         }
+         //else: it's already disabled for this folder
+      }
+      else
+      {
+         // show a message about how to enable this dialog back
+         MDialog_Message
+         (
+            _("Remember that you can reenable this and other dialogs\n"
+              "by using the button in the last page of the \"Preferences\"\n"
+              "dialog.\n"),
+            parent,
+            MDIALOG_MSGTITLE,
+            GetPersMsgBoxName(M_MSGBOX_REENABLE_HINT),
+            M_DLG_DISABLE
+         );
+      }
    }
-   else
-   {
-      noBC = NULL;
-   }
 
-   bool rc = wxPMessageBox(configPath, message, caption,
-                           style,
-                           GetDialogParent(parent)) == wxYES;
-
-   delete noBC;
-
-   return rc;
+   return rc == wxYES;
 }
 
 
@@ -2368,12 +2470,10 @@ void CheckExpungeDialog(ASMailFolder *asmf, wxWindow *parent)
                       "in folder '%s'?"),
                     mf->GetName().c_str());
 
-         // the profile key should be relative, so skip the leading slash
-         String profileName = mf->GetProfile()->GetName();
-         String key = Profile::FilterProfileName(profileName.c_str() + 1);
-         key += "/AutoExpunge";
-
-         if ( MDialog_YesNoDialog(msg, parent, MDIALOG_YESNOTITLE, true, key) )
+         if ( MDialog_YesNoDialog(msg, parent, MDIALOG_YESNOTITLE,
+                                  M_DLG_YES_DEFAULT,
+                                  M_MSGBOX_AUTOEXPUNGE,
+                                  mf->GetName()) )
          {
             (void) mf->ExpungeMessages();
          }
@@ -2476,16 +2576,20 @@ void ReenableDialog::AddAllEntries(wxConfigBase *config,
       switch ( val )
       {
          case wxYES:
-         case wxID_YES:
+         case 0x0020:   // old value of wxYES
             value = _("yes");
             break;
 
          case wxNO:
-         case wxID_NO:
+         case 0x0040:   // old value of wxNO
             value = _("no");
             break;
 
          default:
+            FAIL_MSG( "unknown message box value" );
+            // fall through
+
+         case wxOK:
             // must be a simple msg box
             value = _("off");
       }
@@ -2499,16 +2603,21 @@ void ReenableDialog::AddAllEntries(wxConfigBase *config,
       }
       else
       {
-         // it's a name returned by Profile::FilterProfileName(), so
-         // unfilter it back after removing the leading M_Profiles_ from it
+         // previous versions of the program prefixed the folder names with
+         // "M_Profiles_", the current version of Profile::FilterProfileName()
+         // doesn't do it any more but we still have to deal with the old
+         // config files
          if ( !folder.StartsWith("M_Profiles_", &folderName) )
          {
-            folderName.Printf(_("unknown folder '%s'"), folder.c_str());
+            folderName = folder;
          }
-         else
-         {
-            folderName.Replace("_", "/");
-         }
+
+         // restore the folder separator (i.e. undo what FilterProfileName()
+         // did)
+         //
+         // FIXME: this won't work correctly for the folder names with '_'s in
+         //        them - not critical but annoying
+         folderName.Replace("_", "/");
       }
 
       m_listctrl->SetItem(index, 2, folderName);
@@ -2543,6 +2652,8 @@ bool ReenableDialog::TransferDataFromWindow()
 
    return TRUE;
 }
+
+// TODO: all this should be implemented in wx/persctrl.cpp, not here!
 
 extern
 bool ReenablePersistentMessageBoxes(wxWindow *parent)
@@ -2594,14 +2705,15 @@ bool ReenablePersistentMessageBoxes(wxWindow *parent)
                config->DeleteEntry(entries[selections[n]]);
             }
 
-            wxLogStatus(_("Reenabled %d previously disabled message boxes."),
+            wxLogStatus(GetFrame(parent),
+                        _("Reenabled %d previously disabled message boxes."),
                         count);
 
             return true;
          }
          else
          {
-            wxLogStatus(_("No message boxes were reenabled."));
+            wxLogStatus(GetFrame(parent), _("No message boxes were reenabled."));
          }
       }
    }
@@ -2630,7 +2742,7 @@ extern "C"
            << _("Do you accept this certificate?");
       return (int) MDialog_YesNoDialog(info,
                                        NULL, _("SSL certificate verification"),
-                                       true);
+                                       M_DLG_YES_DEFAULT);
    }
 }
 

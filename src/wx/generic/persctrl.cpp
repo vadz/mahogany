@@ -104,6 +104,9 @@ END_EVENT_TABLE()
 // wxID_FOO -> wxFOO
 static int TranslateBtnIdToMsgBox(int rc);
 
+// translate the old wxID values to the new ones
+static int ConvertId(long rc);
+
 #if wxCHECK_VERSION(2, 3, 1)
     #define Number()    GetCount()
 #endif
@@ -1598,7 +1601,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     wxString textCheckbox = _("Don't show this message again ");
     dc.GetTextExtent(textCheckbox, &width, &heightTextLine);
 
-    if(persistent)
+    if ( persistent )
     {
        // extra space for the check box
        width += 15;
@@ -1706,6 +1709,9 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
         wxFAIL_MSG( "can't find default button for this dialog." );
     }
 
+    if ( style & wxPMSGBOX_DISABLE )
+        m_checkBox->SetValue(TRUE);
+
     // position the controls and the dialog itself
     // -------------------------------------------
 
@@ -1726,8 +1732,8 @@ void wxPMessageDialog::OnButton(wxCommandEvent& event)
 {
     // which button?
     switch ( event.GetId() ) {
-        case wxID_YES:
         case wxID_NO:
+        case wxID_YES:
         case wxID_OK:
             break;
 
@@ -1757,60 +1763,60 @@ int wxPMessageBox(const wxString& configPath,
                   const wxString& caption,
                   long style,
                   wxWindow *parent,
-                  wxConfigBase *config)
+                  wxConfigBase *config,
+                  bool *wontShowAgain)
 {
-   if ( configPath.Length() )
-   {
-      wxPHelper persist(configPath, gs_MessageBoxPath, config);
+    if ( wontShowAgain )
+        *wontShowAgain = FALSE;
 
-      wxString configValue = persist.GetKey();
+    if ( configPath.Length() ) {
+        wxPHelper persist(configPath, gs_MessageBoxPath, config);
 
-      long rc; // return code
+        // if config was NULL, wxPHelper already has the global one
+        config = persist.GetConfig();
 
-      // if config was NULL, wxPHelper already has the global one
-      config = persist.GetConfig();
+        if ( config ) {
+            wxString configValue = persist.GetKey();
 
-      // disabled?
-      if ( config && config->Exists(configValue) ) {
-         // don't show it, it was disabled
-         rc = config->Read(configValue, 0l);
+            int rc = ConvertId(config->Read(configValue, 0l));
 
-         // the values of wxYES and wxNO have changed in wxWindows, still read
-         // the old values if we have them
-         if ( rc == 0x20 )
-             rc = wxYES;
-         else if ( rc == 0x40 )
-             rc = wxNO;
-      }
-      else {
-         // do show the msg box
-         wxPMessageDialog dlg(parent, message, caption, style);
-         rc = dlg.ShowModal();
+            if ( !rc ) {
+                // do show the msg box
+                wxPMessageDialog dlg(parent, message, caption, style);
+                rc = dlg.ShowModal();
 
-         // ignore checkbox value if the dialog was cancelled
-         if ( config && rc != wxCANCEL && dlg.DontShowAgain() ) {
-            // next time we won't show it
-            persist.ChangePath();
-            config->Write(configValue, rc);
-         }
-      }
-      return rc;
-   }
-   else
-   {
-      // use the system standard message box
-      wxMessageDialog dlg(parent, message, caption, style);
+                // ignore checkbox value if the dialog was cancelled
+                if ( rc != wxCANCEL && dlg.DontShowAgain() ) {
+                    if ( rc != wxNO || !(style & wxPMSGBOX_NOT_ON_NO) ) {
+                        // next time we won't show it
+                        persist.ChangePath();
+                        config->Write(configValue, rc);
 
-      return TranslateBtnIdToMsgBox(dlg.ShowModal());
-   }
+                        // let the caller know that we were disabled
+                        if ( wontShowAgain )
+                            *wontShowAgain = TRUE;
+                    }
+                    //else: don't allow remembering "No" as the answer
+                }
+            }
+            //else: don't show it, it was disabled
+
+            return rc;
+        }
+    }
+
+    // use the system standard message box
+    wxMessageDialog dlg(parent, message, caption, style);
+
+    return TranslateBtnIdToMsgBox(dlg.ShowModal());
 }
 
-bool wxPMessageBoxEnabled(const wxString& configPath, wxConfigBase *config)
+int wxPMessageBoxIsDisabled(const wxString& configPath, wxConfigBase *config)
 {
     if ( configPath.empty() )
     {
         // non persistent msg boxes are always enabled
-        return TRUE;
+        return 0;
     }
 
     wxPHelper persist(configPath, gs_MessageBoxPath, config);
@@ -1819,12 +1825,14 @@ bool wxPMessageBoxEnabled(const wxString& configPath, wxConfigBase *config)
     // if config was NULL, wxPHelper already has the global one
     config = persist.GetConfig();
 
-    return !(config && config->Exists(configValue));
+    wxCHECK_MSG( config, 0, _T("no config in wxPMessageBoxEnabled") );
+
+    return ConvertId(config->Read(configValue, 0l));
 }
 
-void wxPMessageBoxEnable(const wxString& configPath,
-                         bool enable,
-                         wxConfigBase *config)
+void wxPMessageBoxDisable(const wxString& configPath,
+                          int value,
+                          wxConfigBase *config)
 {
     wxPHelper persist(configPath, gs_MessageBoxPath, config);
     wxString configValue = persist.GetKey();
@@ -1832,20 +1840,26 @@ void wxPMessageBoxEnable(const wxString& configPath,
     // if config was NULL, wxPHelper already has the global one
     config = persist.GetConfig();
 
-    if ( enable ) {
+    if ( !config )
+        return;
+
+    if ( !value ) {
         // (re)enable
-        if ( config && config->Exists(configValue) ) {
+        if ( config->Exists(configValue) ) {
            // delete stored value
            config->DeleteEntry(configValue);
         }
     }
     else {
-       // disable
-       if ( config ) {
-           // assume it's a Yes/No dialog box
-           config->Write(configValue, (long)wxYES);
-       }
+       // disable by writing the specified value for it
+       config->Write(configValue, (long)value);
     }
+}
+
+void wxPMessageBoxEnable(const wxString& configPath, wxConfigBase *config)
+{
+    // giving the value of 0 means to delete any existing value
+    wxPMessageBoxDisable(configPath, 0, config);
 }
 
 // -----------------------------------------------------------------------------
@@ -2080,3 +2094,34 @@ static int TranslateBtnIdToMsgBox(int rc)
             return wxCANCEL;
     }
 }
+
+// the numeric values of wxYES, wxNO and others have changed in wxWindows in
+// 2.3 and we use the conversion function to deal with the files produced by
+// the earlier versions
+static int ConvertId(long rc)
+{
+    switch ( rc )
+    {
+#if wxCHECK_VERSION(2, 3, 1)
+        case 0x0020:
+#endif
+        case wxYES:
+            return wxYES;
+
+#if wxCHECK_VERSION(2, 3, 1)
+        case 0x0040:
+#endif
+        case wxNO:
+            return wxNO;
+
+        default:
+            wxFAIL_MSG( _T("unexpected persistent message box value") );
+            // fall through
+
+        case wxOK:
+        case 0:
+            return rc;
+    }
+}
+
+/* vi: set ts=4 sw=4: */

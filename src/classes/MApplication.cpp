@@ -111,8 +111,12 @@ extern const MOption MP_USE_SENDMAIL;
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
-extern const MPersMsgBox M_MSGBOX_ASK_RUNASROOT;
-extern const MPersMsgBox M_MSGBOX_EMPTY_TRASH_ON_EXIT;
+extern const MPersMsgBox *M_MSGBOX_ABANDON_CRITICAL;
+extern const MPersMsgBox *M_MSGBOX_ASK_RUNASROOT;
+extern const MPersMsgBox *M_MSGBOX_ASK_SPECIFY_DIR;
+extern const MPersMsgBox *M_MSGBOX_GO_ONLINE_TO_SEND_OUTBOX;
+extern const MPersMsgBox *M_MSGBOX_EMPTY_TRASH_ON_EXIT;
+extern const MPersMsgBox *M_MSGBOX_SEND_OUTBOX_ON_EXIT;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -387,8 +391,8 @@ MAppBase::OnStartup()
               "Are you sure you want to continue?"),
             NULL,
             _("Run as root?"),
-            FALSE,
-            GetPersMsgBoxName(M_MSGBOX_ASK_RUNASROOT)) )
+            M_DLG_NO_DEFAULT,
+            M_MSGBOX_ASK_RUNASROOT) )
       {
          mApplication->SetLastError(M_ERROR_CANCEL);
 
@@ -713,12 +717,18 @@ MAppBase::CanClose() const
    // Try to send outgoing messages:
    if( CheckOutbox() )
    {
-      if(MDialog_YesNoDialog(
-         _("You still have messages queued to be sent.\n"
-           "Do you want to send them before exiting the application?"),
-         NULL, MDIALOG_YESNOTITLE,
-                             TRUE, "SendOutboxOnExit"))
+      if ( MDialog_YesNoDialog
+           (
+            _("You still have messages queued to be sent.\n"
+              "Do you want to send them before exiting the application?"),
+            NULL,
+            MDIALOG_YESNOTITLE,
+            M_DLG_YES_DEFAULT,
+            M_MSGBOX_SEND_OUTBOX_ON_EXIT)
+         )
+      {
          SendOutbox();
+      }
    }
 
    // Check Trash folder if it contains any messages (only the global
@@ -733,8 +743,8 @@ MAppBase::CanClose() const
                              "the trash mailbox (%s)?"), trashName.c_str()),
             NULL,
             _("Empty trash?"),
-            false, // [No] default
-            GetPersMsgBoxName(M_MSGBOX_EMPTY_TRASH_ON_EXIT)
+            M_DLG_NO_DEFAULT,
+            M_MSGBOX_EMPTY_TRASH_ON_EXIT
            ) )
       {
          MFolder_obj folderTrash(trashName);
@@ -755,9 +765,10 @@ MAppBase::CanClose() const
                      "These folders are:\n");
       msg += folders;
       msg += _("Do you want to exit anyway?");
+
       return MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
-                                 FALSE /* no=default */,
-                                 "AbandonCriticalFolders");
+                                 M_DLG_NO_DEFAULT,
+                                 M_MSGBOX_ABANDON_CRITICAL);
    }
 
    return true;
@@ -917,7 +928,8 @@ MAppBase::InitDirectories()
                         "Would you like to specify its location now?");
 #endif // OS_UNIX
          if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
-                                  TRUE /* yes default */, "AskSpecifyDir") )
+                                  M_DLG_YES_DEFAULT,
+                                  M_MSGBOX_ASK_SPECIFY_DIR) )
          {
             wxDirDialog dlg(NULL, _("Specify global directory for Mahogany"));
             if ( dlg.ShowModal() )
@@ -1068,7 +1080,8 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
            "Do you want to go online now?"),
          NULL,
          MDIALOG_YESNOTITLE,
-         TRUE /* yes default */, "GoOnlineToSendOutbox") )
+         M_DLG_YES_DEFAULT,
+         M_MSGBOX_GO_ONLINE_TO_SEND_OUTBOX) )
       {
          STATUSMESSAGE((_("Going online...")));
          GoOnline();

@@ -52,7 +52,7 @@ extern const MOption MP_MBOXDIR;
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
-extern const MPersMsgBox M_MSGBOX_EXPLAIN_GLOBALPASSWD;
+extern const MPersMsgBox *M_MSGBOX_EXPLAIN_GLOBALPASSWD;
 
 // ----------------------------------------------------------------------------
 // local functions
@@ -836,7 +836,7 @@ setup_twofish(void)
                _("The password is wrong.\nDo you want to try again?"),
                NULL,
                MDIALOG_YESNOTITLE,
-               true
+               M_DLG_YES_DEFAULT
               );
 
    } while( retry );

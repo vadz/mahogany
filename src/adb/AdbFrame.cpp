@@ -86,6 +86,12 @@ extern const MOption MP_SHOWADBEDITOR;
 extern const MOption MP_USERDIR;
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox *M_MSGBOX_ADB_DELETE_ENTRY;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
@@ -1738,11 +1744,9 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
       // (suppressing it completely for the next time). As it's dangerous to
       // delete groups without confirmation, we only enable this for simple
       // entries, not groups.
-      wxString configPath;
-      if ( !m_current->IsGroup() ) {
-        // the place where we will store the users answer in config
-        configPath = "AdbDeleteEntry";
-      }
+      const MPersMsgBox *msgbox = m_current->IsGroup()
+                                    ? NULL
+                                    : M_MSGBOX_ADB_DELETE_ENTRY;
 
       // construct the message
       wxString msg;
@@ -1750,8 +1754,8 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
                  strWhat.c_str(), strName.c_str());
       if ( !MDialog_YesNoDialog(msg, this,
                                 _("Address book editor"),
-                                FALSE /* [No] default */,
-                                configPath) ) {
+                                M_DLG_NO_DEFAULT,
+                                msgbox) ) {
         wxLogStatus(this, _("Cancelled: '%s' not deleted."),
                     m_current->GetName().c_str());
         return;

@@ -88,12 +88,11 @@ ARG(STRING, message)
 
 FUNCTION(YesNoDialog, bool , (
 ARG(STRING, message), ARG(const wxWindow *, parent, =NULL),
-ARG(STRING, title, =MDIALOG_YESNOTITLE),
-ARG(bool, yesdefault, =true),
-ARG(STRING, configPath, =NULL) )
+ARG(STRING, title, =MDIALOG_YESNOTITLE)
+)
 ,
 `
-   return MDialog_YesNoDialog(message,parent,title,yesdefault, configPath);
+   return MDialog_YesNoDialog(message,parent,title);
 ')
 
 FUNCTION(StatusMessage, void , ( ARG(STRING, message) )

@@ -66,6 +66,14 @@ extern const MOption MP_BBDB_GENERATEUNIQUENAMES;
 extern const MOption MP_BBDB_IGNOREANONYMOUS;
 extern const MOption MP_BBDB_SAVEONEXIT;
 
+// ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox *M_MSGBOX_BBDB_SAVE_DIALOG;
+
+
+
 /** BBDB Addressbook format:
     Record Vectors
 ..............
@@ -739,7 +747,9 @@ BbdbEntryGroup::~BbdbEntryGroup()
          str.Printf(_("Save BBDB address book '%s'?\n"
                       "This might lead to loss of some of the original data."),
                     m_strName.c_str());
-         save = MDialog_YesNoDialog(str,NULL,_("BBDB"),true,"BbdbSaveDialog");
+         save = MDialog_YesNoDialog(str,NULL,_("BBDB"),
+                                    M_DLG_YES_DEFAULT,
+                                    M_MSGBOX_BBDB_SAVE_DIALOG);
          break;
       }
       case M_ACTION_ALWAYS:

@@ -88,7 +88,8 @@
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
-extern const MPersMsgBox M_MSGBOX_OPT_STOREREMOTENOW;
+extern const MPersMsgBox *M_MSGBOX_CONFIRM_EXIT;
+extern const MPersMsgBox *M_MSGBOX_OPT_STOREREMOTENOW;
 
 // ----------------------------------------------------------------------------
 // conditional compilation
@@ -3443,8 +3444,8 @@ bool wxOptionsPageSync::TransferDataFromWindow()
                  "Do you want to store the current setup now?"),
                this,
                _("Store settings now?"),
-               true,
-               GetPersMsgBoxName(M_MSGBOX_OPT_STOREREMOTENOW)
+               M_DLG_YES_DEFAULT,
+               M_MSGBOX_OPT_STOREREMOTENOW
               )
             )
          {
@@ -3547,7 +3548,8 @@ bool wxOptionsPageOthers::TransferDataToWindow()
    // these setting might be out of date - synchronize
 
    // TODO this should be table based too probably...
-   m_Profile->writeEntry(MP_CONFIRMEXIT, wxPMessageBoxEnabled(MP_CONFIRMEXIT));
+   m_Profile->writeEntry(GetPersMsgBoxName(M_MSGBOX_CONFIRM_EXIT),
+                           !wxPMessageBoxIsDisabled(MP_CONFIRMEXIT));
 
    bool rc = wxOptionsPage::TransferDataToWindow();
    if ( rc )
@@ -3570,8 +3572,8 @@ bool wxOptionsPageOthers::TransferDataFromWindow()
    {
       // now if the user checked "confirm exit" checkbox we must reenable
       // the message box by erasing the stored answer to it
-      wxPMessageBoxEnable(MP_CONFIRMEXIT,
-                          READ_CONFIG_BOOL(m_Profile, MP_CONFIRMEXIT));
+      if ( READ_CONFIG_BOOL(m_Profile, MP_CONFIRMEXIT) )
+         wxPMessageBoxEnable(GetPersMsgBoxName(M_MSGBOX_CONFIRM_EXIT));
 
       // restart the timer if the timeout changed
       long delayNew = READ_CONFIG(m_Profile, MP_AUTOSAVEDELAY);

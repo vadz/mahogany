@@ -77,6 +77,12 @@ extern const MOption MP_USERLEVEL;
 extern const MOption MP_USERNAME;
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox *M_MSGBOX_SAVE_PWD;
+
+// ----------------------------------------------------------------------------
 // global vars and functions
 // ----------------------------------------------------------------------------
 
@@ -980,7 +986,9 @@ MWizard_CreateFolder_ServerPage::TransferDataFromWindow()
                "very weak encryption. If you are concerned about security, leave it\n"
                "empty and Mahogany will prompt you for it whenever needed.");
       msg << _("\nDo you want to save the password anyway?");
-      if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE, true, "AskPwd") )
+      if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
+                               M_DLG_YES_DEFAULT,
+                               M_MSGBOX_SAVE_PWD) )
          params->m_Password = m_Password->GetValue();
    }
 

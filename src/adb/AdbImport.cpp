@@ -45,6 +45,12 @@
 #endif // USE_ADB_MODULES
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox *M_MSGBOX_CONFIRM_ADB_IMPORTER;
+
+// ----------------------------------------------------------------------------
 // function prototypes
 // ----------------------------------------------------------------------------
 
@@ -178,7 +184,8 @@ AdbImporter *FindImporter(const String& filename, AdbImporter *importer)
                     filename.c_str(), importer->GetFormatDesc());
 
          if ( !MDialog_YesNoDialog(msg, NULL, _("Address book import"),
-                                   FALSE, "ConfirmAdbImporter") )
+                                   M_DLG_NO_DEFAULT,
+                                   M_MSGBOX_CONFIRM_ADB_IMPORTER) )
          {
             // cancelled by user
             mApplication->SetLastError(M_ERROR_CANCEL);

@@ -73,6 +73,12 @@ static size_t GetBrowseButtonWidth(wxWindow *win);
 // the passed in string to contain just the label
 static wxArrayString SplitLabelWithChoices(wxString *label);
 
+// ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox *M_MSGBOX_OPT_TEST_ASK;
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -1354,8 +1360,8 @@ bool wxOptionsEditDialog::OnSettingsChange()
                                  "(recommended)?"),
                                this,
                                _("Test setup?"),
-                               true,
-                               "OptTestAsk") )
+                               M_DLG_YES_DEFAULT,
+                               M_MSGBOX_OPT_TEST_ASK) )
       {
          if ( !VerifyEMailSendingWorks() )
          {

@@ -159,10 +159,10 @@ extern const MOption MP_VERSION;
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
-extern const MPersMsgBox M_MSGBOX_RETRIEVE_REMOTE;
-extern const MPersMsgBox M_MSGBOX_STORE_REMOTE;
-extern const MPersMsgBox M_MSGBOX_OVERWRITE_REMOTE;
-extern const MPersMsgBox M_MSGBOX_CONFIG_SAVED_REMOTELY;
+extern const MPersMsgBox *M_MSGBOX_RETRIEVE_REMOTE;
+extern const MPersMsgBox *M_MSGBOX_STORE_REMOTE;
+extern const MPersMsgBox *M_MSGBOX_OVERWRITE_REMOTE;
+extern const MPersMsgBox *M_MSGBOX_CONFIG_SAVED_REMOTELY;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -1066,7 +1066,7 @@ bool InstallWizardServersPage::TransferDataFromWindow()
          check += _("\nDo you want to change these settings?");
          if( MDialog_YesNoDialog(check,this,
                                  _("Potentially wrong server names"),
-                                 true, NULL) )
+                                 M_DLG_YES_DEFAULT) )
             return false;
       }
    }
@@ -2836,7 +2836,7 @@ VerifyStdFolders(void)
               ),
              NULL,
              _("Collect mail from INBOX?"),
-             true
+             M_DLG_YES_DEFAULT
            ) )
       {
          collectFromInbox = true;
@@ -3251,11 +3251,15 @@ bool RetrieveRemoteConfigSettings(bool confirm)
       if ( !READ_APPCONFIG_BOOL(MP_SYNC_REMOTE) )
          return true; // nothing to do
 
-      if (! MDialog_YesNoDialog(
-         _("Retrieve remote configuration settings now?"), NULL,
-         _("Retrieve remote settings?"), true,
-               GetPersMsgBoxName(M_MSGBOX_RETRIEVE_REMOTE) ) )
+      if ( !MDialog_YesNoDialog
+            (
+             _("Retrieve remote configuration settings now?"), NULL,
+             _("Retrieve remote settings?"),
+             M_DLG_YES_DEFAULT,
+            M_MSGBOX_RETRIEVE_REMOTE ) )
+      {
            return true;
+      }
    }
 
    String foldername = READ_APPCONFIG(MP_SYNC_FOLDER);
@@ -3402,11 +3406,16 @@ bool SaveRemoteConfigSettings(bool confirm)
       if ( !READ_APPCONFIG_BOOL(MP_SYNC_REMOTE) )
          return true; // nothing to do
 
-      if (! MDialog_YesNoDialog(
-         _("Store remote configuration settings now?"), NULL,
-         _("Store remote settings?"), true,
-               GetPersMsgBoxName(M_MSGBOX_STORE_REMOTE) ) )
+      if ( !MDialog_YesNoDialog
+            (
+             _("Store remote configuration settings now?"), NULL,
+             _("Store remote settings?"),
+             M_DLG_YES_DEFAULT,
+             M_MSGBOX_STORE_REMOTE
+            ) )
+      {
            return true;
+      }
    }
 
    MFolder_obj folderSync(READ_APPCONFIG(MP_SYNC_FOLDER));
@@ -3451,14 +3460,16 @@ bool SaveRemoteConfigSettings(bool confirm)
       if(gs_RemoteSyncDate != 0 &&
          storedDate > gs_RemoteSyncDate)
       {
-         if (! MDialog_YesNoDialog(
-            _("The remotely stored configuration information seems to have changed\n"
-              "since it was retrieved.\n"
-              "Are you sure you want to overwrite it with the current settings?"),
-            NULL,
-            _("Overwrite remote settings?"),
-            true,
-            GetPersMsgBoxName(M_MSGBOX_OVERWRITE_REMOTE) ) )
+         if ( !MDialog_YesNoDialog
+               (
+                _("The remotely stored configuration information seems to have changed\n"
+                  "since it was retrieved.\n"
+                  "Are you sure you want to overwrite it with the current settings?"),
+                NULL,
+                _("Overwrite remote settings?"),
+                M_DLG_YES_DEFAULT,
+                M_MSGBOX_OVERWRITE_REMOTE
+               ) )
          {
             mf->DecRef();
             msg->DecRef();

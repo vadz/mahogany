@@ -62,7 +62,7 @@ extern const MOption MP_FOLDER_PATH;
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
-extern const MPersMsgBox M_MSGBOX_ADD_ALL_SUBFOLDERS;
+extern const MPersMsgBox *M_MSGBOX_ADD_ALL_SUBFOLDERS;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -1376,8 +1376,8 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
            "manually)?"),
          parent,
          wxString::Format(_("Subfolders of '%s'"), folder->GetPath().c_str()),
-         true, // [Yes] default
-         GetPersMsgBoxName(M_MSGBOX_ADD_ALL_SUBFOLDERS)
+         M_DLG_YES_DEFAULT,
+         M_MSGBOX_ADD_ALL_SUBFOLDERS
         )
       )
    {

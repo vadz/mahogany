@@ -115,6 +115,13 @@ extern const MOption MP_POPHOST;
 extern const MOption MP_USERLEVEL;
 extern const MOption MP_USERNAME;
 
+// ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox *M_MSGBOX_ASK_LOGIN;
+extern const MPersMsgBox *M_MSGBOX_ASK_PWD;
+
 // ============================================================================
 // private classes
 // ============================================================================
@@ -2331,28 +2338,33 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
             flags |= MF_FLAGS_ANON;
          else
          {
-            wxString what,    // what did the user forget to specify
-                     keyname; // for MDialog_YesNoDialog
+            wxString what;    // what did the user forget to specify
+
+            const MPersMsgBox *msgbox; // for MDialog_YesNoDialog
+
             if ( !loginName )
             {
                what = _("a login name");
-               keyname = "AskLogin";
+               msgbox = M_MSGBOX_ASK_LOGIN;
             }
             else if ( !password )
             {
                what = _("a password");
-               keyname = "AskPwd";
+               msgbox = M_MSGBOX_ASK_PWD;
             }
 
-            if ( !!what )
+            if ( !what.empty() )
             {
                wxString msg;
-               msg.Printf(_("You have not specified %s for this folder, although it requires one.\n"
-                        "Alternatively, you might want to select anonymous access.\n"
-                        "Would you like to change this now?"),
-                     what.c_str());
+               msg.Printf
+                   (
+                     _("You have not specified %s for this folder, although it requires one.\n"
+                       "Alternatively, you might want to select anonymous access.\n"
+                       "Would you like to change this now?"),
+                     what.c_str()
+                   );
 
-               if ( keyname == "AskPwd" )
+               if ( msgbox == M_MSGBOX_ASK_PWD )
                {
                   msg << _("\n\n"
                         "Notice that the password will be stored in your configuration with\n"
@@ -2361,7 +2373,8 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
                }
 
                if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
-                                        true, keyname) )
+                                        M_DLG_YES_DEFAULT,
+                                        msgbox) )
                {
                   return false;
                }

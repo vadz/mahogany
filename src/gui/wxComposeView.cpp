@@ -123,6 +123,18 @@ extern const MOption MP_USE_SENDMAIL;
 #endif // OS_UNIX
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox *M_MSGBOX_ASK_FOR_EXT_EDIT;
+extern const MPersMsgBox *M_MSGBOX_ASK_VCARD;
+extern const MPersMsgBox *M_MSGBOX_CONFIG_NET_FROM_COMPOSE;
+extern const MPersMsgBox *M_MSGBOX_FIX_TEMPLATE;
+extern const MPersMsgBox *M_MSGBOX_MIME_TYPE_CORRECT;
+extern const MPersMsgBox *M_MSGBOX_SEND_EMPTY_SUBJECT;
+extern const MPersMsgBox *M_MSGBOX_UNSAVED_PROMPT;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
@@ -1771,8 +1783,8 @@ wxComposeView::DoInitText(Message *mailmsg, MessageView *msgview)
                                     "you like to edit it now?"),
                                     this,
                                     MDIALOG_YESNOTITLE,
-                                    true,
-                                    "FixTemplate") )
+                                    M_DLG_YES_DEFAULT,
+                                    M_MSGBOX_FIX_TEMPLATE) )
          {
             // depending on whether we had the template from the beginning or
             // whether we use the standard one, we want to propose different
@@ -1840,7 +1852,8 @@ wxComposeView::DoInitText(Message *mailmsg, MessageView *msgview)
          {
             msg += _("\n\nWould you like to choose your vCard now?");
             if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
-                                     true, "AskForVCard") )
+                                     M_DLG_YES_DEFAULT,
+                                     M_MSGBOX_ASK_VCARD) )
             {
                wxString pattern;
                pattern << _("vCard files (*.vcf)|*.vcf") << '|' << wxALL_FILES;
@@ -2023,8 +2036,8 @@ wxComposeView::CanClose() const
                   _("There are unsaved changes, close anyway?"),
                   this, // parent
                   MDIALOG_YESNOTITLE,
-                  false, // "yes" not default
-                  "UnsavedCloseAnyway"
+                  M_DLG_NO_DEFAULT,
+                  M_MSGBOX_UNSAVED_PROMPT
                  );
    }
    else
@@ -2387,7 +2400,8 @@ bool wxComposeView::StartExternalEditor()
          String msg = _("Would you like to change the external "
                         "editor setting now?");
          if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
-                                  true, "AskForExtEdit") )
+                                  M_DLG_YES_DEFAULT,
+                                  M_MSGBOX_ASK_FOR_EXT_EDIT) )
          {
             if ( MInputBox(&extEdit,
                            _("Set up external editor"),
@@ -2560,13 +2574,13 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
    }
 
    String msg;
-   msg.Printf(_("File '%s' seems to contain data of\n"
-                "MIME type '%s'.\n"
+   msg.Printf(_("File '%s' seems to contain data of MIME type '%s'.\n"
+                "\n"
                 "Is this correct?"),
               filename.c_str(), strMimeType.c_str());
    if ( !MDialog_YesNoDialog( msg, this, _("Content MIME type"),
-                              true,
-                              GetProfile()->GetName()+"/MimeTypeCorrect") )
+                              M_DLG_YES_DEFAULT,
+                              M_MSGBOX_MIME_TYPE_CORRECT) )
    {
       wxString newtype = strMimeType;
       if(MInputBox(&newtype, _("MIME type"),
@@ -2746,8 +2760,8 @@ wxComposeView::IsReadyToSend() const
                     "change them now?"),
                   this,
                   MDIALOG_YESNOTITLE,
-                  true /* yes is default */,
-                  "ConfigNetFromCompose") )
+                  M_DLG_YES_DEFAULT,
+                  M_MSGBOX_CONFIG_NET_FROM_COMPOSE) )
          {
             ShowOptionsDialog((wxComposeView *)this, OptionsPage_Network);
          }
@@ -2792,8 +2806,8 @@ wxComposeView::IsReadyToSend() const
                  "to change it?"),
                this,
                MDIALOG_YESNOTITLE,
-               true /* yes is default */,
-               "SendemptySubject") )
+               M_DLG_YES_DEFAULT,
+               M_MSGBOX_SEND_EMPTY_SUBJECT) )
       {
          m_txtSubject->SetFocus();
 

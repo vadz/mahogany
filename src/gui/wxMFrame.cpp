@@ -97,6 +97,12 @@ extern const MOption MP_XPOS;
 extern const MOption MP_YPOS;
 
 // ----------------------------------------------------------------------------
+// persistent message boxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox *M_MSGBOX_GO_OFFLINE_SEND_FIRST;
+
+// ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
@@ -747,13 +753,18 @@ wxMFrame::OnMenuCommand(int id)
       case WXMENU_FILE_NET_OFF:
          if(mApplication->CheckOutbox())
          {
-            if ( MDialog_YesNoDialog(
-            _("You have outgoing messages queued.\n"
-              "Do you want to send them before going offline?"),
-            this,
-            MDIALOG_YESNOTITLE,
-            TRUE /* yes default */, "GoOfflineSendFirst") )
+            if ( MDialog_YesNoDialog
+                 (
+                  _("You have outgoing messages queued.\n"
+                    "Do you want to send them before going offline?"),
+                  this,
+                  MDIALOG_YESNOTITLE,
+                  M_DLG_YES_DEFAULT,
+                  M_MSGBOX_GO_OFFLINE_SEND_FIRST
+                 ) )
+            {
                mApplication->SendOutbox();
+            }
          }
          mApplication->GoOffline();
          break;

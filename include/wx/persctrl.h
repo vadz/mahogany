@@ -678,38 +678,54 @@ extern WXDLLMAYEXP wxString wxPDirSelector(const wxString& configPath,
 // Persistent (a.k.a. "don't remind me again") message boxes functions.
 //
 // This function shows to the user a message box with a "don't show this
-// message again" check box. If the user checks, it's state will be saved to
+// message again" check box. If the user checks it, its state will be saved to
 // the config object and the next call to this function will return the value
 // which was selected the last time (Yes/No/Ok/Cancel...) without showing the
 // message box at all.
 //
-// To reset it (i.e. make message box appear again) just delete the value
-// config key where the last value is stored. This key is specified by the
-// configPath parameter according to the following rules:
-//    1. If configPath is an absolute path, it's used as is
-//    2. If it's a relative path (i.e. doesn't start with '/'), it's appended
-//       to the default config path wxPControls::GetSettingsPath()
-//
-// The wontShowAgain parameter may be used to pass in a pointer to a bool which
-// will be true if the user checked the check box.
+// See wxPMessageBoxEnable() for how to reset it (i.e. make message box appear
+// again) later if needed. You may provide wontShowAgain pointer if you want to
+// know if the message box was disabled in the result of this call (i.e. it
+// will not be set to true if it had been already disabled before, use
+// wxPMessageBoxEnabled() for this).
 // ----------------------------------------------------------------------------
+
+// some additional style bits for the persistent message boxes
+//
+// they shouldn't conflict with the usual wxMessageDialog styles
+enum
+{
+    // initially check the "don't remind me again" checkbox
+    wxPMSGBOX_DISABLE   = 0x2000,
+
+    // don't allow disabling the message box on "No" value
+    wxPMSGBOX_NOT_ON_NO = 0x4000
+};
 
 extern WXDLLMAYEXP int wxPMessageBox(const wxString& configPath,
                                      const wxString& message,
                                      const wxString& caption,
                                      long style = wxYES_NO | wxICON_QUESTION,
                                      wxWindow *parent = NULL,
-                                     wxConfigBase *config = NULL);
+                                     wxConfigBase *config = NULL,
+                                     bool *wontShowAgain = NULL);
 
-// was the message box disabled?
-extern WXDLLMAYEXP bool wxPMessageBoxEnabled(const wxString& configPath,
-                                             wxConfigBase *config = NULL);
+// Return a non null value if the message box was previously disabled.
+//
+// The function can return wxYES, wxNO or wxOK if the message was disabled and
+// 0 otherwise.
+extern WXDLLMAYEXP int wxPMessageBoxIsDisabled(const wxString& configPath,
+                                               wxConfigBase *config = NULL);
 
 // make sure that the next call to wxPMessageBox(configPath) will show the
-// message box (by erasing the stored answer in it) or disable it to now
-// show the message box
+// message box (by erasing the stored answer in it)
 extern WXDLLMAYEXP void wxPMessageBoxEnable(const wxString& configPath,
-                                            bool enable = TRUE,
                                             wxConfigBase *config = NULL);
+
+// disable the given message box by storing the given value for it (i.e. it
+// will be returned by wxPMessageBox() call, must be wxYES/NO/OK)
+extern WXDLLMAYEXP void wxPMessageBoxDisable(const wxString& configPath,
+                                             int value,
+                                             wxConfigBase *config = NULL);
 
 #endif // _WX_PWINDOW_H_

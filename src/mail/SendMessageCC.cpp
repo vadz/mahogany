@@ -119,7 +119,7 @@ extern const MOption MP_SENDMAILCMD;
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
-extern const MPersMsgBox M_MSGBOX_SEND_OFFLINE;
+extern const MPersMsgBox *M_MSGBOX_SEND_OFFLINE;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -1261,8 +1261,8 @@ SendMessageCC::SendOrQueue(int flags)
                  "Do you still want to send it?"),
                m_frame,
                MDIALOG_MSGTITLE,
-               false, // [No] default
-               GetPersMsgBoxName(M_MSGBOX_SEND_OFFLINE)
+               M_DLG_NO_DEFAULT,
+               M_MSGBOX_SEND_OFFLINE
             ) )
       {
          return false;

@@ -37,6 +37,17 @@ class WXDLLEXPORT wxFrame;
 class WXDLLEXPORT wxStaticText;
 
 /**
+  Flags for MDialog_YesNoDialog()
+*/
+enum
+{
+   M_DLG_YES_DEFAULT = 0,        // default
+   M_DLG_NO_DEFAULT  = 0x1000,
+   M_DLG_DISABLE     = 0x2000,   // pre-check the "Don't ask again" checkbox
+   M_DLG_NOT_ON_NO   = 0x4000    // don't allow disabling on "No"
+};
+
+/**
    Dialog Boxes
 */
 
@@ -145,24 +156,28 @@ void   MDialog_FatalErrorMessage(char const *message,
 void   MDialog_Message(char const *message,
                        const wxWindow *parent = NULL,
                        char const *title = MDIALOG_MSGTITLE,
-                       const char *configPath = NULL);
+                       const char *configPath = NULL,
+                       int flags = 0);
 
-/** profile-aware Yes/No dialog: has a "don't show this message again" checkbox
-    and remembers in the profile if it had been checked to avoid showing this
-    dialog the next time.
-       @param message the text to display
-       @param parent   the parent frame
-       @param title   title for message box window
-       @param YesDefault true if Yes button is default, false for No as default
-       @param configPath the profile path to use (doesn't use profile if NULL)
+/** profile-aware Yes/No dialog: if persMsg is not NULL, it has a "don't show
+    this message again" checkbox and remembers in the profile if it had been
+    checked to avoid showing this dialog the next time.
 
-       @return true if Yes was selected
-   */
+    @param message the text to display
+    @param parent the parent frame
+    @param title title for message box window
+    @param flags combination of M_DLG_XXX values
+    @param persMsg the profile path to use (doesn't use profile if NULL)
+    @param folderName the name of the folder, global setting if NULL
+
+    @return true if yes was selected
+*/
 bool   MDialog_YesNoDialog(char const *message,
                            const wxWindow *parent = NULL,
                            char const *title = MDIALOG_YESNOTITLE,
-                           bool YesDefault = true,
-                           const char *configPath = NULL);
+                           int flags = M_DLG_YES_DEFAULT,
+                           const class MPersMsgBox *persMsg = NULL,
+                           const char *folderName = NULL);
 
 /** File requester dialog: asks user for a file name
        @param message the text to display

@@ -62,9 +62,9 @@
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
-extern const MPersMsgBox M_MSGBOX_FILTER_NOT_USED_YET;
-extern const MPersMsgBox M_MSGBOX_FILTER_CONFIRM_OVERWRITE;
-extern const MPersMsgBox M_MSGBOX_FILTER_REPLACE;
+extern const MPersMsgBox *M_MSGBOX_FILTER_NOT_USED_YET;
+extern const MPersMsgBox *M_MSGBOX_FILTER_CONFIRM_OVERWRITE;
+extern const MPersMsgBox *M_MSGBOX_FILTER_REPLACE;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -1194,8 +1194,8 @@ wxAllFiltersDialog::OnAddFiter(wxCommandEvent &event)
       if ( MDialog_YesNoDialog(msg,
                                this,
                                _("Filter is not used"),
-                               false /* yes default */,
-                               GetPersMsgBoxName(M_MSGBOX_FILTER_NOT_USED_YET)
+                               M_DLG_YES_DEFAULT,
+                               M_MSGBOX_FILTER_NOT_USED_YET
                               ) )
       {
          MFolder_obj folder(MDialog_FolderChoose(this));
@@ -1327,8 +1327,8 @@ wxAllFiltersDialog::DoCopyFilter(const wxString& nameOld,
       if ( !MDialog_YesNoDialog(msg,
                                 this,
                                 _("Overwrite filter?"),
-                                false /* no default */,
-                                GetPersMsgBoxName(M_MSGBOX_FILTER_CONFIRM_OVERWRITE)
+                                M_DLG_NO_DEFAULT,
+                                M_MSGBOX_FILTER_CONFIRM_OVERWRITE
                                ) )
       {
          // cancelled
@@ -1914,8 +1914,8 @@ static String CreateNewFilter(wxWindow *parent)
          msg.Printf(_("The filter '%s' already exists, do you want "
                       "to replace it?"), name.c_str());
          if ( !MDialog_YesNoDialog(msg, parent, _("Replace filter?"),
-                                   false,
-                                   GetPersMsgBoxName(M_MSGBOX_FILTER_REPLACE)) )
+                                   M_DLG_NO_DEFAULT,
+                                   M_MSGBOX_FILTER_REPLACE) )
          {
             return "";
          }

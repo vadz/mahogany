@@ -158,11 +158,11 @@ extern const MOption MP_TCP_SSHTIMEOUT;
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
-extern const MPersMsgBox M_MSGBOX_REMEMBER_PWD;
-extern const MPersMsgBox M_MSGBOX_KEEP_PWD;
-extern const MPersMsgBox M_MSGBOX_DIALUP_ON_OPEN_FOLDER;
-extern const MPersMsgBox M_MSGBOX_NET_DOWN_OPEN_ANYWAY;
-extern const MPersMsgBox M_MSGBOX_NO_NET_PING_ANYWAY;
+extern const MPersMsgBox *M_MSGBOX_REMEMBER_PWD;
+extern const MPersMsgBox *M_MSGBOX_KEEP_PWD;
+extern const MPersMsgBox *M_MSGBOX_DIALUP_ON_OPEN_FOLDER;
+extern const MPersMsgBox *M_MSGBOX_NET_DOWN_OPEN_ANYWAY;
+extern const MPersMsgBox *M_MSGBOX_NO_NET_PING_ANYWAY;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -1668,8 +1668,9 @@ void MailFolderCC::ProposeSavePassword()
            "(WARNING: don't do it if you are concerned about security)"),
          NULL,
          MDIALOG_YESNOTITLE,
-         TRUE, /* [Yes] default */
-         GetPersMsgBoxName(M_MSGBOX_REMEMBER_PWD)
+         M_DLG_YES_DEFAULT,
+         M_MSGBOX_REMEMBER_PWD,
+         GetName()
         ) )
    {
       // MFolder doesn't have methods to set them
@@ -1692,8 +1693,9 @@ void MailFolderCC::ProposeSavePassword()
                  "each time when the folder is accessed."),
                NULL,
                MDIALOG_YESNOTITLE,
-               TRUE, /* [Yes] default */
-               GetPersMsgBoxName(M_MSGBOX_KEEP_PWD)
+               M_DLG_YES_DEFAULT,
+               M_MSGBOX_KEEP_PWD,
+               GetName()
            ) )
       {
          SavePasswordForSession();
@@ -1928,9 +1930,9 @@ MailFolderCC::OpenFolder(const MFolder *mfolder,
                  mf->GetName().c_str());
 
       if ( MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE,
-                               TRUE /* [Yes] default */,
-                               mf->GetName()+ '/' +
-                               GetPersMsgBoxName(M_MSGBOX_DIALUP_ON_OPEN_FOLDER)))
+                               M_DLG_YES_DEFAULT,
+                               M_MSGBOX_DIALUP_ON_OPEN_FOLDER,
+                               mf->GetName()) )
       {
          mApplication->GoOnline();
       }
@@ -1940,9 +1942,9 @@ MailFolderCC::OpenFolder(const MFolder *mfolder,
          if ( !MDialog_YesNoDialog(_("Opening this folder will probably fail!\n"
                                      "Continue anyway?"),
                                    NULL, MDIALOG_YESNOTITLE,
-                                   FALSE /* [No] default */,
-                                   mf->GetName() + '/' +
-                                   GetPersMsgBoxName(M_MSGBOX_NET_DOWN_OPEN_ANYWAY)) )
+                                   M_DLG_NO_DEFAULT,
+                                   M_MSGBOX_NET_DOWN_OPEN_ANYWAY,
+                                   mf->GetName()) )
          {
              ok = FALSE;
 
@@ -2118,7 +2120,8 @@ MailFolderCC::CheckForFileLock()
                     "Some other process may be using the folder.\n"
                     "Shall I forcefully override the lock?"),
                     lockfile.c_str());
-         if(MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE, true))
+         if(MDialog_YesNoDialog(msg, NULL,
+                                MDIALOG_YESNOTITLE, M_DLG_YES_DEFAULT))
          {
             int success = remove(lockfile);
             if(success != 0) // error!
@@ -2904,8 +2907,10 @@ MailFolderCC::Ping(void)
             ),
             NULL,
             MDIALOG_YESNOTITLE,
-            false,
-            GetName() + '/' + GetPersMsgBoxName(M_MSGBOX_NO_NET_PING_ANYWAY))
+            M_DLG_NO_DEFAULT,
+            M_MSGBOX_NO_NET_PING_ANYWAY,
+            GetName()
+           )
         )
       {
          ForceClose();

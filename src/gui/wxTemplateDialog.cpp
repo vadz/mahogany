@@ -49,6 +49,13 @@
 #include "TemplateDialog.h"
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox *M_MSGBOX_DELETE_TEMPLATE;
+extern const MPersMsgBox *M_MSGBOX_SAVE_TEMPLATE;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
@@ -510,7 +517,9 @@ void wxFolderTemplatesDialog::OnListboxSelection(wxCommandEvent& event)
                    "'%s', would you like to save it?"),
                  gs_templateNames[m_kind]);
       if ( MDialog_YesNoDialog(msg, this,
-                               MDIALOG_YESNOTITLE, true, "SaveTemplate") )
+                               MDIALOG_YESNOTITLE,
+                               M_DLG_YES_DEFAULT,
+                               M_MSGBOX_SAVE_TEMPLATE) )
       {
          SaveChanges();
       }
@@ -733,7 +742,9 @@ void wxAllTemplatesDialog::CheckForChanges()
                    "would you like to save it?"),
                  m_name.c_str());
       if ( MDialog_YesNoDialog(msg, this,
-                               MDIALOG_YESNOTITLE, true, "SaveTemplate") )
+                               MDIALOG_YESNOTITLE,
+                               M_DLG_YES_DEFAULT,
+                               M_MSGBOX_SAVE_TEMPLATE) )
       {
          SaveChanges();
       }
@@ -773,7 +784,9 @@ void wxAllTemplatesDialog::OnDeleteTemplate(wxCommandEvent& event)
    msg.Printf(_("Do you really want to delete the template '%s'?"),
               m_name.c_str());
    if ( MDialog_YesNoDialog(msg, this,
-                            MDIALOG_YESNOTITLE, false, "DeleteTemplate") )
+                            MDIALOG_YESNOTITLE,
+                            M_DLG_NO_DEFAULT,
+                            M_MSGBOX_DELETE_TEMPLATE) )
    {
       m_listbox->Delete(m_listbox->GetSelection());
 

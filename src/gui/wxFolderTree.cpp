@@ -105,6 +105,12 @@ extern const MOption MP_OPEN_ON_CLICK;
 extern const MOption MP_SHOW_HIDDEN_FOLDERS;
 
 // ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox *M_MSGBOX_CONFIRM_FOLDER_DELETE;
+
+// ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
@@ -970,7 +976,7 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
 
    // by default, don't allow to suppress this question as deleting a whole
    // subtree of folders is something which should require confirmation
-   const char *configPath = NULL;
+   const MPersMsgBox *msgbox = NULL;
    wxString msg;
    if ( folder->GetSubfolderCount() > 0 )
    {
@@ -993,7 +999,7 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
       {
          // in this case the question can be suppressed as you don't lose much
          // by inadvertently answering "Yes" to it
-         configPath = "ConfirmFolderDelete";
+         msgbox = M_MSGBOX_CONFIRM_FOLDER_DELETE;
 
          msg.Printf(_("Do you really want to remove folder '%s'?"),
                     folder->GetFullName().c_str());
@@ -1009,8 +1015,8 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
    bool ok = MDialog_YesNoDialog(msg,
                                  m_tree->wxWindow::GetParent(),
                                  MDIALOG_YESNOTITLE,
-                                 false /* 'no' default */,
-                                 configPath);
+                                 M_DLG_NO_DEFAULT,
+                                 msgbox);
    if ( ok )
    {
       // close the folder first
@@ -1094,7 +1100,7 @@ void wxFolderTree::OnClear(MFolder *folder)
             msg,
             parent,
             _("Please confirm"),
-            false /* 'no' default */
+            M_DLG_NO_DEFAULT
          ) )
    {
       wxLogStatus(GetFrame(parent), _("No messages were deleted."));

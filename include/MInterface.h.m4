@@ -100,9 +100,8 @@ const char * message
 
 virtual bool  YesNoDialog (
 const char * message , const wxWindow * parent =NULL,
-const char * title =MDIALOG_YESNOTITLE,
-bool yesdefault =true,
-const char * configPath =NULL )
+const char * title =MDIALOG_YESNOTITLE
+)
  = 0;
 
 

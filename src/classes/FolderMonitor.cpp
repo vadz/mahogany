@@ -55,7 +55,7 @@ extern const MOption MP_POLLINCOMINGDELAY;
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
-extern const MPersMsgBox M_MSGBOX_SUSPENDAUTOCOLLECT;
+extern const MPersMsgBox *M_MSGBOX_SUSPENDAUTOCOLLECT;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -583,8 +583,8 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
                msg,
                NULL,
                _("Check for new mail failed"),
-               TRUE,
-               GetPersMsgBoxName(M_MSGBOX_SUSPENDAUTOCOLLECT)
+               M_DLG_YES_DEFAULT,
+               M_MSGBOX_SUSPENDAUTOCOLLECT
               ) )
          {
             i->SetState(Folder_Unaccessible);

@@ -28,20 +28,38 @@
 
 #include "Mpers.h"
 
+// ----------------------------------------------------------------------------
+// MPersMsgBox class
+// ----------------------------------------------------------------------------
+
+class MPersMsgBox
+{
+public:
+   MPersMsgBox();
+
+private:
+   // for GetPersMsgBoxName() only
+   size_t GetId() const { return m_id; }
+
+   size_t m_id;
+
+   friend String GetPersMsgBoxName(const MPersMsgBox *which);
+};
+
 // ============================================================================
 // data
 // ============================================================================
 
-// note that we need to declare the variable first as being extern and then
-// define it (this can't be done all at once - at least not without a dummy
-// ctor...) and we use an auxiliary header for this as we can't use just a
+// note that we need to first define the variable itself and then define a
+// pointer to it and we use an auxiliary header for this as we can't use just a
 // macro in this file because a macro expansion can't contain #ifdef but some
 // ids are only used in some configurations
-#define DECL_OR_DEF extern const
+#define DECL_OR_DEF(name) static const MPersMsgBox M_MSGBOX_OBJ_##name
 #include "MpersIds.h"
 
 #undef DECL_OR_DEF
-#define DECL_OR_DEF const
+#define DECL_OR_DEF(name) \
+   extern const MPersMsgBox *M_MSGBOX_##name = &M_MSGBOX_OBJ_##name
 #include "MpersIds.h"
 
 // the order of the entries in this array must match the order of the
@@ -56,9 +74,9 @@ static const struct
 #ifdef OS_UNIX
    { "AskRunAsRoot",             gettext_noop("warn if Mahogany is run as root") },
 #endif // OS_UNIX
-   { "SendOutboxOnExit",         gettext_noop("ask whether to send unsent messages on exit") },
+   { "SendOutboxOnExit",         gettext_noop("send unsent messages on exit") },
    { "AbandonCriticalFolders",   gettext_noop("prompt before abandoning critical folders ") },
-   { "GoOnlineToSendOutbox",     gettext_noop("ask whether to go online to send Outbox") },
+   { "GoOnlineToSendOutbox",     gettext_noop("go online to send Outbox") },
    { "FixTemplate",              gettext_noop("propose to fix template with errors") },
    { "AskForSig",                gettext_noop("ask for signature if none found") },
    { "UnsavedCloseAnyway",       gettext_noop("propose to save message before closing") },
@@ -66,21 +84,22 @@ static const struct
    { "AskForExtEdit",            gettext_noop("propose to change external editor settings if unset") },
    { "MimeTypeCorrect",          gettext_noop("ask confirmation for guessed MIME types") },
    { "ConfigNetFromCompose",     gettext_noop("propose to configure network settings before sending the message if necessary") },
-   { "SendemptySubject",         gettext_noop("ask confirmation before sending messages without subject") },
-   { "ConfirmFolderDelete",      gettext_noop("ask confirmation before removing folder from the folder tree") },
-   { "ConfirmFolderPhysDelete",  gettext_noop("ask confirmation before deleting folder with its contents") },
-   { "MarkRead",                 gettext_noop("ask whether to mark all articles as read before closing folder") },
+   { "SendemptySubject",         gettext_noop("confirm sending a message without subject") },
+   { "ConfirmFolderDelete",      gettext_noop("confirm removing folder from the folder tree") },
+   { "ConfirmFolderPhysDelete",  gettext_noop("confirm before deleting folder with its contents") },
+   { "MarkRead",                 gettext_noop("mark all articles as read before closing the folder") },
 #ifdef USE_DIALUP
    { "DialUpConnectedMsg",       gettext_noop("show notification on dial-up network connection") },
    { "DialUpDisconnectedMsg",    gettext_noop("show notification on dial-up network disconnection") },
    { "DialUpOnOpenFolder",       gettext_noop("propose to start dial up networking before trying to open a remote folder") },
    { "NetDownOpenAnyway",        gettext_noop("warn before opening remote folder while not being online") },
-   { "NoNetPingAnyway",          gettext_noop("ask whether to ping remote folders offline") },
+   { "NoNetPingAnyway",          gettext_noop("ping remote folders even while offline") },
 #endif // USE_DIALUP
-   // "ConfirmExit" is the same as MP_CONFIRMEXIT_NAME!
-   { "ConfirmExit",              gettext_noop("ask confirmation before exiting the program") },
-   { "AskLogin",                 gettext_noop("ask for the login name when opening the folder if required") },
-   { "AskPwd",                   gettext_noop("ask for the password when opening the folder if required") },
+   // "ConfirmExit" mist be same as MP_CONFIRMEXIT_NAME!
+   { "ConfirmExit",              gettext_noop("don't ask confirmation before exiting the program") },
+   { "AskLogin",                 gettext_noop("ask for the login name when creating the folder if required") },
+   { "AskPwd",                   gettext_noop("ask for the password when creating the folder if required") },
+   { "SavePwd",                  gettext_noop("ask confirmation before saving the password in the file") },
    { "GoOfflineSendFirst",       gettext_noop("propose to send outgoing messages before hanging up") },
    { "OpenUnaccessibleFolder",   gettext_noop("warn before trying to reopen folder which couldn't be opened the last time") },
    { "ChangeUnaccessibleFolderSettings", gettext_noop("propose to change settings of a folder which couldn't be opened the last time before reopening it") },
@@ -88,6 +107,7 @@ static const struct
    { "OptTestAsk",               gettext_noop("propose to test new settings after changing any important ones") },
    { "WarnRestartOpt",           gettext_noop("warn if some options changes don't take effect until program restart") },
    { "SaveTemplate",             gettext_noop("propose to save changed template before closing it") },
+   { "DeleteTemplate",           gettext_noop("ask for confirmation before deleting a template") },
    { "MailNoNetQueuedMessage",   gettext_noop("show notification if the message is queued in Outbox and not sent out immediately") },
    { "MailQueuedMessage",        gettext_noop("show notification for queued messages") },
    { "MailSentMessage",          gettext_noop("show notification for sent messages") },
@@ -101,8 +121,8 @@ static const struct
    { "RememberPwd",              gettext_noop("propose to permanently remember passwords entered interactively") },
    { "KeepPwd",                  gettext_noop("propose to keep passwords entered interactively for the duration of this session") },
    { "ShowLogWinHint",           gettext_noop("show the hint about reopening the log window when it is being closed") },
-   { "AutoExpunge",              gettext_noop("ask to expunge deleted messages before closing the folder") },
-   { "SuspendAutoCollectFolder", gettext_noop("ask to suspend auto-collecting messages from failed incoming folder") },
+   { "AutoExpunge",              gettext_noop("expunge deleted messages before closing the folder") },
+   { "SuspendAutoCollectFolder", gettext_noop("suspend auto-collecting messages from failed incoming folder") },
 #if 0 // unused any more
    { "RulesMismatchWarn1",       gettext_noop("Warning that filter rules do not match dialog")},
    { "RulesMismatchWarn2",       gettext_noop("Warning that filter rules have been edited") },
@@ -110,12 +130,12 @@ static const struct
    { "FilterReplace",            gettext_noop("ask whether to replace filter when adding a new filter") },
    { "AddAllSubfolders",         gettext_noop("create all subfolders automatically instead of browsing them") },
 
-   { "StoreRemoteNow",           gettext_noop("question whether to store remote configuration from options dialog") },
-   { "GetRemoteNow",             gettext_noop("question whether to retrieve remote configuration from options dialog") },
+   { "StoreRemoteNow",           gettext_noop("store remote configuration from options dialog") },
+   { "GetRemoteNow",             gettext_noop("retrieve remote configuration from options dialog") },
    { "OverwriteRemote",          gettext_noop("ask before overwriting remote configuration settings") },
-   { "RetrieveRemote",           gettext_noop("question whether to retrieve remote settings at startup") },
-   { "StoreRemote",              gettext_noop("question whether to store remote settings at shutdown") },
-   { "StoredRemote",             gettext_noop("confirmation that remote config was saved") },
+   { "RetrieveRemote",           gettext_noop("retrieve remote settings at startup") },
+   { "StoreRemote",              gettext_noop("store remote settings at shutdown") },
+   { "StoredRemote",             gettext_noop("show confirmation after remote config was saved") },
 
    { "ExplainGlobalPasswd",      gettext_noop("show explanation before asking for global password") },
    { "FilterNotUsedYet",         gettext_noop("warn that newly created filter is unused") },
@@ -124,12 +144,14 @@ static const struct
    { "MoveExpungeConfirm",       gettext_noop("confirm expunging messages after moving") },
    { "ApplyQuickFilter",         gettext_noop("propose to apply quick filter after creation") },
    { "BrowseImapServers",        gettext_noop("propose to get all folders from IMAP server") },
-   { "GfxNotInlined",            gettext_noop("ask if big images should be inlined") },
+   { "GfxNotInlined",            gettext_noop("inline the big images") },
    { "EditOnOpenFail",           gettext_noop("propose to edit folder settings if opening it failed") },
    { "ExplainColClick",          gettext_noop("give explanation when clicking on a column in the folder view") },
    { "ViewerBarTip",             gettext_noop("give tip about reenabling the viewer bar when closing it") },
-   { "EmptyTrashOnExit",         gettext_noop("ask whether to purge trash folder on exit") },
+   { "EmptyTrashOnExit",         gettext_noop("purge trash folder on exit") },
    { "SendOffline",              gettext_noop("send mail when the system is offline") },
+   { "AskForVCard",              gettext_noop("propose to attach a vCard if none specified") },
+   { "ReenableHint",             gettext_noop("hint about how to reenable disabled message boxes") },
 };
 
 // ============================================================================
@@ -162,12 +184,14 @@ MPersMsgBox::MPersMsgBox()
 // ----------------------------------------------------------------------------
 
 /// return the name to use for the given persistent msg box
-extern String GetPersMsgBoxName(const MPersMsgBox& which)
+extern String GetPersMsgBoxName(const MPersMsgBox *which)
 {
-   ASSERT_MSG( M_MSGBOX_MAX.GetId() == WXSIZEOF(gs_persMsgBoxData),
+   ASSERT_MSG( M_MSGBOX_MAX->GetId() == WXSIZEOF(gs_persMsgBoxData),
                "should be kept in sync!" );
 
-   return gs_persMsgBoxData[which.GetId()].name;
+   CHECK( which, "", "NULL pointer in GetPersMsgBoxName" );
+
+   return gs_persMsgBoxData[which->GetId()].name;
 }
 
 /// return a user-readable description of the pers msg box with given name
@@ -191,3 +215,4 @@ extern String GetPersMsgBoxHelp(const String& name)
    return s;
 }
 
+/* vi: set tw=0: */

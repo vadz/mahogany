@@ -46,7 +46,7 @@
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
-extern const MPersMsgBox M_MSGBOX_IMPORT_FOLDERS_UNDER_ROOT;
+extern const MPersMsgBox *M_MSGBOX_IMPORT_FOLDERS_UNDER_ROOT;
 
 // ----------------------------------------------------------------------------
 // array classes
@@ -284,8 +284,8 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
                   msg,
                   this,
                   _("Import Folders"),
-                  true /* yes default */,
-                  GetPersMsgBoxName(M_MSGBOX_IMPORT_FOLDERS_UNDER_ROOT)
+                  M_DLG_YES_DEFAULT,
+                  M_MSGBOX_IMPORT_FOLDERS_UNDER_ROOT
               ) )
          {
             folderParent = MDialog_FolderChoose(this);

@@ -140,13 +140,12 @@ const char * message
 
 virtual bool  YesNoDialog (
 const char * message, const wxWindow * parent,
-const char * title,
-bool yesdefault,
-const char * configPath )
+const char * title
+)
 
 {
 
-   return MDialog_YesNoDialog(message,parent,title,yesdefault, configPath);
+   return MDialog_YesNoDialog(message,parent,title);
 
 }
 

@@ -115,7 +115,8 @@ extern const MOption MP_USE_OUTBOX;
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
-extern const MPersMsgBox M_MSGBOX_SHOWLOGWINHINT;
+extern const MPersMsgBox *M_MSGBOX_CONFIRM_EXIT;
+extern const MPersMsgBox *M_MSGBOX_SHOWLOGWINHINT;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -306,17 +307,26 @@ bool wxMLogWindow::IsShown() const
 
 bool wxMLogWindow::OnFrameClose(wxFrame *frame)
 {
-   // disable the log window
-   mApplication->GetProfile()->writeEntry(MP_SHOWLOG, 0l);
-
-   MDialog_Message(_("You have closed the log window and it will not be "
-                     "opened automatically again any more.\n"
-                     "To make it appear again, you should change the "
-                     "corresponding setting in the\n"
-                     "'Miscellaneous' page of the Preferences dialog."),
-                   NULL,
-                   MDIALOG_MSGTITLE,
-                   GetPersMsgBoxName(M_MSGBOX_SHOWLOGWINHINT));
+   if ( !MDialog_YesNoDialog
+        (
+         _("Would you like to close the log window only for the rest "
+           "of this session or permanently?\n"
+           "\n"
+           "Note that in either case you may make it appear again by "
+           "changing the corresponding\n"
+           "setting in the 'Miscellaneous' page of the Preferences dialog.\n"
+           "\n"
+           "Choose \"Yes\" to close the log window just for this "
+           "session, \"No\" - to permanently close it."),
+         NULL,
+         MDIALOG_MSGTITLE,
+         M_DLG_YES_DEFAULT,
+         M_MSGBOX_SHOWLOGWINHINT
+        ) )
+   {
+      // disable the log window permanently
+      mApplication->GetProfile()->writeEntry(MP_SHOWLOG, 0l);
+   }
 
    return wxLogWindow::OnFrameClose(frame); // TRUE, normally
 }
@@ -518,14 +528,16 @@ wxMApp::CanClose() const
    // verify that the user didn't accidentally remembered "No" as the answer to
    // the next message box - the problem with this is that in this case there
    // is no way to exit M at all!
-   if ( !wxPMessageBoxEnabled(MP_CONFIRMEXIT) )
+   String path = GetPersMsgBoxName(M_MSGBOX_CONFIRM_EXIT);
+   if ( wxPMessageBoxIsDisabled(path) )
    {
-      if ( !MDialog_YesNoDialog("", NULL, "", false, MP_CONFIRMEXIT) )
+      if ( !MDialog_YesNoDialog("", NULL, "",
+                                M_DLG_NO_DEFAULT, M_MSGBOX_CONFIRM_EXIT) )
       {
          wxLogDebug("Exit confirmation msg box has been disabled on [No], "
                     "reenabling it.");
 
-         wxPMessageBoxEnable(MP_CONFIRMEXIT, true);
+         wxPMessageBoxEnable(path);
       }
       //else: it was on [Yes], ok
    }
@@ -534,8 +546,8 @@ wxMApp::CanClose() const
    if ( !MDialog_YesNoDialog(_("Do you really want to exit Mahogany?"),
                               m_topLevelFrame,
                               MDIALOG_YESNOTITLE,
-                              false,
-                              MP_CONFIRMEXIT) )
+                              M_DLG_YES_DEFAULT | M_DLG_NOT_ON_NO,
+                              M_MSGBOX_CONFIRM_EXIT) )
    {
       return false;
    }

@@ -43,26 +43,10 @@
 class MPersMsgBox;
 
 /// return the name (== config path) to use for the given persistent msg box
-extern String GetPersMsgBoxName(const MPersMsgBox& which);
+extern String GetPersMsgBoxName(const MPersMsgBox *which);
 
 /// return the help string to use for the message box with this name
 extern String GetPersMsgBoxHelp(const String& name);
-
-// note that we have to define it here to be able to declare the variable of
-// this type but that the class definition should not be used by the clients
-class MPersMsgBox
-{
-public:
-   MPersMsgBox();
-
-private:
-   // for GetPersMsgBoxName() only
-   size_t GetId() const { return m_id; }
-
-   size_t m_id;
-
-   friend String GetPersMsgBoxName(const MPersMsgBox& which);
-};
 
 #endif // _MPERS_H
 

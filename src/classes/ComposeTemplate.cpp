@@ -74,7 +74,8 @@ extern const MOption MP_WRAPMARGIN;
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
-extern const MPersMsgBox M_MSGBOX_SIGNATURE_LENGTH;
+extern const MPersMsgBox *M_MSGBOX_SIGNATURE_LENGTH;
+extern const MPersMsgBox *M_MSGBOX_ASK_FOR_SIG;
 
 // ----------------------------------------------------------------------------
 // the classes which are used together with compose view - we have here a
@@ -1241,7 +1242,8 @@ String VarExpander::GetSignature() const
             msg += _("\n\nWould you like to choose your signature "
                      "right now (otherwise no signature will be used)?");
             if ( MDialog_YesNoDialog(msg, m_cv.GetFrame(), MDIALOG_YESNOTITLE,
-                                     true, "AskForSig") )
+                                     M_DLG_YES_DEFAULT,
+                                     M_MSGBOX_ASK_FOR_SIG) )
             {
                strSignFile = wxPFileSelector("sig",
                                              _("Choose signature file"),

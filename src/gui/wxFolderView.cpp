@@ -140,14 +140,14 @@ extern const MOption MP_USE_TRASH_FOLDER;
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
 
-extern const MPersMsgBox M_MSGBOX_VIEWER_BAR_TIP;
-extern const MPersMsgBox M_MSGBOX_EXPLAIN_COLUMN_CLICK;
-extern const MPersMsgBox M_MSGBOX_MARK_READ;
-extern const MPersMsgBox M_MSGBOX_BROWSE_IMAP_SERVERS;
-extern const MPersMsgBox M_MSGBOX_OPEN_UNACCESSIBLE_FOLDER;
-extern const MPersMsgBox M_MSGBOX_CHANGE_UNACCESSIBLE_FOLDER_SETTINGS;
-extern const MPersMsgBox M_MSGBOX_EDIT_FOLDER_ON_OPEN_FAIL;
-extern const MPersMsgBox M_MSGBOX_APPLY_QUICK_FILTER_NOW;
+extern const MPersMsgBox *M_MSGBOX_APPLY_QUICK_FILTER_NOW;
+extern const MPersMsgBox *M_MSGBOX_BROWSE_IMAP_SERVERS;
+extern const MPersMsgBox *M_MSGBOX_CHANGE_UNACCESSIBLE_FOLDER_SETTINGS;
+extern const MPersMsgBox *M_MSGBOX_EDIT_FOLDER_ON_OPEN_FAIL;
+extern const MPersMsgBox *M_MSGBOX_EXPLAIN_COLUMN_CLICK;
+extern const MPersMsgBox *M_MSGBOX_MARK_READ;
+extern const MPersMsgBox *M_MSGBOX_OPEN_UNACCESSIBLE_FOLDER;
+extern const MPersMsgBox *M_MSGBOX_VIEWER_BAR_TIP;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -3196,15 +3196,6 @@ wxFolderView::SelectInitialMessage()
 // wxFolderView profile stuff (options support, ...)
 // ----------------------------------------------------------------------------
 
-String wxFolderView::GetFullPersistentKey(MPersMsgBox key)
-{
-   String s;
-   s << Profile::FilterProfileName(m_fullname)
-     << '/'
-     << GetPersMsgBoxName(key);
-   return s;
-}
-
 void
 wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
 {
@@ -3386,8 +3377,9 @@ wxFolderView::Clear(bool keepTheViewer)
                      msg,
                      m_Frame,
                      MDIALOG_YESNOTITLE,
-                     true,
-                     GetFullPersistentKey(M_MSGBOX_MARK_READ)
+                     M_DLG_YES_DEFAULT,
+                     M_MSGBOX_MARK_READ,
+                     m_fullname
                     ) )
                {
                   m_ASMailFolder->SetFlagForAll(MailFolder::MSG_STAT_DELETED);
@@ -3544,8 +3536,8 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
                "the folder tree unconditionally."),
              m_Frame,
              MDIALOG_YESNOTITLE,
-             true,
-             GetFullPersistentKey(M_MSGBOX_BROWSE_IMAP_SERVERS)
+             M_DLG_YES_DEFAULT,
+             M_MSGBOX_BROWSE_IMAP_SERVERS
            ) )
       {
          // create all folders under the IMAP server
@@ -3586,8 +3578,9 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
             ),
             m_Frame,
             MDIALOG_YESNOTITLE,
-            false, // [No] default
-            GetPersMsgBoxName(M_MSGBOX_OPEN_UNACCESSIBLE_FOLDER)
+            M_DLG_NO_DEFAULT,
+            M_MSGBOX_OPEN_UNACCESSIBLE_FOLDER,
+            m_fullname
            ) )
       {
          // no, we don't want to open it again
@@ -3601,8 +3594,9 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
               "settings before trying to open it?"),
             m_Frame,
             MDIALOG_YESNOTITLE,
-            false,
-            GetPersMsgBoxName(M_MSGBOX_CHANGE_UNACCESSIBLE_FOLDER_SETTINGS)
+            M_DLG_NO_DEFAULT,
+            M_MSGBOX_CHANGE_UNACCESSIBLE_FOLDER_SETTINGS,
+            m_fullname
          ) )
       {
          // invoke the folder properties dialog
@@ -3667,9 +3661,10 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
             folder->AddFlags(MF_FLAGS_UNACCESSIBLE);
 
             // propose to show the folder properties dialog right here
-            String key =
-               GetFullPersistentKey(M_MSGBOX_EDIT_FOLDER_ON_OPEN_FAIL);
-            if ( wxPMessageBoxEnabled(key) )
+            String key = GetPersMsgBoxName(M_MSGBOX_EDIT_FOLDER_ON_OPEN_FAIL);
+            if ( !wxPMessageBoxIsDisabled(key) &&
+                  !wxPMessageBoxIsDisabled(
+                     Profile::FilterProfileName(m_fullname) + '/' + key) )
             {
                // flush the error messages from the MailFolder::Open() before
                // showing the dialog
@@ -3682,8 +3677,9 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
                                       m_fullname.c_str()),
                      m_Frame,
                      MDIALOG_YESNOTITLE,
-                     true,
-                     key
+                     M_DLG_YES_DEFAULT,
+                     M_MSGBOX_EDIT_FOLDER_ON_OPEN_FAIL,
+                     m_fullname
                     ) )
                {
                   MDialog_FolderProfile(m_Frame, m_fullname);
@@ -4582,8 +4578,9 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                              "created to this message immediately?"),
                            m_Frame,
                            MDIALOG_YESNOTITLE,
-                           true,
-                           GetFullPersistentKey(M_MSGBOX_APPLY_QUICK_FILTER_NOW)
+                           M_DLG_YES_DEFAULT,
+                           M_MSGBOX_APPLY_QUICK_FILTER_NOW,
+                           m_fullname
                           ) )
                      {
                         UIdArray selections;
