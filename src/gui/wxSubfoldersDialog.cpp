@@ -59,6 +59,9 @@ enum
    Button_UnselectAll
 };
 
+// how often to update the progress display?
+static const int PROGRESS_THRESHOLD = 10;
+
 // ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
@@ -248,6 +251,8 @@ class ListFolderEventReceiver : public MEventReceiver
 public:
    ListFolderEventReceiver()
    {
+      m_progressInfo = NULL;
+
       m_regCookie = MEventManager::Register(*this, MEventId_ASFolderResult);
    }
 
@@ -555,7 +560,8 @@ wxTreeItemId wxSubfoldersTree::OnNewFolder(String& name)
    }
 
    // update the progress indicator from time to time
-   if ( !(m_nFoldersRetrieved % 100) )
+   if ( (m_nFoldersRetrieved < PROGRESS_THRESHOLD) ||
+         !(m_nFoldersRetrieved % PROGRESS_THRESHOLD) )
    {
       m_progressInfo->SetValue(m_nFoldersRetrieved);
    }
@@ -1101,6 +1107,10 @@ size_t ListFolderEventReceiver::AddAllFolders(MFolder *folder,
    m_nFoldersRetrieved = 0u;
    m_finished = false;
 
+   m_progressInfo = new MProgressInfo(NULL,
+                                      _("Retrieving the folder list: "));
+   wxYield(); // to show the frame
+
    (void)mailFolder->ListFolders
                      (
                         "*",         // everything
@@ -1115,6 +1125,9 @@ size_t ListFolderEventReceiver::AddAllFolders(MFolder *folder,
       wxYield();
    }
    while ( !m_finished );
+
+   // clean up
+   delete m_progressInfo;
 
    m_folder->DecRef();
 
@@ -1172,16 +1185,10 @@ bool ListFolderEventReceiver::OnMEvent(MEventData& event)
       // count the number of folders retrieved and show progress
       m_nFoldersRetrieved++;
 
-      // create the progress indicator if there are many folders and it hadn't
-      // been yet created
-      if ( m_nFoldersRetrieved > 20 && !m_progressInfo )
-      {
-         m_progressInfo = new MProgressInfo(NULL,
-                                            _("Retrieving the folder list: "));
-      }
-
-      // update the progress indicator from time to time
-      if ( !(m_nFoldersRetrieved % 100) )
+      // update the progress indicator from time to time (but often in the
+      // beginning)
+      if ( (m_nFoldersRetrieved < PROGRESS_THRESHOLD) ||
+             !(m_nFoldersRetrieved % PROGRESS_THRESHOLD) )
       {
          m_progressInfo->SetValue(m_nFoldersRetrieved);
       }
