@@ -359,6 +359,7 @@ void LayoutEditor::SetEncoding(wxFontEncoding encoding)
 void LayoutEditor::MoveCursorTo(unsigned long x, unsigned long y)
 {
    m_LayoutWindow->GetLayoutList()->MoveCursorTo(wxPoint(x, y));
+   m_LayoutWindow->ScrollToCursor();
 }
 
 void LayoutEditor::MoveCursorBy(long x, long y)
@@ -366,6 +367,7 @@ void LayoutEditor::MoveCursorBy(long x, long y)
    wxLayoutList *llist = m_LayoutWindow->GetLayoutList();
    llist->MoveCursorVertically(y);
    llist->MoveCursorHorizontally(x);
+   m_LayoutWindow->ScrollToCursor();
 }
 
 void LayoutEditor::SetFocus()
@@ -425,7 +427,8 @@ void LayoutEditor::InsertAttachment(const wxBitmap& icon, EditorContentPart *mc)
    data->DecRef();
 
    m_LayoutWindow->GetLayoutList()->Insert(obj);
-
+   m_LayoutWindow->ResizeScrollbars(true /* exactly */);
+   m_LayoutWindow->ScrollToCursor();
    m_LayoutWindow->Refresh();
 }
 
@@ -484,13 +487,8 @@ void LayoutEditor::InsertText(const String& text, InsertMode insMode)
 
    // now insert the new text
    wxLayoutImportText(m_LayoutWindow->GetLayoutList(), text);
-   m_LayoutWindow->ResizeScrollbars(true);
    m_LayoutWindow->SetModified();
    m_LayoutWindow->SetDirty();
-
-   // FIXME: what, if either, should be done here?
-   m_LayoutWindow->Refresh();
-   //m_LayoutWindow->GetLayoutList()->ForceTotalLayout();
 
    // and insert the non-text objects back if we had removed them
    if ( listNonTextObjects )
@@ -506,6 +504,10 @@ void LayoutEditor::InsertText(const String& text, InsertMode insMode)
             layoutList->Insert(exp->content.object->Copy());
       delete listNonTextObjects;
    }
+
+   m_LayoutWindow->ResizeScrollbars(true /* exactly */);
+   m_LayoutWindow->ScrollToCursor();
+   m_LayoutWindow->Refresh();
 }
 
 // ----------------------------------------------------------------------------
