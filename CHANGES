@@ -6,7 +6,12 @@
       See at the end of file for the list of contributors (initials appearing
       in the second column of the changelog below).
 
-Release 0.66 'Clio' January 18 2004
+Release 0.66 '???' ??? ??, 2004
+------------------------------------
+
+13.03.04 VZ: folders can now be dragged in the tree to change their order
+
+Release 0.66 'Clio' January 18, 2004
 ------------------------------------
 
 17.01.04 VZ: added --userdir command line option

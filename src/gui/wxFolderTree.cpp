@@ -338,7 +338,9 @@ public:
       // update the tree colours
    void UpdateColours();
 
-   // callbacks
+   // tree event handlers
+   // -------------------
+
    void OnKeyDown(wxTreeEvent& event);
    void OnChar(wxKeyEvent& event);
 
@@ -355,6 +357,9 @@ public:
       { if ( !OnDoubleClick() ) event.Skip(); }
    void OnBeginLabelEdit(wxTreeEvent&);
    void OnEndLabelEdit(wxTreeEvent&);
+
+   void OnTreeBeginDrag(wxTreeEvent& event);
+   void OnTreeEndDrag(wxTreeEvent& event);
 
    void OnIdle(wxIdleEvent& event);
 
@@ -381,6 +386,18 @@ public:
    wxFolderTreeNode *GetFolderTreeNode(const wxTreeItemId& item) const
    {
       return (wxFolderTreeNode *)GetItemData(item);
+   }
+
+   // (safely) get the folder from item id
+   MFolder *GetFolderFromTreeItem(const wxTreeItemId& item) const
+   {
+      wxFolderTreeNode *node = GetFolderTreeNode(item);
+      CHECK( node, NULL, _T("tree item without associated data?") );
+
+      MFolder *folder = node->GetFolder();
+      ASSERT_MSG( folder, _T("tree node without associated folder?") );
+
+      return folder;
    }
 
 protected:
@@ -431,7 +448,7 @@ protected:
    // are we editing an item in place?
    bool IsEditingInPlace() const;
 
-   // reexpand branch - called when something in the tree changes
+   // reexpand branch -- called when something in the tree changes
    void ReopenBranch(wxTreeItemId parent);
 
    // returns true if the given node has hidden flag set in the profile
@@ -451,6 +468,18 @@ protected:
 
    // get the next/previouos item after/before this one
    wxTreeItemId GetNextItem(wxTreeItemId id, bool next = true) const;
+
+   // reposition the src folder between its two siblings, the caller must call
+   // ReopenBranch() to refresh the tree if wanted
+   //
+   // idBefore may be invalid, the other 2 are always valid
+   void MoveFolderBetween(wxTreeItemId id,
+                          wxTreeItemId idBefore,
+                          wxTreeItemId idAfter) const;
+
+   // MoveFolderBetween() helpers, see comments in them
+   int SetIndicesBefore(wxTreeItemId id) const;
+   int OffsetIndicesAfter(wxTreeItemId id) const;
 
 private:
    class FolderMenu : public wxMenu
@@ -578,6 +607,10 @@ private:
 
    // the temporarily saved suffix part of the tree item label being edited
    wxString m_suffix;
+
+
+   // the item currently being dragged or invalid item
+   wxTreeItemId m_idDragged;
 
 #ifdef USE_TREE_ACTIVATE_BUGFIX
    bool MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result);
@@ -710,6 +743,9 @@ BEGIN_EVENT_TABLE(wxFolderTreeImpl, wxPTreeCtrl)
    EVT_TREE_ITEM_ACTIVATED(-1, wxFolderTreeImpl::OnTreeActivate)
    EVT_TREE_BEGIN_LABEL_EDIT(-1, wxFolderTreeImpl::OnBeginLabelEdit)
    EVT_TREE_END_LABEL_EDIT(-1,   wxFolderTreeImpl::OnEndLabelEdit)
+
+   EVT_TREE_BEGIN_DRAG(-1, wxFolderTreeImpl::OnTreeBeginDrag)
+   EVT_TREE_END_DRAG(-1, wxFolderTreeImpl::OnTreeEndDrag)
 
    EVT_RIGHT_DOWN(wxFolderTreeImpl::OnRightDown)
 #ifdef USE_MIDDLE_CLICK_HACK
@@ -2442,6 +2478,257 @@ bool wxFolderTreeImpl::IsEditingInPlace() const
 #endif // MSW
 
    return false;
+}
+
+// ----------------------------------------------------------------------------
+// dragging items in the tree
+// ----------------------------------------------------------------------------
+
+// this function sets tree positions for all the siblings of the given folder
+// up to and including it and returns the new index of idThis
+int wxFolderTreeImpl::SetIndicesBefore(wxTreeItemId idThis) const
+{
+   static const int idxInvalid = GetNumericDefault(MP_FOLDER_TREEINDEX);
+
+   const wxTreeItemId idParent = GetItemParent(idThis);
+
+   int idxThis = 0;
+
+   wxTreeItemIdValue cookie;
+   wxTreeItemId id = GetFirstChild(idParent, cookie);
+   while ( id.IsOk() )
+   {
+      MFolder * const folder = GetFolderFromTreeItem(id);
+      if ( !folder )
+         return idxInvalid;
+
+      int idx = folder->GetTreeIndex();
+      if ( idx != idxInvalid )
+      {
+         // so far, so good: remember the highest previous index
+         ASSERT_MSG( idx >= idxThis, _T("inconsistent tree index values!") );
+
+         idxThis = idx;
+      }
+      else // item without defined position in the tree
+      {
+         // set it now
+         folder->SetTreeIndex(++idxThis);
+      }
+
+      if ( id == idThis )
+         break;
+
+      id = GetNextChild(idParent, cookie);
+   }
+
+   return idxThis;
+}
+
+// this functions moves up the tree positions of all the folders starting
+// (inclusively) from the given one and returns the new index of idThis
+int wxFolderTreeImpl::OffsetIndicesAfter(wxTreeItemId idThis) const
+{
+   static const int idxInvalid = GetNumericDefault(MP_FOLDER_TREEINDEX);
+
+   const wxTreeItemId idParent = GetItemParent(idThis);
+
+   wxTreeItemId id = GetLastChild(idParent);
+   while ( id.IsOk() )
+   {
+      MFolder * const folder = GetFolderFromTreeItem(id);
+      if ( !folder )
+         return idxInvalid;
+
+      int idx = folder->GetTreeIndex();
+      if ( idx != idxInvalid )
+      {
+         // bump the index up
+         folder->SetTreeIndex(idx + 1);
+      }
+      //else: nothing to do, leave it at the end of all the other items
+
+      if ( id == idThis )
+      {
+         // done, alll indices from this item up to the end are offset
+         ASSERT_MSG( idx != idxInvalid, _T("logic error") );
+
+         return idx + 1;
+      }
+
+      id = GetPrevSibling(id);
+   }
+
+   return idxInvalid;
+}
+
+void
+wxFolderTreeImpl::MoveFolderBetween(wxTreeItemId id,
+                                    wxTreeItemId idBefore,
+                                    wxTreeItemId idAfter) const
+{
+   static const int idxInvalid = GetNumericDefault(MP_FOLDER_TREEINDEX);
+
+   // the (new) index of the folder, must be in ]idxBefore, idxAfter[
+   int idx = idxInvalid;
+
+   const MFolder * const folderAfter = GetFolderFromTreeItem(idAfter);
+   if ( !folderAfter )
+      return;
+
+   int idxAfter = folderAfter->GetTreeIndex();
+   if ( idxAfter == idxInvalid )
+   {
+      if ( idBefore.IsOk() )
+      {
+         const MFolder * const folderBefore = GetFolderFromTreeItem(idBefore);
+         if ( !folderBefore )
+            return;
+
+         int idxBefore = folderBefore->GetTreeIndex();
+         if ( idxBefore == idxInvalid )
+         {
+            // we have to fix the indices of all the items before this one so
+            // make it position stick, otherwise it would bubble up to the top
+            idx = SetIndicesBefore(idBefore);
+            if ( idx == idxInvalid )
+               return;
+
+            idx++;
+         }
+         else // position just after idxBefore
+         {
+            idx = idxBefore + 1;
+         }
+      }
+      else // make folder the first child
+      {
+         idx = 0;
+      }
+   }
+   else // we must select an index less than idxAfter
+   {
+      if ( idBefore )
+      {
+         const MFolder * const folderBefore = GetFolderFromTreeItem(idBefore);
+         if ( !folderBefore )
+            return;
+
+         int idxBefore = folderBefore->GetTreeIndex();
+
+         // it can't possibly happen that an item without index is positioned
+         // before another item with index
+         ASSERT_MSG( idxBefore != idxInvalid, _T("confusion with tree indices!") );
+
+         // this might not be the final value, it will be tested below
+         idx = idxBefore + 1;
+      }
+      else // position just before idxAfter
+      {
+         // same as above: this value might be invalid
+         idx = idxAfter - 1;
+      }
+
+      // did we choose a valid value above?
+      if ( idx < 0 || idx >= idxAfter )
+      {
+         // we have to offset the indices of all subsequent items...
+         idx = OffsetIndicesAfter(idAfter);
+         if ( idx == idxInvalid )
+            return;
+
+         idx--;
+      }
+   }
+
+   // do change the folder position
+   ASSERT_MSG( idx != idxInvalid, _T("logic error in MoveFolderBetween()") );
+
+   MFolder * const folder = GetFolderFromTreeItem(id);
+   if ( !folder )
+      return;
+
+   folder->SetTreeIndex(idx);
+}
+
+void wxFolderTreeImpl::OnTreeBeginDrag(wxTreeEvent& event)
+{
+   // do we have something basically valid?
+   const wxTreeItemId idDragged = event.GetItem();
+   const MFolder * const folder = GetFolderFromTreeItem(idDragged);
+   if ( !folder )
+      return;
+
+   // determine if we can drag this item at all?
+   if ( folder->GetType() == MF_ROOT ||
+         (folder->GetFlags() & MF_FLAGS_DONTDELETE) )
+   {
+      wxLogStatus(GetFrame(this),
+                 _("The folder \"%s\" cannot be moved."),
+                 folder->GetFullName().c_str());
+      return;
+   }
+
+   // ok, allow the user to drag it
+   ASSERT_MSG( !m_idDragged.IsOk(), _T("didn't finish the previous drag?") );
+
+   m_idDragged = idDragged;
+   event.Allow();
+}
+
+void wxFolderTreeImpl::OnTreeEndDrag(wxTreeEvent& event)
+{
+   CHECK_RET( m_idDragged.IsOk(), _T("end drag without begin drag?") );
+
+   // get the source and destination folders
+   const wxTreeItemId idDst = event.GetItem();
+   const wxTreeItemId idSrc = m_idDragged;
+   m_idDragged.Unset();
+
+   if ( !idDst.IsOk() )
+   {
+      // happens if the user dragged the mouse completely outside the window,
+      // for example
+      return;
+   }
+
+   MFolder * const folderDst = GetFolderFromTreeItem(idDst);
+   MFolder * const folderSrc = GetFolderFromTreeItem(idSrc);
+
+   if ( !folderDst || !folderSrc )
+   {
+      // this is not supposed to happen (debug error message already given)
+      return;
+   }
+
+   // do we want to just change the item position among its siblings or move it?
+   if ( folderDst->GetParent() == folderSrc->GetParent() )
+   {
+      // just changing the order: put the src folder just before the dst one 
+      // (not just after: this would make it impossible to reposition a folder
+      // to be the first one among its siblings, as dropping it on the parent
+      // would move it one level up)
+      MoveFolderBetween(idSrc, GetPrevSibling(idDst), idDst);
+
+      // reflect the changes in the tree
+      ReopenBranch(GetItemParent(idDst));
+   }
+   else // really moving
+   {
+      if ( !folderSrc->Move(folderDst) )
+      {
+         wxLogError(_("Failed to move the folder \"%s\" to \"%s\"."),
+                    folderSrc->GetFullName().c_str(),
+                    folderDst->GetFullName().c_str());
+      }
+      else // moved ok
+      {
+         wxLogStatus(GetFrame(this),
+                     _("Successfully moved the folder \"%s\" to \"%s\"."),
+                     folderSrc->GetFullName().c_str(),
+                     folderDst->GetFullName().c_str());
+      }
+   }
 }
 
 // ----------------------------------------------------------------------------
