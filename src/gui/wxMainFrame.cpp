@@ -67,7 +67,8 @@
 enum
 {
    WXMENU_DEBUG_WIZARD = WXMENU_DEBUG_BEGIN + 1,
-   WXMENU_DEBUG_TOGGLE_LOG
+   WXMENU_DEBUG_TOGGLE_LOG,
+   WXMENU_DEBUG_CRASH
 };
 
 #endif // DEBUG
@@ -615,6 +616,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    menuDebug->Append(WXMENU_DEBUG_WIZARD, _T("Run install &wizard..."));
    menuDebug->AppendCheckItem(WXMENU_DEBUG_TOGGLE_LOG,
                               _T("Toggle &debug logging\tCtrl-Alt-D"));
+   menuDebug->Append(WXMENU_DEBUG_CRASH, _T("Provoke a c&rash"));
    GetMenuBar()->Append(menuDebug, _T("&Debug"));
 #endif // debug
 
@@ -1035,6 +1037,10 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
             extern bool g_debugMailForceOn;
 
             g_debugMailForceOn = event.IsChecked();
+            break;
+
+         case WXMENU_DEBUG_CRASH:
+            *(char *)17 = '!';
             break;
 
          default:
