@@ -699,8 +699,8 @@ EditorContentPart::~EditorContentPart()
 wxSizer *wxRcptControl::CreateControls(wxWindow *parent)
 {
    // create controls
-   m_choice = new wxRcptTypeChoice(this, parent);
    m_text = CreateText(parent);
+   m_choice = new wxRcptTypeChoice(this, parent);
    m_btnExpand = new wxRcptExpandButton(this, parent);
 
    // add them to sizer
