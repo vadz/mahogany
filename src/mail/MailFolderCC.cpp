@@ -274,6 +274,7 @@ MailFolderCC::AppendMessage(String const &msg)
 
    if(! mail_append(NIL,(char *)m_MailboxPath.c_str(),&str))
       ERRORMESSAGE(("cannot append message"));
+   Ping(); // update information
 }
 
 void
