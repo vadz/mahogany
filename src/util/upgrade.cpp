@@ -2239,7 +2239,7 @@ UpdateCustomHeadersTo064(wxConfigBase *config)
    };
 
    String pathBase = M_CUSTOM_HEADERS_CONFIG_SECTION;
-   for ( int type = 0; type < WXSIZEOF(customHeaderSubgroups); type++ )
+   for ( size_t type = 0; type < WXSIZEOF(customHeaderSubgroups); type++ )
    {
       String path = pathBase + '/' + customHeaderSubgroups[type];
       if ( config->HasGroup(path) )
@@ -2380,7 +2380,6 @@ UpgradeFrom061()
 
    Profile *profile = mApplication->GetProfile();
    wxConfigBase *config = profile->GetConfig();
-   bool rc = true;
 
    // first deal with ADB settings: they now live under /Settings
    String pathOld, pathNew;
