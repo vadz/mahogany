@@ -547,7 +547,6 @@ MailFolderCmn::MailFolderCmn()
    m_PreCloseCalled = false;
 #endif // DEBUG_FOLDER_CLOSE
 
-   m_ProgressDialog = NULL;
    m_Timer = new MailFolderTimer(this);
    m_LastNewMsgUId = UID_ILLEGAL;
 
@@ -1021,9 +1020,9 @@ extern "C"
 
             case MSO_SCORE:
                // we don't store score any more in HeaderInfo
-#ifdef BROKEN_BY_VZ
+#ifdef USE_HEADER_SCORE
                result = CmpNumeric(i1->GetScore(), i2->GetScore());
-#endif
+#endif // USE_HEADER_SCORE
                break;
 
             default:

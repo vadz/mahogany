@@ -150,18 +150,24 @@ public:
    /** return a symbolic name for mail folder
        @return the folder's name
    */
-   inline String GetName(void) const { return m_Name; }
+   String GetName(void) const { return m_Name; }
+
+   /// return the folder type
+   FolderType GetType(void) const { return m_folderType; }
+
+   /// return the folder flags
+   int GetFlags(void) const { return m_FolderFlags; }
 
    /// Return IMAP spec
-   inline virtual String GetImapSpec(void) const { return m_ImapSpec; }
+   virtual String GetImapSpec(void) const { return m_ImapSpec; }
 
    /** Get the profile.
        @return Pointer to the profile.
    */
-   virtual inline Profile *GetProfile(void) { return m_Profile; }
+   virtual Profile *GetProfile(void) { return m_Profile; }
 
    /// Checks if the folder is in a critical section.
-   inline bool InCritical(void) const { return m_InCritical; }
+   bool InCritical(void) const { return m_InCritical; }
 
    /** Get number of messages which have a message status of value
        when combined with the mask. When mask = 0, return total
@@ -310,20 +316,10 @@ public:
 
    /**@name Functions to get an overview of messages in the folder. */
    //@{
-   virtual bool HasHeaders() const;
-   /** Returns a listing of the folder. Must be DecRef'd by caller. */
-   virtual HeaderInfoList *GetHeaders(void) const;
+   virtual unsigned long GetMessageCount() const;
+   virtual size_t GetHeaderInfo(HeaderInfo *arrayHI,
+                                MsgnoType msgnoFrom, MsgnoType msgnoTo);
    //@}
-
-   /** Sets limits for the number of headers to retrieve: if hard limit is not
-       0, we will never retrieve more than that many messages even without
-       asking the user (soft limit is ignored). Otherwise, we will ask the
-       user if the soft limit is exceeded.
-
-       @param soft maximum number of messages to retrieve without askin
-       @param hard maximum number of messages to retrieve, 0 for no limit
-   */
-   virtual void SetRetrievalLimits(unsigned long soft, unsigned long hard);
 
    virtual char GetFolderDelimiter() const;
 
@@ -363,6 +359,13 @@ public:
    void EndReading();
    //@}
 
+   /**
+      For use by class MessageCC only
+
+      @return MAILSTREAM of the folder
+   */
+   MAILSTREAM *Stream(void) const { return m_MailStream; }
+
 private:
    /// private constructor, does basic initialisation
    MailFolderCC(int typeAndFlags,
@@ -386,98 +389,6 @@ private:
    /// half open the folder
    bool HalfOpen(void);
 
-
-   /// The following is also called by SendMessageCC for ESMTP authentication
-   static void SetLoginData(const String &user, const String &pw);
-
-   friend class SendMessageCC;
-
-   /// for POP/IMAP boxes, this holds the user id for the callback
-   static String MF_user;
-   /// for POP/IMAP boxes, this holds the password for the callback
-   static String MF_pwd;
-
-   /// which type is this mailfolder?
-   FolderType   m_folderType;
-
-   ///   mailstream associated with this folder
-   MAILSTREAM   *m_MailStream;
-
-   /// set to true before we get the very first folder info
-   bool m_FirstListing;
-
-   /// number of (retrieved) messages in mailbox
-   unsigned long m_nMessages;
-   /// total number of messages (less could be retrieved if listing aborted)
-   unsigned long m_msgnoMax;
-   /// number or recent messages in mailbox
-   unsigned long m_nRecent;
-
-   /// the array containing indices of expunged messages or NULL
-   wxArrayInt *m_expungedIndices;
-
-   /// last seen UID
-   UIdType m_LastUId;
-
-   /// Full IMAP spec
-   String   m_ImapSpec;
-   /// The symbolic name of the folder
-   String m_Name;
-
-   /** If we are searching, this points to an UIdArray where to store
-       the entries found.
-   */
-   UIdArray *m_SearchMessagesFound;
-
-   /** @name functions for mapping mailstreams and objects
-       These functions enable the class to map incoming events from
-       the  c-client library to the object associated with that event.
-       */
-   //@{
-
-   /// a pointer to the object to use as default if lookup fails
-   static MailFolderCC   *ms_StreamListDefaultObj;
-
-   /// mapping MAILSTREAM* to objects of this class and their names
-   static StreamConnectionList   ms_StreamList;
-
-   /// has c-client library been initialised?
-   static bool   ms_CClientInitialisedFlag;
-
-   /// initialise c-client library
-   static void CClientInit(void);
-
-   /// adds this object to Map
-   void   AddToMap(MAILSTREAM const *stream) const;
-
-   /// remove this object from Map
-   void   RemoveFromMap(void) const;
-
-   /// Gets first mailfolder in map or NULL.
-   static MailFolderCC * GetFirstMapEntry(StreamConnectionList::iterator &i);
-   /// Gets next mailfolder in map or NULL
-   static MailFolderCC * GetNextMapEntry(StreamConnectionList::iterator &i);
-
-   /// find the stream in the map
-   static MailFolderCC *LookupStream(const MAILSTREAM *stream);
-
-   /// lookup object in map first by stream, then by name
-   static MailFolderCC *LookupObject(const MAILSTREAM *stream,
-                                     const char *name = NULL);
-   //@}
-   /** for use by class MessageCC
-       @return MAILSTREAM of the folder
-   */
-   MAILSTREAM *Stream(void) const { return m_MailStream; }
-   friend class MessageCC;
-
-   /// return the folder type
-   FolderType GetType(void) const { return m_folderType; }
-
-   /// return the folder flags
-   int GetFlags(void) const { return m_FolderFlags; }
-
-protected:
    /// Called to notify the folder that its listing changed "from outside"
    virtual void RequestUpdate(void);
 
@@ -496,14 +407,27 @@ protected:
    /// Check if this message is a "New Message":
    virtual bool IsNewMessage(const HeaderInfo * hi);
 
+   /// helper of OverviewHeader
+   static String ParseAddress(struct mail_address *adr);
+
    /**
      Handles the mm_overview_header callback on a per folder basis.
      It returns 0 to abort overview generation, 1 to continue.
    */
    int OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov);
 
+   /// Handles the mm_overview_header callback on a per folder basis
+   static int OverviewHeader (MAILSTREAM *stream, unsigned long uid, OVERVIEW_X *ov);
+
    /// Close the folder
    virtual void Close(void);
+
+   /// destructor
+   ~MailFolderCC();
+
+   /** We remember the last folder to enter a critical section, helps
+       to find crashes.*/
+   static String ms_LastCriticalFolder;
 
    /// physically create the file (MF_FILE or MF_MH) folder
    void CreateFileFolder();
@@ -535,26 +459,11 @@ protected:
    */
    static bool CreateIfNeeded(Profile *profile);
 
-   /// A Mutex to control access to this folder.
-   MMutex *m_Mutex;
-
-   /// PingReopen() protection against recursion
-   MMutex *m_PingReopenSemaphore;
-
-   /// Locked while we're building new listing
-   MMutex *m_InListingRebuild;
-
-   /// Locked while we're applying filter rules
-   MMutex *m_InFilterCode;
-
    /// Updates the status of a single message.
    void UpdateMessageStatus(unsigned long seqno);
 
    /// update the folder status info after getting a new message
    void UpdateFolderStatus(int status);
-
-   /// Gets a complete folder listing from the stream.
-   void BuildListing(void);
 
    /// Apply filters to the new messages and rebuild the listing
    void FilterNewMailAndUpdate();
@@ -562,20 +471,175 @@ protected:
    /// update the folder after appending messages to it
    void UpdateAfterAppend();
 
-   /** The index of the next entry in list to fill. Only used for
-       BuildListing()/OverviewHeader() interaction. */
-   unsigned long m_BuildNextEntry;
-
-   /// The maximum number of messages to retrive or 0
-   unsigned long m_RetrievalLimitHard;
-   /// The maximum number of messages to retrive or 0
-   unsigned long m_RetrievalLimit;
-
-   /// do we have a listing?
-   bool HaveListing() const { return m_Listing != NULL; }
-
    /// return TRUE if it is safe to send update events to GUI right now
    bool CanSendUpdateEvents() const;
+
+   virtual void ReadConfig(MailFolderCmn::MFCmnOptions& config);
+
+   // members (mostly) from here on
+   // -----------------------------
+
+   /** @name Authentification info */
+   //@{
+   /// The following is also called by SendMessageCC for ESMTP authentication
+   static void SetLoginData(const String &user, const String &pw);
+
+   /// for POP/IMAP boxes, this holds the user id for the callback
+   static String MF_user;
+   /// for POP/IMAP boxes, this holds the password for the callback
+   static String MF_pwd;
+   //@}
+
+   /** @name c-client initialization */
+   //@{
+   /// has c-client library been initialised?
+   static bool ms_CClientInitialisedFlag;
+
+   /// initialise c-client library
+   static void CClientInit(void);
+   //@}
+
+   /** @name Mail folder parameters */
+   //@{
+   /// Full IMAP spec
+   String m_ImapSpec;
+
+   // TODO: m_Name and m_folderType/Flags should be replaced with an MFolder!
+
+   /// The symbolic name of the folder (i.e. the name shown in the tree)
+   String m_Name;
+
+   /// Type of this folder
+   FolderType m_folderType;
+
+   /// folder flags
+   int m_FolderFlags;
+
+   /// the folder name delimiter, (char)-1 if unknown yet
+   char m_chDelimiter;
+
+   /// the profile we use for our options
+   Profile *m_Profile;
+   //@}
+
+   /** @name Mail folder state */
+   //@{
+   /// mailstream associated with this folder
+   MAILSTREAM *m_MailStream;
+
+   /// total number of messages last time we looked
+   unsigned long m_msgnoMax;
+
+   /// number or recent messages in mailbox
+   unsigned long m_nRecent;
+
+   /// last seen UID, all messages above this one are new
+   UIdType m_LastUId;
+
+   /** @name Temporary operation parameters */
+   //@{
+   /// struct used by GetHeaderInfo() and OverviewHeaderEntry() only
+   class OverviewData *m_overviewData;
+
+   /// the array containing indices of expunged messages or NULL
+   wxArrayInt *m_expungedIndices;
+
+   /** If we are searching, this points to an UIdArray where to store
+       the entries found.
+   */
+   UIdArray *m_SearchMessagesFound;
+
+   /**@name only used for ListFolders: */
+   //@{
+   UserData m_UserData;
+   Ticket   m_Ticket;
+   class ASMailFolder *m_ASMailFolder;
+   //@}
+
+   /// Used by the subscription management.
+   class FolderListingCC *m_FolderListing;
+   //@}
+
+   /** @name Locking and other semaphores */
+   //@{
+   /// Is this folder in a critical c-client section?
+   bool m_InCritical;
+
+   /// when this mutex is locked, this folder can't be accessed at all
+   MMutex *m_Mutex;
+
+   /// Locked while we're applying filter rules
+   MMutex *m_InFilterCode;
+   //@}
+
+   /** @name functions for mapping mailstreams and objects
+       These functions enable the class to map incoming events from
+       the  c-client library to the object associated with that event.
+       */
+   //@{
+
+   /// a pointer to the object to use as default if lookup fails
+   static MailFolderCC *ms_StreamListDefaultObj;
+
+   /// mapping MAILSTREAM* to objects of this class and their names
+   static StreamConnectionList ms_StreamList;
+
+   /// adds this object to Map
+   void AddToMap(MAILSTREAM const *stream) const;
+
+   /// remove this object from Map
+   void RemoveFromMap(void) const;
+
+   /// Gets first mailfolder in map or NULL.
+   static MailFolderCC *GetFirstMapEntry(StreamConnectionList::iterator &i);
+
+   /// Gets next mailfolder in map or NULL
+   static MailFolderCC *GetNextMapEntry(StreamConnectionList::iterator &i);
+
+   /// find the stream in the map
+   static MailFolderCC *LookupStream(const MAILSTREAM *stream);
+
+   /// lookup object in map first by stream, then by name
+   static MailFolderCC *LookupObject(const MAILSTREAM *stream,
+                                     const char *name = NULL);
+   //@}
+
+   /** @name c-client parameters */
+   //@{
+   /// IMAP lookahead value
+   int m_LookAhead;
+   /// TCP/IP open timeout in seconds.
+   int m_TcpOpenTimeout;
+   /// TCP/IP read timeout in seconds.
+   int m_TcpReadTimeout;
+   /// TCP/IP write timeout in seconds.
+   int m_TcpWriteTimeout;
+   /// TCP/IP close timeout in seconds.
+   int m_TcpCloseTimeout;
+   /// rsh connection timeout in seconds.
+   int m_TcpRshTimeout;
+   /// ssh connection timeout in seconds.
+   int m_TcpSshTimeout;
+   /// the path to rsh
+   String m_RshPath;
+   /// the path to ssh
+   String m_SshPath;
+   //@}
+
+#ifdef DEBUG
+   /// print a list of all streams
+   static void DebugStreams(void);
+#endif
+
+   friend bool MailFolderCCInit();
+   friend void MailFolderCCCleanup();
+
+   friend class CCDefaultFolder;
+   friend class SendMessageCC;
+
+public:
+   DEBUG_DEF
+   MOBJECT_DEBUG(MailFolderCC)
 
 public:
    /** @name common callback routines
@@ -671,89 +735,6 @@ public:
    /// gets called when flags for a message have changed
    static void mm_flags(MAILSTREAM *stream, unsigned long number);
    //@}
-
-   /// Handles the mm_overview_header callback on a per folder basis
-   static int OverviewHeader (MAILSTREAM *stream, unsigned long uid, OVERVIEW_X *ov);
-
-   /// helper of OverviewHeader
-   static String ParseAddress(struct mail_address *adr);
-
-private:
-   /// destructor
-   ~MailFolderCC();
-
-   /// a profile
-   Profile *m_Profile;
-
-   /// The current listing of the folder
-   HeaderInfoList *m_Listing;
-
-   /// Have any new messages arrived?
-   bool m_GotNewMessages;
-
-   /// Is this folder in a critical c-client section?
-   bool m_InCritical;
-
-   /// status of the new messages in the folder, used by OverviewHeaderEntry
-   MailFolderStatus *m_statusNew;
-
-   /** We remember the last folder to enter a critical section, helps
-       to find crashes.*/
-   static String ms_LastCriticalFolder;
-
-   /// folder flags
-   int  m_FolderFlags;
-
-   /** @name Global settings, timeouts for c-client lib */
-   //@{
-   /// IMAP lookahead value
-   int m_LookAhead;
-   /// TCP/IP open timeout in seconds.
-   int m_TcpOpenTimeout;
-   /// TCP/IP read timeout in seconds.
-   int m_TcpReadTimeout;
-   /// TCP/IP write timeout in seconds.
-   int m_TcpWriteTimeout;
-   /// TCP/IP close timeout in seconds.
-   int m_TcpCloseTimeout;
-   /// rsh connection timeout in seconds.
-   int m_TcpRshTimeout;
-   /// ssh connection timeout in seconds.
-   int m_TcpSshTimeout;
-   /// the path to rsh
-   String m_RshPath;
-   /// the path to ssh
-   String m_SshPath;
-   //@}
-
-   /// the folder name delimiter, (char)-1 if unknown yet
-   char m_chDelimiter;
-
-   /// Used by the subscription management.
-   class FolderListingCC *m_FolderListing;
-
-   /**@name only used for ListFolders: */
-   //@{
-   UserData m_UserData;
-   Ticket   m_Ticket;
-   class ASMailFolder *m_ASMailFolder;
-   //@}
-
-#ifdef DEBUG
-   /// print a list of all streams
-   static void DebugStreams(void);
-#endif
-
-   virtual void ReadConfig(MailFolderCmn::MFCmnOptions& config);
-
-   friend bool MailFolderCCInit();
-   friend void MailFolderCCCleanup();
-
-   friend class CCDefaultFolder;
-
-public:
-   DEBUG_DEF
-   MOBJECT_DEBUG(MailFolderCC)
 };
 
 #endif // MAILFOLDERCC_H

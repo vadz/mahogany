@@ -281,9 +281,6 @@ protected:
    /// decrement and delete if reached 0, return TRUE if item wasn't deleted
    virtual bool DecRef();
    virtual bool RealDecRef();
-
-   /// To display progress while reading message headers:
-   class MProgressDialog *m_ProgressDialog;
    //@}
 
    /** @name The listing information */

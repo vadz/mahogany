@@ -92,16 +92,6 @@ extern "C"
 // macros
 // ----------------------------------------------------------------------------
 
-// check that the folder is not in busy state - if it is, no external calls
-// are allowed
-#define CHECK_NOT_BUSY() \
-   CHECK_RET( !m_InListingRebuild->IsLocked() && !m_InFilterCode->IsLocked(), \
-              "folder is busy" )
-
-#define CHECK_NOT_BUSY_RC(rc) \
-   CHECK( !m_InListingRebuild->IsLocked() && !m_InFilterCode->IsLocked(), \
-          rc, "folder is busy" )
-
 // check if the folder is still available trying to reopen it if not
 #define CHECK_DEAD(msg) \
    if ( m_MailStream == NIL && !PingReopen() ) \
@@ -248,7 +238,117 @@ static int cc_loglevel = wxLOG_Error;
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// FolderListing stuff (TODO: move elsewhere)
+// OverviewData: this class is just used to share parameters between
+// GetHeaderInfo() and OverviewHeaderEntry() which is called from it
+// indirectly
+// ----------------------------------------------------------------------------
+
+class OverviewData
+{
+public:
+   // ctor takes the pointer to the start of HeaderInfo buffer and the number
+   // of slots in it and the msgno we are going to start retrieving headers
+   // from
+   OverviewData(HeaderInfo *hi, size_t nTotal, MsgnoType msgnoFrom)
+   {
+      m_msgnoStart = msgnoFrom;
+      m_nTotal = nTotal;
+      m_nRetrieved = 0;
+      m_hi = hi;
+      m_progdlg = NULL;
+   }
+
+   // dtor deletes the progress dialog if it had been shown
+   ~OverviewData()
+   {
+      if ( m_progdlg )
+      {
+         MGuiLocker locker;
+         delete m_progdlg;
+
+         // ok, it's really ugly to put it here, but it's the only way to do it
+         // for now, unfortunately (FIXME)
+         //
+         // we don't want to leave a big "hole" on the parent window but this
+         // may happen as we are not returning to the main loop immediately -
+         // instead we risk to spend some (long) time applying filters and the
+         // window won't be repainted before we finish, so force window redraw
+         // right now
+#ifdef OS_WIN
+         wxFrame *frame = mApplication->TopLevelFrame();
+         if ( frame )
+         {
+            ::UpdateWindow(GetHwndOf(frame));
+         }
+#endif // OS_WIN
+      }
+   }
+
+   // get the msgno we're currently retrieving
+   MsgnoType GetCurrentMsgno() const { return m_msgnoStart + m_nRetrieved; }
+
+   // get the number of messages retrieved so far
+   size_t GetRetrievedCount() const { return m_nRetrieved; }
+
+   // go to the next message
+   void Next() { m_nRetrieved++; }
+
+   // return true if we retrieved all the messages
+   bool Done() const
+   {
+      ASSERT_MSG( m_nRetrieved <= m_nTotal, "too many messages" );
+
+      return m_nRetrieved == m_nTotal;
+   }
+
+   // tell us to use the progress dialog
+   void SetProgressDialog(MProgressDialog *progdlg)
+   {
+      ASSERT_MSG( !m_progdlg, "SetProgressDialog() can only be called once" );
+
+      m_progdlg = progdlg;
+   }
+
+   // get the progress dialog we use (may be NULL)
+   MProgressDialog *GetProgressDialog() const { return m_progdlg; }
+
+   // update the progress dialog and return false if it was cancelled
+   bool UpdateProgress() const
+   {
+      if ( m_progdlg )
+      {
+         MGuiLocker locker;
+         if ( !m_progdlg->Update(m_nRetrieved) )
+         {
+            // cancelled by user
+            return false;
+         }
+      }
+
+      return true;
+   }
+
+private:
+   // the starting msgno we're retrieving
+   MsgnoType m_msgnoStart;
+
+   // the total number of messages we are going to retrieve
+   size_t m_nTotal;
+
+   // the number of headers retrieved so far, the final value of this is the
+   // GetHeaderInfo() return value
+   size_t m_nRetrieved;
+
+   // the buffer in which to store the headers retrieved (in fact, the pointer
+   // to the current header as it is incremented inside OverviewHeaderEntry)
+   HeaderInfo *m_hi;
+
+   // the progress dialog if we use one, NULL otherwise
+   MProgressDialog *m_progdlg;
+};
+
+// ----------------------------------------------------------------------------
+// FolderListing stuff (TODO: move elsewhere, i.e. in MailFolderCmn)
 // ----------------------------------------------------------------------------
 
 class FolderListingEntryCC : public FolderListingEntry
@@ -1052,9 +1152,9 @@ String MailFolderCC::DecodeHeader(const String &in, wxFontEncoding *pEncoding)
 // MailFolderCC
 // ----------------------------------------------------------------------------
 
+// login data
 String MailFolderCC::MF_user;
 String MailFolderCC::MF_pwd;
-
 
 /* static */
 void
@@ -1128,32 +1228,23 @@ MailFolderCC::Create(int typeAndFlags)
    m_folderType = type;
 
    m_Mutex = new MMutex;
-   m_PingReopenSemaphore = new MMutex;
-   m_InListingRebuild = new MMutex;
    m_InFilterCode = new MMutex;
 }
 
 void MailFolderCC::Init()
 {
-   m_nMessages = 0;
    m_msgnoMax = 0;
    m_nRecent = UID_ILLEGAL;
    m_LastUId = UID_ILLEGAL;
 
+   m_overviewData = NULL;
+
    m_expungedIndices = NULL;
-   m_statusNew = NULL;
 
    // currently not used, but might be in the future
    m_GotNewMessages = false;
-   m_FirstListing = true;
 
    m_InCritical = false;
-}
-
-void MailFolderCC::SetRetrievalLimits(unsigned long soft, unsigned long hard)
-{
-   m_RetrievalLimit = soft;
-   m_RetrievalLimitHard = hard;
 }
 
 MailFolderCC::~MailFolderCC()
@@ -1166,7 +1257,8 @@ MailFolderCC::~MailFolderCC()
 
    // these should have been deleted before
    ASSERT(m_SearchMessagesFound == NULL);
-   ASSERT(m_statusNew == NULL);
+
+   ASSERT_MSG( !m_overviewData, "should have been reset in GetHeaderInfo" );
 
    // normally this one should be deleted as well but POP3 server never sends
    // us mm_expunged() (well, because it never expunges the messages until we
@@ -1185,8 +1277,6 @@ MailFolderCC::~MailFolderCC()
    RemoveFromMap();
 
    delete m_Mutex;
-   delete m_PingReopenSemaphore;
-   delete m_InListingRebuild;
    delete m_InFilterCode;
 
    SafeDecRef(m_Listing);
@@ -1320,8 +1410,6 @@ MailFolderCC::OpenFolder(int typeAndFlags,
 
    mf = new MailFolderCC(typeAndFlags, mboxpath, profile, server, login, password);
    mf->m_Name = symname;
-   mf->SetRetrievalLimits(READ_CONFIG(profile, MP_MAX_HEADERS_NUM),
-                          READ_CONFIG(profile, MP_MAX_HEADERS_NUM_HARD));
 
    bool ok = TRUE;
    if ( mf->NeedsNetwork() && !mApplication->IsOnline() )
@@ -1763,7 +1851,7 @@ MailFolderCC::UpdateTimeoutValues(void)
 {
    Profile *p = GetProfile();
 
-   // We now use only one common config setting for all TCP timeout
+   // We now use only one common config setting for all TCP timeouts
    m_TcpOpenTimeout = READ_CONFIG(p, MP_TCP_OPENTIMEOUT);
    m_TcpReadTimeout = m_TcpOpenTimeout;
    m_TcpWriteTimeout = m_TcpOpenTimeout;
@@ -2074,12 +2162,9 @@ MailFolderCC::PingReopen(void)
    wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::PingReopen() on Folder %s.",
               GetName().c_str());
 
-   CHECK_NOT_BUSY_RC(rc);
-
    MailFolderLocker lockFolder(this);
    if ( lockFolder )
    {
-      MLocker lockPing(m_PingReopenSemaphore);
       rc = true;
 
       // This is terribly inefficient to do, but needed for some sick
@@ -2258,7 +2343,7 @@ MailFolderCC::Close()
 bool
 MailFolderCC::Lock(void) const
 {
-   ((MailFolderCC *)this)->m_Mutex->Lock();
+   m_Mutex->Lock();
 
    return true;
 }
@@ -2266,15 +2351,13 @@ MailFolderCC::Lock(void) const
 bool
 MailFolderCC::IsLocked(void) const
 {
-   return m_Mutex->IsLocked() ||
-          m_InListingRebuild->IsLocked() ||
-          m_InFilterCode->IsLocked();
+   return m_Mutex->IsLocked() || m_InFilterCode->IsLocked();
 }
 
 void
 MailFolderCC::UnLock(void) const
 {
-   ((MailFolderCC *)this)->m_Mutex->Unlock();
+   m_Mutex->Unlock();
 }
 
 // ----------------------------------------------------------------------------
@@ -2564,6 +2647,8 @@ static MsgStatus AnalyzeStatus(int stat)
    return status;
 }
 
+#ifdef BROKEN_BY_VZ
+
 // update the folder status to take a new message with this status into account
 // (this is called from OverviewHeaderEntry for all headers we add to the
 // listing)
@@ -2592,6 +2677,8 @@ void MailFolderCC::UpdateFolderStatus(int stat)
          m_statusNew->searched++;
    }
 }
+
+#endif // BROKEN_BY_VZ
 
 // are we asked to count recent messages in WantRecent()?
 static bool WantRecent(int mask, int value)
@@ -2679,7 +2766,7 @@ bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
                  GetName().c_str(), m_nMessages);
 
       status->total = m_msgnoMax;
-      for ( size_t idx = 0; idx < m_nMessages; idx++ )
+      for ( MsgnoType idx = 0; idx < m_nMessages; idx++ )
       {
          int stat = hil->GetItemByIndex(idx)->GetStatus();
 
@@ -2815,23 +2902,23 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit)
       String what;
       error = false;
 
-      if ( m_nMessages > (unsigned)READ_CONFIG(m_Profile,
-                                               MP_FOLDERPROGRESS_THRESHOLD) )
+      MsgnoType nMessages = GetMessageCount();
+      if ( nMessages > (unsigned long)READ_CONFIG(m_Profile,
+                                                  MP_FOLDERPROGRESS_THRESHOLD) )
       {
          String msg;
-         msg.Printf(_("Searching in %lu messages..."),
-                    (unsigned long) m_nMessages);
+         msg.Printf(_("Searching in %lu messages..."), nMessages);
          {
             MGuiLocker locker;
             progDlg = new MProgressDialog(GetName(),
                                           msg,
-                                          m_nMessages,
+                                          nMessages,
                                           NULL,
                                           false, true);// open a status window:
          }
       }
 
-      for ( size_t idx = 0; idx < m_nMessages; idx++ )
+      for ( size_t idx = 0; idx < nMessages; idx++ )
       {
          if ( crit->m_What == SearchCriterium::SC_SUBJECT )
          {
@@ -3087,239 +3174,37 @@ MailFolderCC::DebugDump() const
 #endif // DEBUG
 
 // ----------------------------------------------------------------------------
-// Working with the listing
+// MailFolderCC working with the headers
 // ----------------------------------------------------------------------------
 
-bool MailFolderCC::HasHeaders() const
+unsigned long MailFolderCC::GetMessageCount() const
 {
-   return m_Listing != NULL;
+   CHECK( m_MailStream, 0, "GetMessageCount: folder is closed" );
+
+   return m_MailStream->nmsgs;
 }
 
-/* FIXME-MT: we must add some clever locking to this function! */
-HeaderInfoList *
-MailFolderCC::GetHeaders(void) const
+size_t MailFolderCC::GetHeaderInfo(HeaderInfo *arrayHI,
+                                   MsgnoType msgnoFrom, MsgnoType msgnoTo)
 {
-   if ( !m_Listing )
-   {
-      // remove const from this:
-      MailFolderCC *that = (MailFolderCC *)this;
-
-      // check if we are still alive
-      if ( !m_MailStream )
-      {
-         if( !that->PingReopen() )
-         {
-            ERRORMESSAGE((_("Cannot get listing for closed mailbox '%s'."),
-                          GetName().c_str()));
-            return NULL;
-         }
-      }
-
-      // we don't want MEvents to be handled while we are rebuilding the
-      // listing, as they might query this folder
-      MEventManagerSuspender noEvents;
-
-      // get the new listing
-      that->BuildListing();
-
-      CHECK(m_Listing, NULL, "failed to build folder listing");
-
-      // if we have any new messages, reapply filters to them
-      if ( m_GotNewMessages )
-      {
-         that->FilterNewMailAndUpdate();
-      }
-
-      // sort/thread listing
-      that->ProcessHeaderListing(m_Listing);
-
-      // enforce consistency:
-      ASSERT_MSG( m_nMessages == m_Listing->Count(), "message count mismatch" );
-
-      if ( m_GotNewMessages )
-      {
-         // do it right now to prevent any possible recursion
-         that->m_GotNewMessages = false;
-
-         // check if we need to update our data structures or send new
-         // mail events: notice that we do it after applying the filters above
-         // so as to not show new mail notification for folder if all new
-         // messages were moved elsewhere by the filters
-         that->CheckForNewMail(m_Listing);
-      }
-   }
-   //else: we already have the listing
-
-   m_Listing->IncRef(); // for the caller who uses it
-
-   return m_Listing;
-}
-
-void MailFolderCC::FilterNewMailAndUpdate()
-{
-   CHECK_RET( m_Listing, "can't filter new mail without valid listing" );
-
-   // the problem with filters is that they can both delete messages from
-   // the folder *and* show message boxes which can send requests from GUI,
-   // so we have to block sending events to the GUI while processing them
-   // (this is not stictly necessary as we already have a listing, so there
-   // is no reentrancy problem: if GetHeaders() is called once again, it
-   // will just return immediately, but this is quite inefficient as the
-   // folder views don't have to be updated to reflect any intermidiate
-   // states)
-
-   m_Listing->IncRef();
-
-   // we don't want to process any events while we're filtering mail as
-   // there can be a lot of them and all of them can be processed later
-   MEventManagerSuspender suspendEvents;
-
-   // also tell everyone not to modify the listing while we're filtering it
-   MLocker filterLock(m_InFilterCode);
-
-   int rc = FilterNewMail(m_Listing);
-
-   // avoid doing anything harsh (like expunging the messages) if an error
-   // occurs
-   if ( !(rc & FilterRule::Error) )
-   {
-      // some of the messages might have been deleted by the filters and,
-      // moreover, the filter code could have called ExpungeMessages()
-      // explicitly, so we may have to expunge some messages from the folder
-
-      // calling ExpungeMessages() from filter code is unconditional and
-      // should always be honoured, so check for it first
-      bool expunge = (rc & FilterRule::Expunged) != 0;
-      if ( !expunge )
-      {
-         if ( rc & FilterRule::Deleted )
-         {
-            // expunging here is dangerous because we can expunge the messages
-            // which had been deleted by the user manually before the filters
-            // were applied, so check a special option which may be set to
-            // prevent us from doing this
-            expunge = !READ_APPCONFIG(MP_SAFE_FILTERS);
-         }
-      }
-
-      if ( expunge )
-      {
-         // so be it
-         ExpungeMessages();
-      }
-   }
-}
-
-// rebuild the folder listing completely
-void
-MailFolderCC::BuildListing(void)
-{
-   // shouldn't be done unless it's really needed
-   CHECK_RET( !m_Listing, "BuildListing() called but we already have listing" );
-
-   CHECK_DEAD("Cannot get headers of closed folder '%s'.");
+   CHECK( msgnoFrom <= msgnoTo, 0, "GetHeaderInfo: msgnos in disorder" );
+   CHECK( m_MailStream, 0, "GetHeaderInfo: folder is closed" );
 
    MailFolderLocker lockFolder(this);
 
-   wxLogTrace(TRACE_MF_CALLS, "Building listing for folder '%s'...",
-              GetName().c_str());
+   CHECK( msgnoTo <= m_MailStream->nmsgs, 0, "GetHeaderInfo: invalid msgnoTo" );
 
-   MEventLocker locker;
+   wxLogTrace(TRACE_MF_CALLS, "Retrieving info for headers %lu..%lu for '%s'...",
+              msgnoFrom, msgnoTo, GetName().c_str());
 
-   // we don't want any PingReopen() to be called in the middle of update - not
-   // just ours but any other folders neither
-   //
-   // the reason for it is that new connections to the IMAP server tend to
-   // break down for osme reason while we're rebuilding the listing - this is
-   // quite mysterious and probably due to another bug elsewhere but for now
-   // this should hopefully fix it
-   MTimerSuspender noTimer(MAppBase::Timer_PollIncoming);
+   // prepare m_overviewData to be used by OverviewHeaderEntry()
+   // ----------------------------------------------------------
 
-   MLocker lockListing(m_InListingRebuild);
+   // normally we NULL it before exiting the function
+   CHECK( !m_overviewData, "GetHeaderInfo: reentrancy detected" );
 
-   // update the number of total and recent messages first
-   m_nMessages =
-   m_msgnoMax = m_MailStream->nmsgs;
-   m_nRecent = m_MailStream->recent;
-
-   // if the number of the messages in the folder is bigger than the
-   // configured limit, ask the user whether he really wants to retrieve them
-   // all. The value of 0 disables the limit. Ask only once and never for file
-   // folders (loading headers from them is quick)
-   if ( !IsLocalQuickFolder(GetType()) )
-   {
-      unsigned long retrLimit = m_RetrievalLimit;
-      if ( m_RetrievalLimitHard > 0 && m_RetrievalLimitHard < retrLimit )
-      {
-         // hard limit takes precedence over the soft one
-         retrLimit = m_RetrievalLimitHard;
-      }
-
-      if ( (retrLimit > 0) && (m_nMessages > retrLimit) )
-      {
-         // too many messages: if we exceeded hard limit, just use it instead
-         // of m_msgnoMax, otherwise ask the user how many of them he really
-         // wants
-         long nRetrieve;
-         if ( retrLimit == m_RetrievalLimitHard )
-         {
-            nRetrieve = m_RetrievalLimitHard;
-         }
-         else // soft limit exceeded
-         {
-            // ask the user (in interactive mode only and only if this folder
-            // is opened for the first time)
-            MFrame *frame = GetInteractiveFrame();
-            if ( frame && m_FirstListing )
-            {
-               MGuiLocker locker;
-
-               String msg, title;
-               msg.Printf(
-                  _("This folder contains %lu messages, which is greater than\n"
-                    "the current threshold of %lu (set it to 0 to avoid this "
-                    "question - or\n"
-                    "you can also choose [Cancel] to download all messages)."),
-                  m_nMessages, m_RetrievalLimit
-               );
-               title.Printf(_("How many messages to retrieve from folder '%s'?"),
-                            GetName().c_str());
-
-               String prompt = _("How many of them do you want to retrieve?");
-
-               nRetrieve = MGetNumberFromUser(msg, prompt, title,
-                                              m_RetrievalLimit,
-                                              1, m_nMessages,
-                                              frame);
-            }
-            else // not interactive mode
-            {
-               // get all messages - better do this than present the user with
-               // an annoying modal dialog (he can always set the hard limit
-               // if he really wants to always limit the number of messages
-               // retrieved)
-               nRetrieve = 0;
-            }
-         }
-
-         if ( nRetrieve > 0 && (unsigned long)nRetrieve < m_nMessages )
-         {
-            m_nMessages = nRetrieve;
-
-            // FIXME: how to calculate the number of recent messages now? we
-            //        clearly can't leave it as it is/was because not all
-            //        recent messages are among the ones we retrieved
-            m_nRecent = UID_ILLEGAL;
-         }
-         //else: cancelled or 0 or invalid number entered, retrieve all
-      }
-   }
-
-   // create the new listing
-   m_Listing = HeaderInfoListImpl::Create(m_nMessages, m_msgnoMax);
-
-   // set the entry listing we're currently building to 0 in the beginning
-   m_BuildNextEntry = 0;
+   MsgnoType nMessages = msgnoTo - msgnoFrom + 1;
+   m_overviewData = new OverviewData(arrayHI, nMessages, msgnoFrom);
 
    // don't show the progress dialog if we're not in interactive mode
    if ( GetInteractiveFrame() && !mApplication->IsInAwayMode() )
@@ -3328,161 +3213,85 @@ MailFolderCC::BuildListing(void)
       // the check for threshold > 0 allows to disable the progress dialog
       // completely if the user wants
       long threshold = READ_CONFIG(m_Profile, MP_FOLDERPROGRESS_THRESHOLD);
-      if ( m_ProgressDialog == NULL &&
-           threshold > 0 &&
-           m_nMessages > (unsigned long)threshold )
+      if ( threshold > 0 && nMessages > (unsigned long)threshold )
       {
          String msg;
-         msg.Printf(_("Reading %lu message headers..."), m_nMessages);
+         msg.Printf(_("Retrieving %lu message headers..."), nMessages);
          MGuiLocker locker;
 
-         // create the progress meter which we will just have to Update() later
-         m_ProgressDialog = new MProgressDialog(GetName(),
-                                                msg,
-                                                m_nMessages,
-                                                NULL,
-                                                false, true);
+         // create the progress meter which we will just have to Update() from
+         // OverviewHeaderEntry() later
+         m_overviewData->SetProgressDialog(
+               new MProgressDialog(GetName(), msg, nMessages,
+                                   NULL, false, true));
       }
    }
    //else: no progress dialog
 
-   // remember the status of the new messages
-   m_statusNew = new MailFolderStatus;
-   m_statusNew->total = m_msgnoMax;
+   // tell c-client which headers we want and go get them
+   // ---------------------------------------------------
 
-   // do we have any messages to get?
-   if ( m_nMessages )
+   // build the IMAP sequence
+   UIdType from = mail_uid(m_MailStream, msgnoFrom),
+           to = mail_uid(m_MailStream, msgnoTo);
+
+   String sequence = strutil_ultoa(from);
+
+   // don't produce sequences like "1:1", just "1" will do
+   if ( to != from )
    {
-      // find the first and last messages to retrieve
-      UIdType from = mail_uid(m_MailStream,
-                              m_MailStream->nmsgs - m_nMessages + 1),
-              to = mail_uid(m_MailStream, m_MailStream->nmsgs);
+      sequence << ':' << strutil_ultoa(to);
+   }
 
-      String sequence = strutil_ultoa(from);
-
-      // don't produce sequences like "1:1" or "1:*"
-      if ( to != from )
-      {
-         sequence << ':' << strutil_ultoa(to);
-      }
+   // for MH folders this call generates mm_exists notification
+   // resulting in an infinite recursion, so disable processing them
+   {
+      CCCallbackDisabler noCB;
 
       // do fill the listing by calling mail_fetch_overview_x() which will
-      // call OverviewHeaderEntry() for each entry
-
-      // for MH folders this call generates mm_exists notification
-      // resulting in an infinite recursion, so disable processing them
-      {
-         CCCallbackDisabler noCB;
-
-         mail_fetch_overview_x(m_MailStream,
-                               (char *)sequence.c_str(),
-                               mm_overview_header);
-      }
-
-      // destroy the progress dialog if it had been shown
-      if ( m_ProgressDialog )
-      {
-         MGuiLocker locker;
-         delete m_ProgressDialog;
-         m_ProgressDialog = NULL;
-
-         // ok, it's really ugly to put it here, but it's the only way to do it
-         // for now, unfortunately (FIXME)
-         //
-         // we don't want to leave a big "hole" on the parent window but this
-         // may happen as we are not returning to the main loop immediately -
-         // instead we risk to spend some (long) time applying filters and the
-         // window won't be repainted before we finish, so force window redraw
-         // right now
-#ifdef OS_WIN
-         wxFrame *frame = mApplication->TopLevelFrame();
-         if ( frame )
-         {
-            ::UpdateWindow(GetHwndOf(frame));
-         }
-#endif // OS_WIN
-      }
-
-      // it is possible that we didn't retrieve all messages if the progress
-      // dialog was shown and cancelled, but we shouldn't have retrieved more
-      // than we had aske for
-      if ( m_BuildNextEntry < m_nMessages )
-      {
-         // the listing could be deleted if we got another mm_exists() while
-         // rebuilding it!
-         if ( m_Listing )
-         {
-            m_Listing->SetCount(m_BuildNextEntry);
-         }
-
-         m_nMessages = m_BuildNextEntry;
-      }
-      else
-      {
-         ASSERT_MSG( m_BuildNextEntry == m_nMessages, "message count mismatch" );
-      }
+      // call mm_overview_header -> OverviewHeader -> OverviewHeaderEntry
+      // for each header
+      mail_fetch_overview_x(m_MailStream,
+                            (char *)sequence.c_str(),
+                            mm_overview_header);
    }
-   //else: no messages, perfectly valid if the folder is empty
 
-   // remember the folder status data
-   MfStatusCache::Get()->UpdateStatus(GetName(), *m_statusNew);
-   delete m_statusNew;
-   m_statusNew = NULL;
+   // only we're supposed to do it!
+   CHECK( m_overviewData, 0, "GetHeaderInfo: who deleted m_overviewData?" );
 
-   m_FirstListing = false;
+   size_t nRetrieved = m_overviewData->GetRetrievedCount();
 
-   wxLogTrace(TRACE_MF_CALLS, "Finished building listing for folder '%s'...",
-              GetName().c_str());
+   delete m_overviewData;
+
+   // we shouldn't overwrite the provided buffer
+   ASSERT_MSG( nRetrieved <= nMessages, "GetHeaderInfo: got too many msgs?" );
+
+   return nRetrieved;
 }
 
-/* static */
-String
-MailFolderCC::ParseAddress(ADDRESS *adr)
+// called from mm_overview_header() callback, route it to the right folder
+int
+MailFolderCC::OverviewHeader(MAILSTREAM *stream,
+                             unsigned long uid,
+                             OVERVIEW_X *ov)
 {
-   String from;
+   CHECK_STREAM_LIST();
 
-   /* get first from address from envelope */
-   while ( adr && !adr->host )
-      adr = adr->next;
+   MailFolderCC *mf = MailFolderCC::LookupObject(stream);
+   CHECK(mf, 0, "trying to build overview for non-existent folder");
 
-   if(adr)
-   {
-      from = "";
-      if (adr->personal) // a personal name is given
-         from << adr->personal;
-      if(adr->mailbox)
-      {
-         if(adr->personal)
-            from << " <";
-         from << adr->mailbox;
-         if(adr->host && strlen(adr->host)
-            && (strcmp(adr->host,BADHOST) != 0))
-            from << '@' << adr->host;
-         if(adr->personal)
-            from << '>';
-      }
-   }
-   else
-      from = _("<address missing>");
-
-   return from;
+   return mf->OverviewHeaderEntry(uid, ov);
 }
 
 int
-MailFolderCC::OverviewHeaderEntry (unsigned long uid,
-                                   OVERVIEW_X *ov)
+MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov)
 {
-   // the listing could be deleted if we got another mm_exists() while
-   // rebuilding the listing - abandon it then as we're going to rebuild it
-   // again anyhow
-   if  ( !m_Listing )
-   {
-      return 0;
-   }
+   // m_overviewData must have been created in GetHeaderInfo()
+   CHECK( m_overviewData, 0, "OverviewHeaderEntry: no overview data?" );
 
    // it is possible that new messages have arrived in the meantime, ignore
-   // them
-   if ( m_BuildNextEntry == m_nMessages )
+   // them (FIXME: is it really normal?)
+   if ( m_overviewData->Done() )
    {
       wxLogDebug("New message(s) appeared in folder while overviewing it, "
                  "ignored.");
@@ -3491,54 +3300,29 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
       return 0;
    }
 
-   // after the check above this is not supposed to happen
-   CHECK( m_BuildNextEntry < m_nMessages, 0, "too many messages" );
-
-   if ( m_ProgressDialog )
+   // update the progress dialog and also check if it wasn't cancelled by the
+   // user in the meantime
+   if ( !m_overviewData->UpdateProgress() )
    {
-      MGuiLocker locker;
-      if(! m_ProgressDialog->Update( m_BuildNextEntry ))
-      {
-         // cancelled by user
-         return 0;
-      }
+      // cancelled by user
+      return 0;
    }
 
-   unsigned long msgno = mail_msgno(m_MailStream, uid);
-
-   // as we overview the messages in the reversed order (see comments before
-   // mail_fetch_overview_x()) and msgnos are consecutive we should always have
-   // this -- and maybe we can even save the call to mail_msgno() above
-   ASSERT_MSG( msgno == m_msgnoMax - m_BuildNextEntry,
-               "msgno and listing index out of sync" );
-
+   // see what we've got
+   MsgnoType msgno = m_overviewData->GetCurrentMsgno();
    MESSAGECACHE *elt = mail_elt(m_MailStream, msgno);
 
-   HeaderInfoImpl& entry = *(HeaderInfoImpl *)
-                              m_Listing->GetItemByIndex(m_BuildNextEntry);
-
-   // For NNTP, do not show deleted messages - they are marked as "read"
-   if ( m_folderType == MF_NNTP && elt->deleted )
-   {
-      // ignore but continue: don't forget to update the max number of
-      // messages in the folder if we throw away this one!
-      m_msgnoMax--;
-
-      return 1;
-   }
+   CHECK( elt, 0, "OverviewHeaderEntry: mail_elt() failed" );
 
    if ( ov )
    {
       // status
-      int status = GetMsgStatus(elt);
-      entry.m_Status = status;
-
-      UpdateFolderStatus(status);
+      entry.m_Status = GetMsgStatus(elt);
 
       // date
       MESSAGECACHE selt;
       mail_parse_date(&selt, ov->date);
-      entry.m_Date = (time_t) mail_longdate( &selt);
+      entry.m_Date = (time_t) mail_longdate(&selt);
 
       // from and to
       entry.m_From = ParseAddress(ov->from);
@@ -3552,7 +3336,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
          entry.m_To = ParseAddress( ov->to );
       }
 
-      // now deal with encodings
+      // deal with encodings for the text header fields
       wxFontEncoding encoding;
       if ( !entry.m_To.empty() )
       {
@@ -3611,13 +3395,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
       // set the font encoding to be used for displaying this entry
       entry.m_Encoding = encodingMsg;
 
-      if ( m_ProgressDialog )
-      {
-         MGuiLocker locker;
-         m_ProgressDialog->Update(m_BuildNextEntry);
-      }
-
-      m_BuildNextEntry++;
+      m_overviewData->Next();
    }
    else
    {
@@ -3629,6 +3407,98 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid,
 
    // continue
    return 1;
+}
+
+// ----------------------------------------------------------------------------
+// MailFolderCC new mail handling
+// ----------------------------------------------------------------------------
+
+void MailFolderCC::FilterNewMailAndUpdate()
+{
+   CHECK_RET( m_Listing, "can't filter new mail without valid listing" );
+
+   // the problem with filters is that they can both delete messages from
+   // the folder *and* show message boxes which can send requests from GUI,
+   // so we have to block sending events to the GUI while processing them
+   // (this is not stictly necessary as we already have a listing, so there
+   // is no reentrancy problem: if GetHeaders() is called once again, it
+   // will just return immediately, but this is quite inefficient as the
+   // folder views don't have to be updated to reflect any intermidiate
+   // states)
+
+   m_Listing->IncRef();
+
+   // we don't want to process any events while we're filtering mail as
+   // there can be a lot of them and all of them can be processed later
+   MEventManagerSuspender suspendEvents;
+
+   // also tell everyone not to modify the listing while we're filtering it
+   MLocker filterLock(m_InFilterCode);
+
+   int rc = FilterNewMail(m_Listing);
+
+   // avoid doing anything harsh (like expunging the messages) if an error
+   // occurs
+   if ( !(rc & FilterRule::Error) )
+   {
+      // some of the messages might have been deleted by the filters and,
+      // moreover, the filter code could have called ExpungeMessages()
+      // explicitly, so we may have to expunge some messages from the folder
+
+      // calling ExpungeMessages() from filter code is unconditional and
+      // should always be honoured, so check for it first
+      bool expunge = (rc & FilterRule::Expunged) != 0;
+      if ( !expunge )
+      {
+         if ( rc & FilterRule::Deleted )
+         {
+            // expunging here is dangerous because we can expunge the messages
+            // which had been deleted by the user manually before the filters
+            // were applied, so check a special option which may be set to
+            // prevent us from doing this
+            expunge = !READ_APPCONFIG(MP_SAFE_FILTERS);
+         }
+      }
+
+      if ( expunge )
+      {
+         // so be it
+         ExpungeMessages();
+      }
+   }
+}
+
+/* static */
+String
+MailFolderCC::ParseAddress(ADDRESS *adr)
+{
+   String from;
+
+   /* get first from address from envelope */
+   while ( adr && !adr->host )
+      adr = adr->next;
+
+   if(adr)
+   {
+      from = "";
+      if (adr->personal) // a personal name is given
+         from << adr->personal;
+      if(adr->mailbox)
+      {
+         if(adr->personal)
+            from << " <";
+         from << adr->mailbox;
+         if(adr->host && strlen(adr->host)
+            && (strcmp(adr->host,BADHOST) != 0))
+            from << '@' << adr->host;
+         if(adr->personal)
+            from << '>';
+      }
+   }
+   else
+      from = _("<address missing>");
+
+   return from;
 }
 
 // ----------------------------------------------------------------------------
@@ -4459,20 +4329,6 @@ MailFolderCC::RequestUpdate()
 
       MEventManager::Send(new MEventFolderUpdateData(this));
    }
-}
-
-/* Handles the mm_overview_header callback on a per folder basis. */
-int
-MailFolderCC::OverviewHeader(MAILSTREAM *stream,
-                             unsigned long uid,
-                             OVERVIEW_X *ov)
-{
-   CHECK_STREAM_LIST();
-
-   MailFolderCC *mf = MailFolderCC::LookupObject(stream);
-   CHECK(mf, 0, "trying to build overview for non-existent folder");
-
-   return mf->OverviewHeaderEntry(uid, ov);
 }
 
 // ----------------------------------------------------------------------------
