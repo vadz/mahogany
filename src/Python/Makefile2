@@ -25,6 +25,8 @@ include ../../makerules
 include ../../makeopts
 include .depend
 
+CPPFLAGS:=$(CPPFLAGS) -DSWIG_GLOBAL
+
 ifdef USE_SWIG
 swiglib.cpp: swiglib.i
 	$(SWIG) $(SWIGFLAGS_LIBSWIG) -o $(ODIR)/$@ $<

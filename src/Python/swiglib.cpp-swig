@@ -33,8 +33,8 @@
  * and things like that.
  *
  * $Log$
- * Revision 1.1  1998/10/01 08:43:34  KB
- * Contains all common swig code.
+ * Revision 1.2  1998/10/01 13:37:44  KB
+ * now compiles and links nicely without libswigpy
  *
  ************************************************************************/
 
@@ -553,6 +553,7 @@ char *SWIG_GetPtr(char *_c, void **ptr, char *_t)
 
 #define SWIG_name    "swiglibc"
 
+#define XXX
 static PyMethodDef swiglibcMethods[] = {
 	 { NULL, NULL }
 };
