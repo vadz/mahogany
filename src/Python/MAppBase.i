@@ -29,7 +29,7 @@ class MAppBase
 {
 public:
    void Exit();
-   MFrame *TopLevelFrame(void) const;
+   wxFrame *TopLevelFrame(void) const;
    const char *GetText(const char *in) const;
    String  GetGlobalDir(void) const;
    String  GetLocalDir(void) const;
@@ -41,31 +41,31 @@ MAppBase &wxGetApp();
 
 
 void  MDialog_ErrorMessage(const char  *message,
-                           MFrame *parent = NULL,
+                           wxFrame *parent = NULL,
                            const char *title = MDIALOG_ERRTITLE_C,
                            bool   modal = false);
 
 void  MDialog_SystemErrorMessage(const char  *message,
-                                 MFrame *parent = NULL,
+                                 wxFrame *parent = NULL,
                                  const char  *title = MDIALOG_SYSERRTITLE_C,
                                  bool modal = false);
 
 void  MDialog_FatalErrorMessage(const char *message,
-                                MFrame *parent = NULL,
+                                wxFrame *parent = NULL,
                                 const char  *title = MDIALOG_FATALERRTITLE_C);
 
 void  MDialog_Message(const char *message,
-                      MFrame *parent = NULL,
+                      wxFrame *parent = NULL,
                       const char *title = MDIALOG_MSGTITLE_C);
 
 bool MDialog_YesNoDialog(const char *message,
-                           MWindow *parent = NULL,
+                           wxWindow *parent = NULL,
                            const char *title = MDIALOG_YESNOTITLE_C,
                            bool YesDefault = true,
                            const char *configPath = NULL);
 
 char *MDialog_FileRequester(String  &message,
-                            MWindow *parent = NULL,
+                            wxWindow *parent = NULL,
                             String &path = NULLstring,
                             String &filename = NULLstring,
                             String &extension = NULLstring,
@@ -76,6 +76,6 @@ char *MDialog_FileRequester(String  &message,
 bool MInputBox(String *pstr,
                const char * caption,
                const char * prompt,
-               MWindow *parent = NULL,
+               wxWindow *parent = NULL,
                const char *key = NULL,
                const char *def = NULL);

@@ -26,7 +26,7 @@ class FolderView;
 // forward declarations
 class FolderView;
 class Profile;
-class MWindow;
+class wxWindow;
 class Message;
 
 
@@ -279,7 +279,7 @@ public:
    */
    virtual bool SaveMessagesToFile(const UIdArray *selections,
                                    const String& fileName,
-                                   MWindow *parent);
+                                   wxWindow *parent);
 
    /** Mark messages as deleted or move them to trash.
        @param messages pointer to an array holding the message numbers
@@ -308,7 +308,7 @@ public:
    */
    virtual void ReplyMessages(const UIdArray *messages,
                               const MailFolder::Params& params,
-                              MWindow *parent);
+                              wxWindow *parent);
 
    /** Forward selected messages.
        @param messages pointer to an array holding the message numbers
@@ -317,7 +317,7 @@ public:
    */
    virtual void ForwardMessages(const UIdArray *messages,
                                 const MailFolder::Params& params,
-                                MWindow *parent);
+                                wxWindow *parent);
 
    //@}
 
@@ -344,48 +344,11 @@ public:
    /// return the folder flags
    virtual int GetFlags(void);
 
-   /// Does the folder need a working network to be accessed?
-   virtual bool NeedsNetwork(void)
-      {
-         return
-            (GetType() == MF_NNTP
-             || GetType() == MF_IMAP
-             || GetType() == MF_POP)
-            && ! (GetFlags() & MF_FLAGS_ISLOCAL);
-      }
-
-   /**@name Accessor methods */
-   //@{
-   /// Get authorisation information
-   virtual inline void GetAuthInfo(String *login, String *password)
-      const;
-   //@}
-
    /** Apply any filter rules to the folder.
        Applies the rule to all messages listed in msgs.
        @return -1 if no filter module exists, return code otherwise
    */
    virtual int ApplyFilterRules(UIdArray msgs);
-   /// Request update
-   virtual void RequestUpdate(void);
-protected:
-};
-
-/** This class temporarily locks a mailfolder */
-class MailFolderLock
-{
-public:
-   /// Attempts to lock the folder.
-   MailFolderLock(const MailFolder *mf)
-      { m_Mf = mf; m_Locked = mf->Lock(); }
-   /// Automatically releases lock.
-   ~MailFolderLock()
-      { if(m_Mf) m_Mf->UnLock(); }
-   /// Call this to check that we have a lock.
-   bool Locked(void) { return m_Locked; }
-private:
-   const MailFolder *m_Mf;
-   bool              m_Locked;
 };
 
 /** This class essentially maps to the c-client Overview structure,
@@ -433,25 +396,5 @@ public:
    /// The folder's attribute.
    virtual long GetAttribute(void);
    virtual ~FolderListingEntry() {}
-};
-
-class FolderListingList;
-
-/** This class holds the listings of a server's folders. */
-class FolderListing
-{
-public:
-   typedef FolderListingList::iterator iterator;
-   /// Return the delimiter character for entries in the hierarchy.
-   virtual char GetDelimiter(void);
-   /// Returns the number of entries.
-   virtual size_t CountEntries(void);
-   /// Returns the first entry.
-   virtual const FolderListingEntry *
-   GetFirstEntry(FolderListing::iterator &i);
-   /// Returns the next entry.
-   virtual const FolderListingEntry *
-   GetNextEntry(FolderListing::iterator &i);
-   virtual ~FolderListing() {}
 };
 

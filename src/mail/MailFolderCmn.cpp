@@ -38,6 +38,8 @@
 
 #include "Mdefaults.h"
 
+#include "MPython.h"
+
 #include "MFolder.h"
 #include "MFilter.h"
 #include "modules/Filters.h"
@@ -1738,9 +1740,8 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
 
 #ifdef USE_PYTHON
    // step 3: folder specific Python callback
-   //
-   // FIXME: "this" should be folder below!
-   if ( !PythonCallback(MCB_FOLDER_NEWMAIL, 0, this, GetClassName(), profile) )
+   if ( !PythonCallback(MCB_FOLDER_NEWMAIL, 0,
+                        (MFolder *)folder, "MFolder", profile) ) // const_cast
 
       // step 4: global python callback
       if ( !PythonCallback(MCB_MAPPLICATION_NEWMAIL, 0,
