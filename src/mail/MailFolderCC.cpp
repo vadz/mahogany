@@ -551,29 +551,6 @@ MailFolderCC::RemoveFromMap(MAILSTREAM const * /* stream */)
       SetDefaultObj(false);
 }
 
-void
-MailFolderCC::UpdateCount(void)
-{
-   unsigned long oldnum = m_NumOfMessages;
-
-   UpdateViews();
-
-   if(m_GenerateNewMailEvents && m_NumOfMessages  > oldnum) // new mail has arrived
-   {
-      unsigned long n = m_NumOfMessages - oldnum;
-      unsigned long *messageIDs = new unsigned long[n];
-      // FIXME: this will need to be changed when we sort message
-      for ( unsigned long i = 0; i < n; i++ )
-         messageIDs[i] = m_Listing[oldnum + i].GetUId();
-
-      MEventNewMailData data(this, n, messageIDs);
-      MEventManager::Send(data);
-
-      delete [] messageIDs;
-   }
-   oldnum = m_NumOfMessages;
-}
-
 extern "C"
 {
    static void mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW *ov);

@@ -98,7 +98,8 @@ enum ConfigFields
    ConfigField_FoldersFirst = ConfigField_ComposeLast,
    ConfigField_OpenFolders,
    ConfigField_MainFolder,
-   ConfigField_FoldersLast = ConfigField_MainFolder,
+   ConfigField_NewMailFolder,
+   ConfigField_FoldersLast = ConfigField_NewMailFolder,
 
 #ifdef USE_PYTHON
    // python
@@ -331,7 +332,8 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    // folders
    { gettext_noop("Folders to open on &startup"),  Field_List |
      Field_Restart, -1,                        },
-   { gettext_noop("&Folder opened in main frame"), Field_Text,    -1,                        },
+   { gettext_noop("Folder opened in &main frame"), Field_Text,    -1,                        },
+   { gettext_noop("Folder where to collect &new mail"), Field_Text, -1},
 
 
 #ifdef USE_PYTHON
@@ -445,6 +447,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    // folders
    CONFIG_ENTRY(MP_OPENFOLDERS),
    CONFIG_ENTRY(MP_MAINFOLDER),
+   CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
 
    // python
 #ifdef USE_PYTHON

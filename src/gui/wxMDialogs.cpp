@@ -51,6 +51,7 @@
 #include <wx/persctrl.h>
 #include <wx/gauge.h>
 #include <wx/stattext.h>
+#include <wx/window.h>
 
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
@@ -210,7 +211,7 @@ MProgressDialog::EnableDisableEvents(bool enable)
    }
    else
    {
-      wxwxWindowListNode *node;
+      wxWindowList::Node *node;
       for ( node = wxTopLevelWindows.GetFirst();
             node;
             node = node->GetNext() )

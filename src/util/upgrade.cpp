@@ -21,11 +21,10 @@
 
 #ifndef   USE_PCH
 #  include "Mcommon.h"
-
 #  include "PathFinder.h"
 #  include "Profile.h"
-
 #  include "MApplication.h"
+#  include "strutil.h"
 #endif  //USE_PCH
 
 #  include "Message.h"
@@ -166,7 +165,8 @@ Upgrade(const String& fromVersion)
    return TRUE;
 }
 
-/** Make sure we have /Profiles/INBOX set up.
+/** Make sure we have /Profiles/INBOX set up and the global
+    NewMailFolder folder.
 
     Returns TRUE if the profile already existed, FALSE if it was just created
  */
@@ -174,26 +174,44 @@ extern bool
 VerifyInbox(void)
 {
    ProfileBase *parent = mApplication->GetProfile();
-
+   String foldername = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
+   
+   bool rc;
+   
    ProfilePathChanger pathChanger(parent, M_FOLDER_CONFIG_SECTION);
-
-   // Do we need to create the INBOX (special folder for incoming mail)?
+   //Do we need to create the INBOX (special folder for incoming mail)?
    if ( parent->HasEntry("INBOX") )
-   {
-      // already ok
-      return TRUE;
-   }
+      rc = TRUE;
    else
    {
       ProfileBase *ibp = ProfileBase::CreateFolderProfile("INBOX", parent);
       ibp->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
-      ibp->writeEntry(MP_FOLDER_TYPE, Inbox);
+      ibp->writeEntry(MP_FOLDER_TYPE, MF_INBOX);
       ibp->writeEntry(MP_FOLDER_COMMENT,
                      _("Default system folder for incoming mail."));
       ibp->DecRef();
-
-      return FALSE;
+      rc = FALSE;
    }
+
+   // Is the newmail folder properly configured?
+   strutil_delwhitespace(foldername);
+   if(foldername.IsEmpty()) // this must not be
+      foldername = MP_NEWMAIL_FOLDER_D; // reset to default
+   // Do we need to create the NewMailFolder?
+   if (!  parent->HasEntry(foldername) )
+   {
+      String path;
+      path=foldername;
+      ProfileBase *ibp = ProfileBase::CreateFolderProfile(foldername, parent);
+      ibp->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
+      ibp->writeEntry(MP_FOLDER_TYPE, MF_FILE);
+      ibp->writeEntry(MP_FOLDER_PATH, path);
+      ibp->writeEntry(MP_FOLDER_COMMENT,
+                     _("Folder where new mail gets collected."));
+      ibp->DecRef();
+      rc = FALSE;
+   }
+   return rc;
 }
 
 /** Make sure we have all "vital" things set up. */

@@ -306,17 +306,13 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
       msg->GetHeaderLine("References", references);
       strutil_delwhitespace(references);
       if(references.Length() > 0)
-         references << ", ";
+         references << ",\015\012 ";
       references << messageid;
       cv->AddHeaderEntry("In-Reply-To",messageid);
       cv->AddHeaderEntry("References",references);
       
       SetMessageFlag((*selections)[i], MailFolder::MSG_STAT_ANSWERED, true);
       SafeDecRef(msg);
-
-      //wxString seq;
-      //seq << (*selections)[i];
-      //SetSequenceFlag(seq, MailFolder::MSG_STAT_ANSWERED, true);
    }
 }
 

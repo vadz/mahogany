@@ -355,6 +355,7 @@ wxMFrame::OnCommandEvent(wxCommandEvent &event)
    OnMenuCommand(event.GetId());
 }
 
+
 void
 wxMFrame::OnPrintSetup()
 {
@@ -365,14 +366,9 @@ wxMFrame::OnPrintSetup()
 #endif
 
       wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
-      //FIXME: save and restore orientation
-      //data.SetOrientation(orientation);
-
       wxPrintDialog printerDialog(this, & data);
-      printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
+//      printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
       printerDialog.ShowModal();
-
-      //FIXME orientation = printerDialog.GetPrintData().GetOrientation();
 }
 
 void wxMFrame::OnPrintSetupPS()
@@ -380,13 +376,9 @@ void wxMFrame::OnPrintSetupPS()
       wxGetApp().SetPrintMode(wxPRINT_POSTSCRIPT);
 
       wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
-      //FIXMEdata.SetOrientation(orientation);
-
       wxPrintDialog printerDialog(this, & data);
-      printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
+//      printerDialog.GetPrintDialogData().SetSetupDialog(TRUE);
       printerDialog.ShowModal();
-
-      //FIXME orientation = printerDialog.GetPrintData().GetOrientation();
 }
 
 #if 0

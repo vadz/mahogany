@@ -12,7 +12,7 @@ include ../makeopts
 ifdef USE_PYTHON
 SUB_DIRS += Python
 MOBJS += Python/*.o
-endif
+endif	
 
 all: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done

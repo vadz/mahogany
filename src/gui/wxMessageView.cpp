@@ -384,7 +384,7 @@ wxMessageView::Update(void)
    char const * cptr;
    String tmp,from,url;
    bool   lastObjectWasIcon = false; // a flag
-
+   FolderType ftype;
    ClickableInfo *ci;
 
    wxLayoutList *llist = GetLayoutList();
@@ -462,10 +462,18 @@ wxMessageView::Update(void)
       from = tmp + String(" <") + from + '>';
    llist->Insert(from);
    llist->LineBreak();
+   //Either To: or Newsgroup: header:
    llist->SetFontWeight(wxBOLD);
-   llist->Insert(_("To: "));
+   ftype = mailMessage->GetFolder()->GetType();
+   if(ftype == MF_NEWS || ftype == MF_NNTP)
+      llist->Insert(_("Newsgroup: "));
+   else
+      llist->Insert(_("To: "));      
    llist->SetFontWeight(wxNORMAL);
-   mailMessage->GetHeaderLine("To",tmp);
+   if(ftype == MF_NEWS || ftype == MF_NNTP)
+      mailMessage->GetHeaderLine("Newsgroups",tmp);
+   else
+      mailMessage->GetHeaderLine("To",tmp);
    llist->Insert(tmp);
    llist->LineBreak();
    llist->SetFontWeight(wxBOLD);

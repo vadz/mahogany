@@ -110,6 +110,7 @@ public:
       iconFile,
       iconPOP,
       iconIMAP,
+      iconNNTP,
       iconNews,
       iconRoot,
       iconMax
@@ -460,6 +461,7 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
       { wxFolderTreeImpl::iconFile,  File  },
       { wxFolderTreeImpl::iconPOP,   POP   },
       { wxFolderTreeImpl::iconIMAP,  IMAP  },
+      { wxFolderTreeImpl::iconNNTP,  MF_NNTP  },
       { wxFolderTreeImpl::iconNews,  News  },
       { wxFolderTreeImpl::iconRoot,  FolderRoot  }
    };
@@ -518,6 +520,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
       "folder_file",
       "folder_pop",
       "folder_imap",
+      "folder_nntp",
       "folder_news",
       "folder_root"
    };
