@@ -71,7 +71,12 @@ static void sigpipe_handler(int)
 {
    // do nothing
 }
-#endif
+#endif // OS_UNIX
+
+extern "C" {
+   #undef LOCAL         // previously defined in other cclient headers
+   #include <pop3.h>    // for pop3_xxx() in GetMessageUID()
+}
 
 // ----------------------------------------------------------------------------
 // macros
@@ -2030,6 +2035,51 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
    return rc;
 }
 
+String
+MailFolderCC::GetMessageUID(unsigned long msgno) const
+{
+   String uidString;
+
+   if ( GetType() == MF_POP )
+   {
+      // no real UID in the IMAP sense of the word, but we can use POP3 UIDL
+      // instead
+      if ( pop3_send_num(m_MailStream, "UIDL", msgno) )
+      {
+         char *reply = ((POP3LOCAL *)m_MailStream->local)->reply;
+         unsigned long msgnoFromUIDL;
+
+         // RFC says 70 characters max, but avoid buffer overflows just in case
+         char *buf = new char[strlen(reply) + 1];
+         if ( (sscanf(reply, "%lu %s", &msgnoFromUIDL, buf) != 2) ||
+              (msgnoFromUIDL != msgno) )
+         {
+            // something is wrong
+            wxLogDebug("Unexpected POP3 server UIDL response to UIDL %lu: %s",
+                       msgno, reply);
+         }
+         else // parsed UIDL successfully
+         {
+            uidString = buf;
+         }
+
+         delete [] buf;
+      }
+      //else: failed to get the UIDL from POP3 server
+   }
+   else // try to get the real UID for all other folders
+   {
+      unsigned long uid = mail_uid(m_MailStream, msgno);
+      if ( uid )
+      {
+         // ok, got the real thing
+         uidString = strutil_ultoa(uid);
+      }
+      //else: no way to get an UID, leave uidString empty
+   }
+
+   return uidString;
+}
 
 #ifdef DEBUG
 

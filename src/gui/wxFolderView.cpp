@@ -376,7 +376,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       }
       else
          newFocus = (focused < nMsgs-1) ? focused + 1 : focused;
-      
+
       /** To    allow translations:
           Delete, Undelete, eXpunge, Copytofolder, Savetofile,
           Movetofolder, ReplyTo, Forward, Open, Print, Show Headers,
@@ -509,7 +509,7 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
    m_menu = new wxMenu;
    m_menu->Append(WXMENU_POPUP_FOLDER_MENU, _("&Quick move"), m_menuFolders);
    m_menu->AppendSeparator();
-   
+
    {
       static const int popupMenuEntries[] =
       {
@@ -695,7 +695,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 {
    m_Parent = parent;
    m_profile = fv->GetProfile();
-   
+
    m_PreviewOnSingleClick = false;
 
    m_profile->IncRef(); // we wish to keep it until dtor
@@ -924,7 +924,7 @@ wxFolderListCtrl::SelectNextUnread()
 
    if(focusedUId == UID_ILLEGAL)
       return;
-   
+
    long idx = -1;
    bool foundFocused = false;
    bool failedOnce = false;
@@ -941,14 +941,14 @@ wxFolderListCtrl::SelectNextUnread()
          idx = -1;
          idx = GetNextItem(idx);
       }
-      
+
       const HeaderInfo *hi = (*hil)[idx];
       if(hi->GetUId() == focusedUId)
       {
          foundFocused = true;
          continue; // we don't want the current one
       }
-      
+
       if(
          ((! failedOnce) && foundFocused)// we are looking for the next unread now:
          || (failedOnce && ! foundFocused) // now we look for the once
@@ -1469,7 +1469,7 @@ wxFolderView::OpenFolder(String const &profilename)
    SetFolder(mf);
    SafeDecRef(mf);
    m_ProfileName = profilename;
-   
+
    wxEndBusyCursor();
 
    if ( !mf )
@@ -1788,6 +1788,25 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
             }
          }
          break;
+
+#ifdef EXPERIMENTAL_zeitlin
+      case WXMENU_MSG_SHOWUID:
+         GetSelections(selections);
+         if ( selections.Count() > 0 )
+         {
+            MailFolder *mf = m_ASMailFolder->GetMailFolder();
+
+            String uidString = mf->GetMessageUID(selections[0u]);
+            if ( uidString.empty() )
+               wxLogWarning("This message doesn't have a valid UID.");
+            else
+               wxLogMessage("The UID of this message is '%s'.",
+                            uidString.c_str());
+
+            mf->DecRef();
+         }
+         break;
+#endif // EXPERIMENTAL_zeitlin
 
       default:
          if ( WXMENU_CONTAINS(LANG, cmd) )

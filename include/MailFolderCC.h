@@ -234,6 +234,14 @@ public:
    */
    virtual UIdArray *SearchMessages(const class SearchCriterium *crit);
 
+   /** Get a string uniquely identifying the message in this folder, will be
+       empty if not supported by this folder type
+
+       @param msgno the number of the message in folder
+       @return string uniquely identifying the message in this folder
+   */
+   virtual String GetMessageUID(unsigned long msgno) const;
+
    /** Check whether mailbox has changed.
        @return FALSE on error
    */
@@ -255,7 +263,7 @@ public:
    /** Like PingReopen() but works on all folders, returns true if all
        folders are fine.
        @param fullPing does a full Ping() instead of a PingReopen()
-       only. If doing a full 
+       only. If doing a full
    */
    static bool PingReopenAll(bool fullPing = FALSE);
 
@@ -324,7 +332,7 @@ public:
    /** RFC 2047 compliant message decoding: all encoded words from the header
        are decoded, but only the encoding of the first of them is returned in
        encoding output parameter (if non NULL).
-     
+
        @param in the RFC 2047 header string
        @param encoding the pointer to the charset of the string (may be NULL)
        @return the full 8bit decoded string
@@ -390,7 +398,7 @@ public:
    static const String& InitializeNewsSpool();
 
    /**
-      check whether a folder can have subfolders 
+      check whether a folder can have subfolders
    */
    static bool HasInferiors(const String &imapSpec,
                             const String &user,
@@ -419,7 +427,7 @@ private:
 
    /// The following is also called by SendMessageCC for ESMTP authentication
    static void SetLoginData(const String &user, const String &pw);
-   
+
    friend class SendMessageCC;
 
    /// for POP/IMAP boxes, this holds the user id for the callback
@@ -762,9 +770,9 @@ private:
    int m_TcpRshTimeout;
    /// ssh connection timeout in seconds.
    int m_TcpSshTimeout;
-   /// the path to rsh 
+   /// the path to rsh
    String m_RshPath;
-   /// the path to ssh 
+   /// the path to ssh
    String m_SshPath;
    //@}
 

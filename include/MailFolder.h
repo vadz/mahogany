@@ -384,10 +384,18 @@ public:
    */
    virtual UIdArray *SearchMessages(const class SearchCriterium *crit) = 0;
 
+   /** Get a string uniquely identifying the message in this folder, will be
+       empty if not supported by this folder type
+
+       @param msgno the number of the message in folder
+       @return string uniquely identifying the message in this folder
+   */
+   virtual String GetMessageUID(unsigned long msgno) const = 0;
+
    /** Get the profile.
        @return Pointer to the profile.
    */
-   virtual inline Profile *GetProfile(void) = 0;
+   virtual Profile *GetProfile(void) = 0;
 
    /// return class name
    const char *GetClassName(void) const
