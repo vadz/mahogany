@@ -78,7 +78,7 @@ SignatureFilter::DoProcess(String& text,
    const char *pc = start + text.length() - 1;
 
    // while we're not too far from end
-   for ( size_t numLinesFromEnd = 0; numLinesFromEnd < 8; numLinesFromEnd++ )
+   for ( size_t numLinesFromEnd = 0; numLinesFromEnd < 10; numLinesFromEnd++ )
    {
       // look for the start of this line:
       while ( *pc != '\n' && pc >= start )
@@ -115,10 +115,9 @@ SignatureFilter::DoProcess(String& text,
 
       // continue going backwards after skipping the new line ("\r\n")
       ASSERT_MSG( *pc == '\n', _T("why did we stop then?") );
+      ASSERT_MSG( pc[-1] == '\r', _T("line doesn't end in\"\\r\\n\"?") );
 
-      pc--;
-      if ( *pc == '\r' )
-         pc--;
+      pc -= 2; // '\r' as well
    }
 
    // first show the main text normally

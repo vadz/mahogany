@@ -75,7 +75,7 @@ TrailerFilter::DoProcess(String& text,
    const char *pc = start + text.length() - 1;
 
    // while we're not too far from end
-   for ( size_t numLinesFromEnd = 0; numLinesFromEnd < 5; numLinesFromEnd++ )
+   for ( size_t numLinesFromEnd = 0; numLinesFromEnd < 10; numLinesFromEnd++ )
    {
       // does this seem to be a separator line?
       char chDel = *pc;
@@ -143,10 +143,9 @@ TrailerFilter::DoProcess(String& text,
 
       // continue going backwards after skipping the new line ("\r\n")
       ASSERT_MSG( *pc == '\n', _T("why did we stop then?") );
+      ASSERT_MSG( pc[-1] == '\r', _T("line doesn't end in\"\\r\\n\"?") );
 
-      pc--;
-      if ( *pc == '\r' )
-         pc--;
+      pc -= 2;
    }
 
    // nothing found, process the rest normally
