@@ -146,9 +146,11 @@ public:
    */
    int GetSelections(UIdArray &selections);
 
-   /** Show a message in the preview window.
-    */
-   void PreviewMessage(long messageno);
+   /// Show a message in the preview window.
+   void PreviewMessage(long uid);
+
+   /// Show the raw text of the specified message
+   void ShowRawText(long uid);
 
    void SetSize(const int x, const int y, const int width, int height);
 

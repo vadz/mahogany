@@ -4,6 +4,7 @@
 Release 0.62 'Mars'
 -------------------------------------------------------------------------------
 
+07.03.01 VZ: quick filter enhancements: now can filter on recepients too
 28.02.01 VZ: indicate the external editor status in the composer window title
              filters don't get applied to deleted messages any more
 21.02.01 VZ: added hard limit on the number of headers retrieved

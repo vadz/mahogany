@@ -1407,7 +1407,6 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          m_Profile = Profile::CreateEmptyProfile(mApplication->GetProfile());
 
       m_MessagePreview->SetParentProfile(m_Profile);
-      m_MessagePreview->Clear(); // again, to reflect profile changes
       m_previewUId = UID_ILLEGAL;
 
       // read in our profile settigns
@@ -1863,8 +1862,13 @@ wxFolderView::Update(HeaderInfoList *listing)
 
    UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
 
+   // this doesn't work well with wxWin <= 2.2.5 in debug mode as calling
+   // EnsureVisible() results in an assert failure which is harmless but
+   // _very_ annoying as it happens all the time (FIXME: should be 6 below!!)
+#if !defined(__WXDEBUG__) || wxCHECK_VERSION(2,2,7)
    if(focusedIndex != -1 && focusedIndex < (long) n)
       m_FolderCtrl->EnsureVisible(focusedIndex);
+#endif
 
    if ( n > THRESHOLD )
    {
@@ -2149,9 +2153,19 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
 
       case WXMENU_MSG_FIND:
       case WXMENU_MSG_TOGGLEHEADERS:
-      case WXMENU_MSG_SHOWRAWTEXT:
       case WXMENU_EDIT_COPY:
-         (void)m_MessagePreview->DoMenuCommand(cmd);
+         if ( m_MessagePreview )
+         {
+            (void)m_MessagePreview->DoMenuCommand(cmd);
+         }
+         break;
+
+      case WXMENU_MSG_SHOWRAWTEXT:
+         GetSelections(selections);
+         if ( selections.Count() > 0 )
+         {
+            ShowRawText(selections[0]);
+         }
          break;
 
       case WXMENU_LAYOUT_LCLICK:
@@ -2242,12 +2256,6 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          GetSelections(selections);
          ToggleMessages(selections);
          break;
-
-#if 0
-      case WXMENU_MSG_DELDUPLICATES:
-         m_TicketList->Add(m_ASMailFolder->DeleteDuplicates(this));
-         break;
-#endif // 0
 
       case WXMENU_MSG_NEXT_UNREAD:
          m_FolderCtrl->SelectNextUnread();
@@ -2433,6 +2441,28 @@ wxFolderView::GetSelections(UIdArray& selections)
 }
 
 void
+wxFolderView::ShowRawText(long uid)
+{
+   // do it synchrnously (FIXME we shouldn't!)
+   String text;
+   Message *msg = m_MailFolder->GetMessage(uid);
+   if ( msg )
+   {
+      msg->WriteToString(text, true);
+      msg->DecRef();
+   }
+
+   if ( text.IsEmpty() )
+   {
+      wxLogError(_("Failed to get the raw text of the message."));
+   }
+   else
+   {
+      MDialog_ShowText(m_Parent, _("Raw message text"), text, "RawMsgPreview");
+   }
+}
+
+void
 wxFolderView::PreviewMessage(long uid)
 {
    if ( (unsigned long)uid != m_previewUId )
@@ -2468,7 +2498,9 @@ wxFolderView::PrintMessages(const UIdArray& selections)
    int n = selections.Count();
 
    if(n == 1)
+   {
       m_MessagePreview->Print();
+   }
    else
    {
       int i;
@@ -2486,7 +2518,9 @@ wxFolderView::PrintPreviewMessages(const UIdArray& selections)
    int n = selections.Count();
 
    if(n == 1)
+   {
       m_MessagePreview->PrintPreview();
+   }
    else
    {
       int i;
@@ -2863,16 +2897,44 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
             {
                MFolder_obj folder(m_folderName);
 
-               CreateQuickFilter(folder, msg->From(), msg->Subject(), m_FolderCtrl);
+               String to;
+               (void)msg->GetHeaderLine("To", to);
+
+               if ( CreateQuickFilter(folder,
+                                      msg->From(), msg->Subject(), to,
+                                      m_Frame) )
+               {
+                  // ask the user if he doesn't want to test his new filter
+                  // right now
+                  if ( MDialog_YesNoDialog
+                       (
+                        _("Would you like to apply the filter you have just "
+                          "created to this message immediately?"),
+                        m_Frame,
+                        MDIALOG_YESNOTITLE,
+                        true,
+                        GetFullPersistentKey(M_MSGBOX_APPLY_QUICK_FILTER_NOW)
+                       ) )
+                  {
+                     UIdArray selections;
+                     selections.Add(msg->GetUId());
+                     m_TicketList->Add(
+                           m_ASMailFolder->ApplyFilterRules(&selections, this)
+                        );
+                  }
+               }
+               //else: filter not created, nothing to apply
+
                msg->DecRef();
             }
          }
          break;
 
       default:
-         wxASSERT_MSG(0,"MEvent handling not implemented yet");
+         FAIL_MSG( "MEvent handling not implemented yet" );
       }
    }
+
    result->DecRef();
 }
 

@@ -542,11 +542,13 @@ wxMessageView::SetParentProfile(Profile *profile)
 
    if(profile)
    {
-      m_Profile = profile;/*Profile::CreateProfile("MessageView", profile);*/
+      m_Profile = profile;
       m_Profile->IncRef();
    }
    else
+   {
       m_Profile = Profile::CreateEmptyProfile();
+   }
 
    UpdateProfileValues();
 
@@ -615,7 +617,7 @@ wxMessageView::ReadAllSettings(AllProfileValues *settings)
 }
 
 void
-wxMessageView::Clear(void)
+wxMessageView::ClearWithoutReset(void)
 {
    SetCursorVisibility(-1); // on demand
    wxLayoutWindow::Clear(m_ProfileValues.font, m_ProfileValues.size,
@@ -624,7 +626,19 @@ wxMessageView::Clear(void)
                          &m_ProfileValues.BgCol);
    SetBackgroundColour( m_ProfileValues.BgCol );
    GetLayoutList()->SetAutoFormatting(FALSE); // speeds up insertion of text
+}
+
+void
+wxMessageView::Clear()
+{
+   ClearWithoutReset();
+
    m_uid = UID_ILLEGAL;
+   if ( m_mailMessage )
+   {
+      m_mailMessage->DecRef();
+      m_mailMessage = NULL;
+   }
 }
 
 void
@@ -653,7 +667,7 @@ wxMessageView::Update(void)
    wxLayoutList *llist = GetLayoutList();
    wxLayoutObject *obj = NULL;
 
-   Clear();
+   ClearWithoutReset();
 
    if(! m_mailMessage)  // no message to display
       return;
@@ -663,11 +677,7 @@ wxMessageView::Update(void)
    // if wanted, display all header lines
    if(m_ProfileValues.showHeaders)
    {
-      String
-         tmp = m_mailMessage->GetHeader();
-      char *buf = strutil_strdup(tmp);
-      wxLayoutImportText(llist,buf);
-      delete [] buf;
+      wxLayoutImportText(llist, m_mailMessage->GetHeader());
       llist->LineBreak();
    }
 
@@ -1287,8 +1297,8 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       filename << '.' << ext;
    }
 
-   MailMessageParameters
-      params(filename, mimetype, m_mailMessage, mimeDisplayPart);
+   MailMessageParameters params(filename, mimetype,
+                                m_mailMessage, mimeDisplayPart);
 
    // We might fake a file, so we need this:
    bool already_saved = false;
@@ -1709,24 +1719,6 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
 }
 
 bool
-wxMessageView::ShowRawText(void)
-{
-   if ( !m_mailMessage )
-      return false;
-
-   String text;
-   m_mailMessage->WriteToString(text, true);
-   if ( text.IsEmpty() )
-   {
-      wxLogError(_("Failed to get the raw text of the message."));
-
-      return false;
-   }
-   MDialog_ShowText(m_Parent, _("Raw message text"), text, "RawMsgPreview");
-   return true;
-}
-
-bool
 wxMessageView::DoMenuCommand(int id)
 {
    UIdArray msgs;
@@ -1805,9 +1797,6 @@ wxMessageView::DoMenuCommand(int id)
       }
       break;
 
-   case WXMENU_MSG_SHOWRAWTEXT:
-      ShowRawText();
-      break;
    case WXMENU_EDIT_PASTE:
       Paste();
       Refresh();
@@ -1844,23 +1833,26 @@ wxMessageView::ShowMessage(ASMailFolder *folder, UIdType uid)
 
    if ( uid == UID_ILLEGAL )
    {
+      // don't show anything
       Clear();
-      return;
    }
+   else
+   {
+      SafeDecRef(m_folder);
+      m_folder = folder;
+      SafeIncRef(m_folder);
 
-   SafeDecRef(m_folder);
-   m_folder = folder;
-   SafeIncRef(m_folder);
-
-   Clear();
-   (void)m_folder->GetMessage(uid, this); // file request
+      // file request, our ShowMessage(Message *) will be called later
+      (void)m_folder->GetMessage(uid, this);
+   }
 }
 
 void
 wxMessageView::ShowMessage(Message *mailMessage)
 {
+   CHECK_RET( mailMessage, "no message to show in wxMessageView" );
+
    mailMessage->IncRef();
-   CHECK_RET( mailMessage, "no message with such uid" );
 
    unsigned long size = 0,
                  maxSize = (unsigned long)READ_CONFIG(m_Profile,
@@ -1931,7 +1923,6 @@ wxMessageView::ShowMessage(Message *mailMessage)
 
    Update();
 }
-
 
 bool
 wxMessageView::Print(bool interactive)

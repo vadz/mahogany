@@ -281,13 +281,19 @@ public:
                                 wxTE_MULTILINE | wxTE_READONLY);
         m_text->SetFont(wxFont(12, wxFONTFAMILY_TELETYPE,
                                wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+
+        m_btn = new wxButton(this, wxID_CANCEL, _("Close"));
+
         Resize();
     }
 
     void Resize()
     {
-       wxSize size = GetClientSize();
-       m_text->SetSize(0, 0, size.x, size.y);
+       wxSize size = GetClientSize(),
+              sizeBtn = m_btn->GetSize();
+
+       m_text->SetSize(0, 0, size.x, size.y - sizeBtn.y - 2*LAYOUT_Y_MARGIN);
+       m_btn->Move((size.x - sizeBtn.x) / 2, size.y - sizeBtn.y - LAYOUT_Y_MARGIN);
     }
 
     void OnSize(wxSizeEvent& WXUNUSED(event))
@@ -296,7 +302,11 @@ public:
     }
 
 private:
+    // text control showing the text
     wxTextCtrl *m_text;
+
+    // the button to close the dialog
+    wxButton *m_btn;
 
     DECLARE_EVENT_TABLE()
 };
@@ -2587,6 +2597,7 @@ static const struct
    { "FilterNotUsedYet", gettext_noop("Warn that newly created filter is unused") },
    { "ImportUnderRoot", gettext_noop("Ask where do you want to import folders") },
    { "MoveExpungeConfirm", gettext_noop("Confirm expunging messages after moving") },
+   { "ApplyQuickFilter", gettext_noop("Propose to apply quick filter after creation") },
    //{ "", gettext_noop() },
 };
 

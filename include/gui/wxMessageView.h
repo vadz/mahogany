@@ -129,11 +129,8 @@ public:
    // internal M events processing function
    virtual bool OnMEvent(MEventData& event);
 
-   /// call to show the raw text of the current message (modal dialog)
-   bool ShowRawText(void);
-
-   /// for use by wxMessageViewFrame, to be removed after
-   /// OnCommandEvent() is cleaned up:
+   // for use by wxMessageViewFrame, to be removed after OnCommandEvent() is
+   // cleaned up:
    wxFolderView *GetFolderView(void) { return m_FolderView; }
 
    /// Clear the window.
@@ -159,6 +156,9 @@ private:
 
    /// reread the entries from our profile
    void UpdateProfileValues();
+
+   /// just clear the window without forgetting m_mailMessage
+   void ClearWithoutReset();
 
    /// the parent window
    wxWindow   *m_Parent;

@@ -47,6 +47,7 @@ extern bool ConfigureFilter(MFilterDesc *filterDesc,
 extern bool CreateQuickFilter(MFolder *folder,
                               const String& from,
                               const String& subject,
+                              const String& to,
                               wxWindow *parent = NULL);
 
 #endif // _WXFILTERSDIALOG_H_

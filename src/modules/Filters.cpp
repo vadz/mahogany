@@ -2461,7 +2461,6 @@ int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid, bool *changeflag)
       text = GetStatusString(msg);
 
       GetInterface()->StatusMessage(text + "...");
-      wxYield();
    }
 
    const Value rc = m_Program->Evaluate();
@@ -2489,7 +2488,6 @@ int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid, bool *changeflag)
       }
 
       GetInterface()->StatusMessage(text);
-      wxYield();
 
       msg->DecRef();
    }

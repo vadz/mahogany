@@ -1445,9 +1445,18 @@ void wxFolderFiltersDialog::OnUpdateEditBtn(wxUpdateUIEvent& event)
 class wxQuickFilterDialog : public wxManuallyLaidOutDialog
 {
 public:
+   enum FilterControl
+   {
+      Filter_From,
+      Filter_Subject,
+      Filter_To,
+      Filter_Max
+   };
+
    wxQuickFilterDialog(MFolder *folder,
                        const String& from,
                        const String& subject,
+                       const String& to,
                        wxWindow *parent);
 
    virtual ~wxQuickFilterDialog();
@@ -1457,14 +1466,19 @@ public:
 protected:
    void DoUpdateUI() { m_action->UpdateUI(); }
 
+   // event handlers
    void OnChoice(wxCommandEvent&) { DoUpdateUI(); }
+   void OnUpdateOk(wxUpdateUIEvent& event);
+
+   // add a test if the given checkbox is checked and the text is not empty
+   void AddTest(MFDialogSettings **settings,
+                wxString *name,
+                FilterControl which);
 
 private:
    // GUI controls
-   wxCheckBox *m_checkSubj,
-              *m_checkFrom;
-   wxTextCtrl *m_textSubj,
-              *m_textFrom;
+   wxCheckBox *m_check[Filter_Max];
+   wxTextCtrl *m_text[Filter_Max];
 
    OneActionControl *m_action;
 
@@ -1475,11 +1489,14 @@ private:
 
 BEGIN_EVENT_TABLE(wxQuickFilterDialog, wxManuallyLaidOutDialog)
    EVT_CHOICE(-1, wxQuickFilterDialog::OnChoice)
+
+   EVT_UPDATE_UI(wxID_OK, wxQuickFilterDialog::OnUpdateOk)
 END_EVENT_TABLE()
 
 wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
                                          const String& from,
                                          const String& subject,
+                                         const String& to,
                                          wxWindow *parent)
                    : wxManuallyLaidOutDialog(parent,
                                              _("Create quick filter"),
@@ -1509,43 +1526,47 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
    wxArrayString labels;
    labels.Add(_("the message was sent from"));
    labels.Add(_("the message subject contains"));
+   labels.Add(_("the message was sent to"));
    long widthMax = GetMaxLabelWidth(labels, this) + 4*LAYOUT_X_MARGIN;
 
-   m_textFrom = new wxTextCtrl(this, -1, from);
-   c = new wxLayoutConstraints;
-   c->top.Below(msg, 2*LAYOUT_Y_MARGIN);
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN + widthMax + LAYOUT_X_MARGIN);
-   c->height.AsIs();
-   m_textFrom->SetConstraints(c);
+   wxArrayString text;
+   text.Add(from);
+   text.Add(subject);
+   text.Add(to);
 
-   m_checkFrom = new wxCheckBox(this, -1, labels[0]);
-   c = new wxLayoutConstraints;
-   c->centreY.SameAs(m_textFrom, wxCentreY);
-   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->width.Absolute(widthMax);
-   c->height.AsIs();
-   m_checkFrom->SetConstraints(c);
+   for ( size_t n = 0; n < Filter_Max; n++ )
+   {
+      m_text[n] = new wxTextCtrl(this, -1, text[n]);
+      c = new wxLayoutConstraints;
 
-   m_textSubj = new wxTextCtrl(this, -1, subject);
-   c = new wxLayoutConstraints;
-   c->top.Below(m_textFrom, LAYOUT_Y_MARGIN);
-   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN + widthMax + LAYOUT_X_MARGIN);
-   c->height.AsIs();
-   m_textSubj->SetConstraints(c);
+      if ( n == 0 )
+      {
+         // top control is positioned relatively to the box
+         c->top.Below(msg, 2*LAYOUT_Y_MARGIN);
+      }
+      else
+      {
+         // others are below the previous control
+         c->top.Below(m_text[n - 1], LAYOUT_Y_MARGIN);
+      }
 
-   m_checkSubj = new wxCheckBox(this, -1, labels[1]);
-   c = new wxLayoutConstraints;
-   c->centreY.SameAs(m_textSubj, wxCentreY);
-   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->width.Absolute(widthMax);
-   c->height.AsIs();
-   m_checkSubj->SetConstraints(c);
+      c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+      c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN + widthMax + LAYOUT_X_MARGIN);
+      c->height.AsIs();
+      m_text[n]->SetConstraints(c);
+
+      m_check[n] = new wxCheckBox(this, -1, labels[n]);
+      c = new wxLayoutConstraints;
+      c->centreY.SameAs(m_text[n], wxCentreY);
+      c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+      c->width.Absolute(widthMax);
+      c->height.AsIs();
+      m_check[n]->SetConstraints(c);
+   }
 
    msg = new wxStaticText(this, -1, _("And then:"));
    c = new wxLayoutConstraints;
-   c->top.Below(m_checkSubj, 3*LAYOUT_Y_MARGIN);
+   c->top.Below(m_check[Filter_Max - 1], 3*LAYOUT_Y_MARGIN);
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    c->height.AsIs();
@@ -1555,52 +1576,60 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
 
    wxWindow *last = msg;
    m_action->LayoutControls(&last, 2*LAYOUT_X_MARGIN, 3*LAYOUT_X_MARGIN);
-   SetDefaultSize(8*wBtn, 10*hBtn);
+   SetDefaultSize(8*wBtn, 11*hBtn);
 
    DoUpdateUI();
+}
+
+void wxQuickFilterDialog::AddTest(MFDialogSettings **settings,
+                                  wxString *name,
+                                  FilterControl which)
+{
+   // the part of the name of the filter for the specified criterium
+   static const char *names[Filter_Max] =
+   {
+      gettext_noop("from"),
+      gettext_noop("subject"),
+      gettext_noop("to"),
+   };
+
+   // the AddTest() argument for it
+   static const MFDialogTarget where[Filter_Max] =
+   {
+      ORC_W_From,
+      ORC_W_Subject,
+      ORC_W_Recipients,
+   };
+
+   wxString text = m_text[which]->GetValue();
+   if ( m_check[which]->GetValue() && !text.empty() )
+   {
+      if ( !*settings )
+         *settings = MFDialogSettings::Create();
+      else
+         *name << ' ';
+
+      (*settings)->AddTest(ORC_L_And, false /* not inverted */,
+                           ORC_T_Contains, where[which], text);
+
+      *name << _(names[which]) << ' ' << text;
+   }
 }
 
 bool wxQuickFilterDialog::TransferDataFromWindow()
 {
    MFDialogSettings *settings = NULL;
-   String name,
-          from = m_textFrom->GetValue(),
-          subj = m_textSubj->GetValue();
+   String name = _("quick filter ");
 
-   if ( m_checkFrom->GetValue() && !!from )
+   for ( size_t n = 0; n < Filter_Max; n++ )
    {
-      if ( !settings )
-         settings = MFDialogSettings::Create();
-
-      settings->AddTest(ORC_L_And, false, ORC_T_Contains, ORC_W_From, from);
-
-      if ( !!name )
-         name << ' ';
-      name << _("from ") << from;
-   }
-   if ( m_checkSubj->GetValue() && !!subj )
-   {
-      if ( !settings )
-         settings = MFDialogSettings::Create();
-
-      settings->AddTest(ORC_L_And, false, ORC_T_Contains, ORC_W_Subject, subj);
-
-      if ( !!name )
-         name << ' ';
-      name << _("subject ") << subj;
+      AddTest(&settings, &name, (FilterControl)n);
    }
 
-   if ( !settings )
-   {
-      MDialog_ErrorMessage(_("Please specify either subject or address "
-                             "to create the filter."), this);
-
-      return false;
-   }
+   CHECK( settings, false,
+          "the [Ok] button not supposed to be enabled in this case" );
 
    settings->SetAction(m_action->GetAction(), m_action->GetArgument());
-
-   name.Prepend(_("quick filter "));
 
    MFilter_obj filter(name);
    MFilterDesc fd;
@@ -1616,6 +1645,23 @@ bool wxQuickFilterDialog::TransferDataFromWindow()
 wxQuickFilterDialog::~wxQuickFilterDialog()
 {
    m_folder->DecRef();
+}
+
+void wxQuickFilterDialog::OnUpdateOk(wxUpdateUIEvent& event)
+{
+   // only enable the ok button if we have some condition
+   bool isEnabled = false;
+   for ( size_t n = 0; n < Filter_Max; n++ )
+   {
+      if ( m_check[n]->GetValue() && !m_text[n]->GetValue().empty() )
+      {
+         isEnabled = true;
+
+         break;
+      }
+   }
+
+   event.Enable(isEnabled);
 }
 
 // ----------------------------------------------------------------------------
@@ -1712,9 +1758,11 @@ bool ConfigureFilter(MFilterDesc *filterDesc,
 extern bool CreateQuickFilter(MFolder *folder,
                               const String& from,
                               const String& subject,
+                              const String& to,
                               wxWindow *parent)
 {
-   wxQuickFilterDialog dlg(folder, from, subject, parent);
+   wxQuickFilterDialog dlg(folder, from, subject, to, parent);
+
    return dlg.ShowModal() == wxID_OK;
 }
 
