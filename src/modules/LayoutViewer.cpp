@@ -294,10 +294,9 @@ LayoutViewer::LayoutViewer()
    m_window = NULL;
 }
 
-void LayoutViewer::SetTextColour(const wxColour& col)
+void LayoutViewer::SetTextColour(const wxColour& colToSet)
 {
-   if ( !col.Ok() )
-      col = GetOptions().FgCol;
+   wxColour col = colToSet.Ok() ? colToSet : GetOptions().FgCol;
 
    // const_cast is harmless but needed because of the broken
    // wxLayoutWindow API
