@@ -1506,14 +1506,19 @@ MailFolderCC::Lock(void) const
    ((MailFolderCC *)this)->m_Mutex->Lock();
    return true;
 #else
-   ASSERT_MSG((!m_Mutex), "Attempt to lock locked folder.");
-   if(m_Mutex == false)
+   if(!m_Mutex)
    {
       ((MailFolderCC *)this)->m_Mutex = true;
       return true;
    }
    else
+   {
+#ifdef EXPERIMENTAL_log_callbacks
+      printf("**********Attempt to lock locked folder\n");	// FIXME
+      //mm_log("Attempt to lock locked folder.", 0, (MailFolderCC *)this);
+#endif
       return false;
+   }
 #endif
 }
 
@@ -3491,6 +3496,10 @@ extern "C"
 void
 mm_searched(MAILSTREAM *stream, unsigned long number)
 {
+#ifdef EXPERIMENTAL_log_callbacks
+   printf("mm_searched(`%s', %lu) %d\n", stream->mailbox, number,
+           mm_disable_callbacks);
+#endif
    if(mm_disable_callbacks)
       return;
    MailFolderCC::mm_searched(stream,  number);
@@ -3499,6 +3508,10 @@ mm_searched(MAILSTREAM *stream, unsigned long number)
 void
 mm_expunged(MAILSTREAM *stream, unsigned long number)
 {
+#ifdef EXPERIMENTAL_log_callbacks
+   printf("mm_expunged(`%s', %lu) %d\n", stream->mailbox, number,
+           mm_disable_callbacks);
+#endif
    if(mm_disable_callbacks)
       return;
    MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Expunged,__LINE__);
@@ -3509,6 +3522,10 @@ mm_expunged(MAILSTREAM *stream, unsigned long number)
 void
 mm_flags(MAILSTREAM *stream, unsigned long number)
 {
+#ifdef EXPERIMENTAL_log_callbacks
+   printf("mm_flags(`%s', %lu) %d\n", stream->mailbox, number,
+           mm_disable_callbacks);
+#endif
    if(mm_disable_callbacks)
       return;
    MailFolderCC::mm_flags(stream, number);
@@ -3517,6 +3534,10 @@ mm_flags(MAILSTREAM *stream, unsigned long number)
 void
 mm_notify(MAILSTREAM *stream, char *str, long errflg)
 {
+#ifdef EXPERIMENTAL_log_callbacks
+   printf("mm_notify(`%s', `%s', %lu) %d\n", stream->mailbox, str, errflg,
+           mm_disable_callbacks);
+#endif
    if(mm_disable_callbacks)
       return;
    MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Notify,__LINE__);
@@ -3528,15 +3549,22 @@ mm_notify(MAILSTREAM *stream, char *str, long errflg)
 void
 mm_list(MAILSTREAM *stream, int delim, char *name, long attrib)
 {
+#ifdef EXPERIMENTAL_log_callbacks
+   printf("mm_list(`%s', %d, `%s', %ld) %d\n", stream->mailbox, delim, name,
+           attrib, mm_disable_callbacks);
+#endif
    if(mm_disable_callbacks)
       return;
-
    MailFolderCC::mm_list(stream, delim, name, attrib);
 }
 
 void
 mm_lsub(MAILSTREAM *stream, int delim, char *name, long attrib)
 {
+#ifdef EXPERIMENTAL_log_callbacks
+   printf("mm_lsub(`%s', %d, `%s', %ld) %d\n", stream->mailbox, delim, name,
+           attrib, mm_disable_callbacks);
+#endif
    if(mm_disable_callbacks)
       return;
    MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::LSub,__LINE__);
@@ -3549,6 +3577,10 @@ mm_lsub(MAILSTREAM *stream, int delim, char *name, long attrib)
 void
 mm_exists(MAILSTREAM *stream, unsigned long number)
 {
+#ifdef EXPERIMENTAL_log_callbacks
+   printf("mm_EXISTS(%lu, `%s') %d\n", number, stream->mailbox,
+           mm_disable_callbacks);
+#endif
    if(mm_disable_callbacks)
       return;
    // update count immediately to reflect change:
@@ -3558,6 +3590,10 @@ mm_exists(MAILSTREAM *stream, unsigned long number)
 void
 mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 {
+#ifdef EXPERIMENTAL_log_callbacks
+   printf("mm_status(`%s', `%s', %p) %d\n", stream->mailbox, mailbox, status,
+           mm_disable_callbacks);
+#endif
    if(mm_disable_callbacks)
       return;
    MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::Status,__LINE__);
@@ -3567,16 +3603,17 @@ mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 void
 mm_log(char *str, long errflg)
 {
+#ifdef EXPERIMENTAL_log_callbacks
+   printf("mm_log(`%s', %ld) %d\n", str, errflg, mm_disable_callbacks);
+#endif
    if(mm_disable_callbacks || mm_ignore_errors)
       return;
-
    String *msg = new String(str);
    if(errflg >= 4) // fatal imap error, reopen-mailbox
    {
       if(!MailFolderCC::PingReopenAll())
          *msg << _("\nAttempt to re-open all folders failed.");
    }
-
    MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::Log,__LINE__);
    evptr->m_args[0].m_str = msg;
    evptr->m_args[1].m_long = errflg;
@@ -3586,6 +3623,9 @@ mm_log(char *str, long errflg)
 void
 mm_dlog(char *str)
 {
+#ifdef EXPERIMENTAL_log_callbacks
+   printf("mm_dlog(`%s') %d\n", str, mm_disable_callbacks);
+#endif
    if(mm_disable_callbacks)
       return;
    MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::DLog,__LINE__);
@@ -3596,6 +3636,10 @@ mm_dlog(char *str)
 void
 mm_login(NETMBX *mb, char *user, char *pwd, long trial)
 {
+#ifdef EXPERIMENTAL_log_callbacks
+   printf("mm_login({%s, %s@%s:%ld, %s}, %ld) %d\n", mb->service, mb->user,
+           mb->host, mb->port , mb->mailbox, trial, mm_disable_callbacks);
+#endif
    if(mm_disable_callbacks)
       return;
    // Cannot use event system, has to be called while c-client is working.
@@ -3605,18 +3649,28 @@ mm_login(NETMBX *mb, char *user, char *pwd, long trial)
 void
 mm_critical(MAILSTREAM *stream)
 {
+#ifdef EXPERIMENTAL_log_callbacks
+   printf("mm_critical(`%s') %d\n", stream->mailbox, mm_disable_callbacks);
+#endif
    MailFolderCC::mm_critical(stream);
 }
 
 void
 mm_nocritical(MAILSTREAM *stream)
 {
+#ifdef EXPERIMENTAL_log_callbacks
+   printf("mm_nocritical(`%s') %d\n", stream->mailbox, mm_disable_callbacks);
+#endif
    MailFolderCC::mm_nocritical(stream);
 }
 
 long
 mm_diskerror(MAILSTREAM *stream, long int errorcode, long int serious)
 {
+#ifdef EXPERIMENTAL_log_callbacks
+   printf("mm_diskerror(`%s', %ldl, %ld) %d\n", stream->mailbox, errorcode,
+           serious, mm_disable_callbacks);
+#endif
    if(mm_disable_callbacks)
       return 1;
    return MailFolderCC::mm_diskerror(stream,  errorcode, serious);
@@ -3625,6 +3679,9 @@ mm_diskerror(MAILSTREAM *stream, long int errorcode, long int serious)
 void
 mm_fatal(char *str)
 {
+#ifdef EXPERIMENTAL_log_callbacks
+   printf("mm_fatal(`%s') %d\n", str, mm_disable_callbacks);
+#endif
    MailFolderCC::mm_fatal(str);
 }
 
@@ -3633,6 +3690,10 @@ mm_fatal(char *str)
 static int
 mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW_X *ov)
 {
+#ifdef EXPERIMENTAL_log_callbacks
+   printf("mm_overview_header(`%s', %lu, %p) %d\n", stream->mailbox, uid, ov,
+           mm_disable_callbacks);
+#endif
    return MailFolderCC::OverviewHeader(stream, uid, ov);
 }
 
