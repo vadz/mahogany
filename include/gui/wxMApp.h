@@ -64,7 +64,15 @@ public:
    virtual int  OnRun();
    virtual int  OnExit();
 
-   /// override wxWindows default icons
+   // this function is virtual only in 2.3.0
+#if wxCHECK_VERSION(2, 3, 0)
+   // override top level window detection: never return splash frame from here
+   // as it is transient and so is not suitable for use as a parent for the
+   // dialogs (it can disappear before the dialog is closed)
+   virtual wxWindow *GetTopWindow() const;
+#endif // 2.3.0
+
+   // override wxWindows default icons
    virtual wxIcon GetStdIcon(int which) const;
 
    // OnIdle() handler to process Mahogany-specific MEvents which are

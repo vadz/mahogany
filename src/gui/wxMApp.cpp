@@ -1051,7 +1051,25 @@ wxMApp::ThrEnterLeave(bool enter, SectionId what, bool
 
 #endif
 
+// ----------------------------------------------------------------------------
+// Customize wxApp behaviour
+// ----------------------------------------------------------------------------
 
+#if wxCHECK_VERSION(2, 3, 0)
+
+// never return splash frame from here
+wxWindow *wxMApp::GetTopWindow() const
+{
+   wxWindow *win = wxApp::GetTopWindow();
+   if ( win == g_pSplashScreen )
+      win = NULL;
+
+   return win;
+}
+
+#endif // 2.3.0
+
+// return our icons
 wxIcon
 wxMApp::GetStdIcon(int which) const
 {

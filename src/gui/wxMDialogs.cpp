@@ -1024,18 +1024,40 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
 }
 
 
-
-
+// ----------------------------------------------------------------------------
+// Splash screen stuff
+// ----------------------------------------------------------------------------
 
 class wxMFrame *g_pSplashScreen = NULL;
 
 extern void CloseSplash()
 {
    if ( g_pSplashScreen )
-     ((wxAboutFrame *)g_pSplashScreen)->Close();
+   {
+      // do close the splash
+      wxFrame *frameSplash = (wxFrame *)g_pSplashScreen;
+      frameSplash->Close();
+
+#if !wxCHECK_VERSION(2, 3, 0)
+      // and also unset the splash screen as the main app window: otherwise we
+      // risk to create the dialogs with splash as parent and a crash later when
+      // the dialog is closed as its parent will have already been deleted
+      //
+      // NB: use mApplication and not wxTheApp now as the latter could still be
+      //     NULL if we're called from OnInit()!
+      if ( mApplication )
+      {
+         wxMApp *mapp = (wxMApp *)mApplication;
+         if ( mapp->GetTopWindow() == frameSplash )
+         {
+            mapp->SetTopWindow(NULL);
+
+            wxTopLevelWindows.DeleteObject(frameSplash);
+         }
+      }
+#endif // wxWin 2.3+
+   }
 }
-
-
 
 void
 MDialog_AboutDialog( const MWindow * /* parent */, bool bCloseOnTimeout)
