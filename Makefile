@@ -17,9 +17,9 @@ M := mahogany-$(M_VERSION_MAJOR).$(M_VERSION_MINOR)
 
 FILES := configure.in configure Makefile makeopts.in makerules
 ifeq ($(USE_RESOURCES),yes)
-SUB_DIRS := include extra res src
+SUB_DIRS := include lib res src
 else
-SUB_DIRS := include extra src
+SUB_DIRS := include lib src
 endif
 ALL_DIRS := $(SUB_DIRS) doc
 
@@ -33,7 +33,7 @@ all semistatic quartstatic static:
 	done
 
 doc:
-	set -e; for i in extra doc; do $(MAKE) -C $$i doc; done
+	set -e; for i in doc; do $(MAKE) -C $$i doc; done
 
 classdoc:
 	set -e; for i in doc; do $(MAKE) -C $$i doc; done
@@ -83,7 +83,7 @@ install_bin:
 	if test ! -d $$i; then $(INSTALL) -d -m 755 $$i; \
 	fi \
 	done
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i install; done
+	set -e; for i in $(SUB_DIRS) extra; do $(MAKE) -C $$i install; done
 	set -e; for i in .src/doc/Tips/Tips*.txt; \
 	do $(INSTALL_DATA) $$i $(DOCDIR)/Tips; \
 	done

@@ -1088,7 +1088,7 @@ case "$USE_CCOSTYPE" in
 	*)
 		AC_MSG_RESULT(unknown)
 		AC_MSG_ERROR([cannot guess c-client OS type for $OSTYPE,
-please have a look at extra/src/c-client/Makefile and use --with-ccostype=xxx
+please have a look at lib/imap/Makefile and use --with-ccostype=xxx
 with xxx being the most appropriate system type from this file.])
 		;;
 	esac
@@ -1129,15 +1129,15 @@ case "$USE_PISOCK" in
 esac
 AC_SUBST(MAKE_PISOCKLIB)
 
-dnl Check if we have libmal source in extra/src
+dnl Check if we have libmal source in lib/libmal
 MAKE_HAVE_LIBMAL=
 case "$MAKE_PISOCKLIB" in
 '') ;;
 *)
-	AC_MSG_CHECKING(for libmal in extra/src)
-	if test ! -d $srcdir/extra/src/libmal 
+	AC_MSG_CHECKING(for libmal in lib)
+	if test ! -d $srcdir/lib/libmal 
 	then	AC_MSG_RESULT(not found - no MAL synch for PalmOS)
-	elif test -f $srcdir/extra/src/libmal/Makefile.in \
+	elif test -f $srcdir/lib/libmal/Makefile.in \
 		-a "$SOURCEDIR" != "$BUILDDIR"
 	then	AC_MSG_RESULT(old-style libmal not supported in separate build tree)
 	else	AC_MSG_RESULT(found - MAL synch for PalmOS activated)
@@ -1248,8 +1248,8 @@ dnl --------------------------------------------------------------------------
 dnl add our extra directories to the search path
 dnl --------------------------------------------------------------------------
 
-dnl set the extra include and lib directories
-CPPFLAGS="-I$SOURCEDIR/include $CPPFLAGS -I$SOURCEDIR/extra/include"
+dnl set up the include directories
+CPPFLAGS="-I$SOURCEDIR/include $CPPFLAGS"
 case "$BUILDDIR" in "$SOURCEDIR") ;; *)
 	CPPFLAGS="-I$BUILDDIR/include $CPPFLAGS" ;;
 esac
@@ -1266,13 +1266,13 @@ case "$BUILDDIR" in "$SOURCEDIR") ;; *)
 esac
 AC_SUBST(RESFLAGS)
 
-dnl add all extra/src directories to the search paths
+dnl add 3rd party libraries directories to the search paths
 dnl	c-client
-CPPFLAGS="$CPPFLAGS -I$BUILDDIR/extra/src/c-client"
-LIBS="$BUILDDIR/extra/src/c-client/c-client.a $LIBS"
+CPPFLAGS="$CPPFLAGS -I$BUILDDIR/lib/imap/c-client"
+LIBS="$BUILDDIR/lib/imap/c-client/c-client.a $LIBS"
 dnl	compface
-CPPFLAGS="$CPPFLAGS -I$SOURCEDIR/extra/src/compface -I$SOURCEDIR/src/wx/vcard"
-LIBS="$LIBS -L$BUILDDIR/extra/src/compface -lMcompface"
+CPPFLAGS="$CPPFLAGS -I$SOURCEDIR/lib/compface -I$SOURCEDIR/src/wx/vcard"
+LIBS="$BUILDDIR/lib/compface/libcompface.a $LIBS"
 
 dnl --------------------------------------------------------------------------
 dnl final settings, concatenation of args, etc
@@ -1384,23 +1384,33 @@ case "$GXX" in yes)
 esac
 AC_SUBST(CXXFLAGS_RELAXED)
 
+# gather all directories where we want to create .src links in DIR and all
+# Makefiles in COPY
 OUTPUT="makeopts"
 COPY=Makefile
 DIR=
-for dir in `cd $srcdir; find include extra src locale doc res -type d -print`
-do	case "$dir" in
-	CVS | */CVS)		continue ;;
-	extra/src)		DIR="$DIR $dir" ;;   # no Makefile in this dir
-	extra/src/libmal)	DIR="$DIR $dir"; continue ;;
-	extra/src/libmal*)	continue ;;
-	esac
-	if test -f $srcdir/$dir/Names.mk
-	then
-		DIR="$DIR $dir"
-	elif test -f $srcdir/$dir/Makefile
-	then	COPY="$COPY $dir/Makefile"
-		DIR="$DIR $dir"
-	fi
+for dir in `cd $srcdir; find include lib extra src locale doc res -type d -print`; do
+    case "$dir" in
+	CVS | */CVS | \
+	lib/imap/* | \
+	extra/src/c-client | \
+	extra/src/compface | \
+	extra/src/imap* | \
+	extra/src/libmal*)
+	    # ignore
+	    ;;
+
+	*)
+	    # normal case
+	    if test -f $srcdir/$dir/Makefile.M; then
+		    COPY="$COPY $dir/Makefile.M"
+	    elif test -f $srcdir/$dir/Makefile; then
+		    COPY="$COPY $dir/Makefile"
+	    elif test ! -f $srcdir/$dir/Names.mk; then
+		continue
+	    fi
+	    DIR="$DIR $dir"
+    esac
 done
 # HACK for backward compatibility; clean it up when old libmal is dead
 case "$MAKE_HAVE_LIBMAL" in '') ;; *)
@@ -1440,7 +1450,7 @@ AC_OUTPUT_COMMANDS(
 		do
 		    echo "linking $mf"
 		    rm -f $mf
-		    ln -s .src/Makefile $mf
+		    ln -s .src/`basename $mf` $mf
 		done
 		;;
 	esac
@@ -1466,7 +1476,7 @@ echo "	wxWindows port used:			${WX_NAME} ${WX_VERSION}"
 echo "	Debug mode:				${debug_option}"
 echo "	SSL support:				${ssl_option}"
 echo "	Modules support:			${m_cv_USE_MODULES}"
-echo "	Embedded Python:			${PYTHON_VER-none}"
+echo "	Embedded Python:			${PYTHON_VER:-none}"
 if test "$USE_PYTHON" != 0 -a "$USE_SWIG" = 1; then
     echo "	      with swig:			${SWIG}"
 fi
