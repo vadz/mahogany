@@ -29,6 +29,7 @@ M_OVERRIDES_PREPARE
 DEFAULT_USE_EFENCE=0
 DEFAULT_USE_DMALLOC=0
 DEFAULT_USE_DEBUG=0
+DEFAULT_USE_WXDEBUG=0
 DEFAULT_USE_PYTHON=1
 DEFAULT_USE_THREADS=1
 DEFAULT_USE_KDOC=0
@@ -55,6 +56,10 @@ USE_EFENCE)
 M_OVERRIDES(debug,debug,
 --with-debug    use debug info/code,
 USE_DEBUG)
+
+M_OVERRIDES(wxdebug,wxdebug,
+--with-wxdebug    force use of __WXDEBUG__ define,
+USE_WXDEBUG)
 
 M_OVERRIDES(wxconfig,wxconfig,
 --without-wxconfig    do not use output from wx-config,
@@ -251,12 +256,17 @@ fi
 dnl set debug/optimisation flags
 DBGFLAGS=
 MAKE_DEBUG=
+
+if test "$USE_WXDEBUG" = 1; then
+	DBGFLAGS="-D__WXDEBUG__"
+fi
+
 if test "$USE_DEBUG" = 1; then
 	if test "$GCC" = "yes"
 	then
-		DBGFLAGS="-O0 -g3 -DDEBUG"
+		DBGFLAGS="$DBGFLAGS -O0 -g3 -DDEBUG"
 	else
-		DBGFLAGS="-g -DDEBUG"
+		DBGFLAGS="$DBGFLAGS -g -DDEBUG"
 	fi
 	MAKE_DEBUG="DEBUG=yes"
 fi
