@@ -40,6 +40,7 @@ clean:
 
 doc:
 	if [ ! -d ../doc/classes ] ; then mkdir ../doc/classes ; fi
-	$(DOCHTML) *.h
+# scandoc isn't clever enough for Vadim's coding
+	-$(DOCHTML) *.h
 
 .PHONY: clean doc all install msgcat interface
