@@ -18,7 +18,7 @@ install:
 	$(INSTALL_DATA) .src/kylemail.wav $(DATADIR)
 #	$(INSTALL_DATA) .src/mailcap $(DATADIR)
 	$(INSTALL_DATA) .src/M.conf $(DATADIR)
-	$(INSTALL) -d $(DESTDIR)/man/man1 
+	if test ! -d $(DESTDIR)/man/man1; then $(INSTALL) -d $(DESTDIR)/man/man1; fi
 	$(INSTALL_DATA) .src/mahogany.1 $(DESTDIR)/man/man1
 	$(INSTALL_DATA) .src/mahogany.1 $(DESTDIR)/man/man1/M.1
 
