@@ -25,6 +25,7 @@ mahogany	BITMAP	"mahogany.bmp"
 pythonopower	BITMAP	"pythonpower.bmp"
 #endif
 background	BITMAP	"background.bmp"
+adbimport	BITMAP	"adbimport.bmp"
 
 // frame icons (32x32)
 MFrame		ICON	"Mframe.ico"
@@ -109,6 +110,11 @@ folder_root	BITMAP "folder_root.bmp"
 folder_group	BITMAP "folder_group.bmp"
 folder_newmail	BITMAP "folder_newmail.bmp"
 folder_sentmail	BITMAP "folder_sentmail.bmp"
+
+// Custom headers dialog image list (16x16)
+image_news	BITMAP	"image_news.bmp"
+image_mail	BITMAP	"image_mail.bmp"
+image_both	BITMAP	"image_both.bmp"
 
 ///////////////////////////////////////////////////////////////////////////////
 // wxWindows ressources

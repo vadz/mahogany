@@ -121,6 +121,10 @@ $Id$
 		page probably?
 2		different icon for activity log frame
 2	VZ?	make activity log frame appear on demand only
+
+2	VZ	printing from ADB
+2	VZ	save control values in ImportAdb dialog (wxPCheckBox?)
+
 2		fix es.po - many little errors
 2	KB	optionally activate tearoff menus
 

@@ -2,6 +2,7 @@
 
 CWD = adb
 SRC = AdbFrame.cpp AdbManager.cpp AdbProvider.cpp AdbEntry.cpp \
+      AdbDialogs.cpp \
       ProvFC.cpp ProvBbdb.cpp AdbImport.cpp \
       ImportText.cpp ImportXFMail.cpp ImportMailrc.cpp ImportPine.cpp
 

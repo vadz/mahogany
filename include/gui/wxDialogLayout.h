@@ -85,7 +85,10 @@ protected:
                        bool setAsMinimalSizeToo = TRUE);
 
    // create Ok and Cancel buttons and a static box around all other ctrls
-   wxStaticBox *CreateStdButtonsAndBox(const wxString& boxTitle);
+   // (if noBox is TRUE, the returned value is NULL and wxStaticBox is not
+   // created)
+   wxStaticBox *CreateStdButtonsAndBox(const wxString& boxTitle,
+                                       bool noBox = FALSE);
 
    // these variables are set in the ctor and are the basic measurement unites
    // for us (we allow direct access to them for derived classes for
@@ -233,19 +236,17 @@ protected:
 };
 
 // ----------------------------------------------------------------------------
-// a base class for notebook pages which provides some handy functions for
-// layin out the controls inside the page. It is well suited for the pages
-// showing the controls in a row (text fields with labels for example).
+// this class just groups together some handy layout/control creation functions
 // ----------------------------------------------------------------------------
-class wxNotebookPageBase : public wxPanel
+
+class wxEnhancedPanel : public wxPanel
 {
 public:
-   wxNotebookPageBase(wxNotebook *parent) : wxPanel(parent, -1)
+   wxEnhancedPanel(wxWindow *parent) : wxPanel(parent, -1)
    {
       SetAutoLayout(TRUE);
    }
 
-protected:
    // all these functions create the corresponding control and position it
    // below the "last" which may be NULL in which case the new control is put
    // just below the panel top.
@@ -323,11 +324,6 @@ protected:
       // enable/disable the text control with label and button
    void EnableTextWithButton(wxTextCtrl *control, bool enable);
 
-   // callbacks which will set the parent's dirty flag whenever
-   // something changes
-   // ---------------------------------------------------------
-   void OnChange(wxEvent& event);
-
 private:
    // called from CreateXXX() functions to set up the top constraint which is
    // either just below the "last", or below the page top (with some
@@ -341,9 +337,28 @@ private:
    wxTextCtrl *CreateEntryWithButton(const char *label,
                                      long widthMax,
                                      wxControl *last,
-                                     wxNotebookPageBase::BtnKind kind,
+                                     BtnKind kind,
                                      wxTextBrowseButton **ppButton = NULL);
+};
 
+// ----------------------------------------------------------------------------
+// a base class for notebook pages which provides some handy functions for
+// layin out the controls inside the page. It is well suited for the pages
+// showing the controls in a row (text fields with labels for example).
+// ----------------------------------------------------------------------------
+
+class wxNotebookPageBase : public wxEnhancedPanel
+{
+public:
+   wxNotebookPageBase(wxNotebook *parent) : wxEnhancedPanel(parent) { }
+
+protected:
+   // callbacks which will set the parent's dirty flag whenever
+   // something changes
+   // ---------------------------------------------------------
+   void OnChange(wxEvent& event);
+
+private:
    DECLARE_EVENT_TABLE()
 };
 

@@ -439,8 +439,13 @@ void
 Profile::DeleteGroup(const String & path)
 {
    PCHECK();
-   if(m_IsEmpty) return;
-   ms_GlobalConfig->SetPath(GetName());
+   if(m_IsEmpty)
+       return;
+
+   String root = GetName();
+   if ( !m_ProfilePath.IsEmpty() )
+       root  << '/' << m_ProfilePath;
+   ms_GlobalConfig->SetPath(root);
    ms_GlobalConfig->DeleteGroup(path);
 }
 

@@ -341,7 +341,13 @@ wxPTextEntry::wxPTextEntry(const wxString& configPath,
                            wxConfigBase *config)
            : wxComboBox(parent, id, value, pos, size, style)
 {
-    m_persist = new wxPHelper(configPath, "", config);
+    wxString realConfigPath(configPath);
+    if ( !realConfigPath.IsEmpty() && realConfigPath.Last() != '/' ) {
+        // we need a subgroup name, not a key name
+        realConfigPath += '/';
+    }
+
+    m_persist = new wxPHelper(realConfigPath, "", config);
     m_countSaveMax = ms_countSaveDefault;
 
     RestoreStrings();

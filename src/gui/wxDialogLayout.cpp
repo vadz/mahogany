@@ -179,19 +179,12 @@ wxNotebookWithImages::~wxNotebookWithImages()
 }
 
 // ----------------------------------------------------------------------------
-// wxNotebookPageBase
+// wxEnhancedPanel
 // ----------------------------------------------------------------------------
-
-void wxNotebookPageBase::OnChange(wxEvent& event)
-{
-   wxNotebookDialog *dlg = GET_PARENT_OF_CLASS(this, wxNotebookDialog);
-   if ( dlg )
-      dlg->SetDirty();
-}
 
 // the top item is positioned near the top of the page, the others are
 // positioned from top to bottom, i.e. under the last one
-void wxNotebookPageBase::SetTopConstraint(wxLayoutConstraints *c,
+void wxEnhancedPanel::SetTopConstraint(wxLayoutConstraints *c,
                                           wxControl *last,
                                           size_t extraSpace)
 {
@@ -210,10 +203,10 @@ void wxNotebookPageBase::SetTopConstraint(wxLayoutConstraints *c,
 
 // create a text entry with some browse button
 wxTextCtrl *
-wxNotebookPageBase::CreateEntryWithButton(const char *label,
+wxEnhancedPanel::CreateEntryWithButton(const char *label,
                                           long widthMax,
                                           wxControl *last,
-                                          wxNotebookPageBase::BtnKind kind,
+                                          wxEnhancedPanel::BtnKind kind,
                                           wxTextBrowseButton **ppButton)
 {
    // create the label and text zone, as usually
@@ -255,7 +248,7 @@ wxNotebookPageBase::CreateEntryWithButton(const char *label,
 
 // create a static bitmap with a label and position them and the browse button
 // passed to us
-wxStaticBitmap *wxNotebookPageBase::CreateIconEntry(const char *label,
+wxStaticBitmap *wxEnhancedPanel::CreateIconEntry(const char *label,
                                                     long widthMax,
                                                     wxControl *last,
                                                     wxIconBrowseButton *btnIcon)
@@ -301,7 +294,7 @@ wxStaticBitmap *wxNotebookPageBase::CreateIconEntry(const char *label,
 }
 
 // create a single-line text control with a label
-wxTextCtrl *wxNotebookPageBase::CreateTextWithLabel(const char *label,
+wxTextCtrl *wxEnhancedPanel::CreateTextWithLabel(const char *label,
                                                     long widthMax,
                                                     wxControl *last,
                                                     size_t nRightMargin,
@@ -334,7 +327,7 @@ wxTextCtrl *wxNotebookPageBase::CreateTextWithLabel(const char *label,
 }
 
 // create just some text
-wxStaticText *wxNotebookPageBase::CreateMessage(const char *label,
+wxStaticText *wxEnhancedPanel::CreateMessage(const char *label,
                                                 wxControl *last)
 {
    wxLayoutConstraints *c;
@@ -353,7 +346,7 @@ wxStaticText *wxNotebookPageBase::CreateMessage(const char *label,
 }
 
 // create a button
-wxButton *wxNotebookPageBase::CreateButton(const wxString& labelAndId,
+wxButton *wxEnhancedPanel::CreateButton(const wxString& labelAndId,
                                            wxControl *last)
 {
    wxLayoutConstraints *c;
@@ -378,7 +371,7 @@ wxButton *wxNotebookPageBase::CreateButton(const wxString& labelAndId,
 }
 
 // create a checkbox
-wxCheckBox *wxNotebookPageBase::CreateCheckBox(const char *label,
+wxCheckBox *wxEnhancedPanel::CreateCheckBox(const char *label,
                                               long widthMax,
                                               wxControl *last)
 {
@@ -405,7 +398,7 @@ wxCheckBox *wxNotebookPageBase::CreateCheckBox(const char *label,
 }
 
 // create a radiobox control with 3 choices and a label for it
-wxRadioBox *wxNotebookPageBase::CreateActionChoice(const char *label,
+wxRadioBox *wxEnhancedPanel::CreateActionChoice(const char *label,
                                                    long widthMax,
                                                    wxControl *last,
                                                    size_t nRightMargin)
@@ -449,7 +442,7 @@ wxRadioBox *wxNotebookPageBase::CreateActionChoice(const char *label,
 }
 
 // create a combobox
-wxComboBox *wxNotebookPageBase::CreateComboBox(const char *label,
+wxComboBox *wxEnhancedPanel::CreateComboBox(const char *label,
                                                long widthMax,
                                                wxControl *last,
                                                size_t nRightMargin)
@@ -506,7 +499,7 @@ wxComboBox *wxNotebookPageBase::CreateComboBox(const char *label,
 // create a listbox and the buttons to work with it
 // NB: we consider that there is only one listbox (at most) per page, so
 //     the button ids are always the same
-wxListBox *wxNotebookPageBase::CreateListbox(const char *label,
+wxListBox *wxEnhancedPanel::CreateListbox(const char *label,
                                             wxControl *last)
 {
    // a box around all this stuff
@@ -565,7 +558,7 @@ wxListBox *wxNotebookPageBase::CreateListbox(const char *label,
 }
 
 // enable/disable the text control and its label
-void wxNotebookPageBase::EnableTextWithButton(wxTextCtrl *control, bool bEnable)
+void wxEnhancedPanel::EnableTextWithButton(wxTextCtrl *control, bool bEnable)
 {
    // NB: we assume that the control ids are consecutive
    long id = wxWindow::NextControlId(control->GetId());
@@ -584,7 +577,7 @@ void wxNotebookPageBase::EnableTextWithButton(wxTextCtrl *control, bool bEnable)
 }
 
 // enable/disable the text control with label and button
-void wxNotebookPageBase::EnableTextWithLabel(wxTextCtrl *control, bool bEnable)
+void wxEnhancedPanel::EnableTextWithLabel(wxTextCtrl *control, bool bEnable)
 {
    // not only enable/disable it, but also make (un)editable because it gives
    // visual feedback
@@ -605,6 +598,17 @@ void wxNotebookPageBase::EnableTextWithLabel(wxTextCtrl *control, bool bEnable)
 
       win->Enable(bEnable);
    }
+}
+
+// ----------------------------------------------------------------------------
+// wxNotebookPageBase
+// ----------------------------------------------------------------------------
+
+void wxNotebookPageBase::OnChange(wxEvent& event)
+{
+   wxNotebookDialog *dlg = GET_PARENT_OF_CLASS(this, wxNotebookDialog);
+   if ( dlg )
+      dlg->SetDirty();
 }
 
 // ----------------------------------------------------------------------------
@@ -647,7 +651,8 @@ void wxManuallyLaidOutDialog::SetDefaultSize(int width, int height,
 }
 
 wxStaticBox *
-wxManuallyLaidOutDialog::CreateStdButtonsAndBox(const wxString& boxTitle)
+wxManuallyLaidOutDialog::CreateStdButtonsAndBox(const wxString& boxTitle,
+                                                bool noBox)
 {
    wxLayoutConstraints *c;
 
@@ -670,6 +675,9 @@ wxManuallyLaidOutDialog::CreateStdButtonsAndBox(const wxString& boxTitle)
    btnCancel->SetConstraints(c);
 
    // a box around all the other controls
+   if ( noBox )
+      return NULL;
+
    wxStaticBox *box = new wxStaticBox(this, -1, boxTitle);
    c = new wxLayoutConstraints();
    c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);

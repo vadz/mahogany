@@ -801,9 +801,12 @@ wxMApp::GetStdIcon(int which) const
    } storeConfigPath;
 
    // Set our icons for the dialogs.
+
+   // this ugly "#ifdefs" are needed to silent warning about "switch without
+   // any case" warning under Windows
+#ifndef OS_WIN
    switch(which)
    {
-#ifndef OS_WIN
    case wxICON_HAND:
       return ICON("msg_error"); break;
    case wxICON_EXCLAMATION:
@@ -812,8 +815,10 @@ wxMApp::GetStdIcon(int which) const
       return ICON("msg_question"); break;
    case wxICON_INFORMATION:
       return ICON("msg_info"); break;
-#endif
    default:
+#else
+   {
+#endif
       return wxApp::GetStdIcon(which);
    }
 }

@@ -81,11 +81,26 @@ public:
                       const char *desc);
    } *ms_listImporters;
 
+   // enumerate all available importers: return the names (to make it possible
+   // to create import objects) and the descriptions (to show to the user);
+   // returns the number of different importers
+   static size_t EnumImporters(wxArrayString& names, wxArrayString& descs);
+
    // get importer by name (it's a new pointer, caller must DecRef() it)
    static AdbImporter *GetImporterByName(const String& name);
 
    // test address book in the filename - can we import it?
    virtual bool CanImport(const String& filename) = 0;
+
+   // get the name of the "default" address book file for this importer:
+   // sometimes, it makes sense (Unix .mailrc files always live in the home
+   // directory, so returning $HOME/.mailrc makes sense for mailrc importer),
+   // sometimes it doesn't - in this case, just return an empty string.
+   //
+   // NB: if this function decides to search for the file (e.g., it knows its
+   //     name but not the location), it should provide the necessary feedback
+   //     to the user.
+   virtual String GetDefaultFilename() const { return ""; }
 
    // start importing the file: GetEntry/GroupNames and ImportEntry can only be
    // called after a call to this function
@@ -109,10 +124,11 @@ public:
                             size_t index,
                             AdbEntry *entry) = 0;
 
-   // get the description (shown to the user) of the format imported by this
-   // class (this function is automatically generated during
+   // get the name and description (shown to the user) of the format imported
+   // by this class (these functions are automatically generated during
    // IMPLEMENT_ADB_IMPORTER macro expansion
    virtual String GetDescription() const = 0;
+   virtual String GetName() const = 0;
 };
 
 // ----------------------------------------------------------------------------
@@ -120,9 +136,11 @@ public:
 // ----------------------------------------------------------------------------
 
 #define DECLARE_ADB_IMPORTER()                                             \
+   String GetName() const;                                                 \
    String GetDescription() const;                                          \
    static AdbImporterInfo ms_info
 #define IMPLEMENT_ADB_IMPORTER(name, desc)                                 \
+   String name::GetName() const { return #name; }                          \
    String name::GetDescription() const { return _(desc); }                 \
    AdbImporter *ConstructorFor##name() { return new name; }                \
    AdbImporter::AdbImporterInfo name::ms_info(#name, ConstructorFor##name, \

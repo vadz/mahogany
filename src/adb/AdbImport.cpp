@@ -270,6 +270,53 @@ exit:
 }
 
 // ----------------------------------------------------------------------------
+// static AdbImporter functions
+// ----------------------------------------------------------------------------
+
+size_t AdbImporter::EnumImporters(wxArrayString& names, wxArrayString& descs)
+{
+   names.Empty();
+   descs.Empty();
+
+   AdbImporter *importer = NULL;
+   AdbImporter::AdbImporterInfo *info = AdbImporter::ms_listImporters;
+   while ( info )
+   {
+      importer = info->CreateImporter();
+
+      names.Add(importer->GetName());
+      descs.Add(importer->GetDescription());
+
+      importer->DecRef();
+      importer = NULL;
+
+      info = info->next;
+   }
+
+   return names.GetCount();
+}
+
+AdbImporter *AdbImporter::GetImporterByName(const String& name)
+{
+   AdbImporter *importer = NULL;
+   AdbImporter::AdbImporterInfo *info = AdbImporter::ms_listImporters;
+   while ( info )
+   {
+      importer = info->CreateImporter();
+
+      if ( importer->GetName() == name )
+         break;
+
+      importer->DecRef();
+      importer = NULL;
+
+      info = info->next;
+   }
+
+   return importer;
+}
+
+// ----------------------------------------------------------------------------
 // AdbImporterInfo
 // ----------------------------------------------------------------------------
 

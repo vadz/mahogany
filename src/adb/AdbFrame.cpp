@@ -62,7 +62,8 @@
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
 #include "adb/AdbDataProvider.h"
-#include "adb/AdbImport.h"
+
+#include "adb/AdbDialogs.h"
 
 // our public interface
 #include "adb/AdbFrame.h"
@@ -1877,56 +1878,25 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
 
 bool wxAdbEditFrame::ImportAdb()
 {
-  // ask the filename
-  wxString filename = wxPFileSelector
-                      (
-                       ADB_CONFIG_PATH "/ImportFile",
-                       _("Select the file to import data from"),
-                       READ_APPCONFIG(MP_USERDIR),
-                       "",
-                       "",
-                       _("All files (*.*)|*.*"),
-                       wxHIDE_READONLY | wxFILE_MUST_EXIST,
-                       this
-                      );
-
-  if ( filename.IsEmpty() ) {
-    // cancelled by user
-    return FALSE;
-  }
-
-  // now get the ADB name (the ADB which will be created during import)
   wxString adbname;
-  wxSplitPath(filename, NULL, &adbname, NULL);
-  adbname = wxGetTextFromUser(
-                              _("The address book to create: "),
-                              _("Address book editor"),
-                              adbname,
-                              this
-                             );
+  bool ok = AdbShowImportDialog(this, &adbname);
 
-  if ( !adbname ) {
-    // cancelled
-    return FALSE;
-  }
-
-  // TODO allow the user to choose the importer (by description) as well.
-  //      better yet, combine all three dialogs (choice of filename, adbname
-  //      and importer) into one for convinience
-
-  if ( !AdbImport(filename, adbname) )
+  if ( ok )
   {
-    // error message already logged
-    return FALSE;
-  }
+     // add the newly created ADB to the tree
+     if ( !IsAdbOpened(adbname) )
+     {
+        AdbDataProvider *provider = AdbDataProvider::GetNativeProvider();
+        ok = OpenAdb(adbname, provider, provider->GetProviderName());
+        SafeDecRef(provider);
+     }
 
-  // add the newly created ADB to the tree
-  bool ok = TRUE;
-  if ( !IsAdbOpened(adbname) )
+     wxLogStatus(_("Address book successfully imported into book '%s'."),
+                adbname.c_str());
+  }
+  else
   {
-    AdbDataProvider *provider = AdbDataProvider::GetNativeProvider();
-    ok = OpenAdb(adbname, provider, provider->GetProviderName());
-    SafeDecRef(provider);
+     wxLogStatus(_("Address book import abandoned."));
   }
 
   return ok;
