@@ -739,6 +739,21 @@ private:
    FolderEntryType m_Type;
 };
 
+// keep this enum in sync with the labels array in the function below
+//
+// NB: we can't move the enum inside the function because g++ dies with the
+//     internal compiler error otherwise (when building with optimizations)
+enum
+{
+  Label_Server,
+  Label_Username,
+  Label_Password,
+  Label_Mailbox,
+  Label_Name,
+  Label_LeaveOnServer,
+  Label_Max
+};
+
 MWizard_CreateFolder_ServerPage::
 MWizard_CreateFolder_ServerPage(MWizard *wizard,
                                 MWizardPageId id,
@@ -857,18 +872,8 @@ MWizard_CreateFolder_ServerPage(MWizard *wizard,
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(msgCtrl);
 
-   // keep this enum in sync with the array
-   enum
-   {
-      Label_Server,
-      Label_Username,
-      Label_Password,
-      Label_Mailbox,
-      Label_Name,
-      Label_LeaveOnServer,
-      Label_Max
-   };
-
+   // if you modify this array, don't forget to modify the enum just before
+   // this function!
    wxArrayString labels;
    labels.Add(_("&Server host"));
    labels.Add(_("Your &login"));
@@ -876,6 +881,7 @@ MWizard_CreateFolder_ServerPage(MWizard *wizard,
    labels.Add(pathName);
    labels.Add(_("Folder &name"));
    labels.Add(_("&Leave mail on server"));
+
    long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
 
 #define CREATE_CTRL(name, creat) \
