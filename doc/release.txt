@@ -62,7 +62,7 @@ doc/Mannounce.txt for the change log.
 5. Announcing the release
 -------------------------
 
-a) mailing lists
+a) mailing lists and newsgroups
 
 Edit and send the announcement (doc/Mannounce.txt) to the following addresses:
 
@@ -76,6 +76,7 @@ mahogany-announce@lists.sourceforge.net
 mahogany-developers@lists.sourceforge.net
 mahogany-users@lists.sourceforge.net
 python-announce-list@python.org
+comp.os.linux.announce
 
 b) IMAP software database
 
