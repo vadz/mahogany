@@ -3251,15 +3251,21 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
       return true;
    }
 
+   MailFolder *mfDst = FindFolder(folder);
+
    // update status of the target folder
    MfStatusCache *mfStatusCache = MfStatusCache::Get();
    MailFolderStatus status;
    if ( !mfStatusCache->GetStatus(nameDst, &status) )
    {
-      // assume it was empty... this is, of course, false, but it allows us to
-      // show the folder as having unseen/new/... messages in the tree without
-      // having to open it (slow!) and so this hack is well worth it
-      status.total = 0;
+      // if the folder is already opened, recount the number of messages in it
+      // now, otherwise assume it was empty... this is, of course, false, but
+      // it allows us to show the folder as having unseen/new/... messages in
+      // the tree without having to open it (slow!)
+      if ( !mfDst || !mfDst->CountAllMessages(&status) )
+      {
+         status.total = 0;
+      }
    }
 
    UIdArray uidsNew;
@@ -3325,7 +3331,6 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
    mfStatusCache->UpdateStatus(nameDst, status);
 
    // if the folder is opened, we must also update the display
-   MailFolder *mfDst = FindFolder(folder);
    if ( mfDst )
    {
       mfDst->Ping();
