@@ -351,105 +351,100 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
    }
    m_FolderView->UpdateSelectionInfo();
 
-   if(! event.ControlDown())
+   long keyCode = event.KeyCode();
+   if(keyCode == WXK_F1) // help
    {
-      long keyCode = event.KeyCode();
-      if(keyCode == WXK_F1) // help
+      mApplication->Help(MH_FOLDER_VIEW_KEYBINDINGS,
+                         m_FolderView->GetWindow());
+      event.Skip();
+      return;
+   }
+   UIdArray selections;
+   long nselected = m_FolderView->GetSelections(selections);
+   // there is exactly one item with the focus on  it:
+   long focused = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
+   long nMsgs = m_FolderView->GetFolder()->CountMessages();
+   if(focused == -1 || focused >= nMsgs)
+   {
+      event.Skip();
+      return;
+   }
+   long newFocus = -1;
+   // in this case we operate on the highlighted  message
+   UIdType focused_uid = UID_ILLEGAL;
+   if(nselected == 0)
+   {
+      HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
+      if(hil)
       {
-         mApplication->Help(MH_FOLDER_VIEW_KEYBINDINGS,
-                            m_FolderView->GetWindow());
-         event.Skip();
-         return;
+         if(focused > 0 && focused < (long) hil->Count())
+         focused_uid = (*hil)[focused]->GetUId();
+         selections.Add(focused_uid);
+         hil->DecRef();
       }
-      UIdArray selections;
-      long nselected = m_FolderView->GetSelections(selections);
-      // there is exactly one item with the focus on  it:
-      long focused = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
-      long nMsgs = m_FolderView->GetFolder()->CountMessages();
-      if(focused == -1 || focused >= nMsgs)
-      {
-         event.Skip();
-         return;
-      }
-      long newFocus = -1;
-      // in this case we operate on the highlighted  message
-      UIdType focused_uid = UID_ILLEGAL;
-      if(nselected == 0)
-      {
-         HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
-         if(hil)
-         {
-            if(focused > 0 && focused < (long) hil->Count())
-            focused_uid = (*hil)[focused]->GetUId();
-            selections.Add(focused_uid);
-            hil->DecRef();
-         }
-         newFocus = -1;
-      }
-      else
-         newFocus = (focused < nMsgs-1) ? focused + 1 : focused;
+      newFocus = -1;
+   }
+   else
+      newFocus = (focused < nMsgs-1) ? focused + 1 : focused;
 
-      /** To    allow translations:
-          Delete, Undelete, eXpunge, Copytofolder, Savetofile,
-          Movetofolder, ReplyTo, Forward, Open, Print, Show Headers,
-          View, Group reply (==followup)
-      */
-      const char keycodes_en[] = gettext_noop("DUXCSMRFOPHG ");
-      const char *keycodes = _(keycodes_en);
+   /** To    allow translations:
+       Delete, Undelete, eXpunge, Copytofolder, Savetofile,
+       Movetofolder, ReplyTo, Forward, Open, Print, Show Headers,
+       View, Group reply (==followup)
+   */
+   const char keycodes_en[] = gettext_noop("DUXCSMRFOPHG ");
+   const char *keycodes = _(keycodes_en);
 
-      int idx = 0;
-      int key = toupper((int)keyCode);
-      for(;keycodes[idx] && keycodes[idx] != key;idx++)
-         ;
+   int idx = 0;
+   int key = toupper((int)keyCode);
+   for(;keycodes[idx] && keycodes[idx] != key;idx++)
+      ;
 
-      // extra keys:
-      if(key == '#') idx = 2; // # == expunge for VM compatibility
-      if(key == WXK_DELETE) idx = 0; // delete
-      // scroll up within the message viewer:
-      if(key == WXK_BACK)
-      {
-         if(m_FolderView->GetPreviewUId() == focused_uid)
-            m_FolderView->m_MessagePreview->PageUp();
-         event.Skip();
-         return;
-      }
-      switch(keycodes_en[idx])
-      {
-      case 'D':
-         m_FolderView->DeleteOrTrashMessages(selections);
-         // only move on if we mark as deleted, for trash usage,
-         // selection remains the same:
-         if(READ_APPCONFIG(MP_USE_TRASH_FOLDER) == FALSE)
+   // extra keys:
+   if(key == '#') idx = 2; // # == expunge for VM compatibility
+   if(key == WXK_DELETE) idx = 0; // delete
+   // scroll up within the message viewer:
+   if(key == WXK_BACK)
+   {
+      if(m_FolderView->GetPreviewUId() == focused_uid)
+         m_FolderView->m_MessagePreview->PageUp();
+      event.Skip();
+      return;
+   }
+   switch(keycodes_en[idx])
+   {
+      case 'M': // move = copy + delete
+      case 'D': // delete
+         if ( keycodes_en[idx] == 'D' )
+            m_FolderView->DeleteOrTrashMessages(selections);
+         else
+            m_FolderView->SaveMessagesToFolder(selections, NULL, true);
+
+         // only move on if we mark as deleted, for trash usage, selection
+         // remains the same:
+         if ( !READ_APPCONFIG(MP_USE_TRASH_FOLDER) )
             MoveFocus(newFocus);
          else
             m_FolderView->UpdateSelectionInfo();
          break;
-      case 'U':
+      case 'U': // undelete
          m_FolderView->GetTicketList()->Add(
             m_FolderView->GetFolder()->UnDeleteMessages(&selections, m_FolderView));
          MoveFocus(newFocus);
          break;
-      case 'X':
-            m_FolderView->GetFolder()->ExpungeMessages();
+      case 'X': // expunge
+         m_FolderView->GetFolder()->ExpungeMessages();
          break;
-      case 'C':
+      case 'C': // copy
          m_FolderView->SaveMessagesToFolder(selections);
          MoveFocus(newFocus);
          break;
-      case 'S':
+      case 'S': // save
          m_FolderView->SaveMessagesToFile(selections);
          MoveFocus(newFocus);
          break;
-      case 'M': // move = copy + delete
-         m_FolderView->SaveMessagesToFolder(selections, NULL, true);
-         if(READ_APPCONFIG(MP_USE_TRASH_FOLDER) == FALSE)
-            MoveFocus(newFocus);
-         else
-            m_FolderView->UpdateSelectionInfo();
-         break;
-#if 1 //these should be shortcuts in Message menu, but for now I revert back
-      case 'G':
-      case 'R':
+      case 'G': // group reply
+      case 'R': // reply
          m_FolderView->GetFolder()->ReplyMessages(
             &selections,
             (keycodes_en[idx] == 'G')?MailFolder::REPLY_FOLLOWUP:0,
@@ -457,21 +452,20 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
             m_FolderView);
          MoveFocus(newFocus);
          break;
-      case 'F':
+      case 'F': // forward
          m_FolderView->GetFolder()->ForwardMessages(
             &selections, MailFolder::Params(), GetFrame(this), m_FolderView);
          MoveFocus(newFocus);
          break;
-#endif //1
-      case 'O':
+      case 'O': // open
          m_FolderView->OpenMessages(selections);
          MoveFocus(newFocus);
          break;
-      case 'P':
+      case 'P': // print
          m_FolderView->PrintMessages(selections);
          MoveFocus(newFocus);
          break;
-      case 'H':
+      case 'H': // headers
          m_FolderView->m_MessagePreview->DoMenuCommand(WXMENU_MSG_TOGGLEHEADERS);
          break;
       case ' ': // mark:
@@ -486,7 +480,9 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
           return;
          */
          ;
-      }
+
+      default:
+         event.Skip();
    }
 }
 
