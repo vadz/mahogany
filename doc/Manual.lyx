@@ -1084,7 +1084,8 @@ Create new folder
 
 .
  Then fill in the details: your username and password for accessing the
- account and the hostname of the POP server.
+ account and the hostname of the POP server. Optionally you can enter
+ a port number after a colon.
  If you want Mahogany to collect all mail from here and move it to 
 \begin_inset Quotes eld
 \end_inset 
@@ -3709,7 +3710,7 @@ Remote configuration synchronisation settings
 Please refer to the section below for a detailed explanation.
 \layout Subsection
 
-Remot configuration synchronisation
+Remote configuration synchronisation
 \layout Standard
 
 Mahogany can automatically save a subset of its configuration settings in

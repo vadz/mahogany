@@ -509,9 +509,10 @@ is set up to collect from ``INBOX'', but not from ``SentMail''. Good.
 Setting up POP access is dead easy: You simply click the right mouse button
 in the folder tree and select ``Create new folder''. Then fill in the details:
 your username and password for accessing the account and the hostname of the
-POP server. If you want Mahogany to collect all mail from here and move it to
-``New Mail'' automatically, tick the box, otherwise it will leave the messages
-on the server and you can only read them while you are online.
+POP server. Optionally you can enter a port number after a colon. If you want
+Mahogany to collect all mail from here and move it to ``New Mail''
+automatically, tick the box, otherwise it will leave the messages on the server
+and you can only read them while you are online.
 
 
 \subsubsection{IMAP - what's that?}
@@ -1406,7 +1407,7 @@ files. The searchpath where to look for them can be modified here.
 Please refer to the section below for a detailed explanation.
 \end{itemize}
 
-\subsection{Remot configuration synchronisation}
+\subsection{Remote configuration synchronisation}
 
 Mahogany can automatically save a subset of its configuration settings in a
 mailbox at program exit and automatically retrieve that information the next
