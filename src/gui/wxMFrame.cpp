@@ -118,7 +118,7 @@ wxMFrame::Create(const String &iname, wxWindow *parent)
    initialised = true;
    menuBar = new wxMenuBar;
    m_ToolBar = NULL;
-   SetMenuBar(menuBar);
+   //SetMenuBar(menuBar);
 }
 
 void
