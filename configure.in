@@ -953,10 +953,12 @@ if test "$wxOK" != 1; then
    ])
 fi
 
-dnl set all flags
+dnl set all flags: notice that currently (as of version 2.5.1)
+dnl WX_CXXFLAGS_ONLY does not include C flags but we do need them for C++
+dnl files compilation as well
 CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
-CXXFLAGS="$CXXFLAGS $WX_CXXFLAGS_ONLY"
 CFLAGS="$CFLAGS $WX_CFLAGS_ONLY"
+CXXFLAGS="$CXXFLAGS $WX_CFLAGS_ONLY $WX_CXXFLAGS_ONLY"
 
 dnl normal linking mode is fully dynamic
 GUI_LIBS="$WX_LIBS"
@@ -983,6 +985,13 @@ if test "$USE_MAC" = 1; then
 
     REZFLAGS=`$WX_CONFIG_WITH_ARGS --rezflags`
     AC_SUBST(REZFLAGS)
+fi
+
+dnl we want to have a user-readable wxWindows port name
+WX_NAME=`$WX_CONFIG_WITH_ARGS --basename | sed 's/^wx_//'`
+WX_NAME_NO_DEBUG=`echo $WX_NAME | sed 's/d$//'`
+if test "$WX_NAME_NO_DEBUG" != "$WX_NAME"; then
+    WX_NAME="$WX_NAME_NO_DEBUG (debug build)"
 fi
 
 case "$USE_THREADS" in 1)
@@ -1439,7 +1448,7 @@ dnl show the configuration used
 echo
 echo "Configured Mahogany ${M_VERSION_MAJOR}.${M_VERSION_MINOR}.${M_VERSION_RELEASE} for ${host}."
 echo ""
-echo "	wxWindows version used:			${WX_VERSION}"
+echo "	wxWindows port used:		${WX_NAME} ${WX_VERSION}"
 echo "	Debug mode:				${debug_option}"
 echo "	SSL support:				${ssl_option}"
 echo "	Modules support:			${m_cv_USE_MODULES}"
