@@ -1,7 +1,15 @@
 Mahogany program code, documentation and auxiliary programs are
-Copyright 1996-2001 Karsten Ballueder and Vadim Zeitlin.
+Copyright (C) 1996-2001 Karsten Ballueder and Vadim Zeitlin.
 All rights reserved.
 
-This program may be licensed either under ``Mahogany Artistic License''
-(please see the file doc/License.txt) or under GNU General Public License at
-your convenience.
+You are allowed to use, modify and redistribute this program under the terms
+and conditions of either ``Mahogany Artistic License'' (please see the file
+doc/License.txt for more details) or under GNU General Public License
+(see doc/License_GPL.txt) at your convenience.
+
+THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+
+If you have any concerns, objections or questions about the license,
+please contact us at mahogany-developers@lists.sourceforge.net.
