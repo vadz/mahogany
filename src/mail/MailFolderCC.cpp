@@ -457,6 +457,8 @@ protected:
    class HeaderInfoCC *m_Listing;
    /// number of entries
    size_t              m_NumEntries;
+
+   MOBJECT_DEBUG(HeaderInfoListCC)
 };
 
 
@@ -508,7 +510,7 @@ MailFolderCC::Create(int typeAndFlags)
    m_FolderListing = NULL;
    m_InCritical = false;
    m_ASMailFolder = NULL;
-   
+
    FolderType type = GetFolderType(typeAndFlags);
    m_FolderFlags = GetFolderFlags(typeAndFlags);
 
@@ -1551,13 +1553,29 @@ MailFolderCC::mm_list(MAILSTREAM * stream,
 {
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET(mf,"NULL mailfolder");
-   CHECK_RET(mf->m_FolderListing,"NULL mailfolder listing");
 
+   // VZ: is this really needed?
+#if 0
+   CHECK_RET(mf->m_FolderListing,"NULL mailfolder listing");
+#endif
+
+   // create the event corresponding to the folder
    ASMailFolder::ResultFolderExists *result =
-      ASMailFolder::ResultFolderExists::Create(
-         mf->m_ASMailFolder, mf->m_Ticket,
-         name, delim, mf->m_UserData);
+      ASMailFolder::ResultFolderExists::Create
+      (
+         mf->m_ASMailFolder,
+         mf->m_Ticket,
+         name,
+         delim,
+         mf->m_UserData
+      );
+
+   // and send it
    MEventManager::Send(new MEventASFolderResultData (result) );
+
+   // don't forget to free the result - MEventASFolderResultData makes a copy
+   // (i.e. calls IncRef) of it
+   result->DecRef();
 }
 
 
@@ -1895,7 +1913,13 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
    spec += pattern;
 
    ASSERT(asmf);
+
+   // set user data (retrieved by mm_list)
+   m_UserData = ud;
+
    // temporarily assign us a corresponding ASMailFolder object:
+   ASSERT_MSG( !streamListDefaultObj, "can't list folders" );
+   SetDefaultObj();
    m_ASMailFolder = asmf;
    m_ASMailFolder->IncRef();
    char *ref = reference.length() == 0 ? NULL : (char *)reference.c_str();
@@ -1909,6 +1933,7 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
    }
    m_ASMailFolder->DecRef();
    m_ASMailFolder = NULL;
+   SetDefaultObj(false);
 }
 
 
@@ -2091,7 +2116,7 @@ mm_log(char *str, long errflg)
       if(!MailFolderCC::PingReopenAll())
          *msg << _("\nAttempt to re-open all folders failed.");
    }
-   
+
    MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::Log);
    evptr->m_args[0].m_str = msg;
    evptr->m_args[1].m_long = errflg;
@@ -2154,3 +2179,19 @@ mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW *ov)
 }
 
 } // extern "C"
+
+// ----------------------------------------------------------------------------
+// debugging support
+// ----------------------------------------------------------------------------
+
+#ifdef DEBUG
+
+String HeaderInfoListCC::DebugDump() const
+{
+   String s1 = MObjectRC::DebugDump(), s2;
+   s2.Printf("%u entries", Count());
+
+   return s1 + s2;
+}
+
+#endif // DEBUG

@@ -1735,28 +1735,31 @@ void
 wxMessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
 {
    ASMailFolder::Result *result = event.GetResult();
-   if(result->GetUserData() != this)
-      return;
-   switch(result->GetOperation())
+   if (result->GetUserData() == this )
    {
-   case ASMailFolder::Op_GetMessage:
-   {
-      /* The only situation where we receive a Message, is if we
-         want to open it in a separate viewer. */
-      Message *mptr = ((ASMailFolder::ResultMessage *)result)->GetMessage();
-      ShowMessage(mptr);
-      mptr->DecRef();
-      wxFrame *frame = GetFrame(this);
-      if(frame && frame->IsKindOf(CLASSINFO(wxFolderViewFrame)))
+      switch(result->GetOperation())
       {
-         wxString title;
-         title << "Mahogany: " << mptr->Subject() << _(" , from ") << mptr->From(); 
-         frame->SetTitle(title);
+         case ASMailFolder::Op_GetMessage:
+         {
+            /* The only situation where we receive a Message, is if we
+               want to open it in a separate viewer. */
+            Message *mptr = ((ASMailFolder::ResultMessage *)result)->GetMessage();
+            ShowMessage(mptr);
+            mptr->DecRef();
+            wxFrame *frame = GetFrame(this);
+            if(frame && frame->IsKindOf(CLASSINFO(wxFolderViewFrame)))
+            {
+               wxString title;
+               title << "Mahogany: " << mptr->Subject() << _(" , from ") << mptr->From(); 
+               frame->SetTitle(title);
+            }
+         }
+         break;
+
+         default:
+            ASSERT_MSG(0,"Unexpected async result event");
       }
    }
-   break;
-   default:
-      ASSERT_MSG(0,"Unexpected async result event");
-   }
+
    result->DecRef();
 }

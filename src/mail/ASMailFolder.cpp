@@ -75,7 +75,7 @@ public:
    MailThread(ASMailFolder *mf, UserData ud)
       {
          m_ASMailFolder = mf;
-         if(mf) mf->IncRef();
+         SafeIncRef(mf);
          m_MailFolder = mf ? mf->GetMailFolder() : NULL;
          m_UserData = ud;
       }
@@ -84,16 +84,21 @@ public:
       {
          m_Ticket = GetTicket();
          Run();
+
+         Ticket ticketSave = m_Ticket;  // can't use m_XXX after delete this
 #ifndef USE_THREADS
          // We are not using wxThread, so we must delete this when we
          // are done.
          delete this;
 #endif
-         return m_Ticket;
+         return ticketSave;
       }
+
 #ifndef USE_THREADS
    virtual ~MailThread()
-      { if(m_ASMailFolder) m_ASMailFolder->DecRef(); }
+      {
+         SafeDecRef(m_ASMailFolder);
+      }
 #endif
 
 protected:
@@ -847,6 +852,8 @@ private:
    bool m_Locked;
    /// Next ticket Id to use.
    static Ticket ms_Ticket;
+
+   MOBJECT_DEBUG(ASMailFolderImpl)
 };
 
 
@@ -967,3 +974,26 @@ ASMailFolder::ListFolders(const String &host,
                                                   reference, ud);
 }
 
+// ----------------------------------------------------------------------------
+// debugging functions
+// ----------------------------------------------------------------------------
+
+#ifdef DEBUG
+
+String ASMailFolderImpl::DebugDump() const
+{
+   String s1 = MObjectRC::DebugDump(), s2;
+   s2.Printf("name '%s'", GetName().c_str());
+
+   return s1 + s2;
+}
+
+String ASMailFolder::ResultImpl::DebugDump() const
+{
+   String s1 = MObjectRC::DebugDump(), s2;
+   s2.Printf("operation id = %d, folder '%s'", m_Id, m_Mf->GetName().c_str());
+
+   return s1 + s2;
+}
+
+#endif // DEBUG

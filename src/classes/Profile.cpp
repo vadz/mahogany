@@ -547,7 +547,11 @@ String
 Profile::DebugDump() const
 {
    PCHECK();
-   return m_ProfileName;
+
+   String s1 = MObjectRC::DebugDump(), s2;
+   s2.Printf("name '%s'", m_ProfileName.c_str());
+
+   return s1 + s2;
 }
 
 #endif

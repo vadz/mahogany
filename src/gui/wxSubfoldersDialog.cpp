@@ -84,7 +84,7 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
 
    m_listbox = new wxListBox(this, -1);
    c = new wxLayoutConstraints;
-   c->top.SameAs(box, wxTop, 2*LAYOUT_Y_MARGIN);
+   c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
@@ -110,14 +110,25 @@ bool wxSubscriptionDialog::OnMEvent(MEventData& event)
    // is this message really for us?
    if ( result->GetUserData() != this )
    {
-      // no: conitnue with other event handlers
+      // no: continue with other event handlers
+      result->DecRef();
+
       return TRUE;
    }
 
    CHECK( result->GetOperation() == ASMailFolder::Op_ListFolders, FALSE,
           "unexpected operation notification" );
 
-   m_listbox->Append(((ASMailFolder::ResultFolderExists *)result)->GetName());
+   wxString name = ((ASMailFolder::ResultFolderExists *)result)->GetName();
+   if ( strncmp(name, "#mh/", 4) == 0 )
+   {
+      // remove the #mh prefix
+      name = name.c_str() + 4;
+   }
+
+   m_listbox->Append(name);
+
+   result->DecRef();
 
    // we don't want anyone else to receive this message - it was for us only
    return FALSE;

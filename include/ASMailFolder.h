@@ -159,6 +159,8 @@ public:
       Ticket        m_Ticket;
       UserData      m_UserData;
       INTARRAY *    m_Seq;
+
+      MOBJECT_DEBUG(ASMailFolder::ResultImpl)
    };
    /** Holds the result from an operation which can be expressed as an
        integer value. Used for all boolean success values.
