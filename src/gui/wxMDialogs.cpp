@@ -871,7 +871,7 @@ private:
    wxTextCtrl *m_PasswordTextCtrl;
    wxStaticText *m_PathStaticText;
    wxButton   *m_CancelButton, *m_OkButton, *m_UndoButton;
-   wxString    m_choices[News - Inbox];
+   wxString    m_choices[News - Inbox + 1];
 
    DECLARE_EVENT_TABLE()
 };
