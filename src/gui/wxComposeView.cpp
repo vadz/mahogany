@@ -82,13 +82,11 @@ IMPLEMENT_DYNAMIC_CLASS(wxComposeView, wxMFrame)
    EVT_MENU(WXMENU_COMPOSE_SEND,       wxComposeView::OnSend)
    EVT_MENU(WXMENU_COMPOSE_PRINT,      wxComposeView::OnPrint)
    EVT_MENU(WXMENU_COMPOSE_CLEAR,      wxComposeView::OnClear)
-   
+
    // button notifications
    EVT_BUTTON(IDB_EXPAND, wxComposeView::OnExpand)
 
-   // size change
-   EVT_SIZE(wxComposeView::OnSize)
-   END_EVENT_TABLE() 
+   END_EVENT_TABLE()
 #endif
 
 
@@ -117,14 +115,6 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
       parentProfile = mApplication.GetProfile();
    profile = new Profile(iname,parentProfile);
 
-   // use default values for address fields if none explicitly specified
-   const char *cto = strutil_isempty(to) ? READ_CONFIG(profile, MP_COMPOSE_TO) 
-      : to.c_str();
-   const char *ccc = strutil_isempty(cc) ? READ_CONFIG(profile, MP_COMPOSE_CC) 
-      : cc.c_str();
-   const char *cbcc = strutil_isempty(bcc) ? READ_CONFIG(profile, MP_COMPOSE_BCC)
-      : bcc.c_str();
-
    // build menu
    // ----------
    AddFileMenu();
@@ -140,212 +130,139 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
    AddHelpMenu();
    SetMenuBar(menuBar);
 
-   // create panel with items
-   // -----------------------
-   panel = new wxPanel(this);
-
 #ifdef USE_WXWINDOWS2
    // @@ SetLabelPosition(wxVERTICAL) in wxWin2 ??
 #else
-   panel->SetLabelPosition(wxVERTICAL);
+   m_panel->SetLabelPosition(wxVERTICAL);
 #endif
 
-   txtToLabel = CreateLabel(panel, "To:");
-   txtTo      = CreateText(panel, -1, -1, -1, -1, "toField");
+   CreateStatusBar();
 
-   aliasButton = CreateButton(panel, "Expand", "", IDB_EXPAND);
+   // create the child controls
+   // -------------------------
 
-   if( READ_CONFIG(profile, MP_SHOWCC) )
-   {
-      txtCCLabel = CreateLabel(panel, "CC:");
-      txtCC = CreateText(panel, -1, -1, -1, -1, "");
-   }
-   if( READ_CONFIG(profile, MP_SHOWBCC) )
-   {
-      txtBCCLabel = CreateLabel(panel, "BCC:");
-      txtBCC = CreateText(panel, -1, -1, -1, -1, "");
-   }
-   txtSubjectLabel = CreateLabel(panel, "Subject:");
-   txtSubject = CreateText(panel, -1, -1, -1, -1, "Subject");
-
-   // fix the constraints
-   // -------------------
+   // NB: order of item creation is important for constraints algorithm:
+   // create first the controls whose constraints can be fixed first!
    wxLayoutConstraints *c;
    SetAutoLayout(TRUE);
-   panel->SetAutoLayout(TRUE);
 
-   // with the constraints, I assume that "Subject" is the longest label
-   // and all labels are right justified to the right edge of "Subject" label
-
-   // first row: "To" fields (label and text entry) and the "Expand" button
+   // Panel itself (fills all the frame client area)
+   m_panel = new wxPanel(this, -1);
    c = new wxLayoutConstraints;
-   c->top.SameAs(panel, wxTop, LAYOUT_MARGIN);
-   c->right.SameAs(txtSubjectLabel, wxRight);
-   c->height.AsIs();
-   c->width.AsIs();
-   txtToLabel->SetConstraints(c);
-
-   c = new wxLayoutConstraints;
-   c->top.SameAs(panel, wxTop, LAYOUT_MARGIN);
-   c->left.SameAs(txtSubjectLabel, wxRight, LAYOUT_MARGIN);
-   c->right.SameAs(aliasButton, wxLeft, LAYOUT_MARGIN);
-   c->height.AsIs(); 
-   txtTo->SetConstraints(c);
-
-   c = new wxLayoutConstraints;
-   c->top.SameAs        (panel, wxTop, LAYOUT_MARGIN);
-   c->right.SameAs(panel, wxRight, LAYOUT_MARGIN);
-   c->width.AsIs();
-   c->height.AsIs(); 
-   aliasButton->SetConstraints(c);
-
-   // second row: optional "CC" label and text entry
-
-   // the last control we set the constraints for
-   wxItem *last = txtTo;
-
-   if( READ_CONFIG(profile, MP_SHOWCC) )
-   {
-      c = new wxLayoutConstraints;
-      c->top.Below(txtToLabel);
-      c->right.SameAs(txtSubjectLabel, wxRight);
-      c->height.AsIs();
-      c->width.AsIs();
-      txtCCLabel->SetConstraints(c);
-
-      c = new wxLayoutConstraints;
-      c->top.Below(txtToLabel);
-      c->left.SameAs(txtSubjectLabel, wxRight, LAYOUT_MARGIN);
-      c->right.SameAs(panel, wxRight, LAYOUT_MARGIN);
-      c->height.AsIs(); 
-      txtCC->SetConstraints(c);
-      last = txtCC;
-   }
-
-   // third row: optional "BCC" label and text entry
-   if( READ_CONFIG(profile, MP_SHOWBCC) )
-   {
-      c = new wxLayoutConstraints;
-      c = new wxLayoutConstraints;
-      c->top.Below(last);
-      c->right.SameAs(txtSubjectLabel, wxRight);
-      c->height.AsIs();
-      c->width.AsIs();
-      txtBCCLabel->SetConstraints(c);
-
-      c = new wxLayoutConstraints;
-      c->top.Below(last);
-      c->left.SameAs(txtSubjectLabel, wxRight, LAYOUT_MARGIN);
-      c->right.SameAs(panel, wxRight, LAYOUT_MARGIN);
-      c->height.AsIs(); 
-      txtBCC->SetConstraints(c);
-      last = txtBCC;
-   }
-
-   // fourth row: subject line
-   c = new wxLayoutConstraints;
-   c->top.SameAs(last, wxBottom, LAYOUT_MARGIN); //Below  (last);
-   c->left.SameAs(panel, wxLeft, LAYOUT_MARGIN);
-   c->height.AsIs();
-   c->width.AsIs();
-   txtSubjectLabel->SetConstraints(c);
-
-   c = new wxLayoutConstraints;
-   c->top.Below(last);
-   c->left.SameAs(txtSubjectLabel, wxRight, LAYOUT_MARGIN);
-   c->right.SameAs(panel, wxRight, LAYOUT_MARGIN);
-   c->height.AsIs(); 
-   txtSubject->SetConstraints(c);
-   last = txtSubjectLabel;
-
-   // Panel itself
-   c = new wxLayoutConstraints;
-   c->left.SameAs(this, wxLeft);
    c->top.SameAs(this, wxTop);
-   c->right.SameAs(this, wxRight);
-   c->height.SameAs  (this, wxHeight);
-   panel->SetConstraints(c);
+   c->left.SameAs(this, wxLeft);
+   c->width.SameAs(this, wxWidth);
+   c->height.SameAs(this, wxHeight);
+   m_panel->SetConstraints(c);
+   m_panel->SetAutoLayout(TRUE);
 
-   txtSubjectLabel = CreateLabel(panel, "Subject:");
-   txtSubject = CreateText(panel, -1, -1, -1, -1, "Subject");
+   // box which contains all the header fields
+   wxStaticBox *box = new wxStaticBox(m_panel, -1, "");
+   c = new wxLayoutConstraints;
+   c->left.SameAs(m_panel, wxLeft, LAYOUT_MARGIN);
+   c->right.SameAs(m_panel, wxRight, LAYOUT_MARGIN);
+   c->top.SameAs(m_panel, wxTop, LAYOUT_MARGIN);
+   box->SetConstraints(c);
 
-   wxStaticBox  *box = new wxStaticBox(panel, -1, "");
+   // compose window
    CreateFTCanvas();
-
-   // fix the constraints
-   // -------------------
-
-   // macro which centers one control vertically with respect to another one
-#define VCENTER(c, ref) c->height.AsIs();         \
-   c->centreY.SameAs(ref, wxCentreY, -1)
-
-      SetAutoLayout(TRUE);
-   panel->SetAutoLayout(TRUE);
-
-   // with the constraints, I assume that "Subject" is the longest label
-   // and all labels are right justified to the right edge of "Subject" label
-
-   // first row: "To" fields (label and text entry) and the "Expand" button
    c = new wxLayoutConstraints;
-   c->top.SameAs(panel, wxTop, 15);
-   c->right.SameAs(txtSubjectLabel, wxRight);
-   c->height.AsIs();
-   c->width.AsIs();
-   txtToLabel->SetConstraints(c);
+   c->left.SameAs(m_panel, wxLeft, LAYOUT_MARGIN);
+   c->right.SameAs(m_panel, wxRight, LAYOUT_MARGIN);
+   c->top.Below(box, LAYOUT_MARGIN);
+   c->bottom.SameAs(m_panel, wxBottom, LAYOUT_MARGIN);
+   m_LayoutWindow->SetConstraints(c);
 
-   c = new wxLayoutConstraints;
-   c->left.SameAs(txtSubjectLabel, wxRight);
-   c->right.SameAs(aliasButton, wxLeft, 1);
-   VCENTER(c, txtToLabel); 
-   txtTo->SetConstraints(c);
+   // layout the labels and text fields: label at the left of the field
+   bool bDoShow[Field_Max];
+   bDoShow[Field_To] =
+   bDoShow[Field_Subject] = TRUE;  // To and subject always there
+   bDoShow[Field_Cc] = READ_CONFIG(profile, MP_SHOWCC);
+   bDoShow[Field_Bcc] = READ_CONFIG(profile, MP_SHOWBCC);
 
-   c = new wxLayoutConstraints;
-   c->right.SameAs(panel, wxRight, 7);
-   c->width.AsIs();
-   VCENTER(c, txtToLabel); 
-   aliasButton->SetConstraints(c);
+   // first determine the longest label caption
+   static const char *aszLabels[Field_Max] =
+   {
+      "To:", "Subject:", "CC:", "BCC:",
+   };
+   wxClientDC dc(this);
+   long width, widthMax = 0;
+   uint n;
+   for ( n = 0; n < WXSIZEOF(aszLabels); n++ ) {
+      if ( !bDoShow[n] )
+         continue;
 
-   // this variable holds the last (from top to bottom) text field we created
-   // (we need it because txtCC and txtBCC are optional and the subject field
-   // must be under the last header line)
-   wxText *txtLast = txtTo;
+      dc.GetTextExtent(aszLabels[n], &width, NULL);
+      if ( width > widthMax )
+         widthMax = width;
+   }
+   widthMax += LAYOUT_MARGIN;
 
-   // second row: "CC" label and text entry
-   if ( txtCCLabel != NULL ) {
-      c = new wxLayoutConstraints;
-      c->top.Below(aliasButton, 2);
-      c->right.SameAs(txtSubjectLabel, wxRight);
-      c->height.AsIs();
-      c->width.AsIs();
-      txtCCLabel->SetConstraints(c);
+   wxTextCtrl *m_txtFields[Field_Max];
+   wxStaticText *label;
+   wxWindow  *last = NULL;
+   for ( n = 0; n < Field_Max; n++ ) {
+      if ( bDoShow[n] ) {
+         // text entry goes from right border of the label to the right border
+         // of the box except for the first one where we must also leave space
+         // for the button
+         m_txtFields[n] = new wxTextCtrl(m_panel, -1, "");
+         c = new wxLayoutConstraints;
+         c->left.Absolute(widthMax + LAYOUT_MARGIN);
+         if ( last )
+            c->top.Below(last, LAYOUT_MARGIN);
+         else
+            c->top.SameAs(box, wxTop, 2*LAYOUT_MARGIN);
+         if ( n == Field_To ) {
+            // the [Expand] button
+            wxButton *aliasButton = new wxButton(m_panel, -1, "Expand");
+            wxLayoutConstraints *c2 = new wxLayoutConstraints;
+            c2->top.SameAs(box, wxTop, 2*LAYOUT_MARGIN);
+            c2->right.SameAs(box, wxRight, LAYOUT_MARGIN);
+            c2->width.AsIs();
+            c2->height.AsIs();
+            aliasButton->SetConstraints(c2);
 
-      c = new wxLayoutConstraints;
-      c->left.SameAs(txtSubjectLabel, wxRight);
-      c->right.SameAs(panel, wxRight, 5);
-      VCENTER(c, txtCCLabel); 
-      txtCC->SetConstraints(c);
+            c->right.LeftOf(aliasButton, LAYOUT_MARGIN);
+         }
+         else
+            c->right.SameAs(box, wxRight, LAYOUT_MARGIN);
+         c->height.AsIs();
+         m_txtFields[n]->SetConstraints(c);
 
-      txtLast = txtCC;
+         last = m_txtFields[n];
+
+         // label is aligned to the left
+         label = new wxStaticText(m_panel, -1, aszLabels[n],
+                                  wxDefaultPosition, wxDefaultSize,
+                                  wxALIGN_RIGHT);
+         c = new wxLayoutConstraints;
+         c->left.SameAs(box, wxLeft, LAYOUT_MARGIN);
+         c->right.Absolute(widthMax);
+         c->centreY.SameAs(last, wxCentreY, 3); // @@ looks better...
+         c->height.AsIs();
+         label->SetConstraints(c);
+      }
+      else { // not shown
+         m_txtFields[n] = NULL;
+      }
    }
 
-   // third row: "BCC" label and text entry
-   if ( txtBCCLabel != NULL ) {
-      c = new wxLayoutConstraints;
-      c->top.Below(txtLast, 1);
-      c->right.SameAs(txtSubjectLabel, wxRight);
-      c->height.AsIs();
-      c->width.AsIs();
-      txtBCCLabel->SetConstraints(c);
+   // now we can fix the bottom of the box
+   box->GetConstraints()->bottom.Below(last, -LAYOUT_MARGIN);
 
-      c = new wxLayoutConstraints;
-      c->left.SameAs(txtSubjectLabel, wxRight);
-      c->right.SameAs(panel, wxRight, 5);
-      VCENTER(c, txtBCCLabel); 
-      txtBCC->SetConstraints(c);
+   // initialize the controls
+   // -----------------------
 
-      txtLast = txtBCC;
-   }
+   // set def values for the headers
+   m_txtFields[Field_To]->SetValue(
+      strutil_isempty(to) ? READ_CONFIG(profile, MP_COMPOSE_TO) : to.c_str());
+   m_txtFields[Field_Cc]->SetValue(
+      strutil_isempty(cc) ? READ_CONFIG(profile, MP_COMPOSE_CC) : cc.c_str());
+   m_txtFields[Field_Bcc]->SetValue(
+      strutil_isempty(bcc) ? READ_CONFIG(profile, MP_COMPOSE_BCC) : bcc.c_str());
 
+   // append signature
    if( READ_CONFIG(profile, MP_COMPOSE_USE_SIGNATURE) )
    {
       size_t size;
@@ -373,46 +290,23 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
       }
    }
 
-   CreateStatusBar();
-
+   // show the frame
+   // --------------
    initialised = true;
-   if(! hide)
+   if ( !hide ) {
       Show(TRUE);
-   //   txtTo->SetFocus();
+      m_txtFields[Field_To]->SetFocus();
+   }
 }
 
 void
 wxComposeView::CreateFTCanvas(void)
 {
-   m_LayoutWindow = new wxLayoutWindow(panel);
-   // Canvas
-   wxLayoutConstraints *c = new wxLayoutConstraints;
-   c->left.SameAs  (panel, wxLeft);
-   c->top.SameAs   (txtSubjectLabel, wxBottom, LAYOUT_MARGIN);
-   c->right.SameAs (panel, wxRight);
-   c->bottom.SameAs(panel, wxBottom);
-   m_LayoutWindow->SetConstraints(c);
+   m_LayoutWindow = new wxLayoutWindow(m_panel);
    m_LayoutWindow->GetLayoutList().SetEditable(true);
+
    //FIXMEm_LayoutWindow->SetWrapMargin(READ_CONFIG(profile, MP_COMPOSE_WRAPMARGIN));
 }
-
-#ifdef USE_WXWINDOWS2
-void
-wxComposeView::OnSize(wxSizeEvent& event)
-{
-#  ifdef USE_WXGTK
-   Layout();
-#  else  // MSW
-   wxMFrame::OnSize(event);
-#  endif // GTK
-}
-#else //wxWin1
-void
-wxComposeView::OnSize(int  w, int h)
-{
-   Layout();
-}
-#endif //wxWin1/2
 
 wxComposeView::wxComposeView(const String &iname,
                              wxWindow *parent,
@@ -443,9 +337,9 @@ wxComposeView::OnExpand(wxCommandEvent &event)
    Adb * adb = mApplication.GetAdb();
    AdbEntry *entry = NULL;
 
-   String   tmp = txtTo->GetValue();
+   String   tmp = m_txtFields[Field_To]->GetValue();
    int l = tmp.length();
-   
+
    // FIXME @@@ VZ: I don't know what this test does, so I disabled it
    //if ( tmp.substr(l - 1, 1) == " " )
 
@@ -453,7 +347,7 @@ wxComposeView::OnExpand(wxCommandEvent &event)
    if(l > 0)
    {
       tmp = tmp.substr(0,l-1);
-      txtTo->SetValue(WXCPTR tmp.c_str());
+      m_txtFields[Field_To]->SetValue(WXCPTR tmp.c_str());
       expStr = strrchr(tmp.c_str(),',');
       if(expStr)
       {
@@ -479,7 +373,7 @@ wxComposeView::OnExpand(wxCommandEvent &event)
          tmp += ',';
          tmp += tmp2;
       }
-      txtTo->SetValue(WXCPTR tmp.c_str());
+      m_txtFields[Field_To]->SetValue(WXCPTR tmp.c_str());
    }
 }
 
@@ -488,7 +382,7 @@ void
 wxComposeView::OnCommand(wxWindow &win, wxCommandEvent &event)
 {
    // this gets called when the Expand button is pressed
-   if ( strcmp(win.GetName(),"toField") == 0 || 
+   if ( strcmp(win.GetName(),"toField") == 0 ||
         strcmp(win.GetName(),"button")  == 0    ) {
       OnExpand(event);
    }
@@ -545,10 +439,10 @@ wxComposeView::InsertFile(void)
 
    wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(mApplication.GetIconManager()->GetIcon(mimeType));
    obj->SetUserData(mc);
-   
+
    m_LayoutWindow->GetLayoutList().Insert(tmp);
    m_LayoutWindow->GetLayoutList().MoveCursor(1,0);
-   m_LayoutWindow->SetFocus();   
+   m_LayoutWindow->SetFocus();
 }
 
 // little helper function to turn kbList into a map:
@@ -561,7 +455,7 @@ wxComposeView::LookupFileName(unsigned long id)
          return (*i)->filename.c_str();
    return NULL;
 }
-   
+
 void
 wxComposeView::Send(void)
 {
@@ -584,11 +478,11 @@ wxComposeView::Send(void)
    SendMessageCC sm
       (
          mApplication.GetProfile(),
-         (const char *)txtSubject->GetValue(),
-         (const char *)txtTo->GetValue(),
-         READ_CONFIG(profile, MP_SHOWCC) ? txtCC->GetValue().c_str()
+         (const char *)m_txtFields[Field_Subject]->GetValue(),
+         (const char *)m_txtFields[Field_To]->GetValue(),
+         READ_CONFIG(profile, MP_SHOWCC) ? m_txtFields[Field_Cc]->GetValue().c_str()
          : (const char *)NULL,
-         READ_CONFIG(profile, MP_SHOWBCC) ? txtBCC->GetValue().c_str() 
+         READ_CONFIG(profile, MP_SHOWBCC) ? m_txtFields[Field_Bcc]->GetValue().c_str()
          : (const char *)NULL
          );
 
@@ -596,7 +490,7 @@ wxComposeView::Send(void)
    wxLayoutList::iterator i = m_LayoutWindow->GetLayoutList().begin();
    wxLayoutObjectBase *lo = NULL;
    MimeContent *mc = NULL;
-      
+
    while((export = wxLayoutExport(m_LayoutWindow->GetLayoutList(),
                                   i,WXLO_EXPORT_AS_TEXT)) != NULL)
    {
@@ -617,7 +511,7 @@ wxComposeView::Send(void)
                buffer = new char [size];
                istr.seekg(0,ios::beg);
                istr.read(buffer, size);
- 
+
                if(! istr.fail())
                   sm.AddPart(mc->m_NumericMimeType, buffer, size,
                              strutil_after(mc->m_MimeType,'/')  //subtype
@@ -634,6 +528,7 @@ wxComposeView::Send(void)
       }
       delete export;
    }
+
    sm.Send();
 }
 
@@ -641,21 +536,21 @@ wxComposeView::Send(void)
 void
 wxComposeView::SetTo(const String &to)
 {
-   txtTo->SetValue(WXCPTR to.c_str());
+   m_txtFields[Field_To]->SetValue(WXCPTR to.c_str());
 }
-   
+
 /// sets CC field
 void
 wxComposeView::SetCC(const String &cc)
 {
-   txtCC->SetValue(WXCPTR cc.c_str());
+   m_txtFields[Field_Cc]->SetValue(WXCPTR cc.c_str());
 }
 
 /// sets Subject field
 void
 wxComposeView::SetSubject(const String &subj)
 {
-   txtSubject->SetValue(WXCPTR subj.c_str());
+   m_txtFields[Field_Subject]->SetValue(WXCPTR subj.c_str());
 }
 
 /// inserts a text

@@ -3,9 +3,9 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$ 
+ * $Id$
  *******************************************************************/
-#ifndef	WXCOMPOSEVIEW_H
+#ifndef WXCOMPOSEVIEW_H
 #define WXCOMPOSEVIEW_H
 
 #ifdef __GNUG__
@@ -29,7 +29,7 @@ class wxLayoutWindow;
 
 
 /// just for now, FIXME!
-#define	WXCOMPOSEVIEW_FTCANVAS_YPOS	80
+#define WXCOMPOSEVIEW_FTCANVAS_YPOS 80
 
 struct wxCVFileMapEntry
 {
@@ -56,12 +56,12 @@ public:
        @param hide if true, do not show frame
    */
    void Create(const String &iname = String("wxComposeView"),
-	       wxWindow *parent = NULL,
-	       ProfileBase *parentProfile = NULL,
-	       String const &to = "",
-	       String const &cc = "",
-	       String const &bcc = "",
-	       bool hide = false);
+        wxWindow *parent = NULL,
+        ProfileBase *parentProfile = NULL,
+        String const &to = "",
+        String const &cc = "",
+        String const &bcc = "",
+        bool hide = false);
 
    /** Constructor
        @param iname  name of windowclass
@@ -70,22 +70,22 @@ public:
        @param hide if true, do not show frame
    */
    wxComposeView(const String &iname = String("wxComposeView"),
-		 wxWindow *parent = NULL,
-		 ProfileBase *parentProfile = NULL,
-		 bool hide = false);
-   
+   wxWindow *parent = NULL,
+   ProfileBase *parentProfile = NULL,
+   bool hide = false);
+
    /// Destructor
    ~wxComposeView();
 
    /// return true if initialised
-   inline bool	IsInitialised(void) const { return initialised; }
+   inline bool IsInitialised(void) const { return initialised; }
 
    /// insert a file into buffer
    void InsertFile(void);
-   
+
    /// sets To field
    void SetTo(const String &to);
-   
+
    /// sets CC field
    void SetCC(const String &cc);
 
@@ -94,23 +94,23 @@ public:
 
    /// inserts a text
    void InsertText(const String &txt);
-   
+
    /// make a printout of input window
    void Print(void);
 
    /// send the message
    void Send(void);
-   
+
    /// called on Menu selection
    void OnMenuCommand(int id);
-   
+
    /// for button
    void OnExpand(wxCommandEvent &event);
-   
+
 #ifdef  USE_WXWINDOWS2
    //@{ Menu callbacks
       ///
-   void OnInsertFile(wxCommandEvent&) 
+   void OnInsertFile(wxCommandEvent&)
       { OnMenuCommand(WXMENU_COMPOSE_INSERTFILE); }
       ///
    void OnSend(wxCommandEvent&) { OnMenuCommand(WXMENU_COMPOSE_SEND); }
@@ -118,9 +118,6 @@ public:
    void OnPrint(wxCommandEvent&) { OnMenuCommand(WXMENU_COMPOSE_PRINT); }
       ///
    void OnClear(wxCommandEvent&) { OnMenuCommand(WXMENU_COMPOSE_CLEAR); }
-
-   /// resize callback
-   void OnSize(wxSizeEvent& eventSize);
 
    DECLARE_EVENT_TABLE()
 #else //wxWin1
@@ -135,54 +132,51 @@ private:
    bool initialised;
 
    /// a profile
-   Profile	* profile;
+   Profile * profile;
 
    /// the panel
-   wxPanel	* panel;
+   wxPanel *m_panel;
 
    /// compose menu
-   wxMenu	*composeMenu;
-   
-   /**@name Input fields. */
+   wxMenu *composeMenu;
+
+   /**@name Input fields (arranged into an array) */
    //@{
-   /// The To: field
-   wxText	*txtTo;
-   wxMessage	*txtToLabel;
-   // last length of To field (for expansion)
-   int		txtToLastLength;
-   /// The CC: field
-   wxText	*txtCC;
-   wxMessage	*txtCCLabel;
-   /// The BCC: field
-   wxText	*txtBCC;
-   wxMessage	*txtBCCLabel;
-   /// The Subject: field
-   wxText	*txtSubject;
-   wxMessage	*txtSubjectLabel;
-   /// the canvas for displaying the mail
-   //wxFTCanvas	*ftCanvas;
+      /// last length of To field (for expansion)
+   int  txtToLastLength;
+      /// The text fields
+   enum
+   {
+      Field_To,
+      Field_Subject,
+      Field_Cc,
+      Field_Bcc,
+      Field_Max
+   };
+   wxText *m_txtFields[Field_Max];
+      /// the canvas for displaying the mail
    wxLayoutWindow *m_LayoutWindow;
-   /// the alias expand button
-   wxButton	*aliasButton;
+      /// the alias expand button
+   wxButton *aliasButton;
    //@}
 
    /// the popup menu
-   wxMenu	*popupMenu;
+   wxMenu *popupMenu;
    /**@name The interface to its canvas. */
    //@{
    /// the ComposeView canvas class
    friend class wxCVCanvas;
    /// Process a Mouse Event.
-   void	ProcessMouse(wxMouseEvent &event);
+   void ProcessMouse(wxMouseEvent &event);
    //@}
 
    /// a list mapping IDs to filenames
-   wxCVFileMapType	fileMap;
+   wxCVFileMapType fileMap;
    /// for assigning IDs
-   unsigned long	nextFileID;
+   unsigned long nextFileID;
    /// find the filename for an ID
    const char *LookupFileName(unsigned long id);
-   
+
    /// makes the canvas
    void CreateFTCanvas(void);
 };
