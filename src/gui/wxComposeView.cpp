@@ -59,8 +59,6 @@
    #include <unistd.h>
 #endif
 
-#include <ctype.h>            // for isspace
-
 #include <wx/clipbrd.h>
 #include <wx/process.h>
 #include <wx/file.h>
@@ -2075,7 +2073,7 @@ wxComposeView::ExpandRecipient(String *textAddress)
 
       // the address will probably never start with spaces but if it does, it
       // will be enough to just take it into quotes
-      while ( isspace(text[nLastAddr]) )
+      while ( wxIsspace(text[nLastAddr]) )
       {
          nLastAddr++;
       }
@@ -2170,7 +2168,7 @@ wxComposeView::ExpandRecipient(String *textAddress)
    for ( nPrevAddrEnd = nLastAddr; nPrevAddrEnd > 0; nPrevAddrEnd-- )
    {
       wxChar c = text[nPrevAddrEnd];
-      if ( !isspace(c) && (c != ',') && (c != ';') )
+      if ( !wxIsspace(c) && (c != ',') && (c != ';') )
       {
          // this character is a part of previous string, leave it there
          nPrevAddrEnd++;

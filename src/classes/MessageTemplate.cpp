@@ -491,7 +491,7 @@ String ExtractWord(const wxChar **ppc, wxChar endOfWordMarker, bool forceQuotes)
    String word;
    while ( *pc && (*pc != '\n') &&
            ((quoted && *pc != '"') ||
-            ((forceQuotes || isalnum(*pc)) && *pc != endOfWordMarker)) )
+            ((forceQuotes || wxIsalnum(*pc)) && *pc != endOfWordMarker)) )
    {
       if ( quoted && *pc == '\\' )
       {

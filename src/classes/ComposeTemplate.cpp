@@ -700,7 +700,7 @@ ExpandOriginalText(const String& text,
             size_t n = wrapMargin - 1;
             while ( n > prefix.length() )
             {
-               if ( isspace(lineCur[n]) )
+               if ( wxIsspace(lineCur[n]) )
                   break;
 
                n--;
@@ -718,7 +718,7 @@ ExpandOriginalText(const String& text,
 
             // we don't need to start the new line with spaces so remove them
             // from the tail
-            while ( n < lineCur.length() && isspace(lineCur[n]) )
+            while ( n < lineCur.length() && wxIsspace(lineCur[n]) )
             {
                n++;
             }

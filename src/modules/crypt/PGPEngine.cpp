@@ -545,7 +545,7 @@ PGPEngine::DoExecCommand(const String& options,
          {
             String code;
             const wxChar *pc;
-            for ( pc = line.c_str(); *pc && !isspace(*pc); pc++ )
+            for ( pc = line.c_str(); *pc && !wxIsspace(*pc); pc++ )
             {
                code += *pc;
             }
@@ -602,7 +602,7 @@ PGPEngine::DoExecCommand(const String& options,
             else if ( code == _T("USERID_HINT") )
             {
                // skip the key id
-               while ( *pc && !isspace(*pc) )
+               while ( *pc && !wxIsspace(*pc) )
                   pc++;
 
                if ( *pc )

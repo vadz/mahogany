@@ -1677,7 +1677,7 @@ wxString wxFolderTreeNode::GetName() const
 #endif // 0
 
                default:    /* must be alphanumeric */
-                  if (!isalnum (s))
+                  if (!wxIsalnum (s))
                   {
                      wxLogDebug(_T("invalid modified UTF-7 name"));
                      isValid = false;

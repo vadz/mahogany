@@ -1807,7 +1807,7 @@ Profile::FilterProfileName(const String& profileName)
    for ( size_t n = 0; n < len; n++ )
    {
       wxChar ch = profileName[n];
-      if ( isalnum(ch) || wxStrchr(aValidChars, ch) )
+      if ( wxIsalnum(ch) || wxStrchr(aValidChars, ch) )
       {
          filteredName << ch;
       }

@@ -106,7 +106,7 @@ bool AdbMailrcImporter::ParseMailrcAliasLine(const wxString& line,
                                              wxArrayString *addresses) const
 {
    const wxChar *pc = line.c_str() + lenAlias;
-   while ( isspace(*pc) )
+   while ( wxIsspace(*pc) )
       pc++;
 
    bool quoted = *pc == '"';
@@ -163,7 +163,7 @@ bool AdbMailrcImporter::ParseMailrcAliasLine(const wxString& line,
    // extract addresses too?
    if ( addresses )
    {
-      while ( isspace(*pc) )
+      while ( wxIsspace(*pc) )
          pc++;
 
       addresses->Empty();

@@ -1088,9 +1088,9 @@ wxLayoutLine::DeleteWord(CoordType xpos)
          str = str.substr(offset,str.Length()-offset);
          // Find out how many positions we need to delete:
          // 1. eat leading space
-         while(isspace(str.c_str()[count])) count++;
+         while(wxIsspace(str.c_str()[count])) count++;
          // 2. eat the word itself:
-         while(isalnum(str.c_str()[count])) count++;
+         while(wxIsalnum(str.c_str()[count])) count++;
          // now delete it:
          wxASSERT(count+offset <= (size_t) (**i).GetLength());
          ((wxLayoutObjectText *)*i)->GetText().erase(offset,count);
@@ -1435,7 +1435,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
          {
             do
             {
-               foundSpace = isspace(tobj->GetText()[breakpos]) != 0;
+               foundSpace = wxIsspace(tobj->GetText()[breakpos]) != 0;
                if ( foundSpace )
                   break;
             }
@@ -1599,7 +1599,7 @@ wxLayoutLine::GetWrapPosition(CoordType column)
       {
          do
          {
-            if(isspace(((wxLayoutObjectText*)*i)->GetText().c_str()[(size_t)offset]))
+            if(wxIsspace(((wxLayoutObjectText*)*i)->GetText().c_str()[(size_t)offset]))
                return column;
             else
             {
@@ -1632,7 +1632,7 @@ wxLayoutLine::GetWrapPosition(CoordType column)
    // now we are behind the one long text object and need to find the
    // first space in it
    for(offset = 0; offset < (**i).GetLength(); offset++)
-      if( isspace(((wxLayoutObjectText*)*i)->GetText().c_str()[(size_t)offset]))
+      if( wxIsspace(((wxLayoutObjectText*)*i)->GetText().c_str()[(size_t)offset]))
       {
          return pos+offset;
       }
@@ -2149,13 +2149,13 @@ wxLayoutList::MoveCursorWord(int n, bool untilNext)
             }
 
             // to the beginning/end of the next/prev word
-            while ( p >= start && p < end && isspace(*p) )
+            while ( p >= start && p < end && wxIsspace(*p) )
             {
                n > 0 ? p++ : p--;
             }
 
             // go to the end/beginning of the word (in a broad sense...)
-            while ( p >= start && p < end && !isspace(*p) )
+            while ( p >= start && p < end && !wxIsspace(*p) )
             {
                n > 0 ? p++ : p--;
             }
@@ -2165,14 +2165,14 @@ wxLayoutList::MoveCursorWord(int n, bool untilNext)
                if ( untilNext )
                {
                   // now advance to the beginning of the next word
-                  while ( isspace(*p) && p < end )
+                  while ( wxIsspace(*p) && p < end )
                      p++;
                }
             }
             else // backwards
             {
                // in these 2 cases we took 1 char too much
-               if ( (p < start) || isspace(*p) )
+               if ( (p < start) || wxIsspace(*p) )
                {
                   p++;
                }

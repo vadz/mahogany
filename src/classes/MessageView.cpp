@@ -79,8 +79,6 @@
 #include <wx/fontutil.h>
 #include <wx/tokenzr.h>
 
-#include <ctype.h>  // for isspace
-
 #ifdef OS_UNIX
    #include <sys/stat.h>
 

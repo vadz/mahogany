@@ -734,7 +734,7 @@ match:
          const wxChar *q = start;
          while ( q >= text && *q != '\n' )
          {
-            if ( !isspace(*q--) )
+            if ( !wxIsspace(*q--) )
                break;
          }
 

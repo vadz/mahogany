@@ -311,7 +311,7 @@ void TemplateEditor::OnMenu(wxCommandEvent& event)
          bool needsQuotes = FALSE;
          for ( const wxChar *pc = value.c_str(); *pc; pc++ )
          {
-            if ( !isalnum(*pc) )
+            if ( !wxIsalnum(*pc) )
             {
                needsQuotes = TRUE;
 

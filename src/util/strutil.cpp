@@ -142,7 +142,7 @@ strutil_delwhitespace(String &str)
    String newstr = _T("");
 
    const wxChar *cptr = str.c_str();
-   while(isspace(*cptr))
+   while(wxIsspace(*cptr))
       cptr++;
    while(*cptr)
       newstr += *cptr++;

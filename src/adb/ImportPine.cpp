@@ -274,7 +274,7 @@ bool AdbPineImporter::ParsePineADBEntry(size_t *index,
 
    const wxChar *pc = line.c_str();
 
-   if ( !*pc || isspace(*pc) )
+   if ( !*pc || wxIsspace(*pc) )
    {
       // this is not the start of an entry
       wxLogWarning(_("Unrecognized address book entry '%s'."), pc);

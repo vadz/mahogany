@@ -306,7 +306,7 @@ public:
 
 protected:
    void EatWhiteSpace(void)
-      { while(isspace(m_Input[m_Position])) m_Position++; }
+      { while(wxIsspace(m_Input[m_Position])) m_Position++; }
    const char Char(void) const
       { return m_Input[m_Position]; }
    const char CharInc(void)
@@ -2014,7 +2014,7 @@ static bool CheckSubjectForCapitals(const String& subject)
          return false;
       }
 
-      if ( isspace(*pc) )
+      if ( wxIsspace(*pc) )
       {
          // remember that we have more than one word
          hasSpace = true;
@@ -2048,7 +2048,7 @@ static bool CheckSubjectForJunkAtEnd(const String& subject)
    // skip all whitespace
    const wxChar * const startSpaces = p;
    p += NUM_SPACES;
-   while ( *p < 128 && isspace(*p) )
+   while ( wxIsspace(*p) )
       p++;
 
    // start of the tail

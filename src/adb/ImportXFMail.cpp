@@ -175,7 +175,7 @@ AdbXFMailImporter::GetEntryNames(const String& WXUNUSED_UNLESS_DEBUG(path),
          const wxChar *pc = line;
 
          // skip the spaces in the start of line
-         while ( isspace(*pc) )
+         while ( wxIsspace(*pc) )
             pc++;
 
          // even though nothing prevents XFMail ADB entries from having

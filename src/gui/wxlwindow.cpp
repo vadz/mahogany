@@ -798,7 +798,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                      if(m_DoWordWrap
                         && m_WrapMargin > 0
                         && m_llist->GetCursorPos().x > m_WrapMargin
-                        && isspace(keyCode))
+                        && wxIsspace(keyCode))
                         m_llist->WrapLine(m_WrapMargin);
                      m_llist->Insert((wxChar)keyCode);
                      SetDirty();

@@ -463,7 +463,7 @@ String LineEntry::StripSpace(const String &address)
    
    for ( size_t character = 0; character < address.size(); ++character )
    {
-      if ( !isspace(address[character]) )
+      if ( !wxIsspace(address[character]) )
          nonspace.append(1, address[character]);
    }
 
