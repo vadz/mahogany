@@ -17,7 +17,7 @@ MSGSRC	+= $(MSRC)
 # depend on the real source file and not on this intermediate .cpp one
 define M_COMPILE_SWIG
 $(CXX) -o $@ $(strip $(M_COMPILE_CXX)) $(@:.o=.cpp)
-@test -f $*.d && { sed -e "s,$(@:.o=.cpp),$<," $*.d >$*.d2 && rm -f $*.d && mv $*.d2 $*.d; }
+@test -f $(@:.o=.d) && { sed -e "s,$(@:.o=.cpp),$<," $(@:.o=.d) >$(@:.o=.d)2 && rm -f $(@:.o=.d) && mv $(@:.o=.d)2 $(@:.o=.d); }
 @rm -f $(@:.o=.cpp)
 endef
 
@@ -34,14 +34,14 @@ ifdef SWIG
 # #include MPython.h which we need for dynamic Python linking to work
 define create_cpp
 	$(SWIG) -I$(IFACE_DIR) $(CPPFLAGS) $(SWIGFLAGS) \
-	 $(if $(subst swiglib,,$*),-c) -o $*.cpp $< && \
-	sed -e 's/Python\.h/MPython.h/' $*.cpp > $*.cpp.new && mv $*.cpp.new $*.cpp
+	 $(if $(subst swiglib,,$*),-c) -o $(@:.o=.cpp) $< && \
+	sed -e 's/Python\.h/MPython.h/' $(@:.o=.cpp) > $(@:.o=.cpp).new && mv $(@:.o=.cpp).new $(@:.o=.cpp)
 endef
 
 SWIGFLAGS := -c++ -python -shadow
 vpath %.i $(IFACE_DIR)
 Python/%.o Python/%.py: %.i
-	cd Python && $(create_cpp)
+	$(create_cpp)
 	$(M_COMPILE_SWIG)
 
 # define rule for copying the swig-generated files back to the source tree:
