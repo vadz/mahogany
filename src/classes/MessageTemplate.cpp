@@ -250,6 +250,19 @@ MessageTemplateParser::ExpandTemplate(const wxChar **ppc, String *value) const
                         pc++;
                      }
 
+                     if ( quoted )
+                     {
+                        // skip closing quote or complain about missing one
+                        if ( *pc == '"' )
+                           pc++;
+                        else
+                           wxLogWarning(_("Expected closing quote at line "
+                                          "%d, position %d in the file '%s'"),
+                                        m_nLine,
+                                        pc - m_pStartOfLine,
+                                        m_filename.c_str());
+                     }
+
                      arguments.Add(arg);
                   }
                   while ( *pc == ',' );
