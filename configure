@@ -3665,7 +3665,7 @@ solaris*|SunOS*)
     CCOSTYPE=sol
   fi
   ;;
-fFreebBsSdD*)
+freebsd* | FreeBSD*)
   CCOSTYPE=bsf
   ;;
 OSF1*)

@@ -409,7 +409,7 @@ case "${OSTYPE}" in
 linux* | Linux*)
   CCOSTYPE=slx
   ;;
-solaris*|SunOS*)
+Solaris* | solaris* | SunOS*)
   if test "$GCC" = "yes"
   then
     CCOSTYPE=gso
@@ -417,7 +417,7 @@ solaris*|SunOS*)
     CCOSTYPE=sol
   fi
   ;;
-[fF]ree[bB][sS][dD]*)
+freebsd* | FreeBSD*)
   CCOSTYPE=bsf
   ;;
 OSF1*)
