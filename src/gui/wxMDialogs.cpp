@@ -2899,7 +2899,8 @@ wxMultipleChoiceDialog::wxMultipleChoiceDialog(wxWindow *parent,
                                        -1,
                                        wxDefaultPosition,
                                        wxDefaultSize,
-                                       count, aChoices
+                                       count, aChoices,
+                                       wxLB_EXTENDED
                                       );
 
     delete [] aChoices;
@@ -2922,8 +2923,6 @@ wxMultipleChoiceDialog::wxMultipleChoiceDialog(wxWindow *parent,
     topsizer->Fit(this);
 
     Centre(wxBOTH);
-
-    m_checklstbox->SetFocus();
 }
 
 bool wxMultipleChoiceDialog::TransferDataToWindow()
@@ -2933,6 +2932,9 @@ bool wxMultipleChoiceDialog::TransferDataToWindow()
    {
       m_checklstbox->Check(m_selections->Item(n));
    }
+
+   m_checklstbox->Select(0);
+   m_checklstbox->SetFocus();
 
    return TRUE;
 }
