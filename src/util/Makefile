@@ -3,7 +3,7 @@
 
 include ../../makeopts
 
-TARGETS = strutil.o sysutil.o upgrade.o miscutil.o
+TARGETS = strutil.o sysutil.o upgrade.o miscutil.o twofish2.o
 
 ifdef USE_LEAKTRACER
 TARGETS := $(TARGETS) LeakTracer.o

@@ -17,6 +17,7 @@
 #ifndef   USE_PCH
 #   include "strutil.h"
 #   include "kbList.h"
+#   include "MDialogs.h"
 #endif
 
 #ifdef OS_UNIX
@@ -598,6 +599,178 @@ strutil_enforceNativeCRLF(String const &in)
    return wxTextFile::Translate(in);
 }
 
+
+/******* TwoFish encryption/decryption of strings *************/
+
+extern "C" {
+#include "twofish/aes.h"
+};
+
+struct CryptData
+{
+   size_t len;
+   BYTE  *data;
+
+   CryptData()
+      {  len = 0; data = NULL; }
+   CryptData(const char *str)
+      {
+         len = strlen(str)+1;
+         data = (BYTE *)malloc(len);
+         strcpy((char*)data, str);
+      }
+
+   ~CryptData()
+      { if(data) free(data); }
+
+   String ToHex(void)
+      {
+         String to = "";
+         String tmp;
+         for(size_t i = 0; i < len; i++)
+         {
+            tmp.Printf("%02x", (int) data[i]);
+            to << tmp;
+         }
+         return to;
+      }
+   void FromHex(const String &hexdata)
+      {
+         if(data) free(data);
+         len = hexdata.Length() / 2;
+         data = (BYTE *)malloc( len );
+         const char *cptr = hexdata.c_str();
+         String tmp;
+         int val, idx = 0;
+         while(*cptr)
+         {
+            tmp = "";
+            tmp << *cptr << *(cptr+1);
+            cptr += 2;
+            sscanf(tmp.c_str(),"%02x", &val);
+            data[idx++] = (BYTE)val;
+         }
+      }
+};
+
+int TwoFishCrypt(
+   int direction, /* 1=encrypt or 0=decrypt */
+   int keySize,
+   const char *passwd,
+   const struct CryptData *data_in,
+   struct CryptData *data_out
+   )
+{
+   keyInstance    ki;			/* key information, including tables */
+   cipherInstance ci;			/* keeps mode (ECB, CBC) and IV */
+   int  i;
+   int pwLen, result;
+   int blkCount = (data_in->len+1)/(BLOCK_SIZE/8) + 1;
+   int byteCnt = (BLOCK_SIZE/8) * blkCount;
+
+   BYTE * input = (BYTE *) calloc(byteCnt,1);
+   BYTE * output = (BYTE *) calloc(byteCnt,1);
+   memcpy(input, data_in->data, byteCnt);
+   
+   if (makeKey(&ki,DIR_ENCRYPT,keySize,NULL) != TRUE)
+   {
+      free(input);
+      free(output);
+      return 0;
+   }
+   if (cipherInit(&ci,MODE_ECB,NULL) != TRUE)
+   {
+      free(input);
+      free(output);
+      return 0;
+   }
+   
+   /* Set key bits from password. */
+   pwLen = strlen(passwd);
+   for (i=0;i<keySize/32;i++)	/* select key bits */
+   {
+      ki.key32[i] = (i < pwLen) ? passwd[i] : 0;
+      ki.key32[i] ^= passwd[0];
+   }
+   reKey(&ki);
+
+   /* encrypt the bytes */
+   result =
+      direction ?
+      blockEncrypt(&ci,&ki, input ,byteCnt*8, output)
+      : blockDecrypt(&ci,&ki, input, byteCnt*8, output);
+
+   if(result == byteCnt*8)
+   {
+      data_out->data = (BYTE *) malloc(byteCnt*8);
+      memcpy(data_out->data, output, byteCnt*8);
+      data_out->len = byteCnt*8;
+      free(input);
+      free(output);
+      return 1;
+   }
+   free(input);
+   free(output);
+   return 0;			
+}
+
+
+static String gs_GlobalPassword;
+static bool strutil_has_twofish = false;
+
+static void
+setup_twofish(void)
+{
+   if(gs_GlobalPassword.Length() == 0)
+   {
+      MInputBox(&gs_GlobalPassword,
+                _("Mahogany Password:"),
+                _("Please enter your global Mahogany password:"),
+                NULL,NULL,NULL,TRUE);
+   }
+}
+
+/*
+ * All encrypted data is hex numbers. To distinguish between strong
+ * and weak data, we prefix the strong encryption with a '%'.
+ */
+String
+strutil_encrypt_tf(const String &original)
+{
+   setup_twofish();
+   CryptData input(original);
+   CryptData output;
+   int rc = TwoFishCrypt(1,256,gs_GlobalPassword, &input,&output);
+   if(rc)
+   {
+      String tmp = output.ToHex();
+      String tmp2;
+      tmp2 << '%' << tmp;
+      return tmp2;
+   }
+   return "";
+}
+
+String
+strutil_decrypt_tf(const String &original)
+{
+   if(! strutil_has_twofish)
+   {
+      ERRORMESSAGE((_("Strong encryption algorithm not available.")));
+      return "";
+   }
+   setup_twofish();
+   CryptData input;
+   input.FromHex(original.c_str()+1); // skip initial '%'
+   CryptData output;
+   int rc = TwoFishCrypt(0,256,gs_GlobalPassword, &input,&output);
+   if(rc)
+   {
+      return output.data;
+   }
+   return "";
+}
+
 /* This is not strictly a string utility function, but somehow it is,
    so I don't think we need a separate source file for it just yet.
    This is not a safe encryption system!
@@ -606,12 +779,14 @@ strutil_enforceNativeCRLF(String const &in)
 #define STRUTIL_ENCRYPT_MIX   1000
 #define STRUTIL_ENCRYPT_DELTA 289  // 17*17
 
+
+
 static unsigned char strutil_encrypt_table[256];
 static bool strutil_encrypt_initialised = false;
-
 static void
 strutil_encrypt_initialise(void)
 {
+   /* initialise built-in weak encryption table: */
    for(int c = 0; c < 256; c++)
       strutil_encrypt_table[c] = (unsigned char )c;
 
@@ -630,6 +805,29 @@ strutil_encrypt_initialise(void)
       a %= 256;
       b %= 256;
    }
+
+   /* Now test if twofish works alright on this system: */
+   gs_GlobalPassword = "test";
+   String test = "This is a test, in cleartext.";
+   String cipher = strutil_encrypt_tf(test);
+   strutil_has_twofish = TRUE; // assume or it will fail
+   String clearagain = strutil_decrypt_tf(cipher);
+   if(clearagain != test)
+   {
+      MDialog_Message(
+         _("The secure encryption algorithm included in Mahogany\n"
+           "does not work on your system and will be replaced with\n"
+           "insecure weak encryption.\n"
+           "Please report this as a bug to the Mahogany developers,\n"
+           "so that we can fix it."),
+         NULL,
+         _("Missing feature"),
+         "EncryptionAlgoBroken");
+      strutil_has_twofish = FALSE;
+   }
+   else
+      strutil_has_twofish = TRUE;
+   gs_GlobalPassword = "";
    strutil_encrypt_initialised = true;
 }
 
@@ -658,6 +856,9 @@ strutil_encrypt(const String &original)
    if(! strutil_encrypt_initialised)
       strutil_encrypt_initialise();
 
+   if(strutil_has_twofish)
+      return strutil_encrypt_tf(original);
+   
    String
       tmpstr,
       newstr;
@@ -685,6 +886,10 @@ strutil_decrypt(const String &original)
 {
    if(original.Length() == 0)
       return "";
+
+   if(original[0] == '%')
+      return strutil_decrypt_tf(original);
+
    CHECK(original.Length() % 4 == 0, "", "Decrypt function called with illegal string.");
 
    if(! strutil_encrypt_initialised)

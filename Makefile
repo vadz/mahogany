@@ -85,7 +85,7 @@ install_rpm:
 	@echo "%config $(DATADIR)/M.conf" >> filelist
 	@echo "$(DATADIR)/scripts" >> filelist
 	@echo "$(DATADIR)/newmail.wav" >> filelist
-	@echo "$(DATADIR)/kylemail.wav" >> filelist
+#	@echo "$(DATADIR)/kylemail.wav" >> filelist
 	@echo "$(DATADIR)/afm" >> filelist
 	@echo "$(DATADIR)/bin" >> filelist
 	@echo "$(DATADIR)/$(CANONICAL_HOST)" >> filelist
@@ -95,7 +95,7 @@ install_rpm:
 	@echo "$(BINDIR)/M" >> filelist
 	@echo "$(BINDIR)/mahogany" >> filelist
 	@# the second subsitution takes care of RPM_BUILD_ROOT
-	@perl -i -npe 's/^/%attr(-, root, root) /; s: /.*//: /:' filelist
+	@$(PERL) -i -npe 's/^/%attr(-, root, root) /; s: /.*//: /:' filelist
 
 install: install_bin install_locale install_doc
 

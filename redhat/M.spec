@@ -20,8 +20,8 @@ Version: %VERSION
 Release: %RELEASE
 Copyright: Mahogany Artistic License
 Group: X11/Applications/Networking
-Source: ftp://ftp.wxwindows.org/pub/M/%{VERSION}/mahogany-%{VERSION}.tar.gz
-URL: http://mahogany.home.dhs.org/
+Source: ftp://mahogany.sourceforge.net/pub/%{VERSION}/mahogany-%{VERSION}.tar.gz
+URL: http://mahogany.sourceforge.net/
 Packager: Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 Provides: mua
 Prefix: %prefix

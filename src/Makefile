@@ -12,7 +12,8 @@ all:	subdirs
 MOD_DIRS:= modules adb
 
 SUB_DIRS:= $(MOD_DIRS) util classes gui mail wx
-UTILOBJ := util/strutil.o util/sysutil.o util/miscutil.o util/upgrade.o
+UTILOBJ := util/strutil.o util/sysutil.o util/miscutil.o util/upgrade.o \
+           util/twofish2.o
 MOBJS   = $(UTILOBJ) classes/*.o gui/*.o mail/*.o adb/*.o \
 	wx/generic/*.o wx/common/*.o wx/vcard/*.o
 

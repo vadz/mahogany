@@ -209,6 +209,8 @@
 #   define   MP_PREFIXPATH         "PrefixPath"
 #endif //Unix
 
+/// Which encryption algorithm to use : 0 = simple builtin, 1 = twofish
+#define MP_CRYPTALGO    "CryptAlgo"
 /// the locale for translation to national languages
 #define   MP_LOCALE               "Locale"
 /// the default character set
@@ -776,6 +778,8 @@
 #  define   MP_GLOBALDIR_D  ""
 #endif // Unix/!Unix
 
+/// Which encryption algorithm to use : 0 = simple builtin, 1 = twofish
+#define MP_CRYPTALGO_D   0
 /// the locale for translation to national languages
 #define   MP_LOCALE_D               M_EMPTYSTRING
 /// the default character set
