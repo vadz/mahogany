@@ -17,15 +17,6 @@ $Id$
 - A problem with expunging message from MailFolderCC: as the messages
   are queued, they cause fetches of messages which no longer exist
   because the count has not yet been updated.
-- suspected bug in LoadImageXpm in wxIconmanager leading to crashes
-- make wxFolderView::Update() a bit more intelligent. Clicking on
-  unread mails changes the flags and therefore resets selection.
-  wxListCtrl selection gets reset if message has to be fetched, if it 
-  was already clicked on once, it won't reset the
-  selection. Apparently fetching a message resets the listctrl. Maybe  
-  some c-client update event?
-  --> No, Update() clever enough but wxListCtrl does not return true
-      for IsSelected() -> therefore selection gets reset
 - add TO: field to folderview
 - speed up copy mail to folder by cusing c-client functionality
 - add some more folder properties to config dialog, i.e. be able to
@@ -424,7 +415,8 @@ classes in the hierarchy.
    it doesn't stay with the old folderview profile
  - investigate problem of empty message bodies (e.g. on Micky's mails
    from the Scottish Office).  SEEMS GONE!?
-
+ - suspected bug in LoadImageXpm in wxIconmanager leading to crashes
+ - wxListCtrl in folderview behaves properly now
 
 
  vi: set si tw=80:

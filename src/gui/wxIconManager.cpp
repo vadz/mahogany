@@ -231,8 +231,16 @@ wxIconManager::LoadXpm(String filename)
          }
       }while(! in.fail());
       cpptr[line++] = NULL;
-      cpptr = (char **)realloc(cpptr,line*sizeof(char *));
-      ASSERT(cpptr);
+      if(found_xpm)
+      {
+         cpptr = (char **)realloc(cpptr,line*sizeof(char *));
+         ASSERT(cpptr);
+      }
+      else
+      {
+         free(cpptr);
+         cpptr = NULL;
+      }
    }
    else
    {

@@ -128,13 +128,18 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
 
 
 wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
-   :wxListCtrl(parent,-1,wxDefaultPosition,wxSize(500,300),wxLC_REPORT)
 {
    ProfileBase *p = fv->GetProfile();
 
    m_Parent = parent;
    m_FolderView = fv;
    m_Style = wxLC_REPORT;
+
+   int
+      w = 500,
+      h = 300;
+   if(parent) parent->GetClientSize(&w,&h);
+   wxListCtrl::Create(parent,-1,wxDefaultPosition,wxSize(w,h),wxLC_REPORT);
 
    m_columns[WXFLC_STATUS] = READ_CONFIG(p,MP_FLC_STATUSCOL);
    m_columnWidths[WXFLC_STATUS] = READ_CONFIG(p,MP_FLC_STATUSWIDTH);
@@ -230,7 +235,8 @@ wxFolderView::SetFolder(MailFolder *mf)
    // this shows what's happening:
    m_MessagePreview->Clear();
    m_FolderCtrl->Clear();
-
+   wxYield();
+   
    if(m_MailFolder)  // clean up old folder
    {
       m_timer->Stop();
@@ -277,6 +283,7 @@ wxFolderView::SetFolder(MailFolder *mf)
       m_SplitterWindow->ReplaceWindow(oldfolderctrl, m_FolderCtrl);
       delete oldfolderctrl;
 
+      wxYield(); // display the new folderctrl immediately
       Update();
 
       if(m_NumOfMessages > 0)
@@ -333,6 +340,7 @@ wxFolderView::Update(void)
       return; // don't call this code recursively
    m_UpdateSemaphore = true;
 
+   wxBeginBusyCursor(); wxYield();
    n = m_MailFolder->CountMessages();
 
    // mildly annoying, but have to do it in order to prevent the generation of
@@ -390,6 +398,7 @@ wxFolderView::Update(void)
       SafeDecRef(mptr);
    }
    m_NumOfMessages = n;
+   wxEndBusyCursor(); wxYield();
    m_UpdateSemaphore = false;
 }
 
@@ -398,9 +407,13 @@ void
 wxFolderView::OpenFolder(String const &profilename)
 {
    // show loading of new folder by clearing everything
-   m_FolderCtrl->Clear();
-   m_MessagePreview->Clear();
+   SetFolder(NULL);
+// m_FolderCtrl->Clear();
+// m_MessagePreview->Clear();
+   wxBeginBusyCursor();
+   wxYield(); // make changes visible
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,profilename);
+   wxEndBusyCursor();
    SetFolder(mf);
    SafeDecRef(mf);
 }
