@@ -2079,7 +2079,7 @@ VerifyInbox(void)
     * Is the newmail folder properly configured?
     */
    MFolder_obj folderRoot("");
-#ifdef EXPERIMENTAL_oldnewmail
+#ifndef EXPERIMENTAL_newnewmail
    NewMailFolderTraversal traverse(folderRoot);
    traverse.Traverse(true); // ignore result
    String foldername = traverse.GetNewMailFolder();
