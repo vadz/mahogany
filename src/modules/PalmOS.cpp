@@ -47,15 +47,20 @@
 #define MP_MOD_PALM_DISPOSE "PalmDispose"
 #define MP_MOD_PALM_DISPOSE_D DISPOSE_FILE
 
+
 ///------------------------------
 /// MModule interface:
 ///------------------------------
 
-class PalmOSModule : public MModule_PalmOS
+class PalmOSModule : public MModule
 {
-   MMODULE_DEFINE(PalmOSModule)
 
+   /** Override the Entry() function to allow Main() and Config()
+       functions. */
+   virtual int Entry(int arg);
    void Synchronise(void);
+   void Configure(void);
+   MMODULE_DEFINE(PalmOSModule)
 private:
    /** PalmOS constructor.
        As the class has no usable interface, this doesn´t do much, but 
@@ -109,6 +114,26 @@ private:
 };
 
 
+int
+PalmOSModule::Entry(int arg)
+{
+   switch(arg)
+   {
+      // GetFlags():
+   case 0: return MMOD_FLAG_HASMAIN|MMOD_FLAG_HASCONFIG;
+      // Main():
+   case 1: Synchronise(); return 0;
+      // Configure():
+   case 2: Configure(); return 0;
+   default:
+      return 0;
+   }
+}
+
+void Configure(void)
+{
+}
+
 void
 PalmOSModule::GetConfig(void)
 {
@@ -123,7 +148,7 @@ PalmOSModule::GetConfig(void)
 
 MMODULE_IMPLEMENT(PalmOSModule,
                   "PalmOS",
-                  MMODULE_INTERFACE_PALMOS,
+                  "HandheldSynchronise",
                   "This module provides PalmOS connectivity.",
                   "0.00")
 
@@ -135,8 +160,8 @@ MMODULE_IMPLEMENT(PalmOSModule,
 /* static */
 MModule *
 PalmOSModule::Init(int version_major, int version_minor, 
-                  int version_release, MInterface *interface,
-                  int *errorCode)
+                   int version_release, MInterface *interface,
+                   int *errorCode)
 {
    if(! MMODULE_SAME_VERSION(version_major, version_minor,
                              version_release))
@@ -485,10 +510,10 @@ PalmOSModule::StoreEMails(void)
             StatusMessage(tmpstr);
             String content;
             msg->WriteToString(content, true);
-            strncpy(buffer, content, 0xffff);
+            strncpy((char *)buffer, content, 0xffff);
             buffer[0xfffe] = '\0';
-            t.body = (char *) malloc( strlen(buffer) + 1 );
-            strcpy(t.body, buffer);
+            t.body = (char *) malloc( strlen((char *)buffer) + 1 );
+            strcpy(t.body, (char *)buffer);
             int len = pack_Mail(&t,  buffer, 0xffff);
             if(dlp_WriteRecord(m_PiSocket, m_MailDB, 0, 0, 0, buffer, len, 0) <= 0)
             {

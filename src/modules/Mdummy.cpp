@@ -38,6 +38,7 @@ private:
        reference and check if everything is set up properly.
    */
    DummyModule(MInterface *interface);
+   DEFAULT_ENTRY_FUNC
 };
 
 

@@ -611,7 +611,6 @@ wxMApp::OnInit()
       /// Load any modules requested.
       LoadModules();
 
-      ((wxMainFrame *)m_topLevelFrame)->UpdateToolbar();
       return true;
    }
    else

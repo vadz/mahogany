@@ -114,6 +114,8 @@ static const TbarItemInfo g_aToolBarData[] =
    { "tb_delete",   WXMENU_ADBEDIT_DELETE,  gettext_noop("Delete")                  },
    { "tb_undo",     WXMENU_ADBEDIT_UNDO,    gettext_noop("Undo")                    },
    { "tb_lookup",   WXMENU_ADBFIND_NEXT,    gettext_noop("Find next")               },
+   // modules
+   { "tb_modules",  WXMENU_MODULES, gettext_noop("Run or configure plugin modules") },
 };
 
 // arrays containing tbar buttons for each frame (must be -1 terminated!)
@@ -133,6 +135,8 @@ static const int g_aMainTbar[] =
    WXTBAR_MSG_DELETE,
    WXTBAR_SEP,
    WXTBAR_ADB,
+   WXTBAR_SEP,
+   WXTBAR_MODULES,
    -1
 };
 
@@ -421,8 +425,7 @@ void AddToolbarButton(wxToolBar *toolbar, int nButton)
 // add all buttons for the given frame to the toolbar
 void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
 {
-   wxASSERT( WXSIZEOF(g_aToolBarData) ==
-             (WXTBAR_MAX - (WXTBAR_MOD_END+1 - WXTBAR_MOD_BEGIN)));
+   wxASSERT( WXSIZEOF(g_aToolBarData) == WXTBAR_MAX);
 
 #ifdef __WXMSW__
    // we use the icons of non standard size

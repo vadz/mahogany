@@ -57,6 +57,122 @@
 // private classes
 // ----------------------------------------------------------------------------
 
+
+// A popup menu for entering and configuring plugin modules
+class wxModulePopup : public wxMenu
+{
+public:
+   static wxModulePopup * Create(void);
+   // callbacks
+   void OnCommandEvent(wxCommandEvent &event);
+   ~wxModulePopup()
+      { SafeDecRef(m_Listing); }
+         
+private:
+   wxModulePopup();
+   MModuleListing *m_Listing;
+   size_t m_CountMain, m_CountConfig;
+   DECLARE_EVENT_TABLE()
+};
+
+
+/* static */
+wxModulePopup *
+wxModulePopup::Create(void)
+{
+   wxModulePopup * popup = new wxModulePopup();
+   if(popup->m_CountMain + popup->m_CountConfig == 0) // nothing to do
+   {
+      delete popup;
+      return NULL;
+   }
+   return popup;
+}
+
+
+wxModulePopup::wxModulePopup()
+   : wxMenu(_("Plugin Modules"))
+{
+   m_CountMain = 0;
+   m_CountConfig = 0;
+   
+   m_Listing = MModule::ListLoadedModules();
+   for(size_t i = 0; i < m_Listing->Count(); i++)
+   {
+      MModule *mod = (*m_Listing)[i].GetModule();
+      if(mod->Entry(MMOD_FUNC_GETFLAGS) & MMOD_FLAG_HASMAIN)
+         m_CountMain++;
+      if(mod->Entry(MMOD_FUNC_GETFLAGS) & MMOD_FLAG_HASCONFIG)
+         m_CountConfig++;
+      mod->DecRef();
+   }
+   
+   if(m_CountMain+m_CountConfig == 0)
+   {
+      /// dummy menu:
+      Append(WXMENU_POPUP_MODULES_OFFS,_("No modules to run or configure!"));
+      Enable(WXMENU_POPUP_MODULES_OFFS, FALSE);
+   }
+   else
+   {
+      if(m_CountMain)
+      {
+         for(size_t i = 0; i < m_Listing->Count(); i++)
+         {
+            MModule *mod = (*m_Listing)[i].GetModule();
+            if(mod->Entry(MMOD_FUNC_GETFLAGS) & MMOD_FLAG_HASMAIN)
+               Append(WXMENU_POPUP_MODULES_OFFS+i, (*m_Listing)[i].GetName());
+            mod->DecRef();
+         }
+      }
+      if(m_CountMain && m_CountConfig)
+         AppendSeparator();
+      if(m_CountConfig)
+      {
+         for(size_t i = 0; i < m_Listing->Count(); i++)
+         {
+            wxString entry;
+            MModule *mod = (*m_Listing)[i].GetModule();
+            if(mod->Entry(MMOD_FUNC_GETFLAGS) & MMOD_FLAG_HASCONFIG)
+            {
+               entry.Printf(_("Configure %s module..."),
+                            (*m_Listing)[i].GetName().c_str());
+               Append(WXMENU_POPUP_MODULES_OFFS+i+m_CountMain, entry);
+            }
+            mod->DecRef();
+         }
+      }
+   }
+}
+
+void
+wxModulePopup::OnCommandEvent(wxCommandEvent &event)
+{
+   if(event.GetId() < 0) // wxGTK menu title (how stupid!)
+      return;
+   
+   size_t id = (size_t) event.GetId();
+   size_t count = 0;
+
+   id = id-WXMENU_POPUP_MODULES_OFFS;
+   if(id < m_CountMain)
+   {
+      MModule *mod = (*m_Listing)[id].GetModule();
+      mod->Entry(MMOD_FUNC_MAIN);
+      mod->DecRef();
+      return;
+   }
+   else
+   {
+      id -= m_CountMain;
+      MModule *mod = (*m_Listing)[id].GetModule();
+      mod->Entry(MMOD_FUNC_CONFIG);
+      mod->DecRef();
+      return;
+   }
+   ASSERT(0 /* unreachable code */);
+}
+
 // override wxFolderTree OnOpenHere() function to open the folder in this
 // frame
 class wxMainFolderTree : public wxFolderTree
@@ -101,6 +217,10 @@ BEGIN_EVENT_TABLE(wxMainFrame, wxMFrame)
   EVT_TOOL(-1,    wxMainFrame::OnCommandEvent)
 END_EVENT_TABLE()
 
+BEGIN_EVENT_TABLE(wxModulePopup, wxMenu)
+  EVT_MENU(-1,    wxModulePopup::OnCommandEvent)
+END_EVENT_TABLE()
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -108,6 +228,7 @@ END_EVENT_TABLE()
 wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    : wxMFrame(iname,parent)
 {
+   m_ModulePopup = NULL;
    SetIcon(ICON("MainFrame"));
    SetTitle(M_TOPLEVELFRAME_TITLE);
    static int widths[3] = { -1, 70, 100 }; // FIXME: temporary for debugging
@@ -169,7 +290,16 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    m_ToolBar = CreateToolBar();
    AddToolbarButtons(m_ToolBar, WXFRAME_MAIN);
 
-
+#if 0 //FIMXE: too early here
+   m_ModulePopup = wxModulePopup::Create();
+   if(! m_ModulePopup)
+   {
+      m_ToolBar->EnableTool(WXMENU_MODULES, FALSE);
+      delete m_ModulePopup;
+      m_ModulePopup = NULL;
+   }
+#endif
+   
    m_splitter->SetMinimumPaneSize(0);
    m_splitter->SetFocus();
 
@@ -301,12 +431,13 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
    int id = event.GetId();
 
 
-   if(id == WXTBAR_MOD_PALMOS)
+   if(id == WXMENU_MODULES)
    {
-      MModule_PalmOS *mod = (MModule_PalmOS *) MModule::GetProvider(MMODULE_INTERFACE_PALMOS);
-      ASSERT(mod);
-      mod->Synchronise();
-      mod->DecRef();
+      if(m_ModulePopup)
+         delete m_ModulePopup;
+      m_ModulePopup = wxModulePopup::Create();
+      if(m_ModulePopup)
+         PopupMenu(m_ModulePopup, 100, 100 );
    }
    else if(m_FolderView &&
       (WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
@@ -319,22 +450,6 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
       wxMFrame::OnMenuCommand(id);
 }
 
-void
-wxMainFrame::UpdateToolbar(void)
-{
-   MModule *mod = MModule::GetProvider(MMODULE_INTERFACE_PALMOS);
-   if(mod)
-   {
-      m_ToolBar->AddSeparator();
-      m_ToolBar->AddTool(WXTBAR_MOD_PALMOS,
-                         ICON("tb_palmos"),
-                         wxNullBitmap,
-                         FALSE, -1, -1, NULL,
-                         _("Call PalmOS module"));
-      mod->DecRef();
-   }
-}
-
 wxMainFrame::~wxMainFrame()
 {
    // tell the app there is no main frame any more and do it as the very first
@@ -343,9 +458,9 @@ wxMainFrame::~wxMainFrame()
    // any moment
    mApplication->OnMainFrameClose();
 
+   if(m_ModulePopup) delete m_ModulePopup;
    delete m_FolderView;
    delete m_FolderTree;
-
    // save the last opened folder
    mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, m_folderName);
 }

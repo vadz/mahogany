@@ -20,6 +20,5 @@ class MModule_PalmOS : public MModule
    virtual void  Synchronise(void) = 0;
 };
 
-#define MMODULE_INTERFACE_PALMOS   "PalmOS"
 
 #endif // PALMOSMODULE_H

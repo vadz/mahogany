@@ -1445,6 +1445,7 @@ class MModule_FiltersImpl : public MModule_Filters
        into a class FilterRule object.
    */
    virtual class FilterRule * GetFilter(const String &filterrule) const;
+   DEFAULT_ENTRY_FUNC
 protected:
    MModule_FiltersImpl(MInterface *interface)
       {

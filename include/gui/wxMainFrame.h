@@ -40,9 +40,6 @@ public:
    // wxWindows callbacks
    void OnCommandEvent(wxCommandEvent &);
    void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT);}
-
-   /// add buttons for modules
-   void UpdateToolbar(void);
 protected:
    /// the splitter window holding the treectrl and folder view
    wxSplitterWindow *m_splitter;
@@ -52,7 +49,9 @@ protected:
    wxFolderTree *m_FolderTree;
       /// the folder view
    wxFolderView *m_FolderView;
-
+   /// the popup menu for modules
+   wxMenu *m_ModulePopup;
+   
    /// the name of the currently opened folder (empty if none)
    String m_folderName;
 

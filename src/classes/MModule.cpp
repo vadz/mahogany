@@ -47,8 +47,9 @@
 
 #define MMD_SIGNATURE "Mahogany-Module-Definition"
 
+
 /** Structure for holding information about a loaded module. */
-struct ModuleEntry
+struct MModuleListEntry
 {
    /// Name under which it was loaded.
    String m_Name;
@@ -67,33 +68,34 @@ struct ModuleEntry
 };
 
 /// A list of all loaded modules.
-KBLIST_DEFINE(ModuleList, ModuleEntry);
+KBLIST_DEFINE(MModuleList, MModuleListEntry);
+
 
 /// The actual list of all loaded modules.
-static ModuleList *gs_ModuleList = NULL;
+static MModuleList *gs_MModuleList = NULL;
 
 static
-ModuleList *GetModuleList(void)
+MModuleList *GetMModuleList(void)
 {
-   if(! gs_ModuleList) gs_ModuleList = new ModuleList;
-   return gs_ModuleList;
+   if(! gs_MModuleList) gs_MModuleList = new MModuleList;
+   return gs_MModuleList;
 }
 
 extern
 void MModule_Cleanup(void)
 {
-   if(gs_ModuleList)
-      delete gs_ModuleList;
-   gs_ModuleList = NULL;
+   if(gs_MModuleList)
+      delete gs_MModuleList;
+   gs_MModuleList = NULL;
 }
 
 static
 MModule *FindModule(const String & name)
 {
-   ModuleList::iterator i;
+   MModuleList::iterator i;
    
-   for(i = GetModuleList()->begin();
-       i != GetModuleList()->end();
+   for(i = GetMModuleList()->begin();
+       i != GetMModuleList()->end();
        i++)
       if( (**i).m_Name == name )
       {
@@ -119,16 +121,16 @@ int MModule_AddStaticModule(const char *Name,
                              const char *Interface,
                              const char *Description,
                              const char *Version,
-                             MModule_InitModuleFuncType init)
+                            MModule_InitModuleFuncType initFunc)
 {
-   ModuleEntry *me = new ModuleEntry;
+   MModuleListEntry *me = new MModuleListEntry;
    me->m_Name = Name;
    me->m_Version = Version;
    me->m_Description = Description;
    me->m_Interface = Interface;
    me->m_Module = NULL;
-   me->m_InitFunc = init;
-   GetModuleList()->push_back(me);
+   me->m_InitFunc = initFunc;
+   GetMModuleList()->push_back(me);
    return 1;
 }
 #else
@@ -155,11 +157,11 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
    
    if(module)
    {
-      ModuleEntry *me = new ModuleEntry;
+      MModuleListEntry *me = new MModuleListEntry;
       me->m_Name = name;
       me->m_Interface = module->GetInterface();
       me->m_Module = module;
-      GetModuleList()->push_back(me);
+      GetMModuleList()->push_back(me);
    }
    else
    {
@@ -235,9 +237,9 @@ MModule::LoadModule(const String & name)
 MModule *
 MModule::GetProvider(const wxString &interfaceName)
 {
-   ModuleList::iterator i;
-   for(i = GetModuleList()->begin();
-       i != GetModuleList()->end();
+   MModuleList::iterator i;
+   for(i = GetMModuleList()->begin();
+       i != GetMModuleList()->end();
        i++)
       if( (**i).m_Interface == interfaceName )
       {
@@ -262,13 +264,18 @@ public:
       { return m_Version; }
    virtual const String &GetAuthor(void) const
       { return m_Author; }
-
+   virtual MModule *GetModule(void) const
+      {
+         SafeIncRef(m_Module);
+         return m_Module;
+      }
    MModuleListingEntryImpl(const String &name = "",
                            const String &interfaceName = "",
                            const String &shortdesc = "",
                            const String &desc = "",
                            const String &version = "",
-                           const String &author = "")
+                           const String &author = "",
+                           MModule *module = NULL)
       {
          m_Name = name;
          m_Interface = interfaceName;
@@ -276,6 +283,8 @@ public:
          m_Desc = desc;
          m_Version = version;
          m_Author = author;
+         m_Module = module;
+         SafeIncRef(m_Module);
          strutil_delwhitespace(m_Name);
          strutil_delwhitespace(m_Interface);
          strutil_delwhitespace(m_Desc);
@@ -283,8 +292,14 @@ public:
          strutil_delwhitespace(m_Version);
          strutil_delwhitespace(m_Author);
       }
+   ~MModuleListingEntryImpl()
+      {
+         SafeDecRef(m_Module);
+      }
 private:
-   String m_Name, m_Interface, m_ShortDesc, m_Desc, m_Version, m_Author;
+   String m_Name, m_Interface, m_ShortDesc,
+         m_Desc, m_Version, m_Author;
+   MModule *m_Module;
    GCC_DTOR_WARN_OFF();
 };
 
@@ -321,27 +336,54 @@ private:
 };
 
 /* static */
-MModuleListing *MModule::ListAvailableModules(void)
+MModuleListing *
+MModule::ListLoadedModules(void)
 {
-#ifdef USE_MODULES_STATIC
-
-   MModuleListingImpl *listing = MModuleListingImpl::Create(GetModuleList()->size());
+   MModuleListingImpl *listing = MModuleListingImpl::Create(GetMModuleList()->size());
    size_t count = 0;
-   ModuleList::iterator i;
-   for(i = GetModuleList()->begin();
-       i != GetModuleList()->end();
+   MModuleList::iterator i;
+   for(i = GetMModuleList()->begin();
+       i != GetMModuleList()->end();
        i++)
+#ifdef USE_MODULES_STATIC
    {
-      MModuleListingEntryImpl entry(
+      // we have unloaded modules in the list, ignore them:
+      if((**i).m_Module)
+         MModuleListingEntryImpl entry(
          (**i).m_Name, // module name
          (**i).m_Interface,
          (**i).m_Description,
          "", // long description
          String((**i).m_Version)+ _(" (builtin)"),
-         "m-developers@groups.com");
+         "m-developers@groups.com",
+         (**i).m_Module);
       (*listing)[count++] = entry;
    }
+   listing->SetCount(count); // we might have less than we thought at first
+#else
+   {
+      MModule *m = (**i).m_Module;
+      ASSERT(m);
+      MModuleListingEntryImpl entry(
+         m->GetName(), // module name
+         m->GetInterface(),
+         m->GetDescription(),
+         "", // long description
+         m->GetVersion(),
+         "", m);
+      (*listing)[count++] = entry;
+   }
+#endif
    return listing;
+}
+
+   
+/* static */
+MModuleListing *
+MModule::ListAvailableModules(void)
+{
+#ifdef USE_MODULES_STATIC
+   return ListLoadedModules();
 #else
    kbStringList modules;
 
@@ -425,8 +467,7 @@ MModuleListing *MModule::ListAvailableModules(void)
                   tmp,
                   description,
                   tf[3].Mid(strlen("Version:")),
-                  tf[4].Mid(strlen("Author:"))
-                  );
+                  tf[4].Mid(strlen("Author:")));
                (*listing)[count++] = entry;
             }
          }

@@ -56,17 +56,28 @@ enum MModule_Errors
    MMODULE_ERR_INCOMPATIBLE_VERSIONS
 };
 
+/**@name Module flags */
+//@{
+/// Module has main work function
+#define MMOD_FLAG_HASMAIN   0x0001
+/// Module has config function
+#define MMOD_FLAG_HASCONFIG  0x0002
+//@}
+
+
 /** This class is used as an entry in the MModuleListing and describes 
     a single module. */
 class MModuleListingEntry
 {
 public:
-   virtual const String &GetName(void) const = 0;
-   virtual const String &GetDescription(void) const = 0;
-   virtual const String &GetShortDescription(void) const = 0;
-   virtual const String &GetVersion(void) const = 0;
-   virtual const String &GetAuthor(void) const = 0;
-   virtual const String &GetInterface(void) const = 0;
+   virtual const String & GetName(void) const = 0;
+   virtual const String & GetDescription(void) const = 0;
+   virtual const String & GetShortDescription(void) const = 0;
+   virtual const String & GetVersion(void) const = 0;
+   virtual const String & GetAuthor(void) const = 0;
+   virtual const String & GetInterface(void) const = 0;
+   /// this one returns NULL for non-loaded modules
+   virtual class MModule * GetModule(void) const = 0;
    virtual ~MModuleListingEntry() {}
 };
 
@@ -79,7 +90,19 @@ public:
    virtual size_t Count(void) const = 0;
    /// returns the n-th entry
    virtual const MModuleListingEntry & operator[] (size_t n) const = 0;
+   MOBJECT_NAME(MModuleListing);
 };
+
+
+/**@name Function definitions as used by Entry() */
+//@{
+/// GetFlags(): Returns bitwise or of the MMOD_FLAG_ values
+#define MMOD_FUNC_GETFLAGS   0
+/// Main(): Run the main module functionality
+#define MMOD_FUNC_MAIN       1
+/// Config(): Run the module configuration function
+#define MMOD_FUNC_CONFIG     2
+//@}
 
 /**
    This is the interface for Mahogany extension modules.
@@ -104,6 +127,8 @@ public:
    /// Returns the Mahogany version this module was compiled for.
    virtual void GetMVersion(int *version_major, int *version_minor,
                             int *version_release) const = 0;
+   /// Set arg to a function number and call the function if it exists.
+   virtual int Entry(int arg ) = 0;
    //@}
    
    /** These static functions handle the loading of modules. */
@@ -114,9 +139,13 @@ public:
        @return pointer to the freshly loaded MModule or NULL.
    */
    static MModule * LoadModule(const String & name);
-
+   /** Returns a pointer to a listing of all loaded modules. Must be
+       DecRef()´d by the caller. */
+   static MModuleListing * ListLoadedModules(void);
    /** Returns a pointer to a listing of available modules. Must be
-       DecRef()'d by the caller. */
+       DecRef()'d by the caller. Does not check if modules are loaded, 
+       i.e. GetModule() from these entries will return NULL.
+   */
    static MModuleListing * ListAvailableModules(void);
    /** Finds a module which provides the given interface. Only
        searches already loaded modules.
@@ -128,7 +157,6 @@ public:
 
    MOBJECT_NAME(MModule)
 };
-
 
 /** @name This is the API that each MModule shared lib must
     implement. */
@@ -155,8 +183,6 @@ extern "C"
 }
 //@}
 
-
-
 #ifdef USE_MODULES_STATIC
 /** Used by modules to register themselves statically.
     Return code is always 1. */
@@ -165,7 +191,7 @@ int MModule_AddStaticModule(const char *Name,
                              const char *Interface,
                              const char *Description,
                              const char *Version,
-                             MModule_InitModuleFuncType init);
+                            MModule_InitModuleFuncType init);
 
 /** Used by modules to register themselves statically. */
 #   define MMODULE_INITIALISE(Name, Interface, Description, Version) \
@@ -186,6 +212,8 @@ virtual void GetMVersion(int *version_major, \
                          int *version_minor, \
                          int *version_release) const; \
 static  MModule *Init(int, int, int, MInterface *, int *); 
+
+#define DEFAULT_ENTRY_FUNC   virtual int Entry(int /* arg */) { return 0; }
 
 #ifdef DEBUG
 #   define MMODULE_DEFINE(ClassName) \
