@@ -172,8 +172,9 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
    wxString s;
    s.Alloc(4096);       // be generous and speed up the export
 
-   s << '"' << category << "\";";
-
+/*  It seems the category no longer gets written.
+  s << '"' << category << "\";";
+*/
    // dump all the fields
    wxString val, tmp;
    entry.GetField(AdbField_FamilyName, &val);
