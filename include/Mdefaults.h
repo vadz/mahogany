@@ -123,10 +123,10 @@
 #ifdef OS_UNIX
 /// search paths for M's directory
 #   define   MP_PATHLIST         "PathList"
-/// path to M directory
-#   define   MP_ROOTPATH   "GlobalDirectory"
 /// the name of M's root directory
 #   define   MP_ROOTDIRNAME         "RootDirectoryName"
+/// the complete path to the glocal M directory
+#   define   MP_GLOBALDIR      "GlobalDir"
 /// the name of the M directory
 #   define   MP_USER_MDIR         "MDirName"
 /// the path where to find .afm files
@@ -436,10 +436,10 @@
 #ifdef OS_UNIX
 /// path list for M's directory
 #define   MP_PATHLIST_D M_PREFIX ":/usr/local:/usr/:/opt:/opt/local:/usr/opt:/usr/local/opt"
-/// path to M directory
-#define   MP_ROOTPATH_D   M_PREFIX "/share/M"
+/// the complete path to the glocal M directory
+#   define   MP_GLOBALDIR_D      M_BASEDIR
 /// the name of M's root directory
-#define   MP_ROOTDIRNAME_D   "M"
+#define   MP_ROOTDIRNAME_D   "Mahogany"
 /// the name of the M directory
 #define   MP_USER_MDIR_D         ".M"
 /// the path where to find .afm files

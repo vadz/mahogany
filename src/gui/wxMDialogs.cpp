@@ -784,7 +784,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
             : wxFrame(NULL, -1, _("Welcome"),
                       wxDefaultPosition, wxSize(280, 230),
-                      /* 0 style for borderless wxDOUBLE_BORDER |*/ wxSTAY_ON_TOP)
+                      /* 0 style for borderless wxDOUBLE_BORDER |*/ wxSTAY_ON_TOP|wxCENTER)
 {
    wxCHECK_RET( g_pSplashScreen == NULL, "one splash is more than enough" );
    g_pSplashScreen = (MFrame *)this;

@@ -73,9 +73,9 @@ public:
 
    /** show message
        @param mailfolder the folder
-       @param num the message number
+       @param num the message uid 
    */
-   void ShowMessage(MailFolder *folder, long num);
+   void ShowMessage(MailFolder *folder, long uid);
 
    /// update it
    void   Update(void);

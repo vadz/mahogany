@@ -136,7 +136,11 @@ public:
    /** Show a message in the preview window.
     */
    void PreviewMessage(long messageno)
-      { m_MessagePreview->ShowMessage(m_MailFolder,messageno); }
+      {
+         m_MessagePreview->ShowMessage(
+            m_MailFolder,
+            m_MailFolder->GetHeaderInfo(messageno)->GetUId());
+      }
    void SetSize(const int x, const int y, const int width, int height);
 
    /// return full folder name

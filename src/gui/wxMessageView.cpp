@@ -1199,14 +1199,14 @@ wxMessageView::DoMenuCommand(int id)
 void
 wxMessageView::ShowMessage(MailFolder *folder, long num)
 {
-   if ( m_uid == (long)folder->GetHeaderInfo(num)->GetUId() )
+   if ( m_uid == num )
       return;
 
    if(mailMessage) mailMessage->DecRef();
-   m_uid = folder->GetHeaderInfo(num)->GetUId();
+   m_uid = num;
    mailMessage = folder->GetMessage(m_uid);
 
-   if(! (folder->GetHeaderInfo(num)->GetStatus() & MailFolder::MSG_STAT_SEEN))
+   if(! (mailMessage->GetStatus() & MailFolder::MSG_STAT_SEEN))
       folder->SetMessageFlag(m_uid, MailFolder::MSG_STAT_SEEN, true);
 
    /* FIXME for now it's here, should go somewhere else: */
