@@ -139,9 +139,10 @@ class MModuleCommon
 {
 public:
    /// ctor sets the ref count to 1 to make the object alive
-   MModuleCommon() { m_nRef = 1; m_MInterface = NULL; }
+   MModuleCommon(MInterface *minterface = NULL)
+      { m_nRef = 1; m_MInterface = minterface; }
 
-   /// MInterface pointer must be set immediately after construction
+   /// must be used if not specified in the ctor
    void SetMInterface(MInterface *minterface) { m_MInterface = minterface; }
 
    virtual MInterface *GetMInterface() { return m_MInterface; }
@@ -172,6 +173,8 @@ inline void SafeDecRef(MModuleCommon *p) { if ( p != NULL ) p->DecRef(); }
 class MModule : public MModuleCommon
 {
 public:
+   MModule(MInterface *minterface = NULL) : MModuleCommon(minterface) { }
+
    /** MModule interface, this needs to be implemented by the actual modules. */
    //@{
    /// Returns the Module's name as used in LoadModule().

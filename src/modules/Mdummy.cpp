@@ -36,9 +36,7 @@ private:
        As the class has no usable interface, this doesn´t do much, but
        it displays a small dialog to say hello.
    */
-   DummyModule();
-
-   MInterface *m_Minterface;
+   DummyModule(MInterface *minterface);
 
    DEFAULT_ENTRY_FUNC
 };
@@ -66,14 +64,14 @@ MModule *
 DummyModule::Init(int version_major, int version_minor, int version_release,
                   MInterface *minterface, int *errorCode)
 {
-   return new DummyModule();
+   return new DummyModule(minterface);
 }
 
 
-DummyModule::DummyModule()
-           : MModule()
+DummyModule::DummyModule(MInterface *minterface)
+           : MModule(minterface)
 {
-   GetMInterface()->MessageDialog(
+   minterface->MessageDialog(
       "This message is created by the DummyModule plugin\n"
       "for Mahogany. This module has been loaded at runtime\n"
       "and is not part of the normal Mahogany executable.",
