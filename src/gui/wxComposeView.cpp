@@ -3527,7 +3527,9 @@ wxComposeView::SaveMsgTextToFile(const String& filename) const
    {
       if ( part->GetType() == EditorContentPart::Type_Text )
       {
-         if ( !file.Write(part->GetText()) )
+         // call Translate() to ensure that the text has the native line
+         // termination characters
+         if ( !file.Write(wxTextBuffer::Translate(part->GetText())) )
          {
             wxLogError(_("Cannot write message to file."));
 
