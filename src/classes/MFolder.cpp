@@ -107,7 +107,7 @@ public:
    virtual String GetName() const { return m_fullname.AfterLast('/'); }
    virtual wxString GetFullName() const { return m_fullname; }
    virtual FolderType GetType() const { return m_type; }
-   virtual bool NeedsNetwork(void) const { return FALSE; }
+   virtual bool NeedsNetwork(void) const { return false; }
    virtual int GetIcon() const { return -1; }
    virtual void SetIcon(int /* icon */) { }
    virtual String GetComment() const { return ""; }
@@ -136,7 +136,7 @@ public:
                                     FolderType, bool) { return NULL; }
    virtual void Delete() { FAIL_MSG("doesn't make sense for MTempFolder"); }
    virtual bool Rename(const String&)
-    { FAIL_MSG("doesn't make sense for MTempFolder"); return FALSE; }
+    { FAIL_MSG("doesn't make sense for MTempFolder"); return false; }
 
 private:
    FolderType m_type;
@@ -159,7 +159,7 @@ class MFolderFromProfile : public MFolder
 public:
    // ctor & dtor
       // the folderName is the full profile path which should exist: it may be
-      // created with Create() if Exists() returns FALSE
+      // created with Create() if Exists() returns false
    MFolderFromProfile(const String& folderName)
       : m_folderName(folderName)
    {
@@ -181,10 +181,10 @@ public:
    virtual ~MFolderFromProfile();
 
    // static functions
-      // return TRUE if the folder with given name exists
+      // return true if the folder with given name exists
    static bool Exists(const String& fullname);
       // create a folder in the profile, shouldn't be called if it already
-      // exists - will return FALSE in this case.
+      // exists - will return false in this case.
    static bool Create(const String& fullname);
 
    // implement base class pure virtuals
@@ -235,10 +235,6 @@ public:
    virtual bool Rename(const String& newName);
 
 protected:
-   // helpers
-      // common part of Create() and Exists(): returns true if group exists
-   static bool GroupExists(Profile *profile, const String& fullname);
-
    /** Get the full name of the subfolder.
        As all folder names are relative profile names, we need to
        check for m_folderName not being empty before appending a slash
@@ -293,7 +289,7 @@ public:
 
    // implement base class pure virtuals (some of them don't make sense to us)
    virtual FolderType GetType() const { return MF_ROOT; }
-   virtual bool NeedsNetwork(void) const { return FALSE; }
+   virtual bool NeedsNetwork(void) const { return false; }
 
    virtual String GetComment() const { return ""; }
    virtual void SetComment(const String& /* comment */)
@@ -308,7 +304,7 @@ public:
    virtual void Delete()
       { FAIL_MSG("can not delete root folder."); }
    virtual bool Rename(const String& /* newName */)
-      { FAIL_MSG("can not rename root folder."); return FALSE; }
+      { FAIL_MSG("can not rename root folder."); return false; }
 };
 
 // ----------------------------------------------------------------------------
@@ -323,7 +319,7 @@ public:
     { m_count = 0; }
 
   virtual bool OnVisitFolder(const wxString& /* folderName */)
-    { m_count++; return TRUE; }
+    { m_count++; return true; }
 
   size_t GetCount() const { return m_count; }
 
@@ -345,10 +341,10 @@ public:
          // found, stop traversing the tree
          m_folderName = folderName;
 
-         return FALSE;
+         return false;
       }
 
-      return TRUE;
+      return true;
    }
 
    const wxString& GetName() const { return m_folderName; }
@@ -528,31 +524,6 @@ MFolderFromProfile::~MFolderFromProfile()
    MFolderCache::Remove(this);
 }
 
-bool
-MFolderFromProfile::GroupExists(Profile *profile, const String& fullname)
-{
-   // split path into '/' separated components
-   wxArrayString components;
-   wxSplitPath(components, fullname);
-
-   //PFIXME FolderPathChanger changePath(profile, "");
-
-   size_t n, count = components.GetCount();
-   for ( n = 0; n < count; n++ )
-   {
-      if ( !profile->HasGroup(components[n]) )
-      {
-         break;
-      }
-
-      // go down
-      profile->SetPath(components[n]);
-   }
-
-   // group only exists if we exited from the loop normally (not via break)
-   return n == count;
-}
-
 bool MFolderFromProfile::Exists(const String& fullname)
 {
    Profile_obj profile("");
@@ -562,21 +533,75 @@ bool MFolderFromProfile::Exists(const String& fullname)
 
 bool MFolderFromProfile::Create(const String& fullname)
 {
-   Profile_obj profile(fullname);
-   CHECK( profile, FALSE, "panic in MFolder: no profile" );
+   // update the count of children in the immediate parent of the folder we're
+   // going to create
 
-   if ( GroupExists(profile, fullname) )
+   // split path into '/' separated components
+   wxArrayString components;
+   wxSplitPath(components, fullname);
+
+   bool updatedCount = false;
+
+   String path, component;
+
+   Profile *profile = Profile::CreateFolderProfile("");
+
+   size_t n,
+          count = components.GetCount();
+   for ( n = 0; n < count; n++ )
    {
-      wxLogError(_("Cannot create profile folder '%s' because a group "
-                   "with this name already exists."), fullname.c_str());
+      CHECK( profile, false, "failed to create profile?" );
 
-      return FALSE;
+      component = components[n];
+
+      if ( !updatedCount )
+      {
+         if ( profile->readEntryFromHere(component + '/' + MP_FOLDER_TYPE,
+                                         MF_ILLEGAL) == MF_ILLEGAL )
+         {
+            MFolderFromProfile *folder = (MFolderFromProfile *)MFolder::Get(path);
+            if ( !folder )
+            {
+               FAIL_MSG( "this folder must already exist!" );
+            }
+            else
+            {
+               // we have to invalidate it - unfortunately we can't just
+               // increase it because we may have a situation like this:
+               //
+               //    1. Create("a/b/c")
+               //    2. Create("a/b")
+               //    3. Create("a")
+               //
+               // and then, assuming 'a' hadn't existed before, the children
+               // count of the root folder would be incremented thrice even
+               // though only one new children was created
+               folder->m_nChildren = INVALID_CHILDREN_COUNT;
+
+               folder->DecRef();
+            }
+
+            // this is the the last existing folder for which we have anything to
+            // update
+            updatedCount = true;
+         }
+      }
+
+      // go down
+      if ( !path.empty() )
+         path += '/';
+      path += components[n];
+
+      profile->DecRef();
+      profile = Profile::CreateFolderProfile(path);
    }
 
    // we need to write something to this group to really create it
    profile->writeEntry(MP_FOLDER_TYPE, MF_ILLEGAL);
 
-   return TRUE;
+   profile->DecRef();
+
+   return true;
 }
 
 String MFolderFromProfile::GetName() const
@@ -760,7 +785,7 @@ size_t MFolderFromProfile::GetSubfolderCount() const
       CountTraversal count(this);
 
       // traverse but don't recurse into subfolders
-      count.Traverse(FALSE);
+      count.Traverse(false);
 
       // const_cast needed
       ((MFolderFromProfile *)this)->m_nChildren = count.GetCount();
@@ -776,7 +801,7 @@ MFolder *MFolderFromProfile::GetSubfolder(size_t n) const
    IndexTraversal index(this, n);
 
    // don't recurse into subfolders
-   if ( index.Traverse(FALSE) )
+   if ( index.Traverse(false) )
    {
       FAIL_MSG( "invalid index in MFolderFromProfile::GetSubfolder()" );
 
@@ -870,7 +895,7 @@ void MFolderFromProfile::Delete()
 
 bool MFolderFromProfile::Rename(const String& newName)
 {
-   CHECK( !m_folderName.empty(), FALSE, "can't rename the root pseudo-folder" );
+   CHECK( !m_folderName.empty(), false, "can't rename the root pseudo-folder" );
 
    String path = m_folderName.BeforeLast('/'),
           name = m_folderName.AfterLast('/');
@@ -890,12 +915,12 @@ bool MFolderFromProfile::Rename(const String& newName)
                    "the new name already exists."),
                    m_folderName.c_str(), newName.c_str());
 
-      return FALSE;
+      return false;
    }
 #endif // 0
 
    Profile_obj profile(path);
-   CHECK( profile, FALSE, "panic in MFolder: no profile" );
+   CHECK( profile, false, "panic in MFolder: no profile" );
    if ( profile->Rename(name, newName) )
    {
       String oldName = m_folderName;
@@ -911,7 +936,7 @@ bool MFolderFromProfile::Rename(const String& newName)
                                         newFullName)
          );
 
-      return TRUE;
+      return true;
    }
    else
    {
@@ -919,7 +944,7 @@ bool MFolderFromProfile::Rename(const String& newName)
                    "the new name already exists."),
                    m_folderName.c_str(), newName.c_str());
 
-      return FALSE;
+      return false;
    }
 }
 
@@ -927,7 +952,7 @@ bool MFolderFromProfile::Rename(const String& newName)
 // MFolderCache implementation
 // -----------------------------------------------------------------------------
 
-wxArrayString MFolderCache::ms_aFolderNames(TRUE /* auto sort */);
+wxArrayString MFolderCache::ms_aFolderNames(true /* auto sort */);
 wxArrayFolder MFolderCache::ms_aFolders;
 
 MFolder *MFolderCache::Get(const String& name)
@@ -998,11 +1023,11 @@ bool MFolderTraversal::Traverse(bool recurse)
    return DoTraverse(m_folderName, recurse);
 }
 
-// returns TRUE if all folders were visited or FALSE if traversal was aborted
+// returns true if all folders were visited or false if traversal was aborted
 bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
 {
    Profile_obj profile(start);
-   CHECK( profile, FALSE, "panic in MFolderTraversal: no profile" );
+   CHECK( profile, false, "panic in MFolderTraversal: no profile" );
 
    // enumerate all groups
    String name;
@@ -1022,19 +1047,19 @@ bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
       // if this folder has children recurse into them (if we should)
       if ( recurse )
       {
-         if ( !DoTraverse(fullname, TRUE) )
-            return FALSE;
+         if ( !DoTraverse(fullname, true) )
+            return false;
       }
 
       if ( !OnVisitFolder(fullname) )
       {
-         return FALSE;
+         return false;
       }
 
       cont = profile->GetNextGroup(name, dummy);
    }
 
-   return TRUE;
+   return true;
 }
 
 // ----------------------------------------------------------------------------
@@ -1125,7 +1150,7 @@ bool CreateMboxSubtreeHelper(MFolder *parent,
    {
       wxLogError(_("Directory doesn't exist - no MBOX folders found."));
 
-      return FALSE;
+      return false;
    }
 
    // create folders for all files in this dir
@@ -1142,7 +1167,7 @@ bool CreateMboxSubtreeHelper(MFolder *parent,
                              MF_FILE,
                              0,
                              fullname,
-                             FALSE // don't send notify event
+                             false // don't send notify event
                             );
       if ( folderMbox )
       {
@@ -1172,7 +1197,7 @@ bool CreateMboxSubtreeHelper(MFolder *parent,
                                  MF_GROUP,
                                  0,
                                  subdir,
-                                 FALSE // don't send notify event
+                                 false // don't send notify event
                                 );
 
       if ( folderSubgroup )
@@ -1189,7 +1214,7 @@ bool CreateMboxSubtreeHelper(MFolder *parent,
       cont = dir.GetNext(&dirname);
    }
 
-   return TRUE;
+   return true;
 }
 
 size_t CreateMboxSubtree(MFolder *parent, const String& rootMailDir)
