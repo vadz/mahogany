@@ -481,7 +481,23 @@ wxArrayString
 MessageCC::GetHeaderLines(const char **headersOrig,
                           wxArrayInt *encodings) const
 {
+   // loop variable for iterating over headersOrig
+   const char **headers;
+
+   // we should always return the arrays of correct size, this makes the
+   // calling code simpler as it doesn't have to check for the number of
+   // elements but only their values
    wxArrayString values;
+   for ( headers = headersOrig; *headers; headers++ )
+   {
+      values.Add("");
+      if ( encodings )
+      {
+         encodings->Add(wxFONTENCODING_SYSTEM);
+      }
+   }
+
+
    CHECK( m_folder, values,
           _T("GetHeaderLines() can't be called for this message") );
 
@@ -493,8 +509,7 @@ MessageCC::GetHeaderLines(const char **headersOrig,
    // construct the string list containing all the headers we're interested in
    STRINGLIST *slist = mail_newstringlist();
    STRINGLIST *scur = slist;
-   const char **headers = headersOrig;
-   for ( ;; )
+   for ( headers = headersOrig; ; )
    {
       scur->text.size = strlen(*headers);
       scur->text.data = (unsigned char *)cpystr(*headers);
@@ -530,28 +545,34 @@ MessageCC::GetHeaderLines(const char **headersOrig,
       hdrIter.GetAll(&names, &valuesInDisorder);
 
       // and then copy the headers in order into the dst array
+      size_t nHdr = 0;
       wxFontEncoding encoding;
-      headers = headersOrig;
-      while ( *headers )
+      String value;
+      for ( headers = headersOrig; *headers; headers++ )
       {
          int n = names.Index(*headers, FALSE /* not case sensitive */);
          if ( n != wxNOT_FOUND )
          {
-            values.Add(MailFolderCC::DecodeHeader(valuesInDisorder[(size_t)n],
-                                                  &encoding));
+            value = MailFolderCC::DecodeHeader
+                    (
+                     valuesInDisorder[(size_t)n],
+                     &encoding
+                    );
          }
          else // no such header
          {
-            values.Add("");
+            value.clear();
             encoding = wxFONTENCODING_SYSTEM;
          }
 
+         // store them
+         values[nHdr] = value;
          if ( encodings )
          {
-            encodings->Add(encoding);
+            (*encodings)[nHdr] = encoding;
          }
 
-         headers++;
+         nHdr++;
       }
    }
    else // mail_fetchheader_full() failed
