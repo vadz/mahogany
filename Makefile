@@ -84,9 +84,10 @@ install_doc:
 install_rpm:
 	@echo "Creating the list of files for the RPM"
 	@echo "%doc $(DOCDIR)" > filelist
-	@echo "%config $(DATADIR)/scripts" >> filelist
 	@echo "%config $(DATADIR)/M.conf" >> filelist
+	@echo "$(DATADIR)/scripts" >> filelist
 	@echo "$(DATADIR)/newmail.wav" >> filelist
+	@echo "$(DATADIR)/kylemail.wav" >> filelist
 	@echo "$(DATADIR)/afm" >> filelist
 	@echo "$(DATADIR)/bin" >> filelist
 	@echo "$(DATADIR)/$(CANONICAL_HOST)" >> filelist
