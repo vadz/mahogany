@@ -39,7 +39,8 @@ $Id$
  - integrate new c-client lib 4.5
  - save and restore printer settings in profile
  - add a wxASSERT() for the correct path in READ_APPCONFIG()
-
+ - add some progress messages when opening folders (looks like it's
+   hung when accessing POP folders)
  - Profile readEntry() needs interface extension to allow a boolean success
    value, remove hacks like 17 or "illegal value"!
 
