@@ -157,7 +157,7 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
             {
                if(idx != focused)  // allow us to toggle the focused item
                   SetItemState(idx,0,wxLIST_STATE_SELECTED);
-                 //FIXME this should be wrong  idx++;
+                 idx++;//FIXME this should be wrong
             }
          }
          event.Skip();
