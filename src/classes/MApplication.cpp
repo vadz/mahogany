@@ -662,22 +662,21 @@ MAppBase::CanClose() const
    {
       String trashName = READ_APPCONFIG(MP_TRASH_FOLDER);
 
-      // don´t ask twice
-      if ( trashName != ((wxMainFrame *)m_topLevelFrame)->GetFolderName() )
+      if ( MDialog_YesNoDialog
+           (
+            String::Format(_("Would you like to purge all messages from "
+                             "the trash mailbox (%s)?"), trashName.c_str()),
+            NULL,
+            _("Empty trash?"),
+            false, // [No] default
+            GetPersMsgBoxName(M_MSGBOX_EMPTY_TRASH_ON_EXIT)
+           ) )
       {
          MFolder_obj folderTrash(trashName);
-         if ( folderTrash )
+         if ( !folderTrash ||
+               (MailFolder::ClearFolder(folderTrash) < 0) )
          {
-            ASMailFolder *mf = ASMailFolder::OpenFolder(folderTrash);
-            if( mf )
-            {
-               // make sure they are all marked as deleted:
-               mf->SetFlagForAll(MailFolder::MSG_STAT_DELETED);
-
-               // And now, we can ask if we want to expunge them:
-               CheckExpungeDialog(mf);
-               mf->DecRef();
-            }
+            ERRORMESSAGE((_("Failed to empty the trash folder.")));
          }
       }
    }
