@@ -303,7 +303,7 @@ int InteractivelyCollectAddresses(const wxArrayString& addresses,
          AdbManager_obj manager;
          CHECK( manager, -1, "can't get AdbManager" );
 
-         AdbBook_obj autocollectbook = manager->CreateBook(bookName);
+         AdbBook_obj autocollectbook(manager->CreateBook(bookName));
 
          if ( !autocollectbook )
          {
@@ -315,7 +315,7 @@ int InteractivelyCollectAddresses(const wxArrayString& addresses,
             return -1;
          }
 
-         AdbEntryGroup_obj group = autocollectbook->CreateGroup(groupName);
+         AdbEntryGroup_obj group(autocollectbook->CreateGroup(groupName));
          if ( !group )
          {
             wxLogError(_("Failed to create group '%s' in the address "
@@ -337,7 +337,7 @@ int InteractivelyCollectAddresses(const wxArrayString& addresses,
                name = email.BeforeFirst('@');
             }
 
-            AdbEntry_obj entry = group->CreateEntry(name);
+            AdbEntry_obj entry(group->CreateEntry(name));
             entry->SetField(AdbField_NickName, name);
             entry->SetField(AdbField_FullName, name);
             entry->SetField(AdbField_EMail, email);
