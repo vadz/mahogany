@@ -505,7 +505,8 @@ MAppBase::OnStartup()
 
    m_IncomingFolderList = new MailFolderList;
    MAppFolderTraversal t (m_IncomingFolderList);
-   
+   if(! t.Traverse(true))
+      wxLogError(_("Cannot build list of incoming mail folders."));
    return TRUE;
 }
 

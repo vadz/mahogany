@@ -948,9 +948,6 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
 void
 MailFolderCC::mm_log(String str, long /* errflg */)
 {
-   if(mm_ignore_errors || mm_ignore_logs)
-      return;
-   
    String  msg = _("c-client log: ");
    msg += str;
 
@@ -1268,6 +1265,9 @@ mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
 void
 mm_log(char *str, long errflg)
 {
+   if(mm_ignore_errors || mm_ignore_logs)
+      return;
+   
    MailFolderCC::Event *evptr = new MailFolderCC::Event(NULL,MailFolderCC::Log);
    evptr->m_args[0].m_str = new String(str);
    evptr->m_args[1].m_long = errflg;
