@@ -146,7 +146,7 @@ class wxFolderViewFrame : public wxMFrame
 {
 public:
    wxFolderViewFrame(const String &iname, wxFrame *parent = NULL);
-   void OnCommandEvent(wxCommandEvent &event);
+   void OnMenuCommand(int id);
 #ifdef   USE_WXWINDOWS2
       void OnSize( wxSizeEvent &WXUNUSED(event) );
 #endif

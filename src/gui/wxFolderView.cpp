@@ -330,7 +330,7 @@ wxFolderViewPanel::OnCommand(wxWindow &win, wxCommandEvent &event)
 
 #ifdef USE_WXWINDOWS2
    BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)
-      EVT_SIZE    (wxFolderViewFrame::OnSize)
+      EVT_SIZE    (    wxFolderViewFrame::OnSize)
    END_EVENT_TABLE()
 #endif // wxWin2
 
@@ -373,11 +373,9 @@ wxFolderViewFrame::wxFolderViewFrame(const String &folderName,
 }
    
 void
-wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
+wxFolderViewFrame::OnMenuCommand(int id)
 {
    wxCHECK(m_FolderView);
-
-   int id = event.GetId();
 
    if(WXMENU_CONTAINS(MSG,id))
       m_FolderView->OnMenuCommand(id);
