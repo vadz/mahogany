@@ -310,7 +310,7 @@ AC_SUBST(MAKE_USE_LEAKTRACER)
 case "$USE_THREADS" in 1)
 	AC_CHECK_LIB(pthread,main,,AC_CHECK_LIB(pthreads,main))
 	AC_DEFINE(USE_THREADS)
-	LDFLAGS="$LDFLAGS -lpthread"
+	LIBS="$LIBS -lpthread"
 esac
 
 dnl set debug/optimisation flags
@@ -620,7 +620,7 @@ MAKE_PISOCKLIB=
 AC_CHECK_HEADER(pi-source.h,
  AC_CHECK_LIB(pisock, main,
   [ AC_DEFINE(USE_PISOCK)
-    MAKE_PISOCKLIB="PISOCK_LIB=-lpisock"
+    MAKE_PISOCKLIB="PISOCK_LIB:=-lpisock"
     AC_CHECK_LIB(pisock, pi_setmaxspeed,AC_DEFINE(HAVE_PI_SETMAXSPEED),
     AC_MSG_WARN(Your pisock library is old - some functionality will be disabled.))
     AC_CHECK_LIB(pisock, pi_accept_to,AC_DEFINE(HAVE_PI_ACCEPT_TO),
@@ -628,7 +628,7 @@ AC_CHECK_HEADER(pi-source.h,
   ],
   AC_MSG_WARN(Cannot find pisock library - support for PalmOS disabled.)
  ),
- AC_MSG_WARN(Cannot find pisock library headers - support for PalmOS disabled.)
+ AC_MSG_WARN(Cannot find pisock headers - support for PalmOS disabled.)
 )
 AC_SUBST(MAKE_PISOCKLIB)    
 
@@ -763,21 +763,28 @@ dnl --------------------------------------------------------------------------
 dnl final settings, concatenation of args, etc
 dnl --------------------------------------------------------------------------
 
-dnl Only now can we add them, or otherwise some tests would have failed
-case "$GXX" in yes)
-	case "$USE_STRICT" in
-	1)	CXXFLAGS="$CXXFLAGS -Werror -pedantic" ;;
-	*)	CXXFLAGS="$CXXFLAGS -Wall" ;;
-	esac ;;	
-esac
-
 dnl add other flags
 CFLAGS="$CFLAGS $MYFLAGS"
 CXXFLAGS="$CXXFLAGS $MYFLAGS"
 LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PAM"
 
-dnl Python code produces warnings at present, so don't break compilation:
-CXXFLAGS_RELAXED=`echo $CXXFLAGS | sed 's/-Werror/-Wall/g'`
+dnl Only now can we add them, or otherwise some tests would have failed
+case "$GCC" in yes)
+	case "$USE_STRICT" in
+	1)	CFLAGS="$CFLAGS -Werror -pedantic" ;;
+	*)	CFLAGS="$CFLAGS -Wall" ;;
+	esac ;;	
+esac
+dnl Python code produces warnings, so don't break compilation:
+CXXFLAGS_RELAXED="$CXXFLAGS"
+case "$GXX" in yes)
+	case "$USE_STRICT" in
+	1)	CXXFLAGS_RELAXED="$CXXFLAGS_RELAXED -Wall -pedantic"
+		CXXFLAGS="$CXXFLAGS -Werror -pedantic" ;;
+	*)	CXXFLAGS_RELAXED="$CXXFLAGS_RELAXED -Wall"
+		CXXFLAGS="$CXXFLAGS -Wall" ;;
+	esac ;;	
+esac
 AC_SUBST(CXXFLAGS_RELAXED)
 
 dnl Make sure we get statically linked against wxGTK
@@ -792,6 +799,7 @@ for dir in `cd $srcdir; find include extra src locale doc -type d -print`
 do	case "$dir" in
 	CVS | */CVS)		continue ;;
 	extra/src)		DIR="$DIR $dir" ;;   # no Makefile in this dir
+	extra/src/libmal)	DIR="$DIR $dir"; continue ;;
 	extra/src/libmal*)	continue ;;
 	esac
 	if test -f $srcdir/$dir/Makefile.in
