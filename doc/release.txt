@@ -2,7 +2,7 @@ File:		doc/release.txt
 Summary:	what to do to make a new Mahogany release
 Audience:	Mahogany developers
 Author:		Vadim Zeitlin <vadim@wxwindows.org>
-Last modified:	2001.06.15
+Last modified:	2001.07.24
 Version:	the information in this file applies to the cvs sources
 
 1. Updating the version
@@ -10,9 +10,11 @@ Version:	the information in this file applies to the cvs sources
 
 a) include/Mversion.h
 
-b) Manual.lyx and the files generated from it
+b) Manual.htex
 
-c) Bugzilla
+c) Bugzilla (create new version, check that there are no bugs for this one)
+
+e) redhat/M.spec
 
 
 2. Updating the files
@@ -41,7 +43,6 @@ h) "cvs rtag" the files
 
 a) test wizard with empty config
 
-b) test novice mode
 
 
 4. Preparing the release
@@ -66,6 +67,7 @@ b) RPM
 c) DEB: ???
 
 d) Win32 binaries: build with debug info, save the PDB and MAP files
+
 
 
 5. Uploading the files
