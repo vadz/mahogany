@@ -3015,8 +3015,7 @@ BEGIN_EVENT_TABLE(wxSelectionsOrderDialog, wxManuallyLaidOutDialog)
 
    EVT_CHECKLISTBOX(-1, wxSelectionsOrderDialog::OnCheckLstBoxToggle)
 
-   EVT_UPDATE_UI(Button_Up,   wxSelectionsOrderDialog::OnUpdateUI)
-   EVT_UPDATE_UI(Button_Down, wxSelectionsOrderDialog::OnUpdateUI)
+   EVT_LISTBOX(-1, wxSelectionsOrderDialog::OnCheckLstBoxSelChanged)
 END_EVENT_TABLE()
 
 wxSelectionsOrderDialog::wxSelectionsOrderDialog(wxWindow *parent,
@@ -3036,29 +3035,29 @@ wxSelectionsOrderDialog::wxSelectionsOrderDialog(wxWindow *parent,
    m_box = CreateStdButtonsAndBox(message);
 
    // buttons to move items up/down
-   wxButton *btnDown = new wxButton(this, Button_Down, _("&Down"));
+   m_btnDown = new wxButton(this, Button_Down, _("&Down"));
    c = new wxLayoutConstraints();
    c->right.SameAs(m_box, wxRight, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(m_box, wxCentreY, LAYOUT_Y_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
-   btnDown->SetConstraints(c);
+   m_btnDown->SetConstraints(c);
 
    // FIXME: we also assume that "Down" is longer than "Up" - which may, of
    //        course, be false after translation
-   wxButton *btnUp = new wxButton(this, Button_Up, _("&Up"));
+   m_btnUp = new wxButton(this, Button_Up, _("&Up"));
    c = new wxLayoutConstraints();
    c->right.SameAs(m_box, wxRight, 2*LAYOUT_X_MARGIN);
    c->bottom.SameAs(m_box, wxCentreY, LAYOUT_Y_MARGIN);
-   c->width.SameAs(btnDown, wxWidth);
+   c->width.SameAs(m_btnDown, wxWidth);
    c->height.AsIs();
-   btnUp->SetConstraints(c);
+   m_btnUp->SetConstraints(c);
 
    // a checklistbox with headers on the space which is left
    m_checklstBox = new wxCheckListBox(this, -1);
    c = new wxLayoutConstraints();
    c->left.SameAs(m_box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.LeftOf(btnDown, 2*LAYOUT_X_MARGIN);
+   c->right.LeftOf(m_btnDown, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(m_box, wxTop, 4*LAYOUT_Y_MARGIN);
    c->bottom.SameAs(m_box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_checklstBox->SetConstraints(c);
@@ -3067,10 +3066,13 @@ wxSelectionsOrderDialog::wxSelectionsOrderDialog(wxWindow *parent,
    SetDefaultSize(3*wBtn, 7*hBtn);
 }
 
-void wxSelectionsOrderDialog::OnUpdateUI(wxUpdateUIEvent& event)
+void wxSelectionsOrderDialog::OnCheckLstBoxSelChanged(wxCommandEvent& event)
 {
    // only enable buttons if there is something selected
-   event.Enable( m_checklstBox->GetSelection() != -1 );
+   int sel = event.GetSelection();
+
+   m_btnDown->Enable(sel != -1 && sel < m_checklstBox->GetCount() - 1);
+   m_btnUp->Enable(sel != -1 && sel > 0);
 }
 
 void wxSelectionsOrderDialog::OnButtonMove(bool up)
@@ -3104,6 +3106,11 @@ void wxSelectionsOrderDialog::OnButtonMove(bool up)
 
             // the item could have gone out of the visible part of the listbox
             m_checklstBox->SetFirstItem(selectionNew);
+
+            // notify the derived class about the change
+            if ( up )
+                positionOld--;
+            OnItemSwap(positionOld, selectionNew);
 
             // something changed, remember it
             m_hasChanges = true;

@@ -35,6 +35,17 @@
 #include "wx/spinctrl.h"
 
 // ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+// dialog control ids
+enum
+{
+   Check_MakeDefault,
+   Check_Reset
+};
+
+// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
@@ -43,9 +54,10 @@
 class wxFolderViewColumnsDialog : public wxSelectionsOrderDialogSimple
 {
 public:
-   wxFolderViewColumnsDialog(wxArrayString* names,
-                             wxArrayInt* status,
-                             wxArrayInt* widths,
+   wxFolderViewColumnsDialog(wxArrayString *names,
+                             wxArrayInt *status,
+                             wxArrayInt *widths,
+                             bool *asDefault,
                              wxWindow *parent);
 
    virtual ~wxFolderViewColumnsDialog();
@@ -53,14 +65,67 @@ public:
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
+protected:
+   // update m_idxTrans table here
+   virtual void OnItemSwap(size_t item1, size_t item2);
+
+   // event handlers
+   void OnCheckListbox(wxCommandEvent& event);
+   void OnMakeDefault(wxCommandEvent& event);
+   void OnReset(wxCommandEvent& event);
+   void OnSpinChanged(wxCommandEvent& WXUNUSED(event)) { m_hasChanges = true; }
+
+   // enable or disable the controls for editing width of this column depending
+   // on the current values of the other controls
+   void UpdateWidthState(size_t n);
+
 private:
+   // the number of columns
+   size_t      m_countCol;
+
+   // the index of the width field (i.e. index into m_spins and m_labels
+   // arrays) corresponding to the given check list box item
+   //
+   // this is needed because although initially the columns and the widths are
+   // in sync, the user may change the columns order using the buttons in the
+   // dialog later and we should still be able to disable the correct field in
+   // UpdateWidthState() when he hides/shows a column
+   //
+   // another solution would be to move the width controls themselves when the
+   // columns are moved (or not really move but just change label/value) but I
+   // think it would be confusing to the user if the controls started jumping
+   // around
+   size_t     *m_idxTrans;
+
+   // pointer to callers "make default" flag
+   bool       *m_asDefault;
+
+   // the columns widths
    wxArrayInt *m_widths;
+
+   // and the controls to edit them with their labels
    wxSpinCtrl **m_spins;
+   wxStaticText **m_labels;
+
+   // the checkboxes to make default/reset to default the widths
+   wxCheckBox *m_chkMakeDef,
+              *m_chkReset;
+
+   DECLARE_EVENT_TABLE()
 };
 
 // ============================================================================
 // implementation
 // ============================================================================
+
+BEGIN_EVENT_TABLE(wxFolderViewColumnsDialog, wxSelectionsOrderDialogSimple)
+   EVT_CHECKLISTBOX(-1, wxFolderViewColumnsDialog::OnCheckListbox)
+
+   EVT_CHECKBOX(Check_MakeDefault, wxFolderViewColumnsDialog::OnMakeDefault)
+   EVT_CHECKBOX(Check_Reset,       wxFolderViewColumnsDialog::OnReset)
+
+   EVT_TEXT(-1, wxFolderViewColumnsDialog::OnSpinChanged)
+END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
 // wxFolderViewColumnsDialog
@@ -69,6 +134,7 @@ private:
 wxFolderViewColumnsDialog::wxFolderViewColumnsDialog(wxArrayString* names,
                                                      wxArrayInt* status,
                                                      wxArrayInt* widths,
+                                                     bool *asDefault,
                                                      wxWindow *parent)
     : wxSelectionsOrderDialogSimple(_("&Select the columns to show:"),
                                     // TODO: show folder name in the caption
@@ -78,7 +144,14 @@ wxFolderViewColumnsDialog::wxFolderViewColumnsDialog(wxArrayString* names,
                                     "FolderViewCol",
                                     parent)
 {
+   m_countCol = m_choices->GetCount();
+   m_idxTrans = new size_t[m_countCol];
    m_widths = widths;
+
+   ASSERT_MSG( m_countCol == widths->GetCount(),
+               "arrays should have the same size" );
+
+   m_asDefault = asDefault;
 
    wxLayoutConstraints *c;
 
@@ -86,7 +159,7 @@ wxFolderViewColumnsDialog::wxFolderViewColumnsDialog(wxArrayString* names,
    wxStaticBox *boxLower = new wxStaticBox(this, -1, _("Set column &widths"));
    c = new wxLayoutConstraints();
    c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
-   c->top.Below(m_box, 4*LAYOUT_Y_MARGIN);
+   c->top.Below(m_box, 2*LAYOUT_Y_MARGIN);
    c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
    c->bottom.SameAs(FindWindow(wxID_OK), wxTop, 4*LAYOUT_Y_MARGIN);
    boxLower->SetConstraints(c);
@@ -100,31 +173,31 @@ wxFolderViewColumnsDialog::wxFolderViewColumnsDialog(wxArrayString* names,
    c->bottom.SameAs(m_checklstBox, wxBottom, -4*LAYOUT_Y_MARGIN);
 
    // create the controls for the widths
-   size_t count = m_choices->GetCount();
-   m_spins = new wxSpinCtrl *[count];
+   m_spins = new wxSpinCtrl *[m_countCol];
+   m_labels = new wxStaticText *[m_countCol];
 
    long widthMax = GetMaxLabelWidth(*m_choices, this) + 10; // for ": "
-   wxStaticText *label = NULL;
 
-   for ( size_t n = 0; n < count; n++ )
+   for ( size_t n = 0; n < m_countCol; n++ )
    {
       // create and position the label
+      m_labels[n] = new wxStaticText(this, -1, m_choices->Item(n) + ": ");
+
       c = new wxLayoutConstraints();
       c->left.SameAs(boxLower, wxLeft, LAYOUT_X_MARGIN);
       c->width.Absolute(widthMax);
       c->height.AsIs();
-      if ( label )
+      if ( n )
       {
          // not the top one, put it below the previous one
-         c->top.Below(label, 2*LAYOUT_Y_MARGIN);
+         c->top.Below(m_labels[n - 1], 2*LAYOUT_Y_MARGIN);
       }
       else // top label
       {
          c->top.SameAs(boxLower, wxTop, 4*LAYOUT_Y_MARGIN);
       }
 
-      label = new wxStaticText(this, -1, m_choices->Item(n) + ": ");
-      label->SetConstraints(c);
+      m_labels[n]->SetConstraints(c);
 
       // create the corresponding spin ctrl
       //
@@ -138,22 +211,72 @@ wxFolderViewColumnsDialog::wxFolderViewColumnsDialog(wxArrayString* names,
 
       // ... and position it accordingly
       c = new wxLayoutConstraints();
-      c->left.RightOf(label, LAYOUT_X_MARGIN);
+      c->left.RightOf(m_labels[n], LAYOUT_X_MARGIN);
       c->right.SameAs(boxLower, wxRight, LAYOUT_X_MARGIN);
       c->height.AsIs();
-      c->centreY.SameAs(label, wxCentreY);
+      c->centreY.SameAs(m_labels[n], wxCentreY);
 
       m_spins[n]->SetConstraints(c);
+
+      // also init m_idxTrans while we're in the loop: initially the order is
+      // the same for the columns and the widths
+      m_idxTrans[n] = n;
    }
 
+   m_chkMakeDef = new wxCheckBox(this, Check_MakeDefault, _("Save as &default"));
+   c = new wxLayoutConstraints();
+   c->width.AsIs();
+   c->centreX.SameAs(boxLower, wxCentreX);
+   c->height.AsIs();
+   c->top.Below(m_spins[m_countCol - 1], 2*LAYOUT_Y_MARGIN);
+   m_chkMakeDef->SetConstraints(c);
+
+   m_chkReset = new wxCheckBox(this, Check_Reset, _("&Reset to default"));
+   c = new wxLayoutConstraints();
+   c->width.AsIs();
+   c->centreX.SameAs(boxLower, wxCentreX);
+   c->height.AsIs();
+   c->top.Below(m_chkMakeDef, LAYOUT_Y_MARGIN);
+   m_chkReset->SetConstraints(c);
+
    // set the minimal window size
-   SetDefaultSize(3*wBtn, 15*hBtn);
+   SetDefaultSize(5*wBtn, 19*hBtn);
+}
+
+wxFolderViewColumnsDialog::~wxFolderViewColumnsDialog()
+{
+   delete [] m_idxTrans;
+   delete [] m_spins;
+   delete [] m_labels;
+}
+
+// ----------------------------------------------------------------------------
+// wxFolderViewColumnsDialog data transfer
+// ----------------------------------------------------------------------------
+
+void wxFolderViewColumnsDialog::OnItemSwap(size_t item1, size_t item2)
+{
+   CHECK_RET( item1 < m_countCol && item2 < m_countCol,
+              "invalid item in OnItemSwap" );
+
+   ASSERT_MSG( item1 != item2, "swapping an item with itself?" );
+
+   // swap the corresponding items in our translation table
+   size_t tmp = m_idxTrans[item1];
+   m_idxTrans[item1] = m_idxTrans[item2];
+   m_idxTrans[item2] = tmp;
+
+   UpdateWidthState(item1);
+   UpdateWidthState(item2);
 }
 
 bool wxFolderViewColumnsDialog::TransferDataToWindow()
 {
    if ( !wxSelectionsOrderDialogSimple::TransferDataToWindow() )
       return false;
+
+   // the widths are already there as we set the values of the spin controls in
+   // the ctor, so nothing more to do
 
    return true;
 }
@@ -163,12 +286,63 @@ bool wxFolderViewColumnsDialog::TransferDataFromWindow()
    if ( !wxSelectionsOrderDialogSimple::TransferDataFromWindow() )
       return false;
 
+   m_widths->Empty();
+
+   // by convention, if the widths are reset to default, we don't fill the
+   // array at all
+   if ( !m_chkReset->IsChecked() )
+   {
+      for ( size_t n = 0; n < m_countCol; n++ )
+      {
+         m_widths->Add(m_spins[m_idxTrans[n]]->GetValue());
+      }
+   }
+
+   // return the "make default" checkbox value
+   *m_asDefault = m_chkMakeDef->IsChecked();
+
    return true;
 }
 
-wxFolderViewColumnsDialog::~wxFolderViewColumnsDialog()
+// ----------------------------------------------------------------------------
+// wxFolderViewColumnsDialog event handlers
+// ----------------------------------------------------------------------------
+
+void wxFolderViewColumnsDialog::UpdateWidthState(size_t n)
 {
-   delete [] m_spins;
+   bool shouldEnable = !m_chkReset->IsChecked() && m_checklstBox->IsChecked(n);
+
+   n = m_idxTrans[n];
+
+   m_labels[n]->Enable(shouldEnable);
+   m_spins[n]->Enable(shouldEnable);
+}
+
+void wxFolderViewColumnsDialog::OnCheckListbox(wxCommandEvent& event)
+{
+   // if the column is not shown, don't allow editing its width
+   UpdateWidthState(event.GetInt());
+
+   event.Skip();
+}
+
+void wxFolderViewColumnsDialog::OnMakeDefault(wxCommandEvent& WXUNUSED(event))
+{
+   // we can't reset the column widths if we want to make them default
+   m_chkReset->Enable( !m_chkMakeDef->IsChecked() );
+}
+
+void wxFolderViewColumnsDialog::OnReset(wxCommandEvent& event)
+{
+   // neither does it make sense to set as default the widths if we want to
+   // reset them to, precisely, the default values
+   m_chkMakeDef->Enable( !m_chkReset->IsChecked() );
+
+   // also, if we reset them changing them is futile
+   for ( size_t n = 0; n < m_countCol; n++ )
+   {
+      UpdateWidthState(n);
+   }
 }
 
 // ----------------------------------------------------------------------------
@@ -176,13 +350,20 @@ wxFolderViewColumnsDialog::~wxFolderViewColumnsDialog()
 // ----------------------------------------------------------------------------
 
 extern
-bool ShowFolderViewColumnDialog(wxArrayString* names,
-                                wxArrayInt* status,
-                                wxArrayInt* widths,
+bool ShowFolderViewColumnDialog(wxArrayString *names,
+                                wxArrayInt *status,
+                                wxArrayInt *widths,
+                                bool *asDefault,
                                 wxWindow *parent)
 {
-   wxFolderViewColumnsDialog dlg(names, status, widths, parent);
+   CHECK( names && status && widths && asDefault, false,
+          "NULL pointer in ShowFolderViewColumnDialog" );
 
-   return dlg.ShowModal() == wxID_OK && dlg.HasChanges();
+   wxFolderViewColumnsDialog dlg(names, status, widths, asDefault, parent);
+
+   // don't return false if either checkbox was checked as otherwise
+   // the caller is not going to do anything at all, although it should
+   return dlg.ShowModal() == wxID_OK &&
+            (*asDefault || widths->IsEmpty() || dlg.HasChanges());
 }
 

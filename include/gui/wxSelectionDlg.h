@@ -42,21 +42,32 @@ public:
    // check list box event handler
    void OnCheckLstBoxToggle(wxCommandEvent& event) { m_hasChanges = TRUE; }
 
-   // update UI: disable the text boxes which shouldn't be edited
-   void OnUpdateUI(wxUpdateUIEvent& event);
+   // update UI here: disable the buttons when they don't do anything
+   void OnCheckLstBoxSelChanged(wxCommandEvent& event);
 
    // up/down buttons notifications
    void OnButtonUp(wxCommandEvent& event) { OnButtonMove(TRUE); }
    void OnButtonDown(wxCommandEvent& event) { OnButtonMove(FALSE); }
 
 protected:
+   // can be overridden if the derived class wants to know when the 2 items in
+   // the check list box are exchanged (after this has happened)
+   virtual void OnItemSwap(size_t item1, size_t item2) { }
+
    // real button events handler
    void OnButtonMove(bool up);
 
+   // the box around all our controls (here for wxFolderViewColumnsDialog only)
    wxStaticBox    *m_box;
 
+   // the buttons to move the items in m_checklstBox up and down
+   wxButton       *m_btnUp,
+                  *m_btnDown;
+
+   // the check list box containing the items we reorder
    wxCheckListBox *m_checklstBox;
 
+   // the dirty flag
    bool m_hasChanges;
 
    DECLARE_EVENT_TABLE()
