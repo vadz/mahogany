@@ -24,19 +24,20 @@
 // forward declarations
 // -----------------------------------------------------------------------------
 
-class wxFrame;
-class wxControl;
-class wxListBox;
-class wxCheckBox;
-class wxFileBrowseButton;
-class wxFileOrDirBrowseButton;
-class wxIconBrowseButton;
-class wxTextBrowseButton;
-class wxStaticText;
-class wxStaticBox;
-class wxCheckListBox;
-class wxRadioBox;
-class wxComboBox;
+class WXDLLEXPORT wxFrame;
+class WXDLLEXPORT wxControl;
+class WXDLLEXPORT wxListBox;
+class WXDLLEXPORT wxCheckBox;
+class WXDLLEXPORT wxFileBrowseButton;
+class WXDLLEXPORT wxFileOrDirBrowseButton;
+class WXDLLEXPORT wxIconBrowseButton;
+class WXDLLEXPORT wxTextBrowseButton;
+class WXDLLEXPORT wxStaticBitmap;
+class WXDLLEXPORT wxStaticText;
+class WXDLLEXPORT wxStaticBox;
+class WXDLLEXPORT wxCheckListBox;
+class WXDLLEXPORT wxRadioBox;
+class WXDLLEXPORT wxComboBox;
 
 #undef CreateButton
 

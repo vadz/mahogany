@@ -43,6 +43,11 @@
 #  include <wx/thread.h>
 #endif
 
+#include <wx/msgdlg.h>   // for wxMessageBox
+#include <wx/cmndata.h>  // for wxPageSetupData
+#include <wx/persctrl.h> // for wxPMessageBoxEnable(d)
+
+
 #include "Mdefaults.h"
 #include "MDialogs.h"
 
@@ -54,8 +59,6 @@
 #include "gui/wxIconManager.h"
 #include "MailCollector.h"
 #include "MModule.h"
-
-#include "wx/persctrl.h" // for wxPMessageBoxEnable(d)
 
 #ifdef OS_WIN
 #   include <winnls.h>

@@ -23,12 +23,14 @@
 #include "Mcommon.h"
 
 #ifndef USE_PCH
-# include "PathFinder.h"
+#  include "PathFinder.h"
 
-# include "MApplication.h"
-# include "gui/wxMApp.h"
+#  include "MApplication.h"
+#  include "gui/wxMApp.h"
 
-# include "guidef.h"
+#  include "guidef.h"
+
+#  include "wx/toolbar.h"
 #endif
 
 #include <wx/menu.h>

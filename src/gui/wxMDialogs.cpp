@@ -71,6 +71,8 @@
 #include "gui/wxFolderView.h"
 #include "gui/wxDialogLayout.h"
 
+#include "sysutil.h"    // for sysutil_compare_filenames
+
 #include <errno.h>
 
 #ifdef    OS_WIN

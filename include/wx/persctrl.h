@@ -29,6 +29,7 @@ class wxPHelper;
 #include <wx/splitter.h>
 #include <wx/listctrl.h>
 #include <wx/listbox.h>
+#include <wx/radiobox.h>
 
 // ----------------------------------------------------------------------------
 // a helper class for persistent controls

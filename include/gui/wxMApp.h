@@ -14,12 +14,15 @@
 #  include  <wx/help.h>
 #  include  <wx/icon.h>
 #  include  "MApplication.h"
+
+#  include <wx/cmndata.h>  // for wxPageSetupData, can't fwd declare it
 #endif  //USE_PCH
 
 // fwd decl
-class wxLog;
+class WXDLLEXPORT wxLog;
+class WXDLLEXPORT wxHelpController;
+class WXDLLEXPORT wxPrintData;
 class wxIconManager;
-class wxHelpController;
 
 // ----------------------------------------------------------------------------
 // wxMApp
