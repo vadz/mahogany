@@ -285,6 +285,10 @@
 #define   MP_FOLDER_TYPE         "Type"
 /// the folder flags (see MFolder)
 #define   MP_FOLDER_FLAGS        "Flags"
+/// Collect all mail from this folder?
+#define MP_FOLDER_IS_INCOMING   "FolderIsIncoming"
+/// Where to store all new mail
+#define MP_NEWMAIL_FOLDER      "NewMailFolder"
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH         "Path"
 /// comment
@@ -594,6 +598,10 @@
 #define   MP_COMPOSE_XFACE_FILE_D   "$HOME/.xface"
 /// the folder type for a mailbox
 #define   MP_FOLDER_TYPE_D         (int)(0x00ff)  // MF_ILLEGAL
+/// Collect all mail from this folder?
+#define MP_FOLDER_IS_INCOMING_D   0
+/// Where to store all new mail
+#define MP_NEWMAIL_FOLDER_D      "New Mail"
 /// the folder flags (see MFolder)
 #define   MP_FOLDER_FLAGS_D       0
 /// the filename for a mailbox
