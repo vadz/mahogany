@@ -7,8 +7,8 @@ SRC = AdbFrame.cpp AdbManager.cpp AdbProvider.cpp AdbEntry.cpp \
       AdbImport.cpp AdbExport.cpp \
       ExportPalm.cpp ExportText.cpp
 
-#MOD = ImportText.cpp ImportXFMail.cpp ImportMailrc.cpp ImportPine.cpp
-MOD = ImportXFMail.cpp
+#MOD = ImportText.cpp
+MOD = ImportXFMail.cpp ImportPine.cpp ImportMailrc.cpp
 
 ifdef DEBUG
 SRC += ProvDummy.cpp

@@ -183,7 +183,7 @@ MModule *FindModule(const String & name)
 
 #ifdef USE_MODULES_STATIC
 extern
-int MModule_AddStaticModule(const char *Name,
+void MModule_AddStaticModule(const char *Name,
                              const char *Interface,
                              const char *Description,
                              const char *Version,
@@ -197,7 +197,6 @@ int MModule_AddStaticModule(const char *Name,
    me->m_Module = NULL;
    me->m_InitFunc = initFunc;
    GetMModuleList()->push_back(me);
-   return 1;
 }
 #else
 static
@@ -430,7 +429,7 @@ static MModuleListing * DoListLoadedModules(void)
       }
    }
    listing->SetCount(count); // we might have less than we thought at first
-#else
+#else // !USE_MODULES_STATIC
    {
       MModule *m = (**i).m_Module;
       ASSERT(m);
@@ -443,7 +442,7 @@ static MModuleListing * DoListLoadedModules(void)
          "", m);
       (*listing)[count++] = entry;
    }
-#endif
+#endif // USE_MODULES_STATIC/!USE_MODULES_STATIC
    return listing;
 }
 
@@ -467,7 +466,9 @@ MModule::ListAvailableModules(const String& interfaceName)
    wxArrayString dirs = BuildListOfModulesDirs();
    size_t nDirs = dirs.GetCount();
 
-   /// First, build list of all .mmd files:
+   /// First, build list of all .mmd and .so files in module directories
+   wxString extDll = wxDllLoader::GetDllExt();
+   wxArrayString moduleNames; // base names, actually
    for( size_t i = 0; i < nDirs ; i++ )
    {
          pathname = dirs[i];
@@ -477,7 +478,25 @@ MModule::ListAvailableModules(const String& interfaceName)
             filename = wxFindFirstFile(pathname);
             while(filename.Length())
             {
+               moduleNames.Add(filename.BeforeLast('.'));
+
                modules.push_back(new wxString(filename));
+               filename = wxFindNextFile();
+            }
+
+            pathname = dirs[i];
+            pathname << "*" << extDll;
+            filename = wxFindFirstFile(pathname);
+            while(filename.Length())
+            {
+               // only add if we didn't find a matching .mmd for it
+               wxString basename = filename;
+               basename.Truncate(filename.length() - extDll.length());
+               if ( moduleNames.Index(basename) == wxNOT_FOUND )
+               {
+                  modules.push_back(new wxString(filename));
+               }
+
                filename = wxFindNextFile();
             }
          }
@@ -514,63 +533,108 @@ MModule::ListAvailableModules(const String& interfaceName)
    for(it = modules.begin(); it != modules.end(); it ++)
    {
       filename = **it;
-      errorflag = false;
-      wxTextFile tf(filename);
-      if(! tf.Open())
+
+      // it's either a .mmd file in which case we just read its contents or a
+      // .so file in which case we load it and call its GetMModuleInfo()
+      if ( filename.Right(4) == ".mmd" )
       {
-         errorflag = true;
-      }
-      else
-      {
-         // check that we have all required lines
-         if(tf.GetLineCount() < MMD_LINE_LAST)
+         errorflag = false;
+         wxTextFile tf(filename);
+         if(! tf.Open())
          {
             errorflag = true;
          }
          else
          {
-            // check that the first MMD_LINE_LAST lines are correct and get
-            // the values of the fields too
-            wxString headerValues[MMD_LINE_LAST];
-            for ( size_t line = 0; !errorflag && (line < MMD_LINE_LAST); line++ )
+            // check that we have all required lines
+            if(tf.GetLineCount() < MMD_LINE_LAST)
             {
-               if ( !tf[line].StartsWith(MMD_HEADERS[line], &headerValues[line]) )
-                  errorflag = TRUE;
+               errorflag = true;
             }
-
-            if ( !errorflag )
+            else
             {
-               String interfaceModule = headerValues[MMD_LINE_INTERFACE];
-
-               // take all modules if interfaceName is empty, otherwise only
-               // take those which implement the given interface
-               if ( !interfaceName || interfaceName == interfaceModule )
+               // check that the first MMD_LINE_LAST lines are correct and get
+               // the values of the fields too
+               wxString headerValues[MMD_LINE_LAST];
+               for ( size_t line = 0; !errorflag && (line < MMD_LINE_LAST); line++ )
                {
-                  String description;
-                  for(size_t l = MMD_LINE_LAST + 1; l < tf.GetLineCount(); l++)
-                     description << tf[l] << '\n';
+                  if ( !tf[line].StartsWith(MMD_HEADERS[line], &headerValues[line]) )
+                     errorflag = TRUE;
+               }
 
-                  String name;
-                  wxSplitPath((**it), NULL, &name, NULL);
-                  MModuleListingEntryImpl entry(
-                     name, // module name
+               if ( !errorflag )
+               {
+                  String interfaceModule = headerValues[MMD_LINE_INTERFACE];
 
-                     headerValues[MMD_LINE_INTERFACE],
-                     headerValues[MMD_LINE_NAME],
-                     description,
-                     headerValues[MMD_LINE_VERSION],
-                     headerValues[MMD_LINE_AUTHOR]);
-                  (*listing)[count++] = entry;
+                  // take all modules if interfaceName is empty, otherwise only
+                  // take those which implement the given interface
+                  if ( !interfaceName || interfaceName == interfaceModule )
+                  {
+                     String description;
+                     for(size_t l = MMD_LINE_LAST + 1; l < tf.GetLineCount(); l++)
+                        description << tf[l] << '\n';
+
+                     String name;
+                     wxSplitPath((**it), NULL, &name, NULL);
+                     MModuleListingEntryImpl entry(
+                        name, // module name
+
+                        headerValues[MMD_LINE_INTERFACE],
+                        headerValues[MMD_LINE_NAME],
+                        description,
+                        headerValues[MMD_LINE_VERSION],
+                        headerValues[MMD_LINE_AUTHOR]);
+                     (*listing)[count++] = entry;
+                  }
                }
             }
          }
+         if(errorflag)
+         {
+            wxLogError(_("Cannot parse MMD file for module '%s'."),
+                       filename.c_str());
+         }
       }
-      if(errorflag)
+      else // it's not an .mmd, get info from .so/.dll directly
       {
-         String msg;
-         msg.Printf(_("Cannot parse MMD file for module '%s'."),
-                    filename.c_str());
-         MDialog_ErrorMessage(msg);
+         errorflag = true;
+
+         wxDllType dll = wxDllLoader::LoadLibrary(filename);
+         if( dll )
+         {
+            MModule_GetModulePropFuncType getProp =
+               (MModule_GetModulePropFuncType)
+               wxDllLoader::GetSymbol(dll,
+                                      MMODULE_GETPROPERTY_FUNCTION);
+
+            if ( getProp )
+            {
+               String interfaceModule = getProp("interface");
+               if ( !interfaceName || interfaceName == interfaceModule )
+               {
+                  String name;
+                  wxSplitPath(filename, NULL, &name, NULL);
+                  MModuleListingEntryImpl entry(
+                     name,
+                     interfaceModule,
+                     getProp("desc"),
+                     getProp("description"),
+                     getProp("version"),
+                     getProp("author"));
+                  (*listing)[count++] = entry;
+               }
+
+               errorflag = false;
+            }
+
+            wxDllLoader::UnloadLibrary(dll);
+         }
+
+         if ( errorflag )
+         {
+            wxLogError(_("Shared library '%s' is not a Mahogany module."),
+                       filename.c_str());
+         }
       }
    }
    listing->SetCount(count);

@@ -164,7 +164,7 @@ bool AdbImport(const String& filename,
          wxString msg;
          msg.Printf(_("It seems that the file '%s' is not in the format '%s',\n"
                       "do you still want to try to import it?"),
-                    filename.c_str(), importer->GetDescription());
+                    filename.c_str(), importer->GetFormatDesc());
 
          if ( !MDialog_YesNoDialog(msg, NULL, _("Address book import"),
                                    FALSE, "ConfirmAdbImporter") )
@@ -244,7 +244,7 @@ exit:
       wxLogMessage(_("Successfully imported address book from file '%s' "
                      "(format '%s')"),
                    adbname.c_str(),
-                   importer->GetDescription());
+                   importer->GetFormatDesc());
    }
    else
    {
@@ -292,7 +292,7 @@ size_t AdbImporter::EnumImporters(wxArrayString& names, wxArrayString& descs)
       if ( importer )
       {
          names.Add(importer->GetName());
-         descs.Add(importer->GetDescription());
+         descs.Add(importer->GetFormatDesc());
 
          importer->DecRef();
          importer = NULL;

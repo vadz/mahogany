@@ -115,7 +115,9 @@ protected:
 // ----------------------------------------------------------------------------
 
 IMPLEMENT_ADB_IMPORTER(AdbEudoraImporter,
-                       gettext_noop("Eudora for Windows address book"));
+                       gettext_noop("Eudora address book importer"),
+                       gettext_noop("Eudora for Windows address book"),
+                       "Vadim Zeitlin <vadim@wxwindows.org>");
 
 
 // ----------------------------------------------------------------------------

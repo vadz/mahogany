@@ -2349,11 +2349,12 @@ protected:
       }
 };
 
-MMODULE_IMPLEMENT(MModule_FiltersImpl,
-                  "Filters",
-                  MMODULE_INTERFACE_FILTERS,
-                  _("This plug-in provides a filtering language for Mahogany."),
-                  "0.00")
+MMODULE_BEGIN_IMPLEMENT(MModule_FiltersImpl,
+                        "Filters",
+                        MMODULE_INTERFACE_FILTERS,
+                        _("This plug-in provides a filtering language for Mahogany."),
+                        "0.00")
+MMODULE_END_IMPLEMENT(MModule_FiltersImpl)
 
 FilterRule *
 MModule_FiltersImpl::GetFilter(const String &filterrule) const

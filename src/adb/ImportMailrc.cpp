@@ -48,6 +48,8 @@ static const size_t lenAlias = 5;   // strlen("alias")
 class AdbMailrcImporter : public AdbImporter
 {
 public:
+   AdbMailrcImporter(MInterface *minterface) : AdbImporter(minterface) { }
+
    // implement base class pure virtuals
    virtual String GetDefaultFilename() const;
    virtual bool CanImport(const String& filename);
@@ -84,7 +86,9 @@ protected:
 // ----------------------------------------------------------------------------
 
 IMPLEMENT_ADB_IMPORTER(AdbMailrcImporter,
-                       gettext_noop("Unix .mailrc file"));
+                       gettext_noop("Unix .mailrc file import module"),
+                       gettext_noop("Unix .mailrc file"),
+                       "Vadim Zeitlin <vadim@wxwindows.org>");
 
 
 // ----------------------------------------------------------------------------
@@ -129,7 +133,7 @@ bool AdbMailrcImporter::ParseMailrcAliasLine(const wxString& line,
                          line.c_str());
 
             return FALSE;
-            
+
          case '\\':
             // it quotes the next character
             *nickname += *++pc;
@@ -214,7 +218,7 @@ String AdbMailrcImporter::GetDefaultFilename() const
       location.Empty();
    }
 #else // !Unix
-   // don't know where it can be (,mailrc only exists under Unix, so if the user
+   // don't know where it can be (.mailrc only exists under Unix, so if the user
    // tries to import its ADB from other OS, it means that he transfered it
    // himself somewhere...)
 #endif // Unix/!Unix

@@ -221,7 +221,7 @@ private:
    PalmOSModule(MInterface *interface);
 
    ~PalmOSModule();
-   
+
    bool ProcessMenuEvent(int id);
    bool Connect(void);
    void Disconnect(void);
@@ -431,6 +431,7 @@ MMODULE_IMPLEMENT(PalmOSModule,
                   "HandheldSynchronise",
                   "This module provides PalmOS connectivity.",
                   "0.00")
+MMODULE_END_IMPLEMENT(PalmOSModule)
 
 ///------------------------------
 /// Own functionality:

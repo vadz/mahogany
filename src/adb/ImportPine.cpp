@@ -30,6 +30,7 @@
    #include <wx/dynarray.h>
 #endif // USE_PCH
 
+#include <wx/confbase.h>      // for wxExpandEnvVars
 #include <wx/textfile.h>
 #include <wx/utils.h>
 
@@ -45,6 +46,8 @@ extern void wxSplitPath(wxArrayString&, const wxChar *);
 class AdbPineImporter : public AdbImporter
 {
 public:
+   AdbPineImporter(MInterface *minterface) : AdbImporter(minterface) { }
+
    // implement base class pure virtuals
    virtual bool CanImport(const String& filename);
    virtual bool StartImport(const String& filename);
@@ -55,6 +58,7 @@ public:
    virtual bool ImportEntry(const String& path,
                             size_t index,
                             AdbEntry *entry);
+   virtual String GetDefaultFilename() const;
 
    DECLARE_ADB_IMPORTER();
 
@@ -126,7 +130,9 @@ protected:
 // ----------------------------------------------------------------------------
 
 IMPLEMENT_ADB_IMPORTER(AdbPineImporter,
-                       gettext_noop("PINE addressbook file"));
+                       gettext_noop("PINE address book import module"),
+                       gettext_noop("PINE address book"),
+                       "Vadim Zeitlin <vadim@wxwindows.org>");
 
 
 // ----------------------------------------------------------------------------
@@ -622,3 +628,25 @@ bool AdbPineImporter::ImportEntry(const String& path,
    return TRUE;
 }
 
+String AdbPineImporter::GetDefaultFilename() const
+{
+   String location;
+
+#ifdef OS_UNIX
+   // the default location for Unix is $HOME/.addresbook
+   location = wxExpandEnvVars("$HOME/.addresbook");
+
+   if ( !wxFile::Exists(location) )
+   {
+      // nice try, but it's not there - so we don't know
+      wxLogVerbose(_("Didn't find the PINE address book in the default "
+                     "location (%s)."), location.c_str());
+
+      location.Empty();
+   }
+#else // !Unix
+   // have no idea where PC Pine stores its address book...
+#endif // Unix/!Unix
+
+   return location;
+}

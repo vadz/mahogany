@@ -141,6 +141,7 @@ public:
    // by this class (these functions are automatically generated during
    // IMPLEMENT_ADB_IMPORTER macro expansion
    virtual const char *GetName() const = 0;
+   virtual const char *GetFormatDesc() const = 0;
    virtual const char *GetDescription() const = 0;
 
 private:
@@ -155,26 +156,36 @@ private:
 #ifdef USE_ADB_MODULES
 
 #define DECLARE_ADB_IMPORTER()                                             \
+   const char *GetFormatDesc() const;                                      \
    MMODULE_DEFINE();                                                       \
    DEFAULT_ENTRY_FUNC
 
-#define IMPLEMENT_ADB_IMPORTER(name, desc)                                 \
-   MMODULE_IMPLEMENT(name, #name, "AdbImporter", _(desc), "1.00")          \
-   MModule *name::Init(int version_major, int version_minor,               \
-                       int version_release, MInterface *minterface,        \
-                       int *errorCode)                                     \
+#define IMPLEMENT_ADB_IMPORTER(cname, desc, format, Author)                \
+   MMODULE_BEGIN_IMPLEMENT(cname, _(desc), "AdbImporter", _(desc), "1.00") \
+      MMODULE_PROP(author, Author)                                         \
+      MMODULE_PROP(adbformat, format)                                      \
+   MMODULE_END_IMPLEMENT(cname)                                            \
+   const char *cname::GetFormatDesc() const                                \
    {                                                                       \
-      return new name(minterface);                                         \
+      return GetMModuleProperty("adbformat");                              \
+   }                                                                       \
+   MModule *cname::Init(int version_major, int version_minor,              \
+                        int version_release, MInterface *minterface,       \
+                        int *errorCode)                                    \
+   {                                                                       \
+      return new cname(minterface);                                        \
    }
 
 #else // !USE_ADB_MODULES
 
 #define DECLARE_ADB_IMPORTER()                                             \
    const char *GetName() const;                                            \
+   const char *GetFormatDesc() const;                                      \
    const char *GetDescription() const;                                     \
    static AdbImporterInfo ms_info
-#define IMPLEMENT_ADB_IMPORTER(name, desc)                                 \
+#define IMPLEMENT_ADB_IMPORTER(name, desc, format, author)                 \
    const char *name::GetName() const { return #name; }                     \
+   const char *name::GetFormatDesc() const { return _(format); }           \
    const char *name::GetDescription() const { return _(desc); }            \
    AdbImporter *ConstructorFor##name() { return new name; }                \
    AdbImporter::AdbImporterInfo name::ms_info(#name, ConstructorFor##name, \

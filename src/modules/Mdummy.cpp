@@ -46,11 +46,12 @@ private:
 };
 
 
-MMODULE_IMPLEMENT(DummyModule,
-                  "Mdummy",
-                  "none",
-                  "This module demonstrates the MModule plugin interface.",
-                  "0.00")
+MMODULE_BEGIN_IMPLEMENT(DummyModule,
+                        "Mdummy",
+                        "none",
+                        "This module demonstrates the MModule plugin interface.",
+                        "0.00")
+MMODULE_END_IMPLEMENT(DummyModule)
 
 
 ///------------------------------
@@ -59,16 +60,9 @@ MMODULE_IMPLEMENT(DummyModule,
 
 /* static */
 MModule *
-DummyModule::Init(int version_major, int version_minor,
-                  int version_release, MInterface *minterface,
-                  int *errorCode)
+DummyModule::Init(int version_major, int version_minor, int version_release,
+                  MInterface *minterface, int *errorCode)
 {
-   if(! MMODULE_SAME_VERSION(version_major, version_minor,
-                             version_release))
-   {
-      if(errorCode) *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS;
-      return NULL;
-   }
    return new DummyModule(minterface);
 }
 

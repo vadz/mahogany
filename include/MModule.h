@@ -28,6 +28,7 @@
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
+
 // this is compiler dependent
 #ifdef USE_MODULES_STATIC
 #   define MDLLEXPORT static
@@ -50,6 +51,13 @@
 /// Name of the function which initialised each DLL
 #define MMODULE_INITMODULE_FUNCTION "InitMModule"
 
+/// Name of the function used to retrieve info about the module
+#define MMODULE_GETPROPERTY_FUNCTION "GetMModuleProperty"
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
 /// Error values returned when loading
 enum MModule_Errors
 {
@@ -67,6 +75,26 @@ enum MModule_Errors
 #define MMOD_FLAG_HASCONFIG  0x0002
 //@}
 
+/**@name Function definitions as used by Entry() */
+//@{
+/// GetFlags(): Returns bitwise or of the MMOD_FLAG_ values
+#define MMOD_FUNC_GETFLAGS   0
+/// Main(): Run the main module functionality
+#define MMOD_FUNC_MAIN       1
+/// Config(): Run the module configuration function
+#define MMOD_FUNC_CONFIG     2
+/** ProcessMenuId(): Process the menu id passed as additional
+    argument. Return true if it processed it.
+*/
+#define MMOD_FUNC_MENUEVENT  3
+/** below this number are reserved, from this one on available for
+    module specific functions: */
+#define MMOD_FUNC_USER     0x100
+//@}
+
+// ----------------------------------------------------------------------------
+// classes used for browsing/listing the available modules
+// ----------------------------------------------------------------------------
 
 /** This class is used as an entry in the MModuleListing and describes
     a single module. */
@@ -96,23 +124,9 @@ public:
    MOBJECT_NAME(MModuleListing);
 };
 
-
-/**@name Function definitions as used by Entry() */
-//@{
-/// GetFlags(): Returns bitwise or of the MMOD_FLAG_ values
-#define MMOD_FUNC_GETFLAGS   0
-/// Main(): Run the main module functionality
-#define MMOD_FUNC_MAIN       1
-/// Config(): Run the module configuration function
-#define MMOD_FUNC_CONFIG     2
-/** ProcessMenuId(): Process the menu id passed as additional
-    argument. Return true if it processed it.
-*/
-#define MMOD_FUNC_MENUEVENT  3
-/** below this number are reserved, from this one on available for
-    module specific functions: */
-#define MMOD_FUNC_USER     0x100
-//@}
+// ----------------------------------------------------------------------------
+// MModule class
+// ----------------------------------------------------------------------------
 
 /**
    Small class to ensure proper deregistration of modules on
@@ -155,8 +169,7 @@ class MModule : public MModuleCommon
 public:
    MModule(MInterface *minterface) : MModuleCommon(minterface) { }
 
-   /** MModule interface, this needs to be implemented by the actual
-       modules. */
+   /** MModule interface, this needs to be implemented by the actual modules. */
    //@{
    /// Returns the Module's name as used in LoadModule().
    virtual const char * GetName(void) const = 0;
@@ -166,23 +179,24 @@ public:
    virtual const char * GetDescription(void) const = 0;
    /// Returns a textual representation of the particular version of the module.
    virtual const char * GetVersion(void) const = 0;
+
    /// Returns the Mahogany version this module was compiled for.
    virtual void GetMVersion(int *version_major, int *version_minor,
                             int *version_release) const = 0;
+
    /// Set arg to a function number and call the function if it exists.
    virtual int Entry(int arg, ... ) = 0;
    //@}
 
    /** These static functions handle the loading of modules. */
    //@{
-   /** This will load the module of a given name if not already
-       loaded.
+   /** This will load the module of a given name if not already loaded.
        @param name name of the module.
        @return pointer to the freshly loaded MModule or NULL.
    */
    static MModule * LoadModule(const String & name);
    /** Returns a pointer to a listing of all loaded modules. Must be
-       DecRef()´d by the caller. */
+       DecRef()'d by the caller. */
    static MModuleListing * ListLoadedModules(void);
    /** Returns a pointer to a listing of available modules. Must be
        DecRef()'d by the caller. Does not check if modules are loaded,
@@ -191,7 +205,7 @@ public:
        the given interface.
    */
    static MModuleListing * ListAvailableModules(const String& interfaceName = "");
-   /** Finds a module which provides the given interface. Only
+   /** Finds the first module which provides the given interface. Only
        searches already loaded modules.
        @param interface name of the interface
        @return an inc-ref'd module or NULL
@@ -202,8 +216,7 @@ public:
    MOBJECT_NAME(MModule)
 };
 
-/** @name This is the API that each MModule shared lib must
-    implement. */
+/** @name This is the API that each MModule shared lib must implement. */
 //@{
 extern "C"
 {
@@ -223,85 +236,133 @@ extern "C"
                                                     int version_release,
                                                     class MInterface *minterface,
                                                     int *errorCode);
+
+   /** Function to retreieve info from a module DLL. A module DLL may
+       export such function, although it is not necessary if it has a
+       matching .mmd file.
+
+       The function should return the name, description and version of the
+       module as static strings (they are not freed by the called)
+   */
+   typedef const char *(* MModule_GetModulePropFuncType)(const char *property);
 }
 //@}
 
+// ----------------------------------------------------------------------------
+// macros for module declaration/implementation
+// ----------------------------------------------------------------------------
+
 #ifdef USE_MODULES_STATIC
-/** Used by modules to register themselves statically.
-    Return code is always 1. */
+/** Used by modules to register themselves statically. */
 extern
-int MModule_AddStaticModule(const char *Name,
+void MModule_AddStaticModule(const char *Name,
                              const char *Interface,
                              const char *Description,
                              const char *Version,
-                            MModule_InitModuleFuncType init);
+                             MModule_InitModuleFuncType init);
 
-/** Used by modules to register themselves statically. */
-#   define MMODULE_INITIALISE(Name, Interface, Description, Version) \
-    static int dummy = MModule_AddStaticModule(Name, Interface, \
-                                               Description, Version, InitMModule);
-#else
+#   define MMODULE_INITIALISE(Name, Interface, Description, Version, Author) \
+    static struct MStaticModuleInitializerFor##Name \
+    { \
+     MStaticModuleInitializerFor##Name() \
+     { \
+        MModule_AddStaticModule(Name, Interface, \
+                                Description, Version, InitMModule); \
+     } \
+    } initializerFor##Name;
+#else // !USE_MODULES_STATIC
 #   define MMODULE_INITIALISE(a,b,c,d)
-#endif
+#endif // USE_MODULES_STATIC/!USE_MODULES_STATIC
 
-
-#define MMODULE_DEFINE_CMN() \
+/// this macro must be used inside the class declaration for any module class
+#define MMODULE_DEFINE() \
 public: \
-virtual const char * GetName(void) const; \
-virtual const char * GetDescription(void) const; \
-virtual const char * GetInterface(void) const; \
-virtual const char * GetVersion(void) const; \
-virtual void GetMVersion(int *version_major, \
-                         int *version_minor, \
-                         int *version_release) const; \
-static  MModule *Init(int, int, int, MInterface *, int *)
+   virtual const char * GetName(void) const; \
+   virtual const char * GetInterface(void) const; \
+   virtual const char * GetDescription(void) const; \
+   virtual const char * GetVersion(void) const; \
+   virtual void GetMVersion(int *version_major, \
+                            int *version_minor, \
+                            int *version_release) const; \
+   static  MModule *Init(int, int, int, MInterface *, int *); \
+   static const struct Property \
+   { \
+      const char *name, *value; \
+   } ms_properties[]
 
+/// this macro may be used for modules which don't do anything in their Entry()
 #define DEFAULT_ENTRY_FUNC   virtual int Entry(int /* arg */, ...) { return 0; }
 
-#ifdef DEBUG
-#   define MMODULE_DEFINE() \
-      MMODULE_DEFINE_CMN(); \
-      virtual const char *DebugGetClassName() const
-#else
-#   define MMODULE_DEFINE()      MMODULE_DEFINE_CMN()
-#endif
-
-
-#define MMODULE_IMPLEMENT_CMN(ClassName, Name, Interface, Description, Version) \
-const char * ClassName::GetName(void) const { return Name; } \
-const char * ClassName::GetDescription(void) const { return Description; } \
-const char * ClassName::GetInterface(void) const { return Interface; } \
-const char * ClassName::GetVersion(void) const { return Version; } \
-void ClassName::GetMVersion(int *version_major, int *version_minor, \
+/// these macros must be used in the .cpp file implementing the module class
+#define MMODULE_BEGIN_IMPLEMENT(ClassName, Name, Interface, Description, Version) \
+void ClassName::GetMVersion(int *version_major, \
+                            int *version_minor, \
                             int *version_release) const \
 { \
    if(version_major)   *version_major = M_VERSION_MAJOR; \
    if(version_minor)   *version_major = M_VERSION_MINOR; \
    if(version_release) *version_major = M_VERSION_RELEASE; \
 } \
+\
 extern "C" \
-{\
+{ \
    MDLLEXPORT MModule *InitMModule(int version_major,\
-                           int version_minor,\
-                           int version_release,\
-                           class MInterface * minterface,\
-                           int *errorCode)\
+                                   int version_minor,\
+                                   int version_release,\
+                                   MInterface * minterface,\
+                                   int *errorCode)\
    {\
+      if ( (version_major < M_VERSION_MAJOR) || \
+           ((version_major == M_VERSION_MAJOR) && \
+            (version_minor < M_VERSION_MINOR)) ) \
+      {\
+         *errorCode = MMODULE_ERR_INCOMPATIBLE_VERSIONS; \
+         return NULL; \
+      } \
+      \
       return ClassName::Init(version_major,  version_minor, \
                              version_release, \
                              minterface , errorCode);\
    }\
 } \
-MMODULE_INITIALISE(Name, Interface, Description, Version)
+MMODULE_INITIALISE(Name, Interface, Description, Version); \
+\
+const ClassName::Property ClassName::ms_properties[] = \
+{ \
+   { "name", Name }, \
+   { "desc", Description }, \
+   { "version", Version }, \
+   { "interface", Interface },
 
-#ifdef DEBUG
-#   define MMODULE_IMPLEMENT(ClassName, Name, Interface, Description, Version) \
-      MMODULE_IMPLEMENT_CMN(ClassName, Name, Interface, Description, Version); \
-      const char *ClassName::DebugGetClassName() const { return #ClassName; }
-#else
-#   define MMODULE_IMPLEMENT(ClassName, Name, Interface, Description, Version) \
-           MMODULE_IMPLEMENT_CMN(ClassName, Name, Interface, Description, Version)
-#endif
+#define MMODULE_PROP(name, value) { #name, value },
+
+#define MMODULE_END_IMPLEMENT(ClassName) \
+   }; \
+\
+extern "C" { \
+MDLLEXPORT const char *GetMModuleProperty(const char *property) \
+{ \
+   for ( size_t n = 0; n < WXSIZEOF(ClassName::ms_properties); n++ ) \
+   { \
+      if ( strcmp(ClassName::ms_properties[n].name, property) == 0 ) \
+         return ClassName::ms_properties[n].value; \
+   } \
+   \
+   return ""; \
+} \
+} \
+const char * ClassName::GetName(void) const \
+   { return GetMModuleProperty("name"); } \
+const char * ClassName::GetInterface(void) const \
+   { return GetMModuleProperty("interface"); } \
+const char * ClassName::GetDescription(void) const \
+   { return GetMModuleProperty("desc"); } \
+const char * ClassName::GetVersion(void) const \
+   { return GetMModuleProperty("version"); }
+
+// ----------------------------------------------------------------------------
+// helper functions and macros
+// ----------------------------------------------------------------------------
 
 /** Call this before application exit. */
 extern
@@ -317,7 +378,8 @@ void MModule_Cleanup(void);
 #define MMODULE_SAME_VERSION(a,b,c) (a == M_VERSION_MAJOR && \
                                    b == M_VERSION_MINOR && \
                                    c == M_VERSION_RELEASE)
-/** Test whether version_xxx is compatible with the one the module is compiled for.
+/** Test whether version_xxx is compatible with the one the module is compiled
+    for.
 */
 #define MMODULE_VERSION_COMPATIBLE(a,b) (a_major == M_VERSION_MAJOR && \
                                          b_minor >= M_VERSION_MINOR)
