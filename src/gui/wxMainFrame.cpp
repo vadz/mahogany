@@ -584,8 +584,12 @@ wxMainFrame::~wxMainFrame()
 
    delete m_FolderView;
    delete m_FolderTree;
-   // save the last opened folder
-   mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, m_folderName);
+
+   if ( READ_APPCONFIG(MP_REOPENLASTFOLDER) )
+   {
+      // save the last opened folder if we're going to reopen it
+      mApplication->GetProfile()->writeEntry(MP_MAINFOLDER, m_folderName);
+   }
 }
 
 void

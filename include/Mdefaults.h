@@ -265,6 +265,8 @@ enum MFolderIndex
 #define   MP_ADBFILE         "AddressBook"
 /// names of folders to open at startup (semicolon separated list)
 #define   MP_OPENFOLDERS         "OpenFolders"
+/// reopen the last opened folder in the main frame
+#define   MP_REOPENLASTFOLDER "ReopenLastFolder"
 /// name of folder to open in mainframe
 #define   MP_MAINFOLDER          "MainFolder"
 /// path for Python
@@ -858,6 +860,8 @@ enum MFolderIndex
 #define   MP_SHOWCONSOLE_D      1
 /// names of folders to open at startup
 #define   MP_OPENFOLDERS_D      M_EMPTYSTRING
+/// reopen the last opened folder in the main frame
+#define   MP_REOPENLASTFOLDER_D 1
 /// name of folder to open in mainframe
 #define   MP_MAINFOLDER_D        "INBOX"
 /// path for Python

@@ -4,6 +4,8 @@
 Release 0.61 'Hawkins'
 -------------------------------------------------------------------------------
 
+04.01.01 VZ: an option to not open the last opened folder on startup added
+04.01.01 VZ: fixed crash (debug mode only) when copying 0 length messages
 30.12.00 VZ: added an option to show TEXT/PLAIN attachments inline
 04.12.00 VZ: improvement to "folder filters" dialog: can add filters from here
 01.12.00 VZ: "system" folders are now on the top of the folder tree
@@ -14,10 +16,10 @@ Release 0.61 'Hawkins'
              Ping timer interval <= 0 is now interpreted as "don't ping"
 20.11.00 KB: Added a miniframe with timeout as the dialog for starting PalmOS
              synchronisation. No more any need to press [OK] button.
-08.11.00 KB: Simplifications to folder update and filtering mechanism. Visible 
+08.11.00 KB: Simplifications to folder update and filtering mechanism. Visible
              results are:
-             outbox status inconsistency is gone, filtering should be faster 
-             as unnecessary updates are gone, filtering policy can be set per 
+             outbox status inconsistency is gone, filtering should be faster
+             as unnecessary updates are gone, filtering policy can be set per
              folder
 09.11.00 VZ: added "Save addresses from message" command
 08.11.00 VZ: "Preview message before sending" setting (no GUI support though)
@@ -27,7 +29,7 @@ Release 0.60 'Redmond' November 9, 2000
 24.10.00 VZ: added a per-folder flag for new mail notification
 23.10.00 KB: fixed IMAP flag string generation (didn't work for some servers)
 20.10.00 VZ: access program options dialog from root folder properties
-             don't popup message boxes with unimportant messages any more  
+             don't popup message boxes with unimportant messages any more
 18.10.00 VZ: ask for the passwords as needed, propose to remember them
 05.10.00 NB: Fixed incorrect generation of the "From" header, readded Reply-To
 30.09.00 VZ: allow sending mail to the addresses without the hostname part
@@ -56,7 +58,7 @@ Release 0.60 'Redmond' November 9, 2000
              signature/X-face and other composition parameters for each identity
              separately, options which don't make sense for identities don't
              appear in the identity edit dialog any more
-24.08.00 KB: rpm generation and SuSE compilation work now (export RPM_ROOT= 
+24.08.00 KB: rpm generation and SuSE compilation work now (export RPM_ROOT=
              and if required make a link to it from the default location).
              Added support for PAM under Linux to configure.
 21.08.00 KB: made install wizard explain more and always creates the INBOX

@@ -320,7 +320,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_TOGGLEHEADERS, gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , TRUE },
    { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message"), gettext_noop("Show the raw message text") , FALSE },
 #ifdef EXPERIMENTAL_zeitlin
-   { WXMENU_MSG_SHOWUID, "Show message UIDL", "", FALSE },
+   { WXMENU_MSG_SHOWUID, "Show message UID&L", "", FALSE },
 #endif // EXPERIMENTAL_zeitlin
    { WXMENU_MSG_FIND,  gettext_noop("Fi&nd..."), gettext_noop("F&ind text in message\tCtrl-I") , FALSE },
 

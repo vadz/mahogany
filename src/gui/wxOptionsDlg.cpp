@@ -187,6 +187,7 @@ enum ConfigFields
    // folders
    ConfigField_FoldersFirst = ConfigField_ComposeLast,
    ConfigField_OpenFolders,
+   ConfigField_ReopenLastFolder,
    ConfigField_MainFolder,
    ConfigField_NewMailFolder,
    ConfigField_PollIncomingDelay,
@@ -769,7 +770,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    // folders
    { gettext_noop("Folders to open on &startup"),  Field_List |
                                                    Field_Restart, -1,           },
-   { gettext_noop("Folder opened in &main frame"), Field_Folder,    -1,                        },
+   { gettext_noop("Reopen last open folder"), Field_Bool, -1, },
+   { gettext_noop("Folder opened in &main frame"), Field_Folder | Field_Restart,
+                                                   -ConfigField_ReopenLastFolder,                        },
    { gettext_noop("Folder where to collect &new mail"), Field_Folder, -1},
    { gettext_noop("Poll for &new mail interval in seconds"), Field_Number, -1},
    { gettext_noop("Poll for new mail at s&tartup"), Field_Bool, -1},
@@ -1051,6 +1054,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 
    // folders
    CONFIG_ENTRY(MP_OPENFOLDERS),
+   CONFIG_ENTRY(MP_REOPENLASTFOLDER),
    CONFIG_ENTRY(MP_MAINFOLDER),
    CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
    CONFIG_ENTRY(MP_POLLINCOMINGDELAY),

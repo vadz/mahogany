@@ -458,8 +458,11 @@ MessageCC::FetchText(void)
          folder->UnLock();
          ASSERT_MSG(strlen(mailText) == m_MailTextLen,
                     "DEBUG: Mailfolder corruption detected");
-         ASSERT_MSG(m_MailTextLen > 0,
-                    "DEBUG: Retrieved zero length message contents");
+
+         // there once has been an assert here checking that the message
+         // length was positive, but it makes no sense as 0 length messages do
+         // exist - so I removed it (VZ)
+
          MailFolderCC::ProcessEventQueue();
          return mailText;
       }
