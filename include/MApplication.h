@@ -282,7 +282,17 @@ public:
 /** Our own Mutex type, must support the calls
     Lock() and Unlock().
 */
+#ifdef USE_THREADS
 typedef class WXDLLEXPORT wxMutex MMutex;
+#else
+/// Dummy implementation of MMutex.
+class MMutex
+{
+public:
+   void Lock(void) {}
+   void Unlock(void) {}
+};
+#endif
 
 
 #endif   // MAPPLICATION_H

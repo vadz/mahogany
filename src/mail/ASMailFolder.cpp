@@ -35,15 +35,6 @@
 #   define   AScheck()
 #endif
 
-#if !wxUSE_THREADS
-    class wxMutex
-    {
-    public:
-        void Lock() { }
-        void Unlock() { }
-    };
-#endif
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
  ASMailFolderImpl creates a MailThread object for each operation

@@ -756,8 +756,6 @@ MAppBase::OnMEvent(MEventData& event)
             message.Printf(_("You have received %lu new messages\nin folder '%s'."),
                            number, folder->GetName().c_str());
          }
-
-         // TODO make it a wxPMessageBox to let the user shut if off from here?
          MDialog_Message(message, m_topLevelFrame, _("New Mail"));
       }
    }

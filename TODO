@@ -11,6 +11,8 @@ $Id$
 9 		Does wxlwindow something nasty with undefined
 		update rectangles or wxRegion? Crash happened in
 		wxRegion. 
+9		When retrieving only N our of M messages, Mah. will
+		later say that there are M-N new messages :-(
 9		changing properties for IMAP folder (auto-collect)
 		occasionally dumps core on [OK] click
 7 gtk	VZ?	message boxes have broken icons under wxGTK
@@ -20,6 +22,7 @@ $Id$
 		selections via keyboard still broken
 		speed up wxLayout scrollbar setting, *way* too slow
 		now
+4		fix MProfile.py/Profile.py name confusion
 6	VZ	All Folder create dialog pages have no HelpIDs set.
 5	KB	for NNTP only count unread/new messages
 5	KB	make MailFolder timer react to options change
@@ -104,7 +107,16 @@ $Id$
 		page probably?
 2		different icon for activity log frame
 2	VZ?	make activity log frame appear on demand only
+<<<<<<< TODO
+2		fix es.po - many little errors
 
+from 32bitsonline review:
+
+4		Trash folder, move to trash instead/alternative of of delete
+4		Message menu popup for folderlistctrl
+=======
+
+>>>>>>> 1.272
 *********************************************************************
 *** TESTS
 *********************************************************************
