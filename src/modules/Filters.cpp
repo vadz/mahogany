@@ -246,13 +246,18 @@ public:
          m_MailFolder = folder;
          SafeIncRef(m_MailFolder);
          m_MessageUId = uid;
-         m_MfWasChanged = FALSE;
+
+         m_deletedMsgs =
+         m_expungedMsgs = FALSE;
       }
    /// Has filter rule caused a change to the folder/message?
    bool GetChanged(void) const
       {
          ASSERT(m_MailFolder);
-         return m_MfWasChanged;
+
+         // m_deletedMsgs doesn't count here as if the messages were only
+         // deleted we don't need to rebuild the folder listing
+         return m_expungedMsgs;
       }
    /// Obtain the mailfolder to operate on:
    MailFolder * GetFolder(void)
@@ -268,19 +273,25 @@ public:
       }
    //@}
    MInterface * GetInterface(void) { return m_MInterface; }
-   /// tell parser that msg or folder got changed
-   void SetChanged(void) { m_MfWasChanged = TRUE; }
+
+   /// called if messages were expunged from folder
+   void SetExpunged() { m_expungedMsgs = true; m_deletedMsgs = false; }
+
+   /// called by func_delete() to tell us that a message was deleted
+   void SetDeleted() { m_deletedMsgs = true; }
+
 protected:
-   inline void EatWhiteSpace(void)
+   void EatWhiteSpace(void)
       { while(isspace(m_Input[m_Position])) m_Position++; }
-   inline const char Char(void) const
+   const char Char(void) const
       { return m_Input[m_Position]; }
-   inline const char CharInc(void)
+   const char CharInc(void)
       { return m_Input[m_Position++]; }
-   inline String CharLeft(void)
+   String CharLeft(void)
       { return m_Input.Left(m_Position); }
-   inline String CharMid(void)
+   String CharMid(void)
       { return m_Input.Mid(m_Position); }
+
 private:
    MModule_Filters *m_FilterModule;
    MInterface *m_MInterface;
@@ -293,7 +304,10 @@ private:
 
    UIdType m_MessageUId;
    MailFolder *m_MailFolder;
-   bool m_MfWasChanged;
+
+   // flags set during filter evaluation
+   bool m_expungedMsgs,
+        m_deletedMsgs;      // some messages were marked as deleted
 
    GCC_DTOR_WARN_OFF
 };
@@ -311,6 +325,11 @@ class Value : public MObject
       Type_Error,  /// Undefined value (used for expression error)
       Type_Number, /// Value is a long int number
       Type_String, /// Value is a string
+
+      // VZ: IMNSHO this doesn't work as intended (in fact, this doesn't work
+      //     at all currently as this type is unused): "Finis" (what a strange
+      //     spelling) should be a flag and not a separate type as otherwise
+      //     any attemps to convert it to anything fail with an assert
       Type_Finis   /// Expression processing was aborted
    };
 
@@ -2130,10 +2149,9 @@ extern "C"
       MailFolder *mf = p->GetFolder();
       if(! mf) return Value(0);
       UIdType uid = p->GetMessageUId();
-      int rc = mf->DeleteMessage(uid);
+      int rc = mf->DeleteMessage(uid);    // without expunging
       mf->DecRef();
-      p->SetChanged();
-      return Value::Finis();
+      p->SetDeleted();
       return Value(rc);
    }
 
@@ -2145,7 +2163,8 @@ extern "C"
       if(! mf) return Value(0);
       UIdType rc = mf->DeleteDuplicates();
       mf->DecRef();
-      if(rc != UID_ILLEGAL) p->SetChanged();
+      if ( rc > 0 )
+         p->SetDeleted();
       return Value( (int)(rc != UID_ILLEGAL) ); // success if 0 or
       // more deleted
    }
@@ -2290,7 +2309,7 @@ extern "C"
       MailFolder *mf = p->GetFolder();
       mf->ExpungeMessages();
       mf->DecRef();
-      p->SetChanged();
+      p->SetExpunged();
       return 1;
    }
 
@@ -2371,21 +2390,42 @@ BuiltinFunctions(void)
  * FilterRuleImpl - the class representing a program
  *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid,
-                          bool *changeflag)
+int FilterRuleImpl::Apply(MailFolder *mf, UIdType uid, bool *changeflag)
 {
    if(! m_Program)
       return 0;
 
-   ASSERT(mf);
-   ASSERT(uid != UID_ILLEGAL);
-//FIXME   ASSERT(mf->IsLocked()); // must be called on a locked mailfolder
+   CHECK( mf, 0, "no mailfolder to apply filter rule to" );
+   CHECK( uid != UID_ILLEGAL, 0, "no message to apply filter rules to" );
+
    mf->IncRef();
    SetMessage(mf, uid);
    const Value rc = m_Program->Evaluate();
-   if(changeflag) *changeflag = GetChanged();
+
+   // if the messages were deleted we might want to expunge them now
+   if ( m_deletedMsgs )
+   {
+      // but only expunge them if it is safe, i.e. either we're using trash
+      // (in which case we will keep a copy there) or if the messages are from
+      // incoming folder - which is supposed to never contain any other
+      // messages, so we don't risk to expunge any messages not deleted by the
+      // filter itself
+      //
+      // TODO: currently we have no way to know if we use the trash from here,
+      //       so we only check for the second case
+      if ( mf->GetFlags() & MF_FLAGS_INCOMING )
+      {
+         mf->ExpungeMessages();
+         SetExpunged();
+      }
+   }
+
+   if ( changeflag )
+      *changeflag = GetChanged();
+
    SetMessage(NULL);
    mf->DecRef();
+
    return (int) rc.GetNumber();
 }
 
@@ -2482,9 +2522,10 @@ FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
 
 FilterRuleImpl::FilterRuleImpl(const String &filterrule,
                                MInterface *minterface,
-                               MModule_Filters *mod
-   )
-: m_FilterModule(mod), m_MInterface(minterface), m_MailFolder(NULL)
+                               MModule_Filters *mod)
+              : m_FilterModule(mod),
+                m_MInterface(minterface),
+                m_MailFolder(NULL)
 {
 #ifndef TEST
    // we cannot allow the module to disappear while we exist

@@ -356,6 +356,7 @@ public:
 // for them. There is only one object of this class in the whole program and
 // even this one is never used directly - all functions are static.
 // ----------------------------------------------------------------------------
+
 class MEventManager
 {
 public:
@@ -399,6 +400,17 @@ public:
 protected:
    /// Dispatches a single event.
    static void Dispatch(MEventData *data);
+};
+
+// ----------------------------------------------------------------------------
+// MEventManagerSuspender: temporarily suspend processing the events
+// ----------------------------------------------------------------------------
+
+class MEventManagerSuspender
+{
+public:
+   MEventManagerSuspender() { MEventManager::Suspend(true); }
+   ~MEventManagerSuspender() { MEventManager::Suspend(false); }
 };
 
 #endif // MEVENT_H

@@ -241,9 +241,6 @@ extern "C"
 // globals
 // ----------------------------------------------------------------------------
 
-/// global cclient lock (FIXME: MT)
-static int gs_lockCclient = 0;
-
 /// exactly one object
 static CCStreamCleaner *gs_CCStreamCleaner = NULL;
 
@@ -420,6 +417,39 @@ public:
 private:
    MailFolderCC *m_mfOld;
 };
+
+// VZ: it was a nice idea, but unfortunately GTK+ timers send one last event
+//     even after being stopped! So it doesn't make much sense to do this as
+//     we still get the timer event and the collection code still runs - so
+//     the fix is now in MailCollector() itself
+#ifdef TIMER_SUSPENDING_WORKS
+
+// temporarily pause a global timer
+class MTimerSuspender
+{
+public:
+   MTimerSuspender(MAppBase::Timer timer)
+   {
+      m_restart = mApplication->StopTimer(m_timer = timer);
+   }
+
+   ~MTimerSuspender()
+   {
+      if ( m_restart )
+      {
+         if ( !mApplication->StartTimer(m_timer) )
+         {
+            wxFAIL_MSG("Failed to restart suspended timer");
+         }
+      }
+   }
+
+private:
+   MAppBase::Timer m_timer;
+   bool m_restart;
+};
+
+#endif // TIMER_SUSPENDING_WORKS
 
 // ============================================================================
 // implementation
@@ -1172,7 +1202,7 @@ MailFolderCC::Open(void)
                   lockfile = (char *) sysinbox();
             }
          }
-#endif
+#endif // OS_UNIX
       lockfile << ".lock*"; //FIXME: is this fine for MS-Win? (NO!)
       lockfile = wxFindFirstFile(lockfile, wxFILE);
       while ( !lockfile.IsEmpty() )
@@ -1609,10 +1639,12 @@ MailFolderCC::Checkpoint(void)
 bool
 MailFolderCC::PingReopen(void)
 {
+   bool rc = false;
+
    wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::PingReopen() on Folder %s.",
               GetName().c_str());
 
-   bool rc = false;
+   CHECK_NOT_BUSY_RC(rc);
 
    MailFolderLocker lockFolder(this);
    if ( lockFolder )
@@ -1704,7 +1736,11 @@ MailFolderCC::PingReopenAll(bool fullPing)
    {
       MailFolderCC *mf = connections[n]->folder;
 
-      rc &= fullPing ? mf->PingReopen() : mf->Ping();
+      // don't ping locked folders, they will have to wait for the next time
+      if ( !mf->IsLocked() )
+      {
+         rc &= fullPing ? mf->PingReopen() : mf->Ping();
+      }
    }
 
    delete [] connections;
@@ -1715,44 +1751,16 @@ MailFolderCC::PingReopenAll(bool fullPing)
 bool
 MailFolderCC::Ping(void)
 {
-   if ( gs_lockCclient ) // FIXME: MT
-      return FALSE;
-
-   if( NeedsNetwork() && ! mApplication->IsOnline() )
+   if ( NeedsNetwork() && ! mApplication->IsOnline() )
    {
       ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"), GetName().c_str()));
       return FALSE;
    }
 
-#if 0
-   UIdType count = CountMessages();
-#endif // 0
-
    wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Ping() on Folder %s.",
               GetName().c_str());
 
-   bool rc = FALSE;
-
-   CCLogLevelSetter logLevel(M_LOG_WINONLY); // TODO: why?
-
-   rc = PingReopen();
-
-   // VZ: normally, all this is unnecessary as mm_exists() will be called from
-   //     PingReopen() anyhow
-#if 0
-   if ( CountMessages() != count )
-      RequestUpdate();
-
-   // Check if we want to collect all mail from this folder:
-   if( (GetFlags() & MF_FLAGS_INCOMING) != 0)
-   {
-      // this triggers the mail collection code
-      HeaderInfoList *hil = GetHeaders();
-      hil->DecRef();
-   }
-#endif // 0
-
-   return rc;
+   return PingReopen();
 }
 
 // ----------------------------------------------------------------------------
@@ -2476,13 +2484,19 @@ MailFolderCC::BuildListing(void)
 
    MailFolderLocker lockFolder(this);
 
-   wxLogTrace("cclient", "Building listing for folder '%s'...",
+   wxLogTrace(TRACE_MF_CALLS, "Building listing for folder '%s'...",
               GetName().c_str());
 
-   // we don't want MEvents to be handled while we are in here, as
-   // they might query this folder:
    MEventLocker locker;
-   MEventManager::Suspend(true);
+
+   // we don't want MEvents to be handled while we are in here, as
+   // they might query this folder
+   MEventManagerSuspender noEvents;
+
+#ifdef TIMER_SUSPENDING_WORKS
+   // neither do we want our PingReopen() be called in the middle of update
+   MTimerSuspender noTimer(MAppBase::Timer_PollIncoming);
+#endif // TIMER_SUSPENDING_WORKS
 
    MLocker lockListing(m_InListingRebuild);
 
@@ -2612,10 +2626,7 @@ MailFolderCC::BuildListing(void)
 
    m_FirstListing = false;
 
-   // now we must release the MEvent queue again:
-   MEventManager::Suspend(false);
-
-   wxLogTrace("cclient", "Finished building listing for folder '%s'...",
+   wxLogTrace(TRACE_MF_CALLS, "Finished building listing for folder '%s'...",
               GetName().c_str());
 }
 
@@ -3018,10 +3029,8 @@ MailFolderCC::mm_list(MAILSTREAM * stream,
    // wxYield() is needed to send the events resulting from (previous) calls
    // to MEventManager::Send(), but don't forget to prevent any other calls to
    // c-client from happening - this will result in a fatal error as it is not
-   // reentrant
-   gs_lockCclient++;  // FIXME: MT
+   // reentrant (FIXME!!!)
    wxYield();
-   gs_lockCclient--;
 }
 
 
@@ -3231,16 +3240,20 @@ MailFolderCC::mm_flags(MAILSTREAM * stream, unsigned long msgno)
        @param  stream   mailstream
    */
 void
-MailFolderCC::mm_critical(MAILSTREAM * stream)
+MailFolderCC::mm_critical(MAILSTREAM *stream)
 {
-   ms_LastCriticalFolder = stream ? stream->mailbox : "";
    if ( stream )
    {
+      ms_LastCriticalFolder = stream->mailbox;
       MailFolderCC *mf = LookupObject(stream);
       if(mf)
       {
          mf->m_InCritical = true;
       }
+   }
+   else
+   {
+      ms_LastCriticalFolder = "";
    }
 }
 
@@ -3248,7 +3261,7 @@ MailFolderCC::mm_critical(MAILSTREAM * stream)
    @param   stream mailstream
      */
 void
-MailFolderCC::mm_nocritical(MAILSTREAM *  stream )
+MailFolderCC::mm_nocritical(MAILSTREAM *stream)
 {
    ms_LastCriticalFolder = "";
    if ( stream )

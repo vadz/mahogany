@@ -492,15 +492,58 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
    switch(keycodes_en[idx])
    {
       case 'M': // move = copy + delete
+         m_FolderView->SaveMessagesToFolder(selections, NULL, true);
+
+         // FIXME: no, it isn't worth it... there are plenty of other places
+         //        where messages are moved, so we should check for this at
+         //        much lower level - but there we don't have the profile any
+         //        more...
+#if 0
+         // careful here: DeleteOrTrashMessages() will expunge the folder if
+         // we're using trash possibly removing other messages from it as well
+         // if they had been marked as deleted before
+         //
+         // note that normally this won't happen as, if we use trash, there
+         // should be no deleted messages, but in the case it does (the
+         // messages could have been marked as deleted by external program or
+         // the user could have switched "Use Trash" option on only recently),
+         // warn about it
+         if ( (m_FolderView->m_nDeleted > 0) &&
+              READ_CONFIG(m_FolderView->m_Profile, MP_USE_TRASH_FOLDER) &&
+              MDialog_YesNoDialog
+              (
+               _("This folder contains some messages marked as deleted.\n"
+                 "If you choose to really move this message, they will be\n"
+                 "expunged together with the message(s) you move.\n"
+                 "\n"
+                 "Please select [Yes] to confirm this or [No] to just mark\n"
+                 "the moved message(s) as deleted and not expunge it neither."
+                 "\n"
+                 "Do you want to expunge all messages marked as deleted?"),
+               m_Parent,
+               MDIALOG_YESNOTITLE,
+               false, // [No] default
+               m_FolderView->GetFullPersistentKey(M_MSGBOX_MOVE_EXPUNGE_CONFIRM)
+              ) )
+         {
+            // mark the messages as deleted only, don't expunge them
+            m_FolderView->GetFolder()->DeleteMessages(&selections, false);
+
+            // don't move focus but do update the selection info
+            m_FolderView->UpdateSelectionInfo();
+            newFocus = -1;
+
+            break;
+         }
+#endif // 0
+         // fall through
+
       case 'D': // delete
-         if ( keycodes_en[idx] == 'D' )
-            m_FolderView->DeleteOrTrashMessages(selections);
-         else
-            m_FolderView->SaveMessagesToFolder(selections, NULL, true);
+         m_FolderView->DeleteOrTrashMessages(selections);
 
          // only move on if we mark as deleted, for trash usage, selection
          // remains the same:
-         if ( READ_APPCONFIG(MP_USE_TRASH_FOLDER) )
+         if ( READ_CONFIG(m_FolderView->m_Profile, MP_USE_TRASH_FOLDER) )
          {
             m_FolderView->UpdateSelectionInfo();
 
@@ -515,7 +558,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          break;
 
       case 'X': // expunge
-         m_FolderView->GetFolder()->ExpungeMessages();
+         m_FolderView->ExpungeMessages();
          newFocus = -1;
          break;
 
@@ -914,8 +957,13 @@ wxFolderListCtrl::GetFocusedUId(long *idx) const
       // do we have the listing?
       if ( hil )
       {
+         size_t nMessages = hil->Count();
+
          long item = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
-         if ( item != -1 )
+
+         // we need to compare with nMessages because the listing might have
+         // been already updated and messages could have been deleted from it
+         if ( item != -1 && (unsigned long)item < nMessages )
          {
             uid = hil[item]->GetUId();
             if ( idx )
@@ -1131,23 +1179,29 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       //     prevents us from showing a dialog box when called from dtor
       if ( !m_InDeletion )
       {
-         wxString msg;
-         msg.Printf(_("Mark all articles in\n'%s'\nas read?"),
-                    m_ASMailFolder->GetName().c_str());
-
-         if(m_NumOfMessages > 0
-            && (m_ASMailFolder->GetType() == MF_NNTP ||
-                m_ASMailFolder->GetType() == MF_NEWS)
-            && MDialog_YesNoDialog(msg,
-                                   m_Parent,
-                                   MDIALOG_YESNOTITLE,
-                                   true,
-                                   Profile::FilterProfileName(m_Profile->GetName())+"MarkRead"))
+         if( m_NumOfMessages > 0 &&
+             (m_ASMailFolder->GetType() == MF_NNTP ||
+              m_ASMailFolder->GetType() == MF_NEWS) )
          {
-            UIdArray *seq = GetAllMessagesSequence(m_ASMailFolder);
-            m_ASMailFolder->SetSequenceFlag(seq, MailFolder::MSG_STAT_DELETED);
-            delete seq;
+            wxString msg;
+            msg.Printf(_("Mark all articles in\n'%s'\nas read?"),
+                       m_ASMailFolder->GetName().c_str());
+
+            if ( MDialog_YesNoDialog
+                 (
+                  msg,
+                  m_Parent,
+                  MDIALOG_YESNOTITLE,
+                  true,
+                  GetFullPersistentKey(M_MSGBOX_MARK_READ)
+                 ) )
+            {
+               UIdArray *seq = GetAllMessagesSequence(m_ASMailFolder);
+               m_ASMailFolder->SetSequenceFlag(seq, MailFolder::MSG_STAT_DELETED);
+               delete seq;
+            }
          }
+
          CheckExpungeDialog(m_ASMailFolder, m_Parent);
       }
 
@@ -1239,7 +1293,6 @@ wxFolderView::Create(MWindow *parent)
 
 wxFolderView::wxFolderView(wxWindow *parent)
 {
-   int x,y;
    m_InDeletion = false;
    m_UpdateSemaphore = false;
    m_SetFolderSemaphore = false;
@@ -1252,9 +1305,10 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_TicketsToDeleteList = ASTicketList::Create();
    m_TicketsDroppedList = NULL;
 
-   m_NumOfMessages = 0;
+   m_NumOfMessages =
+   m_nDeleted = 0;
    m_previewUId = UID_ILLEGAL;
-   m_Parent->GetClientSize(&x, &y);
+
    m_Profile = Profile::CreateEmptyProfile(mApplication->GetProfile());
    m_SplitterWindow = new wxFolderSplitterWindow(m_Parent);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow, this);
@@ -1270,7 +1324,9 @@ wxFolderView::wxFolderView(wxWindow *parent)
                                m_settings.font,
                                m_settings.size,
                                m_settings.columns);
-   m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl, m_MessagePreview, y/3);
+   m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl,
+                                       m_MessagePreview,
+                                       m_Parent->GetClientSize().y/3);
    m_SplitterWindow->SetMinimumPaneSize(0);
    m_SplitterWindow->SetFocus();
 
@@ -1291,6 +1347,15 @@ wxFolderView::~wxFolderView()
 
    m_InDeletion = true;
    SetFolder(NULL, FALSE);
+}
+
+String wxFolderView::GetFullPersistentKey(MPersMsgBox key)
+{
+   String s;
+   s << Profile::FilterProfileName(m_ProfileName)
+     << '/'
+     << GetPersMsgBoxName(key);
+   return s;
 }
 
 void
@@ -1393,7 +1458,8 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
                                   m_settings.size,
                                   m_settings.columns);
       m_FolderCtrl->Clear();
-      m_NumOfMessages = 0;
+      m_NumOfMessages =
+      m_nDeleted = 0;
       Update();
    }
 }
@@ -1481,10 +1547,19 @@ wxFolderView::SetEntry(const HeaderInfo *hi, size_t index)
                                         m_settings.dateGMT),
                           strutil_ultoa(hi->GetSize()));
 
+   if ( status & MailFolder::MSG_STAT_DELETED )
+   {
+      // remember the number of deleted messages we have
+      m_nDeleted++;
+   }
+
    m_FolderCtrl->Select(index,selected);
-   m_FolderCtrl->SetItemState(index, wxLIST_STATE_FOCUSED,
-                              (hi->GetUId() == m_FocusedUId)?
-                              wxLIST_STATE_FOCUSED : 0);
+   m_FolderCtrl->SetItemState
+                 (
+                  index,
+                  wxLIST_STATE_FOCUSED,
+                  hi->GetUId() == m_FocusedUId ? wxLIST_STATE_FOCUSED : 0
+                 );
    wxListItem info;
    info.m_itemId = index;
    m_FolderCtrl->GetItem(info);
@@ -1561,7 +1636,8 @@ wxFolderView::Update(HeaderInfoList *listing)
    if(n < (size_t) m_NumOfMessages)  // messages have been deleted, start over
    {
       m_FolderCtrl->Clear();
-      m_NumOfMessages = 0;
+      m_NumOfMessages =
+      m_nDeleted = 0;
    }
 
    bool foundFocus = false;
@@ -1747,10 +1823,27 @@ wxFolderView::UpdateSelectionInfo(void)
    }
 }
 
+void wxFolderView::ExpungeMessages()
+{
+   if ( m_nDeleted )
+   {
+      unsigned long nDeletedOld = m_nDeleted;
+
+      m_ASMailFolder->ExpungeMessages();
+
+      wxLogStatus(GetFrame(m_Parent),
+                  _("%u deleted messages were expunged"),
+                  m_nDeleted - nDeletedOld);
+   }
+   else
+   {
+      wxLogWarning(_("No deleted messages - nothing to expunge"));
+   }
+}
+
 void
 wxFolderView::OnCommandEvent(wxCommandEvent &event)
 {
-   int n;
    UIdArray selections;
 
    UpdateSelectionInfo();
@@ -1811,9 +1904,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          break;
 
       case  WXMENU_MSG_EXPUNGE:
-         m_ASMailFolder->ExpungeMessages();
-         Update();
-         wxLogStatus(GetFrame(m_Parent), _("Deleted messages were expunged"));
+         ExpungeMessages();
          break;
 
       case WXMENU_MSG_OPEN:
@@ -1918,7 +2009,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       case WXMENU_MSG_SELECTALL:
       {
          bool tmp = m_FolderCtrl->EnableSelectionCallbacks(false);
-         for(n = 0; n < m_NumOfMessages; n++)
+         for ( size_t n = 0; n < m_NumOfMessages; n++ )
             m_FolderCtrl->Select(n,TRUE);
          m_FolderCtrl->EnableSelectionCallbacks(tmp);
          break;
@@ -1927,7 +2018,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       case WXMENU_MSG_DESELECTALL:
          {
             bool tmp = m_FolderCtrl->EnableSelectionCallbacks(false);
-            for(n = 0; n < m_NumOfMessages; n++)
+            for ( size_t n = 0; n < m_NumOfMessages; n++ )
                m_FolderCtrl->Select(n,FALSE);
             m_FolderCtrl->EnableSelectionCallbacks(tmp);
          }
@@ -2225,10 +2316,9 @@ wxFolderView::SaveMessagesToFile(const UIdArray& selections)
 }
 
 void
-wxFolderView::SetSize(const int x, const int y, const int width, int
-                      height)
+wxFolderView::SetSize(const int x, const int y,
+                      const int width, int height)
 {
-//   wxPanel::SetSize(x,y,width,height);
    if(m_SplitterWindow)
       m_SplitterWindow->SetSize( x, y, width, height );
 }
@@ -2372,7 +2462,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
 
          // we may have to do a few extra things here:
          //  - if the message was marked for deletion (its ticket is in
-         //    m_TicketsToDeleteList_, we have to delete it and give a
+         //    m_TicketsToDeleteList), we have to delete it and give a
          //    message about a successful move and not copy operation
          //
          //  - if we're inside DoDragDrop(), m_TicketsDroppedList is !NULL
@@ -2382,7 +2472,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
          {
             bool toDelete = m_TicketsToDeleteList->Contains(t);
             bool wasDropped = m_TicketsDroppedList &&
-               m_TicketsDroppedList->Contains(t);
+                                 m_TicketsDroppedList->Contains(t);
 
             if ( toDelete )
             {

@@ -2528,6 +2528,7 @@ static const struct
    { "StoredRemote", gettext_noop("Confirmation that remote config was saved") },
    { "FilterNotUsedYet", gettext_noop("Warn that newly created filter is unused") },
    { "ImportUnderRoot", gettext_noop("Ask where do you want to import folders") },
+   { "MoveExpungeConfirm", gettext_noop("Confirm expunging messages after moving") },
    //{ "", gettext_noop() },
 };
 

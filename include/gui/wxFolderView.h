@@ -18,6 +18,7 @@
 #include "FolderView.h"
 #include "wxMessageView.h"
 #include "MEvent.h"
+#include "Mpers.h"
 
 #include <wx/persctrl.h>
 #include <wx/splitter.h>
@@ -29,6 +30,7 @@ class wxMFrame;
 class wxMessageView;
 class MailFolder;
 class ASMailFolder;
+class ASTicketList;
 
 enum wxFolderListCtrlFields
 {
@@ -123,6 +125,11 @@ public:
     */
    void DeleteOrTrashMessages(const UIdArray& messages);
 
+   /**
+       Expunge messages
+    */
+   void ExpungeMessages();
+
    /** Toggle the "flagged" status of the messages.
        @param pointer to an array holding the message numbers
    */
@@ -175,7 +182,7 @@ public:
    /// return profile name for persistent controls
    wxString const &GetFullName(void) const { return m_ProfileName; }
    /// for use by the listctrl:
-   class ASTicketList *GetTicketList(void) const { return m_TicketList; }
+   ASTicketList *GetTicketList(void) const { return m_TicketList; }
    /// for use by the listctrl only:
    bool GetFocusFollowMode(void) const { return m_FocusFollowMode; }
 
@@ -196,6 +203,7 @@ protected:
    UIdArray m_SelectedUIds;
    /// The last focused UId.
    UIdType  m_FocusedUId;
+
 private:
    /// profile name
    wxString m_ProfileName;
@@ -203,37 +211,34 @@ private:
    wxFolderView(wxWindow *parent);
    /// are we to deallocate the folder?
    bool ownsFolder;
+
    /// the number of messages in the folder when last updated
-   int m_NumOfMessages;
-   /// the number of messages in box
-   long  listBoxEntriesCount;
-   /// the array to hold the strings for the listbox
-   char  **listBoxEntries;
-   /// width of window
-   int width;
-   /// height of window
-   int height;
+   unsigned long m_NumOfMessages;
+   /// number of deleted messages in the folder
+   unsigned long m_nDeleted;
+
    /// its parent
    MWindow *m_Parent;
+
    /// either a listctrl or a treectrl
    wxFolderListCtrl *m_FolderCtrl;
    /// a splitter window
    wxSplitterWindow *m_SplitterWindow;
    /// the preview window
    wxMessageView *m_MessagePreview;
+
    /// UId of last previewed message
    UIdType m_previewUId;
+
    /// semaphore to avoid duplicate calling of Update
    bool m_UpdateSemaphore;
    /// semaphore to avoid recursion in SetFolder()
    bool m_SetFolderSemaphore;
-   /// allow it to access m_MessagePreview;
-   friend class wxFolderListCtrl;
    /// in deletion semaphore, ugly hack to avoid recursion in destructor
    bool m_InDeletion;
 
    /// a list of pending tickets from async operations
-   class ASTicketList *m_TicketList;
+   ASTicketList *m_TicketList;
    /// a list of tickets we should delete if copy operation succeeded
    ASTicketList *m_TicketsToDeleteList;
 
@@ -294,6 +299,9 @@ private:
    /// read the values from the profile into AllProfileSettings structure
    void ReadProfileSettings(AllProfileSettings *settings);
 
+   /// get the full key to use in persistent message boxes
+   String GetFullPersistentKey(MPersMsgBox key);
+
 private:
    void OnOptionsChange(MEventOptionsChangeData& event);
 
@@ -301,6 +309,9 @@ private:
 
    // MEventManager reg info
    void *m_regOptionsChange;
+
+   // allow it to access m_MessagePreview;
+   friend class wxFolderListCtrl;
 };
 
 
@@ -338,13 +349,14 @@ public:
             m_FolderView->GetProfile() : NULL;
       }
    /// don't even think of using this!
-   wxFolderViewFrame(void) {ASSERT(0);}
-   DECLARE_DYNAMIC_CLASS(wxFolderViewFrame)
+   wxFolderViewFrame(void) { wxFAIL_MSG("unreachable"); }
+
 private:
    void InternalCreate(wxFolderView *fv, wxMFrame *parent = NULL);
    wxFolderViewFrame(String const &name, wxMFrame *parent);
    wxFolderView *m_FolderView;
 
+   DECLARE_DYNAMIC_CLASS(wxFolderViewFrame)
    DECLARE_EVENT_TABLE()
 };
 

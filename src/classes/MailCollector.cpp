@@ -222,14 +222,6 @@ MailCollectorImpl::Collect(MailFolder *mf)
    if(m_list->empty())
       return TRUE;
 
-   // VZ: I don't know if it should be here or if this can lead to some
-   //     nasty recursion/reentrancy problems - what to do?
-#if 0
-   // before scanning the list, make sure that all deleted folders are
-   // expunged from it
-   MEventManager::DispatchPending();
-#endif // 0
-
    // we can call RemoveIncomingFolder() inside the loop which
    // would invalidate our cursor, so we iterate using a fake
    // cursor that always points to the subsequent (valid) element
@@ -315,13 +307,25 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
    ReCreate();
    MOcheck();
    ASSERT(mf);
-   bool rc = true;
 
-   if(mf->NeedsNetwork() && ! mApplication->IsOnline())
-      return false;
+   if ( mf->IsLocked() )
+   {
+      // can't collect mail from it right now, will do later: this is not an
+      // error as it's impossible to avoid it (the timer can expire while
+      // we're in MailFolderCC::BuildListing())
+      return true;
+   }
+
+   if( mf->NeedsNetwork() && ! mApplication->IsOnline() )
+   {
+      // this is not an error neither - ignore the inaccessbile folders
+      return true;
+   }
+
    // Folder just needs to retrieve a listing to auto-collect
-   SafeDecRef(mf->GetHeaders()); //update it
-   return rc;
+   SafeDecRef(mf->GetHeaders()); // update it
+
+   return true;
 }
 
 bool

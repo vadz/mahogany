@@ -4,6 +4,7 @@
 Release 0.62 'Mars'
 -------------------------------------------------------------------------------
 
+31.01.01 VZ: safety guard against expunging messages accidentally when moving
 30.01.01 VZ: made title/status bar of the message/folder view customizable
 29.01.01 VZ: support for flagging messages (display and status changing)
 26.01.01 VZ: big internal changes => much better stability
