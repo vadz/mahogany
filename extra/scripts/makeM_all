@@ -67,7 +67,7 @@ KBHOME=/home/karsten
 HOME=$KBHOME
 WWWDIR=$HOME/WWW/Mahogany/daily
 
-LOGNAME="Mahogany Developers <m-developers@egroups.com>"
+LOGNAME="karsten"
 export LOGNAME
 
 MNAME=mahogany
@@ -252,7 +252,7 @@ autoconf && \
 	$DEBUGOPTS \
 	--prefix=$WXPREFIX \
 	--disable-optimise >config.output && \
-($MAKE -k && $MAKE -k install)
+($MAKE -k && $MAKE -k install) >/dev/null
 if [ $? != 0 ]
 then
   echo "Building wxWindows failed - skipping installation."
@@ -308,7 +308,9 @@ rm -f $NAME-$VERSION/*.cache
 if [ $DEBIAN = yes ]
 then
   echo "Building Debian package."
+  rm -f $NAME_$VERSION_*.deb
   (cd $NAME-$VERSION && build)
+  test -f $NAME_$VERSION_*.deb
   if [ $? != 0 ]
   then
     echo "Build of $NAME-$VERSION failed."
@@ -337,12 +339,12 @@ echo "Building tar.gz package."
 cd $BUILDDIR
 ( cd $NAME-$VERSION && ( $MAKE clean >/dev/null 2>&1 ; \
   autoconf && ./configure $DEBUGOPTS --prefix=$MPREFIX $MCONFOPT>config.output && \
-  ( $MAKE depend >/dev/null 2>&1 ; $MAKE all) ))
+  ( $MAKE depend >/dev/null 2>&1 ; $MAKE all >/dev/null) ))
 
 if [ $? = 0 ]
 then
   rm -rf $DESTDIR; mkdir $DESTDIR
-  cd $NAME-$VERSION && $MAKE install DESTDIR=$DESTDIR && \
+  cd $NAME-$VERSION && $MAKE install DESTDIR=$DESTDIR  >/dev/null && \
   cd $DESTDIR && tar cvf $BUILDDIR/$NAME-$VERSION-$OSTYPE.tar * && \
   gzip -f -9 $BUILDDIR/$NAME-$VERSION-$OSTYPE.tar
 else
