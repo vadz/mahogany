@@ -121,21 +121,29 @@ wxDragResult MMessagesDropTarget::OnData(wxCoord x, wxCoord y, wxDragResult def)
       return wxDragNone;
    }
 
-   MFolder *folder = m_where->GetFolder(x, y);
+   MFolder_obj folder(m_where->GetFolder(x, y));
    if ( folder )
    {
       MMessagesDataObject *data = (MMessagesDataObject *)GetDataObject();
       UIdArray messages = data->GetMessages();
 
+      wxFolderView *folderView = data->GetFolderView();
+
       // TODO: check here if the folder can be written to?
 
-      data->GetFolderView()->DropMessagesToFolder(messages, folder);
+      // check that we are not copying to the same folder
+      if ( folderView->GetFullName() == folder->GetFullName() )
+      {
+         wxLogStatus(m_frame, _("Can't drop messages to the same folder."));
+
+         return wxDragNone;
+      }
+
+      folderView->DropMessagesToFolder(messages, folder);
 
       // it's ok even if m_frame is NULL
       wxLogStatus(m_frame, _("%u messages dropped."), messages.GetCount());
       m_where->Refresh();
-
-      folder->DecRef();
    }
 
    return def;
