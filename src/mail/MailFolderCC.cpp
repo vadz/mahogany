@@ -2473,8 +2473,6 @@ MailFolderCC::ApplyTimeoutValues(void)
    (void) mail_parameters(NIL, SET_RSHTIMEOUT, (void *) m_TcpRshTimeout);
    (void) mail_parameters(NIL, SET_SSHTIMEOUT, (void *) m_TcpSshTimeout);
 
-   (void) mail_parameters(NIL, SET_LOOKAHEAD, (void *) m_LookAhead);
-
    // only set the paths if we do use rsh/ssh
    if ( m_TcpRshTimeout )
       (void) mail_parameters(NIL, SET_RSHPATH, (char *)m_RshPath.c_str());
@@ -4135,6 +4133,22 @@ MsgnoType MailFolderCC::GetHeaderInfo(ArrayHeaderInfo& headers,
       }
    }
    //else: no progress dialog
+
+   // tell c-client to cache at least the number of messages equal to the
+   // number of ones we're interested in (of course, there is no guarantee that
+   // we are going to retrieve consequent messages but chances are we will and
+   // in this case the benefits ae big) and even slightly more in case we
+   // scroll down soon
+   //
+   // the user can disable this by setting the option to -1
+   int lookAhead = m_LookAhead == -1 ? 0 : seq.GetCount() + 1;
+   if ( lookAhead < m_LookAhead )
+   {
+      // if the user wants to cache more headers than this, do as he says
+      lookAhead = m_LookAhead;
+   }
+
+   mail_parameters(m_MailStream, SET_LOOKAHEAD, (void *) lookAhead);
 
    // do fill the listing
    size_t n;
