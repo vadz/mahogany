@@ -934,7 +934,12 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
 
    // Get the size of the visible window:
    GetClientSize(&x1,&y1);
-   wxASSERT(x1 >= 0 && y1 >= 0);
+   
+   // can happen when the window size is too small
+   if ( x1 < 0 || y1 < 0 )
+   {
+      return;
+   }
 
    if(updateRect)
    {
