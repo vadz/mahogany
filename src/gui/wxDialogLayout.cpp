@@ -489,8 +489,12 @@ wxEnhancedPanel::wxEnhancedPanel(wxWindow *parent, bool enableScrolling)
    {
       m_canvas = new wxEnhScrolledWindow(this);
    }
-   //else: no need for it... just use the panel directly (canvas is already
-   //      initialized to NULL above)
+   else
+   {
+      // no need for a separate canvas... just use the panel directly (canvas
+      // is already initialized to NULL above)
+      SetAutoLayout(true);
+   }
 }
 
 void wxEnhancedPanel::OnSize(wxSizeEvent& event)
@@ -1297,7 +1301,8 @@ bool wxOptionsEditDialog::TransferDataToWindow()
    wxWindow *focusOld = FindFocus();
 #endif // OS_WIN
 
-   for ( int nPage = 0; nPage < m_notebook->GetPageCount(); nPage++ ) {
+   const int count = m_notebook->GetPageCount();
+   for ( int nPage = 0; nPage < count; nPage++ ) {
       wxWindow *page = m_notebook->GetPage(nPage);
       if ( !page->TransferDataToWindow() ) {
          return FALSE;
@@ -1323,7 +1328,8 @@ bool wxOptionsEditDialog::TransferDataToWindow()
 
 bool wxOptionsEditDialog::TransferDataFromWindow()
 {
-   for ( int nPage = 0; nPage < m_notebook->GetPageCount(); nPage++ )
+   const int count = m_notebook->GetPageCount();
+   for ( int nPage = 0; nPage < count; nPage++ )
    {
       if ( !m_notebook->GetPage(nPage)->TransferDataFromWindow() )
          return FALSE;
