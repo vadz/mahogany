@@ -2087,11 +2087,17 @@ wxFolderView::SetEntryColour(size_t index, const HeaderInfo *hi)
          col = m_settings.FgCol;
    }
 
-   if ( col.Ok() && col != info.GetTextColour() )
+   if ( col.Ok() )
    {
-      info.SetTextColour(col);
+      // due to wxWin "feature" we can't copare directly with GetTextColour()
+      // as comparing black with invalid colour yields true!
+      wxListItemAttr *attr = info.GetAttributes();
+      if ( !attr || !attr->HasTextColour() || col != attr->GetTextColour() )
+      {
+         info.SetTextColour(col);
 
-      m_FolderCtrl->SetItem(info);
+         m_FolderCtrl->SetItem(info);
+      }
    }
 }
 
