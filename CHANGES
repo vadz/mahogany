@@ -3,9 +3,10 @@
       Please refer to the cvs update list archives for the detailed list of
       all changes.
 
-Release 0.62 'Mars'
+Release 0.62 'Mars' March 22, 2001
 -------------------------------------------------------------------------------
 
+21.03.01 VZ: keyboard navigation in the folder view improved significantly
 19.03.01 VZ: allow to have empty SMTP server for Unix setup
 16.03.01 VZ: more flexible initial msg selection in the folder viewer
              reading newsgroups doesn't crash the program and works somehow
@@ -290,13 +291,25 @@ Release 0.50 'Meadows' March 27, 2000
 04.07.99 VZ: folder icons can now be customized
 03.07.99 VZ: support for adding custom headers from compose view
 
-0.23a
-0.22a
-0.20a
 
-0.10a
+Release 0.23a
+Release 0.22a
+Release 0.20a
+
+Release 0.10a August 24, 1998
+-------------------------------------------------------------------------------
+
+First Windows version which starts up
+
+Release 0.01a August 18, 1998
+-------------------------------------------------------------------------------
 
 Initial public release.
+
+Initial version July 2, 1998
+-------------------------------------------------------------------------------
+
+Hey, look, it compiles!
 
 $Id$
 

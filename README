@@ -1,7 +1,5 @@
-$Id$
-
 --------------------------------------------------------------------
-README file for Mahogany, Release 0.60 "Redmond"
+README file for Mahogany, Release 0.62 "Mars"
 --------------------------------------------------------------------
 
 --------------------------------------------------------------------
@@ -14,7 +12,8 @@ in the user manual, included in HTML and PostScript format, or the
 online help system. Some quick compilation notes can be found below,
 more in the manual. All the information, including the full online
 docs, are also available on the Mahogany web page:
-http://mahogany.sourceforge.net/
+
+                  http://mahogany.sourceforge.net/
 
 Be not confused by references to a program called "M", which was the
 original working title for "Mahogany".
@@ -27,22 +26,18 @@ The Mahogany web page is http://mahogany.sourceforge.net/ or
 http://mahogany.home.dhs.org/
 
 The wxWindows home page is http://wxwindows.org/ or
-http://wxwindows.sourceforge.net/ 
+http://wxwindows.sourceforge.net/
 
 More info on Mahogany can be found on the SourceForge project page,
 including links to the FAQ, docs and mailing lists:
 http://sourceforge.net/projects/mahogany
 
 --------------------------------------------------------------------
-Required software
+Windows users
 --------------------------------------------------------------------
 
-   - wxGTK, the gtk port of wxWindows
-   - libgtk 1.2.x, libglib 1.2.x
-
-If you want to compile Mahogany with SSL support, you must have OpenSSL
-installed first. Then you can configure Mahogany with the additional
-option --with-ssl.
+You shouldn't be reading this file, please refer to doc/readme_win.txt
+The rest of this file is oriented towards Unix users.
 
 --------------------------------------------------------------------
 Compilation notes
@@ -51,7 +46,16 @@ Compilation notes
 These are some very brief notes about how to compile Mahogany.  More
 detailed step-for-step instructions can be found in the Manual, which
 is contained in the Mdoc.tar.gz file in the doc directory.  You can
-also view it online at http://mahogany.sourceforge.net/
+also view it online at http://mahogany.sourceforge.net/docs.html
+
+Required software
+
+   - wxGTK (GTK port of wxWindows) 2.2.1 or above, 2.2.6 recommended
+   - GTK+ 1.2.3 or above, 1.2.9 recommended
+
+If you want to compile Mahogany with SSL support, you must have OpenSSL
+installed first. Then you can configure Mahogany with the additional
+option --with-ssl.
 
 Before you can compile Mahogany, you will need to have installed
 wxWindows compiled for the GTK library (wxGTK).
@@ -90,3 +94,5 @@ and  --with-wxdebug options when configuring Mahogany.
 If you want AvantGo/MAL synchronisation for the PalmOS module, you will
 need to get the libmal.tar.gz library source from the mahogany ftp server
 and unpack it in the extra/src directory.
+
+$Id$

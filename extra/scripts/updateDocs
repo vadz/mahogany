@@ -1,6 +1,6 @@
 #!/bin/sh
 
-REPOSITORY=:pserver:anonymous@cvs1:/cvsroot/mahogany 
+REPOSITORY=:pserver:anonymous@cvs1:/cvsroot/mahogany
 CVS="cvs -z3"
 MAKE=make
 LOG=/tmp/mdocs.log
@@ -18,10 +18,10 @@ $CVS -q -d $REPOSITORY co -l M/README \
                              M/doc/Manual.htex \
                              M/doc/Makefile.html \
                              M/extra/scripts/striphelpids &&
-cd M &&
+cd M/doc &&
 $MAKE -f Makefile.html &&
 rm -rf $TARGET/Manual && mv Manual $TARGET &&
-mv README $TARGET
+mv ../README $TARGET
 } >> $LOG 2>&1
 
 rm -rf $BUILDDIR
