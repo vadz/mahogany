@@ -70,6 +70,9 @@ SKIPRESTART=no
 export DOWXWIN DOINSTALL DOSHARED DEBUG USETARSRC MKTARSRC ADDON
 export RESTARTED ORIGINALSCRIPT SKIPRESTART
 
+OPTIONS="$@"
+echo "Called with options: $OPTIONS"
+
 while [ ! -z "$1" ]
 do
 	case "x$1" in
@@ -347,7 +350,7 @@ then
     cp $BUILDDIR/$MNAME-$MVERSION/extra/scripts/makeM_all /tmp/makeM_all$$ && \
     chmod +x /tmp/makeM_all$$
     echo "Restarting script..."
-    exec /tmp/makeM_all$$ --restart-- "$SCRIPT"
+    exec /tmp/makeM_all$$ --restart-- "$SCRIPT" $OPTIONS
     exit # not needed
   fi
 else
