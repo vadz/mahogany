@@ -1,5 +1,9 @@
-define(FILE_HEADER, `')
-define(FILE_FOOTER,`')
+define(FILE_HEADER, `
+#ifndef _$1_MID_H_
+#define _$1_MID_H_')
+define(FILE_FOOTER,`
+#endif
+')
 
 define(INCLUDE,`#include $1')
 define(CLASSINCLUDE,`$2')

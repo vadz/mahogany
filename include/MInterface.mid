@@ -5,13 +5,14 @@
  */
 include(M4FILE)
 
+FILE_HEADER(MApplication)
+
 INCLUDE(`"MApplication.h"')
 INCLUDE(`"strutil.h"')
 INCLUDE(`"MDialogs.h"')
 INCLUDE(`"MailFolderCC.h"')
 INCLUDE(`"MessageCC.h"')
 INCLUDE(`"SendMessageCC.h"')
-FILE_HEADER
 
 /* Define the MInterface ABC: */
 
