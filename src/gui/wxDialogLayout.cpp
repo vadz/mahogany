@@ -411,6 +411,29 @@ CreateFileEntry(wxWindow *parent,
                                 btn, (wxTextBrowseButton **)ppButton);
 }
 
+void EnableTextWithLabel(wxWindow *parent, wxTextCtrl *control, bool bEnable)
+{
+   // not only enable/disable it, but also make (un)editable because it gives
+   // visual feedback
+   control->SetEditable(bEnable);
+
+   // disable the label too: this will grey it out
+
+   // NB: we assume that the control ids are consecutive
+   long id = wxWindow::PrevControlId(control->GetId());
+   wxWindow *win = parent->FindWindow(id);
+
+   if ( win == NULL ) {
+      wxFAIL_MSG(_T("can't find label for the text entry zone"));
+   }
+   else {
+      // did we find the right one?
+      wxASSERT( win->IsKindOf(CLASSINFO(wxStaticText)) );
+
+      win->Enable(bEnable);
+   }
+}
+
 // ----------------------------------------------------------------------------
 // wxPDialog
 // ----------------------------------------------------------------------------
@@ -990,25 +1013,7 @@ void wxEnhancedPanel::EnableColourBrowseButton(wxColorBrowseButton *btn,
 // enable/disable the text control with label and button
 void wxEnhancedPanel::EnableTextWithLabel(wxTextCtrl *control, bool bEnable)
 {
-   // not only enable/disable it, but also make (un)editable because it gives
-   // visual feedback
-   control->SetEditable(bEnable);
-
-   // disable the label too: this will grey it out
-
-   // NB: we assume that the control ids are consecutive
-   long id = wxWindow::PrevControlId(control->GetId());
-   wxWindow *win = FindWindow(id);
-
-   if ( win == NULL ) {
-      wxFAIL_MSG(_T("can't find label for the text entry zone"));
-   }
-   else {
-      // did we find the right one?
-      wxASSERT( win->IsKindOf(CLASSINFO(wxStaticText)) );
-
-      win->Enable(bEnable);
-   }
+   ::EnableTextWithLabel(GetCanvas(), control, bEnable);
 }
 
 wxStaticText *wxEnhancedPanel::GetLabelForControl(wxControl *control)
