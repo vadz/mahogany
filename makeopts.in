@@ -32,7 +32,7 @@ ODIR=.
 # libraries needed by the modules, linked against individually in the modules
 # directory, but listed here in case we build a static library:
 ifeq ($(USE_MODULES),static)
-MODULES_LIBS=$PISOCK_LIB
+MODULES_LIBS=$(PISOCK_LIB)
 else
 MODULES_LIBS=
 endif
