@@ -64,9 +64,11 @@
 #  define M_32x32         "Micon"
 #else   //real XPMs
 #  include "../src/icons/M_32x32.xpm"
+#if 0
 #  include "../src/icons/progress0.xpm"
 #  include "../src/icons/progress1.xpm"
 #  include "../src/icons/progress2.xpm"
+#endif
 #endif  //Win/Unix
 
 // ----------------------------------------------------------------------------
@@ -230,12 +232,6 @@ bool
 MProgressDialog::Update(int value)
 {
    m_gauge->SetValue(value);
-
-#ifdef __WXGTK__
-   // at least under wxGTK it's necessary to call ProcessIdle() to update the
-   // frames size which might have been changed
-   wxTheApp->ProcessIdle();
-#endif // GTK
 
    wxYield();
 
