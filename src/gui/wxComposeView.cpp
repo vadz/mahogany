@@ -1351,6 +1351,15 @@ Composer::EditMessage(Profile *profile, Message *msg)
          cv->AddCc(value);
       else if ( name == "BCC" )
          cv->AddBcc(value);
+      else if ( name == "FCC" )
+      {
+         // if we have any FCC recipients, they should replace the default ones
+         // instead of being appended to them as then the default recipients
+         // would magically reappear after postponing a message and resuming it
+         cv->AddFcc(_T("none"));
+
+         cv->AddFcc(value);
+      }
       else if ( ignoredHeaders.Index(name) == wxNOT_FOUND )
       {
          // compare case sensitively here as we always write HEADER_IS_DRAFT in
@@ -4120,34 +4129,37 @@ SendMessage *wxComposeView::BuildDraftMessage() const
    if ( !msg )
    {
       wxLogError(_("Failed to create the message to save."));
+
+      return NULL;
    }
-   else
+
+   // mark this message as our draft (the value doesn't matter)
+   msg->AddHeaderEntry(HEADER_IS_DRAFT, "Yes");
+
+   // save the composer geometry info
+   String value;
+   wxFrame *frame = ((wxComposeView *)this)->GetFrame();
+   if ( frame->IsIconized() )
    {
-      // mark this message as our draft (the value doesn't matter)
-      msg->AddHeaderEntry(HEADER_IS_DRAFT, "Yes");
-
-      // save the composer geometry info
-      String value;
-      wxFrame *frame = ((wxComposeView *)this)->GetFrame();
-      if ( frame->IsIconized() )
-      {
-         value = GEOMETRY_ICONIZED;
-      }
-      else if ( frame->IsMaximized() )
-      {
-         value = GEOMETRY_MAXIMIZED;
-      }
-      else // normal position
-      {
-         int x, y, w, h;
-         frame->GetPosition(&x, &y);
-         frame->GetSize(&w, &h);
-
-         value.Printf(GEOMETRY_FORMAT, x, y, w, h);
-      }
-
-      msg->AddHeaderEntry(HEADER_GEOMETRY, value);
+      value = GEOMETRY_ICONIZED;
    }
+   else if ( frame->IsMaximized() )
+   {
+      value = GEOMETRY_MAXIMIZED;
+   }
+   else // normal position
+   {
+      int x, y, w, h;
+      frame->GetPosition(&x, &y);
+      frame->GetSize(&w, &h);
+
+      value.Printf(GEOMETRY_FORMAT, x, y, w, h);
+   }
+
+   msg->AddHeaderEntry(HEADER_GEOMETRY, value);
+
+   // also save the Fcc header contents because it's not a "real" header
+   msg->AddHeaderEntry("FCC", GetRecipients(Recipient_Fcc));
 
    return msg;
 }
