@@ -877,7 +877,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "Karsten Ball&uuml;der (ballueder@gmx.net)<br>"
                    "Vadim Zeitlin (vadim@wxwindows.org)<br>"
                    "Vaclav Slavik (vaclav@wxwindows.org)<br>"
-                   "Daniel Seifert (dseifert@student.hu-berlin.de)<br>"
+                   "Daniel Seifert (dseifert@gmx.de)<br>"
                    "<i>The wxWindows team</i><br><hr>"
                    "<p>This Product includes software developed and copyright "
                    "by the University of Washington.<br>" 
