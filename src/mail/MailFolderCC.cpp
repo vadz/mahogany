@@ -1718,12 +1718,16 @@ MailFolderCC::Ping(void)
    if ( gs_lockCclient ) // FIXME: MT
       return FALSE;
 
-   if(NeedsNetwork() && ! mApplication->IsOnline())
+   if( NeedsNetwork() && ! mApplication->IsOnline() )
    {
       ERRORMESSAGE((_("System is offline, cannot access mailbox ´%s´"), GetName().c_str()));
       return FALSE;
    }
+
+#if 0
    UIdType count = CountMessages();
+#endif // 0
+
    wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Ping() on Folder %s.",
               GetName().c_str());
 
@@ -1733,10 +1737,12 @@ MailFolderCC::Ping(void)
 
    rc = PingReopen();
 
+   // VZ: normally, all this is unnecessary as mm_exists() will be called from
+   //     PingReopen() anyhow
+#if 0
    if ( CountMessages() != count )
       RequestUpdate();
 
-#if 0
    // Check if we want to collect all mail from this folder:
    if( (GetFlags() & MF_FLAGS_INCOMING) != 0)
    {
@@ -1943,27 +1949,28 @@ MailFolderCC::CountMessages(int mask, int value) const
    // we need to rebuild listing if we don't have it because either we use it
    // anyhow or we need to ensure that m_nMessages and m_nRecent have correct
    // values
-   HeaderInfoList_obj hil(GetHeaders());
+   HeaderInfoList_obj hil = GetHeaders();
    CHECK( hil, UID_ILLEGAL, "no listing in CountMessages" );
 
+   unsigned long numOfMessages;
    if ( mask == MSG_STAT_NONE )
-      return m_nMessages;
+   {
+      // total number of messages
+      numOfMessages = m_nMessages;
+   }
    else if ( WantRecent(mask, value) && m_nRecent != UID_ILLEGAL )
+   {
+      // asked for recent messages and we have them already
       return m_nRecent;
+   }
    else // general case or we asked for recent messages and we don't have them
    {
       // FIXME there should probably be a much more efficient way (using
-      //       cclient functions?) to do it
-#ifndef DEBUG_no_hack
-      ///HACK: these two counts should be the same, but sometimes they're
-      ///not, so we use the "wrong" value since it won't cause a crash.
-      unsigned long numOfMessages = hil->Count();
-#else
-      unsigned long numOfMessages = 0;
-#endif
-      for ( unsigned long msgno = numOfMessages; msgno > 0; )
+      //       mail_search()?) to do it
+      numOfMessages = 0;
+      for ( unsigned long msgno = 0; msgno < m_nMessages; msgno++ )
       {
-         if ( (hil[--msgno]->GetStatus() & mask) == value )
+         if ( (hil[msgno]->GetStatus() & mask) == value )
             numOfMessages++;
       }
 
@@ -1972,9 +1979,9 @@ MailFolderCC::CountMessages(int mask, int value) const
       {
          ((MailFolderCC *)this)->m_nRecent = numOfMessages;
       }
-
-      return numOfMessages;
    }
+
+   return numOfMessages;
 }
 
 bool MailFolderCC::CountInterestingMessages(MailFolderStatus *status) const
@@ -1983,7 +1990,7 @@ bool MailFolderCC::CountInterestingMessages(MailFolderStatus *status) const
 
    status->Init();
 
-   HeaderInfoList_obj hil(GetHeaders());
+   HeaderInfoList_obj hil = GetHeaders();
    CHECK( hil, false, "no listing in CountInterestingMessages" );
 
    status->total = m_nMessages;
@@ -2022,7 +2029,7 @@ MailFolderCC::GetMessage(unsigned long uid)
 {
    CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", NULL);
 
-   HeaderInfoList_obj hil(GetHeaders());
+   HeaderInfoList_obj hil = GetHeaders();
    CHECK( hil, NULL, "no listing in GetMessage" );
 
    // test to see if the UID is valid:
@@ -2837,14 +2844,12 @@ extern void CC_Cleanup(void)
       gs_CCStreamCleaner = NULL;
    }
 
-#ifdef DEBUG_no_hack
    ASSERT_MSG( MailFolderCC::ms_StreamList.empty(), "some folder objects leaked" );
-#else
-   ///HACK: we really need to clean up these entries, so we just
-   ///decrement the reference count until they go away.
+
+   // FIXME: we really need to clean up these entries, so we just
+   //        decrement the reference count until they go away.
    while (!MailFolderCC::ms_StreamList.empty())
       MailFolderCC::ms_StreamList.front()->folder->DecRef();
-#endif
 }
 
 CCStreamCleaner::~CCStreamCleaner()
@@ -3314,7 +3319,7 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
       return; // will be regenerated anyway
 
    // Otherwise: update the current listing information:
-   HeaderInfoList_obj hil(GetHeaders());
+   HeaderInfoList_obj hil = GetHeaders();
 
    // Find the listing entry for this message:
    UIdType uid = mail_uid(m_MailStream, msgno);

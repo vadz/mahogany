@@ -171,15 +171,15 @@ public:
 #endif ///debug/release
 
 protected:
-  //// dtor is protected because only DecRef() can delete us
-  virtual ~MObjectRC() { MOcheck(); wxASSERT(m_nRef == 0); }
+   //// dtor is protected because only DecRef() can delete us
+   virtual ~MObjectRC() { MOcheck(); wxASSERT(m_nRef == 0); }
    //// return the reference count:
    size_t GetNRef(void) const { return m_nRef; }
 #ifndef DEBUG // we may use m_nRef only for diagnostic functions
 private:
 #endif
 
-  size_t m_nRef;  // always > 0 - as soon as it becomes 0 we delete ourselves
+   size_t m_nRef;  // always > 0 - as soon as it becomes 0 we delete ourselves
 };
 
 #ifdef   DEBUG
@@ -204,7 +204,7 @@ private:
 // ----------------------------------------------------------------------------
 
 // start auto ptr class declaration
-#define BEGIN_DECLARE_AUTOPTR(classname) \
+#define BEGIN_DECLARE_AUTOPTR_0(classname) \
    class classname##_obj \
    { \
    public: \
@@ -230,11 +230,21 @@ private:
       operator bool() const { return m_ptr != NULL; } \
  \
    private: \
-      classname##_obj(const classname##_obj &); \
-      classname##_obj& operator=(const classname##_obj &); \
- \
       classname *m_ptr;
 
+// due to gcc bug we can't declare the copy ctor and assignment operator as
+// private (otherwise it refuses to compile things like "Foo_obj foo = pFoo"
+// with obscure error messages), but we do want to do it for other compilers
+// as copying smart pointers *is* illegal (whatever C++ standard says)
+
+#ifndef __GNUG__
+    #define BEGIN_DECLARE_AUTOPTR(classname) \
+            BEGIN_DECLARE_AUTOPTR_0(classname) \
+            classname##_obj(const classname##_obj &); \
+            classname##_obj& operator=(const classname##_obj &);
+#else // g++
+    #define BEGIN_DECLARE_AUTOPTR(classname) BEGIN_DECLARE_AUTOPTR_0(classname)
+#endif // !g++/g++
 
 // finish the class decl
 #define END_DECLARE_AUTOPTR() }

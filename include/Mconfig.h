@@ -7,7 +7,7 @@
  *******************************************************************/
 
 #ifndef MCONFIG_H
-#define  MCONFIG_H
+#define MCONFIG_H
 
 #include  "config.h"
 
