@@ -662,11 +662,18 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    c->height.AsIs();
    m_NameCtrl->SetConstraints(c);
 
-   // newly created filters can be given any name, of course, but if the
-   // filter already exists under some name it can't be renamed as this will
-   // break all the folders using it, so disable the control in this case
-   if ( !!m_FilterData->GetName() )
+   if ( m_FilterData->GetName().empty() )
+   {
+      // new filter
+      m_NameCtrl->SetFocus();
+   }
+   else // existing filter
+   {
+      // newly created filters can be given any name, of course, but if the
+      // filter already exists under some name it can't be renamed as this will
+      // break all the folders using it, so disable the control in this case
       m_NameCtrl->Disable();
+   }
 
    // the control allowing to edit directly the filter program
    m_textProgram = new wxTextCtrl(this, Text_Program,
@@ -702,6 +709,8 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
 
    SetDefaultSize(8*wBtn, 18*hBtn);
    m_Panel->Layout();
+
+   SetFocus();
 }
 
 void
