@@ -26,6 +26,9 @@ WXGTK:
   - PNG library returns error for transparent PNG
   - wxExecute() doesn't behave as expected, "xxx 'yyy'" gives "xxx" as
     command and "'yyy'" as argument instead of "yyy"!!!
+  - .mailcap should override /etc/mailcap, not other way round
+  - MimeManager::ReadXXX should have returncode and not print error
+    message
 
 - retrieve messages starting from last one
 - folderview listctrl has extra Subject column behind Size field ???
