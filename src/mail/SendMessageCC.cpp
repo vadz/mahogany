@@ -836,12 +836,17 @@ SendMessageCC::Build(bool forStorage)
    if ( !xmailerSet )
    {
       m_headerNames[h] = strutil_strdup("X-Mailer");
+
+      // NB: do *not* translate these strings, this doesn't make much sense
+      //     (the user doesn't usually see them) and, worse, we shouldn't
+      //     include 8bit chars (which may - and do - occur in translations) in
+      //     headers!
       String version;
-      version << "Mahogany, " << M_VERSION_STRING;
+      version << "Mahogany " << M_VERSION_STRING;
 #ifdef OS_UNIX
-      version  << _(", compiled for ") << M_OSINFO;
+      version  << ", compiled for " << M_OSINFO;
 #else // Windows
-      version << _(", running under ") << wxGetOsDescription();
+      version << ", running under " << wxGetOsDescription();
 #endif // Unix/Windows
       m_headerValues[h++] = strutil_strdup(version);
    }
