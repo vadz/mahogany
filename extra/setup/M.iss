@@ -60,8 +60,8 @@ Source: "src\wx\vcard\Release\versit.dll"; DestDir: "{app}"
 
 ; --- misc stuff
 Source: "extra\setup\autocollect.adb"; DestDir: "{app}"
-Source: "doc\Mahogany.url"; DestDir: "{app}"; Components: misc
-Source: "doc\Bug.url"; DestDir: "{app}"; Components: misc
+Source: "extra\setup\Mahogany.url"; DestDir: "{app}"; Components: misc
+Source: "extra\setup\Bug.url"; DestDir: "{app}"; Components: misc
 
 ; --- docs
 Source: "doc\Tips\tips.txt"; DestDir: "{app}\doc"
