@@ -41,19 +41,20 @@ MailFolder::OpenFolder(int typeAndFlags,
    {
       profile = ProfileBase::CreateFolderProfile(i_name, parentProfile);
       CHECK(profile, NULL, "can't create profile");   // return if it fails
-
-      login = READ_CONFIG(profile, MP_POP_LOGIN);
-      passwd = READ_CONFIG(profile, MP_POP_PASSWORD);
-      name = READ_CONFIG(profile, MP_FOLDER_PATH);
-
       int typeflags = READ_CONFIG(profile, MP_FOLDER_TYPE);
-      type = GetFolderType(typeflags);
-      flags = GetFolderFlags(typeflags);
-
-      if(type == MF_ILLEGAL)
+      if(typeflags == MF_ILLEGAL)  // no such profile!
       {
          type = MF_FILE;
+         flags = 0;
          name = i_name;
+      }
+      else
+      {
+         type = GetFolderType(typeflags);
+         flags = GetFolderFlags(typeflags);
+         login = READ_CONFIG(profile, MP_POP_LOGIN);
+         passwd = READ_CONFIG(profile, MP_POP_PASSWORD);
+         name = READ_CONFIG(profile, MP_FOLDER_PATH);
       }
    }
    else // type != PROFILE
