@@ -295,6 +295,16 @@ SendMessageCC::SendMessageCC(Profile *profile,
 
    // remember the default hostname to use for addresses without host part
    m_DefaultHost = READ_CONFIG_TEXT(profile, MP_HOSTNAME);
+   if ( !m_DefaultHost )
+   {
+      // we need a host name!
+      m_DefaultHost = READ_APPCONFIG_TEXT(MP_HOSTNAME);
+      if ( !m_DefaultHost )
+      {
+         // we really need something...
+         m_DefaultHost = wxGetFullHostName();
+      }
+   }
 
    if ( READ_CONFIG_BOOL(profile, MP_USE_OUTBOX) )
       m_OutboxName = READ_CONFIG_TEXT(profile,MP_OUTBOX_NAME);
