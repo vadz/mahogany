@@ -9,6 +9,8 @@
 Release 0.67 'Constance' ??? ??, 2004
 ------------------------------------
 
+12.07.04 VZ: use plain, not encrypted, text in replies to PGP messages
+11.07.04 VZ: integrated DSPAM statistical spam filter
 06.07.04 VZ: "Set From from To" option now behaves more usefully
 02.07.04 VZ: added nop() filter action (stop processing the filter program)
 15.05.04 VZ: added spam filter for dangerous (executable) attachments

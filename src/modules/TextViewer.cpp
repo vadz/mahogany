@@ -120,7 +120,6 @@ public:
    virtual void InsertRawContents(const String& data);
    virtual void InsertText(const String& text, const MTextStyle& style);
    virtual void InsertURL(const String& text, const String& url);
-   virtual void EndText();
    virtual void EndPart();
    virtual void EndBody();
 
@@ -793,11 +792,6 @@ void TextViewer::InsertURL(const String& text, const String& url)
    m_window->InsertClickable(text,
                              new ClickableURL(m_msgView, url),
                              GetOptions().UrlCol);
-}
-
-void TextViewer::EndText()
-{
-   // we don't need to do anything special here
 }
 
 void TextViewer::EndPart()

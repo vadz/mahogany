@@ -117,6 +117,7 @@ extern const MOption MP_MVIEW_HEADER_VALUES_COLOUR;
 extern const MOption MP_MVIEW_URLCOLOUR;
 extern const MOption MP_PGP_COMMAND;
 extern const MOption MP_PLAIN_IS_TEXT;
+extern const MOption MP_REPLY_QUOTE_SELECTION;
 extern const MOption MP_RFC822_IS_TEXT;
 extern const MOption MP_SHOWHEADERS;
 extern const MOption MP_SHOW_XFACES;
@@ -242,7 +243,8 @@ private:
 
 // ----------------------------------------------------------------------------
 // TransparentFilter: the filter which doesn't filter anything but simply
-//                    shows the text in the viewer.
+//                    shows the text in the viewer.(always the last one in
+//                    filter chain)
 // ----------------------------------------------------------------------------
 
 class TransparentFilter : public ViewFilter
@@ -250,6 +252,27 @@ class TransparentFilter : public ViewFilter
 public:
    TransparentFilter(MessageView *msgView) : ViewFilter(msgView, NULL, true)
    {
+      m_isInBody = false;
+   }
+
+   virtual void ProcessURL(const String& text,
+                           const String& url,
+                           MessageViewer *viewer)
+   {
+      if ( m_isInBody )
+         m_msgView->OnBodyText(text);
+
+      viewer->InsertURL(text, url);
+   }
+
+   virtual void StartText()
+   {
+      m_isInBody = true;
+   }
+
+   virtual void EndText()
+   {
+      m_isInBody = false;
    }
 
 protected:
@@ -257,8 +280,13 @@ protected:
                           MessageViewer *viewer,
                           MTextStyle& style)
    {
+      if ( m_isInBody )
+         m_msgView->OnBodyText(text);
+
       viewer->InsertText(text, style);
    }
+
+   bool m_isInBody;
 };
 
 // ----------------------------------------------------------------------------
@@ -1636,7 +1664,11 @@ void MessageView::ShowText(String textPart, wxFontEncoding textEnc)
       InitializeViewFilters();
    }
 
-   m_filters->GetFilter()->Process(textPart, m_viewer, style);
+   ViewFilter *filter = m_filters->GetFilter();
+   CHECK_RET( filter, _T("no view filters at all??") );
+
+   filter->StartText();
+   filter->Process(textPart, m_viewer, style);
 }
 
 // ----------------------------------------------------------------------------
@@ -2229,6 +2261,7 @@ MessageView::Update(void)
       return;
    }
 
+   m_textBody.clear();
    m_uid = m_mailMessage->GetUId();
 
    // use the encoding of the first body part as the default encoding for the
@@ -3138,9 +3171,15 @@ MessageView::DoShowMessage(Message *mailMessage)
 // selection
 // ----------------------------------------------------------------------------
 
-String MessageView::GetSelection() const
+String MessageView::GetText() const
 {
-   return m_viewer->GetSelection();
+   String text;
+   if ( READ_CONFIG(GetProfile(), MP_REPLY_QUOTE_SELECTION) )
+   {
+      text = m_viewer->GetSelection();
+   }
+
+   return text.empty() ? m_textBody : text;
 }
 
 // ----------------------------------------------------------------------------

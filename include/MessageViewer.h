@@ -162,19 +162,6 @@ public:
    /// insert an URL
    virtual void InsertURL(const String& text, const String& url) = 0;
 
-   /**
-      mark the end of text -- only signature/trailers may follow.
-
-      This is currently not used by any viewer, but will be used by composer
-      later: it will know that it can ignore all the rest.
-
-      Note that EndText() may be not called at all, unlike EndPart() or
-      EndBody() which are always called. Alternatively, it can be also called
-      several times -- then only the first call should matter and all
-      subsequent ones can be safely ignored.
-    */
-   virtual void EndText() = 0;
-
    /// mark the end of the MIME part
    virtual void EndPart() = 0;
 

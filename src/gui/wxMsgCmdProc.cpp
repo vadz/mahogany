@@ -788,9 +788,7 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
 #undef CASE_REPLY
 
             MailFolder::Params params(templ, replyKind);
-            params.msgview =
-               quote == M_ACTION_NEVER ? MailFolder::Params::NO_QUOTE
-                                       : m_msgView;
+            params.msgview = quote == M_ACTION_NEVER ? NULL : m_msgView;
 
             m_TicketList->Add(m_asmf->ReplyMessages
                                       (

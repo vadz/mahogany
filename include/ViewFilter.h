@@ -15,6 +15,7 @@
 #define _VIEWFILTER_H_
 
 #include "MModule.h"
+#include "MessageViewer.h"
 
 class MessageView;
 class MessageViewer;
@@ -88,6 +89,13 @@ public:
    //@}
 
    /**
+      Called before starting to filter a new message.
+
+      This is just a counterpart to EndText().
+    */
+   virtual void StartText() { if ( m_next ) m_next->StartText(); }
+
+   /**
      Pass the text through the filter.
 
      This is where the filter does its work: it analyzes the message text and
@@ -108,6 +116,29 @@ public:
       else if ( m_next )
          m_next->Process(text, viewer, style);
    }
+
+   /**
+      Pass an URL through the filter.
+
+      Currently existing filters don't really need to process the URLs but this
+      helps us to gather the URLs text in MessageView::OnBodyText() in addition
+      to the normal text.
+    */
+   virtual void ProcessURL(const String& text,
+                           const String& url,
+                           MessageViewer *viewer)
+   {
+      if ( m_next ) m_next->ProcessURL(text, url, viewer);
+   }
+
+   /**
+      Mark the end of text -- only signature/trailers may follow.
+
+      This is again only used by TransparentFilter currently in order to stop
+      calling MessageViewer::OnBodyText()
+    */
+   virtual void EndText() { if ( m_next ) m_next->EndText(); }
+
 
    /**
      @name State

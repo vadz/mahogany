@@ -160,8 +160,8 @@ public:
    /// show the print preview of the currently shown message
    void PrintPreview();
 
-   /// return the text selected in the viewer, may be empty
-   String GetSelection() const;
+   /// return the text we show (to be quoted in replies)
+   String GetText() const;
 
    //@}
 
@@ -275,6 +275,12 @@ public:
                 WXMENU_VIEW_VIEWERS_BEGIN + 1
     */
    virtual void OnSelectViewer(int id) = 0;
+
+   /**
+      Called by view filter code only to notify that text is being added to the
+      displayed text.
+    */
+   void OnBodyText(const String& text) { m_textBody += text; }
 
 protected:
    /** @name Initialization
@@ -546,6 +552,9 @@ private:
 
    /// our profile object (use GetProfile() instead of accessing directly!)
    Profile *m_profile;
+
+   /// the full text shown to the user
+   String m_textBody;
 
    //@}
 

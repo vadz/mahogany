@@ -122,7 +122,7 @@ TrailerFilter::DoProcess(String& text,
          Process(text, viewer, style);
 
          // the main message text ends here
-         viewer->EndText();
+         m_next->EndText();
 
          // and now show the trailer in special style
          wxColour colOld = style.GetTextColour();

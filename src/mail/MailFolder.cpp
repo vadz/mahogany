@@ -436,9 +436,6 @@ bool MailFolder::CanExit(String * /* which */)
 // reply/forward messages
 // ----------------------------------------------------------------------------
 
-// special, invalid, value for Params::msgview member
-const MessageView *MailFolder::Params::NO_QUOTE = (MessageView *)-1;
-
 // extract the address string from List-Post header, return an empty string if
 // none found
 static String

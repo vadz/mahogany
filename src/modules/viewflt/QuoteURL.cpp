@@ -421,7 +421,7 @@ QuoteURLFilter::DoProcess(String& text,
       if ( !strutil_isempty(url) )
       {
          // we use the URL itself for text here
-         viewer->InsertURL(url, url);
+         m_next->ProcessURL(url, url, viewer);
       }
    }
    while ( !text.empty() );

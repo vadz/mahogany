@@ -2656,7 +2656,7 @@ wxComposeView::DoInitText(Message *msgOrig)
          break;
       }
 
-      if ( m_msgviewOrig == MailFolder::Params::NO_QUOTE )
+      if ( !m_msgviewOrig )
       {
          // we don't want to quote anything at all, so remove all occurences of
          // $QUOTE and/or $TEXT templates in the string -- and also remove

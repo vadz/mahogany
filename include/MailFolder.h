@@ -203,13 +203,10 @@ public:
 
       /**
         msg viewer from which the reply/forward command originated: this is
-        used only to get the selection from it for the cases when "include
-        only selected text in reply" option is on
+        used to get the text to be quoted, if it is NULL no quoting is to be
+        done
       */
       const MessageView *msgview;
-
-      /// the special value for msgview meaning not to quote anything at all
-      static const MessageView *NO_QUOTE;
    };
 
    //@}

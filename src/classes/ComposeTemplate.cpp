@@ -70,7 +70,6 @@ extern const MOption MP_REPLY_MSGPREFIX;
 extern const MOption MP_REPLY_MSGPREFIX_FROM_XATTR;
 extern const MOption MP_REPLY_MSGPREFIX_FROM_SENDER;
 extern const MOption MP_REPLY_QUOTE_EMPTY;
-extern const MOption MP_REPLY_QUOTE_SELECTION;
 extern const MOption MP_REPLY_SIG_SEPARATOR;
 extern const MOption MP_WRAPMARGIN;
 
@@ -336,12 +335,6 @@ protected:
 
    // handle quoting the original message
    void DoQuoteOriginal(bool isQuote, String *value) const;
-
-   // quote a single MimePart, return true if we quoted it or false if we
-   // ignored it (because we can't put such data in the composer...)
-   bool DoQuotePart(const MimePart *mimePart,
-                    const String& prefix,
-                    String *value) const;
 
    // get the signature to use (including the signature separator, if any)
    String GetSignature() const;
@@ -1550,70 +1543,15 @@ String VarExpander::GetSignature() const
 // Quoting helpers
 // ----------------------------------------------------------------------------
 
-bool
-VarExpander::DoQuotePart(const MimePart *mimePart,
-                         const String& prefix,
-                         String *value) const
-{
-   if ( !mimePart )
-   {
-      // this can only happen if the top level MIME part is NULL (when we call
-      // ourselves recursively the pointer is never NULL) and in this case we
-      // must let the user know that something is wrong
-      wxLogError(_("Failed to quote the original message."));
-
-      return false;
-   }
-
-   bool quoted = false;
-
-   const MimeType mimeType = mimePart->GetType();
-   switch ( mimeType.GetPrimary() )
-   {
-      case MimeType::TEXT:
-         *value += ExpandOriginalText(mimePart->GetTextContent(),
-                                      prefix,
-                                      m_profile);
-
-         quoted = true;
-         break;
-
-      case MimeType::MULTIPART:
-         // to process multipart/alternative correctly we should really iterate
-         // from the end to the beginning so that we could take the best
-         // representation of the data but knowing that currently we only
-         // really handle plain/text anyhow, it doesn't matter -- but it will
-         // if/when we extend the composer to deal with other kinds of data
-         {
-            for ( MimePart *mimePartNested = mimePart->GetNested();
-                  mimePartNested;
-                  mimePartNested = mimePartNested->GetNext() )
-            {
-               if ( DoQuotePart(mimePartNested, prefix, value) )
-               {
-                  quoted = true;
-
-                  if ( mimeType.GetSubType() == _T("ALTERNATIVE") )
-                  {
-                     // only one of the alternative parts should be used
-                     break;
-                  }
-               }
-            }
-         }
-         break;
-
-      default:
-         // ignore all the others -- we don't want to quote pictures, do we?
-         ;
-   }
-
-   return quoted;
-}
-
 void
 VarExpander::DoQuoteOriginal(bool isQuote, String *value) const
 {
+   if ( !m_msgview )
+   {
+      // don't quote anything at all
+      return;
+   }
+
    // insert the original text (optionally prefixed by reply
    // string)
    String prefix;
@@ -1623,40 +1561,13 @@ VarExpander::DoQuoteOriginal(bool isQuote, String *value) const
    }
    //else: template "text", so no reply prefix at all
 
-
-   // do we include everything or just the selection?
-
-   // first: can we get the selection?
-   bool justSelection = m_msgview != NULL;
-
-   // second: should we use the selection?
-   if ( justSelection && !READ_CONFIG(m_profile, MP_REPLY_QUOTE_SELECTION) )
-   {
-      justSelection = false;
-   }
-
-   // third: do we have any selection?
-   if ( justSelection )
-   {
-      String selection = m_msgview->GetSelection();
-      if ( selection.empty() )
-      {
-         // take everything if no selection
-         justSelection = false;
-      }
-      else
-      {
-         // include the selection only in the template expansion
-         *value = ExpandOriginalText(selection, prefix, m_profile, NoDetectSig);
-      }
-   }
-
-
-   // quote everything
-   if ( !justSelection )
-   {
-      DoQuotePart(m_msg->GetTopMimePart(), prefix, value);
-   }
+   *value = ExpandOriginalText
+            (
+               m_msgview->GetText(),
+               prefix,
+               m_profile,
+               NoDetectSig
+            );
 }
 
 // ----------------------------------------------------------------------------

@@ -97,7 +97,6 @@ public:
    virtual void InsertRawContents(const String& data);
    virtual void InsertText(const String& text, const MTextStyle& style);
    virtual void InsertURL(const String& text, const String& url);
-   virtual void EndText();
    virtual void EndPart();
    virtual void EndBody();
 
@@ -619,11 +618,6 @@ void LayoutViewer::InsertURL(const String& textOrig, const String& url)
    // SetUserData has incremented the refCount, which is now 2
    // (it was already 1 right after creation)
    data->DecRef();
-}
-
-void LayoutViewer::EndText()
-{
-   // nothing to do here
 }
 
 void LayoutViewer::EndPart()

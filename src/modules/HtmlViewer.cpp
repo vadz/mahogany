@@ -112,7 +112,6 @@ public:
    virtual void InsertRawContents(const String& data);
    virtual void InsertText(const String& text, const MTextStyle& style);
    virtual void InsertURL(const String& text, const String& url);
-   virtual void EndText();
    virtual void EndPart();
    virtual void EndBody();
 
@@ -1097,11 +1096,6 @@ void HtmlViewer::InsertURL(const String& text, const String& url)
    m_htmlText << _T("<a href=\"") << MakeHtmlSafe(url) << _T("\">")
               << MakeHtmlSafe(text)
               << _T("</a>");
-}
-
-void HtmlViewer::EndText()
-{
-   // nothing to do here
 }
 
 void HtmlViewer::EndPart()
