@@ -39,7 +39,7 @@ public:
        @param subject the subject
    */
    virtual void SetSubject(const String &subject);
-   
+
    /** Sets the address fields, To:, CC: and BCC:.
        @param To primary address to send mail to
        @param CC carbon copy addresses
@@ -69,12 +69,13 @@ public:
        @param dlist list of disposition parameters
        @param plist list of parameters
    */
-   virtual void	AddPart(MessageContentType type,
+   virtual void AddPart(MessageContentType type,
                         const char *buf, size_t len,
                         const String &subtype = M_EMPTYSTRING,
                         const String &disposition = SM_INLINE,
                         MessageParameterList const *dlist = NULL,
-                        MessageParameterList const *plist = NULL);
+                        MessageParameterList const *plist = NULL,
+                        wxFontEncoding enc = wxFONTENCODING_SYSTEM);
 
    /** Writes the message to a String
        @param output string to write to
@@ -86,7 +87,7 @@ public:
        @param append if false, overwrite existing contents
    */
    virtual void WriteToFile(const String &filename, bool append = true);
-   
+
    /** Writes the message to a folder.
        @param foldername file where to write to
    */
@@ -107,8 +108,8 @@ public:
    /// destructor
    virtual ~SendMessageCC();
 
-   enum Mode
-   { Mode_SMTP, Mode_NNTP };
+   enum Mode { Mode_SMTP, Mode_NNTP };
+
 protected:
    /** Sends the message.
        @return true on success
@@ -116,15 +117,19 @@ protected:
    bool Send(void);
    void SetupAddresses(void);
    friend class MessageCC; // allowed to call Send() directly
-   
+
    /** Builds the message, i.e. prepare to send it. */
    void Build(void);
    /// Checks for existence of a header entry
    bool HasHeaderEntry(const String &entry);
+
+   /// set the charset from the encoding
+   void SetCharset(wxFontEncoding enc);
+
 private:
-   ENVELOPE	*m_Envelope;
-   BODY		*m_Body;
-   PART		*m_NextPart, *m_LastPart;
+   ENVELOPE *m_Envelope;
+   BODY     *m_Body;
+   PART     *m_NextPart, *m_LastPart;
 
    /// server name to use
    String m_ServerHost;
@@ -134,7 +139,7 @@ private:
    /// use SSL ?
    bool m_UseSSL;
 #endif
-   
+
    /// Address bits
    String m_FromAddress, m_FromPersonal;
    String m_ReturnAddress;
@@ -150,9 +155,9 @@ private:
    String m_CharSet;
    /// default hostname
    String m_DefaultHost;
-   
+
    /// 2nd stage constructor, see constructor
-   void	Create(Protocol protocol, Profile *iprof);
+   void Create(Protocol protocol, Profile *iprof);
    /// Protocol used for sending
    Protocol m_Protocol;
    /** @name variables managed by Build() */
@@ -173,7 +178,7 @@ private:
    /// Parses string for folder aliases, removes them and stores them in m_FccList.
    void ExtractFccFolders(String &addresses);
 //@}
-   
+
 };
 
 

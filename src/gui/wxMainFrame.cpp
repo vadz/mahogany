@@ -287,6 +287,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
 #ifndef HAS_DYNAMIC_MENU_SUPPORT
    AddMessageMenu();
+   AddLanguageMenu();
 #endif
 
    // open the last folder in the main frame by default
@@ -525,7 +526,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
    else if ( m_FolderView &&
             (WXMENU_CONTAINS(MSG, id) ||
              WXMENU_CONTAINS(LAYOUT, id) ||
-             WXMENU_CONTAINS(MSG_LANG_SUBMENU, id) ||
+             (WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT)) ||
              id == WXMENU_FILE_COMPOSE ||
              id == WXMENU_FILE_POST ||
              id == WXMENU_EDIT_COPY ) )

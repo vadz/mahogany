@@ -889,6 +889,8 @@ wxComposeView::CreateReplyMessage(const MailFolder::Params& params,
                                   Message *original,
                                   bool hide)
 {
+   // TODO set the encoding of the original message here for this message
+
    wxComposeView *cv = CreateNewMessage(parent, parentProfile, hide);
 
    cv->m_kind = Message_Reply;
@@ -906,6 +908,8 @@ wxComposeView::CreateFwdMessage(const MailFolder::Params& params,
                                 Profile *parentProfile,
                                 bool hide)
 {
+   // TODO set the encoding of the original message here for this message
+
    wxComposeView *cv = CreateNewMessage(parent, parentProfile, hide);
 
    cv->m_kind = Message_Forward;
@@ -1235,6 +1239,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
 
    m_LayoutWindow = NULL;
    nextFileID = 0;
+   m_encoding = wxFONTENCODING_SYSTEM;
 
    if(!parentProfile)
       parentProfile = mApplication->GetProfile();
@@ -1246,6 +1251,7 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    AddFileMenu();
    AddEditMenu();
    WXADD_MENU(GetMenuBar(), COMPOSE, _("&Compose"));
+   AddLanguageMenu();
    AddHelpMenu();
 
    // FIXME: provide some visual feedback for them, like
@@ -1277,12 +1283,12 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    // -------------------------
 
    // NB: order of item creation is important for constraints algorithm:
-   // create first the controls whose constraints can be fixed first!
+   //     create first the controls whose constraints can be fixed first!
    wxLayoutConstraints *c;
    SetAutoLayout(TRUE);
 
    // Panel itself (fills all the frame client area)
-   m_panel = new wxPanel(this, -1);//,-1);
+   m_panel = new wxPanel(this, -1);
    c = new wxLayoutConstraints;
    c->top.SameAs(this, wxTop);
    c->left.SameAs(this, wxLeft);
@@ -1483,8 +1489,6 @@ wxComposeView::CreateFTCanvas(void)
    wxASSERT(m_LayoutWindow == NULL);
    m_LayoutWindow = new wxLayoutWindow(m_panel);
 
-   wxString colourName;
-
    GetColourByName(&m_fg, READ_CONFIG(m_Profile, MP_CVIEW_FGCOLOUR), "black");
    GetColourByName(&m_bg, READ_CONFIG(m_Profile, MP_CVIEW_BGCOLOUR), "white");
 
@@ -1500,6 +1504,7 @@ wxComposeView::CreateFTCanvas(void)
 
    EnableEditing(true);
    DoClear();
+
    m_LayoutWindow->SetWrapMargin( READ_CONFIG(m_Profile, MP_WRAPMARGIN));
    m_LayoutWindow->SetWordWrap( READ_CONFIG(m_Profile, MP_AUTOMATIC_WORDWRAP) != 0);
 }
@@ -1508,6 +1513,16 @@ void wxComposeView::DoClear()
 {
    m_LayoutWindow->Clear(m_font, m_size, (int) wxNORMAL, (int) wxNORMAL, 0,
                          &m_fg, &m_bg);
+
+   // set the default encoding if any
+   wxFontEncoding enc = (wxFontEncoding)READ_CONFIG(m_Profile,
+                                                    MP_MSGVIEW_DEFAULT_ENCODING);
+   if ( enc != wxFONTENCODING_DEFAULT )
+   {
+      CheckLanguageInMenu(this, enc);
+      m_LayoutWindow->GetLayoutList()->SetFontEncoding(enc);
+   }
+
    ResetDirty();
 }
 
@@ -1770,8 +1785,18 @@ wxComposeView::OnMenuCommand(int id)
       m_LayoutWindow->Cut( WXLO_COPY_FORMAT, FALSE );
       m_LayoutWindow->Refresh();
       break;
+
    default:
-      wxMFrame::OnMenuCommand(id);
+      if ( WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT) )
+      {
+         m_encoding = GetEncodingFromMenuCommand(id);
+         m_LayoutWindow->GetLayoutList()->SetFontEncoding(m_encoding);
+         CheckLanguageInMenu(this, m_encoding);
+      }
+      else
+      {
+         wxMFrame::OnMenuCommand(id);
+      }
    }
 }
 
@@ -2064,12 +2089,15 @@ wxComposeView::Send(bool schedule)
       if(exp->type == WXLO_EXPORT_TEXT)
       {
          String* text = exp->content.text;
-         msg->AddPart
-            (
-               Message::MSG_TYPETEXT,
-               text->c_str(), text->length(),
-               "PLAIN"
-               );
+         msg->AddPart(
+                        Message::MSG_TYPETEXT,
+                        text->c_str(), text->length(),
+                        "PLAIN",
+                        SM_INLINE,  // disposition
+                        NULL,       // disposition parameters
+                        NULL,       // other parameters
+                        m_encoding
+                     );
       }
       else
       {
@@ -2202,6 +2230,8 @@ wxComposeView::Send(bool schedule)
          msg->SetNewsgroups(GetHeaderValue(Field_To));
          break;
    }
+
+   // TODO should encode the headers if they contain 8bit chars
 
    String from = GetHeaderValue(Field_From);
    if ( from && from != m_from )

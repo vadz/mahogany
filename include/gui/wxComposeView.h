@@ -396,6 +396,9 @@ private:
    /// the template to use or an empty string
    String m_template;
 
+   /// the (main) encoding (== charset) to use for the message
+   wxFontEncoding m_encoding;
+
    // external editor support
    // -----------------------
 

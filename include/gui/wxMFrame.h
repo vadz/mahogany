@@ -64,7 +64,7 @@ public:
    */
    virtual class Profile *GetFolderProfile(void)
       { return NULL; }
-   
+
    /// Passes a menu id to modules for reacting to it.
    virtual bool ProcessModulesMenu(int id);
 
@@ -73,6 +73,7 @@ public:
    virtual void AddHelpMenu(void);
    void AddEditMenu(void);
    void AddMessageMenu(void);
+   void AddLanguageMenu(void);
 
    /// wxMFrame handles all print setup
    void OnPrintSetup();

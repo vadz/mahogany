@@ -1,4 +1,5 @@
 (next release) on (date of next release)
+25.07.00 VZ: support for setting charset for the outgoing messages
 21.07.00 VZ: completely rewrote subfoldrs dialog which is now *much* faster
 19.07.00 VZ: it is possible to specify several address which should be replaced
              with the destination address when the corresponding option is on
@@ -17,7 +18,7 @@
 04.07.00 VZ: added "reverse order" checkboxes to sort dialog, made possible to
              reverse sort by arrival order
 04.07.00 KB: wxOptionsDlg now automatically stores all Field_Password entries
-	     encrypted, SMTP/NNTP server passwords are now encrypted in config
+             encrypted, SMTP/NNTP server passwords are now encrypted in config
              keep-open flag now only enforced for Outbox
 30.06.00 VZ: made it possible to attach several files at once
 27.06.00 KB: added DeleteDuplicates functionality, fixed (?) folderview selection behaviour

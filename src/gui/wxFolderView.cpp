@@ -1700,9 +1700,14 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
    break;
 
    default:
-      // it might be a folder from popup menu
-      if ( cmd >= WXMENU_POPUP_FOLDER_MENU )
+      if ( WXMENU_CONTAINS(LANG, cmd) )
       {
+         if ( m_MessagePreview )
+            m_MessagePreview->SetLanguage(cmd);
+      }
+      else if ( cmd >= WXMENU_POPUP_FOLDER_MENU )
+      {
+         // it might be a folder from popup menu
          MFolder *folder = wxFolderMenu::GetFolder(m_FolderCtrl->GetFolderMenu(),
                                                    cmd);
          if ( folder )
@@ -2254,7 +2259,7 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
       default:
          if ( WXMENU_CONTAINS(MSG, id) ||
               WXMENU_CONTAINS(LAYOUT, id) ||
-              WXMENU_CONTAINS(MSG_LANG_SUBMENU, id) ||
+              (WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT)) ||
               id == WXMENU_HELP_CONTEXT ||
               id == WXMENU_FILE_COMPOSE ||
               id == WXMENU_FILE_POST ||

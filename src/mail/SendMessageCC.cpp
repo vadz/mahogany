@@ -101,14 +101,14 @@ SendMessageCC::Create(Protocol protocol,
    m_ReplyTo = miscutil_GetReplyAddress(prof);
 
    m_ReturnAddress = m_FromAddress;
-   
+
    if(READ_CONFIG(prof,MP_COMPOSE_USE_XFACE) != 0)
       m_XFaceFile = prof->readEntry(MP_COMPOSE_XFACE_FILE,"");
    if(READ_CONFIG(prof, MP_USE_OUTBOX) != 0)
       m_OutboxName = READ_CONFIG(prof,MP_OUTBOX_NAME);
    if(READ_CONFIG(prof,MP_USEOUTGOINGFOLDER) )
       m_SentMailName = READ_CONFIG(prof,MP_OUTGOINGFOLDER);
-   m_CharSet = READ_CONFIG(prof, MP_CHARSET);
+   m_CharSet = READ_CONFIG(prof,MP_CHARSET);
 
    m_DefaultHost = miscutil_GetDefaultHost(prof);
 
@@ -156,7 +156,7 @@ SendMessageCC::SetupAddresses(void)
       mail_free_address(&m_Envelope->from);
    if(m_Envelope->return_path != NIL)
       mail_free_address(&m_Envelope->return_path);
-   
+
    // From: line:
    m_Envelope->from = mail_newaddr();
    m_Envelope->return_path = mail_newaddr ();
@@ -339,7 +339,7 @@ SendMessageCC::Build(void)
       return;
 
    SetupAddresses();
-   
+
    bool replyToSet = false;
 
    // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the
@@ -360,7 +360,7 @@ SendMessageCC::Build(void)
       m_headerValues[h] = strutil_strdup(m_Profile->readEntry(**i,""));
    }
 #endif
-   
+
    /* Add directly added additional header lines: */
    i = m_ExtraHeaderLinesNames.begin();
    i2 = m_ExtraHeaderLinesValues.begin();
@@ -438,12 +438,64 @@ SendMessageCC::Build(void)
 }
 
 void
+SendMessageCC::SetCharset(wxFontEncoding enc)
+{
+   // translate encoding to the charset
+   switch ( enc )
+   {
+      case wxFONTENCODING_ISO8859_1:
+      case wxFONTENCODING_ISO8859_2:
+      case wxFONTENCODING_ISO8859_3:
+      case wxFONTENCODING_ISO8859_4:
+      case wxFONTENCODING_ISO8859_5:
+      case wxFONTENCODING_ISO8859_6:
+      case wxFONTENCODING_ISO8859_7:
+      case wxFONTENCODING_ISO8859_8:
+      case wxFONTENCODING_ISO8859_9:
+      case wxFONTENCODING_ISO8859_10:
+      case wxFONTENCODING_ISO8859_11:
+      case wxFONTENCODING_ISO8859_12:
+      case wxFONTENCODING_ISO8859_13:
+      case wxFONTENCODING_ISO8859_14:
+      case wxFONTENCODING_ISO8859_15:
+         m_CharSet.Printf("iso8859-%d",
+                          enc + 1 - wxFONTENCODING_ISO8859_1);
+         break;
+
+      case wxFONTENCODING_CP1250:
+      case wxFONTENCODING_CP1251:
+      case wxFONTENCODING_CP1252:
+      case wxFONTENCODING_CP1253:
+      case wxFONTENCODING_CP1254:
+      case wxFONTENCODING_CP1255:
+      case wxFONTENCODING_CP1256:
+      case wxFONTENCODING_CP1257:
+         m_CharSet.Printf("windows-%d",
+                          1250 + enc - wxFONTENCODING_CP1250);
+         break;
+
+      case wxFONTENCODING_KOI8:
+         m_CharSet = "koi8-r";
+         break;
+
+      case wxFONTENCODING_SYSTEM:
+         // use the default charset set in Create()
+         break;
+
+      default:
+         FAIL_MSG( "unknown encoding" );
+         m_CharSet = "us-ascii";
+   }
+}
+
+void
 SendMessageCC::AddPart(Message::ContentType type,
                        const char *buf, size_t len,
                        String const &subtype_given,
                        String const &disposition,
                        MessageParameterList const *dlist,
-                       MessageParameterList const *plist)
+                       MessageParameterList const *plist,
+                       wxFontEncoding enc)
 {
    BODY
       *bdy;
@@ -501,38 +553,39 @@ SendMessageCC::AddPart(Message::ContentType type,
    m_NextPart = m_NextPart->next;
    m_NextPart->next = NULL;
 
+   PARAMETER *lastpar = NULL,
+             *par;
+
    if(plist)
    {
       MessageParameterList::iterator i;
-      PARAMETER *lastpar = NULL, *par;
 
-      // set default charset, currently we always use ISO-8859-1,
-      // which is latin1
-
-      if(type == TYPETEXT)
-      {
-         if(m_CharSet.Length() != 0)
-         {
-            par = mail_newbody_parameter();
-            par->attribute = strutil_strdup("CHARSET");
-            par->value     = strutil_strdup(m_CharSet);
-            par->next      = NULL;
-            lastpar = par;
-         }
-      }
       for(i=plist->begin(); i != plist->end(); i++)
       {
          par = mail_newbody_parameter();
          par->attribute = strutil_strdup((*i)->name);
          par->value     = strutil_strdup((*i)->value);
-         par->next      = NULL;
-         if(lastpar)
-            lastpar->next = par;
-         else
-            bdy->parameter = par;
+         par->next      = lastpar;
+         lastpar = par;
       }
-
    }
+
+   // add the charset parameter to the param list
+   if (type == TYPETEXT)
+   {
+      SetCharset(enc);
+
+      if(m_CharSet.Length() != 0)
+      {
+         par = mail_newbody_parameter();
+         par->attribute = strutil_strdup("CHARSET");
+         par->value     = strutil_strdup(m_CharSet);
+         par->next      = lastpar;
+         lastpar = par;
+      }
+   }
+
+   bdy->parameter = lastpar;
    bdy->disposition.type = strutil_strdup(disposition);
    if(dlist)
    {
@@ -632,13 +685,13 @@ SendMessageCC::Send(void)
 
    String server = m_ServerHost;
    hostlist[0] = server;
-   
+
    if(m_UserName.Length() > 0) // activate authentication
    {
       server << "/user=\"" << m_UserName << '"';
       MailFolderCC::SetLoginData(m_UserName, m_Password);
    }
-   
+
    switch(m_Protocol)
    {
    case Prot_SMTP:
@@ -653,7 +706,7 @@ SendMessageCC::Send(void)
 #endif
       stream = smtp_open_full
          (NIL,(char **)hostlist, (char *)service.c_str(),
-          SMTPTCPPORT, OP_DEBUG); 
+          SMTPTCPPORT, OP_DEBUG);
       break;
    case Prot_NNTP:
       service = "nntp";

@@ -363,48 +363,8 @@ END_EVENT_TABLE()
 void
 wxMessageView::SetLanguage(int id)
 {
-   int encoding;
-   switch ( id )
-   {
-      default:
-      case WXMENU_LANG_US_ASCII:
-         encoding = wxFONTENCODING_SYSTEM;
-         break;
-
-      case WXMENU_LANG_ISO8859_1:
-      case WXMENU_LANG_ISO8859_2:
-      case WXMENU_LANG_ISO8859_3:
-      case WXMENU_LANG_ISO8859_4:
-      case WXMENU_LANG_ISO8859_5:
-      case WXMENU_LANG_ISO8859_6:
-      case WXMENU_LANG_ISO8859_7:
-      case WXMENU_LANG_ISO8859_8:
-      case WXMENU_LANG_ISO8859_9:
-      case WXMENU_LANG_ISO8859_10:
-      case WXMENU_LANG_ISO8859_11:
-      case WXMENU_LANG_ISO8859_12:
-      case WXMENU_LANG_ISO8859_13:
-      case WXMENU_LANG_ISO8859_14:
-      case WXMENU_LANG_ISO8859_15:
-         encoding = wxFONTENCODING_ISO8859_1 + id - WXMENU_LANG_ISO8859_1;
-         break;
-
-      case WXMENU_LANG_CP1250:
-      case WXMENU_LANG_CP1251:
-      case WXMENU_LANG_CP1252:
-      case WXMENU_LANG_CP1253:
-      case WXMENU_LANG_CP1254:
-      case WXMENU_LANG_CP1255:
-      case WXMENU_LANG_CP1256:
-      case WXMENU_LANG_CP1257:
-         encoding = wxFONTENCODING_CP1250 + id - WXMENU_LANG_CP1250;
-         break;
-
-      case WXMENU_LANG_KOI8:
-         encoding = wxFONTENCODING_KOI8;
-   }
-
-   SetEncoding((wxFontEncoding)encoding);
+   wxFontEncoding encoding = GetEncodingFromMenuCommand(id);
+   SetEncoding(encoding);
 }
 
 void
@@ -1687,7 +1647,7 @@ wxMessageView::DoMenuCommand(int id)
       break;
 
    default:
-      if ( WXMENU_CONTAINS(MSG_LANG_SUBMENU, id) )
+      if ( WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT) )
       {
          SetLanguage(id);
          break;
@@ -2045,6 +2005,7 @@ wxMessageViewFrame::wxMessageViewFrame(ASMailFolder *folder,
    AddFileMenu();
    AddEditMenu();
    AddMessageMenu();
+   AddLanguageMenu();
 
    // add a toolbar to the frame
    // NB: the buttons must have the same ids as the menu commands

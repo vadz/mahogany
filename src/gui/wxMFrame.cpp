@@ -60,6 +60,8 @@
 #include "gui/wxFolderView.h"
 #include "gui/wxIdentityCombo.h"
 
+#include <wx/fontmap.h>          // for GetEncodingDescription()
+
 IMPLEMENT_DYNAMIC_CLASS(wxMFrame, wxFrame)
 
 BEGIN_EVENT_TABLE(wxMFrame, wxFrame)
@@ -175,9 +177,15 @@ void
 wxMFrame::AddMessageMenu(void)
 {
    WXADD_MENU(GetMenuBar(), MSG, _("Me&ssage"));
+}
+
+void
+wxMFrame::AddLanguageMenu(void)
+{
+   WXADD_MENU(GetMenuBar(), LANG, _("&Language"));
 
    // initially use the default charset
-   CheckLanguageInMenu(this);
+   CheckLanguageInMenu(this, wxFONTENCODING_DEFAULT);
 }
 
 wxMFrame::~wxMFrame()
@@ -249,10 +257,10 @@ wxMFrame::OnMenuCommand(int id)
          break;
 
       case WXMENU_FILE_POST:
-         { 
+         {
             wxComposeView *composeView =
                wxComposeView::CreateNewArticle(this,
-                                               GetFolderProfile()); 
+                                               GetFolderProfile());
             composeView->InitText();
             composeView->Show();
          }
@@ -516,6 +524,83 @@ wxMFrame::OnMenuCommand(int id)
 
             if ( !!ident )
                ShowIdentityDialog(ident, this);
+         }
+         break;
+
+      case WXMENU_LANG_SET_DEFAULT:
+         {
+            static const wxFontEncoding encodingsSupported[] =
+            {
+               wxFONTENCODING_ISO8859_1,       // West European (Latin1)
+               wxFONTENCODING_ISO8859_2,       // Central and East European (Latin2)
+               wxFONTENCODING_ISO8859_3,       // Esperanto (Latin3)
+               wxFONTENCODING_ISO8859_4,       // Baltic (old) (Latin4)
+               wxFONTENCODING_ISO8859_5,       // Cyrillic
+               wxFONTENCODING_ISO8859_6,       // Arabic
+               wxFONTENCODING_ISO8859_7,       // Greek
+               wxFONTENCODING_ISO8859_8,       // Hebrew
+               wxFONTENCODING_ISO8859_9,       // Turkish (Latin5)
+               wxFONTENCODING_ISO8859_10,      // Variation of Latin4 (Latin6)
+               wxFONTENCODING_ISO8859_11,      // Thai
+               wxFONTENCODING_ISO8859_12,      // doesn't exist currently, but put it
+                                               // here anyhow to make all ISO8859
+                                               // consecutive numbers
+               wxFONTENCODING_ISO8859_13,      // Baltic (Latin7)
+               wxFONTENCODING_ISO8859_14,      // Latin8
+               wxFONTENCODING_ISO8859_15,      // Latin9 (a.k.a. Latin0, includes euro)
+               wxFONTENCODING_ISO8859_MAX,
+
+               wxFONTENCODING_CP1250,          // WinLatin2
+               wxFONTENCODING_CP1251,          // WinCyrillic
+               wxFONTENCODING_CP1252,          // WinLatin1
+               wxFONTENCODING_CP1253,          // WinGreek (8859-7)
+               wxFONTENCODING_CP1254,          // WinTurkish
+               wxFONTENCODING_CP1255,          // WinHebrew
+               wxFONTENCODING_CP1256,          // WinArabic
+               wxFONTENCODING_CP1257,          // WinBaltic (same as Latin 7)
+
+               wxFONTENCODING_KOI8,            // == KOI8-R
+            };
+
+            wxArrayString encDescs;
+            encDescs.Add(_("Default 7 bit (US ASCII)"));
+            for ( size_t n = 0; n < WXSIZEOF(encodingsSupported); n++ )
+            {
+               encDescs.Add(
+                     wxFontMapper::GetEncodingDescription(
+                        encodingsSupported[n]
+                     )
+               );
+            }
+
+            int choice = MDialog_GetSelection
+                         (
+                           _("Please choose the default encoding:\n"
+                             "it will be used by default in both\n"
+                             "message viewer and composer."),
+                           _("Choose default encoding"),
+                           encDescs,
+                           this
+                         );
+
+            wxFontEncoding enc;
+            if ( choice == -1 )
+            {
+               // cancelled, do nothing
+               break;
+            }
+            else if ( choice == 0 )
+            {
+               enc = wxFONTENCODING_DEFAULT;
+            }
+            else
+            {
+               enc = encodingsSupported[choice - 1];
+            }
+
+            // remember the encoding as default
+            mApplication->GetProfile()->writeEntry(MP_MSGVIEW_DEFAULT_ENCODING,
+                                                   enc);
          }
          break;
    }

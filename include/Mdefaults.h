@@ -470,6 +470,8 @@
 #define   MP_MSGVIEW_ALL_HEADERS     "MsgViewAllHeaders"
 /// should we auto detect the message encoding?
 #define  MP_MSGVIEW_AUTO_ENCODING   "MsgViewAutoDetectEnc"
+/// the default encoding for the viewer/composer
+#define  MP_MSGVIEW_DEFAULT_ENCODING   "DefEncoding"
 /// the type of the last created folder
 #define   MP_LAST_CREATED_FOLDER_TYPE  "LastFolderType"
 /// the filter program to apply (OBSOLETE)
@@ -994,6 +996,8 @@
 #define   MP_MSGVIEW_ALL_HEADERS_D "From:To:Subject:Date:Newsgroups:Return-Path:Received:Delivered-To:Message-Id:X-Sender:X-Mailer:Mime-Version:Content-Type:Content-Length:Status:X-Status:X-Keywords:X-Url:X-UID:Approved:"
 /// should we auto detect the message encoding?
 #define  MP_MSGVIEW_AUTO_ENCODING_D   1
+/// the default encoding for the viewer/composer
+#define  MP_MSGVIEW_DEFAULT_ENCODING_D (long)wxFONTENCODING_DEFAULT
 /// the type of the last created folder
 #define   MP_LAST_CREATED_FOLDER_TYPE_D  (int)File
 /// the filter program to apply (OBSOLETE)
