@@ -100,7 +100,7 @@ public:
 
    bool OnMEvent(MEventData& event)
    {
-      if ( event.GetId() == MEventId_OptionsChange );
+      if ( event.GetId() == MEventId_OptionsChange )
       {
          if ( ((MEventOptionsChangeData &)event).GetChangeKind() ==
                   MEventOptionsChangeData::Ok )
