@@ -24,7 +24,8 @@ $Id$
          headers, no content.
 0009  KB Sending messages with XFace can cause segfault. Thought to be 
          fixed, but persistent.
-
+0014  KB Sometimes program doesn't react to Exit button/menu. 
+0015  KB Sometimes help isn't found, why?
 
 *****************************************************************************
 ** Fixed, to be tested                                                     **
