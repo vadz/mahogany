@@ -51,8 +51,9 @@ class wxRegExBase
 
 #ifdef HAVE_POSIX_REGEX
 
+extern "C" {    // Suns don't protect their C headers (yet?)
 #include <regex.h>
-
+}
 
 #ifndef WX_REGEX_MAXMATCHES
 #   define WX_REGEX_MAXMATCHES 1024
@@ -100,12 +101,11 @@ class wxRegExPOSIX : public wxRegExBase
          int myflags = 0;
          if(flags & RE_NOTBOL) myflags |= REG_NOTBOL;
          if(flags & RE_NOTEOL) myflags |= REG_NOTEOL;
-	return 
+        return 
           regexec((regex_t *)&m_RegEx, str.c_str(),
                   m_nMatches, m_Matches,
                   myflags) == 0;
       }
-
 
    /** Replaces the current regular expression in the string pointed
        to by pattern, with the text in replacement.
@@ -180,13 +180,10 @@ private:
    size_t      m_nMatches;
 };
 
-
 #   define wxRegEx   wxRegExPOSIX
 
 #define WX_HAVE_REGEX
 
 #endif
-
-
 
 #endif
