@@ -197,6 +197,8 @@ static const int *g_aFrameToolbars[WXFRAME_MAX] =
 //     should end with an ellipsis (`...')
 static const MenuItemInfo g_aMenuItems[] =
 {
+   // ABCDEFGHIJKLMNOPQRSTUVWXYZ (VZ: leave it here, it's a cut-&-paste buffer)
+
    // filler for WXMENU_LAYOUT_CLICK
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
 
@@ -270,6 +272,10 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_EDIT_SAVE_PREF,gettext_noop("&Save Preferences"), gettext_noop("Save options")             , FALSE },
 
    // msg
+
+   // the available accelerators for this menu:
+   // BJKQXZ
+
    { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message")    , FALSE },
    { WXMENU_MSG_PRINT,     gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print this message")       , FALSE },
    { WXMENU_MSG_PRINT_PREVIEW, gettext_noop("Print Pre&view"),gettext_noop("Preview a printout of this message")       , FALSE },
@@ -296,8 +302,8 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_MOVE_TO_FOLDER, gettext_noop("&Move to Folder"),gettext_noop("Move message to another folder")   , FALSE },
    { WXMENU_MSG_DELETE,    gettext_noop("&Delete"),           gettext_noop("Delete this message")      , FALSE },
    { WXMENU_MSG_UNDELETE,  gettext_noop("&Undelete"),         gettext_noop("Undelete message")         , FALSE },
-   { WXMENU_MSG_DELDUPLICATES,gettext_noop("Remove Duplicates"),
-     gettext_noop("Delete all duplicate messages")      , FALSE },
+   { WXMENU_MSG_DELDUPLICATES,gettext_noop("Remove dup&licates"),
+                           gettext_noop("Delete all duplicate messages")      , FALSE },
    { WXMENU_MSG_EXPUNGE,   gettext_noop("Ex&punge"),          gettext_noop("Expunge")                  , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_SELECTALL, gettext_noop("Select &all\tCtrl-A"),       gettext_noop("Select all messages")      , FALSE },
