@@ -34,6 +34,22 @@ check:
 	do echo $$i:; $(MSGFMT) -v -o /dev/null $$i; \
 	done
 
+# print out some information for the translator's web page
+# should run this only after `make mergecat' has merged new strings
+percentage:
+	@for i in $(FILES_PO); \
+	do	x=`$(MSGFMT) -v -o /dev/null "$$i" 2>&1 | sed -e 's/[,\.]//g' \
+			-e 's,\([0-9]*\) translated messages,TR=\1,' \
+			-e 's,\([0-9]*\) fuzzy translations,FZ=\1,' \
+			-e 's,\([0-9]*\) untranslated messages,UT=\1,'`; \
+		TR=0 FZ=0 UT=0; \
+		eval $$x; \
+		echo "$$i" `expr 100 "*" $$TR / "(" $$TR + $$FZ + $$UT ")"` \
+			percent of `expr $$TR + $$FZ + $$UT` strings; \
+		sed -n	-e '/Project-Id-Version/p' -e '/Revision-Date/p' \
+			-e '/Last-Translator/p' -e '/^$$/{p;q;}' "$$i"; \
+	done
+
 else		# we don't have MSGFMT; don't try to compile translations
 
 all install check:
