@@ -2875,30 +2875,41 @@ MailFolderCC::GetMessageUID(unsigned long msgno) const
 // MailFolderCC: searching
 // ----------------------------------------------------------------------------
 
-unsigned long
-MailFolderCC::SearchAndCountResults(struct search_program *pgm) const
+MsgnoArray *MailFolderCC::DoSearch(struct search_program *pgm) const
 {
-   CHECK( m_MailStream, 0, "SearchAndCountResults: folder is closed" );
+   CHECK( m_MailStream, NULL, "SearchAndCountResults: folder is closed" );
 
-   ASSERT_MSG( !m_SearchMessagesFound, "DoCountMessages: reentrancy?" );
+   // at best we're going to have a memory leak, at worse c-client is locked
+   // and we will just crash
+   ASSERT_MSG( !m_SearchMessagesFound, "MailFolderCC::DoSearch() reentrancy" );
 
    MailFolderCC *self = (MailFolderCC *)this; // const_cast
    self->m_SearchMessagesFound = new UIdArray;
 
    mail_search_full(m_MailStream, NIL, pgm, SE_FREE | SE_NOPREFETCH);
 
-   unsigned long count;
-   if ( m_SearchMessagesFound )
-   {
-      count = m_SearchMessagesFound->Count();
+   CHECK( m_SearchMessagesFound, NULL, "who deleted m_SearchMessagesFound?" );
 
-      delete m_SearchMessagesFound;
-      self->m_SearchMessagesFound = NULL;
+   MsgnoArray *searchMessagesFound = m_SearchMessagesFound;
+   self->m_SearchMessagesFound = NULL;
+
+   return searchMessagesFound;
+}
+
+unsigned long
+MailFolderCC::SearchAndCountResults(struct search_program *pgm) const
+{
+   MsgnoArray *searchResults = DoSearch(pgm);
+
+   unsigned long count;
+   if ( searchResults )
+   {
+      count = searchResults->Count();
+
+      delete searchResults;
    }
    else
    {
-      FAIL_MSG( "DoCountMessages: who deleted m_SearchMessagesFound?" );
-
       count = 0;
    }
 
@@ -2982,15 +2993,7 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
       pgm->undeleted = 1;
    }
 
-   MailFolderCC *self = (MailFolderCC *)this; // const_cast
-   self->m_SearchMessagesFound = new UIdArray;
-
-   mail_search_full(m_MailStream, NIL, pgm, SE_FREE | SE_NOPREFETCH);
-
-   MsgnoArray *results = m_SearchMessagesFound;
-   self->m_SearchMessagesFound = NULL;
-
-   return results;
+   return DoSearch(pgm);
 }
 
 UIdArray *
