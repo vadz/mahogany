@@ -1559,7 +1559,7 @@ wxComposeView::OnMenuCommand(int id)
 
    case WXMENU_HELP_CONTEXT:
       mApplication->Help(
-         (m_mode == Mode_NNTP)?
+         (m_mode == Mode_SMTP)?
          MH_COMPOSE_MAIL : MH_COMPOSE_NEWS, this);
       break;
    case WXMENU_EDIT_PASTE:
