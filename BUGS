@@ -5,8 +5,6 @@ $Id$
 ** List of known and reported bugs in M with bug-ID                        **
 ** ID ***********************************************************************
 
-0005  KB Profile readEntry() needs interface extension to allow a boolean success
-         value, remove hacks like 17 or "illegal value"!
 0006  KB Memory leaks whenever using wxMessageView (there are some from cclient)
 0007  KB add remaining translation strings from include files
 0008  KB handle "truncated mailfolder" more gracefully (i.e. close and
@@ -18,13 +16,14 @@ $Id$
 0015  KB POP mail folders are a bit broken: "large" messages don't
          show up or corrupt other message contents --> are we really fetching
          all the required data from the server?
-0016  KB "Show raw message text" broken: only gets called from message 
-         view and then only shows empty window
 
 *****************************************************************************
 ** Fixed, to be tested                                                     **
 ** ID ** date fixed ** comment **********************************************
 
+0005  KB Profile readEntry() needs interface extension to allow a boolean success
+         value, remove hacks like 17 or "illegal value"!
+         --> rewrite in progress
 
 *****************************************************************************
 ** Fixed   (only move entries here when tested)                            **
@@ -42,3 +41,5 @@ $Id$
 0013  KB Copying message to other folder sometimes only writes
          headers, no content, same for save to file. Now even
          causes segfaults.
+0016  KB "Show raw message text" broken: only gets called from message 
+         view and then only shows empty window

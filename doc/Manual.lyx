@@ -1,4 +1,4 @@
-#This file was created by <karsten> Tue Feb 16 10:26:49 1999
+#This file was created by <karsten> Fri Feb 19 09:41:44 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -494,6 +494,72 @@ The list of message headers at the top, showing message subjects, authors,
 \layout Itemize
 
 The contents of the currently selected message below.
+\layout Standard
+
+When the top window, the list of messages, is active, certain keyboard bindings
+ are active, the following keys are recognized:
+\layout Standard
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
+multicol5
+8 2 0 0 -1 -1 -1 -1
+1 1 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 1 0 0
+0 1 0 0
+0 1 0 0
+8 1 0 "" ""
+8 1 1 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+
+English
+\newline 
+Action performed
+\newline 
+SPACE
+\newline 
+select/deselect message
+\newline 
+D
+\newline 
+mark selected messages for deletion
+\newline 
+U
+\newline 
+remove deletion mark from selected messages
+\newline 
+X or #
+\newline 
+expunge messages marked for deletion
+\newline 
+C
+\newline 
+copy marked messages to another folder
+\newline 
+M
+\newline 
+move marked messages to another folder
+\newline 
+S
+\newline 
+save marked messages to files
 \layout Subsection
 
 The Open-Folder Dialog_2004_

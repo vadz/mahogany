@@ -9,30 +9,27 @@ $Id$
  - on Alpha: no XFace inserted, trying to convert ~/.xface to ~/.xface.xpm although already an Xpm
  -  new mail dialog getting stuck?
  - mAppBase::OnExit() gets called twice
- - creating new folder and immediately after doing a message/copy to
-   folder caused crash
  - sometimes M is very slow sending a message, why?
- - when calling netscape to view URL, M locked up (after writing
-   "done"), top showed two M processes and after a while it terminated
-   with an IO trap 
 
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
+- suspected bug in LoadImageXpm in wxIconmanager leading to crashes
+- suspected bug in MEvent code causing lockups/endless memory allocation
 - make wxFolderView::Update() a bit more intelligent. Clicking on
   unread mails changes the flags and therefore resets selection.
+  wxListCtrl selection gets reset if message has to be fetched, if it 
+  was already clicked on once, it won't reset the
+  selection. Apparently fetching a message resets the listctrl. Maybe  
+  some c-client update event?
+  --> No, Update() clever enough but wxListCtrl does not return true
+      for IsSelected() -> therefore selection gets reset
 - speed up copy mail to folder by cusing c-client functionality
 - add some more folder properties to config dialog, i.e. be able to
   switch off automatic notification of incoming emails.
-  Currently, coying emails to another folder produces "New Mail" dialogs.
 - fix my OpenAnyFolderDialog to take hostname and folderpath, as
   required for imap  --> drop the dialog?
- - wxListCtrl selection gets reset if message has to be fetched, if it 
-   was already clicked on once, it won't reset the
-   selection. Apparently fetching a message resets the listctrl. Maybe  
-   some c-client update event?
 
- - forwarding messages broken, no content
  - sending messages takes ages - why? Vadim: can you do some profiling
    on that?  --> Local network problem? Verify again later.
  - investigate problem of empty message bodies (e.g. on Micky's mails
@@ -41,40 +38,23 @@ $Id$
  - ADB: does not use substring??? (Joen_Doedoe no expansion for
    "doe" or "Doe")
  - folderview listctrl has extra Subject column behind Size field ???
- - wxlwindow: MIME menu appears at wrong position again
  - when inserting filetype of unknown MIME type, prompt for it,
    possibly have a MIME types editor (similar to netscape's?)
  - forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
    SendMessageCC::AddPart()
 
- - make Message class use reference counting !
- - new mail dialog:
-   + sometimes From: is empty
-   + if more than one new mail, info for one of them is duplicated
-   + apparently if mails have been deleted in the meantime, counter
-     must be updated
-
- - wxLayout:
-   + printing needs better scaling how does sample do it?
-   + use smaller fonts for printing.
-   \--> works well like now, but setting the printer scale smaller
-        reduces page size, just rescale fonts instead
  - wxLayout:
   + Refresh!!
   + undo?
   + fix the minor (moving up in 1st column over empty line) bug
+  + still some cursor corruption which can lead to crashes
 
- - integrate new c-client lib 4.5
+ - Solaris: all helpers need absolute path or won't get found
  - save and restore printer settings in profile
  - M takes ages to send a message
  - add a wxASSERT() for the correct path in READ_APPCONFIG()
  - add some progress messages when opening folders (looks like it's
    hung when accessing POP folders)
- - Profile readEntry() needs interface extension to allow a boolean success
-   value, remove hacks like 17 or "illegal value"!
-
- - trying to exit M when wxMessageViews are open doesn't work and MObjects get
-   leaked
  - Memory leaks whenever using wxMessageView (there are some from cclient)
  - add remaining translation strings from include files
  - handle "truncated mailfolder" more gracefully (i.e. close and re-open folder)
@@ -87,7 +67,6 @@ $Id$
 
  - move some functionality from wxFolderView to MailFolder?
 
- 
  - Profile fixes/rewrite:
    - Current wxFolderView::SaveMessages() relies on
      MailFolder::OpenFolder() profile/file behaviour 
@@ -108,8 +87,8 @@ $Id$
     other icons
   - folder tree control should (configurable on a per-folder basis)
     highlight and count the number of new messages
-  - add (simple) keyboard interface to folder view (?)
-    (at least d,n,p or something like that)
+  - trying to exit M when wxMessageViews are open doesn't work, message 
+    view remains there
 
 - ADB:
   + make AdbEdit auto-generate a formatted name from first/family-name
@@ -410,5 +389,30 @@ classes in the hierarchy.
    and wxFolderTree.
  - documentation system should support pictures
  - wxComposeView::Print() fails, wxMessageView::Print() works, why?
+  - add (simple) keyboard interface to folder view (?)
+    (at least d,n,p or something like that)
+ - forwarding messages broken, no content
+ -   Currently, coying emails to another folder produces "New Mail" dialogs.
+ - creating new folder and immediately after doing a message/copy to
+   folder caused crash
+ - when calling netscape to view URL, M locked up (after writing
+   "done"), top showed two M processes and after a while it terminated
+   with an IO trap 
+ - wxlwindow: MIME menu appears at wrong position again
+ - make Message class use reference counting !
+ - new mail dialog:
+   + sometimes From: is empty
+   + if more than one new mail, info for one of them is duplicated
+   + apparently if mails have been deleted in the meantime, counter
+     must be updated
+ - wxLayout:
+   + printing needs better scaling how does sample do it?
+   + use smaller fonts for printing.
+   \--> works well like now, but setting the printer scale smaller
+        reduces page size, just rescale fonts instead
+ - integrate new c-client lib 4.5
+ - Profile readEntry() needs interface extension to allow a boolean success
+   value, remove hacks like 17 or "illegal value"!
+
 
  vi: set si tw=80:
