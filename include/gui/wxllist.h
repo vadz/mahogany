@@ -810,7 +810,8 @@ public:
               int weight=wxNORMAL,
               int underline=0,
               wxColour *fg=NULL,
-              wxColour *bg=NULL);
+              wxColour *bg=NULL,
+              wxFontEncoding encoding = wxFONTENCODING_DEFAULT);
    /// Empty: clear the list but leave font settings.
    void Empty(void);
 
