@@ -1477,12 +1477,14 @@ MailFolderCC::SetLoginData(const String &user, const String &pw)
 // MailFolderCC construction/opening
 // ----------------------------------------------------------------------------
 
-MailFolderCC::MailFolderCC(const MFolder *mfolder)
+MailFolderCC::MailFolderCC(const MFolder *mfolder, wxFrame *frame)
 {
    m_mfolder = (MFolder *)mfolder; // const_cast needed for IncRef()/DecRef()
    m_mfolder->IncRef();
 
    m_Profile = mfolder->GetProfile();
+
+   (void)SetInteractiveFrame(frame);
 
    Create(mfolder->GetType(), mfolder->GetFlags());
 
@@ -1769,8 +1771,9 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder)
 
 /* static */
 MailFolderCC *
-MailFolderCC::OpenFolder(const MFolder* mfolder,
-                         OpenMode openmode)
+MailFolderCC::OpenFolder(const MFolder *mfolder,
+                         OpenMode openmode,
+                         wxFrame *frame)
 {
    bool userEnteredPwd = false;
    String login, password;
@@ -1795,7 +1798,7 @@ MailFolderCC::OpenFolder(const MFolder* mfolder,
    // no, we are not connected to this folder right now
    //
    // create the new mail folder for it and init its members
-   mf = new MailFolderCC(mfolder);
+   mf = new MailFolderCC(mfolder, frame);
 
    if ( !login.empty() )
    {

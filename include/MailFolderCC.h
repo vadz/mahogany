@@ -90,7 +90,8 @@ public:
    /** @name Constructors and destructor */
    //@{
    static MailFolderCC * OpenFolder(const MFolder *mfolder,
-                                    OpenMode openmode);
+                                    OpenMode openmode,
+                                    wxFrame *frame);
 
    static bool CloseFolder(const MFolder *mfolder);
    //@}
@@ -344,7 +345,7 @@ private:
    /** @name Constructors and such */
    //@{
    /// private constructor, does basic initialisation
-   MailFolderCC(const MFolder *mfolder);
+   MailFolderCC(const MFolder *mfolder, wxFrame *frame);
 
    /// Common code for constructors
    void Create(FolderType type, int flags);

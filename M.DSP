@@ -1913,6 +1913,10 @@ SOURCE=.\src\util\miscutil.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\util\ssl.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\util\strutil.cpp
 
 !IF  "$(CFG)" == "M - Win32 Release"

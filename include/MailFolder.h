@@ -302,17 +302,20 @@ public:
 
      @param mfolder the MFolder object identifying the folder to use
      @param openmode the mode for opening the folder, read/write by default
+     @param frame the interactive frame for the folder or NULL
      @return the opened MailFolder object or NULL if opening failed
     */
    static MailFolder * OpenFolder(const MFolder *mfolder,
-                                  OpenMode openmode = Normal);
+                                  OpenMode openmode = Normal,
+                                  wxFrame *frame = NULL);
 
    /**
      Half open the folder using paremeters from MFolder object. This is a
      simple wrapper around OpenFolder()
     */
-   static MailFolder * HalfOpenFolder(const MFolder *mfolder)
-      { return OpenFolder(mfolder, HalfOpen); }
+   static MailFolder * HalfOpenFolder(const MFolder *mfolder,
+                                      wxFrame *frame = NULL)
+      { return OpenFolder(mfolder, HalfOpen, frame); }
 
    /**
       Closes the folder: this is always safe to call, even if this folder is
@@ -920,25 +923,12 @@ public:
    /** @name Interactivity control */
    //@{
    /**
-      Folder opening functions work differently if SetInteractive() is set:
+      Folder operations work differently if the interactive frame is set:
       they will put more messages into status bar and possibly ask questions to
       the user while in non interactive mode this will never be done. This
       method associates such frame with the folder with given name.
 
-      @param frame the window where the status messages should go (may be NULL)
-      @param foldername the folder for which we set this frame
-   */
-   static void SetInteractive(wxFrame *frame, const String& foldername);
-
-   /**
-      Undo SetInteractive()
-   */
-   static void ResetInteractive();
-
-   /**
-      Set interactive frame for this folder only: long operations on this folder
-      will put the status messages in this frames status bar.
-
+      @param frame the associated frame (may be NULL to disable interactivity)
       @return the old interactive frame for this folder
    */
    virtual wxFrame *SetInteractiveFrame(wxFrame *frame) = 0;
@@ -994,21 +984,20 @@ private:
 DECLARE_AUTOPTR_WITH_CONVERSION(MailFolder);
 
 // ----------------------------------------------------------------------------
-// MFInteractiveLock: sets the interactive frame to the one provided for the
-// life time of this object
+// MFSuspendInteractiviy: resets the folders interactive frame thus suppresing
+//                        any dialogs/... during the life time of this object
 // ----------------------------------------------------------------------------
 
-class MFInteractiveLock
+class MFSuspendInteractivity
 {
 public:
-   // we will DecRef() the mail folder which must be !NULL - but the frame may
-   // be NULL, although it's probably not very useful
-   MFInteractiveLock(MailFolder *mf, wxFrame *frame)
+   // we will DecRef() the mail folder which must be !NULL
+   MFSuspendInteractivity(MailFolder *mf)
    {
       m_mf = mf;
       if ( m_mf )
       {
-         m_frameOld = mf->SetInteractiveFrame(frame);
+         m_frameOld = mf->SetInteractiveFrame(NULL);
       }
       else
       {
@@ -1016,7 +1005,7 @@ public:
       }
    }
 
-   ~MFInteractiveLock()
+   ~MFSuspendInteractivity()
    {
       if ( m_mf )
       {

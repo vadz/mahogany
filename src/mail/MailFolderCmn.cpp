@@ -1861,17 +1861,8 @@ wxFrame *MailFolderCmn::SetInteractiveFrame(wxFrame *frame)
 
 wxFrame *MailFolderCmn::GetInteractiveFrame() const
 {
-   if ( !mApplication->IsInAwayMode() )
-   {
-      if ( m_frame )
-         return m_frame;
-
-      if ( GetName() == ms_interactiveFolder )
-         return ms_interactiveFrame;
-   }
-   //else: no interactivity in away mode at all
-
-   return NULL;
+   // no interactivity at all in away mode
+   return mApplication->IsInAwayMode() ? NULL : m_frame;
 }
 
 // ----------------------------------------------------------------------------

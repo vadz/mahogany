@@ -211,14 +211,14 @@ MLogCircle::Clear(void)
 
 /* static */
 MailFolder *
-MailFolder::OpenFolder(const MFolder *mfolder, OpenMode openmode)
+MailFolder::OpenFolder(const MFolder *folder, OpenMode mode, wxFrame *frame)
 {
    if ( !Init() )
       return NULL;
 
-   CHECK( mfolder, NULL, "NULL MFolder in OpenFolder()" );
+   CHECK( folder, NULL, "NULL MFolder in OpenFolder()" );
 
-   return MailFolderCC::OpenFolder(mfolder, openmode);
+   return MailFolderCC::OpenFolder(folder, mode, frame);
 }
 
 /* static */
@@ -1211,26 +1211,6 @@ MailFolder::CleanUp(void)
 {
    MailFolderCmnCleanup();
    MailFolderCCCleanup();
-}
-
-// ----------------------------------------------------------------------------
-// interactive frame stuff
-// ----------------------------------------------------------------------------
-
-String MailFolder::ms_interactiveFolder;
-wxFrame *MailFolder::ms_interactiveFrame = NULL;
-
-/* static */
-void MailFolder::SetInteractive(wxFrame *frame, const String& foldername)
-{
-   ms_interactiveFolder = foldername;
-   ms_interactiveFrame = frame;
-}
-
-/* static */
-void MailFolder::ResetInteractive()
-{
-   SetInteractive(NULL, "");
 }
 
 // ----------------------------------------------------------------------------

@@ -103,6 +103,7 @@ work		BITMAP "work.bmp"
 // Options dialog notebook image list (32x32)
 ident		BITMAP "ident.bmp"
 network		BITMAP "network.bmp"
+newmail		BITMAP "newmail.bmp"
 compose		BITMAP "compose.bmp"
 folders		BITMAP "folders.bmp"
 #ifdef USE_PYTHON
