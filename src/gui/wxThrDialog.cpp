@@ -215,8 +215,8 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
               "IMAP servers support two threading algorithms: "
               "a correct one (threading by reference) and a simple\n"
               "emulation of it (threading by subject). Some servers "
-              "only provide the simple version and the second options\n"
-              "allows you to disable it if you don't want to use it at all."),
+              "only provide the simple version and the second\n"
+              "option allows you to disable it."),
             last
           );
 
@@ -231,20 +231,21 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
 
    last = m_panel->CreateMessage
           (
-            _("The remaining options allow to configure the details of "
-              "the threading algorithm used when threading the messages\n"
-              "locally (only the last one is also used with server side "
-              "threading). You shouldn't have to modify them normally."),
+            _("The remaining options allow to configure the details "
+              "of the threading algorithm used when threading\n"
+              "the messages locally (only the last one is also used "
+              "with server side threading). You shouldn't have\n"
+	      "to modify them normally."),
             last
           );
 
 #if wxUSE_REGEX
    last = m_panel->CreateMessage
           (
-            _("Mahogany may apply a regular expression to the subjects "
-              "before comparing them: this allows to get rid of non\n"
-              "meaningful parts such as mailing list prefix or reply "
-              "marker easily."),
+            _("Mahogany may apply a regular expression to the "
+              "subjects before comparing them: this allows to get\n"
+              "rid of non meaningful parts such as mailing list "
+              "prefix or reply marker easily."),
             last
           );
 
@@ -276,10 +277,10 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
 
    last = m_panel->CreateMessage
           (
-            _("What happens if the root of the thread is not present in "
-              "the folder? If the option below is on, the messages are\n"
-              "still indented like if it were there, otherwise they are "
-              "shifted to the left."),
+            _("What happens if the root of the thread is not present "
+              "in the folder? If the option below is on, the messages\n"
+              "are still indented like if it were there, otherwise they "
+              "are shifted to the left."),
             last
           );
 
