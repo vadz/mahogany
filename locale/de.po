@@ -6437,7 +6437,7 @@ msgstr "Anzeigen des reinen Nachrichtentext"
 
 #: gui/wxMenuDefs.cpp:439
 msgid "Show &MIME structure...\tShift-Ctrl-Z"
-msgstr "MIME-Struktur anzeigen...\tShift-Ctrl-Z "
+msgstr "&MIME-Struktur anzeigen...\tShift-Ctrl-Z"
 
 #: gui/wxMenuDefs.cpp:439
 msgid "Show the MIME structure of the message"
