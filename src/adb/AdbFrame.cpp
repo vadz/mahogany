@@ -1345,6 +1345,26 @@ void wxAdbEditFrame::RestoreSettings1()
     m_FindWhere = AdbLookup_NickName;
   }
 
+  // if there are no address books at all, load at least the autocollect book
+  if ( !m_astrAdb.Count() ) {
+    m_astrAdb.Add(mApplication->GetLocalDir() + "/autocollect.adb");
+
+    // it should be empty anyhow, but just in case
+    m_astrProviders.Empty();
+    AdbDataProvider *provDef = AdbDataProvider::GetNativeProvider();
+    String nameDef;
+    if ( provDef ) {
+      nameDef = provDef->GetProviderName();
+
+      provDef->DecRef();
+    }
+    else {
+      wxFAIL_MSG( "no default ADB provider?" );
+    }
+
+    m_astrProviders.Add(nameDef);
+  }
+
   // now, m_astrAdb contains all previously opened ADBs: then copy the ones
   // which really exist to a temporary array and assign it to m_astrAdb
   wxArrayString astrAdb, astrProviders;
@@ -1609,8 +1629,35 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
     strWhat = _("Address book");
     strName = ((AdbTreeBook *)m_current)->GetFileName();
 
-    int nIndex = m_astrAdb.Index(strName);
-    wxASSERT( nIndex >= 0 );
+    // found the book index in m_astrAdb array: note that we have to take
+    // account of the fact that either string may be relative or absolute
+    // filename
+    wxASSERT_MSG( IsAbsPath(strName), "book name should be absolute" );
+
+    int nIndex = wxNOT_FOUND;
+    size_t count = m_astrAdb.Count();
+    for ( size_t n = 0; n < count; n++ ) {
+      wxString bookname = m_astrAdb[n];
+      if ( !IsAbsPath(bookname) ) {
+        bookname = mApplication->GetLocalDir() + '/' + bookname;
+      }
+#ifdef __WXMSW__
+      bookname.Replace('\\', '/');
+#endif
+      if ( strName == bookname ) {
+        nIndex = n;
+        break;
+      }
+    }
+
+    if ( nIndex == wxNOT_FOUND )
+    {
+      // this is never supposed to happen
+      wxFAIL_MSG( "deleting book which isn't opened??" );
+
+      return;
+    }
+
     m_astrAdb.Remove((size_t)nIndex);
     m_astrProviders.Remove((size_t)nIndex);
   }

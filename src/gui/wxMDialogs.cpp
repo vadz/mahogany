@@ -2527,6 +2527,7 @@ static const struct
    { "StoreRemote", gettext_noop("Question whether to store remote settings at shutdown.") },   { "OverwriteRemote",gettext_noop("Question whether to overwrite newer remote config settings") },
    { "StoredRemote", gettext_noop("Confirmation that remote config was saved") },
    { "FilterNotUsedYet", gettext_noop("Warn that newly created filter is unused") },
+   { "ImportUnderRoot", gettext_noop("Ask where do you want to import folders") },
    //{ "", gettext_noop() },
 };
 

@@ -1301,27 +1301,31 @@ bool RunInstallWizard()
 
       if ( mf )
       {
+         // make the lines short enough to ensure they're not wrapped with the
+         // default line wrap setting (60 columns)
          String msgFmt =
             _("From: mahogany-users-help@lists.sourceforge.net\n"
               "Subject: Welcome to Mahogany!\n"
               "Date: %s\n"
               "\n"
-              "Thank you for trying Mahogany!\n"
+              "Thank you for using Mahogany!\n"
               "\n"
-              "This mail and news client is developed as an OpenSource project by a\n"
-              "team of volunteers from around the world.\n"
-              "If you would like to contribute to its development, you are\n"
-              "always welcome to join in.\n"
+              "This mail and news client is developed as an OpenSource\n"
+              "project by a team of volunteers from around the world.\n"
+              "If you would like to contribute to its development, you\n"
+              "are always welcome to join in!\n"
               "\n"
-              "We also rely on you to report any bugs or wishes for improvements\n"
-              "that you may have.\n"
+              "We also rely on you to report any bugs or wishes for\n"
+              "improvements that you may have.\n"
               "\n"
-              "Please visit our web pages at http://mahogany.sourceforge.net/\n"
+              "Please look at http://mahogany.sourceforge.net/ for\n"
+              "additional information, news about the latest releases\n"
+              "and frequently asked questions."
               "\n"
-              "Also, reply to this e-mail message and you will automatically be\n"
-              "added to the mailing list of Mahogany users, where you will find\n"
-              "other users happy to share their experiences with you and help you\n"
-              "get started.\n"
+              "Also, if you reply to this e-mail message and you will\n"
+              "be automatically added to the mailing list of Mahogany\n"
+              "users, where you will find other users happy to share\n"
+              "their experiences with you and help you get started.\n"
               "\n"
               "Your Mahogany Developers Team\n"
               );

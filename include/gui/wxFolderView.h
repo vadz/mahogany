@@ -260,16 +260,7 @@ private:
    {
       // default copy ctor is ok for now, add one if needed later!
 
-      bool operator==(const AllProfileSettings& other) const
-      {
-         return dateFormat == other.dateFormat &&
-                dateGMT == other.dateGMT &&
-                senderOnlyNames == other.senderOnlyNames &&
-                replaceFromWithTo == other.replaceFromWithTo &&
-                // returnAddresses == other.returnAddresses &&
-                memcmp(columns, other.columns, sizeof(columns)) == 0;
-      }
-
+      bool operator==(const AllProfileSettings& other) const;
       bool operator!=(const AllProfileSettings& other) const
          { return !(*this == other); }
 

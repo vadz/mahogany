@@ -39,6 +39,7 @@
 #include <wx/datetime.h>
 #include <wx/statline.h>
 
+#include "Mpers.h"
 #include "MImport.h"
 
 // ----------------------------------------------------------------------------
@@ -236,7 +237,65 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
 
       DO_IMPORT(Settings, _("settings"));
       DO_IMPORT(ADB, _("address books"));
-      DO_IMPORT(Folders, _("folders"));
+
+      if ( m_checkFolders->GetValue() )
+      {
+         MFolder *folderParent = NULL;
+         int flags = 0;
+
+         String msg;
+         msg.Printf(_("Would you like to put %s folders under a subgroup\n"
+                      "(otherwise they will be created at the tree "
+                      "root level?"), progname);
+         if ( MDialog_YesNoDialog
+              (
+                  msg,
+                  this,
+                  _("Import Folders"),
+                  true /* yes default */,
+                  GetPersMsgBoxName(M_MSGBOX_IMPORT_FOLDERS_UNDER_ROOT)
+              ) )
+         {
+            folderParent = MDialog_FolderChoose(this);
+         }
+
+         // TODO: this should be customizable, right now we just always put
+         //       the system folders under a subgroup without letting the user
+         //       to put them elsewhere nor (which is probably more useful) to
+         //       not import them at all
+         if ( !folderParent )
+         {
+            String folderName;
+            folderName.Printf(_("%s System Folders"), progname);
+            folderParent = MFolder::Get(folderName);
+            if ( !folderParent )
+            {
+               folderParent = CreateFolderTreeEntry
+                              (
+                               NULL,
+                               folderName,
+                               MF_GROUP,
+                               0,
+                               "",
+                               FALSE
+                              );
+            }
+         }
+         else
+         {
+            // the user has chosen the folder, put the folders there
+            flags |= MImporter::ImportFolder_AllUseParent;
+         }
+
+         flags |= MImporter::ImportFolder_SystemUseParent;
+
+         wxLogMessage(_("Importing %s %s"), progname, _("folders"));
+         if ( !m_importer.ImportFolders(folderParent, flags) )
+            m_ok = false;
+
+         SafeDecRef(folderParent);
+      }
+
       DO_IMPORT(Filters, _("filter rules"));
 
       #undef DO_IMPORT

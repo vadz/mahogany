@@ -1924,9 +1924,12 @@ extern "C"
       const Value v2 = args->GetArg(1)->Evaluate();
       String haystack = v1.ToString();
       String needle = v2.ToString();
-      strutil_RegEx * re = p->GetInterface()->strutil_compileRegEx(needle);
+      strutil_RegEx * re = p->GetInterface()->
+                              strutil_compileRegEx(needle, flags);
       if(! re) return FALSE;
-      bool rc = p->GetInterface()->strutil_matchRegEx(re, haystack, flags);
+
+      // yes, 0, don't use flags here
+      bool rc = p->GetInterface()->strutil_matchRegEx(re, haystack, 0);
       p->GetInterface()->strutil_freeRegEx(re);
       return rc;
    }

@@ -1817,7 +1817,7 @@ void wxOptionsPage::OnListBoxButton(wxCommandEvent& event)
    if ( dirty )
    {
       // mark the dialog as being dirty too
-      wxOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsDialog);
+      wxNotebookDialog *dialog = GET_PARENT_OF_CLASS(this, wxNotebookDialog);
       if ( dialog )
          dialog->SetDirty();
    }

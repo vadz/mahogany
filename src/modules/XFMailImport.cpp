@@ -49,7 +49,7 @@ public:
    virtual bool Applies() const;
    virtual int GetFeatures() const;
    virtual bool ImportADB();
-   virtual bool ImportFolders();
+   virtual bool ImportFolders(MFolder *folderParent, int flags);
    virtual bool ImportSettings();
    virtual bool ImportFilters();
 
@@ -164,7 +164,8 @@ bool MXFMailImporter::ImportSettings()
       int nEq = line.Find('=');
       if ( nEq == wxNOT_FOUND )
       {
-         wxLogDebug("%s(%u): missing '=' sign.", filename.c_str(), nLine + 1);
+         wxLogTrace("importxfmail",
+                    "%s(%u): missing '=' sign.", filename.c_str(), nLine + 1);
 
          // skip line
          continue;
@@ -184,7 +185,7 @@ bool MXFMailImporter::ImportSettings()
 // import XFMail folders
 // ----------------------------------------------------------------------------
 
-bool MXFMailImporter::ImportFolders()
+bool MXFMailImporter::ImportFolders(MFolder *folderParent, int flagsImport)
 {
    wxString foldersfilename = GetXFMailDir() + ".xfmfolders";
    wxTextFile foldersfile(foldersfilename);
@@ -209,7 +210,9 @@ bool MXFMailImporter::ImportFolders()
          int nEq = line.Find('=');
          if ( nEq == wxNOT_FOUND )
          {
-            wxLogDebug("%s(%u): missing '=' sign.", filenamerc.c_str(), nLine + 1);
+            wxLogTrace("importxfmail",
+                       "%s(%u): missing '=' sign.",
+                       filenamerc.c_str(), nLine + 1);
 
             // skip line
             continue;
@@ -228,10 +231,6 @@ bool MXFMailImporter::ImportFolders()
 
    if ( m_mailDir.Last() != '/' )
       m_mailDir += '/';
-
-   // we use this folder for XFMail system folders to avoid name clashes with
-   // Mahogany system folders
-   MFolder *folderXFMail = (MFolder *)NULL;
 
    bool error = FALSE;
    size_t nImported = 0;
@@ -255,7 +254,8 @@ bool MXFMailImporter::ImportFolders()
 
       if ( !folderName )
       {
-         wxLogDebug("%s(%u): empty folder name, skipping.",
+         wxLogTrace("importxfmail",
+                    "%s(%u): empty folder name, skipping.",
                     foldersfilename.c_str(), nLine + 1);
          continue;
       }
@@ -273,7 +273,8 @@ bool MXFMailImporter::ImportFolders()
          // the folder name should not start with a slash
          if ( folderName[0u] == '/' )
          {
-            wxLogDebug("%s(%u): folder '%s' assumed to be a spool, skipping.",
+            wxLogTrace("importxfmail",
+                       "%s(%u): folder '%s' assumed to be a spool, skipping.",
                        foldersfilename.c_str(), nLine + 1, folderName.c_str());
             continue;
          }
@@ -296,7 +297,8 @@ bool MXFMailImporter::ImportFolders()
       unsigned long nType;
       if ( !typeString.ToULong(&nType) || (nType != 1 && nType != 8) )
       {
-         wxLogDebug("%s(%u): unreckognized folder type %s, skipping.",
+         wxLogTrace("importxfmail",
+                    "%s(%u): unreckognized folder type %s, skipping.",
                     foldersfilename.c_str(), nLine + 1, typeString.c_str());
          continue;
       }
@@ -338,46 +340,45 @@ bool MXFMailImporter::ImportFolders()
       unsigned long flags;
       if ( !flagsString.ToULong(&flags) )
       {
-         wxLogDebug("%s(%u): not numeric folder flags %s, skipping.",
+         wxLogTrace("importxfmail",
+                    "%s(%u): not numeric folder flags %s, skipping.",
                     foldersfilename.c_str(), nLine + 1, flagsString.c_str());
          continue;
       }
 
-      MFolder *parent;
-      /*if ( (flags & SYSTEM) ||
+      // find the parent for the folder we're going to import
+      MFolder *parent = NULL;
+      if ( (flags & SYSTEM) ||
             folderName == "inbox" ||
             folderName == "outbox" ||
             folderName == "trash" ||
             folderName == "sent_mail" ||
             folderName == "draft" ||
             folderName == "template" )
-      {*/ //by Nerijus
-         // we put the XFMail system folder under a common parent
-	 // I'd like to put ALL folders under a common parent - Nerijus
-         wxLogDebug("%s(%u): folder %s has system flag set.",
+      {
+         wxLogTrace("importxfmail",
+                    "%s(%u): folder %s is a system folder.",
                     foldersfilename.c_str(), nLine + 1, folderName.c_str());
 
-         if ( !folderXFMail )
+         // do we import system folders at all?
+         if ( !(flagsImport & ImportFolder_SystemImport) )
          {
-            folderXFMail = CreateFolderTreeEntry
-                           (
-                            NULL,
-                            "XFMail",
-                            MF_GROUP,
-                            0,
-                            "",
-                            FALSE
-                           );
-                           if ( !folderXFMail )
-                           folderXFMail = MFolder::Get("XFMail");
+            wxLogTrace("importxfmail", "Skipping XFMail system folder.");
+
+            continue;
          }
 
-         parent = folderXFMail;
-      /*}
-      else
+         // do we put under the given parent folder?
+         if ( (flagsImport & ImportFolder_SystemUseParent)
+                == ImportFolder_SystemUseParent )
+            parent = folderParent;
+      }
+      else // not system folder
       {
-         parent = NULL;
-      }*/ //by Nerijus
+         if ( (flagsImport & ImportFolder_AllUseParent)
+                  == ImportFolder_AllUseParent )
+            parent = folderParent;
+      }
 
       // do create the folder
       FolderType type = nType == 1 ? MF_MH : MF_FILE;
@@ -407,8 +408,6 @@ bool MXFMailImporter::ImportFolders()
       }
    }
 
-   SafeDecRef(folderXFMail);
-
    if ( !nImported )
    {
       if ( error )
@@ -426,11 +425,16 @@ bool MXFMailImporter::ImportFolders()
    else // we did import something
    {
       // refresh the tree(s)
+      String nameParent;
+      if ( (flagsImport & ImportFolder_AllUseParent) && folderParent )
+         nameParent = folderParent->GetFullName();
+      //else: at least some folders were added under root
+
       MEventManager::Send
        (
          new MEventFolderTreeChangeData
             (
-             "",
+             nameParent,
              MEventFolderTreeChangeData::CreateUnder
             )
        );
@@ -573,7 +577,8 @@ typedef struct _xf_rule {
       const char *p = line.c_str();
       if ( *p++ != '@' )
       {
-         wxLogDebug("%s(%u): rule line doesn't start with '@', skipping.",
+         wxLogTrace("importxfmail",
+                    "%s(%u): rule line doesn't start with '@', skipping.",
                     filename.c_str(), nLine + 1);
 
          continue;
@@ -583,7 +588,8 @@ typedef struct _xf_rule {
       wxStringTokenizer tk(p, " ");
       if ( tk.CountTokens() != 5 )
       {
-         wxLogDebug("%s(%u): rule line doesn't contain exactly 5 tokens, skipping.",
+         wxLogTrace("importxfmail",
+                    "%s(%u): rule line doesn't contain exactly 5 tokens, skipping.",
                     filename.c_str(), nLine + 1);
 
          continue;
@@ -594,7 +600,8 @@ typedef struct _xf_rule {
       if ( !tk.GetNextToken().ToULong(&action) ||
            !tk.GetNextToken().ToULong(&flags) )
       {
-         wxLogDebug("%s(%u): non numeric rule action or flags, skipping.",
+         wxLogTrace("importxfmail",
+                    "%s(%u): non numeric rule action or flags, skipping.",
                     filename.c_str(), nLine + 1);
 
          continue;
@@ -632,7 +639,8 @@ typedef struct _xf_rule {
 
       if ( where == ORC_W_Illegal )
       {
-         wxLogDebug("%s(%u): unreckognized rule header '%s', skipping.",
+         wxLogTrace("importxfmail",
+                    "%s(%u): unreckognized rule header '%s', skipping.",
                     filename.c_str(), nLine + 1, fmatch.c_str());
 
          continue;

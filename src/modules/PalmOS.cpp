@@ -10,7 +10,7 @@
 /**
    This module supports synchronisation, backup and install facilities
    for PalmOS based handheld devices.
-   
+
 
    AvantGo / MAL server support:
 
@@ -25,7 +25,7 @@
    then detect the existence of libmal and set everything up properly
    to compile and link it in. MAL support in this file will
    automatically be activated then.
-   
+
 **/
 
 // ----------------------------------------------------------------------------
@@ -44,7 +44,13 @@
 #   include "MMainFrame.h"
 #endif
 
-#ifdef USE_PISOCK
+// we can't compile an empty library as it was done before as then you get
+// constant error messages when looking for a module telling that it is not a
+// valid Mahogany module (as it doesn't then even have GetMModuleProperties()
+// function), so instead just abort
+#ifndef USE_PISOCK
+   #error "This module shouldn't be compiled if you're not using Palm."
+#endif
 
 #if HAVE_PI_ACCEPT_TO
 #   include <wx/minifram.h>
@@ -140,7 +146,7 @@ extern "C"
 #define MP_MOD_PALMOS_MAL_PROXY_LOGIN_D      ""
 #define MP_MOD_PALMOS_MAL_PROXY_PASSWORD_D   ""
 #define MP_MOD_PALMOS_MAL_USE_SOCKS_D        0l
-#define MP_MOD_PALMOS_MAL_SOCKS_HOST_D ""  
+#define MP_MOD_PALMOS_MAL_SOCKS_HOST_D ""
 #define MP_MOD_PALMOS_MAL_SOCKS_PORT_D 80l
 
 #define pi_mktag(c1,c2,c3,c4) (((c1)<<24)|((c2)<<16)|((c3)<<8)|(c4))
@@ -301,7 +307,7 @@ private:
 #ifdef HAVE_LIBMAL
    void SyncMAL(void);
 #endif
-   
+
    void Backup(void);
 
    void Install(void);
@@ -323,7 +329,7 @@ private:
 
    int createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group);
    int CreateFileList(wxArrayString &list, DIR * dir, wxString directory);
-   void RemoveFromList(wxArrayString &list, wxString &name) 
+   void RemoveFromList(wxArrayString &list, wxString &name)
       { if (list.Index(name) >= 0) list.Remove(list.Index(name)); }
 
    int m_PiSocket;
@@ -381,12 +387,12 @@ int MAL_PrintFunc(bool errorflag, const char * format, va_list args)
       rc = msg.PrintfV(format, args);
       msg = "MAL sync: " + msg;
    }
-   
+
    if(errorflag)
       gs_MInterface->MessageDialog(msg,NULL,"MAL synchronisation error!");
    else
    {
-      
+
       gs_MInterface->StatusMessage(msg);
       wxYield();
    }
@@ -439,7 +445,7 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// 
+//
 // ----------------------------------------------------------------------------
 
 bool
@@ -627,7 +633,7 @@ PalmOSModule::PalmOSModule(MInterface *minterface)
    : MModule()
 {
    SetMInterface(minterface);
-   
+
    m_PiSocket = -1;
    m_Profile = NULL;
    m_Lock = NULL;
@@ -754,7 +760,7 @@ PalmOSModule::Connect(void)
 
          return false;
       }
-      
+
       StatusMessage(_("Please press HotSync button and click on OK!"));
 #if HAVE_PI_ACCEPT_TO
       wxMiniFrame *mini = new wxMiniFrame(NULL,-1, "Mahogany");
@@ -787,7 +793,7 @@ PalmOSModule::Connect(void)
       /* Tell user (via Pilot) that we are starting things up */
       dlp_OpenConduit(m_PiSocket);
 
-#ifdef PALMOS_SYNCTIME         
+#ifdef PALMOS_SYNCTIME
       /* set Palm´s time */
       if (m_SyncTime)
       {
@@ -827,7 +833,7 @@ PalmOSModule::Disconnect(void)
          }
       }
    }
-   
+
    StatusMessage(_(""));
 }
 
@@ -892,7 +898,7 @@ void PalmOSModule::Synchronise(PalmBook *pBook)
 #ifdef HAVE_LIBMAL
       // we do this last as there is most potential for something to
       // go wrong and the error handling in libmal is _very_
-      // dodgy... (KB) 
+      // dodgy... (KB)
          if(m_SyncMAL)
             SyncMAL();
 #endif
@@ -933,8 +939,8 @@ PalmOSModule::CreateFileList(wxArrayString &list, DIR * dir,
 #undef _DIRENT_HAVE_D_TYPE
 #ifdef _DIRENT_HAVE_D_TYPE
       // ignore directories
-      if ( (dirent->d_type & DT_REG) == 0 
-         && (dirent->d_type & DT_LNK) == 0 
+      if ( (dirent->d_type & DT_REG) == 0
+         && (dirent->d_type & DT_LNK) == 0
          && (dirent->d_type & DT_UNKNOWN) == 0 )
       {
          wxString msg;
@@ -943,7 +949,7 @@ PalmOSModule::CreateFileList(wxArrayString &list, DIR * dir,
          StatusMessage(_(msg));
          continue;
       }
-  
+
 #endif
       name = dirent->d_name;
       wxString extension = name.AfterLast('.');
@@ -974,7 +980,7 @@ PalmOSModule::CreateFileList(wxArrayString &list, DIR * dir,
 
 
 int
-PalmOSModule::GetPalmDBList(wxArrayString &dblist, bool getFilenames) 
+PalmOSModule::GetPalmDBList(wxArrayString &dblist, bool getFilenames)
 {
    dblist.Empty();
 
@@ -992,7 +998,7 @@ PalmOSModule::GetPalmDBList(wxArrayString &dblist, bool getFilenames)
          break;
 
       StatusMessage(_("Reading list of databases ..."));
-   
+
       wxString dbname;
       dbname.Printf("%s", info.name);
 
@@ -1077,7 +1083,7 @@ PalmOSModule::Backup(void)
       struct utimbuf  times;
       struct stat     statb;
       wxString name, fname;
-      
+
       if (dlp_ReadDBList(m_PiSocket, 0, 0x80, i, &info) < 0)
          break;
 
@@ -1095,7 +1101,7 @@ PalmOSModule::Backup(void)
       // construct filename
       fname.Printf("%s", info.name);
       protect_name(fname);
-      
+
       if (info.flags & dlpDBFlagResource)
          fname.Append(".prc");
       else
@@ -1132,23 +1138,23 @@ PalmOSModule::Backup(void)
          // with string start or end
          bool valid = false;
 
-         if (pos == 0) 
+         if (pos == 0)
             valid = true;  // first entry in ExcludeList
-         else 
-            if ((m_BackupExcludeList.Mid(pos-1, 1)).Cmp(",") == 0) 
+         else
+            if ((m_BackupExcludeList.Mid(pos-1, 1)).Cmp(",") == 0)
                if (pos == 1)
                   valid = true;  // should never happen (string starts with kommata)
                else
-                  if ((m_BackupExcludeList.Mid(pos-2, 1)).Cmp("\\") != 0) 
+                  if ((m_BackupExcludeList.Mid(pos-2, 1)).Cmp("\\") != 0)
                      valid = true; // before entry is a kommata that is not escaped
-         
+
          // now we´ve made sure that the entry in the exclude list started correctly,
          // so let´s check whether it ends correctly, too
-         if (valid) 
+         if (valid)
             if (m_BackupExcludeList.Len() != fname.Len())
                if ((m_BackupExcludeList.Mid(pos + fname.Len(),1)).Cmp(",") != 0)
                   valid = false; // it was neither the last entry nor did it end with komma
-         
+
          if (valid) {
             if (orig_files.Index(name) >= 0)
                orig_files.Remove(orig_files.Index(name));
@@ -1173,7 +1179,7 @@ PalmOSModule::Backup(void)
                     name.c_str());
          ErrorMessage(_(msg));
       }
-      
+
       pi_file_close(f);
 
       /* Note: This is no guarantee that the times on the host system
@@ -1366,14 +1372,14 @@ PalmOSModule::InstallFromDir(wxString directory, bool delFiles)
    }
 
    ofile_total = CreateFileList(fnames, dir, directory);
-   
+
    // we´ve finished reading the filelist
    closedir(dir);
 
    // install files
    if (ofile_total > 0)
       InstallFiles(fnames, delFiles);
-      
+
    fnames.Empty();
 }
 
@@ -1400,7 +1406,7 @@ PalmOSModule::Install()
 
    if (fnames.GetCount() == 0)
       return;
-      
+
    // install files
    PiConnection conn(this);
    if( IsConnected())
@@ -1753,7 +1759,7 @@ PalmOSModule::StoreEMails(void)
          t.sentTo = 0;
          t.body = 0;
          t.dated = 0;
-         
+
          msg = mf->GetMessage(hi->GetUId());
          ASSERT(msg);
          String tmpstr;
@@ -1774,7 +1780,7 @@ PalmOSModule::StoreEMails(void)
          time_t tt;
          time(&tt);
          t.date = *localtime(&tt);
-         
+
          content = "";
          for(int partNo = 0; partNo < msg->CountParts(); partNo++)
          {
@@ -1840,7 +1846,7 @@ PalmOSModule::SyncMAL(void)
 
    PalmSyncInfo * pInfo = syncInfoNew();
    if (NULL == pInfo)
-      return; 
+      return;
 
    /* set up MAL status reporting callback */
    register_printStatusHook (MAL_PrintStatusFunc);
@@ -1861,14 +1867,14 @@ PalmOSModule::SyncMAL(void)
       StatusMessage(_("Setting up SOCKS proxy..."));
       setSocksProxy ((char *) m_MALSocksHost.c_str());
       setSocksProxyPort ( m_MALSocksPort );
-   }    
+   }
    StatusMessage(_("Synchronising MAL server/AvantGo..."));
    malsync (m_PiSocket, pInfo);
    syncInfoFree(pInfo);
    StatusMessage("");
 }
 #endif
-   
+
 
 
 //---------------------------------------------------------
@@ -1908,80 +1914,75 @@ static wxOptionsPage::FieldInfo gs_FieldInfos1[] =
 {
    { gettext_noop("Synchronise Mail"), wxOptionsPage::Field_Bool,    -1 },
 #ifdef PALMOS_SYNCTIME
-      { gettext_noop("Synchronise Time"), wxOptionsPage::Field_Bool, -1 },
+   { gettext_noop("Synchronise Time"), wxOptionsPage::Field_Bool, -1 },
 #endif
-//   { gettext_noop("Synchronise Addressbook"), wxOptionsPage::Field_Bool,    -1 },
-      { gettext_noop("Always do Backup on sync"), wxOptionsPage::Field_Bool,    -1 },
+   //   { gettext_noop("Synchronise Addressbook"), wxOptionsPage::Field_Bool,    -1 },
+   { gettext_noop("Always do Backup on sync"), wxOptionsPage::Field_Bool,    -1 },
 #ifdef HAVE_LIBMAL
-         { gettext_noop("Sync to MAL server (e.g. AvantGo)"), wxOptionsPage::Field_Bool,    -1 }, 
+   { gettext_noop("Sync to MAL server (e.g. AvantGo)"), wxOptionsPage::Field_Bool,    -1 },
 #endif
-            { gettext_noop("The Auto-Install function will automatically\n"
-                           "install all databases from a given directory\n"
-                           "on the PalmPilot during synchronisation."),
-                 wxOptionsPage::Field_Message, -1},
-               { gettext_noop("Do Auto-Install"), wxOptionsPage::Field_Bool,  -1 },
-                  { gettext_noop("Directory for Auto-Install"), wxOptionsPage::Field_Dir, -1 },
-                     { gettext_noop("Pilot device"), wxOptionsPage::Field_Text,    -1 },
-                        // the speed values must be in sync with the ones in the speeds[]
-                        // array in GetConfig() further up:
-                        { gettext_noop("Connection speed:9600:19200:38400:57600:115200"), wxOptionsPage::Field_Combo,    -1 },
-                           { gettext_noop("Mailbox for exchange"), wxOptionsPage::Field_Folder, -1},
-                              { gettext_noop("Mail disposal mode:keep:delete:file"), wxOptionsPage::Field_Combo,   -1},
-                                 { gettext_noop("Directory for backup files"),
-				 wxOptionsPage::Field_Dir,    -1 },
-                                    { gettext_noop("Delete backups of no longer existing databases"),
-                                         wxOptionsPage::Field_Bool,    -1 },
-                                       { gettext_noop("Backup only modified databases"), wxOptionsPage::Field_Bool,    -1 },
-                                          { gettext_noop("Force total backup of all databases"), wxOptionsPage::Field_Bool,    -1 },
-                                             { gettext_noop("Exclude these databases"), wxOptionsPage::Field_Text,    -1 },
-                                                };
+   { gettext_noop("The Auto-Install function will automatically\n"
+         "install all databases from a given directory\n"
+         "on the PalmPilot during synchronisation."), wxOptionsPage::Field_Message, -1},
+   { gettext_noop("Do Auto-Install"), wxOptionsPage::Field_Bool,  -1 },
+   { gettext_noop("Directory for Auto-Install"), wxOptionsPage::Field_Dir, -1 },
+   { gettext_noop("Pilot device"), wxOptionsPage::Field_Text,    -1 },
+   // the speed values must be in sync with the ones in the speeds[]
+   // array in GetConfig() further up:
+   { gettext_noop("Connection speed:9600:19200:38400:57600:115200"), wxOptionsPage::Field_Combo,    -1 },
+   { gettext_noop("Mailbox for exchange"), wxOptionsPage::Field_Folder, -1},
+   { gettext_noop("Mail disposal mode:keep:delete:file"), wxOptionsPage::Field_Combo,   -1},
+   { gettext_noop("Directory for backup files"), wxOptionsPage::Field_Dir,    -1 },
+   { gettext_noop("Delete backups of no longer existing databases"), wxOptionsPage::Field_Bool,    -1 },
+   { gettext_noop("Backup only modified databases"), wxOptionsPage::Field_Bool,    -1 },
+   { gettext_noop("Force total backup of all databases"), wxOptionsPage::Field_Bool,    -1 },
+   { gettext_noop("Exclude these databases"), wxOptionsPage::Field_Text,    -1 },
+};
 
 
 static ConfigValueDefault gs_ConfigValues2 [] =
 {
    ConfigValueDefault(MP_MOD_PALMOS_LOCK, MP_MOD_PALMOS_LOCK_D),
-      ConfigValueNone(),
-      ConfigValueDefault(MP_MOD_PALMOS_SCRIPT1, MP_MOD_PALMOS_SCRIPT1_D),
-      ConfigValueDefault(MP_MOD_PALMOS_SCRIPT2, MP_MOD_PALMOS_SCRIPT2_D),
+   ConfigValueNone(),
+   ConfigValueDefault(MP_MOD_PALMOS_SCRIPT1, MP_MOD_PALMOS_SCRIPT1_D),
+   ConfigValueDefault(MP_MOD_PALMOS_SCRIPT2, MP_MOD_PALMOS_SCRIPT2_D),
 #ifdef HAVE_LIBMAL
-      ConfigValueNone(),
-      ConfigValueDefault(MP_MOD_PALMOS_MAL_USE_PROXY, MP_MOD_PALMOS_MAL_USE_PROXY_D),
-      ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_HOST, MP_MOD_PALMOS_MAL_PROXY_HOST_D),
-      ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_PORT, MP_MOD_PALMOS_MAL_PROXY_PORT_D),
-      ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_LOGIN, MP_MOD_PALMOS_MAL_PROXY_LOGIN_D),
-      ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_PASSWORD, MP_MOD_PALMOS_MAL_PROXY_PASSWORD_D),
-      ConfigValueDefault(MP_MOD_PALMOS_MAL_USE_SOCKS, MP_MOD_PALMOS_MAL_USE_SOCKS_D),
-      ConfigValueDefault(MP_MOD_PALMOS_MAL_SOCKS_HOST, MP_MOD_PALMOS_MAL_SOCKS_HOST_D),
-      ConfigValueDefault(MP_MOD_PALMOS_MAL_SOCKS_PORT, MP_MOD_PALMOS_MAL_SOCKS_PORT_D),
+   ConfigValueNone(),
+   ConfigValueDefault(MP_MOD_PALMOS_MAL_USE_PROXY, MP_MOD_PALMOS_MAL_USE_PROXY_D),
+   ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_HOST, MP_MOD_PALMOS_MAL_PROXY_HOST_D),
+   ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_PORT, MP_MOD_PALMOS_MAL_PROXY_PORT_D),
+   ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_LOGIN, MP_MOD_PALMOS_MAL_PROXY_LOGIN_D),
+   ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_PASSWORD, MP_MOD_PALMOS_MAL_PROXY_PASSWORD_D),
+   ConfigValueDefault(MP_MOD_PALMOS_MAL_USE_SOCKS, MP_MOD_PALMOS_MAL_USE_SOCKS_D),
+   ConfigValueDefault(MP_MOD_PALMOS_MAL_SOCKS_HOST, MP_MOD_PALMOS_MAL_SOCKS_HOST_D),
+   ConfigValueDefault(MP_MOD_PALMOS_MAL_SOCKS_PORT, MP_MOD_PALMOS_MAL_SOCKS_PORT_D),
 #endif
-      };
+};
 
 #define MALPROXY 3
 static wxOptionsPage::FieldInfo gs_FieldInfos2[] =
 {
    { gettext_noop("Try to lock device"), wxOptionsPage::Field_Bool,    -1 },
-      { gettext_noop("The following two settings can run other\n"
-                     "programs or scripts just before and after\n"
-                     "the synchronisation, e.g. to start/stop other\n"
-                     "services using the serial port. Leave them\n"
-                     "empty unless you know what you are doing."),
-           wxOptionsPage::Field_Message, -1},
-         { gettext_noop("Script to run before"), wxOptionsPage::Field_File,    -1 },
-            { gettext_noop("Script to run after"), wxOptionsPage::Field_File,    -1 },
+   { gettext_noop("The following two settings can run other\n"
+         "programs or scripts just before and after\n"
+         "the synchronisation, e.g. to start/stop other\n"
+         "services using the serial port. Leave them\n"
+         "empty unless you know what you are doing."), wxOptionsPage::Field_Message, -1},
+   { gettext_noop("Script to run before"), wxOptionsPage::Field_File,    -1 },
+   { gettext_noop("Script to run after"), wxOptionsPage::Field_File,    -1 },
 #ifdef HAVE_LIBMAL
-               { gettext_noop("The following options affect only the\n"
-                              "MAL/AvantGo synchronisation:"),
-                    wxOptionsPage::Field_Message, -1},
-                  { gettext_noop("Use Proxy host for MAL"), wxOptionsPage::Field_Bool,  -1 },
-                     { gettext_noop("  Proxy host"), wxOptionsPage::Field_Text, MALPROXY },
-                        { gettext_noop("  Proxy port number"), wxOptionsPage::Field_Number,MALPROXY},
-                           { gettext_noop("  Proxy login"), wxOptionsPage::Field_Text,  MALPROXY },
-                              { gettext_noop("  Proxy password"), wxOptionsPage::Field_Passwd, MALPROXY },
-                                 { gettext_noop("Use SOCKS server for MAL access"), wxOptionsPage::Field_Bool,  -1},
-                                    { gettext_noop("  SOCKS host"), wxOptionsPage::Field_Text,  MALPROXY+5 },
-                                       { gettext_noop("  SOCKS port number"), wxOptionsPage::Field_Number,  MALPROXY+5 },
+   { gettext_noop("The following options affect only the\n"
+         "MAL/AvantGo synchronisation:"), wxOptionsPage::Field_Message, -1},
+   { gettext_noop("Use Proxy host for MAL"), wxOptionsPage::Field_Bool,  -1 },
+   { gettext_noop("  Proxy host"), wxOptionsPage::Field_Text, MALPROXY },
+   { gettext_noop("  Proxy port number"), wxOptionsPage::Field_Number,MALPROXY},
+   { gettext_noop("  Proxy login"), wxOptionsPage::Field_Text,  MALPROXY },
+   { gettext_noop("  Proxy password"), wxOptionsPage::Field_Passwd, MALPROXY },
+   { gettext_noop("Use SOCKS server for MAL access"), wxOptionsPage::Field_Bool,  -1},
+   { gettext_noop("  SOCKS host"), wxOptionsPage::Field_Text,  MALPROXY+5 },
+   { gettext_noop("  SOCKS port number"), wxOptionsPage::Field_Number,  MALPROXY+5 },
 #endif
-                                          };
+};
 
 
 static
@@ -2012,7 +2013,7 @@ static
 struct wxOptionsPageDesc g_Pages[] =
 {
    gs_OptionsPageDesc1, gs_OptionsPageDesc2
-      };
+};
 
 void
 PalmOSModule::Configure(void)
@@ -2022,5 +2023,3 @@ PalmOSModule::Configure(void)
    p->DecRef();
 }
 
-
-#endif

@@ -679,7 +679,7 @@ wxOneFilterDialog::wxOneFilterDialog(MFilterDesc *fd, wxWindow *parent)
    m_ButtonMore->SetToolTip(_("Add another condition"));
    m_ButtonLess->SetToolTip(_("Remove the last condition"));
 
-   SetDefaultSize(8*wBtn, 15*hBtn);
+   SetDefaultSize(8*wBtn, 18*hBtn);
 }
 
 void
@@ -1277,7 +1277,7 @@ wxFolderFiltersDialog::wxFolderFiltersDialog(MFolder *folder, wxWindow *parent)
    m_btnAdd->SetConstraints(c);
 
    // increase min horz size
-   SetDefaultSize(5*wBtn, 10*hBtn);
+   SetDefaultSize(5*wBtn, 18*hBtn);
 }
 
 wxFolderFiltersDialog::~wxFolderFiltersDialog()

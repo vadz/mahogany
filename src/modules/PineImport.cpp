@@ -49,7 +49,7 @@ public:
    virtual bool Applies() const;
    virtual int GetFeatures() const;
    virtual bool ImportADB();
-   virtual bool ImportFolders();
+   virtual bool ImportFolders(MFolder *folderParent, int flags);
    virtual bool ImportSettings();
    virtual bool ImportFilters();
 
@@ -123,7 +123,7 @@ bool MPineImporter::ImportADB()
 // import the Pine folders in MBOX format
 // ----------------------------------------------------------------------------
 
-bool MPineImporter::ImportFolders()
+bool MPineImporter::ImportFolders(MFolder *folderParent, int flags)
 {
    // create a folder for each mbox file in ~/mail
 
@@ -149,9 +149,13 @@ bool MPineImporter::ImportFolders()
    {
       wxLogMessage(_("No local %s folders found."), "PINE");
    }
-   else
+   else // we do have some folders
    {
       wxLogMessage(_("Starting importing local %s mail folders."), "PINE");
+
+      // the parent for all folders
+      MFolder *parent = (flags & ImportFolder_AllUseParent)
+                           == ImportFolder_AllUseParent ? folderParent : NULL;
 
       // create the folder tree entries for them
       size_t nImported = 0;
@@ -163,7 +167,7 @@ bool MPineImporter::ImportFolders()
 
          MFolder *folder = CreateFolderTreeEntry
                            (
-                            NULL,      // no parent
+                            parent,    // parent may be NULL
                             name,      // the folder name
                             MF_FILE,   //            type
                             0,         //            flags
@@ -197,7 +201,7 @@ bool MPineImporter::ImportFolders()
           (
             new MEventFolderTreeChangeData
                (
-                "",
+                parent ? parent->GetFullName() : String(""),
                 MEventFolderTreeChangeData::CreateUnder
                )
           );

@@ -2584,3 +2584,30 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
 
    return true;
 }
+
+// ----------------------------------------------------------------------------
+// AllProfileSettings
+// ----------------------------------------------------------------------------
+
+bool wxFolderView::AllProfileSettings::
+operator==(const wxFolderView::AllProfileSettings& other) const
+{
+   bool equal = dateFormat == other.dateFormat &&
+                dateGMT == other.dateGMT &&
+                senderOnlyNames == other.senderOnlyNames &&
+                replaceFromWithTo == other.replaceFromWithTo &&
+                memcmp(columns, other.columns, sizeof(columns)) == 0;
+
+   if ( equal )
+   {
+      size_t count = returnAddresses.GetCount();
+      equal = count == other.returnAddresses.GetCount();
+      for ( size_t n = 0; equal && (n < count); n++ )
+      {
+         equal = returnAddresses[n] == other.returnAddresses[n];
+      }
+   }
+
+   return equal;
+}
+

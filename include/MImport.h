@@ -50,6 +50,14 @@ public:
       Import_Filters  = 0x0008
    };
 
+   // the flags for ImportFolders()
+   enum
+   {
+      ImportFolder_SystemImport    = 0x0001, // import system folders
+      ImportFolder_SystemUseParent = 0x0003, // put them under parent
+      ImportFolder_AllUseParent    = 0x0006  // put all folders under parent
+   };
+
    // return TRUE if the program this importer works with is/was installed
    virtual bool Applies() const = 0;
 
@@ -59,8 +67,10 @@ public:
    // import the address books
    virtual bool ImportADB() = 0;
 
-   // import the folders
-   virtual bool ImportFolders() = 0;
+   // import the folders creating them under the given parent folder
+   // (note: it won't DecRef() folderParent)
+   virtual bool ImportFolders(MFolder *folderParent,
+                              int flags = ImportFolder_SystemUseParent) = 0;
 
    // import the program settings
    virtual bool ImportSettings() = 0;

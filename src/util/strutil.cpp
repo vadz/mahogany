@@ -1258,30 +1258,31 @@ strutil_getMailAddress(const String &inputline,
 class strutil_RegEx : public wxRegEx
 {
 public:
-   strutil_RegEx(const String &pattern):
-      wxRegEx(pattern) { }
+   strutil_RegEx(const String &pattern, int flags):
+      wxRegEx(pattern, (wxRegExBase::Flags)flags) { }
 };
 
 
 class strutil_RegEx *
-strutil_compileRegEx(const String &pattern)
+strutil_compileRegEx(const String &pattern, int flags)
 {
-   strutil_RegEx * re = new strutil_RegEx(pattern);
-   if(re->IsValid())
-      return re;
-   else
+   strutil_RegEx * re = new strutil_RegEx(pattern, flags);
+   if( !re->IsValid() )
    {
       delete re;
-      return NULL;
+      re = NULL;
    }
-   return NULL;
+
+   return re;
 }
 
 bool
-strutil_matchRegEx(const class strutil_RegEx *regex, const String
-                   &pattern, int flags)
+strutil_matchRegEx(const class strutil_RegEx *regex,
+                   const String &pattern,
+                   int flags)
 {
-   ASSERT(regex);
+   CHECK( regex, FALSE, "NULL regex" );
+
    return regex->Match(pattern, (wxRegExBase::Flags) flags) != 0;
 }
 

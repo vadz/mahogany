@@ -363,11 +363,15 @@ bool strutil_is7bit(const char *text);
 
 /** @name regular expression matching */
 //@{
-/// compile a string into a regular expression
-class strutil_RegEx *
-strutil_compileRegEx(const String &pattern);
-/** Check if the regex matches the string.
+/** Compile a string into a regular expression
     @param flags combination of 0, RE_ICASE and RE_EXTENDED
+    @return true if ok
+*/
+class strutil_RegEx *
+strutil_compileRegEx(const String &pattern, int flags = 0);
+
+/** Check if the regex matches the string.
+    @param flags combination of RE_NOTBOL and RE_NOTEOL *only*
     @return true if it matches
 */
 bool

@@ -80,7 +80,7 @@ class wxRegExPOSIX : public wxRegExBase
       {
          return m_Valid;
       }
-   
+
    virtual void SetFlags(Flags flags)
       {
          m_Flags = flags;
@@ -101,7 +101,7 @@ class wxRegExPOSIX : public wxRegExBase
          int myflags = 0;
          if(flags & RE_NOTBOL) myflags |= REG_NOTBOL;
          if(flags & RE_NOTEOL) myflags |= REG_NOTEOL;
-        return 
+        return
           regexec((regex_t *)&m_RegEx, str.c_str(),
                   m_nMatches, m_Matches,
                   myflags) == 0;
@@ -118,11 +118,11 @@ class wxRegExPOSIX : public wxRegExBase
       {
          ASSERT(pattern);
          if(! IsValid()) return -1;
-         
+
          int replaced = 0;
          size_t lastpos = 0;
          wxString newstring;
-         
+
          for(size_t idx = 0;
              m_Matches[idx].rm_so != -1 && idx < m_nMatches;
              idx++)
@@ -168,8 +168,8 @@ private:
       {
          int flags = 0;
          if( m_Flags & RE_EXTENDED ) flags |= REG_EXTENDED;
-         if( m_Flags & RE_ICASE ) flags |= REG_ICASE;         
-         if( m_Flags & RE_NOSUB ) flags |= REG_NOSUB;         
+         if( m_Flags & RE_ICASE ) flags |= REG_ICASE;
+         if( m_Flags & RE_NOSUB ) flags |= REG_NOSUB;
          if( m_Flags & RE_NEWLINE ) flags |= REG_NEWLINE;
          return flags;
       }
