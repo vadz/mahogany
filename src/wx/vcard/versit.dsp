@@ -41,6 +41,7 @@ RSC=rc.exe
 # PROP Output_Dir ".\Release"
 # PROP Intermediate_Dir ".\Release"
 # PROP Target_Dir ""
+F90=df.exe
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /c
 # ADD CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /win32
@@ -67,6 +68,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir ".\Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
+F90=df.exe
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /c
 # ADD CPP /nologo /MDd /W3 /Gm /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
 # SUBTRACT CPP /Fr
@@ -93,10 +95,6 @@ LINK32=link.exe
 # Begin Source File
 
 SOURCE=.\vcc.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\versit.rc
 # End Source File
 # Begin Source File
 
@@ -130,6 +128,10 @@ SOURCE=.\vobject.h
 # Begin Group "Resource Files"
 
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe"
+# Begin Source File
+
+SOURCE=.\versit.rc
+# End Source File
 # End Group
 # Begin Source File
 
@@ -139,7 +141,7 @@ SOURCE=".\vcc.c-yacc"
 
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Creating YACC output file
-InputPath=.\vcc.c-yacc
+InputPath=".\vcc.c-yacc"
 
 "vcc.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	copy $(InputPath) vcc.c
@@ -150,7 +152,7 @@ InputPath=.\vcc.c-yacc
 
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Creating YACC output file
-InputPath=.\vcc.c-yacc
+InputPath=".\vcc.c-yacc"
 
 "vcc.c" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	copy $(InputPath) vcc.c
