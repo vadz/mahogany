@@ -6,6 +6,7 @@ package=mahogany
 
 build:
 	$(checkdir)
+	aclocal
 	autoconf
 	mkdir build-debian; \
 	cd build-debian; \
