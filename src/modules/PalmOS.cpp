@@ -1138,6 +1138,7 @@ PalmOSModule::GetAddresses(PalmBook *palmbook)
    PalmEntryGroup *rootGroup;
 
    if (!palmbook) {
+/*
       AdbManager_obj adbManager;
       adbManager->LoadAll();
       
@@ -1146,10 +1147,11 @@ PalmOSModule::GetAddresses(PalmBook *palmbook)
       sprintf(adbName, "%s", "PalmOS-ADB (ReadOnly)");
       // There is no PalmBook, create a new one if possible
       palmbook = (PalmBook *)adbManager->CreateBook((String)"PalmOS Addressbook", NULL , &adbName);
+*/
    }
 
    if (!palmbook) {
-      ErrorMessage(_("Couldn´t create new palmbook"));
+//      ErrorMessage(_("Couldn´t create new palmbook"));
       return;
    }
 
