@@ -70,15 +70,22 @@ public:
       : wxLayoutWindow(parent)
       {
          m_EC = ec;
+
+         // we're always interested in mouse events
+         SetMouseTracking();
       }
    ~wxMEditCtrlLWindow();
    
    /// intercept character events
    void OnChar(wxKeyEvent& event);
 
-   DECLARE_EVENT_TABLE()
+   // forward mouse events to wxMEditCtrl
+   void OnMouseEvent(wxCommandEvent &event);
+
 private:
    class wxMEditCtrl *m_EC;
+
+   DECLARE_EVENT_TABLE()
 };
 
    
@@ -267,9 +274,13 @@ public:
       {
          return m_LWin->GetClickPosition();
       }
+
+   // called by wxMEditCtrlLWindow
    void OnMouseEvent(wxCommandEvent &event);
+
 protected:
    void AppendXFace(const wxString &face);
+
 private:
    wxLayoutWindow     * m_LWin;
    MEditCtrlCbHandler * m_CbHandler;
@@ -298,8 +309,6 @@ private:
       bool showFaces;
       bool operator==(const AllProfileValues& other);
    } m_ProfileValues;
-
-
 };
 
 
@@ -577,12 +586,18 @@ wxMEditCtrl::OnMouseEvent(wxCommandEvent &event)
 
 BEGIN_EVENT_TABLE(wxMEditCtrlLWindow, wxLayoutWindow)
    EVT_CHAR(wxMEditCtrlLWindow::OnChar)
+
    // mouse click processing
-   EVT_MENU(WXLOWIN_MENU_RCLICK, wxMEditCtrl::OnMouseEvent)
-   EVT_MENU(WXLOWIN_MENU_LCLICK, wxMEditCtrl::OnMouseEvent)
-   EVT_MENU(WXLOWIN_MENU_DBLCLICK, wxMEditCtrl::OnMouseEvent)
+   EVT_MENU(WXLOWIN_MENU_RCLICK, wxMEditCtrlLWindow::OnMouseEvent)
+   EVT_MENU(WXLOWIN_MENU_LCLICK, wxMEditCtrlLWindow::OnMouseEvent)
+   EVT_MENU(WXLOWIN_MENU_DBLCLICK, wxMEditCtrlLWindow::OnMouseEvent)
 END_EVENT_TABLE()
 
+void
+wxMEditCtrlLWindow::OnMouseEvent(wxCommandEvent &event)
+{
+   m_EC->OnMouseEvent(event);
+}
 
 void
 wxMEditCtrlLWindow::OnChar(wxKeyEvent& event)

@@ -304,139 +304,142 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
    // has the mouse only been moved?
    switch ( eventId )
    {
-   case WXLOWIN_MENU_MOUSEMOVE:
-   {
-      // this variables is used to only erase the message in the status
-      // bar if we had put it there previously - otherwise empting status
-      // bar might be undesirable
-      static bool s_hasPutMessageInStatusBar = false;
-
-      // found is only true if we are really over an object, not just
-      // behind it
-      if(found && u && ! m_Selecting)
-      {
-         if(!m_HandCursor)
-            SetCursor(wxCURSOR_HAND);
-         m_HandCursor = TRUE;
-         if(m_StatusBar && m_StatusFieldLabel != -1)
+      case WXLOWIN_MENU_MOUSEMOVE:
          {
-            const wxString &label = u->GetLabel();
-            if(label.Length())
+            // this variables is used to only erase the message in the status
+            // bar if we had put it there previously - otherwise empting status
+            // bar might be undesirable
+            static bool s_hasPutMessageInStatusBar = false;
+
+            // found is only true if we are really over an object, not just
+            // behind it
+            if(found && u && ! m_Selecting)
             {
-               m_StatusBar->SetStatusText(label,
-                                          m_StatusFieldLabel);
-               s_hasPutMessageInStatusBar = true;
+               if(!m_HandCursor)
+                  SetCursor(wxCURSOR_HAND);
+               m_HandCursor = TRUE;
+               if(m_StatusBar && m_StatusFieldLabel != -1)
+               {
+                  const wxString &label = u->GetLabel();
+                  if(label.Length())
+                  {
+                     m_StatusBar->SetStatusText(label,
+                                                m_StatusFieldLabel);
+                     s_hasPutMessageInStatusBar = true;
+                  }
+               }
+            }
+            else
+            {
+               if(m_HandCursor)
+                  SetCursor(wxCURSOR_IBEAM);
+               m_HandCursor = FALSE;
+               if( m_StatusBar && m_StatusFieldLabel != -1 &&
+                   s_hasPutMessageInStatusBar )
+               {
+                  m_StatusBar->SetStatusText("", m_StatusFieldLabel);
+               }
             }
          }
-      }
-      else
-      {
-         if(m_HandCursor)
-            SetCursor(wxCURSOR_IBEAM);
-         m_HandCursor = FALSE;
-         if( m_StatusBar && m_StatusFieldLabel != -1 &&
-             s_hasPutMessageInStatusBar )
+
+         // selecting?
+         if ( event.LeftIsDown() )
          {
-            m_StatusBar->SetStatusText("", m_StatusFieldLabel);
+            // m_Selecting might not be set if the button got pressed
+            // outside this window, so check for it:
+            if( m_Selecting )
+            {
+               m_llist->ContinueSelection(cursorPos, m_ClickPosition);
+               RequestUpdate();  // TODO: we don't have to redraw everything!
+            }
          }
-      }
-   }
 
-   // selecting?
-   if ( event.LeftIsDown() )
-   {
-      // m_Selecting might not be set if the button got pressed
-      // outside this window, so check for it:
-      if( m_Selecting )
-      {
-         m_llist->ContinueSelection(cursorPos, m_ClickPosition);
-         RequestUpdate();  // TODO: we don't have to redraw everything!
-      }
-   }
+         if ( u )
+         {
+            u->DecRef();
+            u = NULL;
+         }
+         break;
 
-   if ( u )
-   {
-      u->DecRef();
-      u = NULL;
-   }
-   break;
+      case WXLOWIN_MENU_LDOWN:
+         {
+            // always move cursor to mouse click:
+            m_llist->MoveCursorTo(cursorPos);
 
-   case WXLOWIN_MENU_LDOWN:
-   {
-      // always move cursor to mouse click:
-      m_llist->MoveCursorTo(cursorPos);
+            // clicking a mouse removes the selection
+            if ( m_llist->HasSelection() )
+            {
+               m_llist->DiscardSelection();
+               m_Selecting = false;
+               RequestUpdate();     // TODO: we don't have to redraw everything!
+            }
+                  
+            // Calculate where the top of the visible area is:
+            int x0, y0;
+            ViewStart(&x0,&y0);
+            int dx, dy;
+            GetScrollPixelsPerUnit(&dx, &dy);
+            x0 *= dx; y0 *= dy;
 
-      // clicking a mouse removes the selection
-      if ( m_llist->HasSelection() )
-      {
-         m_llist->DiscardSelection();
-         m_Selecting = false;
-         RequestUpdate();     // TODO: we don't have to redraw everything!
-      }
-            
-      // Calculate where the top of the visible area is:
-      int x0, y0;
-      ViewStart(&x0,&y0);
-      int dx, dy;
-      GetScrollPixelsPerUnit(&dx, &dy);
-      x0 *= dx; y0 *= dy;
+            wxPoint offset(-x0+WXLO_XOFFSET, -y0+WXLO_YOFFSET);
 
-      wxPoint offset(-x0+WXLO_XOFFSET, -y0+WXLO_YOFFSET);
-
-      if(m_CursorVisibility == -1)
-         m_CursorVisibility = 1;
+            if(m_CursorVisibility == -1)
+               m_CursorVisibility = 1;
 #ifdef WXLAYOUT_USE_CARET
-      if ( m_CursorVisibility == 1 )
-         GetCaret()->Show();
+            if ( m_CursorVisibility == 1 )
+               GetCaret()->Show();
 #endif // WXLAYOUT_USE_CARET
 
-      if(m_CursorVisibility)
-      {
-         // draw a thick cursor for editable windows with focus
-         m_llist->DrawCursor(dc, m_HaveFocus && IsEditable(), offset);
-      }
+            if(m_CursorVisibility)
+            {
+               // draw a thick cursor for editable windows with focus
+               m_llist->DrawCursor(dc, m_HaveFocus && IsEditable(), offset);
+            }
 
 #ifdef __WXGTK__
-      RequestUpdate(); // RequestUpdate suppresses flicker under GTK
+            RequestUpdate(); // RequestUpdate suppresses flicker under GTK
 #endif // wxGTK
 
-      // start selection
-      m_llist->StartSelection(wxPoint(-1, -1), m_ClickPosition);
-      m_Selecting = true;
-   }
-   break;
+            // start selection
+            m_llist->StartSelection(wxPoint(-1, -1), m_ClickPosition);
+            m_Selecting = true;
+         }
+         break;
 
-   case WXLOWIN_MENU_LUP:
-      if ( m_Selecting )
-      {
-         // end selection at the cursor position corresponding to the
-         // current mouse position, but don´t move cursor there.
-         m_llist->EndSelection(cursorPos,m_ClickPosition);
+      case WXLOWIN_MENU_LUP:
+         if ( m_Selecting )
+         {
+            // end selection at the cursor position corresponding to the
+            // current mouse position, but don´t move cursor there.
+            m_llist->EndSelection(cursorPos,m_ClickPosition);
+            m_Selecting = false;
+            // copy selected text to primary selection without
+            // invalidating it:
+            Copy(FALSE,FALSE,TRUE);
+
+            RequestUpdate();     // TODO: we don't have to redraw everything!
+         }
+         break;
+
+      case WXLOWIN_MENU_MDOWN:
+         if ( IsEditable() )
+         {
+            // paste selected text from primary selection without
+            // invalidating it:
+            Paste(FALSE, TRUE); 
+         }
+         break;
+
+      case WXLOWIN_MENU_DBLCLICK:
+         // select a word under cursor
+         m_llist->MoveCursorTo(cursorPos);
+         m_llist->MoveCursorWord(-1);
+         m_llist->StartSelection();
+         m_llist->MoveCursorWord(1, false);
+         m_llist->EndSelection();
          m_Selecting = false;
-         // copy selected text to primary selection without
-         // invalidating it:
-         Copy(FALSE,FALSE,TRUE);
-
          RequestUpdate();     // TODO: we don't have to redraw everything!
-      }
-      break;
-
-   case WXLOWIN_MENU_MDOWN:
-      // paste selected text from primary selection without
-      // invalidating it:
-      Paste(FALSE, TRUE); 
-      break;
-
-   case WXLOWIN_MENU_DBLCLICK:
-      // select a word under cursor
-      m_llist->MoveCursorTo(cursorPos);
-      m_llist->MoveCursorWord(-1);
-      m_llist->StartSelection();
-      m_llist->MoveCursorWord(1, false);
-      m_llist->EndSelection();
-      m_Selecting = false;
-      RequestUpdate();     // TODO: we don't have to redraw everything!
-      break;
+         break;
    }
 
    // notify about mouse events?

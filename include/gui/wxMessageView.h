@@ -112,8 +112,11 @@ public:
    // callbacks
    // ---------
 
+#ifndef EXPERIMENTAL_karsten
    /// called on Menu selection
    void OnMenuCommand(wxCommandEvent& event) { (void) DoMenuCommand(event.GetId()); }
+#endif // EXPERIMENTAL_karsten
+
    /// returns true if it handled the command
    bool DoMenuCommand(int command);
 

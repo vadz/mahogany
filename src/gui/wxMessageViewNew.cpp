@@ -6,11 +6,11 @@
  * $Id$
  *******************************************************************/
 
+#ifdef EXPERIMENTAL_karsten
+
 #ifdef __GNUG__
 #   pragma implementation "wxMessageView.h"
 #endif
-
-#ifdef EXPERIMENTAL_karsten
 
 // ============================================================================
 // declarations
@@ -1550,8 +1550,6 @@ wxMessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
 
    result->DecRef();
 }
-
-
 
 // ----------------------------------------------------------------------------
 // wxMessageViewFrame
