@@ -2869,8 +2869,9 @@ bool wxADBFindDialog::TransferDataFromWindow()
 }
 
 // ----------------------------------------------------------------------------
-// wxADBCreateDialog dialog
+// wxADBCreateDialog: allows the user to enter the new entry or group name
 // ----------------------------------------------------------------------------
+
 wxADBCreateDialog::wxADBCreateDialog(wxWindow *parent,
                                      const wxString& strName,
                                      bool bGroup)
@@ -2941,6 +2942,7 @@ bool wxADBCreateDialog::TransferDataToWindow()
   // will clear it
   m_textName->SetValue(m_strName);
   m_textName->SetSelection(-1, -1);
+  m_textName->SetFocus();
 
   m_checkGroup->SetValue(m_bGroup);
 
