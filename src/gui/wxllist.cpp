@@ -412,7 +412,7 @@ wxLayoutObjectIcon::Write(wxString &ostr)
 
    wxString file = wxGetTempFileName("wxloexport");
 
-   ostr << WXLO_TYPE_ICON << '\n'
+   ostr << (int) WXLO_TYPE_ICON << '\n'
         << file << '\n';
    m_Icon->SaveFile(file, WXLO_BITMAP_FORMAT);
 }
@@ -553,25 +553,25 @@ wxLayoutObjectCmd::Copy(void)
 void
 wxLayoutObjectCmd::Write(wxString &ostr)
 {
-   ostr << WXLO_TYPE_CMD << '\n'
-        << m_StyleInfo->family << '\n'
-        << m_StyleInfo->size << '\n'
-        << m_StyleInfo->style << '\n'
-        << m_StyleInfo->weight << '\n'
-        << m_StyleInfo->underline << '\n'
-        << m_StyleInfo->m_fg_valid << '\n'
-        << m_StyleInfo->m_bg_valid << '\n';
+   ostr << (int) WXLO_TYPE_CMD << '\n'
+        << (int) m_StyleInfo->family << '\n'
+        << (int) m_StyleInfo->size << '\n'
+        << (int) m_StyleInfo->style << '\n'
+        << (int) m_StyleInfo->weight << '\n'
+        << (int) m_StyleInfo->underline << '\n'
+        << (int) m_StyleInfo->m_fg_valid << '\n'
+        << (int) m_StyleInfo->m_bg_valid << '\n';
    if(m_StyleInfo->m_fg_valid)
    {
-      ostr << m_StyleInfo->m_fg.Red() << '\n'
-           << m_StyleInfo->m_fg.Green() << '\n'
-           << m_StyleInfo->m_fg.Blue() << '\n';
+      ostr << (int) m_StyleInfo->m_fg.Red() << '\n'
+           << (int) m_StyleInfo->m_fg.Green() << '\n'
+           << (int) m_StyleInfo->m_fg.Blue() << '\n';
    }
    if(m_StyleInfo->m_bg_valid)
    {
-      ostr << m_StyleInfo->m_bg.Red() << '\n'
-           << m_StyleInfo->m_bg.Green() << '\n'
-           << m_StyleInfo->m_bg.Blue() << '\n';
+      ostr << (int) m_StyleInfo->m_bg.Red() << '\n'
+           << (int) m_StyleInfo->m_bg.Green() << '\n'
+           << (int) m_StyleInfo->m_bg.Blue() << '\n';
    }
 }
 /* static */
