@@ -5576,6 +5576,8 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
                                              mfolder->GetServer(),
                                              login);
 
+   wxLogTrace(TRACE_MF_CALLS, "Clearing folder '%s'", fullname.c_str());
+
    // if this folder is opened, use its stream - and also notify about message
    // deletion
    MAILSTREAM *stream;

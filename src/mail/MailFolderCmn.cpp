@@ -375,6 +375,9 @@ void MfCloser::OnTimer(void)
    {
       if ( i->HasExpired() )
       {
+         wxLogTrace(TRACE_MF_CLOSE, "Going to remove '%s' from m_MfList",
+                    i->GetName().c_str());
+
          i = m_MfList.erase(i);
       }
       else
