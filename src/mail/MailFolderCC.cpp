@@ -199,7 +199,8 @@ MailFolderCC::RegisterView(FolderViewBase *view, bool reg)
       {
          if((*i) == view)
          {
-            m_viewList.erase(i);
+            // do _not_ erase() the entry, just remove it from the list
+            m_viewList.remove(i);
             return;
          }
       }

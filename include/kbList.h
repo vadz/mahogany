@@ -31,7 +31,7 @@ struct kbListNode
    struct kbListNode *next;
    /// pointer to previous node or NULL
    struct kbListNode *prev;
-   /// pointer to the actual data 
+   /// pointer to the actual data
    void *element;
    /** Constructor - it automatically links the node into the list, if
        the iprev, inext parameters are given.
@@ -93,12 +93,12 @@ public:
       /** Comparison operator.
           @return true if not equal.
       */
-      bool operator !=(iterator const &) const; 
+      bool operator !=(iterator const &) const;
 
       /* Comparison operator.
          @return true if equal
       */
-      bool operator ==(iterator const &) const; 
+      bool operator ==(iterator const &) const;
 
       /** Returns a pointer to the node associated with this iterator.
           This function is not for general use and should be
@@ -135,7 +135,7 @@ public:
    */
    bool ownsObjects(void)
       { return ownsEntries; }
-   
+
    /** Add an entry at the end of the list.
        @param element pointer to data
    */
@@ -165,6 +165,12 @@ public:
        @param element the element data
    */
    void insert(iterator & i, void *element);
+
+   /** Remove an element from the list _without_ deleting the object.
+       @param  i iterator pointing to the element to be deleted
+       @return the value of the element just removed
+   */
+   void *remove(iterator& i) { void *p = *i; doErase(i); return p; }
 
    /** Erase an element, move iterator to following element.
        @param i iterator pointing to the element to be deleted
@@ -219,7 +225,7 @@ protected:
    */
    inline void deleteContent(iterator i)
       { if(ownsEntries) delete *i; }
-   
+
 
 private:
    /// forbid copy construction
@@ -265,6 +271,8 @@ public: \
    inline type *pop_front(void) \
       { return (type *) kbList::pop_front(); } \
    \
+   type *remove(iterator& i) \
+      { return (type *)kbList::remove(i); } \
    inline void erase(iterator & i) \
       { deleteContent(i); kbList::erase(i); } \
    \
