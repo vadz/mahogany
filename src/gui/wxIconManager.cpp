@@ -609,86 +609,49 @@ wxIconManager::GetIcon(const String &iconNameOrig)
 }
 
 
-wxIcon wxIconManager::GetIconFromMimeType(const String& type,
-                                          const String& ext)
+wxIcon
+wxIconManager::GetIconFromMimeType(const String& type, const String& ext)
 {
-   // the order of actions is important: we first try to find "exact" match,
-   // but if we can't, we fall back to a standard icon and look for partial
-   // matches only if there is none
-   wxIcon icon = GetIcon(type.Lower());
+   wxIcon icon;
 
-   // the following code will never yield anything under Windows, so save the
-   // efforts
-#ifdef OS_UNIX
-   // Then, try the extension with GNOME first:
-   if(ext.Length() > 0 )
-      icon = GetIcon(_T("file-dot-") + ext);
-
-   wxArrayString exts;
-   if ( icon == m_unknownIcon )
+   // use the system icons by default
+   wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
+   wxFileType *fileType = mimeManager.GetFileTypeFromMimeType(type);
+   if ( !fileType )
    {
-      wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
-      wxFileType *fileType = mimeManager.GetFileTypeFromMimeType(type);
-      if ( fileType != NULL ) {
+      fileType = mimeManager.GetFileTypeFromExtension(ext);
+   }
+
+   if ( fileType )
+   {
 #ifdef wxHAS_ICON_LOCATION
-         wxIconLocation iconLoc;
-         if ( fileType->GetIcon(&iconLoc) )
-         {
-            wxLogNull noLog;
-
-            icon = wxIcon(iconLoc);
-         }
-#else // wx 2.4.x or very early 2.5.0
-         (void)fileType->GetIcon(&icon);
-#endif
-         fileType->GetExtensions(exts);
-         delete fileType;
-      }
-   }
-   if ( icon == m_unknownIcon )
-      icon = GetIcon(type.After('/'));
-   for ( size_t i = 0; i < exts.Count(); i++ )
-   {
-      /// try the gnome style filenames "file-dot-wav.xpm"
-      icon = GetIcon(_T("file-dot-") + exts[i]);
-      if(icon != m_unknownIcon)
-         return icon;
-   }
-#endif // Unix
-
-   if ( icon == m_unknownIcon )
-   {
-      // try to get it from extension: many (broken) mailers will send foo.gif
-      // as application/octet-stream instead of image/gif
-      wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
-      wxFileType *fileType = mimeManager.GetFileTypeFromExtension(ext);
-      if ( fileType )
+      wxIconLocation iconLoc;
+      if ( fileType->GetIcon(&iconLoc) )
       {
-#ifdef wxHAS_ICON_LOCATION
-         wxIconLocation iconLoc;
-         if ( fileType->GetIcon(&iconLoc) )
-         {
-            wxLogNull noLog;
+         wxLogNull noLog;
 
-            icon = wxIcon(iconLoc);
-         }
+         icon = wxIcon(iconLoc);
+      }
 #else // wx 2.4.x or very early 2.5.0
-         (void)fileType->GetIcon(&icon);
+      (void)fileType->GetIcon(&icon);
 #endif
 
-         if ( !icon.Ok() )
-         {
-            icon = m_unknownIcon;
-         }
-
-         delete fileType;
-      }
+      delete fileType;
    }
+
+   if ( icon.Ok() )
+      return icon;
+
+
+   // now try to find it by name
+   icon = GetIcon(type);
 
    if ( icon == m_unknownIcon )
    {
       // the generic icon for this class of things
-      icon = GetIcon(type.Before('/').Lower());
+      String primType = type.BeforeLast(_T('/'));
+      if ( !primType.empty() )
+         icon = GetIcon(primType);
    }
 
    return icon;
