@@ -170,6 +170,7 @@ MessageCC::GetHeaderLine(const String &line, String &value)
    value = strutil_after(val,':');
    delete [] val;
    strutil_delwhitespace(value);
+   value = MailFolderCC::qprint(value);
    delete [] slist.text.data;
    MailFolderCC::ProcessEventQueue();
 }
