@@ -3249,7 +3249,7 @@ wxFolderView::SaveMessagesToFolder(const UIdArray& selections, MFolder *folder)
 
 #if defined(EXPERIMENTAL_MARK_READ)
 Ticket
-wxFolderView::MarkRead(UIdArray& selections, bool read)
+wxFolderView::MarkRead(const UIdArray& selections, bool read)
 {
    size_t count = selections.GetCount();
    CHECK( count, ILLEGAL_TICKET, "no messages to mark" );

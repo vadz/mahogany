@@ -156,7 +156,7 @@ public:
        Mark messages read/unread
        @param read whether message should be marked read (true) or unread
     */
-   Ticket MarkRead(UIdArray& messages, bool read);
+   Ticket MarkRead(const UIdArray& messages, bool read);
 #endif // EXPERIMENTAL_MARK_READ
 
    /** Toggle the "flagged" status of the messages.
