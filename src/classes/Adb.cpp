@@ -6,7 +6,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.7  1998/06/14 21:33:45  KB
+ * fixed the menu/callback problem, wxFolderView is now a panel
+ *
  * Revision 1.6  1998/06/05 16:56:09  VZ
+ *
  * many changes among which:
  *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
  *     i.e. there is wxMApp inheriting from AppBse and wxApp
@@ -384,7 +388,7 @@ Adb::Adb(String const &ifilename)
          list->push_back(eptr);
    }
    String tmp = String("Adb: read ") + strutil_ultoa(list->size()) + String(" database entries.");
-   LOGMESSAGE((LOG_INFO, tmp));
+   LOGMESSAGE((M_LOG_INFO, tmp));
 }
 
 AdbExpandListType *

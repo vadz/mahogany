@@ -6,6 +6,9 @@
  * $Id$           *
  ********************************************************************
  * $Log$
+ * Revision 1.7  1998/06/14 21:33:50  KB
+ * fixed the menu/callback problem, wxFolderView is now a panel
+ *
  * Revision 1.6  1998/06/14 12:24:22  KB
  * started to move wxFolderView to be a panel, Python improvements
  *
@@ -155,8 +158,6 @@ wxMLogFrame::wxMLogFrame()
 
    AddFileMenu();
    AddHelpMenu();
-
-   // associate the menu bar with the frame
    SetMenuBar(menuBar);
 
    // redirect the log output here

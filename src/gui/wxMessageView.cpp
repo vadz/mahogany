@@ -70,7 +70,7 @@ IMPLEMENT_CLASS(wxMessageViewPanel, wxPanel)
 class myPopup : public wxMenu
 {
 protected:
-   wxFrame *popup_parent;
+   wxWindow *popup_parent;
    int      menu_offset;  // all selections get added to this and passed
                           // to popup_parent->OnMenuCommand(offset+entry)
 
@@ -79,7 +79,7 @@ protected:
   #endif
 
 public:
-  myPopup(const char *name, wxFrame *frame, int offset)
+  myPopup(const char *name, wxWindow *frame, int offset)
   #if USE_WXWINDOWS2
       : wxMenu(name)
   #else  // wxWin 1
@@ -121,7 +121,7 @@ public:
 
 
 void
-wxMessageView::Create(const String &iname, wxFrame *parent)
+wxMessageView::Create(const String &iname, wxWindow *parent)
 {
   if(initialised)
     return; // ERROR!
@@ -161,7 +161,7 @@ wxMessageView::Create(const String &iname, wxFrame *parent)
   initialised = true;
 }
 
-wxMessageView::wxMessageView(const String &iname, wxFrame *parent)
+wxMessageView::wxMessageView(const String &iname, wxWindow *parent)
              : wxMFrame(iname)
 {
    initialised = false;
@@ -173,7 +173,7 @@ wxMessageView::wxMessageView(const String &iname, wxFrame *parent)
 wxMessageView::wxMessageView(MailFolder *ifolder,
                              long num,
                              const String &iname,
-                             wxFrame *parent)
+                             wxWindow *parent)
              : wxMFrame(iname)
 {
    initialised = false;

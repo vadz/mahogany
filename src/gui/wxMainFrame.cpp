@@ -12,16 +12,15 @@
 #endif
 
 #include   "Mpch.h"
-#include   "Mcommon.h"
 
 #ifndef   USE_PCH
+#   include   "Mcommon.h"
 #   include   "guidef.h"
-#   include   "gui/wxMDialogs.h"
+#   include   "MFrame.h"
+#   include   "Mdefaults.h"
 #endif
-
-#include   "MFrame.h"
-#include   "Mdefaults.h"
 #include   "gui/wxMainFrame.h"
+
 
 #ifdef    OS_WIN
 #   define MainFrame_xpm   "MainFrame"
@@ -33,30 +32,9 @@
 // ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(wxMainTreeCtrl, wxTreeCtrl)
-/*
-  EVT_TREE_BEGIN_DRAG(TREE_CTRL, MyTreeCtrl::OnBeginDrag)
-  EVT_TREE_BEGIN_RDRAG(TREE_CTRL, MyTreeCtrl::OnBeginRDrag)
-  EVT_TREE_BEGIN_LABEL_EDIT(TREE_CTRL, MyTreeCtrl::OnBeginLabelEdit)
-  EVT_TREE_END_LABEL_EDIT(TREE_CTRL, MyTreeCtrl::OnEndLabelEdit)
-  EVT_TREE_DELETE_ITEM(TREE_CTRL, MyTreeCtrl::OnDeleteItem)
-  EVT_TREE_GET_INFO(TREE_CTRL, MyTreeCtrl::OnGetInfo)
-  EVT_TREE_SET_INFO(TREE_CTRL, MyTreeCtrl::OnSetInfo)
-  EVT_TREE_ITEM_EXPANDED(TREE_CTRL, MyTreeCtrl::OnItemExpanded)
-  EVT_TREE_ITEM_EXPANDING(TREE_CTRL, MyTreeCtrl::OnItemExpanding)
-  EVT_TREE_SEL_CHANGED(TREE_CTRL, MyTreeCtrl::OnSelChanged)
-  EVT_TREE_SEL_CHANGING(TREE_CTRL, MyTreeCtrl::OnSelChanging)
-  EVT_TREE_KEY_DOWN(TREE_CTRL, MyTreeCtrl::OnKeyDown)
-*/
-END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxMainFrame, wxMFrame)
-   EVT_MENU(WXMENU_FILE_OPEN,    wxMFrame::OnOpen)
-   EVT_MENU(WXMENU_FILE_ADBEDIT, wxMFrame::OnAdbEdit)
-   EVT_MENU(WXMENU_FILE_CLOSE,   wxMFrame::OnMenuClose)
-   EVT_MENU(WXMENU_FILE_COMPOSE, wxMFrame::OnCompose)
-   EVT_MENU(WXMENU_FILE_EXIT,    wxMFrame::OnExit)
-   EVT_MENU(WXMENU_HELP_ABOUT,   wxMainFrame::OnAbout)
+   EVT_MENU(-1,    wxMainFrame::OnCommandEvent)
 END_EVENT_TABLE()
 #endif // wxWin2
 
@@ -67,6 +45,8 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
 
   AddFileMenu();
   AddHelpMenu();
+  SetMenuBar(menuBar);
+  
 #ifndef  USE_WXWINDOWS2
   CreateStatusLine(1);
   return;

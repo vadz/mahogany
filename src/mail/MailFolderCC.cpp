@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.12  1998/06/14 21:33:54  KB
+ * fixed the menu/callback problem, wxFolderView is now a panel
+ *
  * Revision 1.11  1998/06/14 12:24:26  KB
  * started to move wxFolderView to be a panel, Python improvements
  *
@@ -207,7 +210,7 @@ MailFolderCC::Ping(void)
 {
 #if DEBUG
    String tmp = "MailFolderCC::Ping() on Folder " + realName;
-   LOGMESSAGE((LOG_DEBUG, tmp));
+   LOGMESSAGE((M_LOG_DEBUG, tmp));
 #endif
    mail_ping(mailstream);
 }
@@ -403,10 +406,10 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream)
     return (*i)->folder;
    if(streamListDefaultObj)
    {
-      LOGMESSAGE((LOG_DEBUG, "Routing call to default mailfolder."));
+      LOGMESSAGE((M_LOG_DEBUG, "Routing call to default mailfolder."));
       return streamListDefaultObj;
    }
-   LOGMESSAGE((LOG_ERROR,"Cannot find mailbox for callback!"));
+   LOGMESSAGE((M_LOG_ERROR,"Cannot find mailbox for callback!"));
    return NULL;
 }
 
@@ -439,7 +442,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
       String
     tmp = "MailFolderCC::mm_exists() for folder " + mf->realName
     + String(" n: ") + strutil_ultoa(number);
-      LOGMESSAGE((LOG_DEBUG, tmp));
+      LOGMESSAGE((M_LOG_DEBUG, tmp));
 #endif
      
       mf->numOfMessages = number;
@@ -453,7 +456,7 @@ void
 MailFolderCC::mm_expunged(MAILSTREAM *stream, unsigned long number)
 {
    String msg = "Expunged message no. " + strutil_ltoa(number);
-   LOGMESSAGE((LOG_DEFAULT, msg));
+   LOGMESSAGE((M_LOG_DEFAULT, msg));
    MailFolderCC *mf = LookupObject(stream);
    if(mf)
    {
@@ -467,7 +470,7 @@ void
 MailFolderCC::mm_flags(MAILSTREAM *stream, unsigned long number)
 {
    String msg = "Flags changed for msg no. " + strutil_ltoa(number);
-   LOGMESSAGE((LOG_DEFAULT, msg));
+   LOGMESSAGE((M_LOG_DEFAULT, msg));
    MailFolderCC *mf = LookupObject(stream);
    if(mf)
       mf->UpdateViews();
@@ -530,7 +533,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS
 #if DEBUG
    String   tmp = "MailFolderCC::mm_status() for folder " +
       mf->realName;
-   LOGMESSAGE((LOG_DEBUG, tmp));
+   LOGMESSAGE((M_LOG_DEBUG, tmp));
 #endif
    
    if(status->flags & SA_MESSAGES)
@@ -547,7 +550,7 @@ void
 MailFolderCC::mm_log(const char *str, long errflg)
 {
    String   msg = (String) "c-client " + (String) str;
-   LOGMESSAGE((LOG_INFO, msg));
+   LOGMESSAGE((M_LOG_INFO, msg));
 }
 
 /** log a debugging message
@@ -558,7 +561,7 @@ MailFolderCC::mm_dlog(const char *str)
 {
    String   msg = (String) "c-client debug: " + (String) str;
    //mApplication.Message(msg.c_str());
-   LOGMESSAGE((LOG_DEBUG, msg));
+   LOGMESSAGE((M_LOG_DEBUG, msg));
 }
 
 /** get user name and password
@@ -614,7 +617,7 @@ void
 MailFolderCC::mm_fatal(char *str)
 {
    String   msg = (String) "Fatal Error:" + (String) str;
-   LOGMESSAGE((LOG_ERROR, msg));
+   LOGMESSAGE((M_LOG_ERROR, msg));
 }
 
 //-------------------------------------------------------------------

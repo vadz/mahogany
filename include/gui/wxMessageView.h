@@ -52,6 +52,54 @@ public:
 class wxMessageView : public MessageViewBase , public wxMFrame
 {
    DECLARE_CLASS(wxMessageView)
+public:
+   /** quasi-Constructor
+       @param iname  name of windowclass
+       @param parent parent window
+   */
+   void Create(const String &iname = String("wxMessageView"),
+	  wxWindow *parent = NULL);
+
+   /** Constructor
+       @param iname  name of windowclass
+       @param parent parent window
+   */
+   wxMessageView(const String &iname = String("wxMessageView"),
+	  wxWindow *parent = NULL);
+   
+   /** Constructor
+       @param folder the mailfolder
+       @param num    number of message (0 based)
+       @param iname  name of windowclass
+       @param parent parent window
+   */
+   wxMessageView(MailFolder *folder,
+		 long num,
+		 const String &iname = String("wxMessageView"),
+		 wxWindow  *parent = NULL);
+   /// Destructor
+   ~wxMessageView();
+
+   /** show message
+       @param mailfolder the folder
+       @param num the message number
+   */
+   void ShowMessage(MailFolder *folder, long num);
+   
+   /// update it
+   void	Update(void);
+
+   /// return true if initialised
+   bool	IsInitialised(void) const { return initialised; }
+
+   /// called on Menu selection
+   void OnMenuCommand(int id);
+
+   /// prints the currently displayed message
+   void Print(void);
+
+   /// convert string in cptr to one in which URLs are highlighted
+   void HighLightURLs(const char *cptr, String &out);
 
 private:
    /// is initialised?
@@ -94,54 +142,6 @@ private:
    /// saves the currently selected MIME content
    void MimeSave(const char *filename = NULL);
 
-public:
-   /** quasi-Constructor
-       @param iname  name of windowclass
-       @param parent parent window
-   */
-   void Create(const String &iname = String("wxMessageView"),
-	  wxFrame *parent = NULL);
-
-   /** Constructor
-       @param iname  name of windowclass
-       @param parent parent window
-   */
-   wxMessageView(const String &iname = String("wxMessageView"),
-	  wxFrame *parent = NULL);
-   
-   /** Constructor
-       @param folder the mailfolder
-       @param num    number of message (0 based)
-       @param iname  name of windowclass
-       @param parent parent window
-   */
-   wxMessageView(MailFolder *folder,
-		 long num,
-		 const String &iname = String("wxMessageView"),
-		 wxFrame *parent = NULL);
-   /// Destructor
-   ~wxMessageView();
-
-   /** show message
-       @param mailfolder the folder
-       @param num the message number
-   */
-   void ShowMessage(MailFolder *folder, long num);
-   
-   /// update it
-   void	Update(void);
-
-   /// return true if initialised
-   bool	IsInitialised(void) const { return initialised; }
-
-   /// called on Menu selection
-   void OnMenuCommand(int id);
-
-   /// prints the currently displayed message
-   void Print(void);
-
-   /// convert string in cptr to one in which URLs are highlighted
-   void HighLightURLs(const char *cptr, String &out);
 };
 
 #endif

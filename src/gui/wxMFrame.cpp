@@ -3,64 +3,7 @@
  *                                                                  *
  * (C) 1997, 1998 by Karsten Ballüder (Ballueder@usa.net)           *
  *                                                                  *
- * $Id$              *
- ********************************************************************
- * $Log$
- * Revision 1.11  1998/06/14 12:24:21  KB
- * started to move wxFolderView to be a panel, Python improvements
- *
- * Revision 1.10  1998/06/09 13:42:28  VZ
- *
- * corrected the line which checks that wxGetTextFromUser() returns something
- * (i.e. wasn't cancelled)
- *
- * Revision 1.9  1998/06/05 16:56:26  VZ
- *
- * many changes among which:
- *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
- *     i.e. there is wxMApp inheriting from AppBse and wxApp
- *  2) wxMLogFrame changed (but will probably change again because I wrote a
- *     generic wxLogFrame for wxWin2 - we can as well use it instead)
- *  3) Profile stuff simplified (but still seems to work :-), at least with
- *     wxConfig), no more AppProfile separate class.
- *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
- *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
- *     Classes
- *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
- *  6) constraints in wxComposeView changed to work under both wxGTK and
- *     wxMSW (but there is an annoying warning about unsatisfied constraints
- *     coming from I don't know where)
- *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
- *  8) many other minor changes I completely forgot about.
- *
- * Revision 1.8  1998/05/24 14:48:16  KB
- * lots of progress on Python, but cannot call functions yet
- * kbList fixes again?
- *
- * Revision 1.7  1998/05/18 17:48:44  KB
- * more list<>->kbList changes, fixes for wxXt, improved makefiles
- *
- * Revision 1.6  1998/05/12 12:19:03  VZ
- *
- * fixes to Windows fixes. Compiles under wxGTK if you #define USE_APPCONF.
- *
- * Revision 1.5  1998/05/11 20:57:33  VZ
- * compiles again under Windows + new compile option USE_WXCONFIG
- *
- * Revision 1.4  1998/04/30 19:12:35  VZ
- * (minor) changes needed to make it compile with wxGTK
- *
- * Revision 1.3  1998/04/26 16:27:17  KB
- * changed configure for wxGTK support (not compiling cleanly yet)
- * did some work on scripting (rudimentary)
- *
- * Revision 1.2  1998/03/26 23:05:41  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:22  karsten
- * first try at a complete archive
- *
+ * $Id$             *
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -120,16 +63,16 @@ IMPLEMENT_DYNAMIC_CLASS(wxMFrame, wxFrame)
 
 #ifdef  USE_WXWINDOWS2
    BEGIN_EVENT_TABLE(wxMFrame, wxFrame)
-      EVT_MENU(WXMENU_FILE_OPEN,    wxMFrame::OnOpen)
-      EVT_MENU(WXMENU_FILE_ADBEDIT, wxMFrame::OnAdbEdit)
-      EVT_MENU(WXMENU_FILE_CLOSE,   wxMFrame::OnMenuClose)
-      EVT_MENU(WXMENU_FILE_COMPOSE, wxMFrame::OnCompose)
-      EVT_MENU(WXMENU_FILE_EXIT,    wxMFrame::OnExit)
-      EVT_MENU(WXMENU_HELP_ABOUT,   wxMFrame::OnAbout)
+      EVT_MENU(WXMENU_FILE_OPEN,    wxMFrame::OnCommandEvent)
+      EVT_MENU(WXMENU_FILE_ADBEDIT, wxMFrame::OnCommandEvent)
+      EVT_MENU(WXMENU_FILE_CLOSE,   wxMFrame::OnCommandEvent)
+      EVT_MENU(WXMENU_FILE_COMPOSE, wxMFrame::OnCommandEvent)
+      EVT_MENU(WXMENU_FILE_EXIT,    wxMFrame::OnCommandEvent)
+      EVT_MENU(WXMENU_HELP_ABOUT,   wxMFrame::OnCommandEvent)
    END_EVENT_TABLE()
 #endif
 
-wxMFrame::wxMFrame(const String &iname, wxFrame *parent)
+wxMFrame::wxMFrame(const String &iname, wxWindow *parent)
         : MFrameBase(iname)
 {
    initialised = false;
@@ -137,7 +80,7 @@ wxMFrame::wxMFrame(const String &iname, wxFrame *parent)
 }
 
 void
-wxMFrame::Create(const String &iname, wxFrame *parent)
+wxMFrame::Create(const String &iname, wxWindow *parent)
 {
    wxCHECK( !initialised );
 
@@ -182,17 +125,17 @@ wxMFrame::AddFileMenu(void)
 {
    fileMenu = new wxMenu;
 
-   fileMenu->Append(WXMENU_FILE_COMPOSE,(char *)_("&Compose"));
+   fileMenu->Append(WXMENU_FILE_COMPOSE,(char *)_("&Compose Message"));
 //   fileMenu->Append(WXMENU_FILE_TEST,(char *)_("&Test"));
-   fileMenu->Append(WXMENU_FILE_OPEN,(char *)_("&Open"));
+   fileMenu->Append(WXMENU_FILE_OPEN,(char *)_("&Open Folder"));
 
 #ifdef USE_WXWINDOWS2
    wxWindow *parent = GetParent();
 #endif
 
    if(parent != NULL)
-      fileMenu->Append(WXMENU_FILE_CLOSE,(char *)_("&Close"));
-   fileMenu->Append(WXMENU_FILE_ADBEDIT, (char *)_("edit &Database"));
+      fileMenu->Append(WXMENU_FILE_CLOSE,(char *)_("&Close Window"));
+   fileMenu->Append(WXMENU_FILE_ADBEDIT, (char *)_("Edit &Database"));
    fileMenu->AppendSeparator();
    fileMenu->Append(WXMENU_FILE_EXIT,(char *)_("&Exit"));
 
@@ -280,12 +223,6 @@ wxMFrame::SavePosition(void)
 }
 
 void
-wxMFrame::OnCommandEvent(wxCommandEvent &event)
-{
-   OnMenuCommand(event.GetId());
-}
-
-void
 wxMFrame::OnMenuCommand(int id)
 {
    switch(id)
@@ -328,3 +265,12 @@ wxMFrame::OnMenuCommand(int id)
       break;
    }
 }
+
+#ifdef   USE_WXWINDOWS2
+void
+wxMFrame::OnCommandEvent(wxCommandEvent &event)
+{
+   OnMenuCommand(event.GetId());
+}
+#endif
+

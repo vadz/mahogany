@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.9  1998/06/14 21:33:38  KB
+ * fixed the menu/callback problem, wxFolderView is now a panel
+ *
  * Revision 1.8  1998/06/14 12:24:05  KB
  * started to move wxFolderView to be a panel, Python improvements
  *
@@ -84,7 +87,7 @@ public:
        @param hide if true, do not show frame
    */
    void Create(const String &iname = String("wxComposeView"),
-	       wxFrame *parent = NULL,
+	       wxWindow *parent = NULL,
 	       ProfileBase *parentProfile = NULL,
 	       String const &to = "",
 	       String const &cc = "",
@@ -98,7 +101,7 @@ public:
        @param hide if true, do not show frame
    */
    wxComposeView(const String &iname = String("wxComposeView"),
-		 wxFrame *parent = NULL,
+		 wxWindow *parent = NULL,
 		 ProfileBase *parentProfile = NULL,
 		 bool hide = false);
    

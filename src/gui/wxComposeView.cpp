@@ -91,7 +91,7 @@ IMPLEMENT_DYNAMIC_CLASS(wxComposeView, wxMFrame)
 // implementation
 // ============================================================================
 void
-wxComposeView::Create(const String &iname, wxFrame *parent,
+wxComposeView::Create(const String &iname, wxWindow *parent,
                       ProfileBase *parentProfile,
                       String const &to, String const &cc, String const &bcc,
                       bool hide)
@@ -320,7 +320,7 @@ wxComposeView::OnSize(int  w, int h)
 #endif //wxWin1/2
 
 wxComposeView::wxComposeView(const String &iname,
-                             wxFrame *parent,
+                             wxWindow *parent,
                              ProfileBase *parentProfile,
                              bool hide)
              : wxMFrame(iname)

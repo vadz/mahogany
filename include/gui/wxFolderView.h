@@ -123,20 +123,6 @@ public:
        @return number of selections.
    */
    int   GetSelections(wxArrayInt &selections);
-#if 0
-   def USE_WXWINDOWS2
-   void OnPrint() { OnMenuCommand(WXMENU_MSG_PRINT); }
-   void OnDelete() { OnMenuCommand(WXMENU_MSG_DELETE); }
-   void OnSave() { OnMenuCommand(WXMENU_MSG_SAVE); }
-   void OnOpen() { OnMenuCommand(WXMENU_MSG_OPEN); }
-   void OnReply() { OnMenuCommand(WXMENU_MSG_REPLY); }
-   void OnForward() { OnMenuCommand(WXMENU_MSG_FORWARD); }
-   void OnSelectAll() { OnMenuCommand(WXMENU_MSG_SELECTALL); }
-   void OnDeselectAll() { OnMenuCommand(WXMENU_MSG_DESELECTALL); }
-   void OnExpunge() { OnMenuCommand(WXMENU_MSG_EXPUNGE); }
-
-   DECLARE_EVENT_TABLE() 
-#endif // wxWin2
 private:
    /// is initialised?
    bool initialised;

@@ -86,7 +86,17 @@ wxFolderView::Build(int x, int y)
    width = x; height = y;
    x = (int) x - WXFRAME_WIDTH_DELTA;
    y = (int) y - WXFRAME_HEIGHT_DELTA;
-   listBox = CreateListBox(this, -1, -1, x, y);
+   //listBox = CreateListBox(this, -1, -1, , y);
+   // wxWin2:
+   listBox = new wxListBox(this,-1);
+   wxLayoutConstraints *c = new wxLayoutConstraints;
+   c->top.SameAs  (this, wxTop);
+   c->left.SameAs (this, wxLeft);
+   c->right.SameAs   (this, wxRight);
+   c->bottom.SameAs  (this, wxBottom);
+   listBox->SetConstraints(c);
+   listBox->SetAutoLayout(true);
+   this->SetAutoLayout(true);
 }
 
 void
@@ -188,8 +198,7 @@ wxFolderView::OnMenuCommand(int id)
          listBox->Deselect(n);
       break;
    default:
-      //wxMFrame::OnMenuCommand(id);
-      ;
+      wxFAIL_MSG("wxFolderView::OnMenuCommand() called with illegal id.");
    }
 }
 
@@ -213,8 +222,7 @@ wxFolderView::OpenMessages(const wxArrayInt& selections)
       mptr = mailFolder->GetMessage(selections[i]+1);
       title = mptr->Subject() + " - " + mptr->From();
       mv = GLOBAL_NEW wxMessageView(mailFolder,selections[i]+1,
-              "wxMessageView",
-                                    NULL); //FIXMEthis);
+              "wxMessageView",parent);
       mv->SetTitle(title);
    }
 }
@@ -274,7 +282,7 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
       str = "";
       msg = mailFolder->GetMessage(selections[i]+1);
       msg->WriteToString(str, false);
-      cv = GLOBAL_NEW wxComposeView(_("Reply"), NULL /*FIXME this*/,
+      cv = GLOBAL_NEW wxComposeView(_("Reply"),parent,
               mailFolder->GetProfile());
       cptr = str.c_str();
       str2 = "";
@@ -351,6 +359,7 @@ wxFolderViewFrame::wxFolderViewFrame(const String &folderName,
 {
    AddFileMenu();
    AddMessageMenu();
+   SetMenuBar(menuBar);
    m_FolderView = new wxFolderView(folderName, this);
    Show();
 }
@@ -360,11 +369,11 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
 {
    wxCHECK(m_FolderView);
 
-   VAR(event.GetId());
-   switch(event.GetId())
-   {
-   default:
-      wxMFrame::OnMenuCommand(event.GetId());
-   }
+   int id = event.GetId();
+
+   if(WXMENU_CONTAINS(MSG,id))
+      m_FolderView->OnMenuCommand(id);
+   else
+      wxMFrame::OnMenuCommand(id);
 }
 

@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/06/14 21:33:42  KB
+ * fixed the menu/callback problem, wxFolderView is now a panel
+ *
  * Revision 1.2  1998/05/06 17:39:25  VZ
  * changed the menu ids to start from 1 (workaround for wxGTK where control
  * id of 0 is still special and matches any id)
@@ -17,14 +20,25 @@
 #ifndef	WXMENUDEFS_H
 #define WXMENUDEFS_H
 
+/// check wether an ID belongs to a given menu
+#define   WXMENU_CONTAINS(menu,id)   (WXMENU_##menu##_BEGIN < id && WXMENU_##menu##_END > id)
+
+/** Definition of all numeric menu IDs.
+    Include each menu in WXMENU_menuname_BEGIN and
+    WXMENU_menuname_END, so it can be tested for by
+    WXMENU_CONTAIN(menu,id).
+*/
 enum
 {
-   WXMENU_FILE_OPEN = 1,
+   WXMENU_FILE_BEGIN = 1,
+   WXMENU_FILE_OPEN,
    WXMENU_FILE_COMPOSE,
    WXMENU_FILE_TEST,
    WXMENU_FILE_CLOSE,
    WXMENU_FILE_EXIT,
    WXMENU_FILE_ADBEDIT,
+   WXMENU_FILE_END,
+   WXMENU_MSG_BEGIN,
    WXMENU_MSG_PRINT,
    WXMENU_MSG_DELETE,
    WXMENU_MSG_SAVE,
@@ -34,14 +48,21 @@ enum
    WXMENU_MSG_SELECTALL,
    WXMENU_MSG_DESELECTALL,
    WXMENU_MSG_EXPUNGE,
+   WXMENU_MSG_END,
+   WXMENU_COMPOSE_BEGIN,
    WXMENU_COMPOSE_INSERTFILE,
    WXMENU_COMPOSE_SEND,
    WXMENU_COMPOSE_PRINT,
    WXMENU_COMPOSE_CLEAR,
+   WXMENU_COMPOSE_END,
+   WXMENU_MIME_BEGIN,
    WXMENU_MIME_HANDLE,
    WXMENU_MIME_INFO,
    WXMENU_MIME_SAVE,
+   WXMENU_MIME_END,
+   WXMENU_HELP_BEGIN,
    WXMENU_HELP_ABOUT,
+   WXMENU_HELP_END,
    WXMENU_POPUP_MIME_OFFS = 100
 };
 
