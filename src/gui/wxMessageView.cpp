@@ -1103,8 +1103,10 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                   {
                      command = "";
                      command << m_ProfileValues.browser << " -remote openURL(" << ci->GetUrl() << ")";
-
-                     bOk = RunProcess(command);
+                     wxString errmsg;
+                     errmsg.Printf(_("Couldn't launch browser: '%s' failed"),
+                                   command.c_str());
+                     bOk = LaunchProcess(command, errmsg);
                   }
                }
 #endif

@@ -1363,9 +1363,7 @@ wxComposeView::SetSubject(const String &subj)
 void
 wxComposeView::InsertText(const String &txt)
 {
-   m_LayoutWindow->GetLayoutList()->MoveCursorTo(wxPoint(0,0));
    wxLayoutImportText(m_LayoutWindow->GetLayoutList(), txt);
-   m_LayoutWindow->GetLayoutList()->MoveCursorTo(wxPoint(0,0));
    m_LayoutWindow->ResizeScrollbars(true);
    m_LayoutWindow->SetModified();
 }
@@ -1553,7 +1551,6 @@ wxComposeView::InsertFileAsText(const String& filename,
             layoutList->LineBreak();
          else
             layoutList->Insert(export->content.object->Copy());
-      layoutList->MoveCursorTo(wxPoint(0, 0));
       delete other_list;
    }
 
