@@ -140,7 +140,8 @@ void Sequence::AddRange(UIdType from, UIdType to)
          break;
 
       default:
-         m_seq << ':' << to;
+         // don't do this - Flush() will do it later
+         //m_seq << ':' << to;
          m_count += to - from;
          m_last = to;
    }
