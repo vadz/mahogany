@@ -558,7 +558,11 @@ void LayoutViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
    wxLayoutList *llist = m_window->GetLayoutList();
 
    wxLayoutObject *obj = new wxLayoutObjectIcon(icon);
-   obj->SetUserData(new LayoutUserData(ci));
+   LayoutUserData* data = new LayoutUserData(ci);
+   obj->SetUserData(data);
+   // SetUserData has incremented the refCount, which is now 2
+   // (it was already 1 right after creation)
+   data->DecRef();
 
    // multiple images look better alligned vertically rather than
    // horizontally
