@@ -14,13 +14,13 @@ install:
 	$(INSTALL) -d $(DOCDIR)/$(DIR)
 	$(INSTALL_DATA) `find $(DIR) -type f` $(DOCDIR)/$(DIR)/
 
-$(DIR).htex: ../$(DIR).htex
+copyfiles: ../$(DIR).aux
 	cp ../$(DIR).htex ../$(DIR).aux .
 
 ps: $(FILES_PS)
 	cp $(FILES_PS) ..
 
-index: $(DIR).htex $(DIR).aux
+index: copyfiles
 	$(LATEX2HTML) -debug $(DIR).htex
 
 wxhelp.map: index
@@ -34,7 +34,7 @@ clean:
 	$(RM) -r pics $(DIR)
 
 
-.PHONY: all install ps clean setup index
+.PHONY: all install ps clean setup index copyfiles
 
 include ../../makerules
 

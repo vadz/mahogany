@@ -12,10 +12,11 @@ build:
 	make doc
 	$(MAKE) all CFLAGS="-O2 -g -Wall"
 # If we are on Debian Slink, we need to build a semistatic binary:
-	if test `cat /etc/debian_version` = "2.1"
-	then
-		# statically link with gtk/glib 1.2.x and wxgtk
-		( cd src && make semistatic )
+	if test "`cat /etc/debian_version`" = "2.1" ; \
+	then \
+		( cd src && make semistatic ) \
+	else \
+		( cd src && make ) \
 	fi
 	touch build
 

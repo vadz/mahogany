@@ -888,7 +888,7 @@ msgstr ""
 
 #: wxComposeView.cpp:1022
 msgid "Cannot create temporary file"
-msgstr ""
+msgstr "No puedo crear el archivo temporal."
 
 #: wxComposeView.cpp:1030
 msgid "Failed to pass message to external editor."

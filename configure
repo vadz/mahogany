@@ -3836,8 +3836,8 @@ fi
 fi
 
 GUI_LIBS_STATIC=`echo $GTK_LDFLAGS | sed '
-s/-lgtk/-Wl,-B,static -lgtk/g
-s/-lglib/-lglib -Wl,-B,dynamic/g'`
+s/-lgtk/-Wl,-Bstatic -lgtk/g
+s/-lglib/-lglib -Wl,-Bdynamic/g'`
 
 
 CPPFLAGS="$CPPFLAGS $GTK_CFLAGS"
@@ -4251,7 +4251,7 @@ LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PNG $LIB_JPEG"
 CXXFLAGS="$CXXFLAGS $DBGFLAGS"
 CFLAGS="$CFLAGS $DBGFLAGS"
 
-LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk2/-Wl,-B,static -lwx_gtk2 -Wl,-B,dynamic/g'`
+LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk2/-Wl,-Bstatic -lwx_gtk2 -Wl,-Bdynamic/g'`
 
 
 

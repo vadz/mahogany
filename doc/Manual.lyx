@@ -1,4 +1,4 @@
-#This file was created by <karsten> Wed May 19 16:27:18 1999
+#This file was created by <karsten> Wed May 19 19:14:36 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -243,6 +243,13 @@ Cursor movement in the message editor (deleting/inserting empty lines) can
  occasionally behave a bit funny.
  Using CTRL-Y reliably deletes lines, just pressing DELETE in an empty line
  doesn't always do so.
+ Using the mouse for selections does not currently cause the window to scroll
+ when moved outside.
+ The editor is still a bit work in progress, but improving quickly.
+\layout Itemize
+
+Printing occasionally repeats the last few lines from the bottom of a page
+ at the top of the next page.
 \layout Itemize
 
 Newsspool support will not work with newsgroups not listed in the 
@@ -267,7 +274,7 @@ This is a list of features on our TODO list that we are currently working
 We are currently working on the implementation of the following:
 \layout Itemize
 
-Easy to use and powerful filtering system for mails.
+Easy to use and powerful filtering system for mails (about one third complete).
 \layout Itemize
 
 Finishing rewrite of message editor: rich text editing & HTML
@@ -299,6 +306,10 @@ Wide character (Unicode) support and other character sets, currently being
 \layout Itemize
 
 Searching in folders.
+\layout Itemize
+
+A calendar add-on to to add some some time planning, reminder functionality
+ (early planning stage).
 \layout Subsubsection
 
 Further we plan the following:
@@ -363,7 +374,12 @@ If you have access to other systems apart from Linux/Solaris/FreeBSD/Windows,
  other hardware than Intel.
 \layout Itemize
 
-Translations to other languages.
+Translations to other languages (We have support for German, French, Spanish
+ at present.
+ Czech and Brasilian-Portuguese are underway.).
+\layout Itemize
+
+MacOS development
 \layout Itemize
 
 
