@@ -22,6 +22,7 @@
 
 #define   OS_SUBTYPE   "unknown"
 
+
 #ifdef unix
 #  define  OS_UNIX    1
 #  define  OS_TYPE    "unix"
@@ -45,6 +46,9 @@
   // this reminder is important, it won't compile without it anyhow...
 # error   "Unknown platform (forgot to #define unix?)"
 #endif
+
+#define   M_DATADIR M_BASEDIR "data"
+#define   M_DOCDIR  M_BASEDIR "doc"
 
 // Are we using GCC?
 #ifdef  __GNUG__
