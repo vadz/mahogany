@@ -84,6 +84,15 @@ extern "C"
    // longs
    PyTypeObject *M_PyLong_Type = NULL;
 
+   // strings
+   char*(*M_PyString_AsString)(PyObject *) = NULL;
+   int (*M_PyString_AsStringAndSize)(PyObject *, char **, int *) = NULL;
+   PyObject*(*M_PyString_FromString)(const char *) = NULL;
+   PyObject*(*M_PyString_FromStringAndSize)(const char *, int) = NULL;
+   int(*M_PyString_Size)(PyObject *) = NULL;
+   PyTypeObject* M_PyString_Type = NULL;
+   PyObject *(*M_PyString_InternFromString)(const char *) = NULL;
+
    // tuples
    PyObject *(*M_PyTuple_GetItem)(PyObject *, int) = NULL;
 
@@ -105,11 +114,6 @@ extern "C"
    PyObject*(*M_PyImport_ImportModule)(const char *) = NULL;
    PyObject*(*M_PyDict_GetItemString)(PyObject *, const char *) = NULL;
    PyObject*(*M_PyModule_GetDict)(PyObject *) = NULL;
-   char*(*M_PyString_AsString)(PyObject *) = NULL;
-   PyObject*(*M_PyString_FromString)(const char *) = NULL;
-   PyObject*(*M_PyString_FromStringAndSize)(const char *, int) = NULL;
-   int(*M_PyString_Size)(PyObject *) = NULL;
-   PyTypeObject* M_PyString_Type = NULL;
    int(*M_PySys_SetObject)(char *, PyObject *) = NULL;
    PyTypeObject* M_PyType_Type = NULL;
    PyObject*(*M_Py_BuildValue)(char *, ...) = NULL;
@@ -122,7 +126,6 @@ extern "C"
    PyObject *(*M_PyImport_GetModuleDict)(void) = NULL;
    PyObject *(*M_PyImport_ReloadModule)(PyObject *) = NULL;
    PyObject *(*M_PyRun_String)(const char *, int, PyObject *, PyObject *) = NULL;
-   PyObject *(*M_PyString_InternFromString)(const char *) = NULL;
 
    int (*M_PyType_IsSubtype)(PyTypeObject *, PyTypeObject *) = NULL;
    void (*M__Py_NegativeRefcount)(const char *, int, PyObject *) = NULL;
@@ -183,6 +186,14 @@ static struct PythonFunc
    // longs
    PYTHON_FUNC(PyLong_Type)
 
+   // strings
+   PYTHON_FUNC(PyString_AsString)
+   PYTHON_FUNC(PyString_AsStringAndSize)
+   PYTHON_FUNC(PyString_FromString)
+   PYTHON_FUNC(PyString_FromStringAndSize)
+   PYTHON_FUNC(PyString_InternFromString)
+   PYTHON_FUNC(PyString_Type)
+
    // tuples
    PYTHON_FUNC(PyTuple_GetItem)
 
@@ -206,8 +217,6 @@ static struct PythonFunc
    PYTHON_FUNC(PyDict_SetItemString)
    PYTHON_FUNC(PyImport_ImportModule)
    PYTHON_FUNC(PyModule_GetDict)
-   PYTHON_FUNC(PyString_AsString)
-   PYTHON_FUNC(PyString_FromString)
    PYTHON_FUNC(PyEval_CallObjectWithKeywords)
    PYTHON_FUNC(PyExc_NameError)
    PYTHON_FUNC(PyExc_TypeError)
@@ -216,7 +225,6 @@ static struct PythonFunc
    PYTHON_FUNC(PyImport_GetModuleDict)
    PYTHON_FUNC(PyImport_ReloadModule)
    PYTHON_FUNC(PyRun_String)
-   PYTHON_FUNC(PyString_InternFromString)
    PYTHON_FUNC(PyType_IsSubtype)
    { "", NULL }
 };
