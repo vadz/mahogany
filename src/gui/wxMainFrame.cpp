@@ -571,6 +571,10 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    SetIcon(ICON(_T("MainFrame")));
    SetTitle(_("Copyright (C) 1997-2004 The Mahogany Developers Team"));
 
+#ifdef DEBUG
+   SetTitle(GetTitle() + _(" (Debug build)"));
+#endif
+
    CreateStatusBar();
 
    // create the child controls
