@@ -25,8 +25,15 @@ allclean:
 dep depend: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
-#config.status: configure
-#	./config.status --recheck
+config.status: configure
+	@ ./config.status --recheck || \
+	echo "\n"; \
+	echo "********************************************************" ; \
+	echo "* You should run configure with appropriate arguments  *" ; \
+	echo "* Refer to doc/Information.txt or use configure --help *" ; \
+	echo "********************************************************" ; \
+	echo "\n"; \
+	exit 1;
 
 config: configure makeopts.in
 	./configure
