@@ -316,6 +316,14 @@ SOURCE=.\src\mail\SendMessageCC.cpp
 
 SOURCE=.\src\mail\Sorting.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\src\mail\Threading.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\mail\ThreadJWZ.cpp
+# End Source File
 # End Group
 # Begin Group "gui"
 
