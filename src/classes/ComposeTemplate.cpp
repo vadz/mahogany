@@ -975,11 +975,29 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
 
                // should we quote the empty lines?
                bool quoteEmpty = READ_CONFIG(m_profile, MP_REPLY_QUOTE_EMPTY) != 0;
+
+               // was the last message part a text one?
+               bool lastWasPlainText = false;
+
                int nParts = m_msg->CountParts();
                for ( int nPart = 0; nPart < nParts; nPart++ )
                {
                   if ( m_msg->GetPartType(nPart) == Message::MSG_TYPETEXT )
                   {
+                     // FIXME: we lack propert multipart/alternative support -
+                     //        until we have it we can at least avoid
+                     //        inserting all parts of such messages when
+                     //        replying in the most common case (2 parts:
+                     //        text/plain and text/html)
+                     String mimeType = m_msg->GetPartMimeType(nPart).Lower();
+                     if ( mimeType == "text/html" && lastWasPlainText )
+                     {
+                        // skip it
+                        continue;
+                     }
+
+                     lastWasPlainText = mimeType == "text/plain";
+
                      String str = m_msg->GetPartContent(nPart);
                      const char *cptr = str.c_str();
                      String str2 = prefix;
@@ -1003,6 +1021,10 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                      }
 
                      *value += str2;
+                  }
+                  else
+                  {
+                     lastWasPlainText = false;
                   }
                }
             }

@@ -762,7 +762,7 @@ void
 wxMessageView::Update(void)
 {
    char const * cptr;
-   String tmp,from,url, mimeType, fileName, disposition;
+   String tmp,from,url, fileName, disposition;
    bool   lastObjectWasIcon = false; // a flag
    ClickableInfo *ci;
 
@@ -967,7 +967,7 @@ wxMessageView::Update(void)
          continue;
       }
 
-      mimeType = m_mailMessage->GetPartMimeType(i);
+      String mimeType = m_mailMessage->GetPartMimeType(i);
       strutil_tolower(mimeType);
       fileName = GetFileNameForMIME(m_mailMessage,i);
       (void) m_mailMessage->GetDisposition(i,&disposition);
