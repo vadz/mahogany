@@ -309,7 +309,7 @@ strutil_extract_formatspec(const char *format)
    // TODO doesn't recognize all possible formats nor backslashes (!)
    String specs;
    while ( *format != '\0' ) {
-      if ( *format == '-' ) {
+      if ( *format == '%' ) {
          // skip flags, width and precision which may optionally follow '-'
          while ( !isalpha(*format) )
             format++;
