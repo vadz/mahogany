@@ -551,10 +551,12 @@ wxMApp::OnAbnormalTermination()
       gettext_noop("The application is terminating abnormally.\n"
                    "\n"
                    "Please report the bug via our bugtracker at\n"
-                   "http://mahogany.sourceforge.net/bugz\n"
-                   "Be sure to mention your OS version and what\n"
-                   "exactly you were doing before this message\n"
-                   "box appeared.\n"
+                   "\n"
+                   "     http://mahogany.sourceforge.net/bugz\n"
+                   "\n"
+                   "Be sure to mention your OS and Mahogany version\n"
+                   "and what exactly you were doing before this message\n"
+                   "box appeared as well as any other useful details!.\n"
                    "\n"
                    "Thank you!");
    static const char *title = gettext_noop("Fatal application error");
