@@ -146,14 +146,18 @@ void AutoCollectAddress(const String& email,
       //     better to create a duplicate entry than to annoy the user with a
       //     long delay
 
-      // avoid creating groups with '/'s in the names - this would create
-      // nested groups!
       wxString adbGroupName;
       if ( groupName[0u] == '/' )
          adbGroupName = groupName.c_str() + 1;
       else
          adbGroupName = groupName;
+
+      // ok, but why exactly is this bad??
+#if 0
+      // avoid creating groups with '/'s in the names - this would create
+      // nested groups!
       adbGroupName.Replace("/", "_");
+#endif // 0
 
       AdbEntryGroup *group = autocollectbook->CreateGroup(adbGroupName);
       if ( !group )
