@@ -133,7 +133,7 @@ then
   KBHOME=/home/karsten
   HOME=$KBHOME
 else
-  REALHOME=HOME
+  REALHOME=$HOME
 fi
 WWWDIR=$HOME/WWW/Mahogany/daily
 LOGNAME="karsten"
