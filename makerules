@@ -21,8 +21,7 @@ else
 	$(CC)  -fPIC $(CFLAGS) -c $<
 
 %.so: %.cpp
-	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< 
-	#$(LIBS)
+	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< $(LIBS)
 endif
 
 %.py: %.i
