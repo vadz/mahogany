@@ -377,7 +377,7 @@ MailCollectorImpl::Collect(MailFolder *mf)
          }
          else
          {
-            ASSERT( (**i).m_failcount > 0);
+            ASSERT( (**i).m_failcount >= 0);
             (**i).m_failcount ++;
             if((**i).m_failcount > MC_MAX_FAIL)
             {

@@ -3416,6 +3416,7 @@ bool MPasswordDialog::TransferDataToWindow()
    m_textUser->SetValue(*m_username);
    m_textPwd->SetValue(*m_password);
 
+   m_textPwd->SetFocus();
    return TRUE;
 }
 
