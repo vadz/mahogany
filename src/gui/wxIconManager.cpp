@@ -27,6 +27,9 @@
 #  include "Profile.h"
 #  include "PathFinder.h"
 #  include "MApplication.h"
+#if wxCHECK_VERSION(2, 5, 0)
+#  include <wx/iconloc.h>
+#endif
 #endif
 
 #include "Mdefaults.h"
@@ -36,7 +39,6 @@
 
 #include <wx/mimetype.h>
 #include <wx/file.h>
-#include <wx/iconloc.h>
 
 #ifdef USE_ICONS_FROM_RESOURCES
 #  define   unknown_xpm     "unknown"
@@ -629,7 +631,15 @@ wxIcon wxIconManager::GetIconFromMimeType(const String& type,
       wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
       wxFileType *fileType = mimeManager.GetFileTypeFromMimeType(type);
       if ( fileType != NULL ) {
-         fileType->GetIcon(&icon);
+#if wxCHECK_VERSION(2, 5, 0)
+         wxIconLocation iconLoc;
+         if ( fileType->GetIcon(&iconLoc) )
+         {
+            icon = wxIcon(iconLoc);
+         }
+#else // wx 2.4.x
+         (void)fileType->GetIcon(&icon);
+#endif
          fileType->GetExtensions(exts);
          delete fileType;
       }
