@@ -62,6 +62,7 @@
 #include "gui/wxOptionsPage.h"
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxSelectionDlg.h"
+#include "gui/wxSpamOptions.h"
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
@@ -495,7 +496,7 @@ public:
       return MFDialogTarget_fromSelect(m_Where->GetSelection());
    }
 
-   String GetArgument() const
+   String GetArgument()
    {
       MFDialogTest test = GetTest();
       if ( ! FilterTestNeedsArgument(test) )
@@ -504,7 +505,7 @@ public:
       switch ( test )
       {
          // spam tests or message flags are decoded separately
-         case ORC_T_IsSpam: return GetSpamTestArgument();
+         case ORC_T_IsSpam: return m_spam->ToString();
          case ORC_T_HasFlag:
             switch ( m_choiceFlags->GetSelection() )
             {
@@ -542,9 +543,6 @@ private:
    // initialize m_checkXXX vars(called from CreateSpamButton())
    void InitSpamOptions(const String& rule);
 
-   // return the string containing the argument for the isspam() test
-   String GetSpamTestArgument() const;
-
    // the controls which are always shown
 
    wxCheckBox *m_Not;      // invert the condition if checked
@@ -564,18 +562,7 @@ private:
 
 
    // the spam test data
-   bool m_checkSpamAssassin:1;
-   bool m_check8bit:1;
-   bool m_checkCaps:1;
-   bool m_checkJunkSubj:1;
-   bool m_checkKorean:1;
-   bool m_checkXAuthWarn:1;
-   bool m_checkReceived:1;
-   bool m_checkHtml:1;
-   bool m_checkMime:1;
-#ifdef USE_RBL
-   bool m_checkRBL:1;
-#endif // USE_RBL
+   SpamOptionManager::Pointer m_spam;
 };
 
 wxCOMPILE_TIME_ASSERT( ORC_LogicalCount == ORC_L_Max, MismatchInLogicOps );
@@ -825,219 +812,19 @@ OneCritControl::SetValues(const MFDialogSettings& settings, size_t n)
 // spam details dialog code
 // ----------------------------------------------------------------------------
 
-// spam details page options
-#define MP_SPAM_SPAM_ASSASSIN "SpamAssassin"
-#define MP_SPAM_SPAM_ASSASSIN_D 1l
-
-#define MP_SPAM_8BIT_SUBJECT "Spam8BitSubject"
-#define MP_SPAM_8BIT_SUBJECT_D 1l
-
-#define MP_SPAM_CAPS_SUBJECT "SpamCapsSubject"
-#define MP_SPAM_CAPS_SUBJECT_D 1l
-
-#define MP_SPAM_JUNK_END_SUBJECT "JunkEndSubject"
-#define MP_SPAM_JUNK_END_SUBJECT_D 1l
-
-#define MP_SPAM_KOREAN_CSET  "SpamKoreanCharset"
-#define MP_SPAM_KOREAN_CSET_D  1l
-
-#define MP_SPAM_X_AUTH_WARN  "SpamXAuthWarning"
-#define MP_SPAM_X_AUTH_WARN_D  0l
-
-#define MP_SPAM_RECEIVED   "SpamReceived"
-#define MP_SPAM_RECEIVED_D  0l
-
-#define MP_SPAM_HTML  "SpamHtml"
-#define MP_SPAM_HTML_D  0l
-
-#define MP_SPAM_MIME  "SpamMime"
-#define MP_SPAM_MIME_D  0l
-
-#ifdef USE_RBL
-#define MP_SPAM_RBL          "SpamIsInRBL"
-#define MP_SPAM_RBL_D          0l
-#endif // USE_RBL
-
-#define CONFIG_ENTRY(name)  ConfigValueDefault(name, name##_D)
-#define CONFIG_NONE()  ConfigValueNone()
-
-static const ConfigValueDefault gs_SpamPageConfigValues[] =
-{
-   CONFIG_NONE(),
-   CONFIG_ENTRY(MP_SPAM_SPAM_ASSASSIN),
-   CONFIG_ENTRY(MP_SPAM_8BIT_SUBJECT),
-   CONFIG_ENTRY(MP_SPAM_CAPS_SUBJECT),
-   CONFIG_ENTRY(MP_SPAM_JUNK_END_SUBJECT),
-   CONFIG_ENTRY(MP_SPAM_KOREAN_CSET),
-   CONFIG_ENTRY(MP_SPAM_X_AUTH_WARN),
-   CONFIG_ENTRY(MP_SPAM_RECEIVED),
-   CONFIG_ENTRY(MP_SPAM_HTML),
-   CONFIG_ENTRY(MP_SPAM_MIME),
-#ifdef USE_RBL
-   CONFIG_ENTRY(MP_SPAM_RBL),
-#endif // USE_RBL
-};
-
-#undef CONFIG_ENTRY
-#undef CONFIG_NONE
-
-static const wxOptionsPage::FieldInfo gs_SpamPageFieldInfos[] =
-{
-   // available accels: 012345679DEFGILNOPQSTUVXYZ
-   { gettext_noop("Mahogany may use several heuristic tests to detect spam.\n"
-                  "Please choose the ones you'd like to be used by checking\n"
-                  "the corresponding entries.\n"
-                  "\n"
-                  "So the message is considered to be spam if it has..."),
-                  wxOptionsPage::Field_Message, -1 },
-   { gettext_noop("Been tagged as spam by Spam&Assassin"), wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("Too many &8 bit characters in subject"), wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("Only &capitals in subject"), wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("&Junk at end of subject"), wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("&Korean charset"), wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("X-Authentication-&Warning header"), wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("Suspicious \"&Received\" headers"), wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("Only &HTML content"), wxOptionsPage::Field_Bool, -1 },
-   { gettext_noop("Unusual &MIME structure"), wxOptionsPage::Field_Bool, -1 },
-#ifdef USE_RBL
-   { gettext_noop("Been &blacklisted by RBL"), wxOptionsPage::Field_Bool, -1},
-#endif // USE_RBL
-};
-
-wxCOMPILE_TIME_ASSERT
-(
-      WXSIZEOF(gs_SpamPageFieldInfos) == WXSIZEOF(gs_SpamPageConfigValues),
-      MismatchInSpamTests
-);
-
-static const wxOptionsPageDesc gs_SpamPageDesc =
-   wxOptionsPageDesc(
-      // title and image
-      gettext_noop("Details of spam detection"),
-      "spam",
-
-      // help id (TODO)
-      -1,
-
-      // the fields description
-      gs_SpamPageFieldInfos,
-      gs_SpamPageConfigValues,
-      WXSIZEOF(gs_SpamPageFieldInfos)
-   );
-
-
 void
 OneCritControl::InitSpamOptions(const String& /* rule */)
 {
    CHECK_RET( m_Argument, _T("no argument control in the spam test?") );
 
-   const String testString = m_Argument->GetValue();
-
-   // use the default values to initialize the dialog
-   if ( testString.empty() )
-   {
-      m_checkSpamAssassin = MP_SPAM_SPAM_ASSASSIN_D;
-      m_check8bit = MP_SPAM_8BIT_SUBJECT_D;
-      m_checkCaps = MP_SPAM_CAPS_SUBJECT_D;
-      m_checkJunkSubj = MP_SPAM_JUNK_END_SUBJECT_D;
-      m_checkKorean = MP_SPAM_KOREAN_CSET_D;
-
-      m_checkXAuthWarn = MP_SPAM_X_AUTH_WARN_D;
-      m_checkReceived = MP_SPAM_RECEIVED_D;
-      m_checkHtml = MP_SPAM_HTML_D;
-      m_checkMime = MP_SPAM_MIME_D;
-
-#ifdef USE_RBL
-      m_checkRBL = MP_SPAM_RBL_D;
-#endif // USE_RBL
-   }
-   else // extract the tests we do from the actual value
-   {
-#ifdef USE_RBL
-      m_checkRBL =
-#endif // USE_RBL
-
-      m_checkSpamAssassin =
-      m_check8bit =
-      m_checkCaps =
-      m_checkJunkSubj =
-      m_checkKorean =
-
-      m_checkXAuthWarn =
-      m_checkReceived =
-      m_checkHtml =
-      m_checkMime = false;
-
-      const wxArrayString tests = strutil_restore_array(testString);
-      const size_t count = tests.GetCount();
-      for ( size_t n = 0; n < count; n++ )
-      {
-         const wxString& t = tests[n];
-         if ( t == SPAM_TEST_SPAMASSASSIN )
-            m_checkSpamAssassin = true;
-         else if ( t == SPAM_TEST_SUBJ8BIT )
-            m_check8bit = true;
-         else if ( t == SPAM_TEST_SUBJCAPS )
-            m_checkCaps = true;
-         else if ( t == SPAM_TEST_SUBJENDJUNK )
-            m_checkJunkSubj = true;
-         else if ( t == SPAM_TEST_KOREAN )
-            m_checkKorean = true;
-         else if ( t == SPAM_TEST_XAUTHWARN )
-            m_checkXAuthWarn = true;
-         else if ( t == SPAM_TEST_RECEIVED )
-            m_checkReceived = true;
-         else if ( t == SPAM_TEST_HTML )
-            m_checkHtml = true;
-         else if ( t == SPAM_TEST_MIME )
-            m_checkMime = true;
-#ifdef USE_RBL
-         else if ( t == SPAM_TEST_RBL )
-            m_checkReceived = true;
-#endif
-         else
-            wxLogDebug(_T("Unknown spam test \"%s\""), t.c_str());
-      }
-   }
-
+   m_spam->FromString(m_Argument->GetValue());
 }
 
 void
 OneCritControl::ShowDetails()
 {
-   // we use the global app profile to pass the settings to/from the options
-   // page because like this we can reuse the options page classes easily
-   Profile *profile = mApplication->GetProfile();
-
-   // transfer data to dialog
-   profile->writeEntry(MP_SPAM_SPAM_ASSASSIN, m_checkSpamAssassin);
-   profile->writeEntry(MP_SPAM_8BIT_SUBJECT, m_check8bit);
-   profile->writeEntry(MP_SPAM_CAPS_SUBJECT, m_checkCaps);
-   profile->writeEntry(MP_SPAM_JUNK_END_SUBJECT, m_checkJunkSubj);
-   profile->writeEntry(MP_SPAM_KOREAN_CSET, m_checkKorean);
-   profile->writeEntry(MP_SPAM_X_AUTH_WARN, m_checkXAuthWarn);
-   profile->writeEntry(MP_SPAM_RECEIVED, m_checkReceived);
-   profile->writeEntry(MP_SPAM_HTML, m_checkHtml);
-   profile->writeEntry(MP_SPAM_MIME, m_checkMime);
-#ifdef USE_RBL
-   profile->writeEntry(MP_SPAM_RBL, m_checkRBL);
-#endif // USE_RBL
-
-   if ( ShowCustomOptionsDialog(gs_SpamPageDesc, profile, GetFrame(m_Parent)) )
+   if ( m_spam->ShowDialog(GetFrame(m_Parent)) )
    {
-      m_checkSpamAssassin = profile->readEntry(MP_SPAM_SPAM_ASSASSIN, 0l) != 0;
-      m_check8bit = profile->readEntry(MP_SPAM_8BIT_SUBJECT, 0l) != 0;
-      m_checkCaps = profile->readEntry(MP_SPAM_CAPS_SUBJECT, 0l) != 0;
-      m_checkJunkSubj = profile->readEntry(MP_SPAM_JUNK_END_SUBJECT, 0l) != 0;
-      m_checkKorean = profile->readEntry(MP_SPAM_KOREAN_CSET, 0l) != 0;
-      m_checkXAuthWarn = profile->readEntry(MP_SPAM_X_AUTH_WARN, 0l) != 0;
-      m_checkReceived = profile->readEntry(MP_SPAM_RECEIVED, 0l) != 0;
-      m_checkHtml = profile->readEntry(MP_SPAM_HTML, 0l) != 0;
-      m_checkMime = profile->readEntry(MP_SPAM_MIME, 0l) != 0;
-#ifdef USE_RBL
-      m_checkRBL = profile->readEntry(MP_SPAM_RBL, 0l) != 0;
-#endif // USE_RBL
-
       wxOneFilterDialog *dlg =
          GET_PARENT_OF_CLASS(m_Parent, wxOneFilterDialog);
       CHECK_RET( dlg, _T("should be a child of wxOneFilterDialog") );
@@ -1045,59 +832,6 @@ OneCritControl::ShowDetails()
       dlg->UpdateProgram();
    }
    //else: cancelled
-
-   // don't keep this stuff in profile, we don't use it except here
-   profile->DeleteEntry(MP_SPAM_SPAM_ASSASSIN);
-   profile->DeleteEntry(MP_SPAM_8BIT_SUBJECT);
-   profile->DeleteEntry(MP_SPAM_CAPS_SUBJECT);
-   profile->DeleteEntry(MP_SPAM_KOREAN_CSET);
-   profile->DeleteEntry(MP_SPAM_X_AUTH_WARN);
-   profile->DeleteEntry(MP_SPAM_RECEIVED);
-   profile->DeleteEntry(MP_SPAM_HTML);
-#ifdef USE_RBL
-   profile->DeleteEntry(MP_SPAM_RBL);
-#endif // USE_RBL
-}
-
-static void AddToSpamArgument(String& s, const char *arg)
-{
-   if ( !s.empty() )
-      s += ':';
-
-   s += arg;
-}
-
-String
-OneCritControl::GetSpamTestArgument() const
-{
-   String s;
-
-   CHECK( m_btnSpam, s, _T("shouldn't be called if spam button not used") );
-
-   if ( m_checkSpamAssassin )
-      AddToSpamArgument(s, SPAM_TEST_SPAMASSASSIN);
-   if ( m_check8bit )
-      AddToSpamArgument(s, SPAM_TEST_SUBJ8BIT);
-   if ( m_checkCaps )
-      AddToSpamArgument(s, SPAM_TEST_SUBJCAPS);
-   if ( m_checkJunkSubj )
-      AddToSpamArgument(s, SPAM_TEST_SUBJENDJUNK);
-   if ( m_checkKorean )
-      AddToSpamArgument(s, SPAM_TEST_KOREAN);
-   if ( m_checkXAuthWarn )
-      AddToSpamArgument(s, SPAM_TEST_XAUTHWARN);
-   if ( m_checkReceived )
-      AddToSpamArgument(s, SPAM_TEST_RECEIVED);
-   if ( m_checkHtml )
-      AddToSpamArgument(s, SPAM_TEST_HTML);
-   if ( m_checkMime )
-      AddToSpamArgument(s, SPAM_TEST_MIME);
-#ifdef USE_RBL
-   if ( m_checkRBL )
-      AddToSpamArgument(s, SPAM_TEST_RBL);
-#endif // USE_RBL
-
-   return s;
 }
 
 void CritDetailsButton::OnClick(wxCommandEvent& WXUNUSED(event))

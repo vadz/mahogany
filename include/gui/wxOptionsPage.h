@@ -14,7 +14,12 @@
 #ifndef _GUI_WXOPTIONSPAGE_H
 #define _GUI_WXOPTIONSPAGE_H
 
-#include <wx/dynarray.h>
+#ifndef USE_PCH
+#       include <wx/control.h>
+#       include <wx/dynarray.h>
+#endif
+
+#include "gui/wxDialogLayout.h"
 
 WX_DEFINE_ARRAY(wxControl *, ArrayControls);
 WX_DEFINE_ARRAY_INT(bool, ArrayBool);
