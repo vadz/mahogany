@@ -754,8 +754,8 @@ wxMessageView::Update(void)
       t = m_mailMessage->GetPartType(i);
       if(m_mailMessage->GetPartSize(i) == 0)
       {
-         // ignore empty parts
-         wxLogVerbose("Skipping the empty MIME part #%d.", i);
+         // ignore empty parts but warn user as it might indicate a problem
+         wxLogStatus(GetFrame(this), "Skipping the empty MIME part #%d.", i);
 
          continue;
       }
