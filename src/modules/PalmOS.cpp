@@ -953,7 +953,6 @@ PalmOSModule::InstallFiles(char **fnames, int files_total)
 
       // remember filename
       sprintf(db[dbcount]->name, "%s", fnames[j]);
-      ErrorMessage(_(fnames[j]));
 
       f = pi_file_open(db[dbcount]->name);
 
@@ -1098,7 +1097,7 @@ PalmOSModule::Install()
    ofile_total = (int) fileNames.Count();
    fnames = (char **) malloc( sizeof(char *) * ofile_total );
    for(int i = 0; i < ofile_total; i++)
-      fnames[i] = strutil_strdup( fileNames[0] );
+      fnames[i] = strutil_strdup( fileNames[i] );
 
    // install files
    PiConnection conn(this);
