@@ -4,6 +4,7 @@
 Release 0.61 'Hawkins'
 -------------------------------------------------------------------------------
 
+22.01.01 NB: determine attachment name correctly
 19.01.01 VZ: serious server side searching on IMAP servers bug fixed
 16.01.01 VZ: sending mail with local MDA respects BCC
              temp mail files are not world readable any more

@@ -48,12 +48,11 @@ Message::ExpandParameter(MessageParameterList const & list, String
                          String *value) const
 {
    MessageParameterList::iterator i;
-   String par = parameter;
-   strutil_toupper(par);
    
    for(i = list.begin(); i != list.end(); i++)
    {
-      if(strutil_cmp(par,(*i)->name))
+      if ( parameter.CmpNoCase((*i)->name) == 0 )
+         // found
       {
          *value = (*i)->value;
          return true;
