@@ -2309,9 +2309,9 @@ arguments.
 
 There are a number of callbacks available which will be called from
 different places within \textsl{Mahogany}. These are defined in the
-header file \texttt{Mcallbacks.h}. The documentation of these callbacks
-can be found in the Classes documentation(\htmladdnormallinkfoot{Classes online docs}{classes/index.html}).
-All of these callbacks are called with at least two arguments:
+header file \texttt{Mcallbacks.h}. There is no documentation for these
+callbacks yet, but don't hesitate to ask us if you need more information
+about this. All of these callbacks are called with at least two arguments:
 
 \begin{enumerate}
 \item The name of the hook for which the function got called, e.g. \texttt{FolderOpenHook}
