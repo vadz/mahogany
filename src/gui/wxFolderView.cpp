@@ -3362,13 +3362,18 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
          m_msgCmdProc->ProcessCommand(WXMENU_MSG_SAVE_TO_FILE, selections);
          break;
 
+      case 'R': // reply
+         m_msgCmdProc->ProcessCommand(WXMENU_MSG_REPLY, selections);
+         newFocus = -1;
+         break;
+
       case 'G': // group reply
          m_msgCmdProc->ProcessCommand(WXMENU_MSG_REPLY_ALL, selections);
          newFocus = -1;
          break;
 
-      case 'R': // reply
-         m_msgCmdProc->ProcessCommand(WXMENU_MSG_REPLY, selections);
+      case 'L': // list reply
+         m_msgCmdProc->ProcessCommand(WXMENU_MSG_REPLY_LIST, selections);
          newFocus = -1;
          break;
 
