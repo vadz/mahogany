@@ -22,6 +22,7 @@
 #ifndef   USE_PCH
 #   include  "kbList.h"
 #   include  "MObject.h"
+#   include  "guidef.h"
 #endif
 
 #include  "MailFolderCmn.h"

@@ -101,9 +101,12 @@ public:
    /** Save messages to a folder.
        @param n number of messages
        @param messages pointer to an array holding the message numbers
+       @param folder is the folder to save to, ask the user if NULL
        @param del if TRUE, delete them when they are saved
    */
-   void SaveMessagesToFolder(UIdArray const &messages, bool del = FALSE);
+   void SaveMessagesToFolder(UIdArray const &messages,
+                             MFolder *folder = NULL,
+                             bool del = FALSE);
 
    /** Returns false if no items are selected
    */

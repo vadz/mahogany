@@ -869,15 +869,22 @@ MailFolderCmn::UnDeleteMessages(const UIdArray *selections)
 }
 
 bool
-MailFolderCmn::SaveMessagesToFolder(const UIdArray *selections, MWindow *parent)
+MailFolderCmn::SaveMessagesToFolder(const UIdArray *selections,
+                                    MWindow *parent,
+                                    MFolder *folder)
 {
    bool rc = false;
-   MFolder *folder = MDialog_FolderChoose(parent);
+   if ( !folder )
+      folder = MDialog_FolderChoose(parent);
+   else
+      folder->IncRef(); // to match DecRef() below
+
    if ( folder )
    {
       rc = SaveMessages(selections, folder, true);
       folder->DecRef();
    }
+
    return rc;
 }
 

@@ -48,6 +48,7 @@
 #include "gui/wxFolderView.h"
 #include "gui/wxMessageView.h"
 #include "gui/wxComposeView.h"
+#include "gui/wxFolderMenu.h"
 
 #include "gui/wxMIds.h"
 #include "MDialogs.h"
@@ -138,6 +139,9 @@ public:
             EnableSelectionCallbacks(false);
       }
 
+   // for wxFolderView
+   wxMenu *GetFolderMenu() const { return m_menuFolders; }
+
 protected:
    long m_Style;
    long m_NextIndex;
@@ -157,6 +161,9 @@ protected:
    bool m_Initialised;
    /// the popup menu
    wxMenu *m_menu;
+   /// and the folder submenu for it
+   wxMenu *m_menuFolders;
+
    DECLARE_EVENT_TABLE()
 };
 
@@ -260,7 +267,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          m_FolderView->SaveMessagesToFile(selections);
          break;
       case 'M': // move = copy + delete
-         m_FolderView->SaveMessagesToFolder(selections, true);
+         m_FolderView->SaveMessagesToFolder(selections, NULL, true);
          break;
       case 'G':
       case 'R':
@@ -322,7 +329,28 @@ void wxFolderListCtrl::OnMouse(wxMouseEvent& event)
    m_menu->Check(WXMENU_MSG_TOGGLEHEADERS,
                  mb->IsChecked(WXMENU_MSG_TOGGLEHEADERS));
 
+   // add a folder menu for quick moving messages
+   m_menuFolders = wxFolderMenu::Create();
+   wxMenuItem *menuItem = wxMenuItem::New(m_menu, WXMENU_POPUP_FOLDER_MENU,
+                                          _("&Quick move"), "",
+                                          FALSE, m_menuFolders);
+   wxMenuItem *menuItemSep = wxMenuItem::New(m_menu);
+#if 1
+   m_menu->Insert(0, menuItem);
+   m_menu->Insert(1, menuItemSep);
+#else
+   m_menu->Append(menuItemSep);
+   m_menu->Append(menuItem);
+#endif
+
    PopupMenu(m_menu, event.GetX(), event.GetY());
+
+   // remove the 2 first items we added
+   m_menu->Delete(menuItemSep);
+   m_menu->Delete(WXMENU_POPUP_FOLDER_MENU);
+
+   wxFolderMenu::Delete(m_menuFolders);
+   m_menuFolders = NULL;
 
    // and now sync them back again
    mb->Check(WXMENU_MSG_TOGGLEHEADERS,
@@ -391,6 +419,8 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_Style = wxLC_REPORT;
    m_SelectionCallbacks = true;
    m_Initialised = false;
+   m_menu =
+   m_menuFolders = NULL;
 
    int
       w = 500,
@@ -1105,7 +1135,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       break;
    case WXMENU_MSG_MOVE_TO_FOLDER:
       GetSelections(selections);
-      SaveMessagesToFolder(selections, true);
+      SaveMessagesToFolder(selections, NULL, true);
       break;
    case WXMENU_MSG_SAVE_TO_FILE:
       GetSelections(selections);
@@ -1198,10 +1228,21 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       composeView->Show();
    }
    break;
+
    default:
-      // VZ: I get asserts here when choosing "Exit" from the main menu...
-      //wxFAIL_MSG("wxFolderView::OnMenuCommand() called with illegal id.");
-       ;
+      // it might be a folder from popup menu
+      if ( cmd >= WXMENU_POPUP_FOLDER_MENU )
+      {
+         MFolder *folder = wxFolderMenu::GetFolder(m_FolderCtrl->GetFolderMenu(),
+                                                   cmd);
+         if ( folder )
+         {
+            GetSelections(selections);
+            SaveMessagesToFolder(selections, folder, true /* move */);
+            folder->DecRef();
+         }
+      }
+      break;
    }
 }
 
@@ -1285,10 +1326,15 @@ wxFolderView::PrintPreviewMessages(const UIdArray& selections)
 
 
 void
-wxFolderView::SaveMessagesToFolder(const UIdArray& selections, bool del)
+wxFolderView::SaveMessagesToFolder(const UIdArray& selections,
+                                   MFolder *folder,
+                                   bool del)
 {
    Ticket t =
-      m_ASMailFolder->SaveMessagesToFolder(&selections,GetFrame(m_Parent), this);
+      m_ASMailFolder->SaveMessagesToFolder(&selections,
+                                           GetFrame(m_Parent),
+                                           folder,
+                                           this);
    m_TicketList->Add(t);
    if(del)
       m_DeleteSavedMessagesTicket = t;

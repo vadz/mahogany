@@ -406,10 +406,13 @@ public:
    /** Save messages to a folder.
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
+       @param folder is the folder to save to, ask the user if NULL
        @return true if messages got saved
    */
-   virtual Ticket SaveMessagesToFolder(const UIdArray *messages, MWindow
-                                     *parent = NULL, UserData ud = 0) = 0;
+   virtual Ticket SaveMessagesToFolder(const UIdArray *messages,
+                                       MWindow *parent = NULL,
+                                       MFolder *folder = NULL,
+                                       UserData ud = 0) = 0;
 
    /** Reply to selected messages.
        @param messages pointer to an array holding the message numbers

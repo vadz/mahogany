@@ -449,10 +449,12 @@ public:
                                  UserData ud,
                                  ASMailFolder::OperationId op,
                                  const UIdArray *selections,
-                                 MWindow *parent)
+                                 MWindow *parent,
+                                 MFolder *folder = NULL)
       : MailThreadSeq(mf, ud, selections)
       {
          m_Parent = parent;
+         m_Folder = folder;
          m_Op = op;
          ASSERT(m_Op == ASMailFolder::Op_SaveMessagesToFile ||
                 m_Op == ASMailFolder::Op_SaveMessagesToFolder);
@@ -461,7 +463,7 @@ public:
       {
          int rc = m_Op == ASMailFolder::Op_SaveMessagesToFile ?
             m_MailFolder->SaveMessagesToFile(m_Seq, m_Parent)
-            : m_MailFolder->SaveMessagesToFolder(m_Seq, m_Parent);
+            : m_MailFolder->SaveMessagesToFolder(m_Seq, m_Parent, m_Folder);
          SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder,
                                                    m_Ticket, m_Op,
                                                    m_Seq,
@@ -472,6 +474,7 @@ public:
       }
 private:
    MWindow *m_Parent;
+   MFolder *m_Folder;
    ASMailFolder::OperationId m_Op;
 };
 
@@ -816,15 +819,19 @@ public:
    /** Save messages to a folder.
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
+       @param folder is the folder to save to, ask the user if NULL
        @return true if messages got saved
    */
    virtual Ticket SaveMessagesToFolder(const UIdArray *messages,
                                        MWindow *parent,
+                                       MFolder *folder,
                                        UserData ud)
       {
          return (new MT_SaveMessagesToFileOrFolder(this, ud,
                                                    Op_SaveMessagesToFolder,
-                                                   messages, parent))->Start();
+                                                   messages,
+                                                   parent,
+                                                   folder))->Start();
       }
 
    /** Reply to selected messages.
