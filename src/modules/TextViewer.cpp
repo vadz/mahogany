@@ -225,7 +225,7 @@ END_EVENT_TABLE()
 TextViewerWindow::TextViewerWindow(TextViewer *viewer, wxWindow *parent)
                 : wxTextCtrl(parent, -1, "",
                              wxDefaultPosition, wxDefaultSize,
-                             wxTE_RICH |
+                             wxTE_RICH2 |
 #ifdef USE_AUTO_URL_DETECTION
                              wxTE_AUTO_URL |
 #endif // USE_AUTO_URL_DETECTION
