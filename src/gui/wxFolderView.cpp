@@ -56,7 +56,6 @@
 #include <wx/file.h>
 #include <wx/listctrl.h>
 #include <wx/menuitem.h>
-#include <wx/dnd.h>
 #include <wx/fontmap.h>
 #include <wx/encconv.h>
 #include "wx/persctrl.h"
@@ -80,7 +79,10 @@
 #include "gui/wxFolderMenu.h"
 #include "gui/wxFiltersDialog.h" // for ConfigureFiltersForFolder()
 #include "MFolderDialogs.h"      // for ShowFolderPropertiesDialog
-#include "Mdnd.h"
+
+#if wxUSE_DRAG_AND_DROP
+   #include "Mdnd.h"
+#endif // wxUSE_DRAG_AND_DROP
 
 #include "gui/wxMIds.h"
 #include "MDialogs.h"
@@ -720,6 +722,8 @@ private:
    bool m_enableOld;
 };
 
+#if wxUSE_DRAG_AND_DROP
+
 // ----------------------------------------------------------------------------
 // FolderViewMessagesDropWhere: a helper class for dnd
 // ----------------------------------------------------------------------------
@@ -746,6 +750,8 @@ public:
 private:
    wxFolderView *m_folderView;
 };
+
+#endif // wxUSE_DRAG_AND_DROP
 
 // ----------------------------------------------------------------------------
 // wxFolderSplitterWindow: splitter containing folder and msg view
@@ -1281,8 +1287,10 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    imagelist->Add(bmpDown);
    AssignImageList(imagelist, wxIMAGE_LIST_SMALL);
 
+#if wxUSE_DRAG_AND_DROP
    // create a drop target for dropping messages on us
    new MMessagesDropTarget(new FolderViewMessagesDropWhere(m_FolderView), this);
+#endif // wxUSE_DRAG_AND_DROP
 }
 
 wxFolderListCtrl::~wxFolderListCtrl()
@@ -1382,6 +1390,7 @@ void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
          SetFocus();
       }
 
+#if wxUSE_DRAG_AND_DROP
    if ( HasFolder() )
    {
       // start the drag and drop operation
@@ -1397,6 +1406,7 @@ void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
          }
       }
    }
+#endif // wxUSE_DRAG_AND_DROP
 
    event.Skip();
 }

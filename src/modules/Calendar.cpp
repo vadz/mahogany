@@ -30,8 +30,6 @@
 #include "MInterface.h"
 #include "Message.h"
 
-#include "Mdnd.h"
-
 #include "ASMailFolder.h"
 #include "HeaderInfo.h"
 #include "Message.h"
@@ -53,6 +51,10 @@
 #include <wx/statbox.h>
 #include "gui/wxDialogLayout.h"
 #include "MHelp.h"
+
+#if wxUSE_DRAG_AND_DROP
+   #include "Mdnd.h"
+#endif // wxUSE_DRAG_AND_DROP
 
 #define MODULE_NAME    MMODULE_INTERFACE_CALENDAR
 
@@ -539,6 +541,8 @@ private:
 // drop target for the calendar frame
 // ----------------------------------------------------------------------------
 
+#if wxUSE_DRAG_AND_DROP
+
 class MMessagesCalDropTarget : public MMessagesDropTargetBase
 {
 public:
@@ -573,6 +577,7 @@ private:
    CalendarFrame *m_Frame;
 };
 
+#endif // wxUSE_DRAG_AND_DROP
 
 class CalEventReceiver : public MEventReceiver
 {
@@ -660,7 +665,9 @@ CalendarFrame::CalendarFrame(CalendarModule *module, wxWindow *parent)
    panel->SetAutoLayout(TRUE);
    SetAutoLayout(TRUE);
 
+#if wxUSE_DRAG_AND_DROP
    new MMessagesCalDropTarget(this);
+#endif // wxUSE_DRAG_AND_DROP
 
    CreateStatusBar();
    GetConfig();

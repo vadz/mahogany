@@ -33,7 +33,6 @@
 #include "MDialogs.h"
 
 #include "MFolder.h"
-#include "Mdnd.h"
 #include "MFolderDialogs.h"
 #include "FolderView.h"
 
@@ -51,6 +50,10 @@
 #include "gui/wxMainFrame.h"
 
 #include "MFCache.h"
+
+#if wxUSE_DRAG_AND_DROP
+   #include "Mdnd.h"
+#endif // wxUSE_DRAG_AND_DROP
 
 #include "Mcclient.h"
 
@@ -547,6 +550,8 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
+#if wxUSE_DRAG_AND_DROP
+
 // ----------------------------------------------------------------------------
 // dnd classes
 // ----------------------------------------------------------------------------
@@ -648,6 +653,8 @@ public:
 private:
    MFolder *m_folderLast;
 };
+
+#endif // wxUSE_DRAG_AND_DROP
 
 // ----------------------------------------------------------------------------
 // event tables
@@ -1604,8 +1611,10 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
 
    UpdateBackground();
 
+#if wxUSE_DRAG_AND_DROP
    // create our drop target
    new TreeDropTarget(new TreeMessagesDropWhere(this), this);
+#endif // wxUSE_DRAG_AND_DROP
 
    // create the root item
    MFolder *folderRoot = MFolder::Get("");

@@ -24,6 +24,8 @@
 
 #include "Mpch.h"
 
+#if wxUSE_DRAG_AND_DROP
+
 #ifndef USE_PCH
 #  include "Mcommon.h"
 
@@ -202,3 +204,6 @@ void MMessagesDropWhere::Refresh()
 MMessagesDropWhere::~MMessagesDropWhere()
 {
 }
+
+#endif // wxUSE_DRAG_AND_DROP
+

@@ -45,13 +45,16 @@
 #include "MsgCmdProc.h"
 
 #include "gui/wxMenuDefs.h"
-#include "Mdnd.h"
 #include "MDialogs.h"         // for MDialog_ShowText
 
 #include "gui/wxDialogLayout.h"
 
 #include <wx/imaglist.h>
 #include <wx/treectrl.h>
+
+#if wxUSE_DRAG_AND_DROP
+   #include "Mdnd.h"
+#endif // wxUSE_DRAG_AND_DROP
 
 #include "modules/Filters.h"    // for FilterRule::Error
 
@@ -1183,6 +1186,7 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
    // window for us but not from wxMessageViewFrame)
    CHECK( m_winForDnd, false, "this msg view doesn't support dnd" );
 
+#if wxUSE_DRAG_AND_DROP
    bool didDrop = false;
 
    size_t countSel = selections.Count();
@@ -1277,6 +1281,7 @@ MsgCmdProcImpl::DragAndDropMessages(const UIdArray& selections)
 
    // did we do anything?
    return didDrop;
+#endif // wxUSE_DRAG_AND_DROP
 }
 
 void
