@@ -527,7 +527,8 @@ wxMApp::AllowBgProcessing() const
 #ifdef __WXDEBUG__
 
 void
-wxMApp::OnAssert(const wxChar *file, int line, const wxChar *msg)
+wxMApp::OnAssert(const wxChar *file, int line,
+                 const wxChar *cond, const wxChar *msg)
 {
    // don't provoke an assert from inside the assert (which would happen if we
    // tried to lock an already locked mutex below)
@@ -543,7 +544,7 @@ wxMApp::OnAssert(const wxChar *file, int line, const wxChar *msg)
    // it will result in a fatal error
    MLocker lock(gs_mutexBlockBg);
 
-   wxApp::OnAssert(file, line, msg);
+   wxApp::OnAssert(file, line, cond, msg);
 }
 
 #endif // __WXDEBUG__
