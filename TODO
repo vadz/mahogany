@@ -1,6 +1,7 @@
 TODO list for M   
 $Id$
 
+
 *** things to fix/implement next ***
 
 - wxOptionsDlg: two conversions from (long) to (int) .... is that ok?
