@@ -3433,8 +3433,9 @@ wxFolderView::ShowFolder(MailFolder *mf)
    CHECK_RET( m_ASMailFolder, "ASMailFolder::Create() failed??" );
 
    m_Profile = m_ASMailFolder->GetProfile();
-   if ( m_Profile )
-      m_Profile->IncRef();
+   CHECK_RET( m_Profile, "ASMailFolder without profile?" );
+
+   m_Profile->IncRef();
 
    m_MessageWindow->UpdateOptions();
    m_MessagePreview->SetFolder(m_ASMailFolder);
