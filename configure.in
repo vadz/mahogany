@@ -143,6 +143,7 @@ DEFAULT_USE_WXXT=1
 DEFAULT_USE_WXWINDOWS=1
 DEFAULT_USE_WXWINDOWS2=0
 DEFAULT_USE_WXSTRING=0
+DEFAULT_USE_WXCONFIG=0
 
 dnl ================ User editable settings ============================
 dnl where to find Python source
@@ -243,6 +244,9 @@ AC_OVERRIDES(python,python,
 --with-python             use python,
 USE_PYTHON)
 
+AC_OVERRIDES(wxConfig,wxConfig,
+--with-wxConfig           use wxConfig,
+USE_WXCONFIG)
 
 dnl ###################
 dnl # checks programs #
@@ -383,7 +387,7 @@ else
   if test "$USE_WXXT" = 1; then
     USE_WXGTK=0
     USE_WXWINDOWS=1  
-    USE_WXWINDOWS2=0  
+    USE_WXWINDOWS2=0
     AC_DEFINE(USE_WXXT)
     AC_DEFINE(USE_WXWINDOWS)
     WX_LINK=
@@ -412,6 +416,16 @@ AC_SUBST(WX_INCLUDE)
 AC_SUBST(WX_LINK)
 AC_SUBST(WX_SLINK)
 AC_SUBST(WX_DEFS)
+
+if test "$USE_WXCONFIG" = 1; then
+	if test "$USE_WXWINDOWS2" = 0; then
+		AC_MSG_ERROR("wxConfig can only be used with wxWindows version 2."
+               		     "Please correct the settings and restart again.")
+	else
+		AC_DEFINE(USE_WXCONFIG)
+	fi
+fi
+
 
 dnl Checks for libraries.
 dnl =====================
@@ -452,6 +466,7 @@ if test "$ac_find_includes" != "" ; then
     PYTHON_LINK="$ac_path_to_link -l$PYTHON_LIB"
     PYTHON_INCLUDE="$ac_path_to_include"
     AC_DEFINE(USE_PYTHON)
+    AC_SUBST(USE_PYTHON)
     AC_MSG_RESULT(yes)
   else
     AC_MSG_RESULT(no)
@@ -471,12 +486,12 @@ LIBDL_LINK=
 AC_MSG_CHECKING(for dl library)
 AC_PATH_FIND_LIBRARIES($SEARCH_LIB,dl)
 if test "$ac_find_libraries" != "" ; then
-  AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
-  CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
-  LIBDL_LINK="$ac_path_to_link -ldl"
-  AC_MSG_RESULT(yes)
+AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
+CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
+LIBDL_LINK="$ac_path_to_link -ldl"
+AC_MSG_RESULT(yes)
 else
-  AC_MSG_RESULT(no)
+AC_MSG_RESULT(no)
 fi
 AC_SUBST(LIBDL_LINK)
 
@@ -485,12 +500,12 @@ LIBINTL_LINK=
 AC_MSG_CHECKING(for intl library)
 AC_PATH_FIND_LIBRARIES($SEARCH_LIB,intl)
 if test "$ac_find_libraries" != "" ; then
-  AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
-  CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
-  LIBINTL_LINK="$ac_path_to_link -lintl"
-  AC_MSG_RESULT(yes)
+AC_LINK_PATH_EXIST($ac_find_libraries,$CHECK_LIB)
+CHECK_LINK="$CHECK_INCLUDE $ac_path_to_link"
+LIBINTL_LINK="$ac_path_to_link -lintl"
+AC_MSG_RESULT(yes)
 else
-  AC_MSG_RESULT(no)
+AC_MSG_RESULT(no)
 fi
 AC_SUBST(LIBINTL_LINK)
 
@@ -510,7 +525,7 @@ AC_SUBST(COMPFACE_LINK)
 dnl extra lib dirs
 EXTRA_SRC_LIB=
 EXTRA_SRC_INC=
-for i in `pwd`/extra/src
+for i in `pwd`/extra/src/*
 do
 	EXTRA_SRC_LIB="$EXTRA_SRC_LIB -L$i"
 	EXTRA_SRC_INC="$EXTRA_SRC_INC -I$i"

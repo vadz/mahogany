@@ -2,6 +2,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.7  1998/05/19 17:02:42  KB
+# several small bugfixes
+#
 # Revision 1.6  1998/05/18 17:48:27  KB
 # more list<>->kbList changes, fixes for wxXt, improved makefiles
 #
@@ -12,13 +15,13 @@
 
 CWD = src
 SUB_DIRS = util classes gui mail
-MOBJS=util/*.o classes/*.o gui/*.o  mail/*.o # without Python
+MOBJS=util/*.o classes/*.o gui/*.o  mail/*.o 
 
 include ../makeopts
 
-
 ifdef	USE_PYTHON
 SUB_DIRS += Python
+MOBJS += Python/*.o
 endif
 
 all: 

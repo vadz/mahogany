@@ -1,11 +1,25 @@
+/*-*- c++ -*-********************************************************
+ * strutil.cc : utility functions for string handling               *
+ *                                                                  *
+ * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ *                                                                  *
+ * $Id$               *
+ *                                                                  *
+ * $Log$
+ * Revision 1.5  1998/05/19 17:02:45  KB
+ * several small bugfixes
+ *
+ *
+ *******************************************************************/
+
 #include "Mpch.h"
 #include "Mcommon.h"
 
 #include <ctype.h>
 #include <stdio.h>
 
-#if      !USE_PCH
-  #include "strutil.h"
+#ifndef   USE_PCH
+#   include "strutil.h"
 #endif
 
 void

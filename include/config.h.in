@@ -68,6 +68,10 @@
 /** Define if you want to use wxString instead of C++ string */
 #undef USE_WXSTRING
 
+/** Define this if you want to use wxConfig instead of AppConfig.
+    Note that this is only available for wxWindows version 2 */
+/* #undef USE_WXCONFIG */
+
 /** Define if you use Python. */
 #undef USE_PYTHON
 

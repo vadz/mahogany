@@ -3,8 +3,6 @@ $Id$
 
 *** bugs to fix ***
 
-- fix configure: it currently depends on the right order of with-wxGTK/without-wxXt
-
 - test/check how Python handles (wx)Strings, try some interaction
 
 - remove remaining few STL classes
@@ -24,11 +22,15 @@ $Id$
   (VZ: it's probably also (will be) needed in other places: think about
   running external viewers for attachments &c?)
 
+- fix non-ASCII characters in header lines
+
 *** to implement in near future ***
 
 - when run for the first time, should display "Mail" configuration dialog
   with reasonable defaults (add a top-level profile option "ConfigDone"
   and do it if it's not found)
+
+- lots of dialogs for profile settings required
 
 - support for external editor
 

@@ -4,6 +4,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.6  1998/05/19 17:02:38  KB
+# several small bugfixes
+#
 # Revision 1.5  1998/05/18 17:48:14  KB
 # more list<>->kbList changes, fixes for wxXt, improved makefiles
 #
@@ -40,6 +43,8 @@ GUI_DEFS=@WX_DEFS@
 
 PYTHON_LINK = @PYTHON_LINK@ @LIBDL_LINK@
 PYTHON_INCLUDE = @PYTHON_INCLUDE@ 
+
+USE_PYTHON=@USE_PYTHON@
 
 # output dir for binaries:
 ODIR = .

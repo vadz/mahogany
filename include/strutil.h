@@ -6,6 +6,9 @@
  * $Id$                *
  *                                                                  *
  * $Log$
+ * Revision 1.9  1998/05/19 17:02:41  KB
+ * several small bugfixes
+ *
  * Revision 1.8  1998/05/18 17:48:23  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -32,10 +35,11 @@
 #ifdef USE_WXSTRING // use std::string
    inline bool strutil_isempty(const String &s) { return IsEmpty(s); }
 #else
-   inline bool strutil_isempty(const String& s) { return s.c_str() == '\0'; }
+   inline bool strutil_isempty(const String &s) { return *s.c_str() == '\0'; }
 #endif
+
 /// return true if string is empty
-inline bool strutil_isempty(const char *s) { return s != NULL && *s!= '\0'; }
+inline bool strutil_isempty(const char *s) { return s == NULL || *s == '\0'; }
 
 /** Read a NL terminated line into a string.
 
