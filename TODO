@@ -71,6 +71,7 @@ VZ:
   application will not exit. Happened after you changed the exit
   behaviour, has been a bug for months.
 
+- closing splashscreen calls wxApp::ExitMainLoop() which is wrong!
 ******* Priorities for KB: ******************************
 
 DONE:

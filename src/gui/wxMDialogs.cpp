@@ -65,8 +65,9 @@
 //#  define M_32x32         "Micon"
 #  define background "background"
 #else   //real XPMs
-//#  include "../src/icons/M_32x32.xpm"
 #  include "../src/icons/background.xpm"
+#  include "../src/icons/mahogany.xpm"
+#  include "../src/icons/pythonpower.xpm"
 #endif  //Win/Unix
 
 // ----------------------------------------------------------------------------
@@ -702,13 +703,10 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 
    Clear(wxROMAN, 30, wxNORMAL, wxBOLD, FALSE, "yellow");
 
-   ll->LineBreak();
-   ll->LineBreak();
-   ll->Insert(_("   Mahogany Mail"));
+   ll->Insert(new wxLayoutObjectIcon(wxIcon(mahogany)));
    ll->LineBreak();
    ll->SetFontWeight(wxNORMAL);
    ll->SetFontSize(10);
-
    String version = _("    Version: ");
    version += M_VERSION_STRING;
    ll->Insert(version);
@@ -733,13 +731,24 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    ll->Insert(_("                      and Vadim Zeitlin"));
    ll->LineBreak();
    ll->SetFontSize(8);
+   ll->Insert("                 ");
    ll->Insert(_("This software is provied 'as is' and without any express or implied"));
    ll->LineBreak();
+   ll->Insert("                 ");
    ll->Insert(_("warranties, including, without limitation, the implied warranties"));
    ll->LineBreak();
+   ll->Insert("                 ");
    ll->Insert(_("of merchantibility and fitness for a particular purpose."));
    ll->LineBreak();
+   ll->Insert("                 ");
    ll->Insert(_("This is OpenSource(TM) software."));
+#ifdef USE_PYTHON
+   ll->LineBreak();
+   ll->LineBreak();
+   ll->Insert("                 ");
+   ll->Insert(new wxLayoutObjectIcon(wxIcon(pythonpower)));
+#endif
+   
    DoPaint();
    ResizeScrollbars(true); // let them disappear
    // start a timer which will close us (if not disabled)
@@ -754,7 +763,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 
 wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
             : wxFrame(NULL, -1, _("Welcome"),
-                      wxDefaultPosition, wxSize(300, 300),
+                      wxDefaultPosition, wxSize(280, 230),
                       /* 0 style for borderless wxDOUBLE_BORDER |*/ wxSTAY_ON_TOP)
 {
    wxCHECK_RET( g_pSplashScreen == NULL, "one splash is more than enough" );
@@ -770,7 +779,7 @@ void
 MDialog_AboutDialog( const MWindow * /* parent */, bool bCloseOnTimeout)
 {
    (void)new wxAboutFrame(bCloseOnTimeout);
-   wxYield(); // to make sure it gets displayed at startup
+   wxSafeYield(); // to make sure it gets displayed at startup
 }
 
 
