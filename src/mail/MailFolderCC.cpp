@@ -2930,7 +2930,7 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
          m_ASMailFolder,
          m_Ticket,
          "",  // empty name == no more entries
-         0,   // delim == 0 ==> no more entries
+         0,   // no delim
          0,   // no flags
          m_UserData
       );
@@ -3112,13 +3112,6 @@ mm_list(MAILSTREAM *stream, int delim, char *name, long attrib)
       return;
 
    MailFolderCC::mm_list(stream, delim, name, attrib);
-/*
-  MailFolderCC::Event *evptr = new MailFolderCC::Event(stream,MailFolderCC::List,__LINE__);
-   evptr->m_args[0].m_int = delim;
-   evptr->m_args[1].m_str = new String(name);
-   evptr->m_args[2].m_long = attrib;
-   MailFolderCC::QueueEvent(evptr);
-*/
 }
 
 void

@@ -164,6 +164,9 @@ public:
    // item selected in the tree
    void OnTreeSelect(wxTreeEvent& event);
 
+   // update the number of items
+   void OnTreeExpanded(wxTreeEvent& event);
+
    // events from "quick search" text control
    void OnText(wxCommandEvent& event);
 
@@ -245,6 +248,8 @@ END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxSubscriptionDialog, wxManuallyLaidOutDialog)
    EVT_TEXT(-1, wxSubscriptionDialog::OnText)
+
+   EVT_TREE_ITEM_EXPANDED(-1, wxSubscriptionDialog::OnTreeExpanded)
    EVT_TREE_SEL_CHANGED(-1, wxSubscriptionDialog::OnTreeSelect)
 
 #ifdef USE_SELECT_BUTTONS
@@ -404,30 +409,38 @@ bool wxSubfoldersTree::OnMEvent(MEventData& event)
       return FALSE;
    }
 
+   // usually, all folders will have a non NUL delimiter ('.' for news, '/'
+   // for everything else), but IMAP INBOX is special
+   char chDelimiter = result->GetDelimiter();
+   if ( chDelimiter )
+   {
+      // avoid setting m_chDelimiter to NUL
+      m_chDelimiter = chDelimiter;
+   }
+
    // is it the special event which signals that there will be no more of
    // folders?
-   if ( !result->GetDelimiter() )
+   wxString spec = result->GetName();
+   if ( !spec )
    {
       OnNoMoreFolders();
    }
    else
    {
-      m_chDelimiter = result->GetDelimiter();
-
       // we're passed a folder specification - extract the folder name from it
       // (it's better to show this to the user rather than cryptic cclient
       // string)
-      wxString name,
-               spec = result->GetName();
+      wxString name;
       if ( MailFolderCC::SpecToFolderName(spec, m_folderType, &name) )
       {
-         // ListFolders() will also return the folder itself, ignore it
-         if ( !!name )
+         // leave only the last componenet if we have a delimiter (the
+         // delimiter may be NUL for IMAP INBOX)
+         if ( !!name && chDelimiter )
          {
-            // leave only the last componenet
-            name = name.AfterLast(m_chDelimiter);
+            name = name.AfterLast(chDelimiter);
          }
 
+         // ListFolders() will also return the folder itself, ignore it
          if ( !!name )
          {
             wxTreeItemId id = OnNewFolder(name);
@@ -482,7 +495,8 @@ wxTreeItemId wxSubfoldersTree::OnNewFolder(String& name)
       m_progressInfo->SetValue(m_nFoldersRetrieved);
    }
 
-   RemoveTrailingDelimiters(&name, m_chDelimiter);
+   if ( m_chDelimiter )
+      RemoveTrailingDelimiters(&name, m_chDelimiter);
 
    // and add the new folder into the tree
    return InsertInOrder(m_idParent, name);
@@ -498,7 +512,7 @@ void wxSubfoldersTree::OnNoMoreFolders()
 
    Enable();
 
-   if ( !m_nFoldersRetrieved )
+   if ( !m_nFoldersRetrieved && m_idParent.IsOk() )
    {
       // this item doesn't have any subfolders
       SetItemHasChildren(m_idParent, FALSE);
@@ -827,6 +841,16 @@ void wxSubscriptionDialog::OnUnselectAll(wxCommandEvent& event)
 }
 
 #endif // USE_SELECT_BUTTONS
+
+// update the number of items in the box
+void wxSubscriptionDialog::OnTreeExpanded(wxTreeEvent& event)
+{
+   size_t nFolders = m_treectrl->GetCount() - 1;
+   m_box->SetLabel(wxString::Format(_("%u subfolders under %s"),
+                   nFolders, m_folder->GetPath().c_str()));
+
+   event.Skip();
+}
 
 void wxSubscriptionDialog::OnTreeSelect(wxTreeEvent& event)
 {
