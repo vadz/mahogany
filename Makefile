@@ -18,8 +18,11 @@ include makeversion
 M := mahogany-$(M_VERSION_MAJOR).$(M_VERSION_MINOR)
 
 doc:
-	set -e; for i in include extra doc; do $(MAKE) -C $$i doc; done
+	set -e; for i in extra doc; do $(MAKE) -C $$i doc; done
 
+classdoc:
+	set -e; for i in doc; do $(MAKE) -C $$i doc; done
+	
 clean:  
 	set -e; for i in $(ALL_DIRS); do $(MAKE) -C $$i $@; done
 
@@ -152,4 +155,4 @@ locales:
 	$(MAKE) -C locale all
 
 .PHONY: all clean bak backup config program doc install install_doc \
-        install_all msgcat locales scandoc install_locale rpm_prep rpm
+        install_all msgcat locales scandoc install_locale rpm_prep rpm classdoc

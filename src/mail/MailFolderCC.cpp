@@ -1324,7 +1324,7 @@ MailFolderCC::Ping(void)
       UnLock();
       ProcessEventQueue();
       
-#ifdef EXPERIMENTAL_newnewmail
+#ifndef EXPERIMENTAL_oldnewmail
       // Check if we want to collect all mail from this folder:
       if( (GetFlags() & MF_FLAGS_INCOMING) != 0)
       {

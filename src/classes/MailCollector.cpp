@@ -396,7 +396,7 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
       return false;
    }
    
-#ifdef EXPERIMENTAL_newnewmail
+#ifndef EXPERIMENTAL_oldnewmail
    // all this now handled by folder itself
    mf->Ping(); //update it
    

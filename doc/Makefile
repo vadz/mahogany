@@ -3,7 +3,7 @@
 
 FILES_TEX = HackersGuide.htex Manual.htex
 FILES_PDF = $(FILES_TEX:.htex=.pdf) #classes.ps
-SUB_DIRS  = HackersGuide #$(FILES_TEX:.htex=)
+SUB_DIRS  = $(FILES_TEX:.htex=)
 
 include ../makeopts
 
@@ -42,6 +42,9 @@ newdoc: doctoolstest
 
 #Copies the files to their locations.
 newinstall:
+#	Check if we have the "Manual" directory, if yes, assume
+#	that the docs have been built.
+	@if [ ! -d Manual ] ; then $(MAKE) newdoc ; fi
 	$(RM) -r $(DOCDIR)/Pdf
 	$(INSTALL) -d $(DOCDIR)/Pdf
 	$(INSTALL_DATA) wxhelp.map $(DOCDIR)
