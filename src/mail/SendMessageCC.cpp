@@ -426,8 +426,10 @@ SendMessageCC::EncodeHeaderString(const String& header)
       }
 
       // create a RFC 2047 encoded word
-      headerEnc << "=?" << EncodingToCharset(m_encHeaders)
-                << '?' << (char)enc2047 << '?'
+      String csName = EncodingToCharset(m_encHeaders);
+      ASSERT_MSG( !csName.empty(), "should have a valid charset name!" );
+
+      headerEnc << "=?" << csName << '?' << (char)enc2047 << '?'
                 << encword
                 << "?=";
 
@@ -698,62 +700,11 @@ SendMessageCC::EncodingToCharset(wxFontEncoding enc)
 {
    // translate encoding to the charset
    wxString cs;
-#if 0
-   switch ( enc )
-   {
-      case wxFONTENCODING_ISO8859_1:
-      case wxFONTENCODING_ISO8859_2:
-      case wxFONTENCODING_ISO8859_3:
-      case wxFONTENCODING_ISO8859_4:
-      case wxFONTENCODING_ISO8859_5:
-      case wxFONTENCODING_ISO8859_6:
-      case wxFONTENCODING_ISO8859_7:
-      case wxFONTENCODING_ISO8859_8:
-      case wxFONTENCODING_ISO8859_9:
-      case wxFONTENCODING_ISO8859_10:
-      case wxFONTENCODING_ISO8859_11:
-      case wxFONTENCODING_ISO8859_12:
-      case wxFONTENCODING_ISO8859_13:
-      case wxFONTENCODING_ISO8859_14:
-      case wxFONTENCODING_ISO8859_15:
-         cs.Printf("ISO-8859-%d", enc + 1 - wxFONTENCODING_ISO8859_1);
-         break;
-
-      case wxFONTENCODING_CP1250:
-      case wxFONTENCODING_CP1251:
-      case wxFONTENCODING_CP1252:
-      case wxFONTENCODING_CP1253:
-      case wxFONTENCODING_CP1254:
-      case wxFONTENCODING_CP1255:
-      case wxFONTENCODING_CP1256:
-      case wxFONTENCODING_CP1257:
-         cs.Printf("windows-%d", 1250 + enc - wxFONTENCODING_CP1250);
-         break;
-
-      case wxFONTENCODING_KOI8:
-         cs = "koi8-r";
-         break;
-
-#if wxCHECK_VERSION(2, 3, 0)
-      case wxFONTENCODING_UTF8:
-         cs = "UTF-8";
-         break;
-#endif // 2.3.0
-
-      default:
-         FAIL_MSG( "unknown encoding" );
-
-      case wxFONTENCODING_SYSTEM:
-      case wxFONTENCODING_DEFAULT:
-         // no special encoding
-         break;
-   }
-#endif // 0
    if ( enc != wxFONTENCODING_SYSTEM && enc != wxFONTENCODING_DEFAULT )
    {
-      cs = wxFontMapper::GetEncodingName(enc);
-      cs.MakeUpper();
+      cs = wxFontMapper::GetEncodingName(enc).Upper();
    }
+
    return cs;
 }
 
