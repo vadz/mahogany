@@ -3694,6 +3694,8 @@ void MailFolderCC::UpdateMessageStatus(unsigned long msgno)
 {
    CHECK_RET( m_MailStream, _T("OnMsgFlagsChange: folder is closed") );
 
+   CHECK_RET( msgno <= m_MailStream->nmsgs, _T("OnMsgFlagsChange: invalid msgno") );
+
    MESSAGECACHE *elt = mail_elt(m_MailStream, msgno);
    CHECK_RET( elt, _T("OnMsgFlagsChange: no elt for the given msgno?") );
 
@@ -4517,6 +4519,9 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
          MsgnoType& m = m_msgnosFlagsChanged->Item(n);
          if ( m == msgno )
          {
+            ASSERT_MSG( nRemove == -1,
+                        _T("duplicate msgnos in m_msgnosFlagsChanged?") );
+
             nRemove = n;
          }
          else if ( m > msgno )
@@ -5161,7 +5166,13 @@ MailFolderCC::mm_flags(MAILSTREAM *stream, unsigned long msgno)
       MEventManager::Send(new MEventFolderOnFlagsChangeData(mf));
    }
 
-   mf->m_msgnosFlagsChanged->Add(msgno);
+   // we must not add the same msgno twice: not only is this inefficient, but
+   // it breaks the login in OnMailExpunge() and so invalid msgnos would be
+   // left in the array if anything is expunged leading to a crash later
+   if ( mf->m_msgnosFlagsChanged->Index(msgno) == wxNOT_FOUND )
+   {
+      mf->m_msgnosFlagsChanged->Add(msgno);
+   }
 }
 
 /** alert that c-client will run critical code
