@@ -723,8 +723,7 @@ wxColorBrowseButton *wxEnhancedPanel::CreateColorEntry(const char *label,
 // create a listbox and the buttons to work with it
 // NB: we consider that there is only one listbox (at most) per page, so
 //     the button ids are always the same
-wxListBox *wxEnhancedPanel::CreateListbox(const char *label,
-                                            wxControl *last)
+wxListBox *wxEnhancedPanel::CreateListbox(const char *label, wxControl *last)
 {
    // a box around all this stuff
    wxStaticBox *box = new wxStaticBox(GetCanvas(), -1, label);
@@ -741,8 +740,8 @@ wxListBox *wxEnhancedPanel::CreateListbox(const char *label,
    // correspond to the order of wxOptionsPage_BtnXXX enum)
    static const char *aszLabels[] =
    {
-      gettext_noop("&Add"),
-      gettext_noop("&Modify"),
+      gettext_noop("&Add..."),
+      gettext_noop("&Modify..."),
       gettext_noop("&Delete"),
    };
 
