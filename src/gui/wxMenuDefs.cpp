@@ -286,7 +286,7 @@ static const MenuItemInfo g_aMenuItems[] =
    // msg
 
    // the available accelerators for this menu:
-   // BGJKQXZ
+   // BJKQZ
 
    { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message")    , FALSE },
    { WXMENU_MSG_PRINT,     gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print this message")       , FALSE },
@@ -322,7 +322,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_DESELECTALL,gettext_noop("D&eselect all\tCtrl-B"),    gettext_noop("Deselect all messages")    , FALSE },
    { WXMENU_MSG_SEARCH,  gettext_noop("&Search..."), gettext_noop("Search and select messages") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_MSG_SAVEADDRESSES, gettext_noop("E&xtract addresses..."), gettext_noop("Save all or some addresses of the message in an address book"), FALSE },
+   { WXMENU_MSG_SAVEADDRESSES, gettext_noop("Extra&ct addresses..."), gettext_noop("Save all or some addresses of the message in an address book"), FALSE },
    { WXMENU_MSG_TOGGLEHEADERS, gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , TRUE },
    { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message\tCtrl-W"), gettext_noop("Show the raw message text") , FALSE },
 #ifdef EXPERIMENTAL_show_uid
