@@ -28,6 +28,12 @@ The threads in ASMailFolderCC don't really need to lock anything,
 as the MailFolderCC.cpp code should take care of that itself.
 
 
+*** VZ: this is my notepad, don't add anything here, it's only for myself
+
+1. add MTempFolder.
+2. trailing ",0" in wxPTreeCtrl should probably be discarded?
+
+*** end of VZ section
 
 
 
@@ -48,9 +54,6 @@ as the MailFolderCC.cpp code should take care of that itself.
 7		after deleting a folder from the tree, the opened message from
 		it stays shown in the main frame - this is confusing and
 		dangerous
-
-3	VZ	change MAXLOGINTRIALS - 3 is too many...
-
 
 6	VZ	"Browse subfolders" under root folder should give a choice:
 		subscribe to newsgroups, import MH folders, mirror server IMAP
@@ -118,8 +121,6 @@ as the MailFolderCC.cpp code should take care of that itself.
 		"crac" in its mail address. Should present the dialog
 		and offer a choice instead of just picking the first.
 		VZ: can't reproduce, any example?
-
-9	VZ	Subfolderdialog must check for asmf == NULL
 
 8	VZ	AdbImort dialog under Windows lacks UpdateUI somewhere
 

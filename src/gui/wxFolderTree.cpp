@@ -159,7 +159,7 @@ private:
 };
 
 // the tree itself
-class wxFolderTreeImpl : public wxTreeCtrl, public MEventReceiver
+class wxFolderTreeImpl : public wxPTreeCtrl, public MEventReceiver
 {
 public:
    // ctor
@@ -360,7 +360,7 @@ private:
 // ----------------------------------------------------------------------------
 
 // tree events
-BEGIN_EVENT_TABLE(wxFolderTreeImpl, wxTreeCtrl)
+BEGIN_EVENT_TABLE(wxFolderTreeImpl, wxPTreeCtrl)
    // don't specify the control id - we shouldn't get any other tree events
    // (except our owns) anyhow
    EVT_TREE_SEL_CHANGED(-1,    wxFolderTreeImpl::OnTreeSelect)
@@ -641,7 +641,7 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
 wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
                                    wxWindow *parent, wxWindowID id,
                                    const wxPoint& pos, const wxSize& size)
-                : wxTreeCtrl(parent, id, pos, size)
+                : wxPTreeCtrl("FolderTree", parent, id, pos, size)
 {
    // init member vars
    m_current = NULL;

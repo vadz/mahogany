@@ -49,6 +49,8 @@
 
 #include "wx/log.h"
 
+#include "wx/tokenzr.h"
+
 #include "wx/config.h"
 #include "wx/persctrl.h"
 
@@ -77,6 +79,10 @@ END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxPRadioBox, wxRadioBox)
     EVT_SIZE(wxPRadioBox::OnSize)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxPTreeCtrl, wxTreeCtrl)
+    EVT_SIZE(wxPTreeCtrl::OnSize)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -1065,6 +1071,210 @@ void wxPRadioBox::SaveSelection()
     if ( m_persist->ChangePath() ) {
         wxConfigBase *config = m_persist->GetConfig();
         config->Write(m_persist->GetKey(), (long)GetSelection());
+
+        m_persist->RestorePath();
+    }
+}
+
+// ----------------------------------------------------------------------------
+// wxPTreeCtrl
+// ----------------------------------------------------------------------------
+
+const char *wxPTreeCtrl::ms_path = "TreeCtrlExp";
+
+// default ctor
+wxPTreeCtrl::wxPTreeCtrl()
+{
+    m_bFirstTime = true;
+    m_persist = new wxPHelper;
+}
+
+// standard ctor
+wxPTreeCtrl::wxPTreeCtrl(const wxString& configPath,
+                         wxWindow *parent,
+                         wxWindowID id,
+                         const wxPoint &pos,
+                         const wxSize &size,
+                         long style,
+                         const wxValidator& validator,
+                         wxConfigBase *config)
+           : wxTreeCtrl(parent, id, pos, size, style, validator)
+{
+    m_bFirstTime = true;
+    m_persist = new wxPHelper(configPath, ms_path, config);
+}
+
+// pseudo ctor
+bool wxPTreeCtrl::Create(const wxString& configPath,
+                         wxWindow *parent,
+                         wxWindowID id,
+                         const wxPoint &pos,
+                         const wxSize &size,
+                         long style,
+                         const wxValidator& validator,
+                         wxConfigBase *config)
+{
+   m_persist->SetConfig(config);
+   m_persist->SetPath(configPath, ms_path);
+
+   return wxTreeCtrl::Create(parent, id, pos, size, style, validator);
+}
+
+// dtor saves the settings
+wxPTreeCtrl::~wxPTreeCtrl()
+{
+    SaveExpandedBranches();
+
+    delete m_persist;
+}
+
+// set the config object to use (must be !NULL)
+void wxPTreeCtrl::SetConfigObject(wxConfigBase *config)
+{
+    m_persist->SetConfig(config);
+}
+
+// set the path to use (either absolute or relative)
+void wxPTreeCtrl::SetConfigPath(const wxString& path)
+{
+    m_persist->SetPath(path, ms_path);
+}
+
+// first time our OnSize() is called we restore the seection: we can't do it
+// before because we don't know when all the items will be added to the radiobox
+// (surely they may be added after ctor call)
+void wxPTreeCtrl::OnSize(wxSizeEvent& event)
+{
+    if ( m_bFirstTime ) {
+        RestoreExpandedBranches();
+
+        m_bFirstTime = FALSE;
+    }
+
+    // important things may be done in the base class version!
+    event.Skip();
+}
+
+// we remember all extended branches by their indices: this is not as reliable
+// as using names because if something somehow changes we will reexpand a
+// wrong branch, but this is not supposed to happen [often] and using labels
+// would take up much more space in the config
+
+// find all expanded branches under the given tree item, return TRUE if this
+// item is expanded at all (then we added something to branches array) and
+// FALSE otherwise
+bool wxPTreeCtrl::GetExpandedBranches(const wxTreeItemId& id,
+                                      wxArrayString& branches)
+{
+    if ( !IsExpanded(id) )
+        return FALSE;
+
+    bool hasExpandedChildren = FALSE;
+
+    size_t nChild = 0;
+    long cookie;
+    wxTreeItemId idChild = GetFirstChild(id, cookie);
+    while ( idChild.IsOk() )
+    {
+        wxArrayString subbranches;
+        if ( GetExpandedBranches(idChild, subbranches) )
+        {
+            wxString prefix = wxString::Format(_T("%d,"), nChild);
+            size_t count = subbranches.GetCount();
+            for ( size_t n = 0; n < count; n++ )
+            {
+                branches.Add(prefix + subbranches[n]);
+            }
+
+            hasExpandedChildren = TRUE;
+        }
+
+        idChild = GetNextChild(id, cookie);
+        nChild++;
+    }
+
+    // we don't need to add a branch for this item if we have expanded
+    // children because we will get expanded anyhow - but we do have to do it
+    // otherwise
+    if ( !hasExpandedChildren )
+    {
+        branches.Add(_T("0"));
+    }
+
+    return TRUE;
+}
+
+void wxPTreeCtrl::SaveExpandedBranches()
+{
+    if ( m_persist->ChangePath() ) {
+        wxConfigBase *config = m_persist->GetConfig();
+
+        wxArrayString branches;
+        GetExpandedBranches(GetRootItem(), branches);
+
+        // we store info about all extended branches of max length separating
+        // the indices in one branch by ',' and branches by ':'
+        wxString data;
+        size_t count = branches.GetCount();
+        for ( size_t n = 0; n < count; n++ )
+        {
+            if ( n != 0 )
+                data += _T(':');
+
+            data += branches[n];
+        }
+
+        config->Write(m_persist->GetKey(), data);
+
+        m_persist->RestorePath();
+    }
+}
+
+void wxPTreeCtrl::RestoreExpandedBranches()
+{
+    if ( m_persist->ChangePath() ) {
+        wxString data = m_persist->GetConfig()->Read(m_persist->GetKey());
+
+        wxStringTokenizer tkBranches(data, _T(":"));
+        while ( tkBranches.HasMoreTokens() )
+        {
+            wxStringTokenizer tkNodes(tkBranches.GetNextToken(), _T(","));
+
+            wxTreeItemId id = GetRootItem();
+            while ( tkNodes.HasMoreTokens() && id.IsOk() )
+            {
+                Expand(id);
+
+                unsigned long index;
+                wxString node = tkNodes.GetNextToken();
+                if ( !node.ToULong(&index) )
+                {
+                    wxLogDebug(_T("Corrupted config data: '%s'."),
+                               node.c_str());
+                    break;
+                }
+
+                // get the child with the given index
+                long cookie;
+                wxTreeItemId idChild = GetFirstChild(id, cookie);
+                while ( idChild.IsOk() )
+                {
+                    if ( index-- == 0 )
+                        break;
+
+                    idChild = GetNextChild(id, cookie);
+                }
+
+                id = idChild;
+
+                if ( !idChild.IsOk() )
+                {
+                    wxLogDebug(_T("Number of items in wxPTreeCtrl changed "
+                                  "unexpectedly."));
+                    break;
+                }
+            }
+        }
 
         m_persist->RestorePath();
     }

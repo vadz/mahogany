@@ -31,6 +31,7 @@ class wxPHelper;
 #include <wx/listctrl.h>
 #include <wx/listbox.h>
 #include <wx/radiobox.h>
+#include <wx/treectrl.h>
 
 // ----------------------------------------------------------------------------
 // a helper class for persistent controls
@@ -463,7 +464,7 @@ public:
     void SetConfigPath(const wxString& path);
 
     // callbacks
-        // when we're resized the first time we restore our page
+        // when we're resized the first time we restore our selection
     void OnSize(wxSizeEvent& event);
 
 protected:
@@ -475,6 +476,67 @@ protected:
     void RestoreSelection();
        // save the column widths to config
     void SaveSelection();
+
+private:
+    static const char *ms_path;
+
+    DECLARE_EVENT_TABLE()
+};
+
+// ----------------------------------------------------------------------------
+// wxPTreeCtrl: remembers which of tree branches were expanded
+// ----------------------------------------------------------------------------
+
+class WXDLLEXPORT wxPTreeCtrl : public wxTreeCtrl
+{
+public:
+    // ctors
+        // default, use Create() after it
+    wxPTreeCtrl();
+        // standard ctor
+    wxPTreeCtrl(const wxString& configPath,
+                wxWindow *parent,
+                wxWindowID id = -1,
+                const wxPoint& pos = wxDefaultPosition,
+                const wxSize& size = wxDefaultSize,
+                long style = wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT,
+                const wxValidator &validator = wxDefaultValidator,
+                wxConfigBase *config = NULL);
+        // pseudo ctor
+    bool Create(const wxString& configPath,
+                wxWindow *parent,
+                wxWindowID id = -1,
+                const wxPoint& pos = wxDefaultPosition,
+                const wxSize& size = wxDefaultSize,
+                long style = wxTR_HAS_BUTTONS | wxTR_LINES_AT_ROOT,
+                const wxValidator &validator = wxDefaultValidator,
+                wxConfigBase *config = NULL);
+
+    // dtor saves the settings
+    virtual ~wxPTreeCtrl();
+
+    // accessors
+        // set the config object to use (must be !NULL)
+    void SetConfigObject(wxConfigBase *config);
+        // set the path to use (either absolute or relative)
+    void SetConfigPath(const wxString& path);
+
+    // callbacks
+        // when we're resized the first time we reexpand
+    void OnSize(wxSizeEvent& event);
+
+protected:
+    bool       m_bFirstTime;  // FIXME hack used in OnSize()
+    wxPHelper *m_persist;
+
+    // do remember/restore the state of the branches
+       // retrieve it from config
+    void RestoreExpandedBranches();
+       // save to config
+    void SaveExpandedBranches();
+
+    // SaveExpandedBranches() helper
+    bool GetExpandedBranches(const wxTreeItemId& id, wxArrayString& branches);
 
 private:
     static const char *ms_path;

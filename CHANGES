@@ -1,4 +1,5 @@
 (next release) on (date of next release)
+03.03.00 VZ: all expanded branches of the folder tree are now saved/restored
 03.03.00 VZ: subscription dialog starts to work
 23.02.00 KB: IMAP code fixes plugging possible memory corruption, message editor fixes.
              Fixed empty names for BBDB and PalmOS adressbooks.
