@@ -30,11 +30,12 @@ allclean: clean
 	find . -name \*.mo -exec rm -f {} \;
 	find . -name .libs -exec rm -rf {} \;
 	find . -name .xvpics -exec rm -r -f {} \; 
-	$(RM) -r debian/tmp *.po config.log src/M
-realclean: allclean
+	$(RM) -r debian/tmp *.po config.log src/M config.status
 	$(RM) config.* makeopts makeversion include/config.h
 	find . -type l -name .src -exec rm -f {} \;
 	find . -type l -name Makefile -exec rm -f {} \;
+
+realclean: allclean
 clobber: realclean
 
 depend:
@@ -47,6 +48,7 @@ depend:
 bak backup:
 	tar cvf M-`date +"%y-%m-%d"`.tar $(FILES) $(ALL_DIRS)
 	gzip -9 M-`date +"%y-%m-%d"`.tar
+
 
 # probably the most complicated target:
 #
@@ -117,11 +119,12 @@ rpm_prep:
 		--exclude="*.o" --exclude="M" --exclude="CVS" \
 		--exclude=".cvsignore" --exclude="*~" --exclude="*.swp" \
 		--exclude="Python" --exclude="*.mo" --exclude="*.a" \
+		--exclude=".sniffdir" --exclude=".depend" \
 		$(M)/README $(M)/TODO $(M)/INSTALL $(M)/Makefile \
 		$(M)/aclocal.m4 $(M)/config.status $(M)/configure.* \
 		$(M)/doc $(M)/extra/Makefile $(M)/include $(M)/locale \
 		$(M)/makeopts.in $(M)/makerules $(M)/src $(M)/extra/install \
-		$(M)/extra/scripts $(M)/extra/src; \
+		$(M)/extra/scripts $(M)/makeversion.in $(M)/extra/src; \
 	cd $(M); \
 	cp redhat/mahogany.gif $$RPM_ROOT/SOURCES; \
 	cp redhat/M.spec $$RPM_ROOT/SPECS

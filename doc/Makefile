@@ -21,12 +21,14 @@ docxx.sty: .src/docxx.sty
 html.sty: .src/html.sty
 	ln -sf .src/html.sty html.sty
 
-subdirs: docxx.sty html.sty $(FILES_PDF)
+subdirs: docxx.sty html.sty 
+	set -e; for i in $(FILES_PDF); do $(MAKE) $$i; done
 	set -e; for i in $(SUB_DIRS); \
 	do if [ ! -d $$i ]; then mkdir $$i; fi; \
 	   cp -f docxx.sty html.sty $$i; \
 	   $(MAKE) -f ../.src/Makefile.sub -C $$i setup all DIR=$$i; \
 	done
+	
 
 install2:
 	$(INSTALL) -d $(DOCDIR)/Pdf
@@ -61,6 +63,7 @@ makemap: subdirs
 clean:
 	$(RM) *.log *.aux *.dvi *.sgml wxhelp.tab wxhelp.tmp *.ps *.toc *.pdf
 	$(RM) -r $(SUB_DIRS) classes classes.tex wxhelp.map
+	$(RM) tmp.*
 
 test:
 	@if test -f Manual.tex; then \
