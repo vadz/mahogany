@@ -1140,15 +1140,26 @@ wxMainFrame::~wxMainFrame()
 void
 wxMainFrame::MakeModulesMenu(void)
 {
-   wxMenuBar *menuBar = GetMenuBar();
-   if(! m_ModulesMenu)
+   if ( !m_ModulesMenu )
    {
+      wxMenuBar *menuBar = GetMenuBar();
+      wxCHECK_RET( menuBar, _T("no menu bar in the main frame?") );
+
       // create the modules menu:
-      m_ModulesMenu = new wxMenu("", wxMENU_TEAROFF);
+      m_ModulesMenu = new wxMenu(_T(""), wxMENU_TEAROFF);
+
       int pos = menuBar->GetMenuCount();
-      wxASSERT(pos  > 1);
-      // pos is the Help menu, so insert at pos-1:
-      menuBar->Insert(pos-1, m_ModulesMenu, _("&Plugins"));
+      wxASSERT_MSG(pos > 1, _T("no menus in the main frame menubar?") );
+
+      // and insert it just before the Help menu which is the last one
+      pos--;
+
+#ifdef DEBUG
+      // (and before the debug menu which is the last one before "Help")
+      pos--;
+#endif // DEBUG
+
+      menuBar->Insert(pos, m_ModulesMenu, _("&Tools"));
    }
 }
 
