@@ -7,20 +7,21 @@ $Id$
   + some code in wxMessageView relies on unix unlink() behaviour 
     (file is still open and in use when deleted)
   + occasional Xlib error messages from MimePopup/Handle  WHAT's that?
+  + fix MessageCC::GetParameters()
 
 - ComposeView:
    + extra header lines don't get set, why? Profile bug?
 
 - wxFolderView:
-  + add wxMessageView
-  + use ListCtrl
+  + add wxMessageView, use wxSplitter
+  + use ListCtrl and/or TextCtrl
   + complete ForwardMessages, add InsertData() to wxComposeView
 
 - wxLayout:
-  + fix wxGTK postscript printing which is pretty broken
-  + deletion of first character (ComposeView)?
-  + backspace sometimes goes wrong, occasional editing problems
+  + fix wxGTK postscript printing which is pretty broken, compare with wxXt?
+  + backspace sometimes goes wrong, occasional editing problems ??
   + flicker
+  + key bindings for wxLayoutWindow
 
 - configure: USE_WXCONFIG does not get defined!
 
