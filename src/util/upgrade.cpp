@@ -1247,7 +1247,7 @@ public:
    bool OnVisitFolder(const wxString& folderName)
       {
          MFolder *f = MFolder::Get(folderName);
-         if(f && f->GetFlags() & MF_FLAGS_NEWMAILFOLDER)
+         if(f && (f->GetFlags() & MF_FLAGS_NEWMAILFOLDER))
          {
             if(m_NewMailFolder.Length())
             {

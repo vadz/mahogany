@@ -1,5 +1,6 @@
 (next release) on (date of next release)
-
+23.02.00 KB: IMAP code fixes plugging possible memory corruption, message editor fixes.
+             Fixed empty names for BBDB and PalmOS adressbooks.
 05.02.00 KB: Folderlisting now uses colour highlighting.
              Imap4.7a integrated and patches simplified.
              POP3 headers cache patch added

@@ -1055,8 +1055,8 @@ wxLayoutWindow::ResizeScrollbars(bool exact, CoordType bottom)
    // TODO why do we set both at once? they're independent...
    if( max.x > m_maxx - WXLO_ROFFSET
        || max.y > m_maxy - WXLO_BOFFSET
-       || max.x < m_maxx - X_SCROLL_PAGE
-       || max.y < m_maxy - Y_SCROLL_PAGE
+       || (max.x < m_maxx - X_SCROLL_PAGE)
+       || (max.y < m_maxy - Y_SCROLL_PAGE)
        || exact )
    {
       // text became too large
@@ -1068,19 +1068,21 @@ wxLayoutWindow::ResizeScrollbars(bool exact, CoordType bottom)
       }
 
       bool done = FALSE;
-      if(max.x < X_SCROLL_PAGE)
+      if(max.x < X_SCROLL_PAGE && m_hasHScrollbar)
       {
          SetScrollbars(0,-1,0,-1,0,-1,true);
          m_hasHScrollbar = FALSE;
          done = TRUE;
       }
-      if(max.y < Y_SCROLL_PAGE)
+      if(max.y < Y_SCROLL_PAGE && m_hasVScrollbar)
       {
          SetScrollbars(-1,0,-1,0,-1,0,true);
          m_hasVScrollbar = FALSE;
          done = TRUE;
       }
-      if(! done)
+      if(! done &&
+         (max.x > X_SCROLL_PAGE || max.y > Y_SCROLL_PAGE)
+         )
       {
          ViewStart(&m_ViewStartX, &m_ViewStartY);
          SetScrollbars(X_SCROLL_PAGE,
@@ -1092,7 +1094,7 @@ wxLayoutWindow::ResizeScrollbars(bool exact, CoordType bottom)
          m_hasHScrollbar =
             m_hasVScrollbar = true;
       }
-
+      
       m_maxx = max.x + X_SCROLL_PAGE;
       m_maxy = max.y + Y_SCROLL_PAGE;
    }

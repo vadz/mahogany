@@ -348,6 +348,10 @@ PalmEntryGroup::PalmEntryGroup(PalmEntryGroup *pParent,
 
 PalmEntryGroup::~PalmEntryGroup()
 {
+   PalmEntryList::iterator i;
+   for(i = m_entries->begin(); i != m_entries->end(); i++)
+      (**i).DecRef();
+   delete m_entries;
 }
 
 size_t PalmEntryGroup::GetEntryNames(wxArrayString& aNames) const
@@ -456,6 +460,8 @@ PalmBook::PalmBook(const String& strName)
   // allowed to contain subgroups!
   m_pRootGroup = new PalmEntryGroup(NULL, strName);
 
+  SetUserName(_("PalmOS Addressbook"));
+  SetDescription(_("PalmOS Addressbook"));
   m_strName = strName;
 }
 

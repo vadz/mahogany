@@ -280,19 +280,25 @@ PalmOSModule::GetConfig(void)
 {
    ASSERT(m_Profile == NULL);
    ProfileBase * appConf = m_MInterface->GetGlobalProfile();
+
+   // mail related values get read from the PALMBOX mailfolder profile:
    m_Profile = m_MInterface->CreateProfile(
       appConf->readEntry(MP_MOD_PALMOS_BOX,MP_MOD_PALMOS_BOX_D));
 
-   m_SyncMail = (READ_CONFIG(m_Profile, MP_MOD_PALMOS_SYNCMAIL) != 0);
-   m_SyncAddr = (READ_CONFIG(m_Profile, MP_MOD_PALMOS_SYNCADDR) != 0);
-   m_LockPort = (READ_CONFIG(m_Profile, MP_MOD_PALMOS_LOCK) != 0);
-   m_PilotDev = READ_CONFIG(m_Profile, MP_MOD_PALMOS_PILOTDEV);
-   m_PalmBox = READ_CONFIG(m_Profile, MP_MOD_PALMOS_BOX);
-   m_Dispose = READ_CONFIG(m_Profile,MP_MOD_PALMOS_DISPOSE);
-   m_Speed = atoi(READ_CONFIG(m_Profile,MP_MOD_PALMOS_SPEED));
-   m_Script1 = READ_CONFIG(m_Profile, MP_MOD_PALMOS_SCRIPT1);
-   m_Script2 = READ_CONFIG(m_Profile, MP_MOD_PALMOS_SCRIPT2);
-
+   // all other values get read from the module profile:
+   ProfileBase * p= m_MInterface->CreateModuleProfile(MODULE_NAME);
+   
+   m_SyncMail = (READ_CONFIG(p, MP_MOD_PALMOS_SYNCMAIL) != 0);
+   m_SyncAddr = (READ_CONFIG(p, MP_MOD_PALMOS_SYNCADDR) != 0);
+   m_LockPort = (READ_CONFIG(p, MP_MOD_PALMOS_LOCK) != 0);
+   m_PilotDev = READ_CONFIG(p, MP_MOD_PALMOS_PILOTDEV);
+   m_PalmBox = READ_CONFIG(p, MP_MOD_PALMOS_BOX);
+   m_Dispose = READ_CONFIG(p,MP_MOD_PALMOS_DISPOSE);
+   m_Speed = atoi(READ_CONFIG(p,MP_MOD_PALMOS_SPEED));
+   m_Script1 = READ_CONFIG(p, MP_MOD_PALMOS_SCRIPT1);
+   m_Script2 = READ_CONFIG(p, MP_MOD_PALMOS_SCRIPT2);
+   p->DecRef();
+   
    String dev;
    dev = m_PilotDev;
    if(strncmp(m_PilotDev,"/dev/",5)==0)

@@ -236,10 +236,12 @@ MessageCC::GetHeader(void) const
    if(! folder)
       return NULL;
 
+   unsigned long len = 0;
    const char *cptr = mail_fetchheader_full(folder->Stream(), m_uid,
-                                            NULL, NIL, FT_UID);
+                                            NULL, &len, FT_UID);
+   String str(cptr, (size_t)len);
    MailFolderCC::ProcessEventQueue();
-   return cptr;
+   return str.c_str();
 }
 
 void
@@ -254,12 +256,13 @@ MessageCC::GetHeaderLine(const String &line, String &value)
    slist.text.size = line.length();
    slist.text.data = (unsigned char *)strutil_strdup(line);
 
+   unsigned long len;
    char *
       rc = mail_fetchheader_full (folder->Stream(),
                                   m_uid,
                                   &slist,
-                                  NIL,FT_UID);
-   value = rc;
+                                  &len,FT_UID);
+   value = String(rc, (size_t)len);
    char *val = strutil_strdup(rc);
    // trim off trailing newlines/crs
    if(strlen(rc))
@@ -768,12 +771,12 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
       if(headerFlag)
       {
          char *headerPart = mail_fetchheader_full(folder->Stream(),m_uid,NIL,&len,FT_UID);
-         str += headerPart;
+         str += String(headerPart, (size_t)len);
          fulllen += len;
       }
 
       char *bodyPart = mail_fetchtext_full(folder->Stream(),m_uid,&len,FT_UID);
-      str += bodyPart;
+      str += String(bodyPart, (size_t)len);
       fulllen += len;
       MailFolderCC::ProcessEventQueue();
    }

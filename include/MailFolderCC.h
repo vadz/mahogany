@@ -323,6 +323,9 @@ private:
    /// Common code for constructors
    void Create(int typeAndFlags);
 
+   /// Update the folder status, number of messages, etc
+   void UpdateStatus(void);
+      
    /** Try to open the mailstream for this folder.
        @return true on success
    */
@@ -348,7 +351,11 @@ private:
    /// Do we need an update?
    bool UpdateNeeded(void) const { return m_UpdateNeeded; }
    /// number of messages in mailbox
-   unsigned long m_NumOfMessages;
+   unsigned long m_nMessages;
+   /// number or recent messages in mailbox
+   unsigned long m_nRecent;
+   /// last seen UID
+   UIdType m_LastUId;
    /// last number of messages
    unsigned long m_OldNumOfMessages;
    /// set to true before we get the very first folder info

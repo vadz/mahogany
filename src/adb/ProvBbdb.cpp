@@ -934,14 +934,20 @@ BbdbEntryGroup::FindEntry(const char *szName)
 // ----------------------------------------------------------------------------
 
 BbdbBook::BbdbBook(const String& name)
-        : m_strName(name), m_strDesc(name)
 {
    MOcheck();
 
    // the user name shouldn't contain slashes - so extract the file name from
    // the full path
-   wxSplitPath(name, NULL, &m_strUserName, NULL);
-
+   wxString ext;
+   wxSplitPath(name, NULL, &m_strUserName, &ext);
+   if(m_strUserName.Length() == 0)
+      m_strUserName << '.' << ext;
+   m_strName = name;
+   
+   String desc = GetUserName();
+   desc << _(" (Emacs BBDB addressbook)");
+   SetDescription(desc);
    // create the root group
    m_pRootGroup = new BbdbEntryGroup(NULL, name); // there is only one group
 }

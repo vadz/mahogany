@@ -686,7 +686,6 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          delete oldfolderctrl;
       }
 
-//      wxSafeYield(); // display the new folderctrl immediately
       Update();
 
       if(m_NumOfMessages > 0 && READ_CONFIG(m_Profile,MP_AUTOSHOW_FIRSTMESSAGE))
@@ -923,7 +922,6 @@ wxFolderView::Update(HeaderInfoList *listing)
       m_FolderCtrl->SetItemState(i, wxLIST_STATE_FOCUSED,
                                  (hi->GetUId() == m_FocusedUId)?
                                  wxLIST_STATE_FOCUSED : 0);
-      // this only affects the first column, why?
       wxListItem info;
       info.m_itemId = i;
       m_FolderCtrl->GetItem(info);

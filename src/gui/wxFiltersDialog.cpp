@@ -104,7 +104,14 @@ public:
       {
          m_Active = true;
       }
-   
+
+   bool operator==(const FilterEntryData b)
+      {
+         return m_Name == b.m_Name
+            && m_Criterium == b.m_Criterium
+            && m_Action == b.m_Action
+            && m_Active == b.m_Active;
+      }
 #if 0 // use default constructor instead
    FilterEntryData & operator=(const FilterEntryData &in)
       {
@@ -136,7 +143,7 @@ public:
    virtual bool TransferDataToWindow();
 
    // returns TRUE if the format string was changed
-   bool WasChanged(void) { return m_Filter != m_OriginalFilter;}
+   bool WasChanged(void) { return ! (*m_FilterData == m_OriginalFilterData);}
 
    // event handlers
    void OnUpdateUI(wxUpdateUIEvent& event);
@@ -147,8 +154,6 @@ protected:
    // data
    wxTextCtrl *m_NameCtrl;
    wxString  m_Name;
-   wxString  m_Filter,
-             m_OriginalFilter;
    class OneCritControl *m_CritControl;
    class OneActionControl *m_ActionControl;
 private:
@@ -601,7 +606,6 @@ wxOneFilterDialog::wxOneFilterDialog(class FilterEntryData *fed,
    m_ActionControl = new OneActionControl(this, c);
    
    TransferDataToWindow();
-   m_OriginalFilter = m_Filter;
    m_OriginalFilterData = *m_FilterData;
 }
 
@@ -936,10 +940,8 @@ wxFiltersDialog::UpdateButtons(void)
    {
       m_Buttons[Button_Edit]->Enable(true);
       m_Buttons[Button_Delete]->Enable(true);
-      if(selection > 0)
-         m_Buttons[Button_Up]->Enable(true);
-      if(selection < (int) (nEntries-1) )
-         m_Buttons[Button_Down]->Enable(true);
+      m_Buttons[Button_Up]->Enable(selection > 0);
+      m_Buttons[Button_Down]->Enable(selection < (int) (nEntries-1));
    }
 }
 

@@ -545,7 +545,9 @@ MailFolderCC::Create(int typeAndFlags)
    UpdateTimeoutValues();
    
    SetRetrievalLimit(0); // no limit
-   m_NumOfMessages = 0;
+   m_nMessages = 0;
+   m_nRecent = 0;
+   m_LastUId = UID_ILLEGAL;
    m_OldNumOfMessages = 0;
    m_Listing = NULL;
    m_NeedFreshListing = true;
@@ -1198,19 +1200,9 @@ MailFolderCC::AppendMessage(String const &msg)
    INIT(&str, mail_string, (void *) msg.c_str(), msg.Length());
    ProcessEventQueue();
 
-//??   PingReopen();
-#if 0
-   char *flags = "\\NEW\\RECENT";
-   bool rc = ( mail_append_full(
-      m_MailStream,
-      (char *)m_MailboxPath.c_str(),
-      flags, NIL, &str)
-               != 0);
-#else
    bool rc = ( mail_append(
       m_MailStream, (char *)m_MailboxPath.c_str(), &str)
                != 0);
-#endif
    if(! rc)
       ERRORMESSAGE(("cannot append message"));
    ProcessEventQueue();
@@ -1231,32 +1223,34 @@ MailFolderCC::AppendMessage(Message const &msg)
 unsigned long
 MailFolderCC::CountMessages(int mask, int value) const
 {
-   unsigned long numOfMessages = m_NumOfMessages;
-
-   if ( mask )
+   if(mask == MSG_STAT_NONE)
+      return m_nMessages;
+   else if(mask == MSG_STAT_RECENT)
+      return m_nRecent;
+   else
    {
+      unsigned long numOfMessages = m_nMessages;
       HeaderInfoList *hil = GetHeaders();
       if ( !hil )
          return 0;
 
       // FIXME there should probably be a much more efficient way (using
       //       cclient functions?) to do it
-      for ( unsigned long msgno = 0; msgno < m_NumOfMessages; msgno++ )
+      for ( unsigned long msgno = 0; msgno < m_nMessages; msgno++ )
       {
          if ( ((*hil)[msgno]->GetStatus() & mask) != value)
             numOfMessages--;
       }
       hil->DecRef();
+      return numOfMessages;
    }
-
-   return numOfMessages;
 }
 
 Message *
 MailFolderCC::GetMessage(unsigned long uid)
 {
    CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", NULL);
-//FIXME: add some test whether uid is valid   ASSERT(index < m_NumOfMessages && index >= 0);
+//FIXME: add some test whether uid is valid   ASSERT(index < m_nMessages && index >= 0);
    MessageCC *m = MessageCC::CreateMessageCC(this,uid);
    ProcessEventQueue();
    return m;
@@ -1310,7 +1304,7 @@ MailFolderCC::GetHeaders(void) const
       m_Listing->IncRef();
    return m_Listing;
 #else
-   if(! m_Listing && m_NumOfMessages > 0)
+   if(! m_Listing && m_nMessages > 0)
    {
       ((MailFolderCC *)this)->UpdateListing();
    }
@@ -1400,15 +1394,15 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
 
    unsigned long lastcount = 0;
    MProgressDialog *progDlg = NULL;
-   if ( m_NumOfMessages > (unsigned)READ_CONFIG(m_Profile,
+   if ( m_nMessages > (unsigned)READ_CONFIG(m_Profile,
                                                 MP_FOLDERPROGRESS_THRESHOLD) )
    {
       String msg;
       msg.Printf(_("Searching in %lu messages..."),
-                 (unsigned long) m_NumOfMessages);
+                 (unsigned long) m_nMessages);
       progDlg = new MProgressDialog(GetName(),
                                     msg,
-                                    m_NumOfMessages,
+                                    m_nMessages,
                                     NULL,
                                     false, true);// open a status window:
    }
@@ -1419,7 +1413,7 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
 
    bool error = false;
 
-   for ( unsigned long msgno = 0; msgno < m_NumOfMessages; msgno++ )
+   for ( unsigned long msgno = 0; msgno < m_nMessages; msgno++ )
    {
       if(crit->m_What == SearchCriterium::SC_SUBJECT)
          what = (*hil)[msgno]->GetSubject();
@@ -1463,7 +1457,7 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
       {
          String msg;
          msg.Printf(_("Searching in %lu messages..."),
-                    (unsigned long) m_NumOfMessages);
+                    (unsigned long) m_nMessages);
          String msg2;
          unsigned long cnt = m_SearchMessagesFound->Count();
          if(cnt != lastcount)
@@ -1647,24 +1641,24 @@ MailFolderCC::BuildListing(void)
       // Hopefully this will only count really existing messages for
       // NNTP connections.
       if(GetType() == MF_NNTP)
-         m_NumOfMessages = m_MailStream->recent;
+         m_nMessages = m_MailStream->recent;
       else
-         m_NumOfMessages = m_MailStream->nmsgs;
+         m_nMessages = m_MailStream->nmsgs;
    }
 
-   if(m_Listing && m_NumOfMessages > m_OldNumOfMessages)
+   if(m_Listing && m_nMessages > m_OldNumOfMessages)
    {
       m_Listing->DecRef();
       m_Listing = NULL;
    }
 
    if(! m_Listing )
-      m_Listing =  HeaderInfoListCC::Create(m_NumOfMessages);
+      m_Listing =  HeaderInfoListCC::Create(m_nMessages);
 
    // by default, we retrieve all messages
-   unsigned long numMessages = m_NumOfMessages;
+   unsigned long numMessages = m_nMessages;
    // the first one to retrieve
-   unsigned long firstMessage = 1; //m_NumOfMessages - numMessages + 1;
+   unsigned long firstMessage = 1; //m_nMessages - numMessages + 1;
 
    // if the number of the messages in the folder is bigger than the
    // configured limit, ask the user whether he really wants to retrieve them
@@ -1672,7 +1666,7 @@ MailFolderCC::BuildListing(void)
    // folders (loading headers from them is quick)
    if ( !IsLocalQuickFolder(GetType()) &&
         (m_RetrievalLimit > 0) && m_FirstListing &&
-        (m_NumOfMessages > m_RetrievalLimit) )
+        (m_nMessages > m_RetrievalLimit) )
    {
       // too many messages - ask the user how many of them he really wants
       String msg, prompt, title;
@@ -1681,17 +1675,17 @@ MailFolderCC::BuildListing(void)
       msg.Printf(_("This folder contains %lu messages, which is greater than\n"
                "the current threshold of %lu (set it to 0 to avoid this "
                "question)."),
-            m_NumOfMessages, m_RetrievalLimit);
+            m_nMessages, m_RetrievalLimit);
       prompt = _("How many of them do you want to retrieve?");
 
       long nRetrieve = MGetNumberFromUser(msg, prompt, title,
                                           m_RetrievalLimit,
-                                          1, m_NumOfMessages);
+                                          1, m_nMessages);
       if ( nRetrieve != -1 )
       {
          numMessages = nRetrieve;
-         if(numMessages > m_NumOfMessages)
-            numMessages = m_NumOfMessages;
+         if(numMessages > m_nMessages)
+            numMessages = m_nMessages;
       }
       //else: cancelled, retrieve all
    }
@@ -1715,9 +1709,9 @@ MailFolderCC::BuildListing(void)
    // info on the messages
    /* stream, sequence, header structure to fill */
    String sequence;
-   if ( numMessages != m_NumOfMessages )
+   if ( numMessages != m_nMessages )
    {
-      sequence = strutil_ultoa(mail_uid(m_MailStream, m_NumOfMessages-numMessages+1));
+      sequence = strutil_ultoa(mail_uid(m_MailStream, m_nMessages-numMessages+1));
       sequence += ":*";
    }
    else
@@ -1741,9 +1735,9 @@ MailFolderCC::BuildListing(void)
    m_ProgressDialog = (MProgressDialog *)1;
 
    // for NNTP, it will not show all messages
-   //ASSERT(m_BuildNextEntry == m_NumOfMessages || m_folderType == MF_NNTP);
-   m_NumOfMessages = m_BuildNextEntry;
-   m_Listing->SetCount(m_NumOfMessages);
+   //ASSERT(m_BuildNextEntry == m_nMessages || m_folderType == MF_NNTP);
+   m_nMessages = m_BuildNextEntry;
+   m_Listing->SetCount(m_nMessages);
 
 
    m_FirstListing = false;
@@ -1761,7 +1755,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    /* Ignore all entries that have arrived in the meantime to avoid
       overflowing the array.
    */
-   if(m_BuildNextEntry >= m_NumOfMessages)
+   if(m_BuildNextEntry >= m_nMessages)
       return 0;
 
    // This is 1 if we don't want any further updates.
@@ -1774,7 +1768,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    // This seems to occasionally happen. Some race condition?
    if(m_BuildNextEntry >= m_Listing->Count())
    {
-      m_NumOfMessages = m_Listing->Count();
+      m_nMessages = m_Listing->Count();
       return 0;
    }
 
@@ -2082,6 +2076,25 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream) const
    streamList.push_front(conn);
 }
 
+
+void
+MailFolderCC::UpdateStatus(void)
+{
+   unsigned long
+      nMessages = m_nMessages,
+      nRecent = m_nRecent;
+   UIdType lastUId = m_LastUId;
+   
+   m_nMessages = m_MailStream->nmsgs;
+   m_nRecent = m_MailStream->recent;
+   m_LastUId = m_MailStream->uid_last;
+
+   if(nMessages != m_nMessages
+      || nRecent != m_nRecent
+      || lastUId != m_LastUId)
+      //FIXME: sent a folder status change event instead!
+      MEventManager::Send( new MEventFolderUpdateData (this) );
+}
 /* static */
 bool
 MailFolderCC::CanExit(String *which)
@@ -2184,10 +2197,10 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
       // this test seems necessary for MH folders, otherwise we're going into
       // an infinite loop (and it shouldn't (?) break anything for other
       // folders)
-      if ( (mf->m_NumOfMessages == 0 && number != 0) ||
-           (mf->m_NumOfMessages != number) )
+      if ( (mf->m_nMessages == 0 && number != 0) ||
+           (mf->m_nMessages != number) )
       {
-         mf->m_NumOfMessages = number;
+         mf->m_nMessages = number;
          mf->RequestUpdate();
       }
    }
@@ -2287,8 +2300,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
               mf->m_MailboxPath.c_str(), status->messages);
 
    if(status->flags & SA_MESSAGES)
-      mf->m_NumOfMessages  = status->messages;
-   MEventManager::Send( new MEventFolderUpdateData (mf) );
+      mf->UpdateStatus();
 }
 
 /** log a message
@@ -2473,7 +2485,7 @@ MailFolderCC::ProcessEventQueue(void)
       case Exists:
          /* The Exists event is ignored here.
             When the mm_exists() callback is called, the
-            m_NumOfMessages counter is updated immediately,
+            m_nMessages counter is updated immediately,
             circumvening the event queue. It should never appear.
             The mm_exists() callback calls RequestUpdate() though.*/
          ASSERT(0);
