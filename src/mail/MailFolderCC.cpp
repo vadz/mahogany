@@ -2892,12 +2892,13 @@ MailFolderCC::ProcessEventQueue(void)
 }
 
 void
-MailFolderCC::RequestUpdate(void)
+MailFolderCC::RequestUpdate(bool sendEvent)
 {
    // invalidate current folder listing and queue at least one folder
    // update event.
    m_NeedFreshListing = true;
-   m_UpdateNeeded = true;
+   if(sendEvent)
+      m_UpdateNeeded = true;
 }
 
 /* Handles the mm_overview_header callback on a per folder basis. */

@@ -43,10 +43,15 @@
 #include  <wx/utils.h>
 #define   SYSTEM(command) wxExecute(command, FALSE)
 
+// should the mailcollector keep folders open?
+//#define MC_KEEP_OPEN
+
 struct MailCollectorFolderEntry
 {
    String      m_name;
+#ifdef MC_KEEP_OPEN
    MailFolder *m_folder;
+#endif
 };
 
 KBLIST_DEFINE(MailCollectorFolderList, MailCollectorFolderEntry);
@@ -134,8 +139,10 @@ protected:
          delete m_EventReceiver;
          InternalDestroy();
       }
+#ifdef MC_KEEP_OPEN
    /// re-opens any closed folders, depending on network status
    void UpdateFolderList(void);
+#endif
    /// Re-initialise the MailCollector if needed
    void ReCreate(void)
       {
@@ -190,23 +197,16 @@ public:
    bool OnVisitFolder(const wxString& folderName)
       {
          MFolder *f = MFolder::Get(folderName);
-         MailFolder *mf = NULL;
          if(f && f->GetFlags() & MF_FLAGS_INCOMING)
          {
             wxLogDebug("Found incoming folder '%s'.",
                        folderName.c_str());
-            mf = MailFolder::OpenFolder(folderName);
-//            if(mf || (!mApplication->IsOnline()))
-// better like this, otherwise folders disappear from the list:
-            if(1) // always add to list
-            {
-               MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
-               e->m_name = folderName;
-               e->m_folder = mf; // might be NULL!
-               m_list->push_back(e);
-            }
-            else
-               ERRORMESSAGE((_("Cannot open incoming folder '%s'."), folderName.c_str()));
+            MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
+            e->m_name = folderName;
+#ifdef MC_KEEP_OPEN
+            e->m_folder = MailFolder::OpenFolder(folderName); // might be NULL!
+#endif
+            m_list->push_back(e);
          }
          if(f) f->DecRef();
          return true;
@@ -238,10 +238,12 @@ MailCollectorImpl::InternalDestroy(void)
 {
    // the m_EventReceiver is not destroyed, we continue to use it
    MOcheck();
+#ifdef MC_KEEP_OPEN
    MailCollectorFolderList::iterator i;
    for(i = m_list->begin();i != m_list->end(); i++)
       if((**i).m_folder)
          (**i).m_folder->DecRef();
+#endif
    if(m_NewMailFolder)
    {
       m_NewMailFolder->DecRef();
@@ -257,8 +259,13 @@ MailCollectorImpl::IsIncoming(MailFolder *mf)
    MOcheck();
    MailCollectorFolderList::iterator i;
    for(i = m_list->begin();i != m_list->end();i++)
+#ifdef MC_KEEP_OPEN
       if((**i).m_folder == mf)
          return true;
+#else
+   if( (**i).m_name == mf->GetName() )
+      return true;
+#endif
    return false;
 }
 
@@ -274,8 +281,10 @@ MailCollectorImpl::Collect(MailFolder *mf)
 
    CHECK(m_NewMailFolder,false,_("Cannot collect mail without New Mail folder."));
 
+#ifdef MC_KEEP_OPEN
    UpdateFolderList();
-
+#endif
+   
    int updateFlags = m_NewMailFolder->GetUpdateFlags();
    if(mf == NULL)
    {
@@ -285,8 +294,52 @@ MailCollectorImpl::Collect(MailFolder *mf)
          // set flags each time because they get reset by SaveMessages()
          m_NewMailFolder->SetUpdateFlags(0 /* no updates, no new mail
                                               detection */);
-            if ((*i)->m_folder)
-             rc &= CollectOneFolder((*i)->m_folder);
+#ifdef MC_KEEP_OPEN
+         if ((*i)->m_folder)
+            rc &= CollectOneFolder((*i)->m_folder);
+#else   
+         MFolder *mfolder = MFolder::Get( (**i).m_name );
+         if(! mfolder)
+         {
+            ERRORMESSAGE((_("Cannot find incoming folder '%s'."),
+                          (**i).m_name.c_str()));
+            continue; // skip this one
+         }
+
+         if(mfolder->NeedsNetwork() && ! mApplication->IsOnline())
+         {
+            ERRORMESSAGE((_("Cannot collect from incoming mailbox '%s'"
+                          " while network is offline."),
+                          (**i).m_name.c_str()));
+            continue; // skip to next in list
+         }
+         MailFolder *imf = MailFolder::OpenFolder( mfolder );
+         mfolder->DecRef();
+         if(imf)
+         {
+            rc &= (mf && CollectOneFolder(imf));
+            imf->DecRef();
+         }
+         else
+         {
+            ERRORMESSAGE((_("Cannot open incoming mailbox '%s'."),
+                          (**i).m_name.c_str()));
+            wxString msg;
+            msg.Printf(_("Accessing the incoming folder\n"
+                         "'%s' failed.\n\n"
+                         "Do you want to stop collecting\n"
+                         "mail from it in this session?"),
+                       (**i).m_name.c_str());
+            if(MDialog_YesNoDialog(
+               msg, NULL, _("Mail collection failed"),
+               TRUE, GetPersMsgBoxName(M_MSGBOX_SUSPENDAUTOCOLLECT)))
+            {
+               RemoveIncomingFolder((**i).m_name);
+               // re-start from beginning of list to avoid iterator trouble:
+               i = m_list->begin();
+            }
+         }
+#endif   
       }
    }
    else
@@ -411,7 +464,9 @@ MailCollectorImpl::AddIncomingFolder(const String &name)
       return false;
    MailCollectorFolderEntry *e = new MailCollectorFolderEntry;
    e->m_name = name;
+#ifdef MC_KEEP_OPEN
    e->m_folder = mf; // might be NULL
+#endif
    m_list->push_back(e);
    return true;
 }
@@ -426,8 +481,10 @@ MailCollectorImpl::RemoveIncomingFolder(const String &name)
    {
       if((**i).m_name == name)
       {
+#ifdef MC_KEEP_OPEN
          if ((**i).m_folder)
             (**i).m_folder->DecRef();
+#endif
          m_list->erase(i);
          return true;
       }
@@ -438,6 +495,8 @@ MailCollectorImpl::RemoveIncomingFolder(const String &name)
 
    return false;
 }
+
+#ifdef MC_KEEP_OPEN
 
 /** Search for incoming folders which are open but cannot be accessed
     or which are closed and try to reopen them. */
@@ -493,3 +552,4 @@ MailCollectorImpl::UpdateFolderList(void)
       }
    }
 }
+#endif

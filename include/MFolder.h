@@ -100,6 +100,9 @@ public:
    /// folder type can't be changed once it's created
    virtual FolderType GetType() const = 0;
 
+   /// Does the folder need a working network to be accessed?
+   virtual bool NeedsNetwork(void) const = 0;
+
       /// the icon index for this folder or -1 if there is no specific icon
       /// associated to it (the icon index should be used to pass it to
       /// GetFolderIconName())

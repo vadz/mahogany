@@ -457,7 +457,7 @@ private:
    int GetFlags(void) const { return m_FolderFlags; }
 protected:
    /// Request update
-   virtual void RequestUpdate(void);
+   virtual void RequestUpdate(bool sendEvents = false);
    /// Update the folder status, number of messages, etc
    virtual void UpdateStatus(void);
    /// Update the timeout values from a profile

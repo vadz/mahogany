@@ -52,6 +52,8 @@ class MessagePtr :
         return val
     def GetHeader(self):
         val = Messagec.Message_GetHeader(self.this)
+        val = StringPtr(val)
+        val.thisown = 1
         return val
     def Subject(self):
         val = Messagec.Message_Subject(self.this)

@@ -175,6 +175,7 @@ enum ConfigFields
 // ConfigField_NewMailFolder,
    ConfigField_PollIncomingDelay,
    ConfigField_UpdateInterval,
+   ConfigField_CloseDelay,
    ConfigField_FolderProgressThreshold,
    ConfigField_AutoShowFirstMessage,
    ConfigField_UseOutbox,
@@ -668,6 +669,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 // { gettext_noop("Folder where to collect &new mail"), Field_Text, -1},
    { gettext_noop("Poll for &new mail interval in seconds"), Field_Number, -1},
    { gettext_noop("&Ping/check folder interval in seconds"), Field_Number, -1},
+   { gettext_noop("&Keep folder open after close for this many seconds"), Field_Number, -1},
    { gettext_noop("&Automatically select first message in viewer"), Field_Bool, -1},
    { gettext_noop("&Threshold for displaying progress dialog"), Field_Number, -1},
    { gettext_noop("Send outgoing messages later"), Field_Bool, -1 },
@@ -905,6 +907,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 // CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
    CONFIG_ENTRY(MP_POLLINCOMINGDELAY),
    CONFIG_ENTRY(MP_UPDATEINTERVAL),
+   CONFIG_ENTRY(MP_FOLDER_CLOSE_DELAY),
    CONFIG_ENTRY(MP_AUTOSHOW_FIRSTMESSAGE),
    CONFIG_ENTRY(MP_FOLDERPROGRESS_THRESHOLD),
    CONFIG_ENTRY(MP_USE_OUTBOX), // where to store message before

@@ -539,11 +539,16 @@ public:
        @return -1 if no filter module exists, return code otherwise
    */
    virtual int ApplyFilterRules(UIdArray msgs) = 0;
-   /// Request update
-   virtual void RequestUpdate(void) = 0;
+   /** Request update. Causes the mailfolder to update its internal
+       status information when required. If sendEvent is TRUE, it will
+       send out an event that its info changed to cause immediate
+       update. */
+   virtual void RequestUpdate(bool sendEvent = FALSE) = 0;
    /// Process all internal update events in the queue.
    static void ProcessEventQueue(void);
 
+   /// Clean up for program exit.
+   static void CleanUp(void);
 protected:
    static MLogCircle ms_LogCircle;
 };

@@ -553,9 +553,7 @@ MAppBase::OnAbnormalTermination()
 void
 MAppBase::OnShutDown()
 {
-   // clean up CClient driver memory
-   extern void CC_Cleanup(void);
-   CC_Cleanup();
+   MailFolder::CleanUp();
 
    // don't want events any more
    if ( m_eventNewMailReg )

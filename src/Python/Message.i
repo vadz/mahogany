@@ -56,10 +56,10 @@ public:
    */
    virtual void GetHeaderLine(const String &line, String &value);
 
-   /** Get a complete header text.
+   /** Get a complete header text (const char *)!!.
        @return pointer to an internal buffer
    */
-   virtual const char * GetHeader(void) ;
+   virtual const String GetHeader(void) ;
 
    /** get Subject line
        @return Subject entry

@@ -76,6 +76,7 @@ public:
    virtual String GetName() const { return m_fullname.AfterLast('/'); }
    virtual wxString GetFullName() const { return m_fullname; }
    virtual FolderType GetType() const { return m_type; }
+   virtual bool NeedsNetwork(void) const { return FALSE; }
    virtual int GetIcon() const { return -1; }
    virtual void SetIcon(int /* icon */) { }
    virtual String GetComment() const { return ""; }
@@ -137,6 +138,14 @@ public:
    virtual wxString GetFullName() const { return m_folderName; }
 
    virtual FolderType GetType() const;
+   virtual bool NeedsNetwork(void) const
+      {
+         return
+            (GetType() == MF_NNTP
+             || GetType() == MF_IMAP
+             || GetType() == MF_POP)
+            && ! (GetFlags() & MF_FLAGS_ISLOCAL);
+      }
 
    virtual int GetIcon() const;
    virtual void SetIcon(int icon);
@@ -190,6 +199,7 @@ public:
 
    // implement base class pure virtuals (some of them don't make sense to us)
    virtual FolderType GetType() const { return MF_ROOT; }
+   virtual bool NeedsNetwork(void) const { return FALSE; }
 
    virtual String GetComment() const { return ""; }
    virtual void SetComment(const String& /* comment */)

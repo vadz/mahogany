@@ -599,8 +599,8 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
 
    // save the new sort order and update everything
    wxLogStatus(GetFrame(this), _("Now sorting by %s%s"),
-               GetColumnName(col),
-               sortOrders[0u] == orderCol ? "" : _(" (reverse)"));
+               GetColumnName(col).c_str(),
+               sortOrders[0u] == orderCol ? "" :  _(" (reverse)"));
 
    sortOrder = BuildSortOrder(sortOrders);
    m_FolderView->GetProfile()->writeEntry(MP_MSGS_SORTBY, sortOrder);

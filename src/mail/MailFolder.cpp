@@ -44,7 +44,7 @@
 #include "MApplication.h"
 #include "modules/Filters.h"
 #include <wx/timer.h>
-
+#include <wx/datetime.h>
 /*-------------------------------------------------------------------*
  * local classes
  *-------------------------------------------------------------------*/
@@ -186,12 +186,17 @@ MLogCircle::Clear(void)
  * static member functions of MailFolder.h
  *-------------------------------------------------------------------*/
 
+/// called to make sure everything is set up
+static void InitStatic(void);
+static void CleanStatic(void);
+
 /* Flush all event queues for all MailFolder drivers. */
 
 /* static */
 void
 MailFolder::ProcessEventQueue(void)
 {
+   InitStatic();
    MailFolderCC::ProcessEventQueue();
 }
 
@@ -204,6 +209,7 @@ MailFolder::ProcessEventQueue(void)
 MailFolder *
 MailFolder::OpenFolder(const String &name, Profile *parentProfile)
 {
+   InitStatic();
    if(Profile::ProfileExists(name))
    {
       MFolder *mf = MFolder::Get(name);
@@ -230,6 +236,7 @@ MailFolder::OpenFolder(const String &name, Profile *parentProfile)
 MailFolder *
 MailFolder::OpenFolder(const MFolder *mfolder)
 {
+   InitStatic();
    CHECK( mfolder, NULL, "NULL MFolder in OpenFolder()" );
 
    // VZ: this doesn't do anything yet anyhow...
@@ -256,6 +263,7 @@ MailFolder::OpenFolder(const MFolder *mfolder)
 MailFolder *
 MailFolder::HalfOpenFolder(const MFolder *mfolder, Profile *profile)
 {
+   InitStatic();
    CHECK( mfolder, NULL, "NULL MFolder in OpenFolder()" );
 
    int typeAndFlags = CombineFolderTypeAndFlags(mfolder->GetType(),
@@ -282,6 +290,7 @@ MailFolder::OpenFolder(int folderType,
                        String const &i_name,
                        bool halfopen)
 {
+   InitStatic();
    FolderType type = GetFolderType(folderType);
 #ifdef EXPERIMENTAL
    CHECK( type != MF_MFILE && type != MF_MDIR,
@@ -417,6 +426,7 @@ MailFolder::OpenFolder(int folderType,
 bool
 MailFolder::DeleteFolder(const MFolder *mfolder)
 {
+   InitStatic();
    // for now there is only one implementation to call:
    return MailFolderCC::DeleteFolder(mfolder);
 }
@@ -429,6 +439,7 @@ MailFolder::CreateFolder(const String &name,
                          const String &path,
                          const String &comment)
 {
+   InitStatic();
    bool valid;
 
    switch(type)
@@ -473,6 +484,7 @@ MailFolder::CreateFolder(const String &name,
 /* static */ String
 MailFolder::ConvertMessageStatusToString(int status, MailFolder *mf)
 {
+   InitStatic();
    String strstatus = "";
 
    // We treat news differently:
@@ -515,10 +527,100 @@ MailFolder::ConvertMessageStatusToString(int status, MailFolder *mf)
    return strstatus;
 }
 
+/* Before actually closing a mailfolder, we keep it around for a
+   little while. If someone reaccesses it, this speeds things up. So
+   all we need, is a little helper class to keep a list of mailfolders
+   open until a timeout occurs.
+*/
+
+struct MfCloseEntry
+{
+   MailFolderCmn * m_mf;
+   wxDateTime m_dt;
+   ~MfCloseEntry()
+      {
+         if(m_mf) m_mf->RealDecRef();
+      }
+   MfCloseEntry(MailFolderCmn *mf, int secs)
+      {
+         mf->IncRef();
+         m_mf = mf;
+         m_dt = wxDateTime::Now();
+         m_dt.Add(wxTimeSpan::Seconds(secs));
+      }
+};
+
+KBLIST_DEFINE(MfList, MfCloseEntry);
+
+class MailFolderCloser : public MObject
+{
+public:
+   MailFolderCloser()
+      : m_MfList(true)
+      {
+      }
+   ~MailFolderCloser()
+      {
+         ASSERT( m_MfList.empty() );
+      }
+
+   void Add(MailFolderCmn *mf)
+      {
+         CHECK_RET( mf, "NULL MailFolder in MailFolderCloser::Add()");
+         m_MfList.push_back(new MfCloseEntry(
+            mf,READ_CONFIG(mf->GetProfile(),MP_FOLDER_CLOSE_DELAY)));
+      }
+   void OnTimer(void)
+      {
+         
+         MfList::iterator i;
+         for(i = m_MfList.begin(); i != m_MfList.end(); i++)
+         {
+            if( (**i).m_dt > wxDateTime::Now() )
+               m_MfList.erase(i);
+         }
+      }
+   void CleanUp(void)
+      {
+         MfList::iterator i = m_MfList.begin();
+         while(i != m_MfList.end() )
+            m_MfList.erase(i);
+      }
+private:
+   MfList m_MfList;
+};
+
+static MailFolderCloser *gs_MailFolderCloser = NULL;
+
+class CloseTimer : public wxTimer
+{
+public:
+   void Notify(void) { gs_MailFolderCloser->OnTimer(); }
+};
+
+static CloseTimer *gs_CloseTimer = NULL;
+
+bool
+MailFolderCmn::DecRef()
+{
+   gs_MailFolderCloser->Add(this);
+   return MObjectRC::DecRef();
+}
+
+bool
+MailFolderCmn::RealDecRef()
+{
+   return MObjectRC::DecRef();
+}
+
+
 /* static */
 bool MailFolder::CanExit(String *which)
 {
-   return MailFolderCC::CanExit(which);
+   bool rc = MailFolderCC::CanExit(which);
+   if(rc)
+      CleanStatic();
+   return rc;
 }
 
 /* static */
@@ -753,6 +855,12 @@ public:
             MEventOptionsChangeData& data = (MEventOptionsChangeData&)event;
             if ( data.GetProfile()->IsAncestor(m_Mf->GetProfile()) )
                m_Mf->OnOptionsChange(data.GetChangeKind());
+            // Also update close timer:
+            if(gs_CloseTimer)
+            {
+               gs_CloseTimer->Stop();
+               gs_CloseTimer->Start(READ_APPCONFIG(MP_FOLDER_CLOSE_DELAY) *1000);
+            }
          }
          return true;
       }
@@ -1515,7 +1623,7 @@ MailFolderCmn::DoUpdate()
       m_Timer->Start(interval);
    }
 
-   RequestUpdate();
+   RequestUpdate(true);
    MailFolder::ProcessEventQueue();
 }
 
@@ -1569,7 +1677,7 @@ MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections)
       if(rc)
          SetSequenceFlag(GetSequenceString(selections),MSG_STAT_DELETED);
       ExpungeMessages();
-      RequestUpdate();
+//      RequestUpdate();
       Ping();
       return rc;
    }
@@ -1672,4 +1780,37 @@ long BuildSortOrder(const wxArrayInt& sortOrders)
    }
 
    return sortOrder;
+}
+
+
+
+
+static void InitStatic()
+{
+   if(gs_CloseTimer)
+      return; // nothing to do
+   gs_MailFolderCloser = new MailFolderCloser;
+   gs_CloseTimer = new CloseTimer();
+   gs_CloseTimer->Start( READ_APPCONFIG(MP_FOLDER_CLOSE_DELAY) *1000);
+}
+
+static void CleanStatic()
+{
+   if(! gs_CloseTimer)
+      return;
+   delete gs_CloseTimer;
+   gs_CloseTimer = NULL;
+   gs_MailFolderCloser->CleanUp();
+   delete gs_MailFolderCloser;
+}
+
+/* static */
+void
+MailFolder::CleanUp(void)
+{      
+   CleanStatic();
+
+   // clean up CClient driver memory
+   extern void CC_Cleanup(void);
+   CC_Cleanup();
 }

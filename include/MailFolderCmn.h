@@ -194,6 +194,8 @@ public:
    */
    virtual void OnOptionsChange(MEventOptionsChangeData::ChangeKind kind);
 
+   /// decrement and delete if reached 0, return TRUE if item wasn't deleted
+   virtual bool DecRef();
 protected:
    /**@name Config information used */
    //@{
@@ -289,7 +291,9 @@ protected:
    /// a timer to update information
    class MailFolderTimer *m_Timer;
 
-
+   /// decrement and delete if reached 0, return TRUE if item wasn't deleted
+   virtual bool RealDecRef();
+   friend class MfCloseEntry;
 private:
    friend class MFCmnEventReceiver;
    /// We react to config change events.
