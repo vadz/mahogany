@@ -4033,7 +4033,7 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
    // which command?
    // --------------
 
-   long key = event.KeyCode();
+   long key = event.GetKeyCode();
    switch ( key )
    {
       case WXK_F1:
