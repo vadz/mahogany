@@ -23,8 +23,6 @@
 #ifndef USE_PCH
    #include "Mcommon.h"
 
-   #include "MFolder.h"
-
    #include "MHelp.h"
 
    #include "guidef.h"
@@ -39,6 +37,8 @@
 #endif // USE_PCH
 
 #include "Mdefaults.h"
+
+#include "MFolder.h"
 
 #include "MSearch.h"
 
