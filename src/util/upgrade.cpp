@@ -108,6 +108,18 @@ enum InstallWizardPageId
 };
 
 // ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+// check the given address for validity
+static bool CheckHostName(const wxString& hostname)
+{
+   // check if server names are valid by verifying the hostname part (i.e.
+   // discard everything after ':' which is the port number) with DNS
+   return hostname.empty() || wxIPV4address().Hostname(hostname.AfterLast(':'));
+}
+
+// ----------------------------------------------------------------------------
 // wizardry
 // ----------------------------------------------------------------------------
 
@@ -296,52 +308,31 @@ public:
             return FALSE;
          }
 
-#if 0
-         // THIS DOES NOT WORK WELL IN PRACTICE, I DISABLED
-         // IT. Creates corrupted config settings in most cases. (KB)
-         
-         // if the email is user@some.where, then suppose that the servers are
-         // pop.some.where &c - be sure to check that some.where is really a
-         // domain and not just a hostname by checking the number of dots in it
-         String
-            domain = Message::GetEMailFromAddress(gs_installWizardData.email).
-                        AfterFirst('@');
-         if ( !!domain )
-         {
-            AddDomain(gs_installWizardData.pop, domain);
-            AddDomain(gs_installWizardData.smtp, domain);
-            AddDomain(gs_installWizardData.imap, domain);
-            AddDomain(gs_installWizardData.nntp, domain);
-         }
-#endif
-         // instead: check if server names are valid by verifying the hostname
-         // part (i.e. discard everything after ':' which is the port number)
-         // with DNS
-         String check = ""; String tmp;
+         // check all the hostnames
+         String check, tmp;
          int failed = 0;
-         wxIPV4address addr;
-         if(! addr.Hostname(gs_installWizardData.pop.AfterLast(':')))
+         if( !CheckHostName(gs_installWizardData.pop) )
          {
             failed++;
             tmp.Printf(_("POP3 server '%s'.\n"),
                        gs_installWizardData.pop.c_str());
             check += tmp;
          }
-         if(! addr.Hostname(gs_installWizardData.smtp.AfterLast(':')))
+         if( !CheckHostName(gs_installWizardData.smtp) )
          {
             failed++;
             tmp.Printf(_("SMTP server '%s'.\n"),
                        gs_installWizardData.smtp.c_str());
             check += tmp;
          }
-         if(! addr.Hostname(gs_installWizardData.imap.AfterLast(':')))
+         if( !CheckHostName(gs_installWizardData.imap) )
          {
             failed++;
             tmp.Printf(_("IMAP server '%s'.\n"),
                        gs_installWizardData.imap.c_str());
             check += tmp;
          }
-         if(! addr.Hostname(gs_installWizardData.nntp.AfterLast(':')))
+         if( !CheckHostName(gs_installWizardData.nntp) )
          {
             failed++;
             tmp.Printf(_("NNTP server '%s'.\n"),
@@ -943,7 +934,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
    labels.Add(_("Use &Outbox queue:"));
    labels.Add(_("&Use dial-up network:"));
    labels.Add(_("&Load PalmOS support:"));
-   labels.Add(_("Default format for mailbox files"));
+   labels.Add(_("Default &mailbox format"));
    labels.Add(_("Enable &Python:"));
 
    long widthMax = GetMaxLabelWidth(labels, panel);
