@@ -151,9 +151,7 @@ extern const MOption MP_WIDTH;
 
 // define this to use semi-modal dialogs which allow to view help while they
 // are shown - note that this doesn't work at all well under Windows
-#ifndef OS_WIN
-   #define USE_SEMIMODAL
-#endif
+//#define USE_SEMIMODAL
 
 int
 wxMDialog::ShowModal()
