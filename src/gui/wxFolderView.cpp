@@ -246,6 +246,9 @@ public:
       { m_FolderView->OnCommandEvent(event); }
    void OnIdle(wxIdleEvent& event);
    void OnMouseMove(wxMouseEvent &event);
+
+   /// called by wxFolderView before previewing the focused message
+   void OnPreview() { m_uidScrolled = UID_ILLEGAL; SelectFocused(); }
    //@}
 
    /// change the options governing our appearance
@@ -865,14 +868,28 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
    //else: processing this is temporarily blocked
 }
 
+// called by RETURN press
 void wxFolderListCtrl::OnActivated(wxListEvent& event)
 {
-   // called by RETURN press
    UIdType uid = GetUIdFromIndex(event.m_itemIndex);
-   if ( IsPreviewed(uid) )
+
+   if ( IsPreviewed(event.m_itemIndex) )
+   {
+      // see the comment near WXK_NEXT handler in OnChar()
+      if ( uid != m_uidScrolled )
+      {
+         m_FolderView->m_MessagePreview->PageDown();
+
+         m_uidScrolled = uid;
+      }
+
+      // just scroll down
       m_FolderView->m_MessagePreview->LineDown();
-   else
+   }
+   else // do preview
+   {
       m_FolderView->PreviewMessage(uid);
+   }
 }
 
 void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
@@ -993,12 +1010,18 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    // no item focused yet
    m_itemFocus = -1;
 
+   // no preview item neither
+   m_uidScrolled = UID_ILLEGAL;
+
+   // do create the control
    Create(parent, M_WXID_FOLDERVIEW_LISTCTRL,
           wxDefaultPosition, parent->GetClientSize(),
           wxLC_REPORT | wxNO_BORDER);
 
+   // set the initial column widths
    ReadColumnsInfo(m_profile, m_columns);
 
+   // and create columns after this
    CreateColumns();
 
    // create a drop target for dropping messages on us
@@ -2642,7 +2665,7 @@ wxFolderView::PreviewMessage(long uid)
    if ( (unsigned long)uid != m_previewUId )
    {
       // select the item we preview in the folder control
-      m_FolderCtrl->SelectFocused();
+      m_FolderCtrl->OnPreview();
 
       // show it in the preview window
       m_MessagePreview->ShowMessage(m_ASMailFolder, uid);
