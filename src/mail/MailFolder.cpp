@@ -338,6 +338,9 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
                cptr++;
             }
             cv->InsertText(str2);
+
+            // the inserted text comes from the program, not from the user
+            cv->ResetDirty();
          }
       }
       cv->Show(TRUE);
@@ -363,37 +366,86 @@ MailFolder::ReplyMessages(const INTARRAY *selections,
 
       if ( collapse != NoCollapse )
       {
+         // the default value of the reply prefix is "Re: ", yet we want to
+         // match something like "Re[2]: " in replies, so hack it a little
+         String replyPrefixWithoutColon(replyPrefix);
+         replyPrefixWithoutColon.Trim();
+         if ( replyPrefixWithoutColon.Last() == ':' )
+         {
+            // throw away last character
+            replyPrefixWithoutColon.Truncate(replyPrefixWithoutColon.Len() - 1);
+         }
+
+         // determine the reply level (level is 0 for first reply, 1 for the
+         // reply to the reply &c)
          size_t replyLevel = 0;
-         const char *pStart = subject.c_str();
+
+         // the search is case insensitive
+         wxString subjectLower(subject.Lower()),
+                  replyPrefixLower(replyPrefixWithoutColon.Lower());
+         const char *pStart = subjectLower.c_str();
          for ( ;; )
          {
-            const char *pMatch = strstr(pStart, replyPrefix);
+            // search for the standard string, for the configured string, and
+            // for the translation of the standard string (notice that the
+            // standard string should be in lower case because we transform
+            // everything to lower case)
+            static const char *replyPrefixStandard = gettext_noop("re");
+
+            size_t matchLen = 0;
+            const char *pMatch = strstr(pStart, replyPrefixLower);
+            if ( !pMatch )
+               pMatch = strstr(pStart, replyPrefixStandard);
+            else if ( !matchLen )
+               matchLen = replyPrefixLower.length();
+            if ( !pMatch )
+               pMatch = strstr(pStart, _(replyPrefixStandard));
+            else if ( !matchLen )
+               matchLen = strlen(replyPrefixStandard);
             if ( !pMatch )
                break;
+            else if ( !matchLen )
+               matchLen = strlen(_(replyPrefixStandard));
 
-            pStart = pMatch + replyPrefix.length();
+            pStart = pMatch + matchLen;
             replyLevel++;
          }
 
-         subject = pStart; // this is the start of real subject
+         if ( replyLevel == 1 )
+         {
+            // try to see if we don't have "Re[N]" string already
+            int replyLevelOld;
+            if ( sscanf(pStart, "[%d]", &replyLevelOld) == 1 ||
+                 sscanf(pStart, "(%d)", &replyLevelOld) == 1 )
+            {
+               replyLevel += replyLevelOld;
+            }
+         }
+
+         // skip spaces
+         while ( isspace(*pStart) )
+            pStart++;
+
+         // skip also the ":" after "Re" is there was one
+         if ( replyLevel > 0 && *pStart == ':' )
+         {
+            pStart++;
+
+            // ... and the spaces after ':' if any too
+            while ( isspace(*pStart) )
+               pStart++;
+         }
+
+         // this is the start of real subject
+         subject = subject.Mid(pStart - subjectLower.c_str());
 
          if ( collapse == SmartCollapse && replyLevel > 0 )
          {
-            // the default value of the reply prefix is "Re: ", yet we want to
-            // have something like "Re[2]: " in replies, so hack it a little
-            String replyPrefix2(replyPrefix);
-            replyPrefix2.Trim();
-            if ( replyPrefix2.Last() == ':' )
-            {
-               // throw away last character
-               replyPrefix2.Truncate(replyPrefix2.Len() - 1);
-            }
-
             // TODO not configurable enough, allow the user to specify the
             //      format string himself and also decide whether we use powers
             //      of 2, just multiply by 2 or nothing at all
             newSubject.Printf("%s[%d]: %s",
-                              replyPrefix2.c_str(),
+                              replyPrefixWithoutColon.c_str(),
                               2*replyLevel,
                               subject.c_str());
          }
