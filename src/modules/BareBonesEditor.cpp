@@ -63,7 +63,6 @@ extern const MOption MP_REPLY_MSGPREFIX;
 // ----------------------------------------------------------------------------
 
 extern const MPersMsgBox *M_MSGBOX_FORMAT_PARAGRAPH_BEFORE_EXIT;
-extern const MPersMsgBox *M_MSGBOX_LANG_CHANGED_WARN;
 extern const MPersMsgBox *M_MSGBOX_REMOVE_ALL_ATTACH;
 
 // ----------------------------------------------------------------------------
@@ -1223,8 +1222,6 @@ EditorContentPart *BareBonesEditor::GetFirstPart()
 {
    m_getNextAttachement = 0;
 
-   wxString text;
-
 #if wxUSE_WCHAR_T && defined(OS_WIN)
    wxFontEncoding encPart = wxFONTENCODING_SYSTEM;
    wxWCharBuffer wbuf = m_textControl->GetUnicodeText();
@@ -1252,82 +1249,16 @@ EditorContentPart *BareBonesEditor::GetFirstPart()
       }
    }
 
-   // if we hadn't had any user-specified encoding before, use the one we just
-   // found
-   if ( m_encoding == wxFONTENCODING_SYSTEM )
-   {
-      m_encoding = encPart;
-   }
-
    if ( encPart != wxFONTENCODING_SYSTEM )
    {
       // must do this first or we wouldn't get the data from MSW rich edit
       // control at all (it would try to convert text to the last set encoding
       // and drop any characters it can't convert)
       SetFontEncoding(encPart);
-
-      text = m_textControl->GetValue();
-
-      // we now know that we have the text in encoding encPart but that we want
-      // to send it out as m_encoding -- do we need to convert?
-      if ( encPart != m_encoding )
-      {
-         if ( encPart == wxFONTENCODING_UTF8 ||
-                  m_encoding == wxFONTENCODING_UTF8 )
-         {
-            // here encPart may only be UTF8 if more than one encoding or an
-            // unknown encoding was used, in either case we can't convert the
-            // text to a single non-Unicode charset, so use UTF8 as is
-            //
-            // of course, if it is m_encoding which is UTF8 we wanted to use it
-            // anyhow
-            text = wxConvUTF8.cWC2MB(wbuf);
-            encPart = wxFONTENCODING_UTF8;
-         }
-         else // 2 multibyte encodings
-         {
-            text = wxCSConv(encPart).cWC2MB(wbuf);
-
-            if ( encPart != m_encoding )
-            {
-               // is it possible to convert to the desired encoding?
-               wxEncodingConverter conv;
-               if ( wxEncodingConverter::GetAllEquivalents(encPart).
-                        Index(m_encoding) != wxNOT_FOUND &&
-                           conv.Init(encPart, m_encoding) )
-               {
-                  // yes, do it
-                  text = conv.Convert(text);
-                  encPart = m_encoding;
-               }
-               else // impossible to convert to the specified encoding
-               {
-                  // tell the user about it
-                  //
-                  // TODO: allow cancelling?
-                  MDialog_Message
-                  (
-                     wxString::Format
-                     (
-                        _("The selected language \"%s\" can't be used to "
-                          "send this message, \"%s\" will be used instead."),
-                        wxFontMapper::GetEncodingName(m_encoding).c_str(),
-                        wxFontMapper::GetEncodingName(encPart).c_str()
-                     ),
-                     m_notebook,
-                     M_MSGBOX_LANG_CHANGED_WARN
-                  );
-               }
-            }
-         }
-      }
    }
-   else // ASCII only, no problems
+
 #endif // wxUSE_WCHAR_T
-   {
-      text = m_textControl->GetValue();
-   }
-
+   wxString text = m_textControl->GetValue();
 
    // Translate LF to CRLF. All internal strings should have only LF, but
    // due to long bug tradition, many strings that contain messages have
