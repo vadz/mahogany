@@ -3759,6 +3759,8 @@ FilterRuleApply::UpdateProgressDialog()
    {
       if( !TreatAsJunk() )
          textPD += _T(" - ");
+      else
+         textPD += _T('\n');
       textPD += textExtra;
       
       if ( !m_pd->Update(m_idx, textPD) )
