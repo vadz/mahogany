@@ -28,6 +28,7 @@ class wxPHelper;
 #include <wx/combobox.h>
 #include <wx/splitter.h>
 #include <wx/listctrl.h>
+#include <wx/listbox.h>
 
 // ----------------------------------------------------------------------------
 // a helper class for persistent controls

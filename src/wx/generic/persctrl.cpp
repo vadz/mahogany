@@ -924,7 +924,9 @@ void wxPListBox::RestoreSelection()
             event.m_clientData = GetClientData(sel);
             event.m_commandString = GetString(sel);
             event.SetEventObject( this );
-            (void)ProcessCommand(event);
+#if __WXMSE__
+#error    (void)ProcessCommand(event);
+#endif
         }
 
         m_persist->RestorePath();

@@ -26,6 +26,7 @@
 #  include "MApplication.h"
 #  include "Profile.h"
 #  include "guidef.h"
+#  include "strutil.h"
 
 #  include <wx/combobox.h>
 #  include <wx/layout.h>
