@@ -17,28 +17,27 @@
 class WXDLLEXPORT wxMenu;
 class MFolder;
 
-/// there are no objects of this class, it is used only as namespace
 class wxFolderMenu
 {
 public:
-   /// returns a menu containing all folders (except the root one)
-   static wxMenu *Create();
+   // we're not ref counted (should we?), so use normal ctor/dtor
+   wxFolderMenu() { m_data = NULL; }
+   virtual ~wxFolderMenu();
+
+   /// get the "real" menu: you MUST Remove() it or call Detach() later
+   wxMenu *GetMenu() const;
 
    /// get an MFolder for the given menu id (caller must DecRef() it)
-   static MFolder *GetFolder(wxMenu *menu, int id);
+   MFolder *GetFolder(int id) const;
 
-   /// call this immediately after youfinished using the menu
-   static void Remove(wxMenu *menu);
-
-   /// save as Remove but will also delete the menu
-   static void Delete(wxMenu *menu);
+#ifdef __WXGTK__
+   /// detach us from the real menu, shouldn't be needed but for wxGTK bug
+   void Detach();
+#endif // __WXGTK__
 
 private:
-   // never used
-   wxFolderMenu();
-   ~wxFolderMenu();
-
-   GCC_DTOR_WARN_OFF
+   // implementation details
+   class wxFolderMenuData *m_data;
 };
 
 #endif // _M_GUI_FOLDERMENU_H_

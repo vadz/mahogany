@@ -277,7 +277,7 @@ public:
    void UpdateFocus();
 
    // for wxFolderView
-   wxMenu *GetFolderMenu() const { return m_menuFolders; }
+   wxFolderMenu *GetFolderMenu() const { return m_menuFolders; }
 
 protected:
    /// read the column width string from profile or default one
@@ -325,7 +325,10 @@ protected:
    wxMenu *m_menu;
 
    /// and the folder submenu for it
-   wxMenu *m_menuFolders;
+   wxFolderMenu *m_menuFolders;
+
+   /// flag to prevent reentrance in OnRightClick()
+   bool m_isInPopupMenu;
 
 private:
    // allow it to use EnableOnSelect()
@@ -807,23 +810,30 @@ void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
 void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
 {
    // PopupMenu() is very dangerous: it can send more messages before returning
-   // and so before we reset m_menuFolders - so we have to protect against it
-   // here
-   if ( m_menuFolders )
+   if ( m_isInPopupMenu )
    {
       return;
    }
 
-   // create popup menu if not done yet
+#ifdef __WXGTK__
+   // I've tried to cache the folder menu to avoid recreating it every time
+   // (which is quite time consuming) but this can't work because of wxGTK bug!
+   // Argh...
    if ( m_menu )
+   {
       delete m_menu;
+      m_menu = NULL;
+   }
 
-   m_menuFolders = wxFolderMenu::Create();
+   if ( m_menuFolders )
+   {
+      delete m_menuFolders;
+      m_menuFolders = NULL;
+   }
+#endif // __WXGTK__
 
-   m_menu = new wxMenu;
-   m_menu->Append(WXMENU_POPUP_FOLDER_MENU, _("&Quick move"), m_menuFolders);
-   m_menu->AppendSeparator();
-
+   // create popup menu if not done yet
+   if ( !m_menu )
    {
       static const int popupMenuEntries[] =
       {
@@ -849,6 +859,11 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
          WXMENU_MSG_SHOWRAWTEXT,
       };
 
+      m_menu = new wxMenu;
+
+      // the first item is going to be the quick move menu added below
+      m_menu->AppendSeparator();
+
       for ( size_t n = 0; n < WXSIZEOF(popupMenuEntries); n++ )
       {
          int id = popupMenuEntries[n];
@@ -856,10 +871,25 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
       }
    }
 
+   if ( !m_menuFolders )
+   {
+      m_menuFolders = new wxFolderMenu();
+   }
+
+   m_menu->Insert(0, WXMENU_POPUP_FOLDER_MENU, _("&Quick move"),
+                  m_menuFolders->GetMenu());
+
+   m_isInPopupMenu = true;
+
    PopupMenu(m_menu, event.GetX(), event.GetY());
 
-   wxFolderMenu::Remove(m_menuFolders);
-   m_menuFolders = NULL;
+   m_isInPopupMenu = false;
+
+#ifdef __WXGTK__
+   m_menuFolders->Detach();
+#else // !__WXGTK__
+   m_menu->Remove(WXMENU_POPUP_FOLDER_MENU);
+#endif // __WXGTK__/!__WXGTK__
 }
 
 void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
@@ -1079,8 +1109,10 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_FolderView = fv;
    m_Initialised = false;
    m_enableOnSelect = true;
-   m_menu =
+   m_menu = NULL;
    m_menuFolders = NULL;
+
+   m_isInPopupMenu = false;
 
    // no item focused yet
    m_itemFocus = -1;
@@ -1110,6 +1142,7 @@ wxFolderListCtrl::~wxFolderListCtrl()
 {
    m_profile->DecRef();
 
+   delete m_menuFolders;
    delete m_menu;
 }
 
@@ -2644,17 +2677,18 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          else if ( cmd >= WXMENU_POPUP_FOLDER_MENU )
          {
             // it might be a folder from popup menu
-            MFolder *folder = wxFolderMenu::GetFolder
-                              (
-                                 m_FolderCtrl->GetFolderMenu(),
-                                 cmd
-                              );
-            if ( folder )
+            wxFolderMenu *menu = m_FolderCtrl->GetFolderMenu();
+            if ( menu )
             {
-               GetSelections(selections);
-               SaveMessagesToFolder(selections, folder, true /* move */);
+               MFolder *folder = menu->GetFolder(cmd);
+               if ( folder )
+               {
+                  // it is, move messages there (it is "quick move" menu)
+                  GetSelections(selections);
+                  SaveMessagesToFolder(selections, folder, true /* move */);
 
-               folder->DecRef();
+                  folder->DecRef();
+               }
             }
          }
          break;

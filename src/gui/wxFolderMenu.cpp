@@ -1,7 +1,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Project:     M
-// File name:   gui/wxFolderMenu.cpp - CreateFolderMenu() implementation
-// Purpose:
+// File name:   gui/wxFolderMenu.cpp - wxFolderMenu implementation
+// Purpose:     we implement a wxMenu containing all folders in the folder tree
+//              here - it is currently used only by wxFolderView in its popup
+//              menu for "Quick move" but might be used elsewhere later
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     23.04.00
@@ -9,8 +11,6 @@
 // Copyright:   (c) 2000 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
-
-// TODO: cache the menu, only update it when folder create/delete events come
 
 // ============================================================================
 // declarations
@@ -25,27 +25,105 @@
 #ifndef USE_PCH
 #  include "Mcommon.h"
 
-#  include <wx/menu.h>
-
 #  include "gui/wxMenuDefs.h"
+
+#  include <wx/menu.h>
 #endif // USE_PCH
 
+#include "MEvent.h"
 #include "MFolder.h"
 
 #include "gui/wxFolderMenu.h"
 
 // ----------------------------------------------------------------------------
-// global data
+// wxFolderMenu private data
 // ----------------------------------------------------------------------------
 
-// so far we support having only one folder menu - this is ok as we only use
-// it in popup menus now and there is at most one of popup menus at a time.
-//
-// however, if we decide to change this, we can allow multiple menus without
-// changing the public API.
+class wxFolderMenuData : public MEventReceiver
+{
+public:
+   wxFolderMenuData()
+   {
+      m_eventCookie = MEventManager::Register(*this, MEventId_FolderTreeChange);
 
-static wxMenu *gs_menuFolders = NULL;
-static wxArrayString gs_folderNames;
+      m_menu = NULL;
+   }
+
+   virtual ~wxFolderMenuData()
+   {
+      MEventManager::Deregister(m_eventCookie);
+
+      ResetMenu();
+   }
+
+   // get the menu creating it if necessary
+   wxMenu *GetMenu()
+   {
+      if ( !m_menu )
+         CreateMenu();
+
+      return m_menu;
+   }
+
+   // get the folder names we used to create the menu the last time
+   const wxArrayString& GetFolderNames() const
+   {
+      // we must had created the menu first
+      ASSERT_MSG(!m_folderNames.IsEmpty(), "wxFolderMenuData used incorrectly");
+
+      return m_folderNames;
+   }
+
+#ifdef __WXGTK__
+   void Detach()
+   {
+      m_menu = NULL;
+   }
+#endif // __WXGTK__
+
+   // base class generic event handler
+   virtual bool OnMEvent(MEventData& data)
+   {
+      OnFolderTreeChangeEvent();
+
+      // continue processing the event
+      return TRUE;
+   }
+
+protected:
+   // create the full menu
+   void CreateMenu();
+
+   // forget the menu we have
+   void ResetMenu()
+   {
+      if ( m_menu )
+      {
+         delete m_menu;
+         m_menu = NULL;
+      }
+   }
+
+   // event handler for folder tree change events
+   void OnFolderTreeChangeEvent() { ResetMenu(); }
+
+private:
+   // CreateMenu() helper
+   void AddSubFoldersToMenu(wxString& folderName,
+                            MFolder *folder,
+                            wxMenu *menu,
+                            size_t& id);
+
+   // MEventManager cookie
+   void *m_eventCookie;
+
+   // the menu, if NULL it means we have to create it
+   wxMenu *m_menu;
+
+   // the names of the folders we have in the menu: array is indexed by the menu
+   // item ids offset by WXMENU_POPUP_FOLDER_MENU
+   wxArrayString m_folderNames;
+};
 
 // ============================================================================
 // implementation
@@ -56,15 +134,15 @@ static wxArrayString gs_folderNames;
 // ----------------------------------------------------------------------------
 
 // recursive helper for CreateFolderMenu
-static void AddSubFoldersToMenu(wxString& folderName,
-                                MFolder *folder,
-                                wxMenu *menu,
-                                size_t& id)
+void wxFolderMenuData::AddSubFoldersToMenu(wxString& folderName,
+                                           MFolder *folder,
+                                           wxMenu *menu,
+                                           size_t& id)
 {
    size_t nSubfolders = folder->GetSubfolderCount();
    for ( size_t n = 0; n < nSubfolders; n++ )
    {
-      MFolder *subfolder = folder->GetSubfolder(n);
+      MFolder_obj subfolder = folder->GetSubfolder(n);
       if ( !subfolder )
       {
          FAIL_MSG( "no subfolder?" );
@@ -77,7 +155,7 @@ static void AddSubFoldersToMenu(wxString& folderName,
       if ( (n == 0) && (folder->GetType() != MF_ROOT) )
       {
          menu->Append(WXMENU_POPUP_FOLDER_MENU + id++, folder->GetName());
-         gs_folderNames.Add(folderName);
+         m_folderNames.Add(folderName);
          menu->AppendSeparator();
       }
 
@@ -95,7 +173,7 @@ static void AddSubFoldersToMenu(wxString& folderName,
          // it's a simple menu item
          menu->Append(WXMENU_POPUP_FOLDER_MENU + id++, name);
       }
-      else // subfolders has more subfolders, make it a submenu
+      else // subfolder has more subfolders, make it a submenu
       {
          wxMenu *submenu = new wxMenu;
          AddSubFoldersToMenu(subfolderName, subfolder, submenu, id);
@@ -103,59 +181,67 @@ static void AddSubFoldersToMenu(wxString& folderName,
       }
 
       // in any case, add it to the id->name map
-      gs_folderNames.Add(subfolderName);
-
-      subfolder->DecRef();
+      m_folderNames.Add(subfolderName);
    }
 }
 
-// ----------------------------------------------------------------------------
-// public API
-// ----------------------------------------------------------------------------
-
-wxMenu *wxFolderMenu::Create()
+void wxFolderMenuData::CreateMenu()
 {
-   ASSERT_MSG( !gs_menuFolders && gs_folderNames.IsEmpty(),
-               "forgot to call wxFolderMenu::Remove()?" );
+   // get the root folder
+   MFolder_obj folder("");
 
-   MFolder *folder = MFolder::Get("");
-   gs_menuFolders = new wxMenu;
+   // and add all of its children to the menu recursively
+   m_menu = new wxMenu;
    size_t id = 0;
    wxString folderName;
-   AddSubFoldersToMenu(folderName, folder, gs_menuFolders, id);
-   folder->DecRef();
-
-   return gs_menuFolders;
+   AddSubFoldersToMenu(folderName, folder, m_menu, id);
 }
 
-MFolder *wxFolderMenu::GetFolder(wxMenu *menu, int id)
+// ----------------------------------------------------------------------------
+// public wxFolderMenu class
+// ----------------------------------------------------------------------------
+
+wxFolderMenu::~wxFolderMenu()
 {
-   CHECK( menu && menu == gs_menuFolders, NULL, "bad menu in wxFolderMenu::GetFolder" );
+   delete m_data;
+}
+
+wxMenu *wxFolderMenu::GetMenu() const
+{
+   if ( !m_data )
+   {
+      // const_cast
+      ((wxFolderMenu *)this)->m_data = new wxFolderMenuData;
+   }
+
+   return m_data->GetMenu();
+}
+
+MFolder *wxFolderMenu::GetFolder(int id) const
+{
+   CHECK( m_data, NULL, "must call wxFolderMenu::GetMenu() first" );
+
    ASSERT_MSG( id >= WXMENU_POPUP_FOLDER_MENU, "bad id in wxFolderMenu::GetFolder" );
 
-   id -= WXMENU_POPUP_FOLDER_MENU;
-   if ( id >= (int)gs_folderNames.GetCount() )
+   const wxArrayString& names = m_data->GetFolderNames();
+   size_t idx = (size_t)(id - WXMENU_POPUP_FOLDER_MENU);
+   if ( idx >= names.GetCount() )
    {
       // don't assert - just not our menu item
       return NULL;
    }
 
-   return MFolder::Get(gs_folderNames[(size_t)id]);
+   return MFolder::Get(names[idx]);
 }
 
-void wxFolderMenu::Remove(wxMenu *menu)
+#ifdef __WXGTK__
+
+void wxFolderMenu::Detach()
 {
-   ASSERT_MSG( menu == gs_menuFolders, "bad parameter in wxFolderMenu::Delete()" );
+   CHECK( m_data, NULL, "must call wxFolderMenu::GetMenu() first" );
 
-   gs_menuFolders = NULL;
-
-   gs_folderNames.Empty();
+   m_data->Detach();
 }
 
-void wxFolderMenu::Delete(wxMenu *menu)
-{
-   ASSERT_MSG( menu == gs_menuFolders, "bad parameter in wxFolderMenu::Delete()" );
+#endif // __WXGTK__
 
-   Remove(menu);
-   delete menu;
-}
