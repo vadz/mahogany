@@ -55,6 +55,8 @@
  * local classes
  *-------------------------------------------------------------------*/
 
+#define MF_LOGCIRCLE_SIZE   10
+
 MLogCircle
 MailFolder::ms_LogCircle(MF_LOGCIRCLE_SIZE);
 

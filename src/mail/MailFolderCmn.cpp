@@ -720,15 +720,15 @@ MailFolderCmn::ReplyMessages(const UIdArray *selections,
                              const MailFolder::Params& params,
                              MWindow *parent)
 {
-   Message *msg;
-
    int n = selections->Count();
    for( int i = 0; i < n; i++ )
    {
-      msg = GetMessage((*selections)[i]);
-      ReplyMessage(msg, params, GetProfile(), parent);
-      msg->DecRef();
-      //now done by composeView SetMessageFlag((*selections)[i], MailFolder::MSG_STAT_ANSWERED, true);
+      Message *msg = GetMessage((*selections)[i]);
+      if ( msg )
+      {
+         ReplyMessage(msg, params, GetProfile(), parent);
+         msg->DecRef();
+      }
    }
 }
 

@@ -19,6 +19,9 @@
 #   pragma interface "HeaderInfo.h"
 #endif
 
+/// type for user data
+typedef unsigned long FolderDataType;
+
 /**
    This class contains all the information about the message such as its
    (important) headers and its appearance parameters (colour, indent, font

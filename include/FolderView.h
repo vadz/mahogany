@@ -25,9 +25,6 @@ class FolderView : public MEventReceiver
 public:
    FolderView();
 
-   /// update the user interface
-   virtual void Update(class HeaderInfoList *list = NULL) = 0;
-
    /// deregister event handlers
    virtual void DeregisterEvents(void);
 

@@ -63,10 +63,7 @@ public:
    wxFolderView(wxWindow *parent);
 
    /// Destructor
-   ~wxFolderView();
-
-   /// update it
-   void  Update(class HeaderInfoList *listing = NULL);
+   virtual ~wxFolderView();
 
    /** Set the associated folder.
        @param folder the folder to display or NULL
@@ -99,7 +96,7 @@ public:
    void PrintPreviewMessages(UIdArray const &messages);
 
    /** For use by the listctrl: get last previewed uid: */
-   UIdType GetPreviewUId(void) const { return m_previewUId; }
+   UIdType GetPreviewUId(void) const { return m_uidPreviewed; }
 
    /** Are we previewing anything? */
    bool HasPreview() const { return GetPreviewUId() != UID_ILLEGAL; }
@@ -151,12 +148,16 @@ public:
    */
    bool HasSelection() const;
 
-   /** Gets an array containing the uids of the selected messages.
-       The number of selections is returned.
-       @param  selections Pass a pointer to an integer array, and do not deallocate the returned array.
-       @return number of selections.
+   /** Gets an array containing the uids of the selected messages. If there is
+       no selection, the array will contain the focused UID (if any)
+
+       @return the array of selections, may be empty
    */
-   int GetSelections(UIdArray &selections);
+   UIdArray GetSelections() const;
+
+   /** Get either the the currently focused message
+   */
+   UIdType GetFocus() const;
 
    /// Show a message in the preview window.
    void PreviewMessage(long uid);
@@ -164,7 +165,14 @@ public:
    /// Show the raw text of the specified message
    void ShowRawText(long uid);
 
-   void SetSize(const int x, const int y, const int width, int height);
+   /// [de]select all items
+   void SelectAll(bool on = true);
+
+   /// select all unread messages
+   void SelectAllUnread();
+
+   /// called by wxFolderListCtrl to drag abd drop messages
+   bool DragAndDropMessages();
 
    /// return the MWindow pointer:
    MWindow *GetWindow(void) const { return m_SplitterWindow; }
@@ -204,17 +212,8 @@ public:
    /// for use by the listctrl only:
    bool GetFocusFollowMode(void) const { return m_FocusFollowMode; }
 
-   /// [de]select all items
-   void SelectAll(bool on = true);
-
-   /// select all unread messages
-   void SelectAllUnread();
-
    /// called when the focused (== current) item in the listctrl changes
    void OnFocusChange(void);
-
-   /// called by wxFolderListCtrl to drag abd drop messages
-   bool DragAndDropMessages();
 
 protected:
    /** Save messages to a folder.
@@ -223,8 +222,14 @@ protected:
    */
    void SaveMessages(UIdArray const &messages, String const &file);
 
-   /// The last focused UId.
-   UIdType  m_FocusedUId;
+   /// update the view after new messages appeared in the folder
+   void Update();
+
+   /// set the currently previewed UID
+   void SetPreviewUID(UIdType uid);
+
+   /// invalidate the last previewed UID
+   void InvalidatePreviewUID() { SetPreviewUID(UID_ILLEGAL); }
 
 private:
    /// profile name
@@ -247,8 +252,11 @@ private:
    /// the preview window
    wxMessageView *m_MessagePreview;
 
-   /// UId of last previewed message
-   UIdType m_previewUId;
+   /// UId of last previewed message (may be UID_ILLEGAL)
+   UIdType m_uidPreviewed;
+
+   /// UId of the focused message, may be different from m_uidPreviewed!
+   UIdType m_uidFocused;
 
    /// semaphore to avoid duplicate calling of Update
    bool m_UpdateSemaphore;
@@ -328,14 +336,20 @@ private:
    /// handler of options change event, refreshes the view if needed
    void OnOptionsChange(MEventOptionsChangeData& event);
 
-   /// displays the specified header in the given position in the view
-   void SetEntry(const HeaderInfo *hi, size_t idx);
+   /// adds the entry to the list control
+   void AddEntry(const HeaderInfo *hi);
+
+   /// set the entry colour to correspond to its status
+   void SetEntryColour(size_t index, const HeaderInfo *hi);
 
    /// MEventManager reg info
    void *m_regOptionsChange;
 
    // allow it to access m_MessagePreview;
    friend class wxFolderListCtrl;
+
+   // allow it to call Update()
+   friend class FolderViewMessagesDropWhere;
 };
 
 // ----------------------------------------------------------------------------
@@ -362,7 +376,6 @@ public:
 
    // callbacks
    void OnCommandEvent(wxCommandEvent& event);
-   void OnSize(wxSizeEvent& event);
    void OnUpdateUI(wxUpdateUIEvent& event);
 
    /** This virtual method returns either NULL or a (not incref'd)

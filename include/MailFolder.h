@@ -36,9 +36,23 @@ class HeaderInfoList;
 #include <wx/dynarray.h>
 WX_DEFINE_ARRAY(UIdType, UIdArray);
 
-/// Long enough for file offsets or pointers
-#define FolderDataType unsigned long
+/// UIdArray which maintains its items always sorted
+WX_DEFINE_SORTED_ARRAY(UIdType, UIdArraySortedBase);
 
+/// the function used for comparing UIDs
+inline int CMPFUNC_CONV UIdCompareFunction(UIdType uid1, UIdType uid2)
+{
+   // an invalid UID is less than all the others
+   return uid1 == UID_ILLEGAL ? -1
+                              : uid2 == UID_ILLEGAL ? 1
+                                                    : (long)(uid1 - uid2);
+}
+
+class UIdArraySorted : public UIdArraySortedBase
+{
+public:
+   UIdArraySorted() : UIdArraySortedBase(UIdCompareFunction) { }
+};
 
 // forward declarations
 class FolderView;
@@ -48,8 +62,6 @@ class MFrame;
 class MWindow;
 class Message;
 
-
-#define MF_LOGCIRCLE_SIZE   10
 /** A small class to hold the last N log messages for analysis.
  */
 class MLogCircle

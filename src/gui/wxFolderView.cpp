@@ -72,6 +72,10 @@
 #include "MHelp.h"
 #include "miscutil.h"            // for UpdateTitleAndStatusBars
 
+#ifdef __WXGTK__
+   #define BROKEN_LISTCTRL
+#endif
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -101,6 +105,9 @@ static const char *FOLDER_LISTCTRL_WIDTHS_D = "60:300:200:80:80";
 
 // the trace mask for dnd messages
 #define M_TRACE_DND "msgdnd"
+
+// the trace mask for selection/focus handling
+#define M_TRACE_SELECTION "msgsel"
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -173,20 +180,32 @@ public:
    // return the string containing ':' separated columns widths
    String GetWidths() const;
 
-   // deletes all items from the control and recreates columns if necessary
-   void Clear(void);
+   // adds a new entry to the control, returns its index
+   long AddEntry(UIdType uid,
+                 const String &status,
+                 const String &sender,
+                 const String &subject,
+                 const String &date,
+                 const String &size);
 
-   // sets or adds an entry
+   // modifies the existing entry
    void SetEntry(long index,
-                 String const &status,
-                 String const &sender,
-                 String const &subject,
-                 String const &date,
-                 String const &size);
+                 const String &status,
+                 const String &sender,
+                 const String &subject,
+                 const String &date,
+                 const String &size);
+
+   // changes the status of the existing entry
+   void SetEntryStatus(long index, const String& status);
 
    /// [de]select the given item
    void Select(long index, bool on = true)
-      { SetItemState(index, on ? wxLIST_STATE_SELECTED : 0, wxLIST_STATE_SELECTED); }
+   {
+      SetItemState(index,
+                   on ? wxLIST_STATE_SELECTED : 0,
+                   wxLIST_STATE_SELECTED);
+   }
 
    /// select the item currently focused
    void SelectFocused() { Select(GetFocusedItem(), true); }
@@ -213,14 +232,13 @@ public:
    bool IsUIdPreviewed(UIdType uid) const
       { return m_FolderView->GetPreviewUId() == uid; }
 
-   /**
-     if nofocused == true the focused entry will not be substituted
-     for an empty list of selections
-   */
-   int GetSelections(UIdArray &selections, bool nofocused = false) const;
-
    /// get the UID of the given item
-   UIdType GetUIdFromIndex(long item) const;
+   UIdType GetUIdFromIndex(long item) const
+   {
+      CHECK( item < GetItemCount(), UID_ILLEGAL, "invalid listctrl index" );
+
+      return (UIdType)GetItemData(item);
+   }
 
    /// get the UID and, optionally, the index of the focused item
    UIdType GetFocusedUId(long *idx = NULL) const;
@@ -237,6 +255,12 @@ public:
 
    /// get the item being previewed
    long GetPreviewedItem() const { return m_itemPreviewed; }
+
+   /// get the selected items (use the focused one if no selection)
+   UIdArray GetSelectionsOrFocus() const;
+
+   /// return true if we have either selection or valid focus
+   bool HasSelection() const;
 
    /// @name the event handlers
    //@{
@@ -339,6 +363,11 @@ protected:
 
    /// flag to prevent reentrance in OnRightClick()
    bool m_isInPopupMenu;
+
+#ifdef BROKEN_LISTCTRL
+   /// flag used in UpdateFocus() to work around wxListCtrl bug in wxGTK
+   bool m_suppressFocusTracking;
+#endif // BROKEN_LISTCTRL
 
 private:
    // allow it to use EnableOnSelect()
@@ -577,15 +606,13 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
    long key = event.KeyCode();
    if ( key == WXK_F1 ) // help
    {
-      mApplication->Help(MH_FOLDER_VIEW_KEYBINDINGS,
-                         m_FolderView->GetWindow());
+      mApplication->Help(MH_FOLDER_VIEW_KEYBINDINGS, m_FolderView->GetWindow());
       event.Skip();
       return;
    }
 
    // we can operate either on all selected items
-   UIdArray selections;
-   m_FolderView->GetSelections(selections);
+   const UIdArray& selections = m_FolderView->GetSelections();
 
    // get the focused item
    long focused = GetFocusedItem();
@@ -906,35 +933,31 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
 void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
 {
    // there is exactly one item with the focus on it
-   long focused = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
+   long focused = GetFocusedItem();
 
    // this would be a wxWin bug
    CHECK_RET( focused != -1, "activated unfocused item?" );
 
    // show the focused message
-   HeaderInfoList_obj hil = m_FolderView->GetFolder()->GetHeaders();
-   CHECK_RET(hil, "no header listing in wxFolderListCtrl");
-
-   const HeaderInfo *hi = hil[focused];
-   if ( hi )
+   UIdType uid = GetUIdFromIndex(focused);
+   if ( m_PreviewOnSingleClick )
    {
-      UIdType focused_uid = hi->GetUId();
-      if ( m_PreviewOnSingleClick )
-      {
-         // view on double click then
-         new wxMessageViewFrame(m_FolderView->GetFolder(),
-                                focused_uid, m_FolderView);
-      }
-      else // preview on double click
-      {
-         m_FolderView->PreviewMessage(focused_uid);
-      }
+      // view on double click then
+      new wxMessageViewFrame(m_FolderView->GetFolder(), uid, m_FolderView);
+   }
+   else // preview on double click
+   {
+      m_FolderView->PreviewMessage(uid);
    }
 }
 
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
    mApplication->UpdateAwayMode();
+
+   long item = event.m_itemIndex;
+
+   wxLogTrace(M_TRACE_SELECTION, "%ld was selected", item);
 
    UpdateUniqueSelFlag();
 
@@ -947,7 +970,7 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
       // only preview the message when it is the first one we select,
       // selecting subsequent messages just extends the selection but doesn't
       // show them
-      if ( m_selIsUnique && (event.m_itemIndex == m_itemFocus) )
+      if ( m_selIsUnique && (item == m_itemFocus) )
       {
          // the current message is selected - view it if we don't yet
          m_FolderView->PreviewMessage(GetFocusedUId());
@@ -1139,7 +1162,12 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
 
    // there is no "focus change" event in wxListCtrl so we have to track it
    // ourselves
-   UpdateFocus();
+#ifdef BROKEN_LISTCTRL
+   if ( !m_suppressFocusTracking )
+#endif // BROKEN_LISTCTRL
+   {
+      UpdateFocus();
+   }
 
    event.Skip();
 }
@@ -1159,6 +1187,10 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_menuFolders = NULL;
 
    m_isInPopupMenu = false;
+
+#ifdef BROKEN_LISTCTRL
+   m_suppressFocusTracking = false;
+#endif // BROKEN_LISTCTRL
 
    // no item focused yet
    m_itemFocus = -1;
@@ -1227,44 +1259,6 @@ wxString wxFolderListCtrl::GetColWidths() const
    return widthsString;
 }
 
-int
-wxFolderListCtrl::GetSelections(UIdArray &selections, bool nofocused) const
-{
-   selections.Empty();
-   ASMailFolder *asmf = m_FolderView->GetFolder();
-
-   if ( asmf )
-   {
-      long item = -1;
-      HeaderInfoList_obj hil = asmf->GetHeaders();
-      const HeaderInfo *hi = NULL;
-      if ( hil )
-      {
-         long count = hil->Count();
-         while( ((item = GetNextSelected(item)) != -1) && item < count )
-         {
-            hi = hil[item];
-            if ( hi )
-               selections.Add(hi->GetUId());
-         }
-
-         // If none is selected, use the focused entry
-         if( selections.Count() == 0 && !nofocused )
-         {
-            item = GetFocusedItem();
-            if ( item != -1 && item < count )
-            {
-               hi = hil[item];
-               if ( hi )
-                  selections.Add(hi->GetUId());
-            }
-         }
-      }
-   }
-
-   return selections.Count();
-}
-
 void wxFolderListCtrl::Focus(long index)
 {
    SetItemState(index, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
@@ -1278,7 +1272,16 @@ void wxFolderListCtrl::Focus(long index)
       // we don't want any events come here while we're inside EnsureVisible()
       MEventManagerSuspender noEvents;
 
+#ifdef BROKEN_LISTCTRL
+      // EnsureVisible() shouldn't call our OnIdle!
+      m_suppressFocusTracking = true;
+#endif // BROKEN_LISTCTRL
+
       EnsureVisible(index);
+
+#ifdef BROKEN_LISTCTRL
+      m_suppressFocusTracking = false;
+#endif // BROKEN_LISTCTRL
    }
 #endif // wxWin >= 2.2.6
 }
@@ -1305,6 +1308,34 @@ long wxFolderListCtrl::GetUniqueSelection() const
    return item;
 }
 
+UIdArray
+wxFolderListCtrl::GetSelectionsOrFocus() const
+{
+   UIdArray uids;
+
+   long item = GetNextSelected(-1);
+   while ( item != -1 )
+   {
+      uids.Add(GetItemData(item));
+
+      item = GetNextSelected(item);
+   }
+
+   // if no selection, use the focused item
+   if ( uids.IsEmpty() )
+   {
+      uids.Add(GetFocusedUId());
+   }
+
+   return uids;
+}
+
+bool
+wxFolderListCtrl::HasSelection() const
+{
+   return GetNextSelected(-1) != -1 || GetFocusedItem() != -1;
+}
+
 UIdType
 wxFolderListCtrl::GetFocusedUId(long *idx) const
 {
@@ -1312,33 +1343,7 @@ wxFolderListCtrl::GetFocusedUId(long *idx) const
    if ( idx )
       *idx = item;
 
-   return GetUIdFromIndex(item);
-}
-
-UIdType
-wxFolderListCtrl::GetUIdFromIndex(long item) const
-{
-   UIdType uid = UID_ILLEGAL;
-   ASMailFolder *asmf = m_FolderView->GetFolder();
-   if ( asmf )
-   {
-      HeaderInfoList_obj hil = asmf->GetHeaders();
-
-      // do we have the listing?
-      if ( hil )
-      {
-         size_t nMessages = hil->Count();
-
-         // we need to compare with nMessages because the listing might have
-         // been already updated and messages could have been deleted from it
-         if ( item != -1 && (unsigned long)item < nMessages )
-         {
-            uid = hil[item]->GetUId();
-         }
-      }
-   }
-
-   return uid;
+   return item == -1 ? UID_ILLEGAL : GetUIdFromIndex(item);
 }
 
 void wxFolderListCtrl::CreateColumns()
@@ -1416,41 +1421,54 @@ void wxFolderListCtrl::ApplyOptions(const wxColour &fg, const wxColour &bg,
    }
 }
 
-void
-wxFolderListCtrl::Clear(void)
+long
+wxFolderListCtrl::AddEntry(UIdType uid,
+                           const String &status,
+                           const String &sender,
+                           const String &subject,
+                           const String &date,
+                           const String &size)
 {
-   DeleteAllItems();
+   // the item label is the value of the first column
+   String label;
+   switch ( GetColumnByIndex(m_columns, 0) )
+   {
+      case WXFLC_STATUS:   label = status;  break;
+      case WXFLC_FROM:     label = sender;  break;
+      case WXFLC_DATE:     label = date;    break;
+      case WXFLC_SIZE:     label = size;    break;
+      case WXFLC_SUBJECT:  label = subject; break;
+
+      default:
+         wxFAIL_MSG( "unknown column" );
+   }
+
+   // add the item
+   long index = GetItemCount();
+   InsertItem(index, label);
+
+   // store the UID with the item
+   SetItemData(index, (long)uid);
+
+   // set the other columns
+   SetEntry(index, status, sender, subject, date, size);
+
+   // return the index of the new item
+   return index;
 }
 
 void
 wxFolderListCtrl::SetEntry(long index,
-                           String const &status,
-                           String const &sender,
-                           String const &subject,
-                           String const &date,
-                           String const &size)
+                           const String &status,
+                           const String &sender,
+                           const String &subject,
+                           const String &date,
+                           const String &size)
 {
-   if ( index >= GetItemCount() )
-   {
-      // the item label is the value of the first column
-      String label;
-      switch ( GetColumnByIndex(m_columns, 0) )
-      {
-         case WXFLC_STATUS:   label = status;  break;
-         case WXFLC_FROM:     label = sender;  break;
-         case WXFLC_DATE:     label = date;    break;
-         case WXFLC_SIZE:     label = size;    break;
-         case WXFLC_SUBJECT:  label = subject; break;
+   ASSERT_MSG( index < GetItemCount(), "invalid index in wxFolderListCtrl" );
 
-         default:
-            wxFAIL_MSG( "unknown column" );
-      }
+   SetEntryStatus(index, status);
 
-      InsertItem(index, label);
-   }
-
-   if ( m_columns[WXFLC_STATUS] != -1 )
-      SetItem(index, m_columns[WXFLC_STATUS], status);
    if ( m_columns[WXFLC_FROM] != -1 )
       SetItem(index, m_columns[WXFLC_FROM], sender);
    if ( m_columns[WXFLC_DATE] != -1 )
@@ -1459,6 +1477,13 @@ wxFolderListCtrl::SetEntry(long index,
       SetItem(index, m_columns[WXFLC_SIZE], size);
    if ( m_columns[WXFLC_SUBJECT] != -1 )
       SetItem(index, m_columns[WXFLC_SUBJECT], subject);
+}
+
+void
+wxFolderListCtrl::SetEntryStatus(long index, const String& status)
+{
+   if ( m_columns[WXFLC_STATUS] != -1 )
+      SetItem(index, m_columns[WXFLC_STATUS], status);
 }
 
 bool
@@ -1549,13 +1574,14 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
    m_SetFolderSemaphore = true;
 
-   m_FocusedUId = UID_ILLEGAL;
-
    // this shows what's happening:
    m_MessagePreview->Clear();
-   m_previewUId = UID_ILLEGAL;
+
+   // reset them as they don't make sense for the new folder
+   InvalidatePreviewUID();
+
    if ( recreateFolderCtrl )
-      m_FolderCtrl->Clear();
+      m_FolderCtrl->DeleteAllItems();
 
    SafeIncRef(mf);
 
@@ -1621,7 +1647,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          m_Profile = Profile::CreateEmptyProfile(mApplication->GetProfile());
 
       m_MessagePreview->SetParentProfile(m_Profile);
-      m_previewUId = UID_ILLEGAL;
+      InvalidatePreviewUID();
 
       // read in our profile settigns
       ReadProfileSettings(&m_settings);
@@ -1658,12 +1684,14 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       //       to allow us to detect if the folder is already opened or not,
       //       or add a method to MEventManager to detect if the event is
       //       already in the queue
-#if 0
-      // dispatch any update folder events in the queue
+      //
+      // For now, let it process the event if there is any and if not, update
+      // manually
       MEventManager::DispatchPending();
-#else
-      Update();
-#endif
+      if ( m_NumOfMessages == 0 )
+      {
+         Update();
+      }
 
       // select some "interesting" message initially: the logic here is a bit
       // hairy, but, hopefully, this does what expected.
@@ -1757,7 +1785,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
 
    m_NumOfMessages =
    m_nDeleted = 0;
-   m_previewUId = UID_ILLEGAL;
+   InvalidatePreviewUID();
 
    m_Profile = Profile::CreateEmptyProfile(mApplication->GetProfile());
    m_SplitterWindow = new wxFolderSplitterWindow(m_Parent);
@@ -1776,8 +1804,6 @@ wxFolderView::wxFolderView(wxWindow *parent)
                                        m_Parent->GetClientSize().y/3);
    m_SplitterWindow->SetMinimumPaneSize(10);
    m_SplitterWindow->SetFocus();
-
-   m_FocusedUId = UID_ILLEGAL;
 }
 
 wxFolderView::~wxFolderView()
@@ -1913,7 +1939,7 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
                                   m_settings.font,
                                   m_settings.size,
                                   m_settings.columns);
-      m_FolderCtrl->Clear();
+      m_FolderCtrl->DeleteAllItems();
       m_NumOfMessages =
       m_nDeleted = 0;
       Update();
@@ -1924,7 +1950,7 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
 
 
 void
-wxFolderView::SetEntry(const HeaderInfo *hi, size_t index)
+wxFolderView::AddEntry(const HeaderInfo *hi)
 {
    String subject = wxString(' ', 3*hi->GetIndentation()) + hi->GetSubject();
    String sender = hi->GetFrom();
@@ -1994,16 +2020,19 @@ wxFolderView::SetEntry(const HeaderInfo *hi, size_t index)
 
    int status = hi->GetStatus();
    String strStatus = MailFolder::ConvertMessageStatusToString(hi->GetStatus());
-   m_FolderCtrl->SetEntry(index,
-                          strStatus,
-                          sender,
-                          subject,
-                          strutil_ftime(hi->GetDate(),
-                                        m_settings.dateFormat,
-                                        m_settings.dateGMT),
-                          MailFolder::SizeToString(hi->GetSize(),
-                                                   hi->GetLines(),
-                                                   m_settings.showSize));
+   int index = m_FolderCtrl->AddEntry
+                             (
+                              hi->GetUId(),
+                              strStatus,
+                              sender,
+                              subject,
+                              strutil_ftime(hi->GetDate(),
+                                            m_settings.dateFormat,
+                                            m_settings.dateGMT),
+                              MailFolder::SizeToString(hi->GetSize(),
+                                                       hi->GetLines(),
+                                                       m_settings.showSize)
+                             );
 
    if ( status & MailFolder::MSG_STAT_DELETED )
    {
@@ -2015,6 +2044,25 @@ wxFolderView::SetEntry(const HeaderInfo *hi, size_t index)
    info.m_itemId = index;
    m_FolderCtrl->GetItem(info);
 
+   if ( encoding != wxFONTENCODING_SYSTEM )
+   {
+      wxFont font = m_FolderCtrl->GetFont();
+      font.SetEncoding(encoding);
+      info.SetFont(font);
+   }
+
+   m_FolderCtrl->SetItem(info);
+
+   SetEntryColour(index, hi);
+}
+
+void
+wxFolderView::SetEntryColour(size_t index, const HeaderInfo *hi)
+{
+   wxListItem info;
+   info.m_itemId = index;
+   m_FolderCtrl->GetItem(info);
+
    wxColour col;
    if ( !hi->GetColour().empty() ) // entry has its own colour setting
    {
@@ -2022,6 +2070,8 @@ wxFolderView::SetEntry(const HeaderInfo *hi, size_t index)
    }
    else // set the colour depending on the status of the message
    {
+      int status = hi->GetStatus();
+
       if ( status & MailFolder::MSG_STAT_FLAGGED )
          col = m_settings.FlaggedCol;
       else if ( status & MailFolder::MSG_STAT_DELETED )
@@ -2035,23 +2085,17 @@ wxFolderView::SetEntry(const HeaderInfo *hi, size_t index)
          col = m_settings.FgCol;
    }
 
-   if ( col.Ok() )
+   if ( col.Ok() && col != info.GetTextColour() )
+   {
       info.SetTextColour(col);
 
-   if ( encoding != wxFONTENCODING_SYSTEM )
-   {
-      wxFont font = m_FolderCtrl->GetFont();
-      font.SetEncoding(encoding);
-      info.SetFont(font);
+      m_FolderCtrl->SetItem(info);
    }
-
-   m_FolderCtrl->SetItem(info);
 }
 
 
-
 void
-wxFolderView::Update(HeaderInfoList *listing)
+wxFolderView::Update()
 {
    if ( !m_ASMailFolder )
       return;
@@ -2065,29 +2109,20 @@ wxFolderView::Update(HeaderInfoList *listing)
    // events can just be lost like this
    CHECK_RET( !m_UpdateSemaphore, "reentrancy in wxFolderView::Update" );
 
+   HeaderInfoList_obj listing = m_ASMailFolder->GetHeaders();
+   if ( !listing )
+   {
+      return;
+   }
+
    m_UpdateSemaphore = true;
 
    MFrame *frameOld = m_MailFolder->SetInteractiveFrame(m_Frame);
 
-   if(! listing )
-   {
-      listing = m_ASMailFolder->GetHeaders();
-
-      if ( !listing )
-      {
-         m_UpdateSemaphore = false;
-         return;
-      }
-   }
-   else
-   {
-      listing->IncRef();
-   }
-
-   size_t nMessagesNew = listing->Count();
+   size_t numMessages = listing->Count();
 
    static const size_t THRESHOLD = 100;
-   if ( nMessagesNew > THRESHOLD )
+   if ( numMessages > THRESHOLD )
    {
       wxBeginBusyCursor();
 #ifdef __WXMSW__
@@ -2095,56 +2130,45 @@ wxFolderView::Update(HeaderInfoList *listing)
 #endif
    }
 
-   // preserve the previously focused item and, if possible, the selection
-   long selOld = m_FolderCtrl->GetUniqueSelection();
+   wxLogTrace(M_TRACE_SELECTION, "recreating the listctrl from Update()");
+
+   // completely repopulate the control
+   m_FolderCtrl->DeleteAllItems();
+
+   // this will reset m_uidFocused
+   OnFocusChange();
 
    // which message should be focused after update? notice that we can *not*
    // keep the old index because the position of the message might have changed
    // because of sorting/threading
-   //
-   // if focusedIndex == -1 it means that the previously focused message has
-   // disappeared
-   long focusedIndex = -1;
-
-   // when the messages are deleted we don't call Update() any longer but delete
-   // them directly from OnFolderExpungeEvent()
-   ASSERT_MSG( nMessagesNew >= (size_t)m_NumOfMessages,
-               "Update() shouldn't be called" );
+   bool searchForFocus = m_uidPreviewed != UID_ILLEGAL;
 
    // fill the list control
-   HeaderInfo const *hi;
-   for ( size_t i = 0; i < nMessagesNew; i++ )
+   const HeaderInfo *hi;
+   for ( size_t i = 0; i < numMessages; i++ )
    {
-      hi = (*listing)[i];
-      SetEntry(hi, i);
+      hi = listing[i];
 
-      // if haven't found it yet ...
-      if ( focusedIndex == -1 )
+      // this adds it to the list control
+      AddEntry(hi);
+
+      // if we haven't found it yet ...
+      if ( searchForFocus )
       {
          // ... try to find the previously focused item
-         if ( hi->GetUId() == m_FocusedUId )
+         if ( hi->GetUId() == m_uidPreviewed )
          {
-            focusedIndex = i;
+            searchForFocus = false;
+
+            m_FolderCtrl->Focus(i);
+            m_FolderCtrl->Select(i);
          }
-      }
-   }
-
-   if ( focusedIndex != -1 )
-   {
-      ASSERT_MSG( (size_t)focusedIndex < nMessagesNew, "invalid focused index" );
-
-      m_FolderCtrl->Focus(focusedIndex);
-
-      if ( selOld != -1 )
-      {
-         // select focused item, not selOld, as items were shifted
-         m_FolderCtrl->SelectFocused();
       }
    }
 
    UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
 
-   if ( nMessagesNew > THRESHOLD )
+   if ( numMessages > THRESHOLD )
    {
 #ifdef __WXMSW__
       m_FolderCtrl->Show();
@@ -2153,15 +2177,17 @@ wxFolderView::Update(HeaderInfoList *listing)
       wxEndBusyCursor();
    }
 
-   m_NumOfMessages = nMessagesNew;
-   listing->DecRef();
+   m_NumOfMessages = numMessages;
 
-   // clear the preview window if the focused message disappeared
-   if ( focusedIndex == -1 )
+   // clear the preview window if the focused message disappeared: this happens
+   // only if we didn't find it above (notice that if there was no preview
+   // message to start with, we have nothing to do here)
+   if ( searchForFocus )
    {
       m_MessagePreview->Clear();
-      m_previewUId = UID_ILLEGAL;
+      InvalidatePreviewUID();
    }
+   //else: it is still there
 
    m_UpdateSemaphore = false;
 
@@ -2170,7 +2196,7 @@ wxFolderView::Update(HeaderInfoList *listing)
 
 
 MailFolder *
-wxFolderView::OpenFolder(String const &profilename)
+wxFolderView::OpenFolder(const String &profilename)
 {
    MFolder_obj folder(profilename);
    if ( !folder.IsOk() )
@@ -2345,37 +2371,6 @@ wxFolderView::SearchMessages(void)
    }
 }
 
-void
-wxFolderView::OnFocusChange(void)
-{
-   long idx;
-   UIdType uid = m_FolderCtrl->GetFocusedUId(&idx);
-   if ( uid != m_FocusedUId )
-   {
-      m_FocusedUId = uid;
-
-      if ( READ_CONFIG(m_Profile, MP_FVIEW_STATUS_UPDATE) )
-      {
-         String msg;
-         if ( m_FocusedUId != UID_ILLEGAL )
-         {
-            HeaderInfoList_obj hil = GetFolder()->GetHeaders();
-            if ( hil )
-            {
-               wxString fmt = READ_CONFIG(m_Profile, MP_FVIEW_STATUS_FMT);
-               HeaderVarExpander expander(hil[idx],
-                                          m_settings.dateFormat,
-                                          m_settings.dateGMT);
-               msg = ParseMessageTemplate(fmt, expander);
-            }
-         }
-
-         wxLogStatus(m_Frame, msg);
-      }
-      //else: no status message
-   }
-}
-
 void wxFolderView::ExpungeMessages()
 {
    if ( m_nDeleted )
@@ -2419,8 +2414,6 @@ void wxFolderView::SelectAll(bool on)
 void
 wxFolderView::OnCommandEvent(wxCommandEvent &event)
 {
-   UIdArray selections;
-
    int cmd = event.GetId();
 
    // first process commands which can be reduced to other commands
@@ -2473,11 +2466,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          break;
 
       case WXMENU_MSG_SHOWRAWTEXT:
-         GetSelections(selections);
-         if ( selections.Count() > 0 )
-         {
-            ShowRawText(selections[0]);
-         }
+         ShowRawText(GetFocus());
          break;
 
       case WXMENU_LAYOUT_LCLICK:
@@ -2491,23 +2480,19 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          break;
 
       case WXMENU_MSG_OPEN:
-         GetSelections(selections);
-         OpenMessages(selections);
+         OpenMessages(GetSelections());
          break;
 
       case WXMENU_MSG_SAVE_TO_FOLDER:
-         GetSelections(selections);
-         SaveMessagesToFolder(selections);
+         SaveMessagesToFolder(GetSelections());
          break;
 
       case WXMENU_MSG_MOVE_TO_FOLDER:
-         GetSelections(selections);
-         SaveMessagesToFolder(selections, NULL, true);
+         SaveMessagesToFolder(GetSelections(), NULL, true);
          break;
 
       case WXMENU_MSG_SAVE_TO_FILE:
-         GetSelections(selections);
-         SaveMessagesToFile(selections);
+         SaveMessagesToFile(GetSelections());
          break;
 
       case WXMENU_MSG_REPLY:
@@ -2516,7 +2501,8 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
             int flags = cmd == WXMENU_MSG_FOLLOWUP ? MailFolder::REPLY_FOLLOWUP
                                                    : 0;
 
-            GetSelections(selections);
+            UIdArray selections = GetSelections();
+
             m_TicketList->Add(
                m_ASMailFolder->ReplyMessages(
                                              &selections,
@@ -2529,44 +2515,53 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          break;
 
       case WXMENU_MSG_FORWARD:
-         GetSelections(selections);
-         m_TicketList->Add(
-               m_ASMailFolder->ForwardMessages(
-                                               &selections,
-                                               MailFolder::Params(templ),
-                                               m_Frame,
-                                               this
-                                              )
-            );
-         break;
-
-      case WXMENU_MSG_QUICK_FILTER:
-         GetSelections(selections);
-         if ( selections.Count() > 0 )
          {
-            // create a filter for the (first of) currently selected message(s)
-            m_TicketList->Add(m_ASMailFolder->GetMessage(selections[0], this));
+            UIdArray selections = GetSelections();
+
+            m_TicketList->Add(
+                  m_ASMailFolder->ForwardMessages(
+                                                  &selections,
+                                                  MailFolder::Params(templ),
+                                                  m_Frame,
+                                                  this
+                                                 )
+               );
          }
          break;
 
+      case WXMENU_MSG_QUICK_FILTER:
+         // create a filter for the (first of) currently selected message(s)
+         m_TicketList->Add(
+               m_ASMailFolder->GetMessage(GetFocus(), this)
+            );
+         break;
+
       case WXMENU_MSG_FILTER:
-         GetSelections(selections);
-         m_TicketList->Add(m_ASMailFolder->ApplyFilterRules(&selections, this));
+         {
+            UIdArray selections = GetSelections();
+
+            m_TicketList->Add(
+                  m_ASMailFolder->ApplyFilterRules(&selections, this)
+               );
+         }
          break;
 
       case WXMENU_MSG_UNDELETE:
-         GetSelections(selections);
-         m_TicketList->Add(m_ASMailFolder->UnDeleteMessages(&selections, this));
+         {
+            UIdArray selections = GetSelections();
+
+            m_TicketList->Add(
+                  m_ASMailFolder->UnDeleteMessages(&selections, this)
+               );
+         }
          break;
 
       case WXMENU_MSG_DELETE:
-         GetSelections(selections);
-         DeleteOrTrashMessages(selections);
+         DeleteOrTrashMessages(GetSelections());
          break;
 
       case WXMENU_MSG_FLAG:
-         GetSelections(selections);
-         ToggleMessages(selections);
+         ToggleMessages(GetSelections());
          break;
 
       case WXMENU_MSG_NEXT_UNREAD:
@@ -2574,20 +2569,17 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          break;
 
       case WXMENU_MSG_PRINT:
-         GetSelections(selections);
-         PrintMessages(selections);
+         PrintMessages(GetSelections());
          break;
 
 #ifdef USE_PS_PRINTING
       case WXMENU_MSG_PRINT_PS:
-         //FIXME GetSelections(selections);
-         //FIXME PrintMessages(selections);
+         //FIXME PrintMessages(GetSelections());
          break;
 #endif // USE_PS_PRINTING
 
       case WXMENU_MSG_PRINT_PREVIEW:
-         GetSelections(selections);
-         PrintPreviewMessages(selections);
+         PrintPreviewMessages(GetSelections());
          break;
 
       case WXMENU_MSG_SELECTUNREAD:
@@ -2644,8 +2636,6 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          break;
 
       case WXMENU_MSG_SAVEADDRESSES:
-         GetSelections(selections);
-
          // this is probably not the way it should be done, but I don't know
          // how to get the folder to do all this synchronously otherwise -
          // and I don't think this operation gains anything from being async
@@ -2655,6 +2645,8 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
 
             MailFolder *mf = m_ASMailFolder->GetMailFolder();
             CHECK_RET( mf, "message preview without folder?" );
+
+            const UIdArray& selections = GetSelections();
 
             // extract all addresses from the selected messages to this array
             wxSortedArrayString addressesSorted;
@@ -2693,12 +2685,10 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
 
 #ifdef EXPERIMENTAL_show_uid
       case WXMENU_MSG_SHOWUID:
-         GetSelections(selections);
-         if ( selections.Count() > 0 )
          {
             MailFolder *mf = m_ASMailFolder->GetMailFolder();
 
-            String uidString = mf->GetMessageUID(selections[0u]);
+            String uidString = mf->GetMessageUID(GetFocus());
             if ( uidString.empty() )
                wxLogWarning("This message doesn't have a valid UID.");
             else
@@ -2726,8 +2716,7 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
                if ( folder )
                {
                   // it is, move messages there (it is "quick move" menu)
-                  GetSelections(selections);
-                  SaveMessagesToFolder(selections, folder, true /* move */);
+                  SaveMessagesToFolder(GetSelections(), folder, true /* move */);
 
                   folder->DecRef();
                }
@@ -2737,34 +2726,74 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       }
 }
 
+// ----------------------------------------------------------------------------
+// selection/focus management
+// ----------------------------------------------------------------------------
+
 void
-wxFolderView::SetSize(const int x, const int y,
-                      const int width, int height)
+wxFolderView::OnFocusChange(void)
 {
-   if(m_SplitterWindow)
-      m_SplitterWindow->SetSize( x, y, width, height );
+   long idx;
+   UIdType uid = m_FolderCtrl->GetFocusedUId(&idx);
+
+   if ( uid != m_uidFocused )
+   {
+      wxLogTrace(M_TRACE_SELECTION, "item %ld (uid = %lx) is now focused",
+                 idx, uid);
+
+      m_uidFocused = uid;
+
+      if ( uid != UID_ILLEGAL && READ_CONFIG(m_Profile, MP_FVIEW_STATUS_UPDATE) )
+      {
+         String msg;
+         if ( m_uidPreviewed != UID_ILLEGAL )
+         {
+            HeaderInfoList_obj hil = GetFolder()->GetHeaders();
+            if ( hil )
+            {
+               wxString fmt = READ_CONFIG(m_Profile, MP_FVIEW_STATUS_FMT);
+               HeaderVarExpander expander(hil[idx],
+                                          m_settings.dateFormat,
+                                          m_settings.dateGMT);
+               msg = ParseMessageTemplate(fmt, expander);
+            }
+         }
+
+         wxLogStatus(m_Frame, msg);
+      }
+      //else: no status message
+   }
 }
 
 bool
 wxFolderView::HasSelection() const
 {
-   return m_FolderCtrl->GetSelectedItemCount() != 0;
+   return m_FolderCtrl->HasSelection();
 }
 
-int
-wxFolderView::GetSelections(UIdArray& selections)
+void
+wxFolderView::SetPreviewUID(UIdType uid)
 {
-   if(! m_ASMailFolder)
-      return 0;
+   wxLogTrace(M_TRACE_SELECTION, "%lx is now previewed", uid);
 
-   // in case there is an event pending:
-   if(m_FolderCtrl->GetItemCount() != (int)m_ASMailFolder->CountMessages())
-   {
-      Update();
-      return 0; // ignore current selection, so user has to re-issue command
-   }
-   return m_FolderCtrl->GetSelections(selections);
+   m_uidPreviewed = uid;
 }
+
+UIdArray
+wxFolderView::GetSelections() const
+{
+   return m_FolderCtrl->GetSelectionsOrFocus();
+}
+
+UIdType
+wxFolderView::GetFocus() const
+{
+   return m_FolderCtrl->GetFocusedUId();
+}
+
+// ----------------------------------------------------------------------------
+// operations on messages
+// ----------------------------------------------------------------------------
 
 void
 wxFolderView::ShowRawText(long uid)
@@ -2791,7 +2820,7 @@ wxFolderView::ShowRawText(long uid)
 void
 wxFolderView::PreviewMessage(long uid)
 {
-   if ( (unsigned long)uid != m_previewUId )
+   if ( (unsigned long)uid != m_uidPreviewed )
    {
       // select the item we preview in the folder control
       m_FolderCtrl->OnPreview();
@@ -2800,7 +2829,7 @@ wxFolderView::PreviewMessage(long uid)
       m_MessagePreview->ShowMessage(m_ASMailFolder, uid);
 
       // remember which item we preview
-      m_previewUId = uid;
+      SetPreviewUID(uid);
    }
 }
 
@@ -3016,59 +3045,75 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
 {
    if ( (event.GetFolder() == m_MailFolder) )
    {
-      // preserve selection if unique
-      long selOld = m_FolderCtrl->GetUniqueSelection();
+      // if we had exactly one message selected before, we want to keep the
+      // selection after expunging
+      bool hadUniqueSelection = m_FolderCtrl->GetUniqueSelection() != -1;
 
-      // we might need to move focus if the focused item was deleted
-      long focus = m_FolderCtrl->GetFocusedItem();
-      bool focusDeleted = false;
-
-      // and we also might have to clear the preview if we delete the message
+      // we might have to clear the preview if we delete the message
       // being previewed
-      long preview = m_FolderCtrl->GetPreviewedItem();
       bool previewDeleted = false;
+
+#ifdef BROKEN_LISTCTRL
+      // wxGTK doesn't seem to keep focus correctly itself when we delete items,
+      // help it
+      long focus = m_FolderCtrl->GetFocusedItem();
+      bool focusDeleted = focus == -1;
+#endif // BROKEN_LISTCTRL
 
       size_t count = event.GetCount();
       for ( size_t n = 0; n < count; n++ )
       {
          long item = event.GetItem(n);
-         if ( item < focus )
-            focus--;
-         else if ( item == focus )
-            focusDeleted = true;
 
-         if ( item == preview )
+#ifdef BROKEN_LISTCTRL
+         if ( !focusDeleted )
+         {
+            if ( item < focus )
+            {
+               focus--;
+            }
+            else if ( item == focus )
+            {
+               focusDeleted = true;
+            }
+         }
+#endif // BROKEN_LISTCTRL
+
+         UIdType uid = m_FolderCtrl->GetUIdFromIndex(item);
+
+         if ( uid == m_uidPreviewed )
             previewDeleted = true;
 
          m_FolderCtrl->DeleteItem(item);
       }
 
-      // restore focus if needed - otherwise there would be no focused item left
-      // at all in the control
-      if ( focusDeleted )
+#ifdef BROKEN_LISTCTRL
+      // restore focus if we had it
+      if ( focusDeleted && (focus != -1) )
       {
-         // last valid index
-         long last = m_FolderCtrl->GetItemCount() - 1;
-         if ( focus > last )
-         {
-            // go to last item - not ideal, but what else can we do?
-            focus = last;
-         }
-
-         m_FolderCtrl->Focus(focus);
-
-         // if it was (unique) selected before, reselect it now
-         if ( selOld != -1 )
-         {
-            m_FolderCtrl->Select(focus);
-         }
+         // take the next item as focus, if there is any - otherwise the last
+         long itemMax = m_FolderCtrl->GetItemCount() - 1;
+         if ( focus > itemMax )
+            focus = itemMax;
       }
+
+      // even if it wasn't deleted it might have changed because items before it
+      // were deleted
+      m_FolderCtrl->Focus(focus);
+      OnFocusChange();
+#endif // BROKEN_LISTCTRL
 
       // clear preview window if the message showed there had been deleted
       if ( previewDeleted )
       {
          m_MessagePreview->Clear();
-         m_previewUId = UID_ILLEGAL;
+         InvalidatePreviewUID();
+      }
+
+      if ( hadUniqueSelection )
+      {
+         // restore the selection
+         m_FolderCtrl->SelectFocused();
       }
    }
 }
@@ -3092,7 +3137,21 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
       size_t index = event.GetIndex();
       if ( index < (size_t)m_FolderCtrl->GetItemCount() )
       {
-         SetEntry(event.GetHeaderInfo(), index);
+         const HeaderInfo *hi = event.GetHeaderInfo();
+         int status = hi->GetStatus();
+         String strStatus =
+            MailFolder::ConvertMessageStatusToString(status);
+
+         m_FolderCtrl->SetEntryStatus(index, strStatus);
+
+         SetEntryColour(index, hi);
+
+         if ( status & MailFolder::MSG_STAT_DELETED )
+         {
+            // remember that we have another deleted message
+            m_nDeleted++;
+         }
+
          UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
       }
       //else: this can happen if we didn't have to update the control yet, just
@@ -3106,8 +3165,8 @@ wxFolderView::DragAndDropMessages()
 {
    bool didDrop = false;
 
-   UIdArray selections;
-   size_t countSel = m_FolderCtrl->GetSelections(selections);
+   const UIdArray& selections = GetSelections();
+   size_t countSel = selections.Count();
    if ( countSel > 0 )
    {
       MailFolder *mf = GetFolder()->GetMailFolder();
@@ -3447,7 +3506,6 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
 // ----------------------------------------------------------------------------
 
 BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)
-   EVT_SIZE(    wxFolderViewFrame::OnSize)
    EVT_MENU(-1,    wxFolderViewFrame::OnCommandEvent)
    EVT_TOOL(-1,    wxFolderViewFrame::OnCommandEvent)
 
@@ -3496,7 +3554,7 @@ wxFolderViewFrame::Create(const String &folderName, wxMFrame *parent)
    return f;
 }
 
-wxFolderViewFrame::wxFolderViewFrame(String const &name, wxMFrame *parent)
+wxFolderViewFrame::wxFolderViewFrame(const String &name, wxMFrame *parent)
    : wxMFrame(name,parent)
 {
    m_FolderView = NULL;
@@ -3561,16 +3619,6 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
          else
             wxMFrame::OnMenuCommand(id);
    }
-}
-
-void
-wxFolderViewFrame::OnSize( wxSizeEvent & WXUNUSED(event) )
-{
-   int x, y;
-   GetClientSize( &x, &y );
-
-   if(m_FolderView)
-      m_FolderView->SetSize(0,0,x,y);
 }
 
 IMPLEMENT_DYNAMIC_CLASS(wxFolderViewFrame, wxMFrame)
