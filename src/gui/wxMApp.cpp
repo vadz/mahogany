@@ -100,6 +100,8 @@ private:
    bool m_hasWindow;
 };
 
+#ifdef wxHAS_LOG_CHAIN
+
 // a wxLogStderr version which closes the file it logs to
 class MLogFile : public wxLogStderr
 {
@@ -108,6 +110,8 @@ public:
 
    virtual ~MLogFile() { fclose(m_fp); }
 };
+
+#endif // wxHAS_LOG_CHAIN
 
 // a timer used to periodically autosave profile settings
 class AutoSaveTimer : public wxTimer
