@@ -1054,6 +1054,7 @@ void wxNotebookDialog::CreateAllControls()
 
 // transfer the data to/from notebook pages
 // ----------------------------------------
+
 bool wxNotebookDialog::TransferDataToWindow()
 {
    for ( int nPage = 0; nPage < m_notebook->GetPageCount(); nPage++ ) {
@@ -1064,6 +1065,13 @@ bool wxNotebookDialog::TransferDataToWindow()
    }
 
    ResetDirty();
+
+   // suspend the profile before anything is written to it
+   m_profileForButtons = GetProfile();
+   if ( m_profileForButtons )
+   {
+      m_profileForButtons->Suspend();
+   }
 
    return TRUE;
 }
@@ -1091,10 +1099,12 @@ bool wxNotebookDialog::TransferDataFromWindow()
 
    Here is what we do to achieve this:
 
-   1. Apply puts the profile which we use for storing the options into
-      "suspend" mode
-   2. Ok calls Commit() thus making all changes definitive
-   3. Cancel calls Discard() returning the profile to the previous state
+   1. Initially we put the profile which we use for storing the options into
+      "suspend" mode (this is done above)
+   2. Apply just writes the new settings to the profile as usual (but they go
+      to the "suspended" section and so can be discarded later)
+   3. Ok calls Commit() thus making all changes definitive
+   4. Cancel calls Discard() returning the profile to the previous state
 */
 
 void
@@ -1103,10 +1113,7 @@ wxNotebookDialog::SendOptionsChangeEvent()
    ASSERT_MSG( m_lastBtn != MEventOptionsChangeData::Invalid,
                "this should be only called when a button is pressed" );
 
-   // notify everybody who cares about the change
-   Profile *profile = GetProfile();
-
-   if ( !profile )
+   if ( !m_profileForButtons )
    {
       // this may happen when cancelling the creation of a folder, so
       // just ignore it (nobody can be interested in it anyhow, this
@@ -1116,18 +1123,15 @@ wxNotebookDialog::SendOptionsChangeEvent()
    }
    else
    {
+      // notify everybody who cares about the change
       MEventOptionsChangeData *data = new MEventOptionsChangeData
                                           (
-                                           profile,
+                                           m_profileForButtons,
                                            m_lastBtn
                                           );
 
       MEventManager::Send(data);
-      profile->DecRef();
    }
-
-   // event sent, reset the flag value
-   m_lastBtn = MEventOptionsChangeData::Invalid;
 }
 
 // button event handlers
@@ -1169,14 +1173,6 @@ void wxNotebookDialog::OnApply(wxCommandEvent& /* event */)
 
 bool wxNotebookDialog::DoApply()
 {
-   if ( !m_profileForButtons )
-   {
-      m_profileForButtons = GetProfile();
-   }
-
-   if ( m_profileForButtons )
-      m_profileForButtons->Suspend();
-
    if ( TransferDataFromWindow() )
    {
       if ( OnSettingsChange() )
@@ -1189,38 +1185,43 @@ bool wxNotebookDialog::DoApply()
          return TRUE;
       }
    }
+
    // If OnSettingsChange() or the Transfer function failed, we
    // don't reset the m_bDirty flag so that OnOk() will know we failed
 
-   if ( m_profileForButtons )
-   {
-      m_profileForButtons->Discard();
-   }
-
-   // don't m_profileForButtons->DecRef() - this will be done in OnOk or
-   // OnCancel later
+   // don't do m_profileForButtons->DecRef() neither - this will be done in
+   // OnOk or OnCancel later
 
    return FALSE;
 }
 
 void wxNotebookDialog::OnCancel(wxCommandEvent& /* event */)
 {
+   // but then only do something non trivial if [Apply] had been pressed
+   if ( m_lastBtn == MEventOptionsChangeData::Apply )
+   {
+      // discard any changes
+      if ( m_profileForButtons )
+      {
+         m_profileForButtons->Discard();
+      }
+
+      // then send the event to allow everything to return to the old state
+      m_lastBtn = MEventOptionsChangeData::Cancel;
+      SendOptionsChangeEvent();
+
+      // allow the event to be processed before we are gone
+      MEventManager::DispatchPending();
+   }
+
+   // release the profile anyhow (notice that this should be done after
+   // SendOptionsChangeEvent() as it uses m_profileForButtons)
    if ( m_profileForButtons )
    {
-      // [Apply] has been called before, undo it now
-      m_profileForButtons->Discard();
       m_profileForButtons->DecRef();
 
       m_profileForButtons = NULL;
    }
-
-   // note that as [Apply] hasn't been pressed if m_profileForButtons is NUL,
-   // we might not send the event below neither in this case - should we?
-
-   m_lastBtn = MEventOptionsChangeData::Cancel;
-   SendOptionsChangeEvent();
-   // allow the event to be processed before we are gone
-   MEventManager::DispatchPending();
 
    EndModal(FALSE);
 }

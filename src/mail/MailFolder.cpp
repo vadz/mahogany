@@ -1624,37 +1624,25 @@ MailFolderCmn::UpdateMessageStatus(UIdType uid)
 void
 MailFolderCmn::OnOptionsChange(MEventOptionsChangeData::ChangeKind kind)
 {
-   bool settingsChanged;
-   switch ( kind )
+   /*
+      We want to avoid rebuilding the listing unnecessary (it is an expensive
+      operation) so we only do it if something really changed for us.
+   */
+
+   MFCmnOptions config;
+   ReadConfig(config);
+   if ( config != m_Config )
    {
-      case MEventOptionsChangeData::Apply:
-         m_ConfigOld = m_Config;
-         // fall through
+      m_Config = config;
 
-      case MEventOptionsChangeData::Ok:
-         ReadConfig(m_Config);
-         settingsChanged = m_Config != m_ConfigOld;
-         break;
-
-      default:
-         wxFAIL_MSG("unexpected options change event kind");
-         // fall through
-
-      case MEventOptionsChangeData::Cancel:
-         settingsChanged = m_Config != m_ConfigOld;
-         if ( settingsChanged )
-            m_Config = m_ConfigOld;
-   }
-
-   if ( settingsChanged )
       DoUpdate();
+   }
 }
 
 void
 MailFolderCmn::UpdateConfig(void)
 {
    ReadConfig(m_Config);
-   m_ConfigOld = m_Config;
 
    DoUpdate();
 }

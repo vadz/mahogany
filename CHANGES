@@ -1,4 +1,6 @@
 (next release) on (date of next release)
+18.07.00 VZ: fixed serious bug in handling options changes, they are now
+             handled correctly and [Apply] and [Cancel] behave as expected
 08.07.00 KB: Find now highlights text in viewer, MFilter reads/writes filter
              code and not just dialog settings
 08.07.00 VZ: added an option to prepend sender initials to the reply prefix

@@ -186,6 +186,8 @@ public:
    virtual void Commit(void) = 0;
    /// Discard changes from suspended mode.
    virtual void Discard(void) = 0;
+   /// Is the profile currently suspended?
+   virtual bool IsSuspended(void) const = 0;
 
    /// return the array containing the names of all existing identities
    static wxArrayString GetAllIdentities();

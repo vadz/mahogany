@@ -232,7 +232,7 @@ protected:
       int m_UpdateInterval;
       /// do we want to thread messages?
       bool m_UseThreading;
-   } m_Config, m_ConfigOld;
+   } m_Config;
    //@}
 
    /// Use the new options from m_Config

@@ -1340,15 +1340,21 @@ public:
    // reset the selected options to their default values
    virtual bool TransferDataFromWindow();
    virtual bool TransferDataToWindow();
-   bool WasChanged(void) { return m_SortOrder != m_OldSortOrder;};
+   bool WasChanged(void) const { return m_wasChanged; }
 
 protected:
    wxChoice    *m_Choices[NUM_CRITERIA];     // sort by what?
    wxCheckBox  *m_Checkboxes[NUM_CRITERIA];  // reverse sort order?
 
-   wxCheckBox  *m_UseThreading;
-   wxCheckBox  *m_ReSortOnChange;
-   long         m_OldSortOrder;
+   wxCheckBox  *m_checkUseThreading;
+   wxCheckBox  *m_checkReSortOnChange;
+
+   // dirty flag
+   bool         m_wasChanged;
+
+   // the dialog data
+   bool         m_UseThreading,
+                m_ReSortOnChange;
    long         m_SortOrder;
 };
 
@@ -1415,68 +1421,42 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
       m_Choices[n]->SetConstraints(c);
    }
 
-   m_UseThreading = new wxCheckBox(this, -1, _("Thread messages"));
+   m_checkUseThreading = new wxCheckBox(this, -1, _("Thread messages"));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    c->top.Below(m_Choices[n-1], 2*LAYOUT_Y_MARGIN);
    c->height.AsIs();
-   m_UseThreading->SetConstraints(c);
+   m_checkUseThreading->SetConstraints(c);
 
-   m_ReSortOnChange = new wxCheckBox(this, -1, _("Re-sort on status change"));
+   m_checkReSortOnChange = new wxCheckBox(this, -1, _("Re-sort on status change"));
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->top.Below(m_UseThreading, 2*LAYOUT_Y_MARGIN);
+   c->top.Below(m_checkUseThreading, 2*LAYOUT_Y_MARGIN);
    c->height.AsIs();
-   m_ReSortOnChange->SetConstraints(c);
+   m_checkReSortOnChange->SetConstraints(c);
 
    Layout();
    SetDefaultSize(380,310);
 
+   m_wasChanged = false;
+
    TransferDataToWindow();
-   m_OldSortOrder = m_SortOrder;
-}
-
-
-bool wxMessageSortingDialog::TransferDataFromWindow()
-{
-   bool uses_scoring = false;
-   int selection;
-   m_SortOrder = 0;
-   for( int n = NUM_SORTLEVELS-1; n >= 0; n--)
-   {
-      m_SortOrder <<= 4;
-      selection = 2*m_Choices[n]->GetSelection();
-      if( selection == MSO_SCORE )
-         uses_scoring = true;
-
-      if ( m_Checkboxes[n]->GetValue() )
-      {
-         // reverse the sort order: MSO_XXX_REV == MSO_XXX + 1
-         selection++;
-      }
-         
-      m_SortOrder += selection;
-   }
-
-   GetProfile()->writeEntry(MP_MSGS_SORTBY, m_SortOrder);
-   GetProfile()->writeEntry(MP_MSGS_USE_THREADING,
-                         m_UseThreading->GetValue());
-   GetProfile()->writeEntry(MP_MSGS_RESORT_ON_CHANGE,
-                         m_ReSortOnChange->GetValue());
-
-   return TRUE;
 }
 
 bool wxMessageSortingDialog::TransferDataToWindow()
 {
    long sortOrder = READ_CONFIG(GetProfile(), MP_MSGS_SORTBY);
+
+   // remmeber the initial values
+   m_SortOrder = sortOrder;
+   m_UseThreading = READ_CONFIG(GetProfile(), MP_MSGS_USE_THREADING) != 0;
+   m_ReSortOnChange = READ_CONFIG(GetProfile(), MP_MSGS_RESORT_ON_CHANGE) != 0;
+
    /* Sort order is stored as 4 bits per hierarchy:
       0xdcba --> 1. sort by "a", then by "b", ...
    */
-
-   m_SortOrder = sortOrder;
 
    long num;
    for( int n = 0; n < NUM_SORTLEVELS; n++)
@@ -1494,10 +1474,59 @@ bool wxMessageSortingDialog::TransferDataToWindow()
       m_Choices[n]->SetSelection(num / 2);
       sortOrder >>= 4;
    }
-   m_UseThreading->SetValue(
-      READ_CONFIG(GetProfile(), MP_MSGS_USE_THREADING) != 0);
-   m_ReSortOnChange->SetValue(
-      READ_CONFIG(GetProfile(), MP_MSGS_RESORT_ON_CHANGE) != 0);
+
+   m_checkUseThreading->SetValue(m_UseThreading);
+   m_checkReSortOnChange->SetValue(m_ReSortOnChange);
+
+   return TRUE;
+}
+
+bool wxMessageSortingDialog::TransferDataFromWindow()
+{
+   bool uses_scoring = false;
+   int selection;
+   long sortOrder = 0;
+   for( int n = NUM_SORTLEVELS-1; n >= 0; n--)
+   {
+      sortOrder <<= 4;
+      selection = 2*m_Choices[n]->GetSelection();
+      if( selection == MSO_SCORE )
+         uses_scoring = true;
+
+      if ( m_Checkboxes[n]->GetValue() )
+      {
+         // reverse the sort order: MSO_XXX_REV == MSO_XXX + 1
+         selection++;
+      }
+         
+      sortOrder += selection;
+   }
+
+   // write the data to config if anything changed (and update the dirty flag)
+   if ( sortOrder != m_SortOrder )
+   {
+      m_SortOrder = sortOrder;
+      m_wasChanged = true;
+
+      GetProfile()->writeEntry(MP_MSGS_SORTBY, m_SortOrder);
+   }
+
+   if ( m_checkUseThreading->GetValue() != m_UseThreading )
+   {
+      m_UseThreading = !m_UseThreading;
+      m_wasChanged = true;
+
+      GetProfile()->writeEntry(MP_MSGS_USE_THREADING, m_UseThreading);
+   }
+
+   if ( m_checkReSortOnChange->GetValue() != m_ReSortOnChange )
+   {
+      m_ReSortOnChange = !m_ReSortOnChange;
+      m_wasChanged = true;
+
+      GetProfile()->writeEntry(MP_MSGS_RESORT_ON_CHANGE, m_ReSortOnChange);
+   }
+
    return TRUE;
 }
 

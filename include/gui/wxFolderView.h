@@ -296,7 +296,7 @@ private:
       wxArrayString returnAddresses;
       /// the order of columns
       int columns[WXFLC_NUMENTRIES];
-   } m_settingsCurrent, m_settingsOld;
+   } m_settings;
 
    /// read the values from the profile into AllProfileSettings structure
    void ReadProfileSettings(AllProfileSettings *settings);

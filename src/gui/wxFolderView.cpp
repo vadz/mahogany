@@ -1040,8 +1040,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       m_previewUId = UID_ILLEGAL;
 
       // read in our profile settigns
-      ReadProfileSettings(&m_settingsCurrent);
-      m_settingsOld = m_settingsCurrent;
+      ReadProfileSettings(&m_settings);
 
       m_MailFolder->IncRef();  // make sure it doesn't go away
       m_folderName = m_ASMailFolder->GetName();
@@ -1050,11 +1049,11 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       {
          wxWindow *oldfolderctrl = m_FolderCtrl;
          m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow, this);
-         m_FolderCtrl->ApplyOptions( m_settingsCurrent.FgCol,
-                                     m_settingsCurrent.BgCol,
-                                     m_settingsCurrent.font,
-                                     m_settingsCurrent.size,
-                                     m_settingsCurrent.columns);
+         m_FolderCtrl->ApplyOptions( m_settings.FgCol,
+                                     m_settings.BgCol,
+                                     m_settings.font,
+                                     m_settings.size,
+                                     m_settings.columns);
          bool previewOnSingleClick = READ_CONFIG(GetProfile(),
                                              MP_PREVIEW_ON_SELECT) != 0;
          m_FolderCtrl->SetPreviewOnSingleClick(previewOnSingleClick);
@@ -1115,16 +1114,16 @@ wxFolderView::wxFolderView(wxWindow *parent)
                                             wxSP_3D|wxSP_BORDER);
    m_MessagePreview = new wxMessageView(this,m_SplitterWindow);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
-   ReadProfileSettings(&m_settingsCurrent);
+   ReadProfileSettings(&m_settings);
    bool   previewOnSingleClick = READ_CONFIG(GetProfile(),
                                              MP_PREVIEW_ON_SELECT) != 0;
 
    m_FolderCtrl->SetPreviewOnSingleClick(previewOnSingleClick);
-   m_FolderCtrl->ApplyOptions( m_settingsCurrent.FgCol,
-                               m_settingsCurrent.BgCol,
-                               m_settingsCurrent.font,
-                               m_settingsCurrent.size,
-                               m_settingsCurrent.columns);
+   m_FolderCtrl->ApplyOptions( m_settings.FgCol,
+                               m_settings.BgCol,
+                               m_settings.font,
+                               m_settings.size,
+                               m_settings.columns);
    m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl, m_MessagePreview, y/3);
    m_SplitterWindow->SetMinimumPaneSize(0);
    m_SplitterWindow->SetFocus();
@@ -1214,41 +1213,21 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
 void
 wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
 {
-   CHECK_RET( m_Profile, "no profile in wxFolderView?" );
-
-   bool settingsChanged;
-   switch ( event.GetChangeKind() )
-   {
-      case MEventOptionsChangeData::Apply:
-         m_settingsOld = m_settingsCurrent;
-         // fall through
-
-      case MEventOptionsChangeData::Ok:
-         ReadProfileSettings(&m_settingsCurrent);
-         settingsChanged = m_settingsCurrent != m_settingsOld;
-         break;
-
-      default:
-         FAIL_MSG("unknown options change event");
-
-      case MEventOptionsChangeData::Cancel:
-         settingsChanged = m_settingsCurrent != m_settingsOld;
-         if ( settingsChanged )
-            m_settingsCurrent = m_settingsOld;
-         break;
-   }
-
    bool previewOnSingleClick = READ_CONFIG(GetProfile(), MP_PREVIEW_ON_SELECT) != 0;
    m_FolderCtrl->SetPreviewOnSingleClick(previewOnSingleClick);
 
-   if ( settingsChanged )
+   AllProfileSettings settings;
+   ReadProfileSettings(&settings);
+   if ( settings != m_settings )
    {
-      // need to repopulate the list ctrl because the date format changed
-      m_FolderCtrl->ApplyOptions( m_settingsCurrent.FgCol,
-                                  m_settingsCurrent.BgCol,
-                                  m_settingsCurrent.font,
-                                  m_settingsCurrent.size,
-                                  m_settingsCurrent.columns);
+      // need to repopulate the list ctrl because its appearance changed
+      m_settings = settings;
+
+      m_FolderCtrl->ApplyOptions( m_settings.FgCol,
+                                  m_settings.BgCol,
+                                  m_settings.font,
+                                  m_settings.size,
+                                  m_settings.columns);
       m_FolderCtrl->Clear();
       m_NumOfMessages = 0;
       Update();
@@ -1280,9 +1259,9 @@ wxFolderView::SetEntry(HeaderInfoList *listing, size_t index)
    // optionally replace the "From" with "To: someone" for messages sent by
    // the user himself
    bool replaceFromWithTo = false;
-   if ( m_settingsCurrent.replaceFromWithTo )
+   if ( m_settings.replaceFromWithTo )
    {
-      const wxArrayString& adrs = m_settingsCurrent.returnAddresses;
+      const wxArrayString& adrs = m_settings.returnAddresses;
       size_t nAdrCount = adrs.GetCount();
       for ( size_t nAdr = 0; !replaceFromWithTo && (nAdr < nAdrCount); nAdr++ )
       {
@@ -1297,7 +1276,7 @@ wxFolderView::SetEntry(HeaderInfoList *listing, size_t index)
    }
 
    // optionally leave only the name part of the address
-   if ( m_settingsCurrent.senderOnlyNames )
+   if ( m_settings.senderOnlyNames )
    {
       sender = Message::GetNameFromAddress(sender);
    }
@@ -1339,8 +1318,8 @@ wxFolderView::SetEntry(HeaderInfoList *listing, size_t index)
                           sender,
                           subject,
                           strutil_ftime(hi->GetDate(),
-                                        m_settingsCurrent.dateFormat,
-                                        m_settingsCurrent.dateGMT),
+                                        m_settings.dateFormat,
+                                        m_settings.dateGMT),
                           strutil_ultoa(hi->GetSize()));
    mf->DecRef();
    m_FolderCtrl->Select(index,selected);
@@ -1360,13 +1339,13 @@ wxFolderView::SetEntry(HeaderInfoList *listing, size_t index)
    }
    else
       info.SetTextColour(
-         ((status & MailFolder::MSG_STAT_DELETED) != 0 ) ? m_settingsCurrent.DeletedCol
+         ((status & MailFolder::MSG_STAT_DELETED) != 0 ) ? m_settings.DeletedCol
          : ( ( (status & MailFolder::MSG_STAT_RECENT) != 0 ) ?
-             ( ( (status & MailFolder::MSG_STAT_SEEN) != 0 ) ? m_settingsCurrent.RecentCol
-               : m_settingsCurrent.NewCol )
+             ( ( (status & MailFolder::MSG_STAT_SEEN) != 0 ) ? m_settings.RecentCol
+               : m_settings.NewCol )
              : ( ((status & MailFolder::MSG_STAT_SEEN) != 0 ) ?
-                 m_settingsCurrent.FgCol :
-                 m_settingsCurrent.UnreadCol)
+                 m_settings.FgCol :
+                 m_settings.UnreadCol)
             )
          );
 

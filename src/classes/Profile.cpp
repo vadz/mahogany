@@ -219,6 +219,8 @@ public:
    virtual void Commit(void) { };
    /// Discard changes from suspended mode.
    virtual void Discard(void) { };
+   /// Is the profile currently suspended?
+   virtual bool IsSuspended(void) const { return false; }
 
    /// Set the identity to be used for this profile
    virtual void SetIdentity(const String & /*idName*/) { };
@@ -337,10 +339,6 @@ public:
       {
          PCHECK();
 
-         // VZ: no, there should be no assert here because it is triggered if
-         //     [Apply] button in the dialog is pressed twice
-         //ASSERT(! m_Suspended); // for debugging, causes no problems though
-
          m_Suspended++;
       }
 
@@ -348,6 +346,8 @@ public:
    virtual void Commit(void);
    /// Discard changes from suspended mode.
    virtual void Discard(void);
+   /// Is the profile currently suspended?
+   virtual bool IsSuspended(void) const { return m_Suspended; }
 
    /** This temporarily overloads this profile with another Identity,
        i.e. the name of an Identity profile. */
@@ -953,18 +953,16 @@ ProfileImpl::readEntry(LookupData &ld) const
    String keySuspended;
    keySuspended << SUSPEND_PATH << '/' << ld.GetKey();
 
-
-   bool foundHere = FALSE;
+   // the value read from profile
    String strResult;
    long   longResult;
    
-   if ( m_Suspended )
-   {
-      if( ld.GetType() == LookupData::LD_STRING )
-         foundHere = ms_GlobalConfig->Read(keySuspended, &strResult, ld.GetString());
-      else
-         foundHere = ms_GlobalConfig->Read(keySuspended, &longResult, ld.GetLong());
-   }
+   bool foundHere;
+   if( ld.GetType() == LookupData::LD_STRING )
+      foundHere = ms_GlobalConfig->Read(keySuspended, &strResult, ld.GetString());
+   else
+      foundHere = ms_GlobalConfig->Read(keySuspended, &longResult, ld.GetLong());
+
    if ( !foundHere )
    {
       if( ld.GetType() == LookupData::LD_STRING )
