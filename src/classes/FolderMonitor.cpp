@@ -316,7 +316,7 @@ FolderMonitorImpl::FolderMonitorImpl()
       Profile_obj profile(i->GetFolder()->GetProfile());
       if ( READ_CONFIG_BOOL(profile, MP_COLLECTATSTARTUP) )
       {
-         (void)CheckOneFolder(i.operator->(), progInfo);
+         (void)CheckOneFolder(*i, progInfo);
       }
    }
 
@@ -443,8 +443,6 @@ FolderMonitorImpl::CheckNewMail(int flags)
    if ( m_inNewMailCheck.IsLocked() )
       return true;
 
-   time_t timeCur = time(NULL);
-
    MLocker lockNewMailCheck(m_inNewMailCheck);
 
    bool rc = true;
@@ -471,21 +469,29 @@ FolderMonitorImpl::CheckNewMail(int flags)
    }
 
    // check all incoming folders
-   for ( FolderMonitorFolderList::iterator i = m_list.begin();
-         i != m_list.end();
-         ++i )
+   time_t timeCur = time(NULL);
+   FolderMonitorFolderList::iterator i;
+   for ( i = m_list.begin(); i != m_list.end(); ++i )
    {
       // force the check now if it was done by the user, even if the timeout
       // hasn't expired yet
       if ( (flags & Interactive) || (i->GetCheckTime() < timeCur) )
       {
-         if ( !CheckOneFolder(i.operator->(), progInfo) )
+         if ( !CheckOneFolder(*i, progInfo) )
             rc = false;
       }
       //else: don't check this folder yet
    }
 
    delete progInfo;
+
+   // update the time of the next check only now, i.e. after CheckFolder() call
+   // as if it takes time longer than the check interval we might keep checking
+   // it all the time without doing anything else
+   for ( i = m_list.begin(); i != m_list.end(); ++i )
+   {
+      i->UpdateCheckTime();
+   }
 
    return rc;
 }
@@ -554,9 +560,6 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
    }
 #endif // USE_DIALUP
 
-   // update the time of the next check
-   i->UpdateCheckTime();
-
    wxLogTrace(TRACE_MONITOR, "Checking for new mail in '%s'.",
               i->GetName().c_str());
 
@@ -598,6 +601,10 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
 
       return false;
    }
+
+   // process the new mail events for the folder we just checked: if we don't
+   // do it know, it might time out and close while we're checking the other
+   // folders
    MEventManager::DispatchPending();
 
    return true;
