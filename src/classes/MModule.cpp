@@ -146,10 +146,13 @@ void MAppBase::RemoveModule(MModuleCommon *module)
    wxDynamicLibrary *dll = module->GetDLL();
 
    // call cleanup function, if any
-   MModule_CleanUpFuncType funcCleanup =
-      (MModule_CleanUpFuncType)dll->GetSymbol(MMODULE_CLEANUP_FUNCTION);
-   if ( funcCleanup )
-      (*funcCleanup)();
+   {
+      wxLogNull noLog;
+      MModule_CleanUpFuncType funcCleanup =
+         (MModule_CleanUpFuncType)dll->GetSymbol(MMODULE_CLEANUP_FUNCTION);
+      if ( funcCleanup )
+         (*funcCleanup)();
+   }
 
    // we can't unload the DLL right now because we're still executing in the
    // modules dtor which is in this DLL (and so doing it would result in
