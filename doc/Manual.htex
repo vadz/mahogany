@@ -1914,7 +1914,7 @@ to provide extra functionality, but it confuses new mail notification
 programs and it looks ugly in mail software that doesn't support it.
 Unchecking this option prevents Mahogany from creating new such messages
 and you can delete previously created messages using text editor. Keep
-in mind many other programs can create such messages and this options
+in mind many other programs can create such messages and this option
 applies only to Mahogany.
 \end{itemize}
 
