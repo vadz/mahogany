@@ -349,6 +349,7 @@ extern const MOption MP_NEWMAIL_SOUND_PROGRAM;
 #endif // OS_UNIX
 extern const MOption MP_SHOW_NEWMAILMSG;
 extern const MOption MP_SHOW_NEWMAILINFO;
+extern const MOption MP_NEWMAIL_UNSEEN;
 extern const MOption MP_COLLECT_INBOX;
 extern const MOption MP_USEOUTGOINGFOLDER;
 extern const MOption MP_OUTGOINGFOLDER;
@@ -1067,6 +1068,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_SHOW_NEWMAILMSG_NAME      "ShowNewMail"
 /// show detailed info about how many new mail messages?
 #define   MP_SHOW_NEWMAILINFO_NAME      "ShowNewMailInfo"
+/// consider only unseen messages as new?
+#define   MP_NEWMAIL_UNSEEN_NAME "NewUnseenOnly"
 /// collect mail from INBOX?
 #define   MP_COLLECT_INBOX_NAME "CollectInbox"
 /// keep copies of outgoing mail?
@@ -2023,6 +2026,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_SHOW_NEWMAILMSG_DEFVAL      1
 /// show detailed info about how many new mail messages?
 #define   MP_SHOW_NEWMAILINFO_DEFVAL      10
+/// consider only unseen messages as new?
+#define   MP_NEWMAIL_UNSEEN_DEFVAL  1
 /// collect mail from INBOX?
 #define   MP_COLLECT_INBOX_DEFVAL 0l
 /// keep copies of outgoing mail?
