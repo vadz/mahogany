@@ -312,9 +312,10 @@ void TextViewerWindow::OnMouseEvent(wxMouseEvent& event)
    long pos = GetInsertionPoint();
 #endif // __WXMSW__/!__WXMSW__
 
-   ProcessMouseEvent(event, pos);
-
-   event.Skip();
+   if ( !ProcessMouseEvent(event, pos) )
+   {
+      event.Skip();
+   }
 }
 
 bool TextViewerWindow::ProcessMouseEvent(const wxMouseEvent& event, long pos)
