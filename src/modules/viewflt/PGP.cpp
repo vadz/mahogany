@@ -86,10 +86,26 @@ PGPFilter::DoProcess(String& text,
                      MTextStyle& style)
 {
    // do we have something looking like a PGP message?
-   if ( text.StartsWith(PGP_BEGIN_PREFIX) )
+   //
+   // there should be a BEGIN line near the start of the message
+   bool foundBegin = false;
+   const char *start = text.c_str();
+   for ( size_t numLines = 0; numLines < 10; numLines++ )
    {
-      const char * const start = text.c_str();
+      if ( strncmp(start, PGP_BEGIN_PREFIX, strlen(PGP_BEGIN_PREFIX)) == 0 )
+      {
+         foundBegin = true;
+         break;
+      }
 
+      // try the next line
+      start = strchr(start + 1, '\n');
+      if ( start )
+         start++; // skip '\n' itself
+   }
+
+   if ( foundBegin )
+   {
       // is the message just signed or encrypted?
       const char *tail = start + strlen(PGP_BEGIN_PREFIX);
       bool isSigned = strncmp(tail, "SIGNED ", 7 /* strlen("SIGNED ") */) == 0;
@@ -177,6 +193,13 @@ PGPFilter::DoProcess(String& text,
       // if everything was ok so far, continue with decoding/verifying
       if ( ok )
       {
+         // output the part before the BEGIN line, if any
+         String prolog(text.c_str(), start);
+         if ( !prolog.empty() )
+         {
+            m_next->Process(prolog, viewer, style);
+         }
+
          if ( isSigned )
          {
             // TODO: pass everything between start and end to PGP for
