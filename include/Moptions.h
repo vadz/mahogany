@@ -252,6 +252,8 @@ extern const MOption MP_FVIEW_NEWCOLOUR;
 extern const MOption MP_FVIEW_RECENTCOLOUR;
 extern const MOption MP_FVIEW_UNREADCOLOUR;
 extern const MOption MP_FVIEW_FLAGGEDCOLOUR;
+extern const MOption MP_FVIEW_AUTONEXT_UNREAD_MSG;
+extern const MOption MP_FVIEW_AUTONEXT_UNREAD_FOLDER;
 extern const MOption MP_FVIEW_STATUS_UPDATE;
 extern const MOption MP_FVIEW_STATUS_FMT;
 
@@ -838,6 +840,10 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_FVIEW_UNREADCOLOUR_NAME      "FViewUnreadColour"
 /// colour for flagged messages
 #define   MP_FVIEW_FLAGGEDCOLOUR_NAME      "FViewFlaggedColour"
+/// automatically select next unread message after finishing the current one
+#define MP_FVIEW_AUTONEXT_UNREAD_MSG_NAME "FViewAutoNextMsg"
+/// automatically select next unread folder after finishing the current one
+#define MP_FVIEW_AUTONEXT_UNREAD_FOLDER_NAME "FViewAutoNextFolder"
 /// update the folder view status bar to show the msg info?
 #define   MP_FVIEW_STATUS_UPDATE_NAME "FViewStatUpdate"
 /// folder view status bar string
@@ -1675,6 +1681,10 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_FVIEW_UNREADCOLOUR_DEFVAL      "blue"
 /// colour for flagged messages
 #define   MP_FVIEW_FLAGGEDCOLOUR_DEFVAL      "purple"
+/// automatically select next unread message after finishing the current one
+#define MP_FVIEW_AUTONEXT_UNREAD_MSG_DEFVAL 1L
+/// automatically select next unread folder after finishing the current one
+#define MP_FVIEW_AUTONEXT_UNREAD_FOLDER_DEFVAL 0L
 /// update the folder view status bar to show the msg info?
 #define   MP_FVIEW_STATUS_UPDATE_DEFVAL 0L
 /// folder view status bar string

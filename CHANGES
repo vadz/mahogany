@@ -6,6 +6,7 @@
 Release 0.64 '???' ???, 2001
 -------------------------------------------------------------------------------
 
+25.08.01 VZ: auto select the next unread msg/folder with one key press
 21.08.01 VZ: added address book interface to /etc/passwd (Unix only)
 21.08.01 VZ: better colour selector control in the options dialog
 20.08.01 VZ: added navigation between unread folders in the tree using PgUp/Dn

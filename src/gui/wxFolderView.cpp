@@ -92,6 +92,7 @@ extern const MOption MP_FLC_SUBJECTCOL;
 extern const MOption MP_FOCUS_FOLLOWSMOUSE;
 extern const MOption MP_FROM_ADDRESS;
 extern const MOption MP_FROM_REPLACE_ADDRESSES;
+extern const MOption MP_FVIEW_AUTONEXT_UNREAD_MSG;
 extern const MOption MP_FVIEW_BGCOLOUR;
 extern const MOption MP_FVIEW_DELETEDCOLOUR;
 extern const MOption MP_FVIEW_FGCOLOUR;
@@ -1991,12 +1992,23 @@ wxFolderView::~wxFolderView()
 }
 
 // ----------------------------------------------------------------------------
-// wxFolderView initialization
+// wxFolderView navigation in headers
 // ----------------------------------------------------------------------------
 
 inline size_t wxFolderView::GetHeadersCount() const
 {
    return m_FolderCtrl->GetHeadersCount();
+}
+
+bool wxFolderView::MoveToNextUnread()
+{
+   if ( !READ_CONFIG(m_Profile, MP_FVIEW_AUTONEXT_UNREAD_MSG) )
+   {
+      // this feature is disabled
+      return false;
+   }
+
+   return SelectNextUnread();
 }
 
 bool wxFolderView::SelectNextUnread()

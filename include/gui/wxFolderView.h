@@ -67,7 +67,7 @@ public:
    /// Destructor
    virtual ~wxFolderView();
 
-   virtual bool MoveToNextUnread() { return SelectNextUnread(); }
+   virtual bool MoveToNextUnread();
 
    /** Set the associated folder.
        @param folder the folder to display or NULL

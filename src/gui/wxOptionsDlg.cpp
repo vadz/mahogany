@@ -311,6 +311,12 @@ enum ConfigFields
    ConfigField_FolderViewRecentColour,
    ConfigField_FolderViewUnreadColour,
    ConfigField_FolderViewDeletedColour,
+   ConfigField_FolderViewFlaggedColour,
+
+   ConfigField_FolderViewAutoNextHelp,
+   ConfigField_FolderViewAutoNextMsg,
+   ConfigField_FolderViewAutoNextFolder,
+
    ConfigField_FolderViewThreadMessages,
 #if defined(EXPERIMENTAL_JWZ_THREADING)
 #if wxUSE_REGEX
@@ -1004,6 +1010,16 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Colour for &recent messages"),  Field_Color,   -1},
    { gettext_noop("Colour for u&nread messages"),  Field_Color,   -1},
    { gettext_noop("Colour for &deleted messages" ),Field_Color,   -1},
+   { gettext_noop("Colour for &flagged messages" ),Field_Color,   -1},
+
+   { gettext_noop("Mahogany may automatically select the next unread\n"
+                  "message when you try to scroll down beyond the end of\n"
+                  "the current message. Automatically select:"),
+                                                   Field_Message, -1},
+   { gettext_noop("    next unread &message"),     Field_Bool,    -1},
+   { gettext_noop("    next unread &folder"),      Field_Bool,
+                                                   ConfigField_FolderViewAutoNextMsg},
+
    { gettext_noop("&Thread messages"),             Field_Bool,    -1},
 
 #if defined(EXPERIMENTAL_JWZ_THREADING)
@@ -1375,6 +1391,12 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FVIEW_RECENTCOLOUR),
    CONFIG_ENTRY(MP_FVIEW_UNREADCOLOUR),
    CONFIG_ENTRY(MP_FVIEW_DELETEDCOLOUR),
+   CONFIG_ENTRY(MP_FVIEW_FLAGGEDCOLOUR),
+
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_FVIEW_AUTONEXT_UNREAD_MSG),
+   CONFIG_ENTRY(MP_FVIEW_AUTONEXT_UNREAD_FOLDER),
+
    CONFIG_ENTRY(MP_MSGS_USE_THREADING),
 
 #if defined(EXPERIMENTAL_JWZ_THREADING)

@@ -66,6 +66,7 @@
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_CURRENT_IDENTITY;
+extern const MOption MP_FVIEW_AUTONEXT_UNREAD_FOLDER;
 extern const MOption MP_MAINFOLDER;
 extern const MOption MP_OPENFOLDERS;
 extern const MOption MP_REOPENLASTFOLDER;
@@ -141,6 +142,12 @@ public:
       {
          // we moved to the next message in this folder, ok
          return true;
+      }
+
+      if ( !READ_CONFIG(m_Profile, MP_FVIEW_AUTONEXT_UNREAD_FOLDER) )
+      {
+         // this feature is disabled
+         return false;
       }
 
       // no more unread messages here, go to the next unread folder
