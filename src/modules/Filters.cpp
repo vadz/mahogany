@@ -2895,7 +2895,7 @@ static Value func_python(ArgList *args, FilterRuleImpl *p)
    int result = 0;
    bool rc = PyH_CallFunction(funcName,
                               "func_python",
-                              p, "Message",
+                              msg, "Message",
                               "%d", &result,
                               NULL);
    msg->DecRef();
