@@ -54,7 +54,7 @@ public:
    */
    virtual void SetFrom(const String &from,
                         const String &personal = "",
-                        const String & returnaddress = "");
+                        const String &replyaddress = "");
 
    virtual void SetNewsgroups(const String &groups);
 

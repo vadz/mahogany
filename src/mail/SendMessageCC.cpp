@@ -300,14 +300,14 @@ SendMessageCC::SetSubject(const String &subject)
 void
 SendMessageCC::SetFrom(const String & from,
                        const String & ipersonal,
-                       const String & returnaddress)
+                       const String & replyaddress)
 {
    if(from.Length())
       m_FromAddress = EncodeAddress(from);
    if(ipersonal.Length())
       m_FromPersonal = ipersonal;
-   if(returnaddress.Length())
-      m_ReplyTo = EncodeAddress(returnaddress);
+   if(replyaddress.Length())
+      m_ReplyTo = EncodeAddress(replyaddress);
 }
 
 void
