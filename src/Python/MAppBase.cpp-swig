@@ -819,36 +819,6 @@ static PyObject *_wrap_MAppBase_GetProfile(PyObject *self, PyObject *args) {
 }
 
 
-static PyObject *_wrap_new_MAppBase(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    MAppBase *result;
-    
-    if(!PyArg_ParseTuple(args,(char *)":new_MAppBase")) goto fail;
-    result = (MAppBase *)new MAppBase();
-    
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_MAppBase, 1);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_delete_MAppBase(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    MAppBase *arg1 = (MAppBase *) 0 ;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:delete_MAppBase",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MAppBase,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    delete arg1;
-    
-    Py_INCREF(Py_None); resultobj = Py_None;
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
 static PyObject * MAppBase_swigregister(PyObject *self, PyObject *args) {
     PyObject *obj;
     if (!PyArg_ParseTuple(args,(char*)"O", &obj)) return NULL;
@@ -1093,8 +1063,6 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"MAppBase_GetLocalDir", _wrap_MAppBase_GetLocalDir, METH_VARARGS },
 	 { (char *)"MAppBase_GetMimeManager", _wrap_MAppBase_GetMimeManager, METH_VARARGS },
 	 { (char *)"MAppBase_GetProfile", _wrap_MAppBase_GetProfile, METH_VARARGS },
-	 { (char *)"new_MAppBase", _wrap_new_MAppBase, METH_VARARGS },
-	 { (char *)"delete_MAppBase", _wrap_delete_MAppBase, METH_VARARGS },
 	 { (char *)"MAppBase_swigregister", MAppBase_swigregister, METH_VARARGS },
 	 { (char *)"wxGetApp", _wrap_wxGetApp, METH_VARARGS },
 	 { (char *)"MDialog_ErrorMessage", _wrap_MDialog_ErrorMessage, METH_VARARGS },

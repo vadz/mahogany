@@ -42,13 +42,7 @@ class MAppBase(_object):
     def GetLocalDir(*args): return apply(_MAppBase.MAppBase_GetLocalDir,args)
     def GetMimeManager(*args): return apply(_MAppBase.MAppBase_GetMimeManager,args)
     def GetProfile(*args): return apply(_MAppBase.MAppBase_GetProfile,args)
-    def __init__(self,*args):
-        _swig_setattr(self, MAppBase, 'this', apply(_MAppBase.new_MAppBase,args))
-        _swig_setattr(self, MAppBase, 'thisown', 1)
-    def __del__(self, destroy= _MAppBase.delete_MAppBase):
-        try:
-            if self.thisown: destroy(self)
-        except: pass
+    def __init__(self): raise RuntimeError, "No constructor defined"
     def __repr__(self):
         return "<C MAppBase instance at %s>" % (self.this,)
 

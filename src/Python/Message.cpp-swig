@@ -751,36 +751,6 @@ static PyObject *_wrap_MessageParameter_value_get(PyObject *self, PyObject *args
 }
 
 
-static PyObject *_wrap_new_MessageParameter(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    MessageParameter *result;
-    
-    if(!PyArg_ParseTuple(args,(char *)":new_MessageParameter")) goto fail;
-    result = (MessageParameter *)new MessageParameter();
-    
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_MessageParameter, 1);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_delete_MessageParameter(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    MessageParameter *arg1 = (MessageParameter *) 0 ;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:delete_MessageParameter",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MessageParameter,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    delete arg1;
-    
-    Py_INCREF(Py_None); resultobj = Py_None;
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
 static PyObject * MessageParameter_swigregister(PyObject *self, PyObject *args) {
     PyObject *obj;
     if (!PyArg_ParseTuple(args,(char*)"O", &obj)) return NULL;
@@ -1212,36 +1182,6 @@ static PyObject *_wrap_Message_WriteToString(PyObject *self, PyObject *args) {
 }
 
 
-static PyObject *_wrap_new_Message(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    Message *result;
-    
-    if(!PyArg_ParseTuple(args,(char *)":new_Message")) goto fail;
-    result = (Message *)new Message();
-    
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_Message, 1);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_delete_Message(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    Message *arg1 = (Message *) 0 ;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:delete_Message",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_Message,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    delete arg1;
-    
-    Py_INCREF(Py_None); resultobj = Py_None;
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
 static PyObject * Message_swigregister(PyObject *self, PyObject *args) {
     PyObject *obj;
     if (!PyArg_ParseTuple(args,(char*)"O", &obj)) return NULL;
@@ -1254,8 +1194,6 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"MessageParameter_name_get", _wrap_MessageParameter_name_get, METH_VARARGS },
 	 { (char *)"MessageParameter_value_set", _wrap_MessageParameter_value_set, METH_VARARGS },
 	 { (char *)"MessageParameter_value_get", _wrap_MessageParameter_value_get, METH_VARARGS },
-	 { (char *)"new_MessageParameter", _wrap_new_MessageParameter, METH_VARARGS },
-	 { (char *)"delete_MessageParameter", _wrap_delete_MessageParameter, METH_VARARGS },
 	 { (char *)"MessageParameter_swigregister", MessageParameter_swigregister, METH_VARARGS },
 	 { (char *)"Message_GetHeaderLine", _wrap_Message_GetHeaderLine, METH_VARARGS },
 	 { (char *)"Message_GetHeader", _wrap_Message_GetHeader, METH_VARARGS },
@@ -1277,8 +1215,6 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"Message_GetSize", _wrap_Message_GetSize, METH_VARARGS },
 	 { (char *)"Message_GetDate", _wrap_Message_GetDate, METH_VARARGS },
 	 { (char *)"Message_WriteToString", _wrap_Message_WriteToString, METH_VARARGS },
-	 { (char *)"new_Message", _wrap_new_Message, METH_VARARGS },
-	 { (char *)"delete_Message", _wrap_delete_Message, METH_VARARGS },
 	 { (char *)"Message_swigregister", Message_swigregister, METH_VARARGS },
 	 { NULL, NULL }
 };

@@ -35,13 +35,7 @@ class MObject(_object):
     __getattr__ = lambda self, name: _swig_getattr(self, MObject, name)
     __swig_getmethods__["CheckLeaks"] = lambda x: _MObject.MObject_CheckLeaks
     if _newclass:CheckLeaks = staticmethod(_MObject.MObject_CheckLeaks)
-    def __init__(self,*args):
-        _swig_setattr(self, MObject, 'this', apply(_MObject.new_MObject,args))
-        _swig_setattr(self, MObject, 'thisown', 1)
-    def __del__(self, destroy= _MObject.delete_MObject):
-        try:
-            if self.thisown: destroy(self)
-        except: pass
+    def __init__(self): raise RuntimeError, "No constructor defined"
     def __repr__(self):
         return "<C MObject instance at %s>" % (self.this,)
 
@@ -63,13 +57,7 @@ class MObjectRC(MObject):
     __getattr__ = lambda self, name: _swig_getattr(self, MObjectRC, name)
     def IncRef(*args): return apply(_MObject.MObjectRC_IncRef,args)
     def DecRef(*args): return apply(_MObject.MObjectRC_DecRef,args)
-    def __init__(self,*args):
-        _swig_setattr(self, MObjectRC, 'this', apply(_MObject.new_MObjectRC,args))
-        _swig_setattr(self, MObjectRC, 'thisown', 1)
-    def __del__(self, destroy= _MObject.delete_MObjectRC):
-        try:
-            if self.thisown: destroy(self)
-        except: pass
+    def __init__(self): raise RuntimeError, "No constructor defined"
     def __repr__(self):
         return "<C MObjectRC instance at %s>" % (self.this,)
 

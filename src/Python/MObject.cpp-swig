@@ -687,36 +687,6 @@ static PyObject *_wrap_MObject_CheckLeaks(PyObject *self, PyObject *args) {
 }
 
 
-static PyObject *_wrap_new_MObject(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    MObject *result;
-    
-    if(!PyArg_ParseTuple(args,(char *)":new_MObject")) goto fail;
-    result = (MObject *)new MObject();
-    
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_MObject, 1);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_delete_MObject(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    MObject *arg1 = (MObject *) 0 ;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:delete_MObject",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MObject,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    delete arg1;
-    
-    Py_INCREF(Py_None); resultobj = Py_None;
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
 static PyObject * MObject_swigregister(PyObject *self, PyObject *args) {
     PyObject *obj;
     if (!PyArg_ParseTuple(args,(char*)"O", &obj)) return NULL;
@@ -757,36 +727,6 @@ static PyObject *_wrap_MObjectRC_DecRef(PyObject *self, PyObject *args) {
 }
 
 
-static PyObject *_wrap_new_MObjectRC(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    MObjectRC *result;
-    
-    if(!PyArg_ParseTuple(args,(char *)":new_MObjectRC")) goto fail;
-    result = (MObjectRC *)new MObjectRC();
-    
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_MObjectRC, 1);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_delete_MObjectRC(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    MObjectRC *arg1 = (MObjectRC *) 0 ;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:delete_MObjectRC",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MObjectRC,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    delete arg1;
-    
-    Py_INCREF(Py_None); resultobj = Py_None;
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
 static PyObject * MObjectRC_swigregister(PyObject *self, PyObject *args) {
     PyObject *obj;
     if (!PyArg_ParseTuple(args,(char*)"O", &obj)) return NULL;
@@ -796,13 +736,9 @@ static PyObject * MObjectRC_swigregister(PyObject *self, PyObject *args) {
 }
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"MObject_CheckLeaks", _wrap_MObject_CheckLeaks, METH_VARARGS },
-	 { (char *)"new_MObject", _wrap_new_MObject, METH_VARARGS },
-	 { (char *)"delete_MObject", _wrap_delete_MObject, METH_VARARGS },
 	 { (char *)"MObject_swigregister", MObject_swigregister, METH_VARARGS },
 	 { (char *)"MObjectRC_IncRef", _wrap_MObjectRC_IncRef, METH_VARARGS },
 	 { (char *)"MObjectRC_DecRef", _wrap_MObjectRC_DecRef, METH_VARARGS },
-	 { (char *)"new_MObjectRC", _wrap_new_MObjectRC, METH_VARARGS },
-	 { (char *)"delete_MObjectRC", _wrap_delete_MObjectRC, METH_VARARGS },
 	 { (char *)"MObjectRC_swigregister", MObjectRC_swigregister, METH_VARARGS },
 	 { NULL, NULL }
 };

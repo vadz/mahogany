@@ -92,13 +92,7 @@ class MailFolder(MObject.MObjectRC):
     def GetType(*args): return apply(_MailFolder.MailFolder_GetType,args)
     def GetFlags(*args): return apply(_MailFolder.MailFolder_GetFlags,args)
     def ApplyFilterRules(*args): return apply(_MailFolder.MailFolder_ApplyFilterRules,args)
-    def __init__(self,*args):
-        _swig_setattr(self, MailFolder, 'this', apply(_MailFolder.new_MailFolder,args))
-        _swig_setattr(self, MailFolder, 'thisown', 1)
-    def __del__(self, destroy= _MailFolder.delete_MailFolder):
-        try:
-            if self.thisown: destroy(self)
-        except: pass
+    def __init__(self): raise RuntimeError, "No constructor defined"
     def __repr__(self):
         return "<C MailFolder instance at %s>" % (self.this,)
 
@@ -135,10 +129,6 @@ class HeaderInfo(_object):
     def GetStatus(*args): return apply(_MailFolder.HeaderInfo_GetStatus,args)
     def GetSize(*args): return apply(_MailFolder.HeaderInfo_GetSize,args)
     def GetLines(*args): return apply(_MailFolder.HeaderInfo_GetLines,args)
-    def __del__(self, destroy= _MailFolder.delete_HeaderInfo):
-        try:
-            if self.thisown: destroy(self)
-        except: pass
     def __init__(self): raise RuntimeError, "No constructor defined"
     def __repr__(self):
         return "<C HeaderInfo instance at %s>" % (self.this,)
@@ -159,13 +149,7 @@ class HeaderInfoList(MObject.MObjectRC):
     __getattr__ = lambda self, name: _swig_getattr(self, HeaderInfoList, name)
     def Count(*args): return apply(_MailFolder.HeaderInfoList_Count,args)
     def GetItem(*args): return apply(_MailFolder.HeaderInfoList_GetItem,args)
-    def __init__(self,*args):
-        _swig_setattr(self, HeaderInfoList, 'this', apply(_MailFolder.new_HeaderInfoList,args))
-        _swig_setattr(self, HeaderInfoList, 'thisown', 1)
-    def __del__(self, destroy= _MailFolder.delete_HeaderInfoList):
-        try:
-            if self.thisown: destroy(self)
-        except: pass
+    def __init__(self): raise RuntimeError, "No constructor defined"
     def __repr__(self):
         return "<C HeaderInfoList instance at %s>" % (self.this,)
 
@@ -187,9 +171,7 @@ class FolderListingEntry(_object):
         try:
             if self.thisown: destroy(self)
         except: pass
-    def __init__(self,*args):
-        _swig_setattr(self, FolderListingEntry, 'this', apply(_MailFolder.new_FolderListingEntry,args))
-        _swig_setattr(self, FolderListingEntry, 'thisown', 1)
+    def __init__(self): raise RuntimeError, "No constructor defined"
     def __repr__(self):
         return "<C FolderListingEntry instance at %s>" % (self.this,)
 

@@ -1501,36 +1501,6 @@ static PyObject *_wrap_MailFolder_ApplyFilterRules(PyObject *self, PyObject *arg
 }
 
 
-static PyObject *_wrap_new_MailFolder(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    MailFolder *result;
-    
-    if(!PyArg_ParseTuple(args,(char *)":new_MailFolder")) goto fail;
-    result = (MailFolder *)new MailFolder();
-    
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_MailFolder, 1);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_delete_MailFolder(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    MailFolder *arg1 = (MailFolder *) 0 ;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:delete_MailFolder",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_MailFolder,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    delete arg1;
-    
-    Py_INCREF(Py_None); resultobj = Py_None;
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
 static PyObject * MailFolder_swigregister(PyObject *self, PyObject *args) {
     PyObject *obj;
     if (!PyArg_ParseTuple(args,(char*)"O", &obj)) return NULL;
@@ -1711,22 +1681,6 @@ static PyObject *_wrap_HeaderInfo_GetLines(PyObject *self, PyObject *args) {
 }
 
 
-static PyObject *_wrap_delete_HeaderInfo(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    HeaderInfo *arg1 = (HeaderInfo *) 0 ;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:delete_HeaderInfo",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_HeaderInfo,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    delete arg1;
-    
-    Py_INCREF(Py_None); resultobj = Py_None;
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
 static PyObject * HeaderInfo_swigregister(PyObject *self, PyObject *args) {
     PyObject *obj;
     if (!PyArg_ParseTuple(args,(char*)"O", &obj)) return NULL;
@@ -1766,36 +1720,6 @@ static PyObject *_wrap_HeaderInfoList_GetItem(PyObject *self, PyObject *args) {
     result = (HeaderInfo *)(arg1)->GetItem(arg2);
     
     resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_HeaderInfo, 0);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_new_HeaderInfoList(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    HeaderInfoList *result;
-    
-    if(!PyArg_ParseTuple(args,(char *)":new_HeaderInfoList")) goto fail;
-    result = (HeaderInfoList *)new HeaderInfoList();
-    
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_HeaderInfoList, 1);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
-static PyObject *_wrap_delete_HeaderInfoList(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    HeaderInfoList *arg1 = (HeaderInfoList *) 0 ;
-    PyObject * obj0 = 0 ;
-    
-    if(!PyArg_ParseTuple(args,(char *)"O:delete_HeaderInfoList",&obj0)) goto fail;
-    if ((SWIG_ConvertPtr(obj0,(void **) &arg1, SWIGTYPE_p_HeaderInfoList,SWIG_POINTER_EXCEPTION | 0 )) == -1) SWIG_fail;
-    delete arg1;
-    
-    Py_INCREF(Py_None); resultobj = Py_None;
     return resultobj;
     fail:
     return NULL;
@@ -1862,20 +1786,6 @@ static PyObject *_wrap_delete_FolderListingEntry(PyObject *self, PyObject *args)
 }
 
 
-static PyObject *_wrap_new_FolderListingEntry(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    FolderListingEntry *result;
-    
-    if(!PyArg_ParseTuple(args,(char *)":new_FolderListingEntry")) goto fail;
-    result = (FolderListingEntry *)new FolderListingEntry();
-    
-    resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_FolderListingEntry, 1);
-    return resultobj;
-    fail:
-    return NULL;
-}
-
-
 static PyObject * FolderListingEntry_swigregister(PyObject *self, PyObject *args) {
     PyObject *obj;
     if (!PyArg_ParseTuple(args,(char*)"O", &obj)) return NULL;
@@ -1920,8 +1830,6 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"MailFolder_GetType", _wrap_MailFolder_GetType, METH_VARARGS },
 	 { (char *)"MailFolder_GetFlags", _wrap_MailFolder_GetFlags, METH_VARARGS },
 	 { (char *)"MailFolder_ApplyFilterRules", _wrap_MailFolder_ApplyFilterRules, METH_VARARGS },
-	 { (char *)"new_MailFolder", _wrap_new_MailFolder, METH_VARARGS },
-	 { (char *)"delete_MailFolder", _wrap_delete_MailFolder, METH_VARARGS },
 	 { (char *)"MailFolder_swigregister", MailFolder_swigregister, METH_VARARGS },
 	 { (char *)"HeaderInfo_GetSubject", _wrap_HeaderInfo_GetSubject, METH_VARARGS },
 	 { (char *)"HeaderInfo_GetFrom", _wrap_HeaderInfo_GetFrom, METH_VARARGS },
@@ -1932,17 +1840,13 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"HeaderInfo_GetStatus", _wrap_HeaderInfo_GetStatus, METH_VARARGS },
 	 { (char *)"HeaderInfo_GetSize", _wrap_HeaderInfo_GetSize, METH_VARARGS },
 	 { (char *)"HeaderInfo_GetLines", _wrap_HeaderInfo_GetLines, METH_VARARGS },
-	 { (char *)"delete_HeaderInfo", _wrap_delete_HeaderInfo, METH_VARARGS },
 	 { (char *)"HeaderInfo_swigregister", HeaderInfo_swigregister, METH_VARARGS },
 	 { (char *)"HeaderInfoList_Count", _wrap_HeaderInfoList_Count, METH_VARARGS },
 	 { (char *)"HeaderInfoList_GetItem", _wrap_HeaderInfoList_GetItem, METH_VARARGS },
-	 { (char *)"new_HeaderInfoList", _wrap_new_HeaderInfoList, METH_VARARGS },
-	 { (char *)"delete_HeaderInfoList", _wrap_delete_HeaderInfoList, METH_VARARGS },
 	 { (char *)"HeaderInfoList_swigregister", HeaderInfoList_swigregister, METH_VARARGS },
 	 { (char *)"FolderListingEntry_GetName", _wrap_FolderListingEntry_GetName, METH_VARARGS },
 	 { (char *)"FolderListingEntry_GetAttribute", _wrap_FolderListingEntry_GetAttribute, METH_VARARGS },
 	 { (char *)"delete_FolderListingEntry", _wrap_delete_FolderListingEntry, METH_VARARGS },
-	 { (char *)"new_FolderListingEntry", _wrap_new_FolderListingEntry, METH_VARARGS },
 	 { (char *)"FolderListingEntry_swigregister", FolderListingEntry_swigregister, METH_VARARGS },
 	 { NULL, NULL }
 };

@@ -41,13 +41,7 @@ class MessageParameter(_object):
     __swig_setmethods__["value"] = _Message.MessageParameter_value_set
     __swig_getmethods__["value"] = _Message.MessageParameter_value_get
     if _newclass:value = property(_Message.MessageParameter_value_get,_Message.MessageParameter_value_set)
-    def __init__(self,*args):
-        _swig_setattr(self, MessageParameter, 'this', apply(_Message.new_MessageParameter,args))
-        _swig_setattr(self, MessageParameter, 'thisown', 1)
-    def __del__(self, destroy= _Message.delete_MessageParameter):
-        try:
-            if self.thisown: destroy(self)
-        except: pass
+    def __init__(self): raise RuntimeError, "No constructor defined"
     def __repr__(self):
         return "<C MessageParameter instance at %s>" % (self.this,)
 
@@ -83,13 +77,7 @@ class Message(_object):
     def GetSize(*args): return apply(_Message.Message_GetSize,args)
     def GetDate(*args): return apply(_Message.Message_GetDate,args)
     def WriteToString(*args): return apply(_Message.Message_WriteToString,args)
-    def __init__(self,*args):
-        _swig_setattr(self, Message, 'this', apply(_Message.new_Message,args))
-        _swig_setattr(self, Message, 'thisown', 1)
-    def __del__(self, destroy= _Message.delete_Message):
-        try:
-            if self.thisown: destroy(self)
-        except: pass
+    def __init__(self): raise RuntimeError, "No constructor defined"
     def __repr__(self):
         return "<C Message instance at %s>" % (self.this,)
 
