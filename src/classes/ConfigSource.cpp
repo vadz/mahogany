@@ -542,6 +542,10 @@ ConfigSourceLocal::CreateFileConfig(const String& localFilePath,
    // among other things, the passwords
    fileconf->SetUmask(0077);
 
+   // disable wxConfig built-in environment variables expansion as we do it
+   // ourselves at Profile level and want to control it from there
+   fileconf->SetExpandEnvVars(false);
+
    return fileconf;
 }
 
@@ -554,14 +558,20 @@ ConfigSourceLocal::CreateRegConfig()
 {
    // don't give explicit name, but rather use the default logic (it's
    // perfectly ok, for the registry case our keys are under vendor\appname)
-   return new wxRegConfig
-              (
-                  M_APPLICATIONNAME,
-                  M_VENDORNAME,
-                  _T(""),
-                  _T(""),
-                  wxCONFIG_USE_LOCAL_FILE | wxCONFIG_USE_GLOBAL_FILE
-              );
+   wxRegConfig *regconf = new wxRegConfig
+                              (
+                                 M_APPLICATIONNAME,
+                                 M_VENDORNAME,
+                                 _T(""),
+                                 _T(""),
+                                 wxCONFIG_USE_LOCAL_FILE |
+                                 wxCONFIG_USE_GLOBAL_FILE
+                              );
+
+   // see comment in CreateFileConfig()
+   regconf->SetExpandEnvVars(false);
+
+   return regconf;
 }
 
 #endif // OS_WIN

@@ -1296,6 +1296,9 @@ Profile::readEntry(const String& key,
 */
 ProfileImpl::ProfileImpl(const String & iName, Profile const *Parent)
 {
+   // expand env vars in string values by default
+   SetExpandEnvVars(true);
+
    m_ProfileName = ( Parent && Parent->GetName().Length())
                      ? ( Parent->GetName() + '/' )
                      : String(GetRootPath());
