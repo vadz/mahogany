@@ -38,6 +38,7 @@ class wxRegExBase
    */
    virtual int Match(const wxString &str, Flags flags = RE_NONE) const = 0;
    virtual bool IsValid(void) const = 0;
+   virtual ~wxRegExBase() {}
 };
 
 #ifdef HAVE_POSIX_REGEX
@@ -52,6 +53,11 @@ class wxRegExPOSIX : public wxRegExBase
       {
          SetFlags(flags);
          m_Valid = Compile(expr);
+      }
+   ~wxRegExPOSIX()
+      {
+         if(m_Valid)
+		regfree(m_RegEx);
       }
    virtual bool IsValid(void) const
       {
@@ -89,6 +95,7 @@ class wxRegExPOSIX : public wxRegExBase
    */
    bool Compile(const wxString &expr)
       {
+         if(m_Valid) regfree(m_RegEx);
          int errorcode = regcomp(&m_RegEx, expr, GetCFlags());
          if(errorcode)
          {
