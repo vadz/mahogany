@@ -583,13 +583,13 @@ SendMessageCC::~SendMessageCC()
 
    if(m_headerNames)
    {
-      delete [] m_headerNames;
-      delete [] m_headerValues;
       for(int j = 0; m_headerNames[j] ; j++)
       {
          delete [] (char *)m_headerNames[j];
          delete [] (char *)m_headerValues[j];
       }
+      delete [] m_headerNames;
+      delete [] m_headerValues;
    }
    profile->DecRef();
 }
