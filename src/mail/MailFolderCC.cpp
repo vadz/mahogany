@@ -603,12 +603,6 @@ MailFolderCC::mm_expunged(MAILSTREAM *stream, unsigned long number)
 {
    String msg = "Expunged message no. " + strutil_ltoa(number);
    LOGMESSAGE((M_LOG_DEFAULT, Str(msg)));
-   MailFolderCC *mf = LookupObject(stream);
-   if(mf)
-   {
-      mf->numOfMessages--;
-      mf->UpdateViews();
-   }
 }
 
 /// flags have changed for a message

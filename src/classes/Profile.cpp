@@ -337,6 +337,37 @@ void ProfileBase::SetExpandEnvVars(bool bDoIt)
     @param type Type of profile to list or PT_Any for all.
     @return a pointer to kbStringList of profile names to be freed by caller.
 */
+static void 
+ListProfilesHelper(wxConfigBase *global_config,
+                   kbList *list, int type, String const &path)
+{
+   long index = 0;
+   wxString name;
+   wxString pathname;
+   int ptype;
+   wxString oldpath = global_config->GetPath();
+   global_config->SetPath(path);
+   if(global_config->GetFirstGroup(name, index))
+   {
+      global_config->Read(name+MP_PROFILE_TYPE, &ptype, MP_PROFILE_TYPE_D);
+      pathname = path;
+      pathname << '/' << name;
+      if(type == ProfileBase::PT_Any || ptype == type)
+         list->push_back(new String(pathname));
+      ListProfilesHelper(global_config, list, type, pathname);
+   }
+   while(global_config->GetNextGroup (name, index))
+   {
+      global_config->Read(name+MP_PROFILE_TYPE, &ptype, MP_PROFILE_TYPE_D);
+      pathname = path;
+      pathname << '/' << name;
+      if(type == ProfileBase::PT_Any || ptype == type)
+         list->push_back(new String(pathname));
+      ListProfilesHelper(global_config, list, type, pathname);
+   }
+   global_config->SetPath(oldpath);
+}
+
 kbStringList *
 ProfileBase::ListProfiles(int type)
 {
@@ -344,24 +375,7 @@ ProfileBase::ListProfiles(int type)
    wxConfigBase *global_config = mApplication->GetProfile()->m_config;
    if(! global_config)
       return list;
-   
-   long index = 0;
-   wxString name;
-   int ptype;
-   wxString path = global_config->GetPath();
-   if(global_config->GetFirstGroup(name, index))
-   {
-      global_config->Read(name+MP_PROFILE_TYPE, &ptype, MP_PROFILE_TYPE_D);
-      if(type == PT_Any || ptype == type)
-         list->push_back(new String(name));
-   }
-   while(global_config->GetNextGroup (name, index))
-   {
-      global_config->Read(name+MP_PROFILE_TYPE, &ptype, MP_PROFILE_TYPE_D);
-      if(type == PT_Any || ptype == type)
-         list->push_back(new String(name));
-   }
-   global_config->SetPath(path);
+   ListProfilesHelper(global_config, list, type, "");
    return list;
 }
 
@@ -432,7 +446,7 @@ ProfileBase::GetExternalProfiles(void)
    String s;
    pattern << STRUTIL_PATH_SEPARATOR << "*.profile";
    wxString file = wxFindFirstFile(pattern);
-   while( !!file )
+   while( file )
    {
       s = file;
       s = strutil_path_filename(s);
