@@ -307,7 +307,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_MOVE_TO_FOLDER, gettext_noop("&Move to Folder..."),gettext_noop("Move message to another folder")   , FALSE },
    { WXMENU_MSG_DELETE,    gettext_noop("&Delete"),           gettext_noop("Delete this message")      , FALSE },
    { WXMENU_MSG_UNDELETE,  gettext_noop("&Undelete"),         gettext_noop("Undelete message")         , FALSE },
-   { WXMENU_MSG_FLAG,      gettext_noop("Fla&g\tCtrl-I"), gettext_noop("Mark message as flagged/unflagged")         , FALSE },
+   { WXMENU_MSG_FLAG,      gettext_noop("F&lag\tCtrl-I"), gettext_noop("Mark message as flagged/unflagged")         , FALSE },
 #if 0
    { WXMENU_MSG_DELDUPLICATES,gettext_noop("Remove dup&licates"),
                            gettext_noop("Delete all duplicate messages")      , FALSE },
