@@ -99,7 +99,7 @@ extern "C"
 #define MP_MOD_PALMOS_BACKUP_INCREMENTAL     "BackupIncremental"
 #define MP_MOD_PALMOS_BACKUP_INCREMENTAL_D   1l
 #define MP_MOD_PALMOS_BACKUP_ALL             "BackupAll"
-#define MP_MOD_PALMOS_BACKUP_ALL_D           1l
+#define MP_MOD_PALMOS_BACKUP_ALL_D           0l
 #define MP_MOD_PALMOS_BACKUP_EXCLUDELIST     "BackupExclude"
 #define MP_MOD_PALMOS_BACKUP_EXCLUDELIST_D   ""
 #define MP_MOD_PALMOS_AUTOINSTALL            "AutoInstall"
