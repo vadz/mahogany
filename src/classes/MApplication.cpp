@@ -484,17 +484,14 @@ MAppBase::OnStartup()
 
    // extend path for commands, look in M's dirs first
    String pathEnv;
-   pathEnv << _T("PATH=")
-           << GetLocalDir() << _T("/scripts") << PATH_SEPARATOR
+   pathEnv << GetLocalDir() << _T("/scripts") << PATH_SEPARATOR
            << GetDataDir() << _T("/scripts");
 
    const wxChar *path = wxGetenv(_T("PATH"));
    if ( path )
       pathEnv << PATH_SEPARATOR << path;
 
-   // on some systems putenv() takes "char *", cast silents the warnings but
-   // should be harmless otherwise
-   putenv((char *)pathEnv.c_str());
+   wxSetEnv(_T("PATH"), pathEnv);
 
    // initialise python interpreter
 #ifdef  USE_PYTHON
