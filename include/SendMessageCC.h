@@ -89,11 +89,11 @@ public:
                         MessageParameterList const *plist = NULL,
                         wxFontEncoding enc = wxFONTENCODING_SYSTEM);
 
-   virtual void WriteToString(String  &output);
+   virtual bool WriteToString(String  &output);
 
-   virtual void WriteToFile(const String &filename, bool append = true);
+   virtual bool WriteToFile(const String &filename, bool append = true);
 
-   virtual void WriteToFolder(const String &foldername);
+   virtual bool WriteToFolder(const String &foldername);
 
    virtual bool SendOrQueue(int flags = 0);
 

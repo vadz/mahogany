@@ -227,7 +227,7 @@ public:
    /// set the MIME type for this attachment, must be called if !Type_Text
    void SetMimeType(const String& mimeType);
 
-   /// give us the data to attach, we take ownership of it (must be !NULL)
+   /// give us the data to attach, we will free() it (must be !NULL)
    void SetData(void *data, size_t length, const char *filename = NULL);
 
    /// give us a file to attach - will be done only when we'll be sent

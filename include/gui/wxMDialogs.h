@@ -32,6 +32,7 @@
 class Profile;
 class ArrayAdbElements;
 class MFolder;
+class MPersMsgBox;
 
 class WXDLLEXPORT wxFrame;
 class WXDLLEXPORT wxStaticText;
@@ -45,6 +46,16 @@ enum
    M_DLG_NO_DEFAULT  = 0x1000,
    M_DLG_DISABLE     = 0x2000,   // pre-check the "Don't ask again" checkbox
    M_DLG_NOT_ON_NO   = 0x4000    // don't allow disabling on "No"
+};
+
+/**
+  Return value of MDialog_YesNoCancel
+ */
+enum MDlgResult
+{
+   MDlg_Cancel = -1,
+   MDlg_No,
+   MDlg_Yes
 };
 
 /**
@@ -176,8 +187,25 @@ bool   MDialog_YesNoDialog(char const *message,
                            const wxWindow *parent = NULL,
                            char const *title = MDIALOG_YESNOTITLE,
                            int flags = M_DLG_YES_DEFAULT,
-                           const class MPersMsgBox *persMsg = NULL,
+                           const MPersMsgBox *persMsg = NULL,
                            const char *folderName = NULL);
+
+/**
+  This is a 3 choice dialog: it has Yes, No and Cancel buttons. Unlile
+  MDialog_YesNoDialog it is not persistent as remembering "Cancel" as answer
+  would probably be very confusing.
+
+  @param message the text to display
+  @param parent the parent frame
+  @param title title for message box window
+  @param flags combination of M_DLG_XXX values
+
+  @return M_DLG_ if yes was chosen, 0 if no and -1 if cancel
+ */
+MDlgResult MDialog_YesNoCancel(char const *message,
+                               const wxWindow *parent = NULL,
+                               char const *title = MDIALOG_YESNOTITLE,
+                               int flags = M_DLG_YES_DEFAULT);
 
 /** File requester dialog: asks user for a file name
        @param message the text to display
@@ -212,6 +240,20 @@ void MDialog_ShowText(wxWindow *parent,
                       const char *configPath = NULL);
 
 } // extern "C"
+
+/**
+  Another, new, version of MDialog_Message which uses MPersMsgBox and has a
+  more useful parameter order.
+
+  @param message the text to display
+  @param parent the parent frame
+  @param persMsg the profile path to use (doesn't use profile if NULL)
+  @param title title for message box window
+ */
+void MDialog_Message(char const *message,
+                     const wxWindow *parent,
+                     const MPersMsgBox *persMsg,
+                     char const *title = MDIALOG_MSGTITLE);
 
 
 /** Ask user for a directory

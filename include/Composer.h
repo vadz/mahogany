@@ -18,6 +18,7 @@
 class Profile;
 class Message;
 class MessageView;
+class MimePart;
 class wxComposeView;
 
 // ----------------------------------------------------------------------------
@@ -38,8 +39,9 @@ public:
       Recipient_Max
    };
 
-   /** @name Create a new composer window */
+   /** @name Different ways to create a new composer window */
    //@{
+
    /** Constructor for posting news.
        @param profile parent profile
        @param hide if true, do not show frame
@@ -89,8 +91,18 @@ public:
     */
    static Composer *CreateFwdMessage(const MailFolder::Params& params,
                                      Profile *profile,
-                                     Message * original = NULL,
+                                     Message *original = NULL,
                                      bool hide = false);
+
+   /**
+     Create a composer window initialized with an existing message.
+
+     @param profile the profile to use for the new composer
+     @param msg the message to edit
+     @return pointer to the new compose view
+    */
+   static Composer *EditMessage(Profile *profile, Message *message);
+
    //@}
 
    /** @name Accessing composer data */
@@ -106,11 +118,15 @@ public:
 
    /** @name Set the composer headers */
    //@{
+
+   /// sets the "From" header
+   virtual void SetFrom(const String& from) = 0;
+
    /// Set the default value for the "From" header (if we have it)
    virtual void SetDefaultFrom() = 0;
 
    /// sets Subject field
-   virtual void SetSubject(const String &subj) = 0;
+   virtual void SetSubject(const String& subj) = 0;
 
    /// adds recepients from addr (Recepient_Max means to reuse the last)
    virtual void AddRecipients(const String& addr,
@@ -144,10 +160,12 @@ public:
        @param value value of header entry
    */
    virtual void AddHeaderEntry(const String& entry, const String& value) = 0;
+
    //@}
 
    /** @name Add/insert stuff into composer */
    //@{
+
    /** Initializes the composer text: for example, if this is a reply, inserts
        the quoted contents of the message being replied to (except that, in
        fact, it may do whatever the user configured it to do using templates).
@@ -171,7 +189,7 @@ public:
                            const char *mimetype = NULL) = 0;
 
    /** Insert MIME content data
-       @param data pointer to data (we take ownership of it)
+       @param data pointer to data (we will free() it later)
        @param len length of data
        @param mimetype mimetype to use
        @param filename optional filename to add to list of parameters
@@ -184,11 +202,15 @@ public:
    /// inserts a text
    virtual void InsertText(const String& txt) = 0;
 
+   /// insert (recursively) a MIME part
+   virtual void InsertMimePart(const MimePart *mimePart) = 0;
+
    /// move the cursor to the given position
    virtual void MoveCursorTo(int x, int y) = 0;
 
    /// reset the "dirty" flag
    virtual void ResetDirty() = 0;
+
    //@}
 
    /** @name Implementation only */

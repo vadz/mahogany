@@ -217,6 +217,7 @@ extern const MOption MP_OUTBOX_NAME;
 extern const MOption MP_USE_OUTBOX;
 extern const MOption MP_TRASH_FOLDER;
 extern const MOption MP_USE_TRASH_FOLDER;
+extern const MOption MP_DRAFTS_FOLDER;
 extern const MOption MP_FOLDER_PATH;
 extern const MOption MP_FOLDER_COMMENT;
 extern const MOption MP_UPDATEINTERVAL;
@@ -795,6 +796,8 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_TRASH_FOLDER_NAME      "TrashFolder"
 /// Use a trash folder?
 #define MP_USE_TRASH_FOLDER_NAME   "UseTrash"
+/// Name of the Drafts folder
+#define MP_DRAFTS_FOLDER_NAME "DraftsFolder"
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH_NAME         "Path"
 /// comment
@@ -1577,6 +1580,8 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_TRASH_FOLDER_DEFVAL      ""
 /// Use a trash folder?
 #define MP_USE_TRASH_FOLDER_DEFVAL   1l
+/// Name of the Drafts folder
+#define MP_DRAFTS_FOLDER_DEFVAL ""
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH_DEFVAL      ((const char *)NULL) // don't change this!
 /// comment

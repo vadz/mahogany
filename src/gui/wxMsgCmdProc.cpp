@@ -41,6 +41,7 @@
 
 #include "TemplateDialog.h"
 #include "MessageView.h"
+#include "Composer.h"
 
 #include "MsgCmdProc.h"
 
@@ -148,6 +149,7 @@ protected:
    //@{
 
    void OpenMessages(const UIdArray& selections);
+   void EditMessages(const UIdArray& selections);
 
    void PrintOrPreviewMessages(const UIdArray& selections, bool preview);
    void PrintMessages(const UIdArray& selections);
@@ -218,6 +220,9 @@ private:
 
    /// a list of UIDs we might have to delete
    UIdArray m_UIdsCopiedOk;
+
+   /// the list of tickets we want to open the compose windows for
+   ASTicketList *m_TicketsToEditList;
 
    /// MEventManager reg info
    void *m_regASyncResult;
@@ -547,7 +552,10 @@ MsgCmdProcImpl::MsgCmdProcImpl(MessageView *msgView, wxWindow *winForDnd)
 
    m_TicketList = ASTicketList::Create();
    m_TicketsToDeleteList = ASTicketList::Create();
+
+   // these are created on demand
    m_TicketsDroppedList = NULL;
+   m_TicketsToEditList = NULL;
 }
 
 MsgCmdProcImpl::~MsgCmdProcImpl()
@@ -562,6 +570,9 @@ MsgCmdProcImpl::~MsgCmdProcImpl()
 
    if ( m_TicketsDroppedList )
       m_TicketsDroppedList->DecRef();
+
+   if ( m_TicketsToEditList )
+      m_TicketsToEditList->DecRef();
 
    if ( m_asmf )
       m_asmf->DecRef();
@@ -637,6 +648,10 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
    {
       case WXMENU_MSG_OPEN:
          OpenMessages(messages);
+         break;
+
+      case WXMENU_MSG_EDIT:
+         EditMessages(messages);
          break;
 
 
@@ -896,6 +911,26 @@ MsgCmdProcImpl::OpenMessages(const UIdArray& selections)
    for ( size_t i = 0; i < n; i++ )
    {
       ShowMessageViewFrame(GetFrame(), m_asmf, selections[i]);
+   }
+}
+
+void
+MsgCmdProcImpl::EditMessages(const UIdArray& selections)
+{
+   if ( !m_TicketsToEditList )
+      m_TicketsToEditList = ASTicketList::Create();
+
+   size_t n = selections.Count();
+   for ( size_t i = 0; i < n; i++ )
+   {
+      Ticket t = m_asmf->GetMessage(selections[i], this);
+
+      m_TicketsToEditList->Add(t);
+
+      AsyncStatusHandler *status =
+         new AsyncStatusHandler(this, _("Retrieving messages..."));
+
+      status->Monitor(t, _("Failed to retrieve messages to edit them."));
    }
 }
 
@@ -1483,6 +1518,23 @@ MsgCmdProcImpl::OnMEvent(MEventData& ev)
                }
             }
             break;
+
+         case ASMailFolder::Op_GetMessage:
+            if ( m_TicketsToEditList->Contains(t) )
+            {
+               m_TicketsToEditList->Remove(t);
+
+               // edit the message in composer
+               Message *msg =
+                  ((ASMailFolder::ResultMessage *)result)->GetMessage();
+
+               Composer::EditMessage(m_asmf->GetProfile(), msg);
+            }
+            else
+            {
+               // we don't use them for anything else yet
+               FAIL_MSG( "unexpected GetMessage() ticket" );
+            }
 
          // nothing special to do for these cases
          case ASMailFolder::Op_ApplyFilterRules:

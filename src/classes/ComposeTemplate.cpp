@@ -853,7 +853,7 @@ VarExpander::ExpandAttach(const String& name,
       }
 
       // guess MIME type from extension
-      m_sink.InsertAttachment(strutil_strdup(value->c_str()),
+      m_sink.InsertAttachment(strdup(value->c_str()),
                               value->length(),
                               "", // will be determined from filename laer
                               filename);
@@ -1171,7 +1171,7 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                // insert the original message as RFC822 attachment
                String str;
                m_msg->WriteToString(str);
-               m_sink.InsertAttachment(strutil_strdup(str), str.Length(),
+               m_sink.InsertAttachment(strdup(str), str.Length(),
                                        "message/rfc822", "");
             }
             else

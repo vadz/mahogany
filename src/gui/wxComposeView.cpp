@@ -107,6 +107,7 @@ extern const MOption MP_CVIEW_FGCOLOUR;
 extern const MOption MP_CVIEW_FONT;
 extern const MOption MP_CVIEW_FONT_DESC;
 extern const MOption MP_CVIEW_FONT_SIZE;
+extern const MOption MP_DRAFTS_FOLDER;
 extern const MOption MP_EXTERNALEDITOR;
 extern const MOption MP_HOSTNAME;
 extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
@@ -126,6 +127,7 @@ extern const MOption MP_USE_SENDMAIL;
 extern const MPersMsgBox *M_MSGBOX_ASK_FOR_EXT_EDIT;
 extern const MPersMsgBox *M_MSGBOX_ASK_VCARD;
 extern const MPersMsgBox *M_MSGBOX_CONFIG_NET_FROM_COMPOSE;
+extern const MPersMsgBox *M_MSGBOX_DRAFT_SAVED;
 extern const MPersMsgBox *M_MSGBOX_FIX_TEMPLATE;
 extern const MPersMsgBox *M_MSGBOX_MIME_TYPE_CORRECT;
 extern const MPersMsgBox *M_MSGBOX_SEND_EMPTY_SUBJECT;
@@ -142,8 +144,8 @@ enum
    IDB_EXPAND = 100
 };
 
-// the default message title
-#define COMPOSER_TITLE (_("Message Composition"))
+// the composer frame title
+#define COMPOSER_TITLE _("Message Composition")
 
 // separate multiple addresses with commas
 #define CANONIC_ADDRESS_SEPARATOR   ", "
@@ -543,7 +545,7 @@ EditorContentPart::~EditorContentPart()
 {
    if ( m_Type == Type_Data )
    {
-      delete [] (char *)m_Data;
+      free(m_Data);
    }
 }
 
@@ -925,84 +927,146 @@ void wxRcptTextCtrl::OnUpdateUI(wxUpdateUIEvent& event)
 }
 
 // ----------------------------------------------------------------------------
-// wxComposeView creation: static functions
+// wxComposeView creation: static creator functions
 // ----------------------------------------------------------------------------
 
-/** Constructor for posting news.
-    @param parentProfile parent profile
-    @param hide if true, do not show frame
-    @return pointer to the new compose view
-*/
-Composer *
-Composer::CreateNewArticle(const MailFolder::Params& params,
-                           Profile *parentProfile,
-                           bool hide)
+static wxComposeView *CreateComposeView(Profile *profile,
+                                        const MailFolder::Params& params,
+                                        wxComposeView::Mode mode,
+                                        wxComposeView::MessageKind kind,
+                                        bool hide)
 {
    wxWindow *parent = mApplication->TopLevelFrame();
-   wxComposeView *cv = new wxComposeView("ComposeViewNews", parent);
-   cv->m_mode = wxComposeView::Mode_News;
-   cv->m_kind = wxComposeView::Message_New;
-   cv->m_template = params.templ;
+   wxComposeView *cv = new wxComposeView
+                           (
+                              "ComposeViewNews",
+                              mode,
+                              kind,
+                              parent
+                           );
+
+   cv->SetTemplate(params.templ);
    cv->SetTitle(COMPOSER_TITLE);
-   cv->Create(parent, parentProfile);
+   cv->Create(parent, profile, hide);
 
    return cv;
 }
 
-/** Constructor for sending mail.
-    @param parentProfile parent profile
-    @param hide if true, do not show frame
-    @return pointer to the new compose view
-*/
 Composer *
-Composer::CreateNewMessage(const MailFolder::Params& params,
-                           Profile *parentProfile,
+Composer::CreateNewArticle(const MailFolder::Params& params,
+                           Profile *profile,
                            bool hide)
 {
-   wxWindow *parent = mApplication->TopLevelFrame();
-   wxComposeView *cv = new wxComposeView("ComposeViewMail", parent);
-   cv->m_mode = wxComposeView::Mode_Mail;
-   cv->m_kind = wxComposeView::Message_New;
-   cv->m_template = params.templ;
-   cv->SetTitle(COMPOSER_TITLE);
-   cv->Create(parent,parentProfile);
+   return CreateComposeView(profile, params,
+                            wxComposeView::Mode_News,
+                            wxComposeView::Message_New,
+                            hide);
+}
 
-   return cv;
+Composer *
+Composer::CreateNewMessage(const MailFolder::Params& params,
+                           Profile *profile,
+                           bool hide)
+{
+   return CreateComposeView(profile, params,
+                            wxComposeView::Mode_Mail,
+                            wxComposeView::Message_New,
+                            hide);
 }
 
 Composer *
 Composer::CreateReplyMessage(const MailFolder::Params& params,
-                             Profile *parentProfile,
+                             Profile *profile,
                              Message *original,
                              bool hide)
 {
-   wxComposeView *cv = CreateNewMessage(parentProfile, hide)->GetComposeView();
+   wxComposeView *cv = CreateComposeView(profile, params,
+                                         wxComposeView::Mode_Mail,
+                                         wxComposeView::Message_Reply,
+                                         hide);
 
-   cv->m_kind = wxComposeView::Message_Reply;
-   cv->m_template = params.templ;
-
-   cv->m_OriginalMessage = original;
-   SafeIncRef(cv->m_OriginalMessage);
-
-   // write reply by default in the same encoding as the original message
-   cv->SetEncodingToSameAs(original);
+   cv->SetOriginal(original);
 
    return cv;
 }
 
 Composer *
 Composer::CreateFwdMessage(const MailFolder::Params& params,
-                           Profile *parentProfile,
+                           Profile *profile,
                            Message *original,
                            bool hide)
 {
-   wxComposeView *cv = CreateNewMessage(parentProfile, hide)->GetComposeView();
+   wxComposeView *cv = CreateComposeView(profile, params,
+                                         wxComposeView::Mode_Mail,
+                                         wxComposeView::Message_Forward,
+                                         hide);
 
-   cv->m_kind = wxComposeView::Message_Forward;
-   cv->m_template = params.templ;
+   cv->SetOriginal(original);
 
-   // preserve message encoding when forwarding it
-   cv->SetEncodingToSameAs(original);
+   return cv;
+}
+
+Composer *
+Composer::EditMessage(Profile *profile, Message *msg)
+{
+   CHECK( msg, NULL, "no message to edit?" );
+
+   // first, create the composer
+
+   // create dummy params object as we need one for CreateNewMessage()
+   MailFolder::Params params("");
+
+   Composer *cv = CreateNewMessage(params, profile);
+
+   // next, import the message body in it
+   cv->InsertMimePart(msg->GetTopMimePart());
+
+   cv->ResetDirty();
+
+   // finally, also import all headers
+
+   // except the ones in ignoredHeaders:
+
+   // first ignore those which are generated by the transport layer as it
+   // doesn't make sense to generate them at all a MUA
+   wxSortedArrayString ignoredHeaders;
+   ignoredHeaders.Add("RECEIVED");
+   ignoredHeaders.Add("RETURN-PATH");
+   ignoredHeaders.Add("DELIVERED-TO");
+
+   // second, ignore some headers which we always generate ourselves and don't
+   // allow the user to override anyhow
+   ignoredHeaders.Add("MIME-VERSION");
+   ignoredHeaders.Add("CONTENT-TYPE");
+   ignoredHeaders.Add("CONTENT-DISPOSITION");
+   ignoredHeaders.Add("CONTENT-TRANSFER-ENCODING");
+
+   wxArrayString names, values;
+   size_t count = msg->GetAllHeaders(&names, &values);
+   for ( size_t n = 0; n < count; n++ )
+   {
+      wxString name = names[n].Upper();
+
+      // test for some standard headers which need special treatment
+      if ( name == "SUBJECT" )
+         cv->SetSubject(values[n]);
+      else if ( name == "FROM" )
+         cv->SetFrom(values[n]);
+      else if ( name == "TO" )
+         cv->AddTo(values[n]);
+      else if ( name == "CC" )
+         cv->AddCc(values[n]);
+      else if ( name == "BCC" )
+         cv->AddBcc(values[n]);
+      else if ( ignoredHeaders.Index(name) == wxNOT_FOUND )
+         cv->AddHeaderEntry(names[n], values[n]);
+      //else: we ignore this one
+   }
+
+   // use the same language as we had used before
+   ((wxComposeView *)cv)->SetEncodingToSameAs(msg);
+
+   msg->DecRef();
 
    return cv;
 }
@@ -1012,9 +1076,13 @@ Composer::CreateFwdMessage(const MailFolder::Params& params,
 // ----------------------------------------------------------------------------
 
 wxComposeView::wxComposeView(const String &name,
+                             Mode mode,
+                             MessageKind kind,
                              wxWindow *parent)
              : wxMFrame(name,parent)
 {
+   m_mode = mode;
+   m_kind = kind;
    m_name = name;
    m_pidEditor = 0;
    m_procExtEdit = NULL;
@@ -1028,6 +1096,17 @@ wxComposeView::wxComposeView(const String &name,
 
    m_editor = NULL;
    m_encoding = wxFONTENCODING_SYSTEM;
+}
+
+void wxComposeView::SetOriginal(Message *original)
+{
+   CHECK_RET( original, "no original message in composer" );
+
+   m_OriginalMessage = original;
+   m_OriginalMessage->IncRef();
+
+   // write reply by default in the same encoding as the original message
+   SetEncodingToSameAs(original);
 }
 
 wxComposeView::~wxComposeView()
@@ -1813,8 +1892,7 @@ wxComposeView::DoInitText(Message *mailmsg, MessageView *msgview)
       // now do attach it
       if ( hasCard )
       {
-         InsertData(strutil_strdup(vcard), vcard.length(),
-                    "text/x-vcard", filename);
+         InsertData(strdup(vcard), vcard.length(), "text/x-vcard", filename);
       }
    }
 
@@ -1863,8 +1941,7 @@ void wxComposeView::SetEncoding(wxFontEncoding encoding)
 
 void wxComposeView::SetEncodingToSameAs(Message *msg)
 {
-   if ( !msg )
-      return;
+   CHECK_RET( msg, "no message in SetEncodingToSameAs" );
 
    // find the first text part with non default encoding
    int count = msg->CountParts();
@@ -1960,14 +2037,32 @@ wxComposeView::CanClose() const
    else if ( m_editor->IsModified() )
    {
       // ask the user if he wants to save the changes
-      canClose = MDialog_YesNoDialog
-                 (
-                  _("There are unsaved changes, close anyway?"),
-                  this, // parent
-                  MDIALOG_YESNOTITLE,
-                  M_DLG_NO_DEFAULT,
-                  M_MSGBOX_UNSAVED_PROMPT
-                 );
+      MDlgResult rc = MDialog_YesNoCancel
+                      (
+                        _("There are unsaved changes, would you like to save the "
+                          "as a draft?\n"
+                          "\n"
+                          "You may also choose \"Cancel\" to not close this "
+                          "window at all."),
+                        this, // parent
+                        MDIALOG_YESNOTITLE,
+                        M_DLG_NO_DEFAULT
+                      );
+
+      switch ( rc )
+      {
+         case MDlg_No:
+            canClose = true;
+            break;
+
+         case MDlg_Yes:
+            if ( SaveAsDraft() )
+               break;
+            //else: fall through and don't close the window
+
+         case MDlg_Cancel:
+            canClose = false;
+      }
    }
    else
    {
@@ -2015,6 +2110,13 @@ wxComposeView::OnMenuCommand(int id)
                   Close();
                }
             }
+         break;
+
+      case WXMENU_COMPOSE_SAVE_AS_DRAFT:
+         if ( SaveAsDraft() )
+         {
+            Close();
+         }
          break;
 
       case WXMENU_COMPOSE_PREVIEW:
@@ -2559,6 +2661,77 @@ wxComposeView::InsertText(const String &text)
    m_editor->InsertText(text, MessageEditor::Insert_Append);
 }
 
+void
+wxComposeView::InsertMimePart(const MimePart *mimePart)
+{
+   CHECK_RET( mimePart, "no top MIME part in the message to edit?" );
+
+   MimeType type = mimePart->GetType();
+   switch ( type.GetPrimary() )
+   {
+      case MimeType::MULTIPART:
+         {
+            const MimePart *partChild = mimePart->GetNested();
+
+            String subtype = type.GetSubType();
+            if ( subtype == "ALTERNATIVE" )
+            {
+               // assume that we can edit the first subpart, this must be the
+               // most "rough" one and as we only support editing text, if we
+               // can edit anything at all it's going to be this one
+               InsertMimePart(partChild);
+            }
+            else // assume MIXED for all others
+            {
+               // and so simply insert all parts in turn
+               while ( partChild )
+               {
+                  InsertMimePart(partChild);
+
+                  partChild = partChild->GetNext();
+               }
+            }
+         }
+         break;
+
+      case MimeType::TEXT:
+         // cast is ok - it's a text part
+         InsertText((const char *)mimePart->GetContent());
+         break;
+
+      case MimeType::MESSAGE:
+      case MimeType::APPLICATION:
+      case MimeType::AUDIO:
+      case MimeType::IMAGE:
+      case MimeType::VIDEO:
+      case MimeType::MODEL:
+      case MimeType::OTHER:
+         // anything else gets inserted as an attachment
+         {
+            // we need to make a copy of the data as we're going to free() it
+            unsigned long len;
+            const void *data = mimePart->GetContent(&len);
+            CHECK_RET( data, "failed to retrieve the message data" );
+
+            void *data2 = malloc(len);
+            memcpy(data2, data, len);
+
+            InsertData(data2, len,
+                       mimePart->GetType().GetFull(), mimePart->GetFilename());
+         }
+         break;
+
+      case MimeType::CUSTOM1:
+      case MimeType::CUSTOM2:
+      case MimeType::CUSTOM3:
+      case MimeType::CUSTOM4:
+      case MimeType::CUSTOM5:
+      case MimeType::CUSTOM6:
+      default:
+         FAIL_MSG( "unknown MIME type" );
+   }
+}
+
 // ----------------------------------------------------------------------------
 // wxComposeView sending the message
 // ----------------------------------------------------------------------------
@@ -2969,6 +3142,13 @@ wxComposeView::AddHeaderEntry(const String &entry,
 // simple GUI accessors
 // -----------------------------------------------------------------------------
 
+void
+wxComposeView::SetFrom(const String& from)
+{
+   m_from = from;
+   m_txtFrom->SetValue(from);
+}
+
 /// sets From field using the current profile
 void
 wxComposeView::SetDefaultFrom()
@@ -2980,8 +3160,7 @@ wxComposeView::SetDefaultFrom()
       Address *addr = addrList->GetFirst();
       if ( addr )
       {
-         m_from = addr->GetAddress();
-         m_txtFrom->SetValue(m_from);
+         SetFrom(addr->GetAddress());
       }
    }
 }
@@ -3023,13 +3202,17 @@ wxComposeView::Print(void)
    m_editor->Print();
 }
 
-/// save the first text part of the message to the given file
+// ----------------------------------------------------------------------------
+// wxComposeView saving
+// ----------------------------------------------------------------------------
+
+// save the first text part of the message to the given file
 bool
 wxComposeView::SaveMsgTextToFile(const String& filename) const
 {
-   // TODO write (and read later...) headers too!
+   // TODO write (and read later...) headers too?
 
-   // write the text part of the message into a file
+   // write all text parts of the message into a file
    wxFile file(filename, wxFile::write_append);
    if ( !file.IsOpened() )
    {
@@ -3038,7 +3221,7 @@ wxComposeView::SaveMsgTextToFile(const String& filename) const
       return false;
    }
 
-   // export all text parts of the message
+   // iterate over all message parts
    for ( EditorContentPart *part = m_editor->GetFirstPart();
          part;
          part = m_editor->GetNextPart() )
@@ -3056,6 +3239,93 @@ wxComposeView::SaveMsgTextToFile(const String& filename) const
    }
 
    ((wxComposeView *)this)->ResetDirty(); // const_cast
+
+   return true;
+}
+
+// from upgrade.cpp, this forward decl will disappear once we move it somewhere
+// else (most likely MFolder?)
+extern int
+VerifyStdFolder(const MOption& optName,
+                const String& nameDefault,
+                int flags,
+                const String& comment,
+                MFolderIndex idxInTree = MFolderIndex_Max,
+                int icon = -1);
+
+bool wxComposeView::SaveAsDraft() const
+{
+   SendMessage_obj msg = BuildMessage();
+   if ( !msg )
+   {
+      wxLogError(_("Failed to create the message to save."));
+
+      return false;
+   }
+
+   // ensure that the "Drafts" folder we're going to save the message to exists
+   String nameDrafts = READ_CONFIG(m_Profile, MP_DRAFTS_FOLDER);
+   if ( !nameDrafts.empty() )
+   {
+      if ( !MFolder_obj(nameDrafts) )
+         nameDrafts.clear();
+   }
+
+   if ( nameDrafts.empty() )
+   {
+      // try the standard folder
+      int rc = VerifyStdFolder
+               (
+                  MP_DRAFTS_FOLDER,
+                  _("Drafts"),
+                  0,
+                  _("Folder where the postponed messages are stored,"),
+                  MFolderIndex_Draft
+               );
+
+      if ( !rc )
+      {
+         wxLogError(_("Please try specifying another \"Drafts\" folder in "
+                      "the preferences dialog."));
+         return false;
+      }
+
+      // VerifyStdFolder() writes the name to profile
+      nameDrafts = READ_APPCONFIG(MP_DRAFTS_FOLDER);
+
+      if ( rc == -1 )
+      {
+         // refresh the tree to show the newly created folder
+         MEventManager::Send(
+            new MEventFolderTreeChangeData(nameDrafts,
+                                           MEventFolderTreeChangeData::Create)
+         );
+      }
+   }
+
+   if ( !msg->WriteToFolder(nameDrafts) )
+   {
+      wxLogError(_("Failed to save the message as a draft."));
+
+      return false;
+   }
+
+   // do this so that we can close unconditionally now
+   wxComposeView *self = (wxComposeView *)this;
+   self->ResetDirty(); // const_cast
+
+   MDialog_Message
+   (
+      String::Format
+      (
+         _("Your message has been saved in the folder '%s',\n"
+           "simply open it and choose \"Message|Edit in composer\" to\n"
+           "continue writing it."),
+         nameDrafts.c_str()
+      ),
+      self->GetFrame(),
+      M_MSGBOX_DRAFT_SAVED
+   );
 
    return true;
 }

@@ -90,6 +90,16 @@ public:
    virtual wxArrayString GetHeaderLines(const char **headers,
                                         wxArrayInt *encodings = NULL) const = 0;
 
+   /**
+     Get the names and values of all headers of the message.
+
+     @param names the array to return the header names in
+     @param values the array to return the header values in
+     @return the number of headers in the arrays
+   */
+   virtual size_t GetAllHeaders(wxArrayString *names,
+                                wxArrayString *values) const = 0;
+
    /** Get the complete header text.
        @return string with multiline text containing the message headers
    */

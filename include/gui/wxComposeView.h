@@ -83,48 +83,42 @@ public:
       Message_Forward   // this one is incompatible with Mode_NNTP
    };
 
-   /** Initializes the composer text: for example, if this is a reply, inserts
-       the quoted contents of the message being replied to (except that, in
-       fact, it may do whatever the user configured it to do using templates).
-       The msg parameter may be NULL only for the new messages, messages
-       created with CreateReply/FwdMessage require it to be !NULL.
+   /**
+     Set the template to use for this message. Should be called before
+     InitText(), if at all.
 
-       @param msg the message we're replying to or forwarding
-    */
-   void InitText(Message *msg = NULL, MessageView *msgview = NULL);
+     @param templ the name of the template
+   */
+   void SetTemplate(const String& templ) { m_template = templ; }
 
-   /** insert a file into buffer
-       @param filename file to insert
-       @param mimetype mimetype to use
-       @param num_mimetype numeric mimetype
-       */
-   void InsertFile(const char *filename = NULL,
-                   const char *mimetype = NULL);
+   /**
+     Set the original message to use when replying or forwarding. Should be
+     called only by CreateReplyMessage() and CreateFwdMessage()
+   */
+   void SetOriginal(Message *original);
 
-   /** Insert MIME content data
-       @param data pointer to data (we take ownership of it)
-       @param len length of data
-       @param mimetype mimetype to use
-       @param filename optional filename to add to list of parameters
-       */
-   void InsertData(void *data,
-                   size_t length,
-                   const char *mimetype = NULL,
-                   const char *filename = NULL);
+   // implement Composer pure virtuals
+   virtual void InitText(Message *msg = NULL, MessageView *msgview = NULL);
+   virtual void InsertFile(const char *filename = NULL,
+                           const char *mimetype = NULL);
 
-   /// inserts a text
-   void InsertText(const String &txt);
+   virtual void InsertData(void *data,
+                           size_t length,
+                           const char *mimetype = NULL,
+                           const char *filename = NULL);
 
-   /// move the cursor to the given position
-   void MoveCursorTo(int x, int y);
+   virtual void InsertText(const String &txt);
 
-   /// set the focus to the composer window
-   void SetFocusToComposer();
+   virtual void InsertMimePart(const MimePart *mimePart);
+
+   virtual void MoveCursorTo(int x, int y);
 
    /** Set the newsgroups to post to.
        @param groups the list of newsgroups
    */
    void SetNewsgroups(const String &groups);
+
+   virtual void SetFrom(const String& from);
 
    /// Set the default value for the "From" header (if we have it)
    void SetDefaultFrom();
@@ -145,8 +139,18 @@ public:
    /// get the currently entered subject
    virtual String GetSubject() const;
 
+   /// set the focus to the editor window itself
+   void SetFocusToComposer();
+
    /// make a printout of input window
    void Print(void);
+
+   /**
+     Save the message in the drafts folder.
+
+     @return true if message was saved ok
+   */
+   bool SaveAsDraft() const;
 
    /** Send the message.
        @param schedule if TRUE, call calendar module to schedule sending
@@ -206,6 +210,9 @@ public:
    /// reset the "dirty" flag
    void ResetDirty();
 
+   /// set the message encoding to be equal to the encoding of this msg
+   void SetEncodingToSameAs(Message *msg);
+
    // implement base class virtual
    virtual wxComposeView *GetComposeView() { return this; }
    virtual wxFrame *GetFrame() { return this; }
@@ -214,9 +221,6 @@ protected:
    /** quasi-Constructor
        @param parent parent window
        @param parentProfile parent profile
-       @param to default value for To field
-       @param cc default value for Cc field
-       @param bcc default value for Bcc field
        @param hide if true, do not show frame
    */
    void Create(wxWindow *parent = NULL,
@@ -224,10 +228,15 @@ protected:
                bool hide = false);
 
    /** Constructor
-       @param iname  name of windowclass
+       @param name  name of windowclass
+       @param mode can be either news or email
+       @param kind is new message/article, reply/followup or forward
        @param parent parent window
    */
-   wxComposeView(const String &iname, wxWindow *parent = NULL);
+   wxComposeView(const String& name,
+                 Mode mode,
+                 MessageKind kind,
+                 wxWindow *parent = NULL);
 
    // helpers
    // -------
@@ -240,9 +249,6 @@ protected:
 
    /// InsertData() and InsertFile() helper
    void DoInsertAttachment(EditorContentPart *mc, const char *mimetype);
-
-   /// set the message encoding to be equal to the encoding of this msg
-   void SetEncodingToSameAs(Message *msg);
 
    /// set encoding to use
    void SetEncoding(wxFontEncoding encoding);
@@ -441,7 +447,11 @@ private:
 
 private:
    // it creates us
-   friend class Composer;
+   friend wxComposeView *CreateComposeView(Profile *profile,
+                                           const MailFolder::Params& params,
+                                           wxComposeView::Mode mode,
+                                           wxComposeView::MessageKind kind,
+                                           bool hide);
 
    // wxWindows macros
    DECLARE_EVENT_TABLE()

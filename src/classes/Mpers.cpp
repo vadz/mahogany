@@ -152,6 +152,7 @@ static const struct
    { "SendOffline",              gettext_noop("send mail when the system is offline") },
    { "AskForVCard",              gettext_noop("propose to attach a vCard if none specified") },
    { "ReenableHint",             gettext_noop("hint about how to reenable disabled message boxes") },
+   { "DraftSaved",               gettext_noop("confirm saving the message as a draft") },
 };
 
 // ============================================================================

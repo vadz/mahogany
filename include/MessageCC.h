@@ -32,10 +32,10 @@ public:
    virtual wxArrayString GetHeaderLines(const char **headers,
                                         wxArrayInt *encodings = NULL) const;
 
-   /** Get a complete header text.
-       @return string with multiline text containing the message headers
-   */
    virtual String GetHeader(void) const;
+
+   virtual size_t GetAllHeaders(wxArrayString *names,
+                                wxArrayString *values) const;
 
    /** @name Envelop headers */
    //@{

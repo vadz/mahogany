@@ -131,19 +131,22 @@ public:
 
    /** Writes the message to a String
        @param output string to write to
+       @return true if ok, false if an error occured
    */
-   virtual void WriteToString(String& output) = 0;
+   virtual bool WriteToString(String& output) = 0;
 
    /** Writes the message to a file
        @param filename file where to write to
        @param append if false, overwrite existing contents
+       @return true if ok, false if an error occured
    */
-   virtual void WriteToFile(const String &filename, bool append = true) = 0;
+   virtual bool WriteToFile(const String &filename, bool append = true) = 0;
 
    /** Writes the message to a folder.
        @param foldername file where to write to
+       @return true if ok, false if an error occured
    */
-   virtual void WriteToFolder(const String &foldername) = 0;
+   virtual bool WriteToFolder(const String &foldername) = 0;
 
    /** Sends the message or stores it in the outbox queue, depending
        on profile settings.
@@ -165,6 +168,9 @@ public:
    /// virtual destructor
    virtual ~SendMessage();
 };
+
+// SendMessage_obj is a smart reference to SendMessage
+DECLARE_AUTOPTR_NO_REF(SendMessage);
 
 #endif // SENDMESSAGE_H
 

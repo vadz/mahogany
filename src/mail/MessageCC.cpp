@@ -53,11 +53,15 @@
 #include <ctype.h>
 
 // ----------------------------------------------------------------------------
-// constants
+// private functions
 // ----------------------------------------------------------------------------
 
-/// temporary buffer for storing message headers, be generous:
-#define   HEADERBUFFERSIZE 100*1024
+/**
+   Parse (partial) message header extracting the names and values of each
+   header in it. Returns the number of (valid) headers found.
+ */
+static size_t ParseHeader(const char *hdr,
+                          wxArrayString& names, wxArrayString& values);
 
 // ----------------------------------------------------------------------------
 // macros
@@ -482,6 +486,18 @@ String MessageCC::GetHeader(void) const
    return str;
 }
 
+size_t
+MessageCC::GetAllHeaders(wxArrayString *names, wxArrayString *values) const
+{
+   CHECK( names && values, 0, "NULL pointer in MessageCC::GetAllHeaders" );
+
+   String hdr = GetHeader();
+   if ( hdr.empty() )
+      return 0;
+
+   return ParseHeader(hdr, *names, *values);
+}
+
 wxArrayString
 MessageCC::GetHeaderLines(const char **headersOrig,
                           wxArrayInt *encodings) const
@@ -523,7 +539,6 @@ MessageCC::GetHeaderLines(const char **headersOrig,
    m_folder->UnLock();
    mail_free_stringlist(&slist);
 
-   // now extract the headers values
    if ( rc )
    {
       // first look at what we got: I don't assume here that the headers are
@@ -532,99 +547,8 @@ MessageCC::GetHeaderLines(const char **headersOrig,
       wxArrayString names;
       wxArrayString valuesInDisorder;
 
-      String s;
-      s.reserve(1024);
-
-      // we are first looking for the name (before ':') and the value (after)
-      bool inName = true;
-
-      // note that we can stop when *pc == 0 as the header must be terminated
-      // by "\r\n" preceding it anyhow
-      for ( const char *pc = rc; *pc ; pc++ )
-      {
-         switch ( *pc )
-         {
-            case '\r':
-               if ( pc[1] != '\n' )
-               {
-                  // this is not supposed to happen in RFC822 headers!
-                  wxLogDebug("Bare '\\r' in header ignored");
-                  continue;
-               }
-
-               // skip '\n' too
-               pc++;
-
-               if ( inName )
-               {
-                  if ( !s.empty() )
-                  {
-                     wxLogDebug("Header line '%s' ignored", s.c_str());
-                  }
-                  else
-                  {
-                     // blank line, header must end here
-                     //
-                     // update: apparently, sometimes it doesn't... it's non
-                     // fatal anyhow, but report it as this is weird
-                     if ( pc[1] != '\0' )
-                     {
-                        wxLogDebug("Blank line inside header?");
-                     }
-                  }
-               }
-               else // we have a valid header name in this line
-               {
-                  if ( s.empty() )
-                  {
-                     wxLogDebug("Empty header value?");
-                  }
-
-                  // this header may continue on the next line if it begins
-                  // with a space or tab - check if it does
-                  if ( pc[1] != ' ' && pc[1] != '\t' )
-                  {
-                     valuesInDisorder.Add(s);
-                     inName = true;
-
-                     s.clear();
-                  }
-                  else
-                  {
-                     // continue with the current s but add "\r\n" to the
-                     // header value as it is part of it
-                     s += "\r\n";
-                  }
-               }
-               break;
-
-            case ':':
-               if ( inName )
-               {
-                  names.Add(s);
-                  if ( *++pc != ' ' )
-                  {
-                     // oops... skip back
-                     pc--;
-
-                     // although this is allowed by the RFC 822 (but not
-                     // 822bis), it is quite uncommon and so may indicate a
-                     // problem - log it
-                     wxLogDebug("Header without space after colon?");
-                  }
-
-                  s.clear();
-
-                  inName = false;
-
-                  break;
-               }
-               //else: fall through
-
-            default:
-               s += *pc;
-         }
-      }
+      // now extract the headers values
+      ParseHeader(rc, names, valuesInDisorder);
 
       // and finally copy the headers in order into the dst array
       wxFontEncoding encoding;
@@ -658,6 +582,119 @@ MessageCC::GetHeaderLines(const char **headersOrig,
    }
 
    return values;
+}
+
+static
+size_t ParseHeader(const char *hdr, wxArrayString& names, wxArrayString& values)
+{
+   String s;
+   s.reserve(1024);
+
+   // number of headers so far
+   size_t numHeaders = 0;
+
+   // we are first looking for the name (before ':') and the value (after)
+   bool inName = true;
+
+   // note that we can stop when *pc == 0 as the header must be terminated
+   // by "\r\n" preceding it anyhow
+   for ( const char *pc = hdr; *pc ; pc++ )
+   {
+      switch ( *pc )
+      {
+         case '\r':
+            if ( pc[1] != '\n' )
+            {
+               // this is not supposed to happen in RFC822 headers!
+               wxLogDebug("Bare '\\r' in header ignored");
+               continue;
+            }
+
+            // skip '\n' too
+            pc++;
+
+            if ( inName )
+            {
+               if ( !s.empty() )
+               {
+                  wxLogDebug("Header line '%s' ignored", s.c_str());
+               }
+               else
+               {
+                  // blank line, header must end here
+                  //
+                  // update: apparently, sometimes it doesn't... it's non
+                  // fatal anyhow, but report it as this is weird
+                  if ( pc[1] != '\0' )
+                  {
+                     wxLogDebug("Blank line inside header?");
+                  }
+               }
+            }
+            else // we have a valid header name in this line
+            {
+               if ( s.empty() )
+               {
+                  wxLogDebug("Empty header value?");
+               }
+
+               // this header may continue on the next line if it begins
+               // with a space or tab - check if it does
+               if ( pc[1] != ' ' && pc[1] != '\t' )
+               {
+                  values.Add(s);
+                  inName = true;
+
+                  s.clear();
+               }
+               else
+               {
+                  // continue with the current s but add "\r\n" to the
+                  // header value as it is part of it
+                  s += "\r\n";
+               }
+            }
+            break;
+
+         case ':':
+            if ( inName )
+            {
+               names.Add(s);
+               if ( *++pc != ' ' )
+               {
+                  // oops... skip back
+                  pc--;
+
+                  // although this is allowed by the RFC 822 (but not
+                  // 822bis), it is quite uncommon and so may indicate a
+                  // problem - log it
+                  wxLogDebug("Header without space after colon?");
+               }
+
+               numHeaders++;
+
+               s.clear();
+
+               inName = false;
+
+               break;
+            }
+            //else: fall through
+
+         default:
+            s += *pc;
+      }
+   }
+
+   if ( !inName )
+   {
+      // make values and names arrays always of the same size
+      wxLogDebug("Last header didn't have a valid value!");
+
+      values.Add("");
+   }
+
+   return numHeaders;
 }
 
 // ----------------------------------------------------------------------------

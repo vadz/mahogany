@@ -807,7 +807,7 @@ SendMessageCC::FindHeaderEntry(const String& name) const
 
    for ( i = m_extraHeaders.begin(); i != m_extraHeaders.end(); ++i )
    {
-      if ( i->m_name == name )
+      if ( wxStricmp(i->m_name, name) == 0 )
          break;
    }
 
@@ -838,27 +838,27 @@ SendMessageCC::GetHeaderEntry(const String& name) const
 void
 SendMessageCC::AddHeaderEntry(const String& nameIn, const String& value)
 {
-   String name = nameIn;
+   String name = nameIn.Upper();
 
    strutil_delwhitespace(name);
 
-   if (name == "To")
+   if (name == "TO")
       ; //TODO: Fix this?SetAddresses(*value);
    else if(name == "CC")
       ; //SetAddresses("",*value);
    else if(name == "BCC")
       ; //SetAddresses("","",*value);
-   else if ( name == "MIME-Version" ||
-             name == "Content-Type" ||
-             name == "Content-Disposition" ||
-             name == "Content-Transfer-Encoding" )
+   else if ( name == "MIME-VERSION" ||
+             name == "CONTENT-TYPE" ||
+             name == "CONTENT-DISPOSITION" ||
+             name == "CONTENT-TRANSFER-ENCODING" )
    {
       ERRORMESSAGE((_("The value of the header '%s' cannot be modified."),
                     name.c_str()));
 
       return;
    }
-   else if ( name == "Subject" )
+   else if ( name == "SUBJECT" )
    {
       SetSubject(value);
    }
@@ -872,7 +872,7 @@ SendMessageCC::AddHeaderEntry(const String& nameIn, const String& value)
       }
       else // add a new header entry
       {
-         m_extraHeaders.push_back(new MessageHeader(name, value));
+         m_extraHeaders.push_back(new MessageHeader(nameIn, value));
       }
    }
 }
@@ -949,9 +949,9 @@ SendMessageCC::Build(bool forStorage)
          ++i, ++h )
    {
       m_headerNames[h] = strutil_strdup(i->m_name);
-      if ( strcmp(m_headerNames[h], "Reply-To") == 0 )
+      if ( wxStricmp(m_headerNames[h], "Reply-To") == 0 )
          replyToSet = true;
-      else if ( strcmp(m_headerNames[h], "X-Mailer") == 0 )
+      else if ( wxStricmp(m_headerNames[h], "X-Mailer") == 0 )
          xmailerSet = true;
 
       m_headerValues[h] = strutil_strdup(i->m_value);
@@ -1606,7 +1606,7 @@ bool SendMessageCC::WriteMessage(soutr_t writer, void *where)
    return rfc822_output(headers, m_Envelope, m_Body, writer, where, NIL) == T;
 }
 
-void
+bool
 SendMessageCC::WriteToString(String& output)
 {
    output.Empty();
@@ -1615,13 +1615,17 @@ SendMessageCC::WriteToString(String& output)
    if ( !WriteMessage(write_str_output, &output) )
    {
       ERRORMESSAGE (("Can't write message to string."));
+
+      return false;
    }
+
+   return true;
 }
 
 /** Writes the message to a file
     @param filename file where to write to
 */
-void
+bool
 SendMessageCC::WriteToFile(const String &filename, bool append)
 {
    ofstream *ostr = new ofstream(filename.c_str(),
@@ -1636,9 +1640,11 @@ SendMessageCC::WriteToFile(const String &filename, bool append)
       ERRORMESSAGE((_("Failed to write message to file '%s'."),
                     filename.c_str()));
    }
+
+   return ok;
 }
 
-void
+bool
 SendMessageCC::WriteToFolder(String const &name)
 {
    MFolder_obj folder(name);
@@ -1646,22 +1652,24 @@ SendMessageCC::WriteToFolder(String const &name)
    {
       ERRORMESSAGE((_("Can't save sent message in the folder '%s' "
                       "which doesn't exist."), name.c_str()));
-      return;
+      return false;
    }
 
-   MailFolder *mf = MailFolder::OpenFolder(folder);
+   MailFolder_obj mf = MailFolder::OpenFolder(folder);
    if ( !mf )
    {
       ERRORMESSAGE((_("Can't open folder '%s' to save the message to."),
                     name.c_str()));
-      return;
+      return false;
    }
 
    String str;
-   WriteToString(str);
+   if ( !WriteToString(str) )
+      return false;
 
    mf->AppendMessage(str);
-   mf->DecRef();
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------

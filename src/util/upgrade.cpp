@@ -2701,7 +2701,7 @@ private:
   Returns value > 0 if the folder already existed, < 0 if it didn't exist and
   was successfulyl created and 0 if we failed to create it
  */
-static int
+extern int
 VerifyStdFolder(const MOption& optName,
                 const String& nameDefault,
                 int flags,

@@ -304,6 +304,7 @@ enum ConfigFields
    ConfigField_OutboxName,
    ConfigField_UseTrash,
    ConfigField_TrashName,
+   ConfigField_DraftsName,
    ConfigField_FoldersFileFormat,
    ConfigField_StatusFormatHelp,
    ConfigField_StatusFormat_StatusBar,
@@ -1184,6 +1185,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                     Field_AppWide, ConfigField_UseOutbox },
    { gettext_noop("Use &Trash folder"), Field_Bool, -1},
    { gettext_noop("&Trash folder name"), Field_Folder, ConfigField_UseTrash},
+   { gettext_noop("&Drafts folder name"), Field_Folder, -1 },
    { gettext_noop("Default format for mailbox files"
                   ":Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)"),
      Field_Combo | Field_AppWide | Field_Advanced, -1},
@@ -1701,6 +1703,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_OUTBOX_NAME),
    CONFIG_ENTRY(MP_USE_TRASH_FOLDER),
    CONFIG_ENTRY(MP_TRASH_FOLDER),
+   CONFIG_ENTRY(MP_DRAFTS_FOLDER),
    CONFIG_ENTRY(MP_FOLDER_FILE_DRIVER),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FOLDERSTATUS_STATBAR),

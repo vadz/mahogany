@@ -120,6 +120,12 @@ extern const MPersMsgBox *M_MSGBOX_AUTOEXPUNGE;
 extern const MPersMsgBox *M_MSGBOX_REENABLE_HINT;
 
 // ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
+#define M_TITLE_PREFIX _("Mahogany: ")
+
+// ----------------------------------------------------------------------------
 // the images names
 // ----------------------------------------------------------------------------
 
@@ -449,6 +455,16 @@ static inline long GetMsgBoxStyle(long style)
 # endif
 }
 
+// get the msg box style for a question dialog box
+static inline long GetYesNoMsgBoxStyle(int flags)
+{
+   int style = GetMsgBoxStyle(wxYES_NO | wxICON_QUESTION);
+   if ( flags & M_DLG_NO_DEFAULT )
+      style |= wxNO_DEFAULT;
+
+   return GetMsgBoxStyle(style);
+}
+
 // needed to fix a bug/misfeature of wxWin 2.2.x: an already deleted window may
 // be used as parent for the newly created dialogs, don't let this happen
 static void ReallyCloseTopLevelWindow(wxFrame *frame)
@@ -514,7 +530,7 @@ MTextInputDialog::MTextInputDialog(wxWindow *parent,
                                    const wxString& strConfigPath,
                                    const wxString& strDefault,
                                    bool passwordflag)
-   : wxDialog(parent, -1, wxString("Mahogany : ") + strCaption,
+   : wxDialog(parent, -1, wxString(M_TITLE_PREFIX) + strCaption,
               wxDefaultPosition,
               wxDefaultSize,
               wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
@@ -657,7 +673,7 @@ MDialog_ErrorMessage(const char *msg,
    //MGuiLocker lock;
    CloseSplash();
    NoBusyCursor no;
-   wxMessageBox(msg, wxString("Mahogany : ") + title,
+   wxMessageBox(msg, wxString(M_TITLE_PREFIX) + title,
                 GetMsgBoxStyle(wxOK|wxICON_EXCLAMATION),
                 GetDialogParent(parent));
 }
@@ -681,7 +697,7 @@ MDialog_SystemErrorMessage(const char *message,
    msg = String(message) + String(_("\nSystem error: "))
       + String(strerror(errno));
 
-   MDialog_ErrorMessage(msg.c_str(), parent, wxString("Mahogany : ")+title, modal);
+   MDialog_ErrorMessage(msg.c_str(), parent, wxString(M_TITLE_PREFIX)+title, modal);
 }
 
 
@@ -697,7 +713,7 @@ MDialog_FatalErrorMessage(const char *message,
 {
    String msg = String(message) + _("\nExiting application...");
 
-   MDialog_ErrorMessage(message,parent, wxString("Mahogany : ")+title,true);
+   MDialog_ErrorMessage(message,parent, wxString(M_TITLE_PREFIX)+title,true);
    mApplication->Exit();
 }
 
@@ -720,9 +736,6 @@ MDialog_Message(const char *message,
    if ( wxPMessageBoxIsDisabled(configPath) )
       return;
 
-   wxString caption = "Mahogany : ";
-   caption += title;
-
    CloseSplash();
    NoBusyCursor noBC;
 
@@ -730,12 +743,55 @@ MDialog_Message(const char *message,
    (
       configPath,
       message,
-      caption,
+      String(M_TITLE_PREFIX) + title,
       GetMsgBoxStyle(wxOK | wxICON_INFORMATION) | (flags & M_DLG_DISABLE),
       GetDialogParent(parent)
    );
 }
 
+void MDialog_Message(char const *message,
+                     const wxWindow *parent,
+                     const MPersMsgBox *persMsg,
+                     char const *title)
+{
+   String configPath;
+   if ( persMsg )
+      configPath = GetPersMsgBoxName(persMsg);
+
+   MDialog_Message(message, parent, title,
+                   persMsg ? configPath.c_str() : NULL);
+}
+
+MDlgResult MDialog_YesNoCancel(char const *message,
+                               const wxWindow *parent,
+                               char const *title,
+                               int flags)
+{
+   CloseSplash();
+   NoBusyCursor noBC;
+
+   switch ( wxMessageBox
+            (
+               message,
+               String("Mahogany: ") + title,
+               GetYesNoMsgBoxStyle(flags) | wxCANCEL,
+               GetDialogParent(parent)
+            ) )
+   {
+      case wxNO:
+         return MDlg_No;
+
+      case wxYES:
+         return MDlg_Yes;
+
+      default:
+         FAIL_MSG( "unexpected wxMessageBox return value" );
+         // fall through
+
+      case wxCANCEL:
+         return MDlg_Cancel;
+   }
+}
 
 /** simple Yes/No dialog
     @param message the text to display
@@ -809,21 +865,15 @@ MDialog_YesNoDialog(const char *message,
    NoBusyCursor noBC;
    CloseSplash();
 
-   wxString caption = "Mahogany : ";
-   caption += title;
-
-   int style = GetMsgBoxStyle(wxYES_NO | wxICON_QUESTION);
-   if ( flags & M_DLG_NO_DEFAULT )
-      style |= wxNO_DEFAULT;
-
    bool wasDisabled;
    int rc = wxPMessageBox
             (
                path,
                message,
-               caption,
-               // these bits are equal to the corresponding wx constants
-               style | (flags & (M_DLG_NOT_ON_NO | M_DLG_DISABLE)),
+               String(M_TITLE_PREFIX) + title,
+               GetYesNoMsgBoxStyle(flags) |
+                  // these bits are equal to the corresponding wx constants
+                  (flags & (M_DLG_NOT_ON_NO | M_DLG_DISABLE)),
                GetDialogParent(parent),
                NULL,
                &wasDisabled
@@ -958,7 +1008,7 @@ MDialog_AdbLookupList(ArrayAdbElements& aEntries,
       wxSingleChoiceDialog dialog(
                                     GetDialogParent(parent),
                                     _("Please choose an entry:"),
-                                    wxString("Mahogany : ") +
+                                    wxString(M_TITLE_PREFIX) +
                                        _("Expansion options"),
                                     nEntryCount,
                                     &aChoices[0]

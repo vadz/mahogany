@@ -212,7 +212,6 @@ private:
    { \
    public: \
       classname##_obj(classname *ptr = NULL) { m_ptr = ptr; } \
-      ~classname##_obj() { if ( m_ptr ) m_ptr->DecRef(); } \
  \
       void Attach(classname *ptr) \
       { \
@@ -256,10 +255,11 @@ private:
 // in DECLARE_AUTOPTR_WITH_CONVERSION() because of ambiguity between them, so
 // we have a separate macro for the part without bool conversion and another
 // one for the whole declaration
-#define BEGIN_DECLARE_AUTOPTR(classname)              \
-   BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname)           \
-   public:                                            \
-      operator bool() const { return m_ptr != NULL; } \
+#define BEGIN_DECLARE_AUTOPTR(classname)                    \
+   BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname)                 \
+   public:                                                  \
+      ~classname##_obj() { if ( m_ptr ) m_ptr->DecRef(); }  \
+      operator bool() const { return m_ptr != NULL; }
 
 // finish the class decl
 #define END_DECLARE_AUTOPTR() }
@@ -271,10 +271,23 @@ private:
 
 // declare an auto ptr with implicit conversion to its real pointer class:
 // dangerous but needed for backwards compatibility
-#define DECLARE_AUTOPTR_WITH_CONVERSION(classname)    \
-   BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname)           \
-   public:                                            \
-      operator classname *() const { return m_ptr; }  \
+#define DECLARE_AUTOPTR_WITH_CONVERSION(classname)          \
+   BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname)                 \
+   public:                                                  \
+      ~classname##_obj() { if ( m_ptr ) m_ptr->DecRef(); }  \
+      operator classname *() const { return m_ptr; }        \
+   END_DECLARE_AUTOPTR()
+
+// same thing for non ref counted pointers
+#define BEGIN_DECLARE_AUTOPTR_NO_REF(classname)             \
+   BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname)                 \
+   public:                                                  \
+      ~classname##_obj() { delete m_ptr; }                  \
+      operator bool() const { return m_ptr != NULL; }
+
+// declare an class which is an auto ptr to the given MObjectRC-derived type
+#define DECLARE_AUTOPTR_NO_REF(classname)                   \
+   BEGIN_DECLARE_AUTOPTR_NO_REF(classname)                  \
    END_DECLARE_AUTOPTR()
 
 // ----------------------------------------------------------------------------

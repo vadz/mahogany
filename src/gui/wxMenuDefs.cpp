@@ -305,10 +305,11 @@ static const MenuItemInfo g_aMenuItems[] =
    // msg
 
    // the available accelerators for this menu:
-   // bijqwz
+   // bjqwz
 
-   { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message")    , FALSE },
-   { WXMENU_MSG_PRINT,     gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print this message")       , FALSE },
+   { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message in a separate window")    , FALSE },
+   { WXMENU_MSG_EDIT,      gettext_noop("Ed&it in composer"), gettext_noop("Edit selected message in composer")    , FALSE },
+   { WXMENU_MSG_PRINT,     gettext_noop("&Print\tCtrl-P"),    gettext_noop("Print this message")       , FALSE },
    { WXMENU_MSG_PRINT_PREVIEW, gettext_noop("Print Pre&view"),gettext_noop("Preview a printout of this message")       , FALSE },
 #ifdef USE_PS_PRINTING
    { WXMENU_MSG_PRINT_PS,     gettext_noop("PS-Prin&t"),      gettext_noop("Print this message as PostScript")       , FALSE },
@@ -417,16 +418,20 @@ static const MenuItemInfo g_aMenuItems[] =
    // compose
 
    // the available accelerators for this menu:
-   // ABDFGJMOQRUXYZ
-   { WXMENU_COMPOSE_INSERTFILE, gettext_noop("&Insert file...\tCtrl-I"),
-                                gettext_noop("Attach a file to the message")            , FALSE },
-   { WXMENU_COMPOSE_LOADTEXT,gettext_noop("I&nsert text...\tCtrl-T"), gettext_noop("Insert text file")         , FALSE },
-   { WXMENU_COMPOSE_SEND,  gettext_noop("&Send\tShift-Ctrl-X"),             gettext_noop("Send the message now")     , FALSE },
-   { WXMENU_COMPOSE_SEND_LATER, gettext_noop("Send &Later\tShift-Ctrl-L"),
-                                gettext_noop("Schedule the message to be send at a later time.")     , FALSE },
+   // ABFGJMOQRUXYZ
+   { WXMENU_COMPOSE_INSERTFILE,     gettext_noop("&Insert file...\tCtrl-I"),
+                                    gettext_noop("Attach a file to the message")            , FALSE },
+   { WXMENU_COMPOSE_LOADTEXT,       gettext_noop("I&nsert text...\tCtrl-T"),
+                                    gettext_noop("Insert text file")         , FALSE },
+   { WXMENU_COMPOSE_SEND,           gettext_noop("&Send\tShift-Ctrl-X"),
+                                    gettext_noop("Send the message now")     , FALSE },
+   { WXMENU_COMPOSE_SAVE_AS_DRAFT,  gettext_noop("Close and save as &draft"),
+                                    gettext_noop("Close the window and save the message in the drafts folder")     , FALSE },
+   { WXMENU_COMPOSE_SEND_LATER,     gettext_noop("Send &Later\tShift-Ctrl-L"),
+                                    gettext_noop("Schedule the message to be send at a later time.")     , FALSE },
    { WXMENU_COMPOSE_SEND_KEEP_OPEN, gettext_noop("Send and &keep\tShift-Ctrl-K"),
                                     gettext_noop("Send the message now and keep the editor open")     , FALSE },
-   { WXMENU_COMPOSE_PRINT, gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print the message")        , FALSE },
+   { WXMENU_COMPOSE_PRINT,          gettext_noop("&Print\tCtrl-P"),            gettext_noop("Print the message")        , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_COMPOSE_PREVIEW, gettext_noop("Previe&w..."),   gettext_noop("View the message as it would be sent"), FALSE },
    { WXMENU_COMPOSE_SAVETEXT,gettext_noop("Save &text..."),   gettext_noop("Save (append) message text to file"), FALSE },
