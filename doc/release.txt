@@ -82,6 +82,8 @@ Update the FM record
 
 d) GNOME app map: http://www.gnome.org/applist/
 
-e) OSD: http://www.opensourcedirectory.org/ (not sure if really needed)
+e) GNU Free Software Directory: http://www.gnu.org/directory/mahogany.html
+
+f) OSD: http://www.opensourcedirectory.org/ (not sure if really needed)
 
 vi: ts=8 nolist:
