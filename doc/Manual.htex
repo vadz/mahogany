@@ -111,7 +111,7 @@ Yet, inevitably, some of them still crept in and here is an incomplete list:
       search in many folders at once.
 \item More new commands in no special order: ``Move folder'', ``Follow up to
       newsgroup'', ``Go to message'' (by number), ``Preview'' in composer
-\item Message viewer and composer support UTF-7 and UTF-8.
+\item Message viewer supports UTF-7 and UTF-8.
 \item Raw text view dialog now has a find button.
 \item It is now possible to use config files instead of the registry under
       Windows too.
