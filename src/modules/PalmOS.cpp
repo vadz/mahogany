@@ -33,7 +33,11 @@
 #include "gui/wxDialogLayout.h"
 #include "gui/wxOptionsDlg.h"
 #include "gui/wxOptionsPage.h"
-#include "adb/ProvPalm.h"
+
+class PalmBook;
+#ifdef EXPERIMENTAL
+#   include "adb/ProvPalm.h"
+#endif
 
 #define MODULE_NAME    "PalmOS"
 
@@ -211,9 +215,11 @@ private:
    MInterface * m_MInterface;
 
 private:
+#if EXPERIMENTAL
    int match_category(char * buf, struct AddressAppInfo *aai);
    int createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_Group);
 
+#endif
    int m_PiSocket;
    int m_MailDB;
    int m_AddrDB;
@@ -490,41 +496,45 @@ int defaultcategory = 0;
 int augment;
 
 void
-PalmOSModule::GetAddresses(PalmBook *palmbook) {
-  int    l;
-  char   buf[0xffff];
-  struct AddressAppInfo aai;
-  char * defaultcategoryname = 0;
+PalmOSModule::GetAddresses(PalmBook *palmbook)
+{
+#ifdef EXPERIMENTAL
+   int    l;
+   char   buf[0xffff];
+   struct AddressAppInfo aai;
+   char * defaultcategoryname = 0;
 
-  // if no book specified where to save, we can skip it
-  if (!palmbook) {
-    ErrorMessage(_("No PalmBook specified."));
-    return;
-  }
+   // if no book specified where to save, we can skip it
+   if (!palmbook) {
+      ErrorMessage(_("No PalmBook specified."));
+      return;
+   }
 
-  /* Open the Address database, store access handle in db */
-  if(dlp_OpenDB(m_PiSocket, 0, 0x80|0x40, "AddressDB", &m_AddrDB) < 0) {
-    ErrorMessage(_("Unable to open AddressDB"));
-    dlp_AddSyncLogEntry(m_PiSocket, "Unable to open AddressDB.\n");
-    exit(1);
-  }
+   /* Open the Address database, store access handle in db */
+   if(dlp_OpenDB(m_PiSocket, 0, 0x80|0x40, "AddressDB", &m_AddrDB) < 0) {
+      ErrorMessage(_("Unable to open AddressDB"));
+      dlp_AddSyncLogEntry(m_PiSocket, "Unable to open AddressDB.\n");
+      exit(1);
+   }
 
-  l = dlp_ReadAppBlock(m_PiSocket, m_AddrDB, 0, (unsigned char *)buf, 0xffff);
-  unpack_AddressAppInfo(&aai, (unsigned char *)buf, l);
+   l = dlp_ReadAppBlock(m_PiSocket, m_AddrDB, 0, (unsigned char *)buf, 0xffff);
+   unpack_AddressAppInfo(&aai, (unsigned char *)buf, l);
 
-  if (defaultcategoryname)
-    defaultcategory = match_category(defaultcategoryname,&aai);
-  else
-    defaultcategory = 0; /* Unfiled */
+   if (defaultcategoryname)
+      defaultcategory = match_category(defaultcategoryname,&aai);
+   else
+      defaultcategory = 0; /* Unfiled */
   
-  if (!palmbook->GetGroup()) {
-    ErrorMessage(_("ADB not correctly initialized!"));
-    return;
-  }
+   if (!palmbook->GetGroup()) {
+      ErrorMessage(_("ADB not correctly initialized!"));
+      return;
+   }
 
-  createEntries(m_AddrDB, &aai, (PalmEntryGroup *)palmbook->GetGroup());
+   createEntries(m_AddrDB, &aai, (PalmEntryGroup *)palmbook->GetGroup());
+#endif
 }
 
+#if EXPERIMENTAL
 int
 PalmOSModule::match_category(char * buf, struct AddressAppInfo * aai)
 {
@@ -572,6 +582,7 @@ PalmOSModule::createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup*
   
   return 0;
 }
+#endif
 
 void
 PalmOSModule::SendEMails(void)
