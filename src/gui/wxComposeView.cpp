@@ -1808,16 +1808,17 @@ wxComposeView::Send(void)
                   char *buffer = new char[size];
                   if ( file.Read(buffer, size) )
                   {
-                     MessageParameterList dlist;
+                     MessageParameterList plist, dlist;
+                     // some mailers want "FILENAME" in disposition parameters
                      MessageParameter *p = new MessageParameter;
                      p->name = "FILENAME";
                      p->value = wxFileNameFromPath(filename);
                      dlist.push_back(p);
-                     // some mailers want "NAME":
+                     // some mailers want "NAME" in parameters:
                      p = new MessageParameter;
                      p->name = "NAME";
                      p->value = wxFileNameFromPath(filename);
-                     dlist.push_back(p);
+                     plist.push_back(p);
 
                      msg->AddPart
                         (
@@ -1825,7 +1826,7 @@ wxComposeView::Send(void)
                            buffer, size,
                            strutil_after(mc->GetMimeType(),'/'), //subtype
                            "INLINE",
-                           &dlist
+                           &dlist, &plist
                            );
                   }
                   else
@@ -1846,13 +1847,17 @@ wxComposeView::Send(void)
 
             case MimeContent::MIMECONTENT_DATA:
             {
-               MessageParameterList dlist;
+               MessageParameterList dlist, plist;
                if(! strutil_isempty(mc->GetFileName()))
                {
                   MessageParameter *p = new MessageParameter;
                   p->name = "FILENAME";
                   p->value = wxFileNameFromPath(mc->GetFileName());
                   dlist.push_back(p);
+                  p = new MessageParameter;
+                  p->name = "NAME";
+                  p->value = wxFileNameFromPath(mc->GetFileName());
+                  plist.push_back(p);
                }
                msg->AddPart
                   (
@@ -1860,8 +1865,7 @@ wxComposeView::Send(void)
                      mc->GetData(), mc->GetSize(),
                      strutil_after(mc->GetMimeType(),'/'),  //subtype
                      "INLINE"
-                     ,&dlist,
-                     NULL
+                     ,&dlist,&plist
                      );
             }
             break;

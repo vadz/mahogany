@@ -503,7 +503,6 @@ SendMessageCC::AddPart(Message::ContentType type,
       
    }
    bdy->disposition.type = strutil_strdup(disposition);
-   bdy->parameter = NULL;
    if(dlist)
    {
       MessageParameterList::iterator i;
