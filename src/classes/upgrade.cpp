@@ -28,8 +28,10 @@
 #  include "MApplication.h"
 
 #  include "Mdefaults.h"
+#ifdef USE_PYTHON
 #  include "Python.h"
 #  include "PythonHelp.h"
+#endif
 #endif  //USE_PCH
 
 #include <wx/log.h>
@@ -80,7 +82,7 @@ bool UpgradeFromNone()
    }
 
    ShowOptionsDialog();
-#if defined ( USE_POYTHON )
+#if defined ( USE_PYTHON )
    // run a python script to set up things
    PyH_RunScript(MSCRIPT_USER_SETUP);
 #else
