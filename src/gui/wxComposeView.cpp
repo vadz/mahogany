@@ -264,7 +264,7 @@ public:
    void RememberCursorPosition() { m_hasCursorPosition = TRUE; }
 
    // called by VarExpander to insert an attachment
-   void InsertAttachment(const void *data, size_t len, const String& mimetype);
+   void InsertAttachment(void *data, size_t len, const String& mimetype);
 
 private:
    // as soon as m_hasCursorPosition becomes TRUE we stop to update the current
@@ -1196,7 +1196,8 @@ wxComposeView::DoInitText(Message *msg)
       // now do attach it
       if ( hasCard )
       {
-         InsertData(vcard.c_str(), vcard.length(), "text/x-vcard", filename);
+         InsertData(strutil_strdup(vcard), vcard.length(),
+                    "text/x-vcard", filename);
       }
    }
 
@@ -2497,7 +2498,7 @@ ExpansionSink::Output(const String& text)
 }
 
 void
-ExpansionSink::InsertAttachment(const void *data,
+ExpansionSink::InsertAttachment(void *data,
                                 size_t len,
                                 const String& mimetype)
 {
