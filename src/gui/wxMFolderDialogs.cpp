@@ -1392,20 +1392,27 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
       case MF_FILE:
 #ifdef EXPERIMENTAL
       case MF_MFILE:
+         m_folderSubtype->SetSelection(
+            m_folderType == MF_MFILE ? FileFolderSubtype_MFile
+            : FileFolderSubtype_Mbox);
+#else
+         m_folderSubtype->SetSelection(FileFolderSubtype_Mbox);
 #endif
          m_browsePath->BrowseForFiles();
-         m_folderSubtype->SetSelection(FileFolderSubtype_MFile);
          m_isDir->Enable(FALSE);
          break;
 
       case MF_MH:
 #ifdef EXPERIMENTAL
       case MF_MDIR:
+         m_folderSubtype->SetSelection(
+            m_folderType == MF_MFILE ? FileFolderSubtype_MDir
+            : FileFolderSubtype_MH);
+#else
+         m_folderSubtype->SetSelection(FileFolderSubtype_MH);
 #endif
       {
          m_browsePath->BrowseForDirectories();
-         m_folderSubtype->SetSelection(FileFolderSubtype_MDir);
-
          MFolder_obj folderParent(dlg->GetParentFolderName());
          Profile_obj profile(folderParent->GetFullName());
 

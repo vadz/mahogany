@@ -144,11 +144,7 @@ MessageCC::Send(Protocol protocol)
 
    String name, reply;
    reply = Address( name, MAT_REPLYTO);
-   if(name.Length())
-   {
-      name << " <" << reply << '>';
-      reply = name;
-   }
+
    switch(protocol)
    {
       case Prot_SMTP:
@@ -158,7 +154,7 @@ MessageCC::Send(Protocol protocol)
          GetHeaderLine("CC", cc);
          GetHeaderLine("BCC",bcc);
          sendMsg.SetAddresses(to, cc, bcc);
-         sendMsg.SetFrom(From(), reply);
+         sendMsg.SetFrom(From(), name, reply);
       }
       break;
 
@@ -167,7 +163,7 @@ MessageCC::Send(Protocol protocol)
          String newsgroups;
          GetHeaderLine("Newsgroups",newsgroups);
          sendMsg.SetNewsgroups(newsgroups);
-         sendMsg.SetFrom(From(), reply);
+         sendMsg.SetFrom(From(), name, reply);
       }
       break;
    }
@@ -314,6 +310,7 @@ MessageCC::Address(String &name, MessageAddressType type) const
    String
       email;
 
+   name = "";
    switch(type)
    {
    case MAT_FROM:
@@ -334,10 +331,17 @@ MessageCC::Address(String &name, MessageAddressType type) const
          addr = m_Envelope->from;
       if(! addr)
          addr = m_Envelope->sender;
+      if(addr->personal && strlen(addr->personal))
+         name = String(addr->personal);
+      else
+      {
+         if(m_Envelope->from->personal &&
+            strlen(m_Envelope->from->personal))
+            name = String(m_Envelope->from->personal);
+      }
       break;
    }
 
-   name = "";
    if(! addr)
       return "";
 
@@ -348,7 +352,7 @@ MessageCC::Address(String &name, MessageAddressType type) const
 
    if(addr->personal && strlen(addr->personal))
       name = String(addr->personal);
-
+   
    name = MailFolderCC::qprint(name);
 
    if(strchr(name, ',') || strchr(name,'<') || strchr(name,'>'))

@@ -51,11 +51,13 @@ public:
 
    /** Sets the value for the from field.
        @param from sender address
-       @param returnaddress  address for Reply-To
+       @param personal personal name
+       @param returnaddress address for Reply-To
    */
    virtual void SetFrom(const String &from,
+                        const String &personal = "",
                         const String & returnaddress = "");
-   
+
    virtual void SetNewsgroups(const String &groups);
    
    /** Get the profile.

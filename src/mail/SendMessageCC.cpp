@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * SendMessageCC class: c-client implementation of a compose message*
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$ *
  *                                                                  *
@@ -90,62 +90,6 @@ SendMessageCC::Create(Protocol protocol,
    m_Envelope = mail_newenvelope();
    m_Body = mail_newbody();
 
-   // From: line:
-   m_Envelope->from = mail_newaddr();
-   if(m_From.Length() == 0)
-   {
-      m_Envelope->from->personal =
-         CPYSTR(m_Profile->readEntry(MP_PERSONALNAME, MP_PERSONALNAME_D));
-      m_Envelope->from->mailbox =
-         CPYSTR(m_Profile->readEntry(MP_USERNAME, MP_USERNAME_D));
-      tmpstr = m_Profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
-      m_Envelope->from->host = tmpstr.Length() ? CPYSTR(tmpstr) : NIL;
-   }
-   else
-   {
-      tmpstr = strutil_before(m_From,'@');
-      m_Envelope->from->mailbox = CPYSTR(tmpstr);
-      tmpstr = strutil_after(m_From,'@');
-      if(tmpstr.Length() == 0)
-         m_Envelope->from->host = CPYSTR(wxGetFullHostName());
-      else
-         m_Envelope->from->host = CPYSTR(tmpstr);
-   }
-      
-   /// return path:
-   if(m_ReplyTo.Length() == 0)
-   {
-      m_Envelope->return_path = mail_newaddr ();
-      tmpstr = m_Profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
-      if(strutil_isempty(tmpstr))
-         tmpstr = m_Profile->readEntry(MP_USERNAME,MP_USERNAME_D);
-      else
-         tmpstr = strutil_before(tmpstr,'@');
-      m_Envelope->return_path->mailbox = CPYSTR(tmpstr);
-      tmpstr = m_Profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
-      if(strutil_isempty(tmpstr))
-         tmpstr = m_Profile->readEntry(MP_HOSTNAME,MP_HOSTNAME_D);
-      else
-         tmpstr = strutil_after(tmpstr,'@');
-      if(tmpstr.Length() == 0)
-      {
-         // we need a valid return path!
-         m_Envelope->return_path->host = CPYSTR(wxGetFullHostName());
-      }
-      else
-         m_Envelope->return_path->host = CPYSTR(tmpstr);
-   }
-   else
-   {
-      tmpstr = strutil_before(m_ReplyTo,'@');
-      m_Envelope->return_path->mailbox = CPYSTR(tmpstr);
-      tmpstr = strutil_after(m_ReplyTo,'@');
-      if(tmpstr.Length() == 0)
-         m_Envelope->return_path->host = CPYSTR(wxGetFullHostName());
-      else
-         m_Envelope->return_path->host = CPYSTR(tmpstr);
-   }
-   
    m_Body->type = TYPEMULTIPART;
    m_Body->nested.part = mail_newbody_part();
    m_Body->nested.part->next = NULL;
@@ -161,9 +105,47 @@ SendMessageCC::SetSubject(const String &subject)
 }
 
 void
-SendMessageCC::SetFrom(const String &from,
+SendMessageCC::SetFrom(const String & from,
+                       const String & ipersonal,
                        const String & returnaddress)
 {
+   if(m_Envelope->from != NIL)
+      mail_free_address(&m_Envelope->from);
+   if(m_Envelope->return_path != NIL)
+      mail_free_address(&m_Envelope->return_path);
+   
+   // From: line:
+   m_Envelope->from = mail_newaddr();
+   m_Envelope->return_path = mail_newaddr ();
+
+   String personal, mailbox, mailhost;
+   
+   personal = ipersonal.Length() == 0 ?
+      m_Profile->readEntry(MP_PERSONALNAME,
+                           MP_PERSONALNAME_D)
+      : ipersonal ;
+   
+   if(from.Length() == 0)
+   {
+      mailbox = m_Profile->readEntry(MP_USERNAME, MP_USERNAME_D);
+      
+      mailhost = m_Profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
+   }
+   else
+   {
+      mailbox  = strutil_before(from,'@');
+      mailhost = strutil_after(from,'@');
+   }
+   if(! mailhost.Length()) mailhost = wxGetFullHostName();
+   
+   m_Envelope->from->personal = CPYSTR(personal);
+   m_Envelope->from->mailbox = CPYSTR(mailbox);
+   m_Envelope->from->host = CPYSTR(mailhost);
+
+   m_Envelope->return_path->mailbox = CPYSTR(mailbox);
+   m_Envelope->return_path->host = CPYSTR(mailhost);
+
+   m_ReplyTo = returnaddress;
 }
 
 void

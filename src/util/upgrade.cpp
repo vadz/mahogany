@@ -1010,7 +1010,36 @@ bool RunInstallWizard()
         "\015\012"
         "Your Mahogany Developers Team\015\012"
         );
-   String msgString; msgString.Printf(msgFmt, __DATE__);
+
+   time_t tt;
+   time(&tt);
+   struct tm *ourtime = localtime(&tt);
+   String timeStr;
+   switch(ourtime->tm_mon)
+   {
+   case  0: timeStr = "Jan"; break;
+   case  1: timeStr = "Feb"; break;
+   case  2: timeStr = "Mar"; break;
+   case  3: timeStr = "Apr"; break;
+   case  4: timeStr = "May"; break;
+   case  5: timeStr = "Jun"; break;
+   case  6: timeStr = "Jul"; break;
+   case  7: timeStr = "Aug"; break;
+   case  8: timeStr = "Sep"; break;
+   case  9: timeStr = "Oct"; break;
+   case 10: timeStr = "Nov"; break;
+   case 11: timeStr = "Dec"; break;
+   default:
+      ; // suppress warning
+   }
+   timeStr.Printf("%02d %s %d %02d:%02d:%02d",
+                  ourtime->tm_mday,
+                  timeStr.c_str(),
+                  ourtime->tm_year+1900,
+                  ourtime->tm_hour,
+                  ourtime->tm_min,
+                  ourtime->tm_sec);
+   String msgString; msgString.Printf(msgFmt, timeStr.c_str());
    MailFolder *mf = NULL;
    if(gs_installWizardData.collectAllMail)
    {
