@@ -35,7 +35,6 @@
 #include   <errno.h>
 
 #include "FolderView.h"
-#include "Adb.h"
 #include "Script.h"
 #include "MailFolder.h"
 #include "MailFolderCC.h"
@@ -69,7 +68,6 @@
 // ----------------------------------------------------------------------------
 MAppBase::MAppBase()
 {
-   adb = NULL;
 }
 
 void
@@ -115,7 +113,6 @@ MAppBase::~MAppBase()
 {
    GLOBAL_DELETE m_mimeList;
    GLOBAL_DELETE m_mimeTypes;
-   GLOBAL_DELETE adb;
    GLOBAL_DELETE m_cfManager;
    GLOBAL_DELETE m_profile;
 }
@@ -214,7 +211,6 @@ MAppBase::OnStartup()
    String adbName = lpf.FindFile(READ_APPCONFIG(MC_ADBFILE), &found);
    if(! found)
       adbName = m_localDir + '/' + READ_APPCONFIG(MC_ADBFILE);
-   adb = GLOBAL_NEW Adb(adbName);
 
    // open all default mailboxes:
    char *folders = strutil_strdup(READ_APPCONFIG(MC_OPENFOLDERS));
