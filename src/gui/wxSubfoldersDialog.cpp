@@ -366,6 +366,8 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
       // other events (possible as we will call wxYield())
       Disable();
       
+      wxBusyCursor bc;
+
       // now OnNewFolder() and OnNoMoreFolders() will be called
       (void)m_mailFolder->ListFolders
                           (
@@ -374,6 +376,13 @@ void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
                              relPath,  // reference (path relative to the folder)
                              this      // data to pass to the callback
                           );
+
+      // wait until the expansion ends
+      do
+      {
+         wxYield();
+      }
+      while ( m_idParent.IsOk() );
    }
    //else: this branch had already been expanded
 
@@ -411,6 +420,10 @@ bool wxSubfoldersTree::OnMEvent(MEventData& event)
 
    // usually, all folders will have a non NUL delimiter ('.' for news, '/'
    // for everything else), but IMAP INBOX is special
+   //
+   // FIXME the much better way to do it is to issue 'LIST "" ""' command
+   //       which will always return the delimiter (and nothing else), however
+   //       I don't know if it is supported by all cclient drivers?
    char chDelimiter = result->GetDelimiter();
    if ( chDelimiter )
    {
@@ -425,7 +438,7 @@ bool wxSubfoldersTree::OnMEvent(MEventData& event)
    {
       OnNoMoreFolders();
    }
-   else
+   else // normal folder event
    {
       // we're passed a folder specification - extract the folder name from it
       // (it's better to show this to the user rather than cryptic cclient
@@ -845,9 +858,10 @@ void wxSubscriptionDialog::OnUnselectAll(wxCommandEvent& event)
 // update the number of items in the box
 void wxSubscriptionDialog::OnTreeExpanded(wxTreeEvent& event)
 {
-   size_t nFolders = m_treectrl->GetCount() - 1;
+   wxTreeItemId id = event.GetItem();
+   size_t nFolders = m_treectrl->GetChildrenCount(id);
    m_box->SetLabel(wxString::Format(_("%u subfolders under %s"),
-                   nFolders, m_folder->GetPath().c_str()));
+                   nFolders, m_treectrl->GetItemText(id).c_str()));
 
    event.Skip();
 }
