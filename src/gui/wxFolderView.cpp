@@ -1717,9 +1717,9 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
       static const int popupMenuEntries[] =
       {
          WXMENU_MSG_QUICK_FILTER,
-         wxID_SEPARATOR,
+         WXMENU_MSG_SEP3,
          WXMENU_MSG_OPEN,
-         wxID_SEPARATOR,
+         WXMENU_MSG_SEP3,     // always the same but it doesn't matter...
          WXMENU_MSG_REPLY,
          WXMENU_MSG_REPLY_WITH_TEMPLATE,
          WXMENU_MSG_REPLY_ALL,
@@ -1727,7 +1727,7 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
          WXMENU_MSG_FORWARD,
          WXMENU_MSG_FORWARD_WITH_TEMPLATE,
          WXMENU_MSG_FOLLOWUP_TO_NEWSGROUP,
-         wxID_SEPARATOR,
+         WXMENU_MSG_SEP3,
          WXMENU_MSG_FILTER,
          WXMENU_MSG_PRINT,
          WXMENU_MSG_SAVE_TO_FILE,
@@ -1735,10 +1735,10 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
          WXMENU_MSG_MOVE_TO_FOLDER,
          WXMENU_MSG_DELETE,
          WXMENU_MSG_UNDELETE,
-         wxID_SEPARATOR,
+         WXMENU_MSG_SEP3,
          WXMENU_MSG_MARK_READ,
          WXMENU_MSG_MARK_UNREAD,
-         wxID_SEPARATOR,
+         WXMENU_MSG_SEP3,
          WXMENU_MSG_SHOWRAWTEXT,
       };
 
