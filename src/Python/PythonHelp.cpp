@@ -172,7 +172,7 @@ bool PyH_CallFunctionVa(const char *func,
                       const char *name,
                       void *obj, const char *classname,
                         const char *resultfmt, void *result,
-                        const char *argfmt, ...
+                        const char * /* argfmt */, ...
    )
 {
    // first check if Python is not disabled
@@ -359,7 +359,7 @@ PyH_RunMScript(const char *scriptname)
 {
    wxString filename = mApplication->GetGlobalDir();
 
-   filename << DIR_SEPARATOR << _T("scripts");
+   filename << DIR_SEPARATOR << _T("scripts") << DIR_SEPARATOR << scriptname;
 
    FILE *file = fopen(filename,"rb");
    if(file)
@@ -369,8 +369,7 @@ PyH_RunMScript(const char *scriptname)
    }
    else
    {
-      filename = _("Cannot run script: ") + filename;
-      ERRORMESSAGE((filename));
+      ERRORMESSAGE((_("Cannot run Python script \"%s\""), scriptname));
    }
 }
 
