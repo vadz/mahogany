@@ -532,8 +532,10 @@ wxMApp::OnInit()
    wxHandleFatalExceptions();
 #endif
 
+#if wxCHECK_VERSION(2, 3, 2)
    if ( !wxApp::OnInit() )
       return false;
+#endif // wxWin 2.3.2+
 
 #ifdef OS_WIN
    // stupidly enough wxWin resets the default timestamp under Windows :-(
