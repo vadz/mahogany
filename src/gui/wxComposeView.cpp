@@ -601,12 +601,14 @@ wxComposeView::Send(void)
       String file;
       MailFolderCC *mf =
          MailFolderCC::OpenFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER));
-      file = READ_CONFIG(mf->GetProfile(),MP_FOLDER_PATH);
-      if(strutil_isempty(file))
-         file = READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER);
-         
-      sm.WriteToFile(file,true/*append*/);
-      mf->Close();
+      if(mf)
+      {
+         file = READ_CONFIG(mf->GetProfile(),MP_FOLDER_PATH);
+         if(strutil_isempty(file))
+            file = READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER);
+         sm.WriteToFile(file,true/*append*/);
+         mf->Close();
+      }
    }
 }
 
