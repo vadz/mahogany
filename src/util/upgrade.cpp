@@ -1083,7 +1083,7 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    }
 
 #ifdef USE_PYTHON
-   if(gs_installWizardData.usePalmOs)
+   if(gs_installWizardData.usePython)
       profile->writeEntry(MP_USEPYTHON, 1l);
    else
       profile->writeEntry(MP_USEPYTHON, 0l);
