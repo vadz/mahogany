@@ -4533,27 +4533,22 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
          newFocus = -1;
          break;
 
-#ifdef OS_WIN
-      case 0:
+      case WXK_UP:
+      case WXK_DOWN:
+      case WXK_HOME:
+      case WXK_END:
+         // let the control process these keys as they're used for navigation
+         event.Skip();
+         return false;
+
+      default:
          // pressing any alphanumeric character in the list control starts
          // incremental search in it which is worse than useless in our case
          // because it's never going to find anything (the first column is
          // always flags in this case and won't match...) and we just lost the
-         // current selection, so prevent this from happening
+         // current selection, so prevent this from happening by *not* calling
+         // event.Skip() here
          newFocus = -1;
-         break;
-#endif // OS_WIN
-
-      case WXK_UP:
-      case WXK_DOWN:
-         event.Skip();
-         // fall through
-
-      default:
-         // for the same reasons as above, eat the character and don't allow
-         // it to be processed by the control itself lest it starts an
-         // incremental search, so don't call event.Skip()
-         return false;
    }
 
    if ( newFocus != -1 )
