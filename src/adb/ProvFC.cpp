@@ -744,14 +744,10 @@ size_t FCBook::GetNumberOfEntries() const
 
 bool FCBook::IsReadOnly() const
 {
-  // flush config forcing the file creation, otherwise our we would always
-  // return true because wxFile::Access() fails for non existing file!
-  if ( !wxFile::Exists(m_strFile) )
-  {
-    m_pConfig->Flush();
-  }
-
-  return !wxFile::Access(m_strFile, wxFile::write);
+  // if the file doesn't exist yet, we can't use Access() (it would return
+  // false) but we can be sure that we're not read only as a new book can be
+  // successfully opened with a non existing file name only for writing
+  return wxFile::Exists(m_strFile) && !wxFile::Access(m_strFile, wxFile::write);
 }
 
 bool FCBook::Flush()
