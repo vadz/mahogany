@@ -38,7 +38,7 @@
 #undef USE_SSL
 
 /** Define this to use built-in i18n support */
-#undef USE_I18N
+#define USE_I18N
 
 /** Define this to build M with dialup support */
 #define USE_DIALUP
