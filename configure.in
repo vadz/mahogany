@@ -37,18 +37,17 @@ dnl Mahogany parameter evaluation
 dnl Usage: M_OVERRIDES(package,message,variable,default,help)
 dnl --------------------------------------------------------------------------
 
-M_OVERRIDES(debugall,debugging,USE_DEBUG_ALL,0,
---enable-debug          generate code for debugging)
+M_OVERRIDES(debug,debugging,USE_DEBUG,0,
+--enable-debug          generate code with debugging information)
 
 M_OVERRIDES(optimize,optimization,USE_OPT,1,
 --disable-optimize      disable compiler optimization)
 
-dnl TODO: the following three options should go
-M_OVERRIDES(debug,debug code,USE_DEBUG,0,
---with-debug            [deprecated, use --enable-debug instead])
-
-M_OVERRIDES(debuginfo,debuging info,USE_DEBUG_INFO,0,
---with-debuginfo        [deprecated, don't use])
+dnl M_OVERRIDES(debug,debug code,USE_DEBUG,0,
+dnl --with-debug            [deprecated, use --enable-debug instead])
+dnl 
+dnl M_OVERRIDES(debuginfo,debuging info,USE_DEBUG_INFO,0,
+dnl --with-debuginfo        [deprecated, don't use])
 
 M_OVERRIDES(wxdebug,wxWin debug libs,USE_WXDEBUG,0,
 --with-wxdebug          use debug wxWindows libraries)
@@ -448,15 +447,6 @@ esac
 AC_SUBST(MAKE_USE_LEAKTRACER)
 
 dnl set debug/optimisation flags
-
-case "$USE_DEBUG_ALL" in
-0|'')	USE_DEBUG=""
-	;;
-*)	if test "x$USE_DEBUG" = "x"; then
-	    USE_DEBUG=1
-	fi
-	;;
-esac
 
 case "$USE_DEBUG" in
 0|'')	DEBUG_OPTS="" ;;
