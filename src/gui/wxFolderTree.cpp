@@ -360,13 +360,21 @@ public:
    // event processing function
    virtual bool OnMEvent(MEventData& event);
 
-#ifdef __WXGTK__
+#if defined(__WXGTK__) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
    void OnMouseMove(wxMouseEvent &event)
    {
-      if ( m_FocusFollowMode && FindFocus() != this )
-         SetFocus();
+#ifdef OS_WIN
+      // workaround for workaround: we have to test this to avoid the frame
+      // containing the list ctrl being raised to the top from behind another top
+      // level frame
+      HWND hwndTop = ::GetForegroundWindow();
+      wxFrame *frame = GetFrame(this);//m_FolderView->m_Frame;
+      if ( frame && frame->GetHWND() == (WXHWND)hwndTop )
+#endif // OS_WIN
+         if ( m_FocusFollowMode && FindFocus() != this )
+            SetFocus();
    }
-#endif // wxGTK
+#endif
 
    // get the folder tree node object from item id
    wxFolderTreeNode *GetFolderTreeNode(const wxTreeItemId& item) const
@@ -546,10 +554,10 @@ private:
    bool     m_showHidden;
    bool     m_curIsHidden;
 
-#ifdef __WXGTK__
+#if defined(__WXGTK__) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
    // give focus to the tree when mouse enters it [used under unix only]
    bool m_FocusFollowMode;
-#endif // wxGTK
+#endif
 
    // the fg and bg colour names
    wxString m_colFgName,
@@ -700,9 +708,9 @@ BEGIN_EVENT_TABLE(wxFolderTreeImpl, wxPTreeCtrl)
 
    EVT_MENU(-1, wxFolderTreeImpl::OnMenuCommand)
 
-#ifdef __WXGTK__
+#if defined(__WXGTK__) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
    EVT_MOTION (wxFolderTreeImpl::OnMouseMove)
-#endif // wxGTK
+#endif
 
    EVT_IDLE(wxFolderTreeImpl::OnIdle)
 END_EVENT_TABLE()
@@ -1622,9 +1630,9 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    m_showHidden = ShowHiddenFolders();
    m_curIsHidden = false;
 
-#ifdef __WXGTK__
+#if defined(__WXGTK__) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
    m_FocusFollowMode = READ_APPCONFIG_BOOL(MP_FOCUS_FOLLOWSMOUSE);
-#endif // wxGTK
+#endif
 
    // create an image list and associate it with this control
    size_t nIcons = GetNumberOfFolderIcons();
@@ -2643,9 +2651,9 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
    }
    else if ( ev.GetId() == MEventId_OptionsChange )
    {
-#ifdef __WXGTK__
+#if defined(__WXGTK__) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
       m_FocusFollowMode = READ_APPCONFIG_BOOL(MP_FOCUS_FOLLOWSMOUSE);
-#endif // wxGTK
+#endif // wxGTK || EXPERIMENTAL_FOCUS_FOLLOWS
 
       // reread the bg colour setting
       UpdateColours();

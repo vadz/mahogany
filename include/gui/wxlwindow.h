@@ -193,7 +193,7 @@ public:
          m_StatusBar = bar; m_StatusFieldLabel = labelfield;
          m_StatusFieldCursor = cursorfield;
       }
-#ifndef __WXMSW__
+#if defined(__WXGTK__) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
    /// Enable or disable focus follow mode under non-MSW
    void SetFocusFollowMode(bool enable = TRUE)
       { m_FocusFollowMode = enable; }
@@ -301,7 +301,7 @@ private:
    //@{
    /// Do we want to auto-replace the selection with new text?
    bool         m_AutoDeleteSelection;
-#ifndef __WXMSW__
+#if defined(__WXGTK__) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
    /// Do we want the focus to follow the mouse?
    bool m_FocusFollowMode;
 #endif

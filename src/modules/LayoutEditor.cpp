@@ -247,7 +247,7 @@ void LayoutEditor::Create(Composer *composer, wxWindow *parent)
 
    Profile *profile = GetProfile();
 
-#ifndef OS_WIN
+#if defined(__WXGTK__) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
    m_LayoutWindow->
       SetFocusFollowMode(READ_CONFIG_BOOL(profile, MP_FOCUS_FOLLOWSMOUSE));
 #endif

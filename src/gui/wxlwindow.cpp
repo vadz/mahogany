@@ -169,8 +169,8 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
    m_llist = new wxLayoutList();
    m_BGbitmap = NULL;
    m_ScrollToCursor = false;
-#ifndef __WXMSW__
-   m_FocusFollowMode = false;
+#if defined(__WXGTK__) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
+   m_FocusFollowMode = true; //READ_APPCONFIG_BOOL(MP_FOCUS_FOLLOWSMOUSE);
 #endif
    SetWordWrap(false);
    SetWrapMargin(0);
@@ -266,13 +266,21 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
 {
    wxClientDC dc( this );
    PrepareDC( dc );
-   if ( (eventId != WXLOWIN_MENU_MOUSEMOVE
-#ifndef __WXMSW__
-        || m_FocusFollowMode
+#ifdef OS_WIN
+   // we have to test this to avoid the frame
+   // containing the list ctrl being raised to the top from behind another top
+   // level frame
+   HWND hwndTop = ::GetForegroundWindow();
+   wxFrame *frame = GetFrame(this);
+   if ( frame && frame->GetHWND() == (WXHWND)hwndTop )
+#endif // OS_WIN
+      if ( (eventId != WXLOWIN_MENU_MOUSEMOVE
+#if defined(__WXGTK__) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
+           || m_FocusFollowMode
 #endif
-        ) && (wxWindow::FindFocus() != this)
-      )
-      SetFocus();
+           ) && (wxWindow::FindFocus() != this)
+         )
+         SetFocus();
 
    wxPoint findPos;
    findPos.x = dc.DeviceToLogicalX(event.GetX());

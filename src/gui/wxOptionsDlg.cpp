@@ -510,7 +510,11 @@ enum ConfigFields
 #endif // USE_SSL
 #ifdef OS_UNIX
    ConfigField_AFMPath,
+#endif // OS_UNIX
+#if defined(OS_UNIX) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
    ConfigField_FocusFollowsMouse,
+#endif
+#ifdef OS_UNIX
    ConfigField_DockableMenubars,
    ConfigField_DockableToolbars,
    ConfigField_ToolbarsFlatButtons,
@@ -1519,7 +1523,11 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // USE_SSL
 #ifdef OS_UNIX
    { gettext_noop("&Path where to find AFM files"), Field_Dir,    -1                     },
+#endif // OS_UNIX
+#if defined(OS_UNIX) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
    { gettext_noop("&Focus follows mouse"), Field_Bool,    -1                     },
+#endif
+#ifdef OS_UNIX
    { gettext_noop("Use floating &menu-bars"), Field_Bool,    -1                     },
    { gettext_noop("Use floating &tool-bars"), Field_Bool,    -1                     },
    { gettext_noop("Tool-bars with f&lat buttons"), Field_Bool,    -1                     },
@@ -1919,7 +1927,11 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #endif // USE_SSL
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_AFMPATH),
+#endif // OS_UNIX
+#if defined(OS_UNIX) || defined(EXPERIMENTAL_FOCUS_FOLLOWS)
    CONFIG_ENTRY(MP_FOCUS_FOLLOWSMOUSE),
+#endif
+#ifdef OS_UNIX
    CONFIG_ENTRY(MP_DOCKABLE_MENUBARS),
    CONFIG_ENTRY(MP_DOCKABLE_TOOLBARS),
    CONFIG_ENTRY(MP_FLAT_TOOLBARS),

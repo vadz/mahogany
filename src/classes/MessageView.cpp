@@ -496,7 +496,7 @@ MessageView::SetViewer(MessageViewer *viewer, wxWindow *parent)
    }
 
    viewer->Create(this, parent);
-
+  
    OnViewerChange(m_viewer, viewer);
    if ( m_viewer )
       delete m_viewer;
@@ -1467,8 +1467,14 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
                         if ( !strstr(p + 1, SIG_END_MARKER) &&
                               !strstr(textPart, SIG_END_MARKER) )
                         {
-                           // ok, it passed all our empirical tests
-                           levelNew = LEVEL_SIG;
+                           // Check that there is not another sig marker below
+                           static const char *OTHER_SIG_END_MARKER = "-- \r\n";
+                           if ( !strstr(p + 1, OTHER_SIG_END_MARKER) &&
+                                 !strstr(textPart, OTHER_SIG_END_MARKER) )
+                           {
+                              // ok, it passed all our empirical tests
+                              levelNew = LEVEL_SIG;
+                           }
                         }
                      }
                   }
