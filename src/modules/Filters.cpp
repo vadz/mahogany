@@ -2052,7 +2052,7 @@ static bool CheckReceivedHeaders(const String& value)
    }
 
    // and there shouldn't be any more lines after this one
-   return *pc == '\0';
+   return pc && *pc == '\0';
 }
 
 // check if we have an HTML-only message
