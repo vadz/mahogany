@@ -2,17 +2,18 @@ TODO list for M
 $Id$
 
 *** bugs to fix ***
-testing
+
+- listCtrl in wxMainFrame doesn't even show up - wxGTK broken?
 
 - clean up header inclusion: use <> for system/wxWin files and "xxx" for M
   headers in order to get "make depend" right
 
-
-- occasional segfaults on exit
+- occasional segfaults on exit (but also in GNOME :-)
 
 - there is still a minor problem with URLs ending in > like <http:xxx>
   Ignored for now, until wxFText/wxFTCanvas get rewritten.
 
+- drop Script classes
 - for now, internal scripts directly execute the code passed as the
   function, this may be changed to loading it from outside. Also,
   namespace issues need to be sorted out. 

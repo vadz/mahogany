@@ -6,6 +6,9 @@
  * $Id$           *
  ********************************************************************
  * $Log$
+ * Revision 1.7  1998/06/14 12:23:59  KB
+ * started to move wxFolderView to be a panel, Python improvements
+ *
  * Revision 1.6  1998/05/24 08:22:31  KB
  * changed the creation/destruction of MailFolders, now done through
  * MailFolder::Open/CloseFolder, made constructor/destructor private,
@@ -99,7 +102,7 @@ public:
    
    /** closes a mail folder in a save way.
    */
-   void CloseFolder(void);
+   void Close(void);
 
 
    /// assume object to only be initialised when stream is ok

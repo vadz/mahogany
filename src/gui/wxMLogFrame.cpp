@@ -6,7 +6,11 @@
  * $Id$           *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/06/14 12:24:22  KB
+ * started to move wxFolderView to be a panel, Python improvements
+ *
  * Revision 1.5  1998/06/05 16:56:28  VZ
+ *
  * many changes among which:
  *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
  *     i.e. there is wxMApp inheriting from AppBse and wxApp
@@ -142,14 +146,13 @@ wxMLogFrame::wxMLogFrame()
 {
    SetTitle(_("M activity log"));
 
-   #if  USE_WXWINDOWS2
-      tw = GLOBAL_NEW wxTextCtrl(this, -1, "", wxDefaultPosition, 
+#if  USE_WXWINDOWS2
+   tw = GLOBAL_NEW wxTextCtrl(this, -1, "", wxDefaultPosition, 
                                  wxDefaultSize, wxTE_MULTILINE);
-   #else  // wxWin 1
-      tw = GLOBAL_NEW wxTextWindow(this);
-   #endif // wxWin ver
+#else  // wxWin 1
+   tw = GLOBAL_NEW wxTextWindow(this);
+#endif // wxWin ver
 
-   AddMenuBar();
    AddFileMenu();
    AddHelpMenu();
 
@@ -192,7 +195,6 @@ wxMLogFrame::OnMenuCommand(int id)
    case WXMENU_FILE_CLOSE:
       OnClose();
       break;
-
    default:
       wxMFrame::OnMenuCommand(id);
    }

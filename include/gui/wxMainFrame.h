@@ -6,7 +6,11 @@
  * $Id$       *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/06/14 12:24:08  KB
+ * started to move wxFolderView to be a panel, Python improvements
+ *
  * Revision 1.3  1998/06/05 16:57:02  VZ
+ *
  * many changes among which:
  *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
  *     i.e. there is wxMApp inheriting from AppBse and wxApp
@@ -42,6 +46,32 @@
 #pragma interface "wxMainFrame.h"
 #endif
 
+class wxMainTreeCtrl : public wxTreeCtrl
+{
+public:
+   wxMainTreeCtrl(wxWindow *parent, const wxWindowID id, const wxPoint& pos,
+                const wxSize& size, long style):
+      wxTreeCtrl(parent, id, pos, size, style)
+      {
+      }
+/*
+  void OnBeginDrag(wxTreeEvent& event);
+  void OnBeginRDrag(wxTreeEvent& event);
+  void OnBeginLabelEdit(wxTreeEvent& event);
+  void OnEndLabelEdit(wxTreeEvent& event);
+  void OnDeleteItem(wxTreeEvent& event);
+  void OnGetInfo(wxTreeEvent& event);
+  void OnSetInfo(wxTreeEvent& event);
+  void OnItemExpanded(wxTreeEvent& event);
+  void OnItemExpanding(wxTreeEvent& event);
+  void OnSelChanged(wxTreeEvent& event);
+  void OnSelChanging(wxTreeEvent& event);
+  void OnKeyDown(wxTreeEvent& event);
+*/
+   DECLARE_EVENT_TABLE()
+};
+
+
 class wxMainFrame : public wxMFrame
 {
 public:
@@ -50,6 +80,15 @@ public:
                wxFrame *parent = NULL);
    
    void OnMenuCommand(int id);
+#ifdef   USE_WXWINDOWS2
+   void OnAbout(wxCommandEvent &) { OnMenuCommand(WXMENU_HELP_ABOUT); }
+   DECLARE_EVENT_TABLE()
+#endif
+private:
+#ifdef   USE_WXWINDOWS2
+   wxSplitterWindow *splitter;
+   wxMainTreeCtrl *treeCtrl;
+#endif
 };
 
 #endif

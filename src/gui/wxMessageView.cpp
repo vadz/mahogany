@@ -132,7 +132,6 @@ wxMessageView::Create(const String &iname, wxFrame *parent)
 
   wxMFrame::Create(iname, parent);
 
-  AddMenuBar();
   AddFileMenu();
 
   messageMenu = GLOBAL_NEW wxMenu;
@@ -520,7 +519,7 @@ wxMessageView::MimeHandle(void)
        MailFolderCC *mf = MailFolderCC::OpenFolder(filename);
        (void) GLOBAL_NEW wxMessageView(mf, 1, "message/rfc822",this);
        wxRemoveFile(filename);//FIXME: does this work for non-UNIX systems?
-       mf->CloseFolder();
+       mf->Close();
      }
    }
 }

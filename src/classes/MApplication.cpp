@@ -6,6 +6,9 @@
  * $Id$         *
  *                                                                  *
  * $Log$
+ * Revision 1.20  1998/06/14 12:24:18  KB
+ * started to move wxFolderView to be a panel, Python improvements
+ *
  * Revision 1.19  1998/06/12 16:06:57  KB
  * updated
  *
@@ -190,7 +193,6 @@ MAppBase::OnStartup()
 
    // set the default path for configuration entries
    profile->GetConfig()->SET_PATH(M_APPLICATIONNAME);
-   VAR( profile->GetConfig()->READ_ENTRY("TestEntry", "DefaultValue") );
 
    // do we have gettext() ?
 #  ifdef  USE_GETTEXT
@@ -205,7 +207,6 @@ MAppBase::OnStartup()
    // create and show the main program window
    CreateTopLevelFrame();
 
-   // this is being called from the GUI's initialisation function
    String   tmp;
    bool   found;
    String strRootDir = READ_APPCONFIG(MC_ROOTDIRNAME);
@@ -221,10 +222,6 @@ MAppBase::OnStartup()
       msg += _("\" in\n \"");
       msg += String(READ_APPCONFIG(MC_PATHLIST));
       ERRORMESSAGE((msg));
-
-      // we should either abort immediately or continue without returning
-      // or vital initializations are skipped!
-      //return NULL;
    }
 
 #  ifdef   USE_WXCONFIG
@@ -253,9 +250,9 @@ MAppBase::OnStartup()
 
    // initialise python interpreter
 #  ifdef  USE_PYTHON
-      // only used here
       InitPython();
 #  endif //Python
+
 
    mimeList = GLOBAL_NEW MimeList();
    mimeTypes = GLOBAL_NEW MimeTypes();
@@ -279,11 +276,7 @@ MAppBase::OnStartup()
          continue;
       
       wxLogDebug("Opening folder '%s'...", (*i)->c_str());
-      MailFolderCC *mf = MailFolderCC::OpenFolder(**i);
-      if(mf->IsInitialised())
-         (GLOBAL_NEW wxFolderView(mf,(*i)->c_str(), topLevelFrame))->Show();
-      else
-         mf->CloseFolder();
+      new wxFolderViewFrame((**i),topLevelFrame);
    }
    
    return TRUE;

@@ -6,6 +6,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.7  1998/06/14 12:24:10  KB
+ * started to move wxFolderView to be a panel, Python improvements
+ *
  * Revision 1.6  1998/06/09 10:14:38  KB
  * InitPython now exits gracefully if Minit.Minit() cannot be found.
  *
@@ -31,8 +34,6 @@
 #include   "Mpch.h"
 #include   "Mcommon.h"
 #include   "Python.h"
-//#include   "pythonrun.h"
-//#include   "pyerrors.h"
 #include   "PythonHelp.h"
 
 #ifndef   USE_PCH
@@ -67,23 +68,18 @@ InitPython(void)
    // initialise python interpreter
    tmp = "";
    tmp += mApplication.GetLocalDir();
-   VAR(mApplication.GetLocalDir());
    tmp += "/scripts";
    tmp += PATH_SEPARATOR;
    tmp += mApplication.GetGlobalDir();
-   VAR(mApplication.GetGlobalDir());
    tmp += "/scripts";
    tmp += PATH_SEPARATOR;
-   tmp +=
-      mApplication.GetProfile()->readEntry(MC_PYTHONPATH,MC_PYTHONPATH_D);
-   VAR(mApplication.GetProfile()->readEntry(MC_PYTHONPATH,MC_PYTHONPATH_D));
+   tmp += mApplication.GetProfile()->readEntry(MC_PYTHONPATH,MC_PYTHONPATH_D);
    if(getenv("PYTHONPATH"))
    {
       tmp += PATH_SEPARATOR;
       tmp += getenv("PYTHONPATH");
    }
    setenv("PYTHONPATH", tmp.c_str(), 1);
-   VAR(getenv("PYTHONPATH"));
    // initialise the interpreter
    Py_Initialize();
       
@@ -98,18 +94,31 @@ InitPython(void)
 
    Python_MinitModule = PyImport_ImportModule("Minit");
    if(PyErr_Occurred())
+   {
+      String err;
+      PyH_GetErrorMessage(&err);
+      MDialog_ErrorMessage("Python Error:\n"+err);
       PyErr_Print();
+   }
    if(Python_MinitModule == NULL)
       MDialog_ErrorMessage("Python: Cannot find/evaluate Minit.py initialisation script.");
    else
    {
-      Py_INCREF(Python_MinitModule);
-      PyObject *minit = PyObject_GetAttrString(Python_MinitModule, "Minit");
+      Py_INCREF(Python_MinitModule); // keep it in memory
+      PyObject *minit = PyObject_GetAttrString(Python_MinitModule,
+                                               "Minit");
       if(minit)
       {
+         Py_INCREF(minit);
          PyObject_CallObject(minit,NULL);
          if(PyErr_Occurred())
-            PyErr_Print();
+         {
+            //PyErr_Print();
+            String err;
+            PyH_GetErrorMessage(&err);
+            MDialog_ErrorMessage("Python Error:\n"+err);
+         }
+         Py_DECREF(minit);
       }
       else
          MDialog_ErrorMessage("Python: Cannot find Minit.Minit function in Minit module.");

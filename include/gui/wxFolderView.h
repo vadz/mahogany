@@ -3,41 +3,7 @@
  *                                                                  *
  * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.5  1998/06/09 14:11:32  VZ
- * event tables for menu events added (wxWin2)
- *
- * Revision 1.4  1998/06/05 16:56:56  VZ
- *
- * many changes among which:
- *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
- *     i.e. there is wxMApp inheriting from AppBse and wxApp
- *  2) wxMLogFrame changed (but will probably change again because I wrote a
- *     generic wxLogFrame for wxWin2 - we can as well use it instead)
- *  3) Profile stuff simplified (but still seems to work :-), at least with
- *     wxConfig), no more AppProfile separate class.
- *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
- *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
- *     Classes
- *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
- *  6) constraints in wxComposeView changed to work under both wxGTK and
- *     wxMSW (but there is an annoying warning about unsatisfied constraints
- *     coming from I don't know where)
- *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
- *  8) many other minor changes I completely forgot about.
- *
- * Revision 1.3  1998/05/11 20:29:40  VZ
- * compiles under Windows again + option USE_WXCONFIG added
- *
- * Revision 1.2  1998/03/26 23:05:38  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:15  karsten
- * first try at a complete archive
- *
+ * $Id$           *
  *******************************************************************/
 #ifndef  WXFOLDERVIEW_H
 #define WXFOLDERVIEW_H
@@ -47,6 +13,7 @@
 #endif
 
 #include "Mdefaults.h"
+#include "wxMFrame.h"
 
 class wxFolderViewPanel;
 class wxFolderView;
@@ -96,8 +63,80 @@ public:
 };
 
 /** a wxWindows FolderView class */
-class wxFolderView : public FolderViewBase , public wxMFrame
+class wxFolderView : public FolderViewBase , public wxPanel
 {
+public:
+   /** Constructor
+       @param folderName the name of the folder
+       @param parent   the parent window
+   */
+   wxFolderView(String const & folderName,
+                wxFrame *parent = NULL);
+   /// Destructor
+   ~wxFolderView();
+
+   /// update it
+   void  Update(void);
+
+   /** called from OnSize(), rebuilds listbox
+       @param x new width
+       @param y new height
+       */
+   void  Build(int x, int y);
+   
+   /// return true if initialised
+   bool  IsInitialised(void) const { return initialised; }
+
+   /// called on Menu selection
+   virtual void OnMenuCommand(int id);
+
+
+   /** Open some messages.
+       @param n number of messages to open
+       @messages pointer to an array holding the message numbers
+   */
+   void OpenMessages(wxArrayInt const &messages);
+
+   /** Mark messages as deleted.
+       @param n number of messages to delete
+       @messages pointer to an array holding the message numbers
+   */
+   void DeleteMessages(wxArrayInt const &messages);
+
+   /** Save messages to a file.
+       
+       @param n number of messages 
+       @messages pointer to an array holding the message numbers
+   */
+   void SaveMessages(wxArrayInt const &messages);
+
+   /** Reply to selected messages.
+       
+       @param n number of messages 
+       @messages pointer to an array holding the message numbers
+   */
+   void ReplyMessages(wxArrayInt const &messages);
+
+   /** Gets an array containing the positions of the selected
+       strings. The number of selections is returned. 
+       @param  selections Pass a pointer to an integer array, and do not deallocate the returned array.
+       @return number of selections.
+   */
+   int   GetSelections(wxArrayInt &selections);
+#if 0
+   def USE_WXWINDOWS2
+   void OnPrint() { OnMenuCommand(WXMENU_MSG_PRINT); }
+   void OnDelete() { OnMenuCommand(WXMENU_MSG_DELETE); }
+   void OnSave() { OnMenuCommand(WXMENU_MSG_SAVE); }
+   void OnOpen() { OnMenuCommand(WXMENU_MSG_OPEN); }
+   void OnReply() { OnMenuCommand(WXMENU_MSG_REPLY); }
+   void OnForward() { OnMenuCommand(WXMENU_MSG_FORWARD); }
+   void OnSelectAll() { OnMenuCommand(WXMENU_MSG_SELECTALL); }
+   void OnDeselectAll() { OnMenuCommand(WXMENU_MSG_DESELECTALL); }
+   void OnExpunge() { OnMenuCommand(WXMENU_MSG_EXPUNGE); }
+
+   DECLARE_EVENT_TABLE() 
+#endif // wxWin2
 private:
    /// is initialised?
    bool initialised;
@@ -119,83 +158,19 @@ private:
    int height;
    /// a timer to update information
    wxFVTimer   *timer;
+   /// its parent
+   wxWindow *parent;
+}; 
+
+class wxFolderViewFrame : public wxMFrame
+{
 public:
-   /** Constructor
-       @param iMailFolder the MailFolder to display
-       @param iname    the frame class name
-       @param parent   the parent window
-       @param ownsFolder  if true, wxFolderView will deallocate folder
-   */
-   wxFolderView(MailFolder *iMailFolder,
-      const String &iname =
-      String("wxFolderView"),
-      wxFrame *parent = NULL,
-      bool ownsFolder = true);
-   /// Destructor
-   ~wxFolderView();
-
-   /// update it
-   void  Update(void);
-
-   /** called from OnSize(), rebuilds listbox
-       @param x new width
-       @param y new height
-       */
-   void  Build(int x, int y);
-   
-   /// return true if initialised
-   bool  IsInitialised(void) const { return initialised; }
-
-   /// called on Menu selection
-   void OnMenuCommand(int id);
-
-
-   /** Open some messages.
-       @param n number of messages to open
-       @messages pointer to an array holding the message numbers
-   */
-   void OpenMessages(int n, int *messages);
-
-   /** Mark messages as deleted.
-       @param n number of messages to delete
-       @messages pointer to an array holding the message numbers
-   */
-   void DeleteMessages(int n, int *messages);
-
-   /** Save messages to a file.
-       
-       @param n number of messages 
-       @messages pointer to an array holding the message numbers
-   */
-   void SaveMessages(int n, int *messages);
-
-   /** Reply to selected messages.
-       
-       @param n number of messages 
-       @messages pointer to an array holding the message numbers
-   */
-   void ReplyMessages(int n, int *messages);
-
-   /** Gets an array containing the positions of the selected
-       strings. The number of selections is returned. 
-       @param  selections Pass a pointer to an integer array, and do not deallocate the returned array.
-       @return number of selections.
-   */
-   int   GetSelections(int **selections);
-
-#ifdef USE_WXWINDOWS2
-   void OnPrint() { OnMenuCommand(WXMENU_MSG_PRINT); }
-   void OnDelete() { OnMenuCommand(WXMENU_MSG_DELETE); }
-   void OnSave() { OnMenuCommand(WXMENU_MSG_SAVE); }
-   void OnOpen() { OnMenuCommand(WXMENU_MSG_OPEN); }
-   void OnReply() { OnMenuCommand(WXMENU_MSG_REPLY); }
-   void OnForward() { OnMenuCommand(WXMENU_MSG_FORWARD); }
-   void OnSelectAll() { OnMenuCommand(WXMENU_MSG_SELECTALL); }
-   void OnDeselectAll() { OnMenuCommand(WXMENU_MSG_DESELECTALL); }
-   void OnExpunge() { OnMenuCommand(WXMENU_MSG_EXPUNGE); }
+   wxFolderViewFrame(const String &iname, wxFrame *parent = NULL);
+   void OnCommandEvent(wxCommandEvent &event);
+private:
+   wxFolderView *m_FolderView;
 
    DECLARE_EVENT_TABLE() 
-#endif // wxWin2
-}; 
+};
 
 #endif

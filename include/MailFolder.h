@@ -52,6 +52,9 @@ protected:
    virtual bool	Open(String const & filename) = 0;
 
 public:
+   /// close the folder
+   virtual void Close(void) = 0;
+   
    /// check wether object is initialised
    virtual bool		IsInitialised(void) const = 0;
 

@@ -6,6 +6,9 @@
  * $Id$          *
  *                                                                  *
  * $Log$
+ * Revision 1.4  1998/06/14 12:24:03  KB
+ * started to move wxFolderView to be a panel, Python improvements
+ *
  * Revision 1.3  1998/05/24 14:47:17  KB
  * lots of progress on Python, but cannot call functions yet
  * kbList fixes again?
@@ -285,7 +288,11 @@ public: \
       { return kbList::tail(); } \
 }
 
+/// a simple define
+#define   KBLIST_SDEFINE(type)   KBLIST_DEFINE(type##List, type)
+
 /// define the most commonly used list type once:
 KBLIST_DEFINE(kbStringList, String);
+
 
 #endif // KBLIST_H

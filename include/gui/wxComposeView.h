@@ -6,7 +6,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.8  1998/06/14 12:24:05  KB
+ * started to move wxFolderView to be a panel, Python improvements
+ *
  * Revision 1.7  1998/05/14 17:34:30  VZ
+ *
  * added wxWin2 event map to wxComposeView class (fixed layout problem, menu
  * commands now also work)
  *
@@ -40,15 +44,11 @@
 #endif
 
 #ifndef USE_PCH
-#  undef    T
-#  include	<map>
-
-#  include	<Message.h>
-#  include	<wxMenuDefs.h>
-#  include	<wxMFrame.h>
-#  include	<Profile.h>
-
-   using namespace std;
+#   include   "Message.h"
+#   include   "wxMenuDefs.h"
+#   include   "wxMFrame.h"
+#   include   "Profile.h"
+#   include   "kbList.h"
 #endif
 
 class wxFTOList;
@@ -59,63 +59,20 @@ class wxFTCanvas;
 /// just for now, FIXME!
 #define	WXCOMPOSEVIEW_FTCANVAS_YPOS	80
 
+struct wxCVFileMapEntry
+{
+   unsigned long   id;
+   String          filename;
+};
+
+KBLIST_DEFINE(wxCVFileMapType,wxCVFileMapEntry);
+
 /** A wxWindows ComposeView class
   */
 
 class wxComposeView : public wxMFrame //FIXME: public ComposeViewBase
 {
    DECLARE_DYNAMIC_CLASS(wxComposeView)
-private:
-   /// is initialised?
-   bool initialised;
-
-   /// a profile
-   Profile	* profile;
-
-   /// the panel
-   wxPanel	* panel;
-
-   /// compose menu
-   wxMenu	*composeMenu;
-   
-   /**@name Input fields. */
-   //@{
-   /// The To: field
-   wxText	*txtTo;
-   wxMessage	*txtToLabel;
-   // last length of To field (for expansion)
-   int		txtToLastLength;
-   /// The CC: field
-   wxText	*txtCC;
-   wxMessage	*txtCCLabel;
-   /// The BCC: field
-   wxText	*txtBCC;
-   wxMessage	*txtBCCLabel;
-   /// The Subject: field
-   wxText	*txtSubject;
-   wxMessage	*txtSubjectLabel;
-   /// the canvas for displaying the mail
-   wxFTCanvas	*ftCanvas;
-   /// the alias expand button
-   wxButton	*aliasButton;
-   //@}
-
-   /// the popup menu
-   wxMenu	*popupMenu;
-   /**@name The interface to its canvas. */
-   //@{
-   /// the ComposeView canvas class
-   friend class wxCVCanvas;
-   /// Process a Mouse Event.
-   void	ProcessMouse(wxMouseEvent &event);
-   //@}
-
-   typedef std::map<unsigned long, String> MapType;
-   MapType	fileMap;
-   unsigned long	nextFileID;
-
-   /// makes the canvas
-   void CreateFTCanvas(void);
 public:
    /** quasi-Constructor
        @param iname  name of windowclass
@@ -201,6 +158,60 @@ public:
    /// for button
    void OnCommand(wxWindow &win, wxCommandEvent &event);
 #endif //wxWin1/2
+private:
+   /// is initialised?
+   bool initialised;
+
+   /// a profile
+   Profile	* profile;
+
+   /// the panel
+   wxPanel	* panel;
+
+   /// compose menu
+   wxMenu	*composeMenu;
+   
+   /**@name Input fields. */
+   //@{
+   /// The To: field
+   wxText	*txtTo;
+   wxMessage	*txtToLabel;
+   // last length of To field (for expansion)
+   int		txtToLastLength;
+   /// The CC: field
+   wxText	*txtCC;
+   wxMessage	*txtCCLabel;
+   /// The BCC: field
+   wxText	*txtBCC;
+   wxMessage	*txtBCCLabel;
+   /// The Subject: field
+   wxText	*txtSubject;
+   wxMessage	*txtSubjectLabel;
+   /// the canvas for displaying the mail
+   wxFTCanvas	*ftCanvas;
+   /// the alias expand button
+   wxButton	*aliasButton;
+   //@}
+
+   /// the popup menu
+   wxMenu	*popupMenu;
+   /**@name The interface to its canvas. */
+   //@{
+   /// the ComposeView canvas class
+   friend class wxCVCanvas;
+   /// Process a Mouse Event.
+   void	ProcessMouse(wxMouseEvent &event);
+   //@}
+
+   /// a list mapping IDs to filenames
+   wxCVFileMapType	fileMap;
+   /// for assigning IDs
+   unsigned long	nextFileID;
+   /// find the filename for an ID
+   const char *LookupFileName(unsigned long id);
+   
+   /// makes the canvas
+   void CreateFTCanvas(void);
 };
 
 #endif

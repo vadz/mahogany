@@ -115,7 +115,6 @@ wxComposeView::Create(const String &iname, wxFrame *parent,
 
   // build menu
   // ----------
-  AddMenuBar();
   AddFileMenu();
 
   composeMenu = new wxMenu;
@@ -447,7 +446,10 @@ wxComposeView::InsertFile(void)
 
    fileName = filename;
    
-   fileMap[nextFileID] = fileName;
+   wxCVFileMapEntry *e = new wxCVFileMapEntry();
+   e->filename = fileName;
+   e->id = nextFileID;
+   fileMap.push_back(e);
 
    numericType = TYPEAPPLICATION;
    if(! mApplication.GetMimeTypes()->Lookup(fileName, mimeType, &numericType))
@@ -463,6 +465,17 @@ wxComposeView::InsertFile(void)
    ftCanvas->SetFocus();   
 }
 
+// little helper function to turn kbList into a map:
+const char *
+wxComposeView::LookupFileName(unsigned long id)
+{
+   wxCVFileMapType::iterator i;
+   for(i = fileMap.begin(); i != fileMap.end(); i++)
+      if((*i)->id == id)
+         return (*i)->filename.c_str();
+   return NULL;
+}
+   
 void
 wxComposeView::Send(void)
 {
@@ -472,6 +485,8 @@ wxComposeView::Send(void)
       tmp2, mimeType, mimeSubType;
    FTObjectType
       ftoType;
+   const char
+      *filename = NULL;
    char
       *cptr, *ocptr,
       *buffer;
@@ -512,7 +527,10 @@ wxComposeView::Send(void)
          cptr = strtok(NULL,";"); // numericMimeType
          numMimeType = atoi(cptr);
          cptr = strtok(NULL,";"); // fileID
-         istr.open(fileMap[atol(cptr)].c_str());
+//         istr.open(fileMap[atol(cptr)].c_str());
+         filename = LookupFileName(atol(cptr));
+         wxCHECK(filename);
+         istr.open(filename);
          if(istr)
          {
           istr.seekg(0,ios::end);

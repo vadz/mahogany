@@ -6,7 +6,11 @@
  * $Id$ *
  *                                                                  *
  * $Log$
+ * Revision 1.9  1998/06/14 12:24:27  KB
+ * started to move wxFolderView to be a panel, Python improvements
+ *
  * Revision 1.8  1998/06/05 16:56:34  VZ
+ *
  * many changes among which:
  *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
  *     i.e. there is wxMApp inheriting from AppBse and wxApp
@@ -236,7 +240,7 @@ SendMessageCC::Send(void)
    if ((stream = smtp_open ((char **)hostlist,NIL)) != 0)
    {
       if (smtp_mail (stream,"MAIL",env,body))
-         LOGMESSAGE((LOG_DEFAULT,"SMTP: MAIL [Ok]"));
+         LOGMESSAGE((M_LOG_DEFAULT,"SMTP: MAIL [Ok]"));
       else
       {
          sprintf (tmpbuf, "[Failed - %s]",stream->reply);

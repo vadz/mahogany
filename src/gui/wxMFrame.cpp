@@ -6,7 +6,11 @@
  * $Id$              *
  ********************************************************************
  * $Log$
+ * Revision 1.11  1998/06/14 12:24:21  KB
+ * started to move wxFolderView to be a panel, Python improvements
+ *
  * Revision 1.10  1998/06/09 13:42:28  VZ
+ *
  * corrected the line which checks that wxGetTextFromUser() returns something
  * (i.e. wasn't cancelled)
  *
@@ -135,7 +139,7 @@ wxMFrame::wxMFrame(const String &iname, wxFrame *parent)
 void
 wxMFrame::Create(const String &iname, wxFrame *parent)
 {
-   CHECK( !initialised );
+   wxCHECK( !initialised );
 
    int xpos = MC_XPOS_D,
        ypos = MC_YPOS_D,
@@ -145,7 +149,8 @@ wxMFrame::Create(const String &iname, wxFrame *parent)
    SetName(iname);
 
    FileConfig *pConf = Profile::GetAppConfig();
-   if ( pConf != NULL ) {
+   if ( pConf != NULL )
+   {
       String tmp = pConf->GET_PATH();
       pConf->SET_PATH(M_FRAMES_CONFIG_SECTION);
       pConf->CHANGE_PATH(MFrameBase::GetName());
@@ -168,12 +173,8 @@ wxMFrame::Create(const String &iname, wxFrame *parent)
    SetIcon(new wxIcon(MFrame_xpm));
 #endif
    initialised = true;
-}
-
-void
-wxMFrame::AddMenuBar(void)
-{
    menuBar = new wxMenuBar;
+   SetMenuBar(menuBar);
 }
 
 void
@@ -205,6 +206,31 @@ wxMFrame::AddHelpMenu(void)
    helpMenu->Append(WXMENU_HELP_ABOUT,(char *)_("&About"));
 
    menuBar->Append(helpMenu, (char *)_("&Help"));
+}
+
+void
+wxMFrame::AddMessageMenu(void)
+{
+   wxMenu   *messageMenu;
+
+   messageMenu = GLOBAL_NEW wxMenu;
+   messageMenu->Append(WXMENU_MSG_OPEN, (char *)_("&Open"));
+   messageMenu->Append(WXMENU_MSG_REPLY, (char *)_("&Reply"));
+   messageMenu->Append(WXMENU_MSG_FORWARD, (char *)_("&Forward"));
+   messageMenu->Append(WXMENU_MSG_DELETE,(char *)_("&Delete"));
+   messageMenu->Append(WXMENU_MSG_SAVE,(char *)_("&Save"));
+   messageMenu->Append(WXMENU_MSG_SELECTALL, (char *)_("Select &all"));
+   messageMenu->Append(WXMENU_MSG_DESELECTALL, (char *)_("&Deselect all"));
+   messageMenu->AppendSeparator();
+   messageMenu->Append(WXMENU_MSG_EXPUNGE,(char *)_("Ex&punge"));
+
+   menuBar->Append(messageMenu, _("&Message"));
+}
+
+void
+wxMFrame::AddMenu(wxMenu *menu, String const &title)
+{
+   menuBar->Append(menu, _(title));
 }
 
 wxMFrame::~wxMFrame()
@@ -254,6 +280,12 @@ wxMFrame::SavePosition(void)
 }
 
 void
+wxMFrame::OnCommandEvent(wxCommandEvent &event)
+{
+   OnMenuCommand(event.GetId());
+}
+
+void
 wxMFrame::OnMenuCommand(int id)
 {
    switch(id)
@@ -269,15 +301,9 @@ wxMFrame::OnMenuCommand(int id)
                                   _("Folder Open"),
                                   "INBOX",
                                   this);
+      VAR(name);
       if ( !strutil_isempty(name) )
-      {
-         MailFolder *mf = MailFolderCC::OpenFolder((const char *)name);
-         if(mf->IsInitialised())
-            (new wxFolderView(mf, "FolderView", this))->Show();
-         else
-            delete mf;
-      }
-      //else: cancelled
+         new wxFolderView(name,this);
       break;
    }
    case WXMENU_FILE_ADBEDIT:

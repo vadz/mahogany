@@ -6,7 +6,11 @@
  * $Id$               *
  *
  * $Log$
+ * Revision 1.11  1998/06/14 12:24:07  KB
+ * started to move wxFolderView to be a panel, Python improvements
+ *
  * Revision 1.10  1998/06/05 16:57:00  VZ
+ *
  * many changes among which:
  *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
  *     i.e. there is wxMApp inheriting from AppBse and wxApp
@@ -39,12 +43,13 @@
 #define WXMFRAME_H
 
 #ifdef __GNUG__
-#pragma interface "wxMFrame.h"
+#   pragma interface "wxMFrame.h"
 #endif
 
 #ifndef  USE_PCH
-#  include  "MFrame.h"
-#  include  "guidef.h"
+#   include  "MFrame.h"
+#   include  "guidef.h"
+#   include  "kbList.h"
 #endif
 
 /**
@@ -54,23 +59,6 @@
 class wxMFrame : public wxFrame, public MFrameBase
 {
    DECLARE_DYNAMIC_CLASS(wxMFrame)
-
-private:
-   /// is it initialised?
-   bool  initialised;
-
-protected:
-   /// the menuBar:
-   wxMenuBar   *menuBar;
-   /// the File menu:
-   wxMenu   *fileMenu;
-   /// the Help menu:
-   wxMenu   *helpMenu;
-
-   void AddMenuBar(void);
-   void AddFileMenu(void);
-   void AddHelpMenu(void);
-
 public:
    /// dummy ctor for DECLARE_DYNAMIC_CLASS
    wxMFrame() : MFrameBase("") { FAIL; }
@@ -97,7 +85,14 @@ public:
    void  SetTitle(String const & name);
    /// handle basic menu callbacks
    void OnMenuCommand(int id);
+   /// return menu bar
+   wxMenuBar *GetMenuBar(void)      { return menuBar; }
 
+   /// add a menu to the bar
+   void AddMenu(wxMenu *menu, String const & title);
+   void AddFileMenu(void);
+   void AddHelpMenu(void);
+   void AddMessageMenu(void);
 #ifdef     USE_WXWINDOWS2
 
    //@{ Menu callbacks
@@ -117,10 +112,22 @@ public:
    void OnMenuClose(wxCommandEvent&) { OnMenuCommand(WXMENU_FILE_CLOSE); }
    //@}
 
+   void OnCommandEvent(wxCommandEvent & event);
    DECLARE_EVENT_TABLE()
 #endif
 
+
+protected:
+   /// the menuBar:
+   wxMenuBar   *menuBar;
+   /// the File menu:
+   wxMenu   *fileMenu;
+   /// the Help menu:
+   wxMenu   *helpMenu;
+
 private:
+   /// is it initialised?
+   bool  initialised;
    ///  try to save the window position and size in config file
    void  SavePosition(void);
 };

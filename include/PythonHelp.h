@@ -6,6 +6,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.3  1998/06/14 12:24:01  KB
+ * started to move wxFolderView to be a panel, Python improvements
+ *
  * Revision 1.2  1998/05/30 17:55:34  KB
  * Python integration mostly complete, added hooks and sample callbacks.
  * Wrote documentation on how to use it.
@@ -107,4 +110,10 @@ PyH_RunFunction(const char *funcname, const char *modname,          /* load from
     @return 0 on error
 */
 int PyH_ConvertResult(PyObject *presult, const char *resFormat, void *resTarget);
+
+/** Gets the last error message/traceback from Python and stores it in a String.
+    @param errString where to store the error message/traceback
+*/
+void PyH_GetErrorMessage(String *errString);
+
 #endif

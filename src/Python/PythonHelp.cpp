@@ -6,6 +6,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.4  1998/06/14 12:24:15  KB
+ * started to move wxFolderView to be a panel, Python improvements
+ *
  * Revision 1.3  1998/06/08 08:19:08  KB
  * Fixed makefiles for wxtab/python. Made Python work with new MAppBase.
  *
@@ -73,7 +76,7 @@ SWIG_MakePtr(char *_c, const void *_ptr, char *type)
 
 int
 PythonCallback(const char *name, void *obj, const char *classname,
-               ProfileBase *profile = NULL, const char *argfmt = NULL,
+               ProfileBase *profile, const char *argfmt,
                ...)
 {
    const char
@@ -88,7 +91,7 @@ PythonCallback(const char *name, void *obj, const char *classname,
    if(argfmt && *argfmt != '\0')
    {
       va_start(argslist, argfmt);
-      parg = Py_VaBuildValue(argfmt, argslist);     /* input: C->Python */
+      parg = Py_VaBuildValue((char *)argfmt, argslist);     /* input: C->Python */
       if (parg == NULL) 
          return 0;
    }
@@ -339,3 +342,77 @@ PyH_RunFunction(const char *funcname, const char *modname,          /* load from
     return PyH_ConvertResult(presult, resfmt, cresult);  /* convert result to C */
 }
 
+#define GPEM_ERROR(what) {errorMsg = "<Error getting traceback - " ##what ## ">";goto done;}
+
+
+void PyH_GetErrorMessage(String *errString)
+{
+   char *result = NULL;
+   char *errorMsg = NULL;
+   PyObject *modStringIO = NULL;
+   PyObject *modTB = NULL;
+   PyObject *obFuncStringIO = NULL;
+   PyObject *obStringIO = NULL;
+   PyObject *obFuncTB = NULL;
+   PyObject *argsTB = NULL;
+   PyObject *obResult = NULL;
+   PyObject *exc_typ, *exc_val, *exc_tb;
+   /* Fetch the error state now before we cruch it */
+   PyErr_Fetch(&exc_typ, &exc_val, &exc_tb);
+
+   /* Import the modules we need - StringIO and traceback */
+   modStringIO = PyImport_ImportModule("StringIO");
+   if (modStringIO==NULL) GPEM_ERROR("cant import StringIO");
+   modTB = PyImport_ImportModule("traceback");
+   if (modTB==NULL) GPEM_ERROR("cant import traceback");
+
+   /* Construct a StringIO object */
+   obFuncStringIO = PyObject_GetAttrString(modStringIO, "StringIO");
+   if (obFuncStringIO==NULL) GPEM_ERROR("cant find StringIO.StringIO");
+   obStringIO = PyObject_CallObject(obFuncStringIO, NULL);
+   if (obStringIO==NULL) GPEM_ERROR("StringIO.StringIO() failed");
+
+   /* Get the traceback.print_exception function, and call it. */
+   obFuncTB = PyObject_GetAttrString(modTB, "print_exception");
+   if (obFuncTB==NULL) GPEM_ERROR("cant find traceback.print_exception");
+   argsTB = Py_BuildValue("OOOOO",
+                          exc_typ ? exc_typ : Py_None,
+                          exc_val ? exc_val : Py_None,
+                          exc_tb  ? exc_tb  : Py_None,
+                          Py_None,
+                          obStringIO);
+   if (argsTB==NULL) GPEM_ERROR("cant make print_exception arguments");
+
+   obResult = PyObject_CallObject(obFuncTB, argsTB);
+   if (obResult==NULL) GPEM_ERROR("traceback.print_exception() failed");
+
+   /* Now call the getvalue() method in the StringIO instance */
+   Py_DECREF(obFuncStringIO);
+   obFuncStringIO = PyObject_GetAttrString(obStringIO, "getvalue");
+   if (obFuncStringIO==NULL) GPEM_ERROR("cant find getvalue function");
+   Py_DECREF(obResult);
+   obResult = PyObject_CallObject(obFuncStringIO, NULL);
+   if (obResult==NULL) GPEM_ERROR("getvalue() failed.");
+
+   /* And it should be a string all ready to go - duplicate it. */
+   if (!PyString_Check(obResult))
+      GPEM_ERROR("getvalue() did not return a string");
+   result = strutil_strdup(PyString_AsString(obResult));
+ done:
+   if (result==NULL && errorMsg != NULL)
+      result = strutil_strdup(errorMsg);
+   Py_XDECREF(modStringIO);
+   Py_XDECREF(modTB);
+   Py_XDECREF(obFuncStringIO);
+   Py_XDECREF(obStringIO);
+   Py_XDECREF(obFuncTB);
+   Py_XDECREF(argsTB);
+   Py_XDECREF(obResult);
+
+   /* Restore the exception state */
+   PyErr_Restore(exc_typ, exc_val, exc_tb);
+   if(result)
+      *errString = result;
+   else
+      *errString = "Unknown error";
+}

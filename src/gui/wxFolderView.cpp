@@ -3,64 +3,7 @@
  *                                                                  *
  * (C) 1997,1998 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.11  1998/06/12 16:18:47  VZ
- * wxArrayInt used instead of "int **" everywhere (because of GetSelections()
- * change in wxListbox)
- *
- * Revision 1.10  1998/06/12 16:07:00  KB
- * updated
- *
- * Revision 1.9  1998/06/09 14:11:29  VZ
- *
- * event tables for menu events added (wxWin2)
- *
- * Revision 1.8  1998/06/05 16:56:22  VZ
- *
- * many changes among which:
- *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
- *     i.e. there is wxMApp inheriting from AppBse and wxApp
- *  2) wxMLogFrame changed (but will probably change again because I wrote a
- *     generic wxLogFrame for wxWin2 - we can as well use it instead)
- *  3) Profile stuff simplified (but still seems to work :-), at least with
- *     wxConfig), no more AppProfile separate class.
- *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
- *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
- *     Classes
- *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
- *  6) constraints in wxComposeView changed to work under both wxGTK and
- *     wxMSW (but there is an annoying warning about unsatisfied constraints
- *     coming from I don't know where)
- *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
- *  8) many other minor changes I completely forgot about.
- *
- * Revision 1.7  1998/05/24 08:22:58  KB
- * changed the creation/destruction of MailFolders, now done through
- * MailFolder::Open/CloseFolder, made constructor/destructor private,
- * this allows multiple view on the same folder
- *
- * Revision 1.6  1998/05/18 17:48:40  KB
- * more list<>->kbList changes, fixes for wxXt, improved makefiles
- *
- * Revision 1.5  1998/05/15 21:59:35  VZ
- *
- * added 4th argument (id, unused in wxWin1) to CreateButton() calls
- *
- * Revision 1.4  1998/05/13 19:02:17  KB
- * added kbList, adapted MimeTypes for it, more python, new icons
- *
- * Revision 1.3  1998/05/11 20:57:30  VZ
- * compiles again under Windows + new compile option USE_WXCONFIG
- *
- * Revision 1.2  1998/03/26 23:05:41  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:22  karsten
- * first try at a complete archive
- *
+ * $Id$         *
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -97,8 +40,8 @@
 
 #ifdef USE_WXWINDOWS2
 #  include <wx/dynarray.h>
-
-   BEGIN_EVENT_TABLE(wxFolderView, wxMFrame)
+#if 0
+   BEGIN_EVENT_TABLE(wxFolderView, wxPanel)
       EVT_MENU(WXMENU_MSG_PRINT,       wxFolderView::OnPrint)
       EVT_MENU(WXMENU_MSG_DELETE,      wxFolderView::OnDelete)
       EVT_MENU(WXMENU_MSG_SAVE,        wxFolderView::OnSave)
@@ -109,24 +52,25 @@
       EVT_MENU(WXMENU_MSG_DESELECTALL, wxFolderView::OnDeselectAll)
       EVT_MENU(WXMENU_MSG_EXPUNGE,     wxFolderView::OnExpunge)
    END_EVENT_TABLE()
+#endif
 #endif // wxWin2
  
-wxFolderView::wxFolderView(MailFolder *iMailFolder,
-                           const String &iname,
-                           wxFrame *parent,
-                           bool ownsFolderi)
-   : wxMFrame(iname, parent)
+   wxFolderView::wxFolderView(String const & folderName,
+                           wxFrame *iparent)
+   : wxPanel(iparent)
 {
+   wxCHECK(iparent);
+   parent = iparent;
 
-   mailFolder = iMailFolder;
+   mailFolder = MailFolderCC::OpenFolder(folderName);
+   wxCHECK(mailFolder);
+   
    initialised = mailFolder->IsInitialised();
-
+   
    if(! initialised)
       return;
    
    listBoxEntries = NULL;
-   panel = NULL;
-   ownsFolder = ownsFolderi;
 
    GetSize(&width,&height);
    Build(width,height);
@@ -139,31 +83,10 @@ wxFolderView::wxFolderView(MailFolder *iMailFolder,
 void
 wxFolderView::Build(int x, int y)
 {
-   wxMenu   *messageMenu;
-
-   AddMenuBar();
-   AddFileMenu();
-       
-   messageMenu = GLOBAL_NEW wxMenu;
-   messageMenu->Append(WXMENU_MSG_OPEN, (char *)_("&Open"));
-   messageMenu->Append(WXMENU_MSG_REPLY, (char *)_("&Reply"));
-   messageMenu->Append(WXMENU_MSG_FORWARD, (char *)_("&Forward"));
-   messageMenu->Append(WXMENU_MSG_DELETE,(char *)_("&Delete"));
-   messageMenu->Append(WXMENU_MSG_SAVE,(char *)_("&Save"));
-   messageMenu->Append(WXMENU_MSG_SELECTALL, (char *)_("Select &all"));
-   messageMenu->Append(WXMENU_MSG_DESELECTALL, (char *)_("&Deselect all"));
-   messageMenu->AppendSeparator();
-   messageMenu->Append(WXMENU_MSG_EXPUNGE,(char *)_("Ex&punge"));
-   menuBar->Append(messageMenu, (char *)_("&Message"));
-
-   AddHelpMenu();
-   SetMenuBar(menuBar);
-
    width = x; height = y;
    x = (int) x - WXFRAME_WIDTH_DELTA;
    y = (int) y - WXFRAME_HEIGHT_DELTA;
-   panel = GLOBAL_NEW wxFolderViewPanel(this);
-   listBox = CreateListBox(panel, -1, -1, x, y);
+   listBox = CreateListBox(this, -1, -1, x, y);
 }
 
 void
@@ -219,11 +142,9 @@ wxFolderView::~wxFolderView()
       timer->Stop();
       GLOBAL_DELETE timer;
       mailFolder->RegisterView(this,false);
-      if(ownsFolder)
-    GLOBAL_DELETE mailFolder;
+      mailFolder->Close();
    }
 }
-
 
 void
 wxFolderView::OnMenuCommand(int id)
@@ -267,7 +188,8 @@ wxFolderView::OnMenuCommand(int id)
          listBox->Deselect(n);
       break;
    default:
-      wxMFrame::OnMenuCommand(id);
+      //wxMFrame::OnMenuCommand(id);
+      ;
    }
 }
 
@@ -292,7 +214,7 @@ wxFolderView::OpenMessages(const wxArrayInt& selections)
       title = mptr->Subject() + " - " + mptr->From();
       mv = GLOBAL_NEW wxMessageView(mailFolder,selections[i]+1,
               "wxMessageView",
-              this);
+                                    NULL); //FIXMEthis);
       mv->SetTitle(title);
    }
 }
@@ -331,7 +253,7 @@ wxFolderView::SaveMessages(const wxArrayInt& selections)
       mailFolder->GetMessage(selections[i]+1)->WriteToString(str);
       mf = MailFolderCC::OpenFolder(folderName);
       mf->AppendMessage(str.c_str());
-      mf->CloseFolder();
+      mf->Close();
    }
 }
 
@@ -352,7 +274,7 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
       str = "";
       msg = mailFolder->GetMessage(selections[i]+1);
       msg->WriteToString(str, false);
-      cv = GLOBAL_NEW wxComposeView(_("Reply"), this,
+      cv = GLOBAL_NEW wxComposeView(_("Reply"), NULL /*FIXME this*/,
               mailFolder->GetProfile());
       cptr = str.c_str();
       str2 = "";
@@ -403,4 +325,46 @@ wxFolderViewPanel::OnCommand(wxWindow &win, wxCommandEvent &event)
 {
 }
 #endif // wxWin1/2
+
+
+
+
+
+
+#ifdef USE_WXWINDOWS2
+   BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)
+      EVT_MENU(WXMENU_MSG_PRINT,       wxFolderViewFrame::OnCommandEvent)
+      EVT_MENU(WXMENU_MSG_DELETE,      wxFolderViewFrame::OnCommandEvent)
+      EVT_MENU(WXMENU_MSG_SAVE,        wxFolderViewFrame::OnCommandEvent)
+      EVT_MENU(WXMENU_MSG_OPEN,        wxFolderViewFrame::OnCommandEvent)
+      EVT_MENU(WXMENU_MSG_REPLY,       wxFolderViewFrame::OnCommandEvent)
+      EVT_MENU(WXMENU_MSG_FORWARD,     wxFolderViewFrame::OnCommandEvent)
+      EVT_MENU(WXMENU_MSG_SELECTALL,   wxFolderViewFrame::OnCommandEvent)
+      EVT_MENU(WXMENU_MSG_DESELECTALL, wxFolderViewFrame::OnCommandEvent)
+      EVT_MENU(WXMENU_MSG_EXPUNGE,     wxFolderViewFrame::OnCommandEvent)
+   END_EVENT_TABLE()
+#endif // wxWin2
+
+wxFolderViewFrame::wxFolderViewFrame(const String &folderName,
+                                     wxFrame *parent)
+   : wxMFrame("FolderView", parent)
+{
+   AddFileMenu();
+   AddMessageMenu();
+   m_FolderView = new wxFolderView(folderName, this);
+   Show();
+}
+   
+void
+wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
+{
+   wxCHECK(m_FolderView);
+
+   VAR(event.GetId());
+   switch(event.GetId())
+   {
+   default:
+      wxMFrame::OnMenuCommand(event.GetId());
+   }
+}
 

@@ -6,7 +6,11 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/06/14 12:24:02  KB
+ * started to move wxFolderView to be a panel, Python improvements
+ *
  * Revision 1.5  1998/06/05 16:56:50  VZ
+ *
  * many changes among which:
  *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
  *     i.e. there is wxMApp inheriting from AppBse and wxApp
@@ -46,39 +50,40 @@
 #ifndef GUIDEF_H
 #define GUIDEF_H
 
-#if	USE_WXWINDOWS
+#if   USE_WXWINDOWS
 
-///	define the class to use for implementing MFrame objects
-#	define	MFrame		wxMFrame
-#	define	FolderView	wxFolderView
-#	define	MainFrame	wxMainFrame
-#	define	MDialogs	wxMDialogs
+///   define the class to use for implementing MFrame objects
+#   define   MFrame      wxMFrame
+#   define   FolderView   wxFolderView
+#   define   MainFrame   wxMainFrame
+#   define   MDialogs   wxMDialogs
 
 
-#	define	Uses_wxFrame
-#	define	Uses_wxMenu
-#	define	Uses_wxString
-#	define	Uses_wxCanvas
-#	define	Uses_wxTextWindow
-#	define	Uses_wxFont
-#	define	Uses_wxMenu
-#	define	Uses_wxMenuBar
-#	define	Uses_wxListBox
-#	define	Uses_wxPostScriptDC
-#	define	Uses_wxPrintSetup
-#	define	Uses_wxTextWindow
-#	define	Uses_wxTimer
-#	define	Uses_wxMessage
-#	define	Uses_wxButton
-#	define	Uses_wxDialogBox
-#	define	Uses_wxDialog
-#	include	<wx/wx.h>
-#	include	"gui/wxMenuDefs.h"
-
+#   define   Uses_wxFrame
+#   define   Uses_wxMenu
+#   define   Uses_wxString
+#   define   Uses_wxCanvas
+#   define   Uses_wxTextWindow
+#   define   Uses_wxFont
+#   define   Uses_wxMenu
+#   define   Uses_wxMenuBar
+#   define   Uses_wxListBox
+#   define   Uses_wxPostScriptDC
+#   define   Uses_wxPrintSetup
+#   define   Uses_wxTextWindow
+#   define   Uses_wxTimer
+#   define   Uses_wxMessage
+#   define   Uses_wxButton
+#   define   Uses_wxDialogBox
+#   define   Uses_wxDialog
+#   include   <wx/wx.h>
+#   include   <wx/splitter.h>
+#   include   <wx/treectrl.h>
+#   include   "gui/wxMenuDefs.h"
 /// how much space to leave in frame around other items
-#	define	WXFRAME_WIDTH_DELTA	16
+#   define   WXFRAME_WIDTH_DELTA   16
 /// how much space to leave in frame around other items
-#	define	WXFRAME_HEIGHT_DELTA	64
+#   define   WXFRAME_HEIGHT_DELTA   64
 
 #endif
 

@@ -21,11 +21,9 @@ import String, MAppBase, MailFolder, Profile, Message
 ####################################################################
 
 def Minit():
-    print "------------------------- This is Minit.py"
     import os
     msg = "Welcome, " + os.environ['USER'] +", to the wonderful world\nof M/Python integration!"
     MAppBase.MDialog_Message(msg);
-    print "------------------------- Minit.py finished."
 
 ####################################################################
 #                                                                  #
@@ -34,20 +32,14 @@ def Minit():
 ####################################################################
     
 def callback_func(arg):
-    print "This is the Python Callback Function!"
-    print "The argument is: ", arg
-
-def StringPrint(name,arg):
-    print "This is the Python StringPrint Function!"
-    print "  called as: ", name
-    print "  with argument: ", String.String(arg).c_str()
-
-
+    msg = "This is a Python Callback Function!\nThe argument is: " + arg
+    MAppBase.MDialog_Message(msg);
+    
 def OpenFolderCallback(name, arg):
-    print "This is the Python OpenFolderCallback function!"
-    print "  called on the hook: ", name
+    msg = "This is the Python OpenFolderCallback function!\n" + "  called on the hook: " +  name 
     mf = MailFolder.MailFolder(arg)
-    print "  from the mailfolder called:", mf.GetName().c_str()
-    print "  The folder contains ", mf.CountMessages(), " messages."
+    msg = msg + "\n  from the mailfolder called:" + mf.GetName().c_str()
+    msg = msg + "\n  The folder contains " + mf.CountMessages() + " messages."
+    MAppBase.MDialog_Message(msg);
 
 

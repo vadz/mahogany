@@ -145,6 +145,7 @@ DEFAULT_USE_WXWINDOWS2=1
 DEFAULT_USE_WXSTRING=1
 DEFAULT_USE_WXCONFIG=1
 DEFAULT_USE_APPCONF=0
+DEFAULT_USE_EFENCE=0
 
 MAKE_USE_WXTAB="USE_WXTAB=1"
 
@@ -253,8 +254,12 @@ AC_OVERRIDES(wxConfig,wxConfig,
 USE_WXCONFIG)
 
 AC_OVERRIDES(appConf,appConf,
---with-appConf           use appConf,
+--with-appConf            use appConf,
 USE_APPCONF)
+
+AC_OVERRIDES(efence,efence,
+--with-efence             use ElectricFence,
+USE_EFENCE)
 
 AC_CONFIG_AUX_DIR(extra/scripts)
 
@@ -593,6 +598,20 @@ AC_STRUCT_TM
 
 dnl Checks for library functions.
 AC_CHECK_FUNCS(strerror strstr strsep)
+
+dnl glibc2 has crypt in extra library
+NEED_LIB_CRYPT=0
+AC_CHECK_FUNC(crypt, NEED_LIB_CRYPT=1)
+if test "$NEED_LIB_CRYPT" = 0; then
+	EXTRA_LINK="$EXTRA_LINK -lcrypt"
+fi
+
+dnl electric fence
+if test "$USE_EFENCE" = 1; then
+	EXTRA_LINK="$EXTRA_LINK -lefence"
+fi
+
+AC_SUBST(EXTRA_LINK)
 
 BUILDDIR=`pwd`
 AC_SUBST(BUILDDIR)

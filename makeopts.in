@@ -4,6 +4,9 @@
 # $Id$
 #
 # $Log$
+# Revision 1.10  1998/06/14 12:23:57  KB
+# started to move wxFolderView to be a panel, Python improvements
+#
 # Revision 1.9  1998/06/08 08:34:51  KB
 # Python adapted to use MAppBase/MDialog instead of MApplication.
 #
@@ -39,7 +42,7 @@ ICONDIR=$(BUILDDIR)/src/icons
 
 #gettext:
 
-EXTRALIBS=@LIBINTL_LINK@ @COMPFACE_LINK@
+EXTRALIBS=@LIBINTL_LINK@ @COMPFACE_LINK@ @EXTRA_LINK@
 
 # compiler flags
 OPT = 

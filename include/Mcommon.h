@@ -154,12 +154,12 @@
 #  include <wx/intl.h>
 #  include <wx/log.h>
 
-#  define LOG_DEBUG   wxLOG_Debug
-#  define LOG_NOISE   wxLOG_Verbose
-#  define LOG_DEFAULT wxLOG_Message
-#  define LOG_INFO    wxLOG_Message
-#  define LOG_ERROR   wxLOG_Warning 
-#  define LOG_URGENT  wxLOG_Error
+#  define M_LOG_DEBUG   wxLOG_Debug
+#  define M_LOG_NOISE   wxLOG_Verbose
+#  define M_LOG_DEFAULT wxLOG_Message
+#  define M_LOG_INFO    wxLOG_Message
+#  define M_LOG_ERROR   wxLOG_Warning 
+#  define M_LOG_URGENT  wxLOG_Error
     
 #  define ERRORMESSAGE(arg)   wxLogError arg
 #  define SYSERRMESSAGE(arg)  wxLogSysError arg
