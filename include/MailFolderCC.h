@@ -65,7 +65,6 @@ public:
 };
 
 KBLIST_DEFINE(StreamConnectionList, StreamConnection);
-KBLIST_DEFINE(FolderViewList, FolderView);
 
 
 /**
