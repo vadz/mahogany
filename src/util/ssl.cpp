@@ -53,11 +53,14 @@ extern void ssl_onceonlyinit();
    name##_TYPE stub_##name = NULL
 
 #define SSL_LOOKUP(name) \
-      stub_##name = (name##_TYPE) wxDllLoader::GetSymbol(slldll, #name); \
-      if ( !stub_##name ) return FALSE
+      stub_##name = (name##_TYPE) wxDllLoader::GetSymbol(ssldll, #name); \
+      if ( !stub_##name ) \
+         goto error
+
 #define CRYPTO_LOOKUP(name) \
       stub_##name = (name##_TYPE) wxDllLoader::GetSymbol(cryptodll, #name); \
-      if ( stub_##name ) return FALSE
+      if ( !stub_##name ) \
+         goto error
 
 SSL_DEF( SSL *, SSL_new, (SSL_CTX *ctx) );
 SSL_DEF( void, SSL_free, (SSL *ssl) );
@@ -159,13 +162,16 @@ bool InitSSL(void) /* FIXME: MT */
 
    // FIXME: when are we going to unload these DLLs?
 
-   wxDllType cryptodll = wxDllLoader::LoadLibrary(crypto_dll);
-   if ( !cryptodll )
-      return FALSE;
+   wxDllType cryptodll = NULL,
+             ssldll = NULL;
 
-   wxDllType slldll = wxDllLoader::LoadLibrary(ssl_dll);
-   if ( slldll )
-      return FALSE;
+   cryptodll = wxDllLoader::LoadLibrary(crypto_dll);
+   if ( !cryptodll )
+      goto error;
+
+   ssldll = wxDllLoader::LoadLibrary(ssl_dll);
+   if ( !ssldll )
+      goto error;
 
    SSL_LOOKUP(SSL_new );
    SSL_LOOKUP(SSL_free );
@@ -184,24 +190,34 @@ bool InitSSL(void) /* FIXME: MT */
    CRYPTO_LOOKUP(ERR_get_error);
    CRYPTO_LOOKUP(ERR_error_string);
    SSL_LOOKUP(SSL_CIPHER_get_bits);
-#   if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
+#if defined(SSLV3ONLYSERVER) && !defined(TLSV1ONLYSERVER)
    SSL_LOOKUP(SSLv3_client_method );
-#   elif defined(TLSV1ONLYSERVER) && !defined(SSLV3ONLYSERVER)
+#elif defined(TLSV1ONLYSERVER) && !defined(SSLV3ONLYSERVER)
    SSL_LOOKUP(TLSv1_client_method );
 #else
    SSL_LOOKUP(SSLv23_client_method );
-#   endif
+#endif
+
    gs_SSL_available =
    gs_SSL_loaded = TRUE;
 
    STATUSMESSAGE((_("Successfully loaded '%s' and '%s' - "
-                    "SSL authentification now available."),
+                    "SSL authentification is now available."),
                   crypto_dll.c_str(),
                   ssl_dll.c_str()));
 
    ssl_onceonlyinit();
 
    return TRUE;
+
+error:
+   if ( cryptodll )
+      wxDllLoader::UnloadLibrary(cryptodll);
+
+   if ( ssldll )
+      wxDllLoader::UnloadLibrary(ssldll);
+
+   return FALSE;
 }
 
 #undef SSL_LOOKUP
