@@ -202,19 +202,8 @@ extern void Pop3_SaveFlags(const String& folderName, MAILSTREAM *stream);
 extern void Pop3_RestoreFlags(const String& folderName, MAILSTREAM *stream);
 
 // ----------------------------------------------------------------------------
-// private functions
+// typedefs
 // ----------------------------------------------------------------------------
-
-extern "C"
-{
-#ifdef USE_READ_PROGRESS
-   void mahogany_read_progress(GETS_DATA *md, unsigned long count);
-#endif
-
-#ifdef USE_BLOCK_NOTIFY
-   void *mahogany_block_notify(int reason, void *data);
-#endif
-};
 
 typedef void (*mm_list_handler)(MAILSTREAM *stream,
                                 char delim,
@@ -224,9 +213,6 @@ typedef void (*mm_list_handler)(MAILSTREAM *stream,
 typedef void (*mm_status_handler)(MAILSTREAM *stream,
                                   const char *mailbox,
                                   MAILSTATUS *status);
-
-// return the c-client "{...}" string for the given folder
-static wxString GetImapSpec(const MFolder *folder);
 
 // ----------------------------------------------------------------------------
 // globals
@@ -262,8 +248,45 @@ static bool mm_disable_callbacks = false;
    static bool mm_show_debug = false;
 #endif
 
-// loglevel for cclient error messages:
+/// loglevel for cclient error messages:
 static int cc_loglevel = wxLOG_Error;
+
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+extern "C"
+{
+#ifdef USE_READ_PROGRESS
+   void mahogany_read_progress(GETS_DATA *md, unsigned long count);
+#endif
+
+#ifdef USE_BLOCK_NOTIFY
+   void *mahogany_block_notify(int reason, void *data);
+#endif
+};
+
+/// return the c-client "{...}" string for the given folder
+static wxString GetImapSpec(const MFolder *folder);
+
+/// trivial wrappers around mail_open() which wants a non const "char *" (ugh)
+static inline
+MAILSTREAM *MailOpen(MAILSTREAM *stream, const char *mailbox, long options = 0)
+{
+   if ( mm_show_debug )
+      options |= OP_DEBUG;
+
+   return mail_open(stream, (char *)mailbox, options);
+}
+
+// we want to specify the stream as the first argument as c-client does so we
+// can't use just one function with default NIL parameter for the stream but
+// instead we have this second version for the most common case
+static inline
+MAILSTREAM *MailOpen(const char *mailbox, long options = 0)
+{
+   return MailOpen(NIL, mailbox, options);
+}
 
 // ============================================================================
 // private classes
@@ -428,7 +451,7 @@ public:
    ~ServerInfoEntry();
 
 private:
-   // ctor is private, nobody except GetFolderServer() can create us
+   // ctor is private, nobody except GetOrCreate() can create us
    ServerInfoEntry(const MFolder *folder, const NETMBX& netmbx);
 
    // this struct contains the server hostname, port, username &c
@@ -2075,8 +2098,7 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
                  imapspec.c_str());
 
       CCErrorDisabler noErrs;
-      stream = mail_open(NULL, (char *)imapspec.c_str(),
-                         mm_show_debug ? OP_DEBUG : NIL);
+      stream = MailOpen(imapspec);
    }
 
    // login data was reset by mm_login() called from mail_open(), set it once
@@ -2108,8 +2130,7 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
       wxLogTrace(TRACE_MF_CALLS, "Opening MailFolderCC '%s' after creating it.",
                  imapspec.c_str());
 
-      stream = mail_open(stream, (char *)imapspec.c_str(),
-                         mm_show_debug ? OP_DEBUG : NIL);
+      stream = MailOpen(stream, imapspec);
    }
 
    if ( stream )
@@ -2500,7 +2521,7 @@ MailFolderCC::Open(OpenMode openmode)
       // Make sure that all events to unknown folder go to us
       CCDefaultFolder def(this);
 
-      long ccOptions = mm_show_debug ? OP_DEBUG : 0;
+      long ccOptions = 0;
       bool tryOpen = true;
       switch ( openmode )
       {
@@ -2548,8 +2569,8 @@ MailFolderCC::Open(OpenMode openmode)
          wxLogTrace(TRACE_MF_CALLS, "Opening MailFolderCC '%s'.",
                     m_ImapSpec.c_str());
 
-         m_MailStream = mail_open(server ? server->GetStream() : NIL,
-                                  (char *)m_ImapSpec.c_str(), ccOptions);
+         m_MailStream = MailOpen(server ? server->GetStream() : NIL,
+                                 m_ImapSpec, ccOptions);
       }
    } // end of cclient lock block
 
@@ -2577,12 +2598,8 @@ MailFolderCC::Open(OpenMode openmode)
 
       // redirect all notifications to us again
       CCDefaultFolder def(this);
-      MAILSTREAM *msHalfOpened = mail_open
-                                 (
-                                  m_MailStream,
-                                  (char *)m_ImapSpec.c_str(),
-                                  (mm_show_debug ? OP_DEBUG : 0) | OP_HALFOPEN
-                                 );
+      MAILSTREAM *
+         msHalfOpened = MailOpen(m_MailStream, m_ImapSpec, OP_HALFOPEN);
       if ( msHalfOpened )
       {
          mail_close(msHalfOpened);
@@ -3279,6 +3296,110 @@ MailFolderCC::PingOpenedFolder()
 }
 
 /* static */
+bool
+MailFolderCC::DoCheckStatus(const MFolder *folder, MAILSTATUS *mailstatus)
+{
+   static const int STATUS_FLAGS = SA_MESSAGES | SA_RECENT | SA_UNSEEN;
+
+   wxBusyCursor busyCursor;
+
+   // instead of calling mail_status() with NIL stream we always open the
+   // connection to the folder manually before as this gives us a
+   // possibility to reuse it for the subsequent operations: this is
+   // especially important when the user chooses to update the status of the
+   // entire subtree as then CheckStatus() is called many times in quick
+   // succession and opening a new connection each time is very inefficient
+
+   // reuse an existing connection to the server if we have one
+   ServerInfoEntry *server;
+   if ( IsReusableFolder(folder) )
+   {
+      // look for the existing entry for this server
+      server = ServerInfoEntry::GetOrCreate(folder);
+
+      if ( !server )
+      {
+         return false;
+      }
+   }
+   else
+   {
+      server = NULL;
+   }
+
+   MAILSTREAM *stream;
+   if ( server )
+   {
+      stream = server->GetStream();
+   }
+   else // no connection to reuse
+   {
+      stream = NULL;
+   }
+
+   // find out the login and password we need: first see if we don't already
+   // have them
+   String login, password;
+   bool hasAuthInfo = server && server->GetAuthInfo(login, password);
+   if ( !hasAuthInfo )
+   {
+      login = folder->GetLogin();
+      password = folder->GetPassword();
+
+      if ( !GetAuthInfoForFolder(folder, login, password ) )
+      {
+         return false;
+      }
+   }
+
+   SetLoginData(login, password);
+
+   // preopen the stream if it may be reused, as explained above
+   String spec = MailFolder::GetImapSpec(folder->GetType(),
+                                         folder->GetFlags(),
+                                         folder->GetPath(),
+                                         folder->GetServer(),
+                                         login);
+
+   if ( server && !stream )
+   {
+      // we're not interested in mm_exists() and what not
+      CCCallbackDisabler noCallbacks;
+
+      stream = MailOpen(spec, OP_HALFOPEN | OP_READONLY);
+      if ( !stream )
+      {
+         // if we failed to open it, checking its status won't work neither
+         return false;
+      }
+   }
+
+   // finally call mail_status()
+   MMStatusRedirector statusRedir(spec, mailstatus);
+
+   wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::CheckStatus() on %s.",
+              spec.c_str());
+
+   mail_status(stream, (char *)spec.c_str(), STATUS_FLAGS);
+
+   // keep the stream alive to be reused in the next call, if any
+   if ( server )
+   {
+      server->KeepStream(stream, folder);
+
+      // and also remember the auth params if we hadn't had them before
+      if ( !hasAuthInfo )
+      {
+         server->SetAuthInfo(login, password);
+      }
+   }
+
+   // we succeed only if we managed to get the values of all flags included in
+   // STATUS_FLAGS
+   return (mailstatus->flags & STATUS_FLAGS) == STATUS_FLAGS;
+}
+
+/* static */
 bool MailFolderCC::CheckStatus(const MFolder *folder)
 {
    CHECK( folder, false, "MailFolderCC::CheckStatus(): NULL folder" );
@@ -3310,39 +3431,9 @@ bool MailFolderCC::CheckStatus(const MFolder *folder)
    MailFolderStatus status;
    (void)mfStatusCache->GetStatus(folder->GetFullName(), &status);
 
-   static const int STATUS_FLAGS = SA_MESSAGES | SA_RECENT | SA_UNSEEN;
-
    // and check for the new one
    MAILSTATUS mailstatus;
-   {
-      wxBusyCursor busyCursor;
-
-      String login = folder->GetLogin(),
-             password = folder->GetPassword();
-
-      String spec = MailFolder::GetImapSpec(folder->GetType(),
-                                            folder->GetFlags(),
-                                            folder->GetPath(),
-                                            folder->GetServer(),
-                                            login);
-
-      if ( !GetAuthInfoForFolder(folder, login, password ) )
-      {
-         return false;
-      }
-
-      SetLoginData(login, password);
-
-      MMStatusRedirector statusRedir(spec, &mailstatus);
-
-      wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::CheckStatus() on %s.",
-                 spec.c_str());
-
-      mail_status(NULL, (char *)spec.c_str(), STATUS_FLAGS);
-   }
-
-   // did we succeed?
-   if ( (mailstatus.flags & STATUS_FLAGS) != STATUS_FLAGS )
+   if ( !DoCheckStatus(folder, &mailstatus) )
    {
       ERRORMESSAGE(( _("Failed to check status of the folder '%s'"),
                      folder->GetFullName().c_str() ));
@@ -6087,8 +6178,7 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
 
       // open the folder: although we don't need to do it to get its status, we
       // have to do it anyhow below, so better do it right now
-      stream = mail_open(stream, (char *)mboxpath.c_str(),
-                         mm_show_debug ? OP_DEBUG : NIL);
+      stream = MailOpen(stream, mboxpath);
 
       if ( !stream )
       {
@@ -6222,8 +6312,7 @@ MailFolderCC::HasInferiors(const String& imapSpec,
    ServerInfoEntry *server = ServerInfoEntry::Get(mfolder);
    MAILSTREAM *stream = server ? server->GetStream() : NIL;
 
-   stream = mail_open(stream, (char *)imapSpec.c_str(),
-                      (mm_show_debug ? OP_DEBUG : NIL) | OP_HALFOPEN);
+   stream = MailOpen(stream, imapSpec, OP_HALFOPEN);
 
    if ( stream != NIL )
    {
@@ -6643,6 +6732,9 @@ ServerInfoEntry *ServerInfoEntry::GetOrCreate(const MFolder *folder)
    if ( !mail_valid_net_parse((char *)GetImapSpec(folder).c_str(), &mbx) )
    {
       // invalid remote spec?
+      ERRORMESSAGE(( _("Parameters of the folder '%s' are invalid."),
+                     folder->GetFullName().c_str() ));
+
       return NULL;
    }
 

@@ -424,6 +424,10 @@ private:
    /// clear m_expungedMsgnos and m_expungedPositions arrays
    void DiscardExpungeData();
 
+   /// fill mailstatus with the results of c-client mail_status() call
+   static bool DoCheckStatus(const MFolder *folder,
+                             struct mbx_status *mailstatus);
+
    /** @name Notification handlers */
    //@{
    /// called when the number of the messages in the folder changes
