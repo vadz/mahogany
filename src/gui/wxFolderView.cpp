@@ -2293,36 +2293,41 @@ wxFolderView::OpenFolder(const String &profilename)
       // note that we don't use GetFullPersistentKey() here as we want this
       // setting to be global (it isn't very useful to disable this msg box
       // only for one folder)
-      if ( MDialog_YesNoDialog
+      if ( !MDialog_YesNoDialog
            (
             _("This folder couldn't be opened last time, "
               "do you still want to try to open it (it "
               "will probably fail again)?"),
             frame,
             MDIALOG_YESNOTITLE,
-            false,
+            false, // [No] default
             GetPersMsgBoxName(M_MSGBOX_OPEN_UNACCESSIBLE_FOLDER)
            ) )
       {
-         if ( MDialog_YesNoDialog
-              (
-               _("Would you like to change folder "
-                 "settings before trying to open it?"),
-               frame,
-               MDIALOG_YESNOTITLE,
-               false,
-               GetPersMsgBoxName(M_MSGBOX_CHANGE_UNACCESSIBLE_FOLDER_SETTINGS)
-            ) )
-         {
-            // invoke the folder properties dialog
-            if ( !ShowFolderPropertiesDialog(folder, frame) )
-            {
-               // the dialog was cancelled
-               wxLogStatus(frame, _("Opening the folder '%s' cancelled."),
-                           profilename.c_str());
+         // no, we don't want to open it again
+         mApplication->SetLastError(M_ERROR_CANCEL);
+         return NULL;
+      }
 
-               return NULL;
-            }
+      if ( MDialog_YesNoDialog
+           (
+            _("Would you like to change folder "
+              "settings before trying to open it?"),
+            frame,
+            MDIALOG_YESNOTITLE,
+            false,
+            GetPersMsgBoxName(M_MSGBOX_CHANGE_UNACCESSIBLE_FOLDER_SETTINGS)
+         ) )
+      {
+         // invoke the folder properties dialog
+         if ( !ShowFolderPropertiesDialog(folder, frame) )
+         {
+            // the dialog was cancelled
+            wxLogStatus(frame, _("Opening the folder '%s' cancelled."),
+                        profilename.c_str());
+
+            mApplication->SetLastError(M_ERROR_CANCEL);
+            return NULL;
          }
       }
    }

@@ -2266,7 +2266,9 @@ bool PickXFaceDialog(Profile *profile, wxWindow *parent)
    return ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() );
 }
 
-
+// ----------------------------------------------------------------------------
+// global password UI support: this password is used for TwoFish encryption
+// ----------------------------------------------------------------------------
 
 class ChangePasswdTraversal : public MFolderTraversal
 {
@@ -2330,7 +2332,7 @@ public:
    // reset the selected options to their default values
    virtual bool TransferDataFromWindow();
    virtual bool TransferDataToWindow();
-   bool WasChanged(void)
+   bool WasChanged(void) const
       {
          // difficult to say, be cautious:
          return TRUE;
@@ -2339,12 +2341,18 @@ public:
    void OnButton(wxCommandEvent & event );
    void OnUpdateUI(wxUpdateUIEvent& event);
    void DoUpdateUI();
+
 protected:
    wxString m_NewPassword;
 
    wxCheckBox *m_UseGlobalPassword;
-   wxTextCtrl *m_oPassword, *m_nPassword, *m_nPassword2;
-   wxStaticText *m_text1, *m_text2;
+   wxTextCtrl *m_oPassword,
+              *m_nPassword,
+              *m_nPassword2;
+
+   wxStaticText *m_text1,
+                *m_text2;
+
    DECLARE_EVENT_TABLE()
 };
 
@@ -2356,6 +2364,7 @@ void wxGlobalPasswdDialog::OnUpdateUI(wxUpdateUIEvent& event)
 {
    DoUpdateUI();
 }
+
 void wxGlobalPasswdDialog::DoUpdateUI()
 {
    bool enable = m_UseGlobalPassword->GetValue();
@@ -2374,14 +2383,19 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
    wxStaticBox *box = CreateStdButtonsAndBox(_("Global Password Settings"), FALSE,
                                              MH_DIALOG_GLOBALPASSWD);
    wxLayoutConstraints *c;
-   wxStaticText *stattext = new wxStaticText(this, -1,
-                                             _("Mahogany can use a global password setting\n"
-                                               "to protect all sensitive information, like\n"
-                                               "server passwords, in your configuration files.\n"
-                                               "\n"
-                                               "If you do not want to use a global password,\n"
-                                               "leave this dialog and disable the use of it\n"
-                                               "in the preferences dialog."));
+   wxStaticText *stattext = new wxStaticText
+                                (
+                                 this, -1,
+                                 _("Mahogany can use a global password setting\n"
+                                   "to protect all sensitive information, like\n"
+                                   "server passwords, in your configuration files.\n"
+                                   "\n"
+                                   "If you do not want to use a global password,\n"
+                                   "leave this dialog and disable the use of it\n"
+                                   "in the preferences dialog."
+                                  )
+                                );
+
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(box, wxTop, 6*LAYOUT_Y_MARGIN);
@@ -2399,7 +2413,11 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
    c->height.AsIs();
    text->SetConstraints(c);
 
-   m_UseGlobalPassword = new wxCheckBox(this, -1, "");
+   m_UseGlobalPassword = new wxCheckBox
+                             (
+                              this, -1,
+                              _("(this implies using stronger encryption)")
+                             );
    c = new wxLayoutConstraints;
    c->left.RightOf(text, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(text, wxTop);
@@ -2407,10 +2425,38 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
    c->height.AsIs();
    m_UseGlobalPassword->SetConstraints(c);
 
+   wxWindow *last = m_UseGlobalPassword;
+
+   if ( READ_CONFIG(profile, MP_CRYPTALGO) )
+   {
+      wxStaticText *label = new wxStaticText(this, -1, _("Old password:"));
+      c = new wxLayoutConstraints;
+      c->top.Below(last, 4*LAYOUT_Y_MARGIN);
+      c->left.SameAs(stattext, wxLeft, 2*LAYOUT_X_MARGIN);
+      c->width.AsIs();
+      c->height.AsIs();
+      label->SetConstraints(c);
+
+      m_oPassword = new wxTextCtrl(this, -1, "",
+                                   wxDefaultPosition, wxDefaultSize,
+                                   wxTE_PASSWORD);
+      c = new wxLayoutConstraints;
+      c->left.RightOf(label, 2*LAYOUT_X_MARGIN);
+      c->centreY.SameAs(label, wxCentreY);
+      c->width.AsIs();
+      c->height.AsIs();
+      m_oPassword->SetConstraints(c);
+
+      last = m_oPassword;
+   }
+   else
+   {
+      m_oPassword = NULL;
+   }
 
    m_text1 = new wxStaticText(this, -1, _("New password:"));
    c = new wxLayoutConstraints;
-   c->top.Below(m_UseGlobalPassword, 4*LAYOUT_Y_MARGIN);
+   c->top.Below(last, 4*LAYOUT_Y_MARGIN);
    c->left.SameAs(stattext, wxLeft, 2*LAYOUT_X_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
@@ -2421,12 +2467,12 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
                                 wxTE_PASSWORD);
    c = new wxLayoutConstraints;
    c->left.RightOf(m_text1, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(m_text1, wxTop);
+   c->centreY.SameAs(m_text1, wxCentreY);
    c->width.AsIs();
    c->height.AsIs();
    m_nPassword->SetConstraints(c);
 
-   m_text2 = new wxStaticText(this, -1, _("New password:"));
+   m_text2 = new wxStaticText(this, -1, _("Retype password:"));
    c = new wxLayoutConstraints;
    c->top.Below(m_nPassword, 4*LAYOUT_Y_MARGIN);
    c->left.SameAs(stattext, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -2439,7 +2485,7 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
                                  wxTE_PASSWORD);
    c = new wxLayoutConstraints;
    c->left.RightOf(m_text2, 2*LAYOUT_X_MARGIN);
-   c->top.SameAs(m_text2, wxTop);
+   c->centreY.SameAs(m_text2, wxCentreY);
    c->width.AsIs();
    c->height.AsIs();
    m_nPassword2->SetConstraints(c);
@@ -2448,29 +2494,12 @@ wxGlobalPasswdDialog::wxGlobalPasswdDialog(Profile *profile,
    TransferDataToWindow();
 }
 
-
-
 bool
 wxGlobalPasswdDialog::TransferDataToWindow()
 {
    m_UseGlobalPassword->SetValue(READ_APPCONFIG(MP_CRYPTALGO) != 0);
-   m_nPassword->Enable(FALSE);
-   m_nPassword2->Enable(FALSE);
-   if(m_UseGlobalPassword->GetValue())
-   {
-      // this triggers a question for the existing global password if it
-      // is set:
-      wxString testdata =
-         strutil_decrypt(READ_APPCONFIG(MP_CRYPT_TESTDATA));
-      if(testdata != "TESTDATA")
-      {
-         wxLogError(_("You need to know the existing global password to change it."));
-         return FALSE;
-      }
-      m_nPassword->Enable(TRUE);
-      m_nPassword2->Enable(TRUE);
-   }
    DoUpdateUI();
+
    return TRUE;
 }
 
@@ -2479,27 +2508,46 @@ wxGlobalPasswdDialog::TransferDataFromWindow()
 {
    Profile * p = mApplication->GetProfile();
 
-
    wxString oldPw = strutil_getpasswd();
    bool oldUseCrypt = READ_CONFIG(p, MP_CRYPTALGO) != 0;
 
-   bool newUseCrypt = m_UseGlobalPassword->GetValue();
-   wxString newPw = "";
-
-   if(newUseCrypt)
+   if ( m_oPassword )
    {
-      if(m_nPassword->GetValue() != m_nPassword2->GetValue())
+      // check the old password was given correctly first
+      if ( !strutil_checkpasswd(m_oPassword->GetValue()) )
+      {
+         wxLogError(_("Incorrect old password value!"));
+         return FALSE;
+      }
+   }
+
+   bool newUseCrypt = m_UseGlobalPassword->GetValue();
+   wxString newPw;
+   if ( newUseCrypt )
+   {
+      newPw = m_nPassword->GetValue();
+
+      if ( newPw.empty() )
+      {
+         wxLogError(_("Password can't be empty."));
+         return FALSE;
+      }
+
+      if ( newPw != m_nPassword2->GetValue() )
       {
          wxLogError(_("The two values for the password do not match!"));
          return FALSE;
       }
-      newPw = m_nPassword->GetValue();
    }
-   /// write test data encrypted with new password
-   p->writeEntry(MP_CRYPTALGO, newUseCrypt);
-   strutil_setpasswd(newPw);
-   p->writeEntry(MP_CRYPT_TESTDATA, strutil_encrypt("TESTDATA"));
 
+   // write test data encrypted with new password
+   p->writeEntry(MP_CRYPTALGO, newUseCrypt);
+   if ( newPw )
+   {
+      strutil_setpasswd(newPw);
+   }
+
+   // reencrypt all existing passwords with the new one
    if(oldPw != newPw || oldUseCrypt != newUseCrypt)
    {
       MFolder_obj folderRoot("");
@@ -2509,7 +2557,6 @@ wxGlobalPasswdDialog::TransferDataFromWindow()
       traverse.Traverse();
    }
 
-
    return TRUE;
 }
 
@@ -2517,8 +2564,13 @@ extern
 bool PickGlobalPasswdDialog(Profile *profile, wxWindow *parent)
 {
    wxGlobalPasswdDialog dlg(profile, parent);
-   return ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() );
+
+   return dlg.ShowModal() == wxID_OK && dlg.WasChanged();
 }
+
+// ----------------------------------------------------------------------------
+// CheckExpungeDialog
+// ----------------------------------------------------------------------------
 
 extern
 void CheckExpungeDialog(ASMailFolder *mf, wxWindow *parent)

@@ -1690,9 +1690,6 @@ extern void MailFolderCmnCleanup()
       gs_MailFolderCloser = NULL;
 
       delete mfCloser;
-
-      // save the cache
-      MfStatusCache::CleanUp();
    }
 }
 

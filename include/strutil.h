@@ -277,7 +277,7 @@ String
 strutil_enforceCRLF(String const &in);
 
 /** Enforces native CR/LF newline convention for this platform.
-    
+
     @param in string to copy
     @return the new string
 */
@@ -307,8 +307,17 @@ String strutil_decrypt(const String &original);
 
 /// set the global password
 extern void strutil_setpasswd(const String &newpasswd);
-// get the global password
+
+/// get the global password
 extern String strutil_getpasswd(void);
+
+/// check the password by rencrypting test data with it
+extern bool strutil_checkpasswd(const String& password);
+
+/// return true if we have a global password at all
+extern bool strutil_haspasswd(void);
+
+//@}
 
 /** Takes a time_t time value and returns either local time or GMT in
     a string.
@@ -354,7 +363,6 @@ strutil_getMailAddress(const String &inputline,
                        String * personal = NULL,
                        String * mailbox = NULL,
                        String * hostname = NULL);
-//@}
 
 /// Check if text is 7bit only:
 bool strutil_is7bit(const char *text);

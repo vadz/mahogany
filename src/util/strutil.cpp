@@ -738,66 +738,72 @@ int TwoFishCrypt(
 static String gs_GlobalPassword;
 static bool strutil_has_twofish = false;
 
-static void
+// return true if ok, false if no password
+static bool
 setup_twofish(void)
 {
-   if ( gs_GlobalPassword.empty() )
+   if ( !gs_GlobalPassword.empty() )
    {
-      MDialog_Message(
-         _("Mahogany uses a global password to protect sensitive\n"
-           "information in your configuration files.\n\n"
-           "The next dialog will ask you for your global password.\n"
-           "If you have not previously chosen one, please do it\n"
-           "now, otherwise enter the one you chose previously.\n\n"
-           "If you do not want to use a global password, just cancel\n"
-           "the next dialog.\n\n"
-           "(Tick the box below to never see this message again.)"),
-         NULL,
-         _("Global Password"),
-         GetPersMsgBoxName(M_MSGBOX_EXPLAIN_GLOBALPASSWD));
-
-      bool retry;
-      do
-      {
-         MInputBox(&gs_GlobalPassword,
-                   _("Global Password:"),
-                   _("Please enter the global password:"),
-                   NULL,NULL,NULL,TRUE);
-
-         if ( gs_GlobalPassword.empty() )
-         {
-            // cancelled, don't insist
-            return;
-         }
-
-         // TODO: ask to confirm it?
-
-         wxString testdata = READ_APPCONFIG(MP_CRYPT_TESTDATA);
-         if ( testdata.empty() )
-         {
-            // we hadn't used the global password before
-            mApplication->GetProfile()->writeEntry(MP_CRYPT_TESTDATA,
-                  strutil_encrypt_tf("TESTDATA"));
-
-            break;
-         }
-
-         if ( strutil_decrypt(testdata) == "TESTDATA" )
-         {
-            // correct password
-            break;
-         }
-
-         retry = MDialog_YesNoDialog
-                 (
-                  _("The password is wrong.\nDo you want to try again?"),
-                  NULL,
-                  MDIALOG_YESNOTITLE,
-                  true
-                 );
-
-      } while( retry );
+      // already have it
+      return true;
    }
+
+   MDialog_Message(
+      _("Mahogany uses a global password to protect sensitive\n"
+        "information in your configuration files.\n\n"
+        "The next dialog will ask you for your global password.\n"
+        "If you have not previously chosen one, please do it\n"
+        "now, otherwise enter the one you chose previously.\n\n"
+        "If you do not want to use a global password, just cancel\n"
+        "the next dialog.\n\n"
+        "(Tick the box below to never see this message again.)"),
+      NULL,
+      _("Global Password"),
+      GetPersMsgBoxName(M_MSGBOX_EXPLAIN_GLOBALPASSWD));
+
+   bool retry;
+   do
+   {
+      MInputBox(&gs_GlobalPassword,
+                _("Global Password:"),
+                _("Please enter the global password:"),
+                NULL,NULL,NULL,TRUE);
+
+      if ( gs_GlobalPassword.empty() )
+      {
+         // cancelled, don't insist
+         return false;
+      }
+
+      // TODO: ask to confirm it?
+
+      wxString testdata = READ_APPCONFIG(MP_CRYPT_TESTDATA);
+      if ( testdata.empty() )
+      {
+         // we hadn't used the global password before
+         mApplication->GetProfile()->writeEntry(MP_CRYPT_TESTDATA,
+               strutil_encrypt_tf("TESTDATA"));
+
+         return true;
+      }
+
+      if ( strutil_decrypt(testdata) == "TESTDATA" )
+      {
+         // correct password
+         return true;
+      }
+
+      retry = MDialog_YesNoDialog
+              (
+               _("The password is wrong.\nDo you want to try again?"),
+               NULL,
+               MDIALOG_YESNOTITLE,
+               true
+              );
+
+   } while( retry );
+
+   return false;
 }
 
 /*
@@ -807,17 +813,24 @@ setup_twofish(void)
 static String
 strutil_encrypt_tf(const String &original)
 {
-   setup_twofish();
-   CryptData input(original);
-   CryptData output;
-   int rc = TwoFishCrypt(1, 128, gs_GlobalPassword, &input ,&output);
-   if(rc)
+   if ( setup_twofish() )
    {
-      String tmp = output.ToHex();
-      String tmp2;
-      tmp2 << '-' << tmp;
-      return tmp2;
+      CryptData input(original);
+      CryptData output;
+      int rc = TwoFishCrypt(1, 128, gs_GlobalPassword, &input ,&output);
+      if(rc)
+      {
+         String tmp = output.ToHex();
+         String tmp2;
+         tmp2 << '-' << tmp;
+         return tmp2;
+      }
    }
+   else
+   {
+      ERRORMESSAGE((_("Impossible to use encryption without password.")));
+   }
+
    return "";
 }
 
@@ -829,7 +842,11 @@ strutil_decrypt_tf(const String &original)
       ERRORMESSAGE((_("Strong encryption algorithm not available.")));
       return "";
    }
-   setup_twofish();
+   if ( !setup_twofish() )
+   {
+      ERRORMESSAGE((_("Impossible to use encryption without password.")));
+   }
+
    CryptData input;
    input.FromHex(original.c_str()+1); // skip initial '-'
    CryptData output;
@@ -876,28 +893,44 @@ strutil_encrypt_initialise(void)
       b %= 256;
    }
 
-   /* Now test if twofish works alright on this system: */
-   gs_GlobalPassword = "testPassword";
-   String test = "This is a test, in cleartext.";
-   String cipher = strutil_encrypt_tf(test);
-   strutil_has_twofish = TRUE; // assume or it will fail
-   String clearagain = strutil_decrypt_tf(cipher);
-   if(clearagain != test)
+   // Now test if twofish works alright on this system
+   int status = READ_APPCONFIG(MP_CRYPT_TWOFISH_OK);
+   if ( status == -1 )
    {
-      MDialog_Message(
-         _("The secure encryption algorithm included in Mahogany\n"
-           "does not work on your system and will be replaced with\n"
-           "insecure weak encryption.\n"
-           "Please report this as a bug to the Mahogany developers,\n"
-           "so that we can fix it."),
-         NULL,
-         _("Missing feature"),
-         "EncryptionAlgoBroken");
-      strutil_has_twofish = FALSE;
+      String oldPassword = gs_GlobalPassword;
+      gs_GlobalPassword = "testPassword";
+      String test = "This is a test, in cleartext.";
+      String cipher = strutil_encrypt_tf(test);
+      strutil_has_twofish = TRUE; // assume or it will fail
+      String clearagain = strutil_decrypt_tf(cipher);
+      if(clearagain != test)
+      {
+         MDialog_Message(
+            _("The secure encryption algorithm included in Mahogany\n"
+              "does not work on your system and will be replaced with\n"
+              "insecure weak encryption.\n"
+              "Please report this as a bug to the Mahogany developers,\n"
+              "so that we can fix it."),
+            NULL,
+            _("Missing feature"),
+            "EncryptionAlgoBroken");
+         strutil_has_twofish = FALSE;
+      }
+      else
+      {
+         strutil_has_twofish = TRUE;
+      }
+
+      gs_GlobalPassword = oldPassword;
+
+      mApplication->GetProfile()->
+         writeEntry(MP_CRYPT_TWOFISH_OK, (long)strutil_has_twofish);
    }
    else
-      strutil_has_twofish = TRUE;
-   gs_GlobalPassword = "";
+   {
+      strutil_has_twofish = status != 0;
+   }
+
    strutil_encrypt_initialised = true;
 }
 
@@ -956,12 +989,35 @@ void
 strutil_setpasswd(const String &newpasswd)
 {
    gs_GlobalPassword = newpasswd;
+   mApplication->GetProfile()->writeEntry(MP_CRYPT_TESTDATA,
+                                          strutil_encrypt("TESTDATA"));
 }
 
 String
 strutil_getpasswd(void)
 {
    return gs_GlobalPassword;
+}
+
+bool
+strutil_haspasswd(void)
+{
+   return !String(READ_APPCONFIG(MP_CRYPT_TESTDATA)).empty();
+}
+
+bool
+strutil_checkpasswd(const String& passwd)
+{
+   wxString testdata = READ_APPCONFIG(MP_CRYPT_TESTDATA);
+
+   CHECK( !testdata.empty(), true, "shouldn't be called if no old password" );
+
+   String oldPassword = gs_GlobalPassword;
+   gs_GlobalPassword = passwd;
+   bool ok = strutil_decrypt(testdata) == "TESTDATA";
+   gs_GlobalPassword = oldPassword;
+
+   return ok;
 }
 
 String

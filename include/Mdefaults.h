@@ -239,6 +239,8 @@ enum MFolderIndex
 
 /// Which encryption algorithm to use : 0 = simple builtin, 1 = twofish
 #define MP_CRYPTALGO    "CryptAlgo"
+/// DoesTwoFish work? (-1 unknown, 0 no, 1 yes)
+#define MP_CRYPT_TWOFISH_OK "TwoFishOk"
 /// some test data
 #define MP_CRYPT_TESTDATA "CryptData"
 /// the locale for translation to national languages
@@ -898,6 +900,8 @@ enum MFolderIndex
 
 /// Which encryption algorithm to use : 0 = simple builtin, 1 = twofish
 #define MP_CRYPTALGO_D   0L
+/// DoesTwoFish work? (-1 unknown, 0 no, 1 yes)
+#define MP_CRYPT_TWOFISH_OK_D -1
 /// some test data
 #define MP_CRYPT_TESTDATA_D ""
 /// the locale for translation to national languages

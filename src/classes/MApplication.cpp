@@ -54,12 +54,14 @@
 #include "Mversion.h"
 #include "Mupgrade.h"
 
+#include "MFCache.h"          // for MfStatusCache::CleanUp
+
 #include <wx/confbase.h>      // wxExpandEnvVars
 #include <wx/mimetype.h>      // wxMimeTypesManager
 
-#include "wx/persctrl.h"      // for wxPControls::SetSettingsPath
+#include <wx/dirdlg.h>        // wxDirDialog
 
-#include "wx/dirdlg.h"        // wxDirDialog
+#include "wx/persctrl.h"      // for wxPControls::SetSettingsPath
 
 #ifdef OS_UNIX
 #  include <unistd.h>
@@ -580,6 +582,7 @@ MAppBase::OnShutDown()
    delete m_mimeManager;
 
    MailFolder::CleanUp();
+   MfStatusCache::CleanUp();
 
    // there might have been events queued, get rid of them
    //
