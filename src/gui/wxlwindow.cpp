@@ -105,6 +105,28 @@ wxLayoutWindow::~wxLayoutWindow()
    SetBackgroundBitmap(NULL);
 }
 
+void
+wxLayoutWindow::Clear(int family,
+                      int size,
+                      int style,
+                      int weight,
+                      int underline,
+                      wxColour *fg,
+                      wxColour *bg)
+{
+   GetLayoutList()->Clear(family,size,style,weight,underline,fg,bg);
+   SetBackgroundColour(*GetLayoutList()->GetDefaults()->GetBGColour());
+   ResizeScrollbars(true);
+   SetDirty();
+   SetModified(false);
+   wxRect r;
+   int w,h;
+   r.x = r.y = 0; GetSize(&w,&h);
+   r.width = w;
+   r.height = h;
+   DoPaint(&r);
+}
+
 #ifdef __WXMSW__
 long
 wxLayoutWindow::MSWGetDlgCode()
@@ -193,40 +215,35 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
 void
 wxLayoutWindow::OnChar(wxKeyEvent& event)
 {
+   int keyCode = event.KeyCode();
+   
 #ifdef WXLAYOUT_DEBUG
-   if(event.KeyCode() == WXK_F1)
+   if(keyCode == WXK_F1)
    {
       m_llist->Debug();
       return;
    }
 #endif
-   
-   long keyCode = event.KeyCode();
-   if(m_Selecting && ! event.ShiftDown())
+
+   if(! m_Selecting && event.ShiftDown())
    {
-      m_llist->EndSelection();
-      m_Selecting = false;
-   }
-   else
-      if(! m_Selecting && event.ShiftDown())
+      switch(keyCode)
       {
-         switch(keyCode)
-         {
-         case WXK_UP:
-         case WXK_DOWN:
-         case WXK_RIGHT:
-         case WXK_LEFT:
-         case WXK_PRIOR:
-         case WXK_NEXT:
-         case WXK_HOME:
-         case WXK_END:
-            m_Selecting = true;
-            m_llist->StartSelection();
-            break;
-         default:
-            ;
-         }
+      case WXK_UP:
+      case WXK_DOWN:
+      case WXK_RIGHT:
+      case WXK_LEFT:
+      case WXK_PRIOR:
+      case WXK_NEXT:
+      case WXK_HOME:
+      case WXK_END:
+         m_Selecting = true;
+         m_llist->StartSelection();
+         break;
+      default:
+         ;
       }
+   }
 
    /* These two nested switches work like this:
       The first one processes all non-editing keycodes, to move the
@@ -348,6 +365,17 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
          SetModified();
       }// if(IsEditable()) 
    }// first switch()
+   if(m_Selecting)
+   {
+      if(event.ShiftDown())
+         m_llist->ContinueSelection();
+      else
+      {
+         m_llist->EndSelection();
+         m_Selecting = false;
+      }
+   }
+
    ScrollToCursor();
    wxRect r = *m_llist->GetUpdateRect();
    DoPaint(&r);
@@ -375,6 +403,8 @@ wxLayoutWindow::ScrollToCursor(void)
    GetScrollPixelsPerUnit(&dx, &dy);
    x0 *= dx; y0 *= dy;
 
+   WXLO_DEBUG(("ScrollToCursor: ViewStart is %d/%d", x0, y0));
+   
    // Get the size of the visible window:
    GetClientSize(&x1,&y1);
    wxASSERT(x1 > 0);
@@ -445,8 +475,10 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
                updateRect->y+updateRect->height));
 
    if(IsDirty())
+   {
+      m_llist->Layout(dc);
       ResizeScrollbars();
-   
+   }
    /* Check whether the window has grown, if so, we need to reallocate 
       the bitmap to be larger. */
    if(x1 > m_bitmapSize.x || y1 > m_bitmapSize.y)
@@ -462,8 +494,8 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
    }
 
    m_memDC->SetDeviceOrigin(0,0);
-   m_memDC->SetBrush(wxBrush(m_llist->GetDefaults()->GetBGColour(),wxSOLID));
-   m_memDC->SetPen(wxPen(m_llist->GetDefaults()->GetBGColour(),
+   m_memDC->SetBrush(wxBrush(*m_llist->GetDefaults()->GetBGColour(),wxSOLID));
+   m_memDC->SetPen(wxPen(*m_llist->GetDefaults()->GetBGColour(),
                          0,wxTRANSPARENT));                               
    m_memDC->SetLogicalFunction(wxCOPY);
 
@@ -489,10 +521,12 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
 
    
    /* This is the important bit: we tell the list to draw itself: */
+#if WXLO_DEBUG_URECT
    WXLO_DEBUG(("Update rect: %ld,%ld / %ld,%ld",
                updateRect->x, updateRect->y,
                updateRect->x+updateRect->width,
                updateRect->y+updateRect->height)); 
+#endif
    
    // Device origins on the memDC are suspect, we translate manually
    // with the translate parameter of Draw().
@@ -544,7 +578,9 @@ void
 wxLayoutWindow::ResizeScrollbars(bool exact)
 {
    wxPoint max = m_llist->GetSize();
-   
+
+   WXLO_DEBUG(("ResizeScrollbars: GetSize: %ld, %ld", (long int)max.x, 
+               (long int) max.y));
    if(max.x > m_maxx || max.y > m_maxy
       || max.x > m_maxx-WXLO_ROFFSET || max.y > m_maxy-WXLO_BOFFSET
       || exact)
@@ -592,6 +628,13 @@ wxLayoutWindow::Paste(void)
 bool
 wxLayoutWindow::Copy(void)
 {
+   // Calling GetSelection() will automatically do an EndSelection()
+   // on the list, but we need to take a note of it, too:
+   if(m_Selecting)
+   {
+      m_Selecting = false;
+      m_llist->EndSelection();
+   }
    wxLayoutList *llist = m_llist->GetSelection();
    if(! llist)
       return FALSE;
@@ -606,6 +649,16 @@ wxLayoutWindow::Copy(void)
       delete export;
    }
    delete llist;
+
+   // The exporter always appends a newline, so we chop it off if it
+   // is there:
+   {
+      size_t len = text.Length();
+      if(len > 2 && text[len-2] ==  '\r') // Windows
+         text = text.Mid(0,len-2);
+      else if(len > 1 && text[len-1] == '\n')
+         text = text.Mid(0,len-1);
+   }
    
    // Read some text
    if (wxTheClipboard->Open())
@@ -616,6 +669,41 @@ wxLayoutWindow::Copy(void)
       return rc;
    }
    return FALSE;
+}
+
+bool
+wxLayoutWindow::Cut(void)
+{
+   if(Copy())
+   {
+      m_llist->DeleteSelection();
+      return TRUE;
+   }
+   else
+      return FALSE;
+}
+bool
+wxLayoutWindow::Find(const wxString &needle,
+                     wxPoint * fromWhere)
+{
+   wxPoint found;
+   
+   if(fromWhere == NULL)
+      found = m_llist->FindText(needle, m_llist->GetCursorPos());
+   else
+      found = m_llist->FindText(needle, *fromWhere);
+   if(found.x != -1)
+   {
+      if(fromWhere)
+      {
+         *fromWhere = found;
+         fromWhere->x ++;
+      }
+      m_llist->MoveCursorTo(found);
+      ScrollToCursor();
+      return true;
+   }
+   return false;
 }
 
 wxMenu *

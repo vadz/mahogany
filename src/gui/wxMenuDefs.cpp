@@ -271,6 +271,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_MSG_TOGGLEHEADERS,gettext_noop("Show &header"),    gettext_noop("Toggle display of message header") },
    { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message"), gettext_noop("Show the raw message text") },
+   { WXMENU_MSG_FIND,  gettext_noop("&Find..."), gettext_noop("Find text in message") },
 
    // compose
    { WXMENU_COMPOSE_INSERTFILE,

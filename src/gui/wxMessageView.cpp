@@ -618,6 +618,31 @@ wxMessageView::HighLightURLs(const char *input)
 
    return out;
 }
+bool
+wxMessageView::Find(const wxString &what)
+{
+   if(what.Length() == 0)
+   {
+      if( ! MInputBox(&m_FindString,
+                      _("Find string in message"),
+                      _("   Find:"),
+                      this,
+                      "MsgVi      ewFindString", "")
+          || strutil_isempty(m_FindString))
+         return true;
+   }
+   else
+      m_FindString = what;
+   return FindAgain();
+}
+
+bool
+wxMessageView::FindAgain(void)
+{
+   bool rc = wxLayoutWindow::Find(m_FindString);
+   Refresh(FALSE);
+   return rc;
+}
 
 wxMessageView::~wxMessageView()
 {
@@ -1156,63 +1181,67 @@ wxMessageView::DoMenuCommand(int id)
    bool handled = true;
    switch ( id )
    {
-      case WXMENU_MSG_REPLY:
-         if(m_uid != -1)
-            GetFolder()->ReplyMessages(&msgs, GetFrame(this), m_Profile);
-         break;
-      case WXMENU_MSG_FORWARD:
-         if(m_uid != -1)
-            GetFolder()->ForwardMessages(&msgs, GetFrame(this), m_Profile);
-         break;
+   case WXMENU_MSG_FIND:
+      if(m_uid != -1)
+         Find();
+      break;
+   case WXMENU_MSG_REPLY:
+      if(m_uid != -1)
+         GetFolder()->ReplyMessages(&msgs, GetFrame(this), m_Profile);
+      break;
+   case WXMENU_MSG_FORWARD:
+      if(m_uid != -1)
+         GetFolder()->ForwardMessages(&msgs, GetFrame(this), m_Profile);
+      break;
 
-      case WXMENU_MSG_SAVE_TO_FOLDER:
-         if(m_uid != -1)
-            GetFolder()->SaveMessagesToFolder(&msgs, GetFrame(this));
-         break;
-      case WXMENU_MSG_SAVE_TO_FILE:
-         if(m_uid != -1)
-            GetFolder()->SaveMessagesToFile(&msgs, GetFrame(this));
-         break;
+   case WXMENU_MSG_SAVE_TO_FOLDER:
+      if(m_uid != -1)
+         GetFolder()->SaveMessagesToFolder(&msgs, GetFrame(this));
+      break;
+   case WXMENU_MSG_SAVE_TO_FILE:
+      if(m_uid != -1)
+         GetFolder()->SaveMessagesToFile(&msgs, GetFrame(this));
+      break;
 
-      case WXMENU_MSG_DELETE:
-         if(m_uid != -1)
-            GetFolder()->DeleteMessages(&msgs);
-         break;
+   case WXMENU_MSG_DELETE:
+      if(m_uid != -1)
+         GetFolder()->DeleteMessages(&msgs);
+      break;
 
-      case WXMENU_MSG_UNDELETE:
-         if(m_uid != -1)
-            GetFolder()->UnDeleteMessages(&msgs);
-         break;
+   case WXMENU_MSG_UNDELETE:
+      if(m_uid != -1)
+         GetFolder()->UnDeleteMessages(&msgs);
+      break;
 
-      case WXMENU_MSG_PRINT:
-         Print();
-         break;
-      case WXMENU_MSG_PRINT_PREVIEW:
-         PrintPreview();
-         break;
+   case WXMENU_MSG_PRINT:
+      Print();
+      break;
+   case WXMENU_MSG_PRINT_PREVIEW:
+      PrintPreview();
+      break;
 #ifdef USE_PS_PRINTING
-      case WXMENU_MSG_PRINT_PS:
-         break;
+   case WXMENU_MSG_PRINT_PS:
+      break;
 #endif
 
-      case WXMENU_HELP_CONTEXT:
-         mApplication->Help(MH_MESSAGE_VIEW,this);
-         break;
+   case WXMENU_HELP_CONTEXT:
+      mApplication->Help(MH_MESSAGE_VIEW,this);
+      break;
 
-      case WXMENU_MSG_TOGGLEHEADERS:
-         {
-            m_ProfileValues.showHeaders = !m_ProfileValues.showHeaders;
-            m_Profile->writeEntry(MP_SHOWHEADERS, m_ProfileValues.showHeaders);
-            Update();
-         }
-         break;
+   case WXMENU_MSG_TOGGLEHEADERS:
+   {
+      m_ProfileValues.showHeaders = !m_ProfileValues.showHeaders;
+      m_Profile->writeEntry(MP_SHOWHEADERS, m_ProfileValues.showHeaders);
+      Update();
+   }
+   break;
 
-      case WXMENU_MSG_SHOWRAWTEXT:
-         ShowRawText();
-         break;
+   case WXMENU_MSG_SHOWRAWTEXT:
+      ShowRawText();
+      break;
 
-      default:
-         handled = false;
+   default:
+      handled = false;
    }
 
    return handled;

@@ -122,6 +122,11 @@ public:
    /// returns the mail folder
    MailFolder *GetFolder(void);
 
+   /// Find a string in message, true if found
+   bool Find(const wxString &what = "");
+   /// Find last string again.
+   bool FindAgain(void);
+   
 private:
    /// the parent window
    wxWindow   *m_Parent;
@@ -139,7 +144,8 @@ private:
    XFace   *xface;
    /// and the xpm for it
    char **xfaceXpm;
-
+   /// string used for last search in message
+   wxString m_FindString;
    /// Profile
    ProfileBase *m_Profile;
    /// the MIME popup menu

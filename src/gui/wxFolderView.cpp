@@ -554,6 +554,11 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
 
    switch(event.GetId())
    {
+   case WXMENU_MSG_FIND:
+   case WXMENU_MSG_TOGGLEHEADERS:
+   case WXMENU_MSG_SHOWRAWTEXT:
+      (void)m_MessagePreview->DoMenuCommand(event.GetId());
+      break;
    case WXMENU_LAYOUT_LCLICK:
    case WXMENU_LAYOUT_RCLICK:
    case WXMENU_LAYOUT_DBLCLICK:
@@ -627,10 +632,6 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       break;
    case WXMENU_HELP_CONTEXT:
       mApplication->Help(MH_FOLDER_VIEW,GetWindow());
-      break;
-   case WXMENU_MSG_TOGGLEHEADERS:
-   case WXMENU_MSG_SHOWRAWTEXT:
-      (void)m_MessagePreview->DoMenuCommand(event.GetId());
       break;
    case WXMENU_FILE_COMPOSE:
    {
