@@ -137,7 +137,7 @@ public:
    {
       Profile_obj profile(m_folder->GetProfile());
 
-      m_timeNext = time(NULL) + READ_CONFIG(profile, MP_POLLINCOMINGDELAY);
+      m_timeNext = time(NULL) + (long)READ_CONFIG(profile, MP_POLLINCOMINGDELAY);
 
       wxLogTrace(TRACE_MONITOR, "Next check for %s scheduled for %s",
                  m_folder->GetFullName().c_str(),
