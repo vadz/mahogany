@@ -215,7 +215,7 @@ bool wxMLogWindow::OnFrameClose(wxFrame *frame)
                    MDIALOG_MSGTITLE,
                    "ShowLogWinHint");
 
-   return wxLogWindow::OnFrameClose(frame); // TRUE, normally
+   return TRUE; //FIXME!!!return wxLogWindow::OnFrameClose(frame); // TRUE, normally
 }
 
 void wxMLogWindow::OnFrameDelete(wxFrame *frame)
