@@ -38,6 +38,8 @@
 #include "Composer.h"
 #include "Collect.h"
 
+#include "MPers.h"
+
 #include <wx/clipbrd.h>
 
 #ifdef OS_UNIX
