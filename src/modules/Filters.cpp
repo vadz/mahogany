@@ -2051,7 +2051,7 @@ static Value func_subj8bit(ArgList *args, FilterRuleImpl *p)
           max8bit = subject.length() / 2;
    for ( const unsigned char *p = (unsigned char *)subject.c_str(); *p; p++ )
    {
-      if ( *p > 127 )
+      if ( *p > 127 || *p == '?' || *p == '!' )
       {
          if ( num8bit++ == max8bit )
          {
