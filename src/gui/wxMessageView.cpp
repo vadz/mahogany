@@ -1588,6 +1588,9 @@ wxMessageView::PrintPreview(void)
 bool
 wxMessageView::RunProcess(const String& command)
 {
+   wxLogStatus(GetFrame(this),
+               _("Calling external viewer '%s'"),
+               command.c_str());
    return wxExecute(command, true) == 0;
 }
 
@@ -1596,6 +1599,10 @@ wxMessageView::LaunchProcess(const String& command,
                              const String& errormsg,
                              const String& filename)
 {
+   wxLogStatus(GetFrame(this),
+               _("Calling external viewer '%s'"),
+               command.c_str());
+
    wxProcess *process = new wxProcess(this);
    int pid = wxExecute(command, false, process);
    if ( !pid )
