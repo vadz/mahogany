@@ -388,7 +388,7 @@ wxLayoutObjectIcon::wxLayoutObjectIcon(wxBitmap const &icon)
 #ifdef __WXMSW__
    // FIXME ugly, ugly, ugly - but the only way to avoid slicing
    m_Icon = icon.GetHBITMAP() ? new wxBitmap(icon)
-                              : new wxBitmap(wxIcon((const wxIcon &)icon));
+                              : new wxBitmap(wxBitmap((const wxBitmap &)icon));
 #else // !MSW
    m_Icon = new wxBitmap(icon);
 #endif // MSW/!MSW
@@ -1240,24 +1240,6 @@ wxLayoutLine::Break(CoordType xpos, wxLayoutList *llist)
    wxASSERT(xpos >= 0);
 
    MarkDirty(xpos);
-
-   /* If we are at the begin of a line, we want to move all other
-      lines down and stay with the cursor where we are. However, if we
-      are in an empty line, we want to move down with it. */
-   if(xpos == 0 && GetLength() > 0)
-   { // insert an empty line before this one
-      wxLayoutLine *prev = new wxLayoutLine(m_Previous, llist);
-      if(m_Previous == NULL)
-      {  // We were in first line, need to link in new empty line
-         // before this.
-         prev->m_Next = this;
-         m_Previous = prev;
-         m_Previous->m_Height = 0; // this is a wild guess
-      }
-      if(m_Next)
-         m_Next->MarkDirty();
-      return m_Previous;
-   }
 
    CoordType offset;
    wxLOiterator i = FindObject(xpos, &offset);
@@ -2228,7 +2210,10 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
 
    
    if(m_ReLayoutAll)
+   {
       forceAll = TRUE;
+      bottom = -1;
+   }
    ForceTotalLayout(FALSE);
    
 
@@ -2272,7 +2257,7 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
                if ( csize )
                   *csize = m_CursorSize;
             }
-         }
+         } 
          else
             if(cpos && line->GetLineNumber() == cpos->y)
                line->Layout(dc, this,
@@ -2333,8 +2318,8 @@ wxLayoutList::Draw(wxDC &dc,
    /* This call to Layout() will re-calculate and update all lines
       marked as dirty.
    */
-   Layout(dc, bottom+offset.y); 
-
+   Layout(dc, bottom);
+   
    ApplyStyle(m_DefaultStyleInfo, dc);
    wxBrush brush(m_CurrentStyleInfo.m_bg, wxSOLID);
    dc.SetBrush(brush);
@@ -2892,6 +2877,9 @@ wxLayoutPrintout::wxLayoutPrintout(wxLayoutList *llist,
    // remove any highlighting which could interfere with printing:
    m_llist->StartSelection();
    m_llist->EndSelection();
+   // force a full layout of the list:
+   m_llist->ForceTotalLayout();
+   // layout  is called in ScaleDC() when we have a DC
 }
 
 wxLayoutPrintout::~wxLayoutPrintout()
@@ -2958,7 +2946,7 @@ bool wxLayoutPrintout::OnPrintPage(int page)
    {
       int top, bottom;
       top = (page - 1)*m_PrintoutHeight;
-      bottom = top + m_PrintoutHeight;
+      bottom = top + m_PrintoutHeight; 
 
       WXLO_DEBUG(("OnPrintPage(%d) printing from %d to %d", page, top, 
                   bottom));
@@ -2979,14 +2967,19 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
       determine the correct paper size and scaling. We don't actually
       print anything on it. */
 #ifdef __WXMSW__
-   wxPrinterDC psdc("","",WXLLIST_TEMPFILE,false);
+   wxPrinterDC *psdc = new wxPrinterDC("","",WXLLIST_TEMPFILE,false);
 #else
-   wxPostScriptDC psdc(WXLLIST_TEMPFILE,false);
+   wxPostScriptDC *psdc = new wxPostScriptDC(WXLLIST_TEMPFILE,false);
 #endif
 
-   float scale = ScaleDC(&psdc);
+   psdc->StartDoc(m_title);
+   // before we draw anything, me must make sure the list is properly
+   // laid out
+   m_llist->Layout(*psdc);
 
-   psdc.GetSize(&m_PageWidth, &m_PageHeight);
+   float scale = ScaleDC(psdc);
+
+   psdc->GetSize(&m_PageWidth, &m_PageHeight);
 
    // This sets a left/top origin of 15% and 5%:
    m_Offset = wxPoint((15*m_PageWidth)/100, (5*m_PageHeight)/100);
@@ -2994,14 +2987,6 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
    // This is the length of the printable area.
    m_PrintoutHeight = m_PageHeight - 2*m_Offset.y;
    m_PrintoutHeight = (int)( m_PrintoutHeight / scale); // we want to use the real paper height
-#if 0
-   // We should really use the margin settings of wxWindows somehow.
-   m_Offset = wxPoint(0,0);
-   // This is the length of the printable area.
-   m_PrintoutHeight = m_PageHeight;
-   m_PrintoutHeight = (int)( m_PrintoutHeight / scale); // we want to use the real paper height
-#endif
-   
 
    m_NumOfPages = 1 +
       (int)( m_llist->GetSize().y / (float)(m_PrintoutHeight));
@@ -3011,6 +2996,8 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
 
    *selPageFrom = 1;
    *selPageTo = m_NumOfPages;
+   psdc->EndDoc();
+   delete psdc;
    wxRemoveFile(WXLLIST_TEMPFILE);
 }
 

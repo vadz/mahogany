@@ -120,7 +120,7 @@ public:
        Internally, this stores the parameter and calls a refresh on
        wxMSW, draws directly on wxGTK.
    */
-   void DoPaint(const wxRect *updateRect = NULL);
+   void RequestUpdate(const wxRect *updateRect = NULL);
 
    /// if exact == false, assume 50% extra size for the future
    void ResizeScrollbars(bool exact = false);  // don't change this to true!
@@ -155,22 +155,9 @@ public:
 
    /// Creates a wxMenu for use as a format popup.
    static wxMenu * MakeFormatMenu(void);
-   /**@name Dirty flag handling for optimisations. */
-   //@{
-   /// Set dirty flag.
-   void SetDirty(void) { m_Dirty = true; }
-   /// Query whether window needs redrawing.
-   bool IsDirty(void) const { return m_Dirty; }
-   /// Reset dirty flag.
-   void ResetDirty(void) { m_Dirty = false; }
-   //@}
-   /// Redraws the window, used by DoPaint() or OnPaint().
+   /// Redraws the window, used by RequestUpdate() or OnPaint().
    void InternalPaint(const wxRect *updateRect);
 
-   /// Has list been modified/edited?
-   bool IsModified(void) const { return m_Modified; }
-   /// Mark list as modified or unchanged.
-   void SetModified(bool modified = true) { m_Modified = modified; }
    /** Tell window to update a wxStatusBar with UserData labels and
        cursor positions.
        @param bar wxStatusBar pointer
@@ -190,6 +177,30 @@ public:
       { m_FocusFollowMode = enable; }
 #endif
 
+   /**@name Modified flag handling, will not get reset by list unless
+      in Clear() */
+   //@{
+   /// Set dirty flag.
+   void SetModified(bool modified = TRUE) { m_Modified = modified; }
+   /// Query whether window needs redrawing.
+   bool IsModified(void) const { return m_Modified; }
+   //@}
+
+   /**@name Dirty flag handling for optimisations.
+    Normally one should only need to call SetDirty(), e.g. when
+    manipulating the wxLayoutList directly, so the window will update
+    itself. ResetDirty() and IsDirty() should only be used
+    internally. */
+   //@{
+   /// Set dirty flag.
+   void SetDirty(void) { m_Dirty = true; m_Modified = true; }
+   /// Query whether window needs redrawing.
+   bool IsDirty(void) const { return m_Dirty; }
+   /// Reset dirty flag.
+   void ResetDirty(void) { m_Dirty = false; }
+   //@}
+
+   
 protected:
    /// generic function for mouse events processing
    void OnMouse(int eventId, wxMouseEvent& event);
@@ -242,10 +253,10 @@ private:
    bool m_Selecting;
    /// wrap margin
    CoordType    m_WrapMargin;
-   /// Is list dirty (for redraws, internal use)?
-   bool         m_Dirty;
-   /// Has list been edited?
-   bool         m_Modified;
+   /// Has list changed since last redraw, e.g. in size?
+   bool m_Dirty;
+   /// Has the list ever been modified?
+   bool m_Modified;
    wxMemoryDC  *m_memDC;
    wxBitmap    *m_bitmap;
    wxPoint      m_bitmapSize;

@@ -26,7 +26,6 @@
 #   include "Profile.h"
 #   include "strutil.h"
 #   include "PathFinder.h"
-#   include "kbList.h"
 #   include "MApplication.h"
 #   ifdef  OS_WIN
 #      include <wx/msw/regconf.h>
@@ -555,6 +554,10 @@ Profile::DebugDump() const
 }
 
 #endif
+
+
+
+
 
 // ----------------------------------------------------------------------------
 // global functions

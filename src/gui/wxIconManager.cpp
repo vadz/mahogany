@@ -638,8 +638,9 @@ wxIconManager::GetIcon(String const &_iconName)
    return m_unknownIcon;
 }
 
-   wxIcon wxIconManager::GetIconFromMimeType(const String& type,
-                                             const String &ext)
+
+wxIcon wxIconManager::GetIconFromMimeType(const String& type,
+                                          const String &ext)
 {
    wxASSERT(this);
 

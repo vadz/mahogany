@@ -500,9 +500,7 @@ wxMessageView::Clear(void)
                          &m_ProfileValues.FgCol,
                          &m_ProfileValues.BgCol);
    SetBackgroundColour( m_ProfileValues.BgCol );
-
-   // be sure that we don't keep the old m_uid, otherwise we won't update later
-   // (if the new uid will be the same...)
+   GetLayoutList()->SetAutoFormatting(FALSE); // speeds up insertion of text
 }
 
 void
@@ -617,6 +615,9 @@ wxMessageView::Update(void)
       if(m_mailMessage->GetPartSize(i) == 0)
          continue; // ignore empty parts
 
+#ifdef DEBUG
+      obj = NULL;
+#endif
       if( t == Message::MSG_TYPEAPPLICATION) // let's guess a little
       {
          wxString ext = GetParameter(m_mailMessage,i,"FILENAME").AfterLast('.');
@@ -678,7 +679,6 @@ wxMessageView::Update(void)
             In case of image content, we check whether it might be a
             Fax message. */
       {
-         wxBitmap icn;
          if(t == Message::MSG_TYPEIMAGE && m_ProfileValues.inlineGFX)
          {
             wxString filename = wxGetTempFileName("Mtemp");
@@ -687,21 +687,23 @@ wxMessageView::Update(void)
             wxImage img =  wxIconManager::LoadImage(filename, &ok, true);
             wxRemoveFile(filename);
             if(ok)
-               icn = img.ConvertToBitmap();
+               obj = new wxLayoutObjectIcon(img.ConvertToBitmap());
             else
-               icn = mApplication->GetIconManager()->
+               obj = new wxLayoutObjectIcon(
+                  mApplication->GetIconManager()->
                   GetIconFromMimeType(m_mailMessage->GetPartMimeType(i),
-                                      GetParameter(m_mailMessage,i,"FILENAME").AfterLast('.'));
-            obj = new wxLayoutObjectIcon(icn);
+                                      GetParameter(m_mailMessage,i,"FILENAME").AfterLast('.'))
+                  );
          }
          else
          {
-            icn = mApplication->GetIconManager()->
+            obj = new wxLayoutObjectIcon(
+               mApplication->GetIconManager()->
                GetIconFromMimeType(m_mailMessage->GetPartMimeType(i),
-                                      GetParameter(m_mailMessage,i,"FILENAME").AfterLast('.'));
+                                   GetParameter(m_mailMessage,i,"FILENAME").AfterLast('.'))
+               );
          }
-         obj = new wxLayoutObjectIcon(icn);
-
+         ASSERT(obj);
          {
             String label;
             label = GetParameter(m_mailMessage,i,"FILENAME");
@@ -718,9 +720,13 @@ wxMessageView::Update(void)
    }
    llist->LineBreak();
    llist->MoveCursorTo(wxPoint(0,0));
-   llist->ForceTotalLayout();
-   Refresh(FALSE);
-   ScrollToCursor();
+   // we have modified the list directly, so we need to mark the
+   // wxlwindow as dirty:
+   SetDirty();
+   // re-enable auto-formatting, seems safer for selection
+   // highlighting, not sure if needed, though
+   llist->SetAutoFormatting(TRUE);
+   RequestUpdate();
 }
 
 String
