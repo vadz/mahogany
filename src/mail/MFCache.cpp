@@ -49,10 +49,19 @@
 
 // the cache file format version
 #define CACHE_VERSION_MAJOR 1
-#define CACHE_VERSION_MINOR 0
+#define CACHE_VERSION_MINOR 1
 
 // the delimiter in the text file lines
 #define CACHE_DELIMITER ":"      // yes, it's a string, not a char
+
+// the versions of the file format we know about
+enum CacheFileFormat
+{
+   CacheFile_1_0,    // name:total:unread:flagged
+   CacheFile_1_1,    // name:total:new:unread:flagged
+   CacheFile_Current = CacheFile_1_1,
+   CacheFile_Max
+};
 
 // ----------------------------------------------------------------------------
 // globals
@@ -205,6 +214,7 @@ bool MfStatusCache::Load(const String& filename)
    bool isFmtOk = count > 1;
 
    // get the version
+   CacheFileFormat fmt = CacheFile_Current;
    if ( isFmtOk )
    {
       int verMaj, verMin;
@@ -213,7 +223,7 @@ bool MfStatusCache::Load(const String& filename)
       if ( isFmtOk )
       {
          if ( verMaj > CACHE_VERSION_MAJOR ||
-               verMaj == CACHE_VERSION_MAJOR && verMin > CACHE_VERSION_MINOR )
+               (verMaj == CACHE_VERSION_MAJOR && verMin > CACHE_VERSION_MINOR) )
          {
             // I don't know what should we really do (refuse to overwrite it?
             // this would be stupid, it's just a cache file...), but at least
@@ -222,6 +232,16 @@ bool MfStatusCache::Load(const String& filename)
                            "created by a newer version of Mahogany but "
                            "will be overwritten when the program exits "
                            "in older format."), filename.c_str());
+
+            // don't try to read it
+            return true;
+         }
+         else if ( verMaj < CACHE_VERSION_MAJOR ||
+                     (verMaj == CACHE_VERSION_MAJOR &&
+                        verMin < CACHE_VERSION_MINOR) )
+         {
+            // read the old format
+            fmt = CacheFile_1_0;
          }
       }
       else
@@ -274,15 +294,37 @@ bool MfStatusCache::Load(const String& filename)
          name = wxString(str.c_str(), p);
 
          // get the rest
-         if ( sscanf(p + 1,
-                    "%lu" CACHE_DELIMITER "%lu" CACHE_DELIMITER "%lu",
-                    &status.total,
-                    &status.unread,
-                    &status.flagged) != 3 )
+         switch ( fmt )
+         {
+            case CacheFile_1_0:
+               isFmtOk = sscanf(p + 1,
+                                "%lu" CACHE_DELIMITER
+                                "%lu" CACHE_DELIMITER
+                                "%lu",
+                                &status.total,
+                                &status.unread,
+                                &status.flagged) == 3;
+               break;
+
+            default:
+               FAIL_MSG( "unknown cache file format" );
+               // fall through nevertheless
+
+            case CacheFile_1_1:
+               isFmtOk = sscanf(p + 1,
+                                "%lu" CACHE_DELIMITER
+                                "%lu" CACHE_DELIMITER 
+                                "%lu" CACHE_DELIMITER
+                                "%lu",
+                                &status.total,
+                                &status.newmsgs,
+                                &status.unread,
+                                &status.flagged) == 4;
+         }
+
+         if ( !isFmtOk )
          {
             wxLogError(_("Missing field(s) at line %d."), n + 1);
-
-            isFmtOk = false;
 
             break;
          }
@@ -359,15 +401,17 @@ bool MfStatusCache::Save(const String& filename)
          name.Replace(CACHE_DELIMITER, CACHE_DELIMITER CACHE_DELIMITER);
 
          // and write info to file: note that we don't remember the number of
-         // new and recent messages because they won't be new nor recent the
-         // next time we run anyhow nor the number of messages matching the
-         // search criteria as this is hardly ever useful
+         // recent messages because they won't be recent the next time we run
+         // anyhow nor the number of messages matching the search criteria as
+         // this is hardly ever useful
          str.Printf("%s" CACHE_DELIMITER
+                    "%lu" CACHE_DELIMITER
                     "%lu" CACHE_DELIMITER
                     "%lu" CACHE_DELIMITER
                     "%lu\n",
                     name.c_str(),
                     status->total,
+                    status->newmsgs,
                     status->unread,
                     status->flagged);
 
