@@ -571,11 +571,13 @@ BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
    EVT_CHOICE(IDC_IDENT_COMBO, wxComposeView::OnIdentChange)
 END_EVENT_TABLE()
 
+
 BEGIN_EVENT_TABLE(wxAddressTextCtrl, wxTextCtrl)
    EVT_SET_FOCUS(wxAddressTextCtrl::OnFocusSet)
    EVT_CHAR(wxAddressTextCtrl::OnChar)
    EVT_TEXT_ENTER(-1, wxAddressTextCtrl::OnEnter)
 END_EVENT_TABLE()
+
 
 // ============================================================================
 // implementation
@@ -3101,15 +3103,15 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
             break;
 
          case OriginalHeader_PersonalName:
-            m_msg->Address(*value);
+            m_msg->Address(*value, MAT_FROM);
             break;
 
          case OriginalHeader_FirstName:
-            *value = m_msg->GetAddressFirstName();
+            *value = m_msg->GetAddressFirstName(MAT_FROM);
             break;
 
          case OriginalHeader_LastName:
-            *value = m_msg->GetAddressLastName();
+            *value = m_msg->GetAddressLastName(MAT_FROM);
             break;
 
          case OriginalHeader_Newsgroups:
