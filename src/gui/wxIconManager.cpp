@@ -280,7 +280,7 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
          pdlg->Update(++step); // ignore break here
       if(cpptr)
       {
-         *img = wxImage(cpptr);
+         *img = wxBitmap(cpptr).ConvertToImage();
          wxIconManager::FreeImage(cpptr);
          loaded = true;
       }

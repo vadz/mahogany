@@ -806,7 +806,7 @@ void HtmlViewer::EndHeaders()
 
    if ( m_bmpXFace.Ok() )
    {
-      wxString filename = CreateImageInMemoryFS(wxImage(m_bmpXFace));
+      wxString filename = CreateImageInMemoryFS(m_bmpXFace.ConvertToImage());
       m_htmlText << "</td><td width="
                  << wxString::Format("%d", m_bmpXFace.GetWidth()) << ">"
                     "<img src=\"memory:" << filename << "\">"
@@ -846,7 +846,7 @@ void HtmlViewer::StartPart()
 void HtmlViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
 {
    wxString url;
-   url << "memory:" << CreateImageInMemoryFS(wxImage(icon));
+   url << "memory:" << CreateImageInMemoryFS(icon.ConvertToImage());
 
    m_htmlText << "<a href=\"" << url << "\">"
                  "<img alt=\"" << ci->GetLabel() << "\" src=\"" << url

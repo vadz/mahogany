@@ -2012,7 +2012,7 @@ void wxFolderListCtrl::OnListKeyDown(wxListEvent& event)
 {
    mApplication->UpdateAwayMode();
 
-   switch ( event.GetCode() )
+   switch ( event.GetKeyCode() )
    {
       case WXK_UP:
       case WXK_DOWN:

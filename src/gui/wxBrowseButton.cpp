@@ -457,7 +457,7 @@ void wxIconBrowseButton::SetIcon(size_t nIcon)
 
       if ( (w1 != w2) || (h1 != h2) )
       {
-         bmp = wxImage(bmp).Rescale(w1, h1).ConvertToBitmap();
+         bmp = wxBitmap(bmp.ConvertToImage().Rescale(w1, h1));
       }
       //else: the size is already correct
 
@@ -481,9 +481,9 @@ void wxIconBrowseButton::DoBrowse()
       if ( bmp.GetWidth() != size || bmp.GetHeight() != size )
       {
          // must resize the icon
-         wxImage image(bmp);
+         wxImage image(bmp.ConvertToImage());
          image.Rescale(size, size);
-         bmp = image.ConvertToBitmap();
+         bmp = wxBitmap(image);
       }
 
       icons.Add(new wxBitmap(bmp));

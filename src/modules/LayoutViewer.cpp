@@ -514,7 +514,7 @@ void LayoutViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
 
 void LayoutViewer::InsertImage(const wxImage& image, ClickableInfo *ci)
 {
-   InsertAttachment(image.ConvertToBitmap(), ci);
+   InsertAttachment(wxBitmap(image), ci);
 }
 
 void LayoutViewer::InsertRawContents(const String& data)

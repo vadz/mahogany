@@ -1502,8 +1502,12 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     // create an icon
 #ifdef USE_ICON
     int which = style & wxICON_MASK;
-    wxStaticBitmap *icon = new wxStaticBitmap(this, -1,
-                                              wxTheApp->GetStdIcon(which));
+    wxStaticBitmap *icon = new wxStaticBitmap
+                               (
+                                this,
+                                -1,
+                                ((wxMApp *)mApplication)->GetStdIcon(which)
+                               );
     const int iconSize = icon->GetIcon().GetWidth();
 #else
     const int iconSize = 0;

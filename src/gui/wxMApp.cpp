@@ -1597,11 +1597,6 @@ wxMApp::GetStdIcon(int which) const
 
    // Set our icons for the dialogs.
 
-   // This might happen during program shutdown, when the profile has
-   // already been deleted or at startup before it is set up.
-   if(! GetProfile() || GetGlobalDir().Length() == 0)
-      return wxApp::GetStdIcon(which);
-
    // this ugly "#ifdefs" are needed to silent warning about "switch without
    // any case" warning under Windows
 #ifndef OS_WIN
@@ -1615,12 +1610,10 @@ wxMApp::GetStdIcon(int which) const
       return ICON("msg_question"); break;
    case wxICON_INFORMATION:
       return ICON("msg_info"); break;
-   default:
-      return wxApp::GetStdIcon(which);
    }
-#else
-   return wxApp::GetStdIcon(which);
 #endif
+
+   return wxNullIcon;
 }
 
 void

@@ -1878,10 +1878,10 @@ wxXFaceButton::SetFile(const wxString &filename)
    {
       bool success = FALSE;
       if(wxFileExists(filename))
-         bmp = XFace::GetXFaceImg(filename, &success, m_Parent).ConvertToBitmap();
+         bmp = wxBitmap(XFace::GetXFaceImg(filename, &success, m_Parent));
       if(! success)
       {
-         bmp = wxBitmap(wxTheApp->GetStdIcon(wxICON_HAND));
+         bmp = wxBitmap(((wxMApp *)mApplication)->GetStdIcon(wxICON_HAND));
          m_XFace = "";
       }
       else
