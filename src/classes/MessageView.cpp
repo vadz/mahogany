@@ -117,6 +117,7 @@ extern const MOption MP_MVIEW_FGCOLOUR;
 extern const MOption MP_MVIEW_HEADER_NAMES_COLOUR;
 extern const MOption MP_MVIEW_HEADER_VALUES_COLOUR;
 extern const MOption MP_MVIEW_URLCOLOUR;
+extern const MOption MP_PGP_COMMAND;
 extern const MOption MP_PLAIN_IS_TEXT;
 extern const MOption MP_RFC822_IS_TEXT;
 extern const MOption MP_SHOWHEADERS;
@@ -1945,7 +1946,10 @@ MessageView::ProcessAlternativeMultiPart(const MimePart *mimepart)
 void
 MessageView::ProcessSignedMultiPart(const MimePart *mimepart)
 {
-   if ( mimepart->GetParam(_T("protocol")) == _T("application/pgp-signature") )
+   // we use MP_PGP_COMMAND as a boolean switch telling us whether we should
+   // use pgp or not as well
+   if ( mimepart->GetParam(_T("protocol")) == _T("application/pgp-signature") &&
+            !READ_APPCONFIG_TEXT(MP_PGP_COMMAND).empty() )
    {
       static const wxChar *sigIgnoredMsg =
          gettext_noop("\n\nSignature will be ignored");
