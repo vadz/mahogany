@@ -14,16 +14,14 @@ $Id$
 *********************************************************************
 *** not fixed yet:
 *********************************************************************
-- A problem with expunging message from MailFolderCC: as the messages
-  are queued, they cause fetches of messages which no longer exist
-  because the count has not yet been updated.
 - add TO: field to folderview
 - speed up copy mail to folder by cusing c-client functionality
 - add some more folder properties to config dialog, i.e. be able to
   switch off automatic notification of incoming emails.
 - fix my OpenAnyFolderDialog to take hostname and folderpath, as
   required for imap  --> drop the dialog?
-
+ - folderview listctrl: save sizes of columns
+   Make types of columns (and  number?) configurable with the new Config_ComboBox
  - folderview listctrl has extra Subject column behind Size field ???
  - when inserting filetype of unknown MIME type, prompt for it,
    possibly have a MIME types editor (similar to netscape's?)
@@ -133,10 +131,12 @@ $Id$
 - put number of total/unread/new msgs in the status bar for the selected
   folder in wxMainFrame, also draw the folders with the new mail in bold
 
-- could we have each flag at its own position in folder view listview? I.e.
-  now they all appear in sequence and I'd like each of them have its own
-  position (looks better and it becomes easier to spot, for example, all
-  unread messages)
+- we need to handle the RepliedTo flag for messages which isn't used
+  much yet
+
+- Things like CopyMessagesToFolder need a return code indicating
+  whether they were successful or not, otherwise MoveMessagesToFolder
+  deletes them in any case. Trivial to add.
 
 - folder set message flag update hook takes too long for really large folders
 ==> code commented out in MailFolderCC.cpp
@@ -317,6 +317,9 @@ classes in the hierarchy.
 *********************************************************************
 *** Fixed and tested:
 *********************************************************************
+ - A problem with expunging message from MailFolderCC: as the messages
+   are queued, they cause fetches of messages which no longer exist
+   because the count has not yet been updated.
  - make Message use refcount
  - add message/move to folder
  - copying to other folder only writes headers, no content 
@@ -419,6 +422,11 @@ classes in the hierarchy.
    from the Scottish Office).  SEEMS GONE!?
  - suspected bug in LoadImageXpm in wxIconmanager leading to crashes
  - wxListCtrl in folderview behaves properly now
+ - could we have each flag at its own position in folder view listview? I.e.
+   now they all appear in sequence and I'd like each of them have its own
+   position (looks better and it becomes easier to spot, for example, all
+   unread messages)
+    KB: done that.
 
 
  vi: set si tw=80:
