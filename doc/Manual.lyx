@@ -1,4 +1,4 @@
-#This file was created by <karsten> Wed May 19 14:26:15 1999
+#This file was created by <karsten> Wed May 19 16:23:30 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -1283,6 +1283,92 @@ New Mail
 \layout Section
 
 Sending Mail
+\layout Subsection
+
+Key Bindings in the Message Editor
+\layout Standard
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
+multicol5
+11 2 0 0 -1 -1 -1 -1
+1 1 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+1 0 0 0
+0 0 0 0
+1 0 0 0
+0 0 0 0
+1 0 0 0
+0 1 0 0
+8 1 0 "" ""
+2 1 1 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 2 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+0 8 1 0 0 0 0 "" ""
+
+Key-Combination
+\newline 
+Function
+\newline 
+ALT-D
+\newline 
+delete word
+\newline 
+CTRL-Y
+\newline 
+delete line
+\newline 
+CTRL-U
+\newline 
+delete to begin of line
+\newline 
+CTRL-K
+\newline 
+delete to end of line
+\newline 
+CTRL-C 
+\newline 
+copy selection to clipboard
+\newline 
+SHIFT-INSERT
+\newline 
+
+\newline 
+CTRL-X
+\newline 
+cut selection to clipboard
+\newline 
+SHIFT-DELETE
+\newline 
+
+\newline 
+CTRL-V
+\newline 
+paste text from clipboard
+\newline 
+CTRL-INSERT
+\newline 
+
 \layout Subsection
 
 Using the address book_3100_
