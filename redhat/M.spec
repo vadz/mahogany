@@ -38,6 +38,7 @@ as local MBOX and news spool folders and sending mail using SMTP.
 %setup -n mahogany-%{VERSION}
 
 %build
+make allclean
 if [ ! -f configure ]; then
   autoconf
 fi
@@ -45,7 +46,7 @@ fi
 CFLAGS="$RPM_OPT_FLAGS" ./configure --without-threads \
 	--prefix=$RPM_BUILD_ROOT/%prefix
 
-make dep
+make depend || true
 make clean
 
 if [ "$SMP" != "" ]; then
