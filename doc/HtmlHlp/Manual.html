@@ -7,9 +7,9 @@ original version by:  Nikos Drakos, CBLU, University of Leeds
 <HTML>
 <HEAD>
 <TITLE>Mahogany User Manual
-Version 0.62 ``Mars''</TITLE>
+Version 0.63 ``Saugus''</TITLE>
 <META NAME="description" CONTENT="Mahogany User Manual
-Version 0.62 ``Mars''">
+Version 0.63 ``Saugus''">
 <META NAME="keywords" CONTENT="Manual">
 <META NAME="resource-type" CONTENT="document">
 <META NAME="distribution" CONTENT="global">
@@ -28,7 +28,7 @@ Version 0.62 ``Mars''">
 <P>
 <H1 ALIGN="CENTER"><I>Mahogany User Manual</I>
 <BR>
-<FONT SIZE="+2">Version 0.62 ``Mars''</FONT></H1>
+<FONT SIZE="+2">Version 0.63 ``Saugus''</FONT></H1>
 <P ALIGN="CENTER"><STRONG>Copyright 1997-2001 by The Mahogany Development Team
 <BR>
 Written by Karsten Ballüder, Vadim Zeitlin et.al.
@@ -284,6 +284,49 @@ Changes against the previous version</A>
 <P>
 
 <H3><A NAME="SECTION00211100000000000000">
+0.63 against 0.62</A>
+</H3>
+
+<P>
+Again, most of the effort went into optimizing the program for speed.Filtering
+and moving mail messages on IMAP servers is now an order ofmagnitude
+faster and startup time has been reduced too (especially underWindows).
+Several fatal buttons which had unfortunately crept into Win32release
+were fixed as well.The new features this time include
+
+<P>
+
+<UL><LI>Showing the total number and the number of unread messages directly
+in thefolder tree
+
+<LI>New so-called unattended, or away, mode in which all new mail notificationsand
+any interactive dialogs are temporarily suppressed
+
+<LI>A few new commands such as &#34;Clear folder&#34; to delete
+all messages in a folderwithout even opening it (handy for emptying
+the trash folder) and &#34;Close&#34; and&#34;Close
+all&#34; folder(s).There are several more minor improvements
+as well:
+
+<LI>New URL popup menu in the message viewer and &#34;Open URL in
+new browser window&#34;option.
+
+<LI>A new option to automatically select the units for message size (kb/mb)
+
+<LI>Python 2.x is now supported and not only 1.5 (Unix)Some of non fatal
+but annoying bugs fixed in this release are:
+
+<LI>Fixed server side searching (IMAP only)
+
+<LI>Fixed text highlighting when selecting text in the viewer
+
+<LI>Renaming of the folders in the tree fixed once again
+
+</UL>
+
+<P>
+
+<H3><A NAME="SECTION00211200000000000000">
 0.62 against 0.61</A>
 </H3>
 
@@ -347,7 +390,7 @@ And a few improvements too:
 
 <P>
 
-<H3><A NAME="SECTION00211200000000000000">
+<H3><A NAME="SECTION00211300000000000000">
 0.61 against 0.60 </A>
 </H3>
 
@@ -370,7 +413,7 @@ using ''F<SMALL>OLDER|</SMALL>I<SMALL>MPORT FOLDER TREE...</SMALL>'' command (se
 
 <P>
 
-<H3><A NAME="SECTION00211300000000000000">
+<H3><A NAME="SECTION00211400000000000000">
 0.60 against 0.50</A>
 </H3>
 
@@ -459,7 +502,7 @@ will hopefully be fixed fairly soon.
 
 <P>
 
-<H3><A NAME="SECTION00211400000000000000">
+<H3><A NAME="SECTION00211500000000000000">
 0.5 against 0.23a</A>
 </H3>
 
@@ -516,7 +559,7 @@ for KDE and GNOME filetype icons.
 
 <P>
 
-<H3><A NAME="SECTION00211500000000000000">
+<H3><A NAME="SECTION00211600000000000000">
 0.23a against 0.22a</A>
 </H3>
 
@@ -560,7 +603,7 @@ Expect them to appear in the next releases.
 
 <P>
 
-<H3><A NAME="SECTION00211600000000000000">
+<H3><A NAME="SECTION00211700000000000000">
 0.22a against 0.21a</A>
 </H3>
 
@@ -590,7 +633,7 @@ replies.
 
 <P>
 
-<H3><A NAME="SECTION00211700000000000000">
+<H3><A NAME="SECTION00211800000000000000">
 0.10a to 0.21a</A>
 </H3>
 
@@ -700,7 +743,7 @@ or find interesting to do. If your priorities are different, join
 our team and help us improve it. Mahogany is and will always be an
 OpenSource(TM) project and your involvement is wanted! If you have
 any questions about this, please contact the developers at <A NAME="tex2html1"
- HREF="mailto:mahogany-developers@lists.sourceforge.net">mahogany-developers@lists.sourceforge.net</A>.
+ HREF="mailto:mahogany-users@lists.sourceforge.net">mahogany-users@lists.sourceforge.net</A>.
 If you have questions about the Mahogany License, discuss them with
 us - we don't want the license to scare anyone.</B>
 
@@ -733,7 +776,7 @@ Why not the GPL/BSD/QPL/my favourite license?</A>
 Recently discussions about which license to chose for which project
 provoked major flamewars in the Unix community. There is a trend to
 put everything under the GPL or LGPL<A NAME="tex2html2"
- HREF="#foot92"><SUP>1.1</SUP></A>. We do not want to get involved in this highly emotional and political
+ HREF="#foot103"><SUP>1.1</SUP></A>. We do not want to get involved in this highly emotional and political
 discussion. Our intent is to allow everyone to use and modify Mahogany
 while preserving some form of control over its development. That is
 why we chose a modified version of Perl's Artistic License. It is
@@ -906,7 +949,7 @@ When you start Mahogany for the first time, it will display the license
 and conditions of use and ask you to accept or reject the license.
 If you do not accept it, Mahogany will terminate. If you have any
 questions about the license or want to otherwise comment on it, please
-email the development team at <TT>mahogany-developers@lists.sourceforge.net</TT>
+email the development team at <TT>mahogany-users@lists.sourceforge.net</TT>
 .
 
 <P>
@@ -1179,11 +1222,12 @@ The Folder Tree</A>
 <P>
 <A NAME="FolderTreeCtrl"></A>The folder tree shows a hierarchical view of
 all folders managed by <I>Mahogany</I>, this includes both mail folders
-and newsgroups. Folders can be grouped hierarchically and inherit settings
-from their parent folders (e.g. the server host). Clicking the right
-mouse button on any tree node will pop up a menu with some options.
-To open a folder or connection to a server for the first time, choose
-``Create New Folder'' which will show you a dialog (<A HREF="Manual.html#CreateNewFolderDialog">1.4.3</A>).
+and newsgroups. Folders can be grouped hierarchically and inherit
+settings from their parent folders (e.g. the server host). Clicking
+the right mouse button on any tree node will pop up a menu with some
+options. To open a folder or connection to a server for the first
+time, choose ``Create New Folder'' which will show you a dialog
+(<A HREF="Manual.html#CreateNewFolderDialog">1.4.3</A>).
 
 <P>
 
@@ -1501,11 +1545,11 @@ Migrating from another mail client</A>
 
 <P>
 <A NAME="Import"></A><I>Mahogany</I> supports importing the settings from
-a few other popular mail clients. The current list includes Pine,
-XFMail and Eudora. Depending on the mail client only part of its settings
-may be imported but in the best case Mahogany can import the address
-books, the configuration settings, the filter rules and the list of
-folders to use. To use this feature, choose ``M<SMALL>AIL|</SMALL>I<SMALL>MPORT...</SMALL>''
+a few other popular mail clients. The current list includes Netscape,
+Pine, XFMail and Eudora. Depending on the mail client only part of
+its settings may be imported but in the best case Mahogany can import
+the address books, the configuration settings, the filter rules and
+the list of folders to use. To use this feature, choose ``M<SMALL>AIL|</SMALL>I<SMALL>MPORT...</SMALL>''
 command and follow the dialogs.
 
 <P>
@@ -1954,8 +1998,8 @@ This is the default server for your IMAP mail folders.
 <LI><B>SMTP server</B>
 <BR>
 This is the server used for sending outgoing mail, please ask your
-system administrator if you don't know its name. If you don't configure
-this setting, you will not be able to send any e-mail!
+system administrator if you don't know its name. This option is disabled
+if ``Use local mail transfer agent'' is checked.
 
 <LI><B>NNTP server</B>
 <BR>
@@ -3625,19 +3669,6 @@ i.e. ``gmake'' rather than the default ``make''.
 
 <P>
 
-<H3><A NAME="SECTION00613100000000000000">
-make fails</A>
-</H3>
-
-<P>
-If Mahogany's own make process fails after configuring it, this is
-likely caused by the ``make depend'' stage. Simply run ``make
--i depend'' from the toplevel (mahogany-0.50) directory and it
-will run through, ignoring all errors. After that, a normal ``make''
-will succeed.
-
-<P>
-
 <H2><A NAME="SECTION00614000000000000000">
 How can I get it to compile on Caldera Linux?</A>
 </H2>
@@ -3676,7 +3707,7 @@ to remove old configuration info and run ./configure
 look at the end of config.log to see what went wrong.
 <DT>.
 <DD>If it does not find the wxWindows library, you need to add /usr/local/lib
-to either your LD_LIBRARY_PATH or to /etc/ld.conf (and run ldconfig
+to either your LD_LIBRARY_PATH or to /etc/ld.so.conf (and run /sbin/ldconfig
 as root), then remove *cache* and try again. Again, if something
 fails, look at config.log.
 </DL>
@@ -3817,7 +3848,7 @@ folder type to be ``IMAP folder''. Then enter the name of your
 IMAP server, your username and password (or leave it empty to be asked
 later) for that server and, optionally, the path to the folder on
 the IMAP server. You can leave the path empty, and it will use the
-default folder (INBOX).
+default folder (usually INBOX).
 
 <P>
 If you want to access many IMAP folders on the same server, or a directory
@@ -3944,7 +3975,7 @@ one as all other folders will move messages straight to Trash instead
 of marking them deleted.
 <BR><HR><H4>Footnotes</H4>
 <DL>
-<DT><A NAME="foot92">... LGPL</A><A NAME="foot92"
+<DT><A NAME="foot103">... LGPL</A><A NAME="foot103"
  HREF="Manual.html#tex2html2"><SUP>1.1</SUP></A>
 <DD>
 which we recently felt victim of - due to some strong demand, we have
@@ -3955,7 +3986,7 @@ decided to allow alternatively licensing Mahogany under GPL
 <BR><HR>
 <ADDRESS>
 <I></I>
-<BR><I>2001-03-23</I>
+<BR><I>2001-06-14</I>
 </ADDRESS>
 </BODY>
 </HTML>

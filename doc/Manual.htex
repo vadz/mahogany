@@ -20,7 +20,7 @@
 
 \vfill{}
 \title{\textsl{Mahogany User Manual}\\
-{\Large Version 0.62 {}``Mars{}''}}
+{\Large Version 0.63 {}``Saugus{}''}}
 \vfill{}
 
 
@@ -51,6 +51,34 @@ will be happy to help you.
 
 \subsection{Changes against the previous version}
 
+
+\subsubsection{0.63 against 0.62}
+
+Again, most of the effort went into optimizing the program for speed.Filtering
+and moving mail messages on IMAP servers is now an order ofmagnitude
+faster and startup time has been reduced too (especially underWindows).
+Several fatal buttons which had unfortunately crept into Win32release
+were fixed as well.The new features this time include
+
+\begin{itemize}
+\item Showing the total number and the number of unread messages directly
+in thefolder tree
+\item New so-called unattended, or away, mode in which all new mail notificationsand
+any interactive dialogs are temporarily suppressed
+\item A few new commands such as \char`\"{}Clear folder\char`\"{} to delete
+all messages in a folderwithout even opening it (handy for emptying
+the trash folder) and \char`\"{}Close\char`\"{} and\char`\"{}Close
+all\char`\"{} folder(s).There are several more minor improvements
+as well:
+\item New URL popup menu in the message viewer and \char`\"{}Open URL in
+new browser window\char`\"{}option.
+\item A new option to automatically select the units for message size (kb/mb)
+\item Python 2.x is now supported and not only 1.5 (Unix)Some of non fatal
+but annoying bugs fixed in this release are:
+\item Fixed server side searching (IMAP only)
+\item Fixed text highlighting when selecting text in the viewer
+\item Renaming of the folders in the tree fixed once again
+\end{itemize}
 
 \subsubsection{0.62 against 0.61}
 

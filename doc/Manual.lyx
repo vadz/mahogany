@@ -35,11 +35,11 @@ Mahogany User Manual
 
 \shape default 
 \size larger 
-Version 0.62 
+Version 0.63 
 \begin_inset Quotes eld
 \end_inset 
 
-Mars
+Saugus
 \begin_inset Quotes erd
 \end_inset 
 
@@ -91,6 +91,51 @@ Due to the fact that it is a cross-platform effort, the compilation and
 \layout Subsection
 
 Changes against the previous version
+\layout Subsubsection
+
+0.63 against 0.62
+\layout Standard
+Again, most of the effort went into optimizing the program for speed.
+Filtering and moving mail messages on IMAP servers is now an order of
+magnitude faster and startup time has been reduced too (especially under
+Windows). Several fatal buttons which had unfortunately crept into Win32
+release were fixed as well.
+
+The new features this time include
+\layout Itemize
+Showing the total number and the number of unread messages directly in the
+folder tree
+
+\layout Itemize
+New so-called unattended, or away, mode in which all new mail notifications
+and any interactive dialogs are temporarily suppressed
+
+\layout Itemize
+A few new commands such as "Clear folder" to delete all messages in a folder
+without even opening it (handy for emptying the trash folder) and "Close" and
+"Close all" folder(s).
+
+There are several more minor improvements as well:
+\layout Itemize
+New URL popup menu in the message viewer and "Open URL in new browser window"
+option.
+
+\layout Itemize
+A new option to automatically select the units for message size (kb/mb)
+
+\layout Itemize
+Python 2.x is now supported and not only 1.5 (Unix)
+
+Some of non fatal but annoying bugs fixed in this release are:
+\layout Itemize
+Fixed server side searching (IMAP only)
+
+\layout Itemize
+Fixed text highlighting when selecting text in the viewer
+
+\layout Itemize
+Renaming of the folders in the tree fixed once again
+
 \layout Subsubsection
 
 0.62 against 0.61
