@@ -1913,41 +1913,47 @@ static void SortListing(MailFolder *mf, HeaderInfoList *hil, long sortOrder)
 {
    CHECK_RET( hil, "no listing to sort" );
 
-   size_t count = hil->Count();
-   if ( count >= 1 )
+   // don't sort the listing if we don't have any sort criterium (so sorting
+   // "by arrival order" will be much faster!)
+   if ( sortOrder != 0 )
    {
-      MFrame *frame = mf->GetInteractiveFrame();
-      if ( frame )
+      size_t count = hil->Count();
+      if ( count >= 1 )
       {
-         wxLogStatus(frame, _("Sorting %u messages..."), count);
+         MFrame *frame = mf->GetInteractiveFrame();
+         if ( frame )
+         {
+            wxLogStatus(frame, _("Sorting %u messages..."), count);
+         }
+
+         MLocker lock(gs_SortData.mutex);
+         gs_SortData.order = sortOrder;
+         gs_SortData.hil = hil;
+
+         // start with unsorted listing
+         size_t *transTable = new size_t[count];
+         for ( size_t n = 0; n < count; n++ )
+         {
+            transTable[n] = n;
+         }
+
+         // now sort it
+         qsort(transTable, count, sizeof(size_t), ComparisonFunction);
+
+         // and tell the listing to use it (it will delete it)
+         hil->SetTranslationTable(transTable);
+
+         // just in case
+         gs_SortData.hil = NULL;
+
+         if ( frame )
+         {
+            wxLogStatus(frame, _("Sorting %u messages... done."), count);
+         }
       }
-
-      MLocker lock(gs_SortData.mutex);
-      gs_SortData.order = sortOrder;
-      gs_SortData.hil = hil;
-
-      // start with unsorted listing
-      size_t *transTable = new size_t[count];
-      for ( size_t n = 0; n < count; n++ )
-      {
-         transTable[n] = n;
-      }
-
-      // now sort it
-      qsort(transTable, count, sizeof(size_t), ComparisonFunction);
-
-      // and tell the listing to use it (it will delete it)
-      hil->SetTranslationTable(transTable);
-
-      // just in case
-      gs_SortData.hil = NULL;
-
-      if ( frame )
-      {
-         wxLogStatus(frame, _("Sorting %u messages... done."), count);
-      }
+      //else: avoid sorting empty listing or listing of 1 element
    }
-   //else: avoid sorting empty listing or listing of 1 element
+   //else: configured not to do any sorting
 
    hil->DecRef();
 }
