@@ -2442,7 +2442,7 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
                   (
                      wxString::Format
                      (
-                        _("Filtering %u messages in folder '%s'...\n\n"),
+                        _("Filtering %u messages in folder '%s'...\n\n\n"),
                         count, m_MailFolder->GetName().c_str()
                      ),
                      "",
