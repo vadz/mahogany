@@ -3848,6 +3848,7 @@ static bool MailStreamHasThreader(MAILSTREAM *stream, const char *thrName)
 // Copy the tree given to us to some 'known' memory
 //
 static THREADNODE* CopyTree(THREADNODE* th) {
+   if (th == NULL) return NULL;
    THREADNODE* thrNode = new THREADNODE;
    thrNode->num = th->num;
    thrNode->next = CopyTree(th->next);
