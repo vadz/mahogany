@@ -1703,6 +1703,13 @@ ProfileImpl::Commit(void)
 
    ASSERT_MSG( m_Suspended, _T("calling Commit() without matching Suspend()") );
 
+   if ( m_Suspended > 1 )
+   {
+      // don't commit yet, we remain suspended
+      m_Suspended--;
+      return;
+   }
+
    if ( m_wroteSuspended )
    {
       CHECK_RET( gs_allConfigSources,
