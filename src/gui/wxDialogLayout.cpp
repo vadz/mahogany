@@ -996,6 +996,14 @@ void wxEnhancedPanel::EnableTextWithLabel(wxTextCtrl *control, bool bEnable)
    }
 }
 
+wxStaticText *wxEnhancedPanel::GetLabelForControl(wxControl *control)
+{
+   long id = wxWindow::PrevControlId(control->GetId());
+   wxWindow *win = FindWindow(id);
+
+   return wxDynamicCast(win, wxStaticText);
+}
+
 // enable/disable any control with label
 void wxEnhancedPanel::EnableControlWithLabel(wxControl *control, bool bEnable)
 {
@@ -1003,20 +1011,10 @@ void wxEnhancedPanel::EnableControlWithLabel(wxControl *control, bool bEnable)
    control->Enable(bEnable);
 
    // then its label
+   wxStaticText *label = GetLabelForControl(control);
+   CHECK_RET( label, _T("controls label not found?") );
 
-   // NB: we assume that the control ids are consecutive
-   long id = wxWindow::PrevControlId(control->GetId());
-   wxWindow *win = FindWindow(id);
-
-   if ( win == NULL ) {
-      wxFAIL_MSG(_T("can't find label for the control"));
-   }
-   else {
-      // did we find the right one?
-      wxASSERT( win->IsKindOf(CLASSINFO(wxStaticText)) );
-
-      win->Enable(bEnable);
-   }
+   label->Enable(bEnable);
 }
 
 // enable/disable the listbox and its buttons

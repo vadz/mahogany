@@ -522,6 +522,10 @@ public:
       // enable/disable listbox and its buttons
    void EnableListBox(wxListBox *control, bool enable);
 
+      // get the label corresponding to the given control or NULL
+   wxStaticText *GetLabelForControl(wxControl *control);
+
+
    // get the canvas - all the controls should be created as children of this
    // canvas, not of the page itself
    wxWindow *GetCanvas() const
