@@ -3874,7 +3874,7 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
 
    wxBeginBusyCursor();
 
-   DoClear(false /* keep the viewer */);
+   DoClear(true /* keep the viewer */);
 
    MailFolder *mf = MailFolder::OpenFolder(folder,
                                            readonly ? MailFolder::ReadOnly
