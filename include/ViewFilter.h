@@ -123,6 +123,20 @@ public:
 
    //@}
 
+   /**
+      Viewer options checks,
+
+      When the user changes the message view options the viewer might have to
+      be refreshed to take them into account. This function is called by
+      MessageView to allow the user to update its options and to decide whether
+      it wants the viewer to be updated or not.
+
+      @param profile to read the options from
+      @return true if the viewer should be refreshed, false if there are no
+              visible changes
+    */
+   virtual bool UpdateOptions(Profile * /* profile */) { return false; }
+
 protected:
    /// the function to implement in the derived classes, called by Process()
    virtual void DoProcess(String& text,
