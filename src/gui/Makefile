@@ -2,7 +2,7 @@
 
 CWD = gui
 SRC = wxMApp.cc wxMFrame.cc wxFolderView.cc wxMessageView.cc \
-wxComposeView.cc wxMainFrame.cc wxFText.cc wxFTCanvas.cc \
+wxComposeView.cc wxMainFrame.cc \
 wxIconManager.cc wxFontManager.cc wxMDialogs.cc wxMLogFrame.cc \
 wxAdbEdit.cc wxlwindow.cc wxllist.cc wxlparser.cc
 

@@ -34,7 +34,7 @@
 /**@name wxWindows implementation of GUI */
 //@{
 //@Include:   gui/wxMFrame.h gui/wxFolderView.h gui/wxMessageView.h
-//@Include:   gui/wxComposeView.h gui/wxFTCanvas.h gui/wxFText.h
+//@Include:   gui/wxComposeView.h 
 //@Include:   gui/wxFTCanvas.h gui/wxIconManager.h gui/wxFontManager.h
 //@Include:   gui/wxMDialogs.h
 //@}

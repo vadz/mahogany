@@ -3,8 +3,7 @@ $Id$
 
 *** bugs to fix ***
 - MessageView:
-  + better detection of mime type for inlining graphics
-  + extraction of parameter list and filenames for mime handling/saving
+   + extraction of parameter list and filenames for mime handling/saving
   + move wxMessageView to be a panel only and rewrite folderview
   + some code in wxMessageView relies on unix unlink() behaviour 
     (file is still open and in use when deleted)
@@ -12,10 +11,8 @@ $Id$
   + fix profile mess in here, use folder profile and MessageView profile
 
 - ComposeView:
-  + constraints
-  + MIME inclusion
-  + MIME subtypes are missing TEXT/ instead of TEXT/PLAIN
-  + extra header lines don't get set, why? Profile bug?
+   + MIME inclusion
+   + extra header lines don't get set, why? Profile bug?
 
 - wxLayout:
   + fix my printing code in wxl*.new in src/Projects/wxLayout
@@ -23,9 +20,10 @@ $Id$
   + backspace sometimes goes wrong
   + flicker
 
-- parent frames should not be NULL
+- fix memory corruption problem, caused by wxGTK?!
 
-- configure: automatically set c-client system type to lnx or gso
+- parent frames should not be NULL --> memory corruption
+  (does not happen when run in gdb)
 
 - WINDOWS: how to do MIME handling?
 
@@ -33,9 +31,6 @@ $Id$
   headers in order to get "make depend" right
 
 - occasional segfaults on exit (but also in GNOME :-)
-
-- there is still a minor problem with URLs ending in > like <http:xxx>
-  Ignored for now, until wxFText/wxFTCanvas get rewritten.
 
 - fix non-ASCII characters in header lines
 
@@ -45,8 +40,6 @@ $Id$
   + add remaining (important) interface definitions
   + add an InputBox dialog
   + user/global Minit files, security issues
-
-- remove wxFText/wxFTCanvas from code base
 
 *** to implement in near future ***
 
