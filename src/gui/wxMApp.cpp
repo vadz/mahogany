@@ -389,6 +389,12 @@ wxMApp::OnInit()
 
    m_IconManager = new wxIconManager();
 
+   // this is necessary to avoid that the app closes automatically when we're
+   // run for the first time and show a modal dialog before opening the main
+   // frame - if we don't do it, when the dialog (which is the last app window
+   // at this moment) disappears, the app will close.
+   SetExitOnFrameDelete(FALSE);
+
    if ( OnStartup() )
    {
       // only now we can use profiles
@@ -477,6 +483,9 @@ wxMApp::OnInit()
       delay = READ_APPCONFIG(MP_POLLINCOMINGDELAY)*1000;
       if ( delay > 0 )
          gs_timerMailCollection.Start(delay);
+
+      // restore the normal behaviour (see the comments above)
+      SetExitOnFrameDelete(TRUE);
 
       return true;
    }
