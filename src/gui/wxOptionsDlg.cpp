@@ -304,6 +304,7 @@ enum ConfigFields
    ConfigField_OutboxHelp,
    ConfigField_UseOutbox,
    ConfigField_OutboxName,
+   ConfigField_TrashHelp,
    ConfigField_UseTrash,
    ConfigField_TrashName,
    ConfigField_DraftsName,
@@ -1186,15 +1187,25 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "the second one is only used for IMAP and NNTP servers."), Field_Message, -1 },
    { gettext_noop("&Keep folder open for (seconds)"), Field_Number, -1},
    { gettext_noop("Keep &connection alive for (seconds)"), Field_Number, -1},
+
    { gettext_noop("\nThe outgoing messages may be sent out immediately\n"
                   "or just stored in an \"Outbox\" and sent later. Choose\n"
-                  "the sending mode here:"),       Field_Message, -1 },
+                  "the sending mode here:"),       Field_Message |
+                                                   Field_AppWide, -1 },
    { gettext_noop("Send outgoing messages later"), Field_Bool |
                                                    Field_Restart |
                                                    Field_AppWide, -1 },
    { gettext_noop("Folder for &outgoing messages"), Field_Folder |
                                                     Field_Restart |
                                                     Field_AppWide, ConfigField_UseOutbox },
+
+   { gettext_noop("\n"
+                  "When you delete a message in the folder it can be\n"
+                  "either just marked as deleted (and you will need to\n"
+                  "use the \"Expunge\" command later to physically\n"
+                  "delete it) or moved to another folder, customarily\n"
+                  "called \"Trash\".\n"
+                  "Which operation mode would you like to use?"), Field_Message, -1 },
    { gettext_noop("Use &Trash folder"), Field_Bool, -1},
    { gettext_noop("&Trash folder name"), Field_Folder, ConfigField_UseTrash},
    { gettext_noop("&Drafts folder name"), Field_Folder, -1 },
@@ -1722,6 +1733,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(), // outbox help
    CONFIG_ENTRY(MP_USE_OUTBOX),
    CONFIG_ENTRY(MP_OUTBOX_NAME),
+   CONFIG_NONE(), // trash help
    CONFIG_ENTRY(MP_USE_TRASH_FOLDER),
    CONFIG_ENTRY(MP_TRASH_FOLDER),
    CONFIG_ENTRY(MP_DRAFTS_FOLDER),
