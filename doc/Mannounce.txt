@@ -2,23 +2,24 @@ A new release of the `Mahogany' e-Mail and News client has been made.
 ===================================================================== 
 
 Binaries and source for a variety of Linux and Unix systems are
-available at http://www.wxwindows.org/Mahogany/
+available at http://mahogany.sourceforge.net/ and
+http://sourceforge.net/projects/mahogany/ 
 
 
 In this message:
 
-1. Announcing Mahogany Version 0.50
+1. Announcing Mahogany Version 0.60
 2. Changes against the previous release
 
-Announcing Mahogany Version 0.50 
+Announcing Mahogany Version 0.60 
 ===================================================================== 
 
 Mahogany is an OpenSource(TM) cross-platform mail and news client. It
 is available for X11/Unix and MS Windows platforms, supporting a wide
 range of protocols and standards, including POP3, IMAP and full MIME
-support as well as optional security via SSL. 
-Thanks to its built-in Python interpreter it can be extended far
-beyond its original functionality.
+support as well as secure communicaionts via SSL.  Thanks to its
+built-in Python interpreter it can be extended far beyond its original
+functionality.
 
 Mahogany's wealth of features and ease of use make it one of the most
 powerful clients available, providing a consistent and intuitive
@@ -31,80 +32,49 @@ support for other program`s address database formats. Currently
 Mahogany`s native format, (X)Emacs` BBDB address books and PalmOS
 address books are supported.
 
-Mahogany is being developed using the free wxWindows application
+Mahogany is being developed using the OpenSource wxWindows application
 framework, building on the GTK+ toolkit on Unix.
 
 Mahogany is constantly being tested on a variety of Linux system,
 Solaris-sparc and MS Windows. It should compile and work on any major
 Unix platform.
 
-CHANGES AGAINST RELEASE 0.23a / UPDATE :
+CHANGES AGAINST RELEASE 0.50 / UPDATE :
 ===================================================================== 
 
-This is the long anticipated "major release" with a long list of
-improvements and new features. Key points are:
+Key changes are:
 
-  - Filtering rules added
-  - Proper MH/NNTP/IMAP support and subscription management
-  - PalmOS connectivity, mail/addressbook support and generic frontend
-  - HTML online help
-  - optional SSL encrypted communications
+ - fixes to all serious bugs from version 0.50
+ - new, improved filtering system replacing the broken filtering
+   in 0.50
+ - supporting multiple-identities and easy switching between them
+ - import of settings and folders from Pine and XFMail
+ - more verbose error reporting and detection
+ - OpenSSL loaded dynamically if available
+ - charset and encoding support for message contents and headers
+ - speed improvements, IMAP server-side copying and searching
+ - PalmOS module supports AvantGo/MAL synchronisation
 
+ - various other fixes
 
- Release 0.50 is Unix-only and should be followed by a common
- Unix and Windows Version within about four to six week. The next
- month or so will be dedicated to updating translations and bringing
- the Windows version back in sync.
-
-A more complete list of changes:
-
- * Proper support for MH folders.
- * Browsing and subscription management for IMAP and NNTP servers.
- * A plugin module system has been created which allows to dynamically
-   load expansion modules. Existing modules (statically linked in this
-   release, but dynamically linkable) include a filtering language
-   and PalmOS support. For the future, a calendar/timeplanner plugin
-   is planned.
- * Configurable filtering rules have been added.
- * Message threading and configurable sort order is supported.
- * An HTML-based help browser has been added. 
- * Configurable date format.
- * Handling of dial-up networking and detection of connection status.
- * Optional user of a Trash folder.
- * Wizard-dialogs and ``tip of the day'' dialogs added to make Mahogany
-   easier to use.
- * Optional SSL support can be compiled in (not activated by default
-   due to US export restrictions), allowing secure access to mail and
-   news servers.
- * PalmOS handheld connectivity: synchronise e-mails with your PalmOS
-   handheld computer and use its addressbook within Mahogany. Also,
-   backup, restore and install databases of your handheld.
- * Bug fixes in nearly all parts of the code. Mahogany should suffer
-   much less from crashes than earlier versions. The message editor
-   behaves better and is faster.
- * Minor GUI improvements like keyboard bindings and nicer icons. Support
-   for KDE and GNOME filetype icons.
-
-
-NEXT 
-===================================================================== 
-
-  0.51 will be a minor update, mainly to bring translations up to date 
-  and to release the version for MS-Windows. Anticipated release date
-  should be early to mid May 2000.
-  It will hopefully also include improved newsreader functionality.
-
-  After that we plan to work on the following next:
-   
-   - test and complete multi-threading to allow network operations to
-     happen in background (almost complete)
-   - write a faster Mailbox file format (possibly using ODBC?)
+Next, we hope to tackle the following:
    - full HTML message editing/displaying (almost complete)
+   - better POP support by using persistent message IDs and flags
+   - multi-threading to allow network operations to happen in
+     background
    - full drag and drop interaction with filemanagers and between folders
-   - a calendar/timeplanner plugin, synchronised with the PalmOS support
-
+   - PGP/GPG support
 
 Please direct any queries to mahogany-developers@lists.sourceforge.net
+
+Known bugs:
+-----------
+There are always some, listed on our bugtracker at
+http://www.wxwindows.org/m-bugs/ and we are working on them.
+
+Version 0.60 suffers from a minor printing bug leading to some overlap 
+between strings sometimes, which is due to a bug in wxWindows which
+will hopefully be fixed fairly soon.
 
 --
  Karsten Ballüder  http://Ballueder.home.dhs.org/  mailto:karste-@phy.hw.ac.uk
