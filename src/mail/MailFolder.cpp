@@ -679,8 +679,11 @@ String FormatFolderStatusString(const String& format,
    return result;
 }
 
+// VZ: disabling this stuff - it is a workaround for the bug which doesn't exist
+//     any more
+#if 0
 // ----------------------------------------------------------------------------
-// eliminating duplicate messages code (TODO: shouldn't be needed!)
+// eliminating duplicate messages code
 // ----------------------------------------------------------------------------
 
 struct Dup_MsgInfo
@@ -746,6 +749,7 @@ MailFolderCmn::DeleteDuplicates()
    // else - uncommented or compiler thinks there's return without value
    return UID_ILLEGAL; // an error happened
 }
+#endif // 0
 
 // ----------------------------------------------------------------------------
 // ping
@@ -1993,16 +1997,16 @@ MailFolderCmn::UnDeleteMessages(const UIdArray *selections)
 
 /** Delete a message.
     @param uid mesage uid
-    @return always true UNSUPPORTED!
+    @return true if ok
     */
 bool
 MailFolderCmn::DeleteMessage(unsigned long uid)
 {
-   UIdArray *ia = new UIdArray;
-   ia->Add(uid);
-   bool rc = DeleteMessages(ia);
-   delete ia;
-   return rc;
+   UIdArray a;
+   a.Add(uid);
+
+   // delete without expunging
+   return DeleteMessages(&a);
 }
 
 
@@ -2213,30 +2217,41 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
    }
 
    // do we have any messages to move?
-   if( (GetFlags() & MF_FLAGS_INCOMING) != 0)
+   if ( (GetFlags() & MF_FLAGS_INCOMING) != 0)
    {
       // where to we move the mails?
-      String newMailFolder = READ_CONFIG(GetProfile(),
-                                         MP_NEWMAIL_FOLDER);
-      if(newMailFolder == GetName())
+      String newMailFolder = READ_CONFIG(GetProfile(), MP_NEWMAIL_FOLDER);
+      if ( newMailFolder == GetName() )
       {
-         ERRORMESSAGE((
-            _("Cannot collect mail from folder '%s' into itself."),
-            GetName().c_str()));
+         ERRORMESSAGE((_("Cannot collect mail from folder '%s' into itself."),
+                      GetName().c_str()));
       }
-      else
+      else // ok, move to another folder
       {
          UIdArray messages;
-         for(UIdType idx = 0; idx < hil->Count(); idx++)
-            messages.Add( (*hil)[idx]->GetUId() );
-         if(SaveMessages(&messages,
-                         newMailFolder,
-                         true /* isProfile */,
-                         false /* update count */))
+         size_t count = hil->Count();
+         for ( size_t idx = 0; idx < count; idx++ )
          {
-            DeleteMessages(&messages);
+            // check that the message isn't deleted - avoids getting 2 (or
+            // more!) copies of the same "new" message (first normal,
+            // subsequent deleted) if, for whatever reason, we failed to
+            // expunge the messages the last time we collected mail from here
+            HeaderInfo *hi = hil->GetItemByIndex(idx);
+            if ( !(hi->GetStatus() & MSG_STAT_DELETED) )
+            {
+               messages.Add(hi->GetUId());
+            }
          }
-         else
+
+         if ( SaveMessages(&messages,
+                           newMailFolder,
+                           true /* isProfile */,
+                           false /* update count */))
+         {
+            // delete and expunge
+            DeleteMessages(&messages, true);
+         }
+         else // don't delete them if we failed to move
          {
             ERRORMESSAGE((_("Cannot move newly arrived messages.")));
          }
@@ -2244,7 +2259,9 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
          changed = TRUE;
       }
    }
+
    hil->DecRef();
+
    return changed;
 }
 

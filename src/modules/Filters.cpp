@@ -2169,20 +2169,6 @@ extern "C"
       return Value(rc);
    }
 
-   static Value func_uniq(ArgList *args, FilterRuleImpl *p)
-   {
-      if(args->Count() != 0)
-         return 0;
-      MailFolder *mf = p->GetFolder();
-      if(! mf) return Value(0);
-      UIdType rc = mf->DeleteDuplicates();
-      mf->DecRef();
-      if ( rc > 0 )
-         p->SetDeleted();
-      return Value( (int)(rc != UID_ILLEGAL) ); // success if 0 or
-      // more deleted
-   }
-
    static Value func_copytofolder(ArgList *args, FilterRuleImpl *p)
    {
 #ifndef TEST                // UIdArray not instantiated
@@ -2382,7 +2368,6 @@ BuiltinFunctions(void)
    Define("body", func_body);
    Define("text", func_text);
    Define("delete", func_delete);
-   Define("uniq", func_uniq);
    Define("copy", func_copytofolder);
    Define("move", func_movetofolder);
    Define("print", func_print);
