@@ -3,7 +3,7 @@
  * File name  : MPassphrase.h: Passphrase handling classes definition *
  * Author     : Carlos Henrique Bauer                                 *
  * Modified by:                                                       *
- * CVS-ID     : $Id$     *
+ * CVS-ID     : $Id$ *
  * Copyright  : (C) 2000 by Carlos H. Bauer <chbauer@acm.org>         *
  *                                          <bauer@atlas.unisinos.br> *
  * License    : M license                                             *
@@ -93,7 +93,6 @@ public:
     
    size_t Len() const;
     
-   operator const char *();
    const char * c_str();
 
    MDecryptedPassphrase & operator =(const char * inPassphrase);
@@ -190,12 +189,6 @@ inline void MDecryptedPassphrase::Forget()
 inline size_t MDecryptedPassphrase::Len() const
 {
    return strlen(m_passphrase);
-}
-
-
-inline MDecryptedPassphrase::operator const char *()
-{
-   return m_passphrase;
 }
 
 

@@ -19,7 +19,7 @@
 #define MEXTPROCCRYPT_H
 
 #ifndef MCRYPT_H
-#include "MCrypt.h"
+#include "modules/MCrypt.h"
 #endif // MCRYPT_H
 
 #ifdef __GNUG__
@@ -36,9 +36,7 @@ class MExtProcCrypt : public MCrypt
 {
 public:
 
-   MExtProcCrypt(const wxString & commandPath,
-		 const wxString & user,
-		 MPassphrase & passphrase);
+   MExtProcCrypt(const wxString & commandPath);
 
 
    void SetPath(const wxString & path);
@@ -93,10 +91,7 @@ protected:
 };
 
 
-inline MExtProcCrypt::MExtProcCrypt(const wxString & commandPath,
-				    const wxString & user,
-				    MPassphrase & passphrase) :
-   MCrypt(user, passphrase),
+inline MExtProcCrypt::MExtProcCrypt(const wxString & commandPath) :
    m_path(commandPath)    
 {
 }

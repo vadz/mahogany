@@ -15,7 +15,7 @@
 #define MPGPCRYPT_H
 
 #ifndef MEXTPROCCRYPT_H
-#include <MExtProcCrypt.h>
+#include "modules/MExtProcCrypt.h"
 #endif // MEXTPROCCRYPT_H
 
 #ifdef __GNUG__
@@ -26,15 +26,21 @@ class MPGPCrypt : public MExtProcCrypt
 {
 
 public:
-   MPGPCrypt(const wxString & user, MPassphrase & passphrase);
+   MPGPCrypt();
+
+   virtual int Decrypt(MPassphrase & passphrase,
+		       const wxString & messageIn,
+		       wxString & messageOut);
 
    virtual int Encrypt(const wxString & recipient,
 		       const wxString & messageIn,
 		       wxString & messageOut,
-		       bool sign = TRUE);
-    
+		       const wxString * user = NULL,
+		       MPassphrase * passphrase = NULL );
 
-   virtual int Sign(const wxString & messageIn,
+   virtual int Sign(const wxString & user,
+		    MPassphrase & passphrase,
+		    const wxString & messageIn,
 		    wxString & messageOut);
 
    virtual int VerifySignature(const wxString & messageIn, wxString &
@@ -43,16 +49,9 @@ public:
    virtual int CheckRecipient(const wxString & recipient) const;
     
 
-   virtual int Decrypt(const wxString & messageIn,
-		       wxString & messageOut);
-
    virtual int GetFingerprint(wxString & fp) const;
    
    virtual int GetPublicKey(wxString & pk) const;
-
-private:
-   // declared but not defined
-   MPGPCrypt();
 };
 
 #endif // MPGPCRYPT_H
