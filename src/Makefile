@@ -39,7 +39,7 @@ endif
 
 main:   Mdll
 
-M:	subdirs
+M:	subdirs modules_obj
 	$(LINK) -symbolic -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)
 
 #$(MOBJS): subdirs
