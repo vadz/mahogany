@@ -7,9 +7,9 @@
  *******************************************************************/
 
 /*
-  
+
  */
- 
+
 #ifdef __GNUG__
 #pragma implementation "wxllist.h"
 #endif
@@ -44,20 +44,20 @@
 #ifdef WXLAYOUT_DEBUG
 
 #  define   TypewxString(t)        g_aTypewxStrings[t]
-#  define   WXLO_DEBUG(x)      wxLogDebug x
+#  define   WXLO_DEBUG(x)          wxLogTrace x
 
-   static const char *g_aTypewxStrings[] = 
-   { 
+   static const char *g_aTypewxStrings[] =
+   {
       "invalid", "text", "cmd", "icon"
    };
    void
    wxLayoutObject::Debug(void)
    {
-      WXLO_DEBUG(("%s",g_aTypewxStrings[GetType()])); 
+      WXLO_DEBUG(("wxllayout", "%s",g_aTypewxStrings[GetType()]));
    }
-#else 
+#else
 #  define   TypewxString(t)        ""
-#  define   WXLO_DEBUG(x)      
+#  define   WXLO_DEBUG(x)
 #endif
 
 
@@ -88,7 +88,7 @@ static void GrowRect(wxRect &r, const wxPoint & p)
       r.x = p.x;
    else if(r.x + r.width < p.x)
       r.width = p.x - r.x;
-   
+
    if(r.y > p.y)
       r.y = p.y;
    else if(r.y + r.height < p.y)
@@ -96,7 +96,7 @@ static void GrowRect(wxRect &r, const wxPoint & p)
 }
 //@}
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
    wxLayoutObjectText
 
@@ -148,18 +148,18 @@ wxLayoutObjectText::GetOffsetScreen(wxDC &dc, CoordType xpos) const
       height, descent = 0l;
 
    if(xpos == 0) return 0; // easy
-   
+
    while(width < xpos && offs < maxlen)
    {
       dc.GetTextExtent(m_Text.substr(0,offs),
                        &width, &height, &descent);
       offs++;
    }
-   /* We have to substract 1 to compensate for the offs++, and another 
+   /* We have to substract 1 to compensate for the offs++, and another
       one because we don't want to position the cursor behind the
       object what we clicked on, but before - otherwise it looks
       funny. */
-   return (xpos > 2) ? offs-2 : 0;  
+   return (xpos > 2) ? offs-2 : 0;
 }
 
 void
@@ -177,11 +177,11 @@ void
 wxLayoutObjectText::Debug(void)
 {
    wxLayoutObject::Debug();
-   WXLO_DEBUG((" `%s`", m_Text.c_str()));
+   WXLO_DEBUG(("wxllayout", " `%s`", m_Text.c_str()));
 }
 #endif
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
    wxLayoutObjectIcon
 
@@ -228,7 +228,7 @@ wxLayoutObjectIcon::GetSize(CoordType *top, CoordType *bottom) const
 
 
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
    wxLayoutObjectIcon
 
@@ -237,7 +237,7 @@ wxLayoutObjectIcon::GetSize(CoordType *top, CoordType *bottom) const
 wxLayoutObjectCmd::wxLayoutObjectCmd(int size, int family, int style, int
                                      weight, bool underline,
                                      wxColour &fg, wxColour &bg)
-   
+
 {
    m_font = new wxFont(size,family,style,weight,underline);
    m_ColourFG = fg;
@@ -249,7 +249,7 @@ wxLayoutObjectCmd::Copy(void)
 {
    wxLayoutStyleInfo si;
    GetStyle(&si);
-   
+
    wxLayoutObjectCmd *obj = new wxLayoutObjectCmd(
       si.size, si.family, si.style, si.weight, si.underline,
       m_ColourFG, m_ColourBG);
@@ -297,7 +297,7 @@ wxLayoutObjectCmd::Layout(wxDC &dc)
 }
 
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
    The wxLayoutLine object
 
@@ -349,7 +349,7 @@ wxLayoutLine::RecalculatePositions(int recurse)
    wxASSERT(recurse >= 0);
    wxPoint pos = m_Position;
    CoordType height = m_Height;
-   
+
 //   WXLO_TRACE("RecalculatePositions()");
    RecalculatePosition();
    if(m_Next)
@@ -359,7 +359,7 @@ wxLayoutLine::RecalculatePositions(int recurse)
          if(m_Next) m_Next->RecalculatePositions(--recurse);
       }
       else if(pos != m_Position || m_Height != height)
-         if(m_Next) m_Next->RecalculatePositions();         
+         if(m_Next) m_Next->RecalculatePositions();
    }
 }
 
@@ -370,7 +370,7 @@ wxLayoutLine::FindObject(CoordType xpos, CoordType *offset) const
    wxASSERT(offset);
    wxLayoutObjectList::iterator i;
    CoordType x = 0, len;
-   
+
 
    for(i = m_ObjectList.begin(); i != NULLIT; i++)
    {
@@ -392,7 +392,7 @@ wxLayoutLine::FindObjectScreen(wxDC &dc, CoordType xpos, CoordType *cxpos) const
    wxASSERT(cxpos);
    wxLayoutObjectList::iterator i;
    CoordType x = 0, cx = 0, width;
-   
+
    for(i = m_ObjectList.begin(); i != NULLIT; i++)
    {
       (**i).Layout(dc);
@@ -400,7 +400,7 @@ wxLayoutLine::FindObjectScreen(wxDC &dc, CoordType xpos, CoordType *cxpos) const
       if( x <= xpos && xpos <= x + width )
       {
          *cxpos = cx + (**i).GetOffsetScreen(dc, xpos-x);
-         wxLogDebug("wxLayoutLine::FindObjectScreen: cursor xpos = %ld", *cxpos);
+         wxLogTrace("wxllayout", "wxLayoutLine::FindObjectScreen: cursor xpos = %ld", *cxpos);
          return i;
       }
       x += (**i).GetWidth();
@@ -465,7 +465,7 @@ wxLayoutLine::Insert(CoordType xpos, wxLayoutObject *obj)
    m_ObjectList.insert(i,new wxLayoutObjectText(left));
    return true;
 }
-   
+
 bool
 wxLayoutLine::Insert(CoordType xpos, wxString text)
 {
@@ -521,7 +521,7 @@ wxLayoutLine::Delete(CoordType xpos, CoordType npos)
          {
             if(xpos == GetLength())
                return npos;
-            else 
+            else
             {  // at    the end of an object
                // move to    begin of next object:
                i++; offset = 0;
@@ -552,7 +552,7 @@ wxLayoutLine::DeleteWord(CoordType xpos)
       if(i == NULLIT) return false;
       if((**i).GetType() != WXLO_TYPE_TEXT)
       {
-         // This should only happen when at end of line, behind a non-text 
+         // This should only happen when at end of line, behind a non-text
          // object:
          if(offset == (**i).GetLength()) return false;
          m_Length -= (**i).GetLength(); // -1
@@ -580,7 +580,7 @@ wxLayoutLine::DeleteWord(CoordType xpos)
          ((wxLayoutObjectText *)*i)->GetText().erase(offset,count);
          m_Length -= count;
          return true;
-      }      
+      }
    }
    wxASSERT(0); // we should never arrive here
 }
@@ -606,9 +606,9 @@ wxLayoutLine::Draw(wxDC &dc, const wxPoint & offset) const
    wxLayoutObjectList::iterator i;
    wxPoint pos = offset;
    pos = pos + GetPosition();
-   
+
    pos.y += m_BaseLine;
-   
+
    for(i = m_ObjectList.begin(); i != NULLIT; i++)
    {
       (**i).Draw(dc, pos);
@@ -619,7 +619,7 @@ wxLayoutLine::Draw(wxDC &dc, const wxPoint & offset) const
 void
 wxLayoutLine::Layout(wxDC &dc, wxPoint *cursorPos,
                      wxPoint *cursorSize,
-                     int cx) 
+                     int cx)
 {
    wxLayoutObjectList::iterator i;
 
@@ -642,7 +642,7 @@ wxLayoutLine::Layout(wxDC &dc, wxPoint *cursorPos,
    {
       *cursorPos = m_Position;
    }
-   
+
    for(i = m_ObjectList.begin(); i != NULLIT; i++)
    {
       (**i).Layout(dc);
@@ -657,7 +657,7 @@ wxLayoutLine::Layout(wxDC &dc, wxPoint *cursorPos,
             {
                len = cx - count; // pos in object
                CoordType width, height, descent;
-               dc.GetTextExtent((*(wxLayoutObjectText*)*i).GetText().substr(0,len), 
+               dc.GetTextExtent((*(wxLayoutObjectText*)*i).GetText().substr(0,len),
                                 &width, &height, &descent);
                cursorPos->x += width;
                cursorPos->y = m_Position.y;
@@ -675,7 +675,7 @@ wxLayoutLine::Layout(wxDC &dc, wxPoint *cursorPos,
                cursorSize->y = height;
                cursorFound = true; // no more checks
             }
-            else 
+            else
             { // on some other object
                CoordType top, bottom; // unused
                *cursorSize = (**i).GetSize(&top,&bottom);
@@ -715,7 +715,7 @@ wxLayoutLine::Layout(wxDC &dc, wxPoint *cursorPos,
       }
    }
 
-   
+
    // tell next line about coordinate change
    if(m_Next && objHeight != oldHeight)
       m_Next->RecalculatePositions();
@@ -742,7 +742,7 @@ wxLayoutLine *
 wxLayoutLine::Break(CoordType xpos)
 {
    wxASSERT(xpos >= 0);
-   
+
    if(xpos == 0)
    { // insert an empty line before this one
       wxLayoutLine *prev = new wxLayoutLine(m_Previous);
@@ -758,7 +758,7 @@ wxLayoutLine::Break(CoordType xpos)
          m_Next->RecalculatePositions(1);
       return this;
    }
-   
+
    CoordType offset;
    wxLOiterator i = FindObject(xpos, &offset);
    if(i == NULLIT)
@@ -794,7 +794,7 @@ wxLayoutLine::Break(CoordType xpos)
       m_Next->RecalculatePositions(2);
    return newLine;
 }
-   
+
 
 void
 wxLayoutLine::MergeNextLine(void)
@@ -802,7 +802,7 @@ wxLayoutLine::MergeNextLine(void)
    wxASSERT(GetNextLine());
    wxLayoutObjectList &list = GetNextLine()->m_ObjectList;
    wxLOiterator i;
-   
+
    for(i = list.begin(); i != list.end();)
    {
       Append(*i);
@@ -822,7 +822,7 @@ wxLayoutLine::GetWrapPosition(CoordType column)
    wxLOiterator i = FindObject(column, &offset);
    if(i == NULLIT) return -1; // cannot wrap
 
-   // go backwards through the list and look for space in text objects 
+   // go backwards through the list and look for space in text objects
    do
    {
       if((**i).GetType() == WXLO_TYPE_TEXT)
@@ -870,12 +870,12 @@ wxLayoutLine::GetWrapPosition(CoordType column)
    pos -= (**i).GetLength();
    return pos; // in front of it
 }
-   
+
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   
+
    The wxLayoutList object
-   
+
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 wxLayoutList::wxLayoutList()
@@ -932,7 +932,7 @@ wxLayoutList::SetFont(int family, int size, int style, int weight,
 
    if(fg) m_ColourFG = *fg;
    if(bg) m_ColourBG = *bg;
-   
+
    Insert(
       new wxLayoutObjectCmd(m_FontPtSize,m_FontFamily,m_FontStyle,m_FontWeight,m_FontUnderline,
                             m_ColourFG, m_ColourBG));
@@ -950,7 +950,7 @@ wxLayoutList::SetFont(int family, int size, int style, int weight,
       cfg = *wxTheColourDatabase->FindColour(fg);
    if( bg )
       cbg = *wxTheColourDatabase->FindColour(bg);
-   
+
    SetFont(family,size,style,weight,underline,&cfg,&cbg);
 }
 
@@ -959,7 +959,7 @@ wxLayoutList::Clear(int family, int size, int style, int weight,
                     int /* underline */, wxColour *fg, wxColour *bg)
 {
    InternalClear();
-   
+
    // set defaults
    m_FontPtSize = size;
    m_FontUnderline = false;
@@ -969,7 +969,7 @@ wxLayoutList::Clear(int family, int size, int style, int weight,
 
    if(fg) m_ColourFG = *fg;
    if(bg) m_ColourBG = *bg;
-   
+
    if(m_DefaultSetting)
       delete m_DefaultSetting;
 
@@ -1003,7 +1003,7 @@ wxLayoutList::MoveCursorTo(wxPoint const &p)
    }
    return false;
 }
-   
+
 bool
 wxLayoutList::MoveCursorVertically(int n)
 {
@@ -1158,15 +1158,15 @@ wxLayoutList::Delete(CoordType npos)
       // First, check if line is empty:
       if(m_CursorLine->GetLength() == 0)
       {  // in this case, updating could probably be optimised
-#ifdef WXLO_DEBUG   
+#ifdef WXLO_DEBUG
          wxASSERT(DeleteLines(1) == 0);
 #else
          DeleteLines(1);
 #endif
-         
+
          left--;
       }
-      else 
+      else
       {
          // Need to join next line
          if(! m_CursorLine->GetNextLine())
@@ -1262,7 +1262,7 @@ wxLayoutList::Draw(wxDC &dc, wxPoint const &offset,
    m_DefaultSetting->Draw(dc, wxPoint(0,0));
    wxBrush brush(m_ColourBG, wxSOLID);
    dc.SetBrush(brush);
-   
+
    while(line)
    {
       // only draw if between top and bottom:
@@ -1284,7 +1284,7 @@ wxLayoutList::FindObjectScreen(wxDC &dc, wxPoint const pos, wxPoint *cursorPos)
    // First, find the right line:
    wxLayoutLine *line = m_FirstLine;
    wxPoint p;
-   
+
    // we need to run a layout here to get font sizes right :-(
    m_DefaultSetting->Layout(dc);
    while(line)
@@ -1300,7 +1300,7 @@ wxLayoutList::FindObjectScreen(wxDC &dc, wxPoint const pos, wxPoint *cursorPos)
    // Now, find the object in the line:
    wxLOiterator i = line->FindObjectScreen(dc, pos.x, & cursorPos->x);
    return (i == NULLIT) ? NULL : *i;
-   
+
 }
 
 wxPoint
@@ -1313,7 +1313,7 @@ wxLayoutList::GetSize(void) const
       return wxPoint(0,0);
 
    wxPoint maxPoint(0,0);
-   
+
    // find last line:
    while(line)
    {
@@ -1336,14 +1336,14 @@ wxLayoutList::DrawCursor(wxDC &dc, bool active, wxPoint const &translate)
    coords.y += translate.y;
 
 #ifdef WXLAYOUT_DEBUG
-   WXLO_DEBUG(("Drawing cursor (%ld,%ld) at %ld,%ld, size %ld,%ld, line: %ld, len %ld",
+   WXLO_DEBUG(("wxllayout", "Drawing cursor (%ld,%ld) at %ld,%ld, size %ld,%ld, line: %ld, len %ld",
                (long)m_CursorPos.x, (long)m_CursorPos.y,
                (long)coords.x, (long)coords.y,
                (long)m_CursorSize.x, (long)m_CursorSize.y,
                (long)m_CursorLine->GetLineNumber(),
                (long)m_CursorLine->GetLength()));
 #endif
-   
+
    dc.SetBrush(*wxBLACK_BRUSH);
    dc.SetLogicalFunction(wxXOR);
    dc.SetPen(wxPen(*wxBLACK,1,wxSOLID));
@@ -1376,7 +1376,7 @@ wxLayoutList::SetUpdateRect(const wxPoint &p)
 }
 
 
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
    wxLayoutPrintout
 
@@ -1395,7 +1395,7 @@ wxLayoutPrintout::ScaleDC(wxDC *dc)
 {
    // The following bit is taken from the printing sample, let's see
    // whether it works for us.
-   
+
    /* You might use THIS code to set the printer DC to ROUGHLY reflect
     * the screen text size. This page also draws lines of actual length 5cm
     * on the page.
@@ -1416,7 +1416,7 @@ wxLayoutPrintout::ScaleDC(wxDC *dc)
       ppiPrinterX = 72;
       ppiPrinterY = 72;
    }
-  
+
   // This scales the DC so that the printout roughly represents the
   // the screen scaling. The text point size _should_ be the right size
   // but in fact is too small for some reason. This is a detail that will
@@ -1445,7 +1445,7 @@ bool wxLayoutPrintout::OnPrintPage(int page)
    wxDC *dc = GetDC();
 
    ScaleDC(dc);
-   
+
    if (dc)
    {
       int top, bottom;
@@ -1481,8 +1481,8 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
    // This is the length of the printable area.
    m_PrintoutHeight = m_PageHeight - (int) (m_PageHeight * 0.15);
    m_PrintoutHeight = (int)( m_PrintoutHeight / scale); // we want to use the real paper height
-   
-   
+
+
    m_NumOfPages = 1 +
       (int)( m_llist->GetSize().y / (float)(m_PrintoutHeight));
 
@@ -1513,12 +1513,12 @@ wxLayoutPrintout::DrawHeader(wxDC &dc,
    const wxBrush& brush = dc.GetBrush();
    const wxPen&   pen = dc.GetPen();
    const wxFont&  font = dc.GetFont();
-   
+
    dc.SetBrush(*wxWHITE_BRUSH);
    dc.SetPen(wxPen(*wxBLACK,0,wxSOLID));
    dc.DrawRoundedRectangle(topleft.x,
                            topleft.y,bottomright.x-topleft.x,
-                           bottomright.y-topleft.y);  
+                           bottomright.y-topleft.y);
    dc.SetBrush(*wxBLACK_BRUSH);
    wxFont myfont = wxFont((WXLO_DEFAULTFONTSIZE*12)/10,
                           wxSWISS,wxNORMAL,wxBOLD,false,"Helvetica");
