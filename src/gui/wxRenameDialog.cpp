@@ -261,7 +261,10 @@ void wxFolderRenameDialog::DoUpdateMboxPath(const String& folderName)
          mboxName = path.BeforeLast(m_chDelim);
    }
 
-   mboxName << m_chDelim << folderName;
+   if ( !mboxName.empty() )
+      mboxName += m_chDelim;
+
+   mboxName += folderName;
 
    m_textMbox->SetValue(mboxName);
 }
