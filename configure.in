@@ -30,6 +30,7 @@ DEFAULT_USE_EFENCE=0
 DEFAULT_USE_DMALLOC=0
 DEFAULT_USE_DEBUG=0
 DEFAULT_USE_OPT=1
+DEFAULT_USE_PROFILER=0
 DEFAULT_USE_DEBUG_FLAG=0
 DEFAULT_USE_WXDEBUG=0
 DEFAULT_USE_PYTHON=1
@@ -74,6 +75,10 @@ USE_DEBUG)
 M_OVERRIDES(opt,opt,
 --with-opt    use compiler optimisations,
 USE_OPT)
+
+M_OVERRIDES(prof,prof,
+--with-prof    generate profiling code,
+USE_PROFILER)
 
 M_OVERRIDES(debuginfo, debuginfo,
 --with-debuginfo    use debug info from compiler,
@@ -385,6 +390,9 @@ if test "$USE_OPT" != 1; then
 	OPT="-O0"
 fi
 
+if test "$USE_PROFILER" != 1; then
+	OPT="-pg"
+fi
 
 dnl experimental code (unstable!)
 MAKE_EXPERIMENTAL=
