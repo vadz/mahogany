@@ -234,19 +234,7 @@ private:
    MFolder_obj& operator=(const MFolder_obj&);
 
    // create folder by name
-   void Init(const String& name)
-   {
-      if ( !name.empty() && name[0] == '/' )
-      {
-         // called with a filename, create a temp folder to access it
-         m_folder = MFolder::CreateTemp(name, MF_FILE, 0, name);
-      }
-      else
-      {
-         // called with a folder name, create a folder for the tree entry
-         m_folder = MFolder::Get(name);
-      }
-   }
+   void Init(const String& name);
 
    MFolder *m_folder;
 };

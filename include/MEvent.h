@@ -383,7 +383,7 @@ public:
    //    Register(this, MEventId_1, &handle, MEventId_Null);
    //
    // return TRUE if all succeeded
-   static bool RegisterAll(MEventReceiver& who,
+   static bool RegisterAll(MEventReceiver *who,
                            /* MEventId eventId, void **pHandle, */
                            ...);
 

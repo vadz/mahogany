@@ -21,11 +21,14 @@
 
 #ifndef  USE_PCH
 #   include "Mcommon.h"
-#   include "Mdefaults.h"
 #   include "MApplication.h"
-#   include "gui/wxMainFrame.h"
-#   include "FolderView.h"
 #endif // USE_PCH
+
+#include "Mdefaults.h"
+
+#include "FolderView.h"
+
+#include "gui/wxMainFrame.h"
 
 // ============================================================================
 // implementation
@@ -39,7 +42,7 @@ FolderView::FolderView()
 {
     if ( !MEventManager::RegisterAll
           (
-            *this,
+            this,
             MEventId_FolderTreeChange,  &m_regCookieTreeChange,
             MEventId_FolderUpdate,      &m_regCookieFolderUpdate,
             MEventId_MsgStatus,         &m_regCookieMsgStatus,

@@ -213,6 +213,7 @@ public:
 
    // accessors
    MFolder *GetFolder() const { SafeIncRef(m_folder); return m_folder; }
+   bool HasUserChosenFolder() const { return m_userChoseFolder; }
 
    // base class virtuals implemented
    virtual bool TransferDataToWindow();
@@ -227,6 +228,8 @@ private:
    wxString      m_FileName;
    MFolder      *m_folder;
    wxFolderTree *m_tree;
+
+   bool          m_userChoseFolder;
 
    DECLARE_EVENT_TABLE();
 };
@@ -249,7 +252,7 @@ public:
       event.SetEventObject(m_dlg);
       m_dlg->GetEventHandler()->ProcessEvent(event);
 
-      return TRUE;
+      return m_dlg->HasUserChosenFolder();
    }
 
 private:
@@ -1108,6 +1111,8 @@ MFolderDialog::MFolderDialog(wxWindow *parent, MFolder *folder)
                                        _("Choose folder"),
                                        "FolderSelDlg")
 {
+   m_userChoseFolder = false;
+
    m_folder = folder;
    SafeIncRef(m_folder);
 
@@ -1165,7 +1170,7 @@ MFolderDialog::~MFolderDialog()
 void
 MFolderDialog::OnButton(wxCommandEvent &ev)
 {
-   switch(ev.GetId())
+   switch ( ev.GetId() )
    {
       case wxID_OPEN:
          m_FileName = wxPFileSelector("FolderDialogFile",
@@ -1292,7 +1297,7 @@ bool MFolderDialog::TransferDataFromWindow()
             )
          {
             // can't continue
-            return FALSE;
+            return false;
          }
       }
 
@@ -1303,6 +1308,8 @@ bool MFolderDialog::TransferDataFromWindow()
       }
       //else: it already existed before with the same filename
    }
+
+   m_userChoseFolder = true;
 
    return true;
 }

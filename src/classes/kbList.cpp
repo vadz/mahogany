@@ -18,8 +18,9 @@
 /** Simulate the layout of a list of pointers.  This struct knows
     entirely too much about the list internals for its own good.
 */
-struct DebugLayout
+class DebugLayout
 {
+public:
    typedef void* value_type;
    typedef value_type *pointer;
    typedef const value_type *const_pointer;
@@ -29,7 +30,6 @@ struct DebugLayout
    M_LIST_NODE;
    M_ITERATOR(DebugLayout);
 
-public:
    /** Function which prints debug information about the iterator.
    */
    static const String DebugIter(iterator *me)

@@ -238,11 +238,11 @@ MEventManager::Suspend(bool suspend)
 // ----------------------------------------------------------------------------
 
 /* static */
-bool MEventManager::RegisterAll(MEventReceiver& who,
+bool MEventManager::RegisterAll(MEventReceiver *who,
                                 ...)
 {
    va_list arglist;
-   va_start(arglist, (void *&)who);
+   va_start(arglist, who);
 
    bool ok = true;
 
@@ -253,7 +253,7 @@ bool MEventManager::RegisterAll(MEventReceiver& who,
          break;
 
       void **pHandle = va_arg(arglist, void **);
-      *pHandle = Register(who, id);
+      *pHandle = Register(*who, id);
       if ( !*pHandle )
          ok = false;
    }

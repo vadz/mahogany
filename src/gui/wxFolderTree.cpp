@@ -771,6 +771,15 @@ bool wxFolderTree::OnDoubleClick()
    MFolder *sel = GetSelection();
    CHECK( sel, FALSE, "no folder to open" );
 
+   if ( !CanOpen(sel) )
+   {
+      wxLogStatus(GetFrame(m_tree), _("Cannot open this folder."));
+
+      sel->DecRef();
+
+      return FALSE;
+   }
+
    if ( READ_APPCONFIG(MP_OPEN_ON_CLICK) )
    {
       // then double click opens in a separate view
@@ -1322,14 +1331,7 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
 
 void wxFolderTreeImpl::OnDoubleClick()
 {
-   if ( !CanOpen() )
-   {
-      wxLogStatus(GetFrame(this), _("Cannot open this folder."));
-
-      return;
-   }
-
-   m_sink->OnDoubleClick();
+   (void)m_sink->OnDoubleClick();
 }
 
 void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)

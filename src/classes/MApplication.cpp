@@ -419,6 +419,10 @@ MAppBase::OnStartup()
    }
 #  endif //USE_PYTHON
 
+   // load any modules requested: notice that this must be done as soon as
+   // possible as filters module is already used by the folder opening code
+   // below
+   LoadModules();
 
    // open all default mailboxes
    // --------------------------
@@ -441,11 +445,6 @@ MAppBase::OnStartup()
    {
       ERRORMESSAGE((_("Cannot build list of folders to keep open.")));
    }
-
-   // Load any modules requested: notice that this must be done before
-   // restoring the ADB editor as it uses the modules
-   // must also be done before calling mailcollector
-   LoadModules();
 
    // initialise collector object for incoming mails
    // ----------------------------------------------

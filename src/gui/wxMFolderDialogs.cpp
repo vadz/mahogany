@@ -820,6 +820,16 @@ bool wxFolderCreateDialog::TransferDataFromWindow()
       ok = FALSE;
    }
 
+   SafeDecRef(m_parentFolder);
+   m_parentFolder = MFolder::Get(m_parentName->GetValue());
+   if ( !m_parentFolder )
+   {
+      wxLogError(_("Folder '%s' specified as the parent for the new folder "
+                   "doesn't exist. Please choose an existing folder as "
+                   "parent or leave it blank."), folderName.c_str());
+      ok = FALSE;
+   }
+
    if ( ok )
    {
       ok = wxNotebookDialog::TransferDataFromWindow();
@@ -1839,12 +1849,26 @@ wxFolderPropertiesPage::SetDefaultValues()
    // set the initial values for all checkboxes and remember them: we will only
    // write it back if it changes later
    int flags = GetFolderFlags(READ_CONFIG(profile, MP_FOLDER_TYPE));
-   m_originalIncomingValue = (flags & MF_FLAGS_INCOMING) != 0;
    m_originalIsHiddenValue = (flags & MF_FLAGS_HIDDEN) != 0;
+
+   if ( m_isCreating && (selRadio == Radio_Pop) )
+   {
+      // we want to collect mail from POP3 folders by default as they don't
+      // work well otherwise (i.e. the message status can't be changed which
+      // leads to all sorts of problems), so always start by checking the
+      // checkbox
+      m_originalIncomingValue = TRUE;
+   }
+   else
+   {
+      m_originalIncomingValue = (flags & MF_FLAGS_INCOMING) != 0;
+   }
+
    m_isIncoming->SetValue(m_originalIncomingValue);
 
    m_originalKeepOpenValue = (flags & MF_FLAGS_KEEPOPEN) != 0;
    m_keepOpen->SetValue(m_originalKeepOpenValue);
+
    m_originalForceReOpenValue = (flags & MF_FLAGS_KEEPOPEN) != 0;
    m_forceReOpen->SetValue(m_originalForceReOpenValue);
 

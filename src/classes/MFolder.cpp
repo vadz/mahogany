@@ -1074,3 +1074,21 @@ size_t CreateMboxSubtree(MFolder *parent, const String& rootMailDir)
 
    return count;
 }
+
+// ----------------------------------------------------------------------------
+// MFolder_obj
+// ----------------------------------------------------------------------------
+
+void MFolder_obj::Init(const String& name)
+{
+   if ( !name.empty() && IsAbsPath(name) )
+   {
+      // called with a filename, create a temp folder to access it
+      m_folder = MFolder::CreateTemp(name, MF_FILE, 0, name);
+   }
+   else
+   {
+      // called with a folder name, create a folder for the tree entry
+      m_folder = MFolder::Get(name);
+   }
+}

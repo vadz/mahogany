@@ -1092,10 +1092,10 @@ void wxNotebookDialog::CreateAllControls()
    c->bottom.SameAs(panel, wxBottom, LAYOUT_Y_MARGIN);
    m_btnApply->SetConstraints(c);
 
-   Layout();
-
    // set dialog size (FIXME these are more or less arbitrary numbers)
    SetDefaultSize(6*wBtn, 27*hBtn, TRUE /* set as min size too */);
+
+   Layout();
 }
 
 // transfer the data to/from notebook pages

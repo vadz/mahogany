@@ -8,11 +8,7 @@
  *******************************************************************/
 
 #ifndef   LISTS_H
-#   define   LISTS_H
-
-#ifndef   NULL
-#   define   NULL   0
-#endif
+#define   LISTS_H
 
 #ifndef ASSERT
 #  ifdef wxASSERT
@@ -22,6 +18,18 @@
 #     define   ASSERT(x) assert(x);
 #  endif
 #endif
+
+// disable some VC++ warnings
+#ifdef _MSC_VER
+   // VZ: this shouldn't really be suppressed as it indicates a real problem:
+   //     if we declare a list of pointers, it shouldn't have operator-> and we
+   //     probably should have a separate macro for this case
+#  pragma warning(disable:4284) // return type for 'identifier::operator->' is
+                                // not a UDT or reference to a UDT. Will
+                                // produce errors if applied using infix
+                                // notation
+#  pragma warning(disable:4355) // 'this': used in base member initializer list
+#endif // Visual C++
 
 /**@name An implementation of STL-like list container class using
     circularly double-linked entries. */
@@ -380,3 +388,4 @@ public: \
 }
 
 #endif // LISTS_H
+

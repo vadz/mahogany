@@ -93,6 +93,7 @@ static const char *FOLDER_LISTCTRL_WIDTHS_D = "60:300:200:80:80";
 // private classes
 // ----------------------------------------------------------------------------
 
+// the list ctrl showing the messages in the folder
 class wxFolderListCtrl : public wxListCtrl
 {
 public:
@@ -220,6 +221,17 @@ public:
 
 private:
    wxFolderView *m_folderView;
+};
+
+class wxFolderSplitterWindow : public wxPSplitterWindow
+{
+public:
+   wxFolderSplitterWindow(wxWindow *parent)
+      : wxPSplitterWindow("FolderSplit", parent, -1,
+                          wxDefaultPosition, parent->GetClientSize(),
+                          wxSP_3D | wxSP_BORDER)
+   {
+   }
 };
 
 // ----------------------------------------------------------------------------
@@ -476,7 +488,6 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          ;
       }
    }
-   event.Skip();
 }
 
 void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
@@ -1142,11 +1153,10 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_previewUId = UID_ILLEGAL;
    m_Parent->GetClientSize(&x, &y);
    m_Profile = Profile::CreateEmptyProfile(mApplication->GetProfile());
-   m_SplitterWindow = new wxPSplitterWindow("FolderSplit", m_Parent, -1,
-                                            wxDefaultPosition, wxSize(x,y),
-                                            wxSP_3D|wxSP_BORDER);
-   m_MessagePreview = new wxMessageView(this,m_SplitterWindow);
-   m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
+   m_SplitterWindow = new wxFolderSplitterWindow(m_Parent);
+   m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow, this);
+   m_MessagePreview = new wxMessageView(this, m_SplitterWindow);
+
    ReadProfileSettings(&m_settings);
    bool   previewOnSingleClick = READ_CONFIG(GetProfile(),
                                              MP_PREVIEW_ON_SELECT) != 0;

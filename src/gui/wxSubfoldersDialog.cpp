@@ -541,10 +541,16 @@ bool wxSubfoldersTree::OnMEvent(MEventData& event)
                   SetItemData(id, new wxTreeItemData());
                }
 
+               // this doesn't make much sense... someone proposed to show
+               // instead the folders already existing in the tree in bold (or
+               // maybe the folders not existing in the tree) - this might be
+               // more useful (TODO?)
+#if 0
                if ( attr & LATT_MARKED )
                {
                   SetItemBold(id);
                }
+#endif // 0
             }
          }
       }
@@ -718,7 +724,7 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
    c->width.AsIs();
    c->height.AsIs();
    c->left.SameAs(m_box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->bottom.SameAs(m_box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   c->bottom.SameAs(m_box, wxBottom, 3*LAYOUT_Y_MARGIN);
    label->SetConstraints(c);
 
    m_textFind = new wxFolderNameTextCtrl(this);
@@ -726,7 +732,7 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
    c->height.AsIs();
    c->left.RightOf(label, LAYOUT_X_MARGIN);
    c->right.SameAs(m_box, wxRight, 2*LAYOUT_X_MARGIN);
-   c->bottom.SameAs(m_box, wxBottom, 2*LAYOUT_Y_MARGIN);
+   c->centreY.SameAs(label, wxCentreY);
    m_textFind->SetConstraints(c);
 
 #ifdef USE_SELECT_BUTTONS
@@ -746,6 +752,8 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
    wxTreeItemId idRoot = m_treectrl->GetRootItem();
    m_folderPath = m_treectrl->GetItemText(idRoot);
    m_treectrl->Expand(idRoot);
+
+   Layout();
 }
 
 wxSubscriptionDialog::~wxSubscriptionDialog()

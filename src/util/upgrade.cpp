@@ -313,7 +313,7 @@ public:
          gs_installWizardData.nntp = m_nntp->GetValue();
          if(gs_installWizardData.smtp.Length() == 0)
          {
-            wxLogError(_("You need to specify at the SMTP server to be able "
+            wxLogError(_("You need to specify the SMTP server to be able "
                          "to send email, please do it!"));
             return FALSE;
          }
@@ -1445,7 +1445,7 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    Profile_obj prof(
       gs_installWizardData.collectAllMail ? foldername : String("INBOX") );
    prof->writeEntry(MP_SHOW_NEWMAILMSG, 1);
-   
+
 
    // TRASH
    if(gs_installWizardData.useTrash)
@@ -2487,16 +2487,19 @@ SetupServers(void)
    serverName = READ_APPCONFIG(MP_POPHOST);
    if ( !!serverName )
    {
+      // the POP3 folder is created as incoming as otherwise it doesn't work
+      // really well
       mfolder = CreateFolderTreeEntry(NULL,
                                       _("POP3 Server"),
                                       MF_POP,
-                                      0,
+                                      MF_FLAGS_INCOMING,
                                       "",
                                       FALSE);
       mfolder->SetTreeIndex(MFolderIndex_POP);
       p = Profile::CreateProfile(mfolder->GetName());
-      //inherit default instead p->writeEntry(MP_POPHOST, serverName);
-      //inherit default instead p->writeEntry(MP_USERNAME, READ_APPCONFIG(MP_USERNAME));
+      // inherit default instead:
+      //p->writeEntry(MP_POPHOST, serverName);
+      //p->writeEntry(MP_USERNAME, READ_APPCONFIG(MP_USERNAME));
       p->DecRef();
       SafeDecRef(mfolder);
    }
@@ -2620,7 +2623,7 @@ bool RetrieveRemoteConfigSettings(void)
    // this forces the disappearance of the startup splash or wxGTK
    // will crash or produce funny memory corruption :-)
    CloseSplash();
-   
+
    if (! MDialog_YesNoDialog(
       _("Retrieve remote configuration settings now?"), NULL,
       _("Retrieve remote settings?"), true,
@@ -2675,10 +2678,10 @@ bool RetrieveRemoteConfigSettings(void)
    wxFile tmpfile(filename, wxFile::write);
    tmpfile.Write(msgText, msgText.Length());
    tmpfile.Close();
-   
+
    wxFileConfig *fc = new
       wxFileConfig("","",filename,"",wxCONFIG_USE_LOCAL_FILE);
-   
+
    bool rc = TRUE;
    if(fc)
    {
@@ -2687,13 +2690,13 @@ bool RetrieveRemoteConfigSettings(void)
                            M_FILTERS_CONFIG_SECTION,
                            M_FILTERS_CONFIG_SECTION_UNIX, TRUE,
                            mApplication->GetProfile()->GetConfig());
-      
+
       if(READ_APPCONFIG(MP_SYNC_IDS) != 0)
          rc &= CopyEntries(fc,
                            M_IDENTITY_CONFIG_SECTION,
                            M_IDENTITY_CONFIG_SECTION_UNIX, TRUE,
                            mApplication->GetProfile()->GetConfig());
-      
+
       if(READ_APPCONFIG(MP_SYNC_FOLDERS) != 0)
       {
          String group = READ_APPCONFIG(MP_SYNC_FOLDERGROUP);
@@ -2788,7 +2791,7 @@ bool SaveRemoteConfigSettings(void)
       msg->DecRef();
       mf->ExpungeMessages();
    }
-   
+
    wxString filename = wxGetTempFileName("MTemp");
    wxFileConfig *fc = new
       wxFileConfig("","",filename,"",wxCONFIG_USE_LOCAL_FILE);
@@ -2797,14 +2800,14 @@ bool SaveRemoteConfigSettings(void)
       mf->DecRef();
       return FALSE;
    }
-   
+
    bool rc = TRUE;
    if(READ_APPCONFIG(MP_SYNC_FILTERS) != 0)
       rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
                         M_FILTERS_CONFIG_SECTION_UNIX,
                         M_FILTERS_CONFIG_SECTION, TRUE,
-                        fc); 
-      
+                        fc);
+
    if(READ_APPCONFIG(MP_SYNC_IDS) != 0)
       rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
                         M_IDENTITY_CONFIG_SECTION_UNIX,
@@ -2841,11 +2844,11 @@ bool SaveRemoteConfigSettings(void)
    }
    buffer[tmpfile.Length()] = '\0';
    tmpfile.Close();
-   
+
    wxString msgText;
    msgText << "From: mahogany-developers@lists.sourceforge.net\n"
            << "Subject: " << M_SYNCMAIL_SUBJECT << "\n"
-           << "Date: " << GetRFC822Time() << "\n" 
+           << "Date: " << GetRFC822Time() << "\n"
            << "\n"
            << M_SYNCMAIL_CONFIGSTART << "\n"
            << buffer << "\n";
@@ -2865,7 +2868,7 @@ bool SaveRemoteConfigSettings(void)
          _("Successfully stored shared configuration info in folder '%s'."),
          mf->GetName().c_str());
       MDialog_Message(msg, NULL, _("Saved settings"),
-                      GetPersMsgBoxName(M_MSGBOX_CONFIG_SAVED_REMOTELY)); 
+                      GetPersMsgBoxName(M_MSGBOX_CONFIG_SAVED_REMOTELY));
    }
    return rc;
 }
@@ -2920,7 +2923,7 @@ CheckConfiguration(void)
 
    if(! RetrieveRemoteConfigSettings() )
       wxLogError(_("Remote configuration information could not be retrieved."));
-   
+
    return true;
 }
 
