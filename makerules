@@ -1,4 +1,6 @@
+# -*-makefile-*-
 # rules to create object files:
+#
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) -c -o $(ODIR)/$@ $<
 %.o: %.cpp

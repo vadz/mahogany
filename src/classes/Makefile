@@ -1,4 +1,5 @@
 # Makefile for src/classes directory
+# $Id$
 
 CWD = classes
 SRC = MObject.cpp MApplication.cpp PathFinder.cpp Profile.cpp \

@@ -223,7 +223,6 @@ void
 wxLayoutObjectCmd::Draw(wxDC &dc, wxPoint const &translate)
 {
    wxASSERT(m_font);
-
    dc.SetFont(*m_font);
    if(m_ColourFG)
       dc.SetTextForeground(*m_ColourFG);
