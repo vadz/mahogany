@@ -1247,10 +1247,13 @@ void VarExpander::ExpandOriginalText(const String& text,
 #endif // wxUSE_REGEX/!wxUSE_REGEX
          }
 
-         if ( !quoteEmpty && IsEndOfLine(cptr + 1) )
+         if ( !quoteEmpty && IsEndOfLine(cptr) )
          {
-            // this line is empty, skip it entirely
+            // this line is empty, skip it entirely (i.e. don't output the
+            // prefix for it)
             cptr += EOL_LEN - 1;
+
+            *value += '\n';
 
             continue;
          }
