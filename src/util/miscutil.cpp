@@ -33,6 +33,9 @@
 
 #include <ctype.h>
 
+extern const MOption MP_FOLDERSTATUS_STATBAR;
+extern const MOption MP_FOLDERSTATUS_TITLEBAR;
+
 // show the number of new/unread/total messages in the title and status bars
 void UpdateTitleAndStatusBars(const String& title,
                               const String& status,

@@ -40,6 +40,15 @@
 #include <wx/regex.h>
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_CRYPTALGO;
+extern const MOption MP_CRYPT_TESTDATA;
+extern const MOption MP_CRYPT_TWOFISH_OK;
+extern const MOption MP_MBOXDIR;
+
+// ----------------------------------------------------------------------------
 // local functions
 // ----------------------------------------------------------------------------
 
@@ -1025,7 +1034,7 @@ strutil_getpasswd(void)
 bool
 strutil_haspasswd(void)
 {
-   return !String(READ_APPCONFIG(MP_CRYPT_TESTDATA)).empty();
+   return !READ_APPCONFIG_TEXT(MP_CRYPT_TESTDATA).empty();
 }
 
 bool

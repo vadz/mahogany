@@ -90,6 +90,31 @@
 #include <errno.h>
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_COMPOSE_USE_XFACE;
+extern const MOption MP_COMPOSE_XFACE_FILE;
+extern const MOption MP_CONFIRMEXIT;
+extern const MOption MP_CRYPTALGO;
+extern const MOption MP_CURRENT_IDENTITY;
+extern const MOption MP_DATE_FMT;
+extern const MOption MP_DATE_GMT;
+extern const MOption MP_FOLDER_PASSWORD;
+extern const MOption MP_FOLDER_PATH;
+extern const MOption MP_HEIGHT;
+extern const MOption MP_LASTTIP;
+extern const MOption MP_MSGS_RESORT_ON_CHANGE;
+extern const MOption MP_MSGS_SEARCH_ARG;
+extern const MOption MP_MSGS_SEARCH_CRIT;
+extern const MOption MP_MSGS_SORTBY;
+extern const MOption MP_NNTPHOST_LOGIN;
+extern const MOption MP_SHOWTIPS;
+extern const MOption MP_SMTPHOST_PASSWORD;
+extern const MOption MP_SPLASHDELAY;
+extern const MOption MP_WIDTH;
+
+// ----------------------------------------------------------------------------
 // the images names
 // ----------------------------------------------------------------------------
 
@@ -810,7 +835,8 @@ MDialog_AdbLookupList(ArrayAdbElements& aEntries,
                                  );
 
       // default width and height are too big for us
-      if ( w == MP_WIDTH_D && h == MP_HEIGHT_D ) {
+      if ( w == GetNumericDefault(MP_WIDTH) &&
+            h == GetNumericDefault(MP_HEIGHT) ) {
          w = 300;
          h = 400;
       }
@@ -1855,7 +1881,7 @@ bool wxMessageSearchDialog::TransferDataFromWindow()
 bool wxMessageSearchDialog::TransferDataToWindow()
 {
    m_Criterium = READ_CONFIG(GetProfile(), MP_MSGS_SEARCH_CRIT);
-   m_Arg = READ_CONFIG(GetProfile(), MP_MSGS_SEARCH_ARG);
+   m_Arg = READ_CONFIG_TEXT(GetProfile(), MP_MSGS_SEARCH_ARG);
 
    if ( m_Criterium & SEARCH_CRIT_MASK )
       m_Choices->SetSelection(m_Criterium & SEARCH_CRIT_MASK);
@@ -2119,7 +2145,7 @@ wxDateFmtDialog::TransferDataToWindow()
    ProfileEnvVarSave noEnvVars(GetProfile());
 #endif // OS_WIN
 
-   m_DateFmt = READ_CONFIG(GetProfile(), MP_DATE_FMT);
+   m_DateFmt = READ_CONFIG_TEXT(GetProfile(), MP_DATE_FMT);
    m_UseGMT->SetValue( READ_CONFIG(GetProfile(), MP_DATE_GMT) != 0);
    m_textctrl->SetValue(m_DateFmt);
 

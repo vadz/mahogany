@@ -90,6 +90,36 @@
 #include "modules/Calendar.h"
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_ADB_SUBSTRINGEXPANSION;
+extern const MOption MP_AFMPATH;
+extern const MOption MP_ALWAYS_USE_EXTERNALEDITOR;
+extern const MOption MP_AUTOMATIC_WORDWRAP;
+extern const MOption MP_COMPOSE_BCC;
+extern const MOption MP_COMPOSE_CC;
+extern const MOption MP_COMPOSE_SIGNATURE;
+extern const MOption MP_COMPOSE_TO;
+extern const MOption MP_COMPOSE_USE_SIGNATURE;
+extern const MOption MP_COMPOSE_USE_SIGNATURE_SEPARATOR;
+extern const MOption MP_CURRENT_IDENTITY;
+extern const MOption MP_CVIEW_BGCOLOUR;
+extern const MOption MP_CVIEW_FGCOLOUR;
+extern const MOption MP_CVIEW_FONT;
+extern const MOption MP_CVIEW_FONT_SIZE;
+extern const MOption MP_EXTERNALEDITOR;
+extern const MOption MP_FOCUS_FOLLOWSMOUSE;
+extern const MOption MP_HOSTNAME;
+extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
+extern const MOption MP_SMTPHOST;
+extern const MOption MP_USERLEVEL;
+extern const MOption MP_USEVCARD;
+extern const MOption MP_USE_SENDMAIL;
+extern const MOption MP_VCARD;
+extern const MOption MP_WRAPMARGIN;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
@@ -1349,7 +1379,7 @@ void wxComposeView::DoClear()
 
    // set the default encoding if any
    wxFontEncoding encoding =
-      (wxFontEncoding)READ_CONFIG(m_Profile, MP_MSGVIEW_DEFAULT_ENCODING);
+      (wxFontEncoding)(long)READ_CONFIG(m_Profile, MP_MSGVIEW_DEFAULT_ENCODING);
    if ( encoding != wxFONTENCODING_DEFAULT )
    {
       SetEncoding(encoding);

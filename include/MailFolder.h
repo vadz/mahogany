@@ -416,8 +416,8 @@ public:
      @return string containing the text for display
     */
    static String SizeToString(unsigned long sizeBytes,
-                              unsigned long sizeLines,
-                              MessageSizeShow show,
+                              unsigned long sizeLines = 0,
+                              MessageSizeShow show = MessageSize_Automatic,
                               bool verbose = false);
 
    /** Forward one message.

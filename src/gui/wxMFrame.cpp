@@ -86,6 +86,38 @@
 #endif
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_CURRENT_IDENTITY;
+extern const MOption MP_DOCKABLE_TOOLBARS;
+extern const MOption MP_FLAT_TOOLBARS;
+extern const MOption MP_HEIGHT;
+extern const MOption MP_ICONISED;
+extern const MOption MP_MAXIMISED;
+extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
+extern const MOption MP_USEPYTHON;
+extern const MOption MP_WIDTH;
+extern const MOption MP_XPOS;
+extern const MOption MP_YPOS;
+
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+inline MOptionValue GetOptionValue(wxConfigBase *config, const MOption opt)
+{
+   MOptionValue value;
+   const char *name = GetOptionName(opt);
+   if ( IsNumeric(opt) )
+      value.Set(config->Read(name, GetNumericDefault(opt)));
+   else
+      value.Set(config->Read(name, GetStringDefault(opt)));
+
+   return value;
+}
+
+// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
@@ -361,30 +393,30 @@ bool wxMFrame::RestorePosition(const char *name,
    if ( pConf != NULL )
    {
       pConf->SetPath(String(M_FRAMES_CONFIG_SECTION)+name);
-      *x = pConf->Read(MP_XPOS, MP_XPOS_D);
-      *y = pConf->Read(MP_YPOS,MP_YPOS_D);
-      *w = pConf->Read(MP_WIDTH, MP_WIDTH_D);
-      *h = pConf->Read(MP_HEIGHT, MP_HEIGHT_D);
+      *x = GetOptionValue(pConf, MP_XPOS);
+      *y = GetOptionValue(pConf, MP_YPOS);
+      *w = GetOptionValue(pConf, MP_WIDTH);
+      *h = GetOptionValue(pConf, MP_HEIGHT);
 
       if ( i )
-          *i = pConf->Read(MP_ICONISED, MP_ICONISED_D) != 0;
+          *i = GetOptionValue(pConf, MP_ICONISED) != 0;
       if ( m )
-          *m = pConf->Read(MP_MAXIMISED, MP_MAXIMISED_D) != 0;
+          *m = GetOptionValue(pConf, MP_MAXIMISED) != 0;
 
       // assume that if one entry existed, then the other existed too
-      return pConf->HasEntry(MP_XPOS);
+      return pConf->HasEntry(GetOptionName(MP_XPOS));
    }
    else
    {
       // it's ok if it's done the first time
-      *x = MP_XPOS_D;
-      *y = MP_YPOS_D;
-      *w = MP_WIDTH_D;
-      *h = MP_HEIGHT_D;
+      *x = GetNumericDefault(MP_XPOS);
+      *y = GetNumericDefault(MP_YPOS);
+      *w = GetNumericDefault(MP_WIDTH);
+      *h = GetNumericDefault(MP_HEIGHT);
       if ( i )
-         *i = MP_ICONISED_D;
+         *i = GetNumericDefault(MP_ICONISED);
       if ( m )
-         *m = MP_MAXIMISED_D;
+         *m = GetNumericDefault(MP_MAXIMISED);
 
       return FALSE;
    }
@@ -424,26 +456,26 @@ wxMFrame::SavePositionInternal(const char *name, wxWindow *frame, bool isFrame)
 
          // the frames are rarely icon/maximized, so don't write these
          // settings to config unless really needed
-         if ( pConf->Read(MP_ICONISED, MP_ICONISED_D) )
+         if ( GetOptionValue(pConf, MP_ICONISED) )
          {
             if ( !isIconized )
-               pConf->DeleteEntry(MP_ICONISED);
+               pConf->DeleteEntry(GetOptionName(MP_ICONISED));
          }
          else // !iconized in config
          {
             if ( isIconized )
-               pConf->Write(MP_ICONISED, isIconized);
+               pConf->Write(GetOptionName(MP_ICONISED), isIconized);
          }
 
-         if ( pConf->Read(MP_MAXIMISED, MP_MAXIMISED_D) )
+         if ( GetOptionValue(pConf, MP_MAXIMISED) )
          {
             if ( !isMaximized )
-               pConf->DeleteEntry(MP_MAXIMISED);
+               pConf->DeleteEntry(GetOptionName(MP_MAXIMISED));
          }
          else // !maximized in config
          {
             if ( isMaximized )
-               pConf->Write(MP_MAXIMISED, isMaximized);
+               pConf->Write(GetOptionName(MP_MAXIMISED), isMaximized);
          }
 
          if ( isMaximized || isIconized )
@@ -457,12 +489,12 @@ wxMFrame::SavePositionInternal(const char *name, wxWindow *frame, bool isFrame)
 
       int x, y;
       frame->GetPosition(&x, &y);
-      pConf->Write(MP_XPOS, (long)x);
-      pConf->Write(MP_YPOS, (long)y);
+      pConf->Write(GetOptionName(MP_XPOS), (long)x);
+      pConf->Write(GetOptionName(MP_YPOS), (long)y);
 
       frame->GetSize(&x,&y);
-      pConf->Write(MP_WIDTH, (long)x);
-      pConf->Write(MP_HEIGHT, (long)y);
+      pConf->Write(GetOptionName(MP_WIDTH), (long)x);
+      pConf->Write(GetOptionName(MP_HEIGHT), (long)y);
    }
 }
 
@@ -741,7 +773,7 @@ wxMFrame::OnMenuCommand(int id)
                   if ( rc == 0 )
                   {
                      // restore the default identity
-                     profile->DeleteEntry(MP_CURRENT_IDENTITY);
+                     profile->DeleteEntry(GetOptionName(MP_CURRENT_IDENTITY));
                   }
                   else
                   {

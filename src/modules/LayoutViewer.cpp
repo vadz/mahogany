@@ -43,6 +43,15 @@
 class LayoutViewerWindow;
 
 // ----------------------------------------------------------------------------
+// options we use
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_FOCUS_FOLLOWSMOUSE;
+extern const MOption MP_PRINT_PREVIEWZOOM;
+extern const MOption MP_VIEW_AUTOMATIC_WORDWRAP;
+extern const MOption MP_VIEW_WRAPMARGIN;
+
+// ----------------------------------------------------------------------------
 // LayoutViewer: a wxLayout-based MessageViewer implementation
 // ----------------------------------------------------------------------------
 

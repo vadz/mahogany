@@ -34,11 +34,6 @@
 #  include <wx/dynarray.h>
 #endif //USE_PCH
 
-// FIXME: we shouldn't use the apps functions from modules...
-#include "MApplication.h"
-#include "Profile.h"
-#include "Mdefaults.h"
-
 #include "Address.h"
 
 #include "adb/AdbManager.h"
@@ -48,6 +43,13 @@
 
 #include <pwd.h>
 #include <sys/types.h>
+
+// FIXME: we shouldn't use the apps functions from modules...
+#include "MApplication.h"
+#include "Profile.h"
+#include "Mdefaults.h"
+
+extern const MOption MP_HOSTNAME;
 
 // ----------------------------------------------------------------------------
 // private classes

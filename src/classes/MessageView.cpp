@@ -78,6 +78,50 @@
 #endif
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_AFMPATH;
+extern const MOption MP_AUTOCOLLECT;
+extern const MOption MP_AUTOCOLLECT_ADB;
+extern const MOption MP_AUTOCOLLECT_NAMED;
+extern const MOption MP_BROWSER;
+extern const MOption MP_BROWSER_INNW;
+extern const MOption MP_BROWSER_ISNS;
+extern const MOption MP_HIGHLIGHT_URLS;
+extern const MOption MP_INCFAX_DOMAINS;
+extern const MOption MP_INCFAX_SUPPORT;
+extern const MOption MP_INLINE_GFX;
+extern const MOption MP_INLINE_GFX_SIZE;
+extern const MOption MP_MAX_MESSAGE_SIZE;
+extern const MOption MP_MSGVIEW_AUTO_ENCODING;
+extern const MOption MP_MSGVIEW_HEADERS;
+extern const MOption MP_MSGVIEW_HEADERS_D;
+extern const MOption MP_MSGVIEW_VIEWER;
+extern const MOption MP_MSGVIEW_VIEWER_D;
+extern const MOption MP_MVIEW_TITLE_FMT;
+extern const MOption MP_MVIEW_FONT;
+extern const MOption MP_MVIEW_FONT_SIZE;
+extern const MOption MP_MVIEW_FGCOLOUR;
+extern const MOption MP_MVIEW_BGCOLOUR;
+extern const MOption MP_MVIEW_URLCOLOUR;
+extern const MOption MP_MVIEW_ATTCOLOUR;
+extern const MOption MP_MVIEW_QUOTED_COLOURIZE;
+extern const MOption MP_MVIEW_QUOTED_CYCLE_COLOURS;
+extern const MOption MP_MVIEW_QUOTED_COLOUR1;
+extern const MOption MP_MVIEW_QUOTED_COLOUR2;
+extern const MOption MP_MVIEW_QUOTED_COLOUR3;
+extern const MOption MP_MVIEW_QUOTED_MAXWHITESPACE;
+extern const MOption MP_MVIEW_QUOTED_MAXALPHA;
+extern const MOption MP_MVIEW_HEADER_NAMES_COLOUR;
+extern const MOption MP_MVIEW_HEADER_VALUES_COLOUR;
+extern const MOption MP_PLAIN_IS_TEXT;
+extern const MOption MP_RFC822_IS_TEXT;
+extern const MOption MP_SHOWHEADERS;
+extern const MOption MP_SHOW_XFACES;
+extern const MOption MP_TIFF2PS;
+
+// ----------------------------------------------------------------------------
 // helper functions
 // ----------------------------------------------------------------------------
 
@@ -450,7 +494,7 @@ MessageView::CreateViewer(wxWindow *parent)
    {
       String name = m_ProfileValues.msgViewer;
       if ( name.empty() )
-         name = MP_MSGVIEW_VIEWER_D;
+         name = GetStringDefault(MP_MSGVIEW_VIEWER);
 
       MModule *viewerFactory = MModule::LoadModule(name);
       if ( !viewerFactory ) // failed to load the configured viewer
@@ -689,7 +733,7 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    #define GET_COLOUR_FROM_PROFILE(col, name) \
       GetColourByName(&col, \
                       READ_CONFIG(profile, MP_MVIEW_##name), \
-                      MP_MVIEW_##name##_D)
+                      GetStringDefault(MP_MVIEW_##name##))
 
    #define GET_COLOUR_FROM_PROFILE_IF_NOT_FG(which, name) \
       GET_COLOUR_FROM_PROFILE(col, name); \
@@ -735,7 +779,7 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
       idx = 0;
    }
 
-   settings->msgViewer = READ_CONFIG(profile, MP_MSGVIEW_VIEWER);
+   settings->msgViewer = READ_CONFIG_TEXT(profile, MP_MSGVIEW_VIEWER);
 
    settings->fontFamily = fontFamilies[idx];
    settings->fontSize = READ_CONFIG(profile, MP_MVIEW_FONT_SIZE);
@@ -750,17 +794,17 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    if ( settings->inlineGFX )
       settings->inlineGFX = READ_CONFIG(profile, MP_INLINE_GFX_SIZE);
 
-   settings->browser = READ_CONFIG(profile, MP_BROWSER);
+   settings->browser = READ_CONFIG_TEXT(profile, MP_BROWSER);
    settings->browserInNewWindow = READ_CONFIG(profile, MP_BROWSER_INNW) != 0;
    settings->autocollect =  READ_CONFIG(profile, MP_AUTOCOLLECT);
    settings->autocollectNamed =  READ_CONFIG(profile, MP_AUTOCOLLECT_NAMED);
-   settings->autocollectBookName = READ_CONFIG(profile, MP_AUTOCOLLECT_ADB);
+   settings->autocollectBookName = READ_CONFIG_TEXT(profile, MP_AUTOCOLLECT_ADB);
    settings->showFaces = READ_CONFIG(profile, MP_SHOW_XFACES) != 0;
 
    // these settings are used under Unix only
 #ifdef OS_UNIX
    settings->browserIsNS = READ_CONFIG(profile, MP_BROWSER_ISNS) != 0;
-   settings->afmpath = READ_APPCONFIG(MP_AFMPATH);
+   settings->afmpath = READ_APPCONFIG_TEXT(MP_AFMPATH);
 #endif // Unix
 
    // update the parents menu as the show headers option might have changed
@@ -1878,7 +1922,7 @@ MessageView::MimeHandle(const MimePart *mimepart)
          // one with the usual ps viewer
          filename2 = filename.BeforeLast('.') + ".ps";
          String command;
-         command.Printf(READ_CONFIG(profile,MP_TIFF2PS),
+         command.Printf(READ_CONFIG_TEXT(profile,MP_TIFF2PS),
                         filename.c_str(), filename2.c_str());
          // we ignore the return code, because next viewer will fail
          // or succeed depending on this:

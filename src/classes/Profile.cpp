@@ -50,6 +50,15 @@
 #endif
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_CURRENT_IDENTITY;
+extern const MOption MP_PROFILEPATH;
+extern const MOption MP_PROFILE_IDENTITY;
+extern const MOption MP_PROFILE_TYPE;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
@@ -572,7 +581,8 @@ ListProfilesHelper(wxConfigBase *config,
    bool ok = config->GetFirstGroup(name, index);
    while ( ok )
    {
-      config->Read(name + '/' + MP_PROFILE_TYPE, &ptype, MP_PROFILE_TYPE_D);
+      config->Read(name + '/' + MP_PROFILE_TYPE, &ptype,
+                   GetNumericDefault(MP_PROFILE_TYPE));
       wxString pathname = path;
       pathname << '/' << name;
       if(type == Profile::PT_Any || ptype == type)
@@ -892,10 +902,10 @@ ProfileImpl::ProfileImpl(const String & iName, Profile const *Parent)
    m_Suspended = 0;
    m_Identity = NULL;
 
-
-   String id = readEntry(MP_PROFILE_IDENTITY, MP_PROFILE_IDENTITY_D);
+   String id = readEntry(GetOptionName(MP_PROFILE_IDENTITY),
+                         GetStringDefault(MP_PROFILE_IDENTITY));
    if ( !id && mApplication->GetProfile() )
-      id = READ_APPCONFIG(MP_CURRENT_IDENTITY);
+      id = READ_APPCONFIG_TEXT(MP_CURRENT_IDENTITY);
    if ( !!id )
       SetIdentity(id);
 }
@@ -1074,8 +1084,8 @@ ProfileImpl::readEntry(LookupData &ld, int flags) const
          strResult = m_Identity->readEntry(keySuspended, ld.GetString(),
                                            &idFound);
       else
-         strResult = m_Identity->readEntry(keySuspended, ld.GetLong(),
-                                           &idFound);
+         longResult = m_Identity->readEntry(keySuspended, ld.GetLong(),
+                                            &idFound);
       if(! idFound)
       {
          if( ld.GetType() == LookupData::LD_STRING )

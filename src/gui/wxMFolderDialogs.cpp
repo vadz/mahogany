@@ -100,6 +100,24 @@
 // why is this conditional?
 #define USE_LOCAL_CHECKBOX
 
+// ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_FOLDER_COMMENT;
+extern const MOption MP_FOLDER_FILE_DRIVER;
+extern const MOption MP_FOLDER_LOGIN;
+extern const MOption MP_FOLDER_PASSWORD;
+extern const MOption MP_FOLDER_PATH;
+extern const MOption MP_FOLDER_TYPE;
+extern const MOption MP_HOSTNAME;
+extern const MOption MP_IMAPHOST;
+extern const MOption MP_LAST_CREATED_FOLDER_TYPE;
+extern const MOption MP_NNTPHOST;
+extern const MOption MP_POPHOST;
+extern const MOption MP_USERLEVEL;
+extern const MOption MP_USERNAME;
+
 // ============================================================================
 // private classes
 // ============================================================================
@@ -1839,9 +1857,9 @@ wxFolderPropertiesPage::SetDefaultValues()
    String value;
    if ( FolderTypeHasUserName(folderType) )
    {
-      value = READ_CONFIG(profile, MP_FOLDER_LOGIN);
+      value = READ_CONFIG_TEXT(profile, MP_FOLDER_LOGIN);
       if ( !value )
-         value = READ_APPCONFIG(MP_USERNAME);
+         value = READ_APPCONFIG_TEXT(MP_USERNAME);
       m_login->SetValue(value);
       m_originalValues[Username] = value;
 
@@ -1859,13 +1877,13 @@ wxFolderPropertiesPage::SetDefaultValues()
          switch ( folderType )
          {
             case MF_NNTP:
-               value = READ_CONFIG(profile, MP_NNTPHOST);
+               value = READ_CONFIG_TEXT(profile, MP_NNTPHOST);
                break;
             case MF_POP:
-               value = READ_CONFIG(profile, MP_POPHOST);
+               value = READ_CONFIG_TEXT(profile, MP_POPHOST);
                break;
             case MF_IMAP:
-               value = READ_CONFIG(profile, MP_IMAPHOST);
+               value = READ_CONFIG_TEXT(profile, MP_IMAPHOST);
                break;
 
             default:
@@ -1881,7 +1899,7 @@ wxFolderPropertiesPage::SetDefaultValues()
       if ( !value )
       {
          // set to this host by default
-         value = READ_CONFIG(profile, MP_HOSTNAME);
+         value = READ_CONFIG_TEXT(profile, MP_HOSTNAME);
       }
 
       m_server->SetValue(value);
@@ -1904,7 +1922,7 @@ wxFolderPropertiesPage::SetDefaultValues()
       }
    }
 
-   value = READ_CONFIG(profile, MP_FOLDER_PATH);
+   value = READ_CONFIG_TEXT(profile, MP_FOLDER_PATH);
    switch ( selRadio )
    {
       case Radio_File:
@@ -2065,7 +2083,8 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
    if ( m_isCreating )
    {
       // use the type of the folder last created
-      m_folderType = (FolderType)READ_APPCONFIG(MP_LAST_CREATED_FOLDER_TYPE);
+      m_folderType =
+         (FolderType)(long)READ_APPCONFIG(MP_LAST_CREATED_FOLDER_TYPE);
    }
    else
    {
@@ -2078,7 +2097,8 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
       // FAIL_MSG("how did we manage to create an INBOX folder?"); --
       // obviously by using a corrupted config file... no need to crash though
 
-      m_folderType = (FolderType)MP_LAST_CREATED_FOLDER_TYPE_D;
+      m_folderType =
+         (FolderType)GetNumericDefault(MP_LAST_CREATED_FOLDER_TYPE);
    }
 
    if ( m_folderType == MF_INBOX )
@@ -2379,7 +2399,7 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
             ASSERT_MSG( format >= 0 && format < FileMbox_Max,
                         "invalid folder format selection" );
 
-            if ( format != MP_FOLDER_FILE_DRIVER_D )
+            if ( format != GetNumericDefault(MP_FOLDER_FILE_DRIVER) )
             {
                m_profile->writeEntry(MP_FOLDER_FILE_DRIVER, format);
             }

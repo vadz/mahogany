@@ -48,6 +48,28 @@
 WX_DEFINE_ARRAY(MFolder *, wxArrayFolder);
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_FOLDER_COMMENT;
+extern const MOption MP_FOLDER_FILTERS;
+extern const MOption MP_FOLDER_ICON;
+extern const MOption MP_FOLDER_ICON_D;
+extern const MOption MP_FOLDER_LOGIN;
+extern const MOption MP_FOLDER_PASSWORD;
+extern const MOption MP_FOLDER_PATH;
+extern const MOption MP_FOLDER_TREEINDEX;
+extern const MOption MP_FOLDER_TREEINDEX_D;
+extern const MOption MP_FOLDER_TRY_CREATE;
+extern const MOption MP_FOLDER_TYPE;
+extern const MOption MP_IMAPHOST;
+extern const MOption MP_NNTPHOST;
+extern const MOption MP_POPHOST;
+extern const MOption MP_PROFILE_TYPE;
+extern const MOption MP_PROFILE_TYPE_D;
+extern const MOption MP_USERNAME;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
@@ -544,8 +566,10 @@ bool MFolderFromProfile::Exists(const String& fullname)
    CHECK( profile, FALSE, "panic in MFolder: no profile" );
 
    bool found;
-   bool exists = profile->readEntry(MP_PROFILE_TYPE, MP_PROFILE_TYPE_D, &found)
-                 == Profile::PT_FolderProfile;
+   bool exists =
+      profile->readEntry(GetOptionName(MP_PROFILE_TYPE),
+                         GetNumericDefault(MP_PROFILE_TYPE),
+                         &found) == Profile::PT_FolderProfile;
    if ( !found )
    {
       // if the value was just inherited from parent, it doesn't count
@@ -607,15 +631,15 @@ String MFolderFromProfile::GetServer() const
    switch( GetType() )
    {
       case MF_NNTP:
-         server = READ_CONFIG(m_profile, MP_NNTPHOST);
+         server = READ_CONFIG_TEXT(m_profile, MP_NNTPHOST);
          break;
 
       case MF_IMAP:
-         server = READ_CONFIG(m_profile, MP_IMAPHOST);
+         server = READ_CONFIG_TEXT(m_profile, MP_IMAPHOST);
          break;
 
       case MF_POP:
-         server = READ_CONFIG(m_profile, MP_POPHOST);
+         server = READ_CONFIG_TEXT(m_profile, MP_POPHOST);
          break;
 
       default:
@@ -632,7 +656,7 @@ String MFolderFromProfile::GetLogin() const
    // if no login setting, fall back to username:
    if ( login.empty() && FolderTypeHasUserName(GetType()) )
    {
-      login = READ_CONFIG(m_profile, MP_USERNAME);
+      login = READ_CONFIG_TEXT(m_profile, MP_USERNAME);
    }
 
    return login;
@@ -656,7 +680,8 @@ bool MFolderFromProfile::NeedsNetwork() const
 int MFolderFromProfile::GetIcon() const
 {
    // it doesn't make sense to inherit the icon from parent profile (does it?)
-   return m_profile->readEntryFromHere(MP_FOLDER_ICON, MP_FOLDER_ICON_D);
+   return m_profile->readEntryFromHere(GetOptionName(MP_FOLDER_ICON),
+                                       GetNumericDefault(MP_FOLDER_ICON));
 }
 
 void MFolderFromProfile::SetIcon(int icon)
@@ -690,7 +715,8 @@ void MFolderFromProfile::SetFlags(int flags)
 int MFolderFromProfile::GetTreeIndex() const
 {
    // it doesn't make sense to inherit the order from parent profile
-   return m_profile->readEntryFromHere(MP_FOLDER_TREEINDEX, MP_FOLDER_TREEINDEX_D);
+   return m_profile->readEntryFromHere(GetOptionName(MP_FOLDER_TREEINDEX),
+                                       GetNumericDefault(MP_FOLDER_TREEINDEX));
 }
 
 void MFolderFromProfile::SetTreeIndex(int pos)

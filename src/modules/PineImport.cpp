@@ -40,6 +40,20 @@
 #include "MImport.h"
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_COMPOSE_SIGNATURE;
+extern const MOption MP_EXTERNALEDITOR;
+extern const MOption MP_NNTPHOST;
+extern const MOption MP_PERSONALNAME;
+extern const MOption MP_POLLINCOMINGDELAY;
+extern const MOption MP_REPLY_PREFIX;
+extern const MOption MP_SMTPHOST;
+extern const MOption MP_VIEW_WRAPMARGIN;
+extern const MOption MP_WRAPMARGIN;
+
+// ----------------------------------------------------------------------------
 // the importer class
 // ----------------------------------------------------------------------------
 

@@ -35,6 +35,15 @@
 #include "Profile.h"
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_ADD_DEFAULT_HOSTNAME;
+extern const MOption MP_FROM_ADDRESS;
+extern const MOption MP_HOSTNAME;
+extern const MOption MP_PERSONALNAME;
+
+// ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
@@ -66,7 +75,7 @@ Address *Address::CreateFromAddress(Profile *profile)
 
    // set personal name
    ADDRESS *adr = mail_newaddr();
-   adr->personal = cpystr(READ_CONFIG(profile, MP_PERSONALNAME));
+   adr->personal = cpystr(READ_CONFIG_TEXT(profile, MP_PERSONALNAME));
 
    // set mailbox/host
    String email = READ_CONFIG(profile, MP_FROM_ADDRESS);
@@ -83,7 +92,7 @@ Address *Address::CreateFromAddress(Profile *profile)
       String host;
       if ( READ_CONFIG(profile, MP_ADD_DEFAULT_HOSTNAME) )
       {
-         host = READ_CONFIG(profile, MP_HOSTNAME);
+         host = READ_CONFIG_TEXT(profile, MP_HOSTNAME);
       }
 
       if ( host.empty() )

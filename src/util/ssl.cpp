@@ -13,12 +13,19 @@
 #include "Mpch.h"
 
 #ifdef USE_SSL
+
+#ifndef USE_PCH
+   #include "Mcommon.h"
+   #include "Profile.h"
+   #include "MApplication.h"
+#endif // !USE_PCH
+
 #include "Mdefaults.h"
-#include "Mcommon.h"
-#include "Profile.h"
-#include "MApplication.h"
 
 #include <wx/dynlib.h>
+
+extern const MOption MP_SSL_DLL_CRYPTO;
+extern const MOption MP_SSL_DLL_SSL;
 
 /* These functions will serve as stubs for the real openSSL library
    and must be initialised at runtime as c-client actually links

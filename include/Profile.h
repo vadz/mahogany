@@ -21,21 +21,6 @@
 class kbStringList;
 
 // ----------------------------------------------------------------------------
-// macros
-// ----------------------------------------------------------------------------
-
-/**@name Profile management classes. */
-//@{
-
-/// read from the global config section
-#   define READ_APPCONFIG(key) \
-      (mApplication->GetProfile()->readEntry(key, key##_D))
-//#endif
-
-/// read from a normal profile
-#define   READ_CONFIG(profile, key) profile->readEntry(key, key##_D)
-
-// ----------------------------------------------------------------------------
 // classes
 // ----------------------------------------------------------------------------
 

@@ -119,6 +119,26 @@ extern "C"
 #endif // DEBUG/!DEBUG
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_DEBUG_CCLIENT;
+extern const MOption MP_FOLDERPROGRESS_THRESHOLD;
+extern const MOption MP_FOLDER_FILE_DRIVER;
+extern const MOption MP_FOLDER_LOGIN;
+extern const MOption MP_FOLDER_PASSWORD;
+extern const MOption MP_FOLDER_TRY_CREATE;
+extern const MOption MP_IMAP_LOOKAHEAD;
+extern const MOption MP_MESSAGEPROGRESS_THRESHOLD_SIZE;
+extern const MOption MP_MESSAGEPROGRESS_THRESHOLD_TIME;
+extern const MOption MP_NEWS_SPOOL_DIR;
+extern const MOption MP_RSH_PATH;
+extern const MOption MP_SSH_PATH;
+extern const MOption MP_TCP_OPENTIMEOUT;
+extern const MOption MP_TCP_RSHTIMEOUT;
+extern const MOption MP_TCP_SSHTIMEOUT;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
@@ -1963,9 +1983,9 @@ MailFolderCC::UpdateTimeoutValues(void)
 
    // also read the paths for the commands if we use them
    if ( m_TcpRshTimeout )
-      m_RshPath = READ_CONFIG(p, MP_RSH_PATH);
+      m_RshPath = READ_CONFIG_TEXT(p, MP_RSH_PATH);
    if ( m_TcpSshTimeout )
-      m_SshPath = READ_CONFIG(p, MP_SSH_PATH);
+      m_SshPath = READ_CONFIG_TEXT(p, MP_SSH_PATH);
 
    ApplyTimeoutValues();
 }
@@ -4051,7 +4071,7 @@ const String& MailFolder::InitializeNewsSpool()
       gs_NewsSpoolDir = (char *)mail_parameters(NULL, GET_NEWSSPOOL, NULL);
       if ( !gs_NewsSpoolDir )
       {
-         gs_NewsSpoolDir = READ_APPCONFIG(MP_NEWS_SPOOL_DIR);
+         gs_NewsSpoolDir = READ_APPCONFIG_TEXT(MP_NEWS_SPOOL_DIR);
          mail_parameters(NULL, SET_NEWSSPOOL, (char *)gs_NewsSpoolDir.c_str());
       }
    }

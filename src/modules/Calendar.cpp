@@ -61,6 +61,9 @@
 #define MP_MOD_CALENDAR_SHOWONSTARTUP        "ShowOnStartup"
 #define MP_MOD_CALENDAR_SHOWONSTARTUP_D      1l
 
+extern const MOption MP_DATE_FMT;
+extern const MOption MP_FROM_ADDRESS;
+extern const MOption MP_NEWMAIL_FOLDER;
 
 // ----------------------------------------------------------------------------
 // ----------------------------------------------------------------------------
@@ -701,12 +704,12 @@ CalendarFrame::GetConfig(void)
    wxString oldFolderName = m_FolderName;
 
    // settings read from normal module profile:
-   m_FolderName = READ_CONFIG(m_Profile, MP_MOD_CALENDAR_BOX);
-   m_Show = READ_CONFIG(m_Profile, MP_MOD_CALENDAR_SHOWONSTARTUP) != 0;
+   m_FolderName = READ_CONFIG_MOD(m_Profile, MP_MOD_CALENDAR_BOX);
+   m_Show = READ_CONFIG_MOD(m_Profile, MP_MOD_CALENDAR_SHOWONSTARTUP) != 0;
 
    // settings read from folder profile:
    Profile *fp = m_MInterface->CreateProfile(m_FolderName);
-   m_MyEmail = READ_CONFIG(fp, MP_FROM_ADDRESS);
+   m_MyEmail = READ_CONFIG_TEXT(fp, MP_FROM_ADDRESS);
 
    {
 #ifdef OS_WIN
@@ -715,10 +718,10 @@ CalendarFrame::GetConfig(void)
       ProfileEnvVarSave noEnvVars(fp);
 #endif // OS_WIN
 
-      m_DateFormat = READ_CONFIG(fp, MP_DATE_FMT);
+      m_DateFormat = READ_CONFIG_TEXT(fp, MP_DATE_FMT);
    }
 
-   m_NewMailFolder = READ_CONFIG(fp, MP_NEWMAIL_FOLDER);
+   m_NewMailFolder = READ_CONFIG_TEXT(fp, MP_NEWMAIL_FOLDER);
    fp->DecRef();
 
    // updates:

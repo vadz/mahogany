@@ -59,11 +59,20 @@
 #include <errno.h>
 
 // ----------------------------------------------------------------------------
-// global vars and functions
+// options we use here
 // ----------------------------------------------------------------------------
 
+extern const MOption MP_FOLDER_PASSWORD;
+extern const MOption MP_FOLDER_PATH;
+extern const MOption MP_IMAPHOST;
+extern const MOption MP_NNTPHOST;
+extern const MOption MP_POPHOST;
+extern const MOption MP_USERLEVEL;
+extern const MOption MP_USERNAME;
 
-
+// ----------------------------------------------------------------------------
+// global vars and functions
+// ----------------------------------------------------------------------------
 
 /**
   The MWizard is a very simple to use Wizard class. Each wizard uses a
@@ -994,15 +1003,15 @@ MWizard_CreateFolder_ServerPage::TransferDataToWindow()
       switch ( GetPageId() )
       {
          case MWizard_CreateFolder_Imap:
-            serverKey = MP_IMAPHOST;
+            serverKey = GetOptionName(MP_IMAPHOST);
             break;
 
          case MWizard_CreateFolder_Nntp:
-            serverKey = MP_NNTPHOST;
+            serverKey = GetOptionName(MP_NNTPHOST);
             break;
 
          case MWizard_CreateFolder_Pop3:
-            serverKey = MP_POPHOST;
+            serverKey = GetOptionName(MP_POPHOST);
             break;
 
          default:
@@ -1180,15 +1189,15 @@ RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
             switch ( type )
             {
                case MF_IMAP:
-                  serverKey = MP_IMAPHOST;
+                  serverKey = GetOptionName(MP_IMAPHOST);
                   break;
 
                case MF_NNTP:
-                  serverKey = MP_NNTPHOST;
+                  serverKey = GetOptionName(MP_NNTPHOST);
                   break;
 
                case MF_POP:
-                  serverKey = MP_POPHOST;
+                  serverKey = GetOptionName(MP_POPHOST);
                   break;
 
                default:

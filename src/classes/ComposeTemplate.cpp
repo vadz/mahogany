@@ -47,6 +47,22 @@
 #include <wx/regex.h>
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_AUTOMATIC_WORDWRAP;
+extern const MOption MP_COMPOSETEMPLATEPATH_GLOBAL;
+extern const MOption MP_COMPOSETEMPLATEPATH_USER;
+extern const MOption MP_DATE_FMT;
+extern const MOption MP_REPLY_DETECT_SIG;
+extern const MOption MP_REPLY_MSGPREFIX;
+extern const MOption MP_REPLY_MSGPREFIX_FROM_SENDER;
+extern const MOption MP_REPLY_QUOTE_EMPTY;
+extern const MOption MP_REPLY_QUOTE_SELECTION;
+extern const MOption MP_REPLY_SIG_SEPARATOR;
+extern const MOption MP_WRAPMARGIN;
+
+// ----------------------------------------------------------------------------
 // the classes which are used together with compose view - we have here a
 // derivation of variable expander and expansion sink which are used for parsing
 // the templates, but are completely hidden from the outside world because we
@@ -597,9 +613,10 @@ VarExpander::GetAbsFilename(const String& name)
    if ( !IsAbsPath(filename) )
    {
       Profile *profile = mApplication->GetProfile();
-      String path = profile->readEntry(MP_COMPOSETEMPLATEPATH_USER,
-                                       mApplication->GetLocalDir());
-      if ( !path || path.Last() != '/' )
+      String path = READ_CONFIG(profile, MP_COMPOSETEMPLATEPATH_USER);
+      if ( path.empty() )
+         path = mApplication->GetLocalDir();
+      if ( !path.empty() || path.Last() != '/' )
       {
          path += '/';
       }
@@ -613,9 +630,10 @@ VarExpander::GetAbsFilename(const String& name)
       else
       {
          // try the global dir
-         String path = profile->readEntry(MP_COMPOSETEMPLATEPATH_GLOBAL,
-                                          mApplication->GetGlobalDir());
-         if ( !path || path.Last() != '/' )
+         String path = READ_CONFIG(profile, MP_COMPOSETEMPLATEPATH_GLOBAL);
+         if ( path.empty() )
+            path = mApplication->GetGlobalDir();
+         if ( !path.empty() || path.Last() != '/' )
          {
             path += '/';
          }

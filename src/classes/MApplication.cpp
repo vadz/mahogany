@@ -73,6 +73,48 @@
 #include  <wx/utils.h>
 #define   SYSTEM(command) wxExecute(command, FALSE)
 
+// ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_AWAY_AUTO_ENTER;
+extern const MOption MP_AWAY_AUTO_EXIT;
+extern const MOption MP_AWAY_REMEMBER;
+extern const MOption MP_AWAY_STATUS;
+extern const MOption MP_COLLECTATSTARTUP;
+extern const MOption MP_DONTOPENSTARTUP;
+extern const MOption MP_EXPAND_ENV_VARS;
+extern const MOption MP_FIRSTRUN;
+extern const MOption MP_GLOBALDIR;
+extern const MOption MP_ICONSTYLE;
+extern const MOption MP_LOGFILE;
+extern const MOption MP_MAINFOLDER;
+extern const MOption MP_NEWMAILCOMMAND;
+extern const MOption MP_OPENFOLDERS;
+extern const MOption MP_OUTBOX_NAME;
+extern const MOption MP_REOPENLASTFOLDER;
+extern const MOption MP_SHOWADBEDITOR;
+extern const MOption MP_SHOWLOG;
+extern const MOption MP_SHOWSPLASH;
+extern const MOption MP_SHOW_NEWMAILINFO;
+extern const MOption MP_SHOW_NEWMAILMSG;
+extern const MOption MP_TRASH_FOLDER;
+extern const MOption MP_USEPYTHON;
+extern const MOption MP_USE_NEWMAILCOMMAND;
+extern const MOption MP_USE_OUTBOX;
+extern const MOption MP_USE_SENDMAIL;
+extern const MOption MP_USE_TRASH_FOLDER;
+
+#ifdef OS_UNIX
+extern const MOption MP_ETCPATH;
+extern const MOption MP_PREFIXPATH;
+extern const MOption MP_ROOTDIRNAME;
+#endif // OS_UNIX
+
+// ----------------------------------------------------------------------------
+// constants
+// ----------------------------------------------------------------------------
+
 // VZ: Karsten, if this is really not used any more, please remove all code
 //     inside USE_ICON_SUBDIRS
 #ifdef USE_ICON_SUBDIRS
@@ -886,7 +928,7 @@ MAppBase::OnMEvent(MEventData& event)
 void
 MAppBase::InitGlobalDir()
 {
-   m_globalDir = READ_APPCONFIG(MP_GLOBALDIR);
+   m_globalDir = READ_APPCONFIG_TEXT(MP_GLOBALDIR);
    if ( m_globalDir.empty() || !PathFinder::IsDir(m_globalDir) )
    {
       // under Unix we try to find our directory in some standard locations
@@ -900,9 +942,9 @@ MAppBase::InitGlobalDir()
       }
       else
       {
-         PathFinder pf(MP_PREFIXPATH_D);
+         PathFinder pf(GetStringDefault(MP_PREFIXPATH));
          pf.AddPaths(M_PREFIX,false,true);
-         m_globalDir = pf.FindDir(MP_ROOTDIRNAME_D, &found);
+         m_globalDir = pf.FindDir(GetStringDefault(MP_ROOTDIRNAME), &found);
       }
 
       if ( !found )
@@ -911,7 +953,8 @@ MAppBase::InitGlobalDir()
          msg.Printf(_("Cannot find global directory \"%s\" in\n"
                       "\"%s\"\n"
                       "Would you like to specify its location now?"),
-                    MP_ROOTDIRNAME_D, MP_ETCPATH_D);
+                    GetStringDefault(MP_ROOTDIRNAME),
+                    GetStringDefault(MP_ETCPATH));
 #else
          String msg = _("Cannot find global program directory.\n"
                         "\n"

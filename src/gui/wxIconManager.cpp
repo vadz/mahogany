@@ -39,14 +39,10 @@
 
 #ifdef USE_ICONS_FROM_RESOURCES
 #  define   unknown_xpm     "unknown"
-#  define   hlink_xpm       "hlink"
-#  define   ftplink_xpm     "ftplink"
 #  define   MFrame_xpm      "mframe"
 #  define   MainFrame_xpm   "MainFrame"
 #else   //real XPMs
 #  include  "../src/icons/unknown.xpm"
-#  include  "../src/icons/hlink.xpm"
-#  include  "../src/icons/ftplink.xpm"
 #  include  "../src/icons/MFrame.xpm"
 #  include  "../src/icons/MainFrame.xpm"
 #endif  //Win/Unix
@@ -59,10 +55,29 @@
 inline bool IsMimeType(const wxString& str) { return str.Find('/') != -1; }
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_CONVERTPROGRAM;
+extern const MOption MP_CONVERTPROGRAM_D;
+extern const MOption MP_ICONPATH;
+extern const MOption MP_TMPGFXFORMAT;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
 static const char *wxTraceIconLoading = "iconload";
+
+/** @name built-in icon names */
+//@{
+/// for hyperlinks/http
+#define   M_ICON_HLINK_HTTP   "M-HTTPLINK"
+/// for hyperlinks/ftp
+#define   M_ICON_HLINK_FTP    "M-FTPLINK"
+/// unknown icon
+#define   M_ICON_UNKNOWN      "UNKNOWN"
+//@}
 
 // ============================================================================
 // implementation
@@ -207,7 +222,7 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
                          "The current setting '%s' is incorrect and "
                          "the default value will be used instead."),
                        strConvertProgram.c_str());
-            strConvertProgram = MP_CONVERTPROGRAM_D;
+            strConvertProgram = GetStringDefault(MP_CONVERTPROGRAM);
          }
          String command;
          command.Printf(strConvertProgram, filename.c_str(), tempfile.c_str());
@@ -303,7 +318,7 @@ wxIconManager::LoadImageXpm(String filename)
          ? getenv("TMP"):"/tmp"
          ) + String('/') + tempfile;
       String command;
-      command.Printf(READ_APPCONFIG(MP_CONVERTPROGRAM),
+      command.Printf(READ_APPCONFIG_TEXT(MP_CONVERTPROGRAM),
                      filename.c_str(), tempfile.c_str());
       wxLogTrace(wxTraceIconLoading,
                  "wxIconManager::LoadImage() calling '%s'...",
@@ -444,8 +459,15 @@ wxIconManager::SetSubDirectory(wxString subDir)
          m_SubDir = ""; // save ourselves some time when searching
 
       // Always add the built-in icons:
+      //
+      // VZ: they're unused right now and I don't know when are we supposed
+      //     to use them?
+#if 0
       AddIcon(M_ICON_HLINK_HTTP, hlink_xpm);
       AddIcon(M_ICON_HLINK_FTP, ftplink_xpm);
+#endif // 0
+
+      // frame icons
       AddIcon("MFrame", MFrame_xpm);
       AddIcon("MainFrame", MainFrame_xpm);
    }

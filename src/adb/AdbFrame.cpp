@@ -78,6 +78,13 @@
 #include "adb/AdbFrame.h"
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_SHOWADBEDITOR;
+extern const MOption MP_USERDIR;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
@@ -2105,7 +2112,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
                      (
                       ADB_CONFIG_PATH "/AdbFile",
                       strTitle,
-                      READ_APPCONFIG(MP_USERDIR),
+                      READ_APPCONFIG_TEXT(MP_USERDIR),
                       "M.adb",
                       "adb",
                       _("Address books (*.adb)|*.adb|All files (*.*)|*.*"),
@@ -2210,7 +2217,7 @@ void wxAdbEditFrame::ExportVCardEntry()
                       (
                         ADB_CONFIG_PATH "/AdbVCardFile",
                         _("Choose the name of vCard file"),
-                        READ_APPCONFIG(MP_USERDIR),
+                        READ_APPCONFIG_TEXT(MP_USERDIR),
                         "vcard.vcf",
                         "vcf",
                         _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*"),
@@ -2257,7 +2264,7 @@ bool wxAdbEditFrame::ImportVCardEntry()
                       (
                         ADB_CONFIG_PATH "/AdbVCardFile",
                         _("Choose the name of vCard file"),
-                        READ_APPCONFIG(MP_USERDIR),
+                        READ_APPCONFIG_TEXT(MP_USERDIR),
                         "vcard.vcf",
                         "vcf",
                         _("vCard files (*.vcf)|*.vcf|All files (*.*)|*.*"),

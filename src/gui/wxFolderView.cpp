@@ -77,6 +77,41 @@
 #include "miscutil.h"            // for UpdateTitleAndStatusBars
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_AUTOSHOW_FIRSTMESSAGE;
+extern const MOption MP_AUTOSHOW_FIRSTUNREADMESSAGE;
+extern const MOption MP_DATE_FMT;
+extern const MOption MP_DATE_GMT;
+extern const MOption MP_FLC_DATECOL;
+extern const MOption MP_FLC_FROMCOL;
+extern const MOption MP_FLC_SIZECOL;
+extern const MOption MP_FLC_STATUSCOL;
+extern const MOption MP_FLC_SUBJECTCOL;
+extern const MOption MP_FOCUS_FOLLOWSMOUSE;
+extern const MOption MP_FROM_ADDRESS;
+extern const MOption MP_FROM_REPLACE_ADDRESSES;
+extern const MOption MP_FVIEW_BGCOLOUR;
+extern const MOption MP_FVIEW_DELETEDCOLOUR;
+extern const MOption MP_FVIEW_FGCOLOUR;
+extern const MOption MP_FVIEW_FLAGGEDCOLOUR;
+extern const MOption MP_FVIEW_FONT;
+extern const MOption MP_FVIEW_FONT_SIZE;
+extern const MOption MP_FVIEW_FROM_REPLACE;
+extern const MOption MP_FVIEW_NAMES_ONLY;
+extern const MOption MP_FVIEW_NEWCOLOUR;
+extern const MOption MP_FVIEW_RECENTCOLOUR;
+extern const MOption MP_FVIEW_SIZE_FORMAT;
+extern const MOption MP_FVIEW_STATUS_FMT;
+extern const MOption MP_FVIEW_STATUS_UPDATE;
+extern const MOption MP_FVIEW_UNREADCOLOUR;
+extern const MOption MP_MSGS_SORTBY;
+extern const MOption MP_PREVIEW_ON_SELECT;
+extern const MOption MP_USERLEVEL;
+extern const MOption MP_USE_TRASH_FOLDER;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
@@ -146,7 +181,7 @@ public:
       else if ( name == "date" )
          *value = strutil_ftime(m_hi->GetDate(), m_dateFormat, m_dateGMT);
       else if ( name == "size" )
-         *value = m_hi->GetSize();
+         *value = MailFolder::SizeToString(m_hi->GetSize());
 #ifdef USE_HEADER_SCORE
       else if ( name == "score" )
          *value = m_hi->GetScore();
@@ -1422,7 +1457,7 @@ void wxFolderListCtrl::SaveColWidths()
 wxString wxFolderListCtrl::GetColWidths() const
 {
    // first look in our profile
-   String widthsString = READ_CONFIG(m_profile, FOLDER_LISTCTRL_WIDTHS);
+   String widthsString = READ_CONFIG_PRIVATE(m_profile, FOLDER_LISTCTRL_WIDTHS);
    if ( widthsString == FOLDER_LISTCTRL_WIDTHS_D )
    {
       // try the global setting
@@ -1729,7 +1764,7 @@ wxFolderListCtrl::GetEntryColour(const HeaderInfo *hi) const
 #ifdef USE_HEADER_COLOUR
    if ( !hi->GetColour().empty() ) // entry has its own colour setting
    {
-      GetColourByName(&col, hi->GetColour(), MP_FVIEW_FGCOLOUR_D);
+      GetColourByName(&col, hi->GetColour(), GetStringDefault(MP_FVIEW_FGCOLOUR));
    }
    else // set the colour depending on the status of the message
 #endif // USE_HEADER_COLOUR
@@ -2091,30 +2126,30 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
    ProfileEnvVarSave noEnvVars(m_Profile);
 #endif // OS_WIN
 
-   settings->dateFormat = READ_CONFIG(m_Profile, MP_DATE_FMT);
+   settings->dateFormat = READ_CONFIG_TEXT(m_Profile, MP_DATE_FMT);
    settings->dateGMT = READ_CONFIG(m_Profile, MP_DATE_GMT) != 0;
 
    GetColourByName(&settings->FgCol,
                    READ_CONFIG(m_Profile, MP_FVIEW_FGCOLOUR),
-                   MP_FVIEW_FGCOLOUR_D);
+                   GetStringDefault(MP_FVIEW_FGCOLOUR));
    GetColourByName(&settings->BgCol,
                    READ_CONFIG(m_Profile, MP_FVIEW_BGCOLOUR),
-                   MP_FVIEW_BGCOLOUR_D);
+                   GetStringDefault(MP_FVIEW_BGCOLOUR));
    GetColourByName(&settings->FlaggedCol,
                    READ_CONFIG(m_Profile, MP_FVIEW_FLAGGEDCOLOUR),
-                   MP_FVIEW_FLAGGEDCOLOUR_D);
+                   GetStringDefault(MP_FVIEW_FLAGGEDCOLOUR));
    GetColourByName(&settings->NewCol,
                    READ_CONFIG(m_Profile, MP_FVIEW_NEWCOLOUR),
-                   MP_FVIEW_NEWCOLOUR_D);
+                   GetStringDefault(MP_FVIEW_NEWCOLOUR));
    GetColourByName(&settings->RecentCol,
                    READ_CONFIG(m_Profile, MP_FVIEW_RECENTCOLOUR),
-                   MP_FVIEW_RECENTCOLOUR_D);
+                   GetStringDefault(MP_FVIEW_RECENTCOLOUR));
    GetColourByName(&settings->DeletedCol,
                    READ_CONFIG(m_Profile, MP_FVIEW_DELETEDCOLOUR),
-                   MP_FVIEW_DELETEDCOLOUR_D);
+                   GetStringDefault(MP_FVIEW_DELETEDCOLOUR));
    GetColourByName(&settings->UnreadCol,
                    READ_CONFIG(m_Profile, MP_FVIEW_UNREADCOLOUR),
-                   MP_FVIEW_UNREADCOLOUR_D);
+                   GetStringDefault(MP_FVIEW_UNREADCOLOUR));
 
    settings->font = READ_CONFIG(m_Profile,MP_FVIEW_FONT);
    if ( settings->font < 0 || settings->font > NUM_FONTS )
@@ -2129,16 +2164,16 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
    settings->senderOnlyNames = READ_CONFIG(m_Profile, MP_FVIEW_NAMES_ONLY) != 0;
 
    settings->showSize =
-      (MessageSizeShow)READ_CONFIG(m_Profile, MP_FVIEW_SIZE_FORMAT);
+      (MessageSizeShow)(long)READ_CONFIG(m_Profile, MP_FVIEW_SIZE_FORMAT);
 
    settings->replaceFromWithTo = READ_CONFIG(m_Profile, MP_FVIEW_FROM_REPLACE) != 0;
    if ( settings->replaceFromWithTo )
    {
       String returnAddrs = READ_CONFIG(m_Profile, MP_FROM_REPLACE_ADDRESSES);
-      if ( returnAddrs == MP_FROM_REPLACE_ADDRESSES_D )
+      if ( returnAddrs == GetStringDefault(MP_FROM_REPLACE_ADDRESSES) )
       {
          // the default for this option is just the return address
-         returnAddrs = READ_CONFIG(m_Profile, MP_FROM_ADDRESS);
+         returnAddrs = READ_CONFIG_TEXT(m_Profile, MP_FROM_ADDRESS);
       }
 
       settings->returnAddresses = strutil_restore_array(':', returnAddrs);
@@ -3236,7 +3271,7 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
    // these arrays contain the current/default columns widths:
    // strWidths[n] is the width of n-th column where n is the column index
    wxArrayString strWidths, strWidthsStandard;
-   strWidths = UnpackWidths(READ_CONFIG(profile, FOLDER_LISTCTRL_WIDTHS));
+   strWidths = UnpackWidths(READ_CONFIG_PRIVATE(profile, FOLDER_LISTCTRL_WIDTHS));
    strWidthsStandard = UnpackWidths(FOLDER_LISTCTRL_WIDTHS_D);
 
    wxArrayString choices;

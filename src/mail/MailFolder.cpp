@@ -52,6 +52,26 @@
 #include "Composer.h"
 #include "MApplication.h"
 
+// ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_FOLDER_COMMENT;
+extern const MOption MP_FOLDER_LOGIN;
+extern const MOption MP_FOLDER_PASSWORD;
+extern const MOption MP_FOLDER_PATH;
+extern const MOption MP_FOLDER_TYPE;
+extern const MOption MP_FORWARD_PREFIX;
+extern const MOption MP_FROM_REPLACE_ADDRESSES;
+extern const MOption MP_IMAPHOST;
+extern const MOption MP_NNTPHOST;
+extern const MOption MP_POPHOST;
+extern const MOption MP_PROFILE_TYPE;
+extern const MOption MP_REPLY_COLLAPSE_PREFIX;
+extern const MOption MP_REPLY_PREFIX;
+extern const MOption MP_SET_REPLY_FROM_TO;
+extern const MOption MP_USERNAME;
+
 /*-------------------------------------------------------------------*
  * local classes
  *-------------------------------------------------------------------*/
@@ -328,11 +348,11 @@ MailFolder::OpenFolder(int folderType,
       {
          type = GetFolderType(typeflags);
          flags = GetFolderFlags(typeflags);
-         login = READ_CONFIG(profile, MP_FOLDER_LOGIN);
+         login = READ_CONFIG_TEXT(profile, MP_FOLDER_LOGIN);
          if(FolderTypeHasUserName(type) && strutil_isempty(login)) // fall back to user name
-            login = READ_CONFIG(profile, MP_USERNAME);
+            login = READ_CONFIG_TEXT(profile, MP_USERNAME);
          passwd = strutil_decrypt(READ_CONFIG(profile, MP_FOLDER_PASSWORD));
-         name = READ_CONFIG(profile, MP_FOLDER_PATH);
+         name = READ_CONFIG_TEXT(profile, MP_FOLDER_PATH);
          /* name can be empty, i.e. for imap */
       }
    }
@@ -356,12 +376,12 @@ MailFolder::OpenFolder(int folderType,
    {
    case MF_NNTP:
       if(strutil_isempty(i_server))
-         server = READ_CONFIG(profile, MP_NNTPHOST);
+         server = READ_CONFIG_TEXT(profile, MP_NNTPHOST);
       break;
 
    case MF_FILE:
       if( strutil_isempty(name) )
-         name = READ_CONFIG(profile, MP_FOLDER_PATH);
+         name = READ_CONFIG_TEXT(profile, MP_FOLDER_PATH);
       if(name == "INBOX")
          type = MF_INBOX;
       name = strutil_expandfoldername(name);
@@ -382,16 +402,16 @@ MailFolder::OpenFolder(int folderType,
       if(strutil_isempty(server))
       {
          if ( type == MF_POP )
-            server = READ_CONFIG(profile, MP_POPHOST);
+            server = READ_CONFIG_TEXT(profile, MP_POPHOST);
          else
-            server = READ_CONFIG(profile, MP_IMAPHOST);
+            server = READ_CONFIG_TEXT(profile, MP_IMAPHOST);
       }
       if(strutil_isempty(login))
-         login = READ_CONFIG(profile, MP_FOLDER_LOGIN);
+         login = READ_CONFIG_TEXT(profile, MP_FOLDER_LOGIN);
       if(strutil_isempty(passwd))
          passwd = strutil_decrypt(READ_CONFIG(profile, MP_FOLDER_PASSWORD));
       if(strutil_isempty(name))
-         name = READ_CONFIG(profile, MP_FOLDER_PATH);
+         name = READ_CONFIG_TEXT(profile, MP_FOLDER_PATH);
       break;
 
    case MF_NEWS:
@@ -889,7 +909,7 @@ MailFolder::ReplyMessage(Message *msg,
       NoCollapse,
       DumbCollapse,
       SmartCollapse
-   } collapse = (CRP)READ_CONFIG(profile, MP_REPLY_COLLAPSE_PREFIX);
+   } collapse = (CRP)(long)READ_CONFIG(profile, MP_REPLY_COLLAPSE_PREFIX);
 
    if ( collapse != NoCollapse )
    {

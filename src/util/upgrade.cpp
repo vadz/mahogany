@@ -81,6 +81,57 @@
 #include "Mupgrade.h"
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_DIALUP_SUPPORT;
+extern const MOption MP_FIRSTRUN;
+extern const MOption MP_FOLDER_COMMENT;
+extern const MOption MP_FOLDER_FILE_DRIVER;
+extern const MOption MP_FOLDER_PASSWORD;
+extern const MOption MP_FOLDER_PATH;
+extern const MOption MP_FOLDER_TREEINDEX;
+extern const MOption MP_FOLDER_TYPE;
+extern const MOption MP_FROM_ADDRESS;
+extern const MOption MP_HOSTNAME;
+extern const MOption MP_IMAPHOST;
+extern const MOption MP_LICENSE_ACCEPTED;
+extern const MOption MP_MAINFOLDER;
+extern const MOption MP_MBOXDIR;
+extern const MOption MP_MODULES;
+extern const MOption MP_NET_CONNECTION;
+extern const MOption MP_NET_OFF_COMMAND;
+extern const MOption MP_NET_ON_COMMAND;
+extern const MOption MP_NEWMAIL_FOLDER;
+extern const MOption MP_NNTPHOST;
+extern const MOption MP_OUTBOX_NAME;
+extern const MOption MP_OUTGOINGFOLDER;
+extern const MOption MP_PERSONALNAME;
+extern const MOption MP_POPHOST;
+extern const MOption MP_PROFILE_TYPE;
+extern const MOption MP_SHOWTIPS;
+extern const MOption MP_SHOW_NEWMAILMSG;
+extern const MOption MP_SMTPHOST;
+extern const MOption MP_SYNC_FILTERS;
+extern const MOption MP_SYNC_FOLDER;
+extern const MOption MP_SYNC_FOLDERGROUP;
+extern const MOption MP_SYNC_FOLDERS;
+extern const MOption MP_SYNC_IDS;
+extern const MOption MP_SYNC_REMOTE;
+extern const MOption MP_TRASH_FOLDER;
+extern const MOption MP_USEOUTGOINGFOLDER;
+extern const MOption MP_USEPYTHON;
+extern const MOption MP_USERDIR;
+extern const MOption MP_USERNAME;
+extern const MOption MP_USER_MDIR;
+extern const MOption MP_USE_OUTBOX;
+extern const MOption MP_USE_TRASH_FOLDER;
+extern const MOption MP_VERSION;
+
+// this option is not used any more
+#define MP_OLD_FOLDER_HOST "HostName"
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
@@ -220,7 +271,7 @@ static wxString GetMainMailFolderName()
       mainFolderName = "INBOX";
    else
 #endif // USE_MAIL_COLLECT
-      mainFolderName = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
+      mainFolderName = READ_APPCONFIG_TEXT(MP_NEWMAIL_FOLDER);
 
    return mainFolderName;
 }
@@ -301,15 +352,15 @@ public:
       // the first time the page is shown, construct the reasonable default
       // value
       if ( !gs_installWizardData.name )
-         gs_installWizardData.name = READ_APPCONFIG(MP_PERSONALNAME);
+         gs_installWizardData.name = READ_APPCONFIG_TEXT(MP_PERSONALNAME);
 
       if ( !gs_installWizardData.email )
-         gs_installWizardData.email = READ_APPCONFIG(MP_FROM_ADDRESS);
+         gs_installWizardData.email = READ_APPCONFIG_TEXT(MP_FROM_ADDRESS);
 
       if ( !gs_installWizardData.email )
       {
-         gs_installWizardData.email = READ_APPCONFIG(MP_USERNAME);
-         gs_installWizardData.email << '@' << READ_APPCONFIG(MP_HOSTNAME);
+         gs_installWizardData.email = READ_APPCONFIG_TEXT(MP_USERNAME);
+         gs_installWizardData.email << '@' << READ_APPCONFIG_TEXT(MP_HOSTNAME);
       }
 
       m_name->SetValue(gs_installWizardData.name);
@@ -1256,14 +1307,14 @@ bool RunInstallWizard()
    gs_installWizardData.useDialUp = -1;
    gs_installWizardData.showImportPage = -1;
 #if defined(OS_WIN)
-   gs_installWizardData.connection = READ_APPCONFIG(MP_NET_CONNECTION);
+   gs_installWizardData.connection = READ_APPCONFIG_TEXT(MP_NET_CONNECTION);
 #elif defined(OS_UNIX)
-   gs_installWizardData.dialCommand = READ_APPCONFIG(MP_NET_ON_COMMAND);
-   gs_installWizardData.hangupCommand = READ_APPCONFIG(MP_NET_OFF_COMMAND);
+   gs_installWizardData.dialCommand = READ_APPCONFIG_TEXT(MP_NET_ON_COMMAND);
+   gs_installWizardData.hangupCommand = READ_APPCONFIG_TEXT(MP_NET_OFF_COMMAND);
 #endif // platform
 
-   gs_installWizardData.useOutbox = MP_USE_OUTBOX_D;
-   gs_installWizardData.useTrash = MP_USE_TRASH_FOLDER_D;
+   gs_installWizardData.useOutbox = GetNumericDefault(MP_USE_OUTBOX);
+   gs_installWizardData.useTrash = GetNumericDefault(MP_USE_TRASH_FOLDER);
 #ifdef USE_MAIL_COLLECT
    gs_installWizardData.collectAllMail = TRUE;
 #endif // USE_MAIL_COLLECT
@@ -1276,10 +1327,10 @@ bool RunInstallWizard()
 #endif
    gs_installWizardData.sendTestMsg = TRUE;
 
-   gs_installWizardData.pop  = READ_APPCONFIG(MP_POPHOST);
-   gs_installWizardData.imap = READ_APPCONFIG(MP_IMAPHOST);
-   gs_installWizardData.smtp = READ_APPCONFIG(MP_SMTPHOST);
-   gs_installWizardData.nntp = READ_APPCONFIG(MP_NNTPHOST);
+   gs_installWizardData.pop  = READ_APPCONFIG_TEXT(MP_POPHOST);
+   gs_installWizardData.imap = READ_APPCONFIG_TEXT(MP_IMAPHOST);
+   gs_installWizardData.smtp = READ_APPCONFIG_TEXT(MP_SMTPHOST);
+   gs_installWizardData.nntp = READ_APPCONFIG_TEXT(MP_NNTPHOST);
 
    // assume we don't skip the wizard by default
    gs_installWizardData.done = true;
@@ -1599,8 +1650,12 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
 #endif // platform
    }
 
-   if(gs_installWizardData.folderType != MP_FOLDER_FILE_DRIVER_D)
-      profile->writeEntry(MP_FOLDER_FILE_DRIVER, gs_installWizardData.folderType);
+   if(gs_installWizardData.folderType !=
+         GetNumericDefault(MP_FOLDER_FILE_DRIVER) )
+   {
+      profile->writeEntry(MP_FOLDER_FILE_DRIVER,
+                          gs_installWizardData.folderType);
+   }
 
 #ifdef USE_PYTHON
    if(gs_installWizardData.usePython)
@@ -1881,18 +1936,21 @@ UpgradeFrom010()
          ok = p->GetNextGroup(group, index))
    {
       tmp = group;
-      tmp << '/' << MP_PROFILE_TYPE;
-      if(p->readEntry(tmp, MP_PROFILE_TYPE_D) == Profile::PT_FolderProfile)
+      tmp << '/' << GetOptionName(MP_PROFILE_TYPE);
+      if(p->readEntry(tmp, GetNumericDefault(MP_PROFILE_TYPE)) ==
+            Profile::PT_FolderProfile)
+      {
          folders.push_back(new String(group));
+      }
    }
    for(kbStringList::iterator i = folders.begin(); i != folders.end();i++)
    {
       group = **i;
       p->SetPath(group);
-      if(p->readEntry(MP_FOLDER_TYPE, MP_FOLDER_TYPE_D) != MP_FOLDER_TYPE_D)
+      if( READ_CONFIG(p, MP_FOLDER_TYPE) != GetNumericDefault(MP_FOLDER_TYPE) )
       {
          p2 = Profile::CreateProfile(group);
-         pw = p2->readEntry(MP_FOLDER_PASSWORD, MP_FOLDER_PASSWORD_D);
+         pw = READ_CONFIG_TEXT(p2, MP_FOLDER_PASSWORD);
          if(pw.Length()) // only if we have a password
             p2->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(pw));
          p2->DecRef();
@@ -2304,7 +2362,7 @@ VerifyInbox(void)
       rc = FALSE;
       Profile *ibp = Profile::CreateProfile("INBOX");
       ibp->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
-      if(READ_APPCONFIG(MP_NEWMAIL_FOLDER) != "INBOX"
+      if(READ_APPCONFIG_TEXT(MP_NEWMAIL_FOLDER) != "INBOX"
          && MDialog_YesNoDialog(
             _("Normally Mahogany will automatically collect all mail\n"
               "from your system's default mail folder (INBOX,\n"
@@ -2379,8 +2437,9 @@ VerifyInbox(void)
    if( READ_APPCONFIG(MP_USEOUTGOINGFOLDER) )
    {
       // this line is for backwards compatibility only
-      foldername = READ_APPCONFIG(MP_OUTGOINGFOLDER);
+      foldername = READ_APPCONFIG_TEXT(MP_OUTGOINGFOLDER);
       strutil_delwhitespace(foldername);
+
       // We have to stick with the following for now, until we add
       // some upgrade functionality which can set this to a different
       // (translated) value.  "SentMail" is the old default name.
@@ -2416,7 +2475,7 @@ VerifyInbox(void)
     */
    if( READ_APPCONFIG(MP_USE_TRASH_FOLDER) )
    {
-      foldername = READ_APPCONFIG(MP_TRASH_FOLDER);
+      foldername = READ_APPCONFIG_TEXT(MP_TRASH_FOLDER);
       strutil_delwhitespace(foldername);
       if(foldername.Length() == 0)
       {
@@ -2453,7 +2512,7 @@ VerifyInbox(void)
     */
    if( READ_APPCONFIG(MP_USE_OUTBOX) )
    {
-      foldername = READ_APPCONFIG(MP_OUTBOX_NAME);
+      foldername = READ_APPCONFIG_TEXT(MP_OUTBOX_NAME);
       strutil_delwhitespace(foldername);
       if(foldername.Length() == 0)
       {
@@ -2538,7 +2597,7 @@ void VerifyUserDir(void)
       Profile *profile = mApplication->GetProfile();
 #if defined(OS_UNIX)
       userdir = getenv("HOME");
-      userdir << DIR_SEPARATOR << READ_APPCONFIG(MP_USER_MDIR);
+      userdir << DIR_SEPARATOR << READ_APPCONFIG_TEXT(MP_USER_MDIR);
 #elif defined(OS_WIN)
       // take the directory of the program
       char szFileName[MAX_PATH];
@@ -2576,7 +2635,7 @@ SetupServers(void)
    Profile *p;
 
    /* The NNTP server: */
-   serverName = READ_APPCONFIG(MP_NNTPHOST);
+   serverName = READ_APPCONFIG_TEXT(MP_NNTPHOST);
    if ( !!serverName )
    {
       mfolder = CreateFolderTreeEntry(NULL,
@@ -2594,7 +2653,7 @@ SetupServers(void)
    }
 
    /* The IMAP server: */
-   serverName = READ_APPCONFIG(MP_IMAPHOST);
+   serverName = READ_APPCONFIG_TEXT(MP_IMAPHOST);
    if ( !!serverName )
    {
       mfolder = CreateFolderTreeEntry(NULL,
@@ -2616,7 +2675,7 @@ SetupServers(void)
                                       MF_FLAGS_DEFAULT,
                                       "INBOX",
                                       FALSE);
-      
+
       SafeDecRef(imapInbox);
 #endif // 0
 
@@ -2624,7 +2683,7 @@ SetupServers(void)
    }
 
    /* The POP3 server: */
-   serverName = READ_APPCONFIG(MP_POPHOST);
+   serverName = READ_APPCONFIG_TEXT(MP_POPHOST);
    if ( !!serverName )
    {
       // the POP3 folder is created as incoming as otherwise it doesn't work
@@ -2688,7 +2747,7 @@ void SetupMinimalConfig(void)
    String str = READ_APPCONFIG(MP_MBOXDIR);
    if( strutil_isempty(str) )
    {
-      str = READ_APPCONFIG(MP_USERDIR);
+      str = READ_APPCONFIG_TEXT(MP_USERDIR);
       profile->writeEntry(MP_MBOXDIR, str);
    }
 
@@ -2701,7 +2760,7 @@ void SetupMinimalConfig(void)
    {
       char *cptr = getenv("NNTPSERVER");
       if(!cptr || !*cptr)
-        cptr = MP_NNTPHOST_FB;
+        cptr = "news";
       profile->writeEntry(MP_NNTPHOST, cptr);
    }
 
@@ -2709,7 +2768,7 @@ void SetupMinimalConfig(void)
    {
       char *cptr = getenv("SMTPSERVER");
       if(!cptr || !*cptr)
-        cptr = MP_SMTPHOST_FB;
+        cptr = "localhost";
       profile->writeEntry(MP_SMTPHOST, cptr);
    }
 

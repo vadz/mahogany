@@ -83,6 +83,22 @@ extern "C"
 #endif // __WXGTK__
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_FOCUS_FOLLOWSMOUSE;
+extern const MOption MP_FOLDER_BGCOLOUR;
+extern const MOption MP_FOLDER_TREEINDEX;
+extern const MOption MP_FTREE_FORMAT;
+extern const MOption MP_FTREE_PROPAGATE;
+extern const MOption MP_FVIEW_FGCOLOUR;
+extern const MOption MP_FVIEW_FLAGGEDCOLOUR;
+extern const MOption MP_FVIEW_NEWCOLOUR;
+extern const MOption MP_FVIEW_UNREADCOLOUR;
+extern const MOption MP_OPEN_ON_CLICK;
+extern const MOption MP_SHOW_HIDDEN_FOLDERS;
+
+// ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
 
@@ -1314,27 +1330,35 @@ void wxFolderTreeNode::UpdateShownStatus(wxTreeCtrl *tree,
    Status statusShown = GetShownStatus();
    if ( statusShown != statusShownBefore )
    {
-      // config entries names for the colours
-      static const char *colorNames[Folder_StatusMax] =
-      {
-         MP_FVIEW_FGCOLOUR,
-         MP_FVIEW_FLAGGEDCOLOUR,
-         MP_FVIEW_UNREADCOLOUR,
-         MP_FVIEW_NEWCOLOUR,
-      };
-
-      static const char *colorDefaults[Folder_StatusMax] =
-      {
-         MP_FVIEW_FGCOLOUR_D,
-         MP_FVIEW_FLAGGEDCOLOUR_D,
-         MP_FVIEW_UNREADCOLOUR_D,
-         MP_FVIEW_NEWCOLOUR_D,
-      };
-
       Profile_obj profile(GetFolder()->GetFullName());
 
-      wxString colorName = profile->readEntry(colorNames[statusShown],
-                                              colorDefaults[statusShown]);
+      const MOption *opt;
+      switch ( statusShown )
+      {
+         default:
+            FAIL_MSG( "unexpected folder status value" );
+            // fall through
+
+         case Folder_Normal:
+            opt = &MP_FVIEW_FGCOLOUR;
+            break;
+
+         case Folder_Flagged:
+            opt = &MP_FVIEW_FLAGGEDCOLOUR;
+            break;
+
+         case Folder_Unseen:
+            opt = &MP_FVIEW_UNREADCOLOUR;
+            break;
+
+         case Folder_New:
+            opt = &MP_FVIEW_NEWCOLOUR;
+            break;
+
+      }
+
+      wxString colorName = profile->readEntry(GetOptionName(*opt),
+                                              GetStringDefault(*opt));
       wxColour col;
       if ( !ParseColourString(colorName, &col) )
       {
@@ -2127,7 +2151,8 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
          // them has a non default index
          if ( !shouldSort )
          {
-            shouldSort = subfolder->GetTreeIndex() != MP_FOLDER_TREEINDEX_D;
+            shouldSort = subfolder->GetTreeIndex() !=
+               GetNumericDefault(MP_FOLDER_TREEINDEX);
          }
 
          // remember this one
@@ -2670,7 +2695,7 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *folder)
 {
    Profile_obj profile(folder->GetName());
 
-   if ( READ_CONFIG(profile, MP_FTREE_FORMAT).empty() )
+   if ( READ_CONFIG_TEXT(profile, MP_FTREE_FORMAT).empty() )
    {
       // don't bother counting the messages - it may be time consuming, so
       // don't do it just to throw away the result later anyhow

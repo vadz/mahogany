@@ -51,6 +51,48 @@
 #include "adb/AdbImpExp.h"
 #include "MImport.h"
 
+// ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_ADD_DEFAULT_HOSTNAME;
+extern const MOption MP_AUTOMATIC_WORDWRAP;
+extern const MOption MP_COMPOSE_BCC;
+extern const MOption MP_COMPOSE_SIGNATURE;
+extern const MOption MP_COMPOSE_USE_SIGNATURE;
+extern const MOption MP_FROM_ADDRESS;
+extern const MOption MP_HOSTNAME;
+extern const MOption MP_IMAPHOST;
+extern const MOption MP_MAILCAP;
+extern const MOption MP_MAX_MESSAGE_SIZE;
+extern const MOption MP_MIMETYPES;
+extern const MOption MP_MSGS_USE_THREADING;
+extern const MOption MP_MVIEW_QUOTED_COLOUR1;
+extern const MOption MP_MVIEW_QUOTED_COLOURIZE;
+extern const MOption MP_NNTPHOST;
+extern const MOption MP_NNTPHOST_LOGIN;
+extern const MOption MP_OUTBOX_NAME;
+extern const MOption MP_OUTGOINGFOLDER;
+extern const MOption MP_PERSONALNAME;
+extern const MOption MP_POLLINCOMINGDELAY;
+extern const MOption MP_POPHOST;
+extern const MOption MP_PRINT_COLOUR;
+extern const MOption MP_PRINT_COMMAND;
+extern const MOption MP_PRINT_ORIENTATION;
+extern const MOption MP_PRINT_PAPER;
+extern const MOption MP_REPLY_ADDRESS;
+extern const MOption MP_SENDMAILCMD;
+extern const MOption MP_SMTPHOST;
+extern const MOption MP_SMTPHOST_LOGIN;
+extern const MOption MP_USEOUTGOINGFOLDER;
+extern const MOption MP_USERNAME;
+extern const MOption MP_USEVCARD;
+extern const MOption MP_USE_OUTBOX;
+extern const MOption MP_USE_SENDMAIL;
+extern const MOption MP_VIEW_AUTOMATIC_WORDWRAP;
+extern const MOption MP_VIEW_WRAPMARGIN;
+extern const MOption MP_WRAPMARGIN;
+
 // User/Dev Comments TODO
 // - create an outbox folder setting [DONE]
 //

@@ -29,6 +29,8 @@
 
 #include "Mdefaults.h"
 
+extern const MOption MP_ICONPATH;
+
 #ifdef HAVE_COMPFACE_H
    extern "C"
    {

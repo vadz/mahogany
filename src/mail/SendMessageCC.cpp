@@ -43,14 +43,14 @@
 // ----------------------------------------------------------------------------
 
 #include "Mpch.h"
-#include "Mcommon.h"
 
 #ifndef  USE_PCH
-#   include "Profile.h"
-#   include "strutil.h"
-#   include "strings.h"
-#   include "guidef.h"
-#   include <strings.h>
+#  include "Mcommon.h"
+#  include "Profile.h"
+#  include "strutil.h"
+#  include "strings.h"
+#  include "guidef.h"
+#  include <strings.h>
 #endif // USE_PCH
 
 #include "Mdefaults.h"
@@ -71,6 +71,36 @@
 
 #include <wx/utils.h> // wxGetFullHostName()
 #include <wx/file.h>
+
+// ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_CHARSET;
+extern const MOption MP_COMPOSE_USE_XFACE;
+extern const MOption MP_COMPOSE_XFACE_FILE;
+extern const MOption MP_CONFIRM_SEND;
+extern const MOption MP_GUESS_SENDER;
+extern const MOption MP_HOSTNAME;
+extern const MOption MP_NNTPHOST;
+extern const MOption MP_NNTPHOST_LOGIN;
+extern const MOption MP_NNTPHOST_PASSWORD;
+extern const MOption MP_NNTPHOST_USE_SSL;
+extern const MOption MP_NNTPHOST_USE_SSL_UNSIGNED;
+extern const MOption MP_OUTBOX_NAME;
+extern const MOption MP_OUTGOINGFOLDER;
+extern const MOption MP_PREVIEW_SEND;
+extern const MOption MP_REPLY_ADDRESS;
+extern const MOption MP_SENDER;
+extern const MOption MP_SENDMAILCMD;
+extern const MOption MP_SMTPHOST;
+extern const MOption MP_SMTPHOST_LOGIN;
+extern const MOption MP_SMTPHOST_PASSWORD;
+extern const MOption MP_SMTPHOST_USE_SSL;
+extern const MOption MP_SMTPHOST_USE_SSL_UNSIGNED;
+extern const MOption MP_USEOUTGOINGFOLDER;
+extern const MOption MP_USE_OUTBOX;
+extern const MOption MP_USE_SENDMAIL;
 
 // ----------------------------------------------------------------------------
 // prototypes
@@ -167,7 +197,7 @@ SendMessageCC::Create(Protocol protocol,
    CHECK_RET(prof,"SendMessageCC::Create() requires profile");
 
    // remember the default hostname to use for addresses without host part
-   m_DefaultHost = READ_CONFIG(prof, MP_HOSTNAME);
+   m_DefaultHost = READ_CONFIG_TEXT(prof, MP_HOSTNAME);
 
    // set up default values for From/Reply-To headers
    Address *addrFrom = Address::CreateFromAddress(prof);
@@ -177,7 +207,7 @@ SendMessageCC::Create(Protocol protocol,
       delete addrFrom;
    }
 
-   m_ReplyTo = READ_CONFIG(prof, MP_REPLY_ADDRESS);
+   m_ReplyTo = READ_CONFIG_TEXT(prof, MP_REPLY_ADDRESS);
 
    /*
       Sender logic: by default, use the SMTP login if it is set and differs
@@ -187,7 +217,7 @@ SendMessageCC::Create(Protocol protocol,
    */
    if ( READ_CONFIG(prof, MP_GUESS_SENDER) )
    {
-      m_Sender = READ_CONFIG(prof, MP_SMTPHOST_LOGIN);
+      m_Sender = READ_CONFIG_TEXT(prof, MP_SMTPHOST_LOGIN);
       m_Sender.Trim().Trim(FALSE); // remove all spaces on begin/end
 
       if ( Message::CompareAddresses(m_From, m_Sender) )
@@ -198,25 +228,27 @@ SendMessageCC::Create(Protocol protocol,
    }
    else // don't guess, use provided value
    {
-      m_Sender = READ_CONFIG(prof, MP_SENDER);
+      m_Sender = READ_CONFIG_TEXT(prof, MP_SENDER);
    }
 
    if(READ_CONFIG(prof,MP_COMPOSE_USE_XFACE) != 0)
       m_XFaceFile = prof->readEntry(MP_COMPOSE_XFACE_FILE,"");
    if(READ_CONFIG(prof, MP_USE_OUTBOX) != 0)
-      m_OutboxName = READ_CONFIG(prof,MP_OUTBOX_NAME);
+      m_OutboxName = READ_CONFIG_TEXT(prof,MP_OUTBOX_NAME);
    if(READ_CONFIG(prof,MP_USEOUTGOINGFOLDER) )
-      m_SentMailName = READ_CONFIG(prof,MP_OUTGOINGFOLDER);
-   m_CharSet = READ_CONFIG(prof,MP_CHARSET);
+      m_SentMailName = READ_CONFIG_TEXT(prof,MP_OUTGOINGFOLDER);
+   m_CharSet = READ_CONFIG_TEXT(prof,MP_CHARSET);
 
-   m_SendmailCmd = READ_CONFIG(prof, MP_USE_SENDMAIL) ?
-      READ_CONFIG(prof,MP_SENDMAILCMD) : String("");
+   if ( READ_CONFIG(prof, MP_USE_SENDMAIL) )
+   {
+      m_SendmailCmd = READ_CONFIG_TEXT(prof, MP_SENDMAILCMD);
+   }
 
    if ( protocol == Prot_SMTP )
    {
-      m_ServerHost = READ_CONFIG(prof, MP_SMTPHOST);
-      m_UserName = READ_CONFIG(prof,MP_SMTPHOST_LOGIN);
-      m_Password = READ_CONFIG(prof,MP_SMTPHOST_PASSWORD);
+      m_ServerHost = READ_CONFIG_TEXT(prof, MP_SMTPHOST);
+      m_UserName = READ_CONFIG_TEXT(prof, MP_SMTPHOST_LOGIN);
+      m_Password = READ_CONFIG_TEXT(prof, MP_SMTPHOST_PASSWORD);
 #ifdef USE_SSL
       m_UseSSLforSMTP = READ_CONFIG(prof, MP_SMTPHOST_USE_SSL) != 0;
       m_UseSSLUnsignedforSMTP = READ_CONFIG(prof, MP_SMTPHOST_USE_SSL_UNSIGNED) != 0;
@@ -224,9 +256,9 @@ SendMessageCC::Create(Protocol protocol,
    }
    else // protocol == NNTP
    {
-      m_ServerHost = READ_CONFIG(prof, MP_NNTPHOST);
-      m_UserName = READ_CONFIG(prof,MP_NNTPHOST_LOGIN);
-      m_Password = READ_CONFIG(prof,MP_NNTPHOST_PASSWORD);
+      m_ServerHost = READ_CONFIG_TEXT(prof, MP_NNTPHOST);
+      m_UserName = READ_CONFIG_TEXT(prof,MP_NNTPHOST_LOGIN);
+      m_Password = READ_CONFIG_TEXT(prof,MP_NNTPHOST_PASSWORD);
 #ifdef USE_SSL
       m_UseSSLforNNTP = READ_CONFIG(prof, MP_NNTPHOST_USE_SSL) != 0;
       m_UseSSLUnsignedforNNTP = READ_CONFIG(prof, MP_NNTPHOST_USE_SSL_UNSIGNED) != 0;

@@ -46,6 +46,8 @@
 
 #include "gui/wxDialogLayout.h"
 
+extern const MOption MP_MODULES;
+
 class wxModulesDialog : public wxManuallyLaidOutDialog
 {
 public:

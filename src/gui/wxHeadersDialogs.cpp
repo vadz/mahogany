@@ -53,6 +53,20 @@
 #include "HeadersDialogs.h"
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_COMPOSE_BCC;
+extern const MOption MP_COMPOSE_CC;
+extern const MOption MP_COMPOSE_TO;
+extern const MOption MP_MSGVIEW_ALL_HEADERS;
+extern const MOption MP_MSGVIEW_HEADERS;
+extern const MOption MP_SHOWBCC;
+extern const MOption MP_SHOWCC;
+extern const MOption MP_SHOW_TO;
+extern const MOption MP_USERLEVEL;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 

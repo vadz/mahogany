@@ -64,6 +64,33 @@
 #endif
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_FOLDERPROGRESS_THRESHOLD;
+extern const MOption MP_FOLDERPROGRESS_THRESHOLD_D;
+extern const MOption MP_FOLDER_CLOSE_DELAY;
+extern const MOption MP_FROM_ADDRESS;
+extern const MOption MP_FROM_REPLACE_ADDRESSES;
+extern const MOption MP_FROM_REPLACE_ADDRESSES_D;
+extern const MOption MP_FVIEW_FROM_REPLACE;
+extern const MOption MP_MSGS_BREAK_THREAD;
+extern const MOption MP_MSGS_GATHER_SUBJECTS;
+extern const MOption MP_MSGS_INDENT_IF_DUMMY;
+extern const MOption MP_MSGS_REMOVE_LIST_PREFIX_BREAKING;
+extern const MOption MP_MSGS_REMOVE_LIST_PREFIX_GATHERING;
+extern const MOption MP_MSGS_REPLACEMENT_STRING;
+extern const MOption MP_MSGS_RESORT_ON_CHANGE;
+extern const MOption MP_MSGS_SIMPLIFYING_REGEX;
+extern const MOption MP_MSGS_SORTBY;
+extern const MOption MP_MSGS_USE_THREADING;
+extern const MOption MP_NEWMAIL_FOLDER;
+extern const MOption MP_SAFE_FILTERS;
+extern const MOption MP_TRASH_FOLDER;
+extern const MOption MP_UPDATEINTERVAL;
+extern const MOption MP_USE_TRASH_FOLDER;
+
+// ----------------------------------------------------------------------------
 // trace masks
 // ----------------------------------------------------------------------------
 
@@ -582,9 +609,9 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
    int n = selections->Count();
 
    MProgressDialog *pd = NULL;
-   int threshold = GetProfile() ?
-      READ_CONFIG(GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
-      : MP_FOLDERPROGRESS_THRESHOLD_D;
+   int threshold = GetProfile()
+      ? READ_CONFIG(GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
+      : GetNumericDefault(MP_FOLDERPROGRESS_THRESHOLD);
    if ( threshold > 0 && n > threshold )
    {
       wxString msg;
@@ -686,9 +713,9 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
    }
 
    MProgressDialog *pd = NULL;
-   int threshold = mf->GetProfile() ?
-      READ_CONFIG(mf->GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
-      : MP_FOLDERPROGRESS_THRESHOLD_D;
+   int threshold = mf->GetProfile()
+      ? READ_CONFIG(mf->GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
+      : GetNumericDefault(MP_FOLDERPROGRESS_THRESHOLD);
 
    if ( threshold > 0 && n > threshold )
    {
@@ -2987,10 +3014,10 @@ MailFolderCmn::ReadConfig(MailFolderCmn::MFCmnOptions& config)
    if ( config.m_replaceFromWithTo )
    {
       String returnAddrs = READ_CONFIG(profile, MP_FROM_REPLACE_ADDRESSES);
-      if ( returnAddrs == MP_FROM_REPLACE_ADDRESSES_D )
+      if ( returnAddrs == GetStringDefault(MP_FROM_REPLACE_ADDRESSES) )
       {
          // the default for this option is just the return address
-         returnAddrs = READ_CONFIG(profile, MP_FROM_ADDRESS);
+         returnAddrs = READ_CONFIG_TEXT(profile, MP_FROM_ADDRESS);
       }
 
       config.m_ownAddresses = strutil_restore_array(':', returnAddrs);

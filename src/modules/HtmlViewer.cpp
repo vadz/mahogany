@@ -553,7 +553,7 @@ void HtmlViewer::StartHeaders()
    // size is 12pt, 6pt is very small and 24pt is very big
    //
    // this is not very rigorous, of course...
-   int diff = profileValues.fontSize - MP_MVIEW_FONT_SIZE_D;
+   int diff = profileValues.fontSize - DEFAULT_FONT_SIZE;
    if ( diff > 0 )
       diff /= 4;
    else

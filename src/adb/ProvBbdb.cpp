@@ -57,6 +57,15 @@
 
 #include <fstream.h>
 
+// ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_BBDB_ANONYMOUS;
+extern const MOption MP_BBDB_GENERATEUNIQUENAMES;
+extern const MOption MP_BBDB_IGNOREANONYMOUS;
+extern const MOption MP_BBDB_SAVEONEXIT;
+
 /** BBDB Addressbook format:
     Record Vectors
 ..............
@@ -499,7 +508,7 @@ BbdbEntry::ParseLine(BbdbEntryGroup *pGroup, String * line)
    {
       // these values are cached for later use
       m_IgnoreAnonymous = READ_APPCONFIG(MP_BBDB_IGNOREANONYMOUS);
-      m_AnonymousName = READ_APPCONFIG(MP_BBDB_ANONYMOUS);
+      m_AnonymousName = READ_APPCONFIG(MP_BBDB_ANONYMOUS).GetTextValue();
       m_EnforceUnique = READ_APPCONFIG(MP_BBDB_GENERATEUNIQUENAMES);
    }
 

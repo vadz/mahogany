@@ -68,6 +68,42 @@
 #endif
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_AUTOSAVEDELAY;
+extern const MOption MP_AWAY_AUTO_ENTER;
+extern const MOption MP_BEACONHOST;
+extern const MOption MP_CONFIRMEXIT;
+extern const MOption MP_DIALUP_SUPPORT;
+extern const MOption MP_HELPBROWSER;
+extern const MOption MP_HELPBROWSER_ISNS;
+extern const MOption MP_HELPDIR;
+extern const MOption MP_HELPFRAME_HEIGHT;
+extern const MOption MP_HELPFRAME_WIDTH;
+extern const MOption MP_HELPFRAME_XPOS;
+extern const MOption MP_HELPFRAME_YPOS;
+extern const MOption MP_MODULES;
+extern const MOption MP_NET_OFF_COMMAND;
+extern const MOption MP_NET_ON_COMMAND;
+extern const MOption MP_POLLINCOMINGDELAY;
+extern const MOption MP_PRINT_BOTTOMMARGIN_X;
+extern const MOption MP_PRINT_BOTTOMMARGIN_Y;
+extern const MOption MP_PRINT_COLOUR;
+extern const MOption MP_PRINT_COMMAND;
+extern const MOption MP_PRINT_FILE;
+extern const MOption MP_PRINT_MODE;
+extern const MOption MP_PRINT_OPTIONS;
+extern const MOption MP_PRINT_ORIENTATION;
+extern const MOption MP_PRINT_PAPER;
+extern const MOption MP_PRINT_TOPMARGIN_X;
+extern const MOption MP_PRINT_TOPMARGIN_Y;
+extern const MOption MP_SHOWLOG;
+extern const MOption MP_SHOWTIPS;
+extern const MOption MP_SMTPHOST;
+extern const MOption MP_USE_OUTBOX;
+
+// ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
@@ -737,8 +773,8 @@ wxMApp::OnInit()
       GetPrintData()->SetPrinterCommand(READ_APPCONFIG(MP_PRINT_COMMAND));
       GetPrintData()->SetPrinterOptions(READ_APPCONFIG(MP_PRINT_OPTIONS));
       GetPrintData()->SetOrientation(READ_APPCONFIG(MP_PRINT_ORIENTATION));
-      GetPrintData()->SetPrintMode((wxPrintMode)READ_APPCONFIG(MP_PRINT_MODE));
-      GetPrintData()->SetPaperId((wxPaperSize)READ_APPCONFIG(MP_PRINT_PAPER));
+      GetPrintData()->SetPrintMode((wxPrintMode)(long)READ_APPCONFIG(MP_PRINT_MODE));
+      GetPrintData()->SetPaperId((wxPaperSize)(long)READ_APPCONFIG(MP_PRINT_PAPER));
       GetPrintData()->SetFilename(READ_APPCONFIG(MP_PRINT_FILE));
       GetPrintData()->SetColour(READ_APPCONFIG(MP_PRINT_COLOUR));
       GetPageSetupData()->SetMarginTopLeft(wxPoint(
@@ -1465,7 +1501,7 @@ wxMApp::SetupOnlineManager(void)
       }
       else // beacon host configured
       {
-         beaconhost = READ_APPCONFIG(MP_SMTPHOST);
+         beaconhost = READ_APPCONFIG_TEXT(MP_SMTPHOST);
          m_OnlineManager->SetWellKnownHost(beaconhost, 25);
       }
 #ifdef OS_UNIX

@@ -53,6 +53,13 @@ WX_DEFINE_ARRAY(AsyncStatusHandler *, ArrayAsyncStatus);
 #define M_TRACE_DND "msgdnd"
 
 // ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_AUTOCOLLECT_ADB;
+extern const MOption MP_REPLY_QUOTE_ORIG;
+
+// ----------------------------------------------------------------------------
 // MsgCmdProcImpl
 // ----------------------------------------------------------------------------
 

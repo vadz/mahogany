@@ -57,8 +57,10 @@
 
 #include "Mpers.h"
 #include "MDialogs.h"
-#include "Mdefaults.h"
 #include "Mcallbacks.h"
+
+#include "Mdefaults.h"
+#include "Moptions.h"            // we need all MP_XXX for our arrays
 
 #include "MessageView.h" // for list of available viewers
 
@@ -1179,7 +1181,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 
 // FIXME ugly, ugly, ugly... config settings should be living in an array from
 //       the beginning which would avoid us all these contorsions
-#define CONFIG_ENTRY(name)  ConfigValueDefault(name, name##_D)
+#define CONFIG_ENTRY(name)  ConfigValueDefault(name##_NAME, name##_DEFVAL)
 // even worse: dummy entries for message fields
 #define CONFIG_NONE()  ConfigValueNone()
 
