@@ -102,8 +102,6 @@ public:
     // the normal one
   DummyEntryGroup(DummyEntryGroup *pParent, const wxString& strName);
 
-  virtual ~DummyEntryGroup();
-
   // implement interface methods
     // AdbEntryGroup
   virtual AdbEntryGroup *GetGroup() const { return m_pParent; }
@@ -128,6 +126,8 @@ public:
   wxString GetPath() const;
 
 private:
+  virtual ~DummyEntryGroup();
+
   wxString         m_strName;      // our name
   DummyEntryGroup *m_pParent;      // the parent group (never NULL)
 };
@@ -137,7 +137,6 @@ class DummyBook : public AdbBook
 {
 public:
   DummyBook(const String& filename);
-  virtual ~DummyBook();
 
   // implement interface methods
     // AdbElement
@@ -186,6 +185,8 @@ public:
   virtual bool IsReadOnly() const;
 
 private:
+  virtual ~DummyBook();
+
   wxString m_strName,
            m_strUserName,
            m_strDesc;
@@ -348,7 +349,7 @@ DummyBook::DummyBook(const String& name)
 
 DummyBook::~DummyBook()
 {
-  delete m_pRootGroup;
+  SafeUnlock(m_pRootGroup);
 }
 
 const char *DummyBook::GetName() const

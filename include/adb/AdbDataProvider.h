@@ -17,6 +17,7 @@
 #include "MObject.h"    // the base class declaration
 
 // forward declaration for classes we use
+class AdbBook;
 class wxArrayString;
 
 /**
@@ -62,6 +63,10 @@ public:
                     bool canCreate, const char *formatName,
                     AdbNameFormat adbFormat);
   } *ms_listProviders;
+
+  // returns provider by name: as with any function returning new pointer, you
+  // must Unlock() it when you don't need it any more
+  static AdbDataProvider *GetProviderByName(const String& name);
 
   // create the book by "name" (in fact, it can be anything at all: a file name
   // or an URL or ...); if the book doesn't exist it's created and NULL is

@@ -142,6 +142,11 @@ int wxMApp::OnExit()
    wxLogWindow *log = (wxLogWindow *)wxLog::GetActiveTarget();
    wxLog::SetActiveTarget(log->GetOldLog());
    delete log;
+ 
+   // as c-client lib doesn't seem to think that deallocating memory is
+   // something good to do, do it at it's place...
+   free(myusername());
+   free(myhomedir());
 
    return 0;
 }

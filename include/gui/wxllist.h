@@ -85,6 +85,7 @@ public:
    wxLayoutObjectBase() { m_UserData = NULL; }
    /// note: any user data will be freed at the time the object is deleted
    virtual ~wxLayoutObjectBase() { if(m_UserData) delete m_UserData; }
+
 #ifdef WXLAYOUT_DEBUG
    virtual void Debug(void);
 #endif

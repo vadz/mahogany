@@ -638,7 +638,7 @@ wxMessageView::OnCommandEvent(wxCommandEvent &event)
          case ClickableInfo::CI_ICON:
          {
             int x,y;
-            wxPoint pos = GetClickPosition();
+            wxPoint pos;// = GetClickPosition();
             wxWindow *p = GetParent();
             while(p)
             {

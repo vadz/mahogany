@@ -42,28 +42,6 @@ static ArrayBooks gs_cache;
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// AdbProviderInfo
-// ----------------------------------------------------------------------------
-AdbDataProvider::AdbProviderInfo *AdbDataProvider::ms_listProviders = NULL;
-
-AdbDataProvider::AdbProviderInfo::AdbProviderInfo(const char *name,
-                                                  Constructor ctor,
-                                                  bool canCreate,
-                                                  const char *formatName,
-                                                  AdbNameFormat adbFormat)
-{
-  bSupportsCreation = canCreate;
-  nameFormat = adbFormat;
-  szFmtName = formatName;
-  szName = name;
-  CreateProvider = ctor;
-
-  // insert us in the linked list (in the head because it's simpler)
-  pNext = AdbDataProvider::ms_listProviders;
-  AdbDataProvider::ms_listProviders = this;
-}
-
-// ----------------------------------------------------------------------------
 // AdbManager static functions and variables
 // ----------------------------------------------------------------------------
 
@@ -104,7 +82,8 @@ void AdbManager::Unget()
 
 // create a new address book using specified provider or trying all of them
 // if it's NULL
-AdbBook *AdbManager::CreateBook(const String& name, AdbDataProvider *provider)
+AdbBook *AdbManager::CreateBook(const String& name, AdbDataProvider *provider,
+                                String *providerName)
 {
   // first see if we don't already have it
   AdbBook *book = FindInCache(name);
@@ -121,8 +100,14 @@ AdbBook *AdbManager::CreateBook(const String& name, AdbDataProvider *provider)
     AdbDataProvider::AdbProviderInfo *info = AdbDataProvider::ms_listProviders;
     while ( info ) {
       prov = info->CreateProvider();
-      if ( prov->IsSupportedFormat(name) )
+      if ( prov->IsSupportedFormat(name) ) {
+        if ( providerName ) {
+          // return the provider name if asked for it
+          *providerName = info->szName;
+        }
         break;
+      }
+
       prov->Unlock();
       prov = NULL;
 

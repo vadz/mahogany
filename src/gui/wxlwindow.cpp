@@ -10,9 +10,13 @@
 #   pragma implementation "wxlwindow.h"
 #endif
 
-#include   "wxlwindow.h"
+#include "Mpch.h"
 
-#define   VAR(x)   cout << #x"=" << x << endl;
+#include "gui/wxlwindow.h"
+
+#ifndef VAR
+#  define   VAR(x)   cout << #x"=" << x << endl;
+#endif
 
 BEGIN_EVENT_TABLE(wxLayoutWindow,wxScrolledWindow)
    EVT_PAINT    (wxLayoutWindow::OnPaint)

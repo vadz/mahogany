@@ -58,7 +58,11 @@ public:
 
   // operations
     /// create a new book and return it (if provider == NULL all are tried)
-  AdbBook *CreateBook(const String& name, AdbDataProvider *provider = NULL);
+    //  if providerName != NULL it's filled with the name of provider used
+    //  to create the book
+  AdbBook *CreateBook(const String& name,
+                      AdbDataProvider *provider = NULL,
+                      String *providerName = NULL);
     /// delete the given book
   void DeleteBook(size_t n);
 

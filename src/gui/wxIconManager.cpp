@@ -80,9 +80,15 @@ wxIconManager::~wxIconManager()
    for ( i = m_iconList->begin(); i != m_iconList->end(); i++ ) {
       // against what your common sense may tell you, the icons we manage
       // should *not* be deleted here because wxWindows does it too!
-      // now we do!
       IconData *id = *i;
-      delete id->iconPtr;
+#     ifndef OS_WIN
+         // now we do!
+         delete id->iconPtr;
+#     else  // Windows
+         // ok, you can delete it if you want but it provokes crash under
+         // Windows and if I don't delete it I don't have memory leaks, so:
+         // no, thanks
+#     endif //OS_WIN
       delete id;
    }
 
