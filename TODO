@@ -26,6 +26,10 @@ $Id$
 
 *** to implement in near future ***
 
+- when run for the first time, should display "Mail" configuration dialog
+  with reasonable defaults (add a top-level profile option "ConfigDone"
+  and do it if it's not found)
+
 - support for external editor
 
 *** long-term projects ***
