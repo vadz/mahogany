@@ -1575,3 +1575,35 @@ MailFolderCmn::ApplyFilterRulesCommonCode(UIdArray *msgs,
    else
       return 0; // no filter module
 }
+
+// ----------------------------------------------------------------------------
+// sort order conversions
+// ----------------------------------------------------------------------------
+
+// split a long value (as read from profile) into (several) sort orders
+wxArrayInt SplitSortOrder(long sortOrder)
+{
+   wxArrayInt sortOrders;
+   while ( sortOrder )
+   {
+      sortOrders.Add(sortOrder & 0x00000F);
+      sortOrder >>= 4;
+   }
+
+   return sortOrders;
+}
+
+// combine several (max 8) sort orders into one value
+long BuildSortOrder(const wxArrayInt& sortOrders)
+{
+   long sortOrder = 0l;
+
+   size_t count = sortOrders.GetCount();
+   for ( size_t n = count + 1; n > 1; n-- )
+   {
+      sortOrder <<= 4;
+      sortOrder |= sortOrders[n - 2];
+   }
+
+   return sortOrder;
+}

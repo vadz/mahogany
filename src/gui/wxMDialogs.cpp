@@ -1325,7 +1325,6 @@ static wxString sortCriteria[] =
    gettext_noop("Score (reverse)"),
 };
 
-// defining it like this makes it much more difficult to forget to update it
 static const size_t NUM_CRITERIA  = WXSIZEOF(sortCriteria);
 
 #define NUM_LABELS 2
@@ -1366,8 +1365,11 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
    dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
    long width, widthMax = 0;
 
-   // see the comment near NUM_CRITERIA definition
-   ASSERT_MSG( NUM_LABELS < 16, "too many search criteria" );
+   // see the comment near sortCriteria definition
+   ASSERT_MSG( NUM_CRITERIA < 16, "too many search criteria" );
+
+   // should have enough space for them in a long
+   ASSERT_MSG( NUM_SORTLEVELS < 8, "too many sort levels" );
 
    size_t n;
    for ( n = 0; n < NUM_LABELS; n++ )

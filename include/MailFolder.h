@@ -662,6 +662,7 @@ enum MessageSortOrder
 {
    /// no sorting
    MSO_NONE,
+
    /// date or reverse date
    MSO_DATE, MSO_DATE_REV,
    MSO_SUBJECT, MSO_SUBJECT_REV,
@@ -669,8 +670,16 @@ enum MessageSortOrder
    MSO_STATUS, MSO_STATUS_REV,
    MSO_SCORE, MSO_SCORE_REV,
    MSO_THREAD, MSO_THREAD_REV
+
+   // NB: the code in wxFolderListCtrl::OnColumnClick() relies on MSO_XXX_REV
+   //     immediately following MSO_XXX
 };
 
+/// split a long value (as read from profile) into (several) sort orders
+extern wxArrayInt SplitSortOrder(long sortOrder);
+
+/// combine several (max 8) sort orders into one value
+extern long BuildSortOrder(const wxArrayInt& sortOrders);
 
 /** Search criterium for searching folder for certain messages. */
 class SearchCriterium

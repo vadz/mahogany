@@ -111,6 +111,7 @@ public:
       { return GetItemState(index,wxLIST_STATE_SELECTED) != 0; }
 
    void OnSelected(wxListEvent& event);
+   void OnColumnClick(wxListEvent& event);
    void OnChar( wxKeyEvent &event);
    void OnRightClick(wxMouseEvent& event);
    void OnDoubleClick(wxMouseEvent & /* event */);
@@ -262,6 +263,30 @@ static wxFolderListCtrlFields GetColumnByName(const wxString& name)
    return (wxFolderListCtrlFields)n;
 }
 
+static MessageSortOrder SortOrderFromCol(wxFolderListCtrlFields col)
+{
+   switch ( col )
+   {
+      case WXFLC_DATE:
+         return MSO_DATE;
+
+      case WXFLC_FROM:
+         return MSO_AUTHOR;
+
+      case WXFLC_SUBJECT:
+         return MSO_SUBJECT;
+
+      default:
+      case WXFLC_NUMENTRIES:
+         wxFAIL_MSG( "invalid column" );
+
+      case WXFLC_SIZE:
+      case WXFLC_STATUS:
+         // we don't support sorting by size or status [yet]
+         return MSO_NONE;
+   }
+}
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -278,6 +303,8 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxPListCtrl)
    EVT_MENU(-1, wxFolderListCtrl::OnCommandEvent)
    EVT_LEFT_DCLICK(wxFolderListCtrl::OnDoubleClick)
    EVT_MOTION (wxFolderListCtrl::OnMouseMove)
+
+   EVT_LIST_COL_CLICK(-1, wxFolderListCtrl::OnColumnClick)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -534,6 +561,56 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
    }
 }
 
+void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
+{
+   // get the column which was clicked
+   wxFolderListCtrlFields col = GetColumnByIndex(m_columns, event.GetColumn());
+   wxCHECK_RET( col != WXFLC_NONE, "should have a valid column" );
+
+   // sort by this column: if we already do this, then toggle the sort
+   // direction
+   long sortOrder = READ_CONFIG(m_FolderView->GetProfile(), MP_MSGS_SORTBY);
+   wxArrayInt sortOrders = SplitSortOrder(sortOrder);
+
+   MessageSortOrder orderCol = SortOrderFromCol(col);
+   if ( orderCol == MSO_NONE )
+   {
+      // we can't sort by this column
+      return;
+   }
+
+   if ( sortOrders.GetCount() == 1 )
+   {
+      // +1 means reverse sort order, so in these tests we toggle the sort
+      // order if we already sort by this column
+      if ( sortOrders[0u] == orderCol )
+         sortOrders[0u] = orderCol + 1;
+      else /* if ( sortOrders[0u] == orderCol + 1 )
+         sortOrders[0u] = orderCol;
+      else -- logically, the code would be like this but commenting it out 
+              doesn't change anything */
+         sortOrders[0u] = orderCol;
+   }
+   else // not exactly one sort order, so just sort on this column
+   {
+      sortOrders.Empty();
+      sortOrders.Add(orderCol);
+   }
+
+   // save the new sort order and update everything
+   wxLogStatus(GetFrame(this), _("Now sorting by %s%s"),
+               GetColumnName(col),
+               sortOrders[0u] == orderCol ? "" : _(" (reverse)"));
+
+   sortOrder = BuildSortOrder(sortOrders);
+   m_FolderView->GetProfile()->writeEntry(MP_MSGS_SORTBY, sortOrder);
+
+   MEventManager::Send(new MEventOptionsChangeData
+                           (
+                            m_FolderView->GetProfile(),
+                            MEventOptionsChangeData::Ok
+                           ));
+}
 
 wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 {
