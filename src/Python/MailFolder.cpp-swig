@@ -9,7 +9,6 @@
  * ----------------------------------------------------------------------------- */
 
 #define SWIGPYTHON
-#define SWIG_NOINCLUDE
 /***********************************************************************
  * common.swg
  *
@@ -1237,15 +1236,16 @@ static PyObject *_wrap_MailFolder_NeedsNetwork(PyObject *self, PyObject *args) {
 }
 
 
-static PyObject *_wrap_MailFolder_SetRetrievalLimit(PyObject *self, PyObject *args) {
+static PyObject *_wrap_MailFolder_SetRetrievalLimits(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     MailFolder *arg0 ;
     unsigned long arg1 ;
+    unsigned long arg2 ;
     PyObject * argo0 =0 ;
     
-    if(!PyArg_ParseTuple(args,"Ol:MailFolder_SetRetrievalLimit",&argo0,&arg1)) return NULL;
+    if(!PyArg_ParseTuple(args,"Oll:MailFolder_SetRetrievalLimits",&argo0,&arg1,&arg2)) return NULL;
     if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_MailFolder,1)) == -1) return NULL;
-    arg0->SetRetrievalLimit(arg1);
+    arg0->SetRetrievalLimits(arg1,arg2);
     Py_INCREF(Py_None);
     resultobj = Py_None;
     return resultobj;
@@ -1515,53 +1515,19 @@ static PyObject *_wrap_HeaderInfoList_Count(PyObject *self, PyObject *args) {
 }
 
 
-static PyObject *_wrap_HeaderInfoList_GetArray(PyObject *self, PyObject *args) {
+static PyObject *_wrap_HeaderInfoList_GetItem(PyObject *self, PyObject *args) {
     PyObject *resultobj;
     HeaderInfoList *arg0 ;
+    size_t *arg1 ;
     PyObject * argo0 =0 ;
+    PyObject * argo1 =0 ;
     HeaderInfo *result ;
     
-    if(!PyArg_ParseTuple(args,"O:HeaderInfoList_GetArray",&argo0)) return NULL;
+    if(!PyArg_ParseTuple(args,"OO:HeaderInfoList_GetItem",&argo0,&argo1)) return NULL;
     if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_HeaderInfoList,1)) == -1) return NULL;
-    result = (HeaderInfo *)arg0->GetArray();
+    if ((SWIG_ConvertPtr(argo1,(void **) &arg1,SWIGTYPE_p_size_t,1)) == -1) return NULL;
+    result = (HeaderInfo *)arg0->GetItem(*arg1);
     resultobj = SWIG_NewPointerObj((void *) result, SWIGTYPE_p_HeaderInfo);
-    return resultobj;
-}
-
-
-static PyObject *_wrap_HeaderInfoList_Swap(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    HeaderInfoList *arg0 ;
-    size_t *arg1 ;
-    size_t *arg2 ;
-    PyObject * argo0 =0 ;
-    PyObject * argo1 =0 ;
-    PyObject * argo2 =0 ;
-    
-    if(!PyArg_ParseTuple(args,"OOO:HeaderInfoList_Swap",&argo0,&argo1,&argo2)) return NULL;
-    if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_HeaderInfoList,1)) == -1) return NULL;
-    if ((SWIG_ConvertPtr(argo1,(void **) &arg1,SWIGTYPE_p_size_t,1)) == -1) return NULL;
-    if ((SWIG_ConvertPtr(argo2,(void **) &arg2,SWIGTYPE_p_size_t,1)) == -1) return NULL;
-    arg0->Swap(*arg1,*arg2);
-    Py_INCREF(Py_None);
-    resultobj = Py_None;
-    return resultobj;
-}
-
-
-static PyObject *_wrap_HeaderInfoList_SetTranslationTable(PyObject *self, PyObject *args) {
-    PyObject *resultobj;
-    HeaderInfoList *arg0 ;
-    size_t *arg1 ;
-    PyObject * argo0 =0 ;
-    PyObject * argo1 =0 ;
-    
-    if(!PyArg_ParseTuple(args,"OO:HeaderInfoList_SetTranslationTable",&argo0,&argo1)) return NULL;
-    if ((SWIG_ConvertPtr(argo0,(void **) &arg0,SWIGTYPE_p_HeaderInfoList,1)) == -1) return NULL;
-    if ((SWIG_ConvertPtr(argo1,(void **) &arg1,SWIGTYPE_p_size_t,1)) == -1) return NULL;
-    arg0->SetTranslationTable(arg1);
-    Py_INCREF(Py_None);
-    resultobj = Py_None;
     return resultobj;
 }
 
@@ -1829,7 +1795,7 @@ static PyMethodDef MailFoldercMethods[] = {
 	 { "MailFolder_GetType", _wrap_MailFolder_GetType, METH_VARARGS },
 	 { "MailFolder_GetFlags", _wrap_MailFolder_GetFlags, METH_VARARGS },
 	 { "MailFolder_NeedsNetwork", _wrap_MailFolder_NeedsNetwork, METH_VARARGS },
-	 { "MailFolder_SetRetrievalLimit", _wrap_MailFolder_SetRetrievalLimit, METH_VARARGS },
+	 { "MailFolder_SetRetrievalLimits", _wrap_MailFolder_SetRetrievalLimits, METH_VARARGS },
 	 { "MailFolder_GetAuthInfo", _wrap_MailFolder_GetAuthInfo, METH_VARARGS },
 	 { "MailFolder_ApplyFilterRules", _wrap_MailFolder_ApplyFilterRules, METH_VARARGS },
 	 { "MailFolder_RequestUpdate", _wrap_MailFolder_RequestUpdate, METH_VARARGS },
@@ -1848,9 +1814,7 @@ static PyMethodDef MailFoldercMethods[] = {
 	 { "HeaderInfo_GetIndentation", _wrap_HeaderInfo_GetIndentation, METH_VARARGS },
 	 { "HeaderInfo_SetIndentation", _wrap_HeaderInfo_SetIndentation, METH_VARARGS },
 	 { "HeaderInfoList_Count", _wrap_HeaderInfoList_Count, METH_VARARGS },
-	 { "HeaderInfoList_GetArray", _wrap_HeaderInfoList_GetArray, METH_VARARGS },
-	 { "HeaderInfoList_Swap", _wrap_HeaderInfoList_Swap, METH_VARARGS },
-	 { "HeaderInfoList_SetTranslationTable", _wrap_HeaderInfoList_SetTranslationTable, METH_VARARGS },
+	 { "HeaderInfoList_GetItem", _wrap_HeaderInfoList_GetItem, METH_VARARGS },
 	 { "FolderListingEntry_GetName", _wrap_FolderListingEntry_GetName, METH_VARARGS },
 	 { "FolderListingEntry_GetAttribute", _wrap_FolderListingEntry_GetAttribute, METH_VARARGS },
 	 { "delete_FolderListingEntry", _wrap_delete_FolderListingEntry, METH_VARARGS },
@@ -1933,6 +1897,7 @@ _swigt__r_FolderListing__iterator,
 
 static swig_const_info swig_const_table[] = {
     { SWIG_PY_INT,     "MSO_NONE", (long) MSO_NONE, 0, 0, 0},
+    { SWIG_PY_INT,     "MSO_NONE_REV", (long) MSO_NONE_REV, 0, 0, 0},
     { SWIG_PY_INT,     "MSO_DATE", (long) MSO_DATE, 0, 0, 0},
     { SWIG_PY_INT,     "MSO_DATE_REV", (long) MSO_DATE_REV, 0, 0, 0},
     { SWIG_PY_INT,     "MSO_SUBJECT", (long) MSO_SUBJECT, 0, 0, 0},
@@ -1943,8 +1908,8 @@ static swig_const_info swig_const_table[] = {
     { SWIG_PY_INT,     "MSO_STATUS_REV", (long) MSO_STATUS_REV, 0, 0, 0},
     { SWIG_PY_INT,     "MSO_SCORE", (long) MSO_SCORE, 0, 0, 0},
     { SWIG_PY_INT,     "MSO_SCORE_REV", (long) MSO_SCORE_REV, 0, 0, 0},
-    { SWIG_PY_INT,     "MSO_THREAD", (long) MSO_THREAD, 0, 0, 0},
-    { SWIG_PY_INT,     "MSO_THREAD_REV", (long) MSO_THREAD_REV, 0, 0, 0},
+    { SWIG_PY_INT,     "MSO_SIZE", (long) MSO_SIZE, 0, 0, 0},
+    { SWIG_PY_INT,     "MSO_SIZE_REV", (long) MSO_SIZE_REV, 0, 0, 0},
     { SWIG_PY_INT,     "MailFolder_MSG_STAT_NONE", (long) MailFolder::MSG_STAT_NONE, 0, 0, 0},
     { SWIG_PY_INT,     "MailFolder_MSG_STAT_SEEN", (long) MailFolder::MSG_STAT_SEEN, 0, 0, 0},
     { SWIG_PY_INT,     "MailFolder_MSG_STAT_DELETED", (long) MailFolder::MSG_STAT_DELETED, 0, 0, 0},

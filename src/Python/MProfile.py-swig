@@ -4,47 +4,46 @@ import MProfilec
 from MObject import *
 
 from MString import *
-class ProfilePtr(MObjectRCPtr):
+class Profile(MObjectRC):
     PT_Unknown = MProfilec.Profile_PT_Unknown
     PT_Any = MProfilec.Profile_PT_Any
     PT_FolderProfile = MProfilec.Profile_PT_FolderProfile
     def __init__(self,this):
         self.this = this
-        self.thisown = 0
-    def readEntry(self,arg0,arg1):
-        val = MProfilec.Profile_readEntry(self.this,arg0.this,arg1)
-        val = StringPtr(val)
-        val.thisown = 1
+
+    def readEntry(*args):
+        val = apply(MProfilec.Profile_readEntry,args)
+        if val: val = StringPtr(val) ; val.thisown = 1
         return val
-    def writeEntry(self,arg0,arg1):
-        val = MProfilec.Profile_writeEntry(self.this,arg0.this,arg1.this)
+    def writeEntry(*args):
+        val = apply(MProfilec.Profile_writeEntry,args)
         return val
-    def SetPath(self,arg0):
-        val = MProfilec.Profile_SetPath(self.this,arg0.this)
+    def SetPath(*args):
+        val = apply(MProfilec.Profile_SetPath,args)
         return val
-    def HasEntry(self,arg0):
-        val = MProfilec.Profile_HasEntry(self.this,arg0.this)
+    def HasEntry(*args):
+        val = apply(MProfilec.Profile_HasEntry,args)
         return val
-    def DeleteGroup(self,arg0):
-        val = MProfilec.Profile_DeleteGroup(self.this,arg0.this)
+    def DeleteGroup(*args):
+        val = apply(MProfilec.Profile_DeleteGroup,args)
         return val
-    def GetName(self):
-        val = MProfilec.Profile_GetName(self.this)
-        val = StringPtr(val)
-        val.thisown = 1
+    def GetName(*args):
+        val = apply(MProfilec.Profile_GetName,args)
+        if val: val = StringPtr(val) ; val.thisown = 1
         return val
-    def IsExpandingEnvVars(self):
-        val = MProfilec.Profile_IsExpandingEnvVars(self.this)
+    def IsExpandingEnvVars(*args):
+        val = apply(MProfilec.Profile_IsExpandingEnvVars,args)
         return val
-    def SetExpandEnvVars(self,*args):
-        val = apply(MProfilec.Profile_SetExpandEnvVars,(self.this,)+args)
+    def SetExpandEnvVars(*args):
+        val = apply(MProfilec.Profile_SetExpandEnvVars,args)
         return val
     def __repr__(self):
-        return "<C Profile instance>"
-class Profile(ProfilePtr):
+        return "<C Profile instance at %s>" % (self.this,)
+class ProfilePtr(Profile):
     def __init__(self,this):
         self.this = this
-
+        self.thisown = 0
+        self.__class__ = Profile
 
 
 
@@ -52,24 +51,24 @@ class Profile(ProfilePtr):
 
 #-------------- FUNCTION WRAPPERS ------------------
 
-def Profile_CreateGlobalConfig(arg0):
-    val = MProfilec.Profile_CreateGlobalConfig(arg0.this)
-    val = ProfilePtr(val)
+def Profile_CreateGlobalConfig(*args, **kwargs):
+    val = apply(MProfilec.Profile_CreateGlobalConfig,args,kwargs)
+    if val: val = ProfilePtr(val)
     return val
 
-def Profile_CreateProfile(arg0,arg1):
-    val = MProfilec.Profile_CreateProfile(arg0.this,arg1.this)
-    val = ProfilePtr(val)
+def Profile_CreateProfile(*args, **kwargs):
+    val = apply(MProfilec.Profile_CreateProfile,args,kwargs)
+    if val: val = ProfilePtr(val)
     return val
 
-def Profile_CreateModuleProfile(arg0,arg1):
-    val = MProfilec.Profile_CreateModuleProfile(arg0.this,arg1.this)
-    val = ProfilePtr(val)
+def Profile_CreateModuleProfile(*args, **kwargs):
+    val = apply(MProfilec.Profile_CreateModuleProfile,args,kwargs)
+    if val: val = ProfilePtr(val)
     return val
 
-def Profile_CreateEmptyProfile(arg0):
-    val = MProfilec.Profile_CreateEmptyProfile(arg0.this)
-    val = ProfilePtr(val)
+def Profile_CreateEmptyProfile(*args, **kwargs):
+    val = apply(MProfilec.Profile_CreateEmptyProfile,args,kwargs)
+    if val: val = ProfilePtr(val)
     return val
 
 Profile_DeleteGlobalConfig = MProfilec.Profile_DeleteGlobalConfig

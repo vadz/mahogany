@@ -1,19 +1,20 @@
 # This file was created automatically by SWIG.
 import MStringc
-class StringPtr :
+class String:
+    def __init__(self,*args):
+        self.this = apply(MStringc.new_String,args)
+        self.thisown = 1
+
+    def c_str(*args):
+        val = apply(MStringc.String_c_str,args)
+        return val
+    def __repr__(self):
+        return "<C String instance at %s>" % (self.this,)
+class StringPtr(String):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def c_str(self):
-        val = MStringc.String_c_str(self.this)
-        return val
-    def __repr__(self):
-        return "<C String instance>"
-class String(StringPtr):
-    def __init__(self,arg0) :
-        self.this = MStringc.new_String(arg0)
-        self.thisown = 1
-
+        self.__class__ = String
 
 
 

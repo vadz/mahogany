@@ -2,41 +2,45 @@
 import MAppBasec
 
 from MString import *
-class MAppBasePtr :
-    def __init__(self,this):
-        self.this = this
-        self.thisown = 0
-    def Exit(self):
-        val = MAppBasec.MAppBase_Exit(self.this)
-        return val
-    def TopLevelFrame(self):
-        val = MAppBasec.MAppBase_TopLevelFrame(self.this)
-        return val
-    def GetText(self,arg0):
-        val = MAppBasec.MAppBase_GetText(self.this,arg0)
-        return val
-    def GetGlobalDir(self):
-        val = MAppBasec.MAppBase_GetGlobalDir(self.this)
-        val = StringPtr(val)
-        val.thisown = 1
-        return val
-    def GetLocalDir(self):
-        val = MAppBasec.MAppBase_GetLocalDir(self.this)
-        val = StringPtr(val)
-        val.thisown = 1
-        return val
-    def GetMimeManager(self):
-        val = MAppBasec.MAppBase_GetMimeManager(self.this)
-        return val
-    def GetProfile(self):
-        val = MAppBasec.MAppBase_GetProfile(self.this)
-        return val
-    def __repr__(self):
-        return "<C MAppBase instance>"
-class MAppBase(MAppBasePtr):
+
+from MProfile import *
+
+from MObject import *
+class MAppBase:
     def __init__(self,this):
         self.this = this
 
+    def Exit(*args):
+        val = apply(MAppBasec.MAppBase_Exit,args)
+        return val
+    def TopLevelFrame(*args):
+        val = apply(MAppBasec.MAppBase_TopLevelFrame,args)
+        return val
+    def GetText(*args):
+        val = apply(MAppBasec.MAppBase_GetText,args)
+        return val
+    def GetGlobalDir(*args):
+        val = apply(MAppBasec.MAppBase_GetGlobalDir,args)
+        if val: val = StringPtr(val) ; val.thisown = 1
+        return val
+    def GetLocalDir(*args):
+        val = apply(MAppBasec.MAppBase_GetLocalDir,args)
+        if val: val = StringPtr(val) ; val.thisown = 1
+        return val
+    def GetMimeManager(*args):
+        val = apply(MAppBasec.MAppBase_GetMimeManager,args)
+        return val
+    def GetProfile(*args):
+        val = apply(MAppBasec.MAppBase_GetProfile,args)
+        if val: val = ProfilePtr(val) 
+        return val
+    def __repr__(self):
+        return "<C MAppBase instance at %s>" % (self.this,)
+class MAppBasePtr(MAppBase):
+    def __init__(self,this):
+        self.this = this
+        self.thisown = 0
+        self.__class__ = MAppBase
 
 
 
@@ -44,9 +48,9 @@ class MAppBase(MAppBasePtr):
 
 #-------------- FUNCTION WRAPPERS ------------------
 
-def wxGetApp():
-    val = MAppBasec.wxGetApp()
-    val = MAppBasePtr(val)
+def wxGetApp(*args, **kwargs):
+    val = apply(MAppBasec.wxGetApp,args,kwargs)
+    if val: val = MAppBasePtr(val); val.thisown = 1
     return val
 
 MDialog_ErrorMessage = MAppBasec.MDialog_ErrorMessage
@@ -61,23 +65,9 @@ MDialog_StatusMessage = MAppBasec.MDialog_StatusMessage
 
 MDialog_YesNoDialog = MAppBasec.MDialog_YesNoDialog
 
-def MDialog_FileRequester(arg0,*args):
-    argl = map(None,args)
-    try: argl[1] = argl[1].this
-    except: pass
-    try: argl[2] = argl[2].this
-    except: pass
-    try: argl[3] = argl[3].this
-    except: pass
-    try: argl[4] = argl[4].this
-    except: pass
-    args = tuple(argl)
-    val = apply(MAppBasec.MDialog_FileRequester,(arg0.this,)+args)
-    return val
+MDialog_FileRequester = MAppBasec.MDialog_FileRequester
 
-def MInputBox(arg0,arg1,arg2,*args):
-    val = apply(MAppBasec.MInputBox,(arg0.this,arg1,arg2,)+args)
-    return val
+MInputBox = MAppBasec.MInputBox
 
 
 
