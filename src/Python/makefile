@@ -7,6 +7,7 @@ SWIG=swig
 SWIGFLAGS := -c++ -python -shadow
 
 IFACES := $(wildcard *.i)
+IFACES := $(filter-out SendMessageCC.i, $(IFACES))
 OBJS := $(IFACES:.i=.o)
 
 %.cpp %.py: %.i
