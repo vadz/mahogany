@@ -32,6 +32,8 @@
    #include "Message.h"
 
    #include "Sorting.h"
+
+   #include "Mcclient.h"      // need THREADNODE
 #endif // USE_PCH
 
 #include "HeaderInfoImpl.h"

@@ -29,6 +29,8 @@
 
    #include "Profile.h"
    #include "Threading.h"
+
+   #include "Mcclient.h"      // need THREADNODE
 #endif // USE_PCH
 
 #include "Mdefaults.h"

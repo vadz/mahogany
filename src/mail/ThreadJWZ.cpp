@@ -1839,7 +1839,6 @@ extern void JWZThreadMessages(const ThreadParams& thrParams,
    wxLogTrace(TRACE_JWZ, "Entering JWZThreadMessages");
    Threadable *threadableRoot = BuildThreadableList(hilp);
    
-   Threadable *th = threadableRoot;
    Threader *threader = new Threader(thrParams);
 
    // Do the work
