@@ -777,9 +777,7 @@ MAppBase::OnMEvent(MEventData& event)
          if(idx < sizeof gs_IconSubDirs)
             GetIconManager()->SetSubDirectory(gs_IconSubDirs[idx]);
      }
-#endif
-     // re-generate the mailcollector object
-     m_MailCollector->RequestReInit();
+#endif // USE_ICON_SUBDIRS
    }
    else if (event.GetId() == MEventId_FolderUpdate)
    {

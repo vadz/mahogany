@@ -90,7 +90,6 @@
 #include "MFolder.h"
 
 #include "Mdefaults.h"
-#include "MailCollector.h"
 
 #include "gui/wxDialogLayout.h"
 #include "gui/wxOptionsPage.h"

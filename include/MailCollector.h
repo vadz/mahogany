@@ -16,8 +16,12 @@
 class MailFolder;
 class MFolder;
 
-/** One object of this class is created by MApplication to collect new 
-    mail from all incoming folders.
+/**
+  One object of this class is created by MApplication to collect new 
+  mail from all incoming folders.
+
+  The name is a misnomer: it should be called MailMonitor, it doesn't actually
+  collect anything anywhere by itself...
 */
 class MailCollector : public MObjectRC
 {
@@ -27,33 +31,17 @@ public:
 
    /**
      Adds or removes this folder to/from the  list of folders to check.
+
+     @param folder the folder to monitor or stop monitoring
+     @return true if ok, false on error
     */
    static bool AddOrRemoveIncoming(MFolder *folder, bool add);
-
-   /// Returns true if the mailfolder mf is an incoming folder.
-   virtual bool IsIncoming(MailFolder *mf) = 0;
 
    /** Collect all mail from folder mf.
        @param mf the folder to collect from
        @return true on success
    */
    virtual bool Collect(MailFolder *mf = NULL) = 0;
-
-   /** Adds a new incoming folder to the list.
-       @param name folder to collect from
-       @return true on success, false if folder was not found
-   */
-   virtual bool AddIncomingFolder(const String &name) = 0;
-
-   /** Removes an incoming folder from the list.
-       @param name no longer collect from this folder
-       @return true on success, false if folder was not found
-   */
-   virtual bool RemoveIncomingFolder(const String &name) = 0;
-
-   /** Ask the MailCollector to re-initialise on next collection.
-    */
-   virtual void RequestReInit(void) = 0;
 };
 
 #endif

@@ -553,7 +553,11 @@ wxMFrame::OnMenuCommand(int id)
          }
 
       case WXMENU_FILE_COLLECT:
-         mApplication->GetMailCollector()->Collect();
+         {
+            MailCollector *mailCollector = mApplication->GetMailCollector();
+            if ( mailCollector )
+               mailCollector->Collect();
+         }
          break;
 
 #ifdef USE_PYTHON

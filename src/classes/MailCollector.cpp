@@ -23,9 +23,6 @@
 #  include "kbList.h"
 #  include "MApplication.h"
 #  include "MPython.h"
-
-#  include  <wx/dynarray.h>
-#  include  <wx/utils.h> // wxYield
 #endif   // USE_PCH
 
 #include "Mdefaults.h"
@@ -38,10 +35,6 @@
 
 #include "MDialogs.h"   // MDialog_YesNoDialog
 #include "Mpers.h"
-
-// instead of writing our own wrapper for wxExecute()
-#include  <wx/utils.h>
-#define   SYSTEM(command) wxExecute(command, FALSE)
 
 #define MC_MAX_FAIL   5
 
@@ -70,29 +63,23 @@ public:
          InternalCreate();
       }
 
-   /// Returns true if the mailfolder mf is an incoming folder.
-   virtual bool IsIncoming(MailFolder *mf);
    /** Collect all mail from folder mf.
        @param mf the folder to collect from
        @return true on success
    */
    virtual bool Collect(MailFolder *mf = NULL);
+
    /** Adds a new incoming folder to the list.
        @param name folder to collect from
        @return true on success, false if folder was not found
    */
-   virtual bool AddIncomingFolder(const String &name);
+   bool AddIncomingFolder(const String &name);
+
    /** Removes an incoming folder from the list.
        @param name no longer collect from this folder
        @return true on success, false if folder was not found
    */
-   virtual bool RemoveIncomingFolder(const String &name);
-   /** Ask the MailCollector to re-initialise on next collection.
-    */
-   virtual void RequestReInit(void)
-      {
-         m_ReInit = true;
-      }
+   bool RemoveIncomingFolder(const String &name);
 
    // react to folder deletion by removing it from the list of folders to poll
    virtual bool OnMEvent(MEventData& event);
@@ -122,8 +109,9 @@ private:
    /// a list of folder names and mailfolder pointers
    class MailCollectorFolderList *m_list;
 
-   /// the event manager cookie
-   void *m_regFolderDelete;
+   /// the event manager cookies
+   void *m_regFolderDelete,
+        *m_regOptionsChange;
 
    /// if this is set, we want to be re-initialised
    bool m_ReInit;
@@ -142,7 +130,8 @@ MailCollector::Create(void)
 bool
 MailCollector::AddOrRemoveIncoming(MFolder *folder, bool isIncoming)
 {
-   MailCollector *collector = mApplication->GetMailCollector();
+   MailCollectorImpl *collector =
+       (MailCollectorImpl *)mApplication->GetMailCollector();
 
    bool rc;
 
@@ -210,6 +199,7 @@ MailCollectorImpl::InternalCreate(void)
    m_ReInit = false;
 
    m_regFolderDelete = MEventManager::Register(*this, MEventId_FolderTreeChange);
+   m_regOptionsChange = MEventManager::Register(*this, MEventId_OptionsChange);
 }
 
 void
@@ -217,11 +207,12 @@ MailCollectorImpl::InternalDestroy(void)
 {
    MOcheck();
 
-   if ( m_regFolderDelete )
-      MEventManager::Deregister(m_regFolderDelete);
+   MEventManager::DeregisterAll(&m_regFolderDelete, &m_regOptionsChange);
 
    delete m_list;
 }
+
+#if 0
 
 bool
 MailCollectorImpl::IsIncoming(MailFolder *mf)
@@ -234,6 +225,8 @@ MailCollectorImpl::IsIncoming(MailFolder *mf)
       return true;
    return false;
 }
+
+#endif // 0
 
 bool
 MailCollectorImpl::Collect(MailFolder *mf)
@@ -419,6 +412,10 @@ MailCollectorImpl::OnMEvent(MEventData& event)
       {
          RemoveIncomingFolder(evTree.GetFolderFullName());
       }
+   }
+   else if ( event.GetId() == MEventId_OptionsChange )
+   {
+      m_ReInit = true;
    }
 
    // continue propagating the event
