@@ -1,7 +1,7 @@
-A new release of the `Mahogany' e-Mail and News client has been made.
+A new release of `Mahogany' portable GUI email client has been made.
 =====================================================================
 
-Source and binaries for a variety of Linux and Unix systems as well
+Source and binaries for a of Linux and Unix systems as well
 as binaries for Win32 are available at
 
      http://sourceforge.net/project/showfiles.php?group_id=3100
@@ -10,112 +10,121 @@ You can also get to the download page starting from
 
                   http://mahogany.sourceforge.net/
 
+If you have any problems, please contact us at
+
+	      mahogany-developers@lists.sourceforge.net
+
+
 In this message:
 
-1. Announcing Mahogany Version 0.63
-2. Changes Against the Previous Release
-3. Future Plans
+1. Announcing Mahogany Version 0.64
+2. Acknowledgements
+3. Changes Against the Previous Release
 
-Announcing Mahogany Version 0.63
+Announcing Mahogany Version 0.64
 =====================================================================
 
-Mahogany is an OpenSource(TM) cross-platform mail and news client. It
-is available for X11/Unix and MS Windows platforms, supporting a wide
-range of protocols and standards, including POP3, IMAP4 and full MIME
-support as well as secure communications via SSL. Mahogany also
-supports many Unix mailbox formats (MBX, MBOX, MH) and can be
-extended even further using its built-in Python interpreter and/or
-its loadable modules (plug-ins).
+Mahogany is an OpenSource(TM) cross-platform mail news client. It is
+available for X11/Unix and MS Windows platforms and supports many of
+the Internet protocols and standards, including POP3, IMAP4
+(and the secure versions using SSL), SMTP and NNTP. Mahogany also
+supports MIME and many common Unix mailbox formats (including MBX,
+MBOX and MH).
 
-Mahogany includes an extendable address book system supporting
-hierarchical organisation of entries, group aliases, searching the
-database and easy editing, with support for other programs' address
-database formats. Currently Mahogany's native format, (X)Emacs' BBDB
-address books and PalmOS address books are supported. LDAP support is
-planned for future versions.
+The main "selling points" of Mahogany in our opinion are:
 
-Mahogany's wealth of features and ease of use make it one of the most
-powerful clients available, providing a consistent and intuitive
-interface across all supported platforms and an ideal GUI email
-client for advanced and novice users alike.
+* Cross-platform: use the same client to access your email from
+  all the machines you use, share the settings between them.
+
+* Everything is configurable: all aspects of the program behaviour
+  may be changed by the user, yet you don't have to spend any time
+  doing it before starting to use the program which is completely
+  plug-and-play - but you can fit it to your needs later.
+
+* High quality IMAP4 support: Mahogany is first and foremost an IMAP
+  client and, although it does support POP3, it uses all the
+  IMAP-only features (on demand message and attachment retrieval,
+  server side messages copying/moving and also sorting/threading if
+  available) and doesn't just consider IMAP as another kind of POP
+  server.
+
+* Open to the world: Mahogany integrates well with the other programs
+  (be it your WWW browser or an editor) and doesn't lock the user in
+  proprietary formats, but uses the standard ones whenever possible.
+
+* Full featured: some of the features not yet mentioned are: modern
+  GUI, built-in filters using a real programming language (but also
+  GUI support for creating them without learning it), message
+  templates, multiple identities, support for calendar plugin,
+  powerful and flexible address book (with vCard support),
+  synchronization with Palm, built-in HTML viewer, X-Face support,
+  support for receiving faxes send via EFax and much more.
+
+Acknowledgements
+=====================================================================
 
 Mahogany is written using the OpenSource wxWindows framework for GUI
 C++ applications, building on the GTK+ toolkit on Unix and native
-Win32 API under Windows and imap-2000 (c-client) library developed by
-University of Washington for mail folder access.
+Win32 API under Windows. The imap-2000 (c-client) library developed
+by University of Washington is used for mail folder access. We also
+use OpenSSL for SSL support and compface for X-Face support. We wish
+to thank all the people whose work has made writing Mahogany much
+simpler (and even possible at all)!
 
-Mahogany is constantly being tested on a variety of Linux systems,
-Solaris-sparc and MS Windows. It should compile and work on any
-modern Unix platform and any Win32 version.
-
-Changes Since Release 0.62
+Changes Since Release 0.63
 =====================================================================
 
 Key changes are:
 
- - huge speed optimizations, especially for IMAP users
- - several fatal bugs fixed (mainly in Win32 version)
+* much more efficient IMAP support:
 
-New features:
+  - retrieve headers on-demand making it possible to work with huge
+    IMAP folders efficiently
+  - use server side sorting and threading when available
 
- - show the number of messages in the folder tree
- - "Clear folder" to delete all messages without opening a folder
- - added "away" or "unattended" mode
- - added "Close" and "Close all" folders commands
+* local cache for POP3 folders which makes it possible to reliably
+  detect new mail in them
 
-Improvements:
+Some of new features:
 
- - passwords can now be encrypted using TwoFish under Win32 as well
- - URL popup menu in the message viewer
- - "open URL in new browser window" option
- - Python 2.x is now supported and not only 1.5 (Unix)
- - option to automatically select the units for message size (kb/mb)
- - added "Sender" option
+* HTML viewing and printing support
 
-Bug fixes:
+* Mailing list support: possibility to automatically send reply only to
+  the mailing list
 
- - fixed server side searching (IMAP only)
- - fixed text highlighting when selecting text in the viewer
- - renaming of the folders in the tree fixed once again
+* Added possibility to monitor the folders in the background without
+  opening them (IMAP)
+
+* Several new commands: permanently delete messages (not to trash),
+  mark messages read/unread, open folder read-only, update/ping
+  folder
+
+* One key message reading: automatically pass to the next unread
+  message or folder after finishing reading the current one.
+
+Other noticeable improvements:
+
+* Win32 version now has SSL support as well
+
+* Passwords can now be stored only for the current session duration
+
+* Many GUI fixes: more (optional) progress dialogs, improvement to
+  the filters dialog ("copy" and "rename" added), quickly change the
+  sort/thread options by right clicking on the folder window header
+
+Important bug fixes:
+
+* Sorting/threading work together
+
+* Handle connection loss more gracefully
+
+* Many fixes to the new mail reporting and processing
 
 Please see the CHANGES file in the distribution for an even more
 detailed list of changes.
 
-Future Plans
-=====================================================================
 
-We are going to continue on optimizing Mahogany and the next version
-should be much faster as the message headers will be retrieved on
-demand only and, optionally, cached locally. The speed optimization
-is the main focus of development for 0.64. The new features we are
-also working on are:
-
- - improving the message editor (work in progress)
- - full HTML message editing/displaying (almost complete)
- - Unicode (UTF7/8) support (mostly done)
-
-Next we hope to implement the following:
-
- - multi-threading to allow network operations to happen in
-   background
- - PGP/GPG support
- - LDAP support
-
-Please direct any queries to mahogany-users@lists.sourceforge.net
-and don't hesitate to contact us if you would like to participate
-in Mahogany development!
-
-Known bugs:
------------
-
-*** Please note that Mahogany/UNIX is officially in beta state while
-*** Mahogany/Win32 is still considered to be in alpha stage (although
-*** we use both versions on the daily basis).
-
-There are always some, listed on our bugtracker at
-http://mahogany.sourceforge.net/bugz/ and we are working on them.
-
- Hoping you will find Mahogany useful,
+ Hoping you will enjoy Mahogany!
 
 M dev-team
 
