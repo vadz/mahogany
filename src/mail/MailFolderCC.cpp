@@ -1911,10 +1911,6 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
       mail_parse_date (&selt,ov->date);
       entry.m_Date = (time_t) mail_longdate( &selt);
 
-      time_t extratime = (time_t) (((selt.hours*60)+selt.minutes)*60
-                                   +selt.seconds);
-      entry.m_Date += extratime;
-      
       // FROM
       /* get first from address from envelope */
       for (adr = ov->from; adr && !adr->host; adr = adr->next);
