@@ -39,16 +39,52 @@ Package=<4>
     Project_Dep_Name tiff
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name wxWindows
+    Project_Dep_Name config
     End Project Dependency
     Begin Project Dependency
-    Project_Dep_Name config
+    Project_Dep_Name core
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name html
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name adv
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name net
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name wxregex
     End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "cclient"=".\extra\src\c-client\cclient.dsp" - Package Owner=<4>
+Project: "adv"=L:\wxWindows\build\msw\wx_adv.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "base"=L:\wxWindows\build\msw\wx_base.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "cclient"=".\lib\imap\imap.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -63,7 +99,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "compface"=.\extra\src\compface\compface.dsp - Package Owner=<4>
+Project: "compface"=.\lib\compface\compface.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -76,6 +112,45 @@ Package=<4>
 ###############################################################################
 
 Project: "config"=.\Mconfig.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "core"=L:\wxWindows\build\msw\wx_core.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name base
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "html"=L:\wxWindows\build\msw\wx_html.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "net"=L:\wxWindows\build\msw\wx_net.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -111,7 +186,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "wxWindows"=L:\wxWindows\src\wxWindows.dsp - Package Owner=<4>
+Project: "wxregex"=L:\wxWindows\build\msw\wx_wxregex.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
