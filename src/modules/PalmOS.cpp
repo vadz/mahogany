@@ -53,6 +53,9 @@ extern "C"
 }
 #endif
 
+// causes Pilot to crash
+#undef PALMOS_SYNC_TIME
+
 #include "MModule.h"
 #include "Mversion.h"
 #include "MInterface.h"
@@ -756,7 +759,7 @@ PalmOSModule::Connect(void)
       /* Tell user (via Pilot) that we are starting things up */
       dlp_OpenConduit(m_PiSocket);
 
-         
+#ifdef PALMOS_SYNC_TIME         
       /* set Palm´s time */
       if (m_SyncTime)
       {
@@ -764,6 +767,7 @@ PalmOSModule::Connect(void)
          time(&localTime);
          dlp_SetSysDateTime(m_PiSocket, localTime);
       }
+#endif
    }
 
    if(m_PiSocket == -1)
@@ -1173,6 +1177,16 @@ PalmOSModule::InstallFiles(wxArrayString &fnames, bool delFile)
    for (unsigned int j = 0; j < fnames.GetCount(); j++) {
       db[dbcount] = (struct db*)malloc(sizeof(struct db));
 
+      wxString extension = fnames.Item(j).AfterLast('.');
+      if(extension != "pdb" && extension != "prc" &&
+         extension != "prc" && extension != "PRC")
+      {
+         wxString msg;
+         msg.Printf(_("Skipping file '%s' with unknown extension."),
+                    fnames.Item(j).c_str());
+         ErrorMessage(_(msg));
+         continue;
+      }
       // remember filename
       sprintf(db[dbcount]->name, "%s", fnames.Item(j).c_str());
 
@@ -1776,6 +1790,9 @@ PalmOSModule::SyncMAL(void)
    if (NULL == pInfo)
       return; 
 
+   /* set up MAL status reporting callback */
+   register_printStatusHook (MAL_PrintStatusFunc);
+   register_printErrorHook (MAL_PrintErrorFunc);
    /* are we using a proxy? */
    if(m_MALUseProxy)
    {
@@ -1812,7 +1829,9 @@ PalmOSModule::SyncMAL(void)
 
 static ConfigValueDefault gs_ConfigValues1 [] =
 {
+#ifdef PALMOS_SYNC_TIME
    ConfigValueDefault(MP_MOD_PALMOS_SYNCMAIL, MP_MOD_PALMOS_SYNCMAIL_D),
+#endif
    ConfigValueDefault(MP_MOD_PALMOS_SYNCTIME, MP_MOD_PALMOS_SYNCTIME_D),
 //   ConfigValueDefault(MP_MOD_PALMOS_SYNCADDR, MP_MOD_PALMOS_SYNCADDR_D),
       ConfigValueDefault(MP_MOD_PALMOS_BACKUP, MP_MOD_PALMOS_BACKUP_D),
@@ -1836,7 +1855,9 @@ static ConfigValueDefault gs_ConfigValues1 [] =
 static wxOptionsPage::FieldInfo gs_FieldInfos1[] =
 {
    { gettext_noop("Synchronise Mail"), wxOptionsPage::Field_Bool,    -1 },
+#ifdef PALMOS_SYNC_TIME
       { gettext_noop("Synchronise Time"), wxOptionsPage::Field_Bool, -1 },
+#endif
 //   { gettext_noop("Synchronise Addressbook"), wxOptionsPage::Field_Bool,    -1 },
       { gettext_noop("Always do Backup on sync"), wxOptionsPage::Field_Bool,    -1 },
 #ifdef HAVE_LIBMAL
