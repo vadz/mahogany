@@ -124,6 +124,9 @@ private:
    // add "attr=#colour" attribute to m_htmlText if col is valid
    void AddColourAttr(const wxChar *attr, const wxColour& col);
 
+   // calculate font size
+   int CalculateFontSize(int diff);
+
    // create a new image in memory, returns its name
    wxString CreateImageInMemoryFS(const wxImage& image);
 
@@ -567,6 +570,19 @@ void HtmlViewer::AddColourAttr(const wxChar *attr, const wxColour& col)
    }
 }
 
+int HtmlViewer::CalculateFontSize(int diff)
+{
+   // map the point size into the HTML font size so that if the standard font
+   // size is 12pt, 6pt is very small and 24pt is very big
+   //
+   // this is not very rigorous, of course...
+   if ( diff > 0 )
+      diff /= 4;
+   else
+      diff /= 2;
+   return diff;
+}
+
 wxString HtmlViewer::CreateImageInMemoryFS(const wxImage& image)
 {
    wxString filename = wxString::Format("image%d.png", m_nImage++);
@@ -603,16 +619,7 @@ void HtmlViewer::StartHeaders()
    // close <body> tag
    m_htmlText += ">";
 
-   // map the point size into the HTML font size so that if the standard font
-   // size is 12pt, 6pt is very small and 24pt is very big
-   //
-   // this is not very rigorous, of course...
-   int diff = profileValues.fontSize - DEFAULT_FONT_SIZE;
-   if ( diff > 0 )
-      diff /= 4;
-   else
-      diff /= 2;
-
+   int diff = CalculateFontSize(profileValues.fontSize - DEFAULT_FONT_SIZE);
    if ( diff )
    {
       m_htmlText << "<font size=" << wxString::Format("%+d", diff) << ">";
@@ -634,7 +641,10 @@ void HtmlViewer::StartHeaders()
 
 void HtmlViewer::ShowRawHeaders(const String& header)
 {
-   m_htmlText << "<pre>" << MakeHtmlSafe(header) << "</pre>";
+   const ProfileValues& profileValues = GetOptions();
+   int diff = CalculateFontSize(profileValues.fontSize - DEFAULT_FONT_SIZE);
+   m_htmlText << "<pre>" << "<font size=" << wxString::Format("%+d", diff) << ">"
+              << MakeHtmlSafe(header) << "</font>" << "</pre>";
 }
 
 void HtmlViewer::ShowHeader(const String& headerName,
