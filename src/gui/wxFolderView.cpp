@@ -4137,15 +4137,6 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
 
    switch ( key )
    {
-      case 'M': // move
-         if ( !m_msgCmdProc->ProcessCommand(WXMENU_MSG_MOVE_TO_FOLDER,
-                                            selections) )
-         {
-            // don't delete the messages if we couldn't save them!
-            newFocus = -1;
-         }
-         break;
-
       case 'D': // delete
          if ( event.ControlDown() )
          {
@@ -4180,7 +4171,19 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
          break;
 
       case 'C': // copy (to folder)
-         m_msgCmdProc->ProcessCommand(WXMENU_MSG_SAVE_TO_FOLDER, selections);
+         if ( !m_msgCmdProc->ProcessCommand(WXMENU_MSG_SAVE_TO_FOLDER, selections) )
+         {
+            // don't move focus if user cancelled copying
+            newFocus = -1;
+         }
+         break;
+
+      case 'M': // move
+         if ( !m_msgCmdProc->ProcessCommand(WXMENU_MSG_MOVE_TO_FOLDER, selections) )
+         {
+            // don't delete the messages if we couldn't save them!
+            newFocus = -1;
+         }
          break;
 
       case 'S': // save (to file)

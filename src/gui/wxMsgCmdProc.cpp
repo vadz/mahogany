@@ -174,9 +174,8 @@ protected:
    void ToggleMessages(const UIdArray& messages);
    void MarkRead(const UIdArray& messages, bool read);
 
-   Ticket SaveMessagesToFolder(const UIdArray& selections,
-                               MFolder *folder = NULL);
-   void MoveMessagesToFolder(const UIdArray& messages, MFolder *folder = NULL);
+   Ticket SaveMessagesToFolder(const UIdArray& selections, MFolder *folder = NULL);
+   Ticket MoveMessagesToFolder(const UIdArray& messages, MFolder *folder = NULL);
    void SaveMessagesToFile(const UIdArray& selections);
 
    void ExtractAddresses(const UIdArray& selections);
@@ -700,7 +699,11 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
 
 
       case WXMENU_MSG_SAVE_TO_FOLDER:
-         (void)SaveMessagesToFolder(messages, folder);
+         if ( SaveMessagesToFolder(messages, folder) == ILLEGAL_TICKET )
+         {
+            // cancelled by user
+            rc = false;
+         }
          break;
 
       case WXMENU_MSG_SAVE_TO_FILE:
@@ -708,7 +711,11 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
          break;
 
       case WXMENU_MSG_MOVE_TO_FOLDER:
-         MoveMessagesToFolder(messages, folder);
+         if ( MoveMessagesToFolder(messages, folder) == ILLEGAL_TICKET )
+         {
+            // cancelled by user
+            rc = false;
+         }
          break;
 
       case WXMENU_MSG_DROP_TO_FOLDER :
@@ -1308,7 +1315,7 @@ MsgCmdProcImpl::SaveMessagesToFolder(const UIdArray& selections,
    return t;
 }
 
-void
+Ticket
 MsgCmdProcImpl::MoveMessagesToFolder(const UIdArray& messages, MFolder *folder)
 {
    Ticket t = SaveMessagesToFolder(messages, folder);
@@ -1317,6 +1324,8 @@ MsgCmdProcImpl::MoveMessagesToFolder(const UIdArray& messages, MFolder *folder)
       // delete messages once they're successfully saved
       AddTicketToDelete(t);
    }
+
+   return t;
 }
 
 void

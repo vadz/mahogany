@@ -9,6 +9,7 @@
 Release 0.64.2 'Sparc' Feb 3, 2003 [semiofficial pre-release]
 -------------------------------------------------------------------------------
 
+14.02.03 NB: don't move focus to the next message when user cancelled copying/moving
 19.01.03 VZ: created a "View" menu from where view filters can be toggled
 16.12.02 VZ: yet another SPAM filter test: single part multipart/alternative
 16.12.02 VZ: added possibility to use '?' and '*' in address lists
