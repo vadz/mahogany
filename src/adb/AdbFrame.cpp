@@ -2382,7 +2382,17 @@ void wxAdbEditFrame::OnHelp(wxCommandEvent&)
 void wxAdbEditFrame::OnTreeSelect(wxTreeEvent& event)
 {
   wxTreeItemId id = event.GetItem();
-  m_current = (AdbTreeNode *)m_treeAdb->GetItemData(id);
+
+  // FIXME: I don't know how is this possible but under Windows when we create
+  //        a new item in a group which had never been expanded yet the data
+  //        may be NULL
+  wxTreeItemData *data = m_treeAdb->GetItemData(id);
+  if ( !data ) {
+    event.Skip();
+    return;
+  }
+
+  m_current = (AdbTreeNode *)data;
 
   if ( m_current->IsGroup() ) {
     if ( m_current->IsBook() ) {
