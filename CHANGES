@@ -1,4 +1,5 @@
 (next release) on (date of next release)
+21.07.00 VZ: completely rewrote subfoldrs dialog which is now *much* faster
 19.07.00 VZ: it is possible to specify several address which should be replaced
              with the destination address when the corresponding option is on
 18.07.00 VZ: fixed serious bug in handling options changes, they are now

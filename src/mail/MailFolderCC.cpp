@@ -2477,7 +2477,7 @@ MailFolderCC::mm_notify(MAILSTREAM * stream, String str, long errflg)
        */
 void
 MailFolderCC::mm_list(MAILSTREAM * stream,
-                      char delim ,
+                      char delim,
                       String  name,
                       long  attrib)
 {
@@ -2497,6 +2497,7 @@ MailFolderCC::mm_list(MAILSTREAM * stream,
          mf->m_Ticket,
          name,
          delim,
+         attrib,
          mf->m_UserData
       );
 
@@ -2874,28 +2875,36 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
 {
    String spec = m_MailboxPath;
 
-   /* Make sure that IMAP specifications are either
-      {...}pattern or {....}path/pattern
-      A spec like {....}pathpattern is useless.
-   */
-   if(GetType() == MF_IMAP
-      && spec.Length() > 0
-      && spec[spec.Length()-1] != '/'
-      && spec[spec.Length()-1] != '}')
-      spec += '/';
-
-   if(GetType() == MF_NNTP || GetType() == MF_NEWS)
+   // make sure that there is a folder name delimiter before pattern - this
+   // only makes sense for non empty spec
+   if ( !!spec )
    {
-      if(spec.Length() > 0
-      && spec[spec.Length()-1] != '.'
-      && spec[spec.Length()-1] != '}')
+      char ch = spec.Last();
+
+      switch ( GetType() )
       {
-         if(spec[spec.Length()-1] == '/')
-            spec[spec.Length()-1] = '.';
+         case MF_IMAP:
+            if ( ch != '/' && ch != '}' )
+               spec += '/';
+            break;
+
+         case MF_MH:
+            if ( ch != '/' )
+               spec += '/';
+            break;
+
+         case MF_NNTP:
+         case MF_NEWS:
+            if ( ch != '.' && ch != '}' )
+               spec += '.';
+            break;
+
+         default:
+            FAIL_MSG( "unexpected folder type in ListFolders" );
       }
    }
 
-   spec += pattern;
+   spec << reference << pattern;
 
    ASSERT(asmf);
 
@@ -2905,15 +2914,13 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
    m_ASMailFolder = asmf;
    m_ASMailFolder->IncRef();
 
-   char *ref = reference.length() == 0 ? NULL : (char *)reference.c_str();
-
    if ( subscribedOnly )
    {
-      mail_lsub (m_MailStream, ref, (char *) spec.c_str());
+      mail_lsub (m_MailStream, NULL, (char *) spec.c_str());
    }
    else
    {
-      mail_list (m_MailStream, ref, (char *) spec.c_str());
+      mail_list (m_MailStream, NULL, (char *) spec.c_str());
    }
 
    // Send event telling about end of listing:
@@ -2924,6 +2931,7 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
          m_Ticket,
          "",  // empty name == no more entries
          0,   // delim == 0 ==> no more entries
+         0,   // no flags
          m_UserData
       );
 

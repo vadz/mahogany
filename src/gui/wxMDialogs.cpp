@@ -2925,13 +2925,18 @@ MProgressInfo::MProgressInfo(wxWindow *parent,
    m_frame = new wxMiniFrame(parent, -1, caption);
    wxBoxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
    sizer->Add(new wxStaticText(m_frame, -1, text), 0, wxALL & ~wxRIGHT, 10);
-   m_label = new wxStaticText(m_frame, -1, _("please wait ..."));
+
+   // hack: use a long label for sizer calculations
+   m_label = new wxStaticText(m_frame, -1, _("XXXXXX done"));
    sizer->Add(m_label, 0, wxALL, 10);
 
    m_frame->SetAutoLayout(TRUE);
    m_frame->SetSizer(sizer);
    sizer->Fit(m_frame);
    sizer->SetSizeHints(m_frame);
+
+   // and then remove it
+   m_label->SetLabel("");
 
    m_frame->CentreOnParent();
    m_frame->Show();

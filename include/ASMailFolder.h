@@ -249,21 +249,28 @@ public:
                                          Ticket t,
                                          const String &name,
                                          char delimiter,
+                                         long attrib,
                                          UserData ud)
-         { return new ResultFolderExists(mf, t, name, delimiter, ud); }
+         { return new ResultFolderExists(mf, t, name, delimiter, attrib, ud); }
+
       String GetName(void) const { return m_Name; }
       char GetDelimiter(void) const { return m_Delim; }
+      long GetAttributes(void) const { return m_Attrib; }
+
    protected:
       ResultFolderExists(ASMailFolder *mf, Ticket t,
-                          const String &name, char delimiter,
+                          const String &name, char delimiter, long attrib,
                           UserData ud)
          : ResultImpl(mf, t, Op_ListFolders, NULL, ud)
          {
             m_Name = name;
             m_Delim = delimiter;
+            m_Attrib = attrib;
          }
    private:
-      String m_Name; char m_Delim;
+      String m_Name;
+      long m_Attrib;
+      char m_Delim;
    };
 
 

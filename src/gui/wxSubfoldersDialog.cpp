@@ -4,7 +4,8 @@
 //              MFolderDialogs.h
 // Purpose:
 // Author:      Vadim Zeitlin
-// Modified by:
+// Modified by: VZ at 21.07.00: now each tree level is retrieved as needed,
+//                              not the whole tree at once (huge perf boost)
 // Created:     26.07.99
 // CVS-ID:      $Id$
 // Copyright:   (c) 1999 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
@@ -58,14 +59,100 @@ enum
 };
 
 // ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+static void RemoveTrailingDelimiters(wxString *s, char chDel = '/')
+{
+   // now remove trailing backslashes if any
+   size_t len = s->length();
+   while ( len > 0 && (*s)[len - 1] == chDel )
+   {
+      // 1 more char to remove
+      len--;
+   }
+
+   s->Truncate(len);
+}
+
+// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
-class wxSubscriptionDialog : public wxManuallyLaidOutDialog,
-                             public MEventReceiver
+// this is the tree which is created with a folder which is the tree node and
+// which is capable of populating the tree itself by getting the list of
+// subfolders from the ASMailFolder
+class wxSubfoldersTree : public wxTreeCtrl,
+                         public MEventReceiver
 {
 public:
-   wxSubscriptionDialog(wxWindow *parent, MFolder *folder);
+   // ctor takes the root of the folder tree and the mail folder to use
+   wxSubfoldersTree(wxWindow *parent,
+                    MFolder *folderRoot,
+                    ASMailFolder *mailFolder);
+
+   // dtor
+   virtual ~wxSubfoldersTree();
+
+   // event handlers
+   // --------------
+
+   // we add the items to the tree here when the user tries to expand a branch
+   void OnTreeExpanding(wxTreeEvent& event);
+
+   // event processing function
+   virtual bool OnMEvent(MEventData& event);
+
+private:
+   // called when a new folder must be added
+   wxTreeItemId OnNewFolder(String& name);
+
+   // called when the last folder is received
+   void OnNoMoreFolders();
+
+   // insert a new item named "name" under parent if it doesn't exist yet in
+   // alphabetical order; returns the id of the (new) item
+   wxTreeItemId InsertInOrder(wxTreeItemId parent, const wxString& name);
+
+   // get the path of the item in the tree excluding the root part
+   wxString GetRelativePath(wxTreeItemId id) const;
+
+   // MEventReceiver cookie for the event manager
+   void *m_regCookie;
+
+   // the progress meter
+   MProgressInfo *m_progressInfo;
+
+   // the type of the folders we're enumerating
+   FolderType m_folderType;
+
+   // the name of the root folder
+   String m_folderPath;
+
+   // the folder itself
+   MFolder *m_folder;
+
+   // and the corresponding (halfopened) mail folder
+   ASMailFolder *m_mailFolder;
+
+   // number of folders retrieved since the last call to ListFolders()
+   size_t m_nFoldersRetrieved;
+
+   // the folder name separator
+   char m_chDelimiter;
+
+   // the item which we're currently populating in the tree
+   wxTreeItemId m_idParent;
+
+   DECLARE_EVENT_TABLE()
+};
+
+class wxSubscriptionDialog : public wxManuallyLaidOutDialog
+{
+public:
+   wxSubscriptionDialog(wxWindow *parent,
+                        MFolder *folder,
+                        ASMailFolder *mailFolder);
    virtual ~wxSubscriptionDialog();
 
    // called when [Ok] is pressed, may veto it
@@ -73,9 +160,6 @@ public:
 
    // callbacks
    // ---------
-
-   // event processing function
-   virtual bool OnMEvent(MEventData& event);
 
    // item selected in the tree
    void OnTreeSelect(wxTreeEvent& event);
@@ -91,27 +175,8 @@ public:
    bool OnComplete(wxTextCtrl *textctrl);
 
 private:
-   // helper function used to populate the tree with folders
-   // ------------------------------------------------------
-
-   // insert all components of the path into the tree
-   void InsertRecursively(const wxString& path);
-
-   // insert a new item named "name" under parent if it doesn't exist yet in
-   // alphabetical order; returns the id of the (new) item
-   wxTreeItemId InsertInOrder(wxTreeItemId parent, const wxString& name);
-
-   // called when a new folder must be added
-   void OnNewFolder(String& name);
-
-   // called when the last folder is received - will expand the top branches
-   // of the tree
-   void OnNoMoreFolders();
-
-   // helper functions for "quick search" text control
-   // ------------------------------------------------
-
-   // selects the folder corresponding to the given path
+   // helper functions for "quick search" text control: selects the folder
+   // corresponding to the given path
    void SelectRecursively(const wxString& path);
 
    // the GUI controls
@@ -125,13 +190,13 @@ private:
    bool m_settingFromProgram;    // notification comes from program, not user
    wxString m_completion;        // TAB completion for the current item
 
-   // the name of the folder whose subfolders we're enumerating
-   String m_folderPath;
-
    // the type of the folders we're enumerating
    FolderType m_folderType;
 
-   // and the folder itself
+   // the name of the root folder
+   String m_folderPath;
+
+   // the folder itself
    MFolder *m_folder;
 
    // returns the separator of the folder name components
@@ -140,15 +205,6 @@ private:
       return (m_folderType == MF_NNTP) || (m_folderType == MF_NEWS) ? '.'
                                                                     : '/';
    }
-
-   // MEventReceiver cookie for the event manager
-   void *m_regCookie;
-
-   // total number of subfolders
-   size_t m_nSubfolders;
-
-   // the progress meter
-   MProgressInfo *m_progressInfo;
 
    DECLARE_EVENT_TABLE()
 };
@@ -179,6 +235,10 @@ private:
 // event tables
 // ----------------------------------------------------------------------------
 
+BEGIN_EVENT_TABLE(wxSubfoldersTree, wxTreeCtrl)
+   EVT_TREE_ITEM_EXPANDING(-1, wxSubfoldersTree::OnTreeExpanding)
+END_EVENT_TABLE()
+
 BEGIN_EVENT_TABLE(wxFolderNameTextCtrl, wxTextCtrl)
    EVT_CHAR(wxFolderNameTextCtrl::OnChar)
 END_EVENT_TABLE()
@@ -196,6 +256,306 @@ END_EVENT_TABLE()
 // ============================================================================
 // implementation
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// wxSubfoldersTree
+// ----------------------------------------------------------------------------
+
+wxSubfoldersTree::wxSubfoldersTree(wxWindow *parent,
+                                   MFolder *folderRoot,
+                                   ASMailFolder *mailFolder)
+                : wxTreeCtrl(parent, -1,
+                             wxDefaultPosition, wxDefaultSize,
+                             wxTR_HAS_BUTTONS | wxBORDER | wxTR_MULTIPLE)
+{
+   // init members
+   m_folder = folderRoot;
+   m_folder->IncRef();
+
+   m_mailFolder = mailFolder;
+   m_mailFolder->IncRef();
+
+   m_regCookie = MEventManager::Register(*this, MEventId_ASFolderResult);
+   ASSERT_MSG( m_regCookie, "can't register with event manager");
+
+   m_progressInfo = (MProgressInfo *)NULL;
+   m_chDelimiter = '\0';
+   m_idParent = wxTreeItemId();
+
+   m_folderType = m_folder->GetType();
+
+   // a hack around old entries in config which were using '/inbox' instead of
+   // just 'inbox' for #mh/inbox
+   m_folderPath = m_folder->GetPath();
+   if ( m_folderType == MF_MH )
+   {
+      if ( !!m_folderPath )
+      {
+         if ( m_folderPath[0] == '/' )
+         {
+            m_folderPath.erase(0, 1);
+         }
+
+         RemoveTrailingDelimiters(&m_folderPath);
+
+         // andnow only leave the last component
+         m_folderPath = m_folderPath.AfterLast('/');
+      }
+   }
+
+   // show something...
+   if ( !m_folderPath )
+   {
+      switch ( m_folderType )
+      {
+         case MF_MH:
+            m_folderPath = _("MH root");
+            break;
+
+         case MF_IMAP:
+            m_folderPath = _("IMAP server");
+            break;
+
+         case MF_NNTP:
+         case MF_NEWS:
+            m_folderPath = _("News server");
+            break;
+
+         default:
+            FAIL_MSG( "unexpected older type" );
+      }
+   }
+
+   // add the root item to the tree
+   SetItemHasChildren(AddRoot(m_folderPath));
+}
+
+wxString wxSubfoldersTree::GetRelativePath(wxTreeItemId id) const
+{
+   wxString path;
+   wxTreeItemId idRoot = GetRootItem();
+   while ( id != idRoot )
+   {
+      ASSERT_MSG( m_chDelimiter, "should know folder name separator by now!" );
+
+      path.Prepend(GetItemText(id) + m_chDelimiter);
+      id = GetParent(id);
+   }
+
+   return path;
+}
+
+void wxSubfoldersTree::OnTreeExpanding(wxTreeEvent& event)
+{
+   m_idParent = event.GetItem();
+   if ( !HasChildren(m_idParent) )
+   {
+      // reset the counter, we will show the progress info if there are many
+      // folders
+      m_nFoldersRetrieved = 0;
+
+      // start from the folder being expanded
+      wxString relPath = GetRelativePath(m_idParent);
+
+      // disable the tree (it will be reenabled in OnNoMoreFolders) to prevent
+      // other events (possible as we will call wxYield())
+      Disable();
+      
+      // now OnNewFolder() and OnNoMoreFolders() will be called
+      (void)m_mailFolder->ListFolders
+                          (
+                             "%",      // everything at this tree level
+                             FALSE,    // subscribed only?
+                             relPath,  // reference (path relative to the folder)
+                             this      // data to pass to the callback
+                          );
+   }
+   //else: this branch had already been expanded
+
+   event.Skip();
+}
+
+// needed to be able to use DECLARE_AUTOREF() macro
+typedef ASMailFolder::ResultFolderExists ASFolderExistsResult;
+DECLARE_AUTOPTR(ASFolderExistsResult);
+
+bool wxSubfoldersTree::OnMEvent(MEventData& event)
+{
+   // we're only subscribed to the ASFolder events
+   CHECK( event.GetId() == MEventId_ASFolderResult, FALSE,
+          "unexpected event type" );
+
+   MEventASFolderResultData &data = (MEventASFolderResultData &)event;
+
+   ASFolderExistsResult_obj result((ASFolderExistsResult *)data.GetResult());
+
+   // is this message really for us?
+   if ( result->GetUserData() != this )
+   {
+      // no: continue with other event handlers
+      return TRUE;
+   }
+
+   if ( result->GetOperation() != ASMailFolder::Op_ListFolders )
+   {
+      FAIL_MSG( "unexpected operation notification" );
+
+      // eat the event - it was for us but we didn't process it...
+      return FALSE;
+   }
+
+   // is it the special event which signals that there will be no more of
+   // folders?
+   if ( !result->GetDelimiter() )
+   {
+      OnNoMoreFolders();
+   }
+   else
+   {
+      m_chDelimiter = result->GetDelimiter();
+
+      // we're passed a folder specification - extract the folder name from it
+      // (it's better to show this to the user rather than cryptic cclient
+      // string)
+      wxString name,
+               spec = result->GetName();
+      if ( MailFolderCC::SpecToFolderName(spec, m_folderType, &name) )
+      {
+         // ListFolders() will also return the folder itself, ignore it
+         if ( !!name )
+         {
+            // leave only the last componenet
+            name = name.AfterLast(m_chDelimiter);
+         }
+
+         if ( !!name )
+         {
+            wxTreeItemId id = OnNewFolder(name);
+            if ( id.IsOk() )
+            {
+               long attr = result->GetAttributes();
+               if ( !(attr & LATT_NOINFERIORS) )
+               {
+                  // this node can have children too
+                  SetItemHasChildren(id);
+               }
+
+               if ( attr & LATT_NOSELECT )
+               {
+                  SetItemData(id, new wxTreeItemData());
+               }
+
+               if ( attr & LATT_MARKED )
+               {
+                  SetItemBold(id);
+               }
+            }
+         }
+      }
+      else
+      {
+         wxLogDebug("Folder specification '%s' unexpected.", spec.c_str());
+      }
+   }
+
+   // we don't want anyone else to receive this message - it was for us only
+   return FALSE;
+}
+
+wxTreeItemId wxSubfoldersTree::OnNewFolder(String& name)
+{
+   CHECK( !!name, wxTreeItemId(), "folder name should not be empty" );
+
+   // count the number of folders retrieved and show progress
+   m_nFoldersRetrieved++;
+
+   // create the progress indicator if there are many folders and it hadn't
+   // been yet created
+   if ( m_nFoldersRetrieved > 20 && !m_progressInfo )
+   {
+      m_progressInfo = new MProgressInfo(this, _("Retrieving the folder list: "));
+   }
+
+   // update the progress indicator from time to time
+   if ( !(m_nFoldersRetrieved % 100) )
+   {
+      m_progressInfo->SetValue(m_nFoldersRetrieved);
+   }
+
+   RemoveTrailingDelimiters(&name, m_chDelimiter);
+
+   // and add the new folder into the tree
+   return InsertInOrder(m_idParent, name);
+}
+
+void wxSubfoldersTree::OnNoMoreFolders()
+{
+   if ( m_progressInfo )
+   {
+      delete m_progressInfo;
+      m_progressInfo = NULL;
+   }
+
+   Enable();
+
+   if ( !m_nFoldersRetrieved )
+   {
+      // this item doesn't have any subfolders
+      SetItemHasChildren(m_idParent, FALSE);
+   }
+
+   m_idParent = wxTreeItemId(); // invalid
+}
+
+wxTreeItemId wxSubfoldersTree::InsertInOrder(wxTreeItemId parent,
+                                             const wxString& name)
+{
+   // insert in alphabetic order under the parent
+   long cookie;
+   wxTreeItemId childPrev,
+                child = GetFirstChild(parent, cookie);
+   while ( child.IsOk() )
+   {
+      int rc = name.Cmp(GetItemText(child));
+
+      if ( rc == 0 )
+      {
+         // the item is already there
+         return child;
+      }
+      else if ( rc < 0 )
+      {
+         // should insert before this item (it's the first one which is
+         // greater than us)
+         break;
+      }
+      else // if ( rc > 0 )
+      {
+         childPrev = child;
+
+         child = GetNextChild(parent, cookie);
+      }
+   }
+
+   if ( childPrev.IsOk() )
+   {
+      // insert after child
+      return InsertItem(parent, childPrev, name);
+   }
+   else
+   {
+      // prepend if there is no previous child
+      return PrependItem(parent, name);
+   }
+}
+
+wxSubfoldersTree::~wxSubfoldersTree()
+{
+   m_folder->DecRef();
+   m_mailFolder->DecRef();
+
+   MEventManager::Deregister(m_regCookie);
+}
 
 // ----------------------------------------------------------------------------
 // wxFolderNameTextCtrl
@@ -236,27 +596,15 @@ void wxFolderNameTextCtrl::OnChar(wxKeyEvent& event)
 // wxSubscriptionDialog
 // ----------------------------------------------------------------------------
 
-wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent, MFolder *folder)
+wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
+                                          MFolder *folder,
+                                          ASMailFolder *mailFolder)
                     : wxManuallyLaidOutDialog(parent, "", "SubscribeDialog")
 {
    // init members
-   m_regCookie = MEventManager::Register(*this, MEventId_ASFolderResult);
-   ASSERT_MSG( m_regCookie, "can't register with event manager");
-
    m_folder = folder;
    m_folder->IncRef();
-
-   m_folderPath = folder->GetPath();
    m_folderType = folder->GetType();
-
-   // a hack around old entries in config which were using '/inbox' instead of
-   // just 'inbox' for #mh/inbox
-   if ( m_folderType == MF_MH && !!m_folderPath && m_folderPath[0] == '/' )
-   {
-      m_folderPath.erase(0, 1);
-   }
-
-   m_nSubfolders = 0;
    m_settingFromProgram = false;
 
    wxString title;
@@ -289,11 +637,7 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent, MFolder *folder)
    m_btnSelectAll = new wxButton(this, , _("&Select all"));
 #endif // USE_SELECT_BUTTONS
                                  
-   m_treectrl = new wxTreeCtrl(this, -1,
-                               wxDefaultPosition, wxDefaultSize,
-                               wxTR_HAS_BUTTONS |
-                               wxBORDER |
-                               wxTR_MULTIPLE);
+   m_treectrl = new wxSubfoldersTree(this, folder, mailFolder);
    c = new wxLayoutConstraints;
    c->top.SameAs(m_box, wxTop, 4*LAYOUT_Y_MARGIN);
    c->left.SameAs(m_box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -301,23 +645,14 @@ wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent, MFolder *folder)
    c->bottom.SameAs(m_textFind, wxTop, 2*LAYOUT_Y_MARGIN);
    m_treectrl->SetConstraints(c);
 
-   // to avoid flicker, initially hide the tree ctrl and show some text
-   // instead
-   m_treectrl->Hide();
-
-   // it will be enabled back in OnNoMoreFolders)
-   Disable();
-
    SetDefaultSize(4*wBtn, 10*hBtn);
 
-   m_progressInfo = (MProgressInfo *)NULL;
+   m_folderPath = m_treectrl->GetItemText(m_treectrl->GetRootItem());
 }
 
 wxSubscriptionDialog::~wxSubscriptionDialog()
 {
    m_folder->DecRef();
-
-   MEventManager::Deregister(m_regCookie);
 }
 
 void wxSubscriptionDialog::SelectRecursively(const wxString& path)
@@ -460,228 +795,6 @@ void wxSubscriptionDialog::SelectRecursively(const wxString& path)
    }
 }
 
-void wxSubscriptionDialog::InsertRecursively(const String& path)
-{
-   // don't do anything for this case as we're not sure to get here (see
-   // comment below)
-   if ( path == m_folderPath )
-   {
-      return;
-   }
-
-   // remove the common prefix and the following it separator from name
-   //
-   // we suppose that all subofolder names start with the parent folder name
-   // followed by the name separator, but don't blindly believe cclient -
-   // check it!
-   size_t len = m_folderPath.length();
-   char sep = GetFolderNameSeparator();
-   CHECK_RET( !wxStrncmp(path, m_folderPath, len),
-              "all folder names should start with the same common prefix" );
-
-   wxString name;
-   if ( !m_folderPath )
-   {
-      // this happens when enumerating all MH subfolders
-      name = path;
-   }
-   else // normal case of non empty m_folderPath
-   {
-      // the following isn't necessarily an error, as trying to browse 
-      // all folders under "ed." also retrieves the ones under "edm.", 
-      // something I rather would call jaccb (just another c-client
-      // bug), so we simply ignore them:
-      if(! (path.length() > len) && (path[len] == sep))
-         return;
-      //CHECK_RET( (path.length() > len) && (path[len] == sep),
-      //           "folder name separator expected in the folder name" );
-
-      // +1 for trailing separator
-      name = path.c_str() + len + 1;
-   }
-
-   // note: in some cases (NNTP) cclient will not return the root folder, in
-   // others (MH) it will, so don't count on it here and instead add the root
-   // item independently of this
-   wxTreeItemId parent = m_treectrl->GetRootItem();
-   if ( !parent.IsOk() )
-   {
-      wxString rootName = m_folderPath;
-      if ( !rootName )
-      {
-         rootName = _("All subfolders");
-      }
-
-      parent = m_treectrl->AddRoot(rootName);
-   }
-
-   wxStringTokenizer tk(name, sep);
-   while ( tk.HasMoreTokens() )
-   {
-      // find the child with the given name
-      wxString component = tk.GetNextToken();
-
-      ASSERT_MSG( !!component, "token can't be empty here" );
-
-      parent = InsertInOrder(parent, component);
-   }
-}
-
-wxTreeItemId wxSubscriptionDialog::InsertInOrder(wxTreeItemId parent,
-                                                 const wxString& name)
-{
-   // insert in alphabetic order under the parent
-   long cookie;
-   wxTreeItemId childPrev,
-                child = m_treectrl->GetFirstChild(parent, cookie);
-   while ( child.IsOk() )
-   {
-      int rc = name.Cmp(m_treectrl->GetItemText(child));
-
-      if ( rc == 0 )
-      {
-         // the item is already there
-         return child;
-      }
-      else if ( rc < 0 )
-      {
-         // should insert before this item (it's the first one which is
-         // greater than us)
-         break;
-      }
-      else // if ( rc > 0 )
-      {
-         childPrev = child;
-
-         child = m_treectrl->GetNextChild(parent, cookie);
-      }
-   }
-
-   if ( childPrev.IsOk() )
-   {
-      // insert after child
-      return m_treectrl->InsertItem(parent, childPrev, name);
-   }
-   else
-   {
-      // prepend if there is no previous child
-      return m_treectrl->PrependItem(parent, name);
-   }
-}
-
-void wxSubscriptionDialog::OnNewFolder(String& name)
-{
-   // create the progress indicator if not done yet
-   if ( !m_progressInfo )
-      m_progressInfo = new MProgressInfo(this, _("Retrieving the folder list: "));
-
-   // count the number of folders retrieved and show progress
-   m_nSubfolders++;
-   if ( !(m_nSubfolders % 100) )
-   {
-      m_progressInfo->SetValue(m_nSubfolders);
-   }
-
-   // remove trailing backslashes if any
-   size_t len = name.length();
-   while ( len > 0 && name[len - 1] == '/' )
-   {
-      // 1 more char to remove
-      len--;
-   }
-
-   name.Truncate(len);
-
-   // put it into the tree
-   InsertRecursively(name);
-}
-
-void wxSubscriptionDialog::OnNoMoreFolders()
-{
-   delete m_progressInfo;
-   m_progressInfo = NULL;
-
-   Enable();
-
-   // expand the root or add it if it's not there
-   wxTreeItemId root = m_treectrl->GetRootItem();
-   if ( root.IsOk() )
-   {
-      m_treectrl->Expand(root);
-      m_textFind->SetValue(m_folderPath);
-
-      m_box->SetLabel(wxString::Format(_("%u subfolders"), m_nSubfolders));
-   }
-   else
-   {
-      m_treectrl->Disable();
-      m_textFind->Disable();
-      wxWindow *label = FindWindow(PrevControlId(m_textFind->GetId()));
-      if ( label )
-         label->Disable();
-
-      m_box->SetLabel(_("No subfolders"));
-   }
-
-   m_treectrl->Show();
-}
-
-// needed to be able to use DECLARE_AUTOREF() macro
-typedef ASMailFolder::ResultFolderExists ASFolderExistsResult;
-DECLARE_AUTOPTR(ASFolderExistsResult);
-
-bool wxSubscriptionDialog::OnMEvent(MEventData& event)
-{
-   // we're only subscribed to the ASFolder events
-   CHECK( event.GetId() == MEventId_ASFolderResult, FALSE,
-          "unexpected event type" );
-
-   MEventASFolderResultData &data = (MEventASFolderResultData &)event;
-
-   ASFolderExistsResult_obj result((ASFolderExistsResult *)data.GetResult());
-
-   // is this message really for us?
-   if ( result->GetUserData() != this )
-   {
-      // no: continue with other event handlers
-      return TRUE;
-   }
-
-   if ( result->GetOperation() != ASMailFolder::Op_ListFolders )
-   {
-      FAIL_MSG( "unexpected operation notification" );
-
-      // eat the event - it was for us but we didn't process it...
-      return FALSE;
-   }
-
-   // is it the special event which signals that there will be no more of
-   // folders?
-   if ( !result->GetDelimiter() )
-   {
-      OnNoMoreFolders();
-   }
-   else
-   {
-      // we're passed a folder specification - extract the folder name from it
-      // (it's better to show this to the user rather than cryptic cclient
-      // string)
-      wxString name,
-               spec = result->GetName();
-      if ( MailFolderCC::SpecToFolderName(spec, m_folderType, &name) )
-      {
-         OnNewFolder(name);
-      }
-      else
-      {
-         wxLogDebug("Folder specification '%s' unexpected.", spec.c_str());
-      }
-   }
-
-   // we don't want anyone else to receive this message - it was for us only
-   return FALSE;
-}
-
 #ifdef USE_SELECT_BUTTONS
 
 void wxSubscriptionDialog::OnSelectAll(wxCommandEvent& event)
@@ -776,6 +889,9 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
       // this is the tree item we're creating folder for
       wxTreeItemId id = selections[sel];
 
+      // the item data is only set by the tree for non selectable folders
+      bool canBeOpened = !m_treectrl->GetItemData(id);
+
       // this will be used to set MF_FLAGS_GROUP flag later
       bool isGroup = m_treectrl->ItemHasChildren(id);
 
@@ -798,13 +914,13 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
       MFolder *parent = m_folder;
       parent->IncRef();
 
-      wxString fullpath = m_folderPath;
+      wxString fullpath = m_folder->GetPath();
       for ( int level = levelMax - 1; level >= 0; level-- )
       {
          wxString name = components[level];
 
          // the idea for this test is to avoid creating MH folders named
-         // /inbox (m_folderPath is empty for the root MH folder)
+         // /inbox (fullpath is empty for the root MH folder)
          if ( !!fullpath )
          {
             fullpath += GetFolderNameSeparator();
@@ -840,6 +956,16 @@ bool wxSubscriptionDialog::TransferDataFromWindow()
             {
                flags &= ~MF_FLAGS_GROUP;
             }
+
+            if ( canBeOpened )
+            {
+               flags &= ~MF_FLAGS_NOSELECT;
+            }
+            else
+            {
+               flags |= MF_FLAGS_NOSELECT;
+            }
+
             folderNew->SetFlags(flags);
 
             // we created a new folder, set the flag to refresh the tree
@@ -900,19 +1026,12 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
       wxLogMessage(_("The folder '%s' has no subfolders."),
                    folder->GetPath().c_str());
 
+      asmf->DecRef();
+
       return FALSE;
    }
 
-   wxSubscriptionDialog dlg(GetFrame(parent), folder);
-
-   UserData ud = &dlg;
-   (void)asmf->ListFolders
-                (
-                 "*",      // everything recursively
-                 FALSE,    // subscribed only?
-                 "",       // reference (what's this?)
-                 ud        // data to pass to the callback
-                );
+   wxSubscriptionDialog dlg(GetFrame(parent), folder, asmf);
 
    asmf->DecRef();
 
