@@ -200,8 +200,13 @@ static const int *g_aFrameToolbars[WXFRAME_MAX] =
 
 
 // array of descriptions of all menu items
+//
 // NB: by convention, if the menu item opens another window (or a dialog), it
 //     should end with an ellipsis (`...')
+//
+// The following accelerators are still unused:
+//    with Ctrl:           E    JKLM      T      
+//    with Shift-Ctrl:  B DE  HIJKLM OPQ  T VWXY 
 static const MenuItemInfo g_aMenuItems[] =
 {
    // ABCDEFGHIJKLMNOPQRSTUVWXYZ (VZ: leave it here, it's a cut-&-paste buffer)
@@ -344,11 +349,11 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SUBMENU,       gettext_noop("&Yet more commands"), "", FALSE },
       { WXMENU_MSG_SAVEADDRESSES, gettext_noop("Extra&ct addresses..."), gettext_noop("Save all or some addresses of the message in an address book"), FALSE },
       { WXMENU_MSG_TOGGLEHEADERS, gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , TRUE },
-      { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message\tCtrl-W"), gettext_noop("Show the raw message text") , FALSE },
+      { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message\tCtrl-Z"), gettext_noop("Show the raw message text") , FALSE },
 #ifdef EXPERIMENTAL_show_uid
       { WXMENU_MSG_SHOWUID, "Show message UID&L", "", FALSE },
 #endif // EXPERIMENTAL_show_uid
-      { WXMENU_MSG_SHOWMIME,  gettext_noop("Show &MIME structure...\tShift-Ctrl-W"), gettext_noop("Show the MIME structure of the message") , FALSE },
+      { WXMENU_MSG_SHOWMIME,  gettext_noop("Show &MIME structure...\tShift-Ctrl-Z"), gettext_noop("Show the MIME structure of the message") , FALSE },
    { WXMENU_SUBMENU,       "", "", FALSE },
 
    // compose
