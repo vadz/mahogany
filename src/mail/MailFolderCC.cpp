@@ -3770,6 +3770,22 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
          // no, they were not - don't refresh everything!
          return;
       }
+
+      // it is not necessary to update the other status fields because they
+      // were already updated when the message was deleted, but this one must
+      // be kept in sync manually as it wasn't updated before
+      MailFolderStatus status;
+      MfStatusCache *mfStatusCache = MfStatusCache::Get();
+      if ( mfStatusCache->GetStatus(mf->GetName(), &status) )
+      {
+         size_t numExpunged = mf->m_expungedIndices->GetCount();
+         ASSERT_MSG( status.total >= numExpunged,
+                     "total number of messages miscached" );
+
+         status.total -= numExpunged;
+
+         mfStatusCache->UpdateStatus(mf->GetName(), status);
+      }
    }
 
    // don't request update if we are only half opened: this will cause another
@@ -3829,20 +3845,6 @@ MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long msgno)
       mf->m_msgnoMax--;
    }
    //else: no need to do anything right now
-
-   // it is not necessary to update the other status fields because they
-   // were already updated when the message was deleted, but this one must
-   // be kept in sync manually as it wasn't updated before
-   MailFolderStatus status;
-   MfStatusCache *mfStatusCache = MfStatusCache::Get();
-   if ( mfStatusCache->GetStatus(mf->GetName(), &status) )
-   {
-      ASSERT_MSG( status.total, "total number of messages miscached" );
-
-      status.total--;
-
-      mfStatusCache->UpdateStatus(mf->GetName(), status);
-   }
 }
 
 /// this message matches a search
