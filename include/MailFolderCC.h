@@ -274,11 +274,38 @@ public:
    */
    static String qprint(const String &in);
 
+   /** @name Folder names and specifications */
+   //@{
+   /** Extracts the folder name from the folder specification string used by
+       cclient (i.e. {nntp/xxx}news.answers => news.answers and also #mh/Foo
+       => Foo)
+
+       @param specification the full cclient folder specification
+       @param folderType the (supposed) type of the folder
+       @param name the variable where the folder name will be returned
+       @return TRUE if folder name could be successfully extracted
+    */
+   static bool SpecToFolderName(const String& specification,
+                                FolderType folderType,
+                                String *name);
+
    /** A helper function: remove the MHPATH prefix from the path and return
        TRUE or return FALSE if the path is absolute but doesn't start with
        MHPATH. Don't change anything for relative paths.
+
+       @param path: full path to the MH folder on input, folder name on output
+       @return TRUE if path was a valid MH folder
    */
-   static bool CanonicalizeMHPath(String *path);
+   static bool GetMHFolderName(String *path);
+   //@}
+
+   /**
+      initialize the MH driver (it's safe to call it more than once) - has a
+      side effect of returning the MHPATH which is the root path under which
+      all MH folders should be situated on success. Returns empty string on
+      failure.
+   */
+   static const String& InitializeMH();
 
 private:
    /// private constructor, does basic initialisation
@@ -581,6 +608,10 @@ private:
    Ticket   m_Ticket;
    class ASMailFolder *m_ASMailFolder;
    //@}
+
+   // used by InitializeMH() only
+   static String ms_MHpath;
+
 public:
    DEBUG_DEF
    MOBJECT_DEBUG(MailFolderCC)

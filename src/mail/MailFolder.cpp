@@ -148,9 +148,9 @@ MailFolder::OpenFolder(int typeAndFlags,
 
       case MF_MH:
          {
-            // call it now just to initialize the MH driver
-            String pathMH;
-            if ( !MailFolderCC::CanonicalizeMHPath(&pathMH) )
+            // initialize the MH driver now to get the MHPATH until cclient
+            // has a chance to complain about it
+            if ( !MailFolderCC::InitializeMH() )
             {
                profile->DecRef();
 

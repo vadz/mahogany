@@ -51,7 +51,7 @@
 #include "Mdefaults.h"
 #include "MailCollector.h"
 
-#include "MailFolderCC.h"        // for CanonicalizeMHPath
+#include "MailFolderCC.h"        // for GetMHFolderName
 
 #include "gui/wxDialogLayout.h"
 #include "gui/wxOptionsPage.h"
@@ -1114,11 +1114,11 @@ wxFolderPropertiesPage::UpdateUI(FolderType folderType)
             Profile_obj profile(folderParent->GetFullName());
 
             wxString path;
-            MailFolderCC::CanonicalizeMHPath(&path);
-            path += READ_CONFIG(profile, MP_FOLDER_PATH);
-            if ( !!path && path.Last() != '/' )
-               path += '/';
-            path += dlg->GetFolderName();
+            path << MailFolderCC::InitializeMH()
+                 << READ_CONFIG(profile, MP_FOLDER_PATH);
+            if ( !!path && !wxIsPathSeparator(path.Last()) )
+               path << '/';
+            path << dlg->GetFolderName();
 
             m_path->SetValue(path);
          }
@@ -1497,10 +1497,12 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    {
       // MH folder name is always relative to the MH root path
       path = m_path->GetValue();
-      if ( !MailFolderCC::CanonicalizeMHPath(&path) )
+      if ( !MailFolderCC::GetMHFolderName(&path) )
       {
          wxLogError(_("Impossible to create MH folder '%s'."),
                     path.c_str());
+
+         wxLog::GetActiveTarget()->Flush();
 
          return FALSE;
       }

@@ -89,7 +89,6 @@ typedef int Ticket;
 /// A ticket number that never appears.
 #define ILLEGAL_TICKET   -1
 
-   
 /** Each operation can carry some user data. */
 typedef void * UserData;
 
@@ -155,10 +154,19 @@ inline bool CanHaveSubfolders(FolderType type, FolderType *subtype = NULL)
             // MH folder can only have MH subfolders
             *subtype = MF_MH;
          }
+         return TRUE;
+
+      case MF_IMAP:
+         if ( subtype )
+         {
+            // IMAP folders only have IMAP subfolders
+            *subtype = MF_IMAP;
+         }
+         return TRUE;
 
       case MF_GROUP:
       case MF_ROOT:
-         if ( subtype && type != MF_MH )
+         if ( subtype )
          {
             // can contain any subfolders at all
             *subtype = MF_ILLEGAL;

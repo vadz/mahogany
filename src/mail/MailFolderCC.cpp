@@ -131,117 +131,6 @@ String MailFolderCC::qprint(const String &in)
       return out;
 }
 
-/* static */
-bool MailFolderCC::CanonicalizeMHPath(String *path)
-{
-   String& name = *path;
-
-   // special convention: return the MH path if the string was empty
-   if ( wxIsAbsolutePath(name) || !name )
-   {
-      // init cclient
-      if ( !cclientInitialisedFlag )
-      {
-         CClientInit();
-      }
-
-      // before trying to use MH driver we must ensure that it has a valid
-      // MHPATH
-      static bool s_hasMHpath = FALSE; // MT-UNSAFE (hopefully this is always
-                                       // called from the main thread, but what
-                                       // if not?)
-      if ( !s_hasMHpath )
-      {
-         // normally, the MH path is read by MH cclient driver from the
-         // MHPROFIle file (~/.mh_profile under Unix), but we can't rely on
-         // this because if this file is not found, it results in an error and
-         // the MH driver is disabled - though it's perfectly ok for this file
-         // to be empty... So we can use cclient MH logic if this file exists -
-         // but not if it doesn't (and never under Windows)
-
-#ifdef OS_UNIX
-         String home = getenv("HOME");
-         String filenameMHProfile = home + "/.mh_profile";
-         FILE *fp = fopen(filenameMHProfile, "r");
-         if ( fp )
-         {
-            fclose(fp);
-         }
-         else
-#endif // OS_UNIX
-         {
-            // need to find MH path ourself
-#ifdef OS_UNIX
-            // the standard location under Unix
-            String pathMH = home + "/Mail";
-#else // !Unix
-            // use the user directory by default
-            String pathMH = READ_APPCONFIG(MP_USERDIR);
-#endif // Unix/!Unix
-
-            // const_cast is harmless
-            mail_parameters(NULL, SET_MHPATH, (char *)pathMH.c_str());
-         }
-      }
-
-      // force cclient to init the MH driver because it may be not inited yet
-      char tmp[MAILTMPLEN];
-      if ( !mh_isvalid("#MHINBOX", tmp, TRUE /* syn only check */) )
-      {
-         wxLogError(_("Sorry, support for MH folders is disabled."));
-
-         return FALSE;
-      }
-
-      s_hasMHpath = TRUE;
-
-      // retrieve the MH path (notice that we don't always find it ourself -
-      // sometimes its found onyl by the call to mh_isvalid)
-
-      // calling mail_parameters doesn't work because of a compiler bug: gcc
-      // mangles mh_parameters function completely and it never returns
-      // anything for GET_MHPATH - I didn't find another workaround
-#if 0
-      (void)mail_parameters(NULL, GET_MHPATH, &tmp);
-
-      String pathMH = tmp;
-#else // 1
-      String pathMH = mh_getpath();
-#endif // 0/1
-
-      if ( !name )
-      {
-         // return the MH path
-         name = pathMH;
-      }
-      else // remove the prefix from absolute path
-      {
-         if ( !!pathMH )
-         {
-            wxString pathFolder(name, pathMH.length());
-            if ( strutil_compare_filenames(name, pathMH) )
-            {
-               // skip MH path (+1 for the '/')
-               name = name.c_str() + pathMH.length() + 1;
-            }
-            else
-            {
-               wxLogError(_("Invalid MH folder name '%s' - all MH folders should "
-                            "be under '%s' directory."),
-                          name.c_str(),
-                          pathMH.c_str());
-
-               return FALSE;
-            }
-         }
-         //else: no MH path, assume it's ok...
-      }
-   }
-   //else: non empty relative path - leave as is
-
-   return TRUE;
-}
-
 
 class FolderListingEntryCC : public FolderListingEntry
 {
@@ -735,9 +624,7 @@ MailFolderCC::Open(void)
       {
          // the real path for MH mailboxes is not just the mailbox name
          String path;
-         CanonicalizeMHPath(&path);
-         path += '/';
-         path += m_MailboxPath.c_str() + 4;   // strlen("#mh/")
+         path << InitializeMH() << m_MailboxPath.c_str() + 4; // strlen("#mh/")
          exists = wxFileExists(path);
       }
 
@@ -1401,6 +1288,181 @@ MailFolderCC::CClientInit(void)
 {
 #include <linkage.c>
    cclientInitialisedFlag = true;
+}
+
+String MailFolderCC::ms_MHpath;
+
+const String&
+MailFolderCC::InitializeMH()
+{
+   if ( !ms_MHpath )
+   {
+      // first, init cclient
+      if ( !cclientInitialisedFlag )
+      {
+         CClientInit();
+      }
+
+      // normally, the MH path is read by MH cclient driver from the MHPROFIle
+      // file (~/.mh_profile under Unix), but we can't rely on this because if
+      // this file is not found, it results in an error and the MH driver is
+      // disabled - though it's perfectly ok for this file to be empty... So
+      // we can use cclient MH logic if this file exists - but not if it
+      // doesn't (and never under Windows)
+
+#ifdef OS_UNIX
+      String home = getenv("HOME");
+      String filenameMHProfile = home + "/.mh_profile";
+      FILE *fp = fopen(filenameMHProfile, "r");
+      if ( fp )
+      {
+         fclose(fp);
+      }
+      else
+#endif // OS_UNIX
+      {
+         // need to find MH path ourself
+#ifdef OS_UNIX
+         // the standard location under Unix
+         String pathMH = home + "/Mail";
+#else // !Unix
+         // use the user directory by default
+         String pathMH = READ_APPCONFIG(MP_USERDIR);
+#endif // Unix/!Unix
+
+         // const_cast is harmless
+         mail_parameters(NULL, SET_MHPATH, (char *)pathMH.c_str());
+      }
+
+      // force cclient to init the MH driver
+      char tmp[MAILTMPLEN];
+      if ( !mh_isvalid("#MHINBOX", tmp, TRUE /* syn only check */) )
+      {
+         wxLogError(_("Sorry, support for MH folders is disabled."));
+      }
+      else
+      {
+         // retrieve the MH path (notice that we don't always find it ourself -
+         // sometimes it's found only by the call to mh_isvalid)
+
+         // calling mail_parameters doesn't work because of a compiler bug: gcc
+         // mangles mh_parameters function completely and it never returns
+         // anything for GET_MHPATH - I didn't find another workaround
+#if 0
+         (void)mail_parameters(NULL, GET_MHPATH, &tmp);
+
+         ms_MHpath = tmp;
+#else // 1
+         ms_MHpath = mh_getpath();
+#endif // 0/1
+
+         // the path should have a trailing [back]slash
+         if ( !!ms_MHpath && !wxIsPathSeparator(ms_MHpath.Last()) )
+         {
+            ms_MHpath << wxFILE_SEP_PATH;
+         }
+      }
+   }
+
+   return ms_MHpath;
+}
+
+bool
+MailFolderCC::GetMHFolderName(String *path)
+{
+   String& name = *path;
+
+   if ( wxIsAbsolutePath(name) )
+   {
+      if ( !InitializeMH() ) // it's harmless to call it more than once
+      {
+         // no MH support
+         return FALSE;
+      }
+
+      wxString pathFolder(name, ms_MHpath.length());
+      if ( strutil_compare_filenames(pathFolder, ms_MHpath) )
+      {
+         // skip MH path (and trailing slash which follows it)
+         name = name.c_str() + ms_MHpath.length();
+      }
+      else
+      {
+         wxLogError(_("Invalid MH folder name '%s' - all MH folders should "
+                      "be under '%s' directory."),
+                    name.c_str(),
+                    ms_MHpath.c_str());
+
+         return FALSE;
+      }
+   }
+   //else: relative path - leave as is
+
+   return TRUE;
+}
+
+bool MailFolderCC::SpecToFolderName(const String& specification,
+                                    FolderType folderType,
+                                    String *pName)
+{
+   CHECK( pName, FALSE, "NULL name in MailFolderCC::SpecToFolderName" );
+
+   String& name(*pName);
+   switch ( folderType )
+   {
+      case MF_MH:
+         {
+            static const int lenPrefix = 4;  // strlen("#mh/")
+            if ( strncmp(specification, "#mh/", lenPrefix) != 0 )
+            {
+               FAIL_MSG("invalid MH folder specification - no #mh/ prefix");
+
+               return FALSE;
+            }
+
+            // make sure that the folder name does not start with s;ash
+            const char *start = specification.c_str() + lenPrefix;
+            while ( wxIsPathSeparator(*start) )
+            {
+               start++;
+            }
+
+            name = start;
+         }
+         break;
+
+      case MF_NNTP:
+      case MF_NEWS:
+         {
+            int startIndex = wxNOT_FOUND;
+            if ( specification[0u] == '{' )
+            {
+               wxString protocol(specification.c_str() + 1, 4);
+               protocol.MakeLower();
+               if ( protocol == "nntp" || protocol == "news" )
+               {
+                  startIndex = specification.Find('}');
+               }
+               //else: leave it to be wxNOT_FOUND
+            }
+
+            if ( startIndex == wxNOT_FOUND )
+            {
+               FAIL_MSG("invalid NNTP folder specification - no {nntp/...}");
+
+               return FALSE;
+            }
+
+            name = specification.c_str() + (size_t)startIndex + 1;
+         }
+         break;
+
+      default:
+         FAIL_MSG("not done yet");
+         return FALSE;
+   }
+
+   return TRUE;
 }
 
 /// adds this object to Map

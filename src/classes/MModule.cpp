@@ -25,6 +25,8 @@
 #   include "strutil.h"
 #endif
 
+#include "MDialogs.h"
+
 #include "Mversion.h"
 #include "MModule.h"
 

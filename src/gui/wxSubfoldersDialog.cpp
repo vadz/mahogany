@@ -28,6 +28,7 @@
 #  include "guidef.h"
 #  include "strutil.h"
 
+#  include <wx/app.h>
 #  include <wx/listbox.h>
 #  include <wx/statbox.h>
 #  include <wx/layout.h>
@@ -49,7 +50,9 @@ class wxSubscriptionDialog : public wxManuallyLaidOutDialog,
                              public MEventReceiver
 {
 public:
-   wxSubscriptionDialog(wxWindow *parent, const wxString& title);
+   wxSubscriptionDialog(wxWindow *parent,
+                        const wxString& title,
+                        FolderType folderType);
    virtual ~wxSubscriptionDialog();
 
    // event processing function
@@ -58,6 +61,9 @@ public:
 private:
    // the GUI controls
    wxListBox *m_listbox;
+
+   // the type of the folders we're enumerating
+   FolderType m_folderType;
 
    // MEventReceiver cookie for the event manager
    void *m_regCookie;
@@ -72,11 +78,15 @@ private:
 // ----------------------------------------------------------------------------
 
 wxSubscriptionDialog::wxSubscriptionDialog(wxWindow *parent,
-                                           const wxString& title)
+                                           const wxString& title,
+                                           FolderType folderType)
                     : wxManuallyLaidOutDialog(parent, title, "SubscribeDialog")
 {
+   // init members
    m_regCookie = MEventManager::Register(*this, MEventId_ASFolderResult);
    ASSERT_MSG( m_regCookie, "can't register with event manager");
+
+   m_folderType = folderType;
 
    // create controls
    wxLayoutConstraints *c;
@@ -119,14 +129,14 @@ bool wxSubscriptionDialog::OnMEvent(MEventData& event)
    CHECK( result->GetOperation() == ASMailFolder::Op_ListFolders, FALSE,
           "unexpected operation notification" );
 
-   wxString name = ((ASMailFolder::ResultFolderExists *)result)->GetName();
-   if ( strncmp(name, "#mh/", 4) == 0 )
+   // we're passed a folder specification - extract the folder name from it
+   // (it's better to show this to the user rather than cryptic cclient string)
+   wxString name,
+            spec = ((ASMailFolder::ResultFolderExists *)result)->GetName();
+   if ( MailFolderCC::SpecToFolderName(spec, m_folderType, &name) )
    {
-      // remove the #mh prefix
-      name = name.c_str() + 4;
+      m_listbox->Append(name);
    }
-
-   m_listbox->Append(name);
 
    result->DecRef();
 
@@ -143,10 +153,8 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
    Profile_obj profile(folder->GetFullName());
    CHECK( profile, FALSE, "can't create profile" );
 
-   String name = READ_CONFIG(profile, MP_FOLDER_PATH);
-   CHECK( !!name, FALSE, "empty folder path?" );
-
-   while ( name.Last() == '/' )
+   wxString name = READ_CONFIG(profile, MP_FOLDER_PATH);
+   while ( !!name && name.Last() == '/' )
    {
       // shouldn't end with backslash because otherwise mail_list won't return
       // the root folder itself (but we want it)
@@ -160,22 +168,24 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
                                                  profile);
 
    wxString title;
-   title.Printf(_("Subfolders of folder '%s'"), folder->GetFullName().c_str()); 
-   wxSubscriptionDialog dlg(parent, title);
+   title.Printf(_("Subfolders of folder '%s'"), folder->GetFullName().c_str());
+   wxSubscriptionDialog dlg(parent, title, folder->GetType());
 
    UserData ud = &dlg;
-   Ticket ticket = asmf->ListFolders
-                         (
-                          "",       // host
-                          MF_MH,    // folder type
-                          name,     // start folder name
-                          "*",      // everything recursively
-                          FALSE,    // subscribed only?
-                          "",       // reference (what's this?)
-                          ud
-                         );
+   (void)asmf->ListFolders
+                (
+                 "",       // host
+                 MF_MH,    // folder type
+                 name,     // start folder name
+                 "*",      // everything recursively
+                 FALSE,    // subscribed only?
+                 "",       // reference (what's this?)
+                 ud
+                );
 
    asmf->DecRef();
+
+   wxTheApp->ProcessIdle();
 
    dlg.ShowModal();
 

@@ -615,11 +615,11 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
       m_menu->Enable(FolderMenu::Delete, !isRoot);
       m_menu->Enable(FolderMenu::Properties, !isRoot);
 
-      // for now, only enable this for MH folders (IMAP and NNTP/News to come)
-      m_menu->Enable(FolderMenu::BrowseSub, folderType == MF_MH);
-
-      // only group folders can have subfolders
-      m_menu->Enable(FolderMenu::New, CanHaveSubfolders(folderType));
+      // these items only make sense when a folder can, in principle, have
+      // inferiors
+      bool mayHaveSubfolders = CanHaveSubfolders(folderType);
+      m_menu->Enable(FolderMenu::BrowseSub, mayHaveSubfolders);
+      m_menu->Enable(FolderMenu::New, mayHaveSubfolders);
 
       PopupMenu(m_menu, pos.x, pos.y);
    }
@@ -640,6 +640,10 @@ wxFolderTreeImpl::GetTreeItemFromName(const String& fullname)
    {
       // find the child of the current item which corresponds to (the [grand]
       // parent of) our folder
+      if ( !!currentPath )
+      {
+         currentPath << '/';
+      }
       currentPath << components[n];
 
       long cookie;
@@ -927,7 +931,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
       // recreate the branch
       wxTreeItemId parent = GetTreeItemFromName(parentName);
 
-      ASSERT_MSG(parent.IsOk(), "no such item in the tree??");
+      CHECK(parent.IsOk(), TRUE, "no such item in the tree??");
 
       Collapse(parent);
       DeleteChildren(parent);
