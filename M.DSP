@@ -1833,6 +1833,10 @@ SOURCE=.\src\modules\viewflt\Rot13.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\modules\viewflt\Signature.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\modules\viewflt\Trailer.cpp
 # End Source File
 # End Group
