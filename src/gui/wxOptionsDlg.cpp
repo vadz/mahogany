@@ -938,21 +938,23 @@ void wxOptionsPage::CreateControls()
 
 void wxOptionsPage::OnChange(wxEvent& event)
 {
-   wxOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsDialog);
-
-   UpdateUI();
-
    wxControl *control = (wxControl *)event.GetEventObject();
    int index = m_aControls.Index(control);
 
-   if ( index != wxNOT_FOUND )
+   if ( index == wxNOT_FOUND )
    {
-      m_aDirtyFlags[(size_t)index] = true;
+      // we can get events from the text controls from "file open" dialog here
+      // too - just skip them silently
+      event.Skip();
+
+      return;
    }
-   else
-   {
-      wxFAIL_MSG("unknown control in wxOptionsPage::OnChange");
-   }
+
+   m_aDirtyFlags[(size_t)index] = true;
+
+   wxOptionsDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsDialog);
+
+   UpdateUI();
 
    if ( !dialog )
    {
