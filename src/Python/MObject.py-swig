@@ -1,0 +1,64 @@
+# This file was created automatically by SWIG.
+import MObjectc
+
+from MString import *
+class MObjectPtr :
+    def __init__(self,this):
+        self.this = this
+        self.thisown = 0
+    def __del__(self):
+        if self.thisown == 1 :
+            MObjectc.delete_MObject(self.this)
+    def MOcheck(self):
+        val = MObjectc.MObject_MOcheck(self.this)
+        return val
+    def __repr__(self):
+        return "<C MObject instance>"
+class MObject(MObjectPtr):
+    def __init__(self,this):
+        self.this = this
+
+
+
+
+class MObjectRCPtr(MObjectPtr):
+    def __init__(self,this):
+        self.this = this
+        self.thisown = 0
+    def IncRef(self):
+        val = MObjectc.MObjectRC_IncRef(self.this)
+        return val
+    def DecRef(self):
+        val = MObjectc.MObjectRC_DecRef(self.this)
+        return val
+    def __repr__(self):
+        return "<C MObjectRC instance>"
+class MObjectRC(MObjectRCPtr):
+    def __init__(self) :
+        self.this = MObjectc.new_MObjectRC()
+        self.thisown = 1
+
+
+
+
+
+
+#-------------- FUNCTION WRAPPERS ------------------
+
+def SafeIncRef(arg0):
+    val = MObjectc.SafeIncRef(arg0.this)
+    return val
+
+def SafeDecRef(arg0):
+    val = MObjectc.SafeDecRef(arg0.this)
+    return val
+
+MObject_CheckLeaks = MObjectc.MObject_CheckLeaks
+
+MObjectRC_CheckLeaks = MObjectc.MObjectRC_CheckLeaks
+
+
+
+#-------------- VARIABLE WRAPPERS ------------------
+
+MOBJECT_MAGIC = MObjectc.MOBJECT_MAGIC
