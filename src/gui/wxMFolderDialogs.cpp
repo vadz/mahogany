@@ -789,7 +789,7 @@ wxFolderPropertiesPage::SetDefaultValues(bool firstTime)
    MFolder::Type typeFolder;
    if ( firstTime )
    {
-      typeFolder = (MFolder::Type)READ_CONFIG(m_profile, MP_FOLDER_TYPE);
+      typeFolder = (MFolder::Type)GetFolderType(READ_CONFIG(m_profile, MP_FOLDER_TYPE));
       if(typeFolder == FolderInvalid)
          typeFolder = File;
       m_radio->SetSelection(typeFolder);
@@ -883,6 +883,13 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    {
       case POP:
       case IMAP:
+         // anonymous IMAP access?
+         if(typeFolder == IMAP &&
+            (m_login->GetValue().IsEmpty() || m_login->GetValue() ==
+             "anonymous"))
+            m_profile->writeEntry(MP_FOLDER_TYPE,typeFolder|MF_FLAGS_ANON);
+         else
+            m_profile->writeEntry(MP_FOLDER_TYPE,typeFolder);
          m_profile->writeEntry(MP_POP_LOGIN,m_login->GetValue());
          m_profile->writeEntry(MP_POP_PASSWORD,m_password->GetValue());
          m_profile->writeEntry(MP_POP_HOST,m_server->GetValue());

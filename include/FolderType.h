@@ -24,7 +24,7 @@ static const int MF_TYPEMASK = 0x00ff;
 enum FolderType
 {
    // the MF_XXX constants have the same values as c-client folder types
-   MF_ILLEGAL = -1,              // illegal type
+   MF_ILLEGAL = 0xff,            // illegal type - cannot use -1 because of bitmask
    MF_INBOX = 0,                 // system inbox
    MF_FILE = 1,                  // mbox file
    MF_POP = 2,                   // pop3
