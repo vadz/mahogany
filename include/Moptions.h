@@ -1829,7 +1829,7 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_NEWMAILCOMMAND_DEFVAL   M_EMPTYSTRING
 
 /// play a sound on new mail?
-#define MP_NEWMAIL_PLAY_SOUND_DEFVAL 1
+#define MP_NEWMAIL_PLAY_SOUND_DEFVAL 1l
 
 #ifdef OS_UNIX
 /// which sound to play?
