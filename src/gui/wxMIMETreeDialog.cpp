@@ -144,7 +144,7 @@ wxMIMETreeCtrl::wxMIMETreeCtrl(wxWindow *parent)
                   parent,
                   -1,
                   wxDefaultPosition,
-                  wxDefaultSize,
+                  wxSize(400, 200),
                   wxTR_DEFAULT_STYLE | wxTR_MULTIPLE
                 )
 {
@@ -217,7 +217,6 @@ wxMIMETreeDialog::wxMIMETreeDialog(const MimePart *partRoot,
    AddToTree(wxTreeItemId(), partRoot);
 
    m_treectrl->Expand(m_treectrl->GetRootItem());
-   m_treectrl->SetMinSize(wxSize(200, 200));
 
    box->SetLabel(wxString::Format(_("%u MIME parts"), m_countParts));
 
