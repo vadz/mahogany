@@ -2442,7 +2442,7 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
                   (
                      wxString::Format
                      (
-                        _("Filtering %u messages in folder '%s'..."),
+                        _("Filtering %u messages in folder '%s'...\n\n"),
                         count, m_MailFolder->GetName().c_str()
                      ),
                      "",
@@ -2502,30 +2502,35 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
          String subject = m_MailMessage->Subject(),
                 from = m_MailMessage->From();
 
-         // make the string shorter for the progress dialog as there is not
-         // much space in it
+         textPD.Printf(_("Filtering message %u/%u"), idx + 1, count);
+
+         // make a multiline label for the progress dialog and a more concise
+         // one for the status bar
          if ( pd )
          {
-            textPD = _("Message ");
+            textPD << '\n'
+                   << _("From: ") << from << '\n'
+                   << _("Subject: ") << subject;
          }
-         else
+         else // no progress dialog, text goes to the status bar
          {
-            // but more informative for the status bar text
-            textPD.Printf(_("Filtering message %u/%u ("), idx + 1, count);
-         }
+            textPD << " (";
 
-         if ( !from.empty() )
-         {
-            textPD << _("from ") << from << ' ';
-         }
+            if ( !from.empty() )
+            {
+               textPD << _("from ") << from << ' ';
+            }
 
-         if ( !subject.empty() )
-         {
-            textPD << _("about '") << subject << '\'';
-         }
-         else
-         {
-            textPD << _("without subject");
+            if ( !subject.empty() )
+            {
+               textPD << _("about '") << subject << '\'';
+            }
+            else
+            {
+               textPD << _("without subject");
+            }
+
+            textPD << ')';
          }
 
          if ( pd )
@@ -2540,9 +2545,6 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
          }
          else // no progress dialog
          {
-            // close the parenthesis from Printf() above
-            textPD << ')';
-
             // don't pass it as the first argument because the string might
             // contain '%' characters!
             wxLogStatus("%s", textPD.c_str());

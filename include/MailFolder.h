@@ -255,10 +255,7 @@ public:
       ReadOnly,
 
       /// only connect to the server, don't really open it
-      HalfOpen,
-
-      /// not used for OpenFolder() (yet?), used by CheckFolder()
-      Silent
+      HalfOpen
    };
 
    /// flags for SearchByFlag()
@@ -338,11 +335,10 @@ public:
    /**
      Check the folder status without opening it (if possible).
 
-     @param openmode if it is Silent, no dialogs are shown
+     @param frame if not NULL, some feedback is given
      @return true if ok, false if an error occured
     */
-   static bool CheckFolder(const MFolder *mfolder,
-                           OpenMode openmode = Normal);
+   static bool CheckFolder(const MFolder *mfolder, wxFrame *frame = NULL);
 
    //@}
 
@@ -375,10 +371,10 @@ public:
    /**
      Call Ping() on all opened mailboxes.
 
-     @param openmode if it is Silent, no dialogs are shown
+     @param frame if not NULL, some feedback is given
      @return true if ok, false if an error occured
     */
-   static bool PingAllOpened(OpenMode openmode = Normal);
+   static bool PingAllOpened(wxFrame *frame = NULL);
 
    //@}
 

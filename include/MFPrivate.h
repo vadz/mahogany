@@ -46,9 +46,9 @@ private:
 class NonInteractiveLock
 {
 public:
-   NonInteractiveLock(MailFolder *mf, MailFolder::OpenMode openmode)
+   NonInteractiveLock(MailFolder *mf, bool interactive)
    {
-      if ( openmode == MailFolder::Silent )
+      if ( !interactive )
       {
          /*
             We need to suppress any GUI manifestations while checking mail in

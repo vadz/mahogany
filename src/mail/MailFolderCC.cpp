@@ -2184,9 +2184,8 @@ MailFolderCC::Open(OpenMode openmode)
             ccOptions |= OP_HALFOPEN;
             break;
 
-         case Silent:
          default:
-            FAIL_MSG( "Silent open mode is not valid here" );
+            FAIL_MSG( "unknown open mode" );
             break;
       }
 

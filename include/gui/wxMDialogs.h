@@ -90,6 +90,9 @@ public:
    /// change just the number shown
    void SetValue(size_t numDone);
 
+   /// get our frame
+   wxFrame *GetFrame() const { return m_frame; }
+
 private:
    wxFrame *m_frame;
    wxStaticText *m_labelText,

@@ -244,7 +244,7 @@ public:
       if ( mApplication->AllowBgProcessing() && !m_mf->IsLocked() )
       {
          // don't show any dialogs when doing background checks
-         NonInteractiveLock noInter(m_mf, MailFolder::Silent);
+         NonInteractiveLock noInter(m_mf, false /* !interactive */);
 
          m_mf->Ping();
       }

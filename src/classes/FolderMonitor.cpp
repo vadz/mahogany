@@ -72,6 +72,20 @@ enum FolderState
 };
 
 // ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+/// create the progress info object to show while we're doing the check
+static MProgressInfo *CreateProgressInfo()
+{
+   // intentionally make the label long to avoid clipping it when it is changed
+   // later
+   return new MProgressInfo(NULL,
+                            _("Checking for new mail, please wait..."),
+                            _("Checking for new mail"));
+}
+
+// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
@@ -211,7 +225,8 @@ public:
 
 protected:
    /// check for new mail in this one folder only
-   bool CheckOneFolder(FolderMonitorFolderEntry *i, bool interactive);
+   bool CheckOneFolder(FolderMonitorFolderEntry *i,
+                       MProgressInfo *progInfo);
 
    /// return true if we already have this folder in the incoming list
    bool IsBeingMonitored(const MFolder *folder) const;
@@ -233,16 +248,6 @@ private:
    /// the mutex locked while we're checking for new mail
    MMutex m_inNewMailCheck;
 };
-
-// ----------------------------------------------------------------------------
-// private functions
-// ----------------------------------------------------------------------------
-
-// translate bool interactive flag to MailFolder open mode
-static inline MailFolder::OpenMode GetMode(bool interactive)
-{
-   return interactive ? MailFolder::Normal : MailFolder::Silent;
-}
 
 // ============================================================================
 // FolderMonitorImpl implementation
@@ -281,16 +286,23 @@ FolderMonitorImpl::FolderMonitorImpl()
 
    BuildList();
 
+   MProgressInfo *progInfo = NULL;
+
    for ( FolderMonitorFolderList::iterator i = m_list.begin();
          i != m_list.end();
          ++i )
    {
+      if ( !progInfo )
+         progInfo = CreateProgressInfo();
+
       Profile_obj profile(i->GetFolder()->GetProfile());
       if ( READ_CONFIG_BOOL(profile, MP_COLLECTATSTARTUP) )
       {
-         (void)CheckOneFolder(i.operator->(), true /* interactive check */);
+         (void)CheckOneFolder(i.operator->(), progInfo);
       }
    }
+
+   delete progInfo;
 }
 
 FolderMonitorImpl::~FolderMonitorImpl(void)
@@ -402,10 +414,24 @@ FolderMonitorImpl::CheckNewMail(int flags)
 
    bool rc = true;
 
+   // show what we're doing in interactive mode
+   MProgressInfo *progInfo;
+   if ( flags & Interactive )
+   {
+      progInfo = CreateProgressInfo();
+   }
+   else // not interactive
+   {
+      progInfo = NULL;
+   }
+
    // check all opened folders if requested
    if ( flags & Opened )
    {
-      if ( !MailFolder::PingAllOpened(GetMode((flags & Interactive) != 0)) )
+      if ( progInfo )
+         progInfo->SetLabel(_("Checking all opened folders..."));
+
+      if ( !MailFolder::PingAllOpened(progInfo ? progInfo->GetFrame() : NULL) )
          rc = false;
    }
 
@@ -418,17 +444,20 @@ FolderMonitorImpl::CheckNewMail(int flags)
       // hasn't expired yet
       if ( (flags & Interactive) || (i->GetCheckTime() < timeCur) )
       {
-         if ( !CheckOneFolder(i.operator->(), (flags & Interactive) != 0) )
+         if ( !CheckOneFolder(i.operator->(), progInfo) )
             rc = false;
       }
       //else: don't check this folder yet
    }
 
+   delete progInfo;
+
    return rc;
 }
 
 bool
-FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i, bool interactive)
+FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i,
+                                  MProgressInfo *progInfo)
 {
    const MFolder *folder = i->GetFolder();
 
@@ -476,14 +505,16 @@ FolderMonitorImpl::CheckOneFolder(FolderMonitorFolderEntry *i, bool interactive)
    wxLogTrace(TRACE_MONITOR, "Checking for new mail in '%s'.",
               i->GetName().c_str());
 
-   if ( interactive )
+   if ( progInfo )
    {
-      // TODO: show to the user that we're doing something
-      ;
+      // show to the user that we're doing something
+      progInfo->SetLabel(String::Format(_("Checking folder %s..."),
+                                        folder->GetFullName().c_str()));
    }
 
    // don't show the dialogs in non-interactive mode
-   if ( !MailFolder::CheckFolder(folder, GetMode(interactive)) )
+   if ( !MailFolder::CheckFolder(folder,
+                                 progInfo ? progInfo->GetFrame() : NULL) )
    {
       if ( !i->IncreaseFailCount() )
       {

@@ -289,7 +289,7 @@ MailFolder::GetOpenedFolderFor(const MFolder *folder)
 }
 
 /* static */
-bool MailFolder::PingAllOpened(OpenMode openmode)
+bool MailFolder::PingAllOpened(wxFrame *frame)
 {
    MailFolder **mfOpened = GetAllOpened();
    if ( !mfOpened )
@@ -300,7 +300,7 @@ bool MailFolder::PingAllOpened(OpenMode openmode)
    {
       MailFolder *mf = mfOpened[n];
 
-      NonInteractiveLock noInter(mf, openmode);
+      NonInteractiveLock noInter(mf, frame != NULL);
 
       if ( !mf->Ping() )
       {
@@ -316,7 +316,7 @@ bool MailFolder::PingAllOpened(OpenMode openmode)
 
 /* static */
 bool
-MailFolder::CheckFolder(const MFolder *folder, OpenMode openmode)
+MailFolder::CheckFolder(const MFolder *folder, wxFrame *frame)
 {
    if ( !Init() )
       return false;
@@ -326,7 +326,7 @@ MailFolder::CheckFolder(const MFolder *folder, OpenMode openmode)
    MailFolder *mf = MailFolder::GetOpenedFolderFor(folder);
    if ( mf )
    {
-      NonInteractiveLock noInter(mf, openmode);
+      NonInteractiveLock noInter(mf, frame != NULL);
 
       // just pinging it is enough
       rc = mf->Ping();
