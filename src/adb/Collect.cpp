@@ -209,9 +209,17 @@ void AutoCollectAddress(const String& email,
             // the value is either 1 or 2, if 1 we have to ask
             bool askUser = autocollectFlag == 1;
             if (
-               !askUser ||
-               MDialog_YesNoDialog(_("Add new e-mail entry to database?"),
-                                   frame)
+                  !askUser ||
+                  MDialog_YesNoDialog
+                  (
+                     String::Format
+                     (
+                        _("Add new e-mail entry '%s' for '%s' to the database?"),
+                        email.c_str(),
+                        name.c_str()
+                     ),
+                     frame
+                  )
                )
             {
                AdbEntry *entry = group->CreateEntry(name);
@@ -222,7 +230,7 @@ void AutoCollectAddress(const String& email,
                                "book '%s' for autocollected address."),
                              bookName.c_str());
 
-                  // TODO ask the user if he wants to disable autocollec?
+                  // TODO ask the user if he wants to disable autocollect?
                }
                else
                {
