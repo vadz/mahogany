@@ -103,7 +103,7 @@ SignatureFilter::ReadOptions(Profile *profile)
 IMPLEMENT_VIEWER_FILTER(SignatureFilter,
                         ViewFilter::Priority_Default + 10,
                         true,      // initially enabled
-                        _("Signature"),
+                        gettext_noop("Signature"),
                         "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
 
 void

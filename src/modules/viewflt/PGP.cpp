@@ -80,7 +80,7 @@ protected:
 IMPLEMENT_VIEWER_FILTER(PGPFilter,
                         ViewFilter::Priority_High + 10,
                         false,      // initially disabled
-                        _("PGP"),
+                        gettext_noop("PGP"),
                         "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
 
 // ----------------------------------------------------------------------------

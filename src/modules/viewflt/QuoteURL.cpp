@@ -205,7 +205,7 @@ CountQuoteLevel(const char *string, int max_white, int max_alpha)
 IMPLEMENT_VIEWER_FILTER(QuoteURLFilter,
                         ViewFilter::Priority_Default,
                         true,      // enabled by default
-                        _("Quotes and URLs"),
+                        gettext_noop("Quotes and URLs"),
                         "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
 
 // ----------------------------------------------------------------------------

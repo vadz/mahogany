@@ -55,7 +55,7 @@ protected:
 IMPLEMENT_VIEWER_FILTER(Rot13Filter,
                         ViewFilter::Priority_Low,
                         false,      // initially disabled
-                        _("ROT13"),
+                        gettext_noop("ROT13"),
                         "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
 
 void

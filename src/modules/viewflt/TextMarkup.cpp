@@ -59,7 +59,7 @@ protected:
 IMPLEMENT_VIEWER_FILTER(TextMarkupFilter,
                         ViewFilter::Priority_Low + 10,
                         true,      // enabled by default
-                        _("Trivial Markup"),
+                        gettext_noop("Trivial Markup"),
                         "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
 
 /*
