@@ -6,6 +6,10 @@ $Id$
 
 - test sl5/slx abiguity in c-client: use -lshadow on libc5 and -lcrypt on glibc2?
 
+- SentMail folder path should be relative - broken
+- reply mail does not quote original mail but inserts junk
+- reply/forward buttons for messageview/folderview
+
 - wxOptionsDlg: two conversions from (long) to (int) .... is that ok?
   + should have "restore defaults", would be nice to be able to do it for
     one setting only (and not for all of them which is trivial)
