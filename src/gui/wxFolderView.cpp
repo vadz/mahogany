@@ -816,6 +816,7 @@ wxFolderListCtrl::SelectNextUnread()
       {
          if(failedOnce)
             break; // we really haven't found one
+	 failedOnce = true;
          // else: we didn't find an unread *below*, so try above:
          foundFocused = false;
          idx = -1;
@@ -825,8 +826,6 @@ wxFolderListCtrl::SelectNextUnread()
       const HeaderInfo *hi = (*hil)[idx];
       if(hi->GetUId() == focusedUId)
          foundFocused = true;
-      else
-         continue;
       
       if(
          ((! failedOnce) && foundFocused)// we are looking for the next unread now:
