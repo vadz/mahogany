@@ -229,6 +229,9 @@ enum TreeElement
 //     several functions which should be virtual are not: we do the dispatching
 //     ourselves which allows us to save 4*sizeof(void *) bytes for each item
 //     (the size a virtual table for this class would have had)
+//
+// NB2: the comment above makes no sense [any more?], the code must be
+//      rewritten to use virtual functions a.s.a.p.
 class AdbTreeElement : public wxTreeItemData
 {
 public:
@@ -328,9 +331,18 @@ public:
   virtual AdbTreeElement *FindChild(const wxChar *szName);
 
     // load all children from the config file (but don't add them to the tree).
+    //
     // This function loads only immediate subgroups and entries (and the
     // others will be loaded only when needed, thus minimizing the load time).
-  virtual void LoadChildren();
+    //
+    // return false if nothing was done (had been already loaded) or true
+    // if we did load children
+  virtual bool LoadChildren();
+
+    // free children created by LoadChildren(): it is not necessary to call this
+    // if the children were added to the tree (it takes ownership of them then)
+    // but it is if not
+  void FreeChildren();
 
     // loads all subgroups recursively and also loads all entry data (which are
     // also normally loaded only when needed) - this is used to copy the
@@ -414,7 +426,7 @@ public:
 
   // overriden base class virtuals
   virtual AdbTreeElement *FindChild(const wxChar *szName);
-  virtual void LoadChildren();
+  virtual bool LoadChildren();
 
 private:
   wxArrayString& m_astrAdb;       // names of ADBs to load
@@ -1885,8 +1897,7 @@ void wxAdbEditFrame::DoFind(const wxChar *szFindWhat, AdbTreeNode *root)
   if ( root == NULL )
     root = GetCurNode();
 
-  if ( !root->WasExpanded() )
-    root->LoadChildren();
+  bool loaded = root->LoadChildren();
 
   // depth first search the tree recursively calling ourselves
   size_t nCount = root->GetChildrenCount();
@@ -1904,6 +1915,12 @@ void wxAdbEditFrame::DoFind(const wxChar *szFindWhat, AdbTreeNode *root)
       pEntry->DecRef();
     }
   }
+
+  // normally the children are freed when the tree is deleted but if we loaded
+  // them just here, for searching, they were never added to the tree and so we
+  // must free them manually
+  if ( loaded )
+    root->FreeChildren();
 }
 
 // pressing cancel button undoes all changes to the current entry
@@ -2723,11 +2740,6 @@ wxAdbEditFrame::~wxAdbEditFrame()
 
   // clear the clipboard (may be NULL, it's ok)
   if(m_clipboard) delete m_clipboard;
-
-  // and now delete all ADB entries
-#if DELETE_TREE_CHILDREN
-  delete m_root;
-#endif
 
   // and the imagelist we were using
   delete m_pImageList;
@@ -4016,16 +4028,26 @@ void AdbTreeNode::ClearDirty()
   }
 }
 
-// this function doesn't (and shouldn't!) change the current config path
-void AdbTreeNode::LoadChildren()
+void AdbTreeNode::FreeChildren()
+{
+  const size_t nCount = m_children.Count();
+  for ( size_t n = 0; n < nCount; n++ ) {
+    AdbTreeElement *child = m_children[n];
+    delete child;
+  }
+
+  m_children.Clear();
+}
+
+bool AdbTreeNode::LoadChildren()
 {
   // only load children once
   if ( !m_children.IsEmpty() )
-    return;
+    return false;
 
   EnsureHasGroup();
 
-  wxCHECK_RET( m_pGroup, _T("AdbTreeNode without associated AdbEntryGroup") );
+  CHECK( m_pGroup, false, _T("AdbTreeNode without associated AdbEntryGroup") );
 
   wxArrayString aNames;
   size_t n, nCount = m_pGroup->GetEntryNames(aNames);
@@ -4037,6 +4059,8 @@ void AdbTreeNode::LoadChildren()
   for ( n = 0; n < nCount; n++ ) {
     (void)new AdbTreeNode(aNames[n], this);
   }
+
+  return true;
 }
 
 void AdbTreeNode::LoadAllData()
@@ -4190,14 +4214,6 @@ wxString AdbTreeNode::GetWhere() const
 
 AdbTreeNode::~AdbTreeNode()
 {
-#if DELETE_TREE_CHILDREN
-  size_t nCount = m_children.Count();
-  for ( size_t n = 0; n < nCount; n++ ) {
-    AdbTreeElement *child = m_children[n];
-    delete child;
-  }
-#endif // 0
-
   SafeDecRef(m_pGroup);
 }
 
@@ -4266,11 +4282,11 @@ AdbTreeElement *AdbTreeRoot::FindChild(const wxChar *szName)
 }
 
 // create all address books
-void AdbTreeRoot::LoadChildren()
+bool AdbTreeRoot::LoadChildren()
 {
   // do it only once
   if ( !m_children.IsEmpty() )
-    return;
+    return false;
 
   wxString strProv;
   AdbDataProvider *pProvider;
@@ -4292,6 +4308,8 @@ void AdbTreeRoot::LoadChildren()
       pProvider->DecRef();
     }
   }
+
+  return true;
 }
 
 // release AdbManager
