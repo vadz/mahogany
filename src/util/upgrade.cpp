@@ -831,9 +831,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
          ), m_UseOutboxCheckbox);
    m_UseDialUpCheckbox = panel->CreateCheckBox(labels[3], widthMax, text4);
 
-#if defined(USE_PISOCK) || defined(USE_PYTHON)
    wxControl *last = m_UseDialUpCheckbox;
-#endif // USE_PISOCK || USE_PYTHON
 
 #ifdef USE_PISOCK
    wxStaticText *text5 = panel->CreateMessage(
