@@ -1524,6 +1524,7 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
 #endif // __WXGTK__/!__WXGTK__
 }
 
+// Event handler for the mouse event "list item has been double clicked"
 void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
 {
    mApplication->UpdateAwayMode();
@@ -1550,6 +1551,7 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
    }
 }
 
+// Event handler for the list event "list item selected"
 void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
    if ( m_enableOnSelect )
@@ -1605,6 +1607,7 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
          // message will be previewed automatically
          //
          // if m_PreviewDelay == 0, this is just the same as PreviewItem()
+         if ( m_PreviewOnSingleClick )
          PreviewItemDelayed(m_itemFocus, uid);
       }
       //else: don't react to selecting another message
@@ -1612,7 +1615,7 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
    //else: processing this notification is temporarily blocked
 }
 
-// called by RETURN press
+// Event handler for the keyboard event Enter
 void wxFolderListCtrl::OnActivated(wxListEvent& event)
 {
    mApplication->UpdateAwayMode();
