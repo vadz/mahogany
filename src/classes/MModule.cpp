@@ -209,9 +209,8 @@ void MModule_AddStaticModule(const char *Name,
 static
 MModule *LoadModuleInternal(const String & name, const String &pathname)
 {
-   bool success = false;
-   wxDllType dll = wxDllLoader::LoadLibrary(pathname, &success);
-   if(! success)
+   wxDllType dll = wxDllLoader::LoadLibrary(pathname);
+   if ( !dll )
    {
       wxLogTrace(M_TRACE_MODULES, "Failed to load module '%s' from '%s'.",
                  name.c_str(), pathname.c_str());
