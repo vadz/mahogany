@@ -2738,6 +2738,10 @@ MessageView::DoMenuCommand(int id)
 void
 MessageView::DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
 {
+   // ignore mouse clicks if we're inside wxYield()
+   if ( !mApplication->AllowBgProcessing() )
+      return;
+
    CHECK_RET( ci, _T("MessageView::DoMouseCommand(): NULL ClickableInfo") );
 
    switch ( id )
