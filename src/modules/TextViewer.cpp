@@ -88,7 +88,7 @@ public:
    virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci);
    virtual void InsertImage(const wxImage& image, ClickableInfo *ci);
    virtual void InsertRawContents(const String& data);
-   virtual void InsertText(const String& text, const TextStyle& style);
+   virtual void InsertText(const String& text, const MTextStyle& style);
    virtual void InsertURL(const String& url);
    virtual void InsertSignature(const String& signature);
    virtual void EndPart();
@@ -557,7 +557,7 @@ void TextViewer::InsertRawContents(const String& data)
    FAIL_MSG( "unexpected call to TextViewer::InsertRawContents()" );
 }
 
-void TextViewer::InsertText(const String& text, const TextStyle& style)
+void TextViewer::InsertText(const String& text, const MTextStyle& style)
 {
    m_window->SetDefaultStyle(style);
 

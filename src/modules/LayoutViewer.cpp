@@ -91,7 +91,7 @@ public:
    virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci);
    virtual void InsertImage(const wxImage& image, ClickableInfo *ci);
    virtual void InsertRawContents(const String& data);
-   virtual void InsertText(const String& text, const TextStyle& style);
+   virtual void InsertText(const String& text, const MTextStyle& style);
    virtual void InsertURL(const String& url);
    virtual void InsertSignature(const String& signature);
    virtual void EndPart();
@@ -585,7 +585,7 @@ void LayoutViewer::InsertRawContents(const String& data)
    FAIL_MSG( "LayoutViewer::InsertRawContents() shouldn't be called" );
 }
 
-void LayoutViewer::InsertText(const String& text, const TextStyle& style)
+void LayoutViewer::InsertText(const String& text, const MTextStyle& style)
 {
    wxLayoutList *llist = m_window->GetLayoutList();
 

@@ -96,7 +96,7 @@ public:
    virtual void InsertAttachment(const wxBitmap& icon, ClickableInfo *ci);
    virtual void InsertImage(const wxImage& image, ClickableInfo *ci);
    virtual void InsertRawContents(const String& data);
-   virtual void InsertText(const String& text, const TextStyle& style);
+   virtual void InsertText(const String& text, const MTextStyle& style);
    virtual void InsertURL(const String& url);
    virtual void InsertSignature(const String& signature);
    virtual void EndPart();
@@ -842,7 +842,7 @@ void HtmlViewer::InsertRawContents(const String& data)
    m_htmlText += data;
 }
 
-void HtmlViewer::InsertText(const String& text, const TextStyle& style)
+void HtmlViewer::InsertText(const String& text, const MTextStyle& style)
 {
    EncodingChanger encChanger(style.HasFont() ? style.GetFont().GetEncoding()
                                               : wxFONTENCODING_SYSTEM,

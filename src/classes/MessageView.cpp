@@ -1180,7 +1180,7 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
    }
 
 
-   TextStyle style;
+   MTextStyle style;
    if ( encPart != wxFONTENCODING_SYSTEM )
    {
       wxFont font(

@@ -22,7 +22,7 @@ class ClickableInfo;
 
 // use the standard wxWin class: even if it is not really intended for this, it
 // just what we need here as it combines text colours and font info
-typedef wxTextAttr TextStyle;
+typedef wxTextAttr MTextStyle;
 
 #include "MModule.h"
 
@@ -139,7 +139,7 @@ public:
    virtual void InsertRawContents(const String& data) = 0;
 
    /// insert a chunk of text and show it in this style
-   virtual void InsertText(const String& text, const TextStyle& style) = 0;
+   virtual void InsertText(const String& text, const MTextStyle& style) = 0;
 
    /// insert an URL
    virtual void InsertURL(const String& url) = 0;
