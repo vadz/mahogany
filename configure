@@ -563,7 +563,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.182 2000/08/14 12:54:53 KB Exp 
+# From configure.in Id: configure.in,v 1.183 2000/08/24 20:19:55 KB Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -4076,9 +4076,9 @@ case "$USE_CCOSTYPE" in
 echo "configure:4077: checking for c-client library OS type" >&5
 	case "$OSTYPE" in
 	linux* | Linux*)
-		echo $ac_n "checking for pxam_end in -lpam""... $ac_c" 1>&6
-echo "configure:4081: checking for pxam_end in -lpam" >&5
-ac_lib_var=`echo pam'_'pxam_end | sed 'y%./+-%__p_%'`
+		echo $ac_n "checking for pam_end in -lpam""... $ac_c" 1>&6
+echo "configure:4081: checking for pam_end in -lpam" >&5
+ac_lib_var=`echo pam'_'pam_end | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4093,10 +4093,10 @@ extern "C"
 #endif
 /* We use char because int might match the return type of a gcc2
     builtin and then its argument prototype would still apply.  */
-char pxam_end();
+char pam_end();
 
 int main() {
-pxam_end()
+pam_end()
 ; return 0; }
 EOF
 if { (eval echo configure:4103: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then

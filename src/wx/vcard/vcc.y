@@ -998,7 +998,7 @@ EndString:
     return lexStr();
     } /* LexQuotedPrintable */
 
-static int yylex() {
+int yylex() {
     int token = 0;
 
     int lexmode = LEXMODE();
@@ -1199,7 +1199,7 @@ DLLEXPORT(void) registerMimeErrorHandler(MimeErrorHandler me)
     mimeErrorHandler = me;
     }
 
-static void mime_error(char *s)
+void mime_error(char *s)
     {
     char msg[256];
     if (mimeErrorHandler) {

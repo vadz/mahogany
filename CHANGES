@@ -1,4 +1,7 @@
 (next release) on (date of next release)
+24.08.00 KB: rpm generation and SuSE compilation work now (export RPM_ROOT= 
+             and if required make a link to it from the default location).
+             Added support for PAM under Linux to configure.
 21.08.00 KB: made install wizard explain more and always creates the INBOX
              default folder for IMAP servers added warning about browsing
              taking very long
