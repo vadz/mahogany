@@ -40,7 +40,7 @@
 #include "gui/wxlwindow.h"
 #include "gui/wxlparser.h"
 
-typedef MessageView::AllProfileValues ProfileValues;
+class LayoutViewerWindow;
 
 // ----------------------------------------------------------------------------
 // LayoutViewer: a wxLayout-based MessageViewer implementation
@@ -52,13 +52,19 @@ public:
    // default ctor
    LayoutViewer();
 
-   // operations
+   // creation &c
    virtual void Create(MessageView *msgView, wxWindow *parent);
    virtual void Clear();
    virtual void Update();
+   virtual void UpdateOptions();
+   virtual wxWindow *GetWindow() const;
+
+   // operations
+   virtual void Find(const String& text);
+   virtual void FindAgain();
+   virtual void Copy();
    virtual bool Print();
    virtual void PrintPreview();
-   virtual wxWindow *GetWindow() const;
 
    // header showing
    virtual void StartHeaders();
@@ -81,19 +87,51 @@ public:
    virtual void EndPart();
    virtual void EndBody();
 
+   // scrolling
+   virtual bool LineDown();
+   virtual bool LineUp();
+   virtual bool PageDown();
+   virtual bool PageUp();
+
    // capabilities querying
    virtual bool CanInlineImages() const;
    virtual bool CanProcess(const String& mimetype) const;
 
+   // for m_window only
+   void DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
+   {
+      m_msgView->DoMouseCommand(id, ci, pt);
+   }
+
 private:
    // set the text colour
-   void SetTextColour(const wxColour& col)
-      { m_window->GetLayoutList()->SetFontColour((wxColour *)&col); }
+   void SetTextColour(const wxColour& col);
+
+   // emulate a key press: this is the only way I found to scroll
+   // wxLayoutWindow
+   void EmulateKeyPress(int keycode);
 
    // the viewer window
-   wxLayoutWindow *m_window;
+   LayoutViewerWindow *m_window;
 
    DECLARE_MESSAGE_VIEWER()
+};
+
+// ----------------------------------------------------------------------------
+// LayoutViewerWindow: wxLayoutWindow used by LayoutViewer
+// ----------------------------------------------------------------------------
+
+class LayoutViewerWindow : public wxLayoutWindow
+{
+public:
+   LayoutViewerWindow(LayoutViewer *viewer, wxWindow *parent);
+
+private:
+   void OnMouseEvent(wxCommandEvent& event);
+
+   LayoutViewer *m_viewer;
+
+   DECLARE_EVENT_TABLE()
 };
 
 // ----------------------------------------------------------------------------
@@ -144,6 +182,95 @@ private:
    Profile *m_profile;
 };
 
+// ----------------------------------------------------------------------------
+// ScrollPositionChangeChecker: helper class used by {Line/Page}{Up/Down} to
+// check if the y-scroll position of the window has changed or not
+// ----------------------------------------------------------------------------
+
+class ScrollPositionChangeChecker
+{
+public:
+   ScrollPositionChangeChecker(wxScrolledWindow *window)
+   {
+      m_window = window;
+
+      m_window->GetViewStart(NULL, &m_y);
+   }
+
+   bool HasChanged() const
+   {
+      wxCoord y;
+      m_window->GetViewStart(NULL, &y);
+
+      return m_y != y;
+   }
+
+private:
+   wxScrolledWindow *m_window;
+
+   wxCoord m_y;
+};
+
+// ============================================================================
+// LayoutViewerWindow implementation
+// ============================================================================
+
+BEGIN_EVENT_TABLE(LayoutViewerWindow, wxLayoutWindow)
+   EVT_MENU(WXLOWIN_MENU_RCLICK, LayoutViewerWindow::OnMouseEvent)
+   EVT_MENU(WXLOWIN_MENU_LCLICK, LayoutViewerWindow::OnMouseEvent)
+   EVT_MENU(WXLOWIN_MENU_DBLCLICK, LayoutViewerWindow::OnMouseEvent)
+END_EVENT_TABLE()
+
+LayoutViewerWindow::LayoutViewerWindow(LayoutViewer *viewer, wxWindow *parent)
+                  : wxLayoutWindow(parent)
+{
+   m_viewer = viewer;
+
+   // we want to get the notifications about mouse clicks
+   SetMouseTracking();
+
+   // remove unneeded status bar pane
+   wxFrame *p = GetFrame(this);
+   if ( p )
+   {
+      wxStatusBar *statusBar = p->GetStatusBar();
+      if ( statusBar )
+      {
+         // we don't edit the message, so the cursor coordinates are useless
+         SetStatusBar(statusBar, 0, -1);
+      }
+   }
+}
+
+void LayoutViewerWindow::OnMouseEvent(wxCommandEvent& event)
+{
+   wxLayoutObject *obj = (wxLayoutObject *)event.GetClientData();
+   ClickableInfo *ci = (ClickableInfo *)obj->GetUserData();
+   if ( ci )
+   {
+      int id;
+      switch ( event.GetId() )
+      {
+         case WXLOWIN_MENU_RCLICK:
+            id = WXMENU_LAYOUT_RCLICK;
+            break;
+
+         default:
+            FAIL_MSG("unknown mouse action");
+
+         case WXLOWIN_MENU_LCLICK:
+            id = WXMENU_LAYOUT_LCLICK;
+            break;
+
+         case WXLOWIN_MENU_DBLCLICK:
+            id = WXMENU_LAYOUT_DBLCLICK;
+            break;
+      }
+
+      m_viewer->DoMouseCommand(id, ci, GetClickPosition());
+   }
+}
+
 // ============================================================================
 // LayoutViewer implementation
 // ============================================================================
@@ -161,14 +288,21 @@ LayoutViewer::LayoutViewer()
    m_window = NULL;
 }
 
+void LayoutViewer::SetTextColour(const wxColour& col)
+{
+    // const_cast is harmless but needed because of the broken wxLayoutWindow
+    // API
+    m_window->GetLayoutList()->SetFontColour((wxColour *)&col);
+}
+
 // ----------------------------------------------------------------------------
-// operations
+// LayoutViewer creation &c
 // ----------------------------------------------------------------------------
 
 void LayoutViewer::Create(MessageView *msgView, wxWindow *parent)
 {
    m_msgView = msgView;
-   m_window = new wxLayoutWindow(parent);
+   m_window = new LayoutViewerWindow(this, parent);
 }
 
 void LayoutViewer::Clear()
@@ -184,10 +318,10 @@ void LayoutViewer::Clear()
                    (int)wxNORMAL,
                    0,
                    (wxColour *)&profileValues.FgCol,
-                   (wxColour *)&profileValues.BgCol,
+                   NULL, //(wxColour *)&profileValues.BgCol,
                    true /* no update */);
 
-   m_window->SetBackgroundColour( profileValues.BgCol );
+   //m_window->SetBackgroundColour( profileValues.BgCol );
 
    // speeds up insertion of text
    m_window->GetLayoutList()->SetAutoFormatting(FALSE);
@@ -197,6 +331,40 @@ void LayoutViewer::Update()
 {
    m_window->RequestUpdate();
 }
+
+void LayoutViewer::UpdateOptions()
+{
+   Profile *profile = GetProfile();
+
+#ifndef OS_WIN
+   m_window->SetFocusFollowMode(READ_CONFIG(profile, MP_FOCUS_FOLLOWSMOUSE) != 0);
+#endif
+
+   m_window->SetWrapMargin(READ_CONFIG(profile, MP_VIEW_WRAPMARGIN));
+}
+
+// ----------------------------------------------------------------------------
+// LayoutViewer operations
+// ----------------------------------------------------------------------------
+
+void LayoutViewer::Find(const String& text)
+{
+   m_window->Find(text);
+}
+
+void LayoutViewer::FindAgain()
+{
+   m_window->FindAgain();
+}
+
+void LayoutViewer::Copy()
+{
+   m_window->Copy();
+}
+
+// ----------------------------------------------------------------------------
+// LayoutViewer printing
+// ----------------------------------------------------------------------------
 
 bool LayoutViewer::Print()
 {
@@ -467,6 +635,66 @@ void LayoutViewer::EndBody()
    m_window->ScrollToCursor();
 
    Update();
+}
+
+// ----------------------------------------------------------------------------
+// scrolling
+// ----------------------------------------------------------------------------
+
+void LayoutViewer::EmulateKeyPress(int keycode)
+{
+   wxKeyEvent event;
+   event.m_keyCode = keycode;
+
+#ifdef __WXGTK__
+   m_window->OnChar(event);
+#else
+   m_window->HandleOnChar(event);
+#endif
+}
+
+/// scroll down one line:
+bool
+LayoutViewer::LineDown()
+{
+   ScrollPositionChangeChecker check(m_window);
+
+   EmulateKeyPress(WXK_DOWN);
+
+   return check.HasChanged();
+}
+
+/// scroll up one line:
+bool
+LayoutViewer::LineUp()
+{
+   ScrollPositionChangeChecker check(m_window);
+
+   EmulateKeyPress(WXK_UP);
+
+   return check.HasChanged();
+}
+
+/// scroll down one page:
+bool
+LayoutViewer::PageDown()
+{
+   ScrollPositionChangeChecker check(m_window);
+
+   EmulateKeyPress(WXK_PAGEDOWN);
+
+   return check.HasChanged();
+}
+
+/// scroll up one page:
+bool
+LayoutViewer::PageUp()
+{
+   ScrollPositionChangeChecker check(m_window);
+
+   EmulateKeyPress(WXK_PAGEUP);
+
+   return check.HasChanged();
 }
 
 // ----------------------------------------------------------------------------

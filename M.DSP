@@ -212,6 +212,10 @@ SOURCE=.\src\classes\MessageTemplate.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\classes\MessageView.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\classes\MEvent.cpp
 # End Source File
 # Begin Source File
@@ -1970,6 +1974,10 @@ SOURCE=.\src\modules\Calendar.cpp
 # Begin Source File
 
 SOURCE=.\src\modules\Filters.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\modules\LayoutViewer.cpp
 # End Source File
 # End Group
 # Begin Group "util"

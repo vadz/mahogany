@@ -1324,21 +1324,10 @@ wxLayoutWindow::Find(const wxString &needle,
                      wxPoint * fromWhere,
                      const wxString &configPath)
 {
-#ifdef M_BASEDIR
-   wxPoint found;
+   m_FindString = needle;
+   CHECK( !m_FindString.empty(), false, "can't search for empty string" );
 
-   if(needle.Length() == 0)
-   {
-      if( ! MInputBox(&m_FindString,
-                      _("Find text"),
-                      _("   Find:"),
-                      this,
-                      configPath, "")
-          || strutil_isempty(m_FindString))
-         return true;
-   }
-   else
-      m_FindString = needle;
+   wxPoint found;
 
    if(fromWhere == NULL)
       found = m_llist->FindText(m_FindString, m_llist->GetCursorPos());
@@ -1358,7 +1347,7 @@ wxLayoutWindow::Find(const wxString &needle,
       RequestUpdate();
       return true;
    }
-#endif
+
    return false;
 }
 

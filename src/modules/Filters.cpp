@@ -2069,13 +2069,11 @@ extern "C"
       if(! msg)
          return Value("");
 
-      wxMessageViewFrame *mvf = new wxMessageViewFrame(NULL,
-                                                       UID_ILLEGAL,
-                                                       NULL);
+      wxMessageViewFrame *mvf = new wxMessageViewFrame(NULL);
       mvf->Show(FALSE);
       mvf->ShowMessage(msg);
       msg->DecRef();
-      bool rc = mvf->GetMessageView()->Print(FALSE);
+      bool rc = mvf->GetMessageView()->Print();
       delete mvf;
 
       return Value(rc);

@@ -331,7 +331,8 @@ static const MenuItemInfo g_aMenuItems[] =
 #ifdef EXPERIMENTAL_show_uid
    { WXMENU_MSG_SHOWUID, "Show message UID&L", "", FALSE },
 #endif // EXPERIMENTAL_show_uid
-   { WXMENU_MSG_FIND,  gettext_noop("Fi&nd...\tCtrl-F"), gettext_noop("Find text in message") , FALSE },
+   { WXMENU_MSG_FIND,  gettext_noop("Fi&nd...\tF3"), gettext_noop("Find text in message") , FALSE },
+   { WXMENU_MSG_FINDAGAIN, gettext_noop("Find again (&z)\tCtrl-F3"), gettext_noop("Find the same text again") , FALSE },
 
    // compose
    { WXMENU_COMPOSE_INSERTFILE, gettext_noop("&Insert file...\tCtrl-I"),

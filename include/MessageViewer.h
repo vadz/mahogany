@@ -26,6 +26,9 @@ typedef wxTextAttr TextStyle;
 
 #include "MModule.h"
 
+// the message viewer module interface name
+#define MESSAGE_VIEWER_INTERFACE "MessageViewer"
+
 // ----------------------------------------------------------------------------
 // MessageViewer: interface for GUI viewers
 // ----------------------------------------------------------------------------
@@ -33,7 +36,10 @@ typedef wxTextAttr TextStyle;
 class MessageViewer : public MModule
 {
 public:
-   /** @name Operations
+   /** @name Creation, updating
+
+       Before calling any other methods Create() must be caleld. It will
+       really create the window (which can later be retrieved with GetWindow())
     */
    //@{
 
@@ -46,17 +52,36 @@ public:
    /// update the window after clearing it
    virtual void Update() = 0;
 
-   /// print the window contents
-   virtual bool Print() = 0;
-
-   /// show the print preview
-   virtual void PrintPreview() = 0;
+   /// update the profile options which are not updated by reshowing a msg
+   virtual void UpdateOptions() = 0;
 
    /// get the viewer window
    virtual wxWindow *GetWindow() const = 0;
 
    //@}
 
+   /** @name Operations
+
+       These methods directly correspond to the menu commands
+    */
+   //@{
+
+   /// find the given string in the window
+   virtual void Find(const String& text) = 0;
+
+   /// find the same string again (i.e. resume search)
+   virtual void FindAgain() = 0;
+
+   /// copy selection to clipboard
+   virtual void Copy() = 0;
+
+   /// print the window contents
+   virtual bool Print() = 0;
+
+   /// show the print preview
+   virtual void PrintPreview() = 0;
+
+   //@}
 
    /** @name Headers
 
@@ -125,6 +150,24 @@ public:
    //@}
 
 
+   /** @name Scrolling
+    */
+   //@{
+
+   /// scroll line down, return false if already at bottom
+   virtual bool LineDown() = 0;
+
+   /// scroll line up, return false if already at top
+   virtual bool LineUp() = 0;
+
+   /// scroll page down, return false if already at bottom
+   virtual bool PageDown() = 0;
+
+   /// scroll page up, return false if already at top
+   virtual bool PageUp() = 0;
+
+   //@}
+
    /** @name Capabilities querying
 
        All viewers are supposed to be able to show the text and the attachments
@@ -150,11 +193,13 @@ protected:
     */
    //@{
 
+   typedef MessageView::AllProfileValues ProfileValues;
+
    /// get the profile to use (NOT IncRef()'d!)
    Profile *GetProfile() const { return m_msgView->GetProfile(); }
 
    /// get the msg view options
-   const MessageView::AllProfileValues& GetOptions() const
+   const ProfileValues& GetOptions() const
       { return m_msgView->GetProfileValues(); }
    //@}
 
@@ -174,7 +219,6 @@ protected:
 // note that GetName() and GetDescription() declarations are inside
 // MMODULE_DEFINE macro
 #define DECLARE_MESSAGE_VIEWER()                                           \
-   virtual const char *GetFormatDesc() const;                              \
    MMODULE_DEFINE();                                                       \
    DEFAULT_ENTRY_FUNC
 
@@ -183,7 +227,8 @@ protected:
 //    desc     - the short description shown in the viewers dialog
 //    cpyright - the module author/copyright string
 #define IMPLEMENT_MESSAGE_VIEWER(cname, desc, cpyright)                    \
-   MMODULE_BEGIN_IMPLEMENT(cname, #cname, "MessageViewer", desc, "1.00")   \
+   MMODULE_BEGIN_IMPLEMENT(cname, #cname,                                  \
+                           MESSAGE_VIEWER_INTERFACE, desc, "1.00")         \
       MMODULE_PROP("author", cpyright)                                     \
    MMODULE_END_IMPLEMENT(cname)                                            \
    MModule *cname::Init(int version_major, int version_minor,              \

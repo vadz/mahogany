@@ -30,9 +30,7 @@
 #ifndef USE_PCH
 #  include "Mcommon.h"
 #  include "strutil.h"
-#  include "guidef.h"
 
-#  include "PathFinder.h"
 #  include "Profile.h"
 
 #  include "MFrame.h"
@@ -42,12 +40,18 @@
 
 #include "Mdefaults.h"
 #include "MHelp.h"
+#include "MModule.h"
+
+#include "MessageView.h"
+#include "MessageViewer.h"
+
 #include "Message.h"
 #include "FolderView.h"
 #include "ASMailFolder.h"
 #include "MFolder.h"
+
 #include "MDialogs.h"
-#include "MessageView.h"
+#include "Mpers.h"
 #include "XFace.h"
 #include "miscutil.h"
 #include "sysutil.h"
@@ -59,16 +63,14 @@
 
 #include <wx/dynarray.h>
 #include <wx/file.h>
-#include <wx/mimetype.h>
-#include <wx/fontmap.h>
-#include <wx/clipbrd.h>
+#include <wx/mimetype.h>      // for wxFileType::MessageParameters
 #include <wx/process.h>
 
 #include <ctype.h>  // for isspace
 #include <time.h>   // for time stamping autocollected addresses
 
 #ifdef OS_UNIX
-#   include <sys/stat.h>
+   #include <sys/stat.h>
 #endif
 
 // ----------------------------------------------------------------------------
@@ -146,56 +148,19 @@ private:
    MTempFileName *m_tempfile; // the temp file (or NULL if none)
 };
 
-// the popup menu invoked by clicking on an attachment in the mail message
-class MimePopup : public wxMenu
+// a simple event forwarder
+class ProcessEvtHandler : public wxEvtHandler
 {
 public:
-   MimePopup(MessageView *parent, int partno)
-   {
-      // init member vars
-      m_PartNo = partno;
-      m_MessageView = parent;
-
-      // create the menu items
-      Append(WXMENU_MIME_INFO, _("&Info"));
-      AppendSeparator();
-      Append(WXMENU_MIME_OPEN, _("&Open"));
-      Append(WXMENU_MIME_OPEN_WITH, _("Open &with..."));
-      Append(WXMENU_MIME_SAVE, _("&Save..."));
-      Append(WXMENU_MIME_VIEW_AS_TEXT, _("&View as text"));
-   }
-
-   // callbacks
-   void OnCommandEvent(wxCommandEvent &event);
+   ProcessEvtHandler(MessageView *msgView) { m_msgView = msgView; }
 
 private:
-   MessageView *m_MessageView;
-   int m_PartNo;
-
-   DECLARE_EVENT_TABLE()
-};
-
-// the popup menu used with URLs
-class UrlPopup : public wxMenu
-{
-public:
-   UrlPopup(MessageView *parent, const String& url)
-      : m_url(url)
+   void OnProcessTermination(wxProcessEvent& event)
    {
-      m_MessageView = parent;
-
-      SetTitle(NormalizeString(url.BeforeFirst(':')) + _(" url"));
-      Append(WXMENU_URL_OPEN, _("&Open"));
-      Append(WXMENU_URL_OPEN_NEW, _("Open in &new window"));
-      Append(WXMENU_URL_COPY, _("&Copy to clipboard"));
+      m_msgView->HandleProcessTermination(event.GetPid(), event.GetExitCode());
    }
 
-   // callbacks
-   void OnCommandEvent(wxCommandEvent &event);
-
-private:
-   MessageView *m_MessageView;
-   String m_url;
+   MessageView *m_msgView;
 
    DECLARE_EVENT_TABLE()
 };
@@ -221,60 +186,13 @@ private:
    int m_part;
 };
 
-// the var expander for message view frame title
-//
-// TODO: the code should be reused with VarExpander in wxComposeView.cpp!
-class MsgVarExpander : public MessageTemplateVarExpander
-{
-public:
-   MsgVarExpander(Message *msg) { m_msg = msg; SafeIncRef(m_msg); }
-   virtual ~MsgVarExpander() { SafeDecRef(m_msg); }
-
-   virtual bool Expand(const String& category,
-                       const String& Name,
-                       const wxArrayString& arguments,
-                       String *value) const
-   {
-      if ( !m_msg )
-         return false;
-
-      // we only understand fields in the unnamed/default category
-      if ( !category.empty() )
-         return false;
-
-      String name = Name.Lower();
-      if ( name == "from" )
-         *value = m_msg->From();
-      else if ( name == "subject" )
-         *value = m_msg->Subject();
-      else if ( name == "date" )
-         *value = m_msg->Date();
-      else
-         return false;
-
-      return true;
-   }
-
-private:
-    Message *m_msg;
-};
-
-// ----------------------------------------------------------------------------
-// event tables
-// ----------------------------------------------------------------------------
-
-BEGIN_EVENT_TABLE(MimePopup, wxMenu)
-   EVT_MENU(-1, MimePopup::OnCommandEvent)
-END_EVENT_TABLE()
-
-BEGIN_EVENT_TABLE(UrlPopup, wxMenu)
-   EVT_MENU(-1, UrlPopup::OnCommandEvent)
-END_EVENT_TABLE()
-
 // ============================================================================
 // implementation
 // ============================================================================
 
+// ----------------------------------------------------------------------------
+// helper functions
+// ----------------------------------------------------------------------------
 
 static String
 GetParameter(Message *msg, int partno, const String &param)
@@ -286,7 +204,6 @@ GetParameter(Message *msg, int partno, const String &param)
    return value;
 }
 
-
 static
 String GetFileNameForMIME(Message *message, int partNo)
 {
@@ -297,33 +214,17 @@ String GetFileNameForMIME(Message *message, int partNo)
    return fileName;
 }
 
+// ----------------------------------------------------------------------------
+// ProcessEvtHandler
+// ----------------------------------------------------------------------------
 
-void
-MimePopup::OnCommandEvent(wxCommandEvent &event)
-{
-   switch ( event.GetId() )
-   {
-      case WXMENU_MIME_INFO:
-         m_MessageView->MimeInfo(m_PartNo);
-         break;
+BEGIN_EVENT_TABLE(ProcessEvtHandler, wxEvtHandler)
+   EVT_END_PROCESS(-1, ProcessEvtHandler::OnProcessTermination)
+END_EVENT_TABLE()
 
-      case WXMENU_MIME_OPEN:
-         m_MessageView->MimeHandle(m_PartNo);
-         break;
-
-      case WXMENU_MIME_OPEN_WITH:
-         m_MessageView->MimeOpenWith(m_PartNo);
-         break;
-
-      case WXMENU_MIME_VIEW_AS_TEXT:
-         m_MessageView->MimeViewText(m_PartNo);
-         break;
-
-      case WXMENU_MIME_SAVE:
-         m_MessageView->MimeSave(m_PartNo);
-         break;
-   }
-}
+// ----------------------------------------------------------------------------
+// MailMessageParameters
+// ----------------------------------------------------------------------------
 
 wxString
 MailMessageParameters::GetParamValue(const wxString& name) const
@@ -353,43 +254,6 @@ MailMessageParameters::GetParamValue(const wxString& name) const
 }
 
 // ----------------------------------------------------------------------------
-// UrlPopup
-// ----------------------------------------------------------------------------
-
-void
-UrlPopup::OnCommandEvent(wxCommandEvent &event)
-{
-   switch ( event.GetId() )
-   {
-      case WXMENU_URL_OPEN:
-         m_MessageView->OpenURL(m_url, FALSE);
-         break;
-
-      case WXMENU_URL_OPEN_NEW:
-         m_MessageView->OpenURL(m_url, TRUE);
-         break;
-
-      case WXMENU_URL_COPY:
-         {
-            wxClipboardLocker lockClip;
-            if ( !lockClip )
-            {
-               wxLogError(_("Failed to lock clipboard, URL not copied."));
-            }
-            else
-            {
-               wxTheClipboard->UsePrimarySelection();
-               wxTheClipboard->SetData(new wxTextDataObject(m_url));
-            }
-         }
-         break;
-
-      default:
-         FAIL_MSG( "unexpected URL popup menu command" );
-         break;
-   }
-}
-// ----------------------------------------------------------------------------
 // MessageView::AllProfileValues
 // ----------------------------------------------------------------------------
 
@@ -416,129 +280,112 @@ bool MessageView::AllProfileValues::operator==(const AllProfileValues& other)
    #undef CMP
 }
 
+// ============================================================================
+// MessageView implementation
+// ============================================================================
+
 // ----------------------------------------------------------------------------
-// MessageView
+// MessageView creation
 // ----------------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(MessageView, wxLayoutWindow)
-   // process termination notification
-   EVT_END_PROCESS(-1, MessageView::OnProcessTermination)
-
-   // mouse click processing
-   EVT_MENU(WXLOWIN_MENU_RCLICK, MessageView::OnMouseEvent)
-   EVT_MENU(WXLOWIN_MENU_LCLICK, MessageView::OnMouseEvent)
-   EVT_MENU(WXLOWIN_MENU_DBLCLICK, MessageView::OnMouseEvent)
-
-   // menu & toolbars
-   EVT_MENU(-1, MessageView::OnMenuCommand)
-   EVT_TOOL(-1, MessageView::OnMenuCommand)
-   EVT_CHAR(MessageView::OnChar)
-END_EVENT_TABLE()
-
-void
-MessageView::SetLanguage(int id)
-{
-   wxFontEncoding encoding = GetEncodingFromMenuCommand(id);
-   SetEncoding(encoding);
-}
-
-void
-MessageView::OnChar(wxKeyEvent& event)
-{
-   // FIXME: this should be more intelligent, i.e. use the
-   // wxlayoutwindow key bindings:
-   if(m_WrapMargin > 0 &&
-      event.KeyCode() == 'q' || event.KeyCode() == 'Q')
-   {
-      // temporarily allow editing to enable manual word wrap:
-      SetEditable(TRUE);
-      event.Skip();
-      SetEditable(FALSE);
-      SetCursorVisibility(1);
-   }
-   else
-      event.Skip();
-}
-
-void
 MessageView::MessageView(wxWindow *parent)
 {
+   Init();
+
+   CreateViewer(parent);
+}
+
+void
+MessageView::Init()
+{
+   m_asyncFolder = NULL;
    m_mailMessage = NULL;
-   m_Parent = parent;
+   m_viewer = NULL;
+
    m_uid = UID_ILLEGAL;
    m_encodingUser = wxFONTENCODING_SYSTEM;
-   SetMouseTracking();
-   SetParentProfile(fv ? fv->GetProfile() : NULL);
 
-   wxFrame *p = GetFrame(this);
-   if ( p )
-   {
-      wxStatusBar *statusBar = p->GetStatusBar();
-      if ( statusBar )
-      {
-         // we don't edit the message, so the cursor coordinates are useless
-         SetStatusBar(statusBar, 0, -1);
-      }
-   }
    RegisterForEvents();
 }
 
-
-MessageView::MessageView(wxFolderView *fv,
-                             wxWindow *parent,
-                             bool show)
-             : wxLayoutWindow(parent)
+void
+MessageView::CreateViewer(wxWindow *parent)
 {
-   m_asyncFolder = NULL;
-   m_Profile = NULL;
-   Create(fv,parent);
-   Show(show);
-}
+   SafeDecRef(m_viewer);
 
-MessageView::MessageView(ASMailFolder *folder,
-                             long num,
-                             wxFolderView *fv,
-                             wxWindow *parent,
-                             bool show)
-             : wxLayoutWindow(parent)
-{
-   m_asyncFolder = folder;
-   SafeIncRef(m_asyncFolder);
-   m_Profile = NULL;
-   Create(fv,parent);
-   if(folder)
-      ShowMessage(folder,num);
-   Show(show);
+   MModuleListing *listing =
+      MModule::ListAvailableModules(MESSAGE_VIEWER_INTERFACE);
+
+   if ( !listing  )
+   {
+      wxLogError(_("No message viewer plug ins found. It will be "
+                   "impossible to view any messages."));
+
+      // TODO: create a dummy viewer here which just does nothing in all
+      //       of its methods, this would allow us to at least not crash
+
+      return;
+   }
+
+   MModule *viewer = MModule::LoadModule((*listing)[0].GetName());
+   if ( viewer )
+   {
+      m_viewer = (MessageViewer *)viewer;
+      m_viewer->Create(this, parent);
+   }
+
+   listing->DecRef();
 }
 
 MessageView::~MessageView()
 {
-   if ( m_regCookieOptionsChange )
-      MEventManager::Deregister(m_regCookieOptionsChange);
-   if(m_regCookieASFolderResult)
-      MEventManager::Deregister(m_regCookieASFolderResult);
+   UnregisterForEvents();
 
-   size_t procCount = m_processes.GetCount();
-   for ( size_t n = 0; n < procCount; n++ )
-   {
-      ProcessInfo *info = m_processes[n];
-      info->Detach();
+   DetachAllProcesses();
+   delete m_evtHandlerProc;
 
-      MTempFileName *tempfile = info->GetTempFile();
-      if ( tempfile )
-      {
-         String tempFileName = tempfile->GetName();
-         wxLogWarning(_("Temporary file '%s' left because it is still in "
-                        "use by an external process"), tempFileName.c_str());
-      }
-
-      delete info;
-   }
-
-   if(m_mailMessage) m_mailMessage->DecRef();
-   if(m_Profile) m_Profile->DecRef();
+   SafeDecRef(m_mailMessage);
    SafeDecRef(m_asyncFolder);
 }
+
+// ----------------------------------------------------------------------------
+// misc
+// ----------------------------------------------------------------------------
+
+wxWindow *MessageView::GetWindow() const
+{
+   return m_viewer ? m_viewer->GetWindow() : NULL;
+}
+
+wxFrame *MessageView::GetParentFrame() const
+{
+   return GetFrame(GetWindow());
+}
+
+void
+MessageView::Clear()
+{
+   m_viewer->Clear();
+   m_viewer->Update();
+
+   m_uid = UID_ILLEGAL;
+   if ( m_mailMessage )
+   {
+      m_mailMessage->DecRef();
+      m_mailMessage = NULL;
+   }
+}
+
+Profile *MessageView::GetProfile() const
+{
+   // always return something non NULL
+   return m_asyncFolder ? m_asyncFolder->GetProfile()
+                        : mApplication->GetProfile();
+}
+
+// ----------------------------------------------------------------------------
+// MessageView events
+// ----------------------------------------------------------------------------
 
 void
 MessageView::RegisterForEvents()
@@ -550,26 +397,96 @@ MessageView::RegisterForEvents()
    ASSERT_MSG( m_regCookieASFolderResult, "can't reg folder view with event manager");
 }
 
-/// Tell it a new parent profile - in case folder changed.
-void
-MessageView::SetParentProfile(Profile *profile)
+void MessageView::UnregisterForEvents()
 {
-   SafeDecRef(m_Profile);
-
-   if(profile)
-   {
-      m_Profile = profile;
-      m_Profile->IncRef();
-   }
-   else
-   {
-      m_Profile = Profile::CreateEmptyProfile();
-   }
-
-   UpdateProfileValues();
-
-   Clear();
+   MEventManager::DeregisterAll(&m_regCookieASFolderResult,
+                                &m_regCookieOptionsChange,
+                                NULL);
 }
+
+bool
+MessageView::OnMEvent(MEventData& event)
+{
+   if ( event.GetId() == MEventId_OptionsChange )
+   {
+      OnOptionsChange((MEventOptionsChangeData &)event);
+   }
+   else if ( event.GetId() == MEventId_ASFolderResult )
+   {
+      OnASFolderResultEvent((MEventASFolderResultData &)event);
+   }
+
+   return true;
+}
+
+void MessageView::OnOptionsChange(MEventOptionsChangeData& event)
+{
+   // first of all, are we interested in this profile or not?
+   Profile *profileChanged = event.GetProfile();
+   if ( !profileChanged || !profileChanged->IsAncestor(GetProfile()) )
+   {
+      // it's some profile which has nothing to do with us
+      return;
+   }
+
+   AllProfileValues settings;
+   ReadAllSettings(&settings);
+   if ( settings == m_ProfileValues )
+   {
+      // nothing changed
+      return;
+   }
+
+   switch ( event.GetChangeKind() )
+   {
+      case MEventOptionsChangeData::Apply:
+      case MEventOptionsChangeData::Ok:
+      case MEventOptionsChangeData::Cancel:
+         // update everything
+         m_ProfileValues = settings;
+         break;
+
+      default:
+         FAIL_MSG("unknown options change event");
+   }
+
+   Update();
+}
+
+void
+MessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
+{
+   ASMailFolder::Result *result = event.GetResult();
+   if ( result->GetUserData() == this )
+   {
+      switch(result->GetOperation())
+      {
+         case ASMailFolder::Op_GetMessage:
+         {
+            /* The only situation where we receive a Message, is if we
+               want to open it in a separate viewer. */
+            Message *mptr =
+               ((ASMailFolder::ResultMessage *)result)->GetMessage();
+
+            if(mptr && mptr->GetUId() != m_uid)
+            {
+               DoShowMessage(mptr);
+            }
+            SafeDecRef(mptr);
+         }
+         break;
+
+         default:
+            FAIL_MSG("Unexpected async result event");
+      }
+   }
+
+   result->DecRef();
+}
+
+// ----------------------------------------------------------------------------
+// MessageView options
+// ----------------------------------------------------------------------------
 
 void
 MessageView::UpdateProfileValues()
@@ -650,40 +567,12 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    settings->afmpath = READ_APPCONFIG(MP_AFMPATH);
 #endif // Unix
 
-#ifndef OS_WIN
-   SetFocusFollowMode(READ_CONFIG(profile,MP_FOCUS_FOLLOWSMOUSE) != 0);
-#endif
-   SetWrapMargin(READ_CONFIG(profile, MP_VIEW_WRAPMARGIN));
-
    // update the parents menu as the show headers option might have changed
    UpdateShowHeadersInMenu();
-}
 
-void
-MessageView::Clear()
-{
-   m_viewer->Clear();
-   m_viewer->Update();
-
-   m_uid = UID_ILLEGAL;
-   if ( m_mailMessage )
+   if ( m_viewer )
    {
-      m_mailMessage->DecRef();
-      m_mailMessage = NULL;
-   }
-}
-
-void
-MessageView::SetEncoding(wxFontEncoding encoding)
-{
-   m_encodingUser = encoding;
-
-   Update();
-
-   if ( READ_CONFIG(m_Profile, MP_MSGVIEW_AUTO_ENCODING) )
-   {
-      // don't keep it for the other messages, just for this one
-      m_encodingUser = wxFONTENCODING_SYSTEM;
+      m_viewer->UpdateOptions();
    }
 }
 
@@ -706,7 +595,7 @@ MessageView::ShowHeaders()
 
    // all the headers the user configured
    wxArrayString headersUser =
-      strutil_restore_array(':', READ_CONFIG(m_Profile, MP_MSGVIEW_HEADERS));
+      strutil_restore_array(':', READ_CONFIG(GetProfile(), MP_MSGVIEW_HEADERS));
 
    // X-Face is handled separately
 #ifdef HAVE_XFACES
@@ -947,7 +836,7 @@ MessageView::ShowHeaders()
          char **xfaceXpm;
          if ( xface->CreateXpm(&xfaceXpm) )
          {
-            DoShowXFace(wxBitmap(xfaceXpm));
+            m_viewer->ShowXFace(wxBitmap(xfaceXpm));
 
             wxIconManager::FreeImage(xfaceXpm);
          }
@@ -982,7 +871,7 @@ MessageView::ShowHeaders()
             encHeader = m_encodingUser;
       }
 
-      m_viewer->ShowHeaders(headerNames[n], headerValues[n], encHeader);
+      m_viewer->ShowHeader(headerNames[n], headerValues[n], encHeader);
    }
 
    return encInHeaders;
@@ -1002,21 +891,19 @@ MessageView::GetQuotedLevel(const char *text) const
                      m_ProfileValues.quotedMaxAlpha
                    );
 
-   static const qlevelMax = WXSIZEOF(AllProfileValues::QuotedCol);
-
    // note that qlevel is counted from 1, really, as 0 means unquoted and that
    // GetQuoteColour() relies on this
-   if ( qlevel > qlevelMax )
+   if ( qlevel > QUOTE_LEVEL_MAX )
    {
       if ( m_ProfileValues.quotedCycleColours )
       {
-         // cycle through the colours: use 1st level colour for qlevelMax
-         qlevel = (qlevel - 1) % qlevelMax + 1;
+         // cycle through the colours: use 1st level colour for QUOTE_LEVEL_MAX
+         qlevel = (qlevel - 1) % QUOTE_LEVEL_MAX + 1;
       }
       else
       {
          // use the same colour for all levels deeper than max
-         qlevel = qlevelMax;
+         qlevel = QUOTE_LEVEL_MAX;
       }
    }
 
@@ -1030,7 +917,7 @@ wxColour MessageView::GetQuoteColour(size_t qlevel) const
       return m_ProfileValues.FgCol;
    }
 
-   CHECK( qlevel < WXSIZEOF(AllProfileValues::QuotedCol), wxNullColour,
+   CHECK( qlevel < QUOTE_LEVEL_MAX, wxNullColour,
           "MessageView::GetQuoteColour(): invalid quoting level" );
 
    return m_ProfileValues.QuotedCol[qlevel];
@@ -1046,7 +933,7 @@ void MessageView::ShowTextPart(wxFontEncoding encBody,
       // user-specified encoding overrides everything
       encPart = m_encodingUser;
    }
-   else if ( READ_CONFIG(m_Profile, MP_MSGVIEW_AUTO_ENCODING) )
+   else if ( READ_CONFIG(GetProfile(), MP_MSGVIEW_AUTO_ENCODING) )
    {
       encPart = m_mailMessage->GetTextPartEncoding(nPart);
       if ( encPart == wxFONTENCODING_SYSTEM )
@@ -1166,7 +1053,8 @@ void MessageView::ShowAttachment(size_t nPart,
                                          mimeFileName.AfterLast('.'));
 
    m_viewer->InsertAttachment(icon,
-                              GetClickableInfo(nPart, mimeFileName, partSize));
+                              GetClickableInfo(nPart, mimeType,
+                                               mimeFileName, partSize));
 }
 
 void MessageView::ShowImage(size_t nPart,
@@ -1180,7 +1068,7 @@ void MessageView::ShowImage(size_t nPart,
       default:
          // check that the size of the image is less than configured
          // maximum
-         if ( partSize > 1024*m_ProfileValues.inlineGFX )
+         if ( partSize > 1024*(size_t)m_ProfileValues.inlineGFX )
          {
             wxString msg;
             msg.Printf
@@ -1199,7 +1087,7 @@ void MessageView::ShowImage(size_t nPart,
             if ( MDialog_YesNoDialog
                  (
                   msg,
-                  GetFrame(this),
+                  GetParentFrame(),
                   MDIALOG_YESNOTITLE,
                   false, // [No] default
                   GetPersMsgBoxName(M_MSGBOX_GFX_NOT_INLINED)
@@ -1235,7 +1123,8 @@ void MessageView::ShowImage(size_t nPart,
       MTempFileName tmpFN;
       if ( tmpFN.IsOk() )
       {
-         MimeSave(nPart, tmpFN.GetName());
+         String filename = tmpFN.GetName();
+         MimeSave(nPart, filename);
 
          wxImage img =  wxIconManager::LoadImage(filename, &ok, true);
 
@@ -1246,7 +1135,8 @@ void MessageView::ShowImage(size_t nPart,
             m_viewer->InsertImage
                       (
                         img.ConvertToBitmap(),
-                        GetClickableInfo(nPart, mimeFileName, partSize)
+                        GetClickableInfo(nPart, mimeType,
+                                         mimeFileName, partSize)
                       );
          }
       }
@@ -1263,7 +1153,8 @@ void MessageView::ShowImage(size_t nPart,
 }
 
 ClickableInfo *MessageView::GetClickableInfo(size_t nPart,
-                                             const String& mimeFileName.
+                                             const String& mimeType,
+                                             const String& mimeFileName,
                                              size_t partSize) const
 {
    wxString label = mimeFileName;
@@ -1378,7 +1269,7 @@ MessageView::Update(void)
       if ( partSize == 0 )
       {
          // ignore empty parts but warn user as it might indicate a problem
-         wxLogStatus(GetFrame(this),
+         wxLogStatus(GetParentFrame(),
                      _("Skipping the empty MIME part #%d."), nPart);
 
          continue;
@@ -1424,7 +1315,10 @@ MessageView::Update(void)
 
       if ( !isAttachment && m_viewer->CanProcess(mimeType) )
       {
-         m_viewer->InsertRawContents();
+         unsigned long len;
+         String data = m_mailMessage->GetPartContent(nPart, &len);
+
+         m_viewer->InsertRawContents(data);
       }
       else if ( !isAttachment &&
                 ((mimeType == "text/plain" &&
@@ -1450,9 +1344,10 @@ MessageView::Update(void)
    m_viewer->EndBody();
 
    // update the menu of the frame containing us to show the encoding used
-   CheckLanguageInMenu(this, encBody == wxFONTENCODING_SYSTEM
-                              ? wxFONTENCODING_DEFAULT
-                              : encBody);
+   CheckLanguageInMenu(GetParentFrame(),
+                       encBody == wxFONTENCODING_SYSTEM
+                        ? wxFONTENCODING_DEFAULT
+                        : encBody);
 }
 
 // ----------------------------------------------------------------------------
@@ -1537,7 +1432,7 @@ MessageView::MimeInfo(int mimeDisplayPart)
 
    String title;
    title << _("MIME information for attachment #") << mimeDisplayPart;
-   MDialog_Message(message, this, title);
+   MDialog_Message(message, GetParentFrame(), title);
 }
 
 // open (execute) a message attachment
@@ -1591,9 +1486,7 @@ MessageView::MimeHandle(int mimeDisplayPart)
          return;
       }
       Message *msg = Message::Create(content, 1);
-      wxMessageViewFrame * f = new wxMessageViewFrame(NULL, 1, NULL, m_Parent);
-      f->ShowMessage(msg);
-      f->SetTitle(mimetype);
+      ...
       msg->DecRef();
 #else // 1
       bool ok = false;
@@ -1613,16 +1506,19 @@ MessageView::MimeHandle(int mimeDisplayPart)
 
          if ( mfolder )
          {
-            ASMailFolder *mf = ASMailFolder::OpenFolder(mfolder);
-            if ( mf )
+            ASMailFolder *asmf = ASMailFolder::OpenFolder(mfolder);
+            if ( asmf )
             {
-               wxMessageViewFrame * f =
-                  new wxMessageViewFrame(mf, 1, NULL, m_Parent);
-               f->SetTitle(mimetype);
+               MessageView *msgView = ShowMessageViewFrame(GetParentFrame());
+               msgView->SetFolder(asmf);
+
+               // FIXME: assume UID of the first message in new MBX folder is
+               //        always 1
+               msgView->ShowMessage(1);
 
                ok = true;
 
-               mf->DecRef();
+               asmf->DecRef();
             }
          }
       }
@@ -1678,17 +1574,19 @@ MessageView::MimeHandle(int mimeDisplayPart)
    // We might fake a file, so we need this:
    bool already_saved = false;
 
+   Profile *profile = GetProfile();
+
 #ifdef OS_UNIX
    /* For IMAGE/TIFF content, check whether it comes from one of the
       fax domains. If so, change the mimetype to "IMAGE/TIFF-G3" and
       proceed in the usual fashion. This allows the use of a special
       image/tiff-g3 mailcap entry. */
-   if ( READ_CONFIG(m_Profile,MP_INCFAX_SUPPORT) &&
+   if ( READ_CONFIG(profile,MP_INCFAX_SUPPORT) &&
         (wxMimeTypesManager::IsOfType(mimetype, "IMAGE/TIFF")
          || wxMimeTypesManager::IsOfType(mimetype, "APPLICATION/OCTET-STREAM")))
    {
       kbStringList faxdomains;
-      char *faxlisting = strutil_strdup(READ_CONFIG(m_Profile,
+      char *faxlisting = strutil_strdup(READ_CONFIG(profile,
                                                     MP_INCFAX_DOMAINS));
       strutil_tokenise(faxlisting, ":;,", faxdomains);
       delete [] faxlisting;
@@ -1714,7 +1612,7 @@ MessageView::MimeHandle(int mimeDisplayPart)
          // one with the usual ps viewer
          filename2 = filename.BeforeLast('.') + ".ps";
          String command;
-         command.Printf(READ_CONFIG(m_Profile,MP_TIFF2PS),
+         command.Printf(READ_CONFIG(profile,MP_TIFF2PS),
                         filename.c_str(), filename2.c_str());
          // we ignore the return code, because next viewer will fail
          // or succeed depending on this:
@@ -1755,7 +1653,7 @@ MessageView::MimeHandle(int mimeDisplayPart)
       prompt.Printf(_("Please enter the command to handle '%s' data:"),
                     mimetype.c_str());
       if ( !MInputBox(&command, _("Unknown MIME type"), prompt,
-                      this, "MimeHandler") )
+                      GetParentFrame(), "MimeHandler") )
       {
          // cancelled by user
          return;
@@ -1852,7 +1750,7 @@ MessageView::MimeOpenWith(int mimeDisplayPart)
    prompt.Printf(_("Please enter the command to handle '%s' data:"),
                  mimetype.c_str());
    if ( !MInputBox(&command, _("Open with"), prompt,
-                   this, "MimeHandler") )
+                   GetParentFrame(), "MimeHandler") )
    {
       // cancelled by user
       return;
@@ -1890,7 +1788,6 @@ MessageView::MimeOpenWith(int mimeDisplayPart)
    }
 }
 
-
 bool
 MessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
 {
@@ -1905,7 +1802,11 @@ MessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
       filename = wxPFileSelector("MimeSave",_("Save attachment as:"),
                                  NULL, // no default path
                                  name, ext,
-                                 NULL, wxFILEDLG_USE_FILENAME | wxSAVE | wxOVERWRITE_PROMPT, this);
+                                 NULL,
+                                 wxFILEDLG_USE_FILENAME |
+                                 wxSAVE |
+                                 wxOVERWRITE_PROMPT,
+                                 GetParentFrame());
    }
    else
       filename = ifilename;
@@ -1980,7 +1881,7 @@ MessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
             // only display in interactive mode
             if ( strutil_isempty(ifilename) )
             {
-               wxLogStatus(GetFrame(this), _("Wrote %lu bytes to file '%s'"),
+               wxLogStatus(GetParentFrame(), _("Wrote %lu bytes to file '%s'"),
                            len, filename.c_str());
             }
 
@@ -2011,7 +1912,7 @@ MessageView::MimeViewText(int mimeDisplayPart)
          title << " ('" << filename << "')";
       }
 
-      MDialog_ShowText(this, title, content, "MimeView");
+      MDialog_ShowText(GetParentFrame(), title, content, "MimeView");
    }
    else
    {
@@ -2023,15 +1924,9 @@ MessageView::MimeViewText(int mimeDisplayPart)
 // URL handling
 // ----------------------------------------------------------------------------
 
-void MessageView::PopupURLMenu(const String& url, const wxPoint& pt)
-{
-   UrlPopup menu(this, url);
-   PopupMenu(&menu, pt);
-}
-
 void MessageView::OpenURL(const String& url, bool inNewWindow)
 {
-   wxFrame *frame = GetFrame(this);
+   wxFrame *frame = GetParentFrame();
    wxLogStatus(frame, _("Opening URL '%s'..."), url.c_str());
 
    wxBusyCursor bc;
@@ -2177,124 +2072,8 @@ void MessageView::OpenURL(const String& url, bool inNewWindow)
 }
 
 // ----------------------------------------------------------------------------
-// event handling
+// MessageView menu command processing
 // ----------------------------------------------------------------------------
-
-bool
-MessageView::OnMEvent(MEventData& ev)
-{
-   if ( ev.GetId() == MEventId_OptionsChange )
-   {
-      MEventOptionsChangeData& event = (MEventOptionsChangeData &)ev;
-
-      // first of all, are we interested in this profile or not?
-      Profile *profileChanged = event.GetProfile();
-      if ( !profileChanged || !profileChanged->IsAncestor(m_Profile) )
-      {
-         // it's some profile which has nothing to do with us
-         return true;
-      }
-
-      AllProfileValues settings;
-      ReadAllSettings(&settings);
-      if ( settings == m_ProfileValues )
-      {
-         // nothing changed
-         return true;
-      }
-
-      switch ( event.GetChangeKind() )
-      {
-         case MEventOptionsChangeData::Apply:
-         case MEventOptionsChangeData::Ok:
-         case MEventOptionsChangeData::Cancel:
-            // update everything
-            m_ProfileValues = settings;
-            break;
-
-         default:
-            FAIL_MSG("unknown options change event");
-      }
-
-      Update();
-   }
-   else if( ev.GetId() == MEventId_ASFolderResult )
-   {
-      OnASFolderResultEvent((MEventASFolderResultData &) ev);
-   }
-
-   return true;
-}
-
-void
-MessageView::OnMouseEvent(wxCommandEvent &event)
-{
-   ClickableInfo *ci;
-
-   wxLayoutObject *obj;
-   obj = (wxLayoutObject *)event.GetClientData();
-   ci = (ClickableInfo *)obj->GetUserData();
-   if(ci)
-   {
-      switch( ci->GetType() )
-      {
-         case ClickableInfo::CI_ICON:
-         {
-            switch ( event.GetId() )
-            {
-               case WXLOWIN_MENU_RCLICK:
-                  // show the menu
-                  PopupMenu(new MimePopup(this, ci->GetPart()), m_ClickPosition);
-                  break;
-
-               case WXLOWIN_MENU_LCLICK:
-                  // for now, do the same thing as double click: perhaps the
-                  // left button behaviour should be configurable?
-
-               case WXLOWIN_MENU_DBLCLICK:
-                  // open
-                  MimeHandle(ci->GetPart());
-                  break;
-
-               default:
-                  FAIL_MSG("unknown mouse action");
-            }
-         }
-         break;
-
-         case ClickableInfo::CI_URL:
-         {
-            wxString url = ci->GetUrl();
-
-            // treat mail urls separately:
-            wxString protocol = url.BeforeFirst(':');
-            if ( protocol == "mailto" )
-            {
-               Composer *cv = Composer::CreateNewMessage(m_Profile);
-
-               cv->SetAddresses(ci->GetUrl().Right(ci->GetUrl().Length()-7));
-               cv->InitText();
-               break;
-            }
-
-            if ( event.GetId() == WXLOWIN_MENU_RCLICK )
-            {
-               PopupURLMenu(url, m_ClickPosition);
-            }
-            else // left or double click
-            {
-               OpenURL(url, m_ProfileValues.browserInNewWindow);
-            }
-         }
-         break;
-
-         default:
-            FAIL_MSG("unknown embedded object type");
-      }
-
-      ci->DecRef();
-   }
-}
 
 bool
 MessageView::DoMenuCommand(int id)
@@ -2304,41 +2083,58 @@ MessageView::DoMenuCommand(int id)
 
    CHECK( GetFolder(), false, "no folder in message view?" );
 
+   Profile *profile = GetProfile();
+   CHECK( profile, false, "no profile in message view?" );
+
    UIdArray msgs;
    msgs.Add(m_uid);
 
    switch ( id )
    {
       case WXMENU_MSG_FIND:
-         Find("");
+         {
+            String text;
+            if ( MInputBox(&text,
+                           _("Find text"),
+                           _("   Find:"),
+                           GetParentFrame(),
+                           "MsgViewFindString") )
+            {
+               m_viewer->Find(text);
+            }
+         }
+         break;
+
+      case WXMENU_MSG_FINDAGAIN:
+         m_viewer->FindAgain();
          break;
 
       case WXMENU_MSG_REPLY:
          MailFolder::ReplyMessage(m_mailMessage,
                                   MailFolder::Params(),
-                                  m_Profile,
-                                  GetFrame(this));
+                                  profile,
+                                  GetParentFrame());
          break;
 
       case WXMENU_MSG_FOLLOWUP:
          MailFolder::ReplyMessage(m_mailMessage,
                                   MailFolder::Params(MailFolder::REPLY_FOLLOWUP),
-                                  m_Profile,
-                                  GetFrame(this));
+                                  profile,
+                                  GetParentFrame());
          break;
       case WXMENU_MSG_FORWARD:
          MailFolder::ForwardMessage(m_mailMessage,
                                     MailFolder::Params(),
-                                    m_Profile,
-                                    GetFrame(this));
+                                    profile,
+                                    GetParentFrame());
          break;
 
       case WXMENU_MSG_SAVE_TO_FOLDER:
-         GetFolder()->SaveMessagesToFolder(&msgs, GetFrame(this));
+         GetFolder()->SaveMessagesToFolder(&msgs, GetParentFrame());
          break;
 
       case WXMENU_MSG_SAVE_TO_FILE:
-         GetFolder()->SaveMessagesToFile(&msgs, GetFrame(this));
+         GetFolder()->SaveMessagesToFile(&msgs, GetParentFrame());
          break;
 
       case WXMENU_MSG_DELETE:
@@ -2363,12 +2159,12 @@ MessageView::DoMenuCommand(int id)
 #endif
 
       case WXMENU_HELP_CONTEXT:
-         mApplication->Help(MH_MESSAGE_VIEW,this);
+         mApplication->Help(MH_MESSAGE_VIEW, GetParentFrame());
          break;
 
       case WXMENU_MSG_TOGGLEHEADERS:
          m_ProfileValues.showHeaders = !m_ProfileValues.showHeaders;
-         m_Profile->writeEntry(MP_SHOWHEADERS, m_ProfileValues.showHeaders);
+         profile->writeEntry(MP_SHOWHEADERS, m_ProfileValues.showHeaders);
          UpdateShowHeadersInMenu();
          Update();
          break;
@@ -2400,7 +2196,7 @@ MessageView::DoMenuCommand(int id)
                      addresses,
                      READ_APPCONFIG(MP_AUTOCOLLECT_ADB),
                      mf->GetName(),
-                     (MFrame *)GetFrame(this)
+                     (MFrame *)GetParentFrame()
                   );
                }
 
@@ -2411,18 +2207,8 @@ MessageView::DoMenuCommand(int id)
          }
          break;
 
-      case WXMENU_EDIT_PASTE:
-         Paste();
-         Refresh();
-         break;
-
       case WXMENU_EDIT_COPY:
-         Copy();
-         break;
-
-      case WXMENU_EDIT_CUT:
-         Cut();
-         Refresh();
+         m_viewer->Copy();
          break;
 
       default:
@@ -2441,6 +2227,121 @@ MessageView::DoMenuCommand(int id)
 }
 
 void
+MessageView::DoMouseCommand(int id, const ClickableInfo *ci, const wxPoint& pt)
+{
+   CHECK_RET( ci, "MessageView::DoMouseCommand(): NULL ClickableInfo" );
+
+   switch( ci->GetType() )
+   {
+      case ClickableInfo::CI_ICON:
+      {
+         switch ( id )
+         {
+            case WXMENU_LAYOUT_RCLICK:
+               PopupMIMEMenu(ci->GetPart(), pt);
+               break;
+
+            case WXMENU_LAYOUT_LCLICK:
+               // for now, do the same thing as double click: perhaps the
+               // left button behaviour should be configurable?
+
+            case WXMENU_LAYOUT_DBLCLICK:
+               // open
+               MimeHandle(ci->GetPart());
+               break;
+
+            default:
+               FAIL_MSG("unknown mouse action");
+         }
+      }
+      break;
+
+      case ClickableInfo::CI_URL:
+      {
+         wxString url = ci->GetUrl();
+
+         // treat mail urls separately:
+         wxString protocol = url.BeforeFirst(':');
+         if ( protocol == "mailto" )
+         {
+            Composer *cv = Composer::CreateNewMessage(GetProfile());
+
+            cv->SetAddresses(ci->GetUrl().Right(ci->GetUrl().Length()-7));
+            cv->InitText();
+
+            break;
+         }
+
+         if ( id == WXMENU_LAYOUT_RCLICK )
+         {
+            PopupURLMenu(url, pt);
+         }
+         else // left or double click
+         {
+            OpenURL(url, m_ProfileValues.browserInNewWindow);
+         }
+      }
+      break;
+
+      default:
+         FAIL_MSG("unknown embedded object type");
+   }
+}
+
+void
+MessageView::SetLanguage(int id)
+{
+   wxFontEncoding encoding = GetEncodingFromMenuCommand(id);
+   SetEncoding(encoding);
+}
+
+void
+MessageView::SetEncoding(wxFontEncoding encoding)
+{
+   m_encodingUser = encoding;
+
+   Update();
+}
+
+void MessageView::ResetUserEncoding()
+{
+   // if the user had manually set the encoding for the old message, we
+   // revert back to automatic encoding detection for the new one
+   if ( READ_CONFIG(GetProfile(), MP_MSGVIEW_AUTO_ENCODING) )
+   {
+      // don't keep it for the other messages, just for this one
+      m_encodingUser = wxFONTENCODING_SYSTEM;
+   }
+}
+
+void
+MessageView::UpdateShowHeadersInMenu()
+{
+   wxFrame *frame = GetParentFrame();
+   CHECK_RET( frame, "message view without parent frame?" );
+
+   wxMenuBar *mbar = frame->GetMenuBar();
+   CHECK_RET( mbar, "message view frame without menu bar?" );
+
+   mbar->Check(WXMENU_MSG_TOGGLEHEADERS, m_ProfileValues.showHeaders);
+}
+
+// ----------------------------------------------------------------------------
+// MessageView selecting the shown message
+// ----------------------------------------------------------------------------
+
+void
+MessageView::SetFolder(ASMailFolder *asmf)
+{
+   if ( asmf == m_asyncFolder )
+      return;
+
+   SafeDecRef(m_asyncFolder);
+
+   ResetUserEncoding();
+}
+
+void
 MessageView::ShowMessage(UIdType uid)
 {
    if ( m_uid == uid )
@@ -2453,13 +2354,15 @@ MessageView::ShowMessage(UIdType uid)
    }
    else
    {
-      // file request, our ShowMessage(Message *) will be called later
+      ResetUserEncoding();
+
+      // file request, our DoShowMessage() will be called later
       (void)m_asyncFolder->GetMessage(uid, this);
    }
 }
 
 void
-MessageView::ShowMessage(Message *mailMessage)
+MessageView::DoShowMessage(Message *mailMessage)
 {
    CHECK_RET( mailMessage, "no message to show in MessageView" );
 
@@ -2467,7 +2370,7 @@ MessageView::ShowMessage(Message *mailMessage)
 
    // size is measured in KBytes
    unsigned long size = mailMessage->GetSize() / 1024,
-                 maxSize = (unsigned long)READ_CONFIG(m_Profile,
+                 maxSize = (unsigned long)READ_CONFIG(GetProfile(),
                                                       MP_MAX_MESSAGE_SIZE);
 
    if ( size > maxSize )
@@ -2478,13 +2381,18 @@ MessageView::ShowMessage(Message *mailMessage)
       // local folders are supposed to be fast
       if ( !IsLocalQuickFolder(mf->GetType()) )
       {
+         // FIXME: this check should probably be replaced by a check in
+         //        Update() as for an IMAP folder message can be very large but
+         //        the text part we show can still be small so the question
+         //        doesn't make sense... and only Update() knows exactly what
+         //        we really show, ShowMessage() doesn't
          wxString msg;
          msg.Printf(_("The selected message is %u Kbytes long which is "
                       "more than the current threshold of %d Kbytes.\n"
                       "\n"
                       "Do you still want to download it?"),
                     size, maxSize);
-         if ( !MDialog_YesNoDialog(msg, this) )
+         if ( !MDialog_YesNoDialog(msg, GetParentFrame()) )
          {
             // don't do anything
             mailMessage->DecRef();
@@ -2499,16 +2407,14 @@ MessageView::ShowMessage(Message *mailMessage)
    m_mailMessage = mailMessage;
    m_uid = mailMessage->GetUId();
 
-   //have we not seen the message before?
-   if( GetFolder() &&
-     ! (m_mailMessage->GetStatus() & MailFolder::MSG_STAT_SEEN))
+   // have we not seen the message before?
+   if ( !(m_mailMessage->GetStatus() & MailFolder::MSG_STAT_SEEN) )
    {
       // mark it as seen
       m_mailMessage->GetFolder()->
         SetMessageFlag(m_uid, MailFolder::MSG_STAT_SEEN, true);
 
       // autocollect the address:
-      /* FIXME for now it's here, should go somewhere else: */
       if ( m_ProfileValues.autocollect )
       {
          String addr, name;
@@ -2522,14 +2428,14 @@ MessageView::ShowMessage(Message *mailMessage)
                               m_ProfileValues.autocollectNamed != 0,
                               m_ProfileValues.autocollectBookName,
                               folderName,
-                              (MFrame *)GetFrame(this));
+                              (MFrame *)GetParentFrame());
          addr = m_mailMessage->Address(name, MAT_FROM);
          AutoCollectAddresses(addr, name,
                               m_ProfileValues.autocollect,
                               m_ProfileValues.autocollectNamed != 0,
                               m_ProfileValues.autocollectBookName,
                               folderName,
-                              (MFrame *)GetFrame(this));
+                              (MFrame *)GetParentFrame());
       }
    }
 
@@ -2541,7 +2447,7 @@ MessageView::ShowMessage(Message *mailMessage)
 // ----------------------------------------------------------------------------
 
 bool
-MessageView::Print(bool interactive)
+MessageView::Print(void)
 {
    return m_viewer->Print();
 }
@@ -2559,10 +2465,21 @@ MessageView::PrintPreview(void)
 bool
 MessageView::RunProcess(const String& command)
 {
-   wxLogStatus(GetFrame(this),
+   wxLogStatus(GetParentFrame(),
                _("Calling external viewer '%s'"),
                command.c_str());
    return wxExecute(command, true) == 0;
+}
+
+ProcessEvtHandler *
+MessageView::GetEventHandlerForProcess()
+{
+   if ( !m_evtHandlerProc )
+   {
+      m_evtHandlerProc = new ProcessEvtHandler(this);
+   }
+
+   return m_evtHandlerProc;
 }
 
 bool
@@ -2570,11 +2487,11 @@ MessageView::LaunchProcess(const String& command,
                              const String& errormsg,
                              const String& filename)
 {
-   wxLogStatus(GetFrame(this),
+   wxLogStatus(GetParentFrame(),
                _("Calling external viewer '%s'"),
                command.c_str());
 
-   wxProcess *process = new wxProcess(this);
+   wxProcess *process = new wxProcess(GetEventHandlerForProcess());
    int pid = wxExecute(command, false, process);
    if ( !pid )
    {
@@ -2597,20 +2514,21 @@ MessageView::LaunchProcess(const String& command,
 }
 
 void
-MessageView::OnProcessTermination(wxProcessEvent& event)
+MessageView::HandleProcessTermination(int pid, int exitcode)
 {
    // find the corresponding entry in m_processes
-   size_t n, procCount = m_processes.GetCount();
+   size_t n,
+          procCount = m_processes.GetCount();
    for ( n = 0; n < procCount; n++ )
    {
-      if ( m_processes[n]->GetPid() == event.GetPid() )
+      if ( m_processes[n]->GetPid() == pid )
          break;
    }
 
    CHECK_RET( n != procCount, "unknown process terminated!" );
 
    ProcessInfo *info = m_processes[n];
-   if ( event.GetExitCode() != 0 )
+   if ( exitcode != 0 )
    {
       wxLogError(_("%s (external viewer exited with non null exit code)"),
                  info->GetErrorMsg().c_str());
@@ -2629,164 +2547,55 @@ MessageView::OnProcessTermination(wxProcessEvent& event)
    delete info;
 }
 
-// ----------------------------------------------------------------------------
-// async result event processing
-// ----------------------------------------------------------------------------
-
-void
-MessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
+void MessageView::DetachAllProcesses()
 {
-   ASMailFolder::Result *result = event.GetResult();
-   if (result->GetUserData() == this )
+   size_t procCount = m_processes.GetCount();
+   for ( size_t n = 0; n < procCount; n++ )
    {
-      switch(result->GetOperation())
+      ProcessInfo *info = m_processes[n];
+      info->Detach();
+
+      MTempFileName *tempfile = info->GetTempFile();
+      if ( tempfile )
       {
-         case ASMailFolder::Op_GetMessage:
-         {
-            /* The only situation where we receive a Message, is if we
-               want to open it in a separate viewer. */
-            Message *mptr =
-               ((ASMailFolder::ResultMessage *)result)->GetMessage();
-
-            if(mptr && mptr->GetUId() != m_uid)
-            {
-               ShowMessage(mptr);
-               wxFrame *frame = GetFrame(this);
-               if ( wxDynamicCast(frame, wxMessageViewFrame) )
-               {
-                  wxString fmt = READ_CONFIG(m_Profile, MP_MVIEW_TITLE_FMT);
-                  MsgVarExpander expander(mptr);
-                  frame->SetTitle(ParseMessageTemplate(fmt, expander));
-               }
-            }
-            SafeDecRef(mptr);
-         }
-         break;
-
-         default:
-            FAIL_MSG("Unexpected async result event");
+         String tempFileName = tempfile->GetName();
+         wxLogWarning(_("Temporary file '%s' left because it is still in "
+                        "use by an external process"), tempFileName.c_str());
       }
+
+      delete info;
    }
-
-   result->DecRef();
-}
-
-void
-MessageView::UpdateShowHeadersInMenu()
-{
-   wxFrame *frame = GetFrame(GetWindow());
-   CHECK_RET( frame, "message view without parent frame?" );
-
-   wxMenuBar *mbar = frame->GetMenuBar();
-   CHECK_RET( mbar, "message view frame without menu bar?" );
-
-   mbar->Check(WXMENU_MSG_TOGGLEHEADERS, m_ProfileValues.showHeaders);
 }
 
 // ----------------------------------------------------------------------------
-// scrolling
+// MessageView scrolling
 // ----------------------------------------------------------------------------
 
-void MessageView::EmulateKeyPress(int keycode)
+/// scroll down one line
+bool
+MessageView::LineDown()
 {
-   wxKeyEvent event;
-   event.m_keyCode = keycode;
-
-#ifdef __WXGTK__
-   wxScrolledWindow::OnChar(event);
-#else
-   wxScrolledWindow::HandleOnChar(event);
-#endif
+   return m_viewer->LineDown();
 }
 
-/// scroll down one line:
-void
-MessageView::LineDown(void)
+/// scroll up one line:
+bool
+MessageView::LineUp()
 {
-   EmulateKeyPress(WXK_DOWN);
+   return m_viewer->LineUp();
 }
 
 /// scroll down one page:
-void
-MessageView::PageDown(void)
+bool
+MessageView::PageDown()
 {
-   EmulateKeyPress(WXK_PAGEDOWN);
+   return m_viewer->PageDown();
 }
 
 /// scroll up one page:
-void
-MessageView::PageUp(void)
+bool
+MessageView::PageUp()
 {
-   EmulateKeyPress(WXK_PAGEUP);
+   return m_viewer->PageUp();
 }
-
-// ----------------------------------------------------------------------------
-// wxMessageViewFrame
-// ----------------------------------------------------------------------------
-
-BEGIN_EVENT_TABLE(wxMessageViewFrame, wxMFrame)
-   EVT_SIZE(wxMessageViewFrame::OnSize)
-   EVT_MENU(-1, wxMessageViewFrame::OnCommandEvent)
-   EVT_TOOL(-1, wxMessageViewFrame::OnCommandEvent)
-END_EVENT_TABLE()
-
-wxMessageViewFrame::wxMessageViewFrame(ASMailFolder *folder,
-                                       long num,
-                                       wxFolderView *fv,
-                                       MWindow  *parent,
-                                       const String& name)
-                  : wxMFrame(name.empty() ? String(_("Mahogany: Message View"))
-                                          : name, parent)
-{
-   m_MessageView = NULL;
-
-   AddFileMenu();
-   AddEditMenu();
-   AddMessageMenu();
-   AddLanguageMenu();
-
-   // add a toolbar to the frame
-   // NB: the buttons must have the same ids as the menu commands
-   AddToolbarButtons(CreateToolBar(), WXFRAME_MESSAGE);
-   CreateStatusBar(2);
-   static const int s_widths[] = { -1, 70 };
-   SetStatusWidths(WXSIZEOF(s_widths), s_widths);
-
-   Show(true);
-   m_MessageView = new MessageView(folder, num, fv, this);
-   wxSizeEvent se; // unused
-   OnSize(se);
-}
-
-void
-wxMessageViewFrame::OnCommandEvent(wxCommandEvent &event)
-{
-   int id = event.GetId();
-   if(! m_MessageView->DoMenuCommand(id))
-   {
-      switch(id)
-      {
-      case WXMENU_MSG_EXPUNGE:
-      case WXMENU_MSG_SELECTALL:
-      case WXMENU_MSG_DESELECTALL:
-         if(m_MessageView->GetFolderView())
-            m_MessageView->GetFolderView()->OnCommandEvent(event);
-         break;
-
-      default:
-         wxMFrame::OnMenuCommand(event.GetId());
-      }
-   }
-}
-
-void
-wxMessageViewFrame::OnSize( wxSizeEvent & WXUNUSED(event) )
-{
-   int x, y;
-   GetClientSize( &x, &y );
-   if(m_MessageView)
-      m_MessageView->SetSize(0,0,x,y);
-}
-
-IMPLEMENT_DYNAMIC_CLASS(wxMessageViewFrame, wxMFrame)
 

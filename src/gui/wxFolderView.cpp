@@ -1153,7 +1153,9 @@ void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
    if ( m_PreviewOnSingleClick )
    {
       // view on double click then
-      new wxMessageViewFrame(m_FolderView->GetFolder(), uid, m_FolderView);
+      MessageView *msgView = ShowMessageViewFrame(GetFrame(this));
+      msgView->SetFolder(m_FolderView->GetFolder());
+      msgView->ShowMessage(uid);
    }
    else // preview on double click
    {
@@ -1973,7 +1975,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_Profile = Profile::CreateEmptyProfile(mApplication->GetProfile());
    m_SplitterWindow = new wxFolderSplitterWindow(m_Parent);
    m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow, this);
-   m_MessagePreview = new wxMessageView(this, m_SplitterWindow);
+   m_MessagePreview = new wxMessageView(m_SplitterWindow);
 
    ReadProfileSettings(&m_settings);
    m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
@@ -1982,8 +1984,8 @@ wxFolderView::wxFolderView(wxWindow *parent)
                                m_settings.font,
                                m_settings.size,
                                m_settings.columns);
-   m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl,
-                                       m_MessagePreview,
+   m_SplitterWindow->SplitHorizontally(m_FolderCtrl,
+                                       m_MessagePreview->GetWindow(),
                                        m_Parent->GetClientSize().y/3);
    m_SplitterWindow->SetMinimumPaneSize(10);
    m_SplitterWindow->SetFocus();
@@ -2305,7 +2307,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       else
          m_Profile = Profile::CreateEmptyProfile(mApplication->GetProfile());
 
-      m_MessagePreview->SetParentProfile(m_Profile);
+      m_MessagePreview->SetFolder(m_ASMailFolder);
       InvalidatePreviewUID();
 
       // read in our profile settigns
@@ -3106,7 +3108,7 @@ wxFolderView::PreviewMessage(long uid)
       m_FolderCtrl->OnPreview();
 
       // show it in the preview window
-      m_MessagePreview->ShowMessage(m_ASMailFolder, uid);
+      m_MessagePreview->ShowMessage(uid);
    }
 }
 
@@ -3122,7 +3124,9 @@ wxFolderView::OpenMessages(const UIdArray& selections)
    int i;
    for(i = 0; i < n; i++)
    {
-      new wxMessageViewFrame(m_ASMailFolder, selections[i], this);
+      MessageView *msgView = ShowMessageViewFrame(GetFrame(m_FolderCtrl));
+      msgView->SetFolder(m_ASMailFolder);
+      msgView->ShowMessage(selections[i]);
    }
 }
 
@@ -3518,7 +3522,7 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
       long focus = m_FolderCtrl->GetFocusedItem();
       if ( focus != -1 )
       {
-         Select(focus);
+         m_FolderCtrl->Select(focus);
       }
    }
 
