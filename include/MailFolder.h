@@ -664,8 +664,8 @@ public:
      @return array with msgnos or UIDs of messages found (to be freed by caller)
    */
    virtual MsgnoArray *SearchByFlag(MessageStatus flag,
-                                    int flags = SEARCH_SET |
-                                                SEARCH_UNDELETED,
+                                    int flags = MailFolder::SEARCH_SET |
+                                                MailFolder::SEARCH_UNDELETED,
                                     MsgnoType last = 0) const = 0;
 
    /**
