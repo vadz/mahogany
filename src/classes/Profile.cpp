@@ -6,6 +6,10 @@
  * $Id$               *
  ********************************************************************
  * $Log$
+ * Revision 1.7  1998/05/24 14:47:59  KB
+ * lots of progress on Python, but cannot call functions yet
+ * kbList fixes again?
+ *
  * Revision 1.6  1998/05/18 17:48:33  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -209,7 +213,7 @@ ConfigFileManager::ConfigFileManager()
 
 ConfigFileManager::~ConfigFileManager()
 {
-   kbListIterator i;
+   FCDataList::iterator i;
    FileConfig *fcp;
    
 #ifdef DEBUG
@@ -217,7 +221,7 @@ ConfigFileManager::~ConfigFileManager()
 #endif
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
-      fcp = kbListICast(FCData,i)->fileConfig;
+      fcp = (*i)->fileConfig;
       fcp->FLUSH();
       delete fcp;
    }
@@ -227,7 +231,7 @@ ConfigFileManager::~ConfigFileManager()
 FileConfig *
 ConfigFileManager::GetConfig(String const &fileName)
 {
-   kbListIterator i;
+   FCDataList::iterator i;
 
 #ifdef DEBUG
    cerr << "ConfigFileManager.GetConfig(" << fileName << ")" << endl;
@@ -235,8 +239,8 @@ ConfigFileManager::GetConfig(String const &fileName)
    
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
-      if(kbListICast(FCData,i)->fileName == fileName)
-         return kbListICast(FCData,i)->fileConfig;
+      if((*i)->fileName == fileName)
+         return (*i)->fileConfig;
    }
    FCData   *newEntry = new FCData;
    newEntry->fileName = fileName;
@@ -262,7 +266,7 @@ ConfigFileManager::GetConfig(String const &fileName)
 void
 ConfigFileManager::Debug(void)
 {
-   kbListIterator i;
+   FCDataList::iterator i;
 
    cerr << "------ConfigFileManager------" << endl;
    for(i = fcList->begin(); i != fcList->end(); i++)

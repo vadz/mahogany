@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/05/24 14:47:12  KB
+ * lots of progress on Python, but cannot call functions yet
+ * kbList fixes again?
+ *
  * Revision 1.4  1998/05/13 19:01:40  KB
  * added kbList, adapted MimeTypes for it, more python, new icons
  *
@@ -42,7 +46,7 @@ class MimeTEntry
    /// type
    String type;
    /// list of extensions for this type
-   kbList extensions;
+   kbStringList extensions;
    friend class MimeTypes;
 public:
    MimeTEntry();
@@ -64,8 +68,8 @@ public:
    MimeTypes - mapping of Mime types to icons and handlers
 */
 
-//class MimeTypes : public STL_LIST<MimeTEntry>, public CommonBase
-class MimeTypes : public kbList, public CommonBase
+KBLIST_DEFINE(MimeTEntryList, MimeTEntry);
+class MimeTypes : public MimeTEntryList, public CommonBase
 {
 public:
    /** Constructor

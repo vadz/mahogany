@@ -33,8 +33,9 @@
  * and things like that.
  *
  * $Log$
- * Revision 1.2  1998/05/24 08:28:55  KB
- * eventually fixed the type problem, now python works as expected
+ * Revision 1.3  1998/05/24 14:47:32  KB
+ * lots of progress on Python, but cannot call functions yet
+ * kbList fixes again?
  *
  ************************************************************************/
 

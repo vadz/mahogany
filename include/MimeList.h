@@ -64,9 +64,9 @@ public:
    MimeList - mapping of Mime types to icons and handlers
 */
 
-#define   MimeEntryCast(iterator)   ((MimeEntry *)*iterator)
+KBLIST_DEFINE(MimeEntryList, MimeEntry);
 
-class MimeList : public kbList, public CommonBase
+class MimeList : public MimeEntryList, public CommonBase
 {
 //   DECLARE_CLASS(MimeList)
    

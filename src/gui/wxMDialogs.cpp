@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/05/24 14:48:15  KB
+ * lots of progress on Python, but cannot call functions yet
+ * kbList fixes again?
+ *
  * Revision 1.4  1998/05/18 17:48:43  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -188,7 +192,7 @@ MDialog_FileRequester(const char *message,
 AdbEntry *
 MDialog_AdbLookupList(AdbExpandListType *adblist, MFrame *parent)
 {
-   AdbExpandListIterator i;
+   AdbExpandListType::iterator i;
 
    int
       idx = 0,
@@ -204,10 +208,10 @@ MDialog_AdbLookupList(AdbExpandListType *adblist, MFrame *parent)
    
    for(i = adblist->begin(); i != adblist->end(); i++, idx++)
    {
-      tmp =AdbEntryCast(i)->formattedName + String(" <")
-	 + AdbEntryCast(i)->email.preferred.c_str() + String(">");
+      tmp =(*i)->formattedName + String(" <")
+	 + (*i)->email.preferred.c_str() + String(">");
       choices[idx] = strutil_strdup(tmp);
-      entries[idx] = AdbEntryCast(i);
+      entries[idx] = (*i);
    }
    int w,h;
    if(parent)

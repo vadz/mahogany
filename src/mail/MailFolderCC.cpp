@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.8  1998/05/24 14:48:33  KB
+ * lots of progress on Python, but cannot call functions yet
+ * kbList fixes again?
+ *
  * Revision 1.7  1998/05/24 08:23:30  KB
  * changed the creation/destruction of MailFolders, now done through
  * MailFolder::Open/CloseFolder, made constructor/destructor private,
@@ -60,6 +64,8 @@ extern "C"
 #include <nntp.h>
 }
 
+#include   "MPython.h"
+
 #endif
 
 #include  "FolderView.h"
@@ -101,6 +107,19 @@ MailFolderCC::Open(String const & filename)
    mail_fetchfast(mailstream, (char *)sequence.c_str());
    
    okFlag = true;
+#ifdef   USE_PYTHON
+   if(okFlag)
+   {
+      const char *callback =
+         profile->readEntry(MP_FOLDER_OPEN_CALLBACK,MP_FOLDER_OPEN_CALLBACK_D);
+      if(!strutil_isempty(callback))
+      {
+         //FIXME: this doesnt work:
+         //PyH_RunFunction(callback,M_PYTHON_MODULE,"",NULL,"",NULL);
+         PyRun_SimpleString(callback);
+      }
+   }
+#endif
    return true;   // success
 }
 

@@ -68,7 +68,7 @@ struct AdbTelStruct
 struct AdbEmailStruct
 {
    String   preferred;
-   kbList    other;
+   kbStringList    other;
    
    void parse(String const &in);
    void write(String &out) const;
@@ -101,16 +101,8 @@ public:
    ~AdbEntry() {}
 };
 
-
-
-typedef  kbList         AdbEntryListType;
-typedef  kbListIterator AdbEntryIterator;
-
-typedef	kbList         AdbExpandListType;
-typedef	kbListIterator AdbExpandListIterator;
-
-#define   AdbEntryCast(iterator)   ((AdbEntry *)*(iterator))
-
+KBLIST_DEFINE(AdbEntryListType, AdbEntry);
+KBLIST_DEFINE(AdbExpandListType, AdbEntry);
 
 /**
    Adb: an address database class
@@ -144,7 +136,7 @@ public:
    /// initialised == there is a list of paths
    bool   IsInitialised(void) const { return true; }
 
-   AdbEntryIterator begin(void)
+   AdbEntryListType::iterator begin(void)
       { return list->begin(); }
    unsigned size(void)
       { return list->size(); }

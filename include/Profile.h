@@ -89,7 +89,7 @@ struct   FCData
    @see FCData
 */
 
-typedef kbList  FCDataList;
+KBLIST_DEFINE(FCDataList, FCData);
 
 class ConfigFileManager : public CommonBase
 {

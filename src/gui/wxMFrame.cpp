@@ -6,6 +6,10 @@
  * $Id$              *
  ********************************************************************
  * $Log$
+ * Revision 1.8  1998/05/24 14:48:16  KB
+ * lots of progress on Python, but cannot call functions yet
+ * kbList fixes again?
+ *
  * Revision 1.7  1998/05/18 17:48:44  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -236,7 +240,7 @@ wxMFrame::OnMenuCommand(int id)
                                   this);
       if(name)
       {
-         MailFolder *mf = new MailFolderCC((const char *)name);
+         MailFolder *mf = MailFolderCC::OpenFolder((const char *)name);
          if(mf->IsInitialised())
             (new wxFolderView(mf, "FolderView", this))->Show();
          else

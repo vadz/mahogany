@@ -6,6 +6,10 @@
  * $Id$             *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/05/24 14:48:14  KB
+ * lots of progress on Python, but cannot call functions yet
+ * kbList fixes again?
+ *
  * Revision 1.5  1998/05/18 17:48:36  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -770,7 +774,7 @@ wxAdbEditFrame::Create(wxFrame *parent, ProfileBase *iprofile)
    panel->Show(TRUE);  
 
    if(mApplication.GetAdb()->size())
-      Load(AdbEntryCast(mApplication.GetAdb()->begin()));
+      Load(*(mApplication.GetAdb()->begin()));
    else
       New();
    
@@ -845,7 +849,7 @@ wxAdbEditFrame::Delete(void)
    if(! eptr)
       return;
    mApplication.GetAdb()->Delete(eptr);
-   Load(AdbEntryCast(mApplication.GetAdb()->begin()));
+   Load(*mApplication.GetAdb()->begin());
 
 }
 

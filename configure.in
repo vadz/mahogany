@@ -264,7 +264,7 @@ dnl   defines CFLAGS
 CFLAGS=`echo "$CFLAGS" | sed 's/-g//g'`
 if test "$GCC" = "yes"
 then
-	CFLAGS="$CFLAGS -DCC_GCC"
+	CFLAGS="$CFLAGS -DCC_GCC  -fno-exceptions -Wall -pedantic "
 fi
 
 dnl does compiler support -c and -o simultaniously

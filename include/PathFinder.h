@@ -6,6 +6,10 @@
  * $Id$             *
  ********************************************************************
  * $Log$
+ * Revision 1.8  1998/05/24 14:47:14  KB
+ * lots of progress on Python, but cannot call functions yet
+ * kbList fixes again?
+ *
  * Revision 1.7  1998/05/18 17:48:20  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -58,7 +62,7 @@
 class PathFinder : public CommonBase
 {
    /// the list of absolute paths
-   kbList *pathList;
+   kbStringList *pathList;
 public:
    /**
       Constructor.

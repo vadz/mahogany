@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/05/24 14:47:55  KB
+ * lots of progress on Python, but cannot call functions yet
+ * kbList fixes again?
+ *
  * Revision 1.4  1998/05/18 17:48:28  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -164,11 +168,11 @@ AdbEmailStruct::parse(String const &in)
 void
 AdbEmailStruct::write(String  &out) const
 {
-   kbListIterator i;
+   kbStringList::iterator i;
 
    out = preferred;
    for(i = other.begin(); i != other.end(); i++)
-      out += String(";") + *((String *)*i);
+      out += String(";") + **i;
 }
 
 bool
@@ -363,7 +367,7 @@ Adb::Adb(String const &ifilename)
 AdbExpandListType *
 Adb::Expand(String const &name)
 {
-   AdbEntryIterator
+   AdbEntryListType::iterator
       i;
    AdbExpandListType
       * foundList = NULL;
@@ -378,30 +382,30 @@ Adb::Expand(String const &name)
    
    for(i = list->begin(); i != list->end(); i++)
    {
-      a = AdbEntryCast(i)->formattedName;
+      a = (*i)->formattedName;
       strutil_toupper(a);
       if(strutil_ncmp(a,b,len))
          goto found;
-      a = AdbEntryCast(i)->structuredName.first;
+      a = (*i)->structuredName.first;
       strutil_toupper(a);
       if(strutil_ncmp(a,b,len))
          goto found;
-      a = AdbEntryCast(i)->structuredName.family;
+      a = (*i)->structuredName.family;
       strutil_toupper(a);
       if(strutil_ncmp(a,b,len))
          goto found;
-      a = AdbEntryCast(i)->structuredName.other;
+      a = (*i)->structuredName.other;
       strutil_toupper(a);
       if(strutil_ncmp(a,b,len))
          goto found;
-      a = AdbEntryCast(i)->alias;
+      a = (*i)->alias;
       strutil_toupper(a);
       if(strutil_ncmp(a,b,len))
          goto found;
-      a = AdbEntryCast(i)->email.preferred;
+      a = (*i)->email.preferred;
       if(strutil_ncmp(a,b,len))
          goto found;
-      a = AdbEntryCast(i)->organisation;
+      a = (*i)->organisation;
       if(strutil_ncmp(a,b,len))
          goto found;
       continue;
@@ -430,7 +434,7 @@ Adb::AddEntry(AdbEntry *eptr)
 void
 Adb::Delete(AdbEntry *eptr)
 {
-   AdbEntryIterator i;
+   AdbEntryListType::iterator i;
    for(i = list->begin(); i != list->end(); i++)
    {
       if(*i == eptr)
@@ -444,13 +448,13 @@ Adb::Delete(AdbEntry *eptr)
 
 Adb::~Adb()
 {
-   AdbEntryIterator i;
+   AdbEntryListType::iterator i;
    ofstream out(fileName.c_str());
 
    for(i = list->begin(); i != list->end(); i++)
    {
-      AdbEntryCast(i)->save(out);
-      //delete AdbEntryCast(i); //gets done by list
+      (*i)->save(out);
+      //delete *i; //gets done by list
    }
    delete list;
 }
@@ -465,7 +469,7 @@ Adb::Lookup(String const &key, MFrame *parent)
       if(list->size() > 1)
          return MDialog_AdbLookupList(list, parent);
       else
-         return AdbEntryCast(list->begin());
+         return *(list->begin());
    }
    else
       wxBell();
@@ -477,7 +481,7 @@ void
 Adb::UpdateEntry(String email, String name, MFrame *parent)
 {
    AdbEntry
-      *entry;
+      *entry = 0;
 
    AdbExpandListType
       * list = Expand(email);
@@ -487,7 +491,7 @@ Adb::UpdateEntry(String email, String name, MFrame *parent)
    
    if(list)
    {
-      entry = AdbEntryCast(list->begin());  // take the first one, should be only one
+      entry = *(list->begin());  // take the first one, should be only one
       if(entry->formattedName.length() == 0)
          entry->formattedName = name;
       if(entry->email.preferred != email)

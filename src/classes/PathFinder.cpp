@@ -6,6 +6,10 @@
  * $Id$            *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/24 14:47:58  KB
+ * lots of progress on Python, but cannot call functions yet
+ * kbList fixes again?
+ *
  * Revision 1.3  1998/05/18 17:48:32  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -45,7 +49,7 @@
 
 PathFinder::PathFinder(String const &ipathlist, bool recursive)
 {
-   pathList = new kbList;
+   pathList = new kbStringList;
    AddPaths(ipathlist,recursive);
 }
 
@@ -90,13 +94,13 @@ String
 PathFinder::Find(String const &filename, bool *found,
                  int mode) const
 {
-   kbListIterator i;
+   kbStringList::iterator i;
    String   work;
    int   result;
    
    for(i = pathList->begin(); i != pathList->end(); i++)
    {
-      work = *kbListICast(String,i) + '/' + filename;
+      work = *(*i) + '/' + filename;
       result = access(work.c_str(),mode);
       if(result == 0)
       {
@@ -113,13 +117,13 @@ String
 PathFinder::FindFile(String const &filename, bool *found,
                      int mode) const
 {
-   kbListIterator i;
+   kbStringList::iterator i;
    String   work;
    int   result;
    
    for(i = pathList->begin(); i != pathList->end(); i++)
    {
-      work = *kbListICast(String,i) + '/' + filename;
+      work = *(*i) + '/' + filename;
       result = access(work.c_str(),mode);
       if(result == 0 && IsFile(work))
       {
@@ -136,13 +140,13 @@ String
 PathFinder::FindDir(String const &filename, bool *found,
                     int mode) const
 {
-   kbListIterator i;
+   kbStringList::iterator i;
    String   work;
    int   result;
    
    for(i = pathList->begin(); i != pathList->end(); i++)
    {
-      work = *kbListICast(String,i) + '/' + filename;
+      work = *(*i) + '/' + filename;
       result = access(work.c_str(),mode);
       if(result == 0 && IsDir(work))
       {
@@ -159,18 +163,18 @@ String
 PathFinder::FindDirFile(String const &filename, bool *found,
                         int mode) const
 {
-   kbListIterator i;
+   kbStringList::iterator i;
    String   work;
    int   result;
    
    for(i = pathList->begin(); i != pathList->end(); i++)
    {
-      work = *kbListICast(String,i) + '/' + filename;
+      work = *(*i) + '/' + filename;
       result = access(work.c_str(),mode);
-      if(result == 0 && IsFile(work) && IsDir(*kbListICast(String,i)))
+      if(result == 0 && IsFile(work) && IsDir(*(*i)))
       {
          if(found)   *found = true;
-         return *kbListICast(String,i);
+         return *(*i);
       }
    }
    if(found)

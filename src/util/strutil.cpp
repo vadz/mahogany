@@ -6,6 +6,10 @@
  * $Id$               *
  *                                                                  *
  * $Log$
+ * Revision 1.6  1998/05/24 14:48:44  KB
+ * lots of progress on Python, but cannot call functions yet
+ * kbList fixes again?
+ *
  * Revision 1.5  1998/05/19 17:02:45  KB
  * several small bugfixes
  *
@@ -262,7 +266,7 @@ strsep(char **stringp, const char *delim)
 #endif
 
 void
-strutil_tokenise(char *string, const char *delim, kbList &tlist)
+strutil_tokenise(char *string, const char *delim, kbStringList &tlist)
 {
    char *found;
    

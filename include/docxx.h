@@ -44,12 +44,12 @@
 //@{
 //@Include: CommonBase.h MApplication.h PathFinder.h
 //@Include: appconf.h
-//@Include: Profile.h XFace.h
+//@Include: Profile.h XFace.h kbList.h
 //@}
 
 /**@name Definitions */
 //@{
-//@Include: config.h Mconfig.h Mcommon.h guidef.h Munix.h
+//@Include: config.h Mconfig.h Mcommon.h guidef.h Munix.h Mwin.h
 //@}
 
 //@Include: strutil.h

@@ -6,6 +6,10 @@
  * $Id$          *
  *                                                                  *
  * $Log$
+ * Revision 1.4  1998/05/24 14:48:00  KB
+ * lots of progress on Python, but cannot call functions yet
+ * kbList fixes again?
+ *
  * Revision 1.3  1998/05/18 17:48:34  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -22,6 +26,7 @@
 #   pragma implementation "kbList.h"
 #endif
 
+#include   "Mpch.h"   // get String type
 #include   "kbList.h"
 
 
@@ -47,57 +52,51 @@ kbListNode::~kbListNode()
 }
 
 
-kbListIterator::kbListIterator(kbListNode *n)
+kbList::iterator::iterator(kbListNode *n)
 {
    node = n;
 }
 
 void *
-kbListIterator::operator*() 
+kbList::iterator::operator*() 
 {
    return node->element;
 }
 
-kbListNode *
-kbListIterator::Node(void)
-{
-   return node;
-}
-
-kbListIterator &
-kbListIterator::operator++()
+kbList::iterator &
+kbList::iterator::operator++()
 {
    node  = node ? node->next : NULL;
    return *this;
 }
 
-kbListIterator &
-kbListIterator::operator--()
+kbList::iterator &
+kbList::iterator::operator--()
 {
    node = node ? node->prev : NULL; 
    return *this;
 }
-kbListIterator &
-kbListIterator::operator++(int foo)
+kbList::iterator &
+kbList::iterator::operator++(int foo)
 {
    return operator++();
 }
 
-kbListIterator &
-kbListIterator::operator--(int bar)
+kbList::iterator &
+kbList::iterator::operator--(int bar)
 {
    return operator--();
 }
 
 
 bool
-kbListIterator::operator !=(kbListIterator const & i) const
+kbList::iterator::operator !=(kbList::iterator const & i) const
 {
    return node != i.node;
 }
 
 bool
-kbListIterator::operator ==(kbListIterator const & i) const
+kbList::iterator::operator ==(kbList::iterator const & i) const
 {
    return node == i.node;
 }
@@ -134,8 +133,38 @@ kbList::push_front(void *element)
       first = new kbListNode(element, NULL, first);
 }
 
+void *
+kbList::pop_back(void)
+{
+   iterator i;
+   void *data;
+   bool ownsFlagBak = ownsEntries;
+   i = tail();
+   data = *i;
+   ownsEntries = false;
+   erase(i);
+   ownsEntries = ownsFlagBak;
+   return data;
+}
+
+void *
+kbList::pop_front(void)
+{
+   iterator i;
+   void *data;
+   bool ownsFlagBak = ownsEntries;
+   
+   i = begin();
+   data = *i;
+   ownsEntries = false;
+   erase(i);
+   ownsEntries = ownsFlagBak;
+   return data;
+   
+}
+
 void
-kbList::insert(kbListIterator & i, void *element)
+kbList::insert(kbList::iterator & i, void *element)
 {   
    if(! i.Node())
       return;
@@ -153,7 +182,7 @@ kbList::insert(kbListIterator & i, void *element)
 }
 
 void
-kbList::erase(kbListIterator & i)
+kbList::erase(kbList::iterator & i)
 {
    kbListNode
       *node = i.Node(),
@@ -183,7 +212,7 @@ kbList::erase(kbListIterator & i)
    delete i.Node();
 
    // change the iterator to next element:
-   i = kbListIterator(next);
+   i = kbList::iterator(next);
 }
 
 kbList::~kbList()
@@ -200,45 +229,53 @@ kbList::~kbList()
    }
 }
 
-kbListIterator
+kbList::iterator
 kbList::begin(void) const
 {
-   return kbListIterator(first);
+   return kbList::iterator(first);
 }
 
-kbListIterator
+kbList::iterator
 kbList::tail(void) const
 {
-   return kbListIterator(last);
+   return kbList::iterator(last);
 }
 
-kbListIterator
+kbList::iterator
 kbList::end(void) const
 {
-   return kbListIterator(NULL); // the one after the last
+   return kbList::iterator(NULL); // the one after the last
 }
 
 unsigned
 kbList::size(void) const // inefficient
 {
    unsigned count = 0;
-   kbListIterator i;
+   kbList::iterator i;
    for(i = begin(); i != end(); i++, count++)
       ;
    return count;
 }
 
+
+
+
+
+
+
 #ifdef   KBLIST_TEST
 
 #include   <iostream.h>
 
+KBLIST_DEFINE(kbListInt,int);
+   
 int main(void)
 {
    int
       n, *ptr;
-   kbList
+   kbListInt
       l;
-   kbListIterator
+   kbListInt::iterator
       i;
    
    for(n = 0; n < 10; n++)

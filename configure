@@ -961,7 +961,7 @@ fi
 CFLAGS=`echo "$CFLAGS" | sed 's/-g//g'`
 if test "$GCC" = "yes"
 then
-	CFLAGS="$CFLAGS -DCC_GCC"
+	CFLAGS="$CFLAGS -DCC_GCC  -fno-exceptions -Wall -pedantic "
 fi
 
 if test "x$CC" != xcc; then

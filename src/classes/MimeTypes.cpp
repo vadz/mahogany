@@ -6,6 +6,10 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/05/24 14:47:57  KB
+ * lots of progress on Python, but cannot call functions yet
+ * kbList fixes again?
+ *
  * Revision 1.5  1998/05/18 17:48:31  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -106,10 +110,9 @@ MimeTEntry::Parse(String const & str)
 bool
 MimeTEntry::Match(String const & extension, String &mimeType)
 {
-//   std::list<String>::iterator i;
-   kbListIterator i;
+   kbStringList::iterator i;
    for(i = extensions.begin(); i != extensions.end(); i++)
-      if( *((String *)(*i)) == extension)
+      if( *(*i) == extension)
       {
          mimeType = type;
          return true;
@@ -147,15 +150,14 @@ MimeTypes::Lookup(String const & filename, String &mimeType, int *numericType)
 {
    const char *ext = strrchr(filename.c_str(),'.');
    String extension;
-   //iterator i;
-   kbListIterator i;
+   iterator i;
    
    if(ext)
       extension = ext+1;
 
    strutil_toupper(extension);
    for(i = begin(); i != end() ; i++)
-      if(((MimeTEntry *)*i)->Match(extension, mimeType))
+      if((*i)->Match(extension, mimeType))
       {
          if(numericType)
          {

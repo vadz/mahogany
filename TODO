@@ -3,14 +3,13 @@ $Id$
 
 *** bugs to fix ***
 
-- test/check how Python handles (wx)Strings, try some interaction
+- Calling python objects does not work yet. Also, how do I create a shadow class object for
+  my callback functions to work on?
 
-- remove remaining few STL classes
+- segfault on program exit
 
 - there is still a minor problem with URLs ending in > like <http:xxx>
   Ignored for now, until wxFText/wxFTCanvas get rewritten.
-
-- paths for PATH and PYTHONPATH get set wrongly in MApplication::OnInit(), why?
 
 - for now, internal scripts directly execute the code passed as the
   function, this may be changed to loading it from outside. Also,
@@ -22,6 +21,11 @@ $Id$
 
 - fix non-ASCII characters in header lines
 
+- in src/Python: improve rules to always redo .cpp/.py
+
+- In wxMessageView::MimeHandle is a call to wxRemoveFile(). This
+  relies on the Unix behaviour of a file continuing to exist after its
+  deletion for as long as it is still in use. Does this work for Windows?
 *** to implement in near future ***
 
 - when run for the first time, should display "Mail" configuration dialog

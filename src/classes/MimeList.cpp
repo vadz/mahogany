@@ -6,6 +6,10 @@
  * $Id$              *
  ********************************************************************
  * $Log$
+ * Revision 1.6  1998/05/24 14:47:56  KB
+ * lots of progress on Python, but cannot call functions yet
+ * kbList fixes again?
+ *
  * Revision 1.5  1998/05/18 17:48:30  KB
  * more list<>->kbList changes, fixes for wxXt, improved makefiles
  *
@@ -101,7 +105,7 @@ MimeEntry::Parse(String const & str)
 
 
 MimeList::MimeList(void)
-   : kbList(true) // own entries
+   : MimeEntryList(true) // own entries
 {
    bool   found;
    MimeEntry   *newEntry;
@@ -133,14 +137,14 @@ bool
 MimeList::GetCommand(String const & type,
                      String &command, String &flags)
 {
-   kbListIterator
+   iterator
       i;
    // look for exact match first:
    for(i = begin(); i != end(); i++)
-      if(strutil_cmp(kbListICast(MimeEntry,i)->type, type))
+      if(strutil_cmp((*i)->type, type))
       {
-         command = kbListICast(MimeEntry,i)->command;
-         flags  = kbListICast(MimeEntry,i)->flags;
+         command = (*i)->command;
+         flags  = (*i)->flags;
          return true;
       }
    
@@ -150,11 +154,11 @@ MimeList::GetCommand(String const & type,
 
    for(i = begin(); i != end(); i++)
    {
-      b = strutil_before(kbListICast(MimeEntry,i)->type,'/');
-      if(strutil_cmp(a,b) && *strutil_after(kbListICast(MimeEntry,i)->type,'/').c_str() == '*')
+      b = strutil_before((*i)->type,'/');
+      if(strutil_cmp(a,b) && *strutil_after((*i)->type,'/').c_str() == '*')
       {
-         command = kbListICast(MimeEntry,i)->command;
-         flags  = kbListICast(MimeEntry,i)->flags;
+         command = (*i)->command;
+         flags  = (*i)->flags;
          return true;
       }
    }

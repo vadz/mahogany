@@ -7,6 +7,7 @@
 	$(CC) $(CXXFLAGS) -c -o $(ODIR)/$@ $<
 %.cpp: %.i
 	$(SWIG) $(SWIGFLAGS) -o $(ODIR)/$@ $<
+
 %cmodule.so: %.o
 	$(CXX) -shared $< -lswigpy -o $(ODIR)/$@
 
@@ -17,7 +18,10 @@ dep depend:
 .depend:
 	touch .depend ; $(MAKE) dep
 
-.PHONY: clean doc dep depend 
+tags:
+	etags --c++ $(SRC) $(CXXSRC)
+
+.PHONY: clean doc dep depend tags
 
 clean:
 	$(RM) $(ODIR)/*.o $(ODIR)/*.so $(ODIR)/*.a

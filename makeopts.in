@@ -4,6 +4,10 @@
 # $Id$
 #
 # $Log$
+# Revision 1.7  1998/05/24 14:46:47  KB
+# lots of progress on Python, but cannot call functions yet
+# kbList fixes again?
+#
 # Revision 1.6  1998/05/19 17:02:38  KB
 # several small bugfixes
 #
@@ -31,7 +35,7 @@ ICONDIR=$(BUILDDIR)/src/icons
 EXTRALIBS=@LIBINTL_LINK@ @COMPFACE_LINK@
 
 # compiler flags
-OPT = -Wall -pedantic #-posix
+OPT = 
 DBG = -g2 -DDEBUG
 
 GUI_SLINK=@WX_SLINK@ 

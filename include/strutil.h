@@ -6,6 +6,10 @@
  * $Id$                *
  *                                                                  *
  * $Log$
+ * Revision 1.10  1998/05/24 14:47:18  KB
+ * lots of progress on Python, but cannot call functions yet
+ * kbList fixes again?
+ *
  * Revision 1.9  1998/05/19 17:02:41  KB
  * several small bugfixes
  *
@@ -162,7 +166,7 @@ void strutil_splitlist(String const &str, std::map<String,String> &table);
    @param delim          character array holding the delimiters
    @param tlist          reference to an STL String list to append the tokens to
   */
-void strutil_tokenise(char *string, const char *delim, kbList &tlist);
+void strutil_tokenise(char *string, const char *delim, kbStringList &tlist);
 
 #ifndef     HAVE_STRSEP
 char * strsep(char **stringp, const char *delim);

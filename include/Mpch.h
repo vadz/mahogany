@@ -20,9 +20,6 @@
 #include  <stdio.h>
 #include  <time.h>
 
-#include  <list>
-#include  <map>
-
 extern "C"
 {
 #	include <mail.h>
