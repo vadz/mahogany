@@ -186,6 +186,7 @@ public:
    void SetEditable(bool editable = true) { m_Editable = true; }
    /// move cursor
    void MoveCursor(int dx = 0, int dy = 0);
+   void SetCursor(wxPoint const &p) { m_CursorPosition = p; }
    /// delete one or more cursor positions
    void Delete(CoordType count = 1);
    void Insert(wxString const &text);
