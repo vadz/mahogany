@@ -685,7 +685,7 @@ PalmOSModule::~PalmOSModule()
 }
 
 #if 0
-#if defined( wxUSE_THREADS ) && defined( OS_UNIX )
+#if wxUSE_THREADS && defined( OS_UNIX )
 class PalmOSAcceptThread : public wxThread
 {
 public:
