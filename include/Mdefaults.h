@@ -615,7 +615,7 @@
 /// the user's hostname
 #define   MP_HOSTNAME_D         M_EMPTYSTRING
 /// Add this hostname for addresses without hostname?
-#define   MP_ADD_DEFAULT_HOSTNAME_D 0L
+#define   MP_ADD_DEFAULT_HOSTNAME_D 1L
 /// the mail host
 #define   MP_SMTPHOST_D         ""
 /// tyhe mail server fallback
