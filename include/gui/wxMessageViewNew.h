@@ -92,6 +92,11 @@ public:
    /// print-previews the currently displayed message
    void PrintPreview(void) { m_EditCtrl->PrintPreview(); }
 
+   /// set the user-specified encoding and update
+   void SetEncoding(wxFontEncoding enc);
+   /// set the font encoding for viewing the current message
+   void SetFontForEncoding(wxFontEncoding enc = wxFONTENCODING_SYSTEM);
+
    /// convert string in cptr to one in which URLs are highlighted
    String HighLightURLs(const char *cptr);
 

@@ -32,6 +32,7 @@ class HeaderInfo
 public:
    virtual const String &GetSubject(void) const = 0;
    virtual const String &GetFrom(void) const = 0;
+   virtual const String &GetTo(void) const = 0;
    virtual time_t GetDate(void) const = 0;
    virtual const String &GetId(void) const = 0;
    virtual const String &GetReferences(void) const = 0;
@@ -62,9 +63,6 @@ public:
    bool HasEncoding() const { return GetEncoding() != wxFONTENCODING_SYSTEM; }
    /// Return some extra data which is folder driver specific
    virtual FolderDataType GetFolderData(void) const = 0;
-   /// The font encoding for the message.
-   virtual void SetEncoding(wxFontEncoding enc);
-   virtual wxFontEncoding GetEncoding() const;
 
 private:
    /// Disallow copy construction

@@ -35,6 +35,7 @@ class HeaderInfoImpl : public HeaderInfo
 public:
    virtual String const &GetSubject(void) const { return m_Subject; }
    virtual String const &GetFrom(void) const { return m_From; }
+   virtual String const &GetTo(void) const { return m_To; }
    virtual time_t GetDate(void) const { return m_Date; }
    virtual String const & GetId(void) const { return m_Id; }
    virtual unsigned long GetUId(void) const { return m_UId; }
