@@ -1453,22 +1453,19 @@ void wxFolderListCtrl::Focus(long index)
    // EnsureVisible() results in an assert failure which is harmless but
    // _very_ annoying as it happens all the time
 #if !defined(__WXDEBUG__) || wxCHECK_VERSION(2,2,6)
-   if ( index != -1 )
-   {
-      // we don't want any events come here while we're inside EnsureVisible()
-      MEventManagerSuspender noEvents;
+   // we don't want any events come here while we're inside EnsureVisible()
+   MEventManagerSuspender noEvents;
 
 #ifdef BROKEN_LISTCTRL
-      // EnsureVisible() shouldn't call our OnIdle!
-      m_suppressFocusTracking = true;
+   // EnsureVisible() shouldn't call our OnIdle!
+   m_suppressFocusTracking = true;
 #endif // BROKEN_LISTCTRL
 
-      EnsureVisible(index);
+   EnsureVisible(index);
 
 #ifdef BROKEN_LISTCTRL
-      m_suppressFocusTracking = false;
+   m_suppressFocusTracking = false;
 #endif // BROKEN_LISTCTRL
-   }
 #endif // wxWin >= 2.2.6
 }
 
@@ -3419,8 +3416,11 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
 
    // even if it wasn't deleted it might have changed because items before it
    // were deleted
-   m_FolderCtrl->Focus(focus);
-   OnFocusChange();
+   if ( focus != -1 )
+   {
+      m_FolderCtrl->Focus(focus);
+      OnFocusChange();
+   }
 #endif // BROKEN_LISTCTRL
 
    // clear preview window if the message showed there had been deleted
