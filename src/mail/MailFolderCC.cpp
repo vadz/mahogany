@@ -1021,14 +1021,38 @@ String MailFolder::GetImapSpec(int typeOrig,
       wxLogWarning(_("Ignoring SSL authentication for folder '%s'"),
                    name.c_str());
    }
+#endif // USE_SSL
 
-   if( (flags & MF_FLAGS_SSLAUTH) != 0 && ! InitSSL() )
-#else // !USE_SSL
-   if( (flags & MF_FLAGS_SSLAUTH) != 0 )
-#endif // USE_SSL/!USE_SSL
+   if ( flags & MF_FLAGS_SSLAUTH )
    {
-      ERRORMESSAGE((_("SSL authentication is not available.")));
-      flags ^= MF_FLAGS_SSLAUTH;
+#ifdef USE_SSL
+      if ( !InitSSL() )
+      {
+#else // !USE_SSL
+         ERRORMESSAGE((_("This version of the program doesn't supprot SSL "
+                         "authentification.")));
+#endif // USE_SSL/!USE_SSL
+
+         ERRORMESSAGE((_("SSL authentication is not available.")));
+
+         flags ^= MF_FLAGS_SSLAUTH;
+
+#ifdef USE_SSL
+         // show the log dialog first
+         wxLog::FlushActive();
+
+         MDialog_Message
+         (
+            _("You can change the locations of the SSL and crypto "
+              "libraries in the last page of the preferences dialog\n"
+              "if you have these libraries in non default location"
+              " or if they have soem other names on your system."),
+            NULL,
+            "SSL tip",
+            "SSLLibTip"
+         );
+      }
+#endif // USE_SSL
    }
 
    switch( type )
@@ -2799,10 +2823,12 @@ bool MailFolderCC::CheckStatus(const MFolder *folder)
    if ( folder->GetType() == MF_POP )
    {
       MailFolder *mf = MailFolder::OpenFolder(folder);
-      bool ok = mf != NULL;
+      if ( !mf )
+         return false;
+
       mf->DecRef();
 
-      return ok;
+      return true;
    }
 
    // remember the old status of the folder

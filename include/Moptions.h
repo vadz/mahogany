@@ -1835,16 +1835,22 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_AUTOCOLLECT_ADB_DEFVAL    "autocollect.adb"
 /// Autocollect entries with names only?
 #define   MP_AUTOCOLLECT_NAMED_DEFVAL 0l
+
+/// Default names for the SSL and crypto libraries
 #ifdef OS_UNIX
-/// Default name for the SSL library
-#define MP_SSL_DLL_SSL_DEFVAL   "libssl.so.0"
-/// Default name for the SSL/crypto library
-#define MP_SSL_DLL_CRYPTO_DEFVAL "libcrypto.so.0"
-#else
-/// Default name for the SSL library
-#define MP_SSL_DLL_SSL_DEFVAL   "libssl.dll"
-/// Default name for the SSL/crypto library
-#define MP_SSL_DLL_CRYPTO_DEFVAL "libcrypto.dll"
+   #ifdef OS_LINUX
+      #define MP_SSL_DLL_SSL_DEFVAL   "libssl.so.0"
+      #define MP_SSL_DLL_CRYPTO_DEFVAL "libcrypto.so.0"
+   #else // !Linux
+      #define MP_SSL_DLL_SSL_DEFVAL   "libssl.so"
+      #define MP_SSL_DLL_CRYPTO_DEFVAL "libcrypto.so"
+   #endif
+#elif defined(OS_WIN)
+   #define MP_SSL_DLL_SSL_DEFVAL   "ssleay32.dll"
+   #define MP_SSL_DLL_CRYPTO_DEFVAL "libeay32.dll"
+#else // !Unix, !Win
+   #define MP_SSL_DLL_SSL_DEFVAL   ""
+   #define MP_SSL_DLL_CRYPTO_DEFVAL ""
 #endif
 
 /**@name message view settings */

@@ -2,7 +2,7 @@ File:		build_win.txt
 Summary:	contains instructions for building Mahogany under MS Windows
 Audience:	Mahogany developers
 Author:		Vadim Zeitlin <vadim@wxwindows.org>
-Last modified:	13.06.00
+Last modified:	18.11.01
 Version:	the information in this file applies to the cvs sources
 
 0. Requirments
@@ -22,6 +22,8 @@ c) GNU m4 from cygwin tools: this is not an absolute requirment, however you
    you don't have it and so you will have to use the versions already in the
    cvs. If you don't have m4, build process will fail: to get around it,
    exclude the file Minterface.mid from build.
+
+d) OpenSSL library from http://www.openssl.org/ for SSL support [optional]
 
 1. wxWindows
 ------------
@@ -81,7 +83,28 @@ otherwise, dependencies will not be handled correctly.
 versit.dll produced when building versit project into the root Mahogany
 directory (or elsewhere in your PATH).
 
-3. Common problems
+3. SSL support
+--------------
+
+    To build Mahogany with the SSL support, first download and install
+(following the included in the distribution instructions) OpenSSL library.
+After building it you should have the SSL headers under inc32 directory and SSL
+libraries (libeay32.dll and ssleay32.dll) under out32dll. Then:
+
+a) copy inc32/openssl somewhere into your compilers include path (if nothing
+   else comes to mind, M/include/openssl is a possible choice)
+
+b) edit M/include/config_nt.h and replace the line "#undef USE_SSL" with
+   "#define USE_SSL 1"
+
+c) build as explained in the previous section
+
+d) copy the libeay32.dll and ssleay32.dll somewhere into your PATH or,
+   alternatively and maybe better, run the program and enter the full paths to
+   the DLLs into the corresponding entries in the last page ("Misc") of the
+   preferences dialog.
+
+4. Common problems
 ------------------
 
 Visual C++ 5.0 doesn't understand environment variables in the project

@@ -150,17 +150,20 @@ bool InitSSL(void) /* FIXME: MT */
    String ssl_dll = READ_APPCONFIG(MP_SSL_DLL_SSL);
    String crypto_dll = READ_APPCONFIG(MP_SSL_DLL_CRYPTO);
 
-#if 0 // there is no status bar anyhow by the time it is called
-   STATUSMESSAGE((_("Trying to load '%s' and '%s'..."),
+   // it doesn't take long so nobody sees this message anyhow
+#if 0
+   STATUSMESSAGE((_("Trying to load SSL libraries '%s' and '%s'..."),
                   crypto_dll.c_str(),
                   ssl_dll.c_str()));
 #endif // 0
 
    bool success = FALSE;
    wxDllType cryptodll = wxDllLoader::LoadLibrary(crypto_dll, &success);
-   if(! success) return FALSE;
+   if(! success)
+      return FALSE;
    wxDllType slldll = wxDllLoader::LoadLibrary(ssl_dll, &success);
-   if(! success) return FALSE;
+   if(! success)
+      return FALSE;
 
    SSL_LOOKUP(SSL_new );
    SSL_LOOKUP(SSL_free );
