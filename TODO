@@ -23,6 +23,11 @@ $Id$
                 b) ...
  
 9		disabling "collect mail" in properties has no effect!
+
+9	KB	fix mm_list, follow Vadim's mail
+9	KB	only one new mail dialog at any given time, suppress
+		them while showing it
+
 8		new mail handling in MApplication should use
 		headerinfo for consistency (different from/reply-to lines)
 9	KB	finish filters dialog / up/down arrows, error messages
