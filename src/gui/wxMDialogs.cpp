@@ -1447,7 +1447,7 @@ bool wxMessageSortingDialog::TransferDataFromWindow()
    for( int n = NUM_SORTLEVELS-1; n >= 0; n--)
    {
       m_SortOrder <<= 4;
-      selection = m_Choices[n]->GetSelection();
+      selection = 2*m_Choices[n]->GetSelection();
       if( selection == MSO_SCORE )
          uses_scoring = true;
 
