@@ -482,9 +482,7 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
    // The folder must be opened via the profile mode, so it can read
    // login and password from it. If using MF_IMAP/MF_NNTP here, one
    // must provide server/login/passwd explicitly.
-   ASMailFolder *asmf = ASMailFolder::OpenFolder(MF_PROFILE,
-                                                 folder->GetName(),
-                                                 profile);
+   ASMailFolder *asmf = ASMailFolder::OpenFolder(MF_PROFILE, folder->GetName());
 
    if ( !asmf )
    {
