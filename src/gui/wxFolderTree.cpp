@@ -53,6 +53,7 @@ enum FolderIcon
 {
    iconInbox,
    iconFile,
+   iconMH,
    iconPOP,
    iconIMAP,
    iconNNTP,
@@ -1067,6 +1068,7 @@ String GetFolderIconName(size_t n)
       // should be in sync with the corresponding enum (FolderIcon)!
       "folder_inbox",
       "folder_file",
+      "folder_file",
       "folder_pop",
       "folder_imap",
       "folder_nntp",
@@ -1112,6 +1114,7 @@ int GetDefaultFolderTypeIcon(FolderType folderType)
    {
       { iconInbox, Inbox      },
       { iconFile,  File       },
+      { iconMH,    MF_MH      },
       { iconPOP,   POP        },
       { iconIMAP,  IMAP       },
       { iconNNTP,  Nntp       },

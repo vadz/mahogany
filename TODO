@@ -20,6 +20,9 @@ $Id$
 		now
 		- deleting wxllist takes ages, calling MoveLines(,-1)
 		  recursively 
+
+8	VZ	mh_parameters provokes a compile bug - what to do?
+
 5	KB	for NNTP only count unread/new messages
 4		Change "only retrieve first X messages" dialog box:
 		1. make it more intuitive (yes/no switch)
@@ -167,6 +170,8 @@ from 32bitsonline review:
 *********************************************************************
 * PRI	WHO	DESCRIPTION
 *********************************************************************
+
+7		test MH folders
 
 5	KB	properties dialog forgets IMAP mailbox name
 5	KB	check handling of missing hostnames,

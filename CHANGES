@@ -1,5 +1,6 @@
 (next release) on (date of next release)
 
+19.07.99 VZ: initial support for MH folders
 18.07.99 KB: more async fixes, fixed some race-conditions, MModule dialog almost working
 17.07.99 KB: more async code, non-async compilation no longer supported
              scandoc now produces usable docs, MModule produces listing of modules,

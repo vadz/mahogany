@@ -51,9 +51,11 @@ enum FolderType
    News  = MF_NEWS,
 
    // pseudo types
-   FolderGroup,                // doesn't contain mail, but other folders
+   MF_GROUP,
+   FolderGroup = MF_GROUP,     // doesn't contain mail, but other folders
    FolderInvalid = MF_ILLEGAL, // folder not initialized properly
-   FolderRoot = 999            // this is the the special pseudo-folder
+   FolderRoot = 999,           // this is the the special pseudo-folder
+   MF_ROOT = FolderRoot
 };
 
 // ----------------------------------------------------------------------------
@@ -121,6 +123,32 @@ inline int CombineFolderTypeAndFlags(FolderType type, int flags)
    ASSERT_MSG( !(flags & MF_TYPEMASK), "flags shouldn't contain type" );
 
    return type | flags;
+}
+
+/// can this folder contain other subfolders? if so, of which type?
+inline bool CanHaveSubfolders(FolderType type, FolderType *subtype = NULL)
+{
+   switch ( type )
+   {
+      case MF_MH:
+         if ( subtype )
+         {
+            // MH folder can only have MH subfolders
+            *subtype = MF_MH;
+         }
+
+      case MF_GROUP:
+      case MF_ROOT:
+         if ( subtype && type != MF_MH )
+         {
+            // can contain any subfolders at all
+            *subtype = MF_ILLEGAL;
+         }
+         return TRUE;
+
+      default:
+         return FALSE;
+   }
 }
 
 // ----------------------------------------------------------------------------

@@ -601,8 +601,14 @@ MailFolderCC::Open(void)
    {
       MCclientLocker lock;
       SetDefaultObj();
-      if(GetType() == MF_FILE && ! wxFileExists(m_MailboxPath))
+
+      // create the mailbox if it doesn't exist yet
+      if( GetType() == MF_FILE && GetType() == MF_MH &&
+          !wxFileExists(m_MailboxPath) )
+      {
          mail_create(NIL, (char *)m_MailboxPath.c_str());
+      }
+
       // If we don't have a mailstram yet, we half-open one:
       if(m_MailStream == NIL)
          m_MailStream = mail_open(NIL,(char *)m_MailboxPath.c_str(),
@@ -875,7 +881,8 @@ MailFolderCC::GetMessage(unsigned long uid)
 class HeaderInfoList *
 MailFolderCC::GetHeaders(void) const
 {
-   ASSERT(m_Listing);
+   CHECK(m_Listing, NULL, "no listing");
+
    m_Listing->IncRef();
    return m_Listing;
 }
@@ -1372,8 +1379,16 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
                    + String(" n: ") + strutil_ultoa(number);
       LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
-      mf->m_NumOfMessages = number;
-      mf->RequestUpdate();
+
+      // this test seems necessary for MH folders, otherwise we're going into
+      // an infinite loop (and it shouldn't (?) break anything for other
+      // folders)
+      if ( (mf->m_NumOfMessages == 0 && number != 0) ||
+           (mf->m_NumOfMessages != number) )
+      {
+         mf->m_NumOfMessages = number;
+         mf->RequestUpdate();
+      }
    }
    else
    {

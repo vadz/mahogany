@@ -37,7 +37,6 @@
 #include "MDialogs.h"
 #include "MApplication.h"
 
-
 /*-------------------------------------------------------------------*
  * static member functions of MailFolder.h
  *-------------------------------------------------------------------*/
@@ -107,12 +106,24 @@ MailFolder::OpenFolder(int typeAndFlags,
          break;
 
       case MF_FILE:
-      case MF_MH:
          if( strutil_isempty(name) )
             name = READ_CONFIG(profile, MP_FOLDER_PATH);
          if(name == "INBOX")
             type = MF_INBOX;
          name = strutil_expandfoldername(name);
+         break;
+
+      case MF_MH:
+         // the name should be relative to the MH root directory
+         {
+            // FIXME this code is CC-specific, shouldn't be here
+            String pathMH = (char *)mail_parameters(NULL, GET_MHPATH, NULL);
+            if ( !!pathMH && strncmp(name, pathMH, pathMH.length()) == 0 )
+            {
+               // skip MH path (+1 for the '/')
+               name = name.c_str() + pathMH.length() + 1;
+            }     
+         }
          break;
 
       case MF_POP:

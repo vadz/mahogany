@@ -353,6 +353,9 @@ public:
       // enable/disable the text control with label and button
    void EnableTextWithButton(wxTextCtrl *control, bool enable);
 
+      // enable/disable the combobox and its label
+   void EnableComboBox(wxComboBox *control, bool bEnable);
+
    // get the canvas - all the controls should be created as children of this
    // canvas, not of the page itself
    wxScrolledWindow *GetCanvas() const { return m_canvas; }

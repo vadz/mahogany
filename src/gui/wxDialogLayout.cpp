@@ -695,6 +695,29 @@ void wxEnhancedPanel::EnableTextWithLabel(wxTextCtrl *control, bool bEnable)
    }
 }
 
+// enable/disable the combobox with label
+void wxEnhancedPanel::EnableComboBox(wxComboBox *control, bool bEnable)
+{
+   // first enable the combobox itself
+   control->Enable(bEnable);
+
+   // then its label
+
+   // NB: we assume that the control ids are consecutive
+   long id = wxWindow::PrevControlId(control->GetId());
+   wxWindow *win = FindWindow(id);
+
+   if ( win == NULL ) {
+      wxFAIL_MSG("can't find label for the text entry zone");
+   }
+   else {
+      // did we find the right one?
+      wxASSERT( win->IsKindOf(CLASSINFO(wxStaticText)) );
+
+      win->Enable(bEnable);
+   }
+}
+
 // ----------------------------------------------------------------------------
 // wxNotebookPageBase
 // ----------------------------------------------------------------------------
