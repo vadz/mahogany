@@ -31,9 +31,7 @@ $(IDLFILES) $(INTERFACES) $(CPPFILES): $(MID) $(M4DEF)
 
 msgcat:
 	@touch $(BUILDDIR)/messages.po
-	@set -e; cd .src; for i in *.h gui/*.h adb/*.h ; \
-	do $(XGETTEXT) -C -k_ -j -o $(BUILDDIR)/messages.po $$i ; \
-	done
+	cd .src; exec $(XGETTEXT) -C -k_ -j -o $(BUILDDIR)/messages.po *.h gui/*.h adb/*.h
 
 clean:
 	$(RM) $(IDLFILES) $(INTERFACES) $(CPPFILES)

@@ -154,7 +154,7 @@ void wxLayoutImportHTML(wxLayoutList *list,
               cptr++;
            continue;
         }
-	if(! inTag)
+	if(!inTag)
 	  filtered += *cptr;
         cptr++;
   }
@@ -282,18 +282,21 @@ wxLayoutExportStatus::wxLayoutExportStatus(wxLayoutList *list)
 wxLayoutExportObject *wxLayoutExport(wxLayoutExportStatus *status,
                                      int mode, int flags)
 {
+// FIXME: this badly needs to be re-written
    wxASSERT(status);
    wxLayoutExportObject * exp;
 
-   if(status->m_iterator == NULLIT) // end of line
+   if (!status->m_line)
+      return NULL;
+   if(status->NULLIT()) // end of line
    {
-      if(!status->m_line || status->m_line->GetNextLine() == NULL)
+      if(status->m_line->GetNextLine() == NULL)
          // reached end of list
          return NULL;
    }
    exp = new wxLayoutExportObject();
    wxLayoutObjectType type;
-   if(status->m_iterator != NULLIT)
+   if(!status->NULLIT())
    {
       type = (** status->m_iterator).GetType();
       if( mode == WXLO_EXPORT_AS_OBJECTS || ! WXLO_IS_TEXT(type)) // simple case
@@ -323,7 +326,7 @@ wxLayoutExportObject *wxLayoutExport(wxLayoutExportStatus *status,
    // text must be concatenated
    for(;;)
    {
-      while(status->m_iterator == NULLIT)
+      while(status->NULLIT())
       {
          if(mode & WXLO_EXPORT_AS_HTML)
             *str += "<br>";
@@ -333,12 +336,11 @@ wxLayoutExportObject *wxLayoutExport(wxLayoutExportStatus *status,
             *str += '\n';
 
          status->m_line = status->m_line->GetNextLine();
-         if(status->m_line)
-            status->m_iterator = status->m_line->GetFirstObject();
-         else
+         if(!status->m_line)
             break; // end of list
+         status->m_iterator = status->m_line->GetFirstObject();
       }
-      if(! status->m_line)  // reached end of list, fall through
+      if(!status->m_line)  // reached end of list, fall through
          break;
       type = (** status->m_iterator).GetType();
       if(type == WXLO_TYPE_ICON)

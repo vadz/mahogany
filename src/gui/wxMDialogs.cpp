@@ -930,7 +930,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
 #endif
                    "SSL "
 #ifdef EXPERIMENTAL
-                   "Experimental Code "
+                   "Experimental Code: " EXPERIMENTAL
 #endif
 
                    "<p>"

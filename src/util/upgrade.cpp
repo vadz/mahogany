@@ -2105,7 +2105,7 @@ public:
                              m_NewMailFolder.c_str()));
 //               f->SetFlags(f->GetFlags() & !MF_FLAGS_NEWMAILFOLDER);
                Profile *p = Profile::CreateProfile(f->GetFullName());
-	       if(p)
+               if(p)
                {
                  int typeAndFlags = READ_CONFIG(p,MP_FOLDER_TYPE);
                  FolderType type = GetFolderType(typeAndFlags);
@@ -2625,7 +2625,7 @@ bool RetrieveRemoteConfigSettings(void)
       _("Retrieve remote configuration settings now?"), NULL,
       _("Retrieve remote settings?"), true,
             GetPersMsgBoxName(M_MSGBOX_RETRIEVE_REMOTE) ) )
-	return TRUE;
+        return TRUE;
 
    MailFolder *mf =
       MailFolder::OpenFolder(READ_APPCONFIG(MP_SYNC_FOLDER));
@@ -2722,7 +2722,7 @@ bool SaveRemoteConfigSettings(void)
       _("Store remote configuration settings now?"), NULL,
       _("Store remote settings?"), true,
             GetPersMsgBoxName(M_MSGBOX_STORE_REMOTE) ) )
-	return TRUE;
+        return TRUE;
 
    MailFolder *mf =
       MailFolder::OpenFolder(READ_APPCONFIG(MP_SYNC_FOLDER));

@@ -3,7 +3,7 @@
 
 include ../../../makeopts
 
-TARGETS := libversit.a
+TARGETS := vcc.o vobject.o # vcaltmp.o
 
 CPPFLAGS += -I.src
 
@@ -11,13 +11,6 @@ all:	$(TARGETS)
 	@true
 
 include ../../../makerules $(wildcard *.d)
-
-libversit_a_OBJECTS := vcc.o vobject.o # vcaltmp.o
-
-libversit.a: $(libversit_a_OBJECTS)
-	$(RM) libversit.a
-	$(AR) cru libversit.a $(libversit_a_OBJECTS)
-	$(RANLIB) libversit.a
 
 clean: stdclean
 	rm -f vcc.c

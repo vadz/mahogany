@@ -29,10 +29,8 @@ ICONDIR=$(SOURCEDIR)/src/icons
 
 # this will be set or unset
 @MAKE_USE_PYTHON@
-@MAKE_USE_SWIG@
 @MAKE_DEBUG@
 @MAKE_EXPERIMENTAL@
-@MAKE_LIBTOOL@
 @MAKE_USE_MODULES@
 @MAKE_USE_LEAKTRACER@
 @MAKE_HAVE_DOCTOOLS@
@@ -81,19 +79,12 @@ CPP	:= @CPP@
 CPPFLAGS= @CPPFLAGS@
 CC	:= @CC@
 CXX	:= @CXX@
-LIBTOOL	:= @LIBTOOL@
 AR	:= ar
 RANLIB	:= @RANLIB@
 YACC	:= @YACC@
 
 # SWIG
-ifdef USE_SWIG
 SWIG	:= @SWIG@
-else
-SWIG	:= true swig
-endif
-SWIGFLAGS_LIBSWIG := -I.src -c++ -python -shadow 
-SWIGFLAGS := $(SWIGFLAGS_LIBSWIG) -dhtml -c
 
 # other stuff
 RM	:= rm -f
@@ -118,12 +109,8 @@ DOCDIR = $(DATADIR)/doc
 LD_RUN_PATH=$(DATADIR)/$(CANONICAL_HOST)/lib
 MODULEDIR=$(DATADIR)/$(CANONICAL_HOST)/modules
 
-ifdef USE_LIBTOOL
-LINK = $(LIBTOOL) --mode=link $(CXX) -Wl-r$(LD_RUN_PATH)
-else
 LINK = $(CXX) -Wl-r$(LD_RUN_PATH)
 #-Wl-export-dynamic 
-endif
 
 CFLAGS   = @CFLAGS@
 CXXFLAGS = @CXXFLAGS@

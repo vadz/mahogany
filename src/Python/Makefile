@@ -20,7 +20,7 @@ all:	$(PYTARGETS) $(OBJECTS)
 
 include ../../makerules $(wildcard *.d)
 
-ifdef USE_SWIG
+ifdef SWIG
 swiglib.cpp: swiglib.i
 	$(SWIG) $(SWIGFLAGS_LIBSWIG) -o $@ $<
 endif

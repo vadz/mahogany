@@ -246,8 +246,6 @@ protected:
 /// Define a list type of wxLayoutObject pointers.
 KBLIST_DEFINE(wxLayoutObjectList, wxLayoutObject);
 
-/// An illegal iterator to save typing.
-#define NULLIT (wxLayoutObjectList::iterator(NULL))
 /// The iterator type.
 typedef wxLayoutObjectList::iterator wxLOiterator;
 
@@ -563,6 +561,11 @@ public:
        @return column for breaking line or -1 if no suitable location found
    */
    CoordType GetWrapPosition(CoordType column);
+
+   /** A cursor used to indicate boundry conditions
+   */
+   inline wxLayoutObjectList::iterator NULLIT(void) const
+      { return m_ObjectList.end(); }
 
    /** Finds the object which covers the cursor position xpos in this
        line.

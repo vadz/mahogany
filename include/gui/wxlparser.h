@@ -62,6 +62,7 @@ struct wxLayoutExportStatus
    wxLOiterator        m_iterator;
    wxLayoutStyleInfo   m_si;
    bool                m_FirstTime;
+   inline bool NULLIT(void) const { return m_iterator == m_line->NULLIT(); }
 };
 
 #ifdef OS_WIN

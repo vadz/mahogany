@@ -323,7 +323,7 @@ MailFolder::OpenFolder(int folderType,
       else
       {
          //String pname = (i_path[0] == '/') ? String(i_path.c_str()+1) : i_path;
-	if(i_path[0] == '/')
+        if(i_path[0] == '/')
           profile = Profile::CreateEmptyProfile(parentProfile);
         else
           profile = Profile::CreateProfile(i_path, parentProfile);
@@ -499,7 +499,7 @@ MailFolder::CreateFolder(const String &name,
    MailFolder *mf2 = MailFolder::OpenFolder(mf);
    SafeDecRef(mf2);
    SafeDecRef(mf);
-   
+
    p->DecRef();
 
    return true;
@@ -672,19 +672,19 @@ public:
       {
 
          MfList::iterator i;
-         for(i = m_MfList.begin(); i != m_MfList.end(); i++)
+         for(i = m_MfList.begin(); i != m_MfList.end();)
          {
             if( (**i).m_dt > wxDateTime::Now() )
-               m_MfList.erase(i);
-            if( i == m_MfList.end() )
-               break;
+               i = m_MfList.erase(i);
+            else
+               ++i;
          }
       }
    void CleanUp(void)
       {
          MfList::iterator i = m_MfList.begin();
          while(i != m_MfList.end() )
-            m_MfList.erase(i);
+            i = m_MfList.erase(i);
       }
 private:
    MfList m_MfList;
@@ -718,7 +718,7 @@ MailFolderCmn::DecRef()
      return FALSE;
    }
    else
-	return RealDecRef();
+        return RealDecRef();
 }
 
 bool
@@ -1848,7 +1848,7 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
    }
    else
       hil->IncRef();
-   
+
    // Maybe we are lucky and have nothing to do?
    if(hil->Count() == 0)
    {
@@ -1868,6 +1868,7 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
          UIdArray messages;
          CHECK(hil, FALSE, "no header listing?");
          for(UIdType idx = 0; idx < hil->Count(); idx++)
+         {
             // the first two condidions: only take NEW=RECENT&&!SEEN messages
             if( ( (*hil)[idx]->GetStatus() &  MSG_STAT_RECENT )
                 && (((*hil)[idx]->GetStatus() &  MSG_STAT_SEEN ) == 0)
@@ -1875,7 +1876,8 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
                 && (((*hil)[idx]->GetStatus() &  MSG_STAT_DELETED ) == 0)
                )
                messages.Add( (*hil)[idx]->GetUId() );
-      
+         }
+
          // build a single program from all filter rules:
          String filterString;
          MFolder_obj folder(GetName());
@@ -1937,7 +1939,7 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
    hil->DecRef();
    return changed;
 }
-   
+
 
 // ----------------------------------------------------------------------------
 // sort order conversions

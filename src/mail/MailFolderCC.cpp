@@ -1347,20 +1347,15 @@ MailFolderCC::PingReopenAll(bool fullPing)
    // try to reopen all streams
    bool rc = true;
 
-   /* We cannot simply traverse the list of mailfolders here, as they
-      might get closed/reopened by Ping(), which invalidates the
-      iterators into the list. Instead, we traverse a copy of the list */
    CHECK_STREAM_LIST();
 
-   StreamConnectionList streamListCopy(FALSE);
-   StreamConnectionList::iterator i;
-   for ( i = ms_StreamList.begin(); i != ms_StreamList.end(); i++ )
+   /* Ping() might close/reopen a mailfolder, which would invalidate
+      the cursor, so the iterating cursor points to the next element */
+   for ( StreamConnectionList::iterator j = ms_StreamList.begin();
+         j != ms_StreamList.end(); )
    {
-      streamListCopy.push_back(*i);
-   }
-
-   for ( i = streamListCopy.begin(); i != streamListCopy.end(); i++ )
-   {
+      StreamConnectionList::iterator i = j;
+      ++j;
       StreamConnection *conn = *i;
       MailFolderCC *mf = conn->folder;
 

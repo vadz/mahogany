@@ -1075,7 +1075,7 @@ wxMessageView::MimeInfo(int mimeDisplayPart)
    // debug output with all parameters
    const MessageParameterList &plist = m_mailMessage->GetParameters(mimeDisplayPart);
    MessageParameterList::iterator plist_it;
-   if(plist.size() > 0)
+   if(!plist.empty())
    {
       message += _("\nParameters:\n");
       for(plist_it = plist.begin(); plist_it != plist.end();
@@ -1091,7 +1091,7 @@ wxMessageView::MimeInfo(int mimeDisplayPart)
    const MessageParameterList &dlist = m_mailMessage->GetDisposition(mimeDisplayPart,&disposition);
    if(! strutil_isempty(disposition))
       message << _("\nDisposition: ") << disposition << '\n';
-   if(dlist.size() > 0)
+   if(!dlist.empty())
    {
       message += _("\nDisposition Parameters:\n");
       for(plist_it = dlist.begin(); plist_it != dlist.end();

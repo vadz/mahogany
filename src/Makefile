@@ -1,29 +1,38 @@
 # Makefile for src directory
 # $Id$
 
-include ../makeopts
+# Our master target.  Put it here so all the intermediate targets generated
+# while reading the Names.mk files won't be considered the master one.
+all:	binary
 
-# use sub-make for M so wildcard dependencies are expanded correctly
-all:	subdirs
-	@$(MAKE) --no-print-directory M
-
-# List all directories which create modules (.so files) to be installed:
+# Get all the names that need to be generated.  The Names.mk file in each
+# subdirectory fills in these parameters.
 #
-MOD_DIRS:= modules adb
+# Objects we will build to be included in the M binary
+MOBJS	:=
+# Modules, compiled separately or bound directly
+MSOS	:=
+# Source files to be scanned for translation strings
+MSGSRC	:=
+# Run `make install' in these directories when installing
+INSTALL_DIRS :=
+# Generated objects to be removed by clean
+CLEAN	:=
+#
+include ../makeopts $(wildcard .src/*/Names.mk) $(wildcard $(patsubst .src/%/Names.mk,%/*.d,$(wildcard .src/*/Names.mk)))
 
-SUB_DIRS:= $(MOD_DIRS) util classes gui mail wx
-UTILOBJ := util/strutil.o util/sysutil.o util/miscutil.o util/upgrade.o \
-           util/twofish2.o
-MOBJS   = $(UTILOBJ) classes/*.o gui/*.o mail/*.o adb/*.o \
-	wx/generic/*.o wx/common/*.o wx/vcard/*.o
-
-ifdef USE_PYTHON
-SUB_DIRS += Python
-MOBJS += Python/*.o
+# modules: MOBJS get linked in statically, MSOS installed as shared libs
+ifeq ($(USE_MODULES),static)
+# static, link modules directly
+MOBJS	+= $(MSOS:.so=.o)
+MSOS	:= 
+else
+ifeq ($(USE_MODULES),dynamic)
+# dynamic, nothing to do
+else
+# none, don't compile modules
+MSOS	:=
 endif
-
-ifeq ($(USE_MODULES), static)
-MOBJS += modules/*.o
 endif
 
 # LeakTracer must be the last object on the linker line!
@@ -31,38 +40,42 @@ ifdef USE_LEAKTRACER
 MOBJS += util/LeakTracer.o
 endif
 
+include ../makerules
+
+# OK, we've got all the names and the rules to generate them; we can
+# now actually specify the dependencies.
+binary:	M $(MSOS)
+	@true
 M:	$(MOBJS)
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)
 
 Mdll:	libM.so
-	$(LINK) -o M -L. $(LDFLAGS) -lM 
+	$(LINK) -o M $(LDFLAGS) libM.so
 
-libM.so: subdirs
-	$(CXX) -shared -Xlinker -z -Xlinker nodefs $(MOBJS) $(LDFLAGS) $(NONPLIBS) $(LDFLAGS) $(GUI_LIBS) $(LIBS) -o libM.so
+libM.so: $(MOBJS)
+	$(CXX) -o libM.so -shared -Xlinker -z -Xlinker nodefs $(MOBJS) $(LDFLAGS) $(NONPLIBS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)
 
 # build the binary which is statically linked to wxGTK, dynamically to
 # everything else
-quartstatic: subdirs
+quartstatic: $(MOBJS)
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS_STATIC)
 
 # build the binary which is statically linked to wxGTK and GTK+, dynamically
 # to everything else
-semistatic: subdirs
-	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(LIBS_STATIC) $(GUI_LIBS_STATIC)
+semistatic: $(MOBJS)
+	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS_STATIC) $(LIBS_STATIC)
 
 # build a (completely) statically linked binary
-static: subdirs
-	$(LINK) -static -o M.static $(LDFLAGS) $(MOBJS) $(LIBS)
-
-subdirs:
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
+M.static: $(MOBJS)
+	$(LINK) -o M.static $(MOBJS) $(LDFLAGS) -static $(LIBS)
 
 doc:
 	@true
 
 clean:
-	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
-	$(RM) core libM.so M M.static
+	$(RM) core libM.so M M.static $(CLEAN)
+	$(RM) $(MOBJS) $(MSOS)
+	$(RM) $(MOBJS:.o=.d) $(MSOS:.so=.d)
 
 install:
 	$(INSTALL_PROGRAM) -s -m 755 M $(DATADIR)/$(CANONICAL_HOST)/bin
@@ -74,20 +87,25 @@ install:
 	$(RM) $(BINDIR)/mahogany
 	ln -f -s ../share/Mahogany/$(CANONICAL_HOST)/bin/M $(BINDIR)/mahogany
 ifeq ($(USE_MODULES),dynamic)
-	set -e; for i in $(MOD_DIRS); do $(MAKE) -C $$i install-modules; done
+	$(INSTALL) -d $(MODULEDIR)
+	set -e $(MSOS); while test $$# -ge 1; \
+	do $(INSTALL_PROGRAM) $$1 $(MODULEDIR); shift; done
 endif
 	$(INSTALL) -d $(DATADIR)/icons
 	for i in .src/icons/*.xpm; \
 	do $(INSTALL_DATA) $$i $(DATADIR)/icons; \
 	done
-ifdef USE_PYTHON
-	$(MAKE) -C Python $@
-endif
+	set -e $(INSTALL_DIRS); \
+	for i; do $(MAKE) -C $$i install; done
 
 # invoked from locale to build message catalog
 msgcat:
-	echo > $(BUILDDIR)/messages.po
+ifeq "$(TRANSLATIONS)" "yes"
+	cd .src; exec $(XGETTEXT) -C -k_ -o $(BUILDDIR)/messages.po $(MSGSRC)
 # Yes, there really are some translatable strings in ../include
-	@set -e; for i in ../include $(SUB_DIRS); do $(MAKE) -C $$i $@; done
+	$(MAKE) -C ../include msgcat
+else
+	false translation tools are not installed
+endif
 
-.PHONY:	all clean doc semistatic static allclean install msgcat subdirs
+.PHONY:	all clean doc semistatic static install msgcat

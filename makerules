@@ -1,100 +1,80 @@
 # makerules (rules to create object files) for M root directory
 # $Id$
 
-# modules: MODOBJS get linked in statically, MODULES installed as shared libs
-ifeq ($(USE_MODULES),static)
-MODULES = 
-MODOBJS = $(MOD:.cpp=.o)
-else
-ifeq ($(USE_MODULES),dynamic)
-MODULES = $(MOD:.cpp=.so)
-MODSOS = $(MOD:.cpp=.so)
-MODOBJS =
-else
-MODULES =
-MODOBJS =
-endif
-endif
+# flags to be set based upon the type of object
+M_FLAGS_o := -c
+M_FLAGS_so := -shared
+M_FLAGS_ii := -E
+M_FLAGS_s := -S
+
+# common initial flags
+define M_COMPILE_CPP
+$(M_FLAGS$(subst .,_,$(suffix $@))) -fPIC $(CPPFLAGS) $(CPPFLAGS$(subst /,_,$(subst /$(notdir $*),,/$*))) $(CPPFLAGS_$(subst .,_,$(subst /,_,$@)))
+endef
+
+# common C flags
+define M_COMPILE_CC_unfiltered
+$(M_COMPILE_CPP) $(CFLAGS) $(CFLAGS$(subst /,_,$(subst /$(notdir $*),,/$*))) $(CFLAGS_$(subst .,_,$(subst /,_,$@)))
+endef
+define M_COMPILE_CC
+$(filter-out $(FILTER_OUT$(subst /,_,$(subst /$(notdir $*),,/$*))) $(FILTER_OUT_$(subst .,_,$(subst /,_,$@))),$(M_COMPILE_CC_unfiltered)) $(FILTER_IN$(subst /,_,$(subst /$(notdir $*),,/$*))) $(FILTER_IN_$(subst .,_,$(subst /,_,$@)))
+endef
+
+# common C++ flags
+define M_COMPILE_CXX_unfiltered
+$(M_COMPILE_CPP) $(CXXFLAGS) $(CXXFLAGS$(subst /,_,$(subst /$(notdir $*),,/$*))) $(CXXFLAGS_$(subst .,_,$(subst /,_,$@)))
+endef
+define M_COMPILE_CXX
+$(filter-out $(FILTER_OUT$(subst /,_,$(subst /$(notdir $*),,/$*))) $(FILTER_OUT_$(subst .,_,$(subst /,_,$@))),$(M_COMPILE_CXX_unfiltered)) $(FILTER_IN$(subst /,_,$(subst /$(notdir $*),,/$*))) $(FILTER_IN_$(subst .,_,$(subst /,_,$@)))
+endef
+
+# common loader flags
+define M_LD_FLAGS
+$(LDFLAGS) $(LDFLAGS$(subst /,_,$(subst /$(notdir $*),,/$*))) $(LDFLAGS_$(subst .,_,$(subst /,_,$@)))
+endef
 
 vpath %.h .src
 vpath %.c .src
-vpath %.y .src
+%.o: %.c
+	$(CC) -o $@ $(strip $(M_COMPILE_CC)) $<
+	@f=$(notdir $*); test ! -f $$f.d || { sed "s,^$$f\.o:,$@:," $$f.d >$*.t && rm -f $$f.d && mv $*.t $*.d; }
+%.s: %.c	# to look at assembly code during debugging
+	$(CC) -o $@ $(strip $(M_COMPILE_CC)) $<
+
 vpath %.cc .src
+%.o: %.cc
+	$(CXX) -o $@ $(strip $(M_COMPILE_CXX)) $<
+	@f=$(notdir $*); test ! -f $$f.d || { sed "s,^$$f\.o:,$@:," $$f.d >$*.t && rm -f $$f.d && mv $*.t $*.d; }
+
 vpath %.cpp .src
+%.o: %.cpp
+	$(CXX) -o $@ $(strip $(M_COMPILE_CXX)) $<
+	@f=$(notdir $*); test ! -f $$f.d || { sed "s,^$$f\.o:,$@:," $$f.d >$*.t && rm -f $$f.d && mv $*.t $*.d; }
+%.ii: %.cpp	# to look at post-processed source during debugging
+	$(CXX) -o $@ $(strip $(M_COMPILE_CXX)) $<
+%.s: %.cpp	# to look at assembly code during debugging
+	$(CXX) -o $@ $(strip $(M_COMPILE_CXX)) $<
 
-ifdef USE_LIBTOOL
-# no longer used
-%.o: %.cc
-	$(LIBTOOL) --mode=compile $(CXX) -fPIC $(CPPFLAGS) $(CXXFLAGS) -c $<
-%.o: %.cpp
-	$(LIBTOOL) --mode=compile $(CXX) -fPIC $(CPPFLAGS) $(CXXFLAGS) -c $<
-%.o: %.c
-	$(LIBTOOL) --mode=compile $(CC)  -fPIC $(CPPFLAGS) $(CFLAGS) -c $<
-%.lo: %.cpp
-	$(LIBTOOL) --mode=compile $(CXX) -fPIC $(CPPFLAGS) $(CXXFLAGS) -c $< 
-%.so: %.lo
-	$(LIBTOOL) $(CXX) -export-dynamic -fPIC $(CPPFLAGS) $(CXXFLAGS) -o $@ $<
-	@if test -f $*.d; then sed 's,\.o:,.so:,' $*.d>$*.o; mv $*.o $*.d; fi
-else
-%.o: %.cc
-	$(CXX) -fPIC $(CPPFLAGS) $(CXXFLAGS) -c $<
-%.o: %.cpp
-	$(CXX) -fPIC $(CPPFLAGS) $(CXXFLAGS) -c $<
-%.o: %.c
-	$(CC)  -fPIC $(CPPFLAGS) $(CFLAGS) -c $<
+# as a side-effect of building a .so file, any corresponding .o is removed
 %.so: %.cpp
-	$(CXX) -shared -fPIC $(CPPFLAGS) $(CXXFLAGS) -o $@ $< $(SO_LIBS)
-	@if test -f $*.d; then sed 's,\.o:,.so:,' $*.d>$*.o; mv $*.o $*.d; fi
-endif
+	$(CXX) -o $@ $(strip $(M_COMPILE_CXX) $< $(M_LD_FLAGS))
+	@f=$(notdir $*); test ! -f $$f.d || { sed "s,^$$f\.o:,$@:," $$f.d >$*.o && rm -f $$f.d && mv $*.o $*.d; }
 
-ifdef USE_SWIG
-vpath %.i .src
-%.cpp %.py: %.i
-	$(SWIG) $(SWIGFLAGS) -o $*.cpp $<
-else
-vpath %.cpp-swig .src
-%.cpp: %.cpp-swig
-	ln -sf $< $*.cpp
-vpath %.py-swig .src
-%.py: %.py-swig
-	ln -sf $< $*.py
-endif
-
-%cmodule.so: %.o
-	$(CXX) -shared $< -lswigpy -o $@
-
-%.c: %.y
-	$(YACC) $(YFLAGS) $< && mv y.tab.c $@
+vpath %.y .src
+%.o: %.y
+	$(YACC) $(YFLAGS) $< && mv y.tab.c $*.c
 	if test -f y.tab.h; then \
 	  if cmp -s y.tab.h $*.h; then rm -f y.tab.h; \
 	  else mv y.tab.h $*.h; fi; \
 	else :; fi
+	$(CC) -o $@ $(M_COMPILE_CC) $*.c
+	@f=$(notdir $*); test ! -f $$f.d || { sed -e "s,^$$f\.o:,$@:," -e "s,$*.c,$<," $$f.d >$*.t && rm -f $$f.d && mv $*.t $*.d; }
+	@rm -f $*.c
 
 tags:
 	etags --c++ $(SRC) $(CXXSRC)
 
-msgcat:
-	@touch $(BUILDDIR)/messages.po
-ifdef SRC
-ifeq "$(TRANSLATIONS)" "yes"
-	@set -e; cd .src; for i in $(SRC) $(CSRC); \
-	do $(XGETTEXT) -C -k_ -j -o $(BUILDDIR)/messages.po $$i; \
-	done
-endif
-endif
-
 stdclean:
 	$(RM) -r *.o *.so *.a *.lo *.d .libs
 
-modules: $(MODULES)
-	@true
-
-install-modules:
-ifeq ($(MODULES),)
-	@true
-else
-	$(INSTALL) -d $(MODULEDIR)
-	for i in $(MODULES); do $(INSTALL_PROGRAM) $$i $(MODULEDIR); done
-endif
-
-.PHONY: all install stdclean tags msgcat modules install-modules
+.PHONY: all install stdclean tags msgcat

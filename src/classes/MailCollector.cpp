@@ -231,7 +231,7 @@ MailCollectorImpl::Collect(MailFolder *mf)
 
    // we can call RemoveIncomingFolder() inside the loop which
    // would invalidate our cursor, so we iterate using a fake
-   // cursor that always points to the subsequent element
+   // cursor that always points to the subsequent (valid) element
    bool rc = true;
    for (MailCollectorFolderList::iterator i_fake = m_list->begin();
             i_fake != m_list->end(); )

@@ -928,11 +928,13 @@ wxMApp::LoadModules(void)
 void
 wxMApp::UnloadModules(void)
 {
-   ModulesList::iterator i;
-   for(i = gs_GlobalModulesList.begin();
-       i != gs_GlobalModulesList.end();
-       i++)
+   for (ModulesList::iterator j = gs_GlobalModulesList.begin();
+       j != gs_GlobalModulesList.end();)
+   {
+      ModulesList::iterator i = j;
+      ++j;
       (**i).m_Module->DecRef();
+   }
 }
 
 // ----------------------------------------------------------------------------

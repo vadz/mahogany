@@ -14,257 +14,51 @@
 #include   "Mconfig.h"
 #include   "kbList.h"
 
-
-kbListNode::kbListNode( void *ielement,
-                        kbListNode *iprev,
-                        kbListNode *inext)
-{
-   next = inext;
-   prev = iprev;
-   if(prev)
-      prev->next = this;
-   if(next)
-      next->prev = this;
-   element = ielement;
-}
-
-kbListNode::~kbListNode()
-{
-   if(prev)
-      prev->next = next;
-   if(next)
-      next->prev = prev;
-}
-
-
-kbList::iterator::iterator(kbListNode *n)
-{
-   node = n;
-}
-
-void *
-kbList::iterator::operator*() 
-{
-   return node->element;
-}
-
-kbList::iterator &
-kbList::iterator::operator++()
-{
-   ASSERT(node != NULL);
-   node  = node ? node->next : NULL;
-   return *this;
-}
-
-kbList::iterator &
-kbList::iterator::operator--()
-{
-   ASSERT(node != NULL);
-   node = node ? node->prev : NULL; 
-   return *this;
-}
-kbList::iterator &
-kbList::iterator::operator++(int /* foo */)
-{
-   ASSERT(node != NULL);
-   return operator++();
-}
-
-kbList::iterator &
-kbList::iterator::operator--(int /* bar */)
-{
-   ASSERT(node != NULL);
-   return operator--();
-}
-
-
-bool
-kbList::iterator::operator !=(kbList::iterator const & i) const
-{
-   return node != i.node;
-}
-
-bool
-kbList::iterator::operator ==(kbList::iterator const & i) const
-{
-   return node == i.node;
-}
-
-kbList::kbList(bool ownsEntriesFlag)
-{
-   first = NULL;
-   last = NULL;
-   ownsEntries = ownsEntriesFlag;
-}
-
-void
-kbList::push_back(void *element)
-{
-   if(! first) // special case of empty list
-   {
-      first = new kbListNode(element);
-      last = first;
-      return;
-   }
-   else
-      last = new kbListNode(element, last);
-}
-
-void
-kbList::push_front(void *element)
-{
-   if(! first) // special case of empty list
-   {
-      push_back(element);
-      return;
-   }
-   else
-      first = new kbListNode(element, NULL, first);
-}
-
-void *
-kbList::pop_back(void)
-{
-   iterator i;
-   void *data;
-   bool ownsFlagBak = ownsEntries;
-   i = tail();
-   if(! i.Node())
-      return NULL;
-   data = *i;
-   ownsEntries = false;
-   erase(i);
-   ownsEntries = ownsFlagBak;
-   return data;
-}
-
-void *
-kbList::pop_front(void)
-{
-   iterator i;
-   void *data;
-   bool ownsFlagBak = ownsEntries;
-   
-   i = begin();
-   if(! i.Node())
-      return NULL;
-   data = *i;
-   ownsEntries = false;
-   erase(i);
-   ownsEntries = ownsFlagBak;
-   return data;
-   
-}
-
-void
-kbList::insert(kbList::iterator & i, void *element)
-{   
-   ASSERT(i.Node());
-   if(! i.Node())
-      return;
-   else if(i.Node() == first)
-   {
-      push_front(element);
-      i = first;
-      return;
-   }
-   i = kbList::iterator(new kbListNode(element, i.Node()->prev, i.Node()));
-}
-
-void
-kbList::doErase(kbList::iterator & i)
-{
-   ASSERT(i.Node());
-   kbListNode
-      *node = i.Node(),
-      *prev, *next;
-   
-   if(! node) // illegal iterator
-      return;
-
-   prev = node->prev;
-   next = node->next;
-   
-   // correct first/last:
-   if(node == first)
-      first = node->next;
-   if(node == last)  // don't put else here!
-      last = node->prev;
-
-   // build new links:
-   if(prev)
-      prev->next = next;
-   if(next)
-      next->prev = prev;
-
-   // delete this node and contents:
-   // now done separately
-   //if(ownsEntries)
-   //delete *i;
-   delete i.Node();
-
-   // change the iterator to next element:
-   i = kbList::iterator(next);
-}
-
-kbList::~kbList()
-{
-   kbListNode *next;
-
-   if(ownsEntries)
-   {
-      /* The base class handling only void * cannot properly delete
-         anything. This code should never really be called. */
-      ASSERT(0);
-      /* delete first->element; */
-   }
-   while ( first != NULL )
-   {
-      next = first->next;
-      delete first;
-      first = next;
-   }
-}
-
-kbList::iterator
-kbList::begin(void) const
-{
-   return kbList::iterator(first);
-}
-
-kbList::iterator
-kbList::tail(void) const
-{
-   return kbList::iterator(last);
-}
-
-kbList::iterator
-kbList::end(void) const
-{
-   return kbList::iterator(NULL); // the one after the last
-}
-
-unsigned
-kbList::size(void) const // inefficient
-{
-   unsigned count = 0;
-   kbList::iterator i;
-   for(i = begin(); i != end(); i++, count++)
-      ;
-   return count;
-}
-
-
 #ifdef   DEBUG
-/** Buffer to hold debug information for systems which haven't
-    got stdout/stderr visible */
-char
-kbList::iterator::ms_debuginfo[512];
+/** Simulate the layout of a list of pointers.  This struct knows
+    entirely too much about the list internals for its own good.
+*/
+struct DebugLayout
+{
+   typedef void* value_type;
+   typedef value_type *pointer;
+   typedef const value_type *const_pointer;
+   typedef value_type &reference;
+   typedef const value_type &const_reference;
+
+   M_LIST_NODE;
+   M_ITERATOR(DebugLayout);
+
+   /** Function which prints debug information about the iterator.
+   */
+   static inline const String DebugIter(iterator *me)
+      {
+         char ms_debuginfo[512];
+         if(me->node == NULL)
+            sprintf(ms_debuginfo,
+                    "iterator::Debug(): %p  Node: NULL",
+                    me);
+         else
+            sprintf(ms_debuginfo,
+                    "iterator::Debug(): %p  Node: %p  "
+                    "Node.next: %p  Node.prev: %p  "
+                    "Node.element: %p",
+                    me, me->node, me->node->next, me->node->prev,
+                    me->node->element);
+         //fprintf(stderr, "%s\n", ms_debuginfo);
+         return ms_debuginfo;
+      }
+};
+
+/** Force the type and use the logic in the simulated layout
+    to generate the debugging message.
+*/
+const String
+DebugIterator(const void *me)
+{
+   return DebugLayout::DebugIter((DebugLayout::iterator *)me);
+}
 #endif
-
-
-
-
 
 #ifdef   KBLIST_TEST
 

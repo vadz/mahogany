@@ -108,55 +108,39 @@ void MAppBase::RemoveModule(MModuleCommon *module)
    if(gs_MModuleList)
    {
       MModuleList::iterator i;
-      for ( i = gs_MModuleList->begin(); i != gs_MModuleList->end(); i++ )
+      for ( i = gs_MModuleList->begin(); i != gs_MModuleList->end(); )
       {
          MModuleListEntry *entry = *i;
          if( entry->m_Module == module )
-         {
-            gs_MModuleList->erase(i);
-
-            // we must reset the iterator as it could be invalidated by the
-            // erase() above - this is very inefficient but we have quite small
-            // lists here (still FIXME?)
-            if ( gs_MModuleList->empty() )
-               break;
-
-            i = gs_MModuleList->begin();
-         }
+            i = gs_MModuleList->erase(i);
+         else
+            ++i;
       }
    }
 }
-
-typedef MModule *MModulePtr;
-KBLIST_DEFINE(MModulePtrList, MModulePtr);
 
 extern
 void MModule_Cleanup(void)
 {
    if(gs_MModuleList)
    {
-      MModulePtrList modules;
       /* For statically linked modules, we must decrement them here to
          avoid memory leaks. The refcount gets raised to 1 before
          anyone uses them, so it should be back to 1 now so that
          DecRef() causes them to be freed.
 
-         We cannot decref them straight from the list, as this would
-         remove them from the list and the iterator would get
-         corrupted. Ugly, but we need to remember them and clean them
-         outside the loop.
+         We cannot decref them directly under the cursor, as this
+         would remove them from the list and the iterator would get
+         corrupted, so the iterating cursor points to the next element.
       */
-      MModuleList::iterator i;
-      for(i = gs_MModuleList->begin();
-          i != gs_MModuleList->end();
-          i++)
+      for (MModuleList::iterator j = gs_MModuleList->begin();
+          j != gs_MModuleList->end();)
+      {
+         MModuleList::iterator i = j;
+         ++j;
          if( (**i).m_Module )
-            modules.push_back( new MModulePtr((**i).m_Module) );
-
-      for(MModulePtrList::iterator j = modules.begin();
-          j != modules.end();
-          j++)
-         (**j)->DecRef();
+            (**i).m_Module->DecRef();
+      }
 
       delete gs_MModuleList;
       gs_MModuleList = NULL;
@@ -176,7 +160,7 @@ MModule *FindModule(const String & name)
       {
 #ifdef USE_MODULES_STATIC
          int errorCode = 0; //for now we ignore it
-         // on the fly initialisation for static modules:
+         // on-the-fly initialisation for static modules:
          if( (**i).m_Module == NULL )
          {
             // initialise the module:
@@ -273,28 +257,26 @@ MModule::LoadModule(const String & name)
       // Yes, just return it (incref happens in FindModule()):
       return module;
    }
-   else
+#ifdef USE_MODULES_STATIC
+   return NULL;
+#else // !USE_MODULES_STATIC
+   wxArrayString dirs = BuildListOfModulesDirs();
+   size_t nDirs = dirs.GetCount();
+
+   const wxString moduleExt = DLL_EXTENSION;
+
+   for ( size_t i = 0; i < nDirs; ++i )
    {
-#ifndef USE_MODULES_STATIC
-      wxArrayString dirs = BuildListOfModulesDirs();
-      size_t nDirs = dirs.GetCount();
-
-
-      const wxString moduleExt = DLL_EXTENSION;
-
-      wxString pathname;
-      for ( size_t i = 0; i < nDirs && ! module; i++ )
+      wxString pathname = dirs[i];
+      pathname << name << moduleExt;
+      if(wxFileExists(pathname))
       {
-         pathname = dirs[i];
-         pathname << name << moduleExt;
-         if(wxFileExists(pathname))
-            module = LoadModuleInternal(name, pathname);
+         if ((module = LoadModuleInternal(name, pathname)) != NULL)
+            break;
       }
-      return module;
-#else // USE_MODULES_STATIC
-      return NULL;
-#endif // !USE_MODULES_STATIC/USE_MODULES_STATIC
    }
+   return module;
+#endif // !USE_MODULES_STATIC/USE_MODULES_STATIC
 }
 
 /* static */
@@ -683,25 +665,30 @@ MModule::ListAvailableModules(const String& interfaceName)
 
 static wxArrayString BuildListOfModulesDirs()
 {
+   wxArrayString dirs;
+
+   // make it possible to use modules without installing them in debug builds
+#if defined(DEBUG) && defined(OS_UNIX)
+   dirs.Add("./modules/");
+   dirs.Add("./adb/");
+#endif // DEBUG
+
    // look under extra M_CANONICAL_HOST directory under Unix, but not for other
    // platforms (doesn't make much sense under Windows)
 
-   wxString path1, path2;
-   wxArrayString dirs;
-
-   path1 << mApplication->GetGlobalDir()
-#ifdef OS_UNIX
-         << DIR_SEPARATOR << M_CANONICAL_HOST
-#endif // Unix
-         << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
-
-   path2 << mApplication->GetLocalDir()
+   wxString path1; path1 << mApplication->GetGlobalDir()
 #ifdef OS_UNIX
          << DIR_SEPARATOR << M_CANONICAL_HOST
 #endif // Unix
          << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
 
    dirs.Add(path1);
+
+   wxString path2; path2 << mApplication->GetLocalDir()
+#ifdef OS_UNIX
+         << DIR_SEPARATOR << M_CANONICAL_HOST
+#endif // Unix
+         << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
 
    // under Windows, the global and local dirs might be the same
    if ( path2 != path1 )
@@ -709,18 +696,12 @@ static wxArrayString BuildListOfModulesDirs()
       dirs.Add(path2);
    }
 
-   // under Windows this owuld be the same as (1)
 #ifdef OS_UNIX
+   // under Windows this would be the same as (1)
    path1 << mApplication->GetLocalDir()
          << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
    dirs.Add(path1);
 #endif // Unix
-
-   // make it possible to use modules without installing them in debug builds
-#if defined(DEBUG) && defined(OS_UNIX)
-   dirs.Add("./adb/");
-   dirs.Add("./modules/");
-#endif // DEBUG
 
    return dirs;
 }
