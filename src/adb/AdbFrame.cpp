@@ -640,9 +640,9 @@ private:
   AdbTreeBook *m_book;
 
   wxStaticText *m_staticFileSize,
-               *m_staticFileName,
                *m_staticNumEntries;
   wxTextCtrl   *m_textName,
+               *m_textFileName,
                *m_textDescription;
 };
 
@@ -2969,7 +2969,7 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
                      : wxDialog(parent, -1, _T(""),
                                 wxDefaultPosition,
                                 wxDefaultSize,
-                                wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
+                                wxDEFAULT_DIALOG_STYLE)
 {
   m_book = book;
 
@@ -3033,7 +3033,8 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   y = 2*LAYOUT_Y_MARGIN;
   m_textName = new wxTextCtrl(this, -1, _T(""), wxPoint(x, y), sizeText);
   y += heightText;
-  m_staticFileName = new wxStaticText(this, -1, _T(""), wxPoint(x, y + dy), sizeLabel);
+  m_textFileName = new wxTextCtrl(this, -1, _T(""),
+                                  wxPoint(x, y + dy), sizeText, wxTE_READONLY);
   y += heightText;
   m_staticFileSize = new wxStaticText(this, -1, _T(""), wxPoint(x, y + dy), sizeLabel);
   y += heightText;
@@ -3088,7 +3089,7 @@ bool wxADBPropertiesDialog::TransferDataToWindow()
   }
 
   m_staticFileSize->SetLabel(str);
-  m_staticFileName->SetLabel(filename);
+  m_textFileName->SetValue(filename);
 
   str.Printf(_T("%ld"), (unsigned long)m_book->GetNumberOfEntries());
   m_staticNumEntries->SetLabel(str);
