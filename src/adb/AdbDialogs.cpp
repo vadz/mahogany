@@ -29,6 +29,7 @@
 #   include <wx/listbox.h>
 #   include <wx/stattext.h>
 #   include <wx/statbmp.h>
+#   include <wx/statbox.h>
 #   include <wx/choicdlg.h>
 #endif //USE_PCH
 
