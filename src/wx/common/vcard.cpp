@@ -44,7 +44,7 @@
 #include "wx/vcard.h"
 
 // ============================================================================
-// implementation
+// implementation: generic vObject API wrappers
 // ============================================================================
 
 // ----------------------------------------------------------------------------
@@ -194,6 +194,30 @@ bool wxVCardObject::GetValue(unsigned long *val) const
     return TRUE;
 }
 
+bool wxVCardObject::GetNamedPropValue(const char *name, wxString *val) const
+{
+    wxString value;
+    wxVCardObject *vcObj = GetProperty(name);
+    if ( vcObj )
+    {
+        vcObj->GetValue(val);
+        delete vcObj;
+
+        return TRUE;
+    }
+    else
+    {
+        return FALSE;
+    }
+}
+
+wxString wxVCardObject::GetValue() const
+{
+    wxString value;
+    GetValue(&value);
+    return value;
+}
+
 // ----------------------------------------------------------------------------
 // enumeration properties
 // ----------------------------------------------------------------------------
@@ -233,17 +257,92 @@ wxVCardObject *wxVCardObject::GetProperty(const wxString& name) const
 }
 
 // ----------------------------------------------------------------------------
-// standard properties
+// enumerating properties of the given name
 // ----------------------------------------------------------------------------
 
-wxString wxVCard::GetFullName() const
+VObject *wxVCard::GetFirstPropOfName(const char *name, void **cookie) const
 {
-    wxString value;
-    wxVCardObject *vcObj = GetProperty(VCFullNameProp);
-    if ( vcObj )
-        vcObj->GetValue(&value);
+    VObjectIterator *iter = new VObjectIterator;
+    initPropIterator(iter, m_vObj);
 
-    return value;
+    *cookie = iter;
+
+    return GetNextPropOfName(name, cookie);
+}
+
+VObject *wxVCard::GetNextPropOfName(const char *name, void **cookie) const
+{
+    VObjectIterator *iter = *(VObjectIterator **)cookie;
+    if ( iter )
+    {
+        while ( moreIteration(iter) )
+        {
+            VObject *vObj = nextVObject(iter);
+            if ( wxStricmp(vObjectName(vObj), name) == 0 )
+            {
+                // found one with correct name
+                return vObj;
+            }
+        }
+    }
+
+    // no more properties with this name
+    delete iter;
+
+    *cookie = NULL;
+
+    return NULL;
+}
+
+// this macro implements GetFirst/Next function for the properties of given
+// name
+#define IMPLEMENT_ENUM_PROPERTIES(classname, propname)                      \
+    wxVCard##classname *wxVCard::GetFirst##classname(void **cookie) const   \
+    {                                                                       \
+        VObject *vObj = GetFirstPropOfName(propname, cookie);               \
+        return vObj ? new wxVCard##classname(vObj) : NULL;                  \
+    }                                                                       \
+                                                                            \
+    wxVCard##classname *wxVCard::GetNext##classname(void **cookie) const    \
+    {                                                                       \
+        VObject *vObj = GetNextPropOfName(propname, cookie);                \
+        return vObj ? new wxVCard##classname(vObj) : NULL;                  \
+    }
+
+IMPLEMENT_ENUM_PROPERTIES(Address, VCAdrProp)
+IMPLEMENT_ENUM_PROPERTIES(AddressLabel, VCDeliveryLabelProp)
+IMPLEMENT_ENUM_PROPERTIES(PhoneNumber, VCTelephoneProp)
+IMPLEMENT_ENUM_PROPERTIES(EMail, VCEmailAddressProp)
+
+#undef IMPLEMENT_ENUM_PROPERTIES
+
+// ----------------------------------------------------------------------------
+// simple standard string properties
+// ----------------------------------------------------------------------------
+
+bool wxVCard::GetFullName(wxString *fullname) const
+{
+    return GetNamedPropValue(VCFullNameProp, fullname);
+}
+
+bool wxVCard::GetTitle(wxString *title) const
+{
+    return GetNamedPropValue(VCTitleProp, title);
+}
+
+bool wxVCard::GetBusinessRole(wxString *role) const
+{
+    return GetNamedPropValue(VCBusinessRoleProp, role);
+}
+
+bool wxVCard::GetComment(wxString *comment) const
+{
+    return GetNamedPropValue(VCCommentProp, comment);
+}
+
+bool wxVCard::GetVersion(wxString *version) const
+{
+    return GetNamedPropValue(VCVersionProp, version);
 }
 
 // ----------------------------------------------------------------------------
@@ -255,4 +354,186 @@ void wxVCardObject::Dump(const wxString& filename)
 {
     // it is ok for m_vObj to be NULL
     printVObjectToFile((char *)filename.mb_str(), m_vObj);
+}
+
+// ============================================================================
+// implementation of wxVCardObject subclasses
+// ============================================================================
+
+// a macro which allows to abbreviate GetFlags() methods: to sue it, you must
+// have local variables like in wxVCardAddrOrLabel::GetFlags() below
+#define CHECK_FLAG(propname, flag)  \
+    prop = GetProperty(propname);   \
+    if ( prop )                     \
+    {                               \
+        flags |= flag;              \
+        delete prop;                \
+    }
+
+// ----------------------------------------------------------------------------
+// wxVCardAddrOrLabel
+// ----------------------------------------------------------------------------
+
+int wxVCardAddrOrLabel::GetFlags() const
+{
+    int flags = 0;
+    wxVCardObject *prop;
+
+    CHECK_FLAG(VCDomesticProp, Domestic);
+    CHECK_FLAG(VCInternationalProp, Intl);
+    CHECK_FLAG(VCPostalProp, Postal);
+    CHECK_FLAG(VCParcelProp, Parcel);
+    CHECK_FLAG(VCHomeProp, Home);
+    CHECK_FLAG(VCWorkProp, Work);
+
+    if ( !flags )
+    {
+        // this is the default flags value - but if any flag(s) are given, they
+        // override it (and not combine with it)
+        flags = Intl | Postal | Parcel | Work;
+    }
+
+    return flags;
+}
+
+// ----------------------------------------------------------------------------
+// wxVCardAddress
+// ----------------------------------------------------------------------------
+
+wxVCardAddress::wxVCardAddress(VObject *vObj)
+              : wxVCardAddrOrLabel(vObj)
+{
+    wxASSERT_MSG( GetName() == VCAdrProp, _T("this is not a vCard address") );
+}
+
+wxString wxVCardAddress::GetPropValue(const wxString& name) const
+{
+    wxString val;
+    wxVCardObject *prop = GetProperty(name);
+    if ( prop )
+    {
+        prop->GetValue(&val);
+        delete prop;
+    }
+
+    return val;
+}
+
+wxString wxVCardAddress::GetPostOffice() const
+{
+    return GetPropValue(VCPostalBoxProp);
+}
+
+wxString wxVCardAddress::GetExtAddress() const
+{
+    return GetPropValue(VCExtAddressProp);
+}
+
+wxString wxVCardAddress::GetStreet() const
+{
+    return GetPropValue(VCStreetAddressProp);
+}
+
+wxString wxVCardAddress::GetLocality() const
+{
+    return GetPropValue(VCCityProp);
+}
+
+wxString wxVCardAddress::GetRegion() const
+{
+    return GetPropValue(VCRegionProp);
+}
+
+wxString wxVCardAddress::GetPostalCode() const
+{
+    return GetPropValue(VCPostalCodeProp);
+}
+
+wxString wxVCardAddress::GetCountry() const
+{
+    return GetPropValue(VCCountryNameProp);
+}
+
+// ----------------------------------------------------------------------------
+// wxVCardAddressLabel
+// ----------------------------------------------------------------------------
+
+wxVCardAddressLabel::wxVCardAddressLabel(VObject *vObj)
+                   : wxVCardAddrOrLabel(vObj)
+{
+    wxASSERT_MSG( GetName() == VCDeliveryLabelProp,
+                  _T("this is not a vCard address label") );
+}
+
+// ----------------------------------------------------------------------------
+// wxVCardPhoneNumber
+// ----------------------------------------------------------------------------
+
+wxVCardPhoneNumber::wxVCardPhoneNumber(VObject *vObj)
+                  : wxVCardObject(vObj)
+{
+    wxASSERT_MSG( GetName() == VCTelephoneProp,
+                  _T("this is not a vCard telephone number") );
+}
+
+int wxVCardPhoneNumber::GetFlags() const
+{
+    int flags = 0;
+    wxVCardObject *prop;
+
+    CHECK_FLAG(VCPreferredProp, Preferred);
+    CHECK_FLAG(VCWorkProp, Work);
+    CHECK_FLAG(VCHomeProp, Home);
+    CHECK_FLAG(VCVoiceProp, Voice);
+    CHECK_FLAG(VCFaxProp, Fax);
+    CHECK_FLAG(VCMessageProp, Messaging);
+    CHECK_FLAG(VCCellularProp, Cellular);
+    CHECK_FLAG(VCPagerProp, Pager);
+    CHECK_FLAG(VCBBSProp, BBS);
+    CHECK_FLAG(VCModemProp, Modem);
+    CHECK_FLAG(VCCarProp, Car);
+    CHECK_FLAG(VCISDNProp, ISDN);
+    CHECK_FLAG(VCVideoProp, Video);
+
+    if ( !flags )
+    {
+        // this is the default flags value
+        flags = Voice;
+    }
+
+    return flags;
+}
+
+// ----------------------------------------------------------------------------
+// wxVCardEMail
+// ----------------------------------------------------------------------------
+
+wxVCardEMail::wxVCardEMail(VObject *vObj)
+            : wxVCardObject(vObj)
+{
+    wxASSERT_MSG( GetName() == VCEmailAddressProp,
+                  _T("this is not a vCard email address") );
+}
+
+wxVCardEMail::Type wxVCardEMail::GetType() const
+{
+    static const char *emailTypes[] =
+    {
+        VCInternetProp,
+        VCX400Prop,
+    };
+
+    // the property names and types should be in sync
+    wxASSERT_MSG( WXSIZEOF(emailTypes) == Max, _T("forgot to update") );
+
+    size_t n;
+    for ( n = 0; n < Max; n++ )
+    {
+        if ( isAPropertyOf(m_vObj, emailTypes[n]) )
+        {
+            break;
+        }
+    }
+
+    return (Type)n;
 }
