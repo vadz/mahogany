@@ -149,7 +149,7 @@ MailFolderCC::Ping(void)
 {
 #if DEBUG
    String tmp = "MailFolderCC::Ping() on Folder " + realName;
-   LOGMESSAGE((M_LOG_DEBUG, tmp));
+   LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
    mail_ping(mailstream);
 }
@@ -379,7 +379,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
       String
     tmp = "MailFolderCC::mm_exists() for folder " + mf->realName
     + String(" n: ") + strutil_ultoa(number);
-      LOGMESSAGE((M_LOG_DEBUG, tmp));
+      LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
      
       mf->numOfMessages = number;
@@ -393,7 +393,7 @@ void
 MailFolderCC::mm_expunged(MAILSTREAM *stream, unsigned long number)
 {
    String msg = "Expunged message no. " + strutil_ltoa(number);
-   LOGMESSAGE((M_LOG_DEFAULT, msg));
+   LOGMESSAGE((M_LOG_DEFAULT, Str(msg)));
    MailFolderCC *mf = LookupObject(stream);
    if(mf)
    {
@@ -407,7 +407,7 @@ void
 MailFolderCC::mm_flags(MAILSTREAM *stream, unsigned long number)
 {
    String msg = "Flags changed for msg no. " + strutil_ltoa(number);
-   LOGMESSAGE((M_LOG_DEFAULT, msg));
+   LOGMESSAGE((M_LOG_DEFAULT, Str(msg)));
    MailFolderCC *mf = LookupObject(stream);
    if(mf)
       mf->UpdateViews();
@@ -470,7 +470,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS
 #if DEBUG
    String   tmp = "MailFolderCC::mm_status() for folder " +
       mf->realName;
-   LOGMESSAGE((M_LOG_DEBUG, tmp));
+   LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
    
    if(status->flags & SA_MESSAGES)
@@ -487,7 +487,7 @@ void
 MailFolderCC::mm_log(const char *str, long errflg)
 {
    String   msg = (String) "c-client " + (String) str;
-   LOGMESSAGE((M_LOG_INFO, msg));
+   LOGMESSAGE((M_LOG_INFO, Str(msg)));
 }
 
 /** log a debugging message
@@ -498,7 +498,7 @@ MailFolderCC::mm_dlog(const char *str)
 {
    String   msg = (String) "c-client debug: " + (String) str;
    //mApplication.Message(msg.c_str());
-   LOGMESSAGE((M_LOG_DEBUG, msg));
+   LOGMESSAGE((M_LOG_DEBUG, Str(msg)));
 }
 
 /** get user name and password
@@ -554,7 +554,7 @@ void
 MailFolderCC::mm_fatal(char *str)
 {
    String   msg = (String) "Fatal Error:" + (String) str;
-   LOGMESSAGE((M_LOG_ERROR, msg));
+   LOGMESSAGE((M_LOG_ERROR, Str(msg)));
 }
 
 //-------------------------------------------------------------------

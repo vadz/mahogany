@@ -128,7 +128,7 @@ wxIconManager::GetIcon(String const &_iconName)
       }
       if(! found)
          continue;
-      if(icn->LoadFile(name,0))
+      if(icn->LoadFile(Str(name),0))
       {
          id.iconPtr = icn;
          id.iconName = key;

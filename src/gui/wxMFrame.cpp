@@ -98,12 +98,12 @@ wxMFrame::Create(const String &iname, wxWindow *parent)
        width = MC_WIDTH_D,
        height = MC_HEIGHT_D;
 
-   SetName(iname);
+   SetName(Str(iname));
 
    FileConfig *pConf = Profile::GetAppConfig();
    if ( pConf != NULL )
    {
-      String tmp = pConf->GET_PATH();
+      String tmp = Str(pConf->GET_PATH());
       pConf->SET_PATH(M_FRAMES_CONFIG_SECTION);
       pConf->CHANGE_PATH(MFrameBase::GetName());
 
@@ -197,7 +197,7 @@ wxMFrame::AddMessageMenu(void)
 void
 wxMFrame::AddMenu(wxMenu *menu, String const &title)
 {
-   menuBar->Append(menu, _(title));
+   menuBar->Append(menu, _(Str(title)));
 }
 
 wxMFrame::~wxMFrame()
@@ -230,7 +230,7 @@ wxMFrame::SavePosition(void)
 
    FileConfig *pConf = Profile::GetAppConfig();
    if ( pConf != NULL ) {
-      String tmp = pConf->GET_PATH();
+      String tmp = Str(pConf->GET_PATH());
       pConf->SET_PATH(M_FRAMES_CONFIG_SECTION);
       pConf->CHANGE_PATH(MFrameBase::GetName());
    
@@ -264,7 +264,7 @@ wxMFrame::OnMenuCommand(int id)
                                   this);
       VAR(name);
       if ( !strutil_isempty(name) )
-         (void) new wxFolderViewFrame(name,this);
+         (void) new wxFolderViewFrame(Str(name),this);
       break;
    }
    case WXMENU_FILE_CLOSE:

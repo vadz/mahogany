@@ -247,7 +247,7 @@ wxFolderView::SaveMessages(const wxArrayInt& selections)
    {
       str = "";
       mailFolder->GetMessage(selections[i]+1)->WriteToString(str);
-      mf = MailFolderCC::OpenFolder(folderName);
+      mf = MailFolderCC::OpenFolder(Str(folderName));
       mf->AppendMessage(str.c_str());
       mf->Close();
    }

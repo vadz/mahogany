@@ -16,10 +16,21 @@
 
 #include   <wx/wx.h>
 
-#ifndef   DEBUG
-#   define DEBUG
+// skip the following defines if embedded in M application
+#ifndef   MCONFIG_H
+// for testing only:
+#   define WXLAYOUT_DEBUG
+#   define USE_STD_STRING
 #endif
 
+#ifdef USE_STD_STRING
+#   include   <string>
+    typedef   std::string String;
+#   define    Str(str)((str).c_str())
+#else
+    typedef   wxString String;
+#   define    Str(str) str
+#endif
 
 enum wxLayoutObjectType { WXLO_TYPE_INVALID, WXLO_TYPE_TEXT, WXLO_TYPE_CMD, WXLO_TYPE_ICON, WXLO_TYPE_LINEBREAK };
 
@@ -52,7 +63,7 @@ public:
 
    wxLayoutObjectBase() { m_UserData = NULL; }
    virtual ~wxLayoutObjectBase() { if(m_UserData) delete m_UserData; }
-#ifdef DEBUG
+#ifdef WXLAYOUT_DEBUG
    virtual void Debug(void);
 #endif
 
@@ -75,18 +86,18 @@ public:
        align text objects.
    */
    virtual wxPoint GetSize(CoordType *baseLine) const;
-#ifdef DEBUG
+#ifdef WXLAYOUT_DEBUG
    virtual void Debug(void);
 #endif
 
-   wxLayoutObjectText(const wxString &txt);
+   wxLayoutObjectText(const String &txt);
    virtual CoordType CountPositions(void) const { return strlen(m_Text.c_str()); }
 
    // for editing:
-   wxString & GetText(void) { return m_Text; }
-   void SetText(wxString const &text) { m_Text = text; }
+   String & GetText(void) { return m_Text; }
+   void SetText(String const &text) { m_Text = text; }
 private:
-   wxString m_Text;
+   String m_Text;
    /// size of the box containing text
    long   m_Width, m_Height;
    /// the position of the baseline counted from the top of the box
@@ -162,7 +173,7 @@ public:
 
    /// adds an object:
    void AddObject(wxLayoutObjectBase *obj);
-   void AddText(wxString const &txt);
+   void AddText(String const &txt);
 
    void LineBreak(void);
    void SetFont(int family, int size, int style,
@@ -190,7 +201,7 @@ public:
    wxLayoutObjectBase *Draw(wxDC &dc, bool findObject = false,
                        wxPoint const &coords = wxPoint(0,0));
 
-#ifdef DEBUG
+#ifdef WXLAYOUT_DEBUG
    void Debug(void);
 #endif
 
@@ -208,7 +219,7 @@ public:
    void SetCursor(wxPoint const &p) { m_CursorPosition = p; }
    /// delete one or more cursor positions
    void Delete(CoordType count = 1);
-   void Insert(wxString const &text);
+   void Insert(String const &text);
    void Insert(wxLayoutObjectBase *obj);
    void Clear(int family = wxROMAN, int size=12, int style=wxNORMAL, int weight=wxNORMAL,
                     int underline=0, char const *fg="black", char const *bg="white");

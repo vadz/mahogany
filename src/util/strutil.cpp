@@ -5,26 +5,6 @@
  *                                                                  *
  * $Id$               *
  *                                                                  *
- * $Log$
- * Revision 1.9  1998/07/11 19:13:32  KB
- * wxMessageView works
- *
- * Revision 1.8  1998/07/08 19:17:50  KB
- * Several fixes for mail display.
- *
- * Revision 1.7  1998/07/05 12:20:28  KB
- * wxMessageView works and handles mime (segfault on deletion)
- * wsIconManager loads files
- * install target
- *
- * Revision 1.6  1998/05/24 14:48:44  KB
- * lots of progress on Python, but cannot call functions yet
- * kbList fixes again?
- *
- * Revision 1.5  1998/05/19 17:02:45  KB
- * several small bugfixes
- *
- *
  *******************************************************************/
 
 #include "Mpch.h"
@@ -326,7 +306,7 @@ strutil_matchurl(const char *string)
 }
 
 String
-strutil_findurl(wxString &str, wxString &url)
+strutil_findurl(String &str, String &url)
 {
    int i;
    String before = "";
@@ -339,7 +319,7 @@ strutil_findurl(wxString &str, wxString &url)
       {
          if(strncmp(cptr,urlnames[i],strlen(urlnames[i])) == 0)
          {
-            while(*cptr && !isspace(*cptr) && *cptr != '>')
+            while(strutil_isurlchar(*cptr))
                url += *cptr++;
             str = cptr;
             return before;

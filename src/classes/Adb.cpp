@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.8  1998/07/12 15:05:24  KB
+ * some fixes and ugly fix to work with std::string again
+ *
  * Revision 1.7  1998/06/14 21:33:45  KB
  * fixed the menu/callback problem, wxFolderView is now a panel
  *
@@ -388,7 +391,7 @@ Adb::Adb(String const &ifilename)
          list->push_back(eptr);
    }
    String tmp = String("Adb: read ") + strutil_ultoa(list->size()) + String(" database entries.");
-   LOGMESSAGE((M_LOG_INFO, tmp));
+   LOGMESSAGE((M_LOG_INFO, Str(tmp)));
 }
 
 AdbExpandListType *

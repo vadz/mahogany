@@ -106,18 +106,25 @@
 
 #define	M_STRBUFLEN		1024
 
-#ifdef         USE_WXSTRING
-# if        !USE_WXWINDOWS2
-#               define  c_str() GetData()
-#               define  length() Length()       //FIXME dangerous!
-#       endif
-#       define  String      wxString
-#	include	<wx/string.h>
+#ifndef   USE_WXSTRING
+#   define   USE_STD_STRING
 #else
-#       include <string>
-  typedef std::string String;
+#   undef    USE_STD_STRING
 #endif
 
+#ifdef USE_STD_STRING
+#   include   <string>
+    typedef   std::string String;
+#   define    Str(str)((str).c_str())
+#else
+#   include   <wx/string.h>
+    typedef   wxString String;
+#   define    Str(str) str
+#   ifndef USE_WXWINDOWS2
+#      define  c_str() GetData()
+#      define  length() Length()       //FIXME dangerous!
+#   endif
+#endif
 
 /// make sure NULL is define properly
 #undef  NULL
@@ -182,7 +189,7 @@
 
 // use builtin wxConfig by default in wxWin2 and appconf otherwise
 #if !defined(USE_APPCONF) && !defined(USE_WXCONFIG)
-#  if defined(USE_WXWINDOWS2) && defined(OS_WIN)  // for now only for windows
+#  if defined(USE_WXWINDOWS2)
 #     define  USE_WXCONFIG 1
 #  else
 #     define  USE_APPCONF  1

@@ -6,6 +6,9 @@
  * $Id$               *
  ********************************************************************
  * $Log$
+ * Revision 1.11  1998/07/12 15:05:26  KB
+ * some fixes and ugly fix to work with std::string again
+ *
  * Revision 1.10  1998/07/05 12:20:16  KB
  * wxMessageView works and handles mime (segfault on deletion)
  * wsIconManager loads files
@@ -184,7 +187,7 @@ Profile::readEntry(const char *szKey, const char *szDefault) const
 
    if( strutil_isempty(rc) && appConfig != NULL )
    {
-      String tmp = appConfig->GET_PATH();
+      String tmp = Str(appConfig->GET_PATH());
       appConfig->SET_PATH(M_PROFILE_CONFIG_SECTION);
       appConfig->CHANGE_PATH(profileName.c_str());
       rc = appConfig->READ_ENTRY(szKey, (const char *)NULL);
@@ -197,10 +200,11 @@ Profile::readEntry(const char *szKey, const char *szDefault) const
       rc = szDefault;
    }
 
-   DBGLOG("Profile(" << profileName << ")::readEntry(" << szKey << ") "
-          "returned: " << (rc == NULL ? (String(szDefault) + " (default)")
-                                      : String(rc)));
-
+   String dbgtmp = "Profile(" + profileName
+      + String(")::readEntry(")+String(szKey)
+      +") returned: " + (rc == NULL ? ((szDefault == NULL ? String("null"):String(szDefault)) + " (default)")
+                                      : String(rc));
+   DBGLOG(Str(dbgtmp));
    return rc == NULL ? szDefault : rc;
 }
 
@@ -284,7 +288,7 @@ ConfigFileManager::GetConfig(String const &fileName)
 {
    FCDataList::iterator i;
 
-   DBGLOG("ConfigFileManager.GetConfig(" << fileName << ")");
+   DBGLOG("ConfigFileManager.GetConfig(" << Str(fileName) << ")");
    
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
@@ -295,7 +299,7 @@ ConfigFileManager::GetConfig(String const &fileName)
    newEntry->fileName = fileName;
 
 #  ifdef  USE_WXCONFIG
-      newEntry->fileConfig = GLOBAL_NEW wxFileConfig(newEntry->fileName);
+      newEntry->fileConfig = GLOBAL_NEW wxFileConfig(Str(newEntry->fileName));
 #  else
       newEntry->fileConfig = GLOBAL_NEW FileConfig;
       newEntry->fileConfig->readFile(newEntry->fileName->c_str());

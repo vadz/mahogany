@@ -6,6 +6,9 @@
  * $Id$             *
  ********************************************************************
  * $Log$
+ * Revision 1.10  1998/07/12 15:05:27  KB
+ * some fixes and ugly fix to work with std::string again
+ *
  * Revision 1.9  1998/07/11 19:13:24  KB
  * wxMessageView works
  *
@@ -180,12 +183,12 @@ END_EVENT_TABLE()
 
 void wxAdbEditPanel::OnTextEnter(wxCommandEvent &event)
 {
-   String tmp = key->GetValue();
+   String tmp = Str(key->GetValue());
    int l = tmp.length();
    if( l > 0  &&  tmp.substr(l-1, 1) == " " )
    {
       key->SetValue(WXCPTR tmp.substr(0, l-1).c_str());
-      frame->Load(key->GetValue()); 
+      frame->Load(Str(key->GetValue())); 
    }
 }
 
@@ -194,7 +197,7 @@ wxAdbEditPanel::OnButtonPress(wxCommandEvent &event)
 {
    switch ( event.GetId() ) {
       case AdbEdit_ExpandBtn:
-         frame->Load(key->GetValue()); 
+         frame->Load(Str(key->GetValue())); 
          break;
 
       case AdbEdit_NewBtn:

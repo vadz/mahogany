@@ -3,12 +3,13 @@ $Id$
 
 *** bugs to fix ***
 - MessageView:
-   + extraction of parameter list and filenames for mime handling/saving
+  + extraction of parameter list and filenames for mime handling/saving
   + move wxMessageView to be a panel only and rewrite folderview
   + some code in wxMessageView relies on unix unlink() behaviour 
     (file is still open and in use when deleted)
   + wxMessageView : Profile reading causes segfault, marked with FIXME
   + fix profile mess in here, use folder profile and MessageView profile
+  + ADD FORWARD AND REPLY, using wxFolderView functionality
 
 - ComposeView:
    + MIME inclusion
@@ -21,6 +22,8 @@ $Id$
   + flicker
 
 - fix memory corruption problem, caused by wxGTK?!
+
+- configure: USE_WXCONFIG does not get defined!
 
 - parent frames should not be NULL --> memory corruption
   (does not happen when run in gdb)

@@ -366,15 +366,18 @@ if test "$USE_WXSTRING" = 1; then
   AC_DEFINE(USE_WXSTRING)
 fi
 
+if test "$USE_WXCONFIG" = 1; then
+  AC_DEFINE(USE_WXCONFIG)
+fi
+
+
 if test "$USE_WXGTK" = 1; then
   USE_WXXT=0
   USE_WXWINDOWS=1  
   USE_WXWINDOWS2=1
-  USE_WXSTRING=1
   AC_DEFINE(USE_WXGTK)
   AC_DEFINE(USE_WXWINDOWS)
   AC_DEFINE(USE_WXWINDOWS2)
-  AC_DEFINE(USE_WXSTRING)
   WX_LINK=
   AC_MSG_CHECKING(for wxWindows(wxGTK) libraries)
   AC_PATH_FIND_INCLUDES($SEARCH_INCLUDE,wxWindows/include/wx/wx.h)
@@ -452,20 +455,6 @@ AC_SUBST(WX_LINK)
 AC_SUBST(WX_SLINK)
 AC_SUBST(WX_DEFS)
 
-if test "$USE_WXCONFIG" = 1; then
-	if test "$USE_WXWINDOWS2" = 0; then
-		AC_MSG_ERROR("wxConfig can only be used with wxWindows version 2."
-               		     "Please correct the settings and restart again.")
-	else
-		AC_DEFINE(USE_WXCONFIG)
-	fi
-	USE_APPCONF=0
-fi
-
-if test "$USE_WXWINDOWS2" = 1; then
-	MAKE_USE_WXTAB=
-fi
-AC_SUBST(MAKE_USE_WXTAB)
 
 
 dnl Checks for libraries.
@@ -635,12 +624,19 @@ fi
 
 AC_SUBST(EXTRA_LINK)
 
+
+
+if test "$USE_WXWINDOWS2" = 1; then
+	MAKE_USE_WXTAB=
+fi
+AC_SUBST(MAKE_USE_WXTAB)
+
 dnl set debug/optimisation flags
 dnl we don't use CFLAGS/CXXFLAGS from autoconf
 DBGFLAGS=
 OPTFLAGS=$CXXFLAGS
 if test "$USE_DEBUG" = 1; then
-	DBGFLAGS="-g2 -DDEBUG"
+	DBGFLAGS="-g3 -DDEBUG"
 	OPTFLAGS="$CXXFLAGS -O0" # turn off all optimisations
 fi
 

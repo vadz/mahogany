@@ -6,6 +6,9 @@
  * $Id$
  *
  * $Log$
+ * Revision 1.9  1998/07/12 15:05:22  KB
+ * some fixes and ugly fix to work with std::string again
+ *
  * Revision 1.8  1998/07/08 11:56:52  KB
  * M compiles and runs on Solaris 2.5/gcc 2.8/c-client gso
  *
@@ -100,7 +103,7 @@ InitPython(void)
    {
       String err;
       PyH_GetErrorMessage(&err);
-      MDialog_ErrorMessage("Python Error:\n"+err);
+      MDialog_ErrorMessage(Str("Python Error:\n"+err));
       PyErr_Print();
    }
    if(Python_MinitModule == NULL)
@@ -119,7 +122,7 @@ InitPython(void)
             //PyErr_Print();
             String err;
             PyH_GetErrorMessage(&err);
-            MDialog_ErrorMessage("Python Error:\n"+err);
+            MDialog_ErrorMessage(Str("Python Error:\n"+err));
          }
          Py_DECREF(minit);
       }

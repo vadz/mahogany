@@ -6,6 +6,9 @@
  * $Id$         *
  *                                                                  *
  * $Log$
+ * Revision 1.25  1998/07/12 15:05:25  KB
+ * some fixes and ugly fix to work with std::string again
+ *
  * Revision 1.24  1998/07/08 11:56:55  KB
  * M compiles and runs on Solaris 2.5/gcc 2.8/c-client gso
  *
@@ -191,7 +194,7 @@ MAppBase::OnStartup()
 {
    // initialise the profile
 #  if USE_WXCONFIG
-      String strConfFile = wxFileConfig::GetLocalFileName(M_APPLICATIONNAME);
+      String strConfFile = Str(wxFileConfig::GetLocalFileName(M_APPLICATIONNAME));
 #     if OS_UNIX
          strConfFile += "/config";
 #     endif // Unix
@@ -238,7 +241,7 @@ MAppBase::OnStartup()
       msg += strRootDir;
       msg += _("\" in\n \"");
       msg += String(READ_APPCONFIG(MC_PATHLIST));
-      ERRORMESSAGE((msg));
+      ERRORMESSAGE((Str(msg)));
    }
 
 #  ifdef   USE_WXCONFIG

@@ -145,7 +145,7 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
    SetAutoLayout(TRUE);
 
    // Panel itself (fills all the frame client area)
-   m_panel = new wxPanel(this, -1,-1);
+   m_panel = new wxPanel(this, -1);//,-1);
    c = new wxLayoutConstraints;
    c->top.SameAs(this, wxTop);
    c->left.SameAs(this, wxLeft);
@@ -281,7 +281,7 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
          istr.read(buffer, size);
          buffer[size] = '\0';
          if(! istr.fail())
-            m_LayoutWindow->GetLayoutList().Insert(buffer);
+            wxLayoutImportText(m_LayoutWindow->GetLayoutList(),buffer);
          delete [] buffer;
          istr.close();
          m_LayoutWindow->GetLayoutList().SetCursor(wxPoint(0,0));
@@ -335,7 +335,7 @@ wxComposeView::OnExpand(wxCommandEvent &event)
    Adb * adb = mApplication.GetAdb();
    AdbEntry *entry = NULL;
 
-   String   tmp = m_txtFields[Field_To]->GetValue();
+   String   tmp = Str(m_txtFields[Field_To]->GetValue());
    int l = tmp.length();
 
    // FIXME @@@ VZ: I don't know what this test does, so I disabled it
@@ -520,7 +520,11 @@ wxComposeView::Send(void)
                istr.close();
             }
             else
-               SYSERRMESSAGE((_("Cannot open file: ")+mc->m_FileName,this));
+            {
+               String dirtyHack = "Cannot open file: ";
+               dirtyHack +=mc->m_FileName;
+               SYSERRMESSAGE((_(Str(dirtyHack)),this));
+            }
             delete mc;
          }
       }

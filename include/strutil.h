@@ -6,6 +6,9 @@
  * $Id$                *
  *                                                                  *
  * $Log$
+ * Revision 1.15  1998/07/12 15:05:18  KB
+ * some fixes and ugly fix to work with std::string again
+ *
  * Revision 1.14  1998/07/11 19:13:18  KB
  * wxMessageView works
  *
@@ -217,10 +220,19 @@ String strutil_matchurl(const char *string);
     after url
   */
 String
-strutil_findurl(wxString &str, wxString &url);
+strutil_findurl(String &str, String &url);
+
+/// checks a character to be a valid part of an URL
+#define strutil_isurlchar(c) \
+   (isalnum(c)  || c == '.' || c == '/' || c == ':' \
+    || c == '_' || c == '&' || c == '#' || c == '-' \
+    || c == '%' || c == '!' || c == '?' || c == '*' \
+    || c == '+' || c == '$' )
+
 
 #ifndef     HAVE_STRSEP
-char * strsep(char **stringp, const char *delim);
+      /// implements the strsep() function found on some Unix systems
+      char * strsep(char **stringp, const char *delim);
 #endif
 
 //@}

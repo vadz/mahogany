@@ -16,7 +16,7 @@
 #include "Message.h"
 
 #ifndef USE_PCH
-#  include <strutil.h>
+#  include "strutil.h"
 
 #  include "PathFinder.h"
 #  include "MimeList.h"
@@ -59,7 +59,7 @@
    {
 #     include <rfc822.h>
    }
-#  include <MessageCC.h>
+#  include "MessageCC.h"
 #endif //USE_PCH
 
 // for clickable objects
@@ -614,7 +614,7 @@ wxMessageView::OnCommandEvent(wxCommandEvent &event)
                cmd = READ_APPCONFIG(MP_BROWSER);
             cmd += ' '; 
             cmd += ci->url;
-            wxExecute(cmd);
+            wxExecute(Str(cmd));
             break;
          }
          }
@@ -631,7 +631,7 @@ wxMessageView::OnMenuCommand(int id)
    switch(id)
    {
    case WXMENU_MSG_PRINT:
-      //Print();
+      Print();
       break;
    case WXMENU_MSG_REPLY:
       //Reply();
