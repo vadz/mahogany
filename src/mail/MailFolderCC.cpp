@@ -1323,7 +1323,9 @@ MailFolderCC::PingReopenAll(void)
    for(mf = MailFolderCC::GetFirstMapEntry(i);
        mf;
        mf = MailFolderCC::GetNextMapEntry(i))
+   {
       rc &= mf->PingReopen();
+   }
    return rc;
 }
 
@@ -1427,8 +1429,8 @@ void MailFolderCC::PingAllOpened(void)
    for ( const MailFolderCC *mf = MailFolderCC::GetFirstMapEntry(i);
          mf;
          mf = MailFolderCC::GetNextMapEntry(i) )
-   {
-      mf->Ping();
+  {
+     ((MailFolderCC *)mf)->Ping();
    }
 }
 

@@ -837,7 +837,7 @@ strutil_encrypt_initialise(void)
    }
 
    /* Now test if twofish works alright on this system: */
-   gs_GlobalPassword = "test";
+   gs_GlobalPassword = "testPassword";
    String test = "This is a test, in cleartext.";
    String cipher = strutil_encrypt_tf(test);
    strutil_has_twofish = TRUE; // assume or it will fail

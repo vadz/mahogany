@@ -4095,21 +4095,3 @@ msgstr "Por favor seleccione"
 # wxMDialogs.cpp:1341
 #~ msgid "Newsgroup"
 #~ msgstr "Grupo de Noticias"
-
-# wxOptionsDlg.cpp:415 wxOptionsDlg.cpp:417 wxOptionsDlg.cpp:436
-#~ msgid "Font &size"
-#~ msgstr "&Tamaño de fuente"
-
-#~ msgid "Converting information for folder '%s'."
-#~ msgstr "Traduciendo informacion para folder '%s'."
-
-# wxMDialogs.cpp:1341
-#~ msgid "Newsgroup"
-#~ msgstr "Grupo de Noticias"
-
-# wxOptionsDlg.cpp:415 wxOptionsDlg.cpp:417 wxOptionsDlg.cpp:436
-#~ msgid "Font &size"
-#~ msgstr "&Tama=F1o de fuente"
-
-#~ msgid "Converting information for folder '%s'."
-#~ msgstr "Traduciendo informacion para folder '%s'." 
