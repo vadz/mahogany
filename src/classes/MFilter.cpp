@@ -244,6 +244,7 @@ static const wxChar * OAC_T_Names[] =
    _T("setflag("),      // OAC_T_SetFlag
    _T("clearflag("),    // OAC_T_ClearFlag
    _T("setscore("),     // OAC_T_SetScore
+   _T("nop("),          // OAC_T_NOP
    NULL
 };
 
@@ -276,7 +277,8 @@ static unsigned char OAC_T_Flags[] =
 #ifndef USE_HEADER_SCORE
    OAC_F_Unimplemented|
 #endif
-   OAC_F_NeedsArg                // OAC_T_SetScore
+   OAC_F_NeedsArg,               // OAC_T_SetScore
+   0,                            // OAC_T_NOP
 };
 
 wxCOMPILE_TIME_ASSERT( WXSIZEOF(ORC_T_Names) == ORC_T_Max + 1,
@@ -287,6 +289,13 @@ wxCOMPILE_TIME_ASSERT( WXSIZEOF(ORC_T_Flags) == ORC_T_Max,
 
 wxCOMPILE_TIME_ASSERT( WXSIZEOF(ORC_W_Names) == ORC_W_Max + 1,
                        MismatchInTargetArray );
+
+wxCOMPILE_TIME_ASSERT( WXSIZEOF(OAC_T_Names) == OAC_T_Max + 1,
+                       MismatchInActionNames );
+
+wxCOMPILE_TIME_ASSERT( WXSIZEOF(OAC_T_Flags) == OAC_T_Max,
+                       MismatchInActionFlags );
+
 
 bool FilterActionNeedsArg(MFDialogAction action)
 {

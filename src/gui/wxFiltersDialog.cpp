@@ -265,7 +265,8 @@ wxString OAC_Types[] =
    gettext_noop("Set Colour"),          // OAC_T_SetColour
    gettext_noop("Print"),               // OAC_T_Print
    gettext_noop("Set Flag"),            // OAC_T_SetFlag
-   gettext_noop("Clear Flag")           // OAC_T_ClearFlag
+   gettext_noop("Clear Flag"),          // OAC_T_ClearFlag
+   gettext_noop("Do nothing"),          // OAC_T_NOP
 };
 
 static const
@@ -290,8 +291,10 @@ MFDialogAction OAC_T_Swap[] =
    OAC_T_SetColour,
    OAC_T_Print,
    OAC_T_SetFlag,
-   OAC_T_ClearFlag
+   OAC_T_ClearFlag,
+   OAC_T_NOP,
 };
+
 ENUM_fromSelect(MFDialogAction, OAC_T_Swap, OAC_TypesCountS, OAC_T_MoveTo)
 ENUM_toSelect(  MFDialogAction, OAC_T_Swap, OAC_TypesCountS, OAC_T_MoveTo)
 

@@ -3129,6 +3129,16 @@ static Value func_isfromme(ArgList *args, FilterRuleImpl *p)
                                                   mf->GetProfile());
 }
 
+static Value func_nop(ArgList *args, FilterRuleImpl *p)
+{
+   // the sole meaning of this function is to prevent the subsequent actiosn
+   // from being evaluated, so do prevent them from running
+   Value v = 1;
+   v.Abort();
+
+   return v;
+}
+
 static Value func_hasflag(ArgList *args, FilterRuleImpl *p)
 {
    if(args->Count() != 1)
@@ -3524,6 +3534,7 @@ BuiltinFunctions(void)
          Define(_T("setflag"), func_setflag);
          Define(_T("clearflag"), func_clearflag);
          Define(_T("isfromme"), func_isfromme);
+         Define(_T("nop"), func_nop);
 #ifdef TEST
          Define(_T("nargs"), func_nargs);
          Define(_T("arg"), func_arg);

@@ -103,6 +103,7 @@ enum MFDialogAction
    OAC_T_SetFlag,
    OAC_T_ClearFlag,
    OAC_T_SetScore,
+   OAC_T_NOP,           // no operation
    OAC_T_Max
 };
 

@@ -85,6 +85,7 @@ any problems with building it.
          of Mahogany options between different installations
    \item Options with non default values are now highlighted in the
          preferences dialog (see \ref{optionshighlight})
+   \item New \texttt{nop()} (stop filter processing) filter action added
 \end{itemize}
 
 \subsubsection{0.66 against 0.65}
