@@ -94,16 +94,14 @@ a) mailing lists and newsgroups
 
 Edit and send the announcement (doc/Mannounce.txt) to the following addresses:
 
-lg@ssc.com
-c-client@u.washington.edu
-linux-announce@news.ornl.gov
-editor@32bitsonline.com
-gnome-announce-list@gnome.org
 mahogany-announce@lists.sourceforge.net
-mahogany-developers@lists.sourceforge.net
-mahogany-users@lists.sourceforge.net
-python-announce-list@python.org
+
+[should we spam the other ones?]
+
+c-client@u.washington.edu
+wxwin-announce@lists.wxwindows.org
 comp.os.linux.announce
+comp.lang.python.announce
 
 b) IMAP software database
 
