@@ -379,6 +379,8 @@ void wxFolderTree::OnOpen(MFolder *folder)
 void wxFolderTree::OnProperties(MFolder *folder)
 {
    (void)ShowFolderPropertiesDialog(folder, m_tree);
+
+   folder->DecRef();
 }
 
 MFolder *wxFolderTree::OnCreate(MFolder *parent)

@@ -322,10 +322,10 @@ END_EVENT_TABLE()
 // wxFolderBaseDialog
 // ----------------------------------------------------------------------------
 
-   wxFolderBaseDialog::wxFolderBaseDialog(wxWindow *parent,
-                                          const wxString& title)
-      : wxNotebookDialog(GET_PARENT_OF_CLASS(parent, wxFrame),
-                         title)
+wxFolderBaseDialog::wxFolderBaseDialog(wxWindow *parent,
+                                       const wxString& title)
+                  : wxNotebookDialog(GET_PARENT_OF_CLASS(parent, wxFrame),
+                                     title)
 {
    m_parentFolder = NULL;
    m_newFolder = NULL;
@@ -846,6 +846,13 @@ wxFolderPropertiesPage::WriteEntryIfChanged(FolderProperty property,
    if ( value != m_originalValues[property] )
    {
       m_profile->writeEntry(profileKeys[property], value);
+
+      // this function has a side effect: it also sets the "modified" flag so
+      // that the other functions know that the folder settings have been
+      // changed and so the "unaccessible" flag may be not valid any longer
+      MFolder_obj folder(m_defaultsPath);
+
+      folder->AddFlags(MF_FLAGS_MODIFIED);
    }
    //else: it didn't change, don't write it back
 }
@@ -1235,17 +1242,10 @@ bool ShowFolderPropertiesDialog(MFolder *folder, wxWindow *parent)
 {
    wxFolderPropertiesDialog dlg(parent, folder);
 
-   MFolder *newfolder = DoShowFolderDialog(dlg, FolderCreatePage_Folder);
-   if ( newfolder )
-   {
-      newfolder->DecRef();
-
-      return TRUE;
-   }
-   else
-   {
-      return FALSE;
-   }
+   // notice that we do *not* need to DecRef() the return value of
+   // DoShowFolderDialog() because it's done in wxFolderPropertiesDialog()
+   // dtor!
+   return DoShowFolderDialog(dlg, FolderCreatePage_Folder) != NULL;
 }
 
 MFolder *ShowFolderSelectionDialog(MFolder *folder, wxWindow *parent)
