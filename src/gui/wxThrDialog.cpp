@@ -261,7 +261,7 @@ wxMessageThreadingDialog::wxMessageThreadingDialog(Profile *profile,
               "\n"
               "The remaining options allow to configure the details "
               "of the threading algorithm used when threading\n"
-              "the messages locally only (we don't have such fine"
+              "the messages locally only (we don't have such fine "
               "control over server side threading).\n"
               "\n"
               "Disable them if you don't want to consider the subject "
