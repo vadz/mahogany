@@ -16,6 +16,8 @@ DOWXWIN=yes  # no or yes
 DOINSTALL=yes
 DOSHARED=no
 DEBUG=no
+ADDON=
+
 while [ ! -z "$1" ]
 do
 	case "x$1" in
@@ -91,6 +93,18 @@ DOCHOST=Matterhorn
 UPLOADWXGTK=no
 
 
+if [ $DOSHARED = yes ]
+then
+	ADDON="_wxshared"
+else
+	ADDON="_wxstatic"
+fi
+
+if [ $DEBUG = yes ]
+then
+	ADDON="${ADDON}_debug"
+fi
+
 if [ -f /etc/debian_version ]
 then
   DEBIAN=yes
@@ -155,6 +169,11 @@ then
   SCP=/usr/local/bin/ssh1/scp
 fi
 
+if [ `hostname` = Matterhorn ]
+then
+  SCP=scp1
+fi
+
 if [ `hostname` = ronnie ]
 then
   PATH=$PATH:/usr/local/bin
@@ -200,6 +219,7 @@ $SCP $FTPLOCATION/buildoptions /tmp/makeM_deb.$$ && \
 
 echo "OSTYPE=$OSTYPE"
 echo "OSTYPE_ADDON=$OSTYPE_ADDON"
+echo "ADDON=$ADDON"
 echo "BUILDDIR=$BUILDDIR"
 echo "DEBIAN=$DEBIAN"
 echo "REDHAT=$REDHAT"
@@ -274,15 +294,6 @@ then
   else
 	SHAREDFLAG="--disable-shared --enable-static"
   fi
-
-# I don't think they are still needed:
-#	--disable-threads \
-#        --enable-wxprintfv \
-#        --enable-html \
-#	--enable-controls \
-#	--with-libpng \
-#	--without-dnd \
-#        --enable-accel \
 
   rm -f wxWindows/*.cache
   cd wxWindows && \
@@ -368,7 +379,6 @@ then
     if [ "$DOINSTALL" = "yes" ] ; then
 	# do not install locally        (cd $NAME-$VERSION && super debi)
         $SCP mahogany_* $FTPLOCATION
-        #mv ${NAME}_$VERSION*deb ${NAME}_$VERSION.tar.gz  /usr/local/ftp/pub/Mahogany/daily
     fi
     echo "Build of $NAME-$VERSION, debian, successful."
     UPLOADWXGTK=yes # cause wxWindow snapshot to be generated
@@ -385,12 +395,10 @@ then
   echo "##################################################################"
   cd $BUILDDIR && \
   (cd $NAME-$VERSION && make allclean 2>/dev/null 2>&1 || true) && \
-#  $SCP $DOCSLOCATION $BUILDDIR/$NAME-$VERSION/doc && \
   $SCP $FTPLOCATION/Mdocs.tar.gz $BUILDDIR/$NAME-$VERSION/doc && \
   tar czf /usr/src/redhat/SOURCES/$NAME-$VERSION.tar.gz $NAME-$VERSION && \
   cp $BUILDDIR/$NAME-$VERSION/redhat/M.spec /usr/src/redhat/SPECS/M.spec && \
   cp $BUILDDIR/$NAME-$VERSION/redhat/mahogany.gif /usr/src/redhat/SOURCES && \
-#  cp $BUILDDIR/$NAME-$VERSION/doc/Mdocs.tar.gz /usr/src/redhat/BUILD/$NAME-$VERSION/doc/ && \
   cd /usr/src/redhat/ && \
   rpm -ba SPECS/M.spec
   if [ "$DOINSTALL" = "yes" ] ; then
@@ -433,8 +441,8 @@ then
     $SCP $FTPLOCATION/Mdocs.tar.gz $BUILDDIR/$NAME-$VERSION/doc/
   fi
   cd $BUILDDIR/$NAME-$VERSION && $MAKE install_all DESTDIR=$DESTDIR  >/dev/null && \
-  cd $DESTDIR && tar cvf $BUILDDIR/$NAME-$VERSION-$OSTYPE$OSTYPE_ADDON.tar * && \
-  gzip -f -9 $BUILDDIR/$NAME-$VERSION-$OSTYPE$OSTYPE_ADDON.tar
+  cd $DESTDIR && tar cvf $BUILDDIR/$NAME-$VERSION-$OSTYPE$OSTYPE_ADDON$ADDON.tar * && \
+  gzip -f -9 $BUILDDIR/$NAME-$VERSION-$OSTYPE$OSTYPE_ADDON$ADDON.tar
 
 else
   echo "Build of $NAME-$VERSION.tar.gz, failed."
@@ -452,10 +460,10 @@ if [ $DOSHARED = yes -a $DOINSTALL = yes ]
 then
   echo "Uploading wxWindows shared library to ftp server"
   cd $WXPREFIX && \
-  tar cvf wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON.tar lib/libwx_gtk* && \
-  gzip -9 wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON.tar && \
-  $SCP wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON.tar $FTPLOCATION && \
-  rm -f wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON.tar
+  tar cvf wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON$ADDON.tar lib/libwx_gtk* && \
+  gzip -9 wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON$ADDON.tar && \
+  $SCP wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON$ADDON.tar $FTPLOCATION && \
+  rm -f wxGTK-SharedLibs-$OSTYPE$OSTYPE_ADDON$ADDON.tar
 fi
 
 ############################
