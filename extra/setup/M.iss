@@ -81,13 +81,13 @@ Source: "src\icons\tb*.xpm"; DestDir: "{app}\icons"
 ; we always need Python DLL as the app wouldn't start without it :-(
 Source: "w:\winnt40\system32\Python20.dll"; DestDir: "{sys}"
 
-Source: "src\Python\MailFolder.py"; DestDir: "{app}\Python"; Components: python
-Source: "src\Python\MAppBase.py"; DestDir: "{app}\Python"; Components: python
-Source: "src\Python\Message.py"; DestDir: "{app}\Python"; Components: python
-Source: "src\Python\MObject.py"; DestDir: "{app}\Python"; Components: python
-Source: "src\Python\MProfile.py"; DestDir: "{app}\Python"; Components: python
-Source: "src\Python\MString.py"; DestDir: "{app}\Python"; Components: python
-Source: "src\Python\MTest.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\MailFolder.py-swig"; DestName: "MailFolder.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\MAppBase.py-swig"; DestName: "MAppBase.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\Message.py-swig"; DestName: "Message.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\MObject.py-swig"; DestName: "MObject.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\MProfile.py-swig"; DestName: "MProfile.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\MString.py-swig"; DestName: "MString.py"; DestDir: "{app}\Python"; Components: python
+Source: "src\Python\MTest.py-swig"; DestName: "MTest.py"; DestDir: "{app}\Python"; Components: python
 
 ; case is important (should be Minit) or Python complains!!
 Source: "src\Python\Scripts\MInit.py"; DestDir: "{app}\Python"; DestName: "Minit.py"; Components: python
