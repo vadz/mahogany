@@ -460,14 +460,18 @@ PGPEngine::DoExecCommand(const String& options,
    messageOut = messageIn;
 
    PGPProcess process;
-   long pid = wxExecute
-              (
-               wxString::Format
+   String command = wxString::Format
                (
                 "%s --status-fd=2 --command-fd 0 --output - -a %s",
                 READ_APPCONFIG_TEXT(MP_PGP_COMMAND).c_str(),
                 options.c_str()
-               ),
+               );
+#if !defined(NDEBUG)
+   if (log)
+      log->AddMessage(command);
+#endif
+   long pid = wxExecute
+              (command,
                wxEXEC_ASYNC,
                &process
               );
