@@ -1976,7 +1976,7 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                      // non-existing location      if(wxFileExists(lockfile))
                   {
                      command = "";
-                     command << m_ProfileValues.browser << " -remote openURL(" << ci->GetUrl() << ")";
+                     command << m_ProfileValues.browser << " -remote openURL(" << ci->GetUrl() << ",new-window)";
                      wxString errmsg;
                      errmsg.Printf(_("Could not launch browser: '%s' failed."),
                                    command.c_str());
