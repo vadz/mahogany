@@ -14,18 +14,39 @@ $Id$
 		now
 		- deleting wxllist takes ages, calling MoveLines(,-1)
 		  recursively 
+                - delete lines at begin of window, then move cursor
+  		  down, next insert at wrong position. If cursor gets
+		  moved with mouse instead of keys, everything is fine.
+		- temparily disable layout while inserting/clearing
+		  window? Should speed up things N*(N-1) fold...
+
+5	KB	make MailFolder timer react to options change
+5	KB	(optionally, but on by default) expunge deleted messages when
+		the folder is closed - as noticed in 32bitonline comparison,
+		otherwise it's a nuisance.
+4	KB	Nicer icons: filetypes (GNOME?) and message/rfc822 and 
+		message view properties page --> rename to "Viewer?"
+		Rename "File" menu to "Messages" or "Program"?
+		Icon subdirectories GNOME/KDE?
+4	KB	Also, why "hide" parameter to all wxComposeView::CreateXXX()
+		functions is ignored - is it used anywhere?
+3	KB	Filters: empty rest expression still causes abort of
+		parsing somehow, try FilterTest="5*4+3"
+
+
 
 8	VZ	AdbImort dialog under Windows lacks UpdateUI somewhere
 
 8	VZ	mh_parameters provokes a compile bug - what to do?
 		--> rewrite it in MailFolderCC.cpp like I did with the 
 		fetch_overview functions
-4	KB	Nicer icons: filetypes (GNOME?) and message/rfc822 and 
-		message view properties page --> rename to "Viewer?"
-		Rename "File" menu to "Messages" or "Program"?
-		Icon subdirectories GNOME/KDE?
 8	VZ	Opening NNTP folders suddenly asks for password - what 
 		happened?
+
+	VZ	Clicking on "header dialog/More button" produces
+		"headers for folder "xpm" in the dialog when called
+		from toplevel window.
+
 8	VZ?     After a dialog was opened (e.g. wxModulesDialog), the
 		app won't termiante but keeps running without windows.
 
@@ -34,10 +55,6 @@ $Id$
 7 gtk		Mahogany occasionally doesn't terminate but remains in
 		gtk event loop without any open windows.
 6	VZ	All Folder create dialog pages have no HelpIDs set.
-5	KB	make MailFolder timer react to options change
-5	KB	(optionally, but on by default) expunge deleted messages when
-		the folder is closed - as noticed in 32bitonline comparison,
-		otherwise it's a nuisance.
 3		foldername in password prompt seems wrong
 3		URL highlighting in headers is missing (e.g. X-Url)
 ? win	VZ	lock files are sometimes left
@@ -52,8 +69,6 @@ $Id$
 4 gtk	VZ	icon selector suffers from several appearance problems
 3 gtk	??	menu acceleratos don't work if we process char events
 
-4	KB	Also, why "hide" parameter to all wxComposeView::CreateXXX()
-		functions is ignored - is it used anywhere?
 
 *********************************************************************
 *** PROJECTS
@@ -80,8 +95,14 @@ $Id$
 6		simple HTML import for wxLayout
 6		threading via References header
 5		integrate wxHTML for HTML viewing
+		config option for iconmanager sub directory
+		More icons needed: INBOX, PopServer, IMAPServer,
+		FolderGroup, NewMail, SentMail, small icons (16x16) for the
+		custom headers dialog, AdbImport.
 
 
+8	VZ	make the message templates work: GUI suport for configuring them
+		and (many) more macros should be added.
 7	VZ	document the new properties dialog entries/pages,
 		please - I've started extending the docs
 6	VZ	Could you please check the file-browse button/dialog to
@@ -92,11 +113,6 @@ $Id$
 		"checklist" (however that thing was called) box to
 		choose the fields and their order and which separator
 		to use would be nice.
-
-4	VZ	templates enhancements:
-		a) take them from files
-		b) "Apply template" command in compose view
-
 8		Find out where Mahogany is when laying out really long 
 		text messages. How can we speed this up? Why do
 		redraws take long, too?
@@ -125,11 +141,6 @@ $Id$
 
 4		improve key bindings for message editor, page up/down
 		whole page
-2	KB	add sub-directories support for different icon sets to 
-		wxIconManager, e.g. small/large style
-		More icons needed: INBOX, PopServer, IMAPServer,
-		FolderGroup, NewMail, SentMail, small icons (16x16) for the
-		custom headers dialog, AdbImport.
 
 3	VZ	XFaces under Windows?
 		KB: no problem if you can read XPMs, use the lib included

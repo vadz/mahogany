@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxIconManager - allocating and deallocating icons for drawing    *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1997-1999 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -46,24 +46,22 @@ KBLIST_DEFINE(IconDataList, IconData);
 
 class wxIconManager
 {
-   /** A list of all known icons.
-       @see IconData
-   */
-   IconDataList *m_iconList;
-   
-   /// An Icon to return for unknown lookup strings.
-   wxIcon m_unknownIcon;
-
 public:
    /** Constructor
-   */
-   wxIconManager();
+       @param sub_dir if not empty a favourite subdirectory to use for the icons
+    */
+   wxIconManager(wxString sub_dir = "");
 
    /** Destructor
        writes back all entries
    */
    ~wxIconManager();
 
+   /** Tells the IconManager to use a different sub-directory.
+       @param sub_dir if not empty a favourite subdirectory to use for the icons
+    */
+   void SetSubDirectory(wxString sub_dir);
+   
    /** Get an Icon.
        If the iconName is not known, a default icon will be returned.
        @param iconName  the name of the icon
@@ -112,6 +110,14 @@ public:
    static void FreeImage(char **ptr);
 
 private:
+   /** A list of all known icons.
+       @see IconData
+   */
+   IconDataList *m_iconList;
+   
+   /// An Icon to return for unknown lookup strings.
+   wxIcon m_unknownIcon;
+
    /// have we checked for supported formats?
    static bool m_knowHandlers;
    /// list of supported types, terminated with -1
@@ -120,6 +126,12 @@ private:
    static int ms_NumOfHandlers;
    /// check this path first
    static wxString ms_IconPath;
+   /// the preferred sub-directory to use for the icons
+   wxString m_SubDir;
+   /// the global icon directory:
+   wxString m_GlobalDir;
+   /// the local icon directory:
+   wxString m_LocalDir;
 };
 
 #endif

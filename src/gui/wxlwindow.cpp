@@ -96,7 +96,7 @@ BEGIN_EVENT_TABLE(wxLayoutWindow,wxScrolledWindow)
    EVT_RIGHT_DOWN(wxLayoutWindow::OnRightMouseClick)
    EVT_LEFT_DCLICK(wxLayoutWindow::OnMouseDblClick)
    EVT_MIDDLE_DOWN(wxLayoutWindow::OnMiddleMouseDown)
-//   EVT_MOTION    (wxLayoutWindow::OnMouseMove)
+   EVT_MOTION    (wxLayoutWindow::OnMouseMove)
 
    EVT_UPDATE_UI(WXLOWIN_MENU_UNDERLINE, wxLayoutWindow::OnUpdateMenuUnderline)
    EVT_UPDATE_UI(WXLOWIN_MENU_BOLD, wxLayoutWindow::OnUpdateMenuBold)
@@ -119,7 +119,7 @@ static bool IsDirectionKey(long keyCode);
 // ============================================================================
 
 #ifndef wxWANTS_CHARS
-   #define wxWANTS_CHARS 0
+#   define wxWANTS_CHARS 0
 #endif
 
 // ----------------------------------------------------------------------------
@@ -146,7 +146,9 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
    m_llist = new wxLayoutList();
    m_BGbitmap = NULL;
    m_ScrollToCursor = false;
+#ifdef __WXMSW__
    m_FocusFollowMode = false;
+#endif
    SetWrapMargin(0);
 
    // no scrollbars initially
@@ -221,16 +223,12 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
 {
    wxClientDC dc( this );
    PrepareDC( dc );
-#ifdef __WXMSW__
-   if ( eventId != WXLOWIN_MENU_MOUSEMOVE )
+   if ( eventId != WXLOWIN_MENU_MOUSEMOVE
+#ifndef __WXMSW__
+        || m_FocusFollowMode
 #endif
-   {
-      // moving the mouse in a window shouldn't give it the focus!
-      // Oh yes! wxGTK's focus handling is so broken, that this is the 
-      // only sensible way to go.
-      if(m_FocusFollowMode)
+        )
          SetFocus();
-   }
 
    wxPoint findPos;
    findPos.x = dc.DeviceToLogicalX(event.GetX());

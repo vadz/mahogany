@@ -329,6 +329,12 @@ wxMApp::DoExit()
          frame->Close(TRUE);
       }
    }
+   /// Close the help frame if it is open:
+   wxFrame *hf = NULL;
+   if(m_HelpController
+      && m_HelpController->IsKindOf(CLASSINFO(wxHelpControllerHtml)))
+      hf = ((wxHelpControllerHtml *)m_HelpController)->GetFrameParameters();
+   if(hf) hf->Close(TRUE);
 }
 
 // app initilization
@@ -395,7 +401,7 @@ wxMApp::OnInit()
       String localePath;
       localePath << m_globalDir << "/locale";
 #else
-      #error "don't know where to find message catalogs on this platform"
+#   error "don't know where to find message catalogs on this platform"
 #endif // OS
       m_Locale->AddCatalogLookupPathPrefix(localePath);
 
@@ -426,6 +432,7 @@ wxMApp::OnInit()
 #endif
 
    m_IconManager = new wxIconManager();
+
 
    // this is necessary to avoid that the app closes automatically when we're
    // run for the first time and show a modal dialog before opening the main

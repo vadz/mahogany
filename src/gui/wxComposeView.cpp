@@ -505,10 +505,6 @@ BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
    // process termination notification
    EVT_END_PROCESS(HelperProcess_Editor, wxComposeView::OnExtEditorTerm)
 
-#ifndef OS_WIN
-   EVT_MOTION(wxComposeView::OnMouseMove)
-#endif
-   
    // button notifications
    EVT_BUTTON(IDB_EXPAND, wxComposeView::OnExpand)
 END_EVENT_TABLE()
@@ -1251,9 +1247,10 @@ wxComposeView::CreateFTCanvas(void)
    m_font = wxFonts[m_font];
    m_size = READ_CONFIG(m_Profile,MP_CVIEW_FONT_SIZE);
 #ifndef OS_WIN
-   m_FocusFollowMode = READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE) != 0;
+   m_LayoutWindow->SetFocusFollowMode(
+      READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE) != 0);
 #endif
-
+   
    EnableEditing(true);
    m_LayoutWindow->Clear(m_font, m_size, (int) wxNORMAL, (int)wxNORMAL, 0, &m_fg, &m_bg);
    m_LayoutWindow->SetWrapMargin( READ_CONFIG(m_Profile, MP_COMPOSE_WRAPMARGIN));

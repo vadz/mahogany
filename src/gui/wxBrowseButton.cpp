@@ -31,6 +31,7 @@
 #   include <wx/dcmemory.h>
 #   include <wx/layout.h>
 #   include <wx/statbox.h>
+#   include <wx/dirdlg.h>
 #endif
 
 #include <wx/colordlg.h>

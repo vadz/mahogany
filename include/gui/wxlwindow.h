@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxLwindow.h : a scrolled Window for displaying/entering rich text*
  *                                                                  *
- * (C) 1998,1999 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1998-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -184,6 +184,11 @@ public:
          m_StatusBar = bar; m_StatusFieldLabel = labelfield;
          m_StatusFieldCursor = cursorfield;
       }
+#ifndef __WXMSW__
+   /// Enable or disable focus follow mode under non-MSW
+   void SetFocusFollowMode(bool enable = TRUE)
+      { m_FocusFollowMode = enable; }
+#endif
 
 protected:
    /// generic function for mouse events processing
@@ -256,9 +261,11 @@ private:
    //@{
    /// Do we want to auto-replace the selection with new text?
    bool         m_AutoDeleteSelection;
+#ifndef __WXMSW__
    /// Do we want the focus to follow the mouse?
    bool m_FocusFollowMode;
-   //@}
+#endif
+//@}
    DECLARE_EVENT_TABLE()
 };
 

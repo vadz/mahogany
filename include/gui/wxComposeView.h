@@ -1,12 +1,10 @@
 /*-*- c++ -*-********************************************************
  * wxComposeView.h: a window displaying a mail message              *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998-1999 by Karsten Ballüder (kasrten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
-
-
 
 #ifndef WXCOMPOSEVIEW_H
 #define WXCOMPOSEVIEW_H
@@ -31,9 +29,7 @@
 // ----------------------------------------------------------------------------
 // forward declarations
 // ----------------------------------------------------------------------------
-class wxFTOList;
 class wxComposeView;
-class wxFTCanvas;
 class wxLayoutWindow;
 
 class wxProcess;
@@ -42,9 +38,6 @@ class wxProcessEvent;
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
-
-/// just for now, FIXME!
-#define WXCOMPOSEVIEW_FTCANVAS_YPOS 80
 
 // ----------------------------------------------------------------------------
 // types and classes
@@ -277,12 +270,6 @@ protected:
    /// A list of all extra headerslines to add to header.
    kbStringList m_ExtraHeaderLinesValues;
 
-#ifndef OS_WIN
-   /// called on mouse move
-   void OnMouseMove(wxMouseEvent & /* event */)
-      { if(m_FocusFollowMode) SetFocus(); }
-#endif
-
 private:
    /// a profile
    ProfileBase * m_Profile;
@@ -337,11 +324,6 @@ private:
 
    /// enable/disable editing of the message text
    inline void EnableEditing(bool enable);
-
-#ifndef OS_WIN
-   /// Do we want the focus to follow the mouse?
-   bool m_FocusFollowMode;
-#endif
 
    /// ids for different processes we may launch
    enum

@@ -216,7 +216,7 @@ protected:
    enum
    {
       FileFolderSubtype_Mbox,
-      FileFolderSubtype_MH,
+      FileFolderSubtype_MH
    };
 
    // fill the fields with the default value for the given folder type (the

@@ -3,7 +3,7 @@
 25.07.99 KB: date format configurable, sorting configurable and complete,
              help and modal dialogs work, mailfolder update improvements,
              abort button for reading folder listings, retrieving listings
-             from newest messages first
+	     from newest messages first, iconmanager supports subdirectories now
 22.07.99 KB: more MailFolder tidying up, sorting works
 19.07.99 KB: tear-off menus option added
 18.07.99 KB: more async fixes, fixed some race-conditions, 

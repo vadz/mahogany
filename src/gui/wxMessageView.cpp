@@ -1,10 +1,14 @@
 /*-*- c++ -*-********************************************************
  * wxMessageView.cc : a wxWindows look at a message                 *
  *                                                                  *
- * (C) 1998, 1999 by Karsten Ballüder (Ballueder@usa.net)           *
+ * (C) 1998-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
  *                                                                  *
  * $Id$
  *******************************************************************/
+
+#ifdef __GNUG__
+#   pragma implementation "wxMessageView.h"
+#endif
 
 // ============================================================================
 // declarations
@@ -13,9 +17,6 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
-#ifdef __GNUG__
-#pragma implementation "wxMessageView.h"
-#endif
 
 #include "Mpch.h"
 
@@ -39,17 +40,14 @@
 
 #include "Mdefaults.h"
 #include "MHelp.h"
-
 #include "Message.h"
-
 #include "FolderView.h"
 #include "ASMailFolder.h"
-
 #include "MDialogs.h"
-
 #include "MessageView.h"
-
 #include "XFace.h"
+#include "miscutil.h"
+#include "sysutil.h"
 
 #include "gui/wxIconManager.h"
 #include "gui/wxMessageView.h"
@@ -57,16 +55,12 @@
 #include "gui/wxllist.h"
 #include "gui/wxlwindow.h"
 #include "gui/wxlparser.h"
-
 #include "gui/wxOptionsDlg.h"
+#include "gui/wxComposeView.h"
 
 #include <wx/dynarray.h>
 #include <wx/file.h>
 #include <wx/mimetype.h>
-#include "miscutil.h"
-#include "gui/wxComposeView.h"
-
-#include "sysutil.h"
 
 #include <ctype.h>  // for isspace
 #include <time.h>   // for time stamping autocollected addresses
@@ -109,6 +103,7 @@ class ProcessInfo
 {
 public:
    ProcessInfo(wxProcess *process,
+
                int pid,
                const String& errormsg,
                const String& tempfilename)
@@ -304,10 +299,6 @@ BEGIN_EVENT_TABLE(wxMessageView, wxLayoutWindow)
    EVT_MENU(WXLOWIN_MENU_LCLICK, wxMessageView::OnMouseEvent)
    EVT_MENU(WXLOWIN_MENU_DBLCLICK, wxMessageView::OnMouseEvent)
 
-#ifndef OS_WIN
-   EVT_MOTION(wxMessageView::OnMouseMove)
-#endif
-   
    // menu & toolbars
    EVT_MENU(-1, wxMessageView::OnMenuCommand)
    EVT_TOOL(-1, wxMessageView::OnMenuCommand)
@@ -458,12 +449,14 @@ wxMessageView::UpdateProfileValues()
    m_ProfileValues.autocollect =  READ_CONFIG(m_Profile, MP_AUTOCOLLECT);
    m_ProfileValues.autocollectNamed =  READ_CONFIG(m_Profile, MP_AUTOCOLLECT_NAMED);
    m_ProfileValues.autocollectBookName = READ_CONFIG(m_Profile, MP_AUTOCOLLECT_ADB);
+   m_ProfileValues.showFaces = READ_CONFIG(m_Profile, MP_SHOW_XFACES) != 0;
+
 #ifdef OS_UNIX
    m_ProfileValues.afmpath = READ_APPCONFIG(MP_AFMPATH);
 #endif // Unix
-   m_ProfileValues.showFaces = READ_CONFIG(m_Profile, MP_SHOW_XFACES) != 0;
+
 #ifndef OS_WIN
-   m_ProfileValues.focusFollowMode = READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE) != 0;
+   SetFocusFollowMode(READ_CONFIG(m_Profile,MP_FOCUS_FOLLOWSMOUSE) != 0);
 #endif
 }
 

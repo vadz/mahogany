@@ -1753,7 +1753,7 @@ wxLayoutList::MoveCursorVertically(int n)
       if(! m_CursorLine)
       {
          m_CursorLine = last;
-         m_CursorPos.y ++;
+         m_CursorPos.y --;
          rc = false;
       }
       else

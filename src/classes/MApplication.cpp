@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MAppBase class: all non GUI specific application stuff           *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997-1999 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *                                                                  *
@@ -45,7 +45,7 @@
 #include "gui/wxMainFrame.h"
 #include "gui/wxMApp.h"
 #include "gui/wxMDialogs.h"   // MDialog_YesNoDialog
-
+#include "gui/wxIconManager.h"
 #include "adb/AdbManager.h"   // for AdbManager::Delete
 
 #include "adb/AdbFrame.h"     // for ShowAdbFrame
@@ -450,6 +450,8 @@ MAppBase::OnStartup()
       return false;
    }
 
+   GetIconManager()->SetSubDirectory(READ_APPCONFIG(MP_ICONSTYLE));
+
 #ifdef OS_WIN
    // cclient extra initialization under Windows
    wxString strHome;
@@ -555,8 +557,8 @@ MAppBase::OnStartup()
 #ifdef EXPERIMENTAL
    /* Test the Filtering subsystem. Completely disabled in release
       build. */
-   extern void FilterTest(void);
-   FilterTest();
+   extern void FilterTest(const String &program);
+   FilterTest(m_profile->readEntry("FilterTest"," 5 + 4 * ( 3 * 4 ) + 5 * print() "));
 #endif
 
    return TRUE;

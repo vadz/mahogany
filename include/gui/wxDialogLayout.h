@@ -238,10 +238,14 @@ public:
       : wxManuallyLaidOutDialog(parent, title, profileKey)
    {
       m_profile = profile;
-
+      m_profile->IncRef(); // paranoid
       m_hasChanges = FALSE;
    }
 
+   virtual ~wxProfileSettingsEditDialog()
+      {
+         m_profile->DecRef();
+      }
    ProfileBase *GetProfile() const { return m_profile; }
 
    bool HasChanges() const { return m_hasChanges; }

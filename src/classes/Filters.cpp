@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Filters - Filtering code for M                                   *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1999 by Karsten Ballüder (ballueder@gmx.net)                 *
  *                                                                  *
  * $Id$
  *
@@ -111,6 +111,40 @@ private:
    Parser *m_Parser;
 };
 
+/* The syntax:
+
+   EXPRESSION :=
+     | EXPR + TERM
+     | EXPR - TERM
+     | TERM   
+
+   TERM :=
+     | TERM * FACTOR
+     | TERM / FACTOR
+     | FACTOR
+
+   FACTOR :=
+     | NUMBER
+     | IDENTIFIER ( EXPRESSION )
+     | ( EXPRESSION )
+
+
+     With the following rewritten rules being used:
+
+     EXPRESSION := TERM RESTEXPRESSION
+     RESTEXPRESSION := 
+       | + TERM
+       | - TERM
+       | EMPTY
+
+     TERM := FACTOR RESTTERM
+     RESTTERM := 
+       | * FACTOR
+       | / FACTOR
+       | EMPTY
+*/
+
+
 // ----------------------------------------------------------------------------
 // An implementation of the Parser ABC
 // ----------------------------------------------------------------------------
@@ -123,10 +157,13 @@ public:
          Rewind();
       }
    class SyntaxNode * Parse(void);
-   class SyntaxNode * ParseExpression(void);
+   class Expression * ParseExpression(void);
+   class RestExpression * ParseRestExpression(class LeftOfRest *term);
+   class RestExpression * ParseRestTerm(class LeftOfRest *term);
    class ArgList    * ParseArgList(void);
    class SyntaxNode *ParseFunctionCall(void);
-   class SyntaxNode * ParseFunctionOrConstant(void);
+   class Expression * ParseTerm(void);
+   class SyntaxNode * ParseFactor(void);
    virtual size_t GetPos(void) const { return m_Position; }
    virtual inline void Rewind(size_t pos = 0) { m_Position = pos; }
    virtual Token GetToken(bool remove = true);
@@ -152,13 +189,13 @@ private:
 class Operator : public MObject
 {
 public:
-   virtual long Evaluate(const class SyntaxNode *left,
-                         const class SyntaxNode *right) const = 0;
+   virtual long Evaluate(long left, long right) const = 0;
+   /// for logical operators, shall we continue parsing the right?
+   virtual bool TestLeft(long left) const = 0;
    /// Returns the priority  of the operator.
    virtual int  Priority(void) const = 0;
 #ifdef DEBUG
-   virtual String Debug(const class SyntaxNode *left,
-                        const class SyntaxNode *right) const = 0;
+   virtual String Debug(void) const = 0;
 #endif
 };
 
@@ -185,7 +222,7 @@ enum OperatorPriorities
 class SyntaxNode : public MObject
 {
 public:
-   virtual long Evaluate(void) const = 0;
+   virtual long Evaluate() const = 0;
 #ifdef DEBUG
    virtual String Debug(void) const = 0;
 #endif
@@ -241,9 +278,11 @@ class Value : public SyntaxNode
 {
 public:
    Value(long v) { m_value = v; }
-   virtual long Evaluate(void) const { MOcheck(); return m_value; }
+   virtual long Evaluate() const
+      { MOcheck(); return m_value; }
 #ifdef DEBUG
-   virtual String Debug(void) const { MOcheck(); String s; s.Printf("Value(%ld)",m_value); return s; }
+   virtual String Debug(void) const
+      { MOcheck(); String s; s.Printf("Value(%ld)",m_value); return s; }
 #endif    
 private:
    long m_value;
@@ -270,7 +309,7 @@ class FunctionCall : public SyntaxNode
 public:
    FunctionCall(const String &name, ArgList *args);
    ~FunctionCall() { delete m_args; }
-   virtual long Evaluate(void) const;
+   virtual long Evaluate() const;
 #ifdef DEBUG
    virtual String Debug(void) const
       { MOcheck(); return String("FunctionCall(") + m_name + String(")"); }
@@ -316,97 +355,147 @@ FunctionCall::FindFunction(void)
 }
 
 long
-FunctionCall::Evaluate(void) const
+FunctionCall::Evaluate() const
 {
    MOcheck();
    ASSERT(m_function);
    return (*m_function)(m_args);
 }
 
-/** An expression consisting of more than one token. */
-class Expression : public SyntaxNode
+/** Anything that can be to the left of a RestExpression: */
+class LeftOfRest : public SyntaxNode
 {
 public:
-   Expression(const SyntaxNode *left, class Operator *op, const SyntaxNode *right)
-      { m_left = left; m_right = right; m_operator = op; }
-   long Evaluate(void) const
-      { MOcheck(); return m_operator->Evaluate(m_left, m_right); }
+   /// this function is only called by RestExpression while being evaluated
+   virtual long EvaluateLeft(void) const = 0;
+};
+
+/** A rest-expression, see the parse function for detail. */
+class RestExpression : public LeftOfRest
+{
+public:
+   RestExpression(class LeftOfRest *parent,
+                  class SyntaxNode     *term,
+                  class Operator       *op,
+                  class RestExpression *rest)
+      {
+         m_Parent = parent;
+         m_Op = op;
+         m_Term = term;
+         m_Rest = rest;
+      }
+   ~RestExpression()
+      {
+         if(m_Op) delete m_Op;
+         if(m_Term) delete m_Term;
+         if(m_Rest) delete m_Rest;
+      }
+   virtual long Evaluate() const;
+   virtual long EvaluateLeft(void) const;
+   void SetRest(class RestExpression *rest)
+      { m_Rest = rest; }
+#ifdef DEBUG
+   virtual String Debug(void) const
+      {
+         MOcheck();
+         String s = "RestExpression(";
+         if(m_Op)
+            s << m_Op->Debug() << m_Term->Debug();
+         if(m_Rest)
+            s << m_Rest->Debug();
+         s << ')';
+         return s;
+      }
+#endif
+private:
+   class LeftOfRest *m_Parent;
+   class Operator             *m_Op;
+   class SyntaxNode           *m_Term;
+   class RestExpression       *m_Rest;
+};
+
+/** An expression consisting of more than one token. */
+class Expression : public LeftOfRest
+{
+public:
+   Expression(const SyntaxNode *term, const SyntaxNode *rest)
+      { m_Term = term; m_Rest = rest; }
+   virtual long Evaluate(void) const
+      {
+         MOcheck();
+         if(m_Rest)
+            return m_Rest->Evaluate();
+         else
+            return m_Term->Evaluate();
+      }
+   virtual long EvaluateLeft(void) const
+      { MOcheck(); return m_Term->Evaluate(); }
+   void SetRest(SyntaxNode *rest)
+      { MOcheck(); ASSERT(m_Rest == NULL); m_Rest = rest; }
    ~Expression()
       {
          MOcheck();
-         if(m_left)  delete m_left;
-         if(m_right) delete m_right;
-         if(m_operator) delete m_operator;
+         if(m_Term)  delete m_Term;
+         if(m_Rest) delete m_Rest;
       }
 #ifdef DEBUG
    virtual String Debug(void) const
       {
          MOcheck();
          String s = "Expression(";
-         if(m_operator) s << m_operator->Debug(m_left, m_right);
-         s << ')';
+         s << m_Term->Debug() << m_Rest->Debug() << ')';
          return s;
       }
 #endif    
 private:
-   const SyntaxNode *m_left, *m_right;
-   class Operator *m_operator;
+   const SyntaxNode *m_Term, *m_Rest;
 };
 
-
-
-/* This operator evaluates both operands and returns the value of the 
-   right one, like ',' in C. */
-class OperatorNone : public Operator
+long
+RestExpression::EvaluateLeft(void) const
 {
-public:
-   virtual long Evaluate(const class SyntaxNode *left,
-                        const class SyntaxNode *right) const
-      {
-         MOcheck();
-         (void) left->Evaluate();
-         return right->Evaluate();
-      }
-   virtual int Priority(void) const
-      { return PRI_LOWEST; }
-#ifdef DEBUG
-   String Debug(const class SyntaxNode *left, const class SyntaxNode
-                *right) const
-      {
-         MOcheck();
-         String s;
-         if(left) s << left->Debug();
-         s << ";";
-         if(right) s << right->Debug();
-         return s;
-      }
-#endif
-};
+   return m_Op->Evaluate(
+      m_Parent->EvaluateLeft(),
+      m_Term->Evaluate()
+      );
+}
+
+long
+RestExpression::Evaluate(void) const
+{
+   MOcheck();
+   if(! m_Op) // empty restexpression
+      return m_Parent->EvaluateLeft();
+   else
+   {
+      ASSERT(m_Rest);
+      return m_Rest->Evaluate();
+   }
+}
 
 #ifdef DEBUG
-#define IMPLEMENT_OP(name, operator, priority) \
+#define IMPLEMENT_OP(name, oper, priority) \
 class Operator##name : public Operator \
 { \
 public: \
-   virtual long Evaluate(const class SyntaxNode *left, \
-                        const class SyntaxNode *right) const \
-      { MOcheck(); return left->Evaluate() operator right->Evaluate(); } \
+   virtual long Evaluate(long left, long right) const \
+      { MOcheck(); return left oper right; } \
+   virtual bool TestLeft(long left) const \
+      { MOcheck(); return (bool) (left oper 1) != 0; } \
    virtual int Priority(void) const \
       { return priority; } \
-   virtual String Debug(const class SyntaxNode *left, \
-                        const class SyntaxNode *right) const \
-                           { MOcheck(); String s; if(left) s << left->Debug(); \
-                           s << "operator"; \
-                           if(right) s << right->Debug(); return s; } \
+   virtual String Debug(void) const \
+      { MOcheck(); return #name; } \
 }
 #else
-#define IMPLEMENT_OP(name, operator) \
+#define IMPLEMENT_OP(name, oper) \
 class Operator##name : public Operator \
 { \
 public: \
-   virtual long Evaluate(const class SyntaxNode *left, \
-                        const class SyntaxNode *right) const \
-      { return left->Evaluate() operator right->Evaluate(); } \
+   virtual long Evaluate(long left, long right) const \
+      { return left oper right; } \
+   virtual bool TestLeft(long left) const \
+      { MOcheck(); return (bool) (left oper 1) != 0; } \
 }
 #endif
 
@@ -570,17 +659,34 @@ ParserImpl::ParseFunctionCall(void)
 }
 
 SyntaxNode *
-ParserImpl::ParseFunctionOrConstant(void)
+ParserImpl::ParseFactor(void)
 {
    MOcheck();
-   /* FuncionOrConstant :=
+   /* FACTOR :=
+        | ( EXRESSION ) 
         | IDENTIFIER( ARGLIST )
         | NUMBER
    */
    SyntaxNode *sn = NULL;
 
    Token t = PeekToken();
-   if(t.GetType() == TT_Identifier)
+
+   /* First case, expression in brackets: */
+   if(t.GetType() == TT_Char && t.GetChar() == '(')
+   {
+      t = GetToken();
+      sn = ParseExpression();
+      t = PeekToken();
+      if(t.GetType() == TT_Char && t.GetChar() == ')')
+         GetToken();
+      else
+      {
+         if(sn) delete sn;
+         Error("Expected ')' after expression.");
+         return NULL;
+      }
+   }
+   else if(t.GetType() == TT_Identifier)
    {
       // IDENTIFIER ( ARGLIST )
       sn = ParseFunctionCall();
@@ -598,69 +704,185 @@ ParserImpl::ParseFunctionOrConstant(void)
    return sn;
 }
 
+RestExpression *
+ParserImpl::ParseRestExpression(LeftOfRest *parent)
+{
+   MOcheck();
+   /* RESTEXPRESSION :=
+      | + TERM
+      | - TERM
+      | EMPTY
 
-SyntaxNode *
+      The term passed as argument is the left side of the operator in
+      the original expression. We return not the rest expression but
+      the full expression here, so we need this.
+   */
+   Token t = PeekToken();
+   if(t.GetType() == TT_EOF
+      || t.GetType() == TT_Char && t.GetChar() == ')')
+   {
+      return new RestExpression(parent, NULL,NULL,NULL); // EMPTY
+   }
+   else if( t.GetType() != TT_Char )
+   {
+      Error(_("Expecting an operator in expression."));
+      return NULL;
+   }
+   else if( t.GetChar() != '+' || t.GetChar() != '-')
+      return new RestExpression(parent,NULL,NULL,NULL);
+   
+   Operator *op = NULL;
+   RestExpression *sn = NULL;
+   RestExpression *rest = NULL;
+   SyntaxNode *term = NULL;
+   char token = t.GetChar();
+   size_t position = GetPos();
+   term = ParseTerm();
+   if(! term)
+   {
+      Error(_("Expected term after operator."));
+      Rewind(position); // needed?
+      return NULL;
+   }
+   switch(token)
+   {
+   case '+':
+      op = new OperatorPlus;break;
+   case '-':
+      op = new OperatorMinus;break;
+   default:
+      ;
+   }
+   sn = new RestExpression(parent, term, op, NULL);
+   rest = ParseRestExpression(sn);
+   sn->SetRest(rest);
+   return sn;
+}
+
+RestExpression *
+ParserImpl::ParseRestTerm(LeftOfRest *parent)
+{
+   MOcheck();
+   /* RESTTERM :=
+      | * TERM
+      | * TERM
+      | EMPTY
+
+      The term passed as argument is the left side of the operator in
+      the original expression. We return not the rest expression but
+      the full expression here, so we need this.
+   */
+   Token t = PeekToken();
+   if(t.GetType() == TT_EOF
+      || t.GetType() == TT_Char && t.GetChar() == ')')
+   {
+      return new RestExpression(parent, NULL,NULL,NULL); // EMPTY
+   }
+   else if( t.GetType() != TT_Char)
+   {
+      Error(_("Expecting an operator in expression."));
+      return NULL;
+   }
+   else if(t.GetChar() != '/' || t.GetChar() != '*')
+      return new RestExpression(parent,NULL,NULL,NULL);
+   
+   Operator *op = NULL;
+   RestExpression *sn = NULL;
+   RestExpression *rest = NULL;
+   SyntaxNode *term = NULL;
+   t = GetToken();
+   char token = t.GetChar();
+   size_t position = GetPos();
+   term = ParseTerm();
+   if(! term)
+   {
+      Error(_("Expected term after operator."));
+      Rewind(position); // needed?
+      return NULL;
+   }
+   switch(token)
+   {
+   case '*':
+      op = new OperatorTimes;break;
+   case '-':
+      op = new OperatorDivide;break;
+   default:
+      return new RestExpression(parent, NULL,NULL,NULL);
+   }
+   sn = new RestExpression(parent, term, op, NULL);
+   rest = ParseRestTerm(sn);
+   sn->SetRest(rest);
+   return sn;
+}
+
+Expression *
 ParserImpl::ParseExpression(void)
 {
    MOcheck();
-   /* Expression :=
-      | FunctionOrConstant   
-      | ( Expression )
-      | Expression LogicalOperator Expression
+   /* EXPRESSION :=
+      | EXPRESSION + TERM
+      | EXPRESSION - TERM
+      | TERM   
+
+      Which is identical to the following expression, resolving the
+      left recursion problem:
+      
+      EXPRESSION :=
+      | TERM RESTEXPRESSION   
+      
    */
-   SyntaxNode *sn = NULL;
-   
-   Token t = PeekToken();
-   
-   /* First case, expression in brackets: */
-   if(t.GetType() == TT_Char && t.GetChar() == '(')
+   SyntaxNode *sn = ParseTerm();
+   if(sn)
    {
-      t = GetToken();
-      sn = ParseExpression();
-      t = PeekToken();
-      if(t.GetType() == TT_Char && t.GetChar() == ')')
-         GetToken();
+      Expression *exp = new Expression(sn, NULL);
+      SyntaxNode *rest = ParseRestExpression(exp);
+      if(rest)
+      {
+         exp->SetRest(rest);
+         return exp;
+      }
       else
       {
-         if(sn) delete sn;
-         Error("Expected ')' after expression.");
+         delete exp;
          return NULL;
       }
    }
-   else
-      /* Either a FunctionOrConstant or an Expression: */
-      sn = ParseFunctionOrConstant();
-   
-   t = PeekToken();
-   if(t.GetType() == TT_Char)
+   return new Expression(sn, NULL);
+}
+
+Expression *
+ParserImpl::ParseTerm(void)
+{
+   MOcheck();
+   /* TERM :=
+      | TERM * FACTOR
+      | TERM / FACTOR
+      | FACTOR   
+
+      Which is identical to the following expression, resolving the
+      left recursion problem:
+      
+      EXPRESSION :=
+      | FACTOR RESTTERM   
+      
+   */
+   SyntaxNode *sn = ParseFactor();
+   if(sn)
    {
-      char token = t.GetChar();
-      switch(token)
+      Expression *exp = new Expression(sn, NULL);
+      SyntaxNode *rest = ParseRestTerm(exp);
+      if(rest)
       {
-      case '&':
-         GetToken(); sn = new Expression(sn, new OperatorAnd, ParseExpression()); break;
-      case '|':
-         GetToken(); sn = new Expression(sn, new OperatorOr, ParseExpression()); break;
-      case '+':
-         GetToken(); sn = new Expression(sn, new OperatorPlus, ParseExpression()); break;
-      case '-':
-         GetToken(); sn = new Expression(sn, new OperatorMinus, ParseExpression()); break;
-      case '*':
-         GetToken(); sn = new Expression(sn, new OperatorTimes, ParseExpression()); break;
-      case '/':
-         GetToken(); sn = new Expression(sn, new OperatorDivide, ParseExpression()); break;
-      case ';':
-         GetToken(); sn = new Expression(sn, new OperatorNone, ParseExpression());break;
-      case ')':
-         return sn;
-         break;
-      default:
-         Error("Unexpected character.");
-         if(sn) delete sn;
+         exp->SetRest(rest);
+         return exp;
+      }
+      else
+      {
+         delete exp;
          return NULL;
       }
    }
-   return sn;
+   return new Expression(sn, NULL);
 }
 
 /** A FUNCTIONCALL has a logical value:
@@ -706,16 +928,20 @@ Condition::Create(Token &token, Parser &p)
 
 /** FOR TESTING ONLY, called from MAppBase::OnStartup(): **/
 
+#if 0
 static const char *testprogram = " 5 + 4 * ( 3 * 4 ) + 5 * print() ";
+static const char *testprogram = " 5 + 4 * 4 -1";
+#endif
 
-void FilterTest(void)
+
+void FilterTest(const String &program)
 {
-   Parser *p = Parser::Create(testprogram);
+   Parser *p = Parser::Create(program);
    SyntaxNode *sn = p->Parse();
    String str = sn->Debug();
    INFOMESSAGE((str.c_str()));
    str.Printf("Evaluated '%s' = %ld",
-              testprogram, sn->Evaluate());
+              program.c_str(), sn->Evaluate());
    INFOMESSAGE((str.c_str()));
    p->DecRef();
    delete sn;

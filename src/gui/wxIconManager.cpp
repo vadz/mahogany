@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxIconManager - allocating and deallocating icons for drawing    *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1997-1999 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -123,11 +123,12 @@ static const char *HandlerNames[]    =
 };
 
 // ----------------------------------------------------------------------------
-// helper functions to load images
+// static helper functions to load images
 // ----------------------------------------------------------------------------
 
 #define   WXICONMANAGER_DEFAULTSIZE 100
 
+/* static */
 wxImage &
 wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
 {
@@ -295,6 +296,7 @@ wxIconManager::LoadImage(String filename, bool *success, bool showDlg)
    return *img;
 }
 
+/* static */
 char **
 wxIconManager::LoadImageXpm(String filename)
 {
@@ -337,6 +339,7 @@ wxIconManager::LoadImageXpm(String filename)
    return cpptr;
 }
 
+/* static */
 char **
 wxIconManager::LoadXpm(String filename)
 {
@@ -399,6 +402,7 @@ wxIconManager::LoadXpm(String filename)
    return cpptr;
 }
 
+/* static */
 void
 wxIconManager::FreeImage(char **cpptr)
 {
@@ -415,21 +419,55 @@ wxIconManager::FreeImage(char **cpptr)
 // ----------------------------------------------------------------------------
 // wxIconManager implementation
 // ----------------------------------------------------------------------------
-wxIconManager::wxIconManager()
+wxIconManager::wxIconManager(wxString sub_dir)
 {
-   m_iconList = new IconDataList();
+   m_iconList = NULL;
 
-   AddIcon(M_ICON_HLINK_HTTP, hlink_xpm);
-   AddIcon(M_ICON_HLINK_FTP, ftplink_xpm);
-   AddIcon("MFrame", MFrame_xpm);
-   AddIcon("MainFrame", MainFrame_xpm);
+   if(sub_dir == "default" || sub_dir == _("default"))
+      sub_dir = "";
+   SetSubDirectory(sub_dir);
    m_unknownIcon = wxIcon(unknown_xpm);
 }
 
 
 wxIconManager::~wxIconManager()
 {
-   delete m_iconList;
+   if(m_iconList)
+      delete m_iconList;
+}
+
+void
+wxIconManager::SetSubDirectory(wxString subDir)
+{
+   wxASSERT(this);
+   // We cannot do this in the constructor as the global dir might not 
+   // be set yet.
+   if(mApplication && ! m_GlobalDir.Length())
+   {
+      m_GlobalDir = mApplication->GetGlobalDir()+"/icons";
+      m_LocalDir  = mApplication->GetLocalDir()+"/icons";
+   }
+   /* If nothing changed, we don't do anything: */
+   if(! m_iconList
+      || subDir != m_SubDir)
+   {
+      /* If we change the directory, we should also discard all old icons 
+         to get the maximum effect. */
+      if(m_iconList)
+         delete m_iconList;
+      m_iconList = new IconDataList();
+      
+      m_SubDir = '/'+subDir;
+      if(! wxDirExists(m_GlobalDir+m_SubDir)
+         && ! wxDirExists(m_LocalDir+m_SubDir))
+         m_SubDir = ""; // save ourselves some time when searching
+      
+      // Always add the built-in icons:
+      AddIcon(M_ICON_HLINK_HTTP, hlink_xpm);
+      AddIcon(M_ICON_HLINK_FTP, ftplink_xpm);
+      AddIcon("MFrame", MFrame_xpm);
+      AddIcon("MainFrame", MainFrame_xpm);
+   }
 }
 
 wxBitmap
@@ -464,6 +502,8 @@ wxIconManager::GetBitmap(const String& bmpName)
 wxIcon 
 wxIconManager::GetIcon(String const &_iconName)
 {
+   wxASSERT(this);
+
    IconDataList::iterator i;
    String iconName = _iconName;
    String key;
@@ -511,61 +551,69 @@ wxIconManager::GetIcon(String const &_iconName)
    // next step: try to load the icon files .png,.xpm,.gif:
    wxIcon icn;
    int c;
-   bool found;
-   PathFinder pf(READ_APPCONFIG(MP_ICONPATH), true);
-   pf.AddPaths(mApplication->GetLocalDir()+"/icons", true);
-   pf.AddPaths(mApplication->GetGlobalDir()+"/icons", true);
-   if(ms_IconPath.Length() > 0) pf.AddPaths(ms_IconPath,
-                                           true /*prepend */);
-   
-   IconData *id;
-
-   String name;
-   for(c = 0; wxIconManagerFileExtensions[c]; c++)
+   bool found = false;
+   if(m_GlobalDir.Length())
    {
-      // Use _iconName to preserve captialisation:
-      name = _iconName + wxIconManagerFileExtensions[c];
-      name = pf.FindFile(name, &found);
-
-      if ( !found && IsMimeType(iconName) )
+      PathFinder pf(READ_APPCONFIG(MP_ICONPATH), true);
+      if(m_SubDir.Length() > 1)  // 1 == "/" == empty
       {
-         key = strutil_after(iconName,'/');
-         name = key + wxIconManagerFileExtensions[c];
+         pf.AddPaths(m_GlobalDir+m_SubDir, true);
+         pf.AddPaths(m_LocalDir+m_SubDir, true);
+      }
+      pf.AddPaths(m_GlobalDir, true);
+      pf.AddPaths(m_LocalDir, true);
+      if(ms_IconPath.Length() > 0)
+         pf.AddPaths(ms_IconPath,true /*prepend */);
+   
+      IconData *id;
+
+      String name;
+      for(c = 0; wxIconManagerFileExtensions[c]; c++)
+      {
+         // Use _iconName to preserve captialisation:
+         name = _iconName + wxIconManagerFileExtensions[c];
          name = pf.FindFile(name, &found);
 
-         if ( !found )
+         if ( !found && IsMimeType(iconName) )
          {
-            key  = strutil_before(iconName,'/');
+            key = strutil_after(iconName,'/');
             name = key + wxIconManagerFileExtensions[c];
             name = pf.FindFile(name, &found);
-         }
-      }
 
-      if( found )
-      {
-#ifdef   OS_UNIX
-         ms_IconPath = name.BeforeLast('/');
-         char **ptr = LoadImageXpm(name);
-         if(ptr)
-         {
-            icn = wxIcon(ptr);
-            FreeImage(ptr);
-#else
-         // Windows:
-         ms_IconPath = name.BeforeLast('\\');
-         if(icn.LoadFile(Str(name),0))
-         {
-#endif   
-            id = new IconData;
-            id->iconRef = icn;
-            id->iconName = iconName;
-            wxLogTrace(wxTraceIconLoading, "... icon found in '%s'",
-                       name.c_str());
-            m_iconList->push_front(id);
-            return icn;
+            if ( !found )
+            {
+               key  = strutil_before(iconName,'/');
+               name = key + wxIconManagerFileExtensions[c];
+               name = pf.FindFile(name, &found);
+            }
          }
-      }
-   }
+
+         if( found )
+         {
+#ifdef   OS_UNIX
+            ms_IconPath = name.BeforeLast('/');
+            char **ptr = LoadImageXpm(name);
+            if(ptr)
+            {
+               icn = wxIcon(ptr);
+               FreeImage(ptr);
+#else
+            // Windows:
+            ms_IconPath = name.BeforeLast('\\');
+            if(icn.LoadFile(Str(name),0))
+            {
+#endif   
+               id = new IconData;
+               id->iconRef = icn;
+               id->iconName = iconName;
+               wxLogTrace(wxTraceIconLoading, "... icon found in '%s'",
+                          name.c_str());
+               m_iconList->push_front(id);
+               return icn;
+            }
+        }
+     } // for
+   }// if globaldir
 
 #  ifdef    OS_WIN
    // last, look in the ressources
@@ -587,6 +635,8 @@ wxIconManager::GetIcon(String const &_iconName)
 
 wxIcon wxIconManager::GetIconFromMimeType(const String& type)
 {
+   wxASSERT(this);
+
    // the order of actions is important: we first try to find "exact" match,
    // but if we can't, we fall back to a standard icon and look for partial
    // matches only if there is none
@@ -612,6 +662,8 @@ wxIcon wxIconManager::GetIconFromMimeType(const String& type)
 void
 wxIconManager::AddIcon(String const &iconName,  IconResourceType data)
 {
+   wxASSERT(this);
+
    // load icon
    wxIcon icon(data);
    if ( icon.Ok() )
