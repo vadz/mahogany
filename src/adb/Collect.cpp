@@ -108,6 +108,7 @@ void AutoCollectAddress(const String& email,
                         wxFrame *frame)
 {
    String name = nameOrig;
+   name = MailFolder::DecodeHeader(name, 0);
 
    // we need an address and a name
    bool hasEmailAndName = true;
