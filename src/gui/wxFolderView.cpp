@@ -307,6 +307,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    int x,y;
    m_Parent = parent;
    m_MailFolder = NULL;
+   m_NumOfMessages = 0;
    m_Parent->GetClientSize(&x, &y);
    m_Profile = ProfileBase::CreateProfile("FolderView",NULL);
    m_SplitterWindow = new wxPSplitterWindow("FolderSplit", m_Parent, -1,

@@ -117,21 +117,28 @@ long wxIconManager::m_wxBitmapHandlers[] =
 wxImage &
 wxIconManager::LoadImage(String filename, bool *success)
 {
-   if(! m_knowHandlers) // first time initialisation
-   {
-      for(int i = 0; m_wxBitmapHandlers[i] != -1; i++)
-         if(wxImage::FindHandler( m_wxBitmapHandlers[i] ) == NULL)
-            m_wxBitmapHandlers[i] = 0; // not available
-      m_knowHandlers = true;
-   }
-   
+   bool loaded = false;
    wxImage *img = new wxImage();
 
-   bool loaded = false;
-   for(int i = 0; (!loaded) && m_wxBitmapHandlers[i] != -1; i++)
-      if(m_wxBitmapHandlers[i])
-         loaded = img->LoadFile(filename, m_wxBitmapHandlers[i] );
+   // suppress any error logging from image handlers, some of them
+   // will fail.
+   {
+      wxLogNull logNo;
+   
+      if(! m_knowHandlers) // first time initialisation
+      {
+         for(int i = 0; m_wxBitmapHandlers[i] != -1; i++)
+            if(wxImage::FindHandler( m_wxBitmapHandlers[i] ) == NULL)
+               m_wxBitmapHandlers[i] = 0; // not available
+         m_knowHandlers = true;
+      }
+   
+      for(int i = 0; (!loaded) && m_wxBitmapHandlers[i] != -1; i++)
+         if(m_wxBitmapHandlers[i])
+            loaded = img->LoadFile(filename, m_wxBitmapHandlers[i] );
+   }
 
+   // now old logging is restored
    if((! loaded) && m_wxBitmapHandlers[0] == 0) // try our own XPM loading code
    {
       char ** cpptr = LoadImageXpm(filename);
