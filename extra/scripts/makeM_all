@@ -96,10 +96,13 @@ do
 	;;
 	"x--restart--")
                 RESTARTED=yes
-                ORIGINALSCRIPT=$0
+		ORIGINALSCRIPT=$2
+		shift
+		shift
 	;;
 	"x--norestart")
 		SKIPRESTART=yes
+		shift
 	;;
 	*)
 	echo "Illegal argument $1"
