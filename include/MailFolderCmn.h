@@ -254,6 +254,11 @@ private:
 
    /// just to notice if the filter code did any work
    bool m_FiltersCausedChange;
+
+
+   /** gcc 2.7.2.1 on FreeBSD 2.8.8-stable is reported to need this to 
+       link correctly: */
+   MailfolderCmn(const MailFolderCmn &) { ASSERT(0); }
 #ifdef DEBUG
    bool m_PreCloseCalled;
 #endif
