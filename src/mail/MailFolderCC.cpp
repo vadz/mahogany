@@ -1962,8 +1962,11 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream) const
    wxLogTrace(TRACE_MF_CACHE, "MailFolderCC::AddToMap() for folder %s",
               GetName().c_str());
 
+   CHECK_RET( stream, "Attempting to AddToMap() a NULL MAILSTREAM" );
+
    CHECK_STREAM_LIST();
 
+#ifdef DEBUG
    // check that the folder is not already in the list
    StreamConnectionList::iterator i;
    for ( i = ms_StreamList.begin(); i != ms_StreamList.end(); i++ )
@@ -1976,6 +1979,7 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream) const
          return;
       }
    }
+#endif // DEBUG
 
    // add it now
    StreamConnection  *conn = new StreamConnection;
@@ -2334,9 +2338,15 @@ MailFolderCC::PingReopenAll(bool fullPing)
          i != ms_StreamList.end();
          i++ )
    {
-      connections[n++] = *i;
+      // skip half opened streams, we can't ping them
+      if ( (*i)->stream && !(*i)->stream->halfopen )
+      {
+         connections[n++] = *i;
+      }
    }
 
+   // we can have fewer of them because of half opened streams
+   count = n;
    for ( n = 0; n < count; n++ )
    {
       MailFolderCC *mf = connections[n]->folder;
