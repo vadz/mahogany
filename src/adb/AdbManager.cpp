@@ -171,6 +171,16 @@ bool AdbExpand(wxArrayString& results, const String& what,
   ArrayAdbGroups aGroups;
   ArrayAdbEntries aEntries;
 
+  // expansion may take a long time ...
+  if ( frame )
+  {
+    wxLogStatus(frame,
+                _("Looking for matches for '%s' in the address books..."),
+                what.c_str());
+  }
+
+  wxBusyCursor bc;
+
   if ( AdbLookupForEntriesOrGroups(aEntries, what, lookupMode,
                                    how, NULL, &aGroups ) ) {
     // merge both arrays into one big one: notice that the order is important,
@@ -228,7 +238,7 @@ bool AdbExpand(wxArrayString& results, const String& what,
       }
       else {
         // one entry
-        AdbEntry *entry = aEntries[index - nGroupCount];
+        AdbEntry *entry = (AdbEntry *)aEverything[index];
         results.Add(entry->GetDescription());
 
         if ( frame ) {
