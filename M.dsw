@@ -87,18 +87,6 @@ Package=<4>
 
 ###############################################################################
 
-Project: "python15"=m:\wxWindows\wxWindows\samples\help\Python\PCbuild\python15.dsp - Package Owner=<4>
-
-Package=<5>
-{{{
-}}}
-
-Package=<4>
-{{{
-}}}
-
-###############################################################################
-
 Project: "versit"=.\src\wx\vcard\versit.dsp - Package Owner=<4>
 
 Package=<5>
@@ -111,7 +99,7 @@ Package=<4>
 
 ###############################################################################
 
-Project: "wxWindows"=M:\wxWindows\wxWindows\src\wxWindows.dsp - Package Owner=<4>
+Project: "wxWindows"=L:\wxWindows\src\wxWindows.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
