@@ -270,6 +270,9 @@ public:
    // store the clickable info for this URL (we take ownership of it)
    void StoreClickable(ClickableInfo *ci, const String& url);
 
+   // remove all clickable infos
+   void ClearClickables();
+
    // override some base class virtuals
    virtual void OnSetTitle(const wxString& title);
    virtual void OnLinkClicked(const wxHtmlLinkInfo& link);
@@ -331,12 +334,19 @@ HtmlViewerWindow::HtmlViewerWindow(HtmlViewer *viewer, wxWindow *parent)
 
 HtmlViewerWindow::~HtmlViewerWindow()
 {
-   WX_CLEAR_ARRAY(m_clickables);
+   ClearClickables();
 }
 
 void HtmlViewerWindow::StoreClickable(ClickableInfo *ci, const String& url)
 {
    m_clickables.Insert(ci, m_urls.Add(url));
+}
+
+void HtmlViewerWindow::ClearClickables()
+{
+   WX_CLEAR_ARRAY(m_clickables);
+
+   m_urls.Empty();
 }
 
 ClickableInfo *HtmlViewerWindow::GetClickable(const String& url) const
@@ -448,6 +458,7 @@ void HtmlViewer::Create(MessageView *msgView, wxWindow *parent)
 
 void HtmlViewer::Clear()
 {
+   m_window->ClearClickables();
    m_window->SetPage("");
 
    m_htmlText.clear();
