@@ -503,7 +503,7 @@ static void CloseOrKeepStream(MAILSTREAM *stream,
    }
    else
    {
-      wxLogTrace(TRACE_MF_CALLS, "Closing folder '%s'",
+      wxLogTrace(TRACE_MF_CALLS, "Closing connection to '%s'",
                  folder->GetFullName().c_str());
 
       mail_close(stream);
