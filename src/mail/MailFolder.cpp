@@ -176,6 +176,7 @@ MLogCircle::GuessError(void) const
              Find("unknown user name", &err) ||
              Find("Bad authentication", &err) ||
              Find("Password supplied for", &err) || // ... <email addr> is incorrect
+             Find("Invalid password", &err) ||
              Find("Invalid login", &err) )
    {
       guess = _("Incorrect username or password: "
