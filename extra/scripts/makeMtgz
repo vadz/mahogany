@@ -44,6 +44,10 @@ eval `grep "M_VERSION_M\(AJ\|IN\)OR=" M/makeversion.in`
 
 # and create the approproately named output file
 M_FULLNAME="mahogany-$M_VERSION_MAJOR.$M_VERSION_MINOR"
+
+# remove the stuff not needed in the distribution
+rm M/*.ds[pw] M/M.DSP M/M.MAK M/TODO M/maketags.cmd M/cvsfix
+
 mv M $M_FULLNAME
 OUTPUT_FILE=$OUTPUT_DIR/$M_FULLNAME.tar.gz
 if ! tar cf - $M_FULLNAME --exclude="CVS" | gzip -c9 > $OUTPUT_FILE; then
