@@ -1088,9 +1088,15 @@ wxMessageView::OnMEvent(MEventData& ev)
 
          case MEventOptionsChangeData::Cancel:
             // restore the old values
-            ASSERT_MSG( m_hasOldValues, "cancel without preceding apply?" );
-
-            m_ProfileValues = m_oldProfileValue;
+            if ( m_hasOldValues )
+            {
+               m_ProfileValues = m_oldProfileValue;
+            }
+            else
+            {
+               // don't update
+               return true;
+            }
             break;
 
          default:
