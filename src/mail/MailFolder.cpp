@@ -894,7 +894,7 @@ static void AddDependents(size_t &idx, int level,
          idx++;
          // after adding an element, we need to check if we have to add
          // any of its own dependents:
-         AddDependents(idx, level+1, idxToAdd, indents, indices, hilp, dependents);
+         AddDependents(idx, level+1, idxToAdd, indices, indents, hilp, dependents);
       }
    }
 }
@@ -906,6 +906,8 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
    if((*hilp).Count() <= 1)
       return; // nothing to be done
 
+   STATUSMESSAGE((_("Threading %lu messages..."), (unsigned long) hilp->Count()));
+   
    for(size_t i = 0; i < hilp->Count(); i++)
       (*hilp)[i]->SetIndentation(0);
    
@@ -951,36 +953,17 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
    }
    ASSERT(idx == hilp->Count());
 
-   // now we have all indices and can re-sort the listing
-//#if 0
-   for(size_t i = 0; i < hilp->Count(); i++)
-      cerr << "indices: " << indices[i] << "  indents: " << indents[i] 
-           << "  subjects: " << (*hilp)[indices[i]]->GetSubject() << endl;
-//#endif
+   hilp->SetTranslationTable(indices);
    
-   for(size_t i = 0; i < hilp->Count(); i++)
-   {
-      (*hilp)[i]->SetIndentation(indents[i]);
-   }
-   for(size_t i = 0; i < hilp->Count(); i++)
-   {
-      if(indices[i] != i)
-      {
-         size_t a = indices[i];
-         hilp->Swap(a,i);
-         for(size_t j = 0; j < hilp->Count(); j++)
-         {
-            if(indices[j] == a)
-               indices[j] = i;
-            else if(indices[j] == i)
-               indices[j] = a;
-         }
-      }
-   }
 
-   delete [] indices;
+   for(size_t i = 0; i < hilp->Count(); i++)
+      (*hilp)[i]->SetIndentation(indents[i]);
+
+
+   //delete [] indices; // freed by ~HeaderInfoList()
    delete [] indents;
    delete [] dependents;
+   STATUSMESSAGE((_("Threading %lu messages...done."), (unsigned long) hilp->Count()));
 }
 
 static void SortListing(MailFolder *mf, HeaderInfoList *hil, long SortOrder)

@@ -492,6 +492,11 @@ public:
    virtual HeaderInfo * GetArray(void) = 0;
    /// Swaps two elements:
    virtual void Swap(size_t index1, size_t index2) = 0;
+   /** Sets a translation table re-mapping index values.
+       Will be freed in destructor.
+       @param array an array of indices or NULL to remove it.
+   */
+   virtual void SetTranslationTable(size_t array[] = NULL) = 0;
    MOBJECT_NAME(HeaderInfoList)
 };
 

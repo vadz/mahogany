@@ -420,18 +420,28 @@ public:
    /// Returns the n-th entry.
    virtual const HeaderInfo * operator[](size_t n) const
       {
-         MOcheck(); ASSERT(n < m_NumEntries);
-         if(n >= m_NumEntries)
-            return NULL;
-         else
-            return & m_Listing[n];
+         // simply call non-const operator:
+         return (*(HeaderInfoListCC *)this)[n];
       }
    //@}
    ///@name Implementation
    //@{
    /// Returns the n-th entry.
    virtual HeaderInfo * operator[](size_t n)
-      { MOcheck(); ASSERT(n < m_NumEntries); return & m_Listing[n]; }
+      {
+         MOcheck();
+         ASSERT(n < m_NumEntries);
+         if(n >= m_NumEntries)
+            return NULL;
+         else
+         {
+            if(m_TranslationTable)
+               return & m_Listing[ m_TranslationTable[n] ];
+            else
+               return & m_Listing[n];
+         }
+         return & m_Listing[n];
+      }
    /// Returns pointer to array of data:
    virtual HeaderInfo *GetArray(void) { MOcheck(); return m_Listing; }
 
@@ -460,22 +470,37 @@ public:
          m_Listing[index1] = m_Listing[index2];
          m_Listing[index2] = hicc;
       }
+   /** Sets a translation table re-mapping index values.
+       Will be freed in destructor.
+       @param array an array of indices or NULL to remove it.
+   */
+   virtual void SetTranslationTable(size_t array[] = NULL)
+      {
+         if(m_TranslationTable)
+            delete [] m_TranslationTable;
+         m_TranslationTable = array;
+      }
+
 protected:
    HeaderInfoListCC(size_t n)
       {
          m_Listing = n == 0 ? NULL : new HeaderInfoCC[n];
          m_NumEntries = n;
+         m_TranslationTable = NULL;
       }
    ~HeaderInfoListCC()
       {
          MOcheck();
          if ( m_Listing ) delete [] m_Listing;
+         if ( m_TranslationTable ) delete [] m_TranslationTable;
       }
    /// The current listing of the folder
    class HeaderInfoCC *m_Listing;
    /// number of entries
    size_t              m_NumEntries;
-
+   /// translation of indices
+   size_t *m_TranslationTable;
+   
    MOBJECT_DEBUG(HeaderInfoListCC)
 };
 

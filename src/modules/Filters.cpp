@@ -2038,7 +2038,9 @@ int FilterTest(MInterface *interface, MModule_Filters *that)
                               "{copy(\"Trash\")&message(\"copied message to trash:\", subject());}"
                               "else{message(\"skipped message\");}"
          );
-
+   if( program.Length() == 0)
+      return 1;
+   
    FilterRule * fr = that->GetFilter(program);
 
    String folderName =

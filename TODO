@@ -31,6 +31,7 @@ $Id$
 8	KB	no handler found for this image in html help
 
 8	KB	integrate imap 4.7 and recently received patches
+5	KB	let all message sorting use the translation table
 
 	KB	properties/access shows wrong help
 	KB	properties/custom headers/more shows corrupted title

@@ -277,7 +277,7 @@ wxMFrame::OnMenuCommand(int id)
       filename = MDialog_FileRequester(_("Please select a Python script to run."),
                                        this,
                                        path, filename,
-                                       "py", "*.py?",
+                                       "py", "*.py",
                                        false,
                                        NULL /* profile */);
       if(! strutil_isempty(filename))
@@ -288,10 +288,10 @@ wxMFrame::OnMenuCommand(int id)
             PyH_RunScript(file,filename);
             fclose(file);
          }
-         break;
       }
       //else: cancelled by user
    }
+   break;
 #endif   // USE_PYTHON
 
    case WXMENU_FILE_EXIT:

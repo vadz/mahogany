@@ -782,7 +782,7 @@ wxFolderView::Update(HeaderInfoList *listing)
    for(i = 0; i < n; i++)
    {
       hi = (*listing)[i];
-      subject = wxString('-', hi->GetIndentation());
+      subject = wxString("   ", hi->GetIndentation());
       subject << hi->GetSubject();
       nsize = day = month = year = 0;
       size = strutil_ultoa(nsize);
@@ -817,7 +817,7 @@ wxFolderView::Update(HeaderInfoList *listing)
    wxEndBusyCursor();
    listing->DecRef();
    // the previously focused uid might be gone now:
-   PreviewMessage(m_FolderCtrl->GetFocusedUId());
+   //PreviewMessage(m_FolderCtrl->GetFocusedUId());
    m_UpdateSemaphore = false;
 }
 
