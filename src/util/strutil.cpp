@@ -41,8 +41,7 @@
 
 extern "C"
 {
-   #include "utf8.h"  // for utf8_text_utf7()
-
+   #include "utf8.h"  // for utf8_text_utf7() and arrays below
    // arrays used by GuessUnicodeCharset()
    #include "charset/iso_8859.c"
    #include "charset/windows.c"
@@ -1477,16 +1476,15 @@ extern wxFontEncoding GuessUnicodeCharset(const wchar_t *pwz)
 // UTF-8 support at all
 //
 // FIXME this won't be needed when full Unicode support is available
-wxFontEncoding
-ConvertUTFToMB(wxString *strUtf, wxFontEncoding enc)
+wxFontEncoding ConvertUTFToMB(wxString *strUtf, wxFontEncoding enc)
 {
    CHECK( strUtf, wxFONTENCODING_SYSTEM, _T("NULL string in ConvertUTFToMB") );
 
    if ( !strUtf->empty() )
    {
-      // first convert to UTF-8
       if ( enc == wxFONTENCODING_UTF7 )
       {
+#if !wxCHECK_VERSION(2, 5, 4)
          // wxWindows does not support UTF-7 yet, so we first convert
          // UTF-7 to UTF-8 using c-client function and then convert
          // UTF-8 to current environment's encoding.
@@ -1502,12 +1500,67 @@ ConvertUTFToMB(wxString *strUtf, wxFontEncoding enc)
          {
             *strUtf << wxChar(text8.data[k]);
          }
+
+         return ConvertUTF8ToMB(strUtf);
+#else // wx >= 2.5.4
+
+         // try to determine which multibyte encoding is best suited for this
+         // Unicode string
+         wxWCharBuffer wbuf(strUtf->wc_str(wxConvUTF7));
+         if ( !wbuf )
+         {
+            // invalid UTF-7 data, leave it as is
+            enc = wxFONTENCODING_SYSTEM;
+         }
+         else // try to find a multibyte encoding we can show this in
+         {
+            enc = GuessUnicodeCharset(wbuf);
+
+            // finally convert to multibyte
+            wxString str;
+            if ( enc == wxFONTENCODING_SYSTEM )
+            {
+               str = wxString(wbuf);
+            }
+            else
+            {
+               wxCSConv conv(enc);
+               str = wxString(wbuf, conv);
+            }
+            if ( str.empty() )
+            {
+               // conversion failed - use original text (and display incorrectly,
+               // unfortunately)
+               wxLogDebug(_T("conversion from UTF-7 to default encoding failed"));
+            }
+            else
+            {
+               *strUtf = str;
+            }
+         }
+#endif // 2.5.4
       }
       else
       {
          ASSERT_MSG( enc == wxFONTENCODING_UTF8, _T("unknown Unicode encoding") );
+         return ConvertUTF8ToMB(strUtf);
       }
+   }
+   else // doesn't really matter what we return from here
+   {
+      enc = wxFONTENCODING_SYSTEM;
+   }
 
+   return enc;
+}
+
+wxFontEncoding ConvertUTF8ToMB(wxString *strUtf)
+{
+   wxFontEncoding enc;
+   CHECK( strUtf, wxFONTENCODING_SYSTEM, _T("NULL string in ConvertUTF8ToMB") );
+
+   if ( !strUtf->empty() )
+   {
       // try to determine which multibyte encoding is best suited for this
       // Unicode string
       wxWCharBuffer wbuf(strUtf->wc_str(wxConvUTF8));
@@ -1565,4 +1618,3 @@ size_t IsEndOfLine(const wxChar *p)
 
    return 0;
 }
-

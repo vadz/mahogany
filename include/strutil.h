@@ -341,7 +341,7 @@ extern String strutil_flatten_array(const wxArrayString& array, wxChar ch = _T('
 extern wxArrayString strutil_uniq_array(const wxSortedArrayString& arrSorted);
 
 /**
-  Try to convert text in UTF-8 or 7 to a multibye encoding.
+  Try to convert text in UTF-8 or 7 to a multibyte encoding.
 
   The conversion is done in place, i.e. the str parameter is read and written
   by the function.
@@ -356,8 +356,8 @@ extern wxArrayString strutil_uniq_array(const wxSortedArrayString& arrSorted);
   @param utfEnc specifies if it is in UTF-7 or UTF-8
   @return the encoding of the returned string
  */
-extern wxFontEncoding
-ConvertUTFToMB(wxString *str, wxFontEncoding utfEnc = wxFONTENCODING_UTF8);
+extern wxFontEncoding ConvertUTFToMB(wxString *str, wxFontEncoding utfEnc);
+extern wxFontEncoding ConvertUTF8ToMB(wxString *str);
 
 // return the length of the line terminator if we're at the end of line or 0
 // otherwise
