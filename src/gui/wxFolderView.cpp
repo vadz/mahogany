@@ -100,6 +100,7 @@
 
 extern const MOption MP_AUTOSHOW_FIRSTMESSAGE;
 extern const MOption MP_AUTOSHOW_FIRSTUNREADMESSAGE;
+extern const MOption MP_AUTOSHOW_LASTSELECTED;
 extern const MOption MP_AUTOSHOW_SELECT;
 extern const MOption MP_DATE_FMT;
 extern const MOption MP_DATE_GMT;
@@ -129,6 +130,7 @@ extern const MOption MP_FVIEW_SIZE_FORMAT;
 extern const MOption MP_FVIEW_STATUS_FMT;
 extern const MOption MP_FVIEW_STATUS_UPDATE;
 extern const MOption MP_FVIEW_UNREADCOLOUR;
+extern const MOption MP_LASTSELECTED_MESSAGE;
 extern const MOption MP_MSGS_SORTBY;
 extern const MOption MP_MSGS_USE_THREADING;
 extern const MOption MP_MSGVIEW_SHOWBAR;
@@ -3157,7 +3159,13 @@ unsigned long wxFolderView::GetDeletedCount() const
 
 bool wxFolderView::GoToMessage(MsgnoType msgno)
 {
-   CHECK( msgno < GetHeadersCount(), false, "invalid item in GoToMessage" );
+   if ( msgno >= GetHeadersCount() )
+   {
+      // this can happen if the user has deleted the messages from the folder
+      // after it had been opened for the last time in this session, so don't
+      // complain, just ignore
+      return false;
+   }
 
    m_FolderCtrl->GoToItem(msgno);
 
@@ -3219,15 +3227,25 @@ bool wxFolderView::SelectNextUnread(bool takeNextIfNoUnread)
 void
 wxFolderView::SelectInitialMessage()
 {
-   // select some "interesting" message initially: the logic here is a bit
-   // hairy, but, hopefully, this does what expected.
-   //
-   // explanations: if MP_AUTOSHOW_FIRSTUNREADMESSAGE is off, then we
-   // just select either the first message (if MP_AUTOSHOW_FIRSTMESSAGE) or
-   // the last one (otherwise). If it is on and we have an unread message,
-   // we always select first unread message, but if there are no unread
-   // messages, we revert to the previous behaviour, i.e. select the first
-   // or the last one
+   /*
+    select some "interesting" message initially: the logic here is a bit
+    hairy, but, hopefully, this does what expected.
+   
+    explanations:
+
+    1. if MP_AUTOSHOW_LASTSELECTED is on, we select the message which had
+       been selected last time we had this folder opened
+
+    2. if not, or if there is no last message, we do the following:
+
+       a) if MP_AUTOSHOW_FIRSTUNREADMESSAGE is off, then we just select either
+          the first message (if MP_AUTOSHOW_FIRSTMESSAGE) or the last one
+          (otherwise).
+
+       b) if it is on and we have an unread message, we always select first
+          unread message, but if there are no unread messages, we revert to the
+          previous behaviour, i.e. select the first or the last one
+   */
    size_t numMessages = GetHeadersCount();
    if ( !numMessages )
    {
@@ -3236,7 +3254,22 @@ wxFolderView::SelectInitialMessage()
    }
 
    MsgnoType idx = INDEX_ILLEGAL;
-   if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTUNREADMESSAGE) )
+
+   // (1) step: check last selected
+   if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_LASTSELECTED) )
+   {
+      int last = m_Profile->readEntryFromHere(MP_LASTSELECTED_MESSAGE, -1);
+      if ( last != -1 )
+      {
+         idx = (MsgnoType)last;
+
+         m_FolderCtrl->Focus(idx);
+      }
+   }
+
+   // (2a) step: check first unread
+   if ( idx == INDEX_ILLEGAL &&
+            READ_CONFIG(m_Profile, MP_AUTOSHOW_FIRSTUNREADMESSAGE) )
    {
       // don't waste time looking for unread messages if we already know that
       // there are none (as we often do)
@@ -3258,6 +3291,7 @@ wxFolderView::SelectInitialMessage()
       }
    }
 
+   // (2b) step: take first or last
    if ( idx == INDEX_ILLEGAL )
    {
       // select first unread is off or no unread message, so select the first
@@ -3438,6 +3472,29 @@ wxFolderView::Update()
 void
 wxFolderView::Clear(bool keepTheViewer)
 {
+   // remember the last selected item, if any, and if we use/need it
+   if ( m_Profile )
+   {
+      if ( READ_CONFIG(m_Profile, MP_AUTOSHOW_LASTSELECTED) )
+      {
+         // we could also always directly write GetPreviewedItem() to the
+         // profile as -1 conveniently means that we don't have any old
+         // selection but we prefer to not keep unnecessary junk in the profile
+         long item = m_FolderCtrl->GetFocusedItem();
+         if ( item != -1 )
+         {
+            m_Profile->writeEntry(MP_LASTSELECTED_MESSAGE, item);
+         }
+         else // no selection
+         {
+            if ( m_Profile->HasEntry(MP_LASTSELECTED_MESSAGE) )
+            {
+               m_Profile->DeleteEntry(MP_LASTSELECTED_MESSAGE);
+            }
+         }
+      }
+   }
+
    // really clear the GUI
    m_FolderCtrl->DeleteAllItems();
    if ( m_MessagePreview )

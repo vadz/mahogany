@@ -97,6 +97,8 @@ extern const MOption MP_OPEN_ON_CLICK;
 extern const MOption MP_SHOW_HIDDEN_FOLDERS;
 extern const MOption MP_CREATE_PROFILES;
 extern const MOption MP_UMASK;
+extern const MOption MP_LASTSELECTED_MESSAGE;
+extern const MOption MP_AUTOSHOW_LASTSELECTED;
 extern const MOption MP_AUTOSHOW_FIRSTMESSAGE;
 extern const MOption MP_AUTOSHOW_FIRSTUNREADMESSAGE;
 extern const MOption MP_PREVIEW_ON_SELECT;
@@ -553,6 +555,10 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_CREATE_PROFILES_NAME   "CreateProfileFiles"
 /// umask setting for normal files
 #define   MP_UMASK_NAME               "Umask"
+/// the last selected message in the folder view (or -1)
+#define   MP_LASTSELECTED_MESSAGE_NAME "FViewLastSel"
+/// automatically show th last selected message in folderview?
+#define   MP_AUTOSHOW_LASTSELECTED_NAME "AutoShowLastSel"
 /// automatically show first message in folderview?
 #define   MP_AUTOSHOW_FIRSTMESSAGE_NAME "AutoShowFirstMessage"
 /// automatically show first unread message in folderview?
@@ -1320,6 +1326,10 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_CREATE_PROFILES_DEFVAL   0l
 /// umask setting for normal files
 #define   MP_UMASK_DEFVAL               022
+/// the last selected message in the folder view (or -1)
+#define   MP_LASTSELECTED_MESSAGE_DEFVAL -1
+/// automatically show th last selected message in folderview?
+#define   MP_AUTOSHOW_LASTSELECTED_DEFVAL 1l
 /// automatically show first message in folderview?
 #define   MP_AUTOSHOW_FIRSTMESSAGE_DEFVAL 0l
 /// automatically show first unread message in folderview?

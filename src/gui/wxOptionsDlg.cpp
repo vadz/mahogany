@@ -378,6 +378,7 @@ enum ConfigFields
    // folder view options
    ConfigField_FolderViewFirst = ConfigField_MessageViewLast,
    ConfigField_FolderViewShowHelpText,
+   ConfigField_FolderViewShowLastSel,
    ConfigField_FolderViewShowInitially,
    ConfigField_FolderViewPreviewHelp,
    ConfigField_FolderViewPreviewOnSelect,
@@ -1283,26 +1284,28 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Title of message view frame"),         Field_Text,    -1                     },
 
    // folder view
-   { gettext_noop("What happens when the folder is opened? You may\n"
-                  "specify the message Mahogany will go to below\n"
-                  "(note that if there are no unread messages,\n"
-                  "just the first or last one will be taken)"),
+   { gettext_noop("What happens when the folder is opened? Mahogany may "
+                  "either return\n"
+                  "to the message which had been previously selected or "
+                  "go to the specified one."),
                                                    Field_Message,  -1 },
-   { gettext_noop("&Go to which message initially:First unread:First:Last"),
+   { gettext_noop("Return to the &last selected"), Field_Bool,  -1 },
+   { gettext_noop("&Go to this message:First unread:First:Last"),
                                                    Field_Radio, -1 },
 
-   { gettext_noop("\nWhen the message is selected Mahogany may preview\n"
-                  "it immediately or wait until you double click it\n"
-                  "or press <Return>. In this mode it may be convenient\n"
-                  "to avoid automatically previewing the message\n"
-                  "initially selected when you open the folder - to\n"
-                  "do this just uncheck the option below."),
+   { gettext_noop("\nWhen the message is selected Mahogany may preview "
+                  "it immediately\n"
+                  "or wait until you double click it or press <Return>.\n"
+                  "In this mode it may be convenient to avoid automatically "
+                  "previewing the\n"
+                  "message initially selected when you open the folder "
+                  "as well."),
                                                    Field_Message,    -1 },
    { gettext_noop("Preview message when &selected"), Field_Bool,  -1 },
    { gettext_noop("&Select the initial message"),    Field_Bool,  ConfigField_FolderViewPreviewOnSelect },
 
-   { gettext_noop("What happens message when you try to scroll down beyond\n"
-                  "the end of the current message in the current folder?\n"
+   { gettext_noop("\nWhat happens when you scroll down beyond "
+                  "the end of the current message?\n"
                   "Mahogany may automatically select..."),
                                                    Field_Message, -1},
    { gettext_noop("    next unread &message"),     Field_Bool,    -1},
@@ -1764,6 +1767,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 
    // folder view
    CONFIG_NONE(),
+   CONFIG_ENTRY(MP_AUTOSHOW_LASTSELECTED),
    CONFIG_NONE(), // MP_AUTOSHOW_XXX radio
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_PREVIEW_ON_SELECT),
