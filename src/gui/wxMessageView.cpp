@@ -1085,6 +1085,8 @@ wxMessageView::Update(void)
             ci = new ClickableInfo(i, label);
             obj->SetUserData(ci); // gets freed by list
             ci->DecRef();
+            llist->LineBreak(); //add a line break before each attachment
+	    //multiple images look better alligned vertically rather than horizontally
             llist->Insert(obj);
             // add extra whitespace so lines with multiple icons can
             // be broken:
