@@ -667,16 +667,20 @@ static wxArrayString BuildListOfModulesDirs()
 {
    wxArrayString dirs;
 
-   // make it possible to use modules without installing them in debug builds
-#if defined(DEBUG) && defined(OS_UNIX)
-   dirs.Add("./modules/");
-   dirs.Add("./adb/");
-#endif // DEBUG
+   // make it possible to use modules without installing them
+#ifdef M_TOP_BUILDDIR
+   wxString path0;
+   path0 << M_TOP_BUILDDIR
+         << DIR_SEPARATOR << "src"
+         << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
+   dirs.Add(path0);
+#endif // Unix
 
    // look under extra M_CANONICAL_HOST directory under Unix, but not for other
    // platforms (doesn't make much sense under Windows)
 
-   wxString path1; path1 << mApplication->GetGlobalDir()
+   wxString path1;
+   path1 << mApplication->GetGlobalDir()
 #ifdef OS_UNIX
          << DIR_SEPARATOR << M_CANONICAL_HOST
 #endif // Unix
@@ -684,7 +688,8 @@ static wxArrayString BuildListOfModulesDirs()
 
    dirs.Add(path1);
 
-   wxString path2; path2 << mApplication->GetLocalDir()
+   wxString path2;
+   path2 << mApplication->GetLocalDir()
 #ifdef OS_UNIX
          << DIR_SEPARATOR << M_CANONICAL_HOST
 #endif // Unix
@@ -695,13 +700,6 @@ static wxArrayString BuildListOfModulesDirs()
    {
       dirs.Add(path2);
    }
-
-#ifdef OS_UNIX
-   // under Windows this would be the same as (1)
-   path1 << mApplication->GetLocalDir()
-         << DIR_SEPARATOR << "modules" << DIR_SEPARATOR;
-   dirs.Add(path1);
-#endif // Unix
 
    return dirs;
 }

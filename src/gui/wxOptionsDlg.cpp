@@ -2290,7 +2290,7 @@ wxOptionsPageSync::wxOptionsPageSync(wxNotebook *parent,
                                          profile,
                                          ConfigField_SyncFirst,
                                          ConfigField_SyncLast,
-                                         MH_OPAGE_OTHERS)
+                                         MH_OPAGE_SYNC)
 {
    m_SyncRemote = -1;
 }

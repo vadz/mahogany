@@ -373,7 +373,7 @@ static inline long Style(long style)
 static void ReallyCloseTopLevelWindow(wxFrame *frame)
 {
    frame->Hide(); // immediately
-   frame->Close(); // will happen later
+   frame->Close(true /* force */); // will happen later
 
 #if !wxCHECK_VERSION(2, 3, 0)
    // unset the given frame as the main app window: otherwise we risk to create
@@ -891,8 +891,11 @@ public:
   // close the about frame
   void DoClose()
   {
-     if(GetParent()) GetParent()->Close(true);
      StopTimer();
+
+     wxWindow *parent = GetParent();
+     if ( parent )
+        parent->Close();
   }
 
 private:
@@ -919,15 +922,22 @@ public:
 #endif // USE_SPLASH_LOG
    }
 
-   void Close(void)
+   void OnClose(wxCloseEvent& event)
    {
       m_Window->StopTimer();
-      wxWindow::Close();
+
+      event.Skip();
    }
 
 private:
    wxAboutWindow *m_Window;
+
+   DECLARE_EVENT_TABLE()
 };
+
+BEGIN_EVENT_TABLE(wxAboutFrame, wxFrame)
+   EVT_CLOSE(wxAboutFrame::OnClose)
+END_EVENT_TABLE()
 
 class MyHtmlWindow : public wxHtmlWindow
 {

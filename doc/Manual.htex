@@ -1660,7 +1660,7 @@ here.
 Please refer to the section below for a detailed explanation.
 \end{itemize}
 
-\subsection{Remote configuration synchronisation}
+\subsection{Remote configuration synchronisation\_4109\_}
 
 Mahogany can automatically save a subset of its configuration settings
 in a mailbox at program exit and automatically retrieve that information
