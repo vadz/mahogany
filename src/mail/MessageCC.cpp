@@ -264,11 +264,10 @@ MessageCC::GetNewsgroups(void) const
    }
    else
    {
-      if ( !m_Envelope->ngbogus )
+      if ( !m_Envelope->newsgroups )
       {
          newsgroups = wxConvertMB2WX(m_Envelope->newsgroups);
       }
-      //else: what does ngbogus really mean??
    }
 
    return newsgroups;

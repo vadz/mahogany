@@ -4113,10 +4113,10 @@ static bool MailStreamHasThreader(MAILSTREAM *stream, const char *thrName)
 {
    CHECK( stream, false, _T("MailStreamHasThreader: folder is closed") );
 
-   IMAPLOCAL *imapLocal = (IMAPLOCAL *)stream->local;
+   IMAPCAP *imapCap = imap_cap(stream);
 
    THREADER *thr;
-   for ( thr = imapLocal->cap.threader;
+   for ( thr = imapCap->threader;
          thr && compare_cstring(thr->name, (char *)thrName);
          thr = thr->next )
       ;
@@ -4168,10 +4168,10 @@ bool MailFolderCC::ThreadMessages(const ThreadParams& thrParams,
                // well, it does have to support something if it announced
                // threading support in its CAPABILITY reply, so just use the
                // first threading method available
-               IMAPLOCAL *imapLocal = (IMAPLOCAL *)m_MailStream->local;
-               if ( imapLocal->cap.threader )
+               IMAPCAP *imapCap = imap_cap(m_MailStream);
+               if ( imapCap->threader )
                {
-                  threadingAlgo = imapLocal->cap.threader->name;
+                  threadingAlgo = imapCap->threader->name;
                }
             }
          }

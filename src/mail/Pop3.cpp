@@ -28,9 +28,8 @@
 
 extern "C"
 {
-   #undef LOCAL         // previously defined in other cclient headers
-   #include <pop3.h>    // for pop3_xxx() functions
-   #undef LOCAL         // prevent clashes with other headers
+   long pop3_send (MAILSTREAM *stream,char *command,char *args);
+   NETSTREAM *pop3_getnetstream(MAILSTREAM *stream);
 }
 
 #include <wx/textfile.h>
@@ -231,7 +230,7 @@ static bool Pop3_GetUIDLs(MAILSTREAM *stream, wxArrayString& uidls)
    String uidl;
    uidls.Alloc(stream->nmsgs);
 
-   NETSTREAM *netstream = ((POP3LOCAL *)stream->local)->netstream;
+   NETSTREAM *netstream = pop3_getnetstream(stream);
    for ( ;; )
    {
       char *s = net_getline(netstream);
