@@ -2680,6 +2680,26 @@ bool MailFolderCC::CheckStatus(const MFolder *folder)
 {
    CHECK( folder, false, "MailFolderCC::CheckStatus(): NULL folder" );
 
+   // doing mail_status() for POP3 is a bad idea for several reasons:
+   //
+   // 1. first, our code in LookupObject() asserts because c-client allocs
+   //    a temp stream for POP3 folder and sends us mm_notify() when it closes
+   //    it and we panic
+   //
+   // 2. second, mail_status() thinks all messages on the POP3 server are
+   //    always unread while we know better because we cache their status
+   //
+   // 3. it's not more efficient to do mail_status() than mail_open() in this
+   //    case because this is what mail_status() does anyhow
+   if ( folder->GetType() == MF_POP )
+   {
+      MailFolder *mf = MailFolder::OpenFolder(folder);
+      bool ok = mf != NULL;
+      mf->DecRef();
+
+      return ok;
+   }
+
    // remember the old status of the folder
    MfStatusCache *mfStatusCache = MfStatusCache::Get();
    MailFolderStatus status;
