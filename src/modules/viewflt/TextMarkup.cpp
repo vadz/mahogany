@@ -62,7 +62,15 @@ IMPLEMENT_VIEWER_FILTER(TextMarkupFilter,
                         _("Trivial Markup"),
                         "(c) 2002 Vadim Zeitlin <vadim@wxwindows.org>");
 
-// render all the words surrounded by asterisks/underscores in bold/italic font
+/*
+   render all the words surrounded by asterisks/underscores in bold/italic font
+
+   this is not as simple as it seems, however, because these characters may be
+   used not for markup purposes in the text and we try hard to avoid any false
+   positives while, OTOH, we want to highlight _stuff_like_this_ entirely
+   italicized.
+ */
+
 void
 TextMarkupFilter::DoProcess(String& text,
                             MessageViewer *viewer,
@@ -80,6 +88,10 @@ TextMarkupFilter::DoProcess(String& text,
 
    // are we at the start of a new word?
    bool atWordStart = true;
+
+   // is the markup currently in progress continuation of the previous one,
+   // i.e. second or more highlighted word in a row?
+   bool isContinuation;
 
    String textNormal,
           textSpecial;
@@ -102,8 +114,9 @@ TextMarkupFilter::DoProcess(String& text,
                   m_next->Process(textNormal, viewer, style);
                   textNormal.clear();
 
-                  // change state
+                  // change state and reset the associated info
                   chLastSpecial = *pc;
+                  isContinuation = false;
                   state = chLastSpecial == _T('*') ? Bold : Italic;
                }
                else // no, it's in the middle of the word
@@ -114,11 +127,15 @@ TextMarkupFilter::DoProcess(String& text,
             }
             else // ending markup tag?
             {
-               if ( *pc != chLastSpecial )
+               // should we highlight what we've got so far?
+               if ( *pc != chLastSpecial || textSpecial.empty() )
                {
-                  // markup mismatch -- consider there was no intention to use
-                  // the last special character for markup at all
+                  // markup mismatch or nothing between 2 delimiters --
+                  // consider there was no intention to use the last special
+                  // character for markup at all
                   textNormal = chLastSpecial + textSpecial + *pc;
+
+                  state = Normal;
                }
                else // matching tag
                {
@@ -131,13 +148,32 @@ TextMarkupFilter::DoProcess(String& text,
                   else // italic
                      font.SetStyle(wxFONTSTYLE_ITALIC);
 
+                  if ( isContinuation )
+                  {
+                     // we should insert a space to separate the continuation
+                     // word from the previous one
+                     textSpecial.replace(0, 0, _T(" "));
+                  }
+
                   style.SetFont(font);
                   m_next->Process(textSpecial, viewer, style);
                   style.SetFont(fontOld);
+
+                  // to handle _the_multi_word_examples_ we suppose that the
+                  // markup may continue after the "end" symbol if the next one
+                  // is not a space
+                  if ( pc[1] != _T('\0') && !wxIsspace(pc[1]) )
+                  {
+                     // maybe continuation, to be precise
+                     isContinuation = true;
+                  }
+                  else // surely end of markup
+                  {
+                     state = Normal;
+                  }
                }
 
                textSpecial.clear();
-               state = Normal;
             }
             break;
 
