@@ -762,7 +762,8 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       proceed in the usual fashion. This allows the use of a special
       image/tiff-g3 mailcap entry. */
    if ( READ_CONFIG(m_Profile,MP_INCFAX_SUPPORT) &&
-        wxMimeTypesManager::IsOfType(mimetype, "IMAGE/TIFF") )
+        (wxMimeTypesManager::IsOfType(mimetype, "IMAGE/TIFF")
+         || wxMimeTypesManager::IsOfType(mimetype, "APPLICATION/OCTET-STREAM")))
    {
       kbStringList faxdomains;
       char *faxlisting = strutil_strdup(READ_CONFIG(m_Profile,
