@@ -181,7 +181,10 @@ public:
    void SetListing(HeaderInfoList *listing);
 
    // get the number of items we show
-   size_t GetHeadersCount() const { return m_Listing ? m_Listing->Count() : 0; }
+   size_t GetHeadersCount() const { return m_headers ? m_headers->Count() : 0; }
+
+   // invlaidate the cached header(s)
+   void InvalidateCache();
 
    // create the columns using order in m_columns and widths from profile
    void CreateColumns();
@@ -225,7 +228,7 @@ public:
       CHECK( (size_t)item < GetHeadersCount(), UID_ILLEGAL,
              "invalid listctrl index" );
 
-      return m_Listing->GetItem((size_t)item)->GetUId();
+      return m_headers->GetItem((size_t)item)->GetUId();
    }
 
    /// get the UID and, optionally, the index of the focused item
@@ -325,13 +328,16 @@ protected:
    HeaderInfo *GetHeaderInfo(size_t index) const;
 
    /// the listing to use
-   HeaderInfoList *m_Listing;
+   HeaderInfoList *m_headers;
 
    /// cached header info (used by OnGetItemXXX())
-   HeaderInfo *m_hi;
+   HeaderInfo *m_hiCached;
 
-   // the index of m_hi in m_Listing (or -1 if not cached)
+   /// the index of m_hiCached in m_headers (or -1 if not cached)
    size_t m_indexHI;
+
+   /// the last headers list modification "date"
+   HeaderInfoList::LastMod m_cacheLastMod;
 
    // TODO: we should have the standard attributes for each of the possible
    //       message states/colours (new/recent/unread/flagged/deleted) and
@@ -702,10 +708,9 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_Parent = parent;
    m_profile = fv->GetProfile();
 
-   m_Listing = NULL;
-   m_hi = NULL;
-   m_indexHI = (size_t)-1;
+   m_headers = NULL;
    m_attr = NULL;
+   InvalidateCache();
 
    m_PreviewOnSingleClick = false;
 
@@ -755,7 +760,7 @@ wxFolderListCtrl::~wxFolderListCtrl()
 {
    SaveColWidths();
 
-   SafeDecRef(m_Listing);
+   SafeDecRef(m_headers);
 
    delete m_attr;
 
@@ -1351,37 +1356,53 @@ void wxFolderListCtrl::OnIdle(wxIdleEvent& event)
 // header info
 // ----------------------------------------------------------------------------
 
+void wxFolderListCtrl::InvalidateCache()
+{
+   m_indexHI = (size_t)-1;
+   m_hiCached = NULL;
+}
+
 void wxFolderListCtrl::SetListing(HeaderInfoList *listing)
 {
-   if ( m_Listing )
-   {
-      m_Listing->DecRef();
+   CHECK_RET( listing, "NULL listing in wxFolderListCtrl" );
 
-      m_indexHI = (size_t)-1;
-      m_hi = NULL;
+   m_cacheLastMod = listing->GetLastMod();
+
+   if ( m_headers )
+   {
+      m_headers->DecRef();
+
+      InvalidateCache();
    }
 
-   m_Listing = listing;
+   m_headers = listing;
 
    SetItemCount(GetHeadersCount());
 
    // we'll crash if we use it after the listing changed!
-   ASSERT_MSG( !m_hi, "should be reset" );
+   ASSERT_MSG( !m_hiCached, "should be reset" );
 }
 
 HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
 {
+   CHECK( m_headers, NULL, "no listing hence no header info" );
+
+   wxFolderListCtrl *self = wxConstCast(this, wxFolderListCtrl);
+
+   if ( m_headers->HasChanged(m_cacheLastMod) )
+   {
+      self->m_cacheLastMod = m_headers->GetLastMod();
+
+      self->InvalidateCache();
+   }
+
    if ( m_indexHI != index )
    {
-      CHECK( m_Listing, NULL, "no listing hence no header info" );
-
-      wxFolderListCtrl *self = wxConstCast(this, wxFolderListCtrl);
-
-      self->m_hi = m_Listing->GetItem(index);
+      self->m_hiCached = m_headers->GetItem(index);
       self->m_indexHI = index;
    }
 
-   return m_hi;
+   return m_hiCached;
 }
 
 // ----------------------------------------------------------------------------
@@ -1610,7 +1631,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
       return text;
    }
 
-   // this does happen because the number of messages in m_Listing is
+   // this does happen because the number of messages in m_headers is
    // decremented first and our OnFolderExpungeEvent() is called much later
    // (during idle time), so we have no choice but to ignore the requests for
    // non existing items
@@ -1677,7 +1698,7 @@ wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
 
       case WXFLC_SUBJECT:
          // FIXME: hard coded 3 spaces
-         text = wxString(' ', 3*m_Listing->GetIndentation((size_t)item))
+         text = wxString(' ', 3*m_headers->GetIndentation((size_t)item))
                   + hi->GetSubject();
          break;
 

@@ -110,6 +110,10 @@ HeaderInfoListImpl::HeaderInfoListImpl(MailFolder *mf)
    // so prevent us from using invalid mf pointer) when it is being deleted
    m_mf = mf;
 
+   // the last modification counter: we're going to increase it each time we
+   // invalidate the pointers in m_headers
+   m_lastMod = 0;
+
    m_count = (size_t)mf->GetMessageCount();
    m_headers.Alloc(m_count);
 }
@@ -120,6 +124,8 @@ void HeaderInfoListImpl::CleanUp()
    //       over the entire array just to call delete for many NULL pointers?
 
    WX_CLEAR_ARRAY(m_headers);
+
+   m_lastMod++;
 }
 
 HeaderInfoListImpl::~HeaderInfoListImpl()
@@ -151,9 +157,19 @@ HeaderInfo *HeaderInfoListImpl::GetItemByIndex(size_t n) const
       // it up to n with NULLs
       //
       // TODO: add SetCount() to wxArray instead
-      for ( size_t count = m_headers.GetCount(); count <= n; count++ )
+      size_t count = m_headers.GetCount();
+      if ( count <= n )
       {
-         ((HeaderInfoListImpl *)this)->m_headers.Add(NULL); // const_cast
+         HeaderInfoListImpl *self = (HeaderInfoListImpl *)this; // const_cast
+
+         // adding elements to array may need realloc()ing and invalidate the
+         // pointers
+         self->m_lastMod++;
+
+         while ( count++ <= n )
+         {
+            self->m_headers.Add(NULL);
+         }
       }
 
       // alloc space for new header
@@ -208,8 +224,14 @@ void HeaderInfoListImpl::OnRemove(size_t n)
    {
       delete m_headers[n];
       m_headers.RemoveAt(n);
+
+      // the indices are shifted (and one is even removed completely)
+      m_lastMod++;
    }
    //else: we have never looked that far
+
+   // update the count anyhow
+   m_count--;
 }
 
 void HeaderInfoListImpl::OnAdd(size_t countNew)
@@ -318,6 +340,20 @@ HeaderInfoListImpl::GetAllHeadersByFlag(MailFolder::MessageStatus flag,
                                         bool set)
 {
    return m_mf->SearchByFlag(flag, set);
+}
+
+// ----------------------------------------------------------------------------
+// HeaderInfoListImpl last modification "date" handling
+// ----------------------------------------------------------------------------
+
+HeaderInfoList::LastMod HeaderInfoListImpl::GetLastMod() const
+{
+   return m_lastMod;
+}
+
+bool HeaderInfoListImpl::HasChanged(const HeaderInfoList::LastMod since) const
+{
+   return m_lastMod > since;
 }
 
 // ----------------------------------------------------------------------------

@@ -284,21 +284,49 @@ public:
 
    //@}
 
-   // currently unused
-#if 0
    /** @name Cache control
-
-       HintCache() is supposed to be called by GUI while IsInCache() is for
-       MailFolder usage
     */
    //@{
-   /// Prepare to access the items in this range of positions (NOT indices!)
+   /// opaque typedef used by GetLastMod() and HasChanged()
+   typedef unsigned long LastMod;
+
+   /**
+      The outside code may want to store pointers returned by GetItemByIndex()
+      and other methods. But these pointers are invalidated each time the
+      messages are added/removed to/from the listing so they may need to be
+      updated. Using GetLastMod() and HasChanged() allows to check for this.
+
+      The value returned by this function is opaque and shouldn't be used for
+      anything but passing it to HasChanged() later. The only other operation
+      with it is comparing it with 0 which will always be false.
+
+      @return the opaque value which can be later passed to HasChanged()
+    */
+   virtual LastMod GetLastMod() const = 0;
+
+   /**
+      Return true if the pointers were invalidated since the moment recorded
+      in since.
+
+      @param since an opaque value previously returned by GetLastMod()
+      @return true if the listing changed
+    */
+   virtual bool HasChanged(const LastMod since) const = 0;
+
+   // currently unused
+#if 0
+   /**
+      Prepare to access the items in this range of positions (NOT indices!)
+
+      This is supposed to be called from GUI code when it thinks that it is
+      going to need these indices soon.
+    */
    virtual void HintCache(size_t posFrom, size_t posTo) = 0;
 
    /// Is the item with this msgno already cached?
    virtual bool IsInCache(MsgnoType msgno) const = 0;
-   //@}
 #endif // 0
+   //@}
 
    MOBJECT_NAME(HeaderInfoList)
 };

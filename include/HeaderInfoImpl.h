@@ -79,6 +79,9 @@ public:
    virtual MsgnoArray *GetAllHeadersByFlag(MailFolder::MessageStatus flag,
                                            bool set);
 
+   virtual LastMod GetLastMod() const;
+   virtual bool HasChanged(const LastMod since) const;
+
    virtual ~HeaderInfoListImpl();
 
 private:
@@ -107,6 +110,8 @@ private:
    /// the number of messages in the folder
    size_t m_count;
 
+   /// last modification "date"
+   LastMod m_lastMod;
 
    // let it create us
    friend HeaderInfoList *HeaderInfoList::Create(MailFolder *mf);
