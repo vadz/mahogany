@@ -1272,8 +1272,6 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
       //     otherwise entering a character into "Folder name" field and
       //     erasing it wouldn't restore the original "Path" value
       wxString folderName;
-      if ( parent )
-         folderName = parent->GetPath();
 
       // the control whose value we will automatically set
       wxTextCtrl *textToSet = NULL;
@@ -1283,7 +1281,9 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
       {
          case MF_MH:
             // MH folder should be created under its parent by default
-            //
+            if ( parent )
+               folderName = parent->GetPath();
+
             // AfterFirst() removes the MH root prefix
             folderName = folderName.AfterFirst('/');
 
@@ -1305,6 +1305,9 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
          case MF_IMAP:
             if ( !textToSet )
                textToSet = m_mailboxname;
+
+            if ( parent )
+               folderName = parent->GetPath();
 
             if ( !folderName.empty() )
             {
@@ -1358,12 +1361,17 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
 
       folderName += dlg->GetFolderName();
 
+      // leave the relative path, it will be normalized when we open the folder
+      // anyhow and like this we don't have to change the paths of all the
+      // folders if we want to change the folder directory
+#if 0
       if ( folderType == MF_MH || folderType == MF_FILE )
       {
          // strutil_expandfoldername() will normalize the path, i.e. make it
          // absolute prepending the correct prefix depending on the folder type
          folderName = strutil_expandfoldername(folderName, folderType);
       }
+#endif // 0
 
       // this will tell SetValue() that we modified it ourselves, not the user
       m_userModifiedPath = -1;
