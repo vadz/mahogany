@@ -139,6 +139,7 @@ public:
    }
 
    virtual String GetServer() const { return m_server; }
+   virtual void SetServer(const String& server) { m_server = server; }
 
    virtual String GetLogin() const { return m_login; }
    virtual String GetPassword() const { return m_password; }
@@ -242,6 +243,7 @@ public:
    virtual String GetPath() const;
    virtual void SetPath(const String& path);
    virtual String GetServer() const;
+   virtual void SetServer(const String& server);
    virtual String GetLogin() const;
    virtual String GetPassword() const;
    virtual void SetAuthInfo(const String& login, const String& password);
@@ -719,6 +721,12 @@ String MFolderFromProfile::GetServer() const
    }
 
    return server;
+}
+
+void MFolderFromProfile::SetServer(const String& server)
+{
+   // it's not used now...
+   FAIL_MSG( "not implemented" );
 }
 
 String MFolderFromProfile::GetLogin() const

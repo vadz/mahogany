@@ -145,6 +145,9 @@ public:
       /// get the server for the folder:
    virtual String GetServer() const = 0;
 
+      /// set the server for the folder
+   virtual void SetServer(const String& server) = 0;
+
       /// get the login for the folder:
    virtual String GetLogin() const = 0;
 
@@ -321,6 +324,17 @@ public:
    // implicit conversion to the real pointer (dangerous, but necessary for
    // backwards compatibility)
    operator MFolder *() const { return m_folder; }
+
+   // get the pointer we store
+   MFolder *Get() const { return m_folder; }
+
+   // replace the pointer we store with another one, taking ownership of it
+   void Set(MFolder *folder)
+   {
+      SafeDecRef(m_folder);
+
+      m_folder = folder;
+   }
 
    // explicitly test if object is valid
    bool IsOk() const { return m_folder != NULL; }
