@@ -620,19 +620,28 @@ String FormatFolderStatusString(const String& format,
                result += name;
                break;
 
-            case 't':
+            case 'i':               // flagged == important
+               result += strutil_ultoa(stat->flagged);
+               break;
+
+
+            case 't':               // total
                result += strutil_ultoa(stat->total);
                break;
 
-            case 'r':
+            case 'r':               // recent
                result += strutil_ultoa(stat->recent);
                break;
 
-            case 'n':
+            case 'n':               // new
                result += strutil_ultoa(stat->newmsgs);
                break;
 
-            case 'u':
+            case 's':               // search result
+               result += strutil_ultoa(stat->searched);
+               break;
+
+            case 'u':               // unseen
                result += strutil_ultoa(stat->unseen);
                break;
 

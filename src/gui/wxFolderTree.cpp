@@ -127,6 +127,7 @@ public:
       Folder_Normal,       // normal state
       Folder_Unseen,       // folder has unread/unseen messages
       Folder_New,          // folder has new messages
+      Folder_Flagged,      // folder has flagged messages
       Folder_StatusMax
    };
 
@@ -191,13 +192,22 @@ private:
 
    wxFolderTreeNode *m_parent;   // the parent node (may be NULL)
 
+   // function for changing the m_nXXX fiedls below
+   void Dec(size_t& n)
+   {
+      wxCHECK_RET( n > 0, "logic error in folder status change code" );
+
+      n--;
+   }
+
    // status info: our current status, our real own status (i.e. corresponding
    // to the messages in this folder) and the number of children with
    // new/unseen messages we have
    Status m_status,
           m_statusOwn;
    size_t m_nNewChildren,
-          m_nUnseenChildren;
+          m_nUnseenChildren,
+          m_nFlaggedChildren;
 
    bool m_wasExpanded;
 };
@@ -853,7 +863,8 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    m_statusOwn = Folder_Normal;
 
    m_nNewChildren =
-   m_nUnseenChildren = 0;
+   m_nUnseenChildren =
+   m_nFlaggedChildren = 0;
 
    int image = GetFolderIconForDisplay(folder);
 
@@ -880,9 +891,16 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
 
 wxFolderTreeNode::Status wxFolderTreeNode::GetChildrenStatus() const
 {
-   return m_nNewChildren ? Folder_New
-                         : m_nUnseenChildren ? Folder_Unseen
-                                             : Folder_Normal;
+   if ( m_nNewChildren )
+      return Folder_New;
+
+   if ( m_nUnseenChildren )
+      return Folder_Unseen;
+
+   if ( m_nFlaggedChildren )
+      return Folder_Flagged;
+
+   return Folder_Normal;
 }
 
 void wxFolderTreeNode::OnChildStatusChange(wxTreeCtrl *tree,
@@ -894,28 +912,50 @@ void wxFolderTreeNode::OnChildStatusChange(wxTreeCtrl *tree,
       return;
    }
 
-   if ( statusOld == Folder_Normal )
+   // first account for the fact that the child lost its special status
+   switch ( statusOld )
    {
-      // one of our children got new mail
-      if ( statusNew == Folder_New )
-         m_nNewChildren++;
-      else
-         m_nUnseenChildren++;
+      case Folder_New:
+         Dec(m_nNewChildren);
+         break;
+
+      case Folder_Unseen:
+         Dec(m_nUnseenChildren);
+         break;
+
+      case Folder_Flagged:
+         Dec(m_nFlaggedChildren);
+         break;
+
+      default:
+         FAIL_MSG("unexpected folder status in OnChildStatusChange");
+
+      case Folder_Normal:
+         // nothing to do
+         ;
    }
-   else // a child lost its new/unseen status
+
+   // then remember that one of our children got some special status
+   switch ( statusNew )
    {
-      if ( statusOld == Folder_New )
-      {
-         wxASSERT_MSG( m_nNewChildren > 0, "error in status change logic" );
+      case Folder_New:
+         m_nNewChildren++;
+         break;
 
-         m_nNewChildren--;
-      }
-      else
-      {
-         wxASSERT_MSG( m_nUnseenChildren > 0, "error in status change logic" );
+      case Folder_Unseen:
+         m_nUnseenChildren++;
+         break;
 
-         m_nUnseenChildren--;
-      }
+      case Folder_Flagged:
+         m_nFlaggedChildren++;
+         break;
+
+      default:
+         FAIL_MSG("unexpected folder status in OnChildStatusChange");
+
+      case Folder_Normal:
+         // nothing to do
+         ;
    }
 
    // update our own status
@@ -942,6 +982,7 @@ void wxFolderTreeNode::SetStatus(wxTreeCtrl *tree, Status status)
          MP_FVIEW_FGCOLOUR,
          MP_FVIEW_UNREADCOLOUR,
          MP_FVIEW_NEWCOLOUR,
+         MP_FVIEW_FLAGGEDCOLOUR,
       };
 
       static const char *colorDefaults[Folder_StatusMax] =
@@ -949,6 +990,7 @@ void wxFolderTreeNode::SetStatus(wxTreeCtrl *tree, Status status)
          MP_FVIEW_FGCOLOUR_D,
          MP_FVIEW_UNREADCOLOUR_D,
          MP_FVIEW_NEWCOLOUR_D,
+         MP_FVIEW_FLAGGEDCOLOUR_D,
       };
 
       wxString colorName = mApplication->GetProfile()
@@ -1768,7 +1810,11 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(MailFolder *folder)
    {
       status = wxFolderTreeNode::Folder_Unseen;
    }
-   else // no unseen, no new
+   else if ( mfStatus.flagged > 0 )
+   {
+      status = wxFolderTreeNode::Folder_Flagged;
+   }
+   else // no unseen, no new, no flagged
    {
       status = wxFolderTreeNode::Folder_Normal;
    }

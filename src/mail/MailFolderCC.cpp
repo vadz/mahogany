@@ -2069,10 +2069,11 @@ bool MailFolderCC::CountInterestingMessages(MailFolderStatus *status) const
    {
       int stat = hil->GetItemByIndex(idx)->GetStatus();
 
-      // ignore deleted messages (FIXME should we?)
+      // ignore deleted messages
       if ( stat & MSG_STAT_DELETED )
          continue;
 
+      // deal with recent and new (== recent and !seen)
       int isRecent = stat & MSG_STAT_RECENT ? 1 : 0;
       if ( !(stat & MSG_STAT_SEEN) )
       {
@@ -2083,12 +2084,23 @@ bool MailFolderCC::CountInterestingMessages(MailFolderStatus *status) const
       }
 
       status->recent += isRecent;
+
+      // and also count flagged and searched messages
+      if ( stat & MSG_STAT_FLAGGED )
+         status->flagged++;
+
+      if ( stat & MSG_STAT_SEARCHED )
+         status->searched++;
    }
 
    // cache the number of recent messages
    ((MailFolderCC *)this)->m_nRecent = status->recent;
 
-   return status->newmsgs || status->recent || status->unseen;
+   return status->newmsgs ||
+          status->recent ||
+          status->unseen ||
+          status->flagged ||
+          status->searched;
 }
 
 // ----------------------------------------------------------------------------

@@ -177,9 +177,22 @@ bool AdbExpand(wxArrayString& results, const String& what,
       aEverything.Add(aGroups[n]);
     }
 
+    wxArrayString emails;
+    wxString email;
     size_t nEntryCount = aEntries.GetCount();
     for ( n = 0; n < nEntryCount; n++ ) {
-      aEverything.Add(aEntries[n]);
+      AdbEntry *entry = aEntries[n];
+
+      entry->GetField(AdbField_EMail, &email);
+      if ( emails.Index(email) == wxNOT_FOUND ) {
+        emails.Add(email);
+        aEverything.Add(entry);
+      }
+      else { // don't propose duplicate entries
+        // need to free it here as it won't be freed with all other entries
+        // from aEverything below
+        entry->DecRef();
+      }
     }
 
     // let the user choose the one he wants

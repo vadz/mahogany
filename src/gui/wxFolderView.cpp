@@ -2099,9 +2099,16 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
          DeleteOrTrashMessages(selections);
          break;
 
+      case WXMENU_MSG_FLAG:
+         GetSelections(selections);
+         ToggleMessages(selections);
+         break;
+
+#if 0
       case WXMENU_MSG_DELDUPLICATES:
          m_TicketList->Add(m_ASMailFolder->DeleteDuplicates(this));
          break;
+#endif // 0
 
       case WXMENU_MSG_NEXT_UNREAD:
          m_FolderCtrl->SelectNextUnread();
@@ -2376,7 +2383,7 @@ wxFolderView::ToggleMessages(const UIdArray& messages)
 
       // find the corresponding entry in the listing
       // is the message currently flagged?
-      bool flagged = (hil->GetItem(idx)->GetStatus() &
+      bool flagged = (hil->GetItemByIndex(idx)->GetStatus() &
                        MailFolder::MSG_STAT_FLAGGED) != 0;
 
       // invert the flag

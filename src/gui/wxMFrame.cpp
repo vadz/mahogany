@@ -80,7 +80,9 @@ END_EVENT_TABLE()
 bool wxMFrame::RestorePosition(const char *name,
                                int *x, int *y, int *w, int *h, bool *i)
 {
-   wxCHECK( x && y && w && h, FALSE ); // no NULL pointers please
+   // only i can be NULL
+   CHECK( x && y && w && h, FALSE,
+          "NULL pointer in wxMFrame::RestorePosition" );
 
    wxConfigBase *pConf = mApplication->GetProfile()->GetConfig();
    if ( pConf != NULL )
@@ -98,12 +100,14 @@ bool wxMFrame::RestorePosition(const char *name,
    }
    else
    {
-      wxLogDebug("Can't restore position/size of window '%s'.", name);
+      // it's ok if it's done the first time
       *x = MP_XPOS_D;
       *y = MP_YPOS_D;
       *w = MP_WIDTH_D;
       *h = MP_HEIGHT_D;
-      if(i) *i = MP_ICONISED_D;
+      if ( i )
+         *i = MP_ICONISED_D;
+
       return FALSE;
    }
 }
@@ -225,6 +229,7 @@ wxMFrame::SavePosition(const char *name, wxFrame *frame)
 {
 	SavePositionInternal(name, frame, TRUE);
 }
+
 void
 wxMFrame::SavePositionInternal(const char *name, wxWindow *frame, bool isFrame)
 {

@@ -79,17 +79,22 @@ struct MailFolderStatus
       total = UID_ILLEGAL;
       newmsgs =
       recent =
-      unseen = 0;
+      unseen =
+      flagged =
+      searched = 0;
    }
 
    bool IsValid() const { return total != UID_ILLEGAL; }
 
-   // the total number of messages and the number of new, recent and unseen
-   // messages in this folder
+   // the total number of messages and the number of new, recent, unseen,
+   // important (== flagged) and searched (== results of search) messages in
+   // this folder
    unsigned long total,
                  newmsgs,
                  recent,
-                 unseen;
+                 unseen,
+                 flagged,
+                 searched;
 };
 
 /**

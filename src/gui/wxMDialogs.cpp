@@ -687,7 +687,6 @@ MDialog_AdbLookupList(ArrayAdbElements& aEntries,
    CloseSplash();
 
    wxArrayString aChoices;
-   wxString strName, strEMail;
 
    size_t nEntryCount = aEntries.Count();
    for( size_t nEntry = 0; nEntry < nEntryCount; nEntry++ )
@@ -695,39 +694,50 @@ MDialog_AdbLookupList(ArrayAdbElements& aEntries,
       aChoices.Add(aEntries[nEntry]->GetDescription());
    }
 
-   int
-      w = 400,
-      h = 400;
+   static const char *DIALOG_NAME = "AdrListSelect";
+   int x, y, w, h;
+   wxMFrame::RestorePosition(DIALOG_NAME, &x, &y, &w, &h);
 
-   parent = GetDialogParent(parent);
-   if(parent)
-   {
-      parent->GetClientSize(&w,&h);
-      w = (w * 8) / 10;
-      h = (h * 8) / 10;
-   }
-
+   int choice;
    if ( nEntryCount == 0 ) {
      // no matches at all
-     return -1;
+     choice = -1;
    }
    else if ( nEntryCount == 1 ) {
      // don't ask user to choose among one entry and itself!
-     return 0;
+     choice = 0;
    }
    else {
-      return wxGetSingleChoiceIndex
-             (
-               _("Please choose an entry:"),
-               wxString("Mahogany : ")+_("Expansion options"),
-               nEntryCount,
-               &aChoices[0],
-               (wxWindow *)parent,
-               -1, -1, // x,y
-               TRUE,   //centre
-               w, h
-             );
+      wxSingleChoiceDialog dialog(
+                                    GetDialogParent(parent),
+                                    _("Please choose an entry:"),
+                                    wxString("Mahogany : ") +
+                                       _("Expansion options"),
+                                    nEntryCount,
+                                    &aChoices[0]
+                                 );
+
+      // default width and height are too big for us
+      if ( w == MP_WIDTH_D && h == MP_HEIGHT_D ) {
+         w = 300;
+         h = 400;
+      }
+
+      dialog.Move(x, y);
+      dialog.SetSize(w, h);
+
+      if ( dialog.ShowModal() == wxID_OK ) {
+         choice = dialog.GetSelection();
+
+         // if the dialog wasn't cancelled, remember its size/position
+         wxMFrame::SavePosition(DIALOG_NAME, &dialog);
+      }
+      else {
+         choice = -1;
+      }
    }
+
+   return choice;
 }
 
 // simple AboutDialog to be displayed at startup
