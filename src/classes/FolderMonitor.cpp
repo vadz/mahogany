@@ -475,23 +475,19 @@ FolderMonitorImpl::CheckNewMail(int flags)
    {
       // force the check now if it was done by the user, even if the timeout
       // hasn't expired yet
-      if ( (flags & Interactive) || (i->GetCheckTime() < timeCur) )
+      if ( (flags & Interactive) || (i->GetCheckTime() <= timeCur) )
       {
          if ( !CheckOneFolder(*i, progInfo) )
             rc = false;
+         // update the time of the next check only now, i.e. after CheckFolder() call
+         // as if it takes time longer than the check interval we might keep checking
+         // it all the time without doing anything else
+         i->UpdateCheckTime();
       }
       //else: don't check this folder yet
    }
 
    delete progInfo;
-
-   // update the time of the next check only now, i.e. after CheckFolder() call
-   // as if it takes time longer than the check interval we might keep checking
-   // it all the time without doing anything else
-   for ( i = m_list.begin(); i != m_list.end(); ++i )
-   {
-      i->UpdateCheckTime();
-   }
 
    return rc;
 }
