@@ -1120,6 +1120,13 @@ MessageView::ShowHeaders()
    wxFontEncoding encInHeaders = wxFONTENCODING_SYSTEM;
    for ( ; n < countHeaders; n++ )
    {
+      wxString value = headerValues[n];
+      if ( value.empty() )
+      {
+         // don't show empty headers at all
+         continue;
+      }
+
       wxFontEncoding encHeader = (wxFontEncoding)headerEncodings[n];
 
       // remember the encoding that we have found in the headers: some mailers
@@ -1148,7 +1155,6 @@ MessageView::ShowHeaders()
          }
       }
 
-      wxString value = headerValues[n];
 #if 0
       // does not work - EnsureAvailableTextEncoding for UTF-8 always succeeds
       if ( !EnsureAvailableTextEncoding(&encHeader, &value) )
@@ -1162,7 +1168,79 @@ MessageView::ShowHeaders()
          }
       }
 
-      m_viewer->ShowHeader(headerNames[n], value, encHeader);
+      // show the header and mark the URLs in it
+      String name = headerNames[n];
+      m_viewer->ShowHeaderName(name);
+
+      // don't highlight the message IDs which looks just like the URLs but,
+      // in fact, are not ones (the test catches Message-Id and Content-Id
+      // headers)
+      bool highlightURLs = m_ProfileValues.highlightURLs &&
+                              !name.MakeUpper().Matches("*-ID");
+      do
+      {
+         String before,
+                url,
+                urlText;
+
+         if ( highlightURLs )
+         {
+            before = strutil_findurl(value, url);
+
+            if ( *url.c_str() == '<' )
+            {
+               // try to find the personal name as well by going backwards
+               // until we reach the previous address
+               bool inQuotes = false,
+                    stop = false;
+
+               while ( !before.empty() )
+               {
+                  char ch = before.Last();
+                  switch ( ch )
+                  {
+                     case '"':
+                        inQuotes = !inQuotes;
+                        break;
+
+                     case ',':
+                     case ';':
+                        if ( !inQuotes )
+                           stop = true;
+                  }
+
+                  if ( stop )
+                     break;
+
+                  url.insert(0, 1, ch);
+                  before.erase(before.length() - 1);
+               }
+            }
+            else // not a mail address
+            {
+               // use the URL itself as label
+               urlText = url;
+            }
+         }
+         else // no URL highlighting
+         {
+            before = value;
+            value.clear();
+         }
+
+         if ( !before.empty() )
+         {
+            m_viewer->ShowHeaderValue(before, encHeader);
+         }
+
+         if ( !url.empty() )
+         {
+            m_viewer->ShowHeaderURL(urlText, url);
+         }
+      }
+      while ( !value.empty() );
+
+      m_viewer->EndHeader();
    }
 
    m_viewer->EndHeaders();
@@ -1287,8 +1365,8 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
       //else: don't change font - no such encoding anyhow
    }
 
-   String url;
-   String before;
+   String url,
+          before;
 
    size_t levelBeforeURL = LEVEL_INVALID;
 
@@ -1443,7 +1521,8 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
 
       if ( !strutil_isempty(url) )
       {
-         m_viewer->InsertURL(url);
+         // we use the URL itself for text here
+         m_viewer->InsertURL(url, url);
       }
    }
    while ( !textPart.empty() );

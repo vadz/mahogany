@@ -459,7 +459,7 @@ match:
       //else: keep '<' as part of the URL
 
       // now look for the end of it
-      while ( IsDomainChar(*p) )
+      while ( *p && IsDomainChar(*p) )
       {
          p++;
       }

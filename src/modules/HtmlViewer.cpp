@@ -84,9 +84,12 @@ public:
    // header showing
    virtual void StartHeaders();
    virtual void ShowRawHeaders(const String& header);
-   virtual void ShowHeader(const String& name,
-                           const String& value,
-                           wxFontEncoding encoding);
+   virtual void ShowHeaderName(const String& name);
+   virtual void ShowHeaderValue(const String& value,
+                                wxFontEncoding encoding);
+   virtual void ShowHeaderURL(const String& text,
+                              const String& url);
+   virtual void EndHeader();
    virtual void ShowXFace(const wxBitmap& bitmap);
    virtual void EndHeaders();
 
@@ -97,7 +100,7 @@ public:
    virtual void InsertImage(const wxImage& image, ClickableInfo *ci);
    virtual void InsertRawContents(const String& data);
    virtual void InsertText(const String& text, const MTextStyle& style);
-   virtual void InsertURL(const String& url);
+   virtual void InsertURL(const String& text, const String& url);
    virtual void InsertSignature(const String& signature);
    virtual void EndPart();
    virtual void EndBody();
@@ -724,14 +727,8 @@ void HtmlViewer::ShowRawHeaders(const String& header)
               << MakeHtmlSafe(header) << "</font>" << "</pre>";
 }
 
-void HtmlViewer::ShowHeader(const String& headerName,
-                            const String& headerValue,
-                            wxFontEncoding encHeader)
+void HtmlViewer::ShowHeaderName(const String& name)
 {
-   // don't show empty headers at all
-   if ( headerValue.empty() )
-      return;
-
    if ( m_firstheader )
    {
       // start the table containing the headers
@@ -740,29 +737,37 @@ void HtmlViewer::ShowHeader(const String& headerName,
       m_firstheader = false;
    }
 
-   const ProfileValues& profileValues = GetOptions();
-
-   // first column: header names (width=1 means minimal width)
+   // create the first column: header names (width=1 means minimal width)
    m_htmlText += "<tr>"
                  "<td align=\"right\" width=\"1\">";
 
-   {
-      FontColourChanger colChanger(profileValues.HeaderNameCol, m_htmlText);
+   FontColourChanger colChanger(GetOptions().HeaderNameCol, m_htmlText);
 
-      m_htmlText << "<tt>" << headerName << ":&nbsp;</tt>";
-   }
+   m_htmlText << "<tt>" << name << ":&nbsp;</tt>";
+}
 
+void HtmlViewer::ShowHeaderValue(const String& value,
+                                 wxFontEncoding encoding)
+{
    // second column: header values
    m_htmlText += "</td><td>";
 
-   {
-      FontColourChanger colChanger(profileValues.HeaderValueCol, m_htmlText);
+   FontColourChanger colChanger(GetOptions().HeaderValueCol, m_htmlText);
 
-      EncodingChanger encChanger(encHeader, m_htmlText);
+   EncodingChanger encChanger(encoding, m_htmlText);
 
-      m_htmlText += MakeHtmlSafe(headerValue);
-   }
+   m_htmlText += MakeHtmlSafe(value);
+}
 
+void HtmlViewer::ShowHeaderURL(const String& text,
+                               const String& url)
+{
+   InsertURL(text, url);
+}
+
+void HtmlViewer::EndHeader()
+{
+   // terminate the header row
    m_htmlText += "</td></tr>";
 }
 
@@ -862,13 +867,13 @@ void HtmlViewer::InsertText(const String& text, const MTextStyle& style)
    m_htmlText += MakeHtmlSafe(text);
 }
 
-void HtmlViewer::InsertURL(const String& url)
+void HtmlViewer::InsertURL(const String& text, const String& url)
 {
    // URLs may contain special characters which must be replaced by HTML
-   // entities (i.e. '&' -> "&amp;")
-   String htmlizedUrl = MakeHtmlSafe(url);
-
-   m_htmlText << "<a href=\"" << htmlizedUrl << "\">" << htmlizedUrl << "</a>";
+   // entities (i.e. '&' -> "&amp;") so use MakeHtmlSafe()
+   m_htmlText << "<a href=\"" << MakeHtmlSafe(url) << "\">"
+              << MakeHtmlSafe(text)
+              << "</a>";
 }
 
 void HtmlViewer::InsertSignature(const String& signature)

@@ -78,9 +78,12 @@ public:
    // header showing
    virtual void StartHeaders();
    virtual void ShowRawHeaders(const String& header);
-   virtual void ShowHeader(const String& name,
-                           const String& value,
-                           wxFontEncoding encoding);
+   virtual void ShowHeaderName(const String& name);
+   virtual void ShowHeaderValue(const String& value,
+                                wxFontEncoding encoding);
+   virtual void ShowHeaderURL(const String& text,
+                              const String& url);
+   virtual void EndHeader();
    virtual void ShowXFace(const wxBitmap& bitmap);
    virtual void EndHeaders();
 
@@ -91,7 +94,7 @@ public:
    virtual void InsertImage(const wxImage& image, ClickableInfo *ci);
    virtual void InsertRawContents(const String& data);
    virtual void InsertText(const String& text, const MTextStyle& style);
-   virtual void InsertURL(const String& url);
+   virtual void InsertURL(const String& text, const String& url);
    virtual void InsertSignature(const String& signature);
    virtual void EndPart();
    virtual void EndBody();
@@ -416,37 +419,44 @@ void LayoutViewer::ShowRawHeaders(const String& header)
    llist->LineBreak();
 }
 
-void LayoutViewer::ShowHeader(const String& headerName,
-                              const String& headerValue,
-                              wxFontEncoding encHeader)
+void LayoutViewer::ShowHeaderName(const String& name)
 {
    wxLayoutList *llist = m_window->GetLayoutList();
-   const ProfileValues& profileValues = GetOptions();
 
-   // don't show the header at all if there is no value
-   if ( !headerValue.empty() )
-   {
-      // insert the header name
-      llist->SetFontWeight(wxBOLD);
-      SetTextColour(profileValues.HeaderNameCol);
+   // insert the header name
+   llist->SetFontWeight(wxBOLD);
+   SetTextColour(GetOptions().HeaderNameCol);
 
-      // always terminate the header names with ": " - configurability
-      // cannot be endless neither
-      llist->Insert(headerName + ": ");
+   // always terminate the header names with ": " - configurability
+   // cannot be endless neither
+   llist->Insert(name + ": ");
 
-      // insert the header value
-      llist->SetFontWeight(wxNORMAL);
-      SetTextColour(profileValues.HeaderValueCol);
+   llist->SetFontWeight(wxNORMAL);
+}
 
-      wxLayoutImportText(llist, headerValue, encHeader);
-      llist->LineBreak();
+void LayoutViewer::ShowHeaderValue(const String& value,
+                                   wxFontEncoding encoding)
+{
+   SetTextColour(GetOptions().HeaderValueCol);
 
-      if ( encHeader != wxFONTENCODING_SYSTEM )
-      {
-         // restore the default encoding
-         llist->SetFontEncoding(wxFONTENCODING_DEFAULT);
-      }
-   }
+   wxLayoutImportText(m_window->GetLayoutList(), value, encoding);
+}
+
+void LayoutViewer::ShowHeaderURL(const String& text,
+                                 const String& url)
+{
+   InsertURL(text, url);
+}
+
+void LayoutViewer::EndHeader()
+{
+   wxLayoutList *llist = m_window->GetLayoutList();
+
+   llist->LineBreak();
+
+   // restore the default encoding after possibly changing it in
+   // ShowHeaderValue()
+   llist->SetFontEncoding(wxFONTENCODING_DEFAULT);
 }
 
 void LayoutViewer::ShowXFace(const wxBitmap& bitmap)
@@ -537,9 +547,9 @@ void LayoutViewer::InsertText(const String& text, const MTextStyle& style)
    wxLayoutImportText(llist, text, enc);
 }
 
-void LayoutViewer::InsertURL(const String& url)
+void LayoutViewer::InsertURL(const String& text, const String& url)
 {
-   wxLayoutObject *obj = new wxLayoutObjectText(url);
+   wxLayoutObject *obj = new wxLayoutObjectText(text);
    LayoutUserData* data = new LayoutUserData(new ClickableInfo(url));
    obj->SetUserData(data);
    // SetUserData has incremented the refCount, which is now 2

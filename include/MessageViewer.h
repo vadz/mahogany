@@ -101,10 +101,19 @@ public:
    /// show all headers in the raw form
    virtual void ShowRawHeaders(const String& header) = 0;
 
-   /// show the header with given name/value in this encoding
-   virtual void ShowHeader(const String& name,
-                           const String& value,
-                           wxFontEncoding encoding) = 0;
+   /// start showing the header
+   virtual void ShowHeaderName(const String& name) = 0;
+
+   /// insert some text as the header value
+   virtual void ShowHeaderValue(const String& value,
+                                wxFontEncoding encoding) = 0;
+
+   /// insert an URL which is part of the header value
+   virtual void ShowHeaderURL(const String& text,
+                              const String& url) = 0;
+
+   /// end of header
+   virtual void EndHeader() = 0;
 
    /// show the X-Face for this message
    virtual void ShowXFace(const wxBitmap& bitmap) = 0;
@@ -142,7 +151,7 @@ public:
    virtual void InsertText(const String& text, const MTextStyle& style) = 0;
 
    /// insert an URL
-   virtual void InsertURL(const String& url) = 0;
+   virtual void InsertURL(const String& text, const String& url) = 0;
 
    /// insert the signature (may be multiline)
    virtual void InsertSignature(const String& signature) = 0;

@@ -239,9 +239,12 @@ public:
    // header showing
    virtual void StartHeaders() { }
    virtual void ShowRawHeaders(const String& header) { }
-   virtual void ShowHeader(const String& name,
-                           const String& value,
-                           wxFontEncoding encoding) { }
+   virtual void ShowHeaderName(const String& name) { }
+   virtual void ShowHeaderValue(const String& value,
+                                wxFontEncoding encoding) { }
+   virtual void ShowHeaderURL(const String& text,
+                              const String& url) { }
+   virtual void EndHeader() { }
    virtual void ShowXFace(const wxBitmap& bitmap) { }
    virtual void EndHeaders() { }
 
@@ -252,7 +255,7 @@ public:
    virtual void InsertImage(const wxImage& image, ClickableInfo *ci) { }
    virtual void InsertRawContents(const String& data) { }
    virtual void InsertText(const String& text, const MTextStyle& style) { }
-   virtual void InsertURL(const String& url) { }
+   virtual void InsertURL(const String& text, const String& url) { }
    virtual void InsertSignature(const String& signature) { }
    virtual void EndPart() { }
    virtual void EndBody() { }

@@ -76,9 +76,12 @@ public:
    // header showing
    virtual void StartHeaders();
    virtual void ShowRawHeaders(const String& header);
-   virtual void ShowHeader(const String& name,
-                           const String& value,
-                           wxFontEncoding encoding);
+   virtual void ShowHeaderName(const String& name);
+   virtual void ShowHeaderValue(const String& value,
+                                wxFontEncoding encoding);
+   virtual void ShowHeaderURL(const String& text,
+                              const String& url);
+   virtual void EndHeader();
    virtual void ShowXFace(const wxBitmap& bitmap);
    virtual void EndHeaders();
 
@@ -89,7 +92,7 @@ public:
    virtual void InsertImage(const wxImage& image, ClickableInfo *ci);
    virtual void InsertRawContents(const String& data);
    virtual void InsertText(const String& text, const MTextStyle& style);
-   virtual void InsertURL(const String& url);
+   virtual void InsertURL(const String& text, const String& url);
    virtual void InsertSignature(const String& signature);
    virtual void EndPart();
    virtual void EndBody();
@@ -488,29 +491,41 @@ void TextViewer::ShowRawHeaders(const String& header)
    m_window->AppendText(header);
 }
 
-void TextViewer::ShowHeader(const String& headerName,
-                            const String& headerValue,
-                            wxFontEncoding encHeader)
+void TextViewer::ShowHeaderName(const String& name)
 {
-   if ( headerValue.empty() )
-      return;
-
    const ProfileValues& profileValues = GetOptions();
 
-   InsertText(headerName + ": ", wxTextAttr(profileValues.HeaderNameCol));
+   InsertText(name + ": ", wxTextAttr(profileValues.HeaderNameCol));
+}
+
+void TextViewer::ShowHeaderValue(const String& value,
+                                 wxFontEncoding encoding)
+{
+   const ProfileValues& profileValues = GetOptions();
 
    wxColour col = profileValues.HeaderValueCol;
    if ( !col.Ok() )
       col = profileValues.FgCol;
 
    wxTextAttr attr(col);
-   if ( encHeader != wxFONTENCODING_SYSTEM )
+   if ( encoding != wxFONTENCODING_SYSTEM )
    {
-      wxFont font = profileValues.GetFont(encHeader);
+      wxFont font = profileValues.GetFont(encoding);
       attr.SetFont(font);
    }
 
-   InsertText(headerValue + "\n", attr);
+   InsertText(value, attr);
+}
+
+void TextViewer::ShowHeaderURL(const String& text,
+                               const String& url)
+{
+   InsertURL(text, url);
+}
+
+void TextViewer::EndHeader()
+{
+   InsertText("\n", wxTextAttr());
 }
 
 void TextViewer::ShowXFace(const wxBitmap& bitmap)
@@ -569,7 +584,7 @@ void TextViewer::InsertText(const String& text, const MTextStyle& style)
 #endif
 }
 
-void TextViewer::InsertURL(const String& url)
+void TextViewer::InsertURL(const String& text, const String& url)
 {
    m_window->InsertClickable(url, new ClickableInfo(url), GetOptions().UrlCol);
 }
