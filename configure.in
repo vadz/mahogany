@@ -1512,7 +1512,7 @@ echo "	Embedded Python:			${PYTHON_VER:-none}"
 if test "$USE_PYTHON" != 0 -a "$USE_SWIG" = 1; then
     echo "	      with swig:			${SWIG}"
 fi
-echo "  DSPAM spam filtering:			${using_dspam}"
+echo "	DSPAM spam filtering:			${using_dspam}"
 echo ""
 echo "Please look at config.log for more details."
 
