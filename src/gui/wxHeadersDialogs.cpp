@@ -171,6 +171,8 @@ private:
    // dirty flag for the checkboxes (textctrls have their own)
    bool        m_oldCheckboxValues[Header_Max];
 
+   static void InitStaticArrays();
+
    DECLARE_EVENT_TABLE()
 };
 
@@ -359,19 +361,22 @@ const char *wxComposeHeadersDialog::ms_headerNames[] =
    gettext_noop("&Bcc")
 };
 
-const char *wxComposeHeadersDialog::ms_profileNamesDefault[] =
-{
-   MP_COMPOSE_TO,
-   MP_COMPOSE_CC,
-   MP_COMPOSE_BCC
-};
+const char *wxComposeHeadersDialog::ms_profileNamesDefault[Header_Max];
+const char *wxComposeHeadersDialog::ms_profileNamesShow[Header_Max];
 
-const char *wxComposeHeadersDialog::ms_profileNamesShow[] =
+void wxComposeHeadersDialog::InitStaticArrays()
 {
-   NULL,  // no MP_SHOW_TO - always true
-   MP_SHOWCC,
-   MP_SHOWBCC
-};
+   if ( !ms_profileNamesDefault[0] )
+   {
+      ms_profileNamesDefault[0] = MP_COMPOSE_TO;
+      ms_profileNamesDefault[1] = MP_COMPOSE_CC;
+      ms_profileNamesDefault[2] = MP_COMPOSE_BCC;
+
+      ms_profileNamesShow[0] = NULL; // no MP_SHOW_TO - always true
+      ms_profileNamesShow[1] = MP_SHOWCC;
+      ms_profileNamesShow[2] = MP_SHOWBCC;
+   }
+}
 
 wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
                                                wxWindow *parent)
@@ -380,6 +385,8 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
                                                  "message composition"),
                                                "ComposeHeaders")
 {
+   InitStaticArrays();
+
    // layout the controls
    // -------------------
    wxLayoutConstraints *c;
