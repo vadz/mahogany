@@ -62,7 +62,7 @@
 #ifndef   MCCLIENT_H
 #include "Mcclient.h"         // for hash_table
 #endif
-#include "wx/regex.h"
+#include <wx/regex.h>
 #endif
 
 // ----------------------------------------------------------------------------

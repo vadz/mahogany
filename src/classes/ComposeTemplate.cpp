@@ -40,7 +40,7 @@
 #include <wx/ffile.h>
 #include <wx/tokenzr.h>
 
-#include "wx/regex.h"
+#include <wx/regex.h>
 
 // ----------------------------------------------------------------------------
 // the classes which are used together with compose view - we have here a

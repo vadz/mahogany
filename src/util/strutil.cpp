@@ -1369,9 +1369,9 @@ strutil_getMailAddress(const String &inputline,
 
 
 #ifdef __GNUG__
-#   pragma implementation "wx/regex.h"
+#   pragma implementation <wx/regex.h>
 #endif
-#include "wx/regex.h"
+#include <wx/regex.h>
 
 #ifdef WX_HAVE_REGEX
 
