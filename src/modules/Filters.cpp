@@ -2063,7 +2063,8 @@ extern "C"
       {
          msg->GetHeaderLine(headers[i], tmp);
          if(tmp[0] && result[0])
-            result << ',' << tmp;
+            result << ',';
+         result << tmp;
       }
       msg->DecRef();
       return Value(result);
