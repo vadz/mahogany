@@ -1413,7 +1413,7 @@ private:
             *m_btnEdit,
             *m_btnDelete;
 
-   DECLARE_EVENT_TABLE();
+   DECLARE_EVENT_TABLE()
 };
 
 BEGIN_EVENT_TABLE(wxFolderFiltersDialog, wxSelectionsOrderDialog)

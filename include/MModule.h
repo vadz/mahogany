@@ -34,7 +34,7 @@
 #  define MDLLEXPORT static
 #else
 #  ifdef OS_WIN
-#     ifdef _MSC_VER
+#     if defined (_MSC_VER) || defined (__BORLANDC__)
 #        define MDLLEXPORT __declspec( dllexport )
 #     else
 #        error "don't know how export functions from DLL with this compiler"

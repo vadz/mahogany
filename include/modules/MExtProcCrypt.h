@@ -82,7 +82,7 @@ public:
       int m_terminated;
 	    
    private:
-      DECLARE_EVENT_TABLE();
+      DECLARE_EVENT_TABLE()
    };
 
 protected:

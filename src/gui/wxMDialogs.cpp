@@ -260,7 +260,7 @@ private:
    // are we going to open this folder or save to it?
    bool m_selectForOpening;
 
-   DECLARE_EVENT_TABLE();
+   DECLARE_EVENT_TABLE()
 };
 
 BEGIN_EVENT_TABLE(MFolderDialog, wxSMDialog)
@@ -1022,7 +1022,7 @@ public:
       }
 private:
    wxAboutWindow *m_window;
-   DECLARE_EVENT_TABLE();
+   DECLARE_EVENT_TABLE()
 };
 
 BEGIN_EVENT_TABLE(MyHtmlWindow, wxHtmlWindow)
