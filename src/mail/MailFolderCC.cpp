@@ -2203,7 +2203,7 @@ MailFolderCC::LookupObject(MAILSTREAM const *stream, const char *name)
       LOGMESSAGE((M_LOG_DEBUG, "Routing call to default mailfolder."));
       return streamListDefaultObj;
    }
-   ASSERT_MSG(0,"Cannot find mailbox for callback!");
+   ASSERT_MSG(0,"DEBUG (harmless): Cannot find mailbox for callback!");
    return NULL;
 }
 
@@ -2592,19 +2592,15 @@ MailFolderCC::ProcessEventQueue(void)
       case Status:
       {
          MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
-         ASSERT(mf);
+         ASSERT_MSG(mf,"DEBUG (harmless): got status/exists event for unknown folder");
          // tell all interested that the folder status has changed:
          if(mf) MEventManager::Send( new MEventFolderStatusData (mf) );
          break;
       }
-      case Flags: // obsolete
-      case Update: // obsolete
-         ASSERT_MSG(0,"obsolete code called");
-         break;
       case Expunged: // invalidate our header listing:
       {
          MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
-         ASSERT(mf);
+         ASSERT_MSG(mf,"DEBUG (harmless): got expunge event for unknown folder");
          if(mf)
          {
             mf->UpdateStatus();
@@ -2613,6 +2609,10 @@ MailFolderCC::ProcessEventQueue(void)
          }
          break;
       }
+      case Flags: // obsolete
+      case Update: // obsolete
+         ASSERT_MSG(0,"obsolete code called");
+         break;
       }// switch
       delete evptr;
    }
