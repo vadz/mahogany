@@ -4,40 +4,51 @@ $Id$
 
 Here is the rough plan for the future of the M development:
 
+* 0.65:
 
-* 0.65-0.70:
+   get it out of the door a.s.a.p., the last release was 9 months ago
+   we just need to fix the crash on exit with IMAP bug
+
+   tentative release date: mid-October
+
+* 0.66:
+
+   + add "IMAP migration" and "Export to MBOX" commands: both will be
+     implemented using the new MTool module class and will be accessible
+     from the main executable "Tools" menu
+
+   + ongoing SPAM filtering improvements
+
+* 0.67:
 
    + ADB lift up:
 
       - it becomes very slow with big books and the autocollect book grows
         really fast (~1000 entries in mine) and the books are also way too
         big. We need a more efficient and more compact format. Support for
-        Gnome and KDE address books (maybe even Windows WAB? ;).
+        Gnome and KDE address books (it would be nice to have Windows WAB
+        support as well but I didn't find any docs about it)?
 
       - GUI side: we need a reusable ADB-tree control like the folder tree
         one which could be reused from other places (composer, extract
-        addresses dialog, ...) and it should also support multiple selection
+        addresses dialog, ...) and it should also support multiple selections
 
-   + implement text only message editor
-
-   + built-in anti SPAM rule (?)
-
-* 0.75:
-
-   + real MIME types editor
+* 0.70:
 
    + implement smart config file synchronization
 
    + store ADB on IMAP server and sync it
 
-   + composer improvements:
+   + composer framework improvements:
+     - implement text only message editor
      - spell checker
      - smart line wrap.
 
+   + real MIME types editor
+
 * 0.80:
 
-   + virtual folder support, search should optionally put the results in
-     the "Search results" vFolder
+   + we really need a decent rich text editor...
 
 * 1.00:
 
@@ -47,7 +58,7 @@ Here is the rough plan for the future of the M development:
 
 * 2.00 should have decent news reading support:
 
-   + handling multipart messages
+   + handling multipart (in news, not MIME, sense) messages
 
    + different convenience features such as ROT-13, spoiler space, ...
 
