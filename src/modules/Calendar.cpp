@@ -624,6 +624,8 @@ CalendarFrame::AddReminder(const wxString &itext,
    String fmt, text;
    wxString timeStr = wxDateTime::Now().Format("%d %b %Y %H:%M:%S");
 
+
+   itext = strutil_enforceCRLF(itext);
    if(action == CAL_ACTION_SEND)
    {
       timeStr = when.Format("%d %b %Y %H:%M:%S");
