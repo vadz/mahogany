@@ -2630,8 +2630,9 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
       }
 
       // check if Cancel wasn't pressed (we'd exit the loop above by break then)
+      wxString pdExecText = _("Executing filter actions...");
       if ( idx == count &&
-           (!pd || pd->Update(count, _("Executing filter actions..."))) )
+           (!pd || pd->Update(count, pdExecText)) )
       {
          UIdArray uidsToDelete;
          wxArrayLong indicesDeleted;
@@ -2668,6 +2669,10 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
                   }
                }
 
+               pd->Update(count + idx, pdExecText + '\n' +
+                          wxString::Format(_("Copying messages to '%s'..."),
+                                           dst.c_str()));
+
                if ( !m_MailFolder->SaveMessages(&uidsToCopy, dst) )
                {
                   rc |= FilterRule::Error;
@@ -2686,6 +2691,9 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
          {
             if ( !uidsToDelete.IsEmpty() )
             {
+               pd->Update(2*count, pdExecText + '\n' +
+                          wxString::Format(_("Deleting moved messages...")));
+
                if ( !m_MailFolder->DeleteMessages(&uidsToDelete) )
                {
                   rc |= FilterRule::Error;
