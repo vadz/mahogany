@@ -489,6 +489,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    bool deletedSelection = false;
    // pressing any non-arrow key optionally replaces the selection:
    if(m_AutoDeleteSelection
+      && IsEditable()
       && !m_Selecting
       && m_llist->HasSelection() 
       && ! IsDirectionKey(keyCode)
