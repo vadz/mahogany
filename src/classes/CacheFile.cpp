@@ -170,6 +170,9 @@ bool CacheFile::Save()
 
    if ( !ok )
    {
+      wxLogMessage(_("Some non vital information could be lost, please "
+                     "try to correct the problem and restart the program."));
+
       wxLogError(_("Failed to write cache file."));
 
       return false;
