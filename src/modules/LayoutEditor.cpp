@@ -473,18 +473,21 @@ void LayoutEditor::InsertText(const String& text, InsertMode insMode)
       //     importing it back adds a '\n' at the end, so this is useful as a
       //     quick workaround for this bug - of course, it's not a real solution
       //     (FIXME)
-      size_t index = text.length() - 1;
-      if ( text[index] == '\n' )
+      if ( !text.empty() )
       {
-         // check for "\r\n" too
-         if ( index > 0 && text[index - 1] == '\r' )
+         size_t index = text.length() - 1;
+         if ( text[index] == '\n' )
          {
-            // truncate one char before
-            index--;
-         }
+            // check for "\r\n" too
+            if ( index > 0 && text[index - 1] == '\r' )
+            {
+               // truncate one char before
+               index--;
+            }
 
-         // FIXME: need this horrible const_cast for this hack to work
-         ((String &)text)[index] = '\0';
+            // FIXME: need this horrible const_cast for this hack to work
+            ((String &)text)[index] = '\0';
+         }
       }
 
       // this is not as simple as it sounds, because we normally exported all
