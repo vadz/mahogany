@@ -69,16 +69,6 @@
 #  define   CC_GCC
 #  define   CC_TYPE "gcc"
 
-   /// gcc does not support precompiled headers
-#  ifdef USE_PCH
-#     if USE_PCH
-#        undef  USE_PCH
-#        define   USE_PCH      // use the Mpch.h anyway
-#     else
-#        undef   USE_PCH
-#     endif
-#  endif
-
    // gcc gives an annoying warning
    // "class 'Foo' only defines a private destructor and has no friends"
    // even when it's a ref counted class which deletes itself.
@@ -93,10 +83,6 @@
 #ifdef   _MSC_VER
 #   define   CC_MSC   1
 #   define   CC_TYPE  "Visual C++"
-/// are we using precompiled headers?
-#   ifndef USE_PCH
-#      define USE_PCH        1
-#   endif
 #endif
 
 /// debug allocator

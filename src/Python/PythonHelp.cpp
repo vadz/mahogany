@@ -34,42 +34,6 @@ extern "C"
    void SWIG_MakePtr(char *_c, const void *_ptr, char *type);
 }
 
-// *KB* FIXME This code should no longer be needed!
-#if 0
-// we assume that we always have libswigpy
-#ifndef HAVE_SWIGLIB
-extern "C"
-{
-   void
-SWIG_MakePtr(char *_c, const void *_ptr, char *type)
-{
-   static char _hex[16] =
-   {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-    'a', 'b', 'c', 'd', 'e', 'f'};
-   unsigned long _p, _s;
-   char _result[20], *_r;    /* Note : a 64-bit hex number = 16 digits */
-   _r = _result;
-   _p = (unsigned long) _ptr;
-   if (_p > 0)
-   {
-      while (_p > 0)
-      {
-         _s = _p & 0xf;
-         *(_r++) = _hex[_s];
-         _p = _p >> 4;
-      }
-      *_r = '_';
-      while (_r >= _result)
-         *(_c++) = *(_r--);
-   } else
-      strcpy (_c, "NULL");
-   if (_ptr)
-      strcpy (_c, type);
-}
-}
-#endif // HAVE_SWIGLIB
-#endif
-
 int
 PythonCallback(const char *name, int def, void *obj, const char *classname,
                Profile *profile, const char *argfmt,

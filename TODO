@@ -6,9 +6,8 @@ $Id$
 
 1. why folder is opened and its listing is built when a message is appended to
    it? very time consuming, can we avoid it?
-
-2. fix the bug in folder tree status change logic: we don't mark the folder
-   as new when we open it and there are new messages in it
+   
+--> because of CountInterestingMessages() call - should cache it
 
 3. problems with calling wxYield() multiple times (under wxGTK) - what to do?
 

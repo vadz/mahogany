@@ -85,10 +85,6 @@
    (e.g. void fprintf(FILE *, char *, ...);) *and* <stdarg.h> */
 #undef HAVE_STDARG_PROTOTYPES
 
-/** Define if you want to use the global Mpch.h header file (e.g. for
-    precompiling headers */
-#undef USE_PCH
-
 /** Define if you want to use wxThreads. (experimental) */
 #undef USE_THREADS
 

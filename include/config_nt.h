@@ -73,8 +73,4 @@
 /* Define if your compiler supports variable length function prototypes
    (e.g. void fprintf(FILE *, char *, ...);) *and* <stdarg.h> */
 #define HAVE_STDARG_PROTOTYPES 1
-
-/** Define if you want to use the global Mpch.h header file (e.g. for
-    precompiling headers */
-#define USE_PCH 1
 //@}

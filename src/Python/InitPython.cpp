@@ -1,5 +1,5 @@
 /*-*- c++ -*-********************************************************
- * InitPython.cc: initialisation of the Python interpreter          *
+ * InitPython.cpp: initialisation of the Python interpreter          *
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
@@ -9,20 +9,22 @@
 
 #include   "Mpch.h"
 
+#ifdef USE_PYTHON
 
 #ifndef   USE_PCH
-#   include   "Mcommon.h"
+#   include "Mcommon.h"
 
-#   include   "MApplication.h"
-#   include   "gui/wxMApp.h"
-#   include   "strutil.h"
+#   include "MApplication.h"
+#   include "gui/wxMApp.h"
+#   include "strutil.h"
 #endif
 
-#include   "Mdefaults.h"
+#include "Mdefaults.h"
 
-#include   "Python.h"
-#include   "PythonHelp.h"
-#include   "MDialogs.h"
+#include <Python.h>
+
+#include "PythonHelp.h"
+#include "MDialogs.h"
 
 // the module initialisations
 extern "C"
@@ -148,3 +150,6 @@ InitPython(void)
 
    return rc;
 }
+
+#endif // USE_PYTHON
+

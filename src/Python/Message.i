@@ -68,7 +68,7 @@ public:
    /** get Subject line
        @return Subject entry
    */
-   virtual String & Subject(void);
+   virtual String Subject(void);
 
    /** get an address line
        @param name where to store personal name if available
