@@ -1,0 +1,91 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Project:     M
+;; File name:   iss.txt - M installation script
+;; Purpose:     Inno Setup Script for M (must be called like this!)
+;; Author:      Vadim Zeitlin
+;; Modified by:
+;; Created:     23.08.98
+;; CVS-ID:      $Id$
+;; Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
+;; Licence:     M license
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[Setup]
+Bits=32
+AppName=M
+AppVerName=M pre-alpha 0.01 "unnamed"
+AppCopyright=Copyright © 1998 Karsten Ballüder and Vadim Zeitlin (Windows port)
+LicenseFile=license.txt
+DefaultDirName=M
+DefaultGroupName=M
+AllowNoIcons=1
+BackColor=clNavy
+
+[Dirs]
+{app}\doc
+{app}\lib
+
+[Files]
+; Parameter quick reference:
+;   "Source filename", "Dest. filename", Copy mode, Flags
+
+; --- program files
+"M.EXE", 		"{app}\M.EXE", copy_normal, 
+
+; --- python support
+"python15.dll", 	"{app}\python15.dll", copy_normal, 
+
+; Python modules: the corresponding pyc files should be specified
+; in the next section for deletion
+
+; M python support
+"Minit.py",		"{app}\lib\Minit.py", copy_normal, 
+"MailFolder.py",	"{app}\lib\MailFolder.py", copy_normal, 
+"MAppBase.py",		"{app}\lib\MAppBase.py", copy_normal, 
+"Message.py",		"{app}\lib\Message.py", copy_normal, 
+"MString.py",		"{app}\lib\MString.py", copy_normal, 
+"MProfile.py",		"{app}\lib\MProfile.py", copy_normal, 
+
+; standard Python modules used
+"exceptions.py",	"{app}\lib.pyc\exceptions.pyc", copy_normal, 
+"ntpath.py",		"{app}\lib.pyc\ntpath.pyc", copy_normal, 
+"os.py",		"{app}\lib.pyc\os.pyc", copy_normal, 
+"stat.py",		"{app}\lib.pyc\stat.pyc", copy_normal, 
+"string.py",		"{app}\lib.pyc\string.pyc", copy_normal, 
+"UserDict.py",		"{app}\lib.pyc\UserDict.pyc", copy_normal, 
+
+; --- documentation
+"readme_win.txt", 	"{app}\readme_win.txt", copy_normal, flag_isreadme
+"bugs.txt",		"{app}\doc\bugs.txt", copy_normal,
+"README.TXT", 		"{app}\doc\README.TXT", copy_normal,
+"Information.TXT", 	"{app}\doc\Information.TXT", copy_normal,
+"Copying", 		"{app}\doc\Copying", copy_normal,
+"License.html", 	"{app}\doc\License.html", copy_normal,
+
+[DeleteFiles]
+; delete all precompiled python files
+{app}\lib\Minit.pyc
+{app}\lib\MailFolder.pyc
+{app}\lib\MAppBase.pyc
+{app}\lib\Message.pyc
+{app}\lib\MString.pyc
+{app}\lib\MProfile.pyc
+{app}\lib\exceptions.pyc
+{app}\lib\ntpath.pyc
+{app}\lib\os.pyc
+{app}\lib\stat.pyc
+{app}\lib\string.pyc
+{app}\lib\UserDict.pyc
+
+[Icons]
+; Parameter quick reference:
+;   "Icon title", "File name", "Parameters", "Working dir (can leave blank)",
+;   "Custom icon filename (leave blank to use the default icon)", Icon index
+"M", "{app}\M.EXE", "", "{app}", "", 0
+
+[Registry]
+; Parameter quick reference:
+;   "Root key", "Subkey", "Value name", Data type, "Data", Flags
+HKLM, "Software\wxWindows\M", "Version", STRING, "0.01a", flag_deletevalue
+HKLM, "Software\wxWindows\M", "InstallDir", STRING, "{app}", flag_deletevalue
+
