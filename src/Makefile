@@ -35,9 +35,12 @@ dep depend:
 
 install: all
 	strip M
-	$(INSTALL_PROGRAM) M $(BINDIR)
-	$(INSTALL_DATA) -d $(DATADIR)/icons
-	$(INSTALL_DATA) icons/* $(DATADIR)/icons
+	$(INSTALL) -d $(DATADIR)/bin
+	$(INSTALL) -d $(DATADIR)/bin/$(OSTYPE)
+	$(INSTALL_PROGRAM) M $(DATADIR)/bin/$(OSTYPE)
+	ln -fs $(DATADIR)/$(OSTYPE)/M $(BINDIR)
+	$(INSTALL) -d $(DATADIR)/icons
+	$(INSTALL_DATA) `find icons/* -not -type d` $(DATADIR)/icons
 
 .PHONY: all dep clean doc static allclean install
 

@@ -1,20 +1,7 @@
 # Makefile for M root directory
 # $Id$
 #
-# $Log$
-# Revision 1.6  1998/07/05 12:19:57  KB
-# wxMessageView works and handles mime (segfault on deletion)
-# wsIconManager loads files
-# install target
-#
-# Revision 1.5  1998/05/18 17:48:10  KB
-# more list<>->kbList changes, fixes for wxXt, improved makefiles
-#
-# Revision 1.4  1998/05/02 18:29:41  KB
-# After many problems, Python integration is eventually taking off -
-# works.
-#
-#
+
 
 CWD = 
 SUB_DIRS = extra src include
@@ -54,10 +41,11 @@ bak backup:
 # probably the most complicated target:
 #
 install:
-	@echo "Installing M in " $(bindir)
-	@echo "        data in " $(datadir)
-	@echo "        docs in " $(prefix)/doc/M
+	@echo "Installing M in " $(BINDIR)
+	@echo "        data in " $(DATADIR)
+	@echo "        docs in " $(PREFIX)/doc/M
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i install; done
+	$(INSTALL_DATA) `find doc -not -type d` $(DOCDIR)
 
 .PHONY: all dep clean bak backup config program 
 

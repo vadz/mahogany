@@ -3,40 +3,6 @@
 #
 # $Id$
 #
-# $Log$
-# Revision 1.13  1998/07/10 09:24:34  KB
-# minor changes and support for c-client config in configure.in
-#
-# Revision 1.12  1998/07/07 12:41:13  KB
-# No longer mixes debug and optimisation flags.
-# New option (on by default) --with-debug for configure.
-#
-# Revision 1.11  1998/07/05 12:20:02  KB
-# wxMessageView works and handles mime (segfault on deletion)
-# wsIconManager loads files
-# install target
-#
-# Revision 1.10  1998/06/14 12:23:57  KB
-# started to move wxFolderView to be a panel, Python improvements
-#
-# Revision 1.9  1998/06/08 08:34:51  KB
-# Python adapted to use MAppBase/MDialog instead of MApplication.
-#
-# Revision 1.8  1998/05/30 17:54:52  KB
-# Python integration mostly complete, added hooks and sample callbacks.
-# Wrote documentation on how to use it.
-#
-# Revision 1.7  1998/05/24 14:46:47  KB
-# lots of progress on Python, but cannot call functions yet
-# kbList fixes again?
-#
-# Revision 1.6  1998/05/19 17:02:38  KB
-# several small bugfixes
-#
-# Revision 1.5  1998/05/18 17:48:14  KB
-# more list<>->kbList changes, fixes for wxXt, improved makefiles
-#
-#
 # set build root directory:
 BUILDDIR = @BUILDDIR@
 
@@ -108,8 +74,8 @@ INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
 
-prefix = @prefix@
-exec_prefix = @exec_prefix@
+PREFIX = @prefix@
+EXEC_PREFIX = @exec_prefix@
 
 # Directory in which to install scripts.
 BINDIR = @bindir@
@@ -123,6 +89,8 @@ INFODIR = @infodir@/M
 # where to install docs
 DOCDIR = $(DATADIR)/doc
 
+# for the dynamic linker, better than using -rpath
+LD_RUN_PATH=$(DATADIR)/bin/$(OSTYPE)
 
 X_CFLAGS = @X_CFLAGS@
 X_LIBS = @X_LIBS@
@@ -135,7 +103,7 @@ XPM_LINK = @XPM_LINK@
 EXTRA_SRC_INC = @EXTRA_SRC_INC@
 EXTRA_SRC_LIB = @EXTRA_SRC_LIB@
 
-LINK = $(CXX) 
+LINK = $(CXX) -Wl-r$(LD_RUN_PATH)
 
 DEF = $(GUI_DEFS)
 INC = -I$(BUILDDIR)/include -I$(BUILDDIR)/extra/include -I$(BUILDDIR)/include/gui -I$(CCLIENTINCLUDE) \

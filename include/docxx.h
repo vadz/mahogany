@@ -35,7 +35,7 @@
 //@{
 //@Include:   gui/wxMFrame.h gui/wxFolderView.h gui/wxMessageView.h
 //@Include:   gui/wxComposeView.h 
-//@Include:   gui/wxFTCanvas.h gui/wxIconManager.h gui/wxFontManager.h
+//@Include:   gui/wxIconManager.h gui/wxFontManager.h
 //@Include:   gui/wxMDialogs.h
 //@}
 //@}

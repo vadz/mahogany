@@ -48,8 +48,6 @@
 
 #include "gui/wxFontManager.h"
 #include "gui/wxIconManager.h"
-//#include "gui/wxFText.h"
-//#include "gui/wxFTCanvas.h"
 
 #include   "gui/wxllist.h"
 #include   "gui/wxlwindow.h"

@@ -3,48 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.6  1998/06/05 16:56:25  VZ
- * many changes among which:
- *  1) AppBase class is now the same to MApplication as FrameBase to wxMFrame,
- *     i.e. there is wxMApp inheriting from AppBse and wxApp
- *  2) wxMLogFrame changed (but will probably change again because I wrote a
- *     generic wxLogFrame for wxWin2 - we can as well use it instead)
- *  3) Profile stuff simplified (but still seems to work :-), at least with
- *     wxConfig), no more AppProfile separate class.
- *  4) wxTab "#ifdef USE_WXWINDOWS2"'d out in wxAdbEdit.cc because not only
- *     it doesn't work with wxWin2, but also breaks wxClassInfo::Initialize
- *     Classes
- *  5) wxFTCanvas tweaked and now _almost_ works (but not quite)
- *  6) constraints in wxComposeView changed to work under both wxGTK and
- *     wxMSW (but there is an annoying warning about unsatisfied constraints
- *     coming from I don't know where)
- *  7) some more wxWin2 specific things corrected to avoid (some) crashes.
- *  8) many other minor changes I completely forgot about.
- *
- * Revision 1.5  1998/05/24 14:48:15  KB
- * lots of progress on Python, but cannot call functions yet
- * kbList fixes again?
- *
- * Revision 1.4  1998/05/18 17:48:43  KB
- * more list<>->kbList changes, fixes for wxXt, improved makefiles
- *
- * Revision 1.3  1998/04/22 19:56:32  KB
- * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
- * precompiled headers. Compiles and runs again under Linux/wxXt. Header
- * organisation is not optimal yet and needs further
- * cleanup. Reintroduced some older fixes which apparently got lost
- * before.
- *
- * Revision 1.2  1998/03/26 23:05:41  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:22  karsten
- * first try at a complete archive
- *
+ * $Id$            *
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -115,6 +74,9 @@ MDialog_SystemErrorMessage(const char *message,
    msg = String(message) + String(("\nSystem error: "))
       + String(strerror(errno));
 
+   if(parent == NULL)
+      parent = mApplication.TopLevelFrame();
+   
    MDialog_ErrorMessage(msg.c_str(), parent, title, modal);
 }
 
@@ -130,6 +92,10 @@ MDialog_FatalErrorMessage(const char *message,
               const char *title)
 {
    String msg = String(message) + _("\nExiting application...");
+
+   if(parent == NULL)
+      parent = mApplication.TopLevelFrame();
+   
    MDialog_ErrorMessage(message,parent,title,true);
    mApplication.Exit(true);
 }
@@ -147,6 +113,10 @@ MDialog_Message(const char *message,
          const char *title,
          bool modal)
 {
+
+   if(parent == NULL)
+      parent = mApplication.TopLevelFrame();
+   
    wxMessageBox((char *)message, title,
       wxOK|wxCENTRE|wxICON_INFORMATION, parent);
 }
@@ -167,6 +137,10 @@ MDialog_YesNoDialog(const char *message,
              const char *title,
              bool YesDefault)
 {
+
+   if(parent == NULL)
+      parent = mApplication.TopLevelFrame();
+   
    return (bool) (wxYES == wxMessageBox(
       (char *)message,title,
       wxYES_NO|wxCENTRE|wxICON_QUESTION,
@@ -213,6 +187,10 @@ MDialog_FileRequester(const char *message,
     wildcard = save ?
        profile->readEntry(MP_DEFAULT_SAVE_WILDCARD,MP_DEFAULT_SAVE_WILDCARD_D)
        : profile->readEntry(MP_DEFAULT_LOAD_WILDCARD,MP_DEFAULT_LOAD_WILDCARD_D);
+
+   if(parent == NULL)
+      parent = mApplication.TopLevelFrame();
+   
    return wxFileSelector(
       message, path, filename, extension, wildcard, 0, parent);
 }
@@ -229,6 +207,10 @@ MDialog_YesNoDialog(String const &message,
 #  else
       const long styleMsgBox = wxYES_NO|wxCENTRE|wxICON_QUESTION;
 #  endif
+
+   if(parent == NULL)
+      parent = mApplication.TopLevelFrame();
+   
 
    return wxMessageBox((char *)message.c_str(), _("Decision"),
                        styleMsgBox,
@@ -252,6 +234,10 @@ MDialog_AdbLookupList(AdbExpandListType *adblist, MFrame *parent)
    AdbEntry
       ** entries = new AdbEntry *[n],
       *result;
+
+   if(parent == NULL)
+      parent = mApplication.TopLevelFrame();
+   
    
    for(i = adblist->begin(); i != adblist->end(); i++, idx++)
    {

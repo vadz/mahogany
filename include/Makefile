@@ -3,7 +3,9 @@
 CWD = classes
 HDR = *.h
 
-all: doc
+all: 
+
+install: doc
 
 include ../makeopts
 
@@ -19,5 +21,5 @@ doc:
 doc2:
 	for i in *.h ; do $(DXX) -f -k -u -k $(DXXTBL) -H -t -o $(DOCDIR)/$$i.tex $$i ; done
 
-.PHONY: clean doc doc2 dep all
+.PHONY: clean doc doc2 dep all install
 

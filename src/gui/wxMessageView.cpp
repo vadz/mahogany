@@ -45,12 +45,11 @@
 
 #include "gui/wxFontManager.h"
 #include "gui/wxIconManager.h"
-#include "gui/wxFText.h"
 #include "gui/wxMessageView.h"
 
-#include   <gui/wxllist.h>
-#include   <gui/wxlwindow.h>
-#include   <gui/wxlparser.h>
+#include   "gui/wxllist.h"
+#include   "gui/wxlwindow.h"
+#include   "gui/wxlparser.h"
 
 #include <ctype.h>  // for isspace
 
