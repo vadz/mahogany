@@ -9485,7 +9485,9 @@ msgid ""
 "Mahogany may highlight the options having non default\n"
 "values, whether they are set specifically at this folder\n"
 "level or inherited from parent."
-msgstr "Mahogany kann die Optionen hervorheben, die eine andereEinstellung als die normale habe, egal ob diese speziell fürdiesen Ordner gesetzt oder von den Eltern geerbt wurde."
+msgstr ""
+"\n"
+"Mahogany kann die Optionen hervorheben, die eine andereEinstellung als die normale habe, egal ob diese speziell fürdiesen Ordner gesetzt oder von den Eltern geerbt wurde."
 
 #: gui/wxOptionsDlg.cpp:1684
 msgid "Show option values &origin"
