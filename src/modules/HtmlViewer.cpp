@@ -652,11 +652,9 @@ void HtmlViewer::Copy()
 
 void HtmlViewer::SelectAll()
 {
-   // you need http://www.volny.cz/v.slavik/wx/wx-htmlwin-selectall.patch
-   // to enable this
-#ifdef wxHAVE_HTML_SELECTALL
+#if wxCHECK_VERSION(2, 5, 1)
    m_window->SelectAll();
-#endif // wxHAVE_HTML_SELECTALL
+#endif // wxWin 2.5.1+
 }
 
 String HtmlViewer::GetSelection() const
