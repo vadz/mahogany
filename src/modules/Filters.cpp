@@ -2887,7 +2887,7 @@ static Value func_python(ArgList *args, FilterRuleImpl *p)
    ASSERT(args);
    if(args->Count() != 1)
       return 0;
-   Message_obj msg = p->GetMessage();
+   Message_obj msg(p->GetMessage());
    if ( !msg )
       return 0;
 
