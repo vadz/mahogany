@@ -106,9 +106,10 @@ void MXFMailImporter::ImportSetting(const wxString& xfmailrc,
                                     const wxString& var,
                                     const wxString& value)
 {
+   Profile *profile = mApplication->GetProfile();
    if ( var == "nntphost" )
    {
-      mApplication->GetProfile()->writeEntry(MP_NNTPHOST, value);
+      profile->writeEntry(MP_NNTPHOST, value);
       wxLogMessage(_("Imported NNTP host setting from %s: %s."),
                    "XFMail", value.c_str());
    }
@@ -116,9 +117,19 @@ void MXFMailImporter::ImportSetting(const wxString& xfmailrc,
    {
       // TODO
    }
+   else if ( var == "from" )
+   {
+      String personalName = Message::GetNameFromAddress(value);
+      if ( !!personalName )
+      {
+         profile->writeEntry(MP_PERSONALNAME, personalName);
+         wxLogMessage(_("Imported name setting from %s: %s."),
+                      "XFMail", personalName.c_str());
+      }
+   }
    else if ( var == "replyexand" )
    {
-      mApplication->GetProfile()->writeEntry(MP_RETURN_ADDRESS, value);
+      profile->writeEntry(MP_RETURN_ADDRESS, value);
       wxLogMessage(_("Imported return address setting from %s: %s."),
                    "XFMail", value.c_str());
    }
@@ -218,9 +229,12 @@ bool MXFMailImporter::ImportFolders()
    if ( m_mailDir.Last() != '/' )
       m_mailDir += '/';
 
+   // we use this folder for XFMail system folders to avoid name clashes with
+   // Mahogany system folders
+   MFolder *folderXFMail = (MFolder *)NULL;
+
    bool error = FALSE;
    size_t nImported = 0;
-   bool bLastWasSystem = FALSE;
    size_t nLines = file.GetLineCount();
    for ( size_t nLine = 0; nLine < nLines; nLine++ )
    {
@@ -239,27 +253,10 @@ bool MXFMailImporter::ImportFolders()
       while ( *p != ' ' )
          folderName += *p++;
 
-      // don't import "system" XFMail folders
-      if ( folderName == "inbox" ||
-           folderName == "outbox" ||
-           folderName == "trash" ||
-           folderName == "sent_mail" ||
-           folderName == "draft" ||
-           folderName == "template" )
+      if ( !folderName )
       {
-         bLastWasSystem = TRUE;
-
-         continue;
-      }
-      else if ( bLastWasSystem )
-      {
-         // the first folder immediately following the system folders is the
-         // spool, skip it too
-         //
-         // FIXME should parse .xfmsources instead of guessing that there is
-         //       only one spool!
-         bLastWasSystem = FALSE;
-
+         wxLogDebug("%s(%u): empty folder name, skipping.",
+                    filename.c_str(), nLine + 1);
          continue;
       }
 
@@ -273,6 +270,14 @@ bool MXFMailImporter::ImportFolders()
       }
       else
       {
+         // the folder name should not start with a slash
+         if ( folderName[0u] == '/' )
+         {
+            wxLogDebug("%s(%u): folder '%s' assumed to be a spool, skipping.",
+                       filename.c_str(), nLine + 1, folderName.c_str());
+            continue;
+         }
+
          name = folderName;
          path << m_mailDir << name;
       }
@@ -285,7 +290,8 @@ bool MXFMailImporter::ImportFolders()
       while ( isdigit(*p) )
          typeString += *p++;
 
-      // we only know about types 1 (MH) and 8 (MBOX)
+      // we only know about types 1 (MH) and 8 (MBOX) and don't support 2
+      // (IMAP) yet (mainly because I don't have any IMAP folders in XFMail)
       unsigned long nType;
       if ( !typeString.ToULong(&nType) || (nType != 1 && nType != 8) )
       {
@@ -294,11 +300,87 @@ bool MXFMailImporter::ImportFolders()
          continue;
       }
 
+      // all XFMail flag values
+#define SYSTEM  0x00000001   /* system folder , can not be deleted or renamed */
+#define SORTED  0x00000002   /* messages are sorted */
+#define OPENED  0x00000004   /* folder is opened */
+#define SEARCH  0x00000008   /* folder contains messages marked during search */
+#define FRONLY  0x00000010   /* read only folder */
+#define NOINFR  0x00000020   /* no inferiors (subfolders) */
+#define FHIDDN  0x00000040   /* hidden folder */
+#define NOTRASH 0x00000080   /* don't move messages to trash */
+#define FRESCAN 0x00000100   /* folder contents has changed, update required */
+#define FSHORTH 0x00000200   /* parse only part of message headers */
+#define FMRKTMP 0x00000400   /* marked temporarily */
+#define FUNREAD 0x00000800   /* only unread messages are opened */
+#define FREMOTE 0x00001000   /* remote (IMAP, NEWS, etc...) folder */
+#define FLOCKED 0x00002000   /* locked folder (MBOX) */
+#define FREWRTE 0x00004000   /* needs to be rewritten (MBOX) */
+#define FNOCLSE 0x00008000   /* don't close (don't discard messages) */
+#define FDUMMY  0x00010000   /* dummy folder, can not be manipulated */
+#define FSKIP   0x00020000   /* skip (don't show) the folder */
+#define FRECNT  0x00040000   /* contains recently retrieved messages */
+#define FALIAS  0x00080000   /* sname is an alias */
+#define FNSCAN  0x00100000   /* don't rescan folder */
+#define FEXPNG  0x00200000   /* EXPUNGE when deselection/closing (IMAP) */
+#define FNOMOD  0x00400000   /* don't modify (ask if modify) */
+#define FTOP    0x00800000   /* top folder of the hierarchy */
+#define FSUBS   0x01000000   /* subscribed folder */
+
+      p++;  // skip space
+
+      // now deal with flags
+      wxString flagsString;
+      while ( isdigit(*p) )
+         flagsString += *p++;
+
+      unsigned long flags;
+      if ( !flagsString.ToULong(&flags) )
+      {
+         wxLogDebug("%s(%u): not numeric folder flags %s, skipping.",
+                    filename.c_str(), nLine + 1, flagsString.c_str());
+         continue;
+      }
+
+      MFolder *parent;
+      if ( (flags & SYSTEM) ||
+            folderName == "inbox" ||
+            folderName == "outbox" ||
+            folderName == "trash" ||
+            folderName == "sent_mail" ||
+            folderName == "draft" ||
+            folderName == "template" )
+      {
+         // we put the XFMail system folder under a common parent
+         wxLogDebug("%s(%u): folder %s has system flag set.",
+                    filename.c_str(), nLine + 1, folderName.c_str());
+
+         if ( !folderXFMail )
+         {
+            folderXFMail = CreateFolderTreeEntry
+                           (
+                            NULL,
+                            "XFMail",
+                            MF_GROUP,
+                            0,
+                            "",
+                            FALSE
+                           );
+         }
+
+         parent = folderXFMail;
+      }
+      else
+      {
+         parent = NULL;
+      }
+
+      // do create the folder
       FolderType type = nType == 1 ? MF_MH : MF_FILE;
 
       MFolder *folder = CreateFolderTreeEntry
                         (
-                         NULL,      // no parent
+                         parent,    // parent folder
                          name,      // the folder name
                          type,      //            type
                          0,         //            flags
@@ -320,6 +402,8 @@ bool MXFMailImporter::ImportFolders()
          wxLogError(_("Error importing folder '%s'."), folderName.c_str());
       }
    }
+
+   SafeDecRef(folderXFMail);
 
    if ( !nImported )
    {
@@ -417,15 +501,7 @@ bool MXFMailImporter::ImportADB()
       wxString path = dirname + xfmailADBs[n];
       if ( AdbImport(path, adbname, adbusername, importer) )
       {
-         wxLogMessage(_("Successfully imported %s address book '%s'."),
-                      "XFMail", path.c_str());
-
          nImported++;
-      }
-      else
-      {
-         wxLogError(_("Failed to import %s address book '%s'."),
-                    "XFMail", path.c_str());
       }
    }
 
@@ -536,11 +612,11 @@ typedef struct _xf_rule {
          "Body",
          "Message",
          "To",
-         "Sender"
+         "Sender",
+         "Recepients"
       };
       MFDialogTarget where = ORC_W_Illegal;
-      wxASSERT_MSG( WXSIZEOF(headers) == ORC_W_Max, "should be in sync" );
-      for ( size_t n = 0; n < ORC_W_Max; n++ )
+      for ( size_t n = 0; n < WXSIZEOF(headers); n++ )
       {
          if ( fmatch == headers[n] )
          {
