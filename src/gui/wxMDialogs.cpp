@@ -763,52 +763,24 @@ MDialog_YesNoDialog(const char *message,
                     const MPersMsgBox *msgBox,
                     const char *folderName)
 {
-   String configPath, path;
+   String pathGlobal,
+          pathLocal;
+
    if ( msgBox )
    {
-      configPath = GetPersMsgBoxName(msgBox);
+      pathLocal =
+      pathGlobal = GetPersMsgBoxName(msgBox);
 
-      // if this is a folder-specific message box, first look if it's not
-      // disabled globally
-      int storedValue;
-      if ( folderName )
+      // first check the global value
+      int storedValue = wxPMessageBoxIsDisabled(pathGlobal);
+
+      // if this is a folder-specific message box, then look if it's not
+      // disabled just for this folder
+      if ( !storedValue && folderName )
       {
-         storedValue = wxPMessageBoxIsDisabled(configPath);
-         if ( !storedValue )
-         {
-            // use this path instead, there is nothing at the global level
-            path << Profile::FilterProfileName(folderName) << '/' << configPath;
+         pathLocal << Profile::FilterProfileName(folderName) << '/' << pathGlobal;
 
-            // an added complication: in the older versions of the program
-            // FilterProfileName() prefixed the folder path with
-            // M_PROFILE_CONFIG_SECTION - which it doesn't do any more, but we
-            // should still honour the old settings
-
-            String pathOld = Profile::GetProfilePath().c_str();
-
-            // skip the leading slash
-            pathOld.erase(0, 1);
-
-            pathOld.Replace("/", "_");
-            pathOld << "_" << path;
-
-            storedValue = wxPMessageBoxIsDisabled(pathOld);
-         }
-         //else: we won't show it at all
-      }
-      else
-      {
-         storedValue = 0;
-         path = configPath;
-
-         ASSERT_MSG( !strchr(configPath, '/'), _T("configPath must be simple!") );
-      }
-
-      if ( !storedValue )
-      {
-         // try again (if we had tried without folderName above) or for the
-         // first time
-         storedValue = wxPMessageBoxIsDisabled(path);
+         storedValue = wxPMessageBoxIsDisabled(pathLocal);
       }
 
       if ( storedValue )
@@ -825,7 +797,7 @@ MDialog_YesNoDialog(const char *message,
    bool wasDisabled;
    int rc = wxPMessageBox
             (
-               path,
+               pathLocal,
                message,
                String(M_TITLE_PREFIX) + title,
                GetYesNoMsgBoxStyle(flags) |
@@ -842,7 +814,7 @@ MDialog_YesNoDialog(const char *message,
       // for all of them globally
       if ( folderName )
       {
-         // no recursion here as we call ourselves without configPath (nor
+         // no recursion here as we call ourselves without pathGlobal (nor
          // folderName)
          String msg = String::Format
                       (
@@ -863,10 +835,10 @@ MDialog_YesNoDialog(const char *message,
          if ( MDialog_YesNoDialog(msg, parent) )
          {
             // we don't need the local key
-            wxPMessageBoxEnable(path);
+            wxPMessageBoxEnable(pathLocal);
 
             // as we disable it globally anyhow
-            wxPMessageBoxDisable(configPath, rc);
+            wxPMessageBoxDisable(pathGlobal, rc);
          }
          //else: it's already disabled for this folder
       }

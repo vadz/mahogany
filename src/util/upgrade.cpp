@@ -2803,13 +2803,43 @@ static bool
 UpgradeFrom065()
 {
 #ifdef OS_UNIX
+   // we don't use "/M" prefix any more, copy everything from under it to the
+   // root
    wxConfigBase *config = mApplication->GetProfile()->GetConfig();
 
-   if ( !CopyEntries(config, "/M", "/") > 0 )
+   if ( CopyEntries(config, "/M", "/") < 0 )
       return false;
 
    if ( !config->DeleteGroup("/M") )
       wxLogDebug("Old data was left in [M] config section.");
+
+
+   // the folder-specific message box settings must be changed as well as
+   // profile paths have changed
+   //
+   // we use hardcoded path here but this is ok as we don't intend to ever
+   // change this code, even if the path used for storing the msg boxes
+   // settings changes in the future
+   String pathOld = config->GetPath();
+
+   String path;
+   path << '/' << M_SETTINGS_CONFIG_SECTION << "MessageBox";
+   config->SetPath(path);
+
+   long cookie;
+   String groupOld,
+          groupNew;
+   for ( bool cont = config->GetFirstGroup(groupOld, cookie);
+         cont;
+         cont = config->GetNextGroup(groupOld, cookie) )
+   {
+      if ( groupOld.StartsWith("M_Profiles_", &groupNew) )
+      {
+         config->RenameGroup(groupOld, groupNew);
+      }
+   }
+
+   config->SetPath(pathOld);
 #endif // OS_UNIX
 
    return true;
