@@ -6,9 +6,11 @@ $Id$
 
 (I've sorted them a bit by "responsible person". :-) )
 
+- toggel header display menu entry
+
 - fix Adb auto-collection
   + auto-collection needs testing, better lookup  -- doesn't work yet
-
+  
 - wxLayout mouse clicks don't work, for two reasons:
      1. event ids are not the ones expected, easy to fix
      2. for some reasons ProcessEvents() does not call any event handler...why?
