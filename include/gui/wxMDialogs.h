@@ -32,16 +32,38 @@ class MFolder;
    Dialog Boxes
 */
 
+/** Progress dialog which shows a moving progress bar. */
+
 class MProgressDialog : public wxFrame
 {
 public:
+   /** Creates and displays dialog, disables event handling for other
+       frames or parent frame to avoid recursion problems.
+       @param title title for window
+       @param message message to display in window
+       @param maximum maximum value for status bar
+       @param parent window or NULL
+       @param disableParentOnly if true, only disable parent window's event handling
+   */
    MProgressDialog(wxString const &title, wxString const &message,
                    int maximum = 100,
-                   wxWindow *parent = NULL);
+                   wxWindow *parent = NULL,
+                   bool disableParentOnly = false);
+   /** Destructor.
+       Re-enables event handling for other windows.
+   */
    ~MProgressDialog();
+   /** Update the status bar to the new value.
+       @param value new value
+   */
    void Update(int value);
 private:
+   /// the status bar
    class wxGauge *m_gauge;
+   /// disable all or parent window only
+   bool m_disableParentOnly;
+   /// pointer to parent window
+   wxWindow *m_Parent;
 };
 
 /** display error message:

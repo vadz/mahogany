@@ -135,7 +135,8 @@ private:
 MProgressDialog::MProgressDialog(wxString const &title,
                                  wxString const &message,
                                  int maximum,
-                                 wxWindow *parent)
+                                 wxWindow *parent,
+                                 bool parentOnly)
 {
    if(! parent)
       parent = wxTheApp->GetTopWindow();
@@ -156,8 +157,10 @@ MProgressDialog::MProgressDialog(wxString const &title,
       }
    }
 
-   wxFrame::Create(parent,-1,_(title),p,
-                       wxSize(220,50), wxCAPTION|wxSTAY_ON_TOP|wxTHICK_FRAME);
+   m_Parent = parent;
+   m_disableParentOnly = parentOnly;
+   wxFrame::Create(m_Parent,-1,_(title),p,
+                   wxSize(220,50), wxCAPTION|wxSTAY_ON_TOP|wxTHICK_FRAME);
    (void) new wxStaticText(this, -1, _(message),wxPoint(10,10));
    m_gauge = new wxGauge(this,-1, maximum, wxPoint(10,35),wxSize(200,10));
    m_gauge->SetValue(0);
