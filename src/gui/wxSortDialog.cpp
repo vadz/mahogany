@@ -153,7 +153,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
                               -1,
                               _("\"Arrival order\" sorting order means that "
                                 "the messages are not sorted at all. Please\n"
-                                "note that using any other sorting method may"
+                                "note that using any other sorting method may "
                                 "slow down the program significantly,\n"
                                 "especially for remote folders without "
                                 "server-side sorting support.")
@@ -201,8 +201,8 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
                this,
                -1,
                _("Some IMAP servers support server side sorting. It may "
-                 "be much faster to use it in this case\n"
-                 "as it avoids having to download all messages just "
+                 "be much faster to use it in this\n"
+                 "case as it avoids having to download all messages just "
                  "to sort them.")
              );
    c = new wxLayoutConstraints;
@@ -231,8 +231,8 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
                this,
                -1,
                _("When sorting by status, check the checkbox below to "
-                 "re-sort all messages when\n"
-                 "the status of one of them changes. Please note that it "
+                 "re-sort all messages when the\n"
+                 "status of one of them changes. Please note that it "
                  "may be quite slow for big folders.")
              );
    c = new wxLayoutConstraints;
