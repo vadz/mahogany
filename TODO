@@ -110,6 +110,8 @@ wxMSW bugs:
 - use mm_critical() and delay application exit if necessary
 - add "double click to open" profile option support to folder list ctrl
 - enable/disable edit menu entries as needed
+- check whether the test in MailFolderCC.cpp, line 949 really works as 
+  expected 
 **************** end of KB priorities :-) *********************
 
 - add closing delay for sentmail folder to avoid reopening it each time

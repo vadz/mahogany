@@ -944,6 +944,12 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
 {
    ASSERT(m_Listing);
 
+   /* Ignore all entries that have arrived in the meantime to avoid
+      overflowing the array.
+   */
+   if(m_BuildNextEntry >= m_NumOfEntries)
+      return;
+   
    HeaderInfoCC & entry = m_Listing[m_BuildNextEntry];
 
    char tmp[MAILTMPLEN];
