@@ -293,7 +293,7 @@ static const MenuItemInfo g_aMenuItems[] =
                            gettext_noop("Forward with te&mplate...\tShift-Ctrl-F"), gettext_noop("Forward this message after choosing a template to use ")     , FALSE },
    { WXMENU_MSG_FILTER,    gettext_noop("Appl&y filter rules..."), gettext_noop("Apply filter rules to selected messages")     , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_MSG_NEXT_UNREAD,   gettext_noop("&Next unread\tCtrl-N"), gettext_noop("Select next unread message")     , FALSE },
+   { WXMENU_MSG_NEXT_UNREAD,   gettext_noop("&Next unread\tCtrl-U"), gettext_noop("Select next unread message")     , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_SAVE_TO_FILE,
                            gettext_noop("Save as F&ile"),
