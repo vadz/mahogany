@@ -1222,7 +1222,7 @@ wxOptionsPagePython::wxOptionsPagePython(wxNotebook *parent,
 wxOptionsPageAdb::wxOptionsPageAdb(wxNotebook *parent,
                                     ProfileBase *profile)
                 : wxOptionsPage(parent,
-                                _("Adressbook"),
+                                _("Addressbook"),
                                 profile,
                                 ConfigField_AdbFirst,
                                 ConfigField_AdbLast,
