@@ -204,31 +204,28 @@ private:
 class AttributeChanger
 {
 public:
-   AttributeChanger(String& str) : m_str(str) { m_doChange = false; }
+   AttributeChanger(String& str) : m_str(str) { }
 
    void DoChange(const String& start, const String& end)
    {
-      m_doChange = true;
-
       m_str += start;
       m_end = end;
    }
 
-   ~AttributeChanger() { if ( m_doChange ) m_str += m_end; }
+   ~AttributeChanger() { m_str += m_end; }
 
 private:
    String& m_str;
 
+   // the end tag (or empty if none)
    String m_end;
-
-   bool m_doChange;
 };
 
 // ----------------------------------------------------------------------------
-// EncodingChanger
+// EncodingChanger: change the encoding to the given one during its lifetime
 // ----------------------------------------------------------------------------
 
-class EncodingChanger : public AttributeChanger
+class EncodingChanger : private AttributeChanger
 {
 public:
    EncodingChanger(wxFontEncoding enc, String& str)
@@ -255,10 +252,10 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// FontColourChanger
+// FontColourChanger: change the font colour during its lifetime
 // ----------------------------------------------------------------------------
 
-class FontColourChanger : public AttributeChanger
+class FontColourChanger : private AttributeChanger
 {
 public:
    FontColourChanger(const wxColour& col, String& str)
@@ -272,6 +269,35 @@ public:
          DoChange(start, "</font>");
       }
    }
+};
+
+// ----------------------------------------------------------------------------
+// FontStyleChanger: changes bold/italic attributes during its lifetime
+// ----------------------------------------------------------------------------
+
+class FontStyleChanger
+{
+public:
+   FontStyleChanger(const wxFont& font, String& str)
+      : m_changerWeight(str),
+        m_changerSlant(str)
+   {
+      // the order is important:should be the reverse of the order of
+      // destruction of the subobjects
+      if ( font.GetStyle() == wxFONTSTYLE_ITALIC )
+      {
+         m_changerSlant.DoChange("<i>", "</i>");
+      }
+
+      if ( font.GetWeight() == wxFONTWEIGHT_BOLD )
+      {
+         m_changerWeight.DoChange("<b>", "</b>");
+      }
+   }
+
+private:
+   AttributeChanger m_changerWeight,
+                    m_changerSlant;
 };
 
 // ----------------------------------------------------------------------------
@@ -889,6 +915,8 @@ void HtmlViewer::InsertText(const String& text, const MTextStyle& style)
                               m_htmlText);
 
    FontColourChanger colChanger(style.GetTextColour(), m_htmlText);
+
+   FontStyleChanger styleChanger(style.GetFont(), m_htmlText);
 
    m_htmlText += MakeHtmlSafe(text, HtmlSpace_Keep);
 }
