@@ -95,9 +95,13 @@
 #include "CmdLineOpts.h"
 
 #ifdef OS_WIN
-#   include <winnls.h>
+   #include <winnls.h>
 
-#   include "wx/msw/helpbest.h"
+   #include "wx/msw/helpbest.h"
+
+   #ifdef wxHAS_CRASH_REPORT
+      #include "wx/msw/crashrpt.h"
+   #endif
 #endif
 
 // ----------------------------------------------------------------------------
@@ -522,9 +526,27 @@ wxMApp::Yield(bool onlyIfNeeded)
    return wxApp::Yield(onlyIfNeeded);
 }
 
+static void
+SafeMsgBox(const String& msg)
+{
+   static const char *title = gettext_noop("Fatal application error");
+
+   // using a plain message box is safer in this situation, but under Unix we
+   // have no such choice
+#ifdef __WXMSW__
+   ::MessageBox(NULL, _(msg), _(title), MB_ICONSTOP);
+#else // !MSW
+   wxMessageBox(_(msg), _(title), wxICON_STOP | wxOK);
+#endif // MSW/!MSW
+}
+
 void
 wxMApp::OnAbnormalTermination()
 {
+   // no more background processing
+   gs_mutexBlockBg.Lock();
+
+
    MAppBase::OnAbnormalTermination();
 
    // try to save the unsaved messages and options
@@ -559,7 +581,6 @@ wxMApp::OnAbnormalTermination()
                    "box appeared as well as any other useful details!.\n"
                    "\n"
                    "Thank you!");
-   static const char *title = gettext_noop("Fatal application error");
 
    if ( !msg.empty() )
    {
@@ -568,13 +589,40 @@ wxMApp::OnAbnormalTermination()
 
    msg += msgCrash;
 
-   // using a plain message box is safer in this situation, but under Unix we
-   // have no such choice
-#ifdef __WXMSW__
-   ::MessageBox(NULL, _(msg), _(title), MB_ICONSTOP);
-#else // !MSW
-   wxMessageBox(_(msg), _(title), wxICON_STOP | wxOK);
-#endif // MSW/!MSW
+#ifdef wxHAS_CRASH_REPORT
+   msg += "\n\n";
+   msg += String::Format
+          (
+            _("P.S. Mahogany will also try to generate bug report in file\n"
+              "\n"
+              "              %s\n"
+              "\n"
+              "after you close this message box. Please download the\n"
+              "PDB file and put it in the same directory as M.exe if\n"
+              "you don't have it already for better results."),
+            wxCrashReport::GetFileName()
+          );
+#endif // wxCrashReport available
+
+   SafeMsgBox(msg);
+
+#ifdef wxHAS_CRASH_REPORT
+   if ( wxCrashReport::Generate() )
+   {
+      msg.Printf
+          (
+            _("Detailed crash report has been generated in file\n"
+              "\n"
+              "           %s\n"
+              "\n"
+              "please look at it for more information and join it\n"
+              "to your bug report."),
+            wxCrashReport::GetFileName()
+          );
+
+      SafeMsgBox(msg);
+   }
+#endif // wxCrashReport available
 }
 
 // can we close now?
@@ -709,7 +757,7 @@ wxMApp::OnInit()
 {
    // in release build we handle any exceptions we generate (i.e. crashes)
    // ourselves
-#ifndef DEBUG
+#if 1 // ndef DEBUG
    wxHandleFatalExceptions();
 #endif
 
