@@ -96,16 +96,24 @@ GENERAL ROADMAP/ORDER OF THINGS:
 *********************************************************************
 *** KB:
 *********************************************************************
-- translation for SentMail folder name!
-- move setting of -fPIC to configure
+
+for release:
+ - fix printing overlap
+ - add new mail and group reply/followup buttons (and menu entry for
+   the latter) to folderview
+ - update docs: 0.23a
+ - document new configure system for wxGTK in HackersGuide
+
 - check handling of missing hostnames,
   suppress missing hostname c-client error message
+- drop classes documentation from archive/docs!!
+- add icons to doc++ generated docs
 
-- check folder dialog settings
+-------------------------
+- move setting of -fPIC to configure
+
 - foldername in password prompt
 - URL highlighting in Headers
-- fix printing overlap
-- document new configure system for wxGTK in HackersGuide
 
 - add goto_next_unread to folderview
 - add more buttons to folderview, such as
@@ -120,8 +128,6 @@ GENERAL ROADMAP/ORDER OF THINGS:
 - if time permits: vcard-import
 - add a popup dialog to edit message headers in composeview
 
-- drop classes documentation from archive/docs!!
-- add icons to doc++ generated docs
 - document python callback behaviour for incoming folders, possibly do 
   testing for callback results in CollectOneFolder!!
 - add configure option for python path
