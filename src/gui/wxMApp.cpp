@@ -2176,6 +2176,7 @@ void wxMApp::ShowLog(bool doShow)
 #define OPTION_CC          _T("cc")
 #define OPTION_USERDIR     _T("userdir")
 #define OPTION_CONFIG      _T("config")
+#define OPTION_IMPORT      _T("import")
 #define OPTION_DEBUGMAIL   _T("debug")
 #define OPTION_FOLDER      _T("folder")
 #define OPTION_LANG        _T("lang")
@@ -2244,6 +2245,14 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
          _T("f"),
          OPTION_FOLDER,
          gettext_noop("specify the folder to open in the main window"),
+      },
+
+      // --import=spec to get the settings from file or remove server
+      {
+         wxCMD_LINE_OPTION,
+         NULL,
+         OPTION_IMPORT,
+         gettext_noop("file or remote server containing Mahogany options"),
       },
 
       // --lang option to specify the language to use
@@ -2369,6 +2378,8 @@ bool wxMApp::OnCmdLineParsed(wxCmdLineParser& parser)
                                               &m_cmdLineOptions->folder);
 
    (void)parser.Found(OPTION_LANG, &m_cmdLineOptions->lang);
+
+   (void)parser.Found(OPTION_IMPORT, &m_cmdLineOptions->configImport);
 
    return true;
 }

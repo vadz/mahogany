@@ -43,6 +43,7 @@
 #include "PathFinder.h"       // for PathFinder
 #include "Composer.h"         // for RestoreAll()
 #include "SendMessage.h"
+#include "ConfigSource.h"
 
 #include "InitPython.h"
 
@@ -358,6 +359,22 @@ MAppBase::OnStartup()
    {
       // not much we can do
       return false;
+   }
+
+   // import the settings from the given location
+   if ( !m_cmdLineOptions->configImport.empty() )
+   {
+      ConfigSource_obj
+         configSrc(ConfigSourceLocal::CreateFile(m_cmdLineOptions->configImport)),
+         configDst(ConfigSourceLocal::CreateDefault());
+
+      if ( !ConfigSource::Copy(*configDst, *configSrc) )
+      {
+         wxLogError(_("Failed to import Mahogany settings from \"%s\"."),
+                    m_cmdLineOptions->configImport.c_str());
+
+         // continue nevertheless
+      }
    }
 
    // disable the use of environment variables if configured like this (this

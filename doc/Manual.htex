@@ -31,7 +31,7 @@
 
 \vfill{}
 \title{{\LARGE \textsl{Mahogany User Manual}}\\
-{\Large Version 0.66 ``Clio''}}
+{\Large Version 0.67 ``???''}}
 \vfill{}
 
 
@@ -80,7 +80,9 @@ any problems with building it.
 \subsubsection{0.67 against 0.66}
 
 \begin{itemize}
-   \item Folders can now be dragged in the folder tree
+   \item Folders can now be dragged in the folder tree to reorder them
+   \item New \texttt{--import} command line option to simplify sharing
+         of Mahogany options between different installations
    \item Options with non default values are now highlighted in the
          preferences dialog (see \ref{optionshighlight})
 \end{itemize}

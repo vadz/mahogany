@@ -683,7 +683,7 @@ wxMFrame::OnMenuCommand(int id)
                configSrc.Swap(configDst);
             }
 
-            bool ok = ConfigSource::Copy(*configDst.Get(), *configSrc.Get());
+            bool ok = ConfigSource::Copy(*configDst, *configSrc);
 
             if ( doExport )
             {
