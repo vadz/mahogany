@@ -2486,6 +2486,7 @@ bool wxOptionsPage::TransferDataToWindow()
    // edit the real value stored in the config
    ProfileEnvVarSave suspend(m_Profile, false);
 
+   Profile::ReadResult readResult;
    String strValue;
    long lValue = 0;
    for ( size_t n = m_nFirst; n < m_nLast; n++ )
@@ -2499,105 +2500,125 @@ bool wxOptionsPage::TransferDataToWindow()
       if ( m_aDefaults[n].IsNumeric() )
       {
          lValue = m_Profile->readEntry(m_aDefaults[n].name,
-                                       (int)m_aDefaults[n].lValue);
+                                       (int)m_aDefaults[n].lValue,
+                                       &readResult);
          strValue.Printf("%ld", lValue);
       }
       else {
          // it's a string
          strValue = m_Profile->readEntry(m_aDefaults[n].name,
-                                         m_aDefaults[n].szValue);
+                                         m_aDefaults[n].szValue,
+                                         &readResult);
       }
 
       wxControl *control = GetControl(n);
       if ( !control )
          continue;
 
-      switch ( GetFieldType(n) ) {
-      case Field_Text:
-      case Field_Number:
-         if ( GetFieldType(n) == Field_Number ) {
+      wxControl *label = NULL;
+      switch ( GetFieldType(n) )
+      {
+         case Field_Text:
+         case Field_Number:
+            if ( GetFieldType(n) == Field_Number ) {
+               wxASSERT( m_aDefaults[n].IsNumeric() );
+
+               strValue.Printf("%ld", lValue);
+            }
+            else {
+               wxASSERT( !m_aDefaults[n].IsNumeric() );
+            }
+
+            // can only have text value
+         case Field_Passwd:
+            if( GetFieldType(n) == Field_Passwd )
+               strValue = strutil_decrypt(strValue);
+
+         case Field_Font:
+            strValue = wxFontBrowseButton::FontDescToUser(strValue);
+            // fall through
+
+         case Field_Dir:
+         case Field_File:
+         case Field_Folder:
+            wxStaticCast(control, wxTextCtrl)->SetValue(strValue);
+            break;
+
+         case Field_Color:
+            wxStaticCast(control, wxColorBrowseButton)->SetValue(strValue);
+            break;
+
+         case Field_Bool:
             wxASSERT( m_aDefaults[n].IsNumeric() );
 
-            strValue.Printf("%ld", lValue);
-         }
-         else {
-            wxASSERT( !m_aDefaults[n].IsNumeric() );
-         }
-
-         // can only have text value
-      case Field_Passwd:
-         if( GetFieldType(n) == Field_Passwd )
-            strValue = strutil_decrypt(strValue);
-
-      case Field_Font:
-         strValue = wxFontBrowseButton::FontDescToUser(strValue);
-         // fall through
-
-      case Field_Dir:
-      case Field_File:
-      case Field_Folder:
-         wxStaticCast(control, wxTextCtrl)->SetValue(strValue);
-         break;
-
-      case Field_Color:
-         wxStaticCast(control, wxColorBrowseButton)->SetValue(strValue);
-         break;
-      case Field_Bool:
-         wxASSERT( m_aDefaults[n].IsNumeric() );
-
-         if ( GetFieldFlags(n) & Field_Inverse )
-         {
-            lValue = !lValue;
-         }
-
-         wxStaticCast(control, wxCheckBox)->SetValue(lValue != 0);
-         break;
-
-      case Field_Radio:
-         wxStaticCast(control, wxRadioBox)->SetSelection(lValue);
-         break;
-
-      case Field_Combo:
-         wxStaticCast(control, wxChoice)->SetSelection(lValue);
-         break;
-
-      case Field_List:
-         wxASSERT( !m_aDefaults[n].IsNumeric() );
-
-         {
-            wxListBox *lbox = wxStaticCast(control, wxListBox);
-
-            // split it on the separator char: this is ':' for everything
-            // except ConfigField_OpenFolders where it is ';' for config
-            // backwards compatibility
-            char ch = n == ConfigField_OpenFolders ? ';' : ':';
-            wxArrayString entries = strutil_restore_array(strValue, ch);
-
-            size_t count = entries.GetCount();
-            for ( size_t m = 0; m < count; m++ )
+            if ( GetFieldFlags(n) & Field_Inverse )
             {
-               lbox->Append(entries[m]);
+               lValue = !lValue;
             }
+
+            wxStaticCast(control, wxCheckBox)->SetValue(lValue != 0);
+
+            label = control;
+            break;
+
+         case Field_Radio:
+            wxStaticCast(control, wxRadioBox)->SetSelection(lValue);
+            break;
+
+         case Field_Combo:
+            wxStaticCast(control, wxChoice)->SetSelection(lValue);
+            break;
+
+         case Field_List:
+            wxASSERT( !m_aDefaults[n].IsNumeric() );
+
+            {
+               wxListBox *lbox = wxStaticCast(control, wxListBox);
+
+               // split it on the separator char: this is ':' for everything
+               // except ConfigField_OpenFolders where it is ';' for config
+               // backwards compatibility
+               char ch = n == ConfigField_OpenFolders ? ';' : ':';
+               wxArrayString entries = strutil_restore_array(strValue, ch);
+
+               size_t count = entries.GetCount();
+               for ( size_t m = 0; m < count; m++ )
+               {
+                  lbox->Append(entries[m]);
+               }
+            }
+            break;
+
+         case Field_XFace:
+         {
+            wxXFaceButton *btnXFace = (wxXFaceButton *)control;
+            if ( READ_CONFIG(m_Profile, MP_COMPOSE_USE_XFACE) )
+               btnXFace->SetFile(READ_CONFIG(m_Profile, MP_COMPOSE_XFACE_FILE));
+            else
+               btnXFace->SetFile("");
          }
          break;
 
-      case Field_XFace:
+         case Field_SubDlg:      // these settings will be read later
+            break;
+
+         case Field_Message:
+         default:
+            wxFAIL_MSG(_T("unexpected field type"));
+      }
+
+#ifdef EXPERIMENTAL_zeitlin
+      if ( readResult )
       {
-         wxXFaceButton *btnXFace = (wxXFaceButton *)control;
-         if ( READ_CONFIG(m_Profile, MP_COMPOSE_USE_XFACE) )
-            btnXFace->SetFile(READ_CONFIG(m_Profile, MP_COMPOSE_XFACE_FILE));
-         else
-            btnXFace->SetFile("");
-      }
-      break;
+         if ( !label )
+            label = GetLabelForControl(control);
 
-      case Field_SubDlg:      // these settings will be read later
-         break;
-
-      case Field_Message:
-      default:
-         wxFAIL_MSG(_T("unexpected field type"));
+         if ( label )
+            label->SetForegroundColour(readResult == Profile::Read_FromHere
+                                          ? *wxRED
+                                          : *wxBLUE);
       }
+#endif // EXPERIMENTAL_zeitlin
 
       // the dirty flag was set from the OnChange() callback, reset it!
       ClearDirty(n);
