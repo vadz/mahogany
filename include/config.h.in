@@ -72,6 +72,9 @@
     Note that this is only available for wxWindows version 2 */
 /* #undef USE_WXCONFIG */
 
+/** Define this if you want to use AppConfig instead of wxConfig. */
+/* #undef USE_APPCONF */
+
 /** Define if you use Python. */
 #undef USE_PYTHON
 

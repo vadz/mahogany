@@ -144,6 +144,7 @@ DEFAULT_USE_WXWINDOWS=1
 DEFAULT_USE_WXWINDOWS2=0
 DEFAULT_USE_WXSTRING=0
 DEFAULT_USE_WXCONFIG=0
+DEFAULT_USE_APPCONF=1
 
 dnl ================ User editable settings ============================
 dnl where to find Python source
@@ -248,6 +249,9 @@ AC_OVERRIDES(wxConfig,wxConfig,
 --with-wxConfig           use wxConfig,
 USE_WXCONFIG)
 
+AC_OVERRIDES(appConf,appConf,
+--with-appConf           use appConf,
+USE_APPCONF)
 
 AC_CONFIG_AUX_DIR(extra/scripts)
 
@@ -430,6 +434,7 @@ if test "$USE_WXCONFIG" = 1; then
 	else
 		AC_DEFINE(USE_WXCONFIG)
 	fi
+	USE_APPCONF=0
 fi
 
 
