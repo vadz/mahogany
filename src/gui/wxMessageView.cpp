@@ -361,6 +361,53 @@ BEGIN_EVENT_TABLE(wxMessageView, wxLayoutWindow)
 END_EVENT_TABLE()
 
 void
+wxMessageView::SetLanguage(int id)
+{
+   int encoding;
+   switch ( id )
+   {
+      default:
+      case WXMENU_LANG_US_ASCII:
+         encoding = wxFONTENCODING_SYSTEM;
+         break;
+
+      case WXMENU_LANG_ISO8859_1:
+      case WXMENU_LANG_ISO8859_2:
+      case WXMENU_LANG_ISO8859_3:
+      case WXMENU_LANG_ISO8859_4:
+      case WXMENU_LANG_ISO8859_5:
+      case WXMENU_LANG_ISO8859_6:
+      case WXMENU_LANG_ISO8859_7:
+      case WXMENU_LANG_ISO8859_8:
+      case WXMENU_LANG_ISO8859_9:
+      case WXMENU_LANG_ISO8859_10:
+      case WXMENU_LANG_ISO8859_11:
+      case WXMENU_LANG_ISO8859_12:
+      case WXMENU_LANG_ISO8859_13:
+      case WXMENU_LANG_ISO8859_14:
+      case WXMENU_LANG_ISO8859_15:
+         encoding = wxFONTENCODING_ISO8859_1 + id - WXMENU_LANG_ISO8859_1;
+         break;
+
+      case WXMENU_LANG_CP1250:
+      case WXMENU_LANG_CP1251:
+      case WXMENU_LANG_CP1252:
+      case WXMENU_LANG_CP1253:
+      case WXMENU_LANG_CP1254:
+      case WXMENU_LANG_CP1255:
+      case WXMENU_LANG_CP1256:
+      case WXMENU_LANG_CP1257:
+         encoding = wxFONTENCODING_CP1250 + id - WXMENU_LANG_CP1250;
+         break;
+
+      case WXMENU_LANG_KOI8:
+         encoding = wxFONTENCODING_KOI8;
+   }
+
+   SetEncoding((wxFontEncoding)encoding);
+}
+
+void
 wxMessageView::OnChar(wxKeyEvent& event)
 {
    // FIXME: this should be more intelligent, i.e. use the
@@ -814,7 +861,7 @@ wxMessageView::Update(void)
          {
             tmp = cptr;
             String url;
-            String before;          
+            String before;
 
             int last_mode, new_mode;
             size_t line_pos, line_lng, line_from;
@@ -822,7 +869,7 @@ wxMessageView::Update(void)
             do
             {
                before = strutil_findurl(tmp, url);
-               
+
                last_mode = 0;
                line_from = 0;
                line_lng = before.Length();
@@ -833,26 +880,26 @@ wxMessageView::Update(void)
                      new_mode = 0;
                      for (size_t i = line_pos + 1; i < line_pos + 6; i++)
                      {
-                        if (line_lng > i && 
-                               (before[i] == '>' || before[i] == '|')) 
+                        if (line_lng > i &&
+                               (before[i] == '>' || before[i] == '|'))
                            new_mode++;
                      }
                      if (new_mode > 2) new_mode = 2;
 
                      if (new_mode != last_mode || new_mode != 0)
                      {
-                        wxLayoutImportText(llist, 
+                        wxLayoutImportText(llist,
                                  before.Mid(line_from, line_pos - line_from + 1),
                                  encPart);
                         switch (new_mode)
                         {
-                           case 0 : 
+                           case 0 :
                               llist->SetFontColour(& m_ProfileValues.FgCol);
                               break;
-                           case 1 : 
+                           case 1 :
                               llist->SetFontColour(& m_ProfileValues.QuotedCol);
                               break;
-                           case 2 : 
+                           case 2 :
                               llist->SetFontColour(& m_ProfileValues.Quoted2Col);
                               break;
                         }
@@ -860,12 +907,12 @@ wxMessageView::Update(void)
                         line_from = line_pos + 1;
                      }
                   }
-               }             
+               }
                if (line_from < line_lng-1)
-                  wxLayoutImportText(llist, 
+                  wxLayoutImportText(llist,
                                  before.Mid(line_from, line_lng - line_from),
                                  encPart);
-                   
+
                if(!strutil_isempty(url))
                {
                   ci = new ClickableInfo(url);
@@ -1552,7 +1599,6 @@ wxMessageView::DoMenuCommand(int id)
    if( m_uid != UID_ILLEGAL )
       msgs.Add(m_uid);
 
-   bool handled = true;
    switch ( id )
    {
    case WXMENU_MSG_FIND:
@@ -1641,10 +1687,18 @@ wxMessageView::DoMenuCommand(int id)
       break;
 
    default:
-      handled = false;
+      if ( WXMENU_CONTAINS(MSG_LANG_SUBMENU, id) )
+      {
+         SetLanguage(id);
+         break;
+      }
+
+      // not handled
+      return false;
    }
 
-   return handled;
+   // message handled
+   return true;
 }
 
 void
@@ -2019,6 +2073,7 @@ wxMessageViewFrame::OnCommandEvent(wxCommandEvent &event)
          if(m_MessageView->GetFolderView())
             m_MessageView->GetFolderView()->OnCommandEvent(event);
          break;
+
       default:
          wxMFrame::OnMenuCommand(event.GetId());
       }
@@ -2035,4 +2090,4 @@ wxMessageViewFrame::OnSize( wxSizeEvent & WXUNUSED(event) )
 }
 
 IMPLEMENT_DYNAMIC_CLASS(wxMessageViewFrame, wxMFrame)
-   
+

@@ -100,6 +100,9 @@ public:
    /// convert string in cptr to one in which URLs are highlighted
    String HighLightURLs(const char *cptr);
 
+   /// set the language to use for message display
+   void SetLanguage(int id);
+
    // callbacks
    // ---------
 

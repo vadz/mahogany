@@ -68,9 +68,6 @@ public:
    */
    MailFolder * OpenFolder(String const &profilename);
 
-   /// set the language to use for message display
-   void SetLanguage(int id);
-
    /// called on Menu selection
    void OnCommandEvent(wxCommandEvent &event);
 

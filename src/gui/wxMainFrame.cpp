@@ -522,12 +522,13 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
             m_FolderTree->ProcessMenuCommand(id);
       }
    }
-   else if ( WXMENU_CONTAINS(MSG_LANG_SUBMENU, id) )
-      m_FolderView->SetLanguage(id);
    else if ( m_FolderView &&
-      (WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
-       || id == WXMENU_FILE_COMPOSE || id == WXMENU_FILE_POST
-       || id == WXMENU_EDIT_COPY ))
+            (WXMENU_CONTAINS(MSG, id) ||
+             WXMENU_CONTAINS(LAYOUT, id) ||
+             WXMENU_CONTAINS(MSG_LANG_SUBMENU, id) ||
+             id == WXMENU_FILE_COMPOSE ||
+             id == WXMENU_FILE_POST ||
+             id == WXMENU_EDIT_COPY ) )
       m_FolderView->OnCommandEvent(event);
    else if(id == WXMENU_HELP_CONTEXT)
       mApplication->Help(MH_MAIN_FRAME,this);

@@ -463,7 +463,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
           MoveFocus(newFocus);
           return;
          */
-	;
+         ;
       }
    }
    event.Skip();
@@ -1415,7 +1415,7 @@ wxFolderView::Update(HeaderInfoList *listing)
       if(hi->GetUId() == m_FocusedUId)
       {
          foundFocus = true;
-	 focusedIndex = i;
+         focusedIndex = i;
       }
    }
    if(! foundFocus) // old focused UId is gone, so we use the list
@@ -1427,7 +1427,7 @@ wxFolderView::Update(HeaderInfoList *listing)
    UpdateTitleAndStatusBars("", "", GetFrame(m_Parent), m_MailFolder);
 
    if(focusedIndex != -1)
-	m_FolderCtrl->EnsureVisible(focusedIndex);
+      m_FolderCtrl->EnsureVisible(focusedIndex);
 
 #ifdef __WXMSW__
    m_FolderCtrl->Show();
@@ -2145,56 +2145,6 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
    result->DecRef();
 }
 
-void
-wxFolderView::SetLanguage(int id)
-{
-   if ( !m_MessagePreview )
-      return;
-
-   int encoding;
-   switch ( id )
-   {
-      default:
-      case WXMENU_LANG_US_ASCII:
-         encoding = wxFONTENCODING_SYSTEM;
-         break;
-
-      case WXMENU_LANG_ISO8859_1:
-      case WXMENU_LANG_ISO8859_2:
-      case WXMENU_LANG_ISO8859_3:
-      case WXMENU_LANG_ISO8859_4:
-      case WXMENU_LANG_ISO8859_5:
-      case WXMENU_LANG_ISO8859_6:
-      case WXMENU_LANG_ISO8859_7:
-      case WXMENU_LANG_ISO8859_8:
-      case WXMENU_LANG_ISO8859_9:
-      case WXMENU_LANG_ISO8859_10:
-      case WXMENU_LANG_ISO8859_11:
-      case WXMENU_LANG_ISO8859_12:
-      case WXMENU_LANG_ISO8859_13:
-      case WXMENU_LANG_ISO8859_14:
-      case WXMENU_LANG_ISO8859_15:
-         encoding = wxFONTENCODING_ISO8859_1 + id - WXMENU_LANG_ISO8859_1;
-         break;
-
-      case WXMENU_LANG_CP1250:
-      case WXMENU_LANG_CP1251:
-      case WXMENU_LANG_CP1252:
-      case WXMENU_LANG_CP1253:
-      case WXMENU_LANG_CP1254:
-      case WXMENU_LANG_CP1255:
-      case WXMENU_LANG_CP1256:
-      case WXMENU_LANG_CP1257:
-         encoding = wxFONTENCODING_CP1250 + id - WXMENU_LANG_CP1250;
-         break;
-
-      case WXMENU_LANG_KOI8:
-         encoding = wxFONTENCODING_KOI8;
-   }
-
-   m_MessagePreview->SetEncoding((wxFontEncoding)encoding);
-}
-
 // ----------------------------------------------------------------------------
 // wxFolderViewFrame
 // ----------------------------------------------------------------------------
@@ -2302,14 +2252,15 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
          break;
 
       default:
-         if ( WXMENU_CONTAINS(MSG_LANG_SUBMENU, id) )
-            m_FolderView->SetLanguage(id);
-         else if( WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
-               || id == WXMENU_HELP_CONTEXT
-               || id == WXMENU_FILE_COMPOSE || id == WXMENU_FILE_POST
-               || id == WXMENU_EDIT_CUT
-               || id == WXMENU_EDIT_COPY
-               || id == WXMENU_EDIT_PASTE)
+         if ( WXMENU_CONTAINS(MSG, id) ||
+              WXMENU_CONTAINS(LAYOUT, id) ||
+              WXMENU_CONTAINS(MSG_LANG_SUBMENU, id) ||
+              id == WXMENU_HELP_CONTEXT ||
+              id == WXMENU_FILE_COMPOSE ||
+              id == WXMENU_FILE_POST ||
+              id == WXMENU_EDIT_CUT ||
+              id == WXMENU_EDIT_COPY ||
+              id == WXMENU_EDIT_PASTE )
             m_FolderView->OnCommandEvent(event);
          else
             wxMFrame::OnMenuCommand(id);
