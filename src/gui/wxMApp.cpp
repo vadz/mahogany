@@ -1201,6 +1201,14 @@ wxMApp::UnloadModules(void)
 // timer stuff
 // ----------------------------------------------------------------------------
 
+// just a wrapper for FolderMonitor::GetMinCheckTimeout()
+static long GetPollIncomingTimerDelay(void)
+{
+   FolderMonitor *collector = mApplication->GetFolderMonitor();
+
+   return collector ? collector->GetMinCheckTimeout() : 0;
+}
+
 bool wxMApp::StartTimer(Timer timer)
 {
    long delay;
@@ -1216,7 +1224,7 @@ bool wxMApp::StartTimer(Timer timer)
          break;
 
       case Timer_PollIncoming:
-         delay = READ_APPCONFIG(MP_POLLINCOMINGDELAY);
+         delay = GetPollIncomingTimerDelay();
          if ( delay )
          {
             return gs_timerMailCollection->Start(1000*delay);

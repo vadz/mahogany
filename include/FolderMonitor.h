@@ -64,6 +64,14 @@ public:
     */
    virtual bool AddOrRemoveFolder(MFolder *folder, bool add) = 0;
 
+   /**
+     Return the smallest poll timeout for all folders we are polling.
+     This is used as the global poll timer interval.
+
+     @return smallest poll timeout in seconds
+    */
+   virtual long GetMinCheckTimeout(void) const = 0;
+
 protected:
    /// only MAppBase can delete us, hence dtor is protected
    virtual ~FolderMonitor();

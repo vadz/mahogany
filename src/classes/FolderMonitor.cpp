@@ -133,12 +133,17 @@ public:
    bool IncreaseFailCount() { return ++m_failcount >= MC_MAX_FAIL; }
    void ResetFailCount() { m_failcount = 0; }
 
-   // next check time
-   void UpdateCheckTime()
+   long GetPollInterval() const
    {
       Profile_obj profile(m_folder->GetProfile());
 
-      m_timeNext = time(NULL) + (long)READ_CONFIG(profile, MP_POLLINCOMINGDELAY);
+      return READ_CONFIG(profile, MP_POLLINCOMINGDELAY);
+   }
+
+   // next check time
+   void UpdateCheckTime()
+   {
+      m_timeNext = time(NULL) + (time_t)GetPollInterval();
 
       wxLogTrace(TRACE_MONITOR, "Next check for %s scheduled for %s",
                  m_folder->GetFullName().c_str(),
@@ -221,6 +226,7 @@ public:
    // implement the FolderMonitor pure virtuals
    virtual bool CheckNewMail(int flags);
    virtual bool AddOrRemoveFolder(MFolder *folder, bool add);
+   virtual long GetMinCheckTimeout(void) const;
 
    // react to folder deletion by removing it from the list of folders to poll
    virtual bool OnMEvent(MEventData& event);
@@ -340,6 +346,23 @@ FolderMonitorImpl::IsBeingMonitored(const MFolder *folder) const
    }
 
    return false;
+}
+
+long
+FolderMonitorImpl::GetMinCheckTimeout(void) const
+{
+   long min_delay = READ_APPCONFIG(MP_POLLINCOMINGDELAY);
+   
+   for ( FolderMonitorFolderList::iterator i = m_list.begin();
+         i != m_list.end();
+         ++i )
+   {
+      long delay = i->GetPollInterval();
+      if ((delay > 0) && (delay < min_delay))
+         min_delay = delay;
+   }
+
+   return min_delay;
 }
 
 bool
