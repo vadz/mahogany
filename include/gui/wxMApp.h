@@ -70,6 +70,10 @@ public:
    virtual int  OnRun();
    virtual int  OnExit();
 
+   // methods used for the command line parsing
+   virtual void OnInitCmdLine(wxCmdLineParser& parser);
+   virtual bool OnCmdLineParsed(wxCmdLineParser& parser);
+
    // this function is virtual only in 2.3.0
 #if wxCHECK_VERSION(2, 3, 0)
    // override top level window detection: never return splash frame from here

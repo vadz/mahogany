@@ -442,6 +442,19 @@ protected:
 
    /// should we enter the away mode after some period of idleness?
    bool m_autoAwayOn;
+
+   /// the struct containing the command line options
+   struct CmdLineOptions *m_cmdLineOptions;
+
+private:
+   /**
+     Second stage of the startup initialization, called from OnStartup() if we
+     are not in safe mode to do all non-critical things
+
+     No error return code as, by definition, nothing critical (i.e. anything
+     which can prevent us from working correctly) can be done here at all.
+   */
+   void ContinueStartup();
 };
 
 /// Report a fatal error:

@@ -4965,6 +4965,13 @@ MailFolderCC::CClientInit(void)
 #endif
       (void *) myusername();
 
+#ifdef OS_WIN
+   // cclient extra initialization under Windows: use the home directory of the
+   // user (the programs directory by default) as HOME
+   wxString home;
+   mail_parameters(NULL, SET_HOMEDIR, (void *)wxGetHomeDir(&home));
+#endif // OS_WIN
+
    // 1 try is enough, the default (3) is too slow: notice that this only sets
    // the number of trials for SMTP and not for the mailbox drivers for which
    // we have to set this separately!

@@ -35,7 +35,9 @@
 #      include <wx/textfile.h>
 #      include <wx/fileconf.h>
 #   endif
-#   include   <wx/config.h>
+
+#   include <wx/config.h>
+#   include <wx/dir.h>
 #endif
 
 #include "Mdefaults.h"
@@ -43,11 +45,15 @@
 #include <wx/fileconf.h>
 
 #include <ctype.h>
+#include <errno.h>
 
 #ifdef OS_UNIX
-#include <sys/types.h>
-#include <sys/stat.h>
-#endif
+   #include <sys/types.h>
+   #include <unistd.h>
+   #include <sys/stat.h>
+   #include <fcntl.h>
+#endif //Unix
+
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -772,10 +778,157 @@ Profile::CreateEmptyProfile(Profile const *parent)
 }
 
 Profile *
-Profile::CreateGlobalConfig(const String & filename)
+Profile::CreateGlobalConfig(const String& filename)
 {
-   ASSERT( ! strutil_isempty(filename) );
-#  ifdef OS_WIN
+   // if the filename is empty, use the default one
+   String strConfFile = filename;
+
+#ifdef OS_UNIX
+   if ( strConfFile.empty() )
+   {
+      strConfFile = wxGetHomeDir();
+      if ( strConfFile.empty() )
+      {
+         // don't create our files in the root directory, try the current one
+         // instead
+         strConfFile = wxGetCwd();
+      }
+
+      if ( !strConfFile.empty() )
+      {
+         strConfFile << '/';
+      }
+      //else: it will be in the current one, what else can we do?
+
+      strConfFile << "/." << M_APPLICATIONNAME;
+
+      if ( !wxDir::Exists(strConfFile) )
+      {
+         if ( !wxMkdir(strConfFile, 0700) )
+         {
+            wxLogError(_("Cannot create the directory for configuration "
+                         "files '%s'."), strConfFile.c_str());
+
+            return FALSE;
+         }
+         else
+         {
+            wxLogInfo(_("Created directory '%s' for configuration files."),
+                      strConfFile.c_str());
+         }
+
+         // also create an empty config file with the right permissions:
+         String filename = strConfFile + "/config";
+
+         // pass false to Create() to avoid overwriting the existing file
+         wxFile file;
+         if ( !file.Create(filename, false, wxS_IRUSR | wxS_IWUSR) &&
+               !wxFile::Exists(filename) )
+         {
+            wxLogError(_("Could not create initial configuration file."));
+         }
+      }
+
+      // Check whether other users can write our config dir.
+      //
+      // This must not be allowed as they could change the behaviour of the
+      // program unknowingly to the user!
+      struct stat st;
+      if ( stat(strConfFile, &st) == 0 )
+      {
+         if ( st.st_mode & (S_IWGRP | S_IWOTH) )
+         {
+            // No other user must have write access to the config dir.
+            String msg;
+            msg.Printf(_("Configuration directory '%s' was writable for other users.\n"
+                         "The programs settings might have been changed without "
+                         "your knowledge and the passwords stored in your config\n"
+                         "file (if any) could have been compromised!\n\n"),
+                       strConfFile.c_str());
+
+            if ( chmod(strConfFile, st.st_mode & ~(S_IWGRP | S_IWOTH)) == 0 )
+            {
+               msg += _("This has been fixed now, the directory is no longer writable for others.");
+            }
+            else
+            {
+               msg << String::Format(_("Failed to correct the directory access (%s)"
+                                       "rights, please do it manually and "
+                                       "restart the program!"),
+                                     strerror(errno));
+            }
+
+            wxLogError(msg);
+         }
+      }
+      else
+      {
+         wxLogSysError(_("Failed to access the directory '%s' containing "
+                         "the configuration files."),
+                       strConfFile.c_str());
+      }
+
+      strConfFile += "/config";
+
+      // Check whether other users can read our config file.
+      //
+      // This must not be allowed as we store passwords in it!
+      if ( stat(strConfFile, &st) == 0 )
+      {
+         if ( st.st_mode & (S_IWGRP | S_IWOTH | S_IRGRP | S_IROTH) )
+         {
+            // No other user must have access to the config file.
+            String msg;
+            if ( st.st_mode & (S_IWGRP | S_IWOTH) )
+            {
+               msg.Printf(_("Configuration file %s was writable by other users.\n"
+                            "The program settings could have been changed without\n"
+                            "your knowledge, please consider reinstalling the "
+                            "program!"),
+                          strConfFile.c_str());
+            }
+
+            if ( st.st_mode & (S_IRGRP | S_IROTH) )
+            {
+               if ( !msg.empty() )
+                  msg += "\n\n";
+
+               msg += String::Format
+                      (
+                        _("Configuration file '%s' was readable for other users.\n"
+                          "Passwords may have been compromised, please "
+                          "consider changing them!"),
+                        strConfFile.c_str()
+                      );
+            }
+
+            msg += "\n\n";
+
+            if ( chmod(strConfFile, S_IRUSR | S_IWUSR) == 0 )
+            {
+               msg += _("This has been fixed now, the file is no longer readable for others.");
+            }
+            else
+            {
+               msg << String::Format(_("The attempt to make the file unreadable "
+                                       "for others has failed: %s"),
+                                     strerror(errno));
+            }
+
+            wxLogError(msg);
+         }
+      }
+      //else: not an error, file may be simply not there yet
+   }
+#else  // Windows
+   // no such concerns here, just use the registry
+   if ( strConfFile.empty() )
+   {
+      strConfFile = M_APPLICATIONNAME;
+   }
+#endif // Win/Unix
+
+#ifdef OS_WIN
    // don't give explicit name, but rather use the default logic (it's
    // perfectly ok, for the registry case our keys are under
    // vendor\appname)
@@ -784,7 +937,7 @@ Profile::CreateGlobalConfig(const String & filename)
                                   "", "",
                                   wxCONFIG_USE_LOCAL_FILE |
                                   wxCONFIG_USE_GLOBAL_FILE);
-#  else  // Unix
+#else  // Unix
    // look for the global config file in the following places in order:
    //    1. compile-time specified installation dir
    //    2. run-time specified installation dir
@@ -810,14 +963,14 @@ Profile::CreateGlobalConfig(const String & filename)
 
    // we don't need the config file manager for this profile
    ms_GlobalConfig = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
-                                  filename, globalFile,
+                                  strConfFile, globalFile,
                                   wxCONFIG_USE_LOCAL_FILE|
                                   wxCONFIG_USE_GLOBAL_FILE);
 
    // don't give the others even read access to our config file as it stores,
    // among other things, the passwords
    ((wxFileConfig *)ms_GlobalConfig)->SetUmask(0077);
-#  endif // Unix/Windows
+#endif // Unix/Windows
 
    Profile *p = ProfileImpl::CreateProfile("",NULL);
    EnforcePolicy(p);

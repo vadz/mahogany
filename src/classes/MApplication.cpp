@@ -30,11 +30,8 @@
 #  include "MApplication.h"
 
 #  include  <wx/dynarray.h>
-#  include  <wx/dir.h>
 #  include  <wx/file.h>
 #endif   // USE_PCH
-
-#include <errno.h>
 
 #include "MPython.h"
 
@@ -60,18 +57,14 @@
 
 #include "MFCache.h"          // for MfStatusCache::CleanUp
 
+#include "CmdLineOpts.h"
+
 #include <wx/confbase.h>      // wxExpandEnvVars
 #include <wx/mimetype.h>      // wxMimeTypesManager
 
 #include <wx/dirdlg.h>        // wxDirDialog
 
 #include "wx/persctrl.h"      // for wxPControls::SetSettingsPath
-
-#ifdef OS_UNIX
-#  include <unistd.h>
-#  include <sys/stat.h>
-#  include <fcntl.h>
-#endif //Unix
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -120,22 +113,6 @@ extern const MPersMsgBox *M_MSGBOX_EMPTY_TRASH_ON_EXIT;
 extern const MPersMsgBox *M_MSGBOX_SEND_OUTBOX_ON_EXIT;
 
 // ----------------------------------------------------------------------------
-// constants
-// ----------------------------------------------------------------------------
-
-// VZ: Karsten, if this is really not used any more, please remove all code
-//     inside USE_ICON_SUBDIRS
-#ifdef USE_ICON_SUBDIRS
-
-// to map icon subdirs to numbers
-static const char *gs_IconSubDirs[] =
-{
-   "default", "GNOME", "KDE", "small"
-};
-
-#endif // USE_ICON_SUBDIRS
-
-// ----------------------------------------------------------------------------
 // private types
 // ----------------------------------------------------------------------------
 
@@ -181,6 +158,8 @@ MAppBase::MAppBase()
    m_isAway =
    m_autoAwayOn = FALSE;
 
+   m_cmdLineOptions = new CmdLineOptions;
+
    mApplication = this;
 
    ResetLastError();
@@ -193,368 +172,42 @@ MAppBase::~MAppBase()
    mApplication = NULL;
 }
 
-bool
-MAppBase::OnStartup()
+void
+MAppBase::ContinueStartup()
 {
-   // initialise the profile(s)
-   // -------------------------
-
-   // TODO: all this should probably go into some static Profile function
-   //       or at least a separate MAppBase method!
-
-   String strConfFile;
-#ifdef OS_UNIX
-   strConfFile = wxGetHomeDir();
-   if ( strConfFile.empty() )
-   {
-      // don't create our files in the root directory, try the current one
-      // instead
-      strConfFile = wxGetCwd();
-   }
-
-   if ( !strConfFile.empty() )
-   {
-      strConfFile << '/';
-   }
-   //else: it will be in the current one, what else can we do?
-
-   strConfFile << "/." << M_APPLICATIONNAME;
-
-   if ( !wxDir::Exists(strConfFile) )
-   {
-      if ( !wxMkdir(strConfFile, 0700) )
-      {
-         wxLogError(_("Cannot create the directory for configuration "
-                      "files '%s'."), strConfFile.c_str());
-
-         return FALSE;
-      }
-      else
-      {
-         wxLogInfo(_("Created directory '%s' for configuration files."),
-                   strConfFile.c_str());
-      }
-
-      // also create an empty config file with the right permissions:
-      String filename = strConfFile + "/config";
-
-      // pass false to Create() to avoid overwriting the existing file
-      wxFile file;
-      if ( !file.Create(filename, false, wxS_IRUSR | wxS_IWUSR) &&
-            !wxFile::Exists(filename) )
-      {
-         wxLogError(_("Could not create initial configuration file."));
-      }
-   }
-
-   // Check whether other users can write our config dir.
-   //
-   // This must not be allowed as they could change the behaviour of the
-   // program unknowingly to the user!
-   struct stat st;
-   if ( stat(strConfFile, &st) == 0 )
-   {
-      if ( st.st_mode & (S_IWGRP | S_IWOTH) )
-      {
-         // No other user must have write access to the config dir.
-         String msg;
-         msg.Printf(_("Configuration directory '%s' was writable for other users.\n"
-                      "The programs settings might have been changed without "
-                      "your knowledge and the passwords stored in your config\n"
-                      "file (if any) could have been compromised!\n\n"),
-                    strConfFile.c_str());
-
-         if ( chmod(strConfFile, st.st_mode & ~(S_IWGRP | S_IWOTH)) == 0 )
-         {
-            msg += _("This has been fixed now, the directory is no longer writable for others.");
-         }
-         else
-         {
-            msg << String::Format(_("Failed to correct the directory access (%s)"
-                                    "rights, please do it manually and "
-                                    "restart the program!"),
-                                  strerror(errno));
-         }
-
-         wxLogError(msg);
-      }
-   }
-   else
-   {
-      wxLogSysError(_("Failed to access the directory '%s' containing "
-                      "the configuration files."),
-                    strConfFile.c_str());
-   }
-
-   strConfFile += "/config";
-#else  // Windows
-   // no such concerns here, just use the registry
-   strConfFile = M_APPLICATIONNAME;
-#endif // Win/Unix
-
-   m_profile = Profile::CreateGlobalConfig(strConfFile);
-
-   // disable the use of environment variables if configured like this (this
-   // speeds up things relatively significantly under Windows - and as few
-   // people use evironment variables there, it is disabled for Windows by
-   // default)
-   m_profile->SetExpandEnvVars(READ_CONFIG_BOOL(m_profile, MP_EXPAND_ENV_VARS));
-
-#ifdef OS_UNIX
-   // Check whether other users can read our config file.
-   //
-   // This must not be allowed as we store passwords in it!
-   if ( stat(strConfFile, &st) == 0 )
-   {
-      if ( st.st_mode & (S_IWGRP | S_IWOTH | S_IRGRP | S_IROTH) )
-      {
-         // No other user must have access to the config file.
-         String msg;
-         if ( st.st_mode & (S_IWGRP | S_IWOTH) )
-         {
-            msg.Printf(_("Configuration file %s was writable by other users.\n"
-                         "The program settings could have been changed without\n"
-                         "your knowledge, please consider reinstalling the "
-                         "program!"),
-                       strConfFile.c_str());
-         }
-
-         if ( st.st_mode & (S_IRGRP | S_IROTH) )
-         {
-            if ( !msg.empty() )
-               msg += "\n\n";
-
-            msg += String::Format
-                   (
-                     _("Configuration file '%s' was readable for other users.\n"
-                       "Passwords may have been compromised, please "
-                       "consider changing them!"),
-                     strConfFile.c_str()
-                   );
-         }
-
-         msg += "\n\n";
-
-         if ( chmod(strConfFile, S_IRUSR | S_IWUSR) == 0 )
-         {
-            msg += _("This has been fixed now, the file is no longer readable for others.");
-         }
-         else
-         {
-            msg << String::Format(_("The attempt to make the file unreadable "
-                                    "for others has failed: %s"),
-                                  strerror(errno));
-         }
-
-         wxLogError(msg);
-      }
-   }
-   //else: not an error, file may be simply not there yet
-#endif // OS_UNIX
-
-#ifdef DEBUG
-   // enable tracing of the specified kinds of messages
-   wxArrayString
-      masks = strutil_restore_array(':', m_profile->readEntry("DebugTrace", ""));
-   size_t nMasks = masks.GetCount();
-   for ( size_t nMask = 0; nMask < nMasks; nMask++ )
-   {
-      wxLog::AddTraceMask(masks[nMask]);
-   }
-#endif // DEBUG
-
-   // NB: although this shouldn't normally be here (it's GUI-dependent code),
-   //     it's really impossible to put it into wxMApp because some dialogs
-   //     can be already shown from here and this initialization must be done
-   //     before.
-
-   // for the persistent controls to work (wx/persctrl.h) we must have
-   // a global wxConfig object
-   wxConfigBase::Set(m_profile->GetConfig());
-
-   // also set the path for persistent controls to save their state to
-   wxPControls::SetSettingsPath("/Settings/");
-
-#ifdef OS_UNIX
-   // now check our user ID: mahogany does not like being run as root
-   //
-   // NB: this can't be done before initializing the persistent controls path
-   //     above or it would be impossible to suppress this dialog (might be a
-   //     good thing to do, too, but the users risk to be annoyed by this)
-   if ( geteuid() == 0 )
-   {
-      if( !MDialog_YesNoDialog
-           (
-            _("You have started Mahogany as the super-user (root).\n"
-              "For security reasons we strongly recommend that you\n"
-              "exit the program now and run it as an ordinary user\n"
-              "instead.\n\n"
-              "Are you sure you want to continue?"),
-            NULL,
-            _("Run as root?"),
-            M_DLG_NO_DEFAULT,
-            M_MSGBOX_ASK_RUNASROOT) )
-      {
-         mApplication->SetLastError(M_ERROR_CANCEL);
-
-         return false;
-      }
-   }
-#endif // Unix
-
-   // find our directories
-   InitDirectories();
-
-#ifdef USE_ICON_SUBDIRS
-   // KB: we no longer use different subdirs:
-   // We need to set this before wxWindows has a chance to process
-   // idle events (splash screen), in case there was any problem with
-   // the config file, or it will show the unknown icon.
-   {
-      unsigned long idx = (unsigned long) READ_APPCONFIG(MP_ICONSTYLE);
-      if(idx < sizeof gs_IconSubDirs)
-         GetIconManager()->SetSubDirectory(gs_IconSubDirs[idx]);
-   }
-#endif // USE_ICON_SUBDIRS
-
-   // do it first to avoid any interactive stuff from popping up if configured
-   // to start up in the unattended mode
-   SetAwayMode(READ_APPCONFIG_BOOL(MP_AWAY_STATUS));
-
-   // show the splash screen (do it as soon as we have profile to read
-   // MP_SHOWSPLASH from) unless this is our first run in which case it will
-   // disappear any how - not showing it avoids some ugly flicker on screen
-   if ( !READ_APPCONFIG(MP_FIRSTRUN) && READ_APPCONFIG(MP_SHOWSPLASH) )
-   {
-      // no parent because no frames created yet
-      MDialog_AboutDialog(NULL);
-   }
-
-   // verify (and upgrade if needed) our settings
-   // -------------------------------------------
-
-   if ( !CheckConfiguration() )
-   {
-      ERRORMESSAGE((_("Program execution aborted.")));
-
-      return false;
-   }
-
-#ifdef OS_WIN
-   // cclient extra initialization under Windows
-   wxString strHome;
-   mail_parameters((MAILSTREAM *)NULL, SET_HOMEDIR, (void *)wxGetHomeDir(&strHome));
-#endif // OS_WIN
-
-#ifdef USE_DIALUP
-   // must be done before using the network
-   SetupOnlineManager();
-#endif // USE_DIALUP
-
-   // extend path for commands, look in M's dirs first
-   String pathEnv;
-   pathEnv << "PATH="
-       << GetLocalDir() << "/scripts" << PATH_SEPARATOR
-       << GetDataDir() << "/scripts";
-
-   const char *path = getenv("PATH");
-   if ( path )
-      pathEnv << PATH_SEPARATOR << path;
-
-   // on some systems putenv() takes "char *", cast silents the warnings but
-   // should be harmless otherwise
-   putenv((char *)pathEnv.c_str());
-
-   // initialise python interpreter
-#ifdef  USE_PYTHON
-   // having the same error message each time M is started is annoying, so
-   // give the user a possibility to disable it
-   if ( READ_CONFIG(m_profile, MP_USEPYTHON) && ! InitPython() )
-   {
-      static const char *msg =
-       "Detected a possible problem with your Python installation.\n"
-       "A properly installed Python system is required for using\n"
-       "M's scripting capabilities. Some minor functionality might\n"
-       "be missing without it, however the core functions will be\n"
-       "unaffected.\n"
-       "Would you like to disable Python support for now?\n"
-       "(You can re-enable it later from the options dialog)";
-      if ( MDialog_YesNoDialog(_(msg)) )
-      {
-         // disable it
-         m_profile->writeEntry(MP_USEPYTHON, FALSE);
-      }
-   }
-#endif //USE_PYTHON
-
-   // load any modules requested: notice that this must be done as soon as
-   // possible as filters module is already used by the folder opening code
-   // below
-   LoadModules();
-
-   // create and show the main program window
-   if ( !CreateTopLevelFrame() )
-   {
-      wxLogError(_("Failed to create the program window."));
-
-      return false;
-   }
-
-   // now we can create the log window (the child of the main frame)
-   if ( READ_APPCONFIG(MP_SHOWLOG) )
-   {
-      ShowLog();
-   }
-
-   // also start file logging if configured
-   SetLogFile(READ_APPCONFIG(MP_LOGFILE));
-
-   // now we have finished the vital initialization and so can assume
-   // everything mostly works
-   m_cycle = Running;
-
-   // and as we have the main window, we can initialize the modules which
-   // use it
-   InitModules();
-
-   // register with the event subsystem
-   // ---------------------------------
-
-   // should never fail...
-   m_eventOptChangeReg = MEventManager::Register(*this,
-                                                 MEventId_OptionsChange);
-   CHECK( m_eventOptChangeReg, FALSE,
-          "failed to register event handler for options change event " );
-   m_eventFolderUpdateReg = MEventManager::Register(*this,
-                                                    MEventId_FolderUpdate);
-   CHECK( m_eventFolderUpdateReg, FALSE,
-          "failed to register event handler for folder status event " );
-
    // open all windows we open initially
    // ----------------------------------
 
-   // open any composer windows we may have
+   // open any interrupted composer windows we may have
    Composer::RestoreAll();
 
-   // open the remembered folder in the main frame unless disabled
-   if ( !READ_APPCONFIG(MP_DONTOPENSTARTUP) )
+   // open the remembered folder in the main frame unless disabled: note that
+   // specifying a folder on the command line still overrides this
+   String foldername = m_cmdLineOptions->folder;
+
+   // if an empty folder was explicitly given, don't open anything
+   if ( foldername.empty() && !m_cmdLineOptions->useFolder )
    {
-      String foldername = READ_APPCONFIG(MP_MAINFOLDER);
-      if ( !foldername.empty() )
+      if ( !READ_APPCONFIG(MP_DONTOPENSTARTUP) )
       {
-         MFolder *folder = MFolder::Get(foldername);
-         if ( folder )
-         {
-            // make sure it doesn't go away after OpenFolder()
-            folder->IncRef();
-            ((wxMainFrame *)m_topLevelFrame)->OpenFolder(folder);
-            folder->DecRef();
-         }
-         else // huh?
-         {
-            wxLogWarning(_("Failed to reopen folder '%s', it doesn't seem "
-                           "to exist any more."), foldername.c_str());
-         }
+         foldername = READ_APPCONFIG_TEXT(MP_MAINFOLDER);
+      }
+   }
+
+   if ( !foldername.empty() )
+   {
+      MFolder *folder = MFolder::Get(foldername);
+      if ( folder )
+      {
+         // make sure it doesn't go away after OpenFolder()
+         folder->IncRef();
+         ((wxMainFrame *)m_topLevelFrame)->OpenFolder(folder);
+         folder->DecRef();
+      }
+      else // invalid folder name
+      {
+         wxLogWarning(_("Failed to open folder '%s' in the main window."),
+                      foldername.c_str());
       }
    }
 
@@ -625,8 +278,247 @@ MAppBase::OnStartup()
       ShowAdbFrame(TopLevelFrame());
    }
 
-   // cache the auto away flag as it will be checked often in UpdateAwayMode
-   m_autoAwayOn = READ_APPCONFIG_BOOL(MP_AWAY_AUTO_ENTER);
+   // open the composer if requested on command line
+   // ----------------------------------------------
+
+   Composer *composer;
+   if ( !m_cmdLineOptions->composer.to.empty() )
+   {
+      composer = Composer::CreateNewMessage();
+   }
+   else if ( !m_cmdLineOptions->composer.newsgroups.empty() )
+   {
+      composer = Composer::CreateNewArticle();
+   }
+   else
+   {
+      composer = NULL;
+   }
+
+   if ( composer )
+   {
+      composer->AddRecipients(m_cmdLineOptions->composer.bcc,
+                              Composer::Recipient_Bcc);
+      composer->AddRecipients(m_cmdLineOptions->composer.cc,
+                              Composer::Recipient_Cc);
+      composer->AddRecipients(m_cmdLineOptions->composer.newsgroups,
+                              Composer::Recipient_Newsgroup);
+      composer->AddRecipients(m_cmdLineOptions->composer.to,
+                              Composer::Recipient_To);
+
+      composer->SetSubject(m_cmdLineOptions->composer.subject);
+
+      composer->InsertText(m_cmdLineOptions->composer.body);
+      composer->ResetDirty();
+
+      // the composer should be in front of everything
+      composer->GetFrame()->Raise();
+   }
+}
+
+bool
+MAppBase::OnStartup()
+{
+   // initialise the profile(s)
+   // -------------------------
+
+   m_profile = Profile::CreateGlobalConfig(m_cmdLineOptions->configFile);
+
+   // disable the use of environment variables if configured like this (this
+   // speeds up things relatively significantly under Windows - and as few
+   // people use evironment variables there, it is disabled for Windows by
+   // default)
+   m_profile->SetExpandEnvVars(READ_CONFIG_BOOL(m_profile, MP_EXPAND_ENV_VARS));
+
+#ifdef DEBUG
+   // enable tracing of the specified kinds of messages
+   wxArrayString
+      masks = strutil_restore_array(':', m_profile->readEntry("DebugTrace", ""));
+   size_t nMasks = masks.GetCount();
+   for ( size_t nMask = 0; nMask < nMasks; nMask++ )
+   {
+      wxLog::AddTraceMask(masks[nMask]);
+   }
+#endif // DEBUG
+
+   // NB: although this shouldn't normally be here (it's GUI-dependent code),
+   //     it's really impossible to put it into wxMApp because some dialogs
+   //     can be already shown from here and this initialization must be done
+   //     before.
+
+   // for the persistent controls to work (wx/persctrl.h) we must have
+   // a global wxConfig object
+   wxConfigBase::Set(m_profile->GetConfig());
+
+   // also set the path for persistent controls to save their state to
+   wxPControls::SetSettingsPath("/Settings/");
+
+#ifdef OS_UNIX
+   // now check our user ID: mahogany does not like being run as root
+   //
+   // NB: this can't be done before initializing the persistent controls path
+   //     above or it would be impossible to suppress this dialog (might be a
+   //     good thing to do, too, but the users risk to be annoyed by this)
+   if ( geteuid() == 0 )
+   {
+      if( !MDialog_YesNoDialog
+           (
+            _("You have started Mahogany as the super-user (root).\n"
+              "For security reasons we strongly recommend that you\n"
+              "exit the program now and run it as an ordinary user\n"
+              "instead.\n\n"
+              "Are you sure you want to continue?"),
+            NULL,
+            _("Run as root?"),
+            M_DLG_NO_DEFAULT,
+            M_MSGBOX_ASK_RUNASROOT) )
+      {
+         mApplication->SetLastError(M_ERROR_CANCEL);
+
+         return false;
+      }
+   }
+#endif // Unix
+
+   // find our directories
+   InitDirectories();
+
+   // safe mode implies interactive
+   if ( !m_cmdLineOptions->safe )
+   {
+      // do it first to avoid any interactive stuff from popping up if
+      // configured to start up in the unattended mode
+      SetAwayMode(READ_APPCONFIG_BOOL(MP_AWAY_STATUS));
+   }
+
+   // show the splash screen (do it as soon as we have profile to read
+   // MP_SHOWSPLASH from) unless this is our first run in which case it will
+   // disappear anyhow - not showing it avoids some ugly flicker on screen
+   if ( !READ_APPCONFIG(MP_FIRSTRUN) && READ_APPCONFIG(MP_SHOWSPLASH) )
+   {
+      // don't show splash in safe mode as it might be a source of the problems
+      // as well
+      if ( !m_cmdLineOptions->safe )
+      {
+         // no parent because no frames created yet
+         MDialog_AboutDialog(NULL);
+      }
+   }
+
+   // verify (and upgrade if needed) our settings
+   // -------------------------------------------
+
+   if ( !CheckConfiguration() )
+   {
+      ERRORMESSAGE((_("Program execution aborted.")));
+
+      return false;
+   }
+
+   // extend path for commands, look in M's dirs first
+   String pathEnv;
+   pathEnv << "PATH="
+           << GetLocalDir() << "/scripts" << PATH_SEPARATOR
+           << GetDataDir() << "/scripts";
+
+   const char *path = getenv("PATH");
+   if ( path )
+      pathEnv << PATH_SEPARATOR << path;
+
+   // on some systems putenv() takes "char *", cast silents the warnings but
+   // should be harmless otherwise
+   putenv((char *)pathEnv.c_str());
+
+   // initialise python interpreter
+#ifdef  USE_PYTHON
+   // having the same error message each time M is started is annoying, so
+   // give the user a possibility to disable it
+   if ( READ_CONFIG(m_profile, MP_USEPYTHON) && ! InitPython() )
+   {
+      static const char *msg =
+       "Detected a possible problem with your Python installation.\n"
+       "A properly installed Python system is required for using\n"
+       "M's scripting capabilities. Some minor functionality might\n"
+       "be missing without it, however the core functions will be\n"
+       "unaffected.\n"
+       "Would you like to disable Python support for now?\n"
+       "(You can re-enable it later from the options dialog)";
+      if ( MDialog_YesNoDialog(_(msg)) )
+      {
+         // disable it
+         m_profile->writeEntry(MP_USEPYTHON, FALSE);
+      }
+   }
+#endif //USE_PYTHON
+
+   // the modules can contain bugs, don't load in safe mode
+   if ( !m_cmdLineOptions->safe )
+   {
+      // load any modules requested: notice that this must be done as soon as
+      // possible as filters module is already used by the folder opening code
+      // below
+      LoadModules();
+   }
+
+   // create and show the main program window
+   if ( !CreateTopLevelFrame() )
+   {
+      wxLogError(_("Failed to create the program window."));
+
+      return false;
+   }
+
+   // now we can create the log window (the child of the main frame)
+   if ( READ_APPCONFIG(MP_SHOWLOG) )
+   {
+      ShowLog();
+
+      // we want the main window to be above the log frame
+      m_topLevelFrame->Raise();
+   }
+
+   // also start file logging if configured
+   SetLogFile(READ_APPCONFIG(MP_LOGFILE));
+
+   // now we have finished the vital initialization and so can assume
+   // everything mostly works
+   m_cycle = Running;
+
+   // register with the event subsystem
+   // ---------------------------------
+
+   // should never fail...
+   m_eventOptChangeReg = MEventManager::Register(*this,
+                                                 MEventId_OptionsChange);
+   CHECK( m_eventOptChangeReg, FALSE,
+          "failed to register event handler for options change event " );
+   m_eventFolderUpdateReg = MEventManager::Register(*this,
+                                                    MEventId_FolderUpdate);
+   CHECK( m_eventFolderUpdateReg, FALSE,
+          "failed to register event handler for folder status event " );
+
+   // finish non critical initialization
+   // ----------------------------------
+
+   if ( !m_cmdLineOptions->safe )
+   {
+      ContinueStartup();
+
+      // as we now have the main window, we can initialize the modules which
+      // use it
+      InitModules();
+
+      // cache the auto away flag as it will be checked often in UpdateAwayMode
+      m_autoAwayOn = READ_APPCONFIG_BOOL(MP_AWAY_AUTO_ENTER);
+   }
+   else // safe mode
+   {
+      m_autoAwayOn = false;
+   }
+
+   // we won't need the command line options any more
+   delete m_cmdLineOptions;
+   m_cmdLineOptions = NULL;
 
    return TRUE;
 }
@@ -852,14 +744,6 @@ MAppBase::OnMEvent(MEventData& event)
 #ifdef USE_DIALUP
       SetupOnlineManager(); // make options change effective
 #endif // USE_DIALUP
-
-#ifdef USE_ICON_SUBDIRS
-     {
-         unsigned long idx = (unsigned long)  READ_APPCONFIG(MP_ICONSTYLE);
-         if(idx < sizeof gs_IconSubDirs)
-            GetIconManager()->SetSubDirectory(gs_IconSubDirs[idx]);
-     }
-#endif // USE_ICON_SUBDIRS
    }
    else if (event.GetId() == MEventId_FolderUpdate)
    {

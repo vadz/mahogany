@@ -6,7 +6,8 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
-29.03.02 VZ: save unsaved messages when on crash or interrupt
+29.03.02 VZ: added command line options to open the composer immediately
+28.03.02 VZ: save unsaved messages when on crash or interrupt
 18.03.02 VZ: added "home folder" option to the folder tree
 17.03.02 VZ: implemented autosaving of the messages being composed
 16.03.02 VZ: implemented message postponing and "Drafts" folder

@@ -43,6 +43,7 @@
 #include <wx/menu.h>
 #include <wx/statusbr.h>
 #include <wx/fs_mem.h>
+#include <wx/cmdline.h>
 
 #ifdef USE_DIALUP
 #  include <wx/dialup.h>
@@ -68,6 +69,8 @@
 #include "Composer.h"       // for SaveAll()
 
 #include "MFCache.h"
+
+#include "CmdLineOpts.h"
 
 #ifdef OS_WIN
 #   include <winnls.h>
@@ -693,6 +696,7 @@ wxMApp::OnInit()
 #endif
 
 #if wxCHECK_VERSION(2, 3, 2)
+   // parse our command line options inside OnInit()
    if ( !wxApp::OnInit() )
       return false;
 #endif // wxWin 2.3.2+
@@ -873,12 +877,6 @@ wxMApp::OnInit()
          //      don't complain any more about missing catalogs
       }
 #endif // USE_I18N
-
-      // we want the main window to be above the log frame
-      if ( IsLogShown() )
-      {
-         m_topLevelFrame->Raise();
-      }
 
       // at this moment we're fully initialized, i.e. profile and log
       // subsystems are working and the main window is created
@@ -1936,6 +1934,163 @@ void wxMApp::ShowLog(bool doShow)
       // reuse the existing one
       m_logWindow->Show(doShow);
    }
+}
+
+// ----------------------------------------------------------------------------
+// command line parsing
+// ----------------------------------------------------------------------------
+
+#define OPTION_BCC         "bcc"
+#define OPTION_BODY        "body"
+#define OPTION_CC          "cc"
+#define OPTION_CONFIG      "config"
+#define OPTION_FOLDER      "folder"
+#define OPTION_NEWSGROUP   "newsgroup"
+#define OPTION_SAFE        "safe"
+#define OPTION_SUBJECT     "subject"
+
+void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
+{
+   wxApp::OnInitCmdLine(parser);
+
+   static const wxCmdLineEntryDesc cmdLineDesc[] =
+   {
+      // -b or --bcc to specify the BCC headers
+      {
+         wxCMD_LINE_OPTION,
+         "b",
+         OPTION_BCC,
+         gettext_noop("specify the blind carbon-copy (BCC) recipients"),
+      },
+
+      // --body to specify the message body
+      {
+         wxCMD_LINE_OPTION,
+         NULL,
+         OPTION_BODY,
+         gettext_noop("specify the body of the message"),
+      },
+
+      // -c or --cc to specify the CC headers
+      {
+         wxCMD_LINE_OPTION,
+         "c",
+         OPTION_CC,
+         gettext_noop("specify the carbon-copy (CC) recipients"),
+      },
+
+      // --config=file to specify an alternative config file to use
+      {
+         wxCMD_LINE_OPTION,
+         NULL,
+         OPTION_CONFIG,
+         gettext_noop("specify the alternative configuration file to use"),
+      },
+
+      // -f or --folder to specify the folder to open in the main frame
+      {
+         wxCMD_LINE_OPTION,
+         "f",
+         OPTION_FOLDER,
+         gettext_noop("specify the folder to open in the main window"),
+      },
+
+      // --newsgroup to specify the newsgroup to post the message to
+      {
+         wxCMD_LINE_OPTION,
+         NULL,
+         OPTION_NEWSGROUP,
+         gettext_noop("the newsgroup to post the message to"),
+      },
+
+      // --safe option to prevent crashes at startup
+      {
+         wxCMD_LINE_SWITCH,
+         NULL,
+         OPTION_SAFE,
+         gettext_noop("don't perform any operations on startup"),
+      },
+
+      // -s or --subject to specify the subject
+      {
+         wxCMD_LINE_OPTION,
+         "s",
+         OPTION_SUBJECT,
+         gettext_noop("specify the subject"),
+      },
+
+      // <address> to write to
+      {
+         wxCMD_LINE_PARAM,
+         NULL,
+         NULL,
+         "address(es) to start composing the message to",
+         wxCMD_LINE_VAL_STRING,
+         wxCMD_LINE_PARAM_OPTIONAL | wxCMD_LINE_PARAM_MULTIPLE
+      },
+
+      // terminator
+      { wxCMD_LINE_NONE }
+   };
+
+   parser.SetDesc(cmdLineDesc);
+}
+
+bool wxMApp::OnCmdLineParsed(wxCmdLineParser& parser)
+{
+   if ( !wxApp::OnCmdLineParsed(parser) )
+      return false;
+
+   // first get the options values
+   bool startComposer = parser.Found(OPTION_BCC, &m_cmdLineOptions->composer.bcc);
+   startComposer |= parser.Found(OPTION_BODY, &m_cmdLineOptions->composer.body);
+   startComposer |= parser.Found(OPTION_CC, &m_cmdLineOptions->composer.cc);
+   startComposer |= parser.Found(OPTION_SUBJECT, &m_cmdLineOptions->composer.subject);
+
+   bool hasRcpt = parser.Found(OPTION_NEWSGROUP, &m_cmdLineOptions->composer.newsgroups);
+   size_t count = parser.GetParamCount();
+   if ( count > 0 )
+   {
+      hasRcpt = true;
+
+      String to;
+      for ( size_t n = 0; n < count; n++ )
+      {
+         if ( !to.empty() )
+            to += ", ";
+
+         to += parser.GetParam(n);
+      }
+
+      m_cmdLineOptions->composer.to = to;
+   }
+
+   m_cmdLineOptions->safe = parser.Found(OPTION_SAFE);
+
+   if ( startComposer )
+   {
+      if ( m_cmdLineOptions->safe )
+      {
+         wxLogWarning(_("Composer options are ignored in safe mode."));
+      }
+      else
+      {
+         // if we have any of the message composing-related options, we must
+         // have at least one rcpt as well
+         if ( !hasRcpt )
+         {
+            wxLogError(_("A message recipient or a newsgroup must be specified "
+                         "if any of the composer-related options are used."));
+            return false;
+         }
+      }
+   }
+
+   parser.Found(OPTION_CONFIG, &m_cmdLineOptions->configFile);
+   m_cmdLineOptions->useFolder = parser.Found(OPTION_FOLDER,
+                                              &m_cmdLineOptions->folder);
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------

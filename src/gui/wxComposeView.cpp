@@ -818,6 +818,9 @@ Composer::RecipientType wxAddressTextCtrl::DoExpand(bool quiet)
 
    // remove "mailto:" prefix if it's there - this is convenient when you paste
    // in an URL from the web browser
+   //
+   // TODO: add support for the mailto URL parameters, i.e. should support
+   //       things like "mailto:foo@bar.com?subject=Please%20help"
    String newText;
    if ( !textOrig.StartsWith("mailto:", &newText) )
    {
