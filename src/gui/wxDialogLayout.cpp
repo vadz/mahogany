@@ -757,18 +757,26 @@ wxNotebookDialog::SendOptionsChangeEvent()
 
    // notify everybody who cares about the change
    ProfileBase *profile = GetProfile();
-   if(! profile) //FIXME!!!
+
+   if ( !profile )
    {
-      ASSERT_MSG( profile, "SendOptionsChangeEvent() with no profile?");
-      return;
+      // this may happen when cancelling the creation of a folder, so
+      // just ignore it (nobody can be interested in it anyhow, this
+      // event doesn't carry any useful information)
+      wxASSERT_MSG( m_lastBtn == MEventOptionsChangeData::Cancel,
+                    "event from Apply or Ok should have a profile!" );
    }
-   MEventOptionsChangeData *data = new MEventOptionsChangeData
-                                       (
-                                        profile,
-                                        m_lastBtn
-                                       );
-   MEventManager::Send(data);
-   profile->DecRef();
+   else
+   {
+      MEventOptionsChangeData *data = new MEventOptionsChangeData
+                                          (
+                                           profile,
+                                           m_lastBtn
+                                          );
+
+      MEventManager::Send(data);
+      profile->DecRef();
+   }
 
    // event sent, reset the flag value
    m_lastBtn = MEventOptionsChangeData::Invalid;

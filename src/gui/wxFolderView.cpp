@@ -248,7 +248,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
    // Without profile, name is relative to /Setting section, nothing we can do about
    wxPListCtrl::Create(name, parent, M_WXID_FOLDERVIEW_LISTCTRL,
-                       wxDefaultPosition, wxSize(w,h), wxLC_REPORT);
+                       wxDefaultPosition, wxSize(w,h), wxLC_REPORT | wxNO_BORDER);
 
    m_columns[WXFLC_STATUS] = READ_CONFIG(p,MP_FLC_STATUSCOL);
    m_columns[WXFLC_DATE] = READ_CONFIG(p,MP_FLC_DATECOL);

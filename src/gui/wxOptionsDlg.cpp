@@ -1522,6 +1522,7 @@ wxRestoreDefaultsDialog::wxRestoreDefaultsDialog(ProfileBase *profile,
    wxStaticBox *box = CreateStdButtonsAndBox(_("&All settings"));
 
    // create a short help message above
+
    wxStaticText *msg = new wxStaticText
                            (
                               this, -1,
