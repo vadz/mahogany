@@ -326,7 +326,7 @@ strutil_countquotinglevels(const char *string, int max_white, int max_alpha)
          c++;
       }
 
-      while ( isalpha(*c) )
+      while ( isalpha((unsigned char)*c) )
       {
          num_alpha++;
          c++;
