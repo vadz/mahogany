@@ -307,53 +307,62 @@ public:
             return FALSE;
          }
 
-         // check all the hostnames
-         String check, tmp;
-         int failed = 0;
-         if( !CheckHostName(gs_installWizardData.pop) )
+         // check all the hostnames unless we use dial up - we can't call
+         // MApp::IsOnline() here yet because this stuff is not yet
+         // configured, so use wxDialUpManager directly
+         wxDialUpManager *dialupMan = wxDialUpManager::Create();
+         if ( dialupMan->IsOnline() )
          {
-            failed++;
-            tmp.Printf(_("POP3 server '%s'.\n"),
-                       gs_installWizardData.pop.c_str());
-            check += tmp;
+            String check, tmp;
+            int failed = 0;
+            if( !CheckHostName(gs_installWizardData.pop) )
+            {
+               failed++;
+               tmp.Printf(_("POP3 server '%s'.\n"),
+                          gs_installWizardData.pop.c_str());
+               check += tmp;
+            }
+            if( !CheckHostName(gs_installWizardData.smtp) )
+            {
+               failed++;
+               tmp.Printf(_("SMTP server '%s'.\n"),
+                          gs_installWizardData.smtp.c_str());
+               check += tmp;
+            }
+            if( !CheckHostName(gs_installWizardData.imap) )
+            {
+               failed++;
+               tmp.Printf(_("IMAP server '%s'.\n"),
+                          gs_installWizardData.imap.c_str());
+               check += tmp;
+            }
+            if( !CheckHostName(gs_installWizardData.nntp) )
+            {
+               failed++;
+               tmp.Printf(_("NNTP server '%s'.\n"),
+                          gs_installWizardData.nntp.c_str());
+               check += tmp;
+            }
+            if(failed)
+            {
+               tmp.Printf(_("%d of the server names specified could not\n"
+                            "be resolved. This could be due to a temporary\n"
+                            "network problem, or because the server name really\n"
+                            "does not exist. If you use dialup-networking and\n"
+                            "are not currently connected, this is perfectly normal.\n"
+                            "The failed server name(s) were:\n"),
+                          failed);
+               check = tmp + check;
+               check += _("\nDo you want to change these settings?");
+               if( MDialog_YesNoDialog(check,this,
+                                       _("Potentially wrong server names"),
+                                       TRUE, NULL) )
+                  return FALSE;
+            }
          }
-         if( !CheckHostName(gs_installWizardData.smtp) )
-         {
-            failed++;
-            tmp.Printf(_("SMTP server '%s'.\n"),
-                       gs_installWizardData.smtp.c_str());
-            check += tmp;
-         }
-         if( !CheckHostName(gs_installWizardData.imap) )
-         {
-            failed++;
-            tmp.Printf(_("IMAP server '%s'.\n"),
-                       gs_installWizardData.imap.c_str());
-            check += tmp;
-         }
-         if( !CheckHostName(gs_installWizardData.nntp) )
-         {
-            failed++;
-            tmp.Printf(_("NNTP server '%s'.\n"),
-                       gs_installWizardData.nntp.c_str());
-            check += tmp;
-         }
-         if(failed)
-         {
-            tmp.Printf(_("%d of the server names specified could not\n"
-                         "be resolved. This could be due to a temporary\n"
-                         "network problem, or because the server name really\n"
-                         "does not exist. If you use dialup-networking and\n"
-                         "are not currently connected, this is perfectly normal.\n"
-                         "The failed server name(s) were:\n"),
-                       failed);
-            check = tmp + check;
-            check += _("\nDo you want to change these settings?");
-            if( MDialog_YesNoDialog(check,this,
-                                    _("Potentially wrong server names"),
-                                    TRUE, NULL) )
-               return FALSE;
-         }
+
+         delete dialupMan;
+
          return TRUE;
       }
 
