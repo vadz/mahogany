@@ -547,17 +547,51 @@ void LayoutViewer::InsertText(const String& text, const MTextStyle& style)
    wxLayoutImportText(llist, text, enc);
 }
 
-void LayoutViewer::InsertURL(const String& text, const String& url)
+void LayoutViewer::InsertURL(const String& textOrig, const String& url)
 {
-   wxLayoutObject *obj = new wxLayoutObjectText(text);
+   wxLayoutList *llist = m_window->GetLayoutList();
+
    LayoutUserData* data = new LayoutUserData(new ClickableInfo(url));
-   obj->SetUserData(data);
+   SetTextColour(GetOptions().UrlCol);
+
+   // the text can contain newlines (when we have a wrapped URL) but a single
+   // wxLayoutObject can't span several lines
+   String text = textOrig,
+          textRest;
+   do
+   {
+      const char *p0 = text;
+      const char *p = strchr(p0, '\n');
+      if ( p )
+      {
+         textRest = text.substr(p - p0 + 1);
+
+         if ( p > p0 && *(p - 1) == '\r' )
+         {
+            p--;
+         }
+
+         text.erase(p - p0);
+      }
+      else // no newline
+      {
+         textRest.clear();
+      }
+
+      wxLayoutObject *obj = new wxLayoutObjectText(text);
+      obj->SetUserData(data);
+      llist->Insert(obj);
+
+      if ( p )
+         llist->LineBreak();
+
+      text = textRest;
+   }
+   while ( !text.empty() );
+
    // SetUserData has incremented the refCount, which is now 2
    // (it was already 1 right after creation)
    data->DecRef();
-
-   SetTextColour(GetOptions().UrlCol);
-   m_window->GetLayoutList()->Insert(obj);
 }
 
 void LayoutViewer::InsertSignature(const String& signature)
