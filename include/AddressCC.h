@@ -44,9 +44,6 @@ public:
 protected:
    virtual bool IsSameAs(const Address& addr) const;
 
-   // dtor deletes m_adr too!
-   virtual ~AddressCC();
-
 private:
    // the cclient ADDRESS struct we correspond to (we own and will delete it!)
    mail_address *m_adr;
@@ -68,18 +65,22 @@ public:
    // create the address from cclient ADDRESS struct
    AddressListCC(mail_address *adr);
 
+   // free the addresses
+   virtual ~AddressListCC();
+
    // implement the base class pure virtuals  
    virtual Address *GetFirst() const;
    virtual Address *GetNext(const Address *addr) const;
    virtual String GetAddresses() const;
-
-protected:
-   virtual bool IsSameAs(const AddressList& addr) const;
+   virtual bool IsSameAs(const AddressList *addr) const;
 
 private:
    // pointer to the head of the linked list of addresses
    AddressCC *m_addrCC;
+
+   MOBJECT_DEBUG(AddressListCC)
 };
+
 #endif // _ADDRESSCC_H_
 
 

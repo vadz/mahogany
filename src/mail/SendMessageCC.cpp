@@ -61,6 +61,8 @@
 
 #include "MThread.h"
 
+#include "AddressCC.h"
+
 #include "SendMessage.h"
 #include "SendMessageCC.h"
 
@@ -500,61 +502,72 @@ SendMessageCC::SetupAddresses(void)
 }
 
 void
+SendMessageCC::SetAddressField(ADDRESS **pAdr, const String& address)
+{
+   ASSERT_MSG( !*pAdr, "shouldn't be called twice" );
+
+   if ( address.empty() )
+   {
+      // nothing to do
+      return;
+   }
+
+   // first remove '#fcc' stuff
+   String addressNoFCC = address;
+   ExtractFccFolders(addressNoFCC);
+
+   // then feed all to c-client
+   //
+   // NB: rfc822_parse_adrlist() modifies the strings passed to it!
+   char *hostCopy = m_DefaultHost.empty() ? NULL : strdup(m_DefaultHost);
+   char *addressCopy = strdup(addressNoFCC);
+
+   rfc822_parse_adrlist(pAdr, addressCopy, hostCopy);
+
+   free(addressCopy);
+   free(hostCopy);
+
+   // finally filter out any invalid addressees
+   ADDRESS *adrPrev = *pAdr,
+           *adr = *pAdr;
+   while ( adr )
+   {
+      ADDRESS *adrNext = adr->next;
+
+      if ( adr->error )
+      {
+         adrPrev->next = adr->next;
+
+         DBGMESSAGE(("Invalid recipient address '%s' ignored.",
+                    AddressCC(adr).GetAddress().c_str()));
+
+         // prevent mail_free_address() from freeing the entire list tail
+         adr->next = NULL;
+
+         mail_free_address(&adr);
+      }
+
+      adr = adrNext;
+   }
+
+   EncodeAddressList(*pAdr);
+}
+
+void
 SendMessageCC::SetAddresses(const String &to,
                             const String &cc,
                             const String &bcc)
 {
-   // TODO should call EncodeHeader() on the name parts of the addresses!
-
-   String
-      tmpstr;
-   char
-      * tmp,
-      * tmp2;
-
    // If Build() has already been called, then it's too late to change
    // anything.
    ASSERT(m_headerNames == NULL);
    ASSERT(m_Protocol == Prot_SMTP || m_Protocol == Prot_Sendmail);
 
-   if(to.Length())
-   {
-      ASSERT(m_Envelope->to == NIL);
-      tmpstr = to;
-      ExtractFccFolders(tmpstr);
-      tmp = strutil_strdup(tmpstr);
-      tmp2 = m_DefaultHost.Length() ? strutil_strdup(m_DefaultHost) : NIL;
-      rfc822_parse_adrlist (&m_Envelope->to,tmp,tmp2);
-      delete [] tmp;
-      delete [] tmp2;
-   }
-   if(cc.Length())
-   {
-      ASSERT(m_Envelope->cc == NIL);
-      tmpstr = cc;
-      ExtractFccFolders(tmpstr);
-      tmp = strutil_strdup(tmpstr);
-      tmp2 = m_DefaultHost.Length() ? strutil_strdup(m_DefaultHost) : NIL;
-      rfc822_parse_adrlist (&m_Envelope->cc,tmp,tmp2);
-      delete [] tmp;
-      delete [] tmp2;
-   }
-   if(bcc.Length())
-   {
-      m_Bcc = bcc; // in case we send later, we need this
-      ASSERT(m_Envelope->bcc == NIL);
-      tmpstr = bcc;
-      ExtractFccFolders(tmpstr);
-      tmp = strutil_strdup(tmpstr);
-      tmp2 = m_DefaultHost.Length() ? strutil_strdup(m_DefaultHost) : NIL;
-      rfc822_parse_adrlist (&m_Envelope->bcc,tmp,tmp2);
-      delete [] tmp;
-      delete [] tmp2;
-   }
+   SetAddressField(&m_Envelope->to, to);
+   SetAddressField(&m_Envelope->cc, cc);
+   SetAddressField(&m_Envelope->bcc, bcc);
 
-   EncodeAddressList(m_Envelope->to);
-   EncodeAddressList(m_Envelope->cc);
-   EncodeAddressList(m_Envelope->bcc);
+   m_Bcc = bcc; // in case we send later, we need this
 }
 
 void

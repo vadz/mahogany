@@ -203,7 +203,10 @@ private:
    kbStringList m_FccList;
    /// Parses string for folder aliases, removes them and stores them in m_FccList.
    void ExtractFccFolders(String &addresses);
-//@}
+
+   /// sets one address field in the envelope
+   void SetAddressField(ADDRESS **pAdr, const String& address);
+   //@}
 
    // give it access to m_headerNames nad m_headerValues
    friend class Rfc822OutputRedirector;

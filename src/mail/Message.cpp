@@ -74,7 +74,7 @@ SplitAddress(const String& address, String *fullname)
 
    AddressList_obj addrList = address;
 
-   Address_obj addr = addrList->GetFirst();
+   Address *addr = addrList->GetFirst();
    if ( !addr )
    {
       wxLogDebug("Invalid address '%s'", address.c_str());
@@ -99,7 +99,7 @@ ExtractAddress(const String& address, String *email)
 
    AddressList_obj addrList = address;
 
-   Address_obj addr = addrList->GetFirst();
+   Address *addr = addrList->GetFirst();
    if ( !addr )
    {
       wxLogDebug("Invalid address '%s'", address.c_str());

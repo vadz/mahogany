@@ -60,6 +60,8 @@
 #include "Mdefaults.h"
 #include "Mpers.h"
 
+#include "Address.h"
+
 #include "FolderView.h"
 #include "MailFolder.h"
 #include "Message.h"
@@ -83,6 +85,7 @@
 
 #include "MessageTemplate.h"
 #include "TemplateDialog.h"
+
 #include "MModule.h"
 #include "modules/Calendar.h"
 
@@ -1419,10 +1422,10 @@ wxComposeView::OnRemoveRcpt(size_t index)
 }
 
 void
-wxComposeView::AddRecipients(const String& addr, RecipientType addrType)
+wxComposeView::AddRecipients(const String& address, RecipientType addrType)
 {
    // if there is no address, nothing to do
-   if ( addr.empty() )
+   if ( address.empty() )
       return;
 
    // invalid rcpt type means to reuse the last one
@@ -1431,8 +1434,15 @@ wxComposeView::AddRecipients(const String& addr, RecipientType addrType)
       addrType = m_rcptTypeLast;
    }
 
-   // FIXME: split the string in addreses and add all of them
-   AddRecipient(addr, addrType);
+   // split the string in addreses and add all of them
+   AddressList_obj addrList = address;
+   Address *addr = addrList->GetFirst();
+   while ( addr )
+   {
+      AddRecipient(addr->GetAddress(), addrType);
+
+      addr = addrList->GetNext(addr);
+   }
 }
 
 void

@@ -37,8 +37,8 @@
 /**
   Address class represents a single RFC 822 address. The RFC 822 groups are not
   (well) supported for the moment, i.e. the group information is lost.
-*/
-class Address : public MObjectRC
+ */
+class Address
 {
 public:
    /// is the address valid?
@@ -73,19 +73,22 @@ protected:
    virtual bool IsSameAs(const Address& addr) const = 0;
 
 private:
-   /// no assignment operator/copy ctor as we always use pointers, not objects
+   /// no assignment operator/copy ctor as AddressList handles us
    DECLARE_NO_COPY_CLASS(Address)
 
    GCC_DTOR_WARN_OFF
 };
 
-/// declare Address_obj class, smart reference to Address
-DECLARE_AUTOPTR_WITH_CONVERSION(Address);
-
 // ----------------------------------------------------------------------------
 // AddressList: an object representing a comma separated string of Addresses
 // ----------------------------------------------------------------------------
 
+/**
+  AddressList basicly converts between string representation and the list of
+  addresses. Note that the pointers returned by GetFirst()/GetNext() belong to
+  the list and will be deleted by it, so you can *not* use them after deleting
+  the list.
+ */
 class AddressList : public MObjectRC
 {
 public:
@@ -98,21 +101,18 @@ public:
    /// get the next address in the list, return NULL if no more
    virtual Address *GetNext(const Address *addr) const = 0;
 
-   /// check if there is a next address (using GetNext would leak memory!)
+   /// check if there is a next address
    bool HasNext(const Address *addr) const;
 
    /// get the comma separated string containing all addresses
    virtual String GetAddresses() const = 0;
 
-   /// compare 2 address lists for equality
-   bool operator==(const AddressList& addr) const { return IsSameAs(addr); }
+   /// comparison function
+   virtual bool IsSameAs(const AddressList *addr) const = 0;
 
 protected:
    /// must have default ctor because we declarae copy ctor private
    AddressList() { }
-
-   /// comparison function
-   virtual bool IsSameAs(const AddressList& addr) const = 0;
 
 private:
    /// no assignment operator/copy ctor as we always use pointers, not objects
@@ -127,6 +127,10 @@ public:
    AddressList_obj(const String& address)
       { m_ptr = AddressList::Create(address); }
 END_DECLARE_AUTOPTR();
+
+/// declarae global comparison operator for addresses
+extern bool operator==(const AddressList_obj& addrList1,
+                       const AddressList_obj& addrList2);
 
 #endif // _ADDRESS_H_
 

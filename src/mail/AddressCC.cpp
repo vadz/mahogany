@@ -52,11 +52,7 @@ AddressCC::AddressCC(ADDRESS *adr)
    ASSERT_MSG( adr && !adr->error, "invalid ADDRESS in AddressCC ctor" );
 
    m_adr = adr;
-}
-
-AddressCC::~AddressCC()
-{
-   mail_free_address(&m_adr);
+   m_addrNext = NULL;
 }
 
 // ----------------------------------------------------------------------------
@@ -132,7 +128,7 @@ bool AddressCC::IsSameAs(const Address& addr) const
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// AddressListCC creation
+// AddressListCC creation/destruction
 // ----------------------------------------------------------------------------
 
 AddressListCC::AddressListCC(mail_address *adr)
@@ -167,6 +163,24 @@ AddressListCC::AddressListCC(mail_address *adr)
    }
 }
 
+AddressListCC::~AddressListCC()
+{
+   if ( m_addrCC )
+   {
+      // this will free all ADDRESS structs as they are linked together
+      mail_free_address(&m_addrCC->m_adr);
+
+      // and now delete our wrappers
+      while ( m_addrCC )
+      {
+         AddressCC *addr = m_addrCC->m_addrNext;
+
+         delete m_addrCC;
+         m_addrCC = addr;
+      }
+   }
+}
+
 // ----------------------------------------------------------------------------
 // AddressListCC enumeration
 // ----------------------------------------------------------------------------
@@ -175,13 +189,20 @@ AddressListCC::AddressListCC(mail_address *adr)
 AddressList *AddressList::Create(const String& address)
 {
    ADDRESS *adr = NULL;
-   rfc822_parse_adrlist(&adr, (char *)address.c_str(), NULL /* default host */);
 
-   if ( !adr || adr->error )
+   if ( !address.empty() )
    {
-      DBGMESSAGE(("Invalid RFC822 address '%s'.", address.c_str()));
+      // rfc822_parse_adrlist() modifies the string passed in
+      char *addressCopy = strdup(address);
+      rfc822_parse_adrlist(&adr, addressCopy, NULL /* default host */);
+      free(addressCopy);
 
-      return NULL;
+      if ( !adr || adr->error )
+      {
+         DBGMESSAGE(("Invalid RFC822 address '%s'.", address.c_str()));
+
+         return NULL;
+      }
    }
 
    return new AddressListCC(adr);
@@ -189,8 +210,6 @@ AddressList *AddressList::Create(const String& address)
 
 Address *AddressListCC::GetFirst() const
 {
-   SafeIncRef(m_addrCC);
-
    return m_addrCC;
 }
 
@@ -198,10 +217,7 @@ Address *AddressListCC::GetNext(const Address *addr) const
 {
    CHECK( addr, NULL, "NULL address in AddressList::GetNext" );
 
-   AddressCC *addrCC = ((AddressCC *)addr)->m_addrNext;
-   SafeIncRef(addrCC);
-
-   return addrCC;
+   return ((AddressCC *)addr)->m_addrNext;
 }
 
 // ----------------------------------------------------------------------------
@@ -219,19 +235,43 @@ String AddressListCC::GetAddresses() const
    return address;
 }
 
-bool AddressListCC::IsSameAs(const AddressList& addrListOther) const
+bool AddressListCC::IsSameAs(const AddressList *addrListOther) const
 {
-   Address_obj addr = GetFirst();
-   Address_obj addrOther = addrListOther.GetFirst();
+   Address *addr = GetFirst();
+   Address *addrOther = addrListOther->GetFirst();
+
+   // empty address list is invalid, so it should never compare equally with
+   // anything else
+   if ( !addr )
+   {
+      return !addrOther;
+   }
+
    while ( addr && addrOther && addr == addrOther )
    {
       addr = GetNext(addr);
-      addrOther = addrListOther.GetNext(addrOther);
+      addrOther = addrListOther->GetNext(addrOther);
    }
 
    // return true if all addresses were equal and if there are no more left
    return !addr && !addrOther;
 }
+
+#ifdef DEBUG
+
+String AddressListCC::DebugDump() const
+{
+   String str = MObjectRC::DebugDump();
+   str << "address list";
+   if ( m_addrCC )
+   {
+      str << " (" << Adr2String(m_addrCC->m_adr) << ')';
+   }
+
+   return str;
+}
+
+#endif // DEBUG
 
 // ============================================================================
 // private functions implementation
@@ -251,7 +291,9 @@ static String Adr2String(ADDRESS *adr, bool all)
 
    // FIXME: there is no way to get the address length from c-client, how to
    //        prevent it from overwriting our buffer??
-   rfc822_write_address(address.GetWriteBuf(4096), adr);
+   char *buf = address.GetWriteBuf(4096);
+   *buf = '\0';
+   rfc822_write_address(buf, adr);
    address.UngetWriteBuf();
    address.Shrink();
 

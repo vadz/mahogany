@@ -43,7 +43,7 @@ bool Address::operator==(const String& address) const
    CHECK( IsValid(), false, "can't compare invalid addresses" );
 
    AddressList_obj addrList(address);
-   Address_obj addr = addrList->GetFirst();
+   Address *addr = addrList->GetFirst();
    if ( !addr || addrList->HasNext(addr) )
    {
       return false;
@@ -58,11 +58,12 @@ bool Address::operator==(const String& address) const
 
 bool AddressList::HasNext(const Address *addr) const
 {
-   Address *addrNext = GetNext(addr);
-   if ( !addrNext )
-      return false;
-
-   addrNext->DecRef();
-
-   return true;
+   return GetNext(addr) != NULL;
 }
+
+extern bool operator==(const AddressList_obj& addrList1,
+                       const AddressList_obj& addrList2)
+{
+   return addrList1->IsSameAs(addrList2.operator->());
+}
+
