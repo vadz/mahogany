@@ -368,13 +368,25 @@ static
 int MAL_PrintFunc(bool errorflag, const char * format, va_list args)
 {
    ASSERT(gs_MInterface != NULL);
-   wxString msg;
-   int rc = msg.PrintfV(format, args);
-   msg = "MAL sync: " + msg;
+   static wxString msg;
+   int rc;
+   if(! errorflag && format[0] == '.')
+   {
+      wxString tmp;
+      rc = tmp.PrintfV(format, args);
+      msg << tmp;
+   }
+   else
+   {
+      rc = msg.PrintfV(format, args);
+      msg = "MAL sync: " + msg;
+   }
+   
    if(errorflag)
       gs_MInterface->MessageDialog(msg,NULL,"MAL synchronisation error!");
    else
    {
+      
       gs_MInterface->StatusMessage(msg);
       wxYield();
    }

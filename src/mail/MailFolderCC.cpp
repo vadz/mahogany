@@ -2714,11 +2714,13 @@ MailFolderCC::UpdateStatus(void)
       m_nRecent = m_MailStream->recent;
       // Little sanity check, needed as c-client is insane:
       if(m_nMessages < m_nRecent)
-         m_nRecent = m_nMessages;
-      MailFolderCC::Event *evptr = new
-         MailFolderCC::Event(m_MailStream,
-                             MailFolderCC::Status,__LINE__);
-      MailFolderCC::QueueEvent(evptr);
+         m_nRecent = m_nMessages
+      {
+         MailFolderCC::Event *evptr = new
+            MailFolderCC::Event(m_MailStream,
+                                MailFolderCC::Status,__LINE__);
+         MailFolderCC::QueueEvent(evptr);
+      }
    }
    m_LastUId = m_MailStream->uid_last;
    // and another sanity check:

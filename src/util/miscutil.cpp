@@ -103,14 +103,14 @@ void UpdateTitleAndStatusBars(const String& title,
    // we need them, but is it worth it?
    String folderName = mailFolder->GetName();
    unsigned long total = mailFolder->CountMessages(),
-                 recent =  mailFolder->CountMessages(MailFolder::MSG_STAT_RECENT |
-                                                     MailFolder::MSG_STAT_SEEN,
-                                                     MailFolder::MSG_STAT_RECENT |
-                                                     MailFolder::MSG_STAT_SEEN),
-                 // recent & !seen --> new
-                 newmsgs = mailFolder->CountMessages(MailFolder::MSG_STAT_RECENT |
-                                                     MailFolder::MSG_STAT_SEEN,
-                                                     MailFolder::MSG_STAT_RECENT);
+      recent =  mailFolder->CountMessages(MailFolder::MSG_STAT_RECENT |
+                                          MailFolder::MSG_STAT_SEEN,
+                                          MailFolder::MSG_STAT_RECENT |
+                                          MailFolder::MSG_STAT_SEEN),
+      // recent & !seen --> new   
+      newmsgs = mailFolder->CountMessages(MailFolder::MSG_STAT_RECENT |
+                                          MailFolder::MSG_STAT_SEEN,
+                                          MailFolder::MSG_STAT_RECENT);
 
    // contruct the messages
    wxString titleMsg(title), statusMsg(status);
