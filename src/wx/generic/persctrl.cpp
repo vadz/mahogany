@@ -1483,6 +1483,17 @@ BEGIN_EVENT_TABLE(wxPMessageDialog, wxDialog)
     EVT_BUTTON(wxID_OK,     wxPMessageDialog::OnButton)
 END_EVENT_TABLE()
 
+// although this enum really should be local in wxPMessageDialog ctor, this
+// causes internal compiler errors with gcc 2.96, so put it here instead
+enum
+{
+    Btn_Ok,
+    Btn_Yes,
+    Btn_No,
+    Btn_Cancel,
+    Btn_Max
+};
+
 wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
                                    const wxString& message,
                                    const wxString& caption,
@@ -1567,14 +1578,6 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     }
 
     // calculate the total dialog size
-    enum
-    {
-        Btn_Ok,
-        Btn_Yes,
-        Btn_No,
-        Btn_Cancel,
-        Btn_Max
-    };
     wxButton *buttons[Btn_Max] = { NULL, NULL, NULL, NULL };
     int nDefaultBtn = -1;
 
