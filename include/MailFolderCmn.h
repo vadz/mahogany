@@ -27,6 +27,7 @@
 #endif // USE_PCH
 
 #include "MEvent.h"     // for MEventOptionsChangeData
+#include "pointers.h"           // for DECLARE_REF_COUNTER
 
 // define this for some additional checks of folder closing logic
 #undef DEBUG_FOLDER_CLOSE
@@ -38,6 +39,7 @@
 #define TRACE_MF_EVENTS "mfevent"
 
 class FilterRule;
+DECLARE_REF_COUNTER(FilterRule)
 
 /**
    MailFolderCmn  class, common code shared by all implementations of
@@ -343,6 +345,32 @@ private:
    wxFrame *m_frame;
 
    friend class MfCloseEntry;
+};
+
+class FilterNewMailContext
+{
+public:
+   FilterNewMailContext(FilterRule *rule)
+   {
+      if( !m_instance )
+      {
+         m_instance = this;
+         m_rule.AttachAndIncRef(rule);
+      }
+   }
+   ~FilterNewMailContext()
+   {
+      if( m_instance == this )
+         m_instance = NULL;
+   }
+
+   static bool IsInStack() { return m_instance != NULL; }
+   static RefCounter<FilterRule> GetFilter() { return m_instance->m_rule; }
+
+private:
+   RefCounter<FilterRule> m_rule;
+   
+   static FilterNewMailContext *m_instance;
 };
 
 #endif // MAILFOLDERCMN_H

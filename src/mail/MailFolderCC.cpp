@@ -671,11 +671,23 @@ public:
       {
          MGuiLocker locker;
 
+         String from = entry.GetFrom();
+         String subject = entry.GetSubject();
+         
+         if( FilterNewMailContext::IsInStack() )
+         {
+            RefCounter<FilterRule> filter(FilterNewMailContext::GetFilter());
+            if( filter->ContainsSpamTest() )
+            {
+               subject = from = _("(hidden in spam filter)");
+            }
+         }
+
          // construct the label
          String label;
          label << m_msgProgress << '\n'
-               << _("From: ") << entry.GetFrom() << '\n'
-               << _("Subject: ") << entry.GetSubject();
+               << _("From: ") << from << '\n'
+               << _("Subject: ") << subject;
 
          if ( !m_progdlg->Update(m_nRetrieved, label) )
          {

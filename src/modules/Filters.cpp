@@ -207,8 +207,10 @@ public:
       Expunge  = 4
    };
 
-   // implement the base class pure virtual
+   // implement the base class pure virtuals
    virtual int Apply(MailFolder *folder, UIdArray& msgs);
+
+   virtual bool ContainsSpamTest();
 
    static FilterRule * Create(const String &filterrule,
                               MInterface *minterface,
@@ -341,6 +343,10 @@ private:
         m_hasRcptFunc,
         m_hasHdrLineFunc,
         m_hasHeaderFunc;
+   
+   // Cache for ContainsSpamTest
+   bool m_spamTestValid;
+   bool m_spamTest;
 
    friend class FilterRuleApply;
 
@@ -475,7 +481,6 @@ private:
    void CollectForDelete();
    void ProgressDelete();
    void IndicateDeleted();
-   bool ContainsSpamTest();
 
    static String GetExecuteProgressString(const String& s)
    {
@@ -505,10 +510,6 @@ private:
 
    // Result of evaluating filter
    Value m_retval;
-   
-   // Cache for ContainsSpamTest
-   bool m_spamTestValid;
-   bool m_spamTest;
 };
 
 // ----------------------------------------------------------------------------
@@ -3319,6 +3320,28 @@ FilterRuleImpl::Apply(MailFolder *mf, UIdArray& msgs)
    return rc;
 }
 
+bool
+FilterRuleImpl::ContainsSpamTest()
+{
+   // Member m_Program is initialized in constructor and it is not
+   // modified afterwards. That means we can easily cache our results.
+   if( !m_spamTestValid )
+   {
+      m_spamTest = false;
+      for( SyntaxNodeIterator each(m_Program); !each.End(); ++each )
+      {
+         const SyntaxNode *node = each.Actual();
+         if( node->IsFunctionCall() )
+         {
+            const FunctionCall *call = (const FunctionCall *)node;
+            m_spamTest = m_spamTest || (call && call->Name() == "isspam");
+         }
+      }
+   }
+   
+   return m_spamTest;
+}
+
 FilterRuleImpl::FilterRuleImpl(const String &filterrule,
                                MInterface *minterface,
                                MModule_Filters *mod)
@@ -3339,6 +3362,8 @@ FilterRuleImpl::FilterRuleImpl(const String &filterrule,
    m_MessageUId = UID_ILLEGAL;
    m_MailMessage = NULL;
    m_MailFolder = NULL;
+   m_spamTestValid = false;
+   m_spamTest = false;
 }
 
 FilterRuleImpl::~FilterRuleImpl()
@@ -3368,8 +3393,6 @@ FilterRuleApply::FilterRuleApply(FilterRuleImpl *parent, UIdArray& msgs)
 {
    m_pd = NULL;
    m_doExpunge = false;
-   m_spamTestValid = false;
-   m_spamTest = false;
 }
 
 FilterRuleApply::~FilterRuleApply()
@@ -3577,10 +3600,9 @@ FilterRuleApply::UpdateProgressDialog()
       m_parent->m_MailMessage->Subject());
    String from = MailFolder::DecodeHeader(m_parent->m_MailMessage->From());
 
-   if( ContainsSpamTest() )
+   if( m_parent->ContainsSpamTest() )
    {
-      subject = _("(hidden in spam filter)");
-      from = _("(hidden in spam filter)");
+      subject = from = _("(hidden in spam filter)");
    }
    
    m_textLog.Printf(_("Filtering message %u/%u"),
@@ -3851,27 +3873,6 @@ FilterRuleApply::IndicateDeleted()
    {
       m_msgs.RemoveAt(m_indicesDeleted[n - 1]);
    }
-}
-
-bool
-FilterRuleApply::ContainsSpamTest()
-{
-   if( !m_spamTestValid )
-   {
-      m_spamTest = false;
-      for( SyntaxNodeIterator each(m_parent->m_Program); !each.End();
-         ++each )
-      {
-         const SyntaxNode *node = each.Actual();
-         if( node->IsFunctionCall() )
-         {
-            const FunctionCall *call = (const FunctionCall *)node;
-            m_spamTest = m_spamTest || (call && call->Name() == "isspam");
-         }
-      }
-   }
-   
-   return m_spamTest;
 }
 
 // ----------------------------------------------------------------------------

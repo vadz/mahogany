@@ -31,6 +31,8 @@
 #   include "kbList.h"
 #endif // USE_PCH
 
+#include "modules/Filters.h"    // for FilterRule
+
 #include "MModule.h"
 
 #include <wx/dynlib.h>
@@ -912,3 +914,7 @@ MModuleCommon::~MModuleCommon()
    if ( m_MInterface )
       m_MInterface->RemoveModule(this);
 }
+
+// Unfortunately most interfaces don't have supporting *.cpp file
+// We have to put their RefCounter functions here
+DEFINE_REF_COUNTER(FilterRule)

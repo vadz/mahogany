@@ -59,7 +59,7 @@ public:
       /// an error happened while evaluating the filters
       Error = 0xf000
    };
-
+   
    /**
      Apply the filter to the selected messages in a folder.
      The messages deleted by the filters are removed from msgs array.
@@ -69,6 +69,9 @@ public:
      @return combination of the flags defined above
    */
    virtual int Apply(MailFolder *folder, UIdArray& msgs) = 0;
+
+   // Hide subjects while filtering spam
+   virtual bool ContainsSpamTest() = 0;
 
    MOBJECT_NAME(FilterRule)
 };
