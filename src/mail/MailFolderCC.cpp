@@ -85,9 +85,16 @@ static const char * cclient_drivers[] =
 { "mbx", "unix", "mmdf", "tenex" };
 #define CCLIENT_MAX_DRIVER 3
 
-typedef int (*overview_x_t) (MAILSTREAM *stream,unsigned long uid,OVERVIEW *ov);
+// extended OVERVIEW struct additionally containing the destination address
+struct OVERVIEW_X : public mail_overview
+{
+   ADDRESS *to;
+};
 
-
+// type of the callback for mail_fetch_overview()
+typedef int (*overview_x_t) (MAILSTREAM *stream,
+                             unsigned long uid,
+                             OVERVIEW_X *ov);
 
 /** This is a list of all mailstreams which were left open because the
     dialup connection broke before we could close them.
@@ -1916,7 +1923,7 @@ MailFolderCC::GetNextMapEntry(StreamConnectionList::iterator &i)
 
 extern "C"
 {
-   static int mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW *ov);
+   static int mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW_X *ov);
    void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t ofn);
    void mail_fetch_overview_x (MAILSTREAM *stream,char *sequence,overview_x_t ofn);
 };
@@ -2101,8 +2108,41 @@ MailFolderCC::BuildListing(void)
 
 }
 
+/* static */
+String
+MailFolderCC::ParseAddress(ADDRESS *adr)
+{
+   String from;
+
+   /* get first from address from envelope */
+   while ( adr && !adr->host )
+      adr = adr->next;
+
+   if(adr)
+   {
+      from = "";
+      if (adr->personal) // a personal name is given
+         from << adr->personal;
+      if(adr->mailbox)
+      {
+         if(adr->personal)
+            from << " <";
+         from << adr->mailbox;
+         if(adr->host && strlen(adr->host)
+            && (strcmp(adr->host,BADHOST) != 0))
+            from << '@' << adr->host;
+         if(adr->personal)
+            from << '>';
+      }
+   }
+   else
+      from = _("<address missing>");
+
+   return from;
+}
+
 int
-MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
+MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov)
 {
    ASSERT(m_Listing);
 
@@ -2128,8 +2168,6 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
 
    HeaderInfoCC & entry = *(HeaderInfoCC *)(*m_Listing)[m_BuildNextEntry];
 
-   ADDRESS *adr;
-
    unsigned long msgno = mail_msgno (m_MailStream,uid);
    MESSAGECACHE *elt = mail_elt (m_MailStream,msgno);
    MESSAGECACHE selt;
@@ -2147,31 +2185,9 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
       mail_parse_date (&selt,ov->date);
       entry.m_Date = (time_t) mail_longdate( &selt);
 
-      // FROM
-      /* get first from address from envelope */
-      for (adr = ov->from; adr && !adr->host; adr = adr->next)
-         ;
-      if(adr)
-      {
-         entry.m_From = "";
-         if (adr->personal) // a personal name is given
-            entry.m_From << adr->personal;
-         if(adr->mailbox)
-         {
-            if(adr->personal)
-               entry.m_From << " <";
-            entry.m_From << adr->mailbox;
-            if(adr->host && strlen(adr->host)
-               && (strcmp(adr->host,BADHOST) != 0))
-               entry.m_From << '@' << adr->host;
-            if(adr->personal)
-               entry.m_From << '>';
-         }
-      }
-      else
-         entry.m_From = _("<address missing>");
-
-      // TO: FIXME how to get it here?
+      // FROM and TO
+      entry.m_From = ParseAddress(ov->from);
+      entry.m_To = ParseAddress(ov->to);
 
       wxFontEncoding encodingFrom;
       entry.m_From = DecodeHeader(entry.m_From, &encodingFrom);
@@ -2932,7 +2948,9 @@ MailFolderCC::RequestUpdate(bool sendEvent)
 
 /* Handles the mm_overview_header callback on a per folder basis. */
 int
-MailFolderCC::OverviewHeader (MAILSTREAM *stream, unsigned long uid, OVERVIEW *ov)
+MailFolderCC::OverviewHeader(MAILSTREAM *stream,
+                             unsigned long uid,
+                             OVERVIEW_X *ov)
 {
    MailFolderCC *mf = MailFolderCC::LookupObject(stream);
    ASSERT(mf);
@@ -3085,7 +3103,7 @@ void mail_fetch_overview_x (MAILSTREAM *stream,char *sequence,overview_x_t ofn)
       mail_uid_sequence (stream,sequence) && mail_ping (stream)) {
     MESSAGECACHE *elt;
     ENVELOPE *env = NULL;  // initialisation not needed but keeps compiler happy
-    OVERVIEW ov;
+    OVERVIEW_X ov;
     unsigned long i;
     ov.optional.lines = 0;
     ov.optional.xref = NIL;
@@ -3094,6 +3112,7 @@ void mail_fetch_overview_x (MAILSTREAM *stream,char *sequence,overview_x_t ofn)
           (env = mail_fetch_structure (stream,i,NIL,NIL)) && ofn) {
         ov.subject = env->subject;
         ov.from = env->from;
+        ov.to = env->to;
         ov.date = env->date;
         ov.message_id = env->message_id;
         ov.references = env->references;
@@ -3120,7 +3139,7 @@ void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t of
    {
       MESSAGECACHE *elt;
       ENVELOPE *env = NULL;  // keep compiler happy
-      OVERVIEW ov;
+      OVERVIEW_X ov;
       unsigned long i;
       ov.optional.lines = 0;
       ov.optional.xref = NIL;
@@ -3130,6 +3149,7 @@ void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t of
          {
             ov.subject = env->subject;
             ov.from = env->from;
+            ov.to = env->to;
             ov.date = env->date;
             ov.message_id = env->message_id;
             ov.references = env->references;
@@ -3296,7 +3316,7 @@ mm_fatal(char *str)
 /* This callback needs to be processed immediately or ov will become
    invalid. */
 static int
-mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW *ov)
+mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW_X *ov)
 {
    return MailFolderCC::OverviewHeader(stream, uid, ov);
 }

@@ -41,6 +41,12 @@ extern void CC_Cleanup();
 // (can't be defined inside the class - VC++ 5.0 can't compile it)
 class MailFolderCC;
 
+// cclient struct representing an address
+struct mail_address;
+
+// our extension of cclient OVERVIEW struct
+struct OVERVIEW_X;
+
 /// structure to hold MailFolder pointer and associated mailstream pointer
 struct StreamConnection
 {
@@ -474,7 +480,8 @@ protected:
 
    /* Handles the mm_overview_header callback on a per folder basis.
       It returns 0 to abort overview generation, 1 to continue.*/
-   int OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov);
+   int OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov);
+
    /// closes the mailstream
    void Close(void);
 
@@ -660,7 +667,10 @@ public:
    static void mm_flags(MAILSTREAM *stream, unsigned long number);
 
    /* Handles the mm_overview_header callback on a per folder basis. */
-   static int OverviewHeader (MAILSTREAM *stream, unsigned long uid, OVERVIEW *ov);
+   static int OverviewHeader (MAILSTREAM *stream, unsigned long uid, OVERVIEW_X *ov);
+
+   /// helper of OverviewHeader
+   static String ParseAddress(struct mail_address *adr);
 
 //@}
 private:
