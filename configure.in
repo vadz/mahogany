@@ -995,10 +995,6 @@ case "$GXX" in yes)
 esac
 AC_SUBST(CXXFLAGS_RELAXED)
 
-AC_SUBST(CXXFLAGS)
-AC_SUBST(CFLAGS)
-AC_SUBST(CPPFLAGS)
-
 dnl Make sure we get statically linked against wxGTK
 LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk./-Wl,-Bstatic & -Wl,-Bdynamic/g'`
 dnl libtool does not like -L.
