@@ -14,67 +14,12 @@
 #   include "MApplication.h"
 #   include "gui/wxIconManager.h"
 #   include "Mdefaults.h"
-#   include "gui/wxMFrame.h"
-
-#   include <wx/frame.h>                // for wxFrame
 #endif // USE_PCH
 
 #include "MFStatus.h"
 #include "MailFolder.h"
 
 #include "miscutil.h"
-
-class MOption;
-
-extern const MOption MP_FOLDERSTATUS_STATBAR;
-extern const MOption MP_FOLDERSTATUS_TITLEBAR;
-
-// show the number of new/unread/total messages in the title and status bars
-void UpdateTitleAndStatusBars(const String& title,
-                              const String& status,
-                              wxFrame *frame,
-                              const MailFolder *mailFolder)
-{
-#ifdef OS_WIN
-   // the MP_FOLDERSTATUS_STATBAR/TOOLBAR entries contain '%' which shouldn't
-   // be handled as var expansions under Windows
-   ProfileEnvVarSave disableExpansion(mApplication->GetProfile());
-#endif // Win
-
-   MailFolderStatus mfStatus;
-   String folderName = mailFolder->GetName();
-
-   // contruct the messages
-   wxString statusMsg(status);
-   statusMsg += FormatFolderStatusString
-                (
-                 READ_APPCONFIG(MP_FOLDERSTATUS_STATBAR),
-                 folderName,
-                 &mfStatus,
-                 mailFolder
-                );
-
-   wxString titleMsg(title);
-   titleMsg += FormatFolderStatusString
-               (
-                READ_APPCONFIG(MP_FOLDERSTATUS_TITLEBAR),
-                folderName,
-                &mfStatus,
-                mailFolder
-               );
-
-   // show them
-   frame->SetStatusText(statusMsg);
-   frame->SetTitle(titleMsg);
-
-   // TODO: customize this to show "unread mail" icon!
-   if ( mfStatus.newmsgs > 0 )
-      frame->SetIcon( frame == mApplication->TopLevelFrame() ?
-                      ICON(_T("MainFrameNewMail")) : ICON(_T("MFrameNewMail")));
-   else
-      frame->SetIcon( frame == mApplication->TopLevelFrame() ?
-                      ICON(_T("MainFrame")) : ICON(_T("MFrame")));
-}
 
 // ---------------------------------------------------------------------------
 // colour to string conversion

@@ -11,24 +11,10 @@
 #ifndef MISCUTIL_H
 #define MISCUTIL_H
 
-#ifndef  USE_PCH
-#endif
-
-class WXDLLEXPORT wxArrayString;
-class ASMailFolder;
-class UIdArray;
-
-/**@name Miscellaneous utility functions */
+/**
+   @name Colour functions.
+ */
 //@{
-
-class wxFrame;
-class MailFolder;
-
-/// set the title and statusbar to show the number of messages in folder
-extern void UpdateTitleAndStatusBars(const String& title,
-                                     const String& status,
-                                     wxFrame *frame,
-                                     const MailFolder *folder);
 
 class wxColour;
 
@@ -42,12 +28,16 @@ extern String GetColourName(const wxColour& color);
 extern void GetColourByName(wxColour *colour,
                             const String& name,
                             const String& defaultName);
+//@}
 
+/**
+   A fixed-size array.
+ */
 class BoundArrayCommon
 {
 public:
    BoundArrayCommon() : m_size(0) {}
-   
+
    size_t Size() const { return m_size; }
 
 protected:
@@ -88,8 +78,6 @@ protected:
       ASSERT( offset < m_size ); \
       return m_array[offset]; \
    } \
-
-//@}
 
 #endif // MISCUTIL_H
 

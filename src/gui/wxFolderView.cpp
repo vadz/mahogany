@@ -96,7 +96,6 @@
 #endif // wxUSE_DRAG_AND_DROP
 
 #include "MDialogs.h"
-#include "miscutil.h"            // for UpdateTitleAndStatusBars
 
 // use XPMs under MSW as well as it's the simplest way to have transparent
 // bitmaps like we need here
@@ -125,6 +124,8 @@ extern const MOption MP_FLC_STATUSCOL;
 extern const MOption MP_FLC_SUBJECTCOL;
 extern const MOption MP_FLC_MSGNOCOL;
 extern const MOption MP_FOCUS_FOLLOWSMOUSE;
+extern const MOption MP_FOLDERSTATUS_STATBAR;
+extern const MOption MP_FOLDERSTATUS_TITLEBAR;
 extern const MOption MP_FROM_ADDRESS;
 extern const MOption MP_FROM_REPLACE_ADDRESSES;
 extern const MOption MP_FVIEW_AUTONEXT_UNREAD_MSG;
@@ -1046,6 +1047,41 @@ static String GetShortFolderNameFromProfile(const Profile *profile)
    }
 
    return name;
+}
+
+// show the number of new/unread/total messages in the title and status bars
+static void
+UpdateTitleAndStatusBars(wxFrame *frame, const MailFolder *mailFolder)
+{
+#ifdef OS_WIN
+   // the MP_FOLDERSTATUS_STATBAR/TOOLBAR entries contain '%' which shouldn't
+   // be handled as var expansions under Windows
+   ProfileEnvVarSave disableExpansion(mApplication->GetProfile());
+#endif // Win
+
+   MailFolderStatus mfStatus;
+   String folderName = mailFolder->GetName();
+
+   // contruct the messages
+   wxString statusMsg = FormatFolderStatusString
+                        (
+                          READ_APPCONFIG(MP_FOLDERSTATUS_STATBAR),
+                          folderName,
+                          &mfStatus,
+                          mailFolder
+                        );
+
+   wxString titleMsg = FormatFolderStatusString
+                       (
+                         READ_APPCONFIG(MP_FOLDERSTATUS_TITLEBAR),
+                         folderName,
+                         &mfStatus,
+                         mailFolder
+                       );
+
+   // show them
+   frame->SetStatusText(statusMsg);
+   frame->SetTitle(titleMsg);
 }
 
 // ============================================================================
@@ -3741,7 +3777,7 @@ wxFolderView::Update()
 
    m_nDeleted = UID_ILLEGAL;
 
-   UpdateTitleAndStatusBars(_T(""), _T(""), m_Frame, mf);
+   UpdateTitleAndStatusBars(m_Frame, mf);
 }
 
 void
@@ -4978,7 +5014,7 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData& event)
    // we don't have any deleted messages any more
    m_nDeleted = 0;
 
-   UpdateTitleAndStatusBars(_T(""), _T(""), m_Frame, mf);
+   UpdateTitleAndStatusBars(m_Frame, mf);
 }
 
 // this function gets called when new mail appears in the folder
@@ -5059,7 +5095,7 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData& event)
       }
 
       // update the number of unread messages showin in the title/status bars
-      UpdateTitleAndStatusBars(_T(""), _T(""), m_Frame, mf);
+      UpdateTitleAndStatusBars(m_Frame, mf);
    }
 }
 
