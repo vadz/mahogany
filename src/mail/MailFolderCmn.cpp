@@ -285,6 +285,11 @@ MfCloseEntry::MfCloseEntry(MailFolderCmn *mf, int secs)
    // keep it for now
    m_mf->IncRef();
 
+   // stop the update timer: we don't want to update the folders kept
+   // artificially alive, if we do they could never close at all
+   if ( m_mf->m_Timer )
+      m_mf->m_Timer->Stop();
+
    m_expires = secs != NEVER_EXPIRES;
    if ( m_expires )
    {
@@ -296,6 +301,12 @@ MfCloseEntry::~MfCloseEntry()
 {
    wxLogTrace(TRACE_MF_CLOSE, "Destroying MfCloseEntry(%s) (%d refs left)",
               m_mf->GetName().c_str(), m_mf->GetNRef());
+
+   // we don't need to restart the timer if we're going to close this folder
+   // now anyhow, but if it is just being removed from the list, then do
+   // restart it
+   if ( m_mf->GetNRef() > 1 && m_mf->m_Timer )
+      m_mf->m_Timer->Start();
 
    m_mf->RealDecRef();
 }
