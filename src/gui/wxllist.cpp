@@ -3450,13 +3450,13 @@ void wxLayoutPrintout::GetPageInfo(int *minPage, int *maxPage, int *selPageFrom,
    // before we draw anything, me must make sure the list is properly laid out
    m_llist->Layout(*psdc);
 
-   (void)ScaleDC(psdc);
+   float scale = ScaleDC(psdc);
 
    // leave margins
    psdc->GetSize(&m_PageWidth, &m_PageHeight);
 
    // This is the length of the printable area.
-   m_PrintoutHeight = m_PageHeight;
+   m_PrintoutHeight = m_PageHeight / scale;
 
    // how many pages do we need to print the entire list?
    m_NumOfPages = 1 + (int)( m_llist->GetSize().y / (float)(m_PrintoutHeight));
