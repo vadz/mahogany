@@ -110,8 +110,8 @@ void MXFMailImporter::ImportSetting(const wxString& xfmailrc,
    if ( var == "nntphost" )
    {
       mApplication->GetProfile()->writeEntry(MP_NNTPHOST, value);
-      wxLogMessage(_("Imported NNTP host setting from XFMail: %s."),
-                   value.c_str());
+      wxLogMessage(_("Imported NNTP host setting from %s: %s."),
+                   value.c_str(), "XFMail");
    }
    else if ( var == "nntpuser" )
    {
@@ -120,8 +120,8 @@ void MXFMailImporter::ImportSetting(const wxString& xfmailrc,
    else if ( var == "replyexand" )
    {
       mApplication->GetProfile()->writeEntry(MP_RETURN_ADDRESS, value);
-      wxLogMessage(_("Imported return address setting from XFMail: %s."),
-                   value.c_str());
+      wxLogMessage(_("Imported return address setting from %s: %s."),
+                   "XFMail", value.c_str());
    }
    else if ( var == "myface" )
    {
@@ -140,8 +140,8 @@ bool MXFMailImporter::ImportSettings()
    wxTextFile file(filename);
    if ( !file.Open() )
    {
-      wxLogError(_("Failed to open XFMail configuration file '%s'."),
-                 filename.c_str());
+      wxLogError(_("Failed to open %s configuration file '%s'."),
+                 "XFMail",filename.c_str());
 
       return FALSE;
    }
@@ -180,7 +180,7 @@ bool MXFMailImporter::ImportFolders()
    wxTextFile file(filename);
    if ( !file.Open() )
    {
-      wxLogError(_("Failed to open XFMail folders file"));
+      wxLogError(_("Failed to open %s folders file"), "XFMail");
 
       return FALSE;
    }
@@ -294,7 +294,7 @@ bool MXFMailImporter::ImportFolders()
 
    if ( !nImported )
    {
-      wxLogError(_("XFMail folder import failed."));
+      wxLogError(_("%s folder import failed."), "XFMail");
 
       return FALSE;
    }
@@ -309,7 +309,7 @@ bool MXFMailImporter::ImportFolders()
          )
     );
 
-   wxLogMessage(_("Successfully imported %u XFMail folders."), nImported);
+   wxLogMessage(_("Successfully imported %u %s folders."), nImported, "XFMail");
 
    return TRUE;
 }
@@ -342,8 +342,8 @@ bool MXFMailImporter::ImportADB()
    size_t count = xfmailADBs.GetCount();
    if ( !count )
    {
-      wxLogError(_("Couldn't find any XFMail address books in '%s'."),
-                 dirname.c_str());
+      wxLogError(_("Couldn't find any %s address books in '%s'."),
+                 "XFMail", dirname.c_str());
 
       return FALSE;
    }
@@ -351,7 +351,7 @@ bool MXFMailImporter::ImportADB()
    AdbImporter *importer = AdbImporter::GetImporterByName("AdbXFMailImporter");
    if ( !importer )
    {
-      wxLogError(_("XFMail address book import module not found."));
+      wxLogError(_("%s address book import module not found."),"XFMail");
 
       return FALSE;
    }
@@ -378,15 +378,15 @@ bool MXFMailImporter::ImportADB()
       wxString path = dirname + xfmailADBs[n];
       if ( AdbImport(path, adbname, adbusername, importer) )
       {
-         wxLogMessage(_("Successfully imported XFMail address book '%s'."),
-                      path.c_str());
+         wxLogMessage(_("Successfully imported %s address book '%s'."),
+                      "XFMail", path.c_str());
 
          nImported++;
       }
       else
       {
-         wxLogError(_("Failed to import XFMail address book '%s'."),
-                    path.c_str());
+         wxLogError(_("Failed to import %s address book '%s'."),
+                    "XFMail", path.c_str());
       }
    }
 
@@ -406,7 +406,7 @@ bool MXFMailImporter::ImportFilters()
    wxTextFile file(filename);
    if ( !file.Open() )
    {
-      wxLogError(_("Failed to open XFMail filter rules file."));
+      wxLogError(_("Failed to open %s filter rules file."),"XFMail");
 
       return FALSE;
    }
@@ -576,7 +576,7 @@ typedef struct _xf_rule {
                       );
       profile->DecRef();
 
-      wxLogVerbose(_("Imported XFMail filter rule '%s'."), program.c_str());
+      wxLogVerbose(_("Imported %s filter rule '%s'."), "XFMail", program.c_str());
    }
 
    profileNewMailFilters->DecRef();

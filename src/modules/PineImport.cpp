@@ -99,22 +99,22 @@ bool MPineImporter::ImportADB()
    AdbImporter *importer = AdbImporter::GetImporterByName("AdbPineImporter");
    if ( !importer )
    {
-      wxLogError(_("PINE address book import module not found."));
+      wxLogError(_("%s address book import module not found."), "PINE");
 
       return FALSE;
    }
 
    wxString filename = importer->GetDefaultFilename();
-   wxLogMessage(_("Starting importing PINE address book '%s'..."),
-                filename.c_str());
+   wxLogMessage(_("Starting importing %s address book '%s'..."),
+                "PINE", filename.c_str());
    bool ok = AdbImport(filename, "pine.adb", "PINE Address Book", importer);
 
    importer->DecRef();
 
    if ( ok )
-      wxLogMessage(_("Successfully imported PINE address book."));
+      wxLogMessage(_("Successfully imported %s address book."), "PINE");
    else
-      wxLogError(_("Failed to import PINE address book."));
+      wxLogError(_("Failed to import %s address book."), "PINE");
 
    return ok;
 }
@@ -147,11 +147,11 @@ bool MPineImporter::ImportFolders()
    size_t count = mboxFiles.GetCount();
    if ( !count )
    {
-      wxLogMessage(_("No local PINE folders found."));
+      wxLogMessage(_("No local %s folders found."), "PINE");
    }
    else
    {
-      wxLogMessage(_("Starting importing local PINE mail folders."));
+      wxLogMessage(_("Starting importing local %s mail folders."), "PINE");
 
       // create the folder tree entries for them
       size_t nImported = 0;
@@ -186,7 +186,7 @@ bool MPineImporter::ImportFolders()
 
       if ( !nImported )
       {
-         wxLogError(_("PINE folder import failed."));
+         wxLogError(_("Folder import failed."));
 
          return FALSE;
       }
@@ -202,7 +202,8 @@ bool MPineImporter::ImportFolders()
                )
           );
 
-         wxLogMessage(_("Successfully imported %u PINE folders."), nImported);
+         wxLogMessage(_("Successfully imported %u %s folders."),
+                      nImported, "PINE");
       }
    }
 
@@ -234,7 +235,8 @@ void MPineImporter::ImportSetting(const wxString& pinerc,
       {
          mApplication->GetProfile()->writeEntry(MP_WRAPMARGIN, wrap);
 
-         wxLogMessage(_("Imported wrap margin setting from PINE: %u."), wrap);
+         wxLogMessage(_("Imported wrap margin setting from %s: %u."),
+                      wrap, "PINE");
       }
       else
       {
@@ -249,8 +251,8 @@ void MPineImporter::ImportSetting(const wxString& pinerc,
 
       mApplication->GetProfile()->writeEntry(MP_EXTERNALEDITOR, editor);
 
-      wxLogMessage(_("Imported external editor setting from PINE: %s."),
-                   editor.c_str());
+      wxLogMessage(_("Imported external editor setting from %s: %s."),
+                   editor.c_str(), "PINE");
    }
    else if ( var == "mail-check-interval" )
    {
@@ -259,8 +261,8 @@ void MPineImporter::ImportSetting(const wxString& pinerc,
       {
          mApplication->GetProfile()->writeEntry(MP_POLLINCOMINGDELAY, delay);
 
-         wxLogMessage(_("Imported mail check interval setting from PINE: %u."),
-                      delay);
+         wxLogMessage(_("Imported mail check interval setting from %s: %u."),
+                      delay, "PINE");
       }
       else
       {
@@ -271,33 +273,33 @@ void MPineImporter::ImportSetting(const wxString& pinerc,
    else if ( var == "nntp-server" )
    {
       mApplication->GetProfile()->writeEntry(MP_NNTPHOST, value);
-      wxLogMessage(_("Imported NNTP host setting from PINE: %s."),
-                   value.c_str());
+      wxLogMessage(_("Imported NNTP host setting from %s: %s."),
+                   value.c_str(), "PINE");
    }
    else if ( var == "personal-name" )
    {
       mApplication->GetProfile()->writeEntry(MP_PERSONALNAME, value);
-      wxLogMessage(_("Imported personal name setting from PINE: %s."),
-                   value.c_str());
+      wxLogMessage(_("Imported personal name setting from %s: %s."),
+                   value.c_str(), "PINE");
    }
    else if ( var == "reply-indent-string" )
    {
       mApplication->GetProfile()->writeEntry(MP_REPLY_PREFIX, value);
-      wxLogMessage(_("Imported reply prefix setting from PINE: %s."),
-                   value.c_str());
+      wxLogMessage(_("Imported reply prefix setting from %s: %s."),
+                   value.c_str(), "PINE");
    }
    else if ( var == "signature-file" )
    {
       mApplication->GetProfile()->writeEntry(MP_COMPOSE_SIGNATURE, value);
-      wxLogMessage(_("Imported signature location from PINE: %s."),
-                   value.c_str());
+      wxLogMessage(_("Imported signature location from %s: %s."),
+                   value.c_str(), "PINE");
    }
    else if ( var == "smtp-server" )
    {
       // FIXME this is a list and the entries may contain port numbers too!
       mApplication->GetProfile()->writeEntry(MP_SMTPHOST, value);
-      wxLogMessage(_("Imported SMTP server setting from PINE: %s."),
-                   value.c_str());
+      wxLogMessage(_("Imported SMTP server setting from %s: %s."),
+                   value.c_str(), "PINE");
    }
 }
 

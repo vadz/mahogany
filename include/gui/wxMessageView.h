@@ -6,10 +6,7 @@
  * $Id$
  *******************************************************************/
 
-//FIXME: this code is thoroughly broken:
-//#define USE_NEW_MSGVIEW
-
-#ifdef USE_NEW_MSGVIEW
+#ifdef EXPERIMENTAL
 #   include "wxMessageViewNew.h"
 #else
 

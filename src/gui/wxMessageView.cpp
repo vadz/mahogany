@@ -20,10 +20,6 @@
 
 #include "Mpch.h"
 
-#ifdef USE_NEW_MSGVIEW
-#   include "wxMessageViewNew.cpp"
-#else
-
 #ifndef USE_PCH
 #  include "Mcommon.h"
 #  include "strutil.h"
@@ -68,6 +64,10 @@
 
 #include <ctype.h>  // for isspace
 #include <time.h>   // for time stamping autocollected addresses
+
+#ifdef USE_NEW_MSGVIEW
+#   error "wxMessageViewNew.cpp must be used instead"
+#endif
 
 #ifdef OS_UNIX
 #   include <sys/stat.h>
@@ -1933,6 +1933,4 @@ wxMessageViewFrame::OnSize( wxSizeEvent & WXUNUSED(event) )
 }
 
 IMPLEMENT_DYNAMIC_CLASS(wxMessageViewFrame, wxMFrame)
-
-#endif
    

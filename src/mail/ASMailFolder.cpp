@@ -400,12 +400,14 @@ public:
       }
    virtual void WorkFunction(void)
       {
-         int rc = m_MailFolder->SaveMessages(m_Seq, m_MfName, m_IsProfile, m_Update);
-         SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder,
-                                                   m_Ticket,
-                                                   ASMailFolder::Op_SaveMessages,
-                                                   m_Seq,
-                                                   rc, m_UserData));
+         int rc = m_MailFolder->SaveMessages(m_Seq, m_MfName,
+                                             m_IsProfile, m_Update); 
+         SendEvent(ASMailFolder::ResultInt
+                   ::Create(m_ASMailFolder,
+                            m_Ticket,
+                            ASMailFolder::Op_SaveMessages,
+                            m_Seq,
+                            rc, m_UserData));
 #ifdef DEBUG
          m_Seq = NULL;
 #endif

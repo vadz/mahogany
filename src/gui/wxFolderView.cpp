@@ -1684,7 +1684,6 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                         result->GetSequence(),
                         (p && READ_CONFIG(p,  MP_USE_TRASH_FOLDER)),
                         this));
-
                      msg.Printf(_("Moved %lu messages."), (unsigned long)
                                 result->GetSequence()->Count());
                   }

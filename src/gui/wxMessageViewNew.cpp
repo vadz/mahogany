@@ -412,6 +412,24 @@ public:
                        m_FontStyle.m_Underline,
                        &fg, &bg);
       }
+   /** Redraws the window. */
+   virtual void RequestUpdate(void)
+      {
+         m_LWin->GetLayoutList()->ForceTotalLayout();
+         RequestUpdate();
+      }
+   /** Enable redrawing while we add content */
+   virtual void EnableAutoUpdate(bool enable = TRUE)
+      {
+         m_LWin->GetLayoutList()->SetAutoFormatting(TRUE);
+      }
+
+   /** Set dirty flag */
+   virtual void SetDirty(bool dirty = TRUE)
+      { if(dirty) m_LWin->SetDirty(); else m_LWin->ResetDirty(); }
+   virtual bool GetDirty(void) const
+      { return m_LWin->IsDirty(); }
+   
    /** Insert some content.
     */
    virtual void Append(const MimeContent *mc);
@@ -821,7 +839,7 @@ wxMessageView::OnSize( wxSizeEvent & WXUNUSED(event) )
 {
    int x, y;
    GetClientSize( &x, &y );
-   m_EditCtrl->SetSize(0,0,x,y);
+   m_EditCtrl->SetSize(x,y);
 }
 
 void
@@ -957,7 +975,6 @@ wxMessageView::SetParentProfile(ProfileBase *profile)
       m_Profile = ProfileBase::CreateEmptyProfile();
 
    UpdateProfileValues();
-
    Clear();
 }
 
@@ -1018,6 +1035,7 @@ wxMessageView::ReadAllSettings(AllProfileValues *settings)
 void
 wxMessageView::Clear(void)
 {
+   m_EditCtrl->Clear();
    m_EditCtrl->SetCursorVisibility(-1); // on demand
    m_EditCtrl->SetFontStyle(
       FontStyle(m_ProfileValues.font, m_ProfileValues.size,
@@ -1025,7 +1043,7 @@ wxMessageView::Clear(void)
                 m_ProfileValues.FgCol,
                 m_ProfileValues.BgCol)
       );
-//FIXME   GetLayoutList()->SetAutoFormatting(FALSE); // speeds up insertion
+   m_EditCtrl->EnableAutoUpdate(FALSE); // speeds up insertion
    // of text
    m_uid = UID_ILLEGAL;
 }
@@ -1152,10 +1170,10 @@ wxMessageView::Update(void)
 //FIXME   m_EditCtrl->GetLList()->MoveCursorTo(wxPoint(0,0));
    // we have modified the list directly, so we need to mark the
    // wxlwindow as dirty:
-//FIXME SetDirty();
+   m_EditCtrl->SetDirty();
    // re-enable auto-formatting, seems safer for selection
    // highlighting, not sure if needed, though
-//FIXME   m_EditCtrl->GetLList()->SetAutoFormatting(TRUE);
+   m_EditCtrl->EnableAutoUpdate(FALSE); // speeds up insertion
 
    long wrapmargin = READ_CONFIG(m_Profile, MP_WRAPMARGIN);
    m_EditCtrl->SetWrapMargin(wrapmargin);
@@ -1165,9 +1183,8 @@ wxMessageView::Update(void)
    // modify it for pasting or wrap lines manually:
    m_EditCtrl->SetEditable(FALSE);
    m_EditCtrl->SetCursorVisibility(-1);
-//FIXME   m_EditCtrl->GetLList()->ForceTotalLayout();
    // for safety, this is required to set scrollbars
-//FIXME   RequestUpdate();
+   m_EditCtrl->RequestUpdate();
 }
 
 
@@ -1299,10 +1316,10 @@ wxMessageView::Update(void)
    m_EditCtrl->GetLList()->MoveCursorTo(wxPoint(0,0));
    // we have modified the list directly, so we need to mark the
    // wxlwindow as dirty:
-//FIXME SetDirty();
+   m_EditCtrl->SetDirty();
    // re-enable auto-formatting, seems safer for selection
    // highlighting, not sure if needed, though
-   m_EditCtrl->GetLList()->SetAutoFormatting(TRUE);
+   m_EditCtrl->EnableAutoUpdate(FALSE); // speeds up insertion
 
    long wrapmargin = READ_CONFIG(m_Profile, MP_WRAPMARGIN);
    m_EditCtrl->SetWrapMargin(wrapmargin);
@@ -1314,7 +1331,7 @@ wxMessageView::Update(void)
    m_EditCtrl->SetCursorVisibility(-1);
    m_EditCtrl->GetLList()->ForceTotalLayout();
    // for safety, this is required to set scrollbars
-//FIXME   RequestUpdate();
+   RequestUpdate();
 }
 #endif
 

@@ -66,7 +66,6 @@ static void sigpipe_handler(int)
 }
 #endif
 
-
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
@@ -82,6 +81,11 @@ static void sigpipe_handler(int)
 // ----------------------------------------------------------------------------
 // private types
 // ----------------------------------------------------------------------------
+
+
+static const char * cclient_drivers[] =
+{ "mbx", "unix", "mmdf", "tenex" };
+#define CCLIENT_MAX_DRIVER 3
 
 typedef int (*overview_x_t) (MAILSTREAM *stream,unsigned long uid,OVERVIEW *ov);
 
@@ -994,9 +998,25 @@ MailFolderCC::Open(void)
       if ( !exists
            && (GetType() == MF_FILE || GetType() == MF_MH))
       {
-         // This little hack makes it root (uid 0) safe:
+         // This little hack makes it root (uid 0) safe and allows us
+         // to choose the file format, too:
          String tmp;
-         tmp = (GetType() == MF_FILE) ? "#driver.mbx/" : "#driver.mh/";
+         if(GetType() == MF_FILE)
+         {
+            long format = READ_CONFIG(m_Profile, MP_FOLDER_FILE_DRIVER);
+            ASSERT(! (format < 0  || format > CCLIENT_MAX_DRIVER));
+            if(format < 0  || format > CCLIENT_MAX_DRIVER)
+               format = 0;
+            tmp = "#driver.";
+            tmp << cclient_drivers[format] << '/';
+               LOGMESSAGE((M_LOG_WINONLY,
+                           _("Trying to create folder '%s' in %s format."),
+                           GetName().c_str(),
+                           cclient_drivers[format]
+                  ));
+         }
+         else
+            tmp = "#driver.mh/";
          tmp += m_MailboxPath;
          mail_create(NIL, (char *)tmp.c_str());
          //mail_create(NIL, (char *)m_MailboxPath.c_str());
@@ -1266,13 +1286,15 @@ MailFolderCC::AppendMessage(String const &msg)
                != 0);
    if(! rc)
       ERRORMESSAGE(("cannot append message"));
-
-   if( ( (m_UpdateFlags & UF_DetectNewMail) == 0)
-       && ( (m_UpdateFlags & UF_UpdateCount) != 0) )
+   else
    {
-      // this mail will be stored as uid_last+1 which isn't updated
-      // yet at this point
-      m_LastNewMsgUId = m_MailStream->uid_last+1;
+      if( ( (m_UpdateFlags & UF_DetectNewMail) == 0)
+          && ( (m_UpdateFlags & UF_UpdateCount) != 0) )
+      {
+         // this mail will be stored as uid_last+1 which isn't updated
+         // yet at this point
+         m_LastNewMsgUId = m_MailStream->uid_last+1;
+      }
    }
    ProcessEventQueue();
    return rc;

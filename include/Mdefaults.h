@@ -456,6 +456,8 @@
 #define   MP_LAST_CREATED_FOLDER_TYPE  "LastFolderType"
 /// the filter program to apply
 #define MP_FILTER_RULE   "Filter"
+/// the default folder file format
+#define MP_FOLDER_FILE_DRIVER   "MailboxFileFormat"
 /**@name  Font settings for message view */
 //@{
 /// which font to use
@@ -949,6 +951,9 @@
 #define   MP_LAST_CREATED_FOLDER_TYPE_D  (int)File
 /// the filter program to apply
 #define MP_FILTER_RULE_D   ""
+/// the default folder file format
+#define MP_FOLDER_FILE_DRIVER_D 0L
+/* format: mbx:unix:mmdf:tenex defined in MailFolderCC.cpp */
 /**@name  Font settings for message view */
 //@{
 /// which font to use

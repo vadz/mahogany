@@ -183,13 +183,13 @@ long wxPipedProcess::Execute(wxChar * const * argv)
                             node; node = node->GetNext() ) {
                           tmpstr = node->GetKeyString();
                           tmpstr << '=' << *node->GetData();
-                          putenv(tmpstr.c_str());
+                          putenv((char *)tmpstr.c_str());
                        }
 
                        for (node = m_setEnvVarList.GetFirst();
                             node; node = node->GetNext() ) {
                           tmpstr = *node->GetData() + '=';
-                          putenv(tmpstr.c_str());
+                          putenv((char *)tmpstr.c_str());
                        }
                     }
 		    execvp (*mb_argv, mb_argv);

@@ -129,6 +129,7 @@ struct InstallWizardData
    int    useDialUp; // initially -1
    bool   useOutbox;
    bool   useTrash;
+   int    folderType;
 #ifdef USE_PISOCK
    bool   usePalmOs;
 #endif
@@ -353,6 +354,7 @@ public:
             // networking, but if we don't, then we probably do
             gs_installWizardData.useDialUp = !man->IsAlwaysOnline();
          }
+         m_FolderTypeChoice->SetSelection(gs_installWizardData.folderType);
 #ifdef USE_PYTHON
          m_UsePythonCheckbox->SetValue(gs_installWizardData.usePython != 0);
 #endif
@@ -368,6 +370,7 @@ public:
 
    virtual bool TransferDataFromWindow()
       {
+         gs_installWizardData.folderType  = m_FolderTypeChoice->GetSelection();
 #ifdef USE_PYTHON
          gs_installWizardData.usePython  = m_UsePythonCheckbox->GetValue();
 #endif
@@ -381,8 +384,9 @@ public:
          return TRUE;
       }
 private:
+   wxChoice *m_FolderTypeChoice; 
    wxCheckBox *m_CollectCheckbox, *m_TrashCheckbox,
-         *m_UseOutboxCheckbox, *m_UseDialUpCheckbox
+      *m_UseOutboxCheckbox, *m_UseDialUpCheckbox
 #ifdef USE_PISOCK
    , *m_UsePalmOsCheckbox
 #endif
@@ -842,6 +846,10 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
    m_UsePalmOsCheckbox = panel->CreateCheckBox(labels[4], widthMax, text5);
    last = m_UsePalmOsCheckbox;
 #endif // USE_PISOCK
+   m_FolderTypeChoice = panel->CreateChoice(
+      _("Default format for mailbox files"
+        ":Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)"),
+      widthMax,last);
 #ifdef USE_PYTHON
    wxStaticText *text6 = panel->CreateMessage(
       _(
@@ -851,6 +859,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
          "This can be used to further customise and\n"
          "expand Mahogany.\n"
          "Would you like to enable it?"), last);
+
    m_UsePythonCheckbox = panel->CreateCheckBox(labels[5], widthMax, text6);
 #endif // USE_PYTHON
 
@@ -954,6 +963,7 @@ bool RunInstallWizard()
    gs_installWizardData.useOutbox = TRUE;
    gs_installWizardData.useTrash = TRUE;
    gs_installWizardData.collectAllMail = TRUE;
+   gs_installWizardData.folderType = 0; /* mbx */
 #ifdef USE_PYTHON
    gs_installWizardData.usePython = FALSE;
 #endif
@@ -1269,6 +1279,9 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
       profile->writeEntry(MP_NET_OFF_COMMAND,gs_installWizardData.hangupCommand);
 #endif // platform
    }
+
+   if(gs_installWizardData.folderType != MP_FOLDER_FILE_DRIVER_D)
+      profile->writeEntry(MP_FOLDER_FILE_DRIVER, gs_installWizardData.folderType);
 
 #ifdef USE_PYTHON
    if(gs_installWizardData.usePython)
@@ -1672,6 +1685,12 @@ UpgradeFrom050()
    TemplateFixFolderTraversal traverse(folderRoot);
    traverse.Traverse();
 
+   MDialog_Message(
+      _("Since version 0.5 the use of the server settings has\n"
+        "changed slightly. If you experience any problems in\n"
+        "accessing remote servers, please check the correct\n"
+        "settings for those mailboxes.\n"
+        "You might have to re-set some of these server hosts."));
    return traverse.IsOk();
 }
 
