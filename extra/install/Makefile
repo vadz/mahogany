@@ -16,5 +16,8 @@ install:
 	$(INSTALL_DATA) .src/newmail.wav .src/kylemail.wav $(DATADIR)
 #	$(INSTALL_DATA) .src/mailcap $(DATADIR)
 	$(INSTALL_DATA) .src/M.conf $(DATADIR)
+	$(INSTALL) -d $(DESTDIR)/man/man1 
+	$(INSTALL_DATA) .src/mahogany.1 $(DESTDIR)/man/man1
+	$(INSTALL_DATA) .src/mahogany.1 $(DESTDIR)/man/man1/M.1
 
 .PHONY: all install clean
