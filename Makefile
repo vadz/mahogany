@@ -60,8 +60,12 @@ install:
 	$(INSTALL) -d $(DATADIR) $(BINDIR) $(DOCDIR)
 	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/bin
 	$(INSTALL) -d $(DATADIR)/$(CANONICAL_HOST)/lib
+	$(INSTALL) -d $(BINDIR)
+	$(INSTALL) -d $(DATADIR)/bin
+	$(INSTALL) -d $(DATADIR)/lib
+	$(INSTALL) -d $(DATADIR)/doc
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i install; done
-	$(INSTALL_DATA) `find doc -not -type d` $(DOCDIR)
+	$(INSTALL_DATA) `find doc \! -type d` $(DOCDIR)
 
 .PHONY: all dep clean bak backup config program doc
 

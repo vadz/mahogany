@@ -42,7 +42,7 @@
 
 /**@name Other classes */
 //@{
-//@Include: MObject.h Magic.h MApplication.h PathFinder.h
+//@Include: MObject.h MApplication.h PathFinder.h
 //@Include: appconf.h
 //@Include: Profile.h XFace.h kbList.h
 //@}

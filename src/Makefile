@@ -41,13 +41,14 @@ clean:
 dep depend: 
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
-install: all
+install: M
 	strip M
 	$(INSTALL_PROGRAM) M $(DATADIR)/$(CANONICAL_HOST)/bin
-	ln -f -s $(DATADIR)/$(CANONICAL_HOST)/bin/M $(BINDIR)
-	ln -f -s $(DATADIR)/$(CANONICAL_HOST)/bin/M $(DATADIR)/bin
+	$(RM) -f $(BINDIR)/M $(DATADIR)/bin/M
+	ln -s $(DATADIR)/$(CANONICAL_HOST)/bin/M $(BINDIR)
+	ln -s $(DATADIR)/$(CANONICAL_HOST)/bin/M $(DATADIR)/bin
 	$(INSTALL) -d $(DATADIR)/icons
-	$(INSTALL_DATA) `find icons/* -prune -not -type d` $(DATADIR)/icons
+	$(INSTALL_DATA) `find icons/* -prune \! -type d` $(DATADIR)/icons
 	$(MAKE) -C Python $@
 
 .PHONY: all dep clean doc semistatic static allclean install

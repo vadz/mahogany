@@ -43,6 +43,7 @@ install:
 	$(INSTALL_DATA) Scripts/*.py $(DATADIR)/scripts
 	$(INSTALL) -d $(DOCDIR)/Python
 	$(INSTALL_DATA) *.html $(DOCDIR)/Python
+	$(RM) $(DATADIR)/scripts/dummy.py $(DOCDIR)/Python/dummy.html
 
 #%.py: %.i
 #	$(SWIG) $(SWIGFLAGS) $<
