@@ -731,7 +731,10 @@ wxMApp::OnInit()
 
    // note that we can't create the lock file in ~/.M because the directory
    // might not have been created yet...
-   if ( !m_snglInstChecker->Create(".mahogany.lock") )
+   //
+   // it could also be a bad idea as HOME is often NFS-mounted and creating
+   // locks over NFS doesn't work well/at all
+   if ( !m_snglInstChecker->Create(".mahogany.lock", "/tmp") )
    {
       // this message is in English because translations were not loaded yet as
       // the locale hadn't been set
