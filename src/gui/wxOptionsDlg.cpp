@@ -1586,7 +1586,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Show &tips at startup"),        Field_Bool,    -1,                    },
    { gettext_noop("&Splash screen at startup"),    Field_Bool | Field_Restart, -1,                    },
    { gettext_noop("Splash screen &delay"),         Field_Number,  ConfigField_Splash     },
-   { gettext_noop("Show toolbar buttons &as"
+   { gettext_noop("Show toolbar buttons and notebook tabs &as"
                   ":Images:Text:Both"),            Field_Radio | Field_Restart, -1     },
    { gettext_noop("If autosave delay is not 0, the program will periodically\n"
                   "save all unsaved information (settings, contents of the\n"
@@ -2074,6 +2074,16 @@ wxOptionsPage::wxOptionsPage(FieldInfoArray aFields,
 
    m_aFields = aFields;
    m_aDefaults = aDefaults;
+
+   // assume that if the user doesn't want to see the images in the toolbar, he
+   // doesn't want to see them elsewhere, in particular in the notebook tabs
+   // neither
+   //
+   // NB: the config values are shifted related to the enum values, hence "+1"
+   if ( (int)READ_APPCONFIG(MP_TBARIMAGES) + 1 == TbarShow_Text )
+   {
+      image = -1;
+   }
 
    notebook->AddPage(this, title, FALSE /* don't select */, image);
 
