@@ -277,6 +277,9 @@ public:
          // if our  parent is one, then so are we
          return m_Parent ? m_Parent->IsAncestor(profile) : FALSE;
       };
+
+   virtual String GetFolderName() const { return ""; }
+
 private:
    Profile *m_Parent;
 
@@ -415,6 +418,8 @@ public:
    MOBJECT_DEBUG(ProfileImpl)
 
    virtual bool IsAncestor(Profile *profile) const;
+
+   virtual String GetFolderName() const;
 
    virtual const char * GetRootPath(void) const
       {
@@ -1397,5 +1402,27 @@ bool ProfileImpl::IsAncestor(Profile *profile) const
    }
 
    return true;
+}
+
+String ProfileImpl::GetFolderName() const
+{
+   String folderName,
+          profileName = GetName();
+   size_t lenPrefix = strlen(M_PROFILE_CONFIG_SECTION);
+   if ( strncmp(profileName, M_PROFILE_CONFIG_SECTION, lenPrefix) == 0 )
+   {
+      const char *p = profileName.c_str() + lenPrefix;
+
+      if ( *p )
+      {
+         ASSERT_MSG( *p == '/', "profile path must start with slash" );
+
+         // +1 to skip following '/'
+         folderName = p + 1;
+      }
+      //else: leave empty
+   }
+
+   return folderName;
 }
 

@@ -145,6 +145,16 @@ enum
    WXMENU_FVIEW_TOGGLE_THREAD,
    WXMENU_FVIEW_CONFIG_THREAD,
 
+   // must be in the same order as MessageSizeShow enum members
+   WXMENU_FVIEW_SIZE_AUTO,
+   WXMENU_FVIEW_SIZE_AUTOBYTES,
+   WXMENU_FVIEW_SIZE_BYTES,
+   WXMENU_FVIEW_SIZE_KBYTES,
+   WXMENU_FVIEW_SIZE_MBYTES,
+
+   WXMENU_FVIEW_CONFIG_DATEFMT,
+   WXMENU_FVIEW_FROM_NAMES_ONLY,
+
    // should be in the same order as wxFolderListColumn enum members
    WXMENU_FVIEW_SORT_BY_COL,
    WXMENU_FVIEW_SORT_BY_STATUS = WXMENU_FVIEW_SORT_BY_COL,
@@ -1651,6 +1661,60 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
    menu.Append(WXMENU_FVIEW_TOGGLE_THREAD, _("&Thread messages"), "", TRUE);
    menu.Append(WXMENU_FVIEW_CONFIG_THREAD, _("&Configure threading..."));
 
+   // add column-specific entries
+   switch ( col )
+   {
+      case WXFLC_DATE:
+         menu.AppendSeparator();
+         menu.Append(WXMENU_FVIEW_CONFIG_DATEFMT, _("&Date format..."));
+         break;
+
+      case WXFLC_FROM:
+         menu.AppendSeparator();
+         menu.Append(WXMENU_FVIEW_FROM_NAMES_ONLY, _("&Show names only"), "", TRUE);
+
+         if ( READ_CONFIG(profile, MP_FVIEW_NAMES_ONLY) )
+         {
+            menu.Check(WXMENU_FVIEW_FROM_NAMES_ONLY, TRUE);
+         }
+         break;
+
+      case WXFLC_SIZE:
+         menu.AppendSeparator();
+         menu.Append(WXMENU_FVIEW_SIZE_AUTO, _("&Automatic units"), "", TRUE);
+         menu.Append(WXMENU_FVIEW_SIZE_AUTOBYTES, _("Automatic b&yte units"), "", TRUE);
+         menu.Append(WXMENU_FVIEW_SIZE_BYTES, _("Use &bytes"), "", TRUE);
+         menu.Append(WXMENU_FVIEW_SIZE_KBYTES, _("Use &Kbytes"), "", TRUE);
+         menu.Append(WXMENU_FVIEW_SIZE_MBYTES, _("Use &Mbytes"), "", TRUE);
+
+         {
+            // we rely on the fact the SIZE_XXX menu items are in the same
+            // order as MessageSize_XXX constants
+            long sizeFmt = READ_CONFIG(profile, MP_FVIEW_SIZE_FORMAT);
+
+            sizeFmt += WXMENU_FVIEW_SIZE_AUTO;
+            if ( sizeFmt > WXMENU_FVIEW_SIZE_MBYTES )
+            {
+               FAIL_MSG( "incorrect MP_FVIEW_SIZE_FORMAT value" );
+
+               sizeFmt = WXMENU_FVIEW_SIZE_AUTO;
+            }
+
+            menu.Check(sizeFmt, TRUE);
+         }
+         break;
+
+      default:
+         FAIL_MSG( "forgot to update the switch after adding a new column?" );
+
+      case WXFLC_STATUS:
+      case WXFLC_SUBJECT:
+         // nothing special to do
+         break;
+   }
+
+   // set the initial state of the menu items
+
    if ( !READ_CONFIG(profile, MP_MSGS_SORTBY) )
    {
       // we're already unsorted, this command doesn't make sense
@@ -1662,6 +1726,7 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
       menu.Check(WXMENU_FVIEW_TOGGLE_THREAD, TRUE);
    }
 
+   // and show the menu
    PopupMenu(&menu, event.GetPoint());
 }
 
@@ -3996,6 +4061,42 @@ void wxFolderView::OnHeaderPopupMenu(int cmd)
          {
             bool thread = READ_CONFIG_BOOL(profile, MP_MSGS_USE_THREADING);
             profile->writeEntry(MP_MSGS_USE_THREADING, !thread);
+         }
+         break;
+
+      case WXMENU_FVIEW_SIZE_AUTO:
+      case WXMENU_FVIEW_SIZE_AUTOBYTES:
+      case WXMENU_FVIEW_SIZE_BYTES:
+      case WXMENU_FVIEW_SIZE_KBYTES:
+      case WXMENU_FVIEW_SIZE_MBYTES:
+         // this is an artefact of missing radio menu support in wxWin: the
+         // user could just unselect the selected checkbox instead of choosing
+         // another one, check for this - this will go away once true radio
+         // menu items are supported
+         cmd -= WXMENU_FVIEW_SIZE_AUTO;
+         if ( cmd == READ_CONFIG(profile, MP_FVIEW_SIZE_FORMAT) )
+         {
+            // nothing changed
+            return;
+         }
+
+         // we rely on the fact the SIZE_XXX menu items are in the same order
+         // as MessageSize_XXX constants
+         profile->writeEntry(MP_FVIEW_SIZE_FORMAT, cmd);
+         break;
+
+      case WXMENU_FVIEW_CONFIG_DATEFMT:
+         if ( !ConfigureDateFormat(profile, GetWindow()) )
+         {
+            // nothing changed, skip MEventManager::Send() below
+            return;
+         }
+         break;
+
+      case WXMENU_FVIEW_FROM_NAMES_ONLY:
+         {
+            bool namesOnly = READ_CONFIG_BOOL(profile, MP_FVIEW_NAMES_ONLY);
+            profile->writeEntry(MP_FVIEW_NAMES_ONLY, !namesOnly);
          }
          break;
 

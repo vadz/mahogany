@@ -180,6 +180,9 @@ public:
    /// is this profile a (grand) parent of the given one?
    virtual bool IsAncestor(Profile *profile) const = 0;
 
+   /// get the name of the folder his profile is for or an empty string
+   virtual String GetFolderName() const = 0;
+
 protected:
    /// why does egcs want this?
    Profile() {}

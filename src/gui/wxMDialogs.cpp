@@ -1764,7 +1764,6 @@ public:
    // event handlers
    void OnUpdate(wxCommandEvent& event) { UpdateExample(); }
 
-   void StopTimer(void) { m_timer->Stop(); }
 protected:
    // update timer
    class ExampleUpdateTimer : public wxTimer
@@ -1812,8 +1811,14 @@ wxDateFmtDialog::wxDateFmtDialog(Profile *profile, wxWindow *parent)
 {
    wxASSERT(NUM_DATE_FMTS == NUM_DATE_FMTS_LABELS);
 
-   wxStaticBox *box = CreateStdButtonsAndBox(_("Date Format"), FALSE,
-                                             MH_DIALOG_DATEFMT);
+   wxString foldername = profile->GetFolderName();
+   wxString labelBox;
+   if ( !foldername.empty() )
+      labelBox.Printf(_("&Date format for folder '%s'"), foldername.c_str());
+   else
+      labelBox.Printf(_("&Default date format"));
+
+   wxStaticBox *box = CreateStdButtonsAndBox(labelBox, FALSE, MH_DIALOG_DATEFMT);
 
    wxLayoutConstraints *c;
 
@@ -1821,8 +1826,8 @@ wxDateFmtDialog::wxDateFmtDialog(Profile *profile, wxWindow *parent)
                                 (
                                  this,
                                  -1,
-                                 _("Press the right mouse button over the "
-                                   "input field to insert format specifiers.\n")
+                                 _("Press the right mouse button over the\n"
+                                   "input field to insert format specifiers.")
                                 );
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -1863,11 +1868,12 @@ wxDateFmtDialog::wxDateFmtDialog(Profile *profile, wxWindow *parent)
    c->height.AsIs();
    m_UseGMT->SetConstraints(c);
 
-   SetDefaultSize(380, 240, FALSE /* not minimal */);
+   SetDefaultSize(5*wBtn, 8*hBtn, TRUE /* minimal */);
    TransferDataToWindow();
    m_OldDateFmt = m_DateFmt;
 
    m_timer = new ExampleUpdateTimer(this);
+
    // update each second
    m_timer->Start(1000);
 }
@@ -1919,16 +1925,8 @@ extern
 bool ConfigureDateFormat(Profile *profile, wxWindow *parent)
 {
    wxDateFmtDialog dlg(profile, parent);
-   if ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() )
-   {
-      dlg.StopTimer();
-      return TRUE;
-   }
-   else
-   {
-      dlg.StopTimer();
-      return FALSE;
-   }
+
+   return dlg.ShowModal() == wxID_OK && dlg.WasChanged();
 }
 
 void

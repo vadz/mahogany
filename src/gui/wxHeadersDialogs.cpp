@@ -117,14 +117,6 @@ enum
 };
 
 // ----------------------------------------------------------------------------
-// private functions
-// ----------------------------------------------------------------------------
-
-// get the folder name from the profile (may return empty string if editing
-// global settings)
-static String GetFolderNameFromProfile(Profile *profile);
-
-// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
@@ -366,7 +358,7 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
    wxLayoutConstraints *c;
 
    // Ok and Cancel buttons and a static box around everything else
-   wxString foldername = GetFolderNameFromProfile(profile);
+   wxString foldername = profile->GetFolderName();
    wxString labelBox;
    if ( !foldername.empty() )
       labelBox.Printf(_("&Headers for folder '%s'"), foldername.c_str());
@@ -620,7 +612,7 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(Profile *profile,
    wxLayoutConstraints *c;
 
    // [Ok], [Cancel] and a box around everything else
-   wxString foldername = GetFolderNameFromProfile(profile);
+   wxString foldername = profile->GetFolderName();
    wxString labelBox;
    if ( !foldername.empty() )
       labelBox.Printf(_("Custom header for folder '%s'"), foldername.c_str());
@@ -817,7 +809,7 @@ wxCustomHeadersDialog::wxCustomHeadersDialog(Profile *profile,
    wxLayoutConstraints *c;
 
    // [Ok], [Cancel] and a box around everything else
-   wxString foldername = GetFolderNameFromProfile(profile);
+   wxString foldername = profile->GetFolderName();
    wxString labelBox;
    if ( !foldername.empty() )
       labelBox.Printf(_("Custom &headers for folder '%s'"), foldername.c_str());
@@ -1114,31 +1106,6 @@ void wxCustomHeadersDialog::OnDelete(wxCommandEvent& WXUNUSED(event))
 
    m_listctrl->DeleteItem(sel);
    m_headerTypes.RemoveAt(sel);
-}
-
-// ----------------------------------------------------------------------------
-// private functions
-// ----------------------------------------------------------------------------
-
-static String GetFolderNameFromProfile(Profile *profile)
-{
-   String folderName, profileName = profile->GetName();
-   size_t lenPrefix = strlen(M_PROFILE_CONFIG_SECTION);
-   if ( strncmp(profileName, M_PROFILE_CONFIG_SECTION, lenPrefix) == 0 )
-   {
-      const char *p = profileName.c_str() + lenPrefix;
-
-      if ( *p )
-      {
-         ASSERT_MSG( *p == '/', "profile path must start with slash" );
-
-         // +1 to skip following '/'
-         folderName = p + 1;
-      }
-      //else: leave empty
-   }
-
-   return folderName;
 }
 
 // ----------------------------------------------------------------------------
