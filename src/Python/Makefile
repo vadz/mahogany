@@ -25,6 +25,9 @@ swiglib.cpp: swiglib.i
 	$(SWIG) $(SWIGFLAGS_LIBSWIG) -o $@ $<
 endif
 
+Minit.py: .src/INIT/Minit.py
+	ln -s $< $@
+
 install:
 	$(INSTALL) -d $(DATADIR)/scripts
 	for i in *.py .src/Scripts/*.py; \
@@ -41,6 +44,5 @@ clean:	stdclean
 	$(RM) *.pyc *.html *.doc junk Minit.py
 	$(RM) $(CPPTARGETS)
 	$(RM) $(PYTARGETS)
-	#??? ln -s INIT/Minit.py .
 
 .PHONY: mkswig all install clean
