@@ -75,8 +75,8 @@ private:
 #if defined(DEBUG)
    String      m_subject;
    String      m_refs;
-   String      m_id;
 #endif
+   String     *m_id;
    String     *m_simplifiedSubject;
    bool        m_isReply;
 public:
@@ -123,13 +123,13 @@ Threadable::Threadable(HeaderInfo *hi, size_t index, bool dummy)
    , m_dummy(dummy)
    , m_next(0)
    , m_child(0)
+   , m_id(0)
    , m_simplifiedSubject(0)
    , m_isReply(false)
 {
 #if defined(DEBUG)
    m_subject = hi->GetSubject();
    m_refs = hi->GetReferences();
-   m_id = hi->GetId();
 #endif
 }
 
@@ -137,6 +137,7 @@ inline
 Threadable::~Threadable()
 {
    delete m_simplifiedSubject;
+   delete m_id;
 }
 
 
@@ -160,11 +161,56 @@ void Threadable::destroy() {
 
 String Threadable::messageThreadID() const
 {
-   String id = m_hi->GetId();
-   if (!id.empty())
-      return id;
-   else
-      return String("<emptyId:") << (int)this << ">";
+   Threadable *that = (Threadable *)this;    // Remove constness
+   if (that->m_id != 0)
+      return *that->m_id;
+   that->m_id = new String;
+
+   // Scan the provided id to remove the garbage
+   const char *s = m_hi->GetId().c_str();
+   
+   enum State {
+      notInRef,
+      openingSeen,
+      atSeen
+   } state = notInRef;
+   
+   size_t start = 0;
+   size_t nbChar = m_hi->GetId().Len();
+   size_t i = 0;
+   while (i < nbChar)
+   {
+      char current = s[i];
+      switch (state)
+      {
+      case notInRef:
+         if (current == '<')
+         {
+            start = i;
+            state = openingSeen;
+         }
+         break;
+      case openingSeen:
+         if (current == '@')
+            state = atSeen;
+         break;
+      case atSeen:
+         if (current == '>')
+         {
+            // We found a reference
+            *that->m_id = m_hi->GetId().Mid(start, i+1-start);
+            i = nbChar; // exit the while loop
+         }
+         break;
+      }
+      i++;
+   }
+
+   if (that->m_id->empty()) {
+      *that->m_id = String("<emptyId:") << (int)this << ">";
+   }
+   
+   return *that->m_id;
 }
 
 
