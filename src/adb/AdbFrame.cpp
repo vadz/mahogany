@@ -1524,7 +1524,7 @@ void wxAdbEditFrame::AdvanceToNextFound()
 {
   size_t nCount = m_aFindResults.Count();
   if ( nCount == 0 )
-    wxLogWarning(_("Can't find any matches for '%s'."), m_strFind.c_str());
+    wxLogWarning(_("Cannot find any matches for '%s'."), m_strFind.c_str());
   else {
     if ( m_nFindIndex == -1 ) {
       // called for the first time (for this search)
@@ -1762,8 +1762,10 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
 
   wxString strAdbName;
   wxString strTitle;
-  strTitle.Printf(_("%s an address book"),
-                  wxGetTranslation(bDoCreate ? "Create" : "Open"));
+  if(bDoCreate)
+     strTitle = _("Create an address book");
+  else
+     strTitle = _("Open an address book");
   switch ( info->nameFormat ) {
     case AdbDataProvider::Name_No:
       // the ADB name is not significant, so empty will do as well as any other
@@ -1816,7 +1818,7 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
 
      if ( book ) {
         if ( !book->Flush() ) {
-           wxLogWarning(_("Address book '%s' was created, but couldn't "
+           wxLogWarning(_("Address book '%s' was created, but could not "
                           "be flushed. It might be unaccessible until "
                           "the program is restarted."), strAdbName.c_str());
         }
@@ -1886,7 +1888,7 @@ void wxAdbEditFrame::DoPaste()
 
   // can't paste if an item with the same name already exists
   if ( group->FindChild(m_clipboard->GetName()) ) {
-    wxLogError(_("Can't paste entry '%s' %s: an entry with\n"
+    wxLogError(_("Cannot paste entry '%s' %s: an entry with\n"
                  "the same name already exists."),
                m_clipboard->GetName().c_str(), group->GetWhere().c_str());
     return;
@@ -1896,7 +1898,7 @@ void wxAdbEditFrame::DoPaste()
   AdbTreeElement *copy = group->CreateChild(m_clipboard->GetName(),
                                             m_clipboard->IsGroup());
   if ( copy == NULL ) {
-    wxLogError(_("Can't paste the clipboard contents here."));
+    wxLogError(_("Cannot paste the clipboard contents here."));
     return;
   }
 
@@ -1975,7 +1977,7 @@ void wxAdbEditFrame::OnTreeExpanding(wxTreeEvent& event)
     // if this group has no entries don't put [+] near it
     m_treeAdb->SetItemHasChildren(parent->GetId(), FALSE);
 
-    wxLogStatus(this, _("This group doesn't have any entries"));
+    wxLogStatus(this, _("This group has no entries"));
   }
 }
 
@@ -2104,7 +2106,7 @@ AdbTreeElement *wxAdbEditFrame::ExpandBranch(const wxString& strEntry)
         m_treeAdb->Expand(current->GetId());
       current = curGroup->FindChild(aComponents[n]);
       if ( current == NULL ) {
-        wxLogError(_("No entry '%s':\n'%s' doesn't have entry/subgroup '%s'."),
+        wxLogError(_("No entry '%s':\n'%s' has no entry/subgroup '%s'."),
                    strEntry.c_str(),
                    curGroup->GetName().c_str(),
                    aComponents[n].c_str());
@@ -2112,7 +2114,7 @@ AdbTreeElement *wxAdbEditFrame::ExpandBranch(const wxString& strEntry)
       }
     }
     else { // current item is an entry
-      wxLogError(_("Entry '%s' can't have subgroup/entry '%s'!"),
+      wxLogError(_("Entry '%s' cannot have subgroup/entry '%s'!"),
                  current->GetName().c_str(), aComponents[n].c_str());
 
       return NULL;

@@ -150,9 +150,11 @@ CHECK:
 
 
 TODO:
+- locale not found
+- message status etc in title bar
 - printer settings seem to have no effect : are persistent, do they get used?
 - MFolder.i
-
+- afm path in config
 - new mail dialog for "New Mail" folder!!!
 
 for release:

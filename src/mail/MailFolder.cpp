@@ -199,7 +199,7 @@ MailFolder::SaveMessages(const INTARRAY *selections,
    if(! mf)
    {
       String msg;
-      msg << _("Cannot open folder '") << folderName << "'.";
+      msg.Printf(_("Cannot open folder '%s'."), folderName.c_str());
       ERRORMESSAGE((msg));
       return false;
    }
@@ -285,7 +285,7 @@ MailFolder::SaveMessagesToFile(const INTARRAY *selections, MWindow *parent)
       // truncate the file
       wxFile fd;
       if ( !fd.Create(filename, TRUE /* overwrite */) )
-          wxLogError(_("Couldn't truncate the existing file."));
+          wxLogError(_("Could not truncate the existing file."));
 
       return SaveMessages(selections,filename, false);
    }

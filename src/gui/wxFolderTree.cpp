@@ -396,8 +396,8 @@ bool wxFolderTree::OnDelete(MFolder *folder)
    {
       case Inbox:
          wxLogError(_("You should not delete the INBOX folder:\n"
-                      "it is automatically created by M to store your "
-                      "incoming mail"));
+                      "it is automatically created by Mahogany to store your "
+                      "incoming mail."));
          return FALSE;
 
       case FolderRoot:

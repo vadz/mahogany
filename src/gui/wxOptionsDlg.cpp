@@ -402,10 +402,10 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
                   ":XPM:PNG:BMP:JPG"),             Field_Combo,   ConfigField_MessageViewInlineGraphics },
    { gettext_noop("Support special &fax mailers"), Field_Bool,    -1 },
    { gettext_noop("&Domains sending faxes"),       Field_Text,    ConfigField_MessageViewFaxSupport},
-#endif // Unix
-   { gettext_noop("The following settings allow to limit the amount of data "
-                  "retrieved from remote server: if the message size or "
-                  "number is greater than the value specified here, you "
+#endif // unix
+   { gettext_noop("The following settings allow to limit the amount of data\n"
+                  "retrieved from remote server: if the message size or\n"
+                  "number is greater than the value specified here, you\n"
                   "will be asked for confirmation before transfering data."),
                                                    Field_Message,  -1 },
    { gettext_noop("Maximum size of &message (in Kb)"),
@@ -414,17 +414,17 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
    { gettext_noop("Configure &headers to show..."),Field_SubDlg,   -1 },
 
    // adb: autocollect and bbdb options
-   { gettext_noop("M may automatically remember all e-mail addresses in the messages you "
-                  "receive in a special addresss book. This is called 'address "
-                  "autocollection' and may be turned on or off from this page"),
+   { gettext_noop("Mahogany may automatically remember all e-mail addresses in the messages you\n"
+                  "receive in a special addresss book. This is called 'address\n"
+                  "autocollection' and may be turned on or off from this page."),
                                                    Field_Message, -1                     },
    { gettext_noop("&Autocollect addresses"),       Field_Action,  -1,                    },
    { gettext_noop("Address &book to use"),         Field_Text, ConfigField_AutoCollect   },
    { gettext_noop("Ignore addresses without &names"), Field_Bool, ConfigField_AutoCollect},
-   { gettext_noop("Thes following settings configure the support of the Big Brother\n"
+   { gettext_noop("The following settings configure the support of the Big Brother\n"
                   "addressbook (BBDB) format. This is supported only for compatibility\n"
-                  "with other software. The normal addressbook is unaffected by these\n"
-                  "settings."), Field_Message, -1},
+                  "with other software (emacs). The normal addressbook is unaffected by\n"
+                  "these settings."), Field_Message, -1},
    { gettext_noop("&Ignore entries without names"), Field_Bool, -1 },
    { gettext_noop("&Generate unique aliases"),      Field_Bool, -1 },
    { gettext_noop("&Name for nameless entries"),    Field_Text, ConfigField_Bbdb_GenerateUnique },

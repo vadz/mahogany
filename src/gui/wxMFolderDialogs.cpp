@@ -1031,19 +1031,19 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
                   keyname; // for MDialog_YesNoDialog
          if ( !loginName )
          {
-            what = _("login name");
+            what = _("a login name");
             keyname = "AskLogin";
          }
          else if ( !m_password->GetValue() )
          {
-            what = _("password");
+            what = _("a password");
             keyname = "AskPwd";
          }
 
          if ( !!what )
          {
             wxString msg;
-            msg.Printf(_("You didn't specify the %s for this folder although it requires one.\n"
+            msg.Printf(_("You have not specified %s for this folder, although it requires one.\n"
                          "\n"
                          "Would you like to do it now?"),
                        what.c_str());
