@@ -25,19 +25,22 @@
 #define   OS_SUBTYPE   "unknown"
 
 /// Test for unix flavours:
-#ifdef unix
+#if defined(unix) || defined(__unix) || defined(__unix__)
 #  define  OS_UNIX    1
 #  define  OS_TYPE    "unix"
-#   ifdef linux
-#      define   OS_LINUX
-#      undef    OS_SUBTYPE
-#      define   OS_SUBTYPE   "linux-gnu"
-#   endif
-#   ifdef sun
-#      define   OS_SOLARIS
-#      undef    OS_SUBTYPE
-#      define   OS_SUBTYPE   "solaris"
-#   endif
+#  undef   OS_SUBTYPE
+#  ifdef linux
+#     define   OS_LINUX
+#     define   OS_SUBTYPE   "linux-gnu"
+#  endif
+#  ifdef sun
+#     define   OS_SOLARIS
+#     define   OS_SUBTYPE   "solaris"
+#  endif
+#  ifdef __osf__
+#     define   OS_TRU64
+#     define   OS_SUBTYPE   "tru64"
+#  endif
 #endif 
 
 /// Test for MS Windows:
