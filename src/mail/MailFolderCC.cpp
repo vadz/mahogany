@@ -1716,7 +1716,12 @@ MailFolderCC::BuildListing(void)
    String sequence;
    if ( numMessages != m_nMessages )
    {
-      sequence = strutil_ultoa(mail_uid(m_MailStream, m_nMessages-numMessages+1));
+      UIdType uid;
+      if(numMessages <= m_nMessages)
+         uid = m_nMessages-numMessages+1;
+      else
+         uid = m_nMessages;
+      sequence = strutil_ultoa(mail_uid(m_MailStream, uid));
       sequence += ":*";
    }
    else
