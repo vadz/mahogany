@@ -1550,11 +1550,14 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
       String msg;
       msg.Printf(_("Searching in %lu messages..."),
                  (unsigned long) m_nMessages);
-      progDlg = new MProgressDialog(GetName(),
+      { 
+        MGuiLocker locker;
+        progDlg = new MProgressDialog(GetName(),
                                     msg,
                                     m_nMessages,
                                     NULL,
                                     false, true);// open a status window:
+      }
    }
 
    m_SearchMessagesFound = new UIdArray;
@@ -1793,10 +1796,11 @@ MailFolderCC::BuildListing(void)
 
    // we don't want MEvents to be handled while we are in here, as
    // they might query this folder:
+   MEventLocker locker;
    MEventManager::Suspend(true);
 
    m_BuildListingSemaphore = true;
-
+   
    if ( m_FirstListing )
    {
       // Hopefully this will only count really existing messages for
@@ -1838,9 +1842,13 @@ MailFolderCC::BuildListing(void)
             m_nMessages, m_RetrievalLimit);
       prompt = _("How many of them do you want to retrieve?");
 
-      long nRetrieve = MGetNumberFromUser(msg, prompt, title,
-                                          m_RetrievalLimit,
-                                          1, m_nMessages);
+      long nRetrieve;
+      {
+	MGuiLocker locker;
+        nRetrieve = MGetNumberFromUser(msg, prompt, title,
+                                            m_RetrievalLimit,
+                                            1, m_nMessages);
+      }
       if ( nRetrieve != -1 )
       {
          numMessages = nRetrieve;
@@ -1859,6 +1867,7 @@ MailFolderCC::BuildListing(void)
       {
          String msg;
          msg.Printf(_("Reading %lu message headers..."), numMessages);
+         MGuiLocker locker;
          m_ProgressDialog = new MProgressDialog(GetName(),
                                                 msg,
                                                 numMessages,
@@ -1913,7 +1922,10 @@ MailFolderCC::BuildListing(void)
       
       mail_fetch_overview_x(m_MailStream, (char *)sequence.c_str(), mm_overview_header);
       if ( m_ProgressDialog != (MProgressDialog *)1 )
+      {
+         MGuiLocker locker;
          delete m_ProgressDialog;
+      }
    }
    
    // We set it to an illegal address here to suppress further updating. This
@@ -1936,7 +1948,6 @@ MailFolderCC::BuildListing(void)
    tmp.Printf("Finished building listing for folder '%s'...",
               GetName().c_str());
    LOGMESSAGE((M_LOG_DEBUG, tmp));
-
 }
 
 /* static */
@@ -1986,6 +1997,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov)
    // This is 1 if we don't want any further updates.
    if(m_ProgressDialog && m_ProgressDialog != (MProgressDialog *)1)
    {
+      MGuiLocker locker;
       if(! m_ProgressDialog->Update( m_BuildNextEntry ))
          return 0;
    }
@@ -2068,7 +2080,10 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov)
 
       // This is 1 if we don't want any further updates.
       if(m_ProgressDialog && m_ProgressDialog != (MProgressDialog *)1)
+      {
+         MGuiLocker locker;
          m_ProgressDialog->Update( m_BuildNextEntry - 1 );
+      }
    }
    else
    {
