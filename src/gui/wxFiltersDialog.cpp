@@ -2116,6 +2116,7 @@ public:
 
    virtual ~wxQuickFilterDialog();
 
+   virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
 protected:
@@ -2179,9 +2180,9 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
    msg->SetConstraints(c);
 
    wxArrayString labels;
-   labels.Add(_("the message was sent from"));
-   labels.Add(_("the message subject contains"));
-   labels.Add(_("the message was sent to"));
+   labels.Add(_("the message was sent &from"));
+   labels.Add(_("the message &subject contains"));
+   labels.Add(_("the message was sent &to"));
    long widthMax = GetMaxLabelWidth(labels, this) + 4*LAYOUT_X_MARGIN;
 
    wxArrayString text;
@@ -2219,7 +2220,7 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
       m_check[n]->SetConstraints(c);
    }
 
-   msg = new wxStaticText(this, -1, _("And then:"));
+   msg = new wxStaticText(this, -1, _("&And then:"));
    c = new wxLayoutConstraints;
    c->top.Below(m_check[Filter_Max - 1], 3*LAYOUT_Y_MARGIN);
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -2269,6 +2270,16 @@ void wxQuickFilterDialog::AddTest(MFDialogSettings **settings,
 
       *name << _(names[which]) << ' ' << text;
    }
+}
+
+bool wxQuickFilterDialog::TransferDataToWindow()
+{
+   // set focus to some control which we're likely to use -- by default it
+   // would have been on the "Ok" button but as it's initially disabled, it
+   // doesn't make much sense
+   m_check[Filter_From]->SetFocus();
+
+   return true;
 }
 
 bool wxQuickFilterDialog::TransferDataFromWindow()
