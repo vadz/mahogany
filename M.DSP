@@ -286,6 +286,10 @@ SOURCE=.\src\mail\HeaderInfoImpl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\mail\HeaderIterator.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\mail\LogCircle.cpp
 # End Source File
 # Begin Source File
