@@ -1,13 +1,25 @@
-/*-*- c++ -*-********************************************************
- * wxComposeView.cc : a wxWindows look at a message                 *
- *                                                                  *
- * (C) 1998-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
- *                                                                  *
- * $Id$   *
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   gui/wxComposeView.cpp - composer GUI code
+// Purpose:     shows a frame containing the header controls and editor window
+// Author:      Karsten Ballüder, Vadim Zeitlin
+// Modified by:
+// Created:     1998
+// CVS-ID:      $Id$
+// Copyright:   (c) 1998-2001 Mahogany team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
+
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
 
 #ifdef __GNUG__
-#pragma  implementation "wxComposeView.h"
+#  pragma  implementation "wxComposeView.h"
 #endif
 
 // ============================================================================
@@ -19,9 +31,9 @@
 // ----------------------------------------------------------------------------
 
 #include "Mpch.h"
-#include "Mcommon.h"
 
 #ifndef USE_PCH
+#  include "Mcommon.h"
 #  include "strutil.h"
 #  include "sysutil.h"
 
@@ -39,12 +51,10 @@
 #endif
 
 #include <wx/textctrl.h>
-#include <wx/confbase.h>      // for wxExpandEnvVars()
 #include <wx/ffile.h>
 #include <wx/textfile.h>
 #include <wx/process.h>
 #include <wx/mimetype.h>
-#include <wx/tokenzr.h>
 #include "wx/persctrl.h"
 
 #include "Mdefaults.h"
@@ -65,6 +75,7 @@
 #include "gui/wxlparser.h"
 #include "gui/wxIdentityCombo.h"
 #include "gui/wxOptionsDlg.h"
+#include "gui/wxDialogLayout.h"
 #include "gui/wxComposeView.h"
 
 #include "adb/AdbEntry.h"
@@ -75,9 +86,6 @@
 #include "MModule.h"
 #include "modules/Calendar.h"
 
-// incredible, but true: cclient headers #define the symbol write...
-#undef write
-
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -85,12 +93,14 @@
 // control ids
 enum
 {
+   // the expand button
    IDB_EXPAND = 100
 };
 
 // the default message title
 #define COMPOSER_TITLE (_("Message Composition"))
 
+// separate multiple addresses with commas
 #define CANONIC_ADDRESS_SEPARATOR   ", "
 
 // code here was written with assumption that x and y margins are the same
@@ -100,12 +110,8 @@ enum
 // private functions
 // ----------------------------------------------------------------------------
 
-// return TRUE if the field should have address expansion
-static inline bool IsAddressField(size_t field)
-{
-   return field != wxComposeView::Field_Subject;
-}
-
+// return the string containing the full mime type for the given filename (uses
+// its extension)
 static wxString GetMimeTypeFromFilename(const wxString& filename)
 {
    wxString strExt;
@@ -129,6 +135,10 @@ static wxString GetMimeTypeFromFilename(const wxString& filename)
 // private classes
 // ----------------------------------------------------------------------------
 
+// ----------------------------------------------------------------------------
+// MimeContent represents an attachement in the composer
+// ----------------------------------------------------------------------------
+
 class MimeContent : public wxLayoutObject::UserData
 {
 public:
@@ -147,7 +157,8 @@ public:
       }
    // initialize
    void SetMimeType(const String& mimeType);
-   void SetData(char *data, size_t length,
+   void SetData(void *data,
+                size_t length,
                 const char *filename = NULL); // we'll delete data!
    void SetFile(const String& filename);
 
@@ -160,7 +171,7 @@ public:
    const String& GetFileName() const
       { return m_FileName; }
 
-   const char *GetData() const
+   const void *GetData() const
       { ASSERT( m_Type == MIMECONTENT_DATA ); return m_Data; }
    size_t GetSize() const
       { ASSERT( m_Type == MIMECONTENT_DATA ); return m_Length; }
@@ -176,7 +187,7 @@ protected:
 private:
    MimeContentType m_Type;
 
-   char     *m_Data;
+   void     *m_Data;
    size_t    m_Length;
    String    m_FileName;
 
@@ -184,25 +195,58 @@ private:
    String               m_MimeType;
 };
 
+// ----------------------------------------------------------------------------
+// specialized choice control which stores its index in the
+// wxComposeView::m_choicesRcpt array (given to it during the construction)
+// ----------------------------------------------------------------------------
+
+class wxAddressTypeChoice : public wxChoice
+{
+public:
+   wxAddressTypeChoice(wxComposeView *cv, size_t index, wxWindow *parent)
+      : wxChoice(parent, -1,
+                 wxDefaultPosition, wxDefaultSize,
+                 WXSIZEOF(ms_addrTypes), ms_addrTypes)
+   {
+      m_composeView = cv;
+      m_index = index;
+   }
+
+   // callbacks
+   void OnChoice(wxCommandEvent& event);
+
+private:
+   // the back pointer to the composer
+   wxComposeView *m_composeView;
+
+   // our index in cv->m_choicesRcpt
+   size_t m_index;
+
+   static const wxString ms_addrTypes[wxComposeView::Recepient_Max];
+
+   DECLARE_EVENT_TABLE()
+};
+
+// ----------------------------------------------------------------------------
 // specialized text control which processes TABs to expand the text it
 // contains and also notifies parent (i.e. wxComposeView) when it is
 // modified.
 //
 // NB: use <Enter> to change the current control when wxAddressTextCtrl
 //     has focus (TAB won't work!)
+// ----------------------------------------------------------------------------
+
 class wxAddressTextCtrl : public wxTextCtrl
 {
 public:
    // ctor
-   wxAddressTextCtrl(wxComposeView *composeView,
-                     wxComposeView::AddressField id,
-                     wxWindow *parent)
+   wxAddressTextCtrl(wxComposeView *composeView, int index, wxWindow *parent)
       : wxTextCtrl(parent, -1, "",
                    wxDefaultPosition, wxDefaultSize,
                    wxTE_PROCESS_ENTER | wxTE_PROCESS_TAB)
    {
       m_composeView = composeView;
-      m_id = id;
+      m_index = index;
       m_lookupMode = (READ_CONFIG(m_composeView->GetProfile(),
                                   MP_ADB_SUBSTRINGEXPANSION) )
                      ? AdbLookup_Substring
@@ -213,16 +257,24 @@ public:
    // if no expansion took place
    bool DoExpand();
 
+   // is this the "new recepient" control or another one?
+   bool IsNewRecepient() const { return m_index == -1; }
+
    // callbacks
    void OnFocusSet(wxFocusEvent& event);
    void OnChar(wxKeyEvent& event);
    void OnEnter(wxCommandEvent& event);
+   void OnUpdateUI(wxUpdateUIEvent& event);
 
 private:
-   wxComposeView              *m_composeView;
-   wxComposeView::AddressField m_id;
+   // the back pointer to the composer
+   wxComposeView *m_composeView;
 
-   int  m_lookupMode;
+   // the index in the array of recepients or -1 if we're the main rcpt field
+   int m_index;
+
+   // ADB lookup mode (substring or any)
+   int m_lookupMode;
 
    DECLARE_EVENT_TABLE()
 };
@@ -261,334 +313,6 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// the classes which are used together with compose view - a derivation of
-// variable expander and expansion sink
-// ----------------------------------------------------------------------------
-
-// this struct and array are used by ExpansionSink only - they contain the
-// information about the attachments
-struct AttachmentInfo
-{
-   AttachmentInfo(const void *d,
-                  size_t l,
-                  const String& m,
-                  const String& f) : mimetype(m), filename(f)
-      { data = d; len = l; }
-
-   const void *data;
-   size_t      len;
-   String      mimetype,
-               filename;
-};
-
-WX_DECLARE_OBJARRAY(AttachmentInfo, ArrayAttachmentInfo);
-
-class ExpansionSink : public MessageTemplateSink
-{
-public:
-   // ctor
-   ExpansionSink() { m_hasCursorPosition = FALSE; m_x = m_y = 0; }
-
-   // called after successful parsing of the template to insert the resulting
-   // text into the compose view
-   void InsertTextInto(wxComposeView& cv) const;
-
-   // implement base class pure virtual function
-   virtual bool Output(const String& text);
-
-   // TODO the functions below should be in the base class (as pure virtuals)
-   //      somehow, not here
-
-   // called by VarExpander to remember the current position as the initial
-   // cursor position
-   void RememberCursorPosition() { m_hasCursorPosition = TRUE; }
-
-   // called by VarExpander to insert an attachment
-   void InsertAttachment(void *data, size_t len,
-                         const String& mimetype,
-                         const String& filename);
-
-private:
-   // as soon as m_hasCursorPosition becomes TRUE we stop to update the current
-   // cursor position which we normally keep track of in m_x and m_y - so that
-   // we'll have the position of the cursor when RememberCursorPosition() in
-   // them at the end
-   bool m_hasCursorPosition;
-   int  m_x, m_y;
-
-   // before each m_attachments[n] there is text from m_texts[n] - and after
-   // the last attachment there is m_text
-   wxString m_text;
-   wxArrayString m_texts;
-   ArrayAttachmentInfo m_attachments;
-};
-
-// VarExpander is the implementation of MessageTemplateVarExpander used here.
-class VarExpander : public MessageTemplateVarExpander
-{
-public:
-   // all categories
-   enum Category
-   {
-      Category_Misc,       // empty category - misc variables
-      Category_File,       // insert file
-      Category_Attach,     // attach file
-      Category_Command,    // execute external command
-#ifdef USE_PYTHON
-      Category_Python,     // execute Python script
-#endif // USE_PYTHON
-      Category_Message,    // the headers of the message being written
-      Category_Original,   // variables pertaining to the original message
-      Category_Invalid,    // unknown/invalid category
-      Category_Max = Category_Invalid
-   };
-
-   // the variables in "misc" category
-   enum Variable
-   {
-      Var_Date,            // insert the date in the default format
-      Var_Cursor,          // position the cursor here after template expansion
-      Var_To,              // the recepient name
-      Var_Subject,         // the message subject (without any "Re"s)
-
-      // all entries from here only apply to the reply/forward/followup
-      // templates because they work with the original message
-      Var_Quote,           // quote the original text
-      Var_Quote822,        // include the original msg as a RFC822 attachment
-      Var_Sender,          // the fullname of the sender
-
-      Var_Invalid,
-      Var_Max = Var_Invalid
-   };
-
-   // the variables in "message" category
-   //
-   // NB: the values should be identical to wxComposeView::AddressField enum
-   //     (or the code in ExpandMessage should be changed)
-   enum MessageHeader
-   {
-      MessageHeader_To,
-      MessageHeader_Subject,
-      MessageHeader_Cc,
-      MessageHeader_Bcc,
-      MessageHeader_LastControl = MessageHeader_Bcc,
-      MessageHeader_FirstName,
-      MessageHeader_LastName,
-      MessageHeader_Invalid,
-      MessageHeader_Max = MessageHeader_Invalid
-   };
-
-   // the variables from "original" category which map to headers
-   enum OriginalHeader
-   {
-      OriginalHeader_Date,
-      OriginalHeader_From,
-      OriginalHeader_Subject,
-      OriginalHeader_PersonalName,
-      OriginalHeader_FirstName,
-      OriginalHeader_LastName,
-      OriginalHeader_To,
-      OriginalHeader_ReplyTo,
-      OriginalHeader_Newsgroups,
-      OriginalHeader_Invalid,
-      OriginalHeader_Max = OriginalHeader_Invalid
-   };
-
-   // get the category from the category string (may return Category_Invalid)
-   static Category GetCategory(const String& category)
-   {
-      return (Category)FindStringInArray(ms_templateVarCategories,
-                                         Category_Max, category);
-   }
-
-   // get the variable id from the string (works for misc variables only, will
-   // return Var_Invalid if variable is unknown)
-   static Variable GetVariable(const String& variable)
-   {
-      return (Variable)FindStringInArray(ms_templateVarNames,
-                                         Var_Max, variable);
-   }
-
-   // get the header corresponding to the variable of "message" category
-   static MessageHeader GetMessageHeader(const String& variable)
-   {
-      return (MessageHeader)FindStringInArray(ms_templateMessageVars,
-                                              MessageHeader_Max, variable);
-   }
-
-   // get the header corresponding to the variable of "original" category
-   // (will return OriginalHeader_Invalid if there is no corresponding header -
-   // note that this doesn't mean that the variable is invalid because, for
-   // example, "quote" doesn't correspond to any header, yet $(original:quote)
-   // is perfectly valid)
-   static OriginalHeader GetOriginalHeader(const String& variable)
-   {
-      return (OriginalHeader)FindStringInArray(ms_templateOriginalVars,
-                                               OriginalHeader_Max, variable);
-   }
-
-   // ctor takes the sink (we need it to implement some pseudo macros such as
-   // "$CURSOR") and also a pointer to message for things like $QUOTE - this
-   // may (and in fact should) be NULL for new messages, in this case using the
-   // macros which require it will result in an error.
-   //
-   // And we also need the compose view to expand the macros in the "message"
-   // category.
-   VarExpander(ExpansionSink& sink,
-               wxComposeView& cv,
-               Profile *profile = NULL,
-               Message *msg = NULL)
-      : m_sink(sink), m_cv(cv)
-   {
-      m_profile = profile ? profile : mApplication->GetProfile();
-      m_profile->IncRef();
-      m_msg = msg;
-      SafeIncRef(m_msg);
-   }
-
-   virtual ~VarExpander()
-   {
-      m_profile->DecRef();
-      SafeDecRef(m_msg);
-   }
-
-   // implement base class pure virtual function
-   virtual bool Expand(const String& category,
-                       const String& name,
-                       const wxArrayString& arguments,
-                       String *value) const;
-
-protected:
-   // read the file into the string, return TRUE on success
-   static bool SlurpFile(const String& filename, String *value);
-
-   // try to find the filename the user wants if only the name was specified
-   // (look in the standard locations...)
-   static String GetAbsFilename(const String& name);
-
-   // Expand determines the category and then calls one of these functions
-   bool ExpandMisc(const String& name, String *value) const;
-   bool ExpandFile(const String& name,
-                   const wxArrayString& arguments,
-                   String *value) const;
-   bool ExpandAttach(const String& name,
-                     const wxArrayString& arguments,
-                     String *value) const;
-   bool ExpandCommand(const String& name, String *value) const;
-#ifdef USE_PYTHON
-   bool ExpandPython(const String& name, String *value) const;
-#endif // USE_PYTHON
-   bool ExpandMessage(const String& name, String *value) const;
-   bool ExpandOriginal(const String& name, String *value) const;
-
-private:
-   // helper used by GetCategory and GetVariable
-   static int FindStringInArray(const char *strs[], int max, const String& s);
-
-   // the sink we use when expanding pseudo variables
-   ExpansionSink& m_sink;
-
-   // the compose view is used for expansion of the variables in "message"
-   // category
-   wxComposeView& m_cv;
-
-   // the message used for expansion of variables pertaining to the original
-   // message (may be NULL for new messages)
-   Message *m_msg;
-
-   // the profile to use for everything (global one by default)
-   Profile *m_profile;
-
-   // this array contains the list of all categories
-   static const char *ms_templateVarCategories[Category_Max];
-
-   // this array contains the list of all variables without category
-   static const char *ms_templateVarNames[Var_Max];
-
-   // this array contains the variable names from "message" category
-   static const char *ms_templateMessageVars[MessageHeader_Max];
-
-   // this array contains all the variables in the "original" category which
-   // map to the headers of the original message (there are other variables in
-   // this category as well)
-   static const char *ms_templateOriginalVars[OriginalHeader_Max];
-};
-
-// ----------------------------------------------------------------------------
-// global data: the definitions of the popum menu for the template editing
-// dialog.
-// ----------------------------------------------------------------------------
-
-// NB: These menus should be kept in sync (if possible) with the variable names
-
-// the misc submenu
-static TemplatePopupMenuItem gs_popupSubmenuMisc[] =
-{
-   TemplatePopupMenuItem(_("Put &cursor here"), "$cursor"),
-   TemplatePopupMenuItem(),
-   TemplatePopupMenuItem(_("Insert current &date"), "$date"),
-   TemplatePopupMenuItem(),
-   TemplatePopupMenuItem(_("Insert &quoted text"), "$quote"),
-   TemplatePopupMenuItem(_("&Attach original text"), "$quote822"),
-};
-
-// the file insert/attach sub menu
-static TemplatePopupMenuItem gs_popupSubmenuFile[] =
-{
-   TemplatePopupMenuItem(_("&Insert file..."), "${file:%s}", TRUE),
-   TemplatePopupMenuItem(_("Insert &any file..."), "${file:%s?ask", TRUE),
-   TemplatePopupMenuItem(_("Insert &quoted file..."), "${file:%s?quote}", TRUE),
-   TemplatePopupMenuItem(_("&Attach file..."), "${attach:%s}", TRUE),
-};
-
-// the message submenu
-static TemplatePopupMenuItem gs_popupSubmenuMessage[] =
-{
-   TemplatePopupMenuItem(_("&To"), "${message:to}"),
-   TemplatePopupMenuItem(_("&First name"), "${message:firstname}"),
-   TemplatePopupMenuItem(_("&Last name"), "${message:lastname}"),
-   TemplatePopupMenuItem(_("&Subject"), "${message:subject}"),
-   TemplatePopupMenuItem(_("&CC"), "${message:cc}"),
-   TemplatePopupMenuItem(_("&BCC"), "${message:bcc}"),
-};
-
-// the original message submenu
-static TemplatePopupMenuItem gs_popupSubmenuOriginal[] =
-{
-   TemplatePopupMenuItem(_("&Date"), "${original:date}"),
-   TemplatePopupMenuItem(_("&From"), "${original:from}"),
-   TemplatePopupMenuItem(_("&Subject"), "${original:subject}"),
-   TemplatePopupMenuItem(_("Full &name"), "${original:fullname}"),
-   TemplatePopupMenuItem(_("F&irst name"), "${original:firstname}"),
-   TemplatePopupMenuItem(_("&Last name"), "${original:lastname}"),
-   TemplatePopupMenuItem(_("&To"), "${original:to}"),
-   TemplatePopupMenuItem(_("&Reply to"), "${original:replyto}"),
-   TemplatePopupMenuItem(_("&Newsgroups"), "${original:newsgroups}"),
-};
-
-// the whole menu
-static TemplatePopupMenuItem gs_popupMenu[] =
-{
-   TemplatePopupMenuItem(_("&Miscellaneous"),
-                         gs_popupSubmenuMisc,
-                         WXSIZEOF(gs_popupSubmenuMisc)),
-   TemplatePopupMenuItem(_("Message &headers"),
-                         gs_popupSubmenuMessage,
-                         WXSIZEOF(gs_popupSubmenuMessage)),
-   TemplatePopupMenuItem(_("&Original message"),
-                         gs_popupSubmenuOriginal,
-                         WXSIZEOF(gs_popupSubmenuOriginal)),
-   TemplatePopupMenuItem(_("Insert or attach a &file"),
-                         gs_popupSubmenuFile,
-                         WXSIZEOF(gs_popupSubmenuFile)),
-   TemplatePopupMenuItem(),
-   TemplatePopupMenuItem(_("&Execute command..."), "${cmd:%s}", FALSE),
-};
-
-const TemplatePopupMenuItem& g_ComposeViewTemplatePopupMenu =
-   TemplatePopupMenuItem("", gs_popupMenu, WXSIZEOF(gs_popupMenu));
-
-// ----------------------------------------------------------------------------
 // event tables &c
 // ----------------------------------------------------------------------------
 
@@ -605,11 +329,17 @@ BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
    EVT_CHOICE(IDC_IDENT_COMBO, wxComposeView::OnIdentChange)
 END_EVENT_TABLE()
 
+BEGIN_EVENT_TABLE(wxAddressTypeChoice, wxChoice)
+   EVT_CHOICE(-1, wxAddressTypeChoice::OnChoice)
+END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxAddressTextCtrl, wxTextCtrl)
    EVT_SET_FOCUS(wxAddressTextCtrl::OnFocusSet)
+
    EVT_CHAR(wxAddressTextCtrl::OnChar)
    EVT_TEXT_ENTER(-1, wxAddressTextCtrl::OnEnter)
+
+   EVT_UPDATE_UI(-1, wxAddressTextCtrl::OnUpdateUI)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxComposerLayoutWindow, wxLayoutWindow)
@@ -648,7 +378,9 @@ void MimeContent::SetMimeType(const String& mimeType)
       m_NumericMimeType = Message::MSG_TYPEOTHER;
 }
 
-void MimeContent::SetData(char *data, size_t length, const char *filename)
+void MimeContent::SetData(void *data,
+                          size_t length,
+                          const char *filename)
 {
    ASSERT( data != NULL );
 
@@ -668,24 +400,67 @@ void MimeContent::SetFile(const String& filename)
 }
 
 // ----------------------------------------------------------------------------
+// wxAddressTypeChoice
+// ----------------------------------------------------------------------------
+
+const wxString wxAddressTypeChoice::ms_addrTypes[] =
+{
+   _("To"),
+   _("Cc"),
+   _("Bcc"),
+   _("Newsgroup"),
+   _("None"),
+};
+
+void wxAddressTypeChoice::OnChoice(wxCommandEvent& event)
+{
+   // notify the composer
+   m_composeView->
+      OnRcptTypeChange((wxComposeView::RecepientType)event.GetSelection());
+
+   event.Skip();
+}
+
+// ----------------------------------------------------------------------------
 // wxAddressTextCtrl
 // ----------------------------------------------------------------------------
 
-// pass to the next control when <Enter> is pressed
+void wxAddressTextCtrl::OnUpdateUI(wxUpdateUIEvent& event)
+{
+   // enable the text only if it has a valid type (also note that the new
+   // recepient control is always enabled)
+   if ( !IsNewRecepient() )
+   {
+      event.Enable(m_composeView->IsRecepientEnabled((size_t)m_index));
+   }
+}
+
 void wxAddressTextCtrl::OnEnter(wxCommandEvent& /* event */)
 {
-    wxNavigationKeyEvent event;
-    event.SetDirection(TRUE);       // forward
-    event.SetWindowChange(FALSE);   // control change
-    event.SetEventObject(this);
+   if ( IsNewRecepient() )
+   {
+      // add new recepient(s)
+      m_composeView->AddRecepients(GetValue());
 
-    GetParent()->GetEventHandler()->ProcessEvent(event);
+      // clear the entry zone as recepient(s) were moved elsewhere
+      SetValue("");
+   }
+   else
+   {
+      // pass to the next control when <Enter> is pressed
+      wxNavigationKeyEvent event;
+      event.SetDirection(TRUE);       // forward
+      event.SetWindowChange(FALSE);   // control change
+      event.SetEventObject(this);
+
+      GetParent()->GetEventHandler()->ProcessEvent(event);
+   }
 }
 
 // mark this ctrl as being the last active - so the [Expand] btn will expand us
 void wxAddressTextCtrl::OnFocusSet(wxFocusEvent& event)
 {
-   m_composeView->SetLastAddressEntry(m_id);
+   m_composeView->SetLastAddressEntry(m_index);
 
    event.Skip();
 }
@@ -695,7 +470,7 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
 {
    ASSERT( event.GetEventObject() == this ); // how can we get anything else?
 
-   m_composeView->SetLastAddressEntry(m_id);
+   m_composeView->SetLastAddressEntry(m_index);
 
    // we're only interested in TABs and only it's not a second TAB in a row
    if ( event.KeyCode() == WXK_TAB )
@@ -863,18 +638,7 @@ bool wxAddressTextCtrl::DoExpand()
 }
 
 // ----------------------------------------------------------------------------
-// wxComposeView inline functions
-// ----------------------------------------------------------------------------
-
-void wxComposeView::EnableEditing(bool enable)
-{
-   // indicate the current state in the status bar
-   SetStatusText(enable ? "" : _("RO"), 1);
-   m_LayoutWindow->SetEditable(enable);
-}
-
-// ----------------------------------------------------------------------------
-// wxComposeView creation
+// wxComposeView creation: static functions
 // ----------------------------------------------------------------------------
 
 /** Constructor for posting news.
@@ -955,6 +719,517 @@ wxComposeView::CreateFwdMessage(const MailFolder::Params& params,
 
    return cv;
 }
+
+// ----------------------------------------------------------------------------
+// wxComposeView ctor/dtor
+// ----------------------------------------------------------------------------
+
+wxComposeView::wxComposeView(const String &name,
+                             wxWindow *parent)
+             : wxMFrame(name,parent)
+{
+   m_name = name;
+   m_pidEditor = 0;
+   m_procExtEdit = NULL;
+   m_sent = false;
+   m_OriginalMessage = NULL;
+
+   m_indexLast =
+   m_indexRcpt = -1;
+
+   // by default new recepients are "to"
+   m_rcptTypeLast = Recepient_To;
+
+   m_LayoutWindow = NULL;
+   m_encoding = wxFONTENCODING_DEFAULT;
+}
+
+wxComposeView::~wxComposeView()
+{
+   SafeDecRef(m_Profile);
+
+   delete m_LayoutWindow;
+
+   SafeDecRef(m_OriginalMessage);
+}
+
+// ----------------------------------------------------------------------------
+// wxComposeView menu/tool/status bar initialization
+// ----------------------------------------------------------------------------
+
+void
+wxComposeView::CreateMenu()
+{
+   AddFileMenu();
+   AddEditMenu();
+   WXADD_MENU(GetMenuBar(), COMPOSE, _("&Compose"));
+   AddLanguageMenu();
+   AddHelpMenu();
+
+   // FIXME: provide some visual feedback for them, like
+   //        enabling/disabling them. Not used yet.
+   m_MItemCut = GetMenuBar()->FindItem(WXMENU_EDIT_CUT);
+   m_MItemCopy = GetMenuBar()->FindItem(WXMENU_EDIT_COPY);
+   m_MItemPaste = GetMenuBar()->FindItem(WXMENU_EDIT_CUT);
+
+   // check if we can schedule messages:
+   MModule *module = MModule::GetProvider(MMODULE_INTERFACE_CALENDAR);
+   if ( module == NULL )
+   {
+      // if menu is !NULL, it will be filled with wxMenu this item belongs to
+      wxMenu *menu = NULL;
+      GetMenuBar()->FindItem(WXMENU_COMPOSE_SEND_LATER, &menu);
+      if ( menu )
+      {
+         menu->Delete(WXMENU_COMPOSE_SEND_LATER);
+      }
+      else // unexpected
+      {
+         FAIL_MSG( "didn't find \"Send later\" in compose menu, why?" );
+      }
+   }
+   else // we do have calendar module
+   {
+      module->DecRef(); // we don't need it yet
+   }
+}
+
+void
+wxComposeView::CreateToolAndStatusBars()
+{
+   AddToolbarButtons(CreateToolBar(), WXFRAME_COMPOSE);
+
+   CreateStatusBar(2);
+   static const int s_widths[] = { -1, 90 };
+   SetStatusWidths(WXSIZEOF(s_widths), s_widths);
+}
+
+// ----------------------------------------------------------------------------
+// wxComposeView "real" creation: here we create the controls and lay them out
+// ----------------------------------------------------------------------------
+
+wxSizer *
+wxComposeView::CreateSizerWithText(wxControl *control,
+                                   wxTextCtrl **ppText,
+                                   TextField tf,
+                                   wxWindow *parent)
+{
+   if ( !parent )
+      parent = m_panel;
+
+   wxSizer *sizerRow = new wxBoxSizer(wxHORIZONTAL);
+   wxTextCtrl *text;
+   switch ( tf )
+   {
+      default:
+         FAIL_MSG( "unexpected text field kind" );
+         // fall through
+
+      case TextField_Normal:
+         text = new wxTextCtrl(parent, -1, _T(""));
+         break;
+
+      case TextField_Address:
+         text = new wxAddressTextCtrl(this, m_indexRcpt, parent);
+         break;
+   }
+
+   sizerRow->Add(control, 0, wxRIGHT | wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
+   sizerRow->Add(text, 1, wxLEFT | wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
+
+   if ( ppText )
+      *ppText = text;
+
+   return sizerRow;
+}
+
+// create a sizer containing a label and a text ctrl
+wxSizer *
+wxComposeView::CreateSizerWithTextAndLabel(const wxString& label,
+                                           wxTextCtrl **ppText,
+                                           TextField tf)
+{
+    return CreateSizerWithText(new wxStaticText(m_panel, -1, label), ppText, tf);
+}
+
+wxSizer *wxComposeView::CreateHeaderFields()
+{
+   // top level vertical (box) sizer
+   wxStaticBox *box = new wxStaticBox(m_panel, -1, "");
+   wxSizer *sizerTop = new wxStaticBoxSizer(box, wxVERTICAL);
+
+   // add a spacer below the static box bottom - looks nicer
+   sizerTop->Add(0, LAYOUT_MARGIN, 0, wxEXPAND);
+
+   // add from line but only if user level is advanced
+   if ( READ_CONFIG(m_Profile, MP_USERLEVEL) >= M_USERLEVEL_ADVANCED )
+   {
+      wxSizer *sizerFrom = CreateSizerWithTextAndLabel(_("&From:"), &m_txtFrom);
+      wxChoice *choiceIdent = CreateIdentCombo(m_panel);
+      if ( choiceIdent )
+      {
+         sizerFrom->Add(choiceIdent, 0,
+                        wxLEFT | wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
+      }
+      //else: no identities configured
+
+      sizerTop->Add(sizerFrom, 0, wxALL | wxEXPAND, LAYOUT_MARGIN);
+   }
+   else // no from line
+   {
+      m_txtFrom = NULL;
+   }
+
+   // subject
+   wxSizer *sizerSubj =
+      CreateSizerWithTextAndLabel(_("&Subject:"), &m_txtSubject);
+   sizerTop->Add(sizerSubj, 0, wxALL | wxEXPAND, LAYOUT_MARGIN);
+
+   // recepient line
+   wxTextCtrl *text;
+   wxSizer *sizerRcpt = CreateSizerWithTextAndLabel
+                        (
+                           _("&Address:"),
+                           &text,
+                           TextField_Address
+                        );
+
+   // we know that it is of the right type
+   m_txtRecepient = (wxAddressTextCtrl *)text;
+
+   m_indexRcpt++; // we just created the first one
+
+   wxButton *btn = new wxButton(m_panel, IDB_EXPAND, "&Expand");
+#if wxUSE_TOOLTIPS
+   btn->SetToolTip(_("Expand the address using address books"));
+#endif // tooltips
+   sizerRcpt->Add(btn, 0, wxLEFT | wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
+
+   sizerTop->Add(sizerRcpt, 0, wxALL | wxEXPAND, LAYOUT_MARGIN);
+
+   // the spare space for already entered recepients below: we use an extra
+   // sizer because we keep it to add more stuff to it later
+   m_panelRecepients = new wxEnhancedPanel(m_panel);
+
+   m_sizerRcpts = new wxBoxSizer(wxVERTICAL);
+   m_sizerRcpts->Add(new wxStaticText(m_panelRecepients, -1, _("No recepients")));
+
+   m_panelRecepients->SetSizer(m_sizerRcpts);
+   m_panelRecepients->SetAutoLayout(TRUE);
+
+   sizerTop->Add(m_panelRecepients, 1, wxALL | wxEXPAND, LAYOUT_MARGIN);
+
+   // number completely arbitrary (FIXME)
+   sizerTop->SetItemMinSize(m_panelRecepients, 0, 80);
+
+   return sizerTop;
+}
+
+void
+wxComposeView::Create(wxWindow * WXUNUSED(parent),
+                      Profile *parentProfile,
+                      bool hide)
+{
+   // first create the profile: we must have one, so find a non NULL one
+   m_Profile = parentProfile ? parentProfile : mApplication->GetProfile();
+   m_Profile->IncRef();
+
+   // sometimes this profile had been created before the identity changed:
+   // make sure we use the current identity for the new message composition
+   m_Profile->SetIdentity(READ_APPCONFIG(MP_CURRENT_IDENTITY));
+
+   // build menu
+   CreateMenu();
+
+   // and tool/status bars
+   CreateToolAndStatusBars();
+
+   // create the child controls
+
+   // the panel which fills all the frame client area and contains all children
+   // (we use it to make the tab navigation work)
+   m_panel = new wxPanel(this, -1);
+   m_panel->SetAutoLayout(TRUE);
+
+   // the sizer containing everything
+   wxSizer *sizerTop = new wxBoxSizer(wxVERTICAL);
+
+   // add the headers sizer to it
+   sizerTop->Add(CreateHeaderFields(), 0,
+                 (wxALL & ~wxTOP) | wxEXPAND, LAYOUT_MARGIN);
+
+   // create a m_LayoutWindow
+   CreateFTCanvas();
+   sizerTop->Add(m_LayoutWindow, 1, wxALL | wxEXPAND, LAYOUT_MARGIN);
+
+   // associate this sizer with the window
+   m_panel->SetSizer(sizerTop);
+   m_panel->SetAutoLayout(TRUE);
+
+   sizerTop->SetSizeHints(this);
+
+   // initialize the controls
+   // -----------------------
+
+   // set def values for all headers
+   SetDefaultFrom();
+
+   AddTo(READ_CONFIG(m_Profile, MP_COMPOSE_TO));
+   AddCc(READ_CONFIG(m_Profile, MP_COMPOSE_CC));
+   AddBcc(READ_CONFIG(m_Profile, MP_COMPOSE_BCC));
+
+   // show the frame
+   // --------------
+
+   if ( !hide )
+   {
+      Show(TRUE);
+      m_txtRecepient->SetFocus();
+   }
+}
+
+/// create the compose window itself
+void
+wxComposeView::CreateFTCanvas(void)
+{
+   wxASSERT_MSG( m_LayoutWindow == NULL, "creating layout window twice?" );
+
+   // create the window
+   m_LayoutWindow = new wxComposerLayoutWindow(this, m_panel);
+
+   // and set its params from config:
+
+   // colours
+   GetColourByName(&m_fg, READ_CONFIG(m_Profile, MP_CVIEW_FGCOLOUR), "black");
+   GetColourByName(&m_bg, READ_CONFIG(m_Profile, MP_CVIEW_BGCOLOUR), "white");
+
+   // font family
+   static const int wxFonts[] =
+   {
+     wxDEFAULT,
+     wxDECORATIVE,
+     wxROMAN,
+     wxSCRIPT,
+     wxSWISS,
+     wxMODERN,
+     wxTELETYPE
+   };
+
+   m_font = READ_CONFIG(m_Profile, MP_CVIEW_FONT);
+   if ( m_font < 0 || (size_t)m_font > WXSIZEOF(wxFonts) )
+   {
+      FAIL_MSG( "invalid font value in config" );
+      m_font = 0;
+   }
+
+   m_font = wxFonts[m_font];
+
+   // font size
+   m_size = READ_CONFIG(m_Profile,MP_CVIEW_FONT_SIZE);
+
+   // others
+#ifndef OS_WIN
+   m_LayoutWindow->
+      SetFocusFollowMode(READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE) != 0);
+#endif
+
+   EnableEditing(true);
+   m_LayoutWindow->SetCursorVisibility(1);
+   DoClear();
+
+   m_LayoutWindow->SetWrapMargin( READ_CONFIG(m_Profile, MP_WRAPMARGIN));
+   m_LayoutWindow->
+      SetWordWrap(READ_CONFIG(m_Profile, MP_AUTOMATIC_WORDWRAP) != 0);
+
+   // tell it which status bar pane to use
+   m_LayoutWindow->SetStatusBar(GetStatusBar(), 0, 1);
+}
+
+void wxComposeView::DoClear()
+{
+   m_LayoutWindow->Clear(m_font, m_size, (int) wxNORMAL, (int) wxNORMAL, 0,
+                         &m_fg, &m_bg);
+
+   // set the default encoding if any
+   wxFontEncoding encoding =
+      (wxFontEncoding)READ_CONFIG(m_Profile, MP_MSGVIEW_DEFAULT_ENCODING);
+   if ( encoding != wxFONTENCODING_DEFAULT )
+   {
+      SetEncoding(encoding);
+   }
+
+   ResetDirty();
+}
+
+// ----------------------------------------------------------------------------
+// wxComposeView address headers stuff
+// ----------------------------------------------------------------------------
+
+void
+wxComposeView::AddRecepientControls(const String& value, RecepientType rt)
+{
+   // it should have been incremented by CreateHeaderFields()
+   ASSERT_MSG( m_indexRcpt >= 0, "incorrect m_indexRcpt" );
+
+   // remove the place holder we had there before
+   if ( m_indexRcpt == 0 )
+   {
+      // 0 by position
+      m_sizerRcpts->Remove((int)0);
+   }
+
+   // create and add the controls
+   wxAddressTypeChoice *choice = new wxAddressTypeChoice
+                                     (
+                                      this,
+                                      m_indexRcpt,
+                                      m_panelRecepients->GetCanvas()
+                                     );
+
+   wxTextCtrl *text;
+   wxSizer *sizerRcpt =
+      CreateSizerWithText
+      (
+         choice,
+         &text,
+         // we can't complete the newsgroups (yet?)
+         rt == Recepient_Newsgroup ? TextField_Normal : TextField_Address,
+         m_panelRecepients->GetCanvas()
+      );
+
+   // increment the index for the next wxAddressTextCtrl we create
+   m_indexRcpt++;
+
+   m_choicesRcpt.Add(choice);
+   m_textsRcpt.Add(text);
+
+   choice->SetSelection(rt);
+   text->SetValue(value);
+
+   m_panelRecepients->RefreshScrollbar(m_panelRecepients->GetClientSize());
+   m_sizerRcpts->Add(sizerRcpt, 0, wxALL | wxEXPAND, LAYOUT_MARGIN);
+   m_sizerRcpts->Layout();
+}
+
+void
+wxComposeView::AddRecepients(const String& addr, RecepientType addrType)
+{
+   // if there is no address, nothing to do
+   if ( addr.empty() )
+      return;
+
+   // invalid rcpt type means to reuse the last one
+   if ( addrType == Recepient_None )
+   {
+      addrType = m_rcptTypeLast;
+   }
+
+   // FIXME: split the string in addreses and add all of them
+   AddRecepient(addr, addrType);
+}
+
+void
+wxComposeView::AddRecepient(const String& addr, RecepientType addrType)
+{
+   // this is a private function, AddRecepients() above is the public one and it
+   // does the parameter validation
+   CHECK_RET( !addr.empty() && addrType != Recepient_None,
+              "invalid parameter in AddRecepient()" );
+
+   // look if we don't already have it
+   size_t count = m_choicesRcpt.GetCount();
+   ASSERT_MSG( count == m_textsRcpt.GetCount(), "mismatch in rcpt controls" );
+
+   bool foundWithAnotherType = false;
+   for ( size_t n = 0; n < count; n++ )
+   {
+      if ( !IsRecepientEnabled(n) )
+      {
+         // type "none" doesn't count
+         continue;
+      }
+
+      if ( Message::CompareAddresses(m_textsRcpt[n]->GetValue(), addr) )
+      {
+         // ok, we already have this address - is it of the same type?
+         if ( m_choicesRcpt[n]->GetSelection() == addrType )
+         {
+            // yes, don't add it again
+            wxLogStatus(this,
+                        _("Address '%s' is already in the recepients list, "
+                          "not added."),
+                        addr.c_str());
+            return;
+         }
+
+         foundWithAnotherType = true;
+
+         // continue - we may yet find it with the same typ later
+      }
+   }
+
+   if ( foundWithAnotherType )
+   {
+      // warn the user that the address is already present but add it
+      // nevertheless - I think this is the most reasonable thing to do,
+      // anything better?
+      wxLogStatus(this,
+                  _("Address '%s' is already in the recepients list but "
+                    "with a different type - will be duplicated."),
+                  addr.c_str());
+   }
+
+   // do add it (either not found or found with a different address)
+   AddRecepientControls(addr, addrType);
+}
+
+bool wxComposeView::IsRecepientEnabled(size_t index) const
+{
+   return m_choicesRcpt[index]->GetSelection() != Recepient_None;
+}
+
+String wxComposeView::GetRecepients(RecepientType type) const
+{
+   size_t count = m_choicesRcpt.GetCount();
+   ASSERT_MSG( count == m_textsRcpt.GetCount(), "mismatch in rcpt controls" );
+
+   String rcpt;
+   for ( size_t n = 0; n < count; n++ )
+   {
+      if ( m_choicesRcpt[n]->GetSelection() == type )
+      {
+         if ( !rcpt.empty() )
+            rcpt += CANONIC_ADDRESS_SEPARATOR;
+
+         rcpt += m_textsRcpt[n]->GetValue();
+      }
+   }
+
+   return rcpt;
+}
+
+String wxComposeView::GetFrom() const
+{
+   String from;
+
+   // be careful here: m_txtFrom might be not shown
+   if ( m_txtFrom )
+   {
+      from = m_txtFrom->GetValue();
+   }
+
+   return from;
+}
+
+String wxComposeView::GetSubject() const
+{
+   return m_txtSubject->GetValue();
+}
+
+// ----------------------------------------------------------------------------
+// filling wxComposeView with text initially: takes care of stuff like
+// signatures, vcards and, more generally, compose templates
+// ----------------------------------------------------------------------------
 
 void
 wxComposeView::InitText(Message *msg)
@@ -1059,14 +1334,16 @@ wxComposeView::DoInitText(Message *msg)
          wxLayoutList *layoutList = m_LayoutWindow->GetLayoutList();
 
          // insert separator optionally
-         if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) ) {
+         if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) )
+         {
             layoutList->LineBreak();
             layoutList->Insert("--");
          }
 
          // read the whole file
          size_t nLineCount = fileSig.GetLineCount();
-         for ( size_t nLine = 0; nLine < nLineCount; nLine++ ) {
+         for ( size_t nLine = 0; nLine < nLineCount; nLine++ )
+         {
             layoutList->LineBreak();
             layoutList->Insert(fileSig[nLine]);
          }
@@ -1139,14 +1416,7 @@ wxComposeView::DoInitText(Message *msg)
       templateChanged = FALSE;
 
       // do parse the template
-      ExpansionSink sink;
-      VarExpander expander(sink, *this, m_Profile, msg);
-      MessageTemplateParser parser(templateValue, _("template"), &expander);
-      if ( parser.Parse(sink) )
-      {
-         sink.InsertTextInto(*this);
-      }
-      else
+      if ( !ExpandTemplate(*this, m_Profile, templateValue, msg) )
       {
          // first show any errors which the call to Parse() above could
          // generate
@@ -1258,317 +1528,9 @@ wxComposeView::DoInitText(Message *msg)
    m_LayoutWindow->Refresh();
 }
 
-void
-wxComposeView::Create(wxWindow * WXUNUSED(parent),
-                      Profile *parentProfile,
-                      bool hide)
-{
-   CHECK_RET( !m_initialised, "wxComposeView created twice" );
-
-   m_LayoutWindow = NULL;
-   m_encoding = wxFONTENCODING_DEFAULT;
-
-   if(!parentProfile)
-      parentProfile = mApplication->GetProfile();
-   m_Profile = parentProfile;
-   m_Profile->IncRef();
-
-   // sometimes this profile had been created before the identity changed:
-   // make sure we use the current identity for the new message composition
-   m_Profile->SetIdentity(READ_APPCONFIG(MP_CURRENT_IDENTITY));
-
-   // build menu
-   // ----------
-   AddFileMenu();
-   AddEditMenu();
-   WXADD_MENU(GetMenuBar(), COMPOSE, _("&Compose"));
-   AddLanguageMenu();
-   AddHelpMenu();
-
-   // FIXME: provide some visual feedback for them, like
-   // enabling/disabling them. Not used yet.
-   m_MItemCut = GetMenuBar()->FindItem(WXMENU_EDIT_CUT);
-   m_MItemCopy = GetMenuBar()->FindItem(WXMENU_EDIT_COPY);
-   m_MItemPaste = GetMenuBar()->FindItem(WXMENU_EDIT_CUT);
-
-   AddToolbarButtons(CreateToolBar(), WXFRAME_COMPOSE);
-
-   CreateStatusBar(2);
-   static const int s_widths[] = { -1, 90 };
-   SetStatusWidths(WXSIZEOF(s_widths), s_widths);
-
-   // check if we can schedule messages:
-   MModule *module = MModule::GetProvider(MMODULE_INTERFACE_CALENDAR);
-   if(module == NULL)
-   {
-      // if menu is !NULL, it will be filled with wxMenu this item belongs to
-      wxMenu *menu = NULL;
-      GetMenuBar()->FindItem(WXMENU_COMPOSE_SEND_LATER, &menu);
-      ASSERT(menu);
-      menu->Delete(WXMENU_COMPOSE_SEND_LATER);
-   }
-   else
-      module->DecRef(); // we don't need it yet
-
-   // create the child controls
-   // -------------------------
-
-   // NB: order of item creation is important for constraints algorithm:
-   //     create first the controls whose constraints can be fixed first!
-   wxLayoutConstraints *c;
-   SetAutoLayout(TRUE);
-
-   // Panel itself (fills all the frame client area)
-   m_panel = new wxPanel(this, -1);
-   c = new wxLayoutConstraints;
-   c->top.SameAs(this, wxTop);
-   c->left.SameAs(this, wxLeft);
-   c->width.SameAs(this, wxWidth);
-   c->height.SameAs(this, wxHeight);
-   m_panel->SetConstraints(c);
-   m_panel->SetAutoLayout(TRUE);
-
-   // box which contains all the header fields
-   wxStaticBox *box = new wxStaticBox(m_panel, -1, "");
-   c = new wxLayoutConstraints;
-   c->left.SameAs(m_panel, wxLeft, LAYOUT_MARGIN);
-   c->right.SameAs(m_panel, wxRight, LAYOUT_MARGIN);
-   c->top.SameAs(m_panel, wxTop);
-   box->SetConstraints(c);
-
-   // layout the labels and text fields: label at the left of the field
-   bool bDoShow[Field_Max];
-
-   // "From" is only shown to advanced users
-   bDoShow[Field_From] = READ_CONFIG(m_Profile, MP_USERLEVEL) >= M_USERLEVEL_ADVANCED;
-
-   // To and subject always there
-   bDoShow[Field_To] =
-   bDoShow[Field_Subject] = TRUE;
-   if( m_mode == Mode_Mail )
-   {
-      bDoShow[Field_Cc] = READ_CONFIG(m_Profile, MP_SHOWCC) != 0;
-      bDoShow[Field_Bcc] = READ_CONFIG(m_Profile, MP_SHOWBCC) != 0;
-   }
-   else
-      bDoShow[Field_Cc] = bDoShow[Field_Bcc] = FALSE; // never for news
-
-
-   // first determine the longest label caption
-   const char *aszLabels[Field_Max];
-
-   aszLabels[Field_From]    = _("From:");
-   aszLabels[Field_To]      = (m_mode == Mode_Mail) ?  _("To:") : _("Newsgroups:");
-   aszLabels[Field_Subject] = _("Subject:");
-   aszLabels[Field_Cc]      = _("CC:");
-   aszLabels[Field_Bcc]     = _("BCC:");
-
-   // don't forget to update the labels when you add a new field
-   ASSERT( WXSIZEOF(aszLabels) == Field_Max );
-
-   wxClientDC dc(this);
-   long width, widthMax = 0;
-   size_t n;
-   for ( n = 0; n < Field_Max; n++ )
-   {
-      if ( !bDoShow[n] )
-         continue;
-
-      dc.GetTextExtent(aszLabels[n], &width, NULL);
-      if ( width > widthMax )
-         widthMax = width;
-   }
-   widthMax += 2*LAYOUT_MARGIN;
-
-   wxStaticText *label;
-   wxWindow  *last = NULL;
-   for ( n = 0; n < Field_Max; n++ )
-   {
-      if ( bDoShow[n] )
-      {
-         if ( IsAddressField(n) ) {
-            m_txtFields[n] = new wxAddressTextCtrl(this, (AddressField)n,
-                                                   m_panel);
-         }
-         else {
-            // fields which don't contain addresses don't need completition
-            m_txtFields[n] = new wxTextCtrl(m_panel, -1, "");
-         }
-
-         // text entry goes from right border of the label to the right border
-         // of the box except for the first one where we must also leave space
-         // for the button
-         c = new wxLayoutConstraints;
-         c->left.Absolute(widthMax + LAYOUT_MARGIN);
-         if ( last )
-            c->top.Below(last, LAYOUT_MARGIN);
-         else
-            c->top.SameAs(box, wxTop, 2*LAYOUT_MARGIN);
-
-         // for some header fields we create helper controls
-         wxControl *ctrlExtra;
-         if ( n == Field_From )
-         {
-            // add the identity combobox
-            ctrlExtra = CreateIdentCombo(m_panel);
-         }
-         else if ( n == Field_To )
-         {
-            // add the extra [Expand] button
-            ctrlExtra = new wxButton(m_panel, IDB_EXPAND, _("Expand"));
-#if wxUSE_TOOLTIPS
-            ctrlExtra->SetToolTip(_("Expand the address using address books"));
-#endif // tooltips
-         }
-         else
-         {
-            ctrlExtra = (wxControl *)NULL;
-         }
-
-         if ( ctrlExtra )
-         {
-            wxLayoutConstraints *c2 = new wxLayoutConstraints;
-            if ( last )
-               c2->top.Below(last, LAYOUT_MARGIN);
-            else
-               c2->top.SameAs(box, wxTop, 2*LAYOUT_MARGIN);
-            c2->right.SameAs(box, wxRight, LAYOUT_MARGIN);
-            c2->width.AsIs();
-            c2->height.AsIs();
-            ctrlExtra->SetConstraints(c2);
-
-            c->right.LeftOf(ctrlExtra, LAYOUT_MARGIN);
-         }
-         else
-         {
-            c->right.SameAs(box, wxRight, LAYOUT_MARGIN);
-         }
-
-         c->height.AsIs();
-         m_txtFields[n]->SetConstraints(c);
-
-         last = m_txtFields[n];
-
-         // label is aligned to the left
-         label = new wxStaticText(m_panel, -1, aszLabels[n],
-                                  wxDefaultPosition, wxDefaultSize,
-                                  wxALIGN_RIGHT);
-         c = new wxLayoutConstraints;
-         c->left.SameAs(box, wxLeft, LAYOUT_MARGIN);
-         c->right.Absolute(widthMax);
-         c->centreY.SameAs(last, wxCentreY, 2); // @@ looks better with 2...
-         c->height.AsIs();
-         label->SetConstraints(c);
-      }
-      else
-      { // not shown
-         m_txtFields[n] = NULL;
-      }
-   }
-
-   // now we can fix the bottom of the box
-   box->GetConstraints()->bottom.Below(last, -LAYOUT_MARGIN);
-
-   // compose window
-   CreateFTCanvas(); // creates a m_LayoutWindow
-   m_LayoutWindow->SetStatusBar(GetStatusBar(),0,1);
-   m_LayoutWindow->SetCursorVisibility(1);
-
-   c = new wxLayoutConstraints;
-   c->left.SameAs(m_panel, wxLeft, LAYOUT_MARGIN);
-   c->right.SameAs(m_panel, wxRight, LAYOUT_MARGIN);
-   c->top.Below(box, LAYOUT_MARGIN);
-   c->bottom.SameAs(m_panel, wxBottom, LAYOUT_MARGIN);
-   m_LayoutWindow->SetConstraints(c);
-
-   // initialize the controls
-   // -----------------------
-
-   // set def values for the headers
-   SetFrom();
-   if(m_txtFields[Field_To])
-      m_txtFields[Field_To]->SetValue(READ_CONFIG(m_Profile, MP_COMPOSE_TO));
-   if(m_txtFields[Field_Cc])
-      m_txtFields[Field_Cc]->SetValue(READ_CONFIG(m_Profile, MP_COMPOSE_CC));
-   if(m_txtFields[Field_Bcc])
-      m_txtFields[Field_Bcc]->SetValue(READ_CONFIG(m_Profile, MP_COMPOSE_BCC));
-
-   // show the frame
-   // --------------
-   m_initialised = true;
-   if ( !hide ) {
-      Show(TRUE);
-      m_txtFields[Field_To]->SetFocus();
-   }
-}
-
-#define NUM_FONTS 7
-static int wxFonts[NUM_FONTS] =
-{
-  wxDEFAULT,
-  wxDECORATIVE,
-  wxROMAN,
-  wxSCRIPT,
-  wxSWISS,
-  wxMODERN,
-  wxTELETYPE
-};
-
-void
-wxComposeView::CreateFTCanvas(void)
-{
-   wxASSERT_MSG( m_LayoutWindow == NULL, "creating layout window twice?" );
-   m_LayoutWindow = new wxComposerLayoutWindow(this, m_panel);
-
-   GetColourByName(&m_fg, READ_CONFIG(m_Profile, MP_CVIEW_FGCOLOUR), "black");
-   GetColourByName(&m_bg, READ_CONFIG(m_Profile, MP_CVIEW_BGCOLOUR), "white");
-
-   m_font = READ_CONFIG(m_Profile,MP_CVIEW_FONT);
-   ASSERT( m_font >= 0 && m_font <= NUM_FONTS );
-
-   m_font = wxFonts[m_font];
-   m_size = READ_CONFIG(m_Profile,MP_CVIEW_FONT_SIZE);
-#ifndef OS_WIN
-   m_LayoutWindow->SetFocusFollowMode(
-      READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE) != 0);
-#endif
-
-   EnableEditing(true);
-   DoClear();
-
-   m_LayoutWindow->SetWrapMargin( READ_CONFIG(m_Profile, MP_WRAPMARGIN));
-   m_LayoutWindow->SetWordWrap( READ_CONFIG(m_Profile, MP_AUTOMATIC_WORDWRAP) != 0);
-}
-
-void wxComposeView::DoClear()
-{
-   m_LayoutWindow->Clear(m_font, m_size, (int) wxNORMAL, (int) wxNORMAL, 0,
-                         &m_fg, &m_bg);
-
-   // set the default encoding if any
-   wxFontEncoding encoding =
-      (wxFontEncoding)READ_CONFIG(m_Profile, MP_MSGVIEW_DEFAULT_ENCODING);
-   if ( encoding != wxFONTENCODING_DEFAULT )
-   {
-      SetEncoding(encoding);
-   }
-
-   ResetDirty();
-}
-
-wxComposeView::wxComposeView(const String &iname,
-                             wxWindow *parent)
-             : wxMFrame(iname,parent)
-{
-   m_initialised = false;
-
-   m_name = iname;
-   m_pidEditor = 0;
-   m_procExtEdit = NULL;
-   m_fieldLast = Field_Max;
-   m_sent = false;
-   m_OriginalMessage = NULL;
-}
+// ----------------------------------------------------------------------------
+// wxComposeView parameters setting
+// ----------------------------------------------------------------------------
 
 void wxComposeView::SetEncoding(wxFontEncoding encoding)
 {
@@ -1598,14 +1560,11 @@ void wxComposeView::SetEncodingToSameAs(Message *msg)
    }
 }
 
-wxComposeView::~wxComposeView()
+void wxComposeView::EnableEditing(bool enable)
 {
-   if ( m_initialised )
-   {
-      m_Profile->DecRef();
-      delete m_LayoutWindow;
-   }
-   SafeDecRef(m_OriginalMessage);
+   // indicate the current state in the status bar
+   SetStatusText(enable ? "" : _("RO"), 1);
+   m_LayoutWindow->SetEditable(enable);
 }
 
 // ----------------------------------------------------------------------------
@@ -1629,25 +1588,38 @@ wxComposeView::OnIdentChange(wxCommandEvent& event)
          m_Profile->SetIdentity(ident);
       }
 
-      SetFrom();
+      SetDefaultFrom();
    }
+}
+
+void
+wxComposeView::OnRcptTypeChange(RecepientType type)
+{
+   // remember it as the last type and reuse it for the next recepient
+   m_rcptTypeLast = type;
 }
 
 // expand (using the address books) the value of the last active text zone
 void
 wxComposeView::OnExpand(wxCommandEvent &WXUNUSED(event))
 {
-   if ( m_fieldLast == Field_Max )
+   wxAddressTextCtrl *text;
+
+   if ( m_indexLast == -1 )
    {
-      // assume "To:" by default
-      m_fieldLast = Field_To;
+      // the new recepient field
+      text = m_txtRecepient;
+   }
+   else // m_indexLast is the index into m_textsRcpt array of existing rcpts
+   {
+      // we know that is of the right type
+      text = (wxAddressTextCtrl *)m_textsRcpt[(size_t)m_indexLast];
    }
 
-   wxCHECK_RET( IsAddressField(m_fieldLast), "no expansion for this field" );
-
-   (void)((wxAddressTextCtrl *)m_txtFields[m_fieldLast])->DoExpand();
+   (void)text->DoExpand();
 }
 
+// can we close the window now? check the modified flag
 bool
 wxComposeView::CanClose() const
 {
@@ -1682,170 +1654,182 @@ wxComposeView::CanClose() const
    return canClose;
 }
 
+// process all our menu commands
 void
 wxComposeView::OnMenuCommand(int id)
 {
    switch(id)
    {
-   case WXMENU_COMPOSE_INSERTFILE:
-      {
-         wxArrayString filenames;
-         size_t nFiles = wxPFilesSelector(filenames, "MsgInsert",
-                                          _("Please choose files to insert."),
-                                          NULL, "dead.letter", NULL,
-                                          _(wxALL_FILES),
-                                          wxOPEN |
-                                          wxHIDE_READONLY |
-                                          wxFILE_MUST_EXIST,
-                                          this);
-         for ( size_t n = 0; n < nFiles; n++ )
+      case WXMENU_COMPOSE_INSERTFILE:
          {
-            InsertFile(filenames[n]);
-         }
-      }
-      break;
-
-
-   case WXMENU_COMPOSE_SEND:
-   case WXMENU_COMPOSE_SEND_LATER:
-      if ( IsReadyToSend() )
-      {
-         if ( Send( (id == WXMENU_COMPOSE_SEND_LATER) ) )
-         {
-            Close();
-         }
-      }
-      break;
-
-   case WXMENU_COMPOSE_SEND_KEEP_OPEN:
-      if ( IsReadyToSend() )
-      {
-         (void)Send();
-      }
-      break;
-
-   case WXMENU_COMPOSE_PRINT:
-      Print();
-      break;
-
-   case WXMENU_COMPOSE_CLEAR:
-      DoClear();
-      break;
-
-   case WXMENU_COMPOSE_EVAL_TEMPLATE:
-      if ( !m_LayoutWindow->IsModified() )
-      {
-         // remove our prompt
-         DoClear();
-      }
-
-      DoInitText(NULL);
-      break;
-
-   case WXMENU_COMPOSE_LOADTEXT:
-      {
-         String filename = wxPFileSelector("MsgInsertText",
-                                           _("Please choose a file to insert."),
-                                           NULL, "dead.letter", NULL,
-                                           _(wxALL_FILES),
-                                           wxOPEN | wxHIDE_READONLY | wxFILE_MUST_EXIST,
-                                           this);
-
-         if ( filename.IsEmpty() )
-         {
-            wxLogStatus(this, _("Cancelled"));
-         }
-         else if ( InsertFileAsText(filename) )
-         {
-            wxLogStatus(this, _("Inserted file '%s'."), filename.c_str());
-         }
-         else
-         {
-            wxLogError(_("Failed to insert the text file '%s'."),
-                       filename.c_str());
-         }
-      }
-      break;
-
-   case WXMENU_COMPOSE_SAVETEXT:
-      {
-         String filename = wxPFileSelector("MsgSaveText",
-                                           _("Choose file to append message to"),
-                                           NULL, "dead.letter", NULL,
-                                           _(wxALL_FILES),
-                                           wxSAVE,
-                                           this);
-
-         if ( filename.IsEmpty() )
-         {
-            wxLogStatus(this, _("Cancelled"));
-         }
-         else if ( SaveMsgTextToFile(filename) )
-         {
-            wxLogStatus(this, _("Message text saved to file '%s'."),
-                        filename.c_str());
-         }
-         else
-         {
-            wxLogError(_("Failed to save the message."));
-         }
-      }
-      break;
-
-   case WXMENU_COMPOSE_EXTEDIT:
-      StartExternalEditor();
-      break;
-
-   case WXMENU_COMPOSE_CUSTOM_HEADERS:
-      {
-         String headerName, headerValue;
-         bool storedInProfile;
-         if ( ConfigureCustomHeader(m_Profile, this,
-                                    &headerName, &headerValue,
-                                    &storedInProfile,
-                                    m_mode == Mode_News ? CustomHeader_News
-                                                        : CustomHeader_Mail) )
-         {
-            if ( !storedInProfile )
+            wxArrayString filenames;
+            size_t nFiles = wxPFilesSelector
+                            (
+                             filenames,
+                             "MsgInsert",
+                             _("Please choose files to insert."),
+                             NULL, "dead.letter", NULL,
+                             _(wxALL_FILES),
+                             wxOPEN | wxHIDE_READONLY | wxFILE_MUST_EXIST,
+                             this
+                            );
+            for ( size_t n = 0; n < nFiles; n++ )
             {
-               AddHeaderEntry(headerName, headerValue);
+               InsertFile(filenames[n]);
             }
-            //else: we will take it from the profile when we will send the msg
-
-            wxLogStatus(this, _("Added custom header '%s' to the message."),
-                        headerName.c_str());
          }
-         //else: cancelled
-      }
-      break;
+         break;
 
-   case WXMENU_HELP_CONTEXT:
-      mApplication->Help(
-         (m_mode == Mode_Mail)?
-         MH_COMPOSE_MAIL : MH_COMPOSE_NEWS, this);
-      break;
-   case WXMENU_EDIT_PASTE:
-      m_LayoutWindow->Paste( WXLO_COPY_FORMAT, FALSE );
-      m_LayoutWindow->Refresh();
-      break;
-   case WXMENU_EDIT_COPY:
-      m_LayoutWindow->Copy( WXLO_COPY_FORMAT, FALSE );
-      m_LayoutWindow->Refresh();
-      break;
-   case WXMENU_EDIT_CUT:
-      m_LayoutWindow->Cut( WXLO_COPY_FORMAT, FALSE );
-      m_LayoutWindow->Refresh();
-      break;
 
-   default:
-      if ( WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT) )
-      {
-         SetEncoding(GetEncodingFromMenuCommand(id));
-      }
-      else
-      {
-         wxMFrame::OnMenuCommand(id);
-      }
+      case WXMENU_COMPOSE_SEND:
+      case WXMENU_COMPOSE_SEND_LATER:
+         if ( IsReadyToSend() )
+         {
+            if ( Send( (id == WXMENU_COMPOSE_SEND_LATER) ) )
+            {
+               Close();
+            }
+         }
+         break;
+
+      case WXMENU_COMPOSE_SEND_KEEP_OPEN:
+         if ( IsReadyToSend() )
+         {
+            (void)Send();
+         }
+         break;
+
+      case WXMENU_COMPOSE_PRINT:
+         Print();
+         break;
+
+      case WXMENU_COMPOSE_CLEAR:
+         DoClear();
+         break;
+
+      case WXMENU_COMPOSE_EVAL_TEMPLATE:
+         if ( !m_LayoutWindow->IsModified() )
+         {
+            // remove our prompt
+            DoClear();
+         }
+
+         DoInitText(NULL);
+         break;
+
+      case WXMENU_COMPOSE_LOADTEXT:
+         {
+            String filename = wxPFileSelector
+                              (
+                               "MsgInsertText",
+                               _("Please choose a file to insert."),
+                               NULL, "dead.letter", NULL,
+                               _(wxALL_FILES),
+                               wxOPEN | wxHIDE_READONLY | wxFILE_MUST_EXIST,
+                               this
+                              );
+
+            if ( filename.IsEmpty() )
+            {
+               wxLogStatus(this, _("Cancelled"));
+            }
+            else if ( InsertFileAsText(filename) )
+            {
+               wxLogStatus(this, _("Inserted file '%s'."), filename.c_str());
+            }
+            else
+            {
+               wxLogError(_("Failed to insert the text file '%s'."),
+                          filename.c_str());
+            }
+         }
+         break;
+
+      case WXMENU_COMPOSE_SAVETEXT:
+         {
+            String filename = wxPFileSelector
+                              (
+                               "MsgSaveText",
+                               _("Choose file to append message to"),
+                               NULL, "dead.letter", NULL,
+                               _(wxALL_FILES),
+                               wxSAVE,
+                               this
+                              );
+
+            if ( filename.IsEmpty() )
+            {
+               wxLogStatus(this, _("Cancelled"));
+            }
+            else if ( SaveMsgTextToFile(filename) )
+            {
+               wxLogStatus(this, _("Message text saved to file '%s'."),
+                           filename.c_str());
+            }
+            else
+            {
+               wxLogError(_("Failed to save the message."));
+            }
+         }
+         break;
+
+      case WXMENU_COMPOSE_EXTEDIT:
+         StartExternalEditor();
+         break;
+
+      case WXMENU_COMPOSE_CUSTOM_HEADERS:
+         {
+            String headerName, headerValue;
+            bool storedInProfile;
+            if ( ConfigureCustomHeader(m_Profile, this,
+                                       &headerName, &headerValue,
+                                       &storedInProfile,
+                                       m_mode == Mode_News ? CustomHeader_News
+                                                           : CustomHeader_Mail) )
+            {
+               if ( !storedInProfile )
+               {
+                  AddHeaderEntry(headerName, headerValue);
+               }
+               //else: we will take it from the profile when we will send the msg
+
+               wxLogStatus(this, _("Added custom header '%s' to the message."),
+                           headerName.c_str());
+            }
+            //else: cancelled
+         }
+         break;
+
+      case WXMENU_HELP_CONTEXT:
+         mApplication->Help(
+            (m_mode == Mode_Mail)?
+            MH_COMPOSE_MAIL : MH_COMPOSE_NEWS, this);
+         break;
+
+      case WXMENU_EDIT_PASTE:
+         m_LayoutWindow->Paste( WXLO_COPY_FORMAT, FALSE );
+         m_LayoutWindow->Refresh();
+         break;
+
+      case WXMENU_EDIT_COPY:
+         m_LayoutWindow->Copy( WXLO_COPY_FORMAT, FALSE );
+         m_LayoutWindow->Refresh();
+         break;
+
+      case WXMENU_EDIT_CUT:
+         m_LayoutWindow->Cut( WXLO_COPY_FORMAT, FALSE );
+         m_LayoutWindow->Refresh();
+         break;
+
+      default:
+         if ( WXMENU_CONTAINS(LANG, id) && (id != WXMENU_LANG_SET_DEFAULT) )
+         {
+            SetEncoding(GetEncodingFromMenuCommand(id));
+         }
+         else
+         {
+            wxMFrame::OnMenuCommand(id);
+         }
    }
 }
 
@@ -2056,20 +2040,30 @@ void wxComposeView::OnExtEditorTerm(wxProcessEvent& event)
 }
 
 // ----------------------------------------------------------------------------
-// wxComposeView operations
+// inserting stuff into wxComposeView
 // ----------------------------------------------------------------------------
 
+// insert any data
 void
-wxComposeView::InsertData(char *data,
+wxComposeView::InsertData(void *data,
                           size_t length,
                           const char *mimetype,
                           const char *filename)
 {
    MimeContent *mc = new MimeContent();
 
-   if(strutil_isempty(mimetype))
-      mimetype = "APPLICATION/OCTET-STREAM";
-
+   String mt = mimetype;
+   if ( mt.empty() )
+   {
+      if ( !strutil_isempty(filename) )
+      {
+         mt = GetMimeTypeFromFilename(filename);
+      }
+      else // default
+      {
+         mt = "APPLICATION/OCTET-STREAM";
+      }
+   }
 
    mc->SetMimeType(mimetype);
    mc->SetData(data, length, filename);
@@ -2086,13 +2080,13 @@ wxComposeView::InsertData(char *data,
    Refresh();
 }
 
+// insert file data
 void
 wxComposeView::InsertFile(const char *fileName, const char *mimetype)
 {
    CHECK_RET( !strutil_isempty(fileName), "filename can't be empty" );
 
-   MimeContent
-      *mc = new MimeContent();
+   MimeContent *mc = new MimeContent();
 
    // if there is a slash after the dot, it is not extension (otherwise it
    // might be not an extension too, but consider that it is - how can we
@@ -2142,6 +2136,209 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
                filename.c_str(), strMimeType.c_str());
 
    m_LayoutWindow->Refresh();
+}
+
+/// insert a text file at the current cursor position
+bool
+wxComposeView::InsertFileAsText(const String& filename,
+                                bool replaceFirstTextPart)
+{
+   // read the text from the file
+   char *text = NULL;
+   off_t lenFile;
+   wxFile file(filename);
+
+   bool ok = file.IsOpened();
+   if ( ok )
+   {
+      lenFile = file.Length();
+      if ( lenFile == 0 )
+      {
+         wxLogVerbose(_("File '%s' is empty, no text to insert."),
+                      filename.c_str());
+         return true;
+      }
+
+      text = new char[lenFile + 1];
+      text[lenFile] = '\0';
+
+      ok = file.Read(text, lenFile) != wxInvalidOffset;
+   }
+
+   if ( !ok )
+   {
+      wxLogError(_("Cannot insert text file into the message."));
+
+      if ( text )
+         delete [] text;
+
+      return false;
+   }
+
+   // insert the text in the beginning of the message replacing the old
+   // text if asked for this
+   if ( replaceFirstTextPart )
+   {
+      // VZ: I don't know why exactly does this happen but exporting text and
+      //     importing it back adds a '\n' at the end, so this is useful as a
+      //     quick workaround for this bug - of course, it's not a real solution
+      //     (FIXME)
+      size_t index = (size_t)lenFile - 1;
+      if ( text[index] == '\n' )
+      {
+         // check for "\r\n" too
+         if ( index > 0 && text[index - 1] == '\r' )
+         {
+            // truncate one char before
+            index--;
+         }
+
+         text[index] = '\0';
+      }
+
+      // this is not as simple as it sounds, because we normally exported all
+      // the text which was in the beginning of the message and it's not one
+      // text object, but possibly several text objects and line break
+      // objects, so now we must delete them and then recreate the new ones...
+
+      wxLayoutList * layoutList = m_LayoutWindow->GetLayoutList();
+      wxLayoutList * other_list = new wxLayoutList;
+      wxLayoutObject *obj;
+      wxLayoutExportStatus status(layoutList);
+      wxLayoutExportObject *exp;
+      while((exp = wxLayoutExport( &status,
+                                      WXLO_EXPORT_AS_OBJECTS)) != NULL)
+      {
+         // ignore WXLO_EXPORT_EMPTYLINE:
+         if(exp->type == WXLO_EXPORT_OBJECT)
+         {
+            obj = exp->content.object;
+            switch(obj->GetType())
+            {
+            case WXLO_TYPE_TEXT:
+               ; //    do nothing
+               break;
+            case WXLO_TYPE_ICON:
+               other_list->Insert(obj->Copy());
+               break;
+            default:
+               ; // cmd    objects get ignored
+            }
+         }
+         delete exp;
+      }
+      layoutList->Empty();
+      //now we move the non-text objects back:
+      wxLayoutExportStatus status2(other_list);
+      while((exp = wxLayoutExport( &status2,
+                                      WXLO_EXPORT_AS_OBJECTS)) != NULL)
+         if(exp->type == WXLO_EXPORT_EMPTYLINE)
+            layoutList->LineBreak();
+         else
+            layoutList->Insert(exp->content.object->Copy());
+      delete other_list;
+   }
+
+   // now insert the new text
+   wxLayoutImportText(m_LayoutWindow->GetLayoutList(), text);
+   m_LayoutWindow->ResizeScrollbars(true);
+   m_LayoutWindow->SetModified();
+   m_LayoutWindow->SetDirty();
+   m_LayoutWindow->Refresh();
+   delete [] text;
+   return true;
+}
+
+/// inserts a text
+void
+wxComposeView::InsertText(const String &txt)
+{
+   wxLayoutImportText(m_LayoutWindow->GetLayoutList(), txt);
+   m_LayoutWindow->ResizeScrollbars(true);
+   m_LayoutWindow->SetDirty();
+   m_LayoutWindow->GetLayoutList()->ForceTotalLayout();
+}
+
+// ----------------------------------------------------------------------------
+// wxComposeView sending the message
+// ----------------------------------------------------------------------------
+
+/// verify that the message is ready to be sent
+bool
+wxComposeView::IsReadyToSend() const
+{
+   // verify that the external editor has terminated
+   if ( m_procExtEdit )
+   {
+      // we don't give the user a choice because it will later leave us with
+      // an orphan ext editor process and it's easier this way
+      wxLogError(_("The external editor is still opened, please close "
+                   "it before sending the message."));
+
+      return false;
+   }
+
+   // verify that the network is configured
+   bool networkSettingsOk = false;
+   while ( !networkSettingsOk )
+   {
+      String host = READ_CONFIG(mApplication->GetProfile(), MP_SMTPHOST);
+      if ( host.IsEmpty() )
+      {
+         if ( MDialog_YesNoDialog(
+                  _("The message can not be sent because the network settings "
+                    "are either not configured or incorrect. Would you like to "
+                    "change them now?"),
+                  this,
+                  MDIALOG_YESNOTITLE,
+                  true /* yes is default */,
+                  "ConfigNetFromCompose") )
+         {
+            ShowOptionsDialog((wxComposeView *)this, OptionsPage_Network);
+         }
+         else
+         {
+            wxLogError(_("Cannot send message - network is not configured."));
+
+            return FALSE;
+         }
+      }
+      else
+      {
+         // TODO any other vital settings to check?
+         networkSettingsOk = true;
+      }
+   }
+
+   // did we forget the recipients?
+   if ( GetRecepients(Recepient_To).empty() )
+   {
+      wxLogError(_("Please specify at least one \"To:\" recipient!"));
+
+      return false;
+   }
+
+   // did we forget the subject?
+   if ( GetSubject().empty() )
+   {
+      // this one is not strictly speaking mandatory, so just ask the user
+      // about it (giving him a chance to get rid of annoying msg box)
+      if ( MDialog_YesNoDialog(
+               _("The subject of your message is empty, would you like "
+                 "to change it?"),
+               this,
+               MDIALOG_YESNOTITLE,
+               true /* yes is default */,
+               "SendemptySubject") )
+      {
+         m_txtSubject->SetFocus();
+
+         return false;
+      }
+   }
+
+   // everything is ok
+   return true;
 }
 
 bool
@@ -2282,11 +2479,13 @@ wxComposeView::Send(bool schedule)
                msg->AddPart
                   (
                      mc->GetMimeCategory(),
-                     mc->GetData(), mc->GetSize(),
+                     (char *)mc->GetData(),
+                     mc->GetSize(),
                      strutil_after(mc->GetMimeType(),'/'),  //subtype
-                     "INLINE"
-                     ,&dlist,&plist
-                     );
+                     "INLINE",
+                     &dlist,
+                     &plist
+                  );
             }
             break;
 
@@ -2308,29 +2507,20 @@ wxComposeView::Send(bool schedule)
    }
 
    // first the standard ones
-   msg->SetSubject(GetHeaderValue(Field_Subject));
-   switch(m_mode)
+   msg->SetSubject(GetSubject());
+
+   msg->SetAddresses(GetRecepients(Recepient_To),
+                     GetRecepients(Recepient_Cc),
+                     GetRecepients(Recepient_Bcc));
+
+   String newsgroups = GetRecepients(Recepient_Newsgroup);
+   if ( !newsgroups.empty() )
    {
-      case Mode_Mail:
-      {
-         // although 'To' field is always present, the others may not be shown
-         // (nor created) at all (but now this is checked in GetHeaderValue
-         // which will return empty value for them then)
-         String to = GetHeaderValue(Field_To);
-         String cc = GetHeaderValue(Field_Cc);
-         String bcc = GetHeaderValue(Field_Bcc);
-
-         msg->SetAddresses(to, cc, bcc);
-      }
-      break;
-
-      case Mode_News:
-         msg->SetNewsgroups(GetHeaderValue(Field_To));
-         break;
+      msg->SetNewsgroups(newsgroups);
    }
 
-   String from = GetHeaderValue(Field_From);
-   if ( from && from != m_from )
+   String from = GetFrom();
+   if ( !from.empty() && from != m_from )
    {
       msg->SetFrom(from,
                    "" /* don't change the personal name */
@@ -2339,12 +2529,12 @@ wxComposeView::Send(bool schedule)
 
    // Add additional header lines: first for this time only and then also the
    // headers stored in the profile
-   kbStringList::iterator
-      i, i2;
-   i = m_ExtraHeaderLinesNames.begin();
-   i2 = m_ExtraHeaderLinesValues.begin();
-   for(; i != m_ExtraHeaderLinesNames.end(); i++, i2++)
+   kbStringList::iterator i = m_ExtraHeaderLinesNames.begin();
+   kbStringList::iterator i2 = m_ExtraHeaderLinesValues.begin();
+   for ( ; i != m_ExtraHeaderLinesNames.end(); i++, i2++ )
+   {
       msg->AddHeaderEntry(**i, **i2);
+   }
 
    wxArrayString headerNames, headerValues;
    size_t nHeaders = GetCustomHeaders(m_Profile,
@@ -2429,50 +2619,31 @@ wxComposeView::AddHeaderEntry(const String &entry,
 
 /// sets From field using the current profile
 void
-wxComposeView::SetFrom()
+wxComposeView::SetDefaultFrom()
 {
-   if ( m_txtFields[Field_From] )
+   if ( m_txtFrom )
    {
       m_from = miscutil_GetFromAddress(m_Profile);
-      m_txtFields[Field_From]->SetValue(m_from);
+      m_txtFrom->SetValue(m_from);
    }
 }
 
-/// sets To field
+/// sets To/Cc/Bcc field
 void
 wxComposeView::SetAddresses(const String &to,
                             const String &cc,
                             const String &bcc)
 {
-   wxTextCtrl *text;
-
-   if ( !!to )
-   {
-      text = m_txtFields[Field_To];
-      if ( text )
-         text->SetValue(to.c_str());
-   }
-
-   if ( !!cc )
-   {
-      text = m_txtFields[Field_Cc];
-      if ( text )
-         text->SetValue(cc.c_str());
-   }
-
-   if ( !!bcc )
-   {
-      text = m_txtFields[Field_Bcc];
-      if ( text )
-         text->SetValue(bcc.c_str());
-   }
+   AddRecepients(to, Recepient_To);
+   AddRecepients(cc, Recepient_Cc);
+   AddRecepients(bcc, Recepient_Bcc);
 }
 
 /// sets Subject field
 void
 wxComposeView::SetSubject(const String &subj)
 {
-   m_txtFields[Field_Subject]->SetValue(subj.c_str());
+   m_txtSubject->SetValue(subj);
 }
 
 void wxComposeView::ResetDirty()
@@ -2481,20 +2652,15 @@ void wxComposeView::ResetDirty()
       m_LayoutWindow->SetModified(false);
 }
 
+// ----------------------------------------------------------------------------
+// other wxComposeView operations
+// ----------------------------------------------------------------------------
+
+/// position the cursor in the composer window
 void
 wxComposeView::MoveCursorTo(int x, int y)
 {
    m_LayoutWindow->GetLayoutList()->MoveCursorTo(wxPoint(x, y));
-}
-
-/// inserts a text
-void
-wxComposeView::InsertText(const String &txt)
-{
-   wxLayoutImportText(m_LayoutWindow->GetLayoutList(), txt);
-   m_LayoutWindow->ResizeScrollbars(true);
-   m_LayoutWindow->SetDirty();
-   m_LayoutWindow->GetLayoutList()->ForceTotalLayout();
 }
 
 /// print the message
@@ -2529,200 +2695,6 @@ wxComposeView::Print(void)
    else
       (* ((wxMApp *)mApplication)->GetPrintData())
          = printer.GetPrintDialogData().GetPrintData();
-}
-
-// -----------------------------------------------------------------------------
-// helper functions
-// -----------------------------------------------------------------------------
-
-/// verify that the message is ready to be sent
-bool
-wxComposeView::IsReadyToSend() const
-{
-   // verify that the external editor has terminated
-   if ( m_procExtEdit )
-   {
-      // we don't give the user a choice because it will later leave us with
-      // an orphan ext editor process and it's easier this way
-      wxLogError(_("The external editor is still opened, please close "
-                   "it before sending the message."));
-
-      return false;
-   }
-
-   // verify that the network is configured
-   bool networkSettingsOk = false;
-   while ( !networkSettingsOk )
-   {
-      String host = READ_CONFIG(mApplication->GetProfile(), MP_SMTPHOST);
-      if ( host.IsEmpty() )
-      {
-         if ( MDialog_YesNoDialog(
-                  _("The message can not be sent because the network settings "
-                    "are either not configured or incorrect. Would you like to "
-                    "change them now?"),
-                  this,
-                  MDIALOG_YESNOTITLE,
-                  true /* yes is default */,
-                  "ConfigNetFromCompose") )
-         {
-            ShowOptionsDialog((wxComposeView *)this, OptionsPage_Network);
-         }
-         else
-         {
-            wxLogError(_("Cannot send message - network is not configured."));
-
-            return FALSE;
-         }
-      }
-      else
-      {
-         // TODO any other vital settings to check?
-         networkSettingsOk = true;
-      }
-   }
-
-   // did we forget the recipients?
-   if ( !GetHeaderValue(Field_To) )
-   {
-      wxLogError(_("Please specify at least one recipient in the \"To:\" "
-                   "field!"));
-
-      return false;
-   }
-
-   // did we forget the subject?
-   if ( !GetHeaderValue(Field_Subject) )
-   {
-      // this one is not strictly speaking mandatory, so just ask the user
-      // about it (giving him a chance to get rid of annoying msg box)
-      if ( MDialog_YesNoDialog(
-               _("The subject of your message is empty, would you like "
-                 "to change it?"),
-               this,
-               MDIALOG_YESNOTITLE,
-               true /* yes is default */,
-               "SendemptySubject") )
-      {
-         m_txtFields[Field_Subject]->SetFocus();
-
-         return false;
-      }
-   }
-
-   // everything is ok
-   return true;
-}
-
-/// insert a text file at the current cursor position
-bool
-wxComposeView::InsertFileAsText(const String& filename,
-                                bool replaceFirstTextPart)
-{
-   // read the text from the file
-   char *text = NULL;
-   off_t lenFile;
-   wxFile file(filename);
-
-   bool ok = file.IsOpened();
-   if ( ok )
-   {
-      lenFile = file.Length();
-      if ( lenFile == 0 )
-      {
-         wxLogVerbose(_("File '%s' is empty, no text to insert."),
-                      filename.c_str());
-         return true;
-      }
-
-      text = new char[lenFile + 1];
-      text[lenFile] = '\0';
-
-      ok = file.Read(text, lenFile) != wxInvalidOffset;
-   }
-
-   if ( !ok )
-   {
-      wxLogError(_("Cannot insert text file into the message."));
-
-      if ( text )
-         delete [] text;
-
-      return false;
-   }
-
-   // insert the text in the beginning of the message replacing the old
-   // text if asked for this
-   if ( replaceFirstTextPart )
-   {
-      // VZ: I don't know why exactly does this happen but exporting text and
-      //     importing it back adds a '\n' at the end, so this is useful as a
-      //     quick workaround for this bug - of course, it's not a real solution
-      //     (FIXME)
-      size_t index = (size_t)lenFile - 1;
-      if ( text[index] == '\n' )
-      {
-         // check for "\r\n" too
-         if ( index > 0 && text[index - 1] == '\r' )
-         {
-            // truncate one char before
-            index--;
-         }
-
-         text[index] = '\0';
-      }
-
-      // this is not as simple as it sounds, because we normally exported all
-      // the text which was in the beginning of the message and it's not one
-      // text object, but possibly several text objects and line break
-      // objects, so now we must delete them and then recreate the new ones...
-
-      wxLayoutList * layoutList = m_LayoutWindow->GetLayoutList();
-      wxLayoutList * other_list = new wxLayoutList;
-      wxLayoutObject *obj;
-      wxLayoutExportStatus status(layoutList);
-      wxLayoutExportObject *exp;
-      while((exp = wxLayoutExport( &status,
-                                      WXLO_EXPORT_AS_OBJECTS)) != NULL)
-      {
-         // ignore WXLO_EXPORT_EMPTYLINE:
-         if(exp->type == WXLO_EXPORT_OBJECT)
-         {
-            obj = exp->content.object;
-            switch(obj->GetType())
-            {
-            case WXLO_TYPE_TEXT:
-               ; //    do nothing
-               break;
-            case WXLO_TYPE_ICON:
-               other_list->Insert(obj->Copy());
-               break;
-            default:
-               ; // cmd    objects get ignored
-            }
-         }
-         delete exp;
-      }
-      layoutList->Empty();
-      //now we move the non-text objects back:
-      wxLayoutExportStatus status2(other_list);
-      while((exp = wxLayoutExport( &status2,
-                                      WXLO_EXPORT_AS_OBJECTS)) != NULL)
-         if(exp->type == WXLO_EXPORT_EMPTYLINE)
-            layoutList->LineBreak();
-         else
-            layoutList->Insert(exp->content.object->Copy());
-      delete other_list;
-   }
-
-   // now insert the new text
-   wxLayoutImportText(m_LayoutWindow->GetLayoutList(), text);
-   m_LayoutWindow->ResizeScrollbars(true);
-   m_LayoutWindow->SetModified();
-   m_LayoutWindow->SetDirty();
-   m_LayoutWindow->Refresh();
-   delete [] text;
-   return true;
 }
 
 /// save the first text part of the message to the given file
@@ -2763,641 +2735,3 @@ wxComposeView::SaveMsgTextToFile(const String& filename,
    return true;
 }
 
-// ----------------------------------------------------------------------------
-// ExpansionSink - the sink used with wxComposeView
-// ----------------------------------------------------------------------------
-
-#include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY(ArrayAttachmentInfo);
-
-bool
-ExpansionSink::Output(const String& text)
-{
-   if ( !m_hasCursorPosition )
-   {
-      // update the current x and y position
-      // FIXME: this supposes that there is no autowrap - is it true?
-      int deltaX = 0, deltaY = 0;
-      for ( const char *pc = text.c_str(); *pc; pc++ )
-      {
-         if ( *pc == '\n' )
-         {
-            deltaX = -m_x;
-            deltaY++;
-         }
-         else
-         {
-            deltaX++;
-         }
-      }
-
-      m_x += deltaX;
-      m_y += deltaY;
-   }
-   //else: we don't have to count anything, we already have the cursor position
-   //      and this is all we want
-
-   // we always add this text to the last "component" of text (i.e. the one
-   // after the last attachment)
-   m_text += text;
-
-   return TRUE;
-}
-
-void
-ExpansionSink::InsertAttachment(void *data,
-                                size_t len,
-                                const String& mimetype,
-                                const String& filename)
-{
-   if ( !m_hasCursorPosition )
-   {
-      // an attachment count as one cursor position
-      m_x++;
-   }
-
-   // create a new attachment info object (NB: it will be deleted by the array
-   // automatically because we pass it by pointer and not by reference)
-   m_attachments.Add(new AttachmentInfo(data, len, mimetype, filename));
-
-   // the last component of text becomes the text before this attachment
-   m_texts.Add(m_text);
-
-   // and the new last component is empty
-   m_text.Empty();
-}
-
-void
-ExpansionSink::InsertTextInto(wxComposeView& cv) const
-{
-   size_t nCount = m_texts.GetCount();
-   ASSERT_MSG( m_attachments.GetCount() == nCount,
-               "something is very wrong in template expansion sink" );
-
-   for ( size_t n = 0; n < nCount; n++ )
-   {
-      cv.InsertText(m_texts[n]);
-
-      AttachmentInfo& attInfo = m_attachments[n];
-      cv.InsertData((char *)attInfo.data, attInfo.len,
-                    attInfo.mimetype,
-                    attInfo.filename);
-   }
-
-   cv.InsertText(m_text);
-
-   // position the cursor - if RememberCursorPosition() hadn't been called, it
-   // will be put in (0, 0)
-   cv.MoveCursorTo(m_x, m_y);
-
-   // as the inserted text comes from the program, not from the user, don't
-   // mark the composer contents as dirty
-   cv.ResetDirty();
-}
-
-// ----------------------------------------------------------------------------
-// VarExpander - used by wxComposeView
-// ----------------------------------------------------------------------------
-
-const char *VarExpander::ms_templateVarCategories[] =
-{
-   "",
-   "file",
-   "attach",
-   "cmd",
-#ifdef USE_PYTHON
-   "python",
-#endif // USE_PYTHON
-   "message",
-   "original",
-};
-
-const char *VarExpander::ms_templateVarNames[] =
-{
-   "date",
-   "cursor",
-   "to",
-   "subject",
-   "quote",
-   "quote822",
-   "sender",
-};
-
-const char *VarExpander::ms_templateMessageVars[] =
-{
-   // the order must be the same as for the text controls in compose view!
-   "to",
-   "subject",
-   "cc",
-   "bcc",
-   "firstname",
-   "lastname",
-};
-
-const char *VarExpander::ms_templateOriginalVars[] =
-{
-   "date",
-   "from",
-   "subject",
-   "fullname",
-   "firstname",
-   "lastname",
-   "to",
-   "replyto",
-   "newsgroups",
-};
-
-int
-VarExpander::FindStringInArray(const char *strings[],
-                               int max,
-                               const String& s)
-{
-   int n;
-   for ( n = 0; n < max; n++ )
-   {
-      if ( strings[n] == s )
-         break;
-   }
-
-   return n;
-}
-
-bool
-VarExpander::SlurpFile(const String& filename, String *value)
-{
-   // it's important that value is not empty even if we return FALSE because if
-   // it's empty when Expand() returns the template parser will log a
-   // misleading error message about "unknown variable"
-   *value = '?';
-
-   wxFFile file(filename);
-
-   return file.IsOpened() && file.ReadAll(value);
-}
-
-String
-VarExpander::GetAbsFilename(const String& name)
-{
-   String filename = wxExpandEnvVars(name);
-   if ( !IsAbsPath(filename) )
-   {
-      Profile *profile = mApplication->GetProfile();
-      String path = profile->readEntry(MP_COMPOSETEMPLATEPATH_USER,
-                                       mApplication->GetLocalDir());
-      if ( !path || path.Last() != '/' )
-      {
-         path += '/';
-      }
-      String filename2 = path + filename;
-
-      if ( wxFile::Exists(filename2) )
-      {
-         // ok, found
-         filename = filename2;
-      }
-      else
-      {
-         // try the global dir
-         String path = profile->readEntry(MP_COMPOSETEMPLATEPATH_GLOBAL,
-                                          mApplication->GetGlobalDir());
-         if ( !path || path.Last() != '/' )
-         {
-            path += '/';
-         }
-
-         filename.Prepend(path);
-      }
-   }
-   //else: absolute filename given, don't look anywhere else
-
-   return filename;
-}
-
-bool
-VarExpander::Expand(const String& category,
-                    const String& name,
-                    const wxArrayString& arguments,
-                    String *value) const
-{
-   value->Empty();
-
-   // comparison is case insensitive
-   switch ( GetCategory(category.Lower()) )
-   {
-      case Category_File:
-         return ExpandFile(name, arguments, value);
-
-      case Category_Attach:
-         return ExpandAttach(name, arguments, value);
-
-      case Category_Command:
-         return ExpandCommand(name, value);
-
-#ifdef USE_PYTHON
-      case Category_Python:
-         return ExpandPython(name, value);
-#endif // USE_PYTHON
-
-      case Category_Message:
-         return ExpandMessage(name, value);
-
-      case Category_Original:
-         return ExpandOriginal(name, value);
-
-      case Category_Misc:
-         return ExpandMisc(name, value);
-
-      default:
-         // unknown category
-         return FALSE;
-   }
-}
-
-bool
-VarExpander::ExpandMisc(const String& name, String *value) const
-{
-   // deal with all special cases
-   switch ( GetVariable(name.Lower()) )
-   {
-      case Var_Date:
-         {
-            time_t ltime;
-            (void)time(&ltime);
-
-#ifdef OS_WIN
-            // MP_DATE_FMT contains '%' which are being (mis)interpreted as
-            // env var expansion characters under Windows
-            ProfileEnvVarSave noEnvVars(m_profile);
-#endif // OS_WIN
-
-            *value = strutil_ftime(ltime, READ_CONFIG(m_profile, MP_DATE_FMT));
-         }
-         break;
-
-      case Var_Cursor:
-         m_sink.RememberCursorPosition();
-         break;
-
-      case Var_To:
-         // just the shorthand for "message:to"
-         return ExpandMessage("to", value);
-
-      case Var_Subject:
-         return ExpandMessage("subject", value);
-
-      case Var_Quote:
-         return ExpandOriginal("quote", value);
-
-      case Var_Quote822:
-         return ExpandOriginal("quote822", value);
-
-      case Var_Sender:
-         ExpandOriginal("from", value);
-         return TRUE;
-
-      default:
-         // unknown name
-         return FALSE;
-   }
-
-   return TRUE;
-}
-
-bool
-VarExpander::ExpandFile(const String& name,
-                        const wxArrayString& arguments,
-                        String *value) const
-{
-   // first check if we don't want to ask user
-   String filename = GetAbsFilename(name);
-   if ( arguments.Index("ask", FALSE /* no case */) != wxNOT_FOUND )
-   {
-      filename = MDialog_FileRequester(_("Select the file to insert"),
-                                       GetFrame(&m_cv),
-                                       filename);
-   }
-
-   if ( !!filename )
-   {
-      // insert the contents of a file
-      if ( !SlurpFile(filename, value) )
-      {
-         wxLogError(_("Failed to insert file '%s' into the message."),
-                    name.c_str());
-
-         return FALSE;
-      }
-
-      // do we want to quote the files contents before inserting?
-      if ( arguments.Index("quote", FALSE /* no case */) != wxNOT_FOUND )
-      {
-         String prefix = READ_CONFIG(m_profile, MP_REPLY_MSGPREFIX);
-         String quotedValue;
-         quotedValue.Alloc(value->length());
-
-         const char *cptr = value->c_str();
-         quotedValue = prefix;
-         while ( *cptr )
-         {
-            if ( *cptr == '\r' )
-            {
-               cptr++;
-               continue;
-            }
-
-            quotedValue += *cptr;
-            if( *cptr++ == '\n' && *cptr )
-            {
-               quotedValue += prefix;
-            }
-         }
-
-         *value = quotedValue;
-      }
-   }
-   //else: no file, nothing to insert
-
-   return TRUE;
-}
-
-bool
-VarExpander::ExpandAttach(const String& name,
-                          const wxArrayString& arguments,
-                          String *value) const
-{
-   String filename = GetAbsFilename(name);
-   if ( arguments.Index("ask", FALSE /* no case */) != wxNOT_FOUND )
-   {
-      filename = MDialog_FileRequester(_("Select the file to attach"),
-                                       GetFrame(&m_cv),
-                                       filename);
-   }
-
-   if ( !!filename )
-   {
-      if ( !SlurpFile(filename, value) )
-      {
-         wxLogError(_("Failed to attach file '%s' to the message."),
-                    name.c_str());
-
-         return FALSE;
-      }
-
-      // guess MIME type from extension
-      m_sink.InsertAttachment(strutil_strdup(value->c_str()),
-                              value->length(),
-                              GetMimeTypeFromFilename(filename),
-                              filename);
-
-      // avoid inserting file as text additionally
-      value->Empty();
-   }
-   //else: no file, nothing to attach
-
-   return TRUE;
-}
-
-bool
-VarExpander::ExpandCommand(const String& name, String *value) const
-{
-   // execute a command (FIXME get the wxProcess class allowing stdout
-   // redirection and use it here)
-   MTempFileName temp;
-
-   bool ok = temp.IsOk();
-   wxString filename = temp.GetName(), command;
-
-   if ( ok )
-      command << name << " > " << filename;
-
-   if ( ok )
-      ok = system(command) == 0;
-
-   if ( ok )
-      ok = SlurpFile(filename, value);
-
-   if ( !ok )
-   {
-      wxLogSysError(_("Failed to execute the command '%s'"), name.c_str());
-
-      return FALSE;
-   }
-
-   return TRUE;
-}
-
-#ifdef USE_PYTHON
-bool
-VarExpander::ExpandPython(const String& name, String *value) const
-{
-   // TODO
-   return FALSE;
-}
-#endif // USE_PYTHON
-
-bool
-VarExpander::ExpandMessage(const String& name, String *value) const
-{
-   MessageHeader header = GetMessageHeader(name.Lower());
-   if ( header == MessageHeader_Invalid )
-   {
-      // unknown variable
-      return FALSE;
-   }
-
-   switch ( header )
-   {
-      case MessageHeader_FirstName:
-      case MessageHeader_LastName:
-         {
-            wxString to = m_cv.GetHeaderValue(wxComposeView::Field_To);
-            if ( header == MessageHeader_FirstName )
-               *value = Message::GetFirstNameFromAddress(to);
-            else
-               *value = Message::GetLastNameFromAddress(to);
-         }
-         break;
-
-      default:
-         CHECK( header <= MessageHeader_LastControl, FALSE,
-                "unexpected macro in message category" );
-
-         // the MessageHeader enum values are the same as AddressField ones
-         // except for the shift due to absence of "From", so no translation is
-         // needed
-         *value = m_cv.GetHeaderValue((wxComposeView::AddressField)(header + 1));
-   }
-
-   return TRUE;
-}
-
-bool
-VarExpander::ExpandOriginal(const String& Name, String *value) const
-{
-   // insert the quoted text of the original message - of course, this
-   // only works if we have this original message
-   if ( !m_msg )
-   {
-      // unfortunately we don't have the real name of the variable
-      // here
-      wxLogWarning(_("The variables using the original message cannot "
-                     "be used in this template; variable ignored."));
-   }
-   else
-   {
-      String name = Name.Lower();
-      switch ( GetOriginalHeader(name) )
-      {
-         case OriginalHeader_Date:
-            *value = m_msg->Date();
-            break;
-
-         case OriginalHeader_From:
-            *value = m_msg->From();
-            break;
-
-         case OriginalHeader_Subject:
-            *value = m_msg->Subject();
-            break;
-
-         case OriginalHeader_ReplyTo:
-            {
-               String dummy;
-               *value = m_msg->Address(dummy, MAT_REPLYTO);
-            }
-            break;
-
-         case OriginalHeader_To:
-            (void)m_msg->GetHeaderLine("To", *value);
-            break;
-
-         case OriginalHeader_PersonalName:
-            m_msg->Address(*value, MAT_FROM);
-            break;
-
-         case OriginalHeader_FirstName:
-            *value = m_msg->GetAddressFirstName(MAT_FROM);
-            break;
-
-         case OriginalHeader_LastName:
-            *value = m_msg->GetAddressLastName(MAT_FROM);
-            break;
-
-         case OriginalHeader_Newsgroups:
-            m_msg->GetHeaderLine("Newsgroups", *value);
-            break;
-
-         default:
-            // it isn't a variable which maps directly onto header, check the
-            // others
-            if ( name == "text" || name == "quote" )
-            {
-               // insert the original text (optionally prefixed by reply
-               // string)
-               String prefix;
-               if ( name == "quote" )
-               {
-                  // prepend the senders initials to the reply prefix (this
-                  // will make reply prefix like "VZ>")
-                  if ( READ_CONFIG(m_profile, MP_REPLY_MSGPREFIX_FROM_SENDER) )
-                  {
-                     // take from address, not reply-to which can be set to
-                     // reply to a mailing list, for example
-                     String name;
-                     m_msg->Address(name, MAT_FROM);
-                     if ( name.empty() )
-                     {
-                        // no from address? try to find anything else
-                        m_msg->Address(name, MAT_REPLYTO);
-                     }
-
-                     // it's (quite) common to have quotes around the personal
-                     // part of the address, remove them if so
-
-                     // remove spaces
-                     name.Trim(TRUE);
-                     name.Trim(FALSE);
-                     if ( !name.empty() )
-                     {
-                        if ( name[0u] == '"' && name.Last() == '"' )
-                        {
-                           name = name.Mid(1, name.length() - 2);
-                        }
-
-                        // take the first letter of each word
-                        wxStringTokenizer tk(name);
-                        while ( tk.HasMoreTokens() )
-                        {
-                           char chInitial = tk.GetNextToken()[0u];
-
-                           if ( chInitial == '<' )
-                           {
-                              // this must be the start of embedded "<...>"
-                              // address, skip it completely
-                              break;
-                           }
-
-                           // only take letters as initials
-                           if ( isalpha(chInitial) )
-                           {
-                              prefix += chInitial;
-                           }
-                        }
-                     }
-                  }
-
-                  // and then the standard reply prefix too
-                  prefix += READ_CONFIG(m_profile, MP_REPLY_MSGPREFIX);
-               }
-               //else: name == text, so no reply prefix at all
-
-               // should we quote the empty lines?
-               bool quoteEmpty = READ_CONFIG(m_profile, MP_REPLY_QUOTE_EMPTY) != 0;
-               int nParts = m_msg->CountParts();
-               for ( int nPart = 0; nPart < nParts; nPart++ )
-               {
-                  if ( m_msg->GetPartType(nPart) == Message::MSG_TYPETEXT )
-                  {
-                     String str = m_msg->GetPartContent(nPart);
-                     const char *cptr = str.c_str();
-                     String str2 = prefix;
-                     while ( *cptr )
-                     {
-                        if ( *cptr == '\r' )
-                        {
-                           cptr++;
-                           continue;
-                        }
-
-                        str2 += *cptr;
-                        if( *cptr++ == '\n' && *cptr )
-                        {
-                           if ( quoteEmpty ||
-                                (*cptr != '\r' && *cptr != '\n') )
-                           {
-                              str2 += prefix;
-                           }
-                        }
-                     }
-
-                     *value += str2;
-                  }
-               }
-            }
-            else if ( name == "quote822" )
-            {
-               // insert the original message as RFC822 attachment
-               String str;
-               m_msg->WriteToString(str);
-               m_sink.InsertAttachment(strutil_strdup(str), str.Length(),
-                                       "message/rfc822", "");
-            }
-            else
-            {
-               return FALSE;
-            }
-      }
-   }
-
-   return TRUE;
-}

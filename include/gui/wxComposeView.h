@@ -1,10 +1,14 @@
-/*-*- c++ -*-********************************************************
- * wxComposeView.h: a window displaying a mail message              *
- *                                                                  *
- * (C) 1998-1999 by Karsten Ballüder (kasrten@phy.hw.ac.uk)         *
- *                                                                  *
- * $Id$
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   gui/wxComposeView.h - composer GUI frame class
+// Purpose:     wxComposeView declaration
+// Author:      Karsten Ballüder, Vadim Zeitlin
+// Modified by:
+// Created:     1998
+// CVS-ID:      $Id$
+// Copyright:   (c) 1998-2001 Mahogany team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 #ifndef WXCOMPOSEVIEW_H
 #define WXCOMPOSEVIEW_H
@@ -14,7 +18,7 @@
 // ----------------------------------------------------------------------------
 
 #ifdef __GNUG__
-#pragma interface "wxComposeView.h"
+#  pragma interface "wxComposeView.h"
 #endif
 
 #ifndef USE_PCH
@@ -24,50 +28,52 @@
 #   include   "gui/wxIconManager.h"
 #   include   "Profile.h"
 #   include   "kbList.h"
-#endif
+#endif // USE_PCH
+
+#include "MailFolder.h"    // for MailFolder::Params
 
 // ----------------------------------------------------------------------------
 // forward declarations
 // ----------------------------------------------------------------------------
-class wxComposeView;
-class wxLayoutWindow;
 
-class wxProcess;
-class wxProcessEvent;
+class wxAddressTextCtrl;
+class wxAddressTypeChoice;
+class wxComposeView;
+class wxEnhancedPanel;
+
+class WXDLLEXPORT wxChoice;
+class WXDLLEXPORT wxLayoutWindow;
+class WXDLLEXPORT wxProcess;
+class WXDLLEXPORT wxProcessEvent;
+class WXDLLEXPORT wxTextCtrl;
+
+#include <wx/dynarray.h>
+
+WX_DEFINE_ARRAY(wxAddressTypeChoice *, ChoicesArray);
+WX_DEFINE_ARRAY(wxTextCtrl *, TextsArray);
 
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
-// types and classes
+// wxComposeView: composer frame
 // ----------------------------------------------------------------------------
-
-struct wxCVFileMapEntry
-{
-   unsigned long   id;
-   String          filename;
-};
-
-KBLIST_DEFINE(wxCVFileMapType,wxCVFileMapEntry);
-
-/** A wxWindows ComposeView class
-  */
 
 class wxComposeView : public wxMFrame //FIXME: public ComposeViewBase
 {
 public:
    // constants
 
-   /// header fields we may show in the composer (not all of them are shown!)
-   enum AddressField
+   /// recepient address types
+   enum RecepientType
    {
-      Field_From,
-      Field_To,
-      Field_Subject,
-      Field_Cc,
-      Field_Bcc,
-      Field_Max
+      Recepient_To,
+      Recepient_Cc,
+      Recepient_Bcc,
+      Recepient_Newsgroup,
+      Recepient_None,
+      Recepient_Max
    };
 
    /// Do we want to send mail or post a news article?
@@ -141,9 +147,6 @@ public:
    /// Destructor
    ~wxComposeView();
 
-   /// is it ok to close now?
-   virtual bool CanClose() const;
-
    /** insert a file into buffer
        @param filename file to insert
        @param mimetype mimetype to use
@@ -158,7 +161,7 @@ public:
        @param mimetype mimetype to use
        @param filename optional filename to add to list of parameters
        */
-   void InsertData(char *data,
+   void InsertData(void *data,
                    size_t length,
                    const char *mimetype = NULL,
                    const char *filename = NULL);
@@ -172,23 +175,41 @@ public:
        @param BCC blind carbon copy addresses
    */
    void SetAddresses(const String &To,
-                     const String &CC = "",
-                     const String & = "");
+                     const String &Cc = "",
+                     const String &Bcc = "");
 
    /** Set the newsgroups to post to.
        @param groups the list of newsgroups
    */
    void SetNewsgroups(const String &groups);
 
+   /// Set the default value for the "From" header (if we have it)
+   void SetDefaultFrom();
+
    /// sets Subject field
    void SetSubject(const String &subj);
 
-   /// get the current value of a header field
-   String GetHeaderValue(AddressField which) const
-   {
-      wxTextCtrl *text = m_txtFields[which];
-      return text ? text->GetValue() : wxString("");
-   }
+   /// adds recepients from addr (Recepient_None means to reuse the last)
+   void AddRecepients(const String& addr,
+                      RecepientType rcptType = Recepient_None);
+
+   /// adds a "To" recepient
+   void AddTo(const String& addr) { AddRecepients(addr, Recepient_To); }
+
+   /// adds a "Cc" recepient
+   void AddCc(const String& addr) { AddRecepients(addr, Recepient_Cc); }
+
+   /// adds a "Bcc" recepient
+   void AddBcc(const String& addr) { AddRecepients(addr, Recepient_Bcc); }
+
+   /// get the subject value
+   String GetSubject() const;
+
+   /// get from value (empty means default)
+   String GetFrom() const;
+
+   /// get (all) addresses of this type
+   String GetRecepients(RecepientType type) const;
 
    /// inserts a text
    void InsertText(const String &txt);
@@ -205,6 +226,9 @@ public:
    /** wxWindows callbacks
    */
    //@{
+      /// is it ok to close now?
+   virtual bool CanClose() const;
+
       /// called when text zone contents changes
    void OnTextChange(wxCommandEvent &event);
 
@@ -222,13 +246,19 @@ public:
 
       /// called when composer window gets focus for the 1st time
    void OnFirstTimeFocus();
+
+      /// called when rcpt type is changed
+   void OnRcptTypeChange(RecepientType type);
    //@}
 
-   // for wxAddressTextCtrl usage
-   void SetLastAddressEntry(AddressField field) { m_fieldLast = field; }
+   // for wxAddressTextCtrl usage: remember last focused field
+   void SetLastAddressEntry(int field) { m_indexLast = field; }
 
-   // for wxAddressTextCtrl usage:
+   // for wxAddressTextCtrl usage: get the profile to use for options
    Profile *GetProfile(void) const { return m_Profile; }
+
+   // for wxAddressTextCtrl usage: is the control with this index enabled?
+   bool IsRecepientEnabled(size_t index) const;
 
    /** Adds an extra header line.
        @param entry name of header entry
@@ -309,12 +339,50 @@ protected:
    /// Launch the external editor
    bool StartExternalEditor();
 
-   /// Set the default value for the "From" header (if we have it)
-   void SetFrom();
-
 private:
-   /// a profile
-   Profile * m_Profile;
+   /// initialize the menubar
+   void CreateMenu();
+
+   /// initialize the toolbar and statusbar
+   void CreateToolAndStatusBars();
+
+   /// makes the canvas
+   void CreateFTCanvas(void);
+
+   /// create the header fields
+   wxSizer *CreateHeaderFields();
+
+   // which kind of text ctrl to create in the functions below
+   enum TextField
+   {
+      TextField_Normal,
+      TextField_Address
+   };
+
+   // create a horz sizer containing the given control and the text ctrl
+   // (pointer to which will be saved in the provided variable if not NULL)
+   // with the specified id
+   wxSizer *CreateSizerWithText(wxControl *control,
+                                wxTextCtrl **ppText = NULL,
+                                TextField tf = TextField_Normal,
+                                wxWindow *parent = NULL);
+
+   // create a sizer containing a label and a text ctrl
+   wxSizer *CreateSizerWithTextAndLabel(const wxString& label,
+                                        wxTextCtrl **ppText = NULL,
+                                        TextField tf = TextField_Normal);
+
+   // create the new controls for another recepient
+   void AddRecepientControls(const String& value, RecepientType rt);
+
+   // adds one recepient, helper of AddRecepients()
+   void AddRecepient(const String& addr, RecepientType rcptType);
+
+   /// enable/disable editing of the message text
+   void EnableEditing(bool enable);
+
+   /// the profile (never NULL)
+   Profile *m_Profile;
 
    /// the name of the class
    String m_name;
@@ -322,7 +390,7 @@ private:
    /// the initial from/reply-to address
    String m_from;
 
-   /// the panel
+   /// the panel: all controls are its children
    wxPanel *m_panel;
 
    /// the edit/cut menu item
@@ -332,30 +400,47 @@ private:
    /// the edit/paste menu item
    class wxMenuItem *m_MItemPaste;
 
-   /**@name Input fields (arranged into an array) */
+   /**@name Child controls */
    //@{
-      /// The text fields
-   AddressField m_fieldLast;            // which had the focus last time
-   wxTextCtrl  *m_txtFields[Field_Max];
+      /// the from address - may be NULL if not shown
+   wxTextCtrl *m_txtFrom;
+
+      /// the subject (never NULL)
+   wxTextCtrl *m_txtSubject;
+
+      /// the address field
+   wxAddressTextCtrl *m_txtRecepient;
+
+      /// the sizer containing all recepients
+   wxSizer *m_sizerRcpts;
+
+      /// the panel containing already entered addresses
+   wxEnhancedPanel *m_panelRecepients;
+
+      /// the additional recepients: array of their types
+   ChoicesArray m_choicesRcpt;
+
+      /// the additional recepients: array of their contents
+   TextsArray m_textsRcpt;
 
       /// the canvas for displaying the mail
    wxLayoutWindow *m_LayoutWindow;
    //@}
 
+   /// the last focused address field: index of -1 means m_txtRecepient itself
+   int m_indexLast;
+
+   /// the index of the next text control to create (-1 initially)
+   int m_indexRcpt;
+
+   /// the type of the last recepient
+   RecepientType m_rcptTypeLast;
+
+   /// composer font
    int m_font, m_size;
+
+   /// composer colours
    wxColour m_fg, m_bg;
-
-   /// makes the canvas
-   void CreateFTCanvas(void);
-
-   /// enable/disable editing of the message text
-   inline void EnableEditing(bool enable);
-
-   /// ids for different processes we may launch
-   enum
-   {
-      HelperProcess_Editor = 1
-   };
 
    /// News or smtp?
    Mode m_mode;
@@ -367,7 +452,7 @@ private:
    bool m_sent;
 
    /// If replying, this is the original message
-   Message * m_OriginalMessage;
+   Message *m_OriginalMessage;
 
    /// the template to use or an empty string
    String m_template;
@@ -378,14 +463,34 @@ private:
    // external editor support
    // -----------------------
 
+   /// ids for different processes we may launch
+   enum
+   {
+      HelperProcess_Editor = 1
+   };
+
    wxProcess *m_procExtEdit;  // wxWin process notification helper
    String     m_tmpFileName;  // temporary file we passed to the editor
    int        m_pidEditor;    // pid of external editor (0 if none)
 
+private:
+   // wxWindows macros
    DECLARE_EVENT_TABLE()
    DECLARE_CLASS(wxComposeView)
-
-   friend class wxCVCanvas;
 };
 
-#endif
+// ----------------------------------------------------------------------------
+// other functions
+// ----------------------------------------------------------------------------
+
+// expand the given template using the profile and message (which may be NULL
+// if it is not a reply/follow up) and insert the result into the composer
+//
+// return true if ok, false if template contained errors
+extern bool ExpandTemplate(wxComposeView& cv,
+                           Profile *profile,
+                           const String& templateValue,
+                           Message *msgOriginal);
+
+#endif // WXCOMPOSEVIEW_H
+

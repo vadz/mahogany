@@ -168,6 +168,8 @@ private:
 // global functions
 // ----------------------------------------------------------------------------
 
+class Profile;
+
 /// the different templates for different kinds of articles
 enum MessageTemplateKind
 {
