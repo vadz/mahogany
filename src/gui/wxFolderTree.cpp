@@ -1057,9 +1057,16 @@ String wxFolderTreeNode::GetLabelSuffix(const MailFolderStatus& mfStatus) const
 {
    Profile_obj profile(GetFolder()->GetFullName());
 
+   String fmt = READ_CONFIG(profile, MP_FTREE_FORMAT);
+   if ( fmt.empty() )
+   {
+      // don't bother calling FormatFolderStatusString
+      return fmt;
+   }
+
    return FormatFolderStatusString
           (
-            READ_CONFIG(profile, MP_FTREE_FORMAT),
+            fmt,
             GetFolder()->GetFullName(),     // name
             (MailFolderStatus *)&mfStatus,  // const_cast is harmless
             NULL                            // don't use mail folder
