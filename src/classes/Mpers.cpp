@@ -156,6 +156,7 @@ static const struct
    { _T("DraftAutoDel"),             gettext_noop("show a warning when \"automatically delete drafts\" option is on") },
    { _T("ConfirmResend"),            gettext_noop("confirm resending messages") },
    { _T("ConfirmZap"),               gettext_noop("confirm permanently deleting messages") },
+   { _T("ZapSpam"),                  gettext_noop("permanently delete message after marking them as spam") },
    { _T("RememberPGPPassphrase"),    gettext_noop("remember PGP/GPG passphrase in memory") },
    { _T("GetPGPPubKey"),             gettext_noop("retrieve PGP/GPG public keys from key server") },
    { _T("SearchAgainIfNoMatch"),     gettext_noop("propose to search again if no matches were found") },
