@@ -744,7 +744,11 @@ MFrame *wxMApp::CreateTopLevelFrame()
 
 int wxMApp::OnRun()
 {
+#ifdef PROFILE_STARTUP
+   return 0;
+#else
    return wxApp::OnRun();
+#endif
 }
 
 int wxMApp::OnExit()

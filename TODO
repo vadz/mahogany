@@ -8,12 +8,10 @@ $Id$
     just continue to remove bugs from this list as they are 
     fixed.
 
-    CLOSE ALL doesn't work
-    CLOSE doesn't take effect "immediately"
-
 ************ optimize (MSW)
 
-1. wxIconManager::LoadImageXpm() is very slow
+1. wxIconManager::LoadImageXpm() is *very* slow - this is the main remaining
+   performance problem at startup!
 
 +2. wxRegConfig::SetPath() takes 15% of program time!!!
 

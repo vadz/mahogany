@@ -1329,7 +1329,7 @@ void wxFolderTreeImpl::DoFolderDelete(bool removeOnly)
 void wxFolderTreeImpl::DoFolderClose()
 {
    MFolder_obj folder = m_sink->GetSelection();
-   if ( !folder )
+   if ( !folder.IsOk() )
    {
       wxLogError(_("Please select the folder to close first."));
 

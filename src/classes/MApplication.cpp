@@ -254,7 +254,7 @@ MAppBase::OnStartup()
    // speeds up things relatively significantly under Windows - and as few
    // people use evironment variables there, it is disabled for Windows by
    // default)
-   m_profile->SetExpandEnvVars(READ_CONFIG(m_profile, MP_EXPAND_ENV_VARS));
+   m_profile->SetExpandEnvVars(READ_CONFIG(m_profile, MP_EXPAND_ENV_VARS) != 0);
 
 #ifdef OS_UNIX
    /* Check whether other users can read our config file. This must

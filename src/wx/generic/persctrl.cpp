@@ -1278,9 +1278,11 @@ void wxPTreeCtrl::SetConfigPath(const wxString& path)
 void wxPTreeCtrl::OnSize(wxSizeEvent& event)
 {
     if ( m_bFirstTime ) {
-        RestoreExpandedBranches();
-
+        // reset the flag first as the calls to Expand() below may generate in
+        // other OnSize()s
         m_bFirstTime = FALSE;
+
+        RestoreExpandedBranches();
     }
 
     // important things may be done in the base class version!

@@ -48,7 +48,14 @@
 WX_DEFINE_ARRAY(MFolder *, wxArrayFolder);
 
 // ----------------------------------------------------------------------------
-// private classes
+// constants
+// ----------------------------------------------------------------------------
+
+// invalid value for children count
+static const size_t INVALID_CHILDREN_COUNT = (size_t)-1;
+
+// ----------------------------------------------------------------------------
+// MFolder implementations
 // ----------------------------------------------------------------------------
 
 // MTempFolder is a temporary object which stores tyhe info about folder, but is
@@ -124,9 +131,24 @@ public:
    // ctor & dtor
       // the folderName is the full profile path which should exist: it may be
       // created with Create() if Exists() returns FALSE
-   MFolderFromProfile(const String& folderName) : MFolder()
-      { m_folderName = folderName; }
-      // dtor is trivial
+   MFolderFromProfile(const String& folderName)
+      : m_folderName(folderName)
+   {
+      m_nChildren = INVALID_CHILDREN_COUNT;
+
+      m_profile = Profile::CreateProfile(m_folderName);
+      if ( !m_profile )
+      {
+         // this should never happen
+         FAIL_MSG( "invalid MFolderFromProfile name!" );
+
+         // to avoid crashes later
+         m_profile = mApplication->GetProfile();
+         m_profile->IncRef();
+      }
+   }
+
+      // dtor frees hte profile and removes us from cache
    virtual ~MFolderFromProfile();
 
    // static functions
@@ -146,14 +168,7 @@ public:
    virtual wxString GetFullName() const { return m_folderName; }
 
    virtual FolderType GetType() const;
-   virtual bool NeedsNetwork(void) const
-      {
-         return
-            (GetType() == MF_NNTP
-             || GetType() == MF_IMAP
-             || GetType() == MF_POP)
-            && ! (GetFlags() & MF_FLAGS_ISLOCAL);
-      }
+   virtual bool NeedsNetwork() const;
 
    virtual int GetIcon() const;
    virtual void SetIcon(int icon);
@@ -183,8 +198,9 @@ public:
 
 protected:
    // helpers
-      // common part of Create() and Exists()
+      // common part of Create() and Exists(): returns true if group exists
    static bool GroupExists(Profile *profile, const String& fullname);
+
    /** Get the full name of the subfolder.
        As all folder names are relative profile names, we need to
        check for m_folderName not being empty before appending a slash
@@ -203,7 +219,14 @@ protected:
    }
 
 private:
-   String m_folderName;    // the full folder name
+   // the full folder name
+   String m_folderName;
+
+   // this should never be NULL
+   Profile *m_profile;
+
+   // cached the number of children (initially INVALID_CHILDREN_COUNT)
+   size_t m_nChildren;
 };
 
 // a special case of MFolderFromProfile: the root folder
@@ -231,6 +254,53 @@ public:
       { FAIL_MSG("can not delete root folder."); }
    virtual bool Rename(const String& /* newName */)
       { FAIL_MSG("can not rename root folder."); return FALSE; }
+};
+
+// ----------------------------------------------------------------------------
+// helper classes
+// ----------------------------------------------------------------------------
+
+// a folder tree iterator which just counts the items it traverses
+class CountTraversal : public MFolderTraversal
+{
+public:
+  CountTraversal(const MFolderFromProfile *folder) : MFolderTraversal(*folder)
+    { m_count = 0; }
+
+  virtual bool OnVisitFolder(const wxString& /* folderName */)
+    { m_count++; return TRUE; }
+
+  size_t GetCount() const { return m_count; }
+
+private:
+  size_t m_count;
+};
+
+// a folder tree iterator which finds the item with given index
+class IndexTraversal : public MFolderTraversal
+{
+public:
+   IndexTraversal(const MFolderFromProfile *folder, size_t count)
+      : MFolderTraversal(*folder) { m_count = count; }
+
+   virtual bool OnVisitFolder(const wxString& folderName)
+   {
+      if ( m_count-- == 0 )
+      {
+         // found, stop traversing the tree
+         m_folderName = folderName;
+
+         return FALSE;
+      }
+
+      return TRUE;
+   }
+
+   const wxString& GetName() const { return m_folderName; }
+
+private:
+   size_t   m_count;
+   wxString m_folderName;
 };
 
 // maintain the list of already created MFolder objects (the cache)
@@ -265,6 +335,7 @@ private:
                   "folder cache corrupted" );
    }
 
+   // FIXME: make the array sorted, should be more efficient
    static wxArrayString ms_aFolderNames;
    static wxArrayFolder ms_aFolders;
 };
@@ -348,6 +419,7 @@ MFolder *MFolder::Create(const String& fullname, FolderType type)
 
    Profile_obj profile(folder->GetFullName());
    CHECK( profile, NULL, "panic in MFolder: no profile" );
+
    profile->writeEntry(MP_FOLDER_TYPE, type);
 
    return folder;
@@ -383,6 +455,8 @@ String MFolder::DebugDump() const
 
 MFolderFromProfile::~MFolderFromProfile()
 {
+   m_profile->DecRef();
+
    // remove the object being deleted (us) from the cache
    MFolderCache::Remove(this);
 }
@@ -472,133 +546,107 @@ String MFolderFromProfile::GetName() const
 
 String MFolderFromProfile::GetPath() const
 {
-   Profile_obj profile(m_folderName);
-   CHECK( profile, "", "panic in MFolder: no profile" );
-
-   return READ_CONFIG(profile, MP_FOLDER_PATH);
+   return READ_CONFIG(m_profile, MP_FOLDER_PATH);
 }
 
 String MFolderFromProfile::GetServer() const
 {
-   Profile_obj profile(m_folderName);
-   CHECK( profile, "", "panic in MFolder: no profile" );
-
    String server;
-   switch(GetType())
+   switch( GetType() )
    {
-   case MF_NNTP:
-      server = READ_CONFIG(profile, MP_NNTPHOST); break;
-   case MF_IMAP:
-      server = READ_CONFIG(profile, MP_IMAPHOST); break;
-   case MF_POP:
-      server = READ_CONFIG(profile, MP_POPHOST); break;
-   default:
-      ; // do nothing
+      case MF_NNTP:
+         server = READ_CONFIG(m_profile, MP_NNTPHOST);
+         break;
+
+      case MF_IMAP:
+         server = READ_CONFIG(m_profile, MP_IMAPHOST);
+         break;
+
+      case MF_POP:
+         server = READ_CONFIG(m_profile, MP_POPHOST);
+         break;
+
+      default:
+         ; // do nothing
    }
+
    return server;
 }
 
 String MFolderFromProfile::GetLogin() const
 {
-   Profile_obj profile(m_folderName);
-   CHECK( profile, "", "panic in MFolder: no profile" );
-   String login = READ_CONFIG(profile, MP_FOLDER_LOGIN);
+   String login = READ_CONFIG(m_profile, MP_FOLDER_LOGIN);
+
    // if no login setting, fall back to username:
-   if(FolderTypeHasUserName(GetType()) && strutil_isempty(login)) // fall back to user name
-      login = READ_CONFIG(profile, MP_USERNAME);
+   if ( login.empty() && FolderTypeHasUserName(GetType()) )
+   {
+      login = READ_CONFIG(m_profile, MP_USERNAME);
+   }
+
    return login;
 }
 
 String MFolderFromProfile::GetPassword() const
 {
-   Profile_obj profile(m_folderName);
-   CHECK( profile, "", "panic in MFolder: no profile" );
-
-   return strutil_decrypt(READ_CONFIG(profile, MP_FOLDER_PASSWORD));
+   return strutil_decrypt(READ_CONFIG(m_profile, MP_FOLDER_PASSWORD));
 }
 
 FolderType MFolderFromProfile::GetType() const
 {
-   Profile_obj profile(m_folderName);
-   CHECK( profile, FolderInvalid, "panic in MFolder: no profile" );
+   return GetFolderType(READ_CONFIG(m_profile, MP_FOLDER_TYPE));
+}
 
-   FolderType t = GetFolderType(READ_CONFIG(profile, MP_FOLDER_TYPE));
-
-   return t;
+bool MFolderFromProfile::NeedsNetwork() const
+{
+   return FolderNeedsNetwork(GetType(), GetFlags());
 }
 
 int MFolderFromProfile::GetIcon() const
 {
-   Profile_obj profile(m_folderName);
-   CHECK( profile, FolderInvalid, "panic in MFolder: no profile" );
-
    // it doesn't make sense to inherit the icon from parent profile (does it?),
    // so check that the value we read was taken from ours
    bool found;
-   int icon = profile->readEntry(MP_FOLDER_ICON, MP_FOLDER_ICON_D, &found);
+   int icon = m_profile->readEntry(MP_FOLDER_ICON, MP_FOLDER_ICON_D, &found);
 
    return found ? icon : MP_FOLDER_ICON_D;
 }
 
 void MFolderFromProfile::SetIcon(int icon)
 {
-   Profile_obj profile(m_folderName);
-   CHECK_RET( profile, "panic in MFolder: no profile" );
-
-   profile->writeEntry(MP_FOLDER_ICON, icon);
+   m_profile->writeEntry(MP_FOLDER_ICON, icon);
 }
 
 String MFolderFromProfile::GetComment() const
 {
-   Profile_obj profile(m_folderName);
-   CHECK( profile, "", "panic in MFolder: no profile" );
-
-   String str = READ_CONFIG(profile, MP_FOLDER_COMMENT);
-
-   return str;
+   return READ_CONFIG(m_profile, MP_FOLDER_COMMENT);
 }
 
 void MFolderFromProfile::SetComment(const String& comment)
 {
-   Profile_obj profile(m_folderName);
-   CHECK_RET( profile, "panic in MFolder: no profile" );
-
-   profile->writeEntry(MP_FOLDER_COMMENT, comment);
+   m_profile->writeEntry(MP_FOLDER_COMMENT, comment);
 }
 
 int MFolderFromProfile::GetFlags() const
 {
-   Profile_obj profile(m_folderName);
-   CHECK( profile, FolderInvalid, "panic in MFolder: no profile" );
-
-   return GetFolderFlags(READ_CONFIG(profile, MP_FOLDER_TYPE));
+   return GetFolderFlags(READ_CONFIG(m_profile, MP_FOLDER_TYPE));
 }
 
 void MFolderFromProfile::SetFlags(int flags)
 {
-   Profile_obj profile(m_folderName);
-   CHECK_RET( profile, "panic in MFolder: no profile" );
-
-   int typeAndFlags = READ_CONFIG(profile, MP_FOLDER_TYPE);
+   int typeAndFlags = READ_CONFIG(m_profile, MP_FOLDER_TYPE);
    typeAndFlags = CombineFolderTypeAndFlags(GetFolderType(typeAndFlags),
                                             flags);
-   profile->writeEntry(MP_FOLDER_TYPE, typeAndFlags);
+   m_profile->writeEntry(MP_FOLDER_TYPE, typeAndFlags);
 }
 
 int MFolderFromProfile::GetTreeIndex() const
 {
-   Profile_obj profile(m_folderName);
-   CHECK( profile, MP_FOLDER_TREEINDEX_D, "panic in MFolder: no profile" );
-
-   return (int)READ_CONFIG(profile, MP_FOLDER_TREEINDEX);
+   return (int)READ_CONFIG(m_profile, MP_FOLDER_TREEINDEX);
 }
 
 void MFolderFromProfile::SetTreeIndex(int pos)
 {
-   Profile_obj profile(m_folderName);
-   CHECK_RET( profile, "panic in MFolder: no profile" );
-
-   profile->writeEntry(MP_FOLDER_TREEINDEX, (long)pos);
+   m_profile->writeEntry(MP_FOLDER_TREEINDEX, (long)pos);
 }
 
 // ----------------------------------------------------------------------------
@@ -607,43 +655,34 @@ void MFolderFromProfile::SetTreeIndex(int pos)
 
 wxArrayString MFolderFromProfile::GetFilters() const
 {
-   Profile_obj profile(m_folderName);
-   CHECK( profile, wxArrayString(), "panic in MFolder: no profile" );
-
-   return strutil_restore_array(':', READ_CONFIG(profile, MP_FOLDER_FILTERS));
+   return strutil_restore_array(':', READ_CONFIG(m_profile, MP_FOLDER_FILTERS));
 }
 
 void MFolderFromProfile::SetFilters(const wxArrayString& filters)
 {
-   Profile_obj profile(m_folderName);
-   CHECK_RET( profile, "panic in MFolder: no profile" );
-
-   profile->writeEntry(MP_FOLDER_FILTERS, strutil_flatten_array(filters, ':'));
+   m_profile->writeEntry(MP_FOLDER_FILTERS, strutil_flatten_array(filters, ':'));
 }
 
 void MFolderFromProfile::AddFilter(const String& filter)
 {
-   Profile_obj profile(m_folderName);
-   CHECK_RET( profile, "panic in MFolder: no profile" );
-
-   String filters = READ_CONFIG(profile, MP_FOLDER_FILTERS);
-   if ( !!filters )
+   String filters = READ_CONFIG(m_profile, MP_FOLDER_FILTERS);
+   if ( !filters.empty() )
       filters += ':';
    filters += filter;
 
-   profile->writeEntry(MP_FOLDER_FILTERS, filters);
+   m_profile->writeEntry(MP_FOLDER_FILTERS, filters);
 }
 
 void MFolderFromProfile::RemoveFilter(const String& filter)
 {
-   Profile_obj profile(m_folderName);
-   CHECK_RET( profile, "panic in MFolder: no profile" );
-
-   String filters = READ_CONFIG(profile, MP_FOLDER_FILTERS);
+   String filters = READ_CONFIG(m_profile, MP_FOLDER_FILTERS);
 
    if ( filters == filter )
+   {
+      // we don't have any other filters
       filters.clear();
-   else
+   }
+   else // something will be left
    {
       String others;
       if ( filters.StartsWith(filter + ':', &others) )
@@ -663,67 +702,35 @@ void MFolderFromProfile::RemoveFilter(const String& filter)
       }
    }
 
-   profile->writeEntry(MP_FOLDER_FILTERS, filters);
+   m_profile->writeEntry(MP_FOLDER_FILTERS, filters);
 }
 
 // ----------------------------------------------------------------------------
 // subfolders
 // ----------------------------------------------------------------------------
 
-class CountTraversal : public MFolderTraversal
-{
-public:
-  CountTraversal(const MFolderFromProfile *folder) : MFolderTraversal(*folder)
-    { m_count = 0; }
-
-  virtual bool OnVisitFolder(const wxString& /* folderName */)
-    { m_count++; return TRUE; }
-
-  size_t GetCount() const { return m_count; }
-
-private:
-  size_t m_count;
-};
-
 size_t MFolderFromProfile::GetSubfolderCount() const
 {
-
-  CountTraversal  count(this);
-  // traverse but don't recurse into subfolders
-  count.Traverse(FALSE);
-
-  return count.GetCount();
-}
-
-   class IndexTraversal : public MFolderTraversal
+   if ( m_nChildren == INVALID_CHILDREN_COUNT )
    {
-   public:
-      IndexTraversal(const MFolderFromProfile *folder, size_t count)
-         : MFolderTraversal(*folder) { m_count = count; }
+      CountTraversal count(this);
 
-      virtual bool OnVisitFolder(const wxString& folderName)
-      {
-         if ( m_count-- == 0 )
-         {
-            // found, stop traversing the tree
-            m_folderName = folderName;
+      // traverse but don't recurse into subfolders
+      count.Traverse(FALSE);
 
-            return FALSE;
-         }
+      // const_cast needed
+      ((MFolderFromProfile *)this)->m_nChildren = count.GetCount();
+   }
 
-         return TRUE;
-      }
-
-      const wxString& GetName() const { return m_folderName; }
-
-   private:
-      size_t   m_count;
-      wxString m_folderName;
-   };
+   return m_nChildren;
+}
 
 MFolder *MFolderFromProfile::GetSubfolder(size_t n) const
 {
-   IndexTraversal  index(this, n);
+   // IndexTraversal is not used any more because it quite inefficient and this
+   // function is called a *lot* of times
+   IndexTraversal index(this, n);
+
    // don't recurse into subfolders
    if ( index.Traverse(FALSE) )
    {
@@ -964,6 +971,7 @@ extern MFolder *CreateFolderTreeEntry(MFolder *parent,
                  name.c_str());
       return NULL;
    }
+
    Profile_obj profile(folder->GetFullName());
    profile->writeEntry(MP_FOLDER_PATH, path);
 
