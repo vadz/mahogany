@@ -9,7 +9,7 @@ FILES = makeopts makerules Makefile makeopts.in configure.in configure
 EXTRA = extra
 
 # FIXME: VZ where can I take the version from?
-M = mahogany-0.22a
+M = mahogany-0.23a
 
 include makeopts
 
@@ -36,6 +36,7 @@ dep depend:
 	@echo "about missing header files - these can be safely ignored."
 	@echo "They should disappear if you run it again."
 	@echo "----------------------------------------------------------"
+	set -e; $(MAKE) -C include # generate some headers first
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 
 config.status: 
