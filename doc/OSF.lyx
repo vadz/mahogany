@@ -1,5 +1,5 @@
-#This file was created by <karsten> Mon Aug 24 10:02:40 1998
-#LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
+#This file was created by <karsten> Sun Nov 22 18:30:05 1998
+#LyX 1.0 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
 \language default
@@ -9,7 +9,7 @@
 \paperfontsize default
 \spacing single 
 \papersize a4paper
-\paperpackage a4wide
+\paperpackage a4
 \use_geometry 0
 \use_amsmath 0
 \paperorientation portrait

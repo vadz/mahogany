@@ -1,0 +1,106 @@
+#This file was created by <karsten> Sun Nov 22 17:27:05 1998
+#LyX 1.0 (C) 1995-1998 Matthias Ettrich and the LyX Team
+\lyxformat 2.15
+\textclass book
+\language default
+\inputencoding default
+\fontscheme palatino
+\graphics default
+\paperfontsize default
+\spacing single 
+\papersize Default
+\paperpackage a4
+\use_geometry 0
+\use_amsmath 0
+\paperorientation portrait
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\quotes_times 2
+\papercolumns 1
+\papersides 2
+\paperpagestyle default
+
+\layout Title
+\added_space_top vfill \added_space_bottom vfill 
+
+\shape italic 
+M
+\shape default 
+ Manual
+\layout Author
+
+Karsten Ballüder <
+\family typewriter 
+Ballueder@usa.net
+\family default 
+>
+\layout Standard
+
+
+\begin_inset LatexCommand \tableofcontents
+
+\end_inset 
+
+
+\layout Chapter
+
+Using M
+\layout Section
+
+The User Interface
+\layout Subsection
+
+The Main Window_2001_
+\layout Standard
+
+M's main window is vertically divided into two parts.
+ On the left it has a tree view of all available mail or news folders.
+ On the right of it, it shows the currently selected folder in a folder
+ view
+\begin_inset LatexCommand \label{FolderView}
+
+\end_inset 
+
+.
+\layout Subsection
+
+Folder Views_2002_
+\layout Standard
+
+
+\begin_inset LatexCommand \label{FolderView}
+
+\end_inset 
+
+A Folder View is a window or part of a window displaying the contents of
+ a mail folder or a newsgroup.
+ It consists of two parts:
+\layout Itemize
+
+The list of message headers at the top, showing message subjects, authors,
+ dates, etc.
+\layout Itemize
+
+The contents of the currently selected message below.
+\layout Subsection
+
+The Open-Folder Dialog_2003_
+\layout Section
+
+Reading Mail
+\layout Subsection
+
+The INBOX Folder
+\layout Subsection
+
+Other Folders
+\layout Section
+
+Sending Mail
+\layout Section
+
+Sending Mail
+\the_end

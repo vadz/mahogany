@@ -1,15 +1,15 @@
-#This file was created by <karsten> Sun Aug 16 15:39:54 1998
-#LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
+#This file was created by <karsten> Sun Nov 22 18:28:40 1998
+#LyX 1.0 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass article
-\language english
+\language default
 \inputencoding default
 \fontscheme palatino
 \graphics default
 \paperfontsize 12
 \spacing single 
 \papersize Default
-\paperpackage a4wide
+\paperpackage a4
 \use_geometry 0
 \use_amsmath 0
 \paperorientation portrait
@@ -664,26 +664,28 @@ $Id$
  and the 
 \family typewriter 
 $Log$
-Revision 1.8  1998/08/16 16:32:16  KB
-updates
-Revision 1.7  1998/05/20 13:32:10  KBEventually fixed
- that Doc++ core dump problem and added a note aboutthis in the StyleGuide.Revisi
-on 1.6  1998/05/14 18:49:07  KBExtended naming conventions, added postscript
- versions.Revision 1.5  1998/05/02 18:29:51  KBAfter many problems, Python
- integration is eventually taking off -works.
+Revision 1.9  1998/11/22 19:48:36  KB
+New documentation generation system. Automatically produces PS, HTML and wxhelp.map.
+Revision 1.8  1998/08/16 16:32:16  KBupdatesRevision
+ 1.7  1998/05/20 13:32:10  KBEventually fixed that Doc++ core dump problem
+ and added a note aboutthis in the StyleGuide.Revision 1.6  1998/05/14 18:49:07
+  KBExtended naming conventions, added postscript versions.Revision 1.5  1998/05/0
+2 18:29:51  KBAfter many problems, Python integration is eventually taking
+ off -works.
 
 \family default 
  tags.
  Including the 
 \family typewriter 
 $Log$
-Revision 1.8  1998/08/16 16:32:16  KB
-updates
-Revision 1.7  1998/05/20 13:32:10  KBEventually fixed
- that Doc++ core dump problem and added a note aboutthis in the StyleGuide.Revisi
-on 1.6  1998/05/14 18:49:07  KBExtended naming conventions, added postscript
- versions.Revision 1.5  1998/05/02 18:29:51  KBAfter many problems, Python
- integration is eventually taking off -works.
+Revision 1.9  1998/11/22 19:48:36  KB
+New documentation generation system. Automatically produces PS, HTML and wxhelp.map.
+Revision 1.8  1998/08/16 16:32:16  KBupdatesRevision
+ 1.7  1998/05/20 13:32:10  KBEventually fixed that Doc++ core dump problem
+ and added a note aboutthis in the StyleGuide.Revision 1.6  1998/05/14 18:49:07
+  KBExtended naming conventions, added postscript versions.Revision 1.5  1998/05/0
+2 18:29:51  KBAfter many problems, Python integration is eventually taking
+ off -works.
 
 \family default 
  information in each file somehow inflates the code, but as the CVS archive

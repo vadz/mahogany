@@ -1,0 +1,34 @@
+# Makefile for doc sub-directories
+# $Id$
+#
+
+CWD = doc
+FILES_TEX=../$(DIR).tex
+FILES_PS=$(FILES_TEX:.tex=.ps)
+
+include ../../makeopts
+
+all: $(DIR)/index.html wxhelp.map
+
+install: 
+	$(INSTALL) -d $(DOCDIR)/$(DIR)
+	$(INSTALL_DATA) `find $(DIR) -type f` $(DOCDIR)/$(DIR)/
+	$(INSTALL_DATA) $(FILES_PS) $(DOCDIR)/Postscript
+
+ps: $(FILES_PS)
+
+$(DIR)/index.html: ../$(DIR).tex
+	$(LATEX2HTML) ../$(DIR).tex
+
+wxhelp.map: $(DIR)/index.html
+	( cd $(DIR); ../../../extra/scripts/html2wxhelp > ../wxhelp.map)
+
+clean:
+
+
+.PHONY: all install ps clean
+
+include ../../makerules
+
+
+
