@@ -1275,7 +1275,7 @@ SendMessageCC::Build(bool forStorage)
    {
       char tmpbuf[MAILTMPLEN];
       rfc822_date (tmpbuf);
-      m_Envelope->date = cpystr(tmpbuf);
+      m_Envelope->date = (unsigned char *)cpystr(tmpbuf);
    }
 
    // Message-Id: we should always generate it ourselves (section 3.6.4 of RFC
