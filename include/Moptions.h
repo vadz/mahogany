@@ -1682,6 +1682,7 @@ extern const MOption MP_AWAY_STATUS;
           "Diagnostic-Code:" \
           "Disclaimer:" \
           "Errors-To:" \
+          "Followup-To:" \
           "Final-Recipient:" \
           "Full-name:" \
           "Importance:" \
