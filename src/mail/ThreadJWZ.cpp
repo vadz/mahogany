@@ -445,6 +445,10 @@ strutil_removeAllReplyPrefixes(const String &isubject,
             //startIndex = i+1;
          }
          break;
+
+         // make gcc happy by including all enum elements in the switch
+      case becomeGarbage:
+         ;
       }
 
       if (state == becomeGarbage)
