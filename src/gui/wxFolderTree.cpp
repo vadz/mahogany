@@ -232,7 +232,7 @@ protected:
    void DoFolderOpen();
 
    void DoFolderCreate();
-   void DoFolderDelete();
+   void DoFolderDelete(bool removeOnly = TRUE);
    void DoFolderRename();
 
    void DoBrowseSubfolders();
@@ -261,6 +261,7 @@ private:
       {
          Open,
          New,
+         Remove,
          Delete,
          Rename,
          BrowseSub,
@@ -280,9 +281,10 @@ private:
          Append(New, _("Create &new folder..."));
          if ( !isRoot )
          {
+            Append(Remove, _("&Remove folder"));
             Append(Delete, _("&Delete folder"));
          }
-         Append(Rename, _("&Rename folder..."));
+         Append(Rename, _("Re&name folder..."));
 
          AppendSeparator();
 
@@ -527,7 +529,7 @@ MFolder *wxFolderTree::OnCreate(MFolder *parent)
    return ShowFolderCreateDialog(NULL, FolderCreatePage_Default, parent);
 }
 
-bool wxFolderTree::OnDelete(MFolder *folder)
+bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
 {
    CHECK( folder, FALSE, "can't delete NULL folder" );
 
@@ -549,15 +551,35 @@ bool wxFolderTree::OnDelete(MFolder *folder)
    if ( folder->GetSubfolderCount() > 0 )
    {
       configPath = NULL; // this question can't be suppressed
-      msg.Printf(_("Do you really want to delete folder '%s' and all of its\n"
-                   "subfolders? You will permanently lose all the settings\n"
-                   "for the deleted folders!"), folder->GetName().c_str());
+
+      if ( removeOnly )
+      {
+         msg.Printf(_("Do you really want to delete folder '%s' and all of its\n"
+                      "subfolders? You will permanently lose all the settings\n"
+                      "for the deleted folders!"), folder->GetName().c_str());
+      }
+      else // remove and delete
+      {
+         msg.Printf(_("Do you really want to delete folder '%s' and all of its\n"
+                      "subfolders? All messages contained in them will be "
+                      "permanently lost!"), folder->GetName().c_str());
+      }
    }
    else
    {
-      configPath = "ConfirmFolderDelete";
-      msg.Printf(_("Do you really want to delete folder '%s'?"),
-                 folder->GetName().c_str());
+      if ( removeOnly )
+      {
+         configPath = "ConfirmFolderDelete";
+         msg.Printf(_("Do you really want to delete folder '%s'?"),
+                    folder->GetName().c_str());
+      }
+      else // remove and delete
+      {
+         configPath = "ConfirmFolderPhysDelete";
+         msg.Printf(_("Do you really want to delete folder '%s' with\n"
+                      "all the messages contained in it?"),
+                    folder->GetName().c_str());
+      }
    }
 
    bool ok = MDialog_YesNoDialog(msg,
@@ -569,6 +591,11 @@ bool wxFolderTree::OnDelete(MFolder *folder)
    {
       // do delete it
       folder->Delete();
+
+      if ( !removeOnly )
+      {
+         // TODO add code to physically delete the folder here
+      }
    }
 
    return ok;
@@ -703,6 +730,10 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
          bool mayHaveSubfolders = CanHaveSubfolders(folderType, folder->GetFlags());
          (*menu)->Enable(FolderMenu::BrowseSub, mayHaveSubfolders && !isGroup);
          (*menu)->Enable(FolderMenu::New, mayHaveSubfolders);
+
+         // all folders may be removed from the tree, but only some of them
+         // can be physically deleted as well
+         (*menu)->Enable(FolderMenu::Delete, CanDeleteFolderOfType(folderType));
       }
 
       PopupMenu(*menu, pos.x, pos.y);
@@ -783,7 +814,7 @@ void wxFolderTreeImpl::DoFolderCreate()
    //else: cancelled by user
 }
 
-void wxFolderTreeImpl::DoFolderDelete()
+void wxFolderTreeImpl::DoFolderDelete(bool removeOnly)
 {
    MFolder *folder = m_sink->GetSelection();
    if ( !folder )
@@ -793,7 +824,7 @@ void wxFolderTreeImpl::DoFolderDelete()
       return;
    }
 
-   if ( m_sink->OnDelete(folder) )
+   if ( m_sink->OnDelete(folder, removeOnly) )
    {
       if ( folder == m_current->GetFolder() )
       {
@@ -801,7 +832,10 @@ void wxFolderTreeImpl::DoFolderDelete()
          m_current = NULL;
       }
 
-      wxLogStatus(_("Folder '%s' deleted"), folder->GetName().c_str());
+      wxLogStatus(_("Folder '%s' %s"),
+                  folder->GetName().c_str(),
+                  removeOnly ? _("removed from the tree")
+                             : _("deleted"));
    }
 
    folder->DecRef();
@@ -992,6 +1026,10 @@ void wxFolderTreeImpl::OnMenuCommand(wxCommandEvent& event)
          break;
 
       case FolderMenu::Delete:
+         DoFolderDelete(FALSE);
+         break;
+
+      case FolderMenu::Remove:
          DoFolderDelete();
          break;
 
@@ -1021,7 +1059,7 @@ void wxFolderTreeImpl::OnChar(wxKeyEvent& event)
 {
   switch ( event.KeyCode() ) {
     case WXK_DELETE:
-      DoFolderDelete();
+      DoFolderDelete(event.ShiftDown());
       break;
 
     case WXK_INSERT:

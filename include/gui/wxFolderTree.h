@@ -58,7 +58,7 @@ public:
       // pointer to new folder or NULL to cancel the operation)
    virtual MFolder *OnCreate(MFolder *parent);
       // user wants to delete this folder, return TRUE to allow this
-   virtual bool OnDelete(MFolder *folder);
+   virtual bool OnDelete(MFolder *folder, bool removeOnly);
 
    // accessors
       // associated window object (for showing/hiding/resizing...)

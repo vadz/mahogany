@@ -734,4 +734,6 @@ extern MFolder *CreateFolderTreeEntry(MFolder *parent,
                                         MEventFolderTreeChangeData::Create)
          );
    }
+
+   return folder;
 }

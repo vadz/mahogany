@@ -259,6 +259,15 @@ inline bool CanHaveSubfolders(FolderType folderType,
    }
 }
 
+/// can a folder of this type be (physically) deleted by the user?
+inline bool CanDeleteFolderOfType(FolderType folderType)
+{
+   return folderType == MF_FILE ||
+          folderType == MF_MH ||
+          // folderType == MF_POP || -- can it?
+          folderType == MF_IMAP;
+}
+
 // ----------------------------------------------------------------------------
 // Icon functions: the associated icon for the folder is shown in the folder
 // tree control, folder options dialog &c
