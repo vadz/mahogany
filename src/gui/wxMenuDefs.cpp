@@ -419,7 +419,7 @@ static const MenuItemInfo g_aMenuItems[] =
 
    // ADB search
    { WXMENU_ADBFIND_FIND,  gettext_noop("&Find..."),          gettext_noop("Find entry by name or contents")                 , FALSE },
-   { WXMENU_ADBFIND_NEXT,  gettext_noop("Find &next"),        gettext_noop("Go to the next match")     , FALSE },
+   { WXMENU_ADBFIND_NEXT,  gettext_noop("Find &next\tCtrl-G"),        gettext_noop("Go to the next match")     , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_ADBFIND_GOTO,  gettext_noop("&Go To..."),         gettext_noop("Go to specified entry")    , FALSE },
 

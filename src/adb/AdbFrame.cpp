@@ -509,8 +509,16 @@ class wxAdbTree : public wxTreeCtrl
 {
 public:
   wxAdbTree(wxAdbEditFrame *frame, wxWindow *parent, long id);
-  ~wxAdbTree();
+  virtual ~wxAdbTree();
 
+  // select and show the item
+  void SelectAndShow(wxTreeItemId id)
+  {
+    SelectItem(id);
+    EnsureVisible(id);
+  }
+
+  // event handlers
   void OnChar(wxKeyEvent& event);
   void OnRightDown(wxMouseEvent& event);
 
@@ -1714,8 +1722,31 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
   parent->DeleteChild(m_current);
   m_current = parent;
 
+  // after the selected item is deleted the selection should move to the next
+  // one
+  wxTreeItemId idNewSel;
+  if ( id == m_treeAdb->GetSelection() ) {
+    // if there is no next sibling after this item, we go to the sibling of the
+    // parent and further upwards the tree if needed
+    wxTreeItemId id2 = id;
+    while ( id2.IsOk() ) {
+      idNewSel = m_treeAdb->GetNextSibling(id2);
+      if ( idNewSel.IsOk() ) {
+        // ok, found new selection
+        break;
+      }
+
+      // move upwards
+      id2 = m_treeAdb->GetParent(id2);
+    }
+  }
+
   // remove from the tree
   m_treeAdb->Delete(id);
+
+  if ( idNewSel.IsOk() ) {
+    m_treeAdb->SelectAndShow(idNewSel);
+  }
 
   strWhat[0u] = toupper(strWhat[0u]);
   wxLogStatus(this, _("%s '%s' deleted."), strWhat.c_str(), strName.c_str());
@@ -2527,13 +2558,13 @@ AdbTreeElement *wxAdbEditFrame::ExpandBranch(const wxString& strEntry)
 bool wxAdbEditFrame::MoveSelection(const wxString& strEntry)
 {
   AdbTreeElement *current = ExpandBranch(strEntry);
-  if ( current != NULL ) {
-    m_treeAdb->SetFocus();
-    m_treeAdb->SelectItem(current->GetId());
-    return TRUE;
-  }
-  else
+  if ( !current )
     return FALSE;
+
+  m_treeAdb->SetFocus();
+  m_treeAdb->SelectAndShow(current->GetId());
+
+  return TRUE;
 }
 
 // calculate the minimal size of the frame and set it
