@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Project:     M
-// File name:   res/M.rc - ressource file for M
-// Purpose:     this file contains all M ressources
+// File name:   res/M.rc - resource file for M
+// Purpose:     this file contains all M resources
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     21.08.98
@@ -161,7 +161,7 @@ msg_copy	CURSOR	"msg_copy.cur"
 msg_move	CURSOR	"msg_move.cur"
 
 ///////////////////////////////////////////////////////////////////////////////
-// wxWindows ressources
+// wxWindows resources
 ///////////////////////////////////////////////////////////////////////////////
 #include <wx/msw/wx.rc>
 
