@@ -104,6 +104,12 @@ public:
      */
    void  Exit(bool force = false);
 
+   /** Gets help for a specific topic.
+       @param id help id from MHelp.h
+       @param parent parent window pointer
+   */
+   virtual void Help(int id, MWindow *parent = NULL) = 0;
+   
    /** gets toplevel frame
        @return the toplevel window of the application
    */

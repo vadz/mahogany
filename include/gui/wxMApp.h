@@ -11,7 +11,7 @@
 #ifndef USE_PCH
 #  define   Uses_wxApp
 #  include  <wx/wx.h>
-
+#  include  <wx/help.h>
 #  include  "MApplication.h"
 #endif  //USE_PCH
 
@@ -43,6 +43,12 @@ public:
    virtual int  OnRun();
    virtual int  OnExit();
 
+
+   /** Gets help for a specific topic.
+       @param id help id from MHelp.h
+   */
+   virtual void Help(int id, wxWindow *parent = NULL);
+
    /// return a pointer to the IconManager:
    wxIconManager *GetIconManager(void) const { return m_IconManager; }
 
@@ -52,6 +58,8 @@ public:
 private:
    /// an iconmanager instance
    wxIconManager *m_IconManager;
+   /// a help controller instance
+   wxHelpController *m_HelpController;
 };
 
 // ----------------------------------------------------------------------------

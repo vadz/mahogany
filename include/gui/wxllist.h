@@ -30,6 +30,9 @@
 #   define WXLAYOUT_DEBUG
     // The wxLayout classes can be compiled with std::string instead of wxString
     //#   define USE_STD_STRING
+#   define WXMENU_LAYOUT_LCLICK     1111
+#   define WXMENU_LAYOUT_RCLICK    1112
+#   define WXMENU_LAYOUT_DBLCLICK   1113
 #endif
 
 #ifdef USE_STD_STRING
@@ -40,6 +43,8 @@
     typedef   wxString String;
 #   define    Str(str) str
 #endif
+
+#define   WXLO_DEFAULTFONTSIZE 12
 
 /// Types of currently supported layout objects.
 enum wxLayoutObjectType
@@ -69,14 +74,21 @@ public:
 
    /// return the type of this object
    virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_INVALID; } ;
-   /** Draws an object.
+   /** Calculates the position etc of an object.
        @param dc the wxDC to draw on
        @param position where to draw the top left corner
        @param baseLine the baseline for alignment, from top of box
-       @draw if set to false, do not draw but just calculate sizes
    */
-   virtual void Draw(wxDC & /* dc */, wxPoint /* position */,
-                     CoordType /* baseLine */, bool /* draw */ = true) {}
+   virtual void Layout(wxDC & dc,
+                       wxPoint position,
+                       CoordType baseLine)
+      { m_Position = position; }
+
+   /** Draws an object.
+       @param dc the wxDC to draw on
+       @param translation to be added to coordinates
+   */
+   virtual void Draw(wxDC & dc, wxPoint const &translate) {}
 
    /** Calculates and returns the size of the object. 
        @param baseLine pointer where to store the baseline position of 
@@ -84,14 +96,13 @@ public:
        baseline)
        @return the size of the object's box in pixels
    */
-   virtual wxPoint GetSize(CoordType * /* baseLine */ = NULL) const
+   virtual wxPoint GetSize(CoordType * baseLine = NULL) const
       { return wxPoint(0,0); }
 
    /** Calculates and returns the position of the object.
        @return the size of the object's box in pixels
    */
-   virtual wxPoint GetPosition(void) const
-      { return wxPoint(-1,-1); }
+   virtual wxPoint GetPosition(void) const { return m_Position; }
 
    /// returns the number of cursor positions occupied by this object
    virtual CoordType CountPositions(void) const { return 1; }
@@ -99,22 +110,27 @@ public:
    /// constructor
    wxLayoutObjectBase() { m_UserData = NULL; }
    /// delete the user data
-   virtual ~wxLayoutObjectBase() { delete m_UserData; }
+   virtual ~wxLayoutObjectBase() { if(m_UserData) delete m_UserData; }
 
 #ifdef WXLAYOUT_DEBUG
    virtual void Debug(void);
 #endif
 
+   /// query whether coordinates have changed since last drawing
+   virtual bool IsDirty(void) const { return true; }  
+   
    /** Tells the object about some user data. This data is associated
        with the object and will be deleted at destruction time.
    */
    void   SetUserData(UserData *data) { m_UserData = data; }
    /** Return the user data. */
    void * GetUserData(void) const { return m_UserData; }
-
+   
 private:
    /// optional data for application's use
    UserData *m_UserData;
+protected:
+   wxPoint m_Position;
 };
 
 /// Define a list type of wxLayoutObjectBase pointers.
@@ -128,21 +144,22 @@ public:
    wxLayoutObjectText(const String &txt);
 
    virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_TEXT; }
-   virtual void Draw(wxDC &dc, wxPoint position, CoordType baseLine,
-                     bool draw = true);
+   virtual void Layout(wxDC &dc, wxPoint position, CoordType
+                       baseLine);
+   
+   virtual void Draw(wxDC &dc, wxPoint const &translate);
    /** This returns the height and in baseLine the position of the
        text's baseline within it's box. This is needed to properly
        align text objects.
    */
    virtual wxPoint GetSize(CoordType *baseLine = NULL) const;
 
-   virtual wxPoint GetPosition(void) const { return m_Position; }
-
 #ifdef WXLAYOUT_DEBUG
    virtual void Debug(void);
 #endif
 
    virtual CoordType CountPositions(void) const { return strlen(m_Text.c_str()); }
+   virtual bool IsDirty(void) const { return m_IsDirty; }  
 
    // for editing:
    String & GetText(void) { return m_Text; }
@@ -152,10 +169,10 @@ private:
    String m_Text;
    /// size of the box containing text
    long   m_Width, m_Height;
-   /// the last draw position
-   wxPoint m_Position;
    /// the position of the baseline counted from the top of the box
    long   m_BaseLine;
+   /// coordinates have changed
+   bool m_IsDirty;
 };
 
 /// icon/pictures:
@@ -168,14 +185,16 @@ public:
    ~wxLayoutObjectIcon() { delete m_Icon; }
 
    virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_ICON; }
-   virtual void Draw(wxDC &dc, wxPoint position, CoordType baseLine,
-                     bool draw = true);
+   virtual void Layout(wxDC &dc, wxPoint position, CoordType baseLine);
+   virtual void Draw(wxDC &dc, wxPoint const &translate);
+
    virtual wxPoint GetSize(CoordType *baseLine = NULL) const;
-   virtual wxPoint GetPosition(void) const { return m_Position; }
+   virtual bool IsDirty(void) const { return m_IsDirty; }  
 
 private:
    wxIcon *m_Icon;
-   wxPoint m_Position;
+   /// coordinates have changed
+   bool m_IsDirty;
 };
 
 /// for export to html:
@@ -192,8 +211,8 @@ class wxLayoutObjectCmd : public wxLayoutObjectBase
 {
 public:
    virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_CMD; }
-   virtual void Draw(wxDC &dc, wxPoint position, CoordType baseLine,
-                     bool draw = true);
+   virtual void Draw(wxDC &dc, wxPoint const &translate);
+   virtual void Layout(wxDC &dc, wxPoint position, CoordType baseLine);
    wxLayoutObjectCmd(int size, int family, int style, int weight,
                 bool underline,
                 wxColour const *fg, wxColour const *bg);
@@ -221,6 +240,16 @@ public:
 
 class wxLayoutPrintout;
 
+class wxLayoutMargins
+{
+public:
+   wxLayoutMargins() { top = left = 0; bottom = right = -1; }
+   int top;
+   int left;
+   int bottom;
+   int right;
+};
+
 /**
    This class provides a high level abstraction to the wxFText
    classes.
@@ -238,41 +267,69 @@ public:
 
    /// adds an object:
    void AddObject(wxLayoutObjectBase *obj);
+   /// adds a text object
    void AddText(String const &txt);
-
+   /// adds a line break
    void LineBreak(void);
+   /// sets font parameters
    void SetFont(int family, int size, int style,
                 int weight, int underline,
                 wxColour const *fg,
                 wxColour const *bg);
+   /// sets font parameters, colours by name
    void SetFont(int family=-1, int size = -1, int style=-1,
                 int weight=-1, int underline = -1,
                 char const *fg = NULL,
                 char const *bg = NULL);
+   /// changes to the next larger font size
+   inline void SetFontLarger(void)
+      { SetFont(-1,(12*m_FontPtSize)/10); }
+   /// changes to the next smaller font size
+   inline void SetFontSmaller(void)
+      { SetFont(-1,(10*m_FontPtSize)/12); }
+   
+   /// set font family
    inline void SetFontFamily(int family) { SetFont(family); }
+   /// set font size
    inline void SetFontSize(int size) { SetFont(-1,size); }
+   /// set font style
    inline void SetFontStyle(int style) { SetFont(-1,-1,style); }
+   /// set font weight
    inline void SetFontWeight(int weight) { SetFont(-1,-1,-1,weight); }
+   /// toggle underline flag
    inline void SetFontUnderline(bool ul) { SetFont(-1,-1,-1,-1,(int)ul); }
+   /// set font colours by name
    inline void SetFontColour(char const *fg, char const *bg = NULL) { SetFont(-1,-1,-1,-1,-1,fg,bg); }
       
-   
-   /** Draw the list on a given DC.
-       @param findObject if true, return the object occupying the
-       position specified by coords
-       @param coords position where to find the object
-       @param pageNo if > 0, print only that page of a document (for
-       printing)
-       @param reallyDraw set this to false if you don't want to draw but
-       just calculate the coordinates
-       @param hasDrawn set to true if a page has been printed
-       @return if findObject == true, the object or NULL
+   /** Sets the wrap margin in cursor positions.
+       @param n the wrap margin, -1 to disable auto wrap
    */
-   wxLayoutObjectBase *Draw(wxDC &dc, bool findObject = false,
-                            wxPoint const &coords = wxPoint(0,0),
-                            int pageNo = -1, bool reallyDraw = true,
-                            bool *hasDrawn = 0);
+   void SetWrapMargin(long n = -1);
 
+   /// Wraps the current line if word wrap is enabled.
+   void WrapLine(void);
+   
+   /** Re-layouts the list on a DC.
+       @param dc the dc to layout for
+       @param margins if not NULL, use these top and left margins
+   */
+   void Layout(wxDC &dc, wxLayoutMargins *margins = NULL);
+                            
+  /** Draw the list on a given DC.
+      @param dc the dc to layout for
+      @param fromLine the first graphics line from where to draw
+      @param toLine the last line at which to draw
+      @param start if != iterator(NULL) start drawing from here
+   */
+   void Draw(wxDC &dc,
+             CoordType fromLine = -1,
+             CoordType toLine = -1,
+             iterator start = iterator(NULL),
+             wxPoint const &translate = wxPoint(0,0));
+
+   /** Deletes at least to the end of line and redraws */
+   void EraseAndDraw(wxDC &dc, iterator start = iterator(NULL));
+   
    /** Finds the object occupying a certain screen position.
        @return pointer to wxLayoutObjectBase or NULL if not found
    */
@@ -285,6 +342,7 @@ public:
 
    /// dirty?
    bool IsDirty() const { return m_bModified; }
+   bool CursorMoved(void) const { return m_CursorMoved; }  
 
    /// called after the contents is saved, for example
    void ResetDirty() { m_bModified = FALSE; }
@@ -302,25 +360,37 @@ public:
    bool IsEditable(void) const { return m_Editable; }
    /// move cursor, returns true if it could move to the desired position
    bool MoveCursor(int dx = 0, int dy = 0);
-   void SetCursor(wxPoint const &p) { m_CursorPosition = p; }
-   wxPoint GetCursor(void) const { return m_CursorPosition; }
+   void SetCursor(wxPoint const &p) { m_CursorPos = p; }
+   void DrawCursor(wxDC &dc, bool erase = false);
+   
+   /// Get current cursor position cursor coords
+   wxPoint GetCursor(void) const { return m_CursorPos; }
+   /// Gets graphical coordinates of cursor
+   wxPoint GetCursorCoords(void) const { return m_CursorCoords; }
+   
    /// delete one or more cursor positions
    void Delete(CoordType count = 1);
    void Insert(String const &text);
    void Insert(wxLayoutObjectBase *obj);
-   void Clear(int family = wxROMAN, int size=12, int style=wxNORMAL, int weight=wxNORMAL,
+   void Clear(int family = wxROMAN, int size=WXLO_DEFAULTFONTSIZE, int style=wxNORMAL, int weight=wxNORMAL,
                     int underline=0, char const *fg="black", char const *bg="white");
 
-   /// return a pointer to the default settings:
+   /// return a pointer to the default settings (dangerous, why?) FIXME:
    wxLayoutObjectCmd const *GetDefaults(void) const { return m_DefaultSetting ; }
 
-   wxLayoutObjectList::iterator FindCurrentObject(CoordType *offset = NULL);
+   /// returns the iterator for the object under the cursor
+   wxLayoutObjectList::iterator GetCurrentObject(CoordType *offset =
+                                                 NULL)
+   { if(offset) *offset = m_CursorOffset; return m_CursorObject; }
+   
    // get the length of the line with the object pointed to by i, offs 
    // only used to decide whether we are before or after linebreak
    CoordType GetLineLength(wxLayoutObjectList::iterator i,
                            CoordType offs = 0);
    wxLayoutPrintout *MakePrintout(wxString const &name);
 
+   /// Return maximum X,Y coordinates
+   wxPoint GetSize(void) const { return wxPoint(m_MaxX, m_MaxY); }
 //@}
 protected:
    /// font parameters:
@@ -335,6 +405,8 @@ protected:
    
    /// needs recalculation?
    bool m_dirty;
+   /// cursor moved
+   bool m_CursorMoved;
 
    /// needs saving (i.e., was modified?)
    bool m_bModified;
@@ -350,8 +422,20 @@ protected:
    CoordType m_MaxY;
 
    //---- this is needed for editing:
-   /// where is the text cursor:
-   wxPoint   m_CursorPosition;
+   /// where is the text cursor (column,line):
+   wxPoint   m_CursorPos;
+   /// where to draw the cursor
+   wxPoint   m_CursorCoords;
+   /// how large to draw it
+   wxPoint   m_CursorSize;
+   /// object iterator for current cursor position:
+   iterator  m_CursorObject;
+   /// position of cursor within m_CursorObject:
+   int       m_CursorOffset;
+   
+   /// to store content overwritten by cursor
+   wxMemoryDC m_CursorMemDC;
+
    /// which is the last line
    CoordType m_MaxLine;
    /// can we edit it?
@@ -359,26 +443,45 @@ protected:
    /// find the object to the cursor position and returns the offset
    /// in there
    wxLayoutObjectList::iterator FindObjectCursor(wxPoint *cpos, CoordType *offset = NULL);
+   /// get the wrap margin
+   inline long GetWrapMargin(void) const { return m_WrapMargin; }
+   /// do we do wrapping?
+   inline bool DoWordWrap(void) const { return m_WrapMargin != -1; }
 private:
+   /// Resets the font settings etc to default values
+   void ResetSettings(wxDC &dc);
+   /// calculates current cursor coordinates, called in Layout()
+   void CalculateCursor(wxDC &dc);
    /// remembers the last cursor position for which FindObjectCursor was called
    wxPoint m_FoundCursor;
    /// remembers the iterator to the object related to m_FoundCursor
    wxLayoutObjectList::iterator m_FoundIterator;
+   /// the wrap margin
+   long m_WrapMargin;
 };
 
 class wxLayoutPrintout: public wxPrintout
 {
  public:
-   wxLayoutPrintout(wxLayoutList &llist, wxString const & title = "My printout"):wxPrintout(title)
-      { m_llist = &llist; m_maxPage = 0; }
+   wxLayoutPrintout(wxLayoutList &llist, wxString const & title =
+                    "wxLayout Printout");
    bool OnPrintPage(int page);
    bool HasPage(int page);
    bool OnBeginDocument(int startPage, int endPage);
    void GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int
                     *selPageTo);
+   void OnPreparePrinting(void);
+protected:
+   virtual void DrawHeader(wxDC &dc, wxPoint topleft, wxPoint bottomright, int pageno);
+                           
 private:
    wxLayoutList *m_llist;
-   int           m_maxPage;
+   wxString      m_title;
+   int           m_PageHeight, m_PageWidth;
+   // how much we actually print per page
+   int           m_PrintoutHeight;
+   wxLayoutMargins m_Margins;
+   int           m_NumOfPages;
 };
 
 #endif // WXLLIST_H

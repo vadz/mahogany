@@ -79,6 +79,11 @@
 /// show log window?
 #define   MC_SHOWLOG          "ShowLog"
 
+/// help browser name
+#define   MC_HELPBROWSER   "HelpBrowser"
+/// is help browser of netscape type?
+#define   MC_HELPBROWSER_ISNS   "HelpBrowserIsNetscape"
+
 // Unix-only entries
 #ifdef OS_UNIX
 /// search paths for M's directory
@@ -296,6 +301,10 @@
 #define   MC_HEIGHT_D   400
 /// show log window?
 #define   MC_SHOWLOG_D  1
+/// help browser name
+#define   MC_HELPBROWSER_D   "netscape"
+/// is help browser of netscape type?
+#define   MC_HELPBROWSER_ISNS_D   1
 
 // Unix-only entries
 #ifdef OS_UNIX

@@ -18,6 +18,7 @@
 
 #ifndef  USE_PCH
 #  include "Mcommon.h"
+#  include   "MHelp.h"
 #  include "guidef.h"
 #  include "MFrame.h"
 #  include "gui/wxMFrame.h"
@@ -100,10 +101,13 @@ void wxMLogWindow::OnFrameDelete(wxFrame *frame)
 wxMApp::wxMApp(void)
 {
    m_IconManager = NULL;
+   m_HelpController = NULL;
 }
 
 wxMApp::~wxMApp()
 {
+   if(m_HelpController)
+      delete m_HelpController;
 }
 
 void
@@ -186,6 +190,51 @@ int wxMApp::OnExit()
 
    return 0;
 }
+
+void
+wxMApp::Help(int id, wxWindow *parent)
+{
+   // store help key used in search
+   static wxString last_key;
+   
+   if(! m_HelpController)
+   {
+      m_HelpController = new wxHelpController;
+      if(m_HelpController->IsKindOf(CLASSINFO(wxExtHelpController)))
+      {
+         ((wxExtHelpController *)m_HelpController)->SetBrowser(
+            READ_APPCONFIG(MC_HELPBROWSER),
+            READ_APPCONFIG(MC_HELPBROWSER_ISNS));
+         // initialise the help system
+         m_HelpController->Initialize(GetGlobalDir()+"/doc");
+      }
+      //FIXME: how to initialise .HLP/.HTML help browser on windows?
+      else // Windows:
+         m_HelpController->Initialize(GetGlobalDir()+"\\doc\\index.html");
+   }
+   // show help:
+   switch(id)
+   {
+      // look up contents:
+   case   MH_CONTENTS:
+      m_HelpController->DisplayContents();
+      break;
+      // implement a search:
+   case MH_SEARCH:
+      last_key = wxGetTextFromUser(_("Search for?"),
+                                   _("Search help for keyword"),
+                                   last_key,
+                                   parent ? parent : GetTopWindow());
+      if(! last_key.IsEmpty())
+         m_HelpController->KeywordSearch(last_key);
+      break;
+      // all other help ids, just look them up:
+   default:
+      m_HelpController->DisplaySection(id);
+      break;
+   }
+}
+
 
 // ----------------------------------------------------------------------------
 // global vars

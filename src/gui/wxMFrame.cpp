@@ -27,6 +27,7 @@
 #   include "gui/wxMApp.h"
 #   include "MailFolder.h"
 #   include "Message.h"
+#   include "MHelp.h"
 #endif
 
 #include   <Python.h>
@@ -262,9 +263,14 @@ wxMFrame::OnMenuCommand(int id)
    case WXMENU_HELP_ABOUT:
       MDialog_AboutDialog(this, false /* don't timeout */);
       break;
-
-   case WXMENU_HELP_HELP:
-      MDialog_Message(_(ABOUTMESSAGE),this,_("About M"));
+   case WXMENU_HELP_CONTEXT:
+      MDialog_Message(_("No help available on current context."),this,_("Sorry"));
+      break;
+   case WXMENU_HELP_CONTENTS:
+      mApplication->Help(MH_CONTENTS,this);
+      break;
+   case WXMENU_HELP_SEARCH:
+      mApplication->Help(MH_SEARCH,this);
       break;
    }
 }

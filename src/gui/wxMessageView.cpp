@@ -753,7 +753,6 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                      // create the pop up menu now if not done yet
                      m_MimePopup = new MimePopup(this, ci->GetPart());
                   }
-
                   PopupMenu(m_MimePopup, m_ClickPosition.x, m_ClickPosition.y);
                   break;
 

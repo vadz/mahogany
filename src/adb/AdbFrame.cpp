@@ -1600,7 +1600,7 @@ void wxAdbEditFrame::OnMenuCommand(wxCommandEvent& event)
       DoUndoChanges();
       break;
 
-    case WXMENU_HELP_HELP:
+    case WXMENU_HELP_CONTEXT:
       OnHelp(event);
       break;
 

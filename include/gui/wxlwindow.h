@@ -18,11 +18,33 @@
 
 #include   "wxllist.h"
 
+enum
+{
+   WXLOWIN_MENU_LARGER = 12000,
+   WXLOWIN_MENU_SMALLER,
+   WXLOWIN_MENU_UNDERLINE,
+   WXLOWIN_MENU_BOLD,
+   WXLOWIN_MENU_ITALICS,
+   WXLOWIN_MENU_ROMAN,
+   WXLOWIN_MENU_TYPEWRITER,
+   WXLOWIN_MENU_SANSSERIF,
+   WXLOWIN_MENU_RCLICK,
+   WXLOWIN_MENU_LCLICK,
+   WXLOWIN_MENU_DBLCLICK
+   
+};
+
 class wxLayoutWindow : public wxScrolledWindow
 {
 public:
+   /** Constructor.
+       @param parent parent window to display this panel in
+   */
    wxLayoutWindow(wxWindow *parent);
 
+   /* Returns a reference to the wxLayoutList object.
+      @return the list
+   */
    wxLayoutList & GetLayoutList(void) { return m_llist; }
 
    // clears the window and sets default parameters:
@@ -39,15 +61,20 @@ public:
    // callbacks
    // NB: these functions are used as event handlers and must not be virtual
    void OnPaint(wxPaintEvent &event);
-
+   
    void OnLeftMouseClick(wxMouseEvent& event)
-      { OnMouse(WXMENU_LAYOUT_LCLICK, event); }
+      { OnMouse(WXLOWIN_MENU_LCLICK, event); }
    void OnRightMouseClick(wxMouseEvent& event)
-      { OnMouse(WXMENU_LAYOUT_RCLICK, event); }
+      { OnMouse(WXLOWIN_MENU_RCLICK, event); }
    void OnMouseDblClick(wxMouseEvent& event)
-      { OnMouse(WXMENU_LAYOUT_DBLCLICK, event); }
+      { OnMouse(WXLOWIN_MENU_DBLCLICK, event); }
 
    void OnChar(wxKeyEvent& event);
+   void OnMenu(wxCommandEvent& event);
+
+   void EnablePopup(bool enable = true) { m_DoPopupMenu = enable; }
+   /// gets called by either Update() or OnPaint()
+   void DoPaint(wxDC &dc);
 
 #ifdef __WXMSW__
    virtual long MSWGetDlgCode();
@@ -55,19 +82,23 @@ public:
 
    void UpdateScrollbars(void);
    void Print(void);
+   wxMenu * MakeFormatMenu(void);
 
    /// if the flag is true, we send events when user clicks on embedded objects
-   void SetMouseTracking(bool doIt = true) { m_doSendEvents = doIt; }
+   inline void SetMouseTracking(bool doIt = true) { m_doSendEvents = doIt; }
 
-   virtual ~wxLayoutWindow() { }
+   virtual ~wxLayoutWindow() { if(m_PopupMenu) delete m_PopupMenu; }
 
    // dirty flag access
    bool IsDirty() const { return m_llist.IsDirty(); }
    void ResetDirty()    { m_llist.ResetDirty();     }
 
 protected:
-   // generic function for mouse events processing
+   /// generic function for mouse events processing
    void OnMouse(int eventId, wxMouseEvent& event);
+
+   /// repaint if needed
+   void Update(void);
 
    /// for sending events
    wxWindow *m_Parent;
@@ -75,16 +106,21 @@ protected:
 
    /// the layout list to be displayed
    wxLayoutList m_llist;
+
    /// have we already set the scrollbars?
    bool m_ScrollbarsSet;
-   /// if we want to find an object:
-   wxPoint m_FindPos;
-   wxLayoutObjectBase *m_FoundObject;
-   wxPoint m_ClickPosition;
-
+   /// Where does the current view start?
+   int m_ViewStartX; int m_ViewStartY;
+   
    /// do we have unsaved data?
    bool m_bDirty;
 
+   /// do we handle clicks of the right mouse button?
+   bool m_DoPopupMenu;
+   /// the menu
+   wxMenu * m_PopupMenu;
+   /// for derived classes, set when mouse is clicked
+   wxPoint m_ClickPosition;
 private:
    DECLARE_EVENT_TABLE()
 };

@@ -302,7 +302,7 @@ MailFolderCC::SetMessageFlag(unsigned long index, int flag, bool set)
    String
       seq;
 
-   seq << index;
+   seq.Printf("%l",index);
 
    const char *flagstr;
 

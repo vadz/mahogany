@@ -86,7 +86,7 @@ static const TbarItemInfo g_aToolBarData[] =
    { "tb_open",          WXMENU_FILE_OPEN,     "Open folder"           },
    { "tb_openany",       WXMENU_FILE_OPENANY,  "Open any folder"       },
    { "tb_mail_compose",  WXMENU_FILE_COMPOSE,  "Compose a new message" },
-   { "tb_help",          WXMENU_HELP_ABOUT,    "About"                 },
+   { "tb_help",          WXMENU_HELP_CONTEXT,  "Help"                  },
    { "tb_exit",          WXMENU_FILE_EXIT,     "Exit the program"      },
 
    // compose frame
@@ -280,7 +280,9 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_HELP_ABOUT,    "&About...",         "Displays the program in"
      "formation and copyright"  },
    { WXMENU_SEPARATOR,     "",                  ""                         },
-   { WXMENU_HELP_HELP,     "&Help",             "Help..."                  },
+   { WXMENU_HELP_CONTEXT, "&Help",    "Help on current context..."},
+   { WXMENU_HELP_CONTENTS, "Help &Contents",    "Contents of help system..."},
+   { WXMENU_HELP_SEARCH,   "&Search Help",      "Search help system for keyword..."},
 };
 
 // ============================================================================

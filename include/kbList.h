@@ -70,6 +70,13 @@ public:
       */
       void * operator*();
 
+      /** This operator allows us to write if(i). It is <em>not</em> a 
+          dereference operator and the result is always useless apart
+          from its logical value!
+      */
+      operator void*() const { return node == NULL ? (void*)0 : (void*)(-1); }
+      
+
       /** Increment operator - prefix, goes to next node in list.
           @return itself
       */

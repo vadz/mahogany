@@ -4,6 +4,10 @@ $Id$
 
 *** things to fix/implement next ***
 
+- wxLayout mouse clicks don't work, for two reasons:
+     1. event ids are not the ones expected, easy to fix
+     2. for some reasons ProcessEvents() does not call any event handler...why?
+
 - Deletion of messages doesn't work.
 - Expand in ComposeView is broken: should insert "Formatted_Name <EMail>" and
   must not treat the whole To: as a single name but properly parse it. How can

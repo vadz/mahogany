@@ -10,10 +10,14 @@
 #   pragma implementation "wxlparser.h"
 #endif
 
-#include "Mpch.h"
-
-#include "gui/wxllist.h"
-#include "gui/wxlparser.h"
+//#include "Mpch.h"
+#ifdef M_BASEDIR
+#   include "gui/wxllist.h"
+#   include "gui/wxlparser.h"
+#else
+#   include "wxllist.h"
+#   include "wxlparser.h"
+#endif
 
 #define   BASE_SIZE 12
 
