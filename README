@@ -23,6 +23,11 @@ http://mahogany.home.dhs.org/
 Be not confused by references to a program called "M", which was the
 original working title for "Mahogany".
 
+
+wxGTK still exhibits a minor bug which occasionally corrupts the
+layout of complex dialogs, such as the preferences dialog in Mahogany.
+Resizing the dialog window a little with the mouse fixes the layout.
+
 --------------------------------------------------------------------
 Internet resources
 --------------------------------------------------------------------
@@ -130,8 +135,10 @@ To compile and install Mahogany itself:
   right versions, "make doc" and "make install_all" might
   fail. Instead, you can do the following:
     make install         # this will install the program and required files
-    make install_doc     # this should install the documentation and online help
-    make install_locale  # this tries to build and install the message catalogs
+    make install_doc     # this should install the documentation and
+                         # online help
+    make install_locale  # this tries to build and install the message
+                         # catalogs
 
 Also, if you change into the src directory, the additional targets
 "make static" and "make semistatic" are available, to produce binaries 
