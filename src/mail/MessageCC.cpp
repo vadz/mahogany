@@ -368,7 +368,7 @@ MessageCC::GetId(void) const
 
    String id;
 
-   if ( !m_Body )
+   if ( !m_Envelope )
    {
       FAIL_MSG( "no envelope in GetId" );
    }
