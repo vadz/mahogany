@@ -206,6 +206,19 @@ class SpamOptionExeAttach : public SpamOption
       { return _T("SpamExeAttachment"); }
    virtual const wxChar *DialogLabel() const
       { return gettext_noop("E&xecutable attachment"); }
+
+   virtual size_t GetEntriesCount() const { return 2; }
+   virtual size_t BuildFieldInfo(FieldInfoArray& fields, size_t n) const
+   {
+      size_t count = SpamOption::BuildFieldInfo(fields, n);
+      wxOptionsPage::FieldInfo& info = fields[n + count];
+      info.label = gettext_noop(
+            "(beware: this will not catch all dangerous attachments!)");
+      info.flags = wxOptionsPage::Field_Message;
+      info.enable = -1;
+
+      return count + 1;
+   }
 };
 
 class SpamOptionXAuth : public SpamOption
@@ -466,8 +479,8 @@ void SpamOptionManagerBody::FromString(const String &source)
 
    const wxArrayString tests = strutil_restore_array(source);
 
-   size_t token;
-   for ( token = 0; token < tests.GetCount(); token++ )
+   const size_t count = tests.GetCount();
+   for ( size_t token = 0; token < count; token++ )
    {
       const wxString& actual = tests[token];
 
@@ -500,7 +513,7 @@ String SpamOptionManagerBody::ToString()
       if ( option->m_active )
       {
          if ( !result.empty() )
-            result += ':';
+            result += _T(':');
 
          result += option->Token();
       }
