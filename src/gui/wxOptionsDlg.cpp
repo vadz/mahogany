@@ -20,22 +20,22 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-# include "Mcommon.h"
-
-# include "Profile.h"
+#   include   "Mcommon.h"
+#   include   "MApplication.h"
+#   include   "Profile.h"
+#   include   "guidef.h"
 #endif
 
 //FIXME which headers are required?
-#include <guidef.h>
-#include <wx/wx.h>
 
-#include <wx/log.h>
-#include <wx/imaglist.h>
-#include <wx/notebook.h>
+#include   <wx/wx.h>
+#include   <wx/log.h>
+#include   <wx/imaglist.h>
+#include   <wx/notebook.h>
+#include   <wx/dynarray.h>
 
-#include "MDialogs.h"
-
-#include "Mdefaults.h"
+#include   "MDialogs.h"
+#include   "Mdefaults.h"
 
 #define MCB_FOLDEROPEN_D            ""
 #define MCB_FOLDERUPDATE_D          ""
@@ -820,26 +820,29 @@ void wxOptionsPage::Refresh()
 bool wxOptionsPage::TransferDataToWindow()
 {
   // disable environment variable expansion here
-  bool bDoesExpand = Profile::GetAppConfig()->IsExpandingEnvVars();
-  Profile::GetAppConfig()->SetExpandEnvVars(FALSE);
+//FIXME
+   bool bDoesExpand = false; //Profile::GetAppConfig()->IsExpandingEnvVars();
+//  Profile::GetAppConfig()->SetExpandEnvVars(FALSE);
 
   // check that we didn't forget to update one of the arrays...
   wxASSERT( WXSIZEOF(gs_aConfigDefaults) == ConfigField_Max );
   wxASSERT( WXSIZEOF(wxOptionsPage::ms_aFields) == ConfigField_Max );
 
-  wxConfigBase *conf = Profile::GetAppConfig();
+  ProfileBase *conf = mApplication->GetProfile();
 
   String strValue;
   long lValue;
-  for ( size_t n = m_nFirst; n < m_nLast; n++ ) {
-    if ( gs_aConfigDefaults[n].IsNumeric() ) {
-      lValue = conf->Read(gs_aConfigDefaults[n].name,
-                          gs_aConfigDefaults[n].lValue);
+  for ( size_t n = m_nFirst; n < m_nLast; n++ )
+  {
+     if ( gs_aConfigDefaults[n].IsNumeric() )
+     {
+      lValue = conf->readEntry(gs_aConfigDefaults[n].name,
+                          (int) gs_aConfigDefaults[n].lValue);
       strValue.Printf("%ld", lValue);
     }
     else {
       // it's a string
-      strValue = conf->Read(gs_aConfigDefaults[n].name,
+      strValue = conf->readEntry(gs_aConfigDefaults[n].name,
                             gs_aConfigDefaults[n].szValue);
     }
 
@@ -900,7 +903,7 @@ bool wxOptionsPage::TransferDataToWindow()
   }
 
   // restore the old setting
-  Profile::GetAppConfig()->SetExpandEnvVars(bDoesExpand);
+  //FIXME Profile::GetAppConfig()->SetExpandEnvVars(bDoesExpand);
 
   return TRUE;
 }
@@ -909,13 +912,15 @@ bool wxOptionsPage::TransferDataToWindow()
 bool wxOptionsPage::TransferDataFromWindow()
 {
   // @@@ should only write the entries which really changed
-  wxConfigBase *conf = Profile::GetAppConfig();
+  ProfileBase *conf = mApplication->GetProfile();
 
   String strValue;
   long lValue;
-  for ( size_t n = m_nFirst; n < m_nLast; n++ ) {
+  for ( size_t n = m_nFirst; n < m_nLast; n++ )
+  {
     wxControl *control = GetControl(n);
-    switch ( ms_aFields[n].type ) {
+    switch ( ms_aFields[n].type )
+    {
       case Field_Text:
       case Field_File:
       case Field_Number:
@@ -961,12 +966,14 @@ bool wxOptionsPage::TransferDataFromWindow()
         wxFAIL_MSG("unexpected field type");
     }
 
-    if ( gs_aConfigDefaults[n].IsNumeric() ) {
-      conf->Write(gs_aConfigDefaults[n].name, lValue);
+    if ( gs_aConfigDefaults[n].IsNumeric() )
+    {
+      conf->writeEntry(gs_aConfigDefaults[n].name, (int)lValue);
     }
-    else {
+    else
+    {
       // it's a string
-      conf->Write(gs_aConfigDefaults[n].name, strValue);
+      conf->writeEntry(gs_aConfigDefaults[n].name, strValue);
     }
   }
 

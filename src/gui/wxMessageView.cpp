@@ -414,13 +414,13 @@ wxMessageView::Update(void)
                obj = new wxLayoutObjectIcon(icn);
             else
             {
-               icn = mApplication.GetIconManager()->
+               icn = mApplication->GetIconManager()->
                         GetIconFromMimeType(mailMessage->GetPartMimeType(i));
             }
             wxRemoveFile(filename);
          }
          else {
-            icn = mApplication.GetIconManager()->
+            icn = mApplication->GetIconManager()->
                GetIconFromMimeType(mailMessage->GetPartMimeType(i));
          }
 
@@ -603,7 +603,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       return;
 
 #  else // Unix
-      MimeList *ml = mApplication.GetMimeList();
+      MimeList *ml = mApplication->GetMimeList();
       String command, flags;
       bool found = ml->GetCommand(mimetype, command, flags);
       if(found)
@@ -846,8 +846,8 @@ wxMessageView::Print(void)
 #ifdef  OS_UNIX
    // set AFM path (recursive!)
    PathFinder pf(READ_APPCONFIG(MC_AFMPATH), true);
-   pf.AddPaths(mApplication.GetGlobalDir(), true);
-   pf.AddPaths(mApplication.GetLocalDir(), true);
+   pf.AddPaths(mApplication->GetGlobalDir(), true);
+   pf.AddPaths(mApplication->GetLocalDir(), true);
 
    String afmpath = pf.FindDirFile("Cour.afm");
    wxSetAFMPath((char *) afmpath.c_str());

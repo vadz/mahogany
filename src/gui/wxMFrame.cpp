@@ -65,11 +65,11 @@ bool wxMFrame::RestorePosition(const char *name,
 {
    wxCHECK( x && y && w && h, FALSE ); // no NULL pointers please
 
-   wxConfig *pConf = Profile::GetAppConfig();
+   ProfileBase *pConf = mApplication->GetProfile();
    if ( pConf != NULL )
    {
       ProfilePathChanger ppc(pConf, M_FRAMES_CONFIG_SECTION);
-      pConf->CHANGE_PATH(name);
+      pConf->SetPath(name);
 
       *x = READ_APPCONFIG(MC_XPOS);
       *y = READ_APPCONFIG(MC_YPOS);
@@ -176,18 +176,18 @@ wxMFrame::SavePosition(const char *name, wxFrame *frame)
 {
    int x,y;
 
-   wxConfig *pConf = Profile::GetAppConfig();
+   ProfileBase *pConf = mApplication->GetProfile();
    if ( pConf != NULL ) {
       ProfilePathChanger ppc(pConf, M_FRAMES_CONFIG_SECTION);
-      pConf->CHANGE_PATH(name);
+      pConf->SetPath(name);
 
       frame->GetPosition(&x,&y);
-      pConf->WRITE_ENTRY(MC_XPOS, (long int) x);
-      pConf->WRITE_ENTRY(MC_YPOS, (long int) y);
+      pConf->writeEntry(MC_XPOS, x);
+      pConf->writeEntry(MC_YPOS, y);
 
       frame->GetSize(&x,&y);
-      pConf->WRITE_ENTRY(MC_WIDTH, (long int) x);
-      pConf->WRITE_ENTRY(MC_HEIGHT, (long int) y);
+      pConf->writeEntry(MC_WIDTH, x);
+      pConf->writeEntry(MC_HEIGHT, y);
    }
 }
 
@@ -222,7 +222,7 @@ wxMFrame::OnMenuCommand(int id)
    }
 
    case WXMENU_FILE_EXIT:
-      mApplication.Exit();
+      mApplication->Exit();
       break;
 
    case WXMENU_EDIT_ADB:

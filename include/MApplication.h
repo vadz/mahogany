@@ -45,8 +45,8 @@ protected:
    /// a list mapping extensions to mime types
    MimeTypes  *m_mimeTypes;
    
-   /// a profile wrapper object for this object
-   Profile *m_profile;
+   /// a profile wrapper object for the global configuration
+   ProfileBase *m_profile;
 
    // global variables stored in the application object
    // -------------------------------------------------
@@ -147,6 +147,11 @@ public:
    */
    void   ShowConsole(bool display = true);
 
+   /// return a pointer to the IconManager:
+   virtual class wxIconManager *GetIconManager(void) const = 0;
+
    CB_DECLARE_CLASS(MApplication, CommonBase)
 };
+
+extern MAppBase *mApplication;
 #endif

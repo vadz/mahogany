@@ -42,25 +42,26 @@ static ArrayObjects gs_aObjects;
 // ----------------------------------------------------------------------------
 void MObject::CheckLeaks()
 {
-  size_t nCount = gs_aObjects.Count();
+   size_t nCount = gs_aObjects.Count();
 
-  if ( nCount > 0 ) {
-    wxFAIL_MSG("MObject memory leaks detected, see debug log for details.");
+   if ( nCount > 0 ) {
+      wxFAIL_MSG("MObject memory leaks detected, see debug log for details.");
 
-    wxLogDebug("%d MObjects leaked:", nCount);
-  }
+      wxLogDebug("%d MObjects leaked:", nCount);
+   }
 
-  for ( size_t n = 0; n < nCount; n++ ) {
-    wxLogDebug("Object %d: %s", n, gs_aObjects[n]->Dump().c_str());
-  }
+   for ( size_t n = 0; n < nCount; n++ ) {
+      wxLogDebug("Object %d: %s", n, gs_aObjects[n]->Dump().c_str());
+   }
 }
 
 String MObject::Dump() const
 {
-  String str;
-  str.Printf("MObject, m_nRef = %d", m_nRef);
+   MOcheck();
+   String str;
+   str.Printf("MObject, m_nRef = %d", m_nRef);
 
-  return str;
+   return str;
 }
 
 // ----------------------------------------------------------------------------
@@ -68,24 +69,27 @@ String MObject::Dump() const
 // ----------------------------------------------------------------------------
 
 MObject::MObject()
-{ 
-  gs_aObjects.Add(this);
+{
+   gs_aObjects.Add(this);
 
-  m_nRef = 1;
+   m_nRef = 1;
+   m_magic = 0x12345678;
 }
 
 bool MObject::Unlock()
 { 
-  wxASSERT(m_nRef > 0);
+   MOcheck();
+   wxASSERT(m_nRef > 0);
 
-  if ( !--m_nRef ) {
-    gs_aObjects.Remove(this);
-    delete this;
+   if ( !--m_nRef )
+   {
+      gs_aObjects.Remove(this);
+      delete this;
 
-    return FALSE;
-  }
+      return FALSE;
+   }
   
-  return TRUE;
+   return TRUE;
 }
 
 #endif //DEBUG

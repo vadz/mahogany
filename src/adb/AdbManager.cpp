@@ -20,8 +20,9 @@
 #include "Mpch.h"
 
 #ifndef USE_PCH
-# include "Mcommon.h"
-# include "Profile.h"
+#   include "Mcommon.h"
+#   include "Profile.h"
+#   include   "MApplication.h"
 #endif // USE_PCH
 
 #include <wx/log.h>
@@ -226,7 +227,7 @@ AdbBook *AdbManager::GetBook(size_t n) const
 // the time to do it right now...
 void AdbManager::LoadAll()
 {
-  wxConfigBase& conf = *Profile::GetAppConfig();
+  ProfileBase & conf = *mApplication->GetProfile();
   conf.SetPath("/AdbEditor");
 
   wxArrayString astrAdb, astrProv;

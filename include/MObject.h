@@ -54,18 +54,15 @@ public:
   MObject() { m_nRef = 1; }
 #endif
 
-  // ref counting
-    // increment
-  void Lock()   { wxASSERT(m_nRef > 0); m_nRef++; }
-    // decrement and delete if reached 0, return TRUE if item wasn't deleted
-#ifdef   DEBUG
-  bool Unlock();
-#else
-  bool Unlock() { if ( --m_nRef ) return TRUE; delete this; return FALSE; }
-#endif
-
   // debugging support
 #ifdef   DEBUG
+    /// check validity of this object
+    void MOcheck(void) const
+       {
+          wxASSERT(this);
+          wxASSERT(m_magic);
+       }
+
     // call this function on program termination to check for memory leaks
     // (of course, you shouldn't allocate memory in static object's: otherwise
     // it will be reported as leaked)
@@ -75,14 +72,33 @@ public:
     // rich information about your object (MObject::Dump() prints the ref
     // count only)
     virtual String Dump() const;
+
 #else
+#   define MOcheck()
     static void CheckLeaks() { }
 #endif
 
-protected:
-  // dtor is protected because only Unlock() can delete us
-  virtual ~MObject() { }
+    // ref counting
+    // increment
+  void Lock()   { MOcheck(); wxASSERT(m_nRef > 0); m_nRef++; }
+    // decrement and delete if reached 0, return TRUE if item wasn't deleted
+#ifdef   DEBUG
+  bool Unlock();
+#else
+  bool Unlock() { MOcheck(); if ( --m_nRef ) return TRUE; delete this; return FALSE; }
+#endif
 
+
+protected:
+#ifdef DEBUG
+  int m_magic;
+  // dtor is protected because only Unlock() can delete us
+  virtual ~MObject() { MOcheck(); m_magic = 0; }
+#else
+  // dtor is protected because only Unlock() can delete us
+    virtual ~MObject() {}
+#endif
+  
 #ifndef DEBUG // we may use m_nRef only for diagnostic functions
 private:
 #endif

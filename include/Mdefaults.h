@@ -286,19 +286,19 @@ enum FolderType
 /// our version
 #define   MC_VERSION_D          ""
 /// are we running for the first time?
-#define   MC_FIRSTRUN_D         1L
+#define   MC_FIRSTRUN_D         1
 /// shall we record default values in configuration files
-#define   MC_RECORDDEFAULTS_D      0L
+#define   MC_RECORDDEFAULTS_D      0
 /// default window position x
-#define   MC_XPOS_D        20L
+#define   MC_XPOS_D        20
 /// default window position y
-#define   MC_YPOS_D        50L
+#define   MC_YPOS_D        50
 /// default window width
-#define   MC_WIDTH_D   600L
+#define   MC_WIDTH_D   600
 /// default window height
-#define   MC_HEIGHT_D   400L
+#define   MC_HEIGHT_D   400
 /// show log window?
-#define   MC_SHOWLOG_D  1L
+#define   MC_SHOWLOG_D  1
 
 // Unix-only entries
 #ifdef OS_UNIX
@@ -355,9 +355,9 @@ enum FolderType
 /// show splash screen on startup?
 #define     MC_SHOWSPLASH_D      1
 /// how long should splash screen stay (0 disables timeout)?
-#define MC_SPLASHDELAY_D        5000L
+#define MC_SPLASHDELAY_D        5000
 /// ask user if he really wants to exit?
-#define   MC_CONFIRMEXIT_D      1L
+#define   MC_CONFIRMEXIT_D      1
 /**@name For Profiles: */
 //@{
 //@}

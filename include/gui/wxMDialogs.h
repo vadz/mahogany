@@ -162,7 +162,7 @@ void
 MDialog_AboutDialog( MWindow *parent, bool bCloseOnTimeout = true);
 
 // @@@@ FIXME it is the only way I see right now...
-extern MFrame *g_pSplashScreen;
+extern class MFrame *g_pSplashScreen;
 
 /// function which will close the splash screen if it's (still) opened
 extern void CloseSplash();

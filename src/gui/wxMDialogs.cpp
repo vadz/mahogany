@@ -117,7 +117,7 @@ inline long Style(long style)
 // returns the argument if it's !NULL of the top-level application frame
 inline MWindow *GetParent(MWindow *parent)
 {
-  return parent == NULL ? mApplication.TopLevelFrame() : parent;
+  return parent == NULL ? mApplication->TopLevelFrame() : parent;
 }
 
 // ============================================================================
@@ -218,12 +218,13 @@ bool MInputBox(wxString *pstr,
 {
   static const wxString strSectionName = "/Prompts/";
 
-  wxConfigBase *pConf = NULL;
+  ProfileBase *pConf = NULL;
 
-  if ( !IsEmpty(szKey) ) {
-    pConf = Profile::GetAppConfig();
+  if ( !IsEmpty(szKey) )
+  {
+    pConf = mApplication->GetProfile();
     if ( pConf != NULL )
-      pConf->Read(pstr, strSectionName + szKey, def);
+      pstr = new wxString(pConf->readEntry(strSectionName + szKey, def));
   }
 
   MTextInputDialog dlg(GetParent(parent), *pstr, wxString("M - "+strCaption), strPrompt);
@@ -231,7 +232,7 @@ bool MInputBox(wxString *pstr,
     *pstr = dlg.GetText();
 
     if ( pConf != NULL )
-      pConf->Write(strSectionName + szKey, *pstr);
+      pConf->writeEntry(strSectionName + szKey, *pstr);
 
     return TRUE;
   }
@@ -289,7 +290,7 @@ MDialog_FatalErrorMessage(const char *message,
    String msg = String(message) + _("\nExiting application...");
 
    MDialog_ErrorMessage(message,parent, wxString(title),true);
-   mApplication.Exit(true);
+   mApplication->Exit(true);
 }
 
    
@@ -362,7 +363,7 @@ MDialog_FileRequester(String const & message,
                       ProfileBase *profile)
 {
    if(! profile)
-      profile = mApplication.GetProfile();
+      profile = mApplication->GetProfile();
    
    if(! path)
       path = save ?
@@ -382,7 +383,7 @@ MDialog_FileRequester(String const & message,
        : profile->readEntry(MP_DEFAULT_LOAD_WILDCARD,MP_DEFAULT_LOAD_WILDCARD_D);
 
    if(parent == NULL)
-      parent = mApplication.TopLevelFrame();
+      parent = mApplication->TopLevelFrame();
    
    return wxFileSelector(
       message, path, filename, extension, wildcard, 0, parent);

@@ -44,7 +44,7 @@ public:
    virtual int  OnExit();
 
    /// return a pointer to the IconManager:
-   wxIconManager *GetIconManager(void) { return m_IconManager; }
+   wxIconManager *GetIconManager(void) const { return m_IconManager; }
 
    /// Destructor
    ~wxMApp();
@@ -61,6 +61,6 @@ private:
 // created dynamically by wxWindows
 DECLARE_APP(wxMApp);
 
-#define mApplication (wxGetApp())
+//#define mApplication (wxGetApp())
 
 #endif

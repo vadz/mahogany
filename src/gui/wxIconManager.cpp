@@ -151,7 +151,8 @@ wxIconManager::GetIcon(String const &_iconName)
       }
    }
 
-   if ( IsMimeType(iconName) ) {
+   if ( IsMimeType(iconName) )
+   {
      // not found, now look for MIME subtype, after '/':
      key = strutil_after(iconName, '/');
      for(i = m_iconList->begin(); i != m_iconList->end(); i++)
@@ -180,8 +181,8 @@ wxIconManager::GetIcon(String const &_iconName)
    int c;
    bool found;
    PathFinder pf(READ_APPCONFIG(MC_ICONPATH), true);
-   pf.AddPaths(mApplication.GetLocalDir()+"/icons", true);
-   pf.AddPaths(mApplication.GetGlobalDir()+"/icons", true);
+   pf.AddPaths(mApplication->GetLocalDir()+"/icons", true);
+   pf.AddPaths(mApplication->GetGlobalDir()+"/icons", true);
 
    IconData *id;
 
@@ -191,7 +192,8 @@ wxIconManager::GetIcon(String const &_iconName)
       name = key + wxIconManagerFileExtensions[c];
       name = pf.FindFile(name, &found);
 
-      if ( !found && IsMimeType(iconName) ) {
+      if ( !found && IsMimeType(iconName) )
+      {
          key = strutil_after(iconName,'/');
          name = key + wxIconManagerFileExtensions[c];
          name = pf.FindFile(name, &found);

@@ -42,14 +42,13 @@
 
 #include "gui/wxFolderView.h"
 #include "gui/wxMainFrame.h"
-
+#include   "gui/wxMApp.h"
 #include "MDialogs.h"
 #include  "gui/wxOptionsDlg.h"
 
-
 #include "Mversion.h"
 
-
+#include   <wx/confbase.h> // wxExpandEnvVars
 #ifdef OS_UNIX
 #  include  <unistd.h>
 #  include  <sys/stat.h>
@@ -68,6 +67,8 @@
 // implementation
 // ============================================================================
 
+MAppBase *mApplication = NULL;
+
 // ----------------------------------------------------------------------------
 // MAppBase - the class which defines the "application object" interface
 // ----------------------------------------------------------------------------
@@ -85,13 +86,13 @@ MAppBase::VerifySettings(void)
    if( strutil_isempty(READ_APPCONFIG(MP_USERNAME)) )
    {
       wxGetUserId(buffer,bufsize);
-      Profile::GetAppConfig()->WRITE_ENTRY(MP_USERNAME, buffer);
+      m_profile->writeEntry(MP_USERNAME, buffer);
    }
 
    if( strutil_isempty(READ_APPCONFIG(MP_PERSONALNAME)) )
    {
       wxGetUserName(buffer,bufsize);
-      Profile::GetAppConfig()->WRITE_ENTRY(MP_PERSONALNAME, buffer);
+      m_profile->writeEntry(MP_PERSONALNAME, buffer);
    }
 
 #  ifdef OS_UNIX
@@ -101,24 +102,24 @@ MAppBase::VerifySettings(void)
 //FIXME         wxGetHomeDir(&strHome);
          strHome = getenv("HOME");
          strHome << DIR_SEPARATOR << READ_APPCONFIG(MC_USER_MDIR);
-         Profile::GetAppConfig()->WRITE_ENTRY(MC_USERDIR, strHome);
+         m_profile->writeEntry(MC_USERDIR, strHome);
       }
 #  endif // Unix
    
    if( strutil_isempty(READ_APPCONFIG(MP_HOSTNAME)) )
    {
       wxGetHostName(buffer,bufsize);
-      Profile::GetAppConfig()->WRITE_ENTRY(MP_HOSTNAME, buffer);
+      m_profile->writeEntry(MP_HOSTNAME, buffer);
    }
 
    bool bFirstRun = READ_APPCONFIG(MC_FIRSTRUN) != 0;
    if ( bFirstRun )
    {
       // next time won't be the first one any more
-      Profile::GetAppConfig()->WRITE_ENTRY(MC_FIRSTRUN, 0L);
+      m_profile->writeEntry(MC_FIRSTRUN, 0);
 
       // write the version
-      Profile::GetAppConfig()->WRITE_ENTRY(MC_VERSION, M_VERSION);
+      m_profile->writeEntry(MC_VERSION, M_VERSION);
    }
 
    return bFirstRun;
@@ -131,38 +132,36 @@ MAppBase::~MAppBase()
 bool
 MAppBase::OnStartup()
 {
+   mApplication = this;
+   
    // initialise the profile(s)
    // -------------------------
    m_cfManager = new ConfigFileManager;
 
       String strConfFile;
 #     ifdef OS_UNIX
-         strConfFile = wxFileConfig::GetLocalFileName(M_APPLICATIONNAME);
-         // FIXME must create the directory ourselves!
-         struct stat st;
-         if ( stat(strConfFile, &st) != 0 || !S_ISDIR(st.st_mode) ) {
-           if ( mkdir(strConfFile, 0777) != 0 ) {
-             wxLogError(_("Can't create the directory for configuration"
-                          "files '%s'."), strConfFile.c_str());
-             
-             return FALSE;
-           }
-           
-           wxLogInfo(_("Created directory '%s' for configuration files."),
-                     strConfFile.c_str());
+      strConfFile = getenv("HOME");
+      strConfFile << "/." << M_APPLICATIONNAME;
+      // FIXME must create the directory ourselves!
+      struct stat st;
+      if ( stat(strConfFile, &st) != 0 || !S_ISDIR(st.st_mode) ) {
+         if ( mkdir(strConfFile, 0777) != 0 ) {
+            wxLogError(_("Can't create the directory for configuration"
+                         "files '%s'."), strConfFile.c_str());
+            
+            return FALSE;
          }
-
-         strConfFile += "/config";
+         
+         wxLogInfo(_("Created directory '%s' for configuration files."),
+                   strConfFile.c_str());
+      }
+      
+      strConfFile += "/config";
 #     else  // Windows
-         strConfFile << "wxWindows\\" << M_APPLICATIONNAME;
+      strConfFile << "wxWindows\\" << M_APPLICATIONNAME;
 #     endif // Unix
 
-      m_profile = GLOBAL_NEW Profile(strConfFile);
-
-#  ifndef OS_WIN
-      // set the default path for configuration entries
-      m_profile->GetConfig()->SET_PATH(M_APPLICATIONNAME);
-#  endif
+         m_profile = new wxConfigProfile(strConfFile.c_str());
 
    // do we have gettext()?
    // ---------------------
@@ -194,24 +193,24 @@ MAppBase::OnStartup()
    // --------------------
    String tmp;
 #  ifdef OS_UNIX
-      bool   found;
-      String strRootDir = READ_APPCONFIG(MC_ROOTDIRNAME);
-      PathFinder pf(READ_APPCONFIG(MC_PATHLIST));
-
-      pf.AddPaths(M_DATADIR);
-
-      m_globalDir = pf.FindDir(strRootDir, &found);
-
-      if(! found)
-      {
-         String msg = _("Cannot find global directory \"");
-         msg += strRootDir;
-         msg += _("\" in\n \"");
-         msg += String(READ_APPCONFIG(MC_PATHLIST));
-         ERRORMESSAGE((Str(msg)));
-      }
-
-      m_localDir = wxExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
+   bool   found;
+   String strRootDir = READ_APPCONFIG(MC_ROOTDIRNAME);
+   PathFinder pf(READ_APPCONFIG(MC_PATHLIST));
+   
+   pf.AddPaths(M_DATADIR);
+   
+   m_globalDir = pf.FindDir(strRootDir, &found);
+   
+   if(! found)
+   {
+      String msg = _("Cannot find global directory \"");
+      msg += strRootDir;
+      msg += _("\" in\n \"");
+      msg += String(READ_APPCONFIG(MC_PATHLIST));
+      ERRORMESSAGE((Str(msg)));
+   }
+   
+   m_localDir = wxExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
 #  else  //Windows
       // under Windows our directory is always the one where the executable is
       // located. At least we're sure that it exists this way...
@@ -255,9 +254,10 @@ MAppBase::OnStartup()
                            "installation. Would you like to disable Python\n"
                            "support for now (set " MC_USEPYTHON " to 1 to"
                            "reenable it later)?";
-         if ( MDialog_YesNoDialog(_(msg)) ) {
+         if ( MDialog_YesNoDialog(_(msg)) )
+         {
             // disable it
-            Profile::GetAppConfig()->WRITE_ENTRY(MC_USEPYTHON, (long)FALSE);
+            m_profile->writeEntry(MC_USEPYTHON, FALSE);
          }
       }
 #  endif //USE_PYTHON
@@ -284,7 +284,7 @@ MAppBase::OnStartup()
    // now that we have the local dir, we can set up a default mail
    // folder dir
    {
-      ProfilePathChanger ppc(m_profile->GetConfig(), M_PROFILE_CONFIG_SECTION);
+      ProfilePathChanger ppc(m_profile, M_PROFILE_CONFIG_SECTION);
       tmp = READ_CONFIG(m_profile, MP_MBOXDIR);
       if( strutil_isempty(tmp) )
       {

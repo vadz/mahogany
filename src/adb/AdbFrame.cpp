@@ -1154,7 +1154,7 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
     else                                          \
       RestoreArray(conf, var, aszConfigNames[i])
 
-  wxConfigBase& conf = *Profile::GetAppConfig();
+  ProfileBase & conf = *mApplication->GetProfile();
   conf.SetPath("/AdbEditor");
 
   TRANSFER_STRING(m_strLastAdbDir, ConfigName_LastAdbDir);

@@ -239,8 +239,7 @@
 #include "CommonBase.h"
 
 /// for convenience, get an icon:
-//#define   ICON(name) (mApplication.GetIconManager()->GetIcon(name))
-#define   ICON(name) (*new wxIcon())
+#define   ICON(name) (mApplication->GetIconManager()->GetIcon(name))
 
 /**@name Macros for calling callback functions.
 

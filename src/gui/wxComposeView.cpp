@@ -134,7 +134,7 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    m_pManager = NULL;
    
    if(!parentProfile)
-      parentProfile = mApplication.GetProfile();
+      parentProfile = mApplication->GetProfile();
    m_Profile = new Profile(iname,parentProfile);
 
    // build menu
@@ -509,7 +509,7 @@ wxComposeView::InsertData(const char *data,
    mc->m_Length = length;
    mc->m_Type = MimeContent::MIMECONTENT_DATA;
    
-   wxIcon icon = mApplication.GetIconManager()->GetIconFromMimeType(mc->m_MimeType);
+   wxIcon icon = mApplication->GetIconManager()->GetIconFromMimeType(mc->m_MimeType);
 
    wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(icon);
    obj->SetUserData(mc);
@@ -533,7 +533,7 @@ wxComposeView::InsertFile(const char *filename, const char *mimetype,
       if(! filename)
          return;
       mc->m_NumericMimeType = TYPEAPPLICATION;
-      if(! mApplication.GetMimeTypes()->Lookup(mc->m_FileName, mc->m_MimeType, &(mc->m_NumericMimeType)))
+      if(! mApplication->GetMimeTypes()->Lookup(mc->m_FileName, mc->m_MimeType, &(mc->m_NumericMimeType)))
          mc->m_MimeType = String("APPLICATION/OCTET-STREAM");
    }
    else
@@ -545,7 +545,7 @@ wxComposeView::InsertFile(const char *filename, const char *mimetype,
    mc->m_FileName = filename;
    mc->m_Type = MimeContent::MIMECONTENT_FILE;
 
-   wxIconManager *iconManager = mApplication.GetIconManager();
+   wxIconManager *iconManager = mApplication->GetIconManager();
 
 #  ifdef OS_WIN
       wxString strExt = wxString(filename).After('.');
@@ -579,7 +579,7 @@ wxComposeView::Send(void)
 
    SendMessageCC sm
       (
-         mApplication.GetProfile(),
+         mApplication->GetProfile(),
          (const char *)m_txtFields[Field_Subject]->GetValue(),
          (const char *)m_txtFields[Field_To]->GetValue(),
          READ_CONFIG(m_Profile, MP_SHOWCC) ? m_txtFields[Field_Cc]->GetValue().c_str()
