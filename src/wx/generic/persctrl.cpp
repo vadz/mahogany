@@ -929,10 +929,10 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
 
     long heightTextLine = 0;
     wxString textCheckbox = _("Don't show this message again ");
+    dc.GetTextExtent(textCheckbox, &width, &heightTextLine);
+
     if(persistent)
     {
-       dc.GetTextExtent(textCheckbox, &width, &heightTextLine);
-
        // extra space for the check box
        width += 15;
 
