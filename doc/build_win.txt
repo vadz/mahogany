@@ -31,7 +31,7 @@ build the wxMSW library. However, do *not* follow the standard build
 instructions included into wxWindows distribution. For historical reasons I am
 using my own project file to build wxWindows version used by Mahogany: it is
 included in Mahogany cvs and is called wxWindows.dsp. You will also need to
-copy extra\scripts\setup.h to include\wx subdirectory of your wxWindows
+copy extra\scripts\wxmsw_setup.h to include\wx subdirectory of your wxWindows
 installation. Notice that this is mandatory, do *not* try to build wxWindows
 using other settings unless you know what you are doing or you are sure to run
 into trouble.
