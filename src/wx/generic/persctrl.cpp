@@ -509,7 +509,7 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
         buttons[Btn_Ok] = new wxButton(this, wxID_OK, _("OK"));
 
         if ( nDefaultBtn == -1 )
-            nDefaultBtn = Btn_Yes;
+            nDefaultBtn = Btn_Ok;
     }
 
     if (style & wxCANCEL) {
@@ -529,13 +529,23 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     }
 
     // now we can place the buttons
-    widthBtnMax += 6;
-    long widthButtonsTotal = nButtons * (widthBtnMax + LAYOUT_X_MARGIN) +
+    if ( widthBtnMax < 75 )
+        widthBtnMax = 75;
+    else
+        widthBtnMax += 10;
+    long heightButton = widthBtnMax*23/75;
+
+    long heightTextLine;
+    wxString textCheckbox = _("Don't show this message again ");
+    dc.GetTextExtent(textCheckbox, &width, &heightTextLine);
+    width += 15;    // for the [x]
+
+    long widthButtonsTotal = nButtons * (widthBtnMax + LAYOUT_X_MARGIN) -
                              LAYOUT_X_MARGIN;
-    if ( widthTextMax < widthButtonsTotal ) {
-        // make the text as least as wide as the buttons
-        widthTextMax = widthButtonsTotal;
-    }
+    long widthDlg = max(widthTextMax, max(widthButtonsTotal, width)) +
+                    4*LAYOUT_X_MARGIN,
+         heightDlg = 10*LAYOUT_Y_MARGIN + heightButton +
+                     heightTextLine*(lines.Count() + 1);
 
     // set default button
     if ( nDefaultBtn != -1 ) {
@@ -548,15 +558,25 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
 
     // create the controls
     // -------------------
+
+    // a box around text and buttons
+    wxStaticBox *box = new wxStaticBox(this, -1, "");
+    c = new wxLayoutConstraints;
+    c->top.SameAs(this, wxTop/*, LAYOUT_Y_MARGIN*/);
+    c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+    c->bottom.SameAs(this, wxBottom, heightTextLine + 3*LAYOUT_Y_MARGIN);
+    c->right.SameAs(this, wxRight, LAYOUT_X_MARGIN);
+    box->SetConstraints(c);
+
     wxStaticText *text = NULL;
     size_t nCount = lines.Count();
     for ( size_t nLine = 0; nLine < nCount; nLine++ ) {
         c = new wxLayoutConstraints;
         if ( text == NULL )
-            c->top.SameAs(this, wxTop, 3*LAYOUT_Y_MARGIN);
+            c->top.SameAs(box, wxTop, 2*LAYOUT_Y_MARGIN);
         else
-            c->top.Below(text, LAYOUT_Y_MARGIN);
-        c->right.SameAs(this, wxRight, 2*LAYOUT_X_MARGIN);
+            c->top.Below(text);
+        c->centreX.SameAs(this, wxCentreX);
         c->width.Absolute(widthTextMax);
         c->height.AsIs();
         text = new wxStaticText(this, -1, lines[nLine]);
@@ -571,22 +591,15 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
             if ( btnPrevious )
                 c->left.RightOf(btnPrevious, LAYOUT_X_MARGIN);
             else
-                c->left.SameAs(this, wxLeft, 3*LAYOUT_X_MARGIN);
+                c->left.SameAs(this, wxLeft, 
+                               (widthDlg - widthButtonsTotal) / 2);
             c->width.Absolute(widthBtnMax);
-            c->top.Below(text, 2*LAYOUT_Y_MARGIN);
-            c->height.AsIs();
+            c->top.Below(text, 3*LAYOUT_Y_MARGIN);
+            c->height.Absolute(heightButton);
             buttons[nBtn]->SetConstraints(c);
             btnPrevious = buttons[nBtn];
         }
     }
-
-    // a line (a small box, in fact) separating the controls
-    wxStaticBox *box = new wxStaticBox(this, -1, "");
-    c = new wxLayoutConstraints;
-    c->width.SameAs(this, wxWidth);
-    c->height.Absolute(2);
-    c->top.Below(btnPrevious, LAYOUT_Y_MARGIN);
-    c->centreX.SameAs(this, wxCentreX);
 
     // and finally create the check box
     c = new wxLayoutConstraints;
@@ -594,14 +607,13 @@ wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
     c->height.AsIs();
     c->top.Below(box, LAYOUT_Y_MARGIN);
     c->centreX.SameAs(this, wxCentreX);
-    m_checkBox = new wxCheckBox(this, -1, _("Don't show this message again"));
+    m_checkBox = new wxCheckBox(this, -1, textCheckbox);
     m_checkBox->SetConstraints(c);
 
     // position the controls and the dialog itself
     // -------------------------------------------
 
-    SetSize(widthTextMax + 2*LAYOUT_X_MARGIN,
-            20*LAYOUT_Y_MARGIN);  // FIXME
+    SetClientSize(widthDlg, heightDlg);
     Layout();
     Centre(wxCENTER_FRAME | wxBOTH);
 }
