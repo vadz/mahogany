@@ -25,6 +25,7 @@ $Id$
 
 - parent frames should not be NULL
 
+- configure: automatically set c-client system type to lnx or gso
 
 - WINDOWS: how to do MIME handling?
 
