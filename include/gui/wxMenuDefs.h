@@ -307,6 +307,12 @@ enum
    WXMENU_MIME_DISMISS,
    WXMENU_MIME_END,
 
+   WXMENU_URL_BEGIN = WXMENU_MIME_END,
+   WXMENU_URL_OPEN,
+   WXMENU_URL_OPEN_NEW,
+   WXMENU_URL_COPY,
+   WXMENU_URL_END,
+
    WXMENU_MODULES,
 
    // mouse events on embedded objects in wxLayoutWindow

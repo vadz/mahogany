@@ -65,6 +65,7 @@
 #include <wx/file.h>
 #include <wx/mimetype.h>
 #include <wx/fontmap.h>
+#include <wx/clipbrd.h>
 
 #include <ctype.h>  // for isspace
 #include <time.h>   // for time stamping autocollected addresses
@@ -97,6 +98,23 @@ static int wxFonts[NUM_FONTS] =
   wxMODERN,
   wxTELETYPE
 };
+
+// ----------------------------------------------------------------------------
+// helper functions
+// ----------------------------------------------------------------------------
+
+// make the first letter of the string capitalized and all the others of lower
+// case, it looks nicer like this when presented to the user
+static String NormalizeString(const String& s)
+{
+   String norm;
+   if ( !s.empty() )
+   {
+      norm << String(s[0]).Upper() << String(s.c_str() + 1).Lower();
+   }
+
+   return norm;
+}
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -220,6 +238,31 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
+// the popup menu used with URLs
+class UrlPopup : public wxMenu
+{
+public:
+   UrlPopup(wxMessageView *parent, const String& url)
+      : m_url(url)
+   {
+      m_MessageView = parent;
+
+      SetTitle(NormalizeString(url.BeforeFirst(':')) + _(" url"));
+      Append(WXMENU_URL_OPEN, _("&Open"));
+      Append(WXMENU_URL_OPEN_NEW, _("Open in &new window"));
+      Append(WXMENU_URL_COPY, _("&Copy to clipboard"));
+   }
+
+   // callbacks
+   void OnCommandEvent(wxCommandEvent &event);
+
+private:
+   wxMessageView *m_MessageView;
+   String m_url;
+
+   DECLARE_EVENT_TABLE()
+};
+
 // the message parameters for the MIME type manager
 class MailMessageParameters : public wxFileType::MessageParameters
 {
@@ -285,6 +328,10 @@ private:
 
 BEGIN_EVENT_TABLE(MimePopup, wxMenu)
    EVT_MENU(-1, MimePopup::OnCommandEvent)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(UrlPopup, wxMenu)
+   EVT_MENU(-1, UrlPopup::OnCommandEvent)
 END_EVENT_TABLE()
 
 // ============================================================================
@@ -368,6 +415,42 @@ MailMessageParameters::GetParamValue(const wxString& name) const
    return BaseMessageParameters::GetParamValue(name);
 }
 
+// ----------------------------------------------------------------------------
+// UrlPopup
+// ----------------------------------------------------------------------------
+
+void
+UrlPopup::OnCommandEvent(wxCommandEvent &event)
+{
+   switch ( event.GetId() )
+   {
+      case WXMENU_URL_OPEN:
+         m_MessageView->OpenURL(m_url, FALSE);
+         break;
+
+      case WXMENU_URL_OPEN_NEW:
+         m_MessageView->OpenURL(m_url, TRUE);
+         break;
+
+      case WXMENU_URL_COPY:
+         {
+            wxClipboardLocker lockClip;
+            if ( !lockClip )
+            {
+               wxLogError(_("Failed to lock clipboard, URL not copied."));
+            }
+            else
+            {
+               wxTheClipboard->SetData(new wxTextDataObject(m_url));
+            }
+         }
+         break;
+
+      default:
+         FAIL_MSG( "unexpected URL popup menu command" );
+         break;
+   }
+}
 // ----------------------------------------------------------------------------
 // wxMessageView::AllProfileValues
 // ----------------------------------------------------------------------------
@@ -1092,7 +1175,7 @@ wxMessageView::Update(void)
                              "you want to always show the images inline."),
                            (unsigned long)m_ProfileValues.inlineGFX
                          );
-                           
+
                      if ( MDialog_YesNoDialog
                           (
                            msg,
@@ -1241,19 +1324,6 @@ wxMessageView::HighLightURLs(const char *input)
 // ----------------------------------------------------------------------------
 // MIME attachments menu commands
 // ----------------------------------------------------------------------------
-
-// make the first letter of the string capitalized and all the others of lower
-// case, it looks nicer like this when presented to the user
-static String NormalizeString(const String& s)
-{
-   String norm;
-   if ( !s.empty() )
-   {
-      norm << String(s[0]).Upper() << String(s.c_str() + 1).Lower();
-   }
-
-   return norm;
-}
 
 // show information about an attachment
 void
@@ -1820,6 +1890,162 @@ wxMessageView::MimeViewText(int mimeDisplayPart)
 }
 
 // ----------------------------------------------------------------------------
+// URL handling
+// ----------------------------------------------------------------------------
+
+void wxMessageView::PopupURLMenu(const String& url, const wxPoint& pt)
+{
+   UrlPopup menu(this, url);
+   PopupMenu(&menu, pt);
+}
+
+void wxMessageView::OpenURL(const String& url, bool inNewWindow)
+{
+   wxFrame *frame = GetFrame(this);
+   wxLogStatus(frame, _("Opening URL '%s'..."), url.c_str());
+
+   wxBusyCursor bc;
+
+   // the command to execute
+   wxString command;
+
+   bool bOk;
+   if ( m_ProfileValues.browser.IsEmpty() )
+   {
+#ifdef OS_WIN
+      // using ShellExecute() doesn't allow us to open in the same
+      // window, so do it manually
+      if ( inNewWindow )
+      {
+         wxRegKey key(wxRegKey::HKCR, url.BeforeFirst(':') + "\\shell\\open");
+         if ( key.Exists() )
+         {
+            wxRegKey keyDDE(key, "DDEExec");
+            if ( keyDDE.Exists() )
+            {
+               wxString ddeTopic = wxRegKey(keyDDE, "topic");
+
+               // we only know the syntax of WWW_OpenURL DDE request
+               if ( ddeTopic == "WWW_OpenURL" )
+               {
+                  wxString ddeCmd = keyDDE;
+
+                  // this is a bit naive but should work as -1 can't appear
+                  // elsewhere in the DDE topic, normally
+                  if ( ddeCmd.Replace("-1", "0",
+                                      FALSE /* only first occurence */) == 1 )
+                  {
+                     // and also replace the parameters
+                     if ( ddeCmd.Replace("%1", url, FALSE) == 1 )
+                     {
+                        // magic incantation understood by wxMSW
+                        command << "WX_DDE#"
+                                << wxRegKey(key, "command") << '#'
+                                << wxRegKey(keyDDE, "application") << '#'
+                                << ddeTopic << '#'
+                                << ddeCmd;
+                     }
+                  }
+               }
+            }
+         }
+      }
+
+      if ( !command.empty() )
+      {
+         wxString errmsg;
+         errmsg.Printf(_("Could not launch browser: '%s' failed."),
+                       command.c_str());
+         bOk = LaunchProcess(command, errmsg);
+      }
+      else // easy case: open in new window
+      {
+         bOk = (int)ShellExecute(NULL, "open", url,
+                                 NULL, NULL, SW_SHOWNORMAL ) > 32;
+      }
+
+      if ( !bOk )
+      {
+         wxLogSysError(_("Cannot open URL '%s'"), url.c_str());
+      }
+# else  // Unix
+      // propose to choose program for opening URLs
+      if (
+         MDialog_YesNoDialog
+         (
+            _("No command configured to view URLs.\n"
+              "Would you like to choose one now?"),
+            frame,
+            MDIALOG_YESNOTITLE,
+            true,
+            GetPersMsgBoxName(M_MSGBOX_ASK_URL_BROWSER)
+            )
+         )
+         ShowOptionsDialog();
+
+      if ( m_ProfileValues.browser.IsEmpty() )
+      {
+         wxLogError(_("No command configured to view URLs."));
+         bOk = false;
+      }
+#endif // Win/Unix
+   }
+   else
+   {
+      // not empty, user provided his script - use it
+      bOk = false;
+#ifdef OS_UNIX
+      if ( m_ProfileValues.browserIsNS ) // try re-loading first
+      {
+         wxString lockfile;
+         wxGetHomeDir(&lockfile);
+         lockfile << WXEXTHELP_SEPARATOR << ".netscape/lock";
+         struct stat statbuf;
+
+         if(lstat(lockfile.c_str(), &statbuf) == 0)
+         // cannot use wxFileExists, because it's a link pointing to a
+         // non-existing location      if(wxFileExists(lockfile))
+         {
+            command << m_ProfileValues.browser
+                    << " -remote openURL(" << url;
+            if ( inNewWindow )
+            {
+               command << ",new-window)";
+            }
+            else
+            {
+               command << ")";
+            }
+            wxString errmsg;
+            errmsg.Printf(_("Could not launch browser: '%s' failed."),
+                          command.c_str());
+            bOk = LaunchProcess(command, errmsg);
+         }
+      }
+#endif // Unix
+      // either not netscape or ns isn't running or we have non-UNIX
+      if(! bOk)
+      {
+         command = m_ProfileValues.browser;
+         command << ' ' << url;
+
+         wxString errmsg;
+         errmsg.Printf(_("Couldn't launch browser: '%s' failed"),
+                       command.c_str());
+
+         bOk = LaunchProcess(command, errmsg);
+      }
+
+      if ( bOk )
+         wxLogStatus(frame, _("Opening URL '%s'... done."),
+                     url.c_str());
+      else
+         wxLogStatus(frame, _("Opening URL '%s' failed."),
+                     url.c_str());
+   }
+}
+
+// ----------------------------------------------------------------------------
 // event handling
 // ----------------------------------------------------------------------------
 
@@ -1889,9 +2115,10 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                   // show the menu
                   if ( m_MimePopup != NULL )
                      delete m_MimePopup; // recreate with new part number
+
                   // create the pop up menu now if not done yet
                   m_MimePopup = new MimePopup(this, ci->GetPart());
-                  PopupMenu(m_MimePopup, m_ClickPosition.x, m_ClickPosition.y);
+                  PopupMenu(m_MimePopup, m_ClickPosition);
                   break;
 
                case WXLOWIN_MENU_LCLICK:
@@ -1911,14 +2138,11 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
 
          case ClickableInfo::CI_URL:
          {
-            wxFrame *frame = GetFrame(this);
-
-            wxLogStatus(frame, _("Opening URL '%s'..."), ci->GetUrl().c_str());
-
-            wxBusyCursor bc;
+            wxString url = ci->GetUrl();
 
             // treat mail urls separately:
-            if(ci->GetUrl().Left(7) == "mailto:")
+            wxString protocol = url.BeforeFirst(':');
+            if ( protocol == "mailto" )
             {
                wxComposeView *cv = wxComposeView::CreateNewMessage(m_Profile);
                cv->SetAddresses(ci->GetUrl().Right(ci->GetUrl().Length()-7));
@@ -1927,98 +2151,22 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                break;
             }
 
-            bool bOk;
-            if ( m_ProfileValues.browser.IsEmpty() )
+            if ( event.GetId() == WXLOWIN_MENU_RCLICK )
             {
-#ifdef OS_WIN
-               bOk = (int)ShellExecute(NULL, "open", ci->GetUrl(),
-                                       NULL, NULL, SW_SHOWNORMAL ) > 32;
-               if ( !bOk )
-               {
-                  wxLogSysError(_("Cannot open URL '%s'"),
-                                ci->GetUrl().c_str());
-               }
-# else  // Unix
-               // propose to choose program for opening URLs
-               if (
-                  MDialog_YesNoDialog
-                  (
-                     _("No command configured to view URLs.\n"
-                       "Would you like to choose one now?"),
-                     frame,
-                     MDIALOG_YESNOTITLE,
-                     true,
-                     GetPersMsgBoxName(M_MSGBOX_ASK_URL_BROWSER)
-                     )
-                  )
-                  ShowOptionsDialog();
-
-               if ( m_ProfileValues.browser.IsEmpty() )
-               {
-                  wxLogError(_("No command configured to view URLs."));
-                  bOk = FALSE;
-               }
-#                 endif
+               PopupURLMenu(url, m_ClickPosition);
             }
-            else
+            else // left or double click
             {
-               // not empty, user provided his script - use it
-               wxString command;
-               bOk = false;
-#ifdef OS_UNIX
-               if ( m_ProfileValues.browserIsNS ) // try re-loading first
-               {
-                  wxString lockfile;
-                  wxGetHomeDir(&lockfile);
-                  lockfile << WXEXTHELP_SEPARATOR << ".netscape/lock";
-                  struct stat statbuf;
-                  if(lstat(lockfile.c_str(), &statbuf) == 0)
-                     // cannot use wxFileExists, because it's a link pointing to a
-                     // non-existing location      if(wxFileExists(lockfile))
-                  {
-                     command = "";
-                     command << m_ProfileValues.browser << " -remote openURL(" << ci->GetUrl();
-                     if ( m_ProfileValues.browserInNewWindow )
-                     {
-                        command << ",new-window)";
-                     }
-                     else
-                     {
-                        command << ")";
-                     }
-                     wxString errmsg;
-                     errmsg.Printf(_("Could not launch browser: '%s' failed."),
-                                   command.c_str());
-                     bOk = LaunchProcess(command, errmsg);
-                  }
-               }
-#endif // Unix
-               // either not netscape or ns isn't running or we have non-UNIX
-               if(! bOk)
-               {
-                  command = m_ProfileValues.browser;
-                  command << ' ' << ci->GetUrl();
-
-                  wxString errmsg;
-                  errmsg.Printf(_("Couldn't launch browser: '%s' failed"),
-                                command.c_str());
-
-                  bOk = LaunchProcess(command, errmsg);
-               }
-
-               if ( bOk )
-                  wxLogStatus(frame, _("Opening URL '%s'... done."),
-                              ci->GetUrl().c_str());
-               else
-                  wxLogStatus(frame, _("Opening URL '%s' failed."),
-                              ci->GetUrl().c_str());
+               OpenURL(url, m_ProfileValues.browserInNewWindow);
             }
-            break;
          }
+         break;
+
          default:
             FAIL_MSG("unknown embedded object type");
       }
-   ci->DecRef();
+
+      ci->DecRef();
    }
 }
 

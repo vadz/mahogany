@@ -195,6 +195,7 @@ private:
 
 protected:
    friend class MimePopup;
+   friend class UrlPopup;
 
    /// update the "show headers" menu item from m_ProfileValues.showHeaders
    void UpdateShowHeadersInMenu();
@@ -219,9 +220,15 @@ protected:
                       const String& errormsg,   // err msg to give on failure
                       const String& tempfile = ""); // temp file nameif any
 
-   /// launch a process and wait for its termination, returns FALSE it
-   /// exitcode != 0
+   /** launch a process and wait for its termination, returns FALSE it
+       exitcode != 0 */
    bool RunProcess(const String& command);
+
+   /// show the URL popup menu
+   void PopupURLMenu(const String& url, const wxPoint& pt);
+
+   /// open the URL
+   void OpenURL(const String& url, bool inNewWindow);
 
    /// All values read from the profile
    struct AllProfileValues
@@ -301,7 +308,7 @@ public:
    /// don't even think of using this!
    wxMessageViewFrame(void) {ASSERT(0);}
    wxMessageView *GetMessageView() { return m_MessageView; }
-   
+
    DECLARE_DYNAMIC_CLASS(wxMessageViewFrame)
 private:
    wxMessageView *m_MessageView;
@@ -309,6 +316,7 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
-#endif
+#endif // WXMESSAGEVIEW_H
 
-#endif
+#endif // EXPERIMENTAL_karsten
+
