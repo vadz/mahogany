@@ -161,7 +161,7 @@ wxLayoutObjectIcon::wxLayoutObjectIcon(wxIcon *icon)
 void
 wxLayoutObjectIcon::Draw(wxDC &dc, wxPoint const &translate)
 {
-   dc.DrawIcon(m_Icon,m_Position.x+translate.x, m_Position.y+translate.y);
+   dc.DrawIcon(*m_Icon,m_Position.x+translate.x, m_Position.y+translate.y);
 }
 
 void
@@ -223,7 +223,8 @@ void
 wxLayoutObjectCmd::Draw(wxDC &dc, wxPoint const &translate)
 {
    wxASSERT(m_font);
-   dc.SetFont(m_font);
+
+   dc.SetFont(*m_font);
    if(m_ColourFG)
       dc.SetTextForeground(*m_ColourFG);
    if(m_ColourBG)
@@ -1322,10 +1323,9 @@ wxLayoutPrintout::DrawHeader(wxDC &dc,
                              int pageno)
 {
    // make backups of all essential parameters
-   wxBrush *brush = dc.GetBrush();
-   wxPen   *pen = dc.GetPen();
-   wxFont  *font = dc.GetFont(),
-           *myfont;;
+   const wxBrush& brush = dc.GetBrush();
+   const wxPen&   pen = dc.GetPen();
+   const wxFont&  font = dc.GetFont();
    
    dc.SetBrush(*wxWHITE_BRUSH);
    dc.SetPen(wxPen(*wxBLACK,0,wxSOLID));
@@ -1333,8 +1333,9 @@ wxLayoutPrintout::DrawHeader(wxDC &dc,
                            topleft.y,bottomright.x-topleft.x,
                            bottomright.y-topleft.y);  
    dc.SetBrush(*wxBLACK_BRUSH);
-   myfont = new wxFont((WXLO_DEFAULTFONTSIZE*12)/10,wxSWISS,wxNORMAL,wxBOLD,false,"Helvetica");
-   dc.SetFont(*myfont);
+   wxFont myfont = wxFont((WXLO_DEFAULTFONTSIZE*12)/10,
+                          wxSWISS,wxNORMAL,wxBOLD,false,"Helvetica");
+   dc.SetFont(myfont);
 
    wxString page;
    page = "9999/9999  ";  // many pages...
@@ -1346,11 +1347,9 @@ wxLayoutPrintout::DrawHeader(wxDC &dc,
    dc.DrawText(m_title, topleft.x+w,topleft.y+h/2);
 
    // restore settings
-   dc.SetPen(*pen);
-   dc.SetBrush(*brush);
-   dc.SetFont(*font);
-
-   delete myfont;
+   dc.SetPen(pen);
+   dc.SetBrush(brush);
+   dc.SetFont(font);
 }
 
 
