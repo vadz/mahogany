@@ -1464,7 +1464,7 @@ bool DetectSignature::Initialize(Profile *profile)
    if ( sig != GetStringDefault(MP_REPLY_SIG_SEPARATOR) )
    {
       // we have no choice but to use the user-supplied RE
-      m_reSig.set(new wxRegEx);
+      m_reSig.reset(new wxRegEx);
 
       // we implicitly anchor the RE at start/end of line
       //

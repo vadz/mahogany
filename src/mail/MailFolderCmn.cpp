@@ -731,7 +731,7 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
    // save the messages
    int n = selections->Count();
 
-   MProgressDialog *pd = NULL;
+   scoped_ptr<MProgressDialog> pd;
    long threshold = GetProgressThreshold(GetProfile());
 
    if ( threshold > 0 && n > threshold )
@@ -740,7 +740,7 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
       msg.Printf(_("Saving %d messages to the file '%s'..."),
                  n, fileName0.empty() ? fileName.c_str() : fileName0.c_str());
 
-      pd = new MProgressDialog(GetName(), msg, 2*n, NULL);
+      pd.reset(new MProgressDialog(GetName(), msg, 2*n, NULL));
    }
 
    bool rc = true;
@@ -768,8 +768,6 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
             pd->Update( 2*i + 2);
       }
    }
-
-   delete pd;
 
    return rc;
 }
@@ -819,14 +817,15 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
       msg.Printf(_("Saving %d messages to the folder '%s'..."),
                  n, folder->GetName().c_str());
 
-      pd.set(new MProgressDialog(
-                               mf->GetName(),   // title
-                               msg,             // label message
-                               2*n,             // range
-                               NULL,            // parent
-                               false,           // disable parent only
-                               true             // allow aborting
-                              ));
+      pd.reset(new MProgressDialog
+                   (
+                     mf->GetName(),   // title
+                     msg,             // label message
+                     2*n,             // range
+                     NULL,            // parent
+                     false,           // disable parent only
+                     true             // allow aborting
+                   ));
    }
 
    // minimize the number of updates by only doing it once

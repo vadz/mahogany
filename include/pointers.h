@@ -24,15 +24,15 @@
 
 
    Rules:
-   
+
    All newly allocated objects are passed to RefCounter constructor,
    for example:
-   
+
       RefCounter<MyClass> ref(new MyClass(x,y));
-   
+
    Pointer to "this" or any other raw pointer can be converted to
    RefCounter using Convert member, for example:
-   
+
       RefCounter<MyClass> ref(RefCounter<MyClass>::convert(this));
 
    RefCounter members must not form cycles. It should be possible to create
@@ -43,22 +43,22 @@
 
 
    Compatibility with legacy raw pointer interfaces:
-   
+
    Raw pointers are converted in one of two ways depending on
    whether they are already IncRef-ed or not:
-   
+
       // IncRef in GetProfile
       ref.attach(x->GetProfile());
-   
+
       // IncRef in Convert
       ref.attach(RefCounter<MyClass>::convert(x->GetProfile()));
-   
+
    Local RefCounter can be returned IncRef-ed using Release:
-   
+
       return x.release();
 
    Raw pointer parameters are not IncRef-ed. They are passed using Get:
-   
+
       SomeFunc(x.get());
  */
 template <class T>
@@ -146,7 +146,7 @@ public:
 
    /**
       Reset to @c NULL.
-      
+
       It looks better than @c NULL assignment and it saves some cycles.
     */
    void reset()
@@ -154,10 +154,10 @@ public:
       RefCounterDecrement(m_pointer);
       m_pointer = NULL;
    }
-   
+
    /**
       Takes ownership of pointer.
-      
+
       The caller has already called IncRef() on the pointer if it is not
       @c NULL.
     */
@@ -166,7 +166,7 @@ public:
       RefCounterDecrement(m_pointer);
       m_pointer = pointer;
    }
-   
+
    /**
       Releases ownership of the held pointer and returns it.
 
@@ -183,7 +183,7 @@ public:
 
    /**
       Converts raw pointer to smart pointer.
-      
+
       The pointer is not manipulated in any way. Returned RefCounter
       calls IncRef() for its own copy of the pointer.
     */
@@ -200,13 +200,13 @@ private:
 
 /**
    Weak pointer complementary to RefCounter.
-   
+
    WeakRef (seems that it) contains NULL if all RefCounter instances
    are gone. WeakRef cannot be used directly. It must be converted to
    RefCounter first.
-   
+
    WeakRef is used to resolve cyclic references. See RefCounter for details.
-   
+
    WeakRef is intrusively counted weak pointer. This means that MObjectRC
    holds not only count of RefCounter instances, but also count of WeakRef
    instances. When all RefCounter instances are destroyed, MObjectRC
@@ -226,14 +226,14 @@ public:
 
    /// Default constructor creates NULL pointer.
    WeakRef() : m_pointer(NULL) {}
-   
+
    /// Copy constructor.
    WeakRef(const WeakRef<T> &copy)
       : m_pointer(copy.m_pointer)
    {
       WeakRefIncrement(m_pointer);
    }
-   
+
    /// Destructor
    ~WeakRef() { WeakRefDecrement(m_pointer); }
 
@@ -259,16 +259,16 @@ public:
       WeakRefIncrement(m_pointer);
       return *this;
    }
-   
+
    /// Conversion from WeakRef to RefCounter.
    RefCounter<T> lock() const
    {
       return RefCounter<T>(WeakRefConvert(m_pointer));
    }
-   
+
    /// Implicit conversion from WeakRef to RefCounter.
    operator RefCounter<T>() const { return lock(); }
-   
+
 private:
    T *m_pointer;
 };
@@ -292,13 +292,12 @@ public:
    scoped_ptr(T *copy) : m_pointer(copy) {}
 
    /// Destructor deletes held pointer if it is not @c NULL.
-   ~scoped_ptr() { if( m_pointer ) delete m_pointer; }
+   ~scoped_ptr() { delete m_pointer; }
 
    /// Late construction. Delete previously help pointer.
-   void set(T *copy)
+   void reset(T *copy = NULL)
    {
-      if( m_pointer )
-         delete m_pointer;
+      delete m_pointer;
       m_pointer = copy;
    }
 
@@ -321,9 +320,62 @@ public:
 private:
    /// Copy constructor is private.
    scoped_ptr(const scoped_ptr<T>& copy) {}
-   
+
    /// Assignment operator is private.
    void operator=(const scoped_ptr<T>& copy) {}
+
+   T *m_pointer;
+};
+
+/// Mostly boost::scoped_array clone.
+template <class T>
+class scoped_array
+{
+public:
+   /// same as auto_ptr<>::element_type
+   typedef T element_type;
+
+   /// a scalar type which doesn't risk to be converted to anything
+   typedef T *(scoped_array<T>::*unspecified_bool_type)() const;
+
+   /// Default constructor initializes to @c NULL.
+   scoped_array() : m_pointer(NULL) {}
+
+   /// Takes ownership of raw pointer
+   scoped_array(T *copy) : m_pointer(copy) {}
+
+   /// Destructor deletes held pointer if it is not @c NULL.
+   ~scoped_array() { delete [] m_pointer; }
+
+   /// Late construction. Delete previously help pointer.
+   void reset(T *copy = NULL)
+   {
+      delete[] m_pointer;
+      m_pointer = copy;
+   }
+
+   /// Return stored pointer.
+   T *get() const { return m_pointer; }
+
+   /// Allow use of this class as pointer.
+   T *operator->() const { return get(); }
+
+   /**
+      Implicit, but safe, conversion to bool.
+
+      It's copy of similar method in RefCounter.
+    */
+   operator unspecified_bool_type() const // never throws
+   {
+      return m_pointer ? &scoped_array<T>::get : NULL;
+   }
+
+private:
+   /// Copy constructor is private.
+   scoped_array(const scoped_array<T>& copy) {}
+
+   /// Assignment operator is private.
+   void operator=(const scoped_array<T>& copy) {}
 
    T *m_pointer;
 };
