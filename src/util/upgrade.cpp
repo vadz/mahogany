@@ -2605,20 +2605,21 @@ SetupServers(void)
                                       FALSE);
       mfolder->SetTreeIndex(MFolderIndex_IMAP);
 
+      // don't create the INBOX automatically, let the user do it if he wants
+      // later - like this he can use IMAP server entry created above directly
+      // which would be impossible if we created INBOX automatically because
+      // doing this disables the parent folder
+#if 0
       MFolder *imapInbox = CreateFolderTreeEntry(mfolder,
                                       _("IMAP INBOX"),
                                       MF_IMAP,
                                       MF_FLAGS_DEFAULT,
                                       "INBOX",
                                       FALSE);
+      
       SafeDecRef(imapInbox);
+#endif // 0
 
-      p = Profile::CreateProfile(mfolder->GetName());
-
-      // inherit default instead
-      //p->writeEntry(MP_IMAPHOST, serverName);
-
-      p->DecRef();
       SafeDecRef(mfolder);
    }
 

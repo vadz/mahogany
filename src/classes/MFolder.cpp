@@ -1079,6 +1079,37 @@ extern MFolder *CreateFolderTreeEntry(MFolder *parent,
    // copy folder flags from its parent
    folder->SetFlags(folderFlags);
 
+   // special IMAP hack: in IMAP, the entry with empty folder name and the
+   // special folder INBOX are equivalent (i.e. if you don't specify any
+   // folder name you get INBOX) so it doesn't make sense to have both an
+   // entry for IMAP server (path == "") and INBOX on it
+   //
+   // the solution we adopt is to disable the IMAP server folder when IMAP
+   // Inbox is created to clear the confusion between the two
+   //
+   // of course, if the user really wants to open it he can always clear the
+   // "can't be opened" flag in the folder properties dialog...
+   if ( folderType == MF_IMAP )
+   {
+      MFolder_obj folderParent = folder->GetParent();
+
+      // are we're the child of the IMAP server entry?
+      if ( folderParent &&
+           folderParent->GetType() == MF_IMAP &&
+           folderParent->GetPath().empty() )
+      {
+         // yes, now check if we're INBOX
+         if ( path.empty() || !wxStricmp(path, "INBOX") )
+         {
+            // INBOX created, so disable the parent
+            folderParent->AddFlags(MF_FLAGS_NOSELECT);
+
+            // should we do MailFolder::CloseFolder(folderParent)?
+         }
+      }
+   }
+
+   // notify the others about new folder creation unless expliticly disabled
    if ( notify )
    {
       MEventManager::Send(

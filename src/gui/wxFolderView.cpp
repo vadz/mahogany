@@ -2523,7 +2523,11 @@ wxFolderView::OpenFolder(MFolder *folder)
             wxLogWarning(_("The folder '%s' cannot be opened, it only contains "
                            "the other folders and not the messages.\n"
                            "Please select \"Browse\" from the menu instead "
-                           "to add its subfolders to the folder tree."),
+                           "to add its subfolders to the folder tree.\n"
+                           "\n"
+                           "If you believe this message to be incorrect, "
+                           "you may reset \"Can be opened\" flag in the\n"
+                           "folder properties dialog and try again."),
                          m_fullname.c_str());
             break;
 
