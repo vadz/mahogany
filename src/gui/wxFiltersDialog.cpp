@@ -700,19 +700,68 @@ static const wxOptionsPageDesc gs_SpamPageDesc =
 void
 OneCritControl::InitSpamOptions(const String& rule)
 {
-   // use the default values to initialize the dialog
-   m_checkSpamAssassin = MP_SPAM_SPAM_ASSASSIN_D;
-   m_check8bit = MP_SPAM_8BIT_SUBJECT_D;
-   m_checkCaps = MP_SPAM_CAPS_SUBJECT_D;
-   m_checkKorean = MP_SPAM_KOREAN_CSET_D;
+   CHECK_RET( m_Argument, "no argument control in the spam test?" );
 
-   m_checkXAuthWarn = MP_SPAM_X_AUTH_WARN_D;
-   m_checkReceived = MP_SPAM_RECEIVED_D;
-   m_checkHtml = MP_SPAM_HTML_D;
+   const String testString = m_Argument->GetValue();
+
+   // use the default values to initialize the dialog
+   if ( testString.empty() )
+   {
+      m_checkSpamAssassin = MP_SPAM_SPAM_ASSASSIN_D;
+      m_check8bit = MP_SPAM_8BIT_SUBJECT_D;
+      m_checkCaps = MP_SPAM_CAPS_SUBJECT_D;
+      m_checkKorean = MP_SPAM_KOREAN_CSET_D;
+
+      m_checkXAuthWarn = MP_SPAM_X_AUTH_WARN_D;
+      m_checkReceived = MP_SPAM_RECEIVED_D;
+      m_checkHtml = MP_SPAM_HTML_D;
 
 #ifdef USE_RBL
-   m_checkRBL = MP_SPAM_RBL_D;
+      m_checkRBL = MP_SPAM_RBL_D;
 #endif // USE_RBL
+   }
+   else // extract the tests we do from the actual value
+   {
+#ifdef USE_RBL
+      m_checkRBL =
+#endif // USE_RBL
+
+      m_checkSpamAssassin =
+      m_check8bit =
+      m_checkCaps =
+      m_checkKorean =
+
+      m_checkXAuthWarn =
+      m_checkReceived =
+      m_checkHtml = false;
+
+      const wxArrayString tests = strutil_restore_array(testString);
+      const size_t count = tests.GetCount();
+      for ( size_t n = 0; n < count; n++ )
+      {
+         const wxString& t = tests[n];
+         if ( t == SPAM_TEST_SPAMASSASSIN )
+            m_checkSpamAssassin = true;
+         else if ( t == SPAM_TEST_SUBJ8BIT )
+            m_check8bit = true;
+         else if ( t == SPAM_TEST_SUBJCAPS )
+            m_checkCaps = true;
+         else if ( t == SPAM_TEST_KOREAN )
+            m_checkKorean = true;
+         else if ( t == SPAM_TEST_XAUTHWARN )
+            m_checkXAuthWarn = true;
+         else if ( t == SPAM_TEST_RECEIVED )
+            m_checkReceived = true;
+         else if ( t == SPAM_TEST_HTML )
+            m_checkHtml = true;
+#ifdef USE_RBL
+         else if ( t == SPAM_TEST_RBL )
+            m_checkReceived = true;
+#endif
+         else
+            wxLogDebug("Unknown spam test \"%s\"", t.c_str());
+      }
+   }
 }
 
 void
@@ -1606,7 +1655,7 @@ private:
   wxString m_name;
   wxString m_nameNew;
 public:
-   RenameAFilterTraversal(MFolder* folder, wxString name, wxString nameNew) 
+   RenameAFilterTraversal(MFolder* folder, wxString name, wxString nameNew)
       : MFolderTraversal(*folder)
       , m_name(name)
       , m_nameNew(nameNew)
