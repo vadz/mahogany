@@ -1621,7 +1621,7 @@ extern void JWZThreadMessages(const ThreadParams& thrParams,
       delete [] seen;
 
 #else
-      FlushThreadable(threadableRoot, indices, thrData->m_children, indents);
+      FlushThreadable(threadableRoot, indices, indents, thrData->m_children);
 #endif
       threadableRoot->destroy();
 
