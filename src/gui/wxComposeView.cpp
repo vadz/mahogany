@@ -2685,8 +2685,12 @@ wxComposeView::IsReadyToSend() const
    m_txtRecipient->AddNewRecipients(true /* quiet */);
 
    // did we forget the recipients?
+   //
+   // NB: it is valid to have only BCC: recipients, c-client will deal with
+   //     this case by adding a dummy to header
    if ( GetRecipients(Recipient_To).empty() &&
-         GetRecipients(Recipient_Newsgroup).empty() )
+         GetRecipients(Recipient_Newsgroup).empty() &&
+           GetRecipients(Recipient_Bcc).empty() )
    {
       wxLogError(_("Please specify at least one \"To:\" or "
                    "\"Newsgroup:\" recipient!"));
