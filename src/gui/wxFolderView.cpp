@@ -828,8 +828,9 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
    }
 
    // we only process unmodified key presses normally - except for Ctrl-Del
+   // and '*' (which may need Shift on some keyboards (including US))
    if ( event.AltDown() ||
-        event.ShiftDown() ||
+        (event.ShiftDown() && key != '*') ||
         (event.ControlDown() && key != 'D') )
    {
       event.Skip();
