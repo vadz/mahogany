@@ -62,7 +62,7 @@ public:
 
    /// create the "View" menu for our parent frame
    virtual void CreateViewMenu();
-;
+
    virtual void OnToggleViewFilter(int id);
    virtual void OnSelectViewer(int id);
 
@@ -88,7 +88,7 @@ private:
 // wxMessageViewFrame
 // ----------------------------------------------------------------------------
 
-class wxMessageViewFrame : public wxMFrame
+class wxMessageViewFrame : public wxMFrame, public MEventReceiver
 {
 public:
    wxMessageViewFrame(wxWindow *parent, ASMailFolder *asmf, UIdType uid);
@@ -98,10 +98,19 @@ public:
 
    virtual void OnMenuCommand(int id);
 
+protected:
+   /// handle M events
+   virtual bool OnMEvent(MEventData& event);
+
 private:
+   /// the message view shown inside this frame
    MessageView *m_MessageView;
 
+   /// the command processor we forward all our commands to
    MsgCmdProc *m_msgCmdProc;
+
+   /// opaque cookie for the event manager registration
+   void *m_eventAsync;
 
    DECLARE_NO_COPY_CLASS(wxMessageViewFrame)
 };

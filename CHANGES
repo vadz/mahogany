@@ -9,6 +9,7 @@
 Release 0.66 '???' ??? ??, 2004
 ------------------------------------
 
+08.04.04 VZ: close the message view window if underlying message is deleted
 14.03.04 VZ: highlight the options with non default values in the options dialog
 13.03.04 VZ: folders can now be dragged in the tree to change their order
 

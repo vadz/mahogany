@@ -427,6 +427,8 @@ wxMessageViewFrame::wxMessageViewFrame(wxWindow *parent,
                                        UIdType uid)
                   : wxMFrame(_("Mahogany: Message View"), parent)
 {
+   m_eventAsync = MEventManager::Register(*this, MEventId_ASFolderResult);
+
    Profile_obj profile(Profile::CreateTemp(asmf->GetProfile()));
    m_MessageView = MessageView::CreateStandalone(this, profile);
 
@@ -527,8 +529,59 @@ wxMessageViewFrame::OnMenuCommand(int id)
    }
 }
 
+bool wxMessageViewFrame::OnMEvent(MEventData& event)
+{
+   // we're only subscribed to ASFolder events
+   ASSERT_MSG( event.GetId() == MEventId_ASFolderResult,
+                  _T("Got unexpected event in wxMessageViewFrame") );
+
+   if ( !m_MessageView || !m_MessageView->GetMessage() )
+   {
+      // if we don't have any message, it can't be deleted
+      return true;
+   }
+
+   // check if it's a delete event for the message we show
+   ASMailFolder::Result *res = ((MEventASFolderResultData &)event).GetResult();
+   if ( res->GetOperation() == ASMailFolder::Op_DeleteMessages )
+   {
+      if ( ((ASMailFolder::ResultInt *)res)->GetValue() )
+      {
+         // is it for our folder?
+         if ( res->GetFolder() == m_MessageView->GetFolder() )
+         {
+            // check if our UID appears among the deleted ones
+            const UIdArray& uids = *(res->GetSequence());
+
+            const UIdType uid = m_MessageView->GetMessage()->GetUId();
+
+            const size_t count = uids.Count();
+            for ( size_t n = 0; n < count; n++ )
+            {
+               if ( uids[n] == uid )
+               {
+                  // it is: close this frame as we don't want to continue
+                  // showing a stale message
+                  Close();
+
+                  break;
+               }
+            }
+         }
+         //else: we're in a strange state...
+      }
+      //else: it was a delete operation but it failed -- stay opened
+   }
+
+   res->DecRef();
+
+   return true;
+}
+
 wxMessageViewFrame::~wxMessageViewFrame()
 {
+   MEventManager::Deregister(m_eventAsync);
+
    delete m_msgCmdProc;
    delete m_MessageView;
 }
