@@ -143,8 +143,6 @@ bool MfStatusCache::OnMEvent(MEventData& ev)
 bool MfStatusCache::GetStatus(const String& folderName,
                               MailFolderStatus *status)
 {
-   CHECK( status, false, "NULL pointer in MfStatusCache::GetStatus" );
-
    int n = m_folderNames.Index(folderName);
    if ( n == wxNOT_FOUND || !m_folderData[(size_t)n]->IsValid() )
    {
@@ -152,7 +150,10 @@ bool MfStatusCache::GetStatus(const String& folderName,
       return false;
    }
 
-   *status = *m_folderData[(size_t)n];
+   if ( status )
+   {
+      *status = *m_folderData[(size_t)n];
+   }
 
    return true;
 }
@@ -165,8 +166,9 @@ void MfStatusCache::UpdateStatus(const String& folderName,
    int n = m_folderNames.Index(folderName);
    if ( n == wxNOT_FOUND )
    {
-      wxLogTrace(M_TRACE_MFSTATUS, "Added status for '%s' (%lu msgs)",
-                 folderName.c_str(), status.total);
+      wxLogTrace(M_TRACE_MFSTATUS,
+                 "Added status for '%s' (%lu total, %lu unread)",
+                 folderName.c_str(), status.total, status.unread);
 
       // add it
       n = m_folderNames.Add(folderName);
@@ -181,8 +183,9 @@ void MfStatusCache::UpdateStatus(const String& folderName,
          return;
       }
 
-      wxLogTrace(M_TRACE_MFSTATUS, "Changed status for '%s' (%lu msgs)",
-                 folderName.c_str(), status.total);
+      wxLogTrace(M_TRACE_MFSTATUS,
+                 "Changed status for '%s' (%lu total, %lu unread)",
+                 folderName.c_str(), status.total, status.unread);
    }
 
    // update

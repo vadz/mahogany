@@ -57,8 +57,8 @@ public:
    static void Flush();
 
    // query the status info: return true and fill the provided pointer with
-   // info if we have it, return false otherwise
-   bool GetStatus(const String& folderName, MailFolderStatus *status);
+   // info if we have it (and the pointer is not NULL), return false otherwise
+   bool GetStatus(const String& folderName, MailFolderStatus *status = NULL);
 
    // update the status info 
    void UpdateStatus(const String& folderName, const MailFolderStatus& status);
