@@ -114,11 +114,7 @@ public:
    bool Matches(const MailFolder *mf) const
    {
       // an entry being deleted shouldn't match anything at all!
-      return m_mf == mf
-#ifdef DEBUG_FOLDER_CLOSE
-            && !m_deleting
-#endif // DEBUG_FOLDER_CLOSE
-            ;
+      return m_mf == mf && !m_deleting;
    }
 
 private:
@@ -134,10 +130,8 @@ private:
    // if false, timeout is infinite
    bool m_expires;
 
-#ifdef DEBUG_FOLDER_CLOSE
    // set to true just before deleting the folder
    bool m_deleting;
-#endif // DEBUG_FOLDER_CLOSE
 };
 
 // a linked list of MfCloseEntries
@@ -263,9 +257,7 @@ MfCloseEntry::MfCloseEntry(MailFolderCmn *mf, int secs)
 
    ResetTimeout();
 
-#ifdef DEBUG_FOLDER_CLOSE
    m_deleting = false;
-#endif // DEBUG_FOLDER_CLOSE
 }
 
 MfCloseEntry::~MfCloseEntry()
@@ -275,9 +267,7 @@ MfCloseEntry::~MfCloseEntry()
       wxLogTrace(TRACE_MF_CLOSE, "Really closing mailfolder '%s' (%d)",
                  m_mf->GetName().c_str(), m_mf->GetNRef());
 
-#ifdef DEBUG_FOLDER_CLOSE
       m_deleting = true;
-#endif // DEBUG_FOLDER_CLOSE
 
       m_mf->RealDecRef();
    }
@@ -3079,6 +3069,8 @@ MailFolderCmn::ApplyFilterRules(UIdArray msgs)
    return rc;
 }
 
+DECLARE_AUTOPTR(MModule_Filters);
+
 // Checks for new mail and filters if necessary.
 bool
 MailFolderCmn::FilterNewMail()
@@ -3091,8 +3083,6 @@ MailFolderCmn::FilterNewMail()
    }
 
    // Obtain pointer to the filtering module:
-   DECLARE_AUTOPTR(MModule_Filters);
-
    MModule_Filters_obj filterModule = MModule_Filters::GetModule();
    if ( !filterModule )
    {
