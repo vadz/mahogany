@@ -1624,6 +1624,7 @@ void
 MailFolderCmn::UpdateConfig(void)
 {
    ReadConfig(m_Config);
+   m_ConfigOld = m_Config;
 
    DoUpdate();
 }
