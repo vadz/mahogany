@@ -38,7 +38,6 @@
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
 #  include "gui/wxIconManager.h"
-#  include "gui/wxDialogLayout.h"
 #endif //USE_PCH
 
 #include "Mdefaults.h"
@@ -63,6 +62,7 @@
 #include "gui/wxlwindow.h"
 #include "gui/wxlparser.h"
 #include "gui/wxOptionsDlg.h"
+#include "gui/wxDialogLayout.h"
 
 #include <wx/dynarray.h>
 #include <wx/file.h>
@@ -70,6 +70,7 @@
 #include <wx/fontmap.h>
 #include <wx/clipbrd.h>
 #include <wx/splitter.h>
+#include <wx/imaglist.h>
 #include <wx/treectrl.h>
 
 // ----------------------------------------------------------------------------
