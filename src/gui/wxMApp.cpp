@@ -2188,6 +2188,7 @@ void wxMApp::ShowLog(bool doShow)
 #define OPTION_FOLDER      _T("folder")
 #define OPTION_LANG        _T("lang")
 #define OPTION_NEWSGROUP   _T("newsgroup")
+#define OPTION_NOPYTHON    _T("nopython")
 #define OPTION_SAFE        _T("safe")
 #define OPTION_SUBJECT     _T("subject")
 
@@ -2270,6 +2271,16 @@ void wxMApp::OnInitCmdLine(wxCmdLineParser& parser)
          gettext_noop("the language to use for the program messages"),
       },
 
+      // --nopython to disable loading Python interpreter
+      // (note that this option exists even if Python is not compiled in, in
+      // this case it simply does nothing)
+      {
+         wxCMD_LINE_SWITCH,
+         NULL,
+         OPTION_NOPYTHON,
+         gettext_noop("don't load Python interpreter even if configured to do so"),
+      },
+
       // --newsgroup to specify the newsgroup to post the message to
       {
          wxCMD_LINE_OPTION,
@@ -2342,6 +2353,10 @@ bool wxMApp::OnCmdLineParsed(wxCmdLineParser& parser)
 
    m_cmdLineOptions->safe = parser.Found(OPTION_SAFE);
    m_cmdLineOptions->debugMail = parser.Found(OPTION_DEBUGMAIL);
+
+#ifdef USE_PYTHON
+   m_cmdLineOptions->noPython = parser.Found(OPTION_NOPYTHON);
+#endif // USE_PYTHON
 
    if ( startComposer )
    {

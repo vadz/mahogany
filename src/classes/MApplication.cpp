@@ -561,7 +561,9 @@ MAppBase::OnStartup()
 #ifdef  USE_PYTHON
    // having the same error message each time M is started is annoying, so
    // give the user a possibility to disable it
-   if ( READ_CONFIG(m_profile, MP_USEPYTHON) && !InitPython() )
+   if ( !m_cmdLineOptions->noPython &&
+            READ_CONFIG(m_profile, MP_USEPYTHON) &&
+                  !InitPython() )
    {
       // show the error messages generated before first
       wxLog::FlushActive();

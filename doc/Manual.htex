@@ -998,6 +998,9 @@ either {\tt /} or {\tt -} but only {\tt -{}-} can be used for the long ones.
    \hline
    -{}-newsgroup=group &  the news group to post the message to \\
    \hline
+   -{}-nopython & disable the embedded Python interpreter, even if it is
+enabled in the program options (\ref{PythonOptions})
+   \hline
    \end{tabular}
 }
 

@@ -13,7 +13,7 @@
 // we have this struct in a separate file simply because only MApplication.cpp
 // and wxMApp.cpp need to include it and so like this we can modify it (when
 // adding new command line options, for example), without needing to recompile
-// everything which includes MApplicatio.h (i.e. 90% of the code)
+// everything which includes MApplication.h (i.e. 90% of the code)
 
 #ifndef _CMDLINEOPTS_H_
 #define _CMDLINEOPTS_H_
@@ -55,6 +55,11 @@ public:
 
    /// force mail debugging on
    bool debugMail;
+
+#ifdef USE_PYTHON
+   /// don't load Python even if configured
+   bool noPython;
+#endif // USE_PYTHON
 
    /**
      @name Conversion to/from string
