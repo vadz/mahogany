@@ -102,9 +102,11 @@ public:
 
    /** Sends the message or stores it in the outbox queue, depending
        on profile settings.
+
+       @param sendAlways overrides the config settings if true
        @return true on success
    */
-   virtual bool SendOrQueue(void);
+   virtual bool SendOrQueue(bool sendAlways = false);
 
    /// destructor
    virtual ~SendMessageCC();
@@ -117,7 +119,6 @@ protected:
    */
    bool Send(void);
    void SetupAddresses(void);
-   friend class MessageCC; // allowed to call Send() directly
 
    /** Builds the message, i.e. prepare to send it.
     @param forStorage if this is TRUE, store some extra information

@@ -887,12 +887,13 @@ SendMessageCC::AddPart(Message::ContentType type,
 }
 
 bool
-SendMessageCC::SendOrQueue(void)
+SendMessageCC::SendOrQueue(bool send)
 {
    bool success;
+
    // send directly?
    bool send_directly = TRUE;
-   if(m_OutboxName.Length())
+   if ( !send && m_OutboxName.Length() )
       send_directly = FALSE;
    else if(! mApplication->IsOnline())
    {

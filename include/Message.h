@@ -16,6 +16,8 @@
 #include "MObject.h"
 #include "kbList.h"
 
+#include <wx/fontenc.h>
+
 class WXDLLEXPORT wxArrayString;
 class MailFolder;
 

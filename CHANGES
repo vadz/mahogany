@@ -1,7 +1,12 @@
       This file contains the detailed list of the user visible changes in
       Mahogany, you can use it to find all the changes between releases.
 
-Release 0.61 'Hawkins'
+Release 0.62 'Hawkins'
+-------------------------------------------------------------------------------
+
+26.01.01 VZ: big internal changes => much better stability
+
+Release 0.61 'Hawkins' [UNRELEASED]
 -------------------------------------------------------------------------------
 
 23.01.01 ALL:allow (dual) licensing Mahogany under GPL

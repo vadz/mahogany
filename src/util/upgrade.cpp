@@ -31,7 +31,7 @@
 #  include "Message.h"
 #  include "MailFolder.h"
 #  include "MailFolderCC.h"
-#  include "SendMessageCC.h"
+#  include "SendMessage.h"
 #  include "MessageCC.h"
 
 #ifdef USE_PYTHON
@@ -2354,14 +2354,17 @@ VerifyMailConfig(void)
    Profile *p = mApplication->GetProfile();
    String me = miscutil_GetFromAddress(p);
 
-   SendMessageCC  sm(p);
-   sm.SetSubject(_("Mahogany Test Message"));
-   sm.SetAddresses(me);
+   SendMessage *sm = SendMessage::Create(p);
+   sm->SetSubject(_("Mahogany Test Message"));
+   sm->SetAddresses(me);
    String msg =
       _("If you have received this mail, your Mahogany configuration works.\n"
         "You should also try to reply to this mail and check that your reply arrives.");
-   sm.AddPart(Message::MSG_TYPETEXT, msg.c_str(), msg.length());
-   if ( sm.SendOrQueue() )
+   sm->AddPart(Message::MSG_TYPETEXT, msg.c_str(), msg.length());
+   bool ok = sm->SendOrQueue();
+   delete sm;
+
+   if ( ok )
    {
       mApplication->SendOutbox();
       msg.Empty();

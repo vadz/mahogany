@@ -35,7 +35,7 @@
 #include "Message.h"
 #include "MessageCC.h"
 
-#include "SendMessageCC.h"
+#include "SendMessage.h"
 
 #include <ctype.h>
 
@@ -147,9 +147,9 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
          protocol = Prot_NNTP;
    }
 
-   SendMessageCC sendMsg(m_Profile, protocol);
+   SendMessage *sendMsg = SendMessage::Create(m_Profile, protocol);
 
-   sendMsg.SetSubject(Subject());
+   sendMsg->SetSubject(Subject());
 
    String name, reply;
    reply = Address( name, MAT_REPLYTO);
@@ -162,8 +162,8 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
          GetHeaderLine("To", to);
          GetHeaderLine("CC", cc);
          GetHeaderLine("BCC",bcc);
-         sendMsg.SetAddresses(to, cc, bcc);
-         sendMsg.SetFrom(From(), name, reply);
+         sendMsg->SetAddresses(to, cc, bcc);
+         sendMsg->SetFrom(From(), name, reply);
       }
       break;
 
@@ -171,8 +171,8 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
       {
          String newsgroups;
          GetHeaderLine("Newsgroups",newsgroups);
-         sendMsg.SetNewsgroups(newsgroups);
-         sendMsg.SetFrom(From(), name, reply);
+         sendMsg->SetNewsgroups(newsgroups);
+         sendMsg->SetFrom(From(), name, reply);
       }
       break;
 
@@ -190,7 +190,7 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
       MessageParameterList const &dlist = GetDisposition(i, &dispType);
       MessageParameterList const &plist = GetParameters(i);
 
-      sendMsg.AddPart(GetPartType(i),
+      sendMsg->AddPart(GetPartType(i),
                        data, len,
                        strutil_after(GetPartMimeType(i),'/'), //subtype
                        dispType,
@@ -217,17 +217,15 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
       name = headerLine.BeforeFirst(':');
       value = headerLine.AfterFirst(':');
       if(name != "Date" && name != "From")
-         sendMsg.AddHeaderEntry(name, value);
+         sendMsg->AddHeaderEntry(name, value);
       headerLine = "";
    }while(*cptr && *cptr != '\012');
 
-   if(send)
-   {
-      sendMsg.Build();
-      return sendMsg.Send();
-   }
-   else
-      return sendMsg.SendOrQueue();
+   bool rc = sendMsg->SendOrQueue(send);
+
+   delete sendMsg;
+
+   return rc;
 }
 
 void

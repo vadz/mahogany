@@ -101,9 +101,11 @@ public:
 
    /** Sends the message or stores it in the outbox queue, depending
        on profile settings.
+
+       @param sendAlways overrides the config settings if true
        @return true on success
    */
-   virtual bool SendOrQueue(void) = 0;
+   virtual bool SendOrQueue(bool sendAlways = false) = 0;
 
    /// virtual destructor
    virtual ~SendMessage();
