@@ -3046,7 +3046,7 @@ MailFolderCC::AppendMessage(const Message& msg)
    char *dateptr = NULL;
    char datebuf[128];
    MESSAGECACHE mc;
-   if ( mail_parse_date(&mc, (char *) date.c_str()) )
+   if ( mail_parse_date(&mc, (unsigned char *) date.c_str()) )
    {
      mail_date(datebuf, &mc);
      dateptr = datebuf;
@@ -4117,7 +4117,8 @@ static bool MailStreamHasThreader(MAILSTREAM *stream, const char *thrName)
 
    THREADER *thr;
    for ( thr = imapCap->threader;
-         thr && compare_cstring(thr->name, (char *)thrName);
+         thr && compare_cstring((unsigned char *)thr->name,
+                                (unsigned char *)thrName);
          thr = thr->next )
       ;
 
@@ -4369,7 +4370,7 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
 
    // date
    MESSAGECACHE selt;
-   mail_parse_date(&selt, env->date);
+   mail_parse_date(&selt, (unsigned char *)env->date);
    entry.m_Date = (time_t) mail_longdate(&selt);
 
    // from and to
