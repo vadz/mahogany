@@ -102,6 +102,14 @@ $(BUNDLE)/Resources/M.icns: $(SOURCEDIR)/macosx/M.icns
 	@$(INSTALL) -d `dirname $@`
 	@cp $< $@
 
+# special target to build a disk image from the bundle
+dmg: install
+	@mkdir dmgtmp
+	@mv Mahogany.app dmgtmp
+	hdiutil create -ov -srcfolder dmgtmp -volname Mahogany Mahogany.dmg
+	@mv dmgtmp/Mahogany.app .
+	@rmdir dmgtmp
+
 else # !USE_MAC
 
 M_BUNDLE :=
