@@ -472,6 +472,9 @@ protected:
    /// do show the current message
    void Update();
 
+   /// show a single header in the viewer
+   void ShowHeader(const String& name, const String& value, wxFontEncoding enc);
+
    /// show all configured headers
    void ShowHeaders();
 
