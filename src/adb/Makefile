@@ -18,7 +18,17 @@ endif
 HDR = $(SRC:.cpp=.h)
 DEP = $(SRC:.cpp=.d)
 
-TARGETS = $(SRC:.cpp=.o) $(MODOBJS)
+include ../../makeopts
+
+ifeq ($(USE_MODULES),static)
+TARGETS = $(MOD:.cpp=.o)
+else
+ifeq ($(USE_MODULES),dynamic)
+TARGETS = $(MOD:.cpp=.so)
+else
+TARGETS=
+endif
+endif
 
 all: $(TARGETS)
 
@@ -26,6 +36,5 @@ clean: stdclean
 
 .PHONY: clean all
 
-include ../../makeopts
 include ../../makerules
 include .depend
