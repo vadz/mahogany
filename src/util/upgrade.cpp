@@ -111,6 +111,80 @@ UpgradeFrom001()
    return true;
 }
 
+#define COPYENTRY(type)  { type val; rc &= _this->Read(entry, &val); rc &= _this->Write(newentry,val); }
+
+/** Copies all entries and optionally subgroups from path from to path 
+    to in the wxConfig.
+    @return false on error
+*/
+static bool
+CopyEntries(wxConfigBase *_this,
+            const wxString &from, const wxString &to, bool recursive = TRUE)
+{
+   wxString oldPath = _this->GetPath();
+   bool rc = TRUE;
+
+   // Build a list of all entries to copy:
+   _this->SetPath(from);
+
+   long
+      index = 0;
+   wxString
+      entry, newentry;
+   bool ok;
+   for ( ok = _this->GetFirstEntry(entry, index);
+         ok ;
+         ok = _this->GetNextEntry(entry, index))
+   {
+      newentry = to;
+      newentry << '/' << entry;
+      switch(_this->GetEntryType(entry))
+      {
+      case wxConfigBase::String:
+         COPYENTRY(wxString); break;
+      case wxConfigBase::Integer:
+         COPYENTRY(long); break;
+      case wxConfigBase::Float:
+         COPYENTRY(double); break;
+      case wxConfigBase::Boolean:
+         COPYENTRY(bool); break;
+      case wxConfigBase::Unknown:
+         wxASSERT(0);
+      }
+   }
+   if(recursive)
+   {
+      wxString
+         fromgroup, togroup;
+      wxString
+         *groups;
+   
+      groups = new wxString[_this->GetNumberOfGroups(FALSE)];
+      size_t
+         idx;
+      index = 0;
+      for ( ok = _this->GetFirstGroup(entry, index);
+            ok ;
+            ok = _this->GetNextGroup(entry, index))
+      {
+         wxASSERT(idx < _this->GetNumberOfEntries(FALSE));
+         groups[idx++] = entry;
+      }
+      for(idx = 0; idx < _this->GetNumberOfGroups(FALSE); idx++)
+      {
+         fromgroup = from;
+         fromgroup << '/' << groups[idx];
+         togroup = to;
+         togroup << '/' << groups[idx];
+         CopyEntries(_this, fromgroup, togroup, recursive);
+      }
+      delete [] groups;
+   }
+   
+   _this->SetPath(oldPath);
+   return rc;
+}
+
 static bool
 UpgradeFrom010()
 {
@@ -123,6 +197,16 @@ UpgradeFrom010()
       algorithms. Totally unsafe but better than cleartext.
     */
 
+
+   CopyEntries(mApplication->GetProfile()->GetConfig(),
+               "/M/Profiles/Folders","/M/Profiles", true);
+
+   CopyEntries(mApplication->GetProfile()->GetConfig(),
+               "/AdbEditor","/M/Profiles/AdbEditor", true);
+
+   //FIXME: still need to encrypt all passwords!
+   //       and rewrite version number, testing!   
+#if 0
    // The old Folders section appears as a profile now:
    ProfileBase *p = ProfileBase::CreateProfile("Folders");
    ProfileBase *p2;
@@ -137,7 +221,7 @@ UpgradeFrom010()
       entry, value, pw;
    kbStringList
       folders;
-   
+
    for ( ok = p->GetFirstGroup(group, index);
          ok ;
          ok = p->GetNextGroup(group, index))
@@ -232,6 +316,7 @@ UpgradeFrom010()
    cf->SetPath(path);
    //FIXME: broken!! cf->DeleteGroup(adbGroup);
    p->DecRef();
+#endif
    return true;
 }
 
