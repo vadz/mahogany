@@ -253,14 +253,19 @@ public:
    void OnSelected(wxListEvent& event);
    void OnColumnClick(wxListEvent& event);
    void OnListKeyDown(wxListEvent& event);
-   void OnChar( wxKeyEvent &event);
+   void OnActivated(wxListEvent& event);
+   void OnListCacheHint(wxListEvent &event);
+
+   void OnChar(wxKeyEvent &event);
+
    void OnRightClick(wxMouseEvent& event);
    void OnDoubleClick(wxMouseEvent &event);
-   void OnActivated(wxListEvent& event);
+   void OnMouseMove(wxMouseEvent &event);
+
+   void OnIdle(wxIdleEvent& event);
+
    void OnCommandEvent(wxCommandEvent& event)
       { m_FolderView->OnCommandEvent(event); }
-   void OnIdle(wxIdleEvent& event);
-   void OnMouseMove(wxMouseEvent &event);
 
    /// called by wxFolderView before previewing the focused message
    void OnPreview()
@@ -684,8 +689,10 @@ int CMPFUNC_CONV compareLongsReverse(long *first, long *second)
 
 BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
    EVT_CHAR(wxFolderListCtrl::OnChar)
+
    EVT_LIST_ITEM_ACTIVATED(-1, wxFolderListCtrl::OnActivated)
    EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
+   EVT_LIST_CACHE_HINT(-1, wxFolderListCtrl::OnListCacheHint)
 
    EVT_MENU(-1, wxFolderListCtrl::OnCommandEvent)
 
@@ -1191,6 +1198,23 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
    //else: processing this is temporarily blocked
 }
 
+// called by the list control itself before showing the given range of items
+void wxFolderListCtrl::OnListCacheHint(wxListEvent& event)
+{
+   // cache all items which are going to become visible
+   if ( m_headers )
+   {
+      long from = event.GetCacheFrom(),
+           to = event.GetCacheTo();
+
+      // not only this test makes sense to avoid caching unnecessarily but it
+      // also takes care of stupid MSW list ctrl which sends us cache hints
+      // with from == to == 0 when it becomes empty
+      if ( from < to )
+         m_headers->HintCache(from, to);
+   }
+}
+
 // called by RETURN press
 void wxFolderListCtrl::OnActivated(wxListEvent& event)
 {
@@ -1561,29 +1585,6 @@ void wxFolderListCtrl::Focus(long index)
 
    EnsureVisible(index);
 #endif // wxWin >= 2.2.6
-
-   // we will need the items nearby as well
-   if ( m_headers )
-   {
-      long page = GetCountPerPage(),
-           total = GetItemCount();
-
-      // cache slightly more than the visible page around the current message
-      page *= 3;
-      page /= 2;
-
-      long from = index - page / 2;
-      if ( from < 0 )
-      {
-         from = 0;
-      }
-
-      long to = from + page;
-      if ( to >= total )
-         to = total - 1;
-
-      m_headers->HintCache((size_t)from, (size_t)to);
-   }
 }
 
 long wxFolderListCtrl::GetUniqueSelection() const
