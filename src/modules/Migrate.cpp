@@ -27,10 +27,6 @@
 #ifndef USE_PCH
    #include "Mcommon.h"
 
-   #include "gui/wxMainFrame.h"
-   #include "gui/wxDialogLayout.h"
-   #include "gui/wxBrowseButton.h"
-
    #include <wx/sizer.h>
 
    #include <wx/gauge.h>
@@ -49,6 +45,10 @@
 
 #include "UIdArray.h"
 #include "HeaderInfo.h"
+
+#include "gui/wxDialogLayout.h"
+#include "gui/wxMainFrame.h"
+#include "gui/wxBrowseButton.h"
 
 #include <wx/wizard.h>
 
