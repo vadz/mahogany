@@ -3,7 +3,7 @@ Summary:	contains instructions for building Mahogany under MS Windows
 Audience:	Mahogany developers
 Author:		Vadim Zeitlin <vadim@wxwindows.org>
 Modified by:	Nerijus Baliunas <nerijus@users.sf.net> (cygwin part)
-Last modified:	2004-07-13
+Last modified:	2004-07-14
 Version:	the information in this file applies to the cvs sources
 
 0. Requirements
@@ -57,10 +57,12 @@ b) DSPAM
 --------
 
    Building Mahogany with DSPAM requires SQlite library: http://www.sqlite.org/
-You should download its sources and build it and add the directory containing
-sqlite.h to the list of global include paths in VC++ IDE. You should also add
-the library directory containing sqlite[d].lib (the debug version should have
-"d" in its name) to the list of library paths.
+You should download its sources and build it using lib\sqlite.vcproj project
+file (you will need to copy it to the directory where you unpacked SQlite
+sources) and add the directory containing sqlite.h to the list of global
+include paths in VC++ IDE. You should also add the library directory containing
+sqlite[d].lib (the debug version should have "d" in its name) to the list of
+library paths.
 
    If you don't want to install SQlite, you will have to skip building dspam
 project and DspamFilter.cpp file located in modules/spam subfolder of the
