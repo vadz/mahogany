@@ -550,6 +550,8 @@ MailFolderCmn::MailFolderCmn()
 
    m_headers = NULL;
 
+   m_frame = NULL;
+
    m_MEventReceiver = new MfCmnEventReceiver(this);
 }
 
