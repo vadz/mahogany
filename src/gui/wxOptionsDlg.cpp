@@ -1506,7 +1506,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("If autosave delay is not 0, the program will periodically\n"
                   "save all unsaved information (settings, contents of the\n"
                   "opened compose windows, ...) which reduces the risk of loss\n"
-                  "of it in a case of crash"),     Field_Message, -1                     },
+                  "of it in a case of crash."),     Field_Message, -1                     },
    { gettext_noop("&Autosave delay"),              Field_Number, -1                      },
    { gettext_noop("Confirm &exit"),                Field_Bool | Field_Restart, -1                     },
    { gettext_noop("Always run only &one instance"),Field_Bool | Field_Restart, -1                     },
