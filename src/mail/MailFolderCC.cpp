@@ -3795,6 +3795,24 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
    {
       if ( m_expungedIndices )
       {
+         // we can update the status faster here as we have decremented the
+         // number of recent/unseen/... when the messages were deleted (before
+         // being expunged), so we just have to update the total now
+         //
+         // FIXME: this has all chances to break down with manual expunge or
+         //        even with automatic one due to race condition (if the
+         //        message status changed from outside...) - but this is so
+         //        much faster and the problem is not really fatal that I
+         //        still prefer to do it like this
+         MailFolderStatus status;
+         MfStatusCache *mfStatusCache = MfStatusCache::Get();
+         if ( mfStatusCache->GetStatus(GetName(), &status) )
+         {
+            status.total = m_MailStream->nmsgs;
+
+            mfStatusCache->UpdateStatus(GetName(), status);
+         }
+
          RequestUpdateAfterExpunge();
       }
       //else: nothing at all
