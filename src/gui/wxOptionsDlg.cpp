@@ -231,6 +231,7 @@ enum ConfigFields
    ConfigField_AutosaveDelay,
    ConfigField_ConfirmExit,
    ConfigField_OpenOnClick,
+   ConfigField_ShowHiddenFolders,
    ConfigField_ShowNewMail,
 #ifdef OS_UNIX
    ConfigField_AFMPath,
@@ -593,6 +594,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Autosave delay"),              Field_Number, -1                      },
    { gettext_noop("Confirm &exit"),                Field_Bool | Field_Restart, -1                     },
    { gettext_noop("Open folder on single &click"), Field_Bool,    -1                     },
+   { gettext_noop("Show &hidden folders in the folder tree"), Field_Bool,    -1                     },
    { gettext_noop("Show new mail &notifications"), Field_Bool,    -1                     },
 #ifdef OS_UNIX
    { gettext_noop("&Path where to find AFM files"), Field_Text,    -1                     },
@@ -756,6 +758,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_AUTOSAVEDELAY),
    CONFIG_ENTRY(MP_CONFIRMEXIT),
    CONFIG_ENTRY(MP_OPEN_ON_CLICK),
+   CONFIG_ENTRY(MP_SHOW_HIDDEN_FOLDERS),
    CONFIG_ENTRY(MP_SHOW_NEWMAILMSG),
 #ifdef OS_UNIX
    CONFIG_ENTRY(MP_AFMPATH),

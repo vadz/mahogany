@@ -162,6 +162,8 @@
 #define MP_HELPFRAME_YPOS   "HelpFrameYpos"
 /// the directory for mbox folders
 #define   MP_MBOXDIR         "FolderDir"
+/// the news spool directory
+#define MP_NEWS_SPOOL_DIR "NewsSpool"
 /// command to convert tiff faxes to postscript
 #define   MP_TIFF2PS         "FaxToPS"
 /// preferred intermediary image format in conversions (0=xpm,1=png,2=bmp,3=jpg)
@@ -237,6 +239,8 @@
 #define   MP_CONFIRMEXIT       "ConfirmExit"
 /// open folders when they're clicked (otherwise - double clicked)
 #define   MP_OPEN_ON_CLICK     "ClickToOpen"
+/// show all folders (even hidden ones) in the folder tree?
+#define   MP_SHOW_HIDDEN_FOLDERS "ShowHiddenFolders"
 /// create .profile files?
 #define   MP_CREATE_PROFILES   "CreateProfileFiles"
 /// umask setting for normal files
@@ -597,6 +601,8 @@
 #define MP_HELPFRAME_YPOS_D  40l
 /// the directory for mbox folders
 #define   MP_MBOXDIR_D         M_EMPTYSTRING
+/// the news spool directory
+#define MP_NEWS_SPOOL_DIR_D M_EMPTYSTRING
 /// command to convert tiff faxes to postscript
 #define   MP_TIFF2PS_D         "tiff2ps -ap %s -O %s"
 /// preferred intermediary image format in conversions
@@ -687,6 +693,8 @@
 #define   MP_CONFIRMEXIT_D      1l
 /// open folders when they're clicked (otherwise - double clicked)
 #define   MP_OPEN_ON_CLICK_D     0l
+/// show all folders (even hidden ones) in the folder tree?
+#define   MP_SHOW_HIDDEN_FOLDERS_D 0l
 /// create .profile files?
 #define   MP_CREATE_PROFILES_D   0l
 /// umask setting for normal files

@@ -70,6 +70,16 @@ enum FolderIcon
 };
 
 // ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+// return TRUE if we're showing all folders, even hidden ones, in the tree
+static bool ShowHiddenFolders()
+{
+   return READ_APPCONFIG(MP_SHOW_HIDDEN_FOLDERS) != 0;
+}
+
+// ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
@@ -215,8 +225,12 @@ protected:
    void DoBrowseSubfolders();
 
    void DoFolderProperties();
+   void DoToggleHidden();
 
    void DoPopupMenu(const wxPoint& pos);
+
+   // reexpand branch - called when something in the tree changes
+   void ReopenBranch(wxTreeItemId parent);
 
 private:
    class FolderMenu : public wxMenu
@@ -230,21 +244,24 @@ private:
          Delete,
          Rename,
          BrowseSub,
-         Properties
+         Properties,
+         ShowHidden
       };
 
-      FolderMenu(const String& folderName)
+      FolderMenu(bool isRoot)
       {
-         String title;
-         title << _("Folder '") << folderName << '\'';
-         SetTitle(title);
+         if ( !isRoot )
+         {
+            Append(Open, _("&Open"));
 
-         Append(Open, _("&Open"));
-
-         AppendSeparator();
+            AppendSeparator();
+         }
 
          Append(New, _("Create &new folder..."));
-         Append(Delete, _("&Delete folder"));
+         if ( !isRoot )
+         {
+            Append(Delete, _("&Delete folder"));
+         }
          Append(Rename, _("&Rename folder..."));
 
          AppendSeparator();
@@ -253,9 +270,17 @@ private:
 
          AppendSeparator();
 
-         Append(Properties, _("&Properties"));
+         if ( isRoot )
+         {
+            Append(ShowHidden, _("Show &hidden folders"), "", TRUE);
+         }
+         else
+         {
+            Append(Properties, _("&Properties"));
+         }
       }
-   } *m_menu;                     // popup menu
+   } *m_menuRoot,                 // popup menu for the root folder
+     *m_menu;                     // popup menu for all folders
 
    wxFolderTree      *m_sink;     // for sending events
    wxFolderTreeNode  *m_current;  // current selection (NULL if none)
@@ -337,8 +362,7 @@ wxFolderTree::Init(wxWindow *parent, wxWindowID id,
 {
    m_tree = new wxFolderTreeImpl(this, parent, id, pos, size);
 
-   ProfilePathChanger p(mApplication->GetProfile(), M_SETTINGS_CONFIG_SECTION);
-   if( READ_CONFIG(mApplication->GetProfile(), MP_EXPAND_TREECTRL) )
+   if( READ_APPCONFIG(MP_EXPAND_TREECTRL) )
       m_tree->Expand(m_tree->GetRootItem());
 }
 
@@ -569,7 +593,8 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    // init member vars
    m_current = NULL;
    m_sink = sink;
-   m_menu = NULL;
+   m_menu =
+   m_menuRoot = NULL;
    m_suppressSelectionChange = FALSE;
    m_previousFolder = NULL;
    m_FocusFollowMode = READ_APPCONFIG(MP_FOCUS_FOLLOWSMOUSE) != 0;
@@ -607,34 +632,47 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
    {
       MFolder *folder = cur->GetFolder();
 
+      // what kind of folder do we have?
       wxString title(folder->GetName());
-      if ( m_menu == NULL )
+      if ( !title )
       {
-         // create our popup menu if not done yet
-         m_menu = new FolderMenu(title);
-      }
-      else
-      {
-         m_menu->SetTitle(title);
+         title = _("All folders");
       }
 
-      // disable the items which don't make sense for some kinds of folders
       FolderType folderType = folder->GetType();
       bool isRoot = folderType == FolderRoot,
            isGroup = folderType == FolderGroup;
 
-      // you can't open nor delete the root folder and it has no properties
-      m_menu->Enable(FolderMenu::Open, !isRoot && !isGroup);
-      m_menu->Enable(FolderMenu::Delete, !isRoot);
-      m_menu->Enable(FolderMenu::Properties, !isRoot);
+      FolderMenu **menu = isRoot ? &m_menuRoot : &m_menu;
 
-      // these items only make sense when a folder can, in principle, have
-      // inferiors
-      bool mayHaveSubfolders = CanHaveSubfolders(folderType);
-      m_menu->Enable(FolderMenu::BrowseSub, mayHaveSubfolders);
-      m_menu->Enable(FolderMenu::New, mayHaveSubfolders);
+      // create our popup menu if not done yet
+      if ( !*menu )
+      {
+         *menu = new FolderMenu(isRoot);
+      }
 
-      PopupMenu(m_menu, pos.x, pos.y);
+      (*menu)->SetTitle(wxString::Format(_("Folder '%s'"), title.c_str()));
+
+      if ( isRoot )
+      {
+         // init the menu
+         (*menu)->Check(FolderMenu::ShowHidden, ShowHiddenFolders());
+      }
+      else
+      {
+         // disable the items which don't make sense for some kinds of folders:
+         // groups can't be opened
+         (*menu)->Enable(FolderMenu::Open, !isGroup);
+
+         // these items only make sense when a folder can, in principle, have
+         // inferiors (and browsing doesn't make sense for "simple" groups - what
+         // would we browse for?)
+         bool mayHaveSubfolders = CanHaveSubfolders(folderType);
+         (*menu)->Enable(FolderMenu::BrowseSub, mayHaveSubfolders && !isGroup);
+         (*menu)->Enable(FolderMenu::New, mayHaveSubfolders);
+      }
+
+      PopupMenu(*menu, pos.x, pos.y);
    }
    //else: no selection
 }
@@ -747,6 +785,15 @@ void wxFolderTreeImpl::DoFolderProperties()
    m_sink->OnProperties(m_sink->GetSelection());
 }
 
+void wxFolderTreeImpl::DoToggleHidden()
+{
+   bool show = !ShowHiddenFolders();
+
+   mApplication->GetProfile()->writeEntry(MP_SHOW_HIDDEN_FOLDERS, show);
+
+   ReopenBranch(GetRootItem());
+}
+
 // add all subfolders of the folder being expanded
 void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
 {
@@ -777,7 +824,7 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
       // if the folder is marked as being "hidden", we don't show it in the
       // tree (but still use for all other purposes), this is useful for
       // "system" folders like INBOX
-      if ( subfolder->GetFlags() & MF_FLAGS_HIDDEN )
+      if ( !ShowHiddenFolders() && (subfolder->GetFlags() & MF_FLAGS_HIDDEN) )
       {
          subfolder->DecRef();
 
@@ -921,6 +968,10 @@ void wxFolderTreeImpl::OnMenuCommand(wxCommandEvent& event)
          DoFolderProperties();
          break;
 
+      case FolderMenu::ShowHidden:
+         DoToggleHidden();
+         break;
+
       default:
          //FAIL_MSG("unexpected menu command in wxFolderTree");
          event.Skip();
@@ -956,6 +1007,15 @@ void wxFolderTreeImpl::OnChar(wxKeyEvent& event)
   }
 }
 
+void wxFolderTreeImpl::ReopenBranch(wxTreeItemId parent)
+{
+   Collapse(parent);
+   DeleteChildren(parent);
+   GetFolderTreeNode(parent)->ResetExpandedFlag();
+   SetItemHasChildren(parent, TRUE);
+   Expand(parent);
+}
+
 bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
 {
    if ( ev.GetId() == MEventId_FolderTreeChange )
@@ -973,12 +1033,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
 
       CHECK(parent.IsOk(), TRUE, "no such item in the tree??");
 
-      Collapse(parent);
-      DeleteChildren(parent);
-      GetFolderTreeNode(parent)->ResetExpandedFlag();
-      SetItemHasChildren(parent, TRUE);
-
-      Expand(parent);
+      ReopenBranch(parent);
 
       if ( event.GetChangeKind() == MEventFolderTreeChangeData::Delete )
       {

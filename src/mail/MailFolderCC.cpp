@@ -864,12 +864,12 @@ MailFolderCC::Open(void)
          exists = wxFileExists(path);
       }
 
-      /* Clever hack: if the folder is IMAP and the folder name ends
+      /* Clever hack: if the folder is IMAP or NNTP and the folder name ends
          in a slash '/' we only half-open it. The server does not like
          opening directories, but the half-open stream can still be
          used for retrieving subfolder listings. */
-      if(GetType() == MF_IMAP
-         && m_MailboxPath[m_MailboxPath.Length()-1] == '/')
+      if( ((GetType() == MF_IMAP) || (GetType() == MF_NNTP)) &&
+          m_MailboxPath[m_MailboxPath.Length()-1] == '/' )
       {
          String spec = m_MailboxPath.BeforeLast('}') + '}';
          CCVerbose();
@@ -1767,6 +1767,7 @@ MailFolderCC::CClientInit(void)
 }
 
 String MailFolderCC::ms_MHpath;
+String MailFolderCC::ms_NewsPath;
 
 const String&
 MailFolderCC::InitializeMH()
@@ -1841,6 +1842,27 @@ MailFolderCC::InitializeMH()
    }
 
    return ms_MHpath;
+}
+
+const String& MailFolderCC::InitializeNewsSpool()
+{
+   if ( !ms_NewsPath )
+   {
+      // first, init cclient
+      if ( !cclientInitialisedFlag )
+      {
+         CClientInit();
+      }
+
+      ms_NewsPath = (char *)mail_parameters(NULL, GET_NEWSSPOOL, NULL);
+      if ( !ms_NewsPath )
+      {
+         ms_NewsPath = READ_APPCONFIG(MP_NEWS_SPOOL_DIR);
+         mail_parameters(NULL, SET_NEWSSPOOL, (char *)ms_NewsPath.c_str());
+      }
+   }
+
+   return ms_NewsPath;
 }
 
 bool

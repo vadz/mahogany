@@ -9,12 +9,12 @@ $Id$
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
 
-6    W  VZ	splash screen disappears immediately
+6	VZ	"Browse subfolders" under root folder should give a choice:
+		subscribe to newsgroups, import MH folders, mirror server IMAP
+		folders...
 
 6	VZ	constraints in the notebooks half broken again, both GTK and
                 Windows (well, they actually work but give warnings)
-
-9    W  VZ      wxStaticBox bug makes it impossible to work with most dialogs
 
 5               [Cancel] in options dialog doesn't cancel everything (i.e. if
                 you [Apply] change first it's not undone when [Cancel] is
@@ -553,7 +553,11 @@ VZ: wouldn't an ifdef alone be enough (you can already grep for it...)?
 
 
 DONE - TO BE TESTED:
-7       VZ     We need a generic way to re-enable disabled pControls
+9    W  VZ      wxStaticBox bug makes it impossible to work with most dialogs
+
+7       VZ	We need a generic way to re-enable disabled pControls
+
+6    W  VZ	splash screen disappears immediately
 
 
 9	VZ	Folder Properties dialog: OK disabled, Apply sometimes 

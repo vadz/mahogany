@@ -41,7 +41,7 @@ extern "C"
 #include  "MFolder.h"
 
 
-/// To really clean up left over memory, call this function at program 
+/// To really clean up left over memory, call this function at program
 /// end:
 extern void CC_Cleanup();
 
@@ -209,7 +209,7 @@ public:
        @return true if stream still valid
    */
    bool PingReopen(void) const;
-   /** Like PingReopen() but works on all folders, returns true if all 
+   /** Like PingReopen() but works on all folders, returns true if all
        folders are fine.
    */
    static bool PingReopenAll(void);
@@ -249,7 +249,7 @@ public:
    //@}
    /**@name Access control */
    //@{
-   /** Locks a mailfolder for exclusive access. In multi-threaded mode 
+   /** Locks a mailfolder for exclusive access. In multi-threaded mode
        it really locks it and always returns true. In single-threaded
        mode it returns false if we cannot get a lock.
        @return TRUE if we have the lock
@@ -310,6 +310,14 @@ public:
       failure.
    */
    static const String& InitializeMH();
+
+   /**
+      initialize the NEWS driver (it's safe to call it more than once).
+
+      @return the path to local news spool or empty string on failure
+   */
+   static const String& InitializeNewsSpool();
+
 private:
    /// private constructor, does basic initialisation
    MailFolderCC(int typeAndFlags,
@@ -321,7 +329,7 @@ private:
 
    /// Common code for constructors
    void Create(int typeAndFlags);
-   
+
    /** Try to open the mailstream for this folder.
        @return true on success
    */
@@ -354,7 +362,7 @@ private:
    bool m_FirstListing;
    /// Path to mailbox
    String   m_MailboxPath;
-   
+
    /// The symbolic name of the folder
    String m_Name;
    /// do we want c-client's debug messages?
@@ -364,7 +372,7 @@ private:
        the entries found.
    */
    INTARRAY *m_SearchMessagesFound;
-   
+
    /** @name functions for mapping mailstreams and objects
        These functions enable the class to map incoming events from
        the  c-client library to the object associated with that event.
@@ -423,7 +431,7 @@ protected:
 
    /// Check if this message is a "New Message":
    virtual bool IsNewMessage(const HeaderInfo * hi);
-   
+
    /* Handles the mm_overview_header callback on a per folder basis.
       It returns 0 to abort overview generation, 1 to continue.*/
    int OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov);
@@ -436,7 +444,7 @@ protected:
 #else
    /// A Mutex to control access to this folder.
    bool m_Mutex;
-#endif    
+#endif
    /*@name Handling of MailFolderCC internal events.
      Callbacks from the c-client library cannot directly be used to
      call other functions as this might lead to a lock up or recursion
@@ -603,11 +611,11 @@ private:
    //@{
    /// TCP/IP open timeout in seconds.
    int ms_TcpOpenTimeout;
-   /// TCP/IP read timeout in seconds.  
+   /// TCP/IP read timeout in seconds.
    int ms_TcpReadTimeout;
-   /// TCP/IP write timeout in seconds. 
+   /// TCP/IP write timeout in seconds.
    int ms_TcpWriteTimeout;
-   /// TCP/IP close timeout in seconds. 
+   /// TCP/IP close timeout in seconds.
    int ms_TcpCloseTimeout;
    /// rsh connection timeout in seconds.
    int ms_TcpRshTimeout;
@@ -625,6 +633,9 @@ private:
 
    // used by InitializeMH() only
    static String ms_MHpath;
+
+   // used by InitializeNewsSpool() only
+   static String ms_NewsPath;
 
 public:
    DEBUG_DEF

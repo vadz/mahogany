@@ -207,7 +207,7 @@ wxTreeItemId wxSubscriptionDialog::GetParentForFolder(String *name)
       if ( !folderName )
       {
          // special case: comparison below would match too, but we don't have
-         // to change name (thishappens only when enumerating the subfolders
+         // to change name (this happens only when enumerating the subfolders
          // of the root MH pseufo-folder)
          return folderId;
       }
@@ -265,7 +265,7 @@ bool wxSubscriptionDialog::OnMEvent(MEventData& event)
           "unexpected event type" );
 
    MEventASFolderResultData &data = (MEventASFolderResultData &)event;
-   
+
    ASFolderExistsResult_obj result((ASFolderExistsResult *)data.GetResult());
 
    // is this message really for us?
@@ -307,6 +307,7 @@ bool wxSubscriptionDialog::OnMEvent(MEventData& event)
    }
 
    wxYield(); // FIXME: is this safe?
+
    // we don't want anyone else to receive this message - it was for us only
    return FALSE;
 }
@@ -322,7 +323,10 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
 
    wxString name = folder->GetPath();
 
-   if ( folder->GetType() == MF_MH && (!name || name.Last() != '/') )
+   FolderType type = folder->GetType();
+
+   bool doesntEndWithSlash = !name || (name.Last() != '/');
+   if ( (type == MF_MH) && doesntEndWithSlash )
    {
       // we don't want to get this folder itself (because it isn't returned
       // anyhow if we enumerate _all_ MH folders, but is returned in the other
@@ -330,29 +334,58 @@ bool ShowFolderSubfoldersDialog(MFolder *folder, wxWindow *parent)
       // "#mh/foldername/*" which will only retrieve strict subfolders.
       name += '/';
    }
+   else
+   {
+      if ( type == MF_GROUP_IMAP )
+      {
+         type = MF_IMAP;
+      }
+      else if ( type == MF_GROUP_NEWS )
+      {
+         type = MF_NNTP;
+      }
+      else
+      {
+         FAIL_MSG( "Unexpected folder type in ShowFolderSubfoldersDialog" );
 
-   int typeAndFlags = CombineFolderTypeAndFlags(folder->GetType(),
-                                                folder->GetFlags());
+         return FALSE;
+      }
+
+      // OpenFolder() will half open folder names ending with '/' - otheriwse
+      // it would try to open something like "{nntp}news" which won't work
+      if ( doesntEndWithSlash )
+      {
+         name += '/';
+      }
+   }
+
+   int typeAndFlags = CombineFolderTypeAndFlags(type, folder->GetFlags());
    ASMailFolder *asmf = ASMailFolder::OpenFolder(typeAndFlags,
                                                  name,
                                                  profile);
 
-   /// Maybe it's not a folder but a directory of folders?
-   /// FIXME we really need a separate entry for this!!!
-   if(asmf == NULL && folder->GetType() == MF_IMAP)
+   if ( !asmf )
    {
-      /// WHAT TO DO? we could half-open it here
+      if ( mApplication->GetLastError() != M_ERROR_CANCEL )
+      {
+         wxLogError(_("Impossible to browse subfolders of folder '%s' because "
+                      "the folder cannot be opened."), name.c_str());
+      }
+      //else: the user didn't want to open the folder (for example because it
+      //      requires going online and he didn't want it)
+
+      return FALSE;
    }
-   ///FIXME!!! needs to handle asmf == NULL  gracefully
-   ASSERT(asmf);
+
    wxSubscriptionDialog dlg(GetFrame(parent), folder);
 
    UserData ud = &dlg;
    (void)asmf->ListFolders
-                ("*",      // everything recursively
+                (
+                 "*",      // everything recursively
                  FALSE,    // subscribed only?
                  "",       // reference (what's this?)
-                 ud
+                 ud        // data to pass to the callback
                 );
 
    asmf->DecRef();

@@ -320,6 +320,8 @@ MGetNumberFromUser(const wxString& message,
                    wxWindow *parent,
                    const wxPoint& pos)
 {
+   NoBusyCursor no;
+
    return wxGetNumberFromUser(message, prompt, caption,
                               value, min, max,
                               parent, pos);
@@ -705,7 +707,8 @@ public:
       }
 
    virtual void Notify();
-   private:
+
+private:
    wxAboutWindow *m_window;
 };
 
@@ -724,24 +727,27 @@ public:
   // mouse event handler closes the parent window
   void OnClick(wxMouseEvent&) { DoClose(); }
 
-  // close the about frame
-   void DoClose()
-      {
-         if(GetParent()) GetParent()->Close(true);
-         if(m_pTimer) delete m_pTimer;
-         m_pTimer = NULL;
-      }
+  /// stop the timer
+  void StopTimer(void)
+  {
+     if(m_pTimer)
+     {
+        delete m_pTimer;
+        m_pTimer = NULL;
+     }
+  }
 
-   /// stop the timer
-   void StopTimer(void)
-      {
-         if(m_pTimer)
-            delete m_pTimer;
-         m_pTimer = NULL;
-      }
+  // close the about frame
+  void DoClose()
+  {
+     if(GetParent()) GetParent()->Close(true);
+     StopTimer();
+  }
+
 private:
-   LogCloseTimer  *m_pTimer;
-   DECLARE_EVENT_TABLE();
+  LogCloseTimer  *m_pTimer;
+
+  DECLARE_EVENT_TABLE();
 };
 
 void
@@ -823,16 +829,10 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    ll->Insert(align);
    ll->Insert(version);
    ll->LineBreak();
-   version = _("compiled for ");
-#ifdef OS_UNIX
-   version += M_OSINFO;
-#else // Windows
-   // TODO put Windows version info here
-   version += "Windows";
-#endif // Unix/Windows
 
    ll->Insert(align);
-   ll->Insert(align);
+   version = _("compiled for ");
+   version += wxGetOsDescription();
    ll->Insert(version);
    ll->LineBreak();
    ll->LineBreak();

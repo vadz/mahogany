@@ -60,7 +60,7 @@ public:
    MailFolderTimer(MailFolder *mf)
       : m_mf(mf)
    {
-      
+
    }
 
    /// get called on timeout and pings the mailfolder
@@ -150,14 +150,12 @@ MailFolder::OpenFolder(int folderType,
          break;
 
       case MF_MH:
+         // initialize the MH driver now to get the MHPATH until cclient
+         // has a chance to complain about it
+         if ( !MailFolderCC::InitializeMH() )
          {
-            // initialize the MH driver now to get the MHPATH until cclient
-            // has a chance to complain about it
-            if ( !MailFolderCC::InitializeMH() )
-            {
-               profile->DecRef();
-               return NULL;
-            }
+            profile->DecRef();
+            return NULL;
          }
          break;
 
@@ -178,6 +176,15 @@ MailFolder::OpenFolder(int folderType,
             passwd = strutil_decrypt(READ_CONFIG(profile, MP_FOLDER_PASSWORD));
          if(strutil_isempty(name))
             name = READ_CONFIG(profile, MP_FOLDER_PATH);
+         break;
+
+      case MF_NEWS:
+         // initialize news spool
+         if ( !MailFolderCC::InitializeNewsSpool() )
+         {
+            profile->DecRef();
+            return NULL;
+         }
          break;
 
       case MF_INBOX:
@@ -212,7 +219,7 @@ MailFolder::OpenFolder(int folderType,
       }
    }
 #endif
-   
+
    // FIXME calling MailFolderCC::OpenFolder() explicitly here is "anti-OO"
    folderType = CombineFolderTypeAndFlags(type, flags);
 
@@ -444,7 +451,7 @@ MailFolder::ForwardMessage(class Message *msg,
    ASSERT_RET(msg);
    msg->IncRef();
    if(! profile) profile = mApplication->GetProfile();
-   
+
    wxComposeView *cv = wxComposeView::CreateFwdMessage(parent, profile);
    cv->SetSubject(READ_CONFIG(profile, MP_FORWARD_PREFIX)+ msg->Subject());
    cv->InitText(msg);
@@ -495,7 +502,7 @@ MailFolderCmn::MailFolderCmn(ProfileBase *profile)
    m_PreCloseCalled = false;
 #endif
 
-   // We need to know if we are building the first folder listing ever 
+   // We need to know if we are building the first folder listing ever
    // or not, to suppress NewMail events.
    m_FirstListing = true;
    m_OldMessageCount = 0;
@@ -509,7 +516,7 @@ MailFolderCmn::MailFolderCmn(ProfileBase *profile)
    m_LastNewMsgUId = UID_ILLEGAL;
 
    m_MEventReceiver = new MFCmnEventReceiver(this);
-   
+
    UpdateConfig(); // read profile settings
 }
 
@@ -768,7 +775,7 @@ static int CompareStatus(int stat1, int stat2, int flag)
       unseen   = +1
       answered = -1
    */
-   
+
    if(stat1 & MailFolder::MSG_STAT_RECENT)
       score1 += 1;
    if( !(stat1 & MailFolder::MSG_STAT_SEEN) )
@@ -798,7 +805,7 @@ extern "C"
 
       int result = 0;
       int flag;
-      
+
       while(result == 0 && sortOrder != 0 )
       {
          criterium = sortOrder & 0xF;
@@ -825,7 +832,7 @@ extern "C"
             String
                subj1 = strutil_removeReplyPrefix(i1->GetSubject()),
                subj2 = strutil_removeReplyPrefix(i2->GetSubject());
-            
+
             result = criterium == MSO_SUBJECT ?
                Stricmp(subj1, subj2) : -Stricmp(subj1, subj2);
          }
@@ -887,7 +894,7 @@ static void AddDependents(size_t &idx, int level,
 {
    if(level >= MFCMN_INDENT1_MARKER)
       level = MFCMN_INDENT1_MARKER - 1;
-   
+
    SizeTList::iterator it;
 
    for(it = dependents[i].begin(); it != dependents[i].end(); it++)
@@ -916,11 +923,11 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
       return; // nothing to be done
 
    STATUSMESSAGE((_("Threading %lu messages..."), (unsigned long) hilp->Count()));
-   
+
    size_t i;
    for(i = 0; i < hilp->Count(); i++)
       (*hilp)[i]->SetIndentation(0);
-   
+
    /* We need a list of dependent messages for each entry. */
    SizeTList  * dependents = new SizeTList[ (*hilp).Count() ];
 
@@ -948,7 +955,7 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
    unsigned * indents = new unsigned [(*hilp).Count()];
    for(i = 0; i < hilp->Count(); i++)
       indents[i] = 0;
-   
+
    size_t idx = 0; // where to store next entry
    for(i = 0; i < hilp->Count(); i++)
    {
@@ -964,7 +971,7 @@ static void ThreadMessages(MailFolder *mf, HeaderInfoList *hilp)
    ASSERT(idx == hilp->Count());
 
    hilp->SetTranslationTable(indices);
-   
+
 
    for(i = 0; i < hilp->Count(); i++)
       (*hilp)[i]->SetIndentation(indents[i]);
@@ -1057,13 +1064,13 @@ MailFolderCmn::UpdateListing(void)
       SortListing(this, hilp, m_Config.m_ListingSortOrder);
       if(m_Config.m_UseThreading)
          ThreadMessages(this, hilp);
-      
+
 
       // now we sent an update event to update folderviews etc
       MEventManager::Send( new MEventFolderUpdateData (this) );
 
       CheckForNewMail(hilp);
-      
+
       if(m_UpdateMsgCount) // this will suppress more new mail events
          m_OldMessageCount = (*hilp).Count();
 
@@ -1097,7 +1104,7 @@ MailFolderCmn::UpdateConfig(void)
                                          MP_MSGS_USE_THREADING) != 0;
 
    m_Timer->Stop();
-   m_Timer->Start(m_Config.m_UpdateInterval * 1000);   
+   m_Timer->Start(m_Config.m_UpdateInterval * 1000);
 }
 
 
@@ -1124,7 +1131,7 @@ MailFolderCmn::DeleteMessages(const INTARRAY *selections)
    if(!reallyDelete && GetName() == READ_CONFIG(GetProfile(),
                                                 MP_TRASH_FOLDER))
       reallyDelete = true;
-   
+
    if(!reallyDelete)
    {
       bool rc = SaveMessages(selections,
@@ -1152,8 +1159,8 @@ MailFolderCmn::ApplyFilterRules(bool newOnly)
    if(newOnly && CountNewMessages() == 0)
          return 0;
 #endif
-   
-   // Obtain pointer to the filtering module: 
+
+   // Obtain pointer to the filtering module:
    MModule_Filters *filterModule = MModule_Filters::GetModule();
 
    /* Has the folder got any filter rules set?
@@ -1172,7 +1179,7 @@ MailFolderCmn::ApplyFilterRules(bool newOnly)
          {
             // This might change the folder contents,
             // so we must set this flag:
-            m_FiltersCausedChange = true; 
+            m_FiltersCausedChange = true;
             rc = filterRule->Apply(this, newOnly);
             filterRule->DecRef();
          }
