@@ -1031,25 +1031,29 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                             *value += str2;
                             str2.Empty();
                         }
-                        if ( *cptr++ == '\n' && *cptr ) {
+                        if ( *cptr++ == '\n' && *cptr )
+			{
+            		   if ( READ_CONFIG(m_profile, MP_REPLY_DETECT_SIG) )
+			   {
 #if defined(wxUSE_REGEX)
-                           String sigSeparator = READ_CONFIG(m_profile, MP_REPLY_SIG_SEPARATOR);
-                           if (!sigSeparator.IsEmpty())
-                           {
-                              sigSeparator += _("\r\n");
-                              wxRegEx regEx(sigSeparator);
-                              if (regEx.Matches(cptr))
-                                 break;
-                           }
+                              String sigSeparator = READ_CONFIG(m_profile, MP_REPLY_SIG_SEPARATOR);
+                              if (!sigSeparator.IsEmpty())
+                              {
+                                 sigSeparator += "\r\n";
+                                 wxRegEx regEx(sigSeparator);
+                                 if (regEx.Matches(cptr))
+                                    break;
+                              }
 #else
-                           if (*cptr == '-' &&
-                               *(cptr+1) == '-' &&
-                               ((*(cptr+2) == ' ' &&
-                                 *(cptr+3) == '\r') ||
-                                *(cptr+2) == '\r'))
-                              // Remaining is a sig. Skip
-                              break;
+                              if (*cptr == '-' &&
+                                  *(cptr+1) == '-' &&
+                                  ((*(cptr+2) == ' ' &&
+                                    *(cptr+3) == '\r') ||
+                                   *(cptr+2) == '\r'))
+                                 // Remaining is a sig. Skip
+                                 break;
 #endif
+			   }
                            if ( quoteEmpty ||
                                 (*cptr != '\r' && *cptr != '\n') )
                            {
@@ -1059,7 +1063,8 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
                            }
                         }
                         if ( wrap_margin > 0 && 
-                                    idx >= (unsigned int) wrap_margin ) {
+                                    idx >= (unsigned int) wrap_margin )
+			{
                             // break the line.
                             // if the first word on a new line overflows the
                             // margin, we just chop it off, else, we put the

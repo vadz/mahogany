@@ -479,6 +479,12 @@ enum MFolderIndex
 #define   MP_COMPOSE_USE_SIGNATURE_SEPARATOR   "ComposeSeparateSignature"
 /// filename of signature file
 #define   MP_COMPOSE_SIGNATURE      "SignatureFile"
+/// detect and remove signature when replying?
+#define MP_REPLY_DETECT_SIG "DetectSig"
+#if defined(wxUSE_REGEX)
+/// a regex to detect signature
+#define MP_REPLY_SIG_SEPARATOR "SigSeparator"
+#endif
 /// use XFace in composition?
 #define   MP_COMPOSE_USE_XFACE   "UseXFaces"
 /// Name from where to read XFace
@@ -513,10 +519,6 @@ enum MFolderIndex
 #define MP_AUTOMATIC_WORDWRAP   "AutoWrap"
 /// wrapmargin for composition (set to -1 to disable it)
 #define   MP_WRAPMARGIN      "WrapMargin"
-#if defined(wxUSE_REGEX)
-/// a regex to detect signature
-#define MP_REPLY_SIG_SEPARATOR "SigSeparator"
-#endif
 /// do automatic word wrap in message view?
 #define MP_VIEW_AUTOMATIC_WORDWRAP   "ViewAutoWrap"
 /// wrapmargin for message view (set to -1 to disable it)
@@ -1176,6 +1178,12 @@ enum MFolderIndex
 #else
 #  define   MP_COMPOSE_SIGNATURE_D      "$HOME/.signature"
 #endif
+/// detect and remove signature when replying?
+#define MP_REPLY_DETECT_SIG_D   1
+#if defined(wxUSE_REGEX)
+/// a regex to detect signature
+#define MP_REPLY_SIG_SEPARATOR_D "^((_____*)|(-- ?))"
+#endif
 /// use XFace in composition?
 #define   MP_COMPOSE_USE_XFACE_D   1
 /// Name from where to read XFace
@@ -1210,10 +1218,6 @@ enum MFolderIndex
 #define MP_AUTOMATIC_WORDWRAP_D   1l
 /// wrapmargin for composition (set to -1 to disable it)
 #define   MP_WRAPMARGIN_D      75
-#if defined(wxUSE_REGEX)
-/// a regex to detect signature
-#define MP_REPLY_SIG_SEPARATOR_D "^((_____*)|(-- ?))"
-#endif
 /// do automatic word wrap in message view?
 #define MP_VIEW_AUTOMATIC_WORDWRAP_D   1l
 /// wrapmargin for message view (set to -1 to disable it)

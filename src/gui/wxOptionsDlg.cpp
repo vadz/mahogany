@@ -175,6 +175,8 @@ enum ConfigFields
    ConfigField_ReplyCharacters,
    ConfigField_ReplyUseSenderInitials,
    ConfigField_ReplyQuoteEmpty,
+
+   ConfigField_DetectSig,
 #if defined(wxUSE_REGEX)
    ConfigField_ReplySigSeparatorHelp,
    ConfigField_ReplySigSeparator,
@@ -816,14 +818,16 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Prepend &sender initials"),     Field_Bool,    ConfigField_ReplyCharacters,                        },
    { gettext_noop("&Quote empty lines too"),       Field_Bool |
                                                    Field_Advanced,    ConfigField_ReplyCharacters,                        },
+   { gettext_noop("Detect and remove signature when replying?"),       Field_Bool |
+                                                   Field_Advanced,    -1 ,                        },
 #if defined(wxUSE_REGEX)
    { gettext_noop("When replying to a message, a regex can be used to detect\n"
                   "the beginning of the signature of the message replied to.\n"
                   "(Do not try to detect the end of the line: a \\r\\n pair will\n"
                   "be added for that at the end of the specified regex. On the\n"
                   "other hand, do not forget '^' at the beginning...)"),
-   Field_Message | Field_AppWide, -1 },
-                  { gettext_noop("Signature separator"),          Field_Text,    -1,                        },
+						   Field_Message | Field_AppWide | Field_Advanced, -1 },
+   { gettext_noop("Signature separator"),          Field_Text | Field_Advanced,    ConfigField_DetectSig,     },
 #endif
 
    { gettext_noop("&Use signature"),               Field_Bool,    -1,                        },
@@ -1229,6 +1233,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX),
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX_FROM_SENDER),
    CONFIG_ENTRY(MP_REPLY_QUOTE_EMPTY),
+
+   CONFIG_ENTRY(MP_REPLY_DETECT_SIG),
 #if defined(wxUSE_REGEX)
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_REPLY_SIG_SEPARATOR),
