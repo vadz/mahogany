@@ -148,6 +148,7 @@ public:
       // templates because they work with the original message
       Var_Quote,           // quote the original text
       Var_Quote822,        // include the original msg as a RFC822 attachment
+      Var_Text,            // include the original text as is
       Var_Sender,          // the fullname of the sender
 
       Var_Invalid,
@@ -357,6 +358,10 @@ static TemplatePopupMenuItem gs_popupSubmenuOriginal[] =
    TemplatePopupMenuItem(_("&To"), "${original:to}"),
    TemplatePopupMenuItem(_("&Reply to"), "${original:replyto}"),
    TemplatePopupMenuItem(_("&Newsgroups"), "${original:newsgroups}"),
+   TemplatePopupMenuItem(),
+   TemplatePopupMenuItem(_("Insert &quoted text"), "$quote"),
+   TemplatePopupMenuItem(_("&Attach original text"), "$quote822"),
+   TemplatePopupMenuItem(_("Insert &unquoted Text"), "$text"),
 };
 
 // the whole menu
@@ -502,6 +507,7 @@ const char *VarExpander::ms_templateVarNames[] =
    "subject",
    "quote",
    "quote822",
+   "text",
    "sender",
 };
 
@@ -671,6 +677,9 @@ VarExpander::ExpandMisc(const String& name, String *value) const
 
       case Var_Quote822:
          return ExpandOriginal("quote822", value);
+
+      case Var_Text:
+         return ExpandOriginal("text", value);
 
       case Var_Sender:
          ExpandOriginal("from", value);
