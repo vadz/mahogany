@@ -441,7 +441,8 @@ public:
    virtual bool TransferDataToWindow()
    {
 #if defined(OS_WIN)
-      m_connections->SetValue(gs_installWizardData.connection);
+      if ( !gs_installWizardData.connection.empty() )
+         m_connections->SetValue(gs_installWizardData.connection);
 #elif defined(OS_UNIX)
       m_connect->SetValue(gs_installWizardData.dialCommand);
       m_disconnect->SetValue(gs_installWizardData.hangupCommand);
