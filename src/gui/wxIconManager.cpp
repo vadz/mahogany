@@ -294,7 +294,7 @@ wxIconManager::GetIcon(String const &_iconName)
          if(ptr)
          {
             icn = wxIcon(ptr);
-            // we never free ptr or wxIcon will get broken? FIXME
+            FreeImage(ptr);
 #else
          // Windows:
          if(icn.LoadFile(Str(name),0))
