@@ -1,0 +1,42 @@
+/* XPM */
+static char *tb_refresh[] = {
+/* width height num_colors chars_per_pixel */
+"    24    24       11            1",
+/* colors */
+". c #000000",
+"# c #566b43",
+"a c #4c603c",
+"b c #526741",
+"c c #5a7046",
+"d c #445636",
+"e c #37452b",
+"f c #425334",
+"g c #475937",
+"h c #5c7449",
+"i c #ffffff",
+/* pixels */
+"iiiiiiiiiiiiiiiiiiiiiiii",
+"iiiiiiiiiiiiiiiiiiiiiiii",
+"iiiiiiiiiiiiiiiiiiiiiiii",
+"iiiiiiiiiiiiiiiiiiiiiiii",
+"iiiiiiiiiii.iiiiiiiiiiii",
+"iiiiiiiiii..iiiiiiiiiiii",
+"iiiiiiiii.#a...iiiiiiiii",
+"iiiiiiii.bcbbad..iiiiiii",
+"iiiiiiiii.#b...dd.iiiiii",
+"iiiiiii.ii..iii.e.iiiiii",
+"iiiiii.iiii.iiii.e.iiiii",
+"iiiii..iiiiiiiiii..iiiii",
+"iiiii..iiiiiiiiii..iiiii",
+"iiiii.f.iiii.iiii.iiiiii",
+"iiiiii.f.iii..ii.iiiiiii",
+"iiiiii.da...bg.iiiiiiiii",
+"iiiiiii..bbhbab.iiiiiiii",
+"iiiiiiiii...ad.iiiiiiiii",
+"iiiiiiiiiiii..iiiiiiiiii",
+"iiiiiiiiiiii.iiiiiiiiiii",
+"iiiiiiiiiiiiiiiiiiiiiiii",
+"iiiiiiiiiiiiiiiiiiiiiiii",
+"iiiiiiiiiiiiiiiiiiiiiiii",
+"iiiiiiiiiiiiiiiiiiiiiiii"
+};
