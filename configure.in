@@ -227,6 +227,7 @@ AC_C_INLINE
 dnl C++-compiler checks
 dnl ===================
 
+AC_LANG_SAVE
 AC_LANG_CPLUSPLUS
 
 dnl use what compiler?
@@ -364,24 +365,7 @@ case "$m_cv_cxx_opernames" in yes)
 	esac
 esac
 
-dnl this is not used any more (with wxWin 2.3.x) as it now conveniently
-dnl defines wxSIZE_T_IS_U(INT|LONG) for us
-dnl ### dnl check if size_t is different from unsigned long - this is used to
-dnl ### dnl define UIdType in a way which would allow it to compile everywhere
-dnl ### AC_CACHE_CHECK([if size_t is different from unsigned long],
-dnl ###     m_cv_size_t_not_ulong,
-dnl ###     AC_TRY_COMPILE([#include <stddef.h>],
-dnl ### 	[
-dnl ### 	    struct Foo { void foo(size_t); void foo(unsigned long); };
-dnl ### 	],
-dnl ### 	m_cv_size_t_not_ulong=yes,
-dnl ### 	m_cv_size_t_not_ulong=no
-dnl ###     )
-dnl ### )
-dnl ### 
-dnl ### if test "$m_cv_size_t_not_ulong" != "yes"; then
-dnl ###     AC_DEFINE(UIDTYPE_IS_UINT)
-dnl ### fi
+AC_LANG_RESTORE
 
 dnl Various other commands needed
 dnl =============================
@@ -569,16 +553,20 @@ case "$USE_SSL" in
 	dnl <ssl.h> and not <openssl/ssl.h> -- using /usr/include/openssl
 	dnl as we used to do doesn't work in case when the SSL headers live
 	dnl under /usr/local
+	dnl
+	dnl OTOH, in the newer versions of OpenSSL ssl.h itself includes the
+	dnl other files as <openssl/foo.h> so when testing the headers
+	dnl existence with -Iprefix/openssl we must *also* have -Iprefix or it
+	dnl doesn't risk to work.
+	CPPFLAGS_OLD=$CPPFLAGS
+	CPPFLAGS="${CPPFLAGS} -I${ssl_inc} -I/usr/ssl/include -I/usr/local/ssl/include"
 	M_CHECK_MYHEADER(ssl.h,
 	[ \
 		$ssl_inc/openssl \
-		/include/openssl \
 		/usr/include/openssl \
 		/usr/ssl/include/openssl \
 		/usr/local/include/openssl \
 		/usr/local/ssl/include/openssl \
-		/home/local/include/openssl \
-		/home/local/ssl/include/openssl \
 	],
 	[
 	   ssl_option=yes
@@ -586,6 +574,8 @@ case "$USE_SSL" in
 	],
 	   ssl_option=no
 	)
+
+	CPPFLAGS=$CPPFLAGS_OLD
 
 	if test "$ssl_option" != "no"; then
 	    dnl remove the openssl suffix now
