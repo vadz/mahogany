@@ -3192,9 +3192,10 @@ VarExpander::ExpandMessage(const String& name, String *value) const
          CHECK( header <= MessageHeader_LastControl, FALSE,
                 "unexpected macro in message category" );
 
-         // the MessageHeader enum values are the same as AddressField ones, so no
-         // translation is needed
-         *value = m_cv.GetHeaderValue((wxComposeView::AddressField)header);
+         // the MessageHeader enum values are the same as AddressField ones
+         // except for the shift due to absence of "From", so no translation is
+         // needed
+         *value = m_cv.GetHeaderValue((wxComposeView::AddressField)(header + 1));
    }
 
    return TRUE;

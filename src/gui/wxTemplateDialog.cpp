@@ -415,13 +415,13 @@ wxFolderTemplatesDialog::wxFolderTemplatesDialog(const TemplatePopupMenuItem& me
    wxStaticBox *box = CreateStdButtonsAndBox("");
 
    // then a short help message
-   wxStaticText *msg = new wxStaticText
-                           (
-                            this, -1,
-                            _("Select the template to edit in the list first. "
-                              "Then right click the mouse in the text control "
-                              "to get the list of all available macros.")
-                           );
+   wxStaticText *msg =
+      new wxStaticText
+      (
+       this, -1,
+       _("Select the template to edit in the list first. Then right click the\n"
+         "mouse in the text control to get the list of all available macros.")
+      );
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
