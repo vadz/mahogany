@@ -19,15 +19,17 @@
 
 
 
+
 #ifndef _MApplication_MID_H_
 #define _MApplication_MID_H_
 
 #include "MApplication.h"
 #include "Profile.h"
 #include "strutil.h"
-#include "MDialogs.h"
+#include "gui/wxMDialogs.h"
 #include "MFolder.h"
 #include "MailFolder.h"
+#include "ASMailFolder.h"
 #include "Message.h"
 #include "SendMessage.h"
 #include "Address.h"
