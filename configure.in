@@ -40,26 +40,27 @@ dnl --------------------------------------------------------------------------
 M_OVERRIDES(debug,debugging,USE_DEBUG,0,
 --enable-debug          generate code with debugging information)
 
-M_OVERRIDES(optimize,optimization,USE_OPT,1,
---disable-optimize      disable compiler optimization)
+case "$USE_DEBUG" in
+    dnl options which are incompatible with debugging
+    0|'')
+	M_OVERRIDES(optimize,optimization,USE_OPT,1,
+	--disable-optimize      disable optimization (automatic if debugging))
+	;;
 
-dnl M_OVERRIDES(debug,debug code,USE_DEBUG,0,
-dnl --with-debug            [deprecated, use --enable-debug instead])
-dnl 
-dnl M_OVERRIDES(debuginfo,debuging info,USE_DEBUG_INFO,0,
-dnl --with-debuginfo        [deprecated, don't use])
+    dnl options which only make sense if debug was given
+    *)
+	M_OVERRIDES(wxdebug,wxWin debug libs,USE_WXDEBUG,0,
+	--with-wxdebug          use debug wxWindows libraries)
 
-M_OVERRIDES(wxdebug,wxWin debug libs,USE_WXDEBUG,0,
---with-wxdebug          use debug wxWindows libraries)
+	M_OVERRIDES(dmalloc,dmalloc library,USE_DMALLOC,0,
+	--with-dmalloc          use dmalloc (http://dmalloc.com/) for debugging)
 
-M_OVERRIDES(dmalloc,dmalloc library,USE_DMALLOC,0,
---with-dmalloc          use dmalloc (http://dmalloc.com/) for debugging)
+	M_OVERRIDES(leaktracer,LeakTracer,USE_LEAKTRACER,0,
+	--with-leaktracer       use LeakTracer for debugging)
 
-M_OVERRIDES(leaktracer,LeakTracer,USE_LEAKTRACER,0,
---with-leaktracer       use LeakTracer for debugging)
-
-M_OVERRIDES(efence,ElectricFence,USE_EFENCE,0,
---with-efence           use ElectricFence for debugging)
+	M_OVERRIDES(efence,ElectricFence,USE_EFENCE,0,
+	--with-efence           use ElectricFence for debugging)
+esac
 
 M_OVERRIDES(profile,profiling,USE_PROFILER,0,
 --enable-profile        generate code for profiling)
@@ -73,8 +74,12 @@ M_OVERRIDES(nls,i18n support,USE_I18N,1,
 M_OVERRIDES(python,Python scripting,USE_PYTHON,none,
 --with-python=xxx       one of none/static/dynamic)
 
-M_OVERRIDES(swig,whether we should use SWIG,USE_SWIG,1,
---without-swig          don't use swig even if it is available)
+case "$USE_PYTHON" in
+    static|Static|STATIC|dynamic|Dynamic|DYNAMIC|1)
+	M_OVERRIDES(swig,whether we should use SWIG,USE_SWIG,1,
+	--without-swig          don't use swig even if it is available)
+	;;
+esac
 
 M_OVERRIDES(dialup,special dial-up support,USE_DIALUP,1,
 --disable-dialup        disable dial-up support for modem users)
