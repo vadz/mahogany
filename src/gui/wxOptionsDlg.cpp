@@ -413,6 +413,8 @@ enum ConfigFields
 
    // folder tree options
    ConfigField_FolderTreeFirst = ConfigField_FolderViewLast,
+   ConfigField_FolderTreeColourHelp,
+   ConfigField_FolderTreeFgColour,
    ConfigField_FolderTreeBgColour,
    ConfigField_FolderTreeFormatHelp,
    ConfigField_FolderTreeFormat,
@@ -1345,7 +1347,11 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Status bar line format"),      Field_Text,    ConfigField_FolderViewUpdateStatus },
 
    // folder tree
-   { gettext_noop("Tree &background colour"), Field_Color, -1 },
+   { gettext_noop("The two options below are common for all folders,\n"
+                  "but note that the first of them may be overridden by setting\n"
+                  "the normal folder colour in the \"Folder View\" page."), Field_Message | Field_AppWide, -1 },
+   { gettext_noop("Tree &foreground colour"), Field_Color | Field_AppWide, -1 },
+   { gettext_noop("Tree &background colour"), Field_Color | Field_AppWide, -1 },
    { gettext_noop("Mahogany can show the number of messages in the folder\n"
                   "directly in the folder tree. You may wish to disable\n"
                   "this feature to speed it up slightly by leaving the text\n"
@@ -1364,10 +1370,10 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "which normally selects the next folder with unread messages.\n"
                   "But if you select it, this one will be skipped even it has\n"
                   "unread mail (again, this is mainly useful for \"Trash\"\n"
-                  "folder, for example)."), Field_Message, -1 },
-   { gettext_noop("&Skip this folder"), Field_Bool, -1 },
-   { gettext_noop("Open folder on single &click"), Field_Bool | Field_AppWide, -1 },
-   { gettext_noop("Show &hidden folders in the folder tree"), Field_Bool | Field_AppWide, -1 },
+                  "folder, for example)."), Field_Message | Field_NotApp, -1 },
+   { gettext_noop("&Skip this folder"), Field_Bool | Field_NotApp, -1 },
+   { gettext_noop("Open folder on single &click"), Field_Bool | Field_AppWide | Field_Global, -1 },
+   { gettext_noop("Show &hidden folders in the folder tree"), Field_Bool | Field_AppWide | Field_Global,-1 },
 
    // adb: autocollect and bbdb options
    { gettext_noop("The addresses listed below are the ones which are\n"
@@ -1790,7 +1796,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FVIEW_STATUS_FMT),
 
    // folder tree
-   CONFIG_ENTRY(MP_FOLDER_BGCOLOUR),
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_FTREE_FGCOLOUR),
+   CONFIG_ENTRY(MP_FTREE_BGCOLOUR),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FTREE_FORMAT),
    CONFIG_NONE(),

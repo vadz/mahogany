@@ -91,7 +91,8 @@ extern "C"
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_FOCUS_FOLLOWSMOUSE;
-extern const MOption MP_FOLDER_BGCOLOUR;
+extern const MOption MP_FTREE_BGCOLOUR;
+extern const MOption MP_FTREE_FGCOLOUR;
 extern const MOption MP_FOLDER_TREEINDEX;
 extern const MOption MP_FTREE_FORMAT;
 extern const MOption MP_FTREE_NEVER_UNREAD;
@@ -315,8 +316,8 @@ public:
       // own popup menu
    bool ProcessMenuCommand(int id);
 
-      // update the bg colour
-   void UpdateBackground();
+      // update the tree colours
+   void UpdateColours();
 
    // callbacks
    void OnKeyDown(wxTreeEvent& event);
@@ -532,8 +533,9 @@ private:
    bool m_FocusFollowMode;
 #endif // wxGTK
 
-   // the bg colour name
-   wxString m_colBgName;
+   // the fg and bg colour names
+   wxString m_colFgName,
+            m_colBgName;
 
    // the id of the item being edited in place
    wxTreeItemId m_idEditedInPlace;
@@ -1415,13 +1417,28 @@ void wxFolderTreeNode::UpdateShownStatus(wxTreeCtrl *tree,
 
       }
 
+      bool found;
       wxString colorName = profile->readEntry(GetOptionName(*opt),
-                                              GetStringDefault(*opt));
+                                              GetStringDefault(*opt),
+                                              &found);
+
+      // use the default tree foreground colour for the folders not explicitly
+      // configured to use another colour
       wxColour col;
-      if ( !ParseColourString(colorName, &col) )
+      if ( found || (statusShown != Folder_Normal) )
       {
-         wxLogDebug("Invalid colour string '%s'.", colorName.c_str());
-         col = *wxBLACK;
+         if ( !ParseColourString(colorName, &col) )
+         {
+            wxLogDebug("Invalid colour string '%s'.", colorName.c_str());
+            col = *wxBLACK;
+         }
+      }
+      else // use default foreground
+      {
+         // NB: we still need to set the colour even if it is now going to be
+         //     the default one simply because it could have been a different
+         //     one before
+         col = tree->GetForegroundColour();
       }
 
       tree->SetItemTextColour(GetId(), col);
@@ -1609,7 +1626,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
 
    SetImageList(imageList);
 
-   UpdateBackground();
+   UpdateColours();
 
 #if wxUSE_DRAG_AND_DROP
    // create our drop target
@@ -1634,12 +1651,12 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
     }
 }
 
-void wxFolderTreeImpl::UpdateBackground()
+void wxFolderTreeImpl::UpdateColours()
 {
-   wxString colName = READ_APPCONFIG(MP_FOLDER_BGCOLOUR);
+   wxString colName = READ_APPCONFIG(MP_FTREE_BGCOLOUR);
    if ( colName != m_colBgName )
    {
-      if ( !!colName )
+      if ( !colName.empty() )
       {
          wxColour col;
          if ( ParseColourString(colName, &col) )
@@ -1650,8 +1667,22 @@ void wxFolderTreeImpl::UpdateBackground()
 
       m_colBgName = colName;
    }
-}
 
+   colName = READ_APPCONFIG_TEXT(MP_FTREE_FGCOLOUR);
+   if ( colName != m_colFgName )
+   {
+      if ( !colName.empty() )
+      {
+         wxColour col;
+         if ( ParseColourString(colName, &col) )
+         {
+            SetForegroundColour(col);
+         }
+      }
+
+      m_colFgName = colName;
+   }
+}
 
 void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
 {
@@ -2568,7 +2599,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
 #endif // wxGTK
 
       // reread the bg colour setting
-      UpdateBackground();
+      UpdateColours();
 
       MEventOptionsChangeData& event = (MEventOptionsChangeData &)ev;
 

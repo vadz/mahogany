@@ -281,7 +281,8 @@ extern const MOption MP_FVIEW_STATUS_FMT;
 extern const MOption MP_FVIEW_PREVIEW_DELAY;
 
 // folder tree
-extern const MOption MP_FOLDER_BGCOLOUR;
+extern const MOption MP_FTREE_FGCOLOUR;
+extern const MOption MP_FTREE_BGCOLOUR;
 extern const MOption MP_FTREE_FORMAT;
 extern const MOption MP_FTREE_PROPAGATE;
 extern const MOption MP_FTREE_NEVER_UNREAD;
@@ -917,8 +918,10 @@ extern const MOption MP_AWAY_STATUS;
 //@}
 /**@name  Font settings for folder tree */
 //@{
+/// the foreground colour for the folder tree
+#define MP_FTREE_FGCOLOUR_NAME "FTreeFgColour"
 /// the background colour for the folder tree
-#define MP_FOLDER_BGCOLOUR_NAME "FTreeBgColour"
+#define MP_FTREE_BGCOLOUR_NAME "FTreeBgColour"
 /// format for the folder tree entries
 #define MP_FTREE_FORMAT_NAME "FTreeFormat"
 /// reflect the folder status in its parent
@@ -1805,8 +1808,10 @@ extern const MOption MP_AWAY_STATUS;
 //@}
 /**@name Font settings for folder tree */
 //@{
+/// the foreground colour for the folder tree
+#define MP_FTREE_FGCOLOUR_DEFVAL ""
 /// the background colour for the folder tree
-#define MP_FOLDER_BGCOLOUR_DEFVAL ""
+#define MP_FTREE_BGCOLOUR_DEFVAL ""
 /// format for the folder tree entries
 #define MP_FTREE_FORMAT_DEFVAL " (%t, %u)"
 /// reflect the folder status in its parent?
