@@ -1421,8 +1421,8 @@ BEGIN_EVENT_TABLE(wxFolderFiltersDialog, wxSelectionsOrderDialog)
    EVT_BUTTON(Button_Edit, wxFolderFiltersDialog::OnEditFiter)
    EVT_BUTTON(Button_Delete, wxFolderFiltersDialog::OnDeleteFiter)
 
-   EVT_UPDATE_UI_RANGE(Button_Add, Button_Edit,
-                       wxFolderFiltersDialog::OnUpdateEditBtn)
+   EVT_UPDATE_UI(Button_Delete, wxFolderFiltersDialog::OnUpdateEditBtn)
+   EVT_UPDATE_UI(Button_Edit, wxFolderFiltersDialog::OnUpdateEditBtn)
 
    EVT_LISTBOX_DCLICK(-1, wxFolderFiltersDialog::OnEditFiter)
 END_EVENT_TABLE()
