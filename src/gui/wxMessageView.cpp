@@ -1284,7 +1284,8 @@ wxMessageView::Print(void)
    if(found)
       wxSetAFMPath(afmpath);
 #endif // Win/Unix
-   wxPrinter printer;
+   wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
+   wxPrinter printer(data);
    wxLayoutPrintout printout(GetLayoutList(),_("M: Printout"));
    if (! printer.Print(this, &printout, TRUE))
       wxMessageBox(
@@ -1308,10 +1309,12 @@ wxMessageView::PrintPreview(void)
    wxSetAFMPath((char *) afmpath.c_str());
 #endif // in/Unix
 
+   wxPrintData &data = ((wxMApp *)mApplication)->GetPrintData();
    // Pass two printout objects: for preview, and possible printing.
-   wxPrintPreview *preview = new wxPrintPreview(new wxLayoutPrintout(GetLayoutList()),
-                                                new wxLayoutPrintout(GetLayoutList()),
-                                               & ((wxMApp *)mApplication)->GetPrintData());
+   wxPrintPreview *preview = new wxPrintPreview(
+	new wxLayoutPrintout(GetLayoutList()),
+        new wxLayoutPrintout(GetLayoutList()),
+        data);
    if(!preview->Ok())
    {
       delete preview;
