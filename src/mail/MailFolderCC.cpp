@@ -2778,21 +2778,24 @@ MailFolderCC::GetAllOpened()
 {
    CHECK_STREAM_LIST();
 
-   size_t count = gs_StreamList->size();
+   size_t count = gs_StreamList ? gs_StreamList->size() : 0;
    MailFolder **mfOpened = new MailFolder *[count + 1];
 
    size_t n = 0;
-   for ( StreamConnectionList::iterator i = gs_StreamList->begin();
-         i != gs_StreamList->end();
-         i++ )
+   if ( count )
    {
-      if ( i->stream && !i->stream->halfopen )
+      for ( StreamConnectionList::iterator i = gs_StreamList->begin();
+            i != gs_StreamList->end();
+            i++ )
       {
-         mfOpened[n++] = i->folder;
+         if ( i->stream && !i->stream->halfopen )
+         {
+            mfOpened[n++] = i->folder;
+         }
       }
    }
 
-   // terminate the array
+   // always terminate the array with NULL
    mfOpened[n] = NULL;
 
    return mfOpened;
@@ -2899,16 +2902,20 @@ MailFolderCC::CanExit(String *which)
 {
    CHECK_STREAM_LIST();
 
-   which->clear();
-
    bool canExit = true;
-   StreamConnectionList::iterator i;
-   for(i = gs_StreamList->begin(); i != gs_StreamList->end(); i++)
+
+   if ( gs_StreamList )
    {
-      if( i->folder->InCritical() )
+      which->clear();
+      for ( StreamConnectionList::iterator i = gs_StreamList->begin();
+            i != gs_StreamList->end();
+            ++i )
       {
-         canExit = false;
-         *which << i->folder->GetName() << '\n';
+         if( i->folder->InCritical() )
+         {
+            canExit = false;
+            *which << i->folder->GetName() << '\n';
+         }
       }
    }
 
@@ -2919,6 +2926,8 @@ MailFolderCC::CanExit(String *which)
 /* static */
 MailFolderCC *MailFolderCC::LookupStream(const MAILSTREAM *stream)
 {
+   CHECK( gs_StreamList, NULL, "shouldn't be called if uninitialized" );
+
    CHECK_STREAM_LIST();
 
    for ( StreamConnectionList::iterator i = gs_StreamList->begin();
@@ -2937,6 +2946,8 @@ MailFolderCC *MailFolderCC::LookupStream(const MAILSTREAM *stream)
 MailFolderCC *
 MailFolderCC::LookupObject(const MAILSTREAM *stream, const char *name)
 {
+   CHECK( gs_StreamList, NULL, "shouldn't be called if uninitialized" );
+
    MailFolderCC *mf = LookupStream(stream);
    if ( mf )
       return mf;
@@ -3031,6 +3042,9 @@ MailFolderCC::RemoveFromMap(void) const
 {
    wxLogTrace(TRACE_MF_CACHE, "MailFolderCC::RemoveFromMap() for folder %s",
               GetName().c_str());
+
+   CHECK_RET( gs_StreamList, "shouldn't be called if uninitialized" );
+
    CHECK_STREAM_LIST();
 
    for ( StreamConnectionList::iterator i = gs_StreamList->begin();
