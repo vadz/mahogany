@@ -2155,15 +2155,6 @@ wxFolderView::Update()
 
    size_t numMessages = listing->Count();
 
-#if 1
-   MailFolderStatus status;
-   if ( !MfStatusCache::Get()->GetStatus(m_MailFolder->GetName(), &status) ||
-            numMessages != status.total )
-   {
-      wxLogDebug("Something is wrong in wxFolderView::Update()");
-   }
-#endif // 0
-
    static const size_t THRESHOLD = 100;
    if ( numMessages > THRESHOLD )
    {
