@@ -435,8 +435,8 @@ wxIconManager::SetSubDirectory(wxString subDir)
    // be set yet.
    if(mApplication && ! m_GlobalDir.Length())
    {
-      m_GlobalDir << mApplication->GetDataDir() << "/icons";
-      m_LocalDir << mApplication->GetLocalDir() << "/icons";
+      m_GlobalDir << mApplication->GetDataDir() << DIR_SEPARATOR << "icons";
+      m_LocalDir << mApplication->GetLocalDir() << DIR_SEPARATOR << "icons";
    }
 
    /* If nothing changed, we don't do anything: */
