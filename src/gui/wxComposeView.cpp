@@ -833,14 +833,14 @@ Composer::RecipientType wxAddressTextCtrl::DoExpand(bool quiet)
    Composer::RecipientType addrType = Composer::Recipient_Max;
    if ( textOrig.length() > 3 )
    {
-      if ( textOrig[2] == ':' )
+      if ( textOrig[2u] == ':' )
       {
-         if ( toupper(textOrig[0]) == 'T' && toupper(textOrig[1]) == 'O' )
+         if ( toupper(textOrig[0u]) == 'T' && toupper(textOrig[1u]) == 'O' )
             addrType = Composer::Recipient_To;
-         else if ( toupper(textOrig[0]) == 'C' && toupper(textOrig[1]) == 'C' )
+         else if ( toupper(textOrig[0u]) == 'C' && toupper(textOrig[1u]) == 'C' )
             addrType = Composer::Recipient_Cc;
       }
-      else if ( textOrig[3] == ':' && textOrig(0, 3).Upper() == "BCC" )
+      else if ( textOrig[3u] == ':' && textOrig(0, 3).Upper() == "BCC" )
       {
          addrType = Composer::Recipient_Bcc;
       }
