@@ -19,11 +19,11 @@
 #define MDIALOG_FATALERRTITLE_C (char *)MDIALOG_FATALERRTITLE
 #define MDIALOG_MSGTITLE_C (char *)MDIALOG_MSGTITLE
 #define MDIALOG_YESNOTITLE_C (char *)MDIALOG_YESNOTITLE
+%}
 
 // it's not really a dialog, but is useful too
 inline void MDialog_StatusMessage(const char *message, MFrame *frame = NULL)
   { wxLogStatus(frame, message); }
-%}
 
 %import MString.i
 %import MProfile.i
@@ -60,9 +60,6 @@ void  MDialog_FatalErrorMessage(const char *message,
 void  MDialog_Message(const char *message,
                       MFrame *parent = NULL,
                       const char *title = MDIALOG_MSGTITLE_C);
-
-void  MDialog_StatusMessage(const char *message, MFrame *frame = NULL);
-
 
 bool MDialog_YesNoDialog(const char *message,
                            MWindow *parent = NULL,
