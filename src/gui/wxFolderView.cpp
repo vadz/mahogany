@@ -179,7 +179,7 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
    }
    else
       event.Skip();
-   SetFocus();  //FIXME ugly wxGTK listctrl bug workaround
+   //SetFocus();  //FIXME ugly wxGTK listctrl bug workaround
 }
 
 
@@ -290,8 +290,6 @@ wxFolderListCtrl::Clear(void)
 
    RestoreWidths();
    m_Initialised = true; // now we have proper columns set up
-
-   SetFocus(); // otherwise we lose it...strange
 }
 
 void

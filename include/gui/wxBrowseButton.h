@@ -46,8 +46,7 @@ public:
          return FALSE;
 
       m_text->Enable(enable);
-
-      return TRUE;
+      return wxButton::Enable(enable);
    }
 
 protected:

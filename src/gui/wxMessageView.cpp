@@ -321,7 +321,7 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent)
    m_FolderView = fv;
    m_MimePopup = NULL;
    m_uid = -1;
-   SetFocus();
+//   SetFocus();
    SetMouseTracking();
    SetParentProfile(fv ? fv->GetProfile() : NULL);
 }

@@ -315,6 +315,8 @@
 #define   MP_REPLY_COLLAPSE_PREFIX "CollapseReplyPrefix"
 /// prefix for text in replies
 #define   MP_REPLY_MSGPREFIX      "ReplyQuote"
+/// set reply string from To: field?
+#define MP_SET_REPLY_FROM_TO   "ReplyEqualsTo"
 /// prefix for subject in forwards
 #define   MP_FORWARD_PREFIX         "ForwardPrefix"
 /// show XFaces?
@@ -672,6 +674,8 @@
 #define   MP_REPLY_COLLAPSE_PREFIX_D 2l
 /// prefix for text in replies
 #define   MP_REPLY_MSGPREFIX_D      " > "
+/// set reply string from To: field?
+#define MP_SET_REPLY_FROM_TO_D   1l
 /// prefix for subject in forwards
 #define   MP_FORWARD_PREFIX_D      "Forwarded message: "
 /// show XFaces?
