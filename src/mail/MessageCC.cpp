@@ -383,7 +383,7 @@ MessageCC::Address(String &name, MessageAddressType type) const
       if(addr->host && strlen(addr->host)
          && (strcmp(addr->host,BADHOST) != 0))
          email0 += String("@") + String(addr->host);
-      email0 = MailFolderCC::DecodeHeader(email);
+      email0 = MailFolderCC::DecodeHeader(email0);
       if(addr->personal && strlen(addr->personal))
       {
          name0 = String(addr->personal);
@@ -398,7 +398,11 @@ MessageCC::Address(String &name, MessageAddressType type) const
       email += email0;
 
       // for now: use first name found:
-      if(name[0] == '\0') name = name0;
+      if(name[0] == '\0') 
+        name = name0;
+      else if (name0[0]) // found another name
+        name << " ...";
+
       
       addr = addr->next;
    }
