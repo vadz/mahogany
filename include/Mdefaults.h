@@ -489,6 +489,9 @@ enum MFolderIndex
 /// a regex to detect signature
 #define MP_REPLY_SIG_SEPARATOR "SigSeparator"
 #endif
+// include the original message in the reply [always,never,ask]
+#define MP_COMPOSE_REPLY_INSERT_ORIG "ReplyQuoteInsert" 
+
 /// use XFace in composition?
 #define   MP_COMPOSE_USE_XFACE   "UseXFaces"
 /// Name from where to read XFace
@@ -1200,6 +1203,9 @@ enum MFolderIndex
 /// a regex to detect signature
 #define MP_REPLY_SIG_SEPARATOR_D "((_____*)|(-- ?))"
 #endif
+// include the original message in the reply [Never,Always,Ask]
+#define MP_COMPOSE_REPLY_INSERT_ORIG_D 2l
+
 /// use XFace in composition?
 #define   MP_COMPOSE_USE_XFACE_D   1
 /// Name from where to read XFace

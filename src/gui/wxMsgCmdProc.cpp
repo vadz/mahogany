@@ -418,6 +418,7 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
          templKind = MessageTemplate_None;
    }
 
+
    String templ;
    if ( templKind != MessageTemplate_None )
    {
@@ -461,6 +462,23 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
       case WXMENU_MSG_REPLY:
       case WXMENU_MSG_FOLLOWUP:
          {
+
+           Profile *m_profile = mApplication->GetProfile();
+           m_profile->IncRef();
+
+           int quoteRule = READ_CONFIG(m_profile, MP_COMPOSE_REPLY_INSERT_ORIG);
+           
+           m_profile->DecRef();
+           
+           if (( quoteRule == 1 ) ||         // if the rule is never
+               ( quoteRule == 2 &&           // or the answer was no
+                 !MDialog_YesNoDialog(_("Insert the original message?")) ))
+             {
+               templ = MessageTemplate_None;
+             }
+   
+
+
             int flags = cmd == WXMENU_MSG_FOLLOWUP ? MailFolder::REPLY_FOLLOWUP
                                                    : 0;
 

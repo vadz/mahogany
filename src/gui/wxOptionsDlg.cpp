@@ -179,7 +179,7 @@ enum ConfigFields
    ConfigField_ReplyCharacters,
    ConfigField_ReplyUseSenderInitials,
    ConfigField_ReplyQuoteEmpty,
-
+   ConfigField_ReplyQuoteInsert,
    ConfigField_DetectSig,
 #if wxUSE_REGEX
    ConfigField_ReplySigSeparatorHelp,
@@ -826,6 +826,9 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Prepend &sender initials"),     Field_Bool,    ConfigField_ReplyCharacters,                        },
    { gettext_noop("&Quote empty lines too"),       Field_Bool |
                                                    Field_Advanced,    ConfigField_ReplyCharacters,                        },
+   { gettext_noop("&Insert original message when quoting"
+                  ":Always:Never:Ask"),Field_Combo,   -1,                        }, 
+
    { gettext_noop("Detect and remove signature when replying"),       Field_Bool |
                                                    Field_Advanced,    -1 ,                        },
 #if wxUSE_REGEX
@@ -1250,7 +1253,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX),
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX_FROM_SENDER),
    CONFIG_ENTRY(MP_REPLY_QUOTE_EMPTY),
-
+   CONFIG_ENTRY(MP_COMPOSE_REPLY_INSERT_ORIG), 
    CONFIG_ENTRY(MP_REPLY_DETECT_SIG),
 #if wxUSE_REGEX
    CONFIG_NONE(),
