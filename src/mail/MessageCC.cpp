@@ -1082,7 +1082,16 @@ MessageCC::GetCacheElement() const
    if ( m_folder && m_folder->Lock() )
    {
       MAILSTREAM *stream = m_folder->Stream();
-      mc = mail_elt(stream, mail_msgno(stream, m_uid));
+
+      unsigned long msgno = mail_msgno(stream, m_uid);
+      if ( msgno )
+      {
+         mc = mail_elt(stream, msgno);
+      }
+      else
+      {
+         FAIL_MSG( "faild to get cache element for the message?" );
+      }
 
       m_folder->UnLock();
    }
