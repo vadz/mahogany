@@ -1940,7 +1940,10 @@ void wxComposeView::SetEncoding(wxFontEncoding encoding)
    }
 
    m_encoding = encoding;
-   m_LayoutWindow->GetLayoutList()->SetFontEncoding(m_encoding);
+   wxLayoutList *llist = m_LayoutWindow->GetLayoutList();
+   llist->SetFontEncoding(m_encoding);
+   llist->GetDefaultStyleInfo().enc = encoding;
+   m_LayoutWindow->Refresh();
 
    // check "Default" menu item if we use the system default encoding in absence
    // of any user-configured default
