@@ -2038,23 +2038,17 @@ int FilterRuleImpl::Apply(class MailFolder *mf, UIdType uid) const
 {
    if(! m_Program || ! m_Parser)
       return 0;
+
    ASSERT(mf);
    ASSERT(uid != UID_ILLEGAL);
+   ASSERT(mf->IsLocked()); // must be called on a locked mailfolder
    mf->IncRef();
-   if(mf->Lock())
-   {
-      m_Parser->SetMessage(mf, uid);
-      Value rc = m_Program->Evaluate();
-      m_Parser->SetMessage(NULL);
-      mf->UnLock();
-      mf->DecRef();
-      return (int) rc.GetNumber();
-   }
-   else
-   {
-      mf->DecRef();
-      return 0; //FIXME: error message?
-   }
+   m_Parser->SetMessage(mf, uid);
+   Value rc = m_Program->Evaluate();
+   m_Parser->SetMessage(NULL);
+   mf->UnLock();
+   mf->DecRef();
+   return (int) rc.GetNumber();
 }
 
 int

@@ -124,6 +124,18 @@ public:
                                   const String &login = NULLstring,
                                   const String &password = NULLstring);
 
+   /**   
+         Creates a mailbox profile and checks the settings to be
+         sensible.
+         @param name name of new folder profile
+         @param type type of folder
+         @param flags folder flags
+         @return false on error or true on success
+   */
+   static bool CreateFolder(const String &name,
+                            FolderType type = MF_FILE,
+                            FolderFlags flags = MF_FLAGS_DEFAULT);
+
    /** Checks if it is OK to exit the application now.
        @param which Will either be set to empty or a '\n' delimited
        list of folders which are in critical sections.
@@ -384,6 +396,8 @@ public:
    virtual bool Lock(void) const = 0;
    /** Releases the lock on the mailfolder. */
    virtual void UnLock(void) const = 0;
+   /// Is folder locked?
+   virtual bool IsLocked(void) const = 0;
    //@}
    /**@name Functions to get an overview of messages in the folder. */
    //@{

@@ -230,6 +230,45 @@ MailFolder::OpenFolder(int folderType,
    return mf;
 }
 
+
+
+/* static */
+bool
+MailFolder::CreateFolder(const String &name,
+                         FolderType type,
+                         FolderFlags flags)
+{
+   bool valid;
+   
+   switch(type)
+      {
+      case MF_INBOX:
+      case MF_FILE:
+      case MF_POP:
+      case MF_IMAP:
+      case MF_NNTP:
+      case MF_NEWS:
+      case MF_MH:
+         valid = true;
+         break;
+      default:
+         valid = false; // all pseudo-types
+      }
+   if(! valid )
+      return false;
+
+   if( name.Length() == 0 )
+      return false;
+   
+   ProfileBase * p = ProfileBase::CreateProfile(name);
+   p->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
+   p->writeEntry(MP_FOLDER_TYPE, type|flags);
+   p->DecRef();
+
+   return true;
+}
+
+
 /* static */ String
 MailFolder::ConvertMessageStatusToString(int status)
 {
@@ -505,7 +544,6 @@ MailFolderCmn::MailFolderCmn(ProfileBase *profile)
    // We need to know if we are building the first folder listing ever
    // or not, to suppress NewMail events.
    m_FirstListing = true;
-   m_OldMessageCount = 0;
    m_ProgressDialog = NULL;
    m_GenerateNewMailEvents = true; // for now don't!
    m_UpdateMsgCount = true; // normal operation
@@ -1007,17 +1045,13 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
 {
    /* Now check whether we need to send new mail notifications: */
    UIdType n = (*hilp).Count();
-   UIdType *messageIDs = new UIdType[n];
+   UIdType messageIDs[n];
+   
    // Find the new messages:
    UIdType nextIdx = 0;
    UIdType highestId = UID_ILLEGAL;
    for ( UIdType i = 0; i < n; i++ )
    {
-      /* int status =(*hilp)[i]->GetStatus();
-         ASSERT(nextIdx < n);
-         if( (status & MSG_STAT_RECENT) &&
-         !(status & MSG_STAT_SEEN))
-      */
       if( IsNewMessage( (*hilp)[i] ) )
       {
          UIdType uid = (*hilp)[i]->GetUId();
@@ -1029,12 +1063,12 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
    if(highestId != UID_ILLEGAL && m_UpdateMsgCount)
       m_LastNewMsgUId = highestId;
    ASSERT(nextIdx <= n);
+   
    if( m_GenerateNewMailEvents )
    {
       if( nextIdx != 0)
          MEventManager::Send( new MEventNewMailData (this, nextIdx, messageIDs) );
    }
-   delete [] messageIDs;
 }
 
 
@@ -1070,9 +1104,6 @@ MailFolderCmn::UpdateListing(void)
       MEventManager::Send( new MEventFolderUpdateData (this) );
 
       CheckForNewMail(hilp);
-
-      if(m_UpdateMsgCount) // this will suppress more new mail events
-         m_OldMessageCount = (*hilp).Count();
 
       hilp->DecRef();
       m_FirstListing = false;
@@ -1179,7 +1210,11 @@ MailFolderCmn::ApplyFilterRules(bool newOnly)
             // This might change the folder contents,
             // so we must set this flag:
             m_FiltersCausedChange = true;
-            rc = filterRule->Apply(this, newOnly);
+            if(Lock())
+            {
+               rc = filterRule->Apply(this, newOnly);
+               UnLock();
+            }
             filterRule->DecRef();
          }
       }

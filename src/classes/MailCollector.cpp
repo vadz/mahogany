@@ -251,7 +251,7 @@ MailCollectorImpl::Collect(MailFolder *mf)
 
    m_NewMailFolder->EnableNewMailEvents(true,true);
    m_NewMailFolder->Ping();
-
+   
 #if 0
    if(m_Count)
    {

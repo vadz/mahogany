@@ -351,6 +351,8 @@ protected:
    wxCheckBox *m_isIncoming;
    /// Keep it always open?
    wxCheckBox *m_keepOpen;
+   /// Is folder hidden?
+   wxCheckBox *m_isHidden;
    /// Force re-open on ping?
    wxCheckBox *m_forceReOpen;
    /// Use anonymous access for this folder?
@@ -387,6 +389,8 @@ protected:
    /// the initial value of the "is local" flag
    bool m_originalIsLocalValue;
 #endif // USE_LOCAL_CHECKBOX
+   /// the initial value of the "hidden" flag
+   bool m_originalIsHiddenValue;
    /// the initial value of the "is group" flag
    bool m_originalIsDir;
 
@@ -897,6 +901,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
 #ifdef USE_LOCAL_CHECKBOX
       Label_IsLocal,
 #endif // USE_LOCAL_CHECKBOX
+      Label_IsHidden,
       Label_IsDir,
       Label_FolderSubtype,
       Label_FolderIcon,
@@ -919,6 +924,7 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
 #ifdef USE_LOCAL_CHECKBOX
       gettext_noop("Folder can be accessed &without network "),
 #endif // USE_LOCAL_CHECKBOX
+      gettext_noop("&Hide folder in tree"),
       gettext_noop("Is &directory: "),
       gettext_noop("Folder sub&type "),
       gettext_noop("&Icon for this folder: "),
@@ -955,7 +961,8 @@ wxFolderPropertiesPage::wxFolderPropertiesPage(wxNotebook *notebook,
 #else // !USE_LOCAL_CHECKBOX
    m_isDir = CreateCheckBox(labels[Label_IsDir], widthMax, m_isAnonymous);
 #endif // USE_LOCAL_CHECKBOX/!USE_LOCAL_CHECKBOX
-   m_folderSubtype = CreateChoice(labels[Label_FolderSubtype], widthMax, m_isDir);
+   m_isHidden = CreateCheckBox(labels[Label_IsHidden], widthMax, m_isDir);
+   m_folderSubtype = CreateChoice(labels[Label_FolderSubtype], widthMax, m_isHidden);
 
    // the checkboxes might not be very clear, so add some explanations in the
    // form of tooltips
@@ -1593,6 +1600,7 @@ wxFolderPropertiesPage::SetDefaultValues()
    // write it back if it changes later
    int flags = GetFolderFlags(READ_CONFIG(profile, MP_FOLDER_TYPE));
    m_originalIncomingValue = (flags & MF_FLAGS_INCOMING) != 0;
+   m_originalIsHiddenValue = (flags & MF_FLAGS_HIDDEN) != 0;
    m_isIncoming->SetValue(m_originalIncomingValue);
 
    m_originalKeepOpenValue = (flags & MF_FLAGS_KEEPOPEN) != 0;
@@ -1606,6 +1614,7 @@ wxFolderPropertiesPage::SetDefaultValues()
 #endif // USE_LOCAL_CHECKBOX
 
    m_originalIsDir = (flags & MF_FLAGS_GROUP) != 0;
+   m_isHidden->SetValue(m_originalIsHiddenValue);
    m_isDir->SetValue(m_originalIsDir);
 
    // although NNTP servers do support password-protected access, this
@@ -1733,7 +1742,9 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
       flags |= MF_FLAGS_REOPENONPING;
    if ( m_isDir->GetValue() )
       flags |= MF_FLAGS_GROUP;
-
+   if ( m_isHidden->GetValue() )
+      flags |= MF_FLAGS_HIDDEN;
+   
 #ifdef USE_LOCAL_CHECKBOX
    if ( m_isLocal->GetValue() )
       flags |= MF_FLAGS_ISLOCAL;

@@ -254,9 +254,11 @@ public:
        mode it returns false if we cannot get a lock.
        @return TRUE if we have the lock
    */
-   bool Lock(void) const;
+   virtual bool Lock(void) const;
    /** Releases the lock on the mailfolder. */
-   void UnLock(void) const;
+   virtual void UnLock(void) const;
+   /// Is folder locked?
+   virtual bool IsLocked(void) const;
    //@}
 
    /**@name Functions to get an overview of messages in the folder. */

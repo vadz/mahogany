@@ -75,6 +75,7 @@ static const int MF_FLAGSMASK = 0xffffff00;
 // the flags of a mail folder
 enum FolderFlags
 {
+   MF_FLAGS_DEFAULT       = 0x00000000, // empty flags
    MF_FLAGS_ANON          = 0x00000100, // use anonymous access
    MF_FLAGS_INCOMING      = 0x00000200, // collect all new mail from it
    MF_FLAGS_UNACCESSIBLE  = 0x00000400, // folder can't be opened

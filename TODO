@@ -13,11 +13,19 @@ $Id$
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
 
+9	VZ	properties dialog fails for INBOX and corrupts its
+		settings
+
+9	VZ	FolderTree: changing folder hidden flag is not
+		reflected, tried to react to it in options change event, but doesn't
+		work, see wxFolderTree.cpp:1061 //FIXME
+
 7		after deleting a folder from the tree, the opened message from
 		it stays shown in the main frame - this is confusing and
 		dangerous
 
 3	VZ	change MAXLOGINTRIALS - 3 is too many...
+
 
 6	VZ	"Browse subfolders" under root folder should give a choice:
 		subscribe to newsgroups, import MH folders, mirror server IMAP
@@ -31,20 +39,19 @@ $Id$
                 pressed), for example:
                 a) sorting order
                 b) ...
+
 9	KB	finish filters dialog / up/down arrows, error messages
-		--> confusion between profile name and filter title
-		    must be resolved or we have a problem
-			--> array mapping profile<-->title?
+
 9	KB	debug filters, does '|' really work?
+		--> works all reasonably well, but calls to
+		MailFolder::Lock() must be cleaned up:
+			- when do we need to lock/unlock exactly?
 
 9		disabling "collect mail" in properties has no effect!
 
-9  	KB	check mm_list, use debugging wxWindows
 9	KB	only Filters appear in list of statically linked
                 modules -why?
 
-fixed?	KB	only one new mail dialog at any given time, suppress
-		them while showing it
 	
 
 9	KB	wxLayout:
@@ -609,5 +616,8 @@ DONE - TO BE TESTED:
 		--> add Suspend()/Discard()/Commit() methods to normal 
 		    profile which work with a temporary subgroup
 
+fixed?	KB	only one new mail dialog at any given time, suppress
+		them while showing it
+9  	KB	check mm_list, use debugging wxWindows
 
 vi: set si ts=8 sw=8 noet nolist tw=80:

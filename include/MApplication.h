@@ -340,7 +340,7 @@ public:
 };
 
 /** Our own Mutex type, must support the calls
-    Lock() and Unlock().
+    Lock() and Unlock() and Locked().
 */
 #ifdef USE_THREADS
 // use inheritance and not typedef to allow forward declaring it
@@ -352,6 +352,7 @@ class MMutex
 public:
    void Lock(void) {}
    void Unlock(void) {}
+   bool IsLocked(void) const{ return false; }
 };
 #endif
 

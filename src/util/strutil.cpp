@@ -809,7 +809,7 @@ strutil_removeReplyPrefix(const String &isubject)
 }
 /* Read and remove the next number from string. */
 long
-strutil_readNumber(String &string)
+strutil_readNumber(String &string, bool *success)
 {
    strutil_delwhitespace(string);
    String newstr;
@@ -819,18 +819,24 @@ strutil_readNumber(String &string)
       newstr << *cptr;
    string = cptr;
    long num = -123456;
-   sscanf(newstr.c_str(),"%ld", &num);
+   int count = sscanf(newstr.c_str(),"%ld", &num);
+   if(success)
+      *success = (count == 1);
    return num;
 }
 
 /* Read and remove the next quoted string from string. */
 String
-strutil_readString(String &string)
+strutil_readString(String &string, bool *success)
 {
    strutil_delwhitespace(string);
    const char *cptr = string.c_str();
    if(*cptr != '"')
+   {
+      if(success)
+         *success = false;
       return "";
+   }
    else
       cptr++;
    
@@ -847,7 +853,14 @@ strutil_readString(String &string)
       newstr << *cptr;
    }
    if(*cptr == '"')
+   {
+      if(success)
+         *success = false;
       cptr++;
+   }
+   else
+      if(success)
+         *success = false;
    string = cptr;
    return newstr;
 }

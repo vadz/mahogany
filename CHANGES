@@ -1,5 +1,9 @@
 (next release) on (date of next release)
 
+27.01.00 KB: Filters dialog changes, creates working (?) Filter rules now
+             hidden folder flag added to config dialog,
+             NewMail dialog changes
+             added static MailFolder::CreateFolder()
 16.01.00 VZ: added right click popup menu to the ADB editor
              added a dialog to reenable previously disabled msg boxes
 03.12.99 KB: MIME type prompt added to compose view. Started adding filters dialog.

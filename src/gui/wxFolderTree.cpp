@@ -1058,6 +1058,8 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
    {
       m_FocusFollowMode = READ_APPCONFIG(MP_FOCUS_FOLLOWSMOUSE) != 0;
 
+//FIXME: causes crash      ReopenBranch(GetRootItem()); // hidden folder flags might have changed
+
       MEventOptionsChangeData& event = (MEventOptionsChangeData &)ev;
 
       ProfileBase *profileChanged = event.GetProfile();

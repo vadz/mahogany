@@ -1061,6 +1061,7 @@ MailFolderCC::Ping(void)
    }
    if(Lock())
    {
+      UIdType count = CountMessages();
       DBGMESSAGE(("MailFolderCC::Ping() on Folder %s.",
                   GetName().c_str()));
 
@@ -1083,7 +1084,7 @@ MailFolderCC::Ping(void)
          ProcessEventQueue();
       }
       CC_SetLogLevel(ccl);
-      if(m_NumOfMessages > m_OldMessageCount)
+      if(CountMessages() != count)
          RequestUpdate();
       ProcessEventQueue();
       UnLock();
@@ -1128,6 +1129,16 @@ MailFolderCC::Lock(void) const
    }
    else
       return false;
+#endif
+}
+
+bool
+MailFolderCC::IsLocked(void) const
+{
+#ifdef USE_THREADS
+   return m_Mutex->IsLocked();
+#else
+   return m_Mutex;
 #endif
 }
 
@@ -1616,7 +1627,8 @@ MailFolderCC::BuildListing(void)
    {
       String msg;
       msg.Printf(_("Reading %lu message headers..."), numMessages);
-      m_ProgressDialog = new MProgressDialog(GetName(),
+      m_ProgressDialog = n
+         ew MProgressDialog(GetName(),
                                              msg,
                                              numMessages,
                                              NULL,

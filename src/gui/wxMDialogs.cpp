@@ -1992,6 +1992,7 @@ void CheckExpungeDialog(ASMailFolder *mf, wxWindow *parent)
                 "in folder '%s'?"),
               mf->GetName().c_str());
    if(mf->GetType() != MF_NNTP
+      && mf->GetType() != MF_NEWS
       && mf->CountMessages(MailFolder::MSG_STAT_DELETED,MailFolder::MSG_STAT_DELETED)
       && MDialog_YesNoDialog(msg,
                              parent,

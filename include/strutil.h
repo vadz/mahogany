@@ -314,11 +314,11 @@ strutil_removeReplyPrefix(const String &isubject);
 
 /* Read and remove the next number from string. */
 long
-strutil_readNumber(String &string);
+strutil_readNumber(String &string, bool *success = NULL);
 
 /* Read and remove the next quoted string from string. */
 String
-strutil_readString(String &string);
+strutil_readString(String &string, bool *success = NULL);
 /* Return an escaped string. */
 String
 strutil_escapeString(const String &string);

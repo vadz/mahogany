@@ -1363,7 +1363,13 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
       case WXMENU_EDIT_PREF: // edit folder profile
          MDialog_FolderProfile(this, m_FolderView->GetFullName());
          break;
-
+   case WXMENU_EDIT_FILTERS:
+   {
+      ASMailFolder *amf = m_FolderView->GetFolder();
+      (void) ConfigureFilterRules(amf->GetProfile(), this);
+   }
+   break;
+      
       default:
          if( WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
              || id == WXMENU_HELP_CONTEXT

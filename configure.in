@@ -97,7 +97,7 @@ M_OVERRIDES(ccostype,ccostype,
 USE_CCOSTYPE)
 
 M_OVERRIDES(modules,modules,
---with-modules=xxx    How to use plugin modules - set to static dynamic or none.,
+--with-modules_static    Compile plugin modules statically,
 USE_MODULES)
 
 M_OVERRIDES(docxx,docxx,
@@ -626,11 +626,10 @@ AC_SUBST(CCOSTYPE)
 dnl --------------------------------------------------------------------------
 dnl How do we want to use modules?
 dnl --------------------------------------------------------------------------
-
 if test "x$USE_MODULES" != "x"; then
    MODULES="${USE_MODULES}"
    case "$MODULES" in
-     none|None|NONE)
+     none|None|NONE|0)
        USE_MODULES=
        MAKE_USE_MODULES=
        ;;
@@ -650,7 +649,6 @@ if test "x$USE_MODULES" != "x"; then
   esac
  fi
 AC_SUBST(MAKE_USE_MODULES)
-AC_DEFINE(USE_MODULES)
 
 dnl --------------------------------------------------------------------------
 dnl set up generators for class documentation

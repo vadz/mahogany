@@ -462,6 +462,16 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
       m_FolderView->OnCommandEvent(event);
    else if(id == WXMENU_HELP_CONTEXT)
       mApplication->Help(MH_MAIN_FRAME,this);
+   else if(id == WXMENU_EDIT_FILTERS)
+   {
+      ASMailFolder *amf = m_FolderView->GetFolder();
+      if(amf)
+         (void) ConfigureFilterRules(amf->GetProfile(), this);
+      else
+      {
+         ERRORMESSAGE((_("You must select a folder first.")));
+      }
+   }
    else
       wxMFrame::OnMenuCommand(id);
 }
