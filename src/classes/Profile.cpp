@@ -284,3 +284,43 @@ ConfigFileManager::Debug() const
    DBGLOG("-----------------------------\n");
 }
 #endif
+
+// ----------------------------------------------------------------------------
+// global functions
+// ----------------------------------------------------------------------------
+
+// all settings are saved as entries 0, 1, 2, ... of group szKey
+void SaveArray(wxConfigBase& conf, const wxArrayString& astr, const char *szKey)
+{
+  // save all array entries
+  conf.DeleteGroup(szKey);    // remove all old entries
+  conf.SetPath(szKey);
+
+  uint nCount = astr.Count();
+  wxString strKey;
+  for ( uint n = 0; n < nCount; n++ ) {
+    strKey.Printf("%d", n);
+    conf.Write(strKey, astr[n]);
+  }
+
+  conf.SetPath("..");
+}
+
+// restores array saved by SaveArray
+void RestoreArray(wxConfigBase& conf, wxArrayString& astr, const char *szKey)
+{
+  wxASSERT( astr.IsEmpty() ); // should be called in the very beginning
+
+  conf.SetPath(szKey);
+
+  wxString strKey, strVal;
+  for ( uint n = 0; ; n++ ) {
+    strKey.Printf("%d", n);
+    if ( !conf.HasEntry(strKey) )
+      break;
+    conf.Read(&strVal, strKey);
+    astr.Add(strVal);
+  }
+
+  conf.SetPath("..");
+}

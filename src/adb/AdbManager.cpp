@@ -19,7 +19,11 @@
 // ----------------------------------------------------------------------------
 #include "Mpch.h"
 
-#include "Mcommon.h"
+#ifndef USE_PCH
+# include "Mcommon.h"
+# include "Profile.h"
+#endif // USE_PCH
+
 #include <wx/log.h>
 #include <wx/dynarray.h>
  
@@ -215,6 +219,41 @@ AdbBook *AdbManager::GetBook(size_t n) const
   book->Lock();
 
   return book;
+}
+
+// FIXME it shouldn't even know about AdbEditor existence! but this would
+// involve changing AdbFrame.cpp to use this function somehow and I don't have
+// the time to do it right now...
+void AdbManager::LoadAll()
+{
+  wxConfigBase& conf = *Profile::GetAppConfig();
+  conf.SetPath("/AdbEditor");
+
+  wxArrayString astrAdb, astrProv;
+  RestoreArray(conf, astrAdb, "AddressBooks");
+  RestoreArray(conf, astrProv, "Providers");
+
+  wxString strProv;
+  AdbDataProvider *pProvider;
+  uint nCount = astrAdb.Count();
+  for ( uint n = 0; n < nCount; n++ ) {
+    if ( n < astrProv.Count() )
+      strProv = astrProv[n];
+    else
+      strProv.Empty();
+    
+    if ( strProv.IsEmpty() )
+      pProvider = NULL;
+    else
+      pProvider = AdbDataProvider::GetProviderByName(strProv);
+    
+    // it's getting worse and worse... we're using our knowledge of internal
+    // structure of AdbManager here: we know the book will not be deleted
+    // after this Unlock because the cache also has a lock on it
+    SafeUnlock(CreateBook(astrAdb[n], pProvider));
+
+    SafeUnlock(pProvider);
+  }
 }
 
 void AdbManager::ClearCache()

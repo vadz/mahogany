@@ -25,8 +25,7 @@ class wxFTOList;
 class wxComposeView;
 class wxFTCanvas;
 class wxLayoutWindow;
-
-
+class AdbManager;
 
 /// just for now, FIXME!
 #define WXCOMPOSEVIEW_FTCANVAS_YPOS 80
@@ -189,6 +188,10 @@ private:
 
    /// makes the canvas
    void CreateFTCanvas(void);
+
+   // we create it only when it's needed for the first time, but then we keep
+   // it until the end
+   AdbManager *m_pManager;
 };
 
 #endif

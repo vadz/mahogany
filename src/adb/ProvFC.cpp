@@ -375,7 +375,7 @@ bool FCEntry::Matches(const char *szWhat, int where, int how)
     strWhat = szWhat;
 
   // if the search is not case sensitive, transform everything to lower case
-  if ( how & AdbLookup_CaseSensitive )
+  if ( (how & AdbLookup_CaseSensitive) == 0 )
     strWhat.MakeLower();
 
   wxString strField;
@@ -383,7 +383,7 @@ bool FCEntry::Matches(const char *szWhat, int where, int how)
   #define CHECK_MATCH(field)                                        \
     if ( where & AdbLookup_##field ) {                              \
       strField = m_astrFields[AdbField_##field];                    \
-      if ( how & AdbLookup_CaseSensitive )                          \
+      if ( (how & AdbLookup_CaseSensitive) == 0 )                   \
         strField.MakeLower();                                       \
       if ( strField.Matches(strWhat) )                              \
         return TRUE;                                                \

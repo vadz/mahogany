@@ -44,7 +44,7 @@ class ArrayAdbBooks;
   @@@ This seems a bit complicated but I don't know how to ensure that there is
       at most one object of this type otherwise...
 */
-class AdbManager : private MObject
+class AdbManager : public MObject
 {
 public:
   // static functions
@@ -70,15 +70,18 @@ public:
     /// delete the given book
   void DeleteBook(size_t n);
 
+    /// load all books stored in our config file
+  void LoadAll();
+
     /// clear the cache contents freeing memory used by all ADBs in it
   void ClearCache();
-
-  // dtor
-  virtual ~AdbManager();
 
   MOBJECT_DEBUG
 
 private:
+  // dtor
+  virtual ~AdbManager();
+
   // ctor is private because we're only created by Get()
   AdbManager() { }
 

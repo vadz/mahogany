@@ -76,6 +76,7 @@ enum
 // other types
 // ----------------------------------------------------------------------------
 WX_DEFINE_ARRAY(AdbEntry *, ArrayAdbEntries);
+WX_DEFINE_ARRAY(AdbBook *, ArrayAdbBooks);
 
 // ----------------------------------------------------------------------------
 // event tables &c
@@ -340,6 +341,8 @@ wxComposeView::wxComposeView(const String &iname,
 
 wxComposeView::~wxComposeView()
 {
+   SafeUnlock(m_pManager);
+
    if(!initialised)
       return;
 
@@ -365,6 +368,11 @@ wxComposeView::OnExpand(wxCommandEvent &WXUNUSED(event))
      return;
    }
 
+   if ( !m_pManager ) {
+     m_pManager = AdbManager::Get();
+     m_pManager->LoadAll();
+   }
+   
    ArrayAdbEntries aEntries;
    if ( AdbLookup(aEntries, what) ) {
      int rc = MDialog_AdbLookupList(aEntries, this);

@@ -229,4 +229,10 @@ public:
 };
 //@}
 
+// ----------------------------------------------------------------------------
+// two handy functions for savings/restoring arrays of strings to/from config
+// ----------------------------------------------------------------------------
+void SaveArray(wxConfigBase& conf, const wxArrayString& astr, const char *key);
+void RestoreArray(wxConfigBase& conf, wxArrayString& astr, const char *key);
+
 #endif // PROFILE_H

@@ -19,7 +19,6 @@
 // ----------------------------------------------------------------------------
 
 // M
-// dirty hack
 #include "Mpch.h"
 
 #ifndef  USE_PCH
@@ -651,10 +650,6 @@ private:
   void SaveSettings();
   void RestoreSettings1();  // 1st step: before the root is created
   void RestoreSettings2();  // 2nd step: after the root tree node was created
-  void SaveArray(wxConfigBase& conf,
-                 const wxArrayString& astr, const char *szKey);
-  void RestoreArray(wxConfigBase& conf,
-                    wxArrayString& astr, const char *szKey);
 
   // adds all expanded branches of group and it's children to m_astrBranches
   bool SaveExpandedBranches(AdbTreeNode *group);
@@ -1109,45 +1104,6 @@ wxAdbEditFrame::wxAdbEditFrame(wxFrame *parent)
   RestoreSettings2();
 }
 
-// all settings are saved as entries 0, 1, 2, ... of group szKey
-void wxAdbEditFrame::SaveArray(wxConfigBase& conf,
-                               const wxArrayString& astr,
-                               const char *szKey)
-{
-  // save all array entries
-  conf.DeleteGroup(szKey);    // remove all old entries
-  conf.SetPath(szKey);
-
-  uint nCount = astr.Count();
-  wxString strKey;
-  for ( uint n = 0; n < nCount; n++ ) {
-    strKey.Printf("%d", n);
-    conf.Write(strKey, astr[n]);
-  }
-
-  conf.SetPath("..");
-}
-
-// restores array saved by SaveArray
-void wxAdbEditFrame::RestoreArray(wxConfigBase& conf,
-                                  wxArrayString& astr,
-                                  const char *szKey)
-{
-  wxASSERT( astr.IsEmpty() ); // should be called in the very beginning
-
-  conf.SetPath(szKey);
-
-  wxString strKey, strVal;
-  for ( uint n = 0; ; n++ ) {
-    strKey.Printf("%d", n);
-    if ( !conf.Read(&strVal, strKey) )
-      break;
-    astr.Add(strVal);
-  }
-
-  conf.SetPath("..");
-}
-
 void wxAdbEditFrame::TransferSettings(bool bSave)
 {
   // enum must be in sync with the array below
@@ -1591,6 +1547,11 @@ void wxAdbEditFrame::AdvanceToNextFound()
     else if ( (uint)++m_nFindIndex == nCount ) {
       wxLogStatus(this, _("Search wrapped to the beginning."));
       m_nFindIndex = 0;
+    }
+    else {
+      // remove the string which might have been left since the last time we
+      // were called
+      wxLogStatus(this, "");
     }
 
     MoveSelection(m_aFindResults[m_nFindIndex]);
