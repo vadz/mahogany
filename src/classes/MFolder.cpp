@@ -179,11 +179,11 @@ public:
    virtual MFolder *GetParent() const { return NULL; }
    virtual MFolder *CreateSubfolder(const String&,
                                     MFolderType, bool) { return NULL; }
-   virtual void Delete() { FAIL_MSG("doesn't make sense for MTempFolder"); }
+   virtual void Delete() { FAIL_MSG(_T("doesn't make sense for MTempFolder")); }
    virtual bool Rename(const String&)
-      { FAIL_MSG("doesn't make sense for MTempFolder"); return false; }
+      { FAIL_MSG(_T("doesn't make sense for MTempFolder")); return false; }
    virtual bool Move(MFolder*)
-      { FAIL_MSG("doesn't make sense for MTempFolder"); return false; }
+      { FAIL_MSG(_T("doesn't make sense for MTempFolder")); return false; }
 
 private:
    String m_fullname,
@@ -220,7 +220,7 @@ public:
       if ( !m_profile )
       {
          // this should never happen
-         FAIL_MSG( "invalid MFolderFromProfile name!" );
+         FAIL_MSG( _T("invalid MFolderFromProfile name!") );
 
          // to avoid crashes later
          m_profile = mApplication->GetProfile();
@@ -348,20 +348,20 @@ public:
 
    virtual String GetComment() const { return ""; }
    virtual void SetComment(const String& /* comment */)
-      { FAIL_MSG("can not set root folder attributes."); }
+      { FAIL_MSG(_T("can not set root folder attributes.")); }
 
    virtual int GetFlags() const { return 0u; }
    virtual void SetFlags(int /* flags */)
-      { FAIL_MSG("can not set root folder attributes."); }
+      { FAIL_MSG(_T("can not set root folder attributes.")); }
 
    virtual MFolder *GetParent() const { return NULL; }
 
    virtual void Delete()
-      { FAIL_MSG("can not delete root folder."); }
+      { FAIL_MSG(_T("can not delete root folder.")); }
    virtual bool Rename(const String& /* newName */)
-      { FAIL_MSG("can not rename root folder."); return false; }
+      { FAIL_MSG(_T("can not rename root folder.")); return false; }
    virtual bool Move(const MFolder* /* newParent */)
-      { FAIL_MSG("can not move root folder."); return false; }
+      { FAIL_MSG(_T("can not move root folder.")); return false; }
 };
 
 // ----------------------------------------------------------------------------
@@ -442,7 +442,7 @@ private:
    static void Check()
    {
       ASSERT_MSG( ms_aFolderNames.GetCount() == ms_aFolders.GetCount(),
-                  "folder cache corrupted" );
+                  _T("folder cache corrupted") );
    }
 
    static wxArrayString ms_aFolderNames;
@@ -524,10 +524,10 @@ MFolder::Create(const String& fullname, MFolderType type, bool tryCreateLater)
 
    folder = Get(fullname);
 
-   CHECK( folder, NULL, "Get() must succeed if Create() succeeded!" );
+   CHECK( folder, NULL, _T("Get() must succeed if Create() succeeded!") );
 
    Profile_obj profile(folder->GetFullName());
-   CHECK( profile, NULL, "panic in MFolder: no profile" );
+   CHECK( profile, NULL, _T("panic in MFolder: no profile") );
 
    profile->writeEntry(MP_FOLDER_TYPE, type);
 
@@ -618,7 +618,7 @@ bool MFolderFromProfile::Create(const String& fullname)
           count = components.GetCount();
    for ( n = 0; n < count; n++ )
    {
-      CHECK( profile, false, "failed to create profile?" );
+      CHECK( profile, false, _T("failed to create profile?") );
 
       component = components[n];
 
@@ -630,7 +630,7 @@ bool MFolderFromProfile::Create(const String& fullname)
             MFolderFromProfile *folder = (MFolderFromProfile *)MFolder::Get(path);
             if ( !folder )
             {
-               FAIL_MSG( "this folder must already exist!" );
+               FAIL_MSG( _T("this folder must already exist!") );
             }
             else
             {
@@ -904,7 +904,7 @@ MFolder *MFolderFromProfile::GetSubfolder(size_t n) const
    // don't recurse into subfolders
    if ( index.Traverse(false) )
    {
-      FAIL_MSG( "invalid index in MFolderFromProfile::GetSubfolder()" );
+      FAIL_MSG( _T("invalid index in MFolderFromProfile::GetSubfolder()") );
 
       return NULL;
    }
@@ -963,12 +963,12 @@ MFolder *MFolderFromProfile::CreateSubfolder(const String& name,
 
 void MFolderFromProfile::Delete()
 {
-   CHECK_RET( !m_folderName.empty(), "can't delete the root pseudo-folder" );
+   CHECK_RET( !m_folderName.empty(), _T("can't delete the root pseudo-folder") );
 
    // delete this folder from the parent profile
    String parentName = m_folderName.BeforeLast('/');
    Profile_obj profile(parentName);
-   CHECK_RET( profile, "panic in MFolder: no profile" );
+   CHECK_RET( profile, _T("panic in MFolder: no profile") );
 
    profile->DeleteGroup(GetName());
 
@@ -984,7 +984,7 @@ void MFolderFromProfile::Delete()
    {
       // either we have managed to delete the root folder (bad) or something is
       // seriously wrong (even worse)
-      FAIL_MSG( "no parent for deleted folder?" );
+      FAIL_MSG( _T("no parent for deleted folder?") );
    }
 
    // notify everybody about the disappearance of the folder
@@ -996,7 +996,7 @@ void MFolderFromProfile::Delete()
 
 bool MFolderFromProfile::Rename(const String& newName)
 {
-   CHECK( !m_folderName.empty(), false, "can't rename the root pseudo-folder" );
+   CHECK( !m_folderName.empty(), false, _T("can't rename the root pseudo-folder") );
 
    String path = m_folderName.BeforeLast('/'),
           name = m_folderName.AfterLast('/');
@@ -1021,7 +1021,7 @@ bool MFolderFromProfile::Rename(const String& newName)
 #endif // 0
 
    Profile_obj profile(path);
-   CHECK( profile, false, "panic in MFolder: no profile" );
+   CHECK( profile, false, _T("panic in MFolder: no profile") );
    if ( profile->Rename(name, newName) )
    {
       String oldName = m_folderName;
@@ -1059,22 +1059,22 @@ bool MFolderFromProfile::Move(MFolder *newParent)
    // that a new folder has been created.
 
    // There are things that do not make sense at all
-   CHECK( GetFolderType(GetType()) != MF_ILLEGAL, false, "How did you manage to try to move an MF_ILLEGAL folder ?" );
-   CHECK( GetFolderType(GetType()) != MF_NNTP, false, "can't move NNTP folders" );
-   CHECK( GetFolderType(GetType()) != MF_NEWS, false, "can't move News folders" );
-   CHECK( GetFolderType(GetType()) != MF_INBOX, false, "can't move system Inbox" );
-   CHECK( GetFolderType(GetType()) != MF_ROOT, false, "can't move the root pseudo-folder" );
-   //CHECK( !m_folderName.empty(), false, "can't move the root pseudo-folder" );
+   CHECK( GetFolderType(GetType()) != MF_ILLEGAL, false, _T("How did you manage to try to move an MF_ILLEGAL folder ?") );
+   CHECK( GetFolderType(GetType()) != MF_NNTP, false, _T("can't move NNTP folders") );
+   CHECK( GetFolderType(GetType()) != MF_NEWS, false, _T("can't move News folders") );
+   CHECK( GetFolderType(GetType()) != MF_INBOX, false, _T("can't move system Inbox") );
+   CHECK( GetFolderType(GetType()) != MF_ROOT, false, _T("can't move the root pseudo-folder") );
+   //CHECK( !m_folderName.empty(), false, _T("can't move the root pseudo-folder") );
 
    // And there are things we can't do yet.
-   CHECK( GetSubfolderCount() == 0, false, "can't move a folder with sub-folders (yet)" );
-   CHECK( GetFolderType(GetType()) != MF_IMAP, false, "can't move IMAP folders (yet)" );
+   CHECK( GetSubfolderCount() == 0, false, _T("can't move a folder with sub-folders (yet)") );
+   CHECK( GetFolderType(GetType()) != MF_IMAP, false, _T("can't move IMAP folders (yet)") );
 
    if ( GetFolderType(GetType()) == MF_IMAP )
    {
       // IMAP folders have one more check: we must make sure that they stay on
       // the same server, so that we can simply send it a RENAME command.
-      CHECK( false, false, "Same server check not yet implemented" );
+      CHECK( false, false, _T("Same server check not yet implemented") );
    }
    
    // Compute the name of the folder to create
@@ -1098,7 +1098,7 @@ bool MFolderFromProfile::Move(MFolder *newParent)
    // information found in the profile of the moved (old) folder.
    // XNOTODO(?): make this some method of the Profile class
    Profile_obj newProfile(newSubfolder->GetProfile());
-   CHECK( newProfile, false, "panic in MFolder: no profile" );
+   CHECK( newProfile, false, _T("panic in MFolder: no profile") );
    Profile_obj oldProfile(m_folderName);
 
    bool isExpendingEnvVars = oldProfile->IsExpandingEnvVars();
@@ -1162,7 +1162,7 @@ bool MFolderFromProfile::Move(MFolder *newParent)
       // command to the server, unless we are moving the root folder
       // for this server (in this case, nothing changes on the server
       // and no RENAME command should be issued).
-      CHECK( false, false, "RENAME command to server not yet implemented" );
+      CHECK( false, false, _T("RENAME command to server not yet implemented") );
    }
 
    // Now, we can delete the old folder from the hierarchy
@@ -1191,7 +1191,7 @@ bool MFolderFromProfile::Move(MFolder *newParent)
             dialogSettings->SetAction(dialogSettings->GetAction(), argument);
             filterDesc.Set(dialogSettings);
             filter->Set(filterDesc);
-            wxLogStatus(_("Filter '%s' has been updated."), filterName);
+            wxLogStatus(_("Filter '%s' has been updated."), filterName.c_str());
          }
          else
          {
@@ -1201,7 +1201,7 @@ bool MFolderFromProfile::Move(MFolder *newParent)
       else
       {
          // XNOTODO: Find out how to updqte this filter anyway
-         wxLogError(_("Filter '%s' is not \"simple\" and has not been updated."), filterName);
+         wxLogError(_("Filter '%s' is not \"simple\" and has not been updated."), filterName.c_str());
       }
       filter->DecRef();
    }
@@ -1248,7 +1248,7 @@ void MFolderCache::Add(MFolder *folder)
 
    // the caller should verify that it's not already in the cache
    ASSERT_MSG( ms_aFolders.Index(folder) == wxNOT_FOUND,
-               "can't add the folder to the cache - it's already there" );
+               _T("can't add the folder to the cache - it's already there") );
 
    size_t index = ms_aFolderNames.Add(folder->GetFullName());
    ms_aFolders.Insert(folder, index);
@@ -1261,7 +1261,7 @@ void MFolderCache::Remove(MFolder *folder)
    // don't use name here - the folder might have been renamed
    int index = ms_aFolders.Index(folder);
    CHECK_RET( index != wxNOT_FOUND,
-              "can't remove folder from cache because it's not in it" );
+              _T("can't remove folder from cache because it's not in it") );
 
 #if wxCHECK_VERSION(2, 2, 8)
    ms_aFolderNames.RemoveAt((size_t)index);
@@ -1312,7 +1312,7 @@ bool MFolderTraversal::Traverse(bool recurse)
 bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
 {
    Profile_obj profile(start);
-   CHECK( profile, false, "panic in MFolderTraversal: no profile" );
+   CHECK( profile, false, _T("panic in MFolderTraversal: no profile") );
 
    // enumerate all groups
    String name;
