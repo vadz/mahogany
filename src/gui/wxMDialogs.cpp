@@ -3096,21 +3096,24 @@ wxMultipleChoiceDialog::wxMultipleChoiceDialog(wxWindow *parent,
 
     delete [] aChoices;
 
-    topsizer->Add( m_checklstbox, 1, wxEXPAND | wxLEFT|wxRIGHT, 15 );
+    topsizer->Add(m_checklstbox, 1,
+                  wxEXPAND | wxLEFT | wxRIGHT, 3*LAYOUT_X_MARGIN);
 
 #if wxUSE_STATLINE
-    topsizer->Add( new wxStaticLine( this, -1 ), 0, wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 10 );
+    topsizer->Add(new wxStaticLine( this, -1 ), 0,
+                  wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 2*LAYOUT_X_MARGIN);
 #endif
 
-    topsizer->Add( CreateButtonSizer( wxOK|wxCANCEL ), 0, wxCENTRE | wxALL, 10 );
+    topsizer->Add(CreateButtonSizer(wxOK | wxCANCEL), 0,
+                  wxCENTRE | wxALL, 2*LAYOUT_X_MARGIN);
 
-    SetAutoLayout( TRUE );
-    SetSizer( topsizer );
+    SetAutoLayout(TRUE);
+    SetSizer(topsizer);
 
-    topsizer->SetSizeHints( this );
-    topsizer->Fit( this );
+    topsizer->SetSizeHints(this);
+    topsizer->Fit(this);
 
-    Centre( wxBOTH );
+    Centre(wxBOTH);
 
     m_checklstbox->SetFocus();
 }

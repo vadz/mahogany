@@ -21,6 +21,7 @@ CFG=M - Win32 Debug DLL
 !MESSAGE "M - Win32 Debug" (based on "Win32 (x86) Application")
 !MESSAGE "M - Win32 Debug DLL" (based on "Win32 (x86) Application")
 !MESSAGE "M - Win32 Release DLL" (based on "Win32 (x86) Application")
+!MESSAGE "M - Win32 Release With Debug Info" (based on "Win32 (x86) Application")
 !MESSAGE 
 
 # Begin Project
@@ -143,6 +144,35 @@ LINK32=link.exe
 # ADD LINK32 $(wx)\ReleaseDll\wxWinDll.lib $(wx)\src\xpm\Release\xpm.lib extra\src\cclient\Release\cclient.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib /nologo /subsystem:windows /machine:I386 /libpath:"e:\python20\libs"
 # SUBTRACT LINK32 /debug
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "M___Win32_Release_With_Debug_Info"
+# PROP BASE Intermediate_Dir "M___Win32_Release_With_Debug_Info"
+# PROP BASE Ignore_Export_Lib 0
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "ReleaseDebug"
+# PROP Intermediate_Dir "ReleaseDebug"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+# ADD BASE CPP /nologo /MD /W3 /Zi /O2 /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(wx)\include" /I "e:\python20\include" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /D "USE_MODULES_STATIC" /Yu"Mpch.h" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(wx)\include" /I "e:\python20\include" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /D "USE_MODULES_STATIC" /Yu"Mpch.h" /FD /c
+# ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
+# ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
+# ADD BASE RSC /l 0x409 /i "include" /i "res" /i "$(wx)\include" /d "NDEBUG"
+# ADD RSC /l 0x409 /i "include" /i "res" /i "$(wx)\include" /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo /o"Debug/M.bsc"
+# ADD BSC32 /nologo /o"Debug/M.bsc"
+LINK32=link.exe
+# ADD BASE LINK32 $(wx)\Release\wxWindows.lib extra\src\c-client\Release\cclient.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib $(WX)\src\xpm\Release\xpm.lib $(WX)\src\zlib\Release\zlib.lib $(WX)\src\png\Release\png.lib $(WX)\src\jpeg\Release\jpeg.lib $(WX)\src\tiff\Release\tiff.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"e:\python20\libs" /fixed:no
+# SUBTRACT BASE LINK32 /pdb:none
+# ADD LINK32 $(wx)\Release\wxWindows.lib extra\src\c-client\Release\cclient.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib $(WX)\src\xpm\Release\xpm.lib $(WX)\src\zlib\Release\zlib.lib $(WX)\src\png\Release\png.lib $(WX)\src\jpeg\Release\jpeg.lib $(WX)\src\tiff\Release\tiff.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept /libpath:"e:\python20\libs" /fixed:no
+# SUBTRACT LINK32 /pdb:none
+
 !ENDIF 
 
 # Begin Target
@@ -151,6 +181,7 @@ LINK32=link.exe
 # Name "M - Win32 Debug"
 # Name "M - Win32 Debug DLL"
 # Name "M - Win32 Release DLL"
+# Name "M - Win32 Release With Debug Info"
 # Begin Group "classes"
 
 # PROP Default_Filter "*.cpp"
@@ -281,6 +312,8 @@ SOURCE=.\src\gui\wxllist.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
 !ENDIF 
 
 # End Source File
@@ -301,6 +334,8 @@ SOURCE=.\src\gui\wxlparser.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
 !ENDIF 
 
 # End Source File
@@ -320,6 +355,8 @@ SOURCE=.\src\gui\wxlwindow.cpp
 # ADD CPP /Yu
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
 !ENDIF 
 
@@ -468,7 +505,30 @@ SOURCE=.\src\adb\Collect.cpp
 # Begin Source File
 
 SOURCE=.\src\adb\ExportPalm.cpp
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -498,6 +558,11 @@ SOURCE=.\src\adb\ImportEudora.cpp
 # PROP BASE Exclude_From_Build 1
 # PROP Exclude_From_Build 1
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
 !ENDIF 
 
 # End Source File
@@ -519,6 +584,11 @@ SOURCE=.\src\adb\ImportMailrc.cpp
 # PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
 # PROP BASE Exclude_From_Build 1
 # PROP Exclude_From_Build 1
@@ -548,6 +618,11 @@ SOURCE=.\src\adb\ImportPine.cpp
 # PROP BASE Exclude_From_Build 1
 # PROP Exclude_From_Build 1
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
 !ENDIF 
 
 # End Source File
@@ -567,6 +642,11 @@ SOURCE=.\src\adb\ImportText.cpp
 # PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
 # PROP BASE Exclude_From_Build 1
 # PROP Exclude_From_Build 1
@@ -600,13 +680,41 @@ SOURCE=.\src\adb\ImportXFMail.cpp
 # PROP BASE Exclude_From_Build 1
 # PROP Exclude_From_Build 1
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
 !ENDIF 
 
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\adb\ProvBbdb.cpp
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -619,7 +727,30 @@ SOURCE=.\src\adb\ProvFC.cpp
 # Begin Source File
 
 SOURCE=.\src\adb\ProvPalm.cpp
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Group "python"
@@ -650,6 +781,11 @@ SOURCE=.\src\Python\MailFolder.i
 # PROP BASE Exclude_From_Build 1
 # PROP Exclude_From_Build 1
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
 !ENDIF 
 
 # End Source File
@@ -671,6 +807,11 @@ SOURCE=.\src\Python\MAppBase.i
 # PROP Exclude_From_Build 1
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
 
 # PROP BASE Exclude_From_Build 1
 # PROP Exclude_From_Build 1
@@ -700,6 +841,11 @@ SOURCE=.\src\Python\Message.i
 # PROP BASE Exclude_From_Build 1
 # PROP Exclude_From_Build 1
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
 !ENDIF 
 
 # End Source File
@@ -725,18 +871,69 @@ SOURCE=.\src\Python\MObject.i
 # PROP BASE Exclude_From_Build 1
 # PROP Exclude_From_Build 1
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
 !ENDIF 
 
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\Python\MProfile.i
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\Python\MString.i
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Group "SWIG-OUT"
@@ -784,6 +981,19 @@ InputPath=".\src\Python\MailFolder.cpp-swig"
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MailFolder.cpp-swig"
+
+"$(InputDir)\MailFolder_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MailFolder_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Ignore_Default_Tool 1
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
@@ -849,6 +1059,19 @@ InputPath=".\src\Python\MAppBase.cpp-swig"
 
 # End Custom Build
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Ignore_Default_Tool 1
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MAppBase.cpp-swig"
+
+"$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+
+# End Custom Build
+
 !ENDIF 
 
 # End Source File
@@ -894,6 +1117,19 @@ InputPath=".\src\Python\Message.cpp-swig"
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\Message.cpp-swig"
+
+"$(InputDir)\Message_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\Message_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Ignore_Default_Tool 1
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
@@ -959,6 +1195,19 @@ InputPath=".\src\Python\MObject.cpp-swig"
 
 # End Custom Build
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Ignore_Default_Tool 1
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MObject.cpp-swig"
+
+"$(InputDir)\MObject_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MObject_swig.cpp
+
+# End Custom Build
+
 !ENDIF 
 
 # End Source File
@@ -1004,6 +1253,19 @@ InputPath=".\src\Python\MProfile.cpp-swig"
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MProfile.cpp-swig"
+
+"$(InputDir)\MProfile_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MProfile_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Ignore_Default_Tool 1
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Updating SWIG-generated sources
 InputDir=.\src\Python
@@ -1069,14 +1331,55 @@ InputPath=".\src\Python\MString.cpp-swig"
 
 # End Custom Build
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Ignore_Default_Tool 1
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\MString.cpp-swig"
+
+"$(InputDir)\MString_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MString_swig.cpp
+
+# End Custom Build
+
 !ENDIF 
 
 # End Source File
 # Begin Source File
 
 SOURCE=".\src\Python\MTest.cpp-swig"
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Exclude_From_Build 1
 # PROP Ignore_Default_Tool 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+# PROP Ignore_Default_Tool 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Exclude_From_Build 1
+# PROP Ignore_Default_Tool 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Exclude_From_Build 1
+# PROP Ignore_Default_Tool 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP BASE Ignore_Default_Tool 1
+# PROP Exclude_From_Build 1
+# PROP Ignore_Default_Tool 1
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -1130,6 +1433,19 @@ InputPath=".\src\Python\swiglib.cpp-swig"
 
 # End Custom Build
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Ignore_Default_Tool 1
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=".\src\Python\swiglib.cpp-swig"
+
+"$(InputDir)\swiglib_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\swiglib_swig.cpp
+
+# End Custom Build
+
 !ENDIF 
 
 # End Source File
@@ -1154,6 +1470,11 @@ SOURCE=.\src\Python\InitPython.cpp
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
 # PROP BASE Exclude_From_Build 1
+# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
 # ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
 
 !ENDIF 
@@ -1182,6 +1503,13 @@ SOURCE=.\src\Python\MailFolder_swig.cpp
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
 # PROP BASE Exclude_From_Build 1
+# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# SUBTRACT BASE CPP /YX /Yc /Yu
 # ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
 # SUBTRACT CPP /YX /Yc /Yu
 
@@ -1214,6 +1542,13 @@ SOURCE=.\src\Python\MAppBase_swig.cpp
 # ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
 # SUBTRACT CPP /YX /Yc /Yu
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# SUBTRACT BASE CPP /YX /Yc /Yu
+# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# SUBTRACT CPP /YX /Yc /Yu
+
 !ENDIF 
 
 # End Source File
@@ -1240,6 +1575,13 @@ SOURCE=.\src\Python\Message_swig.cpp
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
 # PROP BASE Exclude_From_Build 1
+# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# SUBTRACT BASE CPP /YX /Yc /Yu
 # ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
 # SUBTRACT CPP /YX /Yc /Yu
 
@@ -1272,6 +1614,13 @@ SOURCE=.\src\Python\MObject_swig.cpp
 # ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
 # SUBTRACT CPP /YX /Yc /Yu
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# SUBTRACT BASE CPP /YX /Yc /Yu
+# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# SUBTRACT CPP /YX /Yc /Yu
+
 !ENDIF 
 
 # End Source File
@@ -1299,6 +1648,13 @@ SOURCE=.\src\Python\MProfile_swig.cpp
 # ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
 # SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# SUBTRACT BASE CPP /D "USE_PCH" /YX /Yc /Yu
+# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
+
 !ENDIF 
 
 # End Source File
@@ -1323,6 +1679,13 @@ SOURCE=.\src\Python\MString_swig.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
+# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# SUBTRACT BASE CPP /D "USE_PCH" /YX /Yc /Yu
 # ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
 # SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
 
@@ -1355,6 +1718,11 @@ SOURCE=.\src\Python\PythonHelp.cpp
 # PROP BASE Exclude_From_Build 1
 # ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
+# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
+
 !ENDIF 
 
 # End Source File
@@ -1379,6 +1747,13 @@ SOURCE=.\src\Python\swiglib_swig.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
+# ADD CPP /D "STATIC_LINKED" /D "SWIG_GLOBAL" /U "USE_PCH"
+# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# ADD BASE CPP /D "STATIC_LINKED" /D "SWIG_GLOBAL" /U "USE_PCH"
+# SUBTRACT BASE CPP /D "USE_PCH" /YX /Yc /Yu
 # ADD CPP /D "STATIC_LINKED" /D "SWIG_GLOBAL" /U "USE_PCH"
 # SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
 
@@ -1479,6 +1854,24 @@ BuildCmds= \
    $(BuildCmds)
 # End Custom Build
 
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# Begin Custom Build
+InputDir=.\include
+InputPath=.\include\MInterface.mid
+
+BuildCmds= \
+	N:\Unix\Cygwin\cygwin-b20\H-i586-cygwin32\bin\M4.exe -DM4FILE=$(InputDir)/mid2cpp.m4 $(InputPath) > $(InputDir)/MInterface.cpp \
+	N:\Unix\Cygwin\cygwin-b20\H-i586-cygwin32\bin\M4.exe -DM4FILE=$(InputDir)/mid2h.m4 $(InputPath) > $(InputDir)/MInterface.h \
+	
+
+"$(InputDir)/MInterface.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+
+"$(InputDir)/MInterface.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+   $(BuildCmds)
+# End Custom Build
+
 !ENDIF 
 
 # End Source File
@@ -1489,12 +1882,58 @@ BuildCmds= \
 # Begin Source File
 
 SOURCE=.\src\modules\PineImport.cpp
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\modules\XFMailImport.cpp
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Exclude_From_Build 1
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Group "modules"
@@ -1519,6 +1958,21 @@ SOURCE=.\src\util\miscutil.cpp
 # Begin Source File
 
 SOURCE=.\src\util\strutil.cpp
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
+# ADD CPP /O2
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -1527,7 +1981,31 @@ SOURCE=.\src\util\sysutil.cpp
 # Begin Source File
 
 SOURCE=.\src\util\twofish2.c
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
+# ADD CPP /Od
 # SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# SUBTRACT BASE CPP /YX /Yc /Yu
+# SUBTRACT CPP /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -1576,6 +2054,19 @@ InputPath=.\include\config_nt.h
 
 !ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
 
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Copying $(InputPath) to config.h...
+InputDir=.\include
+InputPath=.\include\config_nt.h
+
+"$(InputDir)\config.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\config.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP BASE Ignore_Default_Tool 1
 # PROP Ignore_Default_Tool 1
 # Begin Custom Build - Copying $(InputPath) to config.h...
 InputDir=.\include

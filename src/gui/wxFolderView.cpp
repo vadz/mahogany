@@ -2705,6 +2705,25 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
             // extract all addresses from the selected messages to this array
             wxSortedArrayString addressesSorted;
             size_t count = selections.GetCount();
+
+            MProgressDialog *dlg;
+            if ( count > 10 )  // FIXME: hardcoded
+            {
+               dlg = new MProgressDialog
+                         (
+                           _("Extracting addresses"),
+                           _("Scanning messages..."),
+                           count,
+                           m_Frame,     // parent
+                           true,        // disable parent only
+                           true         // abort button
+                         );
+            }
+            else
+            {
+               dlg = NULL;
+            }
+
             for ( size_t n = 0; n < count; n++ )
             {
                Message *msg = mf->GetMessage(selections[n]);
@@ -2722,7 +2741,15 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
                }
 
                msg->DecRef();
+
+               if ( dlg && !dlg->Update(n) )
+               {
+                  // interrupted
+                  break;
+               }
             }
+
+            delete dlg;
 
             mf->DecRef();
 
