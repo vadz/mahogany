@@ -73,7 +73,7 @@ END_EVENT_TABLE()
 #if wxUSE_LISTBOOK
 
 BEGIN_EVENT_TABLE(wxPListbook, wxListbook)
-    EVT_SIZE(wxPListbook::OnSize)
+    EVT_WINDOW_CREATE(wxPListbook::OnCreate)
 END_EVENT_TABLE()
 
 #endif // wxUSE_LISTBOOK
@@ -430,10 +430,7 @@ wxPListbook::~wxPListbook()
     delete m_persist;
 }
 
-// first time our OnSize() is called we restore the page: there is no other
-// event sent specifically after window creation and we can't do in the ctor
-// (too early) - this should change in wxWin 2.1...
-void wxPListbook::OnSize(wxSizeEvent& event)
+void wxPListbook::OnCreate(wxWindowCreateEvent& event)
 {
     if ( m_bFirstTime ) {
         RestorePage();
@@ -441,7 +438,7 @@ void wxPListbook::OnSize(wxSizeEvent& event)
         m_bFirstTime = FALSE;
     }
 
-    // important things are done in the base class version!
+    // important things may be done in the base class version
     event.Skip();
 }
 

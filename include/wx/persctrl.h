@@ -178,8 +178,8 @@ public:
     void SetConfigPath(const wxString& path);
 
     // callbacks
-        // when we're resized the first time we restore our page
-    void OnSize(wxSizeEvent& event);
+        // when we're created, we restore our page
+    void OnCreate(wxWindowCreateEvent& event);
 
 protected:
     static const wxChar *ms_path;
