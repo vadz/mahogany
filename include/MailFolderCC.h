@@ -174,8 +174,6 @@ public:
    */
    class Message *GetMessage(unsigned long uid);
 
-   virtual int GetMessageFlags(UIdType uid) const;
-
    /** Set flags on a sequence of messages. Possible flag values are MSG_STAT_xxx
        @param sequence the IMAP sequence
        @param flag flag to be set, e.g. "\\Deleted"
@@ -638,9 +636,6 @@ private:
 
    /// Used by the subscription management.
    class FolderListingCC *m_FolderListing;
-
-   /// a private struct used during GetMessageFlags() call only
-   struct MessageFlagsData *m_flagsData;
 
    /**@name only used for ListFolders: */
    //@{

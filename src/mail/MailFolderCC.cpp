@@ -303,17 +303,6 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// MessageFlagsData: struct used for data storage by GetMessageFlags()
-// ----------------------------------------------------------------------------
-
-struct MessageFlagsData
-{
-   MessageFlagsData() { flags = 0; }
-
-   int flags;
-};
-
-// ----------------------------------------------------------------------------
 // Various locker classes
 // ----------------------------------------------------------------------------
 
@@ -2239,29 +2228,6 @@ String MailFolderCC::BuildSequence(const UIdArray& messages)
    return sequence;
 }
 
-int MailFolderCC::GetMessageFlags(UIdType uid) const
-{
-   MailFolderCC *that = (MailFolderCC *)this;
-   if ( m_MailStream == NIL && !that->PingReopen() )
-   {
-      wxLogError(_("Can't get flags for message from closed folder '%s'."),
-                 GetName().c_str());
-
-      return 0;
-   }
-
-   that->m_flagsData = new MessageFlagsData();
-
-   // this will result in calls to mm_flags() which will fill m_flagsData
-   mail_fetch_flags(m_MailStream, (char *)strutil_ultoa(uid).c_str(), ST_UID);
-   int flags = m_flagsData->flags;
-
-   delete m_flagsData;
-   that->m_flagsData = NULL;
-
-   return flags;
-}
-
 bool
 MailFolderCC::SetSequenceFlag(String const &sequence,
                               int flag,
@@ -3173,24 +3139,8 @@ MailFolderCC::mm_flags(MAILSTREAM * stream, unsigned long msgno)
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET(mf, "mm_flags for non existent folder");
 
-   if ( mf->m_flagsData )
-   {
-      // we're inside GetMessageFlags(), just update m_flagsData
-      //
-      // NB: for now we always ask for flags of one message, we should extend
-      //     the MessageFlagsData struct to include msgno/uid if we want to
-      //     get the flags of a whole sequence at ones
-      MESSAGECACHE *elt = mail_elt(mf->m_MailStream, msgno);
-
-      // I think this shouldn't happen (only MRC really knows, of course)
-      CHECK_RET( elt, "mail_elt() returned NULL in mm_flags" );
-
-      mf->m_flagsData->flags = GetMsgStatus(elt);
-   }
-   else // message flags really changed
-   {
-      mf->UpdateMessageStatus(msgno);
-   }
+   // message flags really changed, cclient checks for it
+   mf->UpdateMessageStatus(msgno);
 }
 
 /** alert that c-client will run critical code

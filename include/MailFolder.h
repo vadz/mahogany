@@ -372,13 +372,6 @@ public:
    */
    virtual bool UnDeleteMessage(unsigned long uid) = 0;
 
-   /** Get the message flags
-
-       @param uid the message UID
-       @return the message flags
-   */
-   virtual int GetMessageFlags(UIdType uid) const = 0;
-
    /** Set flags on a messages. Possible flag values are MSG_STAT_xxx
        @param uid the message uid
        @param flag flag to be set, e.g. "\\Deleted"
