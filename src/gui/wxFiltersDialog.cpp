@@ -80,8 +80,7 @@ class wxOneFilterDialog : public wxManuallyLaidOutDialog
 {
 public:
    // ctor & dtor
-   wxOneFilterDialog(const wxString & filterName,
-                     ProfileBase *profile,
+   wxOneFilterDialog(ProfileBase *profile,
                      wxWindow *parent);
    virtual ~wxOneFilterDialog()
       {
@@ -103,10 +102,11 @@ protected:
    ProfileBase *m_Profile;
    // data
    wxTextCtrl *m_NameCtrl;
-   wxString m_Name;
+   wxString  m_Name;
    wxString  m_Filter,
              m_OldFilter;
-   class OneCritControls *m_CritControl;
+   class OneCritControl *m_CritControl;
+   class OneActionControl *m_ActionControl;
 private:
    DECLARE_EVENT_TABLE()
 };
@@ -116,22 +116,25 @@ END_EVENT_TABLE()
 
 
 static
-bool ConfigureOneFilter(const wxString &name,
-                        ProfileBase *profile,
+bool ConfigureOneFilter(ProfileBase *profile,
                         wxWindow *parent)
 {
-   wxOneFilterDialog dlg(name, profile, parent);
+   wxOneFilterDialog dlg(profile, parent);
    return ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() );
 }
 
 
 
-class OneCritControls
+class OneCritControl
 {
 public:
-   OneCritControls(wxWindow *parent, wxLayoutConstraints *c);
+   OneCritControl(wxWindow *parent, wxLayoutConstraints *c);
    void Save(wxString *str);
    void Load(wxString *str);
+
+   /// translate a storage string into a proper rule
+   static wxString TranslateToString(const wxString & criterium);
+
 private:
    wxCheckBox *m_Not; // Not
    wxChoice   *m_Type; // "Match", "Match substring", "Match RegExp",
@@ -147,6 +150,17 @@ wxString ORC_Types[] =
   gettext_noop("Match RegExp"), gettext_noop("Larger than"),
   gettext_noop("Smaller than"), gettext_noop("Older than"),
   gettext_noop("Is SPAM")
+};
+
+enum ORC_Types_Enum
+{
+   ORC_T_Match = 0,
+   ORC_T_MatchSub,
+   ORC_T_MatchRegEx,
+   ORC_T_LargerThan,
+   ORC_T_SmallerThan,
+   ORC_T_OlderThan,
+   ORC_T_IsSpam
 };
 
 static
@@ -165,6 +179,16 @@ wxString ORC_Where[] =
 static
 size_t ORC_WhereCount = WXSIZEOF(ORC_Where);
 
+enum ORC_Where_Enum
+{
+   ORC_W_Subject = 0,
+   ORC_W_Header,
+   ORC_W_From,
+   ORC_W_Body,
+   ORC_W_Message,
+   ORC_W_To
+};
+
 #define CRIT_CTRLCONST(oldctrl,newctrl) \
    c = new wxLayoutConstraints;\
    c->left.RightOf(oldctrl, LAYOUT_X_MARGIN);\
@@ -174,7 +198,7 @@ size_t ORC_WhereCount = WXSIZEOF(ORC_Where);
    newctrl->SetConstraints(c);
 
 
-OneCritControls::OneCritControls(wxWindow *parent, wxLayoutConstraints *c)
+OneCritControl::OneCritControl(wxWindow *parent, wxLayoutConstraints *c)
 {
    m_Parent = parent;
    m_Not = new wxCheckBox(m_Parent, -1, _("Not"));
@@ -193,7 +217,7 @@ OneCritControls::OneCritControls(wxWindow *parent, wxLayoutConstraints *c)
 }
 
 void
-OneCritControls::Save(wxString *str)
+OneCritControl::Save(wxString *str)
 {
    str->Printf("%d %d \"%s\" %d",
               (int)m_Not->GetValue(),
@@ -203,30 +227,88 @@ OneCritControls::Save(wxString *str)
 }
 
 void
-OneCritControls::Load(wxString *str)
+OneCritControl::Load(wxString *str)
 {
-   long number;
-
+   long number = 0;
    number = strutil_readNumber(*str);
    m_Not->SetValue(number);
    number = strutil_readNumber(*str);
    m_Type->SetSelection(number);
    m_Argument->SetValue(strutil_readString(*str));
-
    number = strutil_readNumber(*str);
    m_Where->SetSelection(number);
 }
 
-class OneActionControls
+/* static */
+wxString
+OneCritControl::TranslateToString(const wxString & criterium)
+{
+   String str = criterium;
+   String program;
+   // This returns the bit to go into an if between the brackets:
+   // if ( .............. )
+   if(strutil_readNumber(str) != 0)
+      program << '!';
+   
+   long type = strutil_readNumber(str);
+   wxString argument = strutil_readString(str);
+   long where = strutil_readNumber(str);
+   bool needsWhere = true;
+   switch(type)
+   {
+   case ORC_T_Match:
+      program << "matchi(" << '"' << argument << "\","; break;
+   case ORC_T_MatchSub:
+   case ORC_T_MatchRegEx:
+   case ORC_T_LargerThan:
+   case ORC_T_SmallerThan:
+   case ORC_T_OlderThan:
+      wxASSERT_MSG(0,"not yet implemented");
+      break;
+   case ORC_T_IsSpam:
+      program << "isspam(";
+      needsWhere = false;
+      break;
+   default:
+      wxASSERT_MSG(0,"unknown rule"); // FIXME: give meaningful error message
+   }
+   if(needsWhere)
+   {
+      switch(where)
+      {
+      case ORC_W_Subject:
+         program << "subject()"; break;
+      case ORC_W_Header:
+         program << "header()"; break;
+      case ORC_W_From:
+         program << "from()"; break;
+      case ORC_W_Body:
+         program << "body()"; break;
+      case ORC_W_Message:
+         program << "message()"; break;
+      case ORC_W_To:
+         program << "to()"; break;
+      };
+   }
+   program << ')'; // end of function call
+   return program;
+}
+
+
+class OneActionControl
 {
 public:
-   OneActionControls(wxWindow *parent, wxLayoutConstraints *c);
+   OneActionControl(wxWindow *parent, wxLayoutConstraints *c);
    
+   void Save(wxString *str);
+   void Load(wxString *str);
+
+   /// translate a storage string into a proper rule
+   static wxString TranslateToString(const wxString & action);
 private:
    /// Which action to perform
    wxChoice   *m_Type;
    wxTextCtrl  *m_Argument; // string, number of days or bytes
-   wxChoice   *m_Where; // "In Header", "In Subject", "In From..."
    wxWindow   *m_Parent;
 };
 
@@ -242,8 +324,66 @@ wxString OAC_Types[] =
 static
 size_t OAC_TypesCount = WXSIZEOF(OAC_Types);
 
+enum OAC_Types_Enum
+{
+   OAC_T_Delete = 0,
+   OAC_T_CopyTo,
+   OAC_T_MoveTo,
+   OAC_T_Expunge,
+   OAC_T_MessageBox,
+   OAC_T_LogEntry
+};
 
-OneActionControls::OneActionControls(wxWindow *parent, wxLayoutConstraints *c)
+void
+OneActionControl::Save(wxString *str)
+{
+   str->Printf("%d \"%s\"",
+              m_Type->GetSelection(),
+              strutil_escapeString(m_Argument->GetValue()).c_str());
+}
+
+void
+OneActionControl::Load(wxString *str)
+{
+   m_Type->SetSelection(strutil_readNumber(*str));
+   m_Argument->SetValue(strutil_readString(*str));
+}
+
+
+/* static */
+wxString
+OneActionControl::TranslateToString(const wxString & action)
+{
+   wxString str = action;
+   long type = strutil_readNumber(str);
+   wxString argument = strutil_readString(str);
+   wxString program;
+
+   bool needsArgument = true;
+   switch(type)
+   {
+   case OAC_T_Delete:
+      program << "delete("; needsArgument = false; break;
+   case OAC_T_CopyTo:
+      program << "copy("; break;
+   case OAC_T_MoveTo:
+      program << "move("; break;
+   case OAC_T_Expunge:
+      program << "expunge("; needsArgument = false; break;
+   case OAC_T_MessageBox:
+      program << "message("; break;
+   case OAC_T_LogEntry:
+      program << "log("; break;
+   }
+   if(needsArgument)
+      program << '"' << argument << '"';
+   program << ");";
+   return program;
+}
+
+
+
+OneActionControl::OneActionControl(wxWindow *parent, wxLayoutConstraints *c)
 {
    m_Parent = parent;
 
@@ -261,8 +401,9 @@ OneActionControls::OneActionControls(wxWindow *parent, wxLayoutConstraints *c)
    m_Argument->SetConstraints(c);
 }
 
+
 /*
-  Contains several lines of "OneCritControls" and "OneActionControls":
+  Contains several lines of "OneCritControl" and "OneActionControl":
 
   +--------------------------------+
   |                                |
@@ -284,8 +425,7 @@ OneActionControls::OneActionControls(wxWindow *parent, wxLayoutConstraints *c)
 
 */
 
-wxOneFilterDialog::wxOneFilterDialog(const wxString &filterName,
-                                     ProfileBase *profile,
+wxOneFilterDialog::wxOneFilterDialog(ProfileBase *profile,
                                      wxWindow *parent)
    : wxManuallyLaidOutDialog(parent,
                             _("Filter rule"),
@@ -294,9 +434,9 @@ wxOneFilterDialog::wxOneFilterDialog(const wxString &filterName,
    wxStaticBox *box = CreateStdButtonsAndBox(_("Filter Rule"), FALSE,
                                              MH_DIALOG_FILTERS);
 
-   m_Name = filterName;
    m_Profile = profile;
-   SafeIncRef(m_Profile);
+   m_Profile->IncRef();
+   m_Name = m_Profile->readEntry("Name","");
    
    SetDefaultSize(380, 240, FALSE /* not minimal */);
 
@@ -345,14 +485,14 @@ wxOneFilterDialog::wxOneFilterDialog(const wxString &filterName,
    c->top.SameAs(criteria, wxTop, 4*LAYOUT_Y_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
-   m_CritControl = new OneCritControls(this, c);
+   m_CritControl = new OneCritControl(this, c);
 
    c = new wxLayoutConstraints;
    c->left.SameAs(actions, wxLeft, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(actions, wxTop, 4*LAYOUT_Y_MARGIN);
    c->width.AsIs();
    c->height.AsIs();
-   (void)new OneActionControls(this, c);
+   m_ActionControl = new OneActionControl(this, c);
    
    TransferDataToWindow();
    m_OldFilter = m_Filter;
@@ -361,40 +501,24 @@ wxOneFilterDialog::wxOneFilterDialog(const wxString &filterName,
 bool
 wxOneFilterDialog::TransferDataFromWindow()
 {
-   String str;
-   m_CritControl->Save(&str);
-   GetProfile()->writeEntry("FilterDialog", str);
+   GetProfile()->writeEntry("Name", m_NameCtrl->GetValue().c_str());
 
-#if 0
-   m_Filter = m_textctrl->GetValue();
-   GetProfile()->writeEntry(MP_DATE_FMT, m_Filter);
-   GetProfile()->writeEntry(MP_DATE_GMT, m_UseGMT->GetValue());
-#endif
-   
+   String str;
+   m_CritControl->Save(&str); GetProfile()->writeEntry("Criterium", str);
+   m_ActionControl->Save(&str); GetProfile()->writeEntry("Action", str);
    return TRUE;
 }
 
 bool
 wxOneFilterDialog::TransferDataToWindow()
 {
-   m_NameCtrl->SetValue(m_Name);
+   m_NameCtrl->SetValue(GetProfile()->readEntry("Name", _("unnamed")));
+
    String str;
-   GetProfile()->readEntry("FilterDialog", &str);
-   m_CritControl->Load(&str);
-#if 0
-   m_Filter = READ_CONFIG(GetProfile(), MP_DATE_FMT);
-   m_UseGMT->SetValue( READ_CONFIG(GetProfile(), MP_DATE_GMT) != 0);
-   m_textctrl->SetValue(m_Filter);
-#endif
-   
+   str = GetProfile()->readEntry("Criterium", ""); m_CritControl->Load(&str);
+   str = GetProfile()->readEntry("Action", ""); m_ActionControl->Load(&str);
    return TRUE;
 }
-
-
-
-
-
-
 
 static const char *ButtonLabels [] =
 { gettext_noop("New"), gettext_noop("Delete"), gettext_noop("Edit"),
@@ -414,7 +538,10 @@ class wxFiltersDialog : public wxOptionsPageSubdialog
 public:
    // ctor & dtor
    wxFiltersDialog(ProfileBase *profile, wxWindow *parent);
-   virtual ~wxFiltersDialog() {}
+   virtual ~wxFiltersDialog()
+      {
+         m_FiltersProfile->DecRef();
+      }
 
    // transfer data to/from dialog
    virtual bool TransferDataFromWindow();
@@ -428,12 +555,15 @@ public:
    void OnButton(wxCommandEvent & event );
 protected:
 
-   wxCheckListBox *m_ChecklistBox;
+   wxListBox *m_ListBox;
    wxButton       *m_Buttons[WXSIZEOF(ButtonLabels)];
    
 // data
    wxString  m_Filter,
-m_OldFilter;
+      m_OldFilter;
+   /// an array holding the names of all filters:
+   wxArrayString m_FilterGroups, m_FilterNames;
+   ProfileBase *m_FiltersProfile;
 private:
    DECLARE_EVENT_TABLE()
 };
@@ -451,15 +581,16 @@ wxFiltersDialog::wxFiltersDialog(ProfileBase *profile, wxWindow *parent)
                             _("DO NOT USE - CODE UNDER DEVELOPMENT!!! Filter rules"), //FIXME
                             "FilterDialog")
 {
-   wxLayoutConstraints *c;
+   m_FiltersProfile = ProfileBase::CreateProfile("Filters", profile);
    
+   wxLayoutConstraints *c;
    wxStaticBox *box = CreateStdButtonsAndBox(_("Filter Rules"), FALSE,
                                              MH_DIALOG_FILTERS);
 
    /* This dialog is supposed to look like this:
 
       +------------------+  [new]
-      |checklistbox of   |  [del]
+      |listbox of        |  [del]
       |existing filters  |  [edit]
       |                  |  
       |                  |  [up]
@@ -490,14 +621,14 @@ wxFiltersDialog::wxFiltersDialog(ProfileBase *profile, wxWindow *parent)
       m_Buttons[idx]->SetConstraints(c);
    }
 
-   // create the checklistbox in the area which is left
+   // create the listbox in the area which is left
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
    c->right.SameAs(m_Buttons[0], wxLeft, 2*LAYOUT_X_MARGIN);
    c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
-   m_ChecklistBox = new wxCheckListBox(this, -1);
-   m_ChecklistBox->SetConstraints(c);
+   m_ListBox = new wxListBox(this, -1);
+   m_ListBox->SetConstraints(c);
 
    SetDefaultSize(380, 240, FALSE /* not minimal */);
    TransferDataToWindow();
@@ -512,12 +643,25 @@ wxFiltersDialog::OnButton( wxCommandEvent &event )
    for(size_t idx = 0; ButtonLabels[idx]; idx++)
       if(obj == m_Buttons[idx])
       {
+         // Either edit an existing folder or create a new one:
+         wxString name;
          if(idx == Button_New)
-            ConfigureOneFilter(_("New Filter"), GetProfile(), this);
+            name = m_FiltersProfile->GetUniqueGroupName();
          else if(idx == Button_Edit)
-            ConfigureOneFilter("XXX", GetProfile(), this);
+         {
+            int idx = m_ListBox->GetSelection();
+            if(idx >= 0)
+               name = m_FilterGroups[idx];
+            else
+               return; //FIXME: disable button if none is selected
+         }
          else
             return;
+         // now we have a valid name:
+         ProfileBase *fprof = ProfileBase::CreateProfile(name, m_FiltersProfile);
+         ConfigureOneFilter(fprof, this);
+         fprof->DecRef();
+         TransferDataToWindow(); // update the view
       }
    event.Skip();
 }
@@ -525,25 +669,56 @@ wxFiltersDialog::OnButton( wxCommandEvent &event )
 bool
 wxFiltersDialog::TransferDataFromWindow()
 {
-#if 0
-   m_Filter = m_textctrl->GetValue();
-   GetProfile()->writeEntry(MP_DATE_FMT, m_Filter);
-   GetProfile()->writeEntry(MP_DATE_GMT, m_UseGMT->GetValue());
-#endif
-   
    return TRUE;
 }
 
 bool
 wxFiltersDialog::TransferDataToWindow()
 {
-#if 0
-   m_Filter = READ_CONFIG(GetProfile(), MP_DATE_FMT);
-   m_UseGMT->SetValue( READ_CONFIG(GetProfile(), MP_DATE_GMT) != 0);
-   m_textctrl->SetValue(m_Filter);
-#endif
+   /* Filters are all stored as subgroups under the group "Filters" in 
+      the current profile. I.e. ./Filters/a ./Filters/b etc
+      Fitler names and group names do not correspond, group names are
+      just created to be unique.
+   */
+
+   m_FilterGroups.Clear();
+   m_FilterNames.Clear();
+   m_ListBox->Clear();
    
+   long ref;
+   wxString name;
+   for(bool found = m_FiltersProfile->GetFirstGroup(name, ref);
+       found;
+       found = m_FiltersProfile->GetNextGroup(name, ref))
+   {
+      m_FilterGroups.Add(name);
+      name = m_FiltersProfile->readEntry(name+"/Name",_("unnamed"));
+      m_FilterNames.Add(name);
+      m_ListBox->Append(name);
+   }
    return TRUE;
+}
+
+static
+String TranslateOneRuleToProgram(const wxString &name,
+                                 ProfileBase *profile)
+{
+   wxString program;
+   ProfileBase *p = ProfileBase::CreateProfile(name, profile);
+   wxString criterium = p->readEntry("Criterium","");
+   wxString action = p->readEntry("Action","");
+   if(criterium.Length() > 0 && action.Length() > 0)
+   {
+      program = "if(";
+      program << OneCritControl::TranslateToString(criterium)
+              << ')'
+              << '{'
+              << OneActionControl::TranslateToString(action)
+              << '}';
+      
+   }
+   p->DecRef();
+   return program;
 }
 
 // ----------------------------------------------------------------------------
@@ -554,6 +729,35 @@ extern
 bool ConfigureFilterRules(ProfileBase *profile, wxWindow *parent)
 {
    wxFiltersDialog dlg(profile, parent);
-   return ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() );
+   bool dirty = ( dlg.ShowModal() == wxID_OK && dlg.WasChanged() );
+
+   //FIXME: for debugging purposes only:
+
+   wxString pgm = GetFilterProgram(profile);
+   INFOMESSAGE(("Resulting filter program:\n%s", pgm.c_str()));
+   
+   return dirty;
 }
 
+/** Read a filter program from the data.
+ This takes the sub-groups under "Filters/" and assembles a filter
+ program from them. */
+extern
+String GetFilterProgram(ProfileBase *profile)
+{
+   ProfileBase * filtersProfile =
+      ProfileBase::CreateProfile("Filters", profile);
+
+   String program;
+   
+   long ref;
+   wxString name;
+   for(bool found = filtersProfile->GetFirstGroup(name, ref);
+       found;
+       found = filtersProfile->GetNextGroup(name, ref))
+   {
+      program += TranslateOneRuleToProgram(name, filtersProfile);
+   }
+   filtersProfile->DecRef();
+   return program;
+}

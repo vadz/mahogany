@@ -22,12 +22,9 @@ $Id$
                 a) sorting order
                 b) ...
  
-10!!    KB      100% reproducible crash on linux --with-debug --> due to
-		new mail event changes???
-	      
 9		disabling "collect mail" in properties has no effect!
 
-9	KB	finish filters dialog
+9	KB	finish filters dialog / up/down arrows, error messages
 9	KB	debug filters, does '|' really work?
 
 9	KB	wxLayout:

@@ -129,6 +129,8 @@ public:
    virtual bool GetFirstEntry(String& s, long& l) const;
    /// see wxConfig docs
    virtual bool GetNextEntry(String& s, long& l) const;
+   /// Returns a unique, not yet existing sub-group name:
+   virtual String GetUniqueGroupName(void) const;
 
       /// Returns a pointer to the parent profile.
    virtual ProfileBase *GetParent(void) const;
@@ -281,7 +283,11 @@ bool Profile::GetFirstGroup(String& s, long& l) const
    PCHECK();
    ms_GlobalConfig->SetPath(GetName());
    if(m_ProfilePath.Length()) ms_GlobalConfig->SetPath(m_ProfilePath);
-   return ms_GlobalConfig->GetFirstGroup(s, l);
+   bool success = ms_GlobalConfig->GetFirstGroup(s, l);
+   if(success && s == SUSPEND_PATH)
+      return GetNextGroup(s,l);
+   else
+      return success;
 }
 
 bool Profile::GetNextGroup(String& s, long& l) const
@@ -289,8 +295,30 @@ bool Profile::GetNextGroup(String& s, long& l) const
    PCHECK();
    ms_GlobalConfig->SetPath(GetName());
    if(m_ProfilePath.Length()) ms_GlobalConfig->SetPath(m_ProfilePath);
-   return ms_GlobalConfig->GetNextGroup(s, l);
+   bool success = ms_GlobalConfig->GetNextGroup(s, l);
+   while(success && s == SUSPEND_PATH)
+      success = ms_GlobalConfig->GetNextGroup(s, l);
+   return success;
 }
+
+String Profile::GetUniqueGroupName(void) const
+{
+   PCHECK();
+   String name; // We use hex numbers
+   unsigned long number = 0;
+   for(;;)
+   {
+      name.Printf("%lX", number);
+      if(HasGroup(name))
+         number++;
+      else
+         return name;
+   }
+   wxASSERT(0); // must not happen!
+   return "--outOfBounds--";
+}
+
+
 bool Profile::GetFirstEntry(String& s, long& l) const
 {
    PCHECK();

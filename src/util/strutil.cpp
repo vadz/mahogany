@@ -846,6 +846,8 @@ strutil_readString(String &string)
       }
       newstr << *cptr;
    }
+   if(*cptr == '"')
+      cptr++;
    string = cptr;
    return newstr;
 }

@@ -1077,7 +1077,6 @@ MailFolderCmn::UpdateListing(void)
       hilp->DecRef();
       m_FirstListing = false;
    }
-
 }
 
 void

@@ -298,6 +298,11 @@ wxMFrame::OnMenuCommand(int id)
    case WXMENU_EDIT_PREF:
       ShowOptionsDialog(this);
       break;
+   case WXMENU_EDIT_FILTERS:
+   {
+      (void) ConfigureFilterRules(mApplication->GetProfile(), this);
+      break;
+   }
    case WXMENU_EDIT_MODULES:
       ShowModulesDialog(this);
       break;

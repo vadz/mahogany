@@ -163,6 +163,9 @@ public:
    /// see wxConfig docs
    virtual bool GetNextEntry(String& s, long& l) const = 0;
 
+   /// Returns a unique, not yet existing sub-group name: //MT!!
+   virtual String GetUniqueGroupName(void) const = 0;
+   
    /// Returns a pointer to the parent profile.
    virtual ProfileBase *GetParent(void) const = 0;
    /** @name Managing environment variables

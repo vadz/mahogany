@@ -186,7 +186,6 @@ dnl Here we disable support for exceptions if the compiler is gcc and
 dnl new enough to support it.
 dnl
 AC_PATH_PROG(GREP, grep)
-CXXFLAGS_PYCODE="$CXXFLAGS"
 if test "$GCC" = "yes"
 then
 	dnl first, for gcc set our own debug flags
@@ -217,7 +216,6 @@ then
 	CXXFLAGS_PYCODE="$CXXFLAGS -DCC_GCC -Wall"
 	CXXFLAGS="$CXXFLAGS -Werror"
 fi
-AC_SUBST(CXXFLAGS_PYCODE)
 
 dnl --------------------------------------------------------------------------
 dnl add our extra directories to the search path
@@ -726,6 +724,11 @@ LIBS="$LIBS $PYTHON_LIBS $LIB_EFENCE $LIB_DMALLOC $LIB_PNG $LIB_JPEG"
 CXXFLAGS="$CXXFLAGS $DBGFLAGS $OPT"
 CFLAGS="$CFLAGS $DBGFLAGS $OPT"
 
+dnl Python code produces warnings at present, so don't break compilation:
+CXXFLAGS_PYCODE=`echo $CXXFLAGS | sed 's/-Werror//g'`
+AC_SUBST(CXXFLAGS_PYCODE)
+
+dnl Make sure, we get statically linked against wxGTK:
 LIBS_STATIC=`echo $LIBS | sed 's/-lwx_gtk/-Wl,-Bstatic & -Wl,-Bdynamic/g'`
 dnl libtool does not like -L.
 LIBS=`echo $LIBS | sed 's/-L\.//g'`
