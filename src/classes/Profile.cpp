@@ -739,11 +739,27 @@ Profile::CreateGlobalConfig(const String & filename)
                                   wxCONFIG_USE_LOCAL_FILE |
                                   wxCONFIG_USE_GLOBAL_FILE);
 #  else  // Unix
-   String globalFile;
-   globalFile << M_BASEDIR << '/'
-              << M_APPLICATIONNAME << ".conf";
-   if(! wxFileExists(globalFile))
-      globalFile = String(M_APPLICATIONNAME) + ".conf";
+   // look for the global config file in the following places in order:
+   //    1. compile-time specified installation dir
+   //    2. run-time specified installation dir
+   //    3. default installation dir
+   String globalFileName, globalFile;
+   globalFileName << '/' << M_APPLICATIONNAME << ".conf";
+   globalFile = String(M_PREFIX) + globalFileName;
+   if ( !wxFileExists(globalFile) )
+   {
+      const char *dir = getenv("MAHOGANY_DIR");
+      if ( dir )
+      {
+         globalFile = String(dir) + globalFileName;
+      }
+   }
+   if ( !wxFileExists(globalFile) )
+   {
+      // wxConfig will look for it in the default location(s)
+      globalFile = globalFileName;
+   }
+
    // we don't need the config file manager for this profile
    ms_GlobalConfig = new wxConfig(M_APPLICATIONNAME, M_VENDORNAME,
                                   filename, globalFile,
