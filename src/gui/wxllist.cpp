@@ -1098,8 +1098,6 @@ wxLayoutLine::DeleteWord(CoordType xpos)
          return true;
       }
    }
-
-   wxFAIL_MSG(_T("unreachable"));
 }
 
 wxLayoutLine *
