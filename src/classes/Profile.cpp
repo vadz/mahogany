@@ -148,6 +148,8 @@ public:
    virtual void DeleteGroup(const String & path);
    /// return the name of the profile
    virtual String GetProfileName(void) { return profileName; }
+   
+   MOBJECT_DEBUG
 
 private:
    /** Constructor.
@@ -740,6 +742,19 @@ Profile::writeEntry(const String & key, bool Value)
 {
    return writeEntry(key, (long) Value);
 }
+
+#ifdef DEBUG
+
+wxString
+Profile::Dump() const
+{
+   String str;
+   str.Printf("Profile '%s' (m_nRef = %d).", profileName.c_str(), m_nRef);
+
+   return str;
+}
+
+#endif // Debug
 
 // ----------------------------------------------------------------------------
 // ConfigFileManager
