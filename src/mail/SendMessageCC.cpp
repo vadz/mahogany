@@ -30,9 +30,17 @@
 
  */
 
+// ============================================================================
+// declarations
+// ============================================================================
+
 #ifdef __GNUG__
 #   pragma implementation "SendMessageCC.h"
 #endif
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
 
 #include "Mpch.h"
 #include "Mcommon.h"
@@ -51,6 +59,8 @@
 #include "Message.h"
 #include "MailFolderCC.h"
 
+#include "MThread.h"
+
 #include "SendMessage.h"
 #include "SendMessageCC.h"
 
@@ -63,15 +73,62 @@
 
 extern "C"
 {
-#  include <misc.h>
-
-   void rfc822_setextraheaders(const char **names, const char **values);
+#  include <misc.h> // for cpystr()
 }
 
-#define  CPYSTR(x)   cpystr(x)
+// ----------------------------------------------------------------------------
+// prototypes
+// ----------------------------------------------------------------------------
 
-/// temporary buffer for storing message headers, be generous:
-#define   HEADERBUFFERSIZE 100*1024
+static long write_stream_output(void *, char *);
+static long write_str_output(void *, char *);
+
+// ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
+
+// an object of this class temporarily redirects cclient rfc822_output to our
+// function abd restores the old function in its dtor
+//
+// this class is effectively a singleton as it locks a mutex in its ctor to
+// prevent us from trying to send more than one message at once (bad things
+// will happen inside cclient if we do)
+class Rfc822OutputRedirector
+{
+public:
+   // the ctor may redirect rfc822 output to write bcc as well or to not do
+   // it, it is important to get it right or BCC might be sent as a message
+   // header and be seen by the recepient!
+   Rfc822OutputRedirector(bool outputBcc, SendMessageCC *msg);
+   ~Rfc822OutputRedirector();
+
+   static long FullRfc822Output(char *, ENVELOPE *, BODY *,
+                                soutr_t, void *, long);
+
+private:
+   void SetHeaders(const char **names, const char **values);
+
+   // the old output routine
+   static void *ms_oldRfc822Output;
+
+   // should we output BCC?
+   static bool ms_outputBcc;
+
+   // the extra headers written by FullRfc822Output()
+   static const char **ms_HeaderNames;
+   static const char **ms_HeaderValues;
+
+   // and a mutex to protect them
+   static MMutex ms_mutexExtraHeaders;
+};
+
+// ============================================================================
+// implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// SendMessage
+// ----------------------------------------------------------------------------
 
 SendMessage *SendMessage::Create(Profile *prof, Protocol protocol)
 {
@@ -87,6 +144,10 @@ SendMessageCC::SendMessageCC(Profile *iprof,
 {
    Create(protocol, iprof);
 }
+
+// ----------------------------------------------------------------------------
+// SendMessageCC creation and destruction
+// ----------------------------------------------------------------------------
 
 void
 SendMessageCC::Create(Protocol protocol,
@@ -161,6 +222,27 @@ SendMessageCC::Create(Protocol protocol,
    m_UseSSL = READ_CONFIG(prof, MP_SMTPHOST_USE_SSL) != 0;
 #endif
 }
+
+SendMessageCC::~SendMessageCC()
+{
+   mail_free_envelope (&m_Envelope);
+   mail_free_body (&m_Body);
+
+   if(m_headerNames)
+   {
+      for(int j = 0; m_headerNames[j] ; j++)
+      {
+         delete [] (char *)m_headerNames[j];
+         delete [] (char *)m_headerValues[j];
+      }
+      delete [] m_headerNames;
+      delete [] m_headerValues;
+   }
+}
+
+// ----------------------------------------------------------------------------
+// SendMessageCC header stuff
+// ----------------------------------------------------------------------------
 
 void
 SendMessageCC::SetHeaderEncoding(wxFontEncoding enc)
@@ -301,7 +383,7 @@ SendMessageCC::EncodeAddressList(struct mail_address *adr)
       if ( adr->personal )
       {
          char *tmp = adr->personal;
-         adr->personal = CPYSTR(EncodeHeader(tmp));
+         adr->personal = cpystr(EncodeHeader(tmp));
 
          fs_give((void **)&tmp);
       }
@@ -316,7 +398,7 @@ SendMessageCC::SetSubject(const String &subject)
    if(m_Envelope->subject) fs_give((void **)&m_Envelope->subject);
 
    String subj = EncodeHeader(subject);
-   m_Envelope->subject = CPYSTR(subj.c_str());
+   m_Envelope->subject = cpystr(subj.c_str());
 }
 
 void
@@ -353,9 +435,9 @@ SendMessageCC::SetupAddresses(void)
    mailbox = strutil_before(email, '@');
    mailhost = strutil_after(email,'@');
 
-   m_Envelope->from->personal = CPYSTR(EncodeHeader(m_FromPersonal));
-   m_Envelope->from->mailbox = CPYSTR(mailbox);
-   m_Envelope->from->host = CPYSTR(mailhost);
+   m_Envelope->from->personal = cpystr(EncodeHeader(m_FromPersonal));
+   m_Envelope->from->mailbox = cpystr(mailbox);
+   m_Envelope->from->host = cpystr(mailhost);
 
    if(m_Sender.Length() > 0)
    {
@@ -373,12 +455,12 @@ SendMessageCC::SetupAddresses(void)
 
       String tmp = Message::GetNameFromAddress(m_Sender);
       if(tmp != email) // it might just be the same name@host
-         m_Envelope->sender->personal = CPYSTR(tmp);
-      m_Envelope->sender->mailbox = CPYSTR(mailbox);
-      m_Envelope->sender->host = CPYSTR(mailhost);
+         m_Envelope->sender->personal = cpystr(tmp);
+      m_Envelope->sender->mailbox = cpystr(mailbox);
+      m_Envelope->sender->host = cpystr(mailhost);
    }
-   m_Envelope->return_path->mailbox = CPYSTR(mailbox);
-   m_Envelope->return_path->host = CPYSTR(mailhost);
+   m_Envelope->return_path->mailbox = cpystr(mailbox);
+   m_Envelope->return_path->host = cpystr(mailhost);
 }
 
 void
@@ -491,6 +573,7 @@ SendMessageCC::HasHeaderEntry(const String &entry)
          return true;
    return false;
 }
+
 String
 SendMessageCC::GetHeaderEntry(const String &key)
 {
@@ -554,7 +637,61 @@ SendMessageCC::AddHeaderEntry(String const &entry, String const
    }
 }
 
+String
+SendMessageCC::EncodingToCharset(wxFontEncoding enc)
+{
+   // translate encoding to the charset
+   wxString cs;
+   switch ( enc )
+   {
+      case wxFONTENCODING_ISO8859_1:
+      case wxFONTENCODING_ISO8859_2:
+      case wxFONTENCODING_ISO8859_3:
+      case wxFONTENCODING_ISO8859_4:
+      case wxFONTENCODING_ISO8859_5:
+      case wxFONTENCODING_ISO8859_6:
+      case wxFONTENCODING_ISO8859_7:
+      case wxFONTENCODING_ISO8859_8:
+      case wxFONTENCODING_ISO8859_9:
+      case wxFONTENCODING_ISO8859_10:
+      case wxFONTENCODING_ISO8859_11:
+      case wxFONTENCODING_ISO8859_12:
+      case wxFONTENCODING_ISO8859_13:
+      case wxFONTENCODING_ISO8859_14:
+      case wxFONTENCODING_ISO8859_15:
+         cs.Printf("ISO-8859-%d", enc + 1 - wxFONTENCODING_ISO8859_1);
+         break;
 
+      case wxFONTENCODING_CP1250:
+      case wxFONTENCODING_CP1251:
+      case wxFONTENCODING_CP1252:
+      case wxFONTENCODING_CP1253:
+      case wxFONTENCODING_CP1254:
+      case wxFONTENCODING_CP1255:
+      case wxFONTENCODING_CP1256:
+      case wxFONTENCODING_CP1257:
+         cs.Printf("windows-%d", 1250 + enc - wxFONTENCODING_CP1250);
+         break;
+
+      case wxFONTENCODING_KOI8:
+         cs = "koi8-r";
+         break;
+
+      default:
+         FAIL_MSG( "unknown encoding" );
+
+      case wxFONTENCODING_SYSTEM:
+      case wxFONTENCODING_DEFAULT:
+         // no special encoding
+         break;
+   }
+
+   return cs;
+}
+
+// ----------------------------------------------------------------------------
+// SendMessageCC building
+// ----------------------------------------------------------------------------
 
 void
 SendMessageCC::Build(bool forStorage)
@@ -686,58 +823,6 @@ SendMessageCC::Build(bool forStorage)
    rfc822_date (tmpbuf);
    m_Envelope->date = (char *) fs_get (1+strlen (tmpbuf));
    strcpy (m_Envelope->date,tmpbuf);
-}
-
-String
-SendMessageCC::EncodingToCharset(wxFontEncoding enc)
-{
-   // translate encoding to the charset
-   wxString cs;
-   switch ( enc )
-   {
-      case wxFONTENCODING_ISO8859_1:
-      case wxFONTENCODING_ISO8859_2:
-      case wxFONTENCODING_ISO8859_3:
-      case wxFONTENCODING_ISO8859_4:
-      case wxFONTENCODING_ISO8859_5:
-      case wxFONTENCODING_ISO8859_6:
-      case wxFONTENCODING_ISO8859_7:
-      case wxFONTENCODING_ISO8859_8:
-      case wxFONTENCODING_ISO8859_9:
-      case wxFONTENCODING_ISO8859_10:
-      case wxFONTENCODING_ISO8859_11:
-      case wxFONTENCODING_ISO8859_12:
-      case wxFONTENCODING_ISO8859_13:
-      case wxFONTENCODING_ISO8859_14:
-      case wxFONTENCODING_ISO8859_15:
-         cs.Printf("ISO-8859-%d", enc + 1 - wxFONTENCODING_ISO8859_1);
-         break;
-
-      case wxFONTENCODING_CP1250:
-      case wxFONTENCODING_CP1251:
-      case wxFONTENCODING_CP1252:
-      case wxFONTENCODING_CP1253:
-      case wxFONTENCODING_CP1254:
-      case wxFONTENCODING_CP1255:
-      case wxFONTENCODING_CP1256:
-      case wxFONTENCODING_CP1257:
-         cs.Printf("windows-%d", 1250 + enc - wxFONTENCODING_CP1250);
-         break;
-
-      case wxFONTENCODING_KOI8:
-         cs = "koi8-r";
-         break;
-
-      default:
-         FAIL_MSG( "unknown encoding" );
-
-      case wxFONTENCODING_SYSTEM:
-      case wxFONTENCODING_DEFAULT:
-         // no special encoding
-         break;
-   }
-
-   return cs;
 }
 
 void
@@ -901,6 +986,10 @@ SendMessageCC::AddPart(Message::ContentType type,
    }
 }
 
+// ----------------------------------------------------------------------------
+// SendMessageCC sending
+// ----------------------------------------------------------------------------
+
 bool
 SendMessageCC::SendOrQueue(bool send)
 {
@@ -980,7 +1069,6 @@ SendMessageCC::Send(void)
    MCclientLocker locker();
 
    SENDSTREAM *stream = NIL;
-   bool success = true;
 
    // SMTP/NNTP server reply
    String reply;
@@ -1032,139 +1120,151 @@ SendMessageCC::Send(void)
       }
    }
 
-   switch(m_Protocol)
+   bool success = true;
+   switch ( m_Protocol )
    {
-   case Prot_SMTP:
-      service = "smtp";
-      DBGMESSAGE(("Trying to open connection to SMTP server '%s'", m_ServerHost.c_str()));
+      case Prot_SMTP:
+         service = "smtp";
+         DBGMESSAGE(("Trying to open connection to SMTP server '%s'",
+                     m_ServerHost.c_str()));
 #ifdef USE_SSL
-      if(m_UseSSL)
-      {
-         STATUSMESSAGE(("Sending message via SSL..."));
-         service << "/ssl";
-      }
-#endif
-      stream = smtp_open_full
-         (NIL,(char **)hostlist, (char *)service.c_str(),
-          SMTPTCPPORT, OP_DEBUG);
-      break;
-   case Prot_NNTP:
-      service = "nntp";
-      DBGMESSAGE(("Trying to open connection to NNTP server '%s'", m_ServerHost.c_str()));
-#ifdef USE_SSL
-      if( m_UseSSL )
-      {
-         STATUSMESSAGE(("Posting message via SSL..."));
-         service << "/ssl";
-      }
-#endif
-      stream = nntp_open_full
-         (NIL,(char **)hostlist,"nntp/ssl",SMTPTCPPORT,OP_DEBUG);
-      break;
-#ifdef OS_UNIX
-   case Prot_Sendmail:
-   {
-      if ( msgText.empty() )
-      {
-         WriteToString(msgText);
-      }
-      //else: already done for preview above
-
-      bool success = false;
-
-      // write to temp file:
-#if 0 // VZ: wxGetTempFileName() is broken beyond repair, don't use it for now
-      const char *filename = wxGetTempFileName("Mtemp");
-#else
-      // tmpnam() is POSIX, so use it even if mk(s)temp() would be better
-      // because here we have a race condition
-      const char *filename = tmpnam(NULL);
-#endif
-
-      if ( filename )
-      {
-         wxFile out;
-
-         // don't overwrite because someone could have created file with "bad"
-         // (i.e. world readable) permissions in the meanwhile
-         if ( out.Create(filename, FALSE /* don't overwrite */,
-                         wxS_IRUSR | wxS_IWUSR) )
+         if(m_UseSSL)
          {
-            size_t written = out.Write(msgText, msgText.Length());
-            out.Close();
-            if ( written == msgText.Length() )
-            {
-               String command;
-               command.Printf("%s < '%s'; exec /bin/rm -f '%s'",
-                              m_SendmailCmd.c_str(),
-                              filename, filename);
-               // HORRIBLE HACK: this should be `const char *' but wxExecute's
-               // prototype doesn't allow it...
-               char *argv[4];
-               argv[0] = (char *)"/bin/sh";
-               argv[1] = (char *)"-c";
-               argv[2] = (char *)command.c_str();
-               argv[3] = 0;  // NULL
-               success = (wxExecute(argv) != 0);
-            }
+            STATUSMESSAGE(("Sending message via SSL..."));
+            service << "/ssl";
          }
-      }
-      if(success)
-         MDialog_Message(_("Message sent."),
-                         NULL, // parent window
-                         MDIALOG_MSGTITLE,
-                         "MailSentMessage");
-      else
-         ERRORMESSAGE((_("Failed to send message via '%s'"),
-                       m_SendmailCmd.c_str()));
-      return success;
-   }
+#endif // USE_SSL
+         stream = smtp_open_full(NIL,
+                                 (char **)hostlist,
+                                 (char *)service.c_str(),
+                                 SMTPTCPPORT,
+                                 OP_DEBUG);
+         break;
+
+      case Prot_NNTP:
+         service = "nntp";
+         DBGMESSAGE(("Trying to open connection to NNTP server '%s'",
+                    m_ServerHost.c_str()));
+#ifdef USE_SSL
+         if( m_UseSSL )
+         {
+            STATUSMESSAGE(("Posting message via SSL..."));
+            service << "/ssl";
+         }
+#endif // USE_SSL
+
+         stream = nntp_open_full(NIL,
+                                 (char **)hostlist,
+                                 (char *)service.c_str(),
+                                 NNTPTCPPORT,
+                                 OP_DEBUG);
+         break;
+
+#ifdef OS_UNIX
+         case Prot_Sendmail:
+         {
+            if ( msgText.empty() )
+            {
+               WriteToString(msgText);
+            }
+            //else: already done for preview above
+
+            // write to temp file:
+#if 0 // VZ: wxGetTempFileName() is broken beyond repair, don't use it for now
+            const char *filename = wxGetTempFileName("Mtemp");
+#else
+            // tmpnam() is POSIX, so use it even if mk(s)temp() would be better
+            // because here we have a race condition
+            const char *filename = tmpnam(NULL);
 #endif
-   break;
-      // make gcc happy
-      case Prot_Illegal:
-      default:
-         FAIL_MSG("illegal protocol");
+
+            if ( filename )
+            {
+               wxFile out;
+
+               // don't overwrite because someone could have created file with "bad"
+               // (i.e. world readable) permissions in the meanwhile
+               if ( out.Create(filename, FALSE /* don't overwrite */,
+                               wxS_IRUSR | wxS_IWUSR) )
+               {
+                  size_t written = out.Write(msgText, msgText.Length());
+                  out.Close();
+                  if ( written == msgText.Length() )
+                  {
+                     String command;
+                     command.Printf("%s < '%s'; exec /bin/rm -f '%s'",
+                                    m_SendmailCmd.c_str(),
+                                    filename, filename);
+                     // HORRIBLE HACK: this should be `const char *' but wxExecute's
+                     // prototype doesn't allow it...
+                     char *argv[4];
+                     argv[0] = (char *)"/bin/sh";
+                     argv[1] = (char *)"-c";
+                     argv[2] = (char *)command.c_str();
+                     argv[3] = 0;  // NULL
+                     success = (wxExecute(argv) != 0);
+                  }
+               }
+            }
+            if(success)
+               MDialog_Message(_("Message sent."),
+                               NULL, // parent window
+                               MDIALOG_MSGTITLE,
+                               "MailSentMessage");
+            else
+               ERRORMESSAGE((_("Failed to send message via '%s'"),
+                             m_SendmailCmd.c_str()));
+            return success;
+         }
+#endif // OS_UNIX
+
+         // make gcc happy
+         case Prot_Illegal:
+         default:
+            FAIL_MSG("illegal protocol");
    }
 
-   if (stream)
+   if ( stream )
    {
-      rfc822_setextraheaders(m_headerNames,m_headerValues);
+      Rfc822OutputRedirector redirect(false /* no bcc */, this);
+
       switch(m_Protocol)
       {
-      case Prot_SMTP:
-         success = smtp_mail (stream,"MAIL",m_Envelope,m_Body) != 0;
-         reply = stream->reply;
-         smtp_close (stream);
-         break;
-      case Prot_NNTP:
-         success = nntp_mail (stream,m_Envelope,m_Body) != 0;
-         reply = stream->reply;
-         nntp_close (stream);
-         break;
-      // make gcc happy
-      case Prot_Illegal:
-      default:
-         FAIL_MSG("illegal protocol");
+         case Prot_SMTP:
+            success = smtp_mail (stream,"MAIL",m_Envelope,m_Body) != 0;
+            reply = stream->reply;
+            smtp_close (stream);
+            break;
+
+         case Prot_NNTP:
+            success = nntp_mail (stream,m_Envelope,m_Body) != 0;
+            reply = stream->reply;
+            nntp_close (stream);
+            break;
+
+         // make gcc happy
+         case Prot_Illegal:
+         default:
+            FAIL_MSG("illegal protocol");
       }
-      rfc822_setextraheaders(NULL,NULL);
-      if(success)
+
+      if ( success )
       {
-         MDialog_Message(m_Protocol==Prot_SMTP?_("Message sent."):_("Article posted."),
+         MDialog_Message(m_Protocol == Prot_SMTP ? _("Message sent.")
+                                                 :_("Article posted."),
                          NULL, // parent window
                          MDIALOG_MSGTITLE,
                          "MailSentMessage");
       }
-      else
+      else // failed to send/post
       {
          String tmpbuf = MailFolder::GetLogCircle().GuessError();
          if(tmpbuf[0])
             ERRORMESSAGE((tmpbuf));
          tmpbuf.Printf(_("Failed to send - %s\n"),
                        (reply.Length() > 0) ? reply.c_str()
-                       :_("unknown error"));
+                                            :_("unknown error"));
          ERRORMESSAGE((tmpbuf));
-         success = false;
       }
    }
    else // error in opening stream
@@ -1175,19 +1275,98 @@ SendMessageCC::Send(void)
       ERRORMESSAGE((_("Cannot open connection to any server.\n")));
       success = false;
    }
+
    return success;
 }
 
-static long write_output(void *stream, char *string)
+// ----------------------------------------------------------------------------
+// SendMessageCC output routines
+// ----------------------------------------------------------------------------
+
+bool SendMessageCC::WriteMessage(soutr_t writer, void *where)
+{
+   Build();
+
+   // this buffer is only for the message headers, so normally 16Kb should be
+   // enough - but ideally we'd like to have some way to be sure it doesn't
+   // overflow and I don't see any :-(
+   char headers[16*1024];
+
+   // install our output routine temporarily
+   Rfc822OutputRedirector redirect(true /* with bcc */, this);
+
+   return rfc822_output(headers, m_Envelope, m_Body, writer, where, NIL);
+}
+
+void
+SendMessageCC::WriteToString(String& output)
+{
+   output.Empty();
+   output.Alloc(4096); // FIXME: quick way go get message size?
+
+   if ( !WriteMessage(write_str_output, &output) )
+   {
+      ERRORMESSAGE (("Can't write message to string."));
+   }
+}
+
+/** Writes the message to a file
+    @param filename file where to write to
+    */
+void
+SendMessageCC::WriteToFile(const String &filename, bool append)
+{
+   ofstream *ostr = new ofstream(filename.c_str(),
+                                 ios::out | (append ? 0 : ios::trunc));
+   bool ok = !(!ostr || ostr->bad());
+   if ( ok )
+      ok = WriteMessage(write_stream_output, ostr);
+
+   if ( !ok )
+   {
+      ERRORMESSAGE((_("Failed to write message to file '%s'."),
+                    filename.c_str()));
+   }
+}
+
+void
+SendMessageCC::WriteToFolder(String const &name)
+{
+   MailFolder *mf = MailFolder::OpenFolder(name);
+   if ( !mf )
+   {
+      ERRORMESSAGE((_("Can't open folder '%s' to save the message to."),
+                    name.c_str()));
+      return;
+   }
+
+   String str;
+   WriteToString(str);
+
+   // we don't want this to create new mail events
+   int updateFlags = mf->GetUpdateFlags();
+   mf->SetUpdateFlags( MailFolder::UF_UpdateCount);
+   mf->AppendMessage(str);
+   mf->SetUpdateFlags(updateFlags);
+   mf->DecRef();
+}
+
+// ----------------------------------------------------------------------------
+// output helpers
+// ----------------------------------------------------------------------------
+
+// rfc822_output() callback for writing into a file
+static long write_stream_output(void *stream, char *string)
 {
    ostream *o = (ostream *)stream;
    *o << string;
-   if(o->fail())
+   if( o->fail() )
       return NIL;
    else
       return T;
 }
 
+// rfc822_output() callback for writing to a string
 static long write_str_output(void *stream, char *string)
 {
    String *o = (String *)stream;
@@ -1195,78 +1374,105 @@ static long write_str_output(void *stream, char *string)
    return T;
 }
 
-void
-SendMessageCC::WriteToString(String  &output)
+// ----------------------------------------------------------------------------
+// Rfc822OutputRedirector
+// ----------------------------------------------------------------------------
+
+bool Rfc822OutputRedirector::ms_outputBcc = false;
+
+void *Rfc822OutputRedirector::ms_oldRfc822Output = NULL;
+
+const char **Rfc822OutputRedirector::ms_HeaderNames = NULL;
+const char **Rfc822OutputRedirector::ms_HeaderValues = NULL;
+
+MMutex Rfc822OutputRedirector::ms_mutexExtraHeaders;
+
+Rfc822OutputRedirector::Rfc822OutputRedirector(bool outputBcc,
+                                               SendMessageCC *msg)
 {
-   Build();
+   ms_mutexExtraHeaders.Lock();
 
-   // FIXME what if the message is > 100kb???
-   char *buffer = new char[HEADERBUFFERSIZE];
+   ms_outputBcc = outputBcc;
+   ms_oldRfc822Output = mail_parameters(NULL, GET_RFC822OUTPUT, NULL);
+   (void)mail_parameters(NULL, SET_RFC822OUTPUT, (void *)FullRfc822Output);
 
-   rfc822_setextraheaders(m_headerNames,m_headerValues);
-   if(! rfc822_output(buffer, m_Envelope, m_Body, write_str_output,&output,NIL))
-      ERRORMESSAGE (("[Can't write message to string.]"));
-   rfc822_setextraheaders(NULL,NULL);
-   delete [] buffer;
+   SetHeaders(msg->m_headerNames, msg->m_headerValues);
 }
 
-/** Writes the message to a file
-    @param filename file where to write to
-    */
-void
-SendMessageCC::WriteToFile(String const &filename, bool append)
+void Rfc822OutputRedirector::SetHeaders(const char **names, const char **values)
 {
-   Build();
-
-   // buffer for message header, be generous:
-   char *buffer = new char[HEADERBUFFERSIZE];
-   ofstream  *ostr = new ofstream(filename.c_str(), ios::out | (append ? 0 : ios::trunc));
-
-   rfc822_setextraheaders(m_headerNames,m_headerValues);
-   if(! rfc822_output(buffer, m_Envelope, m_Body, write_output,ostr,NIL))
-      ERRORMESSAGE (("[Can't write message to file %s]",
-                     filename.c_str()));
-   rfc822_setextraheaders(NULL,NULL);
-   delete [] buffer;
-   delete ostr;
+   ms_HeaderNames = names;
+   ms_HeaderValues = values;
 }
 
-void
-SendMessageCC::WriteToFolder(String const &name)
+Rfc822OutputRedirector::~Rfc822OutputRedirector()
 {
-   Build();
+   (void)mail_parameters(NULL, SET_RFC822OUTPUT, ms_oldRfc822Output);
 
-   String str;
+   SetHeaders(NULL, NULL);
 
-   WriteToString(str);
-   MailFolder *mf =
-      MailFolder::OpenFolder(name);
-   CHECK_RET(mf,String(_("Cannot open folder to save to:")+name));
-
-   // we don't want this to create new mail events
-   int updateFlags = mf->GetUpdateFlags();
-   mf->SetUpdateFlags( MailFolder::UF_UpdateCount);
-   mf->AppendMessage(str);
-   mf->Ping();
-   mf->SetUpdateFlags(updateFlags);
-   mf->DecRef();
+   ms_mutexExtraHeaders.Unlock();
 }
 
-SendMessageCC::~SendMessageCC()
+// our rfc822_output replacement: it also adds the custom headers and writes
+// BCC unlike rfc822_output()
+long Rfc822OutputRedirector::FullRfc822Output(char *headers,
+                                              ENVELOPE *env,
+                                              BODY *body,
+                                              soutr_t writer,
+                                              void *stream,
+                                              long ok8bit)
 {
-   mail_free_envelope (&m_Envelope);
-   mail_free_body (&m_Body);
+  if ( ok8bit )
+     rfc822_encode_body_8bit(env, body);
+  else
+     rfc822_encode_body_7bit(env, body);
 
-   rfc822_setextraheaders(NULL,NULL);
+  // write standard headers
+  rfc822_header(headers, env, body);
 
-   if(m_headerNames)
-   {
-      for(int j = 0; m_headerNames[j] ; j++)
-      {
-         delete [] (char *)m_headerNames[j];
-         delete [] (char *)m_headerValues[j];
-      }
-      delete [] m_headerNames;
-      delete [] m_headerValues;
-   }
+  // remove the last blank line
+  size_t i = strlen(headers);
+  if ( i > 4 && headers[i-4] == '\015' )
+  {
+     headers[i-2] = '\0';
+  }
+  else
+  {
+     // just in case MRC decides to change it in the future...
+     wxFAIL_MSG("cclient message header doesn't have terminating blank line?");
+  }
+
+  // save the pointer as rfc822_address_line() modifies it
+  char *headersOrig = headers;
+
+  // cclient omits bcc, but we need it sometimes
+  if ( ms_outputBcc )
+  {
+     rfc822_address_line(&headers, "bcc", env, env->bcc);
+  }
+
+  // and add all other additional custom headers at the end
+  if ( ms_HeaderNames )
+  {
+     for ( size_t n = 0; ms_HeaderNames[n]; n++ )
+     {
+        rfc822_header_line(&headers,
+                           (char *)ms_HeaderNames[n],
+                           env,
+                           (char *)ms_HeaderValues[n]);
+     }
+  }
+
+  // terminate the headers part
+  strcat(headers, "\015\012");
+
+  if ( !(*writer)(stream, headersOrig) )
+     return NIL;
+
+  if ( body && !rfc822_output_body(body, writer, stream) )
+     return NIL;
+
+  return T;
 }
+

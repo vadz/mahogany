@@ -141,6 +141,9 @@ protected:
    /// encode all entries in the list of addresses
    void EncodeAddressList(struct mail_address *adr);
 
+   /// write the message using the specified writer function
+   bool WriteMessage(soutr_t writer, void *where);
+
 private:
    ENVELOPE *m_Envelope;
    BODY     *m_Body;
@@ -199,6 +202,9 @@ private:
    /// Parses string for folder aliases, removes them and stores them in m_FccList.
    void ExtractFccFolders(String &addresses);
 //@}
+
+   // give it access to m_headerNames nad m_headerValues
+   friend class Rfc822OutputRedirector;
 };
 
 
