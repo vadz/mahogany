@@ -86,10 +86,6 @@ public:
     */
    virtual bool OpenFolder(MFolder *folder, bool readonly = false);
 
-   /// called on Menu selection
-   void OnCommandEvent(wxCommandEvent &event);
-
-
    /** Open some messages.
        @param messages array holding the message numbers
    */
@@ -180,11 +176,21 @@ public:
    /// get the parent frame of the folder view
    wxFrame *GetParentFrame() const { return m_Frame; }
 
+   /**
+      @name Event handlers called from elsewhere.
+    */
+   //@{
+
+   /// General callback, forwards to DoCommandEvent()
+   void OnCommandEvent(wxCommandEvent &event);
+
    /// process a keyboard event in the list control, return true if processed
    bool HandleFolderViewCharEvent(wxKeyEvent& event);
 
    /// process a keyboard event in the message view part
    bool HandleMsgViewCharEvent(wxKeyEvent& event);
+
+   //@}
 
 protected:
    /// update the view after new messages appeared in the folder
@@ -221,6 +227,22 @@ protected:
        m_nDeleted directly as it is calculated on demand
     */
    unsigned long GetDeletedCount() const;
+
+   /**
+      @name Event handling implementation.
+
+      Most of the events are forwarded to m_msgCmdProc, but some are handled
+      here.
+    */
+   //@{
+
+   /// Called from OnCommandEvent() and HandleFolderViewCharEvent()
+   void DoCommandEvent(int cmd);
+
+   /// Move to the next message after processing a command if necessary
+   void UpdateFocusAfterCommand(int cmd);
+
+   //@}
 
 private:
    /// show the next or previous message matching the search criteria
@@ -402,10 +424,6 @@ public:
    /// dtor
    ~wxFolderViewFrame();
 
-   // callbacks
-   void OnCommandEvent(wxCommandEvent& event);
-   void OnUpdateUI(wxUpdateUIEvent& event);
-
    /**
       This virtual method returns a pointer to the profile of the mailfolder
       being displayed, for those wxMFrames which have a folder displayed or the
@@ -418,6 +436,11 @@ public:
 
    /// don't even think of using this!
    wxFolderViewFrame(void) { wxFAIL_MSG(_T("unreachable")); }
+
+protected:
+   // event processing
+   void OnCommandEvent(wxCommandEvent& event);
+   void OnUpdateUI(wxUpdateUIEvent& event);
 
 private:
    void InternalCreate(wxFolderView *fv, wxMFrame *parent = NULL);

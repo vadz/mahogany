@@ -4254,6 +4254,50 @@ wxFolderView::HandleMsgViewCharEvent(wxKeyEvent& event)
    return HandleFolderViewCharEvent(event);
 }
 
+void
+wxFolderView::UpdateFocusAfterCommand(int cmd)
+{
+   switch ( cmd )
+   {
+      case WXMENU_MSG_SAVE_TO_FOLDER:
+      case WXMENU_MSG_SAVE_TO_FILE:
+      case WXMENU_MSG_UNDELETE:
+      case WXMENU_MSG_FLAG:
+      case WXMENU_MSG_MARK_READ:
+      case WXMENU_MSG_MARK_UNREAD:
+      case WXMENU_MSG_OPEN:
+      case WXMENU_MSG_PRINT:
+         // go to the next message unconditionally for these commands
+         break;
+
+      case WXMENU_MSG_DELETE:
+      case WXMENU_MSG_MOVE_TO_FOLDER:
+         // if we're using trash, the message we deleted/moved is not there
+         // any more so we shouldn't change the focus as it is already on the
+         // next message -- but if we don't use trash, do move to the next
+         // message
+         if ( !m_settings.usingTrash )
+            break;
+         //else: fall through
+
+      default:
+         // nothing to do, don't change the focus
+         return;
+   }
+
+   // get the focused item
+   long focused = m_FolderCtrl->GetFocusedItem();
+
+   // find the next item
+   long newFocus = focused;
+   if ( newFocus == -1 )
+      newFocus = 0;
+   else if ( focused < m_FolderCtrl->GetItemCount() - 1 )
+      newFocus++;
+
+   (void)m_FolderCtrl->GoToItem(newFocus);
+}
+
 bool
 wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
 {
@@ -4349,123 +4393,70 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
    // do command
    // ----------
 
-   // we can operate either on all selected items
-   const UIdArray& selections = GetSelections();
-
-   // get the focused item
-   long focused = m_FolderCtrl->GetFocusedItem();
-
-   // find the next item
-   long newFocus = focused;
-   if ( newFocus == -1 )
-      newFocus = 0;
-   else if ( focused < m_FolderCtrl->GetItemCount() - 1 )
-      newFocus++;
-
+   int cmd = 0;
    switch ( key )
    {
       case 'D': // delete
-         if ( event.ControlDown() )
-         {
-            m_msgCmdProc->ProcessCommand(WXMENU_MSG_DELETE_EXPUNGE, selections);
-
-            // don't move focus: either the messages were not expunged at all
-            // or they were but then we shouldn't move to the next message as
-            // the indices have been invalidated
-            newFocus = -1;
-         }
-         else // normal delete
-         {
-            m_msgCmdProc->ProcessCommand(WXMENU_MSG_DELETE, selections);
-
-            // only move on if we mark as deleted, for trash usage, selection
-            // remains the same:
-            if ( m_settings.usingTrash )
-            {
-               // don't move focus
-               newFocus = -1;
-            }
-         }
+         cmd = event.ControlDown() ? WXMENU_MSG_DELETE_EXPUNGE
+                                   : WXMENU_MSG_DELETE;
          break;
 
       case 'U': // undelete
-         m_msgCmdProc->ProcessCommand(WXMENU_MSG_UNDELETE, selections);
+         cmd = WXMENU_MSG_UNDELETE;
          break;
 
       case 'X': // expunge
-         ExpungeMessages();
-         newFocus = -1;
+         cmd = WXMENU_MSG_EXPUNGE;
          break;
 
       case 'C': // copy (to folder)
-         if ( !m_msgCmdProc->ProcessCommand(WXMENU_MSG_SAVE_TO_FOLDER, selections) )
-         {
-            // don't move focus if user cancelled copying
-            newFocus = -1;
-         }
+         cmd = WXMENU_MSG_SAVE_TO_FOLDER;
          break;
 
       case 'M': // move
-         if ( !m_msgCmdProc->ProcessCommand(WXMENU_MSG_MOVE_TO_FOLDER, selections) )
-         {
-            // don't delete the messages if we couldn't save them!
-            newFocus = -1;
-         }
+         cmd = WXMENU_MSG_MOVE_TO_FOLDER;
          break;
 
       case 'S': // save (to file)
-         m_msgCmdProc->ProcessCommand(WXMENU_MSG_SAVE_TO_FILE, selections);
+         cmd = WXMENU_MSG_SAVE_TO_FILE;
          break;
 
       case 'R': // reply
-         m_msgCmdProc->ProcessCommand(WXMENU_MSG_REPLY, selections);
-         newFocus = -1;
+         cmd = WXMENU_MSG_REPLY;
          break;
 
       case 'G': // group reply
-         m_msgCmdProc->ProcessCommand(WXMENU_MSG_REPLY_ALL, selections);
-         newFocus = -1;
+         cmd = WXMENU_MSG_REPLY_ALL;
          break;
 
       case 'L': // list reply
-         m_msgCmdProc->ProcessCommand(WXMENU_MSG_REPLY_LIST, selections);
-         newFocus = -1;
+         cmd = WXMENU_MSG_REPLY_LIST;
          break;
 
       case 'F': // forward
-         m_msgCmdProc->ProcessCommand(WXMENU_MSG_FORWARD, selections);
-         newFocus = -1;
+         cmd = WXMENU_MSG_FORWARD;
          break;
 
       case 'O': // open
-         m_msgCmdProc->ProcessCommand(WXMENU_MSG_OPEN, selections);
+         cmd = WXMENU_MSG_OPEN;
          break;
 
       case 'P': // print
-         m_msgCmdProc->ProcessCommand(WXMENU_MSG_PRINT, selections);
+         cmd = WXMENU_MSG_PRINT;
          break;
 
       case 'H': // headers
-         m_msgCmdProc->ProcessCommand(WXMENU_MSG_TOGGLEHEADERS, selections);
-
-         // don't move focus
-         newFocus = -1;
+         cmd = WXMENU_MSG_TOGGLEHEADERS;
          break;
 
       case '*':
-         m_msgCmdProc->ProcessCommand(WXMENU_MSG_FLAG, selections);
-
-         // don't move focus
-         newFocus = -1;
+         cmd = WXMENU_MSG_FLAG;
          break;
 
 
       case '/':   // start search forward
       case '?':   // start search backwards
          {
-            // don't move focus below
-            newFocus = -1;
-
             m_searchData.uids.Clear();
 
             if ( !MInputBox
@@ -4494,15 +4485,12 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
       case 'n':   // find next match
       case 'N':   // find previous match
          MoveToNextSearchMatch(key == 'n');
-
-         // don't move focus below
-         newFocus = -1;
          break;
 
 
       case WXK_NEXT:
          // scroll down the preview window
-         if ( m_FolderCtrl->IsPreviewed(focused) )
+         if ( m_FolderCtrl->IsPreviewed(m_FolderCtrl->GetFocusedItem()) )
          {
             if ( !m_MessagePreview->PageDown() )
             {
@@ -4515,15 +4503,12 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
             // let it work as usual
             event.Skip();
          }
-
-         // don't move focus
-         newFocus = -1;
          break;
 
       case WXK_PRIOR:
       case WXK_BACK:
          // scroll up within the message viewer:
-         if ( m_FolderCtrl->IsPreviewed(focused) )
+         if ( m_FolderCtrl->IsPreviewed(m_FolderCtrl->GetFocusedItem()) )
          {
             if ( key == WXK_BACK )
                m_MessagePreview->LineUp();
@@ -4535,9 +4520,6 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
             // let it work as usual
             event.Skip();
          }
-
-         // don't move focus
-         newFocus = -1;
          break;
 
       case WXK_UP:
@@ -4557,13 +4539,12 @@ wxFolderView::HandleFolderViewCharEvent(wxKeyEvent& event)
          // always flags in this case and won't match...) and we just lost the
          // current selection, so prevent this from happening by *not* calling
          // event.Skip() here
-         newFocus = -1;
+         ;
    }
 
-   if ( newFocus != -1 )
+   if ( cmd )
    {
-      // move focus, possibly selecting the new item as well
-      (void)m_FolderCtrl->GoToItem(newFocus);
+      DoCommandEvent(cmd);
    }
 
    return true;
@@ -4589,6 +4570,12 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
       return;
    }
 
+   DoCommandEvent(cmd);
+}
+
+void
+wxFolderView::DoCommandEvent(int cmd)
+{
    const UIdArray& selections = GetSelections();
    if ( selections.IsEmpty() )
    {
@@ -4601,7 +4588,14 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
    if ( m_MessagePreview )
    {
       if ( m_msgCmdProc->ProcessCommand(cmd, selections) )
+      {
+         // after some commands (such as copying the message to another
+         // folder, tagging, ...) we want to move focus to the next message
+         // because usually you want to operate on the next message now
+         UpdateFocusAfterCommand(cmd);
+
          return;
+      }
    }
 
    switch ( cmd )
