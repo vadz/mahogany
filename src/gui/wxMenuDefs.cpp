@@ -259,9 +259,9 @@ static const MenuItemInfo g_aMenuItems[] =
 #endif
    { WXMENU_MSG_REPLY,     gettext_noop("&Reply"),            gettext_noop("Reply to this message")    , FALSE },
    { WXMENU_MSG_FOLLOWUP,  gettext_noop("&Group reply"),      gettext_noop("Followup/group-reply to this message")    , FALSE },
-   { WXMENU_MSG_FORWARD,   gettext_noop("For&ward"),          gettext_noop("Forward this message")     , FALSE },
+   { WXMENU_MSG_FORWARD,   gettext_noop("&Forward"),          gettext_noop("Forward this message")     , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
-   { WXMENU_MSG_SAVE_TO_FILE, gettext_noop("Save as &File"),
+   { WXMENU_MSG_SAVE_TO_FILE, gettext_noop("Save as F&ile"),
      gettext_noop("Export message to a file")   , FALSE },
    { WXMENU_MSG_SAVE_TO_FOLDER, gettext_noop("&Copy to Folder"),gettext_noop("Save message to another folder")   , FALSE },
    { WXMENU_MSG_MOVE_TO_FOLDER, gettext_noop("&Move to Folder"),gettext_noop("Move message to another folder")   , FALSE },
@@ -275,8 +275,8 @@ static const MenuItemInfo g_aMenuItems[] =
      gettext_noop("Search and select messages") , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_TOGGLEHEADERS,gettext_noop("Show &headers"), gettext_noop("Toggle display of message header") , TRUE },
-   { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show raw m&essage"), gettext_noop("Show the raw message text") , FALSE },
-   { WXMENU_MSG_FIND,  gettext_noop("F&ind..."), gettext_noop("Find text in message") , FALSE },
+   { WXMENU_MSG_SHOWRAWTEXT,  gettext_noop("Show ra&w message"), gettext_noop("Show the raw message text") , FALSE },
+   { WXMENU_MSG_FIND,  gettext_noop("Fi&nd..."), gettext_noop("Find text in message") , FALSE },
 
    // compose
    { WXMENU_COMPOSE_INSERTFILE,

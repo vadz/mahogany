@@ -1009,6 +1009,13 @@ MailFolderCC::ExpungeMessages(void)
    ProcessEventQueue();
 }
 
+/*
+  TODO: this code relies on the header info list being sorted the same 
+  way as the listing in the folderview. Better would be to return UIds 
+  rather than msgnumbers and have the folderview select individual
+  messages, or simply mark them as selected somehow and rebuild the
+  listing in the views. But that seems to be an O(N^2) operation. :-(
+*/
 
 INTARRAY *
 MailFolderCC::SearchMessages(const class SearchCriterium *crit)
@@ -1020,6 +1027,21 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
    if ( !hil )
       return 0;
 
+   unsigned long lastcount = 0;
+   MProgressDialog *progDlg = NULL;
+   if ( m_NumOfMessages > (unsigned)READ_CONFIG(m_Profile,
+                                                MP_FOLDERPROGRESS_THRESHOLD) )
+   {
+      String msg;
+      msg.Printf(_("Searching in %lu messages..."),
+                 (unsigned long) m_NumOfMessages);
+      progDlg = new MProgressDialog(GetName(),
+                                    msg,
+                                    m_NumOfMessages,
+                                    NULL,
+                                    false, true);// open a status window:
+   }
+   
    m_SearchMessagesFound = new INTARRAY;
 
    String what;
@@ -1064,7 +1086,26 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
       if(crit->m_Invert)
          found = ! found;
       if(found)
-         m_SearchMessagesFound->Add(msgno); // sequence number, not! uid!!!
+         m_SearchMessagesFound->Add(msgno); // sequence number, not uid!!!
+
+      if(progDlg)
+      {
+         String msg;
+         msg.Printf(_("Searching in %lu messages..."),
+                    (unsigned long) m_NumOfMessages);
+         String msg2;
+         unsigned long cnt = m_SearchMessagesFound->Count();
+         if(cnt != lastcount)
+         {
+            msg2.Printf(_(" - %lu matches found."), cnt);
+            msg = msg + msg2;
+            if(! progDlg->Update( msgno, msg ))
+               break;  // abort searching
+            lastcount = cnt;
+         }
+         else if(! progDlg->Update( msgno ))
+            break;  // abort searching
+      }
    }
    hil->DecRef();
    
@@ -1111,6 +1152,9 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
    
    INTARRAY *rc = m_SearchMessagesFound; // will get freed by caller!
    m_SearchMessagesFound = NULL;
+
+   if(progDlg)
+      delete progDlg;
    return rc;
 }
 
