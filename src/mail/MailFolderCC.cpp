@@ -1643,6 +1643,11 @@ MailFolderCC::~MailFolderCC()
 
 void MailFolderCC::ProposeSavePassword()
 {
+   // do not process the events while we're showing the dialog boxes below:
+   // this could lead to the new calls to OpenFolder() which would be bad as
+   // we're called from inside OpenFolder()
+   MEventManagerSuspender suspendEvents;
+
    // ask the user if he'd like to remember the password for the future:
    // this is especially useful for the folders created initially by the
    // setup wizard as it doesn't ask for the passwords
