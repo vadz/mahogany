@@ -38,8 +38,8 @@
 // forward declarations
 // ----------------------------------------------------------------------------
 
-class wxNewAddressTextCtrl;
-class wxRcptControls;
+class wxRcptMainControl;
+class wxRcptExtraControl;
 class wxComposeView;
 class wxEnhancedPanel;
 
@@ -54,7 +54,7 @@ class WXDLLEXPORT wxTextCtrl;
 
 #include <wx/dynarray.h>
 
-WX_DEFINE_ARRAY(wxRcptControls *, ArrayRcptControls);
+WX_DEFINE_ARRAY(wxRcptExtraControl *, ArrayRcptControls);
 
 // ----------------------------------------------------------------------------
 // constants
@@ -131,7 +131,7 @@ public:
                       RecipientType rcptType = Recipient_Max);
 
    /// expands an address
-   virtual RecipientType ExpandRecipient(String *text, bool quiet = false);
+   virtual RecipientType ExpandRecipient(String *text);
 
    /// get from value (empty means default)
    String GetFrom() const;
@@ -208,9 +208,6 @@ public:
       /// called to remove the recipient with this index
    void OnRemoveRcpt(size_t index);
    //@}
-
-   /// for wxAddressTextCtrl usage: remember last focused field
-   void SetLastAddressEntry(int field) { m_indexLast = field; }
 
    /// is the control with this index enabled?
    bool IsRecipientEnabled(size_t index) const;
@@ -338,19 +335,6 @@ private:
       TextField_Address
    };
 
-   // create a horz sizer containing the given control and the text ctrl
-   // (pointer to which will be saved in the provided variable if not NULL)
-   // with the specified id
-   wxSizer *CreateSizerWithText(wxControl *control,
-                                wxTextCtrl **ppText = NULL,
-                                TextField tf = TextField_Normal,
-                                wxWindow *parent = NULL);
-
-   // create a sizer containing a label and a text ctrl
-   wxSizer *CreateSizerWithTextAndLabel(const wxString& label,
-                                        wxTextCtrl **ppText = NULL,
-                                        TextField tf = TextField_Normal);
-
    // add a place holder to the recipients sizer
    void CreatePlaceHolder();
 
@@ -399,8 +383,8 @@ private:
       /// the subject (never NULL)
    wxTextCtrl *m_txtSubject;
 
-      /// the address field
-   wxNewAddressTextCtrl *m_txtRecipient;
+      /// the main recipient field
+   wxRcptMainControl *m_rcptMain;
 
       /// the sizer containing all recipients
    wxSizer *m_sizerRcpts;
@@ -409,18 +393,12 @@ private:
    wxEnhancedPanel *m_panelRecipients;
 
       /// the additional recipients: array of corresponding controls
-   ArrayRcptControls m_rcptControls;
+   ArrayRcptControls m_rcptExtra;
 
       /// the editor where the message is really edited
    MessageEditor *m_editor;
 
    //@}
-
-   /// the last focused address field: index of -1 means m_txtRecipient itself
-   int m_indexLast;
-
-   /// the index of the next text control to create (-1 initially)
-   int m_indexRcpt;
 
    /// the type of the last recipient
    RecipientType m_rcptTypeLast;

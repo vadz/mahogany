@@ -307,7 +307,7 @@ MAppBase::ContinueStartup()
       // the "to" parameter may be a mailto: URL, pass it through our expansion
       // function first
       String to = m_cmdLineOptions->composer.to;
-      composer->ExpandRecipient(&to, true /* quiet */);
+      composer->ExpandRecipient(&to);
 
       composer->AddRecipients(to, Composer::Recipient_To);
 

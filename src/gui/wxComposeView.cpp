@@ -142,13 +142,6 @@ extern const MPersMsgBox *M_MSGBOX_UNSAVED_PROMPT;
 // constants
 // ----------------------------------------------------------------------------
 
-// control ids
-enum
-{
-   // the expand button
-   IDB_EXPAND = 100
-};
-
 // the header used to indicate that a message is our draft
 #define HEADER_IS_DRAFT "X-M-Draft"
 
@@ -202,38 +195,150 @@ static wxString GetMimeTypeFromFilename(const wxString& filename)
    return strMimeType;
 }
 
+// return a transparent bitmap
+static wxBitmap GetTransparentBitmap(const char *name)
+{
+   wxBitmap bmp = mApplication->GetIconManager()->GetBitmap(name);
+
+   // FIXME: bg colour still wrong
+#ifdef OS_WIN
+   bmp.SetMask(new wxMask(bmp, *wxLIGHT_GREY));
+#endif // OS_WIN
+
+   return bmp;
+}
+
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
+/*
+   A wxRcptControl allows to enter one or several recipient addresses but they
+   are all limited to the same type (i.e. all "To" or all "Cc"). It consists of
+   a choice control allowing to select the type, the text entry for the address
+   and some buttons.
+
+   There are 2 types of wxRcptControl: wxRcptMainControl is the [only] one
+   which is shown initially and it cannot be removed. When the address is
+   entered into it, the user may press "Add" button to the right of it to add a
+   new recipient control group, a wxRcptExtraControl. This type of recipient
+   controls can be removed (using a special "Delete" button near it) and it
+   can't add any other controls itself.
+
+   Both kinds of the controls may be expanded by using the "Expand" button they
+   have in common.
+ */
+
+class wxRcptAddButton;
 class wxRcptRemoveButton;
-class wxRcptTextCtrl;
+class wxRcptExpandButton;
+class wxAddressTextCtrl;
 class wxRcptTypeChoice;
 
 // ----------------------------------------------------------------------------
-// wxRcptControls: all controls in the row corresponding to one recipient
+// wxRcptControl: all controls in the row corresponding to one recipient
 // ----------------------------------------------------------------------------
 
-class wxRcptControls
+class wxRcptControl
 {
 public:
-   wxRcptControls(wxComposeView *cv, size_t index)
+   wxRcptControl(wxComposeView *cv)
    {
       m_composeView = cv;
-      m_index = index;
 
       m_choice = NULL;
       m_text = NULL;
-      m_btn = NULL;
+      m_btnExpand = NULL;
    }
 
-   ~wxRcptControls();
+   virtual ~wxRcptControl();
 
    // create the controls and return a sizer containing them
-   wxSizer *CreateControls(wxWindow *parent);
+   virtual wxSizer *CreateControls(wxWindow *parent);
 
    // initialize the controls
    void InitControls(const String& value, wxComposeView::RecipientType rt);
+
+   // get our text control
+   wxAddressTextCtrl *GetText() const { return m_text; }
+
+   // get the currently selected address type
+   wxComposeView::RecipientType GetType() const;
+
+   // get the current value of the text field
+   wxString GetValue() const;
+
+   // starting from now, all methods are for the wxRcptXXX controls only
+
+   // change type of this one - called by choice
+   void OnTypeChange(wxComposeView::RecipientType rcptType);
+
+   // expand our text - called by the "Expand" button
+   void OnExpand();
+
+   // is it enabled (disabled if type == none)?
+   bool IsEnabled() const;
+
+   // get the composer
+   wxComposeView *GetComposer() const { return m_composeView; }
+
+protected:
+   // called from CreateControls()
+   virtual wxAddressTextCtrl *CreateText(wxWindow *parent) = 0;
+
+   // access the choice control
+   wxRcptTypeChoice *GetChoice() const { return m_choice; }
+
+   // the back pointer to the composer
+   wxComposeView *m_composeView;
+
+private:
+   // our controls
+   wxRcptTypeChoice *m_choice;
+   wxAddressTextCtrl *m_text;
+   wxRcptExpandButton *m_btnExpand;
+};
+
+// ----------------------------------------------------------------------------
+// wxRcptMainControl: this one has "add" button and can't be removed
+// ----------------------------------------------------------------------------
+
+class wxRcptMainControl : public wxRcptControl
+{
+public:
+   wxRcptMainControl(wxComposeView *cv) : wxRcptControl(cv)
+   {
+      m_btnAdd = NULL;
+   }
+
+   virtual wxSizer *CreateControls(wxWindow *parent);
+
+   void OnAdd();
+
+   virtual ~wxRcptMainControl();
+
+protected:
+   virtual wxAddressTextCtrl *CreateText(wxWindow *parent);
+
+private:
+   wxRcptAddButton *m_btnAdd;
+};
+
+// ----------------------------------------------------------------------------
+// wxRcptExtraControl: an additional recipient, may be removed
+// ----------------------------------------------------------------------------
+
+class wxRcptExtraControl : public wxRcptControl
+{
+public:
+   wxRcptExtraControl(wxComposeView *cv, size_t index) : wxRcptControl(cv)
+   {
+      m_index = index;
+      m_btnRemove = NULL;
+   }
+
+   // remove this one - called by button
+   void OnRemove() { m_composeView->OnRemoveRcpt(m_index); }
 
    // decrement our index (presumably because another control was deleted
    // before us)
@@ -244,53 +349,28 @@ public:
       m_index--;
    }
 
-   // get our text control
-   wxRcptTextCtrl *GetText() const { return m_text; }
+   virtual wxSizer *CreateControls(wxWindow *parent);
 
-   // get the currently selected address type
-   wxComposeView::RecipientType GetType() const;
+   virtual ~wxRcptExtraControl();
 
-   // get the current value of the text field
-   wxString GetValue() const;
-
-   // starting from now, all methods are for the wxRcptXXX controls only
-
-   // set this one as last active - called by text
-   void SetLast() { m_composeView->SetLastAddressEntry(m_index); }
-
-   // change type of this one - called by choice
-   void OnTypeChange(wxComposeView::RecipientType rcptType);
-
-   // remove this one - called by button
-   void OnRemove() { m_composeView->OnRemoveRcpt(m_index); }
-
-   // is it enabled (disabled if type == none)?
-   bool IsEnabled() const;
-
-   // get the composer
-   wxComposeView *GetComposer() const { return m_composeView; }
+protected:
+   virtual wxAddressTextCtrl *CreateText(wxWindow *parent);
 
 private:
-   // the back pointer to the composer
-   wxComposeView *m_composeView;
+   wxRcptRemoveButton *m_btnRemove;
 
    // our index in m_composeView->m_rcptControls
    size_t m_index;
-
-   // our controls
-   wxRcptTypeChoice *m_choice;
-   wxRcptTextCtrl *m_text;
-   wxRcptRemoveButton *m_btn;
 };
 
 // ----------------------------------------------------------------------------
-// wxRcptTypeChoice is first part of wxRcptControls
+// wxRcptTypeChoice is first part of wxRcptControl
 // ----------------------------------------------------------------------------
 
 class wxRcptTypeChoice : public wxChoice
 {
 public:
-   wxRcptTypeChoice(wxRcptControls *rcptControls, wxWindow *parent)
+   wxRcptTypeChoice(wxRcptControl *rcptControls, wxWindow *parent)
       : wxChoice(parent, -1,
                  wxDefaultPosition, wxDefaultSize,
                  WXSIZEOF(ms_addrTypes), ms_addrTypes)
@@ -303,7 +383,7 @@ public:
 
 private:
    // the back pointer to the entire group of controls
-   wxRcptControls *m_rcptControls;
+   wxRcptControl *m_rcptControls;
 
    static const wxString ms_addrTypes[wxComposeView::Recipient_Max];
 
@@ -333,17 +413,13 @@ public:
    }
 
    // expand the text in the control using the address book(s)
-   Composer::RecipientType DoExpand(bool quiet = false);
+   Composer::RecipientType DoExpand();
 
    // callbacks
-   void OnFocusSet(wxFocusEvent& event);
    void OnChar(wxKeyEvent& event);
    void OnEnter(wxCommandEvent& event);
 
 protected:
-   // to implement in the derived classes
-   virtual void SetAsLastActive() const = 0;
-
    wxComposeView *GetComposer() const { return m_composeView; }
 
 private:
@@ -354,44 +430,36 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// wxNewAddressTextCtrl: wxAddressTextCtrl which allows the user to add new
+// wxMainAddressTextCtrl: wxAddressTextCtrl which allows the user to add new
 // recipients (i.e. the unique top address entry in the compose frame)
 // ----------------------------------------------------------------------------
 
-class wxNewAddressTextCtrl : public wxAddressTextCtrl
+class wxMainAddressTextCtrl : public wxAddressTextCtrl
 {
 public:
-   wxNewAddressTextCtrl(wxComposeView *composeView, wxWindow *parent)
-      : wxAddressTextCtrl(parent, composeView)
+   wxMainAddressTextCtrl(wxRcptMainControl *rcptControls, wxWindow *parent)
+      : wxAddressTextCtrl(parent, rcptControls->GetComposer())
       {
-         m_composeView = composeView;
+         m_rcptControls = rcptControls;
       }
-
-   // add the new recipient fields for the addresses currently entered
-   void AddNewRecipients(bool quiet = false);
 
    // callbacks
    void OnEnter(wxCommandEvent& event);
 
-protected:
-   virtual void SetAsLastActive() const
-      { m_composeView->SetLastAddressEntry(-1); }
-
 private:
-   wxComposeView *m_composeView;
+   wxRcptMainControl *m_rcptControls;
 
    DECLARE_EVENT_TABLE()
 };
 
 // ----------------------------------------------------------------------------
-// wxRcptTextCtrl: wxAddressTextCtrl which is part of wxRcptControls (there are
-// as many of those as of the recipients)
+// wxExtraAddressTextCtrl: part of wxRcptExtraControl
 // ----------------------------------------------------------------------------
 
-class wxRcptTextCtrl : public wxAddressTextCtrl
+class wxExtraAddressTextCtrl : public wxAddressTextCtrl
 {
 public:
-   wxRcptTextCtrl(wxRcptControls *rcptControls, wxWindow *parent)
+   wxExtraAddressTextCtrl(wxRcptControl *rcptControls, wxWindow *parent)
       : wxAddressTextCtrl(parent, rcptControls->GetComposer())
       {
          m_rcptControls = rcptControls;
@@ -400,12 +468,69 @@ public:
    // callbacks
    void OnUpdateUI(wxUpdateUIEvent& event);
 
-protected:
-   virtual void SetAsLastActive() const { m_rcptControls->SetLast(); }
+private:
+   // the back pointer to the entire group of controls
+   wxRcptControl *m_rcptControls;
+
+   DECLARE_EVENT_TABLE()
+};
+
+// ----------------------------------------------------------------------------
+// wxRcptExpandButton: small button used to expand the address entered
+// ----------------------------------------------------------------------------
+
+class wxRcptExpandButton : public wxBitmapButton
+{
+public:
+   wxRcptExpandButton(wxRcptControl *rcptControls, wxWindow *parent)
+      : wxBitmapButton(parent,
+                       -1,
+                       GetTransparentBitmap("tb_lookup"),
+                       wxDefaultPosition,
+                       wxDefaultSize,
+                       wxBORDER_NONE)
+      {
+         m_rcptControls = rcptControls;
+
+         SetToolTip(_("Expand the address using address books"));
+      }
+
+   // callback
+   void OnButton(wxCommandEvent&) { m_rcptControls->OnExpand(); }
 
 private:
    // the back pointer to the entire group of controls
-   wxRcptControls *m_rcptControls;
+   wxRcptControl *m_rcptControls;
+
+   DECLARE_EVENT_TABLE()
+};
+
+// ----------------------------------------------------------------------------
+// wxRcptAddButton: small button which is used to add a new recipient
+// ----------------------------------------------------------------------------
+
+class wxRcptAddButton : public wxBitmapButton
+{
+public:
+   wxRcptAddButton(wxRcptMainControl *rcptControls, wxWindow *parent)
+      : wxBitmapButton(parent,
+                       -1,
+                       GetTransparentBitmap("tb_new"),
+                       wxDefaultPosition,
+                       wxDefaultSize,
+                       wxBORDER_NONE)
+      {
+         m_rcptControls = rcptControls;
+
+         SetToolTip(_("Create a new recipient entry"));
+      }
+
+   // callback
+   void OnButton(wxCommandEvent&) { m_rcptControls->OnAdd(); }
+
+private:
+   // the back pointer to the entire group of controls
+   wxRcptMainControl *m_rcptControls;
 
    DECLARE_EVENT_TABLE()
 };
@@ -415,13 +540,20 @@ private:
 // recipient controls
 // ----------------------------------------------------------------------------
 
-class wxRcptRemoveButton : public wxButton
+class wxRcptRemoveButton : public wxBitmapButton
 {
 public:
-   wxRcptRemoveButton(wxRcptControls *rcptControls, wxWindow *parent)
-      : wxButton(parent, -1, _("Delete"))
+   wxRcptRemoveButton(wxRcptExtraControl *rcptControls, wxWindow *parent)
+      : wxBitmapButton(parent,
+                       -1,
+                       GetTransparentBitmap("tb_trash"),
+                       wxDefaultPosition,
+                       wxDefaultSize,
+                       wxBORDER_NONE)
       {
          m_rcptControls = rcptControls;
+
+         SetToolTip(_("Delete this address from\nthe message recipients list"));
       }
 
    // callback
@@ -429,7 +561,7 @@ public:
 
 private:
    // the back pointer to the entire group of controls
-   wxRcptControls *m_rcptControls;
+   wxRcptExtraControl *m_rcptControls;
 
    DECLARE_EVENT_TABLE()
 };
@@ -444,9 +576,6 @@ BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
    // process termination notification
    EVT_END_PROCESS(HelperProcess_Editor, wxComposeView::OnExtEditorTerm)
 
-   // button notifications
-   EVT_BUTTON(IDB_EXPAND, wxComposeView::OnExpand)
-
    // identity combo notification
    EVT_CHOICE(IDC_IDENT_COMBO, wxComposeView::OnIdentChange)
 END_EVENT_TABLE()
@@ -456,18 +585,24 @@ BEGIN_EVENT_TABLE(wxRcptTypeChoice, wxChoice)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxAddressTextCtrl, wxTextCtrl)
-   EVT_SET_FOCUS(wxAddressTextCtrl::OnFocusSet)
-
    EVT_CHAR(wxAddressTextCtrl::OnChar)
    EVT_TEXT_ENTER(-1, wxAddressTextCtrl::OnEnter)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(wxNewAddressTextCtrl, wxAddressTextCtrl)
-   EVT_TEXT_ENTER(-1, wxNewAddressTextCtrl::OnEnter)
+BEGIN_EVENT_TABLE(wxMainAddressTextCtrl, wxAddressTextCtrl)
+   EVT_TEXT_ENTER(-1, wxMainAddressTextCtrl::OnEnter)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(wxRcptTextCtrl, wxAddressTextCtrl)
-   EVT_UPDATE_UI(-1, wxRcptTextCtrl::OnUpdateUI)
+BEGIN_EVENT_TABLE(wxExtraAddressTextCtrl, wxAddressTextCtrl)
+   EVT_UPDATE_UI(-1, wxExtraAddressTextCtrl::OnUpdateUI)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxRcptExpandButton, wxButton)
+   EVT_BUTTON(-1, wxRcptExpandButton::OnButton)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxRcptAddButton, wxButton)
+   EVT_BUTTON(-1, wxRcptAddButton::OnButton)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxRcptRemoveButton, wxButton)
@@ -558,26 +693,26 @@ EditorContentPart::~EditorContentPart()
 }
 
 // ----------------------------------------------------------------------------
-// wxRcptControls
+// wxRcptControl
 // ----------------------------------------------------------------------------
 
-wxSizer *wxRcptControls::CreateControls(wxWindow *parent)
+wxSizer *wxRcptControl::CreateControls(wxWindow *parent)
 {
    // create controls
    m_choice = new wxRcptTypeChoice(this, parent);
-   m_text = new wxRcptTextCtrl(this, parent);
-   m_btn = new wxRcptRemoveButton(this, parent);
+   m_text = CreateText(parent);
+   m_btnExpand = new wxRcptExpandButton(this, parent);
 
    // add them to sizer
    wxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
    sizer->Add(m_choice, 0, wxRIGHT | wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
    sizer->Add(m_text, 1, wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
-   sizer->Add(m_btn, 0, wxLEFT, LAYOUT_MARGIN);
+   sizer->Add(m_btnExpand, 0, wxLEFT, LAYOUT_MARGIN);
 
    return sizer;
 }
 
-void wxRcptControls::InitControls(const String& value,
+void wxRcptControl::InitControls(const String& value,
                                   wxComposeView::RecipientType rt)
 {
    CHECK_RET( m_choice, "must call CreateControls first" );
@@ -586,31 +721,107 @@ void wxRcptControls::InitControls(const String& value,
    m_text->SetValue(value);
 }
 
-wxRcptControls::~wxRcptControls()
+wxRcptControl::~wxRcptControl()
 {
    delete m_choice;
    delete m_text;
-   delete m_btn;
+   delete m_btnExpand;
 }
 
-void wxRcptControls::OnTypeChange(wxComposeView::RecipientType rcptType)
+void wxRcptControl::OnTypeChange(wxComposeView::RecipientType rcptType)
 {
    m_composeView->OnRcptTypeChange(rcptType);
 }
 
-bool wxRcptControls::IsEnabled() const
+void wxRcptControl::OnExpand()
+{
+   m_text->DoExpand();
+}
+
+bool wxRcptControl::IsEnabled() const
 {
    return m_choice->GetSelection() != wxComposeView::Recipient_None;
 }
 
-wxComposeView::RecipientType wxRcptControls::GetType() const
+wxComposeView::RecipientType wxRcptControl::GetType() const
 {
    return (wxComposeView::RecipientType)m_choice->GetSelection();
 }
 
-wxString wxRcptControls::GetValue() const
+wxString wxRcptControl::GetValue() const
 {
    return m_text->GetValue();
+}
+
+// ----------------------------------------------------------------------------
+// wxRcptMainControl
+// ----------------------------------------------------------------------------
+
+wxAddressTextCtrl *wxRcptMainControl::CreateText(wxWindow *parent)
+{
+   return new wxMainAddressTextCtrl(this, parent);
+}
+
+wxSizer *wxRcptMainControl::CreateControls(wxWindow *parent)
+{
+   wxSizer *sizer = wxRcptControl::CreateControls(parent);
+
+   m_btnAdd = new wxRcptAddButton(this, parent);
+
+   sizer->Add(m_btnAdd, 0, wxLEFT, LAYOUT_MARGIN);
+
+   // TODO-NEWS: set to Newsgroup for News
+   GetChoice()->Delete(Composer::Recipient_None);
+   GetChoice()->SetSelection(Composer::Recipient_To);
+
+   return sizer;
+}
+
+void wxRcptMainControl::OnAdd()
+{
+   // expand before adding (make this optional?)
+   Composer::RecipientType addrType = GetText()->DoExpand();
+   if ( addrType == Composer::Recipient_None )
+   {
+      // cancelled or address is invalid
+      return;
+   }
+
+   // add new recipient(s)
+   m_composeView->AddRecipients(GetText()->GetValue(), addrType);
+
+   // clear the entry zone as recipient(s) were moved elsewhere
+   GetText()->SetValue("");
+}
+
+wxRcptMainControl::~wxRcptMainControl()
+{
+   delete m_btnAdd;
+}
+
+// ----------------------------------------------------------------------------
+// wxRcptExtraControl
+// ----------------------------------------------------------------------------
+
+wxAddressTextCtrl *wxRcptExtraControl::CreateText(wxWindow *parent)
+{
+   return new wxExtraAddressTextCtrl(this, parent);
+}
+
+wxSizer *wxRcptExtraControl::CreateControls(wxWindow *parent)
+{
+   wxSizer *sizer = wxRcptControl::CreateControls(parent);
+
+   m_btnRemove = new wxRcptRemoveButton(this, parent);
+
+   sizer->Add(m_btnRemove, 0, wxLEFT, LAYOUT_MARGIN);
+
+   return sizer;
+}
+
+wxRcptExtraControl::~wxRcptExtraControl()
+{
+   delete m_btnRemove;
 }
 
 // ----------------------------------------------------------------------------
@@ -650,20 +861,10 @@ void wxAddressTextCtrl::OnEnter(wxCommandEvent& /* event */)
    GetParent()->GetEventHandler()->ProcessEvent(event);
 }
 
-// mark this ctrl as being the last active - so the [Expand] btn will expand us
-void wxAddressTextCtrl::OnFocusSet(wxFocusEvent& event)
-{
-   SetAsLastActive();
-
-   event.Skip();
-}
-
 // expand the address when <TAB> is pressed
 void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
 {
    ASSERT( event.GetEventObject() == this ); // how can we get anything else?
-
-   SetAsLastActive();
 
    // we're only interested in TABs and only it's not a second TAB in a row
    if ( event.KeyCode() == WXK_TAB )
@@ -699,12 +900,11 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
    event.Skip();
 }
 
-Composer::RecipientType wxAddressTextCtrl::DoExpand(bool quiet)
+Composer::RecipientType wxAddressTextCtrl::DoExpand()
 {
    String text = GetValue();
 
-   Composer::RecipientType
-      rcptType = m_composeView->ExpandRecipient(&text, quiet);
+   Composer::RecipientType rcptType = m_composeView->ExpandRecipient(&text);
 
    if ( rcptType != Composer::Recipient_None )
    {
@@ -716,46 +916,29 @@ Composer::RecipientType wxAddressTextCtrl::DoExpand(bool quiet)
 }
 
 // ----------------------------------------------------------------------------
-// wxNewAddressTextCtrl
+// wxMainAddressTextCtrl
 // ----------------------------------------------------------------------------
 
-void wxNewAddressTextCtrl::AddNewRecipients(bool quiet)
-{
-   // expand before adding (make this optional?)
-   Composer::RecipientType addrType = DoExpand(quiet);
-   if ( addrType == Composer::Recipient_None )
-   {
-      // cancelled or address is invalid
-      return;
-   }
-
-   // add new recipient(s)
-   m_composeView->AddRecipients(GetValue(), addrType);
-
-   // clear the entry zone as recipient(s) were moved elsewhere
-   SetValue("");
-}
-
-void wxNewAddressTextCtrl::OnEnter(wxCommandEvent& /* event */)
+void wxMainAddressTextCtrl::OnEnter(wxCommandEvent& /* event */)
 {
    // if there is nothing in the address field, start editing instead, this is
    // handy to be able to switch to the composer window rapidly - tabbing to it
    // can take ages if there are a lot of recipient controls below us
    if ( GetValue().empty() )
    {
-      m_composeView->SetFocusToComposer();
+      GetComposer()->SetFocusToComposer();
    }
    else // add the contents of the control as a new recipient
    {
-      AddNewRecipients();
+      m_rcptControls->OnAdd();
    }
 }
 
 // ----------------------------------------------------------------------------
-// wxRcptTextCtrl
+// wxExtraAddressTextCtrl
 // ----------------------------------------------------------------------------
 
-void wxRcptTextCtrl::OnUpdateUI(wxUpdateUIEvent& event)
+void wxExtraAddressTextCtrl::OnUpdateUI(wxUpdateUIEvent& event)
 {
    // enable the text only if it has a valid type
    event.Enable(m_rcptControls->IsEnabled());
@@ -984,8 +1167,6 @@ wxComposeView::wxComposeView(const String &name,
    m_OriginalMessage = NULL;
    m_DraftMessage = NULL;
 
-   m_indexLast = -1;
-
    // by default new recipients are "to"
    m_rcptTypeLast = Recipient_To;
 
@@ -1021,7 +1202,8 @@ void wxComposeView::SetDraft(Message *msg)
 
 wxComposeView::~wxComposeView()
 {
-   WX_CLEAR_ARRAY(m_rcptControls);
+   delete m_rcptMain;
+   WX_CLEAR_ARRAY(m_rcptExtra);
 
    SafeDecRef(m_Profile);
 
@@ -1112,52 +1294,9 @@ wxComposeView::CreateToolAndStatusBars()
 // wxComposeView "real" creation: here we create the controls and lay them out
 // ----------------------------------------------------------------------------
 
-wxSizer *
-wxComposeView::CreateSizerWithText(wxControl *control,
-                                   wxTextCtrl **ppText,
-                                   TextField tf,
-                                   wxWindow *parent)
-{
-   if ( !parent )
-      parent = m_panel;
-
-   wxSizer *sizerRow = new wxBoxSizer(wxHORIZONTAL);
-   wxTextCtrl *text;
-   switch ( tf )
-   {
-      default:
-         FAIL_MSG( "unexpected text field kind" );
-         // fall through
-
-      case TextField_Normal:
-         text = new wxTextCtrl(parent, -1, _T(""));
-         break;
-
-      case TextField_Address:
-         text = new wxNewAddressTextCtrl(this, parent);
-   }
-
-   sizerRow->Add(control, 0, wxRIGHT | wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
-   sizerRow->Add(text, 1, wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
-
-   if ( ppText )
-      *ppText = text;
-
-   return sizerRow;
-}
-
-// create a sizer containing a label and a text ctrl
-wxSizer *
-wxComposeView::CreateSizerWithTextAndLabel(const wxString& label,
-                                           wxTextCtrl **ppText,
-                                           TextField tf)
-{
-    return CreateSizerWithText(new wxStaticText(m_panel, -1, label), ppText, tf);
-}
-
 void wxComposeView::CreatePlaceHolder()
 {
-   CHECK_RET( m_sizerRcpts && m_rcptControls.IsEmpty(),
+   CHECK_RET( m_sizerRcpts && m_rcptExtra.IsEmpty(),
               "can't or shouldn't create the place holder now!" );
 
    m_sizerRcpts->Add(0, 0, 1);
@@ -1165,7 +1304,7 @@ void wxComposeView::CreatePlaceHolder()
                          (
                            m_panelRecipients->GetCanvas(),
                            -1,
-                           _("No recipients")
+                           _("No more recipients")
                          ),
                      0, wxALIGN_CENTRE | wxALL, LAYOUT_MARGIN);
    m_sizerRcpts->Add(0, 0, 1);
@@ -1173,7 +1312,7 @@ void wxComposeView::CreatePlaceHolder()
 
 void wxComposeView::DeletePlaceHolder()
 {
-   CHECK_RET( m_sizerRcpts && m_rcptControls.IsEmpty(),
+   CHECK_RET( m_sizerRcpts && m_rcptExtra.IsEmpty(),
               "can't or shouldn't delete the place holder now!" );
 
    // remove the spacers and the static text we had added to it
@@ -1196,7 +1335,7 @@ wxSizer *wxComposeView::CreateHeaderFields()
    // top level vertical (box) sizer
    wxSizer *sizerTop = new wxBoxSizer(wxVERTICAL);
 
-   // leave number of rows unspecified, it can eb calculated from number of
+   // leave number of rows unspecified, it can be calculated from number of
    // columns (2)
    wxFlexGridSizer *sizerHeaders =
       new wxFlexGridSizer(0, 2, LAYOUT_MARGIN, LAYOUT_MARGIN);
@@ -1236,25 +1375,13 @@ wxSizer *wxComposeView::CreateHeaderFields()
    m_txtSubject = new wxTextCtrl(m_panel, -1, _T(""));
    sizerHeaders->Add(m_txtSubject, 1, wxEXPAND | wxALIGN_CENTRE_VERTICAL);
 
-   // recipient line
-   sizerHeaders->Add(new wxStaticText(m_panel, -1, _("&Address:")),
-                     0, wxALIGN_CENTRE_VERTICAL);
-   m_txtRecipient = new wxNewAddressTextCtrl(this, m_panel);
-
-   wxSizer *sizerRcpt = new wxBoxSizer(wxHORIZONTAL);
-   sizerRcpt->Add(m_txtRecipient, 1, wxEXPAND | wxALIGN_CENTRE_VERTICAL);
-
-   // TODO-NEWS: expanding the news groups doesn't work yet
-   if ( m_mode != Mode_News )
-   {
-      wxButton *btn = new wxButton(m_panel, IDB_EXPAND, "&Expand");
-      btn->SetToolTip(_("Expand the address using address books"));
-      sizerRcpt->Add(btn, 0, wxLEFT | wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
-   }
-
-   sizerHeaders->Add(sizerRcpt, 1, wxEXPAND | wxALIGN_CENTRE_VERTICAL);
-
    sizerTop->Add(sizerHeaders, 0, wxALL | wxEXPAND, LAYOUT_MARGIN);
+
+   // main recipient line
+   m_rcptMain = new wxRcptMainControl(this);
+   wxSizer *sizerRcpt = m_rcptMain->CreateControls(m_panel);
+
+   sizerTop->Add(sizerRcpt, 0, wxEXPAND | (wxALL & ~wxBOTTOM), LAYOUT_MARGIN/2);
 
    // the spare space for already entered recipients below: we use an extra
    // sizer because we keep it to add more stuff to it later
@@ -1420,9 +1547,11 @@ void wxComposeView::DoClear()
 // ----------------------------------------------------------------------------
 
 Composer::RecipientType
-wxComposeView::ExpandRecipient(String *textAddress, bool quiet)
+wxComposeView::ExpandRecipient(String *textAddress)
 {
-   // don't do anything for the newsgroups (TODO-NEWS: expand using .newsrc?)
+   // don't do anything for the newsgroups
+   //
+   // TODO-NEWS: expand using .newsrc?
    if ( m_mode == wxComposeView::Mode_News )
    {
       return Composer::Recipient_Newsgroup;
@@ -1439,11 +1568,8 @@ wxComposeView::ExpandRecipient(String *textAddress, bool quiet)
    if ( text.empty() || text == '"' )
    {
       // don't do anything
-      if ( !quiet )
-      {
-         wxLogStatus(GetFrame(),
-                     _("Nothing to expand - please enter something."));
-      }
+      wxLogStatus(GetFrame(),
+                  _("Nothing to expand - please enter something."));
 
       return Composer::Recipient_None;
    }
@@ -1554,7 +1680,7 @@ wxComposeView::ExpandRecipient(String *textAddress, bool quiet)
                          READ_CONFIG(GetProfile(), MP_ADB_SUBSTRINGEXPANSION)
                            ? AdbLookup_Substring
                            : AdbLookup_StartsWith,
-                         quiet ? NULL : this) )
+                         this) )
          {
             // cancelled, don't do anything
             return Composer::Recipient_None;
@@ -1626,19 +1752,20 @@ void
 wxComposeView::AddRecipientControls(const String& value, RecipientType rt)
 {
    // remove the place holder we had there before
-   if ( m_rcptControls.IsEmpty() )
+   if ( m_rcptExtra.IsEmpty() )
    {
       DeletePlaceHolder();
    }
 
    // create the controls and add them to the sizer
-   wxRcptControls *rcpt = new wxRcptControls(this, m_rcptControls.GetCount());
+   wxRcptExtraControl *
+       rcpt = new wxRcptExtraControl(this, m_rcptExtra.GetCount());
 
    wxSizer *sizerRcpt = rcpt->CreateControls(m_panelRecipients->GetCanvas());
 
    rcpt->InitControls(value, rt);
 
-   m_rcptControls.Add(rcpt);
+   m_rcptExtra.Add(rcpt);
 
    m_sizerRcpts->Add(sizerRcpt, 0, wxALL | wxEXPAND, LAYOUT_MARGIN / 2);
    m_sizerRcpts->Layout();
@@ -1654,22 +1781,16 @@ wxComposeView::OnRemoveRcpt(size_t index)
    m_sizerRcpts->Remove(index);
 
    // and delete the controls
-   delete m_rcptControls[index];
+   delete m_rcptExtra[index];
 
    // remove them from the arrays too
-   m_rcptControls.RemoveAt(index);
+   m_rcptExtra.RemoveAt(index);
 
    // and don't forget to adjust the indices of all the others
-   size_t count = m_rcptControls.GetCount();
+   size_t count = m_rcptExtra.GetCount();
    while ( index < count )
    {
-      m_rcptControls[index++]->DecIndex();
-   }
-
-   // and adjust the number of controls
-   if ( m_indexLast != -1 && (size_t)m_indexLast == count )
-   {
-      m_indexLast = count - 1;
+      m_rcptExtra[index++]->DecIndex();
    }
 
    if ( count == 0 )
@@ -1735,7 +1856,7 @@ wxComposeView::AddRecipient(const String& addr, RecipientType addrType)
               "invalid parameter in AddRecipient()" );
 
    // look if we don't already have it
-   size_t count = m_rcptControls.GetCount();
+   size_t count = m_rcptExtra.GetCount();
 
    bool foundWithAnotherType = false;
    for ( size_t n = 0; n < count; n++ )
@@ -1746,10 +1867,10 @@ wxComposeView::AddRecipient(const String& addr, RecipientType addrType)
          continue;
       }
 
-      if ( Message::CompareAddresses(m_rcptControls[n]->GetValue(), addr) )
+      if ( Message::CompareAddresses(m_rcptExtra[n]->GetValue(), addr) )
       {
          // ok, we already have this address - is it of the same type?
-         if ( m_rcptControls[n]->GetType() == addrType )
+         if ( m_rcptExtra[n]->GetType() == addrType )
          {
             // yes, don't add it again
             wxLogStatus(this,
@@ -1782,26 +1903,37 @@ wxComposeView::AddRecipient(const String& addr, RecipientType addrType)
 
 bool wxComposeView::IsRecipientEnabled(size_t index) const
 {
-   return m_rcptControls[index]->IsEnabled();
+   return m_rcptExtra[index]->IsEnabled();
+}
+
+// helper of GetRecipients()
+static void
+GetRecipientFromControl(wxComposeView::RecipientType type,
+                        wxRcptControl *rcpt,
+                        wxString& address)
+{
+   if ( rcpt->GetType() == type )
+   {
+      if ( !address.empty() )
+         address += CANONIC_ADDRESS_SEPARATOR;
+
+      address += rcpt->GetValue();
+   }
 }
 
 String wxComposeView::GetRecipients(RecipientType type) const
 {
-   size_t count = m_rcptControls.GetCount();
+   String address;
 
-   String rcpt;
+   GetRecipientFromControl(type, m_rcptMain, address);
+
+   size_t count = m_rcptExtra.GetCount();
    for ( size_t n = 0; n < count; n++ )
    {
-      if ( m_rcptControls[n]->GetType() == type )
-      {
-         if ( !rcpt.empty() )
-            rcpt += CANONIC_ADDRESS_SEPARATOR;
-
-         rcpt += m_rcptControls[n]->GetValue();
-      }
+      GetRecipientFromControl(type, m_rcptExtra[n], address);
    }
 
-   return rcpt;
+   return address;
 }
 
 String wxComposeView::GetFrom() const
@@ -1886,7 +2018,7 @@ wxComposeView::InitText(Message *msg, MessageView *msgview)
          break;
 
       case Message_Forward:
-         m_txtRecipient->SetFocus();
+         m_rcptMain->GetText()->SetFocus();
          break;
    }
 
@@ -2160,26 +2292,6 @@ wxComposeView::OnRcptTypeChange(RecipientType type)
 {
    // remember it as the last type and reuse it for the next recipient
    m_rcptTypeLast = type;
-}
-
-// expand (using the address books) the value of the last active text zone
-void
-wxComposeView::OnExpand(wxCommandEvent &WXUNUSED(event))
-{
-   wxAddressTextCtrl *text;
-
-   if ( m_indexLast == -1 )
-   {
-      // the new recipient field
-      text = m_txtRecipient;
-   }
-   else // m_indexLast is the index into m_rcptControls array of existing rcpts
-   {
-      // we know that is of the right type
-      text = m_rcptControls[(size_t)m_indexLast]->GetText();
-   }
-
-   (void)text->DoExpand();
 }
 
 // can we close the window now? check the modified flag
@@ -2956,9 +3068,6 @@ wxComposeView::IsReadyToSend() const
          networkSettingsOk = true;
       }
    }
-
-   // take into account any recipients still in the "new address" field
-   m_txtRecipient->AddNewRecipients(true /* quiet */);
 
    // did we forget the recipients?
    //

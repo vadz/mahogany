@@ -183,10 +183,9 @@ public:
       mailto: URLs parsing. It modifies the string passed to it in place.
 
       @param text the text to expand, modified by the method
-      @param quite suppresses any interaction with the user if true
       @return the inferred recipient type or Recipient_None if invalid address
    */
-   virtual RecipientType ExpandRecipient(String *text, bool quiet = false) = 0;
+   virtual RecipientType ExpandRecipient(String *text) = 0;
 
    //@}
 
