@@ -516,7 +516,7 @@
 /// show splash screen on startup?
 #define     MP_SHOWSPLASH_D      1
 /// how long should splash screen stay (0 disables timeout)?
-#define MP_SPLASHDELAY_D        50
+#define MP_SPLASHDELAY_D        5
 /// how often should we autosave the profile settings (0 to disable)?
 #define   MP_AUTOSAVEDELAY_D       60
 /// how often should we check for incoming mail (secs, 0 to disable)?
