@@ -6,6 +6,7 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
+02.09.02 VZ: added a dialog for editing the attachment properties in composer
 29.08.02 VZ: show the number of selected messages in the status bar
 15.08.02 VZ: added "Resend message" command
 08.08.02 NB: added "Follow-up to newsgroup" command

@@ -444,6 +444,10 @@ SOURCE=.\src\gui\MImport.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\wxAttachDialog.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\wxBrowseButton.cpp
 # End Source File
 # Begin Source File

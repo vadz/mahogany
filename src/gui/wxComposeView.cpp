@@ -92,6 +92,7 @@
 
 #include "MessageTemplate.h"
 #include "TemplateDialog.h"
+#include "AttachDialog.h"
 
 #include "MModule.h"
 #include "modules/Calendar.h"
@@ -672,15 +673,34 @@ void EditorContentPart::SetData(void *data,
    m_Type = Type_Data;
 
    if ( filename )
+   {
+      m_Name =
       m_FileName = filename;
+   }
+
+   SetDisposition("INLINE");
 }
 
 void EditorContentPart::SetFile(const String& filename)
 {
    ASSERT_MSG( !filename.empty(), "a file attachment must have a valid file" );
 
+   m_Name =
    m_FileName = filename;
    m_Type = Type_File;
+
+   if ( m_Disposition.empty() )
+      SetDisposition("ATTACHMENT");
+}
+
+void EditorContentPart::SetName(const String& name)
+{
+   m_Name = name;
+}
+
+void EditorContentPart::SetDisposition(const String& disposition)
+{
+   m_Disposition = disposition;
 }
 
 void EditorContentPart::SetText(const String& text)
@@ -689,6 +709,8 @@ void EditorContentPart::SetText(const String& text)
 
    m_Type = Type_Text;
    m_Text = text;
+
+   SetDisposition("INLINE");
 }
 
 EditorContentPart::~EditorContentPart()
@@ -2951,27 +2973,33 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
       strMimeType = mimetype;
    }
 
-   String msg;
-   msg.Printf(_("File '%s' seems to contain data of MIME type '%s'.\n"
-                "\n"
-                "Is this correct?"),
-              filename.c_str(), strMimeType.c_str());
-   if ( !MDialog_YesNoDialog( msg, this, _("Content MIME type"),
-                              M_DLG_YES_DEFAULT,
-                              M_MSGBOX_MIME_TYPE_CORRECT) )
+   // create the new attachment
+   EditorContentPart *mc = new EditorContentPart();
+
+   AttachmentProperties props;
+   props.filename = filename;
+   props.name = filename;
+   props.disposition = AttachmentProperties::Disposition_Inline;
+   props.mimetype = strMimeType;
+
+   // show the attachment properties dialog automatically?
+   String configPath = GetPersMsgBoxName(M_MSGBOX_MIME_TYPE_CORRECT);
+   if ( !wxPMessageBoxIsDisabled(configPath) )
    {
-      wxString newtype = strMimeType;
-      if(MInputBox(&newtype, _("MIME type"),
-                   _("Please enter new MIME type:"),
-                   this))
+      bool dontShowAgain = false;
+      if ( ShowAttachmentDialog(m_editor->GetWindow(), &props, &dontShowAgain) )
       {
-         strMimeType = newtype;
+         mc->SetName(props.name);
+         mc->SetDisposition(props.GetDisposition());
       }
+
+      if ( dontShowAgain )
+         wxPMessageBoxDisable(configPath, wxNO);
    }
 
-   EditorContentPart *mc = new EditorContentPart();
-   mc->SetFile(filename);
+   mc->SetFile(props.filename);
 
+   strMimeType = props.mimetype.GetFull();
    DoInsertAttachment(mc, strMimeType);
 
    wxLogStatus(this, _("Inserted file '%s' (as '%s')"),
@@ -3265,25 +3293,36 @@ wxComposeView::BuildMessage() const
                      // always NUL terminate it
                      buffer[size] = '\0';
 
-                     String basename = wxFileNameFromPath(filename);
+                     // use the user provided name instead of local filename if
+                     // it was given
+                     String name = part->GetName();
+                     if ( name.empty() )
+                     {
+                        name = filename;
+                     }
 
                      MessageParameterList plist, dlist;
                      MessageParameter *p;
 
                      // some mailers want "FILENAME" in disposition parameters
-                     p = new MessageParameter("FILENAME", basename);
+                     // (where only file name, i.e. without path, should be
+                     // used for obvious security reasons)
+                     p = new MessageParameter("FILENAME",
+                                              wxFileNameFromPath(name));
                      dlist.push_back(p);
 
-                     // and some mailers want "NAME" in parameters:
-                     p = new MessageParameter("NAME", basename);
+                     // and some mailers want "NAME" in parameters (we can use
+                     // the full name here)
+                     p = new MessageParameter("NAME", name);
                      plist.push_back(p);
 
+                     const MimeType& mt = part->GetMimeType();
                      msg->AddPart
                           (
-                            part->GetMimeCategory(),
+                            mt.GetPrimary(),
                             buffer, size,
-                            strutil_after(part->GetMimeType(),'/'), //subtype
-                            "INLINE",
+                            mt.GetSubType(),
+                            part->GetDisposition(),
                             &dlist, &plist
                           );
                   }
@@ -3320,13 +3359,14 @@ wxComposeView::BuildMessage() const
                   plist.push_back(p);
                }
 
+               const MimeType& mt = part->GetMimeType();
                msg->AddPart
                     (
-                      part->GetMimeCategory(),
+                      mt.GetPrimary(),
                       (char *)part->GetData(),
                       part->GetSize(),
-                      strutil_after(part->GetMimeType(),'/'),  //subtype
-                      "INLINE",
+                      mt.GetSubType(),
+                      part->GetDisposition(),
                       &dlist,
                       &plist
                     );
@@ -3991,7 +4031,19 @@ MessageEditor::EditAttachmentProperties(EditorContentPart *part)
 {
    CHECK_RET( part, "no attachment to edit in EditAttachmentProperties" );
 
-   wxLogMessage("Attachment '%s' of type '%s' clicked",
-                part->GetFileName().c_str(), part->GetMimeType().c_str());
+   AttachmentProperties props;
+   props.filename = part->GetFileName();
+   props.name = part->GetName();
+   props.SetDisposition(part->GetDisposition());
+   props.mimetype = part->GetMimeType();
+
+   if ( ShowAttachmentDialog(GetWindow(), &props) )
+   {
+      part->SetFile(props.filename);
+      part->SetName(props.name);
+      part->SetMimeType(props.mimetype.GetFull());
+      part->SetDisposition(props.GetDisposition());
+   }
+   //else: cancelled by user or nothing changed
 }
 
