@@ -1198,7 +1198,9 @@ void wxFolderTree::OnUpdate(MFolder *folder)
 
 bool wxFolderTree::OnClose(MFolder *folder)
 {
-   (void)MailFolder::CloseFolder(folder);
+   // if the user chose to manually close the folder, we close the network
+   // connection as well ("don't linger")
+   (void)MailFolder::CloseFolder(folder, false /* don't linger */);
 
    wxLogStatus(GetFrame(m_tree->wxWindow::GetParent()),
                _("Folder '%s' closed."),

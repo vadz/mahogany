@@ -189,7 +189,7 @@ private:
 
 protected:
    /// remove the folder from our "closer" list
-   virtual void Close(void);
+   virtual void Close(bool mayLinger = true);
 
    /// is updating currently suspended?
    bool IsUpdateSuspended() const { return m_suspendUpdates != 0; }

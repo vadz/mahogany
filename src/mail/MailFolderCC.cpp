@@ -441,25 +441,6 @@ static void CloseOrKeepStream(MAILSTREAM *stream,
    }
 }
 
-/// close the stream associated with the given folder
-static void CloseOrKeepStream(MAILSTREAM *stream,
-                              const MFolder *folder)
-{
-   ServerInfoEntryCC *server;
-   if ( IsReusableFolder(folder) )
-   {
-      // do look for the server
-      server = ServerInfoEntryCC::GetOrCreate(folder);
-   }
-   else // no need
-   {
-      // this will just call mail_close() in CloseOrKeepStream() above
-      server = NULL;
-   }
-
-   CloseOrKeepStream(stream, folder, server);
-}
-
 /**
    The idea behind CCEventReflector is to allow postponing some actions in
    MailFolderCC code, i.e. instead of doing something immediately after getting
@@ -2373,11 +2354,11 @@ MailFolderCC::Open(OpenMode openmode)
 // ----------------------------------------------------------------------------
 
 void
-MailFolderCC::Close()
+MailFolderCC::Close(bool mayLinger)
 {
    wxLogTrace(TRACE_MF_CALLS, _T("Closing folder '%s'"), GetName().c_str());
 
-   MailFolderCmn::Close();
+   MailFolderCmn::Close(mayLinger);
 
    if ( m_MailStream )
    {
@@ -2402,18 +2383,21 @@ MailFolderCC::Close()
       else
 #endif // USE_DIALUP
       {
-         // it is wrong to do this as it may result in mm_exists() callbacks
-         // which we ignore (per above), so we miss new mail
-#if 0
-         if ( !m_MailStream->halfopen )
+         // if possible, don't close the stream immediately, we might reuse it
+         // later
+         ServerInfoEntryCC *server;
+         if ( mayLinger && IsReusableFolder(m_mfolder) )
          {
-            // update flags, etc, .newsrc
-            mail_check(m_MailStream);
+            // do look for the server
+            server = ServerInfoEntryCC::GetOrCreate(m_mfolder);
          }
-#endif // 0
+         else // no need
+         {
+            // this will just call mail_close() in CloseOrKeepStream()
+            server = NULL;
+         }
 
-         // don't close the stream immediately, reuse it later
-         CloseOrKeepStream(m_MailStream, m_mfolder);
+         CloseOrKeepStream(m_MailStream, m_mfolder, server);
       }
 
       m_MailStream = NIL;

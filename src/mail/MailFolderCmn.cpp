@@ -478,7 +478,7 @@ void MfCloseTimer::Notify(void)
 // MailFolderCmn folder closing
 // ----------------------------------------------------------------------------
 
-void MailFolderCmn::Close(void)
+void MailFolderCmn::Close(bool /* mayLinger */)
 {
    // this folder shouldn't be reused by MailFolder::OpenFolder() any more as
    // it is being closed anyhow, so prevent this from happening by removing it

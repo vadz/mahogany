@@ -268,7 +268,7 @@ bool MailFolder::CheckNetwork(const MFolder *folder, wxFrame *frame)
 
 /* static */
 bool
-MailFolder::CloseFolder(const MFolder *folder)
+MailFolder::CloseFolder(const MFolder *folder, bool mayLinger)
 {
    CHECK( folder, false, _T("MailFolder::CloseFolder(): NULL folder") );
 
@@ -292,7 +292,7 @@ MailFolder::CloseFolder(const MFolder *folder)
       return false;
    }
 
-   mf->Close();
+   mf->Close(mayLinger);
 
    return true;
 }
@@ -309,7 +309,9 @@ MailFolder::CloseAll()
          mf;
          mf = MFPool::GetNext(cookie), n++ )
    {
-      mf->Close();
+      // if we want to close all folders we almost surely don't want to keep
+      // any outgoing network connections neither
+      mf->Close(false /* don't linger */);
 
       // notify any opened folder views
       MEventManager::Send(new MEventFolderClosedData(mf));

@@ -321,7 +321,7 @@ private:
    bool CheckForFileLock();
 
    /// Close the folder
-   virtual void Close(void);
+   virtual void Close(bool mayLinger = true);
 
    //@}
 

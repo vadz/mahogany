@@ -242,9 +242,10 @@ public:
       close it (i.e. break any connection to server).
 
       @param folder identifies the folder to be closed
+      @param mayLinger if true (default), the network connect may be kept
       @return true if the folder was closed, false if it wasn't opened
     */
-   static bool CloseFolder(const MFolder *mfolder);
+   static bool CloseFolder(const MFolder *mfolder, bool mayLinger = true);
 
    /**
      Check the folder status without opening it (if possible).
@@ -945,8 +946,14 @@ public:
    //@}
 
 protected:
-   /// Close the folder
-   virtual void Close(void) = 0;
+   /**
+      Close the folder.
+
+      If mayLinger parameter is true (default), we can keep the network
+      connection so that it could be reused later. If it is false, the
+      connection should be closed as well.
+    */
+   virtual void Close(bool mayLinger = true) = 0;
 
    /**
      Check if the network connectivity is up if the given folder requires it
