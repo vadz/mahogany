@@ -3,6 +3,9 @@
       Please refer to the cvs update list archives for the even more detailed
       list of all changes.
 
+      See at the end of file for the list of contributors (initials appearing
+      in the second column of the changelog below).
+
 Release 0.65 '???' ??? ??, 2003
 -------------------------------------------------------------------------------
 
@@ -463,6 +466,22 @@ Initial public release.
 Initial version June 2, 1998
 -------------------------------------------------------------------------------
 Hey, look, it compiles!
+
+===============================================================================
+People appearing in the second column of the change log:
+===============================================================================
+
+KB:     Karsten Ballüeder
+MC:     Michael A Chase
+MR:     Michele Ravani
+NB:     Nerijus Baliunas
+TF:     Thomas Finneid
+VS:     Vaclav Slavik
+VZ:     Vadim Zeitiln
+XN:     Xavier Nodet
+
+Thank you all!
+
 
 $Id$
 
