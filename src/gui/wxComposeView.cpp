@@ -407,6 +407,41 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+// wxTextCtrlProcessingEnter: simple base class for wxSubjectTextCtrl and
+//                            wxAddressTextCtrl which handles Enter in the same
+//                            way as Tab
+// ----------------------------------------------------------------------------
+
+class wxTextCtrlProcessingEnter : public wxTextCtrl
+{
+public:
+   wxTextCtrlProcessingEnter(wxWindow *parent, long style = 0)
+      : wxTextCtrl(parent,
+                   -1,
+                   _T(""),
+                   wxDefaultPosition,
+                   wxDefaultSize,
+                   style | wxTE_PROCESS_ENTER)
+      {
+      }
+
+protected:
+   void OnEnter(wxCommandEvent& event);
+
+   DECLARE_EVENT_TABLE()
+};
+
+// ----------------------------------------------------------------------------
+// wxSubjectTextCtrl: text control for the subject
+// ----------------------------------------------------------------------------
+
+class wxSubjectTextCtrl : public wxTextCtrlProcessingEnter
+{
+public:
+   wxSubjectTextCtrl(wxWindow *parent) : wxTextCtrlProcessingEnter(parent) { }
+};
+
+// ----------------------------------------------------------------------------
 // wxAddressTextCtrl: specialized text control which processes TABs to expand
 // the text it contains and also notifies parent (i.e. wxComposeView) when it
 // is modified.
@@ -416,7 +451,7 @@ private:
 // different roles rather than because it is really needed.
 // ----------------------------------------------------------------------------
 
-class wxAddressTextCtrl : public wxTextCtrl
+class wxAddressTextCtrl : public wxTextCtrlProcessingEnter
 {
 public:
    // ctor
@@ -427,7 +462,6 @@ public:
 
    // callbacks
    void OnChar(wxKeyEvent& event);
-   void OnEnter(wxCommandEvent& event);
 
 protected:
    // accessors for the derived classes
@@ -588,9 +622,12 @@ BEGIN_EVENT_TABLE(wxRcptTypeChoice, wxChoice)
    EVT_CHOICE(-1, wxRcptTypeChoice::OnChoice)
 END_EVENT_TABLE()
 
-BEGIN_EVENT_TABLE(wxAddressTextCtrl, wxTextCtrl)
+BEGIN_EVENT_TABLE(wxTextCtrlProcessingEnter, wxTextCtrl)
+   EVT_TEXT_ENTER(-1, wxTextCtrlProcessingEnter::OnEnter)
+END_EVENT_TABLE()
+
+BEGIN_EVENT_TABLE(wxAddressTextCtrl, wxTextCtrlProcessingEnter)
    EVT_CHAR(wxAddressTextCtrl::OnChar)
-   EVT_TEXT_ENTER(-1, wxAddressTextCtrl::OnEnter)
 END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxMainAddressTextCtrl, wxAddressTextCtrl)
@@ -1017,19 +1054,10 @@ void wxRcptTypeChoice::OnChoice(wxCommandEvent& event)
 }
 
 // ----------------------------------------------------------------------------
-// wxAddressTextCtrl
+// wxTextCtrlProcessingEnter
 // ----------------------------------------------------------------------------
 
-wxAddressTextCtrl::wxAddressTextCtrl(wxWindow *parent,
-                                     wxRcptControl *rcptControl)
-                 : wxTextCtrl(parent, -1, "",
-                              wxDefaultPosition, wxDefaultSize,
-                              wxTE_PROCESS_ENTER | wxTE_PROCESS_TAB)
-{
-   m_rcptControl = rcptControl;
-}
-
-void wxAddressTextCtrl::OnEnter(wxCommandEvent& /* event */)
+void wxTextCtrlProcessingEnter::OnEnter(wxCommandEvent& /* event */)
 {
    // pass to the next control when <Enter> is pressed
    wxNavigationKeyEvent event;
@@ -1038,6 +1066,17 @@ void wxAddressTextCtrl::OnEnter(wxCommandEvent& /* event */)
    event.SetEventObject(this);
 
    GetParent()->GetEventHandler()->ProcessEvent(event);
+}
+
+// ----------------------------------------------------------------------------
+// wxAddressTextCtrl
+// ----------------------------------------------------------------------------
+
+wxAddressTextCtrl::wxAddressTextCtrl(wxWindow *parent,
+                                     wxRcptControl *rcptControl)
+                 : wxTextCtrlProcessingEnter(parent, wxTE_PROCESS_TAB)
+{
+   m_rcptControl = rcptControl;
 }
 
 // expand the address when <TAB> is pressed
@@ -1605,7 +1644,7 @@ wxSizer *wxComposeView::CreateHeaderFields()
    sizerHeaders->Add(new wxStaticText(m_panel, -1, _("&Subject:")),
                      0, wxALIGN_CENTRE_VERTICAL);
 
-   m_txtSubject = new wxTextCtrl(m_panel, -1, _T(""));
+   m_txtSubject = new wxSubjectTextCtrl(m_panel);
    sizerHeaders->Add(m_txtSubject, 1, wxEXPAND | wxALIGN_CENTRE_VERTICAL);
    SetTextAppearance(m_txtSubject);
 
