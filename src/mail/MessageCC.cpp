@@ -720,20 +720,21 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
       plain text if the decoding failed.
       FIXME I should really find out whether this is correct :-)
    */
+
+   unsigned char *data = (unsigned char *)partContentPtr; // cast for cclient
    const char * returnVal = NULL;
    switch(GetPartTransferEncoding(n))
    {
    case ENCBASE64:      // base-64 encoded data
-      returnVal = (const char *) rfc822_base64((unsigned char
-                                                *)partContentPtr,GetPartSize(n),lenptr);
+      returnVal = (const char *) rfc822_base64(data, GetPartSize(n), lenptr);
       break;
    case ENCQUOTEDPRINTABLE:   // human-readable 8-as-7 bit data
-      returnVal = (const char *) rfc822_qprint((unsigned char
-                                                *)partContentPtr,GetPartSize(n,true),lenptr);
+      returnVal = (const char *) rfc822_qprint(data, GetPartSize(n), lenptr);
       break;
    case  ENCBINARY:     // 8 bit binary data
       *lenptr = GetPartSize(n);
       return partContentPtr;
+
    case ENC7BIT:     // 7 bit SMTP semantic data
    case ENC8BIT:        // 8 bit SMTP semantic data
    case ENCOTHER:    //unknown
@@ -802,12 +803,14 @@ MessageCC::GetTextPartEncoding(int n)
 }
 
 size_t
-MessageCC::GetPartSize(int n, bool forceBytes)
+MessageCC::GetPartSize(int n, bool useNaturalUnits)
 {
    DecodeMIME();
 
-   if((m_Body->type == TYPEMESSAGE || m_Body->type == TYPETEXT)
-      && ! forceBytes)
+   // return the size in lines for the text messages if requested, otherwise
+   // return size in bytes
+   if( useNaturalUnits &&
+       (m_Body->type == TYPEMESSAGE || m_Body->type == TYPETEXT) )
       return partInfos[n].size_lines;
    else
       return partInfos[n].size_bytes;

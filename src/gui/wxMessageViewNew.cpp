@@ -715,8 +715,10 @@ wxMessageView::MimeInfo(int mimeDisplayPart)
       message << '\n' << _("Description: ") << tmp << '\n';
 
    message << _("Size: ")
-           << strutil_ltoa(m_mailMessage->GetPartSize(mimeDisplayPart));
+           << strutil_ltoa(m_mailMessage->GetPartSize(mimeDisplayPart, true));
 
+   // as we passed true to GetPartSize() above, it will return size in lines
+   // for the text messages (and in bytes for everything else)
    Message::ContentType type = m_mailMessage->GetPartType(mimeDisplayPart);
    if(type == Message::MSG_TYPEMESSAGE || type == Message::MSG_TYPETEXT)
       message << _(" lines");

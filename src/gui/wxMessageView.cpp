@@ -929,7 +929,7 @@ wxMessageView::Update(void)
             label = mimeFileName;
             if(label.Length()) label << " : ";
             label << m_mailMessage->GetPartMimeType(i) << ", "
-                  << strutil_ultoa(m_mailMessage->GetPartSize(i, true)) << _(" bytes");
+                  << strutil_ultoa(m_mailMessage->GetPartSize(i)) << _(" bytes");
             ci = new ClickableInfo(i, label);
             obj->SetUserData(ci); // gets freed by list
             ci->DecRef();
@@ -1015,8 +1015,10 @@ wxMessageView::MimeInfo(int mimeDisplayPart)
       message << '\n' << _("Description: ") << tmp << '\n';
 
    message << _("Size: ")
-           << strutil_ltoa(m_mailMessage->GetPartSize(mimeDisplayPart));
+           << strutil_ltoa(m_mailMessage->GetPartSize(mimeDisplayPart, true));
 
+   // as we passed true to GetPartSize() above, it will return size in lines
+   // for the text messages (and in bytes for everything else)
    Message::ContentType type = m_mailMessage->GetPartType(mimeDisplayPart);
    if(type == Message::MSG_TYPEMESSAGE || type == Message::MSG_TYPETEXT)
       message << _(" lines");

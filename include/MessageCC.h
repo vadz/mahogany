@@ -109,10 +109,10 @@ public:
 
    /** Query the size of the content.
        @param  n part number
-       @param forceBytes force size to be reported in bytes, even if TYPETEXT/TYPEMESSAGE
+       @param useNaturalUnits must be set to true to get size in lines for text
        @return size
    */
-   size_t   GetPartSize(int n = 0, bool forceBytes = false);
+   virtual size_t GetPartSize(int n = 0, bool useNaturalUnits = false);
 
    /** Get the list of parameters for a given part.
        @param n part number, if -1, for the top level.

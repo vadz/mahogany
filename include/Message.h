@@ -211,12 +211,13 @@ public:
    */
    virtual int GetPartTransferEncoding(int n = 0) = 0;
 
-   /** Query the size of the content, either in lines (TYPETEXT/TYPEMESSAGE) or bytes.
-       @param  n part number
-       @param forceBytes if true, the size will be returned in bytes always
+   /** Returns the size of the part in bytes or lines (only for the text
+       messages and only if useNaturalUnits is true)
+       @param n part number
+       @param useNaturalUnits must be set to true to get size in lines for text
        @return size
    */
-   virtual size_t GetPartSize(int n = 0, bool forceBytes = false) = 0;
+   virtual size_t GetPartSize(int n = 0, bool useNaturalUnits = false) = 0;
 
    /** Get the list of parameters for a given part.
        @param n part number, if -1, for the top level.
