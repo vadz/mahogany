@@ -1248,7 +1248,7 @@ void wxFolderListCtrl::UpdateFocus()
 
    m_FolderView->OnFocusChange();
 
-   if ( selIsUnique )
+   if ( selIsUnique && m_itemFocus != -1 )
    {
       // will set m_selIsUnique to true back again
       Select(m_itemFocus, true);
