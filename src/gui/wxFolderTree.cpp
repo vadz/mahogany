@@ -49,9 +49,19 @@
 
 #include "MFCache.h"
 
-//#include <c-client.h>
 #include "Mcclient.h"
-#include <utf8.h>  // for utf8_text_utf7()
+
+extern "C"
+{
+   #include <utf8.h>  // for utf8_text_utf7()
+}
+
+// support for UTF-8 has been only added in 2.3.0
+#if wxCHECK_VERSION(2, 3, 0)
+   #define USE_UTF8
+#else
+   #undef USE_UTF8
+#endif // wxWin 2.3.0
 
 // wxMSW treectrl has a bug: it's impossible to prevent it from
 // collapsing/expanding a branch when it is double clicked, even if we do
@@ -172,97 +182,14 @@ public:
       // get out parent in the tree
    wxFolderTreeNode *GetParent() const { return m_parent; }
 
-      // get the name (basep art of the label) of this folder
-//   String GetName() const { return m_folder->GetName(); }
-   String GetName()
-{
-   wxString nameOrig, name, nameutf7, nameutf8;
-   nameOrig = m_folder->GetName();
-
-#if wxCHECK_VERSION(2, 3, 0)
-   bool IsValid = TRUE;
-   wxChar s;
-   size_t i;
-   for ( i = 0; i < nameOrig.Length(); i++ )
-   {  /* make sure valid name */
-//if (nameOrig.Left(4) == wxT("Pasi"))  wxLogDebug("i = %i", i);
-      s = nameOrig[i];
-      if (s & 0x80)
-      {
-         /* reserved for future use with UTF-8 */
-         wxLogDebug("mailbox name with 8-bit character");
-         IsValid = FALSE;
-         break;
-      }
-      /* validate IMAP modified UTF-7 */
-      else if (s == '&')
-      {
-         IsValid = TRUE;
-         nameutf7 = '+';
-         size_t j = i;
-         while ( (s = nameOrig[++j]) != '-') switch (s)
-         {
-            case '\0':
-               wxLogDebug("unterminated modified UTF-7 name");
-               IsValid = FALSE;
-               break;
-            default:    /* must be alphanumeric */
-               if (!isalnum (s))
-               {
-                  wxLogDebug("invalid modified UTF-7 name");
-                  IsValid = FALSE;
-                  break;
-               }
-               else
-               {
-                  nameutf7 << s; wxLogDebug("nameutf7: %s", nameutf7.c_str());
-               }
-#if 0
-            case '+':   /* valid modified BASE64 */
-               // but we don't support it yet  FIXME
-               IsValid = FALSE;
-               break;
-            case ',':  /* all OK so far */
-               // but we don't support it yet; should be changed to "/"  FIXME
-               IsValid = FALSE;
-               break;
+      // get the name (base part of the label) of this folder
+   String GetName() const
+#ifdef USE_UTF8
+      ;
+#else
+      { return m_folder->GetName(); }
 #endif
-         } //end while
-         if (IsValid)
-         {
-            // valid IMAP modified UTF-7 mailbox name, converting to
-            // environment's default encoding for now (FIXME)
-            nameutf7 << "-";
-//wxLogDebug("nameutf7 = %s", nameutf7.c_str());
 
-            //convert UTF-7 to UTF-8:
-            SIZEDTEXT *text7, *text8;
-            text7->data = (unsigned char *) nameutf7.c_str();
-            text7->size = nameutf7.Length();
-            void *tab;
-            utf8_text_utf7 ( text7, text8, tab );
-            nameutf8 = text8->data;
-
-            nameutf8 = wxString(nameutf8.wc_str(wxConvUTF8), wxConvLocal);
-            name << nameutf8;
-            i = j;
-//wxLogDebug("name = %s", name.c_str());
-//wxLogDebug("nameutf8 = %s", nameutf8.c_str());
-         }
-      }
-      else // s != '&'
-      {
-         name << s;
-      }
-   } //end for
-   if (IsValid)
-   {
-      return name;
-   }
-#endif // 2.3.0
-
-   return nameOrig;
-}
 
    // the folder status functions
 
@@ -1308,6 +1235,107 @@ void wxFolderTreeNode::UpdateShownStatus(wxTreeCtrl *tree,
       }
    }
 }
+
+// ----------------------------------------------------------------------------
+// wxFolderTreeNode UTF8 support
+// ----------------------------------------------------------------------------
+
+#ifdef USE_UTF8
+
+wxString wxFolderTreeNode::GetName() const
+{
+   wxString name, nameutf7, nameutf8;
+   wxString nameOrig = m_folder->GetName();
+
+   bool isValud = TRUE;
+
+   size_t len = nameOrig.length();
+   for ( size_t i = 0; i < len; i++ )
+   {
+      // make sure valid name
+      wxChar s = nameOrig[i];
+      if (s & 0x80)
+      {
+         /* reserved for future use with UTF-8 */
+         wxLogDebug("mailbox name with 8-bit character");
+         isValud = FALSE;
+         break;
+      }
+
+      // validate IMAP modified UTF-7
+      if (s == '&')
+      {
+         nameutf7 = '+';
+         size_t j = i;
+         while ( (s = nameOrig[++j]) != '-')
+         {
+            switch (s)
+            {
+               case '\0':
+                  wxLogDebug("unterminated modified UTF-7 name");
+                  isValud = FALSE;
+                  break;
+               default:    /* must be alphanumeric */
+                  if (!isalnum (s))
+                  {
+                     wxLogDebug("invalid modified UTF-7 name");
+                     isValud = FALSE;
+                     break;
+                  }
+                  else
+                  {
+                     nameutf7 << s; wxLogDebug("nameutf7: %s", nameutf7.c_str());
+                  }
+#if 0
+               case '+':   /* valid modified BASE64 */
+                  // but we don't support it yet  FIXME
+                  isValud = FALSE;
+                  break;
+               case ',':  /* all OK so far */
+                  // but we don't support it yet; should be changed to "/"  FIXME
+                  isValud = FALSE;
+                  break;
+#endif
+            }
+         } //end while
+
+         if (isValud)
+         {
+            // valid IMAP modified UTF-7 mailbox name, converting to
+            // environment's default encoding for now (FIXME)
+            nameutf7 << "-";
+//wxLogDebug("nameutf7 = %s", nameutf7.c_str());
+
+            //convert UTF-7 to UTF-8:
+            SIZEDTEXT *text7, *text8;
+            text7->data = (unsigned char *) nameutf7.c_str();
+            text7->size = nameutf7.Length();
+            void *tab;
+            utf8_text_utf7 ( text7, text8, tab );
+            nameutf8 = text8->data;
+
+            nameutf8 = wxString(nameutf8.wc_str(wxConvUTF8), wxConvLocal);
+            name << nameutf8;
+            i = j;
+//wxLogDebug("name = %s", name.c_str());
+//wxLogDebug("nameutf8 = %s", nameutf8.c_str());
+         }
+      }
+      else // s != '&'
+      {
+         name << s;
+      }
+   } //end for
+
+   if ( isValud )
+   {
+      return name;
+   }
+
+   return nameOrig;
+}
+
+#endif // USE_UTF8
 
 // ----------------------------------------------------------------------------
 // wxFolderTreeImpl
