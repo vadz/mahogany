@@ -796,6 +796,11 @@ SOURCE=.\src\Python\MAppBase.i
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\Python\MDialogs.i
+# PROP Exclude_From_Build 1
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\Python\Message.i
 # PROP Exclude_From_Build 1
 # End Source File
@@ -1042,6 +1047,121 @@ InputPath=".\src\Python\MAppBase.cpp-swig"
 
 "$(InputDir)\MAppBase_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
 	copy $(InputPath) $(InputDir)\MAppBase_swig.cpp
+
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=".\src\Python\MDialogs.cpp-swig"
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=.\src\Python\MDialogs.cpp-swig
+
+"$(InputDir)\MDialogs_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MDialogs_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=.\src\Python\MDialogs.cpp-swig
+
+"$(InputDir)\MDialogs_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MDialogs_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=.\src\Python\MDialogs.cpp-swig
+
+"$(InputDir)\MDialogs_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MDialogs_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=.\src\Python\MDialogs.cpp-swig
+
+"$(InputDir)\MDialogs_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MDialogs_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=.\src\Python\MDialogs.cpp-swig
+
+"$(InputDir)\MDialogs_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MDialogs_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=.\src\Python\MDialogs.cpp-swig
+
+"$(InputDir)\MDialogs_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MDialogs_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=.\src\Python\MDialogs.cpp-swig
+
+"$(InputDir)\MDialogs_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MDialogs_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug Unicode DLL"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=.\src\Python\MDialogs.cpp-swig
+
+"$(InputDir)\MDialogs_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MDialogs_swig.cpp
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release With Debug Info"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Updating SWIG-generated sources
+InputDir=.\src\Python
+InputPath=.\src\Python\MDialogs.cpp-swig
+
+"$(InputDir)\MDialogs_swig.cpp" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	copy $(InputPath) $(InputDir)\MDialogs_swig.cpp
 
 # End Custom Build
 
@@ -1751,6 +1871,12 @@ SOURCE=.\src\Python\MailFolder_swig.cpp
 # Begin Source File
 
 SOURCE=.\src\Python\MAppBase_swig.cpp
+# ADD CPP /W1
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\Python\MDialogs_swig.cpp
 # ADD CPP /W1
 # SUBTRACT CPP /YX /Yc /Yu
 # End Source File
