@@ -93,10 +93,15 @@ public:
                                      bool hide = false);
    //@}
 
-   /** @name Accessing composer addresses */
+   /** @name Accessing composer data */
    //@{
+
    /// get (all) addresses of this type as a single string
    virtual String GetRecipients(RecipientType type) const = 0;
+
+   /// get the currently entered subject
+   virtual String GetSubject() const = 0;
+
    //@}
 
    /** @name Set the composer headers */

@@ -1667,12 +1667,12 @@ wxComposeView::InitText(Message *msg, MessageView *msgview)
                                          m_Profile);
       }
 
-      if ( m_template.empty() )
+      // if we can evaluate the template right now, do it
+      if ( !TemplateNeedsHeaders(m_template) )
       {
-         // this will only insert the sig
          DoInitText(NULL);
       }
-      else // we have a template
+      else // we have a template involving the header values
       {
          // but we can't evaluate it yet because the headers values are
          // unknown, delay the evaluation

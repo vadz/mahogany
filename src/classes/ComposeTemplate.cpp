@@ -711,25 +711,14 @@ VarExpander::ExpandMisc(const String& name, String *value) const
          m_sink.RememberCursorPosition();
          break;
 
+         // some shortcuts for the values of the "original:" category
       case Var_To:
-         // just the shorthand for "message:to"
-         return ExpandMessage("to", value);
-
       case Var_Subject:
-         return ExpandMessage("subject", value);
-
       case Var_Quote:
-         return ExpandOriginal("quote", value);
-
       case Var_Quote822:
-         return ExpandOriginal("quote822", value);
-
       case Var_Text:
-         return ExpandOriginal("text", value);
-
       case Var_Sender:
-         ExpandOriginal("from", value);
-         return TRUE;
+         return ExpandOriginal(name, value);
 
       default:
          // unknown name
@@ -883,6 +872,10 @@ VarExpander::ExpandMessage(const String& name, String *value) const
 
    switch ( header )
    {
+      case MessageHeader_Subject:
+         *value = m_cv.GetSubject();
+         break;
+
       case MessageHeader_FirstName:
       case MessageHeader_LastName:
          {
@@ -1341,6 +1334,15 @@ void VarExpander::ExpandOriginalText(const String& text,
 // ----------------------------------------------------------------------------
 // public API
 // ----------------------------------------------------------------------------
+
+extern bool TemplateNeedsHeaders(const String& templateValue)
+{
+   // check if there are any occurences of "${message:xxx}" in the template
+   //
+   // TODO: really parse it using a specialized expanded and without any
+   //       sink, just checking if message category appears in it
+   return templateValue.Lower().Find("message:") != wxNOT_FOUND;
+}
 
 extern bool ExpandTemplate(Composer& cv,
                            Profile *profile,

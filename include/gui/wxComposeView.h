@@ -132,14 +132,14 @@ public:
    void AddRecipients(const String& addr,
                       RecipientType rcptType = Recipient_Max);
 
-   /// get the subject value
-   String GetSubject() const;
-
    /// get from value (empty means default)
    String GetFrom() const;
 
    /// get (all) addresses of this type
    virtual String GetRecipients(RecipientType type) const;
+
+   /// get the currently entered subject
+   virtual String GetSubject() const;
 
    /// make a printout of input window
    void Print(void);
@@ -437,10 +437,19 @@ private:
 // other functions
 // ----------------------------------------------------------------------------
 
-// expand the given template using the profile and message (which may be NULL
-// if it is not a reply/follow up) and insert the result into the composer
-//
-// return true if ok, false if template contained errors
+/**
+  Returns true if the template contains the references to the headers of the
+  message itself (in this case it can't be evaluated until the headers are
+  set)
+*/
+extern bool TemplateNeedsHeaders(const String& templateValue);
+
+/**
+  Expand the given template using the profile and message (which may be NULL if
+  it is not a reply/follow up) and insert the result into the composer
+
+  @return true if ok, false if template contained errors
+*/
 extern bool ExpandTemplate(Composer& cv,
                            Profile *profile,
                            const String& templateValue,
