@@ -181,13 +181,6 @@ case `eval echo '$'{ac_cv_prog_cc_${ac_cc}_c_o}` in yes) ;; *)
 	have to use a compiler that supports this.]) ;;
 esac
 
-dnl how to generate dependencies...
-dnl for now, we just support -MD on gcc
-dnl NOTICE: this only looks at #include "xxx.h" -- NOT <xxx.h> !!
-case "$GCC" in yes)
-	CFLAGS="$CFLAGS -MMD"
-esac
-
 dnl what is the c-preprocessor?
 AC_PROG_CPP
 dnl   defines CPP with the c-preprocessor
@@ -207,10 +200,12 @@ AC_LANG_CPLUSPLUS
 
 dnl use what compiler?
 CXXFLAGS=${CXXFLAGS=}	# magic incantation so CXXFLAGS not set by AC_PROG_CXX
-AC_PROG_CXX
+
+dnl AC_PROG_CXX macro
 dnl   defines CXX with the compiler to use
 dnl   defines GXX with yes if using gxx, else empty
 dnl   defines CXXFLAGS
+AC_PROG_CXX
 
 dnl disable support for exceptions if the compiler is g++ and
 dnl new enough to support it.
@@ -1084,17 +1079,21 @@ esac
 
 dnl Only now can we add them, or otherwise some tests would have failed
 dnl how to generate dependencies...
-dnl for now, we just support -MD on g++
-case "$GXX" in
-yes)	CXXFLAGS="$CXXFLAGS -MD" ;;
-*)	AC_MSG_WARN([*** dependencies not supported ***
+dnl
+dnl for now, we just support -MD on g++ and also OSF/1 Compaq cc compiler which
+dnl supports the same options
+if test "x$GXX" = "xyes" -o "x$CCOSTYPE" = "xosf"; then
+    CXXFLAGS="$CXXFLAGS -MD"
+    CFLAGS="$CFLAGS -MMD"
+else
+    AC_MSG_WARN([*** dependencies not supported ***
 		    Dependencies are not supported for this compiler.  If this
 		    message appears, then we need to talk---we think we know
 		    how to fix this, but we don't have a machine where we can
 		    test it.  Please go to http://mahogany.sourceforge.net/bugz
 		    and submit a bug against the Build component so we can give
-		    you some code to try.]);;
-esac
+		    you some code to try.])
+fi
 
 dnl Python code produces warnings, so don't break compilation:
 CXXFLAGS_RELAXED="$CXXFLAGS"
