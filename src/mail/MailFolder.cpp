@@ -740,8 +740,12 @@ public:
    wxDateTime m_dt;
    ~MfCloseEntry()
       {
-         wxLogTrace("mailfolder", "Mailfolder '%s': close timed out.", m_mf->GetName().c_str());
-         if(m_mf) m_mf->RealDecRef();
+         if ( m_mf )
+         {
+            wxLogTrace("mfclose", "Mailfolder '%s': close timed out.",
+                       m_mf->GetName().c_str());
+            m_mf->RealDecRef();
+         }
       }
    MfCloseEntry(MailFolderCmn *mf, int secs)
       {
@@ -805,22 +809,24 @@ static CloseTimer *gs_CloseTimer = NULL;
 bool
 MailFolderCmn::DecRef()
 {
-   ASSERT_MSG(gs_MailFolderCloser, "DEBUG: this must not happen (harmless but should not be the case)");
-   int delay = READ_CONFIG(GetProfile(),MP_FOLDER_CLOSE_DELAY);
-
-   if(gs_MailFolderCloser
-      && delay > 0
-      && GetNRef() == 1  // only real closes get delayed
-      && IsAlive() )     // and only if the folder was opened
-                         // successfully and is still functional
+   if ( gs_MailFolderCloser )
    {
-     wxLogTrace("mailfolder", "Mailfolder '%s': close delayed.", GetName().c_str());
-     Checkpoint(); // flush data immediately
-     gs_MailFolderCloser->Add(this, delay);
-     return FALSE;
+      int delay = READ_CONFIG(GetProfile(),MP_FOLDER_CLOSE_DELAY);
+      if ( delay > 0 &&
+            GetNRef() == 1 && // only real closes get delayed
+            IsAlive() )       // and only if the folder was opened
+                              // successfully and is still functional
+      {
+        wxLogTrace("mfclose", "Mailfolder '%s': close delayed.",
+                   GetName().c_str());
+        Checkpoint(); // flush data immediately
+        gs_MailFolderCloser->Add(this, delay);
+
+        return FALSE;
+      }
    }
-   else
-        return RealDecRef();
+
+   return RealDecRef();
 }
 
 #ifdef DEBUG
@@ -2149,6 +2155,9 @@ static void InitStatic()
 {
    if(gs_CloseTimer)
       return; // nothing to do
+
+   wxLog::AddTraceMask("mfclose");
+
    gs_MailFolderCloser = new MailFolderCloser;
    gs_CloseTimer = new CloseTimer();
    gs_CloseTimer->Start( READ_APPCONFIG(MP_FOLDER_CLOSE_DELAY) *1000);
@@ -2160,9 +2169,14 @@ static void CleanStatic()
       return;
    delete gs_CloseTimer;
    gs_CloseTimer = NULL;
-   gs_MailFolderCloser->CleanUp();
-   delete gs_MailFolderCloser;
+
+   // any MailFolderCmn::DecRef() shouldn't add folders to gs_MailFolderCloser
+   // from now on, so NULL it immediately
+   MailFolderCloser *mfCloser = gs_MailFolderCloser;
    gs_MailFolderCloser = NULL;
+
+   mfCloser->CleanUp();
+   delete mfCloser;
 }
 
 /* static */
