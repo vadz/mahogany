@@ -4504,6 +4504,10 @@ if test "x$USE_MODULES" != "x"; then
        USE_MODULES=1
        USE_MODULES-STATIC=1
        MAKE_USE_MODULES="USE_MODULES=static"
+       cat >> confdefs.h <<\EOF
+#define USE_MODULES_STATIC 1
+EOF
+
        ;;
      *)
        { echo "configure: error: Set --with-modules= to either static/dynamic/none!" 1>&2; exit 1; }
@@ -4512,10 +4516,6 @@ if test "x$USE_MODULES" != "x"; then
 
 cat >> confdefs.h <<\EOF
 #define USE_MODULES 1
-EOF
-
-cat >> confdefs.h <<\EOF
-#define USE_MODULES_STATIC 1
 EOF
 
 

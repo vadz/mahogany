@@ -14,6 +14,8 @@ $Id$
 		- temporarily disable layout while inserting/clearing
 		  window? Should speed up things N*(N-1) fold...
 		- scroll window if mouse is selecting outside
+		- wxIcon <-> wxBitmap which one to use?
+		- last line contains garbage
 
 9	KB	add xface button to composeview
 
@@ -27,6 +29,8 @@ $Id$
 5	KB	subject in embedded rfc822 messages shows filename
 		instead???
 
+5	KB	double click on message header should open message in
+		separate viewer if pref. setting is suitable
         KB	wxModulesDialog: add decref/load as reaction to check/uncheck?
 
 4	KB	Nicer icons for some tabs and message/rfc822 and 

@@ -57,7 +57,7 @@ clean:
 
 install:
 	$(INSTALL) -d $(MODULEDIR)
-	$(INSTALL_PROGRAM) $(TARGETS) $(MODULEDIR)
+	for i in $(TARGETS); do $(INSTALL_PROGRAM) $$i $(MODULEDIR); done
 
 .PHONY: clean
 
