@@ -645,7 +645,7 @@ wxEnhancedPanel::CreateRadioBox(const char *labelFull,
    // for the radiobox
    c = new wxLayoutConstraints;
    SetTopConstraint(c, last, LAYOUT_Y_MARGIN);
-   c->left.SameAs(GetCanvas(), wxLeft, 2*LAYOUT_X_MARGIN + widthMax );
+   c->left.SameAs(GetCanvas(), wxLeft, widthMax);
    c->width.AsIs();
    c->height.AsIs();
 
@@ -666,7 +666,7 @@ wxEnhancedPanel::CreateRadioBox(const char *labelFull,
    c = new wxLayoutConstraints;
    c->left.SameAs(GetCanvas(), wxLeft, LAYOUT_X_MARGIN);
    c->centreY.SameAs(radiobox, wxCentreY);
-   c->width.Absolute(widthMax);
+   c->width.Absolute(widthMax - 2*LAYOUT_X_MARGIN); // looks better like this
    c->height.AsIs();
    wxStaticText *pLabel = new wxStaticText(GetCanvas(), -1, label,
                                            wxDefaultPosition, wxDefaultSize,
