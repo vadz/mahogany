@@ -61,9 +61,9 @@ public:
 
    /** @name Constructors and destructor */
    //@{
-   static MailFolderCC * OpenFolder(const MFolder *mfolder,
-                                    OpenMode openmode,
-                                    wxFrame *frame);
+   static MailFolder *OpenFolder(const MFolder *mfolder,
+                                 OpenMode openmode,
+                                 wxFrame *frame);
 
    static bool CloseFolder(const MFolder *mfolder);
    //@}

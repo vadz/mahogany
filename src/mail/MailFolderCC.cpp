@@ -59,6 +59,8 @@
 #include "MFCache.h"
 #include "Sequence.h"
 
+#include "MFFactory.h"
+
 // just to use wxFindFirstFile()/wxFindNextFile() for lockfile checking and
 // wxFile::Exists() too
 #include <wx/filefn.h>
@@ -257,6 +259,9 @@ static bool mm_disable_callbacks = false;
 
 /// loglevel for cclient error messages:
 static int cc_loglevel = wxLOG_Error;
+
+/// our mail folder factory object
+static MFFactory s_factoryCC("cclient", MailFolderCC::OpenFolder);
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -2112,7 +2117,7 @@ bool MailFolderCC::CreateIfNeeded(const MFolder *folder, MAILSTREAM **pStream)
 }
 
 /* static */
-MailFolderCC *
+MailFolder *
 MailFolderCC::OpenFolder(const MFolder *mfolder,
                          OpenMode openmode,
                          wxFrame *frame)

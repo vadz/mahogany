@@ -106,8 +106,11 @@ public:
       /// full folder name (has the same form as a full path name)
    virtual wxString GetFullName() const = 0;
 
-      /// folder type can't be changed once it's created
+      /// folder type (can't be changed once it's created)
    virtual MFolderType GetType() const = 0;
+
+      /// folder class: cclient or virtual currently, default "" == cclient
+   virtual const char *GetClass() const = 0;
 
       /**
         the icon index for this folder or -1 if there is no specific icon

@@ -209,6 +209,7 @@ extern const MOption MP_COMPOSE_USE_SIGNATURE_SEPARATOR;
 extern const MOption MP_COMPOSE_USE_XFACE;
 extern const MOption MP_COMPOSE_XFACE_FILE;
 extern const MOption MP_FOLDER_TYPE;
+extern const MOption MP_FOLDER_CLASS;
 extern const MOption MP_FOLDER_TRY_CREATE;
 extern const MOption MP_FOLDER_ICON;
 extern const MOption MP_FOLDER_TREEINDEX;
@@ -786,6 +787,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_COMPOSE_XFACE_FILE_NAME   "XFace"
 /// the folder type for a mailbox (see enum in MFolder class)
 #define   MP_FOLDER_TYPE_NAME         "Type"
+/// the folder class
+#define   MP_FOLDER_CLASS_NAME         "Class"
 /// should we try to create the folder before opening it?
 #define   MP_FOLDER_TRY_CREATE_NAME "TryCreate"
 /// the folder icon for a mailbox (see icon functions in FolderType.h)
@@ -1582,6 +1585,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_COMPOSE_XFACE_FILE_DEFVAL   "$HOME/.xface"
 /// the folder type for a mailbox
 #define   MP_FOLDER_TYPE_DEFVAL         (long)(0x00ff)  // MF_ILLEGAL
+/// the folder class
+#define   MP_FOLDER_CLASS_DEFVAL         ""
 /// should we try to create the folder before opening it?
 #define   MP_FOLDER_TRY_CREATE_DEFVAL 0L
 /// the folder icon for a mailbox (see icon functions in FolderType.h)

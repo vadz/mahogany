@@ -49,16 +49,10 @@
 #include "MFStatus.h"
 #include "LogCircle.h"
 
-// we use many MailFolderCC methods explicitly currently, this is wrong: we
-// should have some sort of a redirector to emulate virtual static methods
-// (TODO)
-#include "MailFolderCC.h"
-
+#include "MFFactory.h"
 #include "MFPrivate.h"
 
-#ifdef EXPERIMENTAL
-#include "MMailFolder.h"
-#endif
+#include "MailFolderCC.h"
 
 #include "Composer.h"
 #include "MApplication.h"
@@ -88,6 +82,8 @@ extern const MOption MP_USERNAME;
 // implementation
 // ============================================================================
 
+static MFFactory *MFFactory::ms_factories = NULL;
+
 // ----------------------------------------------------------------------------
 // MailFolder opening
 // ----------------------------------------------------------------------------
@@ -101,7 +97,30 @@ MailFolder::OpenFolder(const MFolder *folder, OpenMode mode, wxFrame *frame)
 
    CHECK( folder, NULL, "NULL MFolder in OpenFolder()" );
 
-   return MailFolderCC::OpenFolder(folder, mode, frame);
+   String kind = folder->GetClass();
+
+   // this is a hack needed for backwards compatibility and which also allows
+   // to have the empty default value for the folder class which saves quite
+   // some bytes in the profile
+   if ( kind.empty() )
+   {
+      kind = "cclient";
+   }
+
+   // find the creation function for this kind of folders
+   for ( const MFFactory *factory = MFFactory::GetHead();
+         factory;
+         factory = factory->GetNext() )
+   {
+      if ( factory->GetName() == kind )
+      {
+         return factory->OpenFolder(folder, mode, frame);
+      }
+   }
+
+   ERRORMESSAGE((_("Unknown folder kind '%s'"), kind.c_str()));
+
+   return NULL;
 }
 
 /* static */

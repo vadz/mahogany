@@ -51,6 +51,7 @@ WX_DEFINE_ARRAY(MFolder *, wxArrayFolder);
 // options we use here
 // ----------------------------------------------------------------------------
 
+extern const MOption MP_FOLDER_CLASS;
 extern const MOption MP_FOLDER_COMMENT;
 extern const MOption MP_FOLDER_FILTERS;
 extern const MOption MP_FOLDER_ICON;
@@ -125,6 +126,7 @@ public:
    virtual String GetName() const { return m_fullname.AfterLast('/'); }
    virtual wxString GetFullName() const { return m_fullname; }
    virtual MFolderType GetType() const { return m_type; }
+   virtual const char *GetClass() const { return ""; }
    virtual bool NeedsNetwork(void) const { return false; }
    virtual int GetIcon() const { return -1; }
    virtual void SetIcon(int /* icon */) { }
@@ -217,6 +219,7 @@ public:
    virtual wxString GetFullName() const { return m_folderName; }
 
    virtual MFolderType GetType() const;
+   virtual const char *GetClass() const;
    virtual bool NeedsNetwork() const;
 
    virtual int GetIcon() const;
@@ -694,6 +697,11 @@ String MFolderFromProfile::GetPassword() const
 MFolderType MFolderFromProfile::GetType() const
 {
    return GetFolderType(READ_CONFIG(m_profile, MP_FOLDER_TYPE));
+}
+
+const char *MFolderFromProfile::GetClass() const
+{
+   return READ_CONFIG_TEXT(m_profile, MP_FOLDER_CLASS);
 }
 
 bool MFolderFromProfile::NeedsNetwork() const
