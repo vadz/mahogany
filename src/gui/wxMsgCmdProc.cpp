@@ -727,17 +727,6 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
                }
             }
 
-            // disable the template if we don't want to quote the original
-            // message
-            if ( quote == M_ACTION_NEVER )
-            {
-               // FIXME: this is just a quick and dirty hack, what we really
-               //        need is a way to pass an extra flag to ReplyMessages()
-               //        below, but simply doing this should work in most cases
-               templ.Replace("$QUOTE", "");
-               templ.Replace("$quote", "");
-            }
-
 #define CASE_REPLY(kind) \
    case WXMENU_MSG_##kind: \
       replyKind = MailFolder::kind; \
@@ -759,7 +748,9 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
 #undef CASE_REPLY
 
             MailFolder::Params params(templ, replyKind);
-            params.msgview = m_msgView;
+            params.msgview =
+               quote == M_ACTION_NEVER ? MailFolder::Params::NO_QUOTE
+                                       : m_msgView;
 
             m_TicketList->Add(m_asmf->ReplyMessages
                                       (

@@ -98,7 +98,7 @@ public:
    void SetOriginal(Message *original);
 
    // implement Composer pure virtuals
-   virtual void InitText(Message *msg = NULL, MessageView *msgview = NULL);
+   virtual void InitText(Message *msg = NULL, const MessageView *msgview = NULL);
    virtual void Launch();
    virtual void InsertFile(const char *filename = NULL,
                            const char *mimetype = NULL);
@@ -256,7 +256,7 @@ protected:
    void DoClear();
 
    /// InitText() helper
-   void DoInitText(Message *msg, MessageView *msgview = NULL);
+   void DoInitText(Message *msg, const MessageView *msgview = NULL);
 
    /// InsertData() and InsertFile() helper
    void DoInsertAttachment(EditorContentPart *mc, const char *mimetype);
@@ -501,7 +501,7 @@ extern bool ExpandTemplate(Composer& cv,
                            Profile *profile,
                            const String& templateValue,
                            Message *msgOriginal,
-                           MessageView *msgview = NULL);
+                           const MessageView *msgview = NULL);
 
 #endif // WXCOMPOSEVIEW_H
 

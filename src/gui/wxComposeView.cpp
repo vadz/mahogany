@@ -1956,7 +1956,7 @@ String wxComposeView::GetSubject() const
 // ----------------------------------------------------------------------------
 
 void
-wxComposeView::InitText(Message *msg, MessageView *msgview)
+wxComposeView::InitText(Message *msg, const MessageView *msgview)
 {
    if ( m_kind == Message_New )
    {
@@ -2023,7 +2023,7 @@ void wxComposeView::Launch()
 }
 
 void
-wxComposeView::DoInitText(Message *mailmsg, MessageView *msgview)
+wxComposeView::DoInitText(Message *mailmsg, const MessageView *msgview)
 {
    // position the cursor correctly and separate us from the previous message
    // if we're replying to several messages at once

@@ -304,8 +304,15 @@ public:
       /// the template to use for the new message, use default if empty
       String templ;
 
-      /// msg viewer from which the reply/forward command originated
-      MessageView *msgview;
+      /**
+        msg viewer from which the reply/forward command originated: this is
+        used only to get the selection from it for the cases when "include
+        only selected text in reply" option is on
+      */
+      const MessageView *msgview;
+
+      /// the special value for msgview meaning not to quote anything at all
+      static const MessageView *NO_QUOTE;
    };
    //@}
 

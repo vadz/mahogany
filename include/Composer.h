@@ -194,7 +194,8 @@ public:
        @param msg the message we're replying to or forwarding
        @param msgview the message viewer to query for selection
     */
-   virtual void InitText(Message *msg = NULL, MessageView *msgview = NULL) = 0;
+   virtual void InitText(Message *msg = NULL,
+                         const MessageView *msgview = NULL) = 0;
 
    /** Finishes the composer initialization and shows the composer frame,
        should be called after all calls to InitText()

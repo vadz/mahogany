@@ -272,7 +272,7 @@ public:
                Composer& cv,
                Profile *profile = NULL,
                Message *msg = NULL,
-               MessageView *msgview = NULL)
+               const MessageView *msgview = NULL)
       : m_sink(sink), m_cv(cv)
    {
       m_profile = profile ? profile : mApplication->GetProfile();
@@ -367,7 +367,7 @@ private:
    Message *m_msg;
 
    // the message viewer we use for querying the selection if necessary
-   MessageView *m_msgview;
+   const MessageView *m_msgview;
 
    // the profile to use for everything (global one by default)
    Profile *m_profile;
@@ -1098,6 +1098,12 @@ VarExpander::ExpandOriginal(const String& Name, String *value) const
             // others
             if ( name == "text" || name == "quote" )
             {
+               if ( m_msgview == MailFolder::Params::NO_QUOTE )
+               {
+                  // we don't want to quote anything at all
+                  break;
+               }
+
                // insert the original text (optionally prefixed by reply
                // string)
                String prefix;
@@ -1641,7 +1647,7 @@ extern bool ExpandTemplate(Composer& cv,
                            Profile *profile,
                            const String& templateValue,
                            Message *msg,
-                           MessageView *msgview)
+                           const MessageView *msgview)
 {
    ExpansionSink sink;
    VarExpander expander(sink, cv, profile, msg, msgview);
