@@ -370,12 +370,6 @@ private:
    /// handler of options change event, refreshes the view if needed
    void OnOptionsChange(MEventOptionsChangeData& event);
 
-   /// adds the entry to the list control
-   void AddEntry(const HeaderInfo *hi);
-
-   /// set the entry colour to correspond to its status
-   void SetEntryColour(size_t index, const HeaderInfo *hi);
-
    /// the array containing the progress objects for all async operations
    ArrayAsyncStatus m_arrayAsyncStatus;
 

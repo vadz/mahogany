@@ -3,7 +3,7 @@
 // File name:   gui/wxFolderView.cpp - window with folder view inside
 // Purpose:     wxFolderView is used to show to the user folder contents
 // Author:      Karsten Ballüder (Ballueder@gmx.net)
-// Modified by:
+// Modified by: VZ at 13.07.01: use virtual list control, update on demand
 // Created:     1997
 // CVS-ID:      $Id$
 // Copyright:   (c) 1997-2001 Mahogany team
@@ -177,44 +177,23 @@ private:
 // wxFolderListCtrl: the list ctrl showing the messages in the folder
 // ----------------------------------------------------------------------------
 
-class wxFolderListCtrl : public wxListCtrl
+class wxFolderListCtrl : public wxListView
 {
 public:
    wxFolderListCtrl(wxWindow *parent, wxFolderView *fv);
    virtual ~wxFolderListCtrl();
+
+   // set the listing to use
+   void SetListing(HeaderInfoList *listing);
+
+   // get the number of items we show
+   size_t GetHeadersCount() const { return m_Listing ? m_Listing->Count() : 0; }
 
    // create the columns using order in m_columns and widths from profile
    void CreateColumns();
 
    // return the string containing ':' separated columns widths
    String GetWidths() const;
-
-   // adds a new entry to the control, returns its index
-   long AddEntry(UIdType uid,
-                 const String &status,
-                 const String &sender,
-                 const String &subject,
-                 const String &date,
-                 const String &size);
-
-   // modifies the existing entry
-   void SetEntry(long index,
-                 const String &status,
-                 const String &sender,
-                 const String &subject,
-                 const String &date,
-                 const String &size);
-
-   // changes the status of the existing entry
-   void SetEntryStatus(long index, const String& status);
-
-   /// [de]select the given item
-   void Select(long index, bool on = true)
-   {
-      SetItemState(index,
-                   on ? wxLIST_STATE_SELECTED : 0,
-                   wxLIST_STATE_SELECTED);
-   }
 
    /// select the item currently focused
    void SelectFocused() { Select(GetFocusedItem(), true); }
@@ -237,10 +216,6 @@ public:
    /// focus the given item and ensure it is visible
    void Focus(long index);
 
-   /// get the next selected item after the given one (use -1 to start)
-   long GetNextSelected(long item) const
-      { return GetNextItem(item, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED); }
-
    /// return true if we preview this item
    bool IsPreviewed(long item) const
       { return item == m_itemPreviewed; }
@@ -252,20 +227,14 @@ public:
    /// get the UID of the given item
    UIdType GetUIdFromIndex(long item) const
    {
-      CHECK( item < GetItemCount(), UID_ILLEGAL, "invalid listctrl index" );
+      CHECK( (size_t)item < GetHeadersCount(), UID_ILLEGAL,
+             "invalid listctrl index" );
 
-      return (UIdType)GetItemData(item);
+      return m_Listing->GetItem((size_t)item)->GetUId();
    }
 
    /// get the UID and, optionally, the index of the focused item
    UIdType GetFocusedUId(long *idx = NULL) const;
-
-   /// get the currently focused item or -1
-   long GetFocusedItem() const;
-
-   /// is the given item selected?
-   bool IsSelected(long index)
-      { return GetItemState(index,wxLIST_STATE_SELECTED) != 0; }
 
    /// get the only selected item, return -1 if 0 or >= 2 items are selected
    long GetUniqueSelection() const;
@@ -337,6 +306,14 @@ private:
 #endif // USE_SUSPEND_LISTCTRL
 
 protected:
+   /// get the colour to use for this entry (depends on status)
+   wxColour GetEntryColour(const HeaderInfo *hi) const;
+
+   /// return information about the list ctrl items on demand
+   virtual wxString OnGetItemText(long item, long column) const;
+   virtual int OnGetItemImage(long item) const;
+   virtual wxListItemAttr *OnGetItemAttr(long item) const;
+
    /// read the column width string from profile or default one
    wxString GetColWidths() const;
 
@@ -356,6 +333,22 @@ protected:
 
    /// do we have a folder opened?
    bool HasFolder() const { return m_FolderView->GetFolder() != NULL; }
+
+   /// get the folder view settings we use
+   const wxFolderView::AllProfileSettings& GetSettings() const
+      { return m_FolderView->m_settings; }
+
+   /// get the header info for this index
+   HeaderInfo *GetHeaderInfo(size_t index) const;
+
+   /// the listing to use
+   HeaderInfoList *m_Listing;
+
+   /// cached header info (used by OnGetItemXXX())
+   HeaderInfo *m_hi;
+
+   // the index of m_hi in m_Listing (or -1 if not cached)
+   size_t m_indexHI;
 
    /// parent window
    wxWindow *m_Parent;
@@ -677,6 +670,12 @@ static wxArrayString UnpackWidths(const wxString& s)
 inline bool CheckStatusBit(int status, int bit, bool isSet)
 {
    return !(status & bit) == !isSet;
+}
+
+// used for array sorting
+int CMPFUNC_CONV compareLongsReverse(long *first, long *second)
+{
+   return *second - *first;
 }
 
 // ============================================================================
@@ -1333,6 +1332,10 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    m_Parent = parent;
    m_profile = fv->GetProfile();
 
+   m_Listing = NULL;
+   m_hi = NULL;
+   m_indexHI = (size_t)-1;
+
    m_PreviewOnSingleClick = false;
 
    m_profile->IncRef(); // we wish to keep it until dtor
@@ -1367,7 +1370,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    // do create the control
    Create(parent, M_WXID_FOLDERVIEW_LISTCTRL,
           wxDefaultPosition, parent->GetClientSize(),
-          wxLC_REPORT | wxNO_BORDER);
+          wxLC_REPORT | wxLC_VIRTUAL | wxNO_BORDER);
 
    // set the initial column widths
    ReadColumnsInfo(m_profile, m_columns);
@@ -1383,10 +1386,52 @@ wxFolderListCtrl::~wxFolderListCtrl()
 {
    SaveColWidths();
 
+   SafeDecRef(m_Listing);
+
    m_profile->DecRef();
 
    delete m_menuFolders;
    delete m_menu;
+}
+
+// ----------------------------------------------------------------------------
+// header info
+// ----------------------------------------------------------------------------
+
+void wxFolderListCtrl::SetListing(HeaderInfoList *listing)
+{
+   if ( m_Listing )
+   {
+      m_Listing->DecRef();
+
+      m_indexHI = (size_t)-1;
+      m_hi = NULL;
+   }
+
+   m_Listing = listing;
+
+   if ( m_Listing )
+   {
+      SetItemCount(m_Listing->Count());
+   }
+            
+   // we'll crash if we use it after the listing changed!
+   ASSERT_MSG( !m_hi, "should be reset" );
+}
+
+HeaderInfo *wxFolderListCtrl::GetHeaderInfo(size_t index) const
+{
+   if ( m_indexHI != index )
+   {
+      CHECK( m_Listing, NULL, "no listing hence no header info" );
+
+      wxFolderListCtrl *self = wxConstCast(this, wxFolderListCtrl);
+
+      self->m_hi = m_Listing->GetItem(index);
+      self->m_indexHI = index;
+   }
+
+   return m_hi;
 }
 
 // ----------------------------------------------------------------------------
@@ -1469,14 +1514,9 @@ void wxFolderListCtrl::Focus(long index)
 #endif // wxWin >= 2.2.6
 }
 
-long wxFolderListCtrl::GetFocusedItem() const
-{
-   return GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
-}
-
 long wxFolderListCtrl::GetUniqueSelection() const
 {
-   long item = GetNextSelected(-1);
+   long item = GetFirstSelected();
    if ( item != -1 )
    {
       if ( GetNextSelected(item) != -1 )
@@ -1496,10 +1536,10 @@ wxFolderListCtrl::GetSelectionsOrFocus() const
 {
    UIdArray uids;
 
-   long item = GetNextSelected(-1);
+   long item = GetFirstSelected();
    while ( item != -1 )
    {
-      uids.Add(GetItemData(item));
+      uids.Add(GetUIdFromIndex(item));
 
       item = GetNextSelected(item);
    }
@@ -1516,7 +1556,7 @@ wxFolderListCtrl::GetSelectionsOrFocus() const
 bool
 wxFolderListCtrl::HasSelection() const
 {
-   return GetNextSelected(-1) != -1 || GetFocusedItem() != -1;
+   return GetFirstSelected() != -1 || GetFocusedItem() != -1;
 }
 
 UIdType
@@ -1592,69 +1632,190 @@ void wxFolderListCtrl::ApplyOptions(const wxColour &fg, const wxColour &bg,
    }
 }
 
-long
-wxFolderListCtrl::AddEntry(UIdType uid,
-                           const String &status,
-                           const String &sender,
-                           const String &subject,
-                           const String &date,
-                           const String &size)
+// ----------------------------------------------------------------------------
+// wxFolderListCtrl items callbacks
+// ----------------------------------------------------------------------------
+
+wxString wxFolderListCtrl::OnGetItemText(long item, long column) const
 {
-   // the item label is the value of the first column
-   String label;
-   switch ( GetColumnByIndex(m_columns, 0) )
+   wxString text;
+
+   CHECK( (size_t)item < GetHeadersCount(), text,
+          "invalid item requested in wxFolderListCtrl" );
+
+   HeaderInfo *hi = GetHeaderInfo((size_t)item);
+   CHECK( hi, text, "no header info in OnGetItemText" );
+
+   wxFolderListCtrlFields field = GetColumnByIndex(m_columns, column);
+   switch ( field )
    {
-      case WXFLC_STATUS:   label = status;  break;
-      case WXFLC_FROM:     label = sender;  break;
-      case WXFLC_DATE:     label = date;    break;
-      case WXFLC_SIZE:     label = size;    break;
-      case WXFLC_SUBJECT:  label = subject; break;
+      case WXFLC_STATUS:
+         text = MailFolder::ConvertMessageStatusToString(hi->GetStatus());
+         break;
+
+      case WXFLC_FROM:
+         // optionally replace the "From" with "To: someone" for messages sent
+         // by the user himself
+         switch ( HeaderInfo::GetFromOrTo(hi,
+                                          GetSettings().replaceFromWithTo,
+                                          GetSettings().returnAddresses,
+                                          &text) )
+         {
+            default:
+            case HeaderInfo::Invalid:
+               FAIL_MSG( "unexpected GetFromOrTo() return value" );
+               // fall through
+
+            case HeaderInfo::From:
+               // nothing special to do
+               break;
+
+            case HeaderInfo::To:
+               text.Prepend(_("To: "));
+               break;
+
+            case HeaderInfo::Newsgroup:
+               text.Prepend(_("Posted to: "));
+               break;
+         }
+
+         // optionally leave only the name part of the address
+         if ( GetSettings().senderOnlyNames )
+         {
+            text = Message::GetNameFromAddress(text);
+         }
+         break;
+
+      case WXFLC_DATE:
+         text = strutil_ftime(hi->GetDate(),
+                              GetSettings().dateFormat,
+                              GetSettings().dateGMT);
+
+         break;
+
+      case WXFLC_SIZE:
+         text = MailFolder::SizeToString(hi->GetSize(),
+                                         hi->GetLines(),
+                                         GetSettings().showSize);
+         break;
+
+      case WXFLC_SUBJECT:
+         text = wxString(' ', 3*hi->GetIndentation()) + hi->GetSubject();
+         break;
 
       default:
          wxFAIL_MSG( "unknown column" );
    }
 
-   // add the item
-   long index = GetItemCount();
-   InsertItem(index, label);
+   if ( field == WXFLC_FROM || field == WXFLC_SUBJECT )
+   {
+      wxFontEncoding encoding = hi->GetEncoding();
 
-   // store the UID with the item
-   SetItemData(index, (long)uid);
+      // optionally convert from UTF-8 to environment's default encoding
+      if ( encoding == wxFONTENCODING_UTF8 )
+      {
+         text = wxString(text.wc_str(wxConvUTF8), wxConvLocal);
+         encoding = wxLocale::GetSystemEncoding();
+      }
 
-   // set the other columns
-   SetEntry(index, status, sender, subject, date, size);
+      // we might do conversion if we can't show this encoding directly
+      if ( encoding != wxFONTENCODING_SYSTEM )
+      {
+         wxFontEncoding encoding = hi->GetEncoding();
+         if ( !wxTheFontMapper->IsEncodingAvailable(encoding) )
+         {
+            // try to find another encoding
+            wxFontEncoding encAlt;
+            if ( wxTheFontMapper->GetAltForEncoding(encoding, &encAlt) )
+            {
+               wxEncodingConverter conv;
+               if ( conv.Init(encoding, encAlt) )
+               {
+                  encoding = encAlt;
 
-   // return the index of the new item
-   return index;
+                  text = conv.Convert(text);
+               }
+               else
+               {
+                  // TODO give an error message here
+
+                  // don't attempt to do anything with this encoding
+                  encoding = wxFONTENCODING_SYSTEM;
+               }
+            }
+         }
+      }
+
+   }
+
+   return text;
 }
 
-void
-wxFolderListCtrl::SetEntry(long index,
-                           const String &status,
-                           const String &sender,
-                           const String &subject,
-                           const String &date,
-                           const String &size)
+int wxFolderListCtrl::OnGetItemImage(long item) const
 {
-   ASSERT_MSG( index < GetItemCount(), "invalid index in wxFolderListCtrl" );
-
-   SetEntryStatus(index, status);
-
-   if ( m_columns[WXFLC_FROM] != -1 )
-      SetItem(index, m_columns[WXFLC_FROM], sender);
-   if ( m_columns[WXFLC_DATE] != -1 )
-      SetItem(index, m_columns[WXFLC_DATE], date);
-   if ( m_columns[WXFLC_SIZE] != -1 )
-      SetItem(index, m_columns[WXFLC_SIZE], size);
-   if ( m_columns[WXFLC_SUBJECT] != -1 )
-      SetItem(index, m_columns[WXFLC_SUBJECT], subject);
+   return -1;
 }
 
-void
-wxFolderListCtrl::SetEntryStatus(long index, const String& status)
+wxColour
+wxFolderListCtrl::GetEntryColour(const HeaderInfo *hi) const
 {
-   if ( m_columns[WXFLC_STATUS] != -1 )
-      SetItem(index, m_columns[WXFLC_STATUS], status);
+   wxColour col;
+   if ( !hi->GetColour().empty() ) // entry has its own colour setting
+   {
+      GetColourByName(&col, hi->GetColour(), MP_FVIEW_FGCOLOUR_D);
+   }
+   else // set the colour depending on the status of the message
+   {
+      int status = hi->GetStatus();
+
+      const wxFolderView::AllProfileSettings& settings = GetSettings();
+
+      if ( status & MailFolder::MSG_STAT_FLAGGED )
+         col = settings.FlaggedCol;
+      else if ( status & MailFolder::MSG_STAT_DELETED )
+         col = settings.DeletedCol;
+      else if ( status & MailFolder::MSG_STAT_RECENT )
+         col = status & MailFolder::MSG_STAT_SEEN ? settings.RecentCol
+                                                  : settings.NewCol;
+      else if ( !(status & MailFolder::MSG_STAT_SEEN) )
+         col = settings.UnreadCol;
+      //else: normal message, show in default colour
+   }
+
+   return col;
+}
+
+wxListItemAttr *wxFolderListCtrl::OnGetItemAttr(long item) const
+{
+   CHECK( (size_t)item < GetHeadersCount(), NULL,
+          "invalid item requested in wxFolderListCtrl" );
+
+   HeaderInfo *hi = GetHeaderInfo((size_t)item);
+   CHECK( hi, NULL, "no header info in OnGetItemText" );
+
+   wxListItemAttr *attr = NULL;
+
+   wxColour col = GetEntryColour(hi);
+   if ( col.Ok() )
+   {
+      if ( !attr )
+         attr = new wxListItemAttr;
+
+      attr->SetTextColour(col);
+   }
+
+   wxFontEncoding enc = hi->GetEncoding();
+   if ( enc != wxFONTENCODING_SYSTEM )
+   {
+      if ( !attr )
+         attr = new wxListItemAttr;
+
+      wxFont font = GetFont();
+      font.SetEncoding(enc);
+      attr->SetFont(font);
+   }
+
+   return attr;
 }
 
 // ----------------------------------------------------------------------------
@@ -1815,7 +1976,6 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
    SafeDecRef(m_Profile);
 
    m_NumOfMessages = 0; // At the beginning there was nothing.
-   m_UpdateSemaphore = false;
    m_MailFolder = mf;
    m_ASMailFolder = mf ? ASMailFolder::Create(mf) : NULL;
    m_Profile = NULL;
@@ -1960,7 +2120,6 @@ wxFolderView::Create(MWindow *parent)
 wxFolderView::wxFolderView(wxWindow *parent)
 {
    m_InDeletion = false;
-   m_UpdateSemaphore = false;
    m_SetFolderSemaphore = false;
 
    m_Parent = parent;
@@ -2143,272 +2302,16 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
 
 
 void
-wxFolderView::AddEntry(const HeaderInfo *hi)
-{
-   String subject = wxString(' ', 3*hi->GetIndentation()) + hi->GetSubject();
-
-   String sender;
-
-   // optionally replace the "From" with "To: someone" for messages sent by
-   // the user himself
-   switch ( HeaderInfo::GetFromOrTo(hi,
-                                    m_settings.replaceFromWithTo,
-                                    m_settings.returnAddresses,
-                                    &sender) )
-   {
-      default:
-      case HeaderInfo::Invalid:
-         FAIL_MSG( "unexpected GetFromOrTo() return value" );
-         // fall through
-
-      case HeaderInfo::From:
-         // nothing special to do
-         break;
-
-      case HeaderInfo::To:
-         sender.Prepend(_("To: "));
-         break;
-
-      case HeaderInfo::Newsgroup:
-         sender.Prepend(_("Posted to: "));
-         break;
-   }
-
-   // optionally leave only the name part of the address
-   if ( m_settings.senderOnlyNames )
-   {
-      sender = Message::GetNameFromAddress(sender);
-   }
-
-   // we optionally need to convert sender string
-   wxFontEncoding encoding = hi->GetEncoding();
-#if wxCHECK_VERSION(2, 3, 0)
-   if ( encoding == wxFONTENCODING_UTF8 )
-   {
-      // Convert from UTF-8 to environment's default encoding
-      subject = wxString(subject.wc_str(wxConvUTF8), wxConvLocal);
-      sender = wxString(sender.wc_str(wxConvUTF8), wxConvLocal);
-      encoding = wxLocale::GetSystemEncoding();
-   }
-#endif // 2.3.0
-   if ( encoding != wxFONTENCODING_SYSTEM )
-   {
-      wxFontEncoding encoding = hi->GetEncoding();
-      if ( !wxTheFontMapper->IsEncodingAvailable(encoding) )
-      {
-         // try to find another encoding
-         wxFontEncoding encAlt;
-         if ( wxTheFontMapper->GetAltForEncoding(encoding, &encAlt) )
-         {
-            wxEncodingConverter conv;
-            if ( conv.Init(encoding, encAlt) )
-            {
-               encoding = encAlt;
-
-               sender = conv.Convert(sender);
-               subject = conv.Convert(subject);
-            }
-            else
-            {
-               // TODO give an error message here
-
-               // don't attempt to do anything with this encoding
-               encoding = wxFONTENCODING_SYSTEM;
-            }
-         }
-      }
-   }
-
-   int status = hi->GetStatus();
-   String strStatus = MailFolder::ConvertMessageStatusToString(hi->GetStatus());
-   int index = m_FolderCtrl->AddEntry
-                             (
-                              hi->GetUId(),
-                              strStatus,
-                              sender,
-                              subject,
-                              strutil_ftime(hi->GetDate(),
-                                            m_settings.dateFormat,
-                                            m_settings.dateGMT),
-                              MailFolder::SizeToString(hi->GetSize(),
-                                                       hi->GetLines(),
-                                                       m_settings.showSize)
-                             );
-
-   if ( status & MailFolder::MSG_STAT_DELETED )
-   {
-      // remember the number of deleted messages we have
-      m_nDeleted++;
-   }
-
-   wxListItem info;
-   info.m_itemId = index;
-   m_FolderCtrl->GetItem(info);
-
-   if ( encoding != wxFONTENCODING_SYSTEM )
-   {
-      wxFont font = m_FolderCtrl->GetFont();
-      font.SetEncoding(encoding);
-      info.SetFont(font);
-   }
-
-   m_FolderCtrl->SetItem(info);
-
-   SetEntryColour(index, hi);
-}
-
-void
-wxFolderView::SetEntryColour(size_t index, const HeaderInfo *hi)
-{
-   wxListItem info;
-   info.m_itemId = index;
-   m_FolderCtrl->GetItem(info);
-
-   wxColour col;
-   if ( !hi->GetColour().empty() ) // entry has its own colour setting
-   {
-      GetColourByName(&col, hi->GetColour(), MP_FVIEW_FGCOLOUR_D);
-   }
-   else // set the colour depending on the status of the message
-   {
-      int status = hi->GetStatus();
-
-      if ( status & MailFolder::MSG_STAT_FLAGGED )
-         col = m_settings.FlaggedCol;
-      else if ( status & MailFolder::MSG_STAT_DELETED )
-         col = m_settings.DeletedCol;
-      else if ( status & MailFolder::MSG_STAT_RECENT )
-         col = status & MailFolder::MSG_STAT_SEEN ? m_settings.RecentCol
-                                                  : m_settings.NewCol;
-      else if ( !(status & MailFolder::MSG_STAT_SEEN) )
-         col = m_settings.UnreadCol;
-      else // normal message
-         col = m_settings.FgCol;
-   }
-
-   if ( col.Ok() )
-   {
-      // due to wxWin "feature" we can't copare directly with GetTextColour()
-      // as comparing black with invalid colour yields true!
-      wxListItemAttr *attr = info.GetAttributes();
-      if ( !attr || !attr->HasTextColour() || col != attr->GetTextColour() )
-      {
-         info.SetTextColour(col);
-
-         m_FolderCtrl->SetItem(info);
-      }
-   }
-}
-
-void
 wxFolderView::Update()
 {
    if ( !m_ASMailFolder )
       return;
 
-   // this shouldn't happen but unfortunately it did before because
-   // wxGTK::wxListCtrl::EnsureVisible() which we call from here calls
-   // wxYield() - now I've added a workaround for this, but keep this check in
-   // case it starts happen again
-   //
-   // notice that it's a real error if it happens because the update folder
-   // events can just be lost like this
-   CHECK_RET( !m_UpdateSemaphore, "reentrancy in wxFolderView::Update" );
+   m_FolderCtrl->SetListing(m_ASMailFolder->GetHeaders());
 
-   HeaderInfoList_obj listing = m_ASMailFolder->GetHeaders();
-   if ( !listing )
-   {
-      return;
-   }
-
-   m_UpdateSemaphore = true;
-
-   MFrame *frameOld = m_MailFolder->SetInteractiveFrame(m_Frame);
-
-   size_t numMessages = listing->Count();
-
-   static const size_t THRESHOLD = 100;
-   if ( numMessages > THRESHOLD )
-   {
-      wxBeginBusyCursor();
-#ifdef __WXMSW__
-      m_FolderCtrl->Hide(); // avoid flicker under MSW
-#endif
-   }
-
-   wxLogTrace(M_TRACE_SELECTION, "recreating the listctrl from Update()");
-
-   // completely repopulate the control
-   m_FolderCtrl->DeleteAllItems();
-
-   // this will reset m_uidFocused
-   OnFocusChange();
-
-   // which message should be focused after update? notice that we can *not*
-   // keep the old index because the position of the message might have changed
-   // because of sorting/threading
-   bool searchForFocus = m_uidPreviewed != UID_ILLEGAL;
-
-   //the item to set focus to or -1 if none found
-   int itemFocus = -1;
-
-   // fill the list control
-   const HeaderInfo *hi;
-   for ( size_t i = 0; i < numMessages; i++ )
-   {
-      hi = listing[i];
-
-      // this adds it to the list control
-      AddEntry(hi);
-
-      // if we haven't found it yet ...
-      if ( searchForFocus )
-      {
-         // ... try to find the previously focused item
-         if ( hi->GetUId() == m_uidPreviewed )
-         {
-            searchForFocus = false;
-            itemFocus = i;
-         }
-      }
-   }
+   m_nDeleted = m_ASMailFolder->CountDeletedMessages();
 
    UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
-
-   if ( numMessages > THRESHOLD )
-   {
-#ifdef __WXMSW__
-      m_FolderCtrl->Show();
-#endif
-
-      wxEndBusyCursor();
-   }
-
-   m_NumOfMessages = numMessages;
-
-   // clear the preview window if the focused message disappeared: this happens
-   // only if we didn't find it above (notice that if there was no preview
-   // message to start with, we have nothing to do here)
-   if ( itemFocus != -1 )
-   {
-      m_FolderCtrl->Select(itemFocus);
-      m_FolderCtrl->Focus(itemFocus);
-   }
-   else // no new focus
-   {
-      if ( searchForFocus )
-      {
-         m_MessagePreview->Clear();
-         InvalidatePreviewUID();
-      }
-      //else: we didn't have preview at all
-
-      SelectInitialMessage(listing);
-   }
-
-   m_UpdateSemaphore = false;
-
-   m_MailFolder->SetInteractiveFrame(frameOld);
 }
 
 // ----------------------------------------------------------------------------
@@ -3358,10 +3261,6 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
    if ( event.GetFolder() != m_MailFolder )
       return;
 
-#ifdef USE_SUSPEND_LISTCTRL
-   m_FolderCtrl->Freeze();
-#endif // USE_SUSPEND_LISTCTRL
-
    // if we had exactly one message selected before, we want to keep the
    // selection after expunging
    bool hadUniqueSelection = m_FolderCtrl->GetUniqueSelection() != -1;
@@ -3377,8 +3276,12 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
    bool focusDeleted = focus == -1;
 #endif // BROKEN_LISTCTRL
 
-   size_t count = event.GetCount();
-   for ( size_t n = 0; n < count; n++ )
+   size_t n,
+          count = event.GetCount();
+
+   wxArrayLong itemsDeleted;
+   itemsDeleted.Alloc(count);
+   for ( n = 0; n < count; n++ )
    {
       long item = event.GetItem(n);
 
@@ -3401,7 +3304,16 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
       if ( uid == m_uidPreviewed )
          previewDeleted = true;
 
-      m_FolderCtrl->DeleteItem(item);
+      itemsDeleted.Add(item);
+   }
+
+   // really delete the items: do it from end to avoid changing the indices
+   // while we are doing it
+   itemsDeleted.Sort(compareLongsReverse);
+   count = itemsDeleted.GetCount();
+   for ( n = 0; n < count; n++ )
+   {
+      m_FolderCtrl->DeleteItem(itemsDeleted[n]);
    }
 
 #ifdef BROKEN_LISTCTRL
@@ -3441,10 +3353,6 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
    m_NumOfMessages -= count;
    m_nDeleted = 0;
 
-#ifdef USE_SUSPEND_LISTCTRL
-   m_FolderCtrl->Thaw();
-#endif // USE_SUSPEND_LISTCTRL
-
    UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
 }
 
@@ -3469,25 +3377,14 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
       {
          const HeaderInfo *hi = event.GetHeaderInfo();
          int status = hi->GetStatus();
-         String strStatus =
-            MailFolder::ConvertMessageStatusToString(status);
-
-         // it is common to chaneg status of many messages at once, then we're
-         // going to have many such events - only refresh the list control when
-         // we process all of them
-#ifdef USE_SUSPEND_LISTCTRL
-         m_FolderCtrl->Freeze();
-#endif // USE_SUSPEND_LISTCTRL
-
-         m_FolderCtrl->SetEntryStatus(index, strStatus);
-
-         SetEntryColour(index, hi);
 
          if ( status & MailFolder::MSG_STAT_DELETED )
          {
             // remember that we have another deleted message
             m_nDeleted++;
          }
+
+         m_FolderCtrl->RefreshItem(index);
 
          // TODO: should also do it only once, after all status changes
          UpdateTitleAndStatusBars("", "", m_Frame, m_MailFolder);
