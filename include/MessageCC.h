@@ -1,19 +1,20 @@
-/*-*- c++ -*-********************************************************
- * Message class: entries for message header                        *
- *                      implementation for MailFolderCC             *
- *                                                                  *
- * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
- *                                                                  *
- * $Id$
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   MessageCC.h - declares MessageCC class
+// Purpose:     implementation of Message using c-client API
+// Author:      Karsten Ballüder (Ballueder@gmx.net)
+// Modified by:
+// Created:     1997
+// CVS-ID:      $Id$
+// Copyright:   (c) 1998-2001 M Team
+// License:     M license
+///////////////////////////////////////////////////////////////////////////////
 
-
-
-#ifndef MESSAGECC_H
-#define MESSAGECC_H
+#ifndef _MESSAGECC_H
+#define _MESSAGECC_H
 
 #ifdef __GNUG__
-#pragma interface "MessageCC.h"
+   #pragma interface "MessageCC.h"
 #endif
 
 #include "Message.h"
@@ -252,11 +253,18 @@ private:
    /// common part of all ctors
    void Init();
 
-   /// Get the body information and update body variable.
+   /// Get the body and envelope information into member variables
    void GetBody(void);
 
    /// call GetBody() if necessary
    void CheckBody() const { if ( !m_Body ) ((MessageCC *)this)->GetBody(); }
+
+   /// get the envelope information only (faster than GetBody!)
+   void GetEnvelope();
+
+   /// get the envelope information only if necessary
+   void CheckEnvelope() const
+      { if ( !m_Envelope ) ((MessageCC *)this)->GetEnvelope(); }
 
    /// get the cache element for this message
    MESSAGECACHE *GetCacheElement() const;
@@ -307,4 +315,5 @@ private:
    class PartInfoArray *m_partInfos;
 };
 
-#endif
+#endif // _MESSAGECC_H
+

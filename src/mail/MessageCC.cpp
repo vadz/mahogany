@@ -66,6 +66,15 @@
 // ----------------------------------------------------------------------------
 
 /// check for dead mailstream
+#define CHECK_DEAD()                                                          \
+   if ( !m_folder->Stream() && !m_folder->PingReopen() )                      \
+   {                                                                          \
+      ERRORMESSAGE((_("Cannot access closed folder '%s'."),                   \
+                   m_folder->GetName().c_str()));                             \
+      return;                                                                 \
+   }
+
+/// check for dead mailstream (version with ret code)
 #define CHECK_DEAD_RC(rc)                                                     \
    if ( !m_folder->Stream() && !m_folder->PingReopen() )                      \
    {                                                                          \
@@ -552,8 +561,8 @@ MessageCC::GetHeaderLines(const char **headersOrig,
 ADDRESS *
 MessageCC::GetAddressStruct(MessageAddressType type) const
 {
-   CheckBody();
-   CHECK(m_Envelope, NULL, "no envelop in GetAddressStruct()" )
+   CheckEnvelope();
+   CHECK( m_Envelope, NULL, "no envelop in GetAddressStruct()" )
 
    ADDRESS *addr;
 
@@ -658,7 +667,7 @@ MessageCC::Address(String &nameAll, MessageAddressType type) const
 
 String MessageCC::Date(void) const
 {
-   CheckBody();
+   CheckEnvelope();
 
    String date;
    if ( m_Envelope )
@@ -902,38 +911,64 @@ static void decode_body(PartInfoArray& partInfos,
    }
 }
 
+// ----------------------------------------------------------------------------
+// get the body and/or envelope information from cclient
+// ----------------------------------------------------------------------------
+
+void
+MessageCC::GetEnvelope()
+{
+   if ( !m_folder )
+      return;
+
+   // Forget what we know and re-fetch the body, it is cached anyway.
+   m_Envelope = NULL;
+
+   // reopen the folder if needed
+   CHECK_DEAD();
+
+   if ( !m_folder->Lock() )
+   {
+      ERRORMESSAGE((_("Impossible to retrieve message headers: "
+                      "failed to lock folder '%s'."),
+                    m_folder->GetName().c_str()));
+   }
+
+   m_Envelope = mail_fetch_structure(m_folder->Stream(),
+                                     m_uid,
+                                     NULL, // without body
+                                     FT_UID);
+   m_folder->UnLock();
+
+   ASSERT_MSG( m_Envelope, "failed to get message envelope!" );
+}
+
 void
 MessageCC::GetBody(void)
 {
    if ( !m_folder )
       return;
 
-   int retry = 1;
-
-   // Forget what we  know and re-fetch the body, it is cached anyway.
+   // Forget what we know and re-fetch the body, it is cached anyway.
    m_Body = NULL;
-   do
-   {
-      if(m_Body == NULL && m_folder)
-      {
-         if(m_folder->Stream() && m_folder->Lock())
-         {
-            m_Envelope =
-               mail_fetchstructure_full(m_folder->Stream(),m_uid,
-                                        &m_Body, FT_UID);
-            m_folder->UnLock();
-         }
-         else
-         {
-            m_folder->PingReopen();
-         }
-      }
-      else
-         retry = 0;
-   }
-   while (retry-- && ! (m_Envelope && m_Body));
 
-   ASSERT_MSG( m_Body && m_Envelope, "Non-existent message data." );
+   // reopen the folder if needed
+   CHECK_DEAD();
+
+   if ( !m_folder->Lock() )
+   {
+      ERRORMESSAGE((_("Impossible to retrieve message body: "
+                      "failed to lock folder '%s'."),
+                    m_folder->GetName().c_str()));
+   }
+
+   m_Envelope = mail_fetchstructure_full(m_folder->Stream(),
+                                         m_uid,
+                                         &m_Body,
+                                         FT_UID);
+   m_folder->UnLock();
+
+   ASSERT_MSG( m_Body && m_Envelope, "failed to get body and envelope!" );
 }
 
 MESSAGECACHE *
@@ -1211,17 +1246,17 @@ MessageCC::GetPartDesc(int n)
 String
 MessageCC::GetId(void) const
 {
-   CheckBody();
+   CheckEnvelope();
 
    String id;
 
    if ( !m_Body )
    {
-      FAIL_MSG( "no body in GetId" );
+      FAIL_MSG( "no envelope in GetId" );
    }
    else
    {
-      id = m_Body->id;
+      id = m_Envelope->message_id;
    }
 
    return id;
@@ -1230,13 +1265,13 @@ MessageCC::GetId(void) const
 String
 MessageCC::GetReferences(void) const
 {
-   CheckBody();
+   CheckEnvelope();
 
    String ref;
 
    if ( !m_Body )
    {
-      FAIL_MSG( "no body in GetReferences" );
+      FAIL_MSG( "no envelope in GetReferences" );
    }
    else
    {
