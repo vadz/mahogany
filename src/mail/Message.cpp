@@ -346,7 +346,8 @@ String Message::GetEMailFromAddress(const String &address)
 bool Message::CompareAddresses(const String& adr1, const String& adr2)
 {
 #ifdef USE_ADDRESS_CLASS
-   return AddressList_obj(adr1) == AddressList_obj(adr2);
+   AddressList_obj addrList1(adr1), addrList2(adr2);
+   return addrList1 == addrList2;
 #else // !USE_ADDRESS_CLASS
    String email1, email2;
 
