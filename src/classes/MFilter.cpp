@@ -639,21 +639,30 @@ protected:
          m_Profile = p;
          m_Name = p->readEntry(MP_FILTER_NAME, "");
          m_Settings = NULL;
-         // we now prefer to parse the filter code:
+
+         // use the filter program if we have it
          m_Rule = p->readEntry(MP_FILTER_RULE, "");
-         if( m_Rule[0u] )
+         if( !m_Rule.empty() )
          {
             MFDialogSettingsImpl *control = new MFDialogSettingsImpl;
-            bool rc = control->ReadSettingsFromRule(m_Rule);
+            if ( !control->ReadSettingsFromRule(m_Rule) )
+            {
+               wxLogWarning(_("Failed to parse the filter rule '%s'"),
+                            m_Name.c_str());
+
+               m_Rule.clear();
+            }
+
             control->DecRef();
-            if(rc)
-               m_SettingsStr = ""; // don't need them
-            else
-               m_SettingsStr = p->readEntry(MP_FILTER_GUIDESC, "");
          }
-         else
+
+         if ( m_Rule.empty() )
+         {
+            // use the GUI settings if no rule
             m_SettingsStr = p->readEntry(MP_FILTER_GUIDESC, "");
-            m_dirty = false;
+         }
+
+         m_dirty = false;
       }
    
    virtual ~MFilterFromProfile()
