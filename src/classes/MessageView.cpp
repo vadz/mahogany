@@ -400,12 +400,21 @@ wxFont MessageView::AllProfileValues::GetFont(wxFontEncoding encoding) const
 {
    wxFont font;
 
-   if ( (encoding == wxFONTENCODING_DEFAULT) && !fontDesc.empty() )
+   if ( !fontDesc.empty() )
    {
       wxNativeFontInfo fontInfo;
       if ( fontInfo.FromString(fontDesc) )
       {
          font.SetNativeFontInfo(fontInfo);
+
+         // assume that iso8859-1 text can be shown in any encoding - it's
+         // true for all normal fonts
+         if ( font.Ok() &&
+               (encoding != wxFONTENCODING_DEFAULT) &&
+                  (encoding != wxFONTENCODING_ISO8859_1) )
+         {
+            font.SetEncoding(encoding);
+         }
       }
    }
 
