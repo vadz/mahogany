@@ -344,6 +344,10 @@ if test "$USE_PYTHON" = 1 ; then
 fi
 AC_SUBST(MAKE_USE_PYTHON)
 AC_SUBST(MAKE_USE_SWIG)
+if test "x$MAKE_USE_PYTHON" = x 
+then
+  AC_MSG_WARN("Building M without Python leads to reduced functionality!")
+fi
 
 dnl --------------------------------------------------------------------------
 dnl check for (wx)gtk libraries
