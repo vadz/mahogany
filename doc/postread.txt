@@ -6,4 +6,4 @@ start using it right now.
 
 And don't forget that the most up-to-date documentation is always
 available online at M home page: please see
-http://www.phy.hw.ac.uk/~karsten/Mahogany/doc/Manual/index.html.
+http://www.wxwindows.org/Mahogany/doc/Manual/index.html.

@@ -1311,6 +1311,8 @@ wxLayoutWindow::Find(const wxString &needle,
          fromWhere->x ++;
       }
       m_llist->MoveCursorTo(found);
+      m_llist->StartSelection(found);
+      m_llist->EndSelection(wxPoint(found.x+m_FindString.Length(), found.y));
       ScrollToCursor();
       RequestUpdate();
       return true;

@@ -1744,6 +1744,22 @@ UpgradeFrom050()
    TemplateFixFolderTraversal traverse(folderRoot);
    traverse.Traverse();
 
+   // TODO: move filter settings to new profile locations and warn
+   // user about changed settings:
+   /*
+     1.
+     Combine "1" + "Criterium" + "Action" into one string and write
+     it as the new "Settings" value   ( "1" is the number of Criteria,
+     for more than 1 it was broken in 0.50 and cannot be repaired)
+     2.
+     We could either create new filter name entries for the individual
+     folders, or simply tell the user to set them up anew.
+
+     Important: MFilter will remove the "Settings" entries
+     automatically when edited and convert everything to proper filter
+     code instead, this needn't be done here.
+   */
+
    MDialog_Message(
       _("Since version 0.5 the use of the server settings has\n"
         "changed slightly. If you experience any problems in\n"

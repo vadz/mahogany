@@ -498,7 +498,7 @@ typedef struct _xf_rule {
          "To",
          "Sender"
       };
-      MFDialogTarget where = ORC_W_Invalid;
+      MFDialogTarget where = ORC_W_Illegal;
       wxASSERT_MSG( WXSIZEOF(headers) == ORC_W_Max, "should be in sync" );
       for ( size_t n = 0; n < ORC_W_Max; n++ )
       {
@@ -510,7 +510,7 @@ typedef struct _xf_rule {
          }
       }
 
-      if ( where == ORC_W_Invalid )
+      if ( where == ORC_W_Illegal )
       {
          wxLogDebug("%s(%u): unreckognized rule header '%s', skipping.",
                     filename.c_str(), nLine + 1, fmatch.c_str());
@@ -518,7 +518,7 @@ typedef struct _xf_rule {
          continue;
       }
 
-      MFDialogAction what = OAC_T_Invalid;
+      MFDialogAction what = OAC_T_Illegal;
       switch ( action )
       {
          case R_DISCARD:

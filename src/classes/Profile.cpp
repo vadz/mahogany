@@ -179,11 +179,11 @@ public:
    virtual bool HasGroup(const String & name) const
       { return FALSE; }
    /// delete the entry specified by path
-   virtual void DeleteEntry(const String& key)
-      { }
+   virtual bool DeleteEntry(const String& key)
+      { return FALSE; }
    /// delete the entry group specified by path
-   virtual void DeleteGroup(const String & path)
-      { }
+   virtual bool DeleteGroup(const String & path)
+      { return FALSE; }
    /// rename a group
    virtual bool Rename(const String& oldName, const String& newName)
       { return FALSE; }
@@ -313,8 +313,8 @@ public:
 
    virtual bool HasEntry(const String & key) const;
    virtual bool HasGroup(const String & name) const;
-   virtual void DeleteEntry(const String& key);
-   virtual void DeleteGroup(const String & path);
+   virtual bool DeleteEntry(const String& key);
+   virtual bool DeleteGroup(const String & path);
    virtual bool Rename(const String& oldName, const String& newName);
 
    virtual const String GetName(void) const { return m_ProfileName;}
@@ -886,7 +886,7 @@ ProfileImpl::Rename(const String& oldName, const String& newName)
    return ms_GlobalConfig->RenameGroup(oldName, newName);
 }
 
-void
+bool
 ProfileImpl::DeleteEntry(const String& key)
 {
    PCHECK();
@@ -895,10 +895,10 @@ ProfileImpl::DeleteEntry(const String& key)
    if ( !m_ProfilePath.IsEmpty() )
        root  << '/' << m_ProfilePath;
    ms_GlobalConfig->SetPath(root);
-   ms_GlobalConfig->DeleteEntry(key);
+   return ms_GlobalConfig->DeleteEntry(key);
 }
 
-void
+bool
 ProfileImpl::DeleteGroup(const String & path)
 {
    PCHECK();
@@ -907,7 +907,7 @@ ProfileImpl::DeleteGroup(const String & path)
    if ( !m_ProfilePath.IsEmpty() )
        root  << '/' << m_ProfilePath;
    ms_GlobalConfig->SetPath(root);
-   ms_GlobalConfig->DeleteGroup(path);
+   return ms_GlobalConfig->DeleteGroup(path);
 }
 
 String

@@ -136,9 +136,9 @@ public:
    /// return true if the group exists
    virtual bool HasGroup(const String & name) const = 0;
    /// delete the entry specified by path
-   virtual void DeleteEntry(const String& key) = 0;
+   virtual bool DeleteEntry(const String& key) = 0;
    /// delete the entry group specified by path
-   virtual void DeleteGroup(const String & path) = 0;
+   virtual bool DeleteGroup(const String & path) = 0;
    /// rename a group
    virtual bool Rename(const String& oldName, const String& newName) = 0;
    /// return the name of the profile

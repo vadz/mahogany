@@ -37,7 +37,9 @@ struct MFDialogComponent
    bool ReadSettings(String *str);
    /// writes settings to a string
    String WriteSettings();
-   
+   /// attempt to parse filter rule string
+   bool ReadSettingsFromRule(String & str);
+
    /// Writes a rule
    String WriteTest();
 
@@ -99,19 +101,90 @@ MFDialogComponent::WriteSettings(void)
                            (int) m_Target);
 }
 
+static
+const char * ORC_T_Names[] =
+{
+   "1", // ORC_T_Always = 0,
+   "matchi(", // ORC_T_Match,
+   "matchi(", // ORC_T_Contains,
+   "match(", // ORC_T_MatchC,
+   "contains(", // ORC_T_ContainsC,
+   "matchregex(", // ORC_T_MatchRegExC,
+   "size() > ", // ORC_T_LargerThan,
+   "size() < ", // ORC_T_SmallerThan,
+   "(now()-date()) > ", // ORC_T_OlderThan,
+   "(now()-date()) < ", // ORC_T_NewerThan,
+   "isspam()", // ORC_T_IsSpam,
+   "python(", // ORC_T_Python,
+   "matchregexi(", // ORC_T_MatchRegEx,
+   "score() > ", // ORC_T_ScoreAbove,
+   "score() < ", // ORC_T_ScoreBelow,
+   NULL
+};
+
+/// this array tells us if the tests need arguments
+#define ORC_F_NeedsTarget   0x01
+#define ORC_F_NeedsArg      0x02
+
+static unsigned char ORC_T_Flags[] =
+{
+   0, // ORC_T_Always = 0,
+      ORC_F_NeedsTarget|ORC_F_NeedsArg, // ORC_T_Match,
+      ORC_F_NeedsTarget|ORC_F_NeedsArg, // ORC_T_Contains,
+      ORC_F_NeedsTarget|ORC_F_NeedsArg, // ORC_T_MatchC,
+      ORC_F_NeedsTarget|ORC_F_NeedsArg, // ORC_T_ContainsC,
+      ORC_F_NeedsTarget|ORC_F_NeedsArg, // ORC_T_MatchRegExC,
+      ORC_F_NeedsArg, // ORC_T_LargerThan,
+      ORC_F_NeedsArg, // ORC_T_SmallerThan,
+      ORC_F_NeedsArg, // ORC_T_OlderThan,
+      ORC_F_NeedsArg, // ORC_T_NewerThan,
+      0, // ORC   _T_IsSpam,
+      ORC_F_NeedsArg, // ORC_T_Python,
+      ORC_F_NeedsTarget|ORC_F_NeedsArg, // ORC_T_MatchRegEx,
+      ORC_F_NeedsArg, // ORC_T_ScoreAbove,
+      ORC_F_NeedsArg, // ORC_T_ScoreBelow
+      };
+
+static
+const char * ORC_W_Names[] =
+{
+   "subject()", "header()", "from()", "body()",
+      "message()", "to()", "header(\"Sender\")",
+      NULL
+};
+
+static const char * OAC_T_Names[] = 
+{
+   "delete(", "copy(", "move(", "expunge(",
+      "message(", "log(", "python(", "addscore(",
+      "setcolour(", "uniq(", NULL
+};
+
+#define OAC_F_NeedsArg   0x01
+static unsigned char OAC_T_Flags[] =
+{
+   0, OAC_F_NeedsArg, OAC_F_NeedsArg, 0,
+      OAC_F_NeedsArg, OAC_F_NeedsArg, OAC_F_NeedsArg, OAC_F_NeedsArg,
+      OAC_F_NeedsArg, 0
+};
+
 String
 MFDialogComponent::WriteTest(void)
 {
+   ASSERT( WXSIZEOF(ORC_T_Names) == ORC_T_Max + 1);
+   ASSERT( WXSIZEOF(ORC_T_Flags) == ORC_T_Max);
+   ASSERT( WXSIZEOF(ORC_W_Names) == ORC_W_Max + 1);
+
    String program;
    // This returns the bit to go into an if between the brackets:
    // if ( .............. )
    switch(m_Logical)
    {
    case ORC_L_Or: // OR:
-      program << "|";
+      program << '|';
       break;
    case ORC_L_And: // AND:
-      program << "&";
+      program << '&';
       break;
    case ORC_L_None:
       break;
@@ -122,86 +195,21 @@ MFDialogComponent::WriteTest(void)
    if(m_Inverted)
       program << '!';
          
-   bool needsTarget = true;
-   bool needsArgument = true;
-   switch(m_Test)
+   if(m_Test < 0  || m_Test >= ORC_T_Max)
    {
-   case ORC_T_Always:
-      needsTarget = false;
-      needsArgument = false;
-      program << '1'; // true
-      break;
-   case ORC_T_Match:
-      program << "matchi("; break;
-   case ORC_T_Contains:
-      program << "containsi("; break;
-   case ORC_T_MatchC:
-      program << "match("; break;
-   case ORC_T_ContainsC:
-      program << "contains("; break;
-   case ORC_T_MatchRegExC:
-      program << "matchregex("; break;
-   case ORC_T_MatchRegEx:
-      program << "matchregexi("; break;
-   case ORC_T_Python:
-      program << "python(";
-      needsTarget = false;
-      break;
-   case ORC_T_LargerThan:
-   case ORC_T_SmallerThan:
-   case ORC_T_OlderThan:
-   case ORC_T_ScoreAbove:
-   case ORC_T_ScoreBelow:
-      needsArgument = true;
-      needsTarget = false;
-      switch(m_Test)
-      {
-      case ORC_T_ScoreAbove:
-         program << "score() > "; break;
-      case ORC_T_ScoreBelow:
-         program << "score() < "; break;
-      case ORC_T_LargerThan:
-         program << "size() > "; break;
-      case ORC_T_SmallerThan:
-         program << "size() < "; break;
-      case ORC_T_OlderThan:
-         program << "(date()-now()) > "; break;
-      case ORC_T_NewerThan:
-         program << "(date()-now()) < "; break;
-      default:
-         ;
-      }
-      break;
-   case ORC_T_IsSpam:
-      program << "isspam()";
-      needsTarget = false;
-      needsArgument = false;
-      break;
-   default:
-      wxASSERT_MSG(0,"unknown rule"); // FIXME: give meaningful error message
+      ASSERT_MSG(0, "Illegal test - must not happen");
+      return "";
    }
+   
+   bool needsTarget = ORC_T_Flags[m_Test] & ORC_F_NeedsTarget;
+   bool needsArgument = ORC_T_Flags[m_Test] & ORC_F_NeedsArg;
+   program << ORC_T_Names[m_Test];
    if(needsTarget)
    {
-      switch(m_Target)
-      {
-      case ORC_W_Subject:
-         program << "subject()"; break;
-      case ORC_W_Header:
-         program << "header()"; break;
-      case ORC_W_From:
-         program << "from()"; break;
-      case ORC_W_Body:
-         program << "body()"; break;
-      case ORC_W_Message:
-         program << "message()"; break;
-      case ORC_W_To:
-         program << "to()"; break;
-      case ORC_W_Sender:
-         program << "header(\"Sender\")"; break;
-      case ORC_W_Invalid:
-      case ORC_W_Max:
-         ASSERT(0); // must not happen
-      };
+      if(m_Target != ORC_W_Illegal && m_Target < ORC_W_Max)
+         program << ORC_W_Names[ m_Target ];
+      else
+      { ASSERT_MSG(0,"This must not happen!"); return ""; }
    }
    if(needsTarget && needsArgument)
       program << ',';
@@ -213,6 +221,84 @@ MFDialogComponent::WriteTest(void)
       program << ')'; // end of function call
    program << ')';
    return program;
+}
+
+bool
+MFDialogComponent::ReadSettingsFromRule(String & rule)
+{
+   ASSERT( WXSIZEOF(ORC_T_Names) == ORC_T_Max + 1);
+   ASSERT( WXSIZEOF(ORC_T_Flags) == ORC_T_Max);
+   ASSERT( WXSIZEOF(ORC_W_Names) == ORC_W_Max + 1);
+
+   const char *cptr = rule.c_str();
+
+   if(*cptr == '|')
+   {
+      m_Logical = ORC_L_Or;
+      cptr++;
+   }
+   else if(*cptr == '&')
+   {
+      m_Logical = ORC_L_And;
+      cptr++;
+   }
+   else
+      m_Logical = ORC_L_None;
+   
+   if(*cptr++ != '(')
+      return FALSE;
+
+   if(*cptr == '!')
+   {
+      m_Inverted = TRUE;
+      cptr++;
+   }
+   else
+      m_Inverted = FALSE;
+   // now we need to find the test to be applied:
+   m_Test = ORC_T_Illegal;
+   for(size_t i = 0; ORC_T_Names[i]; i++)
+      if(strncmp(cptr, ORC_T_Names[i], strlen(ORC_T_Names[i])) == 0)
+      {
+         cptr += strlen(ORC_T_Names[i]);
+         m_Test = (MFDialogTest) i;
+         break;
+      }
+   if(m_Test == ORC_T_Illegal)
+      return FALSE;
+   bool needsTarget = ORC_T_Flags[m_Test] & ORC_F_NeedsTarget;
+   bool needsArgument = ORC_T_Flags[m_Test] & ORC_F_NeedsArg;
+   m_Target = ORC_W_Illegal;
+   if(needsTarget)
+   {
+      for(size_t i = 0; ORC_W_Names[i]; i++)
+         if(strncmp(cptr, ORC_W_Names[i], strlen(ORC_W_Names[i])) == 0)
+         {
+            m_Target = (MFDialogTarget) i;
+            break;
+         }
+      if(m_Target == ORC_W_Illegal)
+         return FALSE;
+   }
+   // comma between target and argument:
+   if(needsTarget && needsArgument
+      && *cptr++ != ',')
+      return FALSE;
+   
+   m_Argument = "";
+   if(needsArgument)
+   {
+      if(*cptr != '"') return FALSE;
+      String tmp = *cptr;
+      bool success;
+      m_Argument = strutil_readString(tmp, &success);
+      if(! success) return FALSE;
+   }
+   if(*cptr++ != ')')
+      return FALSE;
+   // assing remaining bit
+   rule = cptr;
+   return TRUE;
 }
 
 #include <wx/dynarray.h>
@@ -303,7 +389,10 @@ public:
    virtual String WriteRule(void) const;
 
    virtual bool operator==(const MFDialogSettings& other) const;
-   
+
+   /// attempt to parse filter rule string
+   bool ReadSettingsFromRule(const String & str);
+
    bool ReadSettings(const String & str);
    String WriteSettings(void) const;
    String WriteActionSettings(void) const;
@@ -338,22 +427,89 @@ MFDialogSettingsImpl::operator==(const MFDialogSettings& o) const
           m_ActionArgument == other.m_ActionArgument;
 }
 
+#define MATCH_FAIL(what) \
+   if( strncmp(cptr, what, strlen(what)) == 0) \
+     cptr += strlen(what); \
+   else \
+     return FALSE \
+
+String
+MFDialogSettingsImpl::WriteAction(void) const
+{
+   String program;
+   if(m_Action < 0 || m_Action >= OAC_T_Max)
+   {
+      ASSERT_MSG(0,"illegal action - must not happen");
+      return "";
+   }
+   bool needsArgument = OAC_T_Flags[m_Action] & OAC_F_NeedsArg;
+   program << OAC_T_Names[m_Action];
+   if(needsArgument)
+      program << '"' << m_ActionArgument << '"';
+   program << ");";
+   return program;
+}
+
+bool
+MFDialogSettingsImpl::ReadSettingsFromRule(const String & rule)
+{
+   const char *cptr = rule.c_str();
+   bool rc;
+
+   MATCH_FAIL("if("); // now inside first test
+
+   String tmp = cptr;
+   do
+   {
+      MFDialogComponent c;
+      rc = c.ReadSettingsFromRule(tmp);
+      if(rc)
+         m_Tests.Add(c);
+   }while(rc);
+   if(m_Tests.Count() == 0)
+      return FALSE; // could not find any test
+   cptr = tmp.c_str();
+
+   MATCH_FAIL("){");
+
+   for(size_t i = 0; OAC_T_Names[i] ; i++)
+      if(strncmp(cptr, OAC_T_Names[i], strlen(OAC_T_Names[i])) == 0)
+      {
+         cptr += strlen(OAC_T_Names[i]);
+         m_Action = (MFDialogAction) i;
+         break;
+      }
+   bool needsArgument = OAC_T_Flags[m_Action] & OAC_F_NeedsArg;
+   if(needsArgument)
+   {
+      if(*cptr != '"') return FALSE;
+      tmp = cptr;
+      m_ActionArgument = strutil_readString(tmp, &rc);
+      if(! rc)
+         return FALSE;
+   }
+   else
+      m_ActionArgument = "";
+   return TRUE; // we    made it
+}
+
 bool
 MFDialogSettingsImpl::ReadSettings(const String & istr)
 {
    String str = istr;
    bool rc;
 
-   size_t n = strutil_readNumber(str, &rc);
-   if(n < 1)
-      return FALSE;
-   for(size_t i = 0; i < n && rc; i++)
+   long n = strutil_readNumber(str, &rc);
+   for(long i = 0; i < n && rc ; i++)
    {
       MFDialogComponent c;
       rc = c.ReadSettings(&str);
       if(rc)
          m_Tests.Add(c);
    }
+   if(m_Tests.Count() == 0)
+      return FALSE;
+   
    // now read the action settings:
    long a = strutil_readNumber(str, &rc);
    if(! rc) return FALSE;
@@ -374,46 +530,6 @@ MFDialogSettingsImpl::WriteSettings(void) const
 }
    
 String
-MFDialogSettingsImpl::WriteAction(void) const
-{
-   String program;
-   bool needsArgument = true;
-   switch(m_Action)
-   {
-   case OAC_T_Delete:
-      program << "delete("; needsArgument = false; break;
-   case OAC_T_CopyTo:
-      program << "copy("; break;
-   case OAC_T_MoveTo:
-      program << "move("; break;
-   case OAC_T_Expunge:
-      program << "expunge("; needsArgument = false; break;
-   case OAC_T_MessageBox:
-      program << "message("; break;
-   case OAC_T_LogEntry:
-      program << "log("; break;
-   case OAC_T_Python:
-      program << "python("; break;
-   case OAC_T_ChangeScore:
-      program << "addscore("
-              << m_ActionArgument;
-      needsArgument = false;
-      break;
-   case OAC_T_SetColour:
-      program << "setcolour("; break;
-   case OAC_T_Uniq:
-      program << "uniq("; needsArgument = false; break;
-   case OAC_T_Invalid:
-   case OAC_T_Max:
-      ASSERT_MSG(0,"Invalid action type");
-   }
-   if(needsArgument)
-      program << '"' << m_ActionArgument << '"';
-   program << ");";
-   return program;
-}
-
-String
 MFDialogSettingsImpl::WriteActionSettings(void) const
 {
    return String::Format("%d \"%s\"",
@@ -426,7 +542,7 @@ MFDialogSettingsImpl::WriteRule(void) const
 {
    ASSERT(m_Tests.Count() > 0);
    String program = "if(";
-
+   
    for(size_t i = 0; i < m_Tests.Count(); i++)
       program << m_Tests[i].WriteTest();
    
@@ -496,11 +612,22 @@ protected:
       {
          m_Profile = p;
          m_Name = p->readEntry("Name", "");
-         m_SettingsStr = p->readEntry("Settings", "");
-         if ( !m_SettingsStr )
-            m_Rule = p->readEntry("Rule", "");
          m_Settings = NULL;
-         m_dirty = false;
+         // we now prefer to parse the filter code:
+         m_Rule = p->readEntry("Rule", "");
+         if( m_Rule[0] )
+         {
+            MFDialogSettingsImpl *control = new MFDialogSettingsImpl;
+            bool rc = control->ReadSettingsFromRule(m_Rule);
+            control->DecRef();
+            if(rc)
+               m_SettingsStr = ""; // don't need them
+            else
+               m_SettingsStr = p->readEntry("Settings", "");
+         }
+         else
+            m_SettingsStr = p->readEntry("Settings", "");
+            m_dirty = false;
       }
    
    virtual ~MFilterFromProfile()
@@ -509,17 +636,16 @@ protected:
          {
             // write the values to the profile
             m_Profile->writeEntry("Name", m_Name);
+#if 0
             if ( m_Settings )
             {
                m_Profile->writeEntry("Settings", m_Settings->WriteSettings());
             }
-            else
-            {
-               m_Profile->DeleteEntry("Settings");
-               m_Profile->writeEntry("Rule", m_Rule);
-            }
+#endif
+            // we now always write code:
+            (void) m_Profile->DeleteEntry("Settings");
+            m_Profile->writeEntry("Rule", m_Rule);
          }
-
          SafeDecRef(m_Settings);
          m_Profile->DecRef();
       }
@@ -527,6 +653,7 @@ protected:
 private:
    void UpdateSettings(void)
       {
+         // old style settings: 
          if ( m_SettingsStr.Length() != 0 )
          {
             // parse the settings string
@@ -537,8 +664,19 @@ private:
                m_Settings->DecRef();
                m_Settings = NULL;
             }
+            else
+               m_Rule = m_Settings->WriteRule();
          }
-         //else: we don't have any setting string at all
+         else // no settings stored but rule code:
+         {
+            m_Settings = new MFDialogSettingsImpl;
+            bool rc = m_Settings->ReadSettingsFromRule(m_Rule);
+            if(!rc)
+            {
+               m_Settings->DecRef();
+               m_Settings = NULL;
+            }
+         }
       }
 
    Profile *m_Profile;
@@ -561,9 +699,15 @@ MFilter::CreateFromProfile(const String &name)
 bool
 MFilter::DeleteFromProfile(const String& name)
 {
-   FAIL_MSG("Karsten, please implement this");
-
-   return false;
+   // get parent of all filters
+   Profile *p = Profile::CreateFilterProfile("");
+   bool rc = FALSE;
+   if(p)
+   {
+      rc = p->DeleteGroup(name);
+      p->DecRef();
+   }
+   return rc;
 }
 
 // ----------------------------------------------------------------------------

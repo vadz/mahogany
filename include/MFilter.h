@@ -18,7 +18,10 @@ class WXDLLEXPORT wxWindow;
 /**@name Some commonly used enums for the different parts of a simple
    dialog-constructed filter rule. */
 //@{
-/// Enum holding the different possible matching filter actions:
+/** Enum holding the different possible matching filter actions.
+    Do not change the order of these without changing MFilter.cpp
+    where corresponding strings are defined.
+*/
 enum MFDialogTest
 {
    ORC_T_Always = 0,
@@ -36,12 +39,13 @@ enum MFDialogTest
    ORC_T_MatchRegEx,
    ORC_T_ScoreAbove,
    ORC_T_ScoreBelow,
-   ORC_T_Max
+   ORC_T_Illegal,// illegal must not occur
+   ORC_T_Max = ORC_T_Illegal
 };
    
 enum MFDialogTarget
 {
-   ORC_W_Invalid = -1,
+   ORC_W_Illegal = -1,
    ORC_W_Subject = 0,
    ORC_W_Header,
    ORC_W_From,
@@ -54,7 +58,7 @@ enum MFDialogTarget
 
 enum MFDialogAction
 {
-   OAC_T_Invalid = -1,
+   OAC_T_Illegal = -1,
    OAC_T_Delete = 0,
    OAC_T_CopyTo,
    OAC_T_MoveTo,
