@@ -949,7 +949,7 @@ case "$MAKE_PISOCKLIB" in '') ;; *)
 	elif test -f $srcdir/extra/src/libmal/Makefile.in \
 		-a "$SOURCEDIR" != "$BUILDDIR"
 	then	AC_MSG_RESULT(old-style libmal not supported in separate build tree)
-	else	AC_MSG_RESULT(found - MAL synch for PalmOS activiated)
+	else	AC_MSG_RESULT(found - MAL synch for PalmOS activated)
 		MAKE_HAVE_LIBMAL="HAVE_LIBMAL=yes"
 	fi
 esac
