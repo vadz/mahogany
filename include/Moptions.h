@@ -1838,13 +1838,8 @@ extern const MOption MP_AWAY_STATUS;
 
 /// Default names for the SSL and crypto libraries
 #ifdef OS_UNIX
-   #ifdef OS_LINUX
-      #define MP_SSL_DLL_SSL_DEFVAL   "libssl.so.0"
-      #define MP_SSL_DLL_CRYPTO_DEFVAL "libcrypto.so.0"
-   #else // !Linux
-      #define MP_SSL_DLL_SSL_DEFVAL   "libssl.so"
-      #define MP_SSL_DLL_CRYPTO_DEFVAL "libcrypto.so"
-   #endif
+   #define MP_SSL_DLL_SSL_DEFVAL   "libssl.so"
+   #define MP_SSL_DLL_CRYPTO_DEFVAL "libcrypto.so"
 #elif defined(OS_WIN)
    #define MP_SSL_DLL_SSL_DEFVAL   "ssleay32.dll"
    #define MP_SSL_DLL_CRYPTO_DEFVAL "libeay32.dll"
