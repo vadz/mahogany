@@ -5,6 +5,8 @@ $Id$
 *** things to fix/implement next ***
 
 - wxOptionsDlg: two conversions from (long) to (int) .... is that ok?
+  + should have "restore defaults", would be nice to be able to do it for
+    one setting only (and not for all of them which is trivial)
 
 - wxLayout:
   + fix wxGTK postscript printing which is pretty broken, compare with wxXt?
