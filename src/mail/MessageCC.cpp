@@ -205,6 +205,12 @@ MessageCC::Address(String &name, MessageAddressType type) const
    case MAT_FROM:
       addr = envelope->from;
       break;
+   case MAT_TO:
+      addr = envelope->to;
+      break;
+   case MAT_CC:
+      addr = envelope->cc;
+      break;
    case MAT_SENDER:
       addr = envelope->sender;
       break;

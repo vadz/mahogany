@@ -33,7 +33,7 @@
 
 #   include "MApplication.h"
 #   include "gui/wxMApp.h"
-
+#   include "MHelp.h"
 #   include <ctype.h>
 #endif //USE_PCH
 
@@ -2001,7 +2001,7 @@ void wxAdbEditFrame::DoPaste()
 
 void wxAdbEditFrame::OnHelp(wxCommandEvent&)
 {
-  NOT_IMPLEMENTED;
+   mApplication->Help(MH_ADB_FRAME, this);
 }
 
 void wxAdbEditFrame::OnTreeSelect(wxTreeEvent& event)

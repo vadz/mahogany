@@ -378,8 +378,9 @@ protected:
    void UpdateTimeoutValues(void);
    void SetType(FolderType type) { m_folderType = type; }
 
-   /* Handles the mm_overview_header callback on a per folder basis. */
-   void OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov);
+   /* Handles the mm_overview_header callback on a per folder basis.
+      It returns 0 to abort overview generation, 1 to continue.*/
+   int OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov);
    /// closes the mailstream
    void Close(void);
 
@@ -538,7 +539,7 @@ public:
    static void mm_fatal(char *str);
 
    /* Handles the mm_overview_header callback on a per folder basis. */
-   static void OverviewHeader (MAILSTREAM *stream, unsigned long uid, OVERVIEW *ov);
+   static int OverviewHeader (MAILSTREAM *stream, unsigned long uid, OVERVIEW *ov);
 
 //@}
 private:

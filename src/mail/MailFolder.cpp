@@ -263,10 +263,13 @@ MailFolder::ReplyMessage(class Message *msg,
    String cc;
    if(flags & REPLY_FOLLOWUP) // group reply
    {
-      String from = msg->Address(name, MAT_FROM);
+      String addr = msg->Address(name, MAT_FROM);
       msg->GetHeaderLine("CC", cc);
-      if(from != email)
-         email << ", " << from;
+      if(! email.Contains(addr))
+         email << ", " << addr;
+      addr = msg->Address(name, MAT_TO);
+      if(! email.Contains(addr))
+         email << ", " << addr;
    }
    cv->SetAddresses(email,cc);
 

@@ -1244,7 +1244,8 @@ static wxString DateFormatsLabels[] =
    gettext_noop("99 (year)"),gettext_noop("1999 (year)"),gettext_noop("24 (hour)"),
    gettext_noop("12 (hour)"),"am/pm", gettext_noop("59 (minutes)"),
    gettext_noop("29 (seconds)"), "EST (timezone)",
-   gettext_noop("Default format")
+   gettext_noop("Default format including time"),
+   gettext_noop("Default format without time")
 };
 
 static wxString DateFormats[] =
@@ -1254,7 +1255,8 @@ static wxString DateFormats[] =
    "%y","%Y","%I",
    "%H","%p","%M",
    "%S","%Z",
-   "%c"
+   "%c",
+   "%x"
 };
 
 static const int NUM_DATE_FMTS  = WXSIZEOF(DateFormats);
@@ -1267,7 +1269,15 @@ class wxDateTextCtrl : public wxTextCtrl
 public:
    wxDateTextCtrl(wxWindow *parent) : wxTextCtrl(parent,-1)
       {
-         m_menu = new wxMenu;
+#ifndef wxMENU_TEAROFF
+   ///FIXME WXWIN-COMPATIBILITY
+         m_menu = new wxMenu(); 
+#else
+   int style = 0;
+   if(READ_APPCONFIG(MP_TEAROFF_MENUS) != 0)
+      style = wxMENU_TEAROFF;
+   m_menu = new wxMenu("", style); 
+#endif
          m_menu->SetTitle(_("Format Specifiers:"));
          for ( int n = 0; n < NUM_DATE_FMTS;n++ )
             m_menu->Append(n, _(DateFormatsLabels[n]));

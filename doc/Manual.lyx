@@ -1,4 +1,4 @@
-#This file was created by <karsten> Tue Jul 13 09:46:07 1999
+#This file was created by <karsten> Sat Jul 24 22:44:52 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -2935,6 +2935,20 @@ This allows you to chose from a list of the most commonly viewed header
  By default, To:, From:, Subject: and Date: are shown.
  Note that you can always view the complete header information or the raw
  message text, no matter what you chose here.
+\layout Itemize
+
+
+\series bold 
+Configure Date Format
+\series default 
+
+\newline 
+This will pop up a sub-dialog (
+\begin_inset LatexCommand \ref{date_format_dialog}
+
+\end_inset 
+
+) for setting the format for displaying dates.
 \layout Subsubsection
 
 Addressbook page_4104_
@@ -3354,6 +3368,144 @@ Path where to find AFM files
 To properly scale printing under Unix, Mahogany needs access to a set of
  AFM files.
  The searchpath where to look for them can be modified here.
+\layout Subsection
+
+Some Other Dialogs You May Encounter
+\layout Subsubsection
+
+Date Format_4220_
+\layout Standard
+
+
+\begin_inset LatexCommand \label{date_format_dialog}
+
+\end_inset 
+
+The dates of messages for the list of headers can be displayed in a format
+ of your choice.
+ The same format is used for inserting the current date in templates when
+ writing messages.
+ The format of the date is controlled by a list of format specifiers (as
+ accepted by the 
+\family typewriter 
+strftime()
+\family default 
+ function in the c-library).
+ Most of the available format specifiers are available via a little popup
+ menu which appears if you press the right-mouse button in the input field.
+\layout Paragraph
+
+Display time in GMT/UST
+\layout Standard
+
+If you tick this box, all times will be displayed in Greenwich Mean Time
+ (= Universal Standard Time) rather than local time.
+ If not checked, all dates and times will be displayed in your own timezone.
+ 
+\shape italic 
+Note that the time and date displayed is not the local time in the sender's
+ timezone but the time it was in your local timezone when the message was
+ sent.
+\layout Subsubsection
+
+Message Sorting Dialog_4210_
+\layout Standard
+
+Here you can choose the criteria for sorting mailfolder listings.
+ If you want to use message score as a sort criterium, you need to have
+ a plugin module loaded which provides the 
+\begin_inset Quotes eld
+\end_inset 
+
+Scoring
+\begin_inset Quotes erd
+\end_inset 
+
+ interface.
+ At time of writing no such plugin is available, it will appear soon, though.
+\layout Paragraph
+
+Use Threading
+\layout Standard
+
+If you tick this box, all messages will be threaded, i.e.
+ sorted in hierarchical orders, with replies following earlier messages
+ in the same discussion thread.
+ Very useful for newsgroups.
+ -- Currently not yet implemented! --
+\layout Paragraph
+
+Re-Sort on status change
+\layout Standard
+
+The effect of this option feels a bit strange at first and you might not
+ like it.
+ If selected, the messages will be re-sorted each time the status of a message
+ changes.
+ If you sort messages by message status and delete a message, it will immediatel
+y drop to the bottom of the list.
+ Useful to always maintain a strict sorting order, but can be confusing.
+\layout Subsection
+
+Mahogany Plugin Modules
+\layout Standard
+
+
+\begin_inset LatexCommand \label{Modules}
+
+\end_inset 
+
+Mahogany can load plugin modules at runtime to extend its functionality.
+ Currently we are working on plugins to supply PGP/GPG encryption support
+ and a scoring engine for sorting mailfolder listings.
+ A plugin to use IBM's ViaVoice will be started work on as soon as the Debian/Li
+nux 
+\begin_inset Quotes eld
+\end_inset 
+
+Potato
+\begin_inset Quotes erd
+\end_inset 
+
+ release becomes stable.
+\layout Standard
+
+Generally, if you want to write an extension for Mahogany without using
+ Python (which we hope to turn into a plugin, too, soon), you can do that
+ very easily by writing it as a plugin module.
+ Get in touch with the developers and we will show you how to do so.
+\layout Subsubsection
+
+The Plugin Module Configuration Dialog_4200_
+\layout Standard
+
+This dialog allows you to decide which plugins get loaded at program start.
+ At present, modules don't get loaded/unloaded at runtime, so you need to
+ restart Mahogany for these options to take effect.
+ On the top left you see a list of all modules that Mahogany has found in
+ either the global 
+\family typewriter 
+modules
+\family default 
+ directory or in your local directory (
+\family typewriter 
+$HOME/.M/modules/
+\family default 
+).
+ The window below shows some information about the module currently selected
+ in the list, such as the name, author, a description of what it does and
+ the name of the interface it provides.
+ The interface would e.g.
+ be 
+\begin_inset Quotes eld
+\end_inset 
+
+Scoring
+\begin_inset Quotes erd
+\end_inset 
+
+ for the plugin providing the functionality for scoring messages and is
+ used by the program to find the right plugin for a given operation.
 \layout Section
 
 The Address Database_3000_
@@ -3362,9 +3514,6 @@ The Address Database_3000_
 \end_inset 
 
 
-\layout Subsection
-
-Introduction
 \layout Standard
 
 Mahogany has a built-in address book system with flexible support for different
@@ -3401,6 +3550,9 @@ This is Mahogany's own address book format, offering you the maximum set
  address book format used by the address auto-collection mechanisms, which
  uses different groups for address entries collected from different mail
  folders.
+\layout Subsection
+
+The Address Book Editor_3200_
 \layout Standard
 
 To edit the address book, open the address book editor.

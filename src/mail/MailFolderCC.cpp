@@ -40,6 +40,7 @@
 #define QPRINT_MIDDLEMARKER_U "?Q?"
 #define QPRINT_MIDDLEMARKER_L "?q?"
 
+typedef int (*overview_x_t) (MAILSTREAM *stream,unsigned long uid,OVERVIEW *ov);
 
 /*
  * Small function to translate c-client status flags into ours.
@@ -1027,8 +1028,9 @@ MailFolderCC::GetNextMapEntry(StreamConnectionList::iterator &i)
 
 extern "C"
 {
-   static void mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW *ov);
+   static int mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW *ov);
    void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t ofn);
+   void mail_fetch_overview_x (MAILSTREAM *stream,char *sequence,overview_x_t ofn);
 };
 
 
@@ -1041,7 +1043,14 @@ MailFolderCC::BuildListing(void)
    CHECK_DEAD_RC("Cannot access closed folder\n'%s'.", NULL);
 
    if ( m_FirstListing )
-      m_NumOfMessages = m_MailStream->nmsgs;
+   {
+      // Hopefully this will only count really existing messages for
+      // NNTP connections.
+      if(GetType() == MF_NNTP)
+         m_NumOfMessages = m_MailStream->recent;
+      else
+         m_NumOfMessages = m_MailStream->nmsgs;
+   }
 
    if(m_Listing && m_NumOfMessages > m_OldNumOfMessages)
    {
@@ -1119,7 +1128,7 @@ MailFolderCC::BuildListing(void)
          sequence << ":*";
    }
 
-   mail_fetch_overview(m_MailStream, (char *)sequence.c_str(), mm_overview_header);
+   mail_fetch_overview_x(m_MailStream, (char *)sequence.c_str(), mm_overview_header);
 
    if ( m_ProgressDialog != (MProgressDialog *)1 )
       delete m_ProgressDialog;
@@ -1134,10 +1143,6 @@ MailFolderCC::BuildListing(void)
    m_NumOfMessages = m_BuildNextEntry;
    m_Listing->SetCount(m_NumOfMessages);
 
-   /*** FROM HERE ON, WE NEED TO BE RECURSION SAFE!!! ***/
-   /* Sending events can cause calls to this function, so we need to
-      be reentrant.
-   */
    m_FirstListing = false;
    m_BuildListingSemaphore = false;
 
@@ -1145,7 +1150,7 @@ MailFolderCC::BuildListing(void)
    return m_Listing;
 }
 
-void
+int
 MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
 {
    ASSERT(m_Listing);
@@ -1154,20 +1159,20 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
       overflowing the array.
    */
    if(m_BuildNextEntry >= m_NumOfMessages)
-      return;
+      return 0;
 
    // This is 1 if we don't want any further updates.
    if(m_ProgressDialog && m_ProgressDialog != (MProgressDialog *)1)
    {
       if(! m_ProgressDialog->Update( m_BuildNextEntry ))
-         return;
+         return 0;
    }
 
    // This seems to occasionally happen. Some race condition?
    if(m_BuildNextEntry >= m_Listing->Count())
    {
       m_NumOfMessages = m_Listing->Count();
-      return;
+      return 0;
    }
    
    HeaderInfoCC & entry = *(HeaderInfoCC *)(*m_Listing)[m_BuildNextEntry];
@@ -1183,7 +1188,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
 
    /* For NNTP, do not show deleted messages: */
    if(m_folderType == MF_NNTP && elt->deleted)
-      return;
+      return 1; // ignore but continue
 
    // DATE
    mail_parse_date (&selt,ov->date);
@@ -1236,6 +1241,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    // This is 1 if we don't want any further updates.
    if(m_ProgressDialog && m_ProgressDialog != (MProgressDialog *)1)
       m_ProgressDialog->Update( m_BuildNextEntry - 1 );
+   return 1;
 }
 
 
@@ -1708,12 +1714,12 @@ MailFolderCC::RequestUpdate(void)
 }
 
 /* Handles the mm_overview_header callback on a per folder basis. */
-void
+int
 MailFolderCC::OverviewHeader (MAILSTREAM *stream, unsigned long uid, OVERVIEW *ov)
 {
    MailFolderCC *mf = MailFolderCC::LookupObject(stream);
    ASSERT(mf);
-   mf->OverviewHeaderEntry(uid, ov);
+   return mf->OverviewHeaderEntry(uid, ov);
 }
 
 
@@ -1758,6 +1764,44 @@ MailFolderCC::ListFolders(const String &host,
 
 extern "C"
 {
+
+/* Mail fetch message overview
+ * Accepts: mail stream
+ *	    UID sequence to fetch
+ *	    pointer to overview return function
+
+ -- Modified to evaluate "continue" return code of callback to allow
+    user to abort it.
+ -- Also modified to fetch messages backwards, useful if aborted.
+ */
+
+void mail_fetch_overview_x (MAILSTREAM *stream,char *sequence,overview_x_t ofn)
+{
+  if (stream->dtb && !(stream->dtb->overview &&
+		       (*stream->dtb->overview) (stream,sequence,(overview_t)ofn)) &&
+      mail_uid_sequence (stream,sequence) && mail_ping (stream)) {
+    MESSAGECACHE *elt;
+    ENVELOPE *env;
+    OVERVIEW ov;
+    unsigned long i;
+    ov.optional.lines = 0;
+    ov.optional.xref = NIL;
+    for (i = stream->nmsgs; i>= 1; i--)
+      if (((elt = mail_elt (stream,i))->sequence) &&
+	  (env = mail_fetch_structure (stream,i,NIL,NIL)) && ofn) {
+	ov.subject = env->subject;
+	ov.from = env->from;
+	ov.date = env->date;
+	ov.message_id = env->message_id;
+	ov.references = env->references;
+	ov.optional.octets = elt->rfc822_size;
+	if(! (*ofn) (stream,mail_uid (stream,i),&ov))
+           break;
+      }
+  }
+}
+
+   
 /* Mail fetch message overview using sequence numbers instead of UIDs!
  * Accepts: mail stream
  *    sequence to fetch (no-UIDs but sequence numbers)
@@ -1952,12 +1996,10 @@ mm_fatal(char *str)
 
 /* This callback needs to be processed immediately or ov will become
    invalid. */
-static void
+static int
 mm_overview_header (MAILSTREAM *stream,unsigned long uid, OVERVIEW *ov)
 {
-   if(mm_disable_callbacks)
-      return;
-   MailFolderCC::OverviewHeader(stream, uid, ov);
+   return MailFolderCC::OverviewHeader(stream, uid, ov);
 }
 
 } // extern "C"

@@ -8,37 +8,24 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
-9	KB	Implement functions to	enumerate profile sub-groups.
-	     !-> Is this still needed?	
-9	KB	Do we need FolderView/ComposeView profiles? 
-9	KB	When retrieving only N our of M messages, Mah. will
-		later say that there are M-N new messages :-(
-		BROKEN COMPLETELY NOW -- FIX IT!
-		CHECK ABORT BUTTON!
-		Add option to re-sort messages on status change.
-9	KB	Group-reply should use old To: field, too if not
-		identical to ourselves
-9	KB	Modify mail_fetch_overview() to work backwards.
-9	KB	ADB frame help button
-8	KB	Why is module not found at exit???
 9	KB	wxLayout editing glitches & cursor positioning bug
 		selections via keyboard still broken
 		speed up wxLayout scrollbar setting, *way* too slow
 		now
 		- deleting wxllist takes ages, calling MoveLines(,-1)
 		  recursively 
-6	KB	Implement functions to	enumerate profile sub-groups.
-	     !-> Is this still needed?	 YES
 
 8	VZ	AdbImort dialog under Windows lacks UpdateUI somewhere
 
 8	VZ	mh_parameters provokes a compile bug - what to do?
-
-5	KB	for NNTP only count unread/new messages
+		--> rewrite it in MailFolderCC.cpp like I did with the 
+		fetch_overview functions
 4	KB	Nicer icons: filetypes (GNOME?) and message/rfc822 and 
 		message view properties page --> rename to "Viewer?"
 		Rename "File" menu to "Messages" or "Program"?
 		Icon subdirectories GNOME/KDE?
+8	VZ	Opening NNTP folders suddenly asks for password - what 
+		happened?
 8	VZ?     After a dialog was opened (e.g. wxModulesDialog), the
 		app won't termiante but keeps running without windows.
 
@@ -75,16 +62,10 @@ $Id$
 *********************************************************************
 		Option to start up iconified.
 
-9	KB	Change/Finish ASMailFolder API for subscription management.
-		---> Add a "find text in folder" method, too, trivial.
-
-9	KB	Profile: add enumeration of entries for profile and
-		its subgroups
+9	KB	Add a "find text in folder" method, too, trivial.
 
 5	KB	forward text-only messages as text rather than rfc822
 4	KB	add threading
-8	VZ	make the message templates work: GUI suport for configuring them
-		and (many) more macros should be added.
 
 8		support of different charsets:
 		a) allow configuring them for outgoing messages
@@ -93,20 +74,23 @@ $Id$
 
 7	KB	Find all possible MT problems in MailFolder.cpp and
 		put mutexes around them.
-7	VZ	document the new properties dialog entries/pages, please
 	KB	which ones are undocumented? It seems like everything is there...
 
 7	KB	write more on tutorial bit in Manual.lyx
 6		simple HTML import for wxLayout
 6		threading via References header
-5		integrate wxHTML for help and HTML viewing
-6	VZ	Could you please add a file-browse button/dialog to
-		the folder selection dialog and modify its return
-		value to somehow indicate that a file rather than a
-		folder name was selected?
+5		integrate wxHTML for HTML viewing
+
+
+8	VZ	make the message templates work: GUI suport for configuring them
+		and (many) more macros should be added.
+7	VZ	document the new properties dialog entries/pages,
+		please - I've started extending the docs
+6	VZ	Could you please check the file-browse button/dialog to
+		the folder selection dialog?
 		I'll then add support for that to the Copy/Move
 		Messages functions. (KB)
-6	VZ	Could you add an ADB/export function, too? A
+3	VZ	Could you add an ADB/export function, too? A
 		"checklist" (however that thing was called) box to
 		choose the fields and their order and which separator
 		to use would be nice.
@@ -187,9 +171,12 @@ from 32bitsonline review:
 *********************************************************************
 * PRI	WHO	DESCRIPTION
 *********************************************************************
-
+5	KB	for NNTP only count unread/new messages
 7		test MH folders
+9	KB	Modify mail_fetch_overview() to work backwards.
 
+9	KB	Group-reply should use old To: field, too if not
+		identical to ourselves
 5	KB	properties dialog forgets IMAP mailbox name
 5	KB	check handling of missing hostnames,
 5	KB	network page

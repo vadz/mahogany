@@ -4,11 +4,9 @@
 ;
 ;
 ;
-; Some doc++ generated files:
-0    index.html                 ; Classes Index
-0    aindex.html                ; Alphabetic Classes Index 
-0    HIER.html                  ; Class Hierarchy; inheritance
+0    Manual/index.html          ; Help Index ; Contents
 ;
+-1   HackersGuide/index.html    ; Hacker's Guide; Hackers Guide
 ; Python interface help
 ;
-0 Python/index.html          ;Python: interface documentation
+-1 Python/index.html          ;Python: interface documentation

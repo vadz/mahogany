@@ -31,7 +31,7 @@
 // ----------------------------------------------------------------------------
 
 /// a type used by Address():
-enum MessageAddressType { MAT_FROM, MAT_SENDER, MAT_REPLYTO };
+enum MessageAddressType { MAT_FROM, MAT_SENDER, MAT_REPLYTO, MAT_TO, MAT_CC };
 
 /// a define to make scandoc work
 #define   MessageContentType Message::ContentType

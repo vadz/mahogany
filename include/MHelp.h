@@ -38,6 +38,7 @@
 #define MH_ADB_ADB           3001
 #define MH_ADB_BBDB          3002
 #define MH_ADB_USING         3100
+#define MH_ADB_FRAME         3200
 #define MH_OPAGE_COMPOSE     4100
 #define MH_OPAGE_MESSAGEVIEW 4101
 #define MH_OPAGE_IDENT       4102
