@@ -1312,9 +1312,8 @@ void wxFolderListCtrl::OnActivated(wxListEvent& event)
 {
    mApplication->UpdateAwayMode();
 
-   UIdType uid = GetUIdFromIndex(event.m_itemIndex);
-
-   if ( IsPreviewed(event.m_itemIndex) )
+   long item = event.m_itemIndex;
+   if ( IsPreviewed(item) )
    {
       // scroll down one line, go to the next unread if already at the end of
       // this one
@@ -1325,7 +1324,9 @@ void wxFolderListCtrl::OnActivated(wxListEvent& event)
    }
    else // do preview
    {
-      PreviewItem(event.m_itemIndex, uid);
+      UIdType uid = GetUIdFromIndex(item);
+
+      PreviewItem(item, uid);
    }
 }
 
