@@ -334,12 +334,13 @@ enum ConfigFields
    ConfigField_FolderViewIndentIfDummy,
 #endif // EXPERIMENTAL_JWZ_THREADING
    ConfigField_FolderViewSortMessagesBy,
-   ConfigField_FolderViewHeaders,
+   ConfigField_FolderViewHeaders, //"Configure columns to show..."
    ConfigField_FolderViewSizeUnits,
    ConfigField_FolderViewStatusHelp,
    ConfigField_FolderViewUpdateStatus,
    ConfigField_FolderViewStatusBarFormat,
-   ConfigField_FolderViewLast = ConfigField_FolderViewStatusBarFormat,
+   ConfigField_FolderViewPreviewDelay,
+   ConfigField_FolderViewLast = ConfigField_FolderViewPreviewDelay,
 
    // folder tree options
    ConfigField_FolderTreeFirst = ConfigField_FolderViewLast,
@@ -1049,7 +1050,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "dialog (i.e. $subject, $from, ...) in this string."),
                                                    Field_Message, -1 },
    { gettext_noop("&Use status bar"),              Field_Bool,    -1 },
-   { gettext_noop("&Status bar line format"),      Field_Text,    ConfigField_FolderViewUpdateStatus                     },
+   { gettext_noop("&Status bar line format"),      Field_Text,    ConfigField_FolderViewUpdateStatus },
+   { gettext_noop("Delay how many miliseconds before displaying message (please change to smth better;)"),      Field_Number | Field_Advanced, -1 },
 
    // folder tree
    { gettext_noop("Tree &background colour:"), Field_Color, -1 },
@@ -1421,6 +1423,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(), // status/title format help
    CONFIG_ENTRY(MP_FVIEW_STATUS_UPDATE),
    CONFIG_ENTRY(MP_FVIEW_STATUS_FMT),
+   CONFIG_ENTRY(MP_FVIEW_PREVIEW_DELAY),
 
    // folder tree
    CONFIG_ENTRY(MP_FOLDER_BGCOLOUR),

@@ -254,6 +254,7 @@ extern const MOption MP_FVIEW_UNREADCOLOUR;
 extern const MOption MP_FVIEW_FLAGGEDCOLOUR;
 extern const MOption MP_FVIEW_AUTONEXT_UNREAD_MSG;
 extern const MOption MP_FVIEW_AUTONEXT_UNREAD_FOLDER;
+extern const MOption MP_FVIEW_SIZE_FORMAT;
 extern const MOption MP_FVIEW_STATUS_UPDATE;
 extern const MOption MP_FVIEW_STATUS_FMT;
 extern const MOption MP_FVIEW_PREVIEW_DELAY;
@@ -286,7 +287,6 @@ extern const MOption MP_MSGS_REMOVE_LIST_PREFIX_GATHERING;
 extern const MOption MP_MSGS_REMOVE_LIST_PREFIX_BREAKING;
 #endif // regex/!regex
 
-extern const MOption MP_FVIEW_SIZE_FORMAT;
 extern const MOption MP_MSGS_SEARCH_CRIT;
 extern const MOption MP_MSGS_SEARCH_ARG;
 extern const MOption MP_BROWSER;
@@ -793,23 +793,23 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_MVIEW_FONT_NAME         "MViewFont"
 /// which font size
 #define   MP_MVIEW_FONT_SIZE_NAME         "MViewFontSize"
-// which foreground colour for the font
+/// which foreground colour for the font
 #define   MP_MVIEW_FGCOLOUR_NAME      "MViewFgColour"
-// which background colour for the font
+/// which background colour for the font
 #define   MP_MVIEW_BGCOLOUR_NAME      "MViewBgColour"
-// which colour for URLS
+/// which colour for URLS
 #define   MP_MVIEW_URLCOLOUR_NAME      "MViewUrlColour"
-// colour for attachment labels
+/// colour for attachment labels
 #define   MP_MVIEW_ATTCOLOUR_NAME      "MViewAttColour"
-// perform quoted text colourization?
+/// perform quoted text colourization?
 #define   MP_MVIEW_QUOTED_COLOURIZE_NAME   "MViewQuotedColourized"
-// cycle colours?
+/// cycle colours?
 #define   MP_MVIEW_QUOTED_CYCLE_COLOURS_NAME   "MViewQuotedCycleColours"
-// which colour for quoted text
+/// which colour for quoted text
 #define   MP_MVIEW_QUOTED_COLOUR1_NAME      "MViewQuotedColour1"
-// which colour for quoted text, second level
+/// which colour for quoted text, second level
 #define   MP_MVIEW_QUOTED_COLOUR2_NAME      "MViewQuotedColour2"
-// which colour for quoted text, third level
+/// which colour for quoted text, third level
 #define   MP_MVIEW_QUOTED_COLOUR3_NAME      "MViewQuotedColour3"
 /// the maximum number of whitespaces prepending >
 #define   MP_MVIEW_QUOTED_MAXWHITESPACE_NAME    "MViewQuotedMaxWhitespace"
@@ -846,14 +846,14 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_FVIEW_AUTONEXT_UNREAD_MSG_NAME "FViewAutoNextMsg"
 /// automatically select next unread folder after finishing the current one
 #define MP_FVIEW_AUTONEXT_UNREAD_FOLDER_NAME "FViewAutoNextFolder"
+/// how to show the size (MessageSizeShow enum value)
+#define MP_FVIEW_SIZE_FORMAT_NAME   "SizeFormat"
 /// update the folder view status bar to show the msg info?
 #define   MP_FVIEW_STATUS_UPDATE_NAME "FViewStatUpdate"
 /// folder view status bar string
 #define   MP_FVIEW_STATUS_FMT_NAME  "FViewStatFmt"
 /// delay before previewing the selected item in the folder view (0 to disable)
 #define MP_FVIEW_PREVIEW_DELAY_NAME "FViewPreviewDelay"
-// how to show the size (MessageSizeShow enum value)
-#define MP_FVIEW_SIZE_FORMAT_NAME   "SizeFormat"
 /// replace "From" address with "To" in messages from oneself?
 #define MP_FVIEW_FROM_REPLACE_NAME "ReplaceFrom"
 /// the ':' separated list of addresses which are "from oneself"
@@ -874,9 +874,9 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_CVIEW_FONT_NAME         "CViewFont"
 /// which font size
 #define   MP_CVIEW_FONT_SIZE_NAME         "CViewFontSize"
-// which foreground colour for the font
+/// which foreground colour for the font
 #define   MP_CVIEW_FGCOLOUR_NAME      "CViewFGColour"
-// which background colour for the font
+/// which background colour for the font
 #define   MP_CVIEW_BGCOLOUR_NAME      "CViewBGColout"
 //@}
 /// highlight URLS?
@@ -1638,24 +1638,24 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_MVIEW_FONT_DEFVAL         6L
 /// which font size
 #define   MP_MVIEW_FONT_SIZE_DEFVAL         DEFAULT_FONT_SIZE
-// which foreground colour for the font
+/// which foreground colour for the font
 #define   MP_MVIEW_FGCOLOUR_DEFVAL      "black"
-// which background colour for the font
+/// which background colour for the font
 #define   MP_MVIEW_BGCOLOUR_DEFVAL      "white"
-// which colour for URLS
+/// which colour for URLS
 #define   MP_MVIEW_URLCOLOUR_DEFVAL     "blue"
-// colour for attachment labels
+/// colour for attachment labels
 #define   MP_MVIEW_ATTCOLOUR_DEFVAL     "dark olive green"
 
-// colorize quoted text?
+/// colorize quoted text?
 #define   MP_MVIEW_QUOTED_COLOURIZE_DEFVAL 1L
-// cycle colours?
+/// cycle colours?
 #define   MP_MVIEW_QUOTED_CYCLE_COLOURS_DEFVAL  0L
-// which colour for quoted text
+/// which colour for quoted text
 #define   MP_MVIEW_QUOTED_COLOUR1_DEFVAL     "gray"
-// which colour for quoted text, seconds level
+/// which colour for quoted text, seconds level
 #define   MP_MVIEW_QUOTED_COLOUR2_DEFVAL     "gray"
-// which colour for quoted text, seconds level
+/// which colour for quoted text, seconds level
 #define   MP_MVIEW_QUOTED_COLOUR3_DEFVAL     "gray"
 /// the maximum number of whitespaces prepending >
 #define   MP_MVIEW_QUOTED_MAXWHITESPACE_DEFVAL  2L
@@ -1692,6 +1692,8 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_FVIEW_AUTONEXT_UNREAD_MSG_DEFVAL 1L
 /// automatically select next unread folder after finishing the current one
 #define MP_FVIEW_AUTONEXT_UNREAD_FOLDER_DEFVAL 0L
+/// how to show the size (MessageSizeShow enum value)
+#define MP_FVIEW_SIZE_FORMAT_DEFVAL  0l
 /// update the folder view status bar to show the msg info?
 #define   MP_FVIEW_STATUS_UPDATE_DEFVAL 0L
 /// folder view status bar string
@@ -1699,7 +1701,7 @@ extern const MOption MP_AWAY_STATUS;
 /// delay before previewing the selected item in the folder view (0 to disable)
 #define MP_FVIEW_PREVIEW_DELAY_DEFVAL 500L
 //@}
-/**@name  Font settings for folder tree */
+/**@name Font settings for folder tree */
 //@{
 /// the background colour for the folder tree
 #define MP_FOLDER_BGCOLOUR_DEFVAL ""
@@ -1714,9 +1716,9 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_CVIEW_FONT_DEFVAL         6L
 /// which font size
 #define   MP_CVIEW_FONT_SIZE_DEFVAL    DEFAULT_FONT_SIZE
-// which foreground colour for the font
+/// which foreground colour for the font
 #define   MP_CVIEW_FGCOLOUR_DEFVAL      "black"
-// which background colour for the font
+/// which background colour for the font
 #define   MP_CVIEW_BGCOLOUR_DEFVAL      "white"
 //@}
 /// highlight URLS?
@@ -1751,8 +1753,6 @@ extern const MOption MP_AWAY_STATUS;
 
 #endif // EXPERIMENTAL_JWZ_THREADING
 
-// how to show the size (MessageSizeShow enum value)
-#define MP_FVIEW_SIZE_FORMAT_DEFVAL  0l
 /// search criterium for searching in folders
 #define MP_MSGS_SEARCH_CRIT_DEFVAL   0l
 /// search argument

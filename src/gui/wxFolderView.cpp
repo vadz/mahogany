@@ -110,11 +110,11 @@ extern const MOption MP_FVIEW_FONT_SIZE;
 extern const MOption MP_FVIEW_FROM_REPLACE;
 extern const MOption MP_FVIEW_NAMES_ONLY;
 extern const MOption MP_FVIEW_NEWCOLOUR;
-extern const MOption MP_FVIEW_PREVIEW_DELAY;
 extern const MOption MP_FVIEW_RECENTCOLOUR;
 extern const MOption MP_FVIEW_SIZE_FORMAT;
-extern const MOption MP_FVIEW_STATUS_FMT;
 extern const MOption MP_FVIEW_STATUS_UPDATE;
+extern const MOption MP_FVIEW_STATUS_FMT;
+extern const MOption MP_FVIEW_PREVIEW_DELAY;
 extern const MOption MP_FVIEW_UNREADCOLOUR;
 extern const MOption MP_MSGS_SORTBY;
 extern const MOption MP_PREVIEW_ON_SELECT;
@@ -978,8 +978,8 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
    // add the images to use for the columns
    wxIconManager *iconManager = mApplication->GetIconManager();
-   wxBitmap bmpDown = sort_down_xpm,
-            bmpUp = sort_up_xpm;
+   wxBitmap bmpDown = sort_down,
+            bmpUp = sort_up;
    wxImageList *imagelist = new wxImageList(bmpDown.GetWidth(),
                                             bmpDown.GetHeight());
 
