@@ -1280,7 +1280,7 @@ wxFolderPropertiesPage::EnableControlsForNewsGroup(bool isNNTP)
    m_canBeOpened->Enable(TRUE);
 }
 
-// enable the controls which make sense for an IMAP folder
+// enable the controls which make sense for a POP or IMAP folder
 void
 wxFolderPropertiesPage::EnableControlsForImapOrPop(bool isIMAP)
 {
@@ -1294,8 +1294,9 @@ wxFolderPropertiesPage::EnableControlsForImapOrPop(bool isIMAP)
    m_isLocal->Enable(TRUE);
 #endif // USE_LOCAL_CHECKBOX
 
-   // this makes no sense for POP and for IMAP we will detect it ourselves and
-   // reset the MF_FLAGS_GROUP if the folder has \Noinferiors flag
+   // this makes no sense for POP and for IMAP we will detect it ourselves
+   if ( m_isCreating && isIMAP )
+      m_isGroup->SetValue(TRUE);
    m_isGroup->Enable(FALSE);
 }
 

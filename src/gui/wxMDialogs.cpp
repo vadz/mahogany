@@ -254,6 +254,8 @@ public:
     {
         m_text = new wxTextCtrl(this, -1, text, wxPoint(0, 0), size,
                                 wxTE_MULTILINE | wxTE_READONLY);
+        m_text->SetFont(wxFont(12, wxFONTFAMILY_TELETYPE,
+                               wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
     }
 
     void OnSize(wxSizeEvent& event)
