@@ -46,6 +46,7 @@
 #include <wx/msgdlg.h>   // for wxMessageBox
 #include <wx/cmndata.h>  // for wxPageSetupData
 #include <wx/persctrl.h> // for wxPMessageBoxEnable(d)
+#include <wx/menu.h>
 
 #include "wx/dialup.h"
 
@@ -935,6 +936,11 @@ wxMApp::SetupOnlineManager(void)
 {
    ASSERT(m_OnlineManager);
    m_DialupSupport = READ_APPCONFIG(MP_DIALUP_SUPPORT);
+   m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_ON, m_DialupSupport);
+   m_topLevelFrame->GetMenuBar()->Enable((int)WXMENU_FILE_NET_OFF, m_DialupSupport);
+//   m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_ON, m_DialupSupport);
+//   m_topLevelFrame->GetToolBar()->EnableItem(WXMENU_FILE_NET_OFF, m_DialupSupport);
+
    String beaconhost = READ_APPCONFIG(MP_BEACONHOST);
    strutil_delwhitespace(beaconhost);
    // If no host configured, use smtp host:
