@@ -205,7 +205,11 @@ MailFolderCC::Open(void)
          lockfile = wxFindNextFile();
       }
    }
-   CCQuiet(); // first try, don't log errors
+
+#ifndef DEBUG
+   CCQuiet(); // first try, don't log errors (except in debug mode)
+#endif // DEBUG
+
    m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
                             debugFlag ? OP_DEBUG : NIL);
    ProcessEventQueue();
@@ -393,8 +397,8 @@ MailFolderCC::SetSequenceFlag(String const &sequence,
       return;
    }
 
-   const char *callback = set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG;
-   if(PY_CALLBACKVA((callback, 1, this, this->GetClassName(),
+   if(PY_CALLBACKVA((set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG,
+                     1, this, this->GetClassName(),
                      GetProfile(), "ss", sequence.c_str(), flagstr),1)  )
    {
       if(set)
@@ -442,7 +446,17 @@ MailFolderCC::Debug(void) const
    }
    DBGLOG("--end of list--");
 }
-#endif
+
+String
+MailFolderCC::DebugDump() const
+{
+   String str = MObjectRC::DebugDump();
+   str << "mailbox '" << m_MailboxPath << "' of type " << m_folderType;
+
+   return str;
+}
+
+#endif // DEBUG
 
 /// remove this object from Map
 void
@@ -1004,7 +1018,7 @@ int main(void)
       cerr << "Object initialised correctly." << endl;
    else
       cerr << "Object initialisation failed." << endl;
-   mf.Debug();    // show debug info
+   mf.DebugDump();    // show debug info
    cout << "----------------------------------------------------------" << endl;
 
    MailFolder &m = mf;

@@ -107,7 +107,7 @@ public:
       // rename this folder: FALSE returned if it failed
    virtual bool Rename(const String& name) = 0;
 
-   MOBJECT_DEBUG
+   MOBJECT_DEBUG(MFolder)
 
 protected:
    // ctor and dtor are private because the user code doesn't create nor deletes

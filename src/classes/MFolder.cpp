@@ -260,10 +260,10 @@ MFolder *MFolder::Create(const String& fullname, Type type)
 
 #ifdef DEBUG
 
-String MFolder::Dump() const
+String MFolder::DebugDump() const
 {
-   String str;
-   str.Printf("MFolder: name = %s, %d refs", GetFullName().c_str(), m_nRef);
+   String str = MObjectRC::DebugDump();
+   str << "name '" << GetFullName() << '\'';
 
    return str;
 }

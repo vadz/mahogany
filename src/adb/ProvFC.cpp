@@ -115,7 +115,7 @@ public:
   // if it's not, we will be deleted, so it really must be something fatal
   bool IsOk() const { return m_pGroup != NULL; }
 
-  MOBJECT_DEBUG
+  MOBJECT_DEBUG(FCEntry)
 
 private:
   virtual ~FCEntry();
@@ -169,7 +169,7 @@ public:
   // if it's not, we will be deleted, so it really must be something fatal
   bool IsOk() const { return m_pConfig != NULL; }
 
-  MOBJECT_DEBUG
+  MOBJECT_DEBUG(FCEntryGroup)
 
 private:
   virtual ~FCEntryGroup();
@@ -240,7 +240,7 @@ public:
 
   virtual bool Flush();
 
-  MOBJECT_DEBUG
+  MOBJECT_DEBUG(FCBook)
 
 private:
   virtual ~FCBook();
@@ -264,7 +264,7 @@ public:
   virtual bool DeleteBook(AdbBook *book);
   virtual bool TestBookAccess(const String& name, AdbTests test);
 
-  MOBJECT_DEBUG
+  MOBJECT_DEBUG(FCDataProvider)
 
   DECLARE_ADB_PROVIDER(FCDataProvider);
 };
@@ -809,35 +809,33 @@ bool FCDataProvider::DeleteBook(AdbBook * /* book */)
 
 #ifdef DEBUG
 
-String FCEntry::Dump() const
+String FCEntry::DebugDump() const
 {
-  String str;
-  str.Printf("FCEntry: name = '%s', m_nRef = %d", GetName(), m_nRef);
+  String str = MObjectRC::DebugDump();
+  str << "name = '" << GetName() << '\'';
 
   return str;
 }
 
-String FCEntryGroup::Dump() const
+String FCEntryGroup::DebugDump() const
 {
-  String str;
-  str.Printf("FCEntryGroup: path = '%s', m_nRef = %d",
-              GetPath().c_str(), m_nRef);
+  String str = MObjectRC::DebugDump();
+  str << "path = '" << GetPath() << '\'';
 
   return str;
 }
 
-String FCBook::Dump() const
+String FCBook::DebugDump() const
 {
-  String str;
-  str.Printf("FCBook: file = '%s', m_nRef = %d", m_strFile.c_str(), m_nRef);
+  String str = MObjectRC::DebugDump();
+  str << "file = '" << m_strFile << '\'';
 
   return str;
 }
 
-String FCDataProvider::Dump() const
+String FCDataProvider::DebugDump() const
 {
-  String str;
-  str.Printf("FCDataProvider: m_nRef = %d", m_nRef);
+  String str = MObjectRC::DebugDump();
 
   return str;
 }

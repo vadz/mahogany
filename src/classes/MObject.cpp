@@ -60,15 +60,15 @@ void MObjectRC::CheckLeaks()
    }
 
    for ( size_t n = 0; n < nCount; n++ ) {
-      wxLogDebug("Object %d: %s", n, gs_aObjects[n]->Dump().c_str());
+      wxLogDebug("Object %d: %s", n, gs_aObjects[n]->DebugDump().c_str());
    }
 }
 
-String MObjectRC::Dump() const
+String MObjectRC::DebugDump() const
 {
    MOcheck();
    String str;
-   str.Printf("MObjectRC, m_nRef = %d", m_nRef);
+   str.Printf("%s at %p m_nRef = %d: ", DebugGetClassName(), this, m_nRef);
 
    return str;
 }

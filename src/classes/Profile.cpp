@@ -163,7 +163,7 @@ public:
    /// return the name of the profile
    virtual String GetProfileName(void) { return profileName; }
 
-   MOBJECT_DEBUG
+   MOBJECT_DEBUG(Profile)
 
 private:
    /** Constructor.
@@ -994,10 +994,10 @@ Profile::writeEntry(const String & key, const String & value)
 #ifdef DEBUG
 
 wxString
-Profile::Dump() const
+Profile::DebugDump() const
 {
-   String str;
-   str.Printf("Profile '%s' (m_nRef = %d).", profileName.c_str(), m_nRef);
+   String str = MObjectRC::DebugDump();
+   str << "name '" << profileName << '\'';
 
    return str;
 }

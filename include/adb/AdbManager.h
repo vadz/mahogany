@@ -90,7 +90,7 @@ public:
     /// clear the cache contents freeing memory used by all ADBs in it
   void ClearCache();
 
-  MOBJECT_DEBUG
+  MOBJECT_DEBUG(AdbManager)
 
 private:
   // dtor

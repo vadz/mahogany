@@ -90,7 +90,10 @@ protected:
   objects are added to the global list. Calling MObjectRC::CheckLeaks() on program
   termination will print a detailed report about leaked objects, including their
   number and their description for all of them. CheckLeaks() does nothing in the
-  release build.
+  release build. You can also insert MOBJECT_DEBUG(classname) macro into the
+  declaration of the class classname to provide some more interesting
+  information about the instance of this class for debugging purposes (it will
+  also put the write classname in the leaked object report then)
 */
 class MObjectRC : public MObject
 {
@@ -110,10 +113,13 @@ public:
     static void CheckLeaks();
 
     // override this function (see also MOBJECT_DEBUG macro) to provide some
-    // rich information about your object (MObjectRC::Dump() prints the ref
-    // count only)
-    virtual String Dump() const;
+    // rich information about your object (MObjectRC::Dump() prints the base
+    // information such as name, pointer and ref count only)
+    virtual String DebugDump() const;
 
+    // this function just returns the class name (also overriden by
+    // MOBJECT_DEBUG macro)
+    virtual const char *DebugGetClassName() const { return "<<Invalid>>"; }
 #else
     static void CheckLeaks() { }
 #endif
@@ -143,8 +149,12 @@ private:
 };
 
 #ifdef   DEBUG
-     /// declare all diagnostic functions (you must still implement them!)
-#   define MOBJECT_DEBUG public: virtual String Dump() const;
+     /// declare all diagnostic functions (you must implement DebugDump)
+#   define MOBJECT_DEBUG(classname)                                           \
+      public:                                                                 \
+         virtual const char *DebugGetClassName() const { return #classname; } \
+         virtual String DebugDump() const;
+
 #else
 #   define MOBJECT_DEBUG
 #endif

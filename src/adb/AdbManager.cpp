@@ -446,11 +446,10 @@ AdbBook *AdbManager::FindInCache(const String& name) const
 // ----------------------------------------------------------------------------
 #ifdef DEBUG
 
-String AdbManager::Dump() const
+String AdbManager::DebugDump() const
 {
-  String str;
-  str.Printf("AdbManager: m_nRef = %d, %d books in cache",
-             m_nRef, gs_cache.Count());
+  String str = MObjectRC::DebugDump();
+  str << (int)gs_cache.Count() << "books in cache";
 
   return str;
 }

@@ -433,6 +433,7 @@ private:
 
 public:
    DEBUG_DEF
+   MOBJECT_DEBUG(MailFolderCC)
 };
 
 #endif
