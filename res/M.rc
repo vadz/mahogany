@@ -171,8 +171,8 @@ msg_move	CURSOR	"msg_move.cur"
 #include "Mversion.h"
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION    0,0,0,1
- PRODUCTVERSION 0,0,0,1
+ FILEVERSION    M_VERSION_MAJOR,M_VERSION_MINOR,M_VERSION_RELEASE,0
+ PRODUCTVERSION M_VERSION_MAJOR,M_VERSION_MINOR,M_VERSION_RELEASE,0
  FILEFLAGSMASK  0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -191,7 +191,7 @@ BEGIN
             VALUE "FileDescription", "Mahogany - the powerful cross-platform e-mail solution\0"
             VALUE "FileVersion", M_VERSION
             VALUE "InternalName", "Main Mahogany program file\0"
-            VALUE "LegalCopyright", "Copyright © 1998-2001 Karsten Ballüder and Vadim Zeitlin\0"
+            VALUE "LegalCopyright", "Copyright © 1998-2003 Vadim Zeitlin and Karsten Ballüder\0"
             VALUE "OriginalFilename", "M.exe\0"
             VALUE "ProductName", "Mahogany\0"
             VALUE "ProductVersion", M_VERSION_STRING
