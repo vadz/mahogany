@@ -3,7 +3,7 @@
 // File name:   mail/MailFolder.cpp: generic MailFolder methods which don't
 //              use cclient (i.e. don't really work with mail folders)
 // Purpose:     handling of mail folders with c-client lib
-// Author:      Karsten Ballüder
+// Author:      Karsten Ballüder, Vadim Zeitlin
 // Modified by:
 // Created:     1997
 // CVS-ID:      $Id$
@@ -15,8 +15,12 @@
 // declarations
 // ============================================================================
 
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
+
 #ifdef __GNUG__
-#   pragma implementation "MailFolder.h"
+   #pragma implementation "MailFolder.h"
 #endif
 
 #include  "Mpch.h"
@@ -49,10 +53,10 @@
 #include "MFStatus.h"
 #include "LogCircle.h"
 
-#include "MFFactory.h"
 #include "MFPrivate.h"
-
-#include "MailFolderCC.h"
+#include "mail/Driver.h"
+#include "mail/FolderPool.h"
+#include "mail/ServerInfo.h"
 
 #include "Composer.h"
 #include "MApplication.h"
@@ -63,8 +67,6 @@
 
 extern const MOption MP_DEFAULT_REPLY_KIND;
 extern const MOption MP_FOLDER_COMMENT;
-extern const MOption MP_FOLDER_LOGIN;
-extern const MOption MP_FOLDER_PASSWORD;
 extern const MOption MP_FOLDER_PATH;
 extern const MOption MP_FOLDER_TYPE;
 extern const MOption MP_FORWARD_PREFIX;
@@ -78,120 +80,285 @@ extern const MOption MP_REPLY_PREFIX;
 extern const MOption MP_SET_REPLY_FROM_TO;
 extern const MOption MP_USERNAME;
 
+// ----------------------------------------------------------------------------
+// persistent msgboxes we use here
+// ----------------------------------------------------------------------------
+
+extern const MPersMsgBox *M_MSGBOX_DIALUP_ON_OPEN_FOLDER;
+extern const MPersMsgBox *M_MSGBOX_KEEP_PWD;
+extern const MPersMsgBox *M_MSGBOX_NET_DOWN_OPEN_ANYWAY;
+extern const MPersMsgBox *M_MSGBOX_REMEMBER_PWD;
+
+// ----------------------------------------------------------------------------
+// global static variables
+// ----------------------------------------------------------------------------
+
+ServerInfoEntry::ServerInfoList ServerInfoEntry::ms_servers;
+
+MFSubSystem *MFSubSystem::ms_initilizers = NULL;
+
 // ============================================================================
-// implementation
+// MailFolder implementation
 // ============================================================================
 
-MFFactory *MFFactory::ms_factories = NULL;
+// ----------------------------------------------------------------------------
+// MailFolder initialization and shutdown
+// ----------------------------------------------------------------------------
+
+/* static */
+bool
+MailFolder::Init()
+{
+   for ( MFSubSystem *subsys = MFSubSystem::GetFirst();
+         subsys;
+         subsys = subsys->GetNext() )
+   {
+      if ( !subsys->Init() )
+      {
+         // any error here is fatal because normally we don't do anything
+         // error-prone in the Init() functions
+         return false;
+      }
+   }
+
+   return true;
+}
+
+/* static */
+void
+MailFolder::CleanUp()
+{
+   ServerInfoEntry::DeleteAll();
+   MFPool::DeleteAll();
+
+   for ( MFSubSystem *subsys = MFSubSystem::GetFirst();
+         subsys;
+         subsys = subsys->GetNext() )
+   {
+      subsys->CleanUp();
+   }
+}
 
 // ----------------------------------------------------------------------------
 // MailFolder opening
 // ----------------------------------------------------------------------------
 
+/**
+  initialize all mail subsystems and return the folder driver or NULL if none
+  (logging the error message in this case)
+ */
+static MFDriver *GetFolderDriver(const MFolder *folder)
+{
+   if ( !MailFolder::Init() )
+      return NULL;
+
+   CHECK( folder, NULL, "MailFolder: NULL folder object" );
+
+   const String kind = folder->GetClass();
+
+   // find the creation function for this kind of folders
+   MFDriver *driver = MFDriver::Get(kind);
+   if ( !driver )
+   {
+      ERRORMESSAGE((_("Unknown folder kind '%s'"), kind.c_str()));
+   }
+
+   return driver;
+}
+
 /* static */
 MailFolder *
 MailFolder::OpenFolder(const MFolder *folder, OpenMode mode, wxFrame *frame)
 {
-   if ( !Init() )
+   MFDriver *driver = GetFolderDriver(folder);
+   if ( !driver )
       return NULL;
 
-   CHECK( folder, NULL, "NULL MFolder in OpenFolder()" );
-
-   String kind = folder->GetClass();
-
-   // this is a hack needed for backwards compatibility and which also allows
-   // to have the empty default value for the folder class which saves quite
-   // some bytes in the profile
-   if ( kind.empty() )
+   // ensure that we have the authentification information for this folder
+   // before trying to open it
+   bool userEnteredPwd = false;
+   String login, password;
+   if ( !GetAuthInfoForFolder(folder, login, password, &userEnteredPwd) )
    {
-      kind = "cclient";
+      // can't continue without login/password
+      return NULL;
    }
 
-   // find the creation function for this kind of folders
-   for ( const MFFactory *factory = MFFactory::GetHead();
-         factory;
-         factory = factory->GetNext() )
+   // look if we don't already have it opened
+   //
+   // NB: if the folder is already opened, the password [possibly] asked for
+   //     above is unused and not checked at all and although it's not a
+   //     serious problem it still doesn't look right (fixme)
+   MailFolder *mf = MFPool::Find(driver, folder, login);
+   if ( mf )
    {
-      if ( factory->GetName() == kind )
+      // make sure it's updated
+      mf->Ping();
+
+      // the connection could have been lost from inside Ping() so check for it
+      // yet again and reopen the folder if this is what happened
+      if ( !mf->IsOpened() )
       {
-         return factory->OpenFolder(folder, mode, frame);
+         mf->DecRef();
+         mf = NULL;
       }
    }
 
-   ERRORMESSAGE((_("Unknown folder kind '%s'"), kind.c_str()));
+   if ( !mf )
+   {
+      // check whether this folder is accessible
+      if ( !CheckNetwork(folder, frame) )
+      {
+         return NULL;
+      }
 
-   return NULL;
+      // and now do [try to] open the folder
+      mf = driver->OpenFolder(folder, login, password, mode, frame);
+
+      // if we have succeeded to open the folder ...
+      if ( mf )
+      {
+         // ... add it to the pool
+         MFPool::Add(driver, mf, folder, login);
+
+         // ... and propose to the user to save the password so that he doesn't
+         // have to enter it again during the subsequent attempts to open it
+         if ( userEnteredPwd )
+         {
+            // const_cast needed, unfortunately
+            ProposeSavePassword(mf, (MFolder *)folder, login, password);
+         }
+      }
+   }
+
+   return mf;
+}
+
+/* static */
+bool MailFolder::CheckNetwork(const MFolder *folder, wxFrame *frame)
+{
+#ifdef USE_DIALUP
+   // check if we need to dial up to open this folder
+   if ( folder->NeedsNetwork() && !mApplication->IsOnline() )
+   {
+      String msg;
+      msg.Printf(_("To open the folder '%s', network access is required "
+                   "but it is currently not available.\n"
+                   "Would you like to connect to the network now?"),
+                 folder->GetFullName().c_str());
+
+      if ( MDialog_YesNoDialog(msg,
+                               frame,
+                               MDIALOG_YESNOTITLE,
+                               M_DLG_YES_DEFAULT,
+                               M_MSGBOX_DIALUP_ON_OPEN_FOLDER,
+                               folder->GetFullName()) )
+      {
+         mApplication->GoOnline();
+      }
+
+      if ( !mApplication->IsOnline() ) // still not?
+      {
+         if ( !MDialog_YesNoDialog(_("Opening this folder will probably fail!\n"
+                                     "Continue anyway?"),
+                                   frame,
+                                   MDIALOG_YESNOTITLE,
+                                   M_DLG_NO_DEFAULT,
+                                   M_MSGBOX_NET_DOWN_OPEN_ANYWAY,
+                                   folder->GetFullName()) )
+         {
+             // remember that the user cancelled opening the folder
+             mApplication->SetLastError(M_ERROR_CANCEL);
+
+             return false;
+         }
+      }
+   }
+#endif // USE_DIALUP
+
+   return true;
 }
 
 /* static */
 bool
-MailFolder::CloseFolder(const MFolder *mfolder)
+MailFolder::CloseFolder(const MFolder *folder)
 {
-   // don't try to close the folder which can't be opened
-   if ( !mfolder->CanOpen() )
+   CHECK( folder, false, "MailFolder::CloseFolder(): NULL folder" );
+
+   // don't try to close the folder which can't be opened, it's a NOOP
+   if ( !folder->CanOpen() )
    {
       return true;
    }
 
-   // for now there is only one implementation to call:
-   return MailFolderCC::CloseFolder(mfolder);
+   MFDriver *driver = GetFolderDriver(folder);
+   if ( !driver )
+      return false;
+
+   // find the associated open folder
+   //
+   // FIXME: using GetLogin() here is wrong, see comments before MFPool::Find()
+   MailFolder_obj mf = MFPool::Find(driver, folder, folder->GetLogin());
+   if ( !mf )
+   {
+      // nothing to close
+      return false;
+   }
+
+   mf->Close();
+
+   return true;
 }
 
 /* static */
 int
 MailFolder::CloseAll()
 {
-   MailFolder **mfOpened = GetAllOpened();
-   if ( !mfOpened )
-      return 0;
-
+   // count the number of folders we close
    size_t n = 0;
-   while ( mfOpened[n] )
-   {
-      MailFolder *mf = mfOpened[n++];
 
+   MFPool::Cookie cookie;
+   for ( MailFolder *mf = MFPool::GetFirst(cookie);
+         mf;
+         mf = MFPool::GetNext(cookie) )
+   {
       mf->Close();
 
       // notify any opened folder views
       MEventManager::Send(new MEventFolderClosedData(mf));
-   }
 
-   delete [] mfOpened;
+      mf->DecRef();
+   }
 
    return n;
 }
+
 
 // ----------------------------------------------------------------------------
 // MailFolder: other operations
 // ----------------------------------------------------------------------------
 
-/* static */
-MailFolder **
-MailFolder::GetAllOpened()
-{
-   // if we ever have other kinds of folders, we should append them to the
-   // same array too
-   return MailFolderCC::GetAllOpened();
-}
-
 MailFolder *
 MailFolder::GetOpenedFolderFor(const MFolder *folder)
 {
-   return MailFolderCC::FindFolder(folder);
+   MFDriver *driver = GetFolderDriver(folder);
+   if ( !driver )
+      return NULL;
+
+   // FIXME: login problem again
+   return MFPool::Find(driver, folder, folder->GetLogin());
 }
 
 /* static */
 bool MailFolder::PingAllOpened(wxFrame *frame)
 {
-   MailFolder **mfOpened = GetAllOpened();
-   if ( !mfOpened )
-      return 0;
-
    bool rc = true;
-   for ( size_t n = 0; mfOpened[n]; n++ )
-   {
-      MailFolder *mf = mfOpened[n];
 
+   MFPool::Cookie cookie;
+   for ( MailFolder *mf = MFPool::GetFirst(cookie);
+         mf;
+         mf = MFPool::GetNext(cookie) )
+   {
       NonInteractiveLock noInter(mf, frame != NULL);
 
       if ( !mf->Ping() )
@@ -199,9 +366,9 @@ bool MailFolder::PingAllOpened(wxFrame *frame)
          // failed with at least one folder
          rc = false;
       }
-   }
 
-   delete [] mfOpened;
+      mf->DecRef();
+   }
 
    return rc;
 }
@@ -210,9 +377,6 @@ bool MailFolder::PingAllOpened(wxFrame *frame)
 bool
 MailFolder::CheckFolder(const MFolder *folder, wxFrame *frame)
 {
-   if ( !Init() )
-      return false;
-
    bool rc;
 
    MailFolder *mf = MailFolder::GetOpenedFolderFor(folder);
@@ -226,8 +390,10 @@ MailFolder::CheckFolder(const MFolder *folder, wxFrame *frame)
    }
    else // not opened
    {
+      MFDriver *driver = GetFolderDriver(folder);
+
       // check its status without opening it
-      return MailFolderCC::CheckStatus(folder);
+      rc = driver ? driver->CheckFolder(folder) : false;
    }
 
    return rc;
@@ -235,76 +401,47 @@ MailFolder::CheckFolder(const MFolder *folder, wxFrame *frame)
 
 /* static */
 bool
-MailFolder::DeleteFolder(const MFolder *mfolder)
+MailFolder::DeleteFolder(const MFolder *folder)
 {
-   if ( !Init() )
-      return false;
+   MFDriver *driver = GetFolderDriver(folder);
 
-   // for now there is only one implementation to call:
-   return MailFolderCC::DeleteFolder(mfolder);
+   return driver ? driver->DeleteFolder(folder) : false;
 }
 
 /* static */
 bool
-MailFolder::Rename(const MFolder *mfolder, const String& name)
+MailFolder::Rename(const MFolder *folder, const String& name)
 {
-   if ( !Init() )
-      return false;
+   MFDriver *driver = GetFolderDriver(folder);
 
-   return MailFolderCC::Rename(mfolder, name);
+   return driver ? driver->RenameFolder(folder, name) : false;
 }
 
 /* static */
 long
 MailFolder::ClearFolder(const MFolder *folder)
 {
-   if ( !Init() )
-      return -1;
+   MFDriver *driver = GetFolderDriver(folder);
 
-   // for now there is only one implementation to call:
-   return MailFolderCC::ClearFolder(folder);
-}
-
-/* static */
-bool
-MailFolder::CreateFolder(const String& name,
-                         MFolderType type,
-                         int flags,
-                         const String &path,
-                         const String &comment)
-{
-   if ( !Init() )
-      return false;
-
-   MFolder *mfolder = MFolder::Create(name, type);
-   if ( !mfolder )
-      return false;
-
-   mfolder->SetFlags(flags);
-   mfolder->SetPath(path);
-   mfolder->SetComment(comment);
-
-   // So far the drivers do an auto-create when we open a folder, so now we
-   // attempt to open the folder to see what happens:
-   MailFolder_obj mf = MailFolder::OpenFolder(mfolder);
-
-   mfolder->DecRef();
-
-   return true;
+   return driver ? driver->ClearFolder(folder) : -1;
 }
 
 /* static */
 bool MailFolder::CanExit(String *which)
 {
-   return MailFolderCC::CanExit(which);
-}
+   bool rc = true;
 
-/* static */
-bool
-MailFolder::Subscribe(const String &host, MFolderType protocol,
-                      const String &mailboxname, bool subscribe)
-{
-   return MailFolderCC::Subscribe(host, protocol, mailboxname, subscribe);
+   MFPool::Cookie cookie;
+   for ( MailFolder *mf = MFPool::GetFirst(cookie);
+         mf && rc;
+         mf = MFPool::GetNext(cookie) )
+   {
+      rc = !mf->IsInCriticalSection();
+
+      mf->DecRef();
+   }
+
+   return rc;
 }
 
 // ----------------------------------------------------------------------------
@@ -936,45 +1073,7 @@ char MailFolder::GetFolderDelimiter() const
 }
 
 // ----------------------------------------------------------------------------
-// static functions used by MailFolder
-// ----------------------------------------------------------------------------
-
-/* static */
-bool
-MailFolder::Init()
-{
-   static bool s_initialized = false;
-
-   if ( !s_initialized )
-   {
-      if ( !MailFolderCmnInit() || !MailFolderCCInit() )
-      {
-         wxLogError(_("Failed to initialize mail subsystem."));
-      }
-      else // remember that we're initialized now
-      {
-#ifdef USE_DIALUP
-         // must be done before using the network
-         mApplication->SetupOnlineManager();
-#endif // USE_DIALUP
-
-         s_initialized = true;
-      }
-   }
-
-   return s_initialized;
-}
-
-/* static */
-void
-MailFolder::CleanUp(void)
-{
-   MailFolderCmnCleanup();
-   MailFolderCCCleanup();
-}
-
-// ----------------------------------------------------------------------------
-// misc
+// misc static MailFolder methods
 // ----------------------------------------------------------------------------
 
 /* static */
@@ -1043,5 +1142,110 @@ MLogCircle& MailFolder::GetLogCircle(void)
    static MLogCircle s_LogCircle(10);
 
    return s_LogCircle;
+}
+
+// ----------------------------------------------------------------------------
+// MailFolder login/password management
+// ----------------------------------------------------------------------------
+
+/* static */
+void
+MailFolder::ProposeSavePassword(MailFolder *mf,
+                                MFolder *folder,
+                                const String& login,
+                                const String& password)
+{
+   // do not process the events while we're showing the dialog boxes below:
+   // this could lead to the new calls to OpenFolder() which would be bad as
+   // we're called from inside OpenFolder()
+   MEventManagerSuspender suspendEvents;
+
+   // ask the user if he'd like to remember the password for the future:
+   // this is especially useful for the folders created initially by the
+   // setup wizard as it doesn't ask for the passwords
+   if ( MDialog_YesNoDialog
+        (
+         String::Format
+         (
+          _("Would you like to permanently remember the password "
+            "for the folder '%s'?\n"
+            "(WARNING: don't do it if you are concerned about security)"),
+            mf->GetName().c_str()
+         ),
+         NULL,
+         MDIALOG_YESNOTITLE,
+         M_DLG_YES_DEFAULT,
+         M_MSGBOX_REMEMBER_PWD,
+         mf->GetName()
+        ) )
+   {
+      folder->SetAuthInfo(login, password);
+   }
+   else // don't save password permanently
+   {
+      // but should we keep it at least during this session?
+      if ( MDialog_YesNoDialog
+           (
+               _("Should the password be kept in memory during this\n"
+                 "session only (it won't be saved to a disk file)?\n"
+                 "If you answer \"No\", you will be asked for the password\n"
+                 "each time when the folder is accessed."),
+               NULL,
+               MDIALOG_YESNOTITLE,
+               M_DLG_YES_DEFAULT,
+               M_MSGBOX_KEEP_PWD,
+               mf->GetName()
+           ) )
+      {
+         ServerInfoEntry *server = ServerInfoEntry::GetOrCreate(folder, mf);
+         CHECK_RET( server, "folder which has login must have server as well!" );
+
+         server->SetAuthInfo(login, password);
+      }
+      //else: don't keep the login info even in memory
+   }
+}
+
+/* static */
+bool MailFolder::GetAuthInfoForFolder(const MFolder *mfolder,
+                                      String& login,
+                                      String& password,
+                                      bool *userEnteredPwd)
+{
+   if ( !mfolder->NeedsLogin() )
+   {
+      // nothing to do then, everything is already fine
+      return true;
+   }
+
+   login = mfolder->GetLogin();
+   password = mfolder->GetPassword();
+
+   if ( login.empty() || password.empty() )
+   {
+      // do we already have login/password for this folder?
+      ServerInfoEntry *server = ServerInfoEntry::Get(mfolder);
+      if ( server && server->GetAuthInfo(login, password) )
+      {
+         return true;
+      }
+
+      // we don't have password for this folder, ask the user about it
+      if ( !MDialog_GetPassword(mfolder->GetFullName(), &login, &password) )
+      {
+         ERRORMESSAGE((_("Cannot access this folder without a password.")));
+
+         mApplication->SetLastError(M_ERROR_CANCEL);
+
+         return false;
+      }
+
+      // remember that the password was entered interactively and propose to
+      // remember it if it really works later
+      if ( userEnteredPwd )
+         *userEnteredPwd = true;
+   }
+
+   return true;
 }
 

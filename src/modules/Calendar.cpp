@@ -744,16 +744,22 @@ CalendarFrame::GetConfig(void)
    // updates:
    if(m_FolderName != oldFolderName)
    {
-      if(m_Folder) m_Folder->DecRef();
+      if(m_Folder)
+         m_Folder->DecRef();
 
       // check if folder profile entry exists:
-      MFolder *mf = m_MInterface->GetMFolder(m_FolderName);
-      if(mf == NULL)
+      MFolder *folder = m_MInterface->GetMFolder(m_FolderName);
+      if ( !folder )
       {
-         if(! m_MInterface->CreateMailFolder(
-            m_FolderName,MF_FILE,MF_FLAGS_DEFAULT|MF_FLAGS_HIDDEN,
-            m_FolderName,
-            _("This folder is used to store data for the calendar plugin module.")))
+         folder = MFolder::Create(m_FolderName, MF_FILE);
+         if ( folder )
+         {
+            folder->SetFlags(MF_FLAGS_DEFAULT | MF_FLAGS_HIDDEN);
+            folder->SetPath(m_FolderName);
+            folder->SetComment(_("This folder is used to store data for "
+                                 "the calendar plugin module."));
+         }
+         else
          {
             wxString msg;
             msg.Printf(_("Cannot create calendar module folder '%s'."),
@@ -761,8 +767,10 @@ CalendarFrame::GetConfig(void)
             m_Module->ErrorMessage(msg);
          }
       }
-      else
-         mf->DecRef();
+
+      if ( folder )
+         folder->DecRef();
+
       m_Folder = m_MInterface->OpenASMailFolder(m_FolderName);
       ParseFolder();
    }

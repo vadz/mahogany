@@ -318,6 +318,14 @@ SOURCE=.\src\mail\MFCache.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\mail\MFDriver.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\mail\MFPool.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\mail\MFui.cpp
 # End Source File
 # Begin Source File
@@ -1884,7 +1892,6 @@ SOURCE=.\src\util\ssl.cpp
 # Begin Source File
 
 SOURCE=.\src\util\strutil.cpp
-
 # End Source File
 # Begin Source File
 

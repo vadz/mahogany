@@ -100,6 +100,9 @@ public:
       /// get the password for the folder:
    virtual String GetPassword() const = 0;
 
+      /// save the login and password (will be encrypted here) for this folder
+   virtual void SetAuthInfo(const String& login, const String& password) = 0;
+
       /// the folder name must be unique among its siblings
    virtual String GetName() const = 0;
 
@@ -110,7 +113,7 @@ public:
    virtual MFolderType GetType() const = 0;
 
       /// folder class: cclient or virtual currently, default "" == cclient
-   virtual const char *GetClass() const = 0;
+   virtual String GetClass() const = 0;
 
       /**
         the icon index for this folder or -1 if there is no specific icon

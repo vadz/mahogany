@@ -12,10 +12,10 @@
 
 #include "MEvent.h"
 
-// ----------------------------------------------------------------------------
-// MFSuspendInteractivity: resets the folders interactive frame thus suppresing
-//                         any dialogs/... during the life time of this object
-// ----------------------------------------------------------------------------
+/**
+   MFSuspendInteractivity: resets the folders interactive frame thus preventing
+   any GUI dialogs from showing showing during the life time of this object
+*/
 
 class MFSuspendInteractivity
 {
@@ -49,7 +49,7 @@ private:
    wxFrame *m_frameOld;
 };
 
-/*
+/**
    This class is used to restore the folders interactive frame "later", i.e.
    during the next idle loop iteration. To do this, we just send an event of
    this type using MEventManager. Although nobody processes it, the event
@@ -75,7 +75,7 @@ private:
    MFSuspendInteractivity *m_suspender;
 };
 
-/*
+/**
    This class sends MEventFolderRestoreInterData if necessary: it suspends the
    interactive notifications in its ctor and sends an event to restore them
    (using the logic described above) in its dtor
@@ -132,6 +132,42 @@ public:
 
 private:
    MFSuspendInteractivity *m_suspender;
+};
+
+/**
+   MFSubSystem: define an object of this class if you want to be called
+   during the mail subsystem initialization and/or shutdown
+ */
+class MFSubSystem
+{
+public:
+   /// return the first initializer in the linked list or NULL if none
+   static MFSubSystem *GetFirst() { return ms_initilizers; }
+
+   /// return the next initializer in the linked list or NULL if no more
+   MFSubSystem *GetNext() const { return m_next; }
+
+   typedef bool (*InitFunction)();
+   typedef void (*CleanupFunction)();
+
+   MFSubSystem(InitFunction init, CleanupFunction cleanup)
+      : m_next(ms_initilizers),
+        m_init(init),
+        m_cleanup(cleanup)
+   {
+      ms_initilizers = this;
+   }
+
+   bool Init() { return m_init ? (*m_init)() : true; }
+   void CleanUp() { if ( m_cleanup ) (*m_cleanup)(); }
+
+private:
+   static MFSubSystem *ms_initilizers;
+
+   MFSubSystem * const m_next;
+
+   InitFunction m_init;
+   CleanupFunction m_cleanup;
 };
 
 

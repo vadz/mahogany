@@ -2943,17 +2943,15 @@ void wxFolderTreeImpl::ProcessMsgNumberChange(const wxString& folderName)
       // we don't have the status right now, count the messages now: this will
       // result in another status update sent to us later but then the status
       // cache should already be cached
-      MailFolder *mf = MailFolder::OpenFolder(folder, MailFolder::ReadOnly);
-      if ( mf )
+      MailFolder_obj mf = MailFolder::OpenFolder(folder, MailFolder::ReadOnly);
+      if ( !mf )
       {
-         MailFolderStatus status;
-         (void)mf->CountAllMessages(&status);
-
-         mf->DecRef();
+         wxLogDebug("Failed to update status for '%s'", folderName.c_str());
       }
       else
       {
-         wxLogDebug("Failed to update status for '%s'", folderName.c_str());
+         MailFolderStatus status;
+         (void)mf->CountAllMessages(&status);
       }
 
       return;

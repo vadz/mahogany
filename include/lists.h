@@ -289,7 +289,7 @@ public: \
     type; i.e. M_LIST(Int,int) would create an Int type holding ints.
 */
 #define M_LIST(name,type) \
-M_LIST_common(name,type);
+   M_LIST_common(name,type)
 
 /** Macro to define a list with a given name, having elements of pointer
     to the given dynamic type; i.e. M_LIST_PTR(MyPtr,obj) will create a

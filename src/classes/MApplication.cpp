@@ -266,6 +266,11 @@ MAppBase::ContinueStartup()
    // open all default mailboxes
    // --------------------------
 
+#ifdef USE_DIALUP
+   // must be done before using the network
+   SetupOnlineManager();
+#endif // USE_DIALUP
+
    if ( !READ_APPCONFIG(MP_DONTOPENSTARTUP) )
    {
       char *folders = strutil_strdup(READ_APPCONFIG(MP_OPENFOLDERS));
@@ -336,6 +341,8 @@ MAppBase::ContinueStartup()
 bool
 MAppBase::OnStartup()
 {
+   #error "This version of Mahogany contains a lot of untested changes, please don't use it until it stabilizes a little (you need to edit the sources and recompile if you still want to use it in spite of the warning.)"
+
    // initialise the profile(s)
    // -------------------------
 

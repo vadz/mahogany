@@ -19,7 +19,6 @@
 
 #include "MObject.h"
 #include "FolderType.h"
-#include "kbList.h"
 
 #include <wx/fontenc.h>
 
@@ -35,6 +34,7 @@ class MFolder;
 class MLogCircle;
 class Profile;
 class Sequence;
+class ServerInfoEntry;
 class UIdArray;
 
 struct MailFolderStatus;
@@ -224,14 +224,6 @@ public:
    //@{
 
    /**
-     Get all currently opened folders. The returned pointer must be delete[]d
-     by the caller if not NULL.
-
-     @return the NULL-terminated array of currently opened MailFolders
-    */
-   static MailFolder **GetAllOpened();
-
-   /**
      Return the currently opened mailfolder for the given MFolder or NULL if it
      is not opened.
 
@@ -261,7 +253,7 @@ public:
     */
    //@{
 
-   /** Phyically deletes this folder.
+   /** Phyically deletes this folder and all of the messages in it.
        @return true on success
    */
    static bool DeleteFolder(const MFolder *mfolder);
@@ -280,22 +272,6 @@ public:
        @return the number of message deleted or -1 on error
    */
    static long ClearFolder(const MFolder *folder);
-
-   /**
-         Creates a mailbox profile and checks the settings to be
-         sensible.
-         @param name name of new folder profile
-         @param type type of folder
-         @param flags folder flags
-         @param optional path for folder
-         @param comment optional comment for the folder
-         @return false on error or true on success
-   */
-   static bool CreateFolder(const String &name,
-                            MFolderType type = MF_FILE,
-                            int flags = MF_FLAGS_DEFAULT,
-                            const String &path = "",
-                            const String &comment = "");
 
    /** Checks if it is OK to exit the application now.
        @param which Will either be set to empty or a '\n' delimited
@@ -412,12 +388,19 @@ public:
     */
    virtual bool CanSetFlag(int flags) const = 0;
 
-   /** Get name of mailbox.
-       @return the symbolic name of the mailbox
-   */
+   /**
+     Get the name of the mail folder: this is the user visible name which
+     appears in the folder tree (for the folders which live there), not the
+     path of the mailbox.
+
+     @return the full symbolic name of the mailbox
+    */
    virtual String GetName(void) const = 0;
 
-   /// Return IMAP spec
+   /**
+     Return the full specification of the folder, i.e. what makes it unique
+     among all folders of this class.
+    */
    virtual String GetImapSpec(void) const = 0;
 
    /// Return the folder's type.
@@ -431,9 +414,19 @@ public:
    */
    virtual Profile *GetProfile(void) const = 0;
 
+   /// Checks if the folder is in a critical section.
+   virtual bool IsInCriticalSection(void) const = 0;
+
    /// return class name
    const char *GetClassName(void) const
       { return "MailFolder"; }
+
+   /**
+     Create the server info entry for the given folder -- this is a backdoor
+     used by static ServerInfoEntry::GetOrCreate() to behave polymorphically
+     and shouldn't be used by anything else.
+    */
+   virtual ServerInfoEntry *CreateServerInfo(const MFolder *folder) const = 0;
 
    /**
       Returns the delimiter used to separate the components of the folder
@@ -840,11 +833,16 @@ public:
 
    //@}
 
-   /// Initialize the underlying mail library
+   /** @name mail subsystem initialization and shutdown */
+   //@{
+
+   /// Initialize the underlying mail library, return false on error
    static bool Init();
 
    /// Clean up for program exit.
-   static void CleanUp(void);
+   static void CleanUp();
+
+   //@}
 
    /** @name Interactivity control */
    //@{
@@ -892,6 +890,52 @@ protected:
    /// Close the folder
    virtual void Close(void) = 0;
 
+   /**
+     Check if the network connectivity is up if the given folder requires it
+
+     @param folder the folder we're going to access
+     @param frame the parent window for the dialog boxes
+     @return true if network is up or not required, false otherwise
+    */
+   static bool CheckNetwork(const MFolder *folder, wxFrame *frame);
+
+   /** @name Authentification info */
+   //@{
+
+   /**
+     Try to find login/password for the given folder looking among the
+     logins/passwords previosuly entered by user if they are not stored in the
+     folder itself. If it doesn't find it there neither, asks the user for the
+     password (and sets didAsk to true then)
+
+     @param mfolder the folder we need auth info for
+     @param login the variable containing username
+     @param password the variable containing password
+     @param didAsk a pointer (may be NULL) set to true if password was entered
+     @return true if the password is either not needed or was entered
+    */
+   static bool GetAuthInfoForFolder(const MFolder *mfolder,
+                                    String& login,
+                                    String& password,
+                                    bool *didAsk = NULL);
+
+   /**
+     Propose to the user to save the login and password temporarily (i.e. in
+     memory only for the duration of this session) or permanently (in config).
+
+     @param mf the opened folder with correct GetLogin()/GetPassword() values
+     @param folder for which the login and/or password should be saved
+     @param login the login name to save
+     @param password the password to save
+   */
+   static void ProposeSavePassword(MailFolder *mf,
+                                   MFolder *folder,
+                                   const String& login,
+                                   const String& password);
+
+   //@}
+
+
    /// the folder for which we had set default interactive frame
    static String ms_interactiveFolder;
 
@@ -905,25 +949,6 @@ private:
 
 // MailFolder_obj is a smart reference to MailFolder
 DECLARE_AUTOPTR_WITH_CONVERSION(MailFolder);
-
-// ----------------------------------------------------------------------------
-// global (but private to MailFolder) functions
-//
-// unfortunately for now these functions have to live here, it would be much
-// better to have some less clumsy initialization code... (FIXME)
-// ----------------------------------------------------------------------------
-
-/// init common MF code
-extern bool MailFolderCmnInit();
-
-// clean up common MF code data
-extern void MailFolderCmnCleanup();
-
-/// init cclient
-extern bool MailFolderCCInit();
-
-/// shutdown cclient
-extern void MailFolderCCCleanup();
 
 #endif // _MAILFOLDER_H
 

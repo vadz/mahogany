@@ -62,14 +62,12 @@ public:
    /** @name Constructors and destructor */
    //@{
    static MailFolder *OpenFolder(const MFolder *mfolder,
+                                 const String& login,
+                                 const String& password,
                                  OpenMode openmode,
                                  wxFrame *frame);
 
-   static bool CloseFolder(const MFolder *mfolder);
    //@}
-
-   static int CloseAll();
-   static MailFolder **GetAllOpened();
 
    /** Phyically deletes this folder.
        @return true on success
@@ -116,13 +114,18 @@ public:
    /// Return IMAP spec
    virtual String GetImapSpec(void) const { return m_ImapSpec; }
 
+   /// return full IMAP spec including the login name
+   static String GetFullImapSpec(const MFolder *folder, const String& login);
+
    /** Get the profile.
        @return Pointer to the profile.
    */
    virtual Profile *GetProfile(void) const { return m_Profile; }
 
    /// Checks if the folder is in a critical section.
-   bool InCritical(void) const { return m_InCritical; }
+   virtual bool IsInCriticalSection(void) const { return m_InCritical; }
+
+   virtual ServerInfoEntry *CreateServerInfo(const MFolder *folder) const;
 
    /// @name Folder operations
    //@{
@@ -470,28 +473,6 @@ private:
    bool NeedsAuthInfo() const
       { return !HasLogin() && m_mfolder->NeedsLogin(); }
 
-   /// propose the user to save the password temporarily or permanently
-   void ProposeSavePassword();
-
-   /// temporarily (i.e. for this session only) save password if we have it
-   void SavePasswordForSession();
-
-   /**
-     Try to find login/password for the given folder looking among the
-     logins/passwords previosuly entered by user if they are not stored in the
-     folder itself. If it doesn't find it there neither, asks the user for the
-     password (and sets didAsk to true then)
-
-     @param mfolder the folder we need auth info for
-     @param login the variable containing username
-     @param password the variable containing password
-     @param didAsk a pointer (may be NULL) set to true if password was entered
-     @return true if the password is either not needed or was entered
-    */
-   static bool GetAuthInfoForFolder(const MFolder *mfolder,
-                                    String& login,
-                                    String& password,
-                                    bool *didAsk = NULL);
    //@}
 
    /** @name c-client initialization */
@@ -639,18 +620,9 @@ private:
    /// a pointer to the object to use as default if lookup fails
    static MailFolderCC *ms_StreamListDefaultObj;
 
-   /// adds this object to Map
-   void AddToMap(const MAILSTREAM *stream, const String& login) const;
+   /// lookup object in map by its stream
+   static MailFolderCC *LookupObject(const MAILSTREAM *stream);
 
-   /// remove this object from Map
-   void RemoveFromMap(void) const;
-
-   /// find the stream in the map
-   static MailFolderCC *LookupStream(const MAILSTREAM *stream);
-
-   /// lookup object in map first by stream, then by name
-   static MailFolderCC *LookupObject(const MAILSTREAM *stream,
-                                     const char *name = NULL);
    //@}
 
    /** @name c-client parameters */
@@ -674,11 +646,6 @@ private:
    /// the path to ssh
    String m_SshPath;
    //@}
-
-#ifdef DEBUG
-   /// print a list of all streams
-   static void DebugStreams(void);
-#endif
 
    friend bool MailFolderCCInit();
    friend void MailFolderCCCleanup();

@@ -40,6 +40,10 @@
 #   define   AScheck()
 #endif
 
+// subscription code is not used for now and probably broken, so it is not
+// compiled in -- but keep it for the future
+//#define USE_SUBSCRIBE
+
 ASMailFolder::ResultImpl::~ResultImpl()
 {
    if ( m_Mf )
@@ -604,6 +608,8 @@ private:
    int m_Flags;
 };
 
+#ifdef USE_SUBSCRIBE
+
 class MT_Subscribe : public MailThread
 {
 public:
@@ -633,6 +639,8 @@ private:
    String  m_Name;
    bool    m_Sub;
 };
+
+#endif // USE_SUBSCRIBE
 
 class MT_ListFolders : public MailThread
 {
@@ -957,6 +965,7 @@ public:
 
    /**@name Subscription management */
    //@{
+#ifdef USE_SUBSCRIBE
    /** Subscribe to a given mailbox (related to the
        mailfolder/mailstream underlying this folder.
        @param host the server host, or empty for local newsspool
@@ -973,6 +982,8 @@ public:
          return (new MT_Subscribe(NULL, ud, host, protocol,
                                   mailboxname, subscribe))->Start();
       }
+#endif // USE_SUBSCRIBE
+
    /** Get a listing of all mailboxes.
        @param pattern a wildcard matching the folders to list
        @param subscribed_only if true, only the subscribed ones
@@ -1133,6 +1144,8 @@ ASTicketList * ASTicketList::Create(void)
 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#ifdef USE_SUBSCRIBE
+
 /** Subscribe to a given mailbox (related to the
     mailfolder/mailstream underlying this folder.
     @param mailboxname name of the mailbox to subscribe to
@@ -1148,6 +1161,8 @@ ASMailFolder::Subscribe(const String &host,
 {
    return ASMailFolderImpl::Subscribe(host, protocol, mailboxname, subscribe, ud);
 }
+
+#endif // USE_SUBSCRIBE
 
 Ticket
 ASMailFolder::ListFolders(const String &pattern,

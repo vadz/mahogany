@@ -99,8 +99,8 @@ class MEventWithFolderData : public MEventData
 public:
    /// ctor takes the (string) id for the event
    MEventWithFolderData(MEventId id = MEventId_Null,
-                        MailFolder *folder = NULL)
-      : MEventData(id) { m_Folder = folder; SafeIncRef(m_Folder); }
+                        MailFolder *mf = NULL)
+      : MEventData(id) { m_Folder = mf; SafeIncRef(m_Folder); }
 
    /// virtual dtor as in any base class
    virtual ~MEventWithFolderData() { SafeDecRef(m_Folder); }
@@ -200,9 +200,9 @@ private:
 class MEventFolderClosedData : public MEventWithFolderData
 {
 public:
-   /// ctor takes the array of deleted msgnos which will be deleted by us
-   MEventFolderClosedData(MailFolder *folder)
-      : MEventWithFolderData(MEventId_FolderClosed, folder)
+   /// ctor takes the pointer to the folder which had been closed
+   MEventFolderClosedData(MailFolder *mf)
+      : MEventWithFolderData(MEventId_FolderClosed, mf)
       {
       }
 };

@@ -63,6 +63,7 @@
 
 #include "MailFolderCmn.h"
 #include "MFPrivate.h"
+#include "mail/FolderPool.h"
 
 #include <wx/timer.h>
 #include <wx/datetime.h>
@@ -480,6 +481,11 @@ void MfCloseTimer::Notify(void)
 
 void MailFolderCmn::Close(void)
 {
+   // this folder shouldn't be reused by MailFolder::OpenFolder() any more as
+   // it is being closed anyhow, so prevent this from happening by removing it
+   // from the pool of available folders
+   MFPool::Remove(this);
+
    if ( m_headers )
    {
       // in case someone else holds to it
@@ -2124,7 +2130,7 @@ bool MfCmnEventReceiver::OnMEvent(MEventData& event)
 // global functions
 // ----------------------------------------------------------------------------
 
-extern bool MailFolderCmnInit()
+bool MailFolderCmnInit()
 {
    if ( !gs_MailFolderCloser )
    {
@@ -2134,7 +2140,7 @@ extern bool MailFolderCmnInit()
    return true;
 }
 
-extern void MailFolderCmnCleanup()
+void MailFolderCmnCleanup()
 {
    if ( gs_MailFolderCloser )
    {
@@ -2146,4 +2152,6 @@ extern void MailFolderCmnCleanup()
       delete mfCloser;
    }
 }
+
+static MFSubSystem gs_subsysCmn(MailFolderCmnInit, MailFolderCmnCleanup);
 

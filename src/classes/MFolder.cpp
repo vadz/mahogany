@@ -122,11 +122,13 @@ public:
    virtual void SetPath(const String& path) { m_path = path; }
    virtual String GetServer() const { return m_server; }
    virtual String GetLogin() const { return m_login; }
-   virtual String GetPassword() const {return m_password; }
+   virtual String GetPassword() const { return m_password; }
+   virtual void SetAuthInfo(const String& login, const String& password)
+      { m_login = login; m_password = password; }
    virtual String GetName() const { return m_fullname.AfterLast('/'); }
    virtual wxString GetFullName() const { return m_fullname; }
    virtual MFolderType GetType() const { return m_type; }
-   virtual const char *GetClass() const { return ""; }
+   virtual String GetClass() const { return ""; }
    virtual bool NeedsNetwork(void) const { return false; }
    virtual int GetIcon() const { return -1; }
    virtual void SetIcon(int /* icon */) { }
@@ -214,12 +216,13 @@ public:
    virtual String GetServer() const;
    virtual String GetLogin() const;
    virtual String GetPassword() const;
+   virtual void SetAuthInfo(const String& login, const String& password);
 
    virtual String GetName() const;
    virtual wxString GetFullName() const { return m_folderName; }
 
    virtual MFolderType GetType() const;
-   virtual const char *GetClass() const;
+   virtual String GetClass() const;
    virtual bool NeedsNetwork() const;
 
    virtual int GetIcon() const;
@@ -694,14 +697,31 @@ String MFolderFromProfile::GetPassword() const
    return strutil_decrypt(READ_CONFIG(m_profile, MP_FOLDER_PASSWORD));
 }
 
+void
+MFolderFromProfile::SetAuthInfo(const String& login, const String& password)
+{
+   m_profile->writeEntry(MP_FOLDER_LOGIN, login);
+   m_profile->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(password));
+}
+
 MFolderType MFolderFromProfile::GetType() const
 {
    return GetFolderType(READ_CONFIG(m_profile, MP_FOLDER_TYPE));
 }
 
-const char *MFolderFromProfile::GetClass() const
+String MFolderFromProfile::GetClass() const
 {
-   return READ_CONFIG_TEXT(m_profile, MP_FOLDER_CLASS);
+   String kind = READ_CONFIG_TEXT(m_profile, MP_FOLDER_CLASS);
+
+   // this is a hack needed for backwards compatibility and which also allows
+   // to have the empty default value for the folder class which saves quite
+   // some bytes in the profile
+   if ( kind.empty() )
+   {
+      kind = "cclient";
+   }
+
+   return kind;
 }
 
 bool MFolderFromProfile::NeedsNetwork() const
