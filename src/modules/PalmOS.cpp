@@ -233,6 +233,7 @@ private:
 
    void Backup(void);
    void Restore(void);
+   void Install(void);
    
    void InstallFiles(char ** fnames, int files_total);
    
@@ -300,13 +301,12 @@ PalmOSModule::ProcessMenuEvent(int id)
       case WXMENU_MODULES_PALMOS_BACKUP:
          Backup();
          return TRUE;
-#ifdef EXPERIMENTAL
       case WXMENU_MODULES_PALMOS_RESTORE:
          Restore();
          return TRUE;
       case WXMENU_MODULES_PALMOS_INSTALL:
+         Install();
          return TRUE;
-#endif
       case WXMENU_MODULES_PALMOS_CONFIG:
          Configure();
          return TRUE;
@@ -454,10 +454,8 @@ PalmOSModule::PalmOSModule(MInterface *minterface)
    palmOsMenu->Append(WXMENU_MODULES_PALMOS_SYNC, _("&Synchronise"));
    palmOsMenu->Break();
    palmOsMenu->Append(WXMENU_MODULES_PALMOS_BACKUP, _("&Backup"));
-#ifdef EXPERIMENTAL
    palmOsMenu->Append(WXMENU_MODULES_PALMOS_RESTORE, _("&Restore"));
    palmOsMenu->Append(WXMENU_MODULES_PALMOS_INSTALL, _("&Install"));
-#endif
    palmOsMenu->Break();
    palmOsMenu->Append(WXMENU_MODULES_PALMOS_CONFIG, _("&Configure"));
 
@@ -751,7 +749,7 @@ PalmOSModule::CreateFileList(char ***list, DIR * dir)
       }
 
       sprintf(name, "%s%s", m_BackupDir.c_str(), dirent->d_name);
-      filelist[filecount++] = strdup(name);
+      filelist[filecount++] = strutil_strdup(name);
    }
 
    *list = filelist;
@@ -1073,6 +1071,41 @@ PalmOSModule::Restore()
    DeleteFileList(fnames, ofile_total);
 }
 
+void
+PalmOSModule::Install()
+{
+   int    ofile_total; 
+   char ** fnames = 0;
+
+   MAppBase *mapp = m_MInterface->GetMApplication();
+
+   /*
+   wxString wxPFileSelector("PalmOS/InstallFilesDlg",
+                            _("Please pick databases to install"),
+                            "","","","*.p*|*",wxOPEN|wxMULTIPLE,
+                            (wxMainFrame *)mapp->TopLevelFrame());
+   */
+   
+   wxFileDialog fileDialog((wxMainFrame *)mapp->TopLevelFrame() ,
+                           _("Please pick databases to install"),
+                           "","", "*.p*|*", wxOPEN|wxMULTIPLE);
+   if ( fileDialog.ShowModal() != wxID_OK )
+      return;
+
+   wxArrayString fileNames;
+   fileDialog.GetFilenames(fileNames);
+
+   ofile_total = (int) fileNames.Count();
+   fnames = (char **) malloc( sizeof(char *) * ofile_total );
+   for(int i = 0; i < ofile_total; i++)
+      fnames[i] = strutil_strdup( fileNames[0] );
+
+   // install files
+   PiConnection conn(this);
+   if( IsConnected())
+      InstallFiles(fnames, ofile_total);
+   DeleteFileList(fnames, ofile_total);
+}
 
 void
 PalmOSModule::GetAddresses(PalmBook *palmbook)
