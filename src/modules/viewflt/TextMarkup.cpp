@@ -131,6 +131,7 @@ TextMarkupFilter::DoProcess(String& text,
                   textNormal = chLastSpecial + textSpecial + *pc;
 
                   state = Normal;
+                  textSpecial.clear();
                }
                else // matching tag
                {
