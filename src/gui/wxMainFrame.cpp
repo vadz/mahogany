@@ -570,7 +570,7 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
             {
                SearchCriterium crit;
 
-               Profile_obj profile = GetFolderProfile();
+               Profile_obj profile(GetFolderProfile());
                if ( ConfigureSearchMessages(&crit, profile, this) )
                {
                   //Ticket t = m_ASMailFolder->SearchMessages(&crit, this);

@@ -13,6 +13,8 @@
 #ifndef _MSEARCH_H_
 #define _MSEARCH_H_
 
+class MFolder;
+
 /**
   Search criterium for searching folders for certain messages.
  */
