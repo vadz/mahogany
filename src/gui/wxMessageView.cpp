@@ -1306,14 +1306,16 @@ wxMessageView::Print(void)
       wxSetAFMPath(afmpath);
 #endif // Win/Unix
 
-   wxPrinter printer(&((wxMApp *)mApplication)->GetPrintDialogData());
+   wxPrintDialogData pdd(*((wxMApp *)mApplication)->GetPrintData());
+   wxPrinter printer(& pdd);
    wxLayoutPrintout printout(GetLayoutList(), _("Mahogany: Printout"));
    if ( !printer.Print(this, &printout, TRUE) )
-   {
       wxMessageBox(_("There was a problem with printing the message:\n"
                      "perhaps your current printer is not set up correctly?"),
                    _("Printing"), wxOK);
-   }
+   else
+      (* ((wxMApp *)mApplication)->GetPrintData())
+         = printer.GetPrintDialogData().GetPrintData();
 }
 
 void
@@ -1334,21 +1336,22 @@ wxMessageView::PrintPreview(void)
 #endif // in/Unix
 
    // Pass two printout objects: for preview, and possible printing.
-   wxPrintPreview *preview = new wxPrintPreview(
+   wxPrintDialogData pdd(*((wxMApp *)mApplication)->GetPrintData());
+   wxPrintPreview preview (
       new wxLayoutPrintout(GetLayoutList()),
       new wxLayoutPrintout(GetLayoutList()),
-      &((wxMApp *)mApplication)->GetPrintDialogData()
-      );
-   if( !preview->Ok() )
+      &pdd);
+   if( !preview.Ok() )
    {
-      delete preview;
       wxMessageBox(_("There was a problem with showing the preview:\n"
                      "perhaps your current printer is not set correctly?"),
                    _("Previewing"), wxOK);
       return;
    }
+   (* ((wxMApp *)mApplication)->GetPrintData())
+      = preview.GetPrintDialogData().GetPrintData();
 
-   wxPreviewFrame *frame = new wxPreviewFrame(preview, GetFrame(m_Parent),
+   wxPreviewFrame *frame = new wxPreviewFrame(&preview, GetFrame(m_Parent),
                                               _("Print Preview"),
                                               wxPoint(100, 100), wxSize(600, 650));
    frame->Centre(wxBOTH);

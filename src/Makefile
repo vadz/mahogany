@@ -46,6 +46,7 @@ install: M
 	$(INSTALL_PROGRAM) M $(DATADIR)/$(CANONICAL_HOST)/bin
 	$(RM) -f $(BINDIR)/M $(DATADIR)/bin/M
 	ln -s ../share/M/$(CANONICAL_HOST)/bin/M $(BINDIR)
+	ln -s ../share/M/$(CANONICAL_HOST)/bin/M $(BINDIR)/mahogany
 	$(INSTALL) -d $(DATADIR)/icons
 	for i in icons/*.xpm ; do $(INSTALL_DATA) $$i $(DATADIR)/icons; done
 	$(MAKE) -C Python $@

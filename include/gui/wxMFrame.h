@@ -68,7 +68,7 @@ public:
    /// wxMFrame handles all print setup
    void OnPrintSetup();
    void OnPrintSetupPS();
-//   void OnPageSetup();
+   void OnPageSetup();
 //   void OnPageSetupPS();
 
    // callbacks

@@ -205,6 +205,14 @@
 #define MP_PRINT_FILE   "PrintFilenname"
 /// print in colour?
 #define MP_PRINT_COLOUR "PrintUseColour"
+/// top margin
+#define MP_PRINT_TOPMARGIN_X    "PrintMarginLeft"
+/// left margin
+#define MP_PRINT_TOPMARGIN_Y   "PrintMarginTop"
+/// bottom margin
+#define MP_PRINT_BOTTOMMARGIN_X    "PrintMarginRight"
+/// right margin
+#define MP_PRINT_BOTTOMMARGIN_Y   "PrintMarginBottom"
 //@}
 /**@name for BBDB address book support */
 //@{
@@ -520,7 +528,7 @@
 /// how often should we autosave the profile settings (0 to disable)?
 #define   MP_AUTOSAVEDELAY_D       60
 /// how often should we check for incoming mail (secs, 0 to disable)?
-#define   MP_POLLINCOMINGDELAY_D       60
+#define   MP_POLLINCOMINGDELAY_D       300
 /// ask user if he really wants to exit?
 #define   MP_CONFIRMEXIT_D      1
 /// open folders when they're clicked (otherwise - double clicked)
@@ -549,6 +557,14 @@
 #define MP_PRINT_FILE_D "mahogany.ps"
 /// print in colour?
 #define MP_PRINT_COLOUR_D 1
+/// top margin
+#define MP_PRINT_TOPMARGIN_X_D    0l
+/// left margin
+#define MP_PRINT_TOPMARGIN_Y_D   0l
+/// bottom margin
+#define MP_PRINT_BOTTOMMARGIN_X_D   0l
+/// right margin
+#define MP_PRINT_BOTTOMMARGIN_Y_D 0l
 //@}
 /**@name for BBDB address book support */
 //@{

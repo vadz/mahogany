@@ -286,14 +286,26 @@ wxMApp::OnInit()
 #endif
       
       // restore our preferred printer settings
+    m_PrintData = new wxPrintData;
+    m_PageSetupData = new wxPageSetupDialogData;
+#if defined(__WXGTK__) || defined(__WXMOTIF__)
+    (*m_PrintData) = * wxThePrintSetupData;
+#endif
+
 #if wxUSE_POSTSCRIPT
-      GetPrintData().SetPrinterCommand(READ_APPCONFIG(MP_PRINT_COMMAND));
-      GetPrintData().SetPrinterOptions(READ_APPCONFIG(MP_PRINT_OPTIONS));
-      GetPrintData().SetOrientation(READ_APPCONFIG(MP_PRINT_ORIENTATION));
-      GetPrintData().SetPrintMode((wxPrintMode)READ_APPCONFIG(MP_PRINT_MODE));
-      GetPrintData().SetPaperId((wxPaperSize)READ_APPCONFIG(MP_PRINT_PAPER));
-      GetPrintData().SetFilename(READ_APPCONFIG(MP_PRINT_FILE));
-      GetPrintData().SetColour(READ_APPCONFIG(MP_PRINT_COLOUR));
+      GetPrintData()->SetPrinterCommand(READ_APPCONFIG(MP_PRINT_COMMAND));
+      GetPrintData()->SetPrinterOptions(READ_APPCONFIG(MP_PRINT_OPTIONS));
+      GetPrintData()->SetOrientation(READ_APPCONFIG(MP_PRINT_ORIENTATION));
+      GetPrintData()->SetPrintMode((wxPrintMode)READ_APPCONFIG(MP_PRINT_MODE));
+      GetPrintData()->SetPaperId((wxPaperSize)READ_APPCONFIG(MP_PRINT_PAPER));
+      GetPrintData()->SetFilename(READ_APPCONFIG(MP_PRINT_FILE));
+      GetPrintData()->SetColour(READ_APPCONFIG(MP_PRINT_COLOUR));
+      GetPageSetupData()->SetMarginTopLeft(wxPoint(
+         READ_APPCONFIG(MP_PRINT_TOPMARGIN_X),
+         READ_APPCONFIG(MP_PRINT_TOPMARGIN_X)));
+      GetPageSetupData()->SetMarginBottomRight(wxPoint(
+         READ_APPCONFIG(MP_PRINT_BOTTOMMARGIN_X),
+         READ_APPCONFIG(MP_PRINT_BOTTOMMARGIN_X)));
 #endif // wxUSE_POSTSCRIPT
       
       // start a timer to autosave the profile entries
@@ -336,14 +348,20 @@ int wxMApp::OnExit()
 
 #if wxUSE_POSTSCRIPT
    // save our preferred printer settings
-   m_profile->writeEntry(MP_PRINT_COMMAND, GetPrintData().GetPrinterCommand());
-   m_profile->writeEntry(MP_PRINT_OPTIONS, GetPrintData().GetPrinterOptions());
-   m_profile->writeEntry(MP_PRINT_ORIENTATION, GetPrintData().GetOrientation());
-   m_profile->writeEntry(MP_PRINT_MODE, GetPrintData().GetPrintMode());
-   m_profile->writeEntry(MP_PRINT_PAPER, GetPrintData().GetPaperId());
-   m_profile->writeEntry(MP_PRINT_FILE, GetPrintData().GetFilename());
-   m_profile->writeEntry(MP_PRINT_COLOUR, GetPrintData().GetColour());
+   m_profile->writeEntry(MP_PRINT_COMMAND, GetPrintData()->GetPrinterCommand());
+   m_profile->writeEntry(MP_PRINT_OPTIONS, GetPrintData()->GetPrinterOptions());
+   m_profile->writeEntry(MP_PRINT_ORIENTATION, GetPrintData()->GetOrientation());
+   m_profile->writeEntry(MP_PRINT_MODE, GetPrintData()->GetPrintMode());
+   m_profile->writeEntry(MP_PRINT_PAPER, GetPrintData()->GetPaperId());
+   m_profile->writeEntry(MP_PRINT_FILE, GetPrintData()->GetFilename());
+   m_profile->writeEntry(MP_PRINT_COLOUR, GetPrintData()->GetColour());
+   m_profile->writeEntry(MP_PRINT_TOPMARGIN_X, GetPageSetupData()->GetMarginTopLeft().x);
+   m_profile->writeEntry(MP_PRINT_TOPMARGIN_Y, GetPageSetupData()->GetMarginTopLeft().y);
+   m_profile->writeEntry(MP_PRINT_BOTTOMMARGIN_X, GetPageSetupData()->GetMarginBottomRight().x);
+   m_profile->writeEntry(MP_PRINT_BOTTOMMARGIN_Y, GetPageSetupData()->GetMarginBottomRight().y);
 #endif // wxUSE_POSTSCRIPT
+   delete m_PrintData;
+   delete m_PageSetupData;
 
    MAppBase::OnShutDown();
 

@@ -58,11 +58,10 @@ public:
    /// Destructor
    ~wxMApp();
 
-   /// get a reference to the print data
-   wxPrintData& GetPrintData(void) { return m_PrintDialogData.GetPrintData(); }
-
-   /// get the print dialog setup data
-   wxPrintDialogData& GetPrintDialogData(void) { return m_PrintDialogData; }
+   /// get a pointer to the print data
+   wxPrintData * GetPrintData(void) { return m_PrintData; }
+   /// get the page setup data
+   wxPageSetupData * GetPageSetupData(void) { return m_PageSetupData; }
 
 private:
    /// an iconmanager instance
@@ -72,7 +71,9 @@ private:
    /// a locale for translation
    class wxLocale *m_Locale;
    /// data for printing
-   wxPrintDialogData m_PrintDialogData;
+   wxPrintData *m_PrintData;
+   // page setup for printing
+   wxPageSetupData *m_PageSetupData;
 };
 
 // ----------------------------------------------------------------------------
