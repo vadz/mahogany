@@ -47,6 +47,7 @@ install: all
 	ln -fs $(DATADIR)/$(CANONICAL_HOST)/bin/M $(DATADIR)/bin
 	$(INSTALL) -d $(DATADIR)/icons
 	$(INSTALL_DATA) `find icons/* -prune -not -type d` $(DATADIR)/icons
+	$(MAKE) -C Python $@
 
 .PHONY: all dep clean doc semistatic static allclean install
 

@@ -111,6 +111,12 @@ MailFolderCC::OpenFolder(String const &name)
    return NULL;
 }
 
+MailFolderCC *
+MailFolderCC::OpenFolder(MailFolderType type, String const &name)
+{
+   return NULL; // not implemented yet, needs new system of tracking mailboxes
+}
+
 void
 MailFolderCC::Close(void)
 {
@@ -175,7 +181,7 @@ MailFolderCC::Create(String const & iname)
       }
       else
       {
-         SetType((MFolder::Type)READ_CONFIG(profile, (int)MP_FOLDER_TYPE));
+         SetType((MailFolderType)READ_CONFIG(profile, (int)MP_FOLDER_TYPE));
          Open(filename);
       }
    }

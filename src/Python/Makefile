@@ -5,7 +5,7 @@
 
 CWD = Python
 
-SWIGSRC = MAppBase.i MailFolder.i String.i Profile.i Message.i
+SWIGSRC = MAppBase.i MailFolder.i String.i Profile.i Message.i MObject.i
 CPPSRC = InitPython.cpp PythonHelp.cpp
 SRC=$(CXXSRC) *.cpp
 
@@ -20,6 +20,13 @@ all:	$(OBJECTS)
 include ../../makerules 
 include ../../makeopts
 include .depend
+
+install:
+	$(INSTALL) -d $(DATADIR)/scripts
+	$(INSTALL_DATA) *.py $(DATADIR)/scripts
+	$(INSTALL_DATA) Scripts/*.py $(DATADIR)/scripts
+	$(INSTALL) -d $(DOCDIR)/Python
+	$(INSTALL_DATA) *.doc $(DOCDIR)/Python
 
 clean:
 	$(RM) *.o *.so *.pyc *.py *.doc $(CPPTARGETS)

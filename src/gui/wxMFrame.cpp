@@ -30,6 +30,9 @@
 #  include "gui/wxMApp.h"
 #endif
 
+#include   <Python.h>
+#include "PythonHelp.h"
+
 #include "Message.h"
 #include "FolderView.h"
 #include "MailFolder.h"
@@ -220,7 +223,28 @@ wxMFrame::OnMenuCommand(int id)
       (new wxComposeView("ComposeView", this))->Show();
       break;
    }
-
+   case WXMENU_FILE_SCRIPT:
+   {
+      String
+         path,
+         filename;
+      
+      path << mApplication->GetGlobalDir() << DIR_SEPARATOR << "scripts";
+      filename = MDialog_FileRequester(
+         "Please select a Python script to run.",
+         this, path, filename, "py", "*.py?", false, NULL /* profile
+                                                           */);
+      if(! strutil_isempty(filename))
+      {
+         FILE *file = fopen(filename,"rb");
+         if(file)
+         {
+            PyH_RunScript(file,filename);
+            fclose(file);
+         }
+         break;
+      }
+   }
    case WXMENU_FILE_EXIT:
       mApplication->Exit();
       break;

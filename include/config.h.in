@@ -78,6 +78,9 @@
 /** Define if you use Python. */
 #undef USE_PYTHON
 
+/** Define if you have libswigpy */
+#undef HAVE_SWIGLIB
+
 /** Define if the C++ compiler supports prototypes (of course it
     does!) - required for Python.h */
 #undef HAVE_PROTOTYPES

@@ -174,11 +174,20 @@ static PyObject *_wrap_MDialog_FatalErrorMessage(PyObject *self, PyObject *args)
 static PyObject *_wrap_MDialog_Message(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
     char * _arg0;
+    MFrame * _arg1 = NULL;
+    char * _arg2 = MDIALOG_MSGTITLE_C;
+    char * _argc1 = 0;
 
     self = self;
-    if(!PyArg_ParseTuple(args,"s:MDialog_Message",&_arg0)) 
+    if(!PyArg_ParseTuple(args,"s|ss:MDialog_Message",&_arg0,&_argc1,&_arg2)) 
         return NULL;
-    MDialog_Message(_arg0);
+    if (_argc1) {
+        if (SWIG_GetPtr(_argc1,(void **) &_arg1,"_MFrame_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 2 of MDialog_Message. Expected _MFrame_p.");
+        return NULL;
+        }
+    }
+    MDialog_Message(_arg0,_arg1,_arg2);
     Py_INCREF(Py_None);
     _resultobj = Py_None;
     return _resultobj;
@@ -301,6 +310,38 @@ static PyObject *_wrap_MDialog_FileRequester(PyObject *self, PyObject *args) {
     }
     _result = (char *)MDialog_FileRequester(*_arg0,_arg1,*_arg2,*_arg3,*_arg4,*_arg5,_arg6,_arg7);
     _resultobj = Py_BuildValue("s", _result);
+    return _resultobj;
+}
+
+static PyObject *_wrap_MInputBox(PyObject *self, PyObject *args) {
+    PyObject * _resultobj;
+    bool  _result;
+    String * _arg0;
+    char * _arg1;
+    char * _arg2;
+    MWindow * _arg3 = NULL;
+    char * _arg4 = NULL;
+    char * _arg5 = NULL;
+    char * _argc0 = 0;
+    char * _argc3 = 0;
+
+    self = self;
+    if(!PyArg_ParseTuple(args,"sss|sss:MInputBox",&_argc0,&_arg1,&_arg2,&_argc3,&_arg4,&_arg5)) 
+        return NULL;
+    if (_argc0) {
+        if (SWIG_GetPtr(_argc0,(void **) &_arg0,"_String_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 1 of MInputBox. Expected _String_p.");
+        return NULL;
+        }
+    }
+    if (_argc3) {
+        if (SWIG_GetPtr(_argc3,(void **) &_arg3,"_MWindow_p")) {
+            PyErr_SetString(PyExc_TypeError,"Type error in argument 4 of MInputBox. Expected _MWindow_p.");
+        return NULL;
+        }
+    }
+    _result = (bool )MInputBox(_arg0,_arg1,_arg2,_arg3,_arg4,_arg5);
+    _resultobj = Py_BuildValue("i",_result);
     return _resultobj;
 }
 
@@ -497,6 +538,7 @@ static PyMethodDef MAppBasecMethods[] = {
 	 { "MAppBase_GetText", _wrap_MAppBase_GetText, 1 },
 	 { "MAppBase_TopLevelFrame", _wrap_MAppBase_TopLevelFrame, 1 },
 	 { "MAppBase_Exit", _wrap_MAppBase_Exit, 1 },
+	 { "MInputBox", _wrap_MInputBox, 1 },
 	 { "MDialog_FileRequester", _wrap_MDialog_FileRequester, 1 },
 	 { "MDialog_YesNoDialog", _wrap_MDialog_YesNoDialog, 1 },
 	 { "MDialog_StatusMessage", _wrap_MDialog_StatusMessage, 1 },

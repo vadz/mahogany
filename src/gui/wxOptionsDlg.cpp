@@ -89,6 +89,7 @@ enum ConfigFields
   // python
   ConfigField_PythonFirst = ConfigField_FoldersLast,
   ConfigField_EnablePython,
+  ConfigField_PythonPath,
   ConfigField_StartupScript,
   ConfigField_CallbackFolderOpen,
   ConfigField_CallbackFolderUpdate,
@@ -409,6 +410,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
 
   // python
   { "&Enable Python",               Field_Bool,    -1,                        },
+  { "Python &Path",                 Field_Text,    ConfigField_EnablePython   },
   { "&Startup script",              Field_File,    ConfigField_EnablePython   },
   { "&Folder open callback",        Field_Text,    ConfigField_EnablePython   },
   { "Folder &update callback",      Field_Text,    ConfigField_EnablePython   },
@@ -459,6 +461,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
 
   // python
   CONFIG_ENTRY(MC_USEPYTHON),
+  CONFIG_ENTRY(MC_PYTHONPATH),
   CONFIG_ENTRY(MC_STARTUPSCRIPT),
   CONFIG_ENTRY(MCB_FOLDEROPEN),
   CONFIG_ENTRY(MCB_FOLDERUPDATE),

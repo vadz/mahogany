@@ -13,7 +13,18 @@
 #include	"Profile.h"
 #include	"FolderView.h"
 
-#include	"MailFolder.h"
+#include   "MailFolder.h"
+#include   "MailFolderCC.h"
+
+MailFolder *
+MailFolder::OpenFolder(MailFolderType type, String const &name)
+{
+   if(type == MF_PROFILE)
+      return MailFolderCC::OpenFolder(name);
+   else
+      return NULL;
+}
+
 
 MailFolder::~MailFolder()
 {

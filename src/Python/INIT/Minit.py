@@ -44,7 +44,7 @@ def GetUserName():
 
 def Minit():
     msg = "Welcome, " + GetUserName() + ", to the wonderful world of M/Python integration!"
-    MAppBase.MDialog_StatusMessage(msg)
+    MAppBase.MDialog_Message(msg)
 
 ####################################################################
 #                                                                  #
@@ -62,5 +62,3 @@ def OpenFolderCallback(name, arg):
     msg = msg + "\n  from the mailfolder called:" + mf.GetName().c_str()
     msg = msg + "\n  The folder contains " + mf.CountMessages() + " messages."
     MAppBase.MDialog_Message(msg);
-
-

@@ -132,6 +132,10 @@ bool PyH_CallFunction(const char *func,
                       PyObject *parg
    )
 {
+   // first check if Python is not disabled
+   if ( !READ_APPCONFIG(MC_USEPYTHON) )
+      return false;
+
    PyObject
       *module,
       *function,
@@ -187,6 +191,10 @@ bool PyH_CallFunctionVa(const char *func,
                         const char *argfmt, ...
    )
 {
+   // first check if Python is not disabled
+   if ( !READ_APPCONFIG(MC_USEPYTHON) )
+      return false;
+
    PyObject
       *module,
       *function,
@@ -341,6 +349,15 @@ PyH_RunFunction(const char *funcname, const char *modname,          /* load from
     Py_DECREF(args);                                  /* result may be None */
     return PyH_ConvertResult(presult, resfmt, cresult);  /* convert result to C */
 }
+
+void
+PyH_RunScript(struct FILE *file, const char *filename)
+{
+   // first check if Python is not disabled
+   if ( READ_APPCONFIG(MC_USEPYTHON) )
+      PyRun_SimpleFile(file, (char *) filename);
+}
+
 
 #define GPEM_ERROR(what) {errorMsg = "<Error getting traceback - " ##what ## ">";goto done;}
 

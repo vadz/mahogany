@@ -103,14 +103,14 @@ MAppBase::VerifySettings(void)
    }
 
 #  ifdef OS_UNIX
-      if( strutil_isempty(READ_APPCONFIG(MC_USERDIR)) )
-      {
-         wxString strHome;
-         //FIXME wxGetHomeDir(&strHome);
-         strHome = getenv("HOME");
-         strHome << DIR_SEPARATOR << READ_APPCONFIG(MC_USER_MDIR);
-         m_profile->writeEntry(MC_USERDIR, strHome);
-      }
+   if( strutil_isempty(READ_APPCONFIG(MC_USERDIR)) )
+   {
+      wxString strHome;
+      //FIXME wxGetHomeDir(&strHome);
+      strHome = getenv("HOME");
+      strHome << DIR_SEPARATOR << READ_APPCONFIG(MC_USER_MDIR);
+      m_profile->writeEntry(MC_USERDIR, strHome);
+   }
 #  endif // Unix
 
    if( strutil_isempty(READ_APPCONFIG(MP_HOSTNAME)) )
@@ -171,9 +171,9 @@ MAppBase::OnStartup()
    // do we have gettext()?
    // ---------------------
 #  ifdef  USE_GETTEXT
-      setlocale (LC_ALL, "");
-      //bindtextdomain (M_APPLICATIONNAME, LOCALEDIR);
-      textdomain (M_APPLICATIONNAME);
+   setlocale (LC_ALL, "");
+   //bindtextdomain (M_APPLICATIONNAME, LOCALEDIR);
+   textdomain (M_APPLICATIONNAME);
 #  endif // USE_GETTEXT
 
 
@@ -185,14 +185,35 @@ MAppBase::OnStartup()
    // --------------------
    String tmp;
 #  ifdef OS_UNIX
+
+   tmp = READ_APPCONFIG(MC_ROOTPATH);
+   if(PathFinder::IsDir(tmp))
+      m_globalDir = tmp;
+   else // look for it
+   {
       bool   found;
       String strRootDir = READ_APPCONFIG(MC_ROOTDIRNAME);
       PathFinder pf(READ_APPCONFIG(MC_PATHLIST));
-      pf.AddPaths(M_DATADIR);
-
       m_globalDir = pf.FindDir(strRootDir, &found);
-
-      if(! found)
+      
+      // this takes rather long, so we only try it once
+      if(bFirstRun)
+      {
+         if(found)
+            m_profile->writeEntry(MC_ROOTPATH,strRootDir);
+         else
+         {
+            // this takes a while!
+            pf.AddPaths(M_PREFIX,true);
+            m_globalDir = pf.FindDir(strRootDir, &found);
+         }
+      }
+      if(found)
+      {
+         if(bFirstRun)
+            m_profile->writeEntry(MC_ROOTPATH,strRootDir);
+      }
+      else
       {
          String msg = _("Cannot find global directory \"");
          msg += strRootDir;
@@ -200,19 +221,20 @@ MAppBase::OnStartup()
          msg += String(READ_APPCONFIG(MC_PATHLIST));
          ERRORMESSAGE((Str(msg)));
       }
-
-      m_localDir = wxExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
+   }
+   
+   m_localDir = wxExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
 #  else  //Windows
-      // under Windows our directory is always the one where the executable is
-      // located. At least we're sure that it exists this way...
-      wxString strPath;
-      ::GetModuleFileName(::GetModuleHandle(NULL),
-                          strPath.GetWriteBuf(MAX_PATH), MAX_PATH);
-      strPath.UngetWriteBuf();
+   // under Windows our directory is always the one where the executable is
+   // located. At least we're sure that it exists this way...
+   wxString strPath;
+   ::GetModuleFileName(::GetModuleHandle(NULL),
+                       strPath.GetWriteBuf(MAX_PATH), MAX_PATH);
+   strPath.UngetWriteBuf();
 
-      // extract the dir name
-      wxSplitPath(strPath, &m_globalDir, NULL, NULL);
-      m_localDir = m_globalDir;
+   // extract the dir name
+   wxSplitPath(strPath, &m_globalDir, NULL, NULL);
+   m_localDir = m_globalDir;
 #  endif //Unix
 
    // create and show the main program window
@@ -220,25 +242,26 @@ MAppBase::OnStartup()
 
    // it doesn't seem to do anything under Windows (though it should...)
 #  ifndef OS_WIN
-      // extend path for commands, look in M's dirs first
-      tmp = "";
-      tmp += GetLocalDir();
-      tmp += "/scripts";
-      tmp += PATH_SEPARATOR;
-      tmp = GetGlobalDir();
-      tmp += "/scripts";
-      tmp += PATH_SEPARATOR;
-      if(getenv("PATH"))
-         tmp += getenv("PATH");
-      tmp="PATH="+tmp;
-      putenv(tmp.c_str());
+   // extend path for commands, look in M's dirs first
+   tmp = "";
+   tmp += GetLocalDir();
+   tmp += "/scripts";
+   tmp += PATH_SEPARATOR;
+   tmp = GetGlobalDir();
+   tmp += "/scripts";
+   tmp += PATH_SEPARATOR;
+   if(getenv("PATH"))
+      tmp += getenv("PATH");
+   tmp="PATH="+tmp;
+   putenv(tmp.c_str());
 #  endif //OS_WIN
 
    // initialise python interpreter
 #  ifdef  USE_PYTHON
    // having the same error message each time M is started is annoying, so
    // give the user a possibility to disable it
-   if ( READ_APPCONFIG(MC_USEPYTHON) && !InitPython() ) {
+   if ( ! InitPython() )
+   {
       // otherwise it would hide our message box
       CloseSplash();
 
@@ -322,9 +345,9 @@ const char *
 MAppBase::GetText(const char *in)
 {
 #  ifdef   USE_GETTEXT
-      return   gettext(in);
+   return   gettext(in);
 #  else
-      return   in;
+   return   in;
 #  endif
 }
 

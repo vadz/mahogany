@@ -16,6 +16,7 @@
 #   include   "Mdefaults.h"
 #   include   "MApplication.h"
 #   include   "gui/wxMApp.h"
+#   include   "strutil.h"
 #endif
 
 #include   "Python.h"
@@ -30,6 +31,7 @@ extern "C"
    void initMailFolderc();
    void initMAppBasec();
    void initMessagec();
+   void initMObjectc();
 };
 
 
@@ -59,37 +61,48 @@ bool
 InitPython(void)
 {
    String
-      tmp;
+      tmp, path;
 
    // VZ: I don't know why, but Python ignores this variable if it's set from
    //     here under Windows - so don't waste our efforts...
 #  ifndef OS_WIN
-      // initialise python interpreter
-      tmp = "PYTHONPATH=";
-      tmp += mApplication->GetLocalDir();
-      tmp += "/scripts";
-      tmp += PATH_SEPARATOR;
-      tmp += mApplication->GetGlobalDir();
-      tmp += "/scripts";
-      tmp += PATH_SEPARATOR;
+   // initialise python interpreter
+   tmp = "PYTHONPATH=";
+   path = mApplication->GetProfile()->readEntry(MC_PYTHONPATH,MC_PYTHONPATH_D);
+   if(strutil_isempty(path))
+   {
+      path += mApplication->GetLocalDir();
+      path += "/scripts";
+      path += PATH_SEPARATOR;
+      path += mApplication->GetGlobalDir();
+      path += "/scripts";
+      tmp += path;
+      mApplication->GetProfile()->writeEntry(MC_PYTHONPATH,path);
+   }
+   else
       tmp += mApplication->GetProfile()->readEntry(MC_PYTHONPATH,MC_PYTHONPATH_D);
-      if(getenv("PYTHONPATH"))
-      {
-         tmp += PATH_SEPARATOR;
-         tmp += getenv("PYTHONPATH");
-      }
-      putenv(tmp.c_str());
+   if(getenv("PYTHONPATH"))
+   {
+      tmp += PATH_SEPARATOR;
+      tmp += getenv("PYTHONPATH");
+   }
+   putenv(tmp.c_str());
 #  endif
 
-   // initialise the interpreter
+   // initialise the interpreter - this we do always, just to avoid problems
    Py_Initialize();
-      
+
+   if(mApplication->GetProfile()->readEntry(MC_USEPYTHON,
+                                            MC_USEPYTHON_D) == false)
+      return true; // it is not an error to have it disabled
+   
    // initialise the modules
    initMStringc();
    initMProfilec();
    initMailFolderc();
    initMAppBasec();
    initMessagec();
+   initMObjectc();
 
    // the return code
    bool rc = TRUE;

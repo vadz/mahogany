@@ -78,6 +78,10 @@ def MDialog_FileRequester(arg0,*args):
     val = apply(MAppBasec.MDialog_FileRequester,(arg0.this,)+args)
     return val
 
+def MInputBox(arg0,arg1,arg2,*args):
+    val = apply(MAppBasec.MInputBox,(arg0.this,arg1,arg2,)+args)
+    return val
+
 
 
 #-------------- VARIABLE WRAPPERS ------------------

@@ -320,7 +320,8 @@ if test "$USE_PYTHON" = 1 ; then
              /home/local/python1.5/config\
            ],
            [ AC_CHECK_LIB(swigpy,main,
-              [ AC_DEFINE(USE_PYTHON)
+             [  AC_DEFINE(USE_PYTHON)
+                AC_DEFINE(HAVE_SWIGLIB)
                 MAKE_USE_PYTHON="USE_PYTHON=yes"
                 PYTHON_LIBS="$libpath_python1_5_main -lpython1.5 -lswigpy"
               ],
@@ -342,19 +343,27 @@ dnl --------------------------------------------------------------------------
 dnl check for (wx)gtk libraries
 dnl --------------------------------------------------------------------------
 
-dnl check for gtk-config
-AC_PATH_PROG(GTK_CONFIG,gtk-config,yes,no)
-dnl we don't set the LIBS directly as libwx_gtk might break other
-dnl checks thanks to its included main() function
-if test "$GTK_CONFIG" = yes
+dnl check for wx-config
+AC_PATH_PROG(WX_CONFIG,wx-config)
+if test "x$WX_CONFIG" != "x"
 then
-	GTK_CFLAGS=`gtk-config --cflags`
-	GTK_LDFLAGS=`gtk-config --libs`
+	GTK_CFLAGS=`$WX_CONFIG --cflags`
+	GTK_LDFLAGS=`$WX_CONFIG --libs`
 else
-	dnl find the X11 include and library files -- our best guess
-	AC_PATH_XTRA
-	GTK_CFLAGS="$X_CFLAGS"
-	GTK_LDFLAGS="-lgtk -lgdk -lglib $X_EXTRA_LIBS"
+	dnl check for gtk-config
+	AC_PATH_PROG(GTK_CONFIG,gtk-config,yes,no)
+	dnl we don't set the LIBS directly as libwx_gtk might break other
+	dnl checks thanks to its included main() function
+	if test "$GTK_CONFIG" = yes
+	then
+		GTK_CFLAGS=`gtk-config --cflags`
+		GTK_LDFLAGS=`gtk-config --libs`
+	else
+		dnl find the X11 include and library files -- our best guess
+		AC_PATH_XTRA
+		GTK_CFLAGS="$X_CFLAGS"
+		GTK_LDFLAGS="-lgtk -lgdk -lglib $X_EXTRA_LIBS"
+	fi
 fi
 
 CPPFLAGS="$CPPFLAGS $GTK_CFLAGS"
@@ -365,8 +374,7 @@ AC_CHECK_HEADERS(wx/wx.h,,AC_MSG_ERROR("Cannot find wx/wx.h header file."))
 dnl We do not explicitly check for all the gtk/gdk/glib libraries. If
 dnl they are not installed, the test for wx_gtk will fail anyway.
 
-AC_CHECK_LIB(wx_gtk,main,,
-	AC_MSG_ERROR("wx_gtk library is required."),$GTK_LDFLAGS)
+AC_CHECK_LIB(wx_gtk,main,,AC_MSG_ERROR("wx_gtk library is required."),$GTK_LDFLAGS)
 
 dnl --------------------------------------------------------------------------
 dnl c-client library: set the proper OSTYPE and compiler variables

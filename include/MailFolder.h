@@ -19,6 +19,27 @@
 #define	MSG_STAT_RECENT    8
 #define	MSG_STAT_SEARCHED 16
 
+
+class FolderViewBase;
+
+/// which type is this mailfolder? (consistent with c-client?)
+enum MailFolderType
+{
+   /// system inbox
+   MF_INBOX = 0,
+   /// mbox file
+   MF_FILE = 1,
+   /// pop3
+   MF_POP = 2,
+   /// imap
+   MF_IMAP = 3,
+   /// newsgroup
+   MF_NNTP = 4,
+   /// read type etc from profile
+   MF_PROFILE
+};
+
+
 /**
    MailFolder base class, represents anything containig mails.
 
@@ -29,8 +50,6 @@
    Before really using an object of this class, one must either
    connect it to a file or open a connection for it.
    */
-
-class FolderViewBase;
 class MailFolder
 {
 public:   
@@ -40,8 +59,14 @@ public:
    /// default destructor
    virtual ~MailFolder();
 
-   //@}
+   /**
+      Opens an existing mail folder of a certain type.
+      @param type one of the supported types
+      @name either a hostname, filename or newgroup name, depending on type
+   */
+   static MailFolder * OpenFolder(MailFolderType type, String const &name);
 
+   //@}
    ProfileBase 	*profile;
    
 protected:

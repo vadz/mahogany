@@ -341,17 +341,6 @@ MDialog_YesNoDialog(const char *message,
        @param save   if true, for saving a file
        @return pointer to a temporarily allocated buffer with he filename, or NULL
    */
-#if 0
-const char *
-MDialog_FileRequester(const char *message,
-          MWindow *parent,
-          const char *path,
-          const char *filename,
-          const char *extension,
-            const char *wildcard,
-            bool save,
-            ProfileBase *profile)
-#endif
 const char *
 MDialog_FileRequester(String const & message,
                       MWindow *parent,

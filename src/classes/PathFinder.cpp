@@ -57,7 +57,7 @@ PathFinder::AddPaths(STRINGARG ipathlist, bool recursive)
       if(recursive && IsDir(found))   // look for subdirectories
       {
          tmp = String(found) + ANYFILE;
-         nextfile = wxFindFirstFile(tmp.c_str());
+         nextfile = wxFindFirstFile(tmp.c_str(), wxDIR);
          while(nextfile)
          {
             if(IsDir(nextfile))
@@ -73,7 +73,7 @@ PathFinder::AddPaths(STRINGARG ipathlist, bool recursive)
    }
    delete[] work;
    if(subdirList.length() > 0)
-      AddPaths(subdirList);
+      AddPaths(subdirList, recursive);
 }
 
 String

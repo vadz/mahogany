@@ -73,7 +73,9 @@ void  MDialog_FatalErrorMessage(const char *message,
                                 MFrame *parent = NULL,
                                 const char  *title = MDIALOG_FATALERRTITLE_C);
 
-void  MDialog_Message(const char *message);
+void  MDialog_Message(const char *message,
+                      MFrame *parent = NULL,
+                      const char *title = MDIALOG_MSGTITLE_C);
 
 void  MDialog_StatusMessage(const char *message, MFrame *frame = NULL);
 
@@ -97,6 +99,13 @@ char *MDialog_FileRequester(String  &message,
                             String &wildcard = NULLstring,
                             bool save = false,
                             ProfileBase *profile = NULL);
+
+bool MInputBox(String *pstr,
+               const char * caption,
+               const char * prompt,
+               MWindow *parent = NULL,
+               const char *key = NULL,
+               const char *def = NULL);
 
 /*
   AdbEntry *

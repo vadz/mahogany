@@ -27,11 +27,6 @@
 /// read from a normal profile   
 #define   READ_CONFIG(profile, key) profile->readEntry(key, key##_D)
 
-#ifndef STRINGARG
-#define   STRINGARG String const &
-//#define   STRINGARG String
-#endif
-
 // ----------------------------------------------------------------------------
 // classes
 // ----------------------------------------------------------------------------
@@ -54,41 +49,41 @@ class ProfileBase : public MObjectRC
 {
 public:
    /// Create a normal Profile object
-   static ProfileBase * CreateProfile(STRINGARG classname, ProfileBase const *parent);
+   static ProfileBase * CreateProfile(String const & classname, ProfileBase const *parent);
    /// Create a global configuration profile object
-   static ProfileBase * CreateGlobalConfig(STRINGARG  filename);
+   static ProfileBase * CreateGlobalConfig(String const &  filename);
    
    /**@name Reading and writing entries.
       All these functions are just identical to the wxConfig ones.
    */
    //@{
    /// Read a character entry.
-   virtual String readEntry(STRINGARG key,
-                            STRINGARG defaultvalue = (const char *)NULL) const = 0;
+   virtual String readEntry(String const & key,
+                            String const & defaultvalue = (const char *)NULL) const = 0;
    /// Read a character entry.
-   String readEntry(STRINGARG  key,
+   String readEntry(String const &  key,
                     const char *defaultvalue = NULL) const;
    /// Read an integer value.
-   virtual long readEntry(STRINGARG key, long defaultvalue) const = 0;
+   virtual long readEntry(String const & key, long defaultvalue) const = 0;
    /// Read an integer value.
-   virtual int readEntry(STRINGARG key, int defaultvalue) const
+   virtual int readEntry(String const & key, int defaultvalue) const
       { return (int) readEntry(key, (long)defaultvalue); }
    /// Write back the character value.
-   virtual bool writeEntry(STRINGARG key, STRINGARG Value) = 0;
+   virtual bool writeEntry(String const & key, String const & Value) = 0;
    /// Write back the int value.
-   virtual bool writeEntry(STRINGARG key, long Value) = 0;
+   virtual bool writeEntry(String const & key, long Value) = 0;
    /// Write back the int value.
-   virtual bool writeEntry(STRINGARG key, int Value)
+   virtual bool writeEntry(String const & key, int Value)
       { return writeEntry(key, (long)Value); }
    //@}
    /// set the path within the profile,just like cd
-   virtual void   SetPath(STRINGARG path) = 0;
+   virtual void   SetPath(String const & path) = 0;
    /// query the current path
    virtual String GetPath(void) const = 0;
    /// return true if the entry is defined
-   virtual bool HasEntry(STRINGARG key) const = 0;
+   virtual bool HasEntry(String const & key) const = 0;
    /// delete the entry group specified by path
-   virtual void DeleteGroup(STRINGARG path) = 0;
+   virtual void DeleteGroup(String const & path) = 0;
    /// return the name of the profile
    virtual String GetProfileName(void) = 0;
 
@@ -140,7 +135,7 @@ private:
 class ProfilePathChanger
 {
 public:
-   ProfilePathChanger(ProfileBase *config, STRINGARG path);
+   ProfilePathChanger(ProfileBase *config, String const & path);
    ~ProfilePathChanger();
    
 private:
@@ -152,8 +147,8 @@ private:
 // ----------------------------------------------------------------------------
 // two handy functions for savings/restoring arrays of strings to/from config
 // ----------------------------------------------------------------------------
-void SaveArray(ProfileBase& conf, const wxArrayString& astr, STRINGARG key);
-void RestoreArray(ProfileBase& conf, wxArrayString& astr, STRINGARG key);
+void SaveArray(ProfileBase& conf, const wxArrayString& astr, String const & key);
+void RestoreArray(ProfileBase& conf, wxArrayString& astr, String const & key);
 
 
 #endif // PROFILE_H

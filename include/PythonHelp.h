@@ -77,6 +77,14 @@ PyH_RunFunction(const char *funcname, const char *modname,          /* load from
                 const char *resfmt,  void *cresult,           /* convert to c/c++ */
                 const char *argfmt,  ... /* arg, arg... */ );  /* convert to python */
 
+/** Function to run a simple python script in the global namespace.
+    @param file FILE * of open file
+    @param filename just for debugging purposes
+*/
+void
+PyH_RunScript(struct FILE *file, const char *filename);
+
+
 /// macro to run an expression
 #define   PyH_Expression(exp,module,resfmt,cresult) \
    PyH_RunCodestr(PY_EXPRESSION,exp,module, resfmt, cresult)

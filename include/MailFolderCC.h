@@ -71,6 +71,12 @@ public:
        @param name name of the folder
    */
    static MailFolderCC* OpenFolder(String const &name);
+
+   /** opens a mail folder in a save way.
+       @param type type of mailfolder
+       @param name depending on type
+   */
+   static MailFolderCC* OpenFolder(MailFolderType type, String const &name);
    
    /** closes a mail folder in a save way.
           */
@@ -195,7 +201,7 @@ private:
    FolderViewList   viewList;
    
    /// which type is this mailfolder?
-   MFolder::Type   m_folderType;
+   MailFolderType   m_folderType;
    ///   mailstream associated with this folder
    MAILSTREAM   *mailstream;
 
@@ -254,9 +260,8 @@ private:
    friend class MessageCC;
 
 protected:
-   void SetType(MFolder::Type type) { m_folderType = type; }
-   MFolder::Type GetType(void) const { return m_folderType; }
-
+   void SetType(MailFolderType type) { folderType = type; }
+   MailFolderType GetType(void) { return folderType; }
 public:
    /** @name common callback routines
        They all take a stram argument and the number of a message.

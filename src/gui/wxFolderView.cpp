@@ -542,7 +542,7 @@ BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)
    // (the range should contain _only_ these operations!)
    { wxEVT_UPDATE_UI, WXMENU_MSG_OPEN, WXMENU_MSG_UNDELETE,
      (wxObjectEventFunction)(wxEventFunction)(wxUpdateUIEventFunction)
-     wxFolderViewFrame::OnUpdateUI, NULL },
+     &(wxFolderViewFrame::OnUpdateUI), NULL },
 END_EVENT_TABLE()
 
 wxFolderViewFrame::wxFolderViewFrame(const String &folderName, wxFrame *parent)

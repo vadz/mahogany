@@ -60,14 +60,14 @@ BINDIR = @bindir@
 # Directory in which to install library files.
 DATADIR = @datadir@/M
 # where to install docs
-DOCDIR = @datadir@/doc
+DOCDIR = @datadir@/M/doc
 
 # for the dynamic linker, better than using -rpath
 LD_RUN_PATH=$(DATADIR)/$(CANONICAL_HOST)/lib
 
 LINK = $(CXX) -Wl-r$(LD_RUN_PATH)
 
-DEF = -DM_BASEDIR="\"$(DATADIR)\"" -DM_DATADIR="\"$(DATADIR)/data\"" -DM_DOCDIR="\"$(DATADIR)/M/doc\""
+DEF = -DM_PREFIX="\"$(PREFIX)\"" -DM_BASEDIR="\"$(DATADIR)\"" -DM_DATADIR="\"$(DATADIR)/data\"" -DM_DOCDIR="\"$(DATADIR)/M/doc\""
 INC = -I$(BUILDDIR)/include -I$(BUILDDIR)/extra/include -I$(BUILDDIR)/include/gui -I$(CCLIENTINCLUDE) 
 CFLAGS   = @CFLAGS@  $(CPPFLAGS) $(DEF) $(INC)
 CXXFLAGS = @CXXFLAGS@ $(CPPFLAGS) $(DEF) $(INC)

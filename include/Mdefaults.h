@@ -81,18 +81,20 @@
 
 // Unix-only entries
 #ifdef OS_UNIX
-   /// search paths for M's directory
-   #define   MC_PATHLIST         "PathList"
-   /// the name of M's root directory
-   #define   MC_ROOTDIRNAME         "RootDirectoryName"
-   /// the user's M directory
-   #define   MC_USERDIR         "UserDirectory"
-   /// the name of the M directory 
-   #define   MC_USER_MDIR         "MDirName"
-   /// the path where to find .afm files
-   #define   MC_AFMPATH         "AfmPath"
-   /// the path to the /etc directories (configuration files)
-   #define   MC_ETCPATH         "ConfigPath"
+/// search paths for M's directory
+#   define   MC_PATHLIST         "PathList"
+/// path to M directory
+#   define   MC_ROOTPATH   "GlobalDirectory"
+/// the name of M's root directory
+#   define   MC_ROOTDIRNAME         "RootDirectoryName"
+/// the user's M directory
+#   define   MC_USERDIR         "UserDirectory"
+/// the name of the M directory 
+#   define   MC_USER_MDIR         "MDirName"
+/// the path where to find .afm files
+#   define   MC_AFMPATH         "AfmPath"
+/// the path to the /etc directories (configuration files)
+#   define   MC_ETCPATH         "ConfigPath"
 #endif //Unix
 
 /// the default icon for frames
@@ -296,7 +298,9 @@
 // Unix-only entries
 #ifdef OS_UNIX
 /// path list for M's directory
-#define   MC_PATHLIST_D   "/usr/local:/usr/:/opt:/opt/local:/usr/opt:/usr/local/opt"
+#define   MC_PATHLIST_D M_PREFIX":/usr/local:/usr/:/opt:/opt/local:/usr/opt:/usr/local/opt"
+/// path to M directory
+#define   MC_ROOTPATH_D   M_PREFIX"/share/M"
 /// the name of M's root directory
 #define   MC_ROOTDIRNAME_D   "M"
 /// the user's M directory
