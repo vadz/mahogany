@@ -1360,11 +1360,13 @@ String MessageView::GetLabelFor(const MimePart *mimepart)
       label << " : ";
 
    MimeType type = mimepart->GetType();
-   label << type.GetFull() << ", ";
+   label << type.GetFull();
 
    // multipart always have size of 0, don't show
    if ( type.GetPrimary() != MimeType::MULTIPART )
    {
+      label << ", ";
+
       size_t lines;
       if ( type.IsText() && (lines = mimepart->GetNumberOfLines()) )
       {
