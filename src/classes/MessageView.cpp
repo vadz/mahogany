@@ -331,14 +331,18 @@ MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
           CMP(quotedMaxWhitespace) && CMP(quotedMaxAlpha) &&
           CMP(HeaderNameCol) && CMP(HeaderValueCol) &&
           CMP(fontFamily) && CMP(fontSize) &&
-          CMP(showHeaders) && CMP(inlineRFC822) && CMP(inlinePlainText) &&
-          CMP(highlightURLs) && CMP(inlineGFX) &&
+          CMP(showHeaders) && CMP(highlightURLs) &&
+          CMP(inlineRFC822) && CMP(inlinePlainText) && CMP(inlineGFX) &&
+          // even if these fields are different, they don't change our
+          // appearance, so ignore them for the purpose of this comparison
+#if 0
           CMP(browser) && CMP(browserInNewWindow) &&
           CMP(autocollect) && CMP(autocollectNamed) &&
           CMP(autocollectBookName) &&
 #ifdef OS_UNIX
           CMP(browserIsNS) && CMP(afmpath) &&
 #endif // Unix
+#endif // 0
           CMP(showFaces);
 
    #undef CMP
@@ -662,8 +666,20 @@ MessageView::UpdateProfileValues()
       {
          CreateViewer(GetWindow()->GetParent());
       }
+      else // use the same viewer
+      {
+         // but update it
+         if ( m_uid != UID_ILLEGAL && m_asyncFolder )
+         {
+            (void)m_asyncFolder->GetMessage(m_uid, this);
+         }
+      }
    }
-   //else: nothing changed
+   else // nothing significant changed
+   {
+      // but still reassign to update all options
+      m_ProfileValues = settings;
+   }
 }
 
 void
@@ -1063,7 +1079,10 @@ MessageView::ShowHeaders()
          }
       }
 
-      m_viewer->ShowHeader(headerNames[n], headerValues[n], encHeader);
+      wxString value = headerValues[n];
+      EnsureAvailableTextEncoding(&encHeader, &value);
+
+      m_viewer->ShowHeader(headerNames[n], value, encHeader);
    }
 
    m_viewer->EndHeaders();
@@ -1189,16 +1208,20 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
    MTextStyle style;
    if ( encPart != wxFONTENCODING_SYSTEM )
    {
-      wxFont font(
-                  m_ProfileValues.fontSize,
-                  m_ProfileValues.fontFamily,
-                  wxNORMAL,
-                  wxNORMAL,
-                  FALSE,   // not underlined
-                  "",      // no specific face name
-                  encPart
-                 );
-      style.SetFont(font);
+      if ( EnsureAvailableTextEncoding(&encPart, &textPart) )
+      {
+         wxFont font(
+                     m_ProfileValues.fontSize,
+                     m_ProfileValues.fontFamily,
+                     wxNORMAL,
+                     wxNORMAL,
+                     FALSE,   // not underlined
+                     "",      // no specific face name
+                     encPart
+                    );
+         style.SetFont(font);
+      }
+      //else: don't change font - no such encoding anyhow
    }
 
    // TODO: detect signature as well and call m_viewer->InsertSignature()
