@@ -632,6 +632,7 @@ AC_STRUCT_TM
 dnl Checks for library functions.
 AC_CHECK_FUNCS(strerror strstr strsep)
 
+EXTRA_LINK=
 dnl glibc2 has crypt in extra library
 NEED_LIB_CRYPT=0
 AC_CHECK_FUNC(crypt, NEED_LIB_CRYPT=0,NEED_LIB_CRYPT=1)
