@@ -261,6 +261,8 @@ void MFPool::DeleteAll()
    {
       pool->connections.clear();
    }
+
+   gs_pool.clear();
 }
 
 // ----------------------------------------------------------------------------
