@@ -22,7 +22,27 @@ class wxMainFrame;
 // abstraction of the folder tree control for M usage
 class wxFolderTree
 {
-public:
+ public:
+   enum FolderIcon
+   {
+      iconInbox,
+      iconFile,
+      iconMH,
+      iconPOP,
+      iconIMAP,
+      iconNNTP,
+      iconNews,
+      iconRoot,
+      iconGroup,
+      iconNewsHierarchy,   // also these types are not used any more, do keep them
+      iconImapDirectory,   // to avoid changing values of others (compatibility!)
+      iconNewMail,
+      iconSentMail,
+      iconPalmPilot,
+      iconTrash,
+      iconOutbox,
+      iconFolderMax
+   };
    // ctor(s) and dtor
       // Init() must be called if you use default ctor
    wxFolderTree() { m_tree = NULL; }

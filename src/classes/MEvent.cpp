@@ -237,10 +237,8 @@ MEventOptionsChangeData::~MEventOptionsChangeData()
 MEventNewMailData::MEventNewMailData(MailFolder *folder,
                                      unsigned long n,
                                      unsigned long *messageIDs)
-   : MEventData(MEventId_NewMail)
+   : MEventWithFolderData(MEventId_NewMail, folder)
 {
-   m_folder = folder;
-   m_folder->IncRef();
    m_number = n;
    m_messageIDs = new unsigned long [n];
    for(size_t i = 0; i < n; i++)
@@ -250,6 +248,5 @@ MEventNewMailData::MEventNewMailData(MailFolder *folder,
 MEventNewMailData::~MEventNewMailData()
 {
    delete [] m_messageIDs;
-   m_folder->DecRef();
 }
 

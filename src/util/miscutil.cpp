@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * miscutil.cpp : miscellaneous utility functions                   *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1999-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *                                                                  *
@@ -382,7 +382,7 @@ void GetColourByName(wxColour *colour,
 
 
 
-String GetSequenceString(const INTARRAY *array)
+String GetSequenceString(const UIdArray *array)
 {
    String sequence;
    for(size_t i = 0; i < array->Count(); i++)
@@ -397,10 +397,10 @@ String GetSequenceString(const INTARRAY *array)
    return sequence;
 }
 
-INTARRAY *GetAllMessagesSequence(ASMailFolder *mf)
+UIdArray *GetAllMessagesSequence(ASMailFolder *mf)
 {
    ASSERT(mf);
-   INTARRAY *sequence = new INTARRAY;
+   UIdArray *sequence = new UIdArray;
    HeaderInfoList *hil = mf->GetHeaders();
    if(hil)
    {

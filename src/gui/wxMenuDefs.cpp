@@ -274,6 +274,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_MSG_FOLLOWUP,  gettext_noop("&Group reply"),      gettext_noop("Followup/group-reply to this message")    , FALSE },
    { WXMENU_MSG_FORWARD,   gettext_noop("&Forward"),          gettext_noop("Forward this message")     , FALSE },
    { WXMENU_MSG_FORWARD_WITH_TEMPLATE, gettext_noop("Forward with &template..."), gettext_noop("Forward this message after choosing a template to use ")     , FALSE },
+   { WXMENU_MSG_FILTER,   gettext_noop("&Apply filter rules..."), gettext_noop("Apply filter rules to selected messages")     , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_FORWARD,   gettext_noop("Next &unread"), gettext_noop("Select next unread message")     , FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },

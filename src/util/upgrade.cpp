@@ -54,6 +54,7 @@
 #endif
 
 #include "gui/wxDialogLayout.h"
+#include "gui/wxFolderTree.h"
 
 #include "Mupgrade.h"
 
@@ -1406,6 +1407,8 @@ VerifyInbox(void)
       if(flags & MF_FLAGS_DONTDELETE) flags ^= MF_FLAGS_DONTDELETE;
       if(flags != oldflags)
          ibp->writeEntry(MP_FOLDER_TYPE, flags);
+      if(ibp->readEntry("Icon", "") == "")
+         ibp->writeEntry("Icon", wxFolderTree::iconSentMail);
       ibp->DecRef();
    }
 
@@ -1441,8 +1444,8 @@ VerifyInbox(void)
       if(flags & MF_FLAGS_DONTDELETE) flags ^= MF_FLAGS_DONTDELETE;
       if(flags != oldflags)
          p->writeEntry(MP_FOLDER_TYPE, flags);
-      // 14=Trash icon from wxFolderTree.cpp:
-      p->writeEntry("Icon", 14l);
+      if(p->readEntry("Icon", "") == "")
+         p->writeEntry("Icon", wxFolderTree::iconTrash);
       p->DecRef();
    }
 
@@ -1478,8 +1481,8 @@ VerifyInbox(void)
       if(flags & MF_FLAGS_DONTDELETE) flags ^= MF_FLAGS_DONTDELETE;
       if(flags != oldflags)
          p->writeEntry(MP_FOLDER_TYPE, flags);
-      // 14=Trash icon from wxFolderTree.cpp:
-      p->writeEntry("Icon", 14l);
+      if(p->readEntry("Icon", "") == "")
+         p->writeEntry("Icon", wxFolderTree::iconOutbox);
       p->DecRef();
    }
 

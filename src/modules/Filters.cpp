@@ -53,6 +53,12 @@ public:
        @return 0 on success
    */
    virtual int Apply(class MailFolder *folder, bool NewOnly = true) const;
+   /** Apply the filter to the messages in a folder.
+       @param folder - the MailFolder object
+       @param msgs - the list of messages to apply to
+       @return 0 on success
+   */
+   virtual int Apply(class MailFolder *folder, UIdArray msgs) const;
    static FilterRule * Create(const String &filterrule,
                               MInterface *interface, MModule_Filters *mod)
       { return new FilterRuleImpl(filterrule, interface, mod); }
@@ -65,6 +71,10 @@ protected:
                   MInterface *interface,
                   MModule_Filters *fmodule);
    ~FilterRuleImpl();
+   /// common code for the two Apply() functions
+   int ApplyCommonCode(class MailFolder *folder,
+                       UIdArray *msgs,
+                       bool newOnly) const;
 private:
    class Parser     *m_Parser;
    class SyntaxNode *m_Program;
@@ -2025,7 +2035,7 @@ extern "C"
       Value fn = args->GetArg(0)->Evaluate();
       MailFolder *mf = p->GetFolder();
       UIdType uid = p->GetMessageUId();
-      INTARRAY ia;
+      UIdArray ia;
       ia.Add(uid);
       int rc = mf->SaveMessages(&ia, fn.ToString(), true);
       mf->DecRef();
@@ -2157,6 +2167,20 @@ int FilterRuleImpl::Apply(class MailFolder *mf, UIdType uid) const
 int
 FilterRuleImpl::Apply(class MailFolder *mf, bool NewOnly) const
 {
+   return ApplyCommonCode(mf, NULL, NewOnly);
+}
+
+int
+FilterRuleImpl::Apply(class MailFolder *folder, UIdArray msgs) const
+{
+   return ApplyCommonCode(folder, &msgs, FALSE);
+}
+
+int
+FilterRuleImpl::ApplyCommonCode(class MailFolder *mf,
+                                UIdArray *msgs,
+                                bool newOnly) const
+{
    if(! m_Program || ! m_Parser)
       return 0;
    int rc = 1; // no error yet
@@ -2165,17 +2189,25 @@ FilterRuleImpl::Apply(class MailFolder *mf, bool NewOnly) const
    HeaderInfoList *hil = mf->GetHeaders();
    if(hil)
    {
-      for(size_t i = 0; i < hil->Count(); i++)
+      if(msgs) // apply to all messages in list
       {
-         const HeaderInfo * hi = (*hil)[i];
-         if( (! NewOnly) || // handle all or only new ones:
-             (
-                (hi->GetStatus() & MailFolder::MSG_STAT_RECENT)
-                && ! (hi->GetStatus() & MailFolder::MSG_STAT_SEEN)
-                ) // new == recent and not seen
-            )
+         for(size_t idx = 0; idx < msgs->Count(); idx++)
+            rc &= Apply(mf, (*msgs)[idx]);
+      }
+      else // apply to all or all recent messages
+      {
+         for(size_t i = 0; i < hil->Count(); i++)
          {
-            rc &= Apply(mf, hi->GetUId());
+            const HeaderInfo * hi = (*hil)[i];
+            if( (! newOnly) || // handle all or only new ones:
+                (
+                   (hi->GetStatus() & MailFolder::MSG_STAT_RECENT)
+                   && ! (hi->GetStatus() & MailFolder::MSG_STAT_SEEN)
+                   ) // n   ew == recent and not seen
+               )
+            {
+               rc &= Apply(mf, hi->GetUId());
+            }
          }
       }
       hil->DecRef();

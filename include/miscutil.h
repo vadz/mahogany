@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * miscutil.h : miscellaneous utility functions                     *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1999-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *
@@ -71,11 +71,11 @@ extern void GetColourByName(wxColour *colour,
                             const String& defaultName);
 
 
-/// Converts an INTARRAY to a sequence string (for backward compatibility):
-extern String GetSequenceString(const INTARRAY *sequence);
+/// Converts an UIdArray to a sequence string (for backward compatibility):
+extern String GetSequenceString(const UIdArray *sequence);
 
-/// Gets an INTARRAY with all message uids in the folder:
-extern INTARRAY *GetAllMessagesSequence(class ASMailFolder *mf);
+/// Gets an UIdArray with all message uids in the folder:
+extern UIdArray *GetAllMessagesSequence(class ASMailFolder *mf);
 
 //@}
 #endif // MISCUTIL_H

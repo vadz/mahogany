@@ -19,13 +19,13 @@
 // ----------------------------------------------------------------------------
 // Type of a mail folder
 // ----------------------------------------------------------------------------
-/** The INTARRAY define is a class which is an integer array. It needs
+/** The UIdArray define is a class which is an integer array. It needs
     to provide a int Count() method to return the number of elements
     and an int operator[int] to access them.
     We use wxArrayInt for this.
+    @deffunc UIdArray
 */
-#define INTARRAY wxArrayInt
-class INTARRAY;
+class UIdArray;
 
 /// A Type used for message UIds
 typedef unsigned long UIdType;

@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Filters - a pluggable module for filtering messages              *
  *                                                                  *
- * (C) 1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)              *
+ * (C) 1999-2000 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -48,6 +48,12 @@ public:
        @return 0 on success
    */
    virtual int Apply(class MailFolder *folder, bool NewOnly = true) const = 0;
+   /** Apply the filter to the messages in a folder.
+       @param folder - the MailFolder object
+       @param msgs - the list of messages to apply to
+       @return 0 on success
+   */
+   virtual int Apply(class MailFolder *folder, UIdArray msgs) const = 0;
    MOBJECT_NAME(FilterRule)
 };
 

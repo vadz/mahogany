@@ -39,7 +39,7 @@ public:
        messages.
        @return true on success
    */
-   virtual bool SaveMessages(const INTARRAY *selections,
+   virtual bool SaveMessages(const UIdArray *selections,
                              String const & folderName,
                              bool isProfile,
                              bool updateCount = true);
@@ -48,27 +48,27 @@ public:
        @param fileName the name of the folder to save to
        @return true on success
    */
-   virtual bool SaveMessagesToFile(const INTARRAY *selections,
+   virtual bool SaveMessagesToFile(const UIdArray *selections,
                                    String const & fileName);
    
    /** Mark messages as deleted or move them to trash.
        @param messages pointer to an array holding the message numbers
        @return true on success
    */
-   virtual bool DeleteOrTrashMessages(const INTARRAY *messages);
+   virtual bool DeleteOrTrashMessages(const UIdArray *messages);
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
        @param expunge expunge messages after deletion
        @return true on success
    */
-   virtual bool DeleteMessages(const INTARRAY *messages, bool expunge=false);
+   virtual bool DeleteMessages(const UIdArray *messages, bool expunge=false);
 
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers
        @return true on success
    */
-   virtual bool UnDeleteMessages(const INTARRAY *messages);
+   virtual bool UnDeleteMessages(const UIdArray *messages);
 
    /**@name Old-style functions, try to avoid. */
    //@{
@@ -105,14 +105,14 @@ public:
        @parent parent window for dialog
        @return true if messages got saved
    */
-   virtual bool SaveMessagesToFile(const INTARRAY *messages, MWindow *parent = NULL);
+   virtual bool SaveMessagesToFile(const UIdArray *messages, MWindow *parent = NULL);
 
    /** Save messages to a folder.
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
        @return true if messages got saved
    */
-   virtual bool SaveMessagesToFolder(const INTARRAY *messages, MWindow *parent = NULL);
+   virtual bool SaveMessagesToFolder(const UIdArray *messages, MWindow *parent = NULL);
 
    /** Reply to selected messages.
        @param messages pointer to an array holding the message numbers
@@ -120,7 +120,7 @@ public:
        @param profile pointer for environment
        @param flags 0, or REPLY_FOLLOWUP
    */
-   virtual void ReplyMessages(const INTARRAY *messages,
+   virtual void ReplyMessages(const UIdArray *messages,
                               MWindow *parent = NULL,
                               int flags = 0);
 
@@ -129,7 +129,7 @@ public:
        @param parent window for dialog
        @param profile pointer for environment
    */
-   virtual void ForwardMessages(const INTARRAY *messages,
+   virtual void ForwardMessages(const UIdArray *messages,
                                 MWindow *parent = NULL);
 
    //@}
@@ -166,7 +166,14 @@ public:
        @return -1 if no filter module exists, return code otherwise
    */
    virtual int ApplyFilterRules(bool NewOnly);
+   /** Apply any filter rules to the folder.
+       Applies the rule to all messages listed in msgs.
+       @return -1 if no filter module exists, return code otherwise
+   */
+   virtual int ApplyFilterRules(UIdArray msgs);
 protected:
+   /// common code for ApplyFilterRules:
+   int ApplyFilterRulesCommonCode(UIdArray *msgs, bool NewOnly = FALSE);
    /// Constructor
    MailFolderCmn(class ProfileBase *profile);
 

@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MailFolderCC class: handling of mail folders through C-Client lib*
  *                                                                  *
- * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *
@@ -147,6 +147,9 @@ public:
    */
    virtual unsigned long CountMessages(int mask = 0, int value = 0) const;
 
+   /// return number of recent messages
+   virtual unsigned long CountRecentMessages(void) const;
+   
    /** get message header
        @param uid mesage uid
        @return message header information class
@@ -168,7 +171,7 @@ public:
        @param set if true, set the flag, if false, clear it
        @return true on success
    */
-   virtual bool SetFlag(const INTARRAY *sequence,
+   virtual bool SetFlag(const UIdArray *sequence,
                         int flag,
                         bool set = true);
 
@@ -189,9 +192,9 @@ public:
    void ExpungeMessages(void);
 
    /** Search Messages for certain criteria.
-       @return INTARRAY with UIds of matching messages
+       @return UIdArray with UIds of matching messages
    */
-   virtual INTARRAY *SearchMessages(const class SearchCriterium *crit);
+   virtual UIdArray *SearchMessages(const class SearchCriterium *crit);
 
    /** Check whether mailbox has changed. */
    void Ping(void);
@@ -374,10 +377,10 @@ private:
    /// do we want c-client's debug messages?
    bool   debugFlag;
 
-   /** If we are searching, this points to an INTARRAY where to store
+   /** If we are searching, this points to an UIdArray where to store
        the entries found.
    */
-   INTARRAY *m_SearchMessagesFound;
+   UIdArray *m_SearchMessagesFound;
 
    /** @name functions for mapping mailstreams and objects
        These functions enable the class to map incoming events from

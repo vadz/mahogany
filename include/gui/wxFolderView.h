@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxFolderView.h: a window displaying a mail folder                *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$          *
  *******************************************************************/
@@ -22,7 +22,6 @@
 #include <wx/persctrl.h>
 #include <wx/splitter.h>
 
-class wxArrayInt;
 class wxFolderViewPanel;
 class wxFolderView;
 class wxFolderListCtrl;
@@ -77,19 +76,19 @@ public:
        @param n number of messages to open
        @messages pointer to an array holding the message numbers
    */
-   void OpenMessages(wxArrayInt const &messages);
+   void OpenMessages(UIdArray const &messages);
 
    /** Print messages.
        @param n number of messages to print
        @messages pointer to an array holding the message numbers
    */
-   void PrintMessages(wxArrayInt const &messages);
+   void PrintMessages(UIdArray const &messages);
 
    /** Print-preview messages.
        @param n number of messages to print preview
        @messages pointer to an array holding the message numbers
    */
-   void PrintPreviewMessages(wxArrayInt const &messages);
+   void PrintPreviewMessages(UIdArray const &messages);
 
    /** For use by the listctrl: get last previewed uid: */
    UIdType GetPreviewUId(void) const { return m_previewUId; }
@@ -97,14 +96,14 @@ public:
        @param n number of messages
        @messages pointer to an array holding the message numbers
    */
-   void SaveMessagesToFile(wxArrayInt const &messages);
+   void SaveMessagesToFile(UIdArray const &messages);
 
    /** Save messages to a folder.
        @param n number of messages
        @param messages pointer to an array holding the message numbers
        @param del if TRUE, delete them when they are saved
    */
-   void SaveMessagesToFolder(wxArrayInt const &messages, bool del = FALSE);
+   void SaveMessagesToFolder(UIdArray const &messages, bool del = FALSE);
 
    /** Returns false if no items are selected
    */
@@ -115,7 +114,7 @@ public:
        @param  selections Pass a pointer to an integer array, and do not deallocate the returned array.
        @return number of selections.
    */
-   int GetSelections(wxArrayInt &selections);
+   int GetSelections(UIdArray &selections);
 
    /** Show a message in the preview window.
     */
@@ -167,10 +166,10 @@ protected:
        @param file filename
        @messages pointer to an array holding the message numbers
    */
-   void SaveMessages(wxArrayInt const &messages, String const &file);
+   void SaveMessages(UIdArray const &messages, String const &file);
 
    /// The UIds of the last selected messages.
-   INTARRAY m_SelectedUIds;
+   UIdArray m_SelectedUIds;
    /// The last focused UId.
    UIdType  m_FocusedUId;
 private:

@@ -2,7 +2,7 @@
  * ASMailFolder class: ABC defining the interface for asynchronous  *
  *                     mail folders                                 *
  *                                                                  *
- * (C) 1999-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1999-2000 by Karsten Ballüder (balluder@gmx.net)             *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -24,7 +24,6 @@
 // forward declarations
 class FolderView;
 class ProfileBase;
-class INTARRAY;
 class MWindow;
 class MailFolder;
 
@@ -100,7 +99,8 @@ public:
       Op_ForwardMessages,
       Op_Subscribe,
       Op_ListFolders,
-      Op_SearchMessages
+      Op_SearchMessages,
+      Op_ApplyFilterRules
    };
     /** A structure containing the return values from an operation.
         This will get passed in an MEvent to notify other parts of the
@@ -121,7 +121,7 @@ public:
       /// Returns an OperationId to tell what happened.
       virtual OperationId GetOperation(void) const = 0;
       /// Returns the list of message uids affected by the operation.
-      virtual INTARRAY * GetSequence(void) const = 0;
+      virtual UIdArray * GetSequence(void) const = 0;
    };
 
    /** Common code shared by all class Result implementations. */
@@ -132,9 +132,9 @@ public:
       virtual Ticket GetTicket(void) const { return m_Ticket; }
       virtual OperationId   GetOperation(void) const { return m_Id; }
       virtual ASMailFolder *GetFolder(void) const { return m_Mf; }
-      virtual INTARRAY * GetSequence(void) const { return m_Seq; }
+      virtual UIdArray * GetSequence(void) const { return m_Seq; }
    protected:
-      ResultImpl(ASMailFolder *mf, Ticket t, OperationId id, INTARRAY * mc,
+      ResultImpl(ASMailFolder *mf, Ticket t, OperationId id, UIdArray * mc,
                  UserData ud)
          {
             m_Id = id;
@@ -154,7 +154,7 @@ public:
       ASMailFolder *m_Mf;
       Ticket        m_Ticket;
       UserData      m_UserData;
-      INTARRAY *    m_Seq;
+      UIdArray *    m_Seq;
 
       MOBJECT_DEBUG(ASMailFolder::ResultImpl)
    };
@@ -168,7 +168,7 @@ public:
       static ResultInt *Create(ASMailFolder *mf,
                                Ticket t,
                                OperationId id,
-                               INTARRAY * mc,
+                               UIdArray * mc,
                                int value,
                                UserData ud)
          { return new ResultInt(mf, t, id, mc, value, ud); }
@@ -176,7 +176,7 @@ public:
       ResultInt(ASMailFolder *mf,
                 Ticket t,
                 OperationId id,
-                INTARRAY * mc,
+                UIdArray * mc,
                 int value,
                 UserData ud)
          : ResultImpl(mf, t, id, mc, ud)
@@ -191,7 +191,7 @@ public:
    public:
       static ResultMessage *Create(ASMailFolder *mf,
                                    Ticket t,
-                                   INTARRAY * mc,
+                                   UIdArray * mc,
                                    Message *msg,
                                    UIdType uid,
                                    UserData ud)
@@ -200,7 +200,7 @@ public:
       unsigned long GetUId(void) const { return m_uid; }
    protected:
       ResultMessage(ASMailFolder *mf, Ticket t,
-                    INTARRAY * mc, Message *msg,
+                    UIdArray * mc, Message *msg,
                     UIdType uid, UserData ud)
          : ResultImpl(mf, t, Op_GetMessage, mc, ud)
          {
@@ -308,7 +308,7 @@ public:
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
    */
-   virtual Ticket SetSequenceFlag(const INTARRAY *sequence,
+   virtual Ticket SetSequenceFlag(const UIdArray *sequence,
                                 int flag,
                                 bool set = true) = 0;
    /** Appends the message to this folder.
@@ -329,7 +329,7 @@ public:
 
    
    /** Search Messages for certain criteria.
-       @return INTARRAY with UIds of matching messages
+       @return UIdArray with UIds of matching messages
    */
    virtual Ticket SearchMessages(const class SearchCriterium *crit, UserData ud) = 0;
 
@@ -348,7 +348,7 @@ public:
        folder is updated. If false, they will be detected as new messages.
        @return ResultInt boolean
    */
-   virtual Ticket SaveMessages(const INTARRAY *selections,
+   virtual Ticket SaveMessages(const UIdArray *selections,
                              String const & folderName,
                              bool isProfile,
                                bool updateCount = true,
@@ -358,7 +358,7 @@ public:
        @param fileName the name of the folder to save to
        @return ResultInt boolean
    */
-   virtual Ticket SaveMessagesToFile(const INTARRAY *selections,
+   virtual Ticket SaveMessagesToFile(const UIdArray *selections,
                                      String const & folderName,
                                      UserData ud = 0) = 0;
 
@@ -366,14 +366,14 @@ public:
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean
    */
-   virtual Ticket DeleteOrTrashMessages(const INTARRAY *messages, UserData ud = 0) = 0;
+   virtual Ticket DeleteOrTrashMessages(const UIdArray *messages, UserData ud = 0) = 0;
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
        @param expunge expunge deleted messages
        @return ResultInt boolean
    */
-   virtual Ticket DeleteMessages(const INTARRAY *messages,
+   virtual Ticket DeleteMessages(const UIdArray *messages,
                                  bool expunge = false,
                                  UserData ud = 0) = 0;
 
@@ -381,14 +381,14 @@ public:
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean
    */
-   virtual Ticket UnDeleteMessages(const INTARRAY *messages, UserData ud = 0) = 0;
+   virtual Ticket UnDeleteMessages(const UIdArray *messages, UserData ud = 0) = 0;
 
    /** Save messages to a file.
        @param messages pointer to an array holding the message numbers
        @parent parent window for dialog
        @return ResultInt boolean
    */
-   virtual Ticket SaveMessagesToFile(const INTARRAY *messages, MWindow
+   virtual Ticket SaveMessagesToFile(const UIdArray *messages, MWindow
                                    *parent = NULL, UserData ud = 0) = 0;
 
    /** Save messages to a folder.
@@ -396,7 +396,7 @@ public:
        @param parent window for dialog
        @return true if messages got saved
    */
-   virtual Ticket SaveMessagesToFolder(const INTARRAY *messages, MWindow
+   virtual Ticket SaveMessagesToFolder(const UIdArray *messages, MWindow
                                      *parent = NULL, UserData ud = 0) = 0;
 
    /** Reply to selected messages.
@@ -405,7 +405,7 @@ public:
        @param profile pointer for environment
        @param flags 0, or REPLY_FOLLOWUP
    */
-   virtual Ticket ReplyMessages(const INTARRAY *messages,
+   virtual Ticket ReplyMessages(const UIdArray *messages,
                                 MWindow *parent = NULL,
                                 int flags = 0,
                                 UserData ud = 0) = 0;
@@ -414,10 +414,17 @@ public:
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
    */
-   virtual Ticket ForwardMessages(const INTARRAY *messages,
+   virtual Ticket ForwardMessages(const UIdArray *messages,
                                   MWindow *parent = NULL,
                                   UserData ud = 0) = 0;
 
+   /** Apply filter rules to the folder.
+       Applies the rule to all messages listed in msgs.
+       @return a ResultInt object
+   */
+   virtual Ticket ApplyFilterRules(const UIdArray *msgs,
+                                   UserData ud = 0) = 0;
+   
    /**@name Subscription management.
       These functions are statically defined and are implemented in
       ASMailFolder.cpp.

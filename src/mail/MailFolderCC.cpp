@@ -1182,6 +1182,14 @@ MailFolderCC::AppendMessage(String const &msg)
                != 0);
    if(! rc)
       ERRORMESSAGE(("cannot append message"));
+
+   if( ( (m_UpdateFlags & UF_DetectNewMail) == 0)
+       && ( (m_UpdateFlags & UF_UpdateCount) != 0) )
+   {
+      // this mail will be stored as uid_last+1 which isn't updated
+      // yet at this point
+      m_LastNewMsgUId = m_MailStream->uid_last+1;
+   }
    ProcessEventQueue();
    return rc;
 }
@@ -1197,12 +1205,19 @@ MailFolderCC::AppendMessage(Message const &msg)
 }
 
 
+/// return number of recent messages
+unsigned long
+MailFolderCC::CountRecentMessages(void) const
+{
+   return m_nRecent;
+}
+
 unsigned long
 MailFolderCC::CountMessages(int mask, int value) const
 {
    if(mask == MSG_STAT_NONE)
       return m_nMessages;
-   else if(mask == MSG_STAT_RECENT)
+   else if(mask == MSG_STAT_RECENT && value == MSG_STAT_RECENT)
       return m_nRecent;
    else
    {
@@ -1307,7 +1322,7 @@ MailFolderCC::SetSequenceFlag(String const &sequence,
 
 
 bool
-MailFolderCC::SetFlag(const INTARRAY *selections, int flag, bool set)
+MailFolderCC::SetFlag(const UIdArray *selections, int flag, bool set)
 {
    int n = selections->Count();
    int i;
@@ -1336,7 +1351,7 @@ MailFolderCC::ExpungeMessages(void)
   listing in the views. But that seems to be an O(N^2) operation. :-(
 */
 
-INTARRAY *
+UIdArray *
 MailFolderCC::SearchMessages(const class SearchCriterium *crit)
 {
    ASSERT(m_SearchMessagesFound == NULL);
@@ -1361,7 +1376,7 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
                                     false, true);// open a status window:
    }
 
-   m_SearchMessagesFound = new INTARRAY;
+   m_SearchMessagesFound = new UIdArray;
 
    String what;
 
@@ -1469,7 +1484,7 @@ MailFolderCC::SearchMessages(const class SearchCriterium *crit)
       mail_free_searchpgm(&pgm);
 #endif
 
-   INTARRAY *rc = m_SearchMessagesFound; // will get freed by caller!
+   UIdArray *rc = m_SearchMessagesFound; // will get freed by caller!
    m_SearchMessagesFound = NULL;
 
    if(progDlg)
@@ -2499,7 +2514,7 @@ MailFolderCC::ProcessEventQueue(void)
       {
          MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
          ASSERT(mf);
-         if(mf) mf->RequestUpdate();  // Queues an Update event.
+         if(mf) mf->m_UpdateNeeded = true;
          break;
       }
       }// switch
@@ -2514,11 +2529,13 @@ MailFolderCC::ProcessEventQueue(void)
       mf = (*i)->folder;
       if( mf && mf->m_UpdateNeeded)
       {
-         mf->m_UpdateNeeded = false;
          // tell all interested that an update might be required
          MEventManager::Send( new MEventFolderUpdateData (mf) );
+         mf->m_UpdateNeeded = false;
       }
    }
+   // If we don't call this, we have to wait for wxMApp::OnIdle(). 
+//   MEventManager::DispatchPending();
 }
 
 void

@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MailFolder class: handling of Unix mail folders                  *
  *                                                                  *
- * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -608,7 +608,7 @@ MailFolderCmn::PreClose(void)
 }
 
 bool
-MailFolderCmn::SaveMessagesToFile(const INTARRAY *selections,
+MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
                                String const & fileName0)
 {
    int
@@ -677,7 +677,7 @@ MailFolderCmn::SaveMessagesToFile(const INTARRAY *selections,
 }
 
 bool
-MailFolderCmn::SaveMessages(const INTARRAY *selections,
+MailFolderCmn::SaveMessages(const UIdArray *selections,
                             String const & folderName,
                             bool isProfile,
                             bool updateCount)
@@ -755,7 +755,7 @@ MailFolderCmn::SaveMessages(const INTARRAY *selections,
 }
 
 bool
-MailFolderCmn::UnDeleteMessages(const INTARRAY *selections)
+MailFolderCmn::UnDeleteMessages(const UIdArray *selections)
 {
    int n = selections->Count();
    int i;
@@ -766,7 +766,7 @@ MailFolderCmn::UnDeleteMessages(const INTARRAY *selections)
 }
 
 bool
-MailFolderCmn::SaveMessagesToFolder(const INTARRAY *selections, MWindow *parent)
+MailFolderCmn::SaveMessagesToFolder(const UIdArray *selections, MWindow *parent)
 {
    bool rc = false;
    MFolder *folder = MDialog_FolderChoose(parent);
@@ -779,7 +779,7 @@ MailFolderCmn::SaveMessagesToFolder(const INTARRAY *selections, MWindow *parent)
 }
 
 bool
-MailFolderCmn::SaveMessagesToFile(const INTARRAY *selections, MWindow *parent)
+MailFolderCmn::SaveMessagesToFile(const UIdArray *selections, MWindow *parent)
 {
 
    String filename = wxPFileSelector("MsgSave",
@@ -803,7 +803,7 @@ MailFolderCmn::SaveMessagesToFile(const INTARRAY *selections, MWindow *parent)
 }
 
 void
-MailFolderCmn::ReplyMessages(const INTARRAY *selections,
+MailFolderCmn::ReplyMessages(const UIdArray *selections,
                           MWindow *parent,
                           int flags)
 {
@@ -821,7 +821,7 @@ MailFolderCmn::ReplyMessages(const INTARRAY *selections,
 
 
 void
-MailFolderCmn::ForwardMessages(const INTARRAY *selections, MWindow *parent)
+MailFolderCmn::ForwardMessages(const UIdArray *selections, MWindow *parent)
 {
    int i;
    Message *msg;
@@ -1158,6 +1158,7 @@ MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
    hilp->DecRef();
 }
 
+
 #if 0
 /* This will disappear: */
 void
@@ -1239,7 +1240,7 @@ MailFolderCmn::UpdateConfig(void)
 bool
 MailFolderCmn::DeleteMessage(unsigned long uid)
 {
-   INTARRAY *ia = new INTARRAY;
+   UIdArray *ia = new UIdArray;
    ia->Add(uid);
    bool rc = DeleteMessages(ia);
    delete ia;
@@ -1248,7 +1249,7 @@ MailFolderCmn::DeleteMessage(unsigned long uid)
 
 
 bool
-MailFolderCmn::DeleteOrTrashMessages(const INTARRAY *selections)
+MailFolderCmn::DeleteOrTrashMessages(const UIdArray *selections)
 {
    bool reallyDelete = ! READ_CONFIG(GetProfile(), MP_USE_TRASH_FOLDER);
    // If we are the trash folder, we *really* delete.
@@ -1274,7 +1275,7 @@ MailFolderCmn::DeleteOrTrashMessages(const INTARRAY *selections)
 }
 
 bool
-MailFolderCmn::DeleteMessages(const INTARRAY *selections, bool expunge)
+MailFolderCmn::DeleteMessages(const UIdArray *selections, bool expunge)
 {
    bool rc = SetSequenceFlag(GetSequenceString(selections),
                              MailFolder::MSG_STAT_DELETED);
@@ -1286,8 +1287,22 @@ MailFolderCmn::DeleteMessages(const INTARRAY *selections, bool expunge)
 int
 MailFolderCmn::ApplyFilterRules(bool newOnly)
 {
+   return ApplyFilterRulesCommonCode(NULL, newOnly);
+}
+
+int
+MailFolderCmn::ApplyFilterRules(UIdArray msgs)
+{
+   return ApplyFilterRulesCommonCode(&msgs);
+}
+
+/// common code for ApplyFilterRules:
+int
+MailFolderCmn::ApplyFilterRulesCommonCode(UIdArray *msgs,
+                                          bool newOnly)
+{
    // Maybe we are lucky and have nothing to do?
-   if(newOnly && CountNewMessages() == 0)
+   if(newOnly && CountRecentMessages() == 0)
          return 0;
 
    // Obtain pointer to the filtering module:
@@ -1302,7 +1317,7 @@ MailFolderCmn::ApplyFilterRules(bool newOnly)
       String filterString;
       // apply the filter from the original folder:
       filterString = READ_CONFIG(GetProfile(), MP_FILTER_RULE);
-      if(filterString.Length())
+      if(filterString.Length()) // otherwise nothing to do
       {
          FilterRule * filterRule = filterModule->GetFilter(filterString);
          if(filterRule)
@@ -1310,7 +1325,10 @@ MailFolderCmn::ApplyFilterRules(bool newOnly)
             // This might change the folder contents,
             // so we must set this flag:
             m_FiltersCausedChange = true;
-            rc = filterRule->Apply(this, newOnly);
+            if(msgs)
+               rc = filterRule->Apply(this, *msgs);
+            else
+               rc = filterRule->Apply(this, newOnly);
             filterRule->DecRef();
          }
       }

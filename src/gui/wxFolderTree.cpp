@@ -49,25 +49,6 @@
 // constants
 // ----------------------------------------------------------------------------
 
-enum FolderIcon
-{
-   iconInbox,
-   iconFile,
-   iconMH,
-   iconPOP,
-   iconIMAP,
-   iconNNTP,
-   iconNews,
-   iconRoot,
-   iconGroup,
-   iconNewsHierarchy,   // also these types are not used any more, do keep them
-   iconImapDirectory,   // to avoid changing values of others (compatibility!)
-   iconNewMail,
-   iconSentMail,
-   iconPalmPilot,
-   iconTrash,
-   iconFolderMax
-};
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -1325,7 +1306,7 @@ wxFolderTreeImpl::~wxFolderTreeImpl()
 
 size_t GetNumberOfFolderIcons()
 {
-   return iconFolderMax;
+   return wxFolderTree::iconFolderMax;
 }
 
 String GetFolderIconName(size_t n)
@@ -1347,10 +1328,11 @@ String GetFolderIconName(size_t n)
       "folder_newmail",
       "folder_sentmail",
       "folder_palmpilot",
+      "folder_outbox",
       "folder_trash"
    };
 
-   ASSERT_MSG( iconFolderMax == WXSIZEOF(aszImages),
+   ASSERT_MSG( wxFolderTree::iconFolderMax == WXSIZEOF(aszImages),
                "bad number of icon names" );
 
    CHECK( n < WXSIZEOF(aszImages), "", "invalid icon index" );
@@ -1379,19 +1361,19 @@ int GetDefaultFolderTypeIcon(FolderType folderType)
    // each folder type has its own icon
    static const struct
    {
-      FolderIcon icon;
+      wxFolderTree::FolderIcon icon;
       FolderType type;
    } FolderIcons[] =
-   {
-      { iconInbox,         MF_INBOX       },
-      { iconFile,          MF_FILE        },
-      { iconMH,            MF_MH          },
-      { iconPOP,           MF_POP         },
-      { iconIMAP,          MF_IMAP        },
-      { iconNNTP,          MF_NNTP        },
-      { iconNews,          MF_NEWS        },
-      { iconRoot,          MF_ROOT        },
-      { iconGroup,         MF_GROUP       },
+     {
+      { wxFolderTree::iconInbox,         MF_INBOX       },
+      { wxFolderTree::iconFile,          MF_FILE        },
+      { wxFolderTree::iconMH,            MF_MH          },
+      { wxFolderTree::iconPOP,           MF_POP         },
+      { wxFolderTree::iconIMAP,          MF_IMAP        },
+      { wxFolderTree::iconNNTP,          MF_NNTP        },
+      { wxFolderTree::iconNews,          MF_NEWS        },
+      { wxFolderTree::iconRoot,          MF_ROOT        },
+      { wxFolderTree::iconGroup,         MF_GROUP       },
    };
 
    int image = -1;

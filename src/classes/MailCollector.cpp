@@ -256,7 +256,8 @@ MailCollectorImpl::Collect(MailFolder *mf)
 
    m_NewMailFolder->SetUpdateFlags(updateFlags);
    m_NewMailFolder->RequestUpdate();
-
+   // requesting a listing triggers folder update:
+   SafeDecRef(m_NewMailFolder->GetHeaders());
    return rc;
 }
 
@@ -289,11 +290,10 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
    {
       wxLogStatus(_("Auto-collecting mail from incoming folder '%s'."),
                   mf->GetName().c_str());
-      wxYield(); // normal wxYield() should be ok here, this code never
-      // gets called from a menu or such
+      wxSafeYield(); // normal wxYield() is not ok here
       int updateFlags = mf->GetUpdateFlags();
       mf->SetUpdateFlags(MailFolder::UF_UpdateCount);
-      INTARRAY selections;
+      UIdArray selections;
 
       const HeaderInfo *hi;
       size_t i;
@@ -398,6 +398,7 @@ void
 MailCollectorImpl::UpdateFolderList(void)
 {
    MOcheck();
+
    MailCollectorFolderList::iterator i;
 
    if(mApplication->IsOnline())

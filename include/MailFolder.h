@@ -22,18 +22,18 @@
 #include "FolderType.h"
 #include "kbList.h"
 
-/** The INTARRAY define is a class which is an integer array. It needs
+/** The UIdArray define is a class which is an integer array. It needs
     to provide a int Count() method to return the number of elements
     and an int operator[int] to access them.
     We use wxArrayInt for this.
-    @deffunc INTARRAY
+    @deffunc UIdArray
 */
-#define INTARRAY wxArrayInt
+#include <wx/dynarray.h>
+WX_DEFINE_EXPORTED_ARRAY(UIdType, UIdArray);
 
 // forward declarations
 class FolderView;
 class ProfileBase;
-class INTARRAY;
 class MWindow;
 class Message;
 
@@ -231,6 +231,9 @@ public:
    /// Count number of new messages.
    virtual unsigned long CountNewMessages(void) const = 0;
 
+   /// Count number of recent messages.
+   virtual unsigned long CountRecentMessages(void) const = 0;
+
    /** Check whether mailbox has changed. */
    virtual void Ping(void) = 0;
 
@@ -268,7 +271,7 @@ public:
        @param set if true, set the flag, if false, clear it
        @return true on success
    */
-   virtual bool SetFlag(const INTARRAY *sequence,
+   virtual bool SetFlag(const UIdArray *sequence,
                         int flag,
                         bool set = true) = 0;
 
@@ -298,10 +301,10 @@ public:
    virtual void ExpungeMessages(void) = 0;
 
    /** Search Messages for certain criteria.
-       @return INTARRAY with UIds of matching messages, caller must
+       @return UIdArray with UIds of matching messages, caller must
        free it
    */
-   virtual INTARRAY *SearchMessages(const class SearchCriterium *crit) = 0;
+   virtual UIdArray *SearchMessages(const class SearchCriterium *crit) = 0;
    
    /** Get the profile.
        @return Pointer to the profile.
@@ -347,7 +350,7 @@ public:
        messages.
        @return true on success
    */
-   virtual bool SaveMessages(const INTARRAY *selections,
+   virtual bool SaveMessages(const UIdArray *selections,
                              String const & folderName,
                              bool isProfile,
                              bool updateCount = true) = 0;
@@ -356,35 +359,35 @@ public:
        @param fileName the name of the folder to save to
        @return true on success
    */
-   virtual bool SaveMessagesToFile(const INTARRAY *selections,
+   virtual bool SaveMessagesToFile(const UIdArray *selections,
                                    String const & fileName) = 0;
 
    /** Mark messages as deleted or move them to trash.
        @param messages pointer to an array holding the message numbers
        @return true on success
    */
-   virtual bool DeleteOrTrashMessages(const INTARRAY *messages) = 0;
+   virtual bool DeleteOrTrashMessages(const UIdArray *messages) = 0;
 
    /** Mark messages as deleted.
        @param messages pointer to an array holding the message numbers
        @param expunge expunge deleted messages
        @return true on success
    */
-   virtual bool DeleteMessages(const INTARRAY *messages,
+   virtual bool DeleteMessages(const UIdArray *messages,
                                bool expunge = false) = 0;
 
    /** Mark messages as no longer deleted.
        @param messages pointer to an array holding the message numbers
        @return true on success
    */
-   virtual bool UnDeleteMessages(const INTARRAY *messages) = 0;
+   virtual bool UnDeleteMessages(const UIdArray *messages) = 0;
 
    /** Save messages to a file.
        @param messages pointer to an array holding the message numbers
        @parent parent window for dialog
        @return true if messages got saved
    */
-   virtual bool SaveMessagesToFile(const INTARRAY *messages, MWindow
+   virtual bool SaveMessagesToFile(const UIdArray *messages, MWindow
                                    *parent = NULL) = 0;
 
    /** Save messages to a folder.
@@ -392,7 +395,7 @@ public:
        @param parent window for dialog
        @return true if messages got saved
    */
-   virtual bool SaveMessagesToFolder(const INTARRAY *messages, MWindow *parent
+   virtual bool SaveMessagesToFolder(const UIdArray *messages, MWindow *parent
                                      = NULL) = 0;
 
    /** Reply to selected messages.
@@ -401,7 +404,7 @@ public:
        @param profile pointer for environment
        @param flags 0, or REPLY_FOLLOWUP
    */
-   virtual void ReplyMessages(const INTARRAY *messages,
+   virtual void ReplyMessages(const UIdArray *messages,
                               MWindow *parent = NULL,
                               int flags = 0) = 0;
 
@@ -409,7 +412,7 @@ public:
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
    */
-   virtual void ForwardMessages(const INTARRAY *messages,
+   virtual void ForwardMessages(const UIdArray *messages,
                                 MWindow *parent = NULL) = 0;
 
    //@}
@@ -460,10 +463,15 @@ public:
 
    /** Apply any filter rules to the folder. Only does anything if a
        filter module is loaded and a filter configured.
-       @param NewOnly if true, only apply filter to new messages
+       @param NewOnly if true, only apply filter to recent messages
        @return -1 if no filter module exists, return code otherwise
    */
    virtual int ApplyFilterRules(bool NewOnly = true) = 0;
+   /** Apply any filter rules to the folder.
+       Applies the rule to all messages listed in msgs.
+       @return -1 if no filter module exists, return code otherwise
+   */
+   virtual int ApplyFilterRules(UIdArray msgs) = 0;
    /// Request update
    virtual void RequestUpdate(void) = 0;
 protected:

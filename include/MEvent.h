@@ -80,6 +80,31 @@ class MailFolder;
 ///FIXME: this shouldn't be needed! Opaque type?
 #include "ASMailFolder.h"
 
+/** The data associated with an event - more classes can be derived from this
+    one.
+*/
+
+// ----------------------------------------------------------------------------
+/// MEventWithFolderData - an event data object containing a folder pointer
+class MEventWithFolderData : public MEventData
+{
+public:
+   /// ctor takes the (string) id for the event
+   MEventWithFolderData(MEventId id = MEventId_Null,
+                        MailFolder *folder = NULL)
+      : MEventData(id) { m_Folder = folder; SafeIncRef(m_Folder); }
+
+   /// virtual dtor as in any base class
+   virtual ~MEventWithFolderData() { SafeDecRef(m_Folder); }
+
+   /** Get the folder associated.
+       If you need the folder after the MEvent object disappears, you
+       need to call IncRef() on it, this function does not IncRef()
+       the folder automatically! */
+   MailFolder *GetFolder() const { return m_Folder; }
+private:
+   MailFolder *m_Folder;
+};
 // ----------------------------------------------------------------------------
 /// MEventPingData - the event asking the folders to ping
 class MEventPingData : public MEventData
@@ -90,7 +115,7 @@ public:
 
 // ----------------------------------------------------------------------------
 /// MEventNewMailData - the event notifying the app about "new mail"
-class MEventNewMailData : public MEventData
+class MEventNewMailData : public MEventWithFolderData
 {
 public:
    /** Constructor.
@@ -106,11 +131,6 @@ public:
    
    /**@name accessors */
    //@{
-   /** Get the folder in which there are new messages.
-       If you need the folder after the MEvent object disappears, you
-       need to call IncRef() on it, this function does not IncRef()
-       the folder automatically! */
-   MailFolder *GetFolder() const { return m_folder; }
    /// get the number of new messages
    unsigned long GetNumber(void) const { return m_number; }
    /// get the index of the Nth new message (for calling GetMessage)
@@ -120,7 +140,6 @@ public:
       }
    //@}
 private:
-   MailFolder    *m_folder;
    unsigned long *m_messageIDs;
    unsigned long  m_number;
 };
@@ -129,58 +148,33 @@ private:
 // ----------------------------------------------------------------------------
 /** MEventFolderUpdate Data - Does not carry any data apart from pointer to
  * mailfolder.*/
-class MEventFolderUpdateData : public MEventData
+class MEventFolderUpdateData : public MEventWithFolderData
 {
 public:
    /** Constructor.
    */
    MEventFolderUpdateData(MailFolder *folder)
-      : MEventData(MEventId_FolderUpdate)
-      {
-         m_folder = folder;
-         m_folder->IncRef();
-         m_listing = m_folder->GetHeaders();
-      }
-   ~MEventFolderUpdateData()
-      {
-         m_folder->DecRef();
-         m_listing->DecRef();
-      }
-   /// get the folder which changed
-   MailFolder *GetFolder() const { return m_folder; }
-   /// Get the new listing. Don't IncRef/DecRef it, exists as long as event.
-   HeaderInfoList *GetHeaders() const { return m_listing; }
+      : MEventWithFolderData(MEventId_FolderUpdate, folder)
+      { }
 private:
    MailFolder           *m_folder;
-   HeaderInfoList       *m_listing;
 };
 // ----------------------------------------------------------------------------
 /** MEventFolderStatus Data - Does not carry any data apart from pointer to
  * mailfolder.*/
-class MEventFolderStatusData : public MEventData
+class MEventFolderStatusData : public MEventWithFolderData
 {
 public:
    /** Constructor.
    */
    MEventFolderStatusData(MailFolder *folder)
-      : MEventData(MEventId_FolderStatus)
-      {
-         m_folder = folder;
-         m_folder->IncRef();
-      }
-   ~MEventFolderStatusData()
-      {
-         m_folder->DecRef();
-      }
-   /// get the folder which changed
-   MailFolder *GetFolder() const { return m_folder; }
-private:
-   MailFolder           *m_folder;
+      : MEventWithFolderData(MEventId_FolderStatus, folder)
+      {}
 };
 // ----------------------------------------------------------------------------
 /** MEventMsgStatus Data - Carries folder pointer and index
     in folder listing for data that changed.*/
-class MEventMsgStatusData : public MEventData
+class MEventMsgStatusData : public MEventWithFolderData
 {
 public:
    /** Constructor.
@@ -188,29 +182,23 @@ public:
    MEventMsgStatusData(MailFolder *folder,
                              size_t index,
                              HeaderInfoList *listing)
-      : MEventData(MEventId_MsgStatus)
+      : MEventWithFolderData(MEventId_MsgStatus, folder)
       {
-         m_folder = folder;
-         m_folder->IncRef();
          m_listing = listing;
          m_listing->IncRef();
          m_index = index;
       }
    ~MEventMsgStatusData()
       {
-         m_folder->DecRef();
          m_listing->DecRef();
       }
-   /// get the folder which changed
-   MailFolder *GetFolder() const { return m_folder; }
    /// Get the new listing. Don't IncRef/DecRef it, exists as long as event.
    HeaderInfoList *GetHeaders() const { return m_listing; }
    /// get the folder which changed
    size_t GetIndex() const { return m_index; }
 private:
-   MailFolder           *m_folder;
-   HeaderInfoList       *m_listing;
    size_t                m_index;
+   class HeaderInfoList  *m_listing;
 };
 
 // ----------------------------------------------------------------------------

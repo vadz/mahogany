@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxFolderView.cc: a window displaying a mail folder               *
  *                                                                  *
- * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -65,7 +65,7 @@ static const char *wxFLC_ColumnNames[] =
    gettext_noop("Subject")
 };
 
-static const char *wxFLC_DEFAULT_SIZES = "80:80:80:80:80";
+static const char *wxFLC_DEFAULT_SIZES = "60:300:200:80:80";
 
 
 class wxFolderListCtrl : public wxPListCtrl
@@ -83,7 +83,7 @@ public:
 
    /// if nofocused == true the focused entry will not be substituted
    /// for an empty list of selections
-   int GetSelections(INTARRAY &selections, bool nofocused = false) const;
+   int GetSelections(UIdArray &selections, bool nofocused = false) const;
    UIdType GetFocusedUId(void) const;
    bool IsSelected(long index)
       { return GetItemState(index,wxLIST_STATE_SELECTED) != 0; }
@@ -195,7 +195,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          event.Skip();
          return;
       }
-      wxArrayInt selections;
+      UIdArray selections;
       long nselected = m_FolderView->GetSelections(selections);
       // there is exactly one item with the focus on  it:
       long focused = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
@@ -369,12 +369,13 @@ void wxFolderListCtrl::OnSelected(wxListEvent& event)
 {
    // check if there is already a selected message, if so, don´t
    // update the message view:
-   INTARRAY selections;
+   UIdArray selections;
    if(GetSelections(selections, true) == 1 // we are the only one
       && m_SelectionCallbacks)
    {
       HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
       const HeaderInfo *hi = (*hil)[event.m_itemIndex];
+      m_FolderView->UpdateSelectionInfo();
       m_FolderView->PreviewMessage(hi->GetUId());
       hil->DecRef();
    }
@@ -407,14 +408,16 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
       // If there is no entry for the listctrl, force one by
       // inheriting from NewMail folder.
       String entry = fv->GetProfile()->readEntry("FolderListCtrl","");
-      if(! entry.Length() || entry == wxFLC_DEFAULT_SIZES)
+      wxLogDebug("FolderView columns: %s", entry.c_str());
+      if( entry.Length() == 0 || entry == wxFLC_DEFAULT_SIZES)
       {
          String newMailFolder = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
          ProfileBase   *p = ProfileBase::CreateProfile(newMailFolder);
-         p->SetPath("FolderView");
+         //p->SetPath("FolderView");
          entry = p->readEntry("FolderListCtrl","");
-         if(entry.Length() && entry != wxFLC_DEFAULT_SIZES)
-            fv->GetProfile()->writeEntry("FolderListCtrl", entry);
+         if(entry.Length() == 0)
+            entry = wxFLC_DEFAULT_SIZES;
+         fv->GetProfile()->writeEntry("FolderListCtrl", entry);
          p->DecRef();
       }
    }
@@ -461,7 +464,7 @@ wxFolderListCtrl::~wxFolderListCtrl()
 }
 
 int
-wxFolderListCtrl::GetSelections(wxArrayInt &selections, bool nofocused) const
+wxFolderListCtrl::GetSelections(UIdArray &selections, bool nofocused) const
 {
    selections.Empty();
    ASMailFolder *asmf = m_FolderView->GetFolder();
@@ -632,7 +635,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
                                    true,
                                    ProfileBase::FilterProfileName(m_Profile->GetName())+"MarkRead"))
          {
-            INTARRAY *seq = GetAllMessagesSequence(m_ASMailFolder);
+            UIdArray *seq = GetAllMessagesSequence(m_ASMailFolder);
             m_ASMailFolder->SetSequenceFlag(seq, MailFolder::MSG_STAT_DELETED);
             delete seq;
          }
@@ -946,7 +949,9 @@ wxFolderView::Update(HeaderInfoList *listing)
       m_NumOfMessages = 0;
    }
 
+#ifdef __WXMSW__
    m_FolderCtrl->Hide(); // optimise for speed under MSW
+#endif
    long focusedIndex, tmp = -1;
    focusedIndex = m_FolderCtrl->GetNextItem(tmp, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
    bool foundFocus = false;
@@ -969,7 +974,9 @@ wxFolderView::Update(HeaderInfoList *listing)
    UpdateTitleAndStatusBars(m_folderName, statusMsg, GetFrame(m_Parent),
                             m_MailFolder);
 
+#ifdef __WXMSW__
    m_FolderCtrl->Show();
+#endif
    m_NumOfMessages = n;
    wxEndBusyCursor();
    listing->DecRef();
@@ -1023,7 +1030,7 @@ void
 wxFolderView::OnCommandEvent(wxCommandEvent &event)
 {
    int n;
-   INTARRAY selections;
+   UIdArray selections;
 
    UpdateSelectionInfo();
 
@@ -1109,6 +1116,10 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       GetSelections(selections);
       m_TicketList->Add(m_ASMailFolder->ForwardMessages(&selections, GetFrame(m_Parent)));
       break;
+   case WXMENU_MSG_FILTER:
+      GetSelections(selections);
+      m_TicketList->Add(m_ASMailFolder->ApplyFilterRules(&selections, this));
+      break;
    case WXMENU_MSG_UNDELETE:
       GetSelections(selections);
       m_TicketList->Add(m_ASMailFolder->UnDeleteMessages(&selections));
@@ -1190,7 +1201,7 @@ wxFolderView::HasSelection() const
 }
 
 int
-wxFolderView::GetSelections(wxArrayInt& selections)
+wxFolderView::GetSelections(UIdArray& selections)
 {
    if(! m_ASMailFolder)
       return 0;
@@ -1213,7 +1224,7 @@ wxFolderView::PreviewMessage(long uid)
 
 
 void
-wxFolderView::OpenMessages(const wxArrayInt& selections)
+wxFolderView::OpenMessages(const UIdArray& selections)
 {
    String title;
 
@@ -1226,7 +1237,7 @@ wxFolderView::OpenMessages(const wxArrayInt& selections)
 }
 
 void
-wxFolderView::PrintMessages(const wxArrayInt& selections)
+wxFolderView::PrintMessages(const UIdArray& selections)
 {
    int n = selections.Count();
 
@@ -1244,7 +1255,7 @@ wxFolderView::PrintMessages(const wxArrayInt& selections)
 }
 
 void
-wxFolderView::PrintPreviewMessages(const wxArrayInt& selections)
+wxFolderView::PrintPreviewMessages(const UIdArray& selections)
 {
    int n = selections.Count();
 
@@ -1263,7 +1274,7 @@ wxFolderView::PrintPreviewMessages(const wxArrayInt& selections)
 
 
 void
-wxFolderView::SaveMessagesToFolder(const wxArrayInt& selections, bool del)
+wxFolderView::SaveMessagesToFolder(const UIdArray& selections, bool del)
 {
    Ticket t =
       m_ASMailFolder->SaveMessagesToFolder(&selections,GetFrame(m_Parent), this);
@@ -1273,7 +1284,7 @@ wxFolderView::SaveMessagesToFolder(const wxArrayInt& selections, bool del)
 }
 
 void
-wxFolderView::SaveMessagesToFile(const wxArrayInt& selections)
+wxFolderView::SaveMessagesToFile(const UIdArray& selections)
 {
    String msg;
    bool rc;
@@ -1320,7 +1331,7 @@ wxFolderView::OnFolderUpdateEvent(MEventFolderUpdateData &event)
 {
    if(event.GetFolder() == m_MailFolder)
    {
-      Update(event.GetHeaders());
+      Update();
    }
 }
 
@@ -1331,9 +1342,13 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
 {
    if(event.GetFolder() == m_MailFolder)
    {
+#ifdef __WXMSW__
       m_FolderCtrl->Hide(); // optimise for speed under MSW
+#endif
       SetEntry(event.GetHeaders(), event.GetIndex());
+#ifdef __WXMSW__
       m_FolderCtrl->Show();
+#endif
    }
 }
    
@@ -1382,7 +1397,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
          ASSERT(result->GetSequence());
          if( ((ASMailFolder::ResultInt *)result)->GetValue() )
          {
-            INTARRAY *ia = result->GetSequence();
+            UIdArray *ia = result->GetSequence();
             msg.Printf(_("Found %lu messages."), (unsigned long)
                        ia->Count());
             bool tmp = m_FolderCtrl->EnableSelectionCallbacks(false);
@@ -1395,7 +1410,20 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
             msg.Printf(_("No matching messages found."));
          wxLogStatus(GetFrame(m_Parent), msg);
          break;
-
+      case ASMailFolder::Op_ApplyFilterRules:
+      {
+         ASSERT(result->GetSequence());
+         int rc = ((ASMailFolder::ResultInt *)result)->GetValue();
+         if(rc == -1)
+            msg.Printf(_("Filtering messages failed."));
+         else
+            msg.Printf(_("Applied filters to %lu messages, return code %d."),
+                       (unsigned long)
+                       result->GetSequence()->Count(),
+                       rc);
+         wxLogStatus(GetFrame(m_Parent), msg);
+         break;
+      }
       // these cases don't have return values
       case ASMailFolder::Op_ReplyMessages:
       case ASMailFolder::Op_ForwardMessages:

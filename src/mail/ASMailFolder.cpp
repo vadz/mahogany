@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * ASMailFolder class: asynchronous handling of mail folders        *
  *                                                                  *
- * (C) 1999-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1999-2000 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -58,9 +58,9 @@
 
 
 static
-INTARRAY *Copy(const INTARRAY *old)
+UIdArray *Copy(const UIdArray *old)
 {
-   INTARRAY *newarray = new INTARRAY;
+   UIdArray *newarray = new UIdArray;
    for(size_t i = 0; i < old->Count(); i++)
       newarray->Add( (*old)[i] );
    return newarray;
@@ -164,7 +164,7 @@ class MailThreadSeq : public MailThread
 public:
    MailThreadSeq(ASMailFolder *mf,
                  UserData ud,
-                 const INTARRAY *selections)
+                 const UIdArray *selections)
       : MailThread(mf, ud)
       {
          m_Seq = Copy(selections);
@@ -177,7 +177,7 @@ public:
          ASSERT(m_Seq == NULL);
       }
 protected:
-   INTARRAY *m_Seq;
+   UIdArray *m_Seq;
 };
 
 class MT_Ping : public MailThread
@@ -220,7 +220,7 @@ class MT_SetFlag : public MailThreadSeq
 {
 public:
    MT_SetFlag(ASMailFolder *mf, UserData ud,
-              const INTARRAY *sequence,
+              const UIdArray *sequence,
               int flag, bool set)
       : MailThreadSeq(mf, ud, sequence)
       {
@@ -244,7 +244,7 @@ class MT_DeleteOrTrashMessages : public MailThreadSeq
 {
 public:
    MT_DeleteOrTrashMessages(ASMailFolder *mf, UserData ud,
-                            const INTARRAY *sequence)
+                            const UIdArray *sequence)
       : MailThreadSeq(mf, ud, sequence)
       {
       }
@@ -265,7 +265,7 @@ class MT_DeleteMessages : public MailThreadSeq
 {
 public:
    MT_DeleteMessages(ASMailFolder *mf, UserData ud,
-                     const INTARRAY *sequence,
+                     const UIdArray *sequence,
                      bool expunge)
       : MailThreadSeq(mf, ud, sequence)
       {
@@ -366,7 +366,7 @@ public:
       : MailThread(mf, ud) { m_Criterium = *crit;}
    virtual void WorkFunction(void)
       {
-         INTARRAY *msgs = m_MailFolder->SearchMessages(&m_Criterium);
+         UIdArray *msgs = m_MailFolder->SearchMessages(&m_Criterium);
          SendEvent(ASMailFolder::ResultInt::Create(m_ASMailFolder,
                                                    m_Ticket,
                                                    ASMailFolder::Op_SearchMessages,
@@ -381,7 +381,7 @@ class MT_SaveMessages : public MailThreadSeq
 {
 public:
    MT_SaveMessages(ASMailFolder *mf, UserData ud,
-                   const INTARRAY *selections,
+                   const UIdArray *selections,
                    const String &folderName,
                    bool isProfile, bool updateCount)
       : MailThreadSeq(mf, ud, selections)
@@ -412,7 +412,7 @@ class MT_SaveMessagesToFile : public MailThreadSeq
 {
 public:
    MT_SaveMessagesToFile(ASMailFolder *mf, UserData ud,
-                         const INTARRAY *selections,
+                         const UIdArray *selections,
                          const String &fileName)
       : MailThreadSeq(mf, ud, selections)
       {
@@ -440,7 +440,7 @@ public:
    MT_SaveMessagesToFileOrFolder(ASMailFolder *mf,
                                  UserData ud,
                                  ASMailFolder::OperationId op,
-                                 const INTARRAY *selections,
+                                 const UIdArray *selections,
                                  MWindow *parent)
       : MailThreadSeq(mf, ud, selections)
       {
@@ -472,7 +472,7 @@ class MT_ReplyForwardMessages : public MailThreadSeq
 public:
    MT_ReplyForwardMessages(ASMailFolder *mf, UserData ud,
                            ASMailFolder::OperationId op,
-                           const INTARRAY *selections,
+                           const UIdArray *selections,
                            MWindow *parent,
                            int flags )
       : MailThreadSeq(mf, ud, selections)
@@ -490,6 +490,29 @@ public:
          else
             m_MailFolder->ForwardMessages(m_Seq, m_Parent);
          delete m_Seq;
+#ifdef DEBUG
+         m_Seq = NULL;
+#endif
+      }
+private:
+   ASMailFolder::OperationId m_Op;
+   MWindow *m_Parent;
+   int m_Flags;
+};
+
+class MT_ApplyFilterRules : public MailThreadSeq
+{
+public:
+   MT_ApplyFilterRules(ASMailFolder *mf, UserData ud,
+                       const UIdArray *selections)
+      : MailThreadSeq(mf, ud, selections)
+      { }
+   virtual void WorkFunction(void)
+      {
+         int result = m_MailFolder->ApplyFilterRules(m_Seq);
+         SendEvent(ASMailFolder::ResultInt::Create(
+            m_ASMailFolder, m_Ticket, ASMailFolder::Op_ApplyFilterRules, m_Seq,
+            result, m_UserData));
 #ifdef DEBUG
          m_Seq = NULL;
 #endif
@@ -611,7 +634,7 @@ public:
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
    */
-   virtual Ticket SetSequenceFlag(const INTARRAY *sequence,
+   virtual Ticket SetSequenceFlag(const UIdArray *sequence,
                                   int flag,
                                   bool set)
       {
@@ -624,7 +647,7 @@ public:
        @param flag flag to be set, e.g. "\\Deleted"
        @param set if true, set the flag, if false, clear it
    */
-   virtual Ticket SetFlag(const INTARRAY *sequence, int flag, bool set)
+   virtual Ticket SetFlag(const UIdArray *sequence, int flag, bool set)
       {
          return (new MT_SetFlag(this, NULL, sequence,flag,set))->Start();
       }
@@ -671,7 +694,7 @@ public:
    */
    virtual Ticket DeleteMessage(unsigned long uid)
       {
-         INTARRAY uids;
+         UIdArray uids;
          uids.Add(uid);
          return DeleteMessages(&uids, false, NULL);
       }
@@ -682,7 +705,7 @@ public:
    */
    virtual Ticket UnDeleteMessage(unsigned long uid)
       {
-         INTARRAY uids;
+         UIdArray uids;
          uids.Add(uid);
          return UnDeleteMessages(&uids, NULL);
       }
@@ -695,7 +718,7 @@ public:
    virtual void SetMessageFlag(unsigned long uid,
                                int flag, bool set)
       {
-         INTARRAY *ia = new INTARRAY;
+         UIdArray *ia = new UIdArray;
          ia->Add(uid);
          SetSequenceFlag(ia, flag, set);
          delete ia;
@@ -718,7 +741,7 @@ public:
        folder is updated. If false, they will be detected as new messages.
        @return ResultInt boolean
    */
-   virtual Ticket SaveMessages(const INTARRAY *selections,
+   virtual Ticket SaveMessages(const UIdArray *selections,
                                String const & folderName,
                                bool isProfile,
                                bool updateCount,
@@ -732,7 +755,7 @@ public:
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean
    */
-   virtual Ticket DeleteOrTrashMessages(const INTARRAY *messages,
+   virtual Ticket DeleteOrTrashMessages(const UIdArray *messages,
                                         UserData ud)
       {
          return (new MT_DeleteOrTrashMessages(this, ud, messages))->Start();
@@ -741,7 +764,7 @@ public:
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean
    */
-   virtual Ticket DeleteMessages(const INTARRAY *messages,
+   virtual Ticket DeleteMessages(const UIdArray *messages,
                                  bool expunge,
                                  UserData ud)
       {
@@ -752,7 +775,7 @@ public:
        @param messages pointer to an array holding the message numbers
        @return ResultInt boolean
    */
-   virtual Ticket UnDeleteMessages(const INTARRAY *messages, UserData ud)
+   virtual Ticket UnDeleteMessages(const UIdArray *messages, UserData ud)
       {
          return SetFlag(messages, MailFolder::MSG_STAT_DELETED, false);
       }
@@ -762,7 +785,7 @@ public:
        @parent parent window for dialog
        @return ResultInt boolean
    */
-   virtual Ticket SaveMessagesToFile(const INTARRAY *messages,
+   virtual Ticket SaveMessagesToFile(const UIdArray *messages,
                                      const String &fileName, UserData ud)
       {
          return (new MT_SaveMessagesToFile(this, ud,
@@ -774,7 +797,7 @@ public:
        @parent parent window for dialog
        @return ResultInt boolean
    */
-   virtual Ticket SaveMessagesToFile(const INTARRAY *messages,
+   virtual Ticket SaveMessagesToFile(const UIdArray *messages,
                                      MWindow *parent, UserData ud)
       {
          return (new MT_SaveMessagesToFileOrFolder(this, ud,
@@ -787,7 +810,7 @@ public:
        @param parent window for dialog
        @return true if messages got saved
    */
-   virtual Ticket SaveMessagesToFolder(const INTARRAY *messages,
+   virtual Ticket SaveMessagesToFolder(const UIdArray *messages,
                                        MWindow *parent,
                                        UserData ud)
       {
@@ -800,7 +823,7 @@ public:
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
    */
-   virtual Ticket ReplyMessages(const INTARRAY *messages,
+   virtual Ticket ReplyMessages(const UIdArray *messages,
                                 MWindow *parent,
                                 int flags,
                                 UserData ud)
@@ -815,7 +838,7 @@ public:
        @param messages pointer to an array holding the message numbers
        @param parent window for dialog
    */
-   virtual Ticket ForwardMessages(const INTARRAY *messages,
+   virtual Ticket ForwardMessages(const UIdArray *messages,
                                   MWindow *parent,
                                   UserData ud)
    {
@@ -824,6 +847,14 @@ public:
                                           messages, parent,
                                           0))->Start();
    }
+   /** Apply filter rules to the folder.
+       Applies the rule to all messages listed in msgs.
+       @return -1 if no filter module exists, return code otherwise
+   */
+   virtual Ticket ApplyFilterRules(const UIdArray * msgs, UserData ud)
+   {
+      return (new MT_ApplyFilterRules(this, ud, msgs))->Start();
+   } 
 
    /**@name Subscription management */
    //@{
@@ -992,14 +1023,14 @@ public:
    virtual void Remove(Ticket t)
       {
          ASSERT(Contains(t));
-         m_Tickets.Remove(t);
+         m_Tickets.Remove( (size_t) t);
       }
    virtual void Clear(void)
       {
          m_Tickets.Clear();
       }
 private:
-   INTARRAY m_Tickets;
+   wxArrayInt m_Tickets;
 };
 
 /* static */

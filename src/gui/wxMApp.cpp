@@ -1196,7 +1196,6 @@ wxMApp::FatalError(const char *message)
 #ifdef DEBUG
    abort();
 #else
-   DoExit();
    OnFatalException();
 #endif
 }

@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MAppBase class: all non GUI specific application stuff           *
  *                                                                  *
- * (C) 1997-1999 by Karsten Ballüder (ballueder@gmx.net)            *
+ * (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *                                                                  *
@@ -476,6 +476,9 @@ MAppBase::OnStartup()
    m_eventOptChangeReg = MEventManager::Register(*this, MEventId_OptionsChange);
    CHECK( m_eventOptChangeReg, FALSE,
           "failed to register event handler for options change event " );
+   m_eventFolderStatusReg = MEventManager::Register(*this, MEventId_FolderStatus);
+   CHECK( m_eventFolderStatusReg, FALSE,
+          "failed to register event handler for folder status event " );
 
    // Load any modules requested.
    LoadModules();
@@ -541,6 +544,11 @@ MAppBase::OnShutDown()
       MEventManager::Deregister(m_eventOptChangeReg);
       m_eventOptChangeReg = NULL;
    }
+   if ( m_eventFolderStatusReg )
+   {
+      MEventManager::Deregister(m_eventFolderStatusReg);
+      m_eventFolderStatusReg = NULL;
+   }
    if(m_MailCollector) m_MailCollector->DecRef();
    delete m_KeepOpenFolders;
 
@@ -592,7 +600,7 @@ MAppBase::CanClose() const
       if(mf)
       {
          // make sure they are all marked as deleted:
-         INTARRAY * ia = GetAllMessagesSequence(mf);
+         UIdArray * ia = GetAllMessagesSequence(mf);
          mf->SetSequenceFlag(ia, MailFolder::MSG_STAT_DELETED);
          delete ia;
          // And now, we can ask if we want to expunge them:
@@ -735,9 +743,6 @@ MAppBase::OnMEvent(MEventData& event)
                MDialog_Message(message, m_topLevelFrame, _("New Mail"));
             }
          }
-
-
-      return TRUE;
    }
    else if (event.GetId() == MEventId_OptionsChange)
    {
@@ -748,10 +753,18 @@ MAppBase::OnMEvent(MEventData& event)
          if(idx < sizeof gs_IconSubDirs)
             GetIconManager()->SetSubDirectory(gs_IconSubDirs[idx]);
       }
-      return TRUE;
+      // re-generate the mailcollector object:
+      m_MailCollector->DecRef();;
+      m_MailCollector = MailCollector::Create();
+      m_MailCollector->Collect(); // empty all at beginning
    }
-   // else
-   ASSERT(0); // unexpected
+   else if (event.GetId() == MEventId_FolderStatus)
+   {
+// is locked??      UpdateOutboxStatus();
+   }
+   else
+      // else
+      ASSERT(0); // unexpected
    return TRUE;
 }
 
@@ -803,36 +816,38 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP) const
    }
    else
    {
-      if(mf->Lock())
+      if(mf->CountMessages() > 0)
       {
-
-         HeaderInfoList *hil = mf->GetHeaders();
-         if( hil )
+         if(mf->Lock())
          {
-            const HeaderInfo *hi;
-            Message *msg;
-            for(UIdType i = 0; i < hil->Count(); i++)
+            HeaderInfoList *hil = mf->GetHeaders();
+            if( hil )
             {
-               hi = (*hil)[i];
-               ASSERT(hi);
-               msg = mf->GetMessage(hi->GetUId());
-               ASSERT(msg);
-               String newsgroups;
-               msg->GetHeaderLine("Newsgroups", newsgroups);
-               if(newsgroups.Length() > 0)
-                  nntp++;
-               else
-                  smtp++;
-               SafeDecRef(msg);
+               const HeaderInfo *hi;
+               Message *msg;
+               for(UIdType i = 0; i < hil->Count(); i++)
+               {
+                  hi = (*hil)[i];
+                  ASSERT(hi);
+                  msg = mf->GetMessage(hi->GetUId());
+                  ASSERT(msg);
+                  String newsgroups;
+                  msg->GetHeaderLine("Newsgroups", newsgroups);
+                  if(newsgroups.Length() > 0)
+                     nntp++;
+                  else
+                     smtp++;
+                  SafeDecRef(msg);
+               }
+               SafeDecRef(hil);
             }
-            SafeDecRef(hil);
+            mf->UnLock();
          }
-         mf->UnLock();
-      }
-      else
-      {
-         ERRORMESSAGE((_("Could not obtain lock for outbox '%s'."),
-                       mf->GetName().c_str()));
+         else
+         {
+            ERRORMESSAGE((_("Could not obtain lock for outbox '%s'."),
+                          mf->GetName().c_str()));
+         }
       }
       mf->DecRef();
    }

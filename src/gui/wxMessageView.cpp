@@ -1435,7 +1435,7 @@ wxMessageView::ShowRawText(void)
 bool
 wxMessageView::DoMenuCommand(int id)
 {
-   wxArrayInt msgs;
+   UIdArray msgs;
    if( m_uid != UID_ILLEGAL )
       msgs.Add(m_uid);
 
