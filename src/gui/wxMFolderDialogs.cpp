@@ -447,6 +447,7 @@ MFolder *wxFolderCreateDialog::DoCreateFolder(MFolder::Type typeFolder)
       // tell the other pages that we now have a folder (and hence a profile)
       ProfileBase *profile = ProfileBase::CreateProfile(m_newFolder->GetFullName());
       GET_COMPOSE_PAGE(m_notebook)->SetProfile(profile);
+      GET_MSGVIEW_PAGE(m_notebook)->SetProfile(profile);
 
       profile->DecRef();
    }
@@ -534,6 +535,7 @@ bool wxFolderPropertiesDialog::TransferDataToWindow()
    // profile section corresponding to our folder
    GET_FOLDER_PAGE(m_notebook)->SetDefaults(folderName);
    GET_COMPOSE_PAGE(m_notebook)->SetProfile(profile);
+   GET_MSGVIEW_PAGE(m_notebook)->SetProfile(profile);
 
    profile->DecRef();
 
@@ -1018,6 +1020,7 @@ const char *wxFolderCreateNotebook::s_aszImages[] =
 {
    "access",
    "compose",
+   "msgview",
    NULL
 };
 
@@ -1036,6 +1039,7 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent,
    // create and add the pages
    (void)new wxFolderPropertiesPage(this, profile, dlg);
    (void)new wxOptionsPageCompose(this, profile);
+   (void)new wxOptionsPageMessageView(this, profile);
 
    profile->DecRef();
 }

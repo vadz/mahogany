@@ -31,6 +31,7 @@ enum FolderCreatePage
    FolderCreatePage_Default = -1, // default must have value -1
    FolderCreatePage_Folder,
    FolderCreatePage_Compose,
+   FolderCreatePage_MsgView,
    FolderCreatePage_Max
 };
 
@@ -40,6 +41,7 @@ enum FolderCreatePage
 
 #define GET_FOLDER_PAGE(nbook)   ((wxFolderPropertiesPage *)nbook->GetPage(FolderCreatePage_Folder))
 #define GET_COMPOSE_PAGE(nbook)  ((wxOptionsPage *)nbook->GetPage(FolderCreatePage_Compose))
+#define GET_MSGVIEW_PAGE(nbook)  ((wxOptionsPage *)nbook->GetPage(FolderCreatePage_MsgView))
 
 // -----------------------------------------------------------------------------
 // functions
