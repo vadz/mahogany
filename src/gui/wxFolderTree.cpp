@@ -54,10 +54,6 @@ public:
                     MFolder *folder,
                     wxFolderTreeNode *parent = NULL);
 
-   // operations
-      // delete all children (not from dtor because needs param)
-   void DeleteChildren(wxTreeCtrl *tree);
-
    // accessors
    bool WasExpanded()
    {
@@ -320,21 +316,6 @@ wxFolderTreeNode::wxFolderTreeNode(wxTreeCtrl *tree,
    tree->SetItemHasChildren(GetId());
 }
 
-void wxFolderTreeNode::DeleteChildren(wxTreeCtrl *tree)
-{
-   // delete all children
-   long cookie;
-   wxTreeItemId id = tree->GetFirstChild(GetId(), cookie);
-   while ( id.IsOk() )
-   {
-      wxFolderTreeNode *child = (wxFolderTreeNode *)tree->GetItemData(id);
-      child->DeleteChildren(tree);
-      delete child;
-
-      id = tree->GetNextChild(GetId(), cookie);
-   }
-}
-
 // ----------------------------------------------------------------------------
 // wxFolderTreeImpl
 // ----------------------------------------------------------------------------
@@ -531,11 +512,7 @@ void wxFolderTreeImpl::OnChar(wxKeyEvent& event)
 wxFolderTreeImpl::~wxFolderTreeImpl()
 {
    long idRoot = GetRootItem();
-   wxFolderTreeNode *root = (wxFolderTreeNode *)GetItemData(idRoot);
-
-   root->DeleteChildren(this);
-   delete root;
-
+   
    delete GetImageList();
 
    delete m_menu;
