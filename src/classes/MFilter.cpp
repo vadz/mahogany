@@ -171,7 +171,7 @@ static unsigned char ORC_T_Flags[] =
    ORC_F_NeedsArg,                     // ORC_T_SmallerThan
    ORC_F_NeedsArg,                     // ORC_T_OlderThan
    ORC_F_NeedsArg,                     // ORC_T_NewerThan
-   0,                                  // ORC_T_IsSpam
+   ORC_F_NeedsArg,                     // ORC_T_IsSpam
 #ifndef USE_PYTHON
    ORC_F_Unimplemented|
 #endif
