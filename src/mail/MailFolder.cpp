@@ -24,7 +24,7 @@
 
 #include "modules/Scoring.h"
 
-#include "MDialogs.h" // for the password prompt...
+#include "MDialogs.h" // for MDialog_FolderChoose
 
 #include "Mdefaults.h"
 
@@ -42,7 +42,6 @@
 
 #include "gui/wxComposeView.h"
 #include "wx/persctrl.h"
-#include "MDialogs.h"
 #include "MApplication.h"
 #include "modules/Filters.h"
 #include <wx/timer.h>

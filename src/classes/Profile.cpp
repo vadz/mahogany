@@ -394,7 +394,6 @@ ProfileBase::CreateGlobalConfig(const String & filename)
                                   wxCONFIG_USE_LOCAL_FILE |
                                   wxCONFIG_USE_GLOBAL_FILE);
 #  else  // Unix
-   mode_t um = umask(0077);
    String globalFile;
    globalFile << M_BASEDIR << '/'
               << M_APPLICATIONNAME << ".conf";
@@ -405,7 +404,10 @@ ProfileBase::CreateGlobalConfig(const String & filename)
                                   filename, globalFile,
                                   wxCONFIG_USE_LOCAL_FILE|
                                   wxCONFIG_USE_GLOBAL_FILE);
-   umask(um);
+
+   // don't give the others even read access to our config file as it stores,
+   // among other things, the passwords
+   ((wxFileConfig *)ms_GlobalConfig)->SetUmask(0077);
 #  endif // Unix/Windows
    ProfileBase *p = Profile::CreateProfile("",NULL);
    EnforcePolicy(p);

@@ -974,12 +974,17 @@ MDialog_ShowTip(const MWindow *parent)
 
    // Tips files are in @prefix@/share/Mahogany/doc/Tips/
    dir = mApplication->GetGlobalDir();
-   dir << DIR_SEPARATOR << "doc" << DIR_SEPARATOR
-       << "Tips" << DIR_SEPARATOR; 
+   if ( !dir )
+   {
+      // like this, it will work in an uninstalled copy of M too
+      dir = "..";
+   }
+
+   dir << DIR_SEPARATOR << "doc" << DIR_SEPARATOR << "Tips" << DIR_SEPARATOR;
 
    // Tips files are either Tips_LOCALENAME.txt, e.g. Tips_de.txt or
    // simply Tips.txt
-   
+
    filename = "Tips";
 
    wxLocale * locale = wxGetLocale();
@@ -989,7 +994,7 @@ MDialog_ShowTip(const MWindow *parent)
 
    if(! wxFileExists(dir+filename))
       filename = "Tips.txt";
-   
+
    wxTipProvider *tipProvider =
       wxCreateFileTipProvider(dir+filename, READ_APPCONFIG(MP_LASTTIP));
 
@@ -1502,7 +1507,7 @@ public:
          return m_Criterium != m_OldCriterium ||
             m_Arg != m_OldArg;
       };
-   
+
 protected:
 
    void UpdateCritStruct(void)
@@ -2129,6 +2134,7 @@ static const struct
    { "BbdbSaveDialog",           gettext_noop("ask for confirmation before saving address books in BBDB format") },
    { "FolderGroupHint",          gettext_noop("show explanation after creating a folder group") },
    { "SignatureTooLong",         gettext_noop("warn if signature is longer than netiquette recommends") },
+   { "RememberPwd",              gettext_noop("propose to remember passwords entered interactively") },
    //{ "", gettext_noop("") },
 };
 

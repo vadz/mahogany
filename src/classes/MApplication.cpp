@@ -590,7 +590,7 @@ bool
 MAppBase::CanClose() const
 {
    // Try to send outgoing messages:
-   if(CheckOutbox() != 0)
+   if( CheckOutbox() )
    {
       if(MDialog_YesNoDialog(
          _("You still have messages queued to be sent.\n"
@@ -820,8 +820,12 @@ MAppBase::SendOutbox(void) const
    UpdateOutboxStatus();
 }
 
+// return true if there are messages to be sent
 bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) const
 {
+   if ( !READ_APPCONFIG(MP_USE_OUTBOX) )
+      return false;
+
    String outbox = READ_APPCONFIG(MP_OUTBOX_NAME);
 
    UIdType

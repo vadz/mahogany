@@ -211,8 +211,22 @@ public:
 
    virtual bool TransferDataFromWindow()
    {
+      wxString email = m_email->GetValue();
       gs_installWizardData.name = m_name->GetValue();
-      gs_installWizardData.email = m_email->GetValue();
+      gs_installWizardData.email = email;
+
+      // if the email is user@some.where, then suppose that the servers are
+      // pop.some.where &c
+      wxString domain = email.AfterFirst('@');
+      if ( !!domain )
+      {
+         AddDomain(gs_installWizardData.pop, domain);
+         AddDomain(gs_installWizardData.smtp, domain);
+         AddDomain(gs_installWizardData.imap, domain);
+         AddDomain(gs_installWizardData.nntp, domain);
+      }
+      //else: no domain specified
+
       return TRUE;
    }
 
@@ -221,6 +235,14 @@ public:
       m_name->SetValue(gs_installWizardData.name);
       m_email->SetValue(gs_installWizardData.email);
       return TRUE;
+   }
+
+   void AddDomain(wxString& server, const wxString& domain)
+   {
+      if ( server.Find('.') == wxNOT_FOUND )
+      {
+         server << '.' << domain;
+      }
    }
 
 private:
@@ -241,7 +263,8 @@ public:
          gs_installWizardData.nntp = m_nntp->GetValue();
          if(gs_installWizardData.smtp.Length() == 0)
          {
-            wxLogError(_("You need to specify at least the SMTP server."));
+            wxLogError(_("You need to specify at the SMTP server to be able "
+                         "to send email, please do it!"));
             return FALSE;
          }
          else
@@ -616,14 +639,16 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
       "\n"
       "Mail servers may use POP3 or IMAP4 access,\n"
       "but you usually need only one of them\n"
-      "(IMAP4 is much better and faster).\n"
+      "(IMAP4 is much better and faster, so use it if you can).\n"
       "\n"
       "To read Usenet discussion groups, you need to\n"
       "specify the NNTP (news) server and to be able\n"
       "to send e-mail, an SMTP server is required.\n"
       "\n"
       "All of these fields may be filled later as well\n"
-      "(and you will be able to specify multiple servers too)"
+      "(and you will be able to specify multiple servers too).\n"
+      "Finally, leave a field empty if you are not going to use\n"
+      "the corresponding server."
       ));
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(text);
@@ -933,18 +958,22 @@ bool RunInstallWizard()
                           gs_installWizardData.email);
       profile->writeEntry(MP_PERSONALNAME, gs_installWizardData.name);
 
+      // write the values even if they're empty as otherwise we'd try to
+      // create folders with default names - instead of not creating them at
+      // all
       profile->writeEntry(MP_POPHOST, gs_installWizardData.pop);
       profile->writeEntry(MP_IMAPHOST, gs_installWizardData.imap);
-      profile->writeEntry(MP_SMTPHOST, gs_installWizardData.smtp);
       profile->writeEntry(MP_NNTPHOST, gs_installWizardData.nntp);
+      profile->writeEntry(MP_SMTPHOST, gs_installWizardData.smtp);
 
       // load all modules by default:
+      wxString modules = "Filters";
 #ifdef USE_PISOCK
       if(gs_installWizardData.usePalmOs)
-         profile->writeEntry(MP_MODULES,"Filters:PalmOS");
-      else
-#endif
-         profile->writeEntry(MP_MODULES,"Filters");
+         modules += ":PalmOS";
+#endif // USE_PISOCK
+
+      profile->writeEntry(MP_MODULES, modules);
 
       CompleteConfiguration(gs_installWizardData);
    }
@@ -1032,45 +1061,55 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
          wxLogError(_("Could not create the outgoing mailbox '%'."),
                     name.c_str());
    }
-
-   // INBOX/NEW MAIL
-   if(gs_installWizardData.collectAllMail)
+   else
    {
-      // create hidden INBOX
-      if(! MailFolder::CreateFolder("INBOX",
-                                    MF_INBOX,
-                                    MF_FLAGS_INCOMING|MF_FLAGS_DONTDELETE
-                                    |MF_FLAGS_HIDDEN|MF_FLAGS_KEEPOPEN,
-                                    "",
-                                    _("Default system folder for incoming mail.")))
-         wxLogError(_("Could not create INBOX mailbox."));
+      profile->writeEntry(MP_USE_OUTBOX, 0l);
+   }
 
-
-      // Create New Mail folder:
-      wxString foldername = READ_CONFIG(profile, MP_NEWMAIL_FOLDER);
-      if(foldername.Length() == 0) // shouldn't happen unless run for the first time
-      {
-         foldername = _("New Mail");
-         profile->writeEntry(MP_NEWMAIL_FOLDER, foldername);
-      }
-      if(! MailFolder::CreateFolder(foldername,
-                                    MF_FILE,
-                                    MF_FLAGS_NEWMAILFOLDER |
-                                    MF_FLAGS_DONTDELETE |
-                                    MF_FLAGS_KEEPOPEN,
-                                    foldername,
-                                    _("Mailbox in which Mahogany collects all new messages.")))
-         wxLogError(_("Could not create central incoming mailbox '%s'."), foldername.c_str());
+   // INBOX/NEW MAIL: in any case, create both INBOX and NEW MAIL folders, but
+   // keep one of them hidden depending on "Collect all mail" setting
+   int flagInbox, flagNewMail;
+   if ( gs_installWizardData.collectAllMail )
+   {
+      // hide INBOX, show the other one
+      flagInbox = MF_FLAGS_HIDDEN | MF_FLAGS_KEEPOPEN;
+      flagNewMail = 0;
    }
    else
    {
-      // create normal INBOX
-      if(! MailFolder::CreateFolder("INBOX",
-                                    MF_INBOX,
-                                    MF_FLAGS_DONTDELETE|MF_FLAGS_KEEPOPEN,
-                                    "",
-                                    _("Default system folder for incoming mail.") ) )
-         wxLogError(_("Could not create INBOX mailbox."));
+      // hie NEW MAIL, show INBOX
+      flagInbox = 0;
+      flagNewMail = MF_FLAGS_HIDDEN | MF_FLAGS_KEEPOPEN;
+   }
+
+   // create hidden INBOX
+   if(! MailFolder::CreateFolder("INBOX",
+                                 MF_INBOX,
+                                 MF_FLAGS_INCOMING |
+                                 MF_FLAGS_DONTDELETE |
+                                 flagInbox,
+                                 "",
+                                 _("Default system folder for incoming mail.")))
+   {
+      wxLogError(_("Could not create INBOX mailbox."));
+   }
+
+   // create New Mail folder:
+   wxString foldername = READ_CONFIG(profile, MP_NEWMAIL_FOLDER);
+   if(foldername.Length() == 0) // shouldn't happen unless run for the first time
+   {
+      foldername = _("New Mail");
+      profile->writeEntry(MP_NEWMAIL_FOLDER, foldername);
+   }
+
+   if(! MailFolder::CreateFolder(foldername,
+                                 MF_FILE,
+                                 MF_FLAGS_NEWMAILFOLDER |
+                                 flagNewMail,
+                                 foldername,
+                                 _("Mailbox in which Mahogany collects all new messages.")))
+   {
+      wxLogError(_("Could not create central incoming mailbox '%s'."), foldername.c_str());
    }
 
    // TRASH
@@ -1839,43 +1878,52 @@ SetupServers(void)
 
    /* The NNTP server: */
    serverName = READ_APPCONFIG(MP_NNTPHOST);
-   mfolder = CreateFolderTreeEntry(NULL,
-                                   _("NNTP Server"),
-                                   MF_NNTP,
-                                   MF_FLAGS_ANON|MF_FLAGS_GROUP,
-                                   "",
-                                   FALSE);
-   p = ProfileBase::CreateProfile(mfolder->GetName());
-   p->writeEntry(MP_NNTPHOST, serverName);
-   p->DecRef();
-   SafeDecRef(mfolder);
+   if ( !!serverName )
+   {
+      mfolder = CreateFolderTreeEntry(NULL,
+                                      _("NNTP Server"),
+                                      MF_NNTP,
+                                      MF_FLAGS_ANON|MF_FLAGS_GROUP,
+                                      "",
+                                      FALSE);
+      p = ProfileBase::CreateProfile(mfolder->GetName());
+      p->writeEntry(MP_NNTPHOST, serverName);
+      p->DecRef();
+      SafeDecRef(mfolder);
+   }
 
    /* The IMAP server: */
    serverName = READ_APPCONFIG(MP_IMAPHOST);
-   mfolder = CreateFolderTreeEntry(NULL,
-                                   _("IMAP Server"),
-                                   MF_IMAP                   ,
-                                   MF_FLAGS_GROUP,
-                                   "",
-                                   FALSE);
-   p = ProfileBase::CreateProfile(mfolder->GetName());
-   p->writeEntry(MP_NNTPHOST, serverName);
-   p->DecRef();
-   SafeDecRef(mfolder);
+   if ( !!serverName )
+   {
+      mfolder = CreateFolderTreeEntry(NULL,
+                                      _("IMAP Server"),
+                                      MF_IMAP                   ,
+                                      MF_FLAGS_GROUP,
+                                      "",
+                                      FALSE);
+      p = ProfileBase::CreateProfile(mfolder->GetName());
+      p->writeEntry(MP_IMAPHOST, serverName);
+      p->DecRef();
+      SafeDecRef(mfolder);
+   }
 
    /* The POP3 server: */
    serverName = READ_APPCONFIG(MP_POPHOST);
-   mfolder = CreateFolderTreeEntry(NULL,
-                                   _("POP3 Server"),
-                                   MF_POP,
-                                   0,
-                                   "",
-                                   FALSE);
-   p = ProfileBase::CreateProfile(mfolder->GetName());
-   p->writeEntry(MP_NNTPHOST, serverName);
-   p->writeEntry(MP_USERNAME, READ_APPCONFIG(MP_USERNAME));
-   p->DecRef();
-   SafeDecRef(mfolder);
+   if ( !!serverName )
+   {
+      mfolder = CreateFolderTreeEntry(NULL,
+                                      _("POP3 Server"),
+                                      MF_POP,
+                                      0,
+                                      "",
+                                      FALSE);
+      p = ProfileBase::CreateProfile(mfolder->GetName());
+      p->writeEntry(MP_POPHOST, serverName);
+      p->writeEntry(MP_USERNAME, READ_APPCONFIG(MP_USERNAME));
+      p->DecRef();
+      SafeDecRef(mfolder);
+   }
 }
 
 /* Make sure we have the minimal set of things set up:

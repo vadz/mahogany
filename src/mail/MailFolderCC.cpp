@@ -699,18 +699,18 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       return mf;
    }
 
-
+   bool userEnteredPwd = false;
    String pword = password;
-   // ask the password for the folders which need it but for which it hadn't been
-   // specified during creation
+
+   // ask the password for the folders which need it but for which it hadn't
+   // been specified during creation
    if ( FolderTypeHasUserName( (FolderType) GetFolderType(typeAndFlags))
         && ((GetFolderFlags(typeAndFlags) & MF_FLAGS_ANON) == 0)
         && (pword.Length() == 0)
       )
    {
-      String prompt, fname;
-      fname = name;
-      if(! fname) fname = mboxpath;
+      String prompt,
+             fname = !name ? mboxpath : name;
       prompt.Printf(_("Please enter the password for folder '%s':"), symname.c_str());
       if(! MInputBox(&pword,
                      _("Password required"),
@@ -723,7 +723,12 @@ MailFolderCC::OpenFolder(int typeAndFlags,
 
          return NULL; // cannot open it
       }
+
+      // remember that the password was entered interactively and propose to
+      // remember it if it really works
+      userEnteredPwd = true;
    }
+
    mf = new
       MailFolderCC(typeAndFlags,mboxpath,profile,server,login,pword);
    mf->m_Name = symname;
@@ -777,6 +782,23 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    {
       mf->DecRef();
       mf = NULL;
+   }
+   else if ( profile && userEnteredPwd )
+   {
+      // ask the user if he'd like to remember the password for the future:
+      // this is especially useful for the folders created initially by the
+      // setup wizard as it doesn't ask for the passwords
+      if ( MDialog_YesNoDialog(_("Would you like to remember the password "
+                                 "for this folder?\n"
+                                 "(WARNING: don't do it if you are concerned "
+                                 "about security)"),
+                               NULL,
+                               MDIALOG_YESNOTITLE,
+                               TRUE, /* [Yes] default */
+                               "RememberPwd") )
+      {
+         profile->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(pword));
+      }
    }
 
    return mf;
