@@ -865,7 +865,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("E&xecute new mail command"), Field_Bool,    -1 },
    { gettext_noop("New mail &command"), Field_File, ConfigField_FolderViewNewMailUseCommand},
    { gettext_noop("Show new mail &notification"), Field_Bool,    -1 },
-   { gettext_noop("\nThe following settings control appearance of the list of messages."),
+   { gettext_noop("\nThe following settings control appearance of the messages list:"),
                                                    Field_Message,  -1 },
    { gettext_noop("Show only sender's name, not &e-mail"), Field_Bool,    -1 },
    { gettext_noop("Show \"&To\" for messages from oneself"), Field_Bool,    -1 },
