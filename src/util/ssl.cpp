@@ -107,8 +107,8 @@ SSL_DEF( int, SSL_CIPHER_get_bits, (SSL_CIPHER *c, int *alg_bits), (c,alg_bits) 
 SSL_DEF( SSL_CIPHER *, SSL_get_current_cipher ,(SSL *s), (s) );
 SSL_DEF( int, SSL_get_fd, (SSL *s), (s) );
 SSL_DEF( int, SSL_set_fd, (SSL *s, int fd), (s, fd) );
-SSL_DEF( int, SSL_get_error, (SSL *s, int ret_code) );
-SSL_DEF( X509 *, SSL_get_peer_certificate, (SSL *s) );
+SSL_DEF( int, SSL_get_error, (SSL *s, int ret_code), (s, ret_code) );
+SSL_DEF( X509 *, SSL_get_peer_certificate, (SSL *s), (s) );
 
 SSL_DEF_VOID( RAND_seed, (const void *buf,int num), (buf, num) );
 SSL_DEF( BIO *, BIO_new_socket, (int sock, int close_flag), (sock, close_flag) );
@@ -136,7 +136,7 @@ SSL_DEF( char *, X509_NAME_oneline, (X509_NAME *a,char *buf,int size), (a,buf,si
 SSL_DEF( int, SSL_shutdown, (SSL *s), (s) );
 SSL_DEF_VOID( SSL_CTX_free, (SSL_CTX *ctx), (ctx) );
 SSL_DEF( RSA *, RSA_generate_key, (int bits, unsigned long e,void (*cb)(int,int,void *),void *cb_arg), (bits,e,cb,cb_arg) );
-SSL_DEF(int, TLSv1_client_method, (void), () );
+SSL_DEF(SSL_METHOD *, TLSv1_client_method, (void), () );
 SSL_DEF(SSL_METHOD *, SSLv23_client_method, (void), () );
 
 #undef SSL_DEF
