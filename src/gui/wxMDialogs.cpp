@@ -91,18 +91,8 @@
 // ----------------------------------------------------------------------------
 // global vars and functions
 // ----------------------------------------------------------------------------
-MFrame *g_pSplashScreen = NULL;
 
-extern void CloseSplash()
-{
-  if ( g_pSplashScreen ) {
-    g_pSplashScreen->Show(FALSE);
-
-    // and it will be closed when timeout elapses (it's the most fool proof
-    // solution, if not the most direct one)
-  }
-}
-
+/// wxAboutFrame: g_pSplashScreen and CloseSplash() further down
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
@@ -693,8 +683,20 @@ public:
   void OnClick(wxMouseEvent&) { DoClose(); }
 
   // close the about frame
-  void DoClose() { if(GetParent()) GetParent()->Close(true); delete m_pTimer; }
+   void DoClose()
+      {
+         if(GetParent()) GetParent()->Close(true);
+         if(m_pTimer) delete m_pTimer;
+         m_pTimer = NULL;
+      }
 
+   /// stop the timer
+   void StopTimer(void)
+      {
+         if(m_pTimer)
+            delete m_pTimer;
+         m_pTimer = NULL;
+      }
 private:
   // timer which calls our DoClose() when it expires
   class CloseTimer : public wxTimer
@@ -720,7 +722,10 @@ class wxAboutFrame : public wxFrame
 {
 public:
   wxAboutFrame(bool bCloseOnTimeout);
-  ~wxAboutFrame() { g_pSplashScreen = NULL; }
+   ~wxAboutFrame() { g_pSplashScreen = NULL; }
+   void Close(void) { m_Window->StopTimer(); wxWindow::Close(); }
+private:
+   wxAboutWindow *m_Window;
 };
 
 BEGIN_EVENT_TABLE(wxAboutWindow, wxLayoutWindow)
@@ -728,6 +733,15 @@ BEGIN_EVENT_TABLE(wxAboutWindow, wxLayoutWindow)
   EVT_MIDDLE_DOWN(OnClick)
   EVT_RIGHT_DOWN(OnClick)
 END_EVENT_TABLE()
+
+
+class wxMFrame *g_pSplashScreen = NULL;
+
+extern void CloseSplash()
+{
+   if ( g_pSplashScreen )
+     ((wxAboutFrame *)g_pSplashScreen)->Close();
+}
 
 wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
              : wxLayoutWindow(parent)
@@ -841,9 +855,9 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
                       /* no border styles at all */ wxSTAY_ON_TOP )
 {
    wxCHECK_RET( g_pSplashScreen == NULL, "one splash is more than enough" );
-   g_pSplashScreen = (MFrame *)this;
+   g_pSplashScreen = (wxMFrame *)this;
 
-   (void)new wxAboutWindow(this, bCloseOnTimeout);
+   m_Window = new wxAboutWindow(this, bCloseOnTimeout);
 
    Centre(wxCENTER_FRAME | wxBOTH);
    Show(TRUE);
@@ -1227,6 +1241,9 @@ wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile,
 
    Layout();
    SetDefaultSize(380,280);
+
+   TransferDataToWindow();
+   m_OldSortOrder = m_SortOrder;
 }
 
 
@@ -1278,7 +1295,7 @@ bool wxMessageSortingDialog::TransferDataToWindow()
       0xdcba --> 1. sort by "a", then by "b", ...
    */
 
-   m_OldSortOrder = m_SortOrder = sortOrder;
+   m_SortOrder = sortOrder;
 
    long num;
    for( int n = 0; n < NUM_SORTLEVELS; n++)

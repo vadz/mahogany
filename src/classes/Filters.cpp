@@ -147,14 +147,14 @@ private:
        
      EXPRESSION := TERM RESTEXPRESSION
      RESTEXPRESSION := 
-       | + TERM
-       | - TERM
+       | + EXPRESSION
+       | - EXPRESSION
        | EMPTY
 
      TERM := FACTOR RESTTERM
      RESTTERM := 
-       | * FACTOR
-       | / FACTOR
+       | * TERM
+       | / TERM
        | EMPTY
 
 */
@@ -300,7 +300,7 @@ public:
       { MOcheck(); return m_value; }
 #ifdef DEBUG
    virtual String Debug(void) const
-      { MOcheck(); String s; s.Printf("Value(%ld)",m_value); return s; }
+      { MOcheck(); String s; s.Printf("%ld",m_value); return s; }
 #endif    
 private:
    long m_value;
@@ -489,7 +489,7 @@ public: \
    virtual int Priority(void) const \
       { return priority; } \
    virtual String Debug(void) const \
-      { MOcheck(); return #name; } \
+      { MOcheck(); return #oper; } \
 }
 #else
 #define IMPLEMENT_OP(name, oper) \
@@ -737,31 +737,24 @@ ParserImpl::ParseRestCondition(Expression *condition)
    ASSERT(condition);
    
    /* RESTCONDITION :=
-      | & TERM
-      | | TERM
+      | & CONDITION
+      | | CONDITION
       | EMPTY
    */
    Token t = PeekToken();
 
    if(t.GetType() == TT_EOF
-      || t.GetType() == TT_Char && t.GetChar() == ')')
+      || ( t.GetType() == TT_Char
+           && t.GetChar() != '&'
+           && t.GetChar() != '|')
+      )
       return; 
-   else if( t.GetType() != TT_Char )
-   {
-      Error(_("Expected an operator in condition."));
-      return;
-   }
-   else if( t.GetChar() != '&' && t.GetChar() != '|')
-   {
-      Error(_("Expected '&' or '|' in condition."));
-      return;
-   }
 
    GetToken();
-   SyntaxNode * expr = ParseExpression();
+   SyntaxNode * expr = ParseCondition();
    if(! expr)
    {
-      Error(_("Expected expression after conditional operator."));
+      Error(_("Expected Condition after conditional operator."));
       return;
    }
    condition->SetRight(expr);
@@ -794,27 +787,20 @@ ParserImpl::ParseRestExpression(Expression *expression)
    Token t = PeekToken();
 
    if(t.GetType() == TT_EOF
-      || t.GetType() == TT_Char && t.GetChar() == ')')
+      || (t.GetType() == TT_Char
+          && t.GetChar() != '+'
+          && t.GetChar() != '-')
+      )
       return; 
-   else if( t.GetType() != TT_Char )
-   {
-      Error(_("Expected an operator in expression."));
-      return;
-   }
-   else if( t.GetChar() != '+' && t.GetChar() != '-')
-   {
-      Error(_("Expected '+' or '-' in expression."));
-      return;
-   }
 
    GetToken();
-   SyntaxNode * term = ParseTerm();
-   if(! term)
+   SyntaxNode * exp = ParseExpression();
+   if(! exp)
    {
-      Error(_("Expected term after operator."));
+      Error(_("Expected expression after operator."));
       return;
    }
-   expression->SetRight(term);
+   expression->SetRight(exp);
    switch(t.GetChar())
    {
    case '+':
@@ -842,31 +828,21 @@ ParserImpl::ParseRestTerm(Expression *expression)
    */
    Token t = PeekToken();
    if(t.GetType() == TT_EOF
-      || t.GetType() == TT_Char && t.GetChar() == ')')
-   {
+      ||
+      ( t.GetType() == TT_Char
+        && t.GetChar() != '/'
+        && t.GetChar() != '*'))
       return;
-   }
-   else if( t.GetType() != TT_Char)
-   {
-      Error(_("Expected an operator in term."));
-      return;
-   }
-   else if(t.GetChar() != '/' && t.GetChar() != '*')
-   {
-      Error(_("Expected '/' or '*' in term."));
-      return;
-   }
    
-   SyntaxNode *factor = NULL;
    t = GetToken(); // eat operator
    char token = t.GetChar();
-   factor = ParseFactor();
-   if(! factor)
+   SyntaxNode *term = ParseTerm();
+   if(! term)
    {
-      Error(_("Expected factor after operator."));
+      Error(_("Expected term after operator."));
       return;
    }
-   expression->SetRight(factor);
+   expression->SetRight(term);
    switch(token)
    {
    case '*':

@@ -3,12 +3,8 @@ import MailFolderc
 
 from MString import *
 
-from MProfile import *
-
-from MObject import *
-
 from Message import *
-class MailFolderPtr(MObjectRCPtr):
+class MailFolderPtr :
     MSG_STAT_NONE = MailFolderc.MailFolder_MSG_STAT_NONE
     MSG_STAT_SEEN = MailFolderc.MailFolder_MSG_STAT_SEEN
     MSG_STAT_DELETED = MailFolderc.MailFolder_MSG_STAT_DELETED
@@ -54,7 +50,6 @@ class MailFolderPtr(MObjectRCPtr):
         return val
     def GetProfile(self):
         val = MailFolderc.MailFolder_GetProfile(self.this)
-        val = ProfileBasePtr(val)
         return val
     def GetClassName(self):
         val = MailFolderc.MailFolder_GetClassName(self.this)
@@ -76,7 +71,7 @@ class MailFolder(MailFolderPtr):
 #-------------- FUNCTION WRAPPERS ------------------
 
 def MailFolder_OpenFolder(arg0,arg1,arg2,arg3,arg4,arg5):
-    val = MailFolderc.MailFolder_OpenFolder(arg0,arg1.this,arg2.this,arg3.this,arg4.this,arg5.this)
+    val = MailFolderc.MailFolder_OpenFolder(arg0,arg1.this,arg2,arg3.this,arg4.this,arg5.this)
     val = MailFolderPtr(val)
     return val
 

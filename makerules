@@ -24,11 +24,11 @@ else
 	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< 
 endif
 
-%.cpp: %.i
-	$(SWIG) $(SWIGFLAGS) -o $(ODIR)/$@ $<
-
 %.py: %.i
 	$(SWIG) $(SWIGFLAGS) -o junk $<
+
+%.cpp: %.i
+	$(SWIG) $(SWIGFLAGS) -o $(ODIR)/$@ $<
 
 %cmodule.so: %.o
 	$(CXX) -shared $< -lswigpy -o $(ODIR)/$@

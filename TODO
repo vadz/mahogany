@@ -65,6 +65,9 @@ $Id$
 		headers are stored and provide a sensible dialog to
 		change them. 
 
+9	VZ	Folder Properties dialog: OK disabled, Apply sometimes 
+		enabled... impossible to change settings for existing
+		folders. 
 
 8	VZ	AdbImort dialog under Windows lacks UpdateUI somewhere
 

@@ -13,8 +13,13 @@ clean:
 	$(RM) *.o *.so *.pyc *.py *.html *.doc junk $(CPPTARGETS)
 	ln -s INIT/Minit.py .
 
+%.cpp: %.i
+	$(SWIG) $(SWIGFLAGS) -o $(ODIR)/$@ $<
+
 %: force
 	@$(MAKE) -f Makefile2 $@
 force: ;
 
-,PHONY: clean
+.PHONY: clean
+
+include ../../makeopts

@@ -2,10 +2,6 @@
 import Messagec
 
 from MString import *
-
-from MProfile import *
-
-from MObject import *
 class MessageParameterPtr :
     def __init__(self,this):
         self.this = this

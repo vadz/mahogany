@@ -45,6 +45,7 @@ install:
 	for i in *.html; do $(INSTALL_DATA) $$i $(DOCDIR)/Python; done
 	$(RM) $(DATADIR)/scripts/dummy.py $(DOCDIR)/Python/dummy.html
 
+
 #%.py: %.i
 #	$(SWIG) $(SWIGFLAGS) $<
 

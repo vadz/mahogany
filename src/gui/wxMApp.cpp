@@ -220,17 +220,6 @@ wxMApp::wxMApp(void)
 
 wxMApp::~wxMApp()
 {
-   if(m_HelpController)
-   {
-      wxSize size;
-      wxPoint pos;
-      m_HelpController->GetFrameParameters(&size, &pos);
-      m_profile->writeEntry(MP_HELPFRAME_WIDTH, size.x),
-      m_profile->writeEntry(MP_HELPFRAME_HEIGHT, size.y);
-      m_profile->writeEntry(MP_HELPFRAME_XPOS, pos.x);
-      m_profile->writeEntry(MP_HELPFRAME_YPOS, pos.y);
-      delete m_HelpController;
-   }
 }
 
 void
@@ -446,6 +435,10 @@ wxMApp::OnInit()
    wxImage::AddHandler( new wxJPEGHandler );
 #endif
 
+#if wxUSE_LIBGIF
+   wxImage::AddHandler( new wxGIFHandler );
+#endif
+
    m_IconManager = new wxIconManager();
 
 
@@ -599,6 +592,18 @@ int wxMApp::OnExit()
    m_profile->writeEntry(MP_PRINT_BOTTOMMARGIN_X, GetPageSetupData()->GetMarginBottomRight().x);
    m_profile->writeEntry(MP_PRINT_BOTTOMMARGIN_Y, GetPageSetupData()->GetMarginBottomRight().y);
 #endif // wxUSE_POSTSCRIPT
+
+   if(m_HelpController)
+   {
+      wxSize size;
+      wxPoint pos;
+      m_HelpController->GetFrameParameters(&size, &pos);
+      m_profile->writeEntry(MP_HELPFRAME_WIDTH, size.x),
+      m_profile->writeEntry(MP_HELPFRAME_HEIGHT, size.y);
+      m_profile->writeEntry(MP_HELPFRAME_XPOS, pos.x);
+      m_profile->writeEntry(MP_HELPFRAME_YPOS, pos.y);
+      delete m_HelpController;
+   }
 
    delete m_PrintData;
    delete m_PageSetupData;

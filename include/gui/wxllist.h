@@ -640,15 +640,6 @@ public:
    CoordType GetHeight(void) const { return m_Height; }
    /// Returns the width of this line.
    CoordType GetWidth(void) const { return m_Width; }
-   /** This will recalculate the position and size of this line.
-       If called recursively it will abort if the position of an
-       object is unchanged, assuming that none of the following
-       objects need to move.
-       @param recurse if greater 0 then it will be used as the
-       minimum(!) recursion level, continue with all lines till the end of
-       the list or until the coordinates no longer changed.
-   */
-   void RecalculatePositions(int recurse, wxLayoutList *llist);
    /// Recalculates the position of this line on the canvas.
    wxPoint RecalculatePosition(wxLayoutList *llist);
 
@@ -699,7 +690,7 @@ private:
        @param height new height
    */
    void SetHeight(CoordType height, wxLayoutList *llist)
-      { m_Height = height; RecalculatePositions(true, llist); }
+      { m_Height = height; MarkDirty(); }
 
    /** Moves the linenumbers one on, because a line has been inserted
        or deleted.

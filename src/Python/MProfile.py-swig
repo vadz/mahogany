@@ -1,0 +1,65 @@
+# This file was created automatically by SWIG.
+import MProfilec
+
+from MObject import *
+
+from MString import *
+class ProfileBasePtr(MObjectRCPtr):
+    def __init__(self,this):
+        self.this = this
+        self.thisown = 0
+    def readEntry(self,arg0,arg1):
+        val = MProfilec.ProfileBase_readEntry(self.this,arg0.this,arg1)
+        val = StringPtr(val)
+        val.thisown = 1
+        return val
+    def writeEntry(self,arg0,arg1):
+        val = MProfilec.ProfileBase_writeEntry(self.this,arg0.this,arg1.this)
+        return val
+    def SetPath(self,arg0):
+        val = MProfilec.ProfileBase_SetPath(self.this,arg0.this)
+        return val
+    def HasEntry(self,arg0):
+        val = MProfilec.ProfileBase_HasEntry(self.this,arg0.this)
+        return val
+    def DeleteGroup(self,arg0):
+        val = MProfilec.ProfileBase_DeleteGroup(self.this,arg0.this)
+        return val
+    def GetName(self):
+        val = MProfilec.ProfileBase_GetName(self.this)
+        val = StringPtr(val)
+        val.thisown = 1
+        return val
+    def IsExpandingEnvVars(self):
+        val = MProfilec.ProfileBase_IsExpandingEnvVars(self.this)
+        return val
+    def SetExpandEnvVars(self,*args):
+        val = apply(MProfilec.ProfileBase_SetExpandEnvVars,(self.this,)+args)
+        return val
+    def __repr__(self):
+        return "<C ProfileBase instance>"
+class ProfileBase(ProfileBasePtr):
+    def __init__(self,this):
+        self.this = this
+
+
+
+
+
+
+#-------------- FUNCTION WRAPPERS ------------------
+
+def ProfileBase_CreateProfile(arg0,arg1):
+    val = MProfilec.ProfileBase_CreateProfile(arg0.this,arg1.this)
+    val = ProfileBasePtr(val)
+    return val
+
+def ProfileBase_CreateGlobalConfig(arg0):
+    val = MProfilec.ProfileBase_CreateGlobalConfig(arg0.this)
+    val = ProfileBasePtr(val)
+    return val
+
+
+
+#-------------- VARIABLE WRAPPERS ------------------
+

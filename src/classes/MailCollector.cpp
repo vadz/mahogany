@@ -223,19 +223,22 @@ MailCollector::CollectOneFolder(MailFolder *mf)
       const HeaderInfo *hi;
       size_t i;
       HeaderInfoList *hil = mf->GetHeaders();
-      if(hil && hil->Count() > 0)
+      if( hil )
       {
-         m_Message << _("From folder '") << mf->GetName() << "':\n";
-         for(i = 0; i < hil->Count(); i++)
+         if( hil->Count() > 0 )
          {
-            hi=(*hil)[i];
-            selections.Add(hi->GetUId());
-            m_Count ++;
-            m_Message << _("  Subject: ") << hi->GetSubject()
-                      << _("  From: ") << hi->GetFrom()
-                      << '\n';
+            m_Message << _("From folder '") << mf->GetName() << "':\n";
+            for(i = 0; i < hil->Count(); i++)
+            {
+               hi=(*hil)[i];
+               selections.Add(hi->GetUId());
+               m_Count ++;
+               m_Message << _("  Subject: ") << hi->GetSubject()
+                         << _("  From: ") << hi->GetFrom()
+                         << '\n';
+            }
+            hil->DecRef();
          }
-         hil->DecRef();
       }
       if(selections.Count() > 0)
       {
@@ -252,32 +255,6 @@ MailCollector::CollectOneFolder(MailFolder *mf)
       }
       else
          rc = true;
-#if 0
-      /* The following bit of code got broken because the folder
-         listing is now sorted. I think it's not needed anyway, so I
-         comment it out now and might delete the code later. KB*/
-      i = 0;
-      String seq;
-      hil = m_NewMailFolder->GetHeaders();
-      if(hil)
-      {
-         for(i = 0; i < hil->Count(); i++)
-         {
-            if(i >= (size_t)oldcount)
-            {
-               if(seq.Length()) seq << ',';
-               seq << strutil_ultoa((*hil)[i]->GetUId());
-            }
-         }
-         hil->DecRef();
-      }
-      if(seq.Length() > 0)
-      {
-         // mark new messages as new:
-         m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_RECENT, true);
-         m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_SEEN, false);
-      }
-#endif
       mf->EnableNewMailEvents(sendsEvents);
       mf->Ping(); //update it
    }

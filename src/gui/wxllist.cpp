@@ -646,7 +646,6 @@ wxLayoutLine::wxLayoutLine(wxLayoutLine *prev, wxLayoutList *llist)
    {
       m_Next->m_Previous = this;
       m_Next->MoveLines(+1);
-      m_Next->RecalculatePositions(1,llist);
    }
 
    m_StyleInfo = llist->GetDefaultStyleInfo();
@@ -688,51 +687,6 @@ wxLayoutLine::RecalculatePosition(wxLayoutList *llist)
    return m_Position;
 }
 
-void
-wxLayoutLine::RecalculatePositions(int recurse, wxLayoutList *llist)
-{
-   //FIXME: is this really needed? We run Layout() anyway.
-   // Recursing here, drives computation time up exponentially, as
-   // each line will cause all following lines to be recalculated.
-   // Yes, or linenumbers go wrong.
-
-   wxASSERT(recurse >= 0);
-   wxPoint pos = m_Position;
-//   CoordType height = m_Height;
-
-//   WXLO_TRACE("RecalculatePositions()");
-   RecalculatePosition(llist);
-
-   wxLayoutLine *line = m_Next;
-   if(line)
-   {
-      CoordType height = line->m_Height;
-      CoordType oldheight = height;
-      while(line && recurse)
-      {
-         oldheight = line->m_Height;
-         line->RecalculatePosition(llist);
-         height = line->m_Height;
-         if(recurse > 0)
-            recurse --;
-         else
-            if(height == oldheight)
-               break;
-         line = line->m_Next;
-      }
-   }
-#if 0
-   if(m_Next)
-   {
-
-
-      if(recurse > 0)
-         m_Next->RecalculatePositions(--recurse, llist);
-      else if(pos != m_Position || m_Height != height)
-         m_Next->RecalculatePositions(0, llist);
-   }
-#endif
-}
 
 wxLayoutObjectList::iterator
 wxLayoutLine::FindObject(CoordType xpos, CoordType *offset) const
@@ -1063,11 +1017,10 @@ wxLayoutLine::DeleteLine(bool update, wxLayoutList *llist)
       next->MoveLines(-1);
    }
 
+   MarkDirty();
+
    if(update)
    {
-      if ( next )
-         next->RecalculatePositions(1, llist);
-
       /* We assume that if we have more than one object in the list,
          this means that we have a command object, so we need to
          update the following lines. */
@@ -1278,10 +1231,6 @@ wxLayoutLine::Layout(wxDC &dc,
    if(m_Next && m_Height != heightOld)
    {
       m_Next->MarkDirty();
-#if 0
-      // FIXME isn't this done in RecalculatePositions() below anyhow?
-      m_Next->RecalculatePositions(0, llist);
-#endif
    }
    
    // We need to check whether we found a valid cursor size:
@@ -1299,7 +1248,6 @@ wxLayoutLine::Layout(wxDC &dc,
       if(m_BaseLine >= cursorSize->y) // the normal case anyway
          cursorPos->y += m_BaseLine-cursorSize->y;
    }
-   RecalculatePositions(1, llist);
    MarkClean();
 }
 
@@ -1325,7 +1273,7 @@ wxLayoutLine::Break(CoordType xpos, wxLayoutList *llist)
          m_Previous->m_Height = 0; // this is a wild guess
       }
       if(m_Next)
-         m_Next->RecalculatePositions(1, llist);
+         m_Next->MarkDirty();
       return m_Previous;
    }
 
@@ -1365,7 +1313,7 @@ wxLayoutLine::Break(CoordType xpos, wxLayoutList *llist)
       m_ObjectList.remove(i); // remove without deleting it
    }
    if(m_Next)
-      m_Next->RecalculatePositions(2, llist);
+      m_Next->MarkDirty();
    return newLine;
 }
 
@@ -2025,7 +1973,7 @@ wxLayoutList::Insert(wxString const &text)
    m_movedCursor = true;
 
    if(m_AutoFormat)
-      m_CursorLine->RecalculatePositions(0, this);
+      m_CursorLine->MarkDirty();
 
    return true;
 }
@@ -2045,7 +1993,7 @@ wxLayoutList::Insert(wxLayoutObject *obj)
    m_movedCursor = true;
 
    if(m_AutoFormat)
-      m_CursorLine->RecalculatePositions(0, this);
+      m_CursorLine->MarkDirty();
 
    return true;
 }
@@ -2128,7 +2076,7 @@ wxLayoutList::WrapLine(CoordType column)
       Delete(1); // delete the space
       m_CursorPos.x = newpos;
 
-      m_CursorLine->RecalculatePositions(1, this);
+      m_CursorLine->MarkDirty();
 
       m_movedCursor = true;
 
@@ -2232,7 +2180,7 @@ wxLayoutList::DeleteLines(int n)
          MoveCursorToBeginOfLine();
          DeleteToEndOfLine();
          if(m_AutoFormat)
-            m_CursorLine->RecalculatePositions(2, this);
+            m_CursorLine->MarkDirty();
          return n-1;
       }
       //else:
@@ -2244,7 +2192,7 @@ wxLayoutList::DeleteLines(int n)
       wxASSERT(m_CursorLine);
    }
    if(m_AutoFormat)
-      m_CursorLine->RecalculatePositions(2, this);
+      m_CursorLine->MarkDirty();
    return n;
 }
 
@@ -2288,14 +2236,21 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
    // This one we always Layout() to get the current cursor
    // coordinates on the screen:
    m_CursorLine->MarkDirty();
-   bool wasDirty = false;
+   // If one line was dirty, we need to re-calculate all
+   // following lines, too.
+   bool wasDirty = forceAll;
    wxLayoutLine *line = m_FirstLine;
    while(line)
    {
       if(! wasDirty)
          ApplyStyle(line->GetStyleInfo(), dc);
-      if(forceAll || wasDirty || line->IsDirty() || (cpos && line->GetLineNumber() == cpos->y))
+      if( wasDirty
+          || line->IsDirty()
+          // layout the cursor line:
+          || (cpos && line->GetLineNumber() == cpos->y) 
+         )
       {
+         
          // The following Layout() calls will update our
          // m_CurrentStyleInfo if needed.
          if(line == m_CursorLine)
@@ -2325,7 +2280,6 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
             break;
          wasDirty = true;
       }
-      line->RecalculatePositions(1, this);
       line = line->GetNextLine();
    }
    
@@ -2370,14 +2324,11 @@ wxLayoutList::Draw(wxDC &dc,
       m_Selection.m_discarded = false;
    }
 
-   /* We need to re-layout all dirty lines to update styleinfos
-      etc. However, somehow we don't find all dirty lines... */
+   /* This call to Layout() will re-calculate and update all lines
+      marked as dirty.
+   */
+   Layout(dc); 
 
-   /*
-     This should not really be needed in the future, we just need to
-     re-layout lines on the fly as done in Layout() at the moment. */
-   
-   Layout(dc); //,-1,true); //FIXME
    ApplyStyle(m_DefaultStyleInfo, dc);
    wxBrush brush(m_CurrentStyleInfo.m_bg, wxSOLID);
    dc.SetBrush(brush);
@@ -2726,7 +2677,7 @@ wxLayoutList::DeleteSelection(void)
    // Recalculate the line positions and numbers but notice that firstLine
    // might not exist any more - it could be deleted by Delete(1) above
    wxLayoutLine *firstLine2 = prevLine ? prevLine->GetNextLine() : m_FirstLine;
-   firstLine2->RecalculatePositions(1, this);
+   firstLine2->MarkDirty();
 }
 
 /// Starts highlighting the selection
