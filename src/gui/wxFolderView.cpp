@@ -1529,7 +1529,7 @@ void wxFolderListCtrl::UpdateFocus()
    // the first selected message, see OnSelected()!)
 
    m_itemFocus = itemFocus;
-   m_uidFocus = GetUIdFromIndex(m_itemFocus);
+   m_uidFocus = m_itemFocus == -1 ? UID_ILLEGAL : GetUIdFromIndex(m_itemFocus);
 
    m_FolderView->OnFocusChange();
 
@@ -3131,7 +3131,7 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
    for ( n = 0; n < count; n++ )
    {
       // we need to get the display position from the msgnos we're given
-      long item = hil->GetPosFromIdx(hil->GetIdxFromMsgno(event.GetItem(n)));
+      long item = event.GetItemPos(n);
 
       // we can't use m_FolderCtrl->GetUIdFromIndex(item) here because the item
       // is not in the headers any more, so we use indices instead of UIDs even

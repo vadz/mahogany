@@ -201,26 +201,34 @@ class MEventFolderExpungeData : public MEventWithFolderData
 {
 public:
    // ctor takes the array of deleted msgnos which will be deleted by us
-   MEventFolderExpungeData(MailFolder *folder, wxArrayInt *delMsgnos)
+   MEventFolderExpungeData(MailFolder *folder,
+                           wxArrayInt *delMsgnos,
+                           wxArrayInt *delPositions)
       : MEventWithFolderData(MEventId_FolderExpunge, folder)
       {
          m_delMsgnos = delMsgnos;
+         m_delPositions = delPositions;
       }
 
    // free msgno array
    virtual ~MEventFolderExpungeData()
    {
       delete m_delMsgnos;
+      delete m_delPositions;
    }
 
    // return the number of messages deleted
    size_t GetCount() const { return m_delMsgnos ? m_delMsgnos->GetCount() : 0; }
 
-   // return the n-th deleted item
+   // return the msgno of n-th deleted item
    size_t GetItem(size_t n) const { return m_delMsgnos->Item(n); }
 
+   // return the position in the listing of the n-th deleted item
+   size_t GetItemPos(size_t n) const { return m_delPositions->Item(n); }
+
 private:
-   wxArrayInt *m_delMsgnos;
+   wxArrayInt *m_delMsgnos,
+              *m_delPositions;
 };
 
 /**

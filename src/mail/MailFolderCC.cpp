@@ -1324,7 +1324,8 @@ void MailFolderCC::Init()
 {
    m_LastUId = UID_ILLEGAL;
 
-   m_expungedIndices = NULL;
+   m_expungedMsgnos =
+   m_expungedPositions = NULL;
 
    m_InCritical = false;
 }
@@ -1345,12 +1346,12 @@ MailFolderCC::~MailFolderCC()
    // us mm_expunged() (well, because it never expunges the messages until we
    // close the folder but by this time the notifications are blocked) so in
    // this case it may be left lying around
-   if ( m_expungedIndices )
+   if ( m_expungedMsgnos )
    {
-      FAIL_MSG( "m_expungedIndices unexpectedly != NULL" );
+      FAIL_MSG( "m_expungedMsgnos unexpectedly != NULL" );
 
-      delete m_expungedIndices;
-      m_expungedIndices = NULL;
+      delete m_expungedMsgnos;
+      delete m_expungedPositions;
    }
 
    // we might still be listed, so we better remove ourselves from the
@@ -1878,10 +1879,13 @@ MailFolderCC::Close()
       m_MailStream = NIL;
    }
 
-   if ( m_expungedIndices )
+   if ( m_expungedMsgnos )
    {
-      delete m_expungedIndices;
-      m_expungedIndices = NULL;
+      delete m_expungedMsgnos;
+      m_expungedMsgnos = NULL;
+
+      delete m_expungedPositions;
+      m_expungedPositions = NULL;
    }
 
    // normally the folder won't be reused any more but reset them just in case
@@ -2623,10 +2627,18 @@ MailFolderCC::SaveMessages(const UIdArray *selections, MFolder *folder)
       return MailFolderCmn::SaveMessages(selections, folder);
    }
 
+   String nameDst = folder->GetFullName();
+
+   // copying to ourselves?
+   if ( nameDst == GetName() )
+   {
+      // yes, no need to update status as it will happen anyhow
+      return true;
+   }
+
    // update status of the target folder
    MfStatusCache *mfStatusCache = MfStatusCache::Get();
    MailFolderStatus status;
-   String nameDst = folder->GetFullName();
    if ( !mfStatusCache->GetStatus(nameDst, &status) )
    {
       // assume it was empty... this is, of course, false, but it allows us to
@@ -2713,9 +2725,9 @@ MailFolderCC::ExpungeMessages(void)
 
       // for some types of folders (IMAP) mm_exists() is called from
       // mail_expunge() but for the others (POP) it isn't and we have to call
-      // it ourselves: check is based on the fact that m_expungedIndices is
+      // it ourselves: check is based on the fact that m_expungedMsgnos is
       // reset in mm_exists handler
-      if ( m_expungedIndices )
+      if ( m_expungedMsgnos )
       {
          RequestUpdateAfterExpunge();
       }
@@ -3670,7 +3682,7 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
 
 void MailFolderCC::RequestUpdateAfterExpunge()
 {
-   CHECK_RET( m_expungedIndices, "shouldn't be called if we didn't expunge" );
+   CHECK_RET( m_expungedMsgnos, "shouldn't be called if we didn't expunge" );
 
    // FIXME: we ignore IsUpdateSuspended() here, should we? and if not,
    //        what to do?
@@ -3679,10 +3691,13 @@ void MailFolderCC::RequestUpdateAfterExpunge()
    wxLogTrace(TRACE_MF_EVENTS, "Sending FolderExpunged event for folder '%s'",
               GetName().c_str());
 
-   MEventManager::Send(new MEventFolderExpungeData(this, m_expungedIndices));
+   MEventManager::Send(new MEventFolderExpungeData(this,
+                                                   m_expungedMsgnos,
+                                                   m_expungedPositions));
 
-   // MEventFolderExpungeData() will delete it
-   m_expungedIndices = NULL;
+   // MEventFolderExpungeData() will delete them
+   m_expungedMsgnos =
+   m_expungedPositions = NULL;
 }
 
 void
@@ -3761,7 +3776,7 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
    }
    else // same number of messages
    {
-      if ( m_expungedIndices )
+      if ( m_expungedMsgnos )
       {
          // we can update the status faster here as we have decremented the
          // number of recent/unseen/... when the messages were deleted (before
@@ -3791,11 +3806,7 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
 
 void MailFolderCC::OnMailExpunge(MsgnoType msgno)
 {
-   // remove the message from the header info list
-   if ( m_headers )
-   {
-      m_headers->OnRemove(m_headers->GetIdxFromMsgno(msgno));
-   }
+   size_t idx = msgno - 1;
 
    // if we're applying the filters to the new messages, the GUI hadn't been
    // notified about existence of these messages yet, so we don't need to
@@ -3807,14 +3818,26 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
       // right now but wait until mm_exists() which is sent after all
       // mm_expunged() as it is much faster to delete all messages at once
       // instead of one at a time
-      if ( !m_expungedIndices )
+      if ( !m_expungedMsgnos )
       {
-         // create a new array
-         m_expungedIndices = new wxArrayInt;
+         // create new arrays
+         m_expungedMsgnos = new wxArrayInt;
+         m_expungedPositions = new wxArrayInt;
       }
 
       // add the msgno to the list of expunged messages
-      m_expungedIndices->Add(msgno);
+      m_expungedMsgnos->Add(msgno);
+
+      // and remember its position as well if we have it
+      m_expungedPositions->Add(m_headers ? m_headers->GetPosFromIdx(idx)
+                                         : INDEX_ILLEGAL);
+   }
+
+   // remove the message from the header info list if we have headers
+   // (it would be wasteful to create them just to do it)
+   if ( m_headers )
+   {
+      m_headers->OnRemove(idx);
    }
 
    // update the total number of messages

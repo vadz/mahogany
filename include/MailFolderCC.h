@@ -561,8 +561,26 @@ private:
 
    /** @name Temporary operation parameters */
    //@{
+
+   /**
+     These two arrays are used between the moment when we get the expunge
+     notification and until the moment we can send the notification about it
+     to the GUI.
+
+     We need both msgnos and positions because by the time GUI code gets our
+     notification, the header listing doesn't have the items corresponding to
+     the expunged msgnos (they were expunged!) and so can't be asked for the
+     positions of these msgnos but the GUI needs them.
+    */
+   //@{
+
    /// the array containing indices of expunged messages or NULL
-   wxArrayInt *m_expungedIndices;
+   wxArrayInt *m_expungedMsgnos;
+
+   /// the array containing the positions of expunged messages or NULL
+   wxArrayInt *m_expungedPositions;
+
+   //@}
 
    /** If we are searching, this points to an UIdArray where to store
        the entries found.
@@ -578,6 +596,7 @@ private:
 
    /// Used by the subscription management.
    class FolderListingCC *m_FolderListing;
+
    //@}
 
    /** @name Locking and other semaphores */
