@@ -171,7 +171,13 @@ public:
    /// select all unread messages
    void SelectAllUnread();
 
-   /// called by wxFolderListCtrl to drag abd drop messages
+   /// select all flagged messages
+   void SelectAllFlagged();
+
+   /// select all messages by some status
+   void SelectAllByStatus(int status);
+
+   /// called by wxFolderListCtrl to drag and drop messages
    bool DragAndDropMessages();
 
    /// return the MWindow pointer:

@@ -308,7 +308,7 @@ public:
    */
    static bool CanExit(String *which);
 
-   /** Utiltiy function to get a textual representation of a message
+   /** Utility function to get a textual representation of a message
        status.
 
        @param message flags
