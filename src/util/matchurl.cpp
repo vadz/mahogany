@@ -361,13 +361,24 @@ static inline bool IsAlnum(char c)
           (c >= '0' && c <= '9');
 }
 
+/// checks a character to be a 'mark' as from RFC2396
+inline bool IsURLMark(char c)
+{
+   return c == '-' || c == '_' || c == '.' || c == '!' || c == '~' || 
+          c == '*' || c == '\'' || c == '(' || c == ')';
+}
+
+/// checks a character to be 'reserved' as from RFC2396
+inline bool IsURLReserved(char c)
+{
+   return c == ';' || c == '/' || c == '?' || c == ':' || c == '@' || 
+          c == '&' || c == '=' || c == '+' || c == '$' || c == ',';
+}
+
 /// checks a character to be a valid part of an URL
 inline bool IsURLChar(char c)
 {
-   // this is bogus, of course... we basicly assume that anything at all can be
-   // an URL except for '>' which, together with '<' is often used for
-   // delimiting the URLs
-   return IsAlnum(c) || !(iscntrl(c) || isspace(c) || c == '>' || c == '*');
+   return IsAlnum(c) || IsURLMark(c) || IsURLReserved(c) || c == '%';
 }
 
 /// check if this is this atext as defined in RFC 2822
@@ -483,6 +494,16 @@ match:
             // it isn't
             break;
          }
+
+         // Check that the beginning of next line is not the start of
+         // another URL. Note that '@' alone is recognized as the beginning
+         // of an URL: here it should not be the case.
+         int nextlen = 0;
+         int nextpos = scan(p+2, nextlen);
+         if ( nextlen && nextpos == 0 && p[2] != '@')
+            // The start of the next line being the start of an URL on its own,
+            // do not join the two.
+            break;
 
          // it might be a wrapped URL but it might be not: it seems like we
          // get way too many false positives if we suppose that it's already
