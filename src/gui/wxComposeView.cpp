@@ -1286,7 +1286,7 @@ wxComposeView::CreateMenu()
 #if 0
    m_MItemCut = GetMenuBar()->FindItem(WXMENU_EDIT_CUT);
    m_MItemCopy = GetMenuBar()->FindItem(WXMENU_EDIT_COPY);
-   m_MItemPaste = GetMenuBar()->FindItem(WXMENU_EDIT_CUT);
+   m_MItemPaste = GetMenuBar()->FindItem(WXMENU_EDIT_PASTE);
 #endif // 0
 
    // check if we can schedule messages:
