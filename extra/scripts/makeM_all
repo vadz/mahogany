@@ -434,7 +434,7 @@ then
       ( HOME=$REALHOME; $CVS -d"$WXCVSROOT" -Q checkout $TAG wxGTK 2>&1)
     else
       echo "Updating wxWindows sources."
-      (HOME=$REALHOME; cd wxWindows && $CVS -d "$WXCVSROOT" -Q update -d $TAG 2>&1)
+      (HOME=$REALHOME; cd wxWindows && $CVS -d "$WXCVSROOT" -Q update $TAG 2>&1)
     fi
     if [ $? -gt 1 ]
     then
