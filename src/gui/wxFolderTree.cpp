@@ -592,7 +592,7 @@ wxFolderTreeImpl::GetTreeItemFromName(const String& fullname)
    {
       // find the child of the current item which corresponds to (the [grand]
       // parent of) our folder
-      currentPath << '/' << components[n];
+      currentPath << components[n];
 
       long cookie;
       wxTreeItemId child = GetFirstChild(current, cookie);
