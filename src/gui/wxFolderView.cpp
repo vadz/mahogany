@@ -179,8 +179,11 @@ public:
                  String const &date,
                  String const &size);
 
-   void Select(long index, bool on=true)
-      { SetItemState(index,on ? wxLIST_STATE_SELECTED : 0, wxLIST_STATE_SELECTED); }
+   void Select(long index, bool on = true)
+      { SetItemState(index, on ? wxLIST_STATE_SELECTED : 0, wxLIST_STATE_SELECTED); }
+
+   void Focus(long index)
+      { SetItemState(index, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED); }
 
    /// if nofocused == true the focused entry will not be substituted
    /// for an empty list of selections
@@ -679,7 +682,7 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
    if ( newFocus != -1 )
    {
       // move focus
-      SetItemState(newFocus, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
+      Focus(newFocus);
       EnsureVisible(newFocus);
       m_FolderView->UpdateSelectionInfo();
    }
@@ -1218,7 +1221,7 @@ wxFolderListCtrl::SelectNextUnread()
       const HeaderInfo *hi = hil[idx];
       if( !(hi->GetStatus() & MailFolder::MSG_STAT_SEEN) )
       {
-         SetItemState(idx, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
+         Focus(idx);
 
          // always preview the selected message, if we did "Show next unread"
          // we really want to see it regardless of m_PreviewOnSingleClick
@@ -1255,9 +1258,9 @@ wxFolderListCtrl::SelectNextUnread()
 void
 wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 {
-   // If we don't check, we could get called recursively from within a
-   // wxYield()...
-   ASSERT_MSG(m_SetFolderSemaphore == false, "DEBUG: SetFolder() called recursively, shouldn't happen.");
+   // this shouldn't happen
+   CHECK_RET(m_SetFolderSemaphore == false,
+             "wxFolderView::SetFolder() called recursively.");
 
    m_SetFolderSemaphore = true;
 
@@ -1270,11 +1273,12 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
    if ( recreateFolderCtrl )
       m_FolderCtrl->Clear();
 
-
    SafeIncRef(mf);
 
-   if(m_ASMailFolder)  // clean up old folder
+   if ( m_ASMailFolder )
    {
+      // clean up old folder
+
       // NB: the test for m_InDeletion is needed because of wxMSW bug which
       //     prevents us from showing a dialog box when called from dtor
       if ( !m_InDeletion )
@@ -1313,6 +1317,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       m_ASMailFolder = NULL; // shouldn't be needed
       mf2->DecRef();
    }
+   //else: no old folder
 
    SafeDecRef(m_Profile);
 
@@ -1323,13 +1328,8 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
    m_Profile = NULL;
    SafeDecRef(mf); // now held by m_ASMailFfolder
 
-   if(m_ASMailFolder)
+   if ( m_ASMailFolder )
    {
-/*      m_Profile = Profile::CreateProfile("FolderView",
-                                             m_ASMailFolder ?
-                                             m_ASMailFolder->GetProfile() :
-                                             NULL);
-*/
       m_Profile = m_ASMailFolder->GetProfile();
       if(m_Profile)
          m_Profile->IncRef();
@@ -1368,22 +1368,27 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          delete oldfolderctrl;
       }
 
-      Update();
+      // dispatch any update folder events in the queue
+      MEventManager::DispatchPending();
 
-      if(m_NumOfMessages > 0 && READ_CONFIG(m_Profile,MP_AUTOSHOW_FIRSTMESSAGE))
+      if ( m_NumOfMessages > 0 &&
+           READ_CONFIG(m_Profile,MP_AUTOSHOW_FIRSTMESSAGE) )
       {
-         m_FolderCtrl->SetItemState(0,wxLIST_STATE_FOCUSED,wxLIST_STATE_FOCUSED);
-         HeaderInfoList *hil = m_ASMailFolder->GetHeaders();
-         if(hil && hil->Count() > 0)
-            PreviewMessage ((*hil)[0]->GetUId());
-         SafeDecRef(hil);
+         m_FolderCtrl->Focus(0);
+
+         HeaderInfoList_obj hil = m_ASMailFolder->GetHeaders();
+         if ( hil && hil->Count() > 0 )
+            PreviewMessage(hil[0]->GetUId());
       }
+
 #ifndef OS_WIN
       m_FocusFollowMode = READ_CONFIG(m_Profile, MP_FOCUS_FOLLOWSMOUSE);
       if(m_FocusFollowMode && wxWindow::FindFocus() != m_FolderCtrl)
          m_FolderCtrl->SetFocus(); // so we can react to keyboard events
-#endif
+#endif // OS_WIN
    }
+   //else: no new folder
+
    EnableMMenu(MMenu_Message, m_FolderCtrl, (m_ASMailFolder != NULL) );
    m_SetFolderSemaphore = false;
 }
@@ -1710,8 +1715,9 @@ wxFolderView::Update(HeaderInfoList *listing)
    if ( !m_ASMailFolder )
       return;
 
-   if(m_UpdateSemaphore == true)
-      return; // don't call this code recursively
+   // this shouldn't happen
+   CHECK_RET( !m_UpdateSemaphore, "wxFolderView::Update() recursion" );
+
    m_UpdateSemaphore = true;
 
    if(! listing )
@@ -1762,12 +1768,13 @@ wxFolderView::Update(HeaderInfoList *listing)
          focusedIndex = i;
       }
    }
-   if(! foundFocus) // old focused UId is gone, so we use the list
+   if(! foundFocus)
    {
-      // index instead
-      if(focusedIndex != -1 && focusedIndex < (long) n)
-         m_FolderCtrl->SetItemState(focusedIndex,
-                                    wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
+      // old focused UId is gone, so we use the list index instead
+      if ( focusedIndex != -1 && focusedIndex < (long) n )
+      {
+         m_FolderCtrl->Focus(focusedIndex);
+      }
    }
 
    UpdateTitleAndStatusBars("", "", GetFrame(m_Parent), m_MailFolder);

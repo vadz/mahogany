@@ -17,12 +17,13 @@ Release 0.62 'Mars'
 30.01.01 VZ: made title/status bar of the message/folder view customizable
 29.01.01 VZ: support for flagging messages (display and status changing)
 
-26.01.01 VZ: big internal changes => much better stability
+26.01.01 VZ: big internal changes => much better stability and more efficient
 
 Release 0.61 'Hawkins' [UNRELEASED]
 -------------------------------------------------------------------------------
 
 23.01.01 ALL:allow (dual) licensing Mahogany under GPL
+
 22.01.01 VZ: open autocollect address book in the editor the first time
 22.01.01 NB: fix attachment name and language autodetection
 19.01.01 VZ: serious server side searching on IMAP servers bug fixed

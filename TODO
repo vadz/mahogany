@@ -12,6 +12,8 @@ $Id$
 
 3. problems with calling wxYield() multiple times (under wxGTK) - what to do?
 
+4. folder opened in the main frame is still sometimes leaked on exit!
+
 *********************************************************************
 *** BUGS
 *********************************************************************

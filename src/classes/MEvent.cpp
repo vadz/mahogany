@@ -115,8 +115,11 @@ MEventManager::MEventManager()
 void
 MEventManager::DispatchPending(void)
 {
-   if(gs_IsDispatching)
+   // don't dispatch events while we're suspended: as Dispatch() just ignores
+   // them, it means that events are simply lost if we do it
+   if ( gs_IsDispatching || gs_IsSuspended )
       return;
+
    gs_IsDispatching = true;
 
    MEventLocker mutex;
