@@ -44,16 +44,16 @@ libM.so:
 
 # build the binary which is statically linked to wxGTK, dynamically to
 # everything else
-quartstatic: subdirs
+quartstatic: $(MOBJS)
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS_STATIC)
 
 # build the binary which is statically linked to wxGTK and GTK+, dynamically
 # to everything else
-semistatic: subdirs
+semistatic: $(MOBJS)
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(LIBS_STATIC) $(GUI_LIBS_STATIC)
 
 # build a (completely) statically linked binary
-static: subdirs
+static: $(MOBJS)
 	$(LINK) -static -o M.static $(LDFLAGS) $(MOBJS) $(LIBS) -lcrypt
 
 subdirs:
