@@ -571,8 +571,12 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
 
       if ( fileName.empty() )
       {
-         // cancelled by user
-         return false;
+         // cancelled by user: don't return false from here as the caller would
+         // think there was an error otherwise and, worse, as this function is
+         // called indirectly (by ASMailFolder::SaveMessagesToFile()), the
+         // caller can't even check mApplication->GetLastError() to check if it
+         // was set to M_ERROR_CANCEL
+         return true;
       }
    }
    else // not empty, use this file name
