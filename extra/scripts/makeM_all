@@ -239,10 +239,10 @@ then
   if [ ! -d wxWindows ]
   then
     echo "wxWindows directory does not exist. Doing fresh checkout."
-    ( HOME=$REALHOME; $CVS checkout $TAG wxGTK >>$BUILDDIR/cvs.log 2>&1)
+    ( HOME=$REALHOME; $CVS -q checkout $TAG wxGTK 2>&1)
   else
     echo "Updating wxWindows sources."
-    (HOME=$REALHOME; cd wxWindows && $CVS update $TAG >>$BUILDDIR/cvs.log 2>&1)
+    (HOME=$REALHOME; cd wxWindows && $CVS -q update $TAG 2>&1)
   fi
   if [ $? -gt 1 ]
   then
@@ -277,7 +277,6 @@ then
   autoconf && \
 	./configure \
 	$SHAREDFLAG \
-	--enable-static \
 	--with-gtk \
 	$DEBUGOPTS \
 	--prefix=$WXPREFIX \
@@ -311,11 +310,11 @@ if [ ! -d $NAME-$VERSION ]
 then
   echo "$NAME-$VERSION directory does not exist. Doing fresh checkout."
   rm -rf M
-  (HOME=$REALHOME; $CVS checkout M >>$BUILDDIR/cvs.log 2>&1) && \
+  (HOME=$REALHOME; $CVS -q checkout M 2>&1) && \
   mv M $NAME-$VERSION
 else
   echo "Updating Mahogany sources."
-  (HOME=$REALHOME; cd $NAME-$VERSION && $CVS update -A >>$BUILDDIR/cvs.log 2>&1)
+  (HOME=$REALHOME; cd $NAME-$VERSION && $CVS -q update -A 2>&1)
 fi
 if [ $? -gt 1 ]
 then
