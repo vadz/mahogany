@@ -96,7 +96,7 @@ A couple of new features, most importantly:
 \begin{itemize}
 \item Possibility to save (to the address book) all addresses from a message appearinganywhere
 in the headers.
-\item It is now possible to import all folder files in MBOX (Unix) format using \noun{''Folde|Import
+\item It is now possible to import all folder files in MBOX (Unix) format using \noun{''Folder|Import
 folder tree...''} command (see \ref{Import})
 \end{itemize}
 \textbf{0.60 against 0.50}\\
