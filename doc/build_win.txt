@@ -71,8 +71,13 @@ in its properties).
 c) Build process
 ----------------
 
-   After this you can open the project workspace M.dsw in Visual C++ IDE. Here
-is a brief description of various projects in the solution:
+   Before loading M.sln file, you will need to open it in your favourite text
+editor and do a global search of replace of "L:\wxWindows" with the path where
+your wxWindows installation is. You also must have "wxwin" environment variable
+set to point to the same location (as per wxWindows installation instructions).
+
+   After this you can open the solution file M.sln in Visual C++ IDE. Here is a
+brief description of various projects in the solution:
 
 * cclient - the mail routines support library
 * compface - the library for X-Face handling
@@ -93,15 +98,10 @@ additional information.
 d) Common problems
 ------------------
 
-Visual C++ 5.0 doesn't understand environment variables in the project
-settings, so you will need to replace the occurences of $(wx) with the value
-of the variable.
+- dspam doesn't compile
++ check that you installed sqlite as explained above
 
-If you don't have yacc or bison on your system, you will need to manually copy
-src/wx/vcard/vcc.c-yacc to vcc.c.
 
-If you get problem with PROIO_yywrap being multiply defined in wxWindows,
-comment out the 2nd definition of this function in src/common/y_tab.c.
 
 
 
