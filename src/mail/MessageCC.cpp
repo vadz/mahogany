@@ -561,13 +561,6 @@ MessageCC::GetBody(void)
    if(folder == NULL) // this message has no folder associated
       return m_Body;
 
-#ifdef DEBUG
-   /// Helps me find corrupted folders:
-   /// Triggers an assert is header is corrupted
-   String tmpstr;
-   WriteToString(tmpstr, true);
-#endif
-   
    int retry = 1;
 
    // Forget what we  know and re-fetch the body, it is cached anyway.
