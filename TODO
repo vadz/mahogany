@@ -65,6 +65,10 @@ DONE:
 - the selection in wxFoldreview should store uids directly, currently
   the wxMessageview of a standalone viewer passes its msgno to some
   functions but msgnos might have changed in the meantime.
+- Things like CopyMessagesToFolder need a return code indicating
+  whether they were successful or not, otherwise MoveMessagesToFolder
+  deletes them in any case. Trivial to add.
+ --> Clicking ABORT doesn't return false!
 
 CHECK:- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
   SendMessageCC::AddPart()
@@ -72,6 +76,7 @@ CHECK:- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
 - MessageCC::GetBody() can return with body/envelope == NULL if
   message no longer exists. Just got a crash in Refresh().
   Add a CHECK() wherever it is called.
+
 - Things like CopyMessagesToFolder need a return code indicating
   whether they were successful or not, otherwise MoveMessagesToFolder
   deletes them in any case. Trivial to add.
