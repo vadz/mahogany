@@ -153,8 +153,11 @@ PGPFilter::DoProcess(String& text,
          break;
       }
 
-      // try the next line
-      start = strchr(start + 1, '\n');
+      // try the next line (but only if not already at the end)
+      if ( *start )
+         start = strchr(start, '\n');
+      else
+         break;
       if ( start )
          start++; // skip '\n' itself
       else
