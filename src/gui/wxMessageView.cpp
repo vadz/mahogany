@@ -796,7 +796,13 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
                         filename.c_str(), filename2.c_str());
          // we ignore the return code, because next viewer will fail
          // or succeed depending on this:
-         system(command);  // this produces a postscript file on success
+         //system(command);  // this produces a postscript file on  success
+         wxExecute(command);
+         // We cannot use launch process, as it doesn't wait for the
+         // program to finish.
+         //wxString msg;
+         //msg.Printf(_("Running '%s' to create Postscript file failed."), command.c_str());
+         //(void)LaunchProcess(command, msg );
          wxRemoveFile(filename);
          filename = filename2;
          mimetype = "application/postscript";
