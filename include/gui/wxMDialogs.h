@@ -172,7 +172,7 @@ int MDialog_AdbLookupList(ArrayAdbEntries& aEntries,
 
 /// simple AboutDialog to be displayed at startup
 void
-MDialog_AboutDialog( MWindow *parent);
+MDialog_AboutDialog( MWindow *parent, bool bCloseOnTimeout = true);
 
 /// dialog to creat a new folder
 void

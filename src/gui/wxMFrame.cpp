@@ -234,7 +234,12 @@ wxMFrame::OnMenuCommand(int id)
    case WXMENU_EDIT_SAVE_PREF:
       MDialog_Message(_("Not implemented yet."),this,_("Sorry"));
       break;
+      
    case WXMENU_HELP_ABOUT:
+      MDialog_AboutDialog(this, false /* don't timeout */);
+      break;
+      
+   case WXMENU_HELP_HELP:
       MDialog_Message(_(ABOUTMESSAGE),this,_("About M"));
       break;
    }

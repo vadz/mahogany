@@ -118,7 +118,7 @@ struct MimeContent
 // implementation
 // ============================================================================
 void
-wxComposeView::Create(const String &iname, wxWindow *parent,
+wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
                       ProfileBase *parentProfile,
                       String const &to, String const &cc, String const &bcc,
                       bool hide)
@@ -349,12 +349,12 @@ wxComposeView::~wxComposeView()
 
 
 void
-wxComposeView::ProcessMouse(wxMouseEvent &event)
+wxComposeView::ProcessMouse(wxMouseEvent &WXUNUSED(event))
 {
 }
 
 void
-wxComposeView::OnExpand(wxCommandEvent &event)
+wxComposeView::OnExpand(wxCommandEvent &WXUNUSED(event))
 {
    String what = Str(m_txtFields[Field_To]->GetValue());
    int l = what.length();
@@ -370,9 +370,13 @@ wxComposeView::OnExpand(wxCommandEvent &event)
      int rc = MDialog_AdbLookupList(aEntries, this);
 
      if ( rc != -1 ) {
-        wxString strEMail;
-        aEntries[rc]->GetField(AdbField_EMail, &strEMail);
-        m_txtFields[Field_To]->SetValue(strEMail);
+        wxString str;
+        AdbEntry *pEntry = aEntries[rc];
+        pEntry->GetField(AdbField_EMail, &str);
+        m_txtFields[Field_To]->SetValue(str);
+
+        pEntry->GetField(AdbField_NickName, &str);
+        wxLogStatus(this, _("Expanded using entry '%s'"), str.c_str());
      }
 
      // free all entries

@@ -797,8 +797,7 @@ wxMessageViewFrame::OnCommandEvent(wxCommandEvent &ev)
 }
 
 void
-wxMessageViewFrame::OnSize( wxSizeEvent &event )
-   
+wxMessageViewFrame::OnSize( wxSizeEvent & WXUNUSED(event) )
 {
    int x = 0;
    int y = 0;

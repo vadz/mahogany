@@ -105,7 +105,7 @@ wxFolderListCtrl::GetSelections(wxArrayInt &selections) const
    return selections.Count();
 }
 void
-wxFolderListCtrl::OnSize( wxSizeEvent &event )
+wxFolderListCtrl::OnSize( wxSizeEvent & WXUNUSED(event) )
 {
    int x,y,i;
    GetClientSize(&x,&y);
@@ -539,8 +539,7 @@ wxFolderViewFrame::OnCommandEvent(wxCommandEvent &event)
 }
 
 void
-wxFolderViewFrame::OnSize( wxSizeEvent &event )
-   
+wxFolderViewFrame::OnSize( wxSizeEvent & WXUNUSED(event) )
 {
    int x = 0;
    int y = 0;

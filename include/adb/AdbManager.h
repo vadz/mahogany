@@ -105,9 +105,10 @@ private:
 */
 bool AdbLookup(ArrayAdbEntries& aEntries,
                const String& what,
-               int where = AdbLookup_Everywhere,
+               int where = AdbLookup_NickName |
+                           AdbLookup_FullName |
+                           AdbLookup_EMail,
                int how = AdbLookup_Substring,
                const ArrayAdbBooks *paBooks = NULL);
-
 
 #endif  //_ADBMANAGER_H

@@ -698,7 +698,7 @@ void FCEntryGroup::DeleteGroup(const String& strName)
   GetConfig()->DeleteGroup(strName);
 }
 
-AdbEntry *FCEntryGroup::FindEntry(const char *szName)
+AdbEntry *FCEntryGroup::FindEntry(const char * /* szName */)
 {
   return NULL;
 }
@@ -770,7 +770,7 @@ AdbBook *FCDataProvider::CreateBook(const String& name)
   return new FCBook(name);
 }
 
-bool FCDataProvider::EnumBooks(wxArrayString& aNames)
+bool FCDataProvider::EnumBooks(wxArrayString& /* aNames */)
 {
   // TODO
   return FALSE;
@@ -794,7 +794,7 @@ bool FCDataProvider::IsSupportedFormat(const String& name)
     if ( *pc == '#' || *pc == ';' || *pc == '\0' )
       continue; // yes, ignore this line
 
-    bOk = strstr(pc, ADB_HEADER) != NULL;
+    bOk = strstr(pc, ADB_HEADER) || strstr(pc, ADB_ENTRIES);
     break;
   }
 
@@ -803,7 +803,7 @@ bool FCDataProvider::IsSupportedFormat(const String& name)
   return bOk;
 }
 
-bool FCDataProvider::DeleteBook(AdbBook *book)
+bool FCDataProvider::DeleteBook(AdbBook * /* book */)
 {
   // TODO
   return FALSE;

@@ -12,7 +12,7 @@
 
 
 /// M release number and name
-#define   M_RELEASE_STRING "pre-alpha 0.00 \"$name$\""
+#define   M_RELEASE_STRING "pre-alpha 0.01 \"unnamed\""
 
 #undef   OS_SOLARIS
 #undef   OS_LINUX

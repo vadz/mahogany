@@ -183,8 +183,10 @@ wxLayoutObjectCmd::GetStyle(void) const
 }
 
 void
-wxLayoutObjectCmd::Draw(wxDC &dc, wxPoint position, CoordType lineHeight,
-                        bool draw)
+wxLayoutObjectCmd::Draw(wxDC &dc,
+                        wxPoint WXUNUSED(position),
+                        CoordType WXUNUSED(lineHeight),
+                        bool WXUNUSED(draw))
 {
    wxASSERT(m_font);
    // this get called even when draw==false, so that recalculation
@@ -982,7 +984,7 @@ wxLayoutList::GetLineLength(wxLayoutObjectList::iterator i, CoordType offs)
 
 void
 wxLayoutList::Clear(int family, int size, int style, int weight,
-                    int underline, char const *fg, char const *bg)
+                    int WXUNUSED(underline), char const *fg, char const *bg)
 {
    wxLayoutObjectList::iterator i = begin();
 

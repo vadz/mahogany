@@ -362,7 +362,7 @@ public:
 
   // operations
     // @@@ renaming not implemented
-  void Rename(const wxString& name) { NOT_IMPLEMENTED; }
+  void Rename(const wxString& /* name */) { NOT_IMPLEMENTED; }
 
     // copy data from another entry
   void CopyData(const AdbTreeEntry& other);
@@ -1295,7 +1295,8 @@ void wxAdbEditFrame::RestoreSettings1()
         astrAdb.Add(strFile);
       }
       else {
-        wxLogWarning(_("Address book '%s' couldn't be opened."),
+        wxLogWarning(_("Address book '%s' couldn't be opened:\n"
+                       "this format is not supported."),
                      strFile.c_str());
         bAllAdbOk = FALSE;
       }
@@ -1925,13 +1926,13 @@ void wxAdbEditFrame::DoPaste()
   AddNewTreeElement(copy);
 }
 
-void wxAdbEditFrame::OnAbout(wxCommandEvent& event)
+void wxAdbEditFrame::OnAbout(wxCommandEvent&)
 {
   wxMessageDialog dialog(this, _("Address Book Editor"));
   dialog.ShowModal();
 }
 
-void wxAdbEditFrame::OnHelp(wxCommandEvent& event)
+void wxAdbEditFrame::OnHelp(wxCommandEvent&)
 {
   NOT_IMPLEMENTED;
 }
@@ -2003,12 +2004,12 @@ void wxAdbEditFrame::OnPageChange(wxNotebookEvent& event)
   #endif
 }
 
-void wxAdbEditFrame::OnTextLookupEnter(wxCommandEvent& event)
+void wxAdbEditFrame::OnTextLookupEnter(wxCommandEvent&)
 {
   DoFind();
 }
 
-void wxAdbEditFrame::OnTextLookupChange(wxCommandEvent& event)
+void wxAdbEditFrame::OnTextLookupChange(wxCommandEvent&)
 {
   // @@ should do it in UpdateUI handler
   m_ToolBar->EnableTool(WXMENU_ADBFIND_NEXT, !m_textKey->GetValue().IsEmpty());
@@ -2049,8 +2050,12 @@ void wxAdbEditFrame::OnUpdatePaste(wxUpdateUIEvent& event)
 
 void wxAdbEditFrame::OnUpdateCopy(wxUpdateUIEvent& event)
 {
+#if 0
   // only when not root or ADB (i.e. a normal entry or group)
   event.Enable(!(m_current->IsRoot() || m_current->IsBook()));
+#else
+  event.Enable(FALSE); // cut-&-paste doesn't work right now
+#endif
 }
 
 void wxAdbEditFrame::OnActivate(wxActivateEvent& event)
@@ -2128,9 +2133,7 @@ void wxAdbEditFrame::SetMinSize()
   m_btnCancel->GetClientSize(&widthBtn, &heightBtn);
 
   // @@ this is completely arbitrary
-#ifndef __WXGTK__
   SetSizeHints(7*widthBtn, 22*heightBtn);
-#endif
 }
 
 bool wxAdbEditFrame::SaveExpandedBranches(AdbTreeNode *group)
@@ -2835,7 +2838,7 @@ void wxAdbPage::SaveChanges(AdbEntry& data)
 }
 
 // something changed, allow undo
-void wxAdbPage::OnTextChange(wxCommandEvent& event)
+void wxAdbPage::OnTextChange(wxCommandEvent&)
 {
   SetDirty();
 }
@@ -3104,7 +3107,7 @@ void wxAdbEMailPage::SaveChanges(AdbEntry& data)
   }
 }
 
-void wxAdbEMailPage::OnCheckBox(wxCommandEvent& event)
+void wxAdbEMailPage::OnCheckBox(wxCommandEvent&)
 {
   SetDirty();
 }
@@ -3255,7 +3258,7 @@ AdbTreeEntry::AdbTreeEntry(const wxString& name, AdbTreeNode *parent)
     parent->AddChild(this);
 }
 
-void AdbTreeEntry::CopyData(const AdbTreeEntry& other)
+void AdbTreeEntry::CopyData(const AdbTreeEntry& /* other */)
 {
   wxFAIL_MSG("not implemented");
 }

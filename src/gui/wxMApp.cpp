@@ -31,6 +31,8 @@
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
 
+#  include "MDialogs.h"
+
    extern "C" {
 #     include <mail.h>
 #     include <osdep.h>  // for sysinbox() &c
@@ -110,6 +112,9 @@ wxFrame *
 #endif
 wxMApp::OnInit()
 {
+   // FIXME it's too ugly right now :-(
+   // MDialog_AboutDialog(NULL);
+
    m_IconManager = new wxIconManager();
 
    if ( OnStartup() ) {

@@ -50,6 +50,11 @@
 #  include  <wx/fileconf.h>
 #endif
 
+#ifdef OS_UNIX
+#  include  <unistd.h>
+#  include  <sys/stat.h>
+#endif
+
 // ----------------------------------------------------------------------------
 // functions
 // ----------------------------------------------------------------------------
@@ -123,9 +128,23 @@ MAppBase::OnStartup()
    // initialise the profile(s)
    m_cfManager = new ConfigFileManager;
 
-#  if USE_WXCONFIG
+#  ifdef USE_WXCONFIG
       String strConfFile = wxFileConfig::GetLocalFileName(M_APPLICATIONNAME);
-#     if OS_UNIX
+#     ifdef OS_UNIX
+         // FIXME must create the directory ourselves!
+         struct stat st;
+         if ( stat(strConfFile, &st) != 0 || !S_ISDIR(st.st_mode) ) {
+           if ( mkdir(strConfFile, 0777) != 0 ) {
+             wxLogError(_("Can't create the directory for configuration"
+                          "files '%s'."), strConfFile.c_str());
+             
+             return FALSE;
+           }
+           
+           wxLogInfo(_("Created directory '%s' for configuration files."),
+                     strConfFile.c_str());
+         }
+
          strConfFile += "/config";
 #     endif // Unix
 

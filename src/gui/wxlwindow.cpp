@@ -152,7 +152,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
 }
 
 void
-wxLayoutWindow::OnPaint( wxPaintEvent &WXUNUSED(event)w)  // or: OnDraw(wxDC& dc)
+wxLayoutWindow::OnPaint( wxPaintEvent &WXUNUSED(event))  // or: OnDraw(wxDC& dc)
 {
    wxPaintDC dc( this );  // only when used as OnPaint for OnDraw we
    PrepareDC( dc );       // can skip the first two lines

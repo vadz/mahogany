@@ -72,7 +72,7 @@ struct TbarItemInfo
 
 // array of descriptions of all toolbar buttons, should be in sync with the enum
 // in wxMenuDefs.h
-const static TbarItemInfo g_aToolBarData[] =
+static const TbarItemInfo g_aToolBarData[] =
 {
   // separator
   { "", -1, "" },
@@ -193,14 +193,16 @@ static const int *g_aFrameToolbars[WXFRAME_MAX] =
 
 
 // array of descriptions of all menu items
-const static MenuItemInfo g_aMenuItems[] =
+static const MenuItemInfo g_aMenuItems[] =
 {
    // filler for WXMENU_LAYOUT_CLICK
    { WXMENU_SEPARATOR,     "",                  ""                         },
 
    // file
-   { WXMENU_FILE_OPEN,     "&Open Folder",      "Open an existing message folder"    },
-   { WXMENU_FILE_CREATE,   "Create &Folder",    "Creates a new folder defintion"},
+   { WXMENU_FILE_OPEN,     "&Open Folder",      "Open an existing message "
+                                                " folder"                  },
+   { WXMENU_FILE_CREATE,   "Create &Folder",    "Creates a new folder "
+                                                "definition"               },
    { WXMENU_FILE_COMPOSE,  "&Compose Message",  "Start a new message"      },
    { WXMENU_FILE_CLOSE,    "&Close Window",     "Close this window"        },
    { WXMENU_SEPARATOR,     "",                  ""                         },
