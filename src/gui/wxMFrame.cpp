@@ -45,6 +45,7 @@
 #include "MDialogs.h"
 
 #include "MFolderDialogs.h"
+#include "MModule.h"
 
 #include "gui/wxIconManager.h"
 #include "gui/wxOptionsDlg.h"
@@ -200,6 +201,13 @@ wxMFrame::SavePosition(const char *name, wxWindow *frame)
 void
 wxMFrame::OnMenuCommand(int id)
 {
+   // is it a module generated entry?
+   if(id >= WXMENU_MODULES_BEGIN && id < WXMENU_MODULES_END)
+   {
+      ProcessModulesMenu(id);
+      return;
+   }
+
    switch(id)
    {
    case WXMENU_FILE_OPEN:
@@ -485,6 +493,34 @@ void wxMFrame::OnPageSetup()
        = pageSetupDialog.GetPageSetupData().GetPrintData();
     *((wxMApp *)mApplication)->GetPageSetupData()
        = pageSetupDialog.GetPageSetupData();
+}
+
+/// Passes a menu id to modules for reacting to it.
+bool
+wxMFrame::ProcessModulesMenu(int id)
+{
+#ifndef USE_MODULES
+   return FALSE;
+#else
+   if(id < WXMENU_MODULES_BEGIN || id > WXMENU_MODULES_END)
+      return FALSE;
+
+   MModuleListing *listing = MModule::ListLoadedModules();
+   MModule *mptr = NULL;
+   for(size_t i = 0; i < listing->Count(); i++)
+   {
+      mptr = (*listing)[i].GetModule();
+      if(mptr->Entry(MMOD_FUNC_MENUEVENT, id) )
+      {
+         listing->DecRef();
+         mptr->DecRef();
+         return TRUE;
+      }
+      mptr->DecRef();
+   }
+   listing->DecRef();
+   return FALSE;
+#endif
 }
 
 

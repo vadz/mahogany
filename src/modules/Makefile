@@ -71,7 +71,7 @@ endif
 clean: 
 	$(RM) *.o *.so *.lo
 
-install:
+install: $(TARGETS)
 ifeq ($(USE_MODULES),dynamic)
 	$(INSTALL) -d $(MODULEDIR)
 	for i in $(TARGETS); do $(INSTALL_PROGRAM) $$i $(MODULEDIR); done

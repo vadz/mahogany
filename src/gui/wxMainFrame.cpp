@@ -449,13 +449,6 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
 {
    int id = event.GetId();
 
-   // is it a module generated entry?
-   if(id >= WXMENU_MODULES_BEGIN && id < WXMENU_MODULES_END)
-   {
-      ProcessModulesMenu(id);
-      return;
-   }
-
    if(m_FolderView &&
       (WXMENU_CONTAINS(MSG, id) || WXMENU_CONTAINS(LAYOUT, id)
        || id == WXMENU_FILE_COMPOSE || id == WXMENU_FILE_POST
@@ -531,32 +524,5 @@ wxMainFrame::AddModulesMenu(const char *name,
    m_ModulesMenu->Append(id, name, help);
 }
 
-/// Passes a menu id to modules for reacting to it.
-bool
-wxMainFrame::ProcessModulesMenu(int id)
-{
-#ifndef USE_MODULES
-   return FALSE;
-#else
-   if(id < WXMENU_MODULES_BEGIN || id > WXMENU_MODULES_END)
-      return FALSE;
-
-   MModuleListing *listing = MModule::ListLoadedModules();
-   MModule *mptr = NULL;
-   for(size_t i = 0; i < listing->Count(); i++)
-   {
-      mptr = (*listing)[i].GetModule();
-      if(mptr->Entry(MMOD_FUNC_MENUEVENT, id) )
-      {
-         listing->DecRef();
-         mptr->DecRef();
-         return TRUE;
-      }
-      mptr->DecRef();
-   }
-   listing->DecRef();
-   return FALSE;
-#endif
-}
 
 

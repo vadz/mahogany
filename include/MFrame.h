@@ -34,6 +34,10 @@ public:
 
    /// used to set the title of the window
    virtual void SetTitle(String const & name) = 0;
+   /// add a menu to the bar
+   virtual void AddFileMenu(void) = 0;
+   virtual void AddHelpMenu(void) = 0;
+   virtual bool ProcessModulesMenu(int id) = 0;
 
    /// make it visible or invisible
    virtual bool Show(bool visible = true) = 0;

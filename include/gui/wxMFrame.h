@@ -57,10 +57,14 @@ public:
    /// used to set the title of the window class
    void  SetTitle(String const & name);
 
+
+   /// Passes a menu id to modules for reacting to it.
+   virtual bool ProcessModulesMenu(int id);
+
    /// add a menu to the bar
+   virtual void AddFileMenu(void);
+   virtual void AddHelpMenu(void);
    void AddEditMenu(void);
-   void AddFileMenu(void);
-   void AddHelpMenu(void);
    void AddMessageMenu(void);
 
    /// wxMFrame handles all print setup

@@ -336,7 +336,6 @@ public:
       {
          m_Message = NULL;
          m_MsgString = msgstr;
-
       }
    ~MT_AppendMessage()
       {

@@ -55,9 +55,6 @@ public:
                                const char *help,
                                int id);
 
-   /// Passes a menu id to modules for reacting to it.
-   bool ProcessModulesMenu(int id);
-
    /// Returns the name of the currently open folder:
    wxString GetFolderName(void) const { return m_folderName; }
 protected:

@@ -1,4 +1,5 @@
 (next release) on (date of next release)
+03.05.00 KB: Started work on a small calendar plugin
 02.05.00 KB: SendMessageCC now only uses the profile at construction time, not later
 02.05.00 VZ: folder renaming implemented
 02.05.00 VZ: the log window can be shown/hidden, closing it hides it permanently

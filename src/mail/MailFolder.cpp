@@ -1273,13 +1273,14 @@ void
 MailFolderCmn::ProcessHeaderListing(HeaderInfoList *hilp)
 {
    ASSERT(hilp);
-   hilp->IncRef();
-
-   SortListing(this, hilp, m_Config.m_ListingSortOrder);
-   if(m_Config.m_UseThreading)
-      ThreadMessages(this, hilp);
-
-   hilp->DecRef();
+   if(hilp)
+   {
+      hilp->IncRef();
+      SortListing(this, hilp, m_Config.m_ListingSortOrder);
+      if(m_Config.m_UseThreading)
+         ThreadMessages(this, hilp);
+      hilp->DecRef();
+   }
 }
 
 
