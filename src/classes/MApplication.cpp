@@ -162,12 +162,16 @@ MAppBase::MAppBase()
    m_isAway =
    m_autoAwayOn = FALSE;
 
+   mApplication = this;
+
    ResetLastError();
 }
 
 MAppBase::~MAppBase()
 {
    delete m_framesOkToClose;
+
+   mApplication = NULL;
 }
 
 /* The code in VerifySettings somehow overlaps with the purpose of
@@ -184,8 +188,6 @@ MAppBase::VerifySettings(void)
 bool
 MAppBase::OnStartup()
 {
-   mApplication = this;
-
 #ifdef OS_UNIX
    // First, check our user ID: mahogany does not like being run as root.
    if(geteuid() == 0)
