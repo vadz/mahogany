@@ -9,11 +9,12 @@
 %module Message
 
 %{
-#include	"Mpch.h"
-#ifndef	USE_PCH
-#   include   "Mcommon.h"
-#   include   "Message.h"
-#endif
+#include   "Mcommon.h"
+#include   "Message.h"
+
+// we don't want to export our functions as we don't build a shared library
+#undef SWIGEXPORT
+#define SWIGEXPORT(a,b) a b
 %}
 
 %import String.i
@@ -33,7 +34,7 @@ public:
    /** get Subject line
        @return Subject entry
    */
-     String & Subject(void) ;
+     const String & Subject(void) ;
 
    /** get From line
        @return From entry
@@ -43,7 +44,7 @@ public:
    /** get Date line
        @return Date when message was sent
    */
-     String & Date(void) ;
+     const String & Date(void) ;
 
    /** get message text
        @return the uninterpreted message body
@@ -87,19 +88,19 @@ public:
        @param  n part number
        @return string describing the Mime type
    */
-    String  & GetPartMimeType(int n = 0);
+    const String  & GetPartMimeType(int n = 0);
 
    /** Query the description of the part.
        @param  n part number
        @return string describing the part.
    */
-    String  & GetPartDesc(int n = 0);
+    const String  & GetPartDesc(int n = 0);
 
    /** Query the section specification string of body part.
        @param  n part number
        @return MIME/IMAP4 section specifier #.#.#.#
    */
-    String  & GetPartSpec(int n = 0);
+    const String  & GetPartSpec(int n = 0);
 
    /** Append the message to a String.
        @param str the string to write message text to

@@ -11,7 +11,8 @@
 #ifndef USE_PCH
 #  define   Uses_wxApp
 #  include  <wx/wx.h>
-#  include  <MApplication.h>
+
+#  include  "MApplication.h"
 #endif  //USE_PCH
 
 // fwd decl
@@ -32,11 +33,14 @@ public:
    /// Constructor
    wxMApp();
 
-   /// create the main application window
+   /// implement base class virtuals
    virtual MFrame *CreateTopLevelFrame();
+   virtual void OnFatalException() { OnAbnormalTermination(); }
+   virtual void OnAbnormalTermination();
 
-   // wxWin calls these functions on application init/termination
+   // wxWin calls these functions to start/run/stop the application
    virtual bool OnInit();
+   virtual int  OnRun();
    virtual int  OnExit();
 
    /// return a pointer to the IconManager:
@@ -44,6 +48,7 @@ public:
 
    /// Destructor
    ~wxMApp();
+
 private:
    /// an iconmanager instance
    wxIconManager *m_IconManager;
@@ -52,6 +57,7 @@ private:
 // ----------------------------------------------------------------------------
 // global application object
 // ----------------------------------------------------------------------------
+
 // created dynamically by wxWindows
 DECLARE_APP(wxMApp);
 

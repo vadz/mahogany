@@ -44,6 +44,10 @@
 
 #include "MDialogs.h"
 
+#include "gui/wxOptionsDlg.h"
+
+#include "Mversion.h"
+
 #ifdef USE_WXCONFIG
 #  include  <wx/file.h>
 #  include  <wx/textfile.h>
@@ -61,7 +65,7 @@
 
 #ifdef  USE_PYTHON
   // only used here
-  extern void InitPython(void);
+  extern bool InitPython(void);
 #endif //Python
 
 // ============================================================================
@@ -73,64 +77,71 @@
 // ----------------------------------------------------------------------------
 MAppBase::MAppBase()
 {
+   m_topLevelFrame = NULL;
 }
 
-void
+bool
 MAppBase::VerifySettings(void)
 {
-   const char *val;
    const size_t bufsize = 200;
    char  buffer[bufsize];
    
-   val = READ_APPCONFIG(MP_USERNAME);
-   if(! *val)
+   if( strutil_isempty(READ_APPCONFIG(MP_USERNAME)) )
    {
       wxGetUserId(buffer,bufsize);
       Profile::GetAppConfig()->WRITE_ENTRY(MP_USERNAME, buffer);
    }
 
-   val = READ_APPCONFIG(MP_PERSONALNAME);
-   if(! *val)
+   if( strutil_isempty(READ_APPCONFIG(MP_PERSONALNAME)) )
    {
       wxGetUserName(buffer,bufsize);
       Profile::GetAppConfig()->WRITE_ENTRY(MP_PERSONALNAME, buffer);
    }
 
-   val = READ_APPCONFIG(MC_USERDIR);
-   if(! *val)
-   {
-      wxGetHomeDir(buffer);
-      strcat(buffer,"/");
-      strcat(buffer, READ_APPCONFIG(MC_USER_MDIR));
-      Profile::GetAppConfig()->WRITE_ENTRY(MC_USERDIR, buffer);
-   }
+#  ifdef OS_UNIX
+      if( strutil_isempty(READ_APPCONFIG(MC_USERDIR)) )
+      {
+         wxString strHome;
+         wxGetHomeDir(&strHome);
+         strHome << DIR_SEPARATOR << READ_APPCONFIG(MC_USER_MDIR);
+         Profile::GetAppConfig()->WRITE_ENTRY(MC_USERDIR, strHome);
+      }
+#  endif // Unix
    
-   val = READ_APPCONFIG(MP_HOSTNAME);
-   if(! *val)
+   if( strutil_isempty(READ_APPCONFIG(MP_HOSTNAME)) )
    {
       wxGetHostName(buffer,bufsize);
       Profile::GetAppConfig()->WRITE_ENTRY(MP_HOSTNAME, buffer);
    }
-  
+
+   bool bFirstRun = READ_APPCONFIG(MC_FIRSTRUN) != 0;
+   if ( bFirstRun )
+   {
+      // next time won't be the first one any more
+      Profile::GetAppConfig()->WRITE_ENTRY(MC_FIRSTRUN, 0L);
+
+      // write the version
+      Profile::GetAppConfig()->WRITE_ENTRY(MC_VERSION, M_VERSION);
+   }
+
+   return bFirstRun;
 }
 
 MAppBase::~MAppBase()
 {
-   GLOBAL_DELETE m_mimeList;
-   GLOBAL_DELETE m_mimeTypes;
-   GLOBAL_DELETE m_cfManager;
-   GLOBAL_DELETE m_profile;
 }
 
 bool
 MAppBase::OnStartup()
 {
    // initialise the profile(s)
+   // -------------------------
    m_cfManager = new ConfigFileManager;
 
 #  ifdef USE_WXCONFIG
-      String strConfFile = wxFileConfig::GetLocalFileName(M_APPLICATIONNAME);
+      String strConfFile;
 #     ifdef OS_UNIX
+         strConfFile = wxFileConfig::GetLocalFileName(M_APPLICATIONNAME);
          // FIXME must create the directory ourselves!
          struct stat st;
          if ( stat(strConfFile, &st) != 0 || !S_ISDIR(st.st_mode) ) {
@@ -146,6 +157,8 @@ MAppBase::OnStartup()
          }
 
          strConfFile += "/config";
+#     else  // Windows
+         strConfFile << "wxWindows\\" << M_APPLICATIONNAME;
 #     endif // Unix
 
       m_profile = GLOBAL_NEW Profile(strConfFile);
@@ -158,10 +171,13 @@ MAppBase::OnStartup()
          Profile::GetAppConfig()->recordDefaults(TRUE);
 #  endif
 
-   // set the default path for configuration entries
-   m_profile->GetConfig()->SET_PATH(M_APPLICATIONNAME);
+#  ifndef OS_WIN
+      // set the default path for configuration entries
+      m_profile->GetConfig()->SET_PATH(M_APPLICATIONNAME);
+#  endif
 
-   // do we have gettext() ?
+   // do we have gettext()?
+   // ---------------------
 #  ifdef  USE_GETTEXT
       setlocale (LC_ALL, "");
       //bindtextdomain (M_APPLICATIONNAME, LOCALEDIR);
@@ -169,69 +185,99 @@ MAppBase::OnStartup()
 #  endif // USE_GETTEXT
 
 
-   String   tmp;
-   bool   found;
-   String strRootDir = READ_APPCONFIG(MC_ROOTDIRNAME);
-   PathFinder pf(READ_APPCONFIG(MC_PATHLIST));
+   // do any first-time specific initializations
+   // ------------------------------------------
+   bool bFirstRun = VerifySettings();
 
-#  if OS_UNIX
-      pf.AddPaths(M_DATADIR);
-#  else
-      // don't know how to get it from makeopts under Windows...
-#  endif
+   if ( bFirstRun ) {
+      wxLog *log = wxLog::GetActiveTarget();
+      if ( log ) {
+        wxLogMessage(_("As it seems that you're running M for the first\n"
+                       "time, you should probably set up some of the options\n"
+                       "needed by the program (especially network "
+                       "parameters)."));
+        log->Flush();
+      }
 
-   m_globalDir = pf.FindDir(strRootDir, &found);
-
-   if(! found)
-   {
-      String msg = _("Cannot find global directory \"");
-      msg += strRootDir;
-      msg += _("\" in\n \"");
-      msg += String(READ_APPCONFIG(MC_PATHLIST));
-      ERRORMESSAGE((Str(msg)));
+      ShowOptionsDialog();
    }
 
-#  ifdef   USE_WXCONFIG
+   // find our directories
+   // --------------------
+   String tmp;
+#  ifdef OS_UNIX
+      bool   found;
+      String strRootDir = READ_APPCONFIG(MC_ROOTDIRNAME);
+      PathFinder pf(READ_APPCONFIG(MC_PATHLIST));
+
+      pf.AddPaths(M_DATADIR);
+
+      m_globalDir = pf.FindDir(strRootDir, &found);
+
+      if(! found)
+      {
+         String msg = _("Cannot find global directory \"");
+         msg += strRootDir;
+         msg += _("\" in\n \"");
+         msg += String(READ_APPCONFIG(MC_PATHLIST));
+         ERRORMESSAGE((Str(msg)));
+      }
+
       m_localDir = wxExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
-#  else
-      char *cptr = ExpandEnvVars(READ_APPCONFIG(MC_USERDIR));
-      m_localDir = String(cptr);
-      GLOBAL_DELETE [] cptr;
-#  endif
+#  else  //Windows
+      // under Windows our directory is always the one where the executable is
+      // located. At least we're sure that it exists this way...
+      wxString strPath;
+      ::GetModuleFileName(::GetModuleHandle(NULL),
+                          strPath.GetWriteBuf(MAX_PATH), MAX_PATH);
+      strPath.UngetWriteBuf();
+
+      // extract the dir name
+      wxSplitPath(strPath, &m_globalDir, NULL, NULL);
+      m_localDir = m_globalDir;
+#  endif //Unix
 
    // create and show the main program window
    CreateTopLevelFrame();
 
-   VerifySettings();
-   
-   // extend path for commands, look in M's dirs first
-   tmp = "";
-   tmp += GetLocalDir();
-   tmp += "/scripts";
-   tmp += PATH_SEPARATOR;
-   tmp = GetGlobalDir();
-   tmp += "/scripts";
-   tmp += PATH_SEPARATOR;
-   if(getenv("PATH"))
-      tmp += getenv("PATH");
-   tmp="PATH="+tmp;
-   putenv(tmp.c_str());
+   // it doesn't seem to do anything under Windows (though it should...)
+#  ifndef OS_WIN
+      // extend path for commands, look in M's dirs first
+      tmp = "";
+      tmp += GetLocalDir();
+      tmp += "/scripts";
+      tmp += PATH_SEPARATOR;
+      tmp = GetGlobalDir();
+      tmp += "/scripts";
+      tmp += PATH_SEPARATOR;
+      if(getenv("PATH"))
+         tmp += getenv("PATH");
+      tmp="PATH="+tmp;
+      putenv(tmp.c_str());
+#  endif //OS_WIN
+
    // initialise python interpreter
 #  ifdef  USE_PYTHON
-      InitPython();
-#  endif //Python
+      // having the same error message each time M is started is annoying, so
+      // give the user a possibility to disable it
+      if ( READ_APPCONFIG(MC_USEPYTHON) && !InitPython() ) {
+         const char *msg = "It's possible that you have problems with Python\n"
+                           "installation. Would you like to disable Python\n"
+                           "support for now (set " MC_USEPYTHON " to 1 to"
+                           "reenable it later)?";
+         if ( MDialog_YesNoDialog(_(msg)) ) {
+            // disable it
+            Profile::GetAppConfig()->WRITE_ENTRY(MC_USEPYTHON, (long)FALSE);
+         }
+      }
+#  endif //USE_PYTHON
 
 
    m_mimeList = GLOBAL_NEW MimeList();
    m_mimeTypes = GLOBAL_NEW MimeTypes();
 
-   // load address database
-   PathFinder lpf(m_localDir);
-   String adbName = lpf.FindFile(READ_APPCONFIG(MC_ADBFILE), &found);
-   if(! found)
-      adbName = m_localDir + '/' + READ_APPCONFIG(MC_ADBFILE);
-
-   // open all default mailboxes:
+   // open all default mailboxes
+   // --------------------------
    char *folders = strutil_strdup(READ_APPCONFIG(MC_OPENFOLDERS));
    kbStringList openFoldersList;
    strutil_tokenise(folders,";",openFoldersList);
@@ -241,23 +287,37 @@ MAppBase::OnStartup()
    {
       if((*i)->length() == 0) // empty token
          continue;
-      wxLogDebug("Opening folder '%s'...", (*i)->c_str());
+      DBGMESSAGE(("Opening folder '%s'...", (*i)->c_str()));
       (void) new wxFolderViewFrame((**i), m_topLevelFrame);
    }
 
    // now that we have the local dir, we can set up a default mail
    // folder dir
-   m_profile->GetConfig()->SET_PATH(M_PROFILE_CONFIG_SECTION);
-   tmp = READ_CONFIG(m_profile,MP_MBOXDIR);
-   if(strutil_isempty(tmp))
    {
-      tmp = m_localDir;
-      m_profile->writeEntry(MP_MBOXDIR, tmp.c_str());
+      ProfilePathChanger ppc(m_profile->GetConfig(), M_PROFILE_CONFIG_SECTION);
+      tmp = READ_CONFIG(m_profile, MP_MBOXDIR);
+      if( strutil_isempty(tmp) )
+      {
+         tmp = m_localDir;
+         m_profile->writeEntry(MP_MBOXDIR, tmp.c_str());
+      }
    }
-   // set the default path for configuration entries
-   m_profile->GetConfig()->SET_PATH(M_APPLICATIONNAME);
    
    return TRUE;
+}
+
+void
+MAppBase::OnAbnormalTermination()
+{
+}
+
+void
+MAppBase::OnShutDown()
+{
+   GLOBAL_DELETE m_mimeList;
+   GLOBAL_DELETE m_mimeTypes;
+   GLOBAL_DELETE m_cfManager;
+   GLOBAL_DELETE m_profile;
 }
 
 const char *

@@ -27,19 +27,20 @@
 #  include "MimeList.h"
 #  include "MimeTypes.h"
 #  include "Profile.h"
-#  include "Mdefaults.h"
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
 
-#  include "MDialogs.h"
-
-   extern "C" {
+   extern "C"
+   {
 #     include <mail.h>
 #     include <osdep.h>  // for sysinbox() &c
    }
 
 #  include <wx/log.h>
 #endif
+
+#include "Mdefaults.h"
+#include "MDialogs.h"
 
 #include "MObject.h"
 
@@ -103,38 +104,39 @@ wxMApp::~wxMApp()
 {
 }
 
+void
+wxMApp::OnAbnormalTermination()
+{
+   MAppBase::OnAbnormalTermination();
+
+   ::MessageBox(NULL, _("The application is terminating abnormally.\n"
+                "Please report the bug to m-developers@makelist.com\n"
+                "Thank you!"), "Fatal application error", MB_ICONSTOP);
+}
+
 // app initilization
-#ifdef  USE_WXWINDOWS2
 bool
-#else //wxWin1
-wxFrame *
-#endif
 wxMApp::OnInit()
 {
-   // FIXME it's too ugly right now :-(
-   // MDialog_AboutDialog(NULL);
-
    m_IconManager = new wxIconManager();
-
+   
    if ( OnStartup() ) {
       // now we can create the log window
-      (void)new wxMLogWindow(m_topLevelFrame, _("M Activity Log"));
+      if ( READ_APPCONFIG(MC_SHOWLOG) ) {
+         (void)new wxMLogWindow(m_topLevelFrame, _("M Activity Log"));
+         
+         // we want it to be above the log frame
+#        ifndef __WXGTK__      
+            m_topLevelFrame->Raise(); // FIXME: no wxWindow::Raise in wxGTK
+#        endif
+      }
 
-      // we want it to be above the log frame
-#     ifndef __WXGTK__      
-         m_topLevelFrame->Raise(); // FIXME: no wxWindow::Raise in wxGTK
-#     endif
-
-#     ifdef  USE_WXWINDOWS2
-         return true;
-#     else
-         return m_topLevelFrame;
-#     endif
+      return true;
    }
    else {
       ERRORMESSAGE(("Can't initialize application, terminating."));
-
-      return 0; // either false or (wxFrame *)NULL
+      
+      return false;
    }
 }
 
@@ -144,18 +146,33 @@ MFrame *wxMApp::CreateTopLevelFrame()
    m_topLevelFrame->SetTitle(M_TOPLEVELFRAME_TITLE);
    m_topLevelFrame->Show(true);
 
+   // can't do it in OnInit() because profile is not yet created
+   if ( READ_APPCONFIG(MC_SHOWSPLASH) ) {
+      MDialog_AboutDialog(NULL);
+   }
+
    return m_topLevelFrame;
+}
+
+int wxMApp::OnRun()
+{
+   return wxApp::OnRun();
 }
 
 int wxMApp::OnExit()
 {
-   if(m_IconManager) delete m_IconManager;
+   MAppBase::OnShutDown();
+
+   delete m_IconManager;
 
    MObject::CheckLeaks();
 
-   wxLogWindow *log = (wxLogWindow *)wxLog::GetActiveTarget();
-   wxLog::SetActiveTarget(log->GetOldLog());
-   //FIXME: is this legal?
+   wxLog *log = wxLog::GetActiveTarget();
+   wxLog::SetActiveTarget(NULL);
+
+   // delete the previously active log target (it's the one we had set before
+   // here, but in fact it doesn't even matter: if somebody installed another
+   // one, we will delete his log object and his code will delete ours)
    delete log;
  
    // as c-client lib doesn't seem to think that deallocating memory is
@@ -174,8 +191,4 @@ int wxMApp::OnExit()
 // ----------------------------------------------------------------------------
 
 // this creates the one and only application object
-#ifdef  USE_WXWINDOWS2
-   IMPLEMENT_APP(wxMApp);
-#else   // wxWin1
-   wxMApp mApplication;
-#endif  // wxWin ver
+IMPLEMENT_APP(wxMApp);

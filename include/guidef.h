@@ -47,6 +47,12 @@
 /// how much space to leave in frame around other items
 #   define   WXFRAME_HEIGHT_DELTA   64
 
+// minimal space to leave between dialog/panel items: tune them if you want,
+// but use these constants everywhere instead of raw numbers to make the look
+// of all dialogs consistent
+#define LAYOUT_X_MARGIN       5
+#define LAYOUT_Y_MARGIN       5
+
 #else
 #  error "Implemented only for wxWindows."
 #endif // USE_WXWINDOWS

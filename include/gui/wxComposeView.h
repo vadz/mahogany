@@ -131,6 +131,9 @@ public:
       ///
    void OnClear(wxCommandEvent&) { OnMenuCommand(WXMENU_COMPOSE_CLEAR); }
 
+   /// can we close now?
+   void OnCloseWindow(wxCloseEvent& event);
+
    DECLARE_EVENT_TABLE()
 #else //wxWin1
    /// resize callback
@@ -139,6 +142,7 @@ public:
    /// for button
    void OnCommand(wxWindow &win, wxCommandEvent &event);
 #endif //wxWin1/2
+
 private:
    /// a profile
    Profile * m_Profile;

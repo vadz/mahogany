@@ -1033,12 +1033,13 @@ wxLayoutList::Find(wxPoint coords) const
    
    while(i != end()) // == while valid
    {
-      topleft = (**i).GetPosition();
+      wxLayoutObjectBase *object = *i;
+      topleft = object->GetPosition();
       if(coords.y >= topleft.y && coords.x >= topleft.x)
       {
          bottomright = topleft;
-         bottomright.x += (**i).GetSize().x;
-         bottomright.y += (**i).GetSize().y;
+         bottomright.x += object->GetSize().x;
+         bottomright.y += object->GetSize().y;
          if(coords.x <= bottomright.x && coords.y <= bottomright.y)
             return *i;
       }
@@ -1054,7 +1055,7 @@ bool wxLayoutPrintout::OnPrintPage(int page)
 {
   wxDC *dc = GetDC();
   if (dc)
-     return m_llist->Draw(*dc,false,wxPoint(0,0),page);
+     return m_llist->Draw(*dc,false,wxPoint(0,0),page) != NULL;
   else
     return FALSE;
 }

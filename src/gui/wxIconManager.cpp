@@ -17,11 +17,12 @@
 #  include "CommonBase.h"   // VAR() macro
 #  include "strutil.h"
 #  include "gui/wxMApp.h"
-#  include "Mdefaults.h"
 #  include "Profile.h"
 #  include "PathFinder.h"
 #  include "MApplication.h"
 #endif
+
+#include "Mdefaults.h"
 
 #include "gui/wxIconManager.h"
 
@@ -74,24 +75,6 @@ wxIconManager::wxIconManager()
 
 wxIconManager::~wxIconManager()
 {
-#if 0
-   IconDataList::iterator i;
-   for ( i = m_iconList->begin(); i != m_iconList->end(); i++ ) {
-      // against what your common sense may tell you, the icons we manage
-      // should *not* be deleted here because wxWindows does it too!
-      IconData *id = *i;
-#     ifndef OS_WIN
-         // now we do!
-      delete id->iconRef;
-#     else  // Windows
-         // ok, you can delete it if you want but it provokes crash under
-         // Windows and if I don't delete it I don't have memory leaks, so:
-         // no, thanks
-#     endif //OS_WIN
-      delete id;
-   }
-#endif
-   
    delete m_iconList;
 }
 
@@ -104,8 +87,6 @@ wxIconManager::GetBitmap(const String& bmpName)
       wxBitmap bmp(bmpName);
       if ( bmp.Ok() )
          return bmp;
-//      else
-//         delete bmp;
 
       // try the other standard locations now
    }
@@ -205,11 +186,11 @@ wxIconManager::GetIcon(String const &_iconName)
 #  ifdef    OS_WIN
    {
       // last, look in the ressources
-      wxIcon *icon = new wxIcon(_iconName);
-      if ( icon->Ok() )
-         return  icon;
-      else
-         delete icon;
+      wxIcon icon(_iconName);
+      if ( icon.Ok() ) {
+         wxLogTrace("... icon found in the ressources.");
+         return icon;
+      }
 
       // ok, it failed - now do all the usual stuff
    }

@@ -41,6 +41,8 @@
 
 #include "adb/AdbFrame.h"
 
+#include "gui/wxOptionsDlg.h"
+
 // test:
 #include   "SendMessageCC.h"
 #include   "MailFolderCC.h"
@@ -66,16 +68,13 @@ bool wxMFrame::RestorePosition(const char *name,
    FileConfig *pConf = Profile::GetAppConfig();
    if ( pConf != NULL )
    {
-      String oldPath = Str(pConf->GET_PATH());
-      pConf->SET_PATH(M_FRAMES_CONFIG_SECTION);
+      ProfilePathChanger ppc(pConf, M_FRAMES_CONFIG_SECTION);
       pConf->CHANGE_PATH(name);
 
       *x = READ_APPCONFIG(MC_XPOS);
       *y = READ_APPCONFIG(MC_YPOS);
       *w = READ_APPCONFIG(MC_WIDTH);
       *h = READ_APPCONFIG(MC_HEIGHT);
-
-      pConf->SET_PATH(oldPath.c_str());
 
       return TRUE;
    }
@@ -179,8 +178,7 @@ wxMFrame::SavePosition(const char *name, wxFrame *frame)
 
    FileConfig *pConf = Profile::GetAppConfig();
    if ( pConf != NULL ) {
-      String tmp = Str(pConf->GET_PATH());
-      pConf->SET_PATH(M_FRAMES_CONFIG_SECTION);
+      ProfilePathChanger ppc(pConf, M_FRAMES_CONFIG_SECTION);
       pConf->CHANGE_PATH(name);
 
       frame->GetPosition(&x,&y);
@@ -190,8 +188,6 @@ wxMFrame::SavePosition(const char *name, wxFrame *frame)
       frame->GetSize(&x,&y);
       pConf->WRITE_ENTRY(MC_WIDTH, (long int) x);
       pConf->WRITE_ENTRY(MC_HEIGHT, (long int) y);
-
-      pConf->SET_PATH(tmp.c_str());
    }
 }
 
@@ -224,13 +220,19 @@ wxMFrame::OnMenuCommand(int id)
       (new wxComposeView("ComposeView", this))->Show();
       break;
    }
+
    case WXMENU_FILE_EXIT:
       mApplication.Exit();
       break;
+
    case WXMENU_EDIT_ADB:
       ShowAdbFrame(this);
       break;
+
    case WXMENU_EDIT_PREF:
+      ShowOptionsDialog(this);
+      break;
+
    case WXMENU_EDIT_SAVE_PREF:
       MDialog_Message(_("Not implemented yet."),this,_("Sorry"));
       break;

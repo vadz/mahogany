@@ -9,11 +9,11 @@
 #ifndef STRUTIL_H
 #define STRUTIL_H
 
-#include  "Mconfig.h"
-
 #ifndef  USE_PCH
-#  include "kbList.h"
+#  include  "Mconfig.h"
 #endif
+
+class kbStringList;
 
 /**@name String class helper functions */
 //@{

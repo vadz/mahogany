@@ -81,29 +81,33 @@ MimeEntry::Parse(String const & str)
 
 MimeList::MimeList(void)
 {
-   bool   found;
-   MimeEntry   *newEntry;
-   String   tmp;
+#  ifdef OS_UNIX
+      bool   found;
+      MimeEntry   *newEntry;
+      String   tmp;
    
-   PathFinder pf(READ_APPCONFIG(MC_ETCPATH));
+      PathFinder pf(READ_APPCONFIG(MC_ETCPATH));
 
-   String file = pf.FindFile(READ_APPCONFIG(MC_MAILCAP), &found);
-   if(! found)
-      return;
-   ifstream str(file.c_str());
-   while(str.good())
-   {
-      strutil_getstrline(str,tmp);
-      strutil_delwhitespace(tmp);
-      if(! str.eof())
+      String file = pf.FindFile(READ_APPCONFIG(MC_MAILCAP), &found);
+      if(! found)
+         return;
+      ifstream str(file.c_str());
+      while(str.good())
       {
-         newEntry = new MimeEntry;
-         if(newEntry->Parse(tmp))
-            push_back(newEntry);
-         else
-            delete newEntry;
+         strutil_getstrline(str,tmp);
+         strutil_delwhitespace(tmp);
+         if(! str.eof())
+         {
+            newEntry = new MimeEntry;
+            if(newEntry->Parse(tmp))
+               push_back(newEntry);
+            else
+               delete newEntry;
+         }
       }
-   }
+#  else  // Windows
+      // TODO: read the Mime types from the registry
+#  endif // Unix
 }
 
 bool

@@ -29,11 +29,12 @@
 #  include "Profile.h"
 
 #  include "MFrame.h"
-#  include "Mdefaults.h"
 
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
 #endif
+
+#include "Mdefaults.h"
 
 #include "FolderView.h"
 #include "MailFolder.h"
@@ -69,8 +70,8 @@ enum
    IDB_EXPAND = 100
 };
 
-// margin between controls on the panel
-#define LAYOUT_MARGIN 5
+// code here was written with assumption that x and y margins are the same
+#define LAYOUT_MARGIN LAYOUT_X_MARGIN
 
 // ----------------------------------------------------------------------------
 // other types
@@ -85,15 +86,17 @@ IMPLEMENT_DYNAMIC_CLASS(wxComposeView, wxMFrame)
 
 #ifdef USE_WXWINDOWS2
    BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
-   // wxComposeView menu events
-   EVT_MENU(WXMENU_COMPOSE_INSERTFILE, wxComposeView::OnInsertFile)
-   EVT_MENU(WXMENU_COMPOSE_SEND,       wxComposeView::OnSend)
-   EVT_MENU(WXMENU_COMPOSE_PRINT,      wxComposeView::OnPrint)
-   EVT_MENU(WXMENU_COMPOSE_CLEAR,      wxComposeView::OnClear)
+      // wxComposeView menu events
+      EVT_MENU(WXMENU_COMPOSE_INSERTFILE, wxComposeView::OnInsertFile)
+      EVT_MENU(WXMENU_COMPOSE_SEND,       wxComposeView::OnSend)
+      EVT_MENU(WXMENU_COMPOSE_PRINT,      wxComposeView::OnPrint)
+      EVT_MENU(WXMENU_COMPOSE_CLEAR,      wxComposeView::OnClear)
 
-   // button notifications
-   EVT_BUTTON(IDB_EXPAND, wxComposeView::OnExpand)
+      // button notifications
+      EVT_BUTTON(IDB_EXPAND, wxComposeView::OnExpand)
 
+      // can we close now?
+      EVT_CLOSE(wxComposeView::OnCloseWindow)
    END_EVENT_TABLE()
 #endif
 
@@ -279,29 +282,32 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    // append signature
    if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE) )
    {
-      wxTextFile fileSig(READ_CONFIG(m_Profile, MP_COMPOSE_SIGNATURE));
-      if ( fileSig.Open() ) {
-         // insert separator optionally
-         if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) ) {
-            m_LayoutWindow->GetLayoutList().Insert("--");
-            m_LayoutWindow->GetLayoutList().LineBreak();;
-         }
+      String strSignFile = READ_CONFIG(m_Profile, MP_COMPOSE_SIGNATURE);
+      if ( !strSignFile.IsEmpty() ) {
+         wxTextFile fileSig(strSignFile);
+         if ( fileSig.Open() ) {
+            // insert separator optionally
+            if( READ_CONFIG(m_Profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) ) {
+               m_LayoutWindow->GetLayoutList().Insert("--");
+               m_LayoutWindow->GetLayoutList().LineBreak();;
+            }
 
-         // read the whole file
-         size_t nLineCount = fileSig.GetLineCount();
-         for ( size_t nLine = 0; nLine < nLineCount; nLine++ ) {
-            m_LayoutWindow->GetLayoutList().Insert(fileSig[nLine]);
-            m_LayoutWindow->GetLayoutList().LineBreak();;
-         }
+            // read the whole file
+            size_t nLineCount = fileSig.GetLineCount();
+            for ( size_t nLine = 0; nLine < nLineCount; nLine++ ) {
+               m_LayoutWindow->GetLayoutList().Insert(fileSig[nLine]);
+               m_LayoutWindow->GetLayoutList().LineBreak();;
+            }
 
-         // let's respect the netiquette
-         static const size_t nMaxSigLines = 4; 
-         if ( nLineCount > nMaxSigLines ) {
-            wxLogWarning(_("Your signature is too long: it should not be more"
-                           " than %d lines"), nMaxSigLines);
-         }
+            // let's respect the netiquette
+            static const size_t nMaxSigLines = 4; 
+            if ( nLineCount > nMaxSigLines ) {
+               wxLogWarning(_("Your signature is too long: it should not be more"
+                              " than %d lines"), nMaxSigLines);
+            }
 
-         m_LayoutWindow->GetLayoutList().SetCursor(wxPoint(0,0));
+            m_LayoutWindow->GetLayoutList().SetCursor(wxPoint(0,0));
+         }
       }
    }
 
@@ -417,6 +423,26 @@ wxComposeView::OnCommand(wxWindow &win, wxCommandEvent &event)
 #endif // wxWin1
 
 void
+wxComposeView::OnCloseWindow(wxCloseEvent& event)
+{
+   bool bDoClose = TRUE;
+   if ( m_LayoutWindow && m_LayoutWindow->IsDirty() ) {
+      bDoClose = MDialog_YesNoDialog
+                 (
+                  _("There are unsaved changes, close anyway?"),
+                  this, // parent
+                  true, // modal
+                  MDIALOG_YESNOTITLE,
+                  false // "yes" not default
+                 ); 
+   }
+
+   if ( bDoClose ) {
+      Destroy();
+   }
+}
+
+void
 wxComposeView::OnMenuCommand(int id)
 {
    switch(id)
@@ -424,23 +450,21 @@ wxComposeView::OnMenuCommand(int id)
    case WXMENU_COMPOSE_INSERTFILE:
       InsertFile();
       break;
+
    case WXMENU_COMPOSE_SEND:
       Send();
+      m_LayoutWindow->ResetDirty();
+      Close();
       break;
+
    case WXMENU_COMPOSE_PRINT:
       Print();
       break;
+
    case WXMENU_COMPOSE_CLEAR:
       m_LayoutWindow->Clear();
-/*
-  Layout();
-#ifdef  USE_WXWINDOWS2
-      Refresh();
-#else //wxWin1
-      OnPaint();
-#endif
-*/
       break;
+
    default:
       wxMFrame::OnMenuCommand(id);
    }

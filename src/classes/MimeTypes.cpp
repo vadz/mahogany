@@ -93,25 +93,29 @@ MimeTEntry::Match(String const & extension, String &mimeType)
 
 MimeTypes::MimeTypes(void) // why? should be default : STL_LIST<MimeTEntry>()
 {
-   bool   found;
-   String   tmp;
+#  ifdef OS_UNIX
+      bool   found;
+      String   tmp;
    
-   PathFinder pf(READ_APPCONFIG(MC_ETCPATH));
+      PathFinder pf(READ_APPCONFIG(MC_ETCPATH));
 
-   String file = pf.FindFile(READ_APPCONFIG(MC_MIMETYPES), &found);
-   if(! found)
-      return;
-   ifstream str(file.c_str());
-   while(str.good())
-   {
-      strutil_getstrline(str,tmp);
-      strutil_delwhitespace(tmp);
-      if(! str.eof())
+      String file = pf.FindFile(READ_APPCONFIG(MC_MIMETYPES), &found);
+      if(! found)
+         return;
+      ifstream str(file.c_str());
+      while(str.good())
       {
-         push_back(new MimeTEntry(tmp));  // this will add an empty
-                                          // entry as the last one
+         strutil_getstrline(str,tmp);
+         strutil_delwhitespace(tmp);
+         if(! str.eof())
+         {
+            push_back(new MimeTEntry(tmp));  // this will add an empty
+                                             // entry as the last one
+         }
       }
-   }
+#  else  // Windows
+      // TODO: read the Mime types from the registry
+#  endif // Unix
 }
 
 bool

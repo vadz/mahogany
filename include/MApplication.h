@@ -57,8 +57,10 @@ protected:
    /** Checks some global configuration settings and makes sure they
        have sensible values. Especially important when M is run for
        the first time.
+
+       @return true if the application is being run for the first time
    */
-   void VerifySettings(void);
+   bool VerifySettings(void);
 
 public:
    MAppBase(void);
@@ -79,6 +81,21 @@ public:
        @return false => application aborts immediately
      */
    virtual bool OnStartup();
+
+   /** called by GUI framework when the application terminates. This is
+       the right place to perform any clean up, it should _not_ be done
+       in the destructor!
+     */
+   virtual void OnShutDown();
+
+   /** called if something goes seriously wrong with the application.
+       Because it can be called from a signal handler, all usual
+       restrictions about signal handlers apply to this function.
+       Because it can be called because of out-of-memory error,
+       it shouldn't allocate memory. The only thing it can do is
+       to save everything that may be saved and return a.s.a.p.
+   */
+   virtual void OnAbnormalTermination();
 
    /** ends the application
        prompting before whether user really wants to exit.

@@ -71,7 +71,7 @@ struct TbarItemInfo
 };
 
 // array of descriptions of all toolbar buttons, should be in sync with the enum
-// in wxMenuDefs.h
+// in wxMenuDefs.h!
 static const TbarItemInfo g_aToolBarData[] =
 {
   // separator
@@ -193,15 +193,17 @@ static const int *g_aFrameToolbars[WXFRAME_MAX] =
 
 
 // array of descriptions of all menu items
+// NB: by convention, if the menu item opens another window (or a dialog), it
+//     should end with an ellipsis (`...')
 static const MenuItemInfo g_aMenuItems[] =
 {
    // filler for WXMENU_LAYOUT_CLICK
    { WXMENU_SEPARATOR,     "",                  ""                         },
 
    // file
-   { WXMENU_FILE_OPEN,     "&Open Folder",      "Open an existing message "
+   { WXMENU_FILE_OPEN,     "&Open Folder...",   "Open an existing message "
                                                 " folder"                  },
-   { WXMENU_FILE_CREATE,   "Create &Folder",    "Creates a new folder "
+   { WXMENU_FILE_CREATE,   "Create &Folder...", "Creates a new folder "
                                                 "definition"               },
    { WXMENU_FILE_COMPOSE,  "&Compose Message",  "Start a new message"      },
    { WXMENU_FILE_CLOSE,    "&Close Window",     "Close this window"        },
@@ -209,8 +211,8 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_FILE_EXIT,     "E&xit",             "Quit the application"     },
 
    // edit
-   { WXMENU_EDIT_ADB,      "&Database",         "Edit the address book(s)" },
-   { WXMENU_EDIT_PREF,     "&Preferences",      "Change options"           },
+   { WXMENU_EDIT_ADB,      "&Address books...", "Edit the address book(s)" },
+   { WXMENU_EDIT_PREF,     "&Preferences...",   "Change options"           },
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_EDIT_SAVE_PREF,"&Save Preferences", "Save options"             },
 
@@ -265,7 +267,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_ADBFIND_GOTO,  "&Go To...",         "Go to specified entry"    },
 
    // help
-   { WXMENU_HELP_ABOUT,    "&About",            "Displays the program in"
+   { WXMENU_HELP_ABOUT,    "&About...",         "Displays the program in"
                                                 "formation and copyright"  },
    { WXMENU_SEPARATOR,     "",                  ""                         },
    { WXMENU_HELP_HELP,     "&Help",             "Help..."                  },

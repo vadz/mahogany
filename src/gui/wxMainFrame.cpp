@@ -25,7 +25,8 @@
 #include   "gui/wxMApp.h"
 #include   "gui/wxIconManager.h"
 #include   "gui/wxFolderView.h"
-#include   "gui/wxMDialogs.h"
+
+#include   "MDialogs.h"
 
 #ifdef   USE_WXWINDOWS2
 // ----------------------------------------------------------------------------

@@ -32,11 +32,12 @@ public:
       {
          GetLayoutList().Clear(family,size,style,weight,underline,fg,bg);
          SetBackgroundColour( *GetLayoutList().GetDefaults()->GetBGColour());
+
+         m_bDirty = FALSE;
       }
 
    // callbacks
    // NB: these functions are used as event handlers and must not be virtual
-   //void OnDraw(wxDC &dc);
    void OnPaint(wxPaintEvent &WXUNUSED(event));
    void OnMouse(wxMouseEvent& event);
    void OnChar(wxKeyEvent& event);
@@ -48,9 +49,12 @@ public:
    void UpdateScrollbars(void);
    void Print(void);
    void SetEventId(int id) { m_EventId = id; }
-   // what for? Caller doesn't even know object's positions in window
-   //wxPoint const &GetClickPosition(void) const { return m_ClickPosition; }
    virtual ~wxLayoutWindow() {}
+
+   // dirty flag access
+   bool IsDirty() const { return m_bDirty; }
+   void ResetDirty() { m_bDirty = FALSE; }
+
 private:
    /// for sending events
    wxWindow *m_Parent;
@@ -63,6 +67,9 @@ private:
    wxPoint m_FindPos;
    wxLayoutObjectBase *m_FoundObject;
    wxPoint m_ClickPosition;
+
+   /// do we have unsaved data?
+   bool m_bDirty;
 
    DECLARE_EVENT_TABLE()
 };

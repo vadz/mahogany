@@ -43,7 +43,7 @@ extern "C"
 #include  "strutil.h"
 
 #ifdef   USE_WXCONFIG
-#  include "wx/config.h"
+#  include <wx/config.h>
 #else  //standalone appconf
 #  include "appconf.h"
 #endif
@@ -59,7 +59,6 @@ extern "C"
 #include "gui/wxMFrame.h"
 
 #include "Profile.h"
-#include "Mdefaults.h"
 
 #include "MApplication.h"
 #include "gui/wxMApp.h"

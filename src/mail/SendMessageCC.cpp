@@ -295,7 +295,7 @@ SendMessageCC::Build(void)
    }
    //always add mailer header:
    m_headerNames[j] = strutil_strdup("X-Mailer:");
-   m_headerValues[j++] = strutil_strdup(String("M, ")+M_RELEASE_STRING);
+   m_headerValues[j++] = strutil_strdup(String("M, ")+M_VERSION_STRING);
    m_headerNames[j] = NULL;
    m_headerValues[j] = NULL;
    rfc822_setextraheaders(m_headerNames,m_headerValues);

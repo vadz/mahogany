@@ -34,13 +34,16 @@
 #  define   CHANGE_PATH    SetPath
 #  define   GET_PATH       GetPath
 
-#  ifndef   USE_PCH
-#     include <wx/config.h>
+#  include  <wx/config.h>
+#  ifdef  __WXMSW__
+#     include <wx/msw/regconf.h>
+#  else
+#     include <wx/fileconf.h>
 #  endif
 
    // both types are mapped just on wxConfig
    typedef  wxConfigBase       FileConfig;
-   typedef  wxConfigBase       AppConfig;
+   typedef  wxConfig           AppConfig;
 #else
 #  include  "appconf.h"
 
@@ -81,12 +84,12 @@ public:
    */
    //@{
    /// Read a character entry.
-   virtual const char *readEntry(const char *szKey,
-                                 const char *szDefault = NULL) const = 0;
+   virtual String readEntry(const char *szKey,
+                            const char *szDefault = NULL) const = 0;
    /// Read an integer value.
-   virtual int readEntry(const char *szKey, int Default = 0) const = 0;
+   virtual int readEntry(const char *szKey, int Default) const = 0;
    /// Read a bool value.
-   virtual bool readEntry(const char *szKey, bool Default = false) const = 0;
+   virtual bool readEntry(const char *szKey, bool Default) const = 0;
    /// Write back the character value.
    virtual bool writeEntry(const char *szKey, const char *szValue) = 0;
    /// Write back the int value.
@@ -134,9 +137,10 @@ public:
 
    /** Get a FileConfig object.
        @param fileName name of configuration file
+       @param isApp if we're creating the app config
        @return the FileConfig object
    */
-   FileConfig *GetConfig(String const &fileName);
+   FileConfig *GetConfig(String const &fileName, bool isApp = FALSE);
 
    /// Prints a list of all entries.
    DEBUG_DEF
@@ -171,7 +175,7 @@ private:
        config object where the entries are searched if not found everywhere
        else.
    */
-   static FileConfig *appConfig;
+   static AppConfig *appConfig;
 
 public:
    /// get the top level config object
@@ -209,11 +213,11 @@ public:
    */
    //@{
       /// Read a character entry.
-   const char *readEntry(const char *szKey, const char *szDefault = NULL) const;
+   String readEntry(const char *szKey, const char *szDefault = NULL) const;
       /// Read an integer value.
-   int readEntry(const char *szKey, int Default = 0) const;
+   int readEntry(const char *szKey, int Default) const;
       /// Read a bool value.
-   bool readEntry(const char *szKey, bool Default = false) const;
+   bool readEntry(const char *szKey, bool Default) const;
       /// Write back the character value.
    bool writeEntry(const char *szKey, const char *szValue);
       /// Write back the int value.
@@ -228,6 +232,33 @@ public:
    CB_DECLARE_CLASS(Profile, CommonBase);
 };
 //@}
+
+// ----------------------------------------------------------------------------
+// a tinu utility class which is used to temporary change the config path, for
+// example:
+//    {
+//       ProfilePathChanger ppc(profile->GetConfig(), "/M/Frames");
+//       profile->WriteEntry("x", 400);
+//       ...
+//       // path automatically restored here
+//    }
+// ----------------------------------------------------------------------------
+class ProfilePathChanger
+{
+public:
+   ProfilePathChanger(wxConfigBase *config, const String& path)
+   {
+      m_config = config;
+      m_strOldPath = m_config->GetPath();
+      m_config->SetPath(path);
+   }
+
+   ~ProfilePathChanger() { m_config->SetPath(m_strOldPath); }
+
+private:
+   wxConfigBase *m_config;
+   String        m_strOldPath;
+};
 
 // ----------------------------------------------------------------------------
 // two handy functions for savings/restoring arrays of strings to/from config

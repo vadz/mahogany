@@ -10,7 +10,8 @@
 #ifndef MDEFAULTS_H
 #define   MDEFAULTS_H
 
-#include   "Mcallbacks.h"
+#include  "Mcallbacks.h"
+#include  "Mversion.h"
 
 /** @name The sections of the configuration file. */
 //@{
@@ -18,14 +19,22 @@
     profiles (trailing '/' required).
 */
 #ifndef M_PROFILE_CONFIG_SECTION
-#   define   M_PROFILE_CONFIG_SECTION   "/M/Profiles"
+#  ifdef OS_WIN
+#     define   M_PROFILE_CONFIG_SECTION   "/Profiles"
+#  else  // Unix
+#     define   M_PROFILE_CONFIG_SECTION   "/M/Profiles"
+#  endif // Unix/Win
 #endif
 
 /** The section in the global configuration file used for storing
     window positions (trailing '/' required).
 */
 #ifndef M_FRAMES_CONFIG_SECTION
-#   define   M_FRAMES_CONFIG_SECTION   "/M/Frames"
+#  ifdef OS_WIN
+#  define   M_FRAMES_CONFIG_SECTION       "/Frames"
+#  else  // Unix
+#     define   M_FRAMES_CONFIG_SECTION    "/M/Frames"
+#  endif // Unix/Win
 #endif
 //@}
 
@@ -50,6 +59,10 @@
 //@}
 /** @name names of configuration entries */
 //@{
+/// our version
+#define   MC_VERSION          "Version"
+/// are we running for the first time?
+#define   MC_FIRSTRUN         "FirstRun"
 /// shall we record default values in configuration files
 #define   MC_RECORDDEFAULTS      "RecordDefaults"
 /// default position x
@@ -60,14 +73,26 @@
 #define   MC_WIDTH         "Width"
 /// window height   
 #define   MC_HEIGHT         "Height"
-/// search paths for M's directory
-#define   MC_PATHLIST         "PathList"
-/// the name of M's root directory
-#define   MC_ROOTDIRNAME         "RootDirectoryName"
-/// the user's M directory
-#define   MC_USERDIR         "UserDirectory"
-/// the name of the M directory 
-#define   MC_USER_MDIR         "MDirName"
+
+/// show log window?
+#define   MC_SHOWLOG          "ShowLog"
+
+// Unix-only entries
+#ifdef OS_UNIX
+   /// search paths for M's directory
+   #define   MC_PATHLIST         "PathList"
+   /// the name of M's root directory
+   #define   MC_ROOTDIRNAME         "RootDirectoryName"
+   /// the user's M directory
+   #define   MC_USERDIR         "UserDirectory"
+   /// the name of the M directory 
+   #define   MC_USER_MDIR         "MDirName"
+   /// the path where to find .afm files
+   #define   MC_AFMPATH         "AfmPath"
+   /// the path to the /etc directories (configuration files)
+   #define   MC_ETCPATH         "ConfigPath"
+#endif //Unix
+
 /// the default icon for frames
 #define   MC_ICON_MFRAME         "MFrameIcon"
 /// the icon for the main frame
@@ -78,10 +103,6 @@
 #define   MC_PROFILE_PATH         "ProfilePath"
 /// the extension to use for profile files
 #define   MC_PROFILE_EXTENSION      "ProfileExtension"
-/// the path where to find .afm files
-#define   MC_AFMPATH         "AfmPath"
-/// the path to the /etc directories (configuration files)
-#define   MC_ETCPATH         "ConfigPath"
 /// the name of the mailcap file
 #define   MC_MAILCAP         "MailCap"
 /// the name of the mime types file
@@ -92,6 +113,8 @@
 #define   MC_TO_LABEL         "ToLabel"
 /// the label for the CC: field
 #define   MC_CC_LABEL         "CcLabel"
+/// the label for the BCC: field
+#define   MC_BCC_LABEL         "BccLabel"
 /// the printf() format for dates
 #define   MC_DATE_FMT         "DateFormat"
 /// show console window
@@ -104,8 +127,14 @@
 #define   MC_MAINFOLDER          "MainFolder"
 /// path for Python
 #define   MC_PYTHONPATH         "PythonPath"
+/// is Python enabled (this is a run-time option)?
+#define   MC_USEPYTHON           "UsePython"
 /// start-up script to run
-#define     MC_STARTUPSCRIPT               "StartupScript"
+#define   MC_STARTUPSCRIPT     "StartupScript"
+/// show splash screen on startup?
+#define   MC_SHOWSPLASH        "ShowSplash"
+/// how long should splash screen stay (0 disables timeout)?
+#define   MC_SPLASHDELAY    "SplashDelay"
 /**@name For Profiles: */
 //@{
 /// the user's full name
@@ -241,24 +270,39 @@
 
 /** @name default values of configuration entries */
 //@{
+/// our version
+#define   MC_VERSION_D          ""
+/// are we running for the first time?
+#define   MC_FIRSTRUN_D         1L
 /// shall we record default values in configuration files
-#define   MC_RECORDDEFAULTS_D      1L
+#define   MC_RECORDDEFAULTS_D      0L
 /// default window position x
 #define   MC_XPOS_D        20L
 /// default window position y
-#define   MC_YPOS_D        20L
+#define   MC_YPOS_D        50L
 /// default window width
 #define   MC_WIDTH_D   600L
 /// default window height
 #define   MC_HEIGHT_D   400L
-/// path list for M's directory
-#define   MC_PATHLIST_D   "/usr/local:/usr/:/opt:/opt/local:/usr/opt:/usr/local/opt:/home/karsten/src/Projects/M/test"
-/// the name of M's root directory
-#define   MC_ROOTDIRNAME_D   "M"
-/// the user's M directory
-#define   MC_USERDIR_D         ""
-/// the name of the M directory 
-#define   MC_USER_MDIR_D         ".M"
+/// show log window?
+#define   MC_SHOWLOG_D  1L
+
+// Unix-only entries
+#ifdef OS_UNIX
+   /// path list for M's directory
+   #define   MC_PATHLIST_D   "/usr/local:/usr/:/opt:/opt/local:/usr/opt:/usr/local/opt"
+   /// the name of M's root directory
+   #define   MC_ROOTDIRNAME_D   "M"
+   /// the user's M directory
+   #define   MC_USERDIR_D         ""
+   /// the name of the M directory 
+   #define   MC_USER_MDIR_D         ".M"
+   /// the path where to find .afm files
+   #define   MC_AFMPATH_D "/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript"
+   /// the path to the /etc directories (configuration files)
+   #define   MC_ETCPATH_D   "/etc:/usr/etc:/usr/local/etc"
+#endif // Unix
+
 /// the default icon for frames
 #define   MC_ICON_MFRAME_D      "mframe.xpm"
 /// the icon for the main frame
@@ -266,13 +310,9 @@
 /// the icon directoy
 #define   MC_ICONPATH_D         "icons"
 /// the profile path
-#define   MC_PROFILE_PATH_D      "/home/karsten/src/Projects/M/test/profiles:profiles:."
+#define   MC_PROFILE_PATH_D      "."
 /// the extension to use for profile files
 #define   MC_PROFILE_EXTENSION_D      ".profile"
-/// the path where to find .afm files
-#define   MC_AFMPATH_D "/usr/share:/usr/lib:/usr/local/share:/usr/local/lib:/opt/ghostscript:/opt/enscript"
-/// the path to the /etc directories (configuration files)
-#define   MC_ETCPATH_D   "/etc:/usr/etc:/usr/local/etc"
 /// the name of the mailcap file
 #define   MC_MAILCAP_D         "mailcap"
 /// the name of the mime types file
@@ -283,20 +323,26 @@
 #define   MC_TO_LABEL_D         "To:"
 /// the label for the CC: field
 #define   MC_CC_LABEL_D         "CC:"
+/// the label for the BCC: field
+#define   MC_BCC_LABEL_D       "BCC:"
 /// the printf() format for dates
 #define   MC_DATE_FMT_D         "\\%2u.\\%2u.\\%4u" //broken: "%1\\$2u.%2\\$2u.%3\\$4u"
 /// show console window
 #define   MC_SHOWCONSOLE_D      1
-/// name of address database
-#define   MC_ADBFILE_D         "M.adb"
 /// names of folders to open at startup
 #define   MC_OPENFOLDERS_D      ""
 /// name of folder to open in mainframe
 #define   MC_MAINFOLDER_D        "INBOX"
 /// path for Python
 #define   MC_PYTHONPATH_D         ""
+/// is Python enabled (this is a run-time option)?
+#define   MC_USEPYTHON_D         1
 /// start-up script to run
 #define     MC_STARTUPSCRIPT_D            "Minit"
+/// show splash screen on startup?
+#define     MC_SHOWSPLASH_D      1
+/// how long should splash screen stay (0 disables timeout)?
+#define MC_SPLASHDELAY_D        5000L
 /**@name For Profiles: */
 //@{
 //@}
@@ -353,7 +399,11 @@
 /// use "--" to separate signature in composition?
 #define   MP_COMPOSE_USE_SIGNATURE_SEPARATOR_D   1
 /// filename of signature file
-#define   MP_COMPOSE_SIGNATURE_D      "$HOME/.signature"
+#ifdef OS_WIN
+#  define   MP_COMPOSE_SIGNATURE_D      ""
+#else
+#  define   MP_COMPOSE_SIGNATURE_D      "$HOME/.signature"
+#endif
 /// the folder type for a mailbox (0 = system inbox, 1 = file, 2 =pop3, 3 = imap, 4 = nntp
 #define   MP_FOLDER_TYPE_D         1
 /// the filename for a mailbox
@@ -388,8 +438,14 @@
 #define   MP_FTEXT_BGCOLOUR_D      "white"
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS_D      1
+
 /// open URLs with
-#define   MP_BROWSER_D         "Mnetscape"
+#ifdef  OS_UNIX
+#  define   MP_BROWSER_D         "Mnetscape"
+#else  // under Windows, we know better...
+#  define   MP_BROWSER_D         ""
+#endif // Unix/Win
+
 /// keep copies of outgoing mail?
 #define   MP_USEOUTGOINGFOLDER_D  1
 /// write outgoing mail to folder:
@@ -427,11 +483,11 @@
 
 /// the wildcard for save dialog
 #ifdef OS_UNIX
-#define   MP_DEFAULT_SAVE_WILDCARD_D   "*"
-#define   MP_DEFAULT_LOAD_WILDCARD_D   "*"
+#  define   MP_DEFAULT_SAVE_WILDCARD_D   "*"
+#  define   MP_DEFAULT_LOAD_WILDCARD_D   "*"
 #else
-#define   MP_DEFAULT_SAVE_WILDCARD_D   "*.*"
-#define   MP_DEFAULT_LOAD_WILDCARD_D   "*.*"
+#  define   MP_DEFAULT_SAVE_WILDCARD_D   "*.*"
+#  define   MP_DEFAULT_LOAD_WILDCARD_D   "*.*"
 #endif
 //@}
 

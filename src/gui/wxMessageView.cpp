@@ -627,43 +627,78 @@ wxMessageView::OnCommandEvent(wxCommandEvent &event)
    if(event.GetId() == WXMENU_LAYOUT_CLICK)
    {
       wxLayoutObjectBase *obj;
-      cerr << "Received click event!" << endl;
       obj = (wxLayoutObjectBase *)event.GetClientData();
       ci = (ClickableInfo *)obj->GetUserData();
       if(ci)
       {
          switch(ci->type)
          {
-         case ClickableInfo::CI_ICON:
-         {
-            int x,y;
-            wxPoint pos;// = GetClickPosition();
-            wxWindow *p = GetParent();
-            while(p)
+            case ClickableInfo::CI_ICON:
             {
-               p->GetPosition(&x,&y);
+               int x,y;
+               wxPoint pos;// = GetClickPosition();
+               wxWindow *p = GetParent();
+               while(p)
+               {
+                  p->GetPosition(&x,&y);
+                  pos.x += x; pos.y += y;
+                  if(p->IsKindOf(CLASSINFO(wxFrame)))
+                     break;
+                  p = p->GetParent();
+               }
+               GetPosition(&x,&y);
                pos.x += x; pos.y += y;
-               if(p->IsKindOf(CLASSINFO(wxFrame)))
-                  break;
-               p = p->GetParent();
+               if(m_MimePopup)
+                  delete m_MimePopup;
+               m_MimePopup = new MimeDialog(this,pos,ci->id);
+               m_MimePopup->Show(true);
+               break;
             }
-            GetPosition(&x,&y);
-            pos.x += x; pos.y += y;
-            if(m_MimePopup)
-               delete m_MimePopup;
-            m_MimePopup = new MimeDialog(this,pos,ci->id);
-            m_MimePopup->Show(true);
-            break;
-         }
-         case ClickableInfo::CI_URL:
-         {
-            String cmd;
-            cmd = m_Profile->readEntry(MP_BROWSER,MP_BROWSER_D);
-            cmd += ' '; 
-            cmd += ci->url;
-            wxExecute(Str(cmd));
-            break;
-         }
+            case ClickableInfo::CI_URL:
+            {
+               // find our frame for the status message
+               wxWindow *win = GetParent();
+               while ( win && !win->IsKindOf(CLASSINFO(wxFrame)) ) {
+                  win = win->GetParent();
+               }
+
+               wxFrame *frame = (wxFrame *)win;
+               wxLogStatus(frame, _("Opening URL '%s'..."), ci->url.c_str());
+               wxYield();  // let the status bar update itself
+
+               bool bOk;
+               String cmd = m_Profile->readEntry(MP_BROWSER,MP_BROWSER_D);
+               if ( cmd.IsEmpty() ) {
+#                 ifdef OS_WIN
+                     bOk = (int)ShellExecute(NULL, "open", ci->url,
+                                             NULL, NULL, SW_SHOWNORMAL ) <= 32;
+                     if ( !bOk ) {
+                        wxLogSysError(_("Can't open URL '%s'"), ci->url.c_str());
+                     }
+#                 else  // Unix
+                     // @@@ propose to change it right now
+                     wxLogError(_("No command configured to view URLs."));
+                     bOk = FALSE;
+#                 endif
+               }
+               else {
+                  // not empty, user provided his script - use it
+                  cmd += ' '; 
+                  cmd += ci->url;
+                  bOk = wxExecute(Str(cmd)) != 0;
+               }
+
+               if ( bOk ) {
+                  wxLogStatus(frame, _("Opening URL '%s'... done."),
+                              ci->url.c_str());
+               }
+               else {
+                  wxLogStatus(frame, _("Opening URL '%s' failed."),
+                              ci->url.c_str());
+               }
+
+               break;
+            }
          }
       }
    }

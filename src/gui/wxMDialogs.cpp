@@ -32,32 +32,31 @@
 #  include "MimeList.h"
 #  include "MimeTypes.h"
 #  include "Profile.h"
+#  include "MApplication.h"
 #endif
 
-#include   "Mdefaults.h"
-#include   "MApplication.h"
-#include   "gui/wxMApp.h"
-#include   "gui/wxMIds.h"
+#include "Mdefaults.h"
+
+#include "gui/wxMApp.h"
+#include "gui/wxMIds.h"
 
 #include "MDialogs.h"
 #include "gui/wxlwindow.h"
 
-#include   <wx/dynarray.h>
-#include   <wx/radiobox.h>
+#include "gui/wxIconManager.h"
+
+#include <wx/dynarray.h>
+#include <wx/radiobox.h>
+#include <wx/minifram.h>
 
 #include "adb/AdbEntry.h"
 #include "adb/AdbBook.h"
 
-#include "M_32x32.xpm"
-
-// ----------------------------------------------------------------------------
-// constants
-// ----------------------------------------------------------------------------
-
-// tune them if you want, but use these constants everywhere instead of raw
-// numbers to make the look of all dialogs consistent
-static const int LAYOUT_X_MARGIN = 5;
-static const int LAYOUT_Y_MARGIN = 5;
+#ifdef    OS_WIN
+#  define M_32x32         "Micon"
+#else   //real XPMs
+#  include "../src/icons/M_32x32.xpm"
+#endif  //Win/Unix
 
 // ----------------------------------------------------------------------------
 // private classes
@@ -235,7 +234,8 @@ MDialog_ErrorMessage(const char *msg,
                      const char *title,
                      bool /* modal */)
 {
-   wxMessageBox(msg, wxString("M -" + wxString(title)), Style(wxOK|wxICON_EXCLAMATION), GetParent(parent));
+   wxMessageBox(msg, wxString(title), Style(wxOK|wxICON_EXCLAMATION),
+                GetParent(parent));
 }
 
 
@@ -257,7 +257,7 @@ MDialog_SystemErrorMessage(const char *message,
    msg = String(message) + String(("\nSystem error: "))
       + String(strerror(errno));
 
-   MDialog_ErrorMessage(msg.c_str(), parent, wxString("M -" + wxString(title)), modal);
+   MDialog_ErrorMessage(msg.c_str(), parent, wxString(title), modal);
 }
 
    
@@ -273,7 +273,7 @@ MDialog_FatalErrorMessage(const char *message,
 {
    String msg = String(message) + _("\nExiting application...");
 
-   MDialog_ErrorMessage(message,parent,wxString("M -" + wxString(title)),true);
+   MDialog_ErrorMessage(message,parent, wxString(title),true);
    mApplication.Exit(true);
 }
 
@@ -290,7 +290,8 @@ MDialog_Message(const char *msg,
                 const char *title,
                 bool /* modal */)
 {
-   wxMessageBox(msg, wxString("M -" + wxString(title)), Style(wxOK|wxICON_INFORMATION), GetParent(parent));
+   wxMessageBox(msg, wxString(title), Style(wxOK|wxICON_INFORMATION),
+                GetParent(parent));
 }
 
 
@@ -309,7 +310,7 @@ MDialog_YesNoDialog(const char *message,
              const char *title,
              bool /* YesDefault */)
 {
-   return wxMessageBox(message, wxString("M -" + wxString(title)), Style(wxYES_NO|wxICON_QUESTION),
+   return wxMessageBox(message, wxString(title), Style(wxYES_NO|wxICON_QUESTION),
                        GetParent(parent)) == wxYES;
 }
 
@@ -370,17 +371,6 @@ MDialog_FileRequester(String const & message,
    
    return wxFileSelector(
       message, path, filename, extension, wildcard, 0, parent);
-}
-
-// simple "Yes/No" dialog
-bool
-MDialog_YesNoDialog(String const &message,
-                    MWindow *parent,
-                    bool /* modal */,
-                    bool /* YesDefault */)
-{
-   return wxMessageBox(message, _("M - Decision"), Style(wxYES_NO|wxICON_QUESTION),
-                       GetParent(parent)) == wxYES;
 }
 
 int
@@ -454,7 +444,8 @@ private:
     CloseTimer(wxAboutWindow *window)
     {
       m_window = window;
-      Start(20000);  // should be more than enough...
+
+      Start(READ_APPCONFIG(MC_SPLASHDELAY));
     }
 
     virtual void Notify() { m_window->DoClose(); }
@@ -478,37 +469,37 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    SetBackgroundColour(wxColour("navy"));
 
    wxLayoutList &ll = GetLayoutList();
-   ll.SetFontColour("white","navy");
+   ll.SetFontColour("white", "navy");
    ll.SetEditable(true);
-
-   // NB: can't use wxIconManager here because it's not yet constructed
-   ll.Insert("               ");
-   ll.Insert(new wxLayoutObjectIcon(wxIcon(M_32x32)));
 
    ll.LineBreak();
    ll.LineBreak();
 
    ll.SetFontSize(30);
    ll.SetFontWeight(wxBOLD);
-   ll.Insert("Welcome");
+   ll.Insert("   Welcome");
    ll.LineBreak();
-   ll.Insert("  to");
+   ll.Insert("         to");
    ll.LineBreak();
-   ll.Insert("     M!");
+   ll.Insert("         ");
+   ll.Insert(new wxLayoutObjectIcon(ICON(M_32x32)));
+   ll.Insert("!");
    ll.SetFontWeight(wxNORMAL);
    ll.SetFontSize(10);
 
    ll.LineBreak();
    ll.LineBreak();
-   ll.Insert("Version: " M_RELEASE_STRING);
+   ll.LineBreak();
+   ll.Insert("    Version: " M_VERSION_STRING);
    ll.LineBreak();
    ll.LineBreak();
-   ll.Insert("Copyright (C) 1998 by Karsten Ballüder");
+   ll.LineBreak();
+   ll.Insert("  Copyright (c) 1998 by Karsten Ballüder");
    ll.LineBreak();
    ll.LineBreak();
-   ll.Insert("Written by Karsten Ballüder");
+   ll.Insert("          Written by Karsten Ballüder");
    ll.LineBreak();
-   ll.Insert("and Vadim Zeitlin");
+   ll.Insert("                      and Vadim Zeitlin");
    ll.LineBreak();
    ll.SetEditable(false);
 
@@ -526,21 +517,22 @@ void
 MDialog_AboutDialog( MWindow * /* parent */, bool bCloseOnTimeout)
 {
    wxFrame *frame = new wxFrame(NULL, -1, _("Welcome"),
-                                wxDefaultPosition, wxSize(200,280));
+                                wxDefaultPosition, wxSize(220, 300),
+                                wxDOUBLE_BORDER | wxSTAY_ON_TOP);
 
    (void)new wxAboutWindow(frame, bCloseOnTimeout);
 
+   frame->Centre(wxBOTH);
    frame->Show(TRUE);
-   frame->Raise();
 }
 
 
 /** A base class for dialog panels */
-class wxProfileEditPanel : public wxPanel
+class wxProfileEditPanel : public wxDialog
 {
 public:
-   wxProfileEditPanel(wxWindow *parent)
-      : wxPanel(parent, -1, wxPoint(0,0), wxSize(400, 400))
+   wxProfileEditPanel(wxWindow *parent, const String& title)
+      : wxDialog(parent, -1, title, wxPoint(0,0), wxSize(400, 400))
       {}
 
    /// virtual destructor
@@ -592,13 +584,13 @@ END_EVENT_TABLE()
 
 #define   MkTextCtrl(control,label,id) \
   (void) new wxStaticText(this, id, _(label), pos, wxSize(labelWidth,labelHeight)); \
-  control = new wxTextCtrl(this, id, "",wxPoint(pos.x+labelWidth,pos.y),wxSize(inputWidth,-1)); \
-  pos.y += labelHeight;\
+  control = new wxTextCtrl(this, id, "",wxPoint(pos.x+labelWidth+LAYOUT_X_MARGIN,pos.y),wxSize(inputWidth,-1)); \
+  pos.y += labelHeight;
 
 #define   MkTextCtrlAndLabel(control,labelctrl,label,id) \
   labelctrl = new wxStaticText(this, id, _(label), pos, wxSize(labelWidth,labelHeight)); \
-  control = new wxTextCtrl(this, id, "",wxPoint(pos.x+labelWidth,pos.y),wxSize(inputWidth,-1)); \
-  pos.y += labelHeight;\
+  control = new wxTextCtrl(this, id, "",wxPoint(pos.x+labelWidth+LAYOUT_X_MARGIN,pos.y),wxSize(inputWidth,-1)); \
+  pos.y += labelHeight;
 
 #define  MkButton(control,label,id) \
   control = new wxButton(this, id, _(label), pos, \
@@ -623,12 +615,11 @@ wxPEP_Folder::OnEvent(wxCommandEvent& event)
 }
 
 wxPEP_Folder::wxPEP_Folder(ProfileBase *profile, wxWindow *parent)
-            : wxProfileEditPanel(parent)
+            : wxProfileEditPanel(parent, _("Folder properties"))
 {
    m_Profile = profile;
    m_Parent = parent;
    wxASSERT(m_Profile);
-   wxASSERT(m_Parent);
 
    wxPoint  pos = wxPoint(2*LAYOUT_X_MARGIN, 2*LAYOUT_Y_MARGIN);
    long labelWidth, labelHeight;
@@ -640,15 +631,15 @@ wxPEP_Folder::wxPEP_Folder(ProfileBase *profile, wxWindow *parent)
    dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
    dc.GetTextExtent(_(label), &labelWidth, &labelHeight);
    size_t heightBtn = TEXT_HEIGHT_FROM_LABEL(labelHeight),
-        widthBtn = BUTTON_WIDTH_FROM_HEIGHT(heightBtn);
+          widthBtn = BUTTON_WIDTH_FROM_HEIGHT(heightBtn);
 
    labelHeight *= 2;
    labelWidth += 10;
-   dc.GetTextExtent("/home/karsten/MailFolders/foldername", &inputWidth, NULL);
+   inputWidth = labelWidth;
    inputWidth += 10;
    
    pos.y += LAYOUT_Y_MARGIN;
-   MkTextCtrlAndLabel(m_FolderPathTextCtrl,m_PathStaticText, "",-1);
+   MkTextCtrlAndLabel(m_FolderPathTextCtrl, m_PathStaticText, "",-1);
    MkTextCtrl(m_UpdateIntervalTextCtrl, label,-1);
    MkTextCtrl(m_UserIdTextCtrl, "User ID",-1);
    MkTextCtrl(m_PasswordTextCtrl, "Password",-1);
@@ -670,7 +661,7 @@ wxPEP_Folder::wxPEP_Folder(ProfileBase *profile, wxWindow *parent)
    m_FolderTypeRadioBox->GetSize(&widthRadio, &heightRadio);
 
    long widthTotal = xRadio + widthRadio;
-   pos.y += 2*LAYOUT_Y_MARGIN;
+   pos.y += 3*LAYOUT_Y_MARGIN;
    pos.x = widthTotal - 3*widthBtn - 2*LAYOUT_X_MARGIN;
 
    // buttons are always aligned to the right and have the same size
@@ -746,43 +737,15 @@ wxPEP_Folder::TransferDataToWindow(void)
    return true;
 }
 
-
-
 void
 MDialog_FolderProfile(MWindow *parent, ProfileBase *profile)
 {
-   // for now, open a frame and display the panel, return immediately
-   wxMFrame *frame = new wxMFrame("FolderProfileFrame",parent);
-   (void) new wxPEP_Folder(profile,frame);
-   frame->SetTitle(_("M - Folder Profile Settings"));
-   frame->Fit();
-   frame->Show(TRUE);
+   // show a modal dialog
+   wxPEP_Folder dlg(profile, NULL);
+   dlg.Centre(wxCENTER_FRAME | wxBOTH);
+   dlg.ShowModal();
 }
 
-
-
-// better looking wxTextEntryDialog
-class MFolderCreateDialog : public wxDialog
-{
-public:
-   MFolderCreateDialog(wxWindow *parent, ProfileBase *profile);
-
-private:
-   wxPEP_Folder *m_pep;
-};
-
-MFolderCreateDialog::MFolderCreateDialog(wxWindow *parent,
-                                         ProfileBase *profile)
-   : wxDialog(parent, -1, _("M - Folder Creation/Definition"),
-              wxDefaultPosition,
-              wxDefaultSize,
-              wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL) 
-{
-   (void)new wxPEP_Folder(profile,this);
-
-   Centre(wxCENTER_FRAME | wxBOTH);
-   Fit();
-}
 
 void
 MDialog_FolderCreate(MWindow *parent)
@@ -799,13 +762,7 @@ MDialog_FolderCreate(MWindow *parent)
 
    ProfileBase *profile = new Profile(name, NULL);
 
-   wxDialog dlg = wxDialog(parent, -1, _("M - Folder Profile Settings"),
-                           wxDefaultPosition, wxDefaultSize,
-                           wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL);
-
-   (void)new wxPEP_Folder(profile, &dlg);
-   dlg.Fit();
-   dlg.ShowModal();
+   MDialog_FolderProfile(parent, profile);
 
    delete profile;
 }

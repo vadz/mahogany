@@ -9,12 +9,14 @@
 %module MailFolder
 
 %{
-#include	"Mpch.h"
-#ifndef	USE_PCH
-#   include   "Mcommon.h"
-#   include   "Profile.h"
-#   include   "MailFolder.h"
-#endif
+#include   "Mcommon.h"
+#include   "kbList.h"
+#include   "Profile.h"
+#include   "MailFolder.h"
+
+// we don't want to export our functions as we don't build a shared library
+#undef SWIGEXPORT
+#define SWIGEXPORT(a,b) a b
 %}
 
 %import String.i

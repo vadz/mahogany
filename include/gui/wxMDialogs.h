@@ -118,19 +118,6 @@ const char *MDialog_FileRequester(String const &message,
                                   ProfileBase *profile = NULL
    );
 
-/** simple Yes/No dialog
-    @param message the text to display
-    @param parent the parent frame (NULL => main app window)
-    @param modal  true to make messagebox modal
-    @param YesDefault true if Yes button is default, false for No as default
-    @return true if Yes was selected
-  */
-bool MDialog_YesNoDialog(String const &message,
-                         MWindow *parent = NULL,
-                         bool modal = false,
-                         bool YesDefault = true);
-
-
 /**
   Ask the user to enter some text and remember the last value in the "Prompt"
   section of the global config object in the key named "key" if it's !NULL:

@@ -8,14 +8,21 @@
  *******************************************************************/
 
 #include   "Mpch.h"  // config.h for correct evaluation of Python.h
-#include   "Mcommon.h"
-#include   "Profile.h"
-#include   "MApplication.h"
-#include   "gui/wxMApp.h"
-#include   "Python.h"
-#include   "PythonHelp.h"
-#include   "strutil.h"
+
+#ifndef   USE_PCH
+#  include   "Mcommon.h"
+#  include   "Profile.h"
+#  include   "MApplication.h"
+#  include   "gui/wxMApp.h"
+#  include   "strutil.h"
+#endif   // USE_PCH
+
+#include   "Mdefaults.h"
+
+#include   <Python.h>
 #include   <string.h>
+
+#include   "PythonHelp.h"
 
 // from InitPython.cc:
 extern PyObject *Python_MinitModule;
@@ -64,13 +71,17 @@ PythonCallback(const char *name, int def, void *obj, const char *classname,
                ProfileBase *profile, const char *argfmt,
                ...)
 {
-   const char
-      *realname;
+   String
+      realname;
    int
       result = 0;
    PyObject
       *parg;
-   
+
+   // first check if Python is not disabled
+   if ( !READ_APPCONFIG(MC_USEPYTHON) )
+      return def;
+
    va_list argslist;
 
    if(argfmt && *argfmt != '\0')
@@ -84,9 +95,9 @@ PythonCallback(const char *name, int def, void *obj, const char *classname,
       parg = NULL;
 
    if(profile)
-      realname = profile->readEntry(name,NULL);
-   if(! profile || realname == NULL)
-      realname = mApplication.GetProfile()->readEntry(name,NULL);
+      realname = profile->readEntry(name);
+   if(strutil_isempty(realname))
+      realname = Profile::GetAppConfig()->READ_ENTRY(name);
 
    if(strutil_isempty(realname))
       return def;    // no callback called, default value 0
@@ -129,7 +140,7 @@ bool PyH_CallFunction(const char *func,
    String
       functionName = func;
    
-   if(index(func,'.'))  // function name contains module name
+   if(strchr(func,'.') != NULL)  // function name contains module name
    {
       String modname;
       const char *cptr = func;
@@ -164,7 +175,8 @@ bool PyH_CallFunction(const char *func,
       presult =
          PyObject_CallFunction(function,"sO",name,object);
       
-   return PyH_ConvertResult(presult, resultfmt, result);     /* expr val to C */
+   // expr val to C
+   return PyH_ConvertResult(presult, resultfmt, result) != 0;
 }
 
 bool PyH_CallFunctionVa(const char *func,
@@ -183,7 +195,7 @@ bool PyH_CallFunctionVa(const char *func,
    String
       functionName = func;
    
-   if(index(func,'.'))  // function name contains module name
+   if(strchr(func,'.') != NULL)  // function name contains module name
    {
       String modname;
       const char *cptr = func;
@@ -212,7 +224,9 @@ bool PyH_CallFunctionVa(const char *func,
    
    object = PyH_makeObjectFromPointer(obj, classname);
    presult = PyObject_CallFunction(function,"sO",name,object);   
-   return PyH_ConvertResult(presult, resultfmt, result);     /* expr val to C */
+
+   // expr val to C
+   return PyH_ConvertResult(presult, resultfmt, result) != 0;
 }
 
 

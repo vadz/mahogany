@@ -12,7 +12,29 @@
 #                                                                  #
 ####################################################################
 
-import String, MAppBase, MailFolder, Profile, Message
+import MString, MAppBase, MailFolder, Profile, Message
+
+# helper function: return the username
+def GetUserName():
+    import os
+    # try to find the username
+    if os.environ.has_key('USER'):          # this works for Unix
+        username = os.environ['USER']
+    else:
+        try:
+            # the best method under Windows is to just call the API
+            # function, but for this we must have this module installed
+            import win32api
+
+            username = win32api.GetUserName
+        except ImportError:
+            # ok, try the environment again
+            if os.environ.has_key('USERNAME'): # this works for NT
+                username = os.environ['USERNAME']
+            else:
+                username = "M user" # default...
+
+    return username
 
 ####################################################################
 #                                                                  #
@@ -21,9 +43,8 @@ import String, MAppBase, MailFolder, Profile, Message
 ####################################################################
 
 def Minit():
-    import os
-    msg = "Welcome, " + os.environ['USER'] +", to the wonderful world\nof M/Python integration!"
-    MAppBase.MDialog_Message(msg);
+    msg = "Welcome, " + GetUserName() + ", to the wonderful world\nof M/Python integration!"
+    MAppBase.MDialog_StatusMessage(msg)
 
 ####################################################################
 #                                                                  #

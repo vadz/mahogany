@@ -27,6 +27,7 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
 {
    m_ScrollbarsSet = false;
    m_EventId = -1;
+   m_bDirty = FALSE;
 }
 
 #ifdef __WXMSW__
@@ -132,28 +133,36 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       }
       else
          m_llist.Delete(1);
+      m_bDirty = TRUE;
       break;
    case WXK_BACK: // backspace
-      if(m_llist.MoveCursor(-1))
+      if(m_llist.MoveCursor(-1)) {
+         m_bDirty = TRUE;
          m_llist.Delete(1);
+      }
       break;
    case WXK_RETURN:
       m_llist.LineBreak();
+      m_bDirty = TRUE;
       break;
+
 #ifdef WXLAYOUT_DEBUG   
    case WXK_F1:
       m_llist.Debug();
       break;
-#endif 
+#endif
+      
    default:
       if(keyCode < 256 && keyCode >= 32)
       {
          String tmp;
          tmp += keyCode;
          m_llist.Insert(tmp);
+         m_bDirty = TRUE;
       }
       break;
    }
+
    Refresh();
    UpdateScrollbars();
 }

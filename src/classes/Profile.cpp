@@ -34,7 +34,6 @@
 #   include "gui/wxMFrame.h"
 
 #   include "Profile.h"
-#   include "Mdefaults.h"
 
 #   include "MApplication.h"
 #   include "gui/wxMApp.h"
@@ -46,6 +45,8 @@
 #  include "wx/fileconf.h"
 #endif
 
+#include "Mdefaults.h"
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -55,7 +56,7 @@
 // ----------------------------------------------------------------------------
 
 // static member variables
-FileConfig *Profile::appConfig = NULL;
+AppConfig *Profile::appConfig = NULL;
 
 /**
    Profile class, managing configuration options on a per class basis.
@@ -73,10 +74,11 @@ Profile::Profile(const String& appConfigFile)
 
    parentProfile = NULL;
 
-   fileConfig = mApplication.GetConfigManager().GetConfig(appConfigFile);
+   fileConfig = mApplication.GetConfigManager().GetConfig(appConfigFile, TRUE);
    isOk = fileConfig != NULL;
    if ( isOk )
-      appConfig = fileConfig;
+      appConfig = (AppConfig *)fileConfig;
+
    //  activate recording of configuration entries
    if ( READ_APPCONFIG(MC_RECORDDEFAULTS) )
       fileConfig->SetRecordDefaults(TRUE);
@@ -117,15 +119,15 @@ Profile::~Profile()
 }
 
 
-const char *
+String
 Profile::readEntry(const char *szKey, const char *szDefault) const
 {
    // config object must be created
    CHECK( fileConfig != NULL, "", "no fileConfig in Profile" );
 
-   const char *rc = NULL;
+   wxString rc;
 
-   rc = fileConfig->READ_ENTRY(szKey, (const char *)NULL);
+   fileConfig->READ_ENTRY(&rc, szKey, (const char *)NULL);
 
    if( strutil_isempty(rc) && parentProfile != NULL)
    {
@@ -134,31 +136,35 @@ Profile::readEntry(const char *szKey, const char *szDefault) const
 
    if( strutil_isempty(rc) && appConfig != NULL )
    {
-      String tmp = Str(appConfig->GET_PATH());
-      appConfig->SET_PATH(M_PROFILE_CONFIG_SECTION);
+      ProfilePathChanger ppc(appConfig, M_PROFILE_CONFIG_SECTION);
+
       appConfig->CHANGE_PATH(profileName.c_str());
-      rc = appConfig->READ_ENTRY(szKey, (const char *)NULL);
+      appConfig->READ_ENTRY(&rc, szKey, (const char *)NULL);
       if( strutil_isempty(rc))
       {
          appConfig->SET_PATH(M_PROFILE_CONFIG_SECTION);
-         rc = appConfig->READ_ENTRY(szKey, (const char *)NULL);
+         appConfig->READ_ENTRY(&rc, szKey, (const char *)NULL);
       }
-      appConfig->SET_PATH(tmp.c_str());
    }
 
-   if( strutil_isempty(rc))
+   if( strutil_isempty(rc) )
    {
       if(READ_APPCONFIG(MC_RECORDDEFAULTS) )
           fileConfig->WRITE_ENTRY(szKey,szDefault); // so default value can be recorded
       rc = szDefault;
    }
 
-   String dbgtmp = "Profile(" + profileName
-      + String(")::readEntry(")+String(szKey)
-      +") returned: " + (rc == NULL ? ((szDefault == NULL ? String("null"):String(szDefault)) + " (default)")
-                                      : String(rc));
-   DBGLOG(Str(dbgtmp));
-   return rc == NULL ? szDefault : rc;
+#  ifdef DEBUG
+      String dbgtmp = "Profile(" + profileName + String(")::readEntry(") +
+                      String(szKey) + ") returned: " + 
+                      (strutil_isempty(rc) ? (String(szDefault == NULL
+                                                    ? "null" : szDefault)
+                                             + " (default)")
+                                           : rc.c_str());
+      DBGLOG(Str(dbgtmp));
+#  endif
+
+   return rc;
 }
 
 int
@@ -168,11 +174,8 @@ Profile::readEntry(const char *szKey, int Default) const
       rc = Default;
    char
       *buf = strutil_strdup(strutil_ltoa(Default));
-   char const
-      * tmp;
    
-   tmp = readEntry(szKey,buf);
-   rc = tmp ? atoi(tmp) : 0;
+   rc = atoi(readEntry(szKey,buf));
    
    delete [] buf;
 
@@ -237,7 +240,7 @@ ConfigFileManager::~ConfigFileManager()
 }
 
 FileConfig *
-ConfigFileManager::GetConfig(String const &fileName)
+ConfigFileManager::GetConfig(String const &fileName, bool isApp)
 {
    FCDataList::iterator i;
 
@@ -252,7 +255,11 @@ ConfigFileManager::GetConfig(String const &fileName)
    newEntry->fileName = fileName;
 
 #  ifdef  USE_WXCONFIG
-   newEntry->fileConfig = GLOBAL_NEW wxFileConfig(Str(newEntry->fileName),wxString(""));
+      if ( isApp )
+         newEntry->fileConfig = GLOBAL_NEW AppConfig(newEntry->fileName);
+      else
+         newEntry->fileConfig = GLOBAL_NEW wxFileConfig(newEntry->fileName,
+                                                        wxString(""));
 #  else
       newEntry->fileConfig = GLOBAL_NEW FileConfig;
       newEntry->fileConfig->readFile(newEntry->fileName->c_str());
