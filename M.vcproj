@@ -130,7 +130,6 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="3"
-				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="TRUE"
 				OptimizeForWindowsApplication="TRUE"
@@ -363,6 +362,9 @@
 				</File>
 				<File
 					RelativePath=".\src\gui\wxMFrame.cpp">
+				</File>
+				<File
+					RelativePath=".\src\gui\wxMIMETreeDialog.cpp">
 				</File>
 				<File
 					RelativePath=".\src\gui\wxModulesDlg.cpp">
@@ -1695,6 +1697,9 @@
 			</File>
 			<File
 				RelativePath=".\include\MimePartCC.h">
+			</File>
+			<File
+				RelativePath=".\include\MIMETreeDialog.h">
 			</File>
 			<File
 				RelativePath=".\include\MimeType.h">
