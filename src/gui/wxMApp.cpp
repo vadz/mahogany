@@ -164,6 +164,10 @@ void wxMLogWindow::OnFrameDelete(wxFrame *frame)
 
 void wxMLogWindow::DoLog(wxLogLevel level, const wxChar *szString, time_t t)
 {
+   // close the splash screen as the very first thing because otherwise it
+   // would float on top of our message boxes
+   CloseSplash();
+
    if ( m_hasWindow && level == wxLOG_User )
    {
       // this will call wxLogWindow::DoLogString()
@@ -227,7 +231,7 @@ wxMApp::CanClose() const
    // but only if it was TRUE.
    if(m_CanClose)
       return m_CanClose;
-   
+
    // ask the user unless disabled
    if ( ! MDialog_YesNoDialog(_("Do you really want to exit Mahogany?"), m_topLevelFrame,
                             MDIALOG_YESNOTITLE, false,
@@ -245,7 +249,7 @@ wxMApp::CanClose() const
       if ( win->IsKindOf(CLASSINFO(wxMFrame)) && win != m_topLevelFrame)
       {
          wxMFrame *frame = (wxMFrame *)win;
-         
+
          if ( !IsOkToClose(frame) )
          {
             if ( !frame->CanClose() )
@@ -258,8 +262,8 @@ wxMApp::CanClose() const
       //      frame?
    }
 
-   
-   // We assume that we can always close the toplevel frame if we make 
+
+   // We assume that we can always close the toplevel frame if we make
    // it until here. Attemps to close the toplevel frame will lead to
    // this function being evaluated anyway. The frame itself does not
    // do any tests.
@@ -338,6 +342,10 @@ wxMApp::OnInit()
 #   error "don't know how to get the current locale on this platform."
 #endif // OS
 
+   // if we fail to load the msg catalog, remember it in this variable because
+   // we can't remember this in the profile yet - it is not yet created
+   bool failedToLoadMsgs = false;
+
    if ( hasLocale )
    {
       m_Locale = new wxLocale(locale, locale, NULL, false);
@@ -352,8 +360,21 @@ wxMApp::OnInit()
       #error "don't know where to find message catalogs on this platform"
 #endif // OS
       m_Locale->AddCatalogLookupPathPrefix(localePath);
-      m_Locale->AddCatalog("wxstd");
-      m_Locale->AddCatalog(M_APPLICATIONNAME);
+
+      // TODO should catch the error messages and save them for later
+      wxLogNull noLog;
+
+      bool ok = m_Locale->AddCatalog("wxstd");
+      ok |= m_Locale->AddCatalog(M_APPLICATIONNAME);
+
+      if ( !ok )
+      {
+         // better use English messages if msg catalog was not found
+         delete m_Locale;
+         m_Locale = NULL;
+
+         failedToLoadMsgs = true;
+      }
    }
    else
       m_Locale = NULL;
@@ -370,6 +391,35 @@ wxMApp::OnInit()
 
    if ( OnStartup() )
    {
+      // only now we can use profiles
+      if ( failedToLoadMsgs )
+      {
+         // if we can't load the msg catalog for the given locale once, don't
+         // try it again next time - the flag is stored in the profile in this
+         // key
+         wxString configPath;
+         configPath << "UseLocale_" << locale;
+
+         ProfileBase *profile = GetProfile();
+         if ( profile->readEntry(configPath, 1l) != 0l )
+         {
+            CloseSplash();
+
+            // the strings here are intentionally not translated
+            wxString msg;
+            msg.Printf("Impossible to load message catalog(s) for the "
+                       "locale '%s', do you want to retry next time?",
+                       locale);
+            if ( wxMessageBox(msg, "Error",
+                              wxICON_STOP | wxYES_NO) != wxYES )
+            {
+               profile->writeEntry(configPath, 0l);
+            }
+         }
+         //else: the user had previously answered "no" to the question above,
+         //      don't complain any more about missing catalogs
+      }
+
       // now we can create the log window
       if ( READ_APPCONFIG(MP_SHOWLOG) ) {
          (void)new wxMLogWindow(m_topLevelFrame, _("Mahogany : Activity Log"));
