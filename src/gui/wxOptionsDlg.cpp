@@ -119,6 +119,11 @@ extern const MPersMsgBox *M_MSGBOX_OPT_STOREREMOTENOW;
 // available fonts he has
 #define USE_FONT_DESC
 
+// define this to show IMAP look ahead setting to the user -- IMHO this is
+// normally unnecessary as the program should be smart enough to determine it
+// automatically
+//#define USE_IMAP_PREFETCH
+
 // ----------------------------------------------------------------------------
 // data
 // ----------------------------------------------------------------------------
@@ -203,8 +208,10 @@ enum ConfigFields
    ConfigField_WriteTimeout,
    ConfigField_CloseTimeout,
 #endif // USE_TCP_TIMEOUTS
+#ifdef USE_IMAP_PREFETCH
    ConfigField_LookAheadHelp,
    Configfield_IMAPLookAhead,
+#endif // USE_IMAP_PREFETCH
    ConfigField_RshHelp,
    ConfigField_RshTimeout,
    ConfigField_NetworkLast = ConfigField_RshTimeout,
@@ -982,11 +989,15 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Write timeout"),               Field_Number | Field_Global | Field_Advanced,    -1,                        },
    { gettext_noop("&Close timeout"),               Field_Number | Field_Global | Field_Advanced,    -1,                        },
 #endif // USE_TCP_TIMEOUTS
+#ifdef USE_IMAP_PREFETCH
    { gettext_noop("When Mahogany needs to fetch a header from IMAP server\n"
-                  "it may also fetch a couple of adjacent messages which\n"
+                  "it may also get a couple of adjacent messages which\n"
                   "will speed up the access to them if they are needed later\n"
-                  "Set this option to 0 to disable prefetching entirely"), Field_Message | Field_Global | Field_Advanced, -1 },
+                  "but can slow down retrieving the individual messages a bit\n"
+                  "\n"
+                  "Set this option to 0 to let Mahogany decide."), Field_Message | Field_Global | Field_Advanced, -1 },
    { gettext_noop("&Pre-fetch this many msgs"),    Field_Number | Field_Global | Field_Advanced,    -1,                        },
+#endif // USE_IMAP_PREFETCH
    { gettext_noop("If the RSH timeout below is greater than 0, Mahogany will\n"
                   "first try to connect to IMAP servers using rsh instead of\n"
                   "sending passwords in clear text. However, if the server\n"
@@ -1671,8 +1682,10 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_TCP_WRITETIMEOUT),
    CONFIG_ENTRY(MP_TCP_CLOSETIMEOUT),
 #endif // USE_TCP_TIMEOUTS
+#ifdef USE_IMAP_PREFETCH
    CONFIG_NONE(), // IMAP look ahead help
    CONFIG_ENTRY(MP_IMAP_LOOKAHEAD),
+#endif // USE_IMAP_PREFETCH
    CONFIG_NONE(), // rsh help
    CONFIG_ENTRY(MP_TCP_RSHTIMEOUT),
 
