@@ -51,7 +51,7 @@ EOF
 			# leave ULs as is
 			print OUT_HHC
 		}
-		elsif ( /^ HREF="([^"]+)">(.+)<\/A>$/ ) {
+		elsif ( /^ +HREF="([^"]+)">(.+)<\/A>$/ ) {
 			# entry body
 			if ( $in_entry ) {
 				print OUT_HHC <<EOF
@@ -67,7 +67,7 @@ EOF
 		}
 		else {
 			# what's this?
-			warn "Line $.: '$_' ignored.\n" unless /^$/
+			warn "Line $.: '$_' ignored.\n" unless /^$/ or /^<BR>$/
 		}
 	}
 }
