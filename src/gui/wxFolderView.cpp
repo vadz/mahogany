@@ -117,6 +117,9 @@ extern const MOption MP_USE_TRASH_FOLDER;
 // constants
 // ----------------------------------------------------------------------------
 
+static const int WXMENU_FVIEW_CONFIG_SORT = 3000;
+static const int WXMENU_FVIEW_RESET_SORT = 3001;
+
 static const char *wxFLC_ColumnNames[] =
 {
    gettext_noop("Status"),
@@ -351,6 +354,7 @@ public:
    //@{
    void OnSelected(wxListEvent& event);
    void OnColumnClick(wxListEvent& event);
+   void OnColumnRightClick(wxListEvent& event);
    void OnListKeyDown(wxListEvent& event);
    void OnActivated(wxListEvent& event);
 
@@ -796,6 +800,7 @@ BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
    EVT_MOTION(wxFolderListCtrl::OnMouseMove)
 
    EVT_LIST_COL_CLICK(-1, wxFolderListCtrl::OnColumnClick)
+   EVT_LIST_COL_RIGHT_CLICK(-1, wxFolderListCtrl::OnColumnRightClick)
    EVT_LIST_KEY_DOWN(-1, wxFolderListCtrl::OnListKeyDown)
 
    EVT_IDLE(wxFolderListCtrl::OnIdle)
@@ -1138,6 +1143,22 @@ void wxFolderListCtrl::OnActivated(wxListEvent& event)
    }
 }
 
+void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
+{
+   // TODO: add items to sort by this column in direct/reverse order
+   wxMenu menu;
+   menu.Append(WXMENU_FVIEW_RESET_SORT, _("&Don't sort at all"));
+   menu.Append(WXMENU_FVIEW_CONFIG_SORT, _("Configure &sort order..."));
+
+   if ( !READ_CONFIG(m_FolderView->GetProfile(), MP_MSGS_SORTBY) )
+   {
+      // we're already unsorted, this command doesn't make sense
+      menu.Enable(WXMENU_FVIEW_RESET_SORT, FALSE);
+   }
+
+   PopupMenu(&menu, event.GetPoint());
+}
+
 void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
 {
    mApplication->UpdateAwayMode();
@@ -1156,9 +1177,7 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
       return;
    }
 
-   // give an explanatory message as this stuff mayb e quite confusing
-   //
-   // FIXME: we should allow accessing the sort dialog more easily!
+   // give an explanatory message as this stuff may be quite confusing
    MDialog_Message
    (
       _("Clicking on the column sorts messages in the folder by this\n"
@@ -1166,7 +1185,8 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
         "sort direction\n"
         "\n"
         "Please use \"Sort\" button in the \"Folder View\" page of the\n"
-        "preferences dialog to configure other sorting options."),
+        "preferences dialog or right click a column to configure the\n"
+        "sorting options in more details."),
       GetFrame(this),
       MDIALOG_MSGTITLE,
       GetPersMsgBoxName(M_MSGBOX_EXPLAIN_COLUMN_CLICK)
@@ -3073,6 +3093,36 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
 
       case WXMENU_HELP_CONTEXT:
          mApplication->Help(MH_FOLDER_VIEW, GetWindow());
+         break;
+
+      case WXMENU_FVIEW_CONFIG_SORT:
+      case WXMENU_FVIEW_RESET_SORT:
+         if ( cmd == WXMENU_FVIEW_RESET_SORT )
+         {
+            // we try to keep our profiles tidy and clean, so first just delete
+            // the current sorting order
+            m_Profile->DeleteEntry(MP_MSGS_SORTBY);
+            if ( READ_CONFIG(m_Profile, MP_MSGS_SORTBY) )
+            {
+               // but it didn't help - our parent must have a non 0 sort order
+               // too, so we're forced to override it in our profile
+               m_Profile->writeEntry(MP_MSGS_SORTBY, 0l);
+            }
+         }
+         else if ( !ConfigureSorting(m_Profile, GetWindow()) )
+         {
+            // nothing changed
+            break;
+         }
+
+         // this will resort the messages refresh us a bit later
+         MEventManager::Send(
+                              new MEventOptionsChangeData
+                                  (
+                                    m_Profile,
+                                    MEventOptionsChangeData::Ok
+                                  )
+                            );
          break;
 
       default:

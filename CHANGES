@@ -6,6 +6,7 @@
 Release 0.64 '???' ???, 2001
 -------------------------------------------------------------------------------
 
+01.09.01 VZ: added sorting menu (right click a column in the folder view)
 30.08.01 VZ: added support for server-side sorting
 30.08.01 VZ: handle connection loss more gracefully
 25.08.01 VZ: auto select the next unread msg/folder with one key press

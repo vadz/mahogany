@@ -151,12 +151,12 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
                            (
                               this,
                               -1,
-                              _("\"Arrival order\" sorting order means that\n"
-                                "the messages are not sorted at all. Please\n"
+                              _("\"Arrival order\" sorting order means that "
+                                "the messages are not sorted at all. Please "
                                 "note that using any other sorting method may\n"
-                                "slow down the program significantly, especially\n"
-                                "for remote folders without server-side sorting\n"
-                                "support.")
+                                "slow down the program significantly, "
+                                "especially for remote folders without "
+                                "server-side sorting support.")
                            );
    msg->SetConstraints(c);
 
@@ -200,9 +200,10 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
              (
                this,
                -1,
-               _("Some IMAP servers support server side sorting. It may\n"
-                 "be much faster to use it in this case as it avoids\n"
-                 "having to download all messages just to sort them.")
+               _("Some IMAP servers support server side sorting. It may "
+                 "be much faster to use it in this case\n"
+                 "as it avoids having to download all messages just "
+                 "to sort them.")
              );
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
@@ -229,7 +230,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
              (
                this,
                -1,
-               _("When sorting by status, check the checkbox below to\n"
+               _("When sorting by status, check the checkbox below to "
                  "all messages when the status of one of them changes.\n"
                  "Please note that it may be quite slow for big folders.")
              );
@@ -248,7 +249,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
    c->height.AsIs();
    m_checkReSortOnChange->SetConstraints(c);
 
-   SetDefaultSize(7*wBtn, 45*hBtn);
+   SetDefaultSize(7*wBtn, 60*hBtn);
 
    m_wasChanged = false;
 
