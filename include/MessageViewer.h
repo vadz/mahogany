@@ -22,6 +22,7 @@ class ClickableInfo;
 
 #include "MModule.h"
 #include "MTextStyle.h"
+#include "MessageView.h"      // we use MessageView in inline funcs below
 
 // the message viewer module interface name
 #define MESSAGE_VIEWER_INTERFACE "MessageViewer"

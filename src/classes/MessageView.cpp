@@ -96,7 +96,6 @@ extern const MOption MP_AUTOCOLLECT_NAMED;
 extern const MOption MP_BROWSER;
 extern const MOption MP_BROWSER_INNW;
 extern const MOption MP_BROWSER_ISNS;
-extern const MOption MP_HIGHLIGHT_SIGNATURE;
 extern const MOption MP_HIGHLIGHT_URLS;
 extern const MOption MP_INCFAX_DOMAINS;
 extern const MOption MP_INCFAX_SUPPORT;
@@ -111,20 +110,12 @@ extern const MOption MP_MVIEW_TITLE_FMT;
 extern const MOption MP_MVIEW_FONT;
 extern const MOption MP_MVIEW_FONT_DESC;
 extern const MOption MP_MVIEW_FONT_SIZE;
-extern const MOption MP_MVIEW_FGCOLOUR;
-extern const MOption MP_MVIEW_BGCOLOUR;
-extern const MOption MP_MVIEW_SIGCOLOUR;
-extern const MOption MP_MVIEW_URLCOLOUR;
 extern const MOption MP_MVIEW_ATTCOLOUR;
-extern const MOption MP_MVIEW_QUOTED_COLOURIZE;
-extern const MOption MP_MVIEW_QUOTED_CYCLE_COLOURS;
-extern const MOption MP_MVIEW_QUOTED_COLOUR1;
-extern const MOption MP_MVIEW_QUOTED_COLOUR2;
-extern const MOption MP_MVIEW_QUOTED_COLOUR3;
-extern const MOption MP_MVIEW_QUOTED_MAXWHITESPACE;
-extern const MOption MP_MVIEW_QUOTED_MAXALPHA;
+extern const MOption MP_MVIEW_BGCOLOUR;
+extern const MOption MP_MVIEW_FGCOLOUR;
 extern const MOption MP_MVIEW_HEADER_NAMES_COLOUR;
 extern const MOption MP_MVIEW_HEADER_VALUES_COLOUR;
+extern const MOption MP_MVIEW_URLCOLOUR;
 extern const MOption MP_PLAIN_IS_TEXT;
 extern const MOption MP_RFC822_IS_TEXT;
 extern const MOption MP_SHOWHEADERS;
@@ -137,14 +128,6 @@ extern const MOption MP_TIFF2PS;
 
 extern const MPersMsgBox *M_MSGBOX_GFX_NOT_INLINED;
 extern const MPersMsgBox *M_MSGBOX_ASK_URL_BROWSER;
-
-// ----------------------------------------------------------------------------
-// constants
-// ----------------------------------------------------------------------------
-
-// some special level values
-static const size_t LEVEL_INVALID = (size_t)-1;
-static const size_t LEVEL_SIG = (size_t)-2;
 
 // ----------------------------------------------------------------------------
 // helper functions
@@ -264,7 +247,9 @@ private:
 class TransparentFilter : public ViewFilter
 {
 public:
-   TransparentFilter() : ViewFilter(NULL, true) { }
+   TransparentFilter(MessageView *msgView) : ViewFilter(msgView, NULL, true)
+   {
+   }
 
 protected:
    virtual void DoProcess(String& text,
@@ -433,18 +418,11 @@ MessageView::AllProfileValues::AllProfileValues()
    fontFamily = -1;
    fontSize = -1;
 
-   quotedColourize =
-   quotedCycleColours = false;
-
-   quotedMaxWhitespace =
-   quotedMaxAlpha = 0;
-
    showHeaders =
    inlineRFC822 =
    inlinePlainText =
    showFaces =
-   highlightURLs =
-   highlightSig = false;
+   highlightURLs = false;
 
    inlineGFX = -1;
    showExtImages = false;
@@ -463,16 +441,12 @@ MessageView::AllProfileValues::operator==(const AllProfileValues& other) const
    #define CMP(x) (x == other.x)
 
    return CMP(msgViewer) && CMP(BgCol) && CMP(FgCol) && CMP(AttCol) &&
-          CMP(QuotedCol[0]) && CMP(QuotedCol[1]) && CMP(QuotedCol[2]) &&
-          CMP(quotedColourize) && CMP(quotedCycleColours) &&
-          CMP(quotedMaxWhitespace) && CMP(quotedMaxAlpha) &&
           CMP(HeaderNameCol) && CMP(HeaderValueCol) &&
           CMP(fontDesc) &&
           (!fontDesc.empty() || (CMP(fontFamily) && CMP(fontSize))) &&
           CMP(showHeaders) && CMP(inlineRFC822) && CMP(inlinePlainText) &&
-          CMP(highlightURLs) && CMP(highlightSig) && CMP(inlineGFX) &&
-          CMP(showExtImages) &&
-          (highlightURLs || CMP(UrlCol)) && (highlightSig || CMP(SigCol)) &&
+          CMP(inlineGFX) && CMP(showExtImages) &&
+          CMP(highlightURLs) && (!highlightURLs || CMP(UrlCol)) &&
           // even if these fields are different, they don't change our
           // appearance, so ignore them for the purpose of this comparison
 #if 0
@@ -698,7 +672,7 @@ MessageView::InitializeViewFilters()
    // always insert the terminating, "do nothing", filter at the end
    m_filters = new ViewFilterNode
                    (
-                     new TransparentFilter,
+                     new TransparentFilter(this),
                      ViewFilter::Priority_Lowest,
                      _T(""),
                      NULL
@@ -739,7 +713,8 @@ MessageView::InitializeViewFilters()
                if ( prio >= node->GetPriority() )
                {
                   // create the new filter
-                  ViewFilter *filter = filterFactory->Create(node->GetFilter());
+                  ViewFilter *
+                     filter = filterFactory->Create(this, node->GetFilter());
 
                   // and insert it here
                   ViewFilterNode *nodeNew = new ViewFilterNode
@@ -1007,25 +982,13 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    GET_COLOUR_FROM_PROFILE(settings->BgCol, BGCOLOUR);
 
    wxColour col; // used by the macro
-   GET_COLOUR_FROM_PROFILE_IF_NOT_FG(UrlCol, URLCOLOUR);
-   GET_COLOUR_FROM_PROFILE_IF_NOT_FG(SigCol, SIGCOLOUR);
    GET_COLOUR_FROM_PROFILE_IF_NOT_FG(AttCol, ATTCOLOUR);
-   GET_COLOUR_FROM_PROFILE_IF_NOT_FG(QuotedCol[0], QUOTED_COLOUR1);
-   GET_COLOUR_FROM_PROFILE_IF_NOT_FG(QuotedCol[1], QUOTED_COLOUR2);
-   GET_COLOUR_FROM_PROFILE_IF_NOT_FG(QuotedCol[2], QUOTED_COLOUR3);
+   GET_COLOUR_FROM_PROFILE_IF_NOT_FG(UrlCol, URLCOLOUR);
    GET_COLOUR_FROM_PROFILE_IF_NOT_FG(HeaderNameCol, HEADER_NAMES_COLOUR);
    GET_COLOUR_FROM_PROFILE_IF_NOT_FG(HeaderValueCol, HEADER_VALUES_COLOUR);
 
    #undef GET_COLOUR_FROM_PROFILE
    #undef GET_COLOUR_FROM_PROFILE_IF_NOT_FG
-
-   settings->quotedColourize =
-       READ_CONFIG_BOOL(profile, MP_MVIEW_QUOTED_COLOURIZE);
-   settings->quotedCycleColours =
-       READ_CONFIG_BOOL(profile, MP_MVIEW_QUOTED_CYCLE_COLOURS);
-   settings->quotedMaxWhitespace =
-       READ_CONFIG_BOOL(profile, MP_MVIEW_QUOTED_MAXWHITESPACE);
-   settings->quotedMaxAlpha = READ_CONFIG(profile,MP_MVIEW_QUOTED_MAXALPHA);
 
    settings->msgViewer = READ_CONFIG_TEXT(profile, MP_MSGVIEW_VIEWER);
 
@@ -1039,8 +1002,6 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    settings->showHeaders = READ_CONFIG_BOOL(profile, MP_SHOWHEADERS);
    settings->inlinePlainText = READ_CONFIG_BOOL(profile, MP_PLAIN_IS_TEXT);
    settings->inlineRFC822 = READ_CONFIG_BOOL(profile, MP_RFC822_IS_TEXT);
-   settings->highlightURLs = READ_CONFIG_BOOL(profile, MP_HIGHLIGHT_URLS);
-   settings->highlightSig = READ_CONFIG_BOOL(profile, MP_HIGHLIGHT_SIGNATURE);
 
    // we set inlineGFX to 0 if we don't inline graphics at all and to the
    // max size limit of graphics to show inline otherwise (-1 if no limit)
@@ -1059,6 +1020,8 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
    settings->autocollectNamed =  READ_CONFIG(profile, MP_AUTOCOLLECT_NAMED);
    settings->autocollectBookName = READ_CONFIG_TEXT(profile, MP_AUTOCOLLECT_ADB);
    settings->showFaces = READ_CONFIG_BOOL(profile, MP_SHOW_XFACES);
+
+   settings->highlightURLs = READ_CONFIG_BOOL(profile, MP_HIGHLIGHT_URLS);
 
    // these settings are used under Unix only
 #ifdef OS_UNIX
@@ -1502,53 +1465,6 @@ MessageView::ShowHeaders()
 // MessageView text part processing
 // ----------------------------------------------------------------------------
 
-size_t
-MessageView::GetQuotedLevel(const wxChar *text) const
-{
-   size_t qlevel = strutil_countquotinglevels
-                   (
-                     text,
-                     m_ProfileValues.quotedMaxWhitespace,
-                     m_ProfileValues.quotedMaxAlpha
-                   );
-
-   // note that qlevel is counted from 1, really, as 0 means unquoted and that
-   // GetQuoteColour() relies on this
-   if ( qlevel > QUOTE_LEVEL_MAX )
-   {
-      if ( m_ProfileValues.quotedCycleColours )
-      {
-         // cycle through the colours: use 1st level colour for QUOTE_LEVEL_MAX
-         qlevel = (qlevel - 1) % QUOTE_LEVEL_MAX + 1;
-      }
-      else
-      {
-         // use the same colour for all levels deeper than max
-         qlevel = QUOTE_LEVEL_MAX;
-      }
-   }
-
-   return qlevel;
-}
-
-wxColour MessageView::GetQuoteColour(size_t qlevel) const
-{
-   if ( qlevel == LEVEL_SIG )
-   {
-      return m_ProfileValues.SigCol;
-   }
-
-   if ( qlevel-- == 0 )
-   {
-      return m_ProfileValues.FgCol;
-   }
-
-   CHECK( qlevel < QUOTE_LEVEL_MAX, wxNullColour,
-          _T("MessageView::GetQuoteColour(): invalid quoting level") );
-
-   return m_ProfileValues.QuotedCol[qlevel];
-}
-
 void MessageView::ShowTextPart(const MimePart *mimepart)
 {
    // as we're going to need its contents, we'll have to download it: check if
@@ -1622,182 +1538,13 @@ void MessageView::ShowTextPart(const MimePart *mimepart)
 
    style.SetTextColour(m_ProfileValues.FgCol);
 
-#if 0
-   String url,
-          before;
-
-   size_t levelBeforeURL = LEVEL_INVALID;
-
-   do
-   {
-      if ( m_ProfileValues.highlightURLs )
-      {
-         // extract the first URL into url string and put all preceding
-         // text into before, textPart is updated to contain only the text
-         // after the URL
-         before = strutil_findurl(textPart, url);
-      }
-      else // no URL highlighting
-      {
-         before = textPart;
-
-         textPart.clear();
-      }
-
-      if ( m_ProfileValues.quotedColourize )
-      {
-         size_t level;
-
-         // if we have just inserted an URL, restore the same level we were
-         // using before as otherwise foo in a line like "> URL foo" wouldn't
-         // be highlighted correctly
-         if ( levelBeforeURL != LEVEL_INVALID )
-         {
-            level = levelBeforeURL;
-            levelBeforeURL = LEVEL_INVALID;
-         }
-         else // no preceding URL, we're really at the start of line
-         {
-            level = GetQuotedLevel(before);
-         }
-
-         style.SetTextColour(GetQuoteColour(level));
-
-         // the string shouldn't be shared as only we use it and, although the
-         // cast is still ugly and dangerous, it should be used here as it
-         // allows us to avoid copying potentially huge strings below but to
-         // just insert '\0' as needed
-
-         // lineCur is the start of the current line, lineNext of the next one
-         wxChar *lineCur = (wxChar *)before.c_str();
-         wxChar *lineNext = wxStrchr(lineCur, '\n');
-         while ( lineNext )
-         {
-            // skip '\n'
-            lineNext++;
-
-            size_t levelNew = LEVEL_INVALID;
-
-            // everything after signature should be in sig colour, so don't
-            // bother calculating the level nor changing it
-            if ( level == LEVEL_SIG )
-            {
-               levelNew = LEVEL_SIG;
-            }
-            else if ( m_ProfileValues.highlightSig )
-            {
-               // check for possible signature start
-               if ( lineNext[0] == '-' && lineNext[1] == '-' )
-               {
-                  // although normally signature delimiter is just "--", allow for
-                  // more dashes as people often put 4 or even 75 of them
-                  const wxChar *p = lineNext + 2;
-                  if ( *p == ' ' )
-                  {
-                     // "-- " is also a valid separator
-                     p++;
-                  }
-                  else // maybe "---...---"?
-                  {
-                     while ( *p == '-' )
-                        p++;
-                  }
-
-                  // but we must have only dashes until the end of string - and it
-                  // must not be end of text
-                  if ( p[0] == '\r' && p[1] == '\n' )
-                  {
-                     // this looks like the signature start, but is it? do some
-                     // sanity checks: it shouldn't be just a first occurence
-                     // of "--" if it is used as a separator of a section, for
-                     // example, so check that no more of them occurs at the
-                     // beginning of the line in the rest of the message - but
-                     // only do it if we're reasonably close to its end because
-                     // a signature can't be that far from it and it would be
-                     // very inefficient to grep a multi megabyte message in
-                     // vain
-                     if ( before.length() - (p - before.c_str()) < 0x200 &&
-                           textPart.length() < 0x200 )
-                     {
-                        static const wxChar *SIG_END_MARKER = _T("--\r\n");
-                        if ( !wxStrstr(p + 1, SIG_END_MARKER) &&
-                              !wxStrstr(textPart, SIG_END_MARKER) )
-                        {
-                           // Check that there is not another sig marker below
-                           static const wxChar *OTHER_SIG_END_MARKER = _T("-- \r\n");
-                           if ( !wxStrstr(p + 1, OTHER_SIG_END_MARKER) &&
-                                 !wxStrstr(textPart, OTHER_SIG_END_MARKER) )
-                           {
-                              // ok, it passed all our empirical tests
-                              levelNew = LEVEL_SIG;
-                           }
-                        }
-                     }
-                  }
-               }
-            }
-
-            // calcuate the quoting level for this line if we're not in
-            // signature
-            if ( levelNew == LEVEL_INVALID )
-            {
-               levelNew = GetQuotedLevel(lineNext);
-            }
-
-            if ( levelNew != level )
-            {
-               char chSave = *lineNext;
-               *lineNext = '\0';
-
-               m_viewer->InsertText(lineCur, style);
-
-               *lineNext = chSave;
-
-               level = levelNew;
-               style.SetTextColour(GetQuoteColour(level));
-
-               lineCur = lineNext;
-            }
-            //else: same level as the previous line, just continue
-
-            if ( !*lineNext )
-            {
-               // nothing left
-               break;
-            }
-
-            // FIXME: why +1 (bug?)?
-            lineNext = wxStrchr(lineNext + 1, '\n');
-         }
-
-         if ( lineCur )
-         {
-            m_viewer->InsertText(lineCur, style);
-         }
-
-         // remember the current quoting level to be able to restore it later
-         levelBeforeURL = level;
-      }
-      else // no quoted text colourizing
-      {
-         m_viewer->InsertText(before, style);
-      }
-
-      if ( !strutil_isempty(url) )
-      {
-         // we use the URL itself for text here
-         m_viewer->InsertURL(url, url);
-      }
-   }
-   while ( !textPart.empty() );
-#else
+   // show the text by passing it to all the registered view filters
    if ( !m_filters )
    {
       InitializeViewFilters();
    }
 
    m_filters->GetFilter()->Process(textPart, m_viewer, style);
-#endif // 0/1
 }
 
 // ----------------------------------------------------------------------------

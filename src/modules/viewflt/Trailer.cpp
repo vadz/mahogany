@@ -35,7 +35,8 @@
 class TrailerFilter : public ViewFilter
 {
 public:
-   TrailerFilter(ViewFilter *next, bool enable) : ViewFilter(next, enable) { }
+   TrailerFilter(MessageView *msgView, ViewFilter *next, bool enable)
+      : ViewFilter(msgView, next, enable) { }
 
 protected:
    virtual void DoProcess(String& text,
@@ -89,15 +90,12 @@ TrailerFilter::DoProcess(String& text,
       //
       // (a) checking that it consists solely of delimiter characters
       //     if there is a chance that this is a delimiter line
-      while ( *pc != '\n' && pc >= start )
+      while ( chDel != '\0' && *pc != '\n' && pc >= start )
       {
          if ( *pc-- != chDel )
          {
             // it's not a delimiter line, finally
             chDel = '\0';
-
-            // we can go faster now
-            break;
          }
       }
 

@@ -25,8 +25,17 @@
 #endif //USE_PCH
 
 #include "MTextStyle.h"
-
 #include "ViewFilter.h"
+#include "MessageView.h"
+
+#include "miscutil.h"         // for GetColourByName()
+
+// ----------------------------------------------------------------------------
+// options we use here
+// ----------------------------------------------------------------------------
+
+extern const MOption MP_HIGHLIGHT_SIGNATURE;
+extern const MOption MP_MVIEW_SIGCOLOUR;
 
 // ----------------------------------------------------------------------------
 // Signature declaration
@@ -35,20 +44,56 @@
 class SignatureFilter : public ViewFilter
 {
 public:
-   SignatureFilter(ViewFilter *next, bool enable) : ViewFilter(next, enable) { }
+   SignatureFilter(MessageView *msgView, ViewFilter *next, bool enable)
+      : ViewFilter(msgView, next, enable)
+   {
+      ReadOptions(msgView->GetProfile());
+   }
 
 protected:
    virtual void DoProcess(String& text,
                           MessageViewer *viewer,
                           MTextStyle& style);
+
+   // fill m_options using the values from the given profile
+   void ReadOptions(Profile *profile);
+
+   struct Options
+   {
+      // the colour to use for signatures
+      wxColour SigCol;
+   } m_options;
 };
 
 // ============================================================================
-// implementation
+// SignatureFilter implementation
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// SignatureFilter
+// SignatureFilter options
+// ----------------------------------------------------------------------------
+
+void
+SignatureFilter::ReadOptions(Profile *profile)
+{
+   // a macro to make setting many colour options less painful
+   #define GET_COLOUR_FROM_PROFILE(col, name) \
+      GetColourByName(&col, \
+                      READ_CONFIG(profile, MP_MVIEW_##name), \
+                      GetStringDefault(MP_MVIEW_##name))
+
+   GET_COLOUR_FROM_PROFILE(m_options.SigCol, SIGCOLOUR);
+
+   #undef GET_COLOUR_FROM_PROFILE
+
+   if ( !READ_CONFIG_BOOL(profile, MP_HIGHLIGHT_SIGNATURE) )
+   {
+      Enable(false);
+   }
+}
+
+// ----------------------------------------------------------------------------
+// SignatureFilter work function
 // ----------------------------------------------------------------------------
 
 // this filter has a high priority as it should be normally applied before
@@ -128,7 +173,7 @@ SignatureFilter::DoProcess(String& text,
    {
       // and now show the trailer in special style
       wxColour colOld = style.GetTextColour();
-      style.SetTextColour(*wxBLUE);
+      style.SetTextColour(m_options.SigCol);
 
       m_next->Process(signature, viewer, style);
 

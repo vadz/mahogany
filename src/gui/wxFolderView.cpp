@@ -1372,7 +1372,7 @@ void wxFolderMsgWindow::OnToggleButton(wxCommandEvent& event)
 {
    const int n = event.GetId() - TglButton_First;
 
-   CHECK_RET( n >= 0 && (size_t)n < m_namesViewers.GetCount(),
+   CHECK_RET( n >= 0 && (size_t)n < m_namesFilters.GetCount(),
               _T("invalid filter toggled?") );
 
    Profile_obj profile(m_folderView->GetFolderProfile());

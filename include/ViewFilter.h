@@ -15,6 +15,8 @@
 #define _VIEWFILTER_H_
 
 #include "MModule.h"
+
+class MessageView;
 class MessageViewer;
 class MTextStyle;
 
@@ -72,11 +74,12 @@ public:
       The next filter is never NULL except for the special last filter (i.e.
       the one with Priority_Last) installed by MessageView itself.
 
+      @param msgView the message view we're associated with
       @param next the next filter in the chain
       @param enable true to enable the filter initially, false to disable it
     */
-   ViewFilter(ViewFilter *next, bool enable)
-      { m_next = next; m_active = enable; }
+   ViewFilter(MessageView *msgView, ViewFilter *next, bool enable)
+      { m_msgView = msgView; m_next = next; m_active = enable; }
 
    /// virtual dtor for any base class
    virtual ~ViewFilter() { }
@@ -126,6 +129,9 @@ protected:
                           MessageViewer *viewer,
                           MTextStyle& style) = 0;
 
+   /// the message view we're associated with
+   MessageView *m_msgView;
+
    /// pointer to the next filter or NULL if this is the last one
    ViewFilter *m_next;
 
@@ -149,7 +155,7 @@ public:
    virtual bool GetDefaultState() const = 0;
 
    /// creates the new filter object, to be deleted by the caller
-   virtual ViewFilter *Create(ViewFilter *next) const = 0;
+   virtual ViewFilter *Create(MessageView *msgView, ViewFilter *next) const = 0;
 };
 
 /**
@@ -167,8 +173,9 @@ public:
    public:                                                                 \
       virtual int GetPriority() const { return prio; }                     \
       virtual bool GetDefaultState() const { return state; }               \
-      virtual ViewFilter *Create(ViewFilter *next) const                   \
-         { return new cname(next, state); }                                \
+      virtual ViewFilter *Create(MessageView *msgView,                     \
+                                 ViewFilter *next) const                   \
+         { return new cname(msgView, next, state); }                       \
                                                                            \
       MMODULE_DEFINE();                                                    \
       DEFAULT_ENTRY_FUNC;                                                  \

@@ -33,7 +33,8 @@
 class Rot13Filter : public ViewFilter
 {
 public:
-   Rot13Filter(ViewFilter *next, bool enable) : ViewFilter(next, enable) { }
+   Rot13Filter(MessageView *msgView, ViewFilter *next, bool enable)
+      : ViewFilter(msgView, next, enable) { }
 
 protected:
    virtual void DoProcess(String& text,

@@ -44,10 +44,6 @@ class ProcessInfo;
 
 WX_DEFINE_ARRAY(ProcessInfo *, ArrayProcessInfo);
 
-// the max quoting level for which we have unique colours (after that we reuse
-// them)
-#define QUOTE_LEVEL_MAX 3
-
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -67,8 +63,8 @@ enum
 };
 
 // ----------------------------------------------------------------------------
-// MessageView: this class does MIME handling and uses MessageViewer to really
-//              show things on screen
+// MessageView: this class does MIME handling and uses ViewFilters (which, in
+//              turn, use MessageViewer) to really show things on the screen
 // ----------------------------------------------------------------------------
 
 class MessageView : public MEventReceiver
@@ -236,6 +232,20 @@ public:
    /// return a descriptive label for this MIME part
    static String GetLabelFor(const MimePart *mimepart);
 
+   /** @name Accessors
+
+       Some trivial accessors
+    */
+   //@{
+
+   /// get the profile to read settings from: DO NOT CALL DecRef() ON RESULT
+   Profile *GetProfile() const;
+
+   /// get the folder we use: DO NOT CALL DecRef() ON RESULT
+   ASMailFolder *GetFolder() const { return m_asyncFolder; }
+
+   //@}
+
 protected:
    /** @name Initialization
     */
@@ -262,20 +272,6 @@ protected:
    /// update GUI to show the new viewer window
    virtual void OnViewerChange(const MessageViewer *viewerOld,
                                const MessageViewer *viewerNew) = 0;
-
-   //@}
-
-   /** @name Accessors
-
-       Some trivial accessors
-    */
-   //@{
-
-   /// get the profile to read settings from: DO NOT CALL DecRef() ON RESULT
-   Profile *GetProfile() const;
-
-   /// get the folder we use: DO NOT CALL DecRef() ON RESULT
-   ASMailFolder *GetFolder() const { return m_asyncFolder; }
 
    //@}
 
@@ -366,12 +362,6 @@ protected:
 
    /// show an inline image
    void ShowImage(const MimePart *part);
-
-   /// return the quoting level of this line, 0 if unquoted
-   size_t GetQuotedLevel(const wxChar *text) const;
-
-   /// return the colour to use for the given quoting level
-   wxColour GetQuoteColour(size_t qlevel) const;
 
    /// return the clickable info object (basicly a label) for this part
    ClickableInfo *GetClickableInfo(const MimePart *part) const;
@@ -488,9 +478,7 @@ private:
       /// Background and foreground colours, colours for URLs and headers
       wxColour BgCol,
                FgCol,
-               UrlCol,           // URL colour (used only if highlightURLs)
-               AttCol,
-               SigCol,           // signature colour (if highlightSig)
+               AttCol,           // attachment colour
                HeaderNameCol,
                HeaderValueCol;
 
@@ -504,71 +492,54 @@ private:
       int fontSize;
       //@}
 
-      /// @name URL highlighting and text quoting colourizing data
-      //@{
-
-      /// the colours for quoted text (only used if quotedColourize)
-      wxColour QuotedCol[QUOTE_LEVEL_MAX];
-
-      /// max number of whitespaces before >
-      int quotedMaxWhitespace;
-
-      /// max number of A-Z before >
-      int quotedMaxAlpha;
-
-      /// process quoted text colourizing?
-      bool quotedColourize:1;
-
-      /// if there is > QUOTE_LEVEL_MAX levels of quoting, cycle colours?
-      bool quotedCycleColours:1;
-
-      /// highlight URLs?
-      bool highlightURLs:1;
-
-      /// highlight the signature?
-      bool highlightSig:1;
-
-      //@}
-
       /// @name MIME options
       //@{
 
       /// show all headers?
-      bool showHeaders;
+      bool showHeaders:1;
 
       /// inline MESSAGE/RFC822 attachments?
-      bool inlineRFC822;
+      bool inlineRFC822:1;
 
       /// inline TEXT/PLAIN attachments?
-      bool inlinePlainText;
+      bool inlinePlainText:1;
 
       /// max size of inline graphics: 0 if never inline at all, -1 if no limit
       long inlineGFX;
 
       /// follow the links to external images in the HTML messages?
-      bool showExtImages;
+      bool showExtImages:1;
 
       /// Show XFaces?
-      bool showFaces;
+      bool showFaces:1;
 
       //@}
 
       /// @name URL viewing
       //@{
+
+      /// highlight the URLs in the message?
+      bool highlightURLs;
+
+      /// the colour to use for URL highlighting (if highlightURLs is true)
+      wxColour UrlCol;
+
       /// URL viewer
       String browser;
 
 #ifdef OS_UNIX
       /// Is URL viewer of the netscape variety?
-      bool browserIsNS;
+      bool browserIsNS:1;
 #endif // Unix
 
       /// open netscape in new window?
-      bool browserInNewWindow;
+      bool browserInNewWindow:1;
+
       //@}
 
       /// @name Address autocollection
       //@{
+
       /// Autocollect email addresses?
       int autocollect;
 
@@ -580,6 +551,7 @@ private:
 
       /// Name of the ADB book to use for autocollect.
       String autocollectBookName;
+
       //@}
 
       AllProfileValues();
