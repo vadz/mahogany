@@ -4446,7 +4446,14 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
 
 void MailFolderCC::OnNewMail()
 {
-   CHECK_RET( m_MailStream, "OnNewMail: folder is closed" );
+   if ( !m_MailStream )
+   {
+      // the folder could have been closed after mm_exists() had been
+      // generated: this happens, in particular, when opening an invalid MBX
+      // folder as c-client first generates mm_exists() and then realizes that
+      // the folder is corrupt and closes it!
+      return;
+   }
 
    // c-client is not reentrant, this is why we have to call this function
    // when we are not inside any c-client call!
