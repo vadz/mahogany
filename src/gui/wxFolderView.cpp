@@ -474,7 +474,8 @@ wxFolderListCtrl::GetFocusedUId(void) const
    if ( asmf )
    {
       HeaderInfoList *hil = asmf->GetHeaders();
-      ASSERT(hil);
+      if(! hil) // if there is no listing
+         return uid;
       const HeaderInfo *hi = NULL;
       long item = -1;
       item = GetNextItem(item, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
