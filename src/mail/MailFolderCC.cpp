@@ -3053,8 +3053,8 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit)
          pgm->msgno->first = 1;
          pgm->msgno->last = GetMessageCount();
 
-         pgm->not = mail_newsearchpgmlist();
-         pgm->not->pgm = pgmReal;
+         pgm->cc_not = mail_newsearchpgmlist();
+         pgm->cc_not->pgm = pgmReal;
       }
 
       // the m_SearchMessagesFound array is filled from mm_searched
