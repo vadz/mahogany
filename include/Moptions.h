@@ -217,6 +217,7 @@ extern const MOption MP_RFC822_IS_TEXT;
 extern const MOption MP_SHOW_XFACES;
 extern const MOption MP_INLINE_GFX;
 extern const MOption MP_INLINE_GFX_SIZE;
+extern const MOption MP_MSGVIEW_SHOWBAR;
 extern const MOption MP_MSGVIEW_VIEWER;
 extern const MOption MP_MSGVIEW_HEADERS;
 extern const MOption MP_MSGVIEW_ALL_HEADERS;
@@ -789,6 +790,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_INLINE_GFX_NAME         "InlineGraphics"
 /// limit size for inline graphics
 #define   MP_INLINE_GFX_SIZE_NAME     "InlineGraphicsSize"
+/// show viewer bar in the message view?
+#define MP_MSGVIEW_SHOWBAR_NAME "ShowViewerBar"
 /// which viewer to use in the message view?
 #define MP_MSGVIEW_VIEWER_NAME "MsgViewer"
 /// which headers to show in the message view?
@@ -1539,6 +1542,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_INLINE_GFX_DEFVAL       1
 /// limit size for inline graphics in Kb (-1 for no limit)
 #define   MP_INLINE_GFX_SIZE_DEFVAL  100
+/// show viewer bar in the message view?
+#define MP_MSGVIEW_SHOWBAR_DEFVAL 1
 /// which viewer to use in the message view?
 #define MP_MSGVIEW_VIEWER_DEFVAL "LayoutViewer"
 /// which headers to show in the message view?

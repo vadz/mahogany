@@ -40,6 +40,8 @@
 #  include <wx/menu.h>
 
 #  include "gui/wxOptionsDlg.h"
+
+#  include "wx/stattext.h"
 #endif //USE_PCH
 
 #include "Mdefaults.h"
@@ -255,7 +257,9 @@ public:
 
    virtual void Create(MessageView *msgView, wxWindow *parent)
    {
-      m_window = new wxWindow(parent, -1);
+      m_window = new wxStaticText(parent, -1, _("No message"),
+                                  wxDefaultPosition, wxDefaultSize,
+                                  wxALIGN_CENTER);
    }
 
    // operations

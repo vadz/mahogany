@@ -561,7 +561,7 @@ else
 fi
 
 
-# From configure.in Id: configure.in,v 1.245 2001/10/26 21:05:55 vadz Exp 
+# From configure.in Id: configure.in,v 1.246 2001/11/06 14:16:52 vadz Exp 
 
 rm -f conftestdata
 if ln -s X conftestdata 2>/dev/null
@@ -4356,27 +4356,28 @@ esac
 
 
 
+    if test x${WX_CONFIG+set} != xset ; then
+     WX_CONFIG_NAME=wx-config
+  fi
+
     if test x$wx_config_exec_prefix != x ; then
      wx_config_args="$wx_config_args --exec-prefix=$wx_config_exec_prefix"
      if test x${WX_CONFIG+set} != xset ; then
-        WX_CONFIG=$wx_config_exec_prefix/bin/wx-config
+        WX_CONFIG_PATH=$wx_config_exec_prefix/bin/$WX_CONFIG_NAME
      fi
   fi
   if test x$wx_config_prefix != x ; then
      wx_config_args="$wx_config_args --prefix=$wx_config_prefix"
      if test x${WX_CONFIG+set} != xset ; then
-        WX_CONFIG=$wx_config_prefix/bin/wx-config
+        WX_CONFIG_PATH=$wx_config_prefix/bin/$WX_CONFIG_NAME
      fi
   fi
 
-    if test x${WX_CONFIG+set} != xset ; then
-     WX_CONFIG=wx-config
-  fi
-
-  # Extract the first word of "$WX_CONFIG", so it can be a program name with args.
-set dummy $WX_CONFIG; ac_word=$2
+    if test "x$WX_CONFIG_PATH" = "x" ; then
+    # Extract the first word of "$WX_CONFIG_NAME", so it can be a program name with args.
+set dummy $WX_CONFIG_NAME; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4380: checking for $ac_word" >&5
+echo "configure:4381: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_WX_CONFIG_PATH'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4409,15 +4410,16 @@ else
   echo "$ac_t""no" 1>&6
 fi
 
-  min_wx_version=2.3.2
-  echo $ac_n "checking for wxWindows version >= $min_wx_version""... $ac_c" 1>&6
-echo "configure:4415: checking for wxWindows version >= $min_wx_version" >&5
+  fi
 
-  WX_VERSION=""
-  no_wx=""
-  if test "$WX_CONFIG_PATH" = "no" ; then
-    no_wx=yes
-  else
+  if test "$WX_CONFIG_PATH" != "no" ; then
+    WX_VERSION=""
+    no_wx=""
+
+    min_wx_version=2.3.2
+    echo $ac_n "checking for wxWindows version >= $min_wx_version""... $ac_c" 1>&6
+echo "configure:4422: checking for wxWindows version >= $min_wx_version" >&5
+
     WX_CONFIG_WITH_ARGS="$WX_CONFIG_PATH $wx_config_args"
 
     WX_VERSION=`$WX_CONFIG_WITH_ARGS --version`
@@ -4490,23 +4492,23 @@ echo "configure:4415: checking for wxWindows version >= $min_wx_version" >&5
          WX_CXXFLAGS_ONLY=`echo $WX_CXXFLAGS | sed "s@^$WX_CFLAGS *@@"`
       fi
     fi
-  fi
 
-  if test "x$no_wx" = x ; then
-     echo "$ac_t""yes (version $WX_VERSION)" 1>&6
-     WX232=1
-  else
-     if test "x$WX_VERSION" = x; then
-                echo "$ac_t""no" 1>&6
-     else
-        echo "$ac_t""no (version $WX_VERSION is not new enough)" 1>&6
-     fi
+    if test "x$no_wx" = x ; then
+       echo "$ac_t""yes (version $WX_VERSION)" 1>&6
+       WX232=1
+    else
+       if test "x$WX_VERSION" = x; then
+	  	  echo "$ac_t""no" 1>&6
+       else
+	  echo "$ac_t""no (version $WX_VERSION is not new enough)" 1>&6
+       fi
 
-     WX_CFLAGS=""
-     WX_CPPFLAGS=""
-     WX_CXXFLAGS=""
-     WX_LIBS=""
-     :
+       WX_CFLAGS=""
+       WX_CPPFLAGS=""
+       WX_CXXFLAGS=""
+       WX_LIBS=""
+       :
+    fi
   fi
 
   
@@ -4519,181 +4521,15 @@ echo "configure:4415: checking for wxWindows version >= $min_wx_version" >&5
 
 
 if test "$WX232" != 1; then
-   # I'm not sure that it still works with 2.2.1, bump the version checked
-   # here if needed
-   
-    if test x$wx_config_exec_prefix != x ; then
-     wx_config_args="$wx_config_args --exec-prefix=$wx_config_exec_prefix"
-     if test x${WX_CONFIG+set} != xset ; then
-        WX_CONFIG=$wx_config_exec_prefix/bin/wx-config
-     fi
-  fi
-  if test x$wx_config_prefix != x ; then
-     wx_config_args="$wx_config_args --prefix=$wx_config_prefix"
-     if test x${WX_CONFIG+set} != xset ; then
-        WX_CONFIG=$wx_config_prefix/bin/wx-config
-     fi
-  fi
+   { echo "configure: error: 
+	   Mahogany requires wxWindows to be installed on your system
+	   but wx-config script couldn't be found.
 
-    if test x${WX_CONFIG+set} != xset ; then
-     WX_CONFIG=wx-config
-  fi
-
-  # Extract the first word of "$WX_CONFIG", so it can be a program name with args.
-set dummy $WX_CONFIG; ac_word=$2
-echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:4546: checking for $ac_word" >&5
-if eval "test \"`echo '$''{'ac_cv_path_WX_CONFIG_PATH'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  case "$WX_CONFIG_PATH" in
-  /*)
-  ac_cv_path_WX_CONFIG_PATH="$WX_CONFIG_PATH" # Let the user override the test with a path.
-  ;;
-  ?:/*)			 
-  ac_cv_path_WX_CONFIG_PATH="$WX_CONFIG_PATH" # Let the user override the test with a dos path.
-  ;;
-  *)
-  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-  ac_dummy="$PATH"
-  for ac_dir in $ac_dummy; do 
-    test -z "$ac_dir" && ac_dir=.
-    if test -f $ac_dir/$ac_word; then
-      ac_cv_path_WX_CONFIG_PATH="$ac_dir/$ac_word"
-      break
-    fi
-  done
-  IFS="$ac_save_ifs"
-  test -z "$ac_cv_path_WX_CONFIG_PATH" && ac_cv_path_WX_CONFIG_PATH="no"
-  ;;
-esac
-fi
-WX_CONFIG_PATH="$ac_cv_path_WX_CONFIG_PATH"
-if test -n "$WX_CONFIG_PATH"; then
-  echo "$ac_t""$WX_CONFIG_PATH" 1>&6
-else
-  echo "$ac_t""no" 1>&6
-fi
-
-  min_wx_version=2.2.1
-  echo $ac_n "checking for wxWindows version >= $min_wx_version""... $ac_c" 1>&6
-echo "configure:4581: checking for wxWindows version >= $min_wx_version" >&5
-
-  WX_VERSION=""
-  no_wx=""
-  if test "$WX_CONFIG_PATH" = "no" ; then
-    no_wx=yes
-  else
-    WX_CONFIG_WITH_ARGS="$WX_CONFIG_PATH $wx_config_args"
-
-    WX_VERSION=`$WX_CONFIG_WITH_ARGS --version`
-    wx_config_major_version=`echo $WX_VERSION | \
-           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\1/'`
-    wx_config_minor_version=`echo $WX_VERSION | \
-           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\2/'`
-    wx_config_micro_version=`echo $WX_VERSION | \
-           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\3/'`
-
-    wx_requested_major_version=`echo $min_wx_version | \
-           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\1/'`
-    wx_requested_minor_version=`echo $min_wx_version | \
-           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\2/'`
-    wx_requested_micro_version=`echo $min_wx_version | \
-           sed 's/\([0-9]*\).\([0-9]*\).\([0-9]*\)/\3/'`
-
-    wx_ver_ok=""
-    if test $wx_config_major_version -gt $wx_requested_major_version; then
-      wx_ver_ok=yes
-    else
-      if test $wx_config_major_version -eq $wx_requested_major_version; then
-         if test $wx_config_minor_version -gt $wx_requested_minor_version; then
-            wx_ver_ok=yes
-         else
-            if test $wx_config_minor_version -eq $wx_requested_minor_version; then
-               if test $wx_config_micro_version -ge $wx_requested_micro_version; then
-                  wx_ver_ok=yes
-               fi
-            fi
-         fi
-      fi
-    fi
-
-    if test "x$wx_ver_ok" = x ; then
-      no_wx=yes
-    else
-      WX_LIBS=`$WX_CONFIG_WITH_ARGS --libs`
-
-            wx_has_cppflags=""
-      if test $wx_config_major_version -gt 2; then
-        wx_has_cppflags=yes
-      else
-        if test $wx_config_major_version -eq 2; then
-           if test $wx_config_minor_version -gt 2; then
-              wx_has_cppflags=yes
-           else
-              if test $wx_config_minor_version -eq 2; then
-                 if test $wx_config_micro_version -ge 6; then
-                    wx_has_cppflags=yes
-                 fi
-              fi
-           fi
-        fi
-      fi
-
-      if test "x$wx_has_cppflags" = x ; then
-                  WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags`
-         WX_CPPFLAGS=$WX_CFLAGS
-         WX_CXXFLAGS=$WX_CFLAGS
-
-         WX_CFLAGS_ONLY=$WX_CFLAGS
-         WX_CXXFLAGS_ONLY=$WX_CFLAGS
-      else
-                  WX_CPPFLAGS=`$WX_CONFIG_WITH_ARGS --cppflags`
-         WX_CXXFLAGS=`$WX_CONFIG_WITH_ARGS --cxxflags`
-         WX_CFLAGS=`$WX_CONFIG_WITH_ARGS --cflags`
-
-         WX_CFLAGS_ONLY=`echo $WX_CFLAGS | sed "s@^$WX_CPPFLAGS *@@"`
-         WX_CXXFLAGS_ONLY=`echo $WX_CXXFLAGS | sed "s@^$WX_CFLAGS *@@"`
-      fi
-    fi
-  fi
-
-  if test "x$no_wx" = x ; then
-     echo "$ac_t""yes (version $WX_VERSION)" 1>&6
-     WX221=1
-  else
-     if test "x$WX_VERSION" = x; then
-                echo "$ac_t""no" 1>&6
-     else
-        echo "$ac_t""no (version $WX_VERSION is not new enough)" 1>&6
-     fi
-
-     WX_CFLAGS=""
-     WX_CPPFLAGS=""
-     WX_CXXFLAGS=""
-     WX_LIBS=""
-     :
-  fi
-
-  
-  
-  
-  
-  
-  
-  
-
-   if test "$WX221" != 1; then
-       { echo "configure: error: 
-               Mahogany requires wxWindows to be installed on your system
-               but wx-config script couldn't be found.
-
-               Please check that wx-config is in path, the directory
-               where wxWindows libraries are installed (returned by
-               'wx-config --libs' command) is in LD_LIBRARY_PATH or
-               equivalent variable and wxWindows version is 2.2.1 or above.
-       " 1>&2; exit 1; }
-   fi
+	   Please check that wx-config is in path, the directory
+	   where wxWindows libraries are installed (returned by
+	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
+	   equivalent variable and wxWindows version is 2.3.2 or above.
+   " 1>&2; exit 1; }
 fi
 
 CPPFLAGS="$CPPFLAGS $WX_CPPFLAGS"
@@ -4710,7 +4546,7 @@ s/-lglib/-lglib -Wl,-Bdynamic/g'`
 
 case "$USE_THREADS" in 1)
 	echo $ac_n "checking if wxWindows was compiled with threads""... $ac_c" 1>&6
-echo "configure:4714: checking if wxWindows was compiled with threads" >&5
+echo "configure:4550: checking if wxWindows was compiled with threads" >&5
 if eval "test \"`echo '$''{'m_cv_wx_threads'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -4718,7 +4554,7 @@ else
   m_cv_wx_threads=x
 else
   cat > conftest.$ac_ext <<EOF
-#line 4722 "configure"
+#line 4558 "configure"
 #include "confdefs.h"
 #ifdef __cplusplus
 extern "C" void exit(int);
@@ -4732,7 +4568,7 @@ extern "C" void exit(int);
 			#endif
 			}
 EOF
-if { (eval echo configure:4736: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:4572: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   m_cv_wx_threads=yes
 else
@@ -4768,7 +4604,7 @@ esac
 case "$OSTYPE" in
    linux* | Linux*)
       echo $ac_n "checking for pam_end in -lpam""... $ac_c" 1>&6
-echo "configure:4772: checking for pam_end in -lpam" >&5
+echo "configure:4608: checking for pam_end in -lpam" >&5
 ac_lib_var=`echo pam'_'pam_end | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4776,7 +4612,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lpam  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4780 "configure"
+#line 4616 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 #ifdef __cplusplus
@@ -4790,7 +4626,7 @@ int main() {
 pam_end()
 ; return 0; }
 EOF
-if { (eval echo configure:4794: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4630: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4816,7 +4652,7 @@ esac
 
 case "$USE_CCOSTYPE" in
 ''|0|1)	echo $ac_n "checking for c-client library OS type""... $ac_c" 1>&6
-echo "configure:4820: checking for c-client library OS type" >&5
+echo "configure:4656: checking for c-client library OS type" >&5
 	case "$OSTYPE" in
 	linux* | Linux*)
 		;; 	Solaris* | solaris* | SunOS*)
@@ -4855,17 +4691,17 @@ case "$USE_PISOCK" in
 1)
     ac_safe=`echo "pi-source.h" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for pi-source.h""... $ac_c" 1>&6
-echo "configure:4859: checking for pi-source.h" >&5
+echo "configure:4695: checking for pi-source.h" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4864 "configure"
+#line 4700 "configure"
 #include "confdefs.h"
 #include <pi-source.h>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:4869: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:4705: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -4882,7 +4718,7 @@ fi
 if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
   echo "$ac_t""yes" 1>&6
   echo $ac_n "checking for main in -lpisock""... $ac_c" 1>&6
-echo "configure:4886: checking for main in -lpisock" >&5
+echo "configure:4722: checking for main in -lpisock" >&5
 ac_lib_var=`echo pisock'_'main | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4890,14 +4726,14 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lpisock  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4894 "configure"
+#line 4730 "configure"
 #include "confdefs.h"
 
 int main() {
 main()
 ; return 0; }
 EOF
-if { (eval echo configure:4901: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4737: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4918,7 +4754,7 @@ EOF
 
 	MAKE_PISOCKLIB="PISOCK_LIB:=-lpisock"
 	echo $ac_n "checking for pi_setmaxspeed in -lpisock""... $ac_c" 1>&6
-echo "configure:4922: checking for pi_setmaxspeed in -lpisock" >&5
+echo "configure:4758: checking for pi_setmaxspeed in -lpisock" >&5
 ac_lib_var=`echo pisock'_'pi_setmaxspeed | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4926,7 +4762,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lpisock  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4930 "configure"
+#line 4766 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 #ifdef __cplusplus
@@ -4940,7 +4776,7 @@ int main() {
 pi_setmaxspeed()
 ; return 0; }
 EOF
-if { (eval echo configure:4944: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4780: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4965,7 +4801,7 @@ echo "configure: warning: Your pisock library is old - some functionality will b
 fi
 
 	echo $ac_n "checking for pi_accept_to in -lpisock""... $ac_c" 1>&6
-echo "configure:4969: checking for pi_accept_to in -lpisock" >&5
+echo "configure:4805: checking for pi_accept_to in -lpisock" >&5
 ac_lib_var=`echo pisock'_'pi_accept_to | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4973,7 +4809,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-lpisock  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4977 "configure"
+#line 4813 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 #ifdef __cplusplus
@@ -4987,7 +4823,7 @@ int main() {
 pi_accept_to()
 ; return 0; }
 EOF
-if { (eval echo configure:4991: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4827: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -5033,7 +4869,7 @@ case "$MAKE_PISOCKLIB" in
 '') ;;
 *)
 	echo $ac_n "checking for libmal in extra/src""... $ac_c" 1>&6
-echo "configure:5037: checking for libmal in extra/src" >&5
+echo "configure:4873: checking for libmal in extra/src" >&5
 	if test ! -d $srcdir/extra/src/libmal 
 	then	echo "$ac_t""not found - no MAL synch for PalmOS" 1>&6
 	elif test -f $srcdir/extra/src/libmal/Makefile.in \
@@ -5105,7 +4941,7 @@ MAKE_HAVE_DOCTOOLS='HAVE_DOCTOOLS=yes'
 # Extract the first word of "perl", so it can be a program name with args.
 set dummy perl; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5109: checking for $ac_word" >&5
+echo "configure:4945: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_PERL'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5140,7 +4976,7 @@ case "$PERL" in '') MAKE_HAVE_DOCTOOLS='' PERL='false "No perl available"';; esa
 # Extract the first word of "latex", so it can be a program name with args.
 set dummy latex; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5144: checking for $ac_word" >&5
+echo "configure:4980: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_LATEX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5175,7 +5011,7 @@ case "$LATEX" in '') MAKE_HAVE_DOCTOOLS='' LATEX='false "No latex available"';; 
 # Extract the first word of "makeindex", so it can be a program name with args.
 set dummy makeindex; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5179: checking for $ac_word" >&5
+echo "configure:5015: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_MAKEINDEX'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5210,7 +5046,7 @@ case "$MAKEINDEX" in '') MAKE_HAVE_DOCTOOLS='' MAKEINDEX='false "No makeindex av
 # Extract the first word of "dvips", so it can be a program name with args.
 set dummy dvips; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5214: checking for $ac_word" >&5
+echo "configure:5050: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_DVIPS'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5245,7 +5081,7 @@ case "$DVIPS" in '') MAKE_HAVE_DOCTOOLS='' DVIPS='false "No dvips available"';; 
 # Extract the first word of "ps2pdf", so it can be a program name with args.
 set dummy ps2pdf; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5249: checking for $ac_word" >&5
+echo "configure:5085: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_PSTOPDF'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -5280,7 +5116,7 @@ case "$PSTOPDF" in '') MAKE_HAVE_DOCTOOLS='' PSTOPDF='false "No ps2pdf available
 # Extract the first word of "latex2html", so it can be a program name with args.
 set dummy latex2html; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:5284: checking for $ac_word" >&5
+echo "configure:5120: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_LATEX2HTML'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else

@@ -42,6 +42,10 @@
 #  include <wx/dynarray.h>
 #  include <wx/colour.h>
 #  include <wx/menu.h>
+
+#  include <wx/stattext.h>
+
+#  include <wx/sizer.h>
 #else
 #  include <wx/imaglist.h>
 #endif // USE_PCH
@@ -121,6 +125,8 @@ extern const MOption MP_FVIEW_STATUS_UPDATE;
 extern const MOption MP_FVIEW_UNREADCOLOUR;
 extern const MOption MP_MSGS_SORTBY;
 extern const MOption MP_MSGS_USE_THREADING;
+extern const MOption MP_MSGVIEW_SHOWBAR;
+extern const MOption MP_MSGVIEW_VIEWER;
 extern const MOption MP_PREVIEW_ON_SELECT;
 extern const MOption MP_USERLEVEL;
 extern const MOption MP_USE_TRASH_FOLDER;
@@ -254,7 +260,7 @@ private:
 //     it also allows us to hook into the kbd processing and forward it to
 //     wxFolderView
 
-class wxFolderMsgWindow : public wxWindow
+class wxFolderMsgWindow : public wxPanel
 {
 public:
    wxFolderMsgWindow(wxWindow *parent, wxFolderView *fv);
@@ -264,18 +270,24 @@ public:
    // with the new one
    void SetViewerWindow(wxWindow *winViewerNew);
 
+   // called when the folder we view changes
+   void UpdateOptions();
+
    // don't get the focus from keyboard, we don't normally need it
    virtual bool AcceptsFocusFromKeyboard() const { return false; }
 
 protected:
+   // the event handlers
    void OnSize(wxSizeEvent& event);
+   void OnButton(wxCommandEvent& event);
+   void OnChoice(wxCommandEvent& event);
 
    // resize our own child to fill the entire window
-   void Resize()
-   {
-      wxSize size = GetClientSize();
-      m_winViewer->SetSize(0, 0, size.x, size.y);
-   }
+   void Resize();
+
+   // create/delete the controls we put above the viewer window
+   void CreateViewerBar();
+   void DeleteViewerBar();
 
 private:
    // the associated folder view (never NULL)
@@ -283,6 +295,12 @@ private:
 
    // the current viewer window (may be NULL)
    wxWindow *m_winViewer;
+
+   // the viewer bar: contains the controls we put above the viewer
+   wxPanel *m_winBar;
+
+   // the array containing the names of all the existing viewers
+   wxArrayString m_namesViewers;
 
    // the event handler to hook the kbd input (NULL initially, !NULL later)
    class wxFolderMsgViewerEvtHandler *m_evtHandlerMsgView;
@@ -860,6 +878,8 @@ END_EVENT_TABLE()
 
 BEGIN_EVENT_TABLE(wxFolderMsgWindow, wxWindow)
    EVT_SIZE(wxFolderMsgWindow::OnSize)
+   EVT_BUTTON(-1, wxFolderMsgWindow::OnButton)
+   EVT_CHOICE(-1, wxFolderMsgWindow::OnChoice)
 END_EVENT_TABLE()
 
 // ----------------------------------------------------------------------------
@@ -867,12 +887,14 @@ END_EVENT_TABLE()
 // ----------------------------------------------------------------------------
 
 wxFolderMsgWindow::wxFolderMsgWindow(wxWindow *parent, wxFolderView *fv)
-                 : wxWindow(parent, -1,
+                 : wxPanel(parent, -1,
                             wxDefaultPosition, wxDefaultSize,
-                            wxBORDER_NONE)
+                            fv ? wxBORDER_NONE : wxBORDER_DEFAULT)
 {
    m_winViewer = NULL;
+   m_winBar = NULL;
    m_folderView = fv;
+   m_winViewer = NULL;
    m_evtHandlerMsgView = NULL;
 }
 
@@ -880,9 +902,21 @@ wxFolderMsgWindow::wxFolderMsgWindow(wxWindow *parent, wxFolderView *fv)
 // with the new one
 void wxFolderMsgWindow::SetViewerWindow(wxWindow *winViewerNew)
 {
+   if ( winViewerNew == m_winViewer )
+      return;
+
    if ( m_winViewer )
    {
       m_winViewer->PopEventHandler(false /* don't delete it */);
+   }
+   else // we didn't have any viewer window before
+   {
+      Profile_obj profile(m_folderView->GetFolderProfile());
+
+      if ( READ_CONFIG(profile, MP_MSGVIEW_SHOWBAR) )
+      {
+         CreateViewerBar();
+      }
    }
 
    m_winViewer = winViewerNew;
@@ -898,14 +932,13 @@ void wxFolderMsgWindow::SetViewerWindow(wxWindow *winViewerNew)
 
       Resize();
    }
-}
-
-// resize our own child to fill the entire window
-void wxFolderMsgWindow::OnSize(wxSizeEvent& event)
-{
-   if ( m_winViewer )
+   else // we don't have any viewer any longer
    {
-      Resize();
+      if ( m_winBar )
+      {
+         DeleteViewerBar();
+      }
+      //else: we might not have created it
    }
 }
 
@@ -915,6 +948,179 @@ wxFolderMsgWindow::~wxFolderMsgWindow()
    {
       m_winViewer->PopEventHandler(true /* delete it */);
    }
+}
+
+// ----------------------------------------------------------------------------
+// wxFolderMsgWindow viewer bar stuff
+// ----------------------------------------------------------------------------
+
+void wxFolderMsgWindow::CreateViewerBar()
+{
+   ASSERT_MSG( !m_winBar, "recreating the viewer bar twice?" );
+
+   // create the window and the sizer containing all controls
+   m_winBar = new wxPanel(this, -1);
+
+   wxSizer *sizer = new wxBoxSizer(wxHORIZONTAL);
+
+   // create the label
+   wxStaticText *labelViewer = new wxStaticText(m_winBar, -1,
+                                                _("Select the &viewer to use: "));
+
+   sizer->Add(labelViewer, 0, wxALL | wxALIGN_CENTRE_VERTICAL, LAYOUT_X_MARGIN);
+
+   // create the choice control for actually choosing the viewer and fill it
+   // with all the available ones
+   wxChoice *choice = new wxChoice(m_winBar, -1);
+
+   wxArrayString descViewers;
+   size_t count = MessageView::GetAllAvailableViewers(&m_namesViewers,
+                                                      &descViewers);
+
+   for ( size_t n = 0; n < count; n++ )
+   {
+      choice->Append(descViewers[n]);
+   }
+
+   Profile_obj profile(m_folderView->GetFolderProfile());
+
+   wxString name = READ_CONFIG(profile, MP_MSGVIEW_VIEWER);
+   int curViewer = m_namesViewers.Index(name);
+   if ( curViewer != -1 )
+   {
+      choice->SetSelection(curViewer);
+   }
+   else
+   {
+      FAIL_MSG( "current viewer not in the list of all viewers?" );
+   }
+
+   choice->SetSize(choice->GetBestSize());
+
+   sizer->Add(choice, 0, wxALL | wxALIGN_CENTRE_VERTICAL, LAYOUT_X_MARGIN);
+
+   // add the spacer and the button at the far right to close this bar
+   sizer->Add(5, 0, 1); // expandable
+
+   wxBitmapButton *btnClose = new wxBitmapButton
+                                  (
+                                    m_winBar,
+                                    wxID_CLOSE,
+                                    mApplication->GetIconManager()->
+                                       GetBitmap("tb_close"),
+                                    wxDefaultPosition,
+                                    wxDefaultSize,
+                                    wxBORDER_NONE
+                                  );
+   btnClose->SetToolTip(_("Close this tool bar"));
+
+   sizer->Add(btnClose, 0, wxALL | wxALIGN_CENTRE_VERTICAL, LAYOUT_X_MARGIN);
+
+   // final initializations
+   m_winBar->SetSizer(sizer);
+   m_winBar->SetAutoLayout(TRUE);
+   sizer->Fit(m_winBar);
+}
+
+void wxFolderMsgWindow::DeleteViewerBar()
+{
+   // harmless but stupid
+   ASSERT_MSG( m_winBar, "deleting non existent viewer bar?" );
+
+   delete m_winBar;
+   m_winBar = NULL;
+}
+
+void wxFolderMsgWindow::UpdateOptions()
+{
+   if ( !m_winViewer )
+   {
+      // we don't show the viewer bar anyhow if we don't have the viewer
+      return;
+   }
+
+   Profile_obj profile(m_folderView->GetFolderProfile());
+
+   // folder options have changed, do we need to update?
+   if ( READ_CONFIG_BOOL(profile, MP_MSGVIEW_SHOWBAR) != (m_winBar != NULL) )
+   {
+      if ( m_winBar )
+         DeleteViewerBar();
+      else
+         CreateViewerBar();
+
+      Resize();
+   }
+}
+
+// ----------------------------------------------------------------------------
+// wxFolderMsgWindow event handlers
+// ----------------------------------------------------------------------------
+
+void wxFolderMsgWindow::OnSize(wxSizeEvent& event)
+{
+   if ( m_winViewer )
+   {
+      Resize();
+   }
+}
+
+void wxFolderMsgWindow::OnButton(wxCommandEvent& event)
+{
+   MDialog_Message
+   (
+      _("You can reenable this tool bar in the \"Message View\" page\n"
+        "of the folders dialog later if you wish."),
+      GetFrame(this),
+      MDIALOG_MSGTITLE,
+      GetPersMsgBoxName(M_MSGBOX_VIEWER_BAR_TIP)
+   );
+
+   // TODO: maybe ask the user if he wants to hide it just for now or disable
+   //       it permanently? And/or also if he wants to do it just for this
+   //       folder or for all of them?
+   Profile_obj profile(m_folderView->GetFolderProfile());
+   profile->writeEntry(MP_MSGVIEW_SHOWBAR, 0l);
+
+   DeleteViewerBar();
+
+   Resize();
+}
+
+void wxFolderMsgWindow::OnChoice(wxCommandEvent& event)
+{
+   int n = event.GetInt();
+
+   CHECK_RET( n >= 0 && (size_t)n < m_namesViewers.GetCount(),
+              "invalid viewer selected?" );
+
+   Profile_obj profile(m_folderView->GetFolderProfile());
+
+   profile->writeEntry(MP_MSGVIEW_VIEWER, m_namesViewers[n]);
+
+   MEventManager::Send(new MEventOptionsChangeData
+                           (
+                            profile,
+                            MEventOptionsChangeData::Ok
+                           ));
+}
+
+// resize our own child to fill the entire available for it area
+void wxFolderMsgWindow::Resize()
+{
+   wxSize size = GetClientSize();
+   int y;
+   if ( m_winBar )
+   {
+      y = m_winBar->GetSize().y;
+      m_winBar->SetSize(0, 0, size.x, y);
+   }
+   else // no viewer bar
+   {
+      y = 0;
+   }
+
+   m_winViewer->SetSize(0, y, size.x, size.y - y);
 }
 
 // ----------------------------------------------------------------------------
@@ -2873,6 +3079,8 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
    m_FolderCtrl->SetPreviewDelay(m_settings.previewDelay);
 
    m_FolderCtrl->UpdateSortIndicator();
+
+   m_MessageWindow->UpdateOptions();
 }
 
 // ----------------------------------------------------------------------------
@@ -2983,6 +3191,7 @@ wxFolderView::ShowFolder(MailFolder *mf)
    if ( m_Profile )
       m_Profile->IncRef();
 
+   m_MessageWindow->UpdateOptions();
    m_MessagePreview->SetFolder(m_ASMailFolder);
 
    m_folderName = m_ASMailFolder->GetName();

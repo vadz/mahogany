@@ -2515,6 +2515,7 @@ static const struct
    { "GfxNotInlined",            gettext_noop("ask if big images should be inlined") },
    { "EditOnOpenFail",           gettext_noop("propose to edit folder settings if opening it failed") },
    { "ExplainColClick",          gettext_noop("give explanation when clicking on a column in the folder view") },
+   { "ViewerBarTip",             gettext_noop("give tip about reenabling the viewer bar when closing it") },
    { "EmptyTrashOnExit",         gettext_noop("ask whether to purge trash folder on exit") },
    { "SendOffline",              gettext_noop("send mail when the system is offline") },
 };

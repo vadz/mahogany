@@ -19,34 +19,37 @@ dnl Get the cflags and libraries from the wx-config script
 dnl
 AC_DEFUN(AM_PATH_WXCONFIG,
 [
+  dnl do we have wx-config name: it can be wx-config or wxd-config or ...
+  if test x${WX_CONFIG+set} != xset ; then
+     WX_CONFIG_NAME=wx-config
+  fi
+
   dnl deal with optional prefixes
   if test x$wx_config_exec_prefix != x ; then
      wx_config_args="$wx_config_args --exec-prefix=$wx_config_exec_prefix"
      if test x${WX_CONFIG+set} != xset ; then
-        WX_CONFIG=$wx_config_exec_prefix/bin/wx-config
+        WX_CONFIG_PATH=$wx_config_exec_prefix/bin/$WX_CONFIG_NAME
      fi
   fi
   if test x$wx_config_prefix != x ; then
      wx_config_args="$wx_config_args --prefix=$wx_config_prefix"
      if test x${WX_CONFIG+set} != xset ; then
-        WX_CONFIG=$wx_config_prefix/bin/wx-config
+        WX_CONFIG_PATH=$wx_config_prefix/bin/$WX_CONFIG_NAME
      fi
   fi
 
-  dnl do we have wx-config name finally?
-  if test x${WX_CONFIG+set} != xset ; then
-     WX_CONFIG=wx-config
+  dnl don't search the PATH if we already have the full name
+  if test "x$WX_CONFIG_PATH" = "x" ; then
+    AC_PATH_PROG(WX_CONFIG_PATH, $WX_CONFIG_NAME, no)
   fi
 
-  AC_PATH_PROG(WX_CONFIG_PATH, $WX_CONFIG, no)
-  min_wx_version=ifelse([$1], ,2.2.1,$1)
-  AC_MSG_CHECKING(for wxWindows version >= $min_wx_version)
+  if test "$WX_CONFIG_PATH" != "no" ; then
+    WX_VERSION=""
+    no_wx=""
 
-  WX_VERSION=""
-  no_wx=""
-  if test "$WX_CONFIG_PATH" = "no" ; then
-    no_wx=yes
-  else
+    min_wx_version=ifelse([$1], ,2.2.1,$1)
+    AC_MSG_CHECKING(for wxWindows version >= $min_wx_version)
+
     WX_CONFIG_WITH_ARGS="$WX_CONFIG_PATH $wx_config_args"
 
     WX_VERSION=`$WX_CONFIG_WITH_ARGS --version`
@@ -122,24 +125,24 @@ AC_DEFUN(AM_PATH_WXCONFIG,
          WX_CXXFLAGS_ONLY=`echo $WX_CXXFLAGS | sed "s@^$WX_CFLAGS *@@"`
       fi
     fi
-  fi
 
-  if test "x$no_wx" = x ; then
-     AC_MSG_RESULT(yes (version $WX_VERSION))
-     ifelse([$2], , :, [$2])
-  else
-     if test "x$WX_VERSION" = x; then
-        dnl no wx-config at all
-        AC_MSG_RESULT(no)
-     else
-        AC_MSG_RESULT(no (version $WX_VERSION is not new enough))
-     fi
+    if test "x$no_wx" = x ; then
+       AC_MSG_RESULT(yes (version $WX_VERSION))
+       ifelse([$2], , :, [$2])
+    else
+       if test "x$WX_VERSION" = x; then
+	  dnl no wx-config at all
+	  AC_MSG_RESULT(no)
+       else
+	  AC_MSG_RESULT(no (version $WX_VERSION is not new enough))
+       fi
 
-     WX_CFLAGS=""
-     WX_CPPFLAGS=""
-     WX_CXXFLAGS=""
-     WX_LIBS=""
-     ifelse([$3], , :, [$3])
+       WX_CFLAGS=""
+       WX_CPPFLAGS=""
+       WX_CXXFLAGS=""
+       WX_LIBS=""
+       ifelse([$3], , :, [$3])
+    fi
   fi
 
   AC_SUBST(WX_CPPFLAGS)

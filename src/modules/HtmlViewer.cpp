@@ -324,7 +324,9 @@ private:
 // ============================================================================
 
 HtmlViewerWindow::HtmlViewerWindow(HtmlViewer *viewer, wxWindow *parent)
-                : wxHtmlWindow(parent)
+                : wxHtmlWindow(parent, -1,
+                               wxDefaultPosition, wxDefaultSize,
+                               wxHW_SCROLLBAR_AUTO | wxBORDER_SIMPLE)
 {
    m_viewer = viewer;
 

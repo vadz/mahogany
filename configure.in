@@ -831,20 +831,15 @@ dnl (i.e. if wxWin was built with --enable-no_rtti, CC can choke on -fno_rtti)
 AM_PATH_WXCONFIG(2.3.2, WX232=1)
 
 if test "$WX232" != 1; then
-   # I'm not sure that it still works with 2.2.1, bump the version checked
-   # here if needed
-   AM_PATH_WXCONFIG(2.2.1, WX221=1)
-   if test "$WX221" != 1; then
-       AC_MSG_ERROR([
-               Mahogany requires wxWindows to be installed on your system
-               but wx-config script couldn't be found.
+   AC_MSG_ERROR([
+	   Mahogany requires wxWindows to be installed on your system
+	   but wx-config script couldn't be found.
 
-               Please check that wx-config is in path, the directory
-               where wxWindows libraries are installed (returned by
-               'wx-config --libs' command) is in LD_LIBRARY_PATH or
-               equivalent variable and wxWindows version is 2.2.1 or above.
-       ])
-   fi
+	   Please check that wx-config is in path, the directory
+	   where wxWindows libraries are installed (returned by
+	   'wx-config --libs' command) is in LD_LIBRARY_PATH or
+	   equivalent variable and wxWindows version is 2.3.2 or above.
+   ])
 fi
 
 dnl set all flags
