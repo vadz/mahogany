@@ -539,46 +539,62 @@ int
 PalmOSModule::createEntries(int db, struct AddressAppInfo * aai, PalmEntryGroup* p_TopGroup)
 {
   struct Address a;
-  struct CategoryAppInfo cats;
-  
-  int i,j,k,l;
   char buf[0xffff];
   int category, attribute;
 
-  cats = aai->category;
-  
+  // the categories of the Palm addressbook
+  struct CategoryAppInfo cats = aai->category;
+
+  // we create our own PalmEntryGroup for each used category  
   PalmEntryGroup** catGroups = new PalmEntryGroup*[16];
-  
-  for (k = 0; k<16; k++) {
-    if (cats.name[k] != "") {
-      catGroups[k] = (PalmEntryGroup*)p_TopGroup->CreateGroup(cats.name[k]);
-    }
-  }
-  
-  for(i=0;
-     (j=dlp_ReadRecordByIndex(m_PiSocket, db, i, (unsigned char *)buf, 0, &l, &attribute, &category)) >= 0;
+
+  // check which category to create and do so
+  for (int i = 0; i<16; i++)
+    if (cats.name[i][0] != 0x0)
+      catGroups[i] = (PalmEntryGroup*)p_TopGroup->CreateGroup(cats.name[i]);
+
+  // read every single address
+  int l, j;
+  for(int i = 0;
+     (j = dlp_ReadRecordByIndex(m_PiSocket, db, i, (unsigned char *)buf, 0, &l, &attribute, &category)) >= 0;
       i++)
   {
-    // to which category does it belong?
+    // to which category/EntryGroup does this entry belong?
     PalmEntryGroup* p_Group = catGroups[category];
-    
+
+    // ignore deleted addresses    
     if (attribute & dlpRecAttrDeleted)
       continue;
+
     unpack_Address(&a, (unsigned char *)buf, l);
 
-    // create new entry to the book ...
-    PalmEntry *p_Entry = new PalmEntry(p_Group, a.entry[0]);
+    // create Name for entry
+    String e_name = a.entry[0];                 // familyname
 
-    if (!p_Entry) {
-        return -1;
+    if (a.entry[1] != NULL) {
+        if (e_name == "")
+            e_name = a.entry[1];
+        else 
+            e_name = (String)a.entry[1] + ' ' + (String)a.entry[0];
     }
-  
+
+    if (e_name == "")
+        e_name = a.entry[2];                    // company
+
+    // create new entry ...
+    PalmEntry *p_Entry = new PalmEntry(p_Group, e_name);
+
+    if (!p_Entry)
+        return -1;
+
     // ... and fill it
     p_Entry->Load(a);
     
     // add entry
     p_Group->AddEntry(p_Entry);
   }
+  
+  // everything worked fine
   return 0;
 }
 #endif
