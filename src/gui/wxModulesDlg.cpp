@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxModulesDlg.cpp -  a dialog to choose which modules to load     *
  *                                                                  *
- * (C) 1999      by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1999-2000 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -19,6 +19,7 @@
 #   include "MHelp.h"
 #   include "gui/wxMIds.h"
 #   include "strutil.h"
+#   include "Mpers.h"
 #endif
 
 #include "Mdefaults.h"
@@ -199,4 +200,11 @@ void ShowModulesDialog(wxFrame *parent)
 {
    wxModulesDialog dlg(parent);
    (void)dlg.ShowModal();
+   MDialog_Message(
+      _("Notice: any changes to the modules settings will only\n"
+        "take effect the next time you start Mahogany."),
+      parent,
+      MDIALOG_MSGTITLE,
+      GetPersMsgBoxName(M_MSGBOX_MODULES_WARNING));
+
 }

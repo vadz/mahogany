@@ -2070,7 +2070,7 @@ extern "C"
       UIdType uid = p->GetMessageUId();
       UIdArray ia;
       ia.Add(uid);
-      int rc = mf->SaveMessages(&ia, fn.ToString(), true);
+      int rc = mf->SaveMessages(&ia, fn.ToString(), true, false);
       mf->DecRef();
       return Value(rc);
    }

@@ -374,6 +374,7 @@ MAppBase::OnStartup()
       ERRORMESSAGE((_("Program execution aborted due to "
                       "installation problems.")));
 
+      wxYield();
       return false;
    }
 
@@ -844,35 +845,26 @@ bool MAppBase::CheckOutbox(UIdType *nSMTP, UIdType *nNNTP, MailFolder *mfi) cons
    {
       if(mf->CountMessages() > 0)
       {
-         if(mf->Lock())
+         HeaderInfoList *hil = mf->GetHeaders();
+         if( hil )
          {
-            HeaderInfoList *hil = mf->GetHeaders();
-            if( hil )
+            const HeaderInfo *hi;
+            Message *msg;
+            for(UIdType i = 0; i < hil->Count(); i++)
             {
-               const HeaderInfo *hi;
-               Message *msg;
-               for(UIdType i = 0; i < hil->Count(); i++)
-               {
-                  hi = (*hil)[i];
-                  ASSERT(hi);
-                  msg = mf->GetMessage(hi->GetUId());
-                  ASSERT(msg);
-                  String newsgroups;
-                  msg->GetHeaderLine("Newsgroups", newsgroups);
-                  if(newsgroups.Length() > 0)
-                     nntp++;
-                  else
-                     smtp++;
-                  SafeDecRef(msg);
-               }
-               SafeDecRef(hil);
+               hi = (*hil)[i];
+               ASSERT(hi);
+               msg = mf->GetMessage(hi->GetUId());
+               ASSERT(msg);
+               String newsgroups;
+               msg->GetHeaderLine("Newsgroups", newsgroups);
+               if(newsgroups.Length() > 0)
+                  nntp++;
+               else
+                  smtp++;
+               SafeDecRef(msg);
             }
-            mf->UnLock();
-         }
-         else
-         {
-            ERRORMESSAGE((_("Could not obtain lock for outbox '%s'."),
-                          mf->GetName().c_str()));
+            SafeDecRef(hil);
          }
       }
       mf->DecRef();
@@ -916,92 +908,82 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
       }
    }
 
-   if(mf->Lock())
+   HeaderInfoList *hil = mf->GetHeaders();
+   if(! hil)
    {
-      
-      HeaderInfoList *hil = mf->GetHeaders();
-      if(! hil)
-      {
-         mf->DecRef();
-         return; // nothing to do
-      }
-
-      const HeaderInfo *hi;
-
-      Message *msg;
-      for(UIdType i = 0; i < hil->Count(); i++)
-      {
-         hi = (*hil)[i];
-         ASSERT(hi);
-         msg = mf->GetMessage(hi->GetUId());
-         ASSERT(msg);
-         String msgText;
-         String target;
-         bool alreadyCounted = false;
-         msg->GetHeaderLine("To", target);
-         protocol = Prot_SMTP; // default
-         if(target.Length() > 0)
-         {
-            protocol = Prot_SMTP;
-            STATUSMESSAGE(( _("Sending message %lu/%lu: %s"),
-                            (unsigned long)(i+1),
-                            (unsigned long)(hil->Count()),
-                            msg->Subject().c_str()));
-            wxYield();
-            if(msg->Send(protocol))
-            {
-               count++; alreadyCounted = true;
-               mf->DeleteMessage(hi->GetUId());
-            }
-            else
-            {
-               String msg;
-               msg.Printf(_("Cannot send message ´%s´."),
-                          hi->GetSubject().c_str());
-               ERRORMESSAGE((msg));
-            }
-         }
-         msg->GetHeaderLine("Newsgroups", target);
-         protocol = Prot_NNTP; // default
-         if(target.Length() > 0)
-         {
-            protocol = Prot_NNTP;
-            STATUSMESSAGE(( _("Posting article %lu/%lu: %s"),
-                            (unsigned long)(i+1),
-                            (unsigned long)(hil->Count()),
-                            msg->Subject().c_str()));
-            wxYield();
-            if(msg->Send(protocol))
-            {
-               if(! alreadyCounted) count++;
-               mf->DeleteMessage(hi->GetUId());
-            }
-            else
-            {
-               String msg;
-               msg.Printf(_("Cannot post article ´%s´."),
-                           hi->GetSubject().c_str());
-               ERRORMESSAGE((msg));
-            }
-         }
-         //ASSERT(0); //TODO: static SendMessageCC::Send(String)!!!
-         SafeDecRef(msg);
-         mf->ExpungeMessages();
-      }
-      SafeDecRef(hil);
-      if(count > 0)
-      {
-         String msg;
-         msg.Printf(_("Sent %lu messages from outbox ´%s´."),
-                    (unsigned long) count, mf->GetName().c_str());
-         STATUSMESSAGE((msg));
-      }
-      mf->UnLock();
+      mf->DecRef();
+      return; // nothing to do
    }
-   else
+
+   const HeaderInfo *hi;
+
+   Message *msg;
+   for(UIdType i = 0; i < hil->Count(); i++)
    {
-      ERRORMESSAGE((_("Could not obtain lock for outbox '%s'."),
-                    mf->GetName().c_str()));
+      hi = (*hil)[i];
+      ASSERT(hi);
+      msg = mf->GetMessage(hi->GetUId());
+      ASSERT(msg);
+      String msgText;
+      String target;
+      bool alreadyCounted = false;
+      msg->GetHeaderLine("To", target);
+      protocol = Prot_SMTP; // default
+      if(target.Length() > 0)
+      {
+         protocol = Prot_SMTP;
+         STATUSMESSAGE(( _("Sending message %lu/%lu: %s"),
+                         (unsigned long)(i+1),
+                         (unsigned long)(hil->Count()),
+                         msg->Subject().c_str()));
+         wxYield();
+         if(msg->Send(protocol))
+         {
+            count++; alreadyCounted = true;
+            mf->DeleteMessage(hi->GetUId());
+         }
+         else
+         {
+            String msg;
+            msg.Printf(_("Cannot send message ´%s´."),
+                       hi->GetSubject().c_str());
+            ERRORMESSAGE((msg));
+         }
+      }
+      msg->GetHeaderLine("Newsgroups", target);
+      protocol = Prot_NNTP; // default
+      if(target.Length() > 0)
+      {
+         protocol = Prot_NNTP;
+         STATUSMESSAGE(( _("Posting article %lu/%lu: %s"),
+                         (unsigned long)(i+1),
+                         (unsigned long)(hil->Count()),
+                         msg->Subject().c_str()));
+         wxYield();
+         if(msg->Send(protocol))
+         {
+            if(! alreadyCounted) count++;
+            mf->DeleteMessage(hi->GetUId());
+         }
+         else
+         {
+            String msg;
+            msg.Printf(_("Cannot post article ´%s´."),
+                       hi->GetSubject().c_str());
+            ERRORMESSAGE((msg));
+         }
+      }
+      //ASSERT(0); //TODO: static SendMessageCC::Send(String)!!!
+      SafeDecRef(msg);
+      mf->ExpungeMessages();
+   }
+   SafeDecRef(hil);
+   if(count > 0)
+   {
+      String msg;
+      msg.Printf(_("Sent %lu messages from outbox ´%s´."),
+                 (unsigned long) count, mf->GetName().c_str());
+      STATUSMESSAGE((msg));
    }
    SafeDecRef(mf);
 }

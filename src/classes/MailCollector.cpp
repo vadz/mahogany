@@ -321,56 +321,51 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
 
    mf->ApplyFilterRules(false);
 
-   /* Obtain exclusive access: */
-   if(mf->Lock())
+   wxLogStatus(_("Auto-collecting mail from incoming folder '%s'."),
+               mf->GetName().c_str());
+//      wxSafeY   ield(); // normal wxYield() is not ok here
+   int updateFlags = mf->GetUpdateFlags();
+   mf->SetUpdateFlags(MailFolder::UF_UpdateCount);
+   UIdArray selections;
+   
+   const HeaderInfo *hi;
+   size_t i;
+   HeaderInfoList *hil = mf->GetHeaders();
+   if( hil )
    {
-      wxLogStatus(_("Auto-collecting mail from incoming folder '%s'."),
-                  mf->GetName().c_str());
-//      wxSafeYield(); // normal wxYield() is not ok here
-      int updateFlags = mf->GetUpdateFlags();
-      mf->SetUpdateFlags(MailFolder::UF_UpdateCount);
-      UIdArray selections;
-
-      const HeaderInfo *hi;
-      size_t i;
-      HeaderInfoList *hil = mf->GetHeaders();
-      if( hil )
+      if( hil->Count() > 0 )
       {
-         if( hil->Count() > 0 )
+         m_Message << _("From folder '") << mf->GetName() << "':\n";
+         for(i = 0; i < hil->Count(); i++)
          {
-            m_Message << _("From folder '") << mf->GetName() << "':\n";
-            for(i = 0; i < hil->Count(); i++)
-            {
-               hi=(*hil)[i];
-               selections.Add(hi->GetUId());
-               m_Count ++;
-               m_Message << _("  Subject: ") << hi->GetSubject()
-                         << _("  From: ") << hi->GetFrom()
-                         << '\n';
-            }
+            hi=(*hil)[i];
+            selections.Add(hi->GetUId());
+            m_Count ++;
+            m_Message << _("  Subject: ") << hi->GetSubject()
+                      << _("  From: ") << hi->GetFrom()
+                      << '\n';
          }
-         hil->DecRef();
       }
-      if(selections.Count() > 0)
+      hil->DecRef();
+   }
+   if(selections.Count() > 0)
+   {
+      if(mf->SaveMessages(&selections,
+                          READ_APPCONFIG(MP_NEWMAIL_FOLDER),
+                          true /* isProfile */, false /* update count */))
       {
-         if(mf->SaveMessages(&selections,
-                             READ_APPCONFIG(MP_NEWMAIL_FOLDER),
-                             true /* isProfile */, false /* update count */))
-         {
-            mf->DeleteMessages(&selections);
-            mf->ExpungeMessages();
-            rc = true;
-         }
-         else
-            rc = false;
+         mf->DeleteMessages(&selections);
+         mf->ExpungeMessages();
+         rc = true;
       }
       else
-         rc = true;
-
-      mf->SetUpdateFlags(updateFlags);
-      mf->UnLock();
-      mf->Ping(); //update it
+         rc = false;
    }
+   else
+      rc = true;
+   
+   mf->SetUpdateFlags(updateFlags);
+   mf->Ping(); //update it
 
    Lock(locked);
 

@@ -168,6 +168,9 @@
 #define MP_TMPGFXFORMAT      "ConvertGfxFormat"
 /// the user's M directory
 #   define   MP_USERDIR         "UserDirectory"
+/// the acceptance status of the license
+#define MP_LICENSE_ACCEPTED   "LicenseAccepted"
+
 /// the complete path to the glocal M directory
 #   define   MP_GLOBALDIR      "GlobalDir"
 
@@ -635,6 +638,8 @@
 /// the user's M directory
 #define   MP_USERDIR_D         M_EMPTYSTRING
 
+/// the acceptance status of the license
+#define MP_LICENSE_ACCEPTED_D   0l
 // Unix-only entries
 #ifdef OS_UNIX
 /// path list for M's directory

@@ -1659,6 +1659,19 @@ CheckConfiguration(void)
 {
    ProfileBase *profile = mApplication->GetProfile();
 
+   if ( READ_APPCONFIG(MP_LICENSE_ACCEPTED) == 0 ) // not accepted
+   {
+      bool accepted = ShowLicenseDialog();
+      if(accepted)
+      {
+         profile->writeEntry(MP_LICENSE_ACCEPTED, 1l);
+      }
+      else
+      {
+         return FALSE;
+      }
+   }
+   
    if ( READ_APPCONFIG(MP_FIRSTRUN) != 0 )
    {
       // make sure the essential things have proper values

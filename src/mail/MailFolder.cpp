@@ -729,26 +729,19 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
    }
 
    bool rc = true;
-   if(Lock()) // we don't want anything to happen in here
+   for(i = 0; i < n; i++)
    {
-      for(i = 0; i < n; i++)
+      msg = GetMessage((*selections)[i]);
+      if(msg)
       {
-         msg = GetMessage((*selections)[i]);
-         if(msg)
-         {
-            if(pd) pd->Update( 2*i + 1 );
-            rc &= mf->AppendMessage(*msg);
-            if(pd) pd->Update( 2*i + 2);
-            msg->DecRef();
-         }
+         if(pd) pd->Update( 2*i + 1 );
+         rc &= mf->AppendMessage(*msg);
+         if(pd) pd->Update( 2*i + 2);
+         msg->DecRef();
       }
-      UnLock();
-      mf->Ping(); // with our flags
-      mf->SetUpdateFlags(updateFlags); // restore old flags
    }
-   else
-      rc = false;
-   
+   mf->Ping(); // with our flags
+   mf->SetUpdateFlags(updateFlags); // restore old flags
    mf->DecRef();
    if(pd) delete pd;
    if(locked)

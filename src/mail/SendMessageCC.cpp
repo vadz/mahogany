@@ -561,7 +561,7 @@ SendMessageCC::SendOrQueue(void)
                        outbox.c_str());
          else
             msg = _("Article posted.");
-         STATUSMESSAGE(msg);
+         STATUSMESSAGE((msg));
       }
    }
    // make copy to "Sent" folder?

@@ -2333,3 +2333,56 @@ extern "C"
 
 #endif
 
+
+
+class wxLicenseDialog : public wxOptionsPageSubdialog
+{
+public:
+   wxLicenseDialog(ProfileBase *profile, wxWindow *parent);
+};
+
+wxLicenseDialog::wxLicenseDialog(ProfileBase *profile, wxWindow *parent)
+   : wxOptionsPageSubdialog(profile,parent,
+                            _("Mahogany Licensing Conditions"),
+                            "LicensingDialog")
+{
+   wxStaticBox *box = CreateStdButtonsAndBox(_("Licensing Conditions"), FALSE,
+                                             MH_DIALOG_LICENSE);
+   wxHtmlWindow *license = new wxHtmlWindow(this);
+
+   wxMemoryFSHandler::AddFile("splash.png", wxBITMAP(Mahogany),
+                              wxBITMAP_TYPE_PNG); 
+
+   license->SetPage("<body text=#000000 bgcolor=#ffffff>"
+                "<center><img src=\"memory:splash.png\"><br>"
+                "</center>"
+#include "license.html"
+      );
+   wxMemoryFSHandler::RemoveFile("splash.png");
+
+
+   wxLayoutConstraints *c = new wxLayoutConstraints;
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 6*LAYOUT_Y_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->bottom.SameAs(box, wxBottom, 6*LAYOUT_Y_MARGIN);
+   license->SetConstraints(c);
+
+   wxButton *button = (wxButton *) FindWindow(wxID_OK);
+   button->SetLabel(_("Accept"));
+   
+   button = (wxButton *) FindWindow(wxID_CANCEL);
+   button->SetLabel(_("Reject"));
+
+   SetDefaultSize(400, 400, FALSE /* not minimal */);
+   SetAutoLayout(TRUE);
+}
+
+
+extern
+bool ShowLicenseDialog(wxWindow *parent)
+{
+   ProfileBase *p = mApplication->GetProfile();
+   wxLicenseDialog dlg(p, parent);
+   return ( dlg.ShowModal() == wxID_OK );
+}

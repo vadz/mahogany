@@ -295,6 +295,9 @@ String GetFilterProgram(ProfileBase *profile);
 extern
 bool ReenablePersistentMessageBoxes(wxWindow *parent = NULL);
 
+/// Returns true if the license was accepted:
+extern bool ShowLicenseDialog(wxWindow *parent = NULL);
+
 #ifdef USE_SSL
 /// Accept or reject certificate
 extern "C"

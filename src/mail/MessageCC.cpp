@@ -236,12 +236,17 @@ MessageCC::GetHeader(void) const
    if(! folder)
       return NULL;
 
-   unsigned long len = 0;
-   const char *cptr = mail_fetchheader_full(folder->Stream(), m_uid,
-                                            NULL, &len, FT_UID);
-   String str(cptr, (size_t)len);
-   MailFolderCC::ProcessEventQueue();
-   return str.c_str();
+   if(folder->Lock())
+   {
+      unsigned long len = 0;
+      const char *cptr = mail_fetchheader_full(folder->Stream(), m_uid,
+                                               NULL, &len, FT_UID);
+      folder->UnLock();
+      String str(cptr, (size_t)len);
+      MailFolderCC::ProcessEventQueue();
+      return str.c_str();
+   }
+   return NULL;
 }
 
 void
@@ -256,12 +261,16 @@ MessageCC::GetHeaderLine(const String &line, String &value)
    slist.text.size = line.length();
    slist.text.data = (unsigned char *)strutil_strdup(line);
 
+   if(!folder->Lock())
+      return ;
+   
    unsigned long len;
    char *
       rc = mail_fetchheader_full (folder->Stream(),
                                   m_uid,
                                   &slist,
                                   &len,FT_UID);
+   folder->UnLock();
    value = String(rc, (size_t)len);
    char *val = strutil_strdup(value);
    // trim off trailing newlines/crs
@@ -346,11 +355,12 @@ MessageCC::Date(void) const
 String
 MessageCC::FetchText(void)
 {
-   if(folder)
+   CHECK_DEAD_RC("");
+   if(folder && folder->Lock())
    {
-      CHECK_DEAD_RC("");
       mailText = mail_fetchtext_full(folder->Stream(), m_uid,
                                      &m_MailTextLen, FT_UID);
+      folder->UnLock();
       MailFolderCC::ProcessEventQueue();
       return String(mailText, (size_t) m_MailTextLen);
    }
@@ -502,9 +512,12 @@ MessageCC::GetBody(void)
    {
       if(m_Body == NULL && folder)
       {
-         if(folder->Stream())
+         if(folder->Stream() && folder->Lock())
+         {
             m_Envelope = mail_fetchstructure_full(folder->Stream(),m_uid, &m_Body,
                                                   FT_UID);
+            folder->UnLock();
+         }
          else
          {
             folder->PingReopen();
@@ -530,11 +543,14 @@ MessageCC::GetStatus(
    unsigned int *month,
    unsigned int *year) const
 {
-   if(folder == NULL || ! ((MessageCC *)this)->GetBody())
+   if(folder == NULL
+      || ! ((MessageCC *)this)->GetBody()
+      || ! folder->Lock())
       return MailFolder::MSG_STAT_NONE;
 
-      
+   
    MESSAGECACHE *mc = mail_elt(folder->Stream(), mail_msgno(folder->Stream(),m_uid));
+   folder->UnLock();
    
    if(size)    *size = mc->rfc822_size;
    if(day)  *day = mc->day;
@@ -597,10 +613,13 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
    String const
       & sp = GetPartSpec(n);
 
+   if(! folder->Lock())
+      return NULL;
    char *cptr = mail_fetchbody_full(folder->Stream(),
                                     m_uid,
                                     (char *)sp.c_str(),
                                     &len, FT_UID);
+   folder->UnLock();
    MailFolderCC::ProcessEventQueue();
 
    if(lenptr == NULL)
@@ -770,11 +789,12 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
 
       ((MessageCC *)this)->GetBody(); // circumvene const restriction
 
-      if(folder)
+      if(folder && folder->Lock())
       {
          str = "";
          CHECK_DEAD();
          char *headerPart = mail_fetchheader_full(folder->Stream(),m_uid,NIL,&len,FT_UID);
+         folder->UnLock();
          str += String(headerPart, (size_t)len);
          str += ((MessageCC*)this)->FetchText();
          MailFolderCC::ProcessEventQueue();
