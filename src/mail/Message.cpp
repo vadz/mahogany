@@ -72,6 +72,14 @@ Message::ExpandParameter(MessageParameterList const & list, String
 static void SplitAddress(const String& addr,
                          String *fullname)
 {
+   ASSERT(fullname);
+   // The code below will crash for empty addresses
+   if(addr.Length() == 0)
+   {
+      *fullname = "";
+      return;
+   }
+
    // handle not only addresses of the form
    //         B. L. User <foo@bar>
    // but also the alternative form specified by RFC 822
