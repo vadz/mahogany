@@ -994,7 +994,7 @@ MailFolderCC::mm_log(String str, long errflg )
 #ifdef DEBUG
    msg << _(" error level: ") << strutil_ultoa(errflg);
 #endif
-   LOGMESSAGE((M_LOG_NOISE, Str(msg)));
+   LOGMESSAGE((M_LOG_VERBOSE, Str(msg)));
    const char *unexpected = "Unexpected change";
    if(strstr(str,unexpected) != NULL)
    {
@@ -1040,7 +1040,7 @@ MailFolderCC::mm_dlog(String str)
       msg += str;
    }
 
-   LOGMESSAGE((M_LOG_NOISE, Str(msg)));
+   LOGMESSAGE((M_LOG_VERBOSE, Str(msg)));
 }
 
 /** get user name and password
@@ -1213,8 +1213,8 @@ extern "C"
 {
 /* Mail fetch message overview using sequence numbers instead of UIDs!
  * Accepts: mail stream
- *	    sequence to fetch (no-UIDs but sequence numbers)
- *	    pointer to overview return function
+ *    sequence to fetch (no-UIDs but sequence numbers)
+ *    pointer to overview return function
  */
 
 void mail_fetch_overview_nonuid (MAILSTREAM *stream,char *sequence,overview_t ofn)

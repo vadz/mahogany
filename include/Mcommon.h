@@ -108,8 +108,8 @@ typedef long int lcoord_t;
 #  include <wx/log.h>
 
 #  define M_LOG_DEBUG   wxLOG_Debug
-#  define M_LOG_VERBOSE wxLOG_Verbose
-#  define M_LOG_DEFAULT wxLOG_Info
+#  define M_LOG_VERBOSE wxLOG_Info
+#  define M_LOG_DEFAULT wxLOG_Message
 #  define M_LOG_INFO    wxLOG_Message
 #  define M_LOG_ERROR   wxLOG_Warning
 #  define M_LOG_URGENT  wxLOG_Error
