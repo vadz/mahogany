@@ -32,7 +32,16 @@ SRC = $(wildcard *.cpp)
 HDR = $(SRC:.cpp=.h)
 DEP = $(SRC:.cpp=.d)
 
+ifeq ($(USE_MODULES),static)
+TARGETS = $(SRC:.cpp=.o)
+else
+ifeq ($(USE_MODULES),dynamic)
 TARGETS = $(SRC:.cpp=.so) $(SRC:.cpp=.mmd)
+else
+TARGETS=
+endif
+endif
+
 
 INTERFACE = ../../include/MInterface.h ../../include/MInterface.cpp
 

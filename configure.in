@@ -39,6 +39,7 @@ DEFAULT_USE_EXPERIMENTAL=0
 DEFAULT_USE_WXCONFIG=1
 DEFAULT_USE_LIBTOOL=0
 DEFAULT_USE_DOCXX=0
+DEFAULT_USE_MODULES=dynamic
 
 M_OVERRIDES(python,python,
 --with-python   use python scripting,
@@ -79,6 +80,10 @@ USE_LIBTOOL)
 M_OVERRIDES(ccostype,ccostype,
 --with-ccostype=xxx    use OS type xxx for c-client compilation,
 USE_CCOSTYPE)
+
+M_OVERRIDES(modules,modules,
+--with-modules=xxx    How to use plugin modules - set to static dynamic or none.,
+USE_MODULES)
 
 M_OVERRIDES(docxx,docxx,
 --with-doc++      use DOC++ for class documentation generation,
@@ -540,6 +545,36 @@ if test "x$CCOSTYPE" = "x" ; then
 	AC_MSG_ERROR("Cannot determine OS type for c-client library for your OS: ${OSTYPE}.")
 fi
 AC_SUBST(CCOSTYPE)
+
+
+dnl --------------------------------------------------------------------------
+dnl How do we want to use modules?
+dnl --------------------------------------------------------------------------
+
+if test "x$USE_MODULES" != "x"; then
+   MODULES="${USE_MODULES}"
+   case "$MODULES" in
+     none|None|NONE)
+       USE_MODULES=
+       MAKE_USE_MODULES=
+       ;;
+     dynamic|Dynamic|DYNAMIC)
+       USE_MODULES=1
+       USE_MODULES-STATIC=
+       MAKE_USE_MODULES="USE_MODULES=dynamic"
+       ;;
+     static|Static|STATIC)
+       USE_MODULES=1
+       USE_MODULES-STATIC=1
+       MAKE_USE_MODULES="USE_MODULES=static"
+       ;;
+     *)
+       AC_MSG_ERROR(Set --with-modules= to either static/dynamic/none!)
+  esac
+ fi
+AC_SUBST(MAKE_USE_MODULES)
+AC_DEFINE(USE_MODULES)
+AC_DEFINE(USE_MODULES_STATIC)
 
 dnl --------------------------------------------------------------------------
 dnl set up generators for class documentation

@@ -14,6 +14,10 @@ SUB_DIRS += Python
 MOBJS += Python/*.o
 endif
 
+ifeq ($(USE_MODULES), static)
+MOBJS += modules/*.o
+endif
+
 # build the dynamically linked binary by default
 all: subdirs
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)

@@ -606,6 +606,7 @@ int wxMApp::OnExit()
    UnloadModules();
    MAppBase::OnShutDown();
 
+   MModule_Cleanup();
    delete m_IconManager;
    delete m_Locale;
 
@@ -623,10 +624,10 @@ int wxMApp::OnExit()
 
    // as c-client lib doesn't seem to think that deallocating memory is
    // something good to do, do it at it's place...
-#ifdef OS_WIN
+//#ifdef OS_WIN
    free(mail_parameters((MAILSTREAM *)NULL, GET_HOMEDIR, NULL));
    free(mail_parameters((MAILSTREAM *)NULL, GET_NEWSRC, NULL));
-#endif // OS_WIN
+//#endif // OS_WIN
 
    return 0;
 }

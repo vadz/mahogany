@@ -2294,7 +2294,7 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
    {
       if(! wasDirty)
          ApplyStyle(line->GetStyleInfo(), dc);
-      if(forceAll || line->IsDirty() || (cpos && line->GetLineNumber() == cpos->y))
+      if(forceAll || wasDirty || line->IsDirty() || (cpos && line->GetLineNumber() == cpos->y))
       {
          // The following Layout() calls will update our
          // m_CurrentStyleInfo if needed.

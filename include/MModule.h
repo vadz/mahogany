@@ -132,7 +132,7 @@ extern "C"
    /** Function type for GetMVersion() function.
        @return pointer to a static buffer with the module description
    */
-   typedef const char  * (* MModule_GetMVersionFuncType )
+   typedef void (* MModule_GetMVersionFuncType )
       (int *version_major, int *version_minor,
        int *version_release);
    /** Function called just before DLL gets unloaded, i.e. when the
@@ -143,13 +143,32 @@ extern "C"
 }
 //@}
 
+#if 0
 /** Function to resolve main program symbols from modules.
  */
 extern "C"
 {
    extern void * MModule_GetSymbol(const char *name);
 }
-   
+#endif
+
+
+#ifdef USE_MODULES_STATIC
+/** Used by modules to register themselves statically.
+    Return code is always 1. */
+extern
+int MModule_AddStaticModule(MModule_InitModuleFuncType init,
+                            MModule_GetNameFuncType gn,
+                            MModule_GetInterfaceFuncType gi,
+                            MModule_GetDescriptionFuncType gs,
+                            MModule_GetVersionFuncType gv,
+                            MModule_GetMVersionFuncType gmv,
+                            MModule_UnLoadModuleFuncType unl);
+#endif
+
+/** Call this before application exit. */
+extern
+void MModule_Cleanup(void);
 
 /**@name Two macros to make testing for compatible versions easier. */
 //@{

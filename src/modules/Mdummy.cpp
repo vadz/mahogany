@@ -113,6 +113,17 @@ extern "C"
 } // extern "C"
 
 
+#ifdef USE_MODULES_STATIC
+/** Used by modules to register themselves statically.
+    Return code is always 1. */
+static int dummy = MModule_AddStaticModule(InitMModule,
+                                           GetName, GetInterface, GetDescription,
+                                           GetModuleVersion, GetMVersion, 
+                                           UnLoadMModule);
+#endif   
+   
+
+
 
 ///------------------------------
 /// Own functionality:

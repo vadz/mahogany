@@ -102,6 +102,12 @@
 /** Define if you want to use wxThreads. (experimental) */
 #undef USE_THREADS
 
+/** Define if you want to use Modules. */
+#undef USE_MODULES
+
+/** Define if you want to link Modules statically. */
+#undef USE_MODULES_STATIC
+
 /** This define carries some information about the operating system
     and release that M is compiled for.
 */

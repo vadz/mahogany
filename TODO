@@ -30,13 +30,7 @@ $Id$
 		- scrollbars don't appear immediately in long
 		  composeview messages
 
-8		Find out where Mahogany is when laying out really long 
-		text messages. How can we speed this up? Why do
-		redraws take long, too?
-
 9	KB	Find MEvent leaks in ASMailFolder/folder/msgview code
-9	KB	Find "cannot create INBOX" bug - trace it
-9	KB	Debug IconManager load path
 		Check before reopening a closed MailFolder in
 		MailCollector, some kind of MailFolder::IsOK()?
 
@@ -45,8 +39,6 @@ $Id$
 		    updating listing? CHECK
 
 9               initial dialogs (wxConfig errors) show unknown icon
-
-9	KB	check password prompt in mailfolder
 
 5	KB	subject in embedded rfc822 messages shows filename
 		instead???
