@@ -25,6 +25,8 @@ class MTextStyle;
 #include "MModule.h"
 #include "MessageView.h"      // we use MessageView in inline funcs below
 
+#include <wx/gdicmn.h>        // for wxNullColour
+
 // the message viewer module interface name
 #define MESSAGE_VIEWER_INTERFACE _T("MessageViewer")
 

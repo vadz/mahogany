@@ -28,6 +28,7 @@
    #include "MApplication.h"
 
    #include <wx/textdlg.h>
+   #include <wx/hashmap.h>
 #endif //USE_PCH
 
 #include "modules/MCrypt.h"

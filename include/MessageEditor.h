@@ -15,6 +15,7 @@
 #define _MESSAGEEDITOR_H_
 
 class WXDLLEXPORT wxBitmap;
+class WXDLLEXPORT wxPoint;
 class WXDLLEXPORT wxTextAttr;
 class WXDLLEXPORT wxWindow;
 
