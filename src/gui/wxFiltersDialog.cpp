@@ -1615,7 +1615,7 @@ public:
    virtual bool OnVisitFolder(const wxString& folderName)
       {
          MFolder* folder = MFolder::Get(folderName);
-         CHECK( folder, NULL, "RenameAFilterTraversal: NULL folder" );
+         CHECK( folder, false, "RenameAFilterTraversal: NULL folder" );
          wxArrayString filters = folder->GetFilters();
          size_t countFilters = filters.GetCount();
          int foundInThisFolder = 0;
