@@ -52,7 +52,7 @@ extern const MOption MP_PERSONALNAME;
 // die horribly if the buffer is overflown -- but what to do except
 // complaining to MRC who'd just tell me that he doesn't care about such
 // "minor" problem? #$#$^$%&^%^&!!
-static const size_t MAX_ADDRESS_LEN = 8192;
+static const size_t MAX_ADDRESS_LEN = 16384;
 
 // ----------------------------------------------------------------------------
 // private functions
