@@ -81,6 +81,7 @@ extern const MOption MP_USE_FOLDER_CREATE_WIZARD;
 // ----------------------------------------------------------------------------
 
 extern const MPersMsgBox *M_MSGBOX_SAVE_PWD;
+extern const MPersMsgBox *M_MSGBOX_USE_FOLDER_CREATE_WIZARD;
 
 // ----------------------------------------------------------------------------
 // global vars and functions
@@ -212,6 +213,9 @@ protected:
    wxWizardPage *GetPageById(MWizardPageId id) const
       { return GetWizard()->GetPageById(id); }
 
+   // set the label of the next button depending on whether we're going to
+   // advance to the next page or if this is the last one
+   void SetNextButtonLabel(bool isLast);
 
    // creates an "enhanced panel" for placing controls into under the static
    // text (explanation)
@@ -268,6 +272,16 @@ wxEnhancedPanel *MWizardPage::CreateEnhancedPanel(wxStaticText *text)
    panel->SetAutoLayout(true);
 
    return panel;
+}
+
+void MWizardPage::SetNextButtonLabel(bool isLast)
+{
+   wxButton * const
+      btn = wxDynamicCast(GetParent()->FindWindow(wxID_FORWARD), wxButton);
+   if ( btn )
+   {
+      btn->SetLabel(isLast ? _("&Finish") : _("&Next >"));
+   }
 }
 
 
@@ -399,14 +413,7 @@ MWizardPageId MWizard_ImportFolders_ChoicePage::GetNextPageId() const
 
 void MWizard_ImportFolders_ChoicePage::OnCheckBox(wxCommandEvent& event)
 {
-   wxButton *btn = (wxButton *)GetParent()->FindWindow(wxID_FORWARD);
-   if ( btn )
-   {
-      if ( GetNextPageId() != MWizard_PageNone )
-         btn->SetLabel(_("&Next >"));
-      else
-         btn->SetLabel(_("&Finish"));
-   }
+   SetNextButtonLabel(GetNextPageId() == MWizard_PageNone);
 }
 
 // MWizard_ImportFolders_MHPage
@@ -582,10 +589,24 @@ public:
    virtual bool TransferDataToWindow();
    virtual bool TransferDataFromWindow();
 
+protected:
+   void OnCheckbox(wxCommandEvent& event);
+
+   bool ShouldSkipWizard() const
+   {
+      return m_checkNoWizard->GetValue() || m_checkNeverWizard->GetValue();
+   }
+
 private:
-   wxCheckBox *m_checkNoWizard;
+   wxCheckBox *m_checkNoWizard,
+              *m_checkNeverWizard;
+
+   DECLARE_EVENT_TABLE()
 };
 
+BEGIN_EVENT_TABLE(MWizard_CreateFolder_WelcomePage, MWizardPage)
+   EVT_CHECKBOX(-1, MWizard_CreateFolder_WelcomePage::OnCheckbox)
+END_EVENT_TABLE()
 
 MWizard_CreateFolder_WelcomePage::
 MWizard_CreateFolder_WelcomePage(MWizard *wizard)
@@ -606,18 +627,20 @@ MWizard_CreateFolder_WelcomePage(MWizard *wizard)
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(msg);
    wxArrayString labels;
-   labels.Add(_("&Don't use the wizard"));
+   labels.Add(_("&Don't use the wizard this time"));
+   labels.Add(_("&Never use the wizard again"));
 
-   long maxwidth = GetMaxLabelWidth(labels, panel->GetCanvas());
+   long wMax = GetMaxLabelWidth(labels, panel->GetCanvas());
 
-   m_checkNoWizard = panel->CreateCheckBox(labels[0], maxwidth, NULL);
+   m_checkNoWizard = panel->CreateCheckBox(labels[0], wMax, NULL);
+   m_checkNeverWizard = panel->CreateCheckBox(labels[1], wMax, m_checkNoWizard);
 
    panel->Layout();
 }
 
 MWizardPageId MWizard_CreateFolder_WelcomePage::GetNextPageId() const
 {
-   if ( m_checkNoWizard->GetValue() )
+   if ( ShouldSkipWizard() )
    {
       // cancel wizard
       ((CreateFolderWizard*)GetWizard())->SetUserWantsDialog();
@@ -626,6 +649,13 @@ MWizardPageId MWizard_CreateFolder_WelcomePage::GetNextPageId() const
    }
 
    return MWizardPage::GetNextPageId();
+}
+
+void MWizard_CreateFolder_WelcomePage::OnCheckbox(wxCommandEvent& event)
+{
+   // if any of our checkboxes if checked, we close the wizard right after this
+   // page so change the label to reflect it
+   SetNextButtonLabel(ShouldSkipWizard());
 }
 
 bool MWizard_CreateFolder_WelcomePage::TransferDataToWindow()
@@ -645,9 +675,27 @@ bool MWizard_CreateFolder_WelcomePage::TransferDataFromWindow()
    if ( !MWizardPage::TransferDataFromWindow() )
       return false;
 
-   // save the checkbox value for the next run
-   mApplication->GetProfile()->writeEntry(MP_USE_FOLDER_CREATE_WIZARD,
-                                          !m_checkNoWizard->GetValue());
+   if ( m_checkNeverWizard->GetValue() )
+   {
+      wxLogMessage(_("You have chosen to never use the wizard for the "
+                     "folder creation.\n"
+                     "\n"
+                     "If you change your mind later, you can always go to\n"
+                     "\"Reenable disabled message boxes\" dialog in the last\n"
+                     "page of the \"Preferences\" dialog and enable it back."));
+
+      // show it now, before showing the options dialog
+      wxLog::FlushActive();
+
+      const String path = GetPersMsgBoxName(M_MSGBOX_USE_FOLDER_CREATE_WIZARD);
+      wxPMessageBoxDisable(path, wxNO);
+   }
+   else // we're not disabled
+   {
+      // save the checkbox value for the next run
+      mApplication->GetProfile()->writeEntry(MP_USE_FOLDER_CREATE_WIZARD,
+                                             !m_checkNoWizard->GetValue());
+   }
 
    return true;
 }
@@ -1415,90 +1463,105 @@ MWizard::GetPageById(MWizardPageId id)
 MFolder *
 RunCreateFolderWizard(bool *wantsDialog, MFolder *parent, wxWindow *parentWin)
 {
-   CreateFolderWizard *wizard = new CreateFolderWizard(parent, parentWin);
    MFolder *newfolder = NULL;
-   if ( wantsDialog )
-      *wantsDialog = false;
-   if ( wizard->Run() )
+
+   // ensure that the pointer is always valid
+   bool dummyWantsDialog;
+   if ( !wantsDialog )
+      wantsDialog = &dummyWantsDialog;
+
+   // are we configured to skip the wizard completely?
+   const String path = GetPersMsgBoxName(M_MSGBOX_USE_FOLDER_CREATE_WIZARD);
+   if ( wxPMessageBoxIsDisabled(path) )
    {
-      if ( wizard->UserWantsDialog() )
+      *wantsDialog = true;
+   }
+   else // wizard not disabled
+   {
+      CreateFolderWizard *wizard = new CreateFolderWizard(parent, parentWin);
+
+      *wantsDialog = false;
+
+      if ( wizard->Run() )
       {
-         if ( wantsDialog )
+         if ( wizard->UserWantsDialog() )
+         {
             *wantsDialog = true;
-      }
-      else // wizard completed successfully, create folder
-      {
-         CreateFolderWizard::FolderParams *params = wizard->GetParams();
-         MFolderType type = params->m_FolderType;
-
-         // collect mail from the POP3 folders by default
-         if ( type == MF_POP )
-         {
-            params->m_FolderFlags |= MF_FLAGS_INCOMING;
          }
-
-         newfolder = CreateFolderTreeEntry(
-            parent,
-            params->m_Name,
-            type,
-            params->m_FolderFlags,
-            params->m_Path,
-            true // notify about folder creation
-         );
-
-         if ( newfolder )
+         else // wizard completed successfully, create folder
          {
-            Profile_obj p(newfolder->GetProfile());
+            CreateFolderWizard::FolderParams *params = wizard->GetParams();
+            MFolderType type = params->m_FolderType;
 
-            String serverKey;
-            switch ( type )
+            // collect mail from the POP3 folders by default
+            if ( type == MF_POP )
             {
-               case MF_IMAP:
-                  serverKey = GetOptionName(MP_IMAPHOST);
-                  break;
-
-               case MF_NNTP:
-                  serverKey = GetOptionName(MP_NNTPHOST);
-                  break;
-
-               case MF_POP:
-                  serverKey = GetOptionName(MP_POPHOST);
-                  break;
-
-               default:
-                  ; // nothing
+               params->m_FolderFlags |= MF_FLAGS_INCOMING;
             }
 
-            if ( !serverKey.empty() )
-            {
-               p->writeEntry(serverKey, params->m_Server);
-            }
+            newfolder = CreateFolderTreeEntry(
+               parent,
+               params->m_Name,
+               type,
+               params->m_FolderFlags,
+               params->m_Path,
+               true // notify about folder creation
+            );
 
-            if ( FolderTypeHasUserName(type) )
+            if ( newfolder )
             {
-               p->writeEntry(MP_USERNAME, params->m_Login);
+               Profile_obj p(newfolder->GetProfile());
 
-               if ( !params->m_Password.empty() )
+               String serverKey;
+               switch ( type )
                {
-                  p->writeEntry(MP_FOLDER_PASSWORD,
-                                strutil_encrypt(params->m_Password));
+                  case MF_IMAP:
+                     serverKey = GetOptionName(MP_IMAPHOST);
+                     break;
+
+                  case MF_NNTP:
+                     serverKey = GetOptionName(MP_NNTPHOST);
+                     break;
+
+                  case MF_POP:
+                     serverKey = GetOptionName(MP_POPHOST);
+                     break;
+
+                  default:
+                     ; // nothing
+               }
+
+               if ( !serverKey.empty() )
+               {
+                  p->writeEntry(serverKey, params->m_Server);
+               }
+
+               if ( FolderTypeHasUserName(type) )
+               {
+                  p->writeEntry(MP_USERNAME, params->m_Login);
+
+                  if ( !params->m_Password.empty() )
+                  {
+                     p->writeEntry(MP_FOLDER_PASSWORD,
+                                   strutil_encrypt(params->m_Password));
+                  }
+               }
+
+               if ( params->m_CheckOnStartup )
+               {
+                  p->writeEntry(MP_COLLECTATSTARTUP, false);
+               }
+
+               if ( params->m_LeaveOnServer )
+               {
+                  p->writeEntry(MP_MOVE_NEWMAIL, false);
                }
             }
-
-            if ( params->m_CheckOnStartup )
-            {
-               p->writeEntry(MP_COLLECTATSTARTUP, false);
-            }
-
-            if ( params->m_LeaveOnServer )
-            {
-               p->writeEntry(MP_MOVE_NEWMAIL, false);
-            }
          }
       }
-   }
 
-   delete wizard;
+      delete wizard;
+   }
 
    return newfolder;
 }

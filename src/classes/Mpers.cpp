@@ -159,6 +159,7 @@ static const struct
    { "RememberPGPPassphrase",    gettext_noop("remember PGP/GPG passphrase in memory") },
    { "GetPGPPubKey",             gettext_noop("retrieve PGP/GPG public keys from key server") },
    { "SearchAgainIfNoMatch",     gettext_noop("propose to search again if no matches were found") },
+   { "UseCreateFolderWizard",    gettext_noop("use wizard when creating a new folder") },
 };
 
 // ============================================================================
