@@ -6,6 +6,7 @@
 Release 0.65 '???' ??? ??, 2002
 -------------------------------------------------------------------------------
 
+05.12.02 VZ: added trivial text markup (*bold* and _italic_ conventions) filter
 03.12.02 VZ: decrypting and verifying PGP messages starts to work
 19.10.02 MC: added new filter tests and actions for working with flags
 15.09.02 VZ: added an option to show text [only] in the toolbar buttons
