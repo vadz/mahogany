@@ -1742,26 +1742,25 @@ static bool findIP(String &header,
    toExamine = header;
    while(toExamine.Length() > 0)
    {
-         if((pos = toExamine.Find(openChar)) == wxNOT_FOUND)
-            return false;
-         ip = toExamine.Mid(pos+1);
-         closePos = ip.Find(closeChar);
-         if(closePos == wxNOT_FOUND)
-            // no second bracket found
-            break;
-         if(sscanf(ip.c_str(), "%d.%d.%d.%d", a,b,c,d) != 4)
-         {
-            // no valid IP number behind open bracket, continue
-            // search:
-            ip = ip.Mid(closePos+1);
+      if((pos = toExamine.Find(openChar)) == wxNOT_FOUND)
+         break;
+      ip = toExamine.Mid(pos+1);
+      closePos = ip.Find(closeChar);
+      if(closePos == wxNOT_FOUND)
+         // no second bracket found
+         break;
+      if(sscanf(ip.c_str(), "%d.%d.%d.%d", a,b,c,d) != 4)
+      {
+         // no valid IP number behind open bracket, continue
+         // search:
+         ip = ip.Mid(closePos+1);
             toExamine = ip;
-         }
-         else // read the IP number
-         {
-            header = ip;
-            ip = ip.Mid(closePos+1);
+      }
+      else // read the IP number
+      {
+         header = ip.Mid(closePos+1);
             return true;
-         }
+      }
    }
    header = "";
    return false;
