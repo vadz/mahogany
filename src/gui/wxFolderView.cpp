@@ -3413,7 +3413,7 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
       READ_CONFIG_BOOL(profile, MP_PREVIEW_ON_SELECT);
 
    settings->previewDelay = READ_CONFIG(profile, MP_FVIEW_PREVIEW_DELAY);
-   settings->focusOnMouse = READ_CONFIG_BOOL(m_Profile, MP_FOCUS_FOLLOWSMOUSE);
+   settings->focusOnMouse = READ_CONFIG_BOOL(profile, MP_FOCUS_FOLLOWSMOUSE);
 
    ReadColumnsInfo(profile, settings->columns);
 }
