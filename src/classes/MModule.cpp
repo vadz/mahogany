@@ -106,6 +106,22 @@ void MModule_Cleanup(void)
    }
 }
 
+
+/* When a module gets deleted it must make sure that it is no longer
+   in the module list. */
+MModuleCommon::~MModuleCommon()
+{
+   if(gs_MModuleList)
+   {
+      MModuleList::iterator i;
+      for(i = gs_MModuleList->begin();
+          i != gs_MModuleList->end();
+          i++)
+         if( (**i).m_Module == this )
+            gs_MModuleList.erase(i); // remove our entry
+   }
+}
+
 static
 MModule *FindModule(const String & name)
 {

@@ -1,4 +1,4 @@
-#This file was created by <karsten> Mon Aug 30 21:14:39 1999
+#This file was created by <karsten> Thu Jan  6 21:54:20 2000
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -35,20 +35,20 @@ Mahogany User Manual
 \newline 
 
 \shape default 
-for Version 0.23a+
+for Version 0.24a+
 \newline 
 
 \begin_inset Quotes eld
 \end_inset 
 
-Viewforth
+Polwarth III
 \begin_inset Quotes erd
 \end_inset 
 
 
 \layout Author
 
-Copyright 1997-1999 by Karsten Ballüder 
+Copyright 1997-2000 by Karsten Ballüder 
 \newline 
  Written by Karsten Ballüder and Vadim Zeitlin
 \newline 

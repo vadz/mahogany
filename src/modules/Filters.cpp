@@ -2057,7 +2057,7 @@ FilterRuleImpl::Apply(class MailFolder *mf, bool NewOnly) const
       for(size_t i = 0; i < hil->Count() && rc != 0; i++)
       {
          const HeaderInfo * hi = (*hil)[i];
-         if( ! NewOnly || // handle all or only new ones:
+         if( (! NewOnly) || // handle all or only new ones:
              (
                 (hi->GetStatus() & MailFolder::MSG_STAT_RECENT)
                 && ! (hi->GetStatus() & MailFolder::MSG_STAT_SEEN)
@@ -2078,7 +2078,6 @@ FilterRuleImpl::FilterRuleImpl(const String &filterrule,
                                MModule_Filters *mod
    ) 
 {
-
    m_FilterModule = mod;
    m_Parser = Parser::Create(filterrule, interface);
    m_Program = m_Parser->Parse();

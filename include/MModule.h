@@ -105,12 +105,22 @@ public:
 //@}
 
 /**
+   Small class to ensure proper deregistration of modules on
+   deletion.
+ */
+class MModuleCommon : public MObjectRC
+{
+protected:
+   virtual ~MModuleCommon();
+};
+
+/**
    This is the interface for Mahogany extension modules.
    Only simple types like const char * are used to keep modules as
    simple as possible and reduce dependencies on other libraries
    (e.g. wxWindows or libstc++).
 */
-class MModule : public MObjectRC
+class MModule : public MModuleCommon
 {
 public:
    /** MModule interface, this needs to be implemented by the actual
