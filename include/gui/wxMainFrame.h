@@ -27,6 +27,8 @@ public:
    wxMainFrame(const String &iname = String("wxMainFrame"),
                wxFrame *parent = NULL);
 
+   virtual ~wxMainFrame();
+
    // callbacks
    void OnCommandEvent(wxCommandEvent &);
    void OnCloseWindow(wxCloseEvent &);

@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/pwindow.h
-// Purpose:     wxPWindow class declaration
+// Name:        wx/persctrl.h
+// Purpose:     persistent classes declarations
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     18/09/98
@@ -24,15 +24,38 @@ class wxPHelper;
 #include <wx/notebook.h>
 #include <wx/combobox.h>
 
+// ----------------------------------------------------------------------------
+// a helper class for persistent controls
+// ----------------------------------------------------------------------------
+
+class wxPControls
+{
+public:
+    // static functions
+        // set the default prefix for storing the configuration settings
+    static void SetSettingsPath(const wxString& path) { ms_pathPrefix = path; }
+        // retrieve the default prefix for storing the configuration settings
+    static const wxString& GetSettingsPath() { return ms_pathPrefix; }
+
+private:
+    // the default value is empty
+    static wxString ms_pathPrefix;
+};
+
 /*
    The persistent classes themselves start from here. They behave exactly in
-   the same was as the standard wxWindows they derive from except that they
-   save some configuration information when deleted and restore it when
+   the same was as the standard wxWindows classes they derive from except that
+   they save some configuration information when deleted and restore it when
    recreated. Each of them takes 2 additional parameters in the ctor and
    Create() function (which all of wxWindows controls have):
+
     1. The first one is the path where the control should save/look for the
        configuration info, in general a descriptive name of the control is
-       probably enough.
+       probably enough. By default, the prefix returned by
+       wxPControls::GetSettingsPath() is prepended to this parameter if it
+       doesn't start with a backslash, so you can choose another location for
+       all this stuff with wxPControls::SetSettingsPath().
+
     2. The last one is the config object to use, by default the global
        application one will be used which is the easiest (and so recommended)
        way to use these classes.
@@ -46,7 +69,7 @@ class wxPHelper;
 // persistent notebook remembers the last active page
 // ----------------------------------------------------------------------------
 
-class wxPNotebook : public wxNotebook
+class WXDLLEXPORT wxPNotebook : public wxNotebook
 {
 public:
     // ctors and dtor
@@ -99,7 +122,7 @@ private:
 // rather as a (single line) text entry, as its name suggests. In particular,
 // you shouldn't add/remove strings from this combobox manually (but using
 // SetValue (and, of course, GetValue) is perfectly ok).
-class wxPTextEntry : public wxComboBox
+class WXDLLEXPORT wxPTextEntry : public wxComboBox
 {
 public:
     // ctors
@@ -146,5 +169,31 @@ protected:
 
     wxPHelper *m_persist;
 };
+
+// ----------------------------------------------------------------------------
+// This function shows to the user a message box with a "don't show this
+// message again" check box. If the user checks, it's state will be saved to
+// the config object and the next call to this function will return the value
+// which was selected the last time (Yes/No/Ok/Cancel...) without showing the
+// message box at all.
+//
+// To reset it (i.e. make message box appear again) just delete the value
+// config key where the last value is stored. This key is specified by the
+// configPath parameter according to the following rules:
+//    1. If configPath is an absolute path, it's used as is
+//    2. If it's a relative path (i.e. doesn't start with '/'), it's appended
+//       to the default config path wxPControls::GetSettingsPath()
+//
+// The wontShowAgain parameter may be used to pass in a pointer to a bool which
+// will be true if the user checked the check box.
+// ----------------------------------------------------------------------------
+
+extern WXDLLEXPORT int wxPMessageBox(const wxString& configPath,
+                                     const wxString& message,
+                                     const wxString& caption,
+                                     long style = wxYES_NO | wxICON_QUESTION,
+                                     wxWindow *parent = NULL,
+                                     bool *wontShowAgain = NULL,
+                                     wxConfigBase *config = NULL);
 
 #endif // _WX_PWINDOW_H_

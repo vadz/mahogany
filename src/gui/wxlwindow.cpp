@@ -10,7 +10,7 @@
 #   pragma implementation "wxlwindow.h"
 #endif
 
-//#include "Mpch.h"
+#include "Mpch.h"
 
 #ifdef M_BASEDIR
 #   ifndef USE_PCH

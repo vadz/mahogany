@@ -61,30 +61,40 @@ void   MDialog_FatalErrorMessage(char const *message,
                                  MWindow *parent = NULL,
                                  char const *title = MDIALOG_FATALERRTITLE);
 
-/** display normal message:
+/** display normal message and, if configPath != NULL, give a user a checkbox
+    "don't show this message again" which allows not to show the same message
+    again.
        @param message the text to display
        @param parent   the parent frame
        @param title   title for message box window
-       @param modal   true to make messagebox modal
+       @param configPath the profile path to use (doesn't use profile if NULL)
    */
 void   MDialog_Message(char const *message,
                        MWindow *parent = NULL,
                        char const *title = MDIALOG_MSGTITLE,
-                       bool modal = false);
+                       const char *configPath = NULL);
 
-/** simple Yes/No dialog
+/** profile-aware Yes/No dialog: has a "don't show this message again" checkbox
+    and remembers in the profile if it had been checked to avoid showing this
+    dialog the next time.
        @param message the text to display
        @param parent   the parent frame
        @param title   title for message box window
-       @param modal   true to make messagebox modal
        @param YesDefault true if Yes button is default, false for No as default
+       @param configPath the profile path to use (doesn't use profile if NULL)
+       @param configBool indicates that configPath points to a value which takes
+              boolean values and is useful when configPath can also be set from
+              some other location (options dlg...) - otherwise, don't give this
+              parameters and everything is managed automatically.
+
        @return true if Yes was selected
    */
 bool   MDialog_YesNoDialog(char const *message,
                            MWindow *parent = NULL,
-                           bool modal = false,
                            char const *title = MDIALOG_YESNOTITLE,
-                           bool YesDefault = true);
+                           bool YesDefault = true,
+                           const char *configPath = NULL,
+                           bool configBool = false);
 
 /** Filerequester
        @param message the text to display

@@ -402,6 +402,7 @@ strutil_isabsolutepath(const String &path)
 String
 strutil_expandpath(const String &ipath)
 {
+#ifdef OS_UNIX
    String path;
    
    if(strutil_isempty(ipath))
@@ -425,7 +426,7 @@ strutil_expandpath(const String &ipath)
             entry = getpwent();
             if(entry && entry->pw_name == user)
                break;
-         }while(entry);
+         } while(entry);
          if(entry)
             path << entry->pw_dir;
          else
@@ -436,6 +437,7 @@ strutil_expandpath(const String &ipath)
       }
    }
    else
+#endif // Unix
       return ipath;
 }
 

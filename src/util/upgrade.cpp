@@ -26,18 +26,20 @@
 #  include "Profile.h"
 
 #  include "MApplication.h"
+#endif  //USE_PCH
 
-#  include "Mdefaults.h"
+#  include "Message.h"
+#  include "MailFolder.h"
+#  include "MailFolderCC.h"
+#  include "SendMessageCC.h"
+
 #ifdef USE_PYTHON
 #  include <Python.h>
 #  include "PythonHelp.h"
 #  include "MScripts.h"
 #endif
-#   include "Message.h"
-#   include "MailFolder.h"
-#   include "MailFolderCC.h"
-#   include "SendMessageCC.h"
-#endif  //USE_PCH
+
+#include "Mdefaults.h"
 
 #include <wx/log.h>
 
@@ -70,11 +72,13 @@ enum MVersion
 static bool
 UpgradeFromNone()
 {
+#if 0 // VZ: this code has no effect!
    // we do it here and only once because it takes a long time
    PathFinder pf(READ_APPCONFIG(MC_PATHLIST));
    pf.AddPaths(M_PREFIX,true);
    bool found;
    String strRootPath = pf.FindDir(READ_APPCONFIG(MC_ROOTDIRNAME), &found);
+#endif // 0
    
    wxLog *log = wxLog::GetActiveTarget();
    if ( log ) {
@@ -196,8 +200,7 @@ VerifyMailConfig(void)
    // we send a mail to ourself
 
    String me;
-   me = READ_APPCONFIG(MP_USERNAME);
-   me << '@' << READ_APPCONFIG(MP_HOSTNAME);
+   me << READ_APPCONFIG(MP_USERNAME) << '@' << READ_APPCONFIG(MP_HOSTNAME);
 
    String nil;
    SendMessageCC  sm(mApplication->GetProfile(),
@@ -207,9 +210,11 @@ VerifyMailConfig(void)
    sm.AddPart(Message::MSG_TYPETEXT, msg.c_str(), msg.length());
    sm.Send();  
 
-   msg = _("Sent email message to:\n");
-   msg += me;
-   msg += _("\nPlease check whether it arrives.");
-   INFOMESSAGE((msg));
+   msg.Empty();
+   msg << _("Sent email message to:\n")
+       << me
+       << _("\nPlease check whether it arrives.");
+   MDialog_Message(msg, NULL, _("Testing your configuration"), "TestMailSent");
+
    return true; // till we know something better
 }

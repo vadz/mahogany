@@ -27,7 +27,6 @@
 #   include "gui/wxMApp.h"
 #   include "MailFolder.h"
 #   include "Message.h"
-#   include "MHelp.h"
 #endif
 
 #ifdef USE_PYTHON
@@ -35,15 +34,17 @@
 #  include "PythonHelp.h"
 #endif // Python
 
+#include "MHelp.h"
+
 #include "FolderView.h"
 #include "MDialogs.h"
 
 #include "gui/wxIconManager.h"
 #include "gui/wxOptionsDlg.h"
 #include "adb/AdbFrame.h"
-#include   "gui/wxMFrame.h"
-#include   "gui/wxComposeView.h"
-#include   "gui/wxFolderView.h"
+#include "gui/wxMFrame.h"
+#include "gui/wxComposeView.h"
+#include "gui/wxFolderView.h"
 
 IMPLEMENT_DYNAMIC_CLASS(wxMFrame, wxFrame)
 

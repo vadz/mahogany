@@ -18,6 +18,7 @@
 // fwd decl
 class wxLog;
 class wxIconManager;
+class wxHelpController;
 
 // ----------------------------------------------------------------------------
 // wxMApp

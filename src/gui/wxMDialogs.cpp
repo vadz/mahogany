@@ -316,13 +316,26 @@ MDialog_FatalErrorMessage(const char *message,
        @param modal  true to make messagebox modal
    */
 void
-MDialog_Message(const char *msg,
+MDialog_Message(const char *message,
                 MWindow *parent,
                 const char *title,
-                bool /* modal */)
+                const char *configPath)
 {
-   wxMessageBox(msg, wxString("M:")+title, Style(wxOK|wxICON_INFORMATION),
-                GetParent(parent));
+   wxString caption = "M: ";
+   caption += title;
+
+   if ( configPath != NULL )
+   {
+      wxPMessageBox(configPath, message, caption,
+                    wxOK | wxICON_INFORMATION | wxCENTRE,
+                    GetParent(parent));
+   }
+   else
+   {
+      wxMessageBox(message, caption,
+                   Style(wxOK | wxICON_INFORMATION),
+                   GetParent(parent));
+   }
 }
 
 
@@ -336,13 +349,38 @@ MDialog_Message(const char *msg,
    */
 bool
 MDialog_YesNoDialog(const char *message,
-             MWindow *parent,
-             bool /* modal */,
-             const char *title,
-             bool /* YesDefault */)
+                    MWindow *parent,
+                    const char *title,
+                    bool /* YesDefault */,
+                    const char *configPath,
+                    bool configBool)
 {
-   return wxMessageBox(message, wxString("M:")+title, Style(wxYES_NO|wxICON_QUESTION),
-                       GetParent(parent)) == wxYES;
+   wxString caption = "M: ";
+   caption += title;
+
+   if ( configPath != NULL )
+   {
+      bool wontShowAgain;
+      wxString path = configBool ? wxString(configPath).Right('/') : configPath;
+
+      bool rc = wxPMessageBox(path, message, caption,
+                              wxYES_NO | wxICON_QUESTION | wxCENTRE,
+                              GetParent(parent), &wontShowAgain) == wxYES;
+
+      if ( configBool && wontShowAgain )
+      {
+         // remember it in other place too
+         wxConfigBase::Get()->Write(configPath, (long)0);
+      }
+
+      return rc;
+   }
+   else
+   {
+      return wxMessageBox(message, caption,
+                          Style(wxYES_NO | wxICON_QUESTION),
+                          GetParent(parent)) == wxYES;
+   }
 }
 
 
@@ -688,7 +726,7 @@ wxPEP_Folder::wxPEP_Folder(ProfileBase *profile, wxWindow *parent)
                                           wxPoint(xRadio, 2*LAYOUT_Y_MARGIN),
                                           wxSize(-1,-1),
                                           5, m_choices,
-                                          1, wxRA_VERTICAL );
+                                          1, wxRA_HORIZONTAL );
 
    int widthRadio, heightRadio;
    m_FolderTypeRadioBox->GetSize(&widthRadio, &heightRadio);

@@ -88,6 +88,7 @@ enum ConfigFields
   ConfigField_MainFolder,
   ConfigField_FoldersLast = ConfigField_MainFolder,
 
+#ifdef USE_PYTHON
   // python
   ConfigField_PythonFirst = ConfigField_FoldersLast,
   ConfigField_EnablePython,
@@ -99,6 +100,9 @@ enum ConfigFields
   ConfigField_CallbackSetFlag,
   ConfigField_CallbackClearFlag,
   ConfigField_PythonLast = ConfigField_CallbackClearFlag,
+#else  // !USE_PYTHON
+  ConfigField_PythonLast = ConfigField_FoldersLast,
+#endif // USE_PYTHON
 
   // other options
   ConfigField_OthersFirst = ConfigField_PythonLast,
@@ -164,7 +168,7 @@ private:
   wxTextCtrl *m_text;
 };
 
-class wxOptionsDialog : public wxFrame
+class wxOptionsDialog : public wxDialog
 {
 public:
   wxOptionsDialog(wxFrame *parent);
@@ -179,6 +183,7 @@ public:
   void OnOK(wxCommandEvent& event);
   void OnApply(wxCommandEvent& event);
   void OnCancel(wxCommandEvent& event);
+
 protected:
    /// ask for test
    void DoTest(void);
@@ -188,7 +193,7 @@ private:
   wxButton    *m_btnOk,
               *m_btnApply;
 
-  bool        m_bDirty;     // any changes?
+  bool         m_bDirty;     // any changes?
 
   DECLARE_EVENT_TABLE()
 };
@@ -201,7 +206,9 @@ public:
     Icon_Ident,
     Icon_Compose,
     Icon_Folders,
+#ifdef USE_PYTHON
     Icon_Python,
+#endif // USE_PYTHON
     Icon_Others,
     Icon_Max
   };
@@ -254,7 +261,7 @@ public:
 
 protected:
   // get the parent frame
-  wxOptionsDialog *GetFrame() const;
+  wxOptionsDialog *GetDialog() const;
 
   void SetTopConstraint(wxLayoutConstraints *c, wxControl *last);
   
@@ -339,6 +346,7 @@ private:
   DECLARE_EVENT_TABLE()
 };
 
+#ifdef USE_PYTHON
 class wxOptionsPagePython : public wxOptionsPage
 {
 public:
@@ -350,6 +358,7 @@ public:
 
 private:
 };
+#endif // USE_PYTHON
 
 class wxOptionsPageOthers : public wxOptionsPage
 {
@@ -366,7 +375,7 @@ private:
 // ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
-BEGIN_EVENT_TABLE(wxOptionsDialog, wxFrame)
+BEGIN_EVENT_TABLE(wxOptionsDialog, wxDialog)
   EVT_BUTTON(wxID_OK,     wxOptionsDialog::OnOK)
   EVT_BUTTON(wxID_APPLY,  wxOptionsDialog::OnApply)
   EVT_BUTTON(wxID_CANCEL, wxOptionsDialog::OnCancel)
@@ -430,6 +439,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
   { "&Folder opened in main frame", Field_Text,    -1,                        },
 
 
+#ifdef USE_PYTHON
   // python
   { "&Enable Python",               Field_Bool,    -1,                        },
   { "Python &Path",                 Field_Text,    ConfigField_EnablePython   },
@@ -439,6 +449,7 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
   { "Folder e&xpunge callback",     Field_Text,    ConfigField_EnablePython   },
   { "Flag &set callback",           Field_Text,    ConfigField_EnablePython   },
   { "Flag &clear callback",         Field_Text,    ConfigField_EnablePython   },
+#endif // USE_PYTHON
 
   // other options
   { "Show &log window",             Field_Bool,    -1,                        },
@@ -484,6 +495,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
   CONFIG_ENTRY(MC_OPENFOLDERS),
   CONFIG_ENTRY(MC_MAINFOLDER),
 
+#ifdef USE_PYTHON
   // python
   CONFIG_ENTRY(MC_USEPYTHON),
   CONFIG_ENTRY(MC_PYTHONPATH),
@@ -493,6 +505,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
   CONFIG_ENTRY(MCB_FOLDEREXPUNGE),
   CONFIG_ENTRY(MCB_FOLDERSETMSGFLAG),
   CONFIG_ENTRY(MCB_FOLDERCLEARMSGFLAG),
+#endif // USE_PYTHON
 
   // other
   CONFIG_ENTRY(MC_SHOWLOG),
@@ -755,15 +768,15 @@ void wxOptionsPage::CreateControls()
   }
 }
 
-wxOptionsDialog *wxOptionsPage::GetFrame() const
+wxOptionsDialog *wxOptionsPage::GetDialog() const
 {
   // find the frame we're in
   wxWindow *win = GetParent();
-  while ( win && !win->IsKindOf(CLASSINFO(wxFrame)) ) {
+  while ( win && !win->IsKindOf(CLASSINFO(wxDialog)) ) {
     win = win->GetParent();
   }
 
-  wxASSERT( win != NULL );  // we must have a parent frame!
+  wxASSERT( win != NULL );  // we must have a top level dialog!
 
   return (wxOptionsDialog *)win;
 }
@@ -776,7 +789,7 @@ void wxOptionsPage::OnBrowse(wxCommandEvent& event)
 
 void wxOptionsPage::OnChange(wxEvent&)
 {
-  GetFrame()->SetDirty();
+  GetDialog()->SetDirty();
 }
 
 void wxOptionsPage::OnCheckboxChange(wxEvent& event)
@@ -1039,6 +1052,8 @@ bool wxOptionsPageIdent::TransferDataFromWindow()
   return TRUE;
 }
 
+#ifdef USE_PYTHON
+
 // ----------------------------------------------------------------------------
 // wxOptionsPagePython
 // ----------------------------------------------------------------------------
@@ -1051,6 +1066,8 @@ bool wxOptionsPagePython::TransferDataFromWindow()
 {
   return TRUE;
 }
+
+#endif // USE_PYTHON
 
 // ----------------------------------------------------------------------------
 // wxOptionsPageOthers
@@ -1105,7 +1122,7 @@ void wxOptionsPageFolders::OnNewFolder(wxCommandEvent&)
 {
   wxString str;
   if ( !MInputBox(&str, _("Folders to open on startup"), _("Folder name"),
-                  GetFrame(), "LastStartupFolder") ) {
+                  GetDialog(), "LastStartupFolder") ) {
     return;
   }
 
@@ -1119,7 +1136,7 @@ void wxOptionsPageFolders::OnNewFolder(wxCommandEvent&)
     // ok, do add it
     listbox->Append(str);
 
-    GetFrame()->SetDirty();
+    GetDialog()->SetDirty();
   }
 }
 
@@ -1132,7 +1149,7 @@ void wxOptionsPageFolders::OnModifyFolder(wxCommandEvent&)
 
   ProfileBase *profile = ProfileBase::CreateProfile(l->GetString(nSel), NULL);
 
-  MDialog_FolderProfile(GetFrame(), profile);
+  MDialog_FolderProfile(GetDialog(), profile);
 }
 
 void wxOptionsPageFolders::OnDeleteFolder(wxCommandEvent&)
@@ -1143,7 +1160,7 @@ void wxOptionsPageFolders::OnDeleteFolder(wxCommandEvent&)
   wxCHECK_RET( nSel != -1, "should be disabled" );
 
   l->Delete(nSel);
-  GetFrame()->SetDirty();
+  GetDialog()->SetDirty();
 }
 
 void wxOptionsPageFolders::OnIdle(wxIdleEvent&)
@@ -1167,7 +1184,9 @@ void wxOptionsPageFolders::OnIdle(wxIdleEvent&)
 // wxOptionsDialog
 // ----------------------------------------------------------------------------
 wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
-               : wxFrame(parent, -1, wxString(_("M Options")))
+               : wxDialog(parent, -1, wxString(_("M Options")),
+                          wxDefaultPosition, wxDefaultSize,
+                          wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
 {
   wxLayoutConstraints *c;  
   SetAutoLayout(TRUE);
@@ -1242,6 +1261,7 @@ wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
   // set position
   // ------------
   SetSizeHints(wDlg, hDlg);
+  Layout();
   Centre(wxCENTER_FRAME | wxBOTH);
 
   TransferDataToWindow();
@@ -1281,10 +1301,13 @@ bool wxOptionsDialog::TransferDataFromWindow()
 void
 wxOptionsDialog::DoTest(void)
 {
-   if(MDialog_YesNoDialog(_("Test new setup?"),
-                          this, true, _("Test setup?"),true))
+   if( MDialog_YesNoDialog(_("Would you like to test your new setup?"),
+                           this,
+                           _("Test setup?"),
+                           true,
+                           "AskTestSetup") ) {
       VerifyMailConfig();
-
+   }
 }
    
 void wxOptionsDialog::OnOK(wxCommandEvent& /* event */)
@@ -1292,8 +1315,9 @@ void wxOptionsDialog::OnOK(wxCommandEvent& /* event */)
    if ( !m_bDirty || TransferDataFromWindow() )
    {
       DoTest();
-      Close();
    }
+
+   EndModal(0);
 }
 
 void wxOptionsDialog::OnApply(wxCommandEvent& /* event */)
@@ -1305,7 +1329,7 @@ void wxOptionsDialog::OnApply(wxCommandEvent& /* event */)
 
 void wxOptionsDialog::OnCancel(wxCommandEvent& /* event */)
 {
-  Close();
+  EndModal(0);
 }
 
 // ----------------------------------------------------------------------------
@@ -1340,7 +1364,13 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
   static const char *aszImages[] =
   { 
     // should be in sync with the corresponding enum
-    "ident", "compose", "folders", "python", "miscopt"
+    "ident",
+    "compose",
+    "folders",
+#ifdef USE_PYTHON
+    "python",
+#endif // USE_PYTHON
+    "miscopt"
   };
 
   wxASSERT( WXSIZEOF(aszImages) == Icon_Max );  // don't forget to update both!
@@ -1354,11 +1384,14 @@ wxOptionsNotebook::wxOptionsNotebook(wxWindow *parent)
   SetImageList(imageList);
 
   ProfileBase *profile = mApplication->GetProfile();
+
   // create and add the pages
   (void)new wxOptionsPageIdent(this,profile);
   (void)new wxOptionsPageCompose(this,profile);
   (void)new wxOptionsPageFolders(this,profile);
+#ifdef USE_PYTHON
   (void)new wxOptionsPagePython(this,profile);
+#endif // USE_PYTHON
   (void)new wxOptionsPageOthers(this,profile);
 }
 
@@ -1370,10 +1403,8 @@ wxOptionsNotebook::~wxOptionsNotebook()
 // ----------------------------------------------------------------------------
 // our public interface is just this simple function
 // ----------------------------------------------------------------------------
-wxFrame *ShowOptionsDialog(wxFrame *parent)
+void ShowOptionsDialog(wxFrame *parent)
 {
-  wxOptionsDialog *dlg = new wxOptionsDialog(parent);
-  dlg->Show(TRUE);
-
-  return dlg;
+  wxOptionsDialog dlg(parent);
+  (void)dlg.ShowModal();
 }

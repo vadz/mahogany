@@ -18,7 +18,6 @@
 
 #ifndef  USE_PCH
 #  include "Mcommon.h"
-#  include   "MHelp.h"
 #  include "guidef.h"
 #  include "MFrame.h"
 #  include "gui/wxMFrame.h"
@@ -46,6 +45,8 @@
 #include "MDialogs.h"
 
 #include "MObject.h"
+
+#include "MHelp.h"
 
 #include "gui/wxMainFrame.h"
 #include "gui/wxIconManager.h"
@@ -131,10 +132,6 @@ wxMApp::OnInit()
    m_IconManager = new wxIconManager();
    
    if ( OnStartup() ) {
-      // for the persistent controls to work (wx/persctrl.h) we must have
-      // a global wxConfig object
-      wxConfigBase::Set(mApplication->GetProfile()->GetConfig());
-
       // now we can create the log window
       if ( READ_APPCONFIG(MC_SHOWLOG) ) {
          (void)new wxMLogWindow(m_topLevelFrame, _("M Activity Log"));
@@ -200,18 +197,17 @@ wxMApp::Help(int id, wxWindow *parent)
    if(! m_HelpController)
    {
       m_HelpController = new wxHelpController;
-      if(m_HelpController->IsKindOf(CLASSINFO(wxExtHelpController)))
-      {
-         ((wxExtHelpController *)m_HelpController)->SetBrowser(
-            READ_APPCONFIG(MC_HELPBROWSER),
-            READ_APPCONFIG(MC_HELPBROWSER_ISNS));
-         // initialise the help system
-         m_HelpController->Initialize(GetGlobalDir()+"/doc");
-      }
-      //FIXME: how to initialise .HLP/.HTML help browser on windows?
-      else // Windows:
-         m_HelpController->Initialize(GetGlobalDir()+"\\doc\\index.html");
+#ifdef OS_UNIX
+      ((wxExtHelpController *)m_HelpController)->SetBrowser(
+         READ_APPCONFIG(MC_HELPBROWSER),
+         READ_APPCONFIG(MC_HELPBROWSER_ISNS));
+      // initialise the help system
+      m_HelpController->Initialize(GetGlobalDir()+"/doc");
+#else // Windows
+      m_HelpController->Initialize(GetGlobalDir()+"\\doc\\M.hlp");
+#endif // Unix/Windows
    }
+
    // show help:
    switch(id)
    {

@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        wx/pwindow.h
-// Purpose:     wxPWindow class declaration
+// Name:        generic/persctrl.cpp
+// Purpose:     persistent classes implementation
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     18/09/98
@@ -57,19 +57,13 @@ END_EVENT_TABLE()
 class wxPHelper
 {
 public:
-    // static functions
-        // set the default prefix for storing the configuration settings
-    static void SetSettingsPath(const wxString& path) { ms_pathPrefix = path; }
-        // retrieve the default prefix for storing the configuration settings
-    static const wxString& GetSettingsPath() { return ms_pathPrefix; }
-
     // ctors and dtor
         // default: need to use Set() functions later
     wxPHelper() { }
         // the 'path' parameter may be either an absolute path or a relative
-        // path, in which case it will go under wxPHelper::GetSettingsPath()
-        // branch. If the config object is not given the global application one
-        // is used.
+        // path, in which case it will go under wxPControls::GetSettingsPath().
+        // If the config object is not given the global application one is
+        // used instead.
     wxPHelper(const wxString& path, wxConfigBase *config = NULL);
         // dtor automatically restores the path if not done yet
     ~wxPHelper();
@@ -90,8 +84,6 @@ public:
     void RestorePath();
 
 private:
-    static wxString ms_pathPrefix;
-
     bool          m_pathRestored;
     wxString      m_path, m_oldPath;
     wxConfigBase *m_config;
@@ -102,15 +94,32 @@ private:
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// wxPControls
+// ----------------------------------------------------------------------------
+
+// don't allocate memory for static objects
+wxString wxPControls::ms_pathPrefix = "";
+
+// ----------------------------------------------------------------------------
 // wxPHelper
 // ----------------------------------------------------------------------------
 
-wxString wxPHelper::ms_pathPrefix = "/Settings/";
-
 wxPHelper::wxPHelper(const wxString& path, wxConfigBase *config)
-         : m_path(path), m_config(config)
+         : m_path(path)
 {
-   m_pathRestored = TRUE;  // it's not changed yet...
+    m_config = config;
+
+    // don't prepend settings path to the absolute paths
+    if ( path[0u] != '/' ) {
+        m_path = wxPControls::GetSettingsPath();
+        if ( m_path.IsEmpty() || (m_path.Last() != '/') ) {
+            m_path += '/';
+        }
+    }
+
+    m_path += path;
+
+    m_pathRestored = TRUE;  // it's not changed yet...
 }
 
 wxPHelper::~wxPHelper()
@@ -130,9 +139,14 @@ bool wxPHelper::ChangePath()
     wxCHECK_MSG( m_config, FALSE, "can't change path without config!" );
 
     m_oldPath = m_config->GetPath();
-    wxString path = ms_pathPrefix;
-    if ( path.IsEmpty() || (path.Last() != '/') ) {
-        path += '/';
+    wxString path;
+
+    // don't prepend settings path to the absolute paths
+    if ( m_path[0u] != '/' ) {
+        path = wxPControls::GetSettingsPath();
+        if ( path.IsEmpty() || (path.Last() != '/') ) {
+            path += '/';
+        }
     }
 
     path += m_path;
@@ -374,3 +388,219 @@ void wxPTextEntry::SetConfigPath(const wxString& path)
     m_persist->SetPath(path);
 }
 
+// ----------------------------------------------------------------------------
+// peristent message box stuff
+// ----------------------------------------------------------------------------
+
+// just a message box with a checkbox
+class wxPMessageDialog : public wxDialog
+{
+public:
+    wxPMessageDialog(wxWindow *parent,
+                     const wxString& message,
+                     const wxString& caption,
+                     long style);
+
+    // accessors
+    bool DontShowAgain() const { return m_checkBox->GetValue(); }
+
+    // callbacks
+    void OnButton(wxCommandEvent& event);
+
+private:
+    wxCheckBox *m_checkBox;
+
+    long        m_dialogStyle;
+
+    DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(wxPMessageDialog, wxDialog)
+    EVT_BUTTON(wxID_YES,    wxPMessageDialog::OnButton)
+    EVT_BUTTON(wxID_NO,     wxPMessageDialog::OnButton)
+    EVT_BUTTON(wxID_CANCEL, wxPMessageDialog::OnButton)
+END_EVENT_TABLE()
+
+// the code below shamelessly copied from wxGenericMessageDialog class
+wxPMessageDialog::wxPMessageDialog(wxWindow *parent,
+                                   const wxString& message,
+                                   const wxString& caption,
+                                   long style)
+                : wxDialog(parent, -1, caption,
+                           wxDefaultPosition, wxDefaultSize,
+                           wxDEFAULT_DIALOG_STYLE | wxDIALOG_MODAL)
+{
+    m_dialogStyle = style;  // we need it in OnButton
+
+    wxBeginBusyCursor();
+
+    wxSizer *topSizer = new wxSizer(this, wxSizerShrink);
+    topSizer->SetBorder(10, 10);
+
+    // split the message in several lines at '\n's
+    wxRowColSizer *messageSizer = new wxRowColSizer(topSizer,
+                                                    wxSIZER_COLS,
+                                                    100);
+    messageSizer->SetName("messageSizer");
+
+    wxString curLine;
+    for ( const char *pc = message; ; pc++ ) {
+        if ( *pc == '\n' || *pc == '\0' ) {
+            wxStaticText *textLine = new wxStaticText(this, -1, curLine);
+            messageSizer->AddSizerChild(textLine);
+            if ( *pc == '\n' ) {
+               curLine.Empty();
+            }
+            else {
+               // the end of string
+               break;
+            }
+        }
+        else {
+            curLine += *pc;
+        }
+    }
+
+    // now create buttons
+    wxSpacingSizer *spacingSizer = new wxSpacingSizer(topSizer,
+                                                      wxBelow,
+                                                      messageSizer,
+                                                      20);
+
+    wxRowColSizer *buttonSizer = new wxRowColSizer(topSizer, wxSIZER_ROWS);
+    buttonSizer->SetName("buttonSizer");
+
+    // Specify constraints for the button sizer
+    wxLayoutConstraints *c = new wxLayoutConstraints;
+    c->width.AsIs();
+    c->height.AsIs();
+    c->top.Below(spacingSizer);
+    c->centreX.SameAs(spacingSizer, wxCentreX);
+    buttonSizer->SetConstraints(c);
+
+    wxButton *ok = (wxButton *) NULL;
+    wxButton *cancel = (wxButton *) NULL;
+    wxButton *yes = (wxButton *) NULL;
+    wxButton *no = (wxButton *) NULL;
+
+    if (style & wxYES_NO) {
+       yes = new wxButton(this, wxID_YES, _("Yes"));
+       no = new wxButton(this, wxID_NO, _("No"));
+
+       buttonSizer->AddSizerChild(yes);
+       buttonSizer->AddSizerChild(no);
+    }
+
+    if (style & wxOK) {
+        ok = new wxButton(this, wxID_OK, _("OK"));
+        buttonSizer->AddSizerChild(ok);
+    }
+
+    if (style & wxCANCEL) {
+        cancel = new wxButton(this, wxID_CANCEL, _("Cancel"));
+        buttonSizer->AddSizerChild(cancel);
+    }
+
+    if (ok) {
+      ok->SetDefault();
+      ok->SetFocus();
+    }
+    else if (yes) {
+      yes->SetDefault();
+      yes->SetFocus();
+    }
+
+    // and finally create the check box
+    c = new wxLayoutConstraints;
+    c->width.AsIs();
+    c->height.AsIs();
+    c->bottom.SameAs(this, wxBottom);
+    c->centreX.SameAs(buttonSizer, wxCentreX);
+    m_checkBox = new wxCheckBox(this, -1, _("Don't show this message again"));
+    m_checkBox->SetConstraints(c);
+
+    Layout();
+    Centre(wxBOTH);
+
+    wxEndBusyCursor();
+}
+
+void wxPMessageDialog::OnButton(wxCommandEvent& event)
+{
+    // which button?
+    switch ( event.GetId() ) {
+        case wxID_YES:
+            EndModal(wxYES);
+            break;
+
+        case wxID_NO:
+            EndModal(wxNO);
+            break;
+
+        default:
+            wxFAIL_MSG("unexpected button id in wxPMessageDialog.");
+            // fall through nevertheless
+
+        case wxID_CANCEL:
+            // allow to cancel the dialog with [Cancel] only if it's not a
+            // "Yes/No" type dialog
+            if ( (m_dialogStyle & wxYES_NO) != wxYES_NO ||
+                 (m_dialogStyle & wxCANCEL) ) {
+                EndModal(wxCANCEL);
+            }
+            break;
+    }
+}
+
+int wxPMessageBox(const wxString& configPath,
+                  const wxString& message,
+                  const wxString& caption,
+                  long style,
+                  wxWindow *parent,
+                  bool *wontShowAgain,
+                  wxConfigBase *config)
+{
+    wxString ourPath;
+    if ( configPath[0u] != '/' ) {
+        // prepend some common prefix
+        ourPath = "Messages/";
+    }
+
+    ourPath += configPath.Before('/');
+    wxString configValue = configPath.Right('/');
+
+    wxPHelper persist(ourPath, config);
+    persist.ChangePath();
+
+    bool dontShowAgain = false;
+
+    long rc; // return code
+
+    // if config was NULL, wxPHelper already has the global one
+    config = persist.GetConfig();
+
+    // disabled?
+    if ( config && config->Exists(configValue) ) {
+        // don't show it, it was disabled
+        rc = config->Read(configValue, 0l);
+        dontShowAgain = true;
+    }
+    else {
+        // do show the msg box
+        wxPMessageDialog dlg(parent, message, caption, style);
+        rc = dlg.ShowModal();
+
+        // ignore checkbox value if the dialog was cancelled
+        if ( config && rc != wxID_CANCEL && dlg.DontShowAgain() ) {
+            // next time we won't show it
+            dontShowAgain = true;
+            config->Write(configValue, rc);
+        }
+    }
+
+    if ( wontShowAgain ) {
+       *wontShowAgain = dontShowAgain;
+    }
+
+    return rc;
+}

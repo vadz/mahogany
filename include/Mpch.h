@@ -42,6 +42,7 @@ extern "C"
 }
 
 #include <wx/config.h>
+#include <wx/help.h>
 
 #include "kbList.h"
 #include "guidef.h"

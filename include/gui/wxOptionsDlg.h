@@ -13,7 +13,7 @@
 #ifndef   _WXOPTIONSDLG_H
 #define   _WXOPTIONSDLG_H
 
-/// creates and shows the options dialog, returns a pointer to it
-wxFrame *ShowOptionsDialog(wxFrame *parent = NULL);
+/// creates and shows the modal options dialog
+void ShowOptionsDialog(wxFrame *parent = NULL);
 
 #endif  //_WXOPTIONSDLG_H

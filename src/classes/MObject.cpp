@@ -22,9 +22,9 @@
 // note: this source file is intentionally empty in release mode, all the code
 // here is only for the debugging support, otherwise the functions are inline in
 // the header.
-#ifdef DEBUG
-
 #include "MObject.h"
+
+#ifdef DEBUG
 
 #include <wx/log.h>
 #include <wx/dynarray.h>

@@ -1457,13 +1457,7 @@ void wxAdbEditFrame::DoDeleteNode(bool bAskConfirmation)
       wxString msg;
       msg.Printf(_("Really delete the %s '%s'?"),
                  strWhat.c_str(), strName.c_str());
-      // don't use wxCENTRE under Windows to use the native msg box
-      #ifdef __WXMSW__
-        static const long style = wxYES_NO|wxICON_QUESTION;
-      #else
-        static const long style = wxYES_NO|wxICON_QUESTION|wxCENTRE;
-      #endif
-      if ( wxMessageBox(msg, _("Confirm"), style) != wxYES ) {
+      if ( !MDialog_YesNoDialog(msg, this) ) {
         wxLogStatus(this, _("Cancelled: '%s' not deleted."),
                     m_current->GetName().c_str());
         return;
@@ -3440,7 +3434,7 @@ AdbTreeBook::~AdbTreeBook()
   // must delete children first to give them the last chance to save changes
   size_t nCount = m_children.Count();
   for ( size_t n = 0; n < nCount; n++ )
-    delete m_children[n];
+    ; // delete m_children[n];
   m_children.Clear();
 
   SafeDecRef(m_pBook);

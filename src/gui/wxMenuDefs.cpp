@@ -366,6 +366,7 @@ void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
    wxASSERT( WXSIZEOF(g_aToolBarData) == WXTBAR_MAX );
 
 #ifndef __WXGTK__
+   toolbar->SetToolBitmapSize(wxSize(16, 16));
    toolbar->SetMargins( 2, 2 );
 #endif
 

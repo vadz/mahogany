@@ -243,6 +243,8 @@ wxLayoutList::wxLayoutList()
 {
    m_DefaultSetting = NULL;
    m_WrapMargin = -1;
+   m_Editable = FALSE;
+
    Clear();
 }
 
@@ -830,7 +832,7 @@ wxLayoutList::Delete(CoordType count)
 
    m_bModified = true;
    
-   CoordType offs;
+   CoordType offs = 0;
    wxLayoutObjectList::iterator i;
       
    do

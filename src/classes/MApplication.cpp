@@ -50,6 +50,8 @@
 #include <wx/confbase.h>      // wxExpandEnvVars
 #include <wx/mimetype.h>      // wxMimeTypesManager
 
+#include <wx/persctrl.h>      // for wxPControls::SetSettingsPath
+
 #include "MFolder.h"          // DeleteRootFolder
 
 #ifdef OS_UNIX
@@ -109,6 +111,7 @@ MAppBase::VerifySettings(void)
       m_profile->writeEntry(MP_PERSONALNAME, buffer);
    }
 
+#ifdef OS_UNIX
    if( strutil_isempty(READ_APPCONFIG(MC_USERDIR)) )
    {
       wxString strHome;
@@ -117,6 +120,7 @@ MAppBase::VerifySettings(void)
       strHome << DIR_SEPARATOR << READ_APPCONFIG(MC_USER_MDIR);
       m_profile->writeEntry(MC_USERDIR, strHome);
    }
+#endif // Unix
 
    if( strutil_isempty(READ_APPCONFIG(MP_HOSTNAME)) )
    {
@@ -224,6 +228,18 @@ MAppBase::OnStartup()
 #endif // Win/Unix
 
    m_profile = ProfileBase::CreateGlobalConfig(strConfFile);
+
+   // NB: although this shouldn't normally be here (it's GUI-dependent code),
+   //     it's really impossible to put it into wxMApp because some dialogs
+   //     can be already shown from here and this initialization must be done
+   //     before.
+
+   // for the persistent controls to work (wx/persctrl.h) we must have
+   // a global wxConfig object
+   wxConfigBase::Set(m_profile->GetConfig());
+
+   // also set the path for persistent controls to save their state to
+   wxPControls::SetSettingsPath("/Settings/");
 
    // FIXME where is MC_USERDIR defined?
 #ifdef OS_UNIX

@@ -369,10 +369,11 @@ wxComposeView::Create(const String &iname, wxWindow * WXUNUSED(parent),
    {
       String strSignFile = READ_CONFIG(m_Profile, MP_COMPOSE_SIGNATURE);
       if ( strSignFile.IsEmpty() ) {
-         // propose to choose it now
+         // no signature, propose to choose it now
          if ( MDialog_YesNoDialog(
                _("No signature file found. Would you like to choose one\n"
-               "right now (otherwise no signature will be used)?"), this) ) {
+                 "right now (otherwise no signature will be used)?"),
+                 this, MDIALOG_YESNOTITLE, true, "AskForSig") ) {
             wxFileDialog dialog(this, "", "", "", _("All files (*.*)|*.*"),
                                 wxHIDE_READONLY | wxFILE_MUST_EXIST);
             if ( dialog.ShowModal() == wxID_OK ) {
@@ -523,7 +524,6 @@ wxComposeView::OnCloseWindow(wxCloseEvent& event)
                  (
                   _("There are unsaved changes, close anyway?"),
                   this, // parent
-                  true, // modal
                   MDIALOG_YESNOTITLE,
                   false // "yes" not default
                  );

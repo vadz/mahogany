@@ -21,7 +21,6 @@
 
 #ifndef USE_PCH
 #  include "Mcommon.h"
-#  include "MHelp.h"
 #  include "strutil.h"
 #  include "guidef.h"
 
@@ -39,6 +38,7 @@
 #endif //USE_PCH
 
 #include "Mdefaults.h"
+#include "MHelp.h"
 
 #include "Message.h"
 
@@ -549,8 +549,7 @@ wxMessageView::MimeInfo(int mimeDisplayPart)
                  << (*plist_it)->value << '\n';
    }
 
-   wxMessageBox(message.c_str(), _("MIME information"),
-                wxOK|wxCENTRE|wxICON_INFORMATION, this);
+   MDialog_Message(message, this, _("MIME information"));
 }
 
 // open (execute) a message attachment
@@ -783,32 +782,35 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
             String cmd = READ_CONFIG(m_Profile, MP_BROWSER);
             if ( cmd.IsEmpty() ) {
 #                 ifdef OS_WIN
-                  bOk = (int)ShellExecute(NULL, "open", ci->GetUrl(),
-                                          NULL, NULL, SW_SHOWNORMAL ) > 32;
-                  if ( !bOk ) {
-                     wxLogSysError(_("Can't open URL '%s'"),
-                                   ci->GetUrl().c_str());
-                  }
+                     bOk = (int)ShellExecute(NULL, "open", ci->GetUrl(),
+                                             NULL, NULL, SW_SHOWNORMAL ) > 32;
+                     if ( !bOk ) {
+                        wxLogSysError(_("Can't open URL '%s'"),
+                                      ci->GetUrl().c_str());
+                     }
 #                 else  // Unix
-                  // propose to choose program for opening URLs
-                  if (
-                       MDialog_YesNoDialog
-                       (
-                        _("No command configured to view URLs.\n"
-                          "Would you like to choose one now?"),
-                        frame
-                       )
-                     )
-                  {
-                     ShowOptionsDialog();
-                     cmd = READ_CONFIG(m_Profile, MP_BROWSER);
-                  }
+                     // propose to choose program for opening URLs
+                     if (
+                          MDialog_YesNoDialog
+                          (
+                           _("No command configured to view URLs.\n"
+                             "Would you like to choose one now?"),
+                           frame,
+                           MDIALOG_YESNOTITLE,
+                           true,
+                           "AskUrlBrowser"
+                          )
+                        )
+                     {
+                        ShowOptionsDialog();
+                        cmd = READ_CONFIG(m_Profile, MP_BROWSER);
+                     }
 
-                  if ( cmd.IsEmpty() )
-                  {
-                     wxLogError(_("No command configured to view URLs."));
-                     bOk = FALSE;
-                  }
+                     if ( cmd.IsEmpty() )
+                     {
+                        wxLogError(_("No command configured to view URLs."));
+                        bOk = FALSE;
+                     }
 #                 endif
             }
             else {

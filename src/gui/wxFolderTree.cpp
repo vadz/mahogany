@@ -363,22 +363,22 @@ void wxFolderTreeImpl::DoPopupMenu(const wxPoint& pos)
    if ( cur != NULL )
    {
       MFolder *folder = cur->GetFolder();
-      if ( folder->GetType() == MFolder::Root )
+      if ( m_menu == NULL )
       {
-         // it's the root pseudo-folder
-         MDialog_Message(_("No properties available for this item."));
-      }
-      else
-      {
-         // normal folder
-         if ( m_menu == NULL )
-         {
-            // create our popup menu if not done yet
-            m_menu = new FolderMenu(folder->GetName());
-         }
+         // create our popup menu if not done yet
+         m_menu = new FolderMenu(folder->GetName());
 
-         PopupMenu(m_menu, pos.x, pos.y);
+         // disable the items which don't make sense for some kinds of folders
+         if ( folder->GetType() == MFolder::Root )
+         {
+            // you can't open nor delete the root folder and it has no properties
+            m_menu->Enable(FolderMenu::Open, FALSE);
+            m_menu->Enable(FolderMenu::Delete, FALSE);
+            m_menu->Enable(FolderMenu::Properties, FALSE);
+         }
       }
+
+      PopupMenu(m_menu, pos.x, pos.y);
    }
    //else: no selection
 }

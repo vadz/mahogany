@@ -31,7 +31,8 @@
 #include   "MailFolderCC.h"
 #include   "SendMessageCC.h"
 #include   "XFace.h"
-#include   "wxIconManager.h"
+#include   "gui/wxIconManager.h"
+
 extern "C"
 {
 #  include <misc.h>
