@@ -1481,6 +1481,9 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
 bool
 wxMessageView::ShowRawText(void)
 {
+   if ( !m_mailMessage )
+      return;
+
    String text;
    m_mailMessage->WriteToString(text, true);
    if ( text.IsEmpty() )

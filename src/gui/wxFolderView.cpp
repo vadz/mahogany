@@ -493,28 +493,48 @@ void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
 
 void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
 {
-   // make sure that the popup menu entries are in sync with the ones in the
-   // top-level menu
-   wxFrame *frame = GetFrame(this);
-   CHECK_RET( frame, "wxFolderListCtrl outside a frame?" );
+   // create popup menu if not done yet
+   if ( !m_menu )
+   {
+      static const int popupMenuEntries[] =
+      {
+         WXMENU_MSG_OPEN,
+         WXMENU_SEPARATOR,
+         WXMENU_MSG_REPLY,
+         WXMENU_MSG_REPLY_WITH_TEMPLATE,
+         WXMENU_MSG_FOLLOWUP,
+         WXMENU_MSG_FOLLOWUP_WITH_TEMPLATE,
+         WXMENU_MSG_FORWARD,
+         WXMENU_MSG_FORWARD_WITH_TEMPLATE,
+         WXMENU_SEPARATOR,
+         WXMENU_MSG_FILTER,
+         WXMENU_MSG_PRINT,
+         WXMENU_MSG_SAVE_TO_FILE,
+         WXMENU_MSG_SAVE_TO_FOLDER,
+         WXMENU_MSG_MOVE_TO_FOLDER,
+         WXMENU_MSG_DELETE,
+         WXMENU_MSG_UNDELETE,
+         WXMENU_SEPARATOR,
+         WXMENU_MSG_SHOWRAWTEXT,
+      };
 
-   wxMenuBar *mb = frame->GetMenuBar();
-   m_menu->Check(WXMENU_MSG_TOGGLEHEADERS,
-                 mb->IsChecked(WXMENU_MSG_TOGGLEHEADERS));
+      m_menu = new wxMenu;
+      for ( size_t n = 0; n < WXSIZEOF(popupMenuEntries); n++ )
+      {
+         int id = popupMenuEntries[n];
+         AppendToMenu(m_menu, id);
+      }
+   }
 
-   // add a folder menu for quick moving messages
+   // add a folder menu for quick moving messages: we do it dynamically as the
+   // folder tree could have changed since the last invocation
    m_menuFolders = wxFolderMenu::Create();
    wxMenuItem *menuItem = wxMenuItem::New(m_menu, WXMENU_POPUP_FOLDER_MENU,
                                           _("&Quick move"), "",
                                           FALSE, m_menuFolders);
    wxMenuItem *menuItemSep = wxMenuItem::New(m_menu);
-#if 1
-   m_menu->Insert(1, menuItem);
-   m_menu->Insert(2, menuItemSep);
-#else
-   m_menu->Append(menuItemSep);
-   m_menu->Append(menuItem);
-#endif
+   m_menu->Insert(0, menuItem);
+   m_menu->Insert(1, menuItemSep);
 
    PopupMenu(m_menu, event.GetX(), event.GetY());
 
@@ -524,10 +544,6 @@ void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
 
    wxFolderMenu::Delete(m_menuFolders);
    m_menuFolders = NULL;
-
-   // and now sync them back again
-   mb->Check(WXMENU_MSG_TOGGLEHEADERS,
-             m_menu->IsChecked(WXMENU_MSG_TOGGLEHEADERS));
 }
 
 void wxFolderListCtrl::OnDoubleClick(wxMouseEvent& /*event*/)
@@ -662,10 +678,6 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    ReadColumnsInfo(m_profile, m_columns);
 
    CreateColumns();
-
-   // Create popup menu:
-   m_menu = new wxMenu("", wxMENU_TEAROFF);
-   AppendToMenu(m_menu, WXMENU_MSG_BEGIN+1, WXMENU_MSG_END);
 
    // create a drop target for dropping messages on us
    new MMessagesDropTarget(new FolderViewMessagesDropWhere(m_FolderView), this);
