@@ -901,7 +901,7 @@ bool MFolderFromProfile::Rename(const String& newName)
           name = m_folderName.AfterLast('/');
 
    String newFullName = path;
-   if ( !!path )
+   if ( !path.empty() )
       newFullName += '/';
    newFullName += newName;
 

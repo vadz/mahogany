@@ -326,7 +326,7 @@ extern bool ShowFolderRenameDialog(const MFolder *folder,
    // only allow to rename the mailbox if we have a valid mboxName pointer
    // and if the mailbox can be renamed
    //
-   // NB: assume that the folder can be renamed iff it can be deleted
+   // NB: assume that the folder can be renamed if it can be deleted
    MFolderType folderType = folder->GetType();
    if ( mboxName &&
         folderType != MF_GROUP &&
