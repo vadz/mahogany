@@ -337,7 +337,7 @@ bool MFolderFromProfile::Create(const String& fullname)
    }
 
    profile->writeEntry(MP_PROFILE_TYPE, ProfileBase::PT_FolderProfile);
-   profile->DecRef();
+
    return TRUE;
 }
 
