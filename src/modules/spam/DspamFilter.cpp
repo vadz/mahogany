@@ -139,7 +139,9 @@ IMPLEMENT_SPAM_FILTER(DspamFilter,
 
 DspamFilter::DspamFilter()
 {
+#ifdef __WINDOWS__
    dspam_set_home(mApplication->GetLocalDir());
+#endif // __WINDOWS__
 
    dspam_init_driver();
 }
