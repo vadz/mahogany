@@ -475,7 +475,7 @@ String MessageCC::GetHeader(void) const
       }
       else
       {
-         ERRORMESSAGE(("Cannot fetch message header"));
+         ERRORMESSAGE((_("Cannot fetch message header")));
       }
    }
    else
@@ -765,7 +765,7 @@ AddressList *MessageCC::GetAddressList(MessageAddressType type) const
 // ----------------------------------------------------------------------------
 
 String
-MessageCC::FetchText(void)
+MessageCC::FetchText(void) const
 {
    if ( m_folder )
    {
@@ -785,9 +785,15 @@ MessageCC::FetchText(void)
             //
             //        having FT_PEEK here for now is a lesser evil, in the
             //        future we really must have PeekText() and GetText()!
-            m_mailFullText = mail_fetchtext_full(m_folder->Stream(), m_uid,
-                                                 &m_MailTextLen,
-                                                 FT_UID | FT_PEEK);
+            MessageCC *self = (MessageCC *)this;
+            self->m_mailFullText = mail_fetchtext_full
+                                   (
+                                    m_folder->Stream(),
+                                    m_uid,
+                                    &self->m_MailTextLen,
+                                    FT_UID | FT_PEEK
+                                   );
+
             m_folder->UnLock();
 
             // there once has been an assert here checking that the message
@@ -801,7 +807,7 @@ MessageCC::FetchText(void)
          }
          else
          {
-            ERRORMESSAGE(("Cannot get lock for obtaining message text."));
+            ERRORMESSAGE((_("Cannot get lock for obtaining message text.")));
          }
       }
       //else: already have it, reuse as msg text doesn't change

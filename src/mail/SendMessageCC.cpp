@@ -10,29 +10,6 @@
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
-/*
-  This is just a quick note I put here to remind me how to do the
-  application/remote-printing support for sending faxes via
-  remote-printer.12345@iddd.tpc.int.
-
-    puts $f "Content-Type: application/remote-printing"
-    puts $f ""
-    puts $f "Recipient:    $recipient(name)"
-    puts $f "Title:        "
-    puts $f "Organization: $recipient(organisation)"
-    puts $f "Address:      "
-    puts $f "Telephone:     "
-    puts $f "Facsimile:    +$recipient(country) $recipient(local) $recipient(number)"
-    puts $f "Email:        $recipient(email)"
-    puts $f ""
-    puts $f "Originator:   $user(name)"
-    puts $f "Organization: $user(organisation)"
-    puts $f "Telephone:    $user(tel)"
-    puts $f "Facsimile:    $user(fax)"
-    puts $f "Email:        $user(email)"
-
- */
-
 // ============================================================================
 // declarations
 // ============================================================================
@@ -195,9 +172,18 @@ private:
 
 /* static */
 SendMessage *
-SendMessage::Create(Profile *prof, Protocol protocol, wxFrame *frame)
+SendMessage::Create(Profile *profile, Protocol protocol, wxFrame *frame)
 {
-   return new SendMessageCC(prof, protocol, frame);
+   return new SendMessageCC(profile, protocol, frame);
+}
+
+/* static */
+SendMessage *
+SendMessage::CreateResent(Profile *profile,
+                          const Message *message,
+                          wxFrame *frame)
+{
+   return new SendMessageCC(profile, Prot_Default, frame, message);
 }
 
 SendMessage::~SendMessage()
@@ -208,17 +194,10 @@ SendMessage::~SendMessage()
 // SendMessageCC creation and destruction
 // ----------------------------------------------------------------------------
 
-SendMessageCC::SendMessageCC(Profile *prof,
+SendMessageCC::SendMessageCC(Profile *profile,
                              Protocol protocol,
-                             wxFrame *frame)
-{
-   Create(protocol, prof, frame);
-}
-
-void
-SendMessageCC::Create(Protocol protocol,
-                      Profile *prof,
-                      wxFrame *frame)
+                             wxFrame *frame,
+                             const Message *message)
 {
    m_frame = frame;
    m_encHeaders = wxFONTENCODING_SYSTEM;
@@ -226,99 +205,83 @@ SendMessageCC::Create(Protocol protocol,
    m_headerNames =
    m_headerValues = NULL;
 
-   m_Protocol = protocol;
+   m_wasBuilt = false;
 
    m_Envelope = mail_newenvelope();
    m_Body = mail_newbody();
 
-   m_Body->type = TYPEMULTIPART;
-   m_Body->nested.part = mail_newbody_part();
-   m_Body->nested.part->next = NULL;
-   m_NextPart = m_Body->nested.part;
-   m_LastPart = m_NextPart;
+   m_NextPart =
+   m_LastPart = NULL;
 
-   if ( !prof )
+   if ( !profile )
    {
       FAIL_MSG( "SendMessageCC::Create() requires profile" );
 
-      prof = mApplication->GetProfile();
+      profile = mApplication->GetProfile();
    }
 
-   m_profile = prof;
+   m_profile = profile;
    m_profile->IncRef();
 
-   // remember the default hostname to use for addresses without host part
-   m_DefaultHost = READ_CONFIG_TEXT(prof, MP_HOSTNAME);
-
-   // set up default values for From/Reply-To headers
-   AddressList_obj addrList(AddressList::CreateFromAddress(prof));
-   Address *addrFrom = addrList->GetFirst();
-   if ( addrFrom )
+   // choose the protocol: mail (SMTP, Sendmail) or NNTP
+   if ( protocol == Prot_Default )
    {
-      m_From = addrFrom->GetAddress();
+#ifdef OS_UNIX
+      if ( READ_CONFIG_BOOL(profile, MP_USE_SENDMAIL) )
+         protocol = Prot_Sendmail;
+      else
+#endif // OS_UNIX
+         protocol = Prot_SMTP;
    }
 
-   m_ReplyTo = READ_CONFIG_TEXT(prof, MP_REPLY_ADDRESS);
+   m_Protocol = protocol;
 
-   /*
-      Sender logic: by default, use the SMTP login if it is set and differs
-      from the "From" value, otherwise leave it empty. If guessing it is
-      disabled, then we use the sender value specified by the user "as is"
-      instead.
-   */
-   if ( READ_CONFIG(prof, MP_GUESS_SENDER) )
+   switch ( m_Protocol )
    {
-      m_Sender = READ_CONFIG_TEXT(prof, MP_SMTPHOST_LOGIN);
-      m_Sender.Trim().Trim(FALSE); // remove all spaces on begin/end
+      default:
+         FAIL_MSG( "unknown SendMessage protocol" );
+         // fall through
 
-      if ( Message::CompareAddresses(m_From, m_Sender) )
-      {
-         // leave Sender empty if it is the same as From, redundant
-         m_Sender.clear();
-      }
-   }
-   else // don't guess, use provided value
-   {
-      m_Sender = READ_CONFIG_TEXT(prof, MP_SENDER);
-   }
-
-   if ( READ_CONFIG_BOOL(prof, MP_COMPOSE_USE_XFACE) )
-      m_XFaceFile = prof->readEntry(MP_COMPOSE_XFACE_FILE, "");
-   if ( READ_CONFIG_BOOL(prof, MP_USE_OUTBOX) )
-      m_OutboxName = READ_CONFIG_TEXT(prof,MP_OUTBOX_NAME);
-   if ( READ_CONFIG(prof,MP_USEOUTGOINGFOLDER) )
-      m_SentMailName = READ_CONFIG_TEXT(prof,MP_OUTGOINGFOLDER);
-   m_CharSet = READ_CONFIG_TEXT(prof,MP_CHARSET);
+      case Prot_SMTP:
+         m_ServerHost = READ_CONFIG_TEXT(profile, MP_SMTPHOST);
+         m_UserName = READ_CONFIG_TEXT(profile, MP_SMTPHOST_LOGIN);
+         m_Password = READ_CONFIG_TEXT(profile, MP_SMTPHOST_PASSWORD);
+#ifdef USE_SSL
+         m_UseSSLforSMTP = READ_CONFIG_BOOL(profile, MP_SMTPHOST_USE_SSL);
+         m_UseSSLUnsignedforSMTP = READ_CONFIG_BOOL(profile, MP_SMTPHOST_USE_SSL_UNSIGNED);
+#endif // USE_SSL
+         break;
 
 #ifdef OS_UNIX
-   if ( READ_CONFIG(prof, MP_USE_SENDMAIL) )
-   {
-      m_SendmailCmd = READ_CONFIG_TEXT(prof, MP_SENDMAILCMD);
-   }
+      case Prot_Sendmail:
+         m_SendmailCmd = READ_CONFIG_TEXT(profile, MP_SENDMAILCMD);
+         break;
 #endif // OS_UNIX
 
-   if ( protocol == Prot_SMTP )
-   {
-      m_ServerHost = READ_CONFIG_TEXT(prof, MP_SMTPHOST);
-      m_UserName = READ_CONFIG_TEXT(prof, MP_SMTPHOST_LOGIN);
-      m_Password = READ_CONFIG_TEXT(prof, MP_SMTPHOST_PASSWORD);
+      case Prot_NNTP:
+         m_ServerHost = READ_CONFIG_TEXT(profile, MP_NNTPHOST);
+         m_UserName = READ_CONFIG_TEXT(profile,MP_NNTPHOST_LOGIN);
+         m_Password = READ_CONFIG_TEXT(profile,MP_NNTPHOST_PASSWORD);
 #ifdef USE_SSL
-      m_UseSSLforSMTP = READ_CONFIG_BOOL(prof, MP_SMTPHOST_USE_SSL);
-      m_UseSSLUnsignedforSMTP = READ_CONFIG_BOOL(prof, MP_SMTPHOST_USE_SSL_UNSIGNED);
-#endif
-   }
-   else // protocol == NNTP
-   {
-      m_ServerHost = READ_CONFIG_TEXT(prof, MP_NNTPHOST);
-      m_UserName = READ_CONFIG_TEXT(prof,MP_NNTPHOST_LOGIN);
-      m_Password = READ_CONFIG_TEXT(prof,MP_NNTPHOST_PASSWORD);
-#ifdef USE_SSL
-      m_UseSSLforNNTP = READ_CONFIG_BOOL(prof, MP_NNTPHOST_USE_SSL);
-      m_UseSSLUnsignedforNNTP = READ_CONFIG_BOOL(prof, MP_NNTPHOST_USE_SSL_UNSIGNED);
-#endif
+         m_UseSSLforNNTP = READ_CONFIG_BOOL(profile, MP_NNTPHOST_USE_SSL);
+         m_UseSSLUnsignedforNNTP = READ_CONFIG_BOOL(profile, MP_NNTPHOST_USE_SSL_UNSIGNED);
+#endif // USE_SSL
    }
 
+   // other initializations common to all messages
+   // --------------------------------------------
+
+   // remember the default hostname to use for addresses without host part
+   m_DefaultHost = READ_CONFIG_TEXT(profile, MP_HOSTNAME);
+
+   if ( READ_CONFIG_BOOL(profile, MP_USE_OUTBOX) )
+      m_OutboxName = READ_CONFIG_TEXT(profile,MP_OUTBOX_NAME);
+   if ( READ_CONFIG(profile,MP_USEOUTGOINGFOLDER) )
+      m_SentMailName = READ_CONFIG_TEXT(profile,MP_OUTGOINGFOLDER);
+
    // check that we have password if we use it
+   //
+   // FIXME: why do we do it here and not when sending??
    if ( !m_UserName.empty() && m_Password.empty() )
    {
       MDialog_GetPassword(protocol, m_ServerHost,
@@ -329,6 +292,123 @@ SendMessageCC::Create(Protocol protocol,
       m_Password = strutil_decrypt(m_Password);
    }
 
+   // finally, special init for resent messages
+   // -----------------------------------------
+
+   if ( message )
+      InitResent(message);
+   else
+      InitNew();
+}
+
+void SendMessageCC::InitNew()
+{
+   m_Body->type = TYPEMULTIPART;
+   m_Body->nested.part = mail_newbody_part();
+   m_Body->nested.part->next = NULL;
+   m_NextPart = m_Body->nested.part;
+   m_LastPart = m_NextPart;
+
+   // set up default values for From/Reply-To headers
+   AddressList_obj addrList(AddressList::CreateFromAddress(m_profile));
+   Address *addrFrom = addrList->GetFirst();
+   if ( addrFrom )
+   {
+      m_From = addrFrom->GetAddress();
+   }
+
+   m_ReplyTo = READ_CONFIG_TEXT(m_profile, MP_REPLY_ADDRESS);
+
+   /*
+      Sender logic: by default, use the SMTP login if it is set and differs
+      from the "From" value, otherwise leave it empty. If guessing it is
+      disabled, then we use the sender value specified by the user "as is"
+      instead.
+   */
+   if ( READ_CONFIG(m_profile, MP_GUESS_SENDER) )
+   {
+      m_Sender = READ_CONFIG_TEXT(m_profile, MP_SMTPHOST_LOGIN);
+      m_Sender.Trim().Trim(FALSE); // remove all spaces on begin/end
+
+      if ( Message::CompareAddresses(m_From, m_Sender) )
+      {
+         // leave Sender empty if it is the same as From, redundant
+         m_Sender.clear();
+      }
+   }
+   else // don't guess, use provided value
+   {
+      m_Sender = READ_CONFIG_TEXT(m_profile, MP_SENDER);
+   }
+
+   if ( READ_CONFIG_BOOL(m_profile, MP_COMPOSE_USE_XFACE) )
+      m_XFaceFile = m_profile->readEntry(MP_COMPOSE_XFACE_FILE, "");
+
+   m_CharSet = READ_CONFIG_TEXT(m_profile,MP_CHARSET);
+}
+
+void SendMessageCC::InitResent(const Message *message)
+{
+   CHECK_RET( message, "message being resent can't be NULL" );
+
+   CHECK_RET( m_Envelope, "envelope must be created in InitResent" );
+
+   // get the original message header and copy it to remail envelope field
+   // almost without any changes except that we have to mask the transport
+   // layer headers as otherwise the SMTP software might get confused: e.g. if
+   // we don't quote Delivered-To line some systems think that the message is
+   // looping endlessly and we quote "Received:" and "Resent-xxx:" because Pine
+   // does it (although I don't know why)
+   String hdrOrig = message->GetHeader();
+
+   String hdr;
+   hdr.reserve(hdrOrig.length() + 100);   // slightly more for "X-"s
+
+   bool firstHeader = true;
+   for ( const char *p = hdrOrig; *p; p++ )
+   {
+      // start of line?
+      if ( firstHeader || (p[0] == '\r' && p[1] == '\n') )
+      {
+         if ( firstHeader )
+         {
+            // no longer
+            firstHeader = false;
+         }
+         else // end of previous line
+         {
+            // copy CR LF as is
+            hdr += *p++;
+            hdr += *p++;
+         }
+
+#define STARTS_WITH(p, what) (!(wxStrnicmp((p), (what), strlen(what))))
+
+         if ( STARTS_WITH(p, "Delivered-To:") ||
+               STARTS_WITH(p, "Received:") ||
+                 STARTS_WITH(p, "Resent-") )
+         {
+            hdr += "X-";
+         }
+
+#undef STARTS_WITH
+      }
+
+      hdr += *p;
+   }
+
+   m_Envelope->remail = cpystr(hdr.c_str());
+
+   // now copy the body: note that we have to use ENCOTHER here to prevent
+   // c-client from (re)encoding the body
+   m_Body->type = TYPETEXT;
+   m_Body->encoding = ENCOTHER;
+   m_Body->subtype = cpystr("PLAIN");
+
+   // FIXME: we potentially copy a lot of data here!
+   String text = message->FetchText();
+   m_Body->contents.text.data = (unsigned char *)cpystr(text.c_str());
+   m_Body->contents.text.size = text.length();
 }
 
 SendMessageCC::~SendMessageCC()
@@ -667,12 +747,15 @@ SendMessageCC::SetupFromAddresses(void)
       adr = m_Envelope->sender;
    }
 
-   // Return-Path (it is used as SMTP "MAIL FROM: <>" argument)
-   ASSERT_MSG( m_Envelope->return_path == NIL, "Return-Path already set?" );
+   if ( adr )
+   {
+      // Return-Path (it is used as SMTP "MAIL FROM: <>" argument)
+      ASSERT_MSG( m_Envelope->return_path == NIL, "Return-Path already set?" );
 
-   m_Envelope->return_path = mail_newaddr();
-   m_Envelope->return_path->mailbox = cpystr(adr->mailbox);
-   m_Envelope->return_path->host = cpystr(adr->host);
+      m_Envelope->return_path = mail_newaddr();
+      m_Envelope->return_path->mailbox = cpystr(adr->mailbox);
+      m_Envelope->return_path->host = cpystr(adr->host);
+   }
 }
 
 void
@@ -894,137 +977,146 @@ SendMessageCC::RemoveHeaderEntry(const String& name)
 void
 SendMessageCC::Build(bool forStorage)
 {
-   if(m_headerNames != NULL) // message was already build
+   if ( m_wasBuilt )
+   {
+      // message was already build
       return;
-
-   SetupFromAddresses();
-
-   /*
-      Is the message supposed to be sent later? In that case, we need
-      to store the BCC header as an X-BCC or it will disappear when
-      the message is saved to the outbox.
-    */
-   if ( forStorage )
-   {
-      // The X-BCC will be converted back to BCC by Send()
-      if ( m_Envelope->bcc )
-         AddHeaderEntry("X-BCC", m_Bcc);
    }
-   else // send, not store
+
+   m_wasBuilt = true;
+
+   // don't add any more headers to the message being resent
+   if ( !m_Envelope->remail )
    {
+      SetupFromAddresses();
+
       /*
-         If sending directly, we need to do the opposite: this message
-         might have come from the Outbox queue, so we translate X-BCC
-         back to a proper bcc setting:
+         Is the message supposed to be sent later? In that case, we need
+         to store the BCC header as an X-BCC or it will disappear when
+         the message is saved to the outbox.
        */
-      if ( HasHeaderEntry("X-BCC") )
+      if ( forStorage )
       {
+         // The X-BCC will be converted back to BCC by Send()
          if ( m_Envelope->bcc )
-         {
-            mail_free_address(&m_Envelope->bcc);
-         }
-
-         SetAddressField(&m_Envelope->bcc, GetHeaderEntry("X-BCC"));
-
-         // don't send X-BCC field or the recipient would still see the BCC
-         // contents (which is highly undesirable!)
-         RemoveHeaderEntry("X-BCC");
+            AddHeaderEntry("X-BCC", m_Bcc);
       }
-   }
-
-   // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the
-   // last NULL entry
-   size_t n = m_extraHeaders.size() + 4;
-   m_headerNames = new const char*[n];
-   m_headerValues = new const char*[n];
-
-   // the current header position in m_headerNames/Values
-   int h = 0;
-
-   bool replyToSet = false,
-        xmailerSet = false;
-
-   // add the additional header lines added by the user
-   for ( MessageHeadersList::iterator i = m_extraHeaders.begin();
-         i != m_extraHeaders.end();
-         ++i, ++h )
-   {
-      m_headerNames[h] = strutil_strdup(i->m_name);
-      if ( wxStricmp(m_headerNames[h], "Reply-To") == 0 )
-         replyToSet = true;
-      else if ( wxStricmp(m_headerNames[h], "X-Mailer") == 0 )
-         xmailerSet = true;
-
-      m_headerValues[h] = strutil_strdup(i->m_value);
-   }
-
-   // add X-Mailer header if it wasn't overridden by the user (yes, we do allow
-   // it - why not?)
-   if ( !xmailerSet )
-   {
-      m_headerNames[h] = strutil_strdup("X-Mailer");
-
-      // NB: do *not* translate these strings, this doesn't make much sense
-      //     (the user doesn't usually see them) and, worse, we shouldn't
-      //     include 8bit chars (which may - and do - occur in translations) in
-      //     headers!
-      String version;
-      version << "Mahogany " << M_VERSION_STRING;
-#ifdef OS_UNIX
-      version  << ", compiled for " << M_OSINFO;
-#else // Windows
-      version << ", running under " << wxGetOsDescription();
-#endif // Unix/Windows
-      m_headerValues[h++] = strutil_strdup(version);
-   }
-
-   // set Reply-To if it hadn't been set by the user as a custom header
-   if ( !replyToSet )
-   {
-      ASSERT_MSG( !HasHeaderEntry("Reply-To"), "logic error" );
-
-      if ( !m_ReplyTo.empty() )
+      else // send, not store
       {
-         m_headerNames[h] = strutil_strdup("Reply-To");
-         m_headerValues[h++] = strutil_strdup(m_ReplyTo);
+         /*
+            If sending directly, we need to do the opposite: this message
+            might have come from the Outbox queue, so we translate X-BCC
+            back to a proper bcc setting:
+          */
+         if ( HasHeaderEntry("X-BCC") )
+         {
+            if ( m_Envelope->bcc )
+            {
+               mail_free_address(&m_Envelope->bcc);
+            }
+
+            SetAddressField(&m_Envelope->bcc, GetHeaderEntry("X-BCC"));
+
+            // don't send X-BCC field or the recipient would still see the BCC
+            // contents (which is highly undesirable!)
+            RemoveHeaderEntry("X-BCC");
+         }
       }
-   }
+
+      // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the
+      // last NULL entry
+      size_t n = m_extraHeaders.size() + 4;
+      m_headerNames = new const char*[n];
+      m_headerValues = new const char*[n];
+
+      // the current header position in m_headerNames/Values
+      int h = 0;
+
+      bool replyToSet = false,
+           xmailerSet = false;
+
+      // add the additional header lines added by the user
+      for ( MessageHeadersList::iterator i = m_extraHeaders.begin();
+            i != m_extraHeaders.end();
+            ++i, ++h )
+      {
+         m_headerNames[h] = strutil_strdup(i->m_name);
+         if ( wxStricmp(m_headerNames[h], "Reply-To") == 0 )
+            replyToSet = true;
+         else if ( wxStricmp(m_headerNames[h], "X-Mailer") == 0 )
+            xmailerSet = true;
+
+         m_headerValues[h] = strutil_strdup(i->m_value);
+      }
+
+      // add X-Mailer header if it wasn't overridden by the user (yes, we do allow
+      // it - why not?)
+      if ( !xmailerSet )
+      {
+         m_headerNames[h] = strutil_strdup("X-Mailer");
+
+         // NB: do *not* translate these strings, this doesn't make much sense
+         //     (the user doesn't usually see them) and, worse, we shouldn't
+         //     include 8bit chars (which may - and do - occur in translations) in
+         //     headers!
+         String version;
+         version << "Mahogany " << M_VERSION_STRING;
+#ifdef OS_UNIX
+         version  << ", compiled for " << M_OSINFO;
+#else // Windows
+         version << ", running under " << wxGetOsDescription();
+#endif // Unix/Windows
+         m_headerValues[h++] = strutil_strdup(version);
+      }
+
+      // set Reply-To if it hadn't been set by the user as a custom header
+      if ( !replyToSet )
+      {
+         ASSERT_MSG( !HasHeaderEntry("Reply-To"), "logic error" );
+
+         if ( !m_ReplyTo.empty() )
+         {
+            m_headerNames[h] = strutil_strdup("Reply-To");
+            m_headerValues[h++] = strutil_strdup(m_ReplyTo);
+         }
+      }
 
 #ifdef HAVE_XFACES
-   // add an XFace?
-   if ( !HasHeaderEntry("X-Face") && !m_XFaceFile.empty() )
-   {
-      XFace xface;
-      if ( xface.CreateFromFile(m_XFaceFile) )
+      // add an XFace?
+      if ( !HasHeaderEntry("X-Face") && !m_XFaceFile.empty() )
       {
-         m_headerNames[h] = strutil_strdup("X-Face");
-         m_headerValues[h] = strutil_strdup(xface.GetHeaderLine());
-         if(strlen(m_headerValues[h]))  // paranoid, I know.
+         XFace xface;
+         if ( xface.CreateFromFile(m_XFaceFile) )
          {
-            ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-2] == '\r', "String should have been DOSified" );
-            ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-1] == '\n', "String should have been DOSified" );
-            ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-2] =
-               '\0'; // cut off \n
+            m_headerNames[h] = strutil_strdup("X-Face");
+            m_headerValues[h] = strutil_strdup(xface.GetHeaderLine());
+            if(strlen(m_headerValues[h]))  // paranoid, I know.
+            {
+               ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-2] == '\r', "String should have been DOSified" );
+               ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-1] == '\n', "String should have been DOSified" );
+               ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-2] =
+                  '\0'; // cut off \n
+            }
+            h++;
          }
-         h++;
+         //else: couldn't read X-Face from file (complain?)
       }
-      //else: couldn't read X-Face from file (complain?)
-   }
 #endif // HAVE_XFACES
 
-   m_headerNames[h] = NULL;
-   m_headerValues[h] = NULL;
+      m_headerNames[h] = NULL;
+      m_headerValues[h] = NULL;
 
-   mail_free_body_part(&m_LastPart->next);
-   m_LastPart->next = NULL;
+      mail_free_body_part(&m_LastPart->next);
+      m_LastPart->next = NULL;
 
-   // check if there is only one part, then we don't need multipart/mixed
-   if(m_LastPart == m_Body->nested.part)
-   {
-      BODY *oldbody = m_Body;
-      m_Body = &(m_LastPart->body);
-      oldbody->nested.part = NULL;
-      mail_free_body(&oldbody);
+      // check if there is only one part, then we don't need multipart/mixed
+      if(m_LastPart == m_Body->nested.part)
+      {
+         BODY *oldbody = m_Body;
+         m_Body = &(m_LastPart->body);
+         oldbody->nested.part = NULL;
+         mail_free_body(&oldbody);
+      }
    }
 
    // finally, set the date
@@ -1076,8 +1168,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
    bdy = &(m_NextPart->body);
    bdy->type = type;
 
-   bdy->subtype = (char *) fs_get( subtype.length()+1);
-   strcpy(bdy->subtype,(char *)subtype.c_str());
+   bdy->subtype = cpystr((char *)subtype.c_str());
 
    bdy->contents.text.data = data;
    bdy->contents.text.size = len;
@@ -1340,7 +1431,7 @@ void SendMessageCC::Preview(String *text)
 bool
 SendMessageCC::Send(int flags)
 {
-   ASSERT_MSG(m_headerNames != NULL, "Build() must have been called!");
+   ASSERT_MSG( m_wasBuilt, "Build() must have been called!" );
 
    if ( !MailFolder::Init() )
       return false;

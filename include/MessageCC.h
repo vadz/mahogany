@@ -76,7 +76,7 @@ public:
    /** get message text
        @return the uninterpreted message body
    */
-   virtual String FetchText(void);
+   virtual String FetchText(void) const;
 
    /** get the decoded part text
     */

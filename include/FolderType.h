@@ -133,14 +133,18 @@ enum Protocol
 {
    /// invalid value
    Prot_Illegal,
+
    /// use SMTP
    Prot_SMTP,
+
    /// use NNTP
    Prot_NNTP,
+
    /// use local sendmail agent
    Prot_Sendmail,
-   /// default delivery mode
-   Prot_Default = Prot_SMTP
+
+   /// default mail delivery mode, i.e. either Prot_SMTP or Prot_Sendmail
+   Prot_Default
 };
 
 // ----------------------------------------------------------------------------

@@ -45,9 +45,6 @@ M_LIST_OWN(MessageHeadersList, MessageHeader);
 class SendMessageCC : public SendMessage
 {
 public:
-   // ctor for base class static Create()
-   SendMessageCC(Profile *profile, Protocol protocol, wxFrame *frame);
-
    // implement the base class pure virtuals
 
    // standard headers
@@ -105,6 +102,25 @@ public:
    enum Mode { Mode_SMTP, Mode_NNTP };
 
 protected:
+   /** @name Construction */
+   //@{
+
+   /**
+     Ctor for base class static Create()
+   */
+   SendMessageCC(Profile *profile,
+                 Protocol protocol,
+                 wxFrame *frame,
+                 const Message *message = NULL);
+
+   /// init the fields for a new message
+   void InitNew();
+
+   /// init the fields for a resent message
+   void InitResent(const Message *message);
+
+   //@}
+
    /** Sends the message.
 
        @param flags are the same as for SendOrQueue()
@@ -182,6 +198,9 @@ private:
         m_UseSSLUnsignedforNNTP;
 #endif // USE_SSL
 
+   /// has the message been properly created (set by Build())?
+   bool m_wasBuilt;
+
    /** @name Address fields
     */
    //@{
@@ -222,9 +241,6 @@ private:
    /// the header encoding (wxFONTENCODING_SYSTEM if none)
    wxFontEncoding m_encHeaders;
 
-   /// 2nd stage constructor, see constructor
-   void Create(Protocol protocol, Profile *prof, wxFrame *frame);
-
    /// Protocol used for sending
    Protocol m_Protocol;
 
@@ -252,6 +268,9 @@ private:
 
    /// the parent frame (only used for the dialogs)
    wxFrame *m_frame;
+
+   // it uses our ctor
+   friend class SendMessage;
 
    // give it access to m_headerNames nad m_headerValues
    friend class Rfc822OutputRedirector;

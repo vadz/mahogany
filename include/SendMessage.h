@@ -13,12 +13,20 @@
 #ifndef SENDMESSAGE_H
 #define SENDMESSAGE_H
 
+class Message;
 class Profile;
 
 // ----------------------------------------------------------------------------
 // SendMessage: ABC for a class allowing to send a message
 // ----------------------------------------------------------------------------
 
+/**
+  SendMessage represents an outgoing message: usually you first create an
+  object of this class, then fill the headers and finally call SendOrQueue()
+  which either sends the message or stores it in the Outbox to be sent later.
+
+  Alternatively, you may use CreateResent() to redirect an existing message.
+ */
 class SendMessage
 {
 public:
@@ -34,15 +42,34 @@ public:
       Silent = 2
    };
 
+   /** @name Creating outgoing messages
+
+       A new message is created with Create(), to redirect/bounce an existing
+       one, use CreateResent()
+   */
+   //@{
+
    /** Creates an empty object, setting some initial values.
 
-       @param prof pointer to the profile to use
+       @param profile pointer to the profile to use (must be non NULL)
        @param protocol which protocol to use for sending
        @param frame the parent window for dialogs, may be NULL
    */
-   static SendMessage *Create(Profile *prof,
+   static SendMessage *Create(Profile *profile,
                               Protocol protocol = Prot_Default,
                               wxFrame *frame = NULL);
+
+   /** Creates a duplicate of an existing message.
+
+       @param profile pointer to the profile to use (must be non NULL)
+       @param message the original message (can't be NULL)
+       @param frame the parent window for dialogs, may be NULL
+   */
+   static SendMessage *CreateResent(Profile *profile,
+                                    const Message *message,
+                                    wxFrame *frame = NULL);
+
+   //@}
 
    /** @name Standard headers */
    //@{

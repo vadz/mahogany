@@ -3127,29 +3127,17 @@ wxComposeView::BuildMessage() const
    Protocol proto;
    switch ( m_mode )
    {
+      default:
+         FAIL_MSG( "unknown protocol" );
+         // fall through nevertheless
+
       case Mode_Mail:
-#ifdef OS_UNIX
-         if ( READ_CONFIG_BOOL(m_Profile, MP_USE_SENDMAIL) )
-            proto = Prot_Sendmail;
-         else
-#endif // OS_UNIX
-            proto = Prot_SMTP;
+         proto = Prot_Default;
          break;
 
       case Mode_News:
          proto = Prot_NNTP;
          break;
-
-      default:
-         proto = Prot_Illegal;
-   }
-
-   if ( proto == Prot_Illegal )
-   {
-      FAIL_MSG( "unknown protocol" );
-
-      // we do have to use something though
-      proto = Prot_Default;
    }
 
    // Create the message to be composed

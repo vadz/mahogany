@@ -189,6 +189,16 @@ protected:
    /// access the m_TicketsToDeleteList creating it if necessary
    void AddTicketToDelete(Ticket t);
 
+   /// get the Message with the given UID (caller must DecRef() it)
+   Message *GetMessage(UIdType uid) const
+   {
+      // do it synchronously (FIXME should we?)
+      MailFolder_obj mf = GetMailFolder();
+      CHECK( mf, NULL, "no folder in MsgCmdProcImpl::GetMessage()" );
+
+      return mf->GetMessage(uid);
+   }
+
 private:
    /// our folder (may be NULL)
    ASMailFolder *m_asmf;
@@ -776,6 +786,44 @@ bool MsgCmdProcImpl::ProcessCommand(int cmd,
          }
          break;
 
+      case WXMENU_MSG_BOUNCE:
+         {
+            // FIXME: bounce all messages, not just one
+            Message *msg = GetMessage(messages[0]);
+
+            if ( !msg )
+               break;
+
+            // TODO: should use a generic address entry control
+            String address;
+            if ( !MInputBox(&address,
+                            _("Please enter the address"),
+                            _("Bounce the message to:"),
+                            GetFrame(),
+                            "BounceAddress") )
+            {
+               // cancelled by user
+               break;
+            }
+
+            SendMessage_obj sendMsg = SendMessage::CreateResent
+                                      (
+                                       m_asmf->GetProfile(),
+                                       msg,
+                                       GetFrame()
+                                      );
+
+            sendMsg->SetAddresses(address);
+            if ( !sendMsg->SendOrQueue() )
+            {
+               ERRORMESSAGE((_("Failed to bounce the message.")));
+            }
+
+            msg->DecRef();
+         }
+         break;
+
+
       case WXMENU_MSG_UNDELETE:
          UndeleteMessages(messages);
          break;
@@ -872,12 +920,9 @@ MsgCmdProcImpl::ShowUIDL(UIdType uid)
 void
 MsgCmdProcImpl::ShowRawText(UIdType uid)
 {
-   // do it synchronously (FIXME should we?)
-   MailFolder_obj mf = GetMailFolder();
-   CHECK_RET( mf, "no folder in MsgCmdProcImpl::ShowRawText" );
-
    String text;
-   Message *msg = mf->GetMessage(uid);
+
+   Message *msg = GetMessage(uid);
    if ( msg )
    {
       msg->WriteToString(text, true);

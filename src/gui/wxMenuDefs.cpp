@@ -318,7 +318,7 @@ static const MenuItemInfo g_aMenuItems[] =
    // msg
 
    // the available accelerators for this menu:
-   // bjqwz
+   // jqwz
 
    { WXMENU_MSG_OPEN,      gettext_noop("&Open"),             gettext_noop("View selected message in a separate window")    , wxITEM_NORMAL },
    { WXMENU_MSG_EDIT,      gettext_noop("Ed&it in composer"), gettext_noop("Edit selected message in composer")    , wxITEM_NORMAL },
@@ -391,6 +391,7 @@ static const MenuItemInfo g_aMenuItems[] =
          wxITEM_NORMAL
       },
    { WXMENU_SUBMENU,       "", "", wxITEM_NORMAL },
+   { WXMENU_MSG_BOUNCE,    gettext_noop("&Bounce..."), gettext_noop("Redirect this message to another recipient"), wxITEM_NORMAL },
    { WXMENU_SEPARATOR,     "",                  ""                         , wxITEM_NORMAL },
    { WXMENU_MSG_FILTER,    gettext_noop("&Apply filter rules..."), gettext_noop("Apply filter rules to selected messages")     , wxITEM_NORMAL },
    { WXMENU_MSG_QUICK_FILTER, gettext_noop("&Quick filter..."), gettext_noop("Create a new filter for the selected message")     , wxITEM_NORMAL },

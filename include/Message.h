@@ -315,7 +315,7 @@ public:
    /** Get message text.
        @return the uninterpreted message body
    */
-   virtual String FetchText(void) = 0;
+   virtual String FetchText(void) const = 0;
 
    /** Write the message to a String.
        @param str the string to write message text to
