@@ -140,6 +140,7 @@ extern const MOption MP_ADD_DEFAULT_HOSTNAME;
 extern const MOption MP_FROM_ADDRESS;
 extern const MOption MP_REPLY_ADDRESS;
 extern const MOption MP_POPHOST;
+extern const MOption MP_POP_NO_AUTH;
 extern const MOption MP_IMAPHOST;
 extern const MOption MP_USE_SSL;
 extern const MOption MP_USE_SSL_UNSIGNED;
@@ -667,6 +668,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_REPLY_ADDRESS_NAME      "ReplyAddress"
 /// the default POP3 host
 #define   MP_POPHOST_NAME          "Pop3Host"
+/// don't use AUTH with POP3
+#define   MP_POP_NO_AUTH_NAME       "Pop3NoAuth"
 /// the default IMAP4 host
 #define   MP_IMAPHOST_NAME          "Imap4Host"
 /// use SSL for POP/IMAP?
@@ -1473,6 +1476,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_REPLY_ADDRESS_DEFVAL      M_EMPTYSTRING
 /// the default POP3 host
 #define   MP_POPHOST_DEFVAL          "pop"
+/// don't use AUTH with POP3
+#define   MP_POP_NO_AUTH_DEFVAL     0l
 /// the default IMAP4 host
 #define   MP_IMAPHOST_DEFVAL          "imap"
 /// use SSL for POP/IMAP?
