@@ -72,10 +72,10 @@ void AutoCollectAddresses(const Message *message,
       MAT_CC,
    };
 
-   size_t stopAt = WXSIZEOF(addressTypesToCollect);
-   if (senderOnly) {
-      stopAt = 2;
-   }
+   // the email addresses we have already seen
+   wxArrayString addressesSeen;
+
+   const size_t stopAt = senderOnly ? 2 : WXSIZEOF(addressTypesToCollect);
    for ( size_t n = 0; n < stopAt; n++ )
    {
       AddressList *addrList = message->GetAddressList(addressTypesToCollect[n]);
@@ -86,13 +86,19 @@ void AutoCollectAddresses(const Message *message,
             addr;
             addr = addrList->GetNext(addr) )
       {
-         AutoCollectAddress(addr->GetEMail(),
-                            addr->GetName(),
-                            autocollectFlag,
-                            collectNamed,
-                            bookName,
-                            groupName,
-                            frame);
+         const String email = addr->GetEMail();
+         if ( addressesSeen.Index(email) == wxNOT_FOUND )
+         {
+            addressesSeen.Add(email);
+
+            AutoCollectAddress(email,
+                               addr->GetName(),
+                               autocollectFlag,
+                               collectNamed,
+                               bookName,
+                               groupName,
+                               frame);
+         }
       }
 
       addrList->DecRef();
