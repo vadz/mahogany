@@ -298,7 +298,7 @@ MModule::GetProvider(const wxString &interfaceName)
       MModuleListEntry *me = *i;
       if( me->m_Interface == interfaceName )
       {
-#ifdef 0 // creating them on the fly is wrong!
+#if 0 // creating them on the fly is wrong!
 #ifdef USE_MODULES_STATIC
          if( !me->m_Module )
          {
