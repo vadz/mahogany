@@ -69,11 +69,11 @@ public:
    virtual size_t GetGroupNames(wxArrayString& names) const
       { names.Empty(); return 0; }
 
-   virtual AdbEntryGroup *GetGroup(const String& name) const
+   virtual AdbEntryGroup *GetGroup(const String&) const
       { FAIL_MSG( _T("LineBook::GetGroup was called.") ); return NULL; }
 
    virtual AdbEntry *CreateEntry(const String& name);
-   virtual AdbEntryGroup *CreateGroup(const String& name)
+   virtual AdbEntryGroup *CreateGroup(const String&)
    {
       FAIL_MSG(
          _T("Nobody asked LineBook whether it supports CreateGroup.") );
@@ -81,7 +81,7 @@ public:
    }
 
    virtual void DeleteEntry(const String& name);
-   virtual void DeleteGroup(const String& name)
+   virtual void DeleteGroup(const String&)
       { FAIL_MSG( _T("LineBook::DeleteGroup was called.") ); }
 
    virtual AdbEntry *FindEntry(const wxChar *name) const;
@@ -91,13 +91,13 @@ public:
 
    virtual String GetFileName() const { return m_file; }
 
-   virtual void SetName(const String& name)
+   virtual void SetName(const String&)
    {
       FAIL_MSG( _T("Nobody asked LineBook whether it supports SetName.") );
    }
    virtual String GetName() const;
 
-   virtual void SetDescription(const String& desc)
+   virtual void SetDescription(const String&)
    {
       FAIL_MSG(
          _T("Nobody asked LineBook whether it supports SetDescription.") );
@@ -149,14 +149,14 @@ public:
    virtual void GetField(size_t n, String *pstr) const;
 
    virtual size_t GetEMailCount() const { return 0; }
-   virtual void GetEMail(size_t n, String *pstr) const
+   virtual void GetEMail(size_t, String *) const
       { FAIL_MSG( _T("LineEntry::GetEMail was called.") ); }
 
    virtual void ClearDirty() { m_dirty = false; }
    virtual bool IsDirty() const { return m_dirty; }
 
    virtual void SetField(size_t n, const String& strValue);
-   virtual void AddEMail(const String& strEMail)
+   virtual void AddEMail(const String&)
    {
       FAIL_MSG( _T("Nobody asked LineBook whether it supports AddEMail.") );
    }
@@ -184,7 +184,7 @@ class LineDataProvider : public AdbDataProvider
 public:
    // implement interface methods
    virtual AdbBook *CreateBook(const String& name);
-   virtual bool EnumBooks(wxArrayString& names) { return false; }
+   virtual bool EnumBooks(wxArrayString&) { return false; }
    virtual bool DeleteBook(AdbBook *book);
    virtual bool TestBookAccess(const String& name, AdbTests test);
 
@@ -483,7 +483,7 @@ void LineEntry::SetField(size_t n, const String& strValue)
    }
 }
 
-int LineEntry::Matches(const wxChar *what, int where, int how) const
+int LineEntry::Matches(const wxChar *what, int /* where */, int how) const
 {
    wxString whatCopy(what);
    wxString addressCopy(m_address);
@@ -605,7 +605,7 @@ bool LineDataProvider::TestBookAccess(const String& name, AdbTests test)
    return ok;
 }
 
-bool LineDataProvider::DeleteBook(AdbBook *book)
+bool LineDataProvider::DeleteBook(AdbBook * /* book */)
 {
    // TODO
    return false;
