@@ -179,7 +179,19 @@ MAppBase::MAppBase()
 
 MAppBase::~MAppBase()
 {
+   // if the program startup failed it could be not deleted before
+   if ( m_profile )
+   {
+      m_profile->DecRef();
+      m_profile = NULL;
+   }
+
+   Profile::DeleteGlobalConfig();
+
    delete m_framesOkToClose;
+
+   MObjectRC::CheckLeaks();
+   MObject::CheckLeaks();
 
    mApplication = NULL;
 }
