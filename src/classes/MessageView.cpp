@@ -1945,7 +1945,7 @@ MessageView::MimeInfo(const MimePart *mimepart)
 
    message << _("Size: ");
    size_t lines;
-   if ( type.IsText() && (lines = mimepart->GetNumberOfLines()) )
+   if ( type.IsText() && (lines = mimepart->GetNumberOfLines()) != 0 )
    {
       message << strutil_ltoa(lines) << _(" lines");
    }

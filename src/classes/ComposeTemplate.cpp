@@ -1533,7 +1533,7 @@ VarExpander::ExpandOriginalText(const String& text,
             }
          }
 
-         if ( !quoteEmpty && (lenEOL = IsEndOfLine(cptr)) )
+         if ( !quoteEmpty && (lenEOL = IsEndOfLine(cptr)) != 0 )
          {
             // this line is empty, skip it entirely (i.e. don't output the
             // prefix for it)
@@ -1547,7 +1547,7 @@ VarExpander::ExpandOriginalText(const String& text,
          lineCur += prefix;
       }
 
-      if ( !*cptr || (lenEOL = IsEndOfLine(cptr)) )
+      if ( !*cptr || (lenEOL = IsEndOfLine(cptr)) != 0 )
       {
          // sanity test
          ASSERT_MSG( !wrapMargin || lineCur.length() <= wrapMargin,

@@ -178,7 +178,7 @@ PGPFilter::DoProcess(String& text,
       }
 
       // end of the PGP part
-      const char *end;
+      const char *end = NULL; // unneeded but suppresses the compiler warning
       if ( ok ) // ok, it starts with something valid
       {
          // now locate the end line

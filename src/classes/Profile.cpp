@@ -1204,7 +1204,7 @@ ProfileImpl::readEntry(LookupData &ld, int flags) const
 
    // the values read from profile
    String strResult;
-   long   longResult;
+   long   longResult = 0; // unneeded but suppresses the compiler warning
 
    // did we find the requested value?
    bool foundHere;

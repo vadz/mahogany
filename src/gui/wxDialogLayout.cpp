@@ -388,17 +388,22 @@ wxPDialog::wxPDialog(const wxString& profileKey,
                      style),
            m_profileKey(profileKey)
 {
-   int x, y, w, h;
-
-   m_didRestoreSize = !m_profileKey.empty() &&
-                      wxMFrame::RestorePosition(m_profileKey, &x, &y, &w, &h);
-
-   if ( m_didRestoreSize )
+   if ( m_profileKey.empty() )
    {
-      SetSize(x, y, w, h);
+      m_didRestoreSize = false;
+   }
+   else
+   {
+      int x, y, w, h;
+      m_didRestoreSize = wxMFrame::RestorePosition(m_profileKey, &x, &y, &w, &h);
+
+      if ( m_didRestoreSize )
+      {
+         SetSize(x, y, w, h);
+      }
    }
    //else: it should be set by the derived class or the default size will be
-   //      used - not too bad neither
+   //      used -- not catastrophic neither
 }
 
 wxPDialog::~wxPDialog()

@@ -2992,7 +2992,7 @@ wxADBPropertiesDialog::wxADBPropertiesDialog(wxWindow *parent, AdbTreeBook *book
   // first determine the longest label
   wxClientDC dc(this);
   dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
-  long widthLabel, heightLabel, widthLabelMax = 0;
+  long widthLabel, heightLabel = 0, widthLabelMax = 0;
   for ( n = 0; n < WXSIZEOF(labels); n++ ) {
     labelsT[n] = wxGetTranslation(labels[n]);
     dc.GetTextExtent(labelsT[n], &widthLabel, &heightLabel);

@@ -772,7 +772,7 @@ OneCritControl::SetValues(const MFDialogSettings& settings, size_t n)
    String argument = settings.GetTestArgument(n);
    if ( test == ORC_T_HasFlag )
    {
-      MFDialogHasFlag flag;
+      MFDialogHasFlag flag = ORC_MF_Illegal; // silent the compiler warning
       if      ( argument == "U" ) flag = ORC_MF_Unseen;
       else if ( argument == "D" ) flag = ORC_MF_Deleted;
       else if ( argument == "A" ) flag = ORC_MF_Answered;
@@ -1063,7 +1063,7 @@ public:
       m_Type->SetSelection(MFDialogAction_toSelect(action));
       if ( FilterActionMsgFlag(action) )
       {
-         MFDialogSetFlag flag;
+         MFDialogSetFlag flag = OAC_MF_Illegal; // silent the compiler warning
          if      ( argument == "U" ) flag = OAC_MF_Unseen;
          else if ( argument == "D" ) flag = OAC_MF_Deleted;
          else if ( argument == "A" ) flag = OAC_MF_Answered;

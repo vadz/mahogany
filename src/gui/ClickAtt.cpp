@@ -135,7 +135,7 @@ String ClickableAttachment::GetLabelFor(const MimePart *mimepart)
       label << ", ";
 
       size_t lines;
-      if ( type.IsText() && (lines = mimepart->GetNumberOfLines()) )
+      if ( type.IsText() && (lines = mimepart->GetNumberOfLines()) != 0 )
       {
          label << strutil_ultoa(lines) << _(" lines");
       }

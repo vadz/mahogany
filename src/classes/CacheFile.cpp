@@ -199,7 +199,7 @@ bool CacheFile::Load()
    // first line is the header but we never write just the header
    bool ok = count > 1;
 
-   int version;
+   int version = 0; // unneeded but suppresses the compiler warning
    if ( ok )
    {
       int rc = CheckFormatVersion(file[0u], &version);
