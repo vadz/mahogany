@@ -255,9 +255,18 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    CreateStatusBar(3, wxST_SIZEGRIP, 12345); // 3 fields, id 12345 fo
    GetStatusBar()->SetFieldsCount(3, widths);
 
+   // construct the menu and toolbar
    AddFileMenu();
    AddFolderMenu();
    AddEditMenu();
+
+#ifndef HAS_DYNAMIC_MENU_SUPPORT
+   AddMessageMenu();
+   AddLanguageMenu();
+#endif
+
+   AddHelpMenu();
+   AddToolbarButtons(CreateToolBar(), WXFRAME_MAIN);
 
    // disable the operations which don't make sense for viewer
    wxMenuBar *menuBar = GetMenuBar();
@@ -285,11 +294,6 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
                                m_FolderView->GetWindow(),
                                x/3);
 
-#ifndef HAS_DYNAMIC_MENU_SUPPORT
-   AddMessageMenu();
-   AddLanguageMenu();
-#endif
-
    // open the last folder in the main frame by default
    String foldername = READ_APPCONFIG(MP_MAINFOLDER);
    if ( !foldername.IsEmpty() )
@@ -304,10 +308,6 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
          folder->DecRef();
       }
    }
-
-   // finish constructing the menu and toolbar
-   AddHelpMenu();
-   AddToolbarButtons(CreateToolBar(), WXFRAME_MAIN);
 
    m_splitter->SetMinimumPaneSize(0);
    m_splitter->SetFocus();

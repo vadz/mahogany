@@ -190,6 +190,9 @@ private:
 protected:
    friend class MimePopup;
 
+   /// update the "show headers" menu item from m_ProfileValues.showHeaders
+   void UpdateShowHeadersInMenu();
+
    /// displays information about the currently selected MIME content
    void MimeInfo(int num);
    /// handles the currently selected MIME content

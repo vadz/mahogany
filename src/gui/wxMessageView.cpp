@@ -568,6 +568,9 @@ wxMessageView::ReadAllSettings(AllProfileValues *settings)
    SetFocusFollowMode(READ_CONFIG(m_Profile,MP_FOCUS_FOLLOWSMOUSE) != 0);
 #endif
    SetWrapMargin(READ_CONFIG(m_Profile, MP_VIEW_WRAPMARGIN));
+
+   // update the parents menu as the show headers option might have changed
+   UpdateShowHeadersInMenu();
 }
 
 void
@@ -1669,6 +1672,7 @@ wxMessageView::DoMenuCommand(int id)
    {
       m_ProfileValues.showHeaders = !m_ProfileValues.showHeaders;
       m_Profile->writeEntry(MP_SHOWHEADERS, m_ProfileValues.showHeaders);
+      UpdateShowHeadersInMenu();
       Update();
    }
    break;
@@ -2027,6 +2031,18 @@ wxMessageView::PageUp(void)
 {
    GetLayoutList()->MoveCursorVertically(-20); // FIXME: ugly hard-coded line count
    ScrollToCursor();
+}
+
+void
+wxMessageView::UpdateShowHeadersInMenu()
+{
+   wxFrame *frame = GetFrame(this);
+   CHECK_RET( frame, "message view without parent frame?" );
+
+   wxMenuBar *mbar = frame->GetMenuBar();
+   CHECK_RET( mbar, "message view frame without menu bar?" );
+
+   mbar->Check(WXMENU_MSG_TOGGLEHEADERS, m_ProfileValues.showHeaders);
 }
 
 // ----------------------------------------------------------------------------
