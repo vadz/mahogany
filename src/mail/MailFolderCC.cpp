@@ -2263,7 +2263,7 @@ MailFolderCC::SearchMessages(const SearchCriterium *crit)
    CHECK( !m_SearchMessagesFound, NULL, "SearchMessages reentered" );
    CHECK( crit, NULL, "no criterium in SearchMessages" );
 
-   HeaderInfoList *hil = GetHeaders();
+   HeaderInfoList_obj hil = GetHeaders();
    CHECK( hil, NULL, "no listing in SearchMessages" );
 
    unsigned long lastcount = 0;
