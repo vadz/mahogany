@@ -1353,7 +1353,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
                    && breakpos > 0)
                breakpos--;
          else
-            breakpos == 0;
+            breakpos = 0;
          if(! foundSpace) // breakpos == 0!
          {
             if(i == m_ObjectList.begin())
