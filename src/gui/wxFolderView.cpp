@@ -173,6 +173,7 @@ enum
 
    WXMENU_FVIEW_CONFIG_DATEFMT,
    WXMENU_FVIEW_FROM_NAMES_ONLY,
+   WXMENU_FVIEW_TO_IN_FROM,
 
    // should be in the same order as wxFolderListColumn enum members
    WXMENU_FVIEW_SORT_BY_COL,
@@ -1808,10 +1809,16 @@ void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
       case WXFLC_FROM:
          menu.AppendSeparator();
          menu.Append(WXMENU_FVIEW_FROM_NAMES_ONLY, _("&Show names only"), "", TRUE);
+         menu.Append(WXMENU_FVIEW_TO_IN_FROM, _("Show \"&To\" address"), "", TRUE);
 
          if ( READ_CONFIG(profile, MP_FVIEW_NAMES_ONLY) )
          {
             menu.Check(WXMENU_FVIEW_FROM_NAMES_ONLY, TRUE);
+         }
+
+         if ( READ_CONFIG(profile, MP_FVIEW_FROM_REPLACE) )
+         {
+            menu.Check(WXMENU_FVIEW_TO_IN_FROM, TRUE);
          }
          break;
 
@@ -4331,6 +4338,13 @@ void wxFolderView::OnHeaderPopupMenu(int cmd)
          {
             bool namesOnly = READ_CONFIG_BOOL(profile, MP_FVIEW_NAMES_ONLY);
             profile->writeEntry(MP_FVIEW_NAMES_ONLY, !namesOnly);
+         }
+         break;
+
+      case WXMENU_FVIEW_TO_IN_FROM:
+         {
+            bool showTo = READ_CONFIG_BOOL(profile, MP_FVIEW_FROM_REPLACE);
+            profile->writeEntry(MP_FVIEW_FROM_REPLACE, !showTo);
          }
          break;
 
