@@ -285,12 +285,28 @@ void PalmEntry::Load(struct Address a)
   }
 
   m_astrFields.Add(alias);
-  SetField(AdbField_FirstName, a.entry[0]);
-  SetField(AdbField_FamilyName, a.entry[1]);
-  SetField(AdbField_Title, a.entry[2]);
-  SetField(AdbField_Organization, a.entry[3]);
-// usw    Setfield(AdbField_
+  SetField(AdbField_FamilyName, a.entry[0]);
+  SetField(AdbField_FirstName, a.entry[1]);
+  SetField(AdbField_Organization, a.entry[2]);
+  SetField(AdbField_O_Phone, a.entry[3]);
+  SetField(AdbField_H_Phone, a.entry[4]);
+  SetField(AdbField_H_Fax, a.entry[5]);
+  SetField(AdbField_H_Street, a.entry[8]);
+  SetField(AdbField_H_City, a.entry[9]);
+  // Locality == state?
+  SetField(AdbField_H_Locality, a.entry[10]);
+  SetField(AdbField_H_Postcode, a.entry[11]);
+  SetField(AdbField_H_Country, a.entry[12]);
+  SetField(AdbField_Title, a.entry[13]);
 
+  // in 7 is the mailaddress
+  // SetField(???, a.entry[7]);
+  
+  // where to write "other number"?
+  // SetField(???, a.entry[6]);
+
+  // write "user defined 1-4" to comments!
+  
   m_bDirty = FALSE;
 }
 
@@ -320,9 +336,11 @@ PalmEntryGroup::PalmEntryGroup(PalmEntryGroup *pParent,
                : m_strName(strName)
 {
   m_pParent = pParent;
-  m_strName = *strName;
+  m_strName = strName;
   m_entries = new PalmEntryList(false);
-   
+
+  // FIXME: Have to check whether m_entries could be created
+     
   if ( bNew ) {
     // force creation of the group
   }
@@ -382,7 +400,7 @@ void PalmEntryGroup::AddEntry(PalmEntry* p_Entry)
 {
   ASSERT_MSG (!!m_entries, "AddEntry: non-initialized m_entries" );
   ASSERT_MSG (!!p_Entry, "AddEntry: non-initialized p_Entry" );
-//  m_entries->push_back(p_Entry);
+  m_entries->push_back(p_Entry);
 }
 
 AdbEntry *PalmEntryGroup::CreateEntry(const String& name)
@@ -436,12 +454,9 @@ PalmBook::PalmBook(const String& strName)
 {
   // create the root group, in our case this is the only group
   // allowed to contain subgroups!
-  m_pRootGroup = new PalmEntryGroup();
+  m_pRootGroup = new PalmEntryGroup(NULL, strName);
 
   m_strName = strName;
-
-  // read addresses and store to appropriate entries
-  // TODO
 }
 
 PalmBook::~PalmBook()
@@ -498,7 +513,7 @@ bool PalmBook::Flush()
 
 AdbBook *PalmDataProvider::CreateBook(const String& name)
 {
-  PalmBook *p_Book = new PalmBook(name);
+  PalmBook *p_Book = new PalmBook("PalmADB");
 
   MModule *palmModule = MModule::GetProvider("HandheldSynchronise");
   if(palmModule)
