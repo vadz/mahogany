@@ -3304,10 +3304,10 @@ void wxAdbEMailPage::OnDeleteEMail(wxCommandEvent&)
 wxAdbAddrPage::wxAdbAddrPage(wxNotebook *notebook, const char *title,
                              int idImage, bool bOffice)
              : wxAdbPage(notebook, title, idImage,
-                         bOffice ? AdbField_H_AddrPageFirst
-                                 : AdbField_O_AddrPageFirst,
-                         bOffice ? AdbField_H_AddrPageLast
-                                 : AdbField_O_AddrPageLast)
+                         bOffice ? AdbField_O_AddrPageFirst
+                                 : AdbField_H_AddrPageFirst,
+                         bOffice ? AdbField_O_AddrPageLast
+                                 : AdbField_H_AddrPageLast)
 {
 }
 

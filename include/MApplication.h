@@ -201,6 +201,8 @@ public:
    virtual void ThrEnter(SectionId what) = 0;
    virtual void ThrLeave(SectionId what) = 0;
    //@}
+   bool SupportsDialUpNetwork(void) const
+      { return m_DialupSupport; }
 protected:
    /// really (and unconditionally) terminate the app
    virtual void DoExit() = 0;

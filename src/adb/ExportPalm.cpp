@@ -58,11 +58,11 @@ protected:
    // the real workers
    static bool DoExportEntry(const AdbEntry& entry,
                              wxFFile& file, wxString const &category,
-                             bool includeEmpty);
+                             bool includeEmpty, bool includeComments);
 
    static bool DoExportGroup(const AdbEntryGroup& group,
                              wxFFile& file, wxString const &category,
-                             bool includeEmpty);
+                             bool includeEmpty, bool includeComments);
 
    // helper to escape quote characters:
    static wxString EscapeQuotes(const wxString &str)
@@ -94,6 +94,9 @@ public:
    // get the include empty flag
    const bool GetIncludeEmpty() const { return m_IncludeEmpty; }
 
+   // get the include empty flag
+   const bool GetIncludeComments() const { return m_IncludeComments; }
+
    // transfer the data from window
    virtual bool TransferDataFromWindow();
 
@@ -104,19 +107,21 @@ private:
    static const char *ms_profilePathLastCategory;
    // the profile path for saving the include empty flag
    static const char *ms_profileIncludeEmpty;
+   // the profile path for saving the include comments flag
+   static const char *ms_profileIncludeComments;
 
    // the data
    wxString
       m_filename,
       m_CategoryName;
    int m_selection;
-   int m_IncludeEmpty;
+   int m_IncludeEmpty, m_IncludeComments;
    
    // GUI controls
    wxComboBox *m_textCustomSep;
    wxTextCtrl *m_textFileName;
    wxTextCtrl *m_textCategoryName;
-   wxCheckBox *m_checkIncludeEmpty;
+   wxCheckBox *m_checkIncludeEmpty, *m_checkIncludeComments;
 };
 
 // ============================================================================
@@ -138,7 +143,7 @@ IMPLEMENT_ADB_EXPORTER(AdbPalmExporter, gettext_noop("PalmOS addressbook format"
 
 bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
                                     wxFFile& file, const wxString &
-                                    category, bool includeEmpty)
+                                    category, bool includeEmpty, bool includeComments)
 {
    /*
      The format:
@@ -153,6 +158,10 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
 
      Types are: "Home", "Work", "E-mail", "Fax", "Other", "Main",
      "Pager", "Mobile"
+
+     "Last","First","Titie","Org","wobk","home","fax","other","email","Add","Town",
+     "County","Pcode","Uk","C1","C2","C3","C4","Note","0"
+
    */
    
    wxString s;
@@ -184,7 +193,7 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
    s << "\"Home\";"; ADD(AdbField_H_Phone);
    s << "\"Fax\";"; ADD(AdbField_H_Fax);
    s << "\"Work\";"; ADD(AdbField_O_Phone);
-   s << "\"Other\";"; ADD(AdbField_O_Fax);
+   s << "\"Fax"; ADD(AdbField_O_Fax);
 
    entry.GetField(AdbField_H_City, &val);
    if(val.Length()) // has home address?
@@ -223,7 +232,12 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
    ADD(AdbField_HomePage);
    ADD(AdbField_ICQ);
    ADD(AdbField_NickName);
-   ADD(AdbField_Comments);
+   if(includeComments)
+   {
+      ADD(AdbField_Comments);
+   }
+   else
+      s << "\"\","; // empty comment
 
    s << "\"0\"";
    s += wxTextFile::GetEOL();
@@ -234,7 +248,8 @@ bool AdbPalmExporter::DoExportEntry(const AdbEntry& entry,
 
 bool AdbPalmExporter::DoExportGroup(const AdbEntryGroup& group,
                                     wxFFile& file, const wxString &
-                                    category, bool includeEmpty)
+                                    category, bool includeEmpty,
+                                    bool includeComments)
 {
    // first, export all subgroups
    wxArrayString names;
@@ -243,7 +258,8 @@ bool AdbPalmExporter::DoExportGroup(const AdbEntryGroup& group,
    {
       AdbEntryGroup *subgroup = group.GetGroup(names[nGroup]);
 
-      bool ok = DoExportGroup(*subgroup, file, category, includeEmpty);
+      bool ok = DoExportGroup(*subgroup, file, category, includeEmpty, 
+                              includeComments);
       subgroup->DecRef();
 
       if ( !ok )
@@ -258,7 +274,8 @@ bool AdbPalmExporter::DoExportGroup(const AdbEntryGroup& group,
    {
       AdbEntry *entry = group.GetEntry(names[nEntry]);
 
-      bool ok = DoExportEntry(*entry, file, category, includeEmpty);
+      bool ok = DoExportEntry(*entry, file, category, includeEmpty,
+                              includeComments);
       entry->DecRef();
 
       if ( !ok )
@@ -291,7 +308,8 @@ bool AdbPalmExporter::Export(const AdbEntryGroup& group)
    if ( file.IsOpened() )
    {
       // export everything recursively
-      if ( DoExportGroup(group, file, dialog.GetCategoryName(), dialog.GetIncludeEmpty() ) )
+      if ( DoExportGroup(group, file, dialog.GetCategoryName(),
+                         dialog.GetIncludeEmpty(), dialog.GetIncludeComments() ) )
       {
          wxLogMessage(_("Successfully exported address book data to "
                         "file '%s'"), filename.c_str());
@@ -317,6 +335,9 @@ const char *wxAdbPalmExporterConfigDialog::ms_profilePathLastCategory
 
 const char *wxAdbPalmExporterConfigDialog::ms_profileIncludeEmpty
    = "Settings/AdbPalmExportIncludeEmpty";
+
+const char *wxAdbPalmExporterConfigDialog::ms_profileIncludeComments
+   = "Settings/AdbPalmExportIncludeComments";
 
 wxAdbPalmExporterConfigDialog::wxAdbPalmExporterConfigDialog
                                (
@@ -366,7 +387,11 @@ wxAdbPalmExporterConfigDialog::wxAdbPalmExporterConfigDialog
    GetTextExtent(label, &width, NULL);
    m_checkIncludeEmpty =  panel->CreateCheckBox(label,width,m_textCategoryName);
 
-   wxString filename = filenameOrig;
+   label = _("&Include comments: ");
+   GetTextExtent(label, &width, NULL);
+   m_checkIncludeComments =  panel->CreateCheckBox(label,width,m_checkIncludeEmpty);
+
+   String filename = filenameOrig;
    if ( !filename )
    {
       ProfileBase *appProfile = mApplication->GetProfile();
@@ -383,6 +408,8 @@ wxAdbPalmExporterConfigDialog::wxAdbPalmExporterConfigDialog
    m_checkIncludeEmpty->SetValue(
       mApplication->GetProfile()->readEntry(ms_profileIncludeEmpty,
                                             0));
+   m_checkIncludeComments->SetValue(
+      mApplication->GetProfile()->readEntry(ms_profileIncludeComments,1));
 
    // set the initial and minimal dialog size
    SetDefaultSize(5*wBtn, 8*hBtn);
@@ -411,12 +438,16 @@ bool wxAdbPalmExporterConfigDialog::TransferDataFromWindow()
 
    m_IncludeEmpty = m_checkIncludeEmpty->GetValue();
    
+   m_IncludeComments = m_checkIncludeComments->GetValue();
+
    mApplication->GetProfile()->writeEntry(ms_profilePathLastFile,
                                           m_filename);
    mApplication->GetProfile()->writeEntry(ms_profilePathLastCategory,
                                           m_CategoryName);
    mApplication->GetProfile()->writeEntry(ms_profileIncludeEmpty,
                                           m_IncludeEmpty);
+   mApplication->GetProfile()->writeEntry(ms_profileIncludeComments,
+                                          m_IncludeComments);
    return TRUE;
 }
 

@@ -65,6 +65,8 @@ public:
    void AddHelpMenu(void);
    void AddMessageMenu(void);
 
+   wxMenuBar * GetMenuBar(void) { return m_MenuBar; }
+   wxToolBar * GetToolBar(void) { return m_ToolBar; }
    /// wxMFrame handles all print setup
    void OnPrintSetup();
    void OnPrintSetupPS();
@@ -81,10 +83,8 @@ public:
 protected:
    /// menu bar
    wxMenuBar *m_MenuBar;
-
    /// toolbar:
    wxToolBar *m_ToolBar;
-
    /// is it initialised?
    bool  initialised;
 };
