@@ -1050,34 +1050,40 @@ MailFolderCC::BuildListing(void)
    if(! m_Listing )
       m_Listing =  HeaderInfoListCC::Create(m_NumOfMessages);
 
-   // we may retrieve not all messages in the folder, but only some of them if
-   // there are too many
+   // by default, we retrieve all messages
    unsigned long numMessages = m_NumOfMessages;
 
-   unsigned long firstMessage = 1; // the first one to retrieve
-   /** The value of 0 disables the limit.
-       Ask only once. Don't ask for file folders.
-   */
-   if ( GetType() != MF_FILE &&
-        (m_RetrievalLimit > 0) && m_FirstListing && (m_NumOfMessages > m_RetrievalLimit) )
+   // if the number of the messages in the folder is bigger than the
+   // configured limit, ask the user whether he really wants to retrieve them
+   // all. The value of 0 disables the limit. Ask only once and never for file
+   // folders (loading headers from them is quick)
+   if ( !IsLocalQuickFolder(GetType()) &&
+        (m_RetrievalLimit > 0) && m_FirstListing &&
+        (m_NumOfMessages > m_RetrievalLimit) )
    {
-      // TODO should really ask the user how many of them he wants (like slrn)
-      String msg;
-      msg.Printf(_("This folder (%s) contains %lu messages, which is greater than "
-                   "the current threshold of %lu.\n"
-                   "\n"
-                   "Would you like to retrieve all messages anyway?\n"),
-                 GetName().c_str(),
+      // too many messages - ask the user how many of them he really wants
+      String msg, prompt, title;
+      title.Printf(_("How many messages to retrieve from folder '%s'?"),
+                   GetName().c_str());
+      msg.Printf(_("This folder contains %lu messages, which is greater than\n"
+                   "the current threshold of %lu (set it to 0 to avoid this "
+                   "question)."),
                  m_NumOfMessages, m_RetrievalLimit);
-      String confpath;
-      confpath << m_Profile->GetName() << '/' << "RetrieveAll";
-      if ( ! MDialog_YesNoDialog(msg, NULL, MDIALOG_YESNOTITLE, true,
-                               confpath) )
+      prompt = _("How many of them do you want to retrieve?");
+
+      long nRetrieve = wxGetNumberFromUser(msg, prompt, title,
+                                           m_RetrievalLimit,
+                                           1, m_NumOfMessages);
+
+      if ( nRetrieve != -1 )
       {
          numMessages = m_RetrievalLimit;
-         firstMessage = m_NumOfMessages - m_RetrievalLimit + 1;
       }
+      //else: cancelled, retrieve all
    }
+
+   // the first one to retrieve
+   unsigned long firstMessage = m_NumOfMessages - numMessages + 1;
 
    m_BuildNextEntry = 0;
 

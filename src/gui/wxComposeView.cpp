@@ -769,7 +769,7 @@ bool wxAddressTextCtrl::DoExpand()
 void wxComposeView::EnableEditing(bool enable)
 {
    // indicate the current state in the status bar
-   SetStatusText(enable ? "" : "RO", 1);
+   SetStatusText(enable ? "" : _("RO"), 1);
    m_LayoutWindow->SetEditable(enable);
 }
 
@@ -788,32 +788,11 @@ wxComposeView::CreateNewArticle(wxWindow *parent,
                                 ProfileBase *parentProfile,
                                 bool hide)
 {
-   wxComposeView *cv = new wxComposeView("_ComposeViewNews", parent);
+   wxComposeView *cv = new wxComposeView("ComposeViewNews", parent);
    cv->m_mode = Mode_NNTP;
    cv->m_kind = Message_New;
    cv->SetTitle(_("Article Composition"));
    cv->Create(parent,parentProfile);
-
-   // testing only
-#if 1
-#ifdef OS_WIN
-   const char *filename = "f:/progs/M/template.test";
-#else
-   const char *filename = "/tmp/template.test";
-#endif
-   String text;
-   wxFFile file(filename);
-   if ( file.IsOpened() && file.ReadAll(&text) )
-   {
-      ExpansionSink sink;
-      VarExpander expander(sink, *cv);
-      MessageTemplateParser parser(text, filename, &expander);
-      if ( parser.Parse(sink) )
-      {
-         sink.InsertTextInto(*cv);
-      }
-   }
-#endif
 
    return cv;
 }
@@ -829,7 +808,7 @@ wxComposeView::CreateNewMessage(wxWindow *parent,
                                 ProfileBase *parentProfile,
                                 bool hide)
 {
-   wxComposeView *cv = new wxComposeView("_ComposeViewMail", parent);
+   wxComposeView *cv = new wxComposeView("ComposeViewMail", parent);
    cv->m_mode = Mode_SMTP;
    cv->m_kind = Message_New;
    cv->SetTitle(_("Message Composition"));
@@ -921,6 +900,14 @@ wxComposeView::InitText(Message *msg)
       }
       else
       {
+         // first show any errors which the call to Parse() above could
+         // generate
+         wxLog *log = wxLog::GetActiveTarget();
+         if ( log )
+         {
+            log->Flush();
+         }
+
          if ( MDialog_YesNoDialog(_("There were errors in the template. Would "
                                     "you like to edit it now?"),
                                     this,
@@ -952,7 +939,8 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
 
    if(!parentProfile)
       parentProfile = mApplication->GetProfile();
-   m_Profile = ProfileBase::CreateProfile(m_name,parentProfile);
+   m_Profile = parentProfile;
+   m_Profile->IncRef();
 
    // build menu
    // ----------

@@ -36,6 +36,13 @@
 
 #include "MessageTemplate.h"
 
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+// parser helper
+static String ExtractWord(const char **ppc, char endOfWordMarker);
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -155,36 +162,7 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
       pc++;
 
       // extract the next word
-      bool quoted = *pc == '"';
-      if ( quoted )
-         pc++;
-
-      String word;
-      while ( *pc && (*pc != '\n') &&
-              ((quoted && *pc && *pc != '"') ||
-              (isalnum(*pc) && *pc != bracketClose && *pc)) )
-      {
-         if ( quoted && *pc == '\\' )
-         {
-            // unless it's the last character in the string, backslash quotes
-            // the next one (it may be used to insert quotes into templates)
-            pc++;
-            if ( !*pc || *pc == '\n' )
-            {
-               // oops... nothing to quote: rollback and insert just '\\'
-               pc--;
-            }
-            //else: we will insert the next character below
-         }
-
-         word += *pc++;
-      }
-
-      if ( quoted && *pc == '"' )
-      {
-         // skip the closing quote
-         pc++;
-      }
+      String word = ExtractWord(&pc, bracketClose);
 
       // decide what we've got
       enum
@@ -218,10 +196,7 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
                      category = word;
 
                      pc++; // skip ':'
-                     while ( isalpha(*pc) )
-                     {
-                        name += *pc++;
-                     }
+                     name = ExtractWord(&pc, bracketClose);
                   }
                   else
                   {
@@ -491,3 +466,46 @@ SetMessageTemplate(const String& value,
    (void)profile->writeEntry(GetMessageTemplateProfilePath(kind), value);
 }
 
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+String ExtractWord(const char **ppc, char endOfWordMarker)
+{
+   const char *pc = *ppc;
+
+   bool quoted = *pc == '"';
+   if ( quoted )
+      pc++;
+
+   String word;
+   while ( *pc && (*pc != '\n') &&
+         ((quoted && *pc && *pc != '"') ||
+          (isalnum(*pc) && *pc != endOfWordMarker && *pc)) )
+   {
+      if ( quoted && *pc == '\\' )
+      {
+         // unless it's the last character in the string, backslash quotes
+         // the next one (it may be used to insert quotes into templates)
+         pc++;
+         if ( !*pc || *pc == '\n' )
+         {
+            // oops... nothing to quote: rollback and insert just '\\'
+            pc--;
+         }
+         //else: we will insert the next character below
+      }
+
+      word += *pc++;
+   }
+
+   if ( quoted && *pc == '"' )
+   {
+      // skip the closing quote
+      pc++;
+   }
+
+   *ppc = pc;
+
+   return word;
+}

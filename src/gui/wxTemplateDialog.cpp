@@ -226,16 +226,12 @@ void TemplateEditor::OnMenu(wxCommandEvent& event)
             String value2('"');
             for ( const char *pc = value.c_str(); *pc; pc++ )
             {
-               if ( *pc == '"' )
+               if ( *pc == '"' || *pc == '\\' )
                {
-                  // escaped quotes inside quotes... a nice test of syntax
-                  // highlighting in vim :-)
-                  value2 += "\\\"";
+                  value2 += '\\';
                }
-               else
-               {
-                  value2 += *pc;
-               }
+
+               value2 += *pc;
             }
 
             // closing quote

@@ -462,7 +462,7 @@ MDialog_YesNoDialog(const char *message,
 
    int style = Style(wxYES_NO | wxICON_QUESTION | wxCENTRE);
    if(! yesDefault) style |= wxNO_DEFAULT;
-   
+
    MGuiLocker lock;
    CloseSplash();
    return wxPMessageBox(configPath, message, caption,
@@ -720,7 +720,7 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    ll->Insert(align);
    ll->Insert(new wxLayoutObjectIcon(wxIcon(pythonpower)));
 #endif // Python
-   
+
    Refresh();
    ResizeScrollbars(true); // let them disappear
    // start a timer which will close us (if not disabled)
@@ -950,9 +950,10 @@ public:
    ~wxMessageSortingDialog();
 
    // reset the selected options to their default values
-   virtual bool TransferDataFromWindow(); 
+   virtual bool TransferDataFromWindow();
    virtual bool TransferDataToWindow();
    bool WasChanged(void) { return m_SortOrder != m_OldSortOrder;};
+
 protected:
    ProfileBase *m_Profile;
    wxChoice    *m_Choices[NUM_CRITERIA];
@@ -960,14 +961,15 @@ protected:
    long         m_SortOrder;
 };
 
-wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile, wxWindow *parent)
-   : wxManuallyLaidOutDialog( parent,
-                              _("Message sorting"),
-                              "MessageSortingDialog")
+wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile,
+                                               wxWindow *parent)
+                      : wxManuallyLaidOutDialog(parent,
+                                                _("Message sorting"),
+                                                "MessageSortingDialog")
 {
    m_Profile = profile;
    profile->IncRef(); // paranoid
-   
+
    SetDefaultSize(380,280);
 
    wxStaticBox *box = CreateStdButtonsAndBox(_("Sort messages by"),MH_DIALOG_SORTING);
@@ -998,7 +1000,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile, wxWindow *p
          c->top.Below(m_Choices[n-1], 2*LAYOUT_Y_MARGIN);
       c->height.AsIs();
       txt->SetConstraints(c);
-      
+
       m_Choices[n] = new wxChoice(this, -1, wxDefaultPosition,
                                   wxDefaultSize, NUM_CRITERIA,
                                   sortCriteria);
@@ -1012,13 +1014,14 @@ wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile, wxWindow *p
       c->height.AsIs();
       m_Choices[n]->SetConstraints(c);
    }
+
+   Layout();
 }
 
 wxMessageSortingDialog::~wxMessageSortingDialog()
 {
    m_Profile->DecRef();
 }
-
 
 bool wxMessageSortingDialog::TransferDataFromWindow()
 {
@@ -1050,7 +1053,7 @@ bool wxMessageSortingDialog::TransferDataToWindow()
       m_Choices[n]->SetSelection(num);
       sortOrder >>= 4;
    }
-   
+
    return TRUE;
 }
 

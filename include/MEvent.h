@@ -256,6 +256,7 @@ private:
 // ----------------------------------------------------------------------------
 // Derive from this class to be able to process events.
 // ----------------------------------------------------------------------------
+
 class MEventReceiver
 {
 public:
@@ -263,6 +264,11 @@ public:
    // return TRUE if it's ok to pass event to other receivers
    // or FALSE to not propagate it any more
    virtual bool OnMEvent(MEventData& event) = 0;
+
+#ifdef DEBUG
+   // check that we had removed ourself from the list of event handlers
+   virtual ~MEventReceiver();
+#endif // DEBUG
 };
 
 // ----------------------------------------------------------------------------

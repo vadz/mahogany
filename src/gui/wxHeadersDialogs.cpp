@@ -804,7 +804,7 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(ProfileBase *profile,
       c->top.Below(m_textctrlValue, LAYOUT_Y_MARGIN);
       c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
       c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
-      c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
+      c->height.AsIs();
       m_radioboxType->SetConstraints(c);
 
       m_headerType = CustomHeader_Both;
@@ -835,6 +835,7 @@ wxCustomHeaderDialog::wxCustomHeaderDialog(ProfileBase *profile,
    }
 
    // final touch
+   Layout();
    m_textctrlName->SetFocus();
    SetDefaultSize(4*wBtn, (8 + extraHeight)*hBtn);
 }

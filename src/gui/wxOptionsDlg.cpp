@@ -1180,7 +1180,7 @@ wxOptionsPageMessageView::wxOptionsPageMessageView(wxNotebook *parent,
 void wxOptionsPageMessageView::OnButton(wxCommandEvent& event)
 {
    bool dirty = false;
-   
+
    wxObject *obj = event.GetEventObject();
    if ( obj == GetControl(ConfigField_MessageViewSortMessagesBy) )
       dirty = ConfigureSorting(m_Profile, this);

@@ -125,6 +125,12 @@ inline int CombineFolderTypeAndFlags(FolderType type, int flags)
    return type | flags;
 }
 
+/// is this folder a local, file based one?
+inline bool IsLocalQuickFolder(FolderType type)
+{
+   return type == MF_FILE || type == MF_MH || type == MF_NEWS;
+}
+
 /// can this folder contain other subfolders? if so, of which type?
 inline bool CanHaveSubfolders(FolderType type, FolderType *subtype = NULL)
 {

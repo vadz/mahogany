@@ -70,9 +70,32 @@ static MEventList gs_EventList;
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// event manager
+// MEventReceiver
 // ----------------------------------------------------------------------------
 
+#ifdef DEBUG
+
+// check that we had removed ourself from the list of event handlers
+MEventReceiver::~MEventReceiver()
+{
+   size_t count = gs_receivers.GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      MEventReceiverInfo *info = gs_receivers[n];
+      if ( &(info->receiver) == this )
+      {
+         FAIL_MSG( "Forgot to Deregister() - will probably crash!" );
+
+         break;
+      }
+   }
+}
+
+#endif // DEBUG
+
+// ----------------------------------------------------------------------------
+// event manager
+// ----------------------------------------------------------------------------
 
 MEventManager::MEventManager()
 {
@@ -83,7 +106,7 @@ void
 MEventManager::DispatchPending(void)
 {
    MEventData *dataptr = NULL;
-   
+
    while(! gs_EventList.empty() )
    {
       dataptr = gs_EventList.pop_front();
@@ -106,7 +129,7 @@ void MEventManager::Dispatch(MEventData * dataptr)
    MEventLocker mutex;
 
    MEventData & data = *dataptr;
-   
+
    MEventId id = data.GetId();
 
    // make a copy of the array because some event handlers might remove
@@ -116,7 +139,7 @@ void MEventManager::Dispatch(MEventData * dataptr)
    for ( size_t n = 0; n < count; n++ )
    {
       MEventReceiverInfo *info = receivers[n];
-      
+
       // check that the object didn't go away!
       if ( gs_receivers.Index(info) == wxNOT_FOUND )
          continue;
@@ -177,15 +200,18 @@ bool MEventManager::Deregister(void *handle)
    return true;
 }
 
+// ----------------------------------------------------------------------------
+// different MEvent derivations
+// ----------------------------------------------------------------------------
 
 MEventOptionsChangeData::MEventOptionsChangeData(class ProfileBase
                                                  *profile, ChangeKind
                                                  what)
-   
+
    : MEventData(MEventId_OptionsChange)
 {
    SafeIncRef(profile);
-   
+
    m_profile = profile;
    m_what = what;
    m_vetoed = false;
@@ -214,4 +240,4 @@ MEventNewMailData::~MEventNewMailData()
    delete [] m_messageIDs;
    m_folder->DecRef();
 }
-   
+
