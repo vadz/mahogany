@@ -28,6 +28,13 @@ ODIR=.
 @MAKE_USE_MODULES@
 @MAKE_USE_LEAKTRACER@
 
+# libraries needed by the modules, linked against individually in the modules
+# directory, but listed here in case we build a static library:
+ifeq ($(USE_MODULES),static)
+MODULES_LIBS=-lpisock
+else
+MODULES_LIBS=
+endif
 # canonical host
 CANONICAL_HOST=@host@
 
@@ -100,7 +107,7 @@ CFLAGS   = @CFLAGS@  $(CPPFLAGS) $(DEF) $(INC)
 CXXFLAGS = @CXXFLAGS@ $(CPPFLAGS) $(DEF) $(INC)
 LDFLAGS = @LDFLAGS@
 
-LIBS=@LIBS@ $(CCLIENTLIB)
+LIBS=@LIBS@ $(CCLIENTLIB) $(MODULES_LIBS)
 LIBS_STATIC=@LIBS_STATIC@ $(CCLIENTLIB)
 GUI_LIBS=@GTK_LDFLAGS@
 GUI_LIBS_STATIC=@GUI_LIBS_STATIC@

@@ -6,6 +6,11 @@
  * $Id$
  *******************************************************************/
 
+/*
+ * This code loads modules dynamically at runtime, or, if linked
+ * statically, initialises them at runtime. The refcount of the
+ * modules is then kept at >1, so they will never get unloaded.
+ */
 #ifdef __GNUG__
 #   pragma implementation "MModule.h"
 #endif
@@ -85,8 +90,20 @@ extern
 void MModule_Cleanup(void)
 {
    if(gs_MModuleList)
-      delete gs_MModuleList;
-   gs_MModuleList = NULL;
+   {
+      /* For statically linked modules, we must decrement them here to 
+         avoid memory leaks. The refcount gets raised to 1 before
+         anyone uses them, so it should be back to 1 now so that
+         DecRef() causes them to be freed. */
+      MModuleList::iterator i;
+      for(i = gs_MModuleList->begin();
+          i != gs_MModuleList->end();
+          i++)
+         if( (**i).m_Module )
+            (**i).m_Module->DecRef(); 
+         delete gs_MModuleList;
+      gs_MModuleList = NULL;
+   }
 }
 
 static
@@ -102,13 +119,15 @@ MModule *FindModule(const String & name)
 #ifdef USE_MODULES_STATIC
          int errorCode = 0; //for now we ignore it
          // on the fly initialisation for static modules:
-         if( ! (**i).m_Module )
+         if( (**i).m_Module == NULL )
+         {
+            // initialise the module:
             (**i).m_Module = (*((**i).m_InitFunc))(
                M_VERSION_MAJOR, M_VERSION_MINOR, M_VERSION_RELEASE,
                &gs_MInterface, &errorCode);
-         else
-            (**i).m_Module->IncRef();
+         }
 #endif
+         (**i).m_Module->IncRef();
          return (**i).m_Module;
       }
    return NULL; // not found
@@ -243,7 +262,13 @@ MModule::GetProvider(const wxString &interfaceName)
        i++)
       if( (**i).m_Interface == interfaceName )
       {
-         (**i).m_Module->IncRef();
+#ifdef USE_MODULES_STATIC
+         if( (**i).m_Module == NULL ) // static case not loaded yet
+            (**i).m_Module = FindModule( (**i).m_Name ); // this will
+         // initialise it
+         else
+#endif
+            (**i).m_Module->IncRef();
          return (**i).m_Module;
       }
    return NULL; // not found
@@ -365,15 +390,17 @@ MModule::ListLoadedModules(void)
    {
       // we have unloaded modules in the list, ignore them:
       if((**i).m_Module)
+      {
          MModuleListingEntryImpl entry(
-         (**i).m_Name, // module name
-         (**i).m_Interface,
-         (**i).m_Description,
-         "", // long description
-         String((**i).m_Version)+ _(" (builtin)"),
-         "m-developers@groups.com",
-         (**i).m_Module);
-      (*listing)[count++] = entry;
+            (**i).m_Name, // module name
+            (**i).m_Interface,
+            (**i).m_Description,
+            "", // long description
+            String((**i).m_Version)+ _(" (builtin)"),
+            "m-developers@groups.com",
+            (**i).m_Module);
+         (*listing)[count++] = entry;
+      }
    }
    listing->SetCount(count); // we might have less than we thought at first
 #else

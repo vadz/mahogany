@@ -396,7 +396,7 @@ AC_CHECK_LIB(shadow,main)
 
 dnl Check if we have the pi-sock library and headers for PalmOS support.
 AC_CHECK_HEADERS(pi-source.h, ,
-  AC_MSG_WARN("Cannot find pisock library support for PalmOS disabled."))
+  AC_MSG_WARN("Cannot find pisock library headers - support for PalmOS disabled."))
 
 dnl libresolv or libbind
 USE_RBL=1

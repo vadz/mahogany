@@ -94,7 +94,7 @@ ARG(STRING , path)
 ')
 
 
-FUNCTION(strutil_tolower, void, ( ARG(String &, str)), `strutil_tolower(str);')
+FUNCTION(strutil_tolower, void, ( ARG(String &, str)), `::strutil_tolower(str);')
 
 
 /* The following line is the end of the MInterface interface definition. */

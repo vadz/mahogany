@@ -3148,7 +3148,7 @@ EOF
  
 else
   echo "$ac_t""no" 1>&6
-echo "configure: warning: "Cannot find pisock library support for PalmOS disabled."" 1>&2
+echo "configure: warning: "Cannot find pisock library headers - support for PalmOS disabled."" 1>&2
 fi
 done
 

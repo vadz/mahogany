@@ -56,6 +56,10 @@ public:
    static FilterRule * Create(const String &filterrule,
                               MInterface *interface, MModule_Filters *mod)
       { return new FilterRuleImpl(filterrule, interface, mod); }
+#ifdef DEBUG
+   void Debug(void);
+#endif
+   
 protected:
    FilterRuleImpl(const String &filterrule,
                   MInterface *interface,
@@ -266,12 +270,15 @@ private:
 
 /* The syntax:
 
-   STATEMENT :=
+   PROGRAM :=
+     | BLOCK [ BLOCK ]
+    
+   BLOCK :=
      | CONDITION ;
-     | { STATEMENT ; RESTSTATEMENT}
+     | { BLOCK RESTBLOCK}
 
-   RESTSTATEMENT :=
-     | STATEMENT ; RESTSTATEMENT  
+   RESTBLOCK :=
+     | BLOCK ; RESTBLOCK  
      | EMPTY
      
    CONDITION :=
@@ -331,6 +338,7 @@ public:
    class SyntaxNode * Parse(void);
    class SyntaxNode * ParseExpression(void);
    class Block      * ParseBlock(void);
+   class Block      * ParseProgram(void);
    class SyntaxNode * ParseIfElse(void);
    class SyntaxNode * ParseCondition(void);
    void  ParseRestBlock(class Block *statement);
@@ -1123,7 +1131,7 @@ SyntaxNode *
 ParserImpl::Parse(void)
 {
    MOcheck();
-   return ParseBlock();
+   return ParseProgram();
 }
 
 SyntaxNode *
@@ -1459,7 +1467,6 @@ ParserImpl::ParseCondition(void)
       | EXPRESSION & EXPRESSION
       | EXPRESSION | EXPRESSION
       | EXPRESSION   
-      | IFELSEBLOCK
       
       Which is identical to the following expression, resolving the
       left recursion problem:
@@ -1467,13 +1474,6 @@ ParserImpl::ParseCondition(void)
       CONDITION := EXPRESSION RESTCONDITION    
       
    */
-   Token t = PeekToken();
-   // Is there an IF() ELSE statement?
-   if(t.GetType() == TT_Keyword && t.GetKeyword() == "if")
-   {
-      return ParseIfElse();
-   }
-
 
    SyntaxNode *expr = ParseExpression();
    if(expr)
@@ -1485,19 +1485,50 @@ ParserImpl::ParseCondition(void)
    return expr;
 }
 
+
+Block *
+ParserImpl::ParseProgram(void)
+{
+   MOcheck();
+   /* PROGRAM :=
+      | BLOCK [ BLOCK ]
+   */
+   bool empty = true;
+   Block * pgm = new Block(this);
+   Block * block = NULL;
+   Token t;
+   for(;;)
+   {
+      t = PeekToken();
+      if(t.GetType() == TT_EOF)
+         break;
+      block = ParseBlock();
+      if(block == NULL)
+         break;
+      pgm->AddNode(block);
+      empty = false;
+   }
+   if(empty)
+   {
+      delete pgm;
+      return NULL;
+   }
+   else
+      return pgm;
+}
+
 Block *
 ParserImpl::ParseBlock(void)
 {
    MOcheck();
-   /* STATEMENT :=
-      | { STATEMENT RESTSTATEMENT }
+   /* BLOCK :=
+      | { BLOCK RESTBLOCK }
       | CONDITION ;
-      
+      | IFELSE
    */
 
    Token t = PeekToken();
 
-#if 0
    // Is there an IF() ELSE statement?
    if(t.GetType() == TT_Keyword && t.GetKeyword() == "if")
    {
@@ -1508,7 +1539,6 @@ ParserImpl::ParseBlock(void)
       block->AddNode(ifelse);
       return block;
    }
-#endif
    
    // Normal block:
    if(t.GetType() == TT_Char && t.GetChar() == '{')
@@ -1555,8 +1585,8 @@ void
 ParserImpl::ParseRestBlock(Block *parent)
 {
    MOcheck();
-   /* RESTSTATEMENT :=
-      | STATEMENT ; RESTSTATEMENT
+   /* RESTBLOCK :=
+      | BLOCK ; RESTBLOCK
       | EMPTY
    */
 
@@ -2050,6 +2080,12 @@ FilterRuleImpl::~FilterRuleImpl()
 
 #ifdef DEBUG
 
+void FilterRuleImpl::Debug(void)
+{
+   m_Parser->Output(m_Program->Debug());
+}
+
+
 /** A small test for the filter module. */
 static
 int FilterTest(MInterface *interface, MModule_Filters *that)
@@ -2066,6 +2102,8 @@ int FilterTest(MInterface *interface, MModule_Filters *that)
    
    FilterRule * fr = that->GetFilter(program);
 
+   ( (FilterRuleImpl *)fr)->Debug();
+   
    String folderName =
       interface->GetMApplication()->GetProfile()->
       readEntry(MP_NEWMAIL_FOLDER,MP_NEWMAIL_FOLDER_D);
