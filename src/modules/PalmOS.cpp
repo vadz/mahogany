@@ -836,8 +836,8 @@ PalmOSModule::CreateFileList(wxArrayString &list, DIR * dir, wxString directory)
 
    list.Empty();
 
+   StatusMessage(_("Reading local directory ..."));
    while( (dirent = readdir(dir)) ) {
-      StatusMessage(_("Reading local directory ..."));
       wxString name;
 
       // ignore .* files (especially . or ..)
@@ -938,8 +938,8 @@ PalmOSModule::Backup(void)
    int max = 0;
    int i = 0;
 
+   StatusMessage(_("Reading list of databases ..."));
    while (true) {
-      StatusMessage(_("Reading list of databases ..."));
       struct DBInfo info;
       if (dlp_ReadDBList(m_PiSocket, 0, 0x80, i, &info) < 0)
          break;
@@ -1126,8 +1126,8 @@ PalmOSModule::InstallFiles(wxArrayString &fnames, bool delFile)
    struct pi_file * f;
    MProgressDialog *pd;
 
+   StatusMessage(_("Checking files to install ..."));
    for (unsigned int j = 0; j < fnames.GetCount(); j++) {
-      StatusMessage(_("Checking files to install ..."));
       db[dbcount] = (struct db*)malloc(sizeof(struct db));
 
       // remember filename
@@ -1180,8 +1180,8 @@ PalmOSModule::InstallFiles(wxArrayString &fnames, bool delFile)
                             dbcount, NULL, false, true);
 
    // Install files
+   StatusMessage(_("Installing Files ..."));
    for (i=0; i < dbcount; i++) {
-      StatusMessage(_("Installing Files ..."));
 
       if (!pd->Update(i, db[i]->name)) {
          delete pd;
@@ -1753,6 +1753,7 @@ PalmOSModule::SyncMAL(void)
     StatusMessage(_("Synchronising MAL server/AvantGo..."));
     malsync (m_PiSocket, pInfo);
     syncInfoFree(pInfo);
+    StatusMessage("");
 }
 #endif
    
