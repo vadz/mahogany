@@ -1653,7 +1653,7 @@ void wxFolderTreeImpl::RestoreLabel(const wxString& label)
    m_idEditedInPlace = 0l;
 }
 
-void wxFolderTreeImpl::OnIdle(wxIdleEvent& WXUNUSED(event))
+void wxFolderTreeImpl::OnIdle(wxIdleEvent& event)
 {
    if ( m_idEditedInPlace )
    {
@@ -1666,6 +1666,8 @@ void wxFolderTreeImpl::OnIdle(wxIdleEvent& WXUNUSED(event))
          RestoreLabel(GetItemText(m_idEditedInPlace));
       }
    }
+
+   event.Skip();
 }
 
 bool wxFolderTreeImpl::IsEditingInPlace() const
