@@ -1009,12 +1009,14 @@ wxMainFrame::OnCommandEvent(wxCommandEvent &event)
       switch ( id )
       {
          case WXMENU_DEBUG_WIZARD:
-            extern bool RunInstallWizard();
+            extern bool RunInstallWizard(bool justTest);
 
-            wxLogStatus("Running installation wizard...");
+            wxLogStatus(_T("Running installation wizard..."));
 
-            wxLogMessage("Wizard returned %s",
-                          RunInstallWizard() ? "true" : "false");
+            if ( !RunInstallWizard(true) )
+            {
+               wxLogWarning(_T("Wizard failed!"));
+            }
             break;
 
          case WXMENU_DEBUG_TOGGLE_LOG:
