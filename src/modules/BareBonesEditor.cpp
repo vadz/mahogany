@@ -156,7 +156,8 @@ private:
    int SizeWithoutNewline(const String &paragraph);
    int FindLineLength(
       const String &paragraph,int lineStart,int paragraphEnd) const;
-   size_t FindLastSpace(const String &paragraph,size_t start) const;
+   size_t RFind(const String &where,wxChar what,size_t start) const;
+   size_t FindLastNotOf(const String &where,wxChar what,size_t start) const;
 
    wxTextCtrl *m_control;
    int m_from;
@@ -273,9 +274,8 @@ void FormattedParagraph::FromCursor()
 
 bool FormattedParagraph::IsWhiteLine(int line)
 {
-   wxString contentWx(m_control->GetLineText(line));
-   String content(contentWx.c_str());
-   return content.find_first_not_of(" \n") == content.npos;
+   String content(m_control->GetLineText(line));
+   return content.find_first_not_of(_T(" \t\r\n")) == content.npos;
 }
 
 int FormattedParagraph::FindLineByWhite(int start,bool white)
@@ -323,12 +323,12 @@ void FormattedParagraph::Set(const String &modified)
    m_control->Replace(LineToPosition(m_from),LineToPosition(m_to),modified);
    int lineCount = 0;
    size_t newline;
-   for(newline = modified.find_first_of('\n'); newline != modified.npos;
-      newline = modified.find_first_of('\n',newline+1))
+   for(newline = modified.find(_T('\n')); newline != modified.npos;
+      newline = modified.find(_T('\n'),newline+1))
    {
       ++lineCount;
    }
-   if(!modified.empty() && modified[modified.size()-1] != '\n')
+   if(!modified.empty() && modified[modified.size()-1] != _T('\n'))
       ++lineCount;
    m_to = m_from+lineCount;
 }
@@ -361,11 +361,11 @@ String FormattedParagraph::UnformatCommon()
 {
    String modified(Get());
    size_t newline;
-   for(newline = modified.find_first_of('\n');
+   for(newline = modified.find(_T('\n'));
       newline != modified.npos && newline != modified.size()-1;
-      newline = modified.find_first_of('\n',newline+1))
+      newline = modified.find(_T('\n'),newline+1))
    {
-      modified[newline] = ' ';
+      modified[newline] = _T(' ');
    }
    return modified;
 }
@@ -401,7 +401,7 @@ String FormattedParagraph::FormatCommon()
    {
       lineLength = FindLineLength(old,lineStart,contentSize);
       modified.append(old,lineStart,lineLength);
-      modified.append(1,'\n');
+      modified.append(1,_T('\n'));
    }
 
    if(lineStart < contentSize)
@@ -413,8 +413,8 @@ String FormattedParagraph::FormatCommon()
 int FormattedParagraph::SizeWithoutNewline(const String &paragraph)
 {
    int contentSize;
-
-   if(!paragraph.empty() && paragraph[paragraph.size()-1] == '\n')
+   
+   if(!paragraph.empty() && paragraph[paragraph.size()-1] == _T('\n'))
       contentSize = paragraph.size()-1;
    else
       contentSize = paragraph.size();
@@ -426,48 +426,91 @@ int FormattedParagraph::FindLineLength(
    const String &paragraph,int lineStart,int paragraphEnd) const
 {
    int lineLength;
-
-   size_t findSpace = FindLastSpace(paragraph,lineStart+m_margin+1);
+   
+   // Try to find at least one space on the line. Pick the last one.
+   // Include one character past margin in case it is space.
+   size_t findSpace = RFind(paragraph,_T(' '),lineStart+m_margin);
    if(findSpace != paragraph.npos && (int)findSpace >= lineStart)
    {
-      size_t findNonSpace = paragraph.find_last_not_of(' ',findSpace);
+      // There are spaces and wrapping within margin is possible.
+      // Let's see whether there is something else than spaces.
+      // Pick last non-space character that precedes our terminating space.
+      size_t findNonSpace = paragraph.find_last_not_of(_T(' '),findSpace);
       if(findNonSpace != paragraph.npos && (int)findNonSpace >= lineStart)
+      {
+         // There is some text followed by some spaces within margin.
+         // If there are multiple spaces, cut first one.
          lineLength = findNonSpace-lineStart+1;
+      }
       else
-         lineLength = m_margin;
+      {
+         // Whole line up to margin consists of spaces. Maybe there is
+         // some word that crosses margin at end. Stuff all spaces on
+         // separate line.
+         lineLength = findSpace-lineStart;
+      }
    }
    else
    {
-      size_t wordEnd = paragraph.find_first_of(' ',lineStart+m_margin);
+      // It's one word longer than margin. Find its end.
+      size_t wordEnd = paragraph.find(_T(' '),lineStart+m_margin);
       if(wordEnd != paragraph.npos)
+      {
+         // It's not the last word in paragraph. Cut at first space.
          lineLength = wordEnd-lineStart;
+      }
       else
+      {
+         // It's last word in paragraph. Stuff it all on one line.
          lineLength = paragraphEnd-lineStart;
+      }
    }
 
    return lineLength;
 }
 
-size_t FormattedParagraph::FindLastSpace(
-   const String &paragraph,size_t start) const
+size_t FormattedParagraph::RFind(
+   const String &where,wxChar what,size_t start) const
 {
-#if wxCHECK_VERSION(2,5,0) // Bug in wxWindows implementation of find_last_of
-   size_t findSpace = paragraph.find_last_of(' ',start);
+#if wxCHECK_VERSION(2,5,0) // Bug in wxWindows implementation of rfind
+   size_t result = where.rfind(what,start);
 #else
-   size_t findSpace = paragraph.npos;
-   int tryFindSpace;
-
-   for( tryFindSpace = start-1; tryFindSpace >= 0; --tryFindSpace )
+   size_t result = where.npos;
+   int cursor;
+   
+   for( cursor = start; cursor >= 0; --cursor )
    {
-      if( paragraph[tryFindSpace] == ' ' )
+      if( where[cursor] == what )
       {
-         findSpace = (size_t)tryFindSpace;
+         result = (size_t)cursor;
          break;
       }
    }
 #endif
 
-   return findSpace;
+   return result;
+}
+
+size_t FormattedParagraph::FindLastNotOf(
+   const String &where,wxChar what,size_t start) const
+{
+#if wxCHECK_VERSION(2,5,0) // Bug in wxWindows implem. of find_last_not_of
+   size_t result = where.find_last_not_of(what,start);
+#else
+   size_t result = where.npos;
+   int cursor;
+   
+   for( cursor = start; cursor >= 0; --cursor )
+   {
+      if( where[cursor] != what )
+      {
+         result = (size_t)cursor;
+         break;
+      }
+   }
+#endif
+
+   return result;
 }
 
 // ----------------------------------------------------------------------------
@@ -510,11 +553,11 @@ wxSizer *wxBareBonesEditorNotebook::CreateButtonRow(wxWindow *parent)
    wxSizer *buttonRow = new wxGridSizer(1,4,0,10);
 
    buttonRow->Add(new wxButton(parent,Button_FormatParagraph,
-      _T("Format Paragraph")),0,wxEXPAND);
+      _("Format Paragraph")),0,wxEXPAND);
    buttonRow->Add(new wxButton(parent,Button_FormatAll,
-      _T("Format All")),0,wxEXPAND);
+      _("Format All")),0,wxEXPAND);
    buttonRow->Add(new wxButton(parent,Button_UnformatParagraph,
-      _T("Unformat Paragraph")),0,wxEXPAND);
+      _("Unformat Paragraph")),0,wxEXPAND);
    buttonRow->Add(new wxButton(parent,Button_UnformatAll,
       _T("Unformat All")),0,wxEXPAND);
 
@@ -616,7 +659,7 @@ END_EVENT_TABLE()
 
 wxBareBonesTextControl::wxBareBonesTextControl(BareBonesEditor *editor,
                                                wxWindow *parent)
-                      : wxTextCtrl(parent,-1,"",
+                      : wxTextCtrl(parent,-1,_T(""),
                         wxDefaultPosition,wxDefaultSize,wxTE_MULTILINE)
 {
    m_editor = editor;
