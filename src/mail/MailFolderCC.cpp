@@ -734,7 +734,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    if(mf)
    {
       mf->IncRef();
-      //FIXME: is this really needed? mf->PingReopen(); // make sure it's updated
+      mf->PingReopen(); //FIXME: is this really needed? // make sure it's updated
       return mf;
    }
 
