@@ -8,6 +8,14 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
+9		cannot create new file from folder create dialog (M
+		bug, not wxGTK, save-as-file works!)
+		Also: dialog: wrong handling of "all files" pattern as "*.*"
+		instead of just "*"
+
+4		BBDB save on exit dialog needs "don't show again" box
+
+6		cannot type text when NUMLOCK is on
 
 6		implement temporary/fake Profile mode
 		--> add Suspend()/Discard()/Commit() methods to normal 
