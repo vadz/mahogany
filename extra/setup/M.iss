@@ -14,24 +14,27 @@
 [Setup]
 ; --- app info
 AppName=Mahogany
-AppVerName=Mahogany alpha 0.63 'Saugus'
+AppVerName=Mahogany alpha 0.64 'Sparc'
 
 ; --- setup compiler params
-OutputBaseFilename=Mahogany-0.63a
+OutputBaseFilename=Mahogany-0.64a
 DefaultDirName={pf}\Mahogany
 DefaultGroupName=Mahogany
 AllowRootDirectory=1
 AllowNoIcons=1
 
 SourceDir=f:\Progs\M
-OutputDir=extra\setup\output
+OutputDir=extra\setup\Output
+
+; bzip is smaller than zip even if slightly slower
+Compression=bzip/3
 
 ; TODO: use AppMutex to check whether the program is running
 
 ; --- app publisher info (for W2K only)
 AppPublisher=Mahogany Dev-Team
 AppPublisherURL=http://mahogany.sourceforge.net/
-AppVersion=0.63
+AppVersion=0.64
 
 ; --- appearance parameters
 
@@ -49,7 +52,8 @@ InfoAfterFile=extra\setup\postread.txt
 [Components]
 Name: "main"; Description: "Required Program Files"; Types: full compact custom; Flags: fixed
 Name: "help"; Description: "Help Files"; Types: full compact
-Name: "python"; Description: "Python Support (Requires Python 2.0)"; Types: full
+Name: "ssl"; Description: "SSL Support"; Types: full compact
+;Name: "python"; Description: "Python Support (Requires Python 2.0)"; Types: full
 Name: "misc"; Description: "Miscellaneous Helper Files"; Types: full
 
 [Files]
@@ -57,6 +61,9 @@ Name: "misc"; Description: "Miscellaneous Helper Files"; Types: full
 ; --- EXEs and DLLs
 Source: "Release\M.EXE"; DestDir: "{app}"; CopyMode: alwaysoverwrite
 Source: "src\wx\vcard\Release\versit.dll"; DestDir: "{app}"
+
+Source: "m:\Sources\openssl-0.9.6b\out32dll\libeay32.dll"; DestDir: "{sys}"; Components: ssl
+Source: "m:\Sources\openssl-0.9.6b\out32dll\ssleay32.dll"; DestDir: "{sys}"; Components: ssl
 
 ; do we need to include VC++ run time?
 ;Source: "w:\winnt40\system32\msvcirt.dll"; DestDir: "{sys}"
@@ -75,29 +82,29 @@ Source: "doc\Mannounce.txt"; DestDir: "{app}\doc"; DestName: "announce.txt"; Com
 Source: "doc\readme_win.txt"; DestDir: "{app}\doc"; DestName: "readme.txt"; Flags: "isreadme"
 
 ; --- help
-Source: "doc\HtmlHlp\Manual.*"; DestDir: "{app}\help"; Components: help
+Source: "doc\HtmlHlp\Manual.chm"; DestDir: "{app}\help"; Components: help
 
 ; icons -- not needed any more, we use the resources now
 ;Source: "src\icons\tb*.xpm"; DestDir: "{app}\icons"
 
 ; --- python support
 
-Source: "w:\winnt40\system32\Python20.dll"; DestDir: "{sys}"; Components: python
-
-Source: "src\Python\MailFolder.py-swig"; DestName: "MailFolder.py"; DestDir: "{app}\Python"; Components: python
-Source: "src\Python\MAppBase.py-swig"; DestName: "MAppBase.py"; DestDir: "{app}\Python"; Components: python
-Source: "src\Python\Message.py-swig"; DestName: "Message.py"; DestDir: "{app}\Python"; Components: python
-Source: "src\Python\MObject.py-swig"; DestName: "MObject.py"; DestDir: "{app}\Python"; Components: python
-Source: "src\Python\MProfile.py-swig"; DestName: "MProfile.py"; DestDir: "{app}\Python"; Components: python
-Source: "src\Python\MString.py-swig"; DestName: "MString.py"; DestDir: "{app}\Python"; Components: python
-Source: "src\Python\MTest.py-swig"; DestName: "MTest.py"; DestDir: "{app}\Python"; Components: python
+;Source: "w:\winnt40\system32\Python20.dll"; DestDir: "{sys}"; Components: python
+;
+;Source: "src\Python\MailFolder.py-swig"; DestName: "MailFolder.py"; DestDir: "{app}\Python"; Components: python
+;Source: "src\Python\MAppBase.py-swig"; DestName: "MAppBase.py"; DestDir: "{app}\Python"; Components: python
+;Source: "src\Python\Message.py-swig"; DestName: "Message.py"; DestDir: "{app}\Python"; Components: python
+;Source: "src\Python\MObject.py-swig"; DestName: "MObject.py"; DestDir: "{app}\Python"; Components: python
+;Source: "src\Python\MProfile.py-swig"; DestName: "MProfile.py"; DestDir: "{app}\Python"; Components: python
+;Source: "src\Python\MString.py-swig"; DestName: "MString.py"; DestDir: "{app}\Python"; Components: python
+;Source: "src\Python\MTest.py-swig"; DestName: "MTest.py"; DestDir: "{app}\Python"; Components: python
 
 ; case is important (should be Minit) or Python complains!!
-Source: "src\Python\Scripts\MInit.py"; DestDir: "{app}\Python"; DestName: "Minit.py"; Components: python
+;Source: "src\Python\Scripts\MInit.py"; DestDir: "{app}\Python"; DestName: "Minit.py"; Components: python
 
 [UninstallDelete]
 ; delete all precompiled python files
-Type: files; Name: "{app}\Python\*.pyc"; Components: python
+;Type: files; Name: "{app}\Python\*.pyc"; Components: python
 
 [Icons]
 Name: "{group}\Mahogany"; Filename: "{app}\M.EXE"; WorkingDir: "{app}"
@@ -109,4 +116,4 @@ Name: "{group}\Report a Bug"; Filename: "{app}\Bug.url"; Components: misc
 Root: HKCU; Subkey: "Software\Mahogany-Team"; ValueType: none; Flags: uninsdeletekeyifempty
 Root: HKCU; Subkey: "Software\Mahogany-Team\M"; ValueType: none; Flags: uninsdeletekeyifempty
 Root: HKCU; Subkey: "Software\Mahogany-Team\M\Profiles"; ValueType: string; ValueName: "GlobalDir"; ValueData: "{app}"
-Root: HKCU; Subkey: "Software\Mahogany-Team\M\Profiles"; ValueType: dword; ValueName: "UsePython"; ValueData: 1; Components: python
+;Root: HKCU; Subkey: "Software\Mahogany-Team\M\Profiles"; ValueType: dword; ValueName: "UsePython"; ValueData: 1; Components: python
