@@ -114,6 +114,7 @@ protected:
    void OnKeyDown(wxKeyEvent& event);
    void OnFocus(wxFocusEvent& event);
    void OnMouseLClick(wxCommandEvent& event);
+   void OnMouseRClick(wxCommandEvent& event);
 
 private:
    LayoutEditor *m_editor;
@@ -178,6 +179,7 @@ BEGIN_EVENT_TABLE(wxComposerLayoutWindow, wxLayoutWindow)
    EVT_SET_FOCUS(wxComposerLayoutWindow::OnFocus)
 
    EVT_MENU(WXLOWIN_MENU_LCLICK, wxComposerLayoutWindow::OnMouseLClick)
+   EVT_MENU(WXLOWIN_MENU_RCLICK, wxComposerLayoutWindow::OnMouseRClick)
 END_EVENT_TABLE()
 
 wxComposerLayoutWindow::wxComposerLayoutWindow(LayoutEditor *editor,
@@ -232,6 +234,26 @@ void wxComposerLayoutWindow::OnMouseLClick(wxCommandEvent& event)
       if ( part )
       {
          m_editor->EditAttachmentProperties(part);
+         part->DecRef();
+      }
+
+      data->DecRef();
+   }
+}
+
+void wxComposerLayoutWindow::OnMouseRClick(wxCommandEvent& event)
+{
+   wxLayoutObject *obj = (wxLayoutObject *)event.GetClientData();
+   LayoutEditData *data = (LayoutEditData *)obj->GetUserData();
+   if ( data )
+   {
+      EditorContentPart *part = data->GetContentPart();
+      if ( part )
+      {
+         CoordType x, y;
+         obj->GetSize(&x, &y);
+
+         m_editor->ShowAttachmentMenu(part, wxPoint(x, y));
          part->DecRef();
       }
 

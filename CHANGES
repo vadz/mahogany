@@ -9,6 +9,7 @@
 Release 0.66 'Clio'
 -------------------
 
+01.10.03 VZ: added popup menu for the attachments in the composer
 28.09.03 VZ: better UI for disablable dialog boxes
 28.09.03 VZ: added support for using files, not registry, by default under Win
 23.09.03 VZ: respect X-Attribution header when writing replies

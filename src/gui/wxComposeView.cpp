@@ -614,6 +614,32 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+// AttachmentMenu is the popup menu shown when an attachment is right clicked
+// ----------------------------------------------------------------------------
+
+class AttachmentMenu : public wxMenu
+{
+public:
+   // win is the window we're shown in and the part is the attachment we're
+   // shown for
+   AttachmentMenu(wxWindow *win, EditorContentPart *part);
+
+   // callbacks
+   void OnCommandEvent(wxCommandEvent &event);
+
+   // operations: this is static as it's also reused from
+   // MessageEditor::EditAttachmentProperties()
+   static void ShowAttachmentProperties(wxWindow *win, EditorContentPart *part);
+
+private:
+   wxWindow *m_window;
+   EditorContentPart *m_part;
+
+   DECLARE_EVENT_TABLE()
+   DECLARE_NO_COPY_CLASS(AttachmentMenu)
+};
+
+// ----------------------------------------------------------------------------
 // event tables &c
 // ----------------------------------------------------------------------------
 
@@ -658,6 +684,94 @@ END_EVENT_TABLE()
 BEGIN_EVENT_TABLE(wxRcptRemoveButton, wxButton)
    EVT_BUTTON(-1, wxRcptRemoveButton::OnButton)
 END_EVENT_TABLE()
+
+// ============================================================================
+// AttachmentMenu implementation
+// ============================================================================
+
+BEGIN_EVENT_TABLE(AttachmentMenu, wxMenu)
+   EVT_MENU(-1, AttachmentMenu::OnCommandEvent)
+END_EVENT_TABLE()
+
+AttachmentMenu::AttachmentMenu(wxWindow *win, EditorContentPart *part)
+{
+   m_window = win;
+   m_part = part;
+
+   // create the menu items
+   Append(WXMENU_MIME_INFO, _("&Properties..."));
+   AppendSeparator();
+#if 0 // TODO
+   Append(WXMENU_MIME_OPEN, _("&Open"));
+   Append(WXMENU_MIME_OPEN_WITH, _("Open &with..."));
+#endif
+   Append(WXMENU_MIME_VIEW_AS_TEXT, _("&View as text"));
+}
+
+/* static */
+void
+AttachmentMenu::ShowAttachmentProperties(wxWindow *win, EditorContentPart *part)
+{
+   CHECK_RET( part, _T("no attachment to edit in ShowAttachmentProperties()") );
+
+   AttachmentProperties props;
+   props.filename = part->GetFileName();
+   props.name = part->GetName();
+   props.SetDisposition(part->GetDisposition());
+   props.mimetype = part->GetMimeType();
+
+   if ( ShowAttachmentDialog(win, &props) )
+   {
+      part->SetFile(props.filename);
+      part->SetName(props.name);
+      part->SetMimeType(props.mimetype.GetFull());
+      part->SetDisposition(props.GetDisposition());
+   }
+   //else: cancelled by user or nothing changed
+}
+
+void
+AttachmentMenu::OnCommandEvent(wxCommandEvent &event)
+{
+   switch ( event.GetId() )
+   {
+      default:
+         FAIL_MSG( _T("unexpected menu command in AttachmentMenu") );
+         // fall through
+
+      case WXMENU_MIME_INFO:
+         ShowAttachmentProperties(m_window, m_part);
+         break;
+
+      case WXMENU_MIME_VIEW_AS_TEXT:
+         {
+            const String& filename = m_part->GetFileName();
+            wxFile file(filename);
+            if ( !file.IsOpened() )
+            {
+               wxLogError(_("Failed to open attachment."));
+               break;
+            }
+
+            wxString content;
+            const off_t len = file.Length();
+            if ( file.Read(wxStringBuffer(content, len + 1), len) != len )
+            {
+               wxLogError(_("Failed to read attachment data."));
+               break;
+            }
+
+            MDialog_ShowText
+            (
+               GetFrame(m_window),
+               wxString::Format(_("Attached file \"%s\""), filename.c_str()),
+               content,
+               _T("AttachView")
+            );
+         }
+         break;
+   }
+}
 
 // ============================================================================
 // implementation
@@ -4451,23 +4565,30 @@ bool Composer::RestoreAll()
 void
 MessageEditor::EditAttachmentProperties(EditorContentPart *part)
 {
-   CHECK_RET( part, _T("no attachment to edit in EditAttachmentProperties") );
-
-   AttachmentProperties props;
-   props.filename = part->GetFileName();
-   props.name = part->GetName();
-   props.SetDisposition(part->GetDisposition());
-   props.mimetype = part->GetMimeType();
-
-   if ( ShowAttachmentDialog(GetWindow(), &props) )
-   {
-      part->SetFile(props.filename);
-      part->SetName(props.name);
-      part->SetMimeType(props.mimetype.GetFull());
-      part->SetDisposition(props.GetDisposition());
-   }
-   //else: cancelled by user or nothing changed
+   AttachmentMenu::ShowAttachmentProperties(GetWindow(), part);
 }
+
+void
+MessageEditor::ShowAttachmentMenu(EditorContentPart *part, const wxPoint& pt)
+{
+   CHECK_RET( part, _T("no attachment to show menu for in ShowAttachmentMenu") );
+
+   if ( part->GetFileName().empty() )
+   {
+      // this is not an attachment at all?
+      return;
+   }
+
+   wxWindow *win = GetWindow();
+   CHECK_RET( win, _T("can't show attachment menu without parent window") );
+
+   AttachmentMenu menu(win, part);
+   win->PopupMenu(&menu, pt);
+}
+
+// ----------------------------------------------------------------------------
+// trivial MessageEditor accessors
+// ----------------------------------------------------------------------------
 
 Profile *MessageEditor::GetProfile() const
 {

@@ -167,6 +167,9 @@ public:
    /// edit the properties of the given attachment when the user clicks on it
    virtual void EditAttachmentProperties(EditorContentPart *part);
 
+   /// show popup menu for an (already attached) attachment
+   virtual void ShowAttachmentMenu(EditorContentPart *part, const wxPoint& pt);
+
    //@}
 
 protected:

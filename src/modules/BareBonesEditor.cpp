@@ -189,6 +189,7 @@ protected:
    void OnUnformatParagraph(wxCommandEvent& event);
    void OnUnformatAll(wxCommandEvent& event);
    void OnItemActivate(wxListEvent& event);
+   void OnItemRightClick(wxListEvent& event);
 
 private:
    wxSizer *CreateButtonRow(wxWindow *parent);
@@ -562,6 +563,8 @@ BEGIN_EVENT_TABLE(wxBareBonesEditorNotebook, wxNotebook)
       wxBareBonesEditorNotebook::OnUnformatAll)
    EVT_LIST_ITEM_ACTIVATED(ListCtrl_Attachments,
       wxBareBonesEditorNotebook::OnItemActivate)
+   EVT_LIST_ITEM_RIGHT_CLICK(ListCtrl_Attachments,
+      wxBareBonesEditorNotebook::OnItemRightClick)
 END_EVENT_TABLE()
 
 wxBareBonesEditorNotebook::wxBareBonesEditorNotebook(
@@ -650,6 +653,12 @@ void wxBareBonesEditorNotebook::OnUnformatAll(wxCommandEvent& event)
 void wxBareBonesEditorNotebook::OnItemActivate(wxListEvent& event)
 {
    m_editor->EditAttachmentProperties((EditorContentPart *)event.GetData());
+}
+
+void wxBareBonesEditorNotebook::OnItemRightClick(wxListEvent& event)
+{
+   m_editor->ShowAttachmentMenu((EditorContentPart *)event.GetData(),
+                                event.GetPoint());
 }
 
 // ----------------------------------------------------------------------------
