@@ -212,7 +212,8 @@ void wxPNotebook::RestorePage()
 wxPNotebook::~wxPNotebook()
 {
     if ( m_persist->ChangePath() ) {
-        m_persist->GetConfig()->Write(ms_pageKey, (long)m_nSelection);
+        int nSelection = GetSelection();
+        m_persist->GetConfig()->Write(ms_pageKey, (long)nSelection);
     }
     //else: couldn't change path, probably because there is no config object.
 
@@ -279,14 +280,14 @@ wxPTextEntry::~wxPTextEntry()
     delete m_persist;
 }
 
-wxPTextEntry::Create(const wxString& configPath,
-                     wxWindow *parent,
-                     wxWindowID id,
-                     const wxString& value,
-                     const wxPoint& pos,
-                     const wxSize& size,
-                     long style,
-                     wxConfigBase *config)
+bool wxPTextEntry::Create(const wxString& configPath,
+                          wxWindow *parent,
+                          wxWindowID id,
+                          const wxString& value,
+                          const wxPoint& pos,
+                          const wxSize& size,
+                          long style,
+                          wxConfigBase *config)
 {
    m_persist->SetConfig(config);
    m_persist->SetPath(configPath);
@@ -372,3 +373,4 @@ void wxPTextEntry::SetConfigPath(const wxString& path)
 {
     m_persist->SetPath(path);
 }
+

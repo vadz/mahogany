@@ -12,6 +12,12 @@
 
 #include "Mpch.h"
 
+#ifndef USE_PCH
+#  include "Mcommon.h"
+
+#  include "gui/wxMenuDefs.h"
+#endif // USE_PCH
+
 #include "gui/wxlwindow.h"
 
 BEGIN_EVENT_TABLE(wxLayoutWindow,wxScrolledWindow)

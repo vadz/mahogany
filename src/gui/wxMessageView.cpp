@@ -625,7 +625,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       // clean up
       if ( remove(filename) != 0 )
       {
-         wxLogSysError(_("Can't delete temporary file '%s'"), filename);
+         wxLogSysError(_("Can't delete temporary file '%s'"), filename.c_str());
       }
    }
 }

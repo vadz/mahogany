@@ -37,6 +37,8 @@
    }
 
 #  include <wx/log.h>
+
+#  include <wx/config.h>
 #endif
 
 #include "Mdefaults.h"

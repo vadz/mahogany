@@ -1,8 +1,8 @@
 # Makefile for src/classes directory
 
 CWD = classes
-SRC = MObject.cpp MApplication.cpp PathFinder.cpp Profile.cpp MimeList.cpp MimeTypes.cpp \
-XFace.cpp kbList.cpp # Script.cpp
+SRC = MObject.cpp MApplication.cpp PathFinder.cpp Profile.cpp \
+      XFace.cpp kbList.cpp upgrade.cpp
 HDR = $(SRC:.cpp=.h)
 DEP = $(SRC:.cpp=.d)
 
@@ -15,3 +15,4 @@ CommonBase.o:
 include ../../makeopts
 include ../../makerules
 include .depend
+

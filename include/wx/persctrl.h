@@ -116,14 +116,14 @@ public:
                  wxConfigBase *config = NULL);
 
         // to be used if object was created with default ctor
-    Create(const wxString& configPath,
-           wxWindow *parent,
-           wxWindowID id = -1,
-           const wxString& value = wxEmptyString,
-           const wxPoint& pos = wxDefaultPosition,
-           const wxSize& size = wxDefaultSize,
-           long style = 0,
-           wxConfigBase *config = NULL);
+    bool Create(const wxString& configPath,
+                wxWindow *parent,
+                wxWindowID id = -1,
+                const wxString& value = wxEmptyString,
+                const wxPoint& pos = wxDefaultPosition,
+                const wxSize& size = wxDefaultSize,
+                long style = 0,
+                wxConfigBase *config = NULL);
 
         // dtor saves the strings
     ~wxPTextEntry();

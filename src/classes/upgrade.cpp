@@ -20,7 +20,14 @@
 #include "Mpch.h"
 
 #ifndef   USE_PCH
-#  include   "Mcommon.h"
+#  include "Mcommon.h"
+
+#  include "PathFinder.h"
+#  include "Profile.h"
+
+#  include "MApplication.h"
+
+#  include "Mdefaults.h"
 #endif  //USE_PCH
 
 #include <wx/log.h>
@@ -51,10 +58,12 @@ enum MVersion
 
 bool UpgradeFromNone()
 {
-#  ifdef OS_UNIX
+   // FIXME I don't remember any more what this is supposed to do. Karsten?
+#  if 0 //def OS_UNIX
       // we do it here and only once because it takes a long time
       PathFinder pf(READ_APPCONFIG(MC_PATHLIST));
       pf.AddPaths(M_PREFIX,true);
+      bool found;
       String strRootPath = pf.FindDir(READ_APPCONFIG(MC_ROOTDIRNAME), &found);
 #  endif // Unix
    
@@ -138,3 +147,4 @@ bool Upgrade(const String& fromVersion)
 
    return TRUE;
 }
+

@@ -34,6 +34,7 @@
 #endif //WX_PRECOMP
 
 #include "wx/log.h"
+#include "wx/intl.h"
 
 #ifdef __WXMSW__
     #include "wx/msw/registry.h"
@@ -120,6 +121,58 @@ public:
 
 #else  // Unix
 
+// this class uses both mailcap and mime.types to gather information about file
+// types.
+//
+// FIXME any docs with real descriptions of these files??
+//
+// Format of mailcap file: spaces are ignored, each line is either a comment
+// (starts with '#') or a line of the form <mime type>;<command>;<flags>. A
+// backslash can be used to quote semicolons and newlines (and probably anything
+// else as well). Any of 2 parts of the MIME type may be '*' used as a wildcard.
+//
+// There are 2 possible formats for mime.types file, one entry per line (used
+// for global mime.types) and "expanded" format where an entry takes multiple
+// lines (used for users mime.types).
+//
+// For both formats spaces are ignored and lines starting with a '#' are
+// comments. Each record has one of two following forms:
+//  a) for "brief" format:  <mime type>  <space separated list of extensions>
+//  b) for "expanded" format:
+//      type=<mime type> \ 
+//      desc="<description>" \ 
+//      exts="ext"
+//
+// We try to autodetect the format of mime.types: if a non-comment line starts
+// with "type=" we assume the second format, otherwise the first one.
+class wxMimeTypesManagerImpl
+{
+friend class wxFileTypeImpl; // give it access to m_aXXX variables
+
+public:
+    // ctor loads all info into memory for quicker access later on
+    // @@ it would be nice to load them all, but parse on demand only...
+    wxMimeTypesManagerImpl();
+
+    // implement containing class functions
+    wxFileType *GetFileTypeFromExtension(const wxString& ext);
+    wxFileType *GetFileTypeFromMimeType(const wxString& mimeType);
+
+    void ReadMailcap(const wxString& filename);
+    void ReadMimeTypes(const wxString& filename);
+
+    // accessors
+        // get the string containing space separated extensions for the given
+        // file type
+    wxString GetExtension(size_t index) { return m_aExtensions[index]; }
+
+private:
+    wxArrayString m_aTypes,         // MIME types
+                  m_aCommands,      // commands to handle them
+                  m_aDescriptions,  // descriptions (just some text)
+                  m_aExtensions;    // space separated list of extensions
+};
+
 class wxFileTypeImpl
 {
 public:
@@ -145,50 +198,6 @@ private:
     size_t                  m_index; // in the wxMimeTypesManagerImpl arrays
 };
 
-// this class uses both mailcap and mime.types to gather information about file
-// types.
-//
-// FIXME any docs with real descriptions of these files??
-//
-// Format of mailcap file: spaces are ignored, each line is either a comment
-// (starts with '#') or a line of the form <mime type>;<command>;<flags>. A
-// backslash can be used to quote semicolons and newlines (and probably anything
-// else as well). Any of 2 parts of the MIME type may be '*' used as a wildcard.
-//
-// There are 2 possible formats for mime.types file, one entry per line (used
-// for global mime.types) and "expanded" format where an entry takes multiple
-// lines (used for users mime.types).
-//
-// For both formats spaces are ignored and lines starting with a '#' are
-// comments. Each record has one of two following forms:
-//  a) for "brief" format:  <mime type>  <space separated list of extensions>
-//  b) for "expanded" format:
-//      type=<mime type> \
-//      desc="<description>" \
-//      exts="ext"
-//
-// We try to autodetect the format of mime.types: if a non-comment line starts
-// with "type=" we assume the second format, otherwise the first one.
-class wxMimeTypesManagerImpl
-{
-public:
-    // ctor loads all info into memory for quicker access later on
-    // @@ it would be nice to load them all, but parse on demand only...
-    wxMimeTypesManagerImpl();
-
-    // implement containing class functions
-    wxFileType *GetFileTypeFromExtension(const wxString& ext);
-    wxFileType *GetFileTypeFromMimeType(const wxString& mimeType);
-
-    void ReadMailcap(const wxString& filename);
-    void ReadMimeTypes(const wxString& filename);
-
-private:
-    wxArrayString m_aTypes,         // MIME types
-                  m_aCommands,      // commands to handle them
-                  m_aDescriptions,  // descriptions (just some text)
-                  m_aExtensions;    // space separated list of extensions
-};
 #endif // OS type
 
 // ============================================================================
@@ -203,7 +212,7 @@ wxString wxFileType::ExpandCommand(const wxString& command,
                                    const wxString& filename,
                                    const wxString& mimetype)
 {
-    String str;
+    wxString str;
     for ( const char *pc = command.c_str(); *pc != '\0'; pc++ )
     {
         if ( *pc == '%' )
@@ -539,7 +548,7 @@ bool wxFileTypeImpl::GetExtensions(wxArrayString& extensions)
 wxMimeTypesManagerImpl::wxMimeTypesManagerImpl()
 {
     // directories where we look for mailcap and mime.types by default
-    static const char *aStandardLocations =
+    static const char *aStandardLocations[] =
     {
         "/etc",
         "/usr/etc",
@@ -555,7 +564,7 @@ wxMimeTypesManagerImpl::wxMimeTypesManagerImpl()
             ReadMailcap(file);
         }
 
-        wxString file = dir + "/mime.types";
+        file = dir + "/mime.types";
         if ( wxFile::Exists(file) ) {
             ReadMimeTypes(file);
         }
@@ -571,7 +580,7 @@ wxMimeTypesManagerImpl::wxMimeTypesManagerImpl()
 
     // read the users mime.types
     wxString strUserMimeTypes = strHome + "/.mime.types";
-    if ( wxFile::Exists(sstrUserMimeTypes) ) {
+    if ( wxFile::Exists(strUserMimeTypes) ) {
         ReadMimeTypes(strUserMimeTypes);
     }
 }
@@ -595,13 +604,12 @@ wxMimeTypesManagerImpl::GetFileTypeFromMimeType(const wxString& mimeType)
         wxCHECK_MSG( !strCategory.IsEmpty(), NULL,
                      "MIME type in wrong format" );
 
-        size_t nCount = m_aTypes.nCount;
+        size_t nCount = m_aTypes.Count();
         for ( size_t n = 0; n < nCount; n++ ) {
             if ( (m_aTypes[n].Before('/').CmpNoCase(strCategory) == 0) &&
                  m_aTypes[n].Right('/') == "*" ) {
                     index = n;
                     break;
-                }
             }
         }
     }
@@ -672,7 +680,7 @@ void wxMimeTypesManagerImpl::ReadMimeTypes(const wxString& strFileName)
             wxString strRHS;
             bool bInQuotes = FALSE;
             for ( pc = pEqualSign + 1; *pc != '\0' && !isspace(*pc); pc++ ) {
-                if ( pc == '"' ) {
+                if ( *pc == '"' ) {
                     if ( bInQuotes ) {
                         // ok, it's the end of the quoted string
                         pc++;
@@ -717,7 +725,7 @@ void wxMimeTypesManagerImpl::ReadMimeTypes(const wxString& strFileName)
                 strExtensions = strLHS;
             }
             else {
-                wxLogWarning(_("Unknown field in file %s, line %d: '%s'.",
+                wxLogWarning(_("Unknown field in file %s, line %d: '%s'."),
                              strFileName.c_str(), nLine, strLHS.c_str());
             }
 
@@ -789,7 +797,7 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
             switch ( *pc ) {
                 case '\\':
                     // interpret the next character literally
-                    strCurrentToken.Add(*++pc);
+                    strCurrentToken += *++pc;
                     break;
 
                 case ';':
@@ -799,7 +807,7 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
                         switch ( currentToken ) {
                             case Token_Type:
                                 // try to find it first
-                                nIndex = m_aTypes.Index(str);
+                                nIndex = m_aTypes.Index(strCurrentToken);
                                 if ( nIndex == NOT_FOUND ) {
                                     m_aTypes.Add(strCurrentToken);
                                     m_aExtensions.Add("");
@@ -833,10 +841,11 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
                                 (
                                   _("Mailcap file %s, line %d: extra fields "
                                     "for the MIME type '%s' ignored."),
-                                  strFileType.c_str(),
+                                  strFileName.c_str(),
                                   nLine,
-                                  nIndex == NOT_FOUND ? m_aCommands.Last()
-                                                      : m_aCommands[nIndex]
+                                  (nIndex == NOT_FOUND ? m_aCommands.Last()
+                                                       :
+                                                       m_aCommands[nIndex]).c_str()
                                 );
                                 break;
 
@@ -846,12 +855,11 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
 
                         // next token starts immediately after ';'
                         strCurrentToken.Empty();
-                        tokenStart = pc + 1;
                     }
                     break;
 
                 default:
-                    strCurrentToken.Add(*pc);
+                    strCurrentToken += *pc;
             }
         }
     }
@@ -865,3 +873,4 @@ void wxMimeTypesManagerImpl::ReadMailcap(const wxString& strFileName)
 #endif // OS type
 
 /* vi: set cin tw=80 ts=4 sw=4: */
+
