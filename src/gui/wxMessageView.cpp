@@ -1126,7 +1126,7 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
       wxSplitPath(filename, NULL, &name, &ext);
 
       name << '.' << ext;
-      filename = wxFileSelector("MimeSave",_("Save attachment as:"),
+      filename = wxpFileSelector("MimeSave",_("Save attachment as:"),
                                 NULLstring, name, NULLstring,
                                 NULLstring, 0, this);
    }
