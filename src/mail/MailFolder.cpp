@@ -156,7 +156,6 @@ MailFolder::OpenFolder(int typeAndFlags,
             if ( !MailFolderCC::InitializeMH() )
             {
                profile->DecRef();
-
                return NULL;
             }
          }
@@ -188,6 +187,7 @@ MailFolder::OpenFolder(int typeAndFlags,
       default:
          profile->DecRef();
          FAIL_MSG("unknown folder type");
+         return NULL;
    }
 
 #if 0
