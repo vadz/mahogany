@@ -9,13 +9,13 @@ SUB_DIRS += src/libmal
 endif
 
 all: 
-	$(MAKE) -j1 -C src/c-client -f .src/Makefile.M
+	$(MAKE) -j1 -C src/imap -f .src/Makefile.M
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i; done
 
 doc: ; @true
 
 clean:
-	$(MAKE) -C src/c-client -f .src/Makefile.M $@
+	$(MAKE) -C src/imap -f .src/Makefile.M $@
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i $@; done
 	$(RM) core
 

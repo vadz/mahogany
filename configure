@@ -4631,8 +4631,8 @@ case "$BUILDDIR" in "$SOURCEDIR") ;; *)
 	CPPFLAGS="-I$BUILDDIR/include $CPPFLAGS" ;;
 esac
 
-CPPFLAGS="$CPPFLAGS -I$BUILDDIR/extra/src/c-client"
-LIBS="$BUILDDIR/extra/src/c-client/c-client.a $LIBS"
+CPPFLAGS="$CPPFLAGS -I$BUILDDIR/extra/src/imap/c-client"
+LIBS="$BUILDDIR/extra/src/imap/c-client/c-client.a $LIBS"
 CPPFLAGS="$CPPFLAGS -I$SOURCEDIR/extra/src/compface"
 LIBS="$LIBS -L$BUILDDIR/extra/src/compface -lMcompface"
 
