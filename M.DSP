@@ -55,7 +55,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo /o"Debug/M.bsc"
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:windows /machine:I386
-# ADD LINK32 $(wx)\Release\wxWindows.lib extra\src\cclient\Release\cclient.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib  $(WX)\src\xpm\Release\xpm.lib $(WX)\src\zlib\Release\zlib.lib $(WX)\src\png\Release\png.lib $(WX)\src\jpeg\Release\jpeg.lib $(WX)\src\tiff\Release\tiff.lib /nologo /subsystem:windows /machine:I386
+# ADD LINK32 $(wx)\Release\wxWindows.lib extra\src\cclient\Release\cclient.lib rpcrt4.lib wsock32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comctl32.lib winmm.lib extra\src\compface\Release\compface.lib src\wx\vcard\release\versit.lib $(WX)\src\xpm\Release\xpm.lib $(WX)\src\zlib\Release\zlib.lib $(WX)\src\png\Release\png.lib $(WX)\src\jpeg\Release\jpeg.lib $(WX)\src\tiff\Release\tiff.lib /nologo /subsystem:windows /machine:I386
 # SUBTRACT LINK32 /debug
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
@@ -185,10 +185,6 @@ SOURCE=.\src\classes\MFolder.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\util\miscutil.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\classes\MModule.cpp
 # End Source File
 # Begin Source File
@@ -203,18 +199,6 @@ SOURCE=.\src\classes\PathFinder.cpp
 # Begin Source File
 
 SOURCE=.\src\classes\Profile.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\util\strutil.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\util\sysutil.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\src\util\upgrade.cpp
 # End Source File
 # Begin Source File
 
@@ -1134,6 +1118,31 @@ SOURCE=.\src\modules\Calendar.cpp
 # Begin Source File
 
 SOURCE=.\src\modules\Filters.cpp
+# End Source File
+# End Group
+# Begin Group "util"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\src\util\miscutil.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\util\strutil.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\util\sysutil.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\util\twofish2.c
+# SUBTRACT CPP /YX /Yc /Yu
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\util\upgrade.cpp
 # End Source File
 # End Group
 # Begin Source File
