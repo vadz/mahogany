@@ -1864,6 +1864,27 @@ static bool findIP(String &header,
 
 #endif
 
+// func_isspam() helper: check the given MIME part and all of its children
+// for Korean charset, return true if any of them has it
+static bool CheckMimePartForKoreanCSet(const MimePart *mimePart)
+{
+   while ( mimePart )
+   {
+      if ( CheckMimePartForKoreanCSet(mimePart->GetNested()) )
+         return true;
+
+      String cset = mimePart->GetParam("charset").Lower();
+      if ( cset == "ks_c_5601-1987" || cset == "euc-kr" )
+      {
+         return true;
+      }
+
+      mimePart = mimePart->GetNext();
+   }
+
+   return false;
+}
+
 static Value func_isspam(ArgList *args, FilterRuleImpl *p)
 {
    String arg;
@@ -1905,9 +1926,15 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
       const wxString& test = tests[n];
       if ( test == "subj8bit" )
       {
-         // consider that the message is a spem if its subject contains more
-         // than half of non alpha numeric chars
+         // consider that the message is a spam if its subject contains more
+         // than half of non alpha numeric chars but isn't properly encoded
          String subject = msg->Subject();
+         if ( subject != MailFolder::DecodeHeader(subject) )
+         {
+            // an encoded subject can have 8 bit chars
+            continue;
+         }
+
          size_t num8bit = 0,
                 max8bit = subject.length() / 2;
          for ( const unsigned char *pc = (const unsigned char *)subject.c_str();
@@ -1926,34 +1953,9 @@ static Value func_isspam(ArgList *args, FilterRuleImpl *p)
       }
       else if ( test == "korean" )
       {
-         if ( msg->GetHeaderLine("Content-Type", value) )
-         {
-            // extract the charset parameter
-            static const char *CHARSET_STRING = "charset=";
-            static const size_t CHARSET_LEN = strlen(CHARSET_STRING);
-
-            const char *pc = strstr(value.MakeLower(), CHARSET_STRING);
-            if ( !pc )
-            {
-               // no charset at all, don't filter
-               continue;
-            }
-
-            pc += CHARSET_LEN;
-            if ( *pc == '"' )
-               pc++;
-
-#define STARTS_WITH(p, what) (!(wxStrncmp((p), (what), strlen(what))))
-
-            // detect all Korean charsets
-            if ( STARTS_WITH(pc, "ks_c_5601-1987") ||
-                    STARTS_WITH(pc, "euc-kr") )
-            {
-               rc = true;
-            }
-
-#undef STARTS_WITH
-         }
+         // detect all Korean charsets -- and do it for all MIME parts, not
+         // just the top level one
+         rc = CheckMimePartForKoreanCSet(msg->GetTopMimePart());
       }
       else if ( test == "xauthwarn" )
       {
