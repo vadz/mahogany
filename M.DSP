@@ -568,6 +568,10 @@ SOURCE=.\src\gui\wxTemplateDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\src\gui\wxTextDialog.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\src\gui\wxThrDialog.cpp
 # End Source File
 # Begin Source File

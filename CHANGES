@@ -6,10 +6,15 @@
       See at the end of file for the list of contributors (initials appearing
       in the second column of the changelog below).
 
+Release 0.65 'Claire' ???, 2003
+-------------------------------
+
+15.02.03 VZ: added find dialog to the raw text viewer
+14.02.03 NB: don't move focus to the next message when user cancelled copying/moving
+
 Release 0.64.2 'Sparc' Feb 3, 2003 [semiofficial pre-release]
 -------------------------------------------------------------------------------
 
-14.02.03 NB: don't move focus to the next message when user cancelled copying/moving
 19.01.03 VZ: created a "View" menu from where view filters can be toggled
 16.12.02 VZ: yet another SPAM filter test: single part multipart/alternative
 16.12.02 VZ: added possibility to use '?' and '*' in address lists
