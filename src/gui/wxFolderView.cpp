@@ -103,7 +103,7 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
 
       // extra keys:
       if(key == '#') idx = 2; // # == expunge for VM compatibility
-
+      if(key == WXK_DELETE) idx = 0; // delete
       switch(keycodes_en[idx])
       {
       case 'D':
