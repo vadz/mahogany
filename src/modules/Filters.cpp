@@ -3561,7 +3561,7 @@ bool FilterRuleApply::TreatAsJunk()
    RefCounter<MFolder> folder(MFolder::Get(m_parent->m_copiedTo));
    CHECK( folder, false, _T("Copied to null folder?") );
    RefCounter<Profile> profile(folder->GetProfile());
-   return READ_CONFIG_BOOL(profile,MP_TREAT_AS_JUNK_MAIL_FOLDER);
+   return READ_CONFIG_BOOL(profile.Get(),MP_TREAT_AS_JUNK_MAIL_FOLDER);
 }
 
 String FilterRuleApply::CreditsCommon()
