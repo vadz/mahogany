@@ -820,7 +820,7 @@ MDialog_YesNoDialog(const wxChar *message,
 
    int rc = wxPMessageBox
             (
-               pathGlobal,
+               pathLocal,
                message,
                String(M_TITLE_PREFIX) + title,
                GetYesNoMsgBoxStyle(flags),
