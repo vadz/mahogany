@@ -58,7 +58,7 @@ static: $(MOBJS)
 	$(LINK) -static -o M.static $(LDFLAGS) $(MOBJS) $(LIBS) -lcrypt
 
 subdirs:
-	set -e; $(MAKE) -C include
+	set -e; $(MAKE) -C ../include
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
 	set -e; $(MAKE) -i -C modules all
 
