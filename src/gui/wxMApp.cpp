@@ -540,40 +540,53 @@ wxMApp::OnInit()
 
    // if we fail to load the msg catalog, remember it in this variable because
    // we can't remember this in the profile yet - it is not yet created
-   bool failedToLoadMsgs = false;
+   bool failedToLoadMsgs = false,
+        failedToSetLocale = false;
 
    if ( hasLocale )
    {
-      m_Locale = new wxLocale(locale, locale, NULL, false);
-#ifdef OS_UNIX
-      String localePath;
-      localePath << M_BASEDIR << "/locale";
-#elif defined(OS_WIN)
-      InitGlobalDir();
-      String localePath;
-      localePath << m_globalDir << "/locale";
-#else
-#   error "don't know where to find message catalogs on this platform"
-#endif // OS
-      m_Locale->AddCatalogLookupPathPrefix(localePath);
-
       // TODO should catch the error messages and save them for later
       wxLogNull noLog;
 
-      bool ok = m_Locale->AddCatalog("wxstd");
-      ok |= m_Locale->AddCatalog(M_APPLICATIONNAME);
-
-      if ( !ok )
+      m_Locale = new wxLocale(locale, locale, NULL, false);
+      if ( !m_Locale->IsOk() )
       {
-         // better use English messages if msg catalog was not found
          delete m_Locale;
          m_Locale = NULL;
 
-         failedToLoadMsgs = true;
+         failedToSetLocale = true;
+      }
+      else
+      {
+#ifdef OS_UNIX
+         String localePath;
+         localePath << M_BASEDIR << "/locale";
+#elif defined(OS_WIN)
+         InitGlobalDir();
+         String localePath;
+         localePath << m_globalDir << "/locale";
+#else
+#   error "don't know where to find message catalogs on this platform"
+#endif // OS
+         m_Locale->AddCatalogLookupPathPrefix(localePath);
+
+         bool ok = m_Locale->AddCatalog("wxstd");
+         ok |= m_Locale->AddCatalog(M_APPLICATIONNAME);
+
+         if ( !ok )
+         {
+            // better use English messages if msg catalog was not found
+            delete m_Locale;
+            m_Locale = NULL;
+
+            failedToLoadMsgs = true;
+         }
       }
    }
    else
+   {
       m_Locale = NULL;
+   }
 
    wxInitAllImageHandlers();
    wxFileSystem::AddHandler(new wxMemoryFSHandler);
@@ -601,7 +614,7 @@ wxMApp::OnInit()
    if ( OnStartup() )
    {
       // only now we can use profiles
-      if ( failedToLoadMsgs )
+      if ( failedToSetLocale || failedToLoadMsgs )
       {
          // if we can't load the msg catalog for the given locale once, don't
          // try it again next time - the flag is stored in the profile in this
@@ -616,9 +629,18 @@ wxMApp::OnInit()
 
             // the strings here are intentionally not translated
             wxString msg;
-            msg.Printf("Impossible to load message catalog(s) for the "
-                       "locale '%s', do you want to retry next time?",
-                       locale);
+            if ( failedToSetLocale )
+            {
+               msg.Printf("Locale '%s' couldn't be set, do you want to "
+                          "retry setting it the next time?",
+                          locale);
+            }
+            else // failedToLoadMsgs
+            {
+               msg.Printf("Impossible to load message catalog(s) for the "
+                          "locale '%s', do you want to retry next time?",
+                          locale);
+            }
             if ( wxMessageBox(msg, "Error",
                               wxICON_STOP | wxYES_NO) != wxYES )
             {
