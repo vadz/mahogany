@@ -842,8 +842,7 @@ strutil_readString(String &string, bool *success)
    
    String newstr;
    bool escaped = false;
-   for(; *cptr && (*cptr != '"' || escaped);
-       cptr++)
+   for(; *cptr && (*cptr != '"' || escaped); cptr++)
    {
       if(*cptr == '\\' && ! escaped)
       {
@@ -855,12 +854,14 @@ strutil_readString(String &string, bool *success)
    if(*cptr == '"')
    {
       if(success)
-         *success = false;
+         *success = true;
       cptr++;
    }
    else
+   {
       if(success)
          *success = false;
+   }
    string = cptr;
    return newstr;
 }
