@@ -25,16 +25,16 @@
 #   include "Mcommon.h"
 #   include "strutil.h"
 #   include "Mdefaults.h"
-#   include "guidef.h"                  // for EnsureAvailableTextEncoding
+#   include "guidef.h"           // for EnsureAvailableTextEncoding
 
 #   include <wx/sizer.h>
 #   include <wx/textctrl.h>
-#   include <wx/button.h>     // for wxButton
+#   include <wx/button.h>        // for wxButton
 #endif // USE_PCH
 
-#include <wx/imaglist.h>        // for wxImageList
+#include <wx/imaglist.h>         // for wxImageList
 #include <wx/notebook.h>
-#include <wx/listctrl.h>     // for wxListEvent
+#include <wx/listctrl.h>         // for wxListEvent
 
 #include "Composer.h"
 #ifdef OS_WIN
@@ -44,7 +44,10 @@
 
 #include "MessageEditor.h"
 
-class WXDLLEXPORT wxListCtrl;
+#if wxUSE_WCHAR_T && defined(OS_WIN)
+   #include <wx/encconv.h>
+   #include <wx/fontmap.h>
+#endif // wxUSE_WCHAR_T
 
 // ----------------------------------------------------------------------------
 // options we use here
@@ -58,7 +61,7 @@ extern const MOption MP_REPLY_MSGPREFIX;
 // ----------------------------------------------------------------------------
 
 extern const MPersMsgBox *M_MSGBOX_FORMAT_PARAGRAPH_BEFORE_EXIT;
-extern const MPersMsgBox *M_MSGBOX_8BIT_WARN;
+extern const MPersMsgBox *M_MSGBOX_LANG_CHANGED_WARN;
 
 // ----------------------------------------------------------------------------
 // constants
@@ -80,6 +83,7 @@ enum
 
 class FormattedParagraph;
 class wxBareBonesEditorNotebook;
+class wxBareBonesTextControl;
 
 class BareBonesEditor : public MessageEditor
 {
@@ -133,11 +137,11 @@ public:
 private:
    // must be called when the encoding changes to reflect it at wxTextCtrl
    // level
-   void SetFontEncoding();
+   void SetFontEncoding(wxFontEncoding encoding);
 
 
    wxBareBonesEditorNotebook *m_notebook;
-   wxTextCtrl *m_textControl;
+   wxBareBonesTextControl *m_textControl;
    wxListCtrl *m_attachments;
 
    // the encoding to use for the text in the control (and the font)
@@ -187,12 +191,16 @@ private:
    Profile *m_profile;
 };
 
+// ----------------------------------------------------------------------------
+// the notebook containing wxBareBonesTextControl and wxBareBonesAttachments
+// ----------------------------------------------------------------------------
+
 class wxBareBonesEditorNotebook : public wxNotebook
 {
 public:
    wxBareBonesEditorNotebook(BareBonesEditor *editor,wxWindow *parent);
 
-   wxTextCtrl *GetTextControl() const { return m_textControl; }
+   wxBareBonesTextControl *GetTextControl() const { return m_textControl; }
    wxListCtrl *GetList() const { return m_attachments; }
 
 protected:
@@ -208,23 +216,29 @@ private:
    void CreateAttachmentPage();
 
    BareBonesEditor *m_editor;
-   wxTextCtrl *m_textControl;
+   wxBareBonesTextControl *m_textControl;
    wxListCtrl *m_attachments;
 
    DECLARE_EVENT_TABLE()
 };
+
+// ----------------------------------------------------------------------------
+// the text control where the user types the message text
+// ----------------------------------------------------------------------------
 
 class wxBareBonesTextControl : public wxTextCtrl
 {
 public:
    wxBareBonesTextControl(BareBonesEditor *editor,wxWindow *parent);
 
+#if wxUSE_WCHAR_T && defined(OS_WIN)
+   // get the text as a Unicode string
+   wxWCharBuffer GetUnicodeText() const;
+#endif // wxUSE_WCHAR_T
+
 protected:
    // event handlers
    void OnKeyDown(wxKeyEvent& event);
-#ifdef OS_WIN
-   void OnChar(wxKeyEvent& event);
-#endif // OS_WIN
    void OnFocus(wxFocusEvent& event);
 
 private:
@@ -233,12 +247,12 @@ private:
    bool m_firstTimeModify;
    bool m_firstTimeFocus;
 
-#ifdef OS_WIN
-   bool m_warning8bitShown;
-#endif // OS_WIN
-
    DECLARE_EVENT_TABLE()
 };
+
+// ----------------------------------------------------------------------------
+// the list control in icon mode showing all the attachments
+// ----------------------------------------------------------------------------
 
 class wxBareBonesAttachments : public wxListView
 {
@@ -255,6 +269,7 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
+
 // ============================================================================
 // implementation
 // ============================================================================
@@ -262,6 +277,48 @@ private:
 IMPLEMENT_MESSAGE_EDITOR(BareBonesEditor,
                          _("Minimal message editor"),
                          "(c) 2003 Mahogany Team");
+
+// ----------------------------------------------------------------------------
+// some global helper functions
+// ----------------------------------------------------------------------------
+
+#if wxUSE_WCHAR_T && defined(OS_WIN)
+
+// this very simple minded function tries to determine the encoding we shoudl
+// use from the given Unicode character code
+static wxFontEncoding GetEncoding(wchar_t wch)
+{
+   // basic latin
+   if ( wch < 0x7f )
+      return wxFONTENCODING_SYSTEM;
+
+   // greek
+   if ( wch >= 0x370 && wch < 0x400 )
+      return wxFONTENCODING_CP1253;
+
+   // cyrillic
+   if ( wch >= 0x400 && wch < 0x530 )
+      return wxFONTENCODING_CP1251;
+
+   // hebrew
+   if ( wch >= 0x590 && wch < 0x600 )
+      return wxFONTENCODING_CP1255;
+
+   // arabic
+   if ( wch >= 0x600 && wch < 0x700 )
+      return wxFONTENCODING_CP1255;
+
+   // unknown
+   return wxFONTENCODING_UTF8;
+}
+
+static bool CanConvert(wxFontEncoding encIn, wxFontEncoding encOut)
+{
+   return
+      wxEncodingConverter::GetAllEquivalents(encIn).Index(encOut) != wxNOT_FOUND;
+}
+
+#endif // wxUSE_WCHAR_T
 
 // ----------------------------------------------------------------------------
 // FormattedParagraph
@@ -718,9 +775,6 @@ void wxBareBonesAttachments::OnKeyDown(wxKeyEvent& event)
 
 BEGIN_EVENT_TABLE(wxBareBonesTextControl, wxTextCtrl)
    EVT_KEY_DOWN(wxBareBonesTextControl::OnKeyDown)
-#ifdef OS_WIN
-   EVT_CHAR(wxBareBonesTextControl::OnChar)
-#endif // OS_WIN
    EVT_SET_FOCUS(wxBareBonesTextControl::OnFocus)
 END_EVENT_TABLE()
 
@@ -737,10 +791,6 @@ wxBareBonesTextControl::wxBareBonesTextControl(BareBonesEditor *editor,
 
    m_firstTimeModify = true;
    m_firstTimeFocus = true;
-
-#ifdef OS_WIN
-   m_warning8bitShown = false;
-#endif // OS_WIN
 }
 
 void wxBareBonesTextControl::OnKeyDown(wxKeyEvent& event)
@@ -754,35 +804,6 @@ void wxBareBonesTextControl::OnKeyDown(wxKeyEvent& event)
 
    event.Skip();
 }
-
-#ifdef OS_WIN
-
-void wxBareBonesTextControl::OnChar(wxKeyEvent& event)
-{
-   if ( event.GetKeyCode() > 0x7f && event.GetKeyCode() < WXK_START )
-   {
-      if ( !m_editor->HasEncoding() && !m_warning8bitShown )
-      {
-         m_warning8bitShown = true;
-
-         MDialog_Message
-         (
-            _("You should specify the language if you want to use non"
-              "ASCII characters in your message.\n"
-              "\n"
-              "Please choose one in the \"Languages\" menu, otherwise "
-              "the non-ASCII characters could be lost."),
-            this,
-            MDIALOG_MSGTITLE,
-            GetPersMsgBoxName(M_MSGBOX_8BIT_WARN)
-         );
-      }
-   }
-
-   event.Skip();
-}
-
-#endif // OS_WIN
 
 void wxBareBonesTextControl::OnFocus(wxFocusEvent& event)
 {
@@ -800,6 +821,18 @@ void wxBareBonesTextControl::OnFocus(wxFocusEvent& event)
 
    event.Skip();
 }
+
+
+#if wxUSE_WCHAR_T && defined(OS_WIN)
+
+wxWCharBuffer
+wxBareBonesTextControl::GetUnicodeText() const
+{
+   wxString s = StreamOut(wxFONTENCODING_UTF8);
+   return s.wc_str(wxConvUTF8);
+}
+
+#endif // wxUSE_WCHAR_T
 
 // ----------------------------------------------------------------------------
 // BareBonesEditor ctor/dtor
@@ -938,9 +971,9 @@ void BareBonesEditor::ResetDirty()
    m_textControl->DiscardEdits();
 }
 
-void BareBonesEditor::SetFontEncoding()
+void BareBonesEditor::SetFontEncoding(wxFontEncoding encoding)
 {
-   if ( m_encoding == wxFONTENCODING_SYSTEM )
+   if ( encoding == wxFONTENCODING_SYSTEM )
    {
       return;
    }
@@ -956,7 +989,7 @@ void BareBonesEditor::SetFontEncoding()
                   fontOld.GetWeight(),
                   fontOld.GetUnderlined(),
                   fontOld.GetFaceName(),
-                  m_encoding);
+                  encoding);
 #endif
 
    if ( fontNew.Ok() )
@@ -967,9 +1000,7 @@ void BareBonesEditor::SetFontEncoding()
 
 void BareBonesEditor::SetEncoding(wxFontEncoding encoding)
 {
-   m_encoding = encoding;
-
-   SetFontEncoding();
+   SetFontEncoding(m_encoding = encoding);
 }
 
 void BareBonesEditor::MoveCursorTo(unsigned long x, unsigned long y)
@@ -1073,7 +1104,7 @@ void BareBonesEditor::InsertText(const String& textOrig, InsertMode insMode)
    // is not available (but equivalent one is)
    if ( EnsureAvailableTextEncoding(&m_encoding, &text, true /* may ask */) )
    {
-      SetFontEncoding();
+      SetFontEncoding(m_encoding);
    }
    //else: don't change the font, encoding is not supported anyhow
 
@@ -1107,13 +1138,115 @@ EditorContentPart *BareBonesEditor::GetFirstPart()
 {
    m_getNextAttachement = 0;
 
+   wxFontEncoding encPart = wxFONTENCODING_SYSTEM;
+   wxString text;
+
+#if wxUSE_WCHAR_T && defined(OS_WIN)
+   wxWCharBuffer wbuf = m_textControl->GetUnicodeText();
+
+   for ( const wchar_t *pwc = wbuf; *pwc; pwc++ )
+   {
+      const wxFontEncoding encThis = GetEncoding(*pwc);
+      if ( encThis != wxFONTENCODING_SYSTEM && encThis != encPart )
+      {
+         if ( encPart != wxFONTENCODING_SYSTEM )
+         {
+            // we have two (or more) different encodings here, we must use UTF8
+            // to send both of them inside a single message part
+            encPart = wxFONTENCODING_UTF8;
+
+            // and we don't have to look any further, we found all we wanted
+            break;
+         }
+
+         // assume we're going to use this encoding for this entire part
+         encPart = encThis;
+      }
+   }
+
+   // if we hadn't had any user-specified encoding before, use the one we just
+   // found
+   if ( m_encoding == wxFONTENCODING_SYSTEM )
+   {
+      m_encoding = encPart;
+   }
+
+   if ( encPart != wxFONTENCODING_SYSTEM )
+   {
+      // must do this first or we wouldn't get the data from MSW rich edit
+      // control at all (it would try to convert text to the last set encoding
+      // and drop any characters it can't convert)
+      SetFontEncoding(encPart);
+
+      text = m_textControl->GetValue();
+
+      // we now know that we have the text in encoding encPart but that we want
+      // to send it out as m_encoding -- do we need to convert?
+      if ( encPart != m_encoding )
+      {
+         if ( encPart == wxFONTENCODING_UTF8 ||
+                  m_encoding == wxFONTENCODING_UTF8 )
+         {
+            // here encPart may only be UTF8 if more than one encoding or an
+            // unknown encoding was used, in either case we can't convert the
+            // text to a single non-Unicode charset, so use UTF8 as is
+            //
+            // of course, if it is m_encoding which is UTF8 we wanted to use it
+            // anyhow
+            text = wxConvUTF8.cWC2MB(wbuf);
+            encPart = wxFONTENCODING_UTF8;
+         }
+         else // 2 multibyte encodings
+         {
+            text = wxCSConv(encPart).cWC2MB(wbuf);
+
+            if ( encPart != m_encoding )
+            {
+               // is it possible to convert to the desired encoding?
+               wxEncodingConverter conv;
+               if ( CanConvert(encPart, m_encoding) &&
+                        conv.Init(encPart, m_encoding) )
+               {
+                  // yes, do it
+                  text = conv.Convert(text);
+                  encPart = m_encoding;
+               }
+               else // impossible to convert to the specified encoding
+               {
+                  // tell the user about it
+                  //
+                  // TODO: allow cancelling?
+                  MDialog_Message
+                  (
+                     wxString::Format
+                     (
+                        _("The selected language \"%s\" can't be used to "
+                          "send this message, \"%s\" will be used instead."),
+                        wxFontMapper::GetEncodingName(m_encoding).c_str(),
+                        wxFontMapper::GetEncodingName(encPart).c_str()
+                     ),
+                     m_notebook,
+                     M_MSGBOX_LANG_CHANGED_WARN
+                  );
+               }
+            }
+         }
+      }
+   }
+   else // ASCII only, no problems
+#endif // wxUSE_WCHAR_T
+   {
+      text = m_textControl->GetValue();
+   }
+
+
    // Translate LF to CRLF. All internal strings should have only LF, but
    // due to long bug tradition, many strings that contain messages have
    // CRLF newlines. They are passed to c-client, which expects CRLF, so
    // think twice before changing it.
    //
    // VZ: see above (FIXME)
-   return new EditorContentPart(strutil_enforceCRLF(m_textControl->GetValue()));
+   return new EditorContentPart(strutil_enforceCRLF(text), encPart);
 }
 
 EditorContentPart *BareBonesEditor::GetNextPart()
