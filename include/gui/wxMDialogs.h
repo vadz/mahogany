@@ -372,6 +372,7 @@ size_t MDialog_GetSelections(const wxString& message,
   @param status
   @param profileKey is the key to be used to stor dialog position &c
   @param parent is the parent window
+  @return TRUE if Ok
 */
 bool MDialog_GetSelectionsInOrder(const wxString& message,
                                   const wxString& caption,
@@ -379,6 +380,17 @@ bool MDialog_GetSelectionsInOrder(const wxString& message,
                                   wxArrayInt* status,
                                   const wxString& profileKey,
                                   wxWindow *parent = NULL);
+
+/**
+  Show a dialog asking the user for password and also, optionally, the
+  username for the folder
+
+  @return TRUE if Ok was pressed
+*/
+bool MDialog_GetPassword(const wxString& folderName,
+                         wxString *password,
+                         wxString *username,
+                         wxWindow *parent = NULL);
 
 #ifdef OS_WIN
 #  undef USE_SEMIMODAL

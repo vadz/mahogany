@@ -231,9 +231,7 @@ private:
    // create folder by name
    void Init(const String& name)
    {
-      wxCHECK_RET( name.length(), "name can't be empty" );
-
-      if( name[0] == '/' )
+      if ( !name.empty() && name[0] == '/' )
       {
          // called with a filename, create a temp folder to access it
          m_folder = MFolder::CreateTemp(name, MF_FILE, 0, name);

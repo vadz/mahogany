@@ -675,8 +675,8 @@ MailFolderCC::OpenFolder(int typeAndFlags,
                          String const &name,
                          Profile *profile,
                          String const &server,
-                         String const &login,
-                         String const &password,
+                         String const &loginGiven,
+                         String const &passwordGiven,
                          String const &symname,
                          bool halfopen)
 {
@@ -688,7 +688,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    int flags = GetFolderFlags(typeAndFlags);
    int type = GetFolderType(typeAndFlags);
 
-
+   String login = loginGiven;
    mboxpath = GetImapSpec(type, flags, name, server, login);
 
    //FIXME: This should somehow be done in MailFolder.cc
@@ -701,26 +701,20 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    }
 
    bool userEnteredPwd = false;
-   String pword = password;
+   String password = passwordGiven;
 
    // ask the password for the folders which need it but for which it hadn't
    // been specified during creation
    if ( FolderTypeHasUserName( (FolderType) GetFolderType(typeAndFlags))
         && ((GetFolderFlags(typeAndFlags) & MF_FLAGS_ANON) == 0)
-        && (pword.Length() == 0)
+        && (login.empty() || password.empty())
       )
    {
-      String prompt,
-             fname = !name ? mboxpath : name;
-      prompt.Printf(_("Please enter the password for folder '%s':"), symname.c_str());
-      if(! MInputBox(&pword,
-                     _("Password required"),
-                     prompt, NULL,
-                     NULL,NULL, true))
+      if ( !MDialog_GetPassword(symname, &login, &password) )
       {
          ERRORMESSAGE((_("Cannot access this folder without a password.")));
 
-         mApplication->SetLastError(M_ERROR_AUTH);
+         mApplication->SetLastError(M_ERROR_CANCEL);
 
          return NULL; // cannot open it
       }
@@ -731,7 +725,7 @@ MailFolderCC::OpenFolder(int typeAndFlags,
    }
 
    mf = new
-      MailFolderCC(typeAndFlags,mboxpath,profile,server,login,pword);
+      MailFolderCC(typeAndFlags, mboxpath, profile, server, login, password);
    mf->m_Name = symname;
    if(mf && profile)
       mf->SetRetrievalLimit(READ_CONFIG(profile, MP_MAX_HEADERS_NUM));
@@ -813,9 +807,11 @@ MailFolderCC::OpenFolder(int typeAndFlags,
                                TRUE, /* [Yes] default */
                                GetPersMsgBoxName(M_MSGBOX_REMEMBER_PWD)) )
       {
-         profile->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(pword));
+         profile->writeEntry(MP_FOLDER_LOGIN, login);
+         profile->writeEntry(MP_FOLDER_PASSWORD, strutil_encrypt(password));
       }
    }
+
    //FIXME: is this really needed if(mf) mf->PingReopen();
    return mf;
 }

@@ -127,6 +127,8 @@ struct InstallWizardData
           smtp,
           nntp;
 
+   bool imapAll;        // import all folders from IMAP server too
+
    // operations page:
    int    useDialUp; // initially -1
    bool   useOutbox;
@@ -282,6 +284,7 @@ public:
       {
          gs_installWizardData.pop  = m_pop->GetValue();
          gs_installWizardData.imap = m_imap->GetValue();
+         gs_installWizardData.imapAll = m_imapAll->GetValue();
          gs_installWizardData.smtp = m_smtp->GetValue();
          gs_installWizardData.nntp = m_nntp->GetValue();
          if(gs_installWizardData.smtp.Length() == 0)
@@ -309,32 +312,34 @@ public:
             AddDomain(gs_installWizardData.nntp, domain);
          }
 #endif
-         // instead: check if server names are valid:
+         // instead: check if server names are valid by verifying the hostname
+         // part (i.e. discard everything after ':' which is the port number)
+         // with DNS
          String check = ""; String tmp;
          int failed = 0;
          wxIPV4address addr;
-         if(! addr.Hostname(gs_installWizardData.pop))
+         if(! addr.Hostname(gs_installWizardData.pop.AfterLast(':')))
          {
             failed++;
             tmp.Printf(_("POP3 server '%s'.\n"),
                        gs_installWizardData.pop.c_str());
             check += tmp;
          }
-         if(! addr.Hostname(gs_installWizardData.smtp))
+         if(! addr.Hostname(gs_installWizardData.smtp.AfterLast(':')))
          {
             failed++;
             tmp.Printf(_("SMTP server '%s'.\n"),
                        gs_installWizardData.smtp.c_str());
             check += tmp;
          }
-         if(! addr.Hostname(gs_installWizardData.imap))
+         if(! addr.Hostname(gs_installWizardData.imap.AfterLast(':')))
          {
             failed++;
             tmp.Printf(_("IMAP server '%s'.\n"),
                        gs_installWizardData.imap.c_str());
             check += tmp;
          }
-         if(! addr.Hostname(gs_installWizardData.nntp))
+         if(! addr.Hostname(gs_installWizardData.nntp.AfterLast(':')))
          {
             failed++;
             tmp.Printf(_("NNTP server '%s'.\n"),
@@ -364,6 +369,7 @@ public:
       {
          m_pop->SetValue(gs_installWizardData.pop);
          m_imap->SetValue(gs_installWizardData.imap);
+         m_imapAll->SetValue(!gs_installWizardData.imap.empty());
          m_smtp->SetValue(gs_installWizardData.smtp);
          m_nntp->SetValue(gs_installWizardData.nntp);
          return TRUE;
@@ -383,13 +389,20 @@ public:
                     server.c_str(), domain.c_str());
          if(MDialog_YesNoDialog(msg,this, MDIALOG_YESNOTITLE, TRUE))
 #endif // 0
+
          server << '.' << domain;
       }
+
 private:
+   void OnText(wxCommandEvent& event);
+
    wxTextCtrl *m_pop,
               *m_imap,
               *m_smtp,
               *m_nntp;
+   wxCheckBox *m_imapAll;
+
+   DECLARE_EVENT_TABLE()
 };
 
 class InstallWizardDialUpPage : public InstallWizardPage
@@ -787,6 +800,10 @@ InstallWizardIdentityPage::InstallWizardIdentityPage(wxWizard *wizard)
 // InstallWizardServersPage
 // ----------------------------------------------------------------------------
 
+BEGIN_EVENT_TABLE(InstallWizardServersPage, InstallWizardPage)
+   EVT_TEXT(-1, InstallWizardServersPage::OnText)
+END_EVENT_TABLE()
+
 InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
                         : InstallWizardPage(wizard, InstallWizard_ServersPage)
 {
@@ -804,7 +821,7 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
       "\n"
       "All of these fields may be filled later as well\n"
       "(and you will be able to specify multiple servers too).\n"
-      "Finally, leave a field empty if you are not going to use\n"
+      "You also may leave a field empty if you are not going to use\n"
       "the corresponding server."
       ));
 
@@ -823,7 +840,22 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
    m_smtp = panel->CreateTextWithLabel(labels[2], widthMax, m_imap);
    m_nntp = panel->CreateTextWithLabel(labels[3], widthMax, m_smtp);
 
+   labels.Empty();
+   labels.Add(_("&Also create all IMAP folders:"));
+   widthMax = GetMaxLabelWidth(labels, panel);
+   m_imapAll = panel->CreateCheckBox(labels[0], widthMax, m_nntp);
+
    panel->ForceLayout();
+}
+
+void InstallWizardServersPage::OnText(wxCommandEvent& event)
+{
+   if ( event.GetEventObject() == m_imap )
+   {
+      m_imapAll->Enable(!m_imap->GetValue().empty());
+   }
+
+   event.Skip();
 }
 
 // InstallWizardDialUpPage
@@ -903,7 +935,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
 
    long widthMax = GetMaxLabelWidth(labels, panel);
 
-   m_CollectCheckbox = panel->CreateCheckBox(labels[0], widthMax,NULL);
+   m_CollectCheckbox = panel->CreateCheckBox(labels[0], widthMax, NULL);
    wxStaticText *text2 = panel->CreateMessage(
       _(
          "\n"
@@ -2296,6 +2328,23 @@ SetupServers(void)
                                       FALSE);
       p = Profile::CreateProfile(mfolder->GetName());
       //inherit default instead p->writeEntry(MP_IMAPHOST, serverName);
+
+      /* The folders under the IMAP server */
+      if ( gs_installWizardData.imapAll )
+      {
+         ASMailFolder *asmf = ASMailFolder::HalfOpenFolder(mfolder, NULL);
+         if ( !asmf )
+         {
+            wxLogError(_("Impossible to add IMAP folders to the folder tree."));
+         }
+         else
+         {
+            AddAllSubfoldersToTree(mfolder, asmf);
+
+            asmf->DecRef();
+         }
+      }
+
       p->DecRef();
       SafeDecRef(mfolder);
    }

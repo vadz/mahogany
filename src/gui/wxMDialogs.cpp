@@ -3000,3 +3000,130 @@ MProgressInfo::~MProgressInfo()
    wxYield();
 }
 
+// ----------------------------------------------------------------------------
+// MPasswordDialog
+// ----------------------------------------------------------------------------
+
+class MPasswordDialog : public wxManuallyLaidOutDialog
+{
+public:
+   MPasswordDialog(wxWindow *parent,
+                   const wxString& folderName,
+                   wxString *username,
+                   wxString *password);
+
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
+
+protected:
+   void OnUpdateOk(wxUpdateUIEvent& event);
+
+private:
+   wxTextCtrl *m_textUser,
+              *m_textPwd;
+
+   wxString *m_username,
+            *m_password;
+
+   DECLARE_EVENT_TABLE()
+};
+
+BEGIN_EVENT_TABLE(MPasswordDialog, wxSMDialog)
+   EVT_UPDATE_UI(wxID_OK, OnUpdateOk)
+END_EVENT_TABLE()
+
+MPasswordDialog::MPasswordDialog(wxWindow *parent,
+                                 const wxString& folderName,
+                                 wxString *username,
+                                 wxString *password)
+               : wxManuallyLaidOutDialog(parent,
+                                         _("Password required"),
+                                         "PasswordDialog")
+{
+   // init members
+   m_username = username;
+   m_password = password;
+
+   // create controls
+   wxLayoutConstraints *c;
+   wxStaticText *label;
+
+   wxStaticBox *box = CreateStdButtonsAndBox(
+      wxString::Format(_("Please enter login/password for the folder '%s'"),
+                       folderName.c_str()));
+
+   wxArrayString labels;
+   labels.Add(_("&Username: "));
+   labels.Add(_("&Password: "));
+
+   long widthMax = GetMaxLabelWidth(labels, this);
+
+   label = new wxStaticText(this, -1, labels[0]);
+   c = new wxLayoutConstraints;
+   c->width.Absolute(widthMax);
+   c->height.AsIs();
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.SameAs(box, wxTop, 6*LAYOUT_Y_MARGIN);
+   label->SetConstraints(c);
+
+   m_textUser = new wxTextCtrl(this, -1, "");
+   c = new wxLayoutConstraints;
+   c->left.RightOf(label, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->centreY.SameAs(label, wxCentreY);
+   c->height.AsIs();
+   m_textUser->SetConstraints(c);
+
+   label = new wxStaticText(this, -1, labels[1]);
+   c = new wxLayoutConstraints;
+   c->width.Absolute(widthMax);
+   c->height.AsIs();
+   c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
+   c->top.Below(m_textUser, 2*LAYOUT_Y_MARGIN);
+   label->SetConstraints(c);
+
+   m_textPwd = new wxTextCtrl(this, -1, "",
+                              wxDefaultPosition, wxDefaultSize,
+                              wxTE_PASSWORD);
+   c = new wxLayoutConstraints;
+   c->left.RightOf(label, 2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
+   c->centreY.SameAs(label, wxCentreY);
+   c->height.AsIs();
+   m_textPwd->SetConstraints(c);
+
+   SetDefaultSize(4*wBtn, 2*hBtn);
+}
+
+bool MPasswordDialog::TransferDataToWindow()
+{
+   m_textUser->SetValue(*m_username);
+   m_textPwd->SetValue(*m_password);
+
+   return TRUE;
+}
+
+bool MPasswordDialog::TransferDataFromWindow()
+{
+   *m_username = m_textUser->GetValue();
+   *m_password = m_textPwd->GetValue();
+
+   return TRUE;
+}
+
+void MPasswordDialog::OnUpdateOk(wxUpdateUIEvent& event)
+{
+   event.Enable( !(m_textUser->GetValue().empty() &&
+                   m_textPwd->GetValue().empty()) );
+}
+
+bool MDialog_GetPassword(const wxString& folderName,
+                         wxString *password,
+                         wxString *username,
+                         wxWindow *parent)
+{
+   MPasswordDialog dlg(parent, folderName, password, username);
+
+   return dlg.ShowModal() == wxID_OK;
+}
+

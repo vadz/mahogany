@@ -1,4 +1,5 @@
 (next release) on (date of next release)
+16.08.00 VZ: install wizard now creates all IMAP folders in the folder tree
 11.08.00 VZ: new option for not quoting the empty lines in reply
 06.08.00 KB: added printing to filter functions
              renamed configure options back to --with instead of --enable
