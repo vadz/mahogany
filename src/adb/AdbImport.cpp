@@ -289,12 +289,18 @@ size_t AdbImporter::EnumImporters(wxArrayString& names, wxArrayString& descs)
    while ( info )
    {
       importer = info->CreateImporter();
+      if ( importer )
+      {
+         names.Add(importer->GetName());
+         descs.Add(importer->GetDescription());
 
-      names.Add(importer->GetName());
-      descs.Add(importer->GetDescription());
-
-      importer->DecRef();
-      importer = NULL;
+         importer->DecRef();
+         importer = NULL;
+      }
+      else
+      {
+         wxLogDebug("Failed to load ADB importer '%s'.", info->name);
+      }
 
       info = info->next;
    }
@@ -362,6 +368,7 @@ void AdbImporter::FreeAdbImporterInfo(AdbImporter::AdbImporterInfo *info)
    {
       next = info->next;
       delete info;
+      info = next;
    }
 
    ms_listImporters = NULL;

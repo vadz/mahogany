@@ -11,9 +11,12 @@
  * statically, initialises them at runtime. The refcount of the
  * modules is then kept at >1, so they will never get unloaded.
  */
+
+/* see the comment in the header
 #ifdef __GNUG__
 #   pragma implementation "MModule.h"
 #endif
+*/
 
 // ----------------------------------------------------------------------------
 // headers
