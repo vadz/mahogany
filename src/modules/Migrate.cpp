@@ -1772,7 +1772,10 @@ void MigrateWizardProgressPage::OnButtonCancel(wxCommandEvent& /* event */)
 // ----------------------------------------------------------------------------
 
 MigrateWizard::MigrateWizard(wxWindow *parent)
-             : wxWizard(parent, -1, _("Mahogany Migration Tool")) // TODO: bmp
+             : wxWizard(parent,
+                        -1,
+                        _("Mahogany Migration Tool"),
+                        mApplication->GetIconManager()->GetBitmap(_T("migrate")))
 {
    for ( size_t n = 0; n < WXSIZEOF(m_pages); n++ )
    {

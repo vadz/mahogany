@@ -164,6 +164,7 @@ image_both	BITMAP	"image_both.bmp"
 // Others
 noxface		BITMAP	"noxface.bmp"
 install_welcome BITMAP  "install1.bmp"
+migrate		BITMAP	"migrate.bmp"
 
 // Cursors (for dnd)
 msg_copy	CURSOR	"msg_copy.cur"
