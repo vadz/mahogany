@@ -23,7 +23,7 @@
 
 // under Unix we have to load libssl and libcrypto to provide access to them to
 // c-client
-#ifdef OS_UNIX
+#if defined(OS_UNIX) || defined(__CYGWIN__)
 
 #ifndef USE_PCH
    #include "Profile.h"
@@ -255,7 +255,7 @@ error:
       MDialog_Message
       (
          _("You can change the locations of the SSL and crypto "
-           "libraries in the last page of the preferences dialog\n"
+           "libraries in the Helpers page of the preferences dialog\n"
            "if you have these libraries in non default location"
            " or if they have some other names on your system."),
          NULL,
@@ -297,5 +297,4 @@ bool InitSSL(void)
 }
 
 #endif // USE_SSL/!USE_SSL
-
 

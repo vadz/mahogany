@@ -27,6 +27,9 @@
 #  include "strutil.h"
 
 #  include "ASMailFolder.h"
+#ifdef __CYGWIN__
+#  include "MApplication.h" // for mApplication
+#endif
 #endif // USE_PCH
 
 #include "MailFolder.h"

@@ -1739,7 +1739,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(), // play sound help
    CONFIG_ENTRY(MP_NEWMAIL_PLAY_SOUND),
    CONFIG_ENTRY(MP_NEWMAIL_SOUND_FILE),
-#ifdef OS_UNIX
+#if defined(OS_UNIX) || defined(__CYGWIN__)
    CONFIG_ENTRY(MP_NEWMAIL_SOUND_PROGRAM),
 #endif // OS_UNIX
 

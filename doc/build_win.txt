@@ -5,26 +5,29 @@ Author:		Vadim Zeitlin <vadim@wxwindows.org>
 Last modified:	15.06.03
 Version:	the information in this file applies to the cvs sources
 
-0. Requirments
---------------
+0. Requirements
+---------------
 
-a) a compiler: currently, the only supported compiler for building Mahogany is
-   Visual C++ 6.0. Version 5.0 of it can be used as well. If you are interested
-   in building using another compiler (mingw32, BC++) please contact me and I
-   will try to help you
+a) a compiler: currently, the supported compilers for building Mahogany are
+   MS Visual C++ 6.0 and cygwin. Version 5.0 of Visual C++ can be used as well.
+   If you are interested in building using another compiler (mingw32, BC++)
+   please contact us and we will try to help you.
 
 b) cvs client: you need to have daily access to Mahogany (and sometimes
    wxWindows) source tree, and the cvs is the only way to keep up to date. The
    precompiled cvs binaries for Win32 can be found at http://www.cyclic.com/
 
-c) GNU m4 from cygwin tools: this is not an absolute requirment, however you
+c) GNU m4 from cygwin tools: this is not an absolute requirement, however you
    will not be able to compile *.mid (Mahogany Interface Description) files if
    you don't have it and so you will have to use the versions already in the
    cvs. If you do have m4, set the environment variable M4 to contain its full
    path (or just m4 if it is in your PATH), otherwise it won't be used.
 
 
-1. wxWindows
+1. Visual C++
+-------------
+
+a) wxWindows
 ------------
 
    Mahogany depends on wxWindows and prior to compiling Mahogany you need to
@@ -41,7 +44,7 @@ should build wxWindows with the standard include\wx\msw\setup.h instead of
 the file extra\scripts\wxmsw_setup.h which had to be used previously.
 
 
-2. Build process
+b) Build process
 ----------------
 
    Open the project workspace M.dsw in Visual C++ IDE. You will have to load
@@ -55,17 +58,17 @@ projects contained in this workspace if they are not loaded yet:
 * wxWindows - the wxMSW library: when opening this project, specify the correct
               file location (in Mahogany directory) when asked
 
-    Note that after building everything (successfully) once, you may unload all
+   Note that after building everything (successfully) once, you may unload all
 the projects except "M" -- this will speed up workspace opening/closing. But if
 you do it, be careful to load them all before rebuilding everything --
 otherwise, dependencies will not be handled correctly.
 
-    Finally, just build everything. Before running M.exe, copy the file
+   Finally, just build everything. Before running M.exe, copy the file
 versit.dll produced when building versit project into the root Mahogany
 directory (or elsewhere in your PATH).
 
 
-3. Common problems
+c) Common problems
 ------------------
 
 Visual C++ 5.0 doesn't understand environment variables in the project
@@ -77,5 +80,39 @@ src/wx/vcard/vcc.c-yacc to vcc.c.
 
 If you get problem with PROIO_yywrap being multiply defined in wxWindows,
 comment out the 2nd definition of this function in src/common/y_tab.c.
+
+
+2. Cygwin
+---------
+
+a) Build process
+----------------
+
+g++ 3.x can not compile Mahogany currently, so I used g++ 2.95.3. As compiler
+version should be the same when compiling both wxWindows and Mahogany, we should
+use g++ 2.95.3 for compiling wxWindows as well. Just use
+
+cd <path to wxWindows sources>
+mkdir build.cygwin.gcc295
+cd build.cygwin.gcc295
+CC=gcc-2 CXX=g++-2 ../configure
+make
+make install
+
+cd <path to Mahogany sources>
+mkdir build.cygwin.gcc295
+cd build.cygwin.gcc295
+CC=gcc-2 CXX=g++-2 ../configure --with-modules=static
+make
+make install
+
+in cygwin bash shell.
+
+
+b) Common problems
+------------------
+
+Linking Mahogany compiled with debug info requires a lot of memory, so please
+disable debugging if you experience out of memory problems.
 
 vi: ts=8 nolist nocin ai:

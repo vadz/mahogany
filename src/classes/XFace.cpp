@@ -170,6 +170,7 @@ XFace::CreateFromXpm(const char *xpmdata)
 wxImage
 XFace::GetXFaceImg(const String &filename, bool *hasimg, class wxWindow *parent)
 {
+#ifndef __CYGWIN__ // FIXME undefined reference to wxIconManager::LoadImage() when linking
    bool success = false;
    wxImage img;
    if(filename.Length())
@@ -211,8 +212,10 @@ XFace::GetXFaceImg(const String &filename, bool *hasimg, class wxWindow *parent)
       if(hasimg) *hasimg = success;
    }
    return img;
+#else // CYGWIN
+   return NULL;
+#endif
 }
-
 
 /* static */
 String

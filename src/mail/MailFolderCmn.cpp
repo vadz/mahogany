@@ -84,7 +84,7 @@ extern const MOption MP_NEWMAILCOMMAND;
 extern const MOption MP_NEWMAIL_FOLDER;
 extern const MOption MP_NEWMAIL_PLAY_SOUND;
 extern const MOption MP_NEWMAIL_SOUND_FILE;
-#ifdef OS_UNIX
+#if defined(OS_UNIX) || defined(__CYGWIN__)
 extern const MOption MP_NEWMAIL_SOUND_PROGRAM;
 #endif // OS_UNIX
 extern const MOption MP_SAFE_FILTERS;
@@ -1950,7 +1950,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
    {
       String sound = READ_CONFIG(profile, MP_NEWMAIL_SOUND_FILE);
 
-#if defined(OS_WIN)
+#if defined(OS_WIN) && !defined(__CYGWIN__)
       DWORD flags = SND_ASYNC;
 
       if ( sound.empty() )
@@ -1965,7 +1965,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
       }
 
       if ( !::PlaySound(sound, NULL, flags) )
-#elif defined(OS_UNIX)
+#elif defined(OS_UNIX) || defined(__CYGWIN__)
       String soundCmd = READ_CONFIG(profile, MP_NEWMAIL_SOUND_PROGRAM);
 
       // we have a handy function in wxFileType which will replace

@@ -15,6 +15,8 @@
 #define	PATH_SEPARATOR	';'
 
 /// not defined by makefile
+#ifndef M_CANONICAL_HOST
 #define M_CANONICAL_HOST   ""
+#endif
 
 #endif

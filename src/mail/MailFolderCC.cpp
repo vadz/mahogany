@@ -4652,7 +4652,7 @@ MailFolderCC::CClientInit(void)
 
    // link in all drivers (SSL is initialized later, when it is needed for the
    // first time)
-#ifdef OS_WIN
+#if defined(OS_WIN) && !defined(__CYGWIN__)
 #  include "linkage.c"
 #else
 #  include "linkage_no_ssl.c"

@@ -32,6 +32,10 @@
 #include <wx/filefn.h>
 #include <wx/file.h>
 
+#if defined(__CYGWIN__)
+#include  <io.h> // for int access()
+#endif
+
 #if defined(OS_UNIX)
 #   define   ANYFILE   "/*"
 #elif defined(OS_WIN)

@@ -81,14 +81,16 @@ extern const MOption MP_PRINT_COMMAND;
 extern const MOption MP_PRINT_ORIENTATION;
 extern const MOption MP_PRINT_PAPER;
 extern const MOption MP_REPLY_ADDRESS;
+#ifdef OS_UNIX
+extern const MOption MP_USE_SENDMAIL;
 extern const MOption MP_SENDMAILCMD;
+#endif
 extern const MOption MP_SMTPHOST;
 extern const MOption MP_SMTPHOST_LOGIN;
 extern const MOption MP_USEOUTGOINGFOLDER;
 extern const MOption MP_USERNAME;
 extern const MOption MP_USEVCARD;
 extern const MOption MP_USE_OUTBOX;
-extern const MOption MP_USE_SENDMAIL;
 extern const MOption MP_VIEW_AUTOMATIC_WORDWRAP;
 extern const MOption MP_VIEW_WRAPMARGIN;
 extern const MOption MP_WRAPMARGIN;
@@ -237,9 +239,15 @@ static  PrefMap g_NetworkPrefMap[] = {
  {"mail.imap.server_ssl" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"mail.imap.delete_is_move_to_trash" , "Not mapped", "No descr", NM_NONE, FALSE },
  // something to use instead of send/fetchmail here?
+#ifdef OS_UNIX
  {"mail.use_movemail" , MP_USE_SENDMAIL, "use mail moving program", NM_IS_BOOL, FALSE },
  {"mail.use_builtin_movemail" , "Ignored", "No descr", NM_NONE, FALSE },
  {"mail.movemail_program" , MP_SENDMAILCMD, "mail moving command", NM_IS_STRING, FALSE },
+#else
+ {"mail.use_movemail" , "Not mapped", "No descr", NM_NONE, FALSE },
+ {"mail.use_builtin_movemail" , "Not mapped", "No descr", NM_NONE, FALSE },
+ {"mail.movemail_program" , "Not mapped", "No descr", NM_NONE, FALSE },
+#endif
  {"mail.movemail_warn" , "Not mapped", "No descr", NM_NONE, FALSE },
  {"END", "Ignored", "End of list record", NM_NONE }   // DO NOT REMOVE, hack to find the end
 };

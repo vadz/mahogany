@@ -127,7 +127,7 @@ extern const MPersMsgBox *M_MSGBOX_REENABLE_HINT;
 // the images names
 // ----------------------------------------------------------------------------
 
-#if defined(OS_WIN) || defined(__CYGWIN__)
+#if defined(OS_WIN)
 #  define Mahogany      "Mahogany"
 #  define PythonPowered "PythonPowered"
 #else   //real XPMs

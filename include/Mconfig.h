@@ -25,7 +25,7 @@
 #define   OS_SUBTYPE   "unknown"
 
 /// Test for unix flavours:
-#if defined(unix) || defined(__unix) || defined(__unix__)
+#if ( defined(unix) || defined(__unix) || defined(__unix__) ) && ! defined(__CYGWIN__)
 #  define  OS_UNIX    1
 #  define  OS_TYPE    "unix"
 #  undef   OS_SUBTYPE
@@ -44,7 +44,7 @@
 #endif
 
 /// Test for MS Windows:
-#if defined(__WIN__) || defined(__WINDOWS__) || defined(_WIN32)
+#if defined(__WIN__) || defined(__WINDOWS__) || defined(_WIN32) || defined(__CYGWIN__)
 #  define  OS_WIN    1
 #  define  OS_TYPE    "windows"
 #  ifndef  __WINDOWS__

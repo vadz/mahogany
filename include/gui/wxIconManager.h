@@ -23,7 +23,7 @@
 
 // under Windows we can use resources as "normal" windows programs do or we can
 // use XPMs as under Unix
-#if defined(OS_WIN) || defined(__CYGWIN__)
+#if defined(OS_WIN)
    #define USE_ICONS_FROM_RESOURCES
 #endif
 

@@ -23,7 +23,7 @@
 // M
 #include "Mpch.h"
 
-#ifndef OS_UNIX
+#if !defined(OS_UNIX) && !defined(__CYGWIN__)
    #error "This module can only be compiled under Unix."
 #endif
 

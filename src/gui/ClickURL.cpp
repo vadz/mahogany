@@ -28,6 +28,9 @@
    #include "gui/wxOptionsDlg.h"
 
    #include <wx/menu.h>
+#ifdef __CYGWIN__
+   #include <wx/msw/registry.h>
+#endif
 #endif //USE_PCH
 
 #include "Mdefaults.h"
@@ -313,11 +316,13 @@ void ClickableURL::OpenInBrowser(int options) const
                      if ( ddeCmd.Replace("%1", m_url, FALSE) == 1 )
                      {
                         // magic incantation understood by wxMSW
+#ifndef __CYGWIN__ // FIXME
                         command << "WX_DDE#"
                                 << wxString(wxRegKey(key, "command")) << '#'
                                 << wxString(wxRegKey(keyDDE, "application"))
                                 << '#' << ddeTopic << '#'
                                 << ddeCmd;
+#endif
                      }
                   }
                }
@@ -334,8 +339,10 @@ void ClickableURL::OpenInBrowser(int options) const
       }
       else // easy case: open in the same window
       {
+#ifndef __CYGWIN__ // FIXME ShellExecute() is defined in <w32api/shellapi.h>, how to include it?
          bOk = (int)ShellExecute(NULL, "open", m_url,
                                  NULL, NULL, SW_SHOWNORMAL ) > 32;
+#endif
       }
 #else  // Unix
       // propose to choose program for opening URLs

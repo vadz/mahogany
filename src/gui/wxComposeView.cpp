@@ -52,7 +52,10 @@
 #  include <wx/textctrl.h>
 
 #  include <ctype.h>          // for isspace()
+#ifdef __CYGWIN__
+#  include <sys/unistd.h>     // for getpid()
 #endif
+#endif // USE_PCH
 
 #include <wx/filename.h>
 #include <wx/file.h>
