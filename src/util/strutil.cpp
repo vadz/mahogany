@@ -361,36 +361,37 @@ strutil_extract_formatspec(const char *format)
    return specs;
 }
 
+// return the basename of a file (i.e. the part after final path separator)
 String
 strutil_getfilename(const String& path)
 {
-   const char *pc = path;
-   const char *pLast1 = strrchr(pc, '/');
-   const char *pLast2 = strrchr(pc, '\\');
-   size_t nPos1 = pLast1 ? pLast1 - pc : 0;
-   size_t nPos2 = pLast2 ? pLast2 - pc : 0;
+   const char *pLast1 = strrchr(path, '/');
+   size_t nPos1 = pLast1 ? pLast1 - path.c_str() : 0;
+
+   // under Windows we understand both '/' and '\\' as path separators, but
+   // '\\' doesn't count as path separator under Unix
+#ifdef OS_WIN
+   const char *pLast2 = strrchr(path, '\\');
+   size_t nPos2 = pLast2 ? pLast2 - path.c_str() : 0;
    if ( nPos2 > nPos1 )
       nPos1 = nPos2;
+#endif // Win
 
    if ( nPos1 == 0 )
       return path;
    else
-      //return path.Right(path.Len() - nPos1 - 1);
-      return path.c_str()+ nPos1 + 1;
+      return path.c_str() + nPos1 + 1;
 }
 
 bool
 strutil_isabsolutepath(const String &path)
 {
-   if(strutil_isempty(path))
-      return false;
 #ifdef OS_UNIX
-   if(path.c_str()[0] == DIR_SEPARATOR || path.c_str()[1] == '~')
-      return true;
+   return !strutil_isempty(path) && (path[0] == DIR_SEPARATOR || path[1] == '~');
 #elif defined ( OS_WIN )
-#   error "How do we handle this?"
+   // TODO copy the code from wxIsAbsolutePath() here if Karsten insists on it
+   return wxIsAbsolutePath(path);
 #endif
-   return false;
 }
 
 String
@@ -403,7 +404,7 @@ strutil_expandpath(const String &ipath)
 
    if(path.c_str()[0]=='~')
    {
-      if{path.c_str()[1] == DIR_SEPARRATOR)
+      if(path.c_str()[1] == DIR_SEPARRATOR)
       {
          path = getenv("HOME");
          path << DIR_SEPARATOR;
