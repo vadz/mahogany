@@ -292,12 +292,6 @@ enum ConfigFields
    ConfigField_FolderProgressHelpText,
    ConfigField_FolderProgressThreshold,
    ConfigField_ShowBusyInfo,
-   ConfigField_FolderMaxHelpText,
-#if 0
-   ConfigField_FolderMaxHeadersNumHard,
-   ConfigField_FolderMaxHeadersNum,
-#endif
-   ConfigField_FolderMaxMsgSize,
    ConfigField_CloseDelay_HelpText,
    ConfigField_FolderCloseDelay,
    ConfigField_ConnCloseDelay,
@@ -363,6 +357,8 @@ enum ConfigFields
    ConfigField_MessageViewProgressHelp,
    ConfigField_MessageViewProgressThresholdSize,
    ConfigField_MessageViewProgressThresholdTime,
+   ConfigField_MessageViewMaxHelp,
+   ConfigField_MessageViewMaxMsgSize,
    ConfigField_MessageViewInlineGraphicsHelp,
    ConfigField_MessageViewInlineGraphics,
    ConfigField_MessageViewInlineGraphicsSize,
@@ -1253,24 +1249,8 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "show the progress dialog at all."), Field_Message, -1},
    { gettext_noop("&Threshold for displaying progress dialog"), Field_Number, -1},
    { gettext_noop("Show bus&y dialog while sorting/threading"), Field_Bool, -1},
-   { gettext_noop("The following setting allows to limit the amount of data\n"
-                  "retrieved from remote server: if the message size\n"
-                  "is greater than the value specified here, you\n"
-                  "will be asked for confirmation before transfering data."),
-                                                   Field_Message,  -1 },
-#if 0
-   { gettext_noop("The following settings allow to limit the amount of data\n"
-                  "retrieved from remote server: if the message size or\n"
-                  "number is greater than the value specified here, you\n"
-                  "will be asked for confirmation before transfering data.\n"
-                  "Additionally, if you set the hard limit, only that many\n"
-                  "messages will be downloaded without asking."),
-                                                   Field_Message,  -1 },
-   { gettext_noop("&Hard message limit"),  Field_Number,   -1 },
-   { gettext_noop("Ask if &number of messages >"),  Field_Number,   -1 },
-#endif
-   { gettext_noop("Ask if size of &message (in Kb) >"), Field_Number,   -1 },
-   { gettext_noop("Mahogany may keep the folder open after closing it\n"
+   { gettext_noop("\n"
+                  "Mahogany may keep the folder open after closing it\n"
                   "for some time to make reopening the same folder faster.\n"
                   "It also can close the folder but keep the connection to\n"
                   "the server alive for some time to make it faster to open\n"
@@ -1376,6 +1356,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "specified time (use -1 to disable progress dialog entirely)"), Field_Message, -1 },
    { gettext_noop("Dialog minimal size t&hreshold (kb)"),             Field_Number,    -1 },
    { gettext_noop("Progress dialog &delay (seconds)"),             Field_Number,    -1 },
+   { gettext_noop("The following setting allows to limit the amount of data\n"
+                  "retrieved from remote server: if the message size\n"
+                  "is greater than the value specified here, you\n"
+                  "will be asked for confirmation before transfering data"
+                  "(set to 0 to disable)"),
+                                                   Field_Message,  -1 },
+   { gettext_noop("Ask if size of &message (in Kb) >"), Field_Number,   -1 },
    { gettext_noop("Some of the Mahogany text viewers may show the images\n"
                   "included with the message inline, i.e. directly in the\n"
                   "viewer window.\n"
@@ -1871,12 +1858,6 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_FOLDERPROGRESS_THRESHOLD),
    CONFIG_ENTRY(MP_SHOWBUSY_DURING_SORT),
-   CONFIG_NONE(),
-#if 0
-   CONFIG_ENTRY(MP_MAX_HEADERS_NUM_HARD),
-   CONFIG_ENTRY(MP_MAX_HEADERS_NUM),
-#endif
-   CONFIG_ENTRY(MP_MAX_MESSAGE_SIZE),
    CONFIG_NONE(), // keep alive help
    CONFIG_ENTRY(MP_FOLDER_CLOSE_DELAY),
    CONFIG_ENTRY(MP_CONN_CLOSE_DELAY),
@@ -1936,6 +1917,8 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_MESSAGEPROGRESS_THRESHOLD_SIZE),
    CONFIG_ENTRY(MP_MESSAGEPROGRESS_THRESHOLD_TIME),
+   CONFIG_NONE(), // max msg size help
+   CONFIG_ENTRY(MP_MAX_MESSAGE_SIZE),
    CONFIG_NONE(), // inline images help
    CONFIG_ENTRY(MP_INLINE_GFX),
    CONFIG_ENTRY(MP_INLINE_GFX_SIZE),
