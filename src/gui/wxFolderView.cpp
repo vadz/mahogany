@@ -41,6 +41,7 @@
 #include "gui/wxIconManager.h"
 #include "gui/wxMIds.h"
 #include "MDialogs.h"
+#include "MHelp.h"
 
 BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
    EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
@@ -374,6 +375,10 @@ wxFolderView::OnCommandEvent(wxCommandEvent &event)
       for(n = 0; n < m_NumOfMessages; n++)
          m_FolderCtrl->Select(n,FALSE);
       break;
+   case WXMENU_HELP_CONTEXT:
+      mApplication->Help(MH_FOLDER_VIEW,GetWindow());
+      break;
+
    default:
       wxFAIL_MSG("wxFolderView::OnMenuCommand() called with illegal id.");
    }

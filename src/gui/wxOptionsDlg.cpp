@@ -30,7 +30,7 @@
 #include   <wx/imaglist.h>
 #include   <wx/notebook.h>
 #include   <wx/dynarray.h>
-
+#include   <wx/resource.h>
 #include   <wx/persctrl.h>
 
 #include   "MDialogs.h"
@@ -154,6 +154,8 @@ enum
 
 WX_DEFINE_ARRAY(wxControl *, ArrayControls);
 
+
+
 // a button which is associated with a text control and which allows shows
 // the file selection dialog and puts the filename chosen by the user into
 // this text control
@@ -202,6 +204,7 @@ public:
    enum Icon
    {
       Icon_Compose,
+      Icon_Folder,
       Icon_Max
    };
 
@@ -556,6 +559,82 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
 // ============================================================================
 // implementation
 // ============================================================================
+#include   "wxr/FOPanel.wxr"
+//----------------------------------------------------------------------------
+// a panel loading from a .wxr file
+//----------------------------------------------------------------------------
+class wxResourcePanel : public wxPanel
+{
+public:
+   wxResourcePanel(wxString const &name, wxWindow *parent)
+      {
+         wxASSERT(LoadFromResource(parent, name));
+      }
+};
+
+/** A panel displaying the core folder profile settings. This is just
+    like the FolderOpen dialog in wxMDialogs which should probably be
+    modified to use this.
+*/
+//FIXME: the renaming and de/activation of entries is still missing,
+//copy the FODialog UpdateUI function here.
+class wxFolderOpenPanel : public wxResourcePanel
+{
+public:
+   virtual bool TransferDataToWindow(void);
+   virtual bool TransferDataFromWindow(void);
+
+   wxFolderOpenPanel(wxWindow *parent, ProfileBase *prof) :
+      wxResourcePanel("FolderOpenPanel", parent)
+      { m_profile = prof; }
+
+private:
+   ProfileBase *m_profile;
+};
+
+//FIXME: doesn't compile because "not in class declaration" ????
+#if 0
+bool
+wxFolderOpenPanel::TranferDataToWindow(void)
+{
+   return true; // nothing for now, should check for existence
+}
+
+bool
+wxFolderOpenPanel::TranferDataFromWindow(void)
+{
+   int type;
+   wxRadioBox *ctrl = (wxRadioBox*)wxFindWindowByName("FolderType",this);
+   ASSERT(ctrl);
+   m_profile->writeEntry(MP_FOLDER_TYPE,type = ctrl->GetSelection());
+
+   if(type == 0)
+      m_profile->writeEntry(MP_FOLDER_PATH, "INBOX");
+   else if(type == 1) // file
+   {
+      // interpret MailHost setting as pathname
+      wxTextCtrl *tctrl = (wxTextCtrl *)wxFindWindowByName("MailHost",this);
+      ASSERT(tctrl);
+      m_profile->writeEntry(MP_FOLDER_PATH,tctrl->GetValue());
+   }
+   else
+   {
+      wxTextCtrl *tctrl = (wxTextCtrl *)wxFindWindowByName("UserID",this);
+      ASSERT(tctrl);
+      m_profile->writeEntry(MP_POP_LOGIN,tctrl->GetValue());
+
+      tctrl = (wxTextCtrl *)wxFindWindowByName("Password",this);
+      ASSERT(tctrl); 
+      m_profile->writeEntry(MP_POP_PASSWORD,tctrl->GetValue());
+   
+      tctrl = (wxTextCtrl *)wxFindWindowByName("MailHost",this);
+      ASSERT(tctrl);
+      m_profile->writeEntry(MP_POP_HOST,tctrl->GetValue());
+   }
+   return true;
+}
+#endif
+
 wxOptionsPage::wxOptionsPage(wxNotebook *notebook,
                              const char *title,
                              ProfileBase *profile,
@@ -1520,7 +1599,7 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent)
    static const char *aszImages[] =
    { 
       // should be in sync with the corresponding enum
-      "compose"
+      "compose","FIXME"
    };
 
    wxASSERT( WXSIZEOF(aszImages) == Icon_Max );  // don't forget to update both!
@@ -1536,6 +1615,8 @@ wxFolderCreateNotebook::wxFolderCreateNotebook(wxWindow *parent)
    ProfileBase *profile = mApplication->GetProfile();
    // create and add the pages
    (void)new wxOptionsPageCompose(this,profile);
+   wxResourceParseData(FolderOpenPanel);
+   AddPage(new wxResourcePanel("FolderOpenPanel",this), _("Folder"),FALSE,1);
 }
    
 
@@ -1543,6 +1624,7 @@ wxOptionsNotebookBase::~wxOptionsNotebookBase()
 {
    delete GetImageList();
 }
+
 
 //----------------------------------------------------------------------------
 // our public interface is just this simple function

@@ -226,7 +226,8 @@ wxMApp::Help(int id, wxWindow *parent)
       break;
       // all other help ids, just look them up:
    default:
-      m_HelpController->DisplaySection(id);
+      if(! m_HelpController->DisplaySection(id)) 
+         MDialog_Message(_("No help found for current context."),NULL,_("Sorry"));
       break;
    }
 }

@@ -268,7 +268,7 @@ wxMFrame::OnMenuCommand(int id)
       MDialog_AboutDialog(this, false /* don't timeout */);
       break;
    case WXMENU_HELP_CONTEXT:
-      MDialog_Message(_("No help available on current context."),this,_("Sorry"));
+      MDialog_Message(_("Help not implemented for current context, yet."),this,_("Sorry"));
       break;
    case WXMENU_HELP_CONTENTS:
       mApplication->Help(MH_CONTENTS,this);

@@ -1,4 +1,4 @@
-static char *OpenFolderDialog = "dialog(name = 'OpenFolderDialog',\
+static char *FolderOpenPanel = "panel(name = 'FolderOpenPanel',\
   style = 'wxRAISED_BORDER | wxCAPTION | wxTHICK_FRAME | wxSYSTEM_MENU',\
   title = 'Folder Open...',\
   id = 100,\
@@ -21,9 +21,5 @@ static char *OpenFolderDialog = "dialog(name = 'OpenFolderDialog',\
       [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'Swiss']],\
   control = [110, wxTextCtrl, '', '0', 'MailHost', 242, 120, 230, 27, '',\
       [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'Swiss']],\
-  control = [111, wxButton, 'OK', '0', 'OK_BUTTON', 137, 175, 49, 26,\
-      [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'Swiss']],\
   control = [999, wxButton, '?', '0', 'HELP_BUTTON', 187, 175, 49, 26,\
-      [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'Swiss']],\
-  control = [112, wxButton, 'Cancel', '0', 'CANCEL_BUTTON', 337, 175, 49, 26,\
       [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'Swiss']]).";

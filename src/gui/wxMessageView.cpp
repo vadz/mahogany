@@ -870,6 +870,9 @@ wxMessageView::OnMenuCommand(int id)
    case WXMENU_MSG_DELETE:
       if(m_FolderView && m_uid != -1)
          m_FolderView->DeleteMessages(msgs);
+   case WXMENU_HELP_CONTEXT:
+      mApplication->Help(MH_MESSAGE_VIEW,this);
+      break;
       break;
 
    }
