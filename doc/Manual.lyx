@@ -1,4 +1,4 @@
-#This file was created by <karsten> Fri Jan 14 09:55:26 2000
+#This file was created by <karsten> Mon Jan 17 16:19:21 2000
 #LyX 0.12 (C) 1995-1998 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -35,7 +35,7 @@ Mahogany User Manual
 \newline 
 
 \shape default 
-for Version 0.7+
+for Version 0.5+
 \newline 
 
 \begin_inset Quotes eld
@@ -71,11 +71,10 @@ Using Mahogany
 Release Notes_1001_
 \layout Standard
 
-This is the fourth public release of Mahogany.
+This is the fifth public release of Mahogany.
  As with the previous release we make the source available and binaries
  for Linux-x86, Linux-alpha and Solaris-sparc.
- The main change since the previous release is that we now provide a Win32
- (requires Windows 95/98/NT) version of Mahogany.
+ 
 \layout Standard
 
 Mahogany is also reported to compile and run on FreeBSD and should generally
@@ -94,6 +93,13 @@ Due to the fact that it is a cross-platform effort, the compilation and
 \layout Subsection
 
 Changes against the previous version
+\layout Subsubsection
+
+0.5 against 0.23a
+\layout Standard
+
+Major changes which will be documented within the next few weeks as we are
+ finishing it.
 \layout Subsubsection
 
 0.23a against 0.22a
@@ -4575,9 +4581,47 @@ make
 \end_inset 
 
 .
+\layout Subsection
+
+How can I get it to compile on Caldera Linux?
+\layout Standard
+
+You will need to install a libcrypt library with a working crypt() function.
+ The source for one such library can be found on the Mahogany ftp server.
+\layout Subsection
+
+Mahogany fails to find wxWindows, Configure fails
+\layout Standard
+
+The following steps should identify and solve the problem:
+\layout Enumerate
+
+Do a "make install" for wxWindows and watch the output, it should copy lots
+ of things to /usr/local/....
+\layout Enumerate
+
+Do a "which wx-config", it should report wx-config to be in /usr/local/bin
+\layout Enumerate
+
+Just type "wx-config --cflags", it should run the wx-config script and report
+ the compiler flags, which should include something like "-I/usr/local/include".
+\layout Enumerate
+
+Then go to the Mahogany directory and "rm *cache*" to remove old configuration
+ info and run ./configure
+\layout Enumerate
+
+This *should* find wx/wx.h if all of the above worked, if not, look at the
+ end of config.log to see what went wrong.
+\layout Enumerate
+
+If it does not find the wxWindows library, you need to add /usr/local/lib
+ to either your LD_LIBRARY_PATH or to /etc/ld.conf (and run ldconfig as root),
+ then remove *cache* and try again.
+ Again, if something fails, look at config.log.
 \layout Section
 
-Other Problems
+Other Problems / Questions
 \layout Subsection
 
 The Preferences Dialog does not show up properly
@@ -4796,44 +4840,6 @@ Under Unix: simply set and export your LANG environment variable like for
  Under Windows: the environment variable LANG will be recognised if it is
  set, but in addition Mahogany will automatically detect which language
  your system is set to use.
-\layout Subsection
-
-How can I get it to compile on Caldera Linux?
-\layout Standard
-
-You will need to install a libcrypt library with a working crypt() function.
- The source for one such library can be found on the Mahogany ftp server.
-\layout Subsection
-
-Mahogany fails to find wxWindows, Configure fails
-\layout Standard
-
-The following steps should identify and solve the problem:
-\layout Enumerate
-
-Do a "make install" for wxWindows and watch the output, it should copy lots
- of things to /usr/local/....
-\layout Enumerate
-
-Do a "which wx-config", it should report wx-config to be in /usr/local/bin
-\layout Enumerate
-
-Just type "wx-config --cflags", it should run the wx-config script and report
- the compiler flags, which should include something like "-I/usr/local/include".
-\layout Enumerate
-
-Then go to the Mahogany directory and "rm *cache*" to remove old configuration
- info and run ./configure
-\layout Enumerate
-
-This *should* find wx/wx.h if all of the above worked, if not, look at the
- end of config.log to see what went wrong.
-\layout Enumerate
-
-If it does not find the wxWindows library, you need to add /usr/local/lib
- to either your LD_LIBRARY_PATH or to /etc/ld.conf (and run ldconfig as root),
- then remove *cache* and try again.
- Again, if something fails, look at config.log.
 \layout Subsection
 
 How can I delete messages?
