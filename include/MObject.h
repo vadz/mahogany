@@ -207,50 +207,42 @@ private:
 // ----------------------------------------------------------------------------
 
 // start auto ptr class declaration
-#define BEGIN_DECLARE_AUTOPTR_NO_BOOL_0(classname) \
-   class classname##_obj \
-   { \
-   public: \
-      classname##_obj(classname *ptr = NULL) { m_ptr = ptr; } \
- \
-      void Attach(classname *ptr) \
-      { \
-         ASSERT_MSG( !m_ptr, _T("should have used Detach() first") ); \
- \
-         m_ptr = ptr; \
-      } \
- \
-      classname *Detach() \
-      { \
-         classname *ptr = m_ptr; \
-         m_ptr = NULL; \
-         return ptr; \
-      } \
- \
-      classname *Get() const { return m_ptr; } \
- \
-      classname *operator->() const { return Get(); } \
- \
-   private: \
-      classname *m_ptr;
-
-// some compilers don't let us declare the copy ctor and assignment operator as
-// private (otherwise they refuse to compile things like "Foo_obj foo = pFoo"
-// with obscure error messages), but we do want to do it for other compilers
-// as copying smart pointers *is* illegal (whatever C++ standard says)
-#if defined(__GNUG__) || defined(__BORLANDC__)
-   #define NO_PRIVATE_COPY
-#endif
-
-#ifndef NO_PRIVATE_COPY
-    #define BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname)   \
-            BEGIN_DECLARE_AUTOPTR_NO_BOOL_0(classname) \
-            classname##_obj(const classname##_obj &);  \
-            classname##_obj& operator=(const classname##_obj &);
-#else // g++
-    #define BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname) \
-            BEGIN_DECLARE_AUTOPTR_NO_BOOL_0(classname)
-#endif // !g++/g++
+#define BEGIN_DECLARE_AUTOPTR_NO_BOOL(classname)                              \
+   class classname##_obj                                                      \
+   {                                                                          \
+   public:                                                                    \
+      classname##_obj(classname *ptr = NULL) { m_ptr = ptr; }                 \
+                                                                              \
+      void Attach(classname *ptr)                                             \
+      {                                                                       \
+         ASSERT_MSG( !m_ptr, _T("should have used Detach() first") );         \
+                                                                              \
+         m_ptr = ptr;                                                         \
+      }                                                                       \
+                                                                              \
+      classname *Detach()                                                     \
+      {                                                                       \
+         classname *ptr = m_ptr;                                              \
+         m_ptr = NULL;                                                        \
+         return ptr;                                                          \
+      }                                                                       \
+                                                                              \
+      classname *Get() const { return m_ptr; }                                \
+                                                                              \
+      classname *operator->() const { return Get(); }                         \
+                                                                              \
+      void Swap(classname##_obj& other)                                       \
+      {                                                                       \
+         classname *tmp = other.m_ptr;                                        \
+         other.m_ptr = m_ptr;                                                 \
+         m_ptr = tmp;                                                         \
+      }                                                                       \
+                                                                              \
+   private:                                                                   \
+      classname *m_ptr;                                                       \
+                                                                              \
+      classname##_obj(const classname##_obj &);                               \
+      classname##_obj& operator=(const classname##_obj &);
 
 // normally our autoptr class has an implicit conversion to bool for truth
 // testing but we can't have both conversion to bool and to a pointer type as
@@ -266,7 +258,7 @@ private:
 // finish the class decl
 #define END_DECLARE_AUTOPTR() }
 
-// declare an class which is an auto ptr to the given MObjectRC-derived type
+// declare a class which is an auto ptr to the given MObjectRC-derived type
 #define DECLARE_AUTOPTR(classname)                    \
    BEGIN_DECLARE_AUTOPTR(classname)                   \
    END_DECLARE_AUTOPTR()
