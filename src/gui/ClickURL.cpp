@@ -41,6 +41,10 @@
 #include "gui/wxOptionsDlg.h"
 #include "MDialogs.h"
 
+#ifdef OS_UNIX
+   #include <sys/stat.h>
+#endif
+
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
 // ----------------------------------------------------------------------------
@@ -348,7 +352,7 @@ void ClickableURL::OpenInBrowser(int options) const
          ShowOptionsDialog();
       }
 
-      browser = String (READ_CONFIG(GetProfile(), MP_BROWSER));
+      browser = READ_CONFIG_TEXT(GetProfile(), MP_BROWSER);
       if ( browser.empty() )
       {
          wxLogError(_("No command configured to view URLs."));
