@@ -2913,6 +2913,8 @@ void wxSelectionsOrderDialog::OnButtonMove(bool up)
                 positionOld--;
             OnItemSwap(positionOld, selectionNew);
 
+            UpdateButtons(m_checklstBox->GetSelection());
+
             // something changed, remember it
             m_hasChanges = true;
         }
