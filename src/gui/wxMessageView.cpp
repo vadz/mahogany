@@ -512,6 +512,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
    char const *content;
 
    mimetype = mailMessage->GetPartMimeType(mimeDisplayPart);
+   String message = String(  _("MIME type: ")) + mimetype + "\n";
 
    tmp = mailMessage->GetPartDesc(mimeDisplayPart);
    if(tmp.length() > 0)
