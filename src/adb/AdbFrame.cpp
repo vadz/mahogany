@@ -1435,6 +1435,8 @@ bool wxAdbEditFrame::OpenAdb(const wxString& strPath,
   // and do expand it!
   m_treeAdb->Expand(m_root->GetId());
 
+  m_treeAdb->SelectItem(adb->GetId());
+
   // currently, we always succeed because even if the file doesn't exist
   // we create it -- should it be changed?
 
