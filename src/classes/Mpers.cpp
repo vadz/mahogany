@@ -165,6 +165,7 @@ static const struct
    { _T("LangChangedWarn"),          gettext_noop("warn if 8bit characters are used in composer and language is not set") },
    { _T("ContUpdateAfterError"),     gettext_noop("ask if we should continue updating folders after an error") },
    { _T("RemoveAllAttach"),          gettext_noop("ask for confirmation before removing all attachments from composer") },
+   { _T("SendDiffEncoding"),         gettext_noop("ask before sending message in a different encoding than chosen") },
    //{ _T(""), gettext_noop("") },
 };
 
