@@ -1547,7 +1547,7 @@ wxFolderTreeImpl::wxFolderTreeImpl(wxFolderTree *sink,
    m_curIsHidden = false;
 
 #ifdef __WXGTK__
-   m_FocusFollowMode = READ_APPCONFIG(MP_FOCUS_FOLLOWSMOUSE) != 0;
+   m_FocusFollowMode = READ_APPCONFIG_BOOL(MP_FOCUS_FOLLOWSMOUSE);
 #endif // wxGTK
 
    // create an image list and associate it with this control
@@ -2498,7 +2498,7 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
    else if ( ev.GetId() == MEventId_OptionsChange )
    {
 #ifdef __WXGTK__
-      m_FocusFollowMode = READ_APPCONFIG(MP_FOCUS_FOLLOWSMOUSE) != 0;
+      m_FocusFollowMode = READ_APPCONFIG_BOOL(MP_FOCUS_FOLLOWSMOUSE);
 #endif // wxGTK
 
       // reread the bg colour setting

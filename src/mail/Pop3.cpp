@@ -157,11 +157,11 @@ bool PopFlagsCacheFile::DoLoad(const wxTextFile& file, int version)
       }
 
       // find the message with this UIDL in the folder
-      int n = m_uidls->Index(uidl);
-      if ( n != wxNOT_FOUND )
+      int idx = m_uidls->Index(uidl);
+      if ( idx != wxNOT_FOUND )
       {
          // +1 to make it a msgno from index
-         MESSAGECACHE *elt = mail_elt(m_stream, n + 1);
+         MESSAGECACHE *elt = mail_elt(m_stream, idx + 1);
          if ( elt )
          {
             elt->recent = (flags & MailFolder::MSG_STAT_RECENT) != 0;

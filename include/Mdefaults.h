@@ -320,7 +320,7 @@ extern long GetNumericOptionValue(Profile *profile, const MOption opt);
 
 // with (sometimes) required cast to bool
 #define READ_CONFIG_BOOL(profile, opt) \
-   (GetNumericOptionValue(profile, opt) != 0)
+   (GetNumericOptionValue(profile, opt) != 0l)
 #define READ_APPCONFIG_BOOL(opt) \
    READ_CONFIG_BOOL(mApplication->GetProfile(), opt)
 

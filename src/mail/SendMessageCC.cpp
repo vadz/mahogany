@@ -271,8 +271,8 @@ SendMessageCC::Create(Protocol protocol,
       m_UserName = READ_CONFIG_TEXT(prof, MP_SMTPHOST_LOGIN);
       m_Password = READ_CONFIG_TEXT(prof, MP_SMTPHOST_PASSWORD);
 #ifdef USE_SSL
-      m_UseSSLforSMTP = READ_CONFIG(prof, MP_SMTPHOST_USE_SSL) != 0;
-      m_UseSSLUnsignedforSMTP = READ_CONFIG(prof, MP_SMTPHOST_USE_SSL_UNSIGNED) != 0;
+      m_UseSSLforSMTP = READ_CONFIG_BOOL(prof, MP_SMTPHOST_USE_SSL);
+      m_UseSSLUnsignedforSMTP = READ_CONFIG_BOOL(prof, MP_SMTPHOST_USE_SSL_UNSIGNED);
 #endif
    }
    else // protocol == NNTP
@@ -281,8 +281,8 @@ SendMessageCC::Create(Protocol protocol,
       m_UserName = READ_CONFIG_TEXT(prof,MP_NNTPHOST_LOGIN);
       m_Password = READ_CONFIG_TEXT(prof,MP_NNTPHOST_PASSWORD);
 #ifdef USE_SSL
-      m_UseSSLforNNTP = READ_CONFIG(prof, MP_NNTPHOST_USE_SSL) != 0;
-      m_UseSSLUnsignedforNNTP = READ_CONFIG(prof, MP_NNTPHOST_USE_SSL_UNSIGNED) != 0;
+      m_UseSSLforNNTP = READ_CONFIG_BOOL(prof, MP_NNTPHOST_USE_SSL);
+      m_UseSSLUnsignedforNNTP = READ_CONFIG_BOOL(prof, MP_NNTPHOST_USE_SSL_UNSIGNED);
 #endif
    }
 

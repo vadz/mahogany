@@ -355,7 +355,7 @@ void LayoutViewer::UpdateOptions()
    Profile *profile = GetProfile();
 
 #ifndef OS_WIN
-   m_window->SetFocusFollowMode(READ_CONFIG(profile, MP_FOCUS_FOLLOWSMOUSE) != 0);
+   m_window->SetFocusFollowMode(READ_CONFIG_BOOL(profile, MP_FOCUS_FOLLOWSMOUSE));
 #endif
 
    m_window->SetWrapMargin(READ_CONFIG(profile, MP_VIEW_WRAPMARGIN));

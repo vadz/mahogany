@@ -665,6 +665,8 @@ RemoveElementFromTable(MsgnoType *table,
    //else: the expunged msgno was the last one, nothing to do
 }
 
+#ifndef wxSIZE_T_IS_ULONG
+
 // same as above but for size_t (yes, one day it will be a template...)
 static void
 RemoveElementFromTable(size_t *table,
@@ -679,6 +681,8 @@ RemoveElementFromTable(size_t *table,
    }
    //else: the expunged msgno was the last one, nothing to do
 }
+
+#endif // !wxSIZE_T_IS_ULONG
 
 void HeaderInfoListImpl::OnRemove(MsgnoType n)
 {
