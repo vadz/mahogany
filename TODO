@@ -15,6 +15,7 @@ $Id$
 
 - wxFolderView:
    + complete ForwardMessages, add InsertData() to wxComposeView
+   + add other functionality such as undelete messages or stripMime
 
 - wxLayout:
   + fix wxGTK postscript printing which is pretty broken, compare with wxXt?
