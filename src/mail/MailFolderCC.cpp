@@ -1460,7 +1460,7 @@ MailFolderCC::Open(void)
             // This little hack makes it root (uid 0) safe and allows us
             // to choose the file format, too:
             String tmp;
-            if(folderType == MF_FILE)
+            if ( folderType == MF_FILE )
             {
                long format = READ_CONFIG(m_Profile, MP_FOLDER_FILE_DRIVER);
                if ( format < 0  || (size_t)format > CCLIENT_MAX_DRIVER )
@@ -1472,19 +1472,12 @@ MailFolderCC::Open(void)
                tmp = "#driver.";
                tmp << cclient_drivers[format] << '/';
 
-               if ( frame )
-               {
-                  STATUSMESSAGE((
-                     frame,
-                     _("Trying to create folder '%s' in %s format."),
-                     GetName().c_str(),
-                     cclient_drivers[format]
-                  ));
-               }
+               wxLogDebug("Trying to create folder '%s' in %s format.",
+                          GetName().c_str(), cclient_drivers[format]);
             }
             else // MF_MH folder
             {
-               // forgot to handle this one...
+               // the only one still not handled
                ASSERT_MSG( folderType == MF_MH, "unexpected folder type" );
 
                tmp = "#driver.mh/";
