@@ -225,10 +225,10 @@ LineBook::LineBook(const String& file)
    m_bad = false;
    m_dirty = false;
    
-   ifstream stream(m_file);
+   ifstream stream(m_file.c_str());
    if ( !stream.good() )
    {
-      ofstream create(m_file, ios::out|ios::ate);
+      ofstream create(m_file.c_str(), ios::out|ios::ate);
       if ( !create.good() )
          goto FileError;
       create.close();
@@ -341,9 +341,9 @@ bool LineBook::Flush()
 {
    if ( IsDirty() )
    {
-      String commit = wxFileName::CreateTempFileName("");
+      String commit = wxFileName::CreateTempFileName(_T(""));
       
-      ofstream stream(commit);
+      ofstream stream(commit.c_str());
       if ( !stream.good() )
          goto FileError;
       
