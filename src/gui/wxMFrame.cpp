@@ -335,7 +335,7 @@ void wxMFrame::UpdateRunPyScriptMenu()
 
    if ( item )
    {
-      item->Enable(READ_APPCONFIG(MP_USEPYTHON) != 0);
+      item->Enable(READ_APPCONFIG_BOOL(MP_USEPYTHON));
    }
    else
    {

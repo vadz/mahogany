@@ -855,7 +855,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "You may also have to tell Mahogany to accept unsigned (or\n"
                   "self-signed) certificates if your organization uses them."),
                                                    Field_Message, -1 },
-   { gettext_noop("SMTP server uses SS&L"), Field_Bool, -ConfigField_UseSendmail,                        },
+   { gettext_noop("SMTP server uses SS&L"),        Field_Bool,
+#ifdef USE_SENDMAIL
+                                                  -ConfigField_UseSendmail,
+#else
+                                                  -1,
+#endif
+   },
    { gettext_noop("&Accept unsigned certificates for SMTP"), Field_Bool, ConfigField_SmtpServerSSL,     },
    { gettext_noop("NNTP s&erver uses SSL"), Field_Bool,    -1,                        },
    { gettext_noop("A&ccept unsigned certificates for NNTP"), Field_Bool, ConfigField_NntpServerSSL,     },

@@ -1327,7 +1327,7 @@ bool RunInstallWizard()
 #endif // USE_INBOX
    gs_installWizardData.folderType = 0; /* mbx */
 #ifdef USE_PYTHON
-   gs_installWizardData.usePython = READ_APPCONFIG(MP_USEPYTHON) != 0;
+   gs_installWizardData.usePython = READ_APPCONFIG_BOOL(MP_USEPYTHON);
 #endif
 #ifdef USE_PISOCK
    gs_installWizardData.usePalmOs = TRUE;
