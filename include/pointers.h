@@ -13,61 +13,132 @@
 #ifndef M_POINTERS_H
 #define M_POINTERS_H
 
-// Our MObjectRC-based smart pointer implementation. To be extended...
-template <class ClassName>
+/**
+   An MObjectRC-based smart pointer implementation.
+
+   RefCounter<> is a smart pointer which works with any MObjectRC-derived
+   class. It has normal copying semantics unlike the std::auto_ptr<> as it uses
+   ref counting.
+
+   @todo To be extended...
+ */
+template <class T>
 class RefCounter
 {
 public:
-   RefCounter() { NewDefault(); }
-   // Expects IncRef-ed object
-   RefCounter(ClassName *copy) { NewBare(copy); }
-   RefCounter(const RefCounter<ClassName> &copy) { NewCopy(copy); }
-   ~RefCounter() { Destroy(); }
+   /// same as auto_ptr<>::element_type
+   typedef T element_type;
 
-   // Expects object that has not been IncRef-ed yet, don't use if possible
-   void AttachAndIncRef(ClassName *pointer)
+   /// synonym for element_type, doesn't exist in auto_ptr
+   typedef T value_type;
+
+   /// synonym for pointer to element_type, doesn't exist in auto_ptr
+   typedef T *pointer;
+
+   /// a scalar type which doesn't risk to be converted to anything
+   typedef T *(RefCounter<T>::*unspecified_bool_type)() const;
+
+
+   /**
+      Default constructor creates an uninitialized pointer.
+
+    */
+   RefCounter() { m_pointer = NULL; }
+
+   /**
+      Constructor from a rawp ointer.
+
+      We take the ownership of the pointer here, i.e. we will call DecRef() on
+      it.
+
+      @param pointer the pointer to take ownership of, may be NULL
+    */
+   RefCounter(T *pointer) { m_pointer = pointer; }
+
+   /**
+      Copy constructor.
+    */
+   RefCounter(const RefCounter<T>& copy)
+   {
+      m_pointer = copy.m_pointer;
+      RefCounterIncrement(m_pointer);
+   }
+
+   /**
+      Assignment operator.
+
+      As with copy constructor, this operator has normal semantics and doesn't
+      modify its argument.
+    */
+   RefCounter<T>& operator=(const RefCounter<T> &copy)
+      { AttachAndIncRef(copy.m_pointer); return *this; }
+
+   /**
+      Destructor releases the pointer possibly destroying it.
+
+      Destructor is not virtual, this class can't be used polymorphically.
+    */
+   ~RefCounter() { RefCounterDecrement(m_pointer); }
+
+   /// returns the stored pointer, may be @c NULL
+   T *Get() const { return m_pointer; }
+
+   /// allows use of this class as a pointer, must be non @c NULL
+   T& operator*() const { return *Get(); }
+
+   /// allows use of this class as a pointer, must be non @c NULL
+   T *operator->() const { return Get(); }
+
+   /**
+       Implicit, but safe, conversion to bool.
+
+       Having this conversion ensures that we can work with the objects of
+       this type as with the plain pointers but using a unique type (instead
+       of bool or int) ensures that we don't risk to implicitly confuse the
+       unrelated pointers.
+    */
+   operator unspecified_bool_type() const // never throws
+   {
+       return m_pointer ? &RefCounter<T>::Get : NULL;
+   }
+
+   /**
+      Releases ownership of the held pointer and returns it.
+
+      The caller is responsible for calling DecRef() on the returned pointer if
+      it is not @c NULL.
+    */
+   T *Release()
+   {
+      T *pointer = m_pointer;
+      m_pointer = NULL;
+
+      return pointer;
+   }
+
+   /// Expects object that has not been IncRef-ed yet, don't use if possible
+   void AttachAndIncRef(T *pointer)
    {
       RefCounterAssign(m_pointer,pointer);
       m_pointer = pointer;
    }
 
-   operator ClassName *() { return Get(); }
-   ClassName *operator->() { return Get(); }
-   operator bool() { return NotNull(); }
-   RefCounter<ClassName>& operator=(const RefCounter<ClassName> &copy)
-      { return Assign(copy); }
-
 private:
-   void NewDefault() { m_pointer = 0; }
-   void NewCopy(const RefCounter<ClassName> &copy)
-      { RefCounterIncrement(m_pointer = copy.m_pointer); }
-   void NewBare(ClassName *copy) { m_pointer = copy; }
-   void Destroy() { RefCounterDecrement(m_pointer); }
-   
-   RefCounter<ClassName>& Assign(const RefCounter<ClassName> &copy)
-   {
-      AttachAndIncRef(copy.m_pointer);
-      return *this;
-   }
-
-   ClassName *Get() const { return m_pointer; }
-   bool NotNull() const { return m_pointer != 0; }
-   
-   ClassName *m_pointer;
+   T *m_pointer;
 };
 
-#define DECLARE_REF_COUNTER(ClassName) \
-   class ClassName; \
-   extern void RefCounterIncrement(ClassName *pointer); \
-   extern void RefCounterDecrement(ClassName *pointer); \
-   extern void RefCounterAssign(ClassName *target,ClassName *source);
+#define DECLARE_REF_COUNTER(T) \
+   class T; \
+   extern void RefCounterIncrement(T *pointer); \
+   extern void RefCounterDecrement(T *pointer); \
+   extern void RefCounterAssign(T *target,T *source);
 
-#define DEFINE_REF_COUNTER(ClassName) \
-   extern void RefCounterIncrement(ClassName *pointer) \
+#define DEFINE_REF_COUNTER(T) \
+   extern void RefCounterIncrement(T *pointer) \
       { RefCounterIncrement(static_cast<MObjectRC *>(pointer)); } \
-   extern void RefCounterDecrement(ClassName *pointer) \
+   extern void RefCounterDecrement(T *pointer) \
       { RefCounterDecrement(static_cast<MObjectRC *>(pointer)); } \
-   extern void RefCounterAssign(ClassName *target,ClassName *source) \
+   extern void RefCounterAssign(T *target,T *source) \
    { \
       RefCounterAssign(static_cast<MObjectRC *>(target), \
          static_cast<MObjectRC *>(source)); \
@@ -80,34 +151,34 @@ extern void RefCounterAssign(MObjectRC *target,MObjectRC *source);
 
 
 // Equivalent of auto_ptr, but with private copy constructor and assignment
-template <class ClassName>
+template <class T>
 class AutoPtr
 {
 public:
    AutoPtr() { NewDefault(); }
-   AutoPtr(ClassName *copy) { NewCopy(); }
+   AutoPtr(T *copy) { NewCopy(); }
    ~AutoPtr() { Destroy(); }
-   
-   void Initialize(ClassName *copy)
+
+   void Initialize(T *copy)
    {
       Destroy();
       m_pointer = copy;
    }
 
-   operator ClassName *() { return Get(); }
-   ClassName *operator->() { return Get(); }
-   
+   operator T *() { return Get(); }
+   T *operator->() { return Get(); }
+
 private:
    void NewDefault() { m_pointer = 0; }
-   void NewCopy(ClassName *copy) { m_pointer = copy; }
+   void NewCopy(T *copy) { m_pointer = copy; }
    void Destroy() { if( m_pointer ) delete m_pointer; }
-   
-   ClassName *Get() { return m_pointer; }
 
-   ClassName *m_pointer;
-   
-   AutoPtr(const AutoPtr<ClassName>& copy) {}
-   void operator=(const AutoPtr<ClassName>& copy) {}
+   T *Get() { return m_pointer; }
+
+   T *m_pointer;
+
+   AutoPtr(const AutoPtr<T>& copy) {}
+   void operator=(const AutoPtr<T>& copy) {}
 };
 
 #endif // M_POINTERS_H
