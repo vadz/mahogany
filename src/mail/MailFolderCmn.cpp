@@ -1566,7 +1566,7 @@ MailFolderCmn::ReportNewMail(const UIdArray& uidsNew, const MFolder *folder)
               folder->GetFullName().c_str(), uidsNew.GetCount());
 
    // step 1: execute external command if it's configured
-   Profile_obj profile = folder->GetProfile();
+   Profile_obj profile(folder->GetProfile());
    if ( READ_CONFIG(profile, MP_USE_NEWMAILCOMMAND) )
    {
       String command = READ_CONFIG(profile, MP_NEWMAILCOMMAND);
