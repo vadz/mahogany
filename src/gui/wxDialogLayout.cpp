@@ -1056,7 +1056,7 @@ wxManuallyLaidOutDialog::wxManuallyLaidOutDialog(wxWindow *parent,
                        : wxPDialog(
                                    profileKey,
                                    parent,
-                                   _T("Mahogany: ") + title,
+                                   String(M_TITLE_PREFIX) + title,
                                    DIALOG_STYLE
                                   )
 {

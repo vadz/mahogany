@@ -15,6 +15,9 @@
 #pragma interface "MDialogs.h"
 #endif
 
+/// Generic title prefix for all top level windows
+#define M_TITLE_PREFIX _("Mahogany: ")
+
 /**@name Strings for default titles */
 //@{
 /// for error message
