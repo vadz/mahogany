@@ -215,6 +215,8 @@ wxLayoutExportObject *wxLayoutExport(wxLayoutExportStatus *status,
       if(! status->m_line)  // reached end of list, fall through
          break; 
       type = (** status->m_iterator).GetType();
+      if(type == WXLO_TYPE_ICON)
+         break;
       switch(type)
       {
       case WXLO_TYPE_TEXT:
