@@ -1604,7 +1604,9 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
          wxTreeItemId item = GetTreeItemFromName(folderName);
          if ( item.IsOk() )
          {
-            SetItemText(item, event.GetNewFolderName());
+            // notice that the event carries the full folder name and we only
+            // want to show the name, i.e. the part after '/' in the tree
+            SetItemText(item, event.GetNewFolderName().AfterLast('/'));
          }
       }
       else

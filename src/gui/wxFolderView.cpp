@@ -83,10 +83,18 @@ static const char *wxFLC_ColumnNames[] =
    gettext_noop("Subject")
 };
 
-// the profile key where the columns widths are stored
+// the app profile key where the last column widths modified by user are
+// stored
+#define USER_COLUMNS_WIDTHS "UserColWidths"
+
+// the profile key where the columns widths of this folder are stored
 #define FOLDER_LISTCTRL_WIDTHS "FolderListCtrl"
 
-// the default widths for the columns
+// the separator in column widths string
+#define COLUMNS_WIDTHS_SEP ':'
+
+// the default widths for the columns: the number of entries must be equal to
+// WXFLC_NUMENTRIES!
 static const char *FOLDER_LISTCTRL_WIDTHS_D = "60:300:200:80:80";
 
 // ----------------------------------------------------------------------------
@@ -144,7 +152,10 @@ private:
     bool m_dateGMT;
 };
 
-// the list ctrl showing the messages in the folder
+// ----------------------------------------------------------------------------
+// wxFolderListCtrl: the list ctrl showing the messages in the folder
+// ----------------------------------------------------------------------------
+
 class wxFolderListCtrl : public wxListCtrl
 {
 public:
@@ -216,34 +227,50 @@ public:
             EnableSelectionCallbacks(false);
       }
 
+   /// save the widths of the columns in profile if needed
+   void SaveColWidths();
+
    // for wxFolderView
    wxMenu *GetFolderMenu() const { return m_menuFolders; }
 
 protected:
-   long m_NextIndex;
+   /// read the column width string from profile or default one
+   wxString GetColWidths() const;
+
    /// parent window
    wxWindow *m_Parent;
+
    /// the folder view
    wxFolderView *m_FolderView;
+
    /// the profile used for storing columns widths
    Profile *m_profile;
+
    /// column numbers
    int m_columns[WXFLC_NUMENTRIES];
+
    /// do we want OnSelect() callbacks?
    bool m_SelectionCallbacks;
+
    /// do we preview a message on a single mouse click?
    bool m_PreviewOnSingleClick;
+
    /// did we create the list ctrl columns?
    bool m_Initialised;
+
    /// the popup menu
    wxMenu *m_menu;
+
    /// and the folder submenu for it
    wxMenu *m_menuFolders;
 
    DECLARE_EVENT_TABLE()
 };
 
-// a helper class for dnd
+// ----------------------------------------------------------------------------
+// FolderViewMessagesDropWhere: a helper class for dnd
+// ----------------------------------------------------------------------------
+
 class FolderViewMessagesDropWhere : public MMessagesDropWhere
 {
 public:
@@ -267,6 +294,10 @@ private:
    wxFolderView *m_folderView;
 };
 
+// ----------------------------------------------------------------------------
+// wxFolderSplitterWindow: splitter containing folder and msg view
+// ----------------------------------------------------------------------------
+
 class wxFolderSplitterWindow : public wxPSplitterWindow
 {
 public:
@@ -279,7 +310,7 @@ public:
 };
 
 // ----------------------------------------------------------------------------
-// priate functions
+// private functions
 // ----------------------------------------------------------------------------
 
 // return the n-th shown column (WXFLC_NONE if no more columns)
@@ -357,6 +388,12 @@ static MessageSortOrder SortOrderFromCol(wxFolderListCtrlFields col)
          // we don't support sorting by size or status [yet]
          return MSO_NONE;
    }
+}
+
+// return columns widths from the given string
+static wxArrayString UnpackWidths(const wxString& s)
+{
+   return strutil_restore_array(COLUMNS_WIDTHS_SEP, s);
 }
 
 // ============================================================================
@@ -895,14 +932,41 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
 wxFolderListCtrl::~wxFolderListCtrl()
 {
-   // save the widths
-   String str = GetWidths();
-   if ( !str.empty() )
-      m_profile->writeEntry(FOLDER_LISTCTRL_WIDTHS, str);
-
    m_profile->DecRef();
 
    delete m_menu;
+}
+
+void wxFolderListCtrl::SaveColWidths()
+{
+   // save the widths if they changed
+   String str = GetWidths();
+   if ( str != FOLDER_LISTCTRL_WIDTHS_D && str != GetColWidths() )
+   {
+      // the widths did change, so save them for this folder
+      m_profile->writeEntry(FOLDER_LISTCTRL_WIDTHS, str);
+
+      // and also in global location so the next folder the user will open
+      // will use these widths unless the user had fixed its width before:
+      // this allows to only set the widths once and have them apply to all
+      // folders
+      mApplication->GetProfile()->writeEntry(USER_COLUMNS_WIDTHS, str);
+   }
+}
+
+wxString wxFolderListCtrl::GetColWidths() const
+{
+   // first look in our profile
+   String widthsString = READ_CONFIG(m_profile, FOLDER_LISTCTRL_WIDTHS);
+   if ( widthsString == FOLDER_LISTCTRL_WIDTHS_D )
+   {
+      // try the global setting
+      widthsString =
+         mApplication->GetProfile()->readEntry(USER_COLUMNS_WIDTHS,
+                                               FOLDER_LISTCTRL_WIDTHS_D);
+   }
+
+   return widthsString;
 }
 
 int
@@ -980,16 +1044,26 @@ void wxFolderListCtrl::CreateColumns()
    // delete existing columns
    ClearAll();
 
-   // read the widths array and complete it with -1 if necessary
-   String widthsString = READ_CONFIG(m_profile, FOLDER_LISTCTRL_WIDTHS);
-   wxArrayString widths = strutil_restore_array(':', widthsString);
-   size_t n;
-   for ( n = widths.GetCount(); n < WXFLC_NUMENTRIES; n++ )
+   // read the widths array
+   String widthsString = GetColWidths();
+
+   // complete the array if necessary - this can happen if the previous folder
+   // had less columns than this one
+   wxArrayString widths = UnpackWidths(widthsString);
+   wxArrayString widthsStd = UnpackWidths(FOLDER_LISTCTRL_WIDTHS_D);
+
+   size_t n,
+          count = widthsStd.GetCount();
+
+   wxASSERT_MSG( widthsStd.GetCount() == WXFLC_NUMENTRIES,
+                 "mismatch in max column number" );
+
+   for ( n = widths.GetCount(); n < count; n++ )
    {
-      widths.Add("-1");
+      widths.Add(widths[n]);
    }
 
-   // add the new ones
+   // add the new columns
    for ( n = 0; n < WXFLC_NUMENTRIES; n++ )
    {
       wxFolderListCtrlFields col = GetColumnByIndex(m_columns, n);
@@ -1012,7 +1086,7 @@ String wxFolderListCtrl::GetWidths() const
    for ( int col = 0; col < count; col++ )
    {
       if ( !str.IsEmpty() )
-         str << ':';
+         str << COLUMNS_WIDTHS_SEP;
 
       str << GetColumnWidth(col);
    }
@@ -1248,7 +1322,12 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
       if ( recreateFolderCtrl )
       {
+         // save the columns widths of the old folder view before creating the
+         // new one as the latter might use the former
+         m_FolderCtrl->SaveColWidths();
+
          wxWindow *oldfolderctrl = m_FolderCtrl;
+
          m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow, this);
          m_FolderCtrl->ApplyOptions( m_settings.FgCol,
                                      m_settings.BgCol,
@@ -2745,6 +2824,9 @@ IMPLEMENT_DYNAMIC_CLASS(wxFolderViewFrame, wxMFrame)
 // other public functions
 // ----------------------------------------------------------------------------
 
+// TODO: this code probably should be updated to avoid writing columns width
+//       to the profile if the widths didn't change
+
 bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
 {
    // prepare the data for the dialog: we need the array of columns in order
@@ -2761,8 +2843,8 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
    // these arrays contain the current/default columns widths:
    // strWidths[n] is the width of n-th column where n is the column index
    wxArrayString strWidths, strWidthsStandard;
-   strWidths = strutil_restore_array(':', READ_CONFIG(profile, FOLDER_LISTCTRL_WIDTHS));
-   strWidthsStandard = strutil_restore_array(':', FOLDER_LISTCTRL_WIDTHS_D);
+   strWidths = UnpackWidths(READ_CONFIG(profile, FOLDER_LISTCTRL_WIDTHS));
+   strWidthsStandard = UnpackWidths(FOLDER_LISTCTRL_WIDTHS_D);
 
    wxArrayString choices;
    wxArrayInt status;
@@ -2836,7 +2918,7 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
    }
 
    profile->writeEntry(FOLDER_LISTCTRL_WIDTHS,
-                       strutil_flatten_array(strWidthsNew, ':'));
+                       strutil_flatten_array(strWidthsNew, COLUMNS_WIDTHS_SEP));
 
    return true;
 }
