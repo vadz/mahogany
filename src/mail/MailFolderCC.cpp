@@ -52,7 +52,7 @@ bool
 MailFolderCC::Open(String const & filename)
 {
    realName = filename;
-   if(GetType() == MF_POP || GetType() == MF_IMAP)
+   if(GetType() == MFolder::POP || GetType() == MFolder::IMAP)
    {
       MF_user = READ_CONFIG(profile, MP_POP_LOGIN);
       MF_pwd = READ_CONFIG(profile, MP_POP_PASSWORD);
@@ -149,7 +149,7 @@ MailFolderCC::Create(String const & iname)
 
    if(iname == String("INBOX"))
    {
-      SetType(MF_INBOX);
+      SetType(MFolder::Inbox);
       Open(iname);
    }
    else
@@ -161,11 +161,11 @@ MailFolderCC::Create(String const & iname)
       // they will return an empty string (NULL) here.
       if(strutil_isempty(filename)) // assume we are a file
       {
-         SetType(MF_FILE);
+         SetType(MFolder::File);
          if( !IsAbsPath(iname) )
          {
             String tmp;
-            tmp = READ_CONFIG(profile,MP_MBOXDIR);
+            tmp = READ_CONFIG(profile, MP_MBOXDIR);
             tmp += DIR_SEPARATOR;
             tmp += iname;
             Open(tmp);
@@ -175,7 +175,7 @@ MailFolderCC::Create(String const & iname)
       }
       else
       {
-         SetType((FolderType)READ_CONFIG(profile, (int)MP_FOLDER_TYPE));
+         SetType((MFolder::Type)READ_CONFIG(profile, (int)MP_FOLDER_TYPE));
          Open(filename);
       }
    }
@@ -641,7 +641,7 @@ MailFolderCC::mm_fatal(char *str)
 MailFolderPopCC::MailFolderPopCC(String const &name)
    : MailFolderCC(name)
 {
-   SetType(MF_POP);
+   SetType(MFolder::POP);
    Open();
 }
 
@@ -649,7 +649,7 @@ void
 MailFolderPopCC::Create(String const &name)
 {
    MailFolderCC::Create(name);
-   SetType(MF_POP);
+   SetType(MFolder::POP);
    Open();
 }
 

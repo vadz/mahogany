@@ -29,6 +29,8 @@ struct __docxxfix;
 #include  "MailFolder.h"
 #include  "FolderView.h"
 
+#include  "MFolder.h"
+
 // fwd decl needed to define StreamListType before MailFolderCC
 // (can't be defined inside the class - VC++ 5.0 can't compile it)
 class MailFolderCC;
@@ -183,10 +185,6 @@ public:
    /** Updates the associated FolderViews */
    void UpdateViews(void);
    
-   /// which type is this mailfolder?
-   enum FolderType { MF_INBOX = 0, MF_FILE = 1, MF_POP = 2, MF_IMAP =
-                     3, MF_NNTP = 4 };
-   
 private:
    /// for POP/IMAP boxes, this holds the user id for the callback
    static String MF_user;
@@ -197,7 +195,7 @@ private:
    FolderViewList   viewList;
    
    /// which type is this mailfolder?
-   FolderType   folderType;
+   MFolder::Type   m_folderType;
    ///   mailstream associated with this folder
    MAILSTREAM   *mailstream;
 
@@ -254,9 +252,11 @@ private:
    */
    inline MAILSTREAM   *Stream(void) const{  return mailstream; }
    friend class MessageCC;
+
 protected:
-   void SetType(FolderType type) { folderType = type; }
-   FolderType GetType(void) { return folderType; }
+   void SetType(MFolder::Type type) { m_folderType = type; }
+   MFolder::Type GetType(void) const { return m_folderType; }
+
 public:
    /** @name common callback routines
        They all take a stram argument and the number of a message.

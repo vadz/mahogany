@@ -23,7 +23,7 @@
 // ----------------------------------------------------------------------------
 
 /// read from the global config section
-#define   READ_APPCONFIG(key) (mApplication->GetProfile()->readEntry(String(key), key##_D))
+#define   READ_APPCONFIG(key) (mApplication->GetProfile()->readEntry(key, key##_D))
 /// read from a normal profile   
 #define   READ_CONFIG(profile, key) profile->readEntry(key, key##_D)
 
@@ -92,6 +92,13 @@ public:
    /// return the name of the profile
    virtual String GetProfileName(void) = 0;
 
+   /** @name Enumerating groups/entries
+
+       again, this is just directly forwarded to wxConfig
+   */
+   virtual bool GetFirstGroup(String&, long) = 0;
+   virtual bool GetNextGroup(String&, long) = 0;
+   
    /** @name Managing environment variables
 
        just expose wxConfig methods (we do need them to be able to read the

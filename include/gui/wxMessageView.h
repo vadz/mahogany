@@ -117,7 +117,7 @@ private:
    ProfileBase *m_Profile;
    /// the MIME popup menu
    wxMenu *m_MimePopup;
-   
+
 protected:
    friend class MimePopup;
 

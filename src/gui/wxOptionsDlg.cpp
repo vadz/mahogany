@@ -1162,7 +1162,7 @@ wxOptionsDialog::wxOptionsDialog(wxFrame *parent)
   // these are more or less arbitrary numbers
   const int wDlg = 6*wBtn;
   const int hDlg = 19*hBtn;
-  SetSize(wDlg, hDlg);
+  wxWindow::SetSize(wDlg, hDlg);
 
   // create the panel
   // ----------------

@@ -10,8 +10,10 @@
 #ifndef MDEFAULTS_H
 #define   MDEFAULTS_H
 
-#include  "Mcallbacks.h"
-#include  "Mversion.h"
+#include "Mcallbacks.h"
+#include "Mversion.h"
+
+#include "MFolder.h"    // for Folder_xxx constants
 
 /** @name The sections of the configuration file. */
 //@{
@@ -37,17 +39,6 @@
 #  endif // Unix/Win
 #endif
 //@}
-
-/// folder types
-enum FolderType
-{
-   Folder_Inbox,     // system inbox
-   Folder_File,      // local file
-   Folder_POP,       // POP3 server
-   Folder_IMAP,      // IMAP4 server
-   Folder_News,      // NNTP server
-   Folder_Max
-};
 
 /** @name Levels of  interaction, do something or not? */
 //@{
@@ -423,8 +414,8 @@ enum FolderType
 #else
 #  define   MP_COMPOSE_SIGNATURE_D      "$HOME/.signature"
 #endif
-/// the folder type for a mailbox (see FolderType enum)
-#define   MP_FOLDER_TYPE_D         Folder_File
+/// the folder type for a mailbox
+#define   MP_FOLDER_TYPE_D         MFolder::File
 /// the filename for a mailbox
 #define   MP_FOLDER_PATH_D      ((const char *)NULL) // don't change this!
 /// update interval for folders in seconds

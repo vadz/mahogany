@@ -691,7 +691,7 @@ wxMessageView::OnCommandEvent(wxCommandEvent &event)
             case ClickableInfo::CI_URL:
             {
                wxFrame *frame = GetFrame(this);
-               
+
                // wxYield() hangs the program in the release build under Windows
                /*
                wxLogStatus(frame, _("Opening URL '%s'..."), ci->url.c_str());

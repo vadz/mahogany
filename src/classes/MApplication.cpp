@@ -32,8 +32,8 @@
 #  include   "MApplication.h"
 #endif   // USE_PCH
 
-#include   <locale.h>
-#include   <errno.h>
+#include <locale.h>
+#include <errno.h>
 
 #include "FolderView.h"
 #include "Script.h"
@@ -42,25 +42,26 @@
 
 #include "gui/wxFolderView.h"
 #include "gui/wxMainFrame.h"
-#include   "gui/wxMApp.h"
+#include "gui/wxMApp.h"
 #include "MDialogs.h"
-#include  "gui/wxOptionsDlg.h"
+#include "gui/wxOptionsDlg.h"
 
 #include "Mversion.h"
 
-#include   <wx/confbase.h> // wxExpandEnvVars
+#include <wx/confbase.h> // wxExpandEnvVars
+
 #ifdef OS_UNIX
 #  include  <unistd.h>
 #  include  <sys/stat.h>
-#endif
+#endif //Unix
 
 // ----------------------------------------------------------------------------
 // functions
 // ----------------------------------------------------------------------------
 
 #ifdef  USE_PYTHON
-// only used here
-extern bool InitPython(void);
+   // only used here
+   extern bool InitPython(void);
 #endif //Python
 
 // ============================================================================
@@ -163,7 +164,7 @@ MAppBase::OnStartup()
    strConfFile += "/config";
 #else  // Windows
    strConfFile = M_APPLICATIONNAME;
-#endif // Unix
+#endif // Win/Unix
 
    m_profile = ProfileBase::CreateGlobalConfig(strConfFile);
 
@@ -176,8 +177,8 @@ MAppBase::OnStartup()
 #  endif // USE_GETTEXT
 
 
-   // do any first-time specific initializations
-   // ------------------------------------------
+   // verify our settings and detect if it's the first run
+   // ----------------------------------------------------
    bool bFirstRun = VerifySettings();
 
    // find our directories
@@ -241,10 +242,10 @@ MAppBase::OnStartup()
       // otherwise it would hide our message box
       CloseSplash();
 
-      const char *msg = "It's possible that you have problems with Python\n"
+      static const char *msg =
+         "It's possible that you have problems with Python\n"
          "installation. Would you like to disable Python\n"
-         "support for now (set " MC_USEPYTHON " to 1 to"
-         "reenable it later)?";
+         "support for now (set " MC_USEPYTHON " to 1 to reenable it later)?";
       if ( MDialog_YesNoDialog(_(msg)) )
       {
          // disable it
@@ -254,15 +255,16 @@ MAppBase::OnStartup()
 #  endif //USE_PYTHON
 
    if ( bFirstRun ) {
-      // otherwise it would hide our message box
+      // otherwise it would hide our message box(es)
       CloseSplash();
 
       wxLog *log = wxLog::GetActiveTarget();
       if ( log ) {
-         wxLogMessage(_("As it seems that you're running M for the first\n"
-                        "time, you should probably set up some of the options\n"
-                        "needed by the program (especially network "
-                        "parameters)."));
+         static const char *msg =
+            "As it seems that you're running M for the first\n"
+            "time, you should probably set up some of the options\n"
+            "needed by the program (especially network parameters).";
+         wxLogMessage(_(msg));
          log->Flush();
       }
 
@@ -285,7 +287,7 @@ MAppBase::OnStartup()
       if((*i)->length() == 0) // empty token
          continue;
       DBGMESSAGE(("Opening folder '%s'...", (*i)->c_str()));
-      (void) new wxFolderViewFrame((**i), m_topLevelFrame);
+      (void)new wxFolderViewFrame((**i), m_topLevelFrame);
    }
 
    // now that we have the local dir, we can set up a default mail
@@ -331,74 +333,3 @@ MAppBase::Exit(bool force)
 {
    m_topLevelFrame->Close(force);
 }
-
-// ----------------------------------------------------------------------------
-// !wxWindows2 part
-// ----------------------------------------------------------------------------
-#ifndef USE_WXWINDOWS2
-
-void
-MAppBase::ErrorMessage(String const &message, MFrame *parent, bool
-                       modal)
-{
-#ifdef   USE_WXWINDOWS
-   wxMessageBox((char *)message.c_str(), _("Error"),
-                wxOK|wxCENTRE|wxICON_EXCLAMATION, parent);
-#else
-#   error MAppBase::ErrorMessage() not implemented
-#endif
-}
-
-void
-MAppBase::SystemErrorMessage(String const &message, MFrame *parent, bool
-                             modal)
-{
-   String
-      msg;
-
-   msg = message + String(("\nSystem error: "))
-      + String(strerror(errno));
-#ifdef   USE_WXWINDOWS
-   wxMessageBox((char *)msg.c_str(), _("System Error"),
-                wxOK|wxCENTRE|wxICON_EXCLAMATION, parent);
-#else
-#   error MAppBase::ErrorMessage() not implemented
-#endif
-}
-
-void
-MAppBase::FatalErrorMessage(String const &message,
-                            MFrame *parent)
-{
-   String msg = message + _("\nExiting application...");
-   ErrorMessage(message,parent,true);
-   Exit(true);
-}
-
-
-void
-MAppBase::Message(String const &message, MFrame *parent, bool
-                  modal)
-{
-#ifdef   USE_WXWINDOWS
-   wxMessageBox((char *)message.c_str(), _("Information"),
-                wxOK|wxCENTRE|wxICON_INFORMATION, parent);
-#else
-#   error MAppBase::Message() not implemented
-#endif
-}
-
-void
-MAppBase::Log(int level, String const &message)
-{
-   if(! logFrame)
-      return;
-   if(level >= readEntry(MP_LOGLEVEL,(long int)MP_LOGLEVEL_D))
-   {
-      logFrame->Write(message);
-      logFrame->Write("\n");
-   }
-}
-
-#endif
-
