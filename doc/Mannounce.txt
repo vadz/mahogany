@@ -1,5 +1,5 @@
 A new release of `Mahogany' portable GUI email client has been made.
-=====================================================================
+====================================================================
 
 Source and binaries for a of Linux and Unix systems as well
 as binaries for Win32 are available at
@@ -12,18 +12,18 @@ You can also get to the download page starting from
 
 If you have any problems, please contact us on our mailing lists:
 
-		mahogany-users@lists.sourceforge.net
-	      mahogany-developers@lists.sourceforge.net
+                mahogany-users@lists.sourceforge.net
+             mahogany-developers@lists.sourceforge.net
 
 
 In this message:
 
-1. Announcing Mahogany Version 0.64
+1. Announcing Mahogany Version 0.65
 2. Acknowledgements
 3. Changes Against the Previous Release
 
-Announcing Mahogany Version 0.64
-=====================================================================
+Announcing Mahogany Version 0.65
+====================================================================
 
 Mahogany is an OpenSource(TM) cross-platform mail news client. It is
 available for X11/Unix and MS Windows platforms and supports many of

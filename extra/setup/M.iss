@@ -15,10 +15,10 @@
 [Setup]
 ; --- app info
 AppName=Mahogany
-AppVerName=Mahogany 0.64.2 'Claire'
+AppVerName=Mahogany 0.65 "Claire"
 
 ; --- setup compiler params
-OutputBaseFilename=Mahogany-0.64.2a
+OutputBaseFilename=Mahogany-0.65.0a
 DefaultDirName={pf}\Mahogany
 DefaultGroupName=Mahogany
 AllowRootDirectory=1
@@ -35,7 +35,7 @@ Compression=bzip/3
 ; --- app publisher info (for W2K only)
 AppPublisher=Mahogany Dev-Team
 AppPublisherURL=http://mahogany.sourceforge.net/
-AppVersion=0.64.2
+AppVersion=0.65.0
 
 ; --- appearance parameters
 
@@ -53,7 +53,6 @@ InfoAfterFile=extra\setup\postread.txt
 [Components]
 Name: "main"; Description: "Required Program Files"; Types: full compact custom; Flags: fixed
 Name: "help"; Description: "Help Files"; Types: full
-Name: "ssl"; Description: "SSL Support"; Types: full
 ;Name: "python"; Description: "Python Support (Requires Python 2.0)"; Types: full
 Name: "misc"; Description: "Miscellaneous Helper Files"; Types: full
 Name: "i18n"; Description: "Translations to other languages"; Types: full
@@ -63,9 +62,6 @@ Name: "i18n"; Description: "Translations to other languages"; Types: full
 ; --- EXEs and DLLs
 Source: "Release\M.EXE"; DestDir: "{app}";
 Source: "src\wx\vcard\Release\versit.dll"; DestDir: "{app}"
-
-Source: "k:\Sources\openssl-0.9.6b\out32dll\libeay32.dll"; DestDir: "{app}"; Components: ssl
-Source: "k:\Sources\openssl-0.9.6b\out32dll\ssleay32.dll"; DestDir: "{app}"; Components: ssl
 
 ; do we need to include VC++ run time?
 ;Source: "w:\winnt40\system32\msvcirt.dll"; DestDir: "{sys}"
@@ -129,3 +125,4 @@ Root: HKCU; Subkey: "Software\Mahogany-Team"; ValueType: none; Flags: uninsdelet
 Root: HKCU; Subkey: "Software\Mahogany-Team\M"; ValueType: none; Flags: uninsdeletekeyifempty
 Root: HKCU; Subkey: "Software\Mahogany-Team\M\Profiles"; ValueType: string; ValueName: "GlobalDir"; ValueData: "{app}"
 ;Root: HKCU; Subkey: "Software\Mahogany-Team\M\Profiles"; ValueType: dword; ValueName: "UsePython"; ValueData: 1; Components: python
+

@@ -1,24 +1,24 @@
 ====================================================================
-README file for Mahogany 0.64 "Sparc"
+README file for Mahogany 0.65 "Claire"
 ====================================================================
 
+Welcome to Mahogany and thank you for using it!
+
 --------------------------------------------------------------------
-Issues with the current release
+Important information
 --------------------------------------------------------------------
 
-More detailed information about Mahogany, how to get support for it,
-how to contribute it, and last not least, how to use it, can be
-found in the user manual, included in HTML and PostScript format, or
-the online help system. All the information, including the full
-online documentation, are also available on the Mahogany web page:
+Please read the "Internet resources" section to find how to contact
+us.
 
-                  http://mahogany.sourceforge.net/
+Please read the "Troubleshooting" section before reporting the bugs.
 
-Be not confused by references to a program called "M", which was the
-original working title for "Mahogany".
+Don't be confused by references to a program called "M", which was
+the original working title for "Mahogany".
 
 Please note that in places where this file contradicts the manual,
 the information here should be considered correct.
+
 
 --------------------------------------------------------------------
 Installation and building instructions
@@ -37,6 +37,7 @@ b) Unix users: the binary installation is dependent on your OS (or
    that you rebuild the program from sources, please see INSTALL
    file for the instuctions.
 
+
 --------------------------------------------------------------------
 What's next?
 --------------------------------------------------------------------
@@ -54,6 +55,7 @@ it to suit your needs better - you will find a lot of possibilities
 for this in the programs options dialog which is accessed via the
 "Preferences..." item of the "Edit" menu.
 
+
 --------------------------------------------------------------------
 Troubleshooting
 --------------------------------------------------------------------
@@ -61,7 +63,7 @@ Troubleshooting
 Please post any questions you may have to the Mahogany users mailing
 list. If you are reporting a bug, don't forget to specify the
 version of Mahogany you are using and also the platform you are
-running it under - thank you in advance!
+running it under -- thank you in advance!
 
 Also please turn on the "Debug server and mailbox access" option
 found in the last page of the preferences dialog or run Mahogany
@@ -69,6 +71,16 @@ with "--debug" command line option if you experience any mail
 related problems (e.g. receiving or sending mail doesn't work): this
 will result in more verbose messages in the log window which can be
 very helpful to diagnose the problem.
+
+If you think you have found a bug in Mahogany, please enter it into
+our bug tracker at
+
+               http://mahogany.sourceforge.net/bugz/
+
+Please be sure to check that you don't enter a duplicated bug report
+by searching ampong the existing bugs and attach the output of the
+debug mail log (explained just above) if applicable!
+
 
 --------------------------------------------------------------------
 Internet resources

@@ -911,34 +911,34 @@ either {\tt /} or {\tt -} but only {\tt -{}-} can be used for the long ones.
    Option & Meaning \\
    \hline
    \hline
-   -h, --help     &  show the summary of the command line options \\
+   -h, -{}-help     &  show the summary of the command line options \\
    \hline
-   --verbose      &  generate verbose messages (off by default)   \\
+   -{}-verbose      &  generate verbose messages (off by default)   \\
    \hline
-   --debug        &  enable debug logging \\
+   -{}-debug        &  enable debug logging \\
    \hline
-   --safe         &  don't do anything automatically on startup \\
+   -{}-safe         &  don't do anything automatically on startup \\
                   &  may be useful if Mahogany crashes when trying \\
                   &  to automatically do something after starting up \\
    \hline
-   --config=file  &  specify the alternate configuration file to use \\
+   -{}-config=file  &  specify the alternate configuration file to use \\
                   &  may be also used to force using file instead of \\
                   &  the registry under Windows \\
    \hline
-   -b, --bcc=adr  &  specify a blind carbon-copy (BCC) recipient  \\
+   -b, -{}-bcc=adr  &  specify a blind carbon-copy (BCC) recipient  \\
    \hline
-   -c, --cc=adr   &  specify a carbon-copy (CC) recipient  \\
+   -c, -{}-cc=adr   &  specify a carbon-copy (CC) recipient  \\
    \hline
-   -s, --subject=str  &  specify the subject for the new message \\
+   -s, -{}-subject=str  &  specify the subject for the new message \\
    \hline
-   --body=str     &  the initial text of the message \\
+   -{}-body=str     &  the initial text of the message \\
    \hline
-   -f, --folder=str & the folder to open in the main frame on startup \\
+   -f, -{}-folder=str & the folder to open in the main frame on startup \\
    \hline
-   --lang=lng     & the language to use for the program messages, \\
+   -{}-lang=lng     & the language to use for the program messages, \\
                   & overrides the default language choice \\
    \hline
-   --newsgroup=group &  the news group to post the message to \\
+   -{}-newsgroup=group &  the news group to post the message to \\
    \hline
    \end{tabular}
 }
@@ -948,15 +948,21 @@ either {\tt /} or {\tt -} but only {\tt -{}-} can be used for the long ones.
 The remaining command line arguments are taken as the recipients for the new
 message.
 
-If either of the {\tt --bcc}, {\tt --cc}, {\tt --subject}, {\tt --newsgroup} or
-{\tt --body} options is given or a command line argument follows the options,
+If either of the {\tt -{}-bcc}, {\tt -{}-cc}, {\tt -{}-subject}, {\tt -{}-newsgroup} or
+{\tt -{}-body} options is given or a command line argument follows the options,
 the composer will be automatically opened on startup. If the ``Always run only
 one instance'' option (see \ref{onlyoneinstance}) is set, the composer will be
 opened in the already running instance of the program, if any.
 
-Please do use {\tt --debug} option if something goes wrongly, it can give
+Please do use {\tt -{}-debug} option if something goes wrongly, it can give
 valuable information about the problem! See also the corresponding option
 (\ref{debugoption}).
+
+\label{configcmdlineopt}
+If you want to use the configuration files under Windows (by default the
+registry will be used to store the program options) you should use the
+{\tt -{}-config=file} option each time when running the program. The easiest way
+to do it is to create a shortcut to {\tt M.exe} and enter this argument there.
 
 \subsection{User configuration files (Unix only)}
 
@@ -977,10 +983,10 @@ file.
 
 Note that an easy way to {}``reinstall{}'' Mahogany is to move \texttt{\$HOME/.M/config}
 file to some other location or even delete it and restart Mahogany
-- then it will go through the installation process once again.
+-- then it will go through the installation process once again.
 
 
-\subsection{System wide configuration file}
+\subsubsection{System wide configuration file}
 
 \emph{Mahogany} can be pre-configured on a system wide basis by supplying
 a \texttt{M.conf} file in the installation directory (e.g. \texttt{/usr/share/Mahogany/M.conf}).
@@ -992,6 +998,18 @@ mark {}``!{}'' are marked as immutable and cannot be overwritten
 by the user. This can be used by the system administrator to hard-wire
 certain settings, like, for example the return mail addresses or mail
 servers to use.
+
+
+\subsection{Registry (Windows only)}\label{registrykey}
+
+Under Windows the user settings are by default stored in the registry, under
+{\tt HKCU$\backslash$Software$\backslash$Mahogany-Team$\backslash$M} key
+where {\tt HKCU} stands for {\tt HKEY\_CURRENT\_USER}.
+
+If you encounter a mention of some {\tt Entry} in the group {\tt {[}Group{]}}
+of the config file, it maps to a value {\tt Entry} in the key
+{\tt Profiles$\backslash$Group} under the root key specified above under
+Windows.
 
 
 \section{The User Interface}
@@ -2230,8 +2248,7 @@ though.
 
 If you tick this box, all messages will be threaded, i.e. sorted in
 hierarchical orders, with replies following earlier messages in the
-same discussion thread. Very useful for newsgroups. -- Currently not
-yet implemented! --
+same discussion thread.
 
 
 \paragraph{Re-Sort on status change}
@@ -2825,7 +2842,7 @@ of wxWindows installed. Also, make sure to rebuild everything (ideally,
 create a new build directory) after installing or uninstalling a new
 wxWindows or Mahogany version. If the problem still persists, please
 try building the debug version of the program (you need debug wxWindows
-library and run configure with --enable-debug switch), run it under
+library and run configure with {\tt -{}-enable-debug switch}), run it under
 \noun{gdb} and send us the output of {}``bt{}'' command in the
 debugger when it crashes.
 \item If your problem is related to receiving or sending mail, please look
@@ -2993,7 +3010,7 @@ The following steps should identify and solve the problem:
 output, it should copy lots of things to /usr/local/....
 \item Do a \char`\"{}which wx-config\char`\"{}, it should report wx-config
 to be in /usr/local/bin
-\item Just type \char`\"{}wx-config --cxxflags\char`\"{}, it should run
+\item Just type \char`\"{}wx-config -{}-cxxflags\char`\"{}, it should run
 the wx-config script and report the compiler flags, which should include
 something like \char`\"{}-I/usr/local/include\char`\"{}.
 \item Then go to the Mahogany directory and \char`\"{}rm {*}cache{*}\char`\"{}
@@ -3222,27 +3239,40 @@ can also change the default forward template to do it.
 
 \subsection{How can I customize the position of folders in the tree?}
 
-Just add {}``Index=N{}'' entry in the folder profile section of
-the config file (or registry under Windows). I.e.:
+Unfortunately there is no GUI support for doing it yet. You may vote for the
+\htmladdnormallinkfoot{bug 404}
+{http://mahogany.sourceforge.net/cgi-bin/show\_bug.cgi?id=404} or subscribe to
+it if you want to be notified when this is implemented.
 
-{[}IMAP/Inbox{]}
 
-Index=0
+But in the meanwhile you can do it manually relatively simply. Under Unix you
+will need to edit the configuration file ({\tt \$HOME/.M/config} by default)
+and under Windows you need to directly modify the registry entries (see
+\ref{registrykey}). In any case the program shouldn't run when you are
+doing this modification.
 
+Here is what you should do: just add {}``Index=N{}'' entry in the folder
+profile section of the config file. I.e. if you add the marked lines:
+
+\begin{verbatim}
+[IMAP/Inbox]
+Index=0                 # added manually
 ...
 
-{[}IMAP/Mahogany{]}
-
-Index=1
-
+[IMAP/Mahogany]
+Index=1                 # added manually
 ...
 
-{[}IMAP/Junk{]}
-
-Index=100
+[IMAP/Junk]
+Index=100               # added manually
+\end{verbatim}
 
 then Inbox and Mahogany will appear first and Junk last in the tree.
 
+Under Windows you need to add the registry values of type \noun{DWORD} using
+the registry editor. For example, the value for Junk folder should be added
+under {\tt HKCU$\backslash$Software$\backslash$Mahogany-Team$\backslash$M$\backslash$Profiles$\backslash$IMAP$\backslash$Junk}
+key.
 
 \subsection{How can I {}``leave messages on server{}'' (POP3)?}
 
