@@ -172,7 +172,6 @@ public:
    {
       m_composeView = composeView;
       m_id = id;
-      m_lastWasTab = FALSE;
       m_lookupMode = (READ_CONFIG(m_composeView->GetProfile(),
                                   MP_ADB_SUBSTRINGEXPANSION) )
                      ? AdbLookup_Substring
@@ -192,7 +191,6 @@ private:
    wxComposeView              *m_composeView;
    wxComposeView::AddressField m_id;
 
-   bool m_lastWasTab;
    int  m_lookupMode;
 
    DECLARE_EVENT_TABLE()
@@ -301,28 +299,34 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
    // we're only interested in TABs and only it's not a second TAB in a row
    if ( event.KeyCode() == WXK_TAB )
    {
-      if ( !m_lastWasTab &&
+      if ( IsModified() &&
            !event.ControlDown() && !event.ShiftDown() && !event.AltDown() )
       {
-         // rememeber it and interpret TAB "normally" if the user presses it
-         // the second time to go to the next window immediately after having
+         // mark control as being "not modified" - if the user presses TAB
+         // the second time go to the next window immediately after having
          // expanded the entry
-         m_lastWasTab = TRUE;
+         DiscardEdits();
 
-         DoExpand();
+         // DoExpand() normally checks if the text is empty and gives an error
+         // message if it's true - because it doesn't make sense to press the
+         // [Expand] button then. This behaviour is not desirable when the user
+         // presses TAB, however, so check it here and just treat TAB normally
+         // if the text is empty instead.
+         if ( !GetValue().IsEmpty() )
+         {
+            DoExpand();
 
-         // don't call event.Skip()
-         return;
+            // don't call event.Skip()
+            return;
+         }
+         //else: text is empty, treat the TAB normally
       }
       //else: nothing because we're not interested in Ctrl-TAB, Shift-TAB &c -
       //      and also in the TABs if the last one was already a TAB
    }
-   else
-   {
-      m_lastWasTab = FALSE;
-   }
 
-   // let the text control process it normally
+   // let the text control process it normally: if it's a TAB this will make
+   // the focus go to the next window
    event.Skip();
 }
 
