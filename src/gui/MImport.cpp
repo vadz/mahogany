@@ -263,7 +263,7 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
       }
       else
       {
-         wxLogError(_("Importing %s settings failed."), progname);
+         wxLogError(_("Importing from %s failed."), progname);
       }
 
       m_listbox->Enable();

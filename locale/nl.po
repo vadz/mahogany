@@ -6666,7 +6666,7 @@ msgstr ""
 # wxFolderView.cpp:1148 wxFolderView.cpp:1208
 #: MImport.cpp:266
 #, fuzzy, c-format
-msgid "Importing %s settings failed."
+msgid "Importing from %s failed."
 msgstr "Berichten bewaren mislukt."
 
 #: MImport.cpp:351

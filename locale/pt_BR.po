@@ -5798,7 +5798,7 @@ msgstr ""
 
 #: MImport.cpp:266
 #, fuzzy, c-format
-msgid "Importing %s settings failed."
+msgid "Importing from %s failed."
 msgstr "O salvamento de mensagens falhou."
 
 #: MImport.cpp:351

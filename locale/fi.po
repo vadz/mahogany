@@ -5673,7 +5673,7 @@ msgstr ""
 
 #: MImport.cpp:266
 #, fuzzy, c-format
-msgid "Importing %s settings failed."
+msgid "Importing from %s failed."
 msgstr "Viestien tallennus epäonnistui."
 
 #: MImport.cpp:351

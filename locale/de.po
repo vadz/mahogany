@@ -5685,7 +5685,7 @@ msgstr "%s-Einstellungen erfolgreich importiert"
 
 #: MImport.cpp:266
 #, c-format
-msgid "Importing %s settings failed."
+msgid "Importing from %s failed."
 msgstr "Importieren der %s-Einstellungen schlug fehl."
 
 #: MImport.cpp:351
