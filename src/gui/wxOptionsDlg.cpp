@@ -299,7 +299,9 @@ enum ConfigFields
 #endif
    ConfigField_FolderMaxMsgSize,
    ConfigField_CloseDelay_HelpText,
-   ConfigField_CloseDelay,
+   ConfigField_FolderCloseDelay,
+   ConfigField_ConnCloseDelay,
+   ConfigField_OutboxHelp,
    ConfigField_UseOutbox,
    ConfigField_OutboxName,
    ConfigField_UseTrash,
@@ -1175,10 +1177,18 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif
    { gettext_noop("Ask if size of &message (in Kb) >"), Field_Number,   -1 },
    { gettext_noop("Mahogany may keep the folder open after closing it\n"
-                  "for some time to make reopening the folder faster.\n"
-                  "This is useful for the folders which you often reopen.\n"
-                  "Note that this option is ignored for POP3 folders."), Field_Message, -1 },
-   { gettext_noop("&Keep open for (seconds)"), Field_Number, -1},
+                  "for some time to make reopening the same folder faster.\n"
+                  "It also can close the folder but keep the connection to\n"
+                  "the server alive for some time to make it faster to open\n"
+                  "other folders on the same server.\n"
+                  "\n"
+                  "Note that the first option is ignored for POP3 folders and\n"
+                  "the second one is only used for IMAP and NNTP servers."), Field_Message, -1 },
+   { gettext_noop("&Keep folder open for (seconds)"), Field_Number, -1},
+   { gettext_noop("Keep &connection alive for (seconds)"), Field_Number, -1},
+   { gettext_noop("\nThe outgoing messages may be sent out immediately\n"
+                  "or just stored in an \"Outbox\" and sent later. Choose\n"
+                  "the sending mode here:"),       Field_Message, -1 },
    { gettext_noop("Send outgoing messages later"), Field_Bool |
                                                    Field_Restart |
                                                    Field_AppWide, -1 },
@@ -1706,9 +1716,11 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MAX_HEADERS_NUM),
 #endif
    CONFIG_ENTRY(MP_MAX_MESSAGE_SIZE),
-   CONFIG_NONE(),
+   CONFIG_NONE(), // keep alive help
    CONFIG_ENTRY(MP_FOLDER_CLOSE_DELAY),
-   CONFIG_ENTRY(MP_USE_OUTBOX), // where to store message before sending them
+   CONFIG_ENTRY(MP_CONN_CLOSE_DELAY),
+   CONFIG_NONE(), // outbox help
+   CONFIG_ENTRY(MP_USE_OUTBOX),
    CONFIG_ENTRY(MP_OUTBOX_NAME),
    CONFIG_ENTRY(MP_USE_TRASH_FOLDER),
    CONFIG_ENTRY(MP_TRASH_FOLDER),
