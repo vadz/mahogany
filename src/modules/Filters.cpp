@@ -2006,7 +2006,7 @@ static bool CheckSubjectForCapitals(const String& subject)
    bool hasSpace = false;
    for ( const wxChar *pc = subject; *pc; pc++ )
    {
-      if ( islower(*pc) )
+      if ( (*pc > 127) || islower(*pc) )
       {
          // not only caps
          return false;
@@ -2046,7 +2046,7 @@ static bool CheckSubjectForJunkAtEnd(const String& subject)
    // skip all whitespace
    const wxChar * const startSpaces = p;
    p += NUM_SPACES;
-   while ( isspace(*p) )
+   while ( *p < 128 && isspace(*p) )
       p++;
 
    // start of the tail
