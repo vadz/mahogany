@@ -2,7 +2,7 @@
 # Version:  $Id$
 
 # version and release
-%define VERSION 0.50
+%define VERSION 0.60
 %define RELEASE 1
 
 # default installation directory
