@@ -67,6 +67,7 @@ public:
               char const *bg="white")
       {
          GetLayoutList()->Clear(family,size,style,weight,underline,fg,bg);
+         m_maxx = m_maxy = 0;
          SetBackgroundColour(*GetLayoutList()->GetDefaults()->GetBGColour());
          ResizeScrollbars(true);
          SetDirty();

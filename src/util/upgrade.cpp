@@ -271,12 +271,8 @@ UpgradeFrom010()
    c->DeleteGroup("M/Profiles/Folders");
    c->DeleteGroup("/AdbEditor");
 #endif
+
    return rc;
-
-
-
-
-
 
 #if 0
    // The old Folders section appears as a profile now:
@@ -425,11 +421,13 @@ Upgrade(const String& fromVersion)
 
       case Version_Alpha010:
          if ( UpgradeFrom010() )
-         {
             wxLogMessage(_("Configuration information and program files were "
                            "successfully upgraded from the version '%s'."),
                          fromVersion.c_str());
-         }
+         else
+            wxLogError(_("Configuration information and program files were "
+                           "successfully could not be upgraded from version '%s'."),
+                         fromVersion.c_str());
          break;
 
       default:

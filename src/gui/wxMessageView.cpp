@@ -566,10 +566,9 @@ wxMessageView::Update(void)
          lastObjectWasIcon = true;
       }
    }
-
    llist->LineBreak();
-   Refresh();
-   ResizeScrollbars(true);
+   //Refresh();
+   //ResizeScrollbars(true);
 }
 
 String
@@ -1200,15 +1199,15 @@ wxMessageView::DoMenuCommand(int id)
 void
 wxMessageView::ShowMessage(MailFolder *folder, long num)
 {
-   //FIXME: is this correct? don't redisplay the already shown message
-   //if ( m_seqno == num )
-   //   return;
+   if ( m_uid == folder->GetHeaderInfo(num)->GetUId() )
+      return;
 
    if(mailMessage) mailMessage->DecRef();
    m_uid = folder->GetHeaderInfo(num)->GetUId();
    mailMessage = folder->GetMessage(m_uid);
 
-   folder->SetMessageFlag(m_uid, MailFolder::MSG_STAT_SEEN, true);
+   if(! (folder->GetHeaderInfo(num)->GetStatus() & MailFolder::MSG_STAT_SEEN))
+      folder->SetMessageFlag(m_uid, MailFolder::MSG_STAT_SEEN, true);
 
    /* FIXME for now it's here, should go somewhere else: */
    if ( m_ProfileValues.autocollect )

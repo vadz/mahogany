@@ -125,10 +125,8 @@ CHECK:- forward messsages as 7Bit, i.e. provide 7bit/8bit selection in
 ---> done, after merging of profile code, add support for building
      list of these folders and periodically checking them.
 - add news posting
-- Change MessageCC code to first look for a mail cache entry via
-  mail_elt() instead of always fetching message. (REALLY REQUIRED?)
-  Is already like this, but fetch_overview() does an extra fetch, even 
-  in mtest.
+
+
 
 TODO:
 - support for local news spool
@@ -138,14 +136,14 @@ TODO:
 
 TESTING!!
 
-- do we really need to scan /var/lib/news/active?
-- more configurability for news
+
+- Change MessageCC code to first look for a mail cache entry via
+  mail_elt() instead of always fetching message. (REALLY REQUIRED?)
+  Is already like this, but fetch_overview() does an extra fetch, even 
+  in mtest.
+STRANGE....
 
 - gtk 1.2 support
-- add auto collection to compose view
-- add a popup dialog to edit message headers in composeview
-- some html mail import/filtering of tags (easy, quick and dirty)
-- copying message to non-existing folder gives error message but works
 
 = wxLayout:
   - delete in empty line doesn't work
@@ -164,6 +162,16 @@ TESTING!!
     x- add setting of background colour and/or image
     x- composeview: after inserting text (reply), update scrollbars
     x- fix initial scrollbar sizes --> seems ok, what exactly is wrong?
+
+- do we really need to scan /var/lib/news/active?
+- some html mail import/filtering of tags (easy, quick and dirty)
+- copying message to non-existing folder gives error message but works
+
+
+- more configurability for news
+- add auto collection to compose view
+- add a popup dialog to edit message headers in composeview
+
 
 - add progress indicator to image loading
     (and the one of SentFolder) in VerifySettings()

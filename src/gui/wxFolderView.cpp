@@ -294,7 +294,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
                                 m_Parent,
                                 MDIALOG_YESNOTITLE,
                                 true,
-                                m_Profile->GetName()))
+                                ProfileBase::FilterProfileName(m_Profile->GetName())))
       {
          // build sequence
          wxString sequence;
@@ -732,7 +732,7 @@ void
 wxFolderViewFrame::InternalCreate(wxFolderView *fv, wxMFrame * /* parent */)
 {
    m_FolderView = fv;
-   SetTitle(String("M: " + m_FolderView->GetFolder()->GetName()));
+   SetTitle(String("Mahogany: " + m_FolderView->GetFolder()->GetName()));
    // add a toolbar to the frame
    // NB: the buttons must have the same ids as the menu commands
    m_ToolBar = CreateToolBar();

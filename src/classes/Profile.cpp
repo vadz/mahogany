@@ -309,7 +309,7 @@ ProfileBase::CreateProfile(const String & classname, ProfileBase const *parent)
 {
    ASSERT(classname.Length() == 0 ||  // only relative paths allowed
           (classname[0u] != '.' && classname[0u] != '/'));
-   ProfileBase *p =  Profile::CreateProfile(FilterProfileName(classname), parent);
+   ProfileBase *p =  Profile::CreateProfile(classname, parent);
    EnforcePolicy(p);
    return p;
 }
