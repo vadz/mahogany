@@ -55,6 +55,7 @@
 #include <wx/checklst.h>
 
 #include <wx/layout.h>
+#include <wx/dialup.h>
 
 #include "wx/persctrl.h"
 
