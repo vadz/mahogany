@@ -12,6 +12,7 @@
 #define STRUTIL_H
 
 #ifndef  USE_PCH
+#  include "miscutil.h"
 #endif
 
 #include <time.h>               // for time_t
@@ -365,7 +366,7 @@ class DetectSignature
 {
 public:
    DetectSignature();
-   ~DetectSignature();
+   
    bool Initialize(Profile *profile);
    bool StartsHere(const wxChar *cptr);
 
@@ -373,7 +374,8 @@ private:
 #if wxUSE_REGEX
    bool m_useRE;
    // a RE to detect the start of the signature
-   wxRegEx *m_reSig;
+   BOUND_POINTER(wxRegEx,RegExPointer);
+   RegExPointer m_reSig;
 #endif
 };
 

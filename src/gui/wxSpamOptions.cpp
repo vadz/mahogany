@@ -27,6 +27,7 @@
 #ifndef USE_PCH
 #   include "Mcommon.h"
 #   include "strutil.h"
+#   include "miscutil.h"
 #   include "Profile.h"
 #   include "MApplication.h"
 #endif // USE_PCH
@@ -202,7 +203,6 @@ class SpamOptionManagerBody : public SpamOptionManager
 {
 public:
    SpamOptionManagerBody();
-   virtual ~SpamOptionManagerBody();
    
    virtual void FromString(const String &source);
    virtual String ToString();
@@ -222,8 +222,10 @@ private:
 
    size_t ConfigEntryCount() const { return ms_count+1; }
    
-   ConfigValueDefault *m_configValues;
-   wxOptionsPage::FieldInfo *m_fieldInfo;
+   BOUND_ARRAY(ConfigValueNone,ConfigValueArray);
+   ConfigValueArray m_configValues;
+   BOUND_ARRAY(wxOptionsPage::FieldInfo,FieldInfoArray);
+   FieldInfoArray m_fieldInfo;
 
    SpamOptionAssassin m_checkSpamAssassin;
    SpamOption *PickAssassin() { return &m_checkSpamAssassin; }
@@ -307,16 +309,13 @@ const size_t SpamOptionManagerBody::ms_count
    = WXSIZEOF(SpamOptionManagerBody::ms_members);
 
 
+IMPLEMENT_BOUND_ARRAY(SpamOptionManagerBody::ConfigValueArray)
+IMPLEMENT_BOUND_ARRAY(SpamOptionManagerBody::FieldInfoArray)
+
 SpamOptionManagerBody::SpamOptionManagerBody()
 {
    BuildConfigValues();
    BuildFieldInfo();
-}
-
-SpamOptionManagerBody::~SpamOptionManagerBody()
-{
-   delete m_fieldInfo;
-   delete m_configValues;
 }
 
 void SpamOptionManagerBody::SetDefaults()
@@ -418,19 +417,20 @@ void SpamOptionManagerBody::DeleteProfile(Profile *profile)
 
 void SpamOptionManagerBody::BuildConfigValues()
 {
-   m_configValues = new ConfigValueNone[ConfigEntryCount()];
+   m_configValues.Initialize(ConfigEntryCount());
    
    for ( SpamOptionManagerBody::Iterator option(this);
       !option.IsEnd(); ++option )
    {
-      m_configValues[option.Index()+1] = ConfigValueDefault(
+      ConfigValueDefault &value = m_configValues[option.Index()+1];
+      value = ConfigValueDefault(
          option->ProfileHackName(),option->DefaultValue());
    }
 }
 
 void SpamOptionManagerBody::BuildFieldInfo()
 {
-   m_fieldInfo = new wxOptionsPage::FieldInfo[ConfigEntryCount()];
+   m_fieldInfo.Initialize(ConfigEntryCount());
    
    m_fieldInfo[0].label
       = gettext_noop("Mahogany may use several heuristic tests to detect spam.\n"
@@ -469,8 +469,8 @@ bool SpamOptionManagerBody::ShowDialog(wxFrame *parent)
          -1,
    
          // the fields description
-         m_fieldInfo,
-         m_configValues,
+         m_fieldInfo.Get(),
+         m_configValues.Get(),
          ConfigEntryCount()
       );
    

@@ -19,6 +19,7 @@
 class MessageView;
 class MessageViewer;
 class MTextStyle;
+class Profile;
 
 // the viewer filter module interface name
 #define VIEW_FILTER_INTERFACE _T("ViewFilter")

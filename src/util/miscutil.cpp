@@ -142,4 +142,3 @@ void GetColourByName(wxColour *colour,
       *colour = def;
    }
 }
-
