@@ -22,5 +22,7 @@ goto end
 :usage
 echo Usage: m4.bat input_dir output_dir
 rem echo was called as %0 %1 %2 %3 %4 %5 %6 %7 %8 %9
+exit 1
 
 :end
+exit 0
