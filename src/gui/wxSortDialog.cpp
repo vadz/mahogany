@@ -253,8 +253,6 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
    SetDefaultSize(7*wBtn, 60*hBtn);
 
    m_wasChanged = false;
-
-   TransferDataToWindow();
 }
 
 bool wxMessageSortingDialog::TransferDataToWindow()

@@ -35,7 +35,9 @@
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
 #  include "Profile.h"
+
 #  include "Sorting.h"
+#  include "Threading.h"
 
 #  include <wx/dynarray.h>
 #  include <wx/colour.h>
@@ -126,11 +128,31 @@ extern const MOption MP_USE_TRASH_FOLDER;
 // constants
 // ----------------------------------------------------------------------------
 
+// the ids of commands in the listctrl header popup menu
 enum
 {
-   WXMENU_FVIEW_CONFIG_SORT = 3000,
+   WXMENU_FVIEW_POPUP_BEGIN = 3000,
+   WXMENU_FVIEW_CONFIG_SORT = WXMENU_FVIEW_POPUP_BEGIN,
    WXMENU_FVIEW_RESET_SORT,
-   WXMENU_FVIEW_TOGGLE_THREAD
+   WXMENU_FVIEW_TOGGLE_THREAD,
+   WXMENU_FVIEW_CONFIG_THREAD,
+
+   // should be in the same order as wxFolderListColumn enum members
+   WXMENU_FVIEW_SORT_BY_COL,
+   WXMENU_FVIEW_SORT_BY_STATUS = WXMENU_FVIEW_SORT_BY_COL,
+   WXMENU_FVIEW_SORT_BY_DATE,
+   WXMENU_FVIEW_SORT_BY_SIZE,
+   WXMENU_FVIEW_SORT_BY_FROM,
+   WXMENU_FVIEW_SORT_BY_SUBJECT,
+
+   WXMENU_FVIEW_SORT_BY_COL_REV,
+   WXMENU_FVIEW_SORT_BY_STATUS_REV = WXMENU_FVIEW_SORT_BY_COL_REV,
+   WXMENU_FVIEW_SORT_BY_DATE_REV,
+   WXMENU_FVIEW_SORT_BY_SIZE_REV,
+   WXMENU_FVIEW_SORT_BY_FROM_REV,
+   WXMENU_FVIEW_SORT_BY_SUBJECT_REV,
+
+   WXMENU_FVIEW_POPUP_END
 };
 
 static const char *wxFLC_ColumnNames[WXFLC_NUMENTRIES] =
@@ -464,6 +486,9 @@ public:
 
    /// set m_PreviewDelay value
    void SetPreviewDelay(unsigned long delay) { m_PreviewDelay = delay; }
+
+   /// set the sort order to use (and notify everybody about it)
+   void SetSortOrder(Profile *profile, long sortOrder);
 
    /// draw the sort direction arrow on the column used for sorting
    void UpdateSortIndicator();
@@ -1295,13 +1320,31 @@ void wxFolderListCtrl::OnActivated(wxListEvent& event)
 
 void wxFolderListCtrl::OnColumnRightClick(wxListEvent& event)
 {
-   // TODO: add items to sort by this column in direct/reverse order
-   wxMenu menu;
-   menu.Append(WXMENU_FVIEW_TOGGLE_THREAD, _("&Thread messages"),
-               "", TRUE /* checkable */);
-   menu.AppendSeparator();
+   wxMenu menu(_("Sorting and threading"));
+
+   // add items to sort by this column in direct/reverse order if we have a
+   // valid column and if we can sort by it
+   wxFolderListColumn col = GetColumnByIndex(m_columns, event.GetColumn());
+   if ( col != WXFLC_NONE && SortOrderFromCol(col) != MSO_NONE )
+   {
+      String colName = GetColumnName(col);
+
+      menu.Append(WXMENU_FVIEW_SORT_BY_COL + col,
+                  wxString::Format(_("Sort by %s"), colName.c_str()));
+      menu.Append(WXMENU_FVIEW_SORT_BY_COL_REV + col,
+                  wxString::Format(_("Reverse sort by %s"), colName.c_str()));
+      menu.AppendSeparator();
+   }
+   //else: clicked outside any column or on a column we can't use for sorting
+
+   // more sorting stuff
    menu.Append(WXMENU_FVIEW_RESET_SORT, _("&Don't sort at all"));
    menu.Append(WXMENU_FVIEW_CONFIG_SORT, _("Configure &sort order..."));
+
+   // threading
+   menu.AppendSeparator();
+   menu.Append(WXMENU_FVIEW_TOGGLE_THREAD, _("&Thread messages"), "", TRUE);
+   menu.Append(WXMENU_FVIEW_CONFIG_THREAD, _("&Configure threading..."));
 
    Profile *profile = m_FolderView->GetProfile();
 
@@ -1439,15 +1482,7 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
                GetColumnName(col).c_str(),
                GetSortCrit(sortOrder) == orderCol ? "" :  _(" (reverse)"));
 
-   profile->writeEntry(MP_MSGS_SORTBY, sortOrder);
-
-   UpdateSortIndicator();
-
-   MEventManager::Send(new MEventOptionsChangeData
-                           (
-                            profile,
-                            MEventOptionsChangeData::Ok
-                           ));
+   SetSortOrder(profile, sortOrder);
 }
 
 void wxFolderListCtrl::OnListKeyDown(wxListEvent& event)
@@ -1812,6 +1847,23 @@ void wxFolderListCtrl::CreateColumns()
       item.m_image = -1;
       InsertColumn(n, item);
    }
+}
+
+// ----------------------------------------------------------------------------
+// wxFolderListCtrl sorting
+// ----------------------------------------------------------------------------
+
+void wxFolderListCtrl::SetSortOrder(Profile *profile, long sortOrder)
+{
+   profile->writeEntry(MP_MSGS_SORTBY, sortOrder);
+
+   UpdateSortIndicator();
+
+   MEventManager::Send(new MEventOptionsChangeData
+                           (
+                            profile,
+                            MEventOptionsChangeData::Ok
+                           ));
 }
 
 void wxFolderListCtrl::UpdateSortIndicator()
@@ -3325,14 +3377,22 @@ wxFolderView::HandleCharEvent(wxKeyEvent& event)
 void
 wxFolderView::OnCommandEvent(wxCommandEvent& event)
 {
-   // we can't do much if we're not opened
+   int cmd = event.GetId();
+
+   // we can process these commands even without having an opened folder
+   if ( cmd >= WXMENU_FVIEW_POPUP_BEGIN && cmd < WXMENU_FVIEW_POPUP_END )
+   {
+      OnHeaderPopupMenu(cmd);
+
+      return;
+   }
+
+   // but we can't do anything else if we're not opened
    if ( !m_ASMailFolder )
    {
       event.Skip();
       return;
    }
-
-   int cmd = event.GetId();
 
    const UIdArray& selections = GetSelections();
    if ( selections.IsEmpty() )
@@ -3392,42 +3452,6 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
          mApplication->Help(MH_FOLDER_VIEW, GetWindow());
          break;
 
-      case WXMENU_FVIEW_CONFIG_SORT:
-      case WXMENU_FVIEW_RESET_SORT:
-      case WXMENU_FVIEW_TOGGLE_THREAD:
-         if ( cmd == WXMENU_FVIEW_RESET_SORT )
-         {
-            // we try to keep our profiles tidy and clean, so first just delete
-            // the current sorting order
-            m_Profile->DeleteEntry(MP_MSGS_SORTBY);
-            if ( READ_CONFIG(m_Profile, MP_MSGS_SORTBY) )
-            {
-               // but it didn't help - our parent must have a non 0 sort order
-               // too, so we're forced to override it in our profile
-               m_Profile->writeEntry(MP_MSGS_SORTBY, 0l);
-            }
-         }
-         else if ( cmd == WXMENU_FVIEW_TOGGLE_THREAD )
-         {
-            bool thread = READ_CONFIG_BOOL(m_Profile, MP_MSGS_USE_THREADING);
-            m_Profile->writeEntry(MP_MSGS_USE_THREADING, !thread);
-         }
-         else if ( !ConfigureSorting(m_Profile, GetWindow()) )
-         {
-            // nothing changed
-            break;
-         }
-
-         // this will resort the messages and refresh us a bit later
-         MEventManager::Send(
-                              new MEventOptionsChangeData
-                                  (
-                                    m_Profile,
-                                    MEventOptionsChangeData::Ok
-                                  )
-                            );
-         break;
-
       default:
          if ( cmd >= WXMENU_POPUP_FOLDER_MENU )
          {
@@ -3448,6 +3472,89 @@ wxFolderView::OnCommandEvent(wxCommandEvent& event)
          }
          break;
    }
+}
+
+void wxFolderView::OnHeaderPopupMenu(int cmd)
+{
+   switch ( cmd )
+   {
+      case WXMENU_FVIEW_CONFIG_SORT:
+         if ( !ConfigureSorting(m_Profile, GetWindow()) )
+         {
+            // nothing changed, skip MEventManager::Send() below
+            return;
+         }
+         break;
+
+      case WXMENU_FVIEW_CONFIG_THREAD:
+         if ( !ConfigureThreading(m_Profile, GetWindow()) )
+         {
+            // nothing changed, skip MEventManager::Send() below
+            return;
+         }
+         break;
+
+      case WXMENU_FVIEW_RESET_SORT:
+         // we try to keep our profiles tidy and clean, so first just delete
+         // the current sorting order
+         m_Profile->DeleteEntry(MP_MSGS_SORTBY);
+         if ( READ_CONFIG(m_Profile, MP_MSGS_SORTBY) )
+         {
+            // but it didn't help - our parent must have a non 0 sort order
+            // too, so we're forced to override it in our profile
+            m_Profile->writeEntry(MP_MSGS_SORTBY, 0l);
+         }
+         break;
+
+      case WXMENU_FVIEW_TOGGLE_THREAD:
+         {
+            bool thread = READ_CONFIG_BOOL(m_Profile, MP_MSGS_USE_THREADING);
+            m_Profile->writeEntry(MP_MSGS_USE_THREADING, !thread);
+         }
+         break;
+
+      case WXMENU_FVIEW_SORT_BY_STATUS:
+      case WXMENU_FVIEW_SORT_BY_DATE:
+      case WXMENU_FVIEW_SORT_BY_SIZE:
+      case WXMENU_FVIEW_SORT_BY_FROM:
+      case WXMENU_FVIEW_SORT_BY_SUBJECT:
+      case WXMENU_FVIEW_SORT_BY_STATUS_REV:
+      case WXMENU_FVIEW_SORT_BY_DATE_REV:
+      case WXMENU_FVIEW_SORT_BY_SIZE_REV:
+      case WXMENU_FVIEW_SORT_BY_FROM_REV:
+      case WXMENU_FVIEW_SORT_BY_SUBJECT_REV:
+         {
+            bool reverse = cmd >= WXMENU_FVIEW_SORT_BY_STATUS_REV;
+            wxFolderListColumn col = (wxFolderListColumn)
+               (reverse ? cmd - WXMENU_FVIEW_SORT_BY_STATUS_REV
+                        : cmd - WXMENU_FVIEW_SORT_BY_STATUS);
+
+            ASSERT_MSG( col < WXFLC_NUMENTRIES, "invalid column" );
+
+            long sortOrder = SortOrderFromCol(col);
+
+            ASSERT_MSG( sortOrder != MSO_NONE, "invalid sort order" );
+
+            m_FolderCtrl->SetSortOrder(m_Profile, reverse ? sortOrder + 1
+                                                          : sortOrder);
+
+            // SetSortOrder() notifies about the options change event itself,
+            // don't do it here
+            return;
+         }
+
+      default:
+         FAIL_MSG( "unexpected command" );
+   }
+
+   // this will resort/thread the messages and refresh us a bit later
+   MEventManager::Send(
+                        new MEventOptionsChangeData
+                            (
+                              m_Profile,
+                              MEventOptionsChangeData::Ok
+                            )
+                      );
 }
 
 // ----------------------------------------------------------------------------

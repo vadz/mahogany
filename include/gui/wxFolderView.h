@@ -197,6 +197,9 @@ protected:
    /// select the next unread message, return false if no more
    bool SelectNextUnread();
 
+   /// called to process messages from the sorting/threading popup menu
+   void OnHeaderPopupMenu(int cmd);
+
    /// called when the focused (== current) item in the listctrl changes
    void OnFocusChange(long item, UIdType uid);
 

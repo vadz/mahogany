@@ -29,6 +29,9 @@
 #  include "strutil.h"
 #  include "Mpers.h"
 
+#  include "Sorting.h"
+#  include "Threading.h"
+
 #  include <wx/dynarray.h>
 #  include <wx/checkbox.h>
 #  include <wx/listbox.h>
@@ -318,24 +321,12 @@ enum ConfigFields
    ConfigField_FolderViewAutoNextMsg,
    ConfigField_FolderViewAutoNextFolder,
 
+   ConfigField_FolderViewSortThreadHelp,
+   ConfigField_FolderViewThread,
    ConfigField_FolderViewThreadMessages,
-   ConfigField_FolderViewThreadOnServer,
-   ConfigField_FolderViewThreadByRefOnly,
-#if wxUSE_REGEX
-   ConfigField_FolderViewSimplifyingRegex,
-   ConfigField_FolderViewReplacementString,
-#endif // wxUSE_REGEX
-   ConfigField_FolderViewGatherSubjects,
-#if !wxUSE_REGEX
-   ConfigField_FolderViewRemoveListPrefixGathering,
-#endif
-   ConfigField_FolderViewBreakThreads,
-#if !wxUSE_REGEX
-   ConfigField_FolderViewRemoveListPrefixBreaking,
-#endif
-   ConfigField_FolderViewIndentIfDummy,
    ConfigField_FolderViewSortMessagesBy,
-   ConfigField_FolderViewHeaders, //"Configure columns to show..."
+
+   ConfigField_FolderViewHeaders, // "Configure columns to show..."
    ConfigField_FolderViewSizeUnits,
    ConfigField_FolderViewPreviewDelayHelp,
    ConfigField_FolderViewPreviewDelay,
@@ -1025,26 +1016,14 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("    next unread &message"),     Field_Bool,    -1},
    { gettext_noop("    next unread &folder"),      Field_Bool,
                                                    ConfigField_FolderViewAutoNextMsg},
-
-   { gettext_noop("&Thread messages"),             Field_Bool,    -1},
-   { gettext_noop("Thread messages on server"), Field_Bool | Field_Advanced,    ConfigField_FolderViewThreadMessages},
-   { gettext_noop("Thread messages by references only"), Field_Bool | Field_Advanced,    ConfigField_FolderViewThreadOnServer},
-
-#if wxUSE_REGEX
-   { gettext_noop("Regex used to &simplify subjects"), Field_Text | Field_Advanced,    ConfigField_FolderViewThreadMessages},
-   { gettext_noop("&Replacement string for the matched part"), Field_Text | Field_Advanced,    ConfigField_FolderViewThreadMessages},
-#endif // wxUSE_REGEX
-   { gettext_noop("&Gather messages with same subject"), Field_Bool | Field_Advanced,    ConfigField_FolderViewThreadMessages},
-#if !wxUSE_REGEX
-   { gettext_noop("&Remove list prefix from subjects"), Field_Bool | Field_Advanced,    ConfigField_FolderViewGatherSubjects},
-#endif // !wxUSE_REGEX
-   { gettext_noop("B&reak thread when subject changes"), Field_Bool | Field_Advanced,    ConfigField_FolderViewThreadMessages},
-#if !wxUSE_REGEX
-   { gettext_noop("Remove list prefix to compare subjects to break threads"), Field_Bool | Field_Advanced,    ConfigField_FolderViewBreakThreads},
-#endif // !wxUSE_REGEX
-   { gettext_noop("&Indent messages with missing ancestor"), Field_Bool | Field_Advanced,    ConfigField_FolderViewThreadMessages},
-
+   { gettext_noop("You may configure how (and if) Mahogany sorts and threads\n"
+                  "messages in the folder using the buttons below. To access\n"
+                  "these configuration dialogs faster, just right click on\n"
+                  "any folder view header column."), Field_Message, -1 },
+   { gettext_noop("&Thread messages"),             Field_Bool, -1 },
+   { gettext_noop("Threading &options..."),        Field_SubDlg, ConfigField_FolderViewThread },
    { gettext_noop("&Sort messages by..."),         Field_SubDlg,  -1},
+
    { gettext_noop("Configure &columns to show..."),Field_SubDlg,   -1 },
    // combo choices must be in sync with MessageSizeShow enum values
    { gettext_noop("Show size in &units of:automatic:autobytes:bytes:kbytes:mbytes"),
@@ -1410,24 +1389,9 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FVIEW_AUTONEXT_UNREAD_MSG),
    CONFIG_ENTRY(MP_FVIEW_AUTONEXT_UNREAD_FOLDER),
 
+   CONFIG_NONE(), // sorting/threading help
    CONFIG_ENTRY(MP_MSGS_USE_THREADING),
-   CONFIG_ENTRY(MP_MSGS_SERVER_THREAD),
-   CONFIG_ENTRY(MP_MSGS_SERVER_THREAD_REF_ONLY),
-
-#if wxUSE_REGEX
-   CONFIG_ENTRY(MP_MSGS_SIMPLIFYING_REGEX),
-   CONFIG_ENTRY(MP_MSGS_REPLACEMENT_STRING),
-#endif // wxUSE_REGEX
-   CONFIG_ENTRY(MP_MSGS_GATHER_SUBJECTS),
-#if !wxUSE_REGEX
-   CONFIG_ENTRY(MP_MSGS_REMOVE_LIST_PREFIX_GATHERING),
-#endif // !wxUSE_REGEX
-   CONFIG_ENTRY(MP_MSGS_BREAK_THREAD),
-#if !wxUSE_REGEX
-   CONFIG_ENTRY(MP_MSGS_REMOVE_LIST_PREFIX_BREAKING),
-#endif // !wxUSE_REGEX
-   CONFIG_ENTRY(MP_MSGS_INDENT_IF_DUMMY),
-
+   CONFIG_NONE(), // threading subdialog
    CONFIG_NONE(), // sorting subdialog
    CONFIG_NONE(), // columns subdialog
    CONFIG_ENTRY(MP_FVIEW_SIZE_FORMAT),
@@ -2515,6 +2479,8 @@ void wxOptionsPageFolderView::OnButton(wxCommandEvent& event)
    wxObject *obj = event.GetEventObject();
    if ( obj == GetControl(ConfigField_FolderViewSortMessagesBy) )
       dirty = ConfigureSorting(m_Profile, this);
+   if ( obj == GetControl(ConfigField_FolderViewThreadMessages) )
+      dirty = ConfigureThreading(m_Profile, this);
    else if ( obj == GetControl(ConfigField_FolderViewHeaders) )
       dirty = ConfigureFolderViewHeaders(m_Profile, this);
    else
