@@ -1599,7 +1599,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
 
 #ifdef USE_SSL
    m_useSSL->Enable(enableSSL);
-   if ( !enableSSL )
+   if ( !enableSSL || m_useSSL->GetSelection() == SSLSupport_None )
       m_acceptUnsignedSSL->Disable();
 #endif // USE_SSL
 
