@@ -1549,7 +1549,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&External editor"),            Field_File,    -1                      },
    { gettext_noop("Always &use it"),              Field_Bool, ConfigField_ExternalEditor },
 #ifdef USE_OPENSSL
-     gettext_noop("\n"
+   { gettext_noop("\n"
                   "Mahogany can use SSL (Secure Sockets Layer) for secure,\n"
                   "encrypted communications, if you have the libssl and libcrypto\n"
                   "shared libraries (DLLs) on your system."),
