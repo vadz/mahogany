@@ -3151,7 +3151,7 @@ wxAdbTree::wxAdbTree(wxAdbEditFrame *frame, wxWindow *parent, long id)
 // Alt-Enter    shows the properties of the current item
 void wxAdbTree::OnChar(wxKeyEvent& event)
 {
-  switch ( event.KeyCode() ) {
+  switch ( event.GetKeyCode() ) {
     case WXK_DELETE:
       if ( m_frame->AllowDelete() )
         m_frame->DoDeleteNode();

@@ -1541,7 +1541,7 @@ void wxComposeView::DeletePlaceHolder()
    m_sizerRcpts->Remove(0); // remove first spacer by position
 
    wxSizerItem *item =
-      (wxSizerItem *)m_sizerRcpts->GetChildren().First()->Data();
+      (wxSizerItem *)m_sizerRcpts->GetChildren().GetFirst()->GetData();
 
    ASSERT_MSG( item->IsWindow(), _T("should be the static text") );
 

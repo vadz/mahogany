@@ -531,7 +531,7 @@ MyHashTable::~MyHashTable()
   wxString *tmp = NULL;
   wxNode* node = NULL;
   while ( (node = m_tbl.Next()) != NULL )
-   if ((tmp = (wxString*)node->Data()))
+   if ((tmp = (wxString*)node->GetData()))
      delete tmp;
 
   //  m_tbl.DeleteContents(FALSE);  // just ot make sure, they are deleted

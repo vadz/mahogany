@@ -507,7 +507,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
 void
 wxLayoutWindow::OnChar(wxKeyEvent& event)
 {
-   int keyCode = event.KeyCode();
+   int keyCode = event.GetKeyCode();
    const bool ctrlDown = event.ControlDown();
    const bool shiftDown = event.ShiftDown();
    const bool altDown = event.AltDown();
@@ -824,7 +824,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
 void
 wxLayoutWindow::OnKeyUp(wxKeyEvent& event)
 {
-   if ( event.KeyCode() == WXK_SHIFT && m_Selecting )
+   if ( event.GetKeyCode() == WXK_SHIFT && m_Selecting )
    {
       m_llist->EndSelection();
       m_Selecting = false;
