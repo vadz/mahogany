@@ -30,6 +30,7 @@ allclean: clean
 	find . -name .libs -exec rm -rf {} \; || true
 	$(RM) config.status *cache* makeopts *.po config.log src/M
 	find . -name .xvpics -exec rm -r -f {} \; 
+	$(RM) -r debian/tmp
 
 dep depend: 
 	@echo "The first time \"make depend\" will print lots of warnings"

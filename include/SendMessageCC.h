@@ -48,6 +48,13 @@ public:
    virtual void SetAddresses(const String &To,
                      const String &CC = "",
                      const String &BCC = "");
+
+   /** Sets the value for the from field.
+       @param from sender address
+       @param returnaddress  address for Reply-To
+   */
+   virtual void SetFrom(const String &from,
+                        const String & returnaddress = "");
    
    virtual void SetNewsgroups(const String &groups);
    
@@ -123,6 +130,9 @@ private:
    ENVELOPE	*m_Envelope;
    BODY		*m_Body;
    PART		*m_NextPart, *m_LastPart;
+
+   /// address strings
+   String m_From, m_ReplyTo;
    /// 2nd stage constructor, see constructor
    void	Create(Protocol protocol, ProfileBase *iprof);
    /// Protocol used for sending

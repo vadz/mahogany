@@ -19,7 +19,7 @@ DEP = $(SRC:.cpp=.d)
 
 TARGETS = $(SRC:.cpp=.o) $(MODOBJS)
 
-all: $(TARGETS) modules
+all: $(TARGETS)
 
 clean: stdclean
 

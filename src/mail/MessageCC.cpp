@@ -141,6 +141,14 @@ MessageCC::Send(Protocol protocol)
    SendMessageCC sendMsg(m_Profile, protocol);
 
    sendMsg.SetSubject(Subject());
+
+   String name, reply;
+   reply = Address( name, MAT_REPLYTO);
+   if(name.Length())
+   {
+      name << " <" << reply << '>';
+      reply = name;
+   }
    switch(protocol)
    {
       case Prot_SMTP:
@@ -150,6 +158,7 @@ MessageCC::Send(Protocol protocol)
          GetHeaderLine("CC", cc);
          GetHeaderLine("BCC",bcc);
          sendMsg.SetAddresses(to, cc, bcc);
+         sendMsg.SetFrom(From(), reply);
       }
       break;
 
@@ -158,6 +167,7 @@ MessageCC::Send(Protocol protocol)
          String newsgroups;
          GetHeaderLine("Newsgroups",newsgroups);
          sendMsg.SetNewsgroups(newsgroups);
+         sendMsg.SetFrom(From(), reply);
       }
       break;
    }
@@ -180,7 +190,7 @@ MessageCC::Send(Protocol protocol)
    const char *header = GetHeader();
    String headerLine;
    const char *cptr = header;
-   String name, value;
+   String value;
    do
    {
       while(*cptr && *cptr != '\r' && *cptr != '\n')

@@ -63,10 +63,12 @@
 #define MP_MOD_PALMOS_BACKUP_SYNC_D          0l
 #define MP_MOD_PALMOS_BACKUP_INCREMENTAL     "BackupIncremental"
 #define MP_MOD_PALMOS_BACKUP_INCREMENTAL_D   1l
-#define MP_MOD_PALMOS_BACKUPALL              "BackupAll"
-#define MP_MOD_PALMOS_BACKUPALL_D            1l
+#define MP_MOD_PALMOS_BACKUP_ALL              "BackupAll"
+#define MP_MOD_PALMOS_BACKUP_ALL_D            1l
 #define MP_MOD_PALMOS_BACKUP_EXCLUDELIST     "BackupExclude"
 #define MP_MOD_PALMOS_BACKUP_EXCLUDELIST_D   ""
+#define MP_MOD_PALMOS_AUTOINSTALLDIR     "AutoInstallDir"
+#define MP_MOD_PALMOS_AUTOINSTALLDIR_D   "/tmp"
 #define MP_MOD_PALMOS_PILOTDEV   "PilotDev"
 #define MP_MOD_PALMOS_PILOTDEV_D "/dev/pilot"
 #define MP_MOD_PALMOS_SPEED      "Speed"
@@ -207,7 +209,7 @@ class PalmOSModule : public MModule
    virtual int Entry(int arg, ...);
    void Synchronise(PalmBook *pBook);
    void Configure(void);
-   MMODULE_DEFINE()
+   MMODULE_DEFINE();
 
 private:
    /** PalmOS constructor.
@@ -218,6 +220,8 @@ private:
    */
    PalmOSModule(MInterface *interface);
 
+   ~PalmOSModule();
+   
    bool ProcessMenuEvent(int id);
    bool Connect(void);
    void Disconnect(void);
@@ -264,7 +268,7 @@ private:
    bool m_SyncMail, m_SyncAddr, m_Backup, m_LockPort;
    bool m_IncrBackup, m_BackupSync, m_BackupAll;
    String m_PilotDev, m_Script1, m_Script2, m_PalmBox;
-   String m_BackupExludeList;
+   String m_BackupExcludeList;
    String m_BackupDir;
    String m_AutoInstallDir;
 
@@ -397,8 +401,9 @@ PalmOSModule::GetConfig(void)
    m_Speed      = READ_CONFIG(p, MP_MOD_PALMOS_SPEED);
    m_IncrBackup = READ_CONFIG(p, MP_MOD_PALMOS_BACKUP_INCREMENTAL);
    m_BackupSync = READ_CONFIG(p, MP_MOD_PALMOS_BACKUP_SYNC);
-   m_BackupAll  = (READ_CONFIG(p, MP_MOD_PALMOS_BACKUPALL) != 0);
-   m_BackupExcludeList = READ_CONFIG(p, MP_MOD_PALMOS_BACKUP_EXCLUDELIST;
+   m_BackupAll  = (READ_CONFIG(p, MP_MOD_PALMOS_BACKUP_ALL) != 0);
+   m_BackupExcludeList = READ_CONFIG(p, MP_MOD_PALMOS_BACKUP_EXCLUDELIST);
+   m_AutoInstallDir = READ_CONFIG(p, MP_MOD_PALMOS_AUTOINSTALLDIR);
 
    if(m_Speed < 0  || m_Speed > (signed) WXSIZEOF(speeds))
       m_Speed = speeds[0];
@@ -478,7 +483,7 @@ PalmOSModule::~PalmOSModule()
       Disconnect();
 
    if(m_Lock) delete m_Lock;
-   SafeDecRef(m_Profile);
+   if(m_Profile) m_Profile->DecRef();
 }
 
 #if defined( wxUSE_THREADS ) && defined( OS_UNIX )
@@ -1569,6 +1574,7 @@ static ConfigValueDefault gs_ConfigValues [] =
    ConfigValueDefault(MP_MOD_PALMOS_BACKUP_INCREMENTAL, MP_MOD_PALMOS_BACKUP_INCREMENTAL_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUP_ALL, MP_MOD_PALMOS_BACKUP_ALL_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUP_EXCLUDELIST, MP_MOD_PALMOS_BACKUP_EXCLUDELIST_D),
+   ConfigValueDefault(MP_MOD_PALMOS_AUTOINSTALLDIR, MP_MOD_PALMOS_AUTOINSTALLDIR_D),
    ConfigValueDefault(MP_MOD_PALMOS_PILOTDEV, MP_MOD_PALMOS_PILOTDEV_D),
    ConfigValueDefault(MP_MOD_PALMOS_SPEED, MP_MOD_PALMOS_SPEED_D),
    ConfigValueDefault(MP_MOD_PALMOS_LOCK, MP_MOD_PALMOS_LOCK_D),
@@ -1589,6 +1595,7 @@ static wxOptionsPage::FieldInfo gs_FieldInfos[] =
    { gettext_noop("Make incremental backup only"), wxOptionsPage::Field_Bool,    -1 },
    { gettext_noop("Backup all databases"), wxOptionsPage::Field_Bool,    -1 },
    { gettext_noop("Exclude these databases"), wxOptionsPage::Field_Text,    -1 },
+   { gettext_noop("Directory for databases to auto-install"), wxOptionsPage::Field_Text,    -1 },
    { gettext_noop("Pilot device"), wxOptionsPage::Field_Text,    -1 },
    // the speed values must be in sync with the ones in the speeds[]
    // array in GetConfig() further up:

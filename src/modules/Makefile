@@ -51,10 +51,18 @@ INTERFACE = ../../include/MInterface.h ../../include/MInterface.cpp
 
 all: $(TARGETS)
 
+modules: all
+
 $(TARGETS): $(INTERFACE)
 
 $(INTERFACE): ../../include/MInterface.mid
 	$(MAKE) -C ../../include MInterface.h
+
+ifdef PISOCK_LIB
+PalmOS.so: PalmOS.cpp
+	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< -L$(BUILDDIR)/src $(PISOCK_LIB) -lM 
+
+endif
 
 clean: 
 	$(RM) *.o *.so *.lo
@@ -65,6 +73,7 @@ ifeq ($(USE_MODULES),dynamic)
 	for i in $(TARGETS); do $(INSTALL_PROGRAM) $$i $(MODULEDIR); done
 endif
 
+install-modules: install
 
 .PHONY: clean
 

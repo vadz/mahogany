@@ -1975,6 +1975,16 @@ String MailFolderCC::ms_NewsPath;
 
 String MailFolderCC::ms_LastCriticalFolder = "";
 
+/// return the directory of the newsspool:
+/* static */
+String
+MailFolderCC::GetNewsSpool(void)
+{
+   CClientInit();
+   return (const char *)mail_parameters
+      (NIL,GET_NEWSSPOOL,NULL);
+}
+
 const String&
 MailFolderCC::InitializeMH()
 {

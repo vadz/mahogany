@@ -113,7 +113,9 @@ public:
    */
    static bool DeleteFolder(const class MFolder *mfolder);
 
-
+   /// return the directory of the newsspool:
+   static String GetNewsSpool(void);
+   
    /// enable/disable debugging:
    void   DoDebug(bool flag = true) { debugFlag = flag; }
 

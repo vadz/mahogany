@@ -1070,6 +1070,23 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
       // the rest is done in Update()
    }
 
+
+   // local newsspool ?
+   {
+      // calling c-client lib:
+      String newsspool = MailFolderCC::GetNewsSpool();
+      if(wxDirExists(newsspool))
+      {
+         String foldername = _("News-spool");
+         if(! MailFolder::CreateFolder(foldername,
+                                       MF_NEWS,
+                                       MF_FLAGS_GROUP,
+                                       "",
+                                       _("Local news-spool found on your system during installation.")))
+            wxLogError(_("Could not create an entry for the local news spool."));
+      }
+   }
+
    // Dial-Up network:
    profile->writeEntry(MP_DIALUP_SUPPORT, gs_installWizardData.useDialUp);
    if(gs_installWizardData.useDialUp)
@@ -1088,7 +1105,7 @@ void CompleteConfiguration(const struct InstallWizardData &gs_installWizardData)
    else
       profile->writeEntry(MP_USEPYTHON, 0l);
 #endif
-   
+
 #ifdef USE_PISOCK
    // PalmOS-box
    if(gs_installWizardData.usePalmOs)

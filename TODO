@@ -59,16 +59,6 @@ as the MailFolderCC.cpp code should take care of that itself.
                 a) sorting order
                 b) ...
 
-9	KB	finish filters dialog / up/down arrows, error messages
-
-9	KB	debug filters, does '|' really work?
-		--> works all reasonably well, but calls to
-		MailFolder::Lock() must be cleaned up:
-			- when do we need to lock/unlock exactly?
-
-9		disabling "collect mail" in properties has no effect!
-
-
 9	KB	wxLayout:
 		- delete in empty line (works at home...)
 		- add blinking cursor
@@ -81,29 +71,15 @@ as the MailFolderCC.cpp code should take care of that itself.
 		 - shouldn't preview messages unless configured to do so
                    (currently does preview on delete)
 
-8	KB	modules:
-		- PalmOS: sync adb and check linkage on solaris
-		- use new config stuff / no direct gui calls (DEFERRED?)
-
 	KB	properties/access shows wrong help
 	KB	properties/custom headers/more shows corrupted title
 
 	KB	wxMessageView: message/rfc822 display via MessageCC(string)
 
-1	KB	copyright display accept/cancel dialog at fist startup
-
 1	KB	SendMessageCC should not use profile but get settings
 		told, so sending from queue can use original settings
 		from folder - at least don't use profile at sending
 		time, but before
-
-	KB	add python hook for filters
-
-3		new mail handling in MApplication should use
-		headerinfo for consistency (different from/reply-to lines)
-
-7	KB	selecting/deselecting only message in folder
-		--fixed?
 
 9	VZ	deleting groups from an ADB book messes up the book and
 		deletes other non-selected groups and entries, too
@@ -118,51 +94,18 @@ as the MailFolderCC.cpp code should take care of that itself.
 
 8	VZ	AdbImort dialog under Windows lacks UpdateUI somewhere
 
-7		After setting date format and closing date fmt dialog, 
-		main config dialog remains completely disabled under
-		KDE and must be closed with window-close button
-
-9		create folder group sets server name
-
-9		Option to set central new mail folder is missing -
+2		Option to set central new mail folder is missing -
 		changing option manually in config file does not work
 
-
-6	KB	Fix PalmExport: 1. handle illegal characters like '
-				2. use libpisock
-
-
-8?		changing password on remote folder while open results
+5		changing password on remote folder while open results
 		in empty folder, but no error message, as login no
 		longer works.  (still true_??)
-
-7	VZ/KB  UPGRADE.CPP/WIZARD:
-		- add support for Outbox and Trash folders
-		 (News get stored to "OutboxName"+_(M_NEWSOUTBOX_POSTFIX)
-		- choose INBOX/New Mail
-
-		main window hides about-splash - not nice
-		--> 2nd timer to bring it to top and run wxYield() to
-		    update it?
-
-	KB	DEBUG:	posting news article --> cannot find mailbox for callback
 
 	VZ	templates need "First Name" field
 	VZ	icons in icons-dialog are scaled --> ugly
 
-6		support for external hooks (programs, not Python scripts)
-
-4	KB	Tidy up menus/toolbars.
-
-
 5		intelligent followup/post article when reading
 		NNTP/NEWS groups
-
-4	KB	Also, why "hide" parameter to all wxComposeView::CreateXXX()
-		functions is ignored - is it used anywhere?
-
-7		unknown folder type in config file provokes a crash => should
-		just ignore the folder!
 
 	VZ	Clicking on "header dialog/More button" produces
 		"headers for folder "xpm" in the dialog when called
@@ -194,21 +137,7 @@ as the MailFolderCC.cpp code should take care of that itself.
 		Printing multiple messages should only use one config
 		dialog.
 
-3		add mf locking to Outbox code
-
 3		Add routine to write large headers.
-
-6	VZ	Adbframe: when creating new entry, the selection
-		should move to that, so it is displayed and can be
-		filled with data immediately. The current behaviour is
-		unintuitive and confusing. 
-
-6	VZ	Adbframe: When listing addressbook types, show native
-		format first.
-
-2 win	VZ	keyboard navigation is somewhat strange in the options
-		dialog, can't TAB to the buttons from the notebook
-		page
 
 6 gtk   RR      The force-reopen checkbox doesn't display its
 		tooltip. Does this work under MSW? A wxGTK bug?

@@ -18,6 +18,7 @@ endif
 endif
 
 ifdef USE_LIBTOOL
+# no longer used
 %.o: %.cc
 	$(LIBTOOL) --mode=compile $(CXX) -fPIC $(CXXFLAGS) -c $<
 %.o: %.cpp
@@ -37,7 +38,7 @@ else
 	$(CC)  -fPIC $(CFLAGS) -c $<
 
 %.so: %.cpp
-	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< $(LIBS)
+	$(CXX) -shared -fPIC $(CXXFLAGS) -o $@ $< -L$(BUILDDIR)/src -lM #$(LIBS)
 endif
 
 %.py: %.i
@@ -83,7 +84,7 @@ dep depend:
 tags:
 	etags --c++ $(SRC) $(CXXSRC)
 
-.PHONY: stdclean dep depend tags msgcat modules modules-install
+.PHONY: stdclean dep depend tags msgcat modules install-modules modules
 
 msgcat:
 	@touch $(BUILDDIR)/messages.po
@@ -94,7 +95,7 @@ stdclean:
 
 modules:	$(MODULES)
 
-modules-install: modules
+install-modules: modules
 ifeq ($(USE_MODULES),dynamic)
 	$(INSTALL) -d $(MODULEDIR)
 	for i in $(MODULES); do $(INSTALL_PROGRAM) $$i $(MODULEDIR); done

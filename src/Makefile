@@ -30,7 +30,9 @@ MOBJS += modules/*.o
 endif
 
 # build the dynamically linked binary by default
-all:	M
+all:	Mdll modules main
+
+main:   Mdll
 
 M:	subdirs
 	$(LINK) -o M $(MOBJS) $(LDFLAGS) $(GUI_LIBS) $(LIBS)
@@ -41,11 +43,11 @@ M:	subdirs
 #left over from my attempt to create a M.so shared lib
 #
 
-Mx:	libM.so
-	$(LINK) -o M -L. $(LDFLAGS) -lM $(LDFLAGS) $(GUI_LIBS) $(LIBS)
+Mdll:	libM.so
+	$(LINK) -o M -L. $(LDFLAGS) -lM 
 
-libM.so:
-	$(CXX) -shared $(MOBJS) $(LDFLAGS) $(NONPLIBS) -o libM.so
+libM.so: subdirs
+	$(CXX) -shared $(MOBJS) $(LDFLAGS) $(NONPLIBS) $(LDFLAGS) $(GUI_LIBS) $(LIBS) -o libM.so
 
 # build the binary which is statically linked to wxGTK, dynamically to
 # everything else
@@ -64,7 +66,10 @@ static: $(MOBJS)
 subdirs:
 	set -e; $(MAKE) -C ../include
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i all; done
-	set -e; $(MAKE) -C modules all
+
+modules:
+	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i modules; done
+	set -e; $(MAKE) -C modules modules
 
 doc:
 	$(MAKE) -C ../include $@
@@ -76,15 +81,15 @@ clean:
 dep depend:
 	set -e; for i in $(SUB_DIRS) modules; do $(MAKE) -C $$i $@; done
 
-install: modules-install
+install: install-modules
 	strip M
 	$(INSTALL_PROGRAM) M $(DATADIR)/$(CANONICAL_HOST)/bin
+	if test -f libM.so ; then $(INSTALL_PROGRAM) libM.so $(DATADIR)/$(CANONICAL_HOST)/lib; fi
 	$(RM) -f $(BINDIR)/M $(DATADIR)/bin/M
 	$(INSTALL) -d $(BINDIR)
 	ln -f -s ../share/Mahogany/$(CANONICAL_HOST)/bin/M $(BINDIR)
 	$(RM) $(BINDIR)/mahogany
 	ln -f -s ../share/Mahogany/$(CANONICAL_HOST)/bin/M $(BINDIR)/mahogany
-	$(MAKE) -C modules $@
 	$(INSTALL) -d $(DATADIR)/icons
 	for i in icons/*.xpm ; do $(INSTALL_DATA) $$i $(DATADIR)/icons; done
 ifdef USE_PYTHON
@@ -94,16 +99,17 @@ endif
 #
 # This must call modules-install for all modules directories:
 #
-modules-install:
+install-modules:
 ifeq ($(USE_MODULES),dynamic)
-	for i in $(MODULES_DIRS); do $(INSTALL) -d $$i modules-install; done
+	for i in $(MODULES_DIRS); do $(MAKE) -C $$i $@ ; done
+	set -e; $(MAKE) -C modules install
 endif
 
 msgcat:
 	set -e; for i in $(SUB_DIRS) modules ; do $(MAKE) -C $$i $@; done
 #	$(MAKE) -C $(BUILDDIR)/locale mergecat
 
-.PHONY: all dep clean doc semistatic static allclean install msgcat subdirs modules-install
+.PHONY: all dep clean doc semistatic static allclean install msgcat subdirs install-modules modules main
 
 
 

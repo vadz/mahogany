@@ -170,8 +170,18 @@ XFace::CreateFromXpm(const char *xpmdata)
 wxImage
 XFace::GetXFaceImg(const String &filename, bool *hasimg, class wxWindow *parent)
 {
-   bool success;
-   wxImage img = wxIconManager::LoadImage(filename, &success);
+   bool success = false;
+   wxImage img;
+   if(filename.Length())
+   {
+      img = wxIconManager::LoadImage(filename, &success);
+      if(! success)
+      {
+         String msg;
+         msg.Printf(_("Could not load XFace file '%s'."),
+                    filename.c_str());
+      }
+   }
    if(success)
    {
       if(img.GetWidth() != 48 || img.GetHeight() != 48)
@@ -192,10 +202,6 @@ XFace::GetXFaceImg(const String &filename, bool *hasimg, class wxWindow *parent)
    }
    else
    {
-      String msg;
-      msg.Printf(_("Could not load XFace file '%s'."),
-                 filename.c_str());
-      MDialog_ErrorMessage(msg, parent);
       PathFinder pf(READ_APPCONFIG(MP_ICONPATH), true);
       pf.AddPaths(mApplication->GetLocalDir()+"/icons", true);
       pf.AddPaths(mApplication->GetGlobalDir()+"/icons", true);

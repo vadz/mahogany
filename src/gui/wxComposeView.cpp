@@ -2029,14 +2029,21 @@ wxComposeView::Print(void)
    if(found)
       wxSetAFMPath(afmpath);
 #endif
-   wxPrinter printer;
+
+   wxPrintDialogData pdd(*((wxMApp *)mApplication)->GetPrintData());
+   wxPrinter printer(& pdd);
+#ifndef OS_WIN
+   wxThePrintSetupData->SetAFMPath(afmpath);
+#endif
    wxLayoutPrintout printout(m_LayoutWindow->GetLayoutList(),_("Mahogany: Printout"));
-   if (! printer.Print(this, &printout, TRUE)
+   if ( !printer.Print(this, &printout, TRUE)
       && ! printer.GetAbort() )
-      wxMessageBox(
-         _("There was a problem with printing the message:\n"
-           "perhaps your current printer is not set up correctly?"),
-         _("Printing"), wxOK);
+      wxMessageBox(_("There was a problem with printing the message:\n"
+                     "perhaps your current printer is not set up correctly?"),
+                   _("Printing"), wxOK);
+   else
+      (* ((wxMApp *)mApplication)->GetPrintData())
+         = printer.GetPrintDialogData().GetPrintData();
 }
 
 // -----------------------------------------------------------------------------

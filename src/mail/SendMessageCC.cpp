@@ -90,36 +90,62 @@ SendMessageCC::Create(Protocol protocol,
    m_Envelope = mail_newenvelope();
    m_Body = mail_newbody();
 
+   // From: line:
    m_Envelope->from = mail_newaddr();
-   m_Envelope->from->personal =
-      CPYSTR(m_Profile->readEntry(MP_PERSONALNAME, MP_PERSONALNAME_D));
-   m_Envelope->from->mailbox =
-      CPYSTR(m_Profile->readEntry(MP_USERNAME, MP_USERNAME_D));
-
-   tmpstr = m_Profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
-   m_Envelope->from->host = tmpstr.Length() ? CPYSTR(tmpstr) : NIL;
-   m_Envelope->return_path = mail_newaddr ();
-
-   tmpstr = m_Profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
-   if(strutil_isempty(tmpstr))
-      tmpstr = m_Profile->readEntry(MP_USERNAME,MP_USERNAME_D);
-   else
-      tmpstr = strutil_before(tmpstr,'@');
-   m_Envelope->return_path->mailbox = CPYSTR(tmpstr);
-
-   tmpstr = m_Profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
-   if(strutil_isempty(tmpstr))
-      tmpstr = m_Profile->readEntry(MP_HOSTNAME,MP_HOSTNAME_D);
-   else
-      tmpstr = strutil_after(tmpstr,'@');
-   if(tmpstr.Length() == 0)
+   if(m_From.Length() == 0)
    {
-      // we need a valid return path!
-      m_Envelope->return_path->host = CPYSTR(wxGetFullHostName());
+      m_Envelope->from->personal =
+         CPYSTR(m_Profile->readEntry(MP_PERSONALNAME, MP_PERSONALNAME_D));
+      m_Envelope->from->mailbox =
+         CPYSTR(m_Profile->readEntry(MP_USERNAME, MP_USERNAME_D));
+      tmpstr = m_Profile->readEntry(MP_HOSTNAME, MP_HOSTNAME_D);
+      m_Envelope->from->host = tmpstr.Length() ? CPYSTR(tmpstr) : NIL;
    }
    else
-      m_Envelope->return_path->host = CPYSTR(tmpstr);
-
+   {
+      tmpstr = strutil_before(m_From,'@');
+      m_Envelope->from->mailbox = CPYSTR(tmpstr);
+      tmpstr = strutil_after(m_From,'@');
+      if(tmpstr.Length() == 0)
+         m_Envelope->from->host = CPYSTR(wxGetFullHostName());
+      else
+         m_Envelope->from->host = CPYSTR(tmpstr);
+   }
+      
+   /// return path:
+   if(m_ReplyTo.Length() == 0)
+   {
+      m_Envelope->return_path = mail_newaddr ();
+      tmpstr = m_Profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
+      if(strutil_isempty(tmpstr))
+         tmpstr = m_Profile->readEntry(MP_USERNAME,MP_USERNAME_D);
+      else
+         tmpstr = strutil_before(tmpstr,'@');
+      m_Envelope->return_path->mailbox = CPYSTR(tmpstr);
+      tmpstr = m_Profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
+      if(strutil_isempty(tmpstr))
+         tmpstr = m_Profile->readEntry(MP_HOSTNAME,MP_HOSTNAME_D);
+      else
+         tmpstr = strutil_after(tmpstr,'@');
+      if(tmpstr.Length() == 0)
+      {
+         // we need a valid return path!
+         m_Envelope->return_path->host = CPYSTR(wxGetFullHostName());
+      }
+      else
+         m_Envelope->return_path->host = CPYSTR(tmpstr);
+   }
+   else
+   {
+      tmpstr = strutil_before(m_ReplyTo,'@');
+      m_Envelope->return_path->mailbox = CPYSTR(tmpstr);
+      tmpstr = strutil_after(m_ReplyTo,'@');
+      if(tmpstr.Length() == 0)
+         m_Envelope->return_path->host = CPYSTR(wxGetFullHostName());
+      else
+         m_Envelope->return_path->host = CPYSTR(tmpstr);
+   }
+   
    m_Body->type = TYPEMULTIPART;
    m_Body->nested.part = mail_newbody_part();
    m_Body->nested.part->next = NULL;
@@ -132,6 +158,12 @@ SendMessageCC::SetSubject(const String &subject)
 {
    if(m_Envelope->subject) delete [] m_Envelope->subject;
    m_Envelope->subject = CPYSTR(subject.c_str());
+}
+
+void
+SendMessageCC::SetFrom(const String &from,
+                       const String & returnaddress = "")
+{
 }
 
 void
@@ -355,7 +387,10 @@ SendMessageCC::Build(void)
       if(! HasHeaderEntry("Reply-To"))
       {
          //always add reply-to header:
-         tmpstr = m_Profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
+         if(m_ReplyTo.Length() > 0)
+            tmpstr = m_ReplyTo;
+         else
+            tmpstr = m_Profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
          if(!strutil_isempty(tmpstr))
          {
             m_headerNames[h] = strutil_strdup("Reply-To");
@@ -368,7 +403,7 @@ SendMessageCC::Build(void)
    if(READ_CONFIG(m_Profile,MP_COMPOSE_USE_XFACE) && ! HasHeaderEntry("X-Face"))
    {
       XFace xface;
-      xface.CreateFromFile(READ_CONFIG(m_Profile, MP_COMPOSE_XFACE_FILE));
+      xface.CreateFromFile(m_Profile->readEntry(MP_COMPOSE_XFACE_FILE,""));
       m_headerNames[h] = strutil_strdup("X-Face");
       m_headerValues[h] = strutil_strdup(xface.GetHeaderLine());
       if(strlen(m_headerValues[h]))  // paranoid, I know.
@@ -555,7 +590,8 @@ SendMessageCC::SendOrQueue(void)
             msg.Printf(_("Message queued in ´%s´."),
                        outbox.c_str());
          else
-            msg = _("Article posted.");
+            msg.Printf(_("Article queued in '%s'."),
+                    outbox.c_str());
          STATUSMESSAGE((msg));
       }
    }

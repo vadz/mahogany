@@ -130,9 +130,6 @@ public:
    virtual void IncRef() { m_nRef++; }
    virtual bool DecRef() { if ( --m_nRef ) return TRUE; delete this; return FALSE; }
 
-   void SafeIncRef() { if ( this ) IncRef(); }
-   void SafeDecRef() { if ( this ) DecRef(); }
-
 protected:
    /// Removes the module from the global list
    virtual ~MModuleCommon() { m_MInterface->RemoveModule(this); }
@@ -302,7 +299,6 @@ MMODULE_INITIALISE(Name, Interface, Description, Version)
       MMODULE_IMPLEMENT_CMN(ClassName, Name, Interface, Description, Version); \
       const char *ClassName::DebugGetClassName() const { return #ClassName; }
 #else
-#define MMODULE_IMPLEMENT_CMN() \
 #   define MMODULE_IMPLEMENT(ClassName, Name, Interface, Description, Version) \
            MMODULE_IMPLEMENT_CMN(ClassName, Name, Interface, Description, Version)
 #endif
