@@ -211,6 +211,7 @@ strutil_tokenise(char *string, const char *delim, kbStringList &tlist)
 static const char *urlnames[] =
 {
    "http:",
+   "https:",
    "ftp:",
    "gopher:",
    "wysiwyg:",
