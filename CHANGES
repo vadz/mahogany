@@ -1,4 +1,5 @@
 (next release) on (date of next release)
+28.07.00 VZ: readded rsh timeout setting, but it is now disabled by default
 26.07.00 VZ: encode 8bit characters in the header of outgoing messages too
              allow adding all subfolders of an IMAP/MH/NNTP folder automatically
 25.07.00 VZ: support for setting charset for the outgoing messages

@@ -825,15 +825,17 @@ void
 MailFolderCC::UpdateTimeoutValues(void)
 {
    Profile *p = GetProfile();
-   // int to;
-   //UPDATE_TO(OPENTIMEOUT, ms_TcpOpenTimeout);
 
-   // We now use only one common config setting:
-   ms_TcpOpenTimeout = READ_CONFIG(p,MP_TCP_OPENTIMEOUT);
+   // We now use only one common config setting for all TCP timeout
+   ms_TcpOpenTimeout = READ_CONFIG(p, MP_TCP_OPENTIMEOUT);
    ms_TcpReadTimeout = ms_TcpOpenTimeout;
    ms_TcpWriteTimeout = ms_TcpOpenTimeout;
    ms_TcpCloseTimeout = ms_TcpOpenTimeout;
-   ms_TcpRshTimeout = ms_TcpOpenTimeout;
+
+   // but a separate one for rsh timeout to allow enabling/disabling rsh
+   // independently of TCP timeout
+   ms_TcpRshTimeout = READ_CONFIG(p, MP_TCP_RSHTIMEOUT);
+
    ApplyTimeoutValues();
 }
 

@@ -140,10 +140,10 @@ enum ConfigFields
    ConfigField_ReadTimeout,
    ConfigField_WriteTimeout,
    ConfigField_CloseTimeout,
+#endif // USE_TCP_TIMEOUTS
+   ConfigField_RshHelp,
    ConfigField_RshTimeout,
    ConfigField_NetworkLast = ConfigField_RshTimeout,
-#endif // USE_TCP_TIMEOUTS
-   ConfigField_NetworkLast = ConfigField_OpenTimeout,
 
    // compose
    ConfigField_ComposeFirst = ConfigField_NetworkLast,
@@ -658,8 +658,13 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Read timeout"),                Field_Number | Field_Advanced,    -1,                        },
    { gettext_noop("&Write timeout"),               Field_Number | Field_Advanced,    -1,                        },
    { gettext_noop("&Close timeout"),               Field_Number | Field_Advanced,    -1,                        },
-   { gettext_noop("&rsh timeout"),                 Field_Number | Field_Advanced,    -1,                        },
 #endif // USE_TCP_TIMEOUTS
+   { gettext_noop("If the RSH timeout below is greater than 0, Mahogany will\n"
+                  "first try to connect to IMAP servers using rsh instead of\n"
+                  "sending passwords in clear text. However, if the server\n"
+                  "does not support rsh connections, enabling this option can\n"
+                  "lead to unneeded delays."),     Field_Message | Field_Advanced,    -1,                        },
+   { gettext_noop("&Rsh timeout"),                 Field_Number | Field_Advanced,    -1,                        },
 
    // compose
    { gettext_noop("Sa&ve sent messages"),          Field_Bool,    -1,                        },
@@ -910,9 +915,10 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #ifdef USE_TCP_TIMEOUTS
    CONFIG_ENTRY(MP_TCP_READTIMEOUT),
    CONFIG_ENTRY(MP_TCP_WRITETIMEOUT),
-   CONFIG_ENTRY(MP_TCP_RSHTIMEOUT),
    CONFIG_ENTRY(MP_TCP_CLOSETIMEOUT),
 #endif // USE_TCP_TIMEOUTS
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_TCP_RSHTIMEOUT),
 
    // compose
    CONFIG_ENTRY(MP_USEOUTGOINGFOLDER), // where to keep copies of messages sent

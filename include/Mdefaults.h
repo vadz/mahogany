@@ -604,15 +604,15 @@
 /// TCP/IP open timeout in seconds.
 #define MP_TCP_OPENTIMEOUT "TCPOpenTimeout"
 #if 0 // no longer used
-/// TCP/IP read timeout in seconds.  
+/// TCP/IP read timeout in seconds.
 #define MP_TCP_READTIMEOUT "TCPReadTimeout"
-/// TCP/IP write timeout in seconds. 
+/// TCP/IP write timeout in seconds.
 #define  MP_TCP_WRITETIMEOUT "TCPWriteTimeout"
-/// TCP/IP close timeout in seconds. 
+/// TCP/IP close timeout in seconds.
 #define  MP_TCP_CLOSETIMEOUT "TCPCloseTimeout"
+#endif // 0
 /// rsh connection timeout in seconds.
 #define MP_TCP_RSHTIMEOUT "TCPRshTimeout"
-#endif
 //@}
 /** @name for folder list ctrls: ratios of the width to use for
     columns */
@@ -779,7 +779,7 @@
 /// how often should we autosave the profile settings (0 to disable)?
 #define   MP_AUTOSAVEDELAY_D       60
 /// how often should we check for incoming mail (secs, 0 to disable)?
-#define   MP_POLLINCOMINGDELAY_D       300 
+#define   MP_POLLINCOMINGDELAY_D       300
 /// ask user if he really wants to exit?
 #define   MP_CONFIRMEXIT_D      1l
 /// open folders when they're clicked (otherwise - double clicked)
@@ -1065,7 +1065,7 @@
 /// highlight URLS?
 #define   MP_HIGHLIGHT_URLS_D      1
 /// sort criterium for folder listing (55=0x37 = status/subject)
-#define MP_MSGS_SORTBY_D         55l 
+#define MP_MSGS_SORTBY_D         55l
 /// re-sort messages on status change?
 #define MP_MSGS_RESORT_ON_CHANGE_D 0l
 /// use threading
@@ -1160,15 +1160,15 @@
 /// TCP/IP open timeout in seconds.
 #define MP_TCP_OPENTIMEOUT_D      10l
 #if 0 // obsolete
-/// TCP/IP read timeout in seconds.  
+/// TCP/IP read timeout in seconds.
 #define MP_TCP_READTIMEOUT_D       30l
-/// TCP/IP write timeout in seconds. 
+/// TCP/IP write timeout in seconds.
 #define  MP_TCP_WRITETIMEOUT_D    30l
-/// TCP/IP close timeout in seconds. 
+/// TCP/IP close timeout in seconds.
 #define  MP_TCP_CLOSETIMEOUT_D 60l
+#endif // 0
 /// rsh connection timeout in seconds.
-#define MP_TCP_RSHTIMEOUT_D 60l
-#endif
+#define MP_TCP_RSHTIMEOUT_D 0l
 //@}
 
 /** @name for folder list ctrls: ratios of the width to use for

@@ -1381,7 +1381,7 @@ extern "C"
          break;
          case MSO_AUTHOR:
          case MSO_AUTHOR_REV:
-            result = criterium == MSO_SUBJECT ?
+            result = criterium == MSO_AUTHOR ?
                -Stricmp(i1->GetFrom(), i2->GetFrom())
                : Stricmp(i1->GetFrom(), i2->GetFrom());
             break;
