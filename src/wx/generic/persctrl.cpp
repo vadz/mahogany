@@ -129,7 +129,7 @@ public:
         // get our config object
     wxConfigBase *GetConfig() const { return m_config; }
         // set the config object to use (must be !NULL)
-    void SetConfig(wxConfigBase *config) { m_config = config; }
+    void SetConfig(wxConfigBase *config);
         // set the path to use (either absolute or relative)
     void SetPath(const wxString& path, const wxString& prefix);
 
@@ -174,6 +174,17 @@ wxPHelper::wxPHelper(const wxString& path,
     m_pathRestored = TRUE;  // it's not changed yet...
 }
 
+void wxPHelper::SetConfig(wxConfigBase *config)
+{
+    m_config = config;
+
+    // if we have no config object, don't despair - perhaps we can use the
+    // global one?
+    if ( !m_config ) {
+        m_config = wxConfigBase::Get();
+    }
+}
+
 void wxPHelper::SetPath(const wxString& path, const wxString& prefix)
 {
     wxCHECK_RET( !path.IsEmpty(), "empty path in persistent ctrl code" );
@@ -203,6 +214,8 @@ void wxPHelper::SetPath(const wxString& path, const wxString& prefix)
         m_path << prefix << '/' << strPath;
         m_key = strKey;
     }
+
+    ChangePath();
 }
 
 wxPHelper::~wxPHelper()
@@ -213,12 +226,6 @@ wxPHelper::~wxPHelper()
 
 bool wxPHelper::ChangePath()
 {
-    // if we have no config object, don't despair - perhaps we can use the
-    // global one?
-    if ( m_config == NULL ) {
-        m_config = wxConfigBase::Get();
-    }
-
     wxCHECK_MSG( m_config, FALSE, "can't change path without config!" );
 
     m_oldPath = m_config->GetPath();
@@ -1612,7 +1619,6 @@ int wxPMessageBox(const wxString& configPath,
    if ( configPath.Length() )
    {
       wxPHelper persist(configPath, gs_MessageBoxPath, config);
-      persist.ChangePath();
 
       wxString configValue = persist.GetKey();
 
@@ -1634,6 +1640,7 @@ int wxPMessageBox(const wxString& configPath,
          // ignore checkbox value if the dialog was cancelled
          if ( config && rc != wxCANCEL && dlg.DontShowAgain() ) {
             // next time we won't show it
+            persist.ChangePath();
             config->Write(configValue, rc);
          }
       }
@@ -1651,7 +1658,6 @@ int wxPMessageBox(const wxString& configPath,
 bool wxPMessageBoxEnabled(const wxString& configPath, wxConfigBase *config)
 {
     wxPHelper persist(configPath, gs_MessageBoxPath, config);
-    persist.ChangePath();
     wxString configValue = persist.GetKey();
 
     // if config was NULL, wxPHelper already has the global one
@@ -1665,7 +1671,6 @@ void wxPMessageBoxEnable(const wxString& configPath,
                          wxConfigBase *config)
 {
     wxPHelper persist(configPath, gs_MessageBoxPath, config);
-    persist.ChangePath();
     wxString configValue = persist.GetKey();
 
     // if config was NULL, wxPHelper already has the global one
@@ -1719,7 +1724,6 @@ static wxFileDialog *wxShowFileSelectorDialog(const wxString& configPath,
     configValuePath << configValueFile << "Path";
 
     wxPHelper persist(ourPath, "", config);
-    persist.ChangePath();
 
     // if config was NULL, wxPHelper already has the global one
     config = persist.GetConfig();
@@ -1767,6 +1771,8 @@ static wxFileDialog *wxShowFileSelectorDialog(const wxString& configPath,
 
             if( ext.Length() )
                name << '.' << ext;
+
+            persist.ChangePath();
             config->Write(configValueFile, name);
             config->Write(configValuePath, path);
         }
