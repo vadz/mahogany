@@ -41,7 +41,7 @@ if ! cvs -z3 -Q -d $CVSROOT co M; then
 fi
 
 # extract version info from the source tree
-eval `grep "^#define M_VERSION_[MR]" $src/include/Mversion.h | \
+eval `grep "^#define M_VERSION_[MR]" M/include/Mversion.h | \
 	    sed 's/^#define \+\(\w\+\) \+\([0-9]\+\)/\1=\2/'`
 
 # and create the approproately named output file
