@@ -17,7 +17,7 @@ on our mailing list:
 1. Unix
 -------
 
- The provided binary RPM are for x86 RedHat 7.3 systems, if you use
+ The provided binary RPM are for x86 RedHat 8/9 systems, if you use
 another system or architecture please rebuild the RPM from the source
 RPM.
 

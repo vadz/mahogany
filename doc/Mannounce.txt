@@ -97,6 +97,7 @@ Other noticeable improvements:
 
 * composer allows to edit the attachment properties
 * popup menus for the URLs in the message viewer
+* find dialog in the message viewer
 
 Important bug fixes:
 
