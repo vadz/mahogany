@@ -38,13 +38,11 @@ as local MBOX and news spool folders and sending mail using SMTP.
 %setup -n mahogany-%{VERSION}
 
 %build
-(cd include ; make -i ) || true
-make -i allclean || true
 if [ ! -f configure ]; then
   autoconf
 fi
 
-CFLAGS="$RPM_OPT_FLAGS" ./configure --without-threads \
+CFLAGS="$RPM_OPT_FLAGS" ./configure --without-threads --without-python \
 	--prefix=$RPM_BUILD_ROOT/%prefix
 
 (cd include ; make ) || true
