@@ -166,9 +166,16 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
 
    label = new wxStaticText(this, -1, _("&containing"));
    c = new wxLayoutConstraints;
-   c->left.RightOf(m_chkInvert, 2*LAYOUT_X_MARGIN);
+   c->left.RightOf(m_chkInvert);
    c->width.AsIs();
+   // this shouldn't be needed but otherwise under MSW the static text is one
+   // pixel lower than the checkbox which is really ugly -- apparently there is
+   // an off by 1 error somewhere in the constraints calculation code?
+#ifdef OS_WIN
+   c->top.SameAs(m_chkInvert, wxTop);
+#else
    c->centreY.SameAs(m_chkInvert, wxCentreY);
+#endif
    c->height.AsIs();
    label->SetConstraints(c);
 
