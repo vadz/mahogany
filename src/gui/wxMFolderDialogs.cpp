@@ -2408,12 +2408,12 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
 
             if ( !loginName )
             {
-               what = _("a login name");
+               what = _("login name");
                msgbox = M_MSGBOX_ASK_LOGIN;
             }
             else if ( !password )
             {
-               what = _("a password");
+               what = _("password");
                msgbox = M_MSGBOX_ASK_PWD;
             }
 
@@ -2422,23 +2422,37 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
                wxString msg;
                msg.Printf
                    (
-                     _("You have not specified %s for this folder, although it requires one.\n"
-                       "Alternatively, you might want to select anonymous access.\n"
-                       "Would you like to change this now?"),
+                     _("You have not specified a %s for this folder, although "
+                       "it requires one.\n"
+                       "If you leave it empty, Mahogany asks you for it every "
+                       "time when opening this folder and\n"
+                       "if you don't want this to happen you should fill "
+                       "it in here or,\n"
+                       "alternatively, select anonymous access.\n"),
                      what.c_str()
                    );
 
                if ( msgbox == M_MSGBOX_ASK_PWD )
                {
-                  msg << _("\n\n"
-                        "Notice that the password will be stored in your configuration with\n"
-                        "very weak encryption. If you are concerned about security, leave it\n"
-                        "empty and Mahogany will prompt you for it whenever needed.");
+                  msg << _("\n"
+                        "Please do notice however that the passwords are "
+                        "stored using weak encryption.\n"
+                        "So if you are concerned about security, it is "
+                        "indeed better to leave it empty\n"
+                        "and let Mahogany will prompt you for it "
+                        "whenever needed.\n");
                }
 
-               if ( MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
-                                        M_DLG_YES_DEFAULT,
-                                        msgbox) )
+               msg << _T('\n')
+                   << wxString::Format
+                      (
+                        _("So would you like to leave the %s empty?"),
+                        what.c_str()
+                      );
+
+               if ( !MDialog_YesNoDialog(msg, this, MDIALOG_YESNOTITLE,
+                                         M_DLG_YES_DEFAULT | M_DLG_NOT_ON_NO,
+                                         msgbox) )
                {
                   return false;
                }
