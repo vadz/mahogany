@@ -38,8 +38,8 @@
 
 #include "FolderView.h"
 #include "MailFolder.h"
-#include "MailFolderCC.h"
 #include "Message.h"
+#include "MailFolderCC.h"
 #include "MessageCC.h"
 #include "SendMessageCC.h"
 
@@ -502,7 +502,7 @@ wxComposeView::InsertData(const char *data,
    if(strutil_isempty(mimetype))
    {
       mc->m_MimeType = String("APPLICATION/OCTET-STREAM");
-      mc->m_NumericMimeType = TYPEAPPLICATION;
+      mc->m_NumericMimeType = Message::MSG_TYPEAPPLICATION;
    }
    else
    {
@@ -536,7 +536,7 @@ wxComposeView::InsertFile(const char *filename, const char *mimetype,
                                        NULLstring, true, m_Profile);
       if(! filename)
          return;
-      mc->m_NumericMimeType = TYPEAPPLICATION;
+      mc->m_NumericMimeType = Message::MSG_TYPEAPPLICATION;
       if(! mApplication->GetMimeTypes()->Lookup(filename, mc->m_MimeType, &(mc->m_NumericMimeType)))
          mc->m_MimeType = String("APPLICATION/OCTET-STREAM");
    }
@@ -600,7 +600,7 @@ wxComposeView::Send(void)
                                   i,WXLO_EXPORT_AS_TEXT)) != NULL)
    {
       if(export->type == WXLO_EXPORT_TEXT)
-         sm.AddPart(TYPETEXT,export->content.text->c_str(),export->content.text->length(),
+         sm.AddPart(Message::MSG_TYPETEXT,export->content.text->c_str(),export->content.text->length(),
                     "PLAIN");
       else
       {
@@ -662,15 +662,15 @@ wxComposeView::Send(void)
    if(READ_CONFIG(m_Profile,MP_USEOUTGOINGFOLDER))
    {
       String file;
-      MailFolderCC *mf =
-         MailFolderCC::OpenFolder(READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER));
+      MailFolder *mf =
+         MailFolder::OpenFolder(MailFolder::MF_PROFILE,READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER));
       if(mf)
       {
-         file = READ_CONFIG(mf->GetProfile(),MP_FOLDER_PATH);
+         file = READ_CONFIG(m_Profile,MP_FOLDER_PATH);
          if(strutil_isempty(file))
             file = READ_CONFIG(m_Profile,MP_OUTGOINGFOLDER);
          sm.WriteToFile(file,true/*append*/);
-         mf->Close();
+         mf->DecRef();
       }
    }
 }

@@ -184,7 +184,7 @@ wxMessageView::Create(wxFolderView *fv, wxWindow *parent, const String &iname)
   SetBackgroundColour( wxColour("White") ); 
 #endif
 
-  m_Profile = ProfileBase::CreateProfile(iname, folder ? folder->GetProfile() : NULL);
+  m_Profile = ProfileBase::CreateProfile(iname, fv ? fv->GetProfile() : NULL);
   initialised = true;
 }
 
@@ -323,8 +323,9 @@ wxMessageView::Update(void)
       }
 #endif
       // insert text:
-      if(t == TYPETEXT
-         || (t == TYPEMESSAGE && READ_CONFIG(m_Profile, MP_RFC822_IS_TEXT)))
+      if(t == Message::MSG_TYPETEXT
+         || (t == Message::MSG_TYPEMESSAGE &&
+             READ_CONFIG(m_Profile,MP_RFC822_IS_TEXT))) 
       {
          cptr = mailMessage->GetPartContent(i);
          if(cptr == NULL)
@@ -358,7 +359,7 @@ wxMessageView::Update(void)
       else // insert an icon
       {
          wxIcon icn;
-         if(t == TYPEIMAGE && READ_CONFIG(m_Profile, MP_INLINE_GFX))
+         if(t == Message::MSG_TYPEIMAGE && READ_CONFIG(m_Profile, MP_INLINE_GFX))
          {
             char *filename = wxGetTempFileName("Mtemp");
             MimeSave(i,filename);
@@ -455,7 +456,7 @@ wxMessageView::MimeInfo(int mimeDisplayPart)
    message << _("Size: ")
            << strutil_ltoa(mailMessage->GetPartSize(mimeDisplayPart));
    type = mailMessage->GetPartType(mimeDisplayPart);
-   if(type == TYPEMESSAGE || type == TYPETEXT)
+   if(type == Message::MSG_TYPEMESSAGE || type == Message::MSG_TYPETEXT)
       message += String(_(" lines\n"));
    else
       message += String(_(" bytes\n"));
@@ -509,7 +510,7 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
    message += String(_("Size: "))
       + strutil_ltoa(mailMessage->GetPartSize(mimeDisplayPart));
    type = mailMessage->GetPartType(mimeDisplayPart);
-   if(type == TYPEMESSAGE || type == TYPETEXT)
+   if(type == Message::MSG_TYPEMESSAGE || type == Message::MSG_TYPETEXT)
       message += String(_(" lines"));
    else
       message += String(_(" bytes"));
@@ -592,9 +593,9 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
    {
       char *filename = wxGetTempFileName("Mtemp");
       MimeSave(mimeDisplayPart,filename);
-      MailFolderCC *mf = MailFolderCC::OpenFolder(filename);
+      MailFolder *mf = MailFolder::OpenFolder(MailFolder::MF_PROFILE,filename);
       (void) GLOBAL_NEW wxMessageViewFrame(mf, 1, m_FolderView, m_Parent);
-      mf->Close();
+      mf->DecRef();
       wxRemoveFile(filename);
    }
 }
@@ -614,7 +615,7 @@ wxMessageView::MimeSave(int mimeDisplayPart,const char *ifilename)
       filename = MDialog_FileRequester(message, m_Parent,
                                        NULLstring, filename,
                                        NULLstring, NULLstring, true,
-                                       folder ? folder->GetProfile() :
+                                       m_FolderView ? m_FolderView->GetProfile() :
                                        NULL); 
       if ( strutil_isempty(filename) ) {
          // cancelled

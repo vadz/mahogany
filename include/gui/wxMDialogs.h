@@ -175,6 +175,9 @@ MDialog_FolderCreate(MWindow *parent);
 void
 MDialog_FolderProfile(MWindow *parent, ProfileBase *profile);
 
+/// test
+void MDialog_FolderOpen(MWindow *parent);
+
 // @@@ the coeffecients are purely empirical...
 #define TEXT_HEIGHT_FROM_LABEL(h)   (23*(h)/13)
 #define BUTTON_WIDTH_FROM_HEIGHT(w) (75*(w)/23)

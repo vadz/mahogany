@@ -795,3 +795,23 @@ MDialog_FolderCreate(MWindow *parent)
 
    delete profile;
 }
+
+#include   "wx/resource.h"
+#include   "wxr/FODialog.wxr"
+
+void
+MDialog_FolderOpen(MWindow *parent)
+{
+   wxResourceParseData(OpenFolderDialog);
+
+   wxDialog *dialog = new wxDialog;
+   if (dialog->LoadFromResource(parent, "OpenFolderDialog"))
+   {
+      //wxTextCtrl *text = (wxTextCtrl *)wxFindWindowByName("multitext3", dialog);
+      //if (text)
+      //   text->SetValue("wxWindows resource demo");
+      dialog->SetModal(TRUE);
+      dialog->ShowModal();
+   }
+   dialog->Close(TRUE);
+}

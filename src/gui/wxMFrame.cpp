@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1997, 1998 by Karsten Ballüder (Ballueder@usa.net)           *
  *                                                                  *
- * $Id$             *
+ * $Id$
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -14,42 +14,30 @@
 #include "Mcommon.h"
 
 #ifndef  USE_PCH
-#  include "guidef.h"
-#  include "strutil.h"
-
-#  include "MFrame.h"
-
-#  include "kbList.h"
-
-#  include "PathFinder.h"
-#  include "MimeList.h"
-#  include "MimeTypes.h"
-#  include "Profile.h"
-#  include "Mdefaults.h"
-#  include "MApplication.h"
-#  include "gui/wxMApp.h"
+#   include "guidef.h"
+#   include "strutil.h"
+#   include "MFrame.h"
+#   include "kbList.h"
+#   include "PathFinder.h"
+#   include "MimeList.h"
+#   include "MimeTypes.h"
+#   include "Profile.h"
+#   include "Mdefaults.h"
+#   include "MApplication.h"
+#   include "gui/wxMApp.h"
+#   include "MailFolder.h"
+#   include "Message.h"
 #endif
 
 #include   <Python.h>
 #include "PythonHelp.h"
 
-#include "Message.h"
 #include "FolderView.h"
-#include "MailFolder.h"
-#include "MailFolderCC.h"
-
 #include "MDialogs.h"
 
 #include "gui/wxIconManager.h"
-
-#include "adb/AdbFrame.h"
-
 #include "gui/wxOptionsDlg.h"
-
-// test:
-#include   "SendMessageCC.h"
-#include   "MailFolderCC.h"
-
+#include "adb/AdbFrame.h"
 #include   "gui/wxMFrame.h"
 #include   "gui/wxComposeView.h"
 #include   "gui/wxFolderView.h"
@@ -208,6 +196,9 @@ wxMFrame::OnMenuCommand(int id)
       }
       break;
    }
+   case WXMENU_FILE_OPENANY:
+      MDialog_FolderOpen(this);
+      break;
    case WXMENU_FILE_CLOSE:
    {
       Close();

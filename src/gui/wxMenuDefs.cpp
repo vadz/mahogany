@@ -84,6 +84,7 @@ static const TbarItemInfo g_aToolBarData[] =
 
    // main frame
    { "tb_open",          WXMENU_FILE_OPEN,     "Open folder"           },
+   { "tb_open",          WXMENU_FILE_OPENANY,     "Open any folder"   },
    { "tb_mail_compose",  WXMENU_FILE_COMPOSE,  "Compose a new message" },
    { "tb_help",          WXMENU_HELP_ABOUT,    "About"                 },
    { "tb_exit",          WXMENU_FILE_EXIT,     "Exit the program"      },

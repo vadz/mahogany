@@ -16,16 +16,6 @@
 #   include "strutil.h"
 #   include "MApplication.h"
 #   include "MDialogs.h"
-
-// includes for c-client library
-extern "C"
-{
-#   include <mail.h>
-#   include <osdep.h>
-#   include <rfc822.h>
-#   include <smtp.h>
-#   include <nntp.h>
-}
 #   include "Profile.h"
 #endif // USE_PCH
 
@@ -48,165 +38,151 @@ static void CCQuiet(void) { mm_ignore_errors = true; }
 static void CCVerbose(void) { mm_ignore_errors = false; }
 
 
-bool
-MailFolderCC::Open(String const & filename)
+MailFolderCC::MailFolderCC(MailFolder::Type type,
+                           String const &path,
+                           ProfileBase *profile,
+                           String const &login,
+                           String const &password)
 {
-   realName = filename;
-   if(GetType() == MF_POP || GetType() == MF_IMAP)
-   {
-      MF_user = READ_CONFIG(profile, MP_POP_LOGIN);
-      MF_pwd = READ_CONFIG(profile, MP_POP_PASSWORD);
-   }
-
-   SetDefaultObj();
-   CCQuiet(); // first try, don't log errors
-   mailstream = mail_open(mailstream,(char *)realName.c_str(),
-           debugFlag ? OP_DEBUG : NIL);
-   SetDefaultObj(false);
-   CCVerbose();
-   if(mailstream == NIL)
-   {
-      // this will fail if file already exists, but it makes sure we can open it
-      // try again:
-      // if this fails, we want to know it, so no CCQuiet()
-      mail_create(NIL, (char *)filename.c_str());
-      SetDefaultObj();
-      mailstream = mail_open(mailstream,(char *)realName.c_str(),
-                             debugFlag ? OP_DEBUG : NIL);
-      SetDefaultObj(false);
-   }
-   if(mailstream == NIL)
-      return false; 
-   AddToMap(mailstream);
-
-   mail_status(mailstream, (char *)realName.c_str(), SA_MESSAGES|SA_RECENT|SA_UNSEEN);
-   String sequence = String("1:") + strutil_ultoa(numOfMessages);
-   mail_fetchfast(mailstream, (char *)sequence.c_str());
+   m_MailStream = NIL;
    
-   okFlag = true;
-   if(okFlag)
-      PY_CALLBACK(MCB_FOLDEROPEN, 0, profile);
-   return true;   // success
+   m_Profile = profile;
+   m_Profile->IncRef(); // we use it now
+   m_MailboxPath = path;
+   m_Login = login;
+   m_Password = password;
+   SetType(type);
 }
 
 MailFolderCC *
-MailFolderCC::OpenFolder(String const &name)
+MailFolderCC::OpenFolder(MailFolder::Type type,
+                         String const &name,
+                         ProfileBase *profile,
+                         String const &login,
+                         String const &password)
 {
-   StreamConnectionList::iterator i;
-   for(i = streamList.begin(); i != streamList.end(); i++)
-      if( (*i)->name == name )
-      {
-         (*i)->refcount++;
-         return (*i)->folder;
-      }
-   // not found:
-   MailFolderCC *mf =  new MailFolderCC(name);
-   if(mf && mf->IsInitialised())
+
+   MailFolderCC *mf;
+   String mboxpath;
+   
+   type = (MailFolder::Type)(type & MailFolder::MF_TYPEMASK);
+
+   switch(type)
+   {
+   case MailFolder::MF_INBOX:
+      mboxpath = "INBOX";
+      break;
+   case MailFolder::MF_FILE:
+      ASSERT(name.c_str());
+      if(*name.c_str() != DIR_SEPARATOR)
+         mboxpath << READ_APPCONFIG(MP_MBOXDIR) << '/';
+      mboxpath << name;
+      break;
+   case MailFolder::MF_POP:
+      mboxpath << '{' << name << "/pop3}";
+      break;
+   case MailFolder::MF_IMAP:
+      mboxpath << '{' << name << "/imap}";
+      break;
+   case MailFolder::MF_NNTP:
+      mboxpath << '{' << name << "/nntp}" << login;
+      break;
+   default:
+      FAIL_MSG("Unsupported folder type.");
+   }
+
+   mf = FindFolder(mboxpath);
+   if(mf)
+   {
+      mf->IncRef();
+      return mf;
+   }
+   
+   mf = new MailFolderCC(type,mboxpath,profile,login,password);
+   if(mf->Open())
       return mf;
    else
-   {
-      if(mf)
-         mf->Close();
-   }
+      mf->DecRef();
    return NULL;
 }
 
-MailFolderCC *
-MailFolderCC::OpenFolder(MailFolderType type, String const &name)
+
+bool
+MailFolderCC::Open(void)
 {
-   return NULL; // not implemented yet, needs new system of tracking mailboxes
-}
-
-void
-MailFolderCC::Close(void)
-{
-   StreamConnectionList::iterator i;
-   for(i = streamList.begin(); i != streamList.end(); i++)
-      if( (*i)->folder == this )
-      {
-         (*i)->refcount--;
-         if((*i)->refcount == 0)
-         {
-            StreamConnection *conn = *i;
-            delete conn;
-
-            streamList.erase(i);
-            if(mailstream)
-               mail_close(mailstream);
-            RemoveFromMap(mailstream);
-            delete this;
-         }
-      }
-   // still in use
-}
-
-void
-MailFolderCC::Create(String const & iname)
-{
-   okFlag = false;
-   mailstream = NIL;
-   symbolicName = iname;
-
-   profile = ProfileBase::CreateProfile(iname, NULL);
-
    // make sure we can use the library
    if(! cclientInitialisedFlag)
       CClientInit();
 
-   if(iname == String("INBOX"))
+   if(GetType() == MF_POP || GetType() == MF_IMAP)
    {
-      SetType(MF_INBOX);
-      Open(iname);
+      MF_user = m_Login;
+      MF_pwd = m_Password;
    }
-   else
+
+   SetDefaultObj();
+   CCQuiet(); // first try, don't log errors
+   m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
+                          debugFlag ? OP_DEBUG : NIL);
+   SetDefaultObj(false);
+   CCVerbose();
+   if(m_MailStream == NIL)
    {
-      // do not use a const char * here, because the next READ_CONFIG
-      // will overwrite the buffer!
-      String filename = READ_CONFIG(profile, MP_FOLDER_PATH);
-      // Undefined folders don't have a filename config setting, so
-      // they will return an empty string (NULL) here.
-      if(strutil_isempty(filename)) // assume we are a file
-      {
-         SetType(MF_FILE);
-         if( !IsAbsPath(iname) )
-         {
-            String tmp;
-            tmp = READ_CONFIG(profile, MP_MBOXDIR);
-            tmp += DIR_SEPARATOR;
-            tmp += iname;
-            Open(tmp);
-         }
-         else
-            Open(iname);
-      }
-      else
-      {
-         SetType((MailFolderType)READ_CONFIG(profile, (int)MP_FOLDER_TYPE));
-         Open(filename);
-      }
+      // this will fail if file already exists, but it makes sure we can open it
+      // try again:
+      // if this fails, we want to know it, so no CCQuiet()
+      mail_create(NIL, (char *)m_MailboxPath.c_str());
+      SetDefaultObj();
+      m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
+                             debugFlag ? OP_DEBUG : NIL);
+      SetDefaultObj(false);
    }
+   if(m_MailStream == NIL)
+      return false; 
+
+   AddToMap(m_MailStream); // now we are known
+
+   mail_status(m_MailStream, (char *)m_MailboxPath.c_str(), SA_MESSAGES|SA_RECENT|SA_UNSEEN);
+   String sequence = String("1:") + strutil_ultoa(numOfMessages);
+   mail_fetchfast(m_MailStream, (char *)sequence.c_str());
+   
+   okFlag = true;
+   if(okFlag)
+      PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
+   return true;   // success
+}
+
+MailFolderCC *
+MailFolderCC::FindFolder(String const &path)
+{
+   StreamConnectionList::iterator i;
+   for(i = streamList.begin(); i != streamList.end(); i++)
+      if( (*i)->name == path )
+         return (*i)->folder;
+   return NULL;
 }
 
 void
 MailFolderCC::Ping(void)
 {
 #if DEBUG
-   String tmp = "MailFolderCC::Ping() on Folder " + realName;
+   String tmp = "MailFolderCC::Ping() on Folder " + m_MailboxPath;
    LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
-   mail_ping(mailstream);
-}
-
-// NB: viewList shouldn't own elements because they're deleted in ~wxFolderView
-MailFolderCC::MailFolderCC(String const & iname)
-            : viewList(FALSE) // doesn't own elements
-{
-   Create(iname);
+   mail_ping(m_MailStream);
 }
 
 MailFolderCC::~MailFolderCC()
 {
-   profile->DecRef();
+   StreamConnectionList::iterator i;
+   for(i = streamList.begin(); i != streamList.end(); i++)
+      if( (*i)->folder == this )
+      {
+         streamList.erase(i);
+         if(m_MailStream) mail_close(m_MailStream);
+         RemoveFromMap(m_MailStream);
+      }
+   GetProfile()->DecRef();
 }
 
 void
@@ -235,7 +211,7 @@ MailFolderCC::AppendMessage(String const &msg)
 
    INIT(&str, mail_string, (void *) msg.c_str(), msg.Length());
 
-   if(! mail_append(NIL,(char *)realName.c_str(),&str))
+   if(! mail_append(NIL,(char *)m_MailboxPath.c_str(),&str))
       ERRORMESSAGE(("cannot append message"));
 }
 
@@ -255,12 +231,29 @@ MailFolderCC::UpdateViews(void)
       i;
    for(i = viewList.begin(); i != viewList.end(); i++)
       (*i)->Update();
-   PY_CALLBACK(MCB_FOLDERUPDATE, 0, profile);
+   PY_CALLBACK(MCB_FOLDERUPDATE, 0, GetProfile());
 }
 
-const String &
+String
 MailFolderCC::GetName(void) const
 {
+   String symbolicName;
+   switch(GetType())
+   {
+   case MailFolder::MF_INBOX:
+      symbolicName = "INBOX"; break;
+   case MailFolder::MF_FILE:
+      symbolicName = m_MailboxPath; break;
+   case MailFolder::MF_POP:
+      symbolicName << "pop:" << m_Login; break;
+   case MailFolder::MF_IMAP:
+      symbolicName << "imap:" << m_Login; break;
+   case MailFolder::MF_NNTP:
+      symbolicName << "news:" << m_Login;
+   default:
+      // just to keep the compiler happy
+      ;
+   }
    return symbolicName;
 }
 
@@ -278,7 +271,7 @@ MailFolderCC::GetMessageStatus(unsigned int msgno,
                 unsigned int *year)
 {
    int status;
-   MESSAGECACHE *mc = mail_elt(mailstream, msgno);
+   MESSAGECACHE *mc = mail_elt(m_MailStream, msgno);
 
    if(size)    *size = mc->rfc822_size;
    if(day)  *day = mc->day;
@@ -296,7 +289,7 @@ MailFolderCC::GetMessageStatus(unsigned int msgno,
 Message *
 MailFolderCC::GetMessage(unsigned long index)
 {
-   return new MessageCC(this,index,mail_uid(mailstream,index));
+   return new MessageCC(this,index,mail_uid(m_MailStream,index));
 }
 
 
@@ -328,20 +321,20 @@ MailFolderCC::SetMessageFlag(unsigned long index, int flag, bool set)
    const char *callback = set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG;
 
    if(PY_CALLBACKVA((callback, 1, this, this->GetClassName(),
-                     profile, "ls", (signed long) index, flagstr),1)  )
+                     GetProfile(), "ls", (signed long) index, flagstr),1)  )
    {
       if(set)
-         mail_setflag(mailstream, (char *)seq.c_str(), (char *)flagstr);
+         mail_setflag(m_MailStream, (char *)seq.c_str(), (char *)flagstr);
       else
-         mail_clearflag(mailstream, (char *)seq.c_str(), (char *)flagstr);
+         mail_clearflag(m_MailStream, (char *)seq.c_str(), (char *)flagstr);
    }
 }
                       
 void
 MailFolderCC::ExpungeMessages(void)
 {
-   if(PY_CALLBACK(MCB_FOLDEREXPUNGE,1,profile))
-      mail_expunge (mailstream);
+   if(PY_CALLBACK(MCB_FOLDEREXPUNGE,1,GetProfile()))
+      mail_expunge (m_MailStream);
 }
 
    
@@ -409,8 +402,7 @@ MailFolderCC::AddToMap(MAILSTREAM const *stream)
    StreamConnection  *conn = new StreamConnection;
    conn->folder = this;
    conn->stream = stream;
-   conn->name = symbolicName;
-   conn->refcount = 1;
+   conn->name = m_MailboxPath;
    streamList.push_front(conn);
 }
 
@@ -459,7 +451,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
    {
 #if DEBUG
       String
-    tmp = "MailFolderCC::mm_exists() for folder " + mf->realName
+    tmp = "MailFolderCC::mm_exists() for folder " + mf->m_MailboxPath
     + String(" n: ") + strutil_ultoa(number);
       LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
@@ -550,8 +542,7 @@ MailFolderCC::mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS
       return;  // oops?!
 
 #if DEBUG
-   String   tmp = "MailFolderCC::mm_status() for folder " +
-      mf->realName;
+   String   tmp = "MailFolderCC::mm_status() for folder " + mf->m_MailboxPath;
    LOGMESSAGE((M_LOG_DEBUG, Str(tmp)));
 #endif
    
@@ -663,7 +654,7 @@ bool
 MailFolderPopCC::Open(void)
 {
    String mboxname = "{";
-   mboxname += READ_CONFIG(profile, MP_POP_HOST);
+   mboxname += READ_CONFIG(GetProfile(), MP_POP_HOST);
    mboxname +="/pop3}";
    
    return MailFolderCC::Open(mboxname.c_str());

@@ -20,11 +20,15 @@
 // includes for c-client library
 extern "C"
 {
-#   include   <mail.h>
+#     include <stdio.h>
+#     include <mail.h>      
+#     include <osdep.h>
+#     include <rfc822.h>
+#     include <smtp.h>
+#     include <nntp.h>
+#     include <misc.h>
 }
 #endif
-
-struct __docxxfix;
 
 #include  "MailFolder.h"
 #include  "FolderView.h"
@@ -40,8 +44,6 @@ struct StreamConnection
 {
    /// pointer to a MailFolderCC object
    MailFolderCC    *folder;
-   /// reference counter
-   int refcount;
    /// pointer to the associated MAILSTREAM
    MAILSTREAM   const *stream;
    /// name of the MailFolderCC object
@@ -69,22 +71,34 @@ public:
 
    /** opens a mail folder in a save way.
        @param name name of the folder
+       @param profile profile to use
    */
-   static MailFolderCC* OpenFolder(String const &name);
+   static MailFolderCC* OpenFolder(String const &name, ProfileBase *profile);
 
-   /** opens a mail folder in a save way.
-       @param type type of mailfolder
-       @param name depending on type
+   /**
+      Opens an existing mail folder of a certain type.
+      The path argument is as follows:
+      <ul>
+      <li>MF_INBOX: unused
+      <li>MF_FILE:  filename, either relative to MP_MBOXDIR (global
+                    profile) or absolute
+      <li>MF_POP:   hostname
+      <li>MF_IMAP:  hostname
+      <li>MF_NNTP:  newshost
+      <ul>
+      @param type one of the supported types
+      @param path either a hostname or filename depending on type
+      @param profile parent profile
+      @param login only used for POP,IMAP and NNTP (as the newsgroup name)
+      @param password only used for POP, IMAP
+      
    */
-   static MailFolderCC* OpenFolder(MailFolderType type, String const &name);
+   static MailFolderCC * OpenFolder(MailFolder::Type type,
+                                    String const &path,
+                                    ProfileBase *profile,
+                                    String const &login,
+                                    String const &password);
    
-   /** closes a mail folder in a save way.
-          */
-   void Close(void);
-
-   /// default destructor
-   ~MailFolderCC();
-
    /// assume object to only be initialised when stream is ok
    bool IsInitialised(void) const { return okFlag; }
 
@@ -93,21 +107,8 @@ public:
    /// enable/disable debugging:
    void   DoDebug(bool flag = true) { debugFlag = flag; }
 
-protected:
-   /** open an existing mailbox:
-       @param   filename the name of the "file" to open
-       */
-   bool   Open(String const & filename);
-
-   /** creates an object representing a folder
-       @param name name of the folder (relative name!)
-   */
-   MailFolderCC(String const & name);
-
-   /** creation of the object
-       @param name name of the folder
-   */
-   void   Create(String const & name);
+   // checks whether a folder with that path exists
+   static MailFolderCC *FindFolder(String const &path);
       
 public:
 
@@ -126,7 +127,7 @@ public:
    /** return a symbolic name for mail folder
        @return the folder's name
    */
-   String const & GetName(void) const;
+   String GetName(void) const;
 
    /** get number of messages
        @return number of messages
@@ -192,6 +193,18 @@ public:
    void UpdateViews(void);
    
 private:
+   /// private constructor, does basic initialisation
+   MailFolderCC(MailFolder::Type type,
+                String const &path,
+                ProfileBase *profile,
+                String const &login,
+                String const &password);
+
+   /** Try to open the mailstream for this folder.
+       @return true on success
+   */
+   bool   Open(void);
+
    /// for POP/IMAP boxes, this holds the user id for the callback
    static String MF_user;
    /// for POP/IMAP boxes, this holds the password for the callback
@@ -201,9 +214,9 @@ private:
    FolderViewList   viewList;
    
    /// which type is this mailfolder?
-   MailFolderType   m_folderType;
+   MailFolder::Type   m_folderType;
    ///   mailstream associated with this folder
-   MAILSTREAM   *mailstream;
+   MAILSTREAM   *m_MailStream;
 
    /// is the MAILSTREAM ok or was there an error?
    bool      okFlag;
@@ -211,12 +224,9 @@ private:
    /// number of messages in mailbox
    long      numOfMessages;
 
-   /// name of mailbox
-   String   symbolicName;
-
-   /// filename of mailbox or name describing IMAP/POP3 connection
-   String   realName;
-
+   /// Path to mailbox
+   String   m_MailboxPath;
+   
    /// do we want c-client's debug messages?
    bool   debugFlag;
 
@@ -256,12 +266,12 @@ private:
    /** for use by class MessageCC
        @return MAILSTREAM of the folder
    */
-   inline MAILSTREAM   *Stream(void) const{  return mailstream; }
+   inline MAILSTREAM   *Stream(void) const{  return m_MailStream; }
    friend class MessageCC;
 
 protected:
-   void SetType(MailFolderType type) { m_folderType = type; }
-   MailFolderType GetType(void) { return m_folderType; }
+   void SetType(MailFolder::Type type) { m_folderType = type; }
+   MailFolder::Type GetType(void) const { return m_folderType; }
 public:
    /** @name common callback routines
        They all take a stram argument and the number of a message.
@@ -356,7 +366,10 @@ public:
    static void mm_fatal(char *str);
 
    //@}
-   
+private:
+   /// destructor
+   ~MailFolderCC();
+
 public:
    DEBUG_DEF
 };

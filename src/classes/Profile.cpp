@@ -104,6 +104,8 @@ public:
    /// like the constructor, but reuses existing objects
    static ProfileBase * CreateProfile(STRINGARG iClassName,
                                       ProfileBase const *Parent);
+   /// makes an empty profile, just inheriting from Parent
+   static ProfileBase * CreateEmptyProfile(ProfileBase const *Parent);
 
    /// get the associated config object
    wxConfigBase *GetConfig() const { return m_config; }
@@ -162,6 +164,8 @@ private:
 
    */
    Profile(STRINGARG iClassName, ProfileBase const *Parent);
+   /// constructor for empty, inheriting profile
+   Profile(ProfileBase const *Parent);
    /// The wxConfig object.
    wxConfigBase  *m_config;
    /// The parent profile.
@@ -237,6 +241,7 @@ private:
 };
 
 
+
 /** A structure holding name and wxConfig pointer.
    This is the element of the list.
 */
@@ -270,6 +275,12 @@ ProfileBase *
 ProfileBase::CreateProfile(STRINGARG classname, ProfileBase const *parent)
 {
    return  Profile::CreateProfile(classname, parent);
+}
+
+ProfileBase *
+ProfileBase::CreateEmptyProfile(ProfileBase const *parent)
+{
+   return Profile::CreateEmptyProfile(parent);
 }
 
 ProfileBase *
@@ -393,7 +404,7 @@ wxConfigProfile::writeEntry(STRINGARG key, long value)
    profile. Thus, an inheriting profile structure is created.
 */
 Profile::Profile(STRINGARG iClassName, ProfileBase const *Parent)
-       : profileName(iClassName)
+   : profileName(iClassName)
 {
    m_config = NULL;   // set it before using CHECK()
    parentProfile = Parent;
@@ -404,7 +415,7 @@ Profile::Profile(STRINGARG iClassName, ProfileBase const *Parent)
    {
       String tmp = READ_APPCONFIG(MC_PROFILE_PATH);
       PathFinder pf(tmp);
-
+      
       String fileName = profileName + READ_APPCONFIG(MC_PROFILE_EXTENSION);
       fullFileName = pf.FindFile(fileName, &isOk);
       if( !isOk )
@@ -413,15 +424,21 @@ Profile::Profile(STRINGARG iClassName, ProfileBase const *Parent)
    else
       // easy...
       fullFileName << profileName << READ_APPCONFIG(MC_PROFILE_EXTENSION);
-
    if ( READ_APPCONFIG(MC_CREATE_PROFILES)|| wxFileExists(fullFileName) )
    {
       m_config = new wxFileConfig(M_APPLICATIONNAME, M_VENDORNAME,
-                                      fullFileName,wxString(""),
-                                      wxCONFIG_USE_LOCAL_FILE);
+                                  fullFileName,wxString(""),
+                                  wxCONFIG_USE_LOCAL_FILE);
    }
-
    ms_cfManager.Register(iClassName,this);
+}
+
+// constructor for empty profile
+Profile::Profile(ProfileBase const *Parent)
+   : profileName("anonymous")
+{
+   m_config = NULL;   // set it before using CHECK()
+   parentProfile = Parent;
 }
 
 ProfileBase *
@@ -433,6 +450,11 @@ Profile::CreateProfile(STRINGARG iClassName, ProfileBase const *parent)
    return profile;
 }
 
+ProfileBase *
+Profile::CreateEmptyProfile(ProfileBase const *parent)
+{
+   return new Profile(parent); // constructor for empty profile
+}
 
 Profile::~Profile()
 {

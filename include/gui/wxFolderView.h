@@ -46,7 +46,7 @@ public:
    wxFVTimer(MailFolder *imf)
       {
     mf = imf;
-    Start(mf->GetProfile()->readEntry(MP_UPDATEINTERVAL,MP_UPDATEINTERVAL_D)*1000);
+    Start(mf->GetUpdateInterval()*1000);
       }
    /// get called on timeout and pings the mailfolder
    void Notify(void)
@@ -140,8 +140,7 @@ public:
    /// return the MWindow pointer:
    MWindow *GetWindow(void) { return m_SplitterWindow; }
    /// return a profile pointer:
-   ProfileBase *GetProfile(void)
-      { return mailFolder ? mailFolder->GetProfile() : NULL; }
+   inline ProfileBase *GetProfile(void) { return m_Profile; }
 protected:
    /** Save messages to a folder.
        @param n number of messages
@@ -178,6 +177,8 @@ private:
    wxMessageView *m_MessagePreview;
    /// semaphore to avoid duplicate calling of Update
    bool m_UpdateSemaphore;
+   /// Profile:
+   ProfileBase *m_Profile;
 }; 
 
 class wxFolderViewFrame : public wxMFrame

@@ -15,21 +15,10 @@
 #include   "Mcommon.h"
 
 #ifndef USE_PCH
-#  include "strutil.h"
-
-   // includes for c-client library
-   extern "C"
-   {
-#   include   <stdio.h>
-#   include   <mail.h>
-#   include   <osdep.h>
-#   include   <rfc822.h>
-#   include   <smtp.h>
-#   include   <nntp.h>
-   }
+#   include "strutil.h"
+#   include "Profile.h"
 #endif // USE_PCH
 
-#include "Profile.h"
 #include "FolderView.h"
 
 #include "Mdefaults.h"

@@ -22,25 +22,14 @@
 
 #   include <strings.h>
 
-   // includes for c-client library
-   extern "C"
-   {
-#     include <stdio.h>
-#     include <mail.h>      
-#     include <osdep.h>
-#     include <rfc822.h>
-#     include <smtp.h>
-#     include <nntp.h>
-#     include <misc.h>
-   }
 
 #endif // USE_PCH
 
 #include   "Mdefaults.h"
 #include   "MApplication.h"
 #include   "Message.h"
-#include   "SendMessageCC.h"
 #include   "MailFolderCC.h"
+#include   "SendMessageCC.h"
 
 extern "C"
 {
@@ -367,9 +356,9 @@ SendMessageCC::WriteToFolder(String const &name)
    String str;
 
    WriteToString(str);
-   MailFolderCC *mf = MailFolderCC::OpenFolder(name);
+   MailFolder *mf = MailFolder::OpenFolder(MailFolder::MF_PROFILE,name);
    mf->AppendMessage(str);
-   mf->Close();
+   mf->DecRef();
 }
 
 SendMessageCC::~SendMessageCC()

@@ -13,8 +13,7 @@
 #   pragma interface "SendMessageCC.h"
 #endif
 
-#include   "MessageCC.h"
-#include   "Profile.h"
+class ProfileBase;
 
 /** A class representing a message during composition.
  */

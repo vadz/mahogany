@@ -32,7 +32,6 @@
 
 #include "FolderView.h"
 #include "MailFolder.h"
-#include "MailFolderCC.h"
 #include "MessageView.h"
 
 #include "gui/wxFolderView.h"
@@ -172,8 +171,8 @@ wxFolderView::wxFolderView(String const & folderName, MWindow *iparent)
    m_NumOfMessages = 0; // At the beginning there was nothing.
    m_UpdateSemaphore = false;
    m_SplitterWindow = 0;
-   
-   mailFolder = MailFolderCC::OpenFolder(folderName);
+   m_Profile = ProfileBase::CreateProfile(folderName, NULL);
+   mailFolder = MailFolder::OpenFolder(MailFolder::MF_PROFILE,folderName);
    if ( !mailFolder )
    {
       ERRORMESSAGE((_("Can't open folder '%s'."), folderName.c_str()));
@@ -239,10 +238,10 @@ wxFolderView::Update(void)
       mptr = mailFolder->GetMessage(i+1);
       nstatus = mailFolder->GetMessageStatus(i+1,&nsize,&day,&month,&year);
       status = "";
-      if(nstatus & MSG_STAT_UNREAD)  status += 'U';
-      if(nstatus & MSG_STAT_DELETED) status += 'D';
-      if(nstatus & MSG_STAT_REPLIED) status += 'R';
-      if(nstatus & MSG_STAT_RECENT)  status += 'N';
+      if(nstatus & MailFolder::MSG_STAT_UNREAD)  status += 'U';
+      if(nstatus & MailFolder::MSG_STAT_DELETED) status += 'D';
+      if(nstatus & MailFolder::MSG_STAT_REPLIED) status += 'R';
+      if(nstatus & MailFolder::MSG_STAT_RECENT)  status += 'N';
 
       subject = mptr->Subject();
       sender  = mptr->From();
@@ -266,13 +265,14 @@ wxFolderView::~wxFolderView()
       if(mailFolder)
       { // mark messages as seen
          for(int i = 0; i < m_NumOfMessages; i++)
-            mailFolder->SetMessageFlag(i, MSG_STAT_UNREAD, false);
+            mailFolder->SetMessageFlag(i, MailFolder::MSG_STAT_UNREAD, false);
       }
                
       timer->Stop();
       GLOBAL_DELETE timer;
       mailFolder->RegisterView(this,false);
-      mailFolder->Close();
+      mailFolder->DecRef();
+      m_Profile->DecRef();
    }
 }
 
@@ -398,7 +398,7 @@ wxFolderView::SaveMessages(const wxArrayInt& selections, String const &folderNam
 {
    int i;
 
-   MailFolderCC   *mf;
+   MailFolder   *mf;
    
    if(strutil_isempty(folderName))
       return;
@@ -406,9 +406,9 @@ wxFolderView::SaveMessages(const wxArrayInt& selections, String const &folderNam
    int n = selections.Count();
    for(i = 0; i < n; i++)
    {
-      mf = MailFolderCC::OpenFolder(Str(folderName));
+      mf = MailFolder::OpenFolder(MailFolder::MF_PROFILE,folderName);
       mf->AppendMessage(*(mailFolder->GetMessage(selections[i]+1)));
-      mf->Close();
+      mf->DecRef();
    }
 
    wxLogStatus(GetFrame(parent), _("%d messages saved"), n);
@@ -432,7 +432,7 @@ wxFolderView::SaveMessagesToFile(const wxArrayInt& selections)
       filename =
       MDialog_FileRequester(NULLstring, parent, NULLstring,
                             NULLstring, NULLstring, NULLstring, true,
-                            mailFolder->GetProfile());   
+                            m_Profile);   
 
    // truncate the file
    wxFile file(filename, wxFile::write);
@@ -452,17 +452,17 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
    Message *msg;
 
    int n = selections.Count();
-   prefix = READ_CONFIG(mailFolder->GetProfile(), MP_REPLY_MSGPREFIX);
+   prefix = READ_CONFIG(m_Profile, MP_REPLY_MSGPREFIX);
    for(i = 0; i < n; i++)
    {
       cv = GLOBAL_NEW wxComposeView(_("Reply"),parent,
-                                    mailFolder->GetProfile());
+                                    m_Profile);
       str = "";
       msg = mailFolder->GetMessage(selections[i]+1);
       np = msg->CountParts();
       for(p = 0; p < np; p++)
       {
-         if(msg->GetPartType(p) == TYPETEXT)
+         if(msg->GetPartType(p) == Message::MSG_TYPETEXT)
          {
             str = msg->GetPartContent(p);
             cptr = str.c_str();
@@ -491,7 +491,7 @@ wxFolderView::ReplyMessages(const wxArrayInt& selections)
       if(name.length() > 0)
          email = name + String(" <") + email + String(">");
       cv->SetTo(email);
-      cv->SetSubject(READ_CONFIG(mailFolder->GetProfile(), MP_REPLY_PREFIX)
+      cv->SetSubject(READ_CONFIG(GetProfile(), MP_REPLY_PREFIX)
                      + msg->Subject());
    }
 }
@@ -507,18 +507,18 @@ wxFolderView::ForwardMessages(const wxArrayInt& selections)
    Message *msg;
 
    int n = selections.Count();
-   prefix = READ_CONFIG(mailFolder->GetProfile(), MP_REPLY_MSGPREFIX);
+   prefix = READ_CONFIG(GetProfile(), MP_REPLY_MSGPREFIX);
    for(i = 0; i < n; i++)
    {
       str = "";
       msg = mailFolder->GetMessage(selections[i]+1);
       cv = GLOBAL_NEW wxComposeView(_("Forward"),parent,
-                                    mailFolder->GetProfile());
-      cv->SetSubject(READ_CONFIG(mailFolder->GetProfile(), MP_FORWARD_PREFIX)
+                                    GetProfile());
+      cv->SetSubject(READ_CONFIG(GetProfile(), MP_FORWARD_PREFIX)
                                  + msg->Subject());
 
       mailFolder->GetMessage(selections[i]+1)->WriteToString(str);
-      cv->InsertData(strutil_strdup(str),str.Length(),"MESSAGE/RFC822",TYPEMESSAGE);
+      cv->InsertData(strutil_strdup(str),str.Length(),"MESSAGE/RFC822",Message::MSG_TYPEMESSAGE);
    }
 
    wxLogStatus(GetFrame(parent), _("%d messages forwarded"), n);

@@ -311,14 +311,16 @@ strutil_findurl(String &str, String &url)
 {
    int i;
    String before = "";
-   const char *cptr = str.c_str();;
+   const char *cptr = str.c_str();
 
    url = "";
    while(*cptr)
    {
       for(i = 0; urlnames[i]; i++)
       {
-         if(strncmp(cptr,urlnames[i],strlen(urlnames[i])) == 0)
+         if(strncmp(cptr,urlnames[i],strlen(urlnames[i])) == 0
+            && (i > 0 || ((cptr != str.c_str() && isspace(*(cptr-1)))))
+            )
          {
             while(strutil_isurlchar(*cptr))
                url += *cptr++;
