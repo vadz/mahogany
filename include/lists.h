@@ -366,8 +366,7 @@ public: \
       iterator(const name##_common::iterator &i) \
          : name##_common::iterator(i) {} \
       operator_star_and_inline \
-      value_type operator->(void) \
-         { return name##_common::iterator::operator*(); } \
+      value_type operator->(void) { return GetData(); } \
    }; \
    inline iterator erase(iterator i) \
       { \
