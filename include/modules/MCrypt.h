@@ -9,7 +9,7 @@
  * License    : M license                                             *
  **********************************************************************/
 
-#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL_crypto
 
 #ifndef MCRYPT_H
 #define MCRYPT_H
@@ -238,4 +238,4 @@ inline void MCrypt::SetComment(const wxString & comment)
 
 
 #endif // MCRYPT_H
-#endif // EXPERIMENTAL
+#endif // EXPERIMENTAL_crypto

@@ -9,7 +9,7 @@
  * License: M license                                              *
  ******************************************************************/
 
-#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL_crypto
 
 #include <wx/intl.h>
 #include <wx/log.h>

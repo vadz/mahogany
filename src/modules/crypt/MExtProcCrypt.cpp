@@ -10,7 +10,7 @@
  * License  : M license                                              *
  ********************************************************************/
 
-#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL_crypto
 
 #include <wx/intl.h>
 #include <wx/log.h>
@@ -104,4 +104,4 @@ void MExtProcCrypt::CryptProcess::OnIdle(wxIdleEvent & event)
    }
 }
 
-#endif // EXPERIMENTAL
+#endif // EXPERIMENTAL_crypto

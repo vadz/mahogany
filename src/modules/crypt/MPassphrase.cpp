@@ -10,7 +10,7 @@
  *********************************************************************/
 
 
-#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL_crypto
 
 #include <wx/intl.h>
 #include <wx/textdlg.h>
@@ -159,4 +159,4 @@ bool MDecryptedPassphrase::GetPassphraseFromUser(
 }
 
 
-#endif // EXPERIMENTAL
+#endif // EXPERIMENTAL_crypto

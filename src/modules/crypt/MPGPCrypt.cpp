@@ -14,7 +14,7 @@
  * Test it in Windows. It will not work with PGP 5.x in windows.
  ******************************************************************/
 
-#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL_crypto
 
 #include <stdlib.h>
 #include <wx/intl.h>
@@ -289,4 +289,4 @@ int MPGPCrypt::GetPublicKey(wxString & pk) const
 }
      
 
-#endif // EXPERIMENTAL
+#endif // EXPERIMENTAL_crypto

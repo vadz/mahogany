@@ -9,7 +9,7 @@
  * License    : M license                                             *
  *********************************************************************/
 
-#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL_crypto
 
 #ifndef MPASSPHRASE_H
 #define MPASSPHRASE_H
@@ -207,4 +207,4 @@ inline MDecryptedPassphrase & MDecryptedPassphrase::operator =(
 
 
 #endif // MPASSPHRASE_H
-#endif // EXPERIMENTAL
+#endif // EXPERIMENTAL_crypto

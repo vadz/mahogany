@@ -9,7 +9,7 @@
  * License    : M license                                            *
  ********************************************************************/
 
-#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL_crypto
 
 #ifndef MPGPCRYPT_H
 #define MPGPCRYPT_H
@@ -55,4 +55,4 @@ public:
 };
 
 #endif // MPGPCRYPT_H
-#endif // EXPERIMENTAL
+#endif // EXPERIMENTAL_crypto

@@ -11,7 +11,7 @@
  * License    : M license                                            *
  *********************************************************************/
 
-#ifdef EXPERIMENTAL
+#ifdef EXPERIMENTAL_crypto
 
 #include <stdlib.h>
 
@@ -192,4 +192,4 @@ inline void MExtProcCrypt::CryptProcess::UnsetEnv(
 
 
 #endif // EXTPROCCRYPT
-#endif // EXPERIMENTAL
+#endif // EXPERIMENTAL_crypto
