@@ -109,13 +109,15 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
          m_FolderView->DeleteMessages(selections);
          break;
       default:
-         //FIXME: this is correct but doesn't work well event.Skip();
-         wxListCtrl::ProcessEvent(event);
+         event.Skip();
+         SetFocus();  //FIXME ugly wxGTK listctrl bug workaround
       }
    }
    else
-      //FIXME: this is correct but doesn't work well event.Skip();
-      wxListCtrl::ProcessEvent(event);
+   {
+      event.Skip();
+      SetFocus();  //FIXME ugly wxGTK listctrl bug workaround
+   }
 }
 
 
