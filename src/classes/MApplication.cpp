@@ -735,40 +735,47 @@ MAppBase::OnMEvent(MEventData& event)
                String message;
 
                unsigned long number = mailevent.GetNumber();
-               unsigned i;
-               unsigned found = 0;
+               unsigned long found = 0;
                if ( number <= (unsigned long) READ_CONFIG(profile,
                                                           MP_SHOW_NEWMAILINFO))
                {
-                  for(i = 0; i < number; i++)
+                  message = _("You have received several new messages:\n");
+                  for( unsigned long i = 0; i < number; i++)
                   {
                      Message *msg =
                         folder->GetMessage(mailevent.GetNewMessageIndex(i));
                      if ( msg )
                      {
-                        message << _("Subject: ") << msg->Subject() << ' '
-                                << _("From: ") << msg->From()
-                                << '\n'
-                                << _("in folder '") << folder->GetName() << "'\n\n";
+                        if ( !message.empty() )
+                           message << '\n';
+
+                        message << _("\tIn folder '") << folder->GetName() << "'\n"
+                                << _("\tFrom: '") << msg->From()
+                                << _("' with subject: ") << msg->Subject();
+
                         msg->DecRef();
                         found++;
                      }
                      else
+                     {
                         FAIL_MSG("new mail received but no new message?");
+                     }
                   }
                }
-               else
+               else // too many new messages
                {
                   // it seems like a better idea to give this brief message in case
                   // of several messages
-                  message.Printf(_("You have received %lu new messages\nin folder '%s'."),
+                  message.Printf(_("You have received %lu new messages\n"
+                                   "in folder '%s'."),
                                  number, folder->GetName().c_str());
                   found = number;
                }
-               // This test is there as the messages might have gone
-               // in the meantime, as happens when filtering.
-               if(found > 0)
-                  wxLogMessage(message);
+
+               // This test is there as the messages might have gone in the
+               // meantime, as happens when filtering.
+               if ( found > 0 )
+                  LOGMESSAGE((M_LOG_WINONLY, message));
             }
          }
    }

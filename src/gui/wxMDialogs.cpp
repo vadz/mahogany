@@ -3027,7 +3027,8 @@ size_t MDialog_GetSelections(const wxString& message,
                              const wxString& caption,
                              const wxArrayString& choices,
                              wxArrayInt *selections,
-                             MWindow *parent)
+                             MWindow *parent,
+                             const wxString& confpathOrig)
 {
    wxCHECK_MSG( selections, 0, _T("selections pointer can't be NULL") );
 
@@ -3037,9 +3038,31 @@ size_t MDialog_GetSelections(const wxString& message,
       return 0;
    }
 
+   wxString confpath = confpathOrig;
+   if ( confpath.empty() )
+   {
+      // use default
+      confpath = "MultiSelect";
+   }
+
+   int x, y, w, h;
+   wxMFrame::RestorePosition(confpath, &x, &y, &w, &h);
+
    wxMultipleChoiceDialog dlg(parent, message, caption, choices, selections);
 
-   return dlg.ShowModal() == wxID_OK ? selections->GetCount() : 0;
+   dlg.Move(x, y);
+   dlg.SetSize(w, h);
+
+   if ( dlg.ShowModal() != wxID_OK )
+   {
+      // cancelled, don't save the position and size
+      return 0;
+   }
+
+   // save the position and size
+   wxMFrame::SavePosition(confpath, &dlg);
+
+   return selections->GetCount();
 }
 
 // ----------------------------------------------------------------------------

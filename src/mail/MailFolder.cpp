@@ -1798,7 +1798,7 @@ static void SortListing(MailFolder *mf, HeaderInfoList *hil, long sortOrder)
 void
 MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
 {
-   UIdType n = (*hilp).Count();
+   UIdType n = hilp->Count();
    if ( !n )
       return;
 
@@ -1822,10 +1822,11 @@ MailFolderCmn::CheckForNewMail(HeaderInfoList *hilp)
    UIdType highestId = m_LastNewMsgUId;
    for ( UIdType i = 0; i < n; i++ )
    {
-      UIdType uid = (*hilp)[i]->GetUId();
+      HeaderInfo *hi = hilp->GetItemByIndex(i);
+      UIdType uid = hi->GetUId();
       if ( uid > m_LastNewMsgUId )
       {
-         if ( IsNewMessage((*hilp)[i]) )
+         if ( IsNewMessage(hi) )
          {
             messageIDs[nextIdx++] = uid;
          }

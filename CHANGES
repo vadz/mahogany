@@ -4,6 +4,7 @@
 Release 0.62 'Mars'
 -------------------------------------------------------------------------------
 
+20.02.01 VZ: made new mail reporting less intrusive
 16.02.01 VZ: added highlighting of folders with flagged messages in the tree
                 and a menu command to flag messages
              don't show duplicates in the address completion dialog

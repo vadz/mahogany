@@ -354,13 +354,15 @@ int MDialog_GetSelection(const wxString& message,
   @param choices is the array of strings to choose from
   @param selections is the array filled by function with selections
   @param parent is the parent window
+  @param confpath the path in config for storing the window position
   @return the number of selected items
 */
 size_t MDialog_GetSelections(const wxString& message,
                              const wxString& caption,
                              const wxArrayString& choices,
                              wxArrayInt *selections,
-                             wxWindow *parent = NULL);
+                             wxWindow *parent = NULL,
+                             const wxString& confpath = "");
 
 /**
   Show a dialog allowing the user to show a subset of a set of strings and the

@@ -280,7 +280,8 @@ int InteractivelyCollectAddresses(const wxArrayString& addresses,
                     _("Save addresses"),
                     addresses,
                     &selections,
-                    parent
+                    parent,
+                    "AddrExtract"
                    );
 
     if ( count > 0 )
@@ -342,6 +343,8 @@ int InteractivelyCollectAddresses(const wxArrayString& addresses,
             entry->SetField(AdbField_FullName, name);
             entry->SetField(AdbField_EMail, email);
          }
+
+         wxLogStatus(parent, _("Saved %u addresses."), count);
        }
        //else: cancelled
     }
