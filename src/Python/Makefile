@@ -23,6 +23,15 @@ include ../../makerules $(wildcard *.d)
 ifdef SWIG
 swiglib.cpp: swiglib.i
 	$(SWIG) $(SWIGFLAGS_LIBSWIG) -o $@ $<
+
+%.cpp %.py: %.i
+	$(SWIG) $(SWIGFLAGS_LIBSWIG) -o $@ $<
+
+%.cpp-swig: %.cpp
+	cp $< $@
+
+%.py-swig: %.py
+	cp $< $@
 endif
 
 Minit.py: .src/INIT/Minit.py

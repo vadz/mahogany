@@ -18,7 +18,7 @@
 %}
 
 %import MString.i
-%import Profile.i
+%import MProfile.i
 %import Message.i
 
 

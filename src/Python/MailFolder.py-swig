@@ -1,0 +1,67 @@
+# This file was created automatically by SWIG.
+import MailFolderc
+
+from MString import *
+
+from Message import *
+
+from MProfile import *
+
+from MObject import *
+class SendMessageCC:
+    Prot_SMTP = MailFolderc.SendMessageCC_Prot_SMTP
+    Prot_NNTP = MailFolderc.SendMessageCC_Prot_NNTP
+    Prot_Default = MailFolderc.SendMessageCC_Prot_Default
+    def __init__(self,*args):
+        self.this = apply(MailFolderc.new_SendMessageCC,args)
+        self.thisown = 1
+
+    def SetSubject(*args):
+        val = apply(MailFolderc.SendMessageCC_SetSubject,args)
+        return val
+    def SetAddresses(*args):
+        val = apply(MailFolderc.SendMessageCC_SetAddresses,args)
+        return val
+    def GetProfile(*args):
+        val = apply(MailFolderc.SendMessageCC_GetProfile,args)
+        return val
+    def AddPart(*args):
+        val = apply(MailFolderc.SendMessageCC_AddPart,args)
+        return val
+    def WriteToString(*args):
+        val = apply(MailFolderc.SendMessageCC_WriteToString,args)
+        return val
+    def WriteToFile(*args):
+        val = apply(MailFolderc.SendMessageCC_WriteToFile,args)
+        return val
+    def WriteToFolder(*args):
+        val = apply(MailFolderc.SendMessageCC_WriteToFolder,args)
+        return val
+    def AddHeaderEntry(*args):
+        val = apply(MailFolderc.SendMessageCC_AddHeaderEntry,args)
+        return val
+    def Send(*args):
+        val = apply(MailFolderc.SendMessageCC_Send,args)
+        return val
+    def __del__(self,MailFolderc=MailFolderc):
+        if self.thisown == 1 :
+            MailFolderc.delete_SendMessageCC(self)
+    def __repr__(self):
+        return "<C SendMessageCC instance at %s>" % (self.this,)
+class SendMessageCCPtr(SendMessageCC):
+    def __init__(self,this):
+        self.this = this
+        self.thisown = 0
+        self.__class__ = SendMessageCC
+
+
+
+
+
+#-------------- FUNCTION WRAPPERS ------------------
+
+
+
+#-------------- VARIABLE WRAPPERS ------------------
+
+SM_INLINE = MailFolderc.SM_INLINE

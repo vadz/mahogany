@@ -1,25 +1,26 @@
 # This file was created automatically by SWIG.
 import MTestc
-class MTestPtr :
+class MTest:
+    def __init__(self,*args):
+        self.this = apply(MTestc.new_MTest,args)
+        self.thisown = 1
+
+    def __del__(self,MTestc=MTestc):
+        if self.thisown == 1 :
+            MTestc.delete_MTest(self)
+    def SetValue(*args):
+        val = apply(MTestc.MTest_SetValue,args)
+        return val
+    def GetValue(*args):
+        val = apply(MTestc.MTest_GetValue,args)
+        return val
+    def __repr__(self):
+        return "<C MTest instance at %s>" % (self.this,)
+class MTestPtr(MTest):
     def __init__(self,this):
         self.this = this
         self.thisown = 0
-    def __del__(self):
-        if self.thisown == 1 :
-            MTestc.delete_MTest(self.this)
-    def SetValue(self,arg0):
-        val = MTestc.MTest_SetValue(self.this,arg0)
-        return val
-    def GetValue(self):
-        val = MTestc.MTest_GetValue(self.this)
-        return val
-    def __repr__(self):
-        return "<C MTest instance>"
-class MTest(MTestPtr):
-    def __init__(self) :
-        self.this = MTestc.new_MTest()
-        self.thisown = 1
-
+        self.__class__ = MTest
 
 
 
