@@ -1901,9 +1901,19 @@ MailFolderCC::ExpungeMessages(void)
 
    m_ExpungeRequested = FALSE;
    if(PY_CALLBACK(MCB_FOLDEREXPUNGE,1,GetProfile()))
+   {
       mail_expunge (m_MailStream);
-   RequestUpdate();
-   ProcessEventQueue();
+
+      // VZ: I think the update request will/should be requested from
+      //     mm_expunged() only if it is needed, right now we even refresh the
+      //     listing if nothing was done
+#if 0
+      RequestUpdate();
+#endif // 0
+
+      // this hopefully won't do anything if there are no events in the queue
+      ProcessEventQueue();
+   }
 }
 
 
