@@ -28,6 +28,7 @@
 
 #   include <wx/string.h>
 #   include <wx/log.h>
+#   include <wx/config.h>
 #endif // USE_PCH
 
 #include <wx/textfile.h>
@@ -505,7 +506,8 @@ static String GetTemplateNamePath(MessageTemplateKind kind)
 static String GetTemplateValuePath(MessageTemplateKind kind, const String& name)
 {
    String path;
-   path << M_TEMPLATES_SECTION << GetTemplateKindPath(kind) << '/' << name;
+   path << M_TEMPLATES_CONFIG_SECTION << GetTemplateKindPath(kind)
+        << '/' << name;
 
    return path;
 }
@@ -534,7 +536,9 @@ GetMessageTemplate(MessageTemplateKind kind, const String& name)
    Profile *profile = mApplication->GetProfile();
    ProfileEnvVarSave noEnvVarExpansion(profile);
 
-   String value = profile->readEntry(GetTemplateValuePath(kind, name), "");
+   wxConfigBase *config = profile->GetConfig();
+
+   String value = config->Read(GetTemplateValuePath(kind, name), "");
    if ( !value )
    {
       // we have the default templates for reply, follow-up and forward
@@ -586,14 +590,15 @@ SetMessageTemplate(const String& name,
       (void)profile->writeEntry(GetTemplateNamePath(kind), name);
    }
 
-   (void)mApplication->GetProfile()->
-      writeEntry(GetTemplateValuePath(kind, name), value);
+   wxConfigBase *config = mApplication->GetProfile()->GetConfig();
+   config->Write(GetTemplateValuePath(kind, name), value);
 }
 
 extern bool
 DeleteMessageTemplate(MessageTemplateKind kind, const String& name)
 {
-   mApplication->GetProfile()->DeleteEntry(GetTemplateValuePath(kind, name));
+   wxConfigBase *config = mApplication->GetProfile()->GetConfig();
+   config->DeleteEntry(GetTemplateValuePath(kind, name));
 
    return true;
 }
@@ -606,15 +611,15 @@ GetMessageTemplateNames(MessageTemplateKind kind)
    // always add the "Standard" template to the list as it is always present
    names.Add(STANDARD_TEMPLATE_NAME);
 
-   Profile *profile = mApplication->GetProfile();
+   wxConfigBase *config = mApplication->GetProfile()->GetConfig();
 
    wxString path;
-   path << M_TEMPLATES_SECTION << GetTemplateKindPath(kind);
-   profile->SetPath(path);
+   path << M_TEMPLATES_CONFIG_SECTION << GetTemplateKindPath(kind);
+   config->SetPath(path);
 
    wxString name;
    long cookie;
-   bool cont = profile->GetFirstEntry(name, cookie);
+   bool cont = config->GetFirstEntry(name, cookie);
    while ( cont )
    {
       // we already did it for this one above
@@ -623,10 +628,8 @@ GetMessageTemplateNames(MessageTemplateKind kind)
          names.Add(name);
       }
 
-      cont = profile->GetNextEntry(name, cookie);
+      cont = config->GetNextEntry(name, cookie);
    }
-
-   profile->ResetPath();
 
    return names;
 }

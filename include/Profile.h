@@ -36,28 +36,20 @@ class wxConfigBase;
 class Profile : public MObjectRC
 {
 public:
-   /** An enum explaining the possible types of profiles. In fact,
-       just a number stored as a normal profile entry which must be
-       maintained manually.
-   */
-   enum Type
-   {
-      /// No profile type specified.
-      PT_Unknown = -1,
-      /// Any profile, default argument for ListProfiles().
-      PT_Any = -1,  // PT_Unknown
-      /// This profile belongs to a folder.
-      PT_FolderProfile = 1
-   };
-
    /// Creates the one global config object.
    static Profile * CreateGlobalConfig(const String & filename);
+
    /// Create a normal Profile object
    static Profile * CreateProfile(const String & classname,
-                                      const Profile *parent = NULL);
+                                  const Profile *parent = NULL);
+
    /// Create a Profile object for a plugin module
    static Profile * CreateModuleProfile(const String & classname,
-                                            const Profile *parent = NULL);
+                                        const Profile *parent = NULL);
+
+   /// Create a profile object for a folder with the given (full) name
+   static Profile * CreateFolderProfile(const String& foldername);
+
    /// Create a dummy Profile just inheriting from the top level
    static Profile * CreateEmptyProfile(const Profile *parent = NULL);
 
@@ -69,14 +61,6 @@ public:
 
    /// Delete the global config object
    static void DeleteGlobalConfig();
-
-   /// does a profile/config group with this name exist?
-   static bool ProfileExists(const String &name);
-   /** List all profiles of a given type or all profiles in total.
-       @param type Type of profile to list or -1 for all.
-       @return a pointer to kbStringList of profile names to be freed by caller.
-   */
-   static kbStringList * ListProfiles(int type = PT_Any);
 
    /// Flush all (disk-based) profiles now
    static void FlushAll();
@@ -147,7 +131,7 @@ public:
 
    /// Returns a unique, not yet existing sub-group name: //MT!!
    virtual String GetUniqueGroupName(void) const = 0;
-   
+
    /// Returns a pointer to the parent profile.
    virtual Profile *GetParent(void) const = 0;
    /** @name Managing environment variables
@@ -162,12 +146,14 @@ public:
    // for internal use by wxWindows related code only: get the pointer to the
    // underlying wxConfig object. Profile readEntry() functions should be
    // used for reading/writing the entries!
-   wxConfigBase *GetConfig() const { return ms_GlobalConfig; }
+   virtual wxConfigBase *GetConfig() const = 0;
+
+   // for internal use only: get the path corresponding to this profile in
+   // config
+   virtual String GetConfigPath() const = 0;
 
    virtual void SetPath(const String &path) = 0;
    virtual void ResetPath(void) = 0;
-/*     virtual const String GetPath() const = 0;
-*/
 
    /// Set temporary/suspended operation.
    virtual void Suspend(void) = 0;
@@ -227,7 +213,7 @@ public:
    Profile_obj(Profile *profile)
       { m_profile = profile; }
    Profile_obj(const String& name)
-      { m_profile = Profile::CreateProfile(name); }
+      { m_profile = Profile::CreateFolderProfile(name); }
    ~Profile_obj()
       { SafeDecRef(m_profile); }
 
@@ -303,9 +289,18 @@ private:
 // helper functions
 // ----------------------------------------------------------------------------
 
-// functions for savings/restoring arrays of strings to/from config
-void SaveArray(Profile *conf, const wxArrayString& astr, const String & key);
-void RestoreArray(Profile * conf, wxArrayString& astr, const String & key);
+/// functions for savings/restoring arrays of strings to/from config
+//@{
+
+extern void
+SaveArray(wxConfigBase *conf, const wxArrayString& astr, const String& key);
+extern void
+RestoreArray(wxConfigBase *conf, wxArrayString& astr, const String& key);
+
+extern void
+SaveArray(Profile *conf, const wxArrayString& astr, const String& key);
+extern void
+RestoreArray(Profile *conf, wxArrayString& astr, const String& key);
 
 //@}
 

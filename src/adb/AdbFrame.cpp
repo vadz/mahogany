@@ -88,10 +88,14 @@ extern const MOption MP_USERDIR;
 // constants
 // ----------------------------------------------------------------------------
 
-// the root path for all our config entries
-#define ADB_CONFIG_PATH "AdbEditor"
+// get the full name of the group we use in wxConfig
+static inline wxString GetConfigPath()
+{
+  wxString path;
+  path << '/' << ADB_CONFIG_PATH << '/' << M_SETTINGS_CONFIG_SECTION;
 
-// the profile entries we use
+  return path;
+}
 
 // enum must be in sync with the array below
 enum
@@ -1062,6 +1066,7 @@ enum
 // -----------------------------------------------------------------------------
 // event tables
 // -----------------------------------------------------------------------------
+
 BEGIN_EVENT_TABLE(wxAdbEditFrame, wxFrame)
   // menu commands (we take all of them and dispatch them later)
   EVT_MENU(-1, wxAdbEditFrame::OnMenuCommand)
@@ -1160,7 +1165,8 @@ void AddBookToAdbEditor(const String& adbname, const String& provname)
     // write to the profile, the editor will load the books the next time it
     // shows up
 
-    Profile *conf = Profile::CreateProfile(ADB_CONFIG_PATH);
+    wxConfigBase *conf = mApplication->GetProfile()->GetConfig();
+    conf->SetPath(GetConfigPath());
 
     wxArrayString books;
     RestoreArray(conf, books, aszConfigNames[ConfigName_AddressBooks]);
@@ -1171,8 +1177,6 @@ void AddBookToAdbEditor(const String& adbname, const String& provname)
     RestoreArray(conf, providers, aszConfigNames[ConfigName_AddressBookProviders]);
     providers.Add(provname);
     SaveArray(conf, providers, aszConfigNames[ConfigName_AddressBookProviders]);
-
-    conf->DecRef();
   }
 }
 
@@ -1305,21 +1309,21 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
 {
   #define TRANSFER_STRING(var, i)           \
     if ( bSave )                            \
-      conf->writeEntry(aszConfigNames[i], var);   \
+      conf->Write(aszConfigNames[i], var);  \
     else                                    \
-      var = conf->readEntry(aszConfigNames[i], var)
+      var = conf->Read(aszConfigNames[i], var)
 
   #define TRANSFER_INT(var, i)                    \
     if ( bSave )                                  \
-      conf->writeEntry(aszConfigNames[i], var);         \
+      conf->Write(aszConfigNames[i], (long)var);  \
     else                                          \
-      var = conf->readEntry(aszConfigNames[i], 0l)
+      var = conf->Read(aszConfigNames[i], 0l)
 
   #define TRANSFER_BOOL(var, i)                   \
     if ( bSave )                                  \
-      conf->writeEntry(aszConfigNames[i], var);         \
+      conf->Write(aszConfigNames[i], var);        \
     else                                          \
-      var = conf->readEntry(aszConfigNames[i], 0l) != 0
+      var = conf->Read(aszConfigNames[i], 0l) != 0
 
   #define TRANSFER_ARRAY(var, i)                  \
     if ( bSave )                                  \
@@ -1327,7 +1331,8 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
     else                                          \
       RestoreArray(conf, var, aszConfigNames[i])
 
-  Profile *conf = Profile::CreateProfile(ADB_CONFIG_PATH);
+  wxConfigBase *conf = mApplication->GetProfile()->GetConfig();
+  conf->SetPath(GetConfigPath());
 
   TRANSFER_STRING(m_strLastNewEntry, ConfigName_LastNewEntry);
   TRANSFER_STRING(m_strSelection, ConfigName_TreeSelection);
@@ -1340,7 +1345,6 @@ void wxAdbEditFrame::TransferSettings(bool bSave)
   TRANSFER_ARRAY(m_astrProviders, ConfigName_AddressBookProviders);
   TRANSFER_ARRAY(m_astrBranches, ConfigName_ExpandedBranches);
 
-  conf->DecRef();
   // keep your namespace clean
   #undef TRANSFER_STRING
   #undef TRANSFER_BOOL

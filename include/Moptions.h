@@ -582,7 +582,7 @@ extern const MOption MP_AWAY_STATUS;
 //@}
 /**@name For Profiles: */
 //@{
-/// The Profile Type.
+/// The Profile Type. [OBSOLETE]
 #define   MP_PROFILE_TYPE_NAME      "ProfileType"
 /// the current user identity
 #define   MP_CURRENT_IDENTITY_NAME  "Identity"
@@ -1072,7 +1072,7 @@ extern const MOption MP_AWAY_STATUS;
 
 /** @name default values of configuration entries */
 //@{
-/// The Profile Type.
+/// The Profile Type. [OBSOLETE]
 #define   MP_PROFILE_TYPE_DEFVAL      0l
 /// our version
 #define   MP_VERSION_DEFVAL          M_EMPTYSTRING

@@ -93,7 +93,7 @@ private:
    // return path where we store the last value of the text ctrl
    static wxString GetFileProfilePath()
    {
-      return wxString(M_SETTINGS_CONFIG_SECTION) + "AdbImportFile";
+      return wxString(M_SETTINGS_CONFIG_SECTION) + "/AdbImportFile";
    }
 
    // stored data

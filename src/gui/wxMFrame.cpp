@@ -387,7 +387,9 @@ bool wxMFrame::RestorePosition(const char *name,
    wxConfigBase *pConf = mApplication->GetProfile()->GetConfig();
    if ( pConf != NULL )
    {
-      pConf->SetPath(String(M_FRAMES_CONFIG_SECTION)+name);
+      String path;
+      path << M_FRAMES_CONFIG_SECTION << '/' << name;
+      pConf->SetPath(path);
       *x = GetOptionValue(pConf, MP_XPOS);
       *y = GetOptionValue(pConf, MP_YPOS);
       *w = GetOptionValue(pConf, MP_WIDTH);
@@ -433,9 +435,13 @@ void
 wxMFrame::SavePositionInternal(const char *name, wxWindow *frame, bool isFrame)
 {
    wxConfigBase *pConf = mApplication->GetProfile()->GetConfig();
-   pConf->SetPath(String(M_FRAMES_CONFIG_SECTION)+name);
    if ( pConf != NULL )
    {
+      String path;
+      path << M_FRAMES_CONFIG_SECTION << '/' << name;
+
+      pConf->SetPath(path);
+
       if ( isFrame )
       {
          wxFrame *fr = (wxFrame *)frame;

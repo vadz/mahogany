@@ -20,61 +20,56 @@
 /** @name The sections of the configuration file. */
 ///@{
 
-/** The section in the global configuration file used for storing
-    profiles (trailing '/' required).
+/**
+  The section in the global configuration file used for storing
+  profiles (without trailing '/')
 */
 #ifndef M_PROFILE_CONFIG_SECTION
-#  define   M_PROFILE_CONFIG_SECTION_UNIX   "/M/Profiles"
-#  define   M_IDENTITY_CONFIG_SECTION_UNIX   "/M/Ids"
-#  define   M_FILTERS_CONFIG_SECTION_UNIX   "/M/Filters"
 #  ifdef OS_WIN
 #     define   M_PROFILE_CONFIG_SECTION   "/Profiles"
-#     define   M_IDENTITY_CONFIG_SECTION   "/Ids"
+#     define   M_IDENTITY_CONFIG_SECTION  "/Ids"
 #     define   M_FILTERS_CONFIG_SECTION   "/Filters"
+#     define   M_FRAMES_CONFIG_SECTION    "/Frames"
+#     define   M_TEMPLATES_CONFIG_SECTION "/Templates"
 #  else  // Unix
-#     define   M_PROFILE_CONFIG_SECTION   M_PROFILE_CONFIG_SECTION_UNIX
-#     define   M_IDENTITY_CONFIG_SECTION  M_IDENTITY_CONFIG_SECTION_UNIX
-#     define   M_FILTERS_CONFIG_SECTION   M_FILTERS_CONFIG_SECTION_UNIX
+#     define   M_PROFILE_CONFIG_SECTION   "/M/Profiles"
+#     define   M_IDENTITY_CONFIG_SECTION  "/M/Ids"
+#     define   M_FILTERS_CONFIG_SECTION   "/M/Filters"
+#     define   M_FRAMES_CONFIG_SECTION    "/M/Frames"
+#     define   M_TEMPLATES_CONFIG_SECTION "/M/Templates"
 #  endif // Unix/Win
+
+   // these are used for remote IMAP sync: we have to use the same format for
+   // the remote settings and we choose to use Unix one
+#  define   M_PROFILE_CONFIG_SECTION_UNIX   "/M/Profiles"
+#  define   M_IDENTITY_CONFIG_SECTION_UNIX  "/M/Ids"
+#  define   M_FILTERS_CONFIG_SECTION_UNIX   "/M/Filters"
+#  define   M_FRAMES_CONFIG_SECTION_UNIX    "/M/Frames"
+#  define   M_TEMPLATES_CONFIG_SECTION_UNIX "/M/Templates"
 #endif
 
-/** The section in the global configuration file used for storing
-    folder profiles (trailing '/' required).
+/**
+  The section in the global configuration file used for storing
+  folder profiles (without trailing '/')
 */
 #ifndef M_FOLDER_CONFIG_SECTION
 #  define   M_FOLDER_CONFIG_SECTION   M_PROFILE_CONFIG_SECTION
 #endif
 
-// The trailing slashes in the following defines are important, otherwise
-// Profile.cpp will get broken!
+/**
+  The section in the global configuration file used for storing
+  control settings.
+*/
+#define M_SETTINGS_CONFIG_SECTION       "Settings"
 
-/** The section in the global configuration file used for storing
-    window positions (trailing '/' required).
-*/
-#ifndef M_FRAMES_CONFIG_SECTION
-#  ifdef OS_WIN
-#  define   M_FRAMES_CONFIG_SECTION       "/Frames/"
-#  else  // Unix
-#     define   M_FRAMES_CONFIG_SECTION    "/M/Frames/"
-#  endif // Unix/Win
-#endif
-/** The section in the global configuration file used for storing
-    control settings.
-*/
-#ifndef M_SETTINGS_CONFIG_SECTION
-#  ifdef OS_WIN
-#  define   M_SETTINGS_CONFIG_SECTION       "Settings/"
-#  else  // Unix
-#     define   M_SETTINGS_CONFIG_SECTION    "Settings/"
-#  endif // Unix/Win
-#endif
+/// the root path for all ADB editor config entries
+#define ADB_CONFIG_PATH "AdbEditor"
 
 /// the subgroup for custom headers values
 #define M_CUSTOM_HEADERS_CONFIG_SECTION "CustomHeaders"
 
 /// the subgroup for message templates (should have the trailing slash)
 #define M_TEMPLATE_SECTION "Template/"
-#define M_TEMPLATES_SECTION "Templates/"
 
 /** @name Keys where the template for messages of given type is stored */
 //@{
@@ -85,6 +80,8 @@
 #define MP_TEMPLATE_FORWARD      "Forward"
 //@}
 
+//@}
+
 // under Windows 12pt font looks too huge, letters are like in a book for
 // children
 #ifdef OS_WIN
@@ -92,8 +89,6 @@
 #else
 #  define DEFAULT_FONT_SIZE 12l
 #endif
-
-//@}
 
 /** @name User level: novice, intermidiate, expert */
 //@{

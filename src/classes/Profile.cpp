@@ -240,6 +240,15 @@ public:
    virtual String GetUniqueGroupName(void) const
       { return "NOSUCHGROUP"; }
 
+   virtual wxConfigBase *GetConfig() const { return NULL; }
+   virtual String GetConfigPath() const
+   {
+      // we don't even have an associated wxConfig!
+      FAIL_MSG( "not supposed to be called" );
+
+      return "";
+   }
+
    /// Returns a pointer to the parent profile.
    virtual Profile *GetParent(void) const
       { return m_Parent; }
@@ -284,10 +293,6 @@ private:
    GCC_DTOR_WARN_OFF
 };
 
-
-const char * gs_RootPath_Identity = M_IDENTITY_CONFIG_SECTION;
-const char * gs_RootPath_Profile = M_PROFILE_CONFIG_SECTION;
-const char * gs_RootPath_FilterProfile = M_FILTERS_CONFIG_SECTION;
 
 /**
    ProfileImpl class, managing configuration options on a per class basis.
@@ -372,6 +377,16 @@ public:
          m_ProfilePath = "";
       }
 
+   virtual wxConfigBase *GetConfig() const { return ms_GlobalConfig; }
+
+   virtual String GetConfigPath() const
+   {
+      String path = GetName();
+      if ( !m_ProfilePath.empty() )
+         path << '/' << m_ProfilePath;
+      return path;
+   }
+
    /// Set temporary/suspended operation.
    virtual void Suspend(void)
       {
@@ -403,7 +418,7 @@ public:
 
    virtual const char * GetRootPath(void) const
       {
-         return gs_RootPath_Profile;
+         return M_PROFILE_CONFIG_SECTION;
       }
 
 protected:
@@ -468,7 +483,7 @@ public:
 
    virtual const char * GetRootPath(void) const
       {
-         return gs_RootPath_Identity;
+         return M_IDENTITY_CONFIG_SECTION;
       }
 private:
    /** Constructor.
@@ -500,7 +515,7 @@ public:
 
    virtual const char * GetRootPath(void) const
       {
-         return gs_RootPath_FilterProfile;
+         return M_FILTERS_CONFIG_SECTION;
       }
 private:
    /** Constructor.
@@ -547,69 +562,6 @@ void Profile::SetExpandEnvVars(bool bDoIt)
    PCHECK();
    ms_GlobalConfig->SetExpandEnvVars(bDoIt);
 }
-
-/// does a profile/config group with this name exist?
-/* static */
-bool
-Profile::ProfileExists(const String &iName)
-{
-   ms_GlobalConfig->SetPath("");
-   String name = M_PROFILE_CONFIG_SECTION;
-   name << '/' << iName;
-   return ms_GlobalConfig->HasGroup(name);
-}
-
-/** List all profiles of a given type or all profiles in total.
-    @param type Type of profile to list or PT_Any for all.
-    @return a pointer to kbStringList of profile names to be freed by caller.
-*/
-static void
-ListProfilesHelper(wxConfigBase *config,
-                   kbStringList *list,
-                   int type,
-                   String const &path)
-{
-   wxString oldpath = config->GetPath();
-   config->SetPath(path);
-
-   int ptype;
-
-   // these variables will be filled by GetFirstGroup/GetNextGroup
-   long index = 0;
-   wxString name;
-
-   bool ok = config->GetFirstGroup(name, index);
-   while ( ok )
-   {
-      config->Read(name + '/' + MP_PROFILE_TYPE, &ptype,
-                   GetNumericDefault(MP_PROFILE_TYPE));
-      wxString pathname = path;
-      pathname << '/' << name;
-      if(type == Profile::PT_Any || ptype == type)
-         list->push_back(new String(pathname));
-      ListProfilesHelper(config, list, type, pathname);
-
-      ok = config->GetNextGroup (name, index);
-   }
-
-   // restore path
-   config->SetPath(oldpath);
-}
-
-kbStringList *
-Profile::ListProfiles(int type)
-{
-   ASSERT(ms_GlobalConfig);
-   kbStringList *list = new kbStringList;
-   if( ms_GlobalConfig )
-   {
-      // may be give a (debug) warning here?
-      ListProfilesHelper(ms_GlobalConfig, list, type, "");
-   }
-
-   return list;
-}
-
 
 //FIXME:MT calling wxWindows from possibly non-GUI code
 bool ProfileImpl::GetFirstGroup(String& s, long& l) const
@@ -800,6 +752,11 @@ Profile::CreateModuleProfile(const String & classname, Profile const *parent)
    return p;
 }
 
+Profile *
+Profile::CreateFolderProfile(const String& foldername)
+{
+   return CreateProfile(foldername);
+}
 
 Profile *
 Profile::CreateEmptyProfile(Profile const *parent)
@@ -1326,7 +1283,9 @@ ProfileImpl::DebugDump() const
 // ----------------------------------------------------------------------------
 
 // all settings are saved as entries 0, 1, 2, ... of group key
-void SaveArray(Profile * conf, const wxArrayString& astr, const String & key)
+void SaveArray(wxConfigBase *conf,
+               const wxArrayString& astr,
+               const String& key)
 {
    // save all array entries
    conf->DeleteGroup(key);    // remove all old entries
@@ -1338,12 +1297,12 @@ void SaveArray(Profile * conf, const wxArrayString& astr, const String & key)
    String strkey;
    for ( size_t n = 0; n < nCount; n++ ) {
       strkey.Printf("%d", n);
-      conf->writeEntry(path+strkey, astr[n]);
+      conf->Write(path + strkey, astr[n]);
    }
 }
 
 // restores array saved by SaveArray
-void RestoreArray(Profile * conf, wxArrayString& astr, const String & key)
+void RestoreArray(wxConfigBase *conf, wxArrayString& astr, const String& key)
 {
    wxASSERT( astr.IsEmpty() ); // should be called in the very beginning
 
@@ -1355,9 +1314,30 @@ void RestoreArray(Profile * conf, wxArrayString& astr, const String & key)
       strkey.Printf("%d", n);
       if ( !conf->HasEntry(path+strkey) )
          break;
-      strVal = conf->readEntry(path+strkey, "");
+
+      strVal = conf->Read(path+strkey, "");
       astr.Add(strVal);
    }
+}
+
+void SaveArray(Profile *profile, const wxArrayString& astr, const String& key)
+{
+   wxConfigBase *conf = profile->GetConfig();
+   CHECK_RET( conf, "can't be used with non config based profile!" );
+
+   conf->SetPath(profile->GetConfigPath());
+
+   SaveArray(conf, astr, key);
+}
+
+void RestoreArray(Profile *profile, wxArrayString& astr, const String& key)
+{
+   wxConfigBase *conf = profile->GetConfig();
+   CHECK_RET( conf, "can't be used with non config based profile!" );
+
+   conf->SetPath(profile->GetConfigPath());
+
+   RestoreArray(conf, astr, key);
 }
 
 // ----------------------------------------------------------------------------

@@ -1368,7 +1368,7 @@ MFolderDialog::OnButton(wxCommandEvent &ev)
 wxString MFolderDialog::GetConfigPath()
 {
    wxString path;
-   path << M_SETTINGS_CONFIG_SECTION << "LastPickedFolder";
+   path << M_SETTINGS_CONFIG_SECTION << "/LastPickedFolder";
    return path;
 }
 
@@ -2734,7 +2734,7 @@ bool ReenablePersistentMessageBoxes(wxWindow *parent)
    CHECK( config, FALSE, "no app config?" );
 
    wxString root;
-   root << '/' << M_SETTINGS_CONFIG_SECTION << "MessageBox";
+   root << '/' << M_SETTINGS_CONFIG_SECTION << "/MessageBox";
    config->SetPath(root);
 
    wxArrayString entries;

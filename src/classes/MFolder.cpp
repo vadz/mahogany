@@ -66,7 +66,6 @@ extern const MOption MP_IMAPHOST;
 extern const MOption MP_NNTPHOST;
 extern const MOption MP_POPHOST;
 extern const MOption MP_PROFILE_TYPE;
-extern const MOption MP_PROFILE_TYPE_D;
 extern const MOption MP_USERNAME;
 
 // ----------------------------------------------------------------------------
@@ -158,7 +157,7 @@ public:
    {
       m_nChildren = INVALID_CHILDREN_COUNT;
 
-      m_profile = Profile::CreateProfile(m_folderName);
+      m_profile = Profile::CreateFolderProfile(m_folderName);
       if ( !m_profile )
       {
          // this should never happen
@@ -562,21 +561,9 @@ MFolderFromProfile::GroupExists(Profile *profile, const String& fullname)
 
 bool MFolderFromProfile::Exists(const String& fullname)
 {
-   Profile_obj profile(fullname);
-   CHECK( profile, FALSE, "panic in MFolder: no profile" );
+   Profile_obj profile("");
 
-   bool found;
-   bool exists =
-      profile->readEntry(GetOptionName(MP_PROFILE_TYPE),
-                         GetNumericDefault(MP_PROFILE_TYPE),
-                         &found) == Profile::PT_FolderProfile;
-   if ( !found )
-   {
-      // if the value was just inherited from parent, it doesn't count
-      exists = FALSE;
-   }
-
-   return exists;
+   return profile->HasGroup(fullname);
 }
 
 bool MFolderFromProfile::Create(const String& fullname)
@@ -609,8 +596,6 @@ bool MFolderFromProfile::Create(const String& fullname)
 
       return FALSE;
    }
-
-   profile->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
 
    return TRUE;
 }
@@ -999,7 +984,7 @@ void MFolderCache::RenameAll(const String& oldName, const String& newName)
    {
       folder->m_folderName = newName;
       SafeDecRef(folder->m_profile);
-      folder->m_profile = Profile::CreateProfile(newName);
+      folder->m_profile = Profile::CreateFolderProfile(newName);
    }
 }
 
@@ -1035,33 +1020,19 @@ bool MFolderTraversal::DoTraverse(const wxString& start, bool recurse)
    bool cont = profile->GetFirstGroup(name, dummy);
    while ( cont )
    {
-      // check that it's a folder - this is the reason why we can't call
-      // GetGroupCount() directly
+      wxString fullname(rootName);
+      fullname += name;
+
+      // if this folder has children recurse into them (if we should)
+      if ( recurse )
       {
-         // check that the special MP_PROFILE_TYPE key is set in *this*
-         // profile - this is why we test for "found"
-         bool found;
-         ProfilePathChanger changePath2(profile, name);
-         if ( (profile->readEntry(MP_PROFILE_TYPE,
-                                  0l,
-                                  &found) == Profile::PT_FolderProfile)
-              && found )
-         {
-            wxString fullname(rootName);
-            fullname += name;
+         if ( !DoTraverse(fullname, TRUE) )
+            return FALSE;
+      }
 
-            // if this folder has children recurse into them (if we should)
-            if ( recurse )
-            {
-               if ( !DoTraverse(fullname, TRUE) )
-                  return FALSE;
-            }
-
-            if ( !OnVisitFolder(fullname) )
-            {
-               return FALSE;
-            }
-         }
+      if ( !OnVisitFolder(fullname) )
+      {
+         return FALSE;
       }
 
       cont = profile->GetNextGroup(name, dummy);

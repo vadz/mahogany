@@ -66,7 +66,6 @@ extern const MOption MP_FROM_REPLACE_ADDRESSES;
 extern const MOption MP_IMAPHOST;
 extern const MOption MP_NNTPHOST;
 extern const MOption MP_POPHOST;
-extern const MOption MP_PROFILE_TYPE;
 extern const MOption MP_REPLY_COLLAPSE_PREFIX;
 extern const MOption MP_REPLY_PREFIX;
 extern const MOption MP_SET_REPLY_FROM_TO;
@@ -263,7 +262,11 @@ MailFolder::OpenFolder(int folderType,
    if ( type == MF_PROFILE )
    {
       if(type == MF_PROFILE)
+      {
+         // FIXME: get rid of this a.s.a.p.
+         FAIL_MSG( "THIS IS BROKEN" );
          profile = Profile::CreateProfile(i_path, parentProfile);
+      }
       else
       {
          //String pname = (i_path[0] == '/') ? String(i_path.c_str()+1) : i_path;
@@ -428,59 +431,24 @@ MailFolder::ClearFolder(const MFolder *folder)
 
 /* static */
 bool
-MailFolder::CreateFolder(const String &name,
+MailFolder::CreateFolder(const String& name,
                          FolderType type,
-                         int iflags,
+                         int flags,
                          const String &path,
                          const String &comment)
 {
    if ( !Init() )
       return false;
 
-   bool valid;
-
-   switch(type)
-      {
-      case MF_INBOX:
-      case MF_FILE:
-      case MF_POP:
-      case MF_IMAP:
-      case MF_NNTP:
-      case MF_NEWS:
-      case MF_MH:
-#ifdef EXPERIMENTAL
-      case MF_MDIR:
-      case MF_MFILE:
-#endif
-         valid = true;
-         break;
-      default:
-         valid = false; // all pseudo-types
-      }
-   if(! valid )
-      return false;
-
-   if( name.Length() == 0 )
-      return false;
-
-   ASSERT( (iflags & MF_FLAGSMASK) == iflags);
-   FolderFlags flags = (FolderFlags) ( iflags & MF_FLAGSMASK ) ;
-   Profile * p = Profile::CreateProfile(name);
-   p->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
-   p->writeEntry(MP_FOLDER_TYPE, type|flags);
-   if(path.Length() > 0)
-      p->writeEntry(MP_FOLDER_PATH, path);
-   if(comment.Length() > 0)
-      p->writeEntry(MP_FOLDER_COMMENT, comment);
-
    /* So far the drivers do an auto-create when we open a folder, so
       now we attempt to open the folder to see what happens: */
-   MFolder *mf = MFolder::Get(name);
-   MailFolder *mf2 = MailFolder::OpenFolder(mf);
-   SafeDecRef(mf2);
-   SafeDecRef(mf);
+   MFolder *mfolder = MFolder::Create(name, type);
+   if ( !mfolder )
+      return false;
 
-   p->DecRef();
+   MailFolder_obj mf = MailFolder::OpenFolder(mfolder);
+
+   mfolder->DecRef();
 
    return true;
 }

@@ -128,8 +128,12 @@ extern const MOption MP_USE_OUTBOX;
 extern const MOption MP_USE_TRASH_FOLDER;
 extern const MOption MP_VERSION;
 
-// this option is not used any more
+// obsolete config names not used any more but needed here to be able to
+// update the old versions of the config
+
 #define MP_OLD_FOLDER_HOST "HostName"
+
+#define M_TEMPLATES_SECTION "Templates/"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -157,7 +161,8 @@ enum MVersion
    Version_061,      // system folders have non default positions in tree
    Version_062 = Version_061, // no changes in config since 0.61
    Version_063 = Version_062, // no changes in config since 0.62
-   Version_NoChange, // any version from which we don't need to upgrade
+   Version_064,      // folder profiles moved, MP_PROFILE_TYPE disappeared
+   Version_Last = Version_064,// last existing version
    Version_Unknown   // some unrecognized version
 };
 
@@ -1724,6 +1729,10 @@ UpgradeFromNone()
    return true;
 }
 
+// ----------------------------------------------------------------------------
+// 0.01 -> 0.10
+// ----------------------------------------------------------------------------
+
 static bool
 UpgradeFrom001()
 {
@@ -1790,7 +1799,7 @@ CopyEntries(wxConfigBase *src,
       newentry = to;
       newentry << '/' << entry;
 
-      switch( src->GetEntryType(entry) )
+      switch ( src->GetEntryType(entry) )
       {
          case wxConfigBase::Type_Unknown:
             wxFAIL_MSG("unexpected entry type");
@@ -1877,6 +1886,10 @@ CopyEntries(wxConfigBase *src,
    return numCopied;
 }
 
+// ----------------------------------------------------------------------------
+// 0.10 -> 0.20
+// ----------------------------------------------------------------------------
+
 static bool
 UpgradeFrom010()
 {
@@ -1938,7 +1951,7 @@ UpgradeFrom010()
       tmp = group;
       tmp << '/' << GetOptionName(MP_PROFILE_TYPE);
       if(p->readEntry(tmp, GetNumericDefault(MP_PROFILE_TYPE)) ==
-            Profile::PT_FolderProfile)
+            1 /* Profile::PT_FolderProfile */ )
       {
          folders.push_back(new String(group));
       }
@@ -1973,7 +1986,9 @@ UpgradeFrom010()
 
 }
 
-
+// ----------------------------------------------------------------------------
+// 0.20 -> 0.21
+// ----------------------------------------------------------------------------
 
 class UpgradeFolderTraversal : public MFolderTraversal
 {
@@ -2029,6 +2044,10 @@ UpgradeFrom020()
 
    return TRUE;
 }
+
+// ----------------------------------------------------------------------------
+// 0.21 -> 0.50
+// ----------------------------------------------------------------------------
 
 class TemplateFixFolderTraversal : public MFolderTraversal
 {
@@ -2106,6 +2125,10 @@ private:
    bool m_ok;
 };
 
+// ----------------------------------------------------------------------------
+// 0.50 -> 0.60
+// ----------------------------------------------------------------------------
+
 static bool
 UpgradeFrom050()
 {
@@ -2153,6 +2176,10 @@ UpgradeFrom050()
    return true;
 }
 
+// ----------------------------------------------------------------------------
+// 0.60 -> 0.63
+// ----------------------------------------------------------------------------
+
 static bool
 UpgradeFrom060()
 {
@@ -2191,6 +2218,102 @@ UpgradeFrom060()
 }
 
 // ----------------------------------------------------------------------------
+// 0.63 -> 0.64
+// ----------------------------------------------------------------------------
+
+static void
+RemoveProfileTypes(wxConfigBase *config)
+{
+   if ( config->HasEntry("ProfileType" /* MP_PROFILE_TYPE_NAME */) )
+   {
+      config->DeleteEntry("ProfileType");
+   }
+
+   String name;
+   long cookie;
+   bool cont = config->GetFirstGroup(name, cookie);
+   while ( cont )
+   {
+      config->SetPath(name);
+      RemoveProfileTypes(config);
+      config->SetPath("..");
+
+      cont = config->GetNextGroup(name, cookie);
+   }
+}
+
+static bool
+UpgradeFrom061()
+{
+   // we have to move all non folder profiles out of M_PROFILE_CONFIG_SECTION
+   // as starting with 0.64 only folders live there
+
+   Profile *profile = mApplication->GetProfile();
+   wxConfigBase *config = profile->GetConfig();
+   bool rc = true;
+
+   // first deal with ADB settings: they now live under /Settings
+   String pathOld, pathNew;
+   pathOld << '/' << M_PROFILE_CONFIG_SECTION << '/' << ADB_CONFIG_PATH;
+   pathNew << '/' << M_SETTINGS_CONFIG_SECTION << '/' << ADB_CONFIG_PATH;
+   if ( CopyEntries(config, pathOld, pathNew) == -1 )
+   {
+      wxLogWarning(_("Address book editor settings couldn't be updated."));
+      rc = false;
+   }
+   else // copied successfully
+   {
+      // delete them from old location
+      config->DeleteGroup(pathOld);
+   }
+
+   // next copy the global templates data to its own section
+
+   // these settings contain plenty of "$"s which shouldn't be expanded
+   ProfileEnvVarSave noEnvVarsExp(profile);
+
+   pathOld.clear();
+   pathNew.clear();
+   pathOld << '/' << M_PROFILE_CONFIG_SECTION << "/Templates";
+   pathNew << M_TEMPLATES_CONFIG_SECTION;
+   if ( CopyEntries(config, pathOld, pathNew) == -1 )
+   {
+      wxLogWarning(_("Address book editor settings couldn't be updated."));
+      rc = false;
+   }
+   else // copied successfully
+   {
+      // delete them from old location
+      config->DeleteGroup(pathOld);
+   }
+
+   // delete all top level groups without ProfileType=1 in them: normally,
+   // there shouldn't be any, but somehow in my own ~/.M/config there is osme
+   // junk (maybe left from some very old version?) and if we leave them in
+   // config we'd have all kinds of problems with them because they don't
+   // represent the real folders
+   String name;
+   long cookie;
+   bool cont = config->GetFirstGroup(name, cookie);
+   while ( cont )
+   {
+      if ( config->Read(name + "/ProfileType", 0l) != 1 )
+      {
+         wxLogWarning(_("Invalid config settings group '%s' was removed."),
+                      name.c_str());
+         config->DeleteGroup(name);
+      }
+
+      cont = config->GetNextGroup(name, cookie);
+   }
+
+   // finally remove all ProfileType entries which are unused any more
+   RemoveProfileTypes(config);
+
+   return rc;
+}
+
+// ----------------------------------------------------------------------------
 // global functions
 // ----------------------------------------------------------------------------
 
@@ -2223,7 +2346,9 @@ Upgrade(const String& fromVersion)
       else if ( version == "0.60" )
          oldVersion = Version_060;
       else if ( version == "0.61" || version == "0.62" || version == "0.63" )
-         oldVersion = Version_NoChange;
+         oldVersion = Version_061;
+      else if ( version == "0.64" )
+         oldVersion = Version_064;
       else
          oldVersion = Version_Unknown;
    }
@@ -2231,58 +2356,63 @@ Upgrade(const String& fromVersion)
    bool success = TRUE;
    switch ( oldVersion )
    {
-   case Version_None:
-      UpgradeFromNone();
-      break;
+      case Version_None:
+         UpgradeFromNone();
+         break;
 
-   case Version_Alpha001:
-      if ( success )
-         success = UpgradeFrom001();
-      // fall through
+      case Version_Alpha001:
+         if ( success )
+            success = UpgradeFrom001();
+         // fall through
 
-   case Version_Alpha010:
-      if ( success )
-         success = UpgradeFrom010();
-      // fall through
+      case Version_Alpha010:
+         if ( success )
+            success = UpgradeFrom010();
+         // fall through
 
-   case Version_Alpha020:
-      if ( success )
-         success = UpgradeFrom020();
-      // fall through
+      case Version_Alpha020:
+         if ( success )
+            success = UpgradeFrom020();
+         // fall through
 
-   case Version_050:
-      if ( success )
-         success = UpgradeFrom050();
-      // fall through
+      case Version_050:
+         if ( success )
+            success = UpgradeFrom050();
+         // fall through
 
-   case Version_060:
-      if ( success && UpgradeFrom060() )
-         wxLogMessage(_("Configuration information and program files were "
-                        "successfully upgraded from the version '%s'."),
-                      fromVersion.c_str());
-      else
-         wxLogError(_("Configuration information and program files "
-                      "could not be upgraded from version '%s', some "
-                      "settings might be lost.\n"
-                      "\n"
-                      "It is recommended that you uninstall and reinstall "
-                      "the program before using it."),
+      case Version_060:
+         if ( success )
+            success = UpgradeFrom060();
+         // fall through
+
+      case Version_061:
+         if ( success && UpgradeFrom061() )
+            wxLogMessage(_("Configuration information and program files were "
+                           "successfully upgraded from the version '%s'."),
+                         fromVersion.c_str());
+         else
+            wxLogError(_("Configuration information and program files "
+                         "could not be upgraded from version '%s', some "
+                         "settings might be lost.\n"
+                         "\n"
+                         "It is recommended that you uninstall and reinstall "
+                         "the program before using it."),
+                       fromVersion.c_str());
+         break;
+
+      case Version_Last:
+         // nothing to do, it's the latest one
+         break;
+
+      default:
+         FAIL_MSG("invalid version value");
+         // fall through
+
+      case Version_Unknown:
+         wxLogError(_("The previously installed version of Mahogany (%s) was "
+                      "probably newer than this one. Cannot upgrade."),
                     fromVersion.c_str());
-      break;
-
-   case Version_061:
-   case Version_NoChange:
-      break;
-
-   default:
-      FAIL_MSG("invalid version value");
-      // fall through
-
-   case Version_Unknown:
-      wxLogError(_("The previously installed version of Mahogany (%s) was "
-                   "probably newer than this one. Cannot upgrade."),
-                 fromVersion.c_str());
-      return FALSE;
+         return FALSE;
    }
 
    return TRUE;
@@ -2361,7 +2491,6 @@ VerifyInbox(void)
    {
       rc = FALSE;
       Profile *ibp = Profile::CreateProfile("INBOX");
-      ibp->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
       if(READ_APPCONFIG_TEXT(MP_NEWMAIL_FOLDER) != "INBOX"
          && MDialog_YesNoDialog(
             _("Normally Mahogany will automatically collect all mail\n"
@@ -2407,7 +2536,6 @@ VerifyInbox(void)
    Profile *ibp = Profile::CreateProfile(foldername);
    if (!  parent->HasEntry(foldername) )
    {
-      ibp->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
       ibp->writeEntry(MP_FOLDER_TYPE,
                       CombineFolderTypeAndFlags(MF_FILE, flagsNewMail));
       ibp->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
@@ -2450,7 +2578,6 @@ VerifyInbox(void)
       Profile *ibp = Profile::CreateProfile(foldername);
       if (! exists )
       {
-         ibp->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
          ibp->writeEntry(MP_FOLDER_TYPE, MF_FILE);
          ibp->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
          ibp->writeEntry(MP_FOLDER_COMMENT,
@@ -2488,7 +2615,6 @@ VerifyInbox(void)
       // Don't overwrite settings if entry already exists:
       if (!  parent->HasEntry(foldername) )
       {
-         p->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
          p->writeEntry(MP_FOLDER_TYPE, MF_FILE);
          p->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
          p->writeEntry(MP_FOLDER_COMMENT,
@@ -2525,7 +2651,6 @@ VerifyInbox(void)
       // Don't overwrite settings if entry already exists:
       if (!  parent->HasEntry(foldername) )
       {
-         p->writeEntry(MP_PROFILE_TYPE, Profile::PT_FolderProfile);
          p->writeEntry(MP_FOLDER_TYPE, MF_FILE|MF_FLAGS_KEEPOPEN);
          p->writeEntry(MP_FOLDER_PATH, strutil_expandfoldername(foldername));
          p->writeEntry(MP_FOLDER_COMMENT,
@@ -2543,11 +2668,6 @@ VerifyInbox(void)
          p->writeEntry("Icon", wxFolderTree::iconOutbox);
       p->DecRef();
    }
-
-   // Set up the treectrl to be expanded at startup:
-   wxConfigBase *conf = mApplication->GetProfile()->GetConfig();
-   conf->Write("Settings/TreeCtrlExp/FolderTree", 1L);
-   return rc;
 }
 
 
