@@ -1338,9 +1338,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
                                      m_settings.font,
                                      m_settings.size,
                                      m_settings.columns);
-         bool previewOnSingleClick = READ_CONFIG(GetProfile(),
-                                             MP_PREVIEW_ON_SELECT) != 0;
-         m_FolderCtrl->SetPreviewOnSingleClick(previewOnSingleClick);
+         m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
 
          m_SplitterWindow->ReplaceWindow(oldfolderctrl, m_FolderCtrl);
          delete oldfolderctrl;
@@ -1420,10 +1418,7 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_MessagePreview = new wxMessageView(this, m_SplitterWindow);
 
    ReadProfileSettings(&m_settings);
-   bool   previewOnSingleClick = READ_CONFIG(GetProfile(),
-                                             MP_PREVIEW_ON_SELECT) != 0;
-
-   m_FolderCtrl->SetPreviewOnSingleClick(previewOnSingleClick);
+   m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
    m_FolderCtrl->ApplyOptions( m_settings.FgCol,
                                m_settings.BgCol,
                                m_settings.font,
@@ -1534,6 +1529,9 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
       settings->returnAddresses = strutil_restore_array(':', returnAddrs);
    }
 
+   settings->previewOnSingleClick =
+      READ_CONFIG(GetProfile(), MP_PREVIEW_ON_SELECT) != 0;
+
    ReadColumnsInfo(m_Profile, settings->columns);
 }
 
@@ -1547,14 +1545,17 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
       return;
    }
 
-   bool previewOnSingleClick = READ_CONFIG(profile, MP_PREVIEW_ON_SELECT) != 0;
-   m_FolderCtrl->SetPreviewOnSingleClick(previewOnSingleClick);
-
    AllProfileSettings settings;
    ReadProfileSettings(&settings);
+
+   // handle this setting specially as we don't have to recreate the folder
+   // list ctrl if it changes, so just pretend it didn't change
+   m_settings.previewOnSingleClick = settings.previewOnSingleClick;
+
+   // did any other, important, setting change?
    if ( settings != m_settings )
    {
-      // need to repopulate the list ctrl because its appearance changed
+      // yes: need to repopulate the list ctrl because its appearance changed
       m_settings = settings;
 
       m_FolderCtrl->ApplyOptions( m_settings.FgCol,
@@ -1567,6 +1568,8 @@ wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
       m_nDeleted = 0;
       Update();
    }
+
+   m_FolderCtrl->SetPreviewOnSingleClick(m_settings.previewOnSingleClick);
 }
 
 
@@ -1956,7 +1959,10 @@ wxFolderView::UpdateSelectionInfo(void)
    {
       m_FolderCtrl->Select(curSel, false);
 
-      PreviewMessage(m_FocusedUId);
+      if ( m_settings.previewOnSingleClick )
+      {
+         PreviewMessage(m_FocusedUId);
+      }
    }
 }
 
