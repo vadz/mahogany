@@ -4,6 +4,7 @@
 Release 0.61 'Hawkins'
 -------------------------------------------------------------------------------
 
+08.01.01 VZ: added option to reopen all folders which were opened the last time
 06.01.01 VZ: fixed crash when viewing messages with incorrect dates
              fixed crash when using encryption in Windows version
 04.01.01 VZ: fixed crash when removing folders with auto collect flag set

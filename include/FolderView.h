@@ -22,53 +22,19 @@ class ASMailFolder;
 class FolderView : public MEventReceiver
 {
 public:
-   FolderView()
-      {
-         m_regCookieTreeChange = MEventManager::Register(*this, MEventId_FolderTreeChange);
-         ASSERT_MSG( m_regCookieTreeChange, "can't reg folder view with event manager");
-         m_regCookieFolderUpdate = MEventManager::Register(*this, MEventId_FolderUpdate);
-         ASSERT_MSG( m_regCookieFolderUpdate, "can't reg folder view with event manager");
-         m_regCookieMsgStatus = MEventManager::Register(*this, MEventId_MsgStatus);
-         ASSERT_MSG( m_regCookieMsgStatus, "can't reg folder view with event manager");
-         ASSERT_MSG( m_regCookieFolderUpdate, "can't reg folder view with event manager");
-         m_regCookieASFolderResult = MEventManager::Register(*this, MEventId_ASFolderResult);
-         ASSERT_MSG( m_regCookieFolderUpdate, "can't reg folder view with event manager");
-      }
+   FolderView();
+
    /// update the user interface
    virtual void Update(class HeaderInfoList *list = NULL) = 0;
-   /// deregister event handlers
-   virtual void DeregisterEvents(void)
-      {
-         MEventManager::Deregister(m_regCookieTreeChange);
-         MEventManager::Deregister(m_regCookieFolderUpdate);
-         MEventManager::Deregister(m_regCookieMsgStatus);
-         MEventManager::Deregister(m_regCookieASFolderResult);
-         m_regCookieTreeChange = NULL;
-      }
-   /// virtual destructor
-   virtual ~FolderView()
-      {
-         ASSERT( m_regCookieTreeChange == NULL);
 
-      }
+   /// deregister event handlers
+   virtual void DeregisterEvents(void);
+
+   /// virtual destructor
+   virtual ~FolderView();
 
    /// event processing function
-   virtual bool OnMEvent(MEventData& ev)
-   {
-      if ( ev.GetId() == MEventId_FolderTreeChange )
-      {
-         MEventFolderTreeChangeData& event = (MEventFolderTreeChangeData &)ev;
-         if ( event.GetChangeKind() == MEventFolderTreeChangeData::Delete )
-            OnFolderDeleteEvent(event.GetFolderFullName());
-      }
-      else if ( ev.GetId() == MEventId_ASFolderResult )
-         OnASFolderResultEvent((MEventASFolderResultData &) ev );
-      else if ( ev.GetId() == MEventId_MsgStatus )
-         OnMsgStatusEvent((MEventMsgStatusData&)ev );
-      else if ( ev.GetId() == MEventId_FolderUpdate )
-         OnFolderUpdateEvent((MEventFolderUpdateData&)ev );
-      return true; // continue evaluating this event
-   }
+   virtual bool OnMEvent(MEventData& ev);
 
    /// return full folder name
    const String& GetFullName() { return m_folderName; }
@@ -86,8 +52,10 @@ protected:
    virtual void OnFolderUpdateEvent(MEventFolderUpdateData &event) = 0;
    /// the derived class should update their display
    virtual void OnMsgStatusEvent(MEventMsgStatusData &event) = 0;
-   /// the derived class should react to the result to an asynch operation
+   /// the derived class should react to the result of an async operation
    virtual void OnASFolderResultEvent(MEventASFolderResultData &event) = 0;
+   /// we remember that we were open when the app exists
+   virtual void OnAppExit();
 
    /// the profile we use for our settings
    Profile *m_Profile;
@@ -99,9 +67,10 @@ protected:
 
 private:
    void *m_regCookieTreeChange,
-      *m_regCookieFolderUpdate,
-      *m_regCookieASFolderResult,
-      *m_regCookieMsgStatus;
+        *m_regCookieFolderUpdate,
+        *m_regCookieASFolderResult,
+        *m_regCookieMsgStatus,
+        *m_regCookieAppExit;
 };
 
 /// show a dialog allowing to choose the order of headers in the folder view

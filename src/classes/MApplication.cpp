@@ -597,22 +597,24 @@ MAppBase::CanClose() const
 
    // Check Trash folder if it contains any messages (only the global
    // Trash can be checked here!):
-
-   if(READ_APPCONFIG(MP_USE_TRASH_FOLDER)
-      // don´t ask twice:
-      && READ_APPCONFIG(MP_TRASH_FOLDER) != ((wxMainFrame *)m_topLevelFrame)->GetFolderName())
+   if ( READ_APPCONFIG(MP_USE_TRASH_FOLDER) )
    {
-      ASMailFolder *mf = ASMailFolder::OpenFolder(
-         READ_APPCONFIG(MP_TRASH_FOLDER));
-      if(mf)
+      String trashName = READ_APPCONFIG(MP_TRASH_FOLDER);
+
+      // don´t ask twice
+      if ( trashName != ((wxMainFrame *)m_topLevelFrame)->GetFolderName() )
       {
-         // make sure they are all marked as deleted:
-         UIdArray * ia = GetAllMessagesSequence(mf);
-         mf->SetSequenceFlag(ia, MailFolder::MSG_STAT_DELETED);
-         delete ia;
-         // And now, we can ask if we want to expunge them:
-         CheckExpungeDialog(mf);
-         mf->DecRef();
+         ASMailFolder *mf = ASMailFolder::OpenFolder(trashName);
+         if( mf )
+         {
+            // make sure they are all marked as deleted:
+            UIdArray * ia = GetAllMessagesSequence(mf);
+            mf->SetSequenceFlag(ia, MailFolder::MSG_STAT_DELETED);
+            delete ia;
+            // And now, we can ask if we want to expunge them:
+            CheckExpungeDialog(mf);
+            mf->DecRef();
+         }
       }
    }
 
@@ -629,8 +631,8 @@ MAppBase::CanClose() const
                                  FALSE /* no=default */,
                                  "AbandonCriticalFolders");
    }
-   else
-      return true;
+
+   return true;
 }
 
 void
@@ -656,6 +658,18 @@ MAppBase::Exit(bool ask)
 
    if ( !ask || CanClose() )
    {
+      if ( READ_APPCONFIG(MP_REOPENLASTFOLDER) )
+      {
+         // reset the list of folders to be reopened, it will be recreated in
+         // MEventId_AppExit handlers
+         GetProfile()->writeEntry(MP_OPENFOLDERS, "");
+      }
+
+      // send an event telling everybody we're closing: note that this can't
+      // be blocked, it is just a notification
+      MEventManager::Send(new MEventData(MEventId_AppExit));
+      MEventManager::DispatchPending();
+
       // this will close all our window and thus terminate the application
       DoExit();
    }

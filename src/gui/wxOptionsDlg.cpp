@@ -186,16 +186,17 @@ enum ConfigFields
 
    // folders
    ConfigField_FoldersFirst = ConfigField_ComposeLast,
-   ConfigField_OpenFolders,
+   ConfigField_ReopenLastFolder_HelpText,
    ConfigField_ReopenLastFolder,
+   ConfigField_OpenFolders,
    ConfigField_MainFolder,
    ConfigField_NewMailFolder,
    ConfigField_PollIncomingDelay,
    ConfigField_CollectAtStartup,
    ConfigField_UpdateInterval,
+   ConfigField_CloseDelay_HelpText,
    ConfigField_CloseDelay,
    ConfigField_FolderProgressThreshold,
-   ConfigField_AutoShowFirstMessage,
    ConfigField_AutocollectFolder,
    ConfigField_UseOutbox,
    ConfigField_OutboxName,
@@ -227,6 +228,7 @@ enum ConfigFields
 
    // message view
    ConfigField_MessageViewFirst = ConfigField_PythonLast,
+   ConfigField_AutoShowFirstMessage,
    ConfigField_MessageViewPreviewOnSelect,
    ConfigField_MessageViewFontFamily,
    ConfigField_MessageViewFontSize,
@@ -768,22 +770,28 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Configure &templates..."),      Field_SubDlg,  -1},
 
    // folders
+   { gettext_noop("You may either choose to reopen all folders which were\n"
+                  "when the program closed last time or explicitly specify\n"
+                  "the folders to reopen on each startup"), Field_Message, -1 },
+   { gettext_noop("Reopen last open folders"), Field_Bool, -1, },
    { gettext_noop("Folders to open on &startup"),  Field_List |
-                                                   Field_Restart, -1,           },
-   { gettext_noop("Reopen last open folder"), Field_Bool, -1, },
+                                                   Field_Restart,
+                                                   -ConfigField_ReopenLastFolder,           },
    { gettext_noop("Folder opened in &main frame"), Field_Folder | Field_Restart,
                                                    -ConfigField_ReopenLastFolder,                        },
    { gettext_noop("Folder where to collect &new mail"), Field_Folder, -1},
    { gettext_noop("Poll for &new mail interval in seconds"), Field_Number, -1},
    { gettext_noop("Poll for new mail at s&tartup"), Field_Bool, -1},
    { gettext_noop("&Ping/check folder interval in seconds"), Field_Number, -1},
-   { gettext_noop("&Keep folder open after close for this many seconds"), Field_Number, -1},
-   { gettext_noop("&Automatically select first message in viewer"), Field_Bool, -1},
+   { gettext_noop("Mahogany may keep the folder open after closing it\n"
+                  "for some time to make reopening the folder faster.\n"
+                  "This is useful for folders you often reopen."), Field_Message, -1},
+   { gettext_noop("&Keep open for (seconds)"), Field_Number, -1},
    { gettext_noop("&Threshold for displaying progress dialog"), Field_Number, -1},
    { gettext_noop("Folder to save &collected messages to"), Field_Folder, -1 },
    { gettext_noop("Send outgoing messages later"), Field_Bool, -1 },
    { gettext_noop("Folder for &outgoing messages"), Field_Folder, ConfigField_UseOutbox },
-   { gettext_noop("Move &deleted messages to Trash folder"), Field_Bool, -1},
+   { gettext_noop("Use &Trash folder"), Field_Bool, -1},
    { gettext_noop("&Trash folder name"), Field_Folder, ConfigField_UseTrash},
    { gettext_noop("Default format for mailbox files"
       ":Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)"),
@@ -812,6 +820,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
 #endif // USE_PYTHON
 
    // message view
+   { gettext_noop("&Select first message in viewer"), Field_Bool, -1},
    { gettext_noop("Preview message when &selected"), Field_Bool,    -1 },
    { gettext_noop("&Font family"
                   ":default:decorative:roman:script:swiss:modern:teletype"),
@@ -1053,15 +1062,16 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
 
    // folders
-   CONFIG_ENTRY(MP_OPENFOLDERS),
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_REOPENLASTFOLDER),
+   CONFIG_ENTRY(MP_OPENFOLDERS),
    CONFIG_ENTRY(MP_MAINFOLDER),
    CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
    CONFIG_ENTRY(MP_POLLINCOMINGDELAY),
    CONFIG_ENTRY(MP_COLLECTATSTARTUP),
    CONFIG_ENTRY(MP_UPDATEINTERVAL),
+   CONFIG_NONE(),
    CONFIG_ENTRY(MP_FOLDER_CLOSE_DELAY),
-   CONFIG_ENTRY(MP_AUTOSHOW_FIRSTMESSAGE),
    CONFIG_ENTRY(MP_FOLDERPROGRESS_THRESHOLD),
    CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
    CONFIG_ENTRY(MP_USE_OUTBOX), // where to store message before sending them
@@ -1088,6 +1098,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
 #endif // USE_PYTHON
 
    // message views
+   CONFIG_ENTRY(MP_AUTOSHOW_FIRSTMESSAGE),
    CONFIG_ENTRY(MP_PREVIEW_ON_SELECT),
    CONFIG_ENTRY(MP_MVIEW_FONT),
    CONFIG_ENTRY(MP_MVIEW_FONT_SIZE),

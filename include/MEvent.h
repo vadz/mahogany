@@ -41,6 +41,8 @@ enum MEventId
    MEventId_Ping,
    /// MEventNewADB - causes the ADB editor to update itself
    MEventId_NewADB,
+   /// MEventData (no special data) - notifies everybody that the app closes
+   MEventId_AppExit = 1000,
    /// (invalid id for an event)
    MEventId_Max
 };
@@ -49,6 +51,8 @@ enum MEventId
 /** The data associated with an event - more classes can be derived from this
     one.
 */
+// ----------------------------------------------------------------------------
+
 class MEventData : public MObject
 {
 public:
@@ -372,12 +376,27 @@ public:
    // Register()
    static bool Deregister(void *handle);
 
+   // convenience wrapper for Register() above: register the same object for
+   // several events putting the cookies into provided pointers and stopping
+   // at MEventId_Null, i.e. you should call it like this:
+   //
+   //    Register(this, MEventId_1, &handle, MEventId_Null);
+   //
+   // return TRUE if all succeeded
+   static bool RegisterAll(MEventReceiver& who,
+                           /* MEventId eventId, void **pHandle, */
+                           ...);
+
+   // convenience wrapper for Deregister(): deregisters all handles and NULLs
+   // them, stops at the NULL pointer
+   static bool DeregisterAll(void **pHandle, ...);
+
    /// Temporarily suspend (enable/disable) event dispatching:
    static void Suspend(bool suspended = TRUE);
 
 protected:
    /// Dispatches a single event.
-   static void Dispatch(MEventData * data);
+   static void Dispatch(MEventData *data);
 };
 
 #endif // MEVENT_H

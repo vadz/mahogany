@@ -16,11 +16,15 @@
 // ----------------------------------------------------------------------------
 // headers
 // ----------------------------------------------------------------------------
+
 #include "Mpch.h"
 
 #ifndef  USE_PCH
 #   include "Mcommon.h"
 #   include "kbList.h"
+
+#   include <stdarg.h>
+
 #   include <wx/dynarray.h>
 #endif // USE_PCH
 
@@ -151,7 +155,7 @@ void MEventManager::Dispatch(MEventData * dataptr)
    MEventLocker mutex;
    MEventReceiverInfoArray receivers = gs_receivers;
    mutex.Unlock();
-   
+
    size_t count = receivers.GetCount();
 
    for ( size_t n = 0; n < count; n++ )
@@ -199,7 +203,7 @@ void *MEventManager::Register(MEventReceiver& who, MEventId eventId)
       MEventLocker mutex;
       gs_receivers.Add(info);
    }
-   
+
    return info;
 }
 
@@ -230,6 +234,56 @@ MEventManager::Suspend(bool suspend)
 }
 
 // ----------------------------------------------------------------------------
+// convenience wrappers for Register() and Deregister()
+// ----------------------------------------------------------------------------
+
+/* static */
+bool MEventManager::RegisterAll(MEventReceiver& who,
+                                ...)
+{
+   va_list arglist;
+   va_start(arglist, (void *&)who);
+
+   bool ok = true;
+
+   for ( ;; )
+   {
+      MEventId id = (MEventId)va_arg(arglist, int);
+      if ( id == MEventId_Null )
+         break;
+
+      void **pHandle = va_arg(arglist, void **);
+      *pHandle = Register(who, id);
+      if ( !*pHandle )
+         ok = false;
+   }
+
+   va_end(arglist);
+
+   return ok;
+}
+
+/* static */
+bool MEventManager::DeregisterAll(void **pHandle, ...)
+{
+   va_list arglist;
+   va_start(arglist, pHandle);
+
+   bool ok = true;
+   while ( pHandle )
+   {
+      if ( !Deregister(*pHandle) )
+         ok = false;
+
+      pHandle = va_arg(arglist, void **);
+   }
+
+   va_end(arglist);
+
+   return ok;
+}
+
+// ----------------------------------------------------------------------------
 // different MEvent derivations
 // ----------------------------------------------------------------------------
 
@@ -237,7 +291,7 @@ MEventOptionsChangeData::MEventOptionsChangeData(class Profile
                                                  *profile, ChangeKind
                                                  what)
 
-   : MEventData(MEventId_OptionsChange)
+                       : MEventData(MEventId_OptionsChange)
 {
    SafeIncRef(profile);
 
@@ -254,7 +308,7 @@ MEventOptionsChangeData::~MEventOptionsChangeData()
 MEventNewMailData::MEventNewMailData(MailFolder *folder,
                                      unsigned long n,
                                      unsigned long *messageIDs)
-   : MEventWithFolderData(MEventId_NewMail, folder)
+                 : MEventWithFolderData(MEventId_NewMail, folder)
 {
    m_number = n;
    m_messageIDs = new unsigned long [n];
