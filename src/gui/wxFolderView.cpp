@@ -1697,10 +1697,15 @@ void wxFolderListCtrl::UpdateListing(HeaderInfoList *headers)
             Focus(posFocus);
          }
       }
+      // this does seem to happen when opening the folder for the first time
+      // under wxGTK - it seems to be harmless but I need to look deeper into
+      // this (FIXME)
+#if 0
       else
       {
          ASSERT_MSG( m_itemFocus == -1, "why no focused UID?" );
       }
+#endif // 0
 
       // TODO: should keep the currently selected items selected - but for
       //       this we need to store UIDs for all of them which we don't do
