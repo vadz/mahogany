@@ -398,7 +398,9 @@ BODY *
 MessageCC::GetBody(void)
 {
    int retry = 1;
-   
+
+   // Forget what we  know and re-fetch the body, it is cached anyway.
+   body = NULL;
    do
    {
       if(body == NULL && folder)
