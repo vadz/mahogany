@@ -208,6 +208,10 @@
 #define   MP_CONVERTPROGRAM      "ImageConverter"
 /// list of modules to load at startup
 #define MP_MODULES               "Modules"
+/// the user path for template files used for message composition
+#define MP_COMPOSETEMPLATEPATH_USER   "CompooseTemplatePathUser"
+/// the global path for template files used for message composition
+#define MP_COMPOSETEMPLATEPATH_GLOBAL   "CompooseTemplatePath"
 
 /**@name Printer settings */
 //@{

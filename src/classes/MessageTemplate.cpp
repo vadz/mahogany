@@ -88,10 +88,22 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
       if ( !*pc )
          break;
 
-      // what kind of brackets do we have?
+      // what kind of brackets do we have? some of them imply the category
+      // (like $`...` is the same as $(cmd: ...))
+      String category;
       char bracketClose, bracketOpen = *++pc;
       switch ( bracketOpen )
       {
+         case '\'':
+            bracketClose = '\'';
+            category = "cmd";
+            break;
+
+         case '<':
+            bracketClose = '<';
+            category = "file";
+            break;
+
          case '(':
             bracketClose = ')';
             break;
@@ -138,7 +150,9 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
          pc++;
 
       String word;
-      while ( (quoted && *pc && *pc != '"') || isalpha(*pc) )
+      while ( *pc && (*pc != '\n') &&
+              ((quoted && *pc && *pc != '"') ||
+              (!strchr("-+=:", *pc) && *pc != bracketClose && *pc)) )
       {
          word += *pc++;
       }
@@ -159,7 +173,7 @@ bool MessageTemplateParser::Parse(MessageTemplateSink& sink) const
       } alignment = None;
       unsigned int alignWidth = 0;
       bool truncate = FALSE;
-      String category, name;
+      String name;
 
       if ( !bracketClose )
       {

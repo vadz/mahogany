@@ -127,6 +127,9 @@ public:
                    const char *mimetype = NULL,
                    const char *filename = NULL);
 
+   /// move the cursor to the given position
+   void MoveCursorTo(int x, int y);
+
    /** Sets the address fields, To:, CC: and BCC:.
        @param To primary address to send mail to
        @param CC carbon copy addresses

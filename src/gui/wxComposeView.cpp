@@ -38,6 +38,8 @@
 #  include <ctype.h>          // for isspace()
 #endif
 
+#include <wx/confbase.h>      // for wxExpandEnvVars()
+#include <wx/ffile.h>
 #include <wx/textfile.h>
 #include <wx/process.h>
 #include <wx/mimetype.h>
@@ -199,7 +201,7 @@ private:
    DECLARE_EVENT_TABLE()
 };
 
-class StandardMessageTemplateSink
+class StandardMessageTemplateSink : public MessageTemplateSink
 {
 public:
    // ctor
@@ -243,11 +245,9 @@ class StandardMessageTemplateVarExpander : public MessageTemplateVarExpander
 {
 public:
    // ctor
-   StandardMessageTemplateVarExpander(wxComposeView *cv,
-                                      StandardMessageTemplateSink *sink)
+   StandardMessageTemplateVarExpander(StandardMessageTemplateSink& sink)
+      : m_sink(sink)
    {
-      m_sink = sink;
-      m_composeView = cv;
    }
 
    // implement base class pure virtual function
@@ -259,8 +259,7 @@ protected:
    bool SlurpFile(const String& filename, String *value) const;
 
 private:
-   wxComposeView               *m_composeView;
-   StandardMessageTemplateSink *m_sink;
+   StandardMessageTemplateSink& m_sink;
 };
 
 // ----------------------------------------------------------------------------
@@ -559,40 +558,29 @@ wxComposeView::CreateNewArticle(wxWindow *parent,
    cv->Create(parent,parentProfile);
 
    // testing only
-#if 0
-   class Expander : public MessageTemplateVarExpander
-   {
-   public:
-      virtual bool Expand(const String& category,
-                          const String& name,
-                          String *value) const
-      {
-         value->Empty();
-         if ( !!category )
-            *value << category << '/';
-         *value << name;
-
-         return TRUE;
-      }
-   } expander;
-
-   String text;
+#if 1
+#ifdef OS_WIN
    const char *filename = "f:/progs/M/template.test";
-   FILE *fp = fopen(filename, "rt");
-   if ( fp )
+#else
+   const char *filename = "/tmp/template.test";
+#endif
+   String text;
+   wxFFile file(filename);
+   if ( file.IsOpened() && file.ReadAll(&text) )
    {
-      char buf[4096];
-      while ( fgets(buf, WXSIZEOF(buf), fp) )
+      StandardMessageTemplateSink sink;
+      StandardMessageTemplateVarExpander expander(sink);
+      MessageTemplateParser parser(text, filename, &expander);
+      if ( parser.Parse(sink) )
       {
-         text += buf;
-      }
-   }
+         cv->InsertText(sink.GetText());
+         int x, y;
+         sink.GetCursorPosition(&x, &y);
+         cv->MoveCursorTo(x, y);
 
-   MessageTemplateParser parser(text, filename, &expander);
-   String output;
-   if ( parser.Parse(&output) )
-   {
-      cv->InsertText(output);
+         // clear the dirty flag - this text wasn't typed by user
+         cv->ResetDirty();
+      }
    }
 #endif
 
@@ -1641,6 +1629,12 @@ void wxComposeView::ResetDirty()
       m_LayoutWindow->SetModified(false);
 }
 
+void
+wxComposeView::MoveCursorTo(int x, int y)
+{
+   m_LayoutWindow->GetLayoutList()->MoveCursorTo(wxPoint(x, y));
+}
+
 /// inserts a text
 void
 wxComposeView::InsertText(const String &txt)
@@ -1918,13 +1912,11 @@ bool StandardMessageTemplateSink::Output(const String& text)
 bool StandardMessageTemplateVarExpander::SlurpFile(const String& filename,
                                                    String *value) const
 {
-   wxFile file(filename);
+   wxFFile file(filename);
    bool ok = file.IsOpened();
    if ( ok )
    {
-      off_t len = file.Length();
-      ok = file.Read(value->GetWriteBuf(len), len) != wxInvalidOffset;
-      value->UngetWriteBuf();
+      ok = file.ReadAll(value);
    }
 
    return ok;
@@ -1942,13 +1934,48 @@ bool StandardMessageTemplateVarExpander::Expand(const String& Category,
 
    if ( category == "file" )
    {
+      // NB: use the original version of the filename, not the lower case one
+      String filename = wxExpandEnvVars(Name);
+      if ( !IsAbsPath(filename) )
+      {
+         ProfileBase *profile = mApplication->GetProfile();
+         String path = profile->readEntry(MP_COMPOSETEMPLATEPATH_USER,
+                                          mApplication->GetLocalDir());
+         if ( !path || path.Last() != '/' )
+         {
+            path += '/';
+         }
+         String filename2 = path + filename;
+
+         if ( wxFile::Exists(filename2) )
+         {
+            // ok, found
+            filename = filename2;
+         }
+         else
+         {
+            // try the global dir
+            String path = profile->readEntry(MP_COMPOSETEMPLATEPATH_GLOBAL,
+                                             mApplication->GetGlobalDir());
+            if ( !path || path.Last() != '/' )
+            {
+               path += '/';
+            }
+
+            filename.Prepend(path);
+         }
+      }
+      //else: absolute filename given, don't look anywhere else
+
       // insert the contents of a file
-      if ( !SlurpFile(name, value) )
+      if ( !SlurpFile(filename, value) )
       {
          wxLogError(_("Failed to insert file '%s' into the message."),
                     name.c_str());
 
-         return FALSE;
+         // not FALSE, because we did understood this variable - just failed
+         // to find the file
+         return TRUE;
       }
    }
    else if ( category == "cmd" )
@@ -1990,6 +2017,7 @@ bool StandardMessageTemplateVarExpander::Expand(const String& Category,
       {
          char buf[256];
          time_t ltime;
+         (void)time(&ltime);
          tm *now = localtime(&ltime);
 
          (void)strftime(buf, WXSIZEOF(buf), "%x", now);
@@ -1998,7 +2026,12 @@ bool StandardMessageTemplateVarExpander::Expand(const String& Category,
       }
       else if ( name == "cursor" )
       {
-         m_sink->RememberCursorPosition();
+         m_sink.RememberCursorPosition();
+      }
+      else
+      {
+         // unknown name
+         return FALSE;
       }
    }
    else
