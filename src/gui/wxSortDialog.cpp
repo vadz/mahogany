@@ -58,7 +58,7 @@ extern const MOption MP_MSGS_SORTBY;
 /* These must not be more than 16, as they are stored in a 4-bit
    value! They must be in sync with the enum in MailFolder.h.
 */
-static wxString sortCriteria[] =
+static const wxChar *sortCriteria[] =
 {
    gettext_noop("Arrival order"),
    gettext_noop("Date"),
@@ -188,9 +188,15 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
       c->height.AsIs();
       m_Checkboxes[n]->SetConstraints(c);
 
+      wxString sortCriteriaTrans[NUM_CRITERIA];
+      for ( size_t i = 0; i < NUM_CRITERIA; i++ )
+      {
+         sortCriteriaTrans[i] = _(sortCriteria[i]);
+      }
+
       m_Choices[n] = new wxChoice(this, -1,
                                   wxDefaultPosition, wxDefaultSize,
-                                  NUM_CRITERIA, sortCriteria);
+                                  NUM_CRITERIA, sortCriteriaTrans);
       c = new wxLayoutConstraints;
       c->left.RightOf(txt, 2*LAYOUT_X_MARGIN);
       c->right.SameAs(m_Checkboxes[n], wxLeft, 2*LAYOUT_X_MARGIN);

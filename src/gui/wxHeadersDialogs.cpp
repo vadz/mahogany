@@ -404,7 +404,7 @@ wxComposeHeadersDialog::wxComposeHeadersDialog(Profile *profile,
    wxControl *last = NULL;
    for ( size_t header = 0; header < Header_Max; header++ )
    {
-      wxStaticText *label = new wxStaticText(this, -1, ms_headerNames[header]);
+      wxStaticText *label = new wxStaticText(this, -1, _(ms_headerNames[header]));
       m_textvalues[header] = new wxTextCtrl(this, TextCtrlId + header);
 
       // set the constraints

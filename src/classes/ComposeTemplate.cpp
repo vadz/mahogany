@@ -408,70 +408,70 @@ private:
 // the misc submenu
 static TemplatePopupMenuItem gs_popupSubmenuMisc[] =
 {
-   TemplatePopupMenuItem(_("Put &cursor here"), _T("$cursor")),
-   TemplatePopupMenuItem(_("Insert &signature"), _T("$signature")),
+   TemplatePopupMenuItem(gettext_noop("Put &cursor here"), _T("$cursor")),
+   TemplatePopupMenuItem(gettext_noop("Insert &signature"), _T("$signature")),
    TemplatePopupMenuItem(),
-   TemplatePopupMenuItem(_("Insert current &date"), _T("$date")),
+   TemplatePopupMenuItem(gettext_noop("Insert current &date"), _T("$date")),
    TemplatePopupMenuItem(),
-   TemplatePopupMenuItem(_("Insert &quoted text"), _T("$quote")),
-   TemplatePopupMenuItem(_("&Attach original text"), _T("$quote822")),
+   TemplatePopupMenuItem(gettext_noop("Insert &quoted text"), _T("$quote")),
+   TemplatePopupMenuItem(gettext_noop("&Attach original text"), _T("$quote822")),
 };
 
 // the file insert/attach sub menu
 static TemplatePopupMenuItem gs_popupSubmenuFile[] =
 {
-   TemplatePopupMenuItem(_("&Insert file..."), _T("${file:%s}"), TRUE),
-   TemplatePopupMenuItem(_("Insert &any file..."), _T("${file:%s?ask"), TRUE),
-   TemplatePopupMenuItem(_("Insert &quoted file..."), _T("${file:%s?quote}"), TRUE),
-   TemplatePopupMenuItem(_("&Attach file..."), _T("${attach:%s}"), TRUE),
+   TemplatePopupMenuItem(gettext_noop("&Insert file..."), _T("${file:%s}"), TRUE),
+   TemplatePopupMenuItem(gettext_noop("Insert &any file..."), _T("${file:%s?ask"), TRUE),
+   TemplatePopupMenuItem(gettext_noop("Insert &quoted file..."), _T("${file:%s?quote}"), TRUE),
+   TemplatePopupMenuItem(gettext_noop("&Attach file..."), _T("${attach:%s}"), TRUE),
 };
 
 // the message submenu
 static TemplatePopupMenuItem gs_popupSubmenuMessage[] =
 {
-   TemplatePopupMenuItem(_("&To"), _T("${message:to}")),
-   TemplatePopupMenuItem(_("&First name"), _T("${message:firstname}")),
-   TemplatePopupMenuItem(_("&Last name"), _T("${message:lastname}")),
-   TemplatePopupMenuItem(_("&Subject"), _T("${message:subject}")),
-   TemplatePopupMenuItem(_("&CC"), _T("${message:cc}")),
-   TemplatePopupMenuItem(_("&BCC"), _T("${message:bcc}")),
+   TemplatePopupMenuItem(gettext_noop("&To"), _T("${message:to}")),
+   TemplatePopupMenuItem(gettext_noop("&First name"), _T("${message:firstname}")),
+   TemplatePopupMenuItem(gettext_noop("&Last name"), _T("${message:lastname}")),
+   TemplatePopupMenuItem(gettext_noop("&Subject"), _T("${message:subject}")),
+   TemplatePopupMenuItem(gettext_noop("&CC"), _T("${message:cc}")),
+   TemplatePopupMenuItem(gettext_noop("&BCC"), _T("${message:bcc}")),
 };
 
 // the original message submenu
 static TemplatePopupMenuItem gs_popupSubmenuOriginal[] =
 {
-   TemplatePopupMenuItem(_("&Date"), _T("${original:date}")),
-   TemplatePopupMenuItem(_("&From"), _T("${original:from}")),
-   TemplatePopupMenuItem(_("&Subject"), _T("${original:subject}")),
-   TemplatePopupMenuItem(_("Full &name"), _T("${original:fullname}")),
-   TemplatePopupMenuItem(_("F&irst name"), _T("${original:firstname}")),
-   TemplatePopupMenuItem(_("&Last name"), _T("${original:lastname}")),
-   TemplatePopupMenuItem(_("&To"), _T("${original:to}")),
-   TemplatePopupMenuItem(_("&Reply to"), _T("${original:replyto}")),
-   TemplatePopupMenuItem(_("&Newsgroups"), _T("${original:newsgroups}")),
+   TemplatePopupMenuItem(gettext_noop("&Date"), _T("${original:date}")),
+   TemplatePopupMenuItem(gettext_noop("&From"), _T("${original:from}")),
+   TemplatePopupMenuItem(gettext_noop("&Subject"), _T("${original:subject}")),
+   TemplatePopupMenuItem(gettext_noop("Full &name"), _T("${original:fullname}")),
+   TemplatePopupMenuItem(gettext_noop("F&irst name"), _T("${original:firstname}")),
+   TemplatePopupMenuItem(gettext_noop("&Last name"), _T("${original:lastname}")),
+   TemplatePopupMenuItem(gettext_noop("&To"), _T("${original:to}")),
+   TemplatePopupMenuItem(gettext_noop("&Reply to"), _T("${original:replyto}")),
+   TemplatePopupMenuItem(gettext_noop("&Newsgroups"), _T("${original:newsgroups}")),
    TemplatePopupMenuItem(),
-   TemplatePopupMenuItem(_("Insert &quoted text"), _T("$quote")),
-   TemplatePopupMenuItem(_("&Attach original text"), _T("$quote822")),
-   TemplatePopupMenuItem(_("Insert &unquoted Text"), _T("$text")),
+   TemplatePopupMenuItem(gettext_noop("Insert &quoted text"), _T("$quote")),
+   TemplatePopupMenuItem(gettext_noop("&Attach original text"), _T("$quote822")),
+   TemplatePopupMenuItem(gettext_noop("Insert &unquoted Text"), _T("$text")),
 };
 
 // the whole menu
 static TemplatePopupMenuItem gs_popupMenu[] =
 {
-   TemplatePopupMenuItem(_("&Miscellaneous"),
+   TemplatePopupMenuItem(gettext_noop("&Miscellaneous"),
                          gs_popupSubmenuMisc,
                          WXSIZEOF(gs_popupSubmenuMisc)),
-   TemplatePopupMenuItem(_("Message &headers"),
+   TemplatePopupMenuItem(gettext_noop("Message &headers"),
                          gs_popupSubmenuMessage,
                          WXSIZEOF(gs_popupSubmenuMessage)),
-   TemplatePopupMenuItem(_("&Original message"),
+   TemplatePopupMenuItem(gettext_noop("&Original message"),
                          gs_popupSubmenuOriginal,
                          WXSIZEOF(gs_popupSubmenuOriginal)),
-   TemplatePopupMenuItem(_("Insert or attach a &file"),
+   TemplatePopupMenuItem(gettext_noop("Insert or attach a &file"),
                          gs_popupSubmenuFile,
                          WXSIZEOF(gs_popupSubmenuFile)),
    TemplatePopupMenuItem(),
-   TemplatePopupMenuItem(_("&Execute command..."), _T("${cmd:%s}"), FALSE),
+   TemplatePopupMenuItem(gettext_noop("&Execute command..."), _T("${cmd:%s}"), FALSE),
 };
 
 const TemplatePopupMenuItem& g_ComposeViewTemplatePopupMenu =

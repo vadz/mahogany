@@ -361,7 +361,7 @@ void TemplateEditor::AppendMenuItem(wxMenu *menu,
          {
             // first create the entry for the submenu
             wxMenu *submenu = new wxMenu;
-            menu->Append(m_items.GetCount(), menuitem.label, submenu);
+            menu->Append(m_items.GetCount(), _(menuitem.label), submenu);
 
             // next subitems
             for ( size_t n = 0; n < menuitem.nSubItems; n++ )
@@ -380,7 +380,7 @@ void TemplateEditor::AppendMenuItem(wxMenu *menu,
       case TemplatePopupMenuItem::Normal:
       case TemplatePopupMenuItem::File:
       case TemplatePopupMenuItem::Text:
-         menu->Append(m_items.GetCount(), menuitem.label);
+         menu->Append(m_items.GetCount(), _(menuitem.label));
          break;
 
       default:

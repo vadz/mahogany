@@ -3493,9 +3493,9 @@ wxListBox *wxAdbPage::CreateListBox(const wxChar *label, wxControl *last)
   wxButton *button = NULL;
   static const wxChar *aszLabels[] =
   {
-    _T("&Add"),
-    _T("&Modify"),
-    _T("&Delete"),
+    _("&Add"),
+    _("&Modify"),
+    _("&Delete"),
   };
   const wxChar *aszLabelsT[WXSIZEOF(aszLabels)];  // translated labels
 

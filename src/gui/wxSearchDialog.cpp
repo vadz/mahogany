@@ -55,7 +55,7 @@ extern const MOption MP_MSGS_SEARCH_CRIT;
 // constants
 // ----------------------------------------------------------------------------
 
-static const wxString searchCriteria[] =
+static const wxChar *searchCriteria[] =
 {
    gettext_noop("Full Message"),
    gettext_noop("Message Content"),
@@ -188,9 +188,15 @@ wxMessageSearchDialog::wxMessageSearchDialog(SearchCriterium *crit,
    m_textWhat->SetConstraints(c);
 
    // second line: In [Where___]
+   wxString searchCriteriaTrans[WXSIZEOF(searchCriteria)];
+   for ( size_t n = 0; n < WXSIZEOF(searchCriteria); n++ )
+   {
+      searchCriteriaTrans[n] = _(searchCriteria[n]);
+   }
+
    m_choiceWhere = new wxPChoice("SearchWhere", this, -1,
                                  wxDefaultPosition, wxDefaultSize,
-                                 WXSIZEOF(searchCriteria), searchCriteria);
+                                 WXSIZEOF(searchCriteria), searchCriteriaTrans);
    c = new wxLayoutConstraints;
    c->left.SameAs(m_textWhat, wxLeft);
    c->right.SameAs(m_textWhat, wxRight);
