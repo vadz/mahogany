@@ -135,7 +135,6 @@ void MEventManager::Dispatch(MEventData * dataptr)
    // themselves from our list while we send the event
    MEventReceiverInfoArray receivers = gs_receivers;
    size_t count = receivers.GetCount();
-//   cerr << "MEvent::Dispatch() looking for receivers." << endl;
 
    for ( size_t n = 0; n < count; n++ )
    {
@@ -147,21 +146,15 @@ void MEventManager::Dispatch(MEventData * dataptr)
 
       if ( info->id == id )
       {
-//         cerr << "MEvent::Dispatch() sending to: " << &(info->receiver)
-//              << endl;
          // notify this one
-         cerr << "Calling receiver:" << endl;
          if ( !info->receiver.OnMEvent(data) )
          {
             // the handler decided to stop the event propagation
-            cerr << "receiver done and aborted." << endl;
             break;
          }
-         cerr << "receiver done." << endl;
          //else: continue to search other receivers for this event
       }
    }
-//   cerr << "MEvent::Dispatch() done." << endl;
 }
 
 // the return value is just the pointer to the structure we add to the array
