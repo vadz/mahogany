@@ -253,7 +253,7 @@ String const
 MessageCC::From(void) const
 {
    String tmp;
-   return Address(tmp, MAT_REPLYTO);
+   return Address(tmp, MAT_FROM);
 }
 
 String

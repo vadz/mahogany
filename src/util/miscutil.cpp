@@ -452,7 +452,12 @@ extern String miscutil_GetFromAddress(Profile *p,
    if(host.Length() == 0)
       mbox = miscutil_ExpandLocalAddress(p, mbox);
    else
-      mbox << '@' << host;
+      mbox << '@' << host;  // FIXME incorrect - FROM always=USER@HOST
+
+   mbox = READ_CONFIG(p, MP_RETURN_ADDRESS); //FIXME, there is no MP_ADDRESS
+					    //or MP_FROM_ADDRESS
+   strutil_delwhitespace(mbox);
+
    if(pers) *pers = personal;
    if(email) *email = mbox;
    return strutil_makeMailAddress(personal,mbox);
