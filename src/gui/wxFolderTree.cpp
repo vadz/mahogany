@@ -676,9 +676,9 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
 
       if ( removeOnly )
       {
-         msg.Printf(_("Do you really want to delete folder '%s' and all of its\n"
+         msg.Printf(_("Do you really want to remove folder '%s' and all of its\n"
                       "subfolders? You will permanently lose all the settings\n"
-                      "for the deleted folders!"), folder->GetName().c_str());
+                      "for the removed folders!"), folder->GetName().c_str());
       }
       else // remove and delete
       {
@@ -692,7 +692,7 @@ bool wxFolderTree::OnDelete(MFolder *folder, bool removeOnly)
       if ( removeOnly )
       {
          configPath = "ConfirmFolderDelete";
-         msg.Printf(_("Do you really want to delete folder '%s'?"),
+         msg.Printf(_("Do you really want to remove folder '%s'?"),
                     folder->GetName().c_str());
       }
       else // remove and delete
