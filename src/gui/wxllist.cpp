@@ -1805,7 +1805,7 @@ wxLayoutList::Clear(
 {
    InternalClear();
    m_DefaultStyleInfo = wxLayoutStyleInfo(family, size, style, weight,
-                                        underline, fg, bg, enc);
+                                        underline, fg, bg, encoding);
    m_CurrentStyleInfo = m_DefaultStyleInfo;
 
    // Empty() should be called after we set m_DefaultStyleInfo because
