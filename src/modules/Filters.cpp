@@ -475,6 +475,7 @@ private:
    void CollectForDelete();
    void ProgressDelete();
    void IndicateDeleted();
+   bool ContainsSpamTest();
 
    static String GetExecuteProgressString(const String& s)
    {
@@ -504,6 +505,10 @@ private:
 
    // Result of evaluating filter
    Value m_retval;
+   
+   // Cache for ContainsSpamTest
+   bool m_spamTestValid;
+   bool m_spamTest;
 };
 
 // ----------------------------------------------------------------------------
@@ -519,12 +524,31 @@ public:
    virtual const Value Evaluate(void) const = 0;
    virtual String ToString(void) const
       { return Evaluate().ToString(); }
+   virtual const SyntaxNode *GetChild(size_t order) const { return NULL; }
+   virtual const SyntaxNode *GetNext() const { return NULL; }
+   virtual bool IsFunctionCall() const { return false; }
 #ifdef DEBUG
    virtual String Debug(void) const = 0;
 #endif
 private:
    MOBJECT_NAME(SyntaxNode)
 };
+
+// TreeIterator-compatible wrapper around SyntaxNode
+class SyntaxNodeIteratorDriver
+{
+public:
+   typedef const SyntaxNode *Type;
+   
+   const SyntaxNode *GetChild(const SyntaxNode *actual,size_t child)
+      { return actual->GetChild(child); }
+   const SyntaxNode *GetNext(const SyntaxNode *actual)
+      { return actual->GetNext(); }
+   bool IsNull(const SyntaxNode *actual) { return actual == NULL; }
+};
+
+// SyntaxNodeIterator walks all nodes deriving from SyntaxNode
+DECLARE_TREE_ITERATOR(SyntaxNodeIterator,SyntaxNodeIteratorDriver);
 
 class SequentialEval : public SyntaxNode
 {
@@ -549,6 +573,9 @@ public:
          // tail recursion, so no add'l stack frame
          return m_Next->Evaluate();
       }
+   virtual const SyntaxNode *GetChild(size_t order) const
+      { return order == 0 ? m_Rule : NULL; }
+   virtual const SyntaxNode *GetNext() const { return m_Next; }
 
 protected:
    const SyntaxNode *m_Rule,
@@ -653,6 +680,8 @@ public:
          return s;
       }
 #endif
+   virtual const SyntaxNode *GetChild(size_t order) const
+      { return order == 0 ? m_Sn : NULL; }
 private:
    const SyntaxNode *m_Sn;
    MOBJECT_NAME(Negation)
@@ -679,6 +708,8 @@ public:
          return s;
       }
 #endif
+   virtual const SyntaxNode *GetChild(size_t order) const
+      { return order == 0 ? m_Sn : NULL; }
 private:
    const SyntaxNode *m_Sn;
    MOBJECT_NAME(Negative)
@@ -783,6 +814,10 @@ public:
          return String("FunctionCall(") + m_fd->GetName() + String(")");
       }
 #endif
+   virtual const SyntaxNode *GetChild(size_t order) const
+      { return order < m_args->Count() ? m_args->GetArg(order) : NULL; }
+   String Name() const { return m_fd->GetName(); }
+   virtual bool IsFunctionCall() const { return true; }
 private:
    const FunctionDefinition *m_fd;
    ArgList *m_args;
@@ -827,6 +862,16 @@ public:
          return s;
       }
 #endif
+   virtual const SyntaxNode *GetChild(size_t order) const
+   {
+      switch(order)
+      {
+      case 0: return m_Cond;
+      case 1: return m_Left;
+      case 2: return m_Right;
+      }
+      return NULL;
+   }
 
 private:
    const SyntaxNode *m_Cond, *m_Left, *m_Right;
@@ -858,6 +903,15 @@ public:
          return s;
       }
 #endif
+   virtual const SyntaxNode *GetChild(size_t order) const
+   {
+      switch(order)
+      {
+      case 0: return m_Left;
+      case 1: return m_Right;
+      }
+      return NULL;
+   }
 protected:
    const SyntaxNode *m_Left, *m_Right;
    MOBJECT_NAME(Expression)
@@ -1021,6 +1075,16 @@ public:
          return s;
       }
 #endif
+   virtual const SyntaxNode *GetChild(size_t order) const
+   {
+      switch(order)
+      {
+      case 0: return m_Condition;
+      case 1: return m_IfBlock;
+      case 2: return m_ElseBlock;
+      }
+      return NULL;
+   }
 private:
    const SyntaxNode *m_Condition, *m_IfBlock, *m_ElseBlock;
    MOBJECT_NAME(IfElse)
@@ -3294,6 +3358,8 @@ FilterRuleApply::FilterRuleApply(FilterRuleImpl *parent, UIdArray& msgs)
 {
    m_pd = NULL;
    m_doExpunge = false;
+   m_spamTestValid = false;
+   m_spamTest = false;
 }
 
 FilterRuleApply::~FilterRuleApply()
@@ -3501,6 +3567,12 @@ FilterRuleApply::UpdateProgressDialog()
       m_parent->m_MailMessage->Subject());
    String from = MailFolder::DecodeHeader(m_parent->m_MailMessage->From());
 
+   if( ContainsSpamTest() )
+   {
+      subject = _("(hidden in spam filter)");
+      from = _("(hidden in spam filter)");
+   }
+   
    m_textLog.Printf(_("Filtering message %u/%u"),
       m_idx + 1, m_msgs.GetCount());
 
@@ -3769,6 +3841,27 @@ FilterRuleApply::IndicateDeleted()
    {
       m_msgs.RemoveAt(m_indicesDeleted[n - 1]);
    }
+}
+
+bool
+FilterRuleApply::ContainsSpamTest()
+{
+   if( !m_spamTestValid )
+   {
+      m_spamTest = false;
+      for( SyntaxNodeIterator each(m_parent->m_Program); !each.End();
+         ++each )
+      {
+         const SyntaxNode *node = each.Actual();
+         if( node->IsFunctionCall() )
+         {
+            const FunctionCall *call = (const FunctionCall *)node;
+            m_spamTest = m_spamTest || (call && call->Name() == "isspam");
+         }
+      }
+   }
+   
+   return m_spamTest;
 }
 
 // ----------------------------------------------------------------------------

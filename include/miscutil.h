@@ -116,6 +116,69 @@ protected:
       m_pointer = new name::HostType; \
    } \
 
+
+class TreeIteratorNode
+{
+public:
+   virtual ~TreeIteratorNode() {}
+   
+   virtual TreeIteratorNode *GetChild(size_t order) = 0;
+   virtual TreeIteratorNode *GetNext() = 0;
+};
+
+WX_DEFINE_ARRAY(TreeIteratorNode *,TreeIteratorResult);
+
+class TreeIterator
+{
+public:
+   ~TreeIterator();
+   
+   bool End() { return m_offset == m_result.GetCount(); }
+   void operator++() { ++m_offset; }
+   
+protected:
+   void Initialize(TreeIteratorNode *start);
+   TreeIteratorNode *ActualCommon() { return m_result[m_offset]; }
+
+private:
+   void Walk(TreeIteratorNode *tree);
+   
+   size_t m_offset;
+   TreeIteratorResult m_result;
+};
+
+#define DECLARE_TREE_ITERATOR(name,driver) \
+   class TreeIteratorNode_##name : public TreeIteratorNode \
+   { \
+   public: \
+      TreeIteratorNode_##name(driver::Type value) : m_value(value) {} \
+   \
+      virtual TreeIteratorNode *GetChild(size_t order) \
+         { return CheckNull(m_driver.GetChild(m_value,order)); } \
+      virtual TreeIteratorNode *GetNext() \
+         { return CheckNull(m_driver.GetNext(m_value)); } \
+   \
+      driver::Type m_value; \
+   \
+   private: \
+      TreeIteratorNode_##name *CheckNull(driver::Type node) \
+      { \
+         return m_driver.IsNull(node) ? NULL \
+            : new TreeIteratorNode_##name(node); \
+      } \
+   \
+      driver m_driver; \
+   }; \
+   \
+   class name : public TreeIterator \
+   { \
+   public: \
+      name(driver::Type start) \
+         { Initialize(new TreeIteratorNode_##name(start)); } \
+      driver::Type Actual() \
+         { return ((TreeIteratorNode_##name *)ActualCommon())->m_value; } \
+   }
+
 //@}
 
 #endif // MISCUTIL_H

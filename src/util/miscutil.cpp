@@ -142,3 +142,33 @@ void GetColourByName(wxColour *colour,
       *colour = def;
    }
 }
+
+TreeIterator::~TreeIterator()
+{
+   for( size_t offset = 0; offset < m_result.GetCount(); ++offset )
+      delete m_result[offset];
+}
+
+void TreeIterator::Initialize(TreeIteratorNode *start)
+{
+   m_offset = 0;
+   Walk(start);
+}
+
+void TreeIterator::Walk(TreeIteratorNode *tree)
+{
+   TreeIteratorNode *sibling;
+   for( sibling = tree; sibling != NULL; sibling = sibling->GetNext() )
+   {
+      m_result.Add(sibling);
+      
+      size_t order = 0;
+      for(;;)
+      {
+         TreeIteratorNode *child = sibling->GetChild(order++);
+         if( !child )
+            break;
+         Walk(child);
+      }
+   }
+}
