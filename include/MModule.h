@@ -61,7 +61,10 @@ public:
     type which will be called to initialise it. That function must
     return NULL if it could not initialise the module.
 */
-typedef class MModule * (* CreateModuleFuncType) (void);
+extern "C"
+{
+   typedef class MModule * (* CreateModuleFuncType) (void);
+};
 
 //@}
 #endif // MMODULE_H
