@@ -155,11 +155,11 @@ MAppBase::OnStartup()
       textdomain (M_APPLICATIONNAME);
 #  endif // USE_GETTEXT
 
-   // create log window
-   logFrame = new wxMLogFrame;
-
    // create and show the main program window
    CreateTopLevelFrame();
+
+   // create log window
+   logFrame = new wxMLogFrame;
 
    String   tmp;
    bool   found;

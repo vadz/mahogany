@@ -63,6 +63,8 @@ wxFrame *
 #endif
 wxMApp::OnInit()
 {
+   m_IconManager = new wxIconManager();
+
    if ( OnStartup() ) {
 #     ifdef  USE_WXWINDOWS2
          return true;
@@ -79,8 +81,6 @@ wxMApp::OnInit()
 
 MFrame *wxMApp::CreateTopLevelFrame()
 {
-   m_IconManager = new wxIconManager();
-
    topLevelFrame = GLOBAL_NEW wxMainFrame();
    topLevelFrame->SetTitle(M_TOPLEVELFRAME_TITLE);
    topLevelFrame->Show(true);
