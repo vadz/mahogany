@@ -243,7 +243,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
            : wxMFrame(iname,parent)
 {
    SetIcon(ICON("MainFrame"));
-   SetTitle(_("Copyright (C) 1997-2001 The Mahogany Developers Team"));
+   SetTitle(_("Copyright (C) 1997-2002 The Mahogany Developers Team"));
 
    static int widths[3] = { -1, 70, 100 }; // FIXME: temporary for debugging
    CreateStatusBar(3, wxST_SIZEGRIP, 12345); // 3 fields, id 12345 fo
