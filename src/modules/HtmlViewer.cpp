@@ -38,6 +38,7 @@
 
 #include <wx/fontmap.h>
 #include <wx/fs_mem.h>
+#include <wx/fs_inet.h>
 
 #include <wx/html/htmlwin.h>    // for wxHtmlWindow
 #include <wx/html/htmprint.h>   // for wxHtmlEasyPrinting
@@ -581,6 +582,8 @@ IMPLEMENT_MESSAGE_VIEWER(HtmlViewer,
 
 HtmlViewer::HtmlViewer()
 {
+   wxFileSystem::AddHandler(new wxInternetFSHandler);
+
    m_window = NULL;
 
    m_nPart =
@@ -1113,6 +1116,10 @@ void HtmlViewer::EndBody()
    //wxLogTrace(_T("html"), _T("Generated HTML output:\n%s\n"), m_htmlText.c_str());
 
    m_window->SetPage(m_htmlText);
+
+#if wxCHECK_VERSION(2, 5, 2)
+   m_msgView->OnBodyText(m_window->ToText());
+#endif
 }
 
 // ----------------------------------------------------------------------------
