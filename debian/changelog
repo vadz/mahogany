@@ -1,5 +1,8 @@
-mahogany (0.50) unstable; urgency=low
+mahogany (0.60) stable; urgency=medium
 
+  * More filter work, import/export of other mailboxes and addressbooks,
+  * vCard support, more support for Windows, Calendar/scheduling module
+  * openSSL support
   * Major changes: Filters added, PalmOS module added,
   *   subscription management for several remote folders,
   *   Wizards and HTML based help system.
@@ -7,9 +10,9 @@ mahogany (0.50) unstable; urgency=low
   * Bug fix release, improved message editor. 
   * Initial Release.
 
- -- Karsten Ballüder <karsten@phy.hw.ac.uk>  Sun, 25 Apr 1999 20:54:01 +0100
+ -- Karsten Ballueder <m-developers@egroups.com>  Sun, 25 Apr 1999 20:54:01 +0100
 
 Local variables:
 mode: debian-changelog
-add-log-mailing-address: "karsten@phy.hw.ac.uk"
+add-log-mailing-address: "m-developers@egroups.com"
 End:
