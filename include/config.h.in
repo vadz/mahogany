@@ -84,9 +84,6 @@
 #define NO_IDEA	1	/* we load openssl later, but this makes it   */
 #endif
 
-/** Define this if you have POSIX.2 regexp suport. */
-#undef HAVE_POSIX_REGEX
-
 /** Define this if you want debugging logic included. */
 #undef DEBUG
 
