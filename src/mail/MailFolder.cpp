@@ -799,13 +799,16 @@ MailFolder::ReplyMessage(class Message *msg,
    if ( !countReplyTo )
    {
       // try from address
-      cv->AddTo(msg->From());
+      //
+      // FIXME: original encoding is lost here
+      cv->AddTo(DecodeHeader(msg->From()));
    }
    else // have Reply-To
    {
       for ( n = 0; n < countReplyTo; n++ )
       {
-         cv->AddTo(replyToAddresses[n]);
+         // FIXME: same as above
+         cv->AddTo(DecodeHeader(replyToAddresses[n]));
       }
    }
 
@@ -824,6 +827,13 @@ MailFolder::ReplyMessage(class Message *msg,
 #if 0
    msg->GetAddresses(MAT_SENDER, otherAddresses);
 #endif // 0
+
+   // decode headers before comparing them - the problem is that we lost their
+   // original encoding when doing this
+   for ( n = 0; n < otherAddresses.GetCount(); n++ )
+   {
+      otherAddresses[n] = DecodeHeader(otherAddresses[n]);
+   }
 
    // remove duplicates
    wxArrayString uniqueAddresses = strutil_uniq_array(otherAddresses);
@@ -869,7 +879,9 @@ MailFolder::ReplyMessage(class Message *msg,
    // construct the new subject
    String newSubject;
    String replyPrefix = READ_CONFIG(profile, MP_REPLY_PREFIX);
-   String subject = msg->Subject();
+
+   // FIXME: original subject encoding is lost here
+   String subject = DecodeHeader(msg->Subject());
 
    // we may collapse "Re:"s in the subject if asked for it
    enum CRP // this is an abbreviation of "collapse reply prefix"
@@ -1038,7 +1050,12 @@ MailFolder::ForwardMessage(class Message *msg,
       profile = mApplication->GetProfile();
 
    Composer *cv = Composer::CreateFwdMessage(params, profile, msg);
-   cv->SetSubject(READ_CONFIG(profile, MP_FORWARD_PREFIX) + msg->Subject());
+
+   // FIXME: we shouldn't assume that all headers have the same encoding
+   //        so we should set the subject text and tell the composer its
+   //        encoding as well
+   cv->SetSubject(READ_CONFIG(profile, MP_FORWARD_PREFIX) +
+                     DecodeHeader(msg->Subject()));
    cv->InitText(msg);
 }
 
