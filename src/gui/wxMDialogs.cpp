@@ -2459,7 +2459,7 @@ static const struct
    { "FolderGroupHint",          gettext_noop("show explanation after creating a folder group") },
    { "SignatureTooLong",         gettext_noop("warn if signature is longer than netiquette recommends") },
    { "RememberPwd",              gettext_noop("propose to permanently remember passwords entered interactively") },
-   { "KeepPwd",                  gettext_noop("propose to keep passwords entered interactively for the duartion of this session") },
+   { "KeepPwd",                  gettext_noop("propose to keep passwords entered interactively for the duration of this session") },
    { "ShowLogWinHint",           gettext_noop("show the hint about reopening the log window when it is being closed") },
    { "AutoExpunge",              gettext_noop("ask to expunge deleted messages before closing the folder") },
    { "SuspendAutoCollectFolder", gettext_noop("ask to suspend auto-collecting messages from failed incoming folder") },

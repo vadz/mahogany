@@ -901,7 +901,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                                                    Field_AppWide,
                                                    -ConfigField_ReopenLastFolder,                        },
    { gettext_noop("A progress dialog will be shown while retrieving more\n"
-                  "the specified number of messages. Set it to 0 to never\n"
+                  "than specified number of messages. Set it to 0 to never\n"
                   "show the progress dialog at all."), Field_Message, -1},
    { gettext_noop("&Threshold for displaying progress dialog"), Field_Number, -1},
    { gettext_noop("Show bus&y dialog while sorting/threading"), Field_Bool, -1},

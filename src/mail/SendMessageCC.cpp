@@ -949,7 +949,7 @@ SendMessageCC::AddPart(MimeType::Primary type,
    PARAMETER *lastpar = NULL,
              *par;
 
-   // do we already have CHARSER parameter?
+   // do we already have CHARSET parameter?
    bool hasCharset = false;
 
    if( plist )
