@@ -2051,14 +2051,13 @@ extern "C"
       return 0;
 #endif
    }
-#else
-
+#else // !USE_PYTHON
    static Value func_python(ArgList *args, FilterRuleImpl *p)
    {
       p->Error(_("Python support for filters is not available."));
       return false;
    }
-#endif
+#endif // USE_PYTHON/!USE_PYTHON
 
    static Value func_print(ArgList *args, FilterRuleImpl *p)
    {
@@ -2424,9 +2423,7 @@ BuiltinFunctions(void)
    Define("now", func_now);
    Define("isspam", func_checkSpam);
    Define("expunge", func_expunge);
-#ifdef USE_PYTHON
    Define("python", func_python);
-#endif
    Define("matchregexi", func_matchregexi);
    Define("setcolour", func_setcolour);
    Define("score", func_score);
