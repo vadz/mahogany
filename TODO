@@ -8,6 +8,8 @@ $Id$
 *********************************************************************
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
+9       KB      PalmOS: store to Palm needs to strip headers and set
+                To/etc and correct LF/CR convention
 
 9	KB	wxLayout:
 		- cannot type text when NUMLOCK is on
