@@ -132,10 +132,6 @@ MailCollector::Collect(MailFolder *mf)
 
    CHECK(m_NewMailFolder,false,_("Cannot collect mail without New Mail folder."));
 
-   if(IsLocked())
-      return true; // didn't collect, but no error
-   
-   bool locked = Lock();
    if(mf == NULL)
    {
       MailCollectorFolderList::iterator i;
@@ -187,7 +183,6 @@ MailCollector::Collect(MailFolder *mf)
             MDialog_Message(text, NULL, _("New Mail"));
          }
    }
-   Lock(locked);
    return rc;
 }
 
