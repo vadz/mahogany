@@ -457,8 +457,7 @@ bool SpamOptionManagerBody::ShowDialog(wxFrame *parent)
 {
    // we use the global app profile to pass the settings to/from the options
    // page because like this we can reuse the options page classes easily
-   RefCounter<Profile> profile;
-   profile.AttachAndIncRef(mApplication->GetProfile());
+   Profile *profile = mApplication->GetProfile();
 
    // transfer data to dialog
    WriteProfile(profile);
