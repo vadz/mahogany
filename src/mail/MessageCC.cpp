@@ -2,7 +2,7 @@
  * Message class: entries for message header                        *
  *                      implementation for MailFolderCC             *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -410,7 +410,11 @@ MessageCC::FetchText(void)
       ASSERT_MSG(strlen(mailText) == m_MailTextLen,
                  "DEBUG: Mailfolder corruption detected");
       MailFolderCC::ProcessEventQueue();
-      return String(mailText, (size_t) m_MailTextLen);
+      String str( (size_t) m_MailTextLen);
+      for(size_t i = 0; i < m_MailTextLen; i++)
+         str[i] = headerPart[i];
+      str[m_MailTextLen] = '\0';
+      return str;
    }
    else // from a text
       return text;
@@ -856,14 +860,17 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
 
       if(folder && folder->Lock())
       {
-         str = "";
          CHECK_DEAD();
          char *headerPart =
             mail_fetchheader_full(folder->Stream(),m_uid,NIL,&len,FT_UID); 
          folder->UnLock();
          ASSERT_MSG(strlen(headerPart) == len,
                     "DEBUG: Mailfolder corruption detected");
-         str += String(headerPart, (size_t)len);
+         str = String( (size_t) len + 1);
+         for(size_t i = 0; i < len; i++)
+            str[i] = headerPart[i];
+         str[len] = '\0';
+         //str += String(headerPart, (size_t)len);
          str += ((MessageCC*)this)->FetchText();
          MailFolderCC::ProcessEventQueue();
       }
