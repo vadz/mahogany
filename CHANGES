@@ -6,7 +6,7 @@
 Release 0.64 '???' ???, 2001
 -------------------------------------------------------------------------------
 
-05.09.01 VZ: added support for server side sorting
+05.09.01 VZ: added support for server side threading
 05.09.01 VZ: added threading item to folder view popup menu
 03.09.01 VZ: added preview delay option in folder view
 01.09.01 VZ: added sorting menu (right click a column in the folder view)
