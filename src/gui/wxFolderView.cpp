@@ -841,7 +841,7 @@ wxFolderView::Update(HeaderInfoList *listing)
    for(i = 0; i < n; i++)
    {
       hi = (*listing)[i];
-      subject = wxString("   ", hi->GetIndentation());
+      subject = wxString(' ', 3*hi->GetIndentation());
       subject << hi->GetSubject();
       nsize = day = month = year = 0;
       size = strutil_ultoa(nsize);
