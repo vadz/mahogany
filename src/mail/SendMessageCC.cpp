@@ -1000,8 +1000,12 @@ SendMessageCC::Build(bool forStorage)
          m_headerNames[h] = strutil_strdup("X-Face");
          m_headerValues[h] = strutil_strdup(xface.GetHeaderLine());
          if(strlen(m_headerValues[h]))  // paranoid, I know.
-            ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-1] =
+         {
+            ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-2] == '\r', "String should have been DOSified" );
+            ASSERT_MSG( ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-1] == '\n', "String should have been DOSified" );
+            ((char*) (m_headerValues[h]))[strlen(m_headerValues[h])-2] =
                '\0'; // cut off \n
+         }
          h++;
       }
       //else: couldn't read X-Face from file (complain?)
