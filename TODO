@@ -9,6 +9,9 @@ $Id$
 *SEV PF WHO	DESCRIPTION
 *********************************************************************
 
+9		persistent message boxes are broken, path changes somewhere and the
+		results are written under Profile while read from Settings/MessageBox
+		(the correct location)
 9 		Does wxlwindow something nasty with undefined
 		update rectangles or wxRegion? Crash happened in
 		wxRegion. 
