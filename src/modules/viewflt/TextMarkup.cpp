@@ -190,7 +190,7 @@ TextMarkupFilter::DoProcess(String& text,
             // after all
             if ( state != Normal )
             {
-               textNormal = chLastSpecial + textSpecial;
+               textNormal = textSpecial;
                textSpecial.clear();
                state = Normal;
             }
