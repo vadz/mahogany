@@ -42,6 +42,12 @@ VZ:
   because there is more than one entry for their column sizes in the
   config file.
 
+- Folder config/create dialog:
+  - anonymous access
+  - NEWS (local newsspool) type support
+    (Just add a folder type News and I'll do the rest in MailFolder to 
+     support it).
+
 ******* Priorities for KB: ******************************
 
 
@@ -52,9 +58,10 @@ BUG:- saving message from messageview (called from embedded rfc822) saves
   this case points to a different folder!) Maybe that functionality
   should really be moved to MailFolder ??
 
+- ISO8859 encoded message headers!
+- some html mail import/filtering of tags (easy, quick and dirty)
 - occasionally parts of xface header show up in following mail header
   lines (content type/parameters)
-- when creating a newsgroup folder, subscribe to it, so it appears in .newsrc
 - add note about --with instead of -with to docs.
 - copying message to non-existing folder gives error message but works
 - add references (and In-Reply-To: ?) headers to message replies
@@ -404,6 +411,7 @@ classes in the hierarchy.
 *********************************************************************
 *** Fixed and tested:
 *********************************************************************
+- when creating a newsgroup folder, subscribe to it, so it appears in .newsrc
 - ReplyTo flag should work now
 - Fix occacions "Sequence invalid" (when marking/replying message)
 -  new mail dialog getting stuck?
