@@ -11,14 +11,15 @@
 #   pragma implementation "Filters.h"
 #endif
 
-#include   "Mpch.h"
-
-#ifdef TEST
-//  For regression testing, we pull the configuration options
-//  and tweak them to suit our nefarious purposes...
+#ifndef TEST
+#   include   "Mpch.h"
+#else
+//  For regression testing, we can't use the pre-compiled headers.
+//  Instead, we pull the configuration options, tweak them to suit
+//  our nefarious purposes, and include the needed headers below.
 #   include "Mconfig.h"
-#   undef USE_PCH                // never use precompiled headers
-#   undef USE_MODULES_STATIC     // don't pull in static linking crud
+#   undef USE_PCH              // pull in headers below
+#   undef USE_MODULES_STATIC   // don't pull in static linking crud
 //  turn on some debugging options in case they weren't already
 #   undef DEBUG                // in case it's already set
 #   define DEBUG 1
@@ -57,7 +58,6 @@ class IfElse;
 class Negation;
 class Negative;
 class Number;
-class Operator;
 class Parser;
 class Statement;
 class StringConstant;
@@ -104,11 +104,9 @@ protected:
                        bool *changeflag) const;
 private:
    Parser     *m_Parser;
-   SyntaxNode *m_Program;
+   const SyntaxNode *m_Program;
    MModule_Filters *m_FilterModule;
 };
-
-
 
 ///------------------------------
 /// Own functionality:
@@ -165,9 +163,13 @@ public:
       { m_type = TT_Identifier; m_string = s; }
    inline void SetEOF(void)
       { m_type = TT_EOF; }
+   inline void SetInvalid(void)
+      { m_type = TT_Invalid; }
 
    inline int IsChar(char c) const
       { return m_type == TT_Char && (unsigned char)m_number == (unsigned)c; }
+   inline int IsOperator(void) const
+      { return m_type == TT_Operator; }
    inline int IsOperator(OperatorType t) const
       { return (m_type == TT_Operator) && ((OperatorType)m_number) == t; }
    inline int IsString(void) const
@@ -176,12 +178,12 @@ public:
       { return m_type == TT_Number; }
    inline int IsIdentifier(const char *s) const
       { return m_type == TT_Identifier && m_string == s; }
-   inline int IsEOF(void)
+   inline int IsEOF(void) const
       { return m_type == TT_EOF; }
 
    inline char GetChar(void) const
       { ASSERT(m_type == TT_Char); return m_number; }
-   OperatorType GetOperator() const
+   inline OperatorType GetOperator() const
       { ASSERT(m_type == TT_Operator); return (OperatorType)m_number; }
    inline const String & GetString(void) const
       { ASSERT(m_type == TT_String); return m_string; }
@@ -195,35 +197,25 @@ private:
    String    m_string;
 };
 
-/** This enum is used to distinguish variable or result types. */
-enum Type
-{
-   /// Undefine value.
-   Type_Error,
-   /// Value is a long int number.
-   Type_Number,
-   /// Value is a string.
-   Type_String
-};
-
 /** This is a value. */
 class Value : public MObject
 {
 public:
+   /** This enum is used to distinguish variable or result types. */
+   enum Type
+   {
+      Type_Error,  /// Undefine value.
+      Type_Number, /// Value is a long int number.
+      Type_String  /// Value is a string.
+   };
+
+   // constructors
    Value()
-      {
-         m_Type = Type_Error;
-      }
+      { m_Type = Type_Error; }
    Value(const String &str)
-      {
-         m_Type = Type_String;
-         m_String = str;
-      }
-   Value(long num)
-      {
-         m_Type = Type_Number;
-         m_Num = num;
-      }
+      { m_Type = Type_String; m_String = str; }
+   Value(long num) { m_Type = Type_Number; m_Num = num; }
+
    Type GetType(void) const
       { MOcheck(); return m_Type; }
    long GetNumber(void) const
@@ -243,12 +235,14 @@ public:
          MOcheck();
          if(m_Type == Type_String)
             return m_String;
-         String str; str.Printf("%ld", m_Num);
+         String str;
+         str.Printf("%ld", m_Num);
          return str;
       }
    long ToNumber(void) const
       {
          MOcheck();
+         // FIXME: if string contains a number, convert it
          if(m_Type == Type_String)
             return m_String.Length();
          return GetNumber();
@@ -263,10 +257,13 @@ private:
 
 /** A Parser class.
  */
+// FIXME: this class is not visible outside this file; there's no need
+// for it to be a separate ABC class and an implementation class.  The
+// two classes should be combined into a single class.
 class Parser : public MObjectRC
 {
 public:
-   virtual SyntaxNode * Parse(void) = 0;
+   virtual const SyntaxNode * Parse(void) = 0;
   /** Reads the next token from the string and removes it from it.
       @param str   string to parse
       @param remove if true, move on in input
@@ -291,7 +288,6 @@ public:
    virtual FunctionDefinition *FindFunction(const String &name) = 0;
    /// Defines a function and overrides a given one
    virtual FunctionDefinition *DefineFunction(const String &name, FunctionPointer fptr) = 0;
-
 
    /**@name for runtime information */
    //@{
@@ -343,69 +339,6 @@ private:
    Parser *m_Parser;
 };
 
-/* Here is the grammar of the filter language:
-
-   PROGRAM :=
-     | BLOCK [ BLOCK ]
-
-   BLOCK :=
-     | CONDITION ;
-     | { BLOCK RESTBLOCK}
-
-   RESTBLOCK :=
-     | BLOCK ; RESTBLOCK
-     | EMPTY
-
-   CONDITION :=
-     | EXPRESSION RELOP EXPRESSION
-     | EXPRESSION
-
-   EXPRESSION :=
-     | EXPRESSION ADDOP TERM
-     | TERM
-
-   TERM :=
-     | TERM MULTOP TERM
-     | SIGNOP TERM
-     | FACTOR
-
-   FACTOR :=
-     | NUMBER
-     | IDENTIFIER ( EXPRESSION )
-     | ( EXPRESSION )
-     | NEGOP FACTOR
-
-  RELOP := < | > | <= | >= | == | !=
-  ADDOP := + | - | |
-  MULTOP := * | / | &
-  SIGNOP := + | -
-  NEGOP := !
-
-  With the following rewritten rules being used:
-
-  CONDITION :=
-    | EXPRESSION RESTCONDITION
-
-  RESTCONDITION :=
-    | RELOP EXPRESSION
-    | EMPTY
-
-  EXPRESSION :=
-    | EXPRESSION RESTEXPRESSION
-
-  RESTEXPRESSION :=
-    | ADDOP TERM
-    | EMPTY
-
-  TERM := FACTOR RESTTERM
-  RESTTERM :=
-    | * TERM
-    | / TERM
-    | EMPTY
-*/
-
-
-
 // ----------------------------------------------------------------------------
 // An implementation of the Parser ABC
 // ----------------------------------------------------------------------------
@@ -413,26 +346,26 @@ private:
 class ParserImpl : public Parser
 {
 public:
-   SyntaxNode * Parse(void);
-   SyntaxNode * ParseProgram(void);
-   SyntaxNode * ParseFilters(void);
-   SyntaxNode * ParseIfElse(void);
-   SyntaxNode * ParseBlock(void);
-   SyntaxNode * ParseStmts(void);
-   SyntaxNode * ParseExpression(void);
-   SyntaxNode * ParseCondition(void);
-   SyntaxNode * ParseQueryOp(void);
-   SyntaxNode * ParseOrs(void);
-   SyntaxNode * ParseIffs(void);
-   SyntaxNode * ParseAnds(void);
-   SyntaxNode * ParseBOrs(void);
-   SyntaxNode * ParseXors(void);
-   SyntaxNode * ParseBAnds(void);
-   SyntaxNode * ParseRelational(void);
-   SyntaxNode * ParseTerm(void);
-   SyntaxNode * ParseFactor(void);
-   SyntaxNode * ParseUnary(void);
-   SyntaxNode * ParseFunctionCall(Token id);
+   const SyntaxNode * Parse(void);
+   const SyntaxNode * ParseProgram(void);
+   const SyntaxNode * ParseFilters(void);
+   const SyntaxNode * ParseIfElse(void);
+   const SyntaxNode * ParseBlock(void);
+   const SyntaxNode * ParseStmts(void);
+   const SyntaxNode * ParseExpression(void);
+   const SyntaxNode * ParseCondition(void);
+   const SyntaxNode * ParseQueryOp(void);
+   const SyntaxNode * ParseOrs(void);
+   const SyntaxNode * ParseIffs(void);
+   const SyntaxNode * ParseAnds(void);
+   const SyntaxNode * ParseBOrs(void);
+   const SyntaxNode * ParseXors(void);
+   const SyntaxNode * ParseBAnds(void);
+   const SyntaxNode * ParseRelational(void);
+   const SyntaxNode * ParseTerm(void);
+   const SyntaxNode * ParseFactor(void);
+   const SyntaxNode * ParseUnary(void);
+   const SyntaxNode * ParseFunctionCall(Token id);
    virtual size_t GetPos(void) const { return m_Position; }
    virtual Token GetToken(bool remove = true);
    virtual Token PeekToken(void) { return token; }
@@ -440,9 +373,7 @@ public:
    inline void NextToken(void) { Rewind(m_Peek); }
    virtual void Error(const String &error);
    virtual void Output(const String &msg)
-      {
-         m_MInterface->MessageDialog(msg,NULL,_("Filters output"));
-      }
+      { m_MInterface->MessageDialog(msg,NULL,_("Filters output")); }
    virtual void Log(const String &imsg, int level)
       {
          String msg = _("Filters: ");
@@ -519,26 +450,6 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// ABC for logical operators.
-// ----------------------------------------------------------------------------
-
-/** This class represents logical operators. */
-// FIXME: you can't derive this class from MObject if you have global objects
-//        of it, please avoid having globals, replace them with static
-//        variables in the functions using them (VZ)
-class Operator // : public MObject
-{
-public:
-   virtual Value Evaluate(SyntaxNode *left, SyntaxNode * right) const = 0;
-#ifdef DEBUG
-   virtual String Debug(void) const = 0;
-#endif
-
-   void MOcheck() const { } // placeholder
-   //MOBJECT_NAME(Operator)
-};
-
-// ----------------------------------------------------------------------------
 // ABC for syntax tree nodes.
 // ----------------------------------------------------------------------------
 /** This class is used to build a syntax tree.
@@ -558,55 +469,10 @@ private:
    MOBJECT_NAME(SyntaxNode)
 };
 
-
-
-#define ARGLIST_DEFAULT_LENGTH 64
-
-class ArgList : public MObject
-{
-public:
-   typedef SyntaxNode *SyntaxNodePtr;
-   ArgList()
-      {
-         m_MaxArgs = ARGLIST_DEFAULT_LENGTH;
-         m_Args = new SyntaxNodePtr[m_MaxArgs];
-         m_NArgs = 0;
-      }
-   ~ArgList()
-      {
-         for(size_t i = 0; i < m_NArgs; i++)
-            delete m_Args[i];
-         delete [] m_Args;
-      }
-   void Add(SyntaxNode *arg)
-      {
-         MOcheck();
-         if(m_NArgs == m_MaxArgs)
-            return; // FIXME realloc?
-         m_Args[m_NArgs++] = arg;
-      }
-   size_t Count(void) const
-      {
-         MOcheck();
-         return m_NArgs;
-      }
-   SyntaxNode * GetArg(size_t n) const
-      {
-         MOcheck();
-         ASSERT(n < m_NArgs);
-         return m_Args[n];
-      }
-private:
-   SyntaxNodePtr *m_Args;
-   size_t m_MaxArgs;
-   size_t m_NArgs;
-   MOBJECT_NAME(ArgList)
-};
-
 class Filter : public SyntaxNode
 {
 public:
-   Filter(SyntaxNode *r, SyntaxNode *n)
+   Filter(const SyntaxNode *r, const SyntaxNode *n)
       {
          ASSERT(r != NULL); ASSERT(n != NULL);
          m_Rule = r; m_Next = n;
@@ -629,14 +495,14 @@ public:
       }
 #endif
 private:
-   SyntaxNode * m_Rule, * m_Next;
+   const SyntaxNode * m_Rule, * m_Next;
    MOBJECT_NAME(Filter)
 };
 
 class Statement : public SyntaxNode
 {
 public:
-   Statement(SyntaxNode *r, SyntaxNode *n)
+   Statement(const SyntaxNode *r, const SyntaxNode *n)
       {
          ASSERT(r != NULL); ASSERT(n != NULL);
          m_Rule = r; m_Next = n;
@@ -649,7 +515,7 @@ public:
          // tail recursion, so no add'l stack frame
          return m_Next->Evaluate();
       }
-   void AddNext(SyntaxNode *node) { m_Next = node; }
+   void AddNext(const SyntaxNode *node) { m_Next = node; }
 #ifdef DEBUG
    virtual String Debug(void) const
       {
@@ -660,7 +526,7 @@ public:
       }
 #endif
 private:
-   SyntaxNode * m_Rule, * m_Next;
+   const SyntaxNode * m_Rule, * m_Next;
    MOBJECT_NAME(Statement)
 };
 
@@ -702,39 +568,13 @@ private:
 class Negation : public SyntaxNode
 {
 public:
-   Negation(SyntaxNode *sn) { m_Sn = sn; }
+   Negation(const SyntaxNode *sn) { m_Sn = sn; }
    ~Negation() { MOcheck(); delete m_Sn; }
    virtual Value Evaluate() const
       {
          MOcheck();
          Value v = m_Sn->Evaluate();
-         return ! (v.GetType() == Type_Number ?
-            v.GetNumber() : v.GetString().Length());
-      }
-#ifdef DEBUG
-   virtual String Debug(void) const
-      {
-         MOcheck();
-         String s;
-         s << "!(" << m_Sn->Debug() << ')';
-         return s;
-      }
-#endif
-private:
-   SyntaxNode *m_Sn;
-   MOBJECT_NAME(Negation)
-};
-
-class Negative : public SyntaxNode
-{
-public:
-   Negative(SyntaxNode *sn) { m_Sn = sn; }
-   ~Negative() { MOcheck(); delete m_Sn; }
-   virtual Value Evaluate() const
-      {
-         MOcheck();
-         Value v = m_Sn->Evaluate();
-         return -(v.GetType() == Type_Number ?
+         return ! (v.GetType() == Value::Type_Number ?
             v.GetNumber() : (long)v.GetString().Length());
       }
 #ifdef DEBUG
@@ -747,7 +587,33 @@ public:
       }
 #endif
 private:
-   SyntaxNode *m_Sn;
+   const SyntaxNode *m_Sn;
+   MOBJECT_NAME(Negation)
+};
+
+class Negative : public SyntaxNode
+{
+public:
+   Negative(const SyntaxNode *sn) { m_Sn = sn; }
+   ~Negative() { MOcheck(); delete m_Sn; }
+   virtual Value Evaluate() const
+      {
+         MOcheck();
+         Value v = m_Sn->Evaluate();
+         return -(v.GetType() == Value::Type_Number ?
+            v.GetNumber() : (long)v.GetString().Length());
+      }
+#ifdef DEBUG
+   virtual String Debug(void) const
+      {
+         MOcheck();
+         String s;
+         s << "!(" << m_Sn->Debug() << ')';
+         return s;
+      }
+#endif
+private:
+   const SyntaxNode *m_Sn;
    MOBJECT_NAME(Negative)
 };
 
@@ -757,6 +623,7 @@ private:
     i.e. links its name to a bit of C code and maintains a use
     count. */
 
+// FIXME: why isn't this a MObjectRC?
 class FunctionDefinition : public MObject
 {
 public:
@@ -776,6 +643,7 @@ public:
 
    FunctionDefinition * FindFunction(const String &name)
       {
+         MOcheck();
          if(name == m_Name) {
             IncRef();
             return this;
@@ -785,6 +653,9 @@ public:
          // tail recursion
          return m_Next->FindFunction(name);
       }
+
+   String Name(void) const
+      { MOcheck(); return m_Name; }
 
    bool DecRef(void)
       {
@@ -813,61 +684,97 @@ private:
    MOBJECT_NAME(FunctionDefinition)
 };
 
-/** This class represents a function call. */
+/** These classes represents a function call. */
+
+#define ARGLIST_DEFAULT_LENGTH 8
+
+class ArgList : public MObject
+{
+   typedef const SyntaxNode *SyntaxNodePtr;
+public:
+   ArgList()
+      {
+         m_MaxArgs = ARGLIST_DEFAULT_LENGTH;
+         m_Args = new SyntaxNodePtr[m_MaxArgs];
+         m_NArgs = 0;
+      }
+   ~ArgList()
+      {
+         for(size_t i = 0; i < m_NArgs; i++)
+            delete m_Args[i];
+         delete [] m_Args;
+      }
+   void Add(const SyntaxNode *arg)
+      {
+         MOcheck();
+         if(m_NArgs == m_MaxArgs)
+         {
+            size_t t = m_MaxArgs + m_MaxArgs;
+            SyntaxNodePtr *args = new SyntaxNodePtr[t];
+            for (size_t i = 0; i < m_NArgs; ++i)
+               args[i] = m_Args[i];
+            delete [] m_Args;
+            m_MaxArgs = t, m_Args = args;
+         }
+         m_Args[m_NArgs++] = arg;
+      }
+   size_t Count(void) const
+      {
+         MOcheck();
+         return m_NArgs;
+      }
+   const SyntaxNode * GetArg(size_t n) const
+      {
+         MOcheck();
+         ASSERT(n < m_NArgs);
+         return m_Args[n];
+      }
+private:
+   SyntaxNodePtr *m_Args;
+   size_t m_MaxArgs;
+   size_t m_NArgs;
+   MOBJECT_NAME(ArgList)
+};
+
 class FunctionCall : public SyntaxNode
 {
 public:
-   // FIXME: name not needed, available from fd
-   FunctionCall(const String &name, ArgList *args,
-                FunctionDefinition *fd, Parser *p);
+   // takes ownership of the FunctionDefinition argument
+   FunctionCall(FunctionDefinition *fd, ArgList *args, Parser *p)
+      {
+         m_args = args; ASSERT(m_args);
+         m_fd = fd; ASSERT(m_fd);
+         m_Parser = p; ASSERT(m_Parser);
+      }
    ~FunctionCall()
       {
          MOcheck();
-         if(m_fd)
-            m_fd->DecRef();
-         ASSERT(m_args);
+         m_fd->DecRef();
          delete m_args;
       }
-   virtual Value Evaluate() const;
+   virtual Value Evaluate() const
+      {
+         MOcheck();
+         return (*m_fd->GetFPtr())(m_args, m_Parser);
+      }
 #ifdef DEBUG
    virtual String Debug(void) const
-      { MOcheck(); return String("FunctionCall(") + m_name + String(")"); }
+      {
+         MOcheck();
+         return String("FunctionCall(") + m_fd->Name() + String(")");
+      }
 #endif
-
 private:
-   FunctionPointer m_function;
    FunctionDefinition *m_fd;
    ArgList *m_args;
-   String  m_name;
    Parser *m_Parser;
    MOBJECT_NAME(FunctionCall)
 };
 
-FunctionCall::FunctionCall(const String &name, ArgList *args,
-                           FunctionDefinition *fd,
-                           Parser *p)
-{
-   m_name = name;
-   m_args = args;
-   m_fd = fd;
-   m_fd->IncRef();
-   m_function = m_fd->GetFPtr();
-   m_Parser = p;
-}
-
-
-Value
-FunctionCall::Evaluate() const
-{
-   MOcheck();
-   ASSERT(m_function);
-   return (*m_function)(m_args, m_Parser);
-}
-
 class QueryOp : public SyntaxNode
 {
 public:
-   QueryOp(SyntaxNode *cond, SyntaxNode *left, SyntaxNode *right)
+   QueryOp(const SyntaxNode *cond, const SyntaxNode *left, const SyntaxNode *right)
       {
          ASSERT(cond != NULL); ASSERT(left != NULL); ASSERT(right != NULL);
          m_Cond = cond; m_Left = left; m_Right = right;
@@ -891,7 +798,7 @@ public:
       {
          MOcheck();
          String s = "(";
-         s << m_Left->Debug()
+         s << m_Cond->Debug()
            << '?'
            << m_Left->Debug()
            << ':'
@@ -902,18 +809,18 @@ public:
 #endif
 
 private:
-   SyntaxNode *m_Cond, *m_Left, *m_Right;
+   const SyntaxNode *m_Cond, *m_Left, *m_Right;
    MOBJECT_NAME(QueryOp)
 };
 
-/** An expression consisting of more than one token. */
+/** A binary expression.  ABC for operators. */
 class Expression : public SyntaxNode
 {
 public:
-   Expression(SyntaxNode *left, Operator *op, SyntaxNode *right)
+   Expression(const SyntaxNode *left, const SyntaxNode *right)
       {
-         ASSERT(left != NULL); ASSERT(op != NULL); ASSERT(right != NULL);
-         m_Left = left; m_Op = op; m_Right = right;
+         m_Left = left; ASSERT(m_Left != NULL);
+         m_Right = right; ASSERT(m_Right != NULL);
       }
    ~Expression()
       {
@@ -921,23 +828,18 @@ public:
          delete m_Left;
          delete m_Right;
       }
-   virtual Value Evaluate(void) const
-      {
-         MOcheck();
-         return m_Op->Evaluate(m_Left, m_Right);
-      }
 #ifdef DEBUG
-   virtual String Debug(void) const
+   virtual const char *OperName(void) const = 0;
+   String Debug(void) const
       {
          MOcheck();
          String s = "(";
-         s << m_Left->Debug() << m_Op->Debug() << m_Right->Debug() << ')';
+         s << m_Left->Debug() << OperName() << m_Right->Debug() << ')';
          return s;
       }
 #endif
-private:
-   SyntaxNode *m_Left, *m_Right;
-   Operator *m_Op;
+protected:
+   const SyntaxNode *m_Left, *m_Right;
    MOBJECT_NAME(Expression)
 };
 
@@ -945,47 +847,55 @@ private:
    one was trying to combine two non-matching types. */
 
 #define IMPLEMENT_VALUE_OP(oper, string) \
-Value operator oper(const Value &left, const Value &right) \
+static inline Value operator oper(const Value &left, const Value &right) \
 { \
-   if(left.GetType() == Type_Error || right.GetType() == Type_Error || \
-      left.GetType() != right.GetType()) \
-   return Value(); \
-   else if(left.GetType() == Type_Number) \
-      return Value(left.GetNumber() oper right.GetNumber()); \
-   else if(left.GetType() == Type_String) \
-      return Value(left.string oper right.string); \
+   if(left.GetType() == Value::Type_Error || \
+      right.GetType() == Value::Type_Error) \
+      return Value(); \
+   if(left.GetType() == right.GetType()) \
+   { \
+      if(left.GetType() == Value::Type_Number) \
+         return Value(left.GetNumber() oper right.GetNumber()); \
+      if(left.GetType() == Value::Type_String) \
+         return Value(left.string oper right.string); \
+      ASSERT(0); \
+   } \
    else \
    { \
-      ASSERT(0); \
-      return Value(); \
+      /* FIXME: should convert numeric string */ \
    } \
+   return Value(); \
 }
 
 #ifdef DEBUG
 #define IMPLEMENT_OP(name, oper, string) \
 IMPLEMENT_VALUE_OP(oper, string); \
-static class Operator##name : public Operator \
+class Operator##name : Expression \
 { \
 public: \
-   virtual Value Evaluate(SyntaxNode *left, SyntaxNode *right) const \
-      { \
-         MOcheck(); ASSERT(left); ASSERT(right); \
-         return left->Evaluate() oper right->Evaluate(); \
-      } \
-   virtual String Debug(void) const \
-      { MOcheck(); return #oper; } \
-} Oper_##name
+   Operator##name(const SyntaxNode *l, const SyntaxNode *r) \
+      : Expression(l, r) {} \
+   static const SyntaxNode *Create(const SyntaxNode *l, const SyntaxNode *r) \
+      { return new Operator##name(l, r); } \
+   virtual Value Evaluate(void) const \
+      { return m_Left->Evaluate() oper m_Right->Evaluate(); } \
+   virtual const char *OperName(void) const { return #oper; } \
+}
 
 #else        // not DEBUGing
 
 #define IMPLEMENT_OP(name, oper, string) \
 IMPLEMENT_VALUE_OP(oper, string); \
-static class Operator##name : public Operator \
+class Operator##name : Expression \
 { \
 public: \
-   virtual Value Evaluate(SyntaxNode *left, SyntaxNode *right) const \
-      { MOcheck(); return left->Evaluate() oper right->Evaluate(); } \
-} Oper_##name
+   Operator##name(const SyntaxNode *l, const SyntaxNode *r) \
+      : Expression(l, r) {} \
+   static const SyntaxNode *Create(const SyntaxNode *l, const SyntaxNode *r) \
+      { return new Operator##name(l, r); } \
+   virtual Value Evaluate(void) const \
+      { return m_Left->Evaluate() oper m_Right->Evaluate(); } \
+}
 #endif
 
 IMPLEMENT_OP(Plus,+,GetString());
@@ -1001,53 +911,55 @@ IMPLEMENT_OP(Geq, >=, GetString());
 IMPLEMENT_OP(Equal, ==, GetString());
 IMPLEMENT_OP(Neq, !=, GetString());
 
+// special logic for AND
 IMPLEMENT_VALUE_OP(&&, GetString().Length());
-
-static class OperatorAnd : public Operator
+class OperatorAnd : Expression
 {
 public:
-   virtual Value Evaluate(SyntaxNode *left, SyntaxNode *right) const
+   OperatorAnd(const SyntaxNode *l, const SyntaxNode *r) : Expression(l, r) {}
+   static const SyntaxNode *Create(const SyntaxNode *l, const SyntaxNode *r)
+      { return new OperatorAnd(l, r); }
+   virtual Value Evaluate(void) const
       {
-         MOcheck(); ASSERT(left); ASSERT(right);
-         Value lv = left->Evaluate();
+         Value lv = m_Left->Evaluate();
          if(lv.ToNumber())
-            return lv && right->Evaluate();
+            return lv && m_Right->Evaluate();
          else
             return lv;
       }
 #ifdef DEBUG
-   virtual String Debug(void) const
-      { MOcheck(); return "And"; }
+   virtual const char *OperName(void) const { return "&&"; }
 #endif
-} Oper_And;
+};
 
+// special logic for OR
 IMPLEMENT_VALUE_OP(||, GetString().Length());
-
-static class OperatorOr : public Operator
+class OperatorOr : Expression
 {
 public:
-   virtual Value Evaluate(SyntaxNode *left, SyntaxNode *right) const
+   OperatorOr(const SyntaxNode *l, const SyntaxNode *r) : Expression(l, r) {}
+   static const SyntaxNode *Create(const SyntaxNode *l, const SyntaxNode *r)
+      { return new OperatorOr(l, r); }
+   virtual Value Evaluate(void) const
       {
-         MOcheck(); ASSERT(left); ASSERT(right);
-         Value lv = left->Evaluate();
+         Value lv = m_Left->Evaluate();
          if(! lv.ToNumber())
-            return lv || right->Evaluate();
+            return lv || m_Right->Evaluate();
          else
             return lv;
       }
 #ifdef DEBUG
-   virtual String Debug(void) const
-      { MOcheck(); return "Or"; }
+   virtual const char *OperName(void) const { return "||"; }
 #endif
-} Oper_Or;
+};
 
 /** An if-else statement. */
 class IfElse : public SyntaxNode
 {
 public:
-   IfElse(SyntaxNode *condition,
-          SyntaxNode *ifBlock,
-          SyntaxNode *elseBlock)
+   IfElse(const SyntaxNode *condition,
+          const SyntaxNode *ifBlock,
+          const SyntaxNode *elseBlock)
       {
          m_Condition = condition;
          m_IfBlock = ifBlock;
@@ -1092,7 +1004,7 @@ public:
       }
 #endif
 private:
-   SyntaxNode *m_Condition, *m_IfBlock, *m_ElseBlock;
+   const SyntaxNode *m_Condition, *m_IfBlock, *m_ElseBlock;
    MOBJECT_NAME(IfElse)
 };
 
@@ -1113,9 +1025,9 @@ static void PreProcessInput(String *input)
       FILE *fp = fopen(filename,"rt");
       if(fp)
       {
-         fseek(fp,0, SEEK_END);
+         fseek(fp, 0, SEEK_END);
          long len = ftell(fp);
-         fseek(fp,0, SEEK_SET);
+         fseek(fp, 0, SEEK_SET);
          if(len > 0)
          {
             char *cp = new char [ len + 1];
@@ -1262,25 +1174,32 @@ ParserImpl::Rewind(size_t pos)
    {
       m_Position++;
       bool escaped = false;
-      while(Char() && (Char() != '"' || escaped))
+      for (;;)
       {
-         if(Char() == '\\')
+         if(Char() == '\0')
          {
-            if(! escaped) // first backslash
-            {
-               escaped = true;
-               m_Position++;
-               continue; // skip it
-            }
+            Error(_("Unterminated string."));
+            token.SetInvalid();
+            break;
+         }
+         if(escaped)
+         {
+            escaped = false;
+         }
+         else if(Char() == '\\')
+         {
+            escaped = true;
+            ++m_Position;
+            continue; // skip it
+         }
+         else if(Char() == '"')
+         {
+            token.SetString(tokstr);
+            ++m_Position;
+            break;
          }
          tokstr += CharInc();
-         escaped = false;
       }
-      if(Char() == '"')
-         m_Position++;
-      else
-         Error(_("Unterminated string."));
-      token.SetString(tokstr);
    }
    else   /// should be a special character
    {
@@ -1358,14 +1277,14 @@ ParserImpl::Rewind(size_t pos)
    m_Position = pos;
 }
 
-SyntaxNode *
+const SyntaxNode *
 ParserImpl::Parse(void)
 {
    MOcheck();
    return ParseProgram();
 }
 
-SyntaxNode *
+const SyntaxNode *
 ParserImpl::ParseProgram(void)
 {
    MOcheck();
@@ -1374,17 +1293,17 @@ ParserImpl::ParseProgram(void)
       Error(_("No filter program found"));
       return NULL;
    }
-   SyntaxNode * pgm = ParseFilters();
+   const SyntaxNode * pgm = ParseFilters();
    if(pgm == NULL)
       Error(_("Parse error, cannot find valid program."));
    return pgm;
 }
 
-SyntaxNode *
+const SyntaxNode *
 ParserImpl::ParseFilters(void)
 {
    MOcheck();
-   SyntaxNode * filter = NULL;
+   const SyntaxNode * filter = NULL;
    if(token.IsIdentifier("if"))
    {
       filter = ParseIfElse();
@@ -1397,7 +1316,7 @@ ParserImpl::ParseFilters(void)
       return NULL;
    if(token.IsEOF())
       return filter;
-   SyntaxNode * next = ParseFilters();
+   const SyntaxNode * next = ParseFilters();
    if (next == NULL) {
       delete filter;
       return NULL;
@@ -1405,7 +1324,7 @@ ParserImpl::ParseFilters(void)
    return new Filter(filter, next);
 }
 
-SyntaxNode *
+const SyntaxNode *
 ParserImpl::ParseIfElse(void)
 {
    MOcheck();
@@ -1419,7 +1338,7 @@ ParserImpl::ParseIfElse(void)
    }
    NextToken(); // swallow '('
 
-   SyntaxNode *condition = ParseCondition();
+   const SyntaxNode *condition = ParseCondition();
    if(! condition)
       return NULL;
 
@@ -1431,13 +1350,13 @@ ParserImpl::ParseIfElse(void)
    }
    NextToken(); // swallow ')'
 
-   SyntaxNode *ifBlock = ParseBlock();
+   const SyntaxNode *ifBlock = ParseBlock();
    if(! ifBlock) {
       delete condition;
       return NULL;
    }
 
-   SyntaxNode *elseBlock = NULL;
+   const SyntaxNode *elseBlock = NULL;
    if(token.IsIdentifier("else"))
    {
       // we must parse the else branch, too:
@@ -1457,7 +1376,7 @@ ParserImpl::ParseIfElse(void)
    return new IfElse(condition, ifBlock, elseBlock);
 }
 
-SyntaxNode *
+const SyntaxNode *
 ParserImpl::ParseBlock(void)
 {
    MOcheck();
@@ -1468,14 +1387,14 @@ ParserImpl::ParseBlock(void)
       return NULL;
    }
    NextToken(); // swallow '{'
-   SyntaxNode * stmt;
+   const SyntaxNode * stmt;
    if(token.IsChar('{'))
       stmt = ParseBlock(); // it can generate {{{ ... }}}
    else
       stmt = ParseStmts();
    if(stmt == NULL)
    {
-      Error(_("Expected statement block after '{'"));
+      Error(_("Expected statements after '{'"));
       return NULL;
    }
    if(!token.IsChar('}'))
@@ -1488,11 +1407,11 @@ ParserImpl::ParseBlock(void)
    return stmt;
 }
 
-SyntaxNode *
+const SyntaxNode *
 ParserImpl::ParseStmts(void)
 {
    MOcheck();
-   SyntaxNode * stmt;
+   const SyntaxNode * stmt;
    if(token.IsIdentifier("if"))
    {
       stmt = ParseIfElse();
@@ -1520,7 +1439,7 @@ ParserImpl::ParseStmts(void)
    }
    if(token.IsChar('}'))
       return stmt;
-   SyntaxNode * next = ParseStmts();
+   const SyntaxNode * next = ParseStmts();
    if(next == NULL) {
       delete stmt;
       return NULL;
@@ -1528,35 +1447,35 @@ ParserImpl::ParseStmts(void)
    return new Statement(stmt, next);
 }
 
-SyntaxNode *
+const SyntaxNode *
 ParserImpl::ParseExpression(void)
 {
    MOcheck();
    return ParseQueryOp();
 }
 
-SyntaxNode *
+const SyntaxNode *
 ParserImpl::ParseCondition(void)
 {
    MOcheck();
-   SyntaxNode *sn = ParseQueryOp();
+   const SyntaxNode *sn = ParseQueryOp();
    if (sn != NULL)
       return sn;
    Error(_("Invalid conditional expression"));
    return NULL;
 }
 
-SyntaxNode *
+const SyntaxNode *
 ParserImpl::ParseQueryOp(void)
 {
    MOcheck();
-   SyntaxNode *sn = ParseOrs();
+   const SyntaxNode *sn = ParseOrs();
    if(sn == NULL)
       return NULL;
    if(!token.IsChar('?'))
            return sn;
    NextToken();
-   SyntaxNode *left = ParseExpression();
+   const SyntaxNode *left = ParseExpression();
    if(left == NULL) {
       Error(_("Expected expression after '?'"));
       delete sn;
@@ -1569,7 +1488,7 @@ ParserImpl::ParseQueryOp(void)
       return NULL;
    }
    NextToken();
-   SyntaxNode *right = ParseExpression();
+   const SyntaxNode *right = ParseExpression();
    if (right == NULL) {
       Error(_("Expected expression after ':'"));
       delete left; delete sn;
@@ -1581,128 +1500,137 @@ ParserImpl::ParseQueryOp(void)
 // These little ditties will be needed a number of times, so they
 // are macros to save some typing (and typos).
 #define OPERATOR_VALUE(oper) \
-   case Token::Operator_##oper: return &Oper_##oper
+   case Token::Operator_##oper: return Operator##oper::Create
 
 // This ditty implements the dreaded left-recursive grammar
-//        name        := part
-//                | name op part
+//      name    := part
+//              | name op part
 // That is, a string of left-associative operators at the same
 // precedence level.  The operands are all of type `part'
+typedef const SyntaxNode *(*OpCreate)(const SyntaxNode *l, const SyntaxNode *r);
 #define LeftAssoc(name,opers,part,msg) \
-SyntaxNode * \
+const SyntaxNode * \
 ParserImpl::Parse##name(void) \
 { \
    MOcheck(); \
-   SyntaxNode *expr = Parse##part(); \
+   const SyntaxNode *expr = Parse##part(); \
    if (expr == NULL) \
       return NULL; \
    for (;;) \
    { \
-      Operator *op = opers(token); \
+      OpCreate op = opers(token); \
       if (op == NULL) \
          break; \
       NextToken(); \
-      SyntaxNode *exp = Parse##part(); \
+      const SyntaxNode *exp = Parse##part(); \
       if (exp == NULL) { \
          delete expr; \
          Error(msg); \
          return NULL; \
       } \
-      expr = new Expression(expr, op, exp); \
+      expr = (*op)(expr, exp); \
    } \
    return expr; \
 }
 
-static Operator *
+static inline OpCreate
 OrOp(Token t)
 {
-   if (t.GetType() == Token::TT_Operator)
+   if (t.IsOperator())
       switch (t.GetOperator())
       {
          OPERATOR_VALUE(Or);
          default: return NULL;
       }
    else if (t.IsIdentifier("or"))
-      return &Oper_Or;
+      return OperatorOr::Create;
    return NULL;
 }
 LeftAssoc(Ors,OrOp,Iffs,_("Expected expression after OR operator"))
 
-static Operator *
+static inline OpCreate
 IffOp(Token t)
 {
-   if (t.GetType() == Token::TT_Operator)
+#if 0     // unimplemented
+   if (t.IsOperator())
       switch (t.GetOperator())
       {
-         //OPERATOR_VALUE(Iff);
+         OPERATOR_VALUE(Iff);
          default: return NULL;
       }
-   //else if (t.IsIdentifier("iff"))
-   //   return &Oper_Iff;
+   else if (t.IsIdentifier("iff"))
+   return OperatorIff::Create;
+#endif
    return NULL;
 }
 LeftAssoc(Iffs,IffOp,Ands,_("Expected expression after IFF operator"))
 
-static Operator *
+static inline OpCreate
 AndOp(Token t)
 {
-   if (t.GetType() == Token::TT_Operator)
+   if (t.IsOperator())
       switch (t.GetOperator())
       {
          OPERATOR_VALUE(And);
          default: return NULL;
       }
    else if (t.IsIdentifier("and"))
-      return &Oper_And;
+      return OperatorAnd::Create;
    return NULL;
 }
 LeftAssoc(Ands,AndOp,BOrs,_("Expected expression after AND operator"))
 
-static Operator *
+static inline OpCreate
 BOrOp(Token t)
 {
-   if (t.GetType() != Token::TT_Operator)
-      return NULL;
-   switch (t.GetOperator())
-   {
-      //OPERATOR_VALUE(BOr);
-      default: return NULL;
-   }
+#if 0     // unimplemented
+   if (t.IsOperator())
+      switch (t.GetOperator())
+      {
+         OPERATOR_VALUE(BOr);
+         default: return NULL;
+      }
+#endif
+   return NULL;
 }
 LeftAssoc(BOrs,BOrOp,Xors,_("Expected expression after bit OR operator"))
 
-static Operator *
+static inline OpCreate
 XorOp(Token t)
 {
-   if (t.GetType() == Token::TT_Operator)
+#if 0     // unimplemented
+   if (t.IsOperator())
       switch (t.GetOperator())
       {
-         //OPERATOR_VALUE(Xor);
+         OPERATOR_VALUE(Xor);
          default: return NULL;
       }
-   //else if (t.IsIdentifier("xor"))
-   //   return &Oper_Xor;
+   else if (t.IsIdentifier("xor"))
+      return OperatorXor::Create;
+#endif
    return NULL;
 }
 LeftAssoc(Xors,XorOp,BAnds,_("Expected expression after XOR operator"))
 
-static Operator *
+static inline OpCreate
 BAndOp(Token t)
 {
-   if (t.GetType() != Token::TT_Operator)
-      return NULL;
-   switch (t.GetOperator())
-   {
-      //OPERATOR_VALUE(BAnd);
-      default: return NULL;
-   }
+#if 0     // unimplemented
+   if (t.IsOperator())
+      switch (t.GetOperator())
+      {
+         OPERATOR_VALUE(BAnd);
+         default: return NULL;
+      }
+#endif
+   return NULL;
 }
 LeftAssoc(BAnds,BAndOp,Relational,_("Expected expression after bit AND operator"))
 
-static Operator *
+static inline OpCreate
 RelOp(Token t)
 {
-   if (t.GetType() != Token::TT_Operator)
+   if (!t.IsOperator())
       return NULL;
    switch (t.GetOperator())
    {
@@ -1716,30 +1644,30 @@ RelOp(Token t)
    }
 }
 // Relationals are a special case; they don't associate.
-SyntaxNode *
+const SyntaxNode *
 ParserImpl::ParseRelational(void)
 {
    MOcheck();
-   SyntaxNode *expr = ParseTerm();
+   const SyntaxNode *expr = ParseTerm();
    if (expr == NULL)
       return NULL;
-   Operator *op = RelOp(token);
+   OpCreate op = RelOp(token);
    if (op == NULL)
       return expr;
    NextToken();
-   SyntaxNode *exp = ParseTerm();
+   const SyntaxNode *exp = ParseTerm();
    if (exp == NULL) {
       delete expr;
       Error(_("Expected expression after relational operator"));
       return NULL;
    }
-   return new Expression(expr, op, exp);
+   return (*op)(expr, exp);
 }
 
-static Operator *
+static inline OpCreate
 AddOp(Token t)
 {
-   if (t.GetType() != Token::TT_Operator)
+   if (!t.IsOperator())
       return NULL;
    switch (t.GetOperator())
    {
@@ -1750,10 +1678,10 @@ AddOp(Token t)
 }
 LeftAssoc(Term,AddOp,Factor,_("Expected term after plus/minus operator"))
 
-static Operator *
+static inline OpCreate
 MulOp(Token t)
 {
-   if (t.GetType() != Token::TT_Operator)
+   if (!t.IsOperator())
       return NULL;
    switch (t.GetOperator())
    {
@@ -1765,11 +1693,11 @@ MulOp(Token t)
 }
 LeftAssoc(Factor,MulOp,Unary,_("Expected factor after multiply/divide/modulus operator"))
 
-SyntaxNode *
+const SyntaxNode *
 ParserImpl::ParseUnary(void)
 {
    MOcheck();
-   SyntaxNode *sn = NULL;
+   const SyntaxNode *sn = NULL;
    if(token.GetType() == Token::TT_Char)
    {
       /* expression in parenthesis */
@@ -1797,7 +1725,7 @@ ParserImpl::ParseUnary(void)
          sn = new Negation(sn);
       }
    }
-   else if( token.GetType() == Token::TT_Operator )
+   else if( token.IsOperator() )
    {
       if(token.GetOperator() == Token::Operator_Plus)
       {
@@ -1848,7 +1776,7 @@ ParserImpl::ParseUnary(void)
    return sn;
 }
 
-SyntaxNode *
+const SyntaxNode *
 ParserImpl::ParseFunctionCall(Token id)
 {
    MOcheck();
@@ -1871,7 +1799,7 @@ ParserImpl::ParseFunctionCall(Token id)
    {
       for(;;)
       {
-         SyntaxNode *expr = ParseExpression();
+         const SyntaxNode *expr = ParseExpression();
          if(expr)
             args->Add(expr);
          else
@@ -1904,8 +1832,7 @@ ParserImpl::ParseFunctionCall(Token id)
       delete args;
       return NULL;
    }
-   fd->DecRef(); // won't go away because it's still in list
-   return new FunctionCall(id.GetIdentifier(), args, fd, this);
+   return new FunctionCall(fd, args, this);
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1954,8 +1881,6 @@ ParserImpl::ParseFunctionCall(Token id)
 static
 bool CheckRBL( int a, int b, int c, int d, const String & rblDomain)
 {
-
-
    char * answerBuffer = new char[ BUFLEN ];
    int len;
 
@@ -2068,7 +1993,7 @@ extern "C"
 
    static Value func_msgbox(ArgList *args, Parser *p)
    {
-      SyntaxNode *sn;
+      const SyntaxNode *sn;
       Value v;
       ASSERT(args);
       String msg;
@@ -2084,7 +2009,7 @@ extern "C"
 
    static Value func_log(ArgList *args, Parser *p)
    {
-      SyntaxNode *sn;
+      const SyntaxNode *sn;
       Value v;
       ASSERT(args);
       String msg;
@@ -2589,8 +2514,7 @@ ParserImpl::AddBuiltinFunctions(void)
    DefineFunction("setcolour", func_setcolour);
    DefineFunction("score", func_score);
    DefineFunction("addscore", func_addscore);
-#ifndef TEST
-#else
+#ifdef TEST
    DefineFunction("nargs", func_nargs);
    DefineFunction("arg", func_arg);
 #endif
@@ -2674,7 +2598,7 @@ FilterRuleImpl::ApplyCommonCode(MailFolder *mf,
    bool changed = FALSE;
    bool changedtemp;
    HeaderInfoList *hil = mf->GetHeaders();
-   CHECK(hil,0,"Cannot get header info list");
+   CHECK(hil, 0, "Cannot get header info list");
 
    if(msgs) // apply to all messages in list
    {
@@ -2716,12 +2640,11 @@ FilterRuleImpl::FilterRuleImpl(const String &filterrule,
                                MModule_Filters *mod
    )
 {
-   m_FilterModule = mod;
-   m_Parser = Parser::Create(filterrule, minterface);
-   m_Program = m_Parser->Parse();
-   ASSERT(mod);
+   m_FilterModule = mod; ASSERT(m_FilterModule);
    // we cannot allow the module to disappear while we exist
    m_FilterModule->IncRef();
+   m_Parser = Parser::Create(filterrule, minterface);
+   m_Program = m_Parser->Parse();
 }
 
 FilterRuleImpl::~FilterRuleImpl()
@@ -2802,21 +2725,24 @@ MModule_FiltersImpl::Init(int vmajor, int vminor, int vrelease,
 class MyParser : public ParserImpl
 {
 public:
-        MyParser(String s) : ParserImpl(s, 0) {}
+        MyParser(String s, bool r = false) : ParserImpl(s, 0) { m_reject = r; }
         virtual void Error(const String &error);
         String CharLeft() { return ParserImpl::CharLeft(); }
         String CharMid() { return ParserImpl::CharMid(); }
+private:
+        bool m_reject;
 };
 void
 MyParser::Error(const String &error)
 {
-   printf(">>>%s\n", error.c_str());
+        if (m_reject == false)
+                printf(">>>%s\n", error.c_str());
 }
 
 void
 Rejected(MyParser &p)
 {
-        printf("Rejected `%s<error>%s'\n",
+        printf("Rejected `%s<ERROR>%s'\n",
                 p.CharLeft().c_str(),
                 p.CharMid().c_str());
 }
@@ -2824,8 +2750,8 @@ Rejected(MyParser &p)
 int        // test whether the string is rejected by the parser
 TestExprFail(const char *s)
 {
-        MyParser p(s);
-        SyntaxNode *exp = p.ParseExpression();
+        MyParser p(s, true);
+        const SyntaxNode *exp = p.ParseExpression();
         if (exp == NULL) {
                 Rejected(p);
                 return 0;
@@ -2840,7 +2766,7 @@ int        // test whether the string is accepted by the parser
 TestExpr(int arg, const char *s)
 {
         MyParser p(s);
-        SyntaxNode *exp = p.ParseExpression();
+        const SyntaxNode *exp = p.ParseExpression();
         if (exp == NULL) {
                 Rejected(p);
                 return 1;
@@ -2857,8 +2783,8 @@ TestExpr(int arg, const char *s)
 int        // test whether the pgm is rejected by the parser
 TestReject(const char *s)
 {
-        MyParser p(s);
-        SyntaxNode *pgm = p.ParseProgram();
+        MyParser p(s, true);
+        const SyntaxNode *pgm = p.ParseProgram();
         if (pgm == NULL) {
                 Rejected(p);
                 return 0;
@@ -2873,7 +2799,7 @@ int        // test whether the pgm is accepted by the parser
 TestAccept(const char *s)
 {
         MyParser p(s);
-        SyntaxNode *pgm = p.ParseProgram();
+        const SyntaxNode *pgm = p.ParseProgram();
         if (pgm == NULL) {
                 Rejected(p);
                 return 1;
@@ -2886,7 +2812,7 @@ int        // test whether the pgm is accepted by the parser
 TestPgm(int arg, const char *s)
 {
         MyParser p(s);
-        SyntaxNode *pgm = p.ParseProgram();
+        const SyntaxNode *pgm = p.ParseProgram();
         if (pgm == NULL) {
                 Rejected(p);
                 return 1;

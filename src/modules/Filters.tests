@@ -1,5 +1,98 @@
-#expr	reject	3 + 5 +
-#expr	reject	9 * (7 - 2
+# This is the grammar that we are testing.  The implemented grammar
+# should match this exactly.  If it doesn't, one or the other is wrong.
+
+#Question: This grammar doesn't accept {} as a Block (with a value of
+#	zero?).  Should it?
+#
+#Program := Filters eof
+#
+#Filters := Filter
+#	| Filter Filters
+#
+#Filter	:= Block
+#	| IfElse
+##	| something to define a function
+#
+#Block	:= '{' Block '}'
+#	| '{' Stmts '}'
+#Stmts	:= Stmt ';'
+#	| Stmt Stmts
+#
+#Stmt	:= IfElse
+#	| identifier '(' Args ')'	# function
+##	| identifier ':=' Expression
+##	| identifier '[' Expression ']' ':=' Expression
+#
+#IfPart	:=  'if' '(' Condition ')' Block
+#IfElse	:= IfPart
+#	| IfPart 'else' Block
+#
+## implemented separately for error messages
+#Expression := QueryOp
+#Condition := QueryOp
+#
+#QueryOp := Ors
+#	| Ors '?' Expression ':' QueryOp
+#
+#Ors	:= Iffs
+#	| Ors OrOp Iffs
+#OrOp	:= '||' | '|' | 'or'
+#
+#Iffs	:= Ands
+#	#| Iffs IffOp Ands
+#IffOp	:= '^^' | 'iff'
+#
+#Ands	:= BitOrs
+#	| Ands AndOp BitOrs
+#AndOp	:= '&&' | '&' | 'and'
+#
+#BitOrs	:= Xors
+#	#| BitOrs BOrOp Xors
+#BOrOp	:= '|'
+#
+#Xors	:= BitAnds
+#	#| Xors XorOp BitAnds
+#XorOp	:= '^' | 'xor'
+#
+#BitAnds := Relational
+#	#| BitAnds BAndOp Relational
+#BAndOp	:= '&'
+#
+#Relational := Term
+#	| Term EqOp Term
+#	| Term RelOp Term
+#EqOp	:= '==' | '=' | '!=' | '<>'
+#RelOp	:= '<' | '<=' | '>' | '>='
+#
+#Term	:= Factor
+#	| Term AddOp Factor
+#AddOp	:= '+' | '-'
+#
+#Factor	:= Unary
+#	| Factor MulOp Unary
+#MulOp	:= '*' | '/' | '%'
+#
+#Unary	:= '(' Expression ')'
+#	| UnaryOp Unary
+#	| identifier '(' Args ')'	# function
+##	| identifier '[' Expression ']'
+##	| identifier
+#	| integer
+#	| string
+#UnaryOp := '!' | '+' | '-'
+#
+#Args	:= empty | ArgList
+#ArgList := Expression
+#	| Expression ',' ArgList
+
+# And here are the tests...
+
+# invalid expressions
+expr	reject	3 + 5 +
+expr	reject	9 * (7 - 2
+# these two seem to tickle a compiler bug?
+#expr	reject	"unterminated
+#expr	reject	"unterminated\
 
 # unary
 expr	-1	-1
@@ -14,6 +107,15 @@ expr	1	(1)
 expr	-1	-(1)
 expr	1	--(1)
 expr	1	--1
+expr	10	"terminated"
+expr	reject	(
+expr	reject	(11
+expr	reject	-
+expr	reject	!
+expr	reject	xxx
+expr	reject	xxx(
+expr	reject	xxx(11
+expr	reject	xxx(11,
 
 # factor
 expr	99	9 * 11
@@ -101,6 +203,9 @@ expr	9	9 > 7 ? 9 : 7
 expr	7	9 < 7 ? 9 : 7
 expr	5	9 < 7 ? 9 : 7 < 5 ? 7 : 5
 expr	7	9 < 7 ? 7 < 5 ? 7 : 5 : 7
+expr	reject	9 > 7 ? 9 : 
+expr	reject	9 > 7 ? 9 
+expr	reject	9 > 7 ? 
 
 # block
 # although all the standard functions are recognized, we must be careful
@@ -134,5 +239,10 @@ pgm	accept	if((containsi(subject(),"[M-Dev]"))|(containsi(subject(),"[M-User]"))
 pgm	accept	if(((now()-date()) > "7")){delete();}
 pgm	accept	if(((now()-date()) > 7)){delete();}
 
-#pgm	reject	{ nargs() }
-#pgm	reject	{ nargs(); )
+pgm	reject	
+pgm	reject	if { arg(1) } { arg(2); }
+pgm	reject	if ( arg(1) } { arg(2); }
+pgm	reject	if ( arg(1) ) ( arg(2); }
+pgm	reject	{ }
+pgm	reject	{ nargs(); )
+pgm	reject	{ nargs() }
