@@ -1546,8 +1546,12 @@ void wxComposeView::DoClear()
                          &m_fg, &m_bg);
 
    // set the default encoding if any
-   SetEncoding(
-         (wxFontEncoding)READ_CONFIG(m_Profile, MP_MSGVIEW_DEFAULT_ENCODING));
+   wxFontEncoding encoding =
+      (wxFontEncoding)READ_CONFIG(m_Profile, MP_MSGVIEW_DEFAULT_ENCODING);
+   if ( encoding != wxFONTENCODING_DEFAULT )
+   {
+      SetEncoding(encoding);
+   }
 
    ResetDirty();
 }
@@ -1569,11 +1573,8 @@ wxComposeView::wxComposeView(const String &iname,
 void wxComposeView::SetEncoding(wxFontEncoding encoding)
 {
    m_encoding = encoding;
-   if ( m_encoding != wxFONTENCODING_DEFAULT )
-   {
-      m_LayoutWindow->GetLayoutList()->SetFontEncoding(m_encoding);
-      CheckLanguageInMenu(this, m_encoding);
-   }
+   m_LayoutWindow->GetLayoutList()->SetFontEncoding(m_encoding);
+   CheckLanguageInMenu(this, m_encoding);
 }
 
 void wxComposeView::SetEncodingToSameAs(Message *msg)
