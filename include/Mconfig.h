@@ -217,7 +217,7 @@
 // macro which marks strings for later extraction with xgettext(1): it
 // intentionally does nothing else!
 #ifndef gettext_noop
-   #define gettext_noop(s)    (s)
+   #define gettext_noop(s)    s
 #endif // gettext_noop
 
 #endif
