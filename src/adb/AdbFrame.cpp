@@ -3241,7 +3241,7 @@ wxAdbNotebook::wxAdbNotebook(wxPanel *parent, wxWindowID id)
     _T("general"), _T("email"), _T("home"), _T("work")
   };
 
-  wxImageList *imageList = new wxImageList(32, 32, FALSE, WXSIZEOF(aszImages));
+  wxImageList *imageList = new wxImageList(32, 32, TRUE, WXSIZEOF(aszImages));
   for ( size_t n = 0; n < WXSIZEOF(aszImages); n++ ) {
     imageList->Add(mApplication->GetIconManager()->GetBitmap(aszImages[n]));
   }
