@@ -539,7 +539,7 @@ typedef struct _xf_rule {
          continue;
       }
 
-      OAC_Types_Enum what;
+      OAC_Types_Enum what = OAC_T_Invalid;
       switch ( action )
       {
          case R_DISCARD:

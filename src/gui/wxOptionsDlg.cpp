@@ -1419,7 +1419,7 @@ bool wxOptionsPage::TransferDataToWindow()
 
          // can only have text value
       case Field_Passwd:
-         if( GetfieldType(n) == Field_Passwd )
+         if( GetFieldType(n) == Field_Passwd )
             strValue = strutil_decrypt(strValue);
       case Field_Dir:
       case Field_File:
@@ -1520,7 +1520,7 @@ bool wxOptionsPage::TransferDataFromWindow()
 
          strValue = ((wxTextCtrl *)control)->GetValue();
 
-         if( GetfieldType(n) == Field_Passwd )
+         if( GetFieldType(n) == Field_Passwd )
             strValue = strutil_encrypt(strValue);
 
          if ( GetFieldType(n) == Field_Number ) {
