@@ -1226,7 +1226,7 @@ VarExpander::SetHeaderValue(const String& name,
 
 #ifdef USE_PYTHON
 bool
-VarExpander::ExpandPython(const String& name, String *value) const
+VarExpander::ExpandPython(const String& /* name */, String * /* value */) const
 {
    // TODO
    return FALSE;
