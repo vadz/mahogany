@@ -1825,20 +1825,11 @@ MailFolderCC::Close()
       }
       else // a remote folder but we're not connected
       {
-         // delay closing
+         // delay closing as we can't do it properly right now
          gs_CCStreamCleaner->Add(m_MailStream);
       }
 
       m_MailStream = NIL;
-   }
-
-   if ( m_headers )
-   {
-      // in case someone else holds to it
-      m_headers->OnClose();
-
-      m_headers->DecRef();
-      m_headers = NULL;
    }
 
    if ( m_expungedIndices )
@@ -1899,12 +1890,6 @@ MailFolderCC::CloseAll()
    delete [] connections;
 
    return count;
-}
-
-bool
-MailFolderCC::IsAlive() const
-{
-   return m_MailStream != NULL;
 }
 
 // ----------------------------------------------------------------------------

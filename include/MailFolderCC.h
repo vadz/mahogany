@@ -400,8 +400,6 @@ private:
    /// called to notify everybody that some messages were expunged
    void RequestUpdateAfterExpunge();
 
-   virtual bool IsAlive(void) const;
-
    /** @name Message counting */
    //@{
    /// perform the search, return number of messages found

@@ -2587,7 +2587,7 @@ void CheckExpungeDialog(ASMailFolder *asmf, wxWindow *parent)
       if ( !mf )
          return;
 
-      if ( mf->CountDeletedMessages() )
+      if ( mf->IsOpened() && mf->CountDeletedMessages() )
       {
          String msg;
          msg.Printf(_("Do you want to expunge all deleted messages\n"

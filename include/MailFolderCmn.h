@@ -164,6 +164,20 @@ public:
    virtual void SuspendUpdates() { m_suspendUpdates++; }
    virtual void ResumeUpdates() { if ( !--m_suspendUpdates ) RequestUpdate(); }
 
+   /** @name Delayed folder closing
+
+       We may want to keep alive the folder for a while instead of closing it
+       immediately, so we artificially bump up its reference count and
+       decrement it back later when the keep alive timeout expires
+    */
+   //@{
+   /// decrement and delete if reached 0, return TRUE if item wasn't deleted
+   virtual void IncRef();
+   virtual bool DecRef();
+private:
+   virtual bool RealDecRef();
+   //@}
+
 protected:
    /// remove the folder from our "closer" list
    virtual void Close(void);
@@ -176,9 +190,6 @@ protected:
 
    /// move new mail to the incoming folder if necessary
    virtual bool CollectNewMail();
-
-   /// Is the mailfolder still connected to a server or file?
-   virtual bool IsAlive(void) const = 0;
 
    /// really count messages
    virtual bool DoCountMessages(MailFolderStatus *status) const = 0;
@@ -276,14 +287,6 @@ protected:
    /** Check if this message is a "New Message" for generating new
        mail event. */
    virtual bool IsNewMessage(const HeaderInfo * hi) = 0;
-
-#ifdef DEBUG_FOLDER_CLOSE
-   virtual void IncRef(void);
-#endif // DEBUG_FOLDER_CLOSE
-
-   /// decrement and delete if reached 0, return TRUE if item wasn't deleted
-   virtual bool DecRef();
-   virtual bool RealDecRef();
    //@}
 
    /** @name The listing information */
@@ -312,10 +315,6 @@ private:
 
    /// suspend update count (updating is suspended if it is > 0)
    size_t m_suspendUpdates;
-
-#ifdef DEBUG_FOLDER_CLOSE
-   bool m_PreCloseCalled;
-#endif // DEBUG_FOLDER_CLOSE
 
    /// the frame to which messages for this folder go by default
    MFrame *m_frame;

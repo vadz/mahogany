@@ -2272,7 +2272,8 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       {
          if( GetHeadersCount() > 0 &&
              (m_ASMailFolder->GetType() == MF_NNTP ||
-              m_ASMailFolder->GetType() == MF_NEWS) )
+              m_ASMailFolder->GetType() == MF_NEWS) &&
+              m_ASMailFolder->GetMailFolder()->IsOpened() )
          {
             wxString msg;
             msg.Printf(_("Mark all articles in\n'%s'\nas read?"),
