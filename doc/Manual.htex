@@ -31,11 +31,11 @@
 
 \vfill{}
 \title{{\LARGE \textsl{Mahogany User Manual}}\\
-{\Large Version 0.65 ``Claire''}}
+{\Large Version 0.66 ``Clio''}}
 \vfill{}
 
 
-\author{Copyright 1997-2003 by The Mahogany Development Team\\
+\author{Copyright 1997-2004 by The Mahogany Development Team\\
 \vspace{1cm}
 \mailtolink{mahogany-developers@lists.sourceforge.net} \\
 \vspace{1cm}
@@ -49,7 +49,7 @@ Written by Vadim Zeitlin, Karsten Ballüder et.al.}
 \chapter{Using Mahogany }
 
 \bigskip{}
-{\centering \textbf{\large Please note that the manual is significantly
+{\centering \textbf{\large Please note that the manual may be partly
 out of date}\large \par}
 
 {\centering \textbf{\large and may contain information which is not
@@ -79,11 +79,21 @@ any problems with building it.
 
 \subsubsection{0.66 against 0.65}
 
+The most noticeable new feature is the new composer. Unfortunately, it is less
+powerful than the old one as the new one is text-only and not rich text but it
+is also significantly less buggy and simpler to use. Other than that, the focus
+of the new release is yet again more bug fixing than adding new features. As
+usual, some of them were still added:
 \begin{itemize}
 \item Quick search commands in the folder view (see \ref{keybindings} and
       \ref{searching})
+\item Text viewer now supports printing
+\item Support for \texttt{X-Attribution} header
+\item Better support for UTF-7/8 encoded headers
+\item ``Paste quoted'' command added
+\item New command to select all text in the viewer added
+\item \texttt{isfromme()} (was message sent by myself?) filter test added
 \end{itemize}
-
 
 \subsubsection{0.65 against 0.64}
 
@@ -2507,10 +2517,12 @@ to download the addressbook again.
 \subsection{Introduction}
 
 \textsl{Mahogany} has an embedded Python interpreter, if compiled
-with Python support enabled. Python is an object-oriented script language
-which can be used to write scripts to be executed by \textsl{Mahogany}
-or even to extend \textsl{Mahogany}'s functionality. Python scripts
-have full access to all internal Mahogany data structures and objects.
+with Python support enabled (check if Python appears in the ``Extra features''
+list in the \MenuCmd{Help|About...} screen if you are unsure about this).
+Python is an object-oriented script language which can be used to write scripts
+to be executed by \textsl{Mahogany} or even to extend \textsl{Mahogany}'s
+functionality. Python scripts have full access to all internal Mahogany data
+structures and objects.
 
 A number of user definable callback functions are available. Scripts
 have access to most objects living in Mahogany. Scripting can be disabled
@@ -2527,6 +2539,15 @@ who will be happy to add it.
 At startup, \textsl{Mahogany} will load a file called \texttt{Minit.py}
 and call the \texttt{Minit()} function defined in there, without any
 arguments.
+
+
+\subsection{Using Python with Filters}
+
+It is possible to write filter tests and actions in Python. The test function
+should return an integer which determines whether the test passed (non zero) or
+not (zero). Both test and action functions receive as their single parameter
+the \texttt{Message} object which corresponds to the message currently being
+filtered.
 
 
 \subsection{Callback Functions (Hooks)}
