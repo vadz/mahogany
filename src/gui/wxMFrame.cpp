@@ -116,7 +116,7 @@ wxMFrame::Create(const String &iname, wxWindow *parent)
    //Show(true);
 
    SetIcon(ICON("MFrame"));
-  
+
    initialised = true;
    m_MenuBar = new wxMenuBar;
    m_ToolBar = NULL;
@@ -126,7 +126,7 @@ void
 wxMFrame::AddFileMenu(void)
 {
    wxMenu *fileMenu = new wxMenu;
-   AppendToMenu(fileMenu, WXMENU_FILE_BEGIN + 1, WXMENU_FILE_CLOSE);
+   AppendToMenu(fileMenu, WXMENU_FILE_BEGIN + 1, WXMENU_FILE_CLOSE - 1);
 
 #ifdef USE_WXWINDOWS2
    wxWindow *parent = GetParent();
@@ -185,7 +185,7 @@ wxMFrame::SavePosition(const char *name, wxFrame *frame)
       String tmp = Str(pConf->GET_PATH());
       pConf->SET_PATH(M_FRAMES_CONFIG_SECTION);
       pConf->CHANGE_PATH(name);
-   
+
       frame->GetPosition(&x,&y);
       pConf->WRITE_ENTRY(MC_XPOS, (long int) x);
       pConf->WRITE_ENTRY(MC_YPOS, (long int) y);

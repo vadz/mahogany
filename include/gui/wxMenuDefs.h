@@ -6,8 +6,10 @@
  * $Id$
  *
  *******************************************************************/
-#ifndef	WXMENUDEFS_H
+#ifndef  WXMENUDEFS_H
 #define  WXMENUDEFS_H
+
+class wxMenu;
 
 /// append an item to menu
 extern void AppendToMenu(wxMenu *menu, int n);
@@ -17,7 +19,7 @@ extern void AppendToMenu(wxMenu *menu, int nFirst, int nLast);
 
 /// check wether an ID belongs to a given menu
 #define  WXMENU_CONTAINS(menu,id)   \
-   (WXMENU_##menu##_BEGIN < (id) && WXMENU_##menu##_END > (id))
+   (WXMENU_##menu##_BEGIN < (id) && WXMENU_##menu##_END >= (id))
 
 /// creates a menu, appends all it's items to it and appends it to menu bar
 #define  WXADD_MENU(menubar, menu, caption)                             \
@@ -47,14 +49,14 @@ enum
    WXMENU_FILE_CLOSE,
    WXMENU_FILE_SEP,
    WXMENU_FILE_EXIT,
-   WXMENU_FILE_END,
+   WXMENU_FILE_END = WXMENU_FILE_EXIT,
 
    WXMENU_EDIT_BEGIN = WXMENU_FILE_END,
    WXMENU_EDIT_ADB,
    WXMENU_EDIT_PREF,
    WXMENU_EDIT_SEP,
    WXMENU_EDIT_SAVE_PREF,
-   WXMENU_EDIT_END,
+   WXMENU_EDIT_END = WXMENU_EDIT_SAVE_PREF,
 
    WXMENU_MSG_BEGIN = WXMENU_EDIT_END,
    WXMENU_MSG_OPEN,
@@ -70,7 +72,7 @@ enum
    WXMENU_MSG_SEP2,
    WXMENU_MSG_SELECTALL,
    WXMENU_MSG_DESELECTALL,
-   WXMENU_MSG_END,
+   WXMENU_MSG_END = WXMENU_MSG_DESELECTALL,
 
    WXMENU_COMPOSE_BEGIN = WXMENU_MSG_END,
    WXMENU_COMPOSE_INSERTFILE,
@@ -78,11 +80,11 @@ enum
    WXMENU_COMPOSE_PRINT,
    WXMENU_COMPOSE_SEP,
    WXMENU_COMPOSE_CLEAR,
-   WXMENU_COMPOSE_END,
+   WXMENU_COMPOSE_END = WXMENU_COMPOSE_CLEAR,
 
    WXMENU_HELP_BEGIN = WXMENU_COMPOSE_END,
    WXMENU_HELP_ABOUT,
-   WXMENU_HELP_END,
+   WXMENU_HELP_END = WXMENU_HELP_ABOUT,
 
    WXMENU_END = WXMENU_HELP_END,
 
