@@ -413,21 +413,26 @@ bool DummyDataProvider::EnumBooks(wxArrayString& /* aNames */)
   return FALSE;
 }
 
+#ifdef EXPERIMENTAL_adbtest
+
 bool DummyDataProvider::TestBookAccess(const String& name, AdbTests test)
 {
-#ifdef EXPERIMENTAL_adbtest
   String str;
   str.Printf("Return TRUE from DummyDataProvider::TestBookAccess(%d) "
              " for '%s'?",
              test, name.c_str());
   return MDialog_YesNoDialog(str);
-#else
-  name;
-  test;
-
-  return FALSE;
-#endif
 }
+
+#else // !EXPERIMENTAL_adbtest
+
+bool
+DummyDataProvider::TestBookAccess(const String& /* name*/, AdbTests /* test */)
+{
+  return FALSE;
+}
+
+#endif // EXPERIMENTAL_adbtest/!EXPERIMENTAL_adbtest
 
 bool DummyDataProvider::DeleteBook(AdbBook * /* book */)
 {
