@@ -121,7 +121,6 @@ wxMFrame::wxMFrame(const String &iname, wxWindow *parent)
         : MFrameBase(iname)
 {
    m_initialised = false;
-   m_startIconised = false;
    Create(iname,parent);
 }
 
