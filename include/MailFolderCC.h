@@ -712,6 +712,8 @@ private:
    int ms_TcpCloseTimeout;
    /// rsh connection timeout in seconds.
    int ms_TcpRshTimeout;
+   /// ssh connection timeout in seconds.
+   int ms_TcpSshTimeout;
    //@}
 
    /// Used by the subscription management.

@@ -817,6 +817,7 @@ MailFolderCC::ApplyTimeoutValues(void)
    (void) mail_parameters(NIL, SET_WRITETIMEOUT, (void *) ms_TcpWriteTimeout);
    (void) mail_parameters(NIL, SET_CLOSETIMEOUT, (void *) ms_TcpCloseTimeout);
    (void) mail_parameters(NIL, SET_RSHTIMEOUT, (void *) ms_TcpRshTimeout);
+   (void) mail_parameters(NIL, SET_SSHTIMEOUT, (void *) ms_TcpSshTimeout);
 }
 
 
@@ -836,9 +837,11 @@ MailFolderCC::UpdateTimeoutValues(void)
    // independently of TCP timeout
    ms_TcpRshTimeout = READ_CONFIG(p, MP_TCP_RSHTIMEOUT);
 
+   // and another one for SSH
+   ms_TcpSshTimeout = READ_CONFIG(p, MP_TCP_SSHTIMEOUT);
+
    ApplyTimeoutValues();
 }
-
 
 
 bool MailFolderCC::HalfOpen()

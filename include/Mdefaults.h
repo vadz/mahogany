@@ -613,6 +613,8 @@
 #endif // 0
 /// rsh connection timeout in seconds.
 #define MP_TCP_RSHTIMEOUT "TCPRshTimeout"
+/// ssh connection timeout in seconds.
+#define MP_TCP_SSHTIMEOUT "TCPSshTimeout"
 //@}
 /** @name for folder list ctrls: ratios of the width to use for
     columns */
@@ -1169,6 +1171,8 @@
 #endif // 0
 /// rsh connection timeout in seconds.
 #define MP_TCP_RSHTIMEOUT_D 0l
+/// ssh connection timeout in seconds.
+#define MP_TCP_SSHTIMEOUT_D 0l
 //@}
 
 /** @name for folder list ctrls: ratios of the width to use for
