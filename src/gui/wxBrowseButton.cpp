@@ -409,7 +409,7 @@ wxIconSelectionDialog::wxIconSelectionDialog(wxWindow *parent,
    c->height.Absolute(wxIconView::ms_iconSize + 9*LAYOUT_X_MARGIN);
    iconView->SetConstraints(c);
 
-   SetDefaultSize(4*wBtn, wxIconView::ms_iconSize + 4*hBtn);
+   SetDefaultSize(8*wBtn, wxIconView::ms_iconSize + 6*hBtn);
 }
 
 void wxIconSelectionDialog::OnIconSelected(wxListEvent& event)

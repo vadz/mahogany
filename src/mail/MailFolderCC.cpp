@@ -2181,51 +2181,52 @@ bool MailFolderCC::CountInterestingMessages(MailFolderStatus *status) const
                   "caching of number of messages broken" );
 
       *status = m_status;
-
-      return true;
    }
-
-   status->Init();
-
-   HeaderInfoList_obj hil = GetHeaders();
-   if ( !hil )
+   else
    {
-      // this is not a (programming) error - maybe we just failed to open the
-      // folder - so don't assert here
-      return false;
+      status->Init();
+
+      HeaderInfoList_obj hil = GetHeaders();
+      if ( !hil )
+      {
+         // this is not a (programming) error - maybe we just failed to open
+         // the folder - so don't assert here
+         return false;
+      }
+
+      wxLogTrace("count",
+                 "Counting all interesting messages in '%s' (%lu all)",
+                 GetName().c_str(), m_nMessages);
+
+      status->total = m_nMessages;
+      for ( size_t idx = 0; idx < m_nMessages; idx++ )
+      {
+         int stat = hil->GetItemByIndex(idx)->GetStatus();
+
+         // ignore deleted messages
+         if ( stat & MSG_STAT_DELETED )
+            continue;
+
+         MsgStatus msgStat = AnalyzeStatus(stat);
+
+         #define INC_NUM_OF(what)   if ( msgStat.what ) status->what++
+
+         INC_NUM_OF(recent);
+         INC_NUM_OF(unseen);
+         INC_NUM_OF(newmsgs);
+         INC_NUM_OF(flagged);
+         INC_NUM_OF(searched);
+
+         #undef INC_NUM_OF
+      }
+
+      // cache the number of messages
+      MailFolderCC *self = (MailFolderCC *)this; // const_cast
+      self->m_status = *status;
+      self->m_nRecent = status->recent;
    }
 
-   wxLogTrace("count",
-              "Counting all interesting messages in '%s' (%lu all)",
-              GetName().c_str(), m_nMessages);
-
-   status->total = m_nMessages;
-   for ( size_t idx = 0; idx < m_nMessages; idx++ )
-   {
-      int stat = hil->GetItemByIndex(idx)->GetStatus();
-
-      // ignore deleted messages
-      if ( stat & MSG_STAT_DELETED )
-         continue;
-
-      MsgStatus msgStat = AnalyzeStatus(stat);
-
-      #define INC_NUM_OF(what)   if ( msgStat.what ) status->what++
-
-      INC_NUM_OF(recent);
-      INC_NUM_OF(unseen);
-      INC_NUM_OF(newmsgs);
-      INC_NUM_OF(flagged);
-      INC_NUM_OF(searched);
-
-      #undef INC_NUM_OF
-   }
-
-   // cache the number of messages
-   MailFolderCC *self = (MailFolderCC *)this; // const_cast
-   self->m_status = *status;
-   self->m_nRecent = status->recent;
-
+   // only return true if we have at least something "interesting"
    return status->newmsgs ||
           status->recent ||
           status->unseen ||

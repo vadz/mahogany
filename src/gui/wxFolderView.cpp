@@ -237,6 +237,9 @@ public:
    /// get the only selected item, return -1 if 0 or >= 2 items are selected
    long GetUniqueSelection() const;
 
+   /// get the item being previewed
+   long GetPreviewedItem() const { return m_itemPreviewed; }
+
    /// @name the event handlers
    //@{
    void OnSelected(wxListEvent& event);
@@ -251,7 +254,11 @@ public:
    void OnMouseMove(wxMouseEvent &event);
 
    /// called by wxFolderView before previewing the focused message
-   void OnPreview() { SelectFocused(); }
+   void OnPreview()
+   {
+      m_itemPreviewed = GetFocusedItem();
+      Select(m_itemPreviewed, true);
+   }
    //@}
 
    /// change the options governing our appearance
@@ -294,6 +301,9 @@ protected:
 
    /// the currently focused item
    long m_itemFocus;
+
+   /// the item currently previewed in the folder view
+   long m_itemPreviewed;
 
    /// this is true as long as we have exactly one selection
    bool m_selIsUnique;
@@ -1076,6 +1086,9 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
    // no item focused yet
    m_itemFocus = -1;
+
+   // nor previewed
+   m_itemPreviewed = -1;
 
    // no selection at all
    m_selIsUnique = false;
@@ -2921,6 +2934,11 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
       long focus = m_FolderCtrl->GetFocusedItem();
       bool focusDeleted = false;
 
+      // and we also might have to clear the preview if we delete the message
+      // being previewed
+      long preview = m_FolderCtrl->GetPreviewedItem();
+      bool previewDeleted = false;
+
       size_t count = event.GetCount();
       for ( size_t n = 0; n < count; n++ )
       {
@@ -2929,6 +2947,9 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
             focus--;
          else if ( item == focus )
             focusDeleted = true;
+
+         if ( item == preview )
+            previewDeleted = true;
 
          m_FolderCtrl->DeleteItem(item);
       }
@@ -2946,6 +2967,13 @@ wxFolderView::OnFolderExpungeEvent(MEventFolderExpungeData &event)
          }
 
          m_FolderCtrl->Focus(focus);
+      }
+
+      // clear preview window if the message showed there had been deleted
+      if ( previewDeleted )
+      {
+         m_MessagePreview->Clear();
+         m_previewUId = UID_ILLEGAL;
       }
    }
 }

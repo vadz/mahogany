@@ -1181,6 +1181,12 @@ wxFolderTreeImpl::GetTreeItemFromName(const String& fullname)
 
       ASSERT_MSG( !!name, "token can't be empty here" );
 
+      if ( ItemHasChildren(current) && !IsExpanded(current) )
+      {
+         // do expand it or we wouldn't find any children under it
+         Expand(current);
+      }
+
       long cookie;
       wxTreeItemId child = GetFirstChild(current, cookie);
       while ( child.IsOk() )

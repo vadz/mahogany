@@ -142,17 +142,15 @@ public:
     bool m_started;
 };
 
-// a timer used to do idle processing
+// a timer used to wake up idle loop to force generation of the idle events
+// even if the program is otherwise idle (i.e. no GUI events happen)
 class IdleTimer : public wxTimer
 {
 public:
-   IdleTimer() : wxTimer() { Start(); }
-   virtual bool Start() { return wxTimer::Start(100); }
+   IdleTimer() : wxTimer() { Start(100); }
 
-   virtual void Notify()
-      { MEventManager::DispatchPending(); }
+   virtual void Notify() { wxWakeUpIdle(); }
 };
-
 
 // ----------------------------------------------------------------------------
 // global vars
@@ -163,7 +161,6 @@ static AutoSaveTimer *gs_timerAutoSave = NULL;
 // a (unique) timer for polling for new mail
 static MailCollectionTimer *gs_timerMailCollection = NULL;
 
-
 struct MModuleEntry
 {
    MModuleEntry(MModule *m) { m_Module = m; }
@@ -171,6 +168,7 @@ struct MModuleEntry
 };
 
 KBLIST_DEFINE(ModulesList, MModuleEntry);
+
 // a list of modules loaded at startup:
 static ModulesList gs_GlobalModulesList;
 
@@ -599,7 +597,6 @@ wxMApp::OnInit()
 
    m_IconManager = new wxIconManager();
 
-   m_OnlineManager = wxDialUpManager::Create();
    m_PrintData = new wxPrintData;
    m_PageSetupData = new wxPageSetupDialogData;
 
@@ -801,6 +798,7 @@ int wxMApp::OnExit()
    delete m_IconManager;
    delete m_Locale;
    delete m_OnlineManager;
+
    // FIXME this is not the best place to do it, but at least we're safe
    //       because we now that by now it's unused any more
    Profile::DeleteGlobalConfig();
@@ -1345,11 +1343,16 @@ wxMApp::UpdateOutboxStatus(MailFolder *mf) const
 void
 wxMApp::SetupOnlineManager(void)
 {
-   ASSERT(m_OnlineManager);
+   // only create dial up manager if needed
    m_DialupSupport = READ_APPCONFIG(MP_DIALUP_SUPPORT) != 0;
 
-   if(m_DialupSupport)
+   if ( m_DialupSupport )
    {
+      if ( !m_OnlineManager )
+      {
+         m_OnlineManager = wxDialUpManager::Create();
+      }
+
       if(! m_OnlineManager->EnableAutoCheckOnlineStatus(60))
       {
          wxLogError(_("Cannot activate auto-check for dial-up network status."));
@@ -1359,8 +1362,10 @@ wxMApp::SetupOnlineManager(void)
       strutil_delwhitespace(beaconhost);
       // If no host configured, use smtp host:
       if(beaconhost.length() > 0)
+      {
          m_OnlineManager->SetWellKnownHost(beaconhost);
-      else
+      }
+      else // beacon host configured
       {
          beaconhost = READ_APPCONFIG(MP_SMTPHOST);
          m_OnlineManager->SetWellKnownHost(beaconhost, 25);
@@ -1372,11 +1377,13 @@ wxMApp::SetupOnlineManager(void)
 #endif // Unix
       m_IsOnline = m_OnlineManager->IsOnline();
    }
-   else
+   else // no dialup support
    {
-      m_OnlineManager->DisableAutoCheckOnlineStatus();
+      delete m_OnlineManager;
+
       m_IsOnline = TRUE;
    }
+
    UpdateOnlineDisplay();
 }
 
@@ -1385,26 +1392,33 @@ wxMApp::IsOnline(void) const
 {
    if(! m_DialupSupport)
       return TRUE; // no dialup--> always connected
-   else
-      // make sure we always have the very latest value:
-      return ((wxMApp*)this)->m_IsOnline = m_OnlineManager->IsOnline();
+
+   // make sure we always have the very latest value:
+   ((wxMApp*)this)->m_IsOnline = m_OnlineManager->IsOnline();
+
+   return m_IsOnline;
 }
 
 void
 wxMApp::GoOnline(void) const
 {
+   CHECK_RET( m_OnlineManager, "can't go online" );
+
    if(m_OnlineManager->IsOnline())
    {
       ((wxMApp *)this)->m_IsOnline = TRUE;
       ERRORMESSAGE((_("Dial-up network is already online.")));
       return;
    }
+
    m_OnlineManager->Dial();
 }
 
 void
 wxMApp::GoOffline(void) const
 {
+   CHECK_RET( m_OnlineManager, "can't go offline" );
+
    if(! m_OnlineManager->IsOnline())
    {
       ((wxMApp *)this)->m_IsOnline = FALSE;
@@ -1421,17 +1435,7 @@ wxMApp::GoOffline(void) const
 void
 wxMApp::FatalError(const char *message)
 {
-   wxString msg = _("An unrecoverable internal error has occured.\n"
-                    "The application will shut down now. Please take\n"
-                    "a note of the error message and report it to\n"
-                    "mahogany-developers@lists.sourceforge.net\n\nInternal error message:\n\n");
-   msg << message;
-   MDialog_ErrorMessage(message, NULL, _("FATAL INTERNAL ERROR"));
-#ifdef DEBUG
-   abort();
-#else
-   OnFatalException();
-#endif
+   OnAbnormalTermination();
 }
 
 // ----------------------------------------------------------------------------
