@@ -224,6 +224,7 @@ extern const MOption MP_FOLDER_PATH;
 extern const MOption MP_FOLDER_COMMENT;
 extern const MOption MP_UPDATEINTERVAL;
 extern const MOption MP_FOLDER_CLOSE_DELAY;
+extern const MOption MP_CONN_CLOSE_DELAY;
 extern const MOption MP_AUTOMATIC_WORDWRAP;
 extern const MOption MP_WRAPMARGIN;
 extern const MOption MP_VIEW_AUTOMATIC_WORDWRAP;
@@ -814,6 +815,8 @@ extern const MOption MP_AWAY_STATUS;
 #define   MP_UPDATEINTERVAL_NAME      "UpdateInterval"
 /// close of folders delayed by
 #define MP_FOLDER_CLOSE_DELAY_NAME   "FolderCloseDelay"
+/// close of network connection delayed by
+#define MP_CONN_CLOSE_DELAY_NAME   "ConnCloseDelay"
 /// do automatic word wrap?
 #define MP_AUTOMATIC_WORDWRAP_NAME   "AutoWrap"
 /// wrapmargin for composition (set to -1 to disable it)
@@ -1605,7 +1608,9 @@ extern const MOption MP_AWAY_STATUS;
 /// update interval for folders in seconds
 #define   MP_UPDATEINTERVAL_DEFVAL      60
 /// close of folders delayed by
-#define MP_FOLDER_CLOSE_DELAY_DEFVAL    30
+#define MP_FOLDER_CLOSE_DELAY_DEFVAL    0l
+/// close of network connection delayed by
+#define MP_CONN_CLOSE_DELAY_DEFVAL    60
 /// do automatic word wrap?
 #define MP_AUTOMATIC_WORDWRAP_DEFVAL   1l
 /// wrapmargin for composition (set to -1 to disable it)
