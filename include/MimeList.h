@@ -35,7 +35,7 @@
 /**
    MimeEntry - holds information about a Mime type
 */
-class MimeEntry
+class MimeEntry : public MObject
 {
       
    /// type
@@ -64,7 +64,7 @@ public:
 
 KBLIST_DEFINE(MimeEntryList, MimeEntry);
 
-class MimeList : public MimeEntryList
+class MimeList : public MObject, public MimeEntryList
 {
 //   DECLARE_CLASS(MimeList)
    

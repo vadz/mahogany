@@ -10,7 +10,6 @@
 
 #include   "Mconfig.h"
 #include   "MObject.h"
-//#include   "Magic.h" // magicobject
 
 #ifdef   HAVE_LIBINTL_H
 #  define   USE_GETTEXT 1

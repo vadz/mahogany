@@ -26,8 +26,8 @@
   books: this is done with AdbManager which in turn uses (one of)
   AdbDataProviders to actually create the book.
 
-  This class derives from MObject and uses reference counting, see the comments
-  in MObject.h for more details about it.
+  This class derives from MObjectRC and uses reference counting, see
+  the comments in MObject.h for more details about it.  
 */
 
 class AdbBook : public AdbEntryGroup

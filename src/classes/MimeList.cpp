@@ -43,6 +43,7 @@ MimeEntry::MimeEntry(String const & itype,
 bool
 MimeEntry::Parse(String const & str)
 {
+   MOcheck();
    if(*str.c_str() == '#')
       return false;
 
@@ -77,6 +78,7 @@ MimeEntry::Parse(String const & str)
 
 MimeList::MimeList(void)
 {
+   MOcheck();
 #  ifdef OS_UNIX
       bool   found;
       MimeEntry   *newEntry;
@@ -110,8 +112,9 @@ bool
 MimeList::GetCommand(String const & type,
                      String &command, String &flags)
 {
-   iterator
-      i;
+   MOcheck();
+
+   iterator i;
    // look for exact match first:
    for(i = begin(); i != end(); i++)
       if(strutil_cmp((*i)->type, type))
@@ -142,6 +145,8 @@ String MimeList::ExpandCommand(String const &commandline,
                                String const &filename,
                                String const &mimetype)
 {
+   MOcheck();
+
    String line = "";
    const char *cptr = commandline.c_str();
 

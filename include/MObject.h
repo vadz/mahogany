@@ -15,12 +15,59 @@
 #ifndef   MOBJECT_H
 #define   MOBJECT_H
 
+
+
 // ----------------------------------------------------------------------------
-// MObject: the mother of all reference counted classes
+// MObject: the mother of all classes
 // ----------------------------------------------------------------------------
 
-/// a magic value for MObject
+/// the magic number
 #define   MOBJECT_MAGIC   1234567890
+
+/** This class is base of all other M objects. It has a simple
+    mechanism of magic numbers to check an object's validity.
+    This class is empty if compiled with debugging disabled.
+*/
+class MObject
+{
+public:
+#ifdef   DEBUG
+   /// initialise the magic number
+   MObject()
+      { m_magic = MOBJECT_MAGIC; }
+   /** Check validity of this object.
+       This function should be called wherever such an object is used, 
+       especially at the beginning of all methods.
+   */
+   void MOcheck(void) const
+      {
+         // check that this != NULL
+         wxASSERT(this);
+         // check that the object is really a MObject
+         wxASSERT(m_magic == MOBJECT_MAGIC);
+      }
+   /// virtual destructor
+   virtual ~MObject()
+      {
+         // check we are valid
+         MOcheck();
+         // make sure we are no longer
+         m_magic = 0;
+      }
+protected:
+   /// a simple magic number as a validity check
+   int m_magic;
+#else
+   /// virtual destructor
+   virtual ~MObject() {}
+   /// empty MOcheck() method
+   void MOcheck(void) const {} 
+#endif
+};
+
+// ----------------------------------------------------------------------------
+// MObjectRC: the mother of all reference counted classes
+// ----------------------------------------------------------------------------
 
 /**
   This class uses reference counting.
@@ -35,45 +82,41 @@
     3) call IncRef() if you wish to have control over object's lifetime (i.e.
        before storing pointer to it - otherwise it may go away leaving you
        with invalid pointer) and, of course, call DecRef() for any IncRef().
-    4) any function returning "MObject *" locks it (according to 3), so you
+    4) any function returning "MObjectRC *" locks it (according to 3), so you
        should call DecRef() when you're done with the returned pointer.
 
   Of course, "objects of this class" also applies for objects of all classes
-  derived from MObject.
+  derived from MObjectRC.
 
-  Debugging: in the debug mode only (when DEBUG is defined) all MObject-derived
-  objects are added to the global list. Calling MObject::CheckLeaks() on program
+  Debugging: in the debug mode only (when DEBUG is defined) all MObjectRC-derived
+  objects are added to the global list. Calling MObjectRC::CheckLeaks() on program
   termination will print a detailed report about leaked objects, including their
   number and their description for all of them. CheckLeaks() does nothing in the
   release build.
 */
-class MObject
+class MObjectRC : public MObject
 {
 public:
   // ctor creates the object with the ref. count of 1
 #ifdef   DEBUG
-  MObject();
+  MObjectRC();
 #else
-  MObject() { m_nRef = 1; }
+  MObjectRC() { m_nRef = 1; }
 #endif
 
   // debugging support
 #ifdef   DEBUG
-    /// check validity of this object
-   void MOcheck(void) const;
-   
     // call this function on program termination to check for memory leaks
     // (of course, you shouldn't allocate memory in static object's: otherwise
     // it will be reported as leaked)
     static void CheckLeaks();
 
     // override this function (see also MOBJECT_DEBUG macro) to provide some
-    // rich information about your object (MObject::Dump() prints the ref
+    // rich information about your object (MObjectRC::Dump() prints the ref
     // count only)
     virtual String Dump() const;
 
 #else
-#   define MOcheck()
     static void CheckLeaks() { }
 #endif
 
@@ -89,14 +132,8 @@ public:
 
 
 protected:
-#ifdef DEBUG
-  int m_magic;
-  // dtor is protected because only DecRef() can delete us
-  virtual ~MObject() { MOcheck(); m_magic = 0; }
-#else
-  // dtor is protected because only DecRef() can delete us
-    virtual ~MObject() {}
-#endif
+  /// dtor is protected because only DecRef() can delete us
+  virtual ~MObjectRC() {}
   
 #ifndef DEBUG // we may use m_nRef only for diagnostic functions
 private:
@@ -117,6 +154,6 @@ private:
 // ----------------------------------------------------------------------------
 
 // unlock the pointer only if it's empty
-inline void SafeDecRef(MObject *p) { if ( p != NULL ) p->DecRef(); }
+inline void SafeDecRef(MObjectRC *p) { if ( p != NULL ) p->DecRef(); }
 
 #endif  //MOBJECT_H

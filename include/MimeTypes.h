@@ -19,7 +19,7 @@
 /**
    MimeTypes - maps file extensions to mime types.
 */
-class MimeTEntry
+class MimeTEntry : public MObject
 {
    /// type
    String type;
@@ -47,7 +47,7 @@ public:
 */
 
 KBLIST_DEFINE(MimeTEntryList, MimeTEntry);
-class MimeTypes : public MimeTEntryList
+class MimeTypes : public MObject, public MimeTEntryList
 {
 public:
    /** Constructor

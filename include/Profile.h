@@ -50,7 +50,7 @@ class wxConfigBase;
     @see ProfileAppConfig
     @see AppConfig
 */
-class ProfileBase : public MObject
+class ProfileBase : public MObjectRC
 {
 public:
    /// Create a normal Profile object

@@ -46,7 +46,7 @@ install: all
 	ln -fs $(DATADIR)/$(CANONICAL_HOST)/bin/M $(BINDIR)
 	ln -fs $(DATADIR)/$(CANONICAL_HOST)/bin/M $(DATADIR)/bin
 	$(INSTALL) -d $(DATADIR)/icons
-	$(INSTALL_DATA) `find icons/* -not -type d` $(DATADIR)/icons
+	$(INSTALL_DATA) `find icons/* -prune -not -type d` $(DATADIR)/icons
 
 .PHONY: all dep clean doc semistatic static allclean install
 

@@ -47,6 +47,7 @@ PathFinder::AddPaths(STRINGARG ipathlist, bool recursive)
    String   subdirList = "";
    char   *nextfile;
    
+   MOcheck();
    strcpy(work,ipathlist.c_str());
    found = strtok(work, PATHFINDER_DELIMITER);
    
@@ -83,6 +84,7 @@ PathFinder::Find(STRINGARG filename, bool *found,
    String   work;
    int   result;
    
+   MOcheck();
    for(i = pathList->begin(); i != pathList->end(); i++)
    {
       work = *(*i) + '/' + filename;
@@ -106,6 +108,7 @@ PathFinder::FindFile(STRINGARG filename, bool *found,
    String   work;
    int   result;
    
+   MOcheck();
    for(i = pathList->begin(); i != pathList->end(); i++)
    {
       work = *(*i) + '/' + filename;
@@ -129,6 +132,7 @@ PathFinder::FindDir(STRINGARG filename, bool *found,
    String   work;
    int   result;
    
+   MOcheck();
    for(i = pathList->begin(); i != pathList->end(); i++)
    {
       work = *(*i) + '/' + filename;
@@ -152,6 +156,7 @@ PathFinder::FindDirFile(STRINGARG filename, bool *found,
    String   work;
    int   result;
    
+   MOcheck();
    for(i = pathList->begin(); i != pathList->end(); i++)
    {
       work = *(*i) + '/' + filename;
@@ -167,6 +172,7 @@ PathFinder::FindDirFile(STRINGARG filename, bool *found,
    return "";
 }
 
+// static
 bool
 PathFinder::IsDir(STRINGARG pathname)
 {
@@ -178,6 +184,7 @@ PathFinder::IsDir(STRINGARG pathname)
       return false;
 }
 
+//static
 bool
 PathFinder::IsFile(STRINGARG pathname) 
 {
@@ -192,6 +199,8 @@ PathFinder::IsFile(STRINGARG pathname)
 PathFinder::~PathFinder()
 {
    kbStringList::iterator i;
+
+   MOcheck();
    for ( i = pathList->begin(); i != pathList->end(); i++ ) {
       String *data = *i;
       delete data;

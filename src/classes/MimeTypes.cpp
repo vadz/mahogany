@@ -39,12 +39,15 @@ MimeTEntry::MimeTEntry(void)
 
 MimeTEntry::MimeTEntry(String const & str)
 {
+   MOcheck();
    Parse(str);
 }
 
 bool
 MimeTEntry::Parse(String const & str)
 {
+   MOcheck();
+
    if(*str.c_str() == '#')
       return false;
    const char *cptr = str.c_str();
@@ -81,6 +84,8 @@ MimeTEntry::Parse(String const & str)
 bool
 MimeTEntry::Match(String const & extension, String &mimeType)
 {
+   MOcheck();
+   
    kbStringList::iterator i;
    for(i = extensions.begin(); i != extensions.end(); i++)
       if( *(*i) == extension)
@@ -93,6 +98,8 @@ MimeTEntry::Match(String const & extension, String &mimeType)
 
 MimeTypes::MimeTypes(void) // why? should be default : STL_LIST<MimeTEntry>()
 {
+   MOcheck();
+   
 #  ifdef OS_UNIX
       bool   found;
       String   tmp;
@@ -121,6 +128,8 @@ MimeTypes::MimeTypes(void) // why? should be default : STL_LIST<MimeTEntry>()
 bool
 MimeTypes::Lookup(String const & filename, String &mimeType, int *numericType)
 {
+   MOcheck();
+
    const char *ext = strrchr(filename.c_str(),'.');
    String extension;
    iterator i;

@@ -34,7 +34,7 @@
    PathFinder class which finds a file,  given its name and the list
    of possible paths.
 */
-class PathFinder //: public MagicObject
+class PathFinder : public MObject
 {
    /// the list of absolute paths
    class kbStringList *pathList;

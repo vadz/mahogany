@@ -30,11 +30,11 @@ class wxArrayString;
   macros add the static object describing this provider to the linked list of
   all data providers managed by AdbManager.
 
-  This class derives from MObject and uses reference counting, see the comments
-  in MObject.h for more details about it.
+  This class derives from MObjectRC and uses reference counting, see
+  the comments in MObject.h for more details about it. 
 */
 
-class AdbDataProvider : public MObject
+class AdbDataProvider : public MObjectRC
 {
 public:
   typedef AdbDataProvider *(*Constructor)();

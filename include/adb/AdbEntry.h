@@ -103,11 +103,10 @@ enum
 /**
   The common base class for AdbEntry and AdbEntryGroup.
 
-  As this class derives from MObject, both AdbEntry and AdbEntryGroup.do too,
-  so they use reference counting: see the comments in MObject.h for more
-  details about it.
-*/
-class AdbElement : public MObject
+  As this class derives from MObjectRC, both AdbEntry and
+  AdbEntryGroup.do too, so they use reference counting: see the
+  comments in MObject.h for more details about it.  */
+class AdbElement : public MObjectRC
 {
   /// the group this entry/group belongs to (never NULL for these classes)
   virtual AdbEntryGroup *GetGroup() const = 0;
@@ -152,9 +151,8 @@ public:
 /**
   A group of ADB entries which contains the entries and other groups.
 
-  This class derives from MObject and uses reference counting, see the comments
-  in MObject.h for more details about it.
-*/
+  This class derives from MObjectRC and uses reference counting, see
+  the comments in MObject.h for more details about it.  */
 class AdbEntryGroup : public AdbElement
 {
 public:

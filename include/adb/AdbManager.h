@@ -44,7 +44,7 @@ class ArrayAdbBooks;
   @@@ This seems a bit complicated but I don't know how to ensure that there is
       at most one object of this type otherwise...
 */
-class AdbManager : public MObject
+class AdbManager : public MObjectRC
 {
 public:
   // static functions

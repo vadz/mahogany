@@ -169,7 +169,7 @@ int wxMApp::OnExit()
 
    delete m_IconManager;
 
-   MObject::CheckLeaks();
+   MObjectRC::CheckLeaks();
 
    wxLog *log = wxLog::GetActiveTarget();
    wxLog::SetActiveTarget(NULL);
