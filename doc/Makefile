@@ -48,7 +48,7 @@ ps:
 	for i in $(FILES_PS); do $(MAKE) -k $$i; done   # one after another
 
 install:
-	if [ -f Mdoc.tar.gz ] ; then gzip -dc < Mdoc.tar.gz | (cd $(DOCDIR) && tar xvf - ); else $(MAKE) install2 ; fi
+	if [ -f Mdocs.tar.gz ] ; then gzip -dc < Mdocs.tar.gz | (cd $(DOCDIR) && tar xvf - ); else $(MAKE) install2 ; fi
 
 classes.tex: ../include/*.h ../include/adb/*.h ../include/gui/*.h
 	$(MAKE) -C ../include doc
