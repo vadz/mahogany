@@ -40,25 +40,6 @@ enum wxFolderListCtrlFields
    WXFLC_NUMENTRIES
 };
 
-/** a timer class for the FolderView */
-class wxFVTimer : public wxTimer
-{
-public:
-   /** constructor
-       @param mf the mailfolder to query on timeout
-   */
-   wxFVTimer(MailFolder *mf) : m_mf(mf)
-   {
-      Start(mf->GetUpdateInterval()*1000);
-   }
-
-   /// get called on timeout and pings the mailfolder
-   void Notify(void) { m_mf->Ping(); }
-
-protected:
-   /// the mailfolder to update
-   MailFolder  *m_mf;
-};
 
 /** a wxWindows FolderView class */
 class wxFolderView : public FolderView
@@ -182,8 +163,6 @@ private:
    int   width;
    /// height of window
    int height;
-   /// a timer to update information
-   wxFVTimer   *m_timer;
    /// its parent
    MWindow *m_Parent;
    /// either a listctrl or a treectrl

@@ -193,7 +193,8 @@ MailCollector::CollectOneFolder(MailFolder *mf)
    m_IsCollecting = true;
    wxLogStatus(_("Auto-collecting mail from incoming folder '%s'."),
                mf->GetName().c_str());
-   wxSafeYield(); // normal wxYield() should be ok here
+   wxYield(); // normal wxYield() should be ok here, this code never
+   // gets called from a menu or such
    long oldcount = m_NewMailFolder->CountMessages();
    bool sendsEvents = mf->SendsNewMailEvents();
    mf->EnableNewMailEvents(false,true);
@@ -243,6 +244,7 @@ MailCollector::CollectOneFolder(MailFolder *mf)
       m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_SEEN, false);
    }
    mf->EnableNewMailEvents(sendsEvents);
+   mf->Ping(); //update it
    m_IsCollecting = false;
    return rc;
 }

@@ -668,8 +668,10 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
       return;
    }
    else
-      wxLogInfo(_("BBDB: file format version '%s'"), version.c_str());
-
+   {
+      LOGMESSAGE((M_LOG_WINONLY, _("BBDB: file format version '%s'"), version.c_str()));
+   }
+   
    MProgressDialog status_frame("BBDB import", "Importing...",
                                  length, NULL);// open a status window:
    do
@@ -688,7 +690,7 @@ BbdbEntryGroup::BbdbEntryGroup(BbdbEntryGroup *, const String& strName)
             ignored ++;
       }
    }while(! (file.eof() || file.fail()));
-   wxLogInfo(_("BBDB: read %d entries."), entries_read);
+   LOGMESSAGE((M_LOG_WINONLY, _("BBDB: read %d entries."), entries_read));
    if(ignored > 0)
       wxLogWarning(_("BBDB: ignored %d entries with neither first nor last names."),
                    ignored);

@@ -92,7 +92,7 @@ void wxFolderListCtrl::OnKey(wxKeyEvent& event)
             return;
       }
       // in this case we operate on the highlighted  message
-      HeaderInfo *hi = m_FolderView->GetFolder()->GetHeaderInfo(focused);
+      const HeaderInfo *hi = m_FolderView->GetFolder()->GetHeaderInfo(focused);
       if(nselected == 0 && hi)
          selections.Add(hi->GetUId());
 
@@ -314,17 +314,6 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
    if(m_MailFolder)  // clean up old folder
    {
-      if ( m_timer )
-      {
-         m_timer->Stop();
-         delete m_timer;
-         m_timer = NULL;
-      }
-      else
-      {
-          return;
-      }
-
       wxString msg;
       msg.Printf(_("Mark all articles in\n%s\nas read?"),
                  m_MailFolder->GetName().c_str());
@@ -362,7 +351,6 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
    m_UpdateSemaphore = false;
    m_MailFolder = mf;
    m_Profile = NULL;
-   m_timer = NULL;
 
    if(m_MailFolder)
    {
@@ -375,7 +363,6 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
       m_MailFolder->IncRef();  // make sure it doesn't go away
       m_folderName = m_MailFolder->GetName();
-      m_timer = new wxFVTimer(m_MailFolder);
 
       if ( recreateFolderCtrl )
       {

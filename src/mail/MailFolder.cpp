@@ -145,7 +145,7 @@ MailFolder::OpenFolder(int typeAndFlags,
    MailFolder *mf = MailFolderCC::OpenFolder(typeAndFlags, name, profile,
                                              server, login, passwd, symbolicName);
    if ( mf )
-      mf->m_UpdateInterval = READ_CONFIG(profile, MP_UPDATEINTERVAL);
+      mf->SetUpdateInterval(READ_CONFIG(profile, MP_UPDATEINTERVAL));
 
    profile->DecRef();
 

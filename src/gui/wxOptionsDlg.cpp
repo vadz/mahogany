@@ -115,6 +115,7 @@ enum ConfigFields
    ConfigField_MainFolder,
    ConfigField_NewMailFolder,
    ConfigField_PollIncomingDelay,
+   ConfigField_UpdateInterval,
    ConfigField_FolderProgressThreshold,
    ConfigField_FoldersLast = ConfigField_FolderProgressThreshold,
 
@@ -387,7 +388,8 @@ wxOptionsPage::FieldInfo wxOptionsPage::ms_aFields[] =
                                                    Field_Restart, -1,           },
    { gettext_noop("Folder opened in &main frame"), Field_Text,    -1,                        },
    { gettext_noop("Folder where to collect &new mail"), Field_Text, -1},
-   { gettext_noop("&Poll for new mail delay in seconds"), Field_Number, -1},
+   { gettext_noop("Poll for &new mail interval in seconds"), Field_Number, -1},
+   { gettext_noop("&Ping/check folder interval in seconds"), Field_Number, -1},
    { gettext_noop("&Threshold for displaying progress dialog"), Field_Number, -1},
 
 
@@ -522,6 +524,7 @@ static const ConfigValueDefault gs_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MAINFOLDER),
    CONFIG_ENTRY(MP_NEWMAIL_FOLDER),
    CONFIG_ENTRY(MP_POLLINCOMINGDELAY),
+   CONFIG_ENTRY(MP_UPDATEINTERVAL),
    CONFIG_ENTRY(MP_FOLDERPROGRESS_THRESHOLD),
    // python
 #ifdef USE_PYTHON

@@ -207,7 +207,7 @@ public:
       { return "MailFolder"; }
 
    /// Get update interval in seconds
-   int GetUpdateInterval(void) const { return m_UpdateInterval; }
+   virtual int GetUpdateInterval(void) const = 0;
 
    /** Utiltiy function to get a textual representation of a message
        status.
@@ -308,16 +308,14 @@ public:
 protected:
    /**@name Accessor methods */
    //@{
-   /// Set update interval in seconds
-   // not yet inline void SetUpdateInterval(void) = 0;
+   /// Set update interval in seconds, 0 to disable
+   virtual void SetUpdateInterval(int secs) = 0;
    /// Get authorisation information
    inline void GetAuthInfo(String *login, String *password) const
       { *login = m_Login; *password = m_Password; }
    //@}
    /**@name Common variables might or might not be used */
    //@{
-   /// Update interval for checking folder content
-   int m_UpdateInterval;
    /// Login for password protected mail boxes.
    String m_Login;
    /// Password for password protected mail boxes.

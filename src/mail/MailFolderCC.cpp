@@ -39,6 +39,29 @@
 #define ISO8859MARKER "=?" // "=?iso-8859-1?Q?"
 #define QPRINT_MIDDLEMARKER "?Q?"
 
+
+#include <wx/timer.h>
+/** a timer class to regularly ping the mailfolder. */
+class MailFolderTimer : public wxTimer
+{
+public:
+   /** constructor
+       @param mf the mailfolder to query on timeout
+   */
+   MailFolderTimer(MailFolder *mf) : m_mf(mf)
+   {
+      Start(mf->GetUpdateInterval()*1000);
+   }
+
+   /// get called on timeout and pings the mailfolder
+   void Notify(void) { m_mf->Ping(); }
+
+protected:
+   /// the mailfolder to update
+   MailFolder  *m_mf;
+};
+
+
 /* Little helper function to convert iso8859 encoded header lines into
    8 bit. This is a quick fix until wxWindows supports unicode.
    Modified it now to not look at the charset argument but always do a
@@ -145,7 +168,8 @@ MailFolderCC::MailFolderCC(int typeAndFlags,
    m_PingReopenSemaphore = false;
    FolderType type = GetFolderType(typeAndFlags);
    SetType(type);
-
+   m_Timer = NULL;
+   
    if( !FolderTypeHasUserName(type) )
       m_Login = ""; // empty login for these types
 
@@ -225,6 +249,19 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       mf->DecRef();
       return NULL;
    }
+}
+
+
+void
+MailFolderCC::SetUpdateInterval(int seconds)
+{
+   if(m_Timer)
+   {
+      m_Timer->Stop();
+      delete m_Timer;
+   }
+   m_UpdateInterval = seconds;
+   m_Timer = new MailFolderTimer(this);
 }
 
 
@@ -332,7 +369,6 @@ MailFolderCC::Open(void)
       return false;
 
    AddToMap(m_MailStream); // now we are known
-
    BuildListing();
    // from now on we want to know when new messages appear
    m_GenerateNewMailEvents = true;
@@ -397,11 +433,13 @@ MailFolderCC::PingReopen(void) const
    {
       ProcessEventQueue();
       rc = true;
-      LOGMESSAGE((M_LOG_WINONLY, _("Folder '%s' is alive."), GetName().c_str()));
+      LOGMESSAGE((M_LOG_WINONLY, _("Folder '%s' is alive."),
+                  GetName().c_str()));
    }
    else
       rc = false;
    t->m_PingReopenSemaphore = false;
+   
    return rc;
 }
 
@@ -422,12 +460,14 @@ MailFolderCC::PingReopenAll(void)
 void
 MailFolderCC::Ping(void)
 {
-   DBGMESSAGE(("MailFolderCC::Ping() on Folder %s.", GetName().c_str()));
+   DBGMESSAGE(("MailFolderCC::Ping() on Folder %s.",
+               GetName().c_str()));
+   ProcessEventQueue();
    if(PingReopen())
    {
-      CCQuiet();
+//      CCQuiet();
       mail_check(m_MailStream); // update flags, etc, .newsrc
-      CCVerbose();
+//      CCVerbose();
       ProcessEventQueue();
    }
 }
@@ -437,6 +477,12 @@ MailFolderCC::~MailFolderCC()
     // can cause references to this folder, cannot be allowd:
    //ProcessEventQueue();
    CCQuiet(true); // disable all callbacks!
+   if ( m_Timer )
+   {
+      m_Timer->Stop();
+      delete m_Timer;
+   }
+   
    // We cannot run ProcessEventQueue() here as we must not allow any
    // Message to be created from this stream. If we miss an event -
    // that's a pity.
@@ -479,7 +525,7 @@ MailFolderCC::RegisterView(FolderView *view, bool reg)
 bool
 MailFolderCC::AppendMessage(String const &msg)
 {
-   CHECK_DEAD("Appending to closed folder '%s' failed.");
+   CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
 
    STRING str;
 
@@ -499,7 +545,7 @@ MailFolderCC::AppendMessage(String const &msg)
 bool
 MailFolderCC::AppendMessage(Message const &msg)
 {
-   CHECK_DEAD("Appending to closed folder '%s' failed.");
+   CHECK_DEAD_RC("Appending to closed folder '%s' failed.", false);
    String tmp;
 
    msg.WriteToString(tmp);
@@ -1051,9 +1097,9 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long number)
        @param errflg error level
        */
 void
-MailFolderCC::mm_notify(MAILSTREAM * /* stream */, String str, long errflg)
+MailFolderCC::mm_notify(MAILSTREAM * stream, String str, long errflg)
 {
-   mm_log(str,errflg);
+   mm_log(str,errflg, MailFolderCC::LookupObject(stream));
 }
 
 
@@ -1116,14 +1162,18 @@ MailFolderCC::mm_status(MAILSTREAM *stream,
     @param errflg error level
 */
 void
-MailFolderCC::mm_log(String str, long errflg )
+MailFolderCC::mm_log(String str, long errflg, MailFolderCC *mf )
 {
-   String  msg = _("c-client log: ");
+   String  msg;
+   if(mf)
+      msg.Printf(_("Folder '%s' : "), mf->GetName().c_str());
+   else
+      msg = _("Folder Log: ");
    msg += str;
 #ifdef DEBUG
-   msg << _(" error level: ") << strutil_ultoa(errflg);
+   msg << _(", error level: ") << strutil_ultoa(errflg);
 #endif
-   if(errflg)
+   if(errflg > 1)
       ERRORMESSAGE((msg));
    else
       LOGMESSAGE((M_LOG_WINONLY, Str(msg)));
@@ -1262,7 +1312,8 @@ MailFolderCC::ProcessEventQueue(void)
          break;
       case Log:
          MailFolderCC::mm_log(*(evptr->m_args[0].m_str),
-                              evptr->m_args[1].m_long);
+                              evptr->m_args[1].m_long,
+                              NULL);
          delete evptr->m_args[0].m_str;
          break;
       case DLog:
@@ -1298,7 +1349,7 @@ MailFolderCC::ProcessEventQueue(void)
       {
          MailFolderCC *mf = MailFolderCC::LookupObject(evptr->m_stream);
          ASSERT(mf);
-         if(mf->UpdateNeeded())  // only call it once
+//         if(mf->UpdateNeeded())  // only call it once
             mf->BuildListing();
          break;
       }
@@ -1310,7 +1361,7 @@ MailFolderCC::ProcessEventQueue(void)
 void
 MailFolderCC::RequestUpdate(void)
 {
-   if(! m_UpdateNeeded)
+//   if(! m_UpdateNeeded)
    {
       // we want only one update event
       MailFolderCC::Event *evptr = new MailFolderCC::Event(m_MailStream,Update);
@@ -1400,8 +1451,7 @@ mm_flags(MAILSTREAM *stream, unsigned long number)
 }
 
 void
-mm_notify(MAILSTREAM *stream, char *str, long
-             errflg)
+mm_notify(MAILSTREAM *stream, char *str, long errflg)
 { 
    if(mm_disable_callbacks)
       return;
