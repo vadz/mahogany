@@ -295,7 +295,6 @@ wxFolderBaseDialog::wxFolderBaseDialog(wxWindow *parent,
    m_parentFolder = NULL;
    m_newFolder = NULL;
    m_mayEnableOk = false;
-   m_mailboxname = NULL;
 }
 
 wxControl *wxFolderBaseDialog::CreateControlsAbove(wxPanel *panel)
