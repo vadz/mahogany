@@ -25,12 +25,18 @@ aaa		ICON	"Micon.ico"
 Micon		ICON	"Micon.ico"
 MLogFrame	ICON	"MLogIcon.ico"
 mahogany	BITMAP	"mahogany.bmp"
+background	BITMAP	"background.bmp"
+adbimport	BITMAP	"adbimport.bmp"
+
+// splash screen images
+Msplash		BITMAP	"Msplash.bmp"
+wxlogo		BITMAP	"wxlogo.bmp"
+#ifdef USE_SSL
+ssllogo		BITMAP	"ssllogo.bmp"
+#endif
 #ifdef USE_PYTHON
 PythonPowered	BITMAP	"pythonpower.bmp"
 #endif
-background	BITMAP	"background.bmp"
-adbimport	BITMAP	"adbimport.bmp"
-Msplash		BITMAP	"Msplash.bmp"
 
 // frame icons (32x32)
 MFrame		ICON	"Mframe.ico"
