@@ -554,11 +554,12 @@ wxIconManager::GetIcon(String const &_iconName)
    bool found = false;
    if(m_GlobalDir.Length())
    {
-      PathFinder pf(READ_APPCONFIG(MP_ICONPATH), true);
+      PathFinder pf(READ_APPCONFIG(MP_ICONPATH),
+                    false /* non-recursive */);
+      pf.AddPaths(m_GlobalDir, false);
       if(ms_IconPath.Length() > 0)
          pf.AddPaths(ms_IconPath,false, true /*prepend */);
-      pf.AddPaths(m_GlobalDir, false, true);
-      pf.AddPaths(m_LocalDir, false, true);
+      pf.AddPaths(m_LocalDir, false);
       if(m_SubDir.Length() > 1)  // 1 == "/" == empty
       {
          pf.AddPaths(m_GlobalDir+m_SubDir, false, true);
