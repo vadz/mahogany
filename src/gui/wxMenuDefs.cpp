@@ -55,6 +55,7 @@
 // ----------------------------------------------------------------------------
 
 extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
+extern const MOption MP_TBARIMAGES;
 extern const MOption MP_USERLEVEL;
 
 // ----------------------------------------------------------------------------
@@ -76,9 +77,10 @@ struct MenuItemInfo
 
 struct TbarItemInfo
 {
-   const char *bmp;      // image file or ressource name
-   int         id;       // id of the associated command (-1 => separator)
-   const char *tooltip;  // flyby text
+   const char *bmp;     // image file or ressource name
+   int         id;      // id of the associated command (-1 => separator)
+   const char *text;    // text for the buttons if image is not shown
+   const char *tooltip; // tooltip text
 };
 
 // array of descriptions of all toolbar buttons, should be in sync with the enum
@@ -86,41 +88,40 @@ struct TbarItemInfo
 static const TbarItemInfo g_aToolBarData[] =
 {
    // separator
-   { "", -1, "" },
+   { "", -1, "", "" },
 
    // common for all frames
-   { "tb_close",        WXMENU_FILE_CLOSE,  gettext_noop("Close this window") },
-   { "tb_adrbook",      WXMENU_EDIT_ADB,    gettext_noop("Edit address book") },
-   { "tb_preferences",  WXMENU_EDIT_PREF,   gettext_noop("Edit preferences")  },
+   { "tb_close",        WXMENU_FILE_CLOSE,  gettext_noop("Close"), gettext_noop("Close this window") },
+   { "tb_adrbook",      WXMENU_EDIT_ADB,    gettext_noop("Addresses"), gettext_noop("Edit address book") },
+   { "tb_preferences",  WXMENU_EDIT_PREF,   gettext_noop("Options"), gettext_noop("Edit preferences")  },
 
    // main frame
-   { "tb_check_mail",    WXMENU_FILE_COLLECT,  gettext_noop("Check for new mail")    },
-   { "tb_open",          WXMENU_FOLDER_OPEN,   gettext_noop("Open folder")           },
-   { "tb_mail_compose",  WXMENU_FILE_COMPOSE,  gettext_noop("Compose a new message") },
-   { "tb_help",          WXMENU_HELP_CONTEXT,  gettext_noop("Help")                  },
-   { "tb_exit",          WXMENU_FILE_EXIT,     gettext_noop("Exit the program")      },
+   { "tb_check_mail",    WXMENU_FILE_COLLECT,  gettext_noop("Check mail"), gettext_noop("Check for new mail")    },
+   { "tb_open",          WXMENU_FOLDER_OPEN,   gettext_noop("Open"), gettext_noop("Open folder")           },
+   { "tb_mail_compose",  WXMENU_FILE_COMPOSE,  gettext_noop("Compose"), gettext_noop("Compose a new message") },
+   { "tb_help",          WXMENU_HELP_CONTEXT,  gettext_noop("Help"), gettext_noop("Help")                  },
+   { "tb_exit",          WXMENU_FILE_EXIT,     gettext_noop("Exit"), gettext_noop("Exit the program")      },
 
    // compose frame
-   { "tb_print",     WXMENU_COMPOSE_PRINT,     gettext_noop("Print")         },
-   { "tb_new",       WXMENU_COMPOSE_CLEAR,     gettext_noop("Clear Window")  },
-   { "tb_attach",    WXMENU_COMPOSE_INSERTFILE,gettext_noop("Insert File")   },
-   { "tb_editor",    WXMENU_COMPOSE_EXTEDIT,   gettext_noop("Call external editor")   },
-   { "tb_mail_send", WXMENU_COMPOSE_SEND,      gettext_noop("Send Message")  },
+   { "tb_print",     WXMENU_COMPOSE_PRINT,     gettext_noop("Print"), gettext_noop("Print")         },
+   { "tb_new",       WXMENU_COMPOSE_CLEAR,     gettext_noop("Clear"), gettext_noop("Clear Window")  },
+   { "tb_attach",    WXMENU_COMPOSE_INSERTFILE,gettext_noop("Attach"), gettext_noop("Insert File")   },
+   { "tb_editor",    WXMENU_COMPOSE_EXTEDIT,   gettext_noop("Editor"), gettext_noop("Call external editor")   },
+   { "tb_mail_send", WXMENU_COMPOSE_SEND,      gettext_noop("Send"), gettext_noop("Send Message")  },
 
    // folder and message view frames
-   { "tb_next_unread",   WXMENU_MSG_NEXT_UNREAD,gettext_noop("Select next unread message") },
-   { "tb_mail",          WXMENU_MSG_OPEN,      gettext_noop("Open message")      },
-   { "tb_mail_reply",    WXMENU_MSG_REPLY,     gettext_noop("Reply to message")  },
-   { "tb_mail_forward",  WXMENU_MSG_FORWARD,   gettext_noop("Forward message")   },
-   { "tb_print",         WXMENU_MSG_PRINT,     gettext_noop("Print message")     },
-   { "tb_trash",         WXMENU_MSG_DELETE,    gettext_noop("Delete message")    },
+   { "tb_next_unread",   WXMENU_MSG_NEXT_UNREAD,gettext_noop("Next unread"), gettext_noop("Select next unread message") },
+   { "tb_mail",          WXMENU_MSG_OPEN,      gettext_noop("Open"), gettext_noop("Open message")      },
+   { "tb_mail_reply",    WXMENU_MSG_REPLY,     gettext_noop("Reply"), gettext_noop("Reply to message")  },
+   { "tb_mail_forward",  WXMENU_MSG_FORWARD,   gettext_noop("Forward"), gettext_noop("Forward message")   },
+   { "tb_print",         WXMENU_MSG_PRINT,     gettext_noop("Print"), gettext_noop("Print message")     },
+   { "tb_trash",         WXMENU_MSG_DELETE,    gettext_noop("Delete"), gettext_noop("Delete message")    },
 
    // ADB edit frame
-   //{ "tb_open",     WXMENU_ADBBOOK_OPEN,    gettext_noop("Open address book file")  },
-   { "tb_new",      WXMENU_ADBEDIT_NEW,     gettext_noop("Create new entry")        },
-   { "tb_delete",   WXMENU_ADBEDIT_DELETE,  gettext_noop("Delete")                  },
-   { "tb_undo",     WXMENU_ADBEDIT_UNDO,    gettext_noop("Undo")                    },
-   { "tb_lookup",   WXMENU_ADBFIND_NEXT,    gettext_noop("Find next")               },
+   { "tb_new",      WXMENU_ADBEDIT_NEW,     gettext_noop("New"), gettext_noop("Create new entry")        },
+   { "tb_delete",   WXMENU_ADBEDIT_DELETE,  gettext_noop("Delete"), gettext_noop("Delete")                  },
+   { "tb_undo",     WXMENU_ADBEDIT_UNDO,    gettext_noop("Undo"), gettext_noop("Undo")                    },
+   { "tb_lookup",   WXMENU_ADBFIND_NEXT,    gettext_noop("Find"), gettext_noop("Find next")               },
 };
 
 // arrays containing tbar buttons for each frame (must be -1 terminated!)
@@ -651,16 +652,26 @@ void AddToolbarButton(wxToolBar *toolbar, int nButton)
       toolbar->AddSeparator();
    }
    else {
-      wxString iconName = g_aToolBarData[nButton].bmp;
-      toolbar->AddTool(g_aToolBarData[nButton].id,
+      const TbarItemInfo& tbii = g_aToolBarData[nButton];
+
+      // we use either bitmap or label, but not both
+      wxString label;
+      wxBitmap bmp;
+      if ( READ_APPCONFIG(MP_TBARIMAGES) )
+      {
+         wxString iconName = tbii.bmp;
 #ifdef __WXMSW__
-                       mApplication->GetIconManager()->GetBitmap(iconName),
+         bmp = mApplication->GetIconManager()->GetBitmap(iconName);
 #else
-                       mApplication->GetIconManager()->GetIcon(iconName),
+         bmp = mApplication->GetIconManager()->GetIcon(iconName);
 #endif
-                       wxNullBitmap,
-                       FALSE, -1, -1, NULL,
-                       _(g_aToolBarData[nButton].tooltip));
+      }
+      else // no bitmaps, use label
+      {
+         label = tbii.text;
+      }
+
+      toolbar->AddTool(tbii.id, label, bmp, wxString(_(tbii.tooltip)));
    }
 }
 

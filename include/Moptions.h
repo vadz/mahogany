@@ -54,6 +54,8 @@ extern const MOption MP_LICENSE_ACCEPTED;
 extern const MOption MP_GLOBALDIR;
 extern const MOption MP_RUNONEONLY;
 
+extern const MOption MP_TBARIMAGES;
+
 #ifdef OS_UNIX
 extern const MOption MP_PATHLIST;
 extern const MOption MP_ROOTDIRNAME;
@@ -474,6 +476,9 @@ extern const MOption MP_AWAY_STATUS;
 
 /// run onl one copy of the program at once?
 #define MP_RUNONEONLY_NAME "RunOneOnly"
+
+/// show images in the toolbar
+#define MP_TBARIMAGES_NAME "ShowTbarImages"
 
 /// the directory containing the help files
 #define MP_HELPDIR_NAME "HelpDir"
@@ -1251,6 +1256,9 @@ extern const MOption MP_AWAY_STATUS;
 
 /// run onl one copy of the program at once?
 #define MP_RUNONEONLY_DEFVAL 1l
+
+/// show images in the toolbar
+#define MP_TBARIMAGES_DEFVAL 1l
 
 // Unix-only entries
 #ifdef OS_UNIX

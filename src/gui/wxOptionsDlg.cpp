@@ -499,6 +499,7 @@ enum ConfigFields
    ConfigField_ShowTips,
    ConfigField_Splash,
    ConfigField_SplashDelay,
+   //ConfigField_ShowTbarImages, -- doesn't work under Windows
    ConfigField_AutosaveHelp,
    ConfigField_AutosaveDelay,
    ConfigField_ConfirmExit,
@@ -1501,6 +1502,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Show &tips at startup"),        Field_Bool,    -1,                    },
    { gettext_noop("&Splash screen at startup"),    Field_Bool | Field_Restart, -1,                    },
    { gettext_noop("Splash screen &delay"),         Field_Number,  ConfigField_Splash     },
+   //{ gettext_noop("Show &images in the toolbar"),  Field_Bool | Field_Restart, -1     },
    { gettext_noop("If autosave delay is not 0, the program will periodically\n"
                   "save all unsaved information (settings, contents of the\n"
                   "opened compose windows, ...) which reduces the risk of loss\n"
@@ -1918,6 +1920,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_SHOWTIPS),
    CONFIG_ENTRY(MP_SHOWSPLASH),
    CONFIG_ENTRY(MP_SPLASHDELAY),
+   //CONFIG_ENTRY(MP_TBARIMAGES),
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_AUTOSAVEDELAY),
    CONFIG_ENTRY(MP_CONFIRMEXIT),
