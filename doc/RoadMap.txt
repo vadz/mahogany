@@ -4,14 +4,14 @@ $Id$
 
 Here is the rough plan for the future of the M development:
 
-* 0.66:
+* 0.67:
 
    + implement smart config file synchronization: Mahogany main advantage
      is its cross-platform nature however it's not very useful if you can't
      keep the same (but not exactly the same!) options on all machines you use,
      we must do something about it.
 
-* 0.67:
+* 0.68:
 
    + ADB lift up:
 
@@ -25,22 +25,19 @@ Here is the rough plan for the future of the M development:
         one which could be reused from other places (composer, extract
         addresses dialog, ...) and it should also support multiple selections
 
-* 0.68
+   + store ADB on IMAP server and sync it
 
-   + support for encrypting/signing messages with PGP
+* 0.69:
+
+   + spell checker
 
 * 0.70:
 
-   + store ADB on IMAP server and sync it
+   + support for encrypting/signing messages with PGP
 
    + add "Server" entiry: i.e. each remote folder has an associated server
      and the servers can be configured in their own dialog. This should include
      IMAP, POP, NNTP but also SMTP
-
-   + composer framework improvements:
-     - implement text only message editor
-     - spell checker
-     - smart line wrap.
 
    + real MIME types editor
 

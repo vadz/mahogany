@@ -18,11 +18,11 @@ If you have any problems, please contact us on our mailing lists:
 
 In this message:
 
-1. Announcing Mahogany Version 0.65
+1. Announcing Mahogany Version 0.66
 2. Acknowledgements
 3. Changes Against the Previous Release
 
-Announcing Mahogany Version 0.65
+Announcing Mahogany Version 0.66
 ====================================================================
 
 Mahogany is an OpenSource(TM) cross-platform mail news client. It is
@@ -30,7 +30,8 @@ available for X11/Unix and MS Windows platforms and supports many of
 the Internet protocols and standards, including POP3, IMAP4
 (and the secure versions using SSL), SMTP and NNTP. Mahogany also
 supports MIME and many common Unix mailbox formats (including MBX,
-MBOX and MH).
+MBOX and MH). Finally, Mahogany can be extended even further using
+the built-in Python interpreter.
 
 The main "selling points" of Mahogany in our opinion are:
 
@@ -72,37 +73,28 @@ use OpenSSL for SSL support and compface for X-Face support. We wish
 to thank all the people whose work has made writing Mahogany much
 simpler (and even possible at all)!
 
-Changes Since Release 0.64
+Changes Since Release 0.65
 =====================================================================
 
 Key changes are:
 
-* messages may be postponed and are saved in case of crash/interrupt
-* added (START)TLS support for POP/IMAP/SMTP/NNTP
-* limited support for reading PGP signed/encrypted messages
-* viewer filters (*bold*, _italic_, signature highlihting, ...)
-* built-in configurable SPAM filters
-* search for messages in multiple folders
+* new, more usable, composer
+* embedded Python interpreter works again
 
 Some of new features:
 
-* new "Migrate" tool for account migration
-* new commands: "Move Folder", "Resent Message", "Bounce",
-  "Follow-up to Newsgroup", "Jump to Message #"
-* UTF-7 support
-* Mahogany process may be controlled remotely
-* composer templates are now more powerful
+* several convenient new commands: quick search ('/', '?'), "Paste
+  quoted", "Select all"
+* viewer improvements: text one now supports printing, HTML viewer
+  supports selection
+* better support for UTF-7/8 encoded headers
+* new template variable ($header)
+* new filter function (isfromme())
 
 Other noticeable improvements:
 
-* composer allows to edit the attachment properties
-* popup menus for the URLs in the message viewer
-* find dialog in the message viewer
-
-Important bug fixes:
-
-* too many to be listed here, but if you had experienced (fatal)
-  problems with a previous Mahogany version, it should be fixed now
+* better crash reporting in Win32 builds
+* and, of course, many bug fixes, as usual
 
 
 Please see the CHANGES file in the distribution for an even more

@@ -6,8 +6,8 @@
       See at the end of file for the list of contributors (initials appearing
       in the second column of the changelog below).
 
-Release 0.66 'Clio'
--------------------
+Release 0.66 'Clio' January 03, 2004
+------------------------------------
 
 28.12.03 VZ: exposed more classes to embedded Python interpreter
 27.12.03 VZ: added $header template variable (entire original message header)
