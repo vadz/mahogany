@@ -46,6 +46,8 @@ extern "C"
 
 extern "C"
 {
+   #include	<misc.h>
+
    void rfc822_setextraheaders(const char **names, const char **values);
 }
 

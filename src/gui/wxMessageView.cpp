@@ -10,11 +10,9 @@
 #pragma implementation "wxMessageView.h"
 #endif
 
-#ifdef USE_PCH
-  #include "Mpch.h"
-#endif
-
+#include "Mpch.h"
 #include "Mcommon.h"
+
 #include "Message.h"
 
 #ifndef USE_PCH

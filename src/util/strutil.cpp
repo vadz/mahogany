@@ -140,6 +140,7 @@ strutil_strdup(String const &in)
 }
 
 // split string into name=value;name=value pairs
+/*
 void
 strutil_splitlist(String const &str, std::map<String,String> &table)
 {
@@ -217,6 +218,7 @@ strutil_splitlist(String const &str, std::map<String,String> &table)
    end:
    delete [] tmp;
 }
+*/
 
 #ifndef	HAVE_STRSEP
 char *

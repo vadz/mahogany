@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.7  1998/05/11 20:57:31  VZ
+ * compiles again under Windows + new compile option USE_WXCONFIG
+ *
  * Revision 1.6  1998/04/30 19:12:35  VZ
  * (minor) changes needed to make it compile with wxGTK
  *
@@ -40,28 +43,30 @@
 #endif
 
 #ifdef    OS_WIN
-#	define	unknown_xpm     "unknown"
-#	define	txt_xpm         "txt"
-#	define	audio_xpm       "audio"
-#	define	application_xpm "application"
-#	define	image_xpm       "image"
-#	define	video_xpm       "video"
-#	define	postscript_xpm  "postscript"
-#	define	dvi_xpm         "dvi"
-#	define	hlink_xpm	"hlink"
-#	define	ftplink_xpm	"ftplink"
+#	define   unknown_xpm     "unknown"
+#	define   txt_xpm         "txt"
+#	define   audio_xpm       "audio"
+#	define   application_xpm "application"
+#	define   image_xpm       "image"
+#	define   video_xpm       "video"
+#	define   postscript_xpm  "postscript"
+#	define   dvi_xpm         "dvi"
+#	define   hlink_xpm	"hlink"
+#	define   ftplink_xpm	"ftplink"
 #else   //real XPMs
-#	include	"../src/icons/unknown.xpm"
-#	include	"../src/icons/txt.xpm"
-#	include	"../src/icons/audio.xpm"
-#	include	"../src/icons/application.xpm"
-#	include	"../src/icons/image.xpm"
-#	include	"../src/icons/video.xpm"
-#	include	"../src/icons/postscript.xpm"
-#	include	"../src/icons/dvi.xpm"
-#	include "../src/icons/hlink.xpm"
-#	include "../src/icons/ftplink.xpm"
+#	include  "../src/icons/unknown.xpm"
+#	include  "../src/icons/txt.xpm"
+#	include  "../src/icons/audio.xpm"
+#	include  "../src/icons/application.xpm"
+#	include  "../src/icons/image.xpm"
+#	include  "../src/icons/video.xpm"
+#	include  "../src/icons/postscript.xpm"
+#	include  "../src/icons/dvi.xpm"
+#	include  "../src/icons/hlink.xpm"
+#	include  "../src/icons/ftplink.xpm"
 #endif  //Win/Unix
+
+#include    "gui/wxIconManager.h"
 
 wxIconManager::wxIconManager()
 {

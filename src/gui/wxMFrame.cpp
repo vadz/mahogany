@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.5  1998/05/11 20:57:33  VZ
+ * compiles again under Windows + new compile option USE_WXCONFIG
+ *
  * Revision 1.4  1998/04/30 19:12:35  VZ
  * (minor) changes needed to make it compile with wxGTK
  *
@@ -26,31 +29,37 @@
 #pragma implementation "wxMFrame.h"
 #endif
 
-#include	  "Mpch.h"
-#include    "Mcommon.h"
+#include "Mpch.h"
+#include "Mcommon.h"
 
-#if       !USE_PCH
-  #include	<guidef.h>
+#ifndef  USE_PCH
+   #include <guidef.h>
+
+   #include "MFrame.h"
+   #include "MLogFrame.h"
+
+   #include "Mdefaults.h"
+
+   #include "PathFinder.h"
+   #include "MimeList.h"
+   #include "MimeTypes.h"
+   #include "Profile.h"
+
+   #include "MApplication.h"
+
 #endif
 
-#include	"MFrame.h"
-#include	"MLogFrame.h"
+// VZ: please don't change the order of headers, "Adb.h" must be the first one
+//     or it doesn't compile under VC++ (don't yet know why @@@)
+#include "Adb.h"
 
-#include	"Mdefaults.h"
+#include "message.h"
+#include "FolderView.h"
+#include "MailFolder.h"
+#include "MailFolderCC.h"
 
-#include	"PathFinder.h"
-#include	"MimeList.h"
-#include	"MimeTypes.h"
-#include	"Profile.h"
+#include "MDialogs.h"
 
-#include  "MApplication.h"
-
-#include  "FolderView.h"
-#include	"MailFolder.h"
-#include	"MailFolderCC.h"
-
-#include  "Adb.h"
-#include  "MDialogs.h"
 
 // test:
 #include	"SendMessageCC.h"
@@ -69,7 +78,7 @@
 
 IMPLEMENT_DYNAMIC_CLASS(wxMFrame, wxFrame)
 
-#if     USE_WXWINDOWS2
+#ifdef  USE_WXWINDOWS2
   BEGIN_EVENT_TABLE(wxMFrame, wxFrame)
   EVT_MENU(WXMENU_FILE_OPEN,    wxMFrame::OnOpen)
   EVT_MENU(WXMENU_FILE_ADBEDIT, wxMFrame::OnAdbEdit)
@@ -224,11 +233,11 @@ wxMFrame::OnMenuCommand(int id)
                                this);
       if(name)
       {
-	 MailFolder *mf = new MailFolderCC((const char *)name);
-	 if(mf->IsInitialised())
-	    (new wxFolderView(mf, "FolderView", this))->Show();
-	 else
-	    delete mf;
+         MailFolder *mf = new MailFolderCC((const char *)name);
+         if(mf->IsInitialised())
+            (new wxFolderView(mf, "FolderView", this))->Show();
+         else
+            delete mf;
       }
       break;
    }

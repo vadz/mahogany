@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/11 20:57:27  VZ
+ * compiles again under Windows + new compile option USE_WXCONFIG
+ *
  * Revision 1.3  1998/04/22 19:55:49  KB
  * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
  * precompiled headers. Compiles and runs again under Linux/wxXt. Header
@@ -106,8 +109,7 @@ MimeList::MimeList(void)
    MimeEntry	newEntry;
    String	tmp;
    
-   PathFinder
-      pf(mApplication.readEntry(MC_ETCPATH,MC_ETCPATH_D));
+   PathFinder pf(mApplication.readEntry(MC_ETCPATH,MC_ETCPATH_D));
 
    String file =
       pf.FindFile(mApplication.readEntry(MC_MAILCAP,MC_MAILCAP_D), &found);
@@ -120,8 +122,8 @@ MimeList::MimeList(void)
       strutil_delwhitespace(tmp);
       if(! str.eof())
       {
-	 if(newEntry.Parse(tmp))
-	    push_back(newEntry);
+         if(newEntry.Parse(tmp))
+         push_back(newEntry);
       }
    }
 }

@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/05/11 20:57:28  VZ
+ * compiles again under Windows + new compile option USE_WXCONFIG
+ *
  * Revision 1.2  1998/03/26 23:05:39  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -26,17 +29,23 @@
   #include	<strutil.h>
 #endif
 
-#include	"MFrame.h"
-#include	"MLogFrame.h"
+#include "MFrame.h"
+#include "MLogFrame.h"
 
-#include	"Mdefaults.h"
+#include "Mdefaults.h"
 
-#include	"PathFinder.h"
-#include	"MimeList.h"
-#include	"MimeTypes.h"
-#include	"Profile.h"
+#include "PathFinder.h"
+#include "MimeList.h"
+#include "MimeTypes.h"
+#include "Profile.h"
 
-#include  "MApplication.h"
+#include "MApplication.h"
+
+#ifdef  USE_WXCONFIG
+   #include "wx/file.h"
+   #include "wx/textfile.h"
+   #include "wx/fileconf.h"
+#endif
 
 /**
    Profile class, managing configuration options on a per class basis.
@@ -90,20 +99,31 @@ Profile::~Profile()
 const char *
 Profile::readEntry(const char *szKey, const char *szDefault) const
 {
-   const char *rc = NULL;
+   #ifdef   USE_WXCONFIG
+      static char s_szBuffer[1024];  // @@ static buffer
+      String rc;
+   #else
+      const char *rc = NULL;
+   #endif
 
-   DBGLOG("Profile(" << profileName << ")::readEntry(" << szKey << ",(const char *)" << szDefault << ')' << " name: " << profileName);
+   DBGLOG("Profile(" << profileName << ")::readEntry(" << szKey 
+                     << ",(const char *)" << szDefault << ')'
+                     << " name: " << profileName);
    if(fileConfig)
    {
       DBGLOG("   looking in fileConfig");
-      rc = fileConfig->readEntry(szKey, (const char *)NULL);
+      #ifdef   USE_WXCONFIG
+         fileConfig->Read(&rc, szKey, NULL);
+      #else
+         rc = fileConfig->readEntry(szKey, (const char *)NULL);
+      #endif
    }
-   if((! rc ) && parentProfile != NULL)
+   if( IsEmpty(rc) && parentProfile != NULL)
    {
       DBGLOG("   looking in parentProfile");
       rc = parentProfile->readEntry(szKey, (const char *)NULL);
    }
-   if(! rc)
+   if( IsEmpty(rc) )
    {
       DBGLOG("   looking in mApplication");
       String tmp = mApplication.getCurrentPath();
@@ -112,15 +132,21 @@ Profile::readEntry(const char *szKey, const char *szDefault) const
       rc = mApplication.readEntry(szKey, (const char *)NULL);
       mApplication.setCurrentPath(tmp.c_str());
    }
-   if(rc == NULL)
+   if( IsEmpty(rc) )
    {
       DBGLOG("   writing entry back");
-      fileConfig->writeEntry(szKey,szDefault); // so default value can
-					       // be recorded
+      fileConfig->WRITE_ENTRY(szKey,szDefault); // so default value can be recorded
       rc = szDefault;
    }
+
    DBGLOG("Profile::readEntry() returned: " << rc);
-   return rc;
+
+   #ifdef   USE_WXCONFIG
+      strncpy(s_szBuffer, rc, SIZEOF(s_szBuffer));
+      return s_szBuffer;
+   #else
+      return rc;
+   #endif
 }
 
 int
@@ -150,7 +176,7 @@ Profile::writeEntry(const char *szKey, int Value)
 {
    if(! fileConfig)
       return false;
-   return fileConfig->writeEntry(szKey, (long int) Value) != 0;
+   return fileConfig->WRITE_ENTRY(szKey, (long int) Value) != 0;
 }
 
 bool
@@ -158,7 +184,7 @@ Profile::writeEntry(const char *szKey, const char *szValue)
 {
    if(! fileConfig)
       return false;
-   return fileConfig->writeEntry(szKey, szValue) != 0;
+   return fileConfig->WRITE_ENTRY(szKey, szValue) != 0;
 }
 
 bool
@@ -185,7 +211,7 @@ ConfigFileManager::~ConfigFileManager()
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
       fcp = (*i).fileConfig;
-      fcp->flush();
+      fcp->FLUSH();
       delete fcp;
    }
    delete fcList;
@@ -203,18 +229,25 @@ ConfigFileManager::GetConfig(String const &fileName)
    for(i = fcList->begin(); i != fcList->end(); i++)
    {
       if((*i).fileName == fileName)
-	 return (*i).fileConfig;
+      return (*i).fileConfig;
    }
-   FCData	newEntry;
+   FCData   newEntry;
    newEntry.fileName = fileName;
-   newEntry.fileConfig = new FileConfig;
-   newEntry.fileConfig->readFile(newEntry.fileName.c_str());
-   newEntry.fileConfig->expandVariables(M_PROFILE_VAREXPAND);
+
+   #ifdef  USE_WXCONFIG
+      newEntry.fileConfig = new wxFileConfig(newEntry.fileName);
+   #else
+      newEntry.fileConfig = new FileConfig;
+      newEntry.fileConfig->readFile(newEntry.fileName.c_str());
+      newEntry.fileConfig->expandVariables(M_PROFILE_VAREXPAND);
+
+      //  activate recording of configuration entries
+      if(mApplication.readEntry(MC_RECORDDEFAULTS,MC_RECORDDEFAULTS_D))
+         newEntry.fileConfig->recordDefaults(TRUE);
+   #endif
+
    fcList->push_front(newEntry);
 
-   //  activate recording of configuration entries
-   if(mApplication.readEntry(MC_RECORDDEFAULTS,MC_RECORDDEFAULTS_D))
-      newEntry.fileConfig->recordDefaults(TRUE);
 
    
    return newEntry.fileConfig;

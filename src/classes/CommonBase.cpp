@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/05/11 20:57:25  VZ
+ * compiles again under Windows + new compile option USE_WXCONFIG
+ *
  * Revision 1.2  1998/03/26 23:05:39  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -16,7 +19,7 @@
  *******************************************************************/
 
 #include  "Mpch.h"
-#include	"Mcommon.h"
+#include  "Mcommon.h"
 
 #ifdef USE_COMMONBASE
 

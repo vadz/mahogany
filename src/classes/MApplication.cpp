@@ -35,38 +35,57 @@
 #include   "gui/wxFolderView.h"
 #include   "gui/wxMainFrame.h"
 
-// only used here
-extern void InitPython(void);
+#ifdef  USE_PYTHON
+  // only used here
+  extern void InitPython(void);
+#endif //Python
 
-#if USE_WXGTK
-  //FIXME wxBell in wxGTK
-  void wxBell(void) { }
-  
-  IMPLEMENT_WXWIN_MAIN
-#endif
+// AppConf must be initialized with different args under Unix and Windows
+// and if we're using wxWin2 we don't inherit from it at all
+// @@@ all this looks quite horrible
+#ifdef USE_WXCONFIG
+#  include  <wx/file.h>
+#  include  <wx/textfile.h>
+#  include  <wx/fileconf.h>
 
-#ifdef OS_UNIX
-MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME, FALSE,
-                    FALSE, TRUE)
+#  define   CALL_APPCONF_CTOR
 #else
-MApplication::MApplication(void) : AppConfig(M_APPLICATIONNAME)
+#  ifdef OS_UNIX
+#     define   CALL_APPCONF_CTOR : AppConfig(M_APPLICATIONNAME,\
+                                             FALSE, FALSE, TRUE)
+#  else
+#     define   CALL_APPCONF_CTOR : AppConfig(M_APPLICATIONNAME)
+#  endif
 #endif
+
+MApplication::MApplication(void) CALL_APPCONF_CTOR
 {
    initialisedFlag = false;
    logFrame = NULL;
-
    
-   //  activate recording of configuration entries
-   if(readEntry(MC_RECORDDEFAULTS,MC_RECORDDEFAULTS_D))
-      recordDefaults(TRUE);
+   #ifdef USE_WXCONFIG
+      wxConfig::Set(GLOBAL_NEW wxFileConfig(M_APPLICATIONNAME));
 
-   // activate variable expansion as default
-   expandVariables(TRUE);
+      // TODO: recordDefaults & expandVariables
+   #else
+      //  activate recording of configuration entries
+      if(readEntry(MC_RECORDDEFAULTS,MC_RECORDDEFAULTS_D))
+         recordDefaults(TRUE);
+
+      // activate variable expansion as default
+      expandVariables(TRUE);
+   #endif
+
    // set the default path for configuration entries
    setCurrentPath(M_APPLICATIONNAME);
    VAR(readEntry("TestEntry","DefaultValue"));
+
    // initialise the profile
-   profile = GLOBAL_NEW ProfileAppConfig(this);
+   #ifdef   USE_WXCONFIG
+      profile = GLOBAL_NEW ProfileAppConfig();
+   #else
+      profile = GLOBAL_NEW ProfileAppConfig(this);
+   #endif
 
    adb = NULL;
    // do we have gettext() ?
@@ -127,7 +146,12 @@ MApplication::~MApplication()
    GLOBAL_DELETE profile;
    if(adb)
       GLOBAL_DELETE adb;
+
    flush();
+
+   #ifdef USE_WXCONFIG
+      GLOBAL_DELETE wxConfig::Set(NULL);
+   #endif
 }
 
 MFrame *
@@ -144,26 +168,32 @@ MApplication::OnInit(void)
    }
 
    bool   found;
+   String strRootDir = readEntry(MC_ROOTDIRNAME,MC_ROOTDIRNAME_D);
    PathFinder   pf(readEntry(MC_PATHLIST,MC_PATHLIST_D));
-   globalDir = pf.FindDir(readEntry(MC_ROOTDIRNAME,MC_ROOTDIRNAME_D),
-           &found);
+   globalDir = pf.FindDir(strRootDir, &found);
 
    VerifySettings();
    
    if(! found)
    {
-      String
-    msg = _("Cannot find global directory \"")
-    + String(readEntry(MC_ROOTDIRNAME,MC_ROOTDIRNAME_D));
+      String msg = _("Cannot find global directory \"");
+      msg += strRootDir;
       msg += _("\" in\n \"");
       msg += String(readEntry(MC_PATHLIST,MC_PATHLIST_D));
       ErrorMessage(msg,topLevelFrame,true);
-      return NULL;
+
+      // we should either abort immediately or continue without returning
+      // or vital initializations are skipped!
+      //return NULL;
    }
 
-   char *cptr = ExpandEnvVars(readEntry(MC_USERDIR,MC_USERDIR_D));
-   localDir = String(cptr);
-   GLOBAL_DELETE [] cptr;
+   #ifdef   USE_WXCONFIG
+      localDir = ExpandEnvVars(readEntry(MC_USERDIR,MC_USERDIR_D));
+   #else
+      char *cptr = ExpandEnvVars(readEntry(MC_USERDIR,MC_USERDIR_D));
+      localDir = String(cptr);
+      GLOBAL_DELETE [] cptr;
+   #endif
 
    // extend path for commands, look in M's dirs first
    tmp="";
@@ -175,20 +205,27 @@ MApplication::OnInit(void)
    tmp += PATH_SEPARATOR;
    if(getenv("PATH"))
       tmp += getenv("PATH");
-   setenv("PATH", tmp.c_str(), 1);
- 
-   // initialise python interpreter
-   InitPython();
+   #  ifdef  __WINDOWS__
+      // FIXME @@@@ what are setenv() params? can putenv be used instead?
+   #else
+      setenv("PATH", tmp.c_str(), 1);
+   #endif
 
-   ExternalScript   echo("echo \"Hello World!\"", "", "");
-   echo.Run("\"and so on\"");
-   cout << echo.GetOutput() << endl;
-   
+   // initialise python interpreter
+#  ifdef  USE_PYTHON
+      // only used here
+      InitPython();
+
+      ExternalScript   echo("echo \"Hello World!\"", "", "");
+      echo.Run("\"and so on\"");
+      cout << echo.GetOutput() << endl;
+#  endif //Python
+
    // now the icon is available, so do this again:
    topLevelFrame->SetTitle(M_TOPLEVELFRAME_TITLE);
 
    ShowConsole(readEntry(MC_SHOWCONSOLE,(long int)MC_SHOWCONSOLE_D) != 0);
-   
+
    mimeList = GLOBAL_NEW MimeList();
    mimeTypes = GLOBAL_NEW MimeTypes();
 
@@ -201,19 +238,21 @@ MApplication::OnInit(void)
 
    // Open all default mailboxes:
    char *folders = strutil_strdup(readEntry(MC_OPENFOLDERS,MC_OPENFOLDERS_D));
-   std::list<String>   openFoldersList;
+   STL_LIST<String>   openFoldersList;
    strutil_tokenise(folders,";",openFoldersList);
    GLOBAL_DELETE [] folders;
    std::list<String>::iterator i;
    for(i = openFoldersList.begin(); i != openFoldersList.end(); i++)
    {
       if((*i).length() == 0) // empty token
-    continue;
+         continue;
+      
+      wxLogDebug("Opening folder '%s'...", i->c_str());
       MailFolderCC *mf = GLOBAL_NEW MailFolderCC(*i);
       if(mf->IsInitialised())
-    (GLOBAL_NEW wxFolderView(mf, *i, topLevelFrame))->Show();
+         (GLOBAL_NEW wxFolderView(mf, *i, topLevelFrame))->Show();
       else
-    GLOBAL_DELETE mf;
+         GLOBAL_DELETE mf;
    }
    
    return topLevelFrame;
@@ -236,9 +275,9 @@ MApplication::Exit(bool force)
    {
       logFrame = NULL; // avoid any more output being printed
       if(topLevelFrame)
-    GLOBAL_DELETE topLevelFrame;
+         GLOBAL_DELETE topLevelFrame;
       else
-    exit(0);
+         exit(0);
    }
 }
 
@@ -302,11 +341,16 @@ MApplication::ShowConsole(bool display)
     logFrame = GLOBAL_NEW MLogFrame();
       logFrame->Show(TRUE);
    }
-   else if(logFrame)
-   {
-      GLOBAL_DELETE logFrame;
-      logFrame = NULL;
-   }
+
+   // wxWin uses the frame after calling OnClose() from which we're
+   // called, so don't delete it!
+   #ifndef  USE_WXWINDOWS2
+      else if(logFrame)
+      {
+         GLOBAL_DELETE logFrame;
+         logFrame = NULL;
+      }
+   #endif
 }
    
 void

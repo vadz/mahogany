@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.4  1998/05/11 20:57:36  VZ
+ * compiles again under Windows + new compile option USE_WXCONFIG
+ *
  * Revision 1.3  1998/04/22 19:57:00  KB
  * Fixed _lots_ of problems introduced by Vadim's efforts to introduce
  * precompiled headers. Compiles and runs again under Linux/wxXt. Header
@@ -46,6 +49,12 @@ extern "C"
 }
 
 #endif
+
+#include  "FolderView.h"
+#include  "MailFolder.h"
+#include  "MailFolderCC.h"
+#include  "Message.h"
+#include  "MessageCC.h"
 
 String MailFolderCC::MF_user;
 String MailFolderCC::MF_pwd;

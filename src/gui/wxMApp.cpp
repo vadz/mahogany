@@ -9,22 +9,22 @@
 #include	"Mpch.h"
 
 #ifndef	USE_PCH
-#	include	"Mcommon.h"
-#	include "guidef.h"
-#	include	"MFrame.h"
-#	include	"gui/wxMFrame.h"
-#	include	"MLogFrame.h"
+#	include  "Mcommon.h"
+#	include  "guidef.h"
+#	include  "MFrame.h"
+#	include  "gui/wxMFrame.h"
+#	include  "MLogFrame.h"
 
-#	include	"PathFinder.h"
-#	include	"MimeList.h"
-#	include	"MimeTypes.h"
-#	include "appconf.h"
-#	include	"Profile.h"
+#	include  "PathFinder.h"
+#	include  "MimeList.h"
+#	include  "MimeTypes.h"
+#	include  "appconf.h"
+#	include  "Profile.h"
 
 #	include  "MApplication.h"
-
-#	include	"gui/wxMApp.h"
 #endif
+
+#include    "gui/wxMApp.h"
 
 wxMApp::wxMApp(void)
 {

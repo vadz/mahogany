@@ -6,6 +6,9 @@
  * $Id$                                                             *
  ********************************************************************
  * $Log$
+ * Revision 1.3  1998/05/11 20:57:30  VZ
+ * compiles again under Windows + new compile option USE_WXCONFIG
+ *
  * Revision 1.2  1998/03/26 23:05:41  VZ
  * Necessary changes to make it compile under Windows (VC++ only)
  * Header reorganization to be able to use precompiled headers
@@ -107,6 +110,7 @@ void
 wxFolderView::Update(void)
 {
    long i;
+   
    Message	*mptr;
    String	line;
    int	status;
@@ -132,8 +136,7 @@ wxFolderView::Update(void)
       if(status & MSG_STAT_RECENT)	line += 'N';
       line += " - ";
       line += mptr->Subject() + " - " + mptr->From();
-      sprintf(buffer,format,
-	      day, month, year);
+      sprintf(buffer,format, day, month, year);
       line += " - ";
       line += buffer;
       line += " - ";
@@ -309,9 +312,11 @@ wxFolderViewPanel::wxFolderViewPanel(wxFolderView *iFolderView)
    folderView = iFolderView;
 
    // @@@@ what goes on here?
-#ifndef USE_WXWINDOWS2
-   Create(folderView);
-#endif
+   #ifdef USE_WXWINDOWS2
+      Create(folderView, -1);
+   #else
+      Create(folderView);
+   #endif
 }
 
 void
