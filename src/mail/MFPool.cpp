@@ -38,7 +38,7 @@
 // ----------------------------------------------------------------------------
 
 // our debugging trace mask
-#define TRACE_MFPOOL "mfpool"
+#define TRACE_MFPOOL _T("mfpool")
 
 // ----------------------------------------------------------------------------
 // global module variables
@@ -188,7 +188,7 @@ MFPool::Add(MFDriver *driver,
 {
    CHECK_RET( driver, _T("MFPool::Add(): NULL driver") );
 
-   const String driverName = driver->GetName();
+   const String driverName = wxConvertMB2WX(driver->GetName());
 
    MFClassPool *pool = FindClassPool(driverName);
    if ( !pool )
@@ -217,7 +217,7 @@ MFPool::Find(MFDriver *driver,
 {
    CHECK( driver, NULL, _T("MFPool::Find(): NULL driver") );
 
-   MFClassPool *pool = FindClassPool(driver->GetName());
+   MFClassPool *pool = FindClassPool(wxConvertMB2WX(driver->GetName()));
    if ( !pool )
    {
       // no cached folders of this class at all

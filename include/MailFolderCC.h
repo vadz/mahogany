@@ -235,7 +235,7 @@ public:
                                    const Sequence& seq);
    //@}
 
-   virtual wxChar GetFolderDelimiter() const;
+   virtual char GetFolderDelimiter() const;
 
    /// return TRUE if CClient lib had been initialized
    static bool IsInitialized() { return ms_CClientInitialisedFlag; }
@@ -467,7 +467,7 @@ private:
    String m_ImapSpec;
 
    /// the folder name delimiter, (char)-1 if unknown yet
-   wxChar m_chDelimiter;
+   char m_chDelimiter;
 
    /// the profile we use for our options
    Profile *m_Profile;
@@ -613,7 +613,7 @@ public:
        @param name    mailbox name
        @param attrib   mailbox attributes
        */
-   static void mm_list(MAILSTREAM *stream, wxChar delim, String name,
+   static void mm_list(MAILSTREAM *stream, char delim, String name,
                        long attrib);
 
    /** matches a subscribed mailbox listing request
@@ -622,7 +622,7 @@ public:
        @param name   mailbox name
        @param attrib   mailbox attributes
        */
-   static void mm_lsub(MAILSTREAM *stream, wxChar delim, String name,
+   static void mm_lsub(MAILSTREAM *stream, char delim, String name,
                        long attrib);
    /** status of mailbox has changed
        @param stream   mailstream
@@ -672,7 +672,7 @@ public:
    /** program is about to crash!
        @param   str   message string
        */
-   static void mm_fatal(wxChar *str);
+   static void mm_fatal(char *str);
 
    /// gets called when messages were deleted
    static void mm_expunged(MAILSTREAM *stream, unsigned long number);

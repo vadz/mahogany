@@ -148,7 +148,7 @@ static MFDriver *GetFolderDriver(const MFolder *folder)
    const String kind = folder->GetClass();
 
    // find the creation function for this kind of folders
-   MFDriver *driver = MFDriver::Get(kind);
+   MFDriver *driver = MFDriver::Get(wxConvertWX2MB(kind));
    if ( !driver )
    {
       ERRORMESSAGE((_("Unknown folder kind '%s'"), kind.c_str()));
@@ -450,11 +450,11 @@ ExtractListPostAddress(const String& listPostHeader)
                static const size_t MAILTO_LEN = 7; // strlen("mailto:")
 
                // start of an URL, get it
-               if ( strncmp(++p, "mailto:", MAILTO_LEN) != 0 )
+               if ( wxStrncmp(++p, _T("mailto:"), MAILTO_LEN) != 0 )
                {
                   wxLogDebug(_T("Unknown URL scheme in List-Post (%s)"),
                              listPostHeader.c_str());
-                  return "";
+                  return _T("");
                }
 
                String listPostAddress;
@@ -498,7 +498,7 @@ ExtractListPostAddress(const String& listPostHeader)
             if ( p[1] == 'O' )
             {
                // posting is forbidden, hence no list posting address
-               return "";
+               return _T("");
             }
             //else: fall through
 
@@ -508,7 +508,7 @@ ExtractListPostAddress(const String& listPostHeader)
             // this code
             wxLogDebug(_T("Malformed List-Post header '%s'!"),
                        listPostHeader.c_str());
-            return "";
+            return _T("");
       }
    }
 }
@@ -715,7 +715,7 @@ InitRecipients(Composer *cv,
 
       // also check if we can't find some in the message itself
       String listPostAddress;
-      if ( msg->GetHeaderLine("List-Post", listPostAddress) )
+      if ( msg->GetHeaderLine(_T("List-Post"), listPostAddress) )
       {
          listPostAddress = ExtractListPostAddress(listPostAddress);
          if ( !listPostAddress.empty() )
@@ -915,28 +915,28 @@ MailFolder::ReplyMessage(Message *msg,
       // the search is case insensitive, so transform everything to lower case
       wxString subjectLower(subject.Lower()),
                replyPrefixLower(replyPrefixWithoutColon.Lower());
-      const char *pStart = subjectLower.c_str();
+      const wxChar *pStart = subjectLower.c_str();
       for ( ;; )
       {
          // search for the standard string, for the configured string, and
          // for the translation of the standard string (notice that the
          // standard string should be in lower case because we transform
          // everything to lower case)
-         static const char *replyPrefixStandard = gettext_noop("re");
+         static const wxChar *replyPrefixStandard = gettext_noop("re");
 
          // first configured string
          size_t matchLen = replyPrefixLower.length();
-         if ( strncmp(pStart, replyPrefixLower, matchLen) != 0 )
+         if ( wxStrncmp(pStart, replyPrefixLower, matchLen) != 0 )
          {
             // next the standard string
-            matchLen = strlen(replyPrefixStandard);
-            if ( strncmp(pStart, replyPrefixStandard, matchLen) != 0 )
+            matchLen = wxStrlen(replyPrefixStandard);
+            if ( wxStrncmp(pStart, replyPrefixStandard, matchLen) != 0 )
             {
                // finally the translation of the standard string
-               const char * const replyPrefixTrans =
+               const wxChar * const replyPrefixTrans =
                   wxGetTranslation(replyPrefixStandard);
-               matchLen = strlen(replyPrefixTrans);
-               if ( strncmp(pStart, replyPrefixTrans, matchLen) != 0 )
+               matchLen = wxStrlen(replyPrefixTrans);
+               if ( wxStrncmp(pStart, replyPrefixTrans, matchLen) != 0 )
                {
                   // failed to find any reply prefix
                   break;
@@ -947,13 +947,13 @@ MailFolder::ReplyMessage(Message *msg,
          // we found the reply prefix, now check that it is followed by
          // one of the allowed symbols -- it has to for it to count as reply
          // prefix
-         char chNext = pStart[matchLen];
+         wxChar chNext = pStart[matchLen];
          if ( chNext == '[' || chNext == '(')
          {
             // try to see if we don't have "Re[N]" string already
             int replyLevelOld;
-            if ( sscanf(pStart + matchLen, "[%d]", &replyLevelOld) == 1 ||
-                 sscanf(pStart + matchLen, "(%d)", &replyLevelOld) == 1 )
+            if ( wxSscanf(pStart + matchLen, _T("[%d]"), &replyLevelOld) == 1 ||
+                 wxSscanf(pStart + matchLen, _T("(%d)"), &replyLevelOld) == 1 )
             {
                // we've got a "Re[N]"
                matchLen++; // opening [ or (
@@ -995,7 +995,7 @@ MailFolder::ReplyMessage(Message *msg,
       if ( collapse == SmartCollapse && replyLevel > 0 )
       {
          replyLevel++;
-         newSubject.Printf("%s[%d]: %s",
+         newSubject.Printf(_T("%s[%d]: %s"),
                            replyPrefixWithoutColon.c_str(),
                            replyLevel,
                            subject.c_str());
@@ -1011,10 +1011,10 @@ MailFolder::ReplyMessage(Message *msg,
    cv->SetSubject(newSubject);
 
    // other headers
-   static const char *headers[] =
+   static const wxChar *headers[] =
    {
-      "Message-Id",
-      "References",
+      _T("Message-Id"),
+      _T("References"),
       NULL
    };
 
@@ -1029,12 +1029,12 @@ MailFolder::ReplyMessage(Message *msg,
       if ( !references.empty() )
       {
          // continue "References" header on the next line
-         references += "\015\012 ";
+         references += _T("\015\012 ");
       }
       references += messageid;
 
-      cv->AddHeaderEntry("References", references);
-      cv->AddHeaderEntry("In-Reply-To", messageid);
+      cv->AddHeaderEntry(_T("References"), references);
+      cv->AddHeaderEntry(_T("In-Reply-To"), messageid);
    }
 
    // if configured, set Reply-To to the same address the message we're
@@ -1042,8 +1042,8 @@ MailFolder::ReplyMessage(Message *msg,
    if ( READ_CONFIG(profile, MP_SET_REPLY_FROM_TO) )
    {
       String rt;
-      msg->GetHeaderLine("To", rt);
-      cv->AddHeaderEntry("Reply-To", rt);
+      msg->GetHeaderLine(_T("To"), rt);
+      cv->AddHeaderEntry(_T("Reply-To"), rt);
    }
 
    cv->InitText(msg, params.msgview);
@@ -1160,7 +1160,7 @@ bool MailFolder::SetFlag(const UIdArray *sequence, int flag, bool set)
 // ----------------------------------------------------------------------------
 
 /* static */
-bool MailFolder::SaveMessageAsMBOX(const String& filename, const char *content)
+bool MailFolder::SaveMessageAsMBOX(const String& filename, const wxChar *content)
 {
    wxFile out(filename, wxFile::write);
    bool ok = out.IsOpened();
@@ -1170,23 +1170,23 @@ bool MailFolder::SaveMessageAsMBOX(const String& filename, const char *content)
       // make them readable in a standard mail client (including this one)
 
       // standard prefix
-      String fromLine = "From ";
+      String fromLine = _T("From ");
 
       // find the from address
-      static const char *FROM_HEADER = "From: ";
-      const char *p = strstr(content, FROM_HEADER);
+      static const wxChar *FROM_HEADER = _T("From: ");
+      const wxChar *p = wxStrstr(content, FROM_HEADER);
       if ( !p )
       {
          // this shouldn't normally happen, but if it does just make it up
          wxLogDebug(_T("Couldn't find from header in the message"));
 
-         fromLine += "MAHOGANY-DUMMY-SENDER";
+         fromLine += _T("MAHOGANY-DUMMY-SENDER");
       }
       else // take everything until the end of line
       {
          // extract just the address in angle brackets
-         p += strlen(FROM_HEADER);
-         const char *q = strchr(p, '<');
+         p += wxStrlen(FROM_HEADER);
+         const wxChar *q = wxStrchr(p, '<');
          if ( q )
             p = q + 1;
 
@@ -1204,14 +1204,14 @@ bool MailFolder::SaveMessageAsMBOX(const String& filename, const char *content)
       // time stamp
       time_t t;
       time(&t);
-      fromLine += ctime(&t);
+      fromLine += wxConvertMB2WX(ctime(&t));
 
       ok = out.Write(fromLine);
 
       if ( ok )
       {
          // write the body
-         size_t len = strlen(content);
+         size_t len = wxStrlen(content);
          ok = out.Write(content, len) == len;
       }
    }

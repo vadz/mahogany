@@ -169,7 +169,7 @@ bool MHFoldersImporter::OnMEvent(MEventData& event)
 
 void MHFoldersImporter::OnNewFolder(String& name)
 {
-   wxLogMessage("Found MH folder %s", name.c_str());
+   wxLogMessage(_T("Found MH folder %s"), name.c_str());
 }
 
 // ----------------------------------------------------------------------------
@@ -191,9 +191,9 @@ MailFolder::InitializeMH()
       // we can use cclient MH logic if this file exists - but not if it
       // doesn't (and never under Windows)
 #ifdef OS_UNIX
-      String home = getenv("HOME");
-      String filenameMHProfile = home + "/.mh_profile";
-      FILE *fp = fopen(filenameMHProfile, "r");
+      String home = wxGetenv(_T("HOME"));
+      String filenameMHProfile = home + _T("/.mh_profile");
+      FILE *fp = wxFopen(filenameMHProfile, _T("r"));
       if ( fp )
       {
          fclose(fp);
@@ -204,7 +204,7 @@ MailFolder::InitializeMH()
          // need to find MH path ourself
 #ifdef OS_UNIX
          // the standard location under Unix
-         String pathMH = home + "/Mail";
+         String pathMH = home + _T("/Mail");
 #else // !Unix
          // use the user directory by default
          String pathMH = READ_APPCONFIG(MP_USERDIR);
@@ -224,7 +224,7 @@ MailFolder::InitializeMH()
       {
          // retrieve the MH path (notice that we don't always find it ourself
          // as sometimes it's found only by the call to mh_isvalid)
-         gs_MHRootDir = (char *)mail_parameters(NULL, GET_MHPATH, &tmp);
+         gs_MHRootDir = (wxChar *)mail_parameters(NULL, GET_MHPATH, &tmp);
 
          // the path should have a trailing [back]slash
          if ( !!gs_MHRootDir && !wxIsPathSeparator(gs_MHRootDir.Last()) )
@@ -310,7 +310,7 @@ bool MailFolder::ImportFoldersMH(const String& root, bool allUnder)
                                              _("MH folders"),
                                              MF_MH,
                                              0,       // flags
-                                             "",
+                                             _T(""),
                                              FALSE);  // don't notify
    if ( !folderMH )
    {
@@ -331,7 +331,7 @@ bool MailFolder::ImportFoldersMH(const String& root, bool allUnder)
       else
       {
          MHFoldersImporter importer;
-         asmf->ListFolders("*", FALSE, "", &importer);
+         asmf->ListFolders(_T("*"), FALSE, _T(""), &importer);
 
          ok = importer.IsOk();
 

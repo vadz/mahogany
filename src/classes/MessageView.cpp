@@ -2095,7 +2095,7 @@ MessageView::ProcessEncryptedMultiPart(const MimePart *mimepart)
                // The following code raises an assert because the MessageCC is
                // not associated to a folder...
                {
-                  MessageCC* decryptedMessage = MessageCC::Create(decryptedData);
+                  MessageCC* decryptedMessage = MessageCC::Create(wxConvertWX2MB(decryptedData));
                   const MimePart* decryptedMimePart = decryptedMessage->GetTopMimePart();
                   ProcessPart(decryptedMimePart);
                }

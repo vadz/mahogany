@@ -92,7 +92,7 @@ private:
 String PopFlagsCacheFile::GetCacheFileName(const String& folderName)
 {
    String folderNameFixed = folderName;
-   folderNameFixed.Replace("/", "_");
+   folderNameFixed.Replace(_T("/"), _T("_"));
 
    String filename;
    filename << GetCacheDirName() << DIR_SEPARATOR << folderNameFixed;
@@ -130,7 +130,7 @@ String PopFlagsCacheFile::GetFileName() const
 
 String PopFlagsCacheFile::GetFileHeader() const
 {
-   return "Mahogany POP3 Flags Cache File (version %d.%d)";
+   return _T("Mahogany POP3 Flags Cache File (version %d.%d)");
 }
 
 int PopFlagsCacheFile::GetFormatVersion() const
@@ -146,7 +146,7 @@ bool PopFlagsCacheFile::DoLoad(const wxTextFile& file, int /* version */)
    for ( size_t n = 1; n < count; n++ )
    {
       int flags;
-      bool ok = sscanf(file[n], "%s %d",
+      bool ok = wxSscanf(file[n], _T("%s %d"),
                        uidl.GetWriteBuf(file[n].length()), &flags) == 2;
       uidl.UngetWriteBuf();
 
@@ -205,7 +205,7 @@ bool PopFlagsCacheFile::DoSave(wxTempFile& file)
          flags = 0;
       }
 
-      str.Printf("%s %d\n", m_uidls->Item(msgno - 1).c_str(), flags);
+      str.Printf(_T("%s %d\n"), m_uidls->Item(msgno - 1).c_str(), flags);
 
       if ( !file.Write(str) )
       {

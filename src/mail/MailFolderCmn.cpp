@@ -96,10 +96,10 @@ extern const MOption MP_USE_TRASH_FOLDER;
 // ----------------------------------------------------------------------------
 
 // trace mail folder ref counting
-#define TRACE_MF_REF "mfref"
+#define TRACE_MF_REF _T("mfref")
 
 // trace mask for mail folder closing
-#define TRACE_MF_CLOSE "mfclose"
+#define TRACE_MF_CLOSE _T("mfclose")
 
 // ----------------------------------------------------------------------------
 // private functions
@@ -691,7 +691,7 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
       // ask the user
       fileName = wxPFileSelector
                  (
-                  "MsgSave",
+                  _T("MsgSave"),
                   _("Choose file to save message to"),
                   NULL, NULL, NULL,
                   _("All files (*.*)|*.*"),
@@ -1005,7 +1005,7 @@ UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
                break;
 
             case SearchCriterium::SC_CC:
-               msg->GetHeaderLine("CC", what);
+               msg->GetHeaderLine(_T("CC"), what);
                break;
 
             default:
@@ -1013,7 +1013,7 @@ UIdArray *MailFolderCmn::SearchMessages(const SearchCriterium *crit, int flags)
          }
       }
 
-      bool found = strstr(what, crit->m_Key) != NULL;
+      bool found = wxStrstr(what, crit->m_Key) != NULL;
       if ( found != crit->m_Invert )
       {
          // really found, remember its UID or msgno depending on the flags
@@ -1179,7 +1179,7 @@ extern "C"
                      subj1 = Address::NormalizeSubject(hi1->GetSubject()),
                      subj2 = Address::NormalizeSubject(hi2->GetSubject());
 
-                  result = Stricmp(subj1, subj2);
+                  result = wxStricmp(subj1, subj2);
                }
                break;
 
@@ -1203,7 +1203,7 @@ extern "C"
                                        &value2
                                     );
 
-                  result = Stricmp(value1, value2);
+                  result = wxStricmp(value1, value2);
                }
                break;
 
@@ -1813,7 +1813,7 @@ bool MailFolderCmn::ProcessNewMail(UIdArray& uidsNew,
    wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::ProcessNewMail(%lu msgs) for %s"),
               GetName().c_str(),
               (unsigned long)uidsNew.GetCount(),
-              folderDst ? folderDst->GetFullName().c_str() : "ourselves");
+              folderDst ? folderDst->GetFullName().c_str() : _T("ourselves"));
 
    // use the settings for the folder where the new mail is!
    MFolder *folderWithNewMail;
@@ -1970,7 +1970,7 @@ MailFolderCmn::ReportNewMail(const MFolder *folder,
       // we have a handy function in wxFileType which will replace
       // '%s' with the file name or add the file name at the end if
       // there is no '%s'
-      wxFileType::MessageParameters params(sound, "");
+      wxFileType::MessageParameters params(sound, _T(""));
       String command = wxFileType::ExpandCommand(soundCmd, params);
 
       wxLogTrace(TRACE_MF_NEWMAIL, _T("MF(%s)::ReportNewMail(): playing '%s'"),

@@ -139,7 +139,7 @@ public:
    /// Return the numeric uid
    virtual UIdType GetUId(void) const { return m_uid; }
 
-   static MessageCC *Create(const wxChar *text,
+   static MessageCC *Create(const char *text,
                             UIdType uid = UID_ILLEGAL,
                             Profile *profile = NULL)
    {
@@ -160,7 +160,7 @@ protected:
 
    /// constructors called by Create()
    MessageCC(MailFolderCC *folder, const HeaderInfo& hi);
-   MessageCC(const wxChar *text,
+   MessageCC(const char *text,
              UIdType uid = UID_ILLEGAL,
              Profile *profile = NULL);
 

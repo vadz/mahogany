@@ -143,7 +143,7 @@ MessageCC::MessageCC(const char *text, UIdType uid, Profile *profile)
    m_Profile->IncRef();
 
    // move \n --> \r\n convention
-   m_msgText = strutil_strdup(strutil_enforceCRLF(text));
+   m_msgText = strutil_strdup(wxConvertWX2MB(strutil_enforceCRLF(wxConvertMB2WX(text))));
 
    // find end of header "\012\012" (FIXME: not "\015\012"???)
    char
@@ -205,7 +205,7 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
    {
       // autodetect protocol:
       String tmp;
-      if ( GetHeaderLine("Newsgroups", tmp) )
+      if ( GetHeaderLine(_T("Newsgroups"), tmp) )
          protocol = Prot_NNTP;
    }
 
@@ -242,7 +242,7 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
    {
       case Prot_SMTP:
          {
-            static const char *headers[] = { "To", "Cc", "Bcc", NULL };
+            static const wxChar *headers[] = { _T("To"), _T("Cc"), _T("Bcc"), NULL };
             wxArrayString recipients = GetHeaderLines(headers);
 
             sendMsg->SetAddresses(recipients[0], recipients[1], recipients[2]);
@@ -252,7 +252,7 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
       case Prot_NNTP:
          {
             String newsgroups;
-            GetHeaderLine("Newsgroups",newsgroups);
+            GetHeaderLine(_T("Newsgroups"), newsgroups);
             sendMsg->SetNewsgroups(newsgroups);
          }
          break;
@@ -280,7 +280,7 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
 
    String header = GetHeader();
    String headerLine;
-   const char *cptr = header;
+   const wxChar *cptr = header;
    String name, value;
    do
    {
@@ -297,15 +297,15 @@ MessageCC::SendOrQueue(Protocol iprotocol, bool send)
       // end of this line
       name = headerLine.BeforeFirst(':').Lower();
       value = headerLine.AfterFirst(':');
-      if ( name != "date" &&
-           name != "from" &&
-           name != "message-id" &&
-           name != "mime-version" &&
-           name != "content-type" &&
-           name != "content-disposition" &&
-           name != "content-transfer-encoding" )
+      if ( name != _T("date") &&
+           name != _T("from") &&
+           name != _T("message-id") &&
+           name != _T("mime-version") &&
+           name != _T("content-type") &&
+           name != _T("content-disposition") &&
+           name != _T("content-transfer-encoding") )
          sendMsg->AddHeaderEntry(name, value);
-      headerLine = "";
+      headerLine = _T("");
    }while(*cptr && *cptr != '\012');
 
    bool rc = sendMsg->SendOrQueue(send);
@@ -325,7 +325,7 @@ String MessageCC::Subject(void) const
 
    String subject;
    if ( m_Envelope )
-      subject = m_Envelope->subject;
+      subject = wxConvertMB2WX(m_Envelope->subject);
    else
       FAIL_MSG( _T("should have envelop in Subject()") );
 
@@ -344,7 +344,7 @@ String MessageCC::Date(void) const
 
    String date;
    if ( m_Envelope )
-      date = m_Envelope->date;
+      date = wxConvertMB2WX(m_Envelope->date);
    else
       FAIL_MSG( _T("should have envelop in Date()") );
 
@@ -369,7 +369,7 @@ MessageCC::GetId(void) const
    }
    else
    {
-      id = m_Envelope->message_id;
+      id = wxConvertMB2WX(m_Envelope->message_id);
    }
 
    return id;
@@ -390,7 +390,7 @@ MessageCC::GetNewsgroups(void) const
    {
       if ( !m_Envelope->ngbogus )
       {
-         newsgroups = m_Envelope->newsgroups;
+         newsgroups = wxConvertMB2WX(m_Envelope->newsgroups);
       }
       //else: what does ngbogus really mean??
    }
@@ -411,7 +411,7 @@ MessageCC::GetReferences(void) const
    }
    else
    {
-      ref = m_Envelope->references;
+      ref = wxConvertMB2WX(m_Envelope->references);
    }
 
    return ref;
@@ -430,7 +430,7 @@ MessageCC::GetInReplyTo(void) const
    }
    else
    {
-      inreplyto = m_Envelope->references;
+      inreplyto = wxConvertMB2WX(m_Envelope->references);
    }
 
    return inreplyto;
@@ -470,11 +470,11 @@ String MessageCC::GetHeader(void) const
 }
 
 wxArrayString
-MessageCC::GetHeaderLines(const char **headersOrig,
+MessageCC::GetHeaderLines(const wxChar **headersOrig,
                           wxArrayInt *encodings) const
 {
    // loop variable for iterating over headersOrig
-   const char **headers;
+   const wxChar **headers;
 
    // we should always return the arrays of correct size, this makes the
    // calling code simpler as it doesn't have to check for the number of
@@ -482,7 +482,7 @@ MessageCC::GetHeaderLines(const char **headersOrig,
    wxArrayString values;
    for ( headers = headersOrig; *headers; headers++ )
    {
-      values.Add("");
+      values.Add(_T(""));
       if ( encodings )
       {
          encodings->Add(wxFONTENCODING_SYSTEM);
@@ -503,8 +503,8 @@ MessageCC::GetHeaderLines(const char **headersOrig,
    STRINGLIST *scur = slist;
    for ( headers = headersOrig; ; )
    {
-      scur->text.size = strlen(*headers);
-      scur->text.data = (unsigned char *)cpystr(*headers);
+      scur->text.size = strlen(wxConvertWX2MB(*headers));
+      scur->text.data = (unsigned char *)cpystr(wxConvertWX2MB(*headers));
       if ( !*++headers )
       {
          // terminating NULL
@@ -533,7 +533,7 @@ MessageCC::GetHeaderLines(const char **headersOrig,
                     valuesInDisorder;
 
       // extract the headers values
-      HeaderIterator hdrIter(rc);
+      HeaderIterator hdrIter(wxConvertMB2WX(rc));
       hdrIter.GetAll(&names, &valuesInDisorder);
 
       // and then copy the headers in order into the dst array
@@ -650,7 +650,7 @@ MessageCC::FetchText(void) const
    {
       if ( !m_mailFullText )
       {
-         CHECK_DEAD_RC("");
+         CHECK_DEAD_RC(_T(""));
 
          if ( m_folder->Lock() )
          {
@@ -691,11 +691,11 @@ MessageCC::FetchText(void) const
       }
       //else: already have it, reuse as msg text doesn't change
 
-      return m_mailFullText;
+      return wxConvertMB2WX(m_mailFullText);
    }
    else // from a text
    {
-      return m_msgText;
+      return wxConvertMB2WX(m_msgText);
    }
 }
 
@@ -1116,7 +1116,8 @@ String MimePartCC::GetTextContent() const
       return wxGetEmptyString();
 
 #if wxUSE_UNICODE
-   #error "We need the original encoding here, TODO"
+   #warning "We need the original encoding here, TODO"
+   return wxConvertMB2WX(p);
 #else // ANSI
    return wxString(p, len);
 #endif // Unicode/ANSI
@@ -1284,7 +1285,7 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
             ASSERT_MSG(strlen(header) == len,
                        _T("DEBUG: Mailfolder corruption detected"));
 
-            str = String(header, (size_t)len);
+            str = wxConvertMB2WX(header);
          }
       }
       else // folder-less message doesn't have headers (why?)!

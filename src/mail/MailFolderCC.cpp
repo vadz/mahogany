@@ -240,7 +240,7 @@ static bool mm_show_debug = false;
 static int cc_loglevel = wxLOG_Error;
 
 /// the cclient mail folder driver name
-static const wxChar *CCLIENT_DRIVER_NAME = _T("cclient");
+static const char *CCLIENT_DRIVER_NAME = "cclient";
 
 /// our mail folder factory object
 static MFDriver gs_driverCC
@@ -1141,7 +1141,7 @@ static LastNewUIDList gs_lastNewUIDList;
 // various MailFolderCC statics
 // ----------------------------------------------------------------------------
 
-String MailFolderCC::ms_LastCriticalFolder = "";
+String MailFolderCC::ms_LastCriticalFolder = _T("");
 
 // ----------------------------------------------------------------------------
 // functions working with IMAP specs and flags
@@ -2572,7 +2572,7 @@ MailFolderCC::LookupObject(const MAILSTREAM *stream)
    {
       mf->DecRef();
 
-      if ( driverName != CCLIENT_DRIVER_NAME )
+      if ( wxConvertWX2MB(driverName) != CCLIENT_DRIVER_NAME )
          continue;
 
       // the cast is valid because of the check above
@@ -5209,12 +5209,12 @@ MailFolderCC::mm_diskerror(MAILSTREAM * /* stream */,
     @param  str   message str
 */
 void
-MailFolderCC::mm_fatal(wxChar *str)
+MailFolderCC::mm_fatal(char *str)
 {
-   GetLogCircle().Add(str);
+   GetLogCircle().Add(wxConvertMB2WX(str));
    wxLogError(_("Fatal error: %s"), str);
 
-   String msg2 = str;
+   String msg2 = wxConvertMB2WX(str);
    if(ms_LastCriticalFolder.length())
       msg2 << _("\nLast folder in a critical section was: ")
            << ms_LastCriticalFolder;
@@ -5249,7 +5249,7 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
                           UserData ud,
                           Ticket ticket)
 {
-   CHECK_DEAD(_T("Cannot list subfolder of the closed folder '%s'."));
+   CHECK_DEAD("Cannot list subfolder of the closed folder '%s'.");
 
    CHECK_RET( asmf, _T("no ASMailFolder in ListFolders") );
 
@@ -5296,7 +5296,7 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
       (
          m_ASMailFolder,
          m_Ticket,
-         "",  // empty name == no more entries
+         _T(""),  // empty name == no more entries
          0,   // no delim
          0,   // no flags
          m_UserData
@@ -5461,7 +5461,7 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
 
       // open the folder: although we don't need to do it to get its status, we
       // have to do it anyhow below, so better do it right now
-      stream = MailOpen(stream, mboxpath);
+      stream = MailOpen(stream, wxConvertWX2MB(mboxpath));
 
       if ( !stream )
       {
@@ -5474,7 +5474,7 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
 
       // get the number of messages (only)
       MAILSTATUS mailstatus;
-      MMStatusRedirector statusRedir(stream->mailbox, &mailstatus);
+      MMStatusRedirector statusRedir(wxConvertMB2WX(stream->mailbox), &mailstatus);
       mail_status(stream, stream->mailbox, SA_MESSAGES);
       nmsgs = mailstatus.messages;
    }
@@ -5484,7 +5484,7 @@ MailFolderCC::ClearFolder(const MFolder *mfolder)
       MBusyCursor busyCursor;
 
       String seq;
-      seq << "1:" << nmsgs;
+      seq << _T("1:") << nmsgs;
 
       // note that ST_SILENT doesn't work for the local folders, so disable the
       // mm_flags notifications for them explicitly
@@ -5768,7 +5768,7 @@ mm_notify(MAILSTREAM *stream, char *str, long errflg)
 
    if ( !mm_disable_callbacks )
    {
-      MailFolderCC::mm_notify(stream, str, errflg);
+      MailFolderCC::mm_notify(stream, wxConvertMB2WX(str), errflg);
    }
 }
 
@@ -5777,7 +5777,7 @@ mm_list(MAILSTREAM *stream, int delim, char *name, long attrib)
 {
    TRACE_CALLBACK3(mm_list, "%d, `%s', %ld", delim, name, attrib);
 
-   MailFolderCC::mm_list(stream, delim, name, attrib);
+   MailFolderCC::mm_list(stream, delim, wxConvertMB2WX(name), attrib);
 }
 
 void
@@ -5785,7 +5785,7 @@ mm_lsub(MAILSTREAM *stream, int delim, char *name, long attrib)
 {
    TRACE_CALLBACK3(mm_lsub, "%d, `%s', %ld", delim, name, attrib);
 
-   MailFolderCC::mm_lsub(stream, delim, name, attrib);
+   MailFolderCC::mm_lsub(stream, delim, wxConvertMB2WX(name), attrib);
 }
 
 void
@@ -5811,7 +5811,7 @@ mm_status(MAILSTREAM *stream, char *mailbox, MAILSTATUS *status)
    }
    else if ( !mm_disable_callbacks )
    {
-      MailFolderCC::mm_status(stream, mailbox, status);
+      MailFolderCC::mm_status(stream, wxConvertMB2WX(mailbox), status);
    }
 }
 
@@ -5823,7 +5823,7 @@ mm_log(char *str, long errflg)
    if ( mm_disable_callbacks || mm_ignore_errors )
       return;
 
-   String msg(str);
+   String msg = wxConvertMB2WX(str);
 
    // TODO: what's going on here?
    if(errflg >= 4) // fatal imap error, reopen-mailbox
@@ -5845,7 +5845,7 @@ mm_dlog(char *str)
 
    // if ( !mm_disable_callbacks )
    {
-      MailFolderCC::mm_dlog(str);
+      MailFolderCC::mm_dlog(wxConvertMB2WX(str));
    }
 }
 

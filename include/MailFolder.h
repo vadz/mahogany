@@ -474,7 +474,7 @@ public:
 
       @return character depending on the folder type and server
     */
-   virtual wxChar GetFolderDelimiter() const = 0;
+   virtual char GetFolderDelimiter() const = 0;
 
    /**
      This function allows to get the folder hierarchy delimiter without
@@ -483,7 +483,7 @@ public:
      @param folder the MFolder describing the folder we'd like to get info for
      @return the delimiter character or NUL
     */
-   static wxChar GetFolderDelimiter(const MFolder *folder);
+   static char GetFolderDelimiter(const MFolder *folder);
 
    //@}
 

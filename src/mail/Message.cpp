@@ -86,7 +86,7 @@ SplitAddress(const String& address, String *fullname)
          // separate from the previous one
          if ( !fullname->empty() )
          {
-            *fullname += ", ";
+            *fullname += _T(", ");
          }
 
          *fullname += name;
@@ -127,11 +127,11 @@ SplitAddress(const String& address, String *firstName, String *lastName)
    String fullname;
    SplitAddress(address, &fullname);
 
-   const char *start = fullname.c_str();
+   const wxChar *start = fullname.c_str();
 
    // the last name is the last word in the name part
    String last;
-   const char *p = start + fullname.length() - 1;
+   const wxChar *p = start + fullname.length() - 1;
    while ( p >= start && !isspace(*p) )
       last += *p--;
 
@@ -431,7 +431,7 @@ bool Message::GetHeaderLine(const String& line,
                             String& value,
                             wxFontEncoding *encoding) const
 {
-   const char *headers[2];
+   const wxChar *headers[2];
    headers[0] = line.c_str();
    headers[1] = NULL;
 

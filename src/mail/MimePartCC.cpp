@@ -57,7 +57,7 @@ MimeType& MimeType::Assign(const String& mimetype)
    m_primary = INVALID;
    for ( size_t n = 0; body_types[n]; n++ )
    {
-      if ( type == body_types[n] )
+      if ( type == wxConvertMB2WX(body_types[n]) )
       {
          m_primary = (MimeType::Primary)n;
 
@@ -79,7 +79,7 @@ String MimeType::GetType() const
    ASSERT_MSG( IsOk(), _T("using uninitialized MimeType") );
 
    // body_types is defined in c-client/rfc822.c
-   return body_types[m_primary];
+   return wxConvertMB2WX(body_types[m_primary]);
 }
 
 // ----------------------------------------------------------------------------
@@ -123,7 +123,7 @@ MimePartCC::MimePartCC(MessageCC *message)
    // if this message is not multipart, we must have "1", otherwise it is
    // unused anyhow (the trouble is that we don't know if we're multipart or
    // not yet as m_body is not set)
-   m_spec = '1';
+   m_spec = _T('1');
 }
 
 MimePartCC::MimePartCC(MimePartCC *parent, size_t nPart)
@@ -173,7 +173,7 @@ MimePartCC::MimePartCC(MimePartCC *parent, size_t nPart)
       m_spec << specParent << '.';
    }
 
-   m_spec << wxString::Format("%lu", (unsigned long)nPart);
+   m_spec << wxString::Format(_T("%lu"), (unsigned long)nPart);
 }
 
 MimePartCC::~MimePartCC()
@@ -211,33 +211,33 @@ MimePart *MimePartCC::GetNested() const
 MimeType MimePartCC::GetType() const
 {
    // cast is ok as we use the same values in MimeType as c-client
-   return MimeType((MimeType::Primary)m_body->type, m_body->subtype);
+   return MimeType((MimeType::Primary)m_body->type, wxConvertMB2WX(m_body->subtype));
 }
 
 String MimePartCC::GetDescription() const
 {
    // FIXME: we lose the encoding info here - but we don't have any way to
    //        return it from here currently
-   return MailFolder::DecodeHeader(m_body->description);
+   return MailFolder::DecodeHeader(wxConvertMB2WX(m_body->description));
 }
 
 String MimePartCC::GetFilename() const
 {
    // try hard to find an acceptable name for this part
-   String filename = GetDispositionParam("filename");
+   String filename = GetDispositionParam(_T("filename"));
 
    if ( filename.empty() )
-      filename = GetParam("filename");
+      filename = GetParam(_T("filename"));
 
    if ( filename.empty() )
-      filename = GetParam("name");
+      filename = GetParam(_T("name"));
 
    return filename;
 }
 
 String MimePartCC::GetDisposition() const
 {
-   return m_body->disposition.type;
+   return wxConvertMB2WX(m_body->disposition.type);
 }
 
 String MimePartCC::GetPartSpec() const
@@ -290,7 +290,7 @@ void MimePartCC::InitParamList(MimeParameterList *list, PARAMETER *par)
 {
    while ( par )
    {
-      list->push_back(new MimeParameter(par->attribute, par->value));
+      list->push_back(new MimeParameter(wxConvertMB2WX(par->attribute), wxConvertMB2WX(par->value)));
 
       par = par->next;
    }
@@ -355,7 +355,7 @@ size_t MimePartCC::GetNumberOfLines() const
 
 wxFontEncoding MimePartCC::GetTextEncoding() const
 {
-   String charset = GetParam("charset");
+   String charset = GetParam(_T("charset"));
 
    return charset.empty() ? wxFONTENCODING_SYSTEM
                           : wxFontMapper::Get()->CharsetToEncoding(charset);

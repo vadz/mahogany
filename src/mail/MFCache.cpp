@@ -40,10 +40,10 @@
 // ----------------------------------------------------------------------------
 
 // location of the cache file
-#define CACHE_FILENAME "status"
+#define CACHE_FILENAME _T("status")
 
 // the delimiter in the text file lines
-#define CACHE_DELIMITER ":"      // string, not char, to allow concatenating
+#define CACHE_DELIMITER _T(":")      // string, not char, to allow concatenating
 #define CACHE_DELIMITER_CH (CACHE_DELIMITER[0])
 
 // the versions of the file format we know about
@@ -238,7 +238,7 @@ String MfStatusCache::GetFileName() const
 
 String MfStatusCache::GetFileHeader() const
 {
-   return "Mahogany Folder Status Cache File (version %d.%d)";
+   return _T("Mahogany Folder Status Cache File (version %d.%d)");
 }
 
 int MfStatusCache::GetFormatVersion() const
@@ -280,10 +280,10 @@ bool MfStatusCache::DoLoad(const wxTextFile& file, int version)
       // skip all "::" as they could have only resulted from quoting a ':'
       // in the folder name and so the loop below looks for the first ':'
       // not followed by another ':'
-      const char *p = strchr(str, CACHE_DELIMITER_CH);
+      const wxChar *p = wxStrchr(str, CACHE_DELIMITER_CH);
       while ( p && p[1] == CACHE_DELIMITER_CH )
       {
-         p = strchr(p + 2, CACHE_DELIMITER_CH);
+         p = wxStrchr(p + 2, CACHE_DELIMITER_CH);
       }
 
       if ( !p )
@@ -305,10 +305,10 @@ bool MfStatusCache::DoLoad(const wxTextFile& file, int version)
       switch ( fmt )
       {
          case CacheFile_1_0:
-            isFmtOk = sscanf(p + 1,
-                             "%lu" CACHE_DELIMITER
-                             "%lu" CACHE_DELIMITER
-                             "%lu",
+            isFmtOk = wxSscanf(p + 1,
+                             _T("%lu") CACHE_DELIMITER
+                             _T("%lu") CACHE_DELIMITER
+                             _T("%lu"),
                              &status.total,
                              &status.unread,
                              &status.flagged) == 3;
@@ -319,11 +319,11 @@ bool MfStatusCache::DoLoad(const wxTextFile& file, int version)
             // fall through nevertheless
 
          case CacheFile_1_1:
-            isFmtOk = sscanf(p + 1,
-                             "%lu" CACHE_DELIMITER
-                             "%lu" CACHE_DELIMITER 
-                             "%lu" CACHE_DELIMITER
-                             "%lu",
+            isFmtOk = wxSscanf(p + 1,
+                             _T("%lu") CACHE_DELIMITER
+                             _T("%lu") CACHE_DELIMITER 
+                             _T("%lu") CACHE_DELIMITER
+                             _T("%lu"),
                              &status.total,
                              &status.newmsgs,
                              &status.unread,

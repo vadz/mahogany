@@ -79,7 +79,7 @@ SizeToString(unsigned long sizeBytes,
          break;
 
       case MessageSize_Bytes:
-         s.Printf("%lu%s", sizeBytes, verbose ? _(" bytes") : "");
+         s.Printf(_("%lu%s"), sizeBytes, verbose ? _(" bytes") : _T(""));
          break;
 
       case MessageSize_KBytes:
@@ -195,8 +195,8 @@ String FormatFolderStatusString(const String& format,
    } stat(status, name, mf);
 
    String result;
-   const char *start = format.c_str();
-   for ( const char *p = start; *p; p++ )
+   const wxChar *start = format.c_str();
+   for ( const wxChar *p = start; *p; p++ )
    {
       if ( *p == '%' )
       {

@@ -115,7 +115,7 @@ class Message : public MObjectRC
 public:
    /** This constructor creates a Message from a string.
     */
-   static Message *Create(const wxChar * itext,
+   static Message *Create(const char * itext,
                           UIdType uid = UID_ILLEGAL,
                           Profile *profile = NULL);
 
