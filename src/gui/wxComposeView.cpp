@@ -1981,7 +1981,7 @@ void wxComposeView::DoClear()
    m_editor->Clear();
 
    // set the default encoding if any
-   m_editor->SetEncoding(wxFONTENCODING_DEFAULT);
+   SetEncoding(wxFONTENCODING_DEFAULT);
 
    // we're not modified [any more]
    ResetDirty();
