@@ -590,9 +590,6 @@ size_t ParseHeader(const char *hdr, wxArrayString& names, wxArrayString& values)
    String s;
    s.reserve(1024);
 
-   // number of headers so far
-   size_t numHeaders = 0;
-
    // we are first looking for the name (before ':') and the value (after)
    bool inName = true;
 
@@ -690,8 +687,6 @@ size_t ParseHeader(const char *hdr, wxArrayString& names, wxArrayString& values)
                   wxLogDebug("Header without space after colon?");
                }
 
-               numHeaders++;
-
                s.clear();
 
                inName = false;
@@ -713,7 +708,7 @@ size_t ParseHeader(const char *hdr, wxArrayString& names, wxArrayString& values)
       values.Add("");
    }
 
-   return numHeaders;
+   return names.GetCount();
 }
 
 // ----------------------------------------------------------------------------
