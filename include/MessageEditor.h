@@ -336,6 +336,8 @@ private:
 
    MimeType m_MimeType;
 
+   MOBJECT_DEBUG(EditorContentPart)
+
    GCC_DTOR_WARN_OFF
 };
 

@@ -907,6 +907,20 @@ EditorContentPart::~EditorContentPart()
    }
 }
 
+#ifdef DEBUG
+
+String EditorContentPart::DebugDump() const
+{
+   String s = MObjectRC::DebugDump();
+
+   s << _T("name = \"") << m_Name
+     << _T("\", filename = \"") << m_FileName << _T('"');
+
+   return s;
+}
+
+#endif // DEBUG
+
 // ----------------------------------------------------------------------------
 // wxRcptControl
 // ----------------------------------------------------------------------------
