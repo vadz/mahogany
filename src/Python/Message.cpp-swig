@@ -334,9 +334,10 @@ static PyObject *_wrap_Message_Date(PyObject *self, PyObject *args) {
 #define Message_FetchText(_swigobj)  (_swigobj->FetchText())
 static PyObject *_wrap_Message_FetchText(PyObject *self, PyObject *args) {
     PyObject * _resultobj;
-    char * _result;
+    String * _result;
     Message * _arg0;
     char * _argc0 = 0;
+    char _ptemp[128];
 
     self = self;
     if(!PyArg_ParseTuple(args,"s:Message_FetchText",&_argc0)) 
@@ -347,8 +348,10 @@ static PyObject *_wrap_Message_FetchText(PyObject *self, PyObject *args) {
         return NULL;
         }
     }
-    _result = (char *)Message_FetchText(_arg0);
-    _resultobj = Py_BuildValue("s", _result);
+    const String & _result_ref = Message_FetchText(_arg0);
+    _result = (String *) &_result_ref;
+    SWIG_MakePtr(_ptemp, (char *) _result,"_String_p");
+    _resultobj = Py_BuildValue("s",_ptemp);
     return _resultobj;
 }
 

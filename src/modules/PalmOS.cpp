@@ -448,11 +448,12 @@ public:
       {
          m_PiSocketPtr = piSocket;
          m_NewSocket = *piSocket;
-         *m_PiSocketPtr = -1;
+         *m_PiSocketPtr = -1; // -2: thread is running, -1: failure
       }
     // thread execution starts here
     virtual void *Entry()
       {
+         *m_PiSocketPtr = -2;
          m_NewSocket = pi_accept(m_NewSocket, 0, 0);
          *m_PiSocketPtr = m_NewSocket;
          return NULL;
@@ -542,16 +543,12 @@ PalmOSModule::Connect(void)
       {
          int oldPiSocket = m_PiSocket;
          acceptThread->Run();
-         //FIXME: should use wxThread::Sleep(5); instead
-         time_t start = time(NULL);
-         while(time(NULL)-start < 5)
-            ;
-         // wxSleep(5);  // using wxSleep() here crashes wxWindows when 
-         // thread gets Killed()
-//         if(acceptThread->IsAlive())
+         wxThread::Sleep(5000);
+         if(m_PiSocket < 0)
+         {
             acceptThread->Kill();
-         if(m_PiSocket == -1)
             pi_close(oldPiSocket);
+         }
       }
 #else
       m_PiSocket = pi_accept(m_PiSocket, 0, 0);

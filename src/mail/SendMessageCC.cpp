@@ -560,8 +560,8 @@ SendMessageCC::SendOrQueue(void)
             msg.Printf(_("Message queued in ´%s´."),
                        outbox.c_str());
          else
-            msg = _("Article posted."),
-         MDialog_Message(msg, NULL, MDIALOG_MSGTITLE,"MailQueuedMessage");
+            msg = _("Article posted.");
+         STATUSMESSAGE(msg);
       }
    }
    // make copy to "Sent" folder?

@@ -2593,6 +2593,7 @@ MailFolderCC::ProcessEventQueue(void)
          if(mf)
          {
             mf->UpdateStatus();
+            mf->RequestUpdate();
             mf->m_UpdateNeeded = true;
          }
          break;

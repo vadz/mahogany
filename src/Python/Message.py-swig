@@ -73,6 +73,7 @@ class MessagePtr :
         return val
     def FetchText(self):
         val = Messagec.Message_FetchText(self.this)
+        val = StringPtr(val)
         return val
     def CountParts(self):
         val = Messagec.Message_CountParts(self.this)

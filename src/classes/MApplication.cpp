@@ -768,11 +768,6 @@ MAppBase::OnMEvent(MEventData& event)
 #endif
      // re-generate the mailcollector object:
      m_MailCollector->RequestReInit();
-#if 0
-     m_MailCollector->DecRef();;
-      m_MailCollector = MailCollector::Create();
-      m_MailCollector->Collect(); // empty all at beginning
-#endif
       
    }
    else if (event.GetId() == MEventId_FolderStatus)
@@ -781,8 +776,11 @@ MAppBase::OnMEvent(MEventData& event)
       MailFolder *folder = ev.GetFolder();
       String folderName = folder->GetName();
       String outbox = READ_APPCONFIG(MP_OUTBOX_NAME);
-      if(folderName.CmpNoCase(outbox) == 0)
+      if(folderName.CmpNoCase(outbox) == 0
+         && ! folder->IsLocked()) // simple recursion check
+      {
          UpdateOutboxStatus(folder);
+      }
    }
    else
       // else
