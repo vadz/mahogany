@@ -1793,7 +1793,12 @@ wxFolderPropertiesPage::SetDefaultValues()
       // MH complications: must prepend MHROOT to relative paths
       if ( folderType == MF_MH )
       {
-         value << MailFolderCC::InitializeMH() << value;
+         wxString mhRoot = MailFolderCC::InitializeMH();
+         if ( !value.StartsWith(mhRoot) && !IsAbsPath(value) )
+         {
+            value.clear();
+            value << mhRoot << value;
+         }
       }
 
       m_path->SetValue(value);
