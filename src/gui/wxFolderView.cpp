@@ -493,12 +493,16 @@ wxFolderView::Update(void)
 
    unsigned long
       total = m_MailFolder->CountMessages(),
-                                // recent & !seen --> new      
+      recent =  m_MailFolder->CountMessages(MailFolder::MSG_STAT_RECENT|MailFolder::MSG_STAT_SEEN,
+                                          MailFolder::MSG_STAT_RECENT|MailFolder::MSG_STAT_SEEN),
+                                // recent    & !seen --> new      
       newmsgs = m_MailFolder->CountMessages(MailFolder::MSG_STAT_RECENT|MailFolder::MSG_STAT_SEEN,
                                             MailFolder::MSG_STAT_RECENT);
    wxString title;
    title.Printf("%s %lu/%lu", m_folderName.c_str(), total, newmsgs);
-   m_Parent->SetTitle(title);
+   GetFrame(m_Parent)->SetTitle(title);
+   wxLogStatus(GetFrame(m_Parent), _("Folder '%s' (%lu messages, %lu recent, %lu new)"),
+               m_MailFolder->GetName().c_str(), total, recent, newmsgs);
 
    m_NumOfMessages = n;
    wxEndBusyCursor(); wxSafeYield();

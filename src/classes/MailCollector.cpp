@@ -211,8 +211,7 @@ MailCollector::CollectOneFolder(MailFolder *mf)
       }
       // mark new messages as new:
       m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_RECENT, true);
-      m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_SEEN,
-                                       false);
+      m_NewMailFolder->SetSequenceFlag(seq,MailFolder::MSG_STAT_SEEN, false);
    }
    mf->EnableNewMailEvents(sendsEvents);
    m_IsCollecting = false;
