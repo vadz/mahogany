@@ -317,6 +317,7 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_SUBMENU,       "", "", FALSE },
    { WXMENU_SEPARATOR,     "",                  ""                         , FALSE },
    { WXMENU_MSG_FILTER,    gettext_noop("&Apply filter rules..."), gettext_noop("Apply filter rules to selected messages")     , FALSE },
+   { WXMENU_MSG_QUICK_FILTER, gettext_noop("Quick &filter..."), gettext_noop("Create a new filter for the selected message")     , FALSE },
    { WXMENU_MSG_SAVE_TO_FILE, gettext_noop("Save as &file..."), gettext_noop("Export message to a file")   , FALSE },
    { WXMENU_MSG_SAVE_TO_FOLDER, gettext_noop("&Copy to folder..."),gettext_noop("Save message to another folder")   , FALSE },
    { WXMENU_MSG_MOVE_TO_FOLDER, gettext_noop("&Move to folder..."),gettext_noop("Move message to another folder")   , FALSE },
@@ -458,9 +459,6 @@ static const MenuItemInfo g_aMenuItems[] =
    { WXMENU_HELP_CONTENTS, gettext_noop("Help &Contents\tF1"),    gettext_noop("Contents of help system..."), FALSE },
    { WXMENU_HELP_SEARCH,   gettext_noop("&Search Help..."),      gettext_noop("Search help system for keyword..."), FALSE },
    { WXMENU_HELP_COPYRIGHT,   gettext_noop("C&opyright"), gettext_noop("Show Copyright."), FALSE },
-
-   // misc entries
-   { WXMENU_MSG_QUICK_FILTER, gettext_noop("Quick &filter..."), gettext_noop("Create a new filter for the selected message")     , FALSE },
 };
 
 // ============================================================================
