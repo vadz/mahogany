@@ -3174,6 +3174,7 @@ AdbTreeBook::~AdbTreeBook()
   m_children.Clear();
 
   SafeUnlock(m_pBook);
+  m_pGroup = NULL;  // prevent it from being unlocked in ~AdbTreeNode
 }
 
 // -----------------------------------------------------------------------------

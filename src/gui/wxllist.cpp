@@ -22,11 +22,8 @@
 #pragma implementation "wxllist.h"
 #endif
 
-// these two lines are for use in M:
-//#include "Mpch.h"
-//#include "gui/wxllist.h"
-
-#include   "wxllist.h"
+#include "Mpch.h"
+#include "gui/wxllist.h"
 
 #ifndef USE_PCH
 #  include   "iostream.h"
