@@ -91,6 +91,7 @@ extern const MOption MP_FOLDER_PATH;
 extern const MOption MP_FOLDER_TREEINDEX;
 extern const MOption MP_FOLDER_TYPE;
 extern const MOption MP_FROM_ADDRESS;
+extern const MOption MP_FVIEW_FROM_REPLACE;
 extern const MOption MP_HOSTNAME;
 extern const MOption MP_IMAPHOST;
 extern const MOption MP_LICENSE_ACCEPTED;
@@ -878,13 +879,18 @@ InstallWizardImportPage::InstallWizardImportPage(wxWizard *wizard)
                        : InstallWizardPage(wizard, InstallWizard_ImportPage)
 {
    wxStaticText *text = new wxStaticText(this, -1,
-         _("Mahogany has detected that you have one or more\n"
-           "other email programs installed on this computer.\n"
+         _("Mahogany has detected that you have one or\n"
+           "more other email programs installed on this\n"
+           "computer.\n"
            "\n"
-           "You may click the button below to invoke a dialog\n"
-           "which will allow you to import some configuration\n"
-           "settings (your personal name, email address, folders,\n"
-           "address books &c) from one or more of them."));
+           "You may click the button below to invoke a\n"
+           "dialog which will allow you to import some\n"
+           "configuration settings (your personal name,\n"
+           "email address, folders, address books &&c)\n"
+           "from one or more of them.\n"
+           "\n"
+           "You may safely skip this step if you don't\n"
+           "want to do it."));
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(text);
    panel->CreateButton(_("&Import..."), NULL);
@@ -931,12 +937,13 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
       "You can receive e-mail from remote mail\n"
       "servers using either POP3 or IMAP4 protocols\n"
       "but you usually need only one of them\n"
-      "(IMAP is more secure and efficient, so use it if you can).\n"
+      "(IMAP is more secure and much more efficient,\n"
+      "so please use it if you can).\n"
       "\n"
       "All of these fields may be filled later as well\n"
-      "(and you will be able to specify multiple servers too).\n"
-      "You also may leave a field empty if you are not going to use\n"
-      "the corresponding server."
+      "and you may add additional servers later too.\n"
+      "You also may leave a field empty if you don't\n"
+      "want to use the corresponding server."
       ));
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(text);
@@ -1181,11 +1188,10 @@ InstallWizardFinalPage::InstallWizardFinalPage(wxWizard *wizard)
       "In case of a problem, consult the help\n"
       "system and, if you cannot resolve it,\n"
       "subscribe to m-users mailing list at\n"
-      "http://mahogany.sourceforge.net/\n"
+      "   http://mahogany.sourceforge.net/\n"
       "\n"
       "We hope you will enjoy using Mahogany!\n"
-      "                    The M-Team"
-                                     ));
+      "                    The M-Team"));
 
    wxEnhancedPanel *panel = CreateEnhancedPanel(text);
 
@@ -1199,9 +1205,10 @@ InstallWizardFinalPage::InstallWizardFinalPage(wxWizard *wizard)
 
       text = panel->CreateMessage(_(
          "\n"
-         "Finally, you may want to test your configuration\n"
-         "by sending a test message to yourself."
-                                    ), NULL);
+         "Finally, it is advised that you test your\n"
+         "configuration by sending a test message to\n"
+         "yourself. Please uncheck the checkbox below\n"
+         "if you don't want to do it."), NULL);
       m_checkboxSendTestMsg = panel->CreateCheckBox(labels[0], widthMax, text);
    }
    else
@@ -2499,9 +2506,10 @@ private:
   Check that the given folder exists and has correct flags, corrects them if
   not.
 
-  Returns TRUE if ok, FALSE if we failed
+  Returns value > 0 if the folder already existed, < 0 if it didn't exist and
+  was successfulyl created and 0 if we failed to create it
  */
-static bool
+static int
 VerifyStdFolder(const MOption& optName,
                 const String& nameDefault,
                 int flags,
@@ -2521,6 +2529,8 @@ VerifyStdFolder(const MOption& optName,
    // all system folders have this flag
    flags |= MF_FLAGS_DONTDELETE;
 
+   int rc;
+
    MFolder *folder = MFolder::Get(name);
    if ( !folder )
    {
@@ -2530,7 +2540,7 @@ VerifyStdFolder(const MOption& optName,
       {
          wxLogError(_("Failed to create system folder '%s'"), name.c_str());
 
-         return false;
+         return 0;
       }
 
       folder->SetPath(name);
@@ -2542,6 +2552,9 @@ VerifyStdFolder(const MOption& optName,
 
       if ( icon != -1 )
          folder->SetIcon(icon);
+
+      // we have created it
+      rc = -1;
    }
    else // already exists
    {
@@ -2565,11 +2578,14 @@ VerifyStdFolder(const MOption& optName,
       {
          folder->SetFlags(flagsNew);
       }
+
+      // it already was there
+      rc = 1;
    }
 
    folder->DecRef();
 
-   return true;
+   return rc;
 }
 
 /**
@@ -2681,17 +2697,43 @@ VerifyStdFolders(void)
 
    if ( READ_APPCONFIG(MP_USEOUTGOINGFOLDER) )
    {
-      if ( !VerifyStdFolder
-            (
-               MP_OUTGOINGFOLDER,
-               _("SentMail"),
-               MF_FLAGS_KEEPOPEN,
-               _("Folder where Mahogany will store copies of outgoing messages."),
-               MFolderIndex_SentMail,
-               wxFolderTree::iconSentMail
-            ) )
+      switch ( VerifyStdFolder
+               (
+                  MP_OUTGOINGFOLDER,
+                  _("SentMail"),
+                  MF_FLAGS_KEEPOPEN,
+                  _("Folder where Mahogany will store copies of outgoing messages."),
+                  MFolderIndex_SentMail,
+                  wxFolderTree::iconSentMail
+               ) )
       {
-         return false;
+         case 0:
+            return false;
+
+         case -1:
+            // set some more default options for the Outbox: by default, show
+            // "To:" addresses in it and not "From:"
+            {
+               MFolder_obj folder(READ_APPCONFIG(MP_OUTGOINGFOLDER));
+               if ( !folder )
+               {
+                  FAIL_MSG( "failed to get newly created Outbox folder?" );
+               }
+               else
+               {
+                  Profile_obj profile(folder->GetProfile());
+
+                  profile->writeEntry(MP_FVIEW_FROM_REPLACE, 1);
+               }
+            }
+
+         default:
+            FAIL_MSG( "unexpected VerifyStdFolder return value" );
+            // fall through
+
+         case 1:
+            // nothing to do
+            ;
       }
    }
 
