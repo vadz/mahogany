@@ -2745,8 +2745,10 @@ MailFolderCC::DeleteFolder(const MFolder *mfolder)
                                  mfolder->GetPath(),
                                  mfolder->GetServer(),
                                  mfolder->GetLogin());
+   MCclientLocker lock;
    SetLoginData(mfolder->GetLogin(), mfolder->GetPassword());
    bool rc = mail_delete(NIL, (char *) mboxpath.c_str()) != NIL;
+   lock->Unlock();
    ProcessEventQueue();
    return rc;
 }
