@@ -109,6 +109,7 @@ static const TbarItemInfo g_aToolBarData[] =
    { "tb_next_unread",   WXMENU_MSG_NEXT_UNREAD,gettext_noop("Next unread"), gettext_noop("Select next unread message") },
    { "tb_mail",          WXMENU_MSG_OPEN,      gettext_noop("Open"), gettext_noop("Open message")      },
    { "tb_mail_reply",    WXMENU_MSG_REPLY,     gettext_noop("Reply"), gettext_noop("Reply to message")  },
+   { "tb_mail_replyall", WXMENU_MSG_REPLY_ALL, gettext_noop("Reply to all"), gettext_noop("Reply to all recipients")  },
    { "tb_mail_forward",  WXMENU_MSG_FORWARD,   gettext_noop("Forward"), gettext_noop("Forward message")   },
    { "tb_print",         WXMENU_MSG_PRINT,     gettext_noop("Print"), gettext_noop("Print message")     },
    { "tb_trash",         WXMENU_MSG_DELETE,    gettext_noop("Delete"), gettext_noop("Delete message")    },
