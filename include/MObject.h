@@ -248,7 +248,7 @@ private:
             BEGIN_DECLARE_AUTOPTR_NO_BOOL_0(classname)
 #endif // !g++/g++
 
-// normally our autoptr class has an implicit conversion to bool fo truth
+// normally our autoptr class has an implicit conversion to bool for truth
 // testing but we can't have both conversion to bool and to a pointer type as
 // in DECLARE_AUTOPTR_WITH_CONVERSION() because of ambiguity between them, so
 // we have a separate macro for the part without bool conversion and another

@@ -1,10 +1,15 @@
-/*-*- c++ -*-********************************************************
- * Message class: entries for message header                        *
- *                                                                  *
- * (C) 1998-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
- *                                                                  *
- * $Id$
- *******************************************************************/
+//////////////////////////////////////////////////////////////////////////////
+// Project:     M - cross platform e-mail GUI client
+// File name:   mail/Message.cpp: implements some static Message methods
+// Purpose:     Message is an ABC but it provides some utility functions which
+//              we implement here, the rest is in MessageCC
+// Author:      Karsten Ballüder
+// Modified by:
+// Created:     1998
+// CVS-ID:      $Id$
+// Copyright:   (c) 1998-2001 M-Team
+// Licence:     M license
+///////////////////////////////////////////////////////////////////////////////
 
 // ============================================================================
 // declarations
@@ -18,18 +23,24 @@
 #   pragma implementation "Message.h"
 #endif
 
-#include   "Mpch.h"
-#include   "Mcommon.h"
-#include   "Message.h"
+#include "Mpch.h"
 
-#include   "strutil.h"
+#ifndef  USE_PCH
+   #include "Mcommon.h"
+   #include "Message.h"
 
-// ============================================================================
-// implementation
-// ============================================================================
+   #include "strutil.h"
+#endif // USE_PCH
+
+// should be always defined now
+#define USE_ADDRESS_CLASS
+
+#ifdef USE_ADDRESS_CLASS
+   #include "Address.h"
+#endif // USE_ADDRESS_CLASS
 
 // ----------------------------------------------------------------------------
-// working with email addresses
+// private functions prototypes
 // ----------------------------------------------------------------------------
 
 /// extract first and last names from an address
@@ -45,6 +56,94 @@ static void SplitAddress(const String& addr,
 static void ExtractAddress(const String& addr,
                            String *email);
 
+
+// ============================================================================
+// implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// address helper functions
+// ----------------------------------------------------------------------------
+
+#ifdef USE_ADDRESS_CLASS
+
+static void
+SplitAddress(const String& address, String *fullname)
+{
+   CHECK_RET( fullname, "SplitAddress(): fullname param can't be NULL" );
+
+   AddressList_obj addrList = address;
+
+   Address_obj addr = addrList->GetFirst();
+   if ( !addr )
+   {
+      wxLogDebug("Invalid address '%s'", address.c_str());
+
+      fullname->clear();
+   }
+   else // have at least one address
+   {
+      *fullname = addr->GetName();
+
+      // check that there are no more as this function doesn't work correctly
+      // (and shouldn't be used) with multiple addresses
+      ASSERT_MSG( !addrList->HasNext(addr),
+                  "extra addresses ignored in SplitAddress" );
+   }
+}
+
+static void
+ExtractAddress(const String& address, String *email)
+{
+   CHECK_RET( email, "ExtractAddress(): email param can't be NULL" );
+
+   AddressList_obj addrList = address;
+
+   Address_obj addr = addrList->GetFirst();
+   if ( !addr )
+   {
+      wxLogDebug("Invalid address '%s'", address.c_str());
+
+      email->clear();
+   }
+   else // have at least one address
+   {
+      *email = addr->GetEMail();
+
+      // check that there are no more as this function doesn't work correctly
+      // (and shouldn't be used) with multiple addresses
+      ASSERT_MSG( !addrList->HasNext(addr),
+                  "extra addresses ignored in ExtractAddress" );
+   }
+}
+
+static void
+SplitAddress(const String& address, String *firstName, String *lastName)
+{
+   String fullname;
+   SplitAddress(address, &fullname);
+
+   const char *start = fullname.c_str();
+
+   // the last name is the last word in the name part
+   String last;
+   const char *p = start + fullname.length() - 1;
+   while ( p >= start && !isspace(*p) )
+      last += *p--;
+
+   // first name(s) is everything preceding the last name
+   String first(start, p);
+   first.Trim();
+
+   if ( firstName )
+      *firstName = first;
+   if ( lastName )
+      *lastName = last;
+}
+
+#else // !USE_ADDRESS_CLASS
+
+// old code, unused any more
 
 static void
 SplitAddress(const String& addr,
@@ -180,6 +279,12 @@ SplitAddress(const String& addr,
       *lastName = last;
 }
 
+#endif // USE_ADDRESS_CLASS
+
+// ----------------------------------------------------------------------------
+// Message methods or working with addresses
+// ----------------------------------------------------------------------------
+
 /* static */ String
 Message::GetFirstNameFromAddress(const String& address)
 {
@@ -230,12 +335,15 @@ String Message::GetEMailFromAddress(const String &address)
 }
 
 // ----------------------------------------------------------------------------
-// address comparison
+// Message: address comparison
 // ----------------------------------------------------------------------------
 
 /* static */
 bool Message::CompareAddresses(const String& adr1, const String& adr2)
 {
+#ifdef USE_ADDRESS_CLASS
+   return AddressList_obj(adr1) == AddressList_obj(adr2);
+#else // !USE_ADDRESS_CLASS
    String email1, email2;
 
    ExtractAddress(adr1, &email1);
@@ -260,6 +368,7 @@ bool Message::CompareAddresses(const String& adr1, const String& adr2)
    //      bar@baz.com, for now it is not...
 
    return email1 == email2;
+#endif // USE_ADDRESS_CLASS
 }
 
 /* static */
@@ -343,3 +452,4 @@ bool Message::GetHeaderLine(const String& line,
   static class Message *Message::Create(const char * itext,
                        UIdType uid, Profile *iprofile)
 */
+

@@ -30,33 +30,56 @@ struct mail_address;
 class AddressCC : public Address
 {
 public:
-   /// create the address from cclient ADDRESS struct
-   static AddressCC *Create(const mail_address *adr);
+   // create the address from cclient ADDRESS struct
+   AddressCC(mail_address *adr);
 
-   /// is the address valid?
+   // implement the base class pure virtuals  
    virtual bool IsValid() const;
-
-   /// get the full address as a string
    virtual String GetAddress() const;
-
-   /// get the name (comment) part of the address
    virtual String GetName() const;
-
-   /// get the address part
+   virtual String GetMailbox() const;
+   virtual String GetDomain() const;
    virtual String GetEMail() const;
 
 protected:
-   /// comparison function
    virtual bool IsSameAs(const Address& addr) const;
 
-   /// dtor deletes m_adr too!
+   // dtor deletes m_adr too!
    virtual ~AddressCC();
 
 private:
-   /// the cclient ADDRESS (we own it and will delete it)
+   // the cclient ADDRESS struct we correspond to (we own and will delete it!)
    mail_address *m_adr;
+
+   // the next address (NB: we always have "m_addrNext->m_adr == m_adr->next")
+   AddressCC *m_addrNext;
+
+   // it accesses both m_adr and m_addrNext
+   friend class AddressListCC;
 };
 
+// ----------------------------------------------------------------------------
+// AddressListCC
+// ----------------------------------------------------------------------------
+
+class AddressListCC : public AddressList
+{
+public:
+   // create the address from cclient ADDRESS struct
+   AddressListCC(mail_address *adr);
+
+   // implement the base class pure virtuals  
+   virtual Address *GetFirst() const;
+   virtual Address *GetNext(const Address *addr) const;
+   virtual String GetAddresses() const;
+
+protected:
+   virtual bool IsSameAs(const AddressList& addr) const;
+
+private:
+   // pointer to the head of the linked list of addresses
+   AddressCC *m_addrCC;
+};
 #endif // _ADDRESSCC_H_
 
 

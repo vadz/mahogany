@@ -62,30 +62,6 @@ public:
                           UIdType uid = UID_ILLEGAL,
                           Profile *profile = NULL);
 
-   /** @name Address stuff
-    */
-   //@{
-
-   /// return "Foo" from address of form "Foo Bar <baz>"
-   static String GetFirstNameFromAddress(const String& address);
-
-   /// return "Bar" from address of form "Foo Bar <baz>"
-   static String GetLastNameFromAddress(const String& address);
-
-   /// return "Foo Bar" from address of form "Foo Bar <baz>"
-   static String GetNameFromAddress(const String& address);
-
-   /// return "baz" from address of form "Foo Bar <baz>"
-   static String GetEMailFromAddress(const String &address);
-
-   /// compare 2 addresses, return TRUE if they're the same
-   static bool CompareAddresses(const String& adr1, const String& adr2);
-
-   /// return the address index in the array of addresses or wxNOT_FOUND
-   static int FindAddress(const wxArrayString& addresses, const String& addr);
-
-   //@}
-
    /** @name Headers access
     */
 
@@ -374,6 +350,32 @@ public:
       /// invalid type code
       MSG_TYPEINVALID = MimeType::INVALID
    };
+
+   /** @name Address stuff
+
+       THESE FUNCTIONS ARE DEPRECATED, USE Address and AddressList INSTEAD!
+    */
+   //@{
+
+   /// return "Foo" from address of form "Foo Bar <baz>"
+   static String GetFirstNameFromAddress(const String& address);
+
+   /// return "Bar" from address of form "Foo Bar <baz>"
+   static String GetLastNameFromAddress(const String& address);
+
+   /// return "Foo Bar" from address of form "Foo Bar <baz>"
+   static String GetNameFromAddress(const String& address);
+
+   /// return "baz" from address of form "Foo Bar <baz>"
+   static String GetEMailFromAddress(const String &address);
+
+   /// compare 2 addresses, return TRUE if they're the same
+   static bool CompareAddresses(const String& adr1, const String& adr2);
+
+   /// return the address index in the array of addresses or wxNOT_FOUND
+   static int FindAddress(const wxArrayString& addresses, const String& addr);
+
+   //@}
 
 protected:
    /** virtual destructor */

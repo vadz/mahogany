@@ -32,34 +32,26 @@
 
 #include <c-client.h>
 
+// ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+// return string containing all addresses or just the first one from this list
+static String Adr2String(ADDRESS *adr, bool all = true);
+
 // ============================================================================
-// implementation
+// AddressCC implementation
 // ============================================================================
 
 // ----------------------------------------------------------------------------
-// AddressCC creation
+// AddressCC creation and destruction
 // ----------------------------------------------------------------------------
 
-/* static */
-AddressCC *AddressCC::Create(const ADDRESS *adr)
+AddressCC::AddressCC(ADDRESS *adr)
 {
-   CHECK( adr, NULL, "can't create AddressCC from NULL ADDRESS" );
+   ASSERT_MSG( adr && !adr->error, "invalid ADDRESS in AddressCC ctor" );
 
-   AddressCC *addrCC = new AddressCC;
-   if ( adr->error )
-   {
-      // this is not supposed to happen - if there is an error in the address,
-      // it should be the last one
-      ASSERT_MSG( !adr->next, "unexpected kind of invalid address" );
-
-      addrCC->m_adr = NULL;
-   }
-   else // valid address
-   {
-      addrCC->m_adr = rfc822_cpy_adr((ADDRESS *)adr); // const_cast
-   }
-
-   return addrCC;
+   m_adr = adr;
 }
 
 AddressCC::~AddressCC()
@@ -73,26 +65,54 @@ AddressCC::~AddressCC()
 
 bool AddressCC::IsValid() const
 {
-   return m_adr != NULL;
+   return m_adr && !m_adr->error;
 }
 
 String AddressCC::GetAddress() const
 {
-   String address;
-   CHECK( IsValid(), address, "invalid address" );
-
-   rfc822_write_address(address.GetWriteBuf(1024), m_adr);
-   address.UngetWriteBuf();
-
-   return address;
+   return Adr2String(m_adr, false /* just the first one */);
 }
 
 String AddressCC::GetName() const
 {
+   String personal;
+   CHECK( m_adr, personal, "invalid address" );
+
+   personal = m_adr->personal;
+
+   return personal;
+}
+
+String AddressCC::GetMailbox() const
+{
+   String mailbox;
+   CHECK( m_adr, mailbox, "invalid address" );
+
+   mailbox = m_adr->mailbox;
+
+   return mailbox;
+}
+
+String AddressCC::GetDomain() const
+{
+   String host;
+   CHECK( m_adr, host, "invalid address" );
+
+   host = m_adr->host;
+
+   return host;
 }
 
 String AddressCC::GetEMail() const
 {
+   String email;
+
+   // FIXME: again, c-client doesn't check size of the buffer!
+   rfc822_address(email.GetWriteBuf(2048), m_adr);
+   email.UngetWriteBuf();
+   email.Shrink();
+
+   return email;
 }
 
 // ----------------------------------------------------------------------------
@@ -105,5 +125,139 @@ bool AddressCC::IsSameAs(const Address& addr) const
 
    // ignore the name parts when comparing
    return false;
+}
+
+// ============================================================================
+// AddressListCC implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// AddressListCC creation
+// ----------------------------------------------------------------------------
+
+AddressListCC::AddressListCC(mail_address *adr)
+{
+   m_addrCC = NULL;
+   AddressCC *addrCur = m_addrCC;
+
+   while ( adr )
+   {
+      if ( adr->error )
+      {
+         DBGMESSAGE(("Skipping bad address '%s'.", Adr2String(adr).c_str()));
+      }
+      else // good address, store
+      {
+         AddressCC *addr = new AddressCC(adr);
+
+         if ( !addrCur )
+         {
+            // first address, remember as head of the linked list
+            m_addrCC = addr;
+         }
+         else // not first address, add to the linked list
+         {
+            addrCur->m_addrNext = addr;
+         }
+
+         addrCur = addr;
+      }
+
+      adr = adr->next;
+   }
+}
+
+// ----------------------------------------------------------------------------
+// AddressListCC enumeration
+// ----------------------------------------------------------------------------
+
+/* static */
+AddressList *AddressList::Create(const String& address)
+{
+   ADDRESS *adr = NULL;
+   rfc822_parse_adrlist(&adr, (char *)address.c_str(), NULL /* default host */);
+
+   if ( !adr || adr->error )
+   {
+      DBGMESSAGE(("Invalid RFC822 address '%s'.", address.c_str()));
+
+      return NULL;
+   }
+
+   return new AddressListCC(adr);
+}
+
+Address *AddressListCC::GetFirst() const
+{
+   SafeIncRef(m_addrCC);
+
+   return m_addrCC;
+}
+
+Address *AddressListCC::GetNext(const Address *addr) const
+{
+   CHECK( addr, NULL, "NULL address in AddressList::GetNext" );
+
+   AddressCC *addrCC = ((AddressCC *)addr)->m_addrNext;
+   SafeIncRef(addrCC);
+
+   return addrCC;
+}
+
+// ----------------------------------------------------------------------------
+// AddressListCC other operations
+// ----------------------------------------------------------------------------
+
+String AddressListCC::GetAddresses() const
+{
+   String address;
+   if ( m_addrCC )
+   {
+      address = Adr2String(m_addrCC->m_adr);
+   }
+
+   return address;
+}
+
+bool AddressListCC::IsSameAs(const AddressList& addrListOther) const
+{
+   Address_obj addr = GetFirst();
+   Address_obj addrOther = addrListOther.GetFirst();
+   while ( addr && addrOther && addr == addrOther )
+   {
+      addr = GetNext(addr);
+      addrOther = addrListOther.GetNext(addrOther);
+   }
+
+   // return true if all addresses were equal and if there are no more left
+   return !addr && !addrOther;
+}
+
+// ============================================================================
+// private functions implementation
+// ============================================================================
+
+static String Adr2String(ADDRESS *adr, bool all)
+{
+   String address;
+   CHECK( adr, address, "invalid address" );
+
+   // if we need only one address, prevent rfc822_write_address() from
+   // traversing the entire address list by temporarily setting the next
+   // pointer to NULL
+   ADDRESS *adrNextOld = all ? NULL : adr->next;
+   if ( adrNextOld )
+      adr->next = NULL;
+
+   // FIXME: there is no way to get the address length from c-client, how to
+   //        prevent it from overwriting our buffer??
+   rfc822_write_address(address.GetWriteBuf(4096), adr);
+   address.UngetWriteBuf();
+   address.Shrink();
+
+   if ( adrNextOld )
+      adr->next = adrNextOld;
+
+   return address;
 }
 
