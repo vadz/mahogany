@@ -288,6 +288,7 @@ SendMessageCC::Build(void)
       j, h = 0;
    char
       tmpbuf[MAILTMPLEN];
+   String tmpstr;
    char
       *headers;
    kbStringList::iterator
@@ -300,7 +301,7 @@ SendMessageCC::Build(void)
    strutil_tokenise(headers,";",m_headerList);
    delete [] headers;
 
-   // +3: 1 for X-Mailer, 1 for X-Face and 1 for the last NULL entry
+   // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the last NULL entry
    m_headerNames = new const char*[m_headerList.size()+2];
    m_headerValues = new const char*[m_headerList.size()+2];
    for(i = m_headerList.begin(), j = 0; i != m_headerList.end(); i++, h++)
@@ -311,6 +312,13 @@ SendMessageCC::Build(void)
    //always add mailer header:
    m_headerNames[h] = strutil_strdup("X-Mailer");
    m_headerValues[h++] = strutil_strdup(String("M, ")+M_VERSION_STRING);
+   //always add reply-to header:
+   tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
+   if(!strutil_isempty(tmpstr))
+   {
+      m_headerNames[h] = strutil_strdup("Reply-To:");
+      m_headerValues[h++] = strutil_strdup(tmpstr);
+   }
 
 #ifdef HAVE_XFACES
    // add an XFace?
