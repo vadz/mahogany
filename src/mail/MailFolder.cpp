@@ -902,6 +902,7 @@ void
 MailFolderCmn::UpdateConfig(void)
 {
    m_Config.m_ListingSortOrder = READ_CONFIG(GetProfile(), MP_MSGS_SORTBY);
-   m_Config.m_ReSortOnChange = READ_CONFIG(GetProfile(), MP_MSGS_RESORT_ON_CHANGE);
+   m_Config.m_ReSortOnChange = READ_CONFIG(GetProfile(),
+                                           MP_MSGS_RESORT_ON_CHANGE) != 0;
 }
 

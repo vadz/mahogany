@@ -268,13 +268,13 @@ MModule::LoadModule(const String & name)
 
 /* static */
 MModule *
-MModule::GetProvider(const wxString &interface)
+MModule::GetProvider(const wxString &interfaceName)
 {
    ModuleList::iterator i;
    for(i = gs_ModuleList.begin();
        i != gs_ModuleList.end();
        i++)
-      if( (**i).m_Interface == interface )
+      if( (**i).m_Interface == interfaceName )
       {
          (**i).m_Module->IncRef();
          return (**i).m_Module;
@@ -316,15 +316,18 @@ public:
       { return m_Author; }
 
    MModuleListingEntryImpl(const String &name = "",
-                           const String &interface = "",
+                           const String &interfaceName = "",
                            const String &shortdesc = "",
                            const String &desc = "",
                            const String &version = "",
                            const String &author = "")
       {
-         m_Name = name; m_Interface = interface;
-         m_ShortDesc = shortdesc; m_Desc = desc;
-         m_Version = version; m_Author = author;
+         m_Name = name;
+         m_Interface = interfaceName;
+         m_ShortDesc = shortdesc;
+         m_Desc = desc;
+         m_Version = version;
+         m_Author = author;
          strutil_delwhitespace(m_Name);
          strutil_delwhitespace(m_Interface);
          strutil_delwhitespace(m_Desc);

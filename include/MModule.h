@@ -90,7 +90,7 @@ public:
        @param interface name of the interface
        @return an inc-ref'd module or NULL
    */
-   static MModule *GetProvider(const wxString &interface);
+   static MModule *GetProvider(const wxString &interfaceName);
 };
 
 

@@ -9,6 +9,8 @@
 #ifndef SCOREMODULE_H
 #define SCOREMODULE_H
 
+#include "mmodule.h"
+
 /**
    This is the interface for the Mahogany scoring module.
    It just provides one function which calculates a score function
