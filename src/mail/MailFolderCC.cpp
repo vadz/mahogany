@@ -4021,7 +4021,7 @@ MsgnoArray *MailFolderCC::SearchByFlag(MessageStatus flag,
          pgm->msgno = set;
    }
 
-   return DoSearch(pgm, flags);
+   return DoSearch(pgm, flags & (SEARCH_UID | SEARCH_MSGNO));
 }
 
 UIdArray *
