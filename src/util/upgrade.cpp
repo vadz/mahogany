@@ -840,10 +840,16 @@ InstallWizardServersPage::InstallWizardServersPage(wxWizard *wizard)
    m_smtp = panel->CreateTextWithLabel(labels[2], widthMax, m_imap);
    m_nntp = panel->CreateTextWithLabel(labels[3], widthMax, m_smtp);
 
+   wxStaticText *imapMsg = panel->CreateMessage(_(
+      "Mahogany can search the IMAP server to\n"
+      "find all folders on it. On some setups\n"
+      "this can take very long. If you only use\n"
+      "the default folder on the server, disable\n"
+      "this option."), m_nntp);
    labels.Empty();
-   labels.Add(_("&Also create all IMAP folders:"));
+   labels.Add(_("&Search for all IMAP folders:"));
    widthMax = GetMaxLabelWidth(labels, panel);
-   m_imapAll = panel->CreateCheckBox(labels[0], widthMax, m_nntp);
+   m_imapAll = panel->CreateCheckBox(labels[0], widthMax, imapMsg);
 
    panel->ForceLayout();
 }
@@ -864,7 +870,6 @@ void InstallWizardServersPage::OnText(wxCommandEvent& event)
 InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
                        : InstallWizardPage(wizard, InstallWizard_DialUpPage)
 {
-
    wxStaticText *text = new wxStaticText(this, -1, _(
       "Mahogany can automatically detect if your\n"
       "network connection is online or offline.\n"
@@ -914,16 +919,21 @@ InstallWizardDialUpPage::InstallWizardDialUpPage(wxWizard *wizard)
 InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
                         : InstallWizardPage(wizard, InstallWizard_OperationsPage)
 {
-   wxStaticText *text = new wxStaticText(this, -1, _(
+
+   wxStaticText *itext = new wxStaticText(this, -1, _(
+      "This page contains some of the basic options\n"
+      "controlling Mahogany's operation. Please take\n"
+      "a moment to check that these settings are as\n"
+      "you prefer them."));
+
+   wxEnhancedPanel *panel = CreateEnhancedPanel(itext);
+
+   wxStaticText *text = panel->CreateMessage(_(
       "Mahogany can either leave all messages in\n"
       "your system mailbox or create its own\n"
-      "mailbox for new mail and collect new\n"
-      "messages in there. This is recommended,\n"
-      "especially when collecting from remote\n"
-      "servers."
-      ));
-
-   wxEnhancedPanel *panel = CreateEnhancedPanel(text);
+      "mailbox for new mail and move all new\n"
+      "messages there. This is recommended,\n"
+      "especially in a multi-user environment."), NULL);
 
    wxArrayString labels;
    labels.Add(_("&Collect new mail:"));
@@ -931,11 +941,12 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
    labels.Add(_("Use &Outbox queue:"));
    labels.Add(_("&Use dial-up network:"));
    labels.Add(_("&Load PalmOS support:"));
+   labels.Add(_("Default format for mailbox files"));
    labels.Add(_("Enable &Python:"));
 
    long widthMax = GetMaxLabelWidth(labels, panel);
 
-   m_CollectCheckbox = panel->CreateCheckBox(labels[0], widthMax, NULL);
+   m_CollectCheckbox = panel->CreateCheckBox(labels[0], widthMax, text);
    wxStaticText *text2 = panel->CreateMessage(
       _(
          "\n"
@@ -979,10 +990,8 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
    m_UsePalmOsCheckbox = panel->CreateCheckBox(labels[4], widthMax, text5);
    last = m_UsePalmOsCheckbox;
 #endif // USE_PISOCK
-   m_FolderTypeChoice = panel->CreateChoice(
-      _("Default format for mailbox files"
-        ":Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)"),
-      widthMax,last);
+   wxString tmp = labels[5] + ":Unix mbx mailbox:Unix mailbox:MMDF (SCO Unix):Tenex (Unix MM format)";
+   m_FolderTypeChoice = panel->CreateChoice(tmp, widthMax, last);
    last = m_FolderTypeChoice;
 #ifdef USE_PYTHON
    wxStaticText *text6 = panel->CreateMessage(
@@ -994,7 +1003,7 @@ InstallWizardOperationsPage::InstallWizardOperationsPage(wxWizard *wizard)
          "expand Mahogany.\n"
          "Would you like to enable it?"), last);
 
-   m_UsePythonCheckbox = panel->CreateCheckBox(labels[5], widthMax, text6);
+   m_UsePythonCheckbox = panel->CreateCheckBox(labels[6], widthMax, text6);
 #endif // USE_PYTHON
 
    panel->ForceLayout();
@@ -2326,6 +2335,14 @@ SetupServers(void)
                                       MF_FLAGS_GROUP,
                                       "",
                                       FALSE);
+      MFolder *imapInbox = CreateFolderTreeEntry(mfolder,
+                                      _("IMAP INBOX"),
+                                      MF_IMAP,
+                                      MF_FLAGS_DEFAULT,
+                                      "INBOX",
+                                      FALSE);
+      SafeDecRef(imapInbox);
+
       p = Profile::CreateProfile(mfolder->GetName());
       //inherit default instead p->writeEntry(MP_IMAPHOST, serverName);
 
