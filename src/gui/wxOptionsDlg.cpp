@@ -334,6 +334,7 @@ enum ConfigFields
    ConfigField_HelpersHelp1,
    ConfigField_Browser,
    ConfigField_BrowserIsNetscape,
+   ConfigField_BrowserInNewWindow,
 #ifdef USE_EXT_HTML_HELP
    ConfigField_HelpersHelp2,
    ConfigField_HelpBrowser,
@@ -994,6 +995,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("The following program will be used to open URLs embedded in messages:"),       Field_Message, -1                      },
    { gettext_noop("Open &URLs with"),             Field_File,    -1                      },
    { gettext_noop("URL &browser is Netscape"),    Field_Bool,    -1                      },
+   { gettext_noop("Open browser in new &window"),    Field_Bool, ConfigField_BrowserIsNetscape },
 #ifdef USE_EXT_HTML_HELP
    { gettext_noop("The following program will be used to view the online help system:"),     Field_Message, -1                      },
    { gettext_noop("&Help viewer"),                Field_File,    -1                      },
@@ -1294,6 +1296,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_BROWSER),
    CONFIG_ENTRY(MP_BROWSER_ISNS),
+   CONFIG_ENTRY(MP_BROWSER_INNW),
 #ifdef USE_EXT_HTML_HELP
    CONFIG_NONE(),
    CONFIG_ENTRY(MP_HELPBROWSER),

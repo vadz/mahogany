@@ -614,6 +614,7 @@ wxMessageView::ReadAllSettings(AllProfileValues *settings)
 
    settings->browser = READ_CONFIG(m_Profile, MP_BROWSER);
    settings->browserIsNS = READ_CONFIG(m_Profile, MP_BROWSER_ISNS) != 0;
+   settings->browserInNewWindow = READ_CONFIG(m_Profile, MP_BROWSER_INNW) != 0;
    settings->autocollect =  READ_CONFIG(m_Profile, MP_AUTOCOLLECT);
    settings->autocollectNamed =  READ_CONFIG(m_Profile, MP_AUTOCOLLECT_NAMED);
    settings->autocollectBookName = READ_CONFIG(m_Profile, MP_AUTOCOLLECT_ADB);
@@ -1965,7 +1966,7 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                wxString command;
                bOk = false;
 #ifdef OS_UNIX
-               if(m_ProfileValues.browserIsNS) // try re-loading first
+               if ( m_ProfileValues.browserIsNS ) // try re-loading first
                {
                   wxString lockfile;
                   wxGetHomeDir(&lockfile);
@@ -1976,7 +1977,15 @@ wxMessageView::OnMouseEvent(wxCommandEvent &event)
                      // non-existing location      if(wxFileExists(lockfile))
                   {
                      command = "";
-                     command << m_ProfileValues.browser << " -remote openURL(" << ci->GetUrl() << ",new-window)";
+                     command << m_ProfileValues.browser << " -remote openURL(" << ci->GetUrl();
+                     if ( m_ProfileValues.browserInNewWindow )
+                     {
+                        command << ",new-window)";
+                     }
+                     else
+                     {
+                        command << ")";
+                     }
                      wxString errmsg;
                      errmsg.Printf(_("Could not launch browser: '%s' failed."),
                                    command.c_str());

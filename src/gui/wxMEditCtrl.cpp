@@ -305,6 +305,8 @@ private:
       String browser;
       /// Is URL viewer of the netscape variety?
       bool browserIsNS;
+      /// open netscape in new window?
+      bool browserInNewWindow;
       /// Show XFaces?
       bool showFaces;
       bool operator==(const AllProfileValues& other);
@@ -338,6 +340,7 @@ wxMEditCtrl::ReadProfile(Profile *p)
    m_ProfileValues.inlineGFX = READ_CONFIG(p, MP_INLINE_GFX) != 0;
    m_ProfileValues.browser = READ_CONFIG(p, MP_BROWSER);
    m_ProfileValues.browserIsNS = READ_CONFIG(p, MP_BROWSER_ISNS) != 0;
+   m_ProfileValues.browserInNewWindow = READ_CONFIG(p, MP_BROWSER_INNW) != 0;
    m_ProfileValues.showFaces = READ_CONFIG(p, MP_SHOW_XFACES) != 0;
 #ifndef OS_WIN
    SetFocusFollowMode(READ_CONFIG(p,MP_FOCUS_FOLLOWSMOUSE) != 0);

@@ -657,6 +657,8 @@ enum MFolderIndex
 #define   MP_BROWSER         "Browser"
 /// Browser is netscape variant
 #define   MP_BROWSER_ISNS    "BrowserIsNetscape"
+/// Open netscape in new window
+#define   MP_BROWSER_INNW    "BrowserInNewWindow"
 /// external editor to use for message composition (use %s for filename)
 #define MP_EXTERNALEDITOR    "ExternalEditor"
 /// start external editor automatically?
@@ -1438,9 +1440,11 @@ enum MFolderIndex
 #ifdef  OS_UNIX
 #  define   MP_BROWSER_D         "netscape"
 #  define   MP_BROWSER_ISNS_D    1
+#  define   MP_BROWSER_INNW_D    1
 #else  // under Windows, we know better...
 #  define   MP_BROWSER_D         M_EMPTYSTRING
 #  define   MP_BROWSER_ISNS_D    0l
+#  define   MP_BROWSER_INNW_D    1l
 #endif // Unix/Win
 
 /// external editor to use for message composition (use %s for filename)

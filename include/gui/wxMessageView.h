@@ -253,6 +253,8 @@ protected:
       String browser;
       /// Is URL viewer of the netscape variety?
       bool browserIsNS;
+      /// open netscape in new window?
+      bool browserInNewWindow;
       /// Autocollect email addresses?
       int autocollect;
       /// Autocollect only email addresses with complete name?
