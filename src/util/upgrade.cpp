@@ -282,11 +282,13 @@ public:
       {
          if ( server.Find('.') != wxNOT_FOUND )
             return;
+#if 0 // VZ: this is annoying! either don't do it all or do without asking
          wxString msg;
          msg.Printf(_("You have no domain specified for the server '%s'.\n"
                       "Do you want to add the domain '%s'?"),
                     server.c_str(), domain.c_str());
          if(MDialog_YesNoDialog(msg,this, MDIALOG_YESNOTITLE, TRUE))
+#endif // 0
          server << '.' << domain;
       }
 private:

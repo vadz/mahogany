@@ -1982,8 +1982,6 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW_X *ov)
 
    HeaderInfoImpl & entry = *(HeaderInfoImpl *)(*m_Listing)[m_BuildNextEntry];
 
-   ADDRESS *adr;
-
    unsigned long msgno = mail_msgno (m_MailStream,uid);
    MESSAGECACHE *elt = mail_elt (m_MailStream,msgno);
    MESSAGECACHE selt;

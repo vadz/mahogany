@@ -81,18 +81,32 @@ static const char *wxFLC_ColumnNames[] =
    gettext_noop("Subject")
 };
 
-static const char *wxFLC_DEFAULT_SIZES = "60:300:200:80:80";
+// the profile key where the columns widths are stored
+#define FOLDER_LISTCTRL_WIDTHS "FolderListCtrl"
+
+// the default widths for the columns
+static const char *FOLDER_LISTCTRL_WIDTHS_D = "60:300:200:80:80";
 
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
 
-class wxFolderListCtrl : public wxPListCtrl
+class wxFolderListCtrl : public wxListCtrl
 {
 public:
    wxFolderListCtrl(wxWindow *parent, wxFolderView *fv);
-   ~wxFolderListCtrl();
+   virtual ~wxFolderListCtrl();
+
+   // create the columns using order in m_columns and widths from profile
+   void CreateColumns();
+
+   // return the string containing ':' separated columns widths
+   String GetWidths() const;
+
+   // deletes all items from the control and recreates columns if necessary
    void Clear(void);
+
+   // sets or adds an entry
    void SetEntry(long index,
                  String const &status,
                  String const &sender,
@@ -130,20 +144,11 @@ public:
    /// goto next unread message
    void SelectNextUnread(void);
 
+   /// change the options governing our appearance
    void ApplyOptions(const wxColour &fg, const wxColour &bg,
-                     int fontFamily, int fontSize)
-      {
-         // the foregroundcolour is the one for the title line, we
-         // leave it as it is SetForegroundColour( fg );
-         // we want to use fg as the default item colour
-         SetBackgroundColour( bg );
-         SetTextColour( fg );
-         // I hate wxWindows using references! :-( KB
-         wxFont * font = new wxFont( fontSize, fontFamily,
-                                wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL );
-         SetFont( *font  );
-         delete font;
-      }
+                     int fontFamily, int fontSize,
+                     int columns[WXFLC_NUMENTRIES]);
+
    /// set m_PreviewOnSingleClick flag
    void SetPreviewOnSingleClick(bool flag)
       {
@@ -158,21 +163,20 @@ public:
    wxMenu *GetFolderMenu() const { return m_menuFolders; }
 
 protected:
-   long m_Style;
    long m_NextIndex;
    /// parent window
    wxWindow *m_Parent;
    /// the folder view
    wxFolderView *m_FolderView;
+   /// the profile used for storing columns widths
+   Profile *m_profile;
    /// column numbers
    int m_columns[WXFLC_NUMENTRIES];
-   /// which entry is in column 0?
-   int m_firstColumn;
    /// do we want OnSelect() callbacks?
    bool m_SelectionCallbacks;
    /// do we preview a message on a single mouse click?
    bool m_PreviewOnSingleClick;
-   /// have we been used previously?
+   /// did we create the list ctrl columns?
    bool m_Initialised;
    /// the popup menu
    wxMenu *m_menu;
@@ -295,7 +299,7 @@ static MessageSortOrder SortOrderFromCol(wxFolderListCtrlFields col)
 // event tables
 // ----------------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(wxFolderListCtrl, wxPListCtrl)
+BEGIN_EVENT_TABLE(wxFolderListCtrl, wxListCtrl)
    EVT_LIST_ITEM_SELECTED(-1, wxFolderListCtrl::OnSelected)
    EVT_CHAR              (wxFolderListCtrl::OnChar)
    EVT_LIST_ITEM_ACTIVATED(-1, wxFolderListCtrl::OnActivated)
@@ -614,11 +618,10 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
 
 wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 {
-   Profile *p = fv->GetProfile();
-
    m_Parent = parent;
+   m_profile = fv->GetProfile();
+   m_profile->IncRef(); // we wish to keep it until dtor
    m_FolderView = fv;
-   m_Style = wxLC_REPORT;
    m_SelectionCallbacks = true;
    m_Initialised = false;
    m_menu =
@@ -631,46 +634,17 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    if(parent)
       parent->GetClientSize(&w,&h);
 
-   wxString name;
+   Create(parent, M_WXID_FOLDERVIEW_LISTCTRL,
+          wxDefaultPosition, wxSize(w,h),
+          wxLC_REPORT | wxNO_BORDER);
 
-   if(fv->GetProfile())
-   {
-      name = fv->GetProfile()->GetName();
-      name << '/' << "FolderListCtrl";
-      // If there is no entry for the listctrl, force one by
-      // inheriting from NewMail folder.
-      String entry = fv->GetProfile()->readEntry("FolderListCtrl","");
-      wxLogDebug("FolderView columns: %s", entry.c_str());
-      if( entry.Length() == 0
-          || entry == wxFLC_DEFAULT_SIZES
-          || entry == "80:80:80:80:80")
-      {
-         String newMailFolder = READ_APPCONFIG(MP_MAINFOLDER);
-         Profile   *p = Profile::CreateProfile(newMailFolder);
-         //p->SetPath("FolderView");
-         entry = p->readEntry("FolderListCtrl","");
-         if(entry.Length() == 0)
-            entry = wxFLC_DEFAULT_SIZES;
-         fv->GetProfile()->writeEntry("FolderListCtrl", entry);
-         p->DecRef();
-      }
-   }
-   else
-      name = "FolderListCtrl";
+   ReadColumnsInfo(m_profile, m_columns);
 
-   // Without profile, name is relative to /Setting section, nothing we can do about
-   wxPListCtrl::Create(name, parent, M_WXID_FOLDERVIEW_LISTCTRL,
-                       wxDefaultPosition, wxSize(w,h), wxLC_REPORT | wxNO_BORDER);
-
-   ReadColumnsInfo(p, m_columns);
-
-   m_firstColumn = GetColumnByIndex(m_columns, 0);
+   CreateColumns();
 
    // Create popup menu:
    m_menu = new wxMenu("", wxMENU_TEAROFF);
    AppendToMenu(m_menu, WXMENU_MSG_BEGIN+1, WXMENU_MSG_END);
-
-   Clear();
 
    // create a drop target for dropping messages on us
    new MMessagesDropTarget(new FolderViewMessagesDropWhere(m_FolderView), this);
@@ -678,6 +652,13 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
 
 wxFolderListCtrl::~wxFolderListCtrl()
 {
+   // save the widths
+   String str = GetWidths();
+   if ( !str.empty() )
+      m_profile->writeEntry(FOLDER_LISTCTRL_WIDTHS, str);
+
+   m_profile->DecRef();
+
    delete m_menu;
 }
 
@@ -746,27 +727,75 @@ wxFolderListCtrl::GetFocusedUId(void) const
    return uid;
 }
 
+void wxFolderListCtrl::CreateColumns()
+{
+   // delete existing columns
+   ClearAll();
+
+   // read the widths array and complete it with -1 if necessary
+   String widthsString = READ_CONFIG(m_profile, FOLDER_LISTCTRL_WIDTHS);
+   wxArrayString widths = strutil_restore_array(':', widthsString);
+   size_t n;
+   for ( n = widths.GetCount(); n < WXFLC_NUMENTRIES; n++ )
+   {
+      widths.Add("-1");
+   }
+
+   // add the new ones
+   for ( n = 0; n < WXFLC_NUMENTRIES; n++ )
+   {
+      wxFolderListCtrlFields col = GetColumnByIndex(m_columns, n);
+      if ( col == WXFLC_NONE )
+         break;
+
+      long width;
+      if ( !widths[n].ToLong(&width) )
+         width = -1;
+
+      InsertColumn(n, GetColumnName(col), wxLIST_FORMAT_LEFT, width);
+   }
+}
+
+String wxFolderListCtrl::GetWidths() const
+{
+   String str;
+
+   int count = GetColumnCount();
+   for ( int col = 0; col < count; col++ )
+   {
+      if ( !str.IsEmpty() )
+         str << ':';
+
+      str << GetColumnWidth(col);
+   }
+
+   return str;
+}
+
+void wxFolderListCtrl::ApplyOptions(const wxColour &fg, const wxColour &bg,
+                                    int fontFamily, int fontSize,
+                                    int columns[WXFLC_NUMENTRIES])
+{
+   // foreground colour is the colour of the items text, and so we use
+   // SetTextColour() and not SetForegroundColour() which would be wrong
+   SetTextColour( fg );
+   SetBackgroundColour( bg );
+
+   SetFont(wxFont(fontSize, fontFamily, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+
+   if ( memcmp(m_columns, columns, sizeof(m_columns)) != 0 )
+   {
+      // the control must be recreated if the order of columns changed
+      memcpy(m_columns, columns, sizeof(m_columns));
+
+      CreateColumns();
+   }
+}
+
 void
 wxFolderListCtrl::Clear(void)
 {
-   int x,y;
-   GetClientSize(&x,&y);
-
-   if(m_Initialised)
-      SaveWidths(); // save widths of old columns
-
-   ClearAll();
-
-   if (m_Style & wxLC_REPORT)
-   {
-      for(int c = 0; c < WXFLC_NUMENTRIES; c++)
-         for (int i = 0; i < WXFLC_NUMENTRIES; i++)
-            if(m_columns[i] == c)
-               InsertColumn( c, GetColumnName(i), wxLIST_FORMAT_LEFT);
-   }
-
-   RestoreWidths();
-   m_Initialised = true; // now we have proper columns set up
+   DeleteAllItems();
 }
 
 void
@@ -778,7 +807,23 @@ wxFolderListCtrl::SetEntry(long index,
                            String const &size)
 {
    if ( index >= GetItemCount() )
-      InsertItem(index, status); // column 0
+   {
+      // the item label is the value of the first column
+      String label;
+      switch ( GetColumnByIndex(m_columns, 0) )
+      {
+         case WXFLC_STATUS:   label = status;  break;
+         case WXFLC_FROM:     label = sender;  break;
+         case WXFLC_DATE:     label = date;    break;
+         case WXFLC_SIZE:     label = size;    break;
+         case WXFLC_SUBJECT:  label = subject; break;
+
+         default:
+            wxFAIL_MSG( "unknown column" );
+      }
+
+      InsertItem(index, label);
+   }
 
    if ( m_columns[WXFLC_STATUS] != -1 )
       SetItem(index, m_columns[WXFLC_STATUS], status);
@@ -939,6 +984,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
 
       // read in our profile settigns
       ReadProfileSettings(&m_settingsCurrent);
+      m_settingsOld = m_settingsCurrent;
 
       m_MailFolder->IncRef();  // make sure it doesn't go away
       m_folderName = m_ASMailFolder->GetName();
@@ -946,11 +992,12 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       if ( recreateFolderCtrl )
       {
          wxWindow *oldfolderctrl = m_FolderCtrl;
-         m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow,this);
+         m_FolderCtrl = new wxFolderListCtrl(m_SplitterWindow, this);
          m_FolderCtrl->ApplyOptions( m_settingsCurrent.FgCol,
                                      m_settingsCurrent.BgCol,
                                      m_settingsCurrent.font,
-                                     m_settingsCurrent.size);
+                                     m_settingsCurrent.size,
+                                     m_settingsCurrent.columns);
          m_SplitterWindow->ReplaceWindow(oldfolderctrl, m_FolderCtrl);
          delete oldfolderctrl;
       }
@@ -1012,7 +1059,8 @@ wxFolderView::wxFolderView(wxWindow *parent)
    m_FolderCtrl->ApplyOptions( m_settingsCurrent.FgCol,
                                m_settingsCurrent.BgCol,
                                m_settingsCurrent.font,
-                               m_settingsCurrent.size);
+                               m_settingsCurrent.size,
+                               m_settingsCurrent.columns);
    m_SplitterWindow->SplitHorizontally((wxWindow *)m_FolderCtrl, m_MessagePreview, y/3);
    m_SplitterWindow->SetMinimumPaneSize(0);
    m_SplitterWindow->SetFocus();
@@ -1095,52 +1143,52 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
 
       settings->returnAddresses = strutil_restore_array(':', returnAddrs);
    }
+
+   ReadColumnsInfo(m_Profile, settings->columns);
 }
 
 void
 wxFolderView::OnOptionsChange(MEventOptionsChangeData& event)
 {
-   if ( !m_Profile )
-   {
-      // can't do anything useful (but can (and will) crash)
-      return;
-   }
+   CHECK_RET( m_Profile, "no profile in wxFolderView?" );
 
-   AllProfileSettings settingsNew;
-   ReadProfileSettings(&settingsNew);
-
-   bool   previewOnSingleClick = READ_CONFIG(GetProfile(),
-                                             MP_PREVIEW_ON_SELECT) != 0;
-
-   m_FolderCtrl->SetPreviewOnSingleClick(previewOnSingleClick);
-
-   if ( settingsNew == m_settingsCurrent )
-   {
-      // we don't care
-      return;
-   }
-
-   m_settingsCurrent = settingsNew;
-
+   bool settingsChanged;
    switch ( event.GetChangeKind() )
    {
       case MEventOptionsChangeData::Apply:
+         m_settingsOld = m_settingsCurrent;
+         // fall through
+
       case MEventOptionsChangeData::Ok:
-      case MEventOptionsChangeData::Cancel:
-         // need to repopulate the list ctrl because the date format changed
-         m_FolderCtrl->ApplyOptions( m_settingsCurrent.FgCol,
-                                     m_settingsCurrent.BgCol,
-                                     m_settingsCurrent.font,
-                                     m_settingsCurrent.size);
-         m_FolderCtrl->Clear();
-         m_NumOfMessages = 0;
-         Update();
+         ReadProfileSettings(&m_settingsCurrent);
+         settingsChanged = m_settingsCurrent != m_settingsOld;
          break;
 
       default:
          FAIL_MSG("unknown options change event");
+
+      case MEventOptionsChangeData::Cancel:
+         settingsChanged = m_settingsCurrent != m_settingsOld;
+         if ( settingsChanged )
+            m_settingsCurrent = m_settingsOld;
+         break;
    }
 
+   bool previewOnSingleClick = READ_CONFIG(GetProfile(), MP_PREVIEW_ON_SELECT) != 0;
+   m_FolderCtrl->SetPreviewOnSingleClick(previewOnSingleClick);
+
+   if ( settingsChanged )
+   {
+      // need to repopulate the list ctrl because the date format changed
+      m_FolderCtrl->ApplyOptions( m_settingsCurrent.FgCol,
+                                  m_settingsCurrent.BgCol,
+                                  m_settingsCurrent.font,
+                                  m_settingsCurrent.size,
+                                  m_settingsCurrent.columns);
+      m_FolderCtrl->Clear();
+      m_NumOfMessages = 0;
+      Update();
+   }
 }
 
 
@@ -2130,8 +2178,21 @@ IMPLEMENT_DYNAMIC_CLASS(wxFolderViewFrame, wxMFrame)
 bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
 {
    // prepare the data for the dialog: we need the array of columns in order
-   int columns[WXFLC_NUMENTRIES];
-   ReadColumnsInfo(profile, columns);
+   // and we also need to remember the widths of the columns to shuffle them
+   // as well if the columns order is changed
+
+   // this array contains the column positions: columns[WXFLC_XXX] is the
+   // index (from 0 to WXFLC_NUMENTRIES) of the column WXFLC_XXX if it is
+   // shown and -1 otherwise (we also have a copy of it used below)
+   int columns[WXFLC_NUMENTRIES], columnsOld[WXFLC_NUMENTRIES];
+   ReadColumnsInfo(profile, columnsOld);
+   memcpy(columns, columnsOld, sizeof(columns));
+
+   // these arrays contain the current/default columns widths:
+   // strWidths[n] is the width of n-th column where n is the column index
+   wxArrayString strWidths, strWidthsStandard;
+   strWidths = strutil_restore_array(':', READ_CONFIG(profile, FOLDER_LISTCTRL_WIDTHS));
+   strWidthsStandard = strutil_restore_array(':', FOLDER_LISTCTRL_WIDTHS_D);
 
    wxArrayString choices;
    wxArrayInt status;
@@ -2184,6 +2245,28 @@ bool ConfigureFolderViewHeaders(Profile *profile, wxWindow *parent)
    }
 
    WriteColumnsInfo(profile, columns);
+
+   // update the widths
+   wxArrayString strWidthsNew;
+   for ( n = 0; n < WXFLC_NUMENTRIES; n++ )
+   {
+      // find the n-th column shown currently
+      wxFolderListCtrlFields col = GetColumnByIndex(columns, n);
+      if ( col == WXFLC_NONE )
+         break;
+
+      String s;
+      int pos = columnsOld[col];
+      if ( pos == -1 || (size_t)pos >= strWidths.GetCount() )
+         s = strWidthsStandard[col];
+      else
+         s = strWidths[pos];
+
+      strWidthsNew.Add(s);
+   }
+
+   profile->writeEntry(FOLDER_LISTCTRL_WIDTHS,
+                       strutil_flatten_array(strWidthsNew, ':'));
 
    return true;
 }

@@ -1594,8 +1594,7 @@ MailFolderCmn::UpdateMessageStatus(UIdType uid)
 void
 MailFolderCmn::OnOptionsChange(MEventOptionsChangeData::ChangeKind kind)
 {
-   MFCmnOptions configOld = m_Config;
-
+   bool settingsChanged;
    switch ( kind )
    {
       case MEventOptionsChangeData::Apply:
@@ -1604,6 +1603,7 @@ MailFolderCmn::OnOptionsChange(MEventOptionsChangeData::ChangeKind kind)
 
       case MEventOptionsChangeData::Ok:
          ReadConfig(m_Config);
+         settingsChanged = m_Config != m_ConfigOld;
          break;
 
       default:
@@ -1611,10 +1611,12 @@ MailFolderCmn::OnOptionsChange(MEventOptionsChangeData::ChangeKind kind)
          // fall through
 
       case MEventOptionsChangeData::Cancel:
-         m_Config = m_ConfigOld;
+         settingsChanged = m_Config != m_ConfigOld;
+         if ( settingsChanged )
+            m_Config = m_ConfigOld;
    }
 
-   if ( m_Config != configOld )
+   if ( settingsChanged )
       DoUpdate();
 }
 

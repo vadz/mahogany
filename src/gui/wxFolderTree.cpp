@@ -193,7 +193,12 @@ public:
    // callbacks
    void OnChar(wxKeyEvent&);
 
-   void OnDoubleClickHandler(wxMouseEvent&) { OnDoubleClick(); }
+   void OnDoubleClickHandler(wxMouseEvent& event)
+   {
+      OnDoubleClick();
+
+      event.Skip();
+   }
    void OnRightDown(wxMouseEvent& event);
 
    void OnMenuCommand(wxCommandEvent&);

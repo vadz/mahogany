@@ -267,8 +267,16 @@ private:
 
       bool operator==(const AllProfileSettings& other) const
       {
-         return dateFormat == other.dateFormat && dateGMT == other.dateGMT;
+         return dateFormat == other.dateFormat &&
+                dateGMT == other.dateGMT &&
+                senderOnlyNames == other.senderOnlyNames &&
+                replaceFromWithTo == other.replaceFromWithTo &&
+                // returnAddresses == other.returnAddresses &&
+                memcmp(columns, other.columns, sizeof(columns)) == 0;
       }
+
+      bool operator!=(const AllProfileSettings& other) const
+         { return !(*this == other); }
 
       /// the strftime(3) format for date
       String dateFormat;
@@ -286,7 +294,9 @@ private:
       bool replaceFromWithTo;
       /// all the addresses corresponding to "oneself"
       wxArrayString returnAddresses;
-   } m_settingsCurrent;
+      /// the order of columns
+      int columns[WXFLC_NUMENTRIES];
+   } m_settingsCurrent, m_settingsOld;
 
    /// read the values from the profile into AllProfileSettings structure
    void ReadProfileSettings(AllProfileSettings *settings);
