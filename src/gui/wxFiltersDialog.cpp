@@ -723,7 +723,7 @@ wxOneFilterDialog::wxOneFilterDialog(class FilterEntryData *fed,
    wxLayoutConstraints *c;
 
    wxStaticBox *box = CreateStdButtonsAndBox(_("Filter Rule"), FALSE,
-                                             MH_DIALOG_FILTERS);
+                                             MH_DIALOG_FILTERS_DETAILS);
 
    /// The name of the filter rule:
    m_NameCtrl = new wxTextCtrl(this, -1);

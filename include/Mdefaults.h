@@ -787,7 +787,7 @@
 /// the default IMAP4 host
 #define   MP_IMAPHOST_D          "imap"
 /// the mail host
-#define   MP_SMTPHOST_D         "smtp"
+#define   MP_SMTPHOST_D         "mail"
 /// the mail host
 #define   MP_SMTPHOST_USE_SSL_D   0l
 /// tyhe mail server fallback

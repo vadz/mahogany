@@ -1,4 +1,4 @@
-#This file was created by <dseifert> Wed Mar 22 21:45:45 2000
+#This file was created by <karsten> Sat Mar 25 19:26:12 2000
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -48,9 +48,15 @@ Meadows
 
 \layout Author
 
-Copyright 1997-2000 by Karsten Ballüder 
+Copyright 1997-2000 by The Mahogany Development Team
 \newline 
- Written by Karsten Ballüder and Vadim Zeitlin
+ Written by Karsten Ballüder, Vadim Zeitlin et.al.
+\newline 
+
+\family typewriter 
+http://www.wxwindows.org/Mahogany/
+\family default 
+
 \newline 
 
 \family typewriter 
@@ -58,7 +64,7 @@ Copyright 1997-2000 by Karsten Ballüder
 \layout Standard
 
 
-\begin_inset LatexCommand \tableofcontents{}
+\begin_inset LatexCommand \tableofcontents
 
 \end_inset 
 
@@ -71,16 +77,14 @@ Using Mahogany
 Release Notes_1001_
 \layout Standard
 
-This is the fifth public release of Mahogany.
- As with the previous release we make the source available and binaries
- for Linux-x86, Linux-alpha and Solaris-sparc.
- 
-\layout Standard
-
-Mahogany is also reported to compile and run on FreeBSD and should generally
- work on any Unix flavour.
- We didn't try it on Win32s platform and we're not going to support it (nor
- Win16).
+This is the another public release of Mahogany.
+ As with usual we make the source available and binaries for the most common
+ operating systems supported.
+ Mahogany should generally work on any Unix flavour.
+ This time, we do not include a Windows version, as our main Windows developer
+ has been busy working on wxWindows over the last weeks.
+ He is now catching up and we hope to release a common Windows and Unix
+ version (0.51) within few weeks.
  Finally, work on making Mahogany available for MacOS is in progress.
 \layout Standard
 
@@ -98,8 +102,76 @@ Changes against the previous version
 0.5 against 0.23a
 \layout Standard
 
-Major changes which will be documented within the next few weeks as we are
- finishing it.
+This release has long been delayed, mainly due to us waiting for changes
+ in wxWindows to be completed.
+ As we introduced new features in the meantime, those introduced new delays,
+ and so on.
+ It has been more than half a year since the last release, so changes are
+ major.
+ We hope to stick to a much faster cylce of minor update releases for the
+ future.
+ The main new features are:
+\layout Itemize
+
+Proper support for MH folders.
+\layout Itemize
+
+Browsing and subscription management for IMAP and NNTP servers.
+\layout Itemize
+
+A plugin module system has been created which allows to dynamically load
+ expansion modules.
+ Existing modules (statically linked in this release, but dynamically linkable)
+ include a filtering language and PalmOS support.
+ For the future, a calendar/timeplanner plugin is planned.
+\layout Itemize
+
+Configurable filtering rules have been added.
+\layout Itemize
+
+Message threading and configurable sort order is supported.
+\layout Itemize
+
+An HTML-based help browser has been added.
+ 
+\layout Itemize
+
+Configurable date format.
+\layout Itemize
+
+Handling of dial-up networking and detection of connection status.
+\layout Itemize
+
+Optional user of a Trash folder.
+\layout Itemize
+
+Wizard-dialogs and 
+\begin_inset Quotes eld
+\end_inset 
+
+tip of the day
+\begin_inset Quotes erd
+\end_inset 
+
+ dialogs added to make Mahogany easier to use.
+\layout Itemize
+
+Optional SSL support can be compiled in (not activated by default due to
+ US export restrictions), allowing secure access to mail and news servers.
+\layout Itemize
+
+PalmOS handheld connectivity: synchronise e-mails with your PalmOS handheld
+ computer and use its addressbook within Mahogany.
+ Also, backup, restore and install databases of your handheld.
+\layout Itemize
+
+Bug fixes in nearly all parts of the code.
+ Mahogany should suffer much less from crashes than earlier versions.
+ The message editor behaves better and is faster.
+\layout Itemize
+
+Minor GUI improvements like keyboard bindings and nicer icons.
+ Support for KDE and GNOME filetype icons.
 \layout Subsubsection
 
 0.23a against 0.22a
@@ -149,7 +221,13 @@ SentMail
 Better behaved, asks before removing all mail from spool.
 \layout Itemize
 
+Configurable templates for message composition and replies.
+\layout Itemize
+
 Message boxes now have icons in them.
+\layout Itemize
+
+Searching in mail folders.
 \layout Itemize
 
 And, of course, updated translations and documentation updates.
@@ -232,78 +310,7 @@ Apart from this there were many minor fixes and changes, both GUI and mail
  code, documented in detail at the end of the TODO file.
 \layout Subsection
 
-Which features are implemented?
-\layout Standard
-
-Quite some already, but more are still missing.
- What we have so far:
-\layout Itemize
-
-Cross-platform.
- Mahogany compiles on a variety of Unix systems and on Microsoft Windows.
- Use one mail client, no matter what system you use.
- The source and binary for Windows 95/98/NT are available on request (
-\latex latex 
-
-\backslash 
-htmladdnormallinkfoot{
-\family typewriter 
-m-developers@makelist.com
-\family default 
-}{
-\family typewriter 
-m-developers@makelist.com
-\family default 
-}
-\latex default 
-).
- Mailbox file formats are the same on both platforms.
-\layout Itemize
-
-Based on the c-client library from the University of Washington, therefore
- full access to a wide range of protocols and file formats, including SMTP,
- IMAP, POP3, NNTP and several mailbox formats.
-\layout Itemize
-
-Wide user configurability.
- Whatever makes sense to override or change, can be changed by the user.
- Configuration supports several configuration files on Unix, with special
- administrator support for making entries immutable, and the registry on
- Windows.
-\layout Itemize
-
-Scriptable and extendable.
- Mahogany includes an embedded Python interpreter with full access to its
- object hierarchy.
- Write object-oriented scripts to extend and control Mahogany.
-\layout Itemize
-
-Easy MIME support.
- Text and other content can be freely mixed and different filetypes are
- represented by icons.
-\layout Itemize
-
-Inline displaying of images, clickable URLs, XFace support.
-\layout Itemize
-
-Multiple mail folders, support for any number of diffferent mail or news
- servers.
-\layout Itemize
-
-Powerful address database and contact manager 
-\layout Itemize
-
-Context sensitive help system (HTML based).
-\layout Itemize
-
-Full internationalisation support, Mahogany speaks multiple languages.
-\layout Subsection
-
 Known bugs
-\layout Itemize
-
-The message editor still has some minor glitches but appears stable and
- reliable now.
 \layout Itemize
 
 Newsspool support will not work with newsgroups not listed in the 
@@ -315,92 +322,45 @@ active
 \end_inset 
 
  file and is little configurable.
+\layout Itemize
+
+News is not always the easiest to use, but will be the next thing to improve.
 \layout Subsection
 
 TODO, features to implement
-\layout Standard
-
-This is a list of features on our TODO list that we are currently working
- on.
- It is not necessarily up to date or complete.
 \layout Subsubsection
 
-We are currently working on the implementation of the following:
-\layout Itemize
-
-Easy to use and powerful filtering system for mails (about one third complete).
-\layout Itemize
-
-Finishing rewrite of message editor: rich text editing & HTML
-\layout Itemize
-
-Threading and scoring of messages and news articles.
+The next few things to be implemented:
 \layout Itemize
 
 Multi-threaded folder access, to avoid blocking while retrieving slow remote
  folders/servers.
+ This is moreless complete but not enabled in the release as we want to
+ test and debug it further before making it the default behaviour.
 \layout Itemize
 
-Subscription management for news and IMAP servers.
+Message editor: rich text editing & HTML (Almost complete, but not activated
+ yet.
+ Will be there very soon.)
 \layout Itemize
 
-Templates for message composition and replies.
+A faster mail folder format or support for storing messages in an ODBC database.
+\layout Itemize
+
+A calendar pluginto to add some some time planning, reminder and mail-delay
+ functionality (and synchronisation of it with PalmOS handhelds).
+\layout Itemize
+
+Full Drag and Drop between folders and interaction with filemanagers of
+ Windows and Gnome/KDE.
 \layout Itemize
 
 Support for PGP and GNU Privacy Guard to encrypt mails.
  
 \layout Itemize
 
-Full Drag and Drop interaction with filemanagers of Windows and Gnome/KDE,
- recently added to wxWindows.
-\layout Itemize
-
 Wide character (Unicode) support and other character sets, currently being
  added to wxWindows.
-\layout Itemize
-
-Searching in folders.
-\layout Itemize
-
-A calendar add-on to to add some some time planning, reminder functionality
- (early planning stage).
-\layout Subsubsection
-
-Further we plan the following:
-\layout Itemize
-
-Better Python support.
- We have some callbacks in place, but after the class hierarchy rewrite
- we have to generate new interface files for the complete class hierarchy.
- Also by this time wxPython might be integrated, so we can actually write
- some of the configuration dialogs in python which should speed things up.
- 
-\shape italic 
-Help welcome.
-\layout Itemize
-
-Support for V-cards.
-\layout Itemize
-
-Spam-Ex spam fighting/auto-complaint function.
-\layout Itemize
-
-Compression of mail folders.
-\layout Itemize
-
-Delay-Folder to keep mails and re-present them at a later date.
-\layout Itemize
-
-More import, export and synchronisation with other programs' address databases.
-\layout Itemize
-
-Voice mail.
-\layout Itemize
-
-CORBA support for GNOME and KDE.
-\layout Itemize
-
-ANY OTHER SUGGESTION
 \layout Subsection
 
 Help Needed
@@ -414,13 +374,7 @@ As you can see, we have big plans for Mahogany.
 Python 
 \layout Itemize
 
-support for further mail protocols, LDAP
-\layout Itemize
-
-The wxQt project, a port of wxWindows to the Qt toolkit, can also use any
- help.
- We are not directly involved in this, but being involved with wxWindows,
- we are happy to support that port.
+support for other mail protocols and mailfolder file formats, LDAP
 \layout Itemize
 
 If you have access to other systems apart from Linux/Solaris/FreeBSD/Windows,
@@ -428,9 +382,7 @@ If you have access to other systems apart from Linux/Solaris/FreeBSD/Windows,
  other hardware than Intel.
 \layout Itemize
 
-Translations to other languages (We have support for German, French, Spanish
- at present.
- Czech and Brasilian-Portuguese are underway.).
+Translations to other languages.
 \layout Itemize
 
 MacOS development
@@ -460,7 +412,8 @@ htmladdnormallinkfoot{m-developers@egroups.com}{mailto:m-developers@egroups.com}
 Copyright_1003_
 \layout Standard
 
-Mahogany is copyright by Karsten Ballüder and Vadim Zeitlin.
+Mahogany is copyright by The Mahogany Development Team (Founding members
+ Karsten Ballüder and Vadim Zeitlin).
  It is licensed under the Mahogany 
 \begin_inset Quotes eld
 \end_inset 
@@ -680,6 +633,20 @@ THIS PACKAGE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES
 , INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTIBILITY
  AND FITNESS FOR A PARTICULAR PURPOSE.
  
+\layout Subsection
+
+The License Dialog_4270_
+\layout Standard
+
+When you start Mahogany for the first time, it will display the license
+ and conditions of use and ask you to accept or reject the license.
+ If you do not accept it, Mahogany will terminate.
+ If you have any questions about the license or want to otherwise comment
+ on it, please email the development team at 
+\family typewriter 
+m-developers@egroups.com
+\family default 
+ .
 \layout Subsection
 
 Additional Credits
@@ -3660,6 +3627,12 @@ Scoring
 
  for the plugin providing the functionality for scoring messages and is
  used by the program to find the right plugin for a given operation.
+\layout Standard
+
+
+\series bold 
+Any changes to the plugin module settings will only take effect after you
+ re-started Mahogany!
 \layout Section
 
 The Address Database_3000_
@@ -4429,6 +4402,185 @@ Mahogany
 Mahogany
 \emph default 
 ´s functionality.
+ These modules can be loaded at runtime and do not need to be part of the
+ main executable.
+ At the time of release 0.5 we are still linking them statically, but they
+ can be loaded dynamically and future releases are likely to use this feature
+ to keep the size of the main executable down.
+\layout Subsection
+
+The Filters Module
+\layout Standard
+
+This module provides a filtering language for Mahogany.
+ It allows you to have Mahogany look at different message properties, such
+ as message contents, size or header lines and execute arbitrary action
+ on them.
+ The most common use would be to sort mails from different mailing lists
+ in corresponding mailfolders, to reduce the number of messages in your
+ main incoming mailbox.
+ Filters can be specified in three possible ways:
+\layout Itemize
+
+You can use the filters dialog.
+ This is the most convenient and best supported option.
+\layout Itemize
+
+You can write them by hand, using a simple programming language remotely
+ similar to 'C', and put the filtering rules directly into the Mahogany
+ configuration file or registry.
+\layout Itemize
+
+You can write complex rules yourself, save them to a file and tell Mahogany
+ to read the rules from that file.
+\layout Subsubsection
+
+The Filters Dialog_4260_
+\layout Standard
+
+You must have a mailbox selected in the tree before calling this dialog.
+ It allows you to set up filtering rules for the folder selected.
+ You can have different sets of rules for each folder.
+ If you want to apply rules to all incoming messages and are collecting
+ mail from different servers, simply apply the rules to the 
+\begin_inset Quotes eld
+\end_inset 
+
+New Mail
+\begin_inset Quotes erd
+\end_inset 
+
+ folder if you have one, alternatively you can set up rules for individual
+ servers or INBOX.
+\layout Standard
+
+The main filters dialog allows you to edit existing rules, add new rules
+ and change the order of the rules.
+ The listbox on the left lists the existing filtering rules for the currently
+ selected folder in the order in which they are executed.
+ You can use the buttons to change the order or rules.
+ If you decide to edit or create a new rule, you get into another dialog,
+ the
+\layout Subsubsection
+
+The Filter-Rule Dialog_4261_
+\layout Standard
+
+This dialog allows you to set up or edit an individual filtering rule, it
+ contains of the following components:
+\layout Itemize
+
+The rule name, in the text entry field at the very top.
+ This name is only to help you remember what the rule does and will appear
+ in the list of rules in the main Filters Dialog, but is without any further
+ significance.
+\layout Itemize
+
+Underneath the name, you find the text 
+\begin_inset Quotes eld
+\end_inset 
+
+If Message...
+\begin_inset Quotes erd
+\end_inset 
+
+ followed by at least one row of conditioncontrols.
+\layout Itemize
+
+Under the condition controls you find the text 
+\begin_inset Quotes eld
+\end_inset 
+
+Then do this:
+\begin_inset Quotes eld
+\end_inset 
+
+ followed by some action controls.
+\layout Standard
+
+You can add more pattern matching controls by pressing the [More] button,
+ and you can delete the last pattern matching rule by pressing the [Less]
+ button.
+ The number of actions to execute is fixed to one.
+\layout Standard
+
+You can use several condition and connect them via logical AND and OR, optionall
+y negating them by ticking the [Not] box.
+ The following conditions can be tested for at present:
+\layout Itemize
+
+Always - this rule will always be executed
+\layout Itemize
+
+Contains - check if the text next to it is contained in the message component
+ selected
+\layout Itemize
+
+Match - check if the message component selected is exactly this text (case
+ independent)
+\layout Itemize
+
+Match Case - check if the message compent selected is exactly this text
+ (case dependent)
+\layout Itemize
+
+Match RegExp - check if the message compent selected matches the regular
+ expression specified
+\layout Itemize
+
+Larger Than - check if the message is larger than this in KByte
+\layout Itemize
+
+Smaller Than - check if the message is smaller than this in KByte
+\layout Itemize
+
+Older Than - check if the message is older than this many days
+\layout Itemize
+
+Newer Than - check if the message is newer than this many days
+\layout Itemize
+
+Is SPAM - check if the message originates from a system blacklisted as sending
+ unsolicited emails (SPAM).
+ 
+\layout Itemize
+
+Python - execute the text in the box in the built-in Python interpreter
+ and proceed if it returns a non-0 result.
+\layout Standard
+
+The possible actions which can be performed, are:
+\layout Itemize
+
+Delete - deletes the message
+\layout Itemize
+
+Copy to - copies the message to the folder specified
+\layout Itemize
+
+Move to - moves the message to the folder specified
+\layout Itemize
+
+Expunge - expunge all messages in this folder
+\layout Itemize
+
+MessageBox - open a message box dialog with the text specified
+\layout Itemize
+
+LogEntry - add the text specified to the log window
+\layout Itemize
+
+Python - execute the text specified in the built-in Python interpreter
+\layout Standard
+
+If you are not using a Trash folder, it is a good idea to add a rule at
+ the end of the list of filtering rules, that always expunges all messages.
+ For testing filters, you can leave that rule disabled, an all messages
+ will get treated and marked as deleted, but stay around.
+ Only when expunge is executed, will they really disappear in the original
+ mailbox.
+ Notice, if you are using a Trash folder, this does not apply, as messages
+ won't be marked as deleted but moved straight to Trash.
 \layout Subsection
 
 The PalmOS Module
@@ -4507,9 +4659,26 @@ Synchronise mails
  a mailbox which will be used as place of exchange for mails.
  Mails in this folder will be transfered to the Palm at the next hotsync
  and the outbox of the Palm´s mail program will be send.
+ This mailbox is also used as a configuration setting for messages sent.
+ Mahogany will use the properties of this mailbox when sending the messages
+ retrieved from the Palm's Outbox.
+ If you have enabled the 
+\begin_inset Quotes eld
+\end_inset 
+
+advanced user
+\begin_inset Quotes erd
+\end_inset 
+
+ option in the program preferences' identity tab, you can set up a separate
+ return-address or completely different options for this mailbox and therefor
+ have the mail sent from the PalmPilot with different settings as those
+ sent normally.
+ The options for user name and return address as set on the Palm are ignored
+ when mails are sent with Mahogany.
 \begin_deeper 
 \begin_deeper 
-\layout Standard
+\layout Itemize
 
 The 
 \begin_inset Quotes eld
@@ -4519,8 +4688,20 @@ Mail disposal mode
 \begin_inset Quotes erd
 \end_inset 
 
- specifies, ...
- ???
+ specifies what to do with outgoing e-mails retrieved from the PalmPilot
+ and sent.
+ You have three options: 
+\begin_deeper 
+\layout Itemize
+
+file : move messages from Outbox to Filed mailbox on the Palm
+\layout Itemize
+
+delete : delete messages after sending
+\layout Itemize
+
+keep : keep messages in Palm's Oubox
+\end_deeper 
 \end_deeper 
 \end_deeper 
 \layout Itemize
