@@ -46,7 +46,8 @@ wxLayoutWindow::OnMouse(wxMouseEvent& event)
    {
       if(m_EventId)
       {
-         wxCommandEvent cevent(0,0);
+//       wxCommandEvent cevent(wxEVT_COMMAND_LEFT_CLICK,0);
+       wxCommandEvent cevent(00);
          cevent.SetId(m_EventId);
          cevent.SetClientData((char *)m_FoundObject);
          GetEventHandler()->ProcessEvent(cevent);

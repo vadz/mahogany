@@ -42,7 +42,7 @@ private:
    bool m_ScrollbarsSet;
    /// if we want to find an object:
    wxPoint m_FindPos;
-   wxLObjectBase *m_FoundObject;
+   wxLayoutObjectBase *m_FoundObject;
 
    DECLARE_EVENT_TABLE()
 };

@@ -6,7 +6,11 @@
  * $Id$ *
  ********************************************************************
  * $Log$
+ * Revision 1.10  1998/06/28 19:45:52  KB
+ * wxComposeView now sends mail, still a bit buggy, but mainly complete.
+ *
  * Revision 1.9  1998/06/22 22:42:32  VZ
+ *
  * kbList/CHECK/PY_CALLBACK small changes
  *
  * Revision 1.8  1998/06/05 16:56:23  VZ
@@ -105,12 +109,12 @@ wxIconManager::wxIconManager()
    AddIcon(M_ICON_HLINK_HTTP, hlink_xpm);
    AddIcon(M_ICON_HLINK_FTP, ftplink_xpm);
 
-   #if  USE_WXGTK
+#if  USE_WXGTK
       // @@@@ no appropriate ctor in wxGTK
       unknownIcon = NULL;
-   #else
-      unknownIcon = GLOBAL_NEW wxIcon(unknown_xpm);
-   #endif 
+#else
+      unknownIcon = new wxIcon(unknown_xpm);
+#endif 
 }
 
 
@@ -119,8 +123,10 @@ wxIconManager::~wxIconManager()
    IconDataList::iterator i;
 
    for(i = iconList->begin(); i != iconList->end(); i++)
-      GLOBAL_DELETE (*i)->iconPtr;
-   GLOBAL_DELETE unknownIcon;
+      if((*i)->iconPtr)
+         delete (*i)->iconPtr;
+   if(unknownIcon)
+      delete unknownIcon;
 }
 
 wxIcon *
@@ -152,12 +158,12 @@ wxIconManager::AddIcon(String const &iconName,  IconResourceType data)
 
    id.iconName = iconName;
 
-   #if  USE_WXGTK
+#if  USE_WXGTK
      // @@@@ no appropriate ctor in wxGTK
      id.iconPtr = NULL;
-   #else
+#else
      id.iconPtr = GLOBAL_NEW wxIcon(data);
-   #endif
+#endif
 
    iconList->push_front(&id);
 }

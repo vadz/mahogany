@@ -3,7 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$         *
+ * $Id$        *
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -50,9 +50,12 @@
 #include "gui/wxIconManager.h"
 //#include "gui/wxFText.h"
 //#include "gui/wxFTCanvas.h"
+
+#include   "gui/wxllist.h"
 #include   "gui/wxlwindow.h"
-#include "gui/wxComposeView.h"
-#include "gui/wxAdbEdit.h"
+#include   "gui/wxlparser.h"
+#include   "gui/wxComposeView.h"
+#include   "gui/wxAdbEdit.h"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -74,19 +77,27 @@ IMPLEMENT_DYNAMIC_CLASS(wxComposeView, wxMFrame)
 
 #ifdef USE_WXWINDOWS2
    BEGIN_EVENT_TABLE(wxComposeView, wxMFrame)
-      // wxComposeView menu events
-      EVT_MENU(WXMENU_COMPOSE_INSERTFILE, wxComposeView::OnInsertFile)
-      EVT_MENU(WXMENU_COMPOSE_SEND,       wxComposeView::OnSend)
-      EVT_MENU(WXMENU_COMPOSE_PRINT,      wxComposeView::OnPrint)
-      EVT_MENU(WXMENU_COMPOSE_CLEAR,      wxComposeView::OnClear)
+   // wxComposeView menu events
+   EVT_MENU(WXMENU_COMPOSE_INSERTFILE, wxComposeView::OnInsertFile)
+   EVT_MENU(WXMENU_COMPOSE_SEND,       wxComposeView::OnSend)
+   EVT_MENU(WXMENU_COMPOSE_PRINT,      wxComposeView::OnPrint)
+   EVT_MENU(WXMENU_COMPOSE_CLEAR,      wxComposeView::OnClear)
    
-      // button notifications
-      EVT_BUTTON(IDB_EXPAND, wxComposeView::OnExpand)
+   // button notifications
+   EVT_BUTTON(IDB_EXPAND, wxComposeView::OnExpand)
 
-      // size change
-      EVT_SIZE(wxComposeView::OnSize)
+   // size change
+   EVT_SIZE(wxComposeView::OnSize)
    END_EVENT_TABLE() 
 #endif
+
+
+   struct MimeContent
+   {
+      String m_FileName;
+      int    m_NumericMimeType;
+      String m_MimeType;
+   };
 
 // ============================================================================
 // implementation
@@ -97,163 +108,163 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
                       String const &to, String const &cc, String const &bcc,
                       bool hide)
 {
-  CHECK_RET( !initialised, "wxComposeView created twice" );
+   CHECK_RET( !initialised, "wxComposeView created twice" );
 
-  m_LayoutWindow = NULL;
-  nextFileID = 0;
+   m_LayoutWindow = NULL;
+   nextFileID = 0;
 
-  if(!parentProfile)
-    parentProfile = mApplication.GetProfile();
+   if(!parentProfile)
+      parentProfile = mApplication.GetProfile();
    profile = new Profile(iname,parentProfile);
 
-  // use default values for address fields if none explicitly specified
-  const char *cto = strutil_isempty(to) ? READ_CONFIG(profile, MP_COMPOSE_TO) 
-                                        : to.c_str();
-  const char *ccc = strutil_isempty(cc) ? READ_CONFIG(profile, MP_COMPOSE_CC) 
-                                        : cc.c_str();
-  const char *cbcc = strutil_isempty(bcc) ? READ_CONFIG(profile, MP_COMPOSE_BCC)
-                                          : bcc.c_str();
+   // use default values for address fields if none explicitly specified
+   const char *cto = strutil_isempty(to) ? READ_CONFIG(profile, MP_COMPOSE_TO) 
+      : to.c_str();
+   const char *ccc = strutil_isempty(cc) ? READ_CONFIG(profile, MP_COMPOSE_CC) 
+      : cc.c_str();
+   const char *cbcc = strutil_isempty(bcc) ? READ_CONFIG(profile, MP_COMPOSE_BCC)
+      : bcc.c_str();
 
-  // build menu
-  // ----------
-  AddFileMenu();
+   // build menu
+   // ----------
+   AddFileMenu();
 
-  composeMenu = new wxMenu;
-  composeMenu->Append(WXMENU_COMPOSE_INSERTFILE, WXCPTR _("Insert &File"));
-  composeMenu->Append(WXMENU_COMPOSE_SEND,WXCPTR _("&Send"));
-  composeMenu->Append(WXMENU_COMPOSE_PRINT,WXCPTR _("&Print"));
-  composeMenu->AppendSeparator();
-  composeMenu->Append(WXMENU_COMPOSE_CLEAR,WXCPTR _("&Clear"));
-  menuBar->Append(composeMenu, WXCPTR _("&Compose"));
+   composeMenu = new wxMenu;
+   composeMenu->Append(WXMENU_COMPOSE_INSERTFILE, WXCPTR _("Insert &File"));
+   composeMenu->Append(WXMENU_COMPOSE_SEND,WXCPTR _("&Send"));
+   composeMenu->Append(WXMENU_COMPOSE_PRINT,WXCPTR _("&Print"));
+   composeMenu->AppendSeparator();
+   composeMenu->Append(WXMENU_COMPOSE_CLEAR,WXCPTR _("&Clear"));
+   menuBar->Append(composeMenu, WXCPTR _("&Compose"));
 
-  AddHelpMenu();
-  SetMenuBar(menuBar);
+   AddHelpMenu();
+   SetMenuBar(menuBar);
 
-  // create panel with items
-  // -----------------------
-  panel = new wxPanel(this);
+   // create panel with items
+   // -----------------------
+   panel = new wxPanel(this);
 
-  #ifdef USE_WXWINDOWS2
-    // @@ SetLabelPosition(wxVERTICAL) in wxWin2 ??
-  #else
-    panel->SetLabelPosition(wxVERTICAL);
-   #endif
+#ifdef USE_WXWINDOWS2
+   // @@ SetLabelPosition(wxVERTICAL) in wxWin2 ??
+#else
+   panel->SetLabelPosition(wxVERTICAL);
+#endif
 
-  txtToLabel = CreateLabel(panel, "To:");
-  txtTo      = CreateText(panel, -1, -1, -1, -1, "toField");
+   txtToLabel = CreateLabel(panel, "To:");
+   txtTo      = CreateText(panel, -1, -1, -1, -1, "toField");
 
    aliasButton = CreateButton(panel, "Expand", "", IDB_EXPAND);
 
-  if( READ_CONFIG(profile, MP_SHOWCC) )
-  {
-    txtCCLabel = CreateLabel(panel, "CC:");
-    txtCC = CreateText(panel, -1, -1, -1, -1, "");
-  }
-  if( READ_CONFIG(profile, MP_SHOWBCC) )
-  {
-    txtBCCLabel = CreateLabel(panel, "BCC:");
-    txtBCC = CreateText(panel, -1, -1, -1, -1, "");
-  }
-  txtSubjectLabel = CreateLabel(panel, "Subject:");
-  txtSubject = CreateText(panel, -1, -1, -1, -1, "Subject");
+   if( READ_CONFIG(profile, MP_SHOWCC) )
+   {
+      txtCCLabel = CreateLabel(panel, "CC:");
+      txtCC = CreateText(panel, -1, -1, -1, -1, "");
+   }
+   if( READ_CONFIG(profile, MP_SHOWBCC) )
+   {
+      txtBCCLabel = CreateLabel(panel, "BCC:");
+      txtBCC = CreateText(panel, -1, -1, -1, -1, "");
+   }
+   txtSubjectLabel = CreateLabel(panel, "Subject:");
+   txtSubject = CreateText(panel, -1, -1, -1, -1, "Subject");
 
-  // fix the constraints
-  // -------------------
-  wxLayoutConstraints *c;
-  SetAutoLayout(TRUE);
-  panel->SetAutoLayout(TRUE);
+   // fix the constraints
+   // -------------------
+   wxLayoutConstraints *c;
+   SetAutoLayout(TRUE);
+   panel->SetAutoLayout(TRUE);
 
-  // with the constraints, I assume that "Subject" is the longest label
-  // and all labels are right justified to the right edge of "Subject" label
+   // with the constraints, I assume that "Subject" is the longest label
+   // and all labels are right justified to the right edge of "Subject" label
 
-  // first row: "To" fields (label and text entry) and the "Expand" button
-  c = new wxLayoutConstraints;
-  c->top.SameAs(panel, wxTop, LAYOUT_MARGIN);
-  c->right.SameAs(txtSubjectLabel, wxRight);
-  c->height.AsIs();
-  c->width.AsIs();
-  txtToLabel->SetConstraints(c);
+   // first row: "To" fields (label and text entry) and the "Expand" button
+   c = new wxLayoutConstraints;
+   c->top.SameAs(panel, wxTop, LAYOUT_MARGIN);
+   c->right.SameAs(txtSubjectLabel, wxRight);
+   c->height.AsIs();
+   c->width.AsIs();
+   txtToLabel->SetConstraints(c);
 
-  c = new wxLayoutConstraints;
-  c->top.SameAs(panel, wxTop, LAYOUT_MARGIN);
-  c->left.SameAs(txtSubjectLabel, wxRight, LAYOUT_MARGIN);
-  c->right.SameAs(aliasButton, wxLeft, LAYOUT_MARGIN);
-  c->height.AsIs(); 
-  txtTo->SetConstraints(c);
+   c = new wxLayoutConstraints;
+   c->top.SameAs(panel, wxTop, LAYOUT_MARGIN);
+   c->left.SameAs(txtSubjectLabel, wxRight, LAYOUT_MARGIN);
+   c->right.SameAs(aliasButton, wxLeft, LAYOUT_MARGIN);
+   c->height.AsIs(); 
+   txtTo->SetConstraints(c);
 
-  c = new wxLayoutConstraints;
-  c->top.SameAs        (panel, wxTop, LAYOUT_MARGIN);
-  c->right.SameAs(panel, wxRight, LAYOUT_MARGIN);
-  c->width.AsIs();
-  c->height.AsIs(); 
-  aliasButton->SetConstraints(c);
+   c = new wxLayoutConstraints;
+   c->top.SameAs        (panel, wxTop, LAYOUT_MARGIN);
+   c->right.SameAs(panel, wxRight, LAYOUT_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs(); 
+   aliasButton->SetConstraints(c);
 
-  // second row: optional "CC" label and text entry
+   // second row: optional "CC" label and text entry
 
-  // the last control we set the constraints for
-  wxItem *last = txtTo;
+   // the last control we set the constraints for
+   wxItem *last = txtTo;
 
-  if( READ_CONFIG(profile, MP_SHOWCC) )
-  {
-    c = new wxLayoutConstraints;
-    c->top.Below(txtToLabel);
-    c->right.SameAs(txtSubjectLabel, wxRight);
-    c->height.AsIs();
-    c->width.AsIs();
-    txtCCLabel->SetConstraints(c);
+   if( READ_CONFIG(profile, MP_SHOWCC) )
+   {
+      c = new wxLayoutConstraints;
+      c->top.Below(txtToLabel);
+      c->right.SameAs(txtSubjectLabel, wxRight);
+      c->height.AsIs();
+      c->width.AsIs();
+      txtCCLabel->SetConstraints(c);
 
-    c = new wxLayoutConstraints;
-    c->top.Below(txtToLabel);
-    c->left.SameAs(txtSubjectLabel, wxRight, LAYOUT_MARGIN);
-    c->right.SameAs(panel, wxRight, LAYOUT_MARGIN);
-    c->height.AsIs(); 
-    txtCC->SetConstraints(c);
-    last = txtCC;
-  }
+      c = new wxLayoutConstraints;
+      c->top.Below(txtToLabel);
+      c->left.SameAs(txtSubjectLabel, wxRight, LAYOUT_MARGIN);
+      c->right.SameAs(panel, wxRight, LAYOUT_MARGIN);
+      c->height.AsIs(); 
+      txtCC->SetConstraints(c);
+      last = txtCC;
+   }
 
-  // third row: optional "BCC" label and text entry
-  if( READ_CONFIG(profile, MP_SHOWBCC) )
-  {
-    c = new wxLayoutConstraints;
-    c = new wxLayoutConstraints;
-    c->top.Below(last);
-    c->right.SameAs(txtSubjectLabel, wxRight);
-    c->height.AsIs();
-    c->width.AsIs();
-    txtBCCLabel->SetConstraints(c);
+   // third row: optional "BCC" label and text entry
+   if( READ_CONFIG(profile, MP_SHOWBCC) )
+   {
+      c = new wxLayoutConstraints;
+      c = new wxLayoutConstraints;
+      c->top.Below(last);
+      c->right.SameAs(txtSubjectLabel, wxRight);
+      c->height.AsIs();
+      c->width.AsIs();
+      txtBCCLabel->SetConstraints(c);
 
-    c = new wxLayoutConstraints;
-    c->top.Below(last);
-    c->left.SameAs(txtSubjectLabel, wxRight, LAYOUT_MARGIN);
-    c->right.SameAs(panel, wxRight, LAYOUT_MARGIN);
-    c->height.AsIs(); 
-    txtBCC->SetConstraints(c);
-    last = txtBCC;
-  }
+      c = new wxLayoutConstraints;
+      c->top.Below(last);
+      c->left.SameAs(txtSubjectLabel, wxRight, LAYOUT_MARGIN);
+      c->right.SameAs(panel, wxRight, LAYOUT_MARGIN);
+      c->height.AsIs(); 
+      txtBCC->SetConstraints(c);
+      last = txtBCC;
+   }
 
-  // fourth row: subject line
-  c = new wxLayoutConstraints;
-  c->top.SameAs(last, wxBottom, LAYOUT_MARGIN); //Below  (last);
-  c->left.SameAs(panel, wxLeft, LAYOUT_MARGIN);
-  c->height.AsIs();
-  c->width.AsIs();
-  txtSubjectLabel->SetConstraints(c);
+   // fourth row: subject line
+   c = new wxLayoutConstraints;
+   c->top.SameAs(last, wxBottom, LAYOUT_MARGIN); //Below  (last);
+   c->left.SameAs(panel, wxLeft, LAYOUT_MARGIN);
+   c->height.AsIs();
+   c->width.AsIs();
+   txtSubjectLabel->SetConstraints(c);
 
-  c = new wxLayoutConstraints;
-  c->top.Below(last);
-  c->left.SameAs(txtSubjectLabel, wxRight, LAYOUT_MARGIN);
-  c->right.SameAs(panel, wxRight, LAYOUT_MARGIN);
-  c->height.AsIs(); 
-  txtSubject->SetConstraints(c);
-  last = txtSubjectLabel;
+   c = new wxLayoutConstraints;
+   c->top.Below(last);
+   c->left.SameAs(txtSubjectLabel, wxRight, LAYOUT_MARGIN);
+   c->right.SameAs(panel, wxRight, LAYOUT_MARGIN);
+   c->height.AsIs(); 
+   txtSubject->SetConstraints(c);
+   last = txtSubjectLabel;
 
-  // Panel itself
-  c = new wxLayoutConstraints;
-  c->left.SameAs(this, wxLeft);
-  c->top.SameAs(this, wxTop);
-  c->right.SameAs(this, wxRight);
-  c->height.SameAs  (this, wxHeight);
-  panel->SetConstraints(c);
+   // Panel itself
+   c = new wxLayoutConstraints;
+   c->left.SameAs(this, wxLeft);
+   c->top.SameAs(this, wxTop);
+   c->right.SameAs(this, wxRight);
+   c->height.SameAs  (this, wxHeight);
+   panel->SetConstraints(c);
 
    txtSubjectLabel = CreateLabel(panel, "Subject:");
    txtSubject = CreateText(panel, -1, -1, -1, -1, "Subject");
@@ -265,10 +276,10 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
    // -------------------
 
    // macro which centers one control vertically with respect to another one
-   #define VCENTER(c, ref) c->height.AsIs();         \
-                          c->centreY.SameAs(ref, wxCentreY, -1)
+#define VCENTER(c, ref) c->height.AsIs();         \
+   c->centreY.SameAs(ref, wxCentreY, -1)
 
-   SetAutoLayout(TRUE);
+      SetAutoLayout(TRUE);
    panel->SetAutoLayout(TRUE);
 
    // with the constraints, I assume that "Subject" is the longest label
@@ -335,38 +346,38 @@ wxComposeView::Create(const String &iname, wxWindow *parent,
       txtLast = txtBCC;
    }
 
-  if( READ_CONFIG(profile, MP_COMPOSE_USE_SIGNATURE) )
-  {
-    size_t size;
-    ifstream istr;
-    char *buffer;
-    istr.open(READ_CONFIG(profile, MP_COMPOSE_SIGNATURE));
-    if(istr)
-    {
-      istr.seekg(0,ios::end);
-      size = istr.tellg();
-      buffer = new char [size+1];
-     if( READ_CONFIG(profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) )
-     {
-        m_LayoutWindow->GetLayoutList().Insert("--");
-        m_LayoutWindow->GetLayoutList().LineBreak();;
-     }
-      istr.seekg(0,ios::beg);
-      istr.read(buffer, size);
-      buffer[size] = '\0';
-      if(! istr.fail())
-        m_LayoutWindow->GetLayoutList().Insert(buffer);
-      delete [] buffer;
-      istr.close();
-      m_LayoutWindow->GetLayoutList().SetCursor(wxPoint(0,0));
-    }
+   if( READ_CONFIG(profile, MP_COMPOSE_USE_SIGNATURE) )
+   {
+      size_t size;
+      ifstream istr;
+      char *buffer;
+      istr.open(READ_CONFIG(profile, MP_COMPOSE_SIGNATURE));
+      if(istr)
+      {
+         istr.seekg(0,ios::end);
+         size = istr.tellg();
+         buffer = new char [size+1];
+         if( READ_CONFIG(profile, MP_COMPOSE_USE_SIGNATURE_SEPARATOR) )
+         {
+            m_LayoutWindow->GetLayoutList().Insert("--");
+            m_LayoutWindow->GetLayoutList().LineBreak();;
+         }
+         istr.seekg(0,ios::beg);
+         istr.read(buffer, size);
+         buffer[size] = '\0';
+         if(! istr.fail())
+            m_LayoutWindow->GetLayoutList().Insert(buffer);
+         delete [] buffer;
+         istr.close();
+         m_LayoutWindow->GetLayoutList().SetCursor(wxPoint(0,0));
+      }
    }
 
    CreateStatusBar();
 
    initialised = true;
    if(! hide)
-    Show(TRUE);
+      Show(TRUE);
    //   txtTo->SetFocus();
 }
 
@@ -390,9 +401,9 @@ void
 wxComposeView::OnSize(wxSizeEvent& event)
 {
 #  ifdef USE_WXGTK
-      Layout();
+   Layout();
 #  else  // MSW
-      wxMFrame::OnSize(event);
+   wxMFrame::OnSize(event);
 #  endif // GTK
 }
 #else //wxWin1
@@ -407,7 +418,7 @@ wxComposeView::wxComposeView(const String &iname,
                              wxWindow *parent,
                              ProfileBase *parentProfile,
                              bool hide)
-             : wxMFrame(iname)
+   : wxMFrame(iname,parent)
 {
    initialised = false;
    Create(iname,parent,parentProfile, "","","",hide);
@@ -517,10 +528,7 @@ wxComposeView::InsertFile(void)
 {
    String
       mimeType,
-      tmp,
-      fileName;
-   int
-      numericType;
+      tmp;
    
    const char
       *filename = MDialog_FileRequester(NULL,this,NULL,NULL,NULL,NULL,true,profile);
@@ -528,21 +536,14 @@ wxComposeView::InsertFile(void)
    if(! filename)
       return;
 
-   fileName = filename;
-   
-   wxCVFileMapEntry *e = new wxCVFileMapEntry();
-   e->filename = fileName;
-   e->id = nextFileID;
-   fileMap.push_back(e);
+   MimeContent *mc = new MimeContent();
+   mc->m_FileName =  String(filename);
+   mc->m_NumericMimeType = TYPEAPPLICATION;
+   if(! mApplication.GetMimeTypes()->Lookup(mc->m_FileName, mc->m_MimeType, &(mc->m_NumericMimeType)))
+      mc->m_MimeType = String("APPLICATION/OCTET-STREAM");
 
-   numericType = TYPEAPPLICATION;
-   if(! mApplication.GetMimeTypes()->Lookup(fileName, mimeType, &numericType))
-      mimeType = "APPLICATION/OCTET-STREAM";
-   tmp = String("<IMG SRC=\"") + mimeType+ String("\" ") + String(";")
-      + mimeType + String (";")  + strutil_ltoa(numericType)
-      + String(";") +  strutil_ultoa(nextFileID) + String(">");
-
-   nextFileID ++;
+   wxLayoutObjectIcon *obj = new wxLayoutObjectIcon(m_IconManager.GetIcon(mimeType));
+   obj->SetUserData(mc);
    
    m_LayoutWindow->GetLayoutList().Insert(tmp);
    m_LayoutWindow->GetLayoutList().MoveCursor(1,0);
@@ -567,10 +568,6 @@ wxComposeView::Send(void)
       * tmp;
    String
       tmp2, mimeType, mimeSubType;
-//FIXME
-   int ftoType = 0;
-//   FTObjectType
-   //    ftoType;
    const char
       *filename = NULL;
    char
@@ -582,25 +579,66 @@ wxComposeView::Send(void)
       size;
    int
       numMimeType;
-   
+
    SendMessageCC sm
       (
-       mApplication.GetProfile(),
-       (const char *)txtSubject->GetValue(),
-       (const char *)txtTo->GetValue(),
-       READ_CONFIG(profile, MP_SHOWCC) ? txtCC->GetValue().c_str()
-                                       : (const char *)NULL,
-       READ_CONFIG(profile, MP_SHOWBCC) ? txtBCC->GetValue().c_str() 
-                                        : (const char *)NULL
-      );
-//FIXME   tmp = m_LayoutWindow->GetContent(&ftoType, true);
+         mApplication.GetProfile(),
+         (const char *)txtSubject->GetValue(),
+         (const char *)txtTo->GetValue(),
+         READ_CONFIG(profile, MP_SHOWCC) ? txtCC->GetValue().c_str()
+         : (const char *)NULL,
+         READ_CONFIG(profile, MP_SHOWBCC) ? txtBCC->GetValue().c_str() 
+         : (const char *)NULL
+         );
+
+   wxLayoutExportObject *export;
+   wxLayoutList::iterator i = m_LayoutWindow->GetLayoutList().begin();
+   wxLayoutObjectBase *lo = NULL;
+   MimeContent *mc = NULL;
+      
+   while((export = wxLayoutExport(m_LayoutWindow->GetLayoutList(),
+                                  i,WXLO_EXPORT_AS_TEXT)) != NULL)
+   {
+      if(export->type == WXLO_EXPORT_TEXT)
+         sm.AddPart(TYPETEXT,export->content.text->c_str(),export->content.text->length());
+      else
+      {
+         lo = export->content.object;
+         if(lo->GetType() == WXLO_TYPE_ICON)
+         {
+            mc = (MimeContent *)lo->GetUserData();
+            istr.open(mc->m_FileName.c_str());
+            if(istr)
+            {
+               istr.seekg(0,ios::end);
+               size = istr.tellg();
+               buffer = new char [size];
+               istr.seekg(0,ios::beg);
+               istr.read(buffer, size);
+ 
+               if(! istr.fail())
+                  sm.AddPart(mc->m_NumericMimeType, buffer, size,
+                             strutil_after(mc->m_MimeType,'/')  //subtype
+                     );
+               else
+                  SYSERRMESSAGE((_("Cannot read file."),this));
+               delete [] buffer;
+               istr.close();
+            }
+            else
+               SYSERRMESSAGE((_("Cannot open file: ")+mc->m_FileName,this));
+            delete mc;
+         }
+      }
+      delete export;
+   }
 #if 0
    while(ftoType != LI_ILLEGAL)
    {
       switch(ftoType)
       {
       case LI_TEXT:
-         sm.AddPart(TYPETEXT,tmp->c_str(),tmp->size());
+         sm.AddPart(TYPETEXT,tmp->c_str(),tmp->length());
          break;
 
       case LI_ICON:
@@ -620,18 +658,18 @@ wxComposeView::Send(void)
          istr.open(filename);
          if(istr)
          {
-          istr.seekg(0,ios::end);
-          size = istr.tellg();
-          buffer = new char [size];
-          istr.seekg(0,ios::beg);
-          istr.read(buffer, size);
+            istr.seekg(0,ios::end);
+            size = istr.tellg();
+            buffer = new char [size];
+            istr.seekg(0,ios::beg);
+            istr.read(buffer, size);
  
-          if(! istr.fail())
-             sm.AddPart(numMimeType, buffer, size, mimeSubType);
-          else
-             SYSERRMESSAGE((_("Cannot read file."),this));
-          delete [] buffer;
-          istr.close();
+            if(! istr.fail())
+               sm.AddPart(numMimeType, buffer, size, mimeSubType);
+            else
+               SYSERRMESSAGE((_("Cannot read file."),this));
+            delete [] buffer;
+            istr.close();
          }
          delete [] ocptr;
          break;

@@ -3,6 +3,8 @@ $Id$
 
 *** bugs to fix ***
 
+- fix wxIconManager for GTK
+
 - listCtrl in wxMainFrame doesn't even show up - wxGTK broken?
 
 - clean up header inclusion: use <> for system/wxWin files and "xxx" for M

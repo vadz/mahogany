@@ -3,44 +3,7 @@
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.10  1998/06/27 20:06:11  KB
- * Added my layout code.
- *
- * Revision 1.9  1998/06/14 21:33:38  KB
- * fixed the menu/callback problem, wxFolderView is now a panel
- *
- * Revision 1.8  1998/06/14 12:24:05  KB
- * started to move wxFolderView to be a panel, Python improvements
- *
- * Revision 1.7  1998/05/14 17:34:30  VZ
- *
- * added wxWin2 event map to wxComposeView class (fixed layout problem, menu
- * commands now also work)
- *
- * Revision 1.6  1998/05/12 12:19:00  VZ
- *
- * fixes to Windows fixes. Compiles under wxGTK if you #define USE_APPCONF.
- *
- * Revision 1.5  1998/05/02 15:21:33  KB
- * Fixed the #if/#ifndef etc mess - previous sources were not compilable.
- *
- * Revision 1.4  1998/05/01 14:02:41  KB
- * Ran sources through conversion script to enforce #if/#ifdef and space/TAB
- * conventions.
- *
- * Revision 1.3  1998/03/26 23:05:38  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.2  1998/03/16 18:22:42  karsten
- * started integration of python, fixed bug in wxFText/word wrapping
- *
- * Revision 1.1  1998/03/14 12:21:14  karsten
- * first try at a complete archive
- *
+ * $Id$ 
  *******************************************************************/
 #ifndef	WXCOMPOSEVIEW_H
 #define WXCOMPOSEVIEW_H
@@ -51,8 +14,9 @@
 
 #ifndef USE_PCH
 #   include   "Message.h"
-#   include   "wxMenuDefs.h"
-#   include   "wxMFrame.h"
+#   include   "gui/wxMenuDefs.h"
+#   include   "gui/wxMFrame.h"
+#   include   "gui/wxIconManager.h"
 #   include   "Profile.h"
 #   include   "kbList.h"
 #endif
@@ -198,6 +162,8 @@ private:
    /// the canvas for displaying the mail
    //wxFTCanvas	*ftCanvas;
    wxLayoutWindow *m_LayoutWindow;
+   /// an icon manager
+   wxIconManager m_IconManager;
    /// the alias expand button
    wxButton	*aliasButton;
    //@}

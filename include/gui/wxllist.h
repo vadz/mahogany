@@ -1,5 +1,5 @@
 /*-*- c++ -*-********************************************************
- * wxFTCanvas: a canvas for editing formatted text                  *
+ * wxLayoutList.h - a formatted text rendering engine for wxWindows *
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
@@ -21,21 +21,21 @@
 #endif
 
 
-enum wxLObjectType { LO_INVALID, LO_TEXT, LO_CMD, LO_ICON, LO_LINEBREAK };
+enum wxLayoutObjectType { WXLO_TYPE_INVALID, WXLO_TYPE_TEXT, WXLO_TYPE_CMD, WXLO_TYPE_ICON, WXLO_TYPE_LINEBREAK };
 
 typedef long CoordType;
 
 class wxLayoutList;
-class wxLObjectBase;
+class wxLayoutObjectBase;
 
-KBLIST_DEFINE(wxLObjectList, wxLObjectBase);
-KBLIST_DEFINE(wxLOLinesList, wxLObjectList::iterator);
+KBLIST_DEFINE(wxLayoutObjectList, wxLayoutObjectBase);
+KBLIST_DEFINE(wxLayoutOLinesList, wxLayoutObjectList::iterator);
 
 
-class wxLObjectBase
+class wxLayoutObjectBase
 {
 public:
-   virtual wxLObjectType GetType(void) const { return LO_INVALID; } ;
+   virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_INVALID; } ;
    /** Draws an object.
        @param dc the wxDC to draw on
        @param position where to draw the top left corner
@@ -50,8 +50,8 @@ public:
    /// returns the number of cursor positions occupied by this object
    virtual CoordType CountPositions(void) const { return 1; }
 
-   wxLObjectBase() { m_UserData = NULL; }
-   virtual ~wxLObjectBase() {}
+   wxLayoutObjectBase() { m_UserData = NULL; }
+   virtual ~wxLayoutObjectBase() {}
 #ifdef DEBUG
    virtual void Debug(void);
 #endif
@@ -64,10 +64,10 @@ private:
 };
 
 /// object for text block
-class wxLObjectText : public wxLObjectBase
+class wxLayoutObjectText : public wxLayoutObjectBase
 {
 public:
-   virtual wxLObjectType GetType(void) const { return LO_TEXT; }
+   virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_TEXT; }
    virtual void Draw(wxDC &dc, wxPoint position, CoordType baseLine,
                      bool draw = true);
    /** This returns the height and in baseLine the position of the
@@ -79,7 +79,7 @@ public:
    virtual void Debug(void);
 #endif
 
-   wxLObjectText(const wxString &txt);
+   wxLayoutObjectText(const wxString &txt);
    virtual CoordType CountPositions(void) const { return strlen(m_Text.c_str()); }
 
    // for editing:
@@ -94,29 +94,40 @@ private:
 };
 
 /// icon/pictures:
-class wxLObjectIcon : public wxLObjectBase
+class wxLayoutObjectIcon : public wxLayoutObjectBase
 {
 public:
-   virtual wxLObjectType GetType(void) const { return LO_ICON; }
+   virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_ICON; }
    virtual void Draw(wxDC &dc, wxPoint position, CoordType baseLine,
                      bool draw = true);
    virtual wxPoint GetSize(CoordType *baseLine) const;
-   wxLObjectIcon(wxIcon *icon);
+   wxLayoutObjectIcon(wxIcon *icon);
 private:
    wxIcon * m_Icon;
 };
 
+/// for export to html:
+struct wxLayoutStyleInfo
+{
+   int  size, family, style, weight;
+   bool underline;
+   unsigned fg_red, fg_green, fg_blue;
+   unsigned bg_red, bg_green, bg_blue;
+};
+
 /// pseudo-object executing a formatting command in Draw()
-class wxLObjectCmd : public wxLObjectBase
+class wxLayoutObjectCmd : public wxLayoutObjectBase
 {
 public:
-   virtual wxLObjectType GetType(void) const { return LO_CMD; }
+   virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_CMD; }
    virtual void Draw(wxDC &dc, wxPoint position, CoordType baseLine,
                      bool draw = true);
-   wxLObjectCmd(int size, int family, int style, int weight,
+   wxLayoutObjectCmd(int size, int family, int style, int weight,
                 bool underline,
                 wxColour const *fg, wxColour const *bg);
-   ~wxLObjectCmd();
+   ~wxLayoutObjectCmd();
+   // caller must free pointer:
+   wxLayoutStyleInfo *GetStyle(void) const ;
 private:
    /// the font to use
    wxFont *m_font;
@@ -127,10 +138,10 @@ private:
 };
 
 /// this object doesn't do anything at all
-class wxLObjectLineBreak : public wxLObjectBase
+class wxLayoutObjectLineBreak : public wxLayoutObjectBase
 {
 public:
-   virtual wxLObjectType GetType(void) const { return LO_LINEBREAK; }
+   virtual wxLayoutObjectType GetType(void) const { return WXLO_TYPE_LINEBREAK; }
 };
 
 
@@ -141,7 +152,7 @@ public:
    functions, providing an editing ability. All events which cannot be
    handled get passed to the parent window's handlers.
 */
-class wxLayoutList : public wxLObjectList
+class wxLayoutList : public wxLayoutObjectList
 {
 public:
    wxLayoutList();
@@ -150,7 +161,7 @@ public:
    ~wxLayoutList();
 
    /// adds an object:
-   void AddObject(wxLObjectBase *obj);
+   void AddObject(wxLayoutObjectBase *obj);
    void AddText(wxString const &txt);
 
    void LineBreak(void);
@@ -168,7 +179,7 @@ public:
        @param coords position where to find the object
        @return if findObject == true, the object or NULL
    */
-   wxLObjectBase *Draw(wxDC &dc, bool findObject = false,
+   wxLayoutObjectBase *Draw(wxDC &dc, bool findObject = false,
                        wxPoint const &coords = wxPoint(0,0));
 
 #ifdef DEBUG
@@ -190,7 +201,7 @@ public:
    /// delete one or more cursor positions
    void Delete(CoordType count = 1);
    void Insert(wxString const &text);
-   void Insert(wxLObjectBase *obj);
+   void Insert(wxLayoutObjectBase *obj);
    void Clear(void);
 
    //@}
@@ -225,10 +236,10 @@ protected:
    bool      m_Editable;
    /// find the object to the cursor position and returns the offset
    /// in there
-   wxLObjectList::iterator FindObjectCursor(wxPoint const &cpos, CoordType *offset = NULL);
-   wxLObjectList::iterator FindCurrentObject(CoordType *offset = NULL);
+   wxLayoutObjectList::iterator FindObjectCursor(wxPoint const &cpos, CoordType *offset = NULL);
+   wxLayoutObjectList::iterator FindCurrentObject(CoordType *offset = NULL);
    // get the length of the line with the object pointed to by i
-   CoordType GetLineLength(wxLObjectList::iterator i);
+   CoordType GetLineLength(wxLayoutObjectList::iterator i);
    
 };
 
