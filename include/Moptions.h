@@ -325,7 +325,6 @@ extern const MOption MP_MAX_HEADERS_NUM;
 extern const MOption MP_MAX_HEADERS_NUM_HARD;
 extern const MOption MP_SAFE_FILTERS;
 extern const MOption MP_IMAP_LOOKAHEAD;
-extern const MOption MP_IMAP_BROKEN_LIST;
 extern const MOption MP_TCP_OPENTIMEOUT;
 extern const MOption MP_TCP_READTIMEOUT;
 extern const MOption MP_TCP_WRITETIMEOUT;
@@ -995,8 +994,6 @@ extern const MOption MP_AWAY_STATUS;
 
 /** @name timeout values for c-client mail library */
 //@{
-/// work around broken IMAP LIST command
-#define MP_IMAP_BROKEN_LIST_NAME "IMAPListHack"
 /// IMAP lookahead value
 #define MP_IMAP_LOOKAHEAD_NAME "IMAPlookahead"
 /// TCP/IP open timeout in seconds.
@@ -1878,8 +1875,6 @@ extern const MOption MP_AWAY_STATUS;
 #define MP_SAFE_FILTERS_DEFVAL 0l
 /** @name timeout values for c-client mail library */
 //@{
-/// work around broken IMAP LIST command
-#define MP_IMAP_BROKEN_LIST_DEFVAL 0l
 /// IMAP lookahead value
 #define MP_IMAP_LOOKAHEAD_DEFVAL 0l
 /// TCP/IP open timeout in seconds.
