@@ -1,12 +1,21 @@
 # -*-makefile-*-
 # rules to create object files:
 #
+ifdef USE_LIBTOOL
 %.o: %.cc
 	$(LIBTOOL) --mode=compile $(CXX) $(CXXFLAGS) -c $<
 %.o: %.cpp
 	$(LIBTOOL) --mode=compile $(CXX) $(CXXFLAGS) -c $<
 %.o: %.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) -c $<
+else
+%.o: %.cc
+	$(CXX) $(CXXFLAGS) -c $<
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $<
+%.o: %.c
+	$(CC) $(CFLAGS) -c $<
+endif
 
 %.cpp: %.i
 	$(SWIG) $(SWIGFLAGS) -o $(ODIR)/$@ $<

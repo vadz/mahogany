@@ -190,7 +190,7 @@ bool MailFolder::CanExit(String *which)
  *-------------------------------------------------------------------*/
 
 
-#include "wx/dynarray.h"
+#include <wx/dynarray.h>
 #include "gui/wxComposeView.h"
 #include "wx/persctrl.h"
 #include "MDialogs.h"

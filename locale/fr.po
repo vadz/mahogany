@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Mahogany 0.22a\n"
-"POT-Creation-Date: 1999-06-09 21:57+0100\n"
+"POT-Creation-Date: 1999-06-15 11:12+0100\n"
 "PO-Revision-Date: 1999-01-11 23:23+0000\n"
 "Last-Translator: Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>\n"
 "Language-Team: M-developers <m-developers@makelist.com>\n"
@@ -13,11 +13,11 @@ msgstr ""
 "Content-Type: text/plain; charset=ISO-8859-1\n"
 "Content-Transfer-Encoding: 8-bit\n"
 
-#: upgrade.cpp:274
+#: upgrade.cpp:275
 msgid "Deleted illegal folder profile: '"
 msgstr "Configuration incorrecte du répertoire: "
 
-#: upgrade.cpp:388
+#: upgrade.cpp:389
 #, c-format
 msgid ""
 "Configuration information and program files were successfully upgraded from "
@@ -26,7 +26,7 @@ msgstr ""
 "Les options du programme et votre configuration one été mises à jour à "
 "partir de la version '%s' avec succès."
 
-#: upgrade.cpp:392
+#: upgrade.cpp:393
 #, c-format
 msgid ""
 "Configuration information and program files could not be upgraded from "
@@ -41,7 +41,7 @@ msgstr ""
 "Il est recommandé de desinstaller et reinstaller de nouveau le programme "
 "avant de l'utiliser"
 
-#: upgrade.cpp:407
+#: upgrade.cpp:408
 msgid ""
 "The previously installed version of Mahogany was probably newer than this "
 "one. Cannot upgrade."
@@ -49,7 +49,7 @@ msgstr ""
 "Il semble que la version de M installée précédemment ait été plus à jour que "
 "la version utilisée maintenant. La mise à jour n'a pas pu être faite."
 
-#: upgrade.cpp:434
+#: upgrade.cpp:437
 msgid ""
 "Normally Mahogany will automatically collect all mail\n"
 "from your system's default mail folder (INBOX,\n"
@@ -60,20 +60,20 @@ msgid ""
 "INBOX and you need to check that folder manually."
 msgstr ""
 
-#: upgrade.cpp:444
+#: upgrade.cpp:445 upgrade.cpp:448
 #, fuzzy
 msgid "Collect mail from INBOX?"
 msgstr "&Rediriger tout le courier arrivant ici: "
 
-#: upgrade.cpp:448 upgrade.cpp:465
+#: upgrade.cpp:449 upgrade.cpp:460 upgrade.cpp:467 upgrade.cpp:478
 msgid "Default system folder for incoming mail."
 msgstr "Répertoire pour le courier entrant."
 
-#: upgrade.cpp:505
+#: upgrade.cpp:513 upgrade.cpp:524
 msgid "Mahogany Test Message"
 msgstr "Message de test de Mahogany"
 
-#: upgrade.cpp:508
+#: upgrade.cpp:516 upgrade.cpp:527
 msgid ""
 "If you have received this mail, your Mahogany configuration works.\n"
 "You should also try to reply to this mail and check that your reply arrives."
@@ -82,11 +82,11 @@ msgstr ""
 "Vous pourriez aussi essayer de répondre à ce message et attendre la "
 "réception de cette réponse"
 
-#: upgrade.cpp:514
+#: upgrade.cpp:522 upgrade.cpp:533
 msgid "Sent email message to:\n"
 msgstr "Le message a été envoyé à:\n"
 
-#: upgrade.cpp:516
+#: upgrade.cpp:524 upgrade.cpp:535
 msgid ""
 "\n"
 "\n"
@@ -96,7 +96,7 @@ msgstr ""
 "\n"
 "Veuillez vérifier que le message sera bien reçu s'il vous plaît."
 
-#: upgrade.cpp:517
+#: upgrade.cpp:525 upgrade.cpp:536
 msgid "Testing your configuration"
 msgstr "Vérification de la configuration en cours"
 
@@ -291,31 +291,44 @@ msgstr ""
 msgid "Cannot open folder '%s' for saving outgoing messages."
 msgstr "Impossible de sauvegarder le message dans le répertoire '%s'."
 
-#: MApplication.cpp:602
+#: MApplication.cpp:549
+msgid ""
+"Some folders are in critical sections and should be allowed\n"
+"to finish whatever operation is pending on them before exiting\n"
+"the application.\n"
+"These folders are:\n"
+msgstr ""
+
+#: MApplication.cpp:554
+#, fuzzy
+msgid "Do you want to exit anyway?"
+msgstr "Voulez-vous vraiment quitter Mahogany?"
+
+#: MApplication.cpp:616
 #, c-format
 msgid "Could not collect mail from incoming folder '%s'."
 msgstr "Impossible d'obtenir le courier à partir du répertoire entrant '%s'."
 
-#: MApplication.cpp:614 MailCollector.cpp:160
+#: MApplication.cpp:628 MailCollector.cpp:160
 #, c-format
 msgid "Command '%s' (to execute on new mail reception) failed."
 msgstr ""
 "La commande '%s' (à exécuter lors de la réception du nouveau message) a "
 "échoué."
 
-#: MApplication.cpp:644
+#: MApplication.cpp:658
 msgid "Subject: "
 msgstr "Sujet: "
 
-#: MApplication.cpp:645
+#: MApplication.cpp:659
 msgid "From: "
 msgstr "De: "
 
-#: MApplication.cpp:647
+#: MApplication.cpp:661
 msgid "in folder '"
 msgstr "Dans le répertoire '"
 
-#: MApplication.cpp:658
+#: MApplication.cpp:672
 #, c-format
 msgid ""
 "You have received %lu new messages\n"
@@ -324,7 +337,7 @@ msgstr ""
 "Vous avez reçu %lu nouveaux messages\n"
 "dans le répertoire '%s'."
 
-#: MApplication.cpp:663 MailCollector.cpp:183
+#: MApplication.cpp:677 MailCollector.cpp:183
 msgid "New Mail"
 msgstr "Nouveau courier"
 
@@ -414,7 +427,7 @@ msgstr " Sujet: "
 msgid "  From: "
 msgstr " De: "
 
-#: wxMApp.cpp:209
+#: wxMApp.cpp:210
 msgid ""
 "The application is terminating abnormally.\n"
 "Please report the bug to m-developers@makelist.com\n"
@@ -424,36 +437,40 @@ msgstr ""
 "Envoyez vos reports de bogues à m-developers@makelist.com s'il vous plaît,\n"
 "Merci pour votre support!"
 
-#: wxMApp.cpp:298
+#: wxMApp.cpp:228
+msgid "Do you really want to exit Mahogany?"
+msgstr "Voulez-vous vraiment quitter Mahogany?"
+
+#: wxMApp.cpp:320
 msgid "Mahogany: Activity Log"
 msgstr "Log de l'activité de Mahogany"
 
-#: wxMApp.cpp:446
+#: wxMApp.cpp:468
 msgid "Cannot initialise help system.\n"
 msgstr "Impossible d'initialiser le système d'aide.\n"
 
-#: wxMApp.cpp:447
+#: wxMApp.cpp:469
 msgid "Help file '"
 msgstr "Fichier d'aide '"
 
-#: wxMApp.cpp:447
+#: wxMApp.cpp:469
 msgid "' not found."
 msgstr "' n'as pas été trouvé."
 
-#: wxMApp.cpp:460
+#: wxMApp.cpp:482
 msgid "Search for?"
 msgstr "Rechercher?"
 
-#: wxMApp.cpp:461
+#: wxMApp.cpp:483
 msgid "Search help for keyword"
 msgstr "Chercher un mot-clé dans l'aide"
 
-#: wxMApp.cpp:472
+#: wxMApp.cpp:494
 #, c-format
 msgid "No help found for current context (%d)."
 msgstr "Pas d'aide sur le contexte courant (%d)."
 
-#: wxMApp.cpp:473 wxMFrame.cpp:305
+#: wxMApp.cpp:495 wxMFrame.cpp:305
 msgid "Sorry"
 msgstr "Désolé"
 
@@ -865,7 +882,7 @@ msgstr ""
 msgid "Choose signature file"
 msgstr "Choisir fichier de signature"
 
-#: MailFolder.cpp:294 wxBrowseButton.cpp:64 wxComposeView.cpp:739
+#: MailFolder.cpp:300 wxBrowseButton.cpp:64 wxComposeView.cpp:739
 #: wxComposeView.cpp:956 wxComposeView.cpp:981 wxComposeView.cpp:1219
 msgid "All files (*.*)|*.*"
 msgstr "Tous les fichiers (*.*)|*.*"
@@ -919,7 +936,7 @@ msgstr "Le fichier '%s' a été inséré."
 msgid "Failed to insert the text file '%s'."
 msgstr "L'insértion du fichier texte '%s' a échoué."
 
-#: MailFolder.cpp:292 wxComposeView.cpp:979
+#: MailFolder.cpp:298 wxComposeView.cpp:979
 msgid "Choose file to save message to"
 msgstr "Veuillez choisir le fichier pour la sauvegardé"
 
@@ -1066,10 +1083,6 @@ msgstr "Voulez-vous changer les options du répertoire avant de l'ouvrir?"
 #, c-format
 msgid "Opened folder '%s'"
 msgstr "Répertoire '%s' ouvert"
-
-#: wxMainFrame.cpp:287
-msgid "Do you really want to exit Mahogany?"
-msgstr "Voulez-vous vraiment quitter Mahogany?"
 
 #: wxIconManager.cpp:168
 msgid "Please wait"
@@ -2613,25 +2626,25 @@ msgstr "Mot de passe"
 msgid "Cannot access this folder without a password."
 msgstr "Impossible d'ouvrir ce répertoire sans le mot de passe."
 
-#: MailFolder.cpp:212
+#: MailFolder.cpp:218
 #, c-format
 msgid "Cannot open folder '%s'."
 msgstr "Impossible d'ouvrir le répertoire '%s'."
 
-#: MailFolder.cpp:227
+#: MailFolder.cpp:233
 #, c-format
 msgid "Saving %d messages..."
 msgstr "Sauvegarde de %d message(s) en cours..."
 
-#: MailFolder.cpp:302
+#: MailFolder.cpp:308
 msgid "Could not truncate the existing file."
 msgstr "Impossible de tronquer le fichier existant."
 
-#: MailFolder.cpp:406
+#: MailFolder.cpp:412
 msgid "re"
 msgstr "re"
 
-#: MailFolderCC.cpp:350
+#: MailFolderCC.cpp:366
 #, c-format
 msgid ""
 "Found lock-file:\n"
@@ -2644,7 +2657,7 @@ msgstr ""
 "Un autre processus peut ètre en cours d'utiliser ce répertoire.\n"
 "Voulez-vous forcer l'accès à ce répertoire néanmoines?"
 
-#: MailFolderCC.cpp:360
+#: MailFolderCC.cpp:376
 msgid ""
 "Could not remove lock-file.\n"
 "Other process may have terminated.\n"
@@ -2654,32 +2667,32 @@ msgstr ""
 "L'autre processus a peut-être terminé.\n"
 "L'exécution continuera normalement."
 
-#: MailFolderCC.cpp:366
+#: MailFolderCC.cpp:382
 msgid "Cannot open the folder while lock-file exists."
 msgstr "Impossible d'ouvrir le répertoire: fichier 'lock' détecté."
 
-#: MailFolderCC.cpp:461
+#: MailFolderCC.cpp:477
 #, c-format
 msgid "Mailstream for folder '%s' has been closed, trying to reopen it."
 msgstr "Le répertoire '%s' a été fermé, tentative de la réouverture en cours."
 
-#: MailFolderCC.cpp:466
+#: MailFolderCC.cpp:482
 #, c-format
 msgid "Re-opening closed folder '%s' failed."
 msgstr "Reouverture du répertoire '%s' a échoué."
 
-#: MailFolderCC.cpp:474
+#: MailFolderCC.cpp:490
 #, c-format
 msgid "Folder '%s' is alive."
 msgstr "Le répertoire '%s' est accessible."
 
-#: MailFolderCC.cpp:851
-#, c-format
+#: MailFolderCC.cpp:812
+#, fuzzy, c-format
 msgid ""
 "This folder (%s) contains %lu messages, which is greater than the current "
 "threshold of %lu.\n"
 "\n"
-"Would you like to retrieve only the first %lu messages?\n"
+"Would you like to retrieve only the last %lu messages?\n"
 "(selecting [No] will retrieve all messages)"
 msgstr ""
 "Ce répertoire (%s) contient %lu messages, ce qui est supérieur à la limite "
@@ -2688,33 +2701,33 @@ msgstr ""
 "Voudriez-vouz télécharger seulement les %lu premiers messages?\n"
 "(si vous repondez [Non], tous les messages seront télécharges)"
 
-#: MailFolderCC.cpp:872
+#: MailFolderCC.cpp:834
 #, c-format
 msgid "Reading %lu message headers..."
 msgstr "Lecture de %lu en-tetes en cours..."
 
-#: MailFolderCC.cpp:999
+#: MailFolderCC.cpp:956
 msgid "<address missing>"
 msgstr "<pas d'adresse>"
 
-#: MailFolderCC.cpp:1229
+#: MailFolderCC.cpp:1201
 #, c-format
 msgid "Folder '%s' : "
 msgstr "Répertoire '%s' : "
 
-#: MailFolderCC.cpp:1231
+#: MailFolderCC.cpp:1203
 msgid "Folder Log: "
 msgstr "Mesages du répertoire: "
 
-#: MailFolderCC.cpp:1234
+#: MailFolderCC.cpp:1206
 msgid ", error level: "
 msgstr ", niveau d'erreur: "
 
-#: MailFolderCC.cpp:1248
+#: MailFolderCC.cpp:1220
 msgid "c-client debug: "
 msgstr "c-client debug: "
 
-#: MailFolderCC.cpp:1572
+#: MailFolderCC.cpp:1583
 msgid ""
 "\n"
 "Attempt to re-open all folders failed."
@@ -2726,32 +2739,32 @@ msgstr ""
 msgid "Non-existent message data."
 msgstr "Pas de données du message."
 
-#: SendMessageCC.cpp:297 SendMessageCC.cpp:300
+#: SendMessageCC.cpp:306 SendMessageCC.cpp:309
 msgid " , compiled for "
 msgstr " , compilé pour "
 
-#: SendMessageCC.cpp:514
+#: SendMessageCC.cpp:523
 msgid "Mail sent."
 msgstr "Le message a été envoyé."
 
-#: SendMessageCC.cpp:514
+#: SendMessageCC.cpp:523
 msgid "Article posted."
 msgstr "Le message a été posté."
 
-#: SendMessageCC.cpp:521
+#: SendMessageCC.cpp:530
 #, c-format
 msgid "Failed to send - %s"
 msgstr "L'envoi du message a échoué - %s"
 
-#: SendMessageCC.cpp:522
+#: SendMessageCC.cpp:531
 msgid "unknown error"
 msgstr "erreur inconnue"
 
-#: SendMessageCC.cpp:529
+#: SendMessageCC.cpp:538
 msgid "Cannot open connection to any server"
 msgstr "Impossible de se connecter à aucun serveur"
 
-#: SendMessageCC.cpp:593
+#: SendMessageCC.cpp:602
 msgid "Cannot open folder to save to:"
 msgstr "Impossible d'ouvrir le répertoire pour la sauvegarde:"
 
@@ -3201,8 +3214,26 @@ msgstr "BBDB"
 msgid "Don't show this message again "
 msgstr "Ne montrez plus ce message"
 
-#: PythonHelp.cpp:380
-msgid "Cannot run script: "
+#: upgrade.cpp:437
+msgid ""
+"Normally Mahogany will automatically collect all mail\n"
+"from your system's default mail folder (INBOX,\n"
+"representing your mail spool entry),\n"
+"and move it to a special 'New Mail' folder.\n"
+"This is generally considered good practice as you\n"
+"should not leave your new mail in INBOX.\n"
+"\n"
+"Please confirm this. If you select No, your mail\n"
+"will remain in INBOX and you need to check that\n"
+"folder manually."
+msgstr ""
+
+#: upgrade.cpp:454
+msgid ""
+"Mahogany will not automatically collect mail from your\n"
+"system's default INBOX.\n"
+"You can change this in the INBOX folder's preferences\n"
+"dialog at any time."
 msgstr ""
 
 # MDialogs.h

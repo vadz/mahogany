@@ -41,7 +41,7 @@
 #include "MFolder.h"
 #include "MFolderDialogs.h"
 
-#include "wx/treectrl.h"
+#include <wx/treectrl.h>
 
 #include "gui/wxFolderTree.h"
 #include "gui/wxIconManager.h"

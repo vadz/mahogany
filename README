@@ -73,15 +73,23 @@ different configure switches is possible, and should generally work with
 Mahogany. However, to play it safe, stick to the options below.
 
 - wxGTK should be configured with the following options:
-    ./configure \
-    --with-gtk \
-    --with-static \
-    --without-shared \
-    --with-dmalloc \
-    --without-odbc \
-    --with-threads \
-    --with-libpng \
-    --with-libjpeg 
+
+     ../configure \
+	--enable-threads \
+        --disable-shared \
+	--enable-static \
+	--with-libjpeg \
+	--with-libpng \
+	--without-dnd \
+	--with-gtk \
+        --without-odbc \
+        --with-threads 
+
+For debugging, the following options should be added:
+
+	--enable-debug_flag \
+	--enable-debug_info \
+	--disable-optimise     
 
 If using gtk 1.0.6 rather than 1.2.x, you need to add --without-dnd .
 If you experience a problem with thread support, you can just as well

@@ -231,6 +231,16 @@ MAppBase::OnStartup()
 {
    mApplication = this;
 
+
+   /* First, check our user ID: mahogany does not like being run as
+      root. */
+   if(geteuid() == 0)
+   {
+      wxLogError(_("You are trying to run Mahogany as the super-user (root).\n"
+                   "For security reasons this is not possible, please log in\n"
+                   "as an ordinary user and try again."));
+      return false;
+   }
    // initialise the profile(s)
    // -------------------------
 

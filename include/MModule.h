@@ -57,13 +57,18 @@ public:
 };
 
 /** Function type for CreateModule() function.
-    Each module DLL must implement a function CreateModule of this
+    Each module DLL must implement a function CreateMModule of this
     type which will be called to initialise it. That function must
-    return NULL if it could not initialise the module.
+    @param version_major major version number of Mahogany 
+    @param version_minor minor version number of Mahogany 
+    @param version_release release version number of Mahogany 
+    @return NULL if it could not initialise the module.
 */
 extern "C"
 {
-   typedef class MModule * (* CreateModuleFuncType) (void);
+   typedef class MModule * (* CreateModuleFuncType) (int version_major,
+                                                     int version_minor,
+                                                     int version_release);
 };
 
 //@}
