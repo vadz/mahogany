@@ -1734,8 +1734,12 @@ bool wxAdbEditFrame::CreateOrOpenAdb(bool bDoCreate)
   else {
    nChoice = wxGetSingleChoiceIndex
               (
-                _("What kind of address book do you want to create?"),
-                _("Creating new address book"),
+                 bDoCreate ?
+                 _("Which kind of address book do you want to create?")
+                 : _("Which kind of address book do you want to open?"),
+                 bDoCreate ?
+                 _("Creating new address book")
+                 :_("Opening an address book"),
                 nProvCount, aPrompts,
                 this
               );

@@ -188,6 +188,8 @@ STRANGE....
 - Problem: mail uids and nums are long, WXARRAYINT.Count() is int,
   content is int.
 
+- MFolderDialog: TransferFromWindow return false ignored when asked
+  for password
 = wxLayout:
   - merge my colour changes into wxGTK/devel version
   - fix horiz scrollbar size

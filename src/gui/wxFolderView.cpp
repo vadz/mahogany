@@ -490,10 +490,20 @@ wxFolderView::Update(void)
       m_FolderCtrl->Select(i,selected);
       i++;
    }
+
+   unsigned long
+      total = m_MailFolder->CountMessages(),
+                                // recent & !seen --> new      
+      newmsgs = m_MailFolder->CountMessages(MailFolder::MSG_STAT_RECENT|MailFolder::MSG_STAT_SEEN,
+                                            MailFolder::MSG_STAT_RECENT);
+   wxString title;
+   title.Printf("%s %lu/%lu", m_folderName.c_str(), total, newmsgs);
+   m_Parent->SetTitle(title);
+
    m_NumOfMessages = n;
    wxEndBusyCursor(); wxSafeYield();
-   if(focusWindow)
-      focusWindow->SetFocus();
+//   if(focusWindow == m_FolderCtrl)
+   m_FolderCtrl->SetFocus();
    m_UpdateSemaphore = false;
 }
 

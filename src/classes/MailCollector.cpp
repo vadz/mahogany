@@ -61,10 +61,15 @@ public:
             wxLogDebug("Found incoming folder '%s'.",
                        folderName.c_str());
             MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE,folderName);
-            MailFolderEntry *e = new MailFolderEntry;
-            e->m_name = folderName;
-            e->m_folder = mf;
-            m_list->push_back(e);
+            if(mf)
+            {
+               MailFolderEntry *e = new MailFolderEntry;
+               e->m_name = folderName;
+               e->m_folder = mf;
+               m_list->push_back(e);
+            }
+            else
+               wxLogError(_("Cannot open incoming folder '%s'."), folderName.c_str());
          }
          if(f)f->DecRef();
          return true;

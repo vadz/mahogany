@@ -678,17 +678,19 @@ MailFolderCC::BuildListing(void)
    unsigned long numMessages = m_NumOfMessages;
 
    /** The value of 0 disables the limit.
-       Ask only once.
+       Ask only once. Don't ask for file folders.
    */
-   if ( (m_RetrievalLimit > 0) && m_FirstListing && (m_NumOfMessages > m_RetrievalLimit) )
+   if ( GetType() != MF_FILE &&
+        (m_RetrievalLimit > 0) && m_FirstListing && (m_NumOfMessages > m_RetrievalLimit) )
    {
       // TODO should really ask the user how many of them he wants (like slrn)
       wxString msg;
-      msg.Printf(_("This folder contains %lu messages which is greater than "
+      msg.Printf(_("This folder (%s) contains %lu messages, which is greater than "
                    "the current threshold of %lu.\n"
                    "\n"
                    "Would you like to retrieve only the first %lu messages?\n"
                    "(selecting [No] will retrieve all messages)"),
+                 GetName().c_str(),
                  m_NumOfMessages, m_RetrievalLimit, m_RetrievalLimit);
 
       if ( MDialog_YesNoDialog(msg) )
