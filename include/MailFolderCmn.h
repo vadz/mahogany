@@ -260,14 +260,8 @@ protected:
    /// Destructor
    ~MailFolderCmn();
 
-   /** @name The listing information */
-   //@{
    /// our listing or NULL if not created yet
    HeaderInfoList *m_headers;
-
-   /// The last seen new UID, to check for new mails:
-   UIdType m_LastNewMsgUId;
-   //@}
 
    /// a timer to update information
    class MailFolderTimer *m_Timer;
@@ -296,6 +290,17 @@ protected:
      Outside of this time window this pointer is always NULL.
     */
    StatusChangeData *m_statusChangeData;
+
+   /**
+      The last msgno about which the outside (GUI) code knows.
+
+      The reason for keeping this is that if we get an expunge notification for
+      a message after this one we don't even have to tell anyone about it
+      because it is as if nothing happened at all -- if we hadn't previously
+      notified the GUI about new mail, we don't need to notify it about its
+      disappearance.
+    */
+   MsgnoType m_msgnoLastNotified;
 
    //@}
 

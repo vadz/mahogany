@@ -593,7 +593,6 @@ MailFolderCmn::RealDecRef()
 MailFolderCmn::MailFolderCmn()
 {
    m_Timer = new MailFolderTimer(this);
-   m_LastNewMsgUId = UID_ILLEGAL;
 
    m_suspendUpdates = 0;
 
@@ -603,6 +602,8 @@ MailFolderCmn::MailFolderCmn()
 
    m_statusChangeData = NULL;
    m_expungeData = NULL;
+
+   m_msgnoLastNotified = MSGNO_ILLEGAL;
 
    m_MEventReceiver = new MfCmnEventReceiver(this);
 }
@@ -1343,6 +1344,9 @@ MailFolderCmn::RequestUpdate()
 
    wxLogTrace(TRACE_MF_EVENTS, _T("Sending FolderUpdate event for folder '%s'"),
               GetName().c_str());
+
+   // remember that the GUI is going to know about that many messages
+   m_msgnoLastNotified = GetMessageCount();
 
    // tell all interested that the folder changed
    MEventManager::Send(new MEventFolderUpdateData(this));
@@ -2151,13 +2155,37 @@ MailFolderCmn::SendMsgStatusChangeEvent()
    if ( mfStatusCache->GetStatus(GetName(), &status) )
    {
       size_t count = m_statusChangeData->msgnos.GetCount();
-      for ( size_t n = 0; n < count; n++ )
+      for ( size_t n = 0; n < count; )
       {
-         int statusNew = m_statusChangeData->statusNew[n],
-             statusOld = m_statusChangeData->statusOld[n];
+         int statusOld = m_statusChangeData->statusOld[n];
+         bool wasDeleted = (statusOld & MSG_STAT_DELETED) != 0;
 
-         bool wasDeleted = (statusOld & MSG_STAT_DELETED) != 0,
-              isDeleted = (statusNew & MSG_STAT_DELETED) != 0;
+         int statusNew;
+         bool isDeleted;
+
+         if ( m_statusChangeData->msgnos[n] == MSGNO_ILLEGAL )
+         {
+            // this means that this message has been expunged
+            isDeleted = true;
+
+            // unused anyhow if isDeleted == true
+            statusNew = 0;
+
+            // delete it from the list which GUI will see -- it doesn't need to
+            // know about it as it doesn't need to update the status of non
+            // existing message any more
+            m_statusChangeData->Remove(n);
+
+            count--;
+         }
+         else // message still exists
+         {
+            statusNew = m_statusChangeData->statusNew[n];
+            isDeleted = (statusNew & MSG_STAT_DELETED) != 0;
+
+            // pass to the next one
+            n++;
+         }
 
          MsgStatus msgStatusOld = AnalyzeStatus(statusOld),
                    msgStatusNew = AnalyzeStatus(statusNew);
@@ -2256,6 +2284,17 @@ void MailFolderCmn::RequestUpdateAfterExpunge()
               GetName().c_str());
 
    MEventManager::Send(new MEventFolderExpungeData(this, m_expungeData));
+
+   // GUI is going to know about less messages now
+   if ( m_msgnoLastNotified )
+   {
+      const size_t countExp = m_expungeData->msgnos.GetCount();
+
+      ASSERT_MSG( m_msgnoLastNotified >= countExp,
+                     _T("we expunged more messages that we had?") );
+
+      m_msgnoLastNotified -= countExp;
+   }
 
    // MEventFolderExpungeData() will delete the data
    m_expungeData = NULL;

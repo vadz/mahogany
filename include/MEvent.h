@@ -228,6 +228,26 @@ struct StatusChangeData
 
    /// the new status of the messages with the msgnos from above array
    wxArrayInt statusNew;
+
+   /// return the number of messages whose status has changed
+   size_t GetCount() const
+   {
+      const size_t count = msgnos.GetCount();
+
+      ASSERT_MSG( statusOld.GetCount() == count &&
+                     statusNew.GetCount() == count,
+                  _T("messages number mismatch in StatusChangeData") );
+
+      return count;
+   }
+
+   /// remove the given (by index) element
+   void Remove(size_t n)
+   {
+      msgnos.RemoveAt(n);
+      statusOld.RemoveAt(n);
+      statusNew.RemoveAt(n);
+   }
 };
 
 /**
@@ -257,7 +277,7 @@ public:
 
    /// return the number of messages affected
    size_t GetCount() const
-      { return m_statusChangeData->msgnos.GetCount(); }
+      { return m_statusChangeData->GetCount(); }
 
    /// get the msgno of the n-th changed header
    MsgnoType GetMsgno(size_t n) const

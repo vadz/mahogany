@@ -289,9 +289,6 @@ public:
    /// called to generate MsgStatus event for many messages at once
    void OnMsgStatusChanged();
 
-   /// called to process delayed mm_flags notifications
-   void OnMsgFlagsChange();
-
    //@}
 
 private:
@@ -397,8 +394,11 @@ private:
    */
    void ForceClose();
 
+   /// Updates the folder status after some messages were expunged
+   void UpdateMsgFlagsOnExpunge(MsgnoType msgnoExpunged);
+
    /// Updates the status of a single message.
-   void UpdateMessageStatus(unsigned long seqno);
+   void UpdateMessageStatus(MsgnoType msgno, int statusNew);
 
    /// update the folder after appending messages to it
    void UpdateAfterAppend();
@@ -409,13 +409,25 @@ private:
    static bool DoCheckStatus(const MFolder *folder,
                              struct mbx_status *mailstatus);
 
-   /** @name Notification handlers */
+   /**
+      @name Notification handlers
+
+      These handles are called from inside c-client and so no other calls to
+      c-client should be made from them. Normally they should just quickly
+      update the internal state and maybe post an event to ourselves which will
+      be processed (thanks to CCEventReflector) by OnXXX() methods.
+    */
    //@{
+
    /// called when the number of the messages in the folder changes
-   void OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax);
+   void HandleMailExists(struct mail_stream *stream, MsgnoType msgnoMax);
 
    /// called when the given msgno is expunged from the folder
-   void OnMailExpunge(MsgnoType msgno);
+   void HandleMailExpunge(MsgnoType msgno);
+
+   /// called when the flags of the given message change
+   void HandleMsgFlags(MsgnoType msgno);
+
    //@}
 
    // members (mostly) from here on
@@ -504,25 +516,19 @@ private:
    //@{
 
    /**
-      If not NULL, this array contains the msgnos of the messages for which we
-      have pending mm_flags() notifications.
-
-      It is created/filled by mm_flags() and reset by OnMsgFlagsChange().
-    */
-   MsgnoArray *m_msgnosFlagsChanged;
-
-   /**
       If we are searching, this points to an UIdArray where to store
       the entries found.
    */
    UIdArray *m_SearchMessagesFound;
 
-   /**@name only used for ListFolders: */
-   //@{
+   /**
+      Data used by ListFolders().
+    */
+
+   // TODO: put all this into a single struct
    UserData m_UserData;
    Ticket   m_Ticket;
    ASMailFolder *m_ASMailFolder;
-   //@}
 
    //@}
 

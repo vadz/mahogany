@@ -551,10 +551,6 @@ public:
             mfCC->OnMsgStatusChanged();
             break;
 
-         case MEventId_MailFolder_OnFlagsChange:
-            mfCC->OnMsgFlagsChange();
-            break;
-
          default:
             FAIL_MSG( _T("unexpected event in CCEventReflector!") );
             return true;
@@ -1747,7 +1743,6 @@ MailFolderCC::Create(MFolderType type, int flags)
 
    m_ASMailFolder = NULL;
 
-   m_msgnosFlagsChanged = NULL;
    m_SearchMessagesFound = NULL;
 }
 
@@ -1791,13 +1786,6 @@ MailFolderCC::~MailFolderCC()
       FAIL_MSG( _T("m_SearchMessagesFound unexpectedly != NULL") );
 
       delete m_SearchMessagesFound;
-   }
-
-   if ( m_msgnosFlagsChanged )
-   {
-      FAIL_MSG( _T("m_msgnosFlagsChanged unexpectedly != NULL") );
-
-      delete m_msgnosFlagsChanged;
    }
 
    m_Profile->DecRef();
@@ -2620,7 +2608,7 @@ void MailFolderCC::ReadConfig(MailFolderCmn::MFCmnOptions& config)
    // the command line option overrides the config value
    mm_show_debug = mApplication->IsMailDebuggingEnabled()
                      ? true
-                     : READ_APPCONFIG_BOOL(MP_DEBUG_CCLIENT);
+                     : READ_CONFIG_BOOL(GetProfile(), MP_DEBUG_CCLIENT);
 
    MailFolderCmn::ReadConfig(config);
 }
@@ -2953,10 +2941,6 @@ void
 MailFolderCC::UpdateAfterAppend()
 {
    CHECK_RET( IsOpened(), _T("how did we manage to append to a closed folder?") );
-
-   // this mail will be stored as uid_last+1 which isn't updated
-   // yet at this point
-   m_LastNewMsgUId = m_MailStream->uid_last + 1;
 
    // don't update if we don't have listing - it will be rebuilt the next time
    // it is needed
@@ -3675,86 +3659,106 @@ MailFolderCC::SetSequenceFlag(SequenceKind kind,
    return true;
 }
 
-void
-MailFolderCC::OnMsgFlagsChange()
+void MailFolderCC::OnMsgStatusChanged()
 {
-   CHECK_RET( m_msgnosFlagsChanged, "OnMsgFlagsChange() shouldn't be called!" );
-
-   const size_t count = m_msgnosFlagsChanged->GetCount();
-   for ( size_t n = 0; n < count; n++ )
-   {
-      UpdateMessageStatus(m_msgnosFlagsChanged->Item(n));
-   }
-
-   delete m_msgnosFlagsChanged;
-   m_msgnosFlagsChanged = NULL;
-}
-
-void MailFolderCC::UpdateMessageStatus(unsigned long msgno)
-{
-   CHECK_RET( m_MailStream, _T("OnMsgFlagsChange: folder is closed") );
-
-   CHECK_RET( msgno <= m_MailStream->nmsgs, _T("OnMsgFlagsChange: invalid msgno") );
-
-   MESSAGECACHE *elt = mail_elt(m_MailStream, msgno);
-   CHECK_RET( elt, _T("OnMsgFlagsChange: no elt for the given msgno?") );
+   CHECK_RET( m_statusChangeData, "OnMsgStatusChanged() shouldn't be called!" );
 
    HeaderInfoList_obj headers = GetHeaders();
-   CHECK_RET( headers, _T("OnMsgFlagsChange: couldn't get headers") );
+   CHECK_RET( headers, _T("OnMsgStatusChanged(): couldn't get headers") );
 
-   HeaderInfo *hi = headers->GetItemByMsgno(msgno);
-   CHECK_RET( hi, _T("OnMsgFlagsChange: no header info for the given msgno?") );
-
-   int statusNew = GetMsgStatus(elt),
-       statusOld = hi->GetStatus();
-   if ( statusNew != statusOld )
+   // retrieve the new message flags: now we can do it as we're not inside
+   // cclient any more
+   const size_t count = m_statusChangeData->GetCount();
+   for ( size_t n = 0; n < count; n++ )
    {
-      hi->m_Status = statusNew;
+      int& status = m_statusChangeData->statusNew[n];
+      ASSERT_MSG( status == -1, _T("not supposed to be set yet") );
 
-      if ( MfStatusCache::Get()->GetStatus(GetName()) )
+      const MsgnoType msgno = m_statusChangeData->msgnos[n];
+      if ( msgno != MSGNO_ILLEGAL )
       {
-         // we send the event telling us that we have some messages with the
-         // changed status only once, when we get the first notification - and
-         // also when we allocate the arrays for msg status change data
-         bool sendEvent;
-         if ( !m_statusChangeData )
+         MESSAGECACHE *elt = m_MailStream ? mail_elt(m_MailStream, msgno)
+                                          : NULL;
+         if ( elt )
          {
-            m_statusChangeData = new StatusChangeData;
-
-            sendEvent = true;
+            status = GetMsgStatus(elt);
          }
          else
          {
-            sendEvent = false;
+            FAIL_MSG( "connection broken?" );
+
+            status = 0;
          }
 
-         // remember who changed and how
-         m_statusChangeData->msgnos.Add(msgno);
-         m_statusChangeData->statusOld.Add(statusOld);
-         m_statusChangeData->statusNew.Add(statusNew);
-
-         // and schedule call to our OnMsgStatusChanged() if not done yet
-         if ( sendEvent )
-         {
-            MEventManager::Send(new MEventFolderOnMsgStatusData(this));
-         }
+         // update the internal status too
+         HeaderInfo *hi = headers->GetItemByMsgno(msgno);
+         if ( hi )
+            hi->m_Status = status;
       }
-      //else: don't update the status because we don't have anything to update
-      //      and, worse, we might obtain the new message status before we get
-      //      to OnMsgStatusChanged() and then we'd apply the updates
-      //      pertaining to the old status to the new values which would make
-      //      them out of sync with the real values
+      //else: this message was expunged, no new status for it
    }
-   //else: flags didn't really change
-}
-
-void MailFolderCC::OnMsgStatusChanged()
-{
-   // normally the CCEventReflector event is generated only if the status of
-   // something has really changed...
-   ASSERT_MSG( m_statusChangeData, _T("unexpected OnMsgStatusChanged() call") );
 
    SendMsgStatusChangeEvent();
+}
+
+void MailFolderCC::UpdateMsgFlagsOnExpunge(MsgnoType msgnoExpunged)
+{
+   if ( !m_statusChangeData )
+   {
+      // nothing to update
+      return;
+   }
+
+   // check all stored msgnos
+   const size_t count = m_statusChangeData->GetCount();
+   for ( size_t n = 0; n < count; n++ )
+   {
+      int& m = m_statusChangeData->msgnos[n];
+      if ( (MsgnoType)m == msgnoExpunged )
+      {
+         // mark this one as invalid
+         m = MSGNO_ILLEGAL;
+      }
+      else // this message stays in the mailbox
+      {
+         if ( (MsgnoType)m > msgnoExpunged )
+         {
+            // but its msgno changes
+            m--;
+         }
+      }
+   }
+}
+
+void MailFolderCC::HandleMsgFlags(MsgnoType msgno)
+{
+   if ( m_msgnoLastNotified && msgno > m_msgnoLastNotified )
+   {
+      // GUI doesn't know about this message, no need to notify it about it
+      return;
+   }
+
+   if ( IsLocked() )
+      return;
+
+   HeaderInfoList_obj headers = GetHeaders();
+   CHECK_RET( headers, _T("HandleMsgFlags: couldn't get headers") );
+
+   HeaderInfo *hi = headers->GetItemByMsgno(msgno);
+   CHECK_RET( hi, _T("HandleMsgFlags: no header info for the given msgno?") );
+
+   if ( !m_statusChangeData )
+   {
+      m_statusChangeData = new StatusChangeData;
+
+      // schedule call to our OnMsgStatusChanged() (we do it only once)
+      MEventManager::Send(new MEventFolderOnMsgStatusData(this));
+   }
+
+   // remember who changed and how
+   m_statusChangeData->msgnos.Add(msgno);
+   m_statusChangeData->statusOld.Add(hi->GetStatus());
+   m_statusChangeData->statusNew.Add(-1);  // will be set later
 }
 
 bool MailFolderCC::IsReadOnly(void) const
@@ -4372,7 +4376,8 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
 // MailFolderCC notification sending
 // ----------------------------------------------------------------------------
 
-void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
+void
+MailFolderCC::HandleMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
 {
    // NB: use stream and not m_MailStream because the latter might not be set
    //     yet if we're called from mail_open()
@@ -4468,7 +4473,8 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
    m_uidLast = stream->uid_last;
 }
 
-void MailFolderCC::OnMailExpunge(MsgnoType msgno)
+void
+MailFolderCC::HandleMailExpunge(MsgnoType msgno)
 {
    // remove the message from the header info list if we have headers
    // (it would be wasteful to create them just to do it)
@@ -4477,25 +4483,30 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
       size_t idx = msgno - 1;
       if ( idx < m_headers->Count() )
       {
-         // let all the others know that some messages were expunged: we
-         // don't do it right now but wait until mm_exists() which is sent
-         // after all mm_expunged() as it is much faster to delete all
-         // messages at once instead of one at a time
-         if ( !m_expungeData )
+         // if the GUI doesn't know about the existence of this message, we
+         // don't need to notify it about its disappearance neither
+         if ( m_msgnoLastNotified && msgno <= m_msgnoLastNotified )
          {
-            // create new arrays
-            m_expungeData = new ExpungeData;
+            // let all the others know that some messages were expunged: we
+            // don't do it right now but wait until mm_exists() which is sent
+            // after all mm_expunged() as it is much faster to delete all
+            // messages at once instead of one at a time
+            if ( !m_expungeData )
+            {
+               // create new arrays
+               m_expungeData = new ExpungeData;
+            }
+
+            // add the msgno to the list of expunged messages
+            m_expungeData->msgnos.Add(msgno);
+
+            // and remember its position as well: notice that we must use the
+            // old, known position, as if we called GetPosFromIdx() from here
+            // it could try to reenter cclient in order to sort/thread the
+            // folder if its sorting/threading information is out of date (this
+            // happens if there has been a new mail notification recently)
+            m_expungeData->positions.Add(m_headers->GetOldPosFromIdx(idx));
          }
-
-         // add the msgno to the list of expunged messages
-         m_expungeData->msgnos.Add(msgno);
-
-         // and remember its position as well: notice that we must use the
-         // old, known position, as if we called GetPosFromIdx() from here
-         // it could try to reenter cclient in order to sort/thread the
-         // folder if its sorting/threading information is out of date (this
-         // happens if there has been a new mail notification recently)
-         m_expungeData->positions.Add(m_headers->GetOldPosFromIdx(idx));
 
          wxLogTrace(TRACE_MF_EVENTS, _T("Removing msgno %u from headers"), (unsigned int)msgno);
 
@@ -4508,31 +4519,8 @@ void MailFolderCC::OnMailExpunge(MsgnoType msgno)
    }
    //else: no headers, nothing to do
 
-   // adjust the stored msgnos which became invalid
-   if ( m_msgnosFlagsChanged )
-   {
-      int nRemove = -1;
-
-      const size_t count = m_msgnosFlagsChanged->GetCount();
-      for ( size_t n = 0; n < count; n++ )
-      {
-         MsgnoType& m = m_msgnosFlagsChanged->Item(n);
-         if ( m == msgno )
-         {
-            ASSERT_MSG( nRemove == -1,
-                        _T("duplicate msgnos in m_msgnosFlagsChanged?") );
-
-            nRemove = n;
-         }
-         else if ( m > msgno )
-         {
-            m--;
-         }
-      }
-
-      if ( nRemove != -1 )
-         m_msgnosFlagsChanged->RemoveAt(nRemove);
-   }
+   // adjust the stored msgnos which could become invalid
+   UpdateMsgFlagsOnExpunge(msgno);
 
    // update the total number of messages
    if ( m_nMessages > 0 )
@@ -4861,7 +4849,7 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgnoMax)
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET( mf, _T("number of messages changed in unknown mail folder") );
 
-   mf->OnMailExists(stream, msgnoMax);
+   mf->HandleMailExists(stream, msgnoMax);
 }
 
 /* static */
@@ -4871,7 +4859,7 @@ MailFolderCC::mm_expunged(MAILSTREAM *stream, unsigned long msgno)
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET(mf, _T("mm_expunged for non existent folder"));
 
-   mf->OnMailExpunge(msgno);
+   mf->HandleMailExpunge(msgno);
 }
 
 /// this message matches a search
@@ -5155,24 +5143,7 @@ MailFolderCC::mm_flags(MAILSTREAM *stream, unsigned long msgno)
    CHECK_RET(mf, _T("mm_flags for non existent folder"));
 
    // message flags really changed, cclient checks for it
-
-   // as we're inside cclient right now we can't retrieve the message flags, so
-   // postpone it until better times
-   if ( !mf->m_msgnosFlagsChanged )
-   {
-      mf->m_msgnosFlagsChanged = new MsgnoArray;
-
-      // we only need to send the message once
-      MEventManager::Send(new MEventFolderOnFlagsChangeData(mf));
-   }
-
-   // we must not add the same msgno twice: not only is this inefficient, but
-   // it breaks the login in OnMailExpunge() and so invalid msgnos would be
-   // left in the array if anything is expunged leading to a crash later
-   if ( mf->m_msgnosFlagsChanged->Index(msgno) == wxNOT_FOUND )
-   {
-      mf->m_msgnosFlagsChanged->Add(msgno);
-   }
+   mf->HandleMsgFlags(msgno);
 }
 
 /** alert that c-client will run critical code
