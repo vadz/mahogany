@@ -1352,7 +1352,8 @@ wxFiltersDialog::TransferDataToWindow()
    m_ListBox->Clear();
 
    m_FilterDataCount = 0;
-   for(size_t i = 0; i < MAX_FILTERS; i++)
+   size_t i;
+   for(i = 0; i < MAX_FILTERS; i++)
    {
       wxString name;
       name.Printf("%ld", (long int) i);
@@ -1373,7 +1374,7 @@ wxFiltersDialog::TransferDataToWindow()
    /* We now check if the rules read back actually match the filter
       program stored there. */
    String filterCheck;
-   for(unsigned i = 0; i < m_FilterDataCount; i++)
+   for(i = 0; i < m_FilterDataCount; i++)
    {
       if(m_FilterData[i].GetActive())
          filterCheck <<

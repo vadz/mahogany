@@ -2168,8 +2168,7 @@ static const struct
    { "ShowLogWinHint",           gettext_noop("show the hint about reopening the log window when it is being closed") },
    { "AutoExpunge",              gettext_noop("ask to expunge deleted messages before closing the folder") },
       { "SuspendAutoCollectFolder", gettext_noop("ask to suspend auto-collecting messages from failed incoming folder") },
-   {"RulesMismatchWarn", gettext_noop("Warning that filter rules do
- not match dialog")}
+   {"RulesMismatchWarn", gettext_noop("warn that filter rules do not match dialog")}
    //{ "", gettext_noop("") },
 };
 
