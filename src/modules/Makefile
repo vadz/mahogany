@@ -24,37 +24,29 @@ include ../../makeopts
 # aren't fully C++ compliant on RH6.1
 CXXFLAGS:=$(CXXFLAGS_RELAXED)
 
-SRC :=	Mdummy.cpp Filters.cpp Calendar.cpp \
+MOD :=	Mdummy.cpp Filters.cpp Calendar.cpp \
 	PineImport.cpp XFMailImport.cpp
 
 ifdef PISOCK_LIB
-SRC := $(SRC) PalmOS.cpp
+MOD += PalmOS.cpp
 ifdef LIBMAL_SRC
 CPPFLAGS := $(CPPFLAGS) -DMALSYNC -DHAVE_LIBMAL -I$(LIBMAL_SRC)/malsync_src/mal/client/common -I$(LIBMAL_SRC)/malsync_src/mal/common -I$(LIBMAL_SRC) 
 endif
 endif
 
 ifdef EXPERIMENTAL
-SRC +=	MCrypt.cpp  MExtProcCrypt.cpp  MPGPCrypt.cpp  MPassphrase.cpp
+MOD +=	MCrypt.cpp MExtProcCrypt.cpp MPGPCrypt.cpp MPassphrase.cpp
 vpath %.cpp .src/crypt
 endif
 
-ifeq ($(USE_MODULES),static)
-TARGETS = $(SRC:.cpp=.o)
-else
-ifeq ($(USE_MODULES),dynamic)
-TARGETS = $(SRC:.cpp=.so) #$(SRC:.cpp=.mmd)
-else
-TARGETS=
-endif
-endif
-
-all:	$(TARGETS)
+all:	binaries
 	@true
 
 include ../../makerules $(wildcard *.d)
 
-modules: all
+# MODOBJS and MODULES defined by makerules
+binaries: $(MODOBJS $(MODULES)
+	@true
 
 ifdef PISOCK_LIB
 PalmOS.so: PalmOS.cpp
@@ -64,14 +56,12 @@ endif
 clean: 
 	$(RM) *.o *.so *.lo
 
-install: all
+install: $(MODULES)
 ifeq ($(USE_MODULES),dynamic)
 	$(INSTALL) -d $(MODULEDIR)
-	for i in $(TARGETS); do $(INSTALL_PROGRAM) $$i $(MODULEDIR); done
+	for i in $(MODULES); do $(INSTALL_PROGRAM) $$i $(MODULEDIR); done
 else
 	@true
 endif
-
-install-modules: install
 
 .PHONY: clean

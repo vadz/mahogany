@@ -10,7 +10,7 @@ include ../makeopts
 
 # List all directories which create modules (.so files) to be installed:
 #
-MODULES_DIRS = adb
+MOD_DIRS = adb
 
 ifdef USE_PYTHON
 SUB_DIRS += Python
@@ -59,7 +59,7 @@ subdirs:
 	set -e; for i in $(SUB_DIRS) modules; do $(MAKE) -C $$i all; done
 
 modules:
-	set -e; for i in $(SUB_DIRS) modules; do $(MAKE) -C $$i modules; done
+	set -e; for i in $(MOD_DIRS) modules; do $(MAKE) -C $$i modules; done
 
 doc:
 	@true
@@ -70,13 +70,15 @@ clean:
 
 install: install-modules
 	$(INSTALL_PROGRAM) -s -m 555 M $(DATADIR)/$(CANONICAL_HOST)/bin
-	if test -f libM.so ; then $(INSTALL_PROGRAM) libM.so $(DATADIR)/$(CANONICAL_HOST)/lib; fi
+	if test -f libM.so; \
+	then $(INSTALL_PROGRAM) libM.so $(DATADIR)/$(CANONICAL_HOST)/lib; \
+	fi
 	$(RM) -f $(BINDIR)/M $(DATADIR)/bin/M
 	ln -f -s ../share/Mahogany/$(CANONICAL_HOST)/bin/M $(BINDIR)/M
 	$(RM) $(BINDIR)/mahogany
 	ln -f -s ../share/Mahogany/$(CANONICAL_HOST)/bin/M $(BINDIR)/mahogany
 	$(INSTALL) -d $(DATADIR)/icons
-	for i in .src/icons/*.xpm ; \
+	for i in .src/icons/*.xpm; \
 	do $(INSTALL_DATA) $$i $(DATADIR)/icons; \
 	done
 ifdef USE_PYTHON
@@ -87,14 +89,14 @@ endif
 #
 install-modules:
 ifeq ($(USE_MODULES),dynamic)
-	set -e; for i in $(MODULES_DIRS); do $(MAKE) -C $$i $@ ; done
 	$(MAKE) -C modules install
+	set -e; for i in $(MOD_DIRS); do $(MAKE) -C $$i $@; done
 else
 	@true
 endif
 
 msgcat:
-	set -e; for i in $(SUB_DIRS) modules ; do $(MAKE) -C $$i $@; done
+	set -e; for i in $(SUB_DIRS) modules; do $(MAKE) -C $$i $@; done
 #	$(MAKE) -C $(BUILDDIR)/locale mergecat
 
 .PHONY:	all clean doc semistatic static allclean install msgcat \

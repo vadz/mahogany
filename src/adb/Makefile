@@ -14,20 +14,14 @@ endif
 
 include ../../makeopts
 
-ifeq ($(USE_MODULES),static)
-TARGETS = $(MOD:.cpp=.o) $(SRC:.cpp=.o)
-else
-ifeq ($(USE_MODULES),dynamic)
-TARGETS = $(MOD:.cpp=.so) $(SRC:.cpp=.o)
-else
-TARGETS = $(SRC:.cpp=.o)
-endif
-endif
-
-all: $(TARGETS)
+all:	binaries
 	@true
 
 include ../../makerules $(wildcard *.d)
+
+# MODOBJS defined by makerules
+binaries: $(MODOBJS) $(SRC:.cpp=.o)
+	@true
 
 clean: stdclean
 
