@@ -1866,6 +1866,9 @@ UpgradeFrom050()
    TemplateFixFolderTraversal traverse(folderRoot);
    traverse.Traverse();
 
+   if ( !traverse.IsOk() )
+      return false;
+
    // TODO: move filter settings to new profile locations and warn
    // user about changed settings:
    /*
@@ -1887,8 +1890,12 @@ UpgradeFrom050()
         "changed slightly. If you experience any problems in\n"
         "accessing remote servers, please check the correct\n"
         "settings for those mailboxes.\n"
-        "You might have to re-set some of these server hosts."));
-   return traverse.IsOk();
+        "You might have to re-set some of these server hosts.\n"
+        "\n"
+        "The filter handling has also changed significantly and the\n"
+        "old filters won't work anymore, sorry."));
+
+   return true;
 }
 
 // ----------------------------------------------------------------------------

@@ -191,11 +191,7 @@ public:
    MFolder *DoCreateFolder(FolderType folderType);
 
    // set the folder name
-   void SetFolderName(const String& name)
-   {
-      m_nameModifiedByUser = -1;
-      m_folderName->SetValue(name);
-   }
+   void SetFolderName(const String& name);
 
    // callbacks
    void OnFolderNameChange(wxCommandEvent& event);
@@ -304,6 +300,7 @@ protected:
    {
       Username,   // login name
       Password,   // password
+      HostName,   // hostname (default value for all servers)
       ServerPop,  // server (for POP3)
       ServerImap, // server (for IMAP)
       ServerNews, // server (for NNTP)
@@ -767,6 +764,19 @@ MFolder *wxFolderCreateDialog::DoCreateFolder(FolderType folderType)
    }
 
    return m_newFolder;
+}
+
+void wxFolderCreateDialog::SetFolderName(const String& name)
+{
+   // take the last component of the folder name only considering that only
+   // '/' and '.' are valid separators - this is surely false, at least for
+   // IMAP folders which can have arbitrary delimiter characters, but this is
+   // all we can do now as currently we don't know the server name yet and so
+   // we can't connect to it and ask it for the proper delimiter
+   String nameFolder = name.AfterLast('/').AfterLast('.');
+
+   m_nameModifiedByUser = -1;
+   m_folderName->SetValue(nameFolder);
 }
 
 void wxFolderCreateDialog::OnFolderNameChange(wxCommandEvent& event)
@@ -1688,6 +1698,7 @@ wxFolderPropertiesPage::WriteEntryIfChanged(FolderProperty property,
    {
       MP_FOLDER_LOGIN,
       MP_FOLDER_PASSWORD,
+      MP_HOSTNAME,
       MP_POPHOST,
       MP_IMAPHOST,
       MP_NNTPHOST,
@@ -1793,20 +1804,22 @@ wxFolderPropertiesPage::SetDefaultValues()
          // take the global server setting for this protocol
          switch ( folderType )
          {
-         case MF_NNTP:
-            value = READ_CONFIG(profile, MP_NNTPHOST);
-            break;
-         case MF_POP:
-            value = READ_CONFIG(profile, MP_POPHOST);
-            break;
-         case MF_IMAP:
-            value = READ_CONFIG(profile, MP_IMAPHOST);
-            break;
-         default:
-            ASSERT_MSG(0,"new remote foldertype was added");
-         case MF_GROUP:
-            break;
-            // suppress warnings
+            case MF_NNTP:
+               value = READ_CONFIG(profile, MP_NNTPHOST);
+               break;
+            case MF_POP:
+               value = READ_CONFIG(profile, MP_POPHOST);
+               break;
+            case MF_IMAP:
+               value = READ_CONFIG(profile, MP_IMAPHOST);
+               break;
+
+            default:
+               FAIL_MSG("new remote foldertype was added");
+               // fall through
+
+            case MF_GROUP:
+               // we will read the correct value below from MP_HOSTNAME
                break;
          }
       }
@@ -1829,9 +1842,11 @@ wxFolderPropertiesPage::SetDefaultValues()
          case MF_IMAP:
             m_originalValues[ServerImap] = value;
             break;
-         default:
-            // suppress warnings
-            break;
+
+         default: // suppress warnings
+
+         case MF_GROUP:
+            m_originalValues[HostName] = value;
       }
    }
 
@@ -2179,12 +2194,13 @@ wxFolderPropertiesPage::TransferDataFromWindow(void)
    String server = m_server->GetValue();
    if ( folderType == MF_GROUP )
    {
-      // the right thing to do is to write the server value into both profile
+      // the right thing to do is to write the server value into all profile
       // entries: for POP/IMAP server and for NNTP one because like this
       // everybody will inherit it
       WriteEntryIfChanged(ServerNews, server);
       WriteEntryIfChanged(ServerPop, server);
       WriteEntryIfChanged(ServerImap, server);
+      WriteEntryIfChanged(HostName, server);
    }
    else if ( FolderTypeHasServer(folderType) )
    {

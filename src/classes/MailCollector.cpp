@@ -243,17 +243,26 @@ MailCollectorImpl::InternalDestroy(void)
 {
    // the m_EventReceiver is not destroyed, we continue to use it
    MOcheck();
+
 #ifdef MC_KEEP_OPEN
    MailCollectorFolderList::iterator i;
    for(i = m_list->begin();i != m_list->end(); i++)
       if((**i).m_folder)
          (**i).m_folder->DecRef();
 #endif
+
    if(m_NewMailFolder)
    {
       m_NewMailFolder->DecRef();
-      m_NewMailProfile->DecRef();
+      m_NewMailFolder = NULL;
    }
+
+   if ( m_NewMailProfile )
+   {
+      m_NewMailProfile->DecRef();
+      m_NewMailProfile = NULL;
+   }
+
    delete m_list;
 }
 
@@ -289,7 +298,21 @@ MailCollectorImpl::Collect(MailFolder *mf)
       if ( mf || m_list->size() )
       {
          // create it now
-         SetNewMailFolder(READ_APPCONFIG(MP_NEWMAIL_FOLDER));
+         String name = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
+         SetNewMailFolder(name);
+
+         // did it succeed?
+         if ( !m_NewMailFolder )
+         {
+            wxLogError(_("The folder for the new mail (%s) could not be "
+                         "created, incoming messages cannot be collected."),
+                       name.c_str());
+
+            // TODO: disable autocollection or propose to manually create the
+            //       new mail folder here
+
+            return false;
+         }
       }
       else
       {
@@ -301,7 +324,11 @@ MailCollectorImpl::Collect(MailFolder *mf)
 #ifdef MC_KEEP_OPEN
    UpdateFolderList();
 #endif
-   
+
+   // by now we should have the new mail folder - if we don't use it or
+   // couldn't create it, we should have aborted before
+   CHECK( m_NewMailFolder, FALSE, "can't collect mail without new mail folder" );
+
    int updateFlags = m_NewMailFolder->GetUpdateFlags();
    if(mf == NULL)
    {
@@ -314,7 +341,7 @@ MailCollectorImpl::Collect(MailFolder *mf)
 #ifdef MC_KEEP_OPEN
          if ((*i)->m_folder)
             rc &= CollectOneFolder((*i)->m_folder);
-#else   
+#else
          MFolder *mfolder = MFolder::Get( (**i).m_name );
          if(! mfolder)
          {
@@ -356,7 +383,7 @@ MailCollectorImpl::Collect(MailFolder *mf)
                i = m_list->begin();
             }
          }
-#endif   
+#endif
       }
    }
    else
@@ -395,13 +422,13 @@ MailCollectorImpl::CollectOneFolder(MailFolder *mf)
       RemoveIncomingFolder(mf->GetName());
       return false;
    }
-   
+
 #ifdef EXPERIMENTAL_newnewmail
    // all this now handled by folder itself
    mf->Ping(); //update it
-   
+
 #else
-   
+
    mf->ApplyFilterRules(false);
 
    wxLogStatus(_("Auto-collecting mail from incoming folder '%s'."),
