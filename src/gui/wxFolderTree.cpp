@@ -2154,6 +2154,10 @@ ProcessFolderTreeChange(const MEventFolderTreeChangeData& event)
             wxFolderTreeNode *nodeNew =
                new wxFolderTreeNode(this, folder, GetFolderTreeNode(parent));
 
+            // if the parent hadn't had any children before, it would be
+            // impossible to open it now if we don't do this
+            SetItemHasChildren(parent, TRUE);
+
             // expand/scroll if necessary to show the newly created item
             EnsureVisible(nodeNew->GetId());
          }

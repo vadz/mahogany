@@ -6,6 +6,7 @@
 Release 0.63 'Saugus'
 -------------------------------------------------------------------------------
 
+17.05.01 VZ: several bugs related to renaming the folders in the tree fixed
 14.05.01 VZ: added "Clear folder" command
 14.05.01 NB: fixed text highlighting (middle lines were black in selection)
 13.05.01 NB: added initial UTF-8 support (converts text to current locale's

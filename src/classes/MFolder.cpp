@@ -227,14 +227,27 @@ private:
 
    // cached the number of children (initially INVALID_CHILDREN_COUNT)
    size_t m_nChildren;
+
+   // we allow it to directly change our name
+   friend class MFolderCache;
 };
 
 // a special case of MFolderFromProfile: the root folder
-class MRootFolderFromProfile : public MFolderFromProfile
+class MRootFolderFromProfile : public MFolderFromProfile,
+                               public MEventReceiver
 {
 public:
    // ctor
-   MRootFolderFromProfile() : MFolderFromProfile("") { }
+   MRootFolderFromProfile() : MFolderFromProfile("")
+   {
+      m_regCookie = MEventManager::Register(*this, MEventId_FolderTreeChange);
+   }
+
+   // dtor
+   virtual ~MRootFolderFromProfile()
+   {
+      MEventManager::Deregister(m_regCookie);
+   }
 
    // implement base class pure virtuals (some of them don't make sense to us)
    virtual FolderType GetType() const { return MF_ROOT; }
@@ -254,6 +267,12 @@ public:
       { FAIL_MSG("can not delete root folder."); }
    virtual bool Rename(const String& /* newName */)
       { FAIL_MSG("can not rename root folder."); return FALSE; }
+
+   // MEventReceiver
+   virtual bool OnMEvent(MEventData& ev);
+
+private:
+   void *m_regCookie;
 };
 
 // ----------------------------------------------------------------------------
@@ -322,6 +341,8 @@ public:
    static void Add(MFolder *folder);
       // removes an object from the cache (must be there!)
    static void Remove(MFolder *folder);
+      // rename all cached folders with this name
+   static void RenameAll(const String& oldName, const String& newName);
 
 private:
    // no copy ctor/assignment operator
@@ -349,6 +370,23 @@ static MFolderCache gs_cache;
 // =============================================================================
 // implementation
 // =============================================================================
+
+// ----------------------------------------------------------------------------
+// MRootFolderFromProfile
+// ----------------------------------------------------------------------------
+
+bool MRootFolderFromProfile::OnMEvent(MEventData& ev)
+{
+   MEventFolderTreeChangeData& event = (MEventFolderTreeChangeData &)ev;
+   if ( event.GetChangeKind() == MEventFolderTreeChangeData::Rename )
+   {
+      MFolderCache::RenameAll(event.GetFolderFullName(),
+                              event.GetNewFolderName());
+   }
+
+   // continue propagating
+   return TRUE;
+}
 
 // -----------------------------------------------------------------------------
 // MFolder
@@ -885,6 +923,18 @@ void MFolderCache::Remove(MFolder *folder)
    ms_aFolders.Remove((size_t)index);
 }
 
+/* static */
+void MFolderCache::RenameAll(const String& oldName, const String& newName)
+{
+   MFolderFromProfile *folder = (MFolderFromProfile *)Get(oldName);
+   if ( folder )
+   {
+      folder->m_folderName = newName;
+      SafeDecRef(folder->m_profile);
+      folder->m_profile = Profile::CreateProfile(newName);
+   }
+}
+
 // ----------------------------------------------------------------------------
 // MFolderTraversal
 // ----------------------------------------------------------------------------
@@ -1083,7 +1133,7 @@ size_t CreateMboxSubtree(MFolder *parent, const String& rootMailDir)
    {
       wxLogError(_("Failed to import MBOX folders."));
 
-      return 0;  
+      return 0;
    }
 
    // notify everyone about folder creation
