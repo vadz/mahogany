@@ -1108,7 +1108,11 @@ THREADNODE* ReOrderTree(THREADNODE* thrNode, MsgnoType *sortTable,
    // First compute the inverse of the sort table.
    globalInvSortTable = new size_t[count];
    for (size_t i = 0; i < count; ++i) {
-      globalInvSortTable[sortTable[i]-1] = (reverseOrder ? count - i - 1 : i);
+      if (sortTable) {
+         globalInvSortTable[sortTable[i]-1] = (reverseOrder ? count - i - 1 : i);
+      } else {
+         globalInvSortTable[i] = i;
+      }
    }
    // Now use this information to reorder the children
    // of each node. But this implies that we have a real
@@ -1175,14 +1179,17 @@ void HeaderInfoListImpl::CombineSortAndThread()
    /*
      We have, on one side, an array of msgno sorted correctly and,
      on the other side, a tree structure resulting from threading.
+
+     Actually, maybe we do not have the sorting table (because no
+     sorting order is defined). In this case, we build a fake one
+     before reordering.
    
      First, we reorder the tree so that all the children of each
      node are sorted according to the sorted array, then we map
      the tree structure to the tables.
      */
    
-   if (m_tableSort)
-      m_thrData->m_root = ReOrderTree(m_thrData->m_root, m_tableSort, m_reverseOrder, m_count);
+   m_thrData->m_root = ReOrderTree(m_thrData->m_root, m_tableSort, m_reverseOrder, m_count);
    
    size_t threadedIndex = 0;
    (void)FillThreadTables(m_thrData->m_root, m_thrData, threadedIndex, 
