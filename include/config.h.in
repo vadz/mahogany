@@ -60,7 +60,7 @@
 /** Define if you have the <unistd.h> header file.  */
 #undef HAVE_UNISTD_H
 
-/** Do we have the pisock library and headers?
+/** Do we have the pisock library and headers? */
 #undef USE_PISOCK
 
 /** Do we have a pisock library with setmaxspeed? */
