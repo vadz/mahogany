@@ -150,7 +150,12 @@ public:
 
    /// return number of recent messages
    virtual unsigned long CountRecentMessages(void) const;
-   
+
+   /** Count number of new messages but only if a listing is
+       available, returns UID_ILLEGAL otherwise.
+   */
+   virtual unsigned long CountNewMessagesQuick(void) const;
+
    /** get message header
        @param uid mesage uid
        @return message header information class
@@ -668,7 +673,7 @@ private:
    class FolderListingCC *m_FolderListing;
 
    /// Counts the number of new mails
-   UIdType CountNewMessages(void);
+   UIdType CountNewMessages(void) const;
    
    /**@name only used for ListFolders: */
    //@{

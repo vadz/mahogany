@@ -1216,6 +1216,15 @@ MailFolderCC::CountRecentMessages(void) const
 }
 
 unsigned long
+MailFolderCC::CountNewMessagesQuick(void) const
+{
+   if(m_Listing)
+      return CountNewMessages();
+   else
+      return UID_ILLEGAL;
+}
+
+unsigned long
 MailFolderCC::CountMessages(int mask, int value) const
 {
    if(mask == MSG_STAT_NONE)
@@ -1254,7 +1263,7 @@ MailFolderCC::GetMessage(unsigned long uid)
 
 /// Counts the number of new mails
 UIdType
-MailFolderCC::CountNewMessages(void)
+MailFolderCC::CountNewMessages(void) const
 {
    const int mask = MSG_STAT_RECENT | MSG_STAT_SEEN;
    const int value = MSG_STAT_RECENT;

@@ -1243,13 +1243,15 @@ bool wxFolderTreeImpl::OnMEvent(MEventData& ev)
       // change the folder colour depending on whether it has any recent
       // messages, any new messages or neither at all
       wxFolderTreeNode::Status status;
-      if ( folder->CountRecentMessages() )
-      {
-         status = wxFolderTreeNode::Folder_Recent;
-      }
-      else if ( folder->CountMessages(MailFolder::MSG_STAT_SEEN, 0) )
+      UIdType newMsgs;
+      newMsgs = folder->CountNewMessagesQuick();
+      if(newMsgs != UID_ILLEGAL && newMsgs > 0)
       {
          status = wxFolderTreeNode::Folder_New;
+      }
+      else if ( folder->CountRecentMessages() )
+      {
+         status = wxFolderTreeNode::Folder_Recent;
       }
       else // no recent, no new
       {
