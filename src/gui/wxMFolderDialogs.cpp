@@ -922,7 +922,7 @@ wxFolderPropertiesPage::SetDefaultValues()
 
    if ( FolderTypeHasServer(typeFolder) )
    {
-      value = READ_CONFIG(profile, MP_FOLDER_HOST);
+      value = profile->readEntry(MP_FOLDER_HOST, "");
       if ( !value )
       {
          if ( typeFolder == Nntp )
@@ -935,6 +935,12 @@ wxFolderPropertiesPage::SetDefaultValues()
             // this host by default
             value = READ_CONFIG(profile, MP_HOSTNAME);
          }
+      }
+
+      if ( !value )
+      {
+          // set to the localhost in despair...
+          value = MP_FOLDER_HOST_D;
       }
 
       m_server->SetValue(value);
