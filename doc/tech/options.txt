@@ -1,0 +1,152 @@
+File:		tech/options.txt
+Summary:	how to add a new program option to Mahogany
+Audience:	Mahogany developers
+Author:		Vadim Zeitlin <vadim@wxwindows.org>
+Created:	21.01.02
+Version:	accurate for 0.64
+
+		     How to add a new option to Mahogany
+		     ===================================
+
+0. About this note
+------------------
+
+   Mahogany has a lot of options according to one of its basic design
+principles: nothing should be hardcoded, everything which might be changed
+must be exposed to the user as sooner or later someone will want to change it.
+
+   You should respect this rule when adding new code to Mahogany by avoiding
+any manifest constants in it - be it numbers, strings or colours. This tech
+note describes how to add a new option to Mahogany and how to use it in your
+code.
+
+1. What are the options
+-----------------------
+
+   All Mahogany options correspond to the entries in the config object which
+is accessed via Profile class. A config object is a wxFileConfig under Unix
+which uses the $HOME/.M/config file by default or a wxRegConfig under Windows
+which uses the registry hive HKCU\Software\Mahogany-Team\Mahogany. You may
+directly change the options in the file/registry for testing but you should
+really provide a way to modify them from the GUI - see below.
+
+   Each option has a name and a value which is either a number (long - which
+may be treated as int, bool or enum by the program) or a string. To avoid the
+dependency problems (namely needing to recompile the entire program if you
+add/modify just one option) the name and value are not exposed directly but
+the following trick is done: for each option FOO there are
+
+a) a line "extern const MOption MP_FOO" in include/Moptions.h
+b) a line
+	#define MP_FOO_NAME "NameOfOptionInConfig"
+   and
+	#define MP_FOO_DEFVAL 17
+   in the same header
+c) definition in src/classes/Moptions.cpp: "const MOption MP_FOO;"
+d) and finally an entry in MOptions[]: DEFINE_OPTION(MP_FOO)
+
+So to add a new option FOO you just have to modify 2 files in the 4 places
+enumerated above. Note that the the order of options in the lists (c) and (d)
+above *MUST* be the same so besure to put any new option you add at the same
+(relative) position!
+
+Also note that the zero default value for long options should be written 0L
+and not just 0 as to avoid ambiguities between long and "char *" later.
+
+2. Using the options
+--------------------
+
+   To use the option in the program you must get a Profile object somewhere.
+Some options (very few) are global: use mApplication->GetProfile() to get the
+global profile which should be used for accessing them. Others (most) depend
+on the folder and you should use the profile of the folder you're working with
+then, i.e. MFolder or MailFolder or ASMailFolder::GetProfile(). Don't forget
+to call DecRef() on the profile object returned by these functions to avoid
+memory leaks or, better yet, use Profile_obj class which is a smart pointer to
+Profile and avoids memory leaks automatically (downside: you can't use it for
+mApplication->GetProfile() bnecause this one should _not_ be DecRef()'d).
+
+   Now that you have a Profile (or Profile_obj) "profile" you may just do the
+following:
+
+	long myfoo = READ_CONFIG(profile, MP_FOO);
+
+or
+
+	bool myfoo = READ_CONFIG_BOOL(profile, MP_FOO);
+
+or
+
+	String myfoo = READ_CONFIG_TEXT(profile, MP_FOO);
+
+These macros will read the value from profile and return the default value
+that you defined above (in Moptions.h). To be able to use them you should
+insert a
+
+	extern const MOption MP_FOO;
+
+somewhere in the declarations section of your file. Please do *NOT* include
+Moptions.h but declare the individual options you use like this - this avoids
+massive recompilations whenever you change a single option.
+
+   Last note: you don't have to use mApplication->GetProfile(), in fact. There
+is a similar set of READ_APPCONFIG(MP_FOO) macros which take just one argument
+and use the global profile automatically.
+
+3. Adding GUI support for editing the options
+---------------------------------------------
+
+   To give the user a possibility to change the programs behaviour he should
+have a simpler way to change the options value than editing the config file or
+running regedit.exe. This is what the options dialog is for - you should be
+familiar with it by now, anyhow.
+
+   Unless your options is very special (or you have added a lot of them) you
+should add it to one of the existing pages of the dialog. Choose the one where
+you'd expect to find it, please try to not put in the "Miscellaneous" page.
+
+   The options dialog is automatically generated, in fact, from the 3 arrays
+in src/gui/wxOptionsDlg.cpp. Search for DONT_FORGET_TO_MODIFY marker in this
+file to find them.
+
+   As the marker says, you must modify all of them when adding new option:
+
+a) add a new ConfigField_Foo to ConfigFields array, to the page (and at the
+   position) you want
+
+b) add a struct to the initialization of ms_aFields _at_exactly_the_same_
+   position
+
+c) add a CONFIG_ENTRY(MP_FOO) to ms_aConfigDefaults, again at exactly the
+   same relative position
+
+It is imperative that the 3 arrays be kept in sync, some asserts will be
+triggered if this is not the case - please do pay attention to them if this
+happens.
+
+   The steps (a) and (c) should be obvious, for the step (b) please look at
+wxOptionsPage.h for the Field_XXX constants descriptions.
+
+   TODO: the dependency fields
+
+
+   You may want to add 2 other kinds of entries to these arrays: first, an
+explanation text. For it you should do the same thing as above but use
+Field_Message in the step (b) and CONFIG_NONE() for the step (c).
+
+   Second, if you have a few related but seldomly accessed options, you may
+want to write a separate dialog for editing them. In this case you should use
+Field_SubDlg in (b) and again CONFIG_NONE() in (c) and also modify/add
+OnButton() of/to the page class containing your entry.
+
+4. Reacting to the options changes
+----------------------------------
+
+   If you use the options you should be also prepared to update them
+(immediately!) when the user presses "Apply" or "Ok" button in the dialog
+above.
+
+   This section will be written later (TODO!) but for now please look at the
+existing code in MessageView or FolderView classes, for example, which shows
+how this should be done.
+
