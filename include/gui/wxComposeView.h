@@ -252,6 +252,24 @@ public:
    /// set the colours and fonts for a (freshly created) text control
    void SetTextAppearance(wxTextCtrl *text);
 
+   /**
+      Return true if we're a reply to another message.
+
+      This doesn't simply check whether we have an original message but checks
+      if we have an In-Reply-To header.
+    */
+   bool IsInReplyTo() const;
+
+   /**
+      Configures whether this message is a reply to another one.
+
+      This is used for handling the menu command "Set if this is a reply" and
+      presents user with a dialog allowing to change this.
+
+      @return true if anything changed, false if nothing happened
+    */
+   bool ConfigureInReplyTo();
+
 protected:
    /** quasi-Constructor
        @param parent parent window
@@ -345,9 +363,6 @@ protected:
      @return SendMessage object to be deleted by the caller
    */
    SendMessage *BuildDraftMessage() const;
-
-   /// Configures whether this message is a reply to another one (menu handler)
-   void ConfigureInReplyTo();
 
 
    /// Destructor

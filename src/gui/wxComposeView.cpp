@@ -447,6 +447,67 @@ private:
 };
 
 // ----------------------------------------------------------------------------
+// wxIsReplyButton: button indicating whether this is a reply
+// ----------------------------------------------------------------------------
+
+class wxIsReplyButton : public wxBitmapButton
+{
+public:
+   wxIsReplyButton(wxComposeView *composer, wxWindow *parent)
+      : wxBitmapButton(parent,
+                       wxID_ANY,
+                       wxNullBitmap,
+                       wxDefaultPosition,
+                       wxDefaultSize,
+                       wxBORDER_NONE),
+        m_composer(composer)
+   {
+      UpdateAppearance();
+
+      Connect(wxEVT_COMMAND_BUTTON_CLICKED,
+               wxCommandEventHandler(wxIsReplyButton::OnClick));
+
+      // AddHeaderEntry("In-Reply-To") is called after composer creation, so we
+      // want to update our state a bit later
+      Connect(wxEVT_IDLE, wxIdleEventHandler(wxIsReplyButton::OnIdle));
+   }
+
+private:
+   void UpdateAppearance()
+   {
+      m_isReply = m_composer->IsInReplyTo();
+
+      SetBitmapLabel(GetTransparentBitmap(m_isReply ? _T("tb_mail_reply")
+                                                    : _T("tb_mail_new")));
+      SetToolTip(m_isReply ? _("This is a reply to another message")
+                         : _("This is a start of new thread"));
+   }
+
+   void OnClick(wxCommandEvent& /* event */)
+   {
+      if ( m_composer->ConfigureInReplyTo() )
+      {
+         UpdateAppearance();
+         Refresh();
+      }
+   }
+
+   void OnIdle(wxIdleEvent& /* event */)
+   {
+      UpdateAppearance();
+
+      Disconnect(wxID_ANY, wxEVT_IDLE,
+                     wxIdleEventHandler(wxIsReplyButton::OnIdle));
+   }
+
+
+   wxComposeView * const m_composer;
+   bool m_isReply;
+
+   DECLARE_NO_COPY_CLASS(wxIsReplyButton)
+};
+
+// ----------------------------------------------------------------------------
 // wxAddressTextCtrl: specialized text control which processes TABs to expand
 // the text it contains and also notifies parent (i.e. wxComposeView) when it
 // is modified.
@@ -1805,9 +1866,15 @@ wxSizer *wxComposeView::CreateHeaderFields()
    sizerHeaders->Add(new wxStaticText(m_panel, -1, _("&Subject:")),
                      0, wxALIGN_CENTRE_VERTICAL);
 
+   wxSizer *sizerSubj = new wxBoxSizer(wxHORIZONTAL);
    m_txtSubject = new wxSubjectTextCtrl(m_panel);
-   sizerHeaders->Add(m_txtSubject, 1, wxEXPAND | wxALIGN_CENTRE_VERTICAL);
+   sizerSubj->Add(m_txtSubject, 1, wxEXPAND | wxALIGN_CENTRE_VERTICAL);
    SetTextAppearance(m_txtSubject);
+
+   sizerSubj->Add(new wxIsReplyButton(this, m_panel),
+                     0, wxLEFT | wxALIGN_CENTRE_VERTICAL, LAYOUT_MARGIN);
+
+   sizerHeaders->Add(sizerSubj, 1, wxEXPAND | wxALIGN_CENTRE_VERTICAL);
 
    sizerTop->Add(sizerHeaders, 0, wxALL | wxEXPAND, LAYOUT_MARGIN);
 
@@ -4336,7 +4403,20 @@ wxComposeView::AddHeaderEntry(const String& name, const String& value)
    }
 }
 
-void wxComposeView::ConfigureInReplyTo()
+bool wxComposeView::IsInReplyTo() const
+{
+   kbStringList::iterator i,
+                          end = m_extraHeadersNames.end();
+   for ( i = m_extraHeadersNames.begin(); i != end; ++i )
+   {
+      if ( **i == _T("In-Reply-To") )
+         return true;
+   }
+
+   return false;
+}
+
+bool wxComposeView::ConfigureInReplyTo()
 {
    kbStringList::iterator end = m_extraHeadersNames.end();
    kbStringList::iterator i, j;
@@ -4352,100 +4432,102 @@ void wxComposeView::ConfigureInReplyTo()
       messageId = **j;
 
    String messageIdNew = messageId;
-   if ( ConfigureInReplyToHeader(&messageIdNew, this) &&
-            messageIdNew != messageId )
+   if ( !ConfigureInReplyToHeader(&messageIdNew, this) ||
+            messageIdNew == messageId )
+      return false;
+
+   if ( messageIdNew.empty() )
    {
-      if ( messageIdNew.empty() )
+      m_extraHeadersNames.erase(i);
+      m_extraHeadersValues.erase(j);
+
+      // also update references header
+      for ( i = m_extraHeadersNames.begin(),
+            end = m_extraHeadersNames.end(),
+            j = m_extraHeadersValues.begin() ; i != end; ++i, ++j )
       {
-         m_extraHeadersNames.erase(i);
-         m_extraHeadersValues.erase(j);
-
-         // also update references header
-         for ( i = m_extraHeadersNames.begin(),
-               end = m_extraHeadersNames.end(),
-               j = m_extraHeadersValues.begin() ; i != end; ++i, ++j )
+         if ( **i == _T("References") )
          {
-            if ( **i == _T("References") )
+            String ref = **j;
+            ref.Trim(true).Trim(false);
+
+            if ( ref == messageId )
             {
-               String ref = **j;
-               ref.Trim(true).Trim(false);
-
-               if ( ref == messageId )
-               {
-                  // just remove the header completely
-                  m_extraHeadersNames.erase(i);
-                  m_extraHeadersValues.erase(j);
-               }
-               else // need to edit it
-               {
-                  size_t pos = ref.find(messageId);
-                  if ( pos != String::npos )
-                  {
-                     // no need to check for "pos > 0" as the string can't
-                     // start with spaces: we've trimmed it above
-                     size_t n;
-                     for ( n = 1; isspace(ref[pos - n]); n++ )
-                        ;
-
-                     n--; // took one too many: this one is not a space
-
-                     // remove this message id with all preceding space
-                     ref.erase(pos - n, n + messageId.length());
-
-                     **j = ref;
-                  }
-               }
-               break;
+               // just remove the header completely
+               m_extraHeadersNames.erase(i);
+               m_extraHeadersValues.erase(j);
             }
-         }
-      }
-      else // should be a reply
-      {
-         if ( i == end )
-         {
-            AddHeaderEntry(_T("In-Reply-To"), messageIdNew);
-         }
-         else // just modify existing value
-         {
-            **j = messageIdNew;
-         }
-
-         // and add to references
-         for ( i = m_extraHeadersNames.begin(),
-               end = m_extraHeadersNames.begin(),
-               j = m_extraHeadersValues.begin(); i != end; ++i, ++j )
-         {
-            if ( **i == _T("References") )
+            else // need to edit it
             {
-               String ref = **j;
-
-               // if we had a message id already, replace the old one with the
-               // new one
-               if ( messageId.empty() || !ref.Replace(messageId, messageIdNew) )
+               size_t pos = ref.find(messageId);
+               if ( pos != String::npos )
                {
-                  // if replacement failed (or if we had nothing to replace),
-                  // just add new message id
-                  if ( !ref.empty() )
-                  {
-                     // continue "References" header on the next line
-                     ref += _T("\015\012 ");
-                  }
+                  // no need to check for "pos > 0" as the string can't
+                  // start with spaces: we've trimmed it above
+                  size_t n;
+                  for ( n = 1; isspace(ref[pos - n]); n++ )
+                     ;
 
-                  ref += messageIdNew;
+                  n--; // took one too many: this one is not a space
+
+                  // remove this message id with all preceding space
+                  ref.erase(pos - n, n + messageId.length());
+
+                  **j = ref;
                }
-
-               **j = ref;
-
-               break;
             }
-         }
-
-         if ( i == end )
-         {
-            AddHeaderEntry(_T("References"), messageIdNew);
+            break;
          }
       }
    }
+   else // should be a reply
+   {
+      if ( i == end )
+      {
+         AddHeaderEntry(_T("In-Reply-To"), messageIdNew);
+      }
+      else // just modify existing value
+      {
+         **j = messageIdNew;
+      }
+
+      // and add to references
+      for ( i = m_extraHeadersNames.begin(),
+            end = m_extraHeadersNames.begin(),
+            j = m_extraHeadersValues.begin(); i != end; ++i, ++j )
+      {
+         if ( **i == _T("References") )
+         {
+            String ref = **j;
+
+            // if we had a message id already, replace the old one with the
+            // new one
+            if ( messageId.empty() || !ref.Replace(messageId, messageIdNew) )
+            {
+               // if replacement failed (or if we had nothing to replace),
+               // just add new message id
+               if ( !ref.empty() )
+               {
+                  // continue "References" header on the next line
+                  ref += _T("\015\012 ");
+               }
+
+               ref += messageIdNew;
+            }
+
+            **j = ref;
+
+            break;
+         }
+      }
+
+      if ( i == end )
+      {
+         AddHeaderEntry(_T("References"), messageIdNew);
+      }
+   }
+
+   return true;
 }
 
 // -----------------------------------------------------------------------------
