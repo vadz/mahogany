@@ -1513,15 +1513,22 @@ String DecodeHeaderOnce(const String& in, wxFontEncoding *pEncoding)
 /* static */
 String MailFolder::DecodeHeader(const String& in, wxFontEncoding *pEncoding)
 {
+   if ( pEncoding )
+      *pEncoding = wxFONTENCODING_SYSTEM;
+
    // some brain dead mailer encode the already encoded headers so to obtain
    // the real header we keep decoding it until it stabilizes
    String header,
           headerOrig = in;
    for ( ;; )
    {
-      header = DecodeHeaderOnce(headerOrig, pEncoding);
+      wxFontEncoding encoding;
+      header = DecodeHeaderOnce(headerOrig, &encoding);
       if ( header == headerOrig )
          break;
+
+      if ( pEncoding )
+         *pEncoding = encoding;
 
       headerOrig = header;
    }
