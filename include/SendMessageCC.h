@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * SendMessageCC.h : class for holding messages during composition  *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998,1999 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -83,6 +83,12 @@ public:
    */
    void WriteToFolder(String const &foldername,
                       MailFolder::Type type = MF_PROFILE );
+
+   /** Adds an extra header line.
+       @param entry name of header entry
+       @param value value of header entry
+   */
+   void AddHeaderEntry(String const &entry, String const &value);
    
    /** Sends the message.
        @return true on success
@@ -107,8 +113,12 @@ private:
    const char **m_headerNames;
    /// values of header lines
    const char **m_headerValues;
-   /// a list of all headers
+   /// A list of all headers to be looked up in profile for addition.
    kbStringList m_headerList;
+   /// A list of all extra headerslines to add to header.
+   kbStringList m_ExtraHeaderLinesNames;
+   /// A list of all extra headerslines to add to header.
+   kbStringList m_ExtraHeaderLinesValues;
 
    /// a list of folders to save copies in
    kbStringList m_FccList;

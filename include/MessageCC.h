@@ -173,11 +173,10 @@ protected:
    /** constructor, required associated folder reference
        @param folder where this mail is stored
        @param uid   unique message id
-       @param msgno used to get cache entry
    */
    static class MessageCC * CreateMessageCC(
       MailFolderCC *folder,
-      unsigned long uid, unsigned long msgno);
+      unsigned long uid);
    
 #if 0
    /** Constructor, creating an object from a text buffer.
@@ -192,7 +191,7 @@ protected:
    //@}
 protected:
    /// constructor, called by CreateMessageCC()
-   MessageCC(MailFolderCC *folder,unsigned long uid, unsigned long msgno);
+   MessageCC(MailFolderCC *folder,unsigned long uid);
    /** destructor */
    ~MessageCC();
 private:
@@ -202,8 +201,6 @@ private:
    char *text; 
    /// unique message id
    unsigned long  m_uid;
-   /// message number, might be outdated!
-   unsigned long  m_msgno;
    /// holds the pointer to a text buffer allocated by cclient lib
    char *mailText;
    /// refresh information in this structure

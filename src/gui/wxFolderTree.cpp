@@ -772,7 +772,8 @@ void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
        item = wxTreeCtrl::GetSelection();
    }
 
-   // try to popup the menu in some reasonabel position
+#if 0
+   // try to popup the menu in some reasonable position
    if ( item.IsOk() )
    {
       wxRect rect;
@@ -780,7 +781,8 @@ void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
       pt.x = (rect.GetX() + rect.GetWidth())/2;
       pt.y = (rect.GetY() + rect.GetHeight())/2;
    }
-
+#endif
+   
    // show menu in any case
    DoPopupMenu(pt);
 

@@ -381,6 +381,9 @@ wxMessageView::Update(void)
    llist.SetEditable(true);
 
    Clear();
+   if(! mailMessage)  // no message to display
+      return;
+   
    // if wanted, display all header lines
    if(m_ProfileValues.showHeaders)
    {
@@ -436,28 +439,6 @@ wxMessageView::Update(void)
       t = mailMessage->GetPartType(i);
       if(mailMessage->GetPartSize(i) == 0)
          continue; // ignore empty parts
-#if 0
-      // debug output with all parameters
-      const MessageParameterList &plist = mailMessage->GetParameters(i);
-      MessageParameterList::iterator plist_it;
-      VAR(i);
-      for(plist_it = plist.begin(); plist_it != plist.end();
-          plist_it++)
-      {
-         VAR( (*plist_it)->name);
-         VAR( (*plist_it)->value);
-      }
-      String disposition;
-      const MessageParameterList &dlist =
-         mailMessage->GetDisposition(i,&disposition);
-      VAR(disposition);
-      for(plist_it = dlist.begin(); plist_it != dlist.end();
-          plist_it++)
-      {
-         VAR( (*plist_it)->name);
-         VAR( (*plist_it)->value);
-      }
-#endif
 
       // insert text:
       if ( (t == Message::MSG_TYPETEXT) ||
@@ -509,18 +490,6 @@ wxMessageView::Update(void)
                icn = mApplication->GetIconManager()->
                   GetIconFromMimeType(mailMessage->GetPartMimeType(i));
             obj = new wxLayoutObjectIcon(icn);
-#if 0   
-            char **xpmarray = NULL;
-            xpmarray = wxIconManager::LoadImageXpm(filename);
-            //if(icn.LoadFile(filename,0))
-            if(xpmarray)
-            {
-               icn = wxBitmap(xpmarray);
-               obj = new wxLayoutObjectIcon(icn);
-               wxIconManager::FreeImage(xpmarray);
-            }
-            wxRemoveFile(filename);
-#endif
          }
          else
          {
@@ -1126,7 +1095,7 @@ wxMessageView::ShowMessage(MailFolder *folder, long num)
    if(mailMessage) mailMessage->DecRef();
    mailMessage = folder->GetMessage(num);
    m_seqno = num;
-   folder->SetMessageFlag(num, MailFolder::MSG_STAT_SEEN, true);
+   folder->SetMessageFlag(num, MailFolder::MSG_STAT_SEEN, false);
 
 
    /* FIXME for now it's here, should go somewhere else: */

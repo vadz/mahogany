@@ -36,15 +36,13 @@
 
 MessageCC *
 MessageCC::CreateMessageCC(MailFolderCC *ifolder,
-                           unsigned long iuid,
-                           unsigned long msgno)
+                           unsigned long iuid)
 {
    CHECK(ifolder, NULL, "NULL folder");
-   return new MessageCC(ifolder, iuid, msgno);
+   return new MessageCC(ifolder, iuid);
 }
 
-MessageCC::MessageCC(MailFolderCC *ifolder,unsigned long iuid,
-                     unsigned long msgno)
+MessageCC::MessageCC(MailFolderCC *ifolder,unsigned long iuid)
 {
    mailText = NULL;
    body = NULL;
@@ -56,7 +54,6 @@ MessageCC::MessageCC(MailFolderCC *ifolder,unsigned long iuid,
    folder = ifolder;
    folder->IncRef();
    m_uid = iuid;
-   m_msgno = msgno;
    Refresh();
 }
 
@@ -371,11 +368,10 @@ MessageCC::GetStatus(
    unsigned int *year) const
 {
    if(! ((MessageCC *)this)->GetBody())
-      return 0;  // should never happen
+      return MailFolder::MSG_STAT_NONE;
 
       
-   MESSAGECACHE *mc = mail_elt(folder->Stream(), m_msgno);
-   folder->ProcessEventQueue();
+   MESSAGECACHE *mc = mail_elt(folder->Stream(), mail_msgno(folder->Stream(),m_uid));
    
    if(size)    *size = mc->rfc822_size;
    if(day)  *day = mc->day;
@@ -389,7 +385,7 @@ MessageCC::GetStatus(
    if(mc->searched)  status |= MailFolder::MSG_STAT_SEARCHED;
    if(mc->recent)    status |= MailFolder::MSG_STAT_RECENT;
    if(mc->flagged)   status |= MailFolder::MSG_STAT_FLAGGED;
-   return status;
+   return (MailFolder::MessageStatus) status;
 }
    
 
@@ -555,7 +551,7 @@ MessageCC::GetId(void) const
    if(body == NULL)
       ((MessageCC *)this)-> GetBody();
    ASSERT(body);
-   return body->id;
+   return * new String(body->id);
 }
 
 String const &
@@ -564,7 +560,7 @@ MessageCC::GetReferences(void) const
    if(body == NULL)
       ((MessageCC *)this)-> GetBody();
    ASSERT(body);
-   return envelope->references;
+   return * new String(envelope->references);
 }
 
 void

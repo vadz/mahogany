@@ -49,7 +49,12 @@ static inline void CCQuiet(void) { mm_ignore_errors = true; }
 static inline void CCVerbose(void) { mm_ignore_errors = false; }
 
 /** This class essentially maps to the c-client Overview structure,
-    which holds information for showing lists of messages. */
+    which holds information for showing lists of messages.
+    The m_uid member is also used to map any access to the n-th message in 
+    the folder to the correct message. I.e. when requesting
+    GetMessage(5), it will use the message with the m_uid from the 5th 
+    entry in the list.
+*/
 class HeaderInfoCC : public HeaderInfo
 {
 public:
@@ -65,6 +70,7 @@ protected:
    String m_Subject, m_From, m_Date, m_Id, m_References;
    int m_Status;
    unsigned long m_Size;
+   unsigned long m_Uid;
    friend class MailFolderCC;
 };
 
@@ -264,19 +270,6 @@ MailFolderCC::Open(void)
    // from now on we want to know when new messages appear
    m_GenerateNewMailEvents = true;
 
-#ifdef DEBUG
-   // TESTING
-   HeaderInfo const *hi;
-   for(hi = GetFirstHeaderInfo(); hi != NULL; hi = GetNextHeaderInfo(hi))
-   {
-      cout << hi->GetSubject() << ' ' << hi->GetFrom() << ' '
-           << hi->GetDate() << ' ' << hi->GetId() << endl
-           << "    " << hi->GetReferences() << ' '
-           << MailFolder::ConvertMessageStatusToString(hi->GetStatus())
-           << ' '
-           << hi->GetSize() << endl;
-   }
-#endif   
    PY_CALLBACK(MCB_FOLDEROPEN, 0, GetProfile());
    return true;   // success
 }
@@ -399,7 +392,8 @@ MailFolderCC::CountMessages(void) const
 Message *
 MailFolderCC::GetMessage(unsigned long index)
 {
-   MessageCC *m = MessageCC::CreateMessageCC(this,mail_uid(m_MailStream,index),index);
+   ASSERT(index <= m_numOfMessages && index >= 1);
+   MessageCC *m = MessageCC::CreateMessageCC(this,m_Listing[index-1].m_Uid);
    ProcessEventQueue();
    return m;
 }
@@ -409,34 +403,27 @@ MailFolderCC::SetSequenceFlag(String const &sequence,
                               int flag,
                               bool set)
 {
-   const char *flagstr;
+   String flags;
 
-   switch(flag)
-   {
-   case MSG_STAT_SEEN:
-      flagstr = "\\SEEN";
-      break;
-   case MSG_STAT_ANSWERED:
-      flagstr = "\\ANSWERED";
-      break;
-   case MSG_STAT_DELETED:
-      flagstr = "\\DELETED";
-      break;
-   case MSG_STAT_FLAGGED:
-      flagstr = "\\FLAGGED";
-      break;
-   default:
-      return;
-   }
+   if(flag & MSG_STAT_SEEN)
+      flags <<"\\SEEN ";
+   if(flag & MSG_STAT_RECENT)
+      flags <<"\\RECENT ";
+   if(flag & MSG_STAT_ANSWERED)
+      flags <<"\\ANSWERED ";
+   if(flag & MSG_STAT_DELETED)
+      flags <<"\\DELETED ";
+   if(flag & MSG_STAT_FLAGGED)
+      flags <<"\\FLAGGED ";
 
    if(PY_CALLBACKVA((set ? MCB_FOLDERSETMSGFLAG : MCB_FOLDERCLEARMSGFLAG,
                      1, this, this->GetClassName(),
-                     GetProfile(), "ss", sequence.c_str(), flagstr),1)  )
+                     GetProfile(), "ss", sequence.c_str(), flags.c_str()),1)  )
    {
       if(set)
-         mail_setflag(m_MailStream, (char *)sequence.c_str(), (char *)flagstr);
+         mail_setflag(m_MailStream, (char *)sequence.c_str(), (char *)flags.c_str());
       else
-         mail_clearflag(m_MailStream, (char *)sequence.c_str(), (char *)flagstr);
+         mail_clearflag(m_MailStream, (char *)sequence.c_str(), (char *)flags.c_str());
       ProcessEventQueue();
    }
 }
@@ -555,25 +542,24 @@ MailFolderCC::BuildListing(void)
       m_Listing = NULL;
    }
       
-   if(! m_Listing)
+   if(! m_Listing && m_numOfMessages > 0)
       m_Listing = new HeaderInfoCC[m_numOfMessages];
 
    m_BuildNextEntry = 0;
-   String sequence = "1:";
-   sequence << strutil_ultoa(m_numOfMessages);
+   
    // mail_fetch_overview() will now fill the m_Listing array with
    // info on the messages
    /* stream, sequence, header structure to fill */
-   mail_fetch_overview_nonuid (m_MailStream, (char *)sequence.c_str(), mm_overview_header);
+   mail_fetch_overview (m_MailStream, (char *)"1:*", mm_overview_header);
 
+#if 0
    /* This can actually happen if no overview information is
-      available, for NNTP sometimes */
+      available, for NNTP sometimes. */
    if(m_BuildNextEntry != m_numOfMessages)
    {
-      ASSERT(m_folderType == MF_NNTP); // otherwise I misunderstood something
       ASSERT(m_BuildNextEntry == 0); // otherwise I misunderstood something
-      String dateFormat = READ_APPCONFIG(MP_DATE_FMT);
 
+      String dateFormat = READ_APPCONFIG(MP_DATE_FMT);
       /* Now we need to build the list ourselves, that's annoying */
       Message *msg;
       unsigned int day, month, year;
@@ -589,12 +575,16 @@ MailFolderCC::BuildListing(void)
          entry.m_Size = size;
          entry.m_References = msg->GetReferences();
          entry.m_Id = ((MessageCC *)msg)->GetId();
+//         entry.m_id
          msg->DecRef(); 
       }
    }
-   
-   ASSERT(m_BuildNextEntry == m_numOfMessages);
+#endif   
 
+   // for NNTP, it will not show all messages
+   //ASSERT(m_BuildNextEntry == m_numOfMessages || m_folderType == MF_NNTP);
+   m_numOfMessages = m_BuildNextEntry;
+   
    // now we sent an update event to update folderviews etc
    MEventFolderUpdateData data(this);
    MEventManager::Send(data);
@@ -624,7 +614,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
 
    ASSERT(m_Listing);
 
-   HeaderInfoCC & entry = m_Listing[m_BuildNextEntry++];
+   HeaderInfoCC & entry = m_Listing[m_BuildNextEntry];
 
    char tmp[MAILTMPLEN];
    ADDRESS *adr;
@@ -634,13 +624,18 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    MESSAGECACHE selt;
 
    // STATUS:
-   entry.m_Status = MSG_STAT_NONE;
-   if(elt->recent) entry.m_Status |= MSG_STAT_RECENT;
-   if(elt->seen) entry.m_Status |= MSG_STAT_SEEN;
-   if(elt->flagged) entry.m_Status |= MSG_STAT_FLAGGED;
-   if(elt->answered) entry.m_Status |= MSG_STAT_ANSWERED;
-   if(elt->deleted) entry.m_Status |= MSG_STAT_DELETED;
+   int status = MSG_STAT_NONE;
+   if(elt->recent) status |= MSG_STAT_RECENT;
+   if(elt->seen) status |= MSG_STAT_SEEN;
+   if(elt->flagged) status |= MSG_STAT_FLAGGED;
+   if(elt->answered) status |= MSG_STAT_ANSWERED;
+   if(elt->deleted) status |= MSG_STAT_DELETED;
+   entry.m_Status = (MailFolder::MessageStatus) status;
 
+   /* For NNTP, do not show deleted messages: */
+   if(m_folderType == MF_NNTP && elt->deleted)
+      return;
+   
    // DATE
    mail_parse_date (&selt,ov->date);
    mail_date (tmp,&selt);  //FIXME: is this ok? Use our date format!
@@ -675,6 +670,8 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
    entry.m_Size = ov->optional.octets;
    entry.m_Id = ov->message_id;
    entry.m_References = ov->references;
+   entry.m_Uid = uid;
+   m_BuildNextEntry++;
 }
 
 
@@ -682,8 +679,7 @@ MailFolderCC::OverviewHeaderEntry (unsigned long uid, OVERVIEW *ov)
 HeaderInfo const *
 MailFolderCC::GetFirstHeaderInfo(void) const
 {
-   ASSERT(m_Listing);
-   return m_Listing;
+   return (m_numOfMessages > 0 ) ? m_Listing : NULL;
 }
 
 /// Return a pointer to the next message's header info.
@@ -1068,6 +1064,7 @@ MailFolderCC::RequestUpdate(void)
 {
    MailFolderCC::Event *evptr = new MailFolderCC::Event(m_MailStream,Update);   
    MailFolderCC::QueueEvent(evptr);
+   m_UpdateNeeded = true;
 }
 
 /* Handles the mm_overview_header callback on a per folder basis. */

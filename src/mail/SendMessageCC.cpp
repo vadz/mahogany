@@ -69,8 +69,6 @@ extern "C"
 
 #define  CPYSTR(x)   cpystr(x)
 
-#define   StringCast(iterator)   ((String *)*i)
-
 /// temporary buffer for storing message headers, be generous:
 #define   HEADERBUFFERSIZE 100*1024
 
@@ -180,6 +178,23 @@ SendMessageCC::Create(ProfileBase *iprof,
 }
 
 
+/** Adds an extra header line.
+    @param entry name of header entry
+    @param value value of header entry
+    */
+void
+SendMessageCC::AddHeaderEntry(String const &entry, String const
+                              &ivalue)
+{
+   String
+      *name = new String(),
+      *value = new String();
+   *name = entry; *value = ivalue;
+   m_ExtraHeaderLinesNames.push_back(name);
+   m_ExtraHeaderLinesValues.push_back(value);
+}
+
+
 
 void
 SendMessageCC::Build(void)
@@ -192,7 +207,7 @@ SendMessageCC::Build(void)
    char
       *headers;
    kbStringList::iterator
-      i;
+      i, i2;
 
    if(m_headerNames != NULL) // message was already build
       return;
@@ -201,14 +216,30 @@ SendMessageCC::Build(void)
    strutil_tokenise(headers,";",m_headerList);
    delete [] headers;
 
-   // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the last NULL entry
-   m_headerNames = new const char*[m_headerList.size()+4];
-   m_headerValues = new const char*[m_headerList.size()+4];
+   // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the
+   // last NULL entry
+   size_t n = m_headerList.size() + m_ExtraHeaderLinesNames.size() + 4;
+   m_headerNames = new const char*[n];
+   m_headerValues = new const char*[n];
+   /* Add the extra headers as defined in list of extra headers in
+      profile: */
    for(i = m_headerList.begin(), j = 0; i != m_headerList.end(); i++, h++)
    {
-      m_headerNames[h] = strutil_strdup(StringCast(i)->c_str());
-      m_headerValues[h] = strutil_strdup(profile->readEntry(StringCast(i)->c_str(),""));
+      m_headerNames[h] = strutil_strdup(**i);
+      // this is clever: read header value from profile:
+      m_headerValues[h] = strutil_strdup(profile->readEntry(**i,""));
    }
+
+   /* Add directly added additional header lines: */
+   i = m_ExtraHeaderLinesNames.begin();
+   i2 = m_ExtraHeaderLinesValues.begin();
+   for(; i != m_ExtraHeaderLinesNames.end(); i++, i2++, h++)
+   {
+      m_headerNames[h] = strutil_strdup(**i);
+      // this is clever: read header value from profile:
+      m_headerValues[h] = strutil_strdup(**i2);
+   }
+
    //always add mailer header:
    m_headerNames[h] = strutil_strdup("X-Mailer");
    String version;
@@ -492,12 +523,10 @@ SendMessageCC::~SendMessageCC()
    mail_free_body (&body);
 
    int j;
-   kbStringList::iterator i;
-   for(i = m_headerList.begin(), j = 0; i != m_headerList.end(); i++,
-          j++)
+   for(j = 0; m_headerNames[j] ; j++)
    {
-      // @ const cast
       delete [] (char *)m_headerNames[j];
+      delete [] (char *)m_headerValues[j];
    }
 
    if(m_headerNames)  delete [] m_headerNames;

@@ -272,16 +272,9 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       delete m_timer;
 //      m_MailFolder->RegisterView(this,false);
       
+      // These messages are no longer recent as we've seen their headers.
       if(m_NumOfMessages > 0)
-      {
-         String sequence;
-         if(m_NumOfMessages > 1)
-            sequence.Printf("%d:%ld", 1, (long)m_NumOfMessages);
-         else
-            sequence = "1";
-         // These messages are no longer recent as we've seen their headers.
-         m_MailFolder->SetSequenceFlag(sequence, MailFolder::MSG_STAT_RECENT, false);
-      }
+         m_MailFolder->SetSequenceFlag("1:*", MailFolder::MSG_STAT_RECENT, false);
       m_MailFolder->DecRef();
    }
 
@@ -433,24 +426,6 @@ wxFolderView::Update(void)
       m_FolderCtrl->Select(i,selected);
       i++;
    }
-
-#if 0
-   for(i = 0; i < n; i++)
-   {
-      mptr = m_MailFolder->GetMessage(i+1);
-      status = MailFolder::ConvertMessageStatusToString(mptr->GetStatus(&nsize,&day,&month,&year));
-
-      subject = mptr->Subject();
-      sender  = mptr->From();
-      date.Printf(dateFormat, day, month, year);
-      size = strutil_ultoa(nsize);
-
-      selected = (i < m_NumOfMessages) ? m_FolderCtrl->IsSelected(i) : false;
-      m_FolderCtrl->SetEntry(i,status, sender, subject, date, size);
-      m_FolderCtrl->Select(i,selected);
-      SafeDecRef(mptr);
-   }
-#endif
    m_NumOfMessages = n;
    wxEndBusyCursor(); wxYield();
    m_UpdateSemaphore = false;
