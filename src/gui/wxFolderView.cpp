@@ -292,6 +292,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
       m_FolderCtrl->Clear();
 
    wxSafeYield();
+
    
    if(m_MailFolder)  // clean up old folder
    {
@@ -320,7 +321,12 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          sequence = sequence.substr(0,sequence.Length()-1); //strip off comma
          m_MailFolder->SetSequenceFlag(sequence, MailFolder::MSG_STAT_DELETED);
       }
-      m_MailFolder->DecRef();
+
+      // This little trick makes sure that we don't react to any final
+      // events sent from the MailFolder destructor.
+      MailFolder *mf = m_MailFolder;
+      m_MailFolder = NULL;
+      mf->DecRef();
    }
 
    SafeDecRef(m_Profile); 

@@ -118,6 +118,7 @@ public:
                                &m_ProfileValues.FgCol,
                                &m_ProfileValues.BgCol);
          SetBackgroundColour( m_ProfileValues.BgCol );
+         m_uid = -1;
       }
    /// returns the mail folder
    MailFolder *GetFolder(void);

@@ -115,6 +115,7 @@ CHECK:
      list of these folders and periodically checking them.
      TEST!!!!
 - suppress mm_log() checkpoint completed messages
+- add URL highlight colour
 
 TODO:
 
@@ -129,12 +130,13 @@ TODO:
 
 for release:
 
+- When mm_log reports a "Unexpected change", do a Ping(), trying to
+  reopen the stream.
+
 - remove dialog box in MailFolderCC::Ping about reopening folder!!!
 - update the list of folders to poll for new mail when the folder
   properties are changed, tricky.
 
-- When mm_log reports a "Unexpected change", do a Ping(), trying to
-  reopen the stream.
 - config panels are too small/too full, move font settings somewhere
   else, i.e. have a "layout" page?
 
@@ -143,7 +145,6 @@ for release:
 
 doc: add note about news active file
 
-- add URL highlight colour
 
 after release:
 

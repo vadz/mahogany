@@ -993,7 +993,7 @@ MailFolderCC::mm_log(String str, long /* errflg */)
    msg += str;
    LOGMESSAGE((M_LOG_INFO, Str(msg)));
    const char *unexpected = "Unexpected change";
-   if(strncmp(str,unexpected, strlen(unexpected)) == 0)
+   if(strstr(str,unexpected) != NULL)
    {
       // try to reopen the stream
       // Problem: we don't know the stream, so we need to ping them
