@@ -143,16 +143,18 @@ export DESTDIR
 
 USESTABLE=no
 
-if [ `hostname -d` = "compile.sourceforge.net" ]
+if [ `domainname` = "compile.sourceforge.net" ]
 then
 	CVSSERVER="cvs1"
+	FTPSERVER="shell1"
 else
 	CVSSERVER="cvs.mahogany.sourceforge.net"
+	FTPSERVER="mahogany.sourceforge.net"
 fi
 
-FTPLOCATION="ballueder@mahogany.sourceforge.net:FTP/daily/"
-LIBMALLOCATION="ballueder@mahogany.sourceforge.net:FTP/Libraries/libmal.tar.gz"
-WWWDOCLOCATION="ballueder@mahogany.sourceforge.net:WWW/doc/"
+FTPLOCATION="ballueder@${FTPSERVER}:FTP/daily/"
+LIBMALLOCATION="ballueder@${FTPSERVER}:FTP/Libraries/libmal.tar.gz"
+WWWDOCLOCATION="ballueder@${FTPSERVER}:WWW/doc/"
 #WXCVSROOT=":pserver:KB@cvs.wxwindows.org:/var/cvs/wxWindows"
 #MCVSROOT="ballueder@cvs.mahogany.sourceforge.net:/cvsroot/mahogany"
 WXCVSROOT=":pserver:anoncvs@cvs.wxwindows.org:/var/cvs/wxWindows"
@@ -178,7 +180,7 @@ MTAG="-A"
 WXNAME=wxGTK
 WXVERSION=2.2
 
-DOCHOST=matterhorn
+DOCHOST=Matterhorn
 
 # This should be set to "yes" by the Mahogany compilation if it
 # succeeds. Used in the debian compilation only for now.
