@@ -1,10 +1,22 @@
-/*-*- c++ -*-********************************************************
- * wxMFrame: a basic window class                                   *
- *                                                                  *
- * (C) 1997, 1998 by Karsten Ballüder (Ballueder@usa.net)           *
- *                                                                  *
- * $Id$
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     Mahogany
+// File name:   gui/wxMFrame.cpp - base frame class
+// Purpose:     GUI functionality common to all Mahogany frames
+// Author:      M-Team
+// Modified by:
+// Created:     1997
+// CVS-ID:      $Id$
+// Copyright:   (c) 1997-2001 Mahogany Team
+// License:     M license
+///////////////////////////////////////////////////////////////////////////////
+
+// ============================================================================
+// declarations
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// headers
+// ----------------------------------------------------------------------------
 
 #ifdef __GNUG__
 #   pragma implementation "wxMFrame.h"
@@ -14,19 +26,20 @@
 #include "Mcommon.h"
 
 #ifndef  USE_PCH
-#   include "guidef.h"
-#   include "strutil.h"
-#   include "MFrame.h"
-#   include "kbList.h"
-#   include "PathFinder.h"
-#   include "Profile.h"
-#   include "Mdefaults.h"
-#   include "MApplication.h"
-#   include "gui/wxMApp.h"
-#   include "MailFolder.h"
-#   include "Message.h"
+#  include "guidef.h"
+#  include "strutil.h"
+#  include "MFrame.h"
+#  include "kbList.h"
+#  include "PathFinder.h"
+#  include "Profile.h"
+#  include "Mdefaults.h"
+#  include "MApplication.h"
+#  include "gui/wxMApp.h"
+#  include "MailFolder.h"
+#  include "Message.h"
+#  include "MEvent.h"
 
-#   include <wx/confbase.h>
+#  include <wx/confbase.h>
 #endif
 
 #ifdef USE_PYTHON
@@ -60,6 +73,63 @@
 
 #include <wx/fontmap.h>          // for GetEncodingDescription()
 
+#ifdef USE_PYTHON
+   #include <wx/ffile.h>
+#endif // USE_PYTHON
+
+#ifdef OS_WIN
+    // ok, wxPrintDialog is the right one
+#else
+    typedef wxGenericPrintDialog wxPrintDialog;
+#endif
+
+// ----------------------------------------------------------------------------
+// private classes
+// ----------------------------------------------------------------------------
+
+#ifdef USE_PYTHON
+
+class PythonOptionChangeHandler : public MEventReceiver
+{
+public:
+   PythonOptionChangeHandler(wxMFrame *frame)
+   {
+      m_frame = frame;
+      m_eventCookie = MEventManager::Register(*this, MEventId_OptionsChange);
+   }
+
+   bool OnMEvent(MEventData& event)
+   {
+      if ( event.GetId() == MEventId_OptionsChange );
+      {
+         if ( ((MEventOptionsChangeData &)event).GetChangeKind() ==
+                  MEventOptionsChangeData::Ok )
+         {
+            m_frame->UpdateRunPyScriptMenu();
+         }
+      }
+
+      // propagate further
+      return TRUE;
+   }
+
+   virtual ~PythonOptionChangeHandler()
+   {
+      if ( m_eventCookie )
+         MEventManager::Deregister(m_eventCookie);
+   }
+
+private:
+   wxMFrame *m_frame;
+   void *m_eventCookie;
+};
+
+#endif // USE_PYTHON
+
+// ----------------------------------------------------------------------------
+// wxWin macros
+// ----------------------------------------------------------------------------
+
 IMPLEMENT_DYNAMIC_CLASS(wxMFrame, wxFrame)
 
 BEGIN_EVENT_TABLE(wxMFrame, wxFrame)
@@ -68,11 +138,214 @@ BEGIN_EVENT_TABLE(wxMFrame, wxFrame)
    EVT_CLOSE(wxMFrame::OnCloseWindow)
 END_EVENT_TABLE()
 
-#ifdef OS_WIN
-    // ok, wxPrintDialog is the right one
-#else
-    typedef wxGenericPrintDialog wxPrintDialog;
+// ============================================================================
+// wxMFrame implementation
+// ============================================================================
+
+// ----------------------------------------------------------------------------
+// wxMFrame creation
+// ----------------------------------------------------------------------------
+
+wxMFrame::wxMFrame(const String &name, wxWindow *parent)
+        : MFrameBase(name)
+{
+#ifdef USE_WORKAROUND_FOR_MAXIMIZE
+   m_shouldMaximizeOnShow = FALSE;
 #endif
+
+#ifdef USE_PYTHON
+   m_pyOptHandler = new PythonOptionChangeHandler(this);
+#endif // USE_PYTHON
+
+   m_initialised = false;
+   Create(name, parent);
+}
+
+#ifdef USE_WORKAROUND_FOR_MAXIMIZE
+
+bool wxMFrame::Show(bool show)
+{
+   if ( show && m_shouldMaximizeOnShow )
+   {
+      // trick it into thinking we're already shown, otherwise it doesn't do
+      // anything
+      bool shown = m_isShown;
+      m_isShown = TRUE;
+      wxFrame::Maximize();
+      m_isShown = shown;
+
+      m_shouldMaximizeOnShow = FALSE;
+   }
+
+   return wxFrame::Show(show);
+}
+
+void wxMFrame::Maximize(bool maximize)
+{
+   if ( maximize && !IsShown() )
+   {
+      m_shouldMaximizeOnShow = TRUE;
+   }
+   else
+   {
+      wxFrame::Maximize(maximize);
+   }
+}
+
+#endif // USE_WORKAROUND_FOR_MAXIMIZE
+
+wxToolBar *
+wxMFrame::CreateToolBar(void)
+{
+   int style = wxTB_HORIZONTAL | wxNO_BORDER;
+   if(READ_APPCONFIG(MP_DOCKABLE_TOOLBARS) != 0)
+      style |= wxTB_DOCKABLE;
+   if(READ_APPCONFIG(MP_FLAT_TOOLBARS) != 0)
+      style |= wxTB_FLAT;
+
+   wxToolBar *tb = wxFrame::CreateToolBar(style, -1, _("Mahogany Toolbar"));
+   tb->SetMargins(4, 4);
+
+   return tb;
+}
+
+void
+wxMFrame::SetTitle(String const &title)
+{
+   wxString t = _("Mahogany : ") + title;
+
+   wxFrame::SetTitle(t.c_str());
+}
+
+void
+wxMFrame::Create(const String &name, wxWindow *parent)
+{
+   wxCHECK_RET( !m_initialised, "wxMFrame created twice" );
+
+   SetName(name);
+
+   int xpos, ypos, width, height;
+   bool startIconised, startMaximised;
+   RestorePosition(MFrameBase::GetName(), &xpos, &ypos, &width, &height,
+                   &startIconised, &startMaximised);
+
+   // use name as default title
+   if ( !wxFrame::Create(parent, -1, name,
+                         wxPoint(xpos, ypos), wxSize(width,height)) )
+   {
+      wxFAIL_MSG( "Failed to create a frame!" );
+
+      return;
+   }
+
+   SetIcon(ICON("MFrame"));
+
+   // no "else": a frame can be maximized and iconized, meaning that it will
+   // become maximized when restored
+   if ( startMaximised )
+      Maximize();
+   if ( startIconised )
+      Iconize();
+
+   m_initialised = true;
+   SetMenuBar(new wxMenuBar(wxMB_DOCKABLE));
+}
+
+wxMFrame::~wxMFrame()
+{
+#ifdef USE_PYTHON
+   delete m_pyOptHandler;
+#endif // USE_PYTHON
+
+   SavePosition(MFrameBase::GetName(), this);
+}
+
+// ----------------------------------------------------------------------------
+// menu stuff
+// ----------------------------------------------------------------------------
+
+void
+wxMFrame::AddFileMenu(void)
+{
+#ifndef wxMENU_TEAROFF
+   // FIXME WXWIN-COMPATIBILITY
+   wxMenu *fileMenu = new wxMenu();
+#else
+   wxMenu *fileMenu = new wxMenu("", wxMENU_TEAROFF);
+#endif
+
+   AppendToMenu(fileMenu, WXMENU_FILE_BEGIN + 1, WXMENU_FILE_CLOSE - 1);
+
+   wxWindow *parent = GetParent();
+
+   // skip "Close" menu item for the main frame - it is the same as "Exit" for
+   // it
+   int n = WXMENU_FILE_CLOSE;
+   if ( parent != NULL )
+   {
+      AppendToMenu(fileMenu, n);
+   }
+
+   // +2 because WXMENU_FILE_CLOSE has a separator with it
+   n += 2;
+   AppendToMenu(fileMenu, n, WXMENU_FILE_END);
+
+   GetMenuBar()->Append(fileMenu, _("&Mail"));
+
+#ifdef USE_PYTHON
+   UpdateRunPyScriptMenu();
+#endif // USE_PYTHON
+}
+
+#ifdef USE_PYTHON
+
+void wxMFrame::UpdateRunPyScriptMenu()
+{
+   wxMenuBar *mbar = GetMenuBar();
+   wxMenuItem *item = mbar->FindItem(WXMENU_FILE_RUN_PYSCRIPT);
+
+   if ( item )
+   {
+      item->Enable(READ_APPCONFIG(MP_USEPYTHON) != 0);
+   }
+   else
+   {
+      FAIL_MSG( "where is \"Run Python script\" menu item?" );
+   }
+}
+
+#endif // USE_PYTHON
+
+void
+wxMFrame::AddEditMenu(void)
+{
+   WXADD_MENU(GetMenuBar(), EDIT, _("&Edit"));
+}
+
+void
+wxMFrame::AddHelpMenu(void)
+{
+   WXADD_MENU(GetMenuBar(), HELP, _("&Help"));
+}
+
+void
+wxMFrame::AddMessageMenu(void)
+{
+   WXADD_MENU(GetMenuBar(), MSG, _("Me&ssage"));
+}
+
+void
+wxMFrame::AddLanguageMenu(void)
+{
+   WXADD_MENU(GetMenuBar(), LANG, _("&Language"));
+
+   // initially use the default charset
+   CheckLanguageInMenu(this, wxFONTENCODING_DEFAULT);
+}
+
+// ----------------------------------------------------------------------------
+// saving and restoring frame position
+// ----------------------------------------------------------------------------
 
 bool wxMFrame::RestorePosition(const char *name,
                                int *x, int *y, int *w, int *h,
@@ -113,169 +386,6 @@ bool wxMFrame::RestorePosition(const char *name,
 
       return FALSE;
    }
-}
-
-wxMFrame::wxMFrame(const String &name, wxWindow *parent)
-        : MFrameBase(name)
-{
-#ifdef USE_WORKAROUND_FOR_MAXIMIZE
-   m_shouldMaximizeOnShow = FALSE;
-#endif
-
-   m_initialised = false;
-   Create(name, parent);
-}
-
-#ifdef USE_WORKAROUND_FOR_MAXIMIZE
-
-bool wxMFrame::Show(bool show)
-{
-   if ( show && m_shouldMaximizeOnShow )
-   {
-      // trick it into thinking we're already shown, otherwise it doesn't do
-      // anything
-      bool shown = m_isShown;
-      m_isShown = TRUE;
-      wxFrame::Maximize();
-      m_isShown = shown;
-
-      m_shouldMaximizeOnShow = FALSE;
-   }
-
-   return wxFrame::Show(show);
-}
-
-void wxMFrame::Maximize(bool maximize)
-{
-   if ( maximize && !IsShown() )
-   {
-      m_shouldMaximizeOnShow = TRUE;
-   }
-   else
-   {
-      wxFrame::Maximize(maximize);
-   }
-}
-
-#endif // USE_WORKAROUND_FOR_MAXIMIZE
-
-void
-wxMFrame::Create(const String &name, wxWindow *parent)
-{
-   wxCHECK_RET( !m_initialised, "wxMFrame created twice" );
-
-   SetName(name);
-
-   int xpos, ypos, width, height;
-   bool startIconised, startMaximised;
-   RestorePosition(MFrameBase::GetName(), &xpos, &ypos, &width, &height,
-                   &startIconised, &startMaximised);
-
-   // use name as default title
-   if ( !wxFrame::Create(parent, -1, name,
-                         wxPoint(xpos, ypos), wxSize(width,height)) )
-   {
-      wxFAIL_MSG( "Failed to create a frame!" );
-
-      return;
-   }
-
-   SetIcon(ICON("MFrame"));
-
-   // no "else": a frame can be maximized and iconized, meaning that it will
-   // become maximized when restored
-   if ( startMaximised )
-      Maximize();
-   if ( startIconised )
-      Iconize();
-
-   m_initialised = true;
-   SetMenuBar(new wxMenuBar(wxMB_DOCKABLE));
-}
-
-void
-wxMFrame::AddFileMenu(void)
-{
-#ifndef wxMENU_TEAROFF
-   // FIXME WXWIN-COMPATIBILITY
-   wxMenu *fileMenu = new wxMenu();
-#else
-   wxMenu *fileMenu = new wxMenu("", wxMENU_TEAROFF);
-#endif
-
-   AppendToMenu(fileMenu, WXMENU_FILE_BEGIN + 1, WXMENU_FILE_CLOSE - 1);
-
-   wxWindow *parent = GetParent();
-
-   int n = WXMENU_FILE_CLOSE;
-   if ( parent != NULL )
-   {
-      AppendToMenu(fileMenu, n);
-   }
-
-   // +2 because WXMENU_FILE_CLOSE has a separator with it
-   n += 2;
-   AppendToMenu(fileMenu, n, WXMENU_FILE_END);
-
-   GetMenuBar()->Append(fileMenu, _("&Mail"));
-
-#ifdef USE_PYTHON
-   // disable the Python menu item if Python is disabled
-   if ( !READ_APPCONFIG(MP_USEPYTHON) )
-   {
-      wxMenuBar *mbar = GetMenuBar();
-      wxMenuItem *item = mbar->FindItem(WXMENU_FILE_RUN_PYSCRIPT);
-
-      if ( item )
-      {
-         item->Enable(FALSE);
-      }
-      else
-      {
-         FAIL_MSG( "where is \"Run Python script\" menu item?" );
-      }
-   }
-#endif // USE_PYTHON
-}
-
-void
-wxMFrame::AddEditMenu(void)
-{
-   WXADD_MENU(GetMenuBar(), EDIT, _("&Edit"));
-}
-
-void
-wxMFrame::AddHelpMenu(void)
-{
-   WXADD_MENU(GetMenuBar(), HELP, _("&Help"));
-}
-
-void
-wxMFrame::AddMessageMenu(void)
-{
-   WXADD_MENU(GetMenuBar(), MSG, _("Me&ssage"));
-}
-
-void
-wxMFrame::AddLanguageMenu(void)
-{
-   WXADD_MENU(GetMenuBar(), LANG, _("&Language"));
-
-   // initially use the default charset
-   CheckLanguageInMenu(this, wxFONTENCODING_DEFAULT);
-}
-
-wxMFrame::~wxMFrame()
-{
-   SavePosition(MFrameBase::GetName(), this);
-}
-
-void
-wxMFrame::SetTitle(String const &title)
-{
-   wxString t = _("Mahogany : ") + title;
-
-   wxFrame::SetTitle(t.c_str());
 }
 
 void
@@ -330,6 +440,10 @@ wxMFrame::SavePositionInternal(const char *name, wxWindow *frame, bool isFrame)
       pConf->Write(MP_HEIGHT, (long)y);
    }
 }
+
+// ----------------------------------------------------------------------------
+// callbacks
+// ----------------------------------------------------------------------------
 
 void
 wxMFrame::OnMenuCommand(int id)
@@ -391,36 +505,33 @@ wxMFrame::OnMenuCommand(int id)
 
 #ifdef USE_PYTHON
       case WXMENU_FILE_RUN_PYSCRIPT:
-      {
-         String path;
-         path << mApplication->GetGlobalDir() << DIR_SEPARATOR << "scripts";
-
-         wxString filename = MDialog_FileRequester
-                             (
-                              _("Please select a Python script to run."),
-                              this,
-                              path, filename,
-                              "py", "*.py",
-                              false,
-                              NULL /* profile */
-                             );
-         if(! strutil_isempty(filename))
          {
-            FILE *file = fopen(filename,"rb");
-            if(file)
+            wxString path = mApplication->GetGlobalDir();
+            if ( !path.empty() )
+               path += DIR_SEPARATOR;
+            path += "scripts";
+
+            wxString filename = MDialog_FileRequester
+                                (
+                                 _("Please select a Python script to run."),
+                                 this,
+                                 path, "",
+                                 "py", "*.py",
+                                 false,
+                                 NULL /* profile */
+                                );
+            if ( !filename.empty() )
             {
-               PyH_RunScript(file,filename);
-               fclose(file);
+               wxFFile file(filename, "rb");
+               if ( file.IsOpened() )
+               {
+                  PyH_RunScript(file.fp(), filename);
+               }
+               //else: couldn't open the file
             }
-            else
-            {
-               wxLogSysError(_("Failed to open Python script '%s'"),
-                             filename.c_str());
-            }
+            //else: cancelled by user
          }
-         //else: cancelled by user
-      }
-      break;
+         break;
 #endif   // USE_PYTHON
 
       case WXMENU_FILE_AWAY_MODE:
@@ -798,21 +909,6 @@ wxMFrame::OnMenuCommand(int id)
          }
          break;
    }
-}
-
-wxToolBar *
-wxMFrame::CreateToolBar(void)
-{
-   int style = wxTB_HORIZONTAL | wxNO_BORDER;
-   if(READ_APPCONFIG(MP_DOCKABLE_TOOLBARS) != 0)
-      style |= wxTB_DOCKABLE;
-   if(READ_APPCONFIG(MP_FLAT_TOOLBARS) != 0)
-      style |= wxTB_FLAT;
-
-   wxToolBar *tb = wxFrame::CreateToolBar(style, -1, _("Mahogany Toolbar"));
-   tb->SetMargins(4, 4);
-
-   return tb;
 }
 
 void

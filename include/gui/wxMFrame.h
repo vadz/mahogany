@@ -1,11 +1,15 @@
-/*-*- c++ -*-********************************************************
- * wxMFrame.h: a basic window class                                 *
- *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
- *                                                                  *
- * $Id$              *
- *
- *******************************************************************/
+///////////////////////////////////////////////////////////////////////////////
+// Project:     Mahogany
+// File name:   gui/wxMFrame.h - base frame class
+// Purpose:     GUI functionality common to all Mahogany frames
+// Author:      M-Team
+// Modified by:
+// Created:     1997
+// CVS-ID:      $Id$
+// Copyright:   (c) 1997-2001 Mahogany Team
+// License:     M license
+///////////////////////////////////////////////////////////////////////////////
+
 #ifndef  WXMFRAME_H
 #define WXMFRAME_H
 
@@ -95,8 +99,6 @@ public:
    void OnCommandEvent(wxCommandEvent & event);
    void OnCloseWindow(wxCloseEvent& event);
 
-   DECLARE_EVENT_TABLE()
-
 protected:
    static void SavePositionInternal(const char *name, wxWindow *frame, bool isFrame);
 
@@ -114,6 +116,16 @@ private:
    bool m_shouldMaximizeOnShow;
 #endif // USE_WORKAROUND_FOR_MAXIMIZE
 
+#ifdef USE_PYTHON
+   /// update the state (enabled/disabled) of the "Run Python script" menu item
+   void UpdateRunPyScriptMenu();
+
+   /// the object which calls our UpdateRunPyScriptMenu()
+   friend class PythonOptionChangeHandler;
+   PythonOptionChangeHandler *m_pyOptHandler;
+#endif // USE_PYTHON
+
+   DECLARE_EVENT_TABLE()
    DECLARE_DYNAMIC_CLASS(wxMFrame)
 };
 

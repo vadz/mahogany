@@ -55,7 +55,7 @@ PythonCallback(const char *name, int def, void *obj, const char *classname,
    {
       va_start(argslist, argfmt);
       parg = Py_VaBuildValue((char *)argfmt, argslist);     /* input: C->Python */
-      if (parg == NULL) 
+      if (parg == NULL)
          return 0;
    }
    else
@@ -110,7 +110,7 @@ bool PyH_CallFunction(const char *func,
 
    String
       functionName = func;
-   
+
    if(strchr(func,'.') != NULL)  // function name contains module name
    {
       String modname;
@@ -129,7 +129,7 @@ bool PyH_CallFunction(const char *func,
       functionName = func;
    }
 
-   if (module == NULL)     
+   if (module == NULL)
       return 0;  // failure
 
    function = PyObject_GetAttrString(module, (char *)functionName.c_str());
@@ -137,7 +137,7 @@ bool PyH_CallFunction(const char *func,
       return 0; // failure
 
    // now build object reference argument:
-   
+
    object = PyH_makeObjectFromPointer(obj, classname);
    if(parg)
       presult =
@@ -145,7 +145,7 @@ bool PyH_CallFunction(const char *func,
    else
       presult =
          PyObject_CallFunction(function,"sO",name,object);
-      
+
    // expr val to C
    return PyH_ConvertResult(presult, resultfmt, result) != 0;
 }
@@ -169,7 +169,7 @@ bool PyH_CallFunctionVa(const char *func,
 
    String
       functionName = func;
-   
+
    if(strchr(func,'.') != NULL)  // function name contains module name
    {
       String modname;
@@ -188,7 +188,7 @@ bool PyH_CallFunctionVa(const char *func,
       functionName = func;
    }
 
-   if (module == NULL)     
+   if (module == NULL)
       return 0;  // failure
 
    function = PyObject_GetAttrString(module, (char *)functionName.c_str());
@@ -196,9 +196,9 @@ bool PyH_CallFunctionVa(const char *func,
       return 0; // failure
 
    // now build object reference argument:
-   
+
    object = PyH_makeObjectFromPointer(obj, classname);
-   presult = PyObject_CallFunction(function,"sO",name,object);   
+   presult = PyObject_CallFunction(function,"sO",name,object);
 
    // expr val to C
    return PyH_ConvertResult(presult, resultfmt, result) != 0;
@@ -214,7 +214,7 @@ PyH_LoadModule(const char *modname)            /* returns module object */
      * 3) reload set and already loaded (on sys.modules): "reload()" before use
      * 4) not loaded yet, or loaded but reload off: "import" to fetch or load */
 
-   PyObject *module;                  
+   PyObject *module;
    module  = PyDict_GetItemString(                 /* in sys.modules dict? */
       PyImport_GetModuleDict(), (char *)modname);
 
@@ -222,7 +222,7 @@ PyH_LoadModule(const char *modname)            /* returns module object */
       return PyImport_AddModule((char *)modname);         /* not incref'd */
    else
       if (module != NULL &&                                /* dummy: no file */
-          PyDict_GetItemString(PyModule_GetDict(module), "__dummy__")) 
+          PyDict_GetItemString(PyModule_GetDict(module), "__dummy__"))
          return module;                                   /* not incref'd */
       else
          if (module != NULL && PyModule_Check(module)) {
@@ -230,7 +230,7 @@ PyH_LoadModule(const char *modname)            /* returns module object */
             Py_XDECREF(module);                       /* still on sys.modules */
             return module;                            /* not incref'd */
          }
-         else {  
+         else {
             module = PyImport_ImportModule((char *)modname);  /* fetch or load module */
             Py_XDECREF(module);                       /* still on sys.modules */
             return module;                            /* not incref'd */
@@ -324,10 +324,9 @@ PyH_RunScript(FILE *file, const char *filename)
    {
       if ( PyRun_SimpleFile(file, (char *) filename) != 0 )
       {
-          String err;
-          PyH_GetErrorMessage(&err);
-          ERRORMESSAGE(("Python error while executing '%s':\n%s",
-                        filename, err.c_str()));
+          // for some reason PyH_GetErrorMessage() does return anything in this
+          // case, why? (FIXME)
+          ERRORMESSAGE(("Python error while executing '%s'", filename));
       }
    }
    else
