@@ -683,11 +683,11 @@ MWizard_CreateFolder_ServerPage(MWizard *wizard,
               "the following access parameters\n"
               "are needed:\n");
 
-   bool
-      needsServer,
-      needsUserId,
-      needsPath,
-      canBrowse;
+   // initialize all the variables just to avoid the compiler warnings
+   bool needsServer = false,
+        needsUserId = false,
+        needsPath = false,
+        canBrowse = false;
 
    switch(type)
    {
