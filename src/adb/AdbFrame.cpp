@@ -2511,7 +2511,7 @@ wxAdbTree::wxAdbTree(wxAdbEditFrame *frame, wxWindow *parent, long id)
   static const char *aszImages[] =
   {
     // should be in sync with the corresponding enum in wxAdbTree
-    "library", "book", "address", "opened", "closed",
+    "adb_library", "adb_book", "adb_address", "adb_opened", "adb_closed",
   };
 
   wxImageList *imageList = new wxImageList(16, 16, FALSE, WXSIZEOF(aszImages));
