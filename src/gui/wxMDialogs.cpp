@@ -984,7 +984,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile, wxWindow *p
       c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
       c->width.Absolute(widthMax);
       if(n == 0)
-         c->top.SameAs(box, wxTop, 2*LAYOUT_Y_MARGIN);
+         c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
       else
          c->top.Below(m_Choices[n-1], 2*LAYOUT_Y_MARGIN);
       c->height.AsIs();
@@ -997,7 +997,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile, wxWindow *p
       c->left.RightOf(txt, 2*LAYOUT_X_MARGIN);
       c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
       if(n == 0)
-         c->top.SameAs(box, wxTop, 2*LAYOUT_Y_MARGIN);
+         c->top.SameAs(box, wxTop, 4*LAYOUT_Y_MARGIN);
       else
          c->top.Below(m_Choices[n-1], 2*LAYOUT_Y_MARGIN);
       c->height.AsIs();

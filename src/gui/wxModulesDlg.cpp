@@ -101,7 +101,7 @@ wxModulesDialog::wxModulesDialog(wxWindow *parent)
    // create the checklistbox in the area which is left
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.SameAs(box, wxRight, -2*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    c->top.Below(msg, 2*LAYOUT_Y_MARGIN);
    c->height.PercentOf(box, wxHeight, 60);
 
@@ -113,7 +113,7 @@ wxModulesDialog::wxModulesDialog(wxWindow *parent)
                                wxDefaultSize, wxTE_MULTILINE|wxTE_READONLY);
    c = new wxLayoutConstraints;
    c->left.SameAs(box, wxLeft, 2*LAYOUT_X_MARGIN);
-   c->right.SameAs(box, wxRight, 3*LAYOUT_X_MARGIN);
+   c->right.SameAs(box, wxRight, 2*LAYOUT_X_MARGIN);
    c->top.Below(m_checklistBox, 2*LAYOUT_Y_MARGIN);
    c->bottom.SameAs(box, wxBottom, 2*LAYOUT_Y_MARGIN);
    m_textCtrl->SetConstraints(c);
