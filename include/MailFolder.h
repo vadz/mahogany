@@ -827,7 +827,8 @@ enum MessageSortOrder
    // NB: the code in wxFolderListCtrl::OnColumnClick() and ComparisonFunction()
    //     relies on MSO_XXX_REV immediately following MSO_XXX, so don't change
    //     the values of the elements of this enum and always add MSO_XXX and
-   //     MSO_XXX in this order
+   //     MSO_XXX in this order.
+   // Don't forget to add to sortCriteria[] in wxMDialogs.cpp
 };
 
 /// split a long value (as read from profile) into (several) sort orders

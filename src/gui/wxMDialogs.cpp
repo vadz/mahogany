@@ -1459,7 +1459,7 @@ void MDialog_ShowText(MWindow *parent,
 #define NUM_SORTLEVELS 5
 
 /* These must not be more than 16, as they are stored in a 4-bit
-   value! They must be in sync with the enum in MailFolderCmn.h.
+   value! They must be in sync with the enum in MailFolder.h.
 */
 static wxString sortCriteria[] =
 {
@@ -1469,6 +1469,7 @@ static wxString sortCriteria[] =
    gettext_noop("Author"),
    gettext_noop("Status"),
    gettext_noop("Score"),
+   gettext_noop("Size"),
 };
 
 static const size_t NUM_CRITERIA  = WXSIZEOF(sortCriteria);
@@ -1518,7 +1519,7 @@ wxMessageSortingDialog::wxMessageSortingDialog(Profile *profile,
    long width, widthMax = 0;
 
    // see the comment near sortCriteria definition
-   ASSERT_MSG( NUM_CRITERIA < 16, "too many search criteria" );
+   ASSERT_MSG( NUM_CRITERIA < 16, "too many sort criteria" );
 
    // should have enough space for them in a long
    ASSERT_MSG( NUM_SORTLEVELS < 8, "too many sort levels" );
