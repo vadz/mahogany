@@ -2618,9 +2618,8 @@ BEGIN_EVENT_TABLE(wxFolderViewFrame, wxMFrame)
 
    // only enable message operations if the selection is not empty
    // (the range should contain _only_ these operations!)
-   { wxEVT_UPDATE_UI, WXMENU_MSG_OPEN, WXMENU_MSG_UNDELETE,
-     (wxObjectEventFunction)(wxEventFunction)(wxUpdateUIEventFunction)
-     &(wxFolderViewFrame::OnUpdateUI), NULL },
+   EVT_UPDATE_UI_RANGE(WXMENU_MSG_OPEN, WXMENU_MSG_UNDELETE,
+                       wxFolderViewFrame::OnUpdateUI)
 END_EVENT_TABLE()
 
 void
