@@ -82,7 +82,9 @@ subdirectory and add the path to include subdirectory to your global VC++
 settings.
 
    Otherwise you may simply remove or comment out the line #defining USE_PYTHON
-in include/config_nt.h to disable embedded Python.
+in include/config_nt.h to disable embedded Python. You will also have to
+exclude files in "interfaces\python" subfolder of "Source file" in M project
+from build.
 
 
 d) Build process
