@@ -136,6 +136,9 @@ private:
    // the XFace if we have any
    wxBitmap m_bmpXFace;
 
+   // did we have any plain text inserted in m_htmlText?
+   bool m_hadPlainText;
+
    DECLARE_MESSAGE_VIEWER()
 };
 
@@ -351,12 +354,7 @@ static wxString MakeHtmlSafe(const wxString& text)
             break;
 
          case '\n':
-            // don't put <br> at the end as we're inside <pre> anyhow, so
-            // there will a line break anyhow
-            if ( p[1] )
-            {
-               textSafe += "<br>";
-            }
+            textSafe += "<br>";
             break;
 
          default:
@@ -501,6 +499,8 @@ void HtmlViewer::EndHeaders()
 
 void HtmlViewer::StartBody()
 {
+   m_hadPlainText = false;
+
    m_htmlText += "<br>";
 }
 
@@ -528,6 +528,7 @@ void HtmlViewer::InsertAttachment(const wxBitmap& icon, ClickableInfo *ci)
               << filename << "\">";
 
    // TODO: remember ClickableInfo
+   delete ci;
 }
 
 void HtmlViewer::InsertImage(const wxBitmap& image, ClickableInfo *ci)
@@ -538,6 +539,7 @@ void HtmlViewer::InsertImage(const wxBitmap& image, ClickableInfo *ci)
               << filename << "\">";
 
    // TODO: remember ClickableInfo
+   delete ci;
 }
 
 void HtmlViewer::InsertRawContents(const String& data)
@@ -547,19 +549,19 @@ void HtmlViewer::InsertRawContents(const String& data)
 
 void HtmlViewer::InsertText(const String& text, const TextStyle& style)
 {
-   if ( text == "\r\n" )
+   if ( !m_hadPlainText )
    {
-      m_htmlText += "<br>";
+      // open <pre>: it will be closed in EndPart()
+      m_htmlText += "<pre>";
 
-      return;
+      m_hadPlainText = true;
    }
 
    // TODO: encoding support!!
 
    bool hasFont = AddFontTag(style.GetTextColour());
 
-   // FIXME: avoid having unnecessary "</pre><pre>" in the text
-   m_htmlText << "<pre>" << MakeHtmlSafe(text) << "</pre>";
+   m_htmlText += MakeHtmlSafe(text);
 
    if ( hasFont )
       m_htmlText += "</font>";
@@ -579,6 +581,13 @@ void HtmlViewer::InsertSignature(const String& signature)
 
 void HtmlViewer::EndPart()
 {
+   if ( m_hadPlainText )
+   {
+      m_htmlText += "</pre>";
+
+      m_hadPlainText = false;
+   }
+
    m_htmlText += "<br>";
 }
 
@@ -587,7 +596,7 @@ void HtmlViewer::EndBody()
    m_htmlText += "</body></html>";
 
    // makes cut-&-pasting into Netscape easier
-   //printf("Generated HTML output:\n%s\n", m_htmlText.c_str());
+   wxLogTrace("html", "Generated HTML output:\n%s\n", m_htmlText.c_str());
 
    m_window->SetPage(m_htmlText);
 }
