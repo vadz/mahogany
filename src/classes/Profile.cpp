@@ -68,6 +68,19 @@
    static const int wxTraceProfileClass = 0x200;
 #endif
 
+/// flags for readEntry
+enum
+{
+   /// use identity, if any
+   Lookup_Identity = 1,
+   /// look under parent profile if not found here
+   Lookup_Parent   = 2,
+   /// honour suspended status
+   Lookup_Suspended = 4,
+   /// default: look everywhere
+   Lookup_All = 7
+};
+
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
@@ -148,21 +161,32 @@ public:
                             const String & defaultvalue = (const char*)NULL,
                             bool *found = NULL) const
       {
-         if(found) *found = FALSE;
-         return m_Parent ?
-            m_Parent->readEntry(key, defaultvalue, found)
-            : defaultvalue;
+         if ( m_Parent )
+            return m_Parent->readEntry(key, defaultvalue, found);
+
+         if ( found )
+            *found = FALSE;
+
+         return defaultvalue;
       }
    /// Read an integer value.
    virtual long readEntry(const String & key,
                           long defaultvalue,
                           bool *found = NULL) const
       {
-         if(found) *found = FALSE;
-         return m_Parent ?
-            m_Parent->readEntry(key, defaultvalue, found)
-            : defaultvalue;
+         if ( m_Parent )
+            return m_Parent->readEntry(key, defaultvalue, found);
+
+         if ( found )
+            *found = FALSE;
+
+         return defaultvalue;
       }
+
+   virtual int readEntryFromHere(const String& key, int defvalue) const
+   {
+      return defvalue;
+   }
 
    /// Write back the character value.
    virtual bool writeEntry(const String & key, const String & Value)
@@ -288,8 +312,11 @@ public:
    long readEntry(const String & key,
                   long defaultvalue,
                   bool * found = NULL) const;
+   /// read entry without recursing upwards
+   virtual int readEntryFromHere(const String& key, int defvalue) const;
    /// Read string or integer
-   virtual void readEntry(LookupData &ld) const;
+   virtual void readEntry(LookupData &ld,
+                          int flags = Lookup_All) const;
 
    /// Write back the character value.
    bool writeEntry(const String & key,
@@ -951,7 +978,8 @@ ProfileImpl::readEntry(const String & key, const String & def,
 {
    LookupData ld(key, def);
    readEntry(ld);
-   if(found) *found = ld.GetFound();
+   if(found)
+      *found = ld.GetFound();
 
    // normally wxConfig does this for us, but if we didn't find the entry at
    // all, it won't happen, so do it here
@@ -963,8 +991,18 @@ ProfileImpl::readEntry(const String & key, long def, bool * found) const
 {
    LookupData ld(key, def);
    readEntry(ld);
-   if(found) *found = ld.GetFound();
+   if(found)
+      *found = ld.GetFound();
+
    return ld.GetLong();
+}
+
+int ProfileImpl::readEntryFromHere(const String& key, int defvalue) const
+{
+   LookupData ld(key, defvalue);
+   readEntry(ld, Lookup_All & ~Lookup_Parent);
+
+   return (int)ld.GetLong();
 }
 
 // Notice that we always look first under SUSPEND_PATH: if the profile is not
@@ -978,7 +1016,7 @@ ProfileImpl::readEntry(const String & key, long def, bool * found) const
 // operation when no profiles are suspended which is quite nice according to
 // the profiling results
 void
-ProfileImpl::readEntry(LookupData &ld) const
+ProfileImpl::readEntry(LookupData &ld, int flags) const
 {
    PCHECK();
 
@@ -997,7 +1035,7 @@ ProfileImpl::readEntry(LookupData &ld) const
    bool foundHere;
 
    String keySuspended;
-   if ( ms_suspendCount )
+   if ( (flags & Lookup_Suspended) && ms_suspendCount )
    {
       keySuspended << SUSPEND_PATH << '/' << ld.GetKey();
 
@@ -1023,7 +1061,7 @@ ProfileImpl::readEntry(LookupData &ld) const
 
    // if we don't have our own setting, check for identity override before
    // quering the parent
-   if ( !foundHere && m_Identity )
+   if ( !foundHere && (flags & Lookup_Identity) && m_Identity )
    {
       // try suspended path first:
       bool idFound = FALSE;
@@ -1056,6 +1094,7 @@ ProfileImpl::readEntry(LookupData &ld) const
 
    bool foundAnywhere = foundHere;
    while ( !foundAnywhere &&
+           (flags & Lookup_Parent) &&
            (ms_GlobalConfig->GetPath() != GetRootPath()) )
    {
       ms_GlobalConfig->SetPath("..");

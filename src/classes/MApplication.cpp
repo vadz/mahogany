@@ -29,12 +29,13 @@
 #  include "Mdefaults.h"
 #  include "MApplication.h"
 #  include "Mpers.h"
-#  include "MPython.h"
 
 #  include  <wx/dynarray.h>
 #endif   // USE_PCH
 
 #include <errno.h>
+
+#include "MPython.h"
 
 #include "MFolder.h"
 #include "FolderView.h"       // for OpenFolderViewFrame()
@@ -574,6 +575,11 @@ MAppBase::OnShutDown()
    free(myusername_full(NULL));
    free(sysinbox());
 #endif // OS_WIN
+
+#ifdef USE_PYTHON_DYNAMIC
+   // free python DLL: this is ok to call even if it wasn't loaded
+   FreePythonDll();
+#endif // USE_PYTHON_DYNAMIC
 }
 
 const char *

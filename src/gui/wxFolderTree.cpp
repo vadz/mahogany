@@ -1432,6 +1432,10 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
       // because we need to sort them before really creating the tree nodes
       wxArrayFolder subfolders;
 
+      // but we keep a flag telling us whether we really need to sort them: if
+      // no positions are configured, we don't which is all the better
+      bool shouldSort = false;
+
       size_t n;
       for ( n = 0; n < nSubfolders; n++ )
       {
@@ -1447,19 +1451,29 @@ void wxFolderTreeImpl::OnTreeExpanding(wxTreeEvent& event)
          // if the folder is marked as being "hidden", we don't show it in the
          // tree (but still use for all other purposes), this is useful for
          // "system" folders like INBOX
-         if ( !ShowHiddenFolders() && (subfolder->GetFlags() & MF_FLAGS_HIDDEN) )
+         if ( !m_showHidden && (subfolder->GetFlags() & MF_FLAGS_HIDDEN) )
          {
             subfolder->DecRef();
 
             continue;
          }
 
+         // do we have to sort folders at all? only do it if at least one of
+         // them has a non default index
+         if ( !shouldSort )
+         {
+            shouldSort = subfolder->GetTreeIndex() != MP_FOLDER_TREEINDEX_D;
+         }
+
          // remember this one
          subfolders.Add(subfolder);
       }
 
-      // sort the array by tree item position
-      subfolders.Sort(CompareFoldersByTreePos);
+      if ( shouldSort )
+      {
+         // sort the array by tree item position
+         subfolders.Sort(CompareFoldersByTreePos);
+      }
 
       // now do fill the tree
       nSubfolders = subfolders.GetCount();

@@ -173,7 +173,7 @@ SWIG_TypeQuery(const char *name) {
  ************************************************************************/
 
 #include <stdlib.h>
-#include "Python.h"
+#include "MPython.h"
 
 #ifdef __cplusplus
 extern "C" {

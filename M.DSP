@@ -45,7 +45,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /Zi /O2 /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(wx)\include" /I "e:\python20\include" /D "NDEBUG" /D "USE_PCH" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /D "USE_MODULES_STATIC" /Yu"Mpch.h" /FD /c
+# ADD CPP /nologo /MD /W3 /Zi /O2 /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(wx)\include" /I "e:\python20\include" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /D "USE_MODULES_STATIC" /Yu"Mpch.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -72,7 +72,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /YX /FD /c
-# ADD CPP /nologo /MDd /W3 /Gm /ZI /Od /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(wx)\include" /I "e:\python20\include" /D "_DEBUG" /D "DEBUG" /D WXDEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "_WIN32" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /D "USE_PCH" /D "USE_MODULES_STATIC" /Yu"Mpch.h" /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /ZI /Od /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(wx)\include" /I "e:\python20\include" /D "_DEBUG" /D "DEBUG" /D WXDEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "_WIN32" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /D "USE_MODULES_STATIC" /Yu"Mpch.h" /FD /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
@@ -101,7 +101,7 @@ LINK32=link.exe
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /ZI /Od /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(wx)\include" /I "\python\include" /D "_DEBUG" /D "DEBUG" /D WXDEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "_WIN32" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /Yu"Mpch.h" /FD /c
 # SUBTRACT BASE CPP /Fr
-# ADD CPP /nologo /MDd /W3 /Gm /ZI /Od /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(wx)\include" /I "e:\python20\include" /D "_DEBUG" /D "DEBUG" /D WXDEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "_WIN32" /D "WXUSINGDLL" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /D "USE_PCH" /D "USE_MODULES_STATIC" /Yu"Mpch.h" /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /ZI /Od /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(wx)\include" /I "e:\python20\include" /D "_DEBUG" /D "DEBUG" /D WXDEBUG=1 /D "__WXDEBUG__" /D "__WIN95__" /D "_WIN32" /D "WXUSINGDLL" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /D "USE_MODULES_STATIC" /Yu"Mpch.h" /FD /c
 # SUBTRACT CPP /Fr
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /o "NUL" /win32
@@ -129,7 +129,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /O2 /I "..\imap-4.2\cclient" /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(wx)\include" /I "\python\include" /D "NDEBUG" /D "USE_PCH" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /Yu"Mpch.h" /FD /c
-# ADD CPP /nologo /MD /W3 /O2 /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(wx)\include" /I "e:\python20\include" /D "NDEBUG" /D "USE_PCH" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "WXUSINGDLL" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /D "USE_MODULES_STATIC" /Yu"Mpch.h" /FD /c
+# ADD CPP /nologo /MD /W3 /O2 /I "include" /I "extra\src\compface" /I "extra\src\c-client" /I "$(wx)\include" /I "e:\python20\include" /D "NDEBUG" /D "_WINDOWS" /D WIN95=1 /D _X86_=1 /D "__WINDOWS__" /D "USE_NEW_IOSTREAM" /D "WX_DRAG_DROP" /D "WX_OWNER_DRAWN" /D "WXUSINGDLL" /D "USE_PCH" /D "WIN32" /D WINVER=0x400 /D "__WXMSW__" /D "__WIN32__" /D M_PREFIX="" /D wxUSE_GUI=1 /D "_MT" /D "USE_MODULES_STATIC" /Yu"Mpch.h" /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x409 /i "include" /i "res" /i "$(wx)\include" /d "NDEBUG"
@@ -376,17 +376,6 @@ SOURCE=.\src\gui\wxMainFrame.cpp
 # Begin Source File
 
 SOURCE=.\src\gui\wxMApp.cpp
-
-!IF  "$(CFG)" == "M - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug"
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -1155,7 +1144,7 @@ SOURCE=.\src\Python\InitPython.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
+# ADD CPP /D "SWIG_NOINCLUDE" /D "STATIC_LINKED"
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
@@ -1181,7 +1170,7 @@ SOURCE=.\src\Python\MailFolder_swig.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# ADD CPP /D "SWIG_NOINCLUDE" /D "STATIC_LINKED" /U "USE_PCH"
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
@@ -1210,7 +1199,7 @@ SOURCE=.\src\Python\MAppBase_swig.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# ADD CPP /D "SWIG_NOINCLUDE" /D "STATIC_LINKED" /U "USE_PCH"
 # SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
@@ -1239,7 +1228,7 @@ SOURCE=.\src\Python\Message_swig.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# ADD CPP /D "SWIG_NOINCLUDE" /D "STATIC_LINKED" /U "USE_PCH"
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
@@ -1268,7 +1257,7 @@ SOURCE=.\src\Python\MObject_swig.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# ADD CPP /D "SWIG_NOINCLUDE" /D "STATIC_LINKED" /U "USE_PCH"
 # SUBTRACT CPP /YX /Yc /Yu
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
@@ -1289,14 +1278,60 @@ SOURCE=.\src\Python\MObject_swig.cpp
 # Begin Source File
 
 SOURCE=.\src\Python\MProfile_swig.cpp
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
 # SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# ADD CPP /D "SWIG_NOINCLUDE" /D "STATIC_LINKED" /U "USE_PCH"
+# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
 SOURCE=.\src\Python\MString_swig.cpp
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
 # SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# ADD CPP /D "SWIG_NOINCLUDE" /D "STATIC_LINKED" /U "USE_PCH"
+# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE" /U "USE_PCH"
+# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\src\Python\PythonDll.cpp
 # End Source File
 # Begin Source File
 
@@ -1308,7 +1343,7 @@ SOURCE=.\src\Python\PythonHelp.cpp
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug"
 
-# ADD CPP /D "STATIC_LINKED" /D "SWIG_NOINCLUDE"
+# ADD CPP /D "SWIG_NOINCLUDE" /D "STATIC_LINKED"
 
 !ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
 
@@ -1326,8 +1361,29 @@ SOURCE=.\src\Python\PythonHelp.cpp
 # Begin Source File
 
 SOURCE=.\src\Python\swiglib_swig.cpp
+
+!IF  "$(CFG)" == "M - Win32 Release"
+
 # ADD CPP /D "STATIC_LINKED" /D "SWIG_GLOBAL" /U "USE_PCH"
 # SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug"
+
+# ADD CPP /D "SWIG_GLOBAL" /D "STATIC_LINKED" /U "USE_PCH"
+# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
+
+# ADD CPP /D "STATIC_LINKED" /D "SWIG_GLOBAL" /U "USE_PCH"
+# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
+
+!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
+
+# ADD CPP /D "STATIC_LINKED" /D "SWIG_GLOBAL" /U "USE_PCH"
+# SUBTRACT CPP /D "USE_PCH" /YX /Yc /Yu
+
+!ENDIF 
+
 # End Source File
 # End Group
 # Begin Group "wx"

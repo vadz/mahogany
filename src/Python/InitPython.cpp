@@ -17,8 +17,9 @@
 #   include "MApplication.h"
 #   include "gui/wxMApp.h"
 #   include "strutil.h"
-#   include "MPython.h"
 #endif
+
+#include "MPython.h"
 
 #include "Mdefaults.h"
 
@@ -61,6 +62,16 @@ static bool CheckPyError()
 bool
 InitPython(void)
 {
+   // first check if Python is available
+#ifdef USE_PYTHON_DYNAMIC
+   if ( !InitPythonDll() )
+   {
+      wxLogError(_("Python dynamic library couldn't be found."));
+
+      return false;
+   }
+#endif // USE_PYTHON_DYNAMIC
+
    // set PYTHONPATH correctly to find our modules
    String tmp = "PYTHONPATH=";
 

@@ -9,14 +9,17 @@
 
 #include   "Mpch.h"
 
+#ifdef USE_PYTHON
+
 #ifndef   USE_PCH
 #  include "Mcommon.h"
 #  include "Profile.h"
 #  include "MApplication.h"
 #  include "gui/wxMApp.h"
 #  include "strutil.h"
-#  include "MPython.h"
 #endif   // USE_PCH
+
+#include "MPython.h"
 
 #include   "Mdefaults.h"
 
@@ -417,3 +420,6 @@ void PyH_GetErrorMessage(String *errString)
       *errString = "Unknown error";
    free(result);
 }
+
+#endif // USE_PYTHON
+

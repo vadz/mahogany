@@ -7,10 +7,12 @@
 
  *******************************************************************/
 
-#ifndef   PYTHONHELP_H
-#   define PYTHONHELP_H
+#ifndef PYTHONHELP_H
+#define PYTHONHELP_H
 
-#include   "Profile.h"
+#include "Mconfig.h"    // for String
+
+class Profile;
 
 /** Function to call a callback function.
     The callback will be called with its name and the object as first arguments.
@@ -23,11 +25,16 @@
     @return an integer value
 */
 int
-PythonCallback(const char *name, int def, void *obj, const char *classname,
-               Profile *profile = NULL, const char *argfmt = NULL,
+PythonCallback(const char *name,
+               int def,
+               void *obj,
+               const char *classname,
+               Profile *profile = NULL,
+               const char *argfmt = NULL,
                ...);
 
 
+/// a helper
 PyObject *PyH_makeObjectFromPointer(void *obj,const char *classname);
 
 /** Call a callback function:
@@ -46,7 +53,7 @@ bool PyH_CallFunction(const char *func,
                       void *obj, const char *classname,
                       const char *resultfmt, void *result,
                       PyObject *parg = NULL);
-   
+
 /// the two possible modes for PyH_Run_Codestr():
 enum PyH_RunModes { PY_STATEMENT, PY_EXPRESSION };
 
@@ -98,7 +105,7 @@ PyH_RunMScript(const char *scriptname);
 #define   PyH_Expression(exp,module,resfmt,cresult) \
    PyH_RunCodestr(PY_EXPRESSION,exp,module, resfmt, cresult)
 
-/// macro to run a statement      
+/// macro to run a statement
 #define   PyH_Statement(stat,module,resfmt,cresult) \
    PyH_RunCodestr(PY_STATEMENT,stat,module, resfmt, cresult)
 
@@ -115,4 +122,5 @@ int PyH_ConvertResult(PyObject *presult, const char *resFormat, void *resTarget)
 */
 void PyH_GetErrorMessage(String *errString);
 
-#endif
+#endif // PYTHONHELP_H
+

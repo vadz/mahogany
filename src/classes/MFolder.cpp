@@ -602,12 +602,8 @@ bool MFolderFromProfile::NeedsNetwork() const
 
 int MFolderFromProfile::GetIcon() const
 {
-   // it doesn't make sense to inherit the icon from parent profile (does it?),
-   // so check that the value we read was taken from ours
-   bool found;
-   int icon = m_profile->readEntry(MP_FOLDER_ICON, MP_FOLDER_ICON_D, &found);
-
-   return found ? icon : MP_FOLDER_ICON_D;
+   // it doesn't make sense to inherit the icon from parent profile (does it?)
+   return m_profile->readEntryFromHere(MP_FOLDER_ICON, MP_FOLDER_ICON_D);
 }
 
 void MFolderFromProfile::SetIcon(int icon)
@@ -640,7 +636,8 @@ void MFolderFromProfile::SetFlags(int flags)
 
 int MFolderFromProfile::GetTreeIndex() const
 {
-   return (int)READ_CONFIG(m_profile, MP_FOLDER_TREEINDEX);
+   // it doesn't make sense to inherit the order from parent profile
+   return m_profile->readEntryFromHere(MP_FOLDER_TREEINDEX, MP_FOLDER_TREEINDEX_D);
 }
 
 void MFolderFromProfile::SetTreeIndex(int pos)

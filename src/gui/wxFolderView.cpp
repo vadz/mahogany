@@ -2881,6 +2881,8 @@ wxFolderView::SaveMessagesToFolder(const UIdArray& selections,
    if ( !folder )
    {
       folder = MDialog_FolderChoose(GetFrame(m_Parent));
+      if ( !folder )
+         return ILLEGAL_TICKET;
    }
    else
    {

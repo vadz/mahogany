@@ -14,7 +14,7 @@ OBJS := $(IFACES:.i=.o)
 	$(SWIG) -I$(dir $<) $(SWIGFLAGS) -o $@ $<
 
 %.cpp-swig: %.cpp %.i
-	cp $(basename $@).cpp $@
+	sed 's/"Python.h"/"MPython.h"/' $(basename $@).cpp > $@
 
 %.py-swig: %.py %.i
 	cp $(basename $@).py $@

@@ -126,6 +126,9 @@ public:
                   bool *found = NULL) const
       { return readEntry(key, (long)defaultvalue, found) != 0; }
 
+   /// Read an integer entry from this profile only, don't look upwards
+   virtual int readEntryFromHere(const String& key, int defvalue) const = 0;
+
    /// Write back the character value.
    virtual bool writeEntry(const String & key, const String & Value) = 0;
    /// Write back the int value.

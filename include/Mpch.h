@@ -66,8 +66,6 @@
 #include "MHelp.h"
 #include "gui/wxMIds.h"
 
-#include "MPython.h"
-
 #endif  //USE_PCH
 
 #endif  //MPCH_H

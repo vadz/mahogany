@@ -87,8 +87,9 @@
 #   include "strutil.h"
 #   include "MApplication.h"
 #   include "Profile.h"
-#   include "MPython.h"
 #endif // USE_PCH
+
+#include "MPython.h"
 
 #include "Mdefaults.h"
 #include "MDialogs.h"
@@ -449,12 +450,6 @@ private:
    MailFolderCC *m_mfOld;
 };
 
-// VZ: it was a nice idea, but unfortunately GTK+ timers send one last event
-//     even after being stopped! So it doesn't make much sense to do this as
-//     we still get the timer event and the collection code still runs - so
-//     the fix is now in MailCollector() itself
-#ifdef TIMER_SUSPENDING_WORKS
-
 // temporarily pause a global timer
 class MTimerSuspender
 {
@@ -479,8 +474,6 @@ private:
    MAppBase::Timer m_timer;
    bool m_restart;
 };
-
-#endif // TIMER_SUSPENDING_WORKS
 
 // temporarily redirect mm_list callbacks to the given function
 class MMListRedirector
@@ -2100,7 +2093,11 @@ MailFolderCC::Ping(void)
    wxLogTrace(TRACE_MF_CALLS, "MailFolderCC::Ping() on Folder %s.",
               GetName().c_str());
 
-   return PingReopen();
+   // we don't want to reopen the folder from here, this leads to inifinite
+   // loops if the network connection goes down because we are called from a
+   // timer event and so if folder pinging taks too long, we will be called
+   // again and again and again ... before we get the chance to do anything
+   return m_MailStream ? PingReopen() : true;
 }
 
 // ----------------------------------------------------------------------------
@@ -3056,10 +3053,14 @@ MailFolderCC::BuildListing(void)
 
    MEventLocker locker;
 
-#ifdef TIMER_SUSPENDING_WORKS
-   // neither do we want our PingReopen() be called in the middle of update
+   // we don't want any PingReopen() to be called in the middle of update - not
+   // just ours but any other folders neither
+   //
+   // the reason for it is that new connections to the IMAP server tend to
+   // break down for osme reason while we're rebuilding the listing - this is
+   // quite mysterious and probably due to another bug elsewhere but for now
+   // this should hopefully fix it
    MTimerSuspender noTimer(MAppBase::Timer_PollIncoming);
-#endif // TIMER_SUSPENDING_WORKS
 
    MLocker lockListing(m_InListingRebuild);
 
@@ -3477,8 +3478,13 @@ MailFolderCC::CClientInit(void)
 #endif
       (void *) myusername();
 
-   // 1 try is enough, the default (3) is too slow
+   // 1 try is enough, the default (3) is too slow: notice that this only sets
+   // the number of trials for SMTP and not for the mailbox drivers for which
+   // we have to set this separately!
    mail_parameters(NULL, SET_MAXLOGINTRIALS, (void *)1);
+
+   (*imapdriver.parameters)(SET_MAXLOGINTRIALS, (void *)1);
+   (*pop3driver.parameters)(SET_MAXLOGINTRIALS, (void *)1);
 
 #ifdef USE_BLOCK_NOTIFY
    mail_parameters(NULL, SET_BLOCKNOTIFY, (void *)mahogany_block_notify);
