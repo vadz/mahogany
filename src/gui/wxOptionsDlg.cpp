@@ -33,6 +33,13 @@
 #include   <wx/resource.h>
 #include   <wx/persctrl.h>
 #include   <wx/confbase.h>
+#include   <wx/checkbox.h>
+#include   <wx/listbox.h>
+#include   <wx/radiobox.h>
+#include   <wx/stattext.h>
+#include   <wx/dynarray.h>
+#include   <wx/stattext.h>
+#include   <wx/textctrl.h>
 
 #include   "MDialogs.h"
 #include   "Mdefaults.h"

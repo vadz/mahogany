@@ -13,6 +13,10 @@
 #	pragma interface "XFace.h"
 #endif
 
+#ifndef XFACE_WITH_WXIMAGE
+#define    XFACE_WITH_WXIMAGE   1
+#endif
+
 /**
    XFace class for handling XFaces.
 */
@@ -37,12 +41,27 @@ class XFace
    ~XFace();
 
    /**
+      Create an XFace from a string containing lines of hex numbers.
+      @param xpmdata data buffer containing the numbers.
+      @return true on success
+   */
+   bool	CreateFromData(const char *data);
+
+   /**
       Create an XFace from an XPM.
       @param xpmdata data buffer containing the XPM structure
       @return true on success
    */
    bool	CreateFromXpm(const char *xpmdata);
 
+#if XFACE_WITH_WXIMAGE
+   /**
+      Create an XFace from a wxImage.
+      @param image image to read
+      @return true on success
+   */
+   bool	CreateFromImage(class wxImage *image);
+#endif
    /**
       Create an XFace from an XFace line.
       @param xfacedata buffer containing the xface line

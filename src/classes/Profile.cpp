@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * Profile - managing configuration options on a per class basis    *
  *                                                                  *
- * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1998,1999 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
  * $Id$
  *
@@ -141,13 +141,18 @@ public:
    //@{
       /// Read a character entry.
    String readEntry(const String & key,
-                    const String & defaultvalue = (const char *)NULL) const;
+                    const String & defaultvalue = (const char *)NULL,
+                    bool * found = NULL) const;
    /// Read an integer value.
-   long readEntry(const String & key, long defaultvalue) const;
+   long readEntry(const String & key,
+                  long defaultvalue,
+                  bool * found = NULL) const;
    /// Write back the character value.
-   bool writeEntry(const String & key, const String & Value);
+   bool writeEntry(const String & key,
+                   const String & Value);
    /// Write back the int value.
-   bool writeEntry(const String & key, long Value);
+   bool writeEntry(const String & key,
+                   long Value);
    //@}
 
    void SetPath(const String & path);
@@ -219,13 +224,18 @@ public:
    //@{
    /// Read a character entry.
    String readEntry(const String & key,
-                    const String & defaultvalue = (const char *) NULL) const;
+                    const String & defaultvalue = (const char *) NULL,
+                    bool * found = NULL) const;
    /// Read an integer value.
-   long readEntry(const String & key, long defaultvalue) const;
+   long readEntry(const String & key,
+                  long defaultvalue,
+                  bool * found = NULL) const;
    /// Write back the character value.
-   bool writeEntry(const String & key, const String & Value);
+   bool writeEntry(const String & key,
+                   const String & Value);
    /// Write back the int value.
-   bool writeEntry(const String & key, long Value);
+   bool writeEntry(const String & key,
+                   long Value);
    //@}
 
    void SetPath(const String & path);
@@ -374,11 +384,12 @@ ProfileBase::CreateFolderProfile(const String & iClassName,
 
 String
 ProfileBase::readEntry(const String & key,
-                       const char *defaultvalue) const
+                       const char *defaultvalue,
+                       bool * found) const
 {
    MOcheck();
    String str;
-   str = readEntry(key, String(defaultvalue));
+   str = readEntry(key, String(defaultvalue), found);
    return str;
 }
 
@@ -502,19 +513,25 @@ wxConfigProfile::~wxConfigProfile()
 }
 
 String
-wxConfigProfile::readEntry(const String & key, const String & def) const
+wxConfigProfile::readEntry(const String & key, const String & def, bool * found) const
 {
    MOcheck(); ASSERT(m_config);
    String str;
-   str = m_config->Read(key.c_str(),def.c_str());
+   bool f = m_config->Read(key,&str, def);
+   if(found)
+     *found = f; 
    return str;
 }
 
 long
-wxConfigProfile::readEntry(const String & key, long def) const
+wxConfigProfile::readEntry(const String & key, long def, bool * found) const
 {
    MOcheck(); ASSERT(m_config);
-   return m_config->Read(key.c_str(),def);
+   long val;
+   bool f = m_config->Read(key,&val,def);
+   if(found)
+     *found = f; 
+   return val;
 }
 
 bool
@@ -820,7 +837,8 @@ readEntryHelper(wxConfigBase *config,
 }
 
 String
-Profile::readEntry(const String & key, const String & defaultvalue) const
+Profile::readEntry(const String & key, const String & defaultvalue,
+                   bool *found) const
 {
    MOcheck();
    bool read;
@@ -829,17 +847,19 @@ Profile::readEntry(const String & key, const String & defaultvalue) const
                                   m_expandEnvVars, &read).GetString();
    if(m_expandEnvVars && ! read)
       value = wxExpandEnvVars(value);
+   if(found)
+      *found = read;
    return value;
 }
 
 long
-Profile::readEntry(const String & key, long defaultvalue) const
+Profile::readEntry(const String & key, long defaultvalue, bool *found) const
 {
    MOcheck();
 
    return readEntryHelper(m_config, parentProfile, profileName,
                           key, KeyValue(defaultvalue),
-                          m_expandEnvVars).GetNumber();
+                          m_expandEnvVars, found).GetNumber();
 }
 
 

@@ -48,7 +48,6 @@ $Id$
   + undo?
   + fix the minor (moving up in 1st column over empty line) bug
   + still some cursor corruption which can lead to crashes
-
  - Solaris: all helpers need absolute path or won't get found
  - save and restore printer settings in profile
  - M takes ages to send a message

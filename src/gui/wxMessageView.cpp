@@ -382,7 +382,7 @@ wxMessageView::Update(void)
          xface->CreateFromXFace(tmp.c_str());
          if(xface->CreateXpm(&xfaceXpm))
          {
-            llist.Insert(new wxLayoutObjectIcon(new wxIcon(xfaceXpm,-1,-1)));
+            llist.Insert(new wxLayoutObjectIcon(new wxBitmap(xfaceXpm)));
             llist.LineBreak();
          }
       }
@@ -476,32 +476,37 @@ wxMessageView::Update(void)
       }
       else // insert an icon
       {
-         wxIcon icn;
+         wxBitmap icn;
          if(t == Message::MSG_TYPEIMAGE && READ_CONFIG(m_Profile, MP_INLINE_GFX))
          {
             char *filename = wxGetTempFileName("Mtemp");
-            char **xpmarray = NULL;
             MimeSave(i,filename);
-            xpmarray = wxIconManager::LoadImage(filename);
+            bool ok;
+            wxImage img =  wxIconManager::LoadImage(filename, &ok);
+            if(ok)
+               icn = img.ConvertToBitmap();
+            else
+               icn = mApplication->GetIconManager()->
+                  GetIconFromMimeType(mailMessage->GetPartMimeType(i));
+            obj = new wxLayoutObjectIcon(icn);
+#if 0   
+            char **xpmarray = NULL;
+            xpmarray = wxIconManager::LoadImageXpm(filename);
             //if(icn.LoadFile(filename,0))
             if(xpmarray)
             {
-               icn = wxIcon(xpmarray);
+               icn = wxBitmap(xpmarray);
                obj = new wxLayoutObjectIcon(icn);
                wxIconManager::FreeImage(xpmarray);
             }
-            else
-            {
-               icn = mApplication->GetIconManager()->
-                  GetIconFromMimeType(mailMessage->GetPartMimeType(i));
-            }
             wxRemoveFile(filename);
+#endif
          }
-         else {
+         else
+         {
             icn = mApplication->GetIconManager()->
                GetIconFromMimeType(mailMessage->GetPartMimeType(i));
          }
-
          obj = new wxLayoutObjectIcon(icn);
 
          ci = new ClickableInfo(i);
@@ -1329,7 +1334,7 @@ wxMessageView::PrintPreview(void)
    }
 
    wxPreviewFrame *frame = new wxPreviewFrame(preview, GetFrame(m_Parent),
-                                              _("Demo Print Preview"),
+                                              _("Print Preview"),
                                               wxPoint(100, 100), wxSize(600, 650));
    frame->Centre(wxBOTH);
    frame->Initialize();

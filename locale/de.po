@@ -149,64 +149,66 @@ msgstr "Adreßbuch editieren"
 msgid ""
 "Can't paste entry '%s' %s: an entry with\n"
 "the same name already exists."
-msgstr ""
+msgstr "Kann Eintrag '%s' %s nicht einfügen: ein Eintrag mit\n"
+"diesem Namen existiert bereits."
 
 #: src/adb/AdbFrame.cpp:1819
 msgid "Can't paste the clipboard contents here."
-msgstr ""
+msgstr "Kann den Inhalt der Zwischenablage hier nicht einfügen."
 
 #: src/adb/AdbFrame.cpp:1853
 #, c-format
 msgid "Editing entry '%s'"
-msgstr ""
+msgstr "Editieren von Eintrag '%s'"
 
 #: src/adb/AdbFrame.cpp:1898
 msgid "This group doesn't have any entries"
-msgstr ""
+msgstr "Diese Gruppe hat keine Einträge"
 
 #: src/adb/AdbFrame.cpp:2031
 #, c-format
 msgid ""
 "No entry '%s':\n"
 "'%s' doesn't have entry/subgroup '%s'."
-msgstr ""
+msgstr "Kein Eintrag '%s':\n"
+"'%s' hat keinen Eintrag oder Untergruppe '%s'"
 
 #: src/adb/AdbFrame.cpp:2039
 #, c-format
 msgid "Entry '%s' can't have subgroup/entry '%s'!"
-msgstr ""
+msgstr "Eintrag '%s' kann keine Untergruppe/Eintrag '%s' haben!"
 
 #: src/adb/AdbFrame.cpp:2128
 #, fuzzy
 msgid "Find address book entry"
-msgstr "Adreßbuch editieren"
+msgstr "Suche Adreßbucheintrag"
 
 #: src/adb/AdbFrame.cpp:2149
 msgid "Find &what:"
-msgstr ""
+msgstr "Suche &nach:"
 
 #: src/adb/AdbFrame.cpp:2280
 msgid "Please specify where to search!"
-msgstr ""
+msgstr "Bitte geben Sie den Suchbegriff an!"
 
 #: src/adb/AdbFrame.cpp:2295
 msgid "Create a new entry/group"
-msgstr ""
+msgstr "Neuen Eintrag/Gruppe anlegen"
 
 #: src/adb/AdbFrame.cpp:2301
 msgid "&New entry/group name:"
-msgstr ""
+msgstr "&Name des neuen Eintrags/Gruppe:"
 
 #: src/adb/AdbFrame.cpp:2336
 msgid "Create a &group"
-msgstr ""
+msgstr "&Gruppe anlegen"
 
 #: src/adb/AdbFrame.cpp:2342 src/adb/AdbFrame.cpp:2461
 #: src/gui/wxDialogLayout.cpp:422 src/gui/wxMDialogs.cpp:235
 #: src/gui/wxMDialogs.cpp:939 src/gui/wxMFolderDialogs.cpp:968
 #: src/wx/generic/persctrl.cpp:641
 msgid "OK"
-msgstr ""
+msgstr "OK"
 
 #: src/adb/AdbFrame.cpp:2346 src/adb/AdbFrame.cpp:2465
 #: src/gui/wxDialogLayout.cpp:431 src/gui/wxMDialogs.cpp:239
@@ -218,49 +220,49 @@ msgstr "Abbruch"
 #: src/adb/AdbFrame.cpp:2373
 #, fuzzy, c-format
 msgid "Please specify a name for the new %s!"
-msgstr "Speichern unter Name:"
+msgstr "Bitte geben Sie dem neuen '%s' einen Namen!"
 
 #: src/adb/AdbFrame.cpp:2474
 #, fuzzy, c-format
 msgid "Properties for '%s'"
-msgstr "&Eigenschaften..."
+msgstr "Eigenschaften für '%s'"
 
 #: src/adb/AdbFrame.cpp:2494
 msgid "unknown"
-msgstr ""
+msgstr "unbekannt"
 
 #: src/adb/AdbFrame.cpp:2588
 msgid "No selection"
-msgstr ""
+msgstr "Keine Auswahl"
 
 #: src/adb/AdbFrame.cpp:2652
 #, c-format
 msgid "Entry '%s' saved."
-msgstr ""
+msgstr "Eintrag '%s' gespeichert."
 
 #: src/adb/AdbFrame.cpp:3053
 msgid "Add another address"
-msgstr ""
+msgstr "Weitere Adresse hinzufügen"
 
 #: src/adb/AdbFrame.cpp:3054 src/adb/AdbFrame.cpp:3073
 #, fuzzy
 msgid "E-mail &address:"
-msgstr "Adreßbuch editieren"
+msgstr "E-Mail &Adresse:"
 
 #: src/adb/AdbFrame.cpp:3067
 #, fuzzy
 msgid "Please select an entry to modify it."
-msgstr "Bitte wählen Sie ein Pythonskript zum Ausführen."
+msgstr "Bitte wählen Sie einen Eintrag zum ändern."
 
 #: src/adb/AdbFrame.cpp:3073
 #, fuzzy
 msgid "Modify address"
-msgstr "Adreßbuch editieren"
+msgstr "Adresse ändern"
 
 #: src/adb/AdbFrame.cpp:3086
 #, fuzzy
 msgid "Please select an entry to delete."
-msgstr "Bitte wählen Sie ein Pythonskript zum Ausführen."
+msgstr "Bitte wählen Sie einen Eintrag zum löschen."
 
 #: src/adb/AdbFrame.cpp:3176
 #, fuzzy
@@ -270,85 +272,86 @@ msgstr "&Adreßbücher..."
 #: src/adb/AdbFrame.cpp:3324
 #, c-format
 msgid "%s '%s' already exists in this group."
-msgstr ""
+msgstr "%s '%s' existiert bereits in dieser Gruppe."
 
 #: src/adb/AdbFrame.cpp:3408
 msgid "at the root level of the addressbook '"
-msgstr ""
+msgstr "am obersten Level des Adreßbuchs '"
 
 #: src/adb/AdbFrame.cpp:3412
 msgid "in group '"
-msgstr ""
+msgstr "in Gruppe '"
 
 #: src/adb/AdbManager.cpp:205
 #, c-format
 msgid "Expanded '%s' using entries from group '%s'"
-msgstr ""
+msgstr "'%s' expandiert mit den Einträgen aus Gruppe '%s'"
 
 #: src/adb/AdbManager.cpp:217
 #, c-format
 msgid "Expanded '%s' using entry '%s'"
-msgstr ""
+msgstr "'%s' expandiert mit Eintrag '%s'"
 
 #: src/adb/AdbManager.cpp:233
 #, fuzzy, c-format
 msgid "No matches for '%s'."
-msgstr "Kann Mailbox '%s' nicht öffnen."
+msgstr "Keine passenden Einträge für '%s'."
 
 #: src/adb/AdbManager.cpp:354
 #, fuzzy, c-format
 msgid "Can't open the address book '%s'."
-msgstr "Kann Mailbox '%s' nicht öffnen."
+msgstr "Kann Adreßbuch '%s' nicht öffnen."
 
 #: src/adb/ProvBbdb.cpp:517
 #, c-format
 msgid "Bbdb::ReadListOfVectors expected ')', found '%s'"
-msgstr ""
+msgstr "Bbdb::ReadListOfVectors erwartete ')', gefunden: '%s'"
 
 #: src/adb/ProvBbdb.cpp:718
 #, c-format
 msgid "BBDB: file has wrong header line: '%s'"
-msgstr ""
+msgstr "BBDB: Datei hat falsche KopfzeileL '%s'"
 
 #: src/adb/ProvBbdb.cpp:724
 #, c-format
 msgid "BBDB: file format version '%s'"
-msgstr ""
+msgstr "BBDB: Dateiformat Version '%s'"
 
 #: src/adb/ProvBbdb.cpp:745
 #, c-format
 msgid "BBDB: read %d entries."
-msgstr ""
+msgstr "BBDB: %d Einträge gelesen."
 
 #: src/adb/ProvBbdb.cpp:747
 #, c-format
 msgid "BBDB: ignored %d entries with neither first nor last names."
-msgstr ""
+msgstr "BBDB: %d Einträge mit weder Vor- noch Nachnamen ignoriert."
 
 #: src/adb/ProvBbdb.cpp:775
 #, c-format
 msgid ""
 "Save BBDB address book '%s'?\n"
 "This might lead to loss of some of the original data."
-msgstr ""
+msgstr "BBDB Adreßbuch '%s' speichern?\n"
+"Dies kann zum Verlust eines Teils der Originaldaten führen."
 
 #: src/adb/ProvBbdb.cpp:778
 msgid "BBDB"
-msgstr ""
+msgstr "BBDB"
 
 #: src/adb/ProvFC.cpp:339
 #, c-format
 msgid "Entry '%s' has too many fields, extra ones ignored."
-msgstr ""
+msgstr "Eintrag '%s' hat zu viele Felder, extra Felder ignoriert."
 
 #: src/adb/ProvFC.cpp:349
 #, c-format
 msgid "Trailing backslash discarded in entry '%s'."
-msgstr ""
+msgstr "Backslash '\\' am Ende von Eintrag '%s' ignoriert."
 
 #: src/classes/MApplication.cpp:138
 msgid "Can't find your M directory, please specify it in the options dialog."
-msgstr ""
+msgstr "Kann das M Verzeichnis nicht finden, bitte geben Sie es im Optionendialog an."
 
 #: src/classes/MApplication.cpp:192
 msgid "Failed to set up initial configuration."
@@ -385,31 +388,31 @@ msgstr "Programmausführung wegen Installationsproblem abgebrochen."
 
 #, c-format
 msgid "Command '%s' (to execute on new mail reception) failed."
-msgstr ""
+msgstr "Befehlsausführung '%s' (wegen neuen Mailempfangs) gescheitert."
 
 #: src/classes/MApplication.cpp:478 src/gui/wxMessageView.cpp:343
 #, fuzzy
 msgid "Subject: "
-msgstr "Betreff"
+msgstr "Betreff: "
 
 #: src/classes/MApplication.cpp:479 src/gui/wxMessageView.cpp:335
 #, fuzzy
 msgid "From: "
-msgstr "Von"
+msgstr "Von: "
 
 #: src/classes/MApplication.cpp:480
 #, fuzzy
 msgid "in folder '"
-msgstr "Mailbox öffnen"
+msgstr "in Mailbox '"
 
 #: src/classes/MApplication.cpp:490
 #, c-format
 msgid "You have received %lu new messages."
-msgstr ""
+msgstr "Sie haben %lu neue Nachrichten."
 
 #: src/classes/MApplication.cpp:494
 msgid "New Mail"
-msgstr ""
+msgstr "Neue Nachrichten"
 
 #: src/classes/MFolder.cpp:233
 #, fuzzy, c-format
@@ -432,7 +435,7 @@ msgstr "Kann Mailbox mit namen '%s' nicht anlegen: existiert bereits."
 msgid ""
 "INBOX folder is a special folder used by the mail system and can not be "
 "renamed."
-msgstr ""
+msgstr "INBOX ist eine spezielle Mailbox die vom System verwaltet wird und kann nicht umbenannt werden."
 
 #: src/classes/MFolder.cpp:528
 #, c-format
@@ -440,7 +443,7 @@ msgid ""
 "Can't rename folder '%s' to '%s': the folder with the new name already "
 "exists."
 msgstr ""
-"Kann Mailbox '%s' nicht zu '%s' umbenennen: neuer Name existiert bereits."
+"Kann Mailbox '%s' nicht zu '%s' umbenennen: eine Mailbox mit diesem Namen existiert bereits."
 
 #: src/gui/wxBrowseButton.cpp:58 src/gui/wxComposeView.cpp:578
 #: src/gui/wxComposeView.cpp:842 src/gui/wxComposeView.cpp:867
@@ -451,16 +454,16 @@ msgstr "Alle Dateien (*.*)|*.*"
 #: src/gui/wxComposeView.cpp:489
 #, fuzzy
 msgid "Expand the address using address books"
-msgstr "Adreßbuch editieren"
+msgstr "Adresse mit Hilfe der Adreßbücher expandieren"
 
 #: src/gui/wxComposeView.cpp:557
 msgid "You haven't configured your signature file."
-msgstr ""
+msgstr "Sie haben keine Signaturdatei konfiguriert."
 
 #: src/gui/wxComposeView.cpp:566
 #, c-format
 msgid "Signature file '%s' couldn't be opened."
-msgstr ""
+msgstr "Signaturdatei '%s' konnte nicht geöffnet werden."
 
 #: src/gui/wxComposeView.cpp:570
 #, fuzzy
@@ -475,20 +478,20 @@ msgstr ""
 
 #: src/gui/wxComposeView.cpp:576
 msgid "Choose signature file"
-msgstr ""
+msgstr "Signaturdatei wählen"
 
 #: src/gui/wxComposeView.cpp:617
 #, fuzzy, c-format
 msgid "Your signature is %stoo long: it should not be more than %d lines"
-msgstr "Ihre Singatur ist zu lang: sie sollte nicht mehr als %d Zeilen haben"
+msgstr "Ihre Singatur ist %s zu lang: sie sollte nicht mehr als %d Zeilen haben"
 
 #: src/gui/wxComposeView.cpp:618
 msgid "way"
-msgstr "beaucoup"
+msgstr "viel"
 
 #: src/gui/wxComposeView.cpp:674
 msgid "M : Message Composition"
-msgstr ""
+msgstr "M : Neue Nachricht schreiben"
 
 #: src/gui/wxComposeView.cpp:703
 msgid "Nothing to expand - please enter something."
@@ -499,7 +502,7 @@ msgstr "Nichts zum expandieren - bitte geben Sie erste etwas ein."
 msgid ""
 "Please terminate the external editor (pid %d) before closing this window."
 msgstr ""
-"Veuillez terminer  l'éditeur externe (pid %d) avant de fermer cette fenêtre."
+"Bitte beenden Sie den externen Editor (pid %d) bevor Sie dieses Fenster schließen."
 
 #: src/gui/wxComposeView.cpp:796
 msgid "There are unsaved changes, close anyway?"
@@ -508,23 +511,23 @@ msgstr "Änderungen nicht gesichert, trotzdem schließen?"
 #: src/gui/wxComposeView.cpp:840 src/gui/wxComposeView.cpp:1080
 #, fuzzy
 msgid "Please choose a file to insert."
-msgstr "Speichern unter Name:"
+msgstr "Bitte wählen Sie eine Datei zum einfügen."
 
 #: src/gui/wxComposeView.cpp:848 src/gui/wxComposeView.cpp:873
 #: src/gui/wxFolderView.cpp:538 src/gui/wxFolderView.cpp:554
 #, fuzzy
 msgid "Cancelled"
-msgstr "Abbruch"
+msgstr "Abgebrochen"
 
 #: src/gui/wxComposeView.cpp:852
 #, fuzzy, c-format
 msgid "Inserted file '%s'."
-msgstr "Datei '%s' eingefügt (als '%s')"
+msgstr "Datei '%s' eingefügt."
 
 #: src/gui/wxComposeView.cpp:856
 #, c-format
 msgid "Failed to insert the text file '%s'."
-msgstr ""
+msgstr "Konte Textdatei '%s' nicht einfügen."
 
 #: src/gui/wxComposeView.cpp:865 src/gui/wxFolderView.cpp:546
 #, fuzzy
@@ -1181,21 +1184,22 @@ msgstr "E-Mail Adresse '%s' gesammelt, in Eintrag '%s'."
 #: src/gui/wxMessageView.cpp:1159
 #, c-format
 msgid "'%s': the name is missing, address was not autocollected."
-msgstr ""
+msgstr "'%s': der Name fehlt, Adresse wurde nicht gesammelt."
 
 #: src/gui/wxMessageView.cpp:1221
 msgid ""
 "There was a problem with showing the preview:\n"
 "perhaps your current printer is not set correctly?"
-msgstr ""
+msgstr "Es gab ein Problem mit der Druckvoransicht:\n"
+"Möglicherweise ist Ihr Durcker nicht richtig eingestellt?""
 
 #: src/gui/wxMessageView.cpp:1223
 msgid "Previewing"
-msgstr ""
+msgstr "Duckvoransicht"
 
 #: src/gui/wxMessageView.cpp:1228
-msgid "Demo Print Preview"
-msgstr ""
+msgid "Print Preview"
+msgstr "Druckvoransicht"
 
 #: src/gui/wxOptionsDlg.cpp:852
 #, fuzzy
@@ -1204,29 +1208,29 @@ msgstr "&Nachricht schreiben"
 
 #: src/gui/wxOptionsDlg.cpp:866
 msgid "Identity"
-msgstr ""
+msgstr "Identität"
 
 #: src/gui/wxOptionsDlg.cpp:882
 msgid "Python"
-msgstr ""
+msgstr "Python"
 
 #: src/gui/wxOptionsDlg.cpp:899
 #, fuzzy
 msgid "Adressbook"
-msgstr "&Adreßbücher..."
+msgstr "Adreßbuch"
 
 #: src/gui/wxOptionsDlg.cpp:914
 msgid "Miscellaneous"
-msgstr ""
+msgstr "Sonstiges"
 
 #: src/gui/wxOptionsDlg.cpp:954
 #, fuzzy
 msgid "Helpers"
-msgstr "Hilfe"
+msgstr "Helfer"
 
 #: src/gui/wxOptionsDlg.cpp:994
 msgid "Mail boxes"
-msgstr ""
+msgstr "Mailboxen"
 
 #: src/gui/wxOptionsDlg.cpp:1035
 msgid "Folders to open on startup"

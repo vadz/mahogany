@@ -83,14 +83,64 @@ static const char *wxIconManagerFileExtensions[] =
    ".xpm", ".png", ".gif", ".jpg", NULL
 };
 
+bool wxIconManager::m_knowHandlers = false;
+long wxIconManager::m_wxBitmapHandlers[] =
+{
+   wxBITMAP_TYPE_XPM,  // XPM must be first entry!
+   wxBITMAP_TYPE_PNG,  //wxGTK
+   wxBITMAP_TYPE_GIF,
+   wxBITMAP_TYPE_TIF,
+   wxBITMAP_TYPE_JPEG,
+   wxBITMAP_TYPE_BMP,  //wxGTK
+   wxBITMAP_TYPE_ANY,
+   wxBITMAP_TYPE_CUR, 
+   wxBITMAP_TYPE_ICO,  //wxGTK
+   -1
+};
+
+   
+
 // ----------------------------------------------------------------------------
 // helper functions to load images
 // ----------------------------------------------------------------------------
 
 #define   WXICONMANAGER_DEFAULTSIZE 100
 
+wxImage &
+wxIconManager::LoadImage(String filename, bool *success)
+{
+   if(! m_knowHandlers) // first time initialisation
+   {
+      for(int i = 0; m_wxBitmapHandlers[i] != -1; i++)
+         if(wxImage::FindHandler( m_wxBitmapHandlers[i] ) == NULL)
+            m_wxBitmapHandlers[i] = 0; // not available
+      m_knowHandlers = true;
+   }
+   
+   wxImage *img = new wxImage();
+
+   bool loaded = false;
+   for(int i = 0; (!loaded) && m_wxBitmapHandlers[i] != -1; i++)
+      if(m_wxBitmapHandlers[i])
+         loaded = img->LoadFile(filename, m_wxBitmapHandlers[i] );
+
+   if((! loaded) && m_wxBitmapHandlers[0] == 0) // try our own XPM loading code
+   {
+      char ** cpptr = LoadImageXpm(filename);
+      if(cpptr)
+      {
+         *img = wxImage(cpptr);
+         wxIconManager::FreeImage(cpptr);
+         loaded = true;
+      }
+   }
+   if(success)
+      *success = loaded;
+   return *img;
+}
+
 char **
-wxIconManager::LoadImage(String filename)
+wxIconManager::LoadImageXpm(String filename)
 {
    String tempfile;
    String oldfilename = filename;
@@ -214,13 +264,13 @@ wxIconManager::~wxIconManager()
    delete m_iconList;
 }
 
-wxBitmap
+wxIcon
 wxIconManager::GetBitmap(const String& bmpName)
 {
 #  ifdef    OS_WIN
    {
       // look in the ressources
-      wxBitmap bmp(bmpName);
+      wxIcon bmp(bmpName);
       if ( bmp.Ok() )
          return bmp;
 
@@ -321,7 +371,7 @@ wxIconManager::GetIcon(String const &_iconName)
       if( found )
       {
 #ifdef   OS_UNIX
-         char **ptr = LoadImage(name);
+         char **ptr = LoadImageXpm(name);
          if(ptr)
          {
             icn = wxIcon(ptr);

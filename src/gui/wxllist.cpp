@@ -147,13 +147,13 @@ wxLayoutObjectText::Debug(void)
 
 //-------------------------- wxLayoutObjectIcon
 
-wxLayoutObjectIcon::wxLayoutObjectIcon(wxIcon const &icon)
+wxLayoutObjectIcon::wxLayoutObjectIcon(wxBitmap const &icon)
 {
    m_Position = wxPoint(-1,-1);
-   m_Icon = new wxIcon(icon);
+   m_Icon = new wxBitmap(icon);
 }
 
-wxLayoutObjectIcon::wxLayoutObjectIcon(wxIcon *icon)
+wxLayoutObjectIcon::wxLayoutObjectIcon(wxBitmap *icon)
 {
    m_Icon = icon;
 }
@@ -161,7 +161,7 @@ wxLayoutObjectIcon::wxLayoutObjectIcon(wxIcon *icon)
 void
 wxLayoutObjectIcon::Draw(wxDC &dc, wxPoint const &translate)
 {
-   dc.DrawIcon(*m_Icon,m_Position.x+translate.x, m_Position.y+translate.y);
+   dc.DrawBitmap(*m_Icon,m_Position.x+translate.x, m_Position.y+translate.y);
 }
 
 void

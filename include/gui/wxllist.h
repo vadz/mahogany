@@ -181,8 +181,8 @@ private:
 class wxLayoutObjectIcon : public wxLayoutObjectBase
 {
 public:
-   wxLayoutObjectIcon(wxIcon *icon);
-   wxLayoutObjectIcon(wxIcon const &icon);
+   wxLayoutObjectIcon(wxBitmap *icon);
+   wxLayoutObjectIcon(wxBitmap const &icon);
 
    ~wxLayoutObjectIcon() { delete m_Icon; }
 
@@ -194,7 +194,7 @@ public:
    virtual bool IsDirty(void) const { return m_IsDirty; }  
 
 private:
-   wxIcon *m_Icon;
+   wxBitmap *m_Icon;
    /// coordinates have changed
    bool m_IsDirty;
 };

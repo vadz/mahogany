@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxIconManager - allocating and deallocating icons for drawing    *
  *                                                                  *
- * (C) 1997 by Karsten Ballüder (Ballueder@usa.net)                 *
+ * (C) 1997-1999 by Karsten Ballüder (Ballueder@usa.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -14,16 +14,14 @@
 #endif
 
 #ifndef USE_PCH
-#  define   Uses_wxIcon
-#  include  <wx/wx.h>
-
-#  include  <Mcommon.h>
+#  include <wx/icon.h>
+#  include <wx/image.h>
+#  include <Mcommon.h>
 #endif  //USE_PCH
 
 /**
    IconManager class, this class allocates and deallocates icons for
-   the application, freeing the individual gui object from the need to
-   allocate or deallocate it.
+   the application.
 */
 
 /// IconResourceType is XPM under Unix and name of ICO resource under Windows
@@ -86,12 +84,20 @@ public:
        for th bitmap in resources first and then calls GetIcon
        @param bmpName the name of the bitmap
    */
-   wxBitmap GetBitmap(const String& bmpName);
+   wxIcon GetBitmap(const String& bmpName);
 
+   /** Load an image file and return it as a wxImage.
+       @filename the name of the file
+       @success set to true on success
+       @return wxImage holding the graphic
+   */
+   static wxImage & LoadImage(String filename, bool *success);
+   
    /** Load an image file and return it as an xpm array.
        @filename the name of the file
    */
-   static char **LoadImage(String filename);
+   static char **LoadImageXpm(String filename);
+   
    /** Load an xpm image file and return it as an xpm array.
        @filename the name of the file
    */
@@ -100,7 +106,12 @@ public:
        @ptr pointer returned by LoadImage
    */
    static void FreeImage(char **ptr);
-   
+
+private:
+   /// have we checked for supported formats?
+   static bool m_knowHandlers;
+   /// list of supported types, terminated with -1
+   static long m_wxBitmapHandlers[];
 };
 
 #endif

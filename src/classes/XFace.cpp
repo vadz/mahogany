@@ -40,6 +40,34 @@ XFace::XFace()
    xface = NULL;
 }
 
+bool
+XFace::CreateFromData(const char *idata)
+{
+#ifndef	HAVE_COMPFACE_H
+   return false;
+#else
+   if(data)  delete [] data;
+   data = strutil_strdup(idata);
+   if(xface) delete [] xface;
+
+   xface = new char[2500];
+   strcpy(xface, data);
+   if(compface(xface) < 0)
+   {
+      delete [] xface;
+      delete [] data;
+      xface = data = NULL;
+      return false;
+   }
+   //convert it:
+   String out = strutil_enforceCRLF(xface);
+   delete [] xface;
+   xface = strutil_strdup(out);
+   initialised = true;
+   return true;
+#endif
+}
+
 // reads from the data, not from a file in memory, it's different!
 bool
 XFace::CreateFromXpm(const char *xpmdata)
@@ -119,32 +147,64 @@ XFace::CreateFromXpm(const char *xpmdata)
       }
    }
    delete [] buf;
-   if(data)  delete [] data;
-   data = strutil_strdup(dataString);
-   if(xface) delete [] xface;
-
-#ifdef HAVE_COMPFACE_H
-   xface = new char[2500];
-   strcpy(xface, data);
-   if(compface(xface) < 0)
-   {
-      delete [] xface;
-      delete [] data;
-      xface = data = NULL;
-      return false;
-   }
-#else
-   xface = NULL;
-#endif // wxGTK
-   //convert it:
-   String out = strutil_enforceCRLF(xface);
-   delete [] xface;
-   xface = strutil_strdup(out);
-   initialised = true;
-   return true;
-#endif
+   return CreateFromData(dataString);
+#endif   
 }
 
+
+#if XFACE_WITH_WXIMAGE
+
+#include   <wx/image.h>
+
+/**
+   Create an XFace from a wxImage.
+   @param image image to read
+   @return true on success
+*/
+bool
+XFace::CreateFromImage(wxImage *image)
+{
+#ifndef	HAVE_COMPFACE_H
+   return false;
+#else
+   if(data)
+      delete [] data;
+
+   char
+      buffer[20];
+   int
+      n,i,y;
+   long
+      value;
+   String
+      dataString,
+      tstr;
+   
+   initialised = false;
+   for(y = 0; y < 48; y++)
+   {
+      for(n = 0; n <= 32; n+= 16)
+      {
+	 value = 0;
+	 for(i = 0; i < 16; i++)
+	 {
+            if(image->GetRed(n+i,y) != 0)  // evaluate red only
+	       value += 1;
+	    if(i != 15)
+               value <<= 1;
+	 }
+         value = value ^ 0xffff;
+	 sprintf(buffer,"0x%04lX", value);
+	 dataString += buffer;
+         dataString += ',';
+      }
+      dataString += '\n';
+   }
+   return CreateFromData(dataString);
+#endif   
+}
+#endif
+// with wxImage
 
 bool
 XFace::CreateFromXFace(const char *xfacedata)

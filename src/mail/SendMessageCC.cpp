@@ -152,6 +152,114 @@ SendMessageCC::Create(ProfileBase *iprof,
    lastpart = nextpart;
 }
 
+
+
+void
+SendMessageCC::Build(void)
+{
+   int
+      j, h = 0;
+   char
+      tmpbuf[MAILTMPLEN];
+   String tmpstr;
+   char
+      *headers;
+   kbStringList::iterator
+      i;
+
+   if(m_headerNames != NULL) // message was already build
+      return;
+   
+   headers = strutil_strdup(READ_CONFIG(profile, MP_EXTRAHEADERS));
+   strutil_tokenise(headers,";",m_headerList);
+   delete [] headers;
+
+   // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the last NULL entry
+   m_headerNames = new const char*[m_headerList.size()+2];
+   m_headerValues = new const char*[m_headerList.size()+2];
+   for(i = m_headerList.begin(), j = 0; i != m_headerList.end(); i++, h++)
+   {
+      m_headerNames[h] = strutil_strdup(StringCast(i)->c_str());
+      m_headerValues[h] = strutil_strdup(profile->readEntry(StringCast(i)->c_str(),""));
+   }
+   //always add mailer header:
+   m_headerNames[h] = strutil_strdup("X-Mailer");
+   String version;
+   version << "M, " << M_VERSION_STRING << _(" ,running on ") << M_OSINFO;
+   m_headerValues[h++] = strutil_strdup(version);
+   //always add reply-to header:
+   tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
+   if(!strutil_isempty(tmpstr))
+   {
+      m_headerNames[h] = strutil_strdup("Reply-To");
+      m_headerValues[h++] = strutil_strdup(tmpstr);
+   }
+
+#ifdef HAVE_XFACES
+   // add an XFace?
+   char **xpmarray = NULL;
+   String xpmdata;
+   if(profile->readEntry(MP_COMPOSE_USE_XFACE,MP_COMPOSE_USE_XFACE_D))
+   {
+      xpmarray =
+         wxIconManager::LoadImageXpm(profile->readEntry(
+               MP_COMPOSE_XFACE_FILE,MP_COMPOSE_XFACE_FILE_D)); 
+      if(! xpmarray)
+      {
+         bool found;
+         PathFinder pf(READ_APPCONFIG(MP_ICONPATH), true);
+         pf.AddPaths(mApplication->GetLocalDir()+"/icons", true);
+         pf.AddPaths(mApplication->GetGlobalDir()+"/icons", true);
+         String name = pf.FindFile("xface.xpm", &found);
+         if(found)
+            xpmarray = wxIconManager::LoadImageXpm(name);
+      }
+      if(xpmarray)
+      {
+         XFace xface;
+         for(j = 0; xpmarray[j]; j++)
+         {
+            xpmdata += xpmarray[j];
+            xpmdata += '\n';
+         }
+         wxIconManager::FreeImage(xpmarray);
+         if(xface.CreateFromXpm(xpmdata.c_str()))
+         {
+            m_headerNames[h] = strutil_strdup("X-Face");
+            m_headerValues[h] = strutil_strdup(xface.GetHeaderLine());
+            //FIXME: find more elegant solution for this (GetHeaderLine())
+            if(strlen(m_headerValues[h]))  // paranoid, I know.
+               ((char*)
+                (m_headerValues[h]))[strlen(m_headerValues[h])-1] =
+                  '\0'; // cut off \n
+            h++;
+         }
+      }
+   }
+#endif
+
+   m_headerNames[h] = NULL;
+   m_headerValues[h] = NULL;
+   rfc822_setextraheaders(m_headerNames,m_headerValues);
+
+   mail_free_body_part(&lastpart->next);
+   lastpart->next = NULL;
+
+   /* Check if there is only one part, then we don't need
+      multipart/mixed: */
+   if(lastpart == body->nested.part)
+   {
+      BODY *oldbody = body;
+      body = &(lastpart->body);
+      oldbody->nested.part = NULL;
+      mail_free_body(&oldbody);
+   }
+   
+   rfc822_date (tmpbuf);
+   env->date = (char *) fs_get (1+strlen (tmpbuf));
+   strcpy (env->date,tmpbuf);
+}
+
 void
 SendMessageCC::AddPart(Message::ContentType type,
                        const char *buf, size_t len,
@@ -279,101 +387,6 @@ SendMessageCC::Send(void)
       success = false;
    }
    return success;
-}
-
-void
-SendMessageCC::Build(void)
-{
-   int
-      j, h = 0;
-   char
-      tmpbuf[MAILTMPLEN];
-   String tmpstr;
-   char
-      *headers;
-   kbStringList::iterator
-      i;
-
-   if(m_headerNames != NULL) // message was already build
-      return;
-   
-   headers = strutil_strdup(READ_CONFIG(profile, MP_EXTRAHEADERS));
-   strutil_tokenise(headers,";",m_headerList);
-   delete [] headers;
-
-   // +4: 1 for X-Mailer, 1 for X-Face, 1 for reply to and 1 for the last NULL entry
-   m_headerNames = new const char*[m_headerList.size()+2];
-   m_headerValues = new const char*[m_headerList.size()+2];
-   for(i = m_headerList.begin(), j = 0; i != m_headerList.end(); i++, h++)
-   {
-      m_headerNames[h] = strutil_strdup(StringCast(i)->c_str());
-      m_headerValues[h] = strutil_strdup(profile->readEntry(StringCast(i)->c_str(),""));
-   }
-   //always add mailer header:
-   m_headerNames[h] = strutil_strdup("X-Mailer");
-   String version;
-   version << "M, " << M_VERSION_STRING << _(" ,running on ") << M_OSINFO;
-   m_headerValues[h++] = strutil_strdup(version);
-   //always add reply-to header:
-   tmpstr = profile->readEntry(MP_RETURN_ADDRESS, MP_RETURN_ADDRESS_D);
-   if(!strutil_isempty(tmpstr))
-   {
-      m_headerNames[h] = strutil_strdup("Reply-To");
-      m_headerValues[h++] = strutil_strdup(tmpstr);
-   }
-
-#ifdef HAVE_XFACES
-   // add an XFace?
-   char **xpmarray = NULL;
-   String xpmdata;
-   if(profile->readEntry(MP_COMPOSE_USE_XFACE,MP_COMPOSE_USE_XFACE_D))
-   {
-      xpmarray =
-         wxIconManager::LoadImage(profile->readEntry(
-               MP_COMPOSE_XFACE_FILE,MP_COMPOSE_XFACE_FILE_D)); 
-      if(! xpmarray)
-      {
-         bool found;
-         PathFinder pf(READ_APPCONFIG(MP_ICONPATH), true);
-         pf.AddPaths(mApplication->GetLocalDir()+"/icons", true);
-         pf.AddPaths(mApplication->GetGlobalDir()+"/icons", true);
-         String name = pf.FindFile("xface.xpm", &found);
-         if(found)
-            xpmarray = wxIconManager::LoadImage(name);
-      }
-      if(xpmarray)
-      {
-         XFace xface;
-         for(j = 0; xpmarray[j]; j++)
-         {
-            xpmdata += xpmarray[j];
-            xpmdata += '\n';
-         }
-         wxIconManager::FreeImage(xpmarray);
-         if(xface.CreateFromXpm(xpmdata.c_str()))
-         {
-            m_headerNames[h] = strutil_strdup("X-Face");
-            m_headerValues[h] = strutil_strdup(xface.GetHeaderLine());
-            //FIXME: find more elegant solution for this (GetHeaderLine())
-            if(strlen(m_headerValues[h]))  // paranoid, I know.
-               ((char*)
-                (m_headerValues[h]))[strlen(m_headerValues[h])-1] =
-                  '\0'; // cut off \n
-            h++;
-         }
-      }
-   }
-#endif
-
-   m_headerNames[h] = NULL;
-   m_headerValues[h] = NULL;
-   rfc822_setextraheaders(m_headerNames,m_headerValues);
-
-   mail_free_body_part(&lastpart->next);
-   lastpart->next = NULL;
-   rfc822_date (tmpbuf);
-   env->date = (char *) fs_get (1+strlen (tmpbuf));
-   strcpy (env->date,tmpbuf);
 }
 
 static long write_output(void *stream, char *string)

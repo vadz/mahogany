@@ -94,18 +94,26 @@ public:
    //@{
    /// Read a character entry.
    virtual String readEntry(String const & key,
-                            String const & defaultvalue = (const char *)NULL) const = 0;
+                            String const & defaultvalue = (const char*)NULL,
+                            bool *found = NULL) const = 0;
    /// Read a character entry.
    String readEntry(String const &  key,
-                    const char *defaultvalue = NULL) const;
+                    const char *defaultvalue = NULL,
+                    bool *found = NULL) const;
    /// Read an integer value.
-   virtual long readEntry(String const & key, long defaultvalue) const = 0;
+   virtual long readEntry(String const & key,
+                          long defaultvalue,
+                          bool *found = NULL) const = 0; 
    /// Read an integer value.
-   int readEntry(String const & key, int defaultvalue) const
-      { return (int)readEntry(key, (long)defaultvalue); }
+   int readEntry(String const & key,
+                 int defaultvalue,
+                 bool *found = NULL) const
+      { return (int)readEntry(key, (long)defaultvalue, found); }
    /// Read a bool value.
-   bool readEntry(const String & key, bool defaultvalue) const
-      { return readEntry(key, (long)defaultvalue) != 0; }
+   bool readEntry(const String & key,
+                  bool defaultvalue,
+                  bool *found = NULL) const
+      { return readEntry(key, (long)defaultvalue, found) != 0; }
 
    /// Write back the character value.
    virtual bool writeEntry(String const & key, String const & Value) = 0;

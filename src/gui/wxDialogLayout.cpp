@@ -31,6 +31,16 @@
 #include   <wx/imaglist.h>
 #include   <wx/notebook.h>
 #include   <wx/persctrl.h>
+#include   <wx/control.h>
+#include   <wx/dcclient.h>
+#include   <wx/layout.h>
+#include   <wx/dynarray.h>
+#include   <wx/stattext.h>
+#include   <wx/settings.h>
+#include   <wx/listbox.h>
+#include   <wx/checkbox.h>
+#include   <wx/radiobox.h>
+#include   <wx/statbox.h>
 
 #include   "gui/wxIconManager.h"
 #include   "gui/wxDialogLayout.h"
