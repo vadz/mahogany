@@ -410,7 +410,14 @@ wxMFrame::SavePositionInternal(const char *name, wxWindow *frame, bool isFrame)
       if ( isFrame )
       {
          wxFrame *fr = (wxFrame *)frame;
+
+         // IsIconized() is broken in wxGTK, it returns TRUE sometimes when the
+         // frame is not at all iconized - no idea why :-(
+#ifdef __WXGTK__
+         bool isIconized = false;
+#else
          bool isIconized = fr->IsIconized();
+#endif
          bool isMaximized = fr->IsMaximized();
 
          // the frames are rarely icon/maximized, so don't write these
