@@ -90,6 +90,19 @@ class wxConfigBase;
 class Profile : public MObjectRC
 {
 public:
+   /// flags returned by readEntry()
+   enum ReadResult
+   {
+      /// entry hasn't been found anywhere, default value is returned
+      Read_Default = 0,
+
+      /// entry has been found in this entry
+      Read_FromHere = 1,
+
+      /// entry has been found in one of the ancestors of this entry
+      Read_FromParent = 2
+   };
+
    /// Creates the one global config object.
    static Profile * CreateGlobalConfig(const String & filename);
 
@@ -129,24 +142,24 @@ public:
    /// Read a character entry.
    virtual String readEntry(const String & key,
                             const String & defaultvalue = (const wxChar*)NULL,
-                            bool *found = NULL) const = 0;
+                            ReadResult *found = NULL) const = 0;
    /// Read a character entry.
    String readEntry(const String &  key,
                     const wxChar *defaultvalue = NULL,
-                    bool *found = NULL) const;
+                    ReadResult *found = NULL) const;
    /// Read an integer value.
    virtual long readEntry(const String & key,
                           long defaultvalue,
-                          bool *found = NULL) const = 0;
+                          ReadResult *found = NULL) const = 0;
    /// Read an integer value.
    int readEntry(const String & key,
                  int defaultvalue,
-                 bool *found = NULL) const
+                 ReadResult *found = NULL) const
       { return (int)readEntry(key, (long)defaultvalue, found); }
    /// Read a bool value.
    bool readEntry(const String & key,
                   bool defaultvalue,
-                  bool *found = NULL) const
+                  ReadResult *found = NULL) const
       { return readEntry(key, (long)defaultvalue, found) != 0; }
 
    /// Read an integer entry from this profile only, don't look upwards

@@ -109,14 +109,14 @@ public:
          m_Type = LD_STRING;
          m_Str = def;
          m_Key = key;
-         m_Found = false;
+         m_Found = Profile::Read_Default;
       }
    LookupData(const String &key, long def)
       {
          m_Type = LD_LONG;
          m_Key = key;
          m_Long = def;
-         m_Found = false;
+         m_Found = Profile::Read_Default;
       }
 
    enum Type { LD_LONG, LD_STRING };
@@ -127,7 +127,7 @@ public:
       { ASSERT(m_Type == LD_STRING); return m_Str; }
    long GetLong(void) const
       { ASSERT(m_Type == LD_LONG); return m_Long; }
-   bool GetFound(void) const
+   Profile::ReadResult GetFound(void) const
       {
          return m_Found;
       }
@@ -141,7 +141,7 @@ public:
          ASSERT(m_Type == LD_LONG);
          m_Long = l;
       }
-   void SetFound(bool found = true)
+   void SetFound(Profile::ReadResult found)
       {
          m_Found = found;
       }
@@ -150,7 +150,7 @@ private:
    String m_Key;
    String m_Str;
    long   m_Long;
-   bool   m_Found;
+   Profile::ReadResult m_Found;
 };
 
 #ifdef DEBUG
@@ -174,26 +174,26 @@ public:
    /// Read a character entry.
    virtual String readEntry(const String & key,
                             const String & defaultvalue = (const char*)NULL,
-                            bool *found = NULL) const
+                            ReadResult *found = NULL) const
       {
          if ( m_Parent )
             return m_Parent->readEntry(key, defaultvalue, found);
 
          if ( found )
-            *found = false;
+            *found = Read_Default;
 
          return defaultvalue;
       }
    /// Read an integer value.
    virtual long readEntry(const String & key,
                           long defaultvalue,
-                          bool *found = NULL) const
+                          ReadResult *found = NULL) const
       {
          if ( m_Parent )
             return m_Parent->readEntry(key, defaultvalue, found);
 
          if ( found )
-            *found = false;
+            *found = Read_Default;
 
          return defaultvalue;
       }
@@ -338,11 +338,11 @@ public:
       /// Read a character entry.
    String readEntry(const String & key,
                     const String & defaultvalue = (const char *)NULL,
-                    bool * found = NULL) const;
+                    ReadResult * found = NULL) const;
    /// Read an integer value.
    long readEntry(const String & key,
                   long defaultvalue,
-                  bool * found = NULL) const;
+                  ReadResult * found = NULL) const;
    /// read entry without recursing upwards
    virtual int readEntryFromHere(const String& key, int defvalue) const;
    /// Read string or integer
@@ -1024,7 +1024,7 @@ Profile::DeleteGlobalConfig()
 String
 Profile::readEntry(const String & key,
                        const char *defaultvalue,
-                       bool * found) const
+                       ReadResult * found) const
 {
    PCHECK();
    String str;
@@ -1155,7 +1155,7 @@ ProfileImpl::DeleteGroup(const String & path)
 
 String
 ProfileImpl::readEntry(const String & key, const String & def,
-                       bool * found) const
+                       ReadResult * found) const
 {
    LookupData ld(key, def);
    readEntry(ld);
@@ -1168,7 +1168,7 @@ ProfileImpl::readEntry(const String & key, const String & def,
 }
 
 long
-ProfileImpl::readEntry(const String & key, long def, bool * found) const
+ProfileImpl::readEntry(const String & key, long def, ReadResult * found) const
 {
    LookupData ld(key, def);
    readEntry(ld);
@@ -1245,7 +1245,7 @@ ProfileImpl::readEntry(LookupData &ld, int flags) const
    if ( !foundHere && (flags & Lookup_Identity) && m_Identity )
    {
       // try suspended path first:
-      bool idFound = false;
+      ReadResult idFound;
       if( ld.GetType() == LookupData::LD_STRING )
          strResult = m_Identity->readEntry(keySuspended, ld.GetString(),
                                            &idFound);
@@ -1265,7 +1265,7 @@ ProfileImpl::readEntry(LookupData &ld, int flags) const
             ld.SetResult(strResult);
          else
             ld.SetResult(longResult);
-         ld.SetFound(false);
+         ld.SetFound(Profile::Read_Default);
          return;
       }
 
@@ -1319,9 +1319,9 @@ ProfileImpl::readEntry(LookupData &ld, int flags) const
          ld.SetResult(strResult);
       else
          ld.SetResult(longResult);
-   }
 
-   ld.SetFound(foundHere);
+      ld.SetFound(foundHere ? Profile::Read_FromHere : Profile::Read_FromParent);
+   }
 }
 
 bool

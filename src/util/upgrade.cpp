@@ -2089,9 +2089,10 @@ public:
    virtual bool OnVisitFolder(const wxString& folderName)
       {
          Profile_obj profile(folderName);
-         bool found;
+
+         Profile::ReadResult found;
          String hostname = profile->readEntry(MP_OLD_FOLDER_HOST, "", &found);
-         if ( found )
+         if ( found == Profile::Read_FromHere )
          {
             // delete the old entry, create the new one
             wxConfigBase *config = profile->GetConfig();

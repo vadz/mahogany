@@ -1489,7 +1489,7 @@ void wxFolderTreeNode::UpdateShownStatus(wxTreeCtrl *tree,
 
       }
 
-      bool found;
+      Profile::ReadResult found;
       wxString colorName = profile->readEntry(GetOptionName(*opt),
                                               GetStringDefault(*opt),
                                               &found);

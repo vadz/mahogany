@@ -2165,16 +2165,12 @@ wxFolderPropertiesPage::SetDefaultValues()
       m_comment->SetValue(READ_CONFIG(profile, MP_FOLDER_COMMENT));
 
    // remember the original folder type
-   bool found;
-   long l = profile->readEntry(GetOptionName(MP_FOLDER_FILE_DRIVER), 0l, &found);
-   if ( found )
-   {
-      m_originalMboxFormat = (FileMailboxFormat)l;
-   }
-   else
-   {
-      m_originalMboxFormat = FileMbox_Max;
-   }
+   m_originalMboxFormat = (FileMailboxFormat)
+                          profile->readEntryFromHere
+                                   (
+                                    GetOptionName(MP_FOLDER_FILE_DRIVER),
+                                    FileMbox_Max
+                                   );
 
    // set the initial values for all checkboxes and remember them: we will only
    // write it back if it changes later

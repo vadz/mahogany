@@ -737,11 +737,10 @@ MessageView::InitializeViewFilters()
                   Profile *profile = GetProfile();
                   CHECK_RET( profile, _T("no profile in InitializeViewFilters?") );
 
-                  bool found;
-                  bool enable = profile->readEntry(name, false, &found);
-                  if ( found )
+                  int enable = profile->readEntryFromHere(name, -1);
+                  if ( enable != -1 )
                   {
-                     filter->Enable(enable);
+                     filter->Enable(enable != 0);
                   }
 
                   break;
@@ -774,11 +773,10 @@ MessageView::UpdateViewFiltersState()
          node->GetNext();
          node = node->GetNext() )
    {
-      bool found;
-      bool enable = profile->readEntry(node->GetName(), false, &found);
-      if ( found )
+      int enable = profile->readEntryFromHere(node->GetName(), -1);
+      if ( enable != -1 )
       {
-         node->GetFilter()->Enable(enable);
+         node->GetFilter()->Enable(enable != 0);
       }
    }
 }
