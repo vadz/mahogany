@@ -496,6 +496,9 @@ wxFolderView::Update(void)
       m_NumOfMessages = 0;
    }
 
+   long focused = m_FolderCtrl->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
+   if(focused >= (long) m_MailFolder->CountMessages()) //FIXME
+      focused = -1;
    HeaderInfo const *hi;
    i = 0;
    for(hi = m_MailFolder->GetFirstHeaderInfo(); hi != NULL;
@@ -517,6 +520,9 @@ wxFolderView::Update(void)
                              strutil_ultoa(hi->GetSize())
          );
       m_FolderCtrl->Select(i,selected);
+      if(i == focused)
+         m_FolderCtrl->SetItemState( i, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED );
+
       i++;
    }
 
