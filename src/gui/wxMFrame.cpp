@@ -42,11 +42,12 @@
 #  include <wx/confbase.h>
 #  include <wx/menu.h>
 #  include <wx/toolbar.h>
-#endif
+#endif // USE_PCH
 
 #ifdef USE_PYTHON
 #  include "MPython.h"
 #  include "PythonHelp.h"
+#  include <wx/ffile.h>
 #endif // Python
 
 #include "MHelp.h"
@@ -72,10 +73,6 @@
 #include "gui/wxIdentityCombo.h"
 
 #include <wx/fontmap.h>          // for GetEncodingDescription()
-
-#ifdef USE_PYTHON
-   #include <wx/ffile.h>
-#endif // USE_PYTHON
 
 #include <wx/printdlg.h>
 
@@ -900,7 +897,6 @@ wxMFrame::OnMenuCommand(int id)
                wxFONTENCODING_ISO8859_13,      // Baltic (Latin7)
                wxFONTENCODING_ISO8859_14,      // Latin8
                wxFONTENCODING_ISO8859_15,      // Latin9 (a.k.a. Latin0, includes euro)
-               wxFONTENCODING_ISO8859_MAX,
 
                wxFONTENCODING_CP1250,          // WinLatin2
                wxFONTENCODING_CP1251,          // WinCyrillic
@@ -909,7 +905,7 @@ wxMFrame::OnMenuCommand(int id)
                wxFONTENCODING_CP1254,          // WinTurkish
                wxFONTENCODING_CP1255,          // WinHebrew
                wxFONTENCODING_CP1256,          // WinArabic
-               wxFONTENCODING_CP1257,          // WinBaltic (same as Latin 7)
+               wxFONTENCODING_CP1257,          // WinBaltic (almost the same as Latin 7)
 
                wxFONTENCODING_KOI8,            // == KOI8-R
 #if wxCHECK_VERSION(2, 3, 0)
