@@ -470,7 +470,8 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
 {
    int keyCode = event.KeyCode();
    bool ctrlDown = event.ControlDown();
-
+   bool shiftDown = event.ShiftDown();
+   
 #ifdef WXLAYOUT_DEBUG
    if(keyCode == WXK_F1)
    {
@@ -572,7 +573,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       break;
    default:
       
-      if(ctrlDown && ! IsEditable())
+      if(ctrlDown && ! shiftDown && ! IsEditable())
          switch(keyCode)
          {
          case 'c':
@@ -593,7 +594,7 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       else if( IsEditable() )
       {
          /* First, handle control keys */
-         if(ctrlDown && ! event.AltDown())
+         if(ctrlDown && !shiftDown && ! event.AltDown())
          {
             if(keyCode >= 'A' && keyCode <= 'Z')
                keyCode = tolower(keyCode);
