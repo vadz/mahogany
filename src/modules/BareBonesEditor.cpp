@@ -34,6 +34,8 @@
 #include <wx/listctrl.h>
 #include <wx/imaglist.h>
 
+#include <wx/fontutil.h>      // for wxNativeFontInfo
+
 #include "Composer.h"
 #include "MessageEditor.h"
 
@@ -274,8 +276,13 @@ void FormattedParagraph::FromCursor()
 
 bool FormattedParagraph::IsWhiteLine(int line)
 {
-   String content(m_control->GetLineText(line));
-   return content.find_first_not_of(_T(" \t\r\n")) == content.npos;
+   String text = m_control->GetLineText(line);
+   const wxChar *p = text.c_str();
+
+   while ( wxIsalnum(*p) )
+      p++;
+
+   return *p == _T('\0');
 }
 
 int FormattedParagraph::FindLineByWhite(int start,bool white)
@@ -660,7 +667,10 @@ END_EVENT_TABLE()
 wxBareBonesTextControl::wxBareBonesTextControl(BareBonesEditor *editor,
                                                wxWindow *parent)
                       : wxTextCtrl(parent,-1,_T(""),
-                        wxDefaultPosition,wxDefaultSize,wxTE_MULTILINE)
+                                   wxDefaultPosition,wxDefaultSize,
+                                   // use wxTE_RICH to allow for more than 64Kb
+                                   // of text under Win9x
+                                   wxTE_MULTILINE | wxTE_RICH)
 {
    m_editor = editor;
 
@@ -813,6 +823,21 @@ void BareBonesEditor::Clear()
 {
    m_textControl->Clear();
    m_textControl->DiscardEdits();
+
+   Options& options = (Options &)GetOptions();     // const_cast
+
+   wxFont font;
+   if ( !options.m_font.empty() )
+   {
+      wxNativeFontInfo fontInfo;
+      if ( fontInfo.FromString(options.m_font) )
+      {
+         font.SetNativeFontInfo(fontInfo);
+      }
+   }
+
+   if ( font.Ok() )
+      m_textControl->SetFont(font);
 }
 
 void BareBonesEditor::Enable(bool enable)
