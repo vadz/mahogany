@@ -1747,11 +1747,11 @@ extern const MOption MP_AWAY_STATUS;
 /// cycle colours?
 #define   MP_MVIEW_QUOTED_CYCLE_COLOURS_DEFVAL  0L
 /// which colour for quoted text
-#define   MP_MVIEW_QUOTED_COLOUR1_DEFVAL     "purple"
+#define   MP_MVIEW_QUOTED_COLOUR1_DEFVAL     "gray"
 /// which colour for quoted text, seconds level
 #define   MP_MVIEW_QUOTED_COLOUR2_DEFVAL     "brown"
 /// which colour for quoted text, seconds level
-#define   MP_MVIEW_QUOTED_COLOUR3_DEFVAL     "gray"
+#define   MP_MVIEW_QUOTED_COLOUR3_DEFVAL     "purple"
 /// the maximum number of whitespaces prepending >
 #define   MP_MVIEW_QUOTED_MAXWHITESPACE_DEFVAL  2L
 /// the maximum number of A-Z prepending >
