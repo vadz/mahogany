@@ -42,6 +42,7 @@
 #   include "Mdefaults.h"
 #   include "gui/wxMenuDefs.h"
 #   include "MMainFrame.h"
+#   include "HeaderInfo.h"
 #endif
 
 // we can't compile an empty library as it was done before as then you get
