@@ -3291,7 +3291,11 @@ MailFolderCC::CClientInit(void)
 
    // do further initialisation (SSL is initialized later, when it is needed for
    // the first time)
-#include "linkage_no_ssl.c"
+#ifdef OS_WIN
+#  include "linkage.c"
+#else
+#  include "linkage_no_ssl.c"
+#endif
 
    // this triggers c-client initialisation via env_init()
 #ifdef OS_UNIX
