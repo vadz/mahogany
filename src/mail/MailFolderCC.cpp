@@ -635,22 +635,48 @@ MailFolderCC::Open(void)
          exists = wxFileExists(path);
       }
 
-      if ( !exists )
+      /* Clever hack: if the folder is IMAP and the folder name ends
+         in a slash '/' we only half-open it. The server does not like 
+         opening directories, but the half-open stream can still be
+         used for retrieving subfolder listings. */
+      if(GetType() == MF_IMAP
+         && m_MailboxPath[m_MailboxPath.Length()-1] == '/')
+      {
+         String spec = m_MailboxPath.BeforeLast('}') + '}';
+         CCVerbose();
+         m_MailStream = mail_open(NIL,(char *)spec.c_str(),
+                                  (debugFlag ? OP_DEBUG : NIL)|OP_HALFOPEN);
+         ProcessEventQueue();
+         SetDefaultObj(false);
+         if(! m_MailStream)
+            return false;
+         else
+            return true;
+      }
+      if ( !exists
+           && (GetType() == MF_FILE || GetType() == MF_MH))
       {
          mail_create(NIL, (char *)m_MailboxPath.c_str());
       }
 
       // first try, don't log errors (except in debug mode)
-      // If we don't have a mailstram yet, we half-open one:
+      // If we don't have a mailstream yet, we half-open one:
+      // this would give us a valid stream to use for looking up the
+#if 0
       if(m_MailStream == NIL)
          m_MailStream = mail_open(NIL,(char *)m_MailboxPath.c_str(),
                                   (debugFlag ? OP_DEBUG : NIL)|OP_HALFOPEN);
-      CCVerbose();
-      // this would give us a valid stream to use for looking up the
-      // object, but seems to break some POP server connections
-      if(m_MailStream != NIL)
+#endif
+      if(m_MailStream == NIL)
          m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
                                   debugFlag ? OP_DEBUG : NIL);
+      if(m_MailStream == NIL) // try to create it
+      {
+         CCVerbose();
+         mail_create(NIL, (char *)m_MailboxPath.c_str());
+         m_MailStream = mail_open(m_MailStream,(char *)m_MailboxPath.c_str(),
+                                  debugFlag ? OP_DEBUG : NIL);
+      }
       ProcessEventQueue();
       SetDefaultObj(false);
    }
@@ -1987,16 +2013,6 @@ MailFolderCC::ListFolders(ASMailFolder *asmf,
       && spec[spec.Length()-1] != '}')
       spec += '/';
 
-   /*
-     The problem with listing IMAP folders is:
-      - It needs a valid mailstream to access the server, at least a
-        half-open one.
-      - Half-opening works, but opening
-      e.g. /home/karsten/MailFolders/ fails, because it is a
-      directory.
-   */
-
-   
    spec += pattern;
 
    ASSERT(asmf);
