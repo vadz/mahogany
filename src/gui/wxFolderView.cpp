@@ -68,50 +68,54 @@ static const char *wxFLC_ColumnNames[] =
 
 void wxFolderListCtrl::OnKey(wxKeyEvent& event)
 {
-   long keyCode = event.KeyCode();
-   if(event.ControlDown())
-      return;
-   
-   wxArrayInt selections;
-   m_FolderView->GetSelections(selections);
+   if(! event.ControlDown())
+   {
+      long keyCode = event.KeyCode();
+      wxArrayInt selections;
+      m_FolderView->GetSelections(selections);
 
-   /** To allow translations:
-       Delete, Undelete, eXpunge, Copytofolder, Savetofile,
-       Movetofolder
-   */
-   const char keycodes[] = gettext_noop("DUXCSM");
-   int idx = 0;
-   int key = toupper((int)keyCode);
-   for(;keycodes[idx] && keycodes[idx] != key;idx++)
-      ;
+      /** To    allow translations:
+          Delete, Undelete, eXpunge, Copytofolder, Savetofile,
+          Movetofolder
+      */
+      const char keycodes[] = gettext_noop("DUXCSM");
+      int idx = 0;
+      int key = toupper((int)keyCode);
+      for(;keycodes[idx] && keycodes[idx] != key;idx++)
+         ;
 
    // extra keys:
-   if(key == '#') idx = 2; // # == expunge for VM compatibility
+      if(key == '#') idx = 2; // # == expunge for VM compatibility
    
-   switch(idx)
-   {
-   case 0:
-      m_FolderView->DeleteMessages(selections);
-      break;
-   case 1:
-      m_FolderView->UnDeleteMessages(selections);
-      break;
-   case 2:
-      m_FolderView->GetFolder()->ExpungeMessages();
-      break;
-   case 3:
-      m_FolderView->SaveMessagesToFolder(selections);
-      break;
-   case 4:
-      m_FolderView->SaveMessagesToFile(selections);
-      break;
-   case 5:
-      m_FolderView->SaveMessagesToFolder(selections);
-      m_FolderView->DeleteMessages(selections);
-      break;
-   default:
-      event.Skip();
+      switch(idx)
+      {
+      case 0:
+         m_FolderView->DeleteMessages(selections);
+         break;
+      case 1:
+         m_FolderView->UnDeleteMessages(selections);
+         break;
+      case 2:
+         m_FolderView->GetFolder()->ExpungeMessages();
+         break;
+      case 3:
+         m_FolderView->SaveMessagesToFolder(selections);
+         break;
+      case 4:
+         m_FolderView->SaveMessagesToFile(selections);
+         break;
+      case 5:
+         m_FolderView->SaveMessagesToFolder(selections);
+         m_FolderView->DeleteMessages(selections);
+         break;
+      default:
+         //FIXME: this is correct but doesn't work well event.Skip();
+         wxListCtrl::ProcessEvent(event);
+      }
    }
+   else
+      //FIXME: this is correct but doesn't work well event.Skip();
+      wxListCtrl::ProcessEvent(event);
 }
 
 
