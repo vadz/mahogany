@@ -1,0 +1,79 @@
+# This file was created automatically by SWIG.
+# Don't modify this file, modify the SWIG interface instead.
+# This file is compatible with both classic and new-style classes.
+import _MimeType
+def _swig_setattr(self,class_type,name,value):
+    if (name == "this"):
+        if isinstance(value, class_type):
+            self.__dict__[name] = value.this
+            if hasattr(value,"thisown"): self.__dict__["thisown"] = value.thisown
+            del value.thisown
+            return
+    method = class_type.__swig_setmethods__.get(name,None)
+    if method: return method(self,value)
+    self.__dict__[name] = value
+
+def _swig_getattr(self,class_type,name):
+    method = class_type.__swig_getmethods__.get(name,None)
+    if method: return method(self)
+    raise AttributeError,name
+
+import types
+try:
+    _object = types.ObjectType
+    _newclass = 1
+except AttributeError:
+    class _object : pass
+    _newclass = 0
+
+
+class MimeType(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, MimeType, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, MimeType, name)
+    TEXT = _MimeType.MimeType_TEXT
+    MULTIPART = _MimeType.MimeType_MULTIPART
+    MESSAGE = _MimeType.MimeType_MESSAGE
+    APPLICATION = _MimeType.MimeType_APPLICATION
+    AUDIO = _MimeType.MimeType_AUDIO
+    IMAGE = _MimeType.MimeType_IMAGE
+    VIDEO = _MimeType.MimeType_VIDEO
+    MODEL = _MimeType.MimeType_MODEL
+    OTHER = _MimeType.MimeType_OTHER
+    CUSTOM1 = _MimeType.MimeType_CUSTOM1
+    CUSTOM2 = _MimeType.MimeType_CUSTOM2
+    CUSTOM3 = _MimeType.MimeType_CUSTOM3
+    CUSTOM4 = _MimeType.MimeType_CUSTOM4
+    CUSTOM5 = _MimeType.MimeType_CUSTOM5
+    CUSTOM6 = _MimeType.MimeType_CUSTOM6
+    INVALID = _MimeType.MimeType_INVALID
+    def __init__(self,*args):
+        _swig_setattr(self, MimeType, 'this', apply(_MimeType.new_MimeType,args))
+        _swig_setattr(self, MimeType, 'thisown', 1)
+    def Assign(*args): return apply(_MimeType.MimeType_Assign,args)
+    def IsOk(*args): return apply(_MimeType.MimeType_IsOk,args)
+    def IsWildcard(*args): return apply(_MimeType.MimeType_IsWildcard,args)
+    def IsText(*args): return apply(_MimeType.MimeType_IsText,args)
+    def GetPrimary(*args): return apply(_MimeType.MimeType_GetPrimary,args)
+    def GetType(*args): return apply(_MimeType.MimeType_GetType,args)
+    def GetSubType(*args): return apply(_MimeType.MimeType_GetSubType,args)
+    def GetFull(*args): return apply(_MimeType.MimeType_GetFull,args)
+    def __ne__(*args): return apply(_MimeType.MimeType___ne__,args)
+    def Matches(*args): return apply(_MimeType.MimeType_Matches,args)
+    def __eq__(*args): return apply(_MimeType.MimeType___eq__,args)
+    def __del__(self, destroy= _MimeType.delete_MimeType):
+        try:
+            if self.thisown: destroy(self)
+        except: pass
+    def __repr__(self):
+        return "<C MimeType instance at %s>" % (self.this,)
+
+class MimeTypePtr(MimeType):
+    def __init__(self,this):
+        _swig_setattr(self, MimeType, 'this', this)
+        if not hasattr(self,"thisown"): _swig_setattr(self, MimeType, 'thisown', 0)
+        _swig_setattr(self, MimeType,self.__class__,MimeType)
+_MimeType.MimeType_swigregister(MimeTypePtr)
+
+
