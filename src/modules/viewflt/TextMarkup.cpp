@@ -91,7 +91,7 @@ TextMarkupFilter::DoProcess(String& text,
 
    // is the markup currently in progress continuation of the previous one,
    // i.e. second or more highlighted word in a row?
-   bool isContinuation;
+   bool isContinuation = false; // just to suppress the compiler warnings
 
    String textNormal,
           textSpecial;
