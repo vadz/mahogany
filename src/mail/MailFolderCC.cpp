@@ -1291,7 +1291,7 @@ MailFolderCC::~MailFolderCC()
    // this case it may be left lying around
    if ( m_expungedIndices )
    {
-      ASSERT_MSG(GetType() == MF_POP, "m_expungedIndices unexpectedly !NULL");
+      FAIL_MSG( "m_expungedIndices unexpectedly != NULL" );
 
       delete m_expungedIndices;
       m_expungedIndices = NULL;
@@ -1827,6 +1827,10 @@ MailFolderCC::Close()
       delete m_expungedIndices;
       m_expungedIndices = NULL;
    }
+
+   // normally the folder won't be reused any more but reset them just in case
+   m_LastUId = UID_ILLEGAL;
+   m_nMessages = 0;
 }
 
 /* static */
@@ -1843,7 +1847,6 @@ MailFolderCC::CloseFolder(const MFolder *folder)
 
    mf->Close();
 
-   mf->Init();
    mf->DecRef();
 
    return true;
@@ -2660,7 +2663,7 @@ MailFolderCC::ExpungeMessages(void)
       // reset in mm_exists handler
       if ( m_expungedIndices )
       {
-         mail_ping(m_MailStream);
+         RequestUpdateAfterExpunge();
       }
    }
 }
@@ -3664,22 +3667,31 @@ MailFolderCC::OverviewHeaderEntry(OverviewData *overviewData,
 }
 
 // ----------------------------------------------------------------------------
-// MailFolderCC handling of message number changes
+// MailFolderCC notification sending
 // ----------------------------------------------------------------------------
+
+void MailFolderCC::RequestUpdateAfterExpunge()
+{
+   CHECK_RET( m_expungedIndices, "shouldn't be called if we didn't expunge" );
+
+   // FIXME: we ignore IsUpdateSuspended() here, should we? and if not,
+   //        what to do?
+
+   // tell GUI to update
+   wxLogTrace(TRACE_MF_EVENTS, "Sending FolderExpunged event for folder '%s'",
+              GetName().c_str());
+
+   MEventManager::Send(new MEventFolderExpungeData(this, m_expungedIndices));
+
+   // MEventFolderExpungeData() will delete it
+   m_expungedIndices = NULL;
+}
 
 void
 MailFolderCC::RequestUpdate()
 {
    if ( IsUpdateSuspended() )
       return;
-
-   if ( m_expungedIndices )
-   {
-      // no need to generate MEventFolderExpunge event if we do an update
-      // anyhow
-      delete m_expungedIndices;
-      m_expungedIndices = NULL;
-   }
 
    wxLogTrace(TRACE_MF_EVENTS, "Sending FolderUpdate event for folder '%s'",
               GetName().c_str());
@@ -3718,18 +3730,8 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
          m_headers->OnAdd(msgnoMax);
       }
 
-      // it is useless to send MEventFolderExpungeData if we're going to send
-      // MEventFolderUpdateData anyhow - the latter should refresh GUI by
-      // itself
-      if ( m_expungedIndices )
-      {
-         delete m_expungedIndices;
-         m_expungedIndices = NULL;
-      }
-
       // our cached idea of the number of messages we have doesn't correspond
       // to reality any more
-
       MfStatusCache *mfStatusCache = MfStatusCache::Get();
       if ( msgnoMax )
       {
@@ -3761,20 +3763,11 @@ void MailFolderCC::OnMailExists(struct mail_stream *stream, MsgnoType msgnoMax)
    }
    else // same number of messages
    {
-      // this means that the messages were only expunged, we shouldn't have
-      // any new ones
-
-      // FIXME: we ignore IsUpdateSuspended() here, should we? and if not,
-      //        what to do?
-
-      // tell GUI to update
-      wxLogTrace(TRACE_MF_EVENTS, "Sending FolderExpunged event for folder '%s'",
-                 GetName().c_str());
-
-      MEventManager::Send(new MEventFolderExpungeData(this, m_expungedIndices));
-
-      // MEventFolderExpungeData() will delete it
-      m_expungedIndices = NULL;
+      if ( m_expungedIndices )
+      {
+         RequestUpdateAfterExpunge();
+      }
+      //else: nothing at all
    }
 
    m_LastUId = stream->uid_last;
