@@ -30,11 +30,14 @@
 #  include "guidef.h"
 
 #  include <wx/checkbox.h>
+#  include <wx/listbox.h>
+#  include <wx/sizer.h>
 #  include <wx/statline.h>
+#  include <wx/statbmp.h>
 #  include <wx/statbox.h>
 #endif // USE_PCH
 
-#include <wx/sizer.h>
+#include <wx/datetime.h>
 
 #include "MImport.h"
 
@@ -56,6 +59,9 @@ public:
    // did import succeed?
    bool IsOk() const { return m_ok; }
 
+   // get the log listbox (for wxImportDialogLog)
+   wxListBox *GetLogListBox() const { return m_listbox; }
+   
    // event handlers
    void OnOk(wxCommandEvent& event);
 
@@ -69,6 +75,7 @@ private:
 
    MImporter& m_importer;
 
+   wxListBox  *m_listbox;
    wxCheckBox *m_checkADB,
               *m_checkFolders,
               *m_checkSettings,
@@ -77,6 +84,36 @@ private:
    bool m_done, m_ok;
 
    DECLARE_EVENT_TABLE()
+};
+
+// ----------------------------------------------------------------------------
+// wxImportDialogLog: a log target which logs everything into a listbox in the
+// import dialog and also lets the messages pass through to the old logger
+// ----------------------------------------------------------------------------
+
+class wxImportDialogLog : public wxLog
+{
+public:
+   wxImportDialogLog(wxImportDialog *dlg, wxLog *logOld)
+   {
+      m_dialog = dlg;
+      m_logOld = logOld;
+   }
+
+   virtual ~wxImportDialogLog() { delete wxLog::SetActiveTarget(m_logOld); }
+
+   virtual void DoLogString(const wxChar *szString, time_t t)
+   {
+      m_dialog->GetLogListBox()->Append(
+            wxString::Format("%s:\t%s",
+                             wxDateTime(t).FormatTime().c_str(),
+                             szString)
+         );
+   }
+
+private:
+   wxImportDialog *m_dialog;
+   wxLog *m_logOld;
 };
 
 // ----------------------------------------------------------------------------
@@ -104,10 +141,15 @@ wxImportDialog::wxImportDialog(MImporter& importer, wxWindow *parent)
 
    wxBoxSizer *topsizer = new wxBoxSizer( wxVERTICAL );
 
-   topsizer->Add( CreateTextSizer(
+   wxBoxSizer *sizerText = new wxBoxSizer( wxHORIZONTAL );
+   sizerText->Add( new wxStaticBitmap(this, -1,
+                     mApplication->GetIconManager()->GetBitmap("import")),
+         0, wxCENTRE | wxALL, 5 );
+   sizerText->Add( CreateTextSizer(
             _("Please choose the actions below you would like to perform\n"
                "and then click the [Start] button to start importing.") ),
-         0, wxALL, 10 );
+         1, wxCENTRE | wxALL, 5 );
+   topsizer->Add(sizerText, 0, wxEXPAND | wxALL, 5);
 
    wxStaticBox *box = new wxStaticBox(this, -1, _("&What to do:"));
    wxStaticBoxSizer *actionsSizer = new wxStaticBoxSizer(box, wxVERTICAL);
@@ -126,7 +168,14 @@ wxImportDialog::wxImportDialog(MImporter& importer, wxWindow *parent)
    m_checkSettings->Enable( flags & MImporter::Import_Settings );
    m_checkFilters->Enable( flags & MImporter::Import_Filters );
 
-   topsizer->Add( actionsSizer, 1, wxEXPAND | wxLEFT|wxRIGHT, 15 );
+   topsizer->Add( actionsSizer, 1, wxEXPAND | wxLEFT | wxRIGHT, 15 );
+
+   m_listbox = new wxListBox(this, -1);
+   m_listbox->Disable();
+   box = new wxStaticBox(this, -1, _("Import log"));
+   wxStaticBoxSizer *resultSizer = new wxStaticBoxSizer(box, wxVERTICAL);
+   resultSizer->Add(m_listbox, 1, wxEXPAND);
+   topsizer->Add( resultSizer, 1, wxEXPAND | wxLEFT | wxRIGHT, 15 );
 
    topsizer->Add( new wxStaticLine( this, -1 ), 0, wxEXPAND | wxLEFT|wxRIGHT|wxTOP, 10 );
 
@@ -152,6 +201,9 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
    else
    {
       wxBusyCursor bc;
+
+      wxLog *logOld = wxLog::GetActiveTarget();
+      wxLog::SetActiveTarget(new wxImportDialogLog(this, logOld));
 
       #define DO_IMPORT(what) \
          if ( m_check##what->GetValue() ) \
@@ -184,6 +236,10 @@ void wxImportDialog::OnOk(wxCommandEvent& event)
          wxLogMessage(_("PINE configuration settings imported successfully."));
       else
          wxLogError(_("Importing PINE settings failed."));
+
+      m_listbox->Enable();
+
+      wxLog::SetActiveTarget(logOld);
    }
 }
 
