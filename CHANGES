@@ -1,4 +1,6 @@
 (next release) on (date of next release)
+15.05.00 KB: Mahogany now runs as "root", too. Fixes to MailCollector and invocation
+             of filters. de.po is up to date.
 12.05.00 VZ: added "compose with template" and "edit templates"
 09.05.00 VZ: implemented reply/forward with template menu commands
 09.05.00 VZ: version number bumped to 0.60a
