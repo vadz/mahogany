@@ -444,15 +444,7 @@ wxFolderListCtrl::wxFolderListCtrl(wxWindow *parent, wxFolderView *fv)
    }
 
    // Create popup menu:
-#ifndef wxMENU_TEAROFF
-   ///FIXME WXWIN-COMPATIBILITY
-   m_menu = new wxMenu();
-#else
-   int style = 0;
-   if(READ_APPCONFIG(MP_TEAROFF_MENUS) != 0)
-      style = wxMENU_TEAROFF;
-   m_menu = new wxMenu("", style);
-#endif
+   m_menu = new wxMenu("", wxMENU_TEAROFF);
    AppendToMenu(m_menu, WXMENU_MSG_BEGIN+1, WXMENU_MSG_END);
 
    Clear();
