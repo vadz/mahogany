@@ -582,7 +582,9 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    m_ModulesMenu = NULL;
 
    // create the children
-   m_splitter = new wxPSplitterWindow("MainSplitter", this);
+   m_splitter = new wxPSplitterWindow("MainSplitter", this, -1,
+                                      wxDefaultPosition, wxDefaultSize,
+                                      0);
 
    wxSize sizeFrame = GetClientSize();
    m_splitter->SetSize(sizeFrame);
