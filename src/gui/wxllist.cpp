@@ -1077,21 +1077,20 @@ wxLayoutLine::Draw(wxDC &dc,
 
    int highlight = llist->IsSelected(this, &from, &to);
 //   WXLO_DEBUG(("highlight=%d",  highlight ));
-   if(highlight == 1) // we need to draw the whole line inverted!
-      llist->StartHighlighting(dc);
-   else
-      llist->EndHighlighting(dc);
 
-   for(i = m_ObjectList.begin(); i != m_ObjectList.end(); ++i)
+   for (i = m_ObjectList.begin(); i != m_ObjectList.end(); ++i)
    {
-      if(highlight == -1) // partially highlight line
+      if (highlight == -1) // partially highlight line
       {
          // parts of the line need highlighting
          tempto = xpos+(**i).GetLength();
          (**i).Draw(dc, pos, llist, from-xpos, to-xpos);
       }
       else
+         if (highlight == 1) llist->StartHighlighting(dc);
+         if (highlight == 0) llist->EndHighlighting(dc);
          (**i).Draw(dc, pos, llist);
+      }
       pos.x += (**i).GetWidth();
       xpos += (**i).GetLength();
    }
