@@ -99,7 +99,7 @@ struct MailFolderStatus
       total = UID_ILLEGAL;
       newmsgs =
       recent =
-      unseen =
+      unread =
       flagged =
       searched = 0;
    }
@@ -111,18 +111,22 @@ struct MailFolderStatus
       return total == status.total &&
              newmsgs == status.newmsgs &&
              recent == status.recent &&
-             unseen == status.unseen &&
+             unread == status.unread &&
              flagged == status.flagged &&
              searched == status.searched;
    }
 
-   // the total number of messages and the number of new, recent, unseen,
+   // the total number of messages and the number of new, recent, unread,
    // important (== flagged) and searched (== results of search) messages in
    // this folder
+   //
+   // note that unread is the total number of unread messages, i.e. it
+   // includes some which are just unseen and the others which are new (i.e.
+   // unseen and recent)
    unsigned long total,
                  newmsgs,
                  recent,
-                 unseen,
+                 unread,
                  flagged,
                  searched;
 };

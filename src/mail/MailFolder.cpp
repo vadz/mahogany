@@ -712,8 +712,8 @@ String FormatFolderStatusString(const String& format,
                result += strutil_ultoa(stat->searched);
                break;
 
-            case 'u':               // unseen
-               result += strutil_ultoa(stat->unseen);
+            case 'u':               // unread
+               result += strutil_ultoa(stat->unread);
                break;
 
             case '%':

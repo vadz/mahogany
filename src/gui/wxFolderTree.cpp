@@ -128,7 +128,7 @@ public:
    {
       Folder_Normal,       // normal state
       Folder_Flagged,      // folder has flagged messages
-      Folder_Unseen,       // folder has unread/unseen messages
+      Folder_Unseen,       // folder has unread messages
       Folder_New,          // folder has new messages
       Folder_StatusMax
    };
@@ -980,7 +980,7 @@ wxFolderTreeNode::GetTreeStatusFromMf(const MailFolderStatus& mfStatus)
    {
       return wxFolderTreeNode::Folder_New;
    }
-   else if ( mfStatus.unseen > 0 )
+   else if ( mfStatus.unread > 0 )
    {
       return wxFolderTreeNode::Folder_Unseen;
    }

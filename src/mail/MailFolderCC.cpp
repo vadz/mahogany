@@ -2291,8 +2291,8 @@ MailFolderCC::SaveMessages(const UIdArray *selections,
          {
             if ( isRecent )
                status.newmsgs++;
-            else
-               status.unseen++;
+
+            status.unread++;
          }
          else if ( isRecent )
          {
@@ -2384,21 +2384,21 @@ MailFolderCC::ExpungeMessages(void)
 struct MsgStatus
 {
    bool recent;
-   bool unseen;
+   bool unread;
    bool newmsgs;
    bool flagged;
    bool searched;
 };
 
-// is this message recent/new/unseen/...?
+// is this message recent/new/unread/...?
 static MsgStatus AnalyzeStatus(int stat)
 {
    MsgStatus status;
 
    // deal with recent and new (== recent and !seen)
    status.recent = (stat & MailFolder::MSG_STAT_RECENT) != 0;
-   status.unseen = !(stat & MailFolder::MSG_STAT_SEEN);
-   status.newmsgs = status.recent && status.unseen;
+   status.unread = !(stat & MailFolder::MSG_STAT_SEEN);
+   status.newmsgs = status.recent && status.unread;
 
    // and also count flagged and searched messages
    status.flagged = (stat & MailFolder::MSG_STAT_FLAGGED) != 0;
@@ -2424,7 +2424,7 @@ void MailFolderCC::UpdateFolderStatus(int stat)
       {
          if ( isRecent )
             m_statusNew->newmsgs++;
-         m_statusNew->unseen++;
+         m_statusNew->unread++;
       }
 
       // and also count flagged and searched messages
@@ -2529,7 +2529,7 @@ bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
          #define INC_NUM_OF(what)   if ( msgStat.what ) status->what++
 
          INC_NUM_OF(recent);
-         INC_NUM_OF(unseen);
+         INC_NUM_OF(unread);
          INC_NUM_OF(newmsgs);
          INC_NUM_OF(flagged);
          INC_NUM_OF(searched);
@@ -2547,7 +2547,7 @@ bool MailFolderCC::DoCountMessages(MailFolderStatus *status) const
    // only return true if we have at least something "interesting"
    return status->newmsgs ||
           status->recent ||
-          status->unseen ||
+          status->unread ||
           status->flagged ||
           status->searched;
 }
@@ -4187,7 +4187,7 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
                   FAIL_MSG( "error in msg status change logic" )
 
          UPDATE_NUM_OF(recent);
-         UPDATE_NUM_OF(unseen);
+         UPDATE_NUM_OF(unread);
          UPDATE_NUM_OF(newmsgs);
          UPDATE_NUM_OF(flagged);
          UPDATE_NUM_OF(searched);

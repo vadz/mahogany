@@ -265,7 +265,7 @@ bool MfStatusCache::Load(const String& filename)
          if ( sscanf(p + 1,
                     "%lu" CACHE_DELIMITER "%lu" CACHE_DELIMITER "%lu",
                     &status.total,
-                    &status.unseen,
+                    &status.unread,
                     &status.flagged) != 3 )
          {
             wxLogError(_("Missing field(s) at line %d."), n + 1);
@@ -350,16 +350,13 @@ bool MfStatusCache::Save(const String& filename)
          // new and recent messages because they won't be new nor recent the
          // next time we run anyhow nor the number of messages matching the
          // search criteria as this is hardly ever useful
-         //
-         // however we do need to add the number of new and unseen messages
-         // together!
          str.Printf("%s" CACHE_DELIMITER
                     "%lu" CACHE_DELIMITER
                     "%lu" CACHE_DELIMITER
                     "%lu\n",
                     name.c_str(),
                     status->total,
-                    status->unseen + status->newmsgs,
+                    status->unread,
                     status->flagged);
 
          ok = file.Write(str);
