@@ -226,7 +226,8 @@ bool MInputBox(wxString *pstr,
   strConfigPath << "/Prompts/" << szKey;
 
   MTextInputDialog dlg(GetParent(parent), *pstr,
-                       strCaption, strPrompt, strConfigPath);
+                       wxString("M - " + strCaption), strPrompt, strConfigPath);
+
   if ( dlg.ShowModal() == wxID_OK ) {
     *pstr = dlg.GetText();
 
@@ -795,19 +796,83 @@ MDialog_FolderCreate(MWindow *parent)
 #include   "wx/resource.h"
 #include   "wxr/FODialog.wxr"
 
+class wxMRDialog : public wxDialog
+{
+public:
+   wxMRDialog()
+      { Centre(); }
+
+   virtual bool TransferDataToWindow();
+   virtual bool TransferDataFromWindow();
+   
+private:
+   //    callbacks
+   void OnButton(wxCommandEvent& event);
+
+   DECLARE_EVENT_TABLE()
+};
+
+// a general wxr dialog
+BEGIN_EVENT_TABLE(wxMRDialog, wxDialog)
+  EVT_BUTTON(-1,     wxMRDialog::OnButton)
+END_EVENT_TABLE()
+
+void wxMRDialog::OnButton(wxCommandEvent&  event)
+{
+   wxWindow * win = (wxWindow *)event.GetEventObject();
+   if(win->GetName() == "OK_BUTTON")
+   {
+      TransferDataFromWindow();
+      EndModal(1);
+   }
+   else if(win->GetName() == "CANCEL_BUTTON")
+      EndModal(0);
+}
+
+bool wxMRDialog::TransferDataToWindow(void)
+{
+   return true;
+}
+
+bool wxMRDialog::TransferDataFromWindow(void)
+{
+   return true;
+}
+
+
+class wxMROpenFolderDialog : public wxMRDialog
+{
+public:
+   virtual bool TransferDataFromWindow(void);
+
+   int m_Type;
+   wxString m_UserID, m_Password, m_Hostname;
+};
+
+bool
+wxMROpenFolderDialog::TransferDataFromWindow(void)
+{
+   wxRadioBox *ctrl = (wxRadioBox
+                       *)wxFindWindowByName("FolderType",this);
+   ASSERT(ctrl); m_Type = ctrl->GetSelection();
+   wxTextCtrl *tctrl = (wxTextCtrl *)wxFindWindowByName("UserID",this);
+   ASSERT(tctrl); m_UserID = tctrl->GetValue();
+   tctrl = (wxTextCtrl *)wxFindWindowByName("Password",this);
+   ASSERT(tctrl); m_Password = tctrl->GetValue();
+   tctrl = (wxTextCtrl *)wxFindWindowByName("MailHost",this);
+   ASSERT(tctrl); m_Hostname = tctrl->GetValue();
+   return true;
+}
+
+
 void
 MDialog_FolderOpen(MWindow *parent)
 {
-   wxResourceParseData(OpenFolderDialog);
-
-   wxDialog *dialog = new wxDialog;
-   if (dialog->LoadFromResource(parent, "OpenFolderDialog"))
-   {
-      //wxTextCtrl *text = (wxTextCtrl *)wxFindWindowByName("multitext3", dialog);
-      //if (text)
-      //   text->SetValue("wxWindows resource demo");
-      dialog->SetModal(TRUE);
-      dialog->ShowModal();
-   }
+   int rc = -1; 
+   wxResourceParseData(OpenFolderDialog); 
+   wxDialog *dialog = new wxMROpenFolderDialog;
+   if (dialog->LoadFromResource(parent, "OpenFolderDialog")) 
+      rc = dialog->ShowModal(); 
    dialog->Close(TRUE);
+   //   return rc;
 }

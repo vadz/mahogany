@@ -31,6 +31,9 @@ config.status: configure
 	echo "********************************************************" ; \
 	echo "* You should run configure with appropriate arguments  *" ; \
 	echo "* Refer to doc/Information.txt or use configure --help *" ; \
+	echo "* If running 'make config' does not work, try running  *" ; \
+	echo "* 'configure' manually. See config.log for output from *" ; \
+	echo "* configure, which might help you find the problem.    *" ; \
 	echo "********************************************************" ; \
 	echo "\n"; \
 	exit 1;

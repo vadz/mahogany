@@ -5,7 +5,7 @@ static char *OpenFolderDialog = "dialog(name = 'OpenFolderDialog',\
   x = 10, y = 40, width = 400, height = 250,\
   background_colour = 'D6D6D6',\
   font = [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0],\
-  control = [103, wxRadioBox, 'Folder Type', 'wxRA_HORIZONTAL', 'Folder Type', 20, 20, 111, 97, ['INBOX', 'Mailbox File', 'POP3', 'IMAP'], 1,\
+  control = [103, wxRadioBox, 'Folder Type', 'wxRA_HORIZONTAL', 'FolderType', 20, 20, 111, 97, ['INBOX', 'Mailbox File', 'POP3', 'IMAP'], 1,\
       [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'Swiss']],\
   control = [104, wxStaticBox, 'Authentication Details', '0', 'staticbox5', 150, 20, 221, 96,\
       [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'Swiss']],\
@@ -13,16 +13,16 @@ static char *OpenFolderDialog = "dialog(name = 'OpenFolderDialog',\
       [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'Swiss']],\
   control = [106, wxStaticText, 'Password', '0', 'statictext7', 162, 80, 64, 26,\
       [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'Swiss']],\
-  control = [107, wxTextCtrl, '', '0', 'textctrl8', 242, 41, 120, 26, '',\
+  control = [107, wxTextCtrl, '', '0', 'UserID', 242, 41, 120, 26, '',\
       [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'Swiss']],\
-  control = [108, wxTextCtrl, '', '0', 'textctrl9', 242, 81, 120, 26, '',\
+  control = [108, wxTextCtrl, '', 'wxPASSWORD | wxTE_PASSWORD', 'Password', 242, 81, 120, 26, '',\
       [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'Swiss']],\
   control = [109, wxStaticText, 'MailHost', '0', 'NameLabel', 22, 140, 61, 26,\
       [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'Swiss']],\
-  control = [110, wxTextCtrl, '', '0', 'textctrl11', 108, 136, 257, 27, '',\
+  control = [110, wxTextCtrl, '', '0', 'MailHost', 108, 136, 257, 27, '',\
       [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'Swiss']],\
-  control = [111, wxButton, 'OK', '0', 'OkButton', 228, 181, 49, 26,\
+  control = [111, wxButton, 'OK', '0', 'OK_BUTTON', 228, 181, 49, 26,\
       [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'Swiss']],\
-  control = [112, wxButton, 'Cancel', '0', 'CancelButton', 299, 181, 49, 26,\
+  control = [112, wxButton, 'Cancel', '0', 'CANCEL_BUTTON', 299, 181, 49, 26,\
       [12, 'wxSWISS', 'wxNORMAL', 'wxNORMAL', 0, 'Swiss']]).";
 
