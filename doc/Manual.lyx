@@ -1,4 +1,4 @@
-#This file was created by <karsten> Mon Jun 21 21:06:17 1999
+#This file was created by <karsten> Thu Jun 24 10:34:30 1999
 #LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
 \lyxformat 2.15
 \textclass book
@@ -296,24 +296,8 @@ Full internationalisation support, Mahogany speaks multiple languages.
 Known bugs
 \layout Itemize
 
-Some configuration settings will only take effect after the program got
- restarted or a folder has been reopened.
- For example, changing message viewer text colours won't take effect until
- a new folder view has been opened.
- 
-\layout Itemize
-
-Cursor movement in the message editor (deleting/inserting empty lines) can
- occasionally behave a bit funny.
- Using CTRL-Y reliably deletes lines, just pressing DELETE in an empty line
- doesn't always do so.
- Using the mouse for selections does not currently cause the window to scroll
- when moved outside.
- The editor is still a bit work in progress, but improving quickly.
-\layout Itemize
-
-Printing occasionally repeats the last few lines from the bottom of a page
- at the top of the next page.
+The message editor still has some minor glitches but appears stable and
+ reliable now.
 \layout Itemize
 
 Newsspool support will not work with newsgroups not listed in the 
@@ -3003,9 +2987,44 @@ The Address Database_3000_
 \layout Subsection
 
 Introduction
+\layout Standard
+
+Mahogany has a built-in address book system with flexible support for different
+ addressbook formats.
+ It can easily expanded to handle other programs' file formats and at present
+ supports two formats, it's own ADB format (
+\begin_inset LatexCommand \ref{ADB}
+
+\end_inset 
+
+) and (X)Emacs' BBDB (
+\begin_inset LatexCommand \ref{ADB}
+
+\end_inset 
+
+) address book format.
+ Generally the address books are ordered hierarchical, with the possibility
+ to order entries in groups and sub-groups in a tree-like fashion.
+ Alias expansion is configurable and also handles group names, to expand
+ to the full list of email addresses within that given group.
 \layout Subsection
 
 The native Address Book _3001_
+\layout Standard
+
+
+\begin_inset LatexCommand \label{ADB}
+
+\end_inset 
+
+This is Mahogany's own address book format, offering you the maximum set
+ of functionality supported by the address book editor.
+ It offers hierarchical grouping of address entries and it also the default
+ address book format used by the address auto-collection mechanisms, which
+ uses different groups for address entries collected from different mail
+ folders.
+ More detailed documentation will be added here soon, for now, just play
+ around with the address book editor and see what happens.
 \layout Subsection
 
 Support for BBDB Address Books_3002_
@@ -3025,7 +3044,7 @@ Mahogany supports reading and writing of BBDB address book files.
 , you can load it into Mahogany and use it.
  This is especially useful if you have an existing file with auto-collected
  email addresses that you want to continue to use.
-\layout Standard
+\layout Paragraph
 
 Caution:
 \layout Standard
@@ -3683,25 +3702,6 @@ If you have compiled it yourself, make sure you do a "make install" or "make
  You do not need any additional library, Mahogany handles xpm files internally.
 \layout Subsection
 
-The Preferences Dialog does not show up properly
-\layout Standard
-
-
-\shape italic 
-When I set up Mahogany or select the preferences dialog, its contents do
- not appear.
- Sometimes I cannot enter anything in the fields.
-\layout Standard
-
-wxGTK has a problem with constraint handling which can cause this dialog
- to sometimes get into an endless loop trying to do the layout.
- On most windowmanagers it helps if you resize the dialog a little and it
- will appear correctly.
- This seems to depend on the platform and windowmanager.
- Also, wxGTK does not seem to work correctly with OpenLook which does not
- allow you to enter anything.
-\layout Subsection
-
 How do I unpack the compressed files?
 \layout Standard
 
@@ -3751,6 +3751,28 @@ thedistributionfile
 tar
 \family default 
  should show you a list of all files being installed as it unpacks them.
+\layout Section
+
+Other Problems
+\layout Subsection
+
+The Preferences Dialog does not show up properly
+\layout Standard
+
+
+\shape italic 
+When I set up Mahogany or select the preferences dialog, its contents do
+ not appear.
+ Sometimes I cannot enter anything in the fields.
+\layout Standard
+
+wxGTK has a problem with constraint handling which can cause this dialog
+ to sometimes get into an endless loop trying to do the layout.
+ On most windowmanagers it helps if you resize the dialog a little and it
+ will appear correctly.
+ This seems to depend on the platform and windowmanager.
+ Also, wxGTK does not seem to work correctly with OpenLook which does not
+ allow you to enter anything.
 \layout Subsection
 
 How do I access mail downloaded via fetchpop/procmail?
