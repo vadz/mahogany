@@ -424,6 +424,9 @@ else
 	dnl we might need posix4 (depending on OS), so link with it if
 	dnl it is available 
 	AC_CHECK_LIB(posix4,nanosleep)
+	dnl check for wcslen
+	AC_CHECK_LIB(c,wcslen,,
+		AC_CHECK_LIB(w,wcslen,,AC_MSG_ERROR("Cannot find wcslen function.")))
 fi
 
 CPPFLAGS="$CPPFLAGS $GTK_CFLAGS"
@@ -439,7 +442,7 @@ AC_CHECK_LIB(wx_gtk2,main,,AC_MSG_ERROR("wx_gtk library is required."),$GTK_LDFL
 dnl png library not required as it is included in wxGTK
 LIB_PNG=
 #AC_CHECK_LIB(png,main,LIB_PNG="-lpng",AC_MSG_WARN("PNG library not available linking might fail."))
-AC_CHECK_LIB(jpeg,main,LIB_JPEG="-ljpeg",AC_MSG_WARN("JPEG library not available linking might fail."))
+#AC_CHECK_LIB(jpeg,main,LIB_JPEG="-ljpeg",AC_MSG_WARN("JPEG library not available linking might fail."))
 
 dnl --------------------------------------------------------------------------
 dnl c-client library: set the proper OSTYPE and compiler variables
