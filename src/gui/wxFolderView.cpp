@@ -1896,19 +1896,26 @@ void wxFolderListCtrl::OnColumnClick(wxListEvent& event)
    }
 
    // give an explanatory message as this stuff may be quite confusing
-   MDialog_Message
-   (
-      _("Clicking on the column sorts messages in the folder by this\n"
-        "column or, if they were already sorted by it, reverses the\n"
-        "sort direction\n"
-        "\n"
-        "Please use \"Sort\" button in the \"Folder View\" page of the\n"
-        "preferences dialog or right click a column to configure the\n"
-        "sorting options in more details."),
-      GetFrame(this),
-      MDIALOG_MSGTITLE,
-      GetPersMsgBoxName(M_MSGBOX_EXPLAIN_COLUMN_CLICK)
-   );
+   if ( !MDialog_Message
+         (
+            _("Clicking on the column sorts messages in the folder by this\n"
+              "column or, if they were already sorted by it, reverses the\n"
+              "sort direction.\n"
+              "\n"
+              "You may use \"Sort\" button in the \"Folder View\" page of the\n"
+              "preferences dialog or right click a column to configure the\n"
+              "sorting options in more details.\n"
+              "\n"
+              "Press \"Ok\" to apply the new sorting order or \"Cancel\"\n"
+              "if you don't want to change anything."),
+            GetFrame(this),
+            M_MSGBOX_EXPLAIN_COLUMN_CLICK,
+            M_DLG_ALLOW_CANCEL
+         ) )
+   {
+      // cancelled by user
+      return;
+   }
 
    // we're going to change the sort order either for this profile in the
    // advanced mode but the global sort order in the novice mode: otherwise,
