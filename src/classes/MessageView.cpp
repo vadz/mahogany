@@ -806,7 +806,7 @@ MessageView::ReadAllSettings(AllProfileValues *settings)
 
    // these settings are used under Unix only
 #ifdef OS_UNIX
-   settings->browserIsNS = READ_CONFIG(profile, MP_BROWSER_ISNS) != 0;
+   settings->browserIsNS = READ_CONFIG_BOOL(profile, MP_BROWSER_ISNS);
    settings->afmpath = READ_APPCONFIG_TEXT(MP_AFMPATH);
 #endif // Unix
 
