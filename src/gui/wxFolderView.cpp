@@ -309,7 +309,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
    if ( recreateFolderCtrl )
       m_FolderCtrl->Clear();
 
-   wxSafeYield();
+//   wxSafeYield();
 
 
    if(m_MailFolder)  // clean up old folder
@@ -372,7 +372,7 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          delete oldfolderctrl;
       }
 
-      wxSafeYield(); // display the new folderctrl immediately
+//      wxSafeYield(); // display the new folderctrl immediately
       Update();
 
       if(m_NumOfMessages > 0 && READ_CONFIG(m_Profile,MP_AUTOSHOW_FIRSTMESSAGE))
@@ -431,8 +431,7 @@ wxFolderView::Update(void)
       return; // don't call this code recursively
    m_UpdateSemaphore = true;
 
-   wxBeginBusyCursor();
-   wxSafeYield();
+   wxBeginBusyCursor();// wxSafeYield();
 
    n = m_MailFolder->CountMessages();
 
@@ -508,7 +507,7 @@ wxFolderView::Update(void)
                m_MailFolder->GetName().c_str(), total, recent, newmsgs);
 
    m_NumOfMessages = n;
-   wxEndBusyCursor(); wxSafeYield();
+   wxEndBusyCursor(); //wxSafeYield();
    m_FolderCtrl->SetFocus();
    m_UpdateSemaphore = false;
 }
@@ -517,8 +516,7 @@ wxFolderView::Update(void)
 MailFolder *
 wxFolderView::OpenFolder(String const &profilename)
 {
-   wxBeginBusyCursor();
-   wxSafeYield(); // make changes visible
+   wxBeginBusyCursor(); //wxSafeYield(); // make changes visible
 
    MailFolder *mf = MailFolder::OpenFolder(MF_PROFILE, profilename);
    SetFolder(mf);
