@@ -999,6 +999,7 @@ wxArrayFolder MFolderCache::ms_aFolders;
 MFolder *MFolderCache::Get(const String& name)
 {
    Check();
+
    int index = ms_aFolderNames.Index(name);
    return index == wxNOT_FOUND ? NULL : ms_aFolders[(size_t)index];
 }
@@ -1036,9 +1037,14 @@ void MFolderCache::Remove(MFolder *folder)
 /* static */
 void MFolderCache::RenameAll(const String& oldName, const String& newName)
 {
-   MFolderFromProfile *folder = (MFolderFromProfile *)Get(oldName);
-   if ( folder )
+   int index = ms_aFolderNames.Index(oldName);
+   if ( index != wxNOT_FOUND )
    {
+      size_t n = (size_t)index;
+
+      ms_aFolderNames[n] = newName;
+      MFolderFromProfile *folder = (MFolderFromProfile *)ms_aFolders[n];
+
       folder->m_folderName = newName;
       SafeDecRef(folder->m_profile);
       folder->m_profile = Profile::CreateFolderProfile(newName);
