@@ -535,6 +535,8 @@ enum MFolderIndex
 #define MP_FOLDER_BGCOLOUR "FTreeBgColour"
 /**@name  Font settings for message view */
 //@{
+/// message view title
+#define   MP_MVIEW_TITLE_FMT   "MViewTitleFmt"
 /// which font to use
 #define   MP_MVIEW_FONT         "MViewFont"
 /// which font size
@@ -586,6 +588,8 @@ enum MFolderIndex
 #define   MP_FVIEW_UNREADCOLOUR      "FViewUnreadColour"
 // colour for flagged messages
 #define   MP_FVIEW_FLAGGEDCOLOUR      "FViewFlaggedColour"
+/// folder view status bar string
+#define   MP_FVIEW_STATUS_FMT  "FViewStatFmt"
 //@}
 /**@name Font settings for compose view */
 //@{
@@ -1249,6 +1253,8 @@ enum MFolderIndex
 #define MP_FOLDER_BGCOLOUR_D ""
 /**@name  Font settings for message view */
 //@{
+/// message view title
+#define   MP_MVIEW_TITLE_FMT_D   "from $from about \"$subject\""
 /// which font to use
 #define   MP_MVIEW_FONT_D         6L
 /// which font size
@@ -1301,6 +1307,8 @@ enum MFolderIndex
 #define   MP_FVIEW_UNREADCOLOUR_D      "blue"
 // colour for flagged messages
 #define   MP_FVIEW_FLAGGEDCOLOUR_D      "purple"
+/// folder view status bar string
+#define   MP_FVIEW_STATUS_FMT_D "Date: $date, Subject: $subject, From: $from"
 //@}
 /**@name Font settings for compose view */
 //@{

@@ -27,7 +27,7 @@
  */
 
 /*
-   Update logic documentation:
+   Update logic documentation (accurate as of 30.01.01):
 
    The mail folder maintains the listing containing the information about all
    messages in the folder in m_Listing. The listing is modified only by
@@ -54,6 +54,19 @@
    The folder is created in the dirty state and transits to the normal state
    via the busy state when it is used for the first time non trivially. A call
    to mm_exists() puts it to the dirty state again.
+
+   Further, there is another subtlety related to the filters: the filters must
+   be executed from GetHeaders() as we want to apply them to all new messages.
+   However filters can modify the folder resulting in more mm_expunged() calls
+   and also call GUI code (message boxes) reentering the GUI event loop
+   implicitly and thus the events may be dispatched from isnide a call to
+   ApplyFilterRules(). Because of this we just don't send any events while the
+   filters are being executed.
+
+   The last twist is that we also avoid sending events when the application is
+   being shut down as it results in the calls to the obejcts which don't exist
+   any more later from the GUI code [FIXME: this might be a kludge and could
+   change]
  */
 
 // ============================================================================
@@ -1536,10 +1549,14 @@ MailFolderCC::GetNextMapEntry(StreamConnectionList::iterator &i)
 {
    CHECK_STREAM_LIST();
 
-   ASSERT( i != ms_StreamList.end());
-   wxLogTrace(TRACE_MF_CACHE, "%s", i.Debug().c_str());
+   ASSERT_MSG( i != ms_StreamList.end(), "no next entry in the map" );
+#ifdef DEBUG
+   wxLogTrace(TRACE_MF_CACHE, "GetNextMapEntry before: %s", i.Debug().c_str());
+#endif
    i++;
-   wxLogTrace(TRACE_MF_CACHE, "%s", i.Debug().c_str());
+#ifdef DEBUG
+   wxLogTrace(TRACE_MF_CACHE, "GetNextMapEntry after: %s", i.Debug().c_str());
+#endif
    if( i != ms_StreamList.end())
       return (**i).folder;
    else
@@ -2369,6 +2386,12 @@ MailFolderCC::GetHeaders(void) const
 
       CHECK(m_Listing, NULL, "failed to build folder listing");
 
+      // if we're configured not to detect new mail, just ignore it
+      if ( !(GetUpdateFlags() & UF_DetectNewMail) )
+      {
+         that->m_GotNewMessages = false;
+      }
+
       // if we have any new messages, reapply filters to them
       that->FilterNewMailIfNeeded();
 
@@ -2905,13 +2928,14 @@ MailFolderCC::mm_exists(MAILSTREAM *stream, unsigned long msgno)
    {
       // if a new message has arrived, we need to reapply the filters
       if ( msgno > mf->m_nMessages )
+      {
          mf->m_GotNewMessages = true;
 
-      // TODO: if the messages were only expunged, we could avoid rebuilding
-      //       the entire listing but just remove some entries from the
-      //       existing one!
+         mf->RequestUpdate();
+      }
+      // else: the messages were only expunged, avoid rebuilding the entire
+      //       listing - the entries were already removed from mm_expunged()
 
-      mf->RequestUpdate();
    }
    else
    {
@@ -3146,17 +3170,24 @@ MailFolderCC::mm_expunged(MAILSTREAM * stream, unsigned long msgno)
 
    // don't do anything while executing the filter code, the listing is going
    // to be rebuilt anyhow
-   if ( mf->m_InFilterCode->IsLocked() )
+   if ( !mf->CanSendUpdateEvents() )
    {
-      DBGMESSAGE(("Ignoring mm_expunged() while executing filter code "
-                  "for folder '%s'", mf->GetName().c_str()));
+      DBGMESSAGE(("Ignoring mm_expunged() for folder '%s'",
+                  mf->GetName().c_str()));
       return;
    }
 
    if ( mf->HaveListing() )
    {
-      // message numbers are counted from 1
-      mf->m_Listing->Remove(msgno - 1);
+      // find the index of the message in the listing
+      UIdType uid = mail_uid(mf->m_MailStream, msgno);
+      UIdType idx = mf->m_Listing->GetIdxFromUId(uid);
+
+      wxCHECK_RET( idx != UID_ILLEGAL, "expunged a non existent message?" );
+
+      // remove oen message from listing
+      mf->m_Listing->Remove(idx);
+      mf->m_nMessages--;
 
       // tell all interested that the listing changed
       wxLogTrace(TRACE_MF_EVENTS, "Sending FolderUpdate event for folder '%s'",
@@ -3247,6 +3278,18 @@ MailFolderCC::mm_fatal(char *str)
 // listing updating
 // ----------------------------------------------------------------------------
 
+bool MailFolderCC::CanSendUpdateEvents() const
+{
+   // we never send update events while the listing is being changed by filter
+   // code as it's at the very best inefficient (the listing is going to be
+   // regenerated anyhow after we're done with filters) and in the worst case
+   // can be fatal
+   //
+   // also, if the application is shutting down, there is no point in send
+   // events
+   return !m_InFilterCode->IsLocked() && mApplication->IsRunning();
+}
+
 void
 MailFolderCC::UpdateMessageStatus(unsigned long msgno)
 {
@@ -3262,16 +3305,12 @@ MailFolderCC::UpdateMessageStatus(unsigned long msgno)
 
    // Find the listing entry for this message:
    UIdType uid = mail_uid(m_MailStream, msgno);
-   size_t i,
-          count = hil->Count();
-   for ( i = 0; i < count && hil[i]->GetUId() != uid; i++ )
-      ;
-
-   CHECK_RET(i < count, "message not found in the listing");
-
-   MESSAGECACHE *elt = mail_elt (m_MailStream, msgno);
+   UIdType i = hil->GetIdxFromUId(uid);
+   CHECK_RET( i != UID_ILLEGAL, "message not found in the listing" );
 
    HeaderInfo *hi = hil[i];
+
+   MESSAGECACHE *elt = mail_elt (m_MailStream, msgno);
    int status = GetMsgStatus(elt);
    if ( status != hi->GetStatus() )
    {
@@ -3297,10 +3336,11 @@ MailFolderCC::RequestUpdate()
 {
    // don't do anything while executing the filter code, the listing is going
    // to be rebuilt anyhow
-   if ( m_InFilterCode->IsLocked() )
+   if ( !CanSendUpdateEvents() )
    {
-      DBGMESSAGE(("Ignoring mm_exists() while executing filter code "
-                  "for folder '%s'", GetName().c_str()));
+      DBGMESSAGE(("Ignoring mm_exists() for folder '%s'",
+                 GetName().c_str()));
+
       return;
    }
 

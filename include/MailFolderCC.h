@@ -474,6 +474,7 @@ protected:
 
    /// Updates the status of a single message.
    void UpdateMessageStatus(unsigned long seqno);
+
    /// Gets a complete folder listing from the stream.
    void BuildListing(void);
 
@@ -489,6 +490,9 @@ protected:
 
    /// do we have a listing?
    bool HaveListing() const { return m_Listing != NULL; }
+
+   /// return TRUE if it is safe to send update events to GUI right now
+   bool CanSendUpdateEvents() const;
 
 public:
    /// re-read some cclient settings

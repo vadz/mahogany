@@ -21,14 +21,18 @@
 #include "Mdefaults.h"
 #include "HeaderInfoImpl.h"
 
+// ----------------------------------------------------------------------------
+// HeaderInfoImpl
+// ----------------------------------------------------------------------------
+
 HeaderInfoImpl::HeaderInfoImpl()
 {
    m_Indentation = 0;
    m_Score = 0;
    m_Encoding = wxFONTENCODING_SYSTEM;
    m_UId = UID_ILLEGAL;
-   // all other fields are filled in by the MailFolderCC when creating
-   // it
+
+   // all other fields are filled in by the MailFolderCC when creating it
 }
 
 HeaderInfo * HeaderInfoImpl::Clone() const
@@ -125,6 +129,12 @@ void HeaderInfoListImpl::Remove(size_t n)
 {
    CHECK_RET( n < m_NumEntries, "invalid index in HeaderInfoList::Remove" );
 
+   // we'd like to use memmove() as efficiently as for m_TranslationTable for
+   // m_Listing too here but it doesn't work because m_Listing is array of
+   // objects, not pointers, and it can't be an array of pointers because there
+   // is HeaderInfoList::GetArray() which is used by MailFolderCmn for sorting
+
+#if 0
    // first delete the entry
    m_Listing[n].~HeaderInfoImpl();
 
@@ -141,6 +151,41 @@ void HeaderInfoListImpl::Remove(size_t n)
 
    // finally adjust the number of items
    m_NumEntries--;
+#else // 1
+   m_NumEntries--;
+
+   // first deal with the header objects
+   HeaderInfoImpl *listingNew =
+      m_NumEntries == 0 ? NULL : new HeaderInfoImpl[m_NumEntries];
+   HeaderInfoImpl *p1 = listingNew,
+                  *p2 = m_Listing;
+   size_t entry;
+   for ( entry = 0; entry <= m_NumEntries; entry++, p2++ )
+   {
+      if ( entry != n )
+      {
+         *p1++ = *p2; // p2++ is done anyhow in the loop line
+      }
+   }
+
+   delete [] m_Listing;
+   m_Listing = listingNew;
+
+   // then with the translation table: notice that we need not only to remove
+   // the entry but also to shift all entries greater than n by -1
+   if ( n < m_NumEntries )
+   {
+      // deletign is easy in this case
+      memmove(&m_TranslationTable[n], &m_TranslationTable[n + 1],
+              (m_NumEntries - n)*sizeof(size_t));
+   }
+
+   for ( entry = 0; entry < m_NumEntries; entry++ )
+   {
+      if ( m_TranslationTable[entry] >= n )
+         m_TranslationTable[entry]--;
+   }
+#endif // 0/1
 }
 
 #ifdef DEBUG

@@ -93,6 +93,57 @@ static const char *FOLDER_LISTCTRL_WIDTHS_D = "60:300:200:80:80";
 // private classes
 // ----------------------------------------------------------------------------
 
+// the var expander for folder view frame status bar
+//
+// TODO: the code should be reused with VarExpander in wxComposeView.cpp!
+class HeaderVarExpander : public MessageTemplateVarExpander
+{
+public:
+   HeaderVarExpander(HeaderInfo *hi,
+                     const String& dateFormat,
+                     bool dateGMT)
+      : m_dateFormat(dateFormat)
+   {
+      m_hi = hi;
+
+      m_dateGMT = dateGMT;
+   }
+
+   virtual bool Expand(const String& category,
+                       const String& Name,
+                       const wxArrayString& arguments,
+                       String *value) const
+   {
+      if ( !m_hi )
+         return false;
+
+      // we only understand fields in the unnamed/default category
+      if ( !category.empty() )
+         return false;
+
+      String name = Name.Lower();
+      if ( name == "from" )
+         *value = m_hi->GetFrom();
+      else if ( name == "subject" )
+         *value = m_hi->GetSubject();
+      else if ( name == "date" )
+         *value = strutil_ftime(m_hi->GetDate(), m_dateFormat, m_dateGMT);
+      else if ( name == "size" )
+         *value = m_hi->SizeOf();
+      else if ( name == "score" )
+         *value = m_hi->GetScore();
+      else
+         return false;
+
+      return true;
+   }
+
+private:
+    HeaderInfo *m_hi;
+    String m_dateFormat;
+    bool m_dateGMT;
+};
+
 // the list ctrl showing the messages in the folder
 class wxFolderListCtrl : public wxListCtrl
 {
@@ -123,7 +174,10 @@ public:
    /// if nofocused == true the focused entry will not be substituted
    /// for an empty list of selections
    int GetSelections(UIdArray &selections, bool nofocused = false) const;
-   UIdType GetFocusedUId(void) const;
+
+   // get the UID and, optionally, the index of the focused item
+   UIdType GetFocusedUId(long *idx = NULL) const;
+
    bool IsSelected(long index)
       { return GetItemState(index,wxLIST_STATE_SELECTED) != 0; }
 
@@ -144,8 +198,8 @@ public:
       }
    void OnMouseMove(wxMouseEvent &event);
 
-   /// goto next unread message
-   void SelectNextUnread(void);
+   /// goto next unread message, return true if found
+   bool SelectNextUnread(void);
 
    /// change the options governing our appearance
    void ApplyOptions(const wxColour &fg, const wxColour &bg,
@@ -165,16 +219,6 @@ public:
    // for wxFolderView
    wxMenu *GetFolderMenu() const { return m_menuFolders; }
 
-   void MoveFocus(int newFocus)
-      {
-         if(newFocus != -1)
-         {
-            SetItemState(newFocus, wxLIST_STATE_FOCUSED,
-                         wxLIST_STATE_FOCUSED);
-            EnsureVisible(newFocus);
-            m_FolderView->UpdateSelectionInfo();
-         }
-      }
 protected:
    long m_NextIndex;
    /// parent window
@@ -341,14 +385,17 @@ END_EVENT_TABLE()
 
 void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 {
-   if(! m_FolderView || ! m_FolderView->m_MessagePreview
-      || event.AltDown() || event.ControlDown()
-      || ! m_FolderView->GetFolder()
-      )
+   // don't process events until we're fully initialized and also only process
+   // simple characters here (without Ctrl/Alt)
+   if( !m_FolderView ||
+       !m_FolderView->m_MessagePreview ||
+       ! m_FolderView->GetFolder() ||
+       event.HasModifiers() )
    {
       event.Skip();
       return; // nothing to do
    }
+
    m_FolderView->UpdateSelectionInfo();
 
    long keyCode = event.KeyCode();
@@ -359,33 +406,46 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
       event.Skip();
       return;
    }
+
+   // we can operate either on all selected items
    UIdArray selections;
    long nselected = m_FolderView->GetSelections(selections);
-   // there is exactly one item with the focus on  it:
+
+   // or only on the one which is focused
    long focused = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
-   long nMsgs = m_FolderView->GetFolder()->CountMessages();
-   if(focused == -1 || focused >= nMsgs)
-   {
-      event.Skip();
-      return;
-   }
-   long newFocus = -1;
-   // in this case we operate on the highlighted  message
+
    UIdType focused_uid = UID_ILLEGAL;
-   if(nselected == 0)
+
+   long newFocus = -1;
+   if ( nselected == 0 )
    {
-      HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
-      if(hil)
+      if ( focused == -1 )
       {
-         if(focused > 0 && focused < (long) hil->Count())
-         focused_uid = (*hil)[focused]->GetUId();
-         selections.Add(focused_uid);
-         hil->DecRef();
+         // no selection and no focus
+         event.Skip();
+         return;
       }
+
+      // in this case we operate on the highlighted message
+      HeaderInfoList_obj hil = m_FolderView->GetFolder()->GetHeaders();
+      if ( hil )
+      {
+         focused_uid = hil[focused]->GetUId();
+         selections.Add(focused_uid);
+      }
+
+      // don't move focus
       newFocus = -1;
    }
-   else
-      newFocus = (focused < nMsgs-1) ? focused + 1 : focused;
+   else // operate on the selected messages
+   {
+      // advance focus
+      newFocus = focused;
+      if ( newFocus == -1 )
+         newFocus = 0;
+      else if ( focused < GetItemCount() - 1 )
+         newFocus++;
+   }
 
    /** To allow translations:
        Delete, Undelete, eXpunge, Copytofolder, Savetofile,
@@ -440,30 +500,31 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
 
          // only move on if we mark as deleted, for trash usage, selection
          // remains the same:
-         if ( !READ_APPCONFIG(MP_USE_TRASH_FOLDER) )
-            MoveFocus(newFocus);
-         else
+         if ( READ_APPCONFIG(MP_USE_TRASH_FOLDER) )
+         {
             m_FolderView->UpdateSelectionInfo();
+
+            // don't move focus
+            newFocus = -1;
+         }
          break;
 
       case 'U': // undelete
          m_FolderView->GetTicketList()->Add(
             m_FolderView->GetFolder()->UnDeleteMessages(&selections, m_FolderView));
-         MoveFocus(newFocus);
          break;
 
       case 'X': // expunge
          m_FolderView->GetFolder()->ExpungeMessages();
+         newFocus = -1;
          break;
 
       case 'C': // copy
          m_FolderView->SaveMessagesToFolder(selections);
-         MoveFocus(newFocus);
          break;
 
       case 'S': // save
          m_FolderView->SaveMessagesToFile(selections);
-         MoveFocus(newFocus);
          break;
 
       case 'G': // group reply
@@ -475,27 +536,31 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
                GetFrame(this),
                m_FolderView
             );
-         MoveFocus(newFocus);
          break;
 
       case 'F': // forward
-         m_FolderView->GetFolder()->ForwardMessages(
-            &selections, MailFolder::Params(), GetFrame(this), m_FolderView);
-         MoveFocus(newFocus);
+         m_FolderView->GetFolder()->ForwardMessages
+         (
+            &selections,
+            MailFolder::Params(),
+            GetFrame(this),
+            m_FolderView
+         );
          break;
 
       case 'O': // open
          m_FolderView->OpenMessages(selections);
-         MoveFocus(newFocus);
          break;
 
       case 'P': // print
          m_FolderView->PrintMessages(selections);
-         MoveFocus(newFocus);
          break;
 
       case 'H': // headers
          m_FolderView->m_MessagePreview->DoMenuCommand(WXMENU_MSG_TOGGLEHEADERS);
+
+         // don't move focus
+         newFocus = -1;
          break;
 
       case ' ': // mark:
@@ -512,7 +577,18 @@ void wxFolderListCtrl::OnChar(wxKeyEvent& event)
          ;
 
       default:
+         // don't move focus
+         newFocus = -1;
+
          event.Skip();
+   }
+
+   if ( newFocus != -1 )
+   {
+      // move focus
+      SetItemState(newFocus, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
+      EnsureVisible(newFocus);
+      m_FolderView->UpdateSelectionInfo();
    }
 }
 
@@ -540,16 +616,13 @@ void wxFolderListCtrl::OnMouseMove(wxMouseEvent &event)
 
 void wxFolderListCtrl::OnRightClick(wxMouseEvent& event)
 {
-#ifdef __WXGTK__
-   // GTK+ seems to be able to reenter this handler from inside PopupMenu()!
-   // this should never happen, of course
+   // PopupMenu() is very dangerous: it can send more messages before returning
+   // and so before we reset m_menuFolders - so we have to protect against it
+   // here
    if ( m_menuFolders )
    {
-      wxLogDebug("GTK+ bug detected: unexpected right click, bailing out.");
-
       return;
    }
-#endif // __WXGTK__
 
    // create popup menu if not done yet
    if ( m_menu )
@@ -830,25 +903,25 @@ wxFolderListCtrl::GetSelections(UIdArray &selections, bool nofocused) const
 }
 
 UIdType
-wxFolderListCtrl::GetFocusedUId(void) const
+wxFolderListCtrl::GetFocusedUId(long *idx) const
 {
    UIdType uid = UID_ILLEGAL;
    ASMailFolder *asmf = m_FolderView->GetFolder();
    if ( asmf )
    {
-      HeaderInfoList *hil = asmf->GetHeaders();
-      if(! hil) // if there is no listing
-         return uid;
-      const HeaderInfo *hi = NULL;
-      long item = -1;
-      item = GetNextItem(item, wxLIST_NEXT_ALL,wxLIST_STATE_FOCUSED);
-      if(item != -1 && item < (long) hil->Count() )
+      HeaderInfoList_obj hil = asmf->GetHeaders();
+
+      // do we have the listing?
+      if ( hil )
       {
-         hi = (*hil)[item];
-         if(hi)
-            uid = hi->GetUId();
+         long item = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
+         if ( item != -1 )
+         {
+            uid = hil[item]->GetUId();
+            if ( idx )
+               *idx = item;
+         }
       }
-      hil->DecRef();
    }
 
    return uid;
@@ -964,64 +1037,66 @@ wxFolderListCtrl::SetEntry(long index,
       SetItem(index, m_columns[WXFLC_SUBJECT], subject);
 }
 
-void
+bool
 wxFolderListCtrl::SelectNextUnread()
 {
-   HeaderInfoList *hil = m_FolderView->GetFolder()->GetHeaders();
-   if(! hil || hil->Count() == 0)
+   HeaderInfoList_obj hil = m_FolderView->GetFolder()->GetHeaders();
+   if( !hil || hil->Count() == 0 )
    {
-      SafeDecRef(hil);
-      return; // cannot do anything
+      // cannot do anything without listing
+      return false;
    }
-   UIdType focusedUId = GetFocusedUId();
 
-   if(focusedUId == UID_ILLEGAL)
-      return;
-
-   long idx = -1;
-   bool foundFocused = false;
-   bool failedOnce = false;
-   while(1)
+   long idxFocused = GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_FOCUSED);
+   long idx = idxFocused;
+   for ( ;; )
    {
       idx = GetNextItem(idx);
-      if(idx == -1)
+      if ( idx == idxFocused )
       {
-         if(failedOnce)
-            break; // we really haven't found one
-         failedOnce = true;
-         // else: we didn't find an unread *below*, so try above:
-         foundFocused = false;
-         idx = -1;
-         idx = GetNextItem(idx);
+         // we have looped
+         break;
       }
 
-      const HeaderInfo *hi = (*hil)[idx];
-      if(hi->GetUId() == focusedUId)
+      if ( idx == -1 )
       {
-         foundFocused = true;
-         continue; // we don't want the current one
+         // continue from the beginning
+         continue;
       }
 
-      if(
-         ((! failedOnce) && foundFocused)// we are looking for the next unread now:
-         || (failedOnce && ! foundFocused) // now we look for the once
-         // before the focused one
-         )
+      // is this one unread?
+      const HeaderInfo *hi = hil[idx];
+      if( !(hi->GetStatus() & MailFolder::MSG_STAT_SEEN) )
       {
-         if((hi->GetStatus() & MailFolder::MSG_STAT_SEEN) == 0)
-         {
-            SetItemState(idx, wxLIST_STATE_FOCUSED,wxLIST_STATE_FOCUSED);
-            if(m_PreviewOnSingleClick)
-               m_FolderView->PreviewMessage(hi->GetUId());
-            m_FolderView->UpdateSelectionInfo();
-            SafeDecRef(hil);
-            return;
-         }
+         SetItemState(idx, wxLIST_STATE_FOCUSED, wxLIST_STATE_FOCUSED);
+
+         // always preview the selected message, if we did "Show next unread"
+         // we really want to see it regardless of m_PreviewOnSingleClick
+         // setting
+         m_FolderView->PreviewMessage(hi->GetUId());
+         m_FolderView->UpdateSelectionInfo();
+
+         return true;
       }
    }
-   SafeDecRef(hil);
-}
 
+   String msg;
+   if ( (idxFocused != -1) &&
+            !(hil[idx]->GetStatus() & MailFolder::MSG_STAT_SEEN) )
+   {
+      // "more" because the one selected previously was unread
+      msg = _("No more unread messages in this folder.");
+   }
+   else
+   {
+      // no unread messages at all
+      msg = _("No unread messages in this folder.");
+   }
+
+   wxLogStatus(GetFrame(this), msg);
+
+   return false;
+}
 
 // ----------------------------------------------------------------------------
 // wxFolderView
@@ -1644,7 +1719,32 @@ wxFolderView::UpdateSelectionInfo(void)
 {
    // record this for the later Update:
    m_FolderCtrl->GetSelections(m_SelectedUIds, true);
-   m_FocusedUId = m_FolderCtrl->GetFocusedUId();
+
+   UIdType uid = m_FolderCtrl->GetFocusedUId();
+   if ( uid != m_FocusedUId )
+   {
+      m_FocusedUId = uid;
+
+      String msg;
+      if ( m_FocusedUId != UID_ILLEGAL )
+      {
+         HeaderInfoList_obj hil = GetFolder()->GetHeaders();
+         if ( hil )
+         {
+            UIdType n = hil->GetIdxFromUId(m_FocusedUId);
+            if ( n != UID_ILLEGAL )
+            {
+               wxString fmt = READ_CONFIG(m_Profile, MP_FVIEW_STATUS_FMT);
+               HeaderVarExpander expander(hil[n],
+                                          m_settings.dateFormat,
+                                          m_settings.dateGMT);
+               msg = ParseMessageTemplate(fmt, expander);
+            }
+         }
+      }
+
+      wxLogStatus(GetFrame(m_Parent), msg);
+   }
 }
 
 void
@@ -2167,16 +2267,8 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
 {
    if ( event.GetFolder() == m_MailFolder )
    {
-#ifdef __WXMSW__
-      m_FolderCtrl->Hide(); // optimise for speed under MSW
-#endif
-
       SetEntry(event.GetHeaderInfo(), event.GetIndex());
       UpdateTitleAndStatusBars("", "", GetFrame(m_Parent), m_MailFolder);
-
-#ifdef __WXMSW__
-      m_FolderCtrl->Show();
-#endif
    }
 }
 

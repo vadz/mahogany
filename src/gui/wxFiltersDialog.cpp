@@ -1483,7 +1483,7 @@ wxQuickFilterDialog::wxQuickFilterDialog(MFolder *folder,
 
    wxWindow *last = msg;
    m_action->LayoutControls(&last, 2*LAYOUT_X_MARGIN, 3*LAYOUT_X_MARGIN);
-   SetDefaultSize(4*wBtn, 4*hBtn);
+   SetDefaultSize(8*wBtn, 10*hBtn);
 
    DoUpdateUI();
 }

@@ -44,13 +44,15 @@
 #include "MHelp.h"
 #include "Message.h"
 #include "FolderView.h"
-//#include "MailFolderCC.h"     // for DecodeHeader() only
 #include "ASMailFolder.h"
+#include "MFolder.h"
 #include "MDialogs.h"
 #include "MessageView.h"
 #include "XFace.h"
 #include "miscutil.h"
 #include "sysutil.h"
+
+#include "MessageTemplate.h"
 
 #include "gui/wxIconManager.h"
 #include "gui/wxMessageView.h"
@@ -239,6 +241,44 @@ private:
    int m_part;
 };
 
+// the var expander for message view frame title
+//
+// TODO: the code should be reused with VarExpander in wxComposeView.cpp!
+class MsgVarExpander : public MessageTemplateVarExpander
+{
+public:
+   MsgVarExpander(Message *msg) { m_msg = msg; SafeIncRef(m_msg); }
+   virtual ~MsgVarExpander() { SafeDecRef(m_msg); }
+
+   virtual bool Expand(const String& category,
+                       const String& Name,
+                       const wxArrayString& arguments,
+                       String *value) const
+   {
+      if ( !m_msg )
+         return false;
+
+      // we only understand fields in the unnamed/default category
+      if ( !category.empty() )
+         return false;
+
+      String name = Name.Lower();
+      if ( name == "from" )
+         *value = m_msg->From();
+      else if ( name == "subject" )
+         *value = m_msg->Subject();
+      else if ( name == "date" )
+         *value = m_msg->Date();
+      else
+         return false;
+
+      return true;
+   }
+
+private:
+    Message *m_msg;
+};
+
 // ----------------------------------------------------------------------------
 // event tables
 // ----------------------------------------------------------------------------
@@ -266,10 +306,10 @@ GetParameter(Message *msg, int partno, const String &param)
 static
 String GetFileNameForMIME(Message *message, int partNo)
 {
-   String fileName;
-   fileName = GetParameter(message, partNo, "FILENAME");
-   if(fileName.Length() == 0)
+   String fileName = GetParameter(message, partNo, "FILENAME");
+   if ( fileName.empty() )
       fileName = GetParameter(message, partNo,"NAME");
+
    return fileName;
 }
 
@@ -1149,10 +1189,10 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       fileType = mimeManager.GetFileTypeFromMimeType(mimetype);
    }
 
-   /* First, we check for those contents that we handle in M itself: */
-   // this we handle internally
-   if(mimetype.length() >= strlen("MESSAGE") &&
-      mimetype.Left(strlen("MESSAGE")) == "MESSAGE")
+   // First, we check for those contents that we handle in M itself:
+
+   // handle internally MESSAGE/*
+   if ( wxMimeTypesManager::IsOfType(mimetype, "MESSAGE/*") )
    {
 #if 0
       // It´s a pity, but creating a MessageCC from a string doesn´t
@@ -1169,17 +1209,50 @@ wxMessageView::MimeHandle(int mimeDisplayPart)
       f->ShowMessage(msg);
       f->SetTitle(mimetype);
       msg->DecRef();
-#endif
-
+#else // 1
+      bool ok = false;
       char *filename = wxGetTempFileName("Mtemp");
-      if(MimeSave(mimeDisplayPart,filename))
+      if ( MimeSave(mimeDisplayPart, filename) )
       {
-         ASMailFolder *mf = ASMailFolder::OpenFolder(filename);
-         wxMessageViewFrame * f = new wxMessageViewFrame(mf, 1, NULL, m_Parent);
-         f->SetTitle(mimetype);
-         mf->DecRef();
+         wxString name;
+         name.Printf(_("Attached message '%s'"),
+                     GetFileNameForMIME(m_mailMessage, mimeDisplayPart).c_str());
+
+         MFolder_obj mfolder = MFolder::CreateTemp
+                               (
+                                 name,
+                                 MF_FILE, 0,
+                                 filename
+                               );
+
+         if ( mfolder )
+         {
+            ASMailFolder *mf = ASMailFolder::OpenFolder(mfolder);
+            if ( mf )
+            {
+               // we have to reset the default UF_DetectNewMail flag to avoid
+               // getting new mail notification for the message we write to it
+               // ourselves
+               mf->SetUpdateFlags(MailFolder::UF_UpdateCount);
+               wxMessageViewFrame * f =
+                  new wxMessageViewFrame(mf, 1, NULL, m_Parent);
+               f->SetTitle(mimetype);
+
+               ok = true;
+
+               mf->DecRef();
+            }
+         }
       }
+
+      if ( !ok )
+      {
+         wxLogError(_("Failed to open attached message."));
+      }
+
       wxRemoveFile(filename);
+#endif // 0/1
+
       return;
    }
 
@@ -2058,17 +2131,18 @@ wxMessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
          {
             /* The only situation where we receive a Message, is if we
                want to open it in a separate viewer. */
-            Message *mptr = ((ASMailFolder::ResultMessage *)result)->GetMessage();
+            Message *mptr =
+               ((ASMailFolder::ResultMessage *)result)->GetMessage();
 
             if(mptr && mptr->GetUId() != m_uid)
             {
                ShowMessage(mptr);
                wxFrame *frame = GetFrame(this);
-               if(frame && frame->IsKindOf(CLASSINFO(wxMessageViewFrame)))
+               if ( wxDynamicCast(frame, wxMessageViewFrame) )
                {
-                  wxString title;
-                  title << mptr->Subject() << _(" , from ") << mptr->From();
-                  frame->SetTitle(title);
+                  wxString fmt = READ_CONFIG(m_Profile, MP_MVIEW_TITLE_FMT);
+                  MsgVarExpander expander(mptr);
+                  frame->SetTitle(ParseMessageTemplate(fmt, expander));
                }
             }
             SafeDecRef(mptr);
@@ -2076,7 +2150,7 @@ wxMessageView::OnASFolderResultEvent(MEventASFolderResultData &event)
          break;
 
          default:
-            ASSERT_MSG(0,"Unexpected async result event");
+            FAIL_MSG("Unexpected async result event");
       }
    }
 

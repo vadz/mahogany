@@ -47,6 +47,17 @@
 #include "gui/wxFolderView.h"
 #include "gui/wxMainFrame.h"
 
+// wxMSW treectrl has a bug: it's impossible to prevent it from
+// collapsing/expanding a branch when it is double clicked, even if we do
+// process the activate message
+#ifdef __WXMSW__
+   #define USE_TREE_ACTIVATE_BUGFIX
+#endif // __WXMSW__
+
+#ifdef USE_TREE_ACTIVATE_BUGFIX
+   #include <commctrl.h>      // for NM_DBLCLK
+#endif
+
 // ----------------------------------------------------------------------------
 // private functions
 // ----------------------------------------------------------------------------
@@ -242,7 +253,8 @@ public:
 #ifdef __WXGTK__
    void OnMouseMove(wxMouseEvent &event)
    {
-      if(m_FocusFollowMode && FindFocus() != this) SetFocus();
+      if ( m_FocusFollowMode && FindFocus() != this )
+         SetFocus();
    }
 #endif // wxGTK
 
@@ -399,6 +411,12 @@ private:
 
    // the bg colour name
    wxString m_colBgName;
+
+#ifdef USE_TREE_ACTIVATE_BUGFIX
+   bool MSWOnNotify(int idCtrl, WXLPARAM lParam, WXLPARAM *result);
+
+   bool m_openedFolderOnDblClick;
+#endif // USE_TREE_ACTIVATE_BUGFIX
 
    DECLARE_EVENT_TABLE()
 };
@@ -1375,7 +1393,11 @@ void wxFolderTreeImpl::OnTreeSelect(wxTreeEvent& event)
 
 void wxFolderTreeImpl::OnDoubleClick()
 {
-   (void)m_sink->OnDoubleClick();
+#ifdef USE_TREE_ACTIVATE_BUGFIX
+   m_openedFolderOnDblClick =
+#endif // USE_TREE_ACTIVATE_BUGFIX
+
+   m_sink->OnDoubleClick();
 }
 
 void wxFolderTreeImpl::OnRightDown(wxMouseEvent& event)
@@ -1816,6 +1838,39 @@ bool wxFolderTreeImpl::FindItemWithChangedIcon(const wxTreeItemId& item,
 
    return FALSE;
 }
+
+#ifdef USE_TREE_ACTIVATE_BUGFIX
+
+// this is a bug fix around MSW quirk: activating an item with the mouse will
+// always toggle the branch, although we don't want to do it if we open the
+// folder on activate
+bool wxFolderTreeImpl::MSWOnNotify(int idCtrl,
+                                   WXLPARAM lParam,
+                                   WXLPARAM *result)
+{
+    NMHDR *hdr = (NMHDR *)lParam;
+
+    bool isDblClk = hdr->code == NM_DBLCLK;
+    if ( isDblClk )
+    {
+       m_openedFolderOnDblClick = FALSE;
+    }
+
+    bool rc = wxPTreeCtrl::MSWOnNotify(idCtrl, lParam, result);
+
+    if ( isDblClk )
+    {
+       if ( m_openedFolderOnDblClick )
+       {
+          // prevent default processing from taking place
+          *result = TRUE;
+       }
+    }
+
+    return rc;
+}
+
+#endif // USE_TREE_ACTIVATE_BUGFIX
 
 wxFolderTreeImpl::~wxFolderTreeImpl()
 {

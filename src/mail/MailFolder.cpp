@@ -2033,7 +2033,9 @@ MailFolderCmn::FilterNewMail(HeaderInfoList *hil)
          // build a single program from all filter rules:
          String filterString;
          MFolder_obj folder(GetName());
-         wxArrayString filters = folder->GetFilters();
+         wxArrayString filters;
+         if ( folder )
+            folder->GetFilters();
          count = filters.GetCount();
          for ( size_t n = 0; n < count; n++ )
          {

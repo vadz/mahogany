@@ -203,4 +203,9 @@ DeleteMessageTemplate(MessageTemplateKind kind, const String& name);
 extern wxArrayString
 GetMessageTemplateNames(MessageTemplateKind kind);
 
+// parse a message template to a string
+extern String
+ParseMessageTemplate(const String& templateText,
+                     MessageTemplateVarExpander& expander);
+
 #endif // _MESSAGETEMPLATE_H_

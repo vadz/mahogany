@@ -257,7 +257,8 @@ enum ConfigFields
    ConfigField_MessageViewMaxHeadersNum,
    ConfigField_MessageViewHeaders,
    ConfigField_MessageViewDateFormat,
-   ConfigField_MessageViewLast = ConfigField_MessageViewDateFormat,
+   ConfigField_MessageViewTitleBarFormat,
+   ConfigField_MessageViewLast = ConfigField_MessageViewTitleBarFormat,
 
    // folder view options
    ConfigField_FolderViewFirst = ConfigField_MessageViewLast,
@@ -277,6 +278,7 @@ enum ConfigFields
    ConfigField_FolderViewRecentColour,
    ConfigField_FolderViewUnreadColour,
    ConfigField_FolderViewDeletedColour,
+   ConfigField_FolderViewStatusBarFormat,
    ConfigField_FolderViewSortMessagesBy,
    ConfigField_FolderViewHeaders,
    ConfigField_FolderViewLast = ConfigField_FolderViewHeaders,
@@ -842,6 +844,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Maximum &number of messages"),  Field_Number,   -1 },
    { gettext_noop("Configure &headers to show..."),Field_SubDlg,   -1 },
    { gettext_noop("Configure &format for displaying dates"),         Field_SubDlg,    -1                     },
+   { gettext_noop("&Title of message view frame"),         Field_Text,    -1                     },
 
    // folder view
    { gettext_noop("When new mail message appears in this folder Mahogany\n"
@@ -865,6 +868,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Colour for &recent messages"),  Field_Color,   -1},
    { gettext_noop("Colour for u&nread messages"),  Field_Color,   -1},
    { gettext_noop("Colour for &deleted messages" ),Field_Color,   -1},
+   { gettext_noop("&Status bar line formar"),      Field_Text,    -1                     },
    { gettext_noop("&Sort messages by..."),         Field_SubDlg,  -1},
    { gettext_noop("Configure &columns to show..."),Field_SubDlg,   -1 },
 
@@ -948,13 +952,10 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "via the Help button below."),
                   Field_Message, -1 },
    { gettext_noop("Sync options with remote server"), Field_Bool|Field_Global, -1 },
-   { gettext_noop(" (IMAP) folder for synchronisation"), Field_Folder|Field_Global,
-   ConfigField_RSynchronise },
-   { gettext_noop(" Sync Filter rules"), Field_Bool|Field_Global, ConfigField_RSynchronise
-   },
+   { gettext_noop(" (IMAP) folder for synchronisation"), Field_Folder|Field_Global, ConfigField_RSynchronise },
+   { gettext_noop(" Sync Filter rules"), Field_Bool|Field_Global, ConfigField_RSynchronise },
    { gettext_noop(" Sync Identities"), Field_Bool|Field_Global, ConfigField_RSynchronise },
-   { gettext_noop(" Sync part of the folder tree"), Field_Bool|Field_Global,
-   ConfigField_RSynchronise },
+   { gettext_noop(" Sync part of the folder tree"), Field_Bool|Field_Global, ConfigField_RSynchronise },
    { gettext_noop(" Folder group to synchronise"), Field_Folder|Field_Global, ConfigField_RSynchronise }
 };
 
@@ -1113,6 +1114,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_MAX_HEADERS_NUM),
    CONFIG_ENTRY(MP_MSGVIEW_HEADERS),
    CONFIG_ENTRY(MP_DATE_FMT),
+   CONFIG_ENTRY(MP_MVIEW_TITLE_FMT),
 
    // folder view
    CONFIG_NONE(),
@@ -1131,6 +1133,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_FVIEW_RECENTCOLOUR),
    CONFIG_ENTRY(MP_FVIEW_UNREADCOLOUR),
    CONFIG_ENTRY(MP_FVIEW_DELETEDCOLOUR),
+   CONFIG_ENTRY(MP_FVIEW_STATUS_FMT),
    CONFIG_ENTRY(MP_MSGS_SORTBY),
    CONFIG_NONE(), // no such thing as MP_FOLDERVIEW_COLUMNS
 
@@ -1416,7 +1419,7 @@ bool wxOptionsPage::OnChangeCommon(wxControl *control)
 
    // mark the dialog as being dirty
    wxOptionsEditDialog *dialog = GET_PARENT_OF_CLASS(this, wxOptionsEditDialog);
-   CHECK( dialog, "option page without option dialog?", FALSE );
+   CHECK( dialog, FALSE, "option page without option dialog?" );
 
    if ( m_aVitalControls.Index(control) != -1 )
       dialog->SetDoTest();

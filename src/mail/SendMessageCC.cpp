@@ -816,14 +816,29 @@ SendMessageCC::AddPart(Message::ContentType type,
    PARAMETER *lastpar = NULL,
              *par;
 
-   if(plist)
+   // do we already have CHARSER parameter?
+   bool hasCharset = false;
+
+   if( plist )
    {
       MessageParameterList::iterator i;
-
-      for(i=plist->begin(); i != plist->end(); i++)
+      for( i = plist->begin(); i != plist->end(); i++ )
       {
          par = mail_newbody_parameter();
-         par->attribute = strdup((*i)->name);
+
+         String name = (*i)->name;
+         if ( name.Lower() == "charset" )
+         {
+            if ( hasCharset )
+            {
+               // although not fatal, this shouldn't happen
+               wxLogDebug("Multiple CHARSET parameters!");
+            }
+
+            hasCharset = true;
+         }
+
+         par->attribute = strdup(name);
          par->value     = strdup((*i)->value);
          par->next      = lastpar;
          lastpar = par;
@@ -831,7 +846,7 @@ SendMessageCC::AddPart(Message::ContentType type,
    }
 
    // add the charset parameter to the param list for the text parts
-   if ( type == TYPETEXT )
+   if ( !hasCharset && (type == TYPETEXT) )
    {
       String cs;
       if ( bdy->encoding == ENC7BIT )
@@ -866,13 +881,13 @@ SendMessageCC::AddPart(Message::ContentType type,
 
    bdy->parameter = lastpar;
    bdy->disposition.type = strdup(disposition);
-   if(dlist)
+   if ( dlist )
    {
-      MessageParameterList::iterator i;
       PARAMETER *lastpar = NULL,
                 *par;
 
-      for(i=dlist->begin(); i != dlist->end(); i++)
+      MessageParameterList::iterator i;
+      for ( i = dlist->begin(); i != dlist->end(); i++ )
       {
          par = mail_newbody_parameter();
          par->attribute = strdup((*i)->name);

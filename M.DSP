@@ -243,31 +243,6 @@ SOURCE=.\src\mail\MessageCC.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\src\mail\SendMessage.cpp
-
-!IF  "$(CFG)" == "M - Win32 Release"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "M - Win32 Debug DLL"
-
-# PROP BASE Exclude_From_Build 1
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "M - Win32 Release DLL"
-
-# PROP BASE Exclude_From_Build 1
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
-# End Source File
-# Begin Source File
-
 SOURCE=.\src\mail\SendMessageCC.cpp
 # End Source File
 # End Group
