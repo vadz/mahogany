@@ -550,7 +550,7 @@ wxMainFrame::wxMainFrame(const String &iname, wxFrame *parent)
    m_searchData = NULL;
 
    SetIcon(ICON("MainFrame"));
-   SetTitle(_("Copyright (C) 1997-2002 The Mahogany Developers Team"));
+   SetTitle(_("Copyright (C) 1997-2003 The Mahogany Developers Team"));
 
    CreateStatusBar();
 
