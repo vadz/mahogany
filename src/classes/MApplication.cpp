@@ -400,11 +400,20 @@ MAppBase::OnStartup()
    LoadModules();
 
    // create and show the main program window
-   CreateTopLevelFrame();
+   if ( !CreateTopLevelFrame() )
+   {
+      wxLogError(_("Failed to create the program window."));
+
+      return false;
+   }
 
    // now we have finished the vital initialization and so can assume
    // everything mostly works
    m_cycle = Running;
+
+   // and as we have the main window, we can initialize the modules which
+   // use it
+   InitModules();
 
    // open the remembered folder in the main frame unless disabled
    if ( !READ_APPCONFIG(MP_DONTOPENSTARTUP) )

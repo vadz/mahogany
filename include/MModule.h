@@ -52,7 +52,7 @@
 #define MMODULE_INITMODULE_FUNCTION "InitMModule"
 
 /// Name of the function used to retrieve info about the module
-#define MMODULE_GETPROPERTY_FUNCTION "GetMModuleProperty"
+#define MMODULE_GETPROPERTY_FUNCTION "GetMModuleProperties"
 
 // ----------------------------------------------------------------------------
 // constants
@@ -127,6 +127,16 @@ public:
    /// returns the n-th entry
    virtual const MModuleListingEntry & operator[] (size_t n) const = 0;
    MOBJECT_NAME(MModuleListing);
+};
+
+// ----------------------------------------------------------------------------
+// ModuleProperty holds a module property which is just a named string value
+// ----------------------------------------------------------------------------
+
+struct ModuleProperty
+{
+   const char *name;
+   const char *value;
 };
 
 // ----------------------------------------------------------------------------
@@ -255,7 +265,7 @@ extern "C"
        The function should return the name, description and version of the
        module as static strings (they are not freed by the called)
    */
-   typedef const char *(* MModule_GetModulePropFuncType)(const char *property);
+   typedef const ModuleProperty *(* MModule_GetModulePropFuncType)(void);
 }
 //@}
 
@@ -296,10 +306,7 @@ public: \
                             int *version_minor, \
                             int *version_release) const; \
    static  MModule *Init(int, int, int, MInterface *, int *); \
-   static const struct Property \
-   { \
-      const char *name, *value; \
-   } ms_properties[]
+   static const ModuleProperty ms_properties[];
 
 /// this macro may be used for modules which don't do anything in their Entry()
 #define DEFAULT_ENTRY_FUNC   virtual int Entry(int /* arg */, ...) { return 0; }
@@ -341,7 +348,7 @@ extern "C" \
 } \
 MMODULE_INITIALISE(ClassName, Name, Interface, Description, Version); \
 \
-const ClassName::Property ClassName::ms_properties[] = \
+const ModuleProperty ClassName::ms_properties[] = \
 { \
    { "name", Name }, \
    { "desc", Description }, \
@@ -351,32 +358,31 @@ const ClassName::Property ClassName::ms_properties[] = \
 #define MMODULE_PROP(name, value) { name, value },
 
 #define MMODULE_END_IMPLEMENT(ClassName) \
+   { NULL, NULL }, \
    }; \
 \
 extern "C" { \
-MDLLEXPORT const char *GetMModuleProperty(const char *property) \
+MDLLEXPORT const ModuleProperty *GetMModuleProperties() \
 { \
-   for ( size_t n = 0; n < WXSIZEOF(ClassName::ms_properties); n++ ) \
-   { \
-      if ( strcmp(ClassName::ms_properties[n].name, property) == 0 ) \
-         return ClassName::ms_properties[n].value; \
-   } \
-   \
-   return ""; \
+   return ClassName::ms_properties; \
 } \
 } \
 const char * ClassName::GetName(void) const \
-   { return GetMModuleProperty("name"); } \
+   { return GetMModuleProperty(GetMModuleProperties(), "name"); } \
 const char * ClassName::GetInterface(void) const \
-   { return GetMModuleProperty("interface"); } \
+   { return GetMModuleProperty(GetMModuleProperties(), "interface"); } \
 const char * ClassName::GetDescription(void) const \
-   { return GetMModuleProperty("desc"); } \
+   { return GetMModuleProperty(GetMModuleProperties(), "desc"); } \
 const char * ClassName::GetVersion(void) const \
-   { return GetMModuleProperty("version"); }
+   { return GetMModuleProperty(GetMModuleProperties(), "version"); }
 
 // ----------------------------------------------------------------------------
 // helper functions and macros
 // ----------------------------------------------------------------------------
+
+/** Get a module property from the properties table */
+extern
+const char *GetMModuleProperty(const ModuleProperty *table, const char *name);
 
 /** Call this before application exit. */
 extern

@@ -414,7 +414,8 @@ extern bool ShowImportDialog(wxWindow *parent)
                                  _("Mahogany: Import Settings"),
                                  prognames,
                                  &selections,
-                                 parent
+                                 parent,
+                                 "Importers"
                                 );
 
    // and do import from those he chose

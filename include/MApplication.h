@@ -285,11 +285,14 @@ public:
 protected:
    /// Load modules at startup
    virtual void LoadModules(void) = 0;
+   /// Init modules - called as soon as the program is fully initialized
+   virtual void InitModules(void) = 0;
    /// Unload modules loaded at startup
    virtual void UnloadModules(void) = 0;
+
    /// makes sure the status bar has enough fields
-   virtual void UpdateStatusBar(int nfields, bool isminimum = FALSE)
-      const = 0;
+   virtual void UpdateStatusBar(int nfields, bool isminimum = FALSE) const = 0;
+
    /// Send all messages from the outbox "name"
    void SendOutbox(const String &name, bool checkOnline) const;
 

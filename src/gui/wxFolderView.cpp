@@ -101,6 +101,9 @@ static const char *wxFLC_ColumnNames[] =
 // WXFLC_NUMENTRIES!
 static const char *FOLDER_LISTCTRL_WIDTHS_D = "60:300:200:80:80";
 
+// the trace mask for dnd messages
+#define M_TRACE_DND "msgdnd"
+
 // ----------------------------------------------------------------------------
 // private classes
 // ----------------------------------------------------------------------------
@@ -2805,10 +2808,17 @@ wxFolderView::DropMessagesToFolder(const UIdArray& selections, MFolder *folder)
    if ( !selections.Count() )
       return;
 
+   wxLogTrace(M_TRACE_DND, "Saving %d message(s) to folder '%s'",
+              selections.Count(), folder->GetFullName().c_str());
+
    Ticket t = SaveMessagesToFolder(selections, folder);
 
    if ( !m_TicketsDroppedList )
+   {
+      wxLogTrace(M_TRACE_DND, "Creating m_TicketsDroppedList");
+
       m_TicketsDroppedList = ASTicketList::Create();
+   }
 
    m_TicketsDroppedList->Add(t);
 }
@@ -2889,6 +2899,8 @@ wxFolderView::OnMsgStatusEvent(MEventMsgStatusData &event)
 bool
 wxFolderView::DragAndDropMessages()
 {
+   bool didDrop = false;
+
    UIdArray selections;
    size_t countSel = m_FolderCtrl->GetSelections(selections);
    if ( countSel > 0 )
@@ -2910,13 +2922,18 @@ wxFolderView::DragAndDropMessages()
       switch ( dropSource.DoDragDrop(true /* allow move */) )
       {
          default:
+            wxFAIL_MSG( "unexpected DoDragDrop return value" );
+            // fall through
+
          case wxDragError:
+            // always give this one in debug mode, it is not supposed to
+            // happen!
             wxLogDebug("An error occured during drag and drop operation");
             break;
 
          case wxDragNone:
          case wxDragCancel:
-            wxLogDebug("Drag and drop aborted by user.");
+            wxLogTrace(M_TRACE_DND, "Drag and drop aborted by user.");
             break;
 
          case wxDragMove:
@@ -2937,23 +2954,45 @@ wxFolderView::DragAndDropMessages()
                {
                   DeleteOrTrashMessages(m_UIdsCopiedOk);
                   m_UIdsCopiedOk.Empty();
+
+                  wxLogTrace(M_TRACE_DND, "Deleted previously dropped msgs.");
+               }
+               else
+               {
+                  // maybe we didn't have time to really copy the messages
+                  // yet, then they will be deleted later
+                  wxLogTrace(M_TRACE_DND, "Dropped msgs will be deleted later");
                }
             }
-            //else: nothing was dropped at all
-
-            // fall through
+            break;
 
          case wxDragCopy:
-            SafeDecRef(m_TicketsDroppedList);
-            m_TicketsDroppedList = NULL;
+            // nothing special to do
+            break;
+      }
 
-            // we did something
-            return true;
+      if ( m_TicketsDroppedList )
+      {
+         didDrop = true;
+
+         m_TicketsDroppedList->DecRef();
+         m_TicketsDroppedList = NULL;
+
+         wxLogTrace(M_TRACE_DND, "DragAndDropMessages() done ok");
+      }
+      else
+      {
+         wxLogTrace(M_TRACE_DND, "Nothing dropped");
+      }
+
+      if ( !m_UIdsCopiedOk.IsEmpty() )
+      {
+         m_UIdsCopiedOk.Empty();
       }
    }
 
-   // we didn't do anything
-   return false;
+   // did we do anything?
+   return didDrop;
 }
 
 void
@@ -2985,6 +3024,7 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
          ASSERT(result->GetSequence());
 
          // we may have to do a few extra things here:
+         //
          //  - if the message was marked for deletion (its ticket is in
          //    m_TicketsToDeleteList), we have to delete it and give a
          //    message about a successful move and not copy operation
@@ -2998,9 +3038,18 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
             bool wasDropped = m_TicketsDroppedList &&
                                  m_TicketsDroppedList->Contains(t);
 
+            // remove from lists before testing value: this should be done
+            // whether we succeeded or failed
             if ( toDelete )
             {
                m_TicketsToDeleteList->Remove(t);
+            }
+
+            if ( wasDropped )
+            {
+               m_TicketsDroppedList->Remove(t);
+
+               wxLogTrace(M_TRACE_DND, "Dropped msgs copied ok");
             }
 
             if ( !value )
@@ -3013,35 +3062,41 @@ wxFolderView::OnASFolderResultEvent(MEventASFolderResultData &event)
                else
                   msg = _("Copying messages failed.");
             }
-            else
+            else // success
             {
                // message was copied ok, what else to do with it?
+               UIdArray *seq = result->GetSequence();
+               unsigned long count = seq->Count();
+
+               if ( wasDropped )
+               {
+                  if ( !toDelete )
+                  {
+                     // remember the UIDs as we may have to delete them later
+                     // even if they are not in m_TicketsToDeleteList yet
+                     WX_APPEND_ARRAY(m_UIdsCopiedOk, (*seq));
+                  }
+                  //else: dropped and already marked for deletion, delete below
+
+                  msg.Printf(_("Dropped %lu messages."), count);
+               }
+               //else: not dropped
+
                if ( toDelete )
                {
                   // delete right now
-                  Profile *p = m_ASMailFolder->GetProfile();
-                  m_TicketList->Add(m_ASMailFolder->DeleteMessages(
-                     result->GetSequence(),
-                     (p && READ_CONFIG(p,  MP_USE_TRASH_FOLDER)),
-                     this));
-                  msg.Printf(_("Moved %lu messages."), (unsigned long)
-                             result->GetSequence()->Count());
-               }
-               else if ( wasDropped )
-               {
-                  // remember all UIDs as we may have to delete them later
-                  m_TicketsDroppedList->Remove(t);
+                  m_TicketList->Add(
+                        m_ASMailFolder->DeleteOrTrashMessages(seq, this));
 
-                  UIdArray& seq = *result->GetSequence();
-                  WX_APPEND_ARRAY(m_UIdsCopiedOk, seq);
-
-                  msg.Printf(_("Dropped %lu messages."), (unsigned long)
-                             result->GetSequence()->Count());
+                  if ( !wasDropped )
+                  {
+                     msg.Printf(_("Moved %lu messages."), count);
+                  }
+                  //else: message already given above
                }
-               else
+               else // simple copy, not move
                {
-                  msg.Printf(_("Copied %lu messages."), (unsigned long)
-                             result->GetSequence()->Count());
+                  msg.Printf(_("Copied %lu messages."), count);
                }
             }
 

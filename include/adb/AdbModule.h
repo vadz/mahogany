@@ -108,7 +108,7 @@ private:
 // note that GetName() and GetDescription() declarations are inside
 // MMODULE_DEFINE macro
 #define DECLARE_ADB_MODULE()                                               \
-   const char *GetFormatDesc() const;                                      \
+   virtual const char *GetFormatDesc() const;                              \
    MMODULE_DEFINE();                                                       \
    DEFAULT_ENTRY_FUNC
 
@@ -125,7 +125,7 @@ private:
    MMODULE_END_IMPLEMENT(cname)                                            \
    const char *cname::GetFormatDesc() const                                \
    {                                                                       \
-      return GetMModuleProperty("adbformat");                              \
+      return GetMModuleProperty(ms_properties, "adbformat");               \
    }                                                                       \
    MModule *cname::Init(int version_major, int version_minor,              \
                         int version_release, MInterface *minterface,       \

@@ -99,7 +99,7 @@ extern bool ShowImportDialog(wxWindow *parent = NULL);
 // ----------------------------------------------------------------------------
 
 #define DECLARE_M_IMPORTER()                                                   \
-   const char *GetProgName() const;                                            \
+   virtual const char *GetProgName() const;                                    \
    MMODULE_DEFINE();                                                           \
    DEFAULT_ENTRY_FUNC                                                          \
 
@@ -110,7 +110,7 @@ extern bool ShowImportDialog(wxWindow *parent = NULL);
    MMODULE_END_IMPLEMENT(cname)                                                \
    const char *cname::GetProgName() const                                      \
    {                                                                           \
-      return GetMModuleProperty(M_IMPORTER_PROG_NAME);                         \
+      return GetMModuleProperty(ms_properties, M_IMPORTER_PROG_NAME);          \
    }                                                                           \
    MModule *cname::Init(int maj, int min, int rel, MInterface *, int *err)     \
    {                                                                           \

@@ -131,6 +131,8 @@ protected:
    void ThrEnterLeave(bool enter, SectionId what, bool testing);
    /// Load modules at startup
    virtual void LoadModules(void);
+   /// Init modules - called as soon as the program is fully initialized
+   virtual void InitModules(void);
    /// Unload modules loaded at startup
    virtual void UnloadModules(void);
 

@@ -1017,6 +1017,23 @@ wxMApp::LoadModules(void)
 }
 
 void
+wxMApp::InitModules(void)
+{
+   for ( ModulesList::iterator i = gs_GlobalModulesList.begin();
+         i != gs_GlobalModulesList.end();
+         i++ )
+   {
+      MModule *module = (**i).m_Module;
+      if ( module->Entry(MMOD_FUNC_INIT) != 0 )
+      {
+         // TODO: propose to disable this module?
+         wxLogWarning(_("Module '%s' failed to initialize."),
+                      module->GetName());
+      }
+   }
+}
+
+void
 wxMApp::UnloadModules(void)
 {
    for (ModulesList::iterator j = gs_GlobalModulesList.begin();

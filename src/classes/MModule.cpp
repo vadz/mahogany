@@ -222,13 +222,11 @@ MModule *LoadModuleInternal(const String & name, const String &pathname)
       MModuleListEntry *me = new MModuleListEntry;
       me->m_Name = name;
       me->m_Module = module;
-//      me->m_Interface = module->GetInterface();
-      //FIXME: This is a workaround in a bug of the properties code:
       MModule_GetModulePropFuncType propFunc =
          (MModule_GetModulePropFuncType)
          wxDllLoader::GetSymbol(dll, MMODULE_GETPROPERTY_FUNCTION);
       if(propFunc)
-         me->m_Interface = (*propFunc)("interface");
+         me->m_Interface = GetMModuleProperty((*propFunc)(), "interface");
       else
          me->m_Interface = name;
       GetMModuleList()->push_back(me);
@@ -621,14 +619,16 @@ MModule::ListAvailableModules(const String& interfaceName)
          wxDllType dll = wxDllLoader::LoadLibrary(filename);
          if( dll )
          {
-            MModule_GetModulePropFuncType getProp =
+            MModule_GetModulePropFuncType getProps =
                (MModule_GetModulePropFuncType)
                wxDllLoader::GetSymbol(dll,
                                       MMODULE_GETPROPERTY_FUNCTION);
 
-            if ( getProp )
+            if ( getProps )
             {
-               String interfaceModule = getProp("interface");
+               const ModuleProperty *props = (*getProps)();
+
+               String interfaceModule = GetMModuleProperty(props, "interface");
                if ( !interfaceName || interfaceName == interfaceModule )
                {
                   String name;
@@ -636,10 +636,10 @@ MModule::ListAvailableModules(const String& interfaceName)
                   MModuleListingEntryImpl entry(
                      name,
                      interfaceModule,
-                     getProp("desc"),
-                     getProp("description"),
-                     getProp("version"),
-                     getProp("author"));
+                     GetMModuleProperty(props, "desc"),
+                     GetMModuleProperty(props, "description"),
+                     GetMModuleProperty(props, "version"),
+                     GetMModuleProperty(props, "author"));
                   (*listing)[count++] = entry;
                }
 
@@ -702,6 +702,23 @@ static wxArrayString BuildListOfModulesDirs()
    }
 
    return dirs;
+}
+
+// ----------------------------------------------------------------------------
+// working with module properties
+// ----------------------------------------------------------------------------
+
+const char *GetMModuleProperty(const ModuleProperty *table, const char *name)
+{
+   while ( table->name )
+   {
+      if ( strcmp(table->name, name) == 0 )
+         return table->value;
+
+      table++;
+   }
+
+   return "";
 }
 
 #endif // !USE_MODULES_STATIC
