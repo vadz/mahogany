@@ -374,10 +374,11 @@ ProfileBase::readEntry(const String & key,
 */
 Profile::Profile(const String & iName, ProfileBase const *Parent)
 {
-   m_ProfileName = Parent ?
+   m_ProfileName = ( Parent && Parent->GetName().Length()) ?
       ( Parent->GetName() + '/' ) :
       String(M_PROFILE_CONFIG_SECTION);
-   m_ProfileName << iName;
+   if(iName.Length())
+      m_ProfileName << '/' << iName;
 }
 
 
@@ -440,7 +441,7 @@ Profile::readEntry(const String & key, const String & def, bool * found) const
    String str;
    bool f = ms_GlobalConfig->Read(keypath,&str, def);
    bool ff = f;
-   while(! f && (ms_GlobalConfig->GetPath()+'/') != M_PROFILE_CONFIG_SECTION)
+   while(! f && (ms_GlobalConfig->GetPath()) != M_PROFILE_CONFIG_SECTION)
    {
       ms_GlobalConfig->SetPath("..");
       f = ms_GlobalConfig->Read(keypath,&str, def);
@@ -462,7 +463,7 @@ Profile::readEntry(const String & key, long def, bool * found) const
    long val;
    bool f = ms_GlobalConfig->Read(keypath,&val,def);
    bool ff = f;
-   while(! f && (ms_GlobalConfig->GetPath()+'/') != M_PROFILE_CONFIG_SECTION)
+   while(! f && (ms_GlobalConfig->GetPath()) != M_PROFILE_CONFIG_SECTION)
    {
       ms_GlobalConfig->SetPath("..");
       ms_GlobalConfig->Read(keypath,&val,def);

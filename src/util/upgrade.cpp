@@ -219,35 +219,15 @@ UpgradeFrom010()
    rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
                      "/AdbEditor","/M/Profiles/AdbEditor", true);
 
-   // encrypt passwords in new location:
    ProfileBase
-      *p = ProfileBase::CreateProfile("Folders"),
+      *p = ProfileBase::CreateProfile(""),
       *p2;
    kbStringList
       folders;
    String
-      group, pw;
+      group, pw, tmp;
    long
       index = 0;
-   for ( bool ok = p->GetFirstGroup(group, index);
-         ok ;
-         ok = p->GetNextGroup(group, index))
-      folders.push_back(new String(group));
-   for(kbStringList::iterator i = folders.begin(); i != folders.end();i++)
-   {
-      group = **i;
-      p->SetPath(group);
-      p2 = ProfileBase::CreateProfile(group);
-      pw = p2->readEntry(MP_POP_PASSWORD, MP_POP_PASSWORD_D);
-      if(pw.Length()) // only if we have a password
-         p2->writeEntry(MP_POP_PASSWORD, strutil_encrypt(pw));
-      p2->DecRef();
-      p->ResetPath();
-   }
-   p->DecRef();
-   //FIXME check returncodes!
-
-   p = ProfileBase::CreateProfile("");
    // We need to rename the old mainfolder, to remove its leading
    // slash:
    String
@@ -261,16 +241,53 @@ UpgradeFrom010()
          p->writeEntry(MP_MAINFOLDER, mainFolder);
       }
    }
-   p->DecRef();
 
    // Delete obsolete groups:
-#if 0
    //FIXME broken wxFileConfig
    //FIXME paths need adjustment for windows?
    wxConfigBase *c = mApplication->GetProfile()->GetConfig();
-   c->DeleteGroup("M/Profiles/Folders");
+   c->DeleteGroup("/M/Profiles/Folders");
    c->DeleteGroup("/AdbEditor");
-#endif
+
+   
+   /* Encrypt passwords in new location and make sure we have no
+      illegal old profiles around. */
+   p->ResetPath(); // to be save
+   for ( bool ok = p->GetFirstGroup(group, index);
+         ok ;
+         ok = p->GetNextGroup(group, index))
+   {
+      tmp = group;
+      tmp << '/' << MP_PROFILE_TYPE;
+      if(p->readEntry(tmp, MP_PROFILE_TYPE_D) == ProfileBase::PT_FolderProfile)
+         folders.push_back(new String(group));
+   }
+   for(kbStringList::iterator i = folders.begin(); i != folders.end();i++)
+   {
+      group = **i;
+      p->SetPath(group);
+      if(p->readEntry(MP_FOLDER_TYPE, MP_FOLDER_TYPE_D) !=
+         MP_FOLDER_TYPE_D)
+      {
+         p2 = ProfileBase::CreateProfile(group);
+         pw = p2->readEntry(MP_POP_PASSWORD, MP_POP_PASSWORD_D);
+         if(pw.Length()) // only if we have a password
+            p2->writeEntry(MP_POP_PASSWORD, strutil_encrypt(pw));
+         p2->DecRef();
+         p->ResetPath();
+      }
+      else
+      {
+         p->ResetPath();
+         p->DeleteGroup(group);
+         String msg = _("Deleted illegal folder profile:\n'");
+         msg << p->GetName() << '/' << group << '\'';
+         wxLogMessage(msg);
+      }
+   }
+   p->DecRef();
+   //FIXME check returncodes!
+
 
    return rc;
 
