@@ -1001,10 +1001,10 @@ wxFolderPropertiesPage::TransferDataToWindow(void)
    {  // set incoming checkbox to right value
       MFolder_obj folder(m_folderPath);
       m_isIncoming->SetValue(
-         (folder->GetFlags() && MF_FLAGS_INCOMING) ? TRUE : FALSE
+         (folder->GetFlags() & MF_FLAGS_INCOMING) ? TRUE : FALSE
          );
       m_keepOpen->SetValue(
-         (folder->GetFlags() && MF_FLAGS_KEEPOPEN) ? TRUE : FALSE
+         (folder->GetFlags() & MF_FLAGS_KEEPOPEN) ? TRUE : FALSE
          );
    }
 

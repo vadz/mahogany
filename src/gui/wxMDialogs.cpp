@@ -848,7 +848,7 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
 #ifdef __WXMSW__
                       wxSize(400, 350),
 #else  // !MSW
-                      wxSize(320, 230),
+                      wxSize(320, 270),
 #endif // MSW/!MSW
                       /* 0 style for borderless wxDOUBLE_BORDER |*/ wxSTAY_ON_TOP|wxCENTER)
 {

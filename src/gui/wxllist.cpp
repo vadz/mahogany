@@ -2478,10 +2478,10 @@ wxLayoutList::DrawCursor(wxDC &dc, bool active, wxPoint const &translate)
 #else // !WXLAYOUT_USE_CARET
    dc.SetBrush(*wxWHITE_BRUSH);
    //FIXME: wxGTK XOR is borken at the moment!!!dc.SetLogicalFunction(wxXOR);
-   dc.SetLogicalFunction(wxXOR);
    dc.SetPen(wxPen(*wxBLACK,1,wxSOLID));
    if(active)
    {
+      dc.SetLogicalFunction(wxXOR);
       dc.DrawRectangle(coords.x, coords.y,
                        m_CursorSize.x, m_CursorSize.y);
       SetUpdateRect(coords.x, coords.y);
@@ -2489,6 +2489,7 @@ wxLayoutList::DrawCursor(wxDC &dc, bool active, wxPoint const &translate)
    }
    else
    {
+      dc.SetLogicalFunction(wxCOPY);
       dc.DrawLine(coords.x, coords.y+m_CursorSize.y-1,
                   coords.x, coords.y);
       SetUpdateRect(coords.x, coords.y+m_CursorSize.y-1);

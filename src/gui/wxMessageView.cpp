@@ -531,7 +531,7 @@ wxMessageView::Update(void)
             llist->SetFontWeight(wxNORMAL);
             llist->SetFontColour(&m_ProfileValues.HeaderValueCol);
 
-            llist->Insert(headerValue);
+            wxLayoutImportText(llist,headerValue);
 
             llist->LineBreak();
          }

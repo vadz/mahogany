@@ -84,17 +84,15 @@ public:
    */
    MEventNewMailData(MailFolder *folder,
                      unsigned long n,
-                     unsigned long *messageIDs)
-      : MEventData(MEventId_NewMail)
-      {
-         m_folder = folder;
-         m_number = n;
-         m_messageIDs = messageIDs;
-      }
-
+                     unsigned long *messageIDs);
+   ~MEventNewMailData();
+   
    /**@name accessors */
    //@{
-   /// get the folder in which there are new messages
+   /** Get the folder in which there are new messages.
+       If you need the folder after the MEvent object disappears, you
+       need to call IncRef() on it, this function does not IncRef()
+       the folder automatically! */
    MailFolder *GetFolder() const { return m_folder; }
    /// get the number of new messages
    unsigned long GetNumber(void) const { return m_number; }

@@ -224,7 +224,9 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
 {
    wxClientDC dc( this );
    PrepareDC( dc );
+#ifdef __WXMSW__
    if ( eventId != WXLOWIN_MENU_MOUSEMOVE )
+#endif
    {
       // moving the mouse in a window shouldn't give it the focus!
       // Oh yes! wxGTK's focus handling is so broken, that this is the 
@@ -345,8 +347,12 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
 
              if(m_CursorVisibility == -1)
                 m_CursorVisibility = 1;
+#ifdef WXLAYOUT_USE_CARET
+             if ( m_CursorVisibility == 1 )
+                GetCaret()->Show();
+#endif // WXLAYOUT_USE_CARET
 
-             if(m_CursorVisibility != 0)
+             if(m_CursorVisibility)
              {
                 // draw a thick cursor for editable windows with focus
                 m_llist->DrawCursor(dc, m_HaveFocus && IsEditable(), offset);
@@ -411,8 +417,7 @@ wxLayoutWindow::OnMouse(int eventId, wxMouseEvent& event)
       }
    }
 
-   if( u )
-      u->DecRef();
+   if( u ) u->DecRef();
 }
 
 // ----------------------------------------------------------------------------
@@ -433,7 +438,6 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
    }
 #endif
 
-#if 0
    // Force m_Selecting to be false if shift is no longer
    // pressed. OnKeyUp() cannot catch all Shift-Up events.
    if(m_Selecting && !event.ShiftDown())
@@ -441,7 +445,6 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
       m_Selecting = false;
       m_llist->EndSelection();
    }
-#endif
    
    // If we deleted the selection here, we must not execute the
    // deletion in Delete/Backspace handling.
@@ -951,18 +954,27 @@ wxLayoutWindow::ResizeScrollbars(bool exact)
       m_maxy = max.y + Y_SCROLL_PAGE;
    }
 #if 0
+   //FIXME: this code is pretty broken, producing "arithmetic
+   //exception" crashes (div by 0??)
    else
    {
       // check if the window hasn't become too big, thus making the scrollbars
       // unnecessary
-      if ( m_hasHScrollbar && (max.x < size.x) )
+      if ( !exact )
+      {
+         // add an extra bit to the sizes to avoid future updates
+         max.x -= WXLO_ROFFSET;
+         max.y -= WXLO_BOFFSET;
+      }
+
+      if ( m_hasHScrollbar && (max.x < m_maxx) )
       {
          // remove the horizontal scrollbar
          SetScrollbars(0, -1, 0, -1, 0, -1, true);
          m_hasHScrollbar = false;
       }
 
-      if ( m_hasVScrollbar && (max.y < size.y) )
+      if ( m_hasVScrollbar && (max.y < m_maxy) )
       {
          // remove the vertical scrollbar
          SetScrollbars(-1, 0, -1, 0, -1, 0, true);

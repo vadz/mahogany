@@ -757,6 +757,11 @@ wxNotebookDialog::SendOptionsChangeEvent()
 
    // notify everybody who cares about the change
    ProfileBase *profile = GetProfile();
+   if(! profile) //FIXME!!!
+   {
+      ASSERT_MSG( profile, "SendOptionsChangeEvent() with no profile?");
+      return;
+   }
    MEventOptionsChangeData *data = new MEventOptionsChangeData
                                        (
                                         profile,

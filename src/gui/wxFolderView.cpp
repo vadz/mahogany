@@ -409,7 +409,9 @@ wxFolderView::SetFolder(MailFolder *mf, bool recreateFolderCtrl)
          m_FolderCtrl->SetItemState(0,wxLIST_STATE_SELECTED,wxLIST_STATE_SELECTED);
          // the callback will preview the (just) selected message
       }
+#ifndef OS_WIN
       m_FolderCtrl->SetFocus(); // so we can react to keyboard events
+#endif
    }
 }
 

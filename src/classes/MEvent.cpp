@@ -26,6 +26,7 @@
 
 #include "MEvent.h"
 #include "Profile.h"
+#include "MailFolder.h"
 
 // ----------------------------------------------------------------------------
 // private types
@@ -183,3 +184,20 @@ MEventOptionsChangeData::~MEventOptionsChangeData()
 {
    SafeDecRef(m_profile);
 }
+
+MEventNewMailData::MEventNewMailData(MailFolder *folder,
+                                     unsigned long n,
+                                     unsigned long *messageIDs)
+   : MEventData(MEventId_NewMail)
+{
+   m_folder = folder;
+   m_folder->IncRef();
+   m_number = n;
+   m_messageIDs = messageIDs;
+}
+
+MEventNewMailData::~MEventNewMailData()
+{
+   m_folder->DecRef();
+}
+   

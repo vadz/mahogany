@@ -783,6 +783,7 @@ MAppBase::OnMEvent(MEventData& event)
    return TRUE;
 }
 
+#ifdef OS_WIN
 void
 MAppBase::InitGlobalDir()
 {
@@ -800,3 +801,4 @@ MAppBase::InitGlobalDir()
    }
    //else: already done once
 }
+#endif

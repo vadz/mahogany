@@ -335,7 +335,7 @@ wxMApp::OnInit()
       }
    }
 #else // Mac?
-   #error "don't know how to get the current locale on this platform."
+#   error "don't know how to get the current locale on this platform."
 #endif // OS
 
    if ( hasLocale )
@@ -430,9 +430,9 @@ wxMApp::OnInit()
 
       return true;
    }
-   else {
+   else
+   {
       ERRORMESSAGE(("Can't initialize application, terminating."));
-
       return false;
    }
 }

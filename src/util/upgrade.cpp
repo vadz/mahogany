@@ -359,7 +359,8 @@ Upgrade(const String& fromVersion)
       oldVersion = Version_Alpha010;
    else if ( fromVersion == "0.20a" )
       oldVersion = Version_Alpha020;
-   else if ( fromVersion == "0.21a" )
+   else if ( fromVersion == "0.21a" || fromVersion == "0.22a" ||
+             fromVersion == "0.23a")
       oldVersion = Version_NoChange;
    else
       oldVersion = Version_Unknown;
@@ -515,8 +516,11 @@ VerifyInbox(void)
    String foldername = traverse.GetNewMailFolder();
    if(foldername.Length() == 0) // shouldn't happen unless run for the first time
       foldername = READ_APPCONFIG(MP_NEWMAIL_FOLDER);
+   /* We need to keep the old "New Mail" name for now, to keep it
+      backwards compatible. */
    if(foldername.IsEmpty()) // this must not be
-      foldername = _("New Mail");
+      foldername = "New Mail";
+   mApplication->GetProfile()->writeEntry(MP_NEWMAIL_FOLDER, foldername);
    strutil_delwhitespace(foldername);
 
    static const long flagsNewMail = MF_FLAGS_NEWMAILFOLDER |
@@ -548,17 +552,22 @@ VerifyInbox(void)
       ibp->writeEntry(MP_FOLDER_TYPE,
                       CombineFolderTypeAndFlags(MF_FILE, flags));
    }
-
    ibp->DecRef();
 
    /*
     * Set up the SentMail folder:
     */
-   // this line is for backwards compatibility only
-   foldername = READ_APPCONFIG(MP_OUTGOINGFOLDER);
-   strutil_delwhitespace(foldername);
-   if(foldername.Length() != 0) // AHA, we want it
+   if( READ_APPCONFIG(MP_USEOUTGOINGFOLDER) )
    {
+      // this line is for backwards compatibility only
+      foldername = READ_APPCONFIG(MP_OUTGOINGFOLDER);
+      strutil_delwhitespace(foldername);
+      // We have to stick with the following for now, until we add
+      // some upgrade functionality which can set this to a different
+      // (translated) value.  "SentMail" is the old default name.
+      if(foldername.Length() == 0)
+         foldername = "SentMail";
+      mApplication->GetProfile()->writeEntry(MP_OUTGOINGFOLDER, foldername);
       ProfileBase *ibp = ProfileBase::CreateProfile(foldername);
       if (!  parent->HasEntry(foldername) )
       {
@@ -590,6 +599,8 @@ SetupInitialConfig(void)
       mApplication->GetProfile()->writeEntry(MP_HOSTNAME,wxGetFullHostName());
    
    (void)VerifyInbox();
+   mApplication->GetProfile()->writeEntry(MP_OUTGOINGFOLDER, _("Sent"));
+   mApplication->GetProfile()->writeEntry(MP_NEWMAIL_FOLDER, _("New Mail"));
 
 #if 0
 #if defined ( USE_PYTHON )
