@@ -23,14 +23,10 @@
 include ../../makeopts
 
 CWD = modules
-SRC = Mdummy.cpp Filters.cpp 
+SRC = Mdummy.cpp Filters.cpp Calendar.cpp
 
 ifdef PISOCK_LIB
 SRC := $(SRC) PalmOS.cpp
-endif
-
-ifdef EXPERIMENTAL
-SRC := $(SRC) Calendar.cpp
 endif
 
 HDR = $(SRC:.cpp=.h)

@@ -13,6 +13,11 @@
 #include   "Mcommon.h"   
 #include   "MailFolder.h"
 #include   "Profile.h"   
+
+// we don't want to export our functions as we don't build a shared library
+#undef SWIGEXPORT
+#define SWIGEXPORT(a,b) a b
+
 %}
 
 %import MString.i

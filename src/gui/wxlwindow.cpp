@@ -67,6 +67,7 @@
 #  define WXLO_DEBUG(x)
 #endif
 
+
 // for profiling in debug mode:
 WXLO_TIMER_DEFINE(UpdateTimer);
 WXLO_TIMER_DEFINE(BlitTimer);
@@ -785,7 +786,10 @@ wxLayoutWindow::ScrollToCursor(void)
 {
    //is always needed to make sure we know where the cursor is
    //if(IsDirty())
-   RequestUpdate(m_llist->GetUpdateRect());
+   //RequestUpdate(m_llist->GetUpdateRect());
+
+
+   ResizeScrollbars();
 
    int x0,y0,x1,y1, dx, dy;
 
@@ -954,7 +958,7 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
 
    WXLO_TIMER_START(BlitTimer);
 // Now copy everything to the screen:
-#if 0
+#ifdef WXLO_PARTIAL_REFRESH
    // This somehow doesn't work, but even the following bit with the
    // whole rect at once is still a bit broken I think.
    wxRegionIterator ri ( GetUpdateRegion() );
@@ -1028,13 +1032,17 @@ as needed.
 void
 wxLayoutWindow::ResizeScrollbars(bool exact)
 {
-
-   if(! IsDirty())
-      return;
-   
    wxClientDC dc( this );
    PrepareDC( dc );
 //   m_llist->ForceTotalLayout();
+
+   if(! IsDirty())
+   {
+      // we are laying out just the minimum, but always up to the
+      // cursor line, so the cursor position is updated.
+      m_llist->Layout(dc, 0);
+      return;
+   }
    WXLO_TIMER_START(LayoutTimer);
    m_llist->Layout(dc, -1);
    WXLO_TIMER_STOP(LayoutTimer);

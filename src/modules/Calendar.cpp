@@ -21,8 +21,6 @@
 #   include "MMainFrame.h"
 #endif
 
-#ifdef EXPERIMENTAL
-
 
 #include "MModule.h"
 #include "modules/Calendar.h"
@@ -236,9 +234,9 @@ public:
    void GetConfig(void);
 
    virtual bool OnClose()
-   {
-      return TRUE;
-   }
+      {
+         return TRUE;
+      }
 
 protected:
 
@@ -625,7 +623,7 @@ CalendarFrame::AddReminder(const wxString &itext,
    wxString timeStr = wxDateTime::Now().Format("%d %b %Y %H:%M:%S");
 
 
-   itext = strutil_enforceCRLF(itext);
+   String tmp = strutil_enforceCRLF(itext);
    if(action == CAL_ACTION_SEND)
    {
       timeStr = when.Format("%d %b %Y %H:%M:%S");
@@ -636,7 +634,7 @@ CalendarFrame::AddReminder(const wxString &itext,
           << "X-M-CAL-DATE: "
           << MakeDateLine(m_CalCtrl->GetDate())
           << "\015\012"
-          << itext;
+          << tmp;
    }
    else
    {
@@ -651,7 +649,7 @@ CalendarFrame::AddReminder(const wxString &itext,
           << "X-M-CAL-CMD: REMIND" << "\015\012"
           << "X-M-CAL-DATE: %s" << "\015\012"
           << "\015\012"
-          << itext
+          << tmp
           << "\015\012";
       text.Printf(fmt, timeStr.c_str(),
                   MakeDateLine(m_CalCtrl->GetDate()).c_str());
@@ -891,6 +889,3 @@ CalendarModule::Configure(void)
    ShowCustomOptionsDialog(gs_OptionsPageDesc, p, NULL);
    p->DecRef();
 }
-
-
-#endif // experimental

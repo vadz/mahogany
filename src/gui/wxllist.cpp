@@ -1355,9 +1355,8 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
             do
             {
                foundSpace = isspace(tobj->GetText()[breakpos]) != 0;
-               if ( !foundSpace )
+               if ( foundSpace )
                   break;
-
             }
             while ( breakpos-- > 0 );
          }
@@ -2421,6 +2420,9 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
          || line == m_CursorLine
          // or if it's the line we are asked to look for:
          || (cpos && line->GetLineNumber() == cpos->y) 
+         // layout at least the desired region:
+         || (bottom == -1 )
+         || (line->GetPosition().y <= bottom)
          )
       {
          if(line->IsDirty())
@@ -2456,9 +2458,6 @@ wxLayoutList::Layout(wxDC &dc, CoordType bottom, bool forceAll,
             else
                line->Layout(dc, this);
          }
-         // little condition to speed up redrawing:
-         if(bottom != -1 && line->GetPosition().y > bottom)
-            break;
       }
       line = line->GetNextLine();
    }

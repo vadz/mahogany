@@ -1967,6 +1967,13 @@ extern "C"
       msg->DecRef();
       return rc ? (result != 0) : false;
    }
+#else
+
+   static Value func_python(ArgList *args, Parser *p)
+   {
+      p->Error(_("Python-Unterstützung für Filter ist nicht verfügbar."));
+      return false;
+   }
 #endif
 
 /* * * * * * * * * * * * * * *
