@@ -20,6 +20,8 @@ $Id$
 		- deleting wxllist takes ages, calling MoveLines(,-1)
 		  recursively 
 
+8	VZ	AdbImort dialog under Windows lacks UpdateUI somewhere
+
 8	VZ	mh_parameters provokes a compile bug - what to do?
 
 5	KB	for NNTP only count unread/new messages

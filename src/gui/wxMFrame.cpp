@@ -137,7 +137,7 @@ wxMFrame::AddFileMenu(void)
    int style = 0;
    if(READ_APPCONFIG(MP_TEAROFF_MENUS) != 0)
       style = wxMENU_TEAROFF;
-   wxMenu *fileMenu = new wxMenu(style); 
+   wxMenu *fileMenu = new wxMenu("", style); 
 #endif
 
    AppendToMenu(fileMenu, WXMENU_FILE_BEGIN + 1, WXMENU_FILE_CLOSE - 1);

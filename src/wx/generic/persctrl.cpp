@@ -71,6 +71,10 @@ BEGIN_EVENT_TABLE(wxPListCtrl, wxListCtrl)
     EVT_SIZE(wxPListCtrl::OnSize)
 END_EVENT_TABLE()
 
+BEGIN_EVENT_TABLE(wxPListBox, wxListBox)
+    EVT_SIZE(wxPListBox::OnSize)
+END_EVENT_TABLE()
+
 // ----------------------------------------------------------------------------
 // constants
 // ----------------------------------------------------------------------------
@@ -584,7 +588,7 @@ void wxPSplitterWindow::SetConfigPath(const wxString& path)
 }
 
 // ----------------------------------------------------------------------------
-// wxPListBox
+// wxPListCtrl
 // ----------------------------------------------------------------------------
 
 const char *wxPListCtrl::ms_path = "ListCtrlColumns";
@@ -819,6 +823,114 @@ void wxPCheckBox::SaveValue()
         m_persist->RestorePath();
     }
     //else: couldn't change path, probably because there is no config object.
+}
+
+// ----------------------------------------------------------------------------
+// wxPListBox
+// ----------------------------------------------------------------------------
+
+const char *wxPListBox::ms_path = "ListBoxSelection";
+
+// default ctor
+wxPListBox::wxPListBox()
+{
+    m_bFirstTime = true;
+    m_persist = new wxPHelper;
+}
+
+// standard ctor
+wxPListBox::wxPListBox(const wxString& configPath,
+                       wxWindow *parent,
+                       wxWindowID id,
+                       const wxPoint &pos,
+                       const wxSize &size,
+                       int n,
+                       const wxString *items,
+                       long style,
+                       const wxValidator& validator,
+                       wxConfigBase *config)
+           : wxListBox(parent, id, pos, size, n, items, style, validator)
+{
+    m_bFirstTime = true;
+    m_persist = new wxPHelper(configPath, ms_path, config);
+}
+
+// pseudo ctor
+bool wxPListBox::Create(const wxString& configPath,
+                        wxWindow *parent,
+                        wxWindowID id,
+                        const wxPoint &pos,
+                        const wxSize &size,
+                        int n,
+                        const wxString *items,
+                        long style,
+                        const wxValidator& validator,
+                        wxConfigBase *config)
+{
+   m_persist->SetConfig(config);
+   m_persist->SetPath(configPath, ms_path);
+
+   return wxListBox::Create(parent, id, pos, size, n, items, style, validator);
+}
+
+// dtor saves the settings
+wxPListBox::~wxPListBox()
+{
+    SaveSelection();
+
+    delete m_persist;
+}
+
+// set the config object to use (must be !NULL)
+void wxPListBox::SetConfigObject(wxConfigBase *config)
+{
+    m_persist->SetConfig(config);
+}
+
+// set the path to use (either absolute or relative)
+void wxPListBox::SetConfigPath(const wxString& path)
+{
+    m_persist->SetPath(path, ms_path);
+}
+
+// first time our OnSize() is called we restore the seection: we can't do it
+// before because we don't know when all the items will be added to the listbox
+// (surely they may be added after ctor call)
+void wxPListBox::OnSize(wxSizeEvent& event)
+{
+    if ( m_bFirstTime ) {
+        RestoreSelection();
+
+        m_bFirstTime = FALSE;
+    }
+
+    // important things may be done in the base class version!
+    event.Skip();
+}
+
+// retrieve the selection from config
+void wxPListBox::RestoreSelection()
+{
+    if ( m_persist->ChangePath() ) {
+        long sel = m_persist->GetConfig()->Read(m_persist->GetKey(), 0l);
+
+        if ( sel < Number() ) {
+            SetSelection(sel);
+        }
+
+        m_persist->RestorePath();
+    }
+}
+
+// save the selection to config
+void wxPListBox::SaveSelection()
+{
+    if ( m_persist->ChangePath() ) {
+        wxConfigBase *config = m_persist->GetConfig();
+        config->Write(m_persist->GetKey(), (long)GetSelection());
+
+        m_persist->RestorePath();
+    }
 }
 
 // ----------------------------------------------------------------------------

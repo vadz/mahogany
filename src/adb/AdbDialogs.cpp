@@ -229,7 +229,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxFrame *parent)
    m_autoFormat->SetConstraints(c);
 
    // listbox
-   m_listbox = new wxListBox(canvas, -1);
+   m_listbox = new wxPListBox("AdbImportFormat", canvas, -1);
    c = new wxLayoutConstraints;
    c->top.Below(m_autoFormat, LAYOUT_Y_MARGIN);
    c->left.SameAs(canvas, wxLeft);

@@ -962,14 +962,15 @@ wxMessageSortingDialog::wxMessageSortingDialog(ProfileBase *profile, wxWindow *p
    wxClientDC dc(this);
    dc.SetFont(wxSystemSettings::GetSystemFont(wxSYS_DEFAULT_GUI_FONT));
    long width, widthMax = 0;
-   for ( size_t n = 0; n < NUM_LABELS; n++ )
+   size_t n;
+   for ( n = 0; n < NUM_LABELS; n++ )
    {
       dc.GetTextExtent(labels[n], &width, NULL);
       if ( width > widthMax ) widthMax = width;
    }
 
    wxLayoutConstraints *c;
-   for(size_t n = 0; n < NUM_CRITERIA; n++)
+   for( n = 0; n < NUM_CRITERIA; n++)
    {
       wxStaticText *txt = new wxStaticText(this, -1,
                                            n < NUM_LABELS ? _(labels[n]) :

@@ -188,7 +188,7 @@ wxTemplateDialog::wxTemplateDialog(ProfileBase *profile, wxWindow *parent)
    msg->SetConstraints(c);
 
    // on the left side is the listbox with all available templates
-   wxListBox *listbox = new wxListBox(this, -1);
+   wxListBox *listbox = new wxPListBox("MsgTemplate", this, -1);
 
    // this array should be in sync with MessageTemplateKind enum
    ASSERT_MSG( WXSIZEOF(ms_templateNames) == MessageTemplate_Max,
