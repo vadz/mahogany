@@ -6,7 +6,11 @@
  * $Id$         *
  *                                                                  *
  * $Log$
+ * Revision 1.23  1998/06/23 08:46:45  KB
+ * fixed #pragma
+ *
  * Revision 1.22  1998/06/22 22:36:57  VZ
+ *
  * config file name fixed for Windows
  *
  * Revision 1.21  1998/06/19 08:05:15  KB
@@ -64,7 +68,7 @@
  *******************************************************************/
 
 #ifdef __GNUG__
-#   pragma implementation "MAppBase.h"
+#   pragma implementation "MApplication.h"
 #endif
 
 // ============================================================================
