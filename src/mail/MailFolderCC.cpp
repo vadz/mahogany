@@ -5878,9 +5878,10 @@ void MailFolderCC::StartReading(unsigned long total)
    long size = READ_CONFIG(m_Profile, MP_MESSAGEPROGRESS_THRESHOLD_SIZE);
    if ( size > 0 )
    {
-      int delay = total > (unsigned long)size * 1024
-                  ? 0
-                  : READ_CONFIG(m_Profile, MP_MESSAGEPROGRESS_THRESHOLD_TIME);
+      long delay =
+         total > (unsigned long)size * 1024
+            ? 0
+            : (long)READ_CONFIG(m_Profile, MP_MESSAGEPROGRESS_THRESHOLD_TIME);
 
       gs_readProgressInfo = new ReadProgressInfo(total, delay);
    }

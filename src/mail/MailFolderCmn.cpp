@@ -98,6 +98,18 @@ extern const MOption MP_USE_TRASH_FOLDER;
 #define TRACE_MF_CLOSE "mfclose"
 
 // ----------------------------------------------------------------------------
+// private functions
+// ----------------------------------------------------------------------------
+
+static long GetProgressThreshold(Profile *profile)
+{
+   if ( !profile )
+      return GetNumericDefault(MP_FOLDERPROGRESS_THRESHOLD);
+
+   return READ_CONFIG(profile, MP_FOLDERPROGRESS_THRESHOLD);
+}
+
+// ----------------------------------------------------------------------------
 // mailfolder closing helper classes
 // ----------------------------------------------------------------------------
 
@@ -665,9 +677,8 @@ MailFolderCmn::SaveMessagesToFile(const UIdArray *selections,
    int n = selections->Count();
 
    MProgressDialog *pd = NULL;
-   int threshold = GetProfile()
-      ? READ_CONFIG(GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
-      : GetNumericDefault(MP_FOLDERPROGRESS_THRESHOLD);
+   int threshold = GetProgressThreshold(GetProfile());
+
    if ( threshold > 0 && n > threshold )
    {
       wxString msg;
@@ -770,9 +781,7 @@ MailFolderCmn::SaveMessages(const UIdArray *selections,
    }
 
    MProgressDialog *pd = NULL;
-   int threshold = mf->GetProfile()
-      ? READ_CONFIG(mf->GetProfile(), MP_FOLDERPROGRESS_THRESHOLD)
-      : GetNumericDefault(MP_FOLDERPROGRESS_THRESHOLD);
+   int threshold = GetProgressThreshold(mf->GetProfile());
 
    if ( threshold > 0 && n > threshold )
    {
