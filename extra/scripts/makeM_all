@@ -3,11 +3,53 @@
 #
 # $Id$
 # makeM_all script: Checkout, compile and package wxGTK and Mahogany.
-# Tested on:    Linux/x86: Debian/Coral, RedHat
+# Tested on:    Linux/x86: Debian/Corel, RedHat
 #               Linux/axp: Debian Slink
 #               Solaris/Sparc
 #		FreeBSD/x86
 #
+#
+#
+# Some quick notes how to adapt this script:
+#
+# What does it do?
+#    - download/update wxGTK from cvs and compile/install it
+#    - download/update Mahogany from cvs and compile/install it
+#    - optionally upload stuff to Mahogany FTP server as packages
+#      for various systems and tar balls for source and binary packages
+#
+# For uploads, SSH1 access is required on the ftp server.
+# For everything, cvs read-only access is required and the user
+# running this script must have done a "cvs login" manually with exactly 
+# the same CVSROOT settings as used in this script. Otherwise cvs will 
+# fail.
+# Alternatively, without cvs, the script can build everything from
+# source tarballs.
+#
+# Debian/RedHat should be detected automatically.
+#
+# Several options are set from the hostname, I have simply put in my
+# favourite buildhosts and they set their build directories etc.
+# Only the host designated as "DOCHOST" will build the documentation
+# and upload it. All other hosts will use the pre-built docs from the
+# FTP server.
+#
+# Most options are hard-coded at the top of the script in
+# corresponding variables. A central config file is retrieved from the 
+# FTP server and can be used to override the settings. Useful for
+# changing version numbers, etc. Host-specific settings are set after
+# that. 
+#
+#
+# I know this script is fairly ugly, but it builds everything on a
+# variety of different systems and *works*. Took a long time to get it 
+# all right.
+#
+#
+# Any problems, comments, improvements:  mailto:ballueder@gmx.net
+#
+
+
 echo "##############################################################################"
 echo "makeM_deb running on " `hostname` " date: " `date`
 echo "##############################################################################"
@@ -180,7 +222,7 @@ then
   MPREFIX=/opt
 fi
 
-if [ `hostname` = caisteal -o `hostname` = dearg -o `hostname` = bidean]
+if [ `hostname` = caisteal -o `hostname` = dearg -o `hostname` = bidean ]
 then
   OSTYPE=SunOS
   OSTYPE_ADDON="-sparc"
