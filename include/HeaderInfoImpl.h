@@ -115,6 +115,9 @@ private:
    /// build m_tableMsgno/m_tablePos from sort/thread data if not done yet
    void BuildTables();
 
+   /// build m_tablePos from m_tableMsgno (call only if needed)
+   void BuildInverseTable();
+
    /// combine sorting and threading data into m_tableMsgno
    void CombineSortAndThread();
 
