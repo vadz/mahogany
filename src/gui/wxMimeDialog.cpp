@@ -66,7 +66,8 @@ private:
    bool *m_openAsMsg;
 
    // the GUI controls
-   wxTextCtrl *m_txtCommand;
+   wxStaticText *m_labelCommand;
+   wxPTextEntry *m_txtCommand;
    wxCheckBox *m_chkOpenAsMsg;
 
 
@@ -110,7 +111,7 @@ wxMimeOpenWithDialog::wxMimeOpenWithDialog(wxWindow *parent,
                      _("Please enter the command to handle data of type \"%s\".\n"
                        "\n"
                        "The command may contain the string \"%%s\" which will "
-                       "be replaced by the file name and if you don't specify it,\n"
+                       "be replaced by the file name and if you don't specify it, "
                        "the file name will be appended at the end."),
                      mimetype.c_str()
                   );
@@ -123,19 +124,35 @@ wxMimeOpenWithDialog::wxMimeOpenWithDialog(wxWindow *parent,
 
    wxStaticText *help = CreateMessage(this, msg, box);
 
-   wxArrayString labels;
-   labels.Add(_("Open &with:"));
-   labels.Add(_("Open as &mail message"));
-   const long widthMax = GetMaxLabelWidth(labels, this);
+   m_labelCommand = new wxStaticText(this, wxID_ANY, _("Open &with:"));
 
-   const wxCoord MARGIN = 2*LAYOUT_X_MARGIN;
-   m_txtCommand = CreateFileEntry(this, labels[0], widthMax, help, MARGIN);
+   wxLayoutConstraints *c = new wxLayoutConstraints;
+   c->left.SameAs(this, wxLeft, LAYOUT_X_MARGIN);
+   c->top.Below(help, 2*LAYOUT_Y_MARGIN);
+   c->width.AsIs();
+   c->height.AsIs();
+   m_labelCommand->SetConstraints(c);
+
+   m_txtCommand = new wxPTextEntry(_T("OpenWith"), this, wxID_ANY);
+   c = new wxLayoutConstraints;
+   c->centreY.SameAs(m_labelCommand, wxCentreY);
+   c->left.RightOf(m_labelCommand, LAYOUT_X_MARGIN);
+   c->right.SameAs(this, wxRight, 2*LAYOUT_X_MARGIN);
+   c->height.AsIs();
+   m_txtCommand->SetConstraints(c);
+
 
    // finally the optional checkbox
    if ( m_openAsMsg )
    {
-      m_chkOpenAsMsg = CreateCheckBox(this, labels[1], widthMax,
-                                      m_txtCommand, MARGIN);
+      m_chkOpenAsMsg = new wxCheckBox(this, wxID_ANY, _("Open as &mail message"));
+      wxLayoutConstraints *c = new wxLayoutConstraints;
+      c->top.Below(m_txtCommand, 3*LAYOUT_Y_MARGIN);
+      c->centreX.SameAs(this, wxCentreX);
+      c->width.AsIs();
+      c->height.AsIs();
+
+      m_chkOpenAsMsg->SetConstraints(c);
    }
 
 
@@ -198,7 +215,10 @@ bool wxMimeOpenWithDialog::TransferDataFromWindow()
 
 void wxMimeOpenWithDialog::OnCheckBox(wxCommandEvent& event)
 {
-   EnableTextWithButton(this, m_txtCommand, !event.IsChecked());
+   bool enableText = !event.IsChecked();
+
+   m_labelCommand->Enable(enableText);
+   m_txtCommand->Enable(enableText);
 }
 
 // ----------------------------------------------------------------------------
