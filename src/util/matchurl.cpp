@@ -489,6 +489,15 @@ URLDetector::URLDetector()
  */
 static bool CanBeWrapped(const char *p)
 {
+   // first check: if the last character on the previous line is a slash,
+   // suppose that it's the trailing slash at the end of URL.
+   //
+   // Rationale: slashes are relatively rare in the URLs and so it's unlikely
+   // that an URL is accidentally wrapped at one of them, but many URLs end in
+   // a slash
+   if ( p[-1] == '/' )
+      return false;
+
    // we consider any alphanumeric string of 3 characters an extension
    // but we have separate arrays of known extensions of other lengths
    static const char *extensions1 =
@@ -676,8 +685,7 @@ match:
          // heuristic text for end of URL detection
          if ( p - start > 5 && !CanBeWrapped(p) )
          {
-            // apparently we have an extension at the end of this line, so
-            // consider that the URL ends here
+            // it seems that the URL ends here
             break;
          }
 
