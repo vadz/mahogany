@@ -43,6 +43,7 @@
 
 #include <wx/log.h>
 #include <wx/confbase.h>
+#include <wx/fileconf.h>
 #include <wx/utils.h>         // wxGetFullHostName()
 #include <wx/dialup.h>        // for IsAlwaysOnline()
 #include <wx/socket.h>        // wxIPv4Address
@@ -2480,6 +2481,48 @@ SetupMinimalConfig(void)
 
 }
 
+
+#ifdef EXPERIMENTAL_sync
+/*
+ * This doesn't strictly belong here(?) but for now it's the easiest
+ * place to put it.
+ * This function exports a configurable subset of the configuration
+ * settings to a file.
+ */
+static
+bool SynchroniseConfigSettings(void)
+{
+   if(READ_APPCONFIG(MP_SYNC_REMOTE) == 0)
+      return TRUE; // nothing to do
+   
+   wxFileConfig *fc = new
+      wxFileConfig("","","/tmp/EXPORTCONFIG","",wxCONFIG_USE_LOCAL_FILE);
+   if(!fc) return FALSE;
+
+   bool rc = TRUE;
+
+   if(READ_APPCONFIG(MP_SYNC_FILTERS) != 0)
+      rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
+                        M_FILTERS_CONFIG_SECTION, M_FILTERS_CONFIG_SECTION_UNIX, TRUE, fc);
+      
+   if(READ_APPCONFIG(MP_SYNC_IDS) != 0)
+      rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
+                        M_IDENTITY_CONFIG_SECTION, M_IDENTITY_CONFIG_SECTION_UNIX, TRUE, fc);
+
+   if(READ_APPCONFIG(MP_SYNC_FOLDERS) != 0)
+   {
+      String group = READ_APPCONFIG(MP_SYNC_FOLDERGROUP);
+      String src = M_PROFILE_CONFIG_SECTION + '/' + group;
+      String dest = M_PROFILE_CONFIG_SECTION_UNIX + '/' + group;
+      rc &= CopyEntries(mApplication->GetProfile()->GetConfig(),
+                        src, dest, TRUE, fc);
+   }
+   delete  fc;
+   return rc;
+}
+
+#endif
+
 extern bool
 CheckConfiguration(void)
 {
@@ -2528,5 +2571,11 @@ CheckConfiguration(void)
    if ( !VerifyInbox() )
       wxLogDebug("Evil user corrupted his profile settings - restored.");
 
+#ifdef EXPERIMENTAL_sync
+   bool rc = SynchroniseConfigSettings();
+   ASSERT(rc == TRUE);
+#endif
+   
    return true;
 }
+

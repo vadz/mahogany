@@ -1,4 +1,11 @@
 (next release) on (date of next release)
+28.08.00 KB: fixed auto-creation of non-existent folders on IMAP etc
+             reorganised the options dialog for the PalmOS module and documented
+	     it better
+             Started remote config synchronisation code, EXPERIMENTAL_sync
+             configure: --with-experimental=a,b,c --> defines EXPERIMENTAL_a,
+             EXPERIMENTAL_b, ...
+             Added MailFolderCC::HasInferiors()
 24.08.00 VZ: added "remove identity" command, it is now possible to set
              signature/X-face and other composition parameters for each identity
              separately, options which don't make sense for identities don't

@@ -492,6 +492,14 @@ MailFolder::CreateFolder(const String &name,
       p->writeEntry(MP_FOLDER_PATH, path);
    if(comment.Length() > 0)
       p->writeEntry(MP_FOLDER_COMMENT, comment);
+
+   /* So far the drivers do an auto-create when we open a folder, so
+      now we attempt to open the folder to see what happens: */
+   MFolder *mf = MFolder::Get(name);
+   MailFolder *mf2 = MailFolder::OpenFolder(mf);
+   SafeDecRef(mf2);
+   SafeDecRef(mf);
+   
    p->DecRef();
 
    return true;

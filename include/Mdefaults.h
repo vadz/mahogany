@@ -29,14 +29,17 @@
     profiles (trailing '/' required).
 */
 #ifndef M_PROFILE_CONFIG_SECTION
+#  define   M_PROFILE_CONFIG_SECTION_UNIX   "/M/Profiles"
+#  define   M_IDENTITY_CONFIG_SECTION_UNIX   "/M/Ids"
+#  define   M_FILTERS_CONFIG_SECTION_UNIX   "/M/Filters"
 #  ifdef OS_WIN
 #     define   M_PROFILE_CONFIG_SECTION   "/Profiles"
 #     define   M_IDENTITY_CONFIG_SECTION   "/Ids"
 #     define   M_FILTERS_CONFIG_SECTION   "/Filters"
 #  else  // Unix
-#     define   M_PROFILE_CONFIG_SECTION   "/M/Profiles"
-#     define   M_IDENTITY_CONFIG_SECTION   "/M/Ids"
-#     define   M_FILTERS_CONFIG_SECTION   "/M/Filters"
+#     define   M_PROFILE_CONFIG_SECTION   M_PROFILE_CONFIG_SECTION_UNIX
+#     define   M_IDENTITY_CONFIG_SECTION  M_IDENTITY_CONFIG_SECTION_UNIX
+#     define   M_FILTERS_CONFIG_SECTION   M_FILTERS_CONFIG_SECTION_UNIX
 #  endif // Unix/Win
 #endif
 
@@ -666,6 +669,22 @@
 //@}
 /// an entry used for testing
 #define MP_TESTENTRY      "TestEntry"
+/// Do we remote synchronise configuration settings?
+#define MP_SYNC_REMOTE   "SyncRemote"
+/// IMAP folder to sync to
+#define MP_SYNC_FOLDER   "SyncFolder"
+/// our last sync date
+#define MP_SYNC_DATE      "SyncDate"
+/// sync filters?
+#define MP_SYNC_FILTERS   "SyncFilters"
+/// sync filters?
+#define MP_SYNC_IDS   "SyncIds"
+/// sync folders?
+#define MP_SYNC_FOLDERS   "SyncFolders"
+/// sync folder tree
+#define MP_SYNC_FOLDERGROUP   "SyncFolderGroup"
+
+
 /** @name names of obsolete configuration entries, for upgrade routines */
 //@{
 #define MP_OLD_FOLDER_HOST "HostName"
@@ -1254,6 +1273,20 @@
 #endif
 /// an entry used for testing
 #define MP_TESTENTRY_D      0L
+/// Do we remote synchronise configuration settings?
+#define MP_SYNC_REMOTE_D   0L
+/// IMAP folder to sync to
+#define MP_SYNC_FOLDER_D   "MahoganySharedConfig"
+/// our last sync date
+#define MP_SYNC_DATE_D      0L
+/// sync filters?
+#define MP_SYNC_FILTERS_D   0L
+/// sync filters?
+#define MP_SYNC_IDS_D   0L
+/// sync folders?
+#define MP_SYNC_FOLDERS_D   0L
+/// sync folder tree
+#define MP_SYNC_FOLDERGROUP_D   ""
 //@}
 
 /** @name other defines used in M */

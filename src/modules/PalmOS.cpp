@@ -683,37 +683,6 @@ PalmOSModule::Connect(void)
          return false;
       }
 
-#if 0
-      // the following code is unsafe under Windows:
-#if defined( wxUSE_THREADS ) && defined( OS_UNIX )
-      // We interrupt the connection attempt after some seconds, to
-      // provide some kind of timeout that the stupid pilot-link code
-      // doesn't. Ugly hack, really. KB
-      PalmOSAcceptThread *acceptThread = new PalmOSAcceptThread(&m_PiSocket);
-      if ( acceptThread->Create() != wxTHREAD_NO_ERROR )
-      {
-         wxLogError(_("Cannot create thread!"));
-         m_PiSocket = pi_accept(m_PiSocket, 0, 0);
-      }
-      else
-      {
-         int oldPiSocket = m_PiSocket;
-         acceptThread->Run();
-         time_t now = time(NULL);
-         while(m_PiSocket < 0 && time(NULL)-now < 5)
-            wxThread::Sleep(100);
-
-         if(m_PiSocket < 0)
-         {
-            //acceptThread->Kill();
-            pi_close(oldPiSocket);
-         }
-      }
-#else
-      m_PiSocket = pi_accept(m_PiSocket, 0, 0);
-#endif
-#endif //0
-
       m_PiSocket = pi_accept_to(m_PiSocket, 0, 0, 5000);
 
       if(m_PiSocket < 0)
@@ -1777,27 +1746,65 @@ PalmOSModule::SyncMAL(void)
 #include "MHelp.h"
 
 
-static ConfigValueDefault gs_ConfigValues [] =
+static ConfigValueDefault gs_ConfigValues1 [] =
 {
    ConfigValueDefault(MP_MOD_PALMOS_SYNCMAIL, MP_MOD_PALMOS_SYNCMAIL_D),
-   ConfigValueDefault(MP_MOD_PALMOS_BOX, MP_MOD_PALMOS_BOX_D),
-   ConfigValueDefault(MP_MOD_PALMOS_DISPOSE, MP_MOD_PALMOS_DISPOSE_D),
 //   ConfigValueDefault(MP_MOD_PALMOS_SYNCADDR, MP_MOD_PALMOS_SYNCADDR_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUP, MP_MOD_PALMOS_BACKUP_D),
+#ifdef HAVE_LIBMAL
+   ConfigValueDefault(MP_MOD_PALMOS_SYNCMAL, MP_MOD_PALMOS_SYNCMAL_D),
+#endif
+   ConfigValueNone(),
+   ConfigValueDefault(MP_MOD_PALMOS_AUTOINSTALL, MP_MOD_PALMOS_AUTOINSTALL_D),
+   ConfigValueDefault(MP_MOD_PALMOS_AUTOINSTALLDIR, MP_MOD_PALMOS_AUTOINSTALLDIR_D),
+   ConfigValueDefault(MP_MOD_PALMOS_PILOTDEV, MP_MOD_PALMOS_PILOTDEV_D),
+   ConfigValueDefault(MP_MOD_PALMOS_SPEED, MP_MOD_PALMOS_SPEED_D),
+   ConfigValueDefault(MP_MOD_PALMOS_BOX, MP_MOD_PALMOS_BOX_D),
+   ConfigValueDefault(MP_MOD_PALMOS_DISPOSE, MP_MOD_PALMOS_DISPOSE_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUPDIR, MP_MOD_PALMOS_BACKUPDIR_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUP_SYNC, MP_MOD_PALMOS_BACKUP_SYNC_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUP_INCREMENTAL, MP_MOD_PALMOS_BACKUP_INCREMENTAL_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUP_ALL, MP_MOD_PALMOS_BACKUP_ALL_D),
    ConfigValueDefault(MP_MOD_PALMOS_BACKUP_EXCLUDELIST, MP_MOD_PALMOS_BACKUP_EXCLUDELIST_D),
-   ConfigValueDefault(MP_MOD_PALMOS_AUTOINSTALL, MP_MOD_PALMOS_AUTOINSTALL_D),
-   ConfigValueDefault(MP_MOD_PALMOS_AUTOINSTALLDIR, MP_MOD_PALMOS_AUTOINSTALLDIR_D),
-   ConfigValueDefault(MP_MOD_PALMOS_PILOTDEV, MP_MOD_PALMOS_PILOTDEV_D),
-   ConfigValueDefault(MP_MOD_PALMOS_SPEED, MP_MOD_PALMOS_SPEED_D),
+};
+
+static wxOptionsPage::FieldInfo gs_FieldInfos1[] =
+{
+   { gettext_noop("Synchronise Mail"), wxOptionsPage::Field_Bool,    -1 },
+//   { gettext_noop("Synchronise Addressbook"), wxOptionsPage::Field_Bool,    -1 },
+      { gettext_noop("Always do Backup on sync"), wxOptionsPage::Field_Bool,    -1 },
+#ifdef HAVE_LIBMAL
+   { gettext_noop("Sync to MAL server (e.g. AvantGo)"), wxOptionsPage::Field_Bool,    -1 }, 
+#endif
+         { gettext_noop("The Auto-Install function will automatically\n"
+                        "install all databases from a given directory\n"
+                        "on the PalmPilot during synchronisation."),
+              wxOptionsPage::Field_Message, -1},
+            { gettext_noop("Do Auto-Install"), wxOptionsPage::Field_Bool,  -1 },
+      { gettext_noop("Directory for Auto-Install"), wxOptionsPage::Field_Dir, -1 },
+               { gettext_noop("Pilot device"), wxOptionsPage::Field_Text,    -1 },
+   // the speed values must be in sync with the ones in the speeds[]
+   // array in GetConfig() further up:
+   { gettext_noop("Connection speed:9600:19200:38400:57600:115200"), wxOptionsPage::Field_Combo,    -1 },
+   { gettext_noop("Mailbox for exchange"), wxOptionsPage::Field_Text, -1},
+   { gettext_noop("Mail disposal mode:keep:delete:file"), wxOptionsPage::Field_Combo,   -1},
+   { gettext_noop("Directory for backup files"), wxOptionsPage::Field_Text,    -1 },
+   { gettext_noop("Delete backups of no longer existing databases"),
+     wxOptionsPage::Field_Bool,    -1 },
+   { gettext_noop("Backup only modified databases"), wxOptionsPage::Field_Bool,    -1 },
+   { gettext_noop("Force total backup of all databases"), wxOptionsPage::Field_Bool,    -1 },
+   { gettext_noop("Exclude these databases"), wxOptionsPage::Field_Text,    -1 },
+};
+
+
+static ConfigValueDefault gs_ConfigValues2 [] =
+{
    ConfigValueDefault(MP_MOD_PALMOS_LOCK, MP_MOD_PALMOS_LOCK_D),
+   ConfigValueNone(),
    ConfigValueDefault(MP_MOD_PALMOS_SCRIPT1, MP_MOD_PALMOS_SCRIPT1_D),
    ConfigValueDefault(MP_MOD_PALMOS_SCRIPT2, MP_MOD_PALMOS_SCRIPT2_D),
 #ifdef HAVE_LIBMAL
-   ConfigValueDefault(MP_MOD_PALMOS_SYNCMAL, MP_MOD_PALMOS_SYNCMAL_D),
+   ConfigValueNone(),
    ConfigValueDefault(MP_MOD_PALMOS_MAL_USE_PROXY, MP_MOD_PALMOS_MAL_USE_PROXY_D),
    ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_HOST, MP_MOD_PALMOS_MAL_PROXY_HOST_D),
    ConfigValueDefault(MP_MOD_PALMOS_MAL_PROXY_PORT, MP_MOD_PALMOS_MAL_PROXY_PORT_D),
@@ -1809,58 +1816,69 @@ static ConfigValueDefault gs_ConfigValues [] =
 #endif
 };
 
-static wxOptionsPage::FieldInfo gs_FieldInfos[] =
+#define MALPROXY 3
+static wxOptionsPage::FieldInfo gs_FieldInfos2[] =
 {
-   { gettext_noop("Synchronise Mail"), wxOptionsPage::Field_Bool,    -1 },
-   { gettext_noop("Mailbox for exchange"), wxOptionsPage::Field_Text, 0},
-   { gettext_noop("Mail disposal mode:keep:delete:file"), wxOptionsPage::Field_Combo,   0},
-//   { gettext_noop("Synchronise Addressbook"), wxOptionsPage::Field_Bool,    -1 },
-   { gettext_noop("Always do Backup"), wxOptionsPage::Field_Bool,    -1 },
-   { gettext_noop("Directory for backup files"), wxOptionsPage::Field_Text,    -1 },
-   { gettext_noop("Delete no longer existing backup files"),
-     wxOptionsPage::Field_Bool,    -1 },
-   { gettext_noop("Make incremental backup only"), wxOptionsPage::Field_Bool,    -1 },
-   { gettext_noop("Backup all databases"), wxOptionsPage::Field_Bool,    -1 },
-   { gettext_noop("Exclude these databases"), wxOptionsPage::Field_Text,    -1 },
-   { gettext_noop("Do auto-install"), wxOptionsPage::Field_Bool,  -1 },
-   { gettext_noop("Directory for databases to auto-install"), wxOptionsPage::Field_Text,    -1 },
-   { gettext_noop("Pilot device"), wxOptionsPage::Field_Text,    -1 },
-   // the speed values must be in sync with the ones in the speeds[]
-   // array in GetConfig() further up:
-   { gettext_noop("Connection speed:9600:19200:38400:57600:115200"), wxOptionsPage::Field_Combo,    -1 },
    { gettext_noop("Try to lock device"), wxOptionsPage::Field_Bool,    -1 },
+      { gettext_noop("The following two settings can run other\n"
+                     "programs or scripts just before and after\n"
+                     "the synchronisation, e.g. to start/stop other\n"
+                     "services using the serial port. Leave them\n"
+                     "empty unless you know what you are doing."),
+                     wxOptionsPage::Field_Message, -1},
    { gettext_noop("Script to run before"), wxOptionsPage::Field_File,    -1 },
    { gettext_noop("Script to run after"), wxOptionsPage::Field_File,    -1 },
 #ifdef HAVE_LIBMAL
-   { gettext_noop("Sync to MAL server (e.g. AvantGo)"), wxOptionsPage::Field_Bool,    -1 }, // 16
-   { gettext_noop("Use Proxy host for MAL"), wxOptionsPage::Field_Bool,    16 },
-   { gettext_noop("  Proxy host"), wxOptionsPage::Field_Text,    17 },
-   { gettext_noop("  Proxy port number"), wxOptionsPage::Field_Number,    17 },
-   { gettext_noop("  Proxy login"), wxOptionsPage::Field_Text,    17 },
-   { gettext_noop("  Proxy password"), wxOptionsPage::Field_Text,    17 },
-   { gettext_noop("Use SOCKS server for MAL access"), wxOptionsPage::Field_Bool,    16 },//22
-   { gettext_noop("  SOCKS host"), wxOptionsPage::Field_Text,    22 },
-   { gettext_noop("  SOCKS port number"), wxOptionsPage::Field_Number,  22 },
+      { gettext_noop("The following options affect only the\n"
+                     "MAL/AvantGo synchronisation:"),
+           wxOptionsPage::Field_Message, -1},
+   { gettext_noop("Use Proxy host for MAL"), wxOptionsPage::Field_Bool,  -1 },
+   { gettext_noop("  Proxy host"), wxOptionsPage::Field_Text, MALPROXY },
+   { gettext_noop("  Proxy port number"), wxOptionsPage::Field_Number,MALPROXY},
+   { gettext_noop("  Proxy login"), wxOptionsPage::Field_Text,  MALPROXY },
+   { gettext_noop("  Proxy password"), wxOptionsPage::Field_Passwd, MALPROXY },
+   { gettext_noop("Use SOCKS server for MAL access"), wxOptionsPage::Field_Bool,  -1},
+   { gettext_noop("  SOCKS host"), wxOptionsPage::Field_Text,  MALPROXY+5 },
+   { gettext_noop("  SOCKS port number"), wxOptionsPage::Field_Number,  MALPROXY+5 },
 #endif
 };
 
+
 static
-struct wxOptionsPageDesc  gs_OptionsPageDesc =
+struct wxOptionsPageDesc  gs_OptionsPageDesc1 =
 wxOptionsPageDesc(
    gettext_noop("PalmOS module preferences"),
       "palmpilot",// image
       MH_MODULES_PALMOS_CONFIG,
       // the fields description
-      gs_FieldInfos,
-      gs_ConfigValues,
-      WXSIZEOF(gs_FieldInfos)
+      gs_FieldInfos1,
+      gs_ConfigValues1,
+      WXSIZEOF(gs_FieldInfos1)
 );
+
+static
+struct wxOptionsPageDesc  gs_OptionsPageDesc2 =
+wxOptionsPageDesc(
+   gettext_noop("Advanced settings"),
+      "palmpilot",// image
+      MH_MODULES_PALMOS_CONFIG,
+      // the fields description
+      gs_FieldInfos2,
+      gs_ConfigValues2,
+      WXSIZEOF(gs_FieldInfos2)
+);
+
+static
+struct wxOptionsPageDesc g_Pages[] =
+{
+   gs_OptionsPageDesc1, gs_OptionsPageDesc2
+      };
 
 void
 PalmOSModule::Configure(void)
 {
    Profile * p= m_MInterface->CreateModuleProfile(MODULE_NAME);
-   ShowCustomOptionsDialog(gs_OptionsPageDesc, p, NULL);
+   ShowCustomOptionsDialog(2,g_Pages, p, NULL);
    p->DecRef();
 }
 

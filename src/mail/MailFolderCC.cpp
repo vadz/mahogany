@@ -179,6 +179,46 @@ void CC_Cleanup(void)
 // implementation
 // ============================================================================
 
+/* This allows us to temporarily redirect mm_list calls: */
+static void (*gs_mmListRedirect)(MAILSTREAM * stream,
+                                 char delim,
+                                 String  name,
+                                 long  attrib) = NULL;
+
+/*
+  Small function to check if the mailstream has \inferiors flag set or
+  not, i.e. if it is a mailbox or a directory on the server.
+*/
+
+static int gs_HasInferiorsFlag;
+
+static void HasInferiorsMMList(MAILSTREAM *stream,
+                               char delim,
+                               String name,
+                               long attrib)
+{
+   gs_HasInferiorsFlag = ((attrib & LATT_NOINFERIORS) == 0);
+}
+
+/* static */
+bool
+MailFolderCC::HasInferiors(const String &imapSpec,
+                           const String &login,
+                           const String &passwd)
+{
+   // We lock the complete c-client code as we need to immediately
+   // redirect the mm_list() callback to tell us what we want to know.
+   
+   MCclientLocker lock;
+
+   SetLoginData(login, passwd);
+   gs_HasInferiorsFlag = -1;
+   gs_mmListRedirect = HasInferiorsMMList;
+   mail_list (NIL, NULL, (char *) imapSpec.c_str());
+   gs_mmListRedirect = NULL;
+   ASSERT(gs_HasInferiorsFlag != -1);
+   return gs_HasInferiorsFlag != 0;
+}
 
 /*
  * Small function to translate c-client status flags into ours.
@@ -724,6 +764,11 @@ MailFolderCC::OpenFolder(int typeAndFlags,
       userEnteredPwd = true;
    }
 
+   if(type == MF_IMAP)
+   {
+      bool inferiors = HasInferiors(mboxpath, login, password);
+   }
+   
    mf = new
       MailFolderCC(typeAndFlags, mboxpath, profile, server, login, password);
    mf->m_Name = symname;
@@ -981,7 +1026,16 @@ MailFolderCC::Open(void)
               << m_MailboxPath.c_str() + 4; // 4 == strlen("#mh/")
          exists = wxFileExists(path);
       }
-
+      else
+      {
+         // for all other types we assume that it doesn't exist, as
+         // IMAP servers allow us to open a non-existing mailbox but
+         // not to write to it, so we force a creation attempt
+         CCQuiet(); // always try creation
+         mail_create(NIL, (char *)m_MailboxPath.c_str());
+         CCVerbose();
+      }
+      
       // Make sure the event handling code knows us:
       SetDefaultObj();
 
@@ -2526,6 +2580,12 @@ MailFolderCC::mm_list(MAILSTREAM * stream,
                       String  name,
                       long  attrib)
 {
+   if(gs_mmListRedirect)
+   {
+      gs_mmListRedirect(stream, delim, name, attrib);
+      return;
+   }
+   
    MailFolderCC *mf = LookupObject(stream);
    CHECK_RET(mf,"NULL mailfolder");
 

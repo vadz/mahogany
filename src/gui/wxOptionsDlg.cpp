@@ -315,7 +315,20 @@ enum ConfigFields
    ConfigField_DockableToolbars,
    ConfigField_ToolbarsFlatButtons,
    ConfigField_ReenableDialog,
+
+#ifdef EXPERIMENTAL
+   ConfigField_RemoteSynchroniseMessage,
+   ConfigField_RSynchronise,
+   ConfigField_RSConfigFolder,
+   ConfigField_RSFilters,
+   ConfigField_RSIds,
+   ConfigField_RSFolders,
+   ConfigField_RSFolderGroup,
+   ConfigField_OthersLast = ConfigField_RSFolderGroup,
+#else
    ConfigField_OthersLast = ConfigField_ReenableDialog,
+#endif
+   
 
    // the end
    ConfigField_Max
@@ -870,7 +883,23 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("Use floating &menu-bars"), Field_Bool,    -1                     },
    { gettext_noop("Use floating &tool-bars"), Field_Bool,    -1                     },
    { gettext_noop("Tool-bars with f&lat buttons"), Field_Bool,    -1                     },
-   { gettext_noop("&Reenable disabled message boxes..."), Field_SubDlg, -1 }
+   { gettext_noop("&Reenable disabled message boxes..."), Field_SubDlg, -1 },
+#ifdef EXPERIMENTAL
+   { gettext_noop("Mahogany can synchronise part of its configuration\n"
+                  "with settings stored in a special folder. This can\n"
+                  "be used to share settings between machines by storing\n"
+                  "them in a special IMAP mailbox on the server."),
+		  Field_Message, -1 },
+   { gettext_noop("Sync options with remote server"), Field_Bool, -1 },
+   { gettext_noop(" (IMAP) folder for synchronisation"), Field_Folder,
+   ConfigField_RSynchronise },
+   { gettext_noop(" Sync Filter rules"), Field_Bool, ConfigField_RSynchronise
+   },
+   { gettext_noop(" Sync Identities"), Field_Bool, ConfigField_RSynchronise },
+   { gettext_noop(" Sync part of the folder tree"), Field_Bool,
+   ConfigField_RSynchronise },
+   { gettext_noop(" Folder group to synchronise"), Field_Folder, ConfigField_RSynchronise }
+#endif
 };
 
 // FIXME ugly, ugly, ugly... config settings should be living in an array from
@@ -1083,7 +1112,16 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_ENTRY(MP_DOCKABLE_MENUBARS),
    CONFIG_ENTRY(MP_DOCKABLE_TOOLBARS),
    CONFIG_ENTRY(MP_FLAT_TOOLBARS),
-   CONFIG_NONE()
+   CONFIG_NONE(),
+#ifdef EXPERIMENTAL_sync
+   CONFIG_NONE(),
+   CONFIG_ENTRY(MP_SYNC_REMOTE),
+   CONFIG_ENTRY(MP_SYNC_FOLDER),
+   CONFIG_ENTRY(MP_SYNC_FILTERS),
+   CONFIG_ENTRY(MP_SYNC_IDS),
+   CONFIG_ENTRY(MP_SYNC_FOLDERS),
+   CONFIG_ENTRY(MP_SYNC_FOLDERGROUP),
+#endif
 };
 
 #undef CONFIG_ENTRY
