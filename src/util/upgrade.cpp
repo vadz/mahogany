@@ -2642,7 +2642,7 @@ VerifyStdFolders(void)
             (
                MP_OUTGOINGFOLDER,
                _("SentMail"),
-               0,
+               MF_FLAGS_KEEPOPEN,
                _("Folder where Mahogany will store copies of outgoing messages."),
                MFolderIndex_SentMail,
                wxFolderTree::iconSentMail
@@ -2661,7 +2661,7 @@ VerifyStdFolders(void)
             (
                MP_TRASH_FOLDER,
                _("Trash"),
-               0,
+               MF_FLAGS_KEEPOPEN,
                _("Folder where Mahogany will store deleted messages."),
                MFolderIndex_Trash,
                wxFolderTree::iconTrash
