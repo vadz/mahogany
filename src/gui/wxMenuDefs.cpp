@@ -547,12 +547,6 @@ void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
    AddToolbarButton(toolbar, WXTBAR_SEP);
 #endif
 
-   // first add the "Close" icon - but only if we're not the main frame
-   if ( frameId != WXFRAME_MAIN ) {
-      AddToolbarButton(toolbar, WXTBAR_CLOSE);
-      AddToolbarButton(toolbar, WXTBAR_SEP);
-   }
-
    for ( size_t nButton = 0; aTbarIcons[nButton] != -1 ; nButton++ ) {
       AddToolbarButton(toolbar, aTbarIcons[nButton]);
    }
@@ -565,10 +559,18 @@ void AddToolbarButtons(wxToolBar *toolbar, wxFrameId frameId)
       if (combo) toolbar->AddControl(combo);
    }
 
-   // next add the "Help" and "Exit" buttons
+   // next add the "Help" button
    AddToolbarButton(toolbar, WXTBAR_SEP);
    AddToolbarButton(toolbar, WXTBAR_MAIN_HELP);
    AddToolbarButton(toolbar, WXTBAR_SEP);
+
+   // finally, add the "Close" icon - but only if we're not the main frame
+   if ( frameId != WXFRAME_MAIN ) {
+      AddToolbarButton(toolbar, WXTBAR_CLOSE);
+      AddToolbarButton(toolbar, WXTBAR_SEP);
+   }
+
+   // and the "Exit" button for all frames
    AddToolbarButton(toolbar, WXTBAR_MAIN_EXIT);
 
    // must do it for the toolbar to be shown properly
