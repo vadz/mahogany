@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * MailFolderCC class: handling of mail folders with c-client lib   *
  *                                                                  *
- * (C) 1997-2000 by Karsten Ballüder (karsten@phy.hw.ac.uk)         *
+ * (C) 1997-2000 by Karsten Ballüder (ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -51,7 +51,7 @@ extern "C"
 #include <ctype.h>   // isspace()
 
 
-#ifdef USE_EXPERIMENTAL
+#ifdef EXPERIMENTAL
 #   define NEW_UPDATE
 #endif
 
@@ -1270,10 +1270,41 @@ MailFolderCC::GetHeaders(void) const
 #ifdef NEW_UPDATE
    if(m_NeedFreshListing)
    {
+      ///FIXME: these numbers don't change here but at any time, so we 
+      // need to make this member variables and send the appropriate
+      // events when needed.
+      
+      unsigned long nMessages, nRecent;
+      UIdType lastUId;
+      nMessages = m_MailStream->nmsgs;
+      nRecent = m_MailStream->recent;
+      lastUId = m_MailStream->uid_last;
+
       // we need to re-generate the listing:
       SafeDecRef(m_Listing);
-      ((MailFolderCC *)this)->UpdateListing();
-      m_NeedFreshListing = false;
+      ((MailFolderCC *)this)->m_Listing = NULL;
+      // the following hil pointer isn't needed as we have control
+      // over it by means of m_Listing:
+      HeaderInfoList * hil = ((MailFolderCC *)this)->BuildListing();
+      hil->DecRef();
+      
+      // one extra incref, to make sure it won't go away:
+      // BuildListing() does not incref it internally!
+      m_Listing->IncRef();
+
+#ifdef DEBUG
+      String msg;
+      msg.Printf("GetHeaders() for '%s': %ld/%ld/%lu --> %ld/%ld/%lu",
+                 GetName().c_str(), nMessages, nRecent,
+                 (long unsigned) lastUId,
+                 m_MailStream->nmsgs,
+                 m_MailStream->recent,
+                 (long unsigned) m_MailStream->uid_last);
+      LOGMESSAGE((M_LOG_DEBUG, msg.c_str()));
+#endif
+      ((MailFolderCC *)this)->m_NeedFreshListing = false;
+      // do filters etc:
+      ((MailFolderCC *)this)->ProcessHeaderListing(m_Listing);
    }
    else
       m_Listing->IncRef();

@@ -45,9 +45,30 @@
 
 #ifdef WXLAYOUT_DEBUG
 #   define WXLO_TRACE(x)   wxLogDebug(x)
+// activate profiling: #   define WXLO_PROFILE
 #else
 #   define WXLO_TRACE(x)
 #endif
+
+/* Some profiling code: */
+#if defined (WXLO_PROFILE)
+#include <sys/time.h>
+#include <unistd.h>
+
+#   define WXLO_TIMER_DEFINE(x)    static struct timeval  x
+#   define WXLO_TIMER_START(x)     gettimeofday(&x,NULL)
+#   define WXLO_TIMER_STOP(x)      { struct timeval y; \
+                                gettimeofday(&y,NULL); \
+                                x.tv_sec -= y.tv_sec; x.tv_usec -= y.tv_usec; }
+#   define   WXLO_TIMER_PRINT(x)   wxLogDebug("Timer " #x " elapsed: %ld", \
+                                         (long)(x.tv_sec * -1000 - x.tv_usec));
+#else
+#   define   WXLO_TIMER_DEFINE(x)
+#   define   WXLO_TIMER_START(x)
+#   define   WXLO_TIMER_STOP(x)
+#   define   WXLO_TIMER_PRINT(x)
+#endif
+
 
 #define WXLO_DEBUG_URECT 0
 

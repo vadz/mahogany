@@ -56,6 +56,7 @@
 
 #include <ctype.h>
 
+
 // ----------------------------------------------------------------------------
 // macros
 // ----------------------------------------------------------------------------
@@ -65,6 +66,13 @@
 #else
 #  define WXLO_DEBUG(x)
 #endif
+
+// for profiling in debug mode:
+WXLO_TIMER_DEFINE(UpdateTimer);
+WXLO_TIMER_DEFINE(BlitTimer);
+WXLO_TIMER_DEFINE(LayoutTimer);
+WXLO_TIMER_DEFINE(TmpTimer);
+WXLO_TIMER_DEFINE(DrawTimer);
 
 // ----------------------------------------------------------------------------
 // constants
@@ -160,6 +168,7 @@ wxLayoutWindow::wxLayoutWindow(wxWindow *parent)
 #ifndef __WXMSW__
    m_FocusFollowMode = false;
 #endif
+   SetWordWrap(false);
    SetWrapMargin(0);
 
    // no scrollbars initially
@@ -637,10 +646,12 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                Cut();
                break;
             case 'w':
-               m_llist->WrapLine(m_WrapMargin);
+               if(m_WrapMargin > 0)
+                  m_llist->WrapLine(m_WrapMargin);
                break;
             case 'q':
-               m_llist->WrapAll(m_WrapMargin);
+               if(m_WrapMargin > 0)
+                  m_llist->WrapAll(m_WrapMargin);
                break;
 #ifdef WXLAYOUT_DEBUG
             case WXK_F1:
@@ -698,7 +709,9 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                   }
                break;
             case WXK_RETURN:
-               if(m_WrapMargin > 0)
+               if(m_DoWordWrap &&
+                  m_WrapMargin > 0
+                  && m_llist->GetCursorPos().x > m_WrapMargin)
                   m_llist->WrapLine(m_WrapMargin);
                m_llist->LineBreak();
                SetDirty();
@@ -723,7 +736,10 @@ wxLayoutWindow::OnChar(wxKeyEvent& event)
                   && (keyCode < 256 && keyCode >= 32)
                   )
                {
-                  if(m_WrapMargin > 0 && isspace(keyCode))
+                  if(m_DoWordWrap
+                     && m_WrapMargin > 0
+                     && m_llist->GetCursorPos().x > m_WrapMargin
+                     && isspace(keyCode))
                      m_llist->WrapLine(m_WrapMargin);
                   m_llist->Insert((char)keyCode);
                   SetDirty();
@@ -839,6 +855,7 @@ wxLayoutWindow::RequestUpdate(const wxRect *updateRect)
 void
 wxLayoutWindow::InternalPaint(const wxRect *updateRect)
 {
+
    wxPaintDC dc( this );
    PrepareDC( dc );
 
@@ -867,9 +884,9 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
                   updateRect->y+updateRect->height));
    }
 
-   ResizeScrollbars();
+   ResizeScrollbars(y0+y1);
 
-   
+   WXLO_TIMER_START(TmpTimer);
    /* Check whether the window has grown, if so, we need to reallocate
       the bitmap to be larger. */
    if(x1 > m_bitmapSize.x || y1 > m_bitmapSize.y)
@@ -890,7 +907,8 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
                          0,wxTRANSPARENT));
    m_memDC->SetLogicalFunction(wxCOPY);
    m_memDC->Clear();
-
+   WXLO_TIMER_STOP(TmpTimer);
+   
    // fill the background with the background bitmap
    if(m_BGbitmap)
    {
@@ -933,6 +951,7 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
                           offset);
    }
 
+   WXLO_TIMER_START(BlitTimer);
 // Now copy everything to the screen:
 #if 0
    // This somehow doesn't work, but even the following bit with the
@@ -958,6 +977,8 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
 //      y1 += WXLO_YOFFSET; //FIXME might not be needed
       dc.Blit(x0,y0,x1,y1,m_memDC,0,0,wxCOPY,FALSE);
    }
+   WXLO_TIMER_STOP(BlitTimer);
+
 
 #ifdef WXLAYOUT_USE_CARET
    // show the caret back after everything is redrawn
@@ -982,6 +1003,10 @@ wxLayoutWindow::InternalPaint(const wxRect *updateRect)
          m_StatusBar->SetStatusText(label, m_StatusFieldCursor);
       }
    }
+
+   WXLO_TIMER_PRINT(LayoutTimer);
+   WXLO_TIMER_PRINT(BlitTimer);
+   WXLO_TIMER_PRINT(TmpTimer);
 }
 
 void
@@ -1000,7 +1025,7 @@ as needed.
 */
 
 void
-wxLayoutWindow::ResizeScrollbars(bool exact)
+wxLayoutWindow::ResizeScrollbars(bool exact, CoordType bottom)
 {
 
    if(! IsDirty())
@@ -1009,7 +1034,9 @@ wxLayoutWindow::ResizeScrollbars(bool exact)
    wxClientDC dc( this );
    PrepareDC( dc );
 //      m_llist->ForceTotalLayout();
-   m_llist->Layout(dc);
+   WXLO_TIMER_START(LayoutTimer);
+   m_llist->Layout(dc, bottom);
+   WXLO_TIMER_STOP(LayoutTimer);
    ResetDirty();
    
    wxPoint max = m_llist->GetSize();

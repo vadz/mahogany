@@ -541,7 +541,7 @@ wxMessageView::Update(void)
 {
    int i,n,t;
    char const * cptr;
-   String tmp,from,url;
+   String tmp,from,url, mimeType, fileName, disposition;
    bool   lastObjectWasIcon = false; // a flag
    ClickableInfo *ci;
 
@@ -650,12 +650,18 @@ wxMessageView::Update(void)
       if(m_mailMessage->GetPartSize(i) == 0)
          continue; // ignore empty parts
 
+      mimeType = m_mailMessage->GetPartMimeType(i);
+      strutil_tolower(mimeType);
+      fileName = GetParameter(m_mailMessage,i,"FILENAME");
+      (void) m_mailMessage->GetDisposition(i,&disposition);
+      strutil_tolower(disposition);
 #ifdef DEBUG
       obj = NULL;
 #endif
+      
       if( t == Message::MSG_TYPEAPPLICATION) // let's guess a little
       {
-         wxString ext = GetParameter(m_mailMessage,i,"FILENAME").AfterLast('.');
+         wxString ext = fileName.AfterLast('.');
          wxMimeTypesManager& mimeManager = mApplication->GetMimeManager();
          wxFileType *ft = mimeManager.GetFileTypeFromExtension(ext);
          if(ft)
@@ -671,11 +677,18 @@ wxMessageView::Update(void)
                t = Message::MSG_TYPEVIDEO;
          }
       }
-
-      // insert text:
-      if ( (t == Message::MSG_TYPETEXT) ||
-           (t == Message::MSG_TYPEMESSAGE &&
-            m_ProfileValues.rfc822isText) )
+      
+      /* Insert text:
+         - if it is text/plain and not "attachment" or with a filename
+         - if it is rfc822 and it is configured to be displayed
+         - HTML is for now displayed as normal text
+      */
+      if (
+         ((fileName.Length() == 0) && (disposition != "attachment"))
+         &&
+         ( (mimeType == "text/plain" || (mimeType == "text/html") 
+            || (t == Message::MSG_TYPEMESSAGE && m_ProfileValues.rfc822isText))
+         ) )
       {
          unsigned long len;
          cptr = m_mailMessage->GetPartContent(i, &len);
@@ -709,7 +722,7 @@ wxMessageView::Update(void)
          }
       }
       else
-         /* This block captures all non-text message parts. They get
+         /* This block captures all non-inlined message parts. They get
             represented by an icon.
             In case of image content, we check whether it might be a
             Fax message. */
@@ -764,6 +777,13 @@ wxMessageView::Update(void)
    // re-enable auto-formatting, seems safer for selection
    // highlighting, not sure if needed, though
    llist->SetAutoFormatting(TRUE);
+
+   SetWrapMargin(READ_CONFIG(m_Profile, MP_WRAPMARGIN));
+   if(m_WrapMargin > 0 && READ_CONFIG(m_Profile, MP_AUTOMATIC_WORDWRAP) != 0)
+      llist->WrapAll(m_WrapMargin);
+   // yes, we allow the user to edit the buffer, in case he wants to
+   // modify it for pasting or wrap lines manually:
+   SetEditable(TRUE); 
    RequestUpdate();
 }
 

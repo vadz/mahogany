@@ -120,6 +120,7 @@ enum ConfigFields
    ConfigField_UseOutgoingFolder,
    ConfigField_OutgoingFolder,
    ConfigField_WrapMargin,
+   ConfigField_WrapAuto,
    ConfigField_ReplyString,
    ConfigField_ReplyCollapse,
    ConfigField_ReplyCharacter,
@@ -481,6 +482,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
    { gettext_noop("&Folder file for sent messages"),
                                                    Field_File,    ConfigField_UseOutgoingFolder },
    { gettext_noop("&Wrap margin"),                 Field_Number,  -1,                        },
+   { gettext_noop("Wra&p lines automatically"),    Field_Bool,  -1,                        },
    { gettext_noop("&Reply string in subject"),     Field_Text,    -1,                        },
    { gettext_noop("Co&llapse reply markers"
                   ":no:collapse:collapse & count"),            Field_Combo,   -1,                        },
@@ -687,6 +689,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
                                        // messages send
    CONFIG_ENTRY(MP_OUTGOINGFOLDER),
    CONFIG_ENTRY(MP_WRAPMARGIN),
+   CONFIG_ENTRY(MP_AUTOMATIC_WORDWRAP),
    CONFIG_ENTRY(MP_REPLY_PREFIX),
    CONFIG_ENTRY(MP_REPLY_COLLAPSE_PREFIX),
    CONFIG_ENTRY(MP_REPLY_MSGPREFIX),

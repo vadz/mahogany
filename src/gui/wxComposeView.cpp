@@ -1260,6 +1260,7 @@ wxComposeView::CreateFTCanvas(void)
    EnableEditing(true);
    m_LayoutWindow->Clear(m_font, m_size, (int) wxNORMAL, (int)wxNORMAL, 0, &m_fg, &m_bg);
    m_LayoutWindow->SetWrapMargin( READ_CONFIG(m_Profile, MP_WRAPMARGIN));
+   m_LayoutWindow->SetWordWrap( READ_CONFIG(m_Profile, MP_AUTOMATIC_WORDWRAP) != 0);
 }
 
 wxComposeView::wxComposeView(const String &iname,

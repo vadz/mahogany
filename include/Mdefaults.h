@@ -402,6 +402,8 @@
 #define   MP_FOLDER_COMMENT      "Comment"
 /// update interval for folders in seconds
 #define   MP_UPDATEINTERVAL      "UpdateInterval"
+/// do automatic word wrap?
+#define MP_AUTOMATIC_WORDWRAP   "AutoWrap"
 /// wrapmargin for composition/message view (set to -1 to disable it)
 #define   MP_WRAPMARGIN      "WrapMargin"
 /// show MESSAGE/RFC822 as text?
@@ -870,6 +872,8 @@
 #define   MP_FOLDER_COMMENT_D      M_EMPTYSTRING
 /// update interval for folders in seconds
 #define   MP_UPDATEINTERVAL_D      60
+/// do automatic word wrap?
+#define MP_AUTOMATIC_WORDWRAP_D   1l
 /// wrapmargin for composition/message view (set to -1 to disable it)
 #define   MP_WRAPMARGIN_D      60
 /// show MESSAGE/RFC822 as text?

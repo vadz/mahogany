@@ -1,7 +1,7 @@
 /*-*- c++ -*-********************************************************
  * wxllist: wxLayoutList, a layout engine for text and graphics     *
  *                                                                  *
- * (C) 1998-1999 by Karsten Ballüder (Ballueder@usa.net)            *
+ * (C) 1998-2000 by Karsten Ballüder (Ballueder@gmx.net)            *
  *                                                                  *
  * $Id$
  *******************************************************************/
@@ -81,9 +81,10 @@
       return str;
    }
 #else
-#  define   TypeString(t)        ""
-#  define   WXLO_DEBUG(x)
+#   define   TypeString(t)        ""
+#   define   WXLO_DEBUG(x)
 #endif
+
 
 // FIXME under MSW, this constant is needed to make the thing properly redraw
 //       itself - I don't know where the size calculation error is and I can't
@@ -1347,9 +1348,12 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
       {
          // try to find a suitable place to split the object:
          wxLayoutObjectText *tobj = (wxLayoutObjectText *)*i;
-         while( (! (foundSpace = isspace(tobj->GetText()[breakpos])))
-                && breakpos > 0)
-            breakpos--;
+         if(tobj->GetText().Length() >= breakpos)
+            while( (! (foundSpace = isspace(tobj->GetText()[breakpos])))
+                   && breakpos > 0)
+               breakpos--;
+         else
+            breakpos == 0;
          if(! foundSpace) // breakpos == 0!
          {
             if(i == m_ObjectList.begin())
@@ -1376,7 +1380,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
       }
       // now we know where to break it:
       wxLayoutObjectText *tobj = (wxLayoutObjectText *)*i;
-      shorter = tobj->GetLength() - breakpos - 1;
+      shorter = tobj->GetLength() - breakpos;
       // remember text to copy from this object
       prependText = tobj->GetText().Mid(breakpos+1);
       tobj->SetText(tobj->GetText().Left(breakpos));
@@ -1384,12 +1388,9 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
       copyObject = i; copyObject ++;
    }
 
-   // make sure there is an m_Next line:
-   if(! m_Next)
-   {
-      (void) new wxLayoutLine(this, llist);
-      wxASSERT(m_Next);
-   }
+   // make sure there is an empty m_Next line:
+   (void) new wxLayoutLine(this, llist);
+   wxASSERT(m_Next);
    // We need to move this and all following objects to the next
    // line. Starting from the end of line, to keep the order right. 
    if(copyObject != NULLIT)
@@ -1406,7 +1407,7 @@ wxLayoutLine::Wrap(CoordType wrapmargin, wxLayoutList *llist)
       }
    }
    m_Length -= shorter;
-
+   
    if(prependText.Length() > 0)
       m_Next->Insert(0, prependText);
 
@@ -2215,7 +2216,7 @@ bool
 wxLayoutList::WrapAll(CoordType column)
 {
    wxLayoutLine *line = m_FirstLine;
-   if( line)
+   if(! line)
       return FALSE;
    bool rc = FALSE;
    while(line)
@@ -2625,7 +2626,7 @@ wxLayoutList::DrawCursor(wxDC &dc, bool active, wxPoint const &translate)
 #ifdef WXLAYOUT_DEBUG
    WXLO_DEBUG(("Drawing cursor (%ld,%ld) at %ld,%ld, size %ld,%ld, line: %ld, len %ld",
                (long)m_CursorPos.x, (long)m_CursorPos.y,
-               (long)coords.x, (long)coords.y,
+               (long)coords.x, (long)coords.y, 
                (long)m_CursorSize.x, (long)m_CursorSize.y,
                (long)m_CursorLine->GetLineNumber(),
                (long)m_CursorLine->GetLength()));

@@ -63,7 +63,7 @@
 #include <wx/treectrl.h>
 #include <wx/utils.h>
 #include <wx/help.h>
-
+#include <wx/fs_mem.h> // memory filesystem for startup screen
 #include "MFolderDialogs.h"
 
 #include "adb/AdbEntry.h"
@@ -83,16 +83,22 @@
 
 
 #ifndef NEW_SPLASH
-#ifdef    OS_WIN
-#  define mahogany   "mahogany"
-#  define background "background"
-#else   //real XPMs
-#  include "../src/icons/background.xpm"
-#  include "../src/icons/mahogany.xpm"
-#  ifdef USE_PYTHON
-#     include "../src/icons/pythonpower.xpm"
-#  endif // USE_PYTHON
-#endif  //Win/Unix
+#   ifdef    OS_WIN
+#     define mahogany   "mahogany"
+#     define background "background"
+#   else   //real XPMs
+#     include "../src/icons/background.xpm"
+#     include "../src/icons/mahogany.xpm"
+#     ifdef USE_PYTHON
+#        include "../src/icons/pythonpower.xpm"
+#     endif // USE_PYTHON
+#   endif  //Win/Unix
+#else
+#   ifdef    OS_WIN
+#     define mahogany   "mahogany"
+#   else   //real XPMs
+#     include "../src/icons/mahogany.xpm"
+#   endif  //Win/Unix
 #endif
 
 // ----------------------------------------------------------------------------
@@ -834,9 +840,13 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
    wxHtmlWindow *bottom = new MyHtmlWindow(this,sp);
    sp->SplitHorizontally(top,bottom,200);
 
+
+   wxMemoryFSHandler::AddFile("splash.bmp", wxBITMAP(mahogany), wxBITMAP_TYPE_BMP);
+
    top->SetPage("<body text=#ffffff bgcolor=#000000>"
+                "<center><img src=\"memory:splash.bmp\"></center><br>"
                 "<center>Welcome to Mahogany!</center>");
-   
+
    bottom->SetPage("<body text=#ffffff bgcolor=#000000>"
 #ifdef DEBUG
                    "<h3>Debug information:</h3>"
@@ -863,6 +873,9 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    ")"
 #   endif
 #endif
+#ifdef EXPERIMENTAL
+                   "Experimental Code "
+#endif
                    
                    "<p>"
 #endif
@@ -886,6 +899,8 @@ wxAboutWindow::wxAboutWindow(wxFrame *parent, bool bCloseOnTimeout)
                    "Heriot-Watt University, GDev.net, Simon Shapiro, VA Linux and SuSE GmbH."
       );
    
+
+   wxMemoryFSHandler::RemoveFile("splash.bmp");
 
    bottom->SetFocus();
    // start a timer which will close us (if not disabled)
@@ -1116,6 +1131,7 @@ wxAboutFrame::wxAboutFrame(bool bCloseOnTimeout)
    wxLog::SetActiveTarget(new SplashKillerLog);
 
    m_Window = new wxAboutWindow(this, bCloseOnTimeout);
+   
    g_pSplashScreen = (wxMFrame *)this;
    Centre(wxCENTER_FRAME | wxBOTH);
    Show(TRUE);
