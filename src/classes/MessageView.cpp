@@ -1573,6 +1573,8 @@ MessageView::ProcessAllNestedParts(const MimePart *mimepart)
 void
 MessageView::ProcessPart(const MimePart *mimepart)
 {
+   CHECK_RET( mimepart, "MessageView::ProcessPart: NULL mimepart" );
+
    MimeType type = mimepart->GetType();
    switch ( type.GetPrimary() )
    {
