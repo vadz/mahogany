@@ -6,6 +6,9 @@
  * $Id$               *
  *
  * $Log$
+ * Revision 1.8  1998/05/11 20:18:44  VZ
+ * Testing CVS from Windows
+ *
  * Revision 1.7  1998/05/02 15:21:33  KB
  * Fixed the #if/#ifndef etc mess - previous sources were not compilable.
  *
@@ -66,7 +69,7 @@ public:
 #ifdef     USE_WXWINDOWS2
    bool Show(bool visible = true) { return wxFrame::Show(visible); }
 #else
-   void	Show(bool visible = true) { wxFrame::Show(visible); }
+   void Show(bool visible = true) { wxFrame::Show(visible); }
 #endif
 
    /// to be called on closing of window
