@@ -72,6 +72,8 @@
 
 #include "MessageTemplate.h"
 #include "TemplateDialog.h"
+#include "MModule.h"
+#include "modules/Calendar.h"
 
 // incredible, but true: cclient headers #define the symbol write...
 #undef write
@@ -964,6 +966,19 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent),
    static const int s_widths[] = { -1, 90 };
    SetStatusWidths(WXSIZEOF(s_widths), s_widths);
 
+   // check if we can schedule messages:
+   MModule *module = MModule::GetProvider(MMODULE_INTERFACE_CALENDAR);
+   if(module == NULL)
+   {
+      // if menu is !NULL, it will be filled with wxMenu this item belongs to
+      wxMenu *menu = NULL;
+      GetMenuBar()->FindItem(WXMENU_COMPOSE_SEND_LATER, &menu);
+      ASSERT(menu);
+      menu->Delete(WXMENU_COMPOSE_SEND_LATER);
+   }
+   else
+      module->DecRef(); // we don't need it yet
+
    // create the child controls
    // -------------------------
 
@@ -1351,10 +1366,12 @@ wxComposeView::OnMenuCommand(int id)
       InsertFile();
       break;
 
+
    case WXMENU_COMPOSE_SEND:
+   case WXMENU_COMPOSE_SEND_LATER:
       if ( IsReadyToSend() )
       {
-         if ( Send() )
+         if ( Send( (id == WXMENU_COMPOSE_SEND_LATER) ) )
          {
             ResetDirty();
             Close();
@@ -1750,7 +1767,7 @@ wxComposeView::InsertFile(const char *fileName, const char *mimetype)
 }
 
 bool
-wxComposeView::Send(void)
+wxComposeView::Send(bool schedule)
 {
    bool success = false;
    String
@@ -1921,7 +1938,21 @@ wxComposeView::Send(void)
          break;
    }
 
-   success = msg->SendOrQueue();
+   if( schedule )
+   {
+      MModule_Calendar *calmod =
+         (MModule_Calendar *) MModule::GetProvider(MMODULE_INTERFACE_CALENDAR);
+      if(calmod)
+      {
+         calmod->ScheduleMessage(msg);
+         calmod->DecRef();
+         success = TRUE;
+      }
+      else
+         success = FALSE;
+   }
+   else
+      success = msg->SendOrQueue();
    delete msg;
 
    if(success && m_OriginalMessage != NULL)

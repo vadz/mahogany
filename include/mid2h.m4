@@ -16,7 +16,7 @@ $2
 };')
 
 define(STRING, const char *)
-define(INT, long)
+define(INT, long int)
 define(UIDTYPE, UIdType)
 define(ARG, $1 $2 $3)
 define(FUNCTION, `

@@ -240,10 +240,12 @@ public:
 
    /** Takes this message and tries to send it. Only useful for
        messages in some kind of Outbox folder.
-       @param protocol how to send the message
+       @param protocol how to send the message, or Prot_Illegal to autodetect
+       @param send if true, send, otherwise send or queue depending on setting
        @return true on success
    */
-   virtual bool Send(Protocol protocol = Prot_SMTP) = 0;
+   virtual bool SendOrQueue(Protocol protocol = Prot_Illegal,
+                            bool send = FALSE) = 0;
 
    /// Return the numeric uid
    virtual UIdType GetUId(void) const = 0;

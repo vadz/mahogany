@@ -199,9 +199,10 @@ public:
    void Print(void);
 
    /** Send the message.
+       @param schedule if TRUE, call calendar module to schedule sending
        @return true if successful, false otherwise
    */
-   bool Send(void);
+   bool Send(bool schedule = FALSE);
 
    /** wxWindows callbacks
    */

@@ -103,7 +103,8 @@ MODULEDIR=$(DATADIR)/$(CANONICAL_HOST)/modules
 ifdef USE_LIBTOOL
 LINK = $(LIBTOOL) --mode=link $(CXX) -Wl-r$(LD_RUN_PATH)
 else
-LINK = $(CXX) -Wl-export-dynamic -Wl-r$(LD_RUN_PATH)
+LINK = $(CXX) -Wl-r$(LD_RUN_PATH)
+#-Wl-export-dynamic 
 endif
 
 DEF = -DM_PREFIX="\"$(PREFIX)/\"" -DM_CANONICAL_HOST="\"$(CANONICAL_HOST)\""

@@ -136,8 +136,19 @@ MessageCC::MessageCC(const char * itext, UIdType uid, ProfileBase *iprofile)
 }
 
 bool
-MessageCC::Send(Protocol protocol)
+MessageCC::SendOrQueue(Protocol iprotocol, bool send)
 {
+   Protocol protocol = Prot_SMTP; // default
+
+   if(iprotocol == Prot_Illegal)
+   {
+      // autodetect protocol:
+      String tmp;
+      GetHeaderLine("Newsgroups", tmp);
+      if( ! strutil_isempty(tmp) )
+         protocol = Prot_NNTP;
+   }
+
    SendMessageCC sendMsg(m_Profile, protocol);
 
    sendMsg.SetSubject(Subject());
@@ -207,7 +218,10 @@ MessageCC::Send(Protocol protocol)
       headerLine = "";
    }while(*cptr && *cptr != '\012');
    
-   return sendMsg.Send();
+   if(send)
+      return sendMsg.Send();
+   else
+      return sendMsg.SendOrQueue();
 }
 
 void

@@ -10,9 +10,11 @@ FILE_HEADER(MApplication)
 INCLUDE(`"MApplication.h"')
 INCLUDE(`"strutil.h"')
 INCLUDE(`"MDialogs.h"')
+INCLUDE(`"MFolder.h"')
 INCLUDE(`"MailFolderCC.h"')
 INCLUDE(`"MessageCC.h"')
 INCLUDE(`"SendMessageCC.h"')
+INCLUDE(`"wx/persctrl.h"')
 
 /* Define the MInterface ABC: */
 
@@ -43,6 +45,18 @@ ARG(ProfileBase *, parent, =NULL)
 `
  return ProfileBase::CreateModuleProfile(classname,parent);
 ')
+
+FUNCTION(CreatePListCtrl, wxPListCtrl *, (
+ARG(STRING, name),
+ARG(wxWindow *, parent, =NULL),
+ARG(INT, id, =-1),
+ARG(INT, style, =0)
+),
+`
+return new wxPListCtrl(name, parent, id, wxDefaultPosition,
+wxDefaultSize, style);
+')
+
 
 FUNCTION(CreateMessage, Message *, (
 ARG(STRING, text),
@@ -95,12 +109,34 @@ ARG(Protocol , protocol, =Prot_SMTP)
  return new SendMessageCC(profile,protocol);
 ')
 
-FUNCTION(OpenFolder, MailFolder *, (
+FUNCTION(GetMFolder, MFolder *, (
+ARG(STRING, name)
+),
+` return MFolder::Get(name); ')
+
+FUNCTION(OpenMailFolder, MailFolder *, (
 ARG(STRING , path)
 ),
 `
  return MailFolder::OpenFolder(path);
 ')
+
+FUNCTION(OpenASMailFolder, ASMailFolder *, (
+ARG(STRING , path)
+),
+`
+ return ASMailFolder::OpenFolder(path);
+')
+
+FUNCTION(CreateMailFolder, bool, (
+ARG(STRING, name),
+ARG(INT, type, =MF_FILE),
+ARG(INT, flags, = MF_FLAGS_DEFAULT),
+ARG(STRING, path, = ""),
+ARG(STRING, comment, = "")
+),
+` return MailFolder::CreateFolder(name,(FolderType)type,flags,path,comment); ')
+
 
 
 FUNCTION(strutil_tolower, void, ( ARG(String &, str)), `::strutil_tolower(str);')

@@ -974,7 +974,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
                          (unsigned long)(hil->Count()),
                          msg->Subject().c_str()));
          wxYield();
-         if(msg->Send(protocol))
+         if(msg->SendOrQueue(protocol, TRUE))
          {
             count++; alreadyCounted = true;
             mf->DeleteMessage(hi->GetUId());
@@ -997,7 +997,7 @@ MAppBase::SendOutbox(const String & outbox, bool checkOnline ) const
                          (unsigned long)(hil->Count()),
                          msg->Subject().c_str()));
          wxYield();
-         if(msg->Send(protocol))
+         if(msg->SendOrQueue(protocol, TRUE))
          {
             if(! alreadyCounted) count++;
             mf->DeleteMessage(hi->GetUId());

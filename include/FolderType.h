@@ -98,7 +98,7 @@ enum FolderFlags
 
 /** SendMessageCC supports two different protocols:
  */
-enum Protocol { Prot_SMTP, Prot_NNTP, Prot_Default = Prot_SMTP };
+enum Protocol { Prot_Illegal, Prot_SMTP, Prot_NNTP, Prot_Default = Prot_SMTP };
 
 // ----------------------------------------------------------------------------
 // For asynchronous operations:

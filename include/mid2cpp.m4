@@ -15,7 +15,7 @@ $2
 static PREFIX`'Impl gs_`'PREFIX;')
 
 define(STRING, const char *)
-define(INT, int)
+define(INT, long int)
 define(UIDTYPE, UIdType)
 define(ARG, $1 $2)
 define(FUNCTION, `

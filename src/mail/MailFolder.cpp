@@ -92,10 +92,13 @@ MailFolder::OpenFolder(const String &name, ProfileBase *parentProfile)
       return m;
    }
    else
-   { // profile entry does not exist
+   {
+      // profile entry does not exist
       ProfileBase *profile =
          ProfileBase::CreateProfile(name, parentProfile);
-      return OpenFolder( MF_FILE, name, profile);
+      MailFolder *m = OpenFolder( MF_FILE, name, profile);
+      profile->DecRef();
+      return m;
    }
 }
 

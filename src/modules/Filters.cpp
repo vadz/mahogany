@@ -12,12 +12,23 @@
 #endif
 
 #include   "Mpch.h"
+
+#ifndef USE_MODULES_STATIC
+/* We are using kbList here which is in the main executable and has no
+   clean virtual table API, so we must include its source to avoid
+   unresolved references: */
+//#   include "../classes/kbList.cpp"
+#endif
+
 #ifndef USE_PCH
 #   include   "Mcommon.h"
-#   include   "kbList.h"
 #   include   "Message.h"
 #   include   "MailFolder.h"
+#   include   "kbList.h"
 #endif
+
+
+
 
 #include "MModule.h"
 #include "Mversion.h"
@@ -33,6 +44,10 @@
 class Value;
 class ArgList;
 class Parser;
+
+
+
+
 
 /// Type for functions to be called.
 extern "C" {
