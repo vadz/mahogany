@@ -186,11 +186,8 @@ bool strutil_isabsolutepath(const String &path);
 */
 String strutil_expandpath(const String &ipath);
 
-
-#ifndef HAVE_STRSEP
-   /// implements the strsep() function found on some Unix systems
-   char *strsep(char **stringp, const char *delim);
-#endif // !HAVE_STRSEP
+/// Same as semi-standard strsep() function found on some Unix systems
+char *strutil_strsep(char **stringp, const char *delim);
 
 /** A small helper function to expand mailfolder names or path names.
     This function takes absolute or relative names. Absolute ones are

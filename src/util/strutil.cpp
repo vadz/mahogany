@@ -223,10 +223,12 @@ strutil_strdup(String const &in)
    return strutil_strdup(in.c_str());
 }
 
-#ifndef   HAVE_STRSEP
 char *
-strsep(char **stringp, const char *delim)
+strutil_strsep(char **stringp, const char *delim)
 {
+#ifdef HAVE_STRSEP
+   return strsep(stringp, delim);
+#else // !HAVE_STRSEP
    char
       * cptr = *stringp,
    * nextdelim = strpbrk(*stringp, delim);
@@ -247,8 +249,8 @@ strsep(char **stringp, const char *delim)
    else
       *stringp = nextdelim;
    return   cptr;
+#endif // HAVE_STRSEP/!HAVE_STRSEP
 }
-#endif // HAVE_STRSEP
 
 void
 strutil_tokenise(char *string, const char *delim, kbStringList &tlist)
@@ -257,7 +259,7 @@ strutil_tokenise(char *string, const char *delim, kbStringList &tlist)
 
    for(;;)
    {
-      found = strsep(&string, delim);
+      found = strutil_strsep(&string, delim);
       if(! found || ! *found)
          break;
       tlist.push_back(new String(wxConvertMB2WX(found)));

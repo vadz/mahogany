@@ -109,24 +109,24 @@ XFace::CreateFromXpm(const char *xpmdata)
    initialised = false;
    do
    {
-      token = strsep(&ptr, "\n\r");
+      token = strutil_strsep(&ptr, "\n\r");
       if(! token)
-   break;
+         break;
       if(zero == 0 || one == 0)
       {
          strncpy(buffer,token+4,8);
          tstr = wxConvertMB2WX(buffer);
          strutil_tolower(tstr);
 
-   if(tstr == _T("#000000") || tstr == _T("gray0"))
+         if(tstr == _T("#000000") || tstr == _T("gray0"))
             zero = token[0];
-   else if(tstr == _T("#ffffff")
-                 || tstr >= _T("gray100")
-                 || tstr >= _T("white"))
-      one = token[0];
+         else if(tstr == _T("#ffffff")
+               || tstr >= _T("gray100")
+               || tstr >= _T("white"))
+            one = token[0];
       }
       else  // now the data will follow
-   break;
+         break;
    }
    while(token);
    if(! token) // something went wrong
@@ -139,25 +139,25 @@ XFace::CreateFromXpm(const char *xpmdata)
    {
       for(n = 0; n <= 32; n+= 16)
       {
-   value = 0;
-   for(i = 0; i < 16; i++)
-   {
-      if(token[n+i] == one)
-         value += 1;
-      if(i != 15)
+         value = 0;
+         for(i = 0; i < 16; i++)
+         {
+            if(token[n+i] == one)
+               value += 1;
+            if(i != 15)
                value <<= 1;
-   }
+         }
          value = value ^ 0xffff;
-   sprintf(buffer,"0x%04lX", value);
-   dataString += wxConvertMB2WX(buffer);
+         sprintf(buffer,"0x%04lX", value);
+         dataString += wxConvertMB2WX(buffer);
          dataString += _T(',');
       }
       dataString += _T('\n');
-      token = strsep(&ptr, "\n\r");
+      token = strutil_strsep(&ptr, "\n\r");
       if(l < 47 && ! token)
       {
-   delete [] buf;
-   return false;
+         delete [] buf;
+         return false;
       }
    }
    delete [] buf;
@@ -234,17 +234,17 @@ XFace::ConvertImgToXFaceData(wxImage &img)
    {
       for(n = 0; n <= 32; n+= 16)
       {
-   value = 0;
-   for(i = 0; i < 16; i++)
-   {
-      if(img.GetRed(n+i,l) != 0)
-         value += 1;
-      if(i != 15)
+         value = 0;
+         for(i = 0; i < 16; i++)
+         {
+            if(img.GetRed(n+i,l) != 0)
+               value += 1;
+            if(i != 15)
                value <<= 1;
-   }
+         }
          value = value ^ 0xffff;
-   tmp.Printf(_T("0x%04lX"), (unsigned long)value);
-   dataString += tmp;
+         tmp.Printf(_T("0x%04lX"), (unsigned long)value);
+         dataString += tmp;
          dataString += _T(',');
       }
       dataString += _T('\n');
@@ -371,60 +371,60 @@ XFace::CreateXpm(String &xpm)
       xpm += '"';
       for(c = 0; c < 3; c++)
       {
-   token = strsep(&ptr,",\n\r");
-   if(strlen(token) == 0)
-      token = strsep(&ptr, ",\n\r");  // skip end of line
-   if(token)
-   {
-      token += 2;  // skip  0x
-      for(q = 0; q < 4; q++)
-      {
-         switch(token[q])
+         token = strutil_strsep(&ptr,",\n\r");
+         if(strlen(token) == 0)
+            token = strutil_strsep(&ptr, ",\n\r");  // skip end of line
+         if(token)
          {
-         case '0':
-      xpm += _T("...."); break;
-         case '1':
-      xpm += _T("...#"); break;
-         case '2':
-      xpm += _T("..#."); break;
-         case '3':
-      xpm += _T("..##"); break;
-         case '4':
-      xpm += _T(".#.."); break;
-         case '5':
-      xpm += _T(".#.#"); break;
-         case '6':
-      xpm += _T(".##."); break;
-         case '7':
-      xpm += _T(".###"); break;
-         case '8':
-      xpm += _T("#..."); break;
-         case '9':
-      xpm += _T("#..#"); break;
-         case 'a': case 'A':
-      xpm += _T("#.#."); break;
-         case 'b': case 'B':
-      xpm += _T("#.##"); break;
-         case 'c': case 'C':
-      xpm += _T("##.."); break;
-         case 'd': case 'D':
-      xpm += _T("##.#"); break;
-         case 'e': case 'E':
-      xpm += _T("###."); break;
-         case 'f': case 'F':
-      xpm += _T("####"); break;
-         default:
-      break;
-         }
-      }
+            token += 2;  // skip  0x
+            for(q = 0; q < 4; q++)
+            {
+               switch(token[q])
+               {
+                  case '0':
+                     xpm += _T("...."); break;
+                  case '1':
+                     xpm += _T("...#"); break;
+                  case '2':
+                     xpm += _T("..#."); break;
+                  case '3':
+                     xpm += _T("..##"); break;
+                  case '4':
+                     xpm += _T(".#.."); break;
+                  case '5':
+                     xpm += _T(".#.#"); break;
+                  case '6':
+                     xpm += _T(".##."); break;
+                  case '7':
+                     xpm += _T(".###"); break;
+                  case '8':
+                     xpm += _T("#..."); break;
+                  case '9':
+                     xpm += _T("#..#"); break;
+                  case 'a': case 'A':
+                     xpm += _T("#.#."); break;
+                  case 'b': case 'B':
+                     xpm += _T("#.##"); break;
+                  case 'c': case 'C':
+                     xpm += _T("##.."); break;
+                  case 'd': case 'D':
+                     xpm += _T("##.#"); break;
+                  case 'e': case 'E':
+                     xpm += _T("###."); break;
+                  case 'f': case 'F':
+                     xpm += _T("####"); break;
+                  default:
+                     break;
+               }
+            }
 
-   }
+         }
       }
       xpm += _T('"');
       if(l < 47)
-   xpm += _T(",\n");
+         xpm += _T(",\n");
       else
-   xpm += _T("\n};\n");
+         xpm += _T("\n};\n");
    }
    return true;
 #endif
@@ -458,54 +458,54 @@ XFace::CreateXpm(char ***xpm)
       tmp = _T("");
       for(c = 0; c < 3; c++)
       {
-   token = strsep(&ptr,",\n\r");
-   if(strlen(token) == 0)
-      token = strsep(&ptr, ",\n\r");  // skip end of line
-   if(token)
-   {
-      token += 2;  // skip  0x
-      for(q = 0; q < 4; q++)
-      {
-         switch(token[q])
+         token = strutil_strsep(&ptr,",\n\r");
+         if(strlen(token) == 0)
+            token = strutil_strsep(&ptr, ",\n\r");  // skip end of line
+         if(token)
          {
-         case '0':
-      tmp += _T("...."); break;
-         case '1':
-      tmp += _T("...#"); break;
-         case '2':
-      tmp += _T("..#."); break;
-         case '3':
-      tmp += _T("..##"); break;
-         case '4':
-      tmp += _T(".#.."); break;
-         case '5':
-      tmp += _T(".#.#"); break;
-         case '6':
-      tmp += _T(".##."); break;
-         case '7':
-      tmp += _T(".###"); break;
-         case '8':
-      tmp += _T("#..."); break;
-         case '9':
-      tmp += _T("#..#"); break;
-         case 'a': case 'A':
-      tmp += _T("#.#."); break;
-         case 'b': case 'B':
-      tmp += _T("#.##"); break;
-         case 'c': case 'C':
-      tmp += _T("##.."); break;
-         case 'd': case 'D':
-      tmp += _T("##.#"); break;
-         case 'e': case 'E':
-      tmp += _T("###."); break;
-         case 'f': case 'F':
-      tmp += _T("####"); break;
-         default:
-      break;
-         }
-      }
+            token += 2;  // skip  0x
+            for(q = 0; q < 4; q++)
+            {
+               switch(token[q])
+               {
+                  case '0':
+                     tmp += _T("...."); break;
+                  case '1':
+                     tmp += _T("...#"); break;
+                  case '2':
+                     tmp += _T("..#."); break;
+                  case '3':
+                     tmp += _T("..##"); break;
+                  case '4':
+                     tmp += _T(".#.."); break;
+                  case '5':
+                     tmp += _T(".#.#"); break;
+                  case '6':
+                     tmp += _T(".##."); break;
+                  case '7':
+                     tmp += _T(".###"); break;
+                  case '8':
+                     tmp += _T("#..."); break;
+                  case '9':
+                     tmp += _T("#..#"); break;
+                  case 'a': case 'A':
+                     tmp += _T("#.#."); break;
+                  case 'b': case 'B':
+                     tmp += _T("#.##"); break;
+                  case 'c': case 'C':
+                     tmp += _T("##.."); break;
+                  case 'd': case 'D':
+                     tmp += _T("##.#"); break;
+                  case 'e': case 'E':
+                     tmp += _T("###."); break;
+                  case 'f': case 'F':
+                     tmp += _T("####"); break;
+                  default:
+                     break;
+               }
+            }
 
-   }
+         }
       }
       (*xpm)[line++] = strutil_strdup(wxConvertWX2MB(tmp));
    }
@@ -526,8 +526,8 @@ XFace::GetHeaderLine(void) const
 
 XFace::~XFace()
 {
-   if(data)  delete[] data;
-   if(xface)  delete[] xface;
+   delete[] data;
+   delete[] xface;
    initialised = false;
 }
 
