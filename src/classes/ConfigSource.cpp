@@ -327,7 +327,8 @@ wxConfigBase *ConfigSourceLocal::CreateDefaultConfig(const String& filename)
 {
    wxConfigBase *config = NULL;
 
-   String localFilePath, globalFilePath;
+   String localFilePath = filename,
+          globalFilePath;
 
 #ifdef OS_UNIX
    // if the filename is empty, use the default one
@@ -490,7 +491,6 @@ wxConfigBase *ConfigSourceLocal::CreateDefaultConfig(const String& filename)
    }
 #elif defined(OS_WIN)
    // under Windows we just use the registry if the filename is not specified
-   localFilePath = filename;
    if ( localFilePath.empty() )
    {
       config = CreateRegConfig();
