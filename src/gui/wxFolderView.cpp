@@ -704,7 +704,7 @@ wxFolderView::PrintMessages(const wxArrayInt& selections)
       int i;
       for(i = 0; i < n; i++)
       {
-         PreviewMessage(i);
+         PreviewMessage(selections[i]);
          m_MessagePreview->Print();
       }
    }
@@ -722,7 +722,7 @@ wxFolderView::PrintPreviewMessages(const wxArrayInt& selections)
       int i;
       for(i = 0; i < n; i++)
       {
-         PreviewMessage(i);
+         PreviewMessage(selections[i]);
          m_MessagePreview->PrintPreview();
       }
    }
