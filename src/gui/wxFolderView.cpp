@@ -772,8 +772,7 @@ wxFolderView::ReadProfileSettings(AllProfileSettings *settings)
    ASSERT(settings->font >= 0 && settings->font <= NUM_FONTS);
    settings->font = wxFonts[settings->font];
    settings->size = READ_CONFIG(m_Profile,MP_FVIEW_FONT_SIZE);
-
-
+   settings->senderOnlyNames = READ_CONFIG(m_Profile,MP_FVIEW_NAMES_ONLY);
 }
 
 void
@@ -834,6 +833,7 @@ wxFolderView::Update(HeaderInfoList *listing)
    int n;
    String status, sender, subject, size;
    bool selected;
+   bool namesOnly = m_settingsCurrent.senderOnlyNames;
 
    if(m_UpdateSemaphore == true)
       return; // don't call this code recursively
@@ -874,9 +874,15 @@ wxFolderView::Update(HeaderInfoList *listing)
       nsize = day = month = year = 0;
       size = strutil_ultoa(nsize);
       selected = (m_SelectedUIds.Index(hi->GetUId()) != wxNOT_FOUND);
+      sender = hi->GetFrom();
+      if (namesOnly)
+      {
+         int pos = sender.Find(" <");
+	 if (pos != wxNOT_FOUND) sender = sender.Left(pos + 1);
+      }
       m_FolderCtrl->SetEntry(i,
                              MailFolder::ConvertMessageStatusToString(hi->GetStatus()),
-                             hi->GetFrom(),
+                             sender,
                              subject,
                              strutil_ftime(hi->GetDate(),
                                            m_settingsCurrent.dateFormat,
