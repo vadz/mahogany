@@ -41,14 +41,20 @@ public:
    MMessagesDataObject(wxFolderView *view,
                        MailFolder *folder,
                        const UIdArray& messages);
+
+   virtual ~MMessagesDataObject();
+
    // accessors
    wxFolderView *GetFolderView() const { return GetMData()->view; }
+
    /// return the inc-refed folder pointer
    MailFolder *GetFolder() const
-      {
-         SafeIncRef(GetMData()->folder);
-         return GetMData()->folder;
-      }
+   {
+      MailFolder *mf = GetMData()->folder;
+      SafeIncRef(mf);
+      return mf;
+   }
+
    size_t GetMessageCount() const { return GetMData()->number; }
    size_t GetMessageUId(size_t n) const { return GetUIDs(GetMData())[n]; }
 

@@ -288,6 +288,9 @@ private:
    */
    PalmOSModule(MInterface *mi);
 
+   /// register with the main frame
+   bool RegisterWithMainFrame();
+
    ~PalmOSModule();
 
    bool ProcessMenuEvent(int id);
@@ -374,7 +377,7 @@ extern "C" { int register_printErrorHook (printErrorHook); }
 static
 int MAL_PrintFunc(bool errorflag, const char * format, va_list args)
 {
-   ASSERT(gs_MInterface != NULL);
+   CHECK(gs_MInterface != NULL, 0, "no MInterface");
    static wxString msg;
    int rc;
    if(! errorflag && format[0] == '.')
@@ -479,44 +482,47 @@ PalmOSModule::Entry(int arg, ...)
 {
    switch(arg)
    {
-      // GetFlags():
-   case MMOD_FUNC_GETFLAGS:
-      return MMOD_FLAG_HASMAIN|MMOD_FLAG_HASCONFIG;
+      case MMOD_FUNC_INIT:
+         return RegisterWithMainFrame() ? 0 : -1;
 
-      // Main():
-   case MMOD_FUNC_MAIN:
-      Synchronise(NULL);
-      return 0;
+         // GetFlags():
+      case MMOD_FUNC_GETFLAGS:
+         return MMOD_FLAG_HASMAIN|MMOD_FLAG_HASCONFIG;
 
-      // Configure():
-   case MMOD_FUNC_CONFIG:
-      Configure();
-      return 0;
+         // Main():
+      case MMOD_FUNC_MAIN:
+         Synchronise(NULL);
+         return 0;
 
-      // Menu event
-   case MMOD_FUNC_MENUEVENT:
-   {
-      va_list ap;
-      va_start(ap, arg);
-      int id = va_arg(ap, int);
-      va_end(ap);
-      return ProcessMenuEvent(id);
-   }
+         // Configure():
+      case MMOD_FUNC_CONFIG:
+         Configure();
+         return 0;
 
-   // module specific functions:
-   // MMOD_FUNC_USER : Synchronise ADB
-   case MMOD_FUNC_USER:
-   {
-      va_list ap;
-      va_start(ap, arg);
-      PalmBook *pbp = va_arg(ap, PalmBook *);
-      va_end(ap);
-      Synchronise(pbp);
-      return 0;
-   }
+         // Menu event
+      case MMOD_FUNC_MENUEVENT:
+         {
+            va_list ap;
+            va_start(ap, arg);
+            int id = va_arg(ap, int);
+            va_end(ap);
+            return ProcessMenuEvent(id);
+         }
 
-   default:
-      return 0;
+         // module specific functions:
+         // MMOD_FUNC_USER : Synchronise ADB
+      case MMOD_FUNC_USER:
+         {
+            va_list ap;
+            va_start(ap, arg);
+            PalmBook *pbp = va_arg(ap, PalmBook *);
+            va_end(ap);
+            Synchronise(pbp);
+            return 0;
+         }
+
+      default:
+         return 0;
    }
 }
 
@@ -639,6 +645,13 @@ PalmOSModule::PalmOSModule(MInterface *minterface)
    m_Profile = NULL;
    m_Lock = NULL;
 
+   ASSERT(gs_MInterface == NULL);
+   gs_MInterface = m_MInterface;
+}
+
+bool
+PalmOSModule::RegisterWithMainFrame()
+{
    wxMenu * palmOsMenu = new wxMenu("", wxMENU_TEAROFF);
    palmOsMenu->Append(WXMENU_MODULES_PALMOS_SYNC, _("&Synchronise"));
    palmOsMenu->Break();
@@ -649,12 +662,14 @@ PalmOSModule::PalmOSModule(MInterface *minterface)
    palmOsMenu->Append(WXMENU_MODULES_PALMOS_CONFIG, _("&Configure"));
 
    MAppBase *mapp = m_MInterface->GetMApplication();
+
+   MFrame *mframe = mapp->TopLevelFrame();
+   CHECK( mframe, false, "can't init PalmOS module - no main window" );
+
    ((wxMainFrame *)mapp->TopLevelFrame())->AddModulesMenu(_("&PalmOS Module"),
                                                           _("Functionality to interact with your PalmOS based palmtop."),
                                                           palmOsMenu,
                                                           -1);
-   ASSERT(gs_MInterface == NULL);
-   gs_MInterface = m_MInterface;
 }
 
 PalmOSModule::~PalmOSModule()

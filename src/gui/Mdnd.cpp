@@ -51,7 +51,7 @@ MMessagesDataObject::MMessagesDataObject(wxFolderView *view,
                                          const UIdArray& messages)
                    : wxCustomDataObject(MMESSAGE_FORMAT)
 {
-   // we store the wxFolderView pointer first followed bythe number of
+   // we store the wxFolderView pointer first followed by the number of
    // messages - and then all messages after it
    size_t len = sizeof(MMessagesDataObject::Data) +
                   messages.GetCount()*sizeof(UIdType);
@@ -82,6 +82,16 @@ UIdArray MMessagesDataObject::GetMessages() const
    }
 
    return messages;
+}
+
+MMessagesDataObject::~MMessagesDataObject()
+{
+   Data *data = GetMData();
+   if ( data )
+   {
+      SafeDecRef(data->folder);
+   }
+   //else: it's ok for it to be NULL if we had been created with def ctor
 }
 
 // ----------------------------------------------------------------------------
