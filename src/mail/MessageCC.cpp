@@ -1,29 +1,10 @@
 /*-*- c++ -*-********************************************************
- * Message class: entries for message header                  *
+ * Message class: entries for message header                        *
  *                      implementation for MailFolderCC             *
  *                                                                  *
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
- * $Id$                                                             *
- ********************************************************************
- * $Log$
- * Revision 1.5  1998/05/15 22:00:47  VZ
- * TEXT_DATA_CAST macro
- *
- * Revision 1.4  1998/05/13 19:02:47  KB
- * added kbList, adapted MimeTypes for it, more python, new icons
- *
- * Revision 1.3  1998/05/12 12:19:04  VZ
- *
- * fixes to Windows fixes. Compiles under wxGTK if you #define USE_APPCONF.
- *
- * Revision 1.2  1998/03/26 23:05:43  VZ
- * Necessary changes to make it compile under Windows (VC++ only)
- * Header reorganization to be able to use precompiled headers
- *
- * Revision 1.1  1998/03/14 12:21:28  karsten
- * first try at a complete archive
- *
+ * $Id$
  *******************************************************************/
 
 #ifdef __GNUG__
@@ -45,21 +26,21 @@
 #include "MessageCC.h"
 
 #ifndef USE_PCH
-  #include  "strutil.h"
+#include  "strutil.h"
 
-  // includes for c-client library
-  extern "C"
-  {
-    #include   <stdio.h>
-    #include   <osdep.h>
-    #include   <rfc822.h>
-    #include   <smtp.h>
-    #include   <nntp.h>
-  }
+// includes for c-client library
+extern "C"
+{
+#include   <stdio.h>
+#include   <osdep.h>
+#include   <rfc822.h>
+#include   <smtp.h>
+#include   <nntp.h>
+}
 #endif
 
 MessageCC::MessageCC(MailFolderCC *ifolder, unsigned long msgno,
-           unsigned long iuid)
+                     unsigned long iuid)
 {
    Create(ifolder->GetProfile());
 
@@ -90,11 +71,11 @@ MessageCC::MessageCC(const char *itext,  Profile *iprofile)
    {
       if(text[pos] == '\012' && text[pos+1] == '\012') // empty line is end of header
       {
-    header = GLOBAL_NEW char [pos+2];
-    strncpy(header, text, pos+1);
-    header[pos+1] = '\0';
-    headerLen = pos+1;
-    break;
+         header = GLOBAL_NEW char [pos+2];
+         strncpy(header, text, pos+1);
+         header[pos+1] = '\0';
+         headerLen = pos+1;
+         break;
       }
    }
    if(! header)
@@ -102,7 +83,7 @@ MessageCC::MessageCC(const char *itext,  Profile *iprofile)
    
    char *buf = GLOBAL_NEW char [headerLen];
    rfc822_parse_msg (&envelope, &body,header,headerLen, b,
-           ""   /*defaulthostname */,  buf);
+                     ""   /*defaulthostname */,  buf);
    GLOBAL_DELETE [] buf;
    initialisedFlag = true;
 #endif
@@ -154,7 +135,7 @@ MessageCC::Refresh(void)
       if(envelope->date)
          hdr_date = String(envelope->date);
       else
-        hdr_date = "";
+         hdr_date = "";
    }
    
    initialisedFlag = true;
@@ -183,9 +164,9 @@ MessageCC::GetHeaderLine(const String &line, String &value)
 
    char *
       rc = mail_fetchheader_full (folder->Stream(),
-              uid,
-              &slist,
-              NIL,FT_UID);
+                                  uid,
+                                  &slist,
+                                  NIL,FT_UID);
    value = rc;
    GLOBAL_DELETE [] slist.text.data;
 }
@@ -211,7 +192,7 @@ MessageCC::Address(String &name, MessageAddressType type) const
    case MAT_REPLYTO:
       addr = envelope->reply_to;
       if(! addr)
-    addr = envelope->from;
+         addr = envelope->from;
       break;
    }
 
@@ -243,7 +224,7 @@ MessageCC::FetchText(void)
 
    if(folder)
       return mailText = mail_fetchtext_full(folder->Stream(), uid,
-                   NIL, FT_UID);
+                                            NIL, FT_UID);
    else // from a text
       return text; 
 }
@@ -256,21 +237,24 @@ MessageCC::FetchText(void)
 
 void
 MessageCC::decode_body (BODY *body, String & pfx,long i,
-         int * count, bool write, bool firsttime)
+                        int * count, bool write, bool firsttime)
 {
    String   line;
    PARAMETER *par;
    PART *part;
    String   mimeId, type, desc, parms, id;
-
+   MessageParameter *parameter;
+   MessageParameterList plist(false); // temporary, doesn't own entries
+   MessageParameterList::iterator plist_iterator;
+   
    /* multipart doesn't have a row to itself */
    if (body->type == TYPEMULTIPART)
    {
       /* if not first time, extend prefix */
       if(! firsttime)
-    line = pfx + strutil_ltoa(++i) + String(".");
+         line = pfx + strutil_ltoa(++i) + String(".");
       for (i = 0,part = body->nested.part; part; part = part->next)
-    decode_body (&part->body,line,i++, count, write, false);
+         decode_body (&part->body,line,i++, count, write, false);
    }
    else
    {
@@ -280,68 +264,78 @@ MessageCC::decode_body (BODY *body, String & pfx,long i,
       mimeId = line;
       type = body_types[body->type];
       if (body->subtype)
-    type = type + '/' + body->subtype;
+         type = type + '/' + body->subtype;
       line += type;
       if (body->description)
       {
-    desc  = body->description;
-    line = line + " (" + desc + ')';
+         desc  = body->description;
+         line = line + " (" + desc + ')';
       }
       if ((par = body->parameter) != NULL)
       {
-    do
-    {
-       parms = parms + par->attribute + '=' + par->value;
-       if(par->next)
-          parms += '=';
-    }
-    while ((par = par->next) != NULL);
-    line  += parms;
+         do
+         {
+            if(write)
+            {
+               parameter = new MessageParameter();
+               parameter->name = par->attribute;
+               parameter->value = par->value;
+               plist.push_back(parameter);
+            }
+            parms = parms + par->attribute + '=' + par->value;
+            if(par->next)
+               parms += ':';
+         }
+         while ((par = par->next) != NULL);
+         line  += parms;
       }
       if (body->id)
       {
-    id = body->id;
-    line = line + String(" , id=") + id;
+         id = body->id;
+         line = line + String(" , id=") + id;
       }
       switch (body->type)
       {
-        /* bytes or lines depending upon body type */
+         /* bytes or lines depending upon body type */
       case TYPEMESSAGE:    /* encapsulated message */
       case TYPETEXT:    /* plain text */
-    line = line + String(" (") + strutil_ltoa(body->size.lines) + String(" lines)");
-    break;
+         line = line + String(" (") + strutil_ltoa(body->size.lines) + String(" lines)");
+         break;
       default:
-    line = line + String(" (") + strutil_ltoa(body->size.bytes) + String(" bytes)");
-    break;
+         line = line + String(" (") + strutil_ltoa(body->size.bytes) + String(" bytes)");
+         break;
       }
 
       if(write)
       {
-    PartInfo &pi = partInfos[*count];
-    pi.mimeId = mimeId;
-    pi.type = type;
-    pi.numericalType  = body->type;
-    pi.numericalEncoding = body->encoding;
-    pi.params = parms;
-    pi.description = desc;
-    pi.id = id;
-    pi.size_lines = body->size.lines;
-    pi.size_bytes = body->size.bytes;
+         PartInfo &pi = partInfos[*count];
+         pi.mimeId = mimeId;
+         pi.type = type;
+         pi.numericalType  = body->type;
+         pi.numericalEncoding = body->encoding;
+         pi.params = parms;
+         pi.description = desc;
+         pi.id = id;
+         pi.size_lines = body->size.lines;
+         pi.size_bytes = body->size.bytes;
+         for(plist_iterator = plist.begin(); plist_iterator !=
+                plist.end(); plist_iterator++)
+            pi.parameterList.push_back(*plist_iterator);
       }
       (*count)++;
 
       /* encapsulated message? */
       if ((body->type == TYPEMESSAGE) && !strcmp (body->subtype,"RFC822") &&
-     (body = body->nested.msg->body))
+          (body = body->nested.msg->body))
       {
-    if (body->type == TYPEMULTIPART)
-       decode_body (body,pfx,i-1,count, write, false);
-    else
-    {       /* build encapsulation prefix */
-       line = pfx;
-       line = line + strutil_ltoa(i);
-       decode_body (body,line,(long) 0,count, write, false);
-    }
+         if (body->type == TYPEMULTIPART)
+            decode_body (body,pfx,i-1,count, write, false);
+         else
+         {       /* build encapsulation prefix */
+            line = pfx;
+            line = line + strutil_ltoa(i);
+            decode_body (body,line,(long) 0,count, write, false);
+         }
       }
    }
 }
@@ -376,13 +370,13 @@ MessageCC::CountParts(void)
    if(numOfParts == -1)
    {
       if(!GetBody())
-    return -1 ;
+         return -1 ;
       // don't gather info, just count the parts
       String a = "";
       decode_body(body,a, 0l, &numOfParts, false);
       numOfParts ++;
    }
-      return numOfParts;
+   return numOfParts;
 }
 
 
@@ -396,9 +390,9 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
       & sp = GetPartSpec(n);
    
    char *cptr = mail_fetchbody_full(folder->Stream(),
-                uid,
-                (char *)sp.c_str(),
-                &len, FT_UID);
+                                    uid,
+                                    (char *)sp.c_str(),
+                                    &len, FT_UID);
    if(lenptr == NULL)
       lenptr  = &len;   // so to give c-client lib a place where to write to
    
@@ -433,6 +427,16 @@ MessageCC::GetPartContent(int n, unsigned long *lenptr)
    }
    
 //   return partContentPtr;
+}
+
+MessageParameterList *
+MessageCC::GetParameters(int n = -1)
+{
+   DecodeMIME();
+   MessageParameterList *l = new MessageParameterList();
+   MessageParameter *p;
+
+   
 }
 
 
@@ -497,13 +501,13 @@ MessageCC::WriteToString(String &str, bool headerFlag) const
    {
       if(headerFlag)
       {
-    char *headerPart = mail_fetchheader_full(folder->Stream(),seq_no,NIL,&len,FT_UID);
-    str += headerPart;
-    fulllen += len;
+         char *headerPart = mail_fetchheader_full(folder->Stream(),seq_no,NIL,&len,FT_UID);
+         str += headerPart;
+         fulllen += len;
       }
    
-   //rfc822_output(headerBuffer, envelope, body,
-   //MessageCCWriteToString, par, 0);
+      //rfc822_output(headerBuffer, envelope, body,
+      //MessageCCWriteToString, par, 0);
 
       char *bodyPart = mail_fetchtext_full(folder->Stream(),seq_no,&len,FT_UID);
       str += bodyPart;

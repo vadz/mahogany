@@ -4,12 +4,6 @@
  * (C) 1998 by Karsten Ballüder (Ballueder@usa.net)                 *
  *                                                                  *
  * $Id$
- * $Log$
- * Revision 1.7  1998/07/08 11:56:49  KB
- * M compiles and runs on Solaris 2.5/gcc 2.8/c-client gso
- *
- * Revision 1.6  1998/06/27 20:06:10  KB
- * Added my layout code.
  *
  *******************************************************************/
 

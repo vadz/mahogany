@@ -3,11 +3,17 @@
 CWD = classes
 HDR = *.h
 
+include ../makeopts
+
+INSTALLTARGET=
+
+ifdef DOCHTML
+INSTALLTARGET += doc
+endif
+
 all: 
 
-install: doc
-
-include ../makeopts
+install: $(INSTALLTARGET)
 
 clean:
 

@@ -74,8 +74,10 @@ private:
       int   numericalType;
       /// numerical encoding id as used by c-client lib
       int   numericalEncoding;
-      /// string containing the paramter settings
+      /// string containing the parameter settings
       String   params;
+      /// list of parameters
+      MessageParameterList parameterList;
       /// description
       String   description;
       /// id
@@ -206,6 +208,12 @@ public:
    */
    size_t   GetPartSize(int n = 0, bool forceBytes = false);
 
+   /** Get the list of parameters for a given part.
+       @param n part number, if -1, for the top level.
+       @return list of parameters, must be freed by caller.
+   */
+   MessageParameterList *GetParameters(int n = -1);
+   
    /** Query the MimeType of the content.
        @param  n part number
        @return string describing the Mime type

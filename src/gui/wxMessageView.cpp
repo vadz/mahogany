@@ -243,6 +243,9 @@ wxMessageView::Update(void)
    wxLayoutList &llist = GetLayoutList();
    wxLayoutObjectBase *obj = NULL;
 
+   MessageParameterList *plist;
+   MessageParameterList::iterator plist_it;
+   
    GetLayoutList().SetEditable(true);
    //GetLayoutList().Clear(wxROMAN,16);
    
@@ -300,9 +303,19 @@ wxMessageView::Update(void)
       t = mailMessage->GetPartType(i);
       if(mailMessage->GetPartSize(i) == 0)
          continue; // ignore empty parts
+#ifdef DEBUG
+      plist = mailMessage->GetParameters(i);
+      VAR(i);
+      for(plist_it = plist->begin(); plist_it != plist->end();
+          plist_it++)
+      {
+         VAR( (*plist_it)->name);
+         VAR( (*plist_it)->value);
+      }
+#endif
       // insert text:
-      if(t == TYPETEXT || (t == TYPEMESSAGE
-                           && m_Profile->readEntry(MP_RFC822_IS_TEXT,MP_RFC822_IS_TEXT_D)))
+      if(t == TYPETEXT
+         || (t == TYPEMESSAGE && m_Profile->readEntry(MP_RFC822_IS_TEXT,MP_RFC822_IS_TEXT_D)))
       {
          cptr = mailMessage->GetPartContent(i);
          if(cptr == NULL)
