@@ -20,7 +20,7 @@
 
 \vfill{}
 \title{\textsl{Mahogany User Manual}\\
-{\Large Version 0.63 {}``Saugus{}''}}
+{\Large Version 0.64 {}``Sparc{}''}}
 \vfill{}
 
 
@@ -786,10 +786,10 @@ is outlawed in some dictatorical countries. If your copy of Mahogany
 supports SSL, tick this box to access a secure IMAP/POP/NNTP server.
 Must be supported by the server side, too. It will ensure that your
 communication with the server is encrypted and safe from eavesdropping.
-For this to work, the user might also need to open the preference dialog, and,
-in the \textbf{Misc} tab, fill-out the boxes labeled ``Path where to find
-shared libssl'' and ``Path where to find shared libcrypto''.
-Linux users must also see the SSL section of the FAQ.
+For this to work, the user might also need to open the preferences
+dialog, and, in the \textbf{Misc} tab, fill-out the boxes labeled
+``Path where to find shared libssl'' and ``Path where to find shared
+libcrypto''. Linux users must also see the SSL section of the FAQ.
 \item \textbf{Anonymous access}\\
 This marks the folder as anonymous, such as for anonymous IMAP access,
 telling Mahogany that no user name or password are required to access
@@ -2000,24 +2000,6 @@ object is a \texttt{MailFolder}, the object must either be used as
 or a tuple holding several values.
 \end{enumerate}
 
-\subsection{SSL does not work}
-\textit{I went to the preferences menu, in the "Miscellaneous" tab, and made
-sure the pathnames of libcrypto and libssl where correct. I Went to the acces
-tab of my mail folder preferences and enabled SSL. However, when I try to open
-that folder, it fails and the log window talks about being unable to load
-libssl.}
-
-Under Linux, this is due to a combination of factors, fixing one of them is
-enough to fix the problem. Versions of libssl.so older than 0.9.6 require
-libcrypto to be explicitly loaded beforehand. Updating to version 0.9.6 or
-newer fixes the problem. Versions of libwx\_gtk older than or equal to 2.2.0
-load shared libraries in such a way that, eventhough M loads libcrypto,
-libssl still fails to load. Upgrading libwx\_gtk to a later version will fix
-the problem. Finaly, if all else fails, starting M with the command:
-\texttt{LD\_PRELOAD=/usr/lib/libcrypto.so M} will fix the problem as well.
-If the second solution is used, the pathname of libcrypto must be set
-properly. Otherwise it is better to leave it blank.
-
 \subsection{Namespaces}
 
 To avoid repeatedly typing in the name of the module (\texttt{MailFolder}
@@ -2471,16 +2453,16 @@ on the mailing lists.
 \section{Installation Problems}
 
 
-\subsection{All Mahogany icons show a questionmark}
+\subsection{All Mahogany icons show a question mark}
 
 \textit{I'm a linuxuser (redhat) who just found Mahogany and really
-likes it, but I have a problem, I cant get all the widgets to work,
+likes it, but I have a problem, I can't get all the widgets to work,
 the pictures on the buttons and the ones before the mailboxes all
 appear as an questionmark. Do I need some library to make it look
 like your screenshot? If you would assist me in this matter I would
 be very grateful.}
 
-It depends how you installed it. If the icon with the questionmark
+It depends how you installed it. If the icon with the question mark
 appears, it means that Mahogany didn't find its installation directory
 with the icons. If you installed the linux version from the .tar.gz
 with the binary, it should go into /usr/local or a similar place and
@@ -2501,9 +2483,9 @@ xpm files internally.
 
 \subsection{How do I unpack the compressed files?}
 
-The distribution files for Solaris and some of the other ones, are
+The distribution files for Solaris and some of the other ones are
 in compressed tar format, having the ending \texttt{.tar.gz} . To
-unpack them, you need \texttt{gzip} and \texttt{tar}. Change to the
+unpack them you need \texttt{gzip} and \texttt{tar}. Change to the
 directory where you want to install Mahogany, e.g to \texttt{/usr}
 or \texttt{/opt} or \texttt{/usr/local} and issue the following command: 
 
@@ -2529,18 +2511,11 @@ will re-use some old settings.
 Also, as we are omitting some unused subdirectories from the wxGTK
 source, to save you download time, you may need to run {}``make -k{}''
 rather than just {}``make{}'' to get it to ignore some errors caused
-by this. On non-Linux/GNU systems, you need to use the GNU linker,
+by this. On non-Linux/GNU systems, you need to use the GNU make utility,
 i.e. {}``gmake{}'' rather than the default {}``make{}''.
 
 
-\subsection{How can I get it to compile on Caldera Linux?}
-
-You will need to install a libcrypt library with a working crypt()
-function. The source for one such library can be found on the Mahogany
-ftp server.
-
-
-\subsection{Mahogany fails to find wxWindows, Configure fails}
+\subsection{Mahogany fails to find wxWindows, configure fails}
 
 The following steps should identify and solve the problem:
 
@@ -2563,24 +2538,28 @@ fails, look at config.log.
 \end{enumerate}
 
 \subsection{SSL does not work}
-\textit{I went to the preferences menu, in the "Miscellaneous" tab, and made
-sure the pathnames of libcrypto and libssl where correct. I Went to the acces
-tab of my mail folder preferences and enabled SSL. However, when I try to open
-that folder, it fails and the log window talks about being unable to load
-libssl.}
 
-Under Linux, this is due to a combination of factors, fixing one of them is
-enough to fix the problem. Versions of libssl.so older than 0.9.6 require
-libcrypto to be explicitly loaded beforehand. Updating to version 0.9.6 or
-newer fixes the problem. Versions of libwx\_gtk older than or equal to 2.2.0
-load shared libraries in such a way that, eventhough M loads libcrypto,
-libssl still fails to load. Upgrading libwx\_gtk to a later version will fix
-the problem. Finaly, if all else fails, starting M with the command:
-\texttt{LD\_PRELOAD=/usr/lib/libcrypto.so M} will fix the problem as well.
-If the second solution is used, the pathname of libcrypto must be set
-properly. Otherwise it is better to leave it blank.
+\textit{I went to the \char`\"{}Miscellaneous\char`\"{} tab in preferences
+menu and made sure the pathnames of libcrypto and libssl where correct.
+I enabled SSL in the access tab of my mail folder preferences. However,
+when I try to open that folder, it fails and the log window talks
+about being unable to load libssl.}
+
+Under Linux, this is due to a combination of factors, fixing one of
+them is enough to fix the problem. Versions of libssl.so older than
+0.9.6 require libcrypto to be explicitly loaded beforehand. Updating
+to version 0.9.6 or newer fixes the problem. Versions of libwx\_gtk
+older than or equal to 2.2.0 load shared libraries in such a way that,
+even though M loads libcrypto, libssl still fails to load. Upgrading
+libwx\_gtk to a later version will fix the problem. Finally, if everything
+else fails, starting M with the command: {}``LD\_PRELOAD=/usr/lib/libcrypto.so
+M{}'' will fix the problem as well. If the second solution is used,
+the pathname of libcrypto.so must be set properly. Otherwise it is
+better to leave it blank.
+
 
 \section{Other Problems / Questions}
+
 
 \subsection{The Preferences Dialog does not show up properly}
 
@@ -2591,33 +2570,24 @@ wxGTK has a problem with constraint handling which can cause this
 dialog to sometimes get into an endless loop trying to do the layout.
 On most windowmanagers it helps if you resize the dialog a little
 and it will appear correctly. This seems to depend on the platform
-and windowmanager. Also, wxGTK does not seem to work correctly with
+and window manager. Also, wxGTK does not seem to work correctly with
 OpenLook which does not allow you to enter anything.
 
 
-\subsection{How to use Mahogany with fetchpop/procmail?}
+\subsection{How to use Mahogany with fetchmail/procmail?}
 
-\textit{I use fetchpop and procmail do deliver my mail (Redhat Linux).
+\textit{I use fetchmail and procmail to deliver my mail (Redhat Linux).
 I'm reading mail with Netscape right now and I want to move to M.
-I cannot for the life of me get M to open my files when it loads.
-I have to open them manually. Can someone please help me (if its possible)
-to get M to open all of my Linux Folders at startup.}
+I cannot for the life of me get M to open my mail when it loads. I
+have to open them manually. Can someone please help me to get M to
+open all of my Linux Folders at startup.}
 
 You should be able to right-click on the folder treecontrol on the
 left of the main screen and \char`\"{}Create a new folder\char`\"{}.
 Make it of type \char`\"{}file\char`\"{} and specify the path to the
 the folder file as the filename. Your normal mailspool /var/spool/mail/username
-is available under the name INBOX anyway, but I guess you have fetchpop/procmail
+is available under the name INBOX anyway, but I guess you have fetchmail/procmail
 deliver your mail to some other place.
-
-
-\subsection{Mahogany cannot create some files when run as root}
-
-Mahogany will not work properly when executed by the \texttt{root}
-super-user. The underlying mail handling library used in Mahogany
-will change to some other user id for security reasons and therefore
-the program will not be able to create some files needed. For security
-reasons it is a bad idea anyway to run any X11 application as \texttt{root}.
 
 
 \subsection{Does Mahogany have group aliases?}
@@ -2637,7 +2607,7 @@ list of email addresses of all of its group members. This is more
 powerful, as you can easily add and remove entries to sub groups.
 \end{itemize}
 
-\subsection{How can I set up my POP3 access (applies to IMAP, too)?}
+\subsection{How can I set up POP3/IMAP access?}
 
 \textit{It is not immediately apparent how to set up my POP3 server
 under 0.23a , can someone give me a hand, please? It appears there
@@ -2649,16 +2619,14 @@ account:
 
 \begin{enumerate}
 \item right click on the folder tree and choose \char`\"{}Create Folder\char`\"{} 
-\item give the folder a name, set its type to POP and fill in the required
+\item give the folder a name, set its type to POP3 and fill in the required
 fields, such as server and login 
 \item Click on {[}OK{]}. The folder will now appear in the tree 
 \item Double-click on the folder to open it.
 \end{enumerate}
 \begin{itemize}
 \item If opening fails, right click on it again and choose \char`\"{}Properties\char`\"{},
-make sure that all settings are correct. I found that occasionally
-some setting would not get set properly in the Windows version. Setting
-it again fixes it.
+make sure that all settings are correct.
 \item - If you want Mahogany to collect all mail from that box, you can
 tick that checkbox and whenever Mahogany starts, it will open that
 box and continue collecting all mail from there and move it to the
@@ -2747,6 +2715,8 @@ display, do a {}``\texttt{xhost localhost}{}'' before, which will
 allow all local users to access your display. All this is not very
 safe from a security point of view if you don't trust your local machine,
 but perfectly fine for standalone or dialup boxes.
+
+Update: Mahogany now runs as \char`\"{}root\char`\"{}.
 
 
 \subsection{How can I set which language to use?}

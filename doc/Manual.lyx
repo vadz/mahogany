@@ -35,11 +35,11 @@ Mahogany User Manual
 
 \shape default 
 \size larger 
-Version 0.63 
+Version 0.64 
 \begin_inset Quotes eld
 \end_inset 
 
-Saugus
+Sparc
 \begin_inset Quotes erd
 \end_inset 
 
@@ -1680,6 +1680,14 @@ This option is not always available, as the use of strong cryptography is
  Must be supported by the server side, too.
  It will ensure that your communication with the server is encrypted and
  safe from eavesdropping.
+ For this to work, the user might also need to open the preferences dialog,
+ and, in the 
+\series bold 
+Misc
+\series default 
+ tab, fill-out the boxes labeled ``Path where to find shared libssl'' and
+ ``Path where to find shared libcrypto''.
+ Linux users must also see the SSL section of the FAQ.
 \layout Itemize
 
 
@@ -6479,20 +6487,20 @@ Being a brand new program, this section is currently pretty empty.
 Installation Problems
 \layout Subsection
 
-All Mahogany icons show a questionmark
+All Mahogany icons show a question mark
 \layout Standard
 
 
 \shape italic 
 I'm a linuxuser (redhat) who just found Mahogany and really likes it, but
- I have a problem, I cant get all the widgets to work, the pictures on the
- buttons and the ones before the mailboxes all appear as an questionmark.
+ I have a problem, I can't get all the widgets to work, the pictures on
+ the buttons and the ones before the mailboxes all appear as an questionmark.
  Do I need some library to make it look like your screenshot? If you would
  assist me in this matter I would be very grateful.
 \layout Standard
 
 It depends how you installed it.
- If the icon with the questionmark appears, it means that Mahogany didn't
+ If the icon with the question mark appears, it means that Mahogany didn't
  find its installation directory with the icons.
  If you installed the linux version from the .tar.gz with the binary, it should
  go into /usr/local or a similar place and you should have the icons in
@@ -6514,13 +6522,13 @@ If you have compiled it yourself, make sure you do a "make install" or "make
 How do I unpack the compressed files?
 \layout Standard
 
-The distribution files for Solaris and some of the other ones, are in compressed
+The distribution files for Solaris and some of the other ones are in compressed
  tar format, having the ending 
 \family typewriter 
 .tar.gz
 \family default 
  .
- To unpack them, you need 
+ To unpack them you need 
 \family typewriter 
 gzip
 \family default 
@@ -6597,7 +6605,7 @@ make
 \end_inset 
 
  to get it to ignore some errors caused by this.
- On non-Linux/GNU systems, you need to use the GNU linker, i.e.
+ On non-Linux/GNU systems, you need to use the GNU make utility, i.e.
  
 \begin_inset Quotes eld
 \end_inset 
@@ -6617,14 +6625,7 @@ make
 .
 \layout Subsection
 
-How can I get it to compile on Caldera Linux?
-\layout Standard
-
-You will need to install a libcrypt library with a working crypt() function.
- The source for one such library can be found on the Mahogany ftp server.
-\layout Subsection
-
-Mahogany fails to find wxWindows, Configure fails
+Mahogany fails to find wxWindows, configure fails
 \layout Standard
 
 The following steps should identify and solve the problem:
@@ -6653,6 +6654,41 @@ If it does not find the wxWindows library, you need to add /usr/local/lib
  to either your LD_LIBRARY_PATH or to /etc/ld.so.conf (and run /sbin/ldconfig
  as root), then remove *cache* and try again.
  Again, if something fails, look at config.log.
+\layout Subsection
+
+SSL does not work
+\layout Standard
+
+
+\shape italic 
+I went to the "Miscellaneous" tab in preferences menu and made sure the
+ pathnames of libcrypto and libssl where correct.
+ I enabled SSL in the access tab of my mail folder preferences.
+ However, when I try to open that folder, it fails and the log window talks
+ about being unable to load libssl.
+\layout Standard
+
+Under Linux, this is due to a combination of factors, fixing one of them
+ is enough to fix the problem.
+ Versions of libssl.so older than 0.9.6 require libcrypto to be explicitly
+ loaded beforehand.
+ Updating to version 0.9.6 or newer fixes the problem.
+ Versions of libwx_gtk older than or equal to 2.2.0 load shared libraries
+ in such a way that, even though M loads libcrypto, libssl still fails to
+ load.
+ Upgrading libwx_gtk to a later version will fix the problem.
+ Finally, if everything else fails, starting M with the command: 
+\begin_inset Quotes eld
+\end_inset 
+
+LD_PRELOAD=/usr/lib/libcrypto.so M
+\begin_inset Quotes erd
+\end_inset 
+
+ will fix the problem as well.
+ If the second solution is used, the pathname of libcrypto.so must be set
+ properly.
+ Otherwise it is better to leave it blank.
 \layout Section
 
 Other Problems / Questions
@@ -6672,22 +6708,22 @@ wxGTK has a problem with constraint handling which can cause this dialog
  to sometimes get into an endless loop trying to do the layout.
  On most windowmanagers it helps if you resize the dialog a little and it
  will appear correctly.
- This seems to depend on the platform and windowmanager.
+ This seems to depend on the platform and window manager.
  Also, wxGTK does not seem to work correctly with OpenLook which does not
  allow you to enter anything.
 \layout Subsection
 
-How to use Mahogany with fetchpop/procmail?
+How to use Mahogany with fetchmail/procmail?
 \layout Standard
 
 
 \shape italic 
-I use fetchpop and procmail do deliver my mail (Redhat Linux).
+I use fetchmail and procmail to deliver my mail (Redhat Linux).
  I'm reading mail with Netscape right now and I want to move to M.
- I cannot for the life of me get M to open my files when it loads.
+ I cannot for the life of me get M to open my mail when it loads.
  I have to open them manually.
- Can someone please help me (if its possible) to get M to open all of my
- Linux Folders at startup.
+ Can someone please help me to get M to open all of my Linux Folders at
+ startup.
 \layout Standard
 
 You should be able to right-click on the folder treecontrol on the left
@@ -6695,27 +6731,8 @@ You should be able to right-click on the folder treecontrol on the left
  Make it of type "file" and specify the path to the the folder file as the
  filename.
  Your normal mailspool /var/spool/mail/username is available under the name
- INBOX anyway, but I guess you have fetchpop/procmail deliver your mail
+ INBOX anyway, but I guess you have fetchmail/procmail deliver your mail
  to some other place.
-\layout Subsection
-
-Mahogany cannot create some files when run as root
-\layout Standard
-
-Mahogany will not work properly when executed by the 
-\family typewriter 
-root
-\family default 
- super-user.
- The underlying mail handling library used in Mahogany will change to some
- other user id for security reasons and therefore the program will not be
- able to create some files needed.
- For security reasons it is a bad idea anyway to run any X11 application
- as 
-\family typewriter 
-root
-\family default 
-.
 \layout Subsection
 
 Does Mahogany have group aliases?
@@ -6739,7 +6756,7 @@ The more elegant method: Create a new group in your addressbook and add
  groups.
 \layout Subsection
 
-How can I set up my POP3 access (applies to IMAP, too)?
+How can I set up POP3/IMAP access?
 \layout Standard
 
 
@@ -6763,7 +6780,7 @@ Mahogany allows you to have as many folders or mail accounts as you like.
 right click on the folder tree and choose "Create Folder" 
 \layout Enumerate
 
-give the folder a name, set its type to POP and fill in the required fields,
+give the folder a name, set its type to POP3 and fill in the required fields,
  such as server and login 
 \layout Enumerate
 
@@ -6776,9 +6793,6 @@ Double-click on the folder to open it.
 
 If opening fails, right click on it again and choose "Properties", make
  sure that all settings are correct.
- I found that occasionally some setting would not get set properly in the
- Windows version.
- Setting it again fixes it.
 \layout Itemize
 
 - If you want Mahogany to collect all mail from that box, you can tick that
@@ -7003,6 +7017,9 @@ xhost localhost
  before, which will allow all local users to access your display.
  All this is not very safe from a security point of view if you don't trust
  your local machine, but perfectly fine for standalone or dialup boxes.
+\layout Standard
+
+Update: Mahogany now runs as "root".
 \layout Subsection
 
 How can I set which language to use?
