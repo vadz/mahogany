@@ -115,21 +115,32 @@ struct ThreadParams;
 // MLogCircle
 // ----------------------------------------------------------------------------
 
-/** A small class to hold the last N log messages for analysis.
+/**
+  A small class to hold the last N log messages for analysis: when an error
+  happens you may call its GuessError() method to try to give the user a
+  human-readable description of the problem.
  */
 class MLogCircle
 {
 public:
    MLogCircle(int n);
    ~MLogCircle();
+
    void Add(const String &txt);
    bool Find(const String needle, String *store = NULL) const;
    String GetLog(void) const;
    void Clear(void);
-   /// Looks at log data and guesses what went wrong.
-   String GuessError(void) const;
+
+   /**
+     Looks at log data and guesses what went wrong and calls LOGMESSAGE()
+     if we have any ideas.
+    */
+   void GuessError(void) const;
+
 private:
-   int m_N, m_Next;
+   int m_N,
+       m_Next;
+
    String *m_Messages;
 };
 

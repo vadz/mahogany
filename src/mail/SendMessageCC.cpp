@@ -1547,23 +1547,15 @@ SendMessageCC::Send(int flags)
                       m_Protocol == Prot_SMTP ? "SMTP" : "NNTP",
                       reply.empty() ? _("unknown error") : reply.c_str());
 
-         String err = MailFolder::GetLogCircle().GuessError();
-         if ( !err.empty() )
-         {
-            ERRORMESSAGE((err));
-         }
+         MailFolder::GetLogCircle().GuessError();
       }
    }
    else // error in opening stream
    {
+      MailFolder::GetLogCircle().GuessError();
+
       ERRORMESSAGE((_("Cannot open connection to the server '%s'."),
                     m_ServerHost.c_str()));
-
-      String err = MailFolder::GetLogCircle().GuessError();
-      if ( !err.empty() )
-      {
-         ERRORMESSAGE((err));
-      }
 
       success = false;
    }

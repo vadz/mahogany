@@ -3649,6 +3649,10 @@ wxFolderView::OpenFolder(MFolder *folder, bool readonly)
                GetFullPersistentKey(M_MSGBOX_EDIT_FOLDER_ON_OPEN_FAIL);
             if ( wxPMessageBoxEnabled(key) )
             {
+               // flush the error messages from the MailFolder::Open() before
+               // showing the dialog
+               wxLog::FlushActive();
+
                if ( MDialog_YesNoDialog
                     (
                      wxString::Format(_("The folder '%s' could not be opened, "

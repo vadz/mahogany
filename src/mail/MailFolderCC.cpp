@@ -2289,13 +2289,11 @@ MailFolderCC::Open(OpenMode openmode)
    if ( m_MailStream == NIL )
    {
       // can we give the user a hint as to why did it fail?
-      String err = GetLogCircle().GuessError();
-      if ( !err.empty() )
-      {
-         ERRORMESSAGE((err));
-      }
+      GetLogCircle().GuessError();
 
+      // give the general error message anyhow
       wxLogError(_("Could not open mailbox '%s'."), GetName().c_str());
+
       return false;
    }
 
@@ -5251,7 +5249,7 @@ MailFolderCC::mm_notify(MAILSTREAM * stream, String str, long errflg)
    MailFolderCC *mf = MailFolderCC::LookupObject(stream);
 
    // detect the notifications about stream being closed
-   if ( mf && errflg == BYE )
+   if ( mf && mf->IsOpened() && errflg == BYE )
    {
       mf->ForceClose();
 
