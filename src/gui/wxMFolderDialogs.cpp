@@ -12,6 +12,47 @@
 // Licence:     M license
 ///////////////////////////////////////////////////////////////////////////////
 
+/*
+   The GUI update logic in these dialogs is a horrible mess. I am not sure
+   that even I understand any longer how it works but here is what I think it
+   does:
+
+   0. on creation, TransferDataToWindow() calles SetDefaultValues() and
+      DoUpdateUIForFolder() to initialize the controls with the values
+      either read from profile (for the existing ones) or the reasonable
+      defaults (new ones) and then enable/disable settings depending on the
+      precise folder type
+
+   1. when anything changes, DoUpdateUI() is called and does, roughly, this:
+         if ( folder type changed )
+            if ( radio box selection changed )
+               reinit the folder subtype choice
+               enable/disable entries depending on the radio selection
+
+            SetDefaultValues()
+
+         DoUpdateUIForFolder()
+
+   2. when creating a new folder the user may edit the folder name in the
+      text control on top of the dialog which changes the value of the path
+      field unless it had been changed
+
+      vice versa, if the user edits the path field we try to generate the
+      expected folder name from it - again, only if the user hadn't entered it
+      manually before
+
+      all this is done in UpdateOnFolderNameChange() which also takes care of
+      preventing the infinite recursion which could happen as wxTextCtrl sends
+      notifications even when its text is changed programmatically
+
+
+   Now this is theory and in practice there were some really strange things
+   going on with MH folder (granted, this is complicated as we want to check
+   that the folder path is always under MHROOT) which I think are not needed
+   any more. I keep the old code inside "#ifdef USE_OLD_MH" but if the logic
+   above correponds to the code, it shouldn't be necessary to do all this.
+ */
+
 // ============================================================================
 // declarations
 // ============================================================================
@@ -412,7 +453,7 @@ protected:
    /// the initial value of the "use SSL" flag
    bool m_originalUseSSL;
 #endif
-/// the initial value of the "is incoming" flag
+   /// the initial value of the "is incoming" flag
    bool m_originalIncomingValue;
    /// the initial value of the "force re-open" flag
    bool m_originalForceReOpenValue;
@@ -1195,14 +1236,12 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
          wxString folderName;
 
          // MH folder should be created under its parent by default
-         if ( folderType == MF_MH
-#ifdef EXPERIMENTAL_MFormat
-              || folderType == MF_MDIR
-#endif // EXPERIMENTAL_MFormat
-            )
+         if ( folderType == MF_MH )
          {
             // AfterFirst() removes the MH root prefix
-            folderName << dlg->GetParentFolderName().AfterFirst('/') << '/';
+            folderName = dlg->GetParentFolderName().AfterFirst('/');
+            if ( !folderName.empty() )
+              folderName += '/';
          }
          //else: MBOX folders don't have hierarchical structure
 
@@ -1212,6 +1251,9 @@ wxFolderPropertiesPage::UpdateOnFolderNameChange()
          // user
          m_userModifiedPath = -1;
 
+         // strutil_expandfoldername() will normalize the path, i.e. make it
+         // absolute prepending the correct prefix depending on the folder
+         // type
          m_path->SetValue(strutil_expandfoldername(folderName, folderType));
       }
    }
@@ -1445,6 +1487,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
 #endif // EXPERIMENTAL_MFormat
          EnableControlsForFileFolder(m_folderType);
 
+#ifdef USE_OLD_MH
          if ( m_folderType == MF_MH || m_folderType == MF_MDIR )
          {
             // set the path to MHROOT by default
@@ -1463,6 +1506,7 @@ wxFolderPropertiesPage::DoUpdateUIForFolder()
                m_path->SetValue(path);
             }
          }
+#endif // USE_OLD_MH
 
          // not yet
          m_userModifiedPath = false;
@@ -1853,28 +1897,50 @@ wxFolderPropertiesPage::SetDefaultValues()
    }
 
    value = READ_CONFIG(profile, MP_FOLDER_PATH);
-   if ( (selRadio == Radio_Group) ||
-        ((selRadio == Radio_File) && !m_isCreating) )
+   switch ( selRadio )
    {
-      // MH complications: must prepend MHROOT to relative paths
-      if ( folderType == MF_MH )
-      {
-         wxString mhRoot = MailFolder::InitializeMH();
-         if ( !value.StartsWith(mhRoot) && !IsAbsPath(value) )
+      case Radio_File:
+         if ( m_isCreating )
          {
-            value.Prepend(mhRoot);
-         }
-      }
+            // switch the browse to the correct mode
+            if ( folderType == MF_MH )
+               m_browsePath->BrowseForDirectories();
+            else
+               m_browsePath->BrowseForFiles();
 
-      m_path->SetValue(value);
-   }
-   else if ( selRadio == Radio_News )
-   {
-      m_newsgroup->SetValue(value);
-   }
-   else if ( selRadio == Radio_Imap )
-   {
-      m_mailboxname->SetValue(value);
+            // don't need to set anything
+            break;
+         }
+
+#ifdef USE_OLD_MH
+         // MH complications: must prepend MHROOT to relative paths
+         if ( folderType == MF_MH )
+         {
+            wxString mhRoot = MailFolder::InitializeMH();
+            if ( !value.StartsWith(mhRoot) && !IsAbsPath(value) )
+            {
+               value.Prepend(mhRoot);
+            }
+         }
+#endif // USE_OLD_MH
+
+         // fall through
+
+      case Radio_Group:
+         m_path->SetValue(value);
+         break;
+
+      case Radio_News:
+         m_newsgroup->SetValue(value);
+         break;
+
+      case Radio_Imap:
+         m_mailboxname->SetValue(value);
+         break;
+
+      default:
+         // nothing special to do
+         ;
    }
 
    m_originalValues[Path] = value;
