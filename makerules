@@ -9,6 +9,7 @@ MODOBJS = $(MOD:.cpp=.o)
 else
 ifeq ($(USE_MODULES),dynamic)
 MODULES = $(MOD:.cpp=.so) $(MOD:.cpp=.mmd)
+MODSOS = $(MOD:.cpp=.so)
 MODOBJS =
 else
 MODULES =
@@ -89,7 +90,7 @@ msgcat:
 	@for i in $(SRC) $(CSRC) ; do $(XGETTEXT) -C -k_ -j -o $(BUILDDIR)/messages.po $$i ; done
 
 stdclean:
-	$(RM) $(ODIR)/*.o $(ODIR)/*.so $(ODIR)/*.a $(ODIR)/*.lo $(ODIR)/.libs $(MODULES) $(MODOBJS)
+	$(RM) $(ODIR)/*.o $(ODIR)/*.so $(ODIR)/*.a $(ODIR)/*.lo $(ODIR)/.libs $(MODSOS) $(MODOBJS)
 
 modules:	$(MODULES)
 
