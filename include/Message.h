@@ -9,14 +9,26 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
-#ifndef	USE_PCH
-#	include	<Mcommon.h>
-#	include	<list>
+#ifndef  USE_PCH
+#  include  <Mcommon.h>
+#  include  <list>
 #endif
+
+// ----------------------------------------------------------------------------
+// C-client compatibility defines
+// ----------------------------------------------------------------------------
+#ifdef   OS_WIN
+#  define   TEXT_DATA_CAST(x)    ((unsigned char *)x)
+#else
+#  define   TEXT_DATA_CAST(x)    ((char *)x)
+#endif
+
+// ----------------------------------------------------------------------------
+// Message class
+// ----------------------------------------------------------------------------
 
 /// a type used by Address():
 enum MessageAddressType { MAT_FROM, MAT_SENDER, MAT_REPLYTO };
-      
 
 /**
    Message class, containing the most commonly used message headers.
@@ -33,7 +45,7 @@ public:
    /** get Subject line
        @return Subject entry
    */
-   virtual const String	& Subject(void) const = 0;
+   virtual const String & Subject(void) const = 0;
 
    /** get an address line
        @param name where to store personal name if available
@@ -41,9 +53,9 @@ public:
        @return address entry
    */
    virtual const String Address(String &name,
-				MessageAddressType type = MAT_FROM)
+            MessageAddressType type = MAT_FROM)
       const = 0;
-				   
+               
    /** get From line
        @return From entry
    */
@@ -52,7 +64,7 @@ public:
    /** get Date line
        @return Date when message was sent
    */
-   virtual const String	& Date(void) const = 0;
+   virtual const String & Date(void) const = 0;
 
    /** get message text
        @return the uninterpreted message body
@@ -90,7 +102,7 @@ public:
        @param forceBytes if true, the size will be returned in bytes always
        @return size
    */
-   virtual size_t	GetPartSize(int n = 0, bool forceBytes = false) = 0;
+   virtual size_t GetPartSize(int n = 0, bool forceBytes = false) = 0;
 
    /** Query the MimeType of the content.
        @param  n part number
