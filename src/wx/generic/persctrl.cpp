@@ -1689,36 +1689,31 @@ void wxPMessageBoxEnable(const wxString& configPath,
 // Persistent file selector boxes stuff
 // -----------------------------------------------------------------------------
 
-// get the path to use for file prompts settings
-static void wxPFileSelectorHelper(const wxString& configPath,
-                                  wxString& ourPath,
-                                  wxString& ourValue)
+// common part of wxPFileSelector and wxPFilesSelector
+static wxFileDialog *wxShowFileSelectorDialog(const wxString& configPath,
+                                              const wxString& title,
+                                              const char *defpath,
+                                              const char *defname,
+                                              const char *defext,
+                                              const char *filter,
+                                              int flags,
+                                              wxWindow *parent,
+                                              wxConfigBase *config)
 {
-    wxASSERT_MSG( ourPath.IsEmpty(), "should be passed in an empty string" );
+    wxCHECK_MSG( !!configPath, NULL, _T("configPath can't be empty") );
+
+    wxString ourPath,           // path in the config
+             configValueFile,   // name of the entry where filename is stored
+             configValuePath;   // name of the entry where path is stored
 
     if ( configPath[0u] != '/' ) {
         // prepend some common prefix
         ourPath = "FilePrompts/";
     }
+    //else: absolute path - use as is
 
     ourPath += configPath.BeforeLast('/');
-    ourValue = configPath.AfterLast('/');
-}
-
-wxString wxPFileSelector(const wxString& configPath,
-                         const wxString& title,
-                         const char *defpath,
-                         const char *defname,
-                         const char *defext,
-                         const char *filter,
-                         int flags,
-                         wxWindow *parent,
-                         wxConfigBase *config)
-{
-    wxString ourPath,           // path in the config
-             configValueFile,   // name of the entry where filename is stored
-             configValuePath;   // name of the entry where path is stored
-    wxPFileSelectorHelper(configPath, ourPath, configValueFile);
+    configValueFile = configPath.AfterLast('/');
     configValuePath << configValueFile << "Path";
 
     wxPHelper persist(ourPath, "", config);
@@ -1745,26 +1740,99 @@ wxString wxPFileSelector(const wxString& configPath,
         defaultPath = defpath;
     }
 
-    // do show the file selector box
-    wxString filename = wxFileSelector(title, defaultPath, defaultName, NULL,
-                                       filter
-                                        ? filter
-                                        : wxFileSelectorDefaultWildcardStr,
-                                       flags, parent);
+    wxFileDialog *dialog = new wxFileDialog(parent,
+                                            title,
+                                            defaultPath,
+                                            defaultName,
+                                            filter
+                                            ? filter
+                                            : wxFileSelectorDefaultWildcardStr,
+                                            flags);
+    if ( dialog->ShowModal() != wxID_OK ) {
+        // cancelled
+        dialog->Destroy();
 
-    // and save the file name if it was entered
-    if ( !filename.IsEmpty() && config ) {
-        wxString path, name, ext;
-        wxSplitPath(filename, &path, &name, &ext);
-
-        if(ext.Length())
-           name << '.' << ext;
-        config->Write(configValueFile, name);
-        config->Write(configValuePath, path);
+        dialog = NULL;
     }
+    else {
+        // remember the last filename/path chosen
+        wxString filename = dialog->GetPath();
+        if ( !filename.IsEmpty() && config ) {
+            wxString path, name, ext;
+            wxSplitPath(filename, &path, &name, &ext);
+
+            if( ext.Length() )
+               name << '.' << ext;
+            config->Write(configValueFile, name);
+            config->Write(configValuePath, path);
+        }
+    }
+
+    return dialog;
+}
+
+wxString wxPFileSelector(const wxString& configPath,
+                         const wxString& title,
+                         const char *defpath,
+                         const char *defname,
+                         const char *defext,
+                         const char *filter,
+                         int flags,
+                         wxWindow *parent,
+                         wxConfigBase *config)
+{
+    // show the file selector box
+    wxFileDialog *dialog = wxShowFileSelectorDialog(configPath,
+                                                    title,
+                                                    defpath,
+                                                    defname,
+                                                    defext,
+                                                    filter,
+                                                    flags,
+                                                    parent,
+                                                    config);
+
+    if ( !dialog )
+        return wxEmptyString;
+
+    wxString filename = dialog->GetPath();
+    dialog->Destroy();
 
     return filename;
 }
+
+size_t wxPFilesSelector(wxArrayString& filenames,
+                        const wxString& configPath,
+                        const wxString& title,
+                        const char *defpath = NULL,
+                        const char *defname = NULL,
+                        const char *defext = NULL,
+                        const char *filter = NULL,
+                        int flags = 0,
+                        wxWindow *parent = NULL,
+                        wxConfigBase *config = NULL)
+{
+    wxFileDialog *dialog = wxShowFileSelectorDialog(configPath,
+                                                    title,
+                                                    defpath,
+                                                    defname,
+                                                    defext,
+                                                    filter,
+                                                    flags | wxMULTIPLE,
+                                                    parent,
+                                                    config);
+    if ( !dialog )
+        return 0;
+
+    dialog->GetPaths(filenames);
+    dialog->Destroy();
+
+    return filenames.GetCount();
+}
+
+// ----------------------------------------------------------------------------
+// misc helper functions
+// ----------------------------------------------------------------------------
 
 static int TranslateBtnIdToMsgBox(int rc)
 {

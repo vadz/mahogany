@@ -573,6 +573,19 @@ extern WXDLLEXPORT wxString wxPFileSelector(const wxString& configPath,
                                             wxWindow *parent = NULL,
                                             wxConfigBase *config = NULL);
 
+// return the number of filenames selected, the filenames themselves are in
+// the array passed by reference
+extern WXDLLEXPORT size_t wxPFilesSelector(wxArrayString& filenames,
+                                           const wxString& configPath,
+                                           const wxString& title,
+                                           const char *defpath = NULL,
+                                           const char *defname = NULL,
+                                           const char *extension = NULL,
+                                           const char *filter = NULL,
+                                           int flags = 0,
+                                           wxWindow *parent = NULL,
+                                           wxConfigBase *config = NULL);
+
 // ----------------------------------------------------------------------------
 // Persistent (a.k.a. "don't remind me again") message boxes functions.
 //
