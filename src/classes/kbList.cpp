@@ -6,6 +6,9 @@
  * $Id$          *
  *                                                                  *
  * $Log$
+ * Revision 1.2  1998/05/14 16:39:31  VZ
+ * fixed SIGSEGV in ~kbList if the list is empty
+ *
  * Revision 1.1  1998/05/13 19:02:11  KB
  * added kbList, adapted MimeTypes for it, more python, new icons
  *
@@ -181,16 +184,15 @@ kbList::erase(kbListIterator & i)
 
 kbList::~kbList()
 {
-   kbListNode *n = first->next;
+   kbListNode *next;
 
-   while(first)
+   while ( first != NULL )
    {
+      next = first->next;
       if(ownsEntries)
          delete first->element;
       delete first;
-      first = n;
-      if(first)
-         n = first->next;
+      first = next;
    }
 }
 
