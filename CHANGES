@@ -1,4 +1,7 @@
 (next release) on (date of next release)
+04.07.00 KB: wxOptionsDlg now automatically stores all Field_Password entries
+	     encrypted, SMTP/NNTP server passwords are now encrypted in config
+             keep-open flag now only enforced for Outbox
 30.06.00 VZ: made it possible to attach several files at once
 27.06.00 KB: added DeleteDuplicates functionality, fixed (?) folderview selection behaviour
              for auto-show-first and move focus on after delete/undelete/etc
