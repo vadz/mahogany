@@ -164,7 +164,7 @@ UpgradeFrom010()
       p2->writeEntry(MP_POP_PASSWORD, strutil_encrypt(pw));
       p2->DecRef();
       p->ResetPath();
-      p->DeleteGroup(group);
+      //FIXME causes assert in wxConfig code p->DeleteGroup(group);
    }
    p->DecRef();
 
@@ -182,7 +182,7 @@ UpgradeFrom010()
    }
    // And now we delete the old Folders section altogether
    //FIXME: disabled due to wxFileConfig bug
-   p->DeleteGroup("Folders");
+   //p->DeleteGroup("Folders");
 
    // Write our new version number:
    p->writeEntry(MP_VERSION, M_VERSION);
