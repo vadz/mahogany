@@ -481,6 +481,10 @@ MAppBase::OnStartup()
       m_MailCollector->Collect(); // empty all at beginning
    }
 
+   // Load any modules requested: notice that this must be done before
+   // restoring the ADB editor as it uses the modules
+   LoadModules();
+
    // show the ADB editor if it had been shown the last time when we ran
    // ------------------------------------------------------------------
 
@@ -501,10 +505,6 @@ MAppBase::OnStartup()
    m_eventFolderStatusReg = MEventManager::Register(*this, MEventId_FolderStatus);
    CHECK( m_eventFolderStatusReg, FALSE,
           "failed to register event handler for folder status event " );
-
-   // Load any modules requested.
-   LoadModules();
-
 
    return TRUE;
 }
