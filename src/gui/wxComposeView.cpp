@@ -117,8 +117,10 @@ extern const MOption MP_DRAFTS_FOLDER;
 extern const MOption MP_EXTERNALEDITOR;
 extern const MOption MP_HOSTNAME;
 extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
+extern const MOption MP_OUTGOINGFOLDER;
 extern const MOption MP_SENDMAILCMD;
 extern const MOption MP_SMTPHOST;
+extern const MOption MP_USEOUTGOINGFOLDER;
 extern const MOption MP_USERLEVEL;
 extern const MOption MP_USEVCARD;
 extern const MOption MP_USE_SENDMAIL;
@@ -276,7 +278,7 @@ public:
 
    // starting from now, all methods are for the wxRcptXXX controls only
 
-   // change type of this one - called by choice
+   // change type of this one -- called by choice
    virtual void OnTypeChange(wxComposeView::RecipientType rcptType);
 
    // expand our text: called by the "Expand" button and
@@ -499,8 +501,6 @@ public:
                        wxBORDER_NONE)
       {
          m_rcptControl = rcptControl;
-
-         SetToolTip(_("Expand the address using address books"));
       }
 
    // callback
@@ -748,6 +748,9 @@ void wxRcptControl::InitControls(const String& value,
 
    m_choice->SetSelection(rt);
    m_text->SetValue(value);
+
+   // init the m_btnExpand state
+   OnTypeChange(rt);
 }
 
 wxRcptControl::~wxRcptControl()
@@ -759,17 +762,88 @@ wxRcptControl::~wxRcptControl()
 
 void wxRcptControl::OnTypeChange(wxComposeView::RecipientType rcptType)
 {
-   // nothing to do here
+   switch ( rcptType )
+   {
+      case Composer::Recipient_To:
+      case Composer::Recipient_Cc:
+      case Composer::Recipient_Bcc:
+         m_btnExpand->Enable();
+         m_btnExpand->SetToolTip(_("Expand the address using address books"));
+         break;
+
+      case Composer::Recipient_Newsgroup:
+         // TODO-NEWS: we can't browse for newsgroups yet
+         m_btnExpand->Disable();
+         break;
+
+      case Composer::Recipient_Fcc:
+         // browse for folder now
+         m_btnExpand->Enable();
+         m_btnExpand->SetToolTip(_("Browse for folder"));
+         break;
+
+      case Composer::Recipient_None:
+         m_btnExpand->Disable();
+         break;
+
+      case Composer::Recipient_Max:
+      default:
+         FAIL_MSG( "unexpected rcpt type on wxRcptControl" );
+   }
 }
 
 void wxRcptControl::OnExpand()
 {
-   Composer::RecipientType rcptType = m_text->DoExpand();
-   if ( rcptType != Composer::Recipient_None &&
-         rcptType != Composer::Recipient_Max )
+   switch ( GetType() )
    {
-      // update the type of the choice control
-      SetType(rcptType);
+      case Composer::Recipient_To:
+      case Composer::Recipient_Cc:
+      case Composer::Recipient_Bcc:
+         {
+            Composer::RecipientType rcptType = m_text->DoExpand();
+            if ( rcptType != Composer::Recipient_None &&
+                  rcptType != Composer::Recipient_Max )
+            {
+               // update the type of the choice control
+               SetType(rcptType);
+            }
+         }
+         break;
+
+      case Composer::Recipient_Fcc:
+         // browse for folder
+         {
+            MFolder_obj folder(MDialog_FolderChoose
+                               (
+                                 m_composeView->GetFrame(),
+                                 NULL,
+                                 MDlg_Folder_NoFiles
+                               ));
+            if ( !folder )
+            {
+               // cancelled by user
+               break;
+            }
+
+            // separate the new folder with a comma from the previous ones
+            String fcc = m_text->GetValue();
+            fcc.Trim();
+            if ( !fcc.empty() && fcc[fcc.length() - 1] != ',' )
+            {
+               fcc += CANONIC_ADDRESS_SEPARATOR;
+            }
+
+            fcc += folder->GetFullName();
+
+            m_text->SetValue(fcc);
+         }
+         break;
+
+      case Composer::Recipient_Newsgroup:
+      case Composer::Recipient_None:
+      case Composer::Recipient_Max:
+      default:
+         FAIL_MSG( "unexpected wxRcptControl::OnExpand() call" );
    }
 }
 
@@ -816,11 +890,16 @@ wxSizer *wxRcptMainControl::CreateControls(wxWindow *parent)
    GetChoice()->Delete(Composer::Recipient_None);
    GetChoice()->SetSelection(Composer::Recipient_To);
 
+   // init the m_btnExpand button here
+   wxRcptControl::OnTypeChange(GetType());
+
    return sizer;
 }
 
 void wxRcptMainControl::OnTypeChange(Composer::RecipientType rcptType)
 {
+   wxRcptControl::OnTypeChange(rcptType);
+
    GetComposer()->OnRcptTypeChange(rcptType);
 }
 
@@ -881,6 +960,7 @@ const wxString wxRcptTypeChoice::ms_addrTypes[] =
    _("Cc"),
    _("Bcc"),
    _("Newsgroup"),
+   _("Fcc"),
    _("None"),
 };
 
@@ -948,14 +1028,45 @@ void wxAddressTextCtrl::OnChar(wxKeyEvent& event)
 
 Composer::RecipientType wxAddressTextCtrl::DoExpand()
 {
-   String text = GetValue();
+   Composer::RecipientType rcptType;
 
-   Composer::RecipientType rcptType = GetComposer()->ExpandRecipient(&text);
-
-   if ( rcptType != Composer::Recipient_None )
+   switch ( m_rcptControl->GetType() )
    {
-      SetValue(text);
-      SetInsertionPointEnd();
+      case Composer::Recipient_To:
+      case Composer::Recipient_Cc:
+      case Composer::Recipient_Bcc:
+         {
+            String text = GetValue();
+
+            rcptType = GetComposer()->ExpandRecipient(&text);
+
+            if ( rcptType != Composer::Recipient_None )
+            {
+               SetValue(text);
+               SetInsertionPointEnd();
+            }
+         }
+         break;
+
+      case Composer::Recipient_Newsgroup:
+         // TODO-NEWS: we should expand the newsgroups too
+         rcptType = Composer::Recipient_Newsgroup;
+         break;
+
+      case Composer::Recipient_Fcc:
+         // TODO: we could expand the folder names -- but for now we don't
+         rcptType = Composer::Recipient_Fcc;
+         break;
+
+      case Composer::Recipient_Max:
+      default:
+         FAIL_MSG( "unexpected wxRcptControl type" );
+         // fall through
+
+      case Composer::Recipient_None:
+         // nothing to do
+         rcptType = Composer::Recipient_None;
+         break;
    }
 
    return rcptType;
@@ -1527,6 +1638,9 @@ wxComposeView::Create(wxWindow * WXUNUSED(parent), Profile *parentProfile)
    AddTo(READ_CONFIG(m_Profile, MP_COMPOSE_TO));
    AddCc(READ_CONFIG(m_Profile, MP_COMPOSE_CC));
    AddBcc(READ_CONFIG(m_Profile, MP_COMPOSE_BCC));
+
+   if ( READ_CONFIG(m_Profile, MP_USEOUTGOINGFOLDER) )
+      AddFcc(READ_CONFIG_TEXT(m_Profile, MP_OUTGOINGFOLDER));
 }
 
 /// create the compose window itself
@@ -1861,35 +1975,60 @@ wxComposeView::AddRecipients(const String& address, RecipientType addrType)
       addrType = m_rcptTypeLast;
    }
 
-   if ( addrType == Recipient_Newsgroup )
+   switch ( addrType )
    {
-      // tokenize the string possibly containing several newsgroups
-      wxArrayString groups = wxStringTokenize(address, ",; \t", wxTOKEN_STRTOK);
-
-      size_t count = groups.GetCount();
-      for ( size_t n = 0; n < count; n++ )
-      {
-         AddRecipient(groups[n], Recipient_Newsgroup);
-      }
-   }
-   else // email address
-   {
-      // split the string in addreses and add all of them
-      AddressList_obj addrList(address, READ_CONFIG(m_Profile, MP_HOSTNAME));
-      if ( addrList )
-      {
-         Address *addr = addrList->GetFirst();
-         while ( addr )
+      case Recipient_Newsgroup:
          {
-            String address = addr->GetAddress();
-            if ( !address.empty() )
-            {
-               AddRecipient(address, addrType);
-            }
+            // tokenize the string possibly containing several newsgroups
+            const wxArrayString
+               groups = wxStringTokenize(address, ",; \t", wxTOKEN_STRTOK);
 
-            addr = addrList->GetNext(addr);
+            size_t count = groups.GetCount();
+            for ( size_t n = 0; n < count; n++ )
+            {
+               AddRecipient(groups[n], Recipient_Newsgroup);
+            }
          }
-      }
+         break;
+
+      case Recipient_To:
+      case Recipient_Cc:
+      case Recipient_Bcc:
+         // an email address
+         {
+            // split the string in addreses and add all of them
+            AddressList_obj addrList(address,
+                                     READ_CONFIG(m_Profile, MP_HOSTNAME));
+            if ( addrList )
+            {
+               Address *addr = addrList->GetFirst();
+               while ( addr )
+               {
+                  String address = addr->GetAddress();
+                  if ( !address.empty() )
+                  {
+                     AddRecipient(address, addrType);
+                  }
+
+                  addr = addrList->GetNext(addr);
+               }
+            }
+         }
+         break;
+
+      case Recipient_Fcc:
+         // folder names
+         AddRecipient(address, Recipient_Fcc);
+         break;
+
+      case Recipient_Max:
+      default:
+         FAIL_MSG( "unexpected wxRcptControl type" );
+         // fall through
+
+      case Recipient_None:
+         // nothing to do
+         ;
    }
 }
 
@@ -3401,14 +3540,18 @@ wxComposeView::BuildMessage() const
       msg->SetNewsgroups(newsgroups);
    }
 
+   // from
    String from = GetFrom();
    if ( !from.empty() )
    {
       msg->SetFrom(from);
    }
 
-   // Add additional header lines: first for this time only and then also the
-   // headers stored in the profile
+   // fcc
+   msg->SetFcc(GetRecipients(Recipient_Fcc));
+
+   // add any additional header lines: first for this time only and then also
+   // the headers stored in the profile
    kbStringList::iterator i = m_ExtraHeaderLinesNames.begin();
    kbStringList::iterator i2 = m_ExtraHeaderLinesValues.begin();
    for ( ; i != m_ExtraHeaderLinesNames.end(); i++, i2++ )

@@ -35,6 +35,7 @@ public:
       Recipient_Cc,
       Recipient_Bcc,
       Recipient_Newsgroup,
+      Recipient_Fcc,
       Recipient_None,
       Recipient_Max
    };
@@ -157,6 +158,9 @@ public:
 
    /// adds a "Bcc" recipient
    void AddBcc(const String& addr) { AddRecipients(addr, Recipient_Bcc); }
+
+   /// adds a "Fcc" recipient
+   void AddFcc(const String& fcc) { AddRecipients(fcc, Recipient_Fcc); }
 
    /// adds a Newsgroup
    void AddNewsgroup(const String& addr) { AddRecipients(addr, Recipient_Newsgroup); }
