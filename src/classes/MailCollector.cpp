@@ -47,7 +47,8 @@
 
 struct MailCollectorFolderEntry
 {
-   String      m_name;
+   String m_name;
+
    /** Failcount is 0 initially, when it reaches MC_MAX_FAIL a warning is
        printed. If set to -1, user has been warned about it being
        inaccessible and no more warnings are printed. */
@@ -56,13 +57,14 @@ struct MailCollectorFolderEntry
 
 KBLIST_DEFINE(MailCollectorFolderList, MailCollectorFolderEntry);
 
-class MailCollectorImpl : public MailCollector
+class MailCollectorImpl : public MailCollector, public MEventReceiver
 {
 public:
    MailCollectorImpl()
       {
          InternalCreate();
       }
+
    /// Returns true if the mailfolder mf is an incoming folder.
    virtual bool IsIncoming(MailFolder *mf);
    /** Collect all mail from folder mf.
@@ -86,6 +88,10 @@ public:
       {
          m_ReInit = true;
       }
+
+   // react to folder deletion by removing it from the list of folders to poll
+   virtual bool OnMEvent(MEventData& event);
+
 protected:
    /// Collect mail from this one folder.
    bool CollectOneFolder(MailFolder *mf);
@@ -110,6 +116,10 @@ private:
    void InternalDestroy(void);
    /// a list of folder names and mailfolder pointers
    class MailCollectorFolderList *m_list;
+
+   /// the event manager cookie
+   void *m_regFolderDelete;
+
    /// if this is set, we want to be re-initialised
    bool m_ReInit;
 };
@@ -163,12 +173,18 @@ MailCollectorImpl::InternalCreate(void)
    if(! t.Traverse(true))
       wxLogError(_("Cannot build list of incoming mail folders."));
    m_ReInit = false;
+
+   m_regFolderDelete = MEventManager::Register(*this, MEventId_FolderTreeChange);
 }
 
 void
 MailCollectorImpl::InternalDestroy(void)
 {
    MOcheck();
+
+   if ( m_regFolderDelete )
+      MEventManager::Deregister(m_regFolderDelete);
+
    delete m_list;
 }
 
@@ -200,12 +216,28 @@ MailCollectorImpl::Collect(MailFolder *mf)
    // maybe we've got nothing to do?
    if(mf == NULL && m_list->size() == 0)
       return TRUE;
-   
+
    // first case, mf==NULL, collect from all incoming folders:
-   if(mf == NULL)
+   if ( mf == NULL )
    {
+      // VZ: I don't know if it should be here or if this can lead to some
+      //     nasty recursion/reentrancy problems - what to do?
+#if 0
+      // before scanning the list, make sure that all deleted folders are
+      // expunged from it
+      MEventManager::DispatchPending();
+#endif // 0
+
+      // make a copy of the list to iterate over as we can't modify the list
+      // we're iterating over (we call RemoveIncomingFolder() inside the loop)
       MailCollectorFolderList::iterator i;
-      for(i = m_list->begin();i != m_list->end();i++)
+      MailCollectorFolderList list(false /* doesn't own entries */);
+      for ( i = m_list->begin(); i != m_list->end(); i++ )
+      {
+         list.push_back(*i);
+      }
+
+      for ( i = list.begin();i != list.end(); i++ )
       {
          MFolder *mfolder = MFolder::Get( (**i).m_name );
          if(! mfolder)
@@ -265,8 +297,6 @@ MailCollectorImpl::Collect(MailFolder *mf)
                   TRUE, GetPersMsgBoxName(M_MSGBOX_SUSPENDAUTOCOLLECT)))
                {
                   RemoveIncomingFolder((**i).m_name);
-                  // re-start from beginning of list to avoid iterator trouble:
-                  i = m_list->begin();
                }
                else
                {
@@ -333,3 +363,18 @@ MailCollectorImpl::RemoveIncomingFolder(const String &name)
    return false;
 }
 
+bool
+MailCollectorImpl::OnMEvent(MEventData& event)
+{
+   if ( event.GetId() == MEventId_FolderTreeChange )
+   {
+      MEventFolderTreeChangeData& evTree = (MEventFolderTreeChangeData &)event;
+      if ( evTree.GetChangeKind() == MEventFolderTreeChangeData::Delete )
+      {
+         RemoveIncomingFolder(evTree.GetFolderFullName());
+      }
+   }
+
+   // continue propagating the event
+   return true;
+}
