@@ -118,6 +118,9 @@ void MAppBase::RemoveModule(MModuleCommon *module)
             // we must reset the iterator as it could be invalidated by the
             // erase() above - this is very inefficient but we have quite small
             // lists here (still FIXME?)
+            if ( gs_MModuleList->empty() )
+               break;
+
             i = gs_MModuleList->begin();
          }
       }

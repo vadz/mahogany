@@ -20,9 +20,11 @@
 #   define   NULL   0
 #endif
 
-#ifndef ASSERT
-#   include   <assert.h>
-#   define   ASSERT(x) assert(x);
+#ifndef wxASSERT
+#  include   <assert.h>
+#  define   ASSERT(x) assert(x);
+#else
+#  define   ASSERT(x) wxASSERT(x)
 #endif
 
 #ifdef DEBUG

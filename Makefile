@@ -121,18 +121,20 @@ rpm_prep:
       exit 1; \
    fi; \
 	echo "*** Preparing to build RPM in $$RPM_TOP_DIR..."; \
-	cd ..; \
+	cd $(SOURCEDIR)/..; \
+	mv M $(M); \
 	tar cvzf $$RPM_TOP_DIR/SOURCES/$(M).tar.gz \
 		--exclude="*.o" --exclude="M" --exclude="CVS" \
 		--exclude=".cvsignore" --exclude="*~" --exclude="*.swp" \
 		--exclude="*.mo" --exclude="*.a" \
 		--exclude=".sniffdir" --exclude=".depend" \
 		$(M)/README $(M)/TODO $(M)/INSTALL $(M)/Makefile \
-		$(M)/aclocal.m4 $(M)/config.status $(M)/configure.* \
+		$(M)/aclocal.m4 $(M)/configure.* \
 		$(M)/doc $(M)/extra/Makefile $(M)/include $(M)/locale \
 		$(M)/makeopts.in $(M)/makerules $(M)/src $(M)/extra/install \
 		$(M)/extra/scripts $(M)/makeversion.in $(M)/extra/src; \
-	cd $(M); \
+	mv $(M) M; \
+	cd M; \
 	cp redhat/mahogany.gif $$RPM_ROOT/SOURCES; \
 	cp redhat/M.spec $$RPM_ROOT/SPECS
 
