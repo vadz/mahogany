@@ -516,8 +516,9 @@ enum ConfigFields
    ConfigField_PGPHelp,
    ConfigField_PGPCommand,
    ConfigField_PGPKeyServer,
+   ConfigField_PGPGetPubKey,
 
-   ConfigField_HelpersLast = ConfigField_PGPKeyServer,
+   ConfigField_HelpersLast = ConfigField_PGPGetPubKey,
 
    // other options
    ConfigField_OthersFirst = ConfigField_HelpersLast,
@@ -1572,6 +1573,7 @@ const wxOptionsPage::FieldInfo wxOptionsPageStandard::ms_aFields[] =
                   "you receive and decrypt them."), Field_Message, -1 },
    { gettext_noop("&GPG command"),                Field_File,    -1                      },
    { gettext_noop("GPG &key server"),             Field_Text,    -1                      },
+   { gettext_noop("Get GPG key &from server"),    Field_Bool,    -1                      },
 
    // other options
    { gettext_noop("Mahogany may log everything into the log window, a file\n"
@@ -2006,6 +2008,7 @@ const ConfigValueDefault wxOptionsPageStandard::ms_aConfigDefaults[] =
    CONFIG_NONE(), // PGP help
    CONFIG_ENTRY(MP_PGP_COMMAND),
    CONFIG_ENTRY(MP_PGP_KEYSERVER),
+   CONFIG_ENTRY(MP_PGP_GET_PUBKEY),
 
    // other
    CONFIG_NONE(),

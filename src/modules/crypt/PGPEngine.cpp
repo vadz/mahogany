@@ -42,6 +42,7 @@
 
 extern const MOption MP_PGP_COMMAND;
 extern const MOption MP_PGP_KEYSERVER;
+extern const MOption MP_PGP_GET_PUBKEY;
 
 // ----------------------------------------------------------------------------
 // persistent msgboxes we use here
@@ -778,7 +779,7 @@ PGPEngine::ExecCommand(const String& options,
                        MCryptoEngineOutputLog *log)
 {
    Status status = DoExecCommand(options, messageIn, messageOut, log);
-   if ( status == NONEXISTING_KEY_ERROR )
+   if ( status == NONEXISTING_KEY_ERROR && READ_APPCONFIG_BOOL(MP_PGP_GET_PUBKEY) ) //FIXME use Profile
    {
       // propose to the user to retrieve the key from a keyserver
       if ( MDialog_Message
