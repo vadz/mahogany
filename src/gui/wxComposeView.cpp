@@ -116,9 +116,11 @@ extern const MOption MP_DRAFTS_FOLDER;
 extern const MOption MP_EXTERNALEDITOR;
 extern const MOption MP_HOSTNAME;
 extern const MOption MP_MSGVIEW_DEFAULT_ENCODING;
+extern const MOption MP_SENDMAILCMD;
 extern const MOption MP_SMTPHOST;
 extern const MOption MP_USERLEVEL;
 extern const MOption MP_USEVCARD;
+extern const MOption MP_USE_SENDMAIL;
 extern const MOption MP_VCARD;
 
 #ifdef OS_UNIX
@@ -3043,8 +3045,17 @@ wxComposeView::IsReadyToSend() const
    bool networkSettingsOk = false;
    while ( !networkSettingsOk )
    {
-      String host = READ_CONFIG(mApplication->GetProfile(), MP_SMTPHOST);
-      if ( host.empty() )
+      // we should have either SMTP host or a sendmail command
+      String hostOrCmd;
+#ifdef OS_UNIX
+      if ( READ_CONFIG(m_Profile, MP_USE_SENDMAIL) )
+         hostOrCmd = READ_CONFIG_TEXT(m_Profile, MP_SENDMAILCMD);
+      else
+#else
+         hostOrCmd = READ_CONFIG_TEXT(m_Profile, MP_SMTPHOST);
+#endif
+
+      if ( hostOrCmd.empty() )
       {
          if ( MDialog_YesNoDialog(
                   _("The message can not be sent because the network settings "
