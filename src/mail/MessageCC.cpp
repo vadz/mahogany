@@ -383,9 +383,9 @@ MessageCC::GetHeaderLines(const char **headersOrig,
    // now extract the headers values
    if ( rc )
    {
-      // first look at what we got: I don't assume here that the headers
-      // are return in the order requested. This complicates the code a bit
-      // but assuming otherwise would be probably unsafe.
+      // first look at what we got: I don't assume here that the headers are
+      // returned in the order requested - althouh this complicates the code a
+      // bit assuming otherwise would be unsafe
       wxArrayString names;
       wxArrayString valuesInDisorder;
 
@@ -394,7 +394,10 @@ MessageCC::GetHeaderLines(const char **headersOrig,
 
       // we are first looking for the name (before ':') and the value (after)
       bool inName = true;
-      for ( const char *pc = rc; ; pc++ )
+
+      // note that we can stop when *pc == 0 as the header must be terminated
+      // by "\r\n" preceding it anyhow
+      for ( const char *pc = rc; *pc ; pc++ )
       {
          switch ( *pc )
          {
@@ -409,23 +412,35 @@ MessageCC::GetHeaderLines(const char **headersOrig,
                // skip '\n' too
                pc++;
 
-               // fall through
-
-            case '\0':
                if ( inName )
                {
                   if ( !s.empty() )
                   {
-                     wxLogDebug("Header without contents part ignored");
+                     wxLogDebug("Header line '%s' ignored", s.c_str());
                   }
-                  //else: blank line, ignore
+                  else
+                  {
+                     // blank line, header must end here
+                     ASSERT_MSG( pc[1] == '\0', "blank line inside header?" );
+                  }
                }
-               else if ( !s.empty() ) // end of correctly formed line
+               else // we have a valid header name in this line
                {
-                  valuesInDisorder.Add(s);
-                  inName = true;
+                  if ( s.empty() )
+                  {
+                     wxLogDebug("Empty header value?");
+                  }
 
-                  s.clear();
+                  // this header may continue on the next line if it begins
+                  // with a space or tab - check if it does
+                  if ( pc[1] != ' ' && pc[1] != '\t' )
+                  {
+                     valuesInDisorder.Add(s);
+                     inName = true;
+
+                     s.clear();
+                  }
+                  //else: continue with the current s
                }
                break;
 
@@ -438,6 +453,9 @@ MessageCC::GetHeaderLines(const char **headersOrig,
                      // oops... skip back
                      pc--;
 
+                     // although this is allowed by the RFC 822 (but not
+                     // 822bis), it is quite uncommon and so may indicate a
+                     // problem - log it
                      wxLogDebug("Header without space after colon?");
                   }
 
@@ -451,13 +469,6 @@ MessageCC::GetHeaderLines(const char **headersOrig,
 
             default:
                s += *pc;
-         }
-
-         if ( !*pc )
-         {
-            // have to exit the loop here to not lose the last string if it's
-            // not "\r\n" terminated
-            break;
          }
       }
 
