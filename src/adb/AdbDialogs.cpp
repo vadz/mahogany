@@ -1,4 +1,3 @@
-///////////////////////////////////////////////////////////////////////////////
 // Project:     M - cross platform e-mail GUI client
 // File name:   adb/AdbDialogs.cpp - assorted ADB-related dialogs
 // Purpose:     dialogs to import an ADB, select ADB entry expansion, ...
@@ -174,6 +173,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxFrame *parent)
    c->height.Absolute(32);
    bmp->SetConstraints(c);
 
+#if 0
    wxArrayString lines;
    wxSize sizeMsg = SplitTextMessage
                     (
@@ -204,6 +204,18 @@ wxAdbImportDialog::wxAdbImportDialog(wxFrame *parent)
       msg = new wxStaticText(canvas, -1, lines[nLine]);
       msg->SetConstraints(c);
    }
+#else
+   wxStaticText *msg = new wxStaticText(canvas, -1,
+                                        _("Select the file or directory to import the data\n"
+                                          "from or select the import format and check the\n"
+                                          "'location' checkbox below"));
+      c = new wxLayoutConstraints;
+      c->top.SameAs(canvas, wxTop, LAYOUT_Y_MARGIN);
+      c->left.RightOf(bmp, 2*LAYOUT_X_MARGIN);
+      c->width.AsIs();
+      c->height.AsIs();
+      msg->SetConstraints(c);
+#endif
 
    // text and browse button
    int widthMax;
@@ -254,7 +266,7 @@ wxAdbImportDialog::wxAdbImportDialog(wxFrame *parent)
       m_text->SetValue(file);
    }
 
-   SetDefaultSize(4*LAYOUT_X_MARGIN + sizeMsg.x + 32, 12*hBtn);
+   SetDefaultSize(4*LAYOUT_X_MARGIN + msg->GetSize().x + 32, 12*hBtn);
    Centre();
    DoUpdateUI();
 }
