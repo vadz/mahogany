@@ -46,6 +46,9 @@ public:
    /// Destructor
    ~wxMFrame();
 
+   /// to enforce common style
+   wxToolBar *CreateToolBar(void)
+	{ return wxFrame::CreateToolBar(wxTB_DOCKABLE|wxTB_FLAT|wxTB_HORIZONTAL); }
    /// return true if initialised
    bool  IsInitialised(void) const { return initialised; }
 
