@@ -157,7 +157,7 @@ void wxFileBrowseButton::DoBrowse()
    if ( m_existingOnly )
       style |= wxFILE_MUST_EXIST;
 
-   wxFileDialog dialog(this, _T(""),
+   wxFileDialog dialog(GetFrame(this), _T(""),
                        strLastDir, strLastFile,
                        wxGetTranslation(wxALL_FILES),
                        style);
@@ -233,7 +233,7 @@ wxFolderBrowseButton::wxFolderBrowseButton(wxTextCtrl *text,
 
 void wxFolderBrowseButton::DoBrowse()
 {
-   MFolder *folder = MDialog_FolderChoose(this, m_folder);
+   MFolder *folder = MDialog_FolderChoose(GetFrame(this), m_folder);
 
    if ( folder && folder != m_folder )
    {
@@ -306,7 +306,7 @@ void wxColorBrowseButton::DoBrowse()
       colData.SetColour(m_color);
    }
 
-   wxColourDialog dialog(this, &colData);
+   wxColourDialog dialog(GetFrame(this), &colData);
 
    if ( dialog.ShowModal() == wxID_OK )
    {
@@ -426,11 +426,11 @@ void wxFontBrowseButton::DoBrowse()
          font.SetNativeFontInfo(fontInfo);
       }
    }
-   
+
    wxFontData data;
    data.SetInitialFont(font);
 
-   wxFontDialog dialog(this, &data);
+   wxFontDialog dialog(GetFrame(this), &data);
    if ( dialog.ShowModal() == wxID_OK )
    {
       font = dialog.GetFontData().GetChosenFont();
@@ -509,7 +509,7 @@ void wxIconBrowseButton::DoBrowse()
       icons.Add(new wxBitmap(bmp));
    }
 
-   wxIconSelectionDialog dlg(this, _("Choose icon"), icons, m_nIcon);
+   wxIconSelectionDialog dlg(GetFrame(this), _("Choose icon"), icons, m_nIcon);
 
    if ( dlg.ShowModal() == wxID_OK )
    {
