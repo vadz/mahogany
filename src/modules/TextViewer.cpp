@@ -346,6 +346,11 @@ bool TextViewerWindow::ProcessMouseEvent(const wxMouseEvent& event, long pos)
             id = WXMENU_LAYOUT_DBLCLICK;
          }
 
+         // the mouse cursor is captured by the text control when we're here
+         // and this results in very strange behaviour if we open a window
+         // without releasing mouse capture first
+         ReleaseMouse();
+
          m_viewer->DoMouseCommand(id, clickable->GetClickableInfo(),
                                   event.GetPosition());
 
