@@ -67,7 +67,12 @@ install_bin:
 	   $(DATADIR)/$(CANONICAL_HOST)/lib \
 	   $(DOCDIR) \
 	   $(DOCDIR)/Tips \
-	;do $(INSTALL) -d -m 755 $$i; \
+	;do \
+      # added specially for Nerijus who wants to install Mahogany in a
+      # directory which he doesn't have write access to but where bin &c
+      # already exist and so don't need to be created
+      if test ! -d $$i; then $(INSTALL) -d -m 755 $$i; \
+      fi \
 	done
 	set -e; for i in $(SUB_DIRS); do $(MAKE) -C $$i install; done
 	set -e; for i in .src/doc/Tips/Tips*.txt; \
